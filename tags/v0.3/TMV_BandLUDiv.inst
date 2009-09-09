@@ -1,0 +1,29 @@
+
+#define CT complex<T>
+
+template class BandLUDiv<T>;
+template class BandLUDiv<CT>;
+
+#define DefLUD(T1)\
+template void BandLU_Decompose(const BandMatrixView<T1>& lu, \
+    vector<size_t>& p, T1& det);
+DefLUD(T);
+DefLUD(CT);
+#undef DefLUD
+
+#define DefDivEq(T1,T2)\
+template void BandTriLDivEq(const GenBandMatrix<T1>& A, \
+    const MatrixView<T2>& B, DiagType dt); \
+template void BandLU_LDivEq(const GenBandMatrix<T1>& A, \
+    const vector<size_t>& p, const MatrixView<T2>& m); \
+template void BandLU_RDivEq(const GenBandMatrix<T1>& A, \
+    const vector<size_t>& p, const MatrixView<T2>& m); \
+
+DefDivEq(T,T);
+DefDivEq(T,CT);
+DefDivEq(CT,CT);
+
+#undef DefDivEq
+
+#undef CT
+
