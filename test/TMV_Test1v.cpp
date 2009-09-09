@@ -35,19 +35,19 @@ int main() try {
 
 #ifndef SKIPREST
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
   TestAllVector<double>();
 #endif // DOUBLE
 
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
   TestAllVector<float>();
 #endif // FLOAT
 
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
   TestAllVector<long double>();
 #endif // LONGDOUBLE
 
-#ifdef TEST_INT
+#ifdef INST_INT
   TestAllVector<int>();
 #endif  // INT
 

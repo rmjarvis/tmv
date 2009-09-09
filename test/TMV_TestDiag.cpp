@@ -2,8 +2,7 @@
 
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
-#include "TMV_Diag.h"
-#include "TMV_Mat.h"
+#include "TMV.h"
 #include <fstream>
 #include <cstdio>
 
@@ -12,7 +11,7 @@ template <class T> void TestDiagMatrix()
   const int N = 10;
 
   tmv::DiagMatrix<T> a(N);
-  tmv::DiagMatrixF<T> af(N);
+  tmv::DiagMatrix<T,tmv::FortranStyle> af(N);
   Assert(a.colsize() == size_t(N) && a.rowsize() == size_t(N),
       "Creating DiagMatrix(N)");
   Assert(af.colsize() == size_t(N) && af.rowsize() == size_t(N),
@@ -24,8 +23,8 @@ template <class T> void TestDiagMatrix()
   }
   tmv::ConstDiagMatrixView<T> acv = a.View();
   tmv::DiagMatrixView<T> av = a.View();
-  tmv::ConstDiagMatrixViewF<T> afcv = af.View();
-  tmv::DiagMatrixViewF<T> afv = af.View();
+  tmv::ConstDiagMatrixView<T,tmv::FortranStyle> afcv = af.View();
+  tmv::DiagMatrixView<T,tmv::FortranStyle> afv = af.View();
 
   for (int i=0, k=0; i<N; ++i) for (int j=0; j<N; ++j, ++k)
     if (i == j) {
@@ -49,6 +48,15 @@ template <class T> void TestDiagMatrix()
   Assert(a==afcv,"Matrix == FortranStyle ConstMatrixView");
   Assert(a==afv,"Matrix == FortranStyle MatrixView");
 
+  tmv::DiagMatrix<T> b(N);
+  for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) 
+    if (i == j) {
+      a(i,j) = T(3+i+5*j);
+      b(i,j) = T(5+2*i+4*j);
+    }
+  af = a;
+  Assert(a==af,"Copy CStyle DiagMatrix to FotranStyle");
+
   T qar[] = { T(0), T(3), T(6) };
   std::vector<T> qv(3);
   for(int i=0;i<3;i++) qv[i] = qar[i];
@@ -60,15 +68,6 @@ template <class T> void TestDiagMatrix()
     Assert(q2(i,i) == T(3*i),"Create DiagMatrix from vector");
     Assert(q3(i,i) == T(3*i),"Create DiagMatrixView of T*");
   }
-
-  tmv::DiagMatrix<T> b(N);
-  for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) 
-    if (i == j) {
-      a(i,j) = T(3+i+5*j);
-      b(i,j) = T(5+2*i+4*j);
-    }
-  af = a;
-  Assert(a==af,"Copy CStyle DiagMatrix to FotranStyle");
 
   tmv::DiagMatrix<T> c(N);
   c = a+b;
@@ -138,33 +137,24 @@ template <class T> void TestDiagMatrix()
   std::remove("tmvtest_diagmatrix_io.dat");
 #endif
 
-#if 1
-  TestDiagMatrixArith_A1<T>();
-  TestDiagMatrixArith_A2<T>();
-  TestDiagMatrixArith_A3<T>();
-  TestDiagMatrixArith_A4<T>();
-  TestDiagMatrixArith_A5<T>();
-  TestDiagMatrixArith_A6<T>();
-  TestDiagMatrixArith_B4a<T>();
-  TestDiagMatrixArith_B4b<T>();
-  TestDiagMatrixArith_B5a<T>();
-  TestDiagMatrixArith_B5b<T>();
-  TestDiagMatrixArith_B6a<T>();
-  TestDiagMatrixArith_B6b<T>();
-#endif
+  if (tmv::Epsilon<T>() > T(0)) {
+    TestDiagMatrixArith_A<T>();
+    TestDiagMatrixArith_B1<T>();
+    TestDiagMatrixArith_B2<T>();
+  }
 
   std::cout<<"DiagMatrix<"<<tmv::TypeText(T())<<"> passed all tests\n";
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestDiagMatrix<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestDiagMatrix<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestDiagMatrix<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestDiagMatrix<int>();
 #endif

@@ -663,7 +663,7 @@ void TestSymBandDecomp()
   }
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestHermBandDecomp<double,tmv::Upper,tmv::ColMajor>();
 template void TestHermBandDecomp<double,tmv::Upper,tmv::RowMajor>();
 template void TestHermBandDecomp<double,tmv::Lower,tmv::ColMajor>();
@@ -673,7 +673,7 @@ template void TestSymBandDecomp<double,tmv::Upper,tmv::RowMajor>();
 template void TestSymBandDecomp<double,tmv::Lower,tmv::ColMajor>();
 template void TestSymBandDecomp<double,tmv::Lower,tmv::RowMajor>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestHermBandDecomp<float,tmv::Upper,tmv::ColMajor>();
 template void TestHermBandDecomp<float,tmv::Upper,tmv::RowMajor>();
 template void TestHermBandDecomp<float,tmv::Lower,tmv::ColMajor>();
@@ -683,7 +683,7 @@ template void TestSymBandDecomp<float,tmv::Upper,tmv::RowMajor>();
 template void TestSymBandDecomp<float,tmv::Lower,tmv::ColMajor>();
 template void TestSymBandDecomp<float,tmv::Lower,tmv::RowMajor>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestHermBandDecomp<long double,tmv::Upper,tmv::ColMajor>();
 template void TestHermBandDecomp<long double,tmv::Upper,tmv::RowMajor>();
 template void TestHermBandDecomp<long double,tmv::Lower,tmv::ColMajor>();

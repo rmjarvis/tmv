@@ -1,7 +1,8 @@
 // vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 #include "TMV_Test.h"
 #include "TMV_Test3.h"
-#include "TMV_Mat.h"
+#include "TMV.h"
+#include "TMV_Small.h"
 #include <fstream>
 
 template <class T, size_t M, size_t N, tmv::StorageType S> 
@@ -83,15 +84,15 @@ template <class T> void TestSmallMatrix_Sub()
   DoTestSmallMatrix_Sub<T,15,10,tmv::ColMajor>();
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestSmallMatrix_Sub<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestSmallMatrix_Sub<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestSmallMatrix_Sub<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestSmallMatrix_Sub<int>();
 #endif

@@ -37,11 +37,8 @@
 #include "TMV.h"
 #include "tmv/TMV_SmallVector.h"
 #include "tmv/TMV_SmallMatrix.h"
-#include "tmv/TMV_SmallMatrixProdXM.h"
-#include "tmv/TMV_SmallMatrixSumMM.h"
-#include "tmv/TMV_SmallMatrixOProdVV.h"
-#include "tmv/TMV_SmallMatrixProdMV.h"
-#include "tmv/TMV_SmallMatrixProdMM.h"
+#include "tmv/TMV_SmallVectorArith.h"
+#include "tmv/TMV_SmallMatrixArith.h"
 #include "tmv/TMV_SmallMatrixDiv.h"
 
 #endif

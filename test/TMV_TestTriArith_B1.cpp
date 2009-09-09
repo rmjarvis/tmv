@@ -111,16 +111,16 @@ template <class T> void TestTriMatrixArith_B1()
 #endif
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestTriMatrixArith_B1<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestTriMatrixArith_B1<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestTriMatrixArith_B1<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestTriMatrixArith_B1<int>();
 #endif
 

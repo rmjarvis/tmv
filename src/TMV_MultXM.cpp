@@ -30,131 +30,150 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tmv/TMV_MultXM.h"
-#include "tmv/TMV_ProdXM.h"
-#include "tmv/TMV_Matrix.h"
-#include "tmv/TMV_ProdXV.h"
-#include "tmv/TMV_SwapM.h"
 
+//#define XDEBUG
+
+
+#include "tmv/TMV_MatrixArithFunc.h"
+#include "tmv/TMV_Matrix.h"
+#include "tmv/TMV_VectorArith.h"
+
+#ifdef XDEBUG
 #include <iostream>
-#include "tmv/TMV_MatrixIO.h"
+#include "tmv/TMV_VIt.h"
+using std::cout;
+using std::cerr;
+using std::endl;
+#endif
 
 namespace tmv {
 
-  const int XX = UNKNOWN;
-
   //
-  // MultXM: m *= x
-  // 
-
-  template <class T, class M>
-  static void DoMultXM(const T x, M& m)
-  {
-    if (x == T(-1))
-      InlineMultXM(Scaling<-1,T>(x),m); 
-    else if (x == T(0))
-      m.Zero();
-    else if (x != T(1))
-      InlineMultXM(Scaling<0,T>(x),m); 
-  }
-
-  template <class T, class M>
-  static void DoMultXM(const std::complex<T> x, M& m)
-  { 
-    if (imag(x) == T(0)) 
-    {
-      if (real(x) == T(-1))
-        InlineMultXM(Scaling<-1,T>(real(x)),m); 
-      else if (real(x) == T(0))
-        m.Zero();
-      else if (real(x) != T(1))
-        InlineMultXM(Scaling<0,T>(real(x)),m); 
-    }
-    else InlineMultXM(Scaling<0,std::complex<T> >(x),m);
-  }
-
-  template <class T>
-  void InstMultXM(const T x, MatrixView<T> m)
-  {
-    if (m.CanLinearize()) {
-      VectorView<T> ml = m.LinearView();
-      InstMultXV(x,ml);
-    }
-    else if (m.iscm())
-    {
-      MatrixView<T,1> mcm = m.CMView();
-      DoMultXM(x,mcm); 
-    }
-    else if (m.isrm())
-    {
-      MatrixView<T,UNKNOWN,1> mrm = m.RMView();
-      DoMultXM(x,mrm); 
-    }
-    else
-    {
-      DoMultXM(x,m); 
-    }
-  }
-
-
-  //
-  // m2 = x * m1
+  // MultXM
   //
 
-  template <class T, class M1, class M2>
-  static void DoMultXM(const T x, const M1& m1, M2& m2)
+  template <class T, class Ta> static void RowMajorMultXM(
+      const Ta alpha, const MatrixView<T>& A)
   {
-    if (x == T(-1))
-      InlineMultXM(Scaling<-1,T>(x),m1,m2); 
-    else if (x == T(1))
-      m2 = m1;
-    else
-      InlineMultXM(Scaling<0,T>(x),m1,m2); 
-  }
+    TMVAssert(A.isrm());
+    TMVAssert(A.ct() == NonConj);
+    TMVAssert(A.colsize() > 0 && A.rowsize() > 0);
+    TMVAssert(alpha != Ta(1));
+    TMVAssert(alpha != Ta(0));
 
-  template <class T, class M1, class M2>
-  static void DoMultXM(const std::complex<T> x, const M1& m1, M2& m2)
-  { 
-    if (imag(x) == T(0)) 
-    {
-      if (x == T(-1))
-        InlineMultXM(Scaling<-1,T>(real(x)),m1,m2); 
-      else if (x == T(1))
-        m2 = m1;
-      else
-        InlineMultXM(Scaling<0,T>(real(x)),m1,m2); 
-    }
-    else InlineMultXM(Scaling<0,std::complex<T> >(x),m1,m2); 
-  }
+    const int M = A.colsize();
+    const int N = A.rowsize();
 
-  template <class T1, bool C1, class T2>
-  void InstMultXM(const T2 x, const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
-      MatrixView<T2> m2)
-  {
-    if (m2.isrm() && !m2.iscm())
-    {
-      InstMultXM(x,m1.Transpose(),m2.Transpose());
-    }
-    else if (m1.iscm() && m2.iscm())
-    {
-      if (m1.CanLinearize() && m2.CanLinearize()) 
-      {
-        VectorView<T2> m2l = m2.LinearView();
-        InstMultXV(x,m1.LinearView().XView(),m2l);
-      }
-      else
-      {
-        MatrixView<T2,1> m2cm = m2.CMView();
-        DoMultXM(x,m1.CMView(),m2cm);
+    T* Ai0 = A.ptr();
+
+    for(int i=M;i>0;--i,Ai0+=A.stepi()) {
+      // A.row(i) *= alpha;
+      T* Aij = Ai0;
+      for(int j=N;j>0;--j,++Aij) {
+#ifdef TMVFLDEBUG
+        TMVAssert(Aij >= A.first);
+        TMVAssert(Aij < A.last);
+#endif
+        *Aij *= alpha;
       }
     }
-    else 
-    {
-      m2 = m1;
-      m2 *= x;
+  }
+
+  template <class T> void MultXM(const T alpha, const MatrixView<T>& A)
+  // A = alpha * A
+  {
+#ifdef XDEBUG
+    Matrix<T> A0 = A;
+    Matrix<T> A2 = A;
+    for(size_t i=0;i<A.colsize();i++)
+      for(size_t j=0;j<A.rowsize();j++)
+        A2(i,j) *= alpha;
+    //cout<<"MultXM: alpha = "<<alpha<<", A = "<<TypeText(A)<<"  "<<A<<endl;
+#endif
+
+    if (A.colsize() > 0 && A.rowsize() > 0 && alpha != T(1)) {
+      if (A.isconj()) MultXM(CONJ(alpha),A.Conjugate());
+      else if (alpha == T(0)) A.Zero();
+      else if (A.CanLinearize()) A.LinearView() *= alpha;
+      else if (A.isrm())
+        if (IsComplex(T()) && IMAG(alpha) == RealType(T)(0))
+          RowMajorMultXM(REAL(alpha),A);
+        else
+          RowMajorMultXM(alpha,A);
+      else if (A.iscm())
+        if (IsComplex(T()) && IMAG(alpha) == RealType(T)(0))
+          RowMajorMultXM(REAL(alpha),A.Transpose());
+        else 
+          RowMajorMultXM(alpha,A.Transpose());
+      else {
+        const int M = A.colsize();
+        const int N = A.rowsize();
+        if (M < N)
+          for(int i=0;i<M;++i) A.row(i) *= alpha;
+        else 
+          for(int j=0;j<N;++j) A.col(j) *= alpha;
+      }
+    }
+#ifdef XDEBUG
+    //cout<<"Done: A = "<<A<<endl;
+    // Doing A-A2 becomes recursive call to MultXM
+    Matrix<T> diff(A.colsize(),A.rowsize());
+    for(size_t i=0;i<A.colsize();i++)
+      for(size_t j=0;j<A.rowsize();j++)
+        diff(i,j) = A(i,j) - A2(i,j);
+    if (Norm(diff) > 0.001*ABS(alpha)*Norm(A)) {
+      cerr<<"TriMultXM: alpha = "<<alpha<<endl;
+      cerr<<"A = "<<TypeText(A)<<"  "<<A0<<endl;
+      cerr<<"-> A = "<<A<<endl;
+      cerr<<"A2 = "<<A2<<endl;
+      abort();
+    }
+#endif
+  }
+
+  template <class T, class Ta> void ElementProd(
+      const T alpha, const GenMatrix<Ta>& A, const MatrixView<T>& B)
+  {
+    TMVAssert(A.colsize() == B.colsize());
+    TMVAssert(A.rowsize() == B.rowsize());
+    if (A.stor() == B.stor() && A.CanLinearize() && B.CanLinearize()) {
+      TMVAssert(A.stepi() == B.stepi() && A.stepj() == B.stepj());
+      ElementProd(alpha,A.ConstLinearView(),B.LinearView());
+    } else if (B.isrm()) {
+      const int M = B.colsize();
+      for(int i=0;i<M;i++)
+        ElementProd(alpha,A.row(i),B.row(i));
+    } else {
+      const int N = B.rowsize();
+      for(int j=0;j<N;j++)
+        ElementProd(alpha,A.col(j),B.col(j));
     }
   }
 
+  template <class T, class Ta, class Tb> void AddElementProd(
+      const T alpha, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
+      const MatrixView<T>& C)
+  {
+    TMVAssert(A.colsize() == C.colsize());
+    TMVAssert(A.rowsize() == C.rowsize());
+    TMVAssert(B.colsize() == C.colsize());
+    TMVAssert(B.rowsize() == C.rowsize());
+    if (A.stor() == C.stor() && B.stor() == C.stor() &&
+        A.CanLinearize() && B.CanLinearize() && C.CanLinearize()) {
+      TMVAssert(A.stepi() == C.stepi() && A.stepj() == C.stepj());
+      TMVAssert(B.stepi() == C.stepi() && B.stepj() == C.stepj());
+      AddElementProd(alpha,A.ConstLinearView(),B.ConstLinearView(),
+          C.LinearView());
+    } else if (C.isrm()) {
+      const int M = C.colsize();
+      for(int i=0;i<M;i++)
+        AddElementProd(alpha,A.row(i),B.row(i),C.row(i));
+    } else {
+      const int N = C.rowsize();
+      for(int j=0;j<N;j++)
+        AddElementProd(alpha,A.col(j),B.col(j),C.col(j));
+    }
+  }
 
 #define InstFile "TMV_MultXM.inst"
 #include "TMV_Inst.h"

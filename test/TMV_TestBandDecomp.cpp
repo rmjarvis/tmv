@@ -314,17 +314,17 @@ template <class T, tmv::StorageType stor> void TestBandDecomp()
   }
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestBandDecomp<double,tmv::ColMajor>();
 template void TestBandDecomp<double,tmv::RowMajor>();
 template void TestBandDecomp<double,tmv::DiagMajor>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestBandDecomp<float,tmv::ColMajor>();
 template void TestBandDecomp<float,tmv::RowMajor>();
 template void TestBandDecomp<float,tmv::DiagMajor>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestBandDecomp<long double,tmv::ColMajor>();
 template void TestBandDecomp<long double,tmv::RowMajor>();
 template void TestBandDecomp<long double,tmv::DiagMajor>();

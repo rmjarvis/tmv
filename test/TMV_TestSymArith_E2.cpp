@@ -63,15 +63,15 @@ template <class T> void TestSymMatrixArith_E2()
 #endif
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestSymMatrixArith_E2<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestSymMatrixArith_E2<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestSymMatrixArith_E2<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestSymMatrixArith_E2<int>();
 #endif

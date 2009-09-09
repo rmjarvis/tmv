@@ -27,31 +27,30 @@ int main() try {
   std::ofstream log("tmvtest1c.log");
   tmv::WriteWarningsTo(&log);
 
-  showacc=true;
-  showdiv=true;
-  showtests=true;
-  showstartdone=true;
-  TestTriMatrix<double>();
-#define SKIPREST
+  //showacc=true;
+  //showdiv=true;
+  //showtests=true;
+  //showstartdone=true;
+//#define SKIPREST
 
 #ifndef SKIPREST
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
   TestTriMatrix<double>();
   TestAllTriDiv<double>();
 #endif // DOUBLE
 
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
   TestTriMatrix<float>();
   TestAllTriDiv<float>();
 #endif // FLOAT
 
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
   TestTriMatrix<long double>();
   TestAllTriDiv<long double>();
 #endif // LONGDOUBLE
 
-#ifdef TEST_INT
+#ifdef INST_INT
   TestTriMatrix<int>();
 #endif  // INT
 

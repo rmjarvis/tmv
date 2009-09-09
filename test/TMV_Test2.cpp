@@ -35,7 +35,7 @@ int main() try {
 
 #ifndef SKIPREST
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
   TestBandMatrix<double>();
   TestSymMatrix<double>();
   TestSymBandMatrix<double>();
@@ -44,7 +44,7 @@ int main() try {
   TestAllSymBandDiv<double>();
 #endif
 
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
   TestBandMatrix<float>();
   TestSymMatrix<float>();
   TestSymBandMatrix<float>();
@@ -53,7 +53,7 @@ int main() try {
   TestAllSymBandDiv<float>();
 #endif
 
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
   TestBandMatrix<long double>();
   TestSymMatrix<long double>();
   TestSymBandMatrix<long double>();
@@ -62,7 +62,7 @@ int main() try {
   TestAllSymBandDiv<long double>();
 #endif 
 
-#ifdef TEST_INT
+#ifdef INST_INT
   TestBandMatrix<int>();
   TestSymMatrix<int>();
   TestSymBandMatrix<int>();

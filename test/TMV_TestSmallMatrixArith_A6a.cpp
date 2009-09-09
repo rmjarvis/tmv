@@ -1,7 +1,8 @@
 // vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 #include "TMV_Test.h"
 #include "TMV_Test3.h"
-#include "TMV_Mat.h"
+#include "TMV.h"
+#include "TMV_Small.h"
 
 #include "TMV_TestMatrixArith.h"
 
@@ -25,11 +26,6 @@ template <class T, int N> static void DoTestSmallMatrixArith_A6a()
   if (N > 3) ca1.row(3) += 
     tmv::SmallVector<std::complex<T>,N>(std::complex<T>(1.8,9.2));
 
-  if (N > 10) {
-    a1 /= T(N*N); a1 += T(1); 
-    ca1 /= T(N*N); ca1 += T(1); 
-  }
-
   tmv::SmallMatrix<T,N,N,tmv::ColMajor> a2 = a1.Transpose();
   if (N > 1) a2.row(1) *= T(3.1);
   if (N > 2) a2.col(2) -= tmv::SmallVector<T,N>(4.9);
@@ -48,39 +44,45 @@ template <class T, int N> static void DoTestSmallMatrixArith_A6a()
 #ifdef XTEST
   tmv::SmallMatrix<T,N,N,tmv::RowMajor> a1b = a1;
   tmv::SmallMatrix<std::complex<T>,N,N,tmv::RowMajor> ca1b = ca1;
+  tmv::SmallMatrix<T,N,N,tmv::RowMajor> a1c = a1;
+  tmv::SmallMatrix<std::complex<T>,N,N,tmv::RowMajor> ca1c = ca1;
   tmv::SmallMatrix<T,N,N,tmv::RowMajor,tmv::FortranStyle> a1f = a1;
   tmv::SmallMatrix<std::complex<T>,N,N,tmv::RowMajor,tmv::FortranStyle> ca1f = ca1;
+  tmv::SmallMatrix<T,N,N,tmv::RowMajor,tmv::FortranStyle> a1fb = a1;
+  tmv::SmallMatrix<std::complex<T>,N,N,tmv::RowMajor,tmv::FortranStyle> ca1fb = ca1;
   tmv::SmallMatrix<T,N,N,tmv::ColMajor,tmv::FortranStyle> a2f = a2;
   tmv::SmallMatrix<std::complex<T>,N,N,tmv::ColMajor,tmv::FortranStyle> ca2f = ca2;
 
+  TestMatrixArith6<T>(a1,ca1,a1b,ca1b,a1c,ca1c,"Square");
+  TestMatrixArith6<T>(a1,ca1,a1b,ca1b,a2,ca2,"Square");
   TestMatrixArith6<T>(a1,ca1,a2,ca2,a1b,ca1b,"Square");
-  //TestMatrixArith6<T>(a1f,ca1f,a2,ca2,a1b,ca1b,"Square");
+  TestMatrixArith6<T>(a1f,ca1f,a2,ca2,a1b,ca1b,"Square");
   TestMatrixArith6<T>(a1f,ca1f,a2f,ca2f,a1b,ca1b,"Square");
+  TestMatrixArith6<T>(a1f,ca1f,a2f,ca2f,a1fb,ca1fb,"Square");
 #endif
 }
 
 template <class T> void TestSmallMatrixArith_A6a()
 {
   DoTestSmallMatrixArith_A6a<T,2>();
-  DoTestSmallMatrixArith_A6a<T,12>();
+  DoTestSmallMatrixArith_A6a<T,5>();
 #ifdef XTEST
   DoTestSmallMatrixArith_A6a<T,1>();
   DoTestSmallMatrixArith_A6a<T,3>();
   DoTestSmallMatrixArith_A6a<T,4>();
-  DoTestSmallMatrixArith_A6a<T,22>();
 #endif
 }
 
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestSmallMatrixArith_A6a<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestSmallMatrixArith_A6a<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestSmallMatrixArith_A6a<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestSmallMatrixArith_A6a<int>();
 #endif

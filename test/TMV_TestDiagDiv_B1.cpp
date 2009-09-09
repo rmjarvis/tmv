@@ -2,8 +2,7 @@
 
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
-#include "TMV_Diag.h"
-#include "TMV_Mat.h"
+#include "TMV.h"
 
 #define NOLDIVEQ
 #define NORDIVEQ
@@ -53,12 +52,12 @@ template <class T> void TestDiagDiv_B1()
       "Diag/SquareM");
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestDiagDiv_B1<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestDiagDiv_B1<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestDiagDiv_B1<long double>();
 #endif

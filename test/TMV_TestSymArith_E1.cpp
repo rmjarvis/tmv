@@ -61,15 +61,15 @@ template <class T> void TestSymMatrixArith_E1()
   for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestSymMatrixArith_E1<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestSymMatrixArith_E1<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestSymMatrixArith_E1<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestSymMatrixArith_E1<int>();
 #endif

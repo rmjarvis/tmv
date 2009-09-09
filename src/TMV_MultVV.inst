@@ -1,41 +1,25 @@
 
 #define CT std::complex<T>
 
-#ifndef TMV_INST_SKIP_BLAS
-template T InstMultVV(
-    const ConstVectorView<T >& v1, const ConstVectorView<T >& v2); 
-template CT InstMultVV(
-    const ConstVectorView<CT >& v1, const ConstVectorView<CT >& v2); 
-template CT InstMultVV(
-    const ConstVectorView<CT,UNKNOWN,true>& v1, 
-    const ConstVectorView<CT >& v2); 
-#ifdef TMV_INST_MIX
-template CT InstMultVV(
-    const ConstVectorView<T >& v1, const ConstVectorView<CT >& v2); 
-#endif
+#define Def0(T)\
+  template const T* VectorComposite<T >::cptr() const; \
+  template VectorComposite<T >::~VectorComposite(); \
+
+Def0(T)
+#ifdef INST_COMPLEX
+Def0(CT)
 #endif
 
-#define Def1(T1,C1,T2,C2,T3)\
-  template void InstElemMultVV(const T3 x, \
-      const ConstVectorView<T1,UNKNOWN,C1>& v1, \
-      const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3); \
-  template void InstAddElemMultVV(const T3 x, \
-      const ConstVectorView<T1,UNKNOWN,C1>& v1, \
-      const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3); \
+#undef Def0
 
-Def1(T,false,T,false,T)
-#ifdef TMV_INST_COMPLEX
-#ifdef TMV_INST_MIX
-Def1(T,false,T,false,CT)
-Def1(T,false,CT,false,CT)
-Def1(T,false,CT,true,CT)
-Def1(CT,false,T,false,CT)
-Def1(CT,true,T,false,CT)
-#endif
-Def1(CT,false,CT,false,CT)
-Def1(CT,false,CT,true,CT)
-Def1(CT,true,CT,false,CT)
-Def1(CT,true,CT,true,CT)
+#define Def1(T,T1)\
+  template T MultVV(const GenVector<T >& v1,\
+      const GenVector<T1 >& v2); \
+
+Def1(T,T)
+#ifdef INST_COMPLEX
+Def1(CT,T)
+Def1(CT,CT)
 #endif
 
 #undef Def1

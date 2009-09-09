@@ -2,7 +2,8 @@
 
 #include "TMV_Test.h"
 #include "TMV_Test3.h"
-#include "TMV_Mat.h"
+#include "TMV.h"
+#include "TMV_Small.h"
 
 #define NORDIVEQ
 #include "TMV_TestMatrixDivArith.h"
@@ -73,12 +74,12 @@ template <class T> void TestSmallMatrixDiv_B5a()
 #endif
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestSmallMatrixDiv_B5a<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestSmallMatrixDiv_B5a<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestSmallMatrixDiv_B5a<long double>();
 #endif

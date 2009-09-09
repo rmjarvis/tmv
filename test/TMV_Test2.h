@@ -1,7 +1,6 @@
 // vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 #define ALIASOK
 
-#include "tmv/TMV_Base.h"
 
 template <class T> void TestBandMatrix();
 template <class T> void TestBandMatrixArith_A();

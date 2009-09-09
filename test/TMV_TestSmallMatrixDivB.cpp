@@ -21,12 +21,12 @@ template <class T> void TestAllSmallMatrixDivB()
   std::cout<<" passed all arithemtic tests\n";
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestAllSmallMatrixDivB<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestAllSmallMatrixDivB<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestAllSmallMatrixDivB<long double>();
 #endif

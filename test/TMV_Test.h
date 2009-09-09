@@ -8,19 +8,14 @@
 
 #include <iostream>
 
+//#define LONGDOUBLE
+
 #define EPS (10*tmv::Epsilon<T>())
 
-#ifndef NO_TEST_DOUBLE
-#define TEST_DOUBLE
+#ifndef XDEBUG
+#define XDEBUG
 #endif
-
-#ifndef NO_TEST_FLOAT
-#define TEST_FLOAT
-#endif
-
-#ifndef NO_TEST_COMPLEX
-#define TEST_COMPLEX
-#endif
+#include "tmv/TMV_Base.h"
 
 extern bool showtests;
 extern bool showacc;
@@ -39,7 +34,7 @@ void DoAssert(bool x, std::string s);
 do {  \
   PreAssert(s);  \
   DoAssert(x,s); \
-} while (false)
+} while (false);
 
 extern bool XXDEBUG1;
 extern bool XXDEBUG2;

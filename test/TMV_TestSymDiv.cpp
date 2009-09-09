@@ -312,12 +312,12 @@ template <class T> void TestAllSymDiv()
   TestSymDiv<T>(tmv::SV,Sing);
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestAllSymDiv<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestAllSymDiv<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestAllSymDiv<long double>();
 #endif

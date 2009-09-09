@@ -2,7 +2,8 @@
 
 #include "TMV_Test.h"
 #include "TMV_Test3.h"
-#include "TMV_Mat.h"
+#include "TMV.h"
+#include "TMV_Small.h"
 
 #define NOLDIVEQ
 #include "TMV_TestMatrixDivArith.h"
@@ -63,12 +64,12 @@ template <class T> void TestSmallMatrixDiv_B2a()
 #endif
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestSmallMatrixDiv_B2a<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestSmallMatrixDiv_B2a<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestSmallMatrixDiv_B2a<long double>();
 #endif

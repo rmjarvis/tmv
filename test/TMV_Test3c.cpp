@@ -35,19 +35,19 @@ int main() try {
 
 #ifndef SKIPREST
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
   TestAllSmallMatrixB<double>();
 #endif
 
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
   TestAllSmallMatrixB<float>();
 #endif
 
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
   TestAllSmallMatrixB<long double>();
 #endif 
 
-#ifdef TEST_INT
+#ifdef INST_INT
   TestAllSmallMatrixB<int>();
 #endif 
 

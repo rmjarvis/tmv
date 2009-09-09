@@ -29,36 +29,59 @@ int main() try {
   std::ofstream log("tmvtest3b.log");
   tmv::WriteWarningsTo(&log);
 
-  showacc=true;
-  showdiv=true;
-  showtests=true;
-  showstartdone=true;
+  //showacc=true;
+  //showdiv=true;
+  //showtests=true;
+  //showstartdone=true;
+
+#if 0
+  tmv::SmallMatrix<double,2,2,tmv::RowMajor> a;
+  a = tmv::ListInit, 4.5, 2., 1.2, 8.6;
+  tmv::SmallVector<double,2> b;
+  b = tmv::ListInit, 3.1, 0.9;
+  tmv::SmallVector<double,2> c = b;
+  tmv::Vector<double> v = b;
+  double x = 5.;
+
+  std::cout<<"a = "<<a<<std::endl;
+  std::cout<<"b = "<<b<<std::endl;
+  std::cout<<"c = "<<c<<std::endl;
+  std::cout<<"v = "<<v<<std::endl;
+  std::cout<<"x = "<<x<<std::endl;
+ 
+  std::cout<<"(1) v+x*a*b = "<<v+x*tmv::Matrix<double>(a)*tmv::Vector<double>(b)<<std::endl;
+  std::cout<<"(2) v+x*a*b = "<<v+tmv::Vector<double>(x*a*b)<<std::endl;
+  std::cout<<"(3) v+x*a*b = "<<tmv::SmallVector<double,2>(v+tmv::SmallVector<double,2>(x*a*b))<<std::endl;
+  c += x * a * b;
+  std::cout<<"(4) c+=x*a*b = "<<c<<std::endl;
+  v += x * a * b;
+  std::cout<<"(5) v+=x*a*b = "<<v<<std::endl;
+#endif
 
 //#define SKIPREST
 
 #ifndef SKIPREST
 
-#ifdef TEST_DOUBLE
-  TestSmallMatrixArith_1<double>();
+#ifdef INST_DOUBLE
+  TestAllSmallMatrixA<double>();
 #endif
 
-#ifdef TEST_FLOAT
-  TestSmallMatrixArith_1<float>();
+#ifdef INST_FLOAT
+  TestAllSmallMatrixA<float>();
 #endif
 
-#ifdef TEST_LONGDOUBLE
-  TestSmallMatrixArith_1<long double>();
+#ifdef INST_LONGDOUBLE
+  TestAllSmallMatrixA<long double>();
 #endif 
 
-#ifdef TEST_INT
-  TestSmallMatrixArith_1<int>();
+#ifdef INST_INT
+  TestAllSmallMatrixA<int>();
 #endif 
 
 #endif // SKIPREST
 
   return 0;
 }
-#if 0
 #ifndef NOTHROW
 catch (tmv::Error& e) {
   std::cerr<<e<<std::endl;
@@ -76,9 +99,6 @@ catch (...) {
   std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
   return 1;
 }
-#else
-catch (int) {}
-#endif
 
 
 void PreAssert(std::string s)

@@ -8,22 +8,17 @@ ReadFileList=env['__readfunc']
 
 # Source lists
 basic = ReadFileList('basic.files')
-#basic = ReadFileList('basicv.files')
 basic_omp = ReadFileList('basic_omp.files')
-#basic_omp = []
 diag = ReadFileList('diag.files')
 tri = ReadFileList('tri.files')
-tri = ReadFileList('tri.files1')
-div = ReadFileList('div.files')
-div_omp = ReadFileList('div_omp.files')
 
 band = ReadFileList('band.files')
 sym = ReadFileList('sym.files')
 sym_omp = ReadFileList('sym_omp.files')
 symband = ReadFileList('symband.files')
 
-lib_files= basic + diag #+ tri #+ div
-lib_omp_files= basic_omp #+ div_omp
+lib_files= basic + diag + tri
+lib_omp_files= basic_omp
 sblib_files= band + sym + symband
 sblib_omp_files= sym_omp
 
@@ -43,14 +38,12 @@ obj_omp_lib = env2.Object(lib_omp_files)
 obj_omp_sblib = env2.Object(sblib_omp_files)
 
 lib = env1.Library('#lib/tmv',obj_lib+obj_omp_lib)
-#lib = env1.Library('#lib/tmv',obj_lib)
 sblib = env1.Library('#lib/tmv_symband',obj_sblib+obj_omp_sblib)
 
 env.Alias(target='lib', source=lib)
 env.Alias(target='sblib', source=sblib)
 
-#Default(['lib','sblib'])
-Default(['lib'])
+Default(['lib','sblib'])
 
 #
 # install/uninstall

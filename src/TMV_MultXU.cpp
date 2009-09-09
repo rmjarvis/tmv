@@ -30,120 +30,156 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tmv/TMV_MultXU.h"
-#include "tmv/TMV_ProdXM.h"
+
+//#define XDEBUG
+
+
+#include "tmv/TMV_TriMatrixArithFunc.h"
 #include "tmv/TMV_TriMatrix.h"
-#include "tmv/TMV_ProdXV.h"
+#include "tmv/TMV_VectorArith.h"
+
+#ifdef XDEBUG
+#include "tmv/TMV_MatrixArith.h"
+#include <iostream>
+using std::cout;
+using std::cerr;
+using std::endl;
+#endif
 
 namespace tmv {
 
-  const int XX = UNKNOWN;
-
   //
-  // MultXM: m *= x
-  // 
-
-  template <class T, class M>
-  static void DoMultXM(const T x, M& m)
-  {
-    if (x == T(-1))
-      InlineMultXM(Scaling<-1,T>(x),m); 
-    else if (x == T(0))
-      m.Zero();
-    else if (x != T(1))
-      InlineMultXM(Scaling<0,T>(x),m); 
-  }
-
-  template <class T, class M>
-  static void DoMultXM(const std::complex<T> x, M& m)
-  { 
-    if (imag(x) == T(0)) 
-    {
-      if (real(x) == T(-1))
-        InlineMultXM(Scaling<-1,T>(real(x)),m); 
-      else if (real(x) == T(0))
-        m.Zero();
-      else if (real(x) != T(1))
-        InlineMultXM(Scaling<0,T>(real(x)),m); 
-    }
-    else InlineMultXM(Scaling<0,std::complex<T> >(x),m);
-  }
-
-  template <class T>
-  void InstMultXM(const T x, UpperTriMatrixView<T,NonUnitDiag> m)
-  {
-    if (m.isrm())
-    {
-      UpperTriMatrixView<T,NonUnitDiag,UNKNOWN,1> mrm = m.RMView();
-      DoMultXM(x,mrm);
-    }
-    else if (m.iscm())
-    {
-      UpperTriMatrixView<T,NonUnitDiag,1,UNKNOWN> mcm = m.CMView();
-      DoMultXM(x,mcm);
-    }
-    else 
-      DoMultXM(x,m);
-  }
-
-
-  //
-  // m2 = x * m1
+  // MultXM
   //
 
-  template <class T, class M1, class M2>
-  static void DoMultXM(const T x, const M1& m1, M2& m2)
+  template <class T, class T1> static void RowMajorMultXM(
+      const T1 alpha, const UpperTriMatrixView<T>& A)
   {
-    if (x == T(-1))
-      InlineMultXM(Scaling<-1,T>(x),m1,m2); 
-    else if (x == T(1))
-      m2 = m1;
-    else
-      InlineMultXM(Scaling<0,T>(x),m1,m2); 
-  }
+    TMVAssert(A.isrm());
+    TMVAssert(!A.isunit());
+    TMVAssert(alpha != T1(1));
+    TMVAssert(A.size() > 0);
+    TMVAssert(A.ct() == NonConj);
 
-  template <class T, class M1, class M2>
-  static void DoMultXM(const std::complex<T> x, const M1& m1, M2& m2)
-  { 
-    if (imag(x) == T(0)) 
-    {
-      if (x == T(-1))
-        InlineMultXM(Scaling<-1,T>(real(x)),m1,m2); 
-      else if (x == T(1))
-        m2 = m1;
-      else
-        InlineMultXM(Scaling<0,T>(real(x)),m1,m2); 
+    T* Aii = A.ptr();
+    const int ds = A.stepi()+1;
+    const int N = A.size();
+
+    for(int len=N;len>0;--len,Aii+=ds) {
+      // A.row(i,i,N) *= alpha;
+      T* Aij = Aii;
+      for(int j=len;j>0;--j,++Aij) {
+#ifdef TMVFLDEBUG
+        TMVAssert(Aij >= A.first);
+        TMVAssert(Aij < A.last);
+#endif
+        *Aij *= alpha;
+      }
     }
-    else InlineMultXM(Scaling<0,std::complex<T> >(x),m1,m2); 
   }
 
-  template <class T1, DiagType D1, bool C1, class T2>
-  void InstMultXM(const T2 x,
-      const ConstUpperTriMatrixView<T1,D1,UNKNOWN,UNKNOWN,C1>& m1,
-      UpperTriMatrixView<T2,NonUnitDiag> m2)
+  template <class T, class T1> static void ColMajorMultXM(
+      const T1 alpha, const UpperTriMatrixView<T>& A)
   {
-    if (m1.isrm() && m2.isrm())
-    {
-      UpperTriMatrixView<T2,NonUnitDiag,UNKNOWN,1> m2rm = m2.RMView();
-      DoMultXM(x,m1.RMView(),m2rm);
-    }
-    else if (m1.iscm() && m2.iscm())
-    {
-      UpperTriMatrixView<T2,NonUnitDiag,1> m2cm = m2.CMView();
-      DoMultXM(x,m1.CMView(),m2cm);
-    }
-    else 
-    {
-      m2 = m1;
-      m2 *= x;
+    TMVAssert(A.iscm());
+    TMVAssert(!A.isunit());
+    TMVAssert(alpha != T1(1));
+    TMVAssert(A.size() > 0);
+    TMVAssert(A.ct() == NonConj);
+
+    T* A0j = A.ptr();
+    const int Astepj = A.stepj();
+    const int N = A.size();
+
+    for(int j=N,len=1;j>0;--j,++len,A0j+=Astepj) {
+      // A.col(j,0,j+1) *= alpha;
+      T* Aij = A0j;
+      for(int i=len;i>0;--i,++Aij) {
+#ifdef TMVFLDEBUG
+        TMVAssert(Aij >= A.first);
+        TMVAssert(Aij < A.last);
+#endif
+        *Aij *= alpha;
+      }
     }
   }
 
+  template <class T> void MultXM(const T alpha, const UpperTriMatrixView<T>& A)
+  // A = alpha * A
+  {
+#ifdef XDEBUG
+    Matrix<T> A0 = A;
+    Matrix<T> A2 = alpha * A0;
+    //cout<<"MultXM: alpha = "<<alpha<<", A = "<<TypeText(A)<<" "<<A<<endl;
+#endif
+
+    if (A.size() > 0 && alpha != T(1)) {
+      TMVAssert(!A.isunit());
+      if (A.isconj()) MultXM(CONJ(alpha),A.Conjugate());
+      else if (alpha == T(0)) A.Zero();
+      else if (A.isrm())
+        if (IMAG(alpha) == RealType(T)(0))
+          RowMajorMultXM(REAL(alpha),A);
+        else
+          RowMajorMultXM(alpha,A);
+      else if (A.iscm())
+        if (IMAG(alpha) == RealType(T)(0))
+          ColMajorMultXM(REAL(alpha),A);
+        else
+          ColMajorMultXM(alpha,A);
+      else {
+        const int M = A.colsize();
+        const int N = A.rowsize();
+        for(int i=0;i<M;++i) 
+          A.row(i,i,N) *= alpha;
+      }
+    }
+#ifdef XDEBUG
+    //cout<<"Done MultXM: A = "<<A<<endl;
+    if (Norm(Matrix<T>(A)-A2) > 0.001*ABS(alpha)*Norm(A)) {
+      cerr<<"TriMultXM: alpha = "<<alpha<<endl;
+      cerr<<"A = "<<TypeText(A)<<"  "<<A0<<endl;
+      cerr<<"-> A = "<<A<<endl;
+      cerr<<"A2 = "<<A2<<endl;
+      abort();
+    }
+#endif
+  }
+
+  template <class T, class Ta> void ElementProd(
+      const T alpha, const GenUpperTriMatrix<Ta>& A,
+      const UpperTriMatrixView<T>& B)
+  {
+    TMVAssert(A.size() == B.size());
+    const int N = B.size();
+    if (B.isrm()) {
+      for(int i=0;i<N;i++)
+        ElementProd(alpha,A.row(i,i,N),B.row(i,i,N));
+    } else {
+      for(int j=0;j<N;j++)
+        ElementProd(alpha,A.col(j,0,j+1),B.col(j,0,j+1));
+    }
+  }
+
+  template <class T, class Ta, class Tb> void AddElementProd(
+      const T alpha, const GenUpperTriMatrix<Ta>& A,
+      const GenUpperTriMatrix<Tb>& B, const UpperTriMatrixView<T>& C)
+  {
+    TMVAssert(A.size() == C.size());
+    TMVAssert(B.size() == C.size());
+    const int N = C.size();
+    if (C.isrm()) {
+      for(int i=0;i<N;i++)
+        AddElementProd(alpha,A.row(i,i,N),B.row(i,i,N),C.row(i,i,N));
+    } else {
+      for(int j=0;j<N;j++)
+        AddElementProd(alpha,A.col(j,0,j+1),B.col(j,0,j+1),C.col(j,0,j+1));
+    }
+  }
 
 #define InstFile "TMV_MultXU.inst"
 #include "TMV_Inst.h"
 #undef InstFile
 
 } // namespace tmv
-
 

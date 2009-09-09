@@ -58,7 +58,7 @@
 //   BLASPTR -- Pass all arguments to Blas calls by pointer, not reference.
 //   BLASSTRLEN -- Last argument of Blas calls need the length of char array.
 //   BLASZDROT -- Include extra routines, zdrot and csrot
-//   BLASIDAMIN -- Include extra routines idamin, isamin, izamin, icamin
+//   BLASIDAMIN -- Include extra routines idamin, isamin
 //
 //   LAP -- Use LAPack calls (see below for more specific subsets here)
 //   CLAP -- LAPack calls should use clapack_* calling convention.
@@ -197,7 +197,7 @@ extern "C" {
 
 #define BLAS
 extern "C" {
-#include "util/fblas.h"
+#include "fblas.h"
 }
 #define BLAS_
 #define BLASSTRLEN
@@ -473,7 +473,7 @@ namespace tmv {
 #define LAP_
 
 extern "C" {
-#include "util/flapack.h"
+#include "flapack.h"
 }
 
 namespace tmv {
@@ -522,14 +522,14 @@ namespace tmv {
 #endif // ELAP
 
 namespace tmv {
-  // This are defined in TMV_Vector.cpp
+  // These are defined in TMV_Vector.cpp
   extern int Lap_info; 
-  const char Blas_ch_N = 'N';
-  const char Blas_ch_C = 'C';
-  const char Blas_ch_T = 'T';
-  const char Blas_ch_L = 'L';
-  const char Blas_ch_R = 'R';
-  const char Blas_ch_U = 'U';
+  extern char Blas_ch_N;
+  extern char Blas_ch_C;
+  extern char Blas_ch_T;
+  extern char Blas_ch_L;
+  extern char Blas_ch_R;
+  extern char Blas_ch_U;
 }
 
 #ifdef BLAS

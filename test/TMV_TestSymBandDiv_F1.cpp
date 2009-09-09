@@ -56,12 +56,12 @@ template <class T> void TestSymBandDiv_F1(tmv::DivType dt, PosDefCode pdc)
   for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestSymBandDiv_F1<double>(tmv::DivType dt, PosDefCode pdc);
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestSymBandDiv_F1<float>(tmv::DivType dt, PosDefCode pdc);
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestSymBandDiv_F1<long double>(tmv::DivType dt, PosDefCode pdc);
 #endif

@@ -35,22 +35,22 @@ int main() try {
 
 #ifndef SKIPREST
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
   TestSymMatrix<double>();
   TestAllSymDiv<double>();
 #endif
 
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
   TestSymMatrix<float>();
   TestAllSymDiv<float>();
 #endif
 
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
   TestSymMatrix<long double>();
   TestAllSymDiv<long double>();
 #endif 
 
-#ifdef TEST_INT
+#ifdef INST_INT
   TestSymMatrix<int>();
 #endif 
 

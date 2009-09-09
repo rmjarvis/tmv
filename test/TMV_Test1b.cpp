@@ -31,28 +31,26 @@ int main() try {
   //showdiv=true;
   //showtests=true;
   //showstartdone=true;
-  //XXDEBUG9 = true;
-
 //#define SKIPREST
 
 #ifndef SKIPREST
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
   TestDiagMatrix<double>();
-  //TestDiagDiv<double>();
+  TestDiagDiv<double>();
 #endif
 
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
   TestDiagMatrix<float>();
-  //TestDiagDiv<float>();
+  TestDiagDiv<float>();
 #endif
 
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
   TestDiagMatrix<long double>();
-  //TestDiagDiv<long double>();
+  TestDiagDiv<long double>();
 #endif
 
-#ifdef TEST_INT
+#ifdef INST_INT
   TestDiagMatrix<int>();
 #endif
 
@@ -60,7 +58,7 @@ int main() try {
 
   return 0;
 }
-#if 0
+#if 1
 #ifndef NOTHROW
 catch (tmv::Error& e) {
   std::cerr<<e<<std::endl;

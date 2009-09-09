@@ -704,7 +704,7 @@ template <class T> void TestAllSymDiv()
   TestSymDiv<T>(tmv::SV,Sing);
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestHermDecomp<double,tmv::Upper,tmv::ColMajor>();
 template void TestHermDecomp<double,tmv::Upper,tmv::RowMajor>();
 template void TestHermDecomp<double,tmv::Lower,tmv::ColMajor>();
@@ -716,7 +716,7 @@ template void TestSymDecomp<double,tmv::Lower,tmv::RowMajor>();
 template void TestPolar<double,tmv::ColMajor>();
 template void TestPolar<double,tmv::RowMajor>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestHermDecomp<float,tmv::Upper,tmv::ColMajor>();
 template void TestHermDecomp<float,tmv::Upper,tmv::RowMajor>();
 template void TestHermDecomp<float,tmv::Lower,tmv::ColMajor>();
@@ -728,7 +728,7 @@ template void TestSymDecomp<float,tmv::Lower,tmv::RowMajor>();
 template void TestPolar<float,tmv::ColMajor>();
 template void TestPolar<float,tmv::RowMajor>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestHermDecomp<long double,tmv::Upper,tmv::ColMajor>();
 template void TestHermDecomp<long double,tmv::Upper,tmv::RowMajor>();
 template void TestHermDecomp<long double,tmv::Lower,tmv::ColMajor>();

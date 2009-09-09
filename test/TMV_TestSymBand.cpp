@@ -986,15 +986,15 @@ template <class T> void TestSymBandMatrix()
   }
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestSymBandMatrix<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestSymBandMatrix<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestSymBandMatrix<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestSymBandMatrix<int>();
 #endif

@@ -35,6 +35,10 @@
 
 namespace tmv {
 
+  class ListInitClass {};
+
+  extern ListInitClass ListInit;
+
   class ListReadError : 
     public ReadError
   {
@@ -57,21 +61,21 @@ namespace tmv {
   class ListAssigner
   {
   public:
-    inline ListAssigner( IT _ptr, int _nleft ) : ptr( _ptr ), nleft(_nleft) {}
+    ListAssigner( IT _ptr, int _nleft ) : ptr( _ptr ), nleft(_nleft) {}
 
-    inline ListAssigner( const ListAssigner<T,IT>& rhs ) : 
+    ListAssigner( const ListAssigner<T,IT>& rhs ) : 
       ptr( rhs.ptr ), nleft(rhs.nleft), islast(true)
     { rhs.islast = false; }
 
-    inline ~ListAssigner()
+    ~ListAssigner()
     {
-      TMVAssert((nleft == 0 || !islast) && "Too few elements in ListInit");
+      if (nleft > 0 && islast) throw ListReadError(nleft);
     }
 
-    inline ListAssigner<T,IT> operator,( T x )
+    ListAssigner<T,IT> operator,( T x )
     {
       if (nleft == 0) throw ListReadError(0);
-      TMVAssert((nleft > 0) && "Too many elements in ListInit");
+      TMVAssert( nleft > 0 );
       *ptr = x;
       islast = false;
       return ListAssigner<T,IT>(++ptr,nleft-1);

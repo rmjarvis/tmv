@@ -243,12 +243,12 @@ template <class T> void TestAllTriDiv()
   std::cout<<"TriMatrix<"<<tmv::TypeText(T())<<"> Division passed all tests\n";
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestAllTriDiv<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestAllTriDiv<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestAllTriDiv<long double>();
 #endif

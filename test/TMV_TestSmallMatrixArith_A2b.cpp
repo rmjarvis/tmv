@@ -1,7 +1,8 @@
 // vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 #include "TMV_Test.h"
 #include "TMV_Test3.h"
-#include "TMV_Mat.h"
+#include "TMV.h"
+#include "TMV_Small.h"
 
 #include "TMV_TestMatrixArith.h"
 
@@ -24,11 +25,6 @@ template <class T, int N> static void DoTestSmallMatrixArith_A2b()
   if (N > 1) ca1.col(1) *= std::complex<T>(-1.1,3.6);
   if (N > 3) ca1.row(3) += 
     tmv::SmallVector<std::complex<T>,N>(std::complex<T>(1.8,9.2));
-
-  if (N > 10) {
-    a1 /= T(N*N); a1 += T(1); 
-    ca1 /= T(N*N); ca1 += T(1); 
-  }
 
   tmv::SmallVector<T,N> v1 = a1.row(0);
   tmv::SmallVector<std::complex<T>,N> cv1 = ca1.row(0);
@@ -59,36 +55,35 @@ template <class T, int N> static void DoTestSmallMatrixArith_A2b()
   tmv::SmallVector<std::complex<T>,N,tmv::FortranStyle> cv2f = cv1;
 
   TestMatrixArith2b<T>(a2,ca2,v1,cv1,v2,cv2,"Square");
-  //TestMatrixArith2b<T>(a1f,ca1f,v1,cv1,v2,cv2,"Square");
-  //TestMatrixArith2b<T>(a2f,ca2f,v1,cv1,v2,cv2,"Square");
-  //TestMatrixArith2b<T>(a1f,ca1f,v1f,cv1f,v2,cv2,"Square");
-  //TestMatrixArith2b<T>(a2f,ca2f,v1f,cv1f,v2,cv2,"Square");
+  TestMatrixArith2b<T>(a1f,ca1f,v1,cv1,v2,cv2,"Square");
+  TestMatrixArith2b<T>(a2f,ca2f,v1,cv1,v2,cv2,"Square");
+  TestMatrixArith2b<T>(a1f,ca1f,v1f,cv1f,v2,cv2,"Square");
+  TestMatrixArith2b<T>(a2f,ca2f,v1f,cv1f,v2,cv2,"Square");
   TestMatrixArith2b<T>(a1f,ca1f,v1f,cv1f,v2f,cv2f,"Square");
-  //TestMatrixArith2b<T>(a2f,ca2f,v1f,cv1f,v2f,cv2f,"Square");
+  TestMatrixArith2b<T>(a2f,ca2f,v1f,cv1f,v2f,cv2f,"Square");
 #endif
 }
 
 template <class T> void TestSmallMatrixArith_A2b()
 {
   DoTestSmallMatrixArith_A2b<T,2>();
-  DoTestSmallMatrixArith_A2b<T,12>();
+  DoTestSmallMatrixArith_A2b<T,5>();
 #ifdef XTEST
   DoTestSmallMatrixArith_A2b<T,1>();
   DoTestSmallMatrixArith_A2b<T,3>();
   DoTestSmallMatrixArith_A2b<T,4>();
-  DoTestSmallMatrixArith_A2b<T,22>();
 #endif
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestSmallMatrixArith_A2b<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestSmallMatrixArith_A2b<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestSmallMatrixArith_A2b<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestSmallMatrixArith_A2b<int>();
 #endif

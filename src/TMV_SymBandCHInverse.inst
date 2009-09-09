@@ -1,0 +1,32 @@
+#define CT std::complex<T>
+
+#define DefInv(T,T1) \
+template void CH_Inverse(const GenSymBandMatrix<T >& m, \
+    const SymMatrixView<T1 >& sinv); \
+template void LDL_Inverse(const GenSymBandMatrix<T >& m, \
+    const SymMatrixView<T1 >& sinv); \
+    
+DefInv(T,T)
+#ifdef INST_COMPLEX
+DefInv(T,CT)
+DefInv(CT,CT)
+#endif
+
+#undef DefInv
+
+#define DefInv(T,T1) \
+template <> void CH_Inverse(const GenSymBandMatrix<T >& , \
+    const SymMatrixView<T1 >& )\
+    { TMVAssert(FALSE); } \
+template <> void LDL_Inverse(const GenSymBandMatrix<T >& , \
+    const SymMatrixView<T1 >& )\
+    { TMVAssert(FALSE); } \
+    
+#ifdef INST_COMPLEX
+DefInv(CT,T)
+#endif
+
+#undef DefInv
+
+#undef CT
+

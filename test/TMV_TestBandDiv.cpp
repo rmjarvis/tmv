@@ -216,13 +216,13 @@ template <class T> void TestAllBandDiv()
   TestBandDiv<T>(tmv::SV);
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestAllBandDiv<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestAllBandDiv<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestAllBandDiv<long double>();
 #endif
 

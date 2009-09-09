@@ -2,7 +2,7 @@
 
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
-#include "TMV_Mat.h"
+#include "TMV.h"
 #include <fstream>
 #include <cstdio>
 
@@ -14,7 +14,7 @@ template <class T, tmv::StorageType S> static void TestBasicMatrix_1()
   const int N = 10;
 
   tmv::Matrix<T,S> m(M,N);
-  tmv::MatrixF<T,S> mf(M,N);
+  tmv::Matrix<T,S,tmv::FortranStyle> mf(M,N);
   Assert(m.colsize() == size_t(M) && m.rowsize() == size_t(N),
       "Creating Matrix(M,N)");
   Assert(m.colsize() == size_t(M) && m.rowsize() == size_t(N),
@@ -26,8 +26,8 @@ template <class T, tmv::StorageType S> static void TestBasicMatrix_1()
   }
   tmv::ConstMatrixView<T> mcv = m.View();
   tmv::MatrixView<T> mv = m.View();
-  tmv::ConstMatrixViewF<T> mfcv = mf.View();
-  tmv::MatrixViewF<T> mfv = mf.View();
+  tmv::ConstMatrixView<T,tmv::FortranStyle> mfcv = mf.View();
+  tmv::MatrixView<T,tmv::FortranStyle> mfv = mf.View();
 
   for (int i=0, k=0; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
     Assert(m(i,j) == k,"Read/Write Matrix");
@@ -125,7 +125,7 @@ template <class T, tmv::StorageType S> static void TestBasicMatrix_2()
   const int N = 10;
 
   tmv::Matrix<T,S> m(M,N);
-  tmv::MatrixF<T,S> mf(M,N);
+  tmv::Matrix<T,S,tmv::FortranStyle> mf(M,N);
 
   for (int i=0, k=0; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
     m(i,j) = T(k);
@@ -133,8 +133,8 @@ template <class T, tmv::StorageType S> static void TestBasicMatrix_2()
   }
   tmv::ConstMatrixView<T> mcv = m.View();
   tmv::MatrixView<T> mv = m.View();
-  tmv::ConstMatrixViewF<T> mfcv = mf.View();
-  tmv::MatrixViewF<T> mfv = mf.View();
+  tmv::ConstMatrixView<T,tmv::FortranStyle> mfcv = mf.View();
+  tmv::MatrixView<T,tmv::FortranStyle> mfv = mf.View();
 
   Assert(m.SubMatrix(2,5,1,4) == m.SubMatrix(2,5,1,4,1,1),"SubMatrix");
   Assert(m.SubVector(2,5,4,2,3) == m.SubMatrix(2,14,5,11,4,2).diag(),
@@ -234,70 +234,46 @@ template <class T, tmv::StorageType S> static void TestBasicMatrix_2()
   mf = a;
   Assert(a == mf,"Copy CStyle Matrix to FortranStyle");
 
-  std::vector<T> qv(12);
-  tmv::Matrix<T,S> q4(3,4);
-  tmv::Matrix<T,S> q5t(4,3);
+  std::vector<T> qv(6);
+  tmv::Matrix<T,S> q4(2,3);
+  tmv::Matrix<T,S> q5t(3,2);
   tmv::MatrixView<T> q5 = q5t.Transpose();
   if (S == tmv::RowMajor) {
-    T qvar[] = { 
-      T(0), T(-1), T(-2), T(-3),
-      T(2), T(1), T(0), T(-1),
-      T(4), T(3), T(2), T(1) 
-    };
-    for(int i=0;i<12;i++) qv[i] = qvar[i];
-    q4 <<
-       0, -1, -2, -3,
-       2, 1, 0, -1,
-       4, 3, 2, 1;
-    q5 <<
-       0, 2, 4,
-       -1, 1, 3,
-       -2, 0, 2,
-       -3, -1, 1;
+    T qvar[] = { T(0), T(-1), T(-2),
+      T(2), T(1), T(0) };
+    for(int i=0;i<6;i++) qv[i] = qvar[i];
+    q4 = tmv::ListInit,
+       0, -1, -2,
+       2, 1, 0;
+    q5 = tmv::ListInit,
+       0, 2,
+       -1, 1,
+       -2, 0;
   } else {
-    T qvar[] = {
-      T(0), T(2), T(4),
-      T(-1), T(1), T(3),
-      T(-2), T(0), T(2),
-      T(-3), T(-1), T(1) 
-    };
-    for(int i=0;i<12;i++) qv[i] = qvar[i];
-    q4 <<
-       0, 2, 4,
-       -1, 1, 3,
-       -2, 0, 2,
-       -3, -1, 1;
-    q5 <<
-       0, -1, -2, -3,
-       2, 1, 0, -1,
-       4, 3, 2, 1;
+    T qvar[] = { T(0), T(2),
+      T(-1), T(1),
+      T(-2), T(0) };
+    for(int i=0;i<6;i++) qv[i] = qvar[i];
+    q4 = tmv::ListInit,
+       0, 2,
+       -1, 1,
+       -2, 0;
+    q5 = tmv::ListInit,
+       0, -1, -2,
+       2, 1, 0;
   }
-  const int Si = (S == tmv::RowMajor ? 4 : 1);
-  const int Sj = (S == tmv::RowMajor ? 1 : 3);
-  T qar[12];
-  for(int i=0;i<12;i++) qar[i] = qv[i];
-  tmv::Matrix<T,S> q1(3,4,qar);
-  tmv::Matrix<T,S> q2(3,4,qv);
-  
-  tmv::ConstMatrixView<T> q3 = tmv::MatrixViewOf(qar,3,4,S);
-  tmv::ConstMatrixView<T,Si,Sj> q6 = tmv::MatrixViewOf(qar,3,4,Si,Sj);
+  T qar[6];
+  for(int i=0;i<6;i++) qar[i] = qv[i];
+  tmv::Matrix<T,S> q1(2,3,qar);
+  tmv::Matrix<T,S> q2(2,3,qv);
+  tmv::ConstMatrixView<T> q3 = tmv::MatrixViewOf(qar,2,3,S);
 
-  if (showacc) {
-    std::cout<<"q1 = "<<q1<<std::endl;
-    std::cout<<"q2 = "<<q2<<std::endl;
-    std::cout<<"q3 = "<<q3<<std::endl;
-    std::cout<<"q4 = "<<q4<<std::endl;
-    std::cout<<"q5 = "<<q5<<std::endl;
-    std::cout<<"q6 = "<<q6<<std::endl;
-  }
-
-  for(int i=0;i<3;i++) for(int j=0;j<4;j++) {
+  for(int i=0;i<2;i++) for(int j=0;j<3;j++) {
     Assert(q1(i,j) == T(2*i-j),"Create Matrix from T*");
     Assert(q2(i,j) == T(2*i-j),"Create Matrix from vector");
-    Assert(q3(i,j) == T(2*i-j),"Create MatrixView of T* (S)");
-    Assert(q4(i,j) == T(2*i-j),"Create Matrix from << list");
-    Assert(q5(i,j) == T(2*i-j),"Create MatrixView from << list");
-    Assert(q6(i,j) == T(2*i-j),"Create MatrixView of T* (Si,Sj)");
+    Assert(q3(i,j) == T(2*i-j),"Create MatrixView of T*");
+    Assert(q4(i,j) == T(2*i-j),"Create Matrix from ListInit");
+    Assert(q5(i,j) == T(2*i-j),"Create MatrixView of ListInit");
   }
 
   c = a+b;
@@ -412,13 +388,13 @@ template <class T, tmv::StorageType S> static void TestBasicMatrix_IO()
 
 #ifndef XTEST
   std::remove("tmvtest_matrix_io.dat");
+  //system("rm tmvtest_matrix_io.dat");
 #endif
 
 }
 
 template <class T> void TestAllMatrix()
 {
-#if 1
   TestBasicMatrix_1<T,tmv::RowMajor>();
   TestBasicMatrix_1<T,tmv::ColMajor>();
   TestBasicMatrix_2<T,tmv::RowMajor>();
@@ -426,30 +402,22 @@ template <class T> void TestAllMatrix()
   TestBasicMatrix_IO<T,tmv::RowMajor>();
   TestBasicMatrix_IO<T,tmv::ColMajor>();
   std::cout<<"Matrix<"<<tmv::TypeText(T())<<"> passed all basic tests\n";
-#endif
 
-#if 1
-  TestMatrixArith_1<T>();
-  TestMatrixArith_2<T>();
-  TestMatrixArith_3<T>();
-  TestMatrixArith_4<T>();
-  TestMatrixArith_5<T>();
-  TestMatrixArith_6<T>();
-  TestMatrixArith_7<T>();
-  TestMatrixArith_8<T>();
-  std::cout<<"Matrix<"<<tmv::TypeText(T())<<"> Arithmetic passed all tests\n";
-#endif
+  if (tmv::Epsilon<T>() > T(0)) {
+    TestAllMatrixArith<T>();
+    std::cout<<"Matrix<"<<tmv::TypeText(T())<<"> Arithmetic passed all tests\n";
+  }
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestAllMatrix<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestAllMatrix<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestAllMatrix<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestAllMatrix<int>();
 #endif

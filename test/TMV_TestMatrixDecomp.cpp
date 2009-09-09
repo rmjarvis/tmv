@@ -3,7 +3,7 @@
 #include "../src/TMV_Blas.h"
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
-#include "TMV_Mat.h"
+#include "TMV.h"
 
 template <class T, tmv::StorageType stor> void TestMatrixDecomp()
 {
@@ -440,19 +440,19 @@ template <class T, tmv::StorageType stor> void TestMatrixDecomp()
   }
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestMatrixDecomp<double,tmv::RowMajor>();
 template void TestMatrixDecomp<double,tmv::ColMajor>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestMatrixDecomp<float,tmv::RowMajor>();
 template void TestMatrixDecomp<float,tmv::ColMajor>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestMatrixDecomp<long double,tmv::RowMajor>();
 template void TestMatrixDecomp<long double,tmv::ColMajor>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestMatrixDecomp<int,tmv::RowMajor>();
 template void TestMatrixDecomp<int,tmv::ColMajor>();
 #endif

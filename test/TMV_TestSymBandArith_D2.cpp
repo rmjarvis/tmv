@@ -114,15 +114,15 @@ template <class T> void TestSymBandMatrixArith_D2()
 #endif
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestSymBandMatrixArith_D2<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestSymBandMatrixArith_D2<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestSymBandMatrixArith_D2<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestSymBandMatrixArith_D2<int>();
 #endif

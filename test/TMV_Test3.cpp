@@ -35,7 +35,7 @@ int main() try {
 
 #ifndef SKIPREST
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
   TestAllSmallVector<double>();
   TestAllSmallMatrix<double>();
   TestAllSmallMatrixA<double>();
@@ -45,7 +45,7 @@ int main() try {
   TestAllSmallMatrixDivB<double>();
 #endif
 
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
   TestAllSmallVector<float>();
   TestAllSmallMatrix<float>();
   TestAllSmallMatrixA<float>();
@@ -55,7 +55,7 @@ int main() try {
   TestAllSmallMatrixDivB<float>();
 #endif
 
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
   TestAllSmallVector<long double>();
   TestAllSmallMatrix<long double>();
   TestAllSmallMatrixA<long double>();
@@ -65,7 +65,7 @@ int main() try {
   TestAllSmallMatrixDivB<long double>();
 #endif 
 
-#ifdef TEST_INT
+#ifdef INST_INT
   TestAllSmallVector<int>();
   TestAllSmallMatrix<int>();
 #endif 

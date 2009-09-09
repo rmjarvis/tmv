@@ -2,7 +2,8 @@
 
 #include "TMV_Test.h"
 #include "TMV_Test3.h"
-#include "TMV_Mat.h"
+#include "TMV.h"
+#include "TMV_Small.h"
 
 template <class T, tmv::StorageType stor, int N> static void TestSmallSquareDiv()
 {
@@ -290,12 +291,12 @@ template <class T> void TestAllSmallMatrixDiv()
   std::cout<<" passed all basic tests\n";
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestAllSmallMatrixDiv<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestAllSmallMatrixDiv<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestAllSmallMatrixDiv<long double>();
 #endif

@@ -2,7 +2,7 @@
 
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
-#include "TMV_Mat.h"
+#include "TMV.h"
 
 #include "TMV_TestMatrixDivArith.h"
 
@@ -862,12 +862,12 @@ template <class T> void TestAllMatrixDiv()
   TestSingularDiv<T,tmv::ColMajor>(tmv::SV);
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestAllMatrixDiv<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestAllMatrixDiv<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestAllMatrixDiv<long double>();
 #endif

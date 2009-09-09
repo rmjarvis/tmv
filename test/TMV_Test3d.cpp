@@ -35,17 +35,17 @@ int main() try {
 
 #ifndef SKIPREST
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
   TestAllSmallMatrixDiv<double>();
   TestAllSmallMatrixDivA<double>();
 #endif
 
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
   TestAllSmallMatrixDiv<float>();
   TestAllSmallMatrixDivA<float>();
 #endif
 
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
   TestAllSmallMatrixDiv<long double>();
   TestAllSmallMatrixDivA<long double>();
 #endif 

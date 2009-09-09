@@ -1,7 +1,8 @@
 // vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 #include "TMV_Test.h"
 #include "TMV_Test3.h"
-#include "TMV_Mat.h"
+#include "TMV.h"
+#include "TMV_Small.h"
 
 #define INORDER
 #include "TMV_TestMatrixArith.h"
@@ -26,26 +27,22 @@ template <class T, int N> static void DoTestSmallMatrixArith_B5a()
   if (N > 3) ca1.row(3) += 
     tmv::SmallVector<std::complex<T>,N>(std::complex<T>(1.8,9.2));
 
-  if (N > 10) {
-    a1 /= T(N*N); a1 += T(1); 
-    ca1 /= T(N*N); ca1 += T(1); 
-  }
-
   tmv::SmallMatrix<T,7,N,tmv::RowMajor> a3;
   for(int i=0;i<7;++i) for(int j=0;j<N;++j) a3(i,j) = T(1-3*i+2*j);
-  if (N > 7) a3 += a1.Rows(1,8);
-  else a3.SubMatrix(2,N+2,0,N) += a1;
+  a3.SubMatrix(2,N+2,0,N) += a1;
   tmv::SmallMatrix<std::complex<T>,7,N,tmv::RowMajor> ca3 = 
   a3*std::complex<T>(1,2);
-  if (N > 7) ca3 += ca1.Rows(1,8);
-  else ca3.SubMatrix(2,N+2,0,N) += ca1;
+  ca3.SubMatrix(2,N+2,0,N) += ca1;
   if (N > 1) ca3.col(1) *= std::complex<T>(2,1);
   ca3.row(6).AddToAll(std::complex<T>(-7,2));
+
+  tmv::SmallMatrix<T,7,N> a3x;
+  tmv::SmallMatrix<std::complex<T>,7,N> ca3x;
 
   if (showstartdone) {
     std::cout<<"B5a\n";
   }
-  TestMatrixArith5<T>(a3,ca3,a1,ca1,"NonSquare");
+  TestMatrixArith5<T>(a3x,ca3x,a3x,ca3x,a3,ca3,a1,ca1,"NonSquare");
 
 #ifdef XTEST
   tmv::SmallMatrix<T,N,N,tmv::ColMajor> a2 = a1;
@@ -58,37 +55,35 @@ template <class T, int N> static void DoTestSmallMatrixArith_B5a()
   tmv::SmallMatrix<T,7,N,tmv::RowMajor,tmv::FortranStyle> a3f = a3;
   tmv::SmallMatrix<std::complex<T>,7,N,tmv::RowMajor,tmv::FortranStyle> ca3f = ca3;
 
-  TestMatrixArith5<T>(a3,ca3,a2,ca2,"NonSquare");
-  TestMatrixArith5<T>(a4,ca4,a1,ca1,"NonSquare");
-  TestMatrixArith5<T>(a4,ca4,a2,ca2,"NonSquare");
-  //TestMatrixArith5<T>(a3f,ca3f,a1,ca1,"NonSquare");
-  //TestMatrixArith5<T>(a3f,ca3f,a1f,ca1f,"NonSquare");
+  TestMatrixArith5<T>(a3x,ca3x,a3x,ca3x,a3,ca3,a2,ca2,"NonSquare");
+  TestMatrixArith5<T>(a3x,ca3x,a3x,ca3x,a4,ca4,a1,ca1,"NonSquare");
+  TestMatrixArith5<T>(a3x,ca3x,a3x,ca3x,a4,ca4,a2,ca2,"NonSquare");
+  TestMatrixArith5<T>(a3x,ca3x,a3x,ca3x,a3f,ca3f,a1,ca1,"NonSquare");
+  TestMatrixArith5<T>(a3x,ca3x,a3x,ca3x,a3f,ca3f,a1f,ca1f,"NonSquare");
 #endif
 }
 
 template <class T> void TestSmallMatrixArith_B5a()
 {
   DoTestSmallMatrixArith_B5a<T,2>();
-  DoTestSmallMatrixArith_B5a<T,12>();
+  DoTestSmallMatrixArith_B5a<T,5>();
 #ifdef XTEST
   DoTestSmallMatrixArith_B5a<T,1>();
   DoTestSmallMatrixArith_B5a<T,3>();
   DoTestSmallMatrixArith_B5a<T,4>();
-  DoTestSmallMatrixArith_B5a<T,22>();
-  DoTestSmallMatrixArith_B5a<T,555>();
 #endif
 }
 
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestSmallMatrixArith_B5a<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestSmallMatrixArith_B5a<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestSmallMatrixArith_B5a<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestSmallMatrixArith_B5a<int>();
 #endif

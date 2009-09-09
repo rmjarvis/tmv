@@ -40,34 +40,14 @@ opts.Add('FLAGS','Compile flags to send to the compiler','')
 opts.Add(BoolVariable('DEBUG','Turn on debugging statements',False))
 opts.Add(PathVariable('PREFIX',
             'prefix for installation','', PathVariable.PathAccept))
-
-opts.Add(EnumVariable('OPT',
-            'Set the optimization level for TMV library', '3',
-            allowed_values=('0','1','2','3')))
-opts.Add(BoolVariable('INST_FLOAT',
-            'Instantiate <float> templates in compiled library', True))
-opts.Add(BoolVariable('INST_DOUBLE',
-            'Instantiate <double> templates in compiled library', True))
-opts.Add(BoolVariable('INST_LONGDOUBLE',
-            'Instantiate <long double> templates in compiled library', False))
-opts.Add(BoolVariable('INST_INT',
-            'Instantiate <int> templates in compiled library', False))
-opts.Add(BoolVariable('INST_COMPLEX',
-            'Instantiate complex<T> templates in compiled library', True))
-opts.Add(BoolVariable('INST_MIX',
-            'Instantiate functions that mix real with complex', True))
-
-opts.Add(EnumVariable('TEST_OPT',
-            'Set the optimization level for TMV test suite', '0',
-            allowed_values=('0','1','2','3')))
-opts.Add(BoolVariable('TEST_FLOAT',
-            'Instantiate <float> in the test suite', True))
-opts.Add(BoolVariable('TEST_DOUBLE',
-            'Instantiate <double> in the test suite', True))
-opts.Add(BoolVariable('TEST_LONGDOUBLE',
-            'Instantiate <long double> in the test suite', False))
-opts.Add(BoolVariable('TEST_INT',
-            'Instantiate <int> in the test suite', True))
+opts.Add(BoolVariable('WITH_FLOAT',
+            'Instantiate <float> templates', True))
+opts.Add(BoolVariable('WITH_DOUBLE',
+            'Instantiate <double> templates', True))
+opts.Add(BoolVariable('WITH_LONGDOUBLE',
+            'Instantiate <long double> templates', False))
+opts.Add(BoolVariable('WITH_INT',
+            'Instantiate <int> templates', False))
 
 opts.Add(PathVariable('EXTRA_PATH',
             'Extra paths for executables (separated by : if more than 1)',
@@ -108,9 +88,6 @@ opts.Add(BoolVariable('FORCE_FLAPACK',
             'Force scons to use Fortran LAPACK', False))
 opts.Add('LIBS','Libraries to send to the linker','')
 
-opts.Add(BoolVariable('SMALL_LIB',
-            'Avoid optimizations that cause the library to become very large', 
-            True))
 opts.Add(BoolVariable('WITH_OPENMP',
             'Look for openmp and use if found.', False))
 opts.Add(BoolVariable('STATIC',
@@ -144,8 +121,8 @@ def BasicCCFlags(env):
         version = env['CXXVERSION_NUMERICAL']
     
         if compiler == 'g++':
-            env.Replace(CCFLAGS=['-O3'])
-            env['TEST_FLAGS'] = ['-O']
+            env.Replace(CCFLAGS=['-O2'])
+            env['TEST_FLAGS'] = []
             if version <= 4.2:
                 env.Append(CCFLAGS=['-fno-strict-aliasing'])
             if env['WARN']:
@@ -159,8 +136,8 @@ def BasicCCFlags(env):
                 env.Append(CCFLAGS=['-vec-report0'])
                 env['TEST_FLAGS'] += ['-vec-report0']
             if env['WARN']:
-                env.Append(CCFLAGS=['-Wall','-Werror','-wd279,383,810,981'])
-                env['TEST_FLAGS'] += ['-Wall','-Werror','-wd279,383,810,981']
+                env.Append(CCFLAGS=['-Wall','-Werror','-wd383,810,981'])
+                env['TEST_FLAGS'] += ['-Wall','-Werror','-wd383,810,981']
                 if version >= 9:
                     env.Append(CCFLAGS=['-wd1572'])
                     env['TEST_FLAGS'] += ['-wd1572']
@@ -170,16 +147,13 @@ def BasicCCFlags(env):
                 if version >= 11:
                     env.Append(CCFLAGS=['-wd2259'])
                     env['TEST_FLAGS'] += ['-wd2259']
-            else :
-                env.Append(CCFLAGS=['-w'])
-                env['TEST_FLAGS'] += ['-w']
 
         elif compiler == 'pgCC':
             env.Replace(CCFLAGS=['-O2','-fast','-Mcache_align'])
             env['TEST_FLAGS'] = ['-O0']
 
         elif compiler == 'cl':
-            env.Replace(CCFLAGS=['/EHsc','/nologo','/O2','/Oi'])
+            env.Replace(CCFLAGS=['/EHsc','/nologo','/O2','/Oi',])
             env['TEST_FLAGS'] = ['/EHsc','/nologo']
             if env['WARN']:
                 env.Append(CCFLAGS=['/W2','/WX'])
@@ -494,9 +468,8 @@ int main()
     if context.TryCompile(acml_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],acml_source_file) or
-            CheckLibs(context,['acml'],acml_source_file) or
             CheckLibs(context,['acml','pgftnrtl'],acml_source_file) or
-            CheckLibs(context,['acml','gfortran'],acml_source_file) )
+            CheckLibs(context,['acml'],acml_source_file) )
 
         context.Result(result)
 
@@ -517,7 +490,7 @@ int main()
 def CheckGOTO(context):
     goto_source_file = """
 extern "C" {
-#include "util/fblas.h"
+#include "fblas.h"
 }
 int main()
 {
@@ -635,7 +608,7 @@ int main()
 def CheckFBLAS(context):
     fblas_source_file = """
 extern "C" {
-#include "util/fblas.h"
+#include "fblas.h"
 }
 int main()
 {
@@ -653,8 +626,7 @@ int main()
         result = (
             CheckLibs(context,[],fblas_source_file) or
             CheckLibs(context,['blas'],fblas_source_file) or
-            CheckLibs(context,['blas','pgftnrtl'],fblas_source_file) or
-            CheckLibs(context,['blas','gfortran'],fblas_source_file) )
+            CheckLibs(context,['blas','pgftnrtl'],fblas_source_file) )
 
         context.Result(result)
 
@@ -691,8 +663,7 @@ int main()
 
     result = (context.TryCompile(mkl_lap_source_file,'.cpp') and
         (CheckLibs(context,[],mkl_lap_source_file) or
-         CheckLibs(context,['mkl_lapack'],mkl_lap_source_file) or
-         CheckLibs(context,['mkl_lapack','guide'],mkl_lap_source_file)))
+         CheckLibs(context,['mkl_lapack'],mkl_lap_source_file)))
 
     context.Result(result)
     return result
@@ -791,7 +762,7 @@ int main()
 def CheckFLAPACK(context):
     flapack_source_file = """
 extern "C" {
-#include "util/flapack.h"
+#include "flapack.h"
 }
 int main()
 {
@@ -809,8 +780,7 @@ int main()
         result = (
             CheckLibs(context,[],flapack_source_file) or
             CheckLibs(context,['lapack'],flapack_source_file) or
-            CheckLibs(context,['lapack','pgftnrtl'],flapack_source_file) or
-            CheckLibs(context,['lapack','gfortran'],flapack_source_file) )
+            CheckLibs(context,['lapack','pgftnrtl'],flapack_source_file) )
 
         context.Result(result)
 
@@ -997,37 +967,24 @@ def DoConfig(env):
     # Some extra flags depending on the options:
     if env['WITH_OPENMP']:
         AddOpenMPFlag(env)
-    env.Append(CPPDEFINES=['TMV_OPT=' + env['OPT']])
     if not env['DEBUG']:
         print 'Debugging turned off'
-        env.Append(CPPDEFINES=['NDEBUG'])
+        env.Append(CPPDEFINES='NDEBUG')
     if env['MEM_TEST']:
-        env.Append(CPPDEFINES=['TMV_MEM_TEST'])
+        env.Append(CPPDEFINES=['MEMTEST'])
     if env['STATIC'] :
         if env['CXXTYPE'] == 'pgCC':
             env.Append(LINKFLAGS=['-Bstatic'])
         else:
             env.Append(LINKFLAGS=['-static'])
-    if not env['INST_FLOAT']:
-        env.Append(CPPDEFINES=['TMV_NO_INST_FLOAT'])
-    if not env['INST_DOUBLE']:
-        env.Append(CPPDEFINES=['TMV_NO_INST_DOUBLE'])
-    if env['INST_LONGDOUBLE']:
-        env.Append(CPPDEFINES=['TMV_INST_LONGDOUBLE'])
-    if env['INST_INT']:
-        env.Append(CPPDEFINES=['TMV_INST_INT'])
-    if not env['INST_COMPLEX']:
-        env.Append(CPPDEFINES=['TMV_NO_INST_COMPLEX'])
-    if not env['INST_MIX']:
-        env.Append(CPPDEFINES=['TMV_NO_INST_MIX'])
-    if not env['TEST_FLOAT']:
-        env.Append(CPPDEFINES=['NO_TEST_FLOAT'])
-    if not env['TEST_DOUBLE']:
-        env.Append(CPPDEFINES=['NO_TEST_DOUBLE'])
-    if env['TEST_LONGDOUBLE']:
-        env.Append(CPPDEFINES=['TEST_LONGDOUBLE'])
-    if env['TEST_INT']:
-        env.Append(CPPDEFINES=['TEST_INT'])
+    if not env['WITH_FLOAT']:
+        env.Append(CPPDEFINES=['NO_INST_FLOAT'])
+    if not env['WITH_DOUBLE']:
+        env.Append(CPPDEFINES=['NO_INST_DOUBLE'])
+    if env['WITH_LONGDOUBLE']:
+        env.Append(CPPDEFINES=['INST_LONGDOUBLE'])
+    if env['WITH_INT']:
+        env.Append(CPPDEFINES=['INST_INT'])
 
     import SCons.SConf
 

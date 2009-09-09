@@ -76,15 +76,15 @@ template <class T> void TestSymBandMatrixArith_F1()
   for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestSymBandMatrixArith_F1<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestSymBandMatrixArith_F1<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestSymBandMatrixArith_F1<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestSymBandMatrixArith_F1<int>();
 #endif

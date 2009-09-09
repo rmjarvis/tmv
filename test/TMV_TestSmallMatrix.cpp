@@ -1,17 +1,14 @@
 // vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 #include "TMV_Test.h"
 #include "TMV_Test3.h"
-#include "TMV_Mat.h"
+#include "TMV.h"
+#include "TMV_Small.h"
 #include <fstream>
 #include <cstdio>
 
 template <class T, int M, int N, tmv::StorageType S> 
 inline void TestBasicSmallMatrix()
 {
-  Assert(M >= N,"Matrix must not be short"); 
-  // The checks below implicitly assume this.
-  // So make it explicity here to avoid confusion.
-
   tmv::SmallMatrix<T,M,N,S> m;
   tmv::SmallMatrix<T,M,N,S,tmv::FortranStyle> mf;
   Assert(m.colsize() == size_t(M) && m.rowsize() == size_t(N),
@@ -75,11 +72,11 @@ inline void TestBasicSmallMatrix()
       Assert(q2(i,j) == T(2*i-j),"Create SmallMatrix from vector");
     }
     tmv::SmallMatrix<T,2,3,S> q3;
-    q3 <<
+    q3 = tmv::ListInit,
        0, -1, -2,
        2, 1, 0;
     for(int i=0;i<2;i++) for(int j=0;j<3;j++) {
-      Assert(q3(i,j) == T(2*i-j),"Create SmallMatrix from << list");
+      Assert(q3(i,j) == T(2*i-j),"Create SmallMatrix from ListInit");
     }
   } else {
     const T qar[] = { 
@@ -97,12 +94,12 @@ inline void TestBasicSmallMatrix()
       Assert(q2(i,j) == T(2*i-j),"Create SmallMatrix from vector");
     }
     tmv::SmallMatrix<T,2,3,S> q3;
-    q3 <<
+    q3 = tmv::ListInit,
        0, 2,
        -1, 1,
        -2, 0;
     for(int i=0;i<2;i++) for(int j=0;j<3;j++) {
-      Assert(q3(i,j) == T(2*i-j),"Create SmallMatrix from << list");
+      Assert(q3(i,j) == T(2*i-j),"Create SmallMatrix from ListInit");
     }
   }
   // Test Basic Arithmetic 
@@ -207,25 +204,21 @@ inline void TestBasicSmallMatrix()
 
 template <class T> void TestAllSmallMatrix()
 {
-  TestBasicSmallMatrix<T,6,4,tmv::RowMajor>();
-  TestBasicSmallMatrix<T,6,4,tmv::ColMajor>();
-#ifdef XTEST
-  TestBasicSmallMatrix<T,42,10,tmv::RowMajor>();
-  TestBasicSmallMatrix<T,42,10,tmv::ColMajor>();
-#endif
+  TestBasicSmallMatrix<T,15,10,tmv::RowMajor>();
+  TestBasicSmallMatrix<T,15,10,tmv::ColMajor>();
   TestSmallMatrix_Sub<T>();
   std::cout<<"SmallMatrix<"<<tmv::TypeText(T())<<"> passed all basic tests\n";
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestAllSmallMatrix<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestAllSmallMatrix<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestAllSmallMatrix<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestAllSmallMatrix<int>();
 #endif

@@ -50,12 +50,12 @@ template <class T> void TestBandDiv_C1(tmv::DivType dt)
   for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestBandDiv_C1<double>(tmv::DivType dt);
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestBandDiv_C1<float>(tmv::DivType dt);
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestBandDiv_C1<long double>(tmv::DivType dt);
 #endif

@@ -33,148 +33,57 @@
 
 //-----------------------------------------------------------------------------
 //
-// This file defines the SmallVector class.
-//
-// A SmallVector is a vector whose size is known at compile time.
-// This allows for a lot of optimizations by the compiler in implementing
-// the various operations on it. 
-// 
-// Since the instantiation needs to know the size of the vector, all 
-// operations on the SmallVector are done inline, rather than precompiled.
-// This gives another speed boost in most cases, since the compiler can
-// avoid implementing a function call in most cases.
-//
-// Finally, another advantage is that we allocate the data on the stack
-// rather than the heap, so we avoid new and delete calls as well.
-// However, stack sizes are usually limited to hundreds of KB, 
-// (mine is 8 MB), so we set a maximum size of 1KB for each SmallVector.
-// (For double, this means up to N=128 will be allocated on the stack.)
-// Any bigger than that, and the performance drop from using the
-// heap is pretty irrelevant.  (See TMV_StackArray.h to change this.)
-// 
-// One drawback of using a SmallVector is that it does not do any
-// alias checking in the aritmetic statements.  So a statement like
-// v = m * v will not produce a correct answer. 
-// Normally this is a feature, since the alias checks can be a 
-// significant fraction of the calculation time for small vectors/matrices.
-// 
-// You can workaround this when necessary by explicitly making a copy.
-// The easiest way is with the .copy() method.  e.g. v = m * v.copy().
-//
+// This file defines the TMV SmallVector class.
 //
 // Constructors:
 //
-//    SmallVector<T,N,I>()  
+//    explicit SmallVector<T,N,I>()  
 //        Makes a Vector of size N with _uninitialized_ values
 //
 //    SmallVector<T,N,I>(T x)
 //        Makes a Vector of size N with all values = x
 //
-//    SmallVector<T,N,I>(const T* v2)
-//    SmallVector<T,N,I>(const vector<T>& v2)
-//    SmallVector<T,N,I>(const BaseVector<V2>& v2)
-//        Makes a SmallVector which copies the elements of v2.
+//    SmallVector<T,N,I>(const T* vv)
+//    SmallVector<T,N,I>(const vector<T>& vv)
+//    SmallVector<T,N,I>(const GenVector<T>& vv)
+//        Makes a SmallVector which copies the elements of vv.
 //
+// 
+// SmallVector doesn't have views like a regular Vector.
+// All the normal viewing kinds of routines just return a regular VectorView.
+// It is mostly useful for fast element access and simple tasks
+// like multiplication and addition.  All the calculations are done
+// inline, so the compiler can optimize the calculation for the particular
+// value of N.  It is ually faster, but may take longer to compile
+// depending on what calculations you are doing with them.
+// 
 
 #ifndef TMV_SmallVector_H
 #define TMV_SmallVector_H
 
-
-#include <vector>
-#include <sstream>
-
-#include "tmv/TMV_BaseVector.h"
+#include "tmv/TMV_Vector.h"
 #include "tmv/TMV_VIt.h"
-#include "tmv/TMV_StackArray.h"
+#include <sstream>
+#include <algorithm>
 
 namespace tmv {
 
-  //
-  // SmallVector
-  //
+  template <class T, int N> 
+  class SmallVectorComposite;
 
-  template <class T, int N, IndexStyle I> 
-  struct Traits<SmallVector<T,N,I> >
-  {
-    typedef T value_type;
+  template <class T1, class T2, int N, IndexStyle I1, IndexStyle I2> 
+  inline void Copy(const SmallVector<T1,N,I1>& v1, SmallVector<T2,N,I2>& v2);
 
-    typedef typename Traits<T>::real_type real_type;
-    typedef typename Traits<T>::complex_type complex_type;
-    enum { visreal = Traits<T>::isreal };
-    enum { viscomplex = Traits<T>::iscomplex };
-
-    typedef SmallVector<T,N,I> type;
-    typedef const type& calc_type; 
-    typedef const type& eval_type; 
-    typedef type copy_type;
-
-    enum { vsize = N }; 
-    enum { vfort = (I == FortranStyle) };
-    enum { vcalc = true };
-    enum { vstep = 1 }; 
-    enum { vconj = false }; 
-
-    typedef ConstVectorView<T,1,false,I> const_subvector_type;
-    typedef ConstVectorView<T,UNKNOWN,false,I> const_subvector_step_type;
-    typedef ConstSmallVectorView<T,N,1,false,I> const_view_type;
-    typedef ConstSmallVectorView<T,N,1,false,CStyle> const_cview_type;
-    typedef ConstSmallVectorView<T,N,1,false,FortranStyle> const_fview_type;
-    typedef ConstVectorView<T> const_xview_type;
-    typedef ConstSmallVectorView<T,N,1,false,I> const_unitview_type;
-    typedef ConstSmallVectorView<T,N,1,viscomplex,I> const_conjugate_type;
-    typedef ConstSmallVectorView<T,N,-1,false,I> const_reverse_type;
-    typedef ConstSmallVectorView<real_type,N,visreal?1:2,false,I> const_realview_type;
-    typedef const_realview_type const_imagview_type;
-    typedef ConstSmallVectorView<real_type,visreal?N:N*2,1,false,I> const_flatten_type;
-    typedef ConstSmallVectorView<T,N,1,false,I> const_nonconj_type;
-
-    typedef CVIt<T,1,false> const_iterator;
-    typedef CVIt<T,-1,false> const_reverse_iterator;
-
-    typedef T& reference;
-
-    typedef VectorView<T,1,false,I> subvector_type;
-    typedef VectorView<T,UNKNOWN,false,I> subvector_step_type;
-    typedef SmallVectorView<T,N,1,false,I> view_type;
-    typedef SmallVectorView<T,N,1,false,CStyle> cview_type;
-    typedef SmallVectorView<T,N,1,false,FortranStyle> fview_type;
-    typedef VectorView<T> xview_type;
-    typedef SmallVectorView<T,N,1,false,I> unitview_type;
-    typedef SmallVectorView<T,N,1,viscomplex,I> conjugate_type;
-    typedef SmallVectorView<T,N,-1,false,I> reverse_type;
-    typedef SmallVectorView<real_type,N,visreal?1:2,false,I> realview_type;
-    typedef realview_type imagview_type;
-    typedef SmallVectorView<real_type,visreal?N:N*2,1,false,I> flatten_type;
-    typedef SmallVectorView<T,N,1,false,I> nonconj_type;
-
-    typedef VIt<T,1,false> iterator;
-    typedef VIt<T,-1,false> reverse_iterator;
-  };
-
-
-//#ifdef XTEST
-#ifdef TMV_DEBUG
-#ifndef XTEST_DEBUG
+#ifdef XTEST
+#ifdef TMVDEBUG
 #define XTEST_DEBUG
 #endif
 #endif
-//#endif
 
   template <class T, int N, IndexStyle I> 
-  class SmallVector : 
-    public BaseVector_Mutable<SmallVector<T,N,I> >
+  class SmallVector 
   {
   public:
-
-    typedef SmallVector<T,N,I> type;
-    typedef BaseVector_Mutable<type> base_mut;
-    typedef typename Traits<T>::real_type real_type;
-    typedef typename Traits<T>::complex_type complex_type;
-
-    enum { visreal = Traits<T>::isreal }; 
-    enum { viscomplex = Traits<T>::iscomplex }; 
-
-    typedef typename base_mut::iterator iterator;
 
     //
     // Constructors
@@ -182,63 +91,135 @@ namespace tmv {
 
     inline SmallVector() 
     {
-      TMVStaticAssert(N > 0);
-#ifdef TMV_DEBUG
-      this->SetAllTo(T(888));
+      TMVAssert(N > 0);
+#ifdef TMVDEBUG
+      SetAllTo(T(888));
 #endif
     }
 
     explicit inline SmallVector(T x) 
     {
-      TMVStaticAssert(N > 0);
-      this->SetAllTo(x); 
+      TMVAssert(N > 0);
+      if (x == T(0)) Zero();
+      else SetAllTo(x); 
     }
 
-    explicit inline SmallVector(const T* v) 
+    explicit inline SmallVector(const T* vv) 
     {
 #ifdef XTEST_DEBUG
-      this->SetAllTo(T(888));
+      SetAllTo(T(888));
 #endif
-      TMVStaticAssert(N > 0);
-      ConstSmallVectorView<T,N> vv(v);
-      vv.AssignTo(*this);
+      TMVAssert(N > 0);
+      for(int i=0;i<N;++i) itsv[i] = vv[i];
     }
 
-    explicit inline SmallVector(const std::vector<T>& v2) 
+    explicit inline SmallVector(const std::vector<T>& vv) 
     {
 #ifdef XTEST_DEBUG
-      this->SetAllTo(T(888));
+      SetAllTo(T(888));
 #endif
-      TMVStaticAssert(N > 0);
-      for(int i=0;i<N;++i) itsv[i] = v2[i];
+      TMVAssert(N > 0);
+      for(int i=0;i<N;++i) itsv[i] = vv[i];
     }
 
-    inline SmallVector(const type& v2) 
+    inline SmallVector(const SmallVector<T,N,I>& v2) 
     {
 #ifdef XTEST_DEBUG
-      this->SetAllTo(T(888));
+      SetAllTo(T(888));
 #endif
-      TMVStaticAssert(N > 0);
-      v2.AssignTo(*this);
+      TMVAssert(N > 0);
+      for(int i=0;i<N;++i) itsv[i] = v2.cref(i);
     }
 
-    template <class V2>
-    inline SmallVector(const BaseVector<V2>& v2) 
+    template <IndexStyle I2> 
+    inline SmallVector(const SmallVector<T,N,I2>& v2) 
     {
 #ifdef XTEST_DEBUG
-      this->SetAllTo(T(888));
+      SetAllTo(T(888));
 #endif
-      TMVStaticAssert((Sizes<N,V2::vsize>::same)); 
+      TMVAssert(N > 0);
       TMVAssert(v2.size() == N);
-      TMVStaticAssert(viscomplex || V2::visreal);
-      TMVStaticAssert(N > 0);
-      v2.AssignTo(*this);
+      for(int i=0;i<N;++i) itsv[i] = v2.cref(i);
     }
 
-    inline ~SmallVector()
+    template <class T2, IndexStyle I2> 
+    inline SmallVector(const SmallVector<T2,N,I2>& v2) 
     {
-#ifdef TMV_DEBUG
-      this->SetAllTo(T(999));
+#ifdef XTEST_DEBUG
+      SetAllTo(T(888));
+#endif
+      TMVAssert(N > 0);
+      TMVAssert(v2.size() == N);
+      Copy(v2,*this); 
+    }
+
+    template <IndexStyle I2> 
+    inline SmallVector(const Vector<T,I2>& v2) 
+    {
+#ifdef XTEST_DEBUG
+      SetAllTo(T(888));
+#endif
+      TMVAssert(N > 0);
+      TMVAssert(v2.size() == N);
+      for(int i=0;i<N;++i) itsv[i] = v2.cref(i);
+    }
+
+    template <class T2> 
+    inline SmallVector(const GenVector<T2>& v2) 
+    {
+#ifdef XTEST_DEBUG
+      SetAllTo(T(888));
+#endif
+      TMVAssert(N > 0);
+      TMVAssert(IsReal(T2()) || IsComplex(T()));
+      TMVAssert(v2.size() == N);
+      View() = v2;
+    }
+
+    inline SmallVector(const AssignableToVector<RealType(T)>& v2) 
+    {
+#ifdef XTEST_DEBUG
+      SetAllTo(T(888));
+#endif
+      TMVAssert(N > 0);
+      TMVAssert(v2.size() == N);
+      View() = v2;
+    }
+
+    inline SmallVector(const AssignableToVector<ComplexType(T)>& v2) 
+    {
+#ifdef XTEST_DEBUG
+      SetAllTo(T(888));
+#endif
+      TMVAssert(N > 0);
+      TMVAssert(IsComplex(T()));
+      TMVAssert(v2.size() == N);
+      View() = v2;
+    }
+
+    inline SmallVector(const SmallVectorComposite<RealType(T),N>& v2) 
+    {
+#ifdef XTEST_DEBUG
+      SetAllTo(T(888));
+#endif
+      TMVAssert(N > 0);
+      v2.AssignTov(*this);
+    }
+
+    inline SmallVector(const SmallVectorComposite<ComplexType(T),N>& v2) 
+    {
+#ifdef XTEST_DEBUG
+      SetAllTo(T(888));
+#endif
+      TMVAssert(IsComplex(T()));
+      TMVAssert(N > 0);
+      v2.AssignTov(*this);
+    }
+
+    virtual inline ~SmallVector()
+    {
+#ifdef TMVDEBUG
+      SetAllTo(T(999));
 #endif
     }
 
@@ -246,444 +227,592 @@ namespace tmv {
     // Op =
     //
 
-    inline type& operator=(const type& v2)
+    inline SmallVector<T,N,I>& operator=(SmallVector<T,N,I>& v2)
     { 
-      if (&v2 != this) base_mut::operator=(v2); 
+      if (&v2 != this) 
+        for(int i=0;i<N;++i) itsv[i] = v2.cref(i);
       return *this; 
     }
 
-    template <class V2>
-    inline type& operator=(const BaseVector<V2>& v2) 
-    { base_mut::operator=(v2); return *this; }
+    template <IndexStyle I2> 
+    inline SmallVector<T,N,I>& operator=(SmallVector<T,N,I2>& v2)
+    { 
+      if (&v2 != this) 
+        for(int i=0;i<N;++i) itsv[i] = v2.cref(i);
+      return *this; 
+    }
+
+    template <class T2, IndexStyle I2> 
+    inline SmallVector<T,N,I>& operator=(const SmallVector<T2,N,I2>& v2) 
+    { 
+      TMVAssert(IsReal(T2()) || IsComplex(T()));
+      TMVAssert(v2.size() == N);
+      Copy(v2,*this);
+      return *this; 
+    }
+
+    inline SmallVector<T,N,I>& operator=(const Vector<T>& v2) 
+    {
+      TMVAssert(v2.size() == N);
+      for(int i=0;i<N;++i) itsv[i] = v2.cref(i);
+      return *this; 
+    }
+
+    template <class T2> 
+    inline SmallVector<T,N,I>& operator=(const GenVector<T2>& v2) 
+    {
+      TMVAssert(IsReal(T2()) || IsComplex(T()));
+      TMVAssert(v2.size() == N);
+      View() = v2;
+      return *this; 
+    }
+
+    inline SmallVector<T,N,I>& operator=(
+        const AssignableToVector<RealType(T)>& v2) 
+    {
+      TMVAssert(v2.size() == N);
+      View() = v2;
+      return *this; 
+    }
+
+    inline SmallVector<T,N,I>& operator=(
+        const AssignableToVector<ComplexType(T)>& v2) 
+    {
+      TMVAssert(IsComplex(T()));
+      TMVAssert(v2.size() == N);
+      View() = v2;
+      return *this; 
+    }
+
+    inline SmallVector<T,N,I>& operator=(
+        const SmallVectorComposite<RealType(T),N>& v2) 
+    {
+      v2.AssignTov(*this);
+      return *this; 
+    }
+
+    inline SmallVector<T,N,I>& operator=(
+        const SmallVectorComposite<ComplexType(T),N>& v2) 
+    {
+      TMVAssert(IsComplex(T()));
+      v2.AssignTov(*this);
+      return *this; 
+    }
 
 
     //
-    // Auxilliary Functions
+    // Access Functions
     //
 
-    inline const T* cptr() const { return itsv; }
-    inline T* ptr() { return itsv; }
-    inline T cref(int i) const  { return itsv[i]; }
-    inline T& ref(int i) { return itsv[i]; }
+    typedef T value_type;
+    typedef VIt<T,Unit,NonConj> iterator;
+    typedef CVIt<T,Unit,NonConj> const_iterator;
+    typedef VIt<T,Step,NonConj> reverse_iterator;
+    typedef CVIt<T,Step,NonConj> const_reverse_iterator;
+    typedef T& reference;
+
+    inline const_iterator begin() const 
+    { return const_iterator(itsv,1); }
+    inline const_iterator end() const 
+    { return begin()+N; }
+    inline const_reverse_iterator rbegin() const 
+    { return const_reverse_iterator(itsv+(N-1),-1); }
+    inline const_reverse_iterator rend() const 
+    { return rbegin()+N; }
+
+    ListAssigner<T,iterator> inline operator=(ListInitClass)
+    { return ListAssigner<T,iterator>(begin(),size()); }
+
+    inline T operator[](int i) const 
+    { 
+      if (I == CStyle) {
+        TMVAssert(i>=0 && i<N);
+        return cref(i); 
+      } else {
+        TMVAssert(i>=1 && i<=N);
+        return cref(i-1); 
+      }
+    }
+    inline T operator()(int i) const 
+    { 
+      if (I == CStyle) {
+        TMVAssert(i>=0 && i<N);
+        return cref(i); 
+      } else {
+        TMVAssert(i>=1 && i<=N);
+        return cref(i-1); 
+      }
+    }
+
+    inline iterator begin() 
+    { return iterator(itsv,1 FIRSTLAST ); }
+    inline iterator end() 
+    { return begin() + N; }
+
+    inline reverse_iterator rbegin() 
+    { return reverse_iterator(itsv+N-1,-1 FIRSTLAST ); }
+    inline reverse_iterator rend() 
+    { return rbegin()+N; }
+
+    inline T& operator[](int i) 
+    { 
+      if (I == CStyle) {
+        TMVAssert(i>=0 && i<N);
+        return ref(i); 
+      } else {
+        TMVAssert(i>=1 && i<=N);
+        return ref(i-1); 
+      }
+    }
+    inline T& operator()(int i) 
+    { 
+      if (I == CStyle) {
+        TMVAssert(i>=0 && i<N);
+        return ref(i); 
+      } else {
+        TMVAssert(i>=1 && i<=N);
+        return ref(i-1); 
+      }
+    }
+
+    //
+    // Functions of Vector
+    //
+
+    inline RealType(T) Norm() const // = Norm2
+    { return Norm2(); }
+
+    inline RealType(T) NormSq(RealType(T) scale = RealType(T)(1)) const
+    {
+      RealType(T) sum(0);
+      if (scale == RealType(T)(1))
+        for(int i=0;i<N;++i) sum += NORM(itsv[i]);
+      else
+        for(int i=0;i<N;++i) sum += NORM(scale*itsv[i]);
+      return sum;
+    }
+
+    inline RealType(T) Norm1() const // sum_i |v_i|
+    { return SumAbsElements(); }
+
+    inline RealType(T) Norm2() const // sqrt( sum_i |v_i|^2 )
+    { return SQRT(NormSq()); }
+
+    inline RealType(T) NormInf() const // max_i |v_i|
+    { return size() > 0 ? MaxAbsElement() : RealType(T)(0); }
+
+    inline T SumElements() const
+    {
+      T sum(0);
+      for(int i=0;i<N;++i) sum += itsv[i];
+      return sum;
+    }
+
+    inline RealType(T) SumAbsElements() const
+    {
+      RealType(T) sum(0);
+      for(int i=0;i<N;++i) sum += ABS(itsv[i]);
+      return sum;
+    }
+
+    inline T MinElement(int* iminout=0) const
+    {
+      T min = N>0 ? itsv[0] : T(0);
+      if (iminout) *iminout = 0;
+      for(int i=1;i<N;++i) {
+        if (REAL(itsv[i]) < REAL(min)) {
+          min = itsv[i];
+          if (iminout) *iminout = i;
+        }
+      }
+      if (I == FortranStyle && iminout) ++(*iminout);
+      return min;
+    }
+
+    inline T MaxElement(int* imaxout=0) const
+    {
+      T max = N>0 ? itsv[0] : T(0);
+      if (imaxout) *imaxout = 0;
+      for(int i=1;i<N;++i) {
+        if (REAL(itsv[i]) > REAL(max)) {
+          max = itsv[i];
+          if (imaxout) *imaxout = i;
+        }
+      }
+      if (I == FortranStyle && imaxout) ++(*imaxout);
+      return  max;
+    }
+
+    inline RealType(T) MinAbsElement(int* iminout=0) const
+    {
+      RealType(T) min = N>0 ? 
+      (IsReal(T()) ? ABS(itsv[0]) : NORM(itsv[0])) : RealType(T)(0);
+      if (iminout) *iminout = 0;
+      for(int i=1;i<N;++i) {
+        RealType(T) absvi = IsReal(T()) ? ABS(itsv[i]) : NORM(itsv[i]);
+        if (absvi < min) {
+          min = absvi;
+          if (iminout) *iminout = i;
+        }
+      }
+      if (I == FortranStyle && iminout) ++(*iminout);
+      return IsReal(T()) ? min : SQRT(min);
+    }
+
+    inline RealType(T) MaxAbsElement(int* imaxout=0) const
+    {
+      RealType(T) max = N>0 ? 
+      (IsReal(T()) ? ABS(itsv[0]) : NORM(itsv[0])) : RealType(T)(0);
+      if (imaxout) *imaxout = 0;
+      for(int i=1;i<N;++i) {
+        RealType(T) absvi = IsReal(T()) ? ABS(itsv[i]) : NORM(itsv[i]);
+        if (absvi > max) {
+          max = absvi;
+          if (imaxout) *imaxout = i;
+        }
+      }
+      if (I == FortranStyle && imaxout) ++(*imaxout);
+      return IsReal(T()) ? max : SQRT(max);
+    }
+
+
+    //
+    // Modifying Functions
+    //
+
+    inline SmallVector<T,N,I>& Zero() 
+    { 
+      for(int i=0;i<N;++i) itsv[i] = T(0);
+      return *this;
+    }
+
+    inline SmallVector<T,N,I>& Clip(RealType(T) thresh)
+    {
+      for(int i=0; i<N; ++i)
+        if (std::abs(itsv[i]) < thresh) itsv[i] = T(0);
+      return *this;
+    }
+
+    inline SmallVector<T,N,I>& SetAllTo(T x)
+    { 
+      for(int i=0;i<N;++i) itsv[i] = x;
+      return *this;
+    }
+
+    inline SmallVector<T,N,I>& AddToAll(T x)
+    {
+      for(int i=0;i<N;++i) itsv[i] += x;
+      return *this;
+    }
+
+    inline SmallVector<T,N,I>& ConjugateSelf()
+    { 
+      if (IsComplex(T())) {
+        RealType(T)* itsvi = reinterpret_cast<RealType(T)*>(itsv)+1;
+        for(int i=0;i<2*N;i+=2) itsvi[i] = -itsvi[i];
+      }
+      return *this; 
+    }
+
+    inline SmallVector<T,N,I>& MakeBasis(int i)
+    { 
+      if (I == CStyle) {
+        TMVAssert(i>=0 && i<N);
+        Zero(); itsv[i] = T(1);
+      } else {
+        TMVAssert(i>=1 && i<=N);
+        Zero(); itsv[i-1] = T(1);
+      }
+      return *this; 
+    }
+
+    inline SmallVector<T,N,I>& Swap(int i1, int i2)
+    {
+      if (I == CStyle) {
+        TMVAssert(i1>=0 && i1<N);
+        TMVAssert(i2>=0 && i2<N);
+        if (i1 != i2) __TMV_SWAP(itsv[i1],itsv[i2]);
+      } else {
+        TMVAssert(i1>=1 && i1<=N);
+        TMVAssert(i2>=1 && i2<=N);
+        if (i1 != i2) __TMV_SWAP(itsv[i1-1],itsv[i2-1]);
+      }
+      return *this;
+    }
+
+    inline SmallVector<T,N,I>& Permute(const int* p, int i1, int i2) 
+    {
+      if (I == CStyle) {
+        TMVAssert(i1>=0 && i1<=i2 && i2<=N);
+        for(int i=i1;i<i2;++i) Swap(i,p[i]);
+      } else {
+        TMVAssert(i1>=1 && i1<=i2 && i2<=N);
+        for(int i=i1-1;i<i2;++i) Swap(i,p[i]);
+      }
+      return *this;
+    }
+
+    inline SmallVector<T,N,I>& Permute(const int* p) 
+    { return Permute(p,I==CStyle?0:1,N); }
+
+    inline SmallVector<T,N,I>& ReversePermute(const int* p, 
+        int i1, int i2)
+    {
+      if (I == CStyle) {
+        TMVAssert(i1>=0 && i1<=i2 && i2<=N);
+        for(int i=i2-1;i>=i1;--i) Swap(i,p[i]);
+      } else {
+        TMVAssert(i1>=1 && i1<=i2 && i2<=N);
+        for(int i=i2-1;i>=i1-1;--i) Swap(i,p[i]);
+      }
+      return *this;
+    }
+
+    inline SmallVector<T,N,I>& ReversePermute(const int* p)
+    { return ReversePermute(p,I==CStyle?0:1,N); }
+
+    inline SmallVector<T,N,I>& ReverseSelf()
+    {
+      for(int i1=0,i2=N-1;i1<i2;++i1,--i2) __TMV_SWAP(itsv[i1],itsv[i2]);
+      return *this;
+    }
+
+    inline SmallVector<T,N,I>& Sort(
+        int* P, ADType ad=ASCEND, COMPType comp=REAL_COMP)
+    { View().Sort(P,ad,comp); return *this; }
+
+    //
+    // SubVector
+    //
+
+    inline ConstVectorView<T,I> SubVector(int i1, int i2) const
+    { return View().SubVector(i1,i2); }
+
+    inline VectorView<T,I> SubVector(int i1, int i2)
+    { return View().SubVector(i1,i2); }
+
+    inline ConstVectorView<T,I> SubVector(int i1, int i2, int istep) const
+    { return View().SubVector(i1,i2,istep); }
+
+    inline VectorView<T,I> SubVector(int i1, int i2, int istep)
+    { return View().SubVector(i1,i2,istep); }
+
+    inline ConstVectorView<T,I> Reverse() const
+    { return View().Reverse(); }
+
+    inline VectorView<T,I> Reverse()
+    { return View().Reverse(); }
+
+    inline ConstVectorView<T,I> View() const
+    { return ConstVectorView<T,I>(itsv,N,1,NonConj); }
+
+    inline VectorView<T,I> View()
+    { return VectorView<T,I>(itsv,N,1,NonConj); }
+
+    inline ConstVectorView<T,I> Conjugate() const
+    { return ConstVectorView<T,I>(itsv,N,1,IsReal(T())?NonConj:Conj); }
+
+    inline VectorView<T,I> Conjugate()
+    { return VectorView<T,I>(itsv,N,1,IsReal(T())?NonConj:Conj); }
+
+    inline ConstVectorView<RealType(T),I> Real() const
+    { return View().Real(); }
+
+    inline ConstVectorView<RealType(T),I> Imag() const
+    { return View().Imag(); }
+
+    inline ConstVectorView<RealType(T),I> Flatten() const
+    { return View().Flatten(); }
+
+    inline VectorView<RealType(T),I> Real()
+    { return View().Real(); }
+
+    inline VectorView<RealType(T),I> Imag()
+    { return View().Imag(); }
+
+    inline VectorView<RealType(T),I> Flatten()
+    { return View().Flatten(); }
+
+    // 
+    // I/O
+    //
+
+    inline void Write(std::ostream& os) const
+    { View().Write(os); }
+
+    inline void Write(std::ostream& os, RealType(T) thresh) const
+    { View().Write(os,thresh); }
 
     inline size_t size() const { return N; }
+    inline const T* cptr() const { return itsv; }
+    inline T* ptr() { return itsv; }
     inline int step() const { return 1; }
+    inline ConjType ct() const { return NonConj; }
     inline bool isconj() const { return false; }
+
+    inline T cref(int i) const
+    { return itsv[i]; }
+
+    inline T& ref(int i)
+    { return itsv[i]; }
 
   protected :
 
-    StackArray<T,N> itsv;
+    T itsv[N];
 
   }; // SmallVector
 
-  template <class T, int N>
-  class SmallVectorF : 
-    public SmallVector<T,N,FortranStyle>
-  {
-  public:
-
-    typedef SmallVectorF<T,N> type;
-    typedef SmallVector<T,N,FortranStyle> vtype;
-
-    inline SmallVectorF() : type() {}
-    explicit inline SmallVectorF(T x) : type(x) {}
-    explicit inline SmallVectorF(const T* v2)  : type(v2) {}
-    explicit inline SmallVectorF(const std::vector<T>& v2)  : type(v2) {}
-    inline SmallVectorF(const type& v2)  : type(v2) {}
-    template <class V2>
-    inline SmallVectorF(const BaseVector<V2>& v2)  : type(v2) {}
-    inline ~SmallVectorF() {}
-
-    template <class V2>
-    inline type& operator=(const BaseVector<V2>& v2) 
-    { vtype::operator=(v2); return *this; }
-    inline type& operator=(const type& v2)
-    { vtype::operator=(v2); return *this; }
-  }; // SmallVectorF
-
 
   //
-  // ConstSmallVectorView
+  // Copy SmallVectors
   //
 
-  template <class T, int N, int S, bool C, IndexStyle I>
-  struct Traits<ConstSmallVectorView<T,N,S,C,I> >
+  template <int N, class T1, class T2> 
+  struct DoCopy1
   {
-    typedef T value_type;
-    typedef typename Traits<T>::real_type real_type;
-    typedef typename Traits<T>::complex_type complex_type;
-    enum { visreal = Traits<T>::isreal };
-    enum { viscomplex = Traits<T>::iscomplex };
-
-    typedef ConstSmallVectorView<T,N,S,C,I> type;
-    typedef const type& calc_type;
-    typedef const type& eval_type;
-
-    enum { vsize = N }; 
-    enum { vfort = (I==FortranStyle) }; 
-    enum { vcalc = true };
-    enum { vstep = S };
-    enum { vconj = C };
-
-    // In case N == UNKNOWN
-    typedef typename VCopyHelper<T,N,vfort>::type copy_type;
-
-    enum { negS = IntTraits<S>::negS };
-    enum { twoS = visreal ? S : IntTraits<S>::twoS };
-    enum { notC = !C && viscomplex };
-    enum { twoN = visreal ? N : IntTraits<N>::twoS };
-
-    typedef ConstVectorView<T,S,C,I> const_subvector_type;
-    typedef ConstVectorView<T,UNKNOWN,C,I> const_subvector_step_type;
-    typedef ConstSmallVectorView<T,N,S,C,I> const_view_type;
-    typedef ConstSmallVectorView<T,N,S,C,CStyle> const_cview_type;
-    typedef ConstSmallVectorView<T,N,S,C,FortranStyle> const_fview_type;
-    typedef ConstVectorView<T,UNKNOWN,C> const_xview_type;
-    typedef ConstSmallVectorView<T,N,1,C,I> const_unitview_type;
-    typedef ConstSmallVectorView<T,N,S,notC,I> const_conjugate_type;
-    typedef ConstSmallVectorView<T,N,negS,C,I> const_reverse_type;
-    typedef ConstSmallVectorView<real_type,N,twoS,false,I> const_realview_type;
-    typedef const_realview_type const_imagview_type;
-    typedef ConstSmallVectorView<real_type,twoN,1,false,I> const_flatten_type;
-    typedef ConstSmallVectorView<T,N,S,false,I> const_nonconj_type;
-
-    typedef CVIt<T,S,C> const_iterator;
-    typedef CVIt<T,negS,C> const_reverse_iterator;
+    DoCopy1(const T1* v1, T2* v2)
+    { for(int i=0;i<N;++i) v2[i] = v1[i]; }
   };
 
-  template <class T, int N, int S, bool C, IndexStyle I>
-  class ConstSmallVectorView : 
-    public BaseVector_Calc<ConstSmallVectorView<T,N,S,C,I> >
+  template <int N, class T> 
+  struct DoCopy1<N,std::complex<T>,T>
   {
-  public:
-
-    typedef ConstSmallVectorView<T,N,S,C,I> type;
-
-    typedef typename Traits<T>::real_type real_type;
-    typedef typename Traits<T>::complex_type complex_type;
-
-    //
-    // Constructors
-    //
-
-    inline ConstSmallVectorView(const T* v, size_t n, int s) : 
-      itsv(v), itssize(n), itsstep(s) {}
-
-    inline ConstSmallVectorView(const T* v, size_t n) : 
-      itsv(v), itssize(n), itsstep(S) 
-    { TMVStaticAssert(S != UNKNOWN); }
-
-    inline ConstSmallVectorView(const T* v) :
-      itsv(v), itssize(N), itsstep(S) 
-    { TMVStaticAssert(N != UNKNOWN); TMVStaticAssert(S != UNKNOWN); }
-
-    inline ConstSmallVectorView(const type& v2) : 
-      itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) {}
-
-    template <int S2, IndexStyle I2>
-    inline ConstSmallVectorView(const ConstVectorView<T,S2,C,I2>& v2) :
-      itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) {}
-
-    template <int S2, IndexStyle I2>
-    inline ConstSmallVectorView(const VectorView<T,S2,C,I2>& v2) :
-      itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) {}
-
-    template <int N2, int S2, IndexStyle I2>
-    inline ConstSmallVectorView(const ConstSmallVectorView<T,N2,S2,C,I2>& v2) :
-      itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) {}
-
-    template <int N2, int S2, IndexStyle I2>
-    inline ConstSmallVectorView(const SmallVectorView<T,N2,S2,C,I2>& v2) :
-      itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) {}
-
-    inline ~ConstSmallVectorView() {
-#ifdef TMV_DEBUG
-      itsv = 0; 
-#endif
-    }
-
-  private :
-    inline void operator=(const type& v2);
-  public :
-
-
-    //
-    // Auxilliary Functions
-    //
-
-    inline const T* cptr() const { return itsv; }
-    inline T cref(int i) const  { return DoConj<C>(itsv[i*step()]); }
-
-    inline size_t size() const { return itssize; }
-    inline int step() const { return itsstep; }
-    inline bool isconj() const { return C; }
-
-  protected :
-
-#ifdef TMV_DEBUG
-    const T* itsv;
-#else
-    const T*const itsv;
-#endif
-    // We use StepInt for the size too, in case it is unknown.
-    const StepInt<N> itssize;
-    const StepInt<S> itsstep;
-
-  }; // ConstSmallVectorView
-
-  template <class T, int N, int S, bool C>
-  class ConstSmallVectorViewF : 
-    public ConstSmallVectorView<T,N,S,C,FortranStyle>
-  {
-  public:
-
-    typedef ConstSmallVectorViewF<T,N,S,C> type;
-    typedef ConstSmallVectorView<T,N,S,C,FortranStyle> vtype;
-
-    inline ConstSmallVectorViewF(const T* v, size_t n, int s) : vtype(v,n,s) {}
-    inline ConstSmallVectorViewF(const T* v, size_t n) : vtype(v,n) {}
-    inline ConstSmallVectorViewF(const T* v) : vtype(v) {}
-    inline ConstSmallVectorViewF(const type& v2) : vtype(v2) {}
-    template <int S2, IndexStyle I2>
-    inline ConstSmallVectorViewF(const ConstVectorView<T,S2,C,I2>& v2) :
-      vtype(v2) {}
-    template <int S2, IndexStyle I2>
-    inline ConstSmallVectorViewF(const VectorView<T,S2,C,I2>& v2) :
-      vtype(v2) {}
-    template <int N2, int S2, IndexStyle I2>
-    inline ConstSmallVectorViewF(const ConstSmallVectorView<T,N2,S2,C,I2>& v2) :
-      vtype(v2) {}
-    template <int N2, int S2, IndexStyle I2>
-    inline ConstSmallVectorViewF(const SmallVectorView<T,N2,S2,C,I2>& v2) :
-      vtype(v2) {}
-    inline ~ConstSmallVectorViewF() {}
-
-  private :
-    inline void operator=(const type& v2);
-  }; // ConstSmallVectorView
-
-
-  // 
-  // SmallVectorView
-  //
-
-  template <class T, int N, int S, bool C, IndexStyle I>
-  struct Traits<SmallVectorView<T,N,S,C,I> >
-  {
-    typedef T value_type;
-    typedef typename Traits<T>::real_type real_type;
-    typedef typename Traits<T>::complex_type complex_type;
-    enum { visreal = Traits<T>::isreal };
-    enum { viscomplex = Traits<T>::iscomplex };
-
-    typedef SmallVectorView<T,N,S,C,I> type;
-    typedef const ConstSmallVectorView<T,N,S,C,I> calc_type;
-    typedef calc_type eval_type;
-
-    enum { vsize = N }; 
-    enum { vfort = (I==FortranStyle) }; 
-    enum { vcalc = true };
-    enum { vstep = S };
-    enum { vconj = C };
-
-    // In case N == UNKNOWN
-    typedef typename VCopyHelper<T,N,vfort>::type copy_type;
-
-    enum { negS = IntTraits<S>::negS };
-    enum { twoS = visreal ? S : IntTraits<S>::twoS };
-    enum { notC = !C && viscomplex };
-    enum { twoN = visreal ? N : IntTraits<N>::twoS };
-
-    typedef ConstVectorView<T,S,C,I> const_subvector_type;
-    typedef ConstVectorView<T,UNKNOWN,C,I> const_subvector_step_type;
-    typedef ConstSmallVectorView<T,N,S,C,I> const_view_type;
-    typedef ConstSmallVectorView<T,N,S,C,CStyle> const_cview_type;
-    typedef ConstSmallVectorView<T,N,S,C,FortranStyle> const_fview_type;
-    typedef ConstVectorView<T,UNKNOWN,C> const_xview_type;
-    typedef ConstSmallVectorView<T,N,1,C,I> const_unitview_type;
-    typedef ConstSmallVectorView<T,N,S,notC,I> const_conjugate_type;
-    typedef ConstSmallVectorView<T,N,negS,C,I> const_reverse_type;
-    typedef ConstSmallVectorView<real_type,N,twoS,false,I> const_realview_type;
-    typedef const_realview_type const_imagview_type;
-    typedef ConstSmallVectorView<real_type,twoN,1,false,I> const_flatten_type;
-    typedef ConstSmallVectorView<T,N,S,false,I> const_nonconj_type;
-
-    typedef CVIt<T,S,C> const_iterator;
-    typedef CVIt<T,negS,C> const_reverse_iterator;
-
-    typedef typename AuxRef<T,C>::reference reference;
-
-    typedef VectorView<T,S,C,I> subvector_type;
-    typedef VectorView<T,UNKNOWN,C,I> subvector_step_type;
-    typedef SmallVectorView<T,N,S,C,I> view_type;
-    typedef SmallVectorView<T,N,S,C,CStyle> cview_type;
-    typedef SmallVectorView<T,N,S,C,FortranStyle> fview_type;
-    typedef VectorView<T,UNKNOWN,C> xview_type;
-    typedef SmallVectorView<T,N,1,C,I> unitview_type;
-    typedef SmallVectorView<T,N,S,notC,I> conjugate_type;
-    typedef SmallVectorView<T,N,negS,C,I> reverse_type;
-    typedef SmallVectorView<real_type,N,twoS,false,I> realview_type;
-    typedef realview_type imagview_type;
-    typedef SmallVectorView<real_type,twoN,1,false,I> flatten_type;
-    typedef SmallVectorView<T,N,S,false,I> nonconj_type;
-
-    typedef VIt<T,S,C> iterator;
-    typedef VIt<T,negS,C> reverse_iterator;
+    DoCopy1(const std::complex<T>* , T* )
+    { TMVAssert(FALSE); }
   };
 
-  template <class T, int N, int S, bool C, IndexStyle I>
-  class SmallVectorView : 
-    public BaseVector_Mutable<SmallVectorView<T,N,S,C,I> >
-  {
-  public:
+  template <int N, class T1, class T2> 
+  inline void DoCopy(const T1* v1, T2* v2)
+  { DoCopy1<N,T1,T2>(v1,v2); }
 
-    typedef SmallVectorView<T,N,S,C,I> type;
-    typedef BaseVector_Mutable<type> base_mut;
-    typedef typename base_mut::reference reference;
-
-    //
-    // Constructors
-    //
-
-    inline SmallVectorView(T* v, size_t n, int s) :
-      itsv(v), itssize(n), itsstep(s) {}
-
-    inline SmallVectorView(T* v, size_t n) : itsv(v), itssize(n), itsstep(S) 
-    { TMVAssert(S != UNKNOWN); }
-
-    inline SmallVectorView(T* v) : itsv(v), itssize(N), itsstep(S) 
-    { TMVAssert(N != UNKNOWN);  TMVAssert(S != UNKNOWN); }
-
-    inline SmallVectorView(const type& v2) : 
-      itsv(v2.itsv), itssize(v2.size()), itsstep(v2.step()) {}
-
-    template <IndexStyle I2>
-    inline SmallVectorView(SmallVectorView<T,N,S,C,I2> v2) :
-      itsv(v2.ptr()), itssize(v2.size()), itsstep(v2.step()) {}
-
-    template <int S2, IndexStyle I2>
-    inline SmallVectorView(VectorView<T,S2,C,I2> v2) :
-      itsv(v2.ptr()), itssize(v2.size()), itsstep(v2.step()) {}
-
-    inline ~SmallVectorView() {
-#ifdef TMV_DEBUG
-      itsv = 0; 
-#endif
-    }
-
-
-    //
-    // Op =
-    //
-
-    template <class V2>
-    inline type& operator=(const BaseVector<V2>& v2) 
-    { base_mut::operator=(v2); return *this; }
-
-    inline type& operator=(const type& v2)
-    { base_mut::operator=(v2); return *this; }
-
-    //
-    // Auxilliary Functions
-    //
-
-    inline const T* cptr() const { return itsv; }
-    inline T cref(int i) const  { return DoConj<C>(itsv[i*step()]); }
-    inline T* ptr() { return itsv; }
-    inline reference ref(int i) { return reference(itsv[i*step()]); }
-
-    inline size_t size() const { return itssize; }
-    inline int step() const { return itsstep; }
-    inline bool isconj() const { return C; }
-
-  protected :
-
-#ifdef TMV_DEBUG
-    T* itsv;
-#else
-    T*const itsv;
-#endif
-    const StepInt<N> itssize;
-    const StepInt<S> itsstep;
-
-  }; // SmallVectorView
-
-  template <class T, int N, int S, bool C>
-  class SmallVectorViewF : 
-    public SmallVectorView<T,N,S,C,FortranStyle>
-  {
-  public:
-    typedef SmallVectorViewF<T,N,S,C> type;
-    typedef SmallVectorView<T,N,S,C,FortranStyle> vtype;
-
-    inline SmallVectorViewF(T* v, size_t n=N, int s=S) : vtype(v,n,s) {}
-    inline SmallVectorViewF(T* v, size_t n=N) : vtype(v,n) {}
-    inline SmallVectorViewF(T* v) : vtype(v) {}
-    inline SmallVectorViewF(const type& v2) : vtype(v2) {}
-    template <IndexStyle I2>
-    inline SmallVectorViewF(SmallVectorView<T,N,S,C,I2> v2) : vtype(v2) {}
-    template <int S2, IndexStyle I2>
-    inline SmallVectorViewF(VectorView<T,S2,C,I2> v2) : vtype(v2) {}
-    inline ~SmallVectorViewF() {}
-
-    template <class V2>
-    inline type& operator=(const BaseVector<V2>& v2) 
-    { vtype::operator=(v2); return *this; }
-    inline type& operator=(const type& v2)
-    { vtype::operator=(v2); return *this; }
-
-  }; // SmallVectorViewF
-
-
-  // 
-  // Swap
-  //
-
-  template <class T, int N, IndexStyle I1, int S2, bool C2, IndexStyle I2>
-  inline void Swap(SmallVector<T,N,I1>& v1, SmallVectorView<T,N,S2,C2,I2> v2)
-  { DoSwap(v1,v2); }
-  template <class T, int N, int S1, bool C1, IndexStyle I1, IndexStyle I2>
-  inline void Swap(SmallVectorView<T,N,S1,C1,I1> v1, SmallVector<T,N,I2>& v2)
-  { DoSwap(v1,v2); }
-  template <class T, int N, int S1, bool C1, IndexStyle I1, int S2, bool C2, IndexStyle I2>
-  inline void Swap(SmallVectorView<T,N,S1,C1,I1> v1, SmallVectorView<T,N,S2,C2,I2> v2)
-  { DoSwap(v1,v2); }
+  template <class T1, class T2, int N, IndexStyle I1, IndexStyle I2> 
+  inline void Copy(const SmallVector<T1,N,I1>& v1, SmallVector<T2,N,I2>& v2)
+  { DoCopy<N>(v1.cptr(),v2.ptr()); }
 
   //
-  // TypeText functions
+  // Swap SmallVectors
+  //
+
+  template <class T, int N, IndexStyle I1, IndexStyle I2> 
+  inline void Swap(SmallVector<T,N,I1>& v1, SmallVector<T,N,I2>& v2)
+  {
+    for(int i=0;i<N;++i) __TMV_SWAP(v1.ref(i),v2.ref(i));
+  }
+
+  //
+  // Functions of Vectors
   //
 
   template <class T, int N, IndexStyle I> 
-  inline std::string TypeText(const SmallVector<T,N,I>& )
+  inline RealType(T) Norm(const SmallVector<T,N,I>& v)
+  { return v.Norm(); }
+
+  template <class T, int N, IndexStyle I> 
+  inline RealType(T) Norm1( const SmallVector<T,N,I>& v)
+  { return v.Norm1(); }
+
+  template <class T, int N, IndexStyle I> 
+  inline RealType(T) NormSq( const SmallVector<T,N,I>& v)
+  { return v.NormSq(); }
+
+  template <class T, int N, IndexStyle I> 
+  inline RealType(T) Norm2( const SmallVector<T,N,I>& v)
+  { return v.Norm2(); }
+
+  template <class T, int N, IndexStyle I> 
+  inline RealType(T) NormInf( const SmallVector<T,N,I>& v)
+  { return v.NormInf(); }
+
+  template <class T, int N, IndexStyle I> 
+  inline T SumElements( const SmallVector<T,N,I>& v)
+  { return v.SumElements(); }
+
+  template <class T, int N, IndexStyle I> 
+  inline RealType(T) SumAbsElements(const SmallVector<T,N,I>& v)
+  { return v.SumAbsElements(); }
+
+  template <class T, int N, IndexStyle I> 
+  inline T MinElement(const SmallVector<T,N,I>& v)
+  { return v.MinElement(); }
+
+  template <class T, int N, IndexStyle I> 
+  inline T MaxElement(const SmallVector<T,N,I>& v)
+  { return v.MaxElement(); }
+
+  template <class T, int N, IndexStyle I> 
+  inline RealType(T) MinAbsElement(const SmallVector<T,N,I>& v)
+  { return v.MinAbsElement(); }
+
+  template <class T, int N, IndexStyle I> 
+  inline RealType(T) MaxAbsElement(const SmallVector<T,N,I>& v)
+  { return v.MaxAbsElement(); }
+
+  template <class T, int N, IndexStyle I> 
+  inline VectorView<T,I> Conjugate(const SmallVector<T,N,I>& v)
+  { return v.Conjugate(); }
+
+  template <class T, int N, IndexStyle I> 
+  inline VectorView<T,I> Conjugate(SmallVector<T,N,I>& v)
+  { return v.Conjugate(); }
+
+
+  //
+  // Vector ==, != Vector
+  //
+
+  template <class T1, class T2, int N, IndexStyle I1, IndexStyle I2> 
+  inline bool operator==(
+      const SmallVector<T1,N,I1>& v1, const SmallVector<T2,N,I2>& v2)
   {
+    for(int i=0;i<N;++i) if (v1.cref(i) != v2.cref(i)) return false;
+    return true;
+  }
+
+  template <class T1, class T2, int N, IndexStyle I1, IndexStyle I2> 
+  inline bool operator!=(
+      const SmallVector<T1,N,I1>& v1, const SmallVector<T2,N,I2>& v2)
+  { return !(v1 == v2); }
+
+  template <class T1, class T2, int N, IndexStyle I> 
+  inline bool operator==(
+      const GenVector<T1>& v1, const SmallVector<T2,N,I>& v2)
+  { return v1 == v2.View(); }
+
+  template <class T1, class T2, int N, IndexStyle I> 
+  inline bool operator==(
+      const SmallVector<T1,N,I>& v1, const GenVector<T2>& v2)
+  { return v1.View() == v2; }
+
+  template <class T1, class T2, int N, IndexStyle I> 
+  inline bool operator!=(
+      const GenVector<T1>& v1, const SmallVector<T2,N,I>& v2)
+  { return v1 != v2.View(); }
+
+  template <class T1, class T2, int N, IndexStyle I> 
+  inline bool operator!=(
+      const SmallVector<T1,N,I>& v1, const GenVector<T2>& v2)
+  { return v1.View() != v2; }
+
+
+  //
+  // I/O
+  //
+
+  template <class T, int N, IndexStyle I> 
+  inline std::ostream& operator<<(
+      std::ostream& os, const SmallVector<T,N,I>& v)
+  { v.Write(os); return os; }
+
+  template <class T, int N, IndexStyle I> 
+  inline std::istream& operator>>(
+      std::istream& is, SmallVector<T,N,I>& v)
+  { return is >> v.View(); }
+
+  template <class T, int N, IndexStyle I> 
+  inline std::string TypeText(const SmallVector<T,N,I>& )
+  { 
     std::ostringstream s;
     s << "SmallVector<"<<TypeText(T())<<","<<N<<","<<Text(I)<<">";
-    return s.str();
-  }
-
-  template <class T, int N, int S, bool C, IndexStyle I>
-  inline std::string TypeText(const SmallVectorView<T,N,S,C,I>& v)
-  {
-    std::ostringstream s;
-    s << "SmallVectorView<"<<TypeText(T());
-    s << ","<<IntTraits<N>::text();
-    if (N == UNKNOWN) s << "("<<v.size()<<")";
-    s << ","<<IntTraits<S>::text();
-    if (S == UNKNOWN) s << "("<<v.step()<<")";
-    s << ","<<C<<","<<Text(I)<<">";
-    return s.str();
-  }
-
-  template <class T, int N, int S, bool C, IndexStyle I>
-  inline std::string TypeText(const ConstSmallVectorView<T,N,S,C,I>& v)
-  {
-    std::ostringstream s;
-    s << "ConstSmallVectorView<"<<TypeText(T());
-    s << ","<<IntTraits<N>::text();
-    if (N == UNKNOWN) s << "("<<v.size()<<")";
-    s << ","<<IntTraits<S>::text();
-    if (S == UNKNOWN) s << "("<<v.step()<<")";
-    s << ","<<C<<","<<Text(I)<<">";
     return s.str();
   }
 

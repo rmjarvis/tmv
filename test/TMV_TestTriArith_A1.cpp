@@ -99,18 +99,18 @@ template <class T> void TestTriMatrixArith_A1()
   tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag,tmv::RowMajor> cl2(c1);
   tmv::LowerTriMatrix<std::complex<T>,tmv::NonUnitDiag,tmv::ColMajor> cl3(c1);
   tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag,tmv::ColMajor> cl4(c1);
-  tmv::UpperTriMatrixView<T,tmv::UnitDiag> u2v = u2.View();
+  tmv::UpperTriMatrixView<T> u2v = u2.View();
   tmv::UpperTriMatrixView<T> u3v = u3.View();
-  tmv::UpperTriMatrixView<T,tmv::UnitDiag> u4v = u4.View();
-  tmv::LowerTriMatrixView<T,tmv::UnitDiag> l2v = l2.View();
+  tmv::UpperTriMatrixView<T> u4v = u4.View();
+  tmv::LowerTriMatrixView<T> l2v = l2.View();
   tmv::LowerTriMatrixView<T> l3v = l3.View();
-  tmv::LowerTriMatrixView<T,tmv::UnitDiag> l4v = l4.View();
-  tmv::UpperTriMatrixView<std::complex<T>,tmv::UnitDiag> cu2v = cu2.View();
+  tmv::LowerTriMatrixView<T> l4v = l4.View();
+  tmv::UpperTriMatrixView<std::complex<T> > cu2v = cu2.View();
   tmv::UpperTriMatrixView<std::complex<T> > cu3v = cu3.View();
-  tmv::UpperTriMatrixView<std::complex<T>,tmv::UnitDiag> cu4v = cu4.View();
-  tmv::LowerTriMatrixView<std::complex<T>,tmv::UnitDiag> cl2v = cl2.View();
+  tmv::UpperTriMatrixView<std::complex<T> > cu4v = cu4.View();
+  tmv::LowerTriMatrixView<std::complex<T> > cl2v = cl2.View();
   tmv::LowerTriMatrixView<std::complex<T> > cl3v = cl3.View();
-  tmv::LowerTriMatrixView<std::complex<T>,tmv::UnitDiag> cl4v = cl4.View();
+  tmv::LowerTriMatrixView<std::complex<T> > cl4v = cl4.View();
   tmv::UpperTriMatrix<T,tmv::NonUnitDiag> u1x = u1v;
   tmv::UpperTriMatrix<T,tmv::UnitDiag> u2x = u2v;
   tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag> cu1x = cu1v;
@@ -125,7 +125,6 @@ template <class T> void TestTriMatrixArith_A1()
   TestMatrixArith123<T>(l2x,cl2x,l4v,cl4v,"Tri L");
   TestMatrixArith123<T>(u1x,cu1x,u3v,cu3v,"Tri U");
   TestMatrixArith123<T>(u2x,cu2x,u4v,cu4v,"Tri U");
-#if 0
   TestMatrixArith456<T>(l1x,cl1x,l1v,cl1v,l2v,cl2v,"Tri L/L");
   TestMatrixArith456<T>(l1x,cl1x,l1v,cl1v,l3v,cl3v,"Tri L/L");
   TestMatrixArith456<T>(l1x,cl1x,l1v,cl1v,l4v,cl4v,"Tri L/L");
@@ -151,19 +150,18 @@ template <class T> void TestTriMatrixArith_A1()
   TestMatrixArith456<T>(u2x,cu2x,u4v,cu4v,u2v,cu2v,"Tri U/U");
   TestMatrixArith456<T>(u2x,cu2x,u4v,cu4v,u3v,cu3v,"Tri U/U");
 #endif
-#endif
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestTriMatrixArith_A1<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestTriMatrixArith_A1<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestTriMatrixArith_A1<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestTriMatrixArith_A1<int>();
 #endif
 

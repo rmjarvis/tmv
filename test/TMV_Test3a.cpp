@@ -31,29 +31,26 @@ int main() try {
   //showdiv=true;
   //showtests=true;
   //showstartdone=true;
-
-  //TestSmallVectorArith_1a<double>();
-  //TestAllSmallVector<double>();
 //#define SKIPREST
 
 #ifndef SKIPREST
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
   TestAllSmallVector<double>();
   TestAllSmallMatrix<double>();
 #endif
 
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
   TestAllSmallVector<float>();
   TestAllSmallMatrix<float>();
 #endif
 
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
   TestAllSmallVector<long double>();
   TestAllSmallMatrix<long double>();
 #endif 
 
-#ifdef TEST_INT
+#ifdef INST_INT
   TestAllSmallVector<int>();
   TestAllSmallMatrix<int>();
 #endif 

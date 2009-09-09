@@ -286,12 +286,12 @@ template <class T> void TestAllSymBandDiv()
   TestSymBandDiv<T>(tmv::SV,Sing);
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestAllSymBandDiv<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestAllSymBandDiv<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestAllSymBandDiv<long double>();
 #endif

@@ -31,46 +31,113 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 
+//#define XDEBUG
+
+
 #include "TMV_Blas.h"
-#include "tmv/TMV_MultVV.h"
+#include "tmv/TMV_VectorArithFunc.h"
 #include "tmv/TMV_Vector.h"
 
+#ifdef XDEBUG
+#include "tmv/TMV_VIt.h"
+#include <iostream>
+using std::cerr;
+using std::endl;
+#endif
+
 namespace tmv {
+
+#ifdef TMV_BLOCKSIZE
+#define TMV_MULTVV_RECURSE_SIZE TMV_BLOCKSIZE
+#else
+#define TMV_MULTVV_RECURSE_SIZE 64
+#endif
+
+  //
+  // VectorComposite
+  //
+
+  template <class T> const T* VectorComposite<T>::cptr() const
+  {
+    if (!itsv.get()) {
+      size_t len = this->size();
+      itsv.reset(new T[len]);
+      AssignToV(VectorView<T>(itsv.get(),len,1,NonConj
+            FIRSTLAST1(itsv.get(),itsv.get()+len) ) );
+    }
+    return itsv.get();
+  }
 
   //
   // MultVV
   //
-
-  template <class T, class V1, class V2>
-  static T DoMultVV(const V1& v1, const V2& v2)
+  template <bool unit, bool c2, class T, class T2> static T NonBlasMultVV(
+      const GenVector<T>& v1, const GenVector<T2>& v2) 
   {
-    if (v1.step() == 1)
-      if (v2.step() == 1)
-        return InlineMultVV(v1.UnitView(),v2.UnitView());
-      else
-        return InlineMultVV(v1.UnitView(),v2);
-    else
-      if (v2.step() == 1)
-        return InlineMultVV(v1,v2.UnitView());
-      else
-        return InlineMultVV(v1,v2);
+    TMVAssert(v1.size()==v2.size());
+    TMVAssert(v1.size()>0);
+    TMVAssert(v1.ct() == NonConj);
+    TMVAssert(v2.step() != -1);
+    TMVAssert(v1.step() != -1 || v2.step() == 1);
+    TMVAssert(v2.step() >= 0 || v1.step() == 1);
+    TMVAssert(c2 == v2.isconj());
+
+    const T* v1ptr = v1.cptr();
+    const T2* v2ptr = v2.cptr();
+
+    const int N = v1.size();
+    if (N > TMV_MULTVV_RECURSE_SIZE) {
+      // This isn't for speed reasons - it's for increased accuracy.
+      // For large vectors, the incremental additions can be much smaller
+      // than the running sum, so the relative errors can be huge.
+      // With the recursive algorithm, the relative error is generally
+      // closer to the expected few * epsilon.
+      const int N1 = N/2;
+      return NonBlasMultVV<unit,c2>(v1.SubVector(0,N1),v2.SubVector(0,N1)) +
+      NonBlasMultVV<unit,c2>(v1.SubVector(N1,N),v2.SubVector(N1,N));
+    } else {
+      T res(0);
+
+      if (unit) {
+        const int N1 = N/4;
+        const int N2 = N-4*N1;
+        if (N1) for(int i=N1;i>0;--i,v1ptr+=4,v2ptr+=4) {
+          res += (*v1ptr) * (c2 ? CONJ(*v2ptr) : (*v2ptr));
+          res += v1ptr[1] * (c2 ? CONJ(v2ptr[1]) : v2ptr[1]);
+          res += v1ptr[2] * (c2 ? CONJ(v2ptr[2]) : v2ptr[2]);
+          res += v1ptr[3] * (c2 ? CONJ(v2ptr[3]) : v2ptr[3]);
+        }
+        if (N2) for(int i=N2;i>0;--i,++v1ptr,++v2ptr) 
+          res += (*v1ptr) * (c2 ? CONJ(*v2ptr) : (*v2ptr));
+      } else {
+        const int s1 = v1.step();
+        const int s2 = v2.step();
+
+        for(int i=N;i>0;--i,v1ptr+=s1,v2ptr+=s2) 
+          res += (*v1ptr) * (c2 ? CONJ(*v2ptr) : (*v2ptr));
+      }
+      return res;
+    }
   }
-
-  template <class T1, bool C1, class T2>
-  T2 InstMultVV(
-      const ConstVectorView<T1,UNKNOWN,C1>& v1, const ConstVectorView<T2>& v2)
-  { return DoMultVV<T2>(v1,v2); }
-
+  template <class T, class T2> static inline T DoMultVV(
+      const GenVector<T>& v1, const GenVector<T2>& v2) 
+  { 
+    if (v1.step() == 1 && v2.step() == 1)
+      if (v2.isconj()) return NonBlasMultVV<true,true>(v1,v2); 
+      else return NonBlasMultVV<true,false>(v1,v2); 
+    else
+      if (v2.isconj()) return NonBlasMultVV<false,true>(v1,v2); 
+      else return NonBlasMultVV<false,false>(v1,v2); 
+  }
 #ifdef BLAS
 #ifndef BLASNORETURN
-#define TMV_INST_SKIP_BLAS
-#ifdef TMV_INST_DOUBLE
-  template <> double InstMultVV(
-      const ConstVectorView<double>& v1, const ConstVectorView<double>& v2) 
+#ifdef INST_DOUBLE
+  template <> double DoMultVV(
+      const GenVector<double>& v1, const GenVector<double>& v2) 
   { 
     TMVAssert(v1.size()==v2.size());
-    int n=v1.size();
-    if (n == 0) return 0.;
+    TMVAssert(v1.size()>0);
+    int n=v2.size();
     int s1=v1.step();
     int s2=v2.step();
     const double* v1p = v1.cptr();
@@ -80,13 +147,14 @@ namespace tmv {
     return BLASNAME(ddot) (BLASV(n),BLASP(v1p),BLASV(s1),
         BLASP(v2p),BLASV(s2));
   }
-  template <> std::complex<double> InstMultVV(
-      const ConstVectorView<std::complex<double> >& v1, 
-      const ConstVectorView<std::complex<double> >& v2) 
-  {
+  template <> std::complex<double> DoMultVV(
+      const GenVector<std::complex<double> >& v1, 
+      const GenVector<std::complex<double> >& v2) 
+  { 
     TMVAssert(v1.size()==v2.size());
-    int n=v1.size();
-    if (n == 0) return 0.;
+    TMVAssert(v1.size()>0);
+    TMVAssert(v1.ct() == NonConj);
+    int n=v2.size();
     int s1=v1.step();
     int s2=v2.step();
     const std::complex<double>* v1p = v1.cptr();
@@ -94,63 +162,50 @@ namespace tmv {
     const std::complex<double>* v2p = v2.cptr();
     if (s2 < 0) v2p += (n-1)*s2;
     std::complex<double> res;
-    BLASZDOTSET( res, BLASZDOTNAME(zdotu) (
-          BLASZDOT1(BLASP(&res))
-          BLASV(n),BLASP(v2p),BLASV(s2),
-          BLASP(v1p),BLASV(s1)
-          BLASZDOT2(BLASP(&res)) ));
+    if (v2.isconj())
+      BLASZDOTSET( res, BLASZDOTNAME(zdotc) (
+            BLASZDOT1(BLASP(&res))
+            BLASV(n),BLASP(v2p),BLASV(s2),
+            BLASP(v1p),BLASV(s1)
+            BLASZDOT2(BLASP(&res)) ));
+    else
+      BLASZDOTSET( res, BLASZDOTNAME(zdotu) (
+            BLASZDOT1(BLASP(&res))
+            BLASV(n),BLASP(v2p),BLASV(s2),
+            BLASP(v1p),BLASV(s1)
+            BLASZDOT2(BLASP(&res)) ));
     return res;
   }
-  template <> std::complex<double> InstMultVV(
-      const ConstVectorView<std::complex<double>,UNKNOWN,true>& v1,
-      const ConstVectorView<std::complex<double> >& v2) 
-  {
+  template <> std::complex<double> DoMultVV(
+      const GenVector<std::complex<double> >& v1, 
+      const GenVector<double>& v2) 
+  { 
     TMVAssert(v1.size()==v2.size());
-    int n=v1.size();
-    if (n == 0) return 0.;
-    int s1=v1.step();
+    TMVAssert(v1.size()>0);
+    TMVAssert(v1.ct() == NonConj);
+    int n=v2.size();
+    int s1=2*v1.step();
     int s2=v2.step();
     const std::complex<double>* v1p = v1.cptr();
-    if (s1 < 0) v1p += (n-1)*s1;
-    const std::complex<double>* v2p = v2.cptr();
+    if (s1 < 0) v1p += (n-1)*v1.step();
+    const double* v2p = v2.cptr();
     if (s2 < 0) v2p += (n-1)*s2;
-    std::complex<double> res;
-    BLASZDOTSET( res, BLASZDOTNAME(zdotc) (
-          BLASZDOT1(BLASP(&res))
-          BLASV(n),BLASP(v1p),BLASV(s1),
-          BLASP(v2p),BLASV(s2)
-          BLASZDOT2(BLASP(&res)) ));
-    return res;
-  }
-#ifdef TMV_INST_MIX
-  template <> std::complex<double> InstMultVV(
-      const ConstVectorView<double>& v1, 
-      const ConstVectorView<std::complex<double> >& v2) 
-  {
-    TMVAssert(v1.size()==v2.size());
-    int n=v1.size();
-    if (n == 0) return 0.F;
-    int s1=v1.step();
-    int s2=2*v2.step();
-    const double* v1p = v1.cptr();
-    if (s1 < 0) v1p += (n-1)*s1;
-    const std::complex<double>* v2p = v2.cptr();
-    if (s2 < 0) v2p += (n-1)*v2.step();
-    double resr = BLASNAME(ddot) (BLASV(n),BLASP(v1p),BLASV(s1),
-        BLASP((double*)v2p),BLASV(s2));
-    double resi = BLASNAME(ddot) (BLASV(n),BLASP(v1p),BLASV(s1),
-        BLASP((double*)v2p+1),BLASV(s2));
+    double resr = 
+    BLASNAME(ddot) (BLASV(n),BLASP((double*)v1p),BLASV(s1),
+        BLASP(v2p),BLASV(s2));
+    double resi = 
+    BLASNAME(ddot) (BLASV(n),BLASP((double*)v1p+1),BLASV(s1),
+        BLASP(v2p),BLASV(s2));
     return std::complex<double>(resr,resi);
   }
 #endif
-#endif
-#ifdef TMV_INST_FLOAT
-  template <> float InstMultVV(
-      const ConstVectorView<float>& v1, const ConstVectorView<float>& v2) 
-  {
+#ifdef INST_FLOAT
+  template <> float DoMultVV(
+      const GenVector<float>& v1, const GenVector<float>& v2) 
+  { 
     TMVAssert(v1.size()==v2.size());
-    int n=v1.size();
-    if (n == 0) return 0.F;
+    TMVAssert(v1.size()>0);
+    int n=v2.size();
     int s1=v1.step();
     int s2=v2.step();
     const float* v1p = v1.cptr();
@@ -160,13 +215,14 @@ namespace tmv {
     return BLASNAME(sdot) (BLASV(n),BLASP(v1p),BLASV(s1),
         BLASP(v2p),BLASV(s2));
   }
-  template <> std::complex<float> InstMultVV(
-      const ConstVectorView<std::complex<float> >& v1, 
-      const ConstVectorView<std::complex<float> >& v2) 
-  {
+  template <> std::complex<float> DoMultVV(
+      const GenVector<std::complex<float> >& v1, 
+      const GenVector<std::complex<float> >& v2) 
+  { 
     TMVAssert(v1.size()==v2.size());
-    int n=v1.size();
-    if (n == 0) return 0.F;
+    TMVAssert(v1.size()>0);
+    TMVAssert(v1.ct() == NonConj);
+    int n=v2.size();
     int s1=v1.step();
     int s2=v2.step();
     const std::complex<float>* v1p = v1.cptr();
@@ -174,122 +230,87 @@ namespace tmv {
     const std::complex<float>* v2p = v2.cptr();
     if (s2 < 0) v2p += (n-1)*s2;
     std::complex<float> res;
-    BLASZDOTSET( res, BLASZDOTNAME(cdotu) (
-          BLASZDOT1(BLASP(&res))
-          BLASV(n),BLASP(v2p),BLASV(s2),
-          BLASP(v1p),BLASV(s1)
-          BLASZDOT2(BLASP(&res)) ));
+    if (v2.isconj())
+      BLASZDOTSET( res, BLASZDOTNAME(cdotc) (
+            BLASZDOT1(BLASP(&res))
+            BLASV(n),BLASP(v2p),BLASV(s2),
+            BLASP(v1p),BLASV(s1)
+            BLASZDOT2(BLASP(&res)) ));
+    else
+      BLASZDOTSET( res, BLASZDOTNAME(cdotu) (
+            BLASZDOT1(BLASP(&res))
+            BLASV(n),BLASP(v2p),BLASV(s2),
+            BLASP(v1p),BLASV(s1)
+            BLASZDOT2(BLASP(&res)) ));
     return res;
   }
-  template <> std::complex<float> InstMultVV(
-      const ConstVectorView<std::complex<float>,UNKNOWN,true>& v2,
-      const ConstVectorView<std::complex<float> >& v1) 
-  {
+  template <> std::complex<float> DoMultVV(
+      const GenVector<std::complex<float> >& v1, 
+      const GenVector<float>& v2) 
+  { 
     TMVAssert(v1.size()==v2.size());
-    int n=v1.size();
-    if (n == 0) return 0.F;
-    int s1=v1.step();
+    TMVAssert(v1.size()>0);
+    TMVAssert(v1.ct() == NonConj);
+    int n=v2.size();
+    int s1=2*v1.step();
     int s2=v2.step();
     const std::complex<float>* v1p = v1.cptr();
-    if (s1 < 0) v1p += (n-1)*s1;
-    const std::complex<float>* v2p = v2.cptr();
+    if (s1 < 0) v1p += (n-1)*v1.step();
+    const float* v2p = v2.cptr();
     if (s2 < 0) v2p += (n-1)*s2;
-    std::complex<float> res;
-    BLASZDOTSET( res, BLASZDOTNAME(cdotc) (
-          BLASZDOT1(BLASP(&res))
-          BLASV(n),BLASP(v1p),BLASV(s1),
-          BLASP(v2p),BLASV(s2)
-          BLASZDOT2(BLASP(&res)) ));
-    return res;
-  }
-#ifdef TMV_INST_MIX
-  template <> std::complex<float> InstMultVV(
-      const ConstVectorView<float>& v1, 
-      const ConstVectorView<std::complex<float> >& v2) 
-  {
-    TMVAssert(v1.size()==v2.size());
-    int n=v1.size();
-    if (n == 0) return 0.F;
-    int s1=v1.step();
-    int s2=2*v2.step();
-    const float* v1p = v1.cptr();
-    if (s1 < 0) v1p += (n-1)*s1;
-    const std::complex<float>* v2p = v2.cptr();
-    if (s2 < 0) v2p += (n-1)*v2.step();
-    float resr = BLASNAME(sdot) (BLASV(n),BLASP(v1p),BLASV(s1),
-        BLASP((float*)v2p),BLASV(s2));
-    float resi = BLASNAME(sdot) (BLASV(n),BLASP(v1p),BLASV(s1),
-        BLASP((float*)v2p+1),BLASV(s2));
+    float resr = 
+    BLASNAME(sdot) (BLASV(n),BLASP((float*)v1p),BLASV(s1),
+        BLASP(v2p),BLASV(s2));
+    float resi = 
+    BLASNAME(sdot) (BLASV(n),BLASP((float*)v1p)+1,BLASV(s1),
+        BLASP(v2p),BLASV(s2));
     return std::complex<float>(resr,resi);
   }
-#endif
 #endif
 #endif // BLASNORETURN
 #endif // BLAS
 
+  template <class T, class T2> T MultVV(
+      const GenVector<T>& v1, const GenVector<T2>& v2) 
+  { 
+    TMVAssert(v1.size() == v2.size()); 
 
-  //
-  // ElementProd
-  //
-
-  template <bool add, class T, class V1, class V2, class V3> 
-  static void CallInlineElemMultVV(
-      const T x, const V1& v1, const V2& v2, V3& v3)
-  {
-    if (x == T(1))
-      InlineElemMultVV<add>(Scaling<1,T>(x),v1,v2,v3);
-    else if (x == T(-1))
-      InlineElemMultVV<add>(Scaling<-1,T>(x),v1,v2,v3);
-    else if (x == T(0))
-    { if (!add) v3.Zero(); }
-    else
-      InlineElemMultVV<add>(Scaling<0,T>(x),v1,v2,v3);
-  }
-
-  template <bool add, class T, class V1, class V2, class V3> 
-  static void CallInlineElemMultVV(
-      const std::complex<T> x, const V1& v1, const V2& v2, V3& v3)
-  {
-    if (imag(x) == T(0)) {
-      if (real(x) == T(1))
-        InlineElemMultVV<add>(Scaling<1,T>(real(x)),v1,v2,v3);
-      else if (real(x) == T(-1))
-        InlineElemMultVV<add>(Scaling<-1,T>(real(x)),v1,v2,v3);
-      else if (real(x) == T(0))
-      { if (!add) v3.Zero(); }
-      else
-        InlineElemMultVV<add>(Scaling<0,T>(real(x)),v1,v2,v3);
+#ifdef XDEBUG
+    T resx(0);
+    for(int i=0;i<int(v1.size());i++) {
+      resx += v1(i)*v2(i);
     }
-    else
-      InlineElemMultVV<add>(Scaling<0,std::complex<T> >(x),v1,v2,v3);
-  }
+#endif
 
-  template <class T1, bool C1, class T2, bool C2, class T3> 
-  void InstElemMultVV(const T3 x,
-      const ConstVectorView<T1,UNKNOWN,C1>& v1,
-      const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3)
-  {
-    if (v1.step() == 1 && v2.step() == 1 && v3.step() == 1) {
-      ConstVectorView<T1,1,C1> v1unit = v1;
-      ConstVectorView<T2,1,C2> v2unit = v2;
-      VectorView<T3,1> v3unit = v3;
-      CallInlineElemMultVV<false>(x,v1unit,v2unit,v3unit);
+    T res(0);
+    if (v1.size() > 0) {
+      if (v2.SameAs(v1.Conjugate())) return v1.NormSq();
+      else if (ShouldReverse(v1.step(),v2.step())) 
+        if (v1.isconj()) 
+          res = CONJ(DoMultVV(v1.Reverse().Conjugate(),
+                v2.Reverse().Conjugate()));
+        else 
+          res = DoMultVV(v1.Reverse(),v2.Reverse());
+      else 
+        if (v1.isconj()) 
+          res = CONJ(DoMultVV(v1.Conjugate(),v2.Conjugate()));
+        else 
+          res = DoMultVV(v1,v2);
     }
-    else CallInlineElemMultVV<false>(x,v1,v2,v3);
-  }
 
-  template <class T1, bool C1, class T2, bool C2, class T3> 
-  void InstAddElemMultVV(const T3 x,
-      const ConstVectorView<T1,UNKNOWN,C1>& v1,
-      const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3)
-  {
-    if (v1.step() == 1 && v2.step() == 1 && v3.step() == 1) {
-      ConstVectorView<T1,1,C1> v1unit = v1;
-      ConstVectorView<T2,1,C2> v2unit = v2;
-      VectorView<T3,1> v3unit = v3;
-      CallInlineElemMultVV<true>(x,v1unit,v2unit,v3unit);
+#ifdef XDEBUG
+    if (ABS(resx-res) > 0.001*MAX(RealType(T)(1),Norm(v1)*Norm(v2))) {
+      cerr<<"MultVV: \n";
+      cerr<<"v1 = "<<TypeText(v1)<<"  step "<<v1.step()<<"  "<<v1<<endl;
+      cerr<<"v2 = "<<TypeText(v2)<<"  step "<<v2.step()<<"  "<<v2<<endl;
+      cerr<<"v1*v2 = "<<resx<<endl;
+      cerr<<"res = "<<res<<endl;
+      cerr<<"abs(resx-res) = "<<ABS(resx-res)<<endl;
+      abort();
     }
-    else CallInlineElemMultVV<true>(x,v1,v2,v3);
+#endif
+
+    return res;
   }
 
 #define InstFile "TMV_MultVV.inst"
