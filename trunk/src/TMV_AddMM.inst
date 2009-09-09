@@ -1,0 +1,19 @@
+
+#define CT std::complex<T>
+
+#define Def1(T1,C1,T2)\
+  template void InstAddMM(const T2 x, \
+      const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& v1, MatrixView<T2> v2); \
+
+Def1(T,false,T)
+#ifdef TMV_INST_COMPLEX
+#ifdef TMV_INST_MIX
+Def1(T,false,CT)
+#endif
+Def1(CT,false,CT)
+Def1(CT,true,CT)
+#endif
+
+#undef Def1
+
+#undef CT

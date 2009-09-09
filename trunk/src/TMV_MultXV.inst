@@ -1,0 +1,33 @@
+
+#define CT std::complex<T>
+
+#define Def1(T)\
+  template void InstMultXV(const T x, VectorView<T > v); \
+
+#ifndef TMV_INST_SKIP_BLAS
+Def1(T)
+#ifdef TMV_INST_COMPLEX
+Def1(CT)
+#endif
+#endif
+
+#undef Def1
+
+#define Def2(T1,C1,T2)\
+  template void InstMultXV(const T2 x, const ConstVectorView<T1,XX,C1>& v1, \
+      VectorView<T2 > v2); \
+
+#ifndef TMV_INST_SKIP_BLAS
+Def2(T,false,T)
+#ifdef TMV_INST_COMPLEX
+#ifdef TMV_INST_MIX
+Def2(T,false,CT)
+#endif
+Def2(CT,false,CT)
+Def2(CT,true,CT)
+#endif
+#endif
+
+#undef Def2
+
+#undef CT

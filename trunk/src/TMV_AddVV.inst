@@ -1,0 +1,24 @@
+
+#define CT std::complex<T>
+
+#define Def1(T1,C1,T2)\
+  template void InstAddVV(const T2 x, \
+      const ConstVectorView<T1,UNKNOWN,C1>& v1, VectorView<T2> v2); \
+
+#ifndef TMV_INST_SKIP_BLAS
+Def1(T,false,T)
+#ifdef TMV_INST_COMPLEX
+#ifdef TMV_INST_MIX
+Def1(T,false,CT)
+#endif
+Def1(CT,false,CT)
+#endif
+#endif
+
+#ifdef TMV_INST_COMPLEX
+Def1(CT,true,CT)
+#endif
+
+#undef Def1
+
+#undef CT

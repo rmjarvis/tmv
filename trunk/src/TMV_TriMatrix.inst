@@ -1,0 +1,67 @@
+
+#define CT std::complex<T>
+
+#define Def1(RT,T,D)\
+  template T InstSumElements(const ConstUpperTriMatrixView<T,D>& m); \
+  template RT InstSumAbsElements(const ConstUpperTriMatrixView<T,D>& m); \
+  template RT InstNormSq(const ConstUpperTriMatrixView<T,D>& m);  \
+  template RT InstNormSq(const ConstUpperTriMatrixView<T,D>& m, \
+      const RT scale);  \
+  template RT InstMaxAbsElement(const ConstUpperTriMatrixView<T,D>& m);  \
+  template RT InstNormF(const ConstUpperTriMatrixView<T,D>& m);  \
+  template RT InstNorm1(const ConstUpperTriMatrixView<T,D>& m);  \
+  template RT InstNormInf(const ConstUpperTriMatrixView<T,D>& m);  \
+
+Def1(T,T,NonUnitDiag)
+Def1(T,T,UnitDiag)
+#ifdef TMV_INST_COMPLEX
+Def1(T,CT,NonUnitDiag)
+Def1(T,CT,UnitDiag)
+#endif
+
+#undef Def1
+
+#define Def2(T,D,C) \
+  template void InstSwap(UpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,C> m1, \
+      UpperTriMatrixView<T,D> m2); \
+  template void InstWriteCompact(std::ostream& os, \
+      const ConstUpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,C>& m1); \
+  template void InstRead(std::istream& is, \
+      UpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,C> m1); \
+  template void InstWriteCompact(std::ostream& os, \
+      const ConstLowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,C>& m1); \
+  template void InstRead(std::istream& is, \
+      LowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,C> m1); \
+
+Def2(T,UnitDiag,false)
+Def2(T,NonUnitDiag,false)
+#ifdef TMV_INST_COMPLEX
+Def2(CT,UnitDiag,false)
+Def2(CT,NonUnitDiag,false)
+Def2(CT,UnitDiag,true)
+Def2(CT,NonUnitDiag,true)
+#endif
+
+#undef Def2
+
+#define Def3(T,D1,C,D2) \
+  template void InstCopy(\
+      const ConstUpperTriMatrixView<T,D1,UNKNOWN,UNKNOWN,C>& m1, \
+      UpperTriMatrixView<T,D2> m2); \
+
+Def3(T,UnitDiag,false,UnitDiag)
+Def3(T,UnitDiag,false,NonUnitDiag)
+Def3(T,NonUnitDiag,false,NonUnitDiag)
+#ifdef TMV_INST_COMPLEX
+Def3(CT,UnitDiag,false,UnitDiag)
+Def3(CT,UnitDiag,false,NonUnitDiag)
+Def3(CT,NonUnitDiag,false,NonUnitDiag)
+Def3(CT,UnitDiag,true,UnitDiag)
+Def3(CT,UnitDiag,true,NonUnitDiag)
+Def3(CT,NonUnitDiag,true,NonUnitDiag)
+#endif
+
+#undef Def2
+
+#undef CT
+
