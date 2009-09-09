@@ -1,0 +1,888 @@
+
+#include "TMV_Tri.h"
+
+//#define XDEBUG
+
+namespace tmv {
+
+  //
+  // MultMV
+  //
+
+  template <bool rm, bool cx, bool ca, class T, class Ta, class Tx>
+    void DoRowAddMultMV(
+	const GenUpperTriMatrix<Ta>& A, const GenVector<Tx>& x,
+	const VectorView<T>& y)
+    {
+      //cerr<<"RowAddMultMV Upper\n";
+      TMVAssert(A.size() == x.size());
+      TMVAssert(A.size() == y.size());
+      TMVAssert(y.size() > 0);
+      TMVAssert(x.step()==1);
+      TMVAssert(y.step()==1);
+      TMVAssert(y.ct() == NonConj);
+      TMVAssert(!A.isunit());
+      TMVAssert(cx == x.isconj());
+      TMVAssert(rm == A.isrm());
+      TMVAssert(ca == A.isconj());
+
+      const size_t N = x.size();
+
+      const int sj = rm ? 1 : A.stepj();
+      const int ds = A.stepi()+sj;
+      const Tx* xi = x.cptr();
+      T* yi = y.ptr();
+      const Ta* Aii = A.cptr();
+      size_t len = N;
+
+      for(; len>0; --len,++xi,++yi,Aii+=ds) {
+	// *yi += A.row(i,ii,N) * x.SubVector(ii,N);
+	const Tx* xj = xi;
+	const Ta* Aij = Aii;
+	for(size_t j=len;j>0;--j,++xj,(rm?++Aij:Aij+=sj))
+	  *yi += (cx ? CONJ(*xj) : *xj) * (ca ? CONJ(*Aij) : *Aij);
+      }
+    }
+
+  template <bool rm, class T, class Ta, class Tx> inline void RowAddMultMV(
+      const GenUpperTriMatrix<Ta>& A, const GenVector<Tx>& x,
+      const VectorView<T>& y)
+  { 
+    if (x.isconj())
+      if (A.isconj())
+	DoRowAddMultMV<rm,true,true>(A,x,y);
+      else
+	DoRowAddMultMV<rm,true,false>(A,x,y);
+    else
+      if (A.isconj())
+	DoRowAddMultMV<rm,false,true>(A,x,y);
+      else
+	DoRowAddMultMV<rm,false,false>(A,x,y);
+  }
+
+  template <bool cm, bool cx, bool ca, class T, class Ta, class Tx> 
+    void DoColAddMultMV(
+	const GenUpperTriMatrix<Ta>& A, const GenVector<Tx>& x,
+	const VectorView<T>& y)
+    {
+      //cerr<<"ColAddMultMV Upper\n";
+      TMVAssert(A.size() == x.size());
+      TMVAssert(A.size() == y.size());
+      TMVAssert(y.size() > 0);
+      TMVAssert(x.step()==1);
+      TMVAssert(y.step()==1);
+      TMVAssert(y.ct() == NonConj);
+      TMVAssert(!A.isunit());
+      TMVAssert(cx == x.isconj());
+      TMVAssert(cm == A.iscm());
+      TMVAssert(ca == A.isconj());
+
+      const size_t N = x.size();
+
+      T* y0 = y.ptr();
+      const Tx* xj = x.cptr();
+      const int si = cm ? 1 : A.stepi();
+      const Ta* A0j = A.cptr();
+
+      for(size_t j=0; j<N; ++j,++xj,A0j+=A.stepj()) if (*xj != T(0)) {
+	// y.SubVector(0,j+1) += *xj * A.col(j,0,j+1);
+	const Ta* Aij = A0j;
+	T* yi = y0;
+	for(size_t i=j+1;i>0;--i,++yi,(cm?++Aij:Aij+=si))
+	  *yi += (cx ? CONJ(*xj) : *xj) * (ca ? CONJ(*Aij) : *Aij);
+      }
+    }
+
+  template <bool cm, class T, class Ta, class Tx> inline void ColAddMultMV(
+      const GenUpperTriMatrix<Ta>& A, const GenVector<Tx>& x,
+      const VectorView<T>& y)
+  { 
+    if (x.isconj())
+      if (A.isconj())
+	DoColAddMultMV<cm,true,true>(A,x,y);
+      else
+	DoColAddMultMV<cm,true,false>(A,x,y);
+    else
+      if (A.isconj())
+	DoColAddMultMV<cm,false,true>(A,x,y);
+      else
+	DoColAddMultMV<cm,false,false>(A,x,y);
+  }
+
+  template <bool rm, bool cx, bool ca, class T, class Ta, class Tx> 
+    void DoRowAddMultMV(
+	const GenLowerTriMatrix<Ta>& A, const GenVector<Tx>& x,
+	const VectorView<T>& y)
+    {
+      //cerr<<"RowAddMultMV Lower\n";
+      TMVAssert(A.size() == x.size());
+      TMVAssert(A.size() == y.size());
+      TMVAssert(y.size() > 0);
+      TMVAssert(x.step()==1);
+      TMVAssert(y.step()==1);
+      TMVAssert(y.ct() == NonConj);
+      TMVAssert(!A.isunit());
+      TMVAssert(cx == x.isconj());
+      TMVAssert(rm == A.isrm());
+      TMVAssert(ca == A.isconj());
+
+      const size_t N = x.size();
+      const Tx* x0 = x.cptr();
+
+      T* yi = y.ptr() + N-1;
+      const int sj = rm ? 1 : A.stepj();
+      const Ta* Ai0 = A.cptr()+(N-1)*A.stepi();
+      for(size_t len=N; len>0; --len,--yi,Ai0-=A.stepi()) {
+	// temp = A.row(i,0,ii) * x.SubVector(0,ii);
+	const Ta* Aij = Ai0;
+	const Tx* xj = x0;
+	for(size_t j=len;j>0;--j,++xj,(rm?++Aij:Aij+=sj))
+	  *yi += (cx ? CONJ(*xj) : *xj) * (ca ? CONJ(*Aij) : *Aij);
+      }
+    }
+
+  template <bool rm, class T, class Ta, class Tx> inline void RowAddMultMV(
+      const GenLowerTriMatrix<Ta>& A, const GenVector<Tx>& x,
+      const VectorView<T>& y)
+  { 
+    if (x.isconj())
+      if (A.isconj())
+	DoRowAddMultMV<rm,true,true>(A,x,y);
+      else
+	DoRowAddMultMV<rm,true,false>(A,x,y);
+    else
+      if (A.isconj())
+	DoRowAddMultMV<rm,false,true>(A,x,y);
+      else
+	DoRowAddMultMV<rm,false,false>(A,x,y);
+  }
+
+  template <bool cm, bool cx, bool ca, class T, class Ta, class Tx> 
+    void DoColAddMultMV(
+	const GenLowerTriMatrix<Ta>& A, const GenVector<Tx>& x,
+	const VectorView<T>& y)
+    {
+      //cerr<<"ColAddMultMV Lower\n";
+      TMVAssert(A.size() == x.size());
+      TMVAssert(A.size() == y.size());
+      TMVAssert(y.size() > 0);
+      TMVAssert(x.step()==1);
+      TMVAssert(y.step()==1);
+      TMVAssert(y.ct() == NonConj);
+      TMVAssert(!A.isunit());
+      TMVAssert(cx == x.isconj());
+      TMVAssert(cm == A.iscm());
+      TMVAssert(ca == A.isconj());
+
+      const size_t N = x.size();
+
+      T* yj = y.ptr() + N-1;
+      const Tx* xj = x.cptr() + N-1;
+      const int si = cm ? 1 : A.stepi();
+      const int ds = A.stepj()+si;
+      const Ta* Ajj = A.cptr()+(N-1)*ds;
+
+      for(size_t j=N,len=1;j>0;--j,++len,--yj,--xj,Ajj-=ds) if (*xj!=T(0)) {
+	// y.SubVector(j,N) += *xj * A.col(j,j,N);
+	T* yi = yj;
+	const Ta* Aij = Ajj;
+	for (size_t i=len;i>0;--i,++yi,(cm?++Aij:Aij+=si))
+	  *yi += (cx ? CONJ(*xj) : *xj) * (ca ? CONJ(*Aij) : *Aij);
+      }
+    }
+
+  template <bool cm, class T, class Ta, class Tx> inline void ColAddMultMV(
+      const GenLowerTriMatrix<Ta>& A, const GenVector<Tx>& x,
+      const VectorView<T>& y)
+  { 
+    if (x.isconj())
+      if (A.isconj())
+	DoColAddMultMV<cm,true,true>(A,x,y);
+      else
+	DoColAddMultMV<cm,true,false>(A,x,y);
+    else
+      if (A.isconj())
+	DoColAddMultMV<cm,false,true>(A,x,y);
+      else
+	DoColAddMultMV<cm,false,false>(A,x,y);
+  }
+
+  template <class T, class Ta, class Tx> inline void DoAddMultMV(
+      const GenUpperTriMatrix<Ta>& A, const GenVector<Tx>& x,
+      const VectorView<T>& y)
+  {
+    if (A.isunit()) {
+      const size_t N = y.size();
+      AddVV(T(1),x,y);
+      if (y.size() > 1) 
+	AddMultMV(A.OffDiag(),x.SubVector(1,N),y.SubVector(0,N-1));
+    } else {
+      if (A.isrm()) RowAddMultMV<true>(A,x,y);
+      else if (A.iscm()) ColAddMultMV<true>(A,x,y);
+      else RowAddMultMV<false>(A,x,y);
+    }
+  }
+
+  template <bool b0, bool cx, class T, class Ta, class Tx> 
+    extern void UnitAMultMV1(const GenMatrix<Ta>& A, const GenVector<Tx>& x,
+	const VectorView<T>& y);
+
+  template <class T, class Ta, class Tx> inline void AddMultMV(
+      const GenUpperTriMatrix<Ta>& A, const GenVector<Tx>& x,
+      const VectorView<T>& y)
+    // y += A * x
+  {
+    TMVAssert(A.size() == x.size());
+    TMVAssert(A.size() == y.size());
+    TMVAssert(y.size() > 0);
+    TMVAssert(x.step() == 1);
+    TMVAssert(y.step() == 1);
+    TMVAssert(y.ct() == NonConj);
+
+    //      [ A11 A12 A13 ] [ 0  ]   [ A12 x2 ]
+    // y += [  0  A22 A23 ] [ x2 ] = [ A22 x2 ]
+    //      [  0   0  A33 ] [ 0  ]   [   0    ]
+
+    const size_t N = x.size(); // = A.size()
+    size_t j2 = N;
+    for(const Tx* x2=x.cptr()+N-1; j2>0 && *x2==Tx(0); --j2,--x2);
+    if (j2 == 0) return;
+    size_t j1 = 0;
+    for(const Tx* x1=x.cptr(); *x1==Tx(0); ++j1,++x1);
+    if (j1 == 0 && j2 == N) {
+      DoAddMultMV(A,x,y);
+    } else {
+      TMVAssert(j1 < j2);
+      ConstUpperTriMatrixView<Ta> A22 = A.SubTriMatrix(j1,j2);
+      ConstVectorView<Tx> x2 = x.SubVector(j1,j2);
+      VectorView<T> y2 = y.SubVector(j1,j2);
+
+      if (j1 != 0) {
+	ConstMatrixView<Ta> A12 = A.SubMatrix(0,j1,j1,j2);
+	VectorView<T> y1 = y.SubVector(0,j1);
+	if (x.isconj())
+	  UnitAMultMV1<false,true>(A12,x2,y1);
+	else
+	  UnitAMultMV1<false,false>(A12,x2,y1);
+      }
+      DoAddMultMV(A22,x2,y2);
+    }
+  }
+
+  template <class T, class Ta, class Tx> inline void DoAddMultMV(
+      const GenLowerTriMatrix<Ta>& A, const GenVector<Tx>& x,
+      const VectorView<T>& y)
+    // y += A * x
+  {
+    TMVAssert(A.size() == x.size());
+    TMVAssert(A.size() == y.size());
+    TMVAssert(y.size() > 0);
+    TMVAssert(x.step() == 1);
+    TMVAssert(y.step() == 1);
+
+    if (A.isunit()) {
+      const size_t N = y.size();
+      AddVV(T(1),x,y);
+      if (y.size() > 1) 
+	AddMultMV(A.OffDiag(),x.SubVector(0,N-1),y.SubVector(1,N));
+    } else {
+      if (A.isrm()) RowAddMultMV<true>(A,x,y);
+      else if (A.iscm()) ColAddMultMV<true>(A,x,y);
+      else RowAddMultMV<false>(A,x,y);
+    }
+  }
+
+  template <class T, class Ta, class Tx> inline void AddMultMV(
+      const GenLowerTriMatrix<Ta>& A, const GenVector<Tx>& x,
+      const VectorView<T>& y)
+    // y += A * x
+  {
+    TMVAssert(A.size() == x.size());
+    TMVAssert(A.size() == y.size());
+    TMVAssert(y.size() > 0);
+    TMVAssert(x.step() == 1);
+    TMVAssert(y.step() == 1);
+    TMVAssert(y.ct() == NonConj);
+
+    //      [ A11  0   0  ] [ 0  ]   [   0    ]
+    // y += [ A21 A22  0  ] [ x2 ] = [ A22 x2 ]
+    //      [ A31 A32 A33 ] [ 0  ]   [ A32 x2 ]
+
+    const size_t N = x.size(); // = A.size()
+    size_t j2 = N;
+    for(const Tx* x2=x.cptr()+N-1; j2>0 && *x2==Tx(0); --j2,--x2);
+    if (j2 == 0) return;
+    size_t j1 = 0;
+    for(const Tx* x1=x.cptr(); *x1==Tx(0); ++j1,++x1);
+    if (j1 == 0 && j2 == N) {
+      DoAddMultMV(A,x,y);
+    } else {
+      TMVAssert(j1 < j2);
+      ConstLowerTriMatrixView<Ta> A22 = A.SubTriMatrix(j1,j2);
+      ConstVectorView<Tx> x2 = x.SubVector(j1,j2);
+      VectorView<T> y2 = y.SubVector(j1,j2);
+
+      if (j2 != N) {
+	ConstMatrixView<Ta> A32 = A.SubMatrix(j2,N,j1,j2);
+	VectorView<T> y3 = y.SubVector(j2,N);
+	if (x.isconj())
+	  UnitAMultMV1<false,true>(A32,x2,y3);
+	else
+	  UnitAMultMV1<false,false>(A32,x2,y3);
+      }
+      DoAddMultMV(A22,x2,y2);
+    }
+  }
+
+  // 
+  // MultEqMV
+  //
+
+  template <bool rm, bool ca, bool ua, class T, class Ta> void DoRowMultEqMV(
+      const GenUpperTriMatrix<Ta>& A, const VectorView<T>& x)
+  {
+    //cerr<<"RowMultEqMV Upper\n";
+    TMVAssert(x.step()==1);
+    TMVAssert(A.size() == x.size());
+    TMVAssert(x.size() > 0);
+    TMVAssert(x.ct() == NonConj);
+    TMVAssert(rm == A.isrm());
+    TMVAssert(ca == A.isconj());
+    TMVAssert(ua == A.isunit());
+
+    const size_t N = x.size();
+
+    const int sj = rm ? 1 : A.stepj();
+    const int ds = A.stepi()+sj;
+    T* xi = x.ptr();
+    const Ta* Aii = A.cptr();
+    size_t len = N-1;
+
+    for(; len>0; --len,++xi,Aii+=ds) {
+      // i = 0..N-2
+      // x(i) = A.row(i,i,N) * x.SubVector(i,N);
+      if (!ua) *xi *= (ca ? CONJ(*Aii) : *Aii);
+      const T* xj = xi+1;
+      const Ta* Aij = Aii+sj;
+      for(size_t j=len;j>0;--j,++xj,(rm?++Aij:Aij+=sj))
+	*xi += (*xj) * (ca ? CONJ(*Aij) : *Aij);
+    }
+    if (!ua) *xi *= (ca ? CONJ(*Aii) : *Aii);
+  }
+
+  template <bool rm, class T, class Ta> inline void RowMultEqMV(
+      const GenUpperTriMatrix<Ta>& A, const VectorView<T>& x)
+  { 
+    if (A.isconj())
+      if (A.isunit())
+	DoRowMultEqMV<rm,true,true>(A,x);
+      else
+	DoRowMultEqMV<rm,true,false>(A,x);
+    else
+      if (A.isunit())
+	DoRowMultEqMV<rm,false,true>(A,x);
+      else
+	DoRowMultEqMV<rm,false,false>(A,x);
+  }
+
+  template <bool cm, bool ca, bool ua, class T, class Ta> void DoColMultEqMV(
+      const GenUpperTriMatrix<Ta>& A, const VectorView<T>& x)
+  {
+    //cerr<<"ColMultEqMV Upper\n";
+    TMVAssert(x.step()==1);
+    TMVAssert(A.size() == x.size());
+    TMVAssert(x.size() > 0);
+    TMVAssert(x.ct() == NonConj);
+    TMVAssert(cm == A.iscm());
+    TMVAssert(ca == A.isconj());
+    TMVAssert(ua == A.isunit());
+
+    const size_t N = x.size();
+
+    T* x0 = x.ptr();
+    const T* xj = x0+1;
+    const int si = cm ? 1 : A.stepi();
+    const Ta* A0j = A.cptr();
+
+    if (!ua) *x0 *= (ca ? CONJ(*A0j) : *A0j);
+    A0j += A.stepj();
+
+    for(size_t len=1; len<N; ++len,++xj,A0j+=A.stepj()) if (*xj != T(0)) {
+      // j = 1..N-1
+      // x.SubVector(0,j) += *xj * A.col(j,0,j);
+      const Ta* Aij = A0j;
+      T* xi = x0;
+      for(size_t i=len;i>0;--i,++xi,(cm?++Aij:Aij+=si))
+	*xi += *xj * (ca ? CONJ(*Aij) : *Aij);
+      // Now Aij == Ajj, xi == xj
+      // so this next statement is really *xj *= *Ajj
+      if (!ua) *xi *= (ca ? CONJ(*Aij) : *Aij);
+    }
+  }
+
+  template <bool cm, class T, class Ta> inline void ColMultEqMV(
+      const GenUpperTriMatrix<Ta>& A, const VectorView<T>& x)
+  { 
+    if (A.isconj())
+      if (A.isunit())
+	DoColMultEqMV<cm,true,true>(A,x);
+      else
+	DoColMultEqMV<cm,true,false>(A,x);
+    else
+      if (A.isunit())
+	DoColMultEqMV<cm,false,true>(A,x);
+      else
+	DoColMultEqMV<cm,false,false>(A,x);
+  }
+
+  template <bool rm, bool ca, bool ua, class T, class Ta> void DoRowMultEqMV(
+      const GenLowerTriMatrix<Ta>& A, const VectorView<T>& x)
+  {
+    //cerr<<"RowMultEqMV Lower\n";
+    TMVAssert(x.step()==1);
+    TMVAssert(A.size() == x.size());
+    TMVAssert(x.size() > 0);
+    TMVAssert(x.ct() == NonConj);
+    TMVAssert(rm == A.isrm());
+    TMVAssert(ca == A.isconj());
+    TMVAssert(ua == A.isunit());
+
+    const size_t N = x.size();
+    const int si = A.stepi();
+    const int sj = rm ? 1 : A.stepj();
+    const int ds = si+sj;
+
+    const T* x0 = x.cptr();
+    T* xi = x.ptr() + N-1;
+    const Ta* Ai0 = A.cptr()+(N-1)*si;
+    const Ta* Aii = Ai0 + (N-1)*sj;
+
+    for(size_t len=N-1; len>0; --len,--xi,Ai0-=si,Aii-=ds) {
+      // i = N-1..1
+      // x(i) = A.row(i,0,i+1) * x.SubVector(0,i+1);
+      if (!ua) *xi *= (ca ? CONJ(*Aii) : *Aii);
+      const Ta* Aij = Ai0;
+      const T* xj = x0;
+      for(size_t j=len;j>0;--j,++xj,(rm?++Aij:Aij+=sj))
+	*xi += *xj * (ca ? CONJ(*Aij) : *Aij);
+    }
+    if (!ua) *xi *= (ca ? CONJ(*Aii) : *Aii);
+  }
+
+  template <bool rm, class T, class Ta> inline void RowMultEqMV(
+      const GenLowerTriMatrix<Ta>& A, const VectorView<T>& x)
+  { 
+    if (A.isconj())
+      if (A.isunit())
+	DoRowMultEqMV<rm,true,true>(A,x);
+      else
+	DoRowMultEqMV<rm,true,false>(A,x);
+    else
+      if (A.isunit())
+	DoRowMultEqMV<rm,false,true>(A,x);
+      else
+	DoRowMultEqMV<rm,false,false>(A,x);
+  }
+
+  template <bool cm, bool ca, bool ua, class T, class Ta> void DoColMultEqMV(
+      const GenLowerTriMatrix<Ta>& A, const VectorView<T>& x)
+  {
+    //cerr<<"ColMultEqMV Lower\n";
+    TMVAssert(A.size() == x.size());
+    TMVAssert(x.size() > 0);
+    TMVAssert(x.ct() == NonConj);
+    TMVAssert(x.step() == 1);
+    TMVAssert(cm == A.iscm());
+    TMVAssert(ca == A.isconj());
+    TMVAssert(ua == A.isunit());
+
+    const size_t N = x.size();
+
+    T* xj = x.ptr() + N-2;
+    const int si = cm ? 1 : A.stepi();
+    const int ds = A.stepj()+si;
+    const Ta* Ajj = A.cptr()+(N-2)*ds;
+
+    if (!ua) *(xj+1) *= (ca ? CONJ(*(Ajj+ds)) : *(Ajj+ds));
+    for(size_t j=N-1,len=1;j>0;--j,++len,--xj,Ajj-=ds) if (*xj!=T(0)) {
+      // Actual j = N-2..0
+      // x.SubVector(j+1,N) += *xj * A.col(j,j+1,N);
+      T* xi = xj+1;
+      const Ta* Aij = Ajj+si;
+      for (size_t i=len;i>0;--i,++xi,(cm?++Aij:Aij+=si))
+	*xi += *xj * (ca ? CONJ(*Aij) : *Aij);
+      if (!ua) *xj *= (ca ? CONJ(*Ajj) : *Ajj);
+    }
+  }
+
+  template <bool cm, class T, class Ta> inline void ColMultEqMV(
+      const GenLowerTriMatrix<Ta>& A, const VectorView<T>& x)
+  { 
+    if (A.isconj())
+      if (A.isunit())
+	DoColMultEqMV<cm,true,true>(A,x);
+      else
+	DoColMultEqMV<cm,true,false>(A,x);
+    else
+      if (A.isunit())
+	DoColMultEqMV<cm,false,true>(A,x);
+      else
+	DoColMultEqMV<cm,false,false>(A,x);
+  }
+
+  template <class T, class Ta> inline void DoMultEqMV(
+      const GenUpperTriMatrix<Ta>& A, const VectorView<T>& x)
+    // x = A * x
+  {
+    if (A.isrm()) RowMultEqMV<true>(A,x);
+    else if (A.iscm()) ColMultEqMV<true>(A,x);
+    else RowMultEqMV<false>(A,x);
+  }
+
+  template <class T, class Ta> void NonBlasMultEqMV(
+      const GenUpperTriMatrix<Ta>& A, const VectorView<T>& x)
+  {
+    TMVAssert(A.size() == x.size());
+    TMVAssert(x.size() > 0);
+    TMVAssert(x.step() == 1);
+    TMVAssert(x.ct() == NonConj);
+
+    //     [ A11 A12 A13 ] [ 0  ]   [ A12 x2 ]
+    // x = [  0  A22 A23 ] [ x2 ] = [ A22 x2 ]
+    //     [  0   0  A33 ] [ 0  ]   [   0    ]
+
+    const size_t N = x.size(); // = A.size()
+    size_t j2 = N;
+    for(const T* x2=x.cptr()+N-1; j2>0 && *x2==T(0); --j2,--x2);
+    if (j2 == 0) return;
+    size_t j1 = 0;
+    for(const T* x1=x.cptr(); *x1==T(0); ++j1,++x1);
+    if (j1 == 0 && j2 == N) {
+      DoMultEqMV(A,x);
+    } else {
+      TMVAssert(j1 < j2);
+      ConstUpperTriMatrixView<Ta> A22 = A.SubTriMatrix(j1,j2);
+      VectorView<T> x2 = x.SubVector(j1,j2);
+
+      if (j1 != 0) {
+	ConstMatrixView<Ta> A12 = A.SubMatrix(0,j1,j1,j2);
+	VectorView<T> x1 = x.SubVector(0,j1);
+	UnitAMultMV1<false,false>(A12,x2,x1);
+      }
+      DoMultEqMV(A22,x2);
+    }
+  }
+
+  template <class T, class Ta> inline void DoMultEqMV(
+      const GenLowerTriMatrix<Ta>& A, const VectorView<T>& x)
+  {
+    if (A.isrm()) RowMultEqMV<true>(A,x);
+    else if (A.iscm()) ColMultEqMV<true>(A,x);
+    else RowMultEqMV<false>(A,x);
+  }
+
+  template <class T, class Ta> void NonBlasMultEqMV(
+      const GenLowerTriMatrix<Ta>& A, const VectorView<T>& x)
+    // x = A * x
+  {
+    TMVAssert(A.size() == x.size());
+    TMVAssert(x.size() > 0);
+    TMVAssert(x.step() == 1);
+    TMVAssert(x.ct() == NonConj);
+
+    //     [ A11  0   0  ] [ 0  ]   [   0    ]
+    // x = [ A21 A22  0  ] [ x2 ] = [ A22 x2 ]
+    //     [ A31 A32 A33 ] [ 0  ]   [ A32 x2 ]
+
+    const size_t N = x.size(); // = A.size()
+    size_t j2 = N;
+    for(const T* x2=x.cptr()+N-1; j2>0 && *x2==T(0); --j2,--x2);
+    if (j2 == 0) return;
+    size_t j1 = 0;
+    for(const T* x1=x.cptr(); *x1==T(0); ++j1,++x1);
+    if (j1 == 0 && j2 == N) {
+      DoMultEqMV(A,x);
+    } else {
+      TMVAssert(j1 < j2);
+      ConstLowerTriMatrixView<Ta> A22 = A.SubTriMatrix(j1,j2);
+      VectorView<T> x2 = x.SubVector(j1,j2);
+
+      if (j2 != N) {
+	ConstMatrixView<Ta> A32 = A.SubMatrix(j2,N,j1,j2);
+	VectorView<T> x3 = x.SubVector(j2,N);
+	UnitAMultMV1<false,false>(A32,x2,x3);
+      }
+      DoMultEqMV(A22,x2);
+    }
+  }
+
+#ifdef BLAS
+  template <class T, class Ta> void BlasMultEqMV(
+      const GenUpperTriMatrix<Ta>& A, const VectorView<T>& x)
+  { NonBlasMultEqMV(A,x); }
+  template <class T, class Ta> void BlasMultEqMV(
+      const GenLowerTriMatrix<Ta>& A, const VectorView<T>& x)
+  { NonBlasMultEqMV(A,x); }
+  template <> void BlasMultEqMV( 
+      const GenUpperTriMatrix<double>& A, const VectorView<double>& x)
+  {
+    TMVAssert(A.size() == x.size());
+    TMVAssert(x.size() > 0);
+    TMVAssert(A.ct() == NonConj);
+    TMVAssert(x.ct() == NonConj);
+    cblas_dtrmv(A.isrm() ? CblasRowMajor : CblasColMajor,
+	CblasUpper, CblasNoTrans, A.isunit() ? CblasUnit : CblasNonUnit,
+	A.size(),A.cptr(), A.isrm() ? A.stepi() : A.stepj(),
+	x.ptr(),x.step()); 
+  }
+  template <> void BlasMultEqMV( 
+      const GenLowerTriMatrix<double>& A, const VectorView<double>& x)
+  {
+    TMVAssert(A.size() == x.size());
+    TMVAssert(x.size() > 0);
+    TMVAssert(A.ct() == NonConj);
+    TMVAssert(x.ct() == NonConj);
+    cblas_dtrmv(A.isrm() ? CblasRowMajor : CblasColMajor,
+	CblasLower, CblasNoTrans, A.isunit() ? CblasUnit : CblasNonUnit,
+	A.size(),A.cptr(), A.isrm() ? A.stepi() : A.stepj(),
+	x.ptr(),x.step()); 
+  }
+  template <> void BlasMultEqMV(const GenUpperTriMatrix<complex<double> >& A,
+      const VectorView<complex<double> >& x)
+  {
+    TMVAssert(A.size() == x.size());
+    TMVAssert(x.size() > 0);
+    TMVAssert(x.ct() == NonConj);
+    CBLAS_ORDER order = (A.iscm() == A.isconj()) ? 
+      CblasRowMajor : CblasColMajor;
+    CBLAS_UPLO uplo = A.isconj() ? CblasLower : CblasUpper;
+    CBLAS_TRANSPOSE tran = A.isconj() ?  CblasConjTrans : CblasNoTrans;
+    cblas_ztrmv(order, uplo, tran, A.isunit() ? CblasUnit : CblasNonUnit,
+	A.size(),A.cptr(), A.isrm() ? A.stepi() : A.stepj(),
+	x.ptr(),x.step()); 
+  }
+  template <> void BlasMultEqMV(const GenLowerTriMatrix<complex<double> >& A,
+      const VectorView<complex<double> >& x)
+  {
+    TMVAssert(A.size() == x.size());
+    TMVAssert(x.size() > 0);
+    TMVAssert(x.ct() == NonConj);
+    CBLAS_ORDER order = (A.iscm() == A.isconj()) ? 
+      CblasRowMajor : CblasColMajor;
+    CBLAS_UPLO uplo = A.isconj() ? CblasUpper : CblasLower;
+    CBLAS_TRANSPOSE tran = A.isconj() ?  CblasConjTrans : CblasNoTrans;
+    cblas_ztrmv(order, uplo, tran, A.isunit() ? CblasUnit : CblasNonUnit,
+	A.size(),A.cptr(), A.isrm() ? A.stepi() : A.stepj(),
+	x.ptr(),x.step()); 
+  }
+#ifndef NOFLOAT
+  template <> void BlasMultEqMV( 
+      const GenUpperTriMatrix<float>& A, const VectorView<float>& x)
+  {
+    TMVAssert(A.size() == x.size());
+    TMVAssert(x.size() > 0);
+    TMVAssert(A.ct() == NonConj);
+    TMVAssert(x.ct() == NonConj);
+    cblas_strmv(A.isrm() ? CblasRowMajor : CblasColMajor,
+	CblasUpper, CblasNoTrans, A.isunit() ? CblasUnit : CblasNonUnit,
+	A.size(),A.cptr(), A.isrm() ? A.stepi() : A.stepj(),
+	x.ptr(),x.step()); 
+  }
+  template <> void BlasMultEqMV( 
+      const GenLowerTriMatrix<float>& A, const VectorView<float>& x)
+  {
+    TMVAssert(A.size() == x.size());
+    TMVAssert(x.size() > 0);
+    TMVAssert(A.ct() == NonConj);
+    TMVAssert(x.ct() == NonConj);
+    cblas_strmv(A.isrm() ? CblasRowMajor : CblasColMajor,
+	CblasLower, CblasNoTrans, A.isunit() ? CblasUnit : CblasNonUnit,
+	A.size(),A.cptr(), A.isrm() ? A.stepi() : A.stepj(),
+	x.ptr(),x.step()); 
+  }
+  template <> void BlasMultEqMV(const GenUpperTriMatrix<complex<float> >& A,
+      const VectorView<complex<float> >& x)
+  {
+    TMVAssert(A.size() == x.size());
+    TMVAssert(x.size() > 0);
+    TMVAssert(x.ct() == NonConj);
+    CBLAS_ORDER order = (A.iscm() == A.isconj()) ? 
+      CblasRowMajor : CblasColMajor;
+    CBLAS_UPLO uplo = A.isconj() ? CblasLower : CblasUpper;
+    CBLAS_TRANSPOSE tran = A.isconj() ? CblasConjTrans : CblasNoTrans;
+    cblas_ctrmv(order, uplo, tran, A.isunit() ? CblasUnit : CblasNonUnit,
+	A.size(),A.cptr(), A.isrm() ? A.stepi() : A.stepj(),
+	x.ptr(),x.step()); 
+  }
+  template <> void BlasMultEqMV(const GenLowerTriMatrix<complex<float> >& A,
+      const VectorView<complex<float> >& x)
+  {
+    TMVAssert(A.size() == x.size());
+    TMVAssert(x.size() > 0);
+    TMVAssert(x.ct() == NonConj);
+    CBLAS_ORDER order = (A.iscm() == A.isconj()) ? 
+      CblasRowMajor : CblasColMajor;
+    CBLAS_UPLO uplo = A.isconj() ? CblasUpper : CblasLower;
+    CBLAS_TRANSPOSE tran = A.isconj() ?  CblasConjTrans : CblasNoTrans;
+    cblas_ctrmv(order, uplo, tran, A.isunit() ? CblasUnit : CblasNonUnit,
+	A.size(),A.cptr(), A.isrm() ? A.stepi() : A.stepj(),
+	x.ptr(),x.step()); 
+  }
+#endif // NOFLOAT
+#endif // BLAS
+
+  template <class T, class Ta> void MultEqMV(
+      const GenUpperTriMatrix<Ta>& A, const VectorView<T>& x)
+  {
+#ifdef XDEBUG
+    Vector<T> x2 = Matrix<T>(A) * x;
+    Vector<T> x0 = x;
+#endif
+    TMVAssert(A.size() == x.size());
+    TMVAssert(x.size() > 0);
+    TMVAssert(x.step() == 1);
+
+    if (x.isconj()) MultEqMV(A.Conjugate(),x.Conjugate());
+    else 
+#ifdef BLAS
+      if (A.isrm() || A.iscm())
+	BlasMultEqMV(A,x);
+      else
+#endif
+	NonBlasMultEqMV(A,x);
+#ifdef XDEBUG
+    if (Norm(x-x2) > 0.001*Norm(x)) {
+      cerr<<"MultEqMV: \n";
+      cerr<<"A = "<<Type(A)<<"  "<<A<<endl;
+      cerr<<"x = "<<Type(x)<<" step "<<x.step()<<"  "<<x0<<endl;
+      cerr<<"-> x = "<<x<<endl;
+      cerr<<"x2 = "<<x2<<endl;
+      abort();
+    }
+#endif
+  }
+
+  template <class T, class Ta> void MultEqMV(
+      const GenLowerTriMatrix<Ta>& A, const VectorView<T>& x)
+  {
+#ifdef XDEBUG
+    Vector<T> x2 = Matrix<T>(A) * x;
+    Vector<T> x0 = x;
+#endif
+    TMVAssert(A.size() == x.size());
+    TMVAssert(x.size() > 0);
+    TMVAssert(x.step() == 1);
+
+    if (x.isconj()) MultEqMV(A.Conjugate(),x.Conjugate());
+    else 
+#ifdef BLAS
+      if ( (A.isrm() && A.stepi()>0) || (A.iscm() && A.stepj()>0) )
+	BlasMultEqMV(A,x);
+      else
+#endif
+	NonBlasMultEqMV(A,x);
+#ifdef XDEBUG
+    if (Norm(x-x2) > 0.001*Norm(x)) {
+      cerr<<"MultEqMV: \n";
+      cerr<<"A = "<<Type(A)<<"  "<<A<<endl;
+      cerr<<"x = "<<Type(x)<<" step "<<x.step()<<"  "<<x0<<endl;
+      cerr<<"-> x = "<<x<<endl;
+      cerr<<"x2 = "<<x2<<endl;
+      abort();
+    }
+#endif
+  }
+
+  template <class T, class Ta, class Tx> void MultMV(
+      const T alpha, const GenUpperTriMatrix<Ta>& A,
+      const GenVector<Tx>& x, const T beta, const VectorView<T>& y)
+    // y = alpha * A * x + beta * y    
+  { 
+#ifdef XDEBUG
+    Vector<T> y2 = beta*y+alpha*Matrix<Ta>(A)*x;
+    Vector<T> y0 = y;
+#endif
+    TMVAssert(A.size() == x.size());
+    TMVAssert(A.size() == y.size());
+
+    if (y.size() > 0) {
+      if (alpha==T(0)) {
+	y *= beta;
+      } else {
+	if (alpha != T(1) || y.SameStorageAs(x) ||
+	    x.step() != 1 || y.step() != 1) {
+	  Vector<T> xx = alpha*x;
+	  MultEqMV(A,xx.View());
+	  AddVV(T(1),xx,beta,y);
+	}
+	else if (beta == T(0)) {
+	  y = x;
+	  MultEqMV(A,y);
+	} else {
+	  if (beta != T(1)) y *= beta;
+	  AddMultMV(A,x,y);
+	}
+      } 
+    }
+#ifdef XDEBUG
+    if (Norm(y-y2) > 0.001*Norm(y)) {
+      cerr<<"TriMultMV: alpha,beta = "<<alpha<<"  "<<beta<<endl;
+      cerr<<"A = "<<Type(A)<<"  "<<A<<endl;
+      cerr<<"x = "<<Type(x)<<" step "<<x.step()<<"  "<<x<<endl;
+      cerr<<"y = "<<Type(y)<<" step "<<y.step()<<"  "<<y0<<endl;
+      cerr<<"-> y = "<<y<<endl;
+      cerr<<"y2 = "<<y2<<endl;
+      abort();
+    }
+#endif
+  }
+
+  template <class T, class Ta, class Tx> void MultMV(
+      const T alpha, const GenLowerTriMatrix<Ta>& A,
+      const GenVector<Tx>& x, const T beta, const VectorView<T>& y)
+    // y = alpha * A * x + beta * y    
+  { 
+#ifdef XDEBUG
+    Vector<T> y2 = beta*y+alpha*Matrix<Ta>(A)*x;
+    Vector<T> y0 = y;
+#endif
+
+    TMVAssert(A.size() == x.size());
+    TMVAssert(A.size() == y.size());
+
+    if (y.size() > 0) {
+      if (alpha==T(0)) {
+	if (beta != T(1)) y *= beta;
+      } else if (beta == T(0) && y.step() == 1) {
+	y = alpha * x;
+	MultEqMV(A,y);
+      } else if (alpha != T(1) || y.SameStorageAs(x) ||
+	  x.step() != 1 || y.step() != 1) {
+	Vector<T> xx = alpha*x;
+	MultEqMV(A,xx.View());
+	AddVV(T(1),xx,beta,y);
+      } else {
+	if (beta != T(1)) y *= beta;
+	AddMultMV(A,x,y);
+      }
+    }
+#ifdef XDEBUG
+    if (Norm(y-y2) > 0.001*max(RealType(T)(1),Norm(y))) {
+      cerr<<"TriMultMV: alpha,beta = "<<alpha<<"  "<<beta<<endl;
+      cerr<<"A = "<<Type(A)<<"  "<<A<<endl;
+      cerr<<"x = "<<Type(x)<<" step "<<x.step()<<"  "<<x<<endl;
+      cerr<<"y = "<<Type(y)<<" step "<<y.step()<<"  "<<y0<<endl;
+      cerr<<"-> y = "<<y<<endl;
+      cerr<<"y2 = "<<y2<<endl;
+      abort();
+    }
+#endif
+  }
+
+#define InstFile "TMV_TriMatrixArith_A.inst"
+#include "TMV_Inst.h"
+#undef InstFile
+
+} // namespace mv
+
+
