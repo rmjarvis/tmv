@@ -1,0 +1,13 @@
+#define CT complex<T>
+
+#define DefQRD(T)\
+template void GetQFromQR(const MatrixView<T >& Q, \
+    const GenVector<T >& beta); \
+
+DefQRD(T)
+DefQRD(CT)
+
+#undef DefQRD
+
+#undef CT
+

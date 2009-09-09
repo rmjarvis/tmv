@@ -1,0 +1,13 @@
+#define CT complex<T>
+
+#define DefQRD(T)\
+template bool QR_Downdate(const UpperTriMatrixView<T >& R, \
+    const MatrixView<T >& A); \
+
+DefQRD(T)
+DefQRD(CT)
+
+#undef DefQRD
+
+#undef CT
+

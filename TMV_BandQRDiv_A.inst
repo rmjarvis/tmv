@@ -1,0 +1,14 @@
+
+#define CT complex<T>
+
+#define DefQRD(T)\
+template void BandQR_Decompose(const BandMatrixView<T >& QR, \
+    const VectorView<T >& Qtau, T& det); \
+
+DefQRD(T)
+DefQRD(CT)
+
+#undef DefQRD
+
+#undef CT
+

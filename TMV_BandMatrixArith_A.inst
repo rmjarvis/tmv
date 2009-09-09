@@ -1,0 +1,18 @@
+
+#define CT complex<T>
+
+#define DefMV(T,Ta,Tx)\
+  template void MultMV(const T alpha, \
+      const GenBandMatrix<Ta >& A, \
+      const GenVector<Tx >& x, const T beta, \
+      const VectorView<T >& y); \
+
+DefMV(T,T,T)
+DefMV(CT,T,T)
+DefMV(CT,CT,T)
+DefMV(CT,T,CT)
+DefMV(CT,CT,CT)
+
+#undef DefMV
+
+#undef CT

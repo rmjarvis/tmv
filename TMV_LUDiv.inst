@@ -1,0 +1,15 @@
+
+#define CT complex<T>
+
+#define DefFuncs(T) \
+  template LUDiv<T >::LUDiv(const GenMatrix<T >& A, bool _inplace); \
+  template bool LUDiv<T >::CheckDecomp( \
+      const BaseMatrix<T >& m, ostream* fout) const; \
+  template T LUDiv<T >::Det() const; \
+
+DefFuncs(T)
+DefFuncs(CT)
+
+#undef DefFuncs
+
+#undef CT

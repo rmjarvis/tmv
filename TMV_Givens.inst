@@ -1,0 +1,30 @@
+
+#define CT complex<T>
+
+#define DefGiv1(T) \
+  template Givens<T > Givens_Rotate(T& x, T& y); \
+
+DefGiv1(T)
+DefGiv1(CT)
+  
+#define DefGiv2(RT,Ts,T) \
+  template void GivensMult(RT c, Ts s, T& x, T& y); \
+  template void GivensMult(RT c, Ts s, const VectorView<T >& v0, \
+      const VectorView<T >& v1); \
+  template void GivensSymMult(RT c, Ts s, T& x, T& y, T& z); \
+  template void GivensHermMult(RT c, Ts s, T& x, T& y, T& z); \
+
+DefGiv2(T,T,T)
+DefGiv2(T,T,CT)
+DefGiv2(T,CT,CT)
+
+#undef DefGiv1
+#undef DefGiv2
+
+template void GivensMult(T c, CT s, ConjRef<CT > x, ConjRef<CT > y); 
+template void GivensMult(T c, T s, ConjRef<CT > x, ConjRef<CT > y); 
+template void GivensMult(T c, CT s, VarConjRef<CT > x, VarConjRef<CT > y); 
+template void GivensMult(T c, T s, VarConjRef<CT > x, VarConjRef<CT > y); 
+
+#undef CT
+

@@ -1,0 +1,18 @@
+
+#define CT complex<T>
+
+#define DefSVD(RT,T)\
+template void HermSV_Decompose(const MatrixView<T >& U, \
+    const VectorView<RT >& S, bool StorU); \
+template void HermSV_Decompose_From_Tridiagonal(const MatrixView<T >* U, \
+    const VectorView<RT >& D, const VectorView<RT >& E); \
+template void SymSV_Decompose(const MatrixView<T >& U, \
+    const VectorView<RT >& S, const MatrixView<T >* V, T& det); \
+
+DefSVD(T,T)
+DefSVD(T,CT)
+
+#undef DefSVD
+
+#undef CT
+

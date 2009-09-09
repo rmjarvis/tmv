@@ -1,0 +1,18 @@
+
+#define CT complex<T>
+
+#define DefFuncs(RT,T) \
+  template BandSVDiv<T >::BandSVDiv(const GenBandMatrix<T >& A, \
+      bool StoreU, bool StoreV); \
+  template bool BandSVDiv<T >::CheckDecomp( \
+      const BaseMatrix<T >& m, ostream* fout) const; \
+  template void BandSVDiv<T >::Thresh(RT toler, ostream* debugout) const; \
+  template void BandSVDiv<T >::Top(size_t neigen, ostream* debugout) const; \
+
+DefFuncs(T,T)
+DefFuncs(T,CT)
+
+#undef DefFuncs
+
+#undef CT
+

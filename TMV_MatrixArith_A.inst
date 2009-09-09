@@ -1,0 +1,29 @@
+
+#define CT complex<T>
+
+#define DefMV(T,Ta,Tx)\
+  template void MultMV(const T alpha, \
+      const GenMatrix<Ta >& A, const GenVector<Tx >& x, const T beta, \
+      const VectorView<T >& y); \
+  template void UnitAMultMV1<true,true,T,Ta,Tx >( \
+      const GenMatrix<Ta >& A, const GenVector<Tx >& x, \
+      const VectorView<T >& y); \
+  template void UnitAMultMV1<true,false,T,Ta,Tx >( \
+      const GenMatrix<Ta >& A, const GenVector<Tx >& x, \
+      const VectorView<T >& y); \
+  template void UnitAMultMV1<false,true,T,Ta,Tx >( \
+      const GenMatrix<Ta >& A, const GenVector<Tx >& x, \
+      const VectorView<T >& y); \
+  template void UnitAMultMV1<false,false,T,Ta,Tx >( \
+      const GenMatrix<Ta >& A, const GenVector<Tx >& x, \
+      const VectorView<T >& y); \
+
+DefMV(T,T,T)
+DefMV(CT,T,T)
+DefMV(CT,T,CT)
+DefMV(CT,CT,T)
+DefMV(CT,CT,CT)
+
+#undef DefMV
+
+#undef CT

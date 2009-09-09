@@ -1,0 +1,15 @@
+
+#define CT complex<T>
+
+#define DefDivEq(T,T1)\
+  template void LU_LDivEq(const GenMatrix<T1 >& A,\
+      const size_t* P, const MatrixView<T >& b); \
+  template void LU_RDivEq(const GenMatrix<T1 >& A,\
+      const size_t* P, const MatrixView<T >& b); \
+
+DefDivEq(T,T)
+DefDivEq(CT,T)
+DefDivEq(CT,CT)
+#undef DefDivEq
+
+#undef CT

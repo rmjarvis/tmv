@@ -1,0 +1,18 @@
+
+#define CT complex<T>
+
+#define DefFuncs(T) \
+  template BandQRDiv<T >::BandQRDiv(const GenBandMatrix<T >& A, bool _inplace); \
+  template bool BandQRDiv<T >::CheckDecomp( \
+      const BaseMatrix<T >& m, ostream* fout) const; \
+  template Matrix<T > GetQFromBandQR( \
+      const GenBandMatrix<T >& QRx, const GenVector<T >& Qbeta); \
+  template T BandQRDiv<T >::Det() const; \
+  template Matrix<T > BandQRDiv<T >::GetQ() const; \
+
+DefFuncs(T)
+DefFuncs(CT)
+
+#undef DefFuncs
+
+#undef CT

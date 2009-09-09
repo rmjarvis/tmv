@@ -1,0 +1,23 @@
+
+#define CT complex<T>
+
+#define DefFuncs(RT,T) \
+  template HermSVDiv<T >::HermSVDiv(const GenSymMatrix<T >& A, bool StoreU); \
+  template SymSVDiv<T >::SymSVDiv(const GenSymMatrix<T >& A,  \
+      bool StoreU, bool StoreV); \
+  template bool SymSVDiv<T >::CheckDecomp( \
+      const BaseMatrix<T >& m, ostream* fout) const; \
+  template bool HermSVDiv<T >::CheckDecomp( \
+      const BaseMatrix<T >& m, ostream* fout) const; \
+  template T HermSVDiv<T >::Det() const; \
+  template void HermSVDiv<T >::Thresh(RT toler, ostream* debugout) const; \
+  template void HermSVDiv<T >::Top(size_t neigen, ostream* debugout) const; \
+  template void SymSVDiv<T >::Thresh(RT toler, ostream* debugout) const; \
+  template void SymSVDiv<T >::Top(size_t neigen, ostream* debugout) const; \
+
+DefFuncs(T,T)
+DefFuncs(T,CT)
+
+#undef DefFuncs
+
+#undef CT

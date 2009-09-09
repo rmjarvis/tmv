@@ -1,0 +1,43 @@
+
+#define CT complex<T>
+
+#define DefMultXV(T)\
+  template void MultXV(const T x, const VectorView<T >& v2); \
+
+DefMultXV(T)
+DefMultXV(CT)
+
+#undef DefMultXV
+
+#define DefAddVV(T,T1)\
+  template void AddVV(const T x, const GenVector<T1 >& v1, \
+      const VectorView<T >& v2);  \
+  template void AddVV(const T x1, const GenVector<T1 >& v1, \
+      const T x2, const VectorView<T >& v0);  \
+  template void MultXV(const T x, const GenVector<T1 >& v1, \
+      const VectorView<T >& v2); \
+  template void ElementProd(const T alpha, \
+      const GenVector<T1 >& x, const VectorView<T >& y);  \
+  template T MultVV(const GenVector<T >& v1,\
+      const GenVector<T1 >& v2); \
+
+DefAddVV(T,T)
+DefAddVV(CT,T)
+DefAddVV(CT,CT)
+
+#undef DefAddVV
+
+#define DefAddEl(T,T1,T2)\
+  template void AddElementProd(const T alpha, \
+      const GenVector<T1 >& x, const GenVector<T2 >& y, \
+      const VectorView<T >& z);  \
+
+DefAddEl(T,T,T)
+DefAddEl(CT,T,T)
+DefAddEl(CT,T,CT)
+DefAddEl(CT,CT,T)
+DefAddEl(CT,CT,CT)
+
+#undef DefAddEl
+
+#undef CT

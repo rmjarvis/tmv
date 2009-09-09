@@ -1,0 +1,16 @@
+
+#define CT complex<T>
+
+#define DefAdd(T,Ta)\
+  template void AddMM(const T alpha, const GenBandMatrix<Ta >& A, \
+      const T beta, const BandMatrixView<T >& B); \
+  template void AddMM(const T alpha, const GenBandMatrix<Ta >& A, \
+      const T beta, const MatrixView<T >& B); \
+
+DefAdd(T,T)
+DefAdd(CT,T)
+DefAdd(CT,CT)
+
+#undef DefAdd
+
+#undef CT

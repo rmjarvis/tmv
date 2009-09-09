@@ -1,0 +1,16 @@
+
+#define CT complex<T>
+
+#define DefMM(T,Tx,Ty)\
+  template void SymMultMM(const T alpha,const GenMatrix<Tx >& x, \
+      const GenMatrix<Ty >& y, const int beta, const SymMatrixView<T >& A); \
+
+DefMM(T,T,T)
+DefMM(CT,T,T)
+DefMM(CT,CT,T)
+DefMM(CT,T,CT)
+DefMM(CT,CT,CT)
+
+#undef DefMM
+
+#undef CT

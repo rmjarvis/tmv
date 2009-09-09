@@ -1,0 +1,16 @@
+
+#define CT complex<T>
+
+#define DefR2(T,Tx,Ty)\
+  template void Rank2KUpdate(const T alpha,const GenMatrix<Tx >& x, \
+      const GenMatrix<Ty >& y, const int beta, const SymMatrixView<T >& A); \
+
+DefR2(T,T,T)
+DefR2(CT,T,T)
+DefR2(CT,CT,T)
+DefR2(CT,T,CT)
+DefR2(CT,CT,CT)
+
+#undef DefR2
+
+#undef CT
