@@ -1,10 +1,10 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 #define START 0
 
 #include "TMV_Test.h"
 #include "TMV_Test2.h"
 #include "TMV.h"
 #include "TMV_SymBand.h"
+#include "TMV_Tri.h"
 #include "TMV_TestSymBandArith.h"
 
 #define NOADDEQ
@@ -18,15 +18,13 @@ template <class T> void TestSymBandMatrixArith_D1()
 
   std::vector<tmv::SymBandMatrixView<T> > s;
   std::vector<tmv::SymBandMatrixView<std::complex<T> > > cs;
-  std::vector<tmv::BaseMatrix<T>*> B;
-  std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
-  MakeSymBandList(s,cs,B,CB,InDef);
+  MakeSymBandList(s,cs,InDef);
 
   tmv::Matrix<T> a1(N,N);
-  for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) a1(i,j) = T(3+i-5*j);
+  for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) a1(i,j) = 3.+i-5*j;
   tmv::Matrix<std::complex<T> > ca1(N,N);
   for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) ca1(i,j) = 
-    std::complex<T>(3+i-5*j,2-3*i);
+    std::complex<T>(3.+i-5*j,2.-3.*i);
 
   tmv::UpperTriMatrix<T,tmv::NonUnitDiag,tmv::RowMajor> u1(a1);
   tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag,tmv::RowMajor> cu1(ca1);
@@ -88,45 +86,43 @@ template <class T> void TestSymBandMatrixArith_D1()
       tmv::HermBandMatrix<T> sx = si;
       tmv::HermBandMatrix<std::complex<T> > csx = csi;
 
-      TestMatrixArith456<T>(sx,csx,si,csi,u1v,cu1v,"HermBand/UpperTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,u1v,cu1v,"HermBand/UpperTri");
 #ifdef XTEST
-      TestMatrixArith456<T>(sx,csx,si,csi,l1v,cl1v,"HermBand/LowerTri");
-      TestMatrixArith456<T>(sx,csx,si,csi,u2v,cu2v,"HermBand/UpperTri");
-      TestMatrixArith456<T>(sx,csx,si,csi,l2v,cl2v,"HermBand/LowerTri");
-      TestMatrixArith456<T>(sx,csx,si,csi,u3v,cu3v,"HermBand/UpperTri");
-      TestMatrixArith456<T>(sx,csx,si,csi,l3v,cl3v,"HermBand/LowerTri");
-      TestMatrixArith456<T>(sx,csx,si,csi,u4v,cu4v,"HermBand/UpperTri");
-      TestMatrixArith456<T>(sx,csx,si,csi,l4v,cl4v,"HermBand/LowerTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,l1v,cl1v,"HermBand/LowerTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,u2v,cu2v,"HermBand/UpperTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,l2v,cl2v,"HermBand/LowerTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,u3v,cu3v,"HermBand/UpperTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,l3v,cl3v,"HermBand/LowerTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,u4v,cu4v,"HermBand/UpperTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,l4v,cl4v,"HermBand/LowerTri");
 #endif
     } else {
       tmv::SymBandMatrix<T> sx = si;
       tmv::SymBandMatrix<std::complex<T> > csx = csi;
 
-      TestMatrixArith456<T>(sx,csx,si,csi,u1v,cu1v,"SymBand/UpperTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,u1v,cu1v,"SymBand/UpperTri");
 #ifdef XTEST
-      TestMatrixArith456<T>(sx,csx,si,csi,l1v,cl1v,"SymBand/LowerTri");
-      TestMatrixArith456<T>(sx,csx,si,csi,u2v,cu2v,"SymBand/UpperTri");
-      TestMatrixArith456<T>(sx,csx,si,csi,l2v,cl2v,"SymBand/LowerTri");
-      TestMatrixArith456<T>(sx,csx,si,csi,u3v,cu3v,"SymBand/UpperTri");
-      TestMatrixArith456<T>(sx,csx,si,csi,l3v,cl3v,"SymBand/LowerTri");
-      TestMatrixArith456<T>(sx,csx,si,csi,u4v,cu4v,"SymBand/UpperTri");
-      TestMatrixArith456<T>(sx,csx,si,csi,l4v,cl4v,"SymBand/LowerTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,l1v,cl1v,"SymBand/LowerTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,u2v,cu2v,"SymBand/UpperTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,l2v,cl2v,"SymBand/LowerTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,u3v,cu3v,"SymBand/UpperTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,l3v,cl3v,"SymBand/LowerTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,u4v,cu4v,"SymBand/UpperTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,l4v,cl4v,"SymBand/LowerTri");
 #endif
     }
   }
-  for(size_t i=0;i<B.size();++i) delete B[i];
-  for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestSymBandMatrixArith_D1<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestSymBandMatrixArith_D1<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestSymBandMatrixArith_D1<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestSymBandMatrixArith_D1<int>();
 #endif

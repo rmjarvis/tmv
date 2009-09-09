@@ -1,0 +1,61 @@
+
+#define CT std::complex<T>
+
+#define DefHR(T)\
+template T Householder_Reflect(T& x0, const VectorView<T >& x, T& det);  \
+template T Householder_Reflect(const VectorView<T >& x, T& det);  \
+template T Householder_Reflect(const MatrixView<T >& m, T& det);  \
+template bool Householder_UnReflect(T& y, const VectorView<T >& x, \
+    T& beta);  \
+template void Householder_Unpack(T& v0, const VectorView<T >& v, T beta); \
+template void Householder_Unpack(const MatrixView<T >& m, T beta); \
+template void BlockHouseholder_Augment(const GenMatrix<T >& Y, \
+    const UpperTriMatrixView<T >& Z, T beta); \
+template void BlockHouseholder_MakeZ(const GenMatrix<T >& Y, \
+    const UpperTriMatrixView<T >& Z, const GenVector<T >& beta); \
+template void BlockHouseholder_Unpack(const MatrixView<T >& Y, \
+    const GenUpperTriMatrix<T >& Z, const MatrixView<T >& m); \
+
+DefHR(T)
+#ifdef INST_COMPLEX
+DefHR(CT)
+#endif
+
+#undef DefHR
+
+// These are only for CT:
+#ifdef INST_COMPLEX
+template CT Householder_Reflect(ConjRef<CT > x0, const VectorView<CT >& x,
+    CT& det); 
+template CT Householder_Reflect(VarConjRef<CT > x0, const VectorView<CT >& x,
+    CT& det);
+template void Householder_Unpack(ConjRef<CT > v0, const VectorView<CT >& v,
+    CT beta); 
+template void Householder_Unpack(VarConjRef<CT > v0, const VectorView<CT >& v,
+    CT beta);
+template bool Householder_UnReflect(ConjRef<CT > y, const VectorView<CT >& x,
+    CT& det);
+template bool Householder_UnReflect(VarConjRef<CT > y, const VectorView<CT >& x,
+    CT& det);
+#endif
+
+#define DefMult(T,T1)\
+template void Householder_LMult( \
+    const GenVector<T1 >& v, T1 beta, const VectorView<T >& m0, \
+    const MatrixView<T >& mx); \
+template void Householder_LMult( \
+    const GenVector<T1 >& v, T1 beta, const MatrixView<T >& m); \
+template void BlockHouseholder_LMult(const GenMatrix<T1 >& Y, \
+    const GenUpperTriMatrix<T1 >& Z, const MatrixView<T >& m); \
+template void BlockHouseholder_LDiv(const GenMatrix<T1 >& Y, \
+    const GenUpperTriMatrix<T1 >& Z, const MatrixView<T >& m); \
+
+DefMult(T,T)
+#ifdef INST_COMPLEX
+DefMult(CT,T)
+DefMult(CT,CT)
+#endif
+
+#undef DefMult
+
+#undef CT

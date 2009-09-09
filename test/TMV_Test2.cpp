@@ -1,68 +1,80 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 
-#include <fstream>
+#define TESTDIV
+#define TESTMEM
+
+#ifdef TESTMEM
+#define MEMDEBUG
+#include "MemDebug.h"
+AllocList* allocList=0;
+#endif
+
 #include "TMV_Test.h"
 #include "TMV_Test2.h"
-
-bool XXDEBUG1 = false;
-bool XXDEBUG2 = false;
-bool XXDEBUG3 = false;
-bool XXDEBUG4 = false;
-bool XXDEBUG5 = false;
-bool XXDEBUG6 = false;
-bool XXDEBUG7 = false;
-bool XXDEBUG8 = false;
-bool XXDEBUG9 = false;
 
 bool showtests = false;
 bool showacc = false;
 bool showdiv = false;
 bool showstartdone = false;
-bool donorm2 = true;
-bool symoprod = true;
+bool donorm2 = false;
+bool symoprod = false;
 bool dontthrow = false;
 std::string lastsuccess = "";
 
-int main() try {
-  std::ofstream log("tmvtest2.log");
-  tmv::WriteWarningsTo(&log);
+#include "TMV_Sym.h"
+#include "TMV_Tri.h"
 
-  //showtests=true;
+int main() try {
+
+#ifdef TESTMEM
+  atexit(&DumpUnfreed);
+#endif
+
+#ifdef XTEST
+  donorm2 = true;
+#endif
+
   //showacc=true;
   //showdiv=true;
-  //showstartdone = true;
+  //showtests=true;
+  //showstartdone=true;
 //#define SKIPREST
 
 #ifndef SKIPREST
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
   TestBandMatrix<double>();
   TestSymMatrix<double>();
   TestSymBandMatrix<double>();
+#ifdef TESTDIV
   TestAllBandDiv<double>();
   TestAllSymDiv<double>();
   TestAllSymBandDiv<double>();
 #endif
+#endif
 
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
   TestBandMatrix<float>();
   TestSymMatrix<float>();
   TestSymBandMatrix<float>();
+#ifdef TESTDIV
   TestAllBandDiv<float>();
   TestAllSymDiv<float>();
   TestAllSymBandDiv<float>();
 #endif
+#endif
 
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
   TestBandMatrix<long double>();
   TestSymMatrix<long double>();
   TestSymBandMatrix<long double>();
+#ifdef TESTDIV
   TestAllBandDiv<long double>();
   TestAllSymDiv<long double>();
   TestAllSymBandDiv<long double>();
 #endif 
+#endif 
 
-#ifdef TEST_INT
+#ifdef INST_INT
   TestBandMatrix<int>();
   TestSymMatrix<int>();
   TestSymBandMatrix<int>();
@@ -72,14 +84,11 @@ int main() try {
 
   return 0;
 }
-#if 1
-#ifndef NOTHROW
 catch (tmv::Error& e) {
   std::cerr<<e<<std::endl;
   std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
   return 1;
 }
-#endif
 catch (std::exception& e) {
   std::cerr<<e.what()<<std::endl;
   std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
@@ -90,9 +99,6 @@ catch (...) {
   std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
   return 1;
 }
-#else
-catch (double) {}
-#endif
 
 void PreAssert(std::string s)
 {
@@ -110,12 +116,7 @@ void DoAssert(bool x, std::string s)
   } else { 
     if (showtests) std::cout<<"  Failed"<<std::endl;
     if (dontthrow) std::cout<<"Failed test: "<<s<<std::endl;  
-    else
-#ifdef NOTHROW
-    { std::cerr<<"Error in test: "<<s<<std::endl; exit(1); }
-#else
-    throw tmv::Error("Error in test: ",s);  
-#endif
+    else throw tmv::Error(std::string("Error in test: ") + s);  
   } 
 }
 

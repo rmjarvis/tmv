@@ -1,7 +1,8 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
 #include "TMV.h"
+#include "TMV_Tri.h"
+#include "TMV_Diag.h"
 
 template <class T1, class T2> inline bool CanAddEq(
     const tmv::UpperTriMatrixView<T1>& a,
@@ -13,37 +14,36 @@ template <class T1, class T2> inline bool CanAddEq(
     const tmv::DiagMatrixView<T2>& b)
 { return a.size() == b.size() && !a.isunit(); }
 
-template <class T1, class T2, class T3> inline bool CanMultMM(
+template <class T1, class T2, class T3> inline bool CanMult(
     const tmv::UpperTriMatrixView<T1>& a, const tmv::DiagMatrixView<T2>& b,
     const tmv::UpperTriMatrixView<T3>& c)
 { return a.size() == b.size() && a.size() == c.size() && !c.isunit(); }
 
-template <class T1, class T2, class T3> inline bool CanMultMM(
+template <class T1, class T2, class T3> inline bool CanMult(
     const tmv::DiagMatrixView<T1>& a, const tmv::UpperTriMatrixView<T2>& b,
     const tmv::UpperTriMatrixView<T3>& c)
 { return a.size() == b.size() && a.size() == c.size() && !c.isunit(); }
 
-template <class T1, class T2, class T3> inline bool CanMultMM(
+template <class T1, class T2, class T3> inline bool CanMult(
     const tmv::DiagMatrixView<T1>& a, const tmv::DiagMatrixView<T2>& b,
     const tmv::UpperTriMatrixView<T3>& c)
 { return a.size() == b.size() && a.size() == c.size() && !c.isunit(); }
 
-template <class T1, class T2, class T3> inline bool CanMultMM(
+template <class T1, class T2, class T3> inline bool CanMult(
     const tmv::LowerTriMatrixView<T1>& a, const tmv::DiagMatrixView<T2>& b,
     const tmv::LowerTriMatrixView<T3>& c)
 { return a.size() == b.size() && a.size() == c.size() && !c.isunit(); }
 
-template <class T1, class T2, class T3> inline bool CanMultMM(
+template <class T1, class T2, class T3> inline bool CanMult(
     const tmv::DiagMatrixView<T1>& a, const tmv::LowerTriMatrixView<T2>& b,
     const tmv::LowerTriMatrixView<T3>& c)
 { return a.size() == b.size() && a.size() == c.size() && !c.isunit(); }
 
-template <class T1, class T2, class T3> inline bool CanMultMM(
+template <class T1, class T2, class T3> inline bool CanMult(
     const tmv::DiagMatrixView<T1>& a, const tmv::DiagMatrixView<T2>& b,
     const tmv::LowerTriMatrixView<T3>& c)
 { return a.size() == b.size() && a.size() == c.size() && !c.isunit(); }
 
-#define NOTRANSMM
 #include "TMV_TestMatrixArith.h"
 
 template <class T> void TestTriMatrixArith_C1()
@@ -51,7 +51,7 @@ template <class T> void TestTriMatrixArith_C1()
   const int N = 10;
 
   tmv::Matrix<T> a1(N,N);
-  for(int i=0;i<N;i++) for(int j=0;j<N;j++) a1(i,j) = T(12+3*i-5*j);
+  for(int i=0;i<N;i++) for(int j=0;j<N;j++) a1(i,j) = 12+3*i-5*j;
   tmv::Matrix<std::complex<T> > ca1 = a1 * std::complex<T>(1,2);
 
   tmv::DiagMatrix<T> d1(a1.diag());
@@ -66,8 +66,8 @@ template <class T> void TestTriMatrixArith_C1()
   tmv::DiagMatrixView<T> d1v = d1.View();
   tmv::DiagMatrixView<std::complex<T> > cd1v = cd1.View();
 
-  TestMatrixArith456<T>(l1x,cl1x,l1v,cl1v,d1v,cd1v,"Tri/Diag L");
-#ifdef XTES6T
+  TestMatrixArith45<T>(l1x,cl1x,l1v,cl1v,d1v,cd1v,"Tri/Diag L");
+#ifdef XTEST
   tmv::UpperTriMatrix<T,tmv::NonUnitDiag,tmv::RowMajor> u1(a1);
   tmv::UpperTriMatrix<T,tmv::UnitDiag,tmv::RowMajor> u2(a1);
   tmv::UpperTriMatrix<T,tmv::NonUnitDiag,tmv::ColMajor> u3(a1);
@@ -108,26 +108,26 @@ template <class T> void TestTriMatrixArith_C1()
   tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag> cl2x = cl2v;
   tmv::DiagMatrix<std::complex<T> > cd1x = cd1v;
 
-  TestMatrixArith456<T>(l2x,cl2x,l2v,cl2v,d1v,cd1v,"Tri/Diag L");
-  TestMatrixArith456<T>(l1x,cl1x,l3v,cl3v,d1v,cd1v,"Tri/Diag L");
-  TestMatrixArith456<T>(l2x,cl2x,l4v,cl4v,d1v,cd1v,"Tri/Diag L");
-  TestMatrixArith456<T>(u1x,cu1x,u1v,cu1v,d1v,cd1v,"Tri/Diag U");
-  TestMatrixArith456<T>(u2x,cu2x,u2v,cu2v,d1v,cd1v,"Tri/Diag U");
-  TestMatrixArith456<T>(u1x,cu1x,u3v,cu3v,d1v,cd1v,"Tri/Diag U");
-  TestMatrixArith456<T>(u2x,cu2x,u4v,cu4v,d1v,cd1v,"Tri/Diag U");
+  TestMatrixArith45<T>(l2x,cl2x,l2v,cl2v,d1v,cd1v,"Tri/Diag L");
+  TestMatrixArith45<T>(l1x,cl1x,l3v,cl3v,d1v,cd1v,"Tri/Diag L");
+  TestMatrixArith45<T>(l2x,cl2x,l4v,cl4v,d1v,cd1v,"Tri/Diag L");
+  TestMatrixArith45<T>(u1x,cu1x,u1v,cu1v,d1v,cd1v,"Tri/Diag U");
+  TestMatrixArith45<T>(u2x,cu2x,u2v,cu2v,d1v,cd1v,"Tri/Diag U");
+  TestMatrixArith45<T>(u1x,cu1x,u3v,cu3v,d1v,cd1v,"Tri/Diag U");
+  TestMatrixArith45<T>(u2x,cu2x,u4v,cu4v,d1v,cd1v,"Tri/Diag U");
 #endif
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestTriMatrixArith_C1<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestTriMatrixArith_C1<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestTriMatrixArith_C1<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestTriMatrixArith_C1<int>();
 #endif
 

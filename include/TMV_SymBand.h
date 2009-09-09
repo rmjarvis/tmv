@@ -1,8 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
+// Copyright (C) 2007                                                        //
 //                                                                           //
 // The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
 // where you can find the current version and current documention.           //
@@ -21,7 +20,7 @@
 // GNU General Public License for more details.                              //
 //                                                                           //
 // You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
+// along with this program in the file gpl.txt.                              //
 //                                                                           //
 // If not, write to:                                                         //
 // The Free Software Foundation, Inc.                                        //
@@ -31,16 +30,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef TMV_SYMBAND_H
+#ifndef TMV_SYBANDM_H
 #define TMV_SYMBAND_H
 
 #include "TMV.h"
-#include "TMV_Band.h"
-#include "TMV_Sym.h"
-
-#include "tmv/TMV_SymBandMatrix.h"
-#include "tmv/TMV_SymBandSVD.h"
-#include "tmv/TMV_SymBandCHD.h"
-#include "tmv/TMV_SymBandMatrixArith.h"
+#include "TMV_SymBandMatrix.h"
+#include "TMV_SymBandMatrixArith.h"
+#include "TMV_SymBandSVDiv.h"
+#include "TMV_SymBandCHDiv.h"
+#include "TMV_BandMatrixArith.h"
 
 #endif

@@ -1,10 +1,10 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 #define START 0
 
 #include "TMV_Test.h"
 #include "TMV_Test2.h"
 #include "TMV.h"
 #include "TMV_SymBand.h"
+#include "TMV_Diag.h"
 #include "TMV_TestSymBandArith.h"
 
 template <class T1, class T2> inline bool CanAddEq(
@@ -21,15 +21,13 @@ template <class T> void TestSymBandMatrixArith_C1()
 
   std::vector<tmv::SymBandMatrixView<T> > s;
   std::vector<tmv::SymBandMatrixView<std::complex<T> > > cs;
-  std::vector<tmv::BaseMatrix<T>*> B;
-  std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
-  MakeSymBandList(s,cs,B,CB,InDef);
+  MakeSymBandList(s,cs,InDef);
 
   tmv::Matrix<T> a1(N,N);
-  for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) a1(i,j) = T(3+i-5*j);
+  for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) a1(i,j) = 3.+i-5*j;
   tmv::Matrix<std::complex<T> > ca1(N,N);
   for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) ca1(i,j) =
-    std::complex<T>(3+i-5*j,2-3*i);
+    std::complex<T>(3.+i-5*j,2.-3.*i);
 
   tmv::DiagMatrix<T> d1(a1);
   tmv::DiagMatrix<std::complex<T> > cd1(ca1);
@@ -50,26 +48,24 @@ template <class T> void TestSymBandMatrixArith_C1()
     if (csi.isherm()) {
       tmv::HermBandMatrix<T> sx = si;
       tmv::HermBandMatrix<std::complex<T> > csx = csi;
-      TestMatrixArith456<T>(sx,csx,si,csi,d1v,cd1v,"HermBand/Diag");
+      TestMatrixArith45<T>(sx,csx,si,csi,d1v,cd1v,"HermBand/Diag");
     } else {
       tmv::SymBandMatrix<T> sx = si;
       tmv::SymBandMatrix<std::complex<T> > csx = csi;
-      TestMatrixArith456<T>(sx,csx,si,csi,d1v,cd1v,"SymBand/Diag");
+      TestMatrixArith45<T>(sx,csx,si,csi,d1v,cd1v,"SymBand/Diag");
     }
   }
-  for(size_t i=0;i<B.size();++i) delete B[i];
-  for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestSymBandMatrixArith_C1<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestSymBandMatrixArith_C1<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestSymBandMatrixArith_C1<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestSymBandMatrixArith_C1<int>();
 #endif

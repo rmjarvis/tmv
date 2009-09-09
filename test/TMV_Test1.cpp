@@ -1,31 +1,36 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 
-#include <fstream>
+#define TESTDIV
+#define TESTDIAG
+#define TESTTRI
+#define TESTMEM
+
+#ifdef TESTMEM
+#define MEMDEBUG
+#include "MemDebug.h"
+AllocList* allocList=0;
+#endif
+
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
-
-bool XXDEBUG1 = false;
-bool XXDEBUG2 = false;
-bool XXDEBUG3 = false;
-bool XXDEBUG4 = false;
-bool XXDEBUG5 = false;
-bool XXDEBUG6 = false;
-bool XXDEBUG7 = false;
-bool XXDEBUG8 = false;
-bool XXDEBUG9 = false;
 
 bool showtests = false;
 bool showacc = false;
 bool showdiv = false;
 bool showstartdone = false;
-bool donorm2 = true;
-bool symoprod = true;
+bool donorm2 = false;
+bool symoprod = false;
 bool dontthrow = false;
 std::string lastsuccess = "";
 
 int main() try {
-  std::ofstream log("tmvtest1.log");
-  tmv::WriteWarningsTo(&log);
+
+#ifdef TESTMEM
+  atexit(&DumpUnfreed);
+#endif
+
+#ifdef XTEST
+  donorm2 = true;
+#endif
 
   //showacc=true;
   //showdiv=true;
@@ -35,55 +40,74 @@ int main() try {
 
 #ifndef SKIPREST
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
   TestAllVector<double>();
   TestAllMatrix<double>();
+#ifdef TESTDIAG
   TestDiagMatrix<double>();
   TestDiagDiv<double>();
+#endif
+#ifdef TESTTRI
   TestTriMatrix<double>();
   TestAllTriDiv<double>();
+#endif
+#ifdef TESTDIV
   TestAllMatrixDiv<double>();
+#endif
 #endif // DOUBLE
 
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
   TestAllVector<float>();
   TestAllMatrix<float>();
+#ifdef TESTDIAG
   TestDiagMatrix<float>();
   TestDiagDiv<float>();
+#endif
+#ifdef TESTTRI
   TestTriMatrix<float>();
   TestAllTriDiv<float>();
+#endif
+#ifdef TESTDIV
   TestAllMatrixDiv<float>();
+#endif
 #endif // FLOAT
 
-#ifdef TEST_INT
-  TestAllVector<int>();
-  TestAllMatrix<int>();
-  TestDiagMatrix<int>();
-  TestTriMatrix<int>();
-#endif  // INT
-
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
   TestAllVector<long double>();
   TestAllMatrix<long double>();
+#ifdef TESTDIAG
   TestDiagMatrix<long double>();
   TestDiagDiv<long double>();
+#endif
+#ifdef TESTTRI
   TestTriMatrix<long double>();
   TestAllTriDiv<long double>();
+#endif
+#ifdef TESTDIV
   TestAllMatrixDiv<long double>();
+#endif
 #endif // LONGDOUBLE
+
+#ifdef INST_INT
+  TestAllVector<int>();
+  TestAllMatrix<int>();
+#ifdef TESTDIAG
+  TestDiagMatrix<int>();
+#endif
+#ifdef TESTTRI
+  TestTriMatrix<int>();
+#endif
+#endif  // INT
 
 #endif // SKIPREST
 
   return 0;
 }
-#if 1
-#ifndef NOTHROW
 catch (tmv::Error& e) {
   std::cerr<<e<<std::endl;
   std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
   return 1;
 }
-#endif
 catch (std::exception& e) {
   std::cerr<<e.what()<<std::endl;
   std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
@@ -94,9 +118,6 @@ catch (...) {
   std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
   return 1;
 }
-#else
-catch (double) {}
-#endif
 
 void PreAssert(std::string s)
 {
@@ -114,12 +135,7 @@ void DoAssert(bool x, std::string s)
   } else { 
     if (showtests) std::cout<<"  Failed"<<std::endl;
     if (dontthrow) std::cout<<"Failed test: "<<s<<std::endl;  
-    else
-#ifdef NOTHROW
-    { std::cerr<<"Error in test: "<<s<<std::endl; exit(1); }
-#else
-    throw tmv::Error("Error in test: ",s);  
-#endif
+    else throw tmv::Error(std::string("Error in test: ") + s);  
   } 
 }
 

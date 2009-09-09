@@ -1,8 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
+// Copyright (C) 2007                                                        //
 //                                                                           //
 // The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
 // where you can find the current version and current documention.           //
@@ -21,7 +20,7 @@
 // GNU General Public License for more details.                              //
 //                                                                           //
 // You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
+// along with this program in the file gpl.txt.                              //
 //                                                                           //
 // If not, write to:                                                         //
 // The Free Software Foundation, Inc.                                        //
@@ -35,11 +34,10 @@
 #define TMV_SYM_H
 
 #include "TMV.h"
-
-#include "tmv/TMV_SymMatrix.h"
-#include "tmv/TMV_SymLDLD.h"
-#include "tmv/TMV_SymSVD.h"
-#include "tmv/TMV_SymCHD.h"
-#include "tmv/TMV_SymMatrixArith.h"
+#include "TMV_SymMatrix.h"
+#include "TMV_SymMatrixArith.h"
+#include "TMV_SymLUDiv.h"
+#include "TMV_SymSVDiv.h"
+#include "TMV_SymCHDiv.h"
 
 #endif

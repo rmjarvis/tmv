@@ -1,51 +1,39 @@
 
-BASIC= TMV_Vector.cpp TMV_MultVV.cpp TMV_AddVV.cpp TMV_MultXV.cpp TMV_BaseMatrix.cpp TMV_Matrix.cpp TMV_MultXM.cpp TMV_AddMM.cpp TMV_MultMV.cpp TMV_Rank1_VVM.cpp TMV_MultMM.cpp TMV_MultMM_CCC.cpp TMV_MultMM_CRC.cpp TMV_MultMM_RCC.cpp TMV_Givens.cpp TMV_Householder.cpp TMV_LUD.cpp TMV_LUDecompose.cpp TMV_LUDiv.cpp TMV_LUInverse.cpp TMV_QRD.cpp TMV_QRDecompose.cpp TMV_PackedQ.cpp TMV_QRDiv.cpp TMV_QRInverse.cpp TMV_GetQFromQR.cpp TMV_QRUpdate.cpp TMV_QRDowndate.cpp TMV_QRPD.cpp TMV_QRPDecompose.cpp TMV_SVD.cpp TMV_SVDecompose.cpp TMV_SVDecompose_Bidiag.cpp TMV_SVDecompose_QR.cpp TMV_SVDecompose_DC.cpp TMV_SVDiv.cpp #mmgr.cpp
+BASIC= TMV_Vector.cpp TMV_VectorArith.cpp TMV_BaseMatrix.cpp TMV_Matrix.cpp TMV_MatrixArith_A.cpp TMV_MatrixArith_B.cpp TMV_MatrixArith_C.cpp TMV_MatrixArith_D.cpp TMV_MatrixArith_E.cpp TMV_Givens.cpp TMV_Householder.cpp TMV_LUDiv.cpp TMV_LUDiv_A.cpp TMV_LUDiv_B.cpp TMV_LUDiv_C.cpp TMV_QRDiv.cpp TMV_QRDiv_A.cpp TMV_QRDiv_B.cpp TMV_QRDiv_D.cpp TMV_QRDiv_E.cpp TMV_QRDiv_F.cpp TMV_QRPDiv.cpp TMV_QRPDiv_A.cpp TMV_SVDiv.cpp TMV_SVDiv_A.cpp TMV_SVDiv_B.cpp
 
-DIAG= TMV_DiagMatrix.cpp TMV_MultDV.cpp TMV_AddDM.cpp TMV_MultDM.cpp
+DIAG= TMV_DiagMatrix.cpp TMV_DiagMatrixArith.cpp
 
-TRI= TMV_TriMatrix.cpp TMV_TriDiv.cpp TMV_TriDiv_V.cpp TMV_TriDiv_M.cpp TMV_TriDiv_L.cpp TMV_TriInverse.cpp TMV_MultUV.cpp TMV_MultXU.cpp TMV_AddUU.cpp TMV_MultUM.cpp TMV_MultUL.cpp TMV_MultUU.cpp TMV_MultDU.cpp
+TRI= TMV_TriMatrix.cpp TMV_TriDiv.cpp TMV_TriDiv_A.cpp TMV_TriDiv_B.cpp TMV_TriDiv_C.cpp TMV_TriDiv_D.cpp TMV_TriMatrixArith_A.cpp TMV_TriMatrixArith_B.cpp TMV_TriMatrixArith_C.cpp TMV_TriMatrixArith_D.cpp TMV_TriMatrixArith_E.cpp TMV_TriMatrixArith_F.cpp TMV_DiagTriArith.cpp
 
-BAND= TMV_BandMatrix.cpp TMV_BandLUD.cpp TMV_BandLUDecompose.cpp TMV_BandLUDiv.cpp TMV_BandLUInverse.cpp TMV_BandTriDiv_V.cpp TMV_BandTriDiv_M.cpp TMV_BandQRD.cpp TMV_BandQRDecompose.cpp TMV_BandQRDiv.cpp TMV_BandQRInverse.cpp TMV_BandSVD.cpp TMV_BandSVDecompose.cpp TMV_MultBV.cpp TMV_MultXB.cpp TMV_AddBB.cpp TMV_MultBM.cpp TMV_MultBB.cpp 
+BAND= TMV_BandMatrix.cpp TMV_BandLUDiv.cpp TMV_BandLUDiv_A.cpp TMV_BandLUDiv_B.cpp TMV_BandQRDiv.cpp TMV_BandQRDiv_A.cpp TMV_BandQRDiv_B.cpp TMV_BandSVDiv.cpp TMV_BandSVDiv_A.cpp TMV_BandMatrixArith_A.cpp TMV_BandMatrixArith_B.cpp TMV_BandMatrixArith_C.cpp TMV_BandMatrixArith_D.cpp TMV_BandMatrixArith_E.cpp 
 
-SYM= TMV_SymMatrix.cpp TMV_MultSV.cpp TMV_AddSS.cpp TMV_Rank1_VVS.cpp TMV_Rank2_VVS.cpp TMV_MultSM.cpp TMV_RankK_MMS.cpp TMV_Rank2K_MMS.cpp TMV_RankK_ULS.cpp TMV_RankK_LUS.cpp TMV_SymMultMMS.cpp TMV_SymHouseholder.cpp TMV_SymLDLD.cpp TMV_SymLDLDecompose.cpp TMV_SymLDLDiv.cpp TMV_SymLDLInverse.cpp TMV_SymLDLPseudo.cpp TMV_SymSquare.cpp TMV_SymCHD.cpp TMV_SymCHDecompose.cpp TMV_SymCHDiv.cpp TMV_SymCHInverse.cpp TMV_SymSVD.cpp TMV_SymSVInverse.cpp TMV_SymSVDecompose.cpp TMV_IsNaN.cpp TMV_SymSVDecompose_Tridiag.cpp TMV_SymSVDecompose_QR.cpp TMV_SymSVDecompose_DC.cpp
+SYM= TMV_SymMatrix.cpp TMV_SymMatrixArith_A.cpp TMV_SymMatrixArith_B.cpp TMV_SymMatrixArith_C.cpp TMV_SymMatrixArith_D.cpp TMV_SymMatrixArith_E.cpp TMV_SymMatrixArith_F.cpp TMV_SymMatrixArith_G.cpp TMV_SymHouseholder.cpp TMV_SymLUDiv.cpp TMV_SymLUDiv_A.cpp TMV_SymLUDiv_B.cpp TMV_SymLUDiv_C.cpp TMV_SymCHDiv.cpp TMV_SymCHDiv_A.cpp TMV_SymCHDiv_B.cpp TMV_SymSVDiv.cpp TMV_SymSVDiv_A.cpp
 
-SYMBAND= TMV_SymBandMatrix.cpp TMV_MultsBV.cpp TMV_AddsBsB.cpp TMV_MultsBM.cpp TMV_MultsBB.cpp TMV_SymBandCHD.cpp TMV_SymBandCHDecompose.cpp TMV_SymBandCHDiv.cpp TMV_SymBandCHInverse.cpp TMV_SymBandSVD.cpp TMV_SymBandSVDecompose.cpp
+SYMBAND= TMV_SymBandMatrix.cpp TMV_SymBandMatrixArith_A.cpp TMV_SymBandMatrixArith_B.cpp TMV_SymBandCHDiv.cpp TMV_SymBandCHDiv_A.cpp TMV_SymBandCHDiv_B.cpp TMV_SymBandSVDiv.cpp TMV_SymBandSVDiv_A.cpp
 
 LIB= $(BASIC) $(DIAG) $(TRI)
 SBLIB= $(BAND) $(SYM) $(SYMBAND)
 
-TEST1_VM=TMV_TestVector.cpp TMV_TestMatrix.cpp TMV_TestMatrixArith.cpp TMV_TestMatrixDiv.cpp  TMV_TestMatrixDecomp.cpp
-TEST1_DIAG=TMV_TestDiag.cpp TMV_TestDiagArith_A.cpp TMV_TestDiagArith_B1.cpp TMV_TestDiagArith_B2.cpp TMV_TestDiagDiv_A.cpp TMV_TestDiagDiv_B1.cpp TMV_TestDiagDiv_B2.cpp 
-TEST1_TRI=TMV_TestTri.cpp TMV_TestTriArith_A1.cpp TMV_TestTriArith_A2.cpp TMV_TestTriArith_B1.cpp TMV_TestTriArith_B2.cpp TMV_TestTriArith_C1.cpp TMV_TestTriArith_C2.cpp TMV_TestTriDiv_A1.cpp TMV_TestTriDiv_A2.cpp TMV_TestTriDiv_B1.cpp TMV_TestTriDiv_B2.cpp TMV_TestTriDiv_C1.cpp TMV_TestTriDiv_C2.cpp 
-TEST1=TMV_Test1.cpp $(TEST1_VM) $(TEST1_DIAG) $(TEST1_TRI)
-TEST1a=TMV_Test1a.cpp $(TEST1_VM)
-TEST1b=TMV_Test1b.cpp $(TEST1_DIAG)
-TEST1c=TMV_Test1c.cpp $(TEST1_TRI)
-TEST2_BAND= TMV_TestBand.cpp TMV_TestBandArith_A.cpp TMV_TestBandArith_B1.cpp TMV_TestBandArith_B2.cpp TMV_TestBandArith_C1.cpp TMV_TestBandArith_C2.cpp TMV_TestBandArith_D1.cpp TMV_TestBandArith_D2.cpp TMV_TestBandDiv.cpp TMV_TestBandDiv_A.cpp TMV_TestBandDiv_B1.cpp TMV_TestBandDiv_B2.cpp TMV_TestBandDiv_C1.cpp TMV_TestBandDiv_C2.cpp TMV_TestBandDiv_D1.cpp TMV_TestBandDiv_D2.cpp TMV_TestBandDecomp.cpp
-TEST2_SYM=TMV_TestSym.cpp TMV_TestSymArith_A.cpp TMV_TestSymArith_B1.cpp TMV_TestSymArith_B2.cpp TMV_TestSymArith_C1.cpp TMV_TestSymArith_C2.cpp TMV_TestSymArith_D1.cpp TMV_TestSymArith_D2.cpp TMV_TestSymArith_E1.cpp TMV_TestSymArith_E2.cpp TMV_TestSymDiv.cpp TMV_TestSymDiv_A.cpp TMV_TestSymDiv_B1.cpp TMV_TestSymDiv_B2.cpp TMV_TestSymDiv_C1.cpp TMV_TestSymDiv_C2.cpp TMV_TestSymDiv_D1.cpp TMV_TestSymDiv_D2.cpp TMV_TestSymDiv_E1.cpp TMV_TestSymDiv_E2.cpp TMV_TestSymDecomp.cpp
-TEST2_SYMBAND=TMV_TestSymBand.cpp TMV_TestSymBandArith_A.cpp TMV_TestSymBandArith_B1.cpp TMV_TestSymBandArith_B2.cpp TMV_TestSymBandArith_C1.cpp TMV_TestSymBandArith_C2.cpp TMV_TestSymBandArith_D1.cpp TMV_TestSymBandArith_D2.cpp TMV_TestSymBandArith_E1.cpp TMV_TestSymBandArith_E2.cpp TMV_TestSymBandArith_F1.cpp TMV_TestSymBandArith_F2.cpp TMV_TestSymBandDiv.cpp TMV_TestSymBandDiv_A.cpp TMV_TestSymBandDiv_B1.cpp TMV_TestSymBandDiv_B2.cpp TMV_TestSymBandDiv_C1.cpp TMV_TestSymBandDiv_C2.cpp TMV_TestSymBandDiv_D1.cpp TMV_TestSymBandDiv_D2.cpp TMV_TestSymBandDiv_E1.cpp TMV_TestSymBandDiv_E2.cpp TMV_TestSymBandDiv_F1.cpp TMV_TestSymBandDiv_F2.cpp TMV_TestSymBandDecomp.cpp
-TEST2=TMV_Test2.cpp $(TEST2_BAND) $(TEST2_SYM) $(TEST2_SYMBAND)
-TEST2a=TMV_Test2a.cpp $(TEST2_BAND)
-TEST2b=TMV_Test2b.cpp $(TEST2_SYM)
-TEST2c=TMV_Test2c.cpp $(TEST2_SYMBAND)
-TEST3_A=TMV_TestSmallVector.cpp TMV_TestSmallMatrix.cpp TMV_TestSmallMatrix_Sub.cpp
-TEST3a=TMV_Test3a.cpp $(TEST3_A)
-TEST3_B=TMV_TestSmallMatrixA.cpp TMV_TestSmallMatrixArith_A1.cpp TMV_TestSmallMatrixArith_A2a.cpp TMV_TestSmallMatrixArith_A2b.cpp TMV_TestSmallMatrixArith_A3a.cpp TMV_TestSmallMatrixArith_A3b.cpp TMV_TestSmallMatrixArith_A4a.cpp TMV_TestSmallMatrixArith_A4b.cpp TMV_TestSmallMatrixArith_A5a.cpp TMV_TestSmallMatrixArith_A5b.cpp TMV_TestSmallMatrixArith_A6a.cpp TMV_TestSmallMatrixArith_A6b.cpp TMV_TestSmallMatrixArith_A7.cpp
-TEST3b=TMV_Test3b.cpp $(TEST3_B)
-TEST3_C=TMV_TestSmallMatrixB.cpp TMV_TestSmallMatrixArith_B1.cpp TMV_TestSmallMatrixArith_B2a.cpp TMV_TestSmallMatrixArith_B2b.cpp TMV_TestSmallMatrixArith_B3a.cpp TMV_TestSmallMatrixArith_B3b.cpp TMV_TestSmallMatrixArith_B4a.cpp TMV_TestSmallMatrixArith_B4b.cpp TMV_TestSmallMatrixArith_B4c.cpp TMV_TestSmallMatrixArith_B4d.cpp TMV_TestSmallMatrixArith_B5a.cpp TMV_TestSmallMatrixArith_B5b.cpp TMV_TestSmallMatrixArith_B5c.cpp TMV_TestSmallMatrixArith_B5d.cpp TMV_TestSmallMatrixArith_B6a.cpp TMV_TestSmallMatrixArith_B6b.cpp TMV_TestSmallMatrixArith_B6c.cpp TMV_TestSmallMatrixArith_B6d.cpp TMV_TestSmallMatrixArith_B7.cpp
-TEST3c=TMV_Test3c.cpp $(TEST3_C)
-TEST3_D=TMV_TestSmallMatrixDiv.cpp TMV_TestSmallMatrixDivA.cpp TMV_TestSmallMatrixDiv_A1a.cpp TMV_TestSmallMatrixDiv_A1b.cpp TMV_TestSmallMatrixDiv_A1c.cpp TMV_TestSmallMatrixDiv_A2a.cpp TMV_TestSmallMatrixDiv_A2b.cpp TMV_TestSmallMatrixDiv_A3a.cpp TMV_TestSmallMatrixDiv_A3b.cpp TMV_TestSmallMatrixDiv_A4.cpp TMV_TestSmallMatrixDiv_A5.cpp
-TEST3d=TMV_Test3d.cpp $(TEST3_D)
-TEST3_E=TMV_TestSmallMatrixDivB.cpp TMV_TestSmallMatrixDiv_B1a.cpp TMV_TestSmallMatrixDiv_B1b.cpp TMV_TestSmallMatrixDiv_B1c.cpp TMV_TestSmallMatrixDiv_B2a.cpp TMV_TestSmallMatrixDiv_B2b.cpp TMV_TestSmallMatrixDiv_B3a.cpp TMV_TestSmallMatrixDiv_B3b.cpp TMV_TestSmallMatrixDiv_B4a.cpp TMV_TestSmallMatrixDiv_B4b.cpp TMV_TestSmallMatrixDiv_B5a.cpp TMV_TestSmallMatrixDiv_B5b.cpp
-TEST3e=TMV_Test3e.cpp $(TEST3_E)
-TEST3=TMV_Test3.cpp $(TEST3_A) $(TEST3_B) $(TEST3_C) $(TEST3_D) $(TEST3_E)
+TEST1=TMV_Test1.cpp TMV_TestVector.cpp TMV_TestMatrix.cpp TMV_TestMatrixDiv.cpp TMV_TestDiag.cpp TMV_TestDiagArith_A.cpp TMV_TestDiagArith_B1.cpp TMV_TestDiagArith_B2.cpp TMV_TestDiagDiv.cpp TMV_TestTri.cpp TMV_TestTriArith_A1.cpp TMV_TestTriArith_A2.cpp TMV_TestTriArith_B1.cpp TMV_TestTriArith_B2.cpp TMV_TestTriArith_C1.cpp TMV_TestTriArith_C2.cpp TMV_TestTriDiv.cpp 
+TEST1a=TMV_Test1a.cpp TMV_TestVector.cpp TMV_TestMatrix.cpp TMV_TestMatrixDiv.cpp 
+TEST1b=TMV_Test1b.cpp TMV_TestDiag.cpp TMV_TestDiagArith_A.cpp TMV_TestDiagArith_B1.cpp TMV_TestDiagArith_B2.cpp TMV_TestDiagDiv.cpp 
+TEST1c=TMV_Test1c.cpp TMV_TestTri.cpp TMV_TestTriArith_A1.cpp TMV_TestTriArith_A2.cpp TMV_TestTriArith_B1.cpp TMV_TestTriArith_B2.cpp TMV_TestTriArith_C1.cpp TMV_TestTriArith_C2.cpp TMV_TestTriDiv.cpp 
+TEST2=TMV_Test2.cpp TMV_TestBand.cpp TMV_TestBandArith_A.cpp TMV_TestBandArith_B1.cpp TMV_TestBandArith_B2.cpp TMV_TestBandArith_C1.cpp TMV_TestBandArith_C2.cpp TMV_TestBandArith_D1.cpp TMV_TestBandArith_D2.cpp TMV_TestBandDiv.cpp TMV_TestBandDiv_A.cpp TMV_TestBandDiv_B.cpp TMV_TestBandDiv_C.cpp TMV_TestBandDiv_D.cpp TMV_TestSym.cpp TMV_TestSymArith_A.cpp TMV_TestSymArith_B1.cpp TMV_TestSymArith_B2.cpp TMV_TestSymArith_C1.cpp TMV_TestSymArith_C2.cpp TMV_TestSymArith_D1.cpp TMV_TestSymArith_D2.cpp TMV_TestSymArith_E1.cpp TMV_TestSymArith_E2.cpp TMV_TestSymDiv.cpp TMV_TestSymDiv_A.cpp TMV_TestSymDiv_B.cpp TMV_TestSymDiv_C.cpp TMV_TestSymDiv_D.cpp TMV_TestSymDiv_E.cpp TMV_TestSymBand.cpp TMV_TestSymBandArith_A.cpp TMV_TestSymBandArith_B1.cpp TMV_TestSymBandArith_B2.cpp TMV_TestSymBandArith_C1.cpp TMV_TestSymBandArith_C2.cpp TMV_TestSymBandArith_D1.cpp TMV_TestSymBandArith_D2.cpp TMV_TestSymBandArith_E1.cpp TMV_TestSymBandArith_E2.cpp TMV_TestSymBandArith_F1.cpp TMV_TestSymBandArith_F2.cpp TMV_TestSymBandDiv.cpp TMV_TestSymBandDiv_A.cpp TMV_TestSymBandDiv_B.cpp TMV_TestSymBandDiv_C.cpp TMV_TestSymBandDiv_D.cpp TMV_TestSymBandDiv_E.cpp TMV_TestSymBandDiv_F.cpp
+TEST2a=TMV_Test2a.cpp TMV_TestBand.cpp TMV_TestBandArith_A.cpp TMV_TestBandArith_B1.cpp TMV_TestBandArith_B2.cpp TMV_TestBandArith_C1.cpp TMV_TestBandArith_C2.cpp TMV_TestBandArith_D1.cpp TMV_TestBandArith_D2.cpp TMV_TestBandDiv.cpp TMV_TestBandDiv_A.cpp TMV_TestBandDiv_B.cpp TMV_TestBandDiv_C.cpp TMV_TestBandDiv_D.cpp 
+TEST2b=TMV_Test2b.cpp TMV_TestSym.cpp TMV_TestSymArith_A.cpp TMV_TestSymArith_B1.cpp TMV_TestSymArith_B2.cpp TMV_TestSymArith_C1.cpp TMV_TestSymArith_C2.cpp TMV_TestSymArith_D1.cpp TMV_TestSymArith_D2.cpp TMV_TestSymArith_E1.cpp TMV_TestSymArith_E2.cpp TMV_TestSymDiv.cpp TMV_TestSymDiv_A.cpp TMV_TestSymDiv_B.cpp TMV_TestSymDiv_C.cpp TMV_TestSymDiv_D.cpp TMV_TestSymDiv_E.cpp 
+TEST2c=TMV_Test2c.cpp TMV_TestSymBand.cpp TMV_TestSymBandArith_A.cpp TMV_TestSymBandArith_B1.cpp TMV_TestSymBandArith_B2.cpp TMV_TestSymBandArith_C1.cpp TMV_TestSymBandArith_C2.cpp TMV_TestSymBandArith_D1.cpp TMV_TestSymBandArith_D2.cpp TMV_TestSymBandArith_E1.cpp TMV_TestSymBandArith_E2.cpp TMV_TestSymBandArith_F1.cpp TMV_TestSymBandArith_F2.cpp TMV_TestSymBandDiv.cpp TMV_TestSymBandDiv_A.cpp TMV_TestSymBandDiv_B.cpp TMV_TestSymBandDiv_C.cpp TMV_TestSymBandDiv_D.cpp TMV_TestSymBandDiv_E.cpp TMV_TestSymBandDiv_F.cpp
+#TEST3=TMV_Test3.cpp TMV_TestSmallMatrixArith_A1.cpp
+#TEST3=TMV_Test3.cpp TMV_TestSmallVector.cpp TMV_TestSmallMatrix.cpp 
+TEST3=TMV_Test3.cpp TMV_TestSmallVector.cpp TMV_TestSmallMatrix.cpp TMV_TestSmallMatrixA.cpp TMV_TestSmallMatrixB.cpp TMV_TestSmallMatrixArith_A1.cpp TMV_TestSmallMatrixArith_A2a.cpp TMV_TestSmallMatrixArith_A2b.cpp TMV_TestSmallMatrixArith_A2c.cpp TMV_TestSmallMatrixArith_A3a.cpp TMV_TestSmallMatrixArith_A3b.cpp TMV_TestSmallMatrixArith_A3c.cpp TMV_TestSmallMatrixArith_A4a.cpp TMV_TestSmallMatrixArith_A4b.cpp TMV_TestSmallMatrixArith_A4c.cpp TMV_TestSmallMatrixArith_A5a.cpp TMV_TestSmallMatrixArith_A5b.cpp TMV_TestSmallMatrixArith_A5c.cpp TMV_TestSmallMatrixArith_A6a.cpp TMV_TestSmallMatrixArith_A6b.cpp TMV_TestSmallMatrixArith_A6c.cpp TMV_TestSmallMatrixArith_B1.cpp TMV_TestSmallMatrixArith_B3a.cpp TMV_TestSmallMatrixArith_B3b.cpp TMV_TestSmallMatrixArith_B4a.cpp TMV_TestSmallMatrixArith_B4b.cpp TMV_TestSmallMatrixArith_B4c.cpp TMV_TestSmallMatrixArith_B5a.cpp TMV_TestSmallMatrixArith_B5b.cpp TMV_TestSmallMatrixArith_B5c.cpp TMV_TestSmallMatrixArith_B6a.cpp TMV_TestSmallMatrixArith_B6b.cpp TMV_TestSmallMatrix_Sub1.cpp TMV_TestSmallMatrix_Sub2.cpp TMV_TestSmallMatrix_Sub3.cpp TMV_TestSmallMatrix_Sub4.cpp TMV_TestSmallMatrix_Sub5.cpp
+TEST3a=TMV_Test3a.cpp TMV_TestSmallVector.cpp TMV_TestSmallMatrix.cpp TMV_TestSmallMatrix_Sub1.cpp TMV_TestSmallMatrix_Sub2.cpp TMV_TestSmallMatrix_Sub3.cpp TMV_TestSmallMatrix_Sub4.cpp TMV_TestSmallMatrix_Sub5.cpp
+TEST3b=TMV_Test3b.cpp TMV_TestSmallMatrixA.cpp TMV_TestSmallMatrixArith_A1.cpp TMV_TestSmallMatrixArith_A2a.cpp TMV_TestSmallMatrixArith_A2b.cpp TMV_TestSmallMatrixArith_A2c.cpp TMV_TestSmallMatrixArith_A3a.cpp TMV_TestSmallMatrixArith_A3b.cpp TMV_TestSmallMatrixArith_A3c.cpp TMV_TestSmallMatrixArith_A4a.cpp TMV_TestSmallMatrixArith_A4b.cpp TMV_TestSmallMatrixArith_A4c.cpp TMV_TestSmallMatrixArith_A5a.cpp TMV_TestSmallMatrixArith_A5b.cpp TMV_TestSmallMatrixArith_A5c.cpp TMV_TestSmallMatrixArith_A6a.cpp TMV_TestSmallMatrixArith_A6b.cpp TMV_TestSmallMatrixArith_A6c.cpp 
+TEST3c=TMV_Test3c.cpp TMV_TestSmallMatrixB.cpp TMV_TestSmallMatrixArith_B1.cpp TMV_TestSmallMatrixArith_B3a.cpp TMV_TestSmallMatrixArith_B3b.cpp TMV_TestSmallMatrixArith_B4a.cpp TMV_TestSmallMatrixArith_B4b.cpp TMV_TestSmallMatrixArith_B4c.cpp TMV_TestSmallMatrixArith_B5a.cpp TMV_TestSmallMatrixArith_B5b.cpp TMV_TestSmallMatrixArith_B5c.cpp TMV_TestSmallMatrixArith_B6a.cpp TMV_TestSmallMatrixArith_B6b.cpp 
 
 EX1= Vector.cpp
 EX2= Matrix.cpp
 EX3= Division.cpp
 EX4= BandMatrix.cpp
 EX5= SymMatrix.cpp
-EX6= NewMatrix.cpp
 
 LIBFILE= $(LIBDIR)/libtmv.a
 LIBS= -L$(LIBDIR) -ltmv $(BLASLIBS) -lm
@@ -66,14 +54,11 @@ TEST3_O := $(patsubst %.cpp,$(TESTDIR)/%.o,$(TEST3))
 TEST3a_O := $(patsubst %.cpp,$(TESTDIR)/%.o,$(TEST3a))
 TEST3b_O := $(patsubst %.cpp,$(TESTDIR)/%.o,$(TEST3b))
 TEST3c_O := $(patsubst %.cpp,$(TESTDIR)/%.o,$(TEST3c))
-TEST3d_O := $(patsubst %.cpp,$(TESTDIR)/%.o,$(TEST3d))
-TEST3e_O := $(patsubst %.cpp,$(TESTDIR)/%.o,$(TEST3e))
 EX1_O := $(patsubst %.cpp,$(EXDIR)/%.o,$(EX1))
 EX2_O := $(patsubst %.cpp,$(EXDIR)/%.o,$(EX2))
 EX3_O := $(patsubst %.cpp,$(EXDIR)/%.o,$(EX3))
 EX4_O := $(patsubst %.cpp,$(EXDIR)/%.o,$(EX4))
 EX5_O := $(patsubst %.cpp,$(EXDIR)/%.o,$(EX5))
-EX6_O := $(patsubst %.cpp,$(EXDIR)/%.o,$(EX6))
 
 LIB_SRC := $(patsubst %.cpp,$(SRCDIR)/%.cpp,$(LIB))
 SBLIB_SRC := $(patsubst %.cpp,$(SRCDIR)/%.cpp,$(SBLIB))
@@ -89,22 +74,17 @@ TEST3_SRC := $(patsubst %.cpp,$(TESTDIR)/%.cpp,$(TEST3))
 TEST3a_SRC := $(patsubst %.cpp,$(TESTDIR)/%.cpp,$(TEST3a))
 TEST3b_SRC := $(patsubst %.cpp,$(TESTDIR)/%.cpp,$(TEST3b))
 TEST3c_SRC := $(patsubst %.cpp,$(TESTDIR)/%.cpp,$(TEST3c))
-TEST3d_SRC := $(patsubst %.cpp,$(TESTDIR)/%.cpp,$(TEST3d))
-TEST3e_SRC := $(patsubst %.cpp,$(TESTDIR)/%.cpp,$(TEST3e))
 EX1_SRC := $(patsubst %.cpp,$(EXDIR)/%.cpp,$(EX1))
 EX2_SRC := $(patsubst %.cpp,$(EXDIR)/%.cpp,$(EX2))
 EX3_SRC := $(patsubst %.cpp,$(EXDIR)/%.cpp,$(EX3))
 EX4_SRC := $(patsubst %.cpp,$(EXDIR)/%.cpp,$(EX4))
 EX5_SRC := $(patsubst %.cpp,$(EXDIR)/%.cpp,$(EX5))
-EX6_SRC := $(patsubst %.cpp,$(EXDIR)/%.cpp,$(EX6))
 
 libs: lib sblib
 
-test: test1 test2 test3
+tests: test1 test2 test3
 
-speed: speed_multmm
-
-examples: vector matrix bandmatrix symmatrix division newmatrix
+examples: vector matrix bandmatrix symmatrix division
 
 all: libs tests examples
 
@@ -112,51 +92,45 @@ lib: $(LIBFILE)
 
 sblib: $(SBLIBFILE)
 
-test1: $(TESTDIR)/tmvtest1
+test1: $(BINDIR)/tmvtest1
 
-test1a: $(TESTDIR)/tmvtest1a
+test1a: $(BINDIR)/tmvtest1a
 
-test1b: $(TESTDIR)/tmvtest1b
+test1b: $(BINDIR)/tmvtest1b
 
-test1c: $(TESTDIR)/tmvtest1c
+test1c: $(BINDIR)/tmvtest1c
 
-test2: $(TESTDIR)/tmvtest2
+test2: $(BINDIR)/tmvtest2
 
-test2a: $(TESTDIR)/tmvtest2a
+test2a: $(BINDIR)/tmvtest2a
 
-test2b: $(TESTDIR)/tmvtest2b
+test2b: $(BINDIR)/tmvtest2b
 
-test2c: $(TESTDIR)/tmvtest2c
+test2c: $(BINDIR)/tmvtest2c
 
-test3: $(TESTDIR)/tmvtest3
+test3: $(BINDIR)/tmvtest3
 
-test3a: $(TESTDIR)/tmvtest3a
+test3a: $(BINDIR)/tmvtest3a
 
-test3b: $(TESTDIR)/tmvtest3b
+test3b: $(BINDIR)/tmvtest3b
 
-test3c: $(TESTDIR)/tmvtest3c
+test3c: $(BINDIR)/tmvtest3c
 
-test3d: $(TESTDIR)/tmvtest3d
+vector: $(BINDIR)/vector
 
-test3e: $(TESTDIR)/tmvtest3e
+matrix: $(BINDIR)/matrix
 
-vector: $(EXDIR)/vector
+bandmatrix: $(BINDIR)/bandmatrix
 
-matrix: $(EXDIR)/matrix
+symmatrix: $(BINDIR)/symmatrix
 
-bandmatrix: $(EXDIR)/bandmatrix
-
-symmatrix: $(EXDIR)/symmatrix
-
-newmatrix: $(EXDIR)/newmatrix
-
-division: $(EXDIR)/division
+division: $(BINDIR)/division
 
 
 testclean:
-	- $(RM) $(TESTDIR)/*.o $(TESTDIR)/.*.P $(TESTDIR)/tmv* tmv*.dat
+	- $(RM) $(TESTDIR)/*.o $(TESTDIR)/.*.P $(BINDIR)/tmv* tmv*.dat
  
-clean:
+clean: testclean
 	- $(RM) $(SRCDIR)/*.o $(SRCDIR)/.*.P $(EXDIR)/*.o $(EXDIR)/.*.P 
 
 $(LIBFILE): $(LIB_O)
@@ -167,28 +141,18 @@ $(SBLIBFILE): $(SBLIB_O)
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
 
-install: $(LIBFILE) $(SBLIBFILE)
-	$(CP) -r include/*.h tmv $(PREFIX)/include
-	$(CP) lib/lib*.a $(PREFIX)/lib
-
-uninstall:
-	- $(RM) -r $(PREFIX)/include/TMV_*.h $(PREFIX)/include/tmv
-	- $(CP) $(PREFIX)/lib/libtmv*.a
-
 LIB_ALL= $(LIB) $(SBLIB) 
 TEST_ALL= $(TEST1) $(TEST2) $(TEST3) 
-EX_ALL= $(EX1) $(EX2) $(EX3) $(EX4) $(EX5) $(EX6)
+EX_ALL= $(EX1) $(EX2) $(EX3) $(EX4) $(EX5)
 LIB_P := $(patsubst %.cpp,$(SRCDIR)/.%.P,$(LIB_ALL)) 
 TEST_P := $(patsubst %.cpp,$(TESTDIR)/.%.P,$(TEST_ALL)) 
 EX_P := $(patsubst %.cpp,$(EXDIR)/.%.P,$(EX_ALL)) 
 ALL_P= $(LIB_P) $(TEST_P) $(EX_P)
-ALL_O= $(LIB_O) $(SBLIB_O) $(TEST1_O) $(TEST2_O) $(TEST3_O) $(EX1_O) $(EX2_O) $(EX3_O) $(EX4_O) $(EX5_O) $(EX6_O)
+ALL_O= $(LIB_O) $(SBLIB_O) $(TEST1_O) $(TEST2_O) $(TEST3_O) $(EX1_O) $(EX2_O) $(EX3_O) $(EX4_O) $(EX5_O)
 
 # Add in the SRCDIR to the includes for the .inst files
-CFLAGS2= -I$(SRCDIR) $(CFLAGS)
+CFLAGS2= -I$(SRCDIR) $(CFLAGS) 
 INCLUDE2= -I$(SRCDIR) $(INCLUDE)
-CFLAGS3= -I$(SRCDIR) -I$(TESTDIR) $(CFLAGS)
-INCLUDE3= -I$(SRCDIR) -I$(TESTDIR) $(INCLUDE)
 
 # See http://make.paulandlesley.org/autodep.html for an explanation of 
 # the following lines
@@ -201,7 +165,7 @@ $(SRCDIR)/%.o : $(SRCDIR)/%.cpp
 	$(CC) -c $(CFLAGS2) -o $@ $<
 	@gcc -MM $(INCLUDE2) -o $*.d $<; \
 	  $(RM) $(SRCDIR)/.$*.P; \
-	  printf $(SRCDIR)/ > $(SRCDIR)/.$*.P; \
+	  echo -n $(SRCDIR)/ > $(SRCDIR)/.$*.P; \
 	  cat $*.d >> $(SRCDIR)/.$*.P; \
 	  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
 	      -e '/^$$/ d' -e 's/$$/ :/' < $*.d >> $(SRCDIR)/.$*.P; \
@@ -211,79 +175,70 @@ $(EXDIR)/%.o : $(EXDIR)/%.cpp
 	$(CC) -c $(CFLAGS2) -o $@ $<
 	@gcc -MM $(INCLUDE2) -o $*.d $<; \
 	  $(RM) $(EXDIR)/.$*.P; \
-	  printf $(EXDIR)/ > $(EXDIR)/.$*.P; \
+	  echo -n $(EXDIR)/ > $(EXDIR)/.$*.P; \
 	  cat $*.d >> $(EXDIR)/.$*.P; \
 	  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
 	      -e '/^$$/ d' -e 's/$$/ :/' < $*.d >> $(EXDIR)/.$*.P; \
 	  $(RM) $*.d
 
 $(TESTDIR)/%.o : $(TESTDIR)/%.cpp
-	$(CC) -c $(CFLAGS3) -o $@ $<
-	@gcc -MM $(INCLUDE3) -o $*.d $<; \
+	$(CC) -c $(CFLAGS2) -o $@ $<
+	@gcc -MM $(INCLUDE2) -o $*.d $<; \
 	  $(RM) $(TESTDIR)/.$*.P; \
-	  printf $(TESTDIR)/ > $(TESTDIR)/.$*.P; \
+	  echo -n $(TESTDIR)/ > $(TESTDIR)/.$*.P; \
 	  cat $*.d >> $(TESTDIR)/.$*.P; \
 	  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
 	      -e '/^$$/ d' -e 's/$$/ :/' < $*.d >> $(TESTDIR)/.$*.P; \
 	  $(RM) $*.d
 
-$(TESTDIR)/tmvtest1: $(TEST1_O) $(LIBFILE)
+$(BINDIR)/tmvtest1: $(TEST1_O) $(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST1_O) $(LIBS)
 
-$(TESTDIR)/tmvtest1a: $(TEST1a_O) $(LIBFILE)
+$(BINDIR)/tmvtest1a: $(TEST1a_O) $(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST1a_O) $(LIBS)
 
-$(TESTDIR)/tmvtest1b: $(TEST1b_O) $(LIBFILE)
+$(BINDIR)/tmvtest1b: $(TEST1b_O) $(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST1b_O) $(LIBS)
 
-$(TESTDIR)/tmvtest1c: $(TEST1c_O) $(LIBFILE)
+$(BINDIR)/tmvtest1c: $(TEST1c_O) $(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST1c_O) $(LIBS)
 
-$(TESTDIR)/tmvtest2: $(TEST2_O) $(SBLIBFILE) $(LIBFILE)
+$(BINDIR)/tmvtest2: $(TEST2_O) $(SBLIBFILE) $(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST2_O) $(SBLIBS)
 
-$(TESTDIR)/tmvtest2a: $(TEST2a_O) $(SBLIBFILE) $(LIBFILE)
+$(BINDIR)/tmvtest2a: $(TEST2a_O) $(SBLIBFILE) $(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST2a_O) $(SBLIBS)
 
-$(TESTDIR)/tmvtest2b: $(TEST2b_O) $(SBLIBFILE) $(LIBFILE)
+$(BINDIR)/tmvtest2b: $(TEST2b_O) $(SBLIBFILE) $(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST2b_O) $(SBLIBS)
 
-$(TESTDIR)/tmvtest2c: $(TEST2c_O) $(SBLIBFILE) $(LIBFILE)
+$(BINDIR)/tmvtest2c: $(TEST2c_O) $(SBLIBFILE) $(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST2c_O) $(SBLIBS)
 
-$(TESTDIR)/tmvtest3: $(TEST3_O) $(LIBFILE)
+$(BINDIR)/tmvtest3: $(TEST3_O) $(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST3_O) $(LIBS)
 
-$(TESTDIR)/tmvtest3a: $(TEST3a_O) $(LIBFILE)
+$(BINDIR)/tmvtest3a: $(TEST3a_O) $(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST3a_O) $(LIBS)
 
-$(TESTDIR)/tmvtest3b: $(TEST3b_O) $(LIBFILE)
+$(BINDIR)/tmvtest3b: $(TEST3b_O) $(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST3b_O) $(LIBS)
 
-$(TESTDIR)/tmvtest3c: $(TEST3c_O) $(LIBFILE)
+$(BINDIR)/tmvtest3c: $(TEST3c_O) $(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST3c_O) $(LIBS)
 
-$(TESTDIR)/tmvtest3d: $(TEST3d_O) $(LIBFILE)
-	$(CC) $(CFLAGS) -o $@ $(TEST3d_O) $(LIBS)
-
-$(TESTDIR)/tmvtest3e: $(TEST3e_O) $(LIBFILE)
-	$(CC) $(CFLAGS) -o $@ $(TEST3e_O) $(LIBS)
-
-$(EXDIR)/vector: $(EX1_O) $(LIBFILE)
+$(BINDIR)/vector: $(EX1_O) $(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(EX1_O) $(LIBS)
 
-$(EXDIR)/matrix: $(EX2_O) $(LIBFILE)
+$(BINDIR)/matrix: $(EX2_O) $(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(EX2_O) $(LIBS)
 
-$(EXDIR)/division: $(EX3_O) $(LIBFILE)
+$(BINDIR)/division: $(EX3_O) $(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(EX3_O) $(LIBS)
 
-$(EXDIR)/bandmatrix: $(EX4_O) $(SBLIBFILE) $(LIBFILE)
+$(BINDIR)/bandmatrix: $(EX4_O) $(SBLIBFILE) $(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(EX4_O) $(SBLIBS)
 
-$(EXDIR)/symmatrix: $(EX5_O) $(SBLIBFILE) $(LIBFILE)
+$(BINDIR)/symmatrix: $(EX5_O) $(SBLIBFILE) $(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(EX5_O) $(SBLIBS)
-
-$(EXDIR)/newmatrix: $(EX6_O) $(LIBFILE)
-	$(CC) $(CFLAGS) -o $@ $(EX6_O) $(LIBS)
 

@@ -1,6 +1,6 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
+#include "TMV_Tri.h"
 #include "TMV.h"
 
 #define NOSV
@@ -12,7 +12,7 @@ template <class T> void TestTriMatrixArith_B2()
   const int N = 10;
 
   tmv::Matrix<T> a1(N,N);
-  for(int i=0;i<N;i++) for(int j=0;j<N;j++) a1(i,j) = T(12+3*i-5*j);
+  for(int i=0;i<N;i++) for(int j=0;j<N;j++) a1(i,j) = 12+3*i-5*j;
 
   tmv::LowerTriMatrix<T,tmv::NonUnitDiag,tmv::RowMajor> l1(a1);
 
@@ -63,31 +63,31 @@ template <class T> void TestTriMatrixArith_B2()
   tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag> cl2x = cl2v;
   tmv::Matrix<std::complex<T> > ca1x = ca1v;
 
-  TestMatrixArith456<T>(a1x,ca1x,a1v,ca1v,u1v,cu1v,"Square/Tri");
-  TestMatrixArith456<T>(a1x,ca1x,a1v,ca1v,u2v,cu2v,"Square/Tri");
-  TestMatrixArith456<T>(a1x,ca1x,a1v,ca1v,u3v,cu3v,"Square/Tri");
-  TestMatrixArith456<T>(a1x,ca1x,a1v,ca1v,u4v,cu4v,"Square/Tri");
-  TestMatrixArith456<T>(a1x,ca1x,a1v,ca1v,l1v,cl1v,"Square/Tri");
-  TestMatrixArith456<T>(a1x,ca1x,a1v,ca1v,l2v,cl2v,"Square/Tri");
-  TestMatrixArith456<T>(a1x,ca1x,a1v,ca1v,l3v,cl3v,"Square/Tri");
-  TestMatrixArith456<T>(a1x,ca1x,a1v,ca1v,l4v,cl4v,"Square/Tri");
+  TestMatrixArith45<T>(a1x,ca1x,a1v,ca1v,u1v,cu1v,"Square/Tri");
+  TestMatrixArith45<T>(a1x,ca1x,a1v,ca1v,u2v,cu2v,"Square/Tri");
+  TestMatrixArith45<T>(a1x,ca1x,a1v,ca1v,u3v,cu3v,"Square/Tri");
+  TestMatrixArith45<T>(a1x,ca1x,a1v,ca1v,u4v,cu4v,"Square/Tri");
+  TestMatrixArith45<T>(a1x,ca1x,a1v,ca1v,l1v,cl1v,"Square/Tri");
+  TestMatrixArith45<T>(a1x,ca1x,a1v,ca1v,l2v,cl2v,"Square/Tri");
+  TestMatrixArith45<T>(a1x,ca1x,a1v,ca1v,l3v,cl3v,"Square/Tri");
+  TestMatrixArith45<T>(a1x,ca1x,a1v,ca1v,l4v,cl4v,"Square/Tri");
 
   tmv::Matrix<T> a2(15,10);
-  for(int i=0;i<15;++i) for(int j=0;j<10;++j) a2(i,j) = T(1-3*i+2*j);
+  for(int i=0;i<15;++i) for(int j=0;j<10;++j) a2(i,j) = 1-3*i+2*j;
   tmv::Matrix<std::complex<T> > ca2 = a2*std::complex<T>(1,2);
   tmv::MatrixView<T> a2v = a2.View();
   tmv::MatrixView<std::complex<T> > ca2v = ca2.View();
   tmv::Matrix<T> a2x = a2v;
   tmv::Matrix<std::complex<T> > ca2x = ca2v;
 
-  TestMatrixArith456<T>(a2x,ca2x,a2v,ca2v,u1v,cu1v,"NonSquare/Tri");
-  TestMatrixArith456<T>(a2x,ca2x,a2v,ca2v,u2v,cu2v,"NonSquare/Tri");
-  TestMatrixArith456<T>(a2x,ca2x,a2v,ca2v,u3v,cu3v,"NonSquare/Tri");
-  TestMatrixArith456<T>(a2x,ca2x,a2v,ca2v,u4v,cu4v,"NonSquare/Tri");
-  TestMatrixArith456<T>(a2x,ca2x,a2v,ca2v,l1v,cl1v,"NonSquare/Tri");
-  TestMatrixArith456<T>(a2x,ca2x,a2v,ca2v,l2v,cl2v,"NonSquare/Tri");
-  TestMatrixArith456<T>(a2x,ca2x,a2v,ca2v,l3v,cl3v,"NonSquare/Tri");
-  TestMatrixArith456<T>(a2x,ca2x,a2v,ca2v,l4v,cl4v,"NonSquare/Tri");
+  TestMatrixArith45<T>(a2x,ca2x,a2v,ca2v,u1v,cu1v,"NonSquare/Tri");
+  TestMatrixArith45<T>(a2x,ca2x,a2v,ca2v,u2v,cu2v,"NonSquare/Tri");
+  TestMatrixArith45<T>(a2x,ca2x,a2v,ca2v,u3v,cu3v,"NonSquare/Tri");
+  TestMatrixArith45<T>(a2x,ca2x,a2v,ca2v,u4v,cu4v,"NonSquare/Tri");
+  TestMatrixArith45<T>(a2x,ca2x,a2v,ca2v,l1v,cl1v,"NonSquare/Tri");
+  TestMatrixArith45<T>(a2x,ca2x,a2v,ca2v,l2v,cl2v,"NonSquare/Tri");
+  TestMatrixArith45<T>(a2x,ca2x,a2v,ca2v,l3v,cl3v,"NonSquare/Tri");
+  TestMatrixArith45<T>(a2x,ca2x,a2v,ca2v,l4v,cl4v,"NonSquare/Tri");
 
   tmv::Matrix<T> a3(10,0,1);
   tmv::Matrix<std::complex<T> > ca3 = a3;
@@ -96,27 +96,27 @@ template <class T> void TestTriMatrixArith_B2()
   tmv::Matrix<T> a3x = a3v;
   tmv::Matrix<std::complex<T> > ca3x = ca3v;
 
-  TestMatrixArith456<T>(a3x,ca3x,a3v,ca3v,u1v,cu1v,"Degenerate/Tri");
-  TestMatrixArith456<T>(a3x,ca3x,a3v,ca3v,u2v,cu2v,"Degenerate/Tri");
-  TestMatrixArith456<T>(a3x,ca3x,a3v,ca3v,u3v,cu3v,"Degenerate/Tri");
-  TestMatrixArith456<T>(a3x,ca3x,a3v,ca3v,u4v,cu4v,"Degenerate/Tri");
-  TestMatrixArith456<T>(a3x,ca3x,a3v,ca3v,l1v,cl1v,"Degenerate/Tri");
-  TestMatrixArith456<T>(a3x,ca3x,a3v,ca3v,l2v,cl2v,"Degenerate/Tri");
-  TestMatrixArith456<T>(a3x,ca3x,a3v,ca3v,l3v,cl3v,"Degenerate/Tri");
-  TestMatrixArith456<T>(a3x,ca3x,a3v,ca3v,l4v,cl4v,"Degenerate/Tri");
+  TestMatrixArith45<T>(a3x,ca3x,a3v,ca3v,u1v,cu1v,"Degenerate/Tri");
+  TestMatrixArith45<T>(a3x,ca3x,a3v,ca3v,u2v,cu2v,"Degenerate/Tri");
+  TestMatrixArith45<T>(a3x,ca3x,a3v,ca3v,u3v,cu3v,"Degenerate/Tri");
+  TestMatrixArith45<T>(a3x,ca3x,a3v,ca3v,u4v,cu4v,"Degenerate/Tri");
+  TestMatrixArith45<T>(a3x,ca3x,a3v,ca3v,l1v,cl1v,"Degenerate/Tri");
+  TestMatrixArith45<T>(a3x,ca3x,a3v,ca3v,l2v,cl2v,"Degenerate/Tri");
+  TestMatrixArith45<T>(a3x,ca3x,a3v,ca3v,l3v,cl3v,"Degenerate/Tri");
+  TestMatrixArith45<T>(a3x,ca3x,a3v,ca3v,l4v,cl4v,"Degenerate/Tri");
 #endif
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestTriMatrixArith_B2<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestTriMatrixArith_B2<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestTriMatrixArith_B2<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestTriMatrixArith_B2<int>();
 #endif
 

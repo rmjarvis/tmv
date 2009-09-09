@@ -1,38 +1,37 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 
 #define START 0
 
+#include "TMV.h"
 #include "TMV_Test.h"
 #include "TMV_Test2.h"
-#include "TMV.h"
 #include "TMV_Band.h"
 #include "TMV_TestBandArith.h"
 
-template <class T> void TestBandDiv(tmv::DivType dt)
+#include "TMV_TestMatrixDivArith.h"
+
+template <class T> inline void TestBandDiv(tmv::DivType dt)
 {
   const int N = 10;
 
   std::vector<tmv::BandMatrixView<T> > b;
   std::vector<tmv::BandMatrixView<std::complex<T> > > cb;
-  std::vector<tmv::BaseMatrix<T>*> B;
-  std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
-  MakeBandList(b,cb,B,CB);
+  MakeBandList(b,cb);
 
   tmv::Matrix<T> a1(N,N);
-  for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) a1(i,j) = T(3+i-2*j);
+  for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) a1(i,j) = 3.+i-2*j;
   a1.diag().AddToAll(T(10)*N);
   a1 /= T(10);
 
   tmv::Matrix<std::complex<T> > ca1 = a1 * std::complex<T>(3,-4);
 
-  tmv::Vector<T> v1(N);
-  tmv::Vector<T> v2(N-1);
-  for (int i=0; i<N; ++i) v1(i) = T(16-3*i);
-  for (int i=0; i<N-1; ++i) v2(i) = T(-6+i); 
-  tmv::Vector<std::complex<T> > cv1(N);
-  tmv::Vector<std::complex<T> > cv2(N-1);
-  for (int i=0; i<N; ++i) cv1(i) = std::complex<T>(16-3*i,i+4); 
-  for (int i=0; i<N-1; ++i) cv2(i) = std::complex<T>(2*i-3,-6+i); 
+  static tmv::Vector<T> v1(N);
+  static tmv::Vector<T> v2(N-1);
+  for (int i=0; i<N; ++i) v1(i) = 16.-3*i; 
+  for (int i=0; i<N-1; ++i) v2(i) = -6.+i; 
+  static tmv::Vector<std::complex<T> > cv1(N);
+  static tmv::Vector<std::complex<T> > cv2(N-1);
+  for (int i=0; i<N; ++i) cv1(i) = std::complex<T>(16.-3*i,i+4.); 
+  for (int i=0; i<N-1; ++i) cv2(i) = std::complex<T>(2*i-3.,-6.+i); 
 
   tmv::Matrix<T> a3 = a1.Cols(0,N/2);
   tmv::Matrix<std::complex<T> > ca3 = ca1.Cols(0,N/2);
@@ -49,7 +48,7 @@ template <class T> void TestBandDiv(tmv::DivType dt)
 
   for(size_t i=START;i<b.size();i++) {
     if (showstartdone) 
-      std::cout<<"Start loop: i = "<<i<<"\nbi = "<<tmv::TypeText(b[i])<<"  "<<b[i]<<std::endl;
+      std::cout<<"Start loop: i = "<<i<<"\nbi = "<<tmv::Type(b[i])<<"  "<<b[i]<<std::endl;
     const tmv::BandMatrixView<T>& bi = b[i];
     const tmv::BandMatrixView<std::complex<T> >& cbi = cb[i];
     if (dt == tmv::LU && !bi.IsSquare()) continue;
@@ -72,7 +71,7 @@ template <class T> void TestBandDiv(tmv::DivType dt)
       tmv::Vector<T> x1 = v1/bi;
       tmv::Vector<T> x2 = v1/m;
       if (showacc) {
-        std::cout<<"v/b: Norm(x1-x2) = "<<Norm(x1-x2)<<"  "<<eps*Norm(x1)<<std::endl;
+	std::cout<<"v/b: Norm(x1-x2) = "<<Norm(x1-x2)<<"  "<<eps*Norm(x1)<<std::endl;
       }
       Assert(Norm(x1-x2) < eps*Norm(x1),"Band v/b");
     }
@@ -81,7 +80,7 @@ template <class T> void TestBandDiv(tmv::DivType dt)
       tmv::Vector<T> x1 = v1%bi;
       tmv::Vector<T> x2 = v1%m;
       if (showacc) {
-        std::cout<<"v%b: Norm(x1-x2) = "<<Norm(x1-x2)<<"  "<<eps*Norm(x1)<<std::endl;
+	std::cout<<"v%b: Norm(x1-x2) = "<<Norm(x1-x2)<<"  "<<eps*Norm(x1)<<std::endl;
       }
       Assert(Norm(x1-x2) < eps*Norm(x1),"Band v%b");
     }
@@ -97,16 +96,13 @@ template <class T> void TestBandDiv(tmv::DivType dt)
 
     if (m.IsSquare()) {
       if (showacc) {
-        std::cout<<"b.Det = "<<bi.Det()<<", m.Det = "<<m.Det()<<std::endl;
-        std::cout<<"abs(bdet-mdet) = "<<std::abs(bi.Det()-m.Det());
-        std::cout<<"  EPS*abs(mdet) = "<<eps*std::abs(m.Det())<<std::endl;
-        std::cout<<"abs(abs(bdet)-abs(mdet)) = "<<std::abs(std::abs(bi.Det())-std::abs(m.Det()));
-        std::cout<<"  EPS*abs(mdet) = "<<eps*std::abs(m.Det())<<std::endl;
+	std::cout<<"b.Det = "<<bi.Det()<<", m.Det = "<<m.Det()<<std::endl;
+	std::cout<<"abs(bdet-mdet) = "<<std::abs(bi.Det()-m.Det());
+	std::cout<<"  EPS*abs(mdet) = "<<eps*std::abs(m.Det())<<std::endl;
+	std::cout<<"abs(abs(bdet)-abs(mdet)) = "<<std::abs(std::abs(bi.Det())-std::abs(m.Det()));
+	std::cout<<"  EPS*abs(mdet) = "<<eps*std::abs(m.Det())<<std::endl;
       }
-      Assert(std::abs(m.Det()-bi.Det()) < eps*std::abs(m.Det()+m.Norm()),"Band Det");
-      T msign, bsign;
-      Assert(std::abs(m.LogDet(&msign)-bi.LogDet(&bsign)) < N*eps,"Band LogDet");
-      Assert(std::abs(msign-bsign) < N*eps,"Band LogDet - sign");
+      Assert(std::abs(m.Det()-bi.Det()) < eps*std::abs(m.Det()),"Band Det");
     }
 
     cbi.DivideUsing(dt);
@@ -121,19 +117,15 @@ template <class T> void TestBandDiv(tmv::DivType dt)
 
     if (cm.IsSquare()) {
       if (showacc) {
-        std::cout<<"cbi.Det = "<<cbi.Det()<<", cm.Det = "<<cm.Det()<<std::endl;
-        std::cout<<"abs(cbidet-cmdet) = "<<std::abs(cbi.Det()-cm.Det());
-        std::cout<<"  cbidet/cmdet = "<<cbi.Det()/cm.Det();
-        std::cout<<"  EPS*abs(cmdet) = "<<ceps*std::abs(cm.Det())<<std::endl;
-        std::cout<<"abs(abs(bdet)-abs(mdet)) = "<<std::abs(std::abs(bi.Det())-std::abs(m.Det()));
-        std::cout<<"  EPS*abs(mdet) = "<<ceps*std::abs(m.Det())<<std::endl;
+	std::cout<<"cbi.Det = "<<cbi.Det()<<", cm.Det = "<<cm.Det()<<std::endl;
+	std::cout<<"abs(cbidet-cmdet) = "<<std::abs(cbi.Det()-cm.Det());
+	std::cout<<"  cbidet/cmdet = "<<cbi.Det()/cm.Det();
+	std::cout<<"  EPS*abs(cmdet) = "<<ceps*std::abs(cm.Det())<<std::endl;
+	std::cout<<"abs(abs(bdet)-abs(mdet)) = "<<std::abs(std::abs(bi.Det())-std::abs(m.Det()));
+	std::cout<<"  EPS*abs(mdet) = "<<ceps*std::abs(m.Det())<<std::endl;
       }
-      Assert(std::abs(cbi.Det()-cm.Det()) < ceps*std::abs(cm.Det()+cm.Norm()),
-          "Band CDet");
-      std::complex<T> cmsign, cbsign;
-      Assert(std::abs(cm.LogDet(&cmsign)-cbi.LogDet(&cbsign)) < N*eps,
-          "Band CLogDet");
-      Assert(std::abs(cmsign-cbsign) < N*eps,"Band CLogDet - sign");
+      Assert(std::abs(cbi.Det()-cm.Det()) < ceps*std::abs(cm.Det()),
+	  "Band CDet");
     }
 
     tmv::Vector<std::complex<T> > cv(v1 * std::complex<T>(1,1));
@@ -145,7 +137,7 @@ template <class T> void TestBandDiv(tmv::DivType dt)
       tmv::Vector<std::complex<T> > y1 = v1/cbi;
       tmv::Vector<std::complex<T> > y2 = v1/cm;
       if (showacc) {
-        std::cout<<"v/cb: Norm(y1-y2) = "<<Norm(y1-y2)<<"  "<<ceps*Norm(y1)<<std::endl;
+	std::cout<<"v/cb: Norm(y1-y2) = "<<Norm(y1-y2)<<"  "<<ceps*Norm(y1)<<std::endl;
       }
       Assert(Norm(y1-y2) < ceps*Norm(y1),"Band v/cb");
 
@@ -153,7 +145,7 @@ template <class T> void TestBandDiv(tmv::DivType dt)
       y1 = cv/bi;
       y2 = cv/m;
       if (showacc) {
-        std::cout<<"cv/b: Norm(y1-y2) = "<<Norm(y1-y2)<<"  "<<eps*Norm(y1)<<std::endl;
+	std::cout<<"cv/b: Norm(y1-y2) = "<<Norm(y1-y2)<<"  "<<eps*Norm(y1)<<std::endl;
       }
       Assert(Norm(y1-y2) < eps*Norm(y1),"Band cv/b");
 
@@ -161,7 +153,7 @@ template <class T> void TestBandDiv(tmv::DivType dt)
       y1 = cv/cbi;
       y2 = cv/cm;
       if (showacc) {
-        std::cout<<"cv/cb: Norm(y1-y2) = "<<Norm(y1-y2)<<"  "<<ceps*Norm(y1)<<std::endl;
+	std::cout<<"cv/cb: Norm(y1-y2) = "<<Norm(y1-y2)<<"  "<<ceps*Norm(y1)<<std::endl;
       }
       Assert(Norm(y1-y2) < ceps*Norm(y1),"Band cv/cb");
     }
@@ -170,20 +162,20 @@ template <class T> void TestBandDiv(tmv::DivType dt)
       tmv::Vector<std::complex<T> > y1 = v1%cbi;
       tmv::Vector<std::complex<T> > y2 = v1%cm;
       if (showacc) {
-        std::cout<<"v%cb: Norm(y1-y2) = "<<Norm(y1-y2)<<"  "<<ceps*Norm(y1)<<std::endl;
+	std::cout<<"v%cb: Norm(y1-y2) = "<<Norm(y1-y2)<<"  "<<ceps*Norm(y1)<<std::endl;
       }
       Assert(Norm(y1-y2) < ceps*Norm(y1),"Band v%cb");
 
       y1 = cv%bi;
       y2 = cv%m;
       if (showacc) {
-        std::cout<<"cv%b: Norm(y1-y2) = "<<Norm(y1-y2)<<"  "<<eps*Norm(y1)<<std::endl;
+	std::cout<<"cv%b: Norm(y1-y2) = "<<Norm(y1-y2)<<"  "<<eps*Norm(y1)<<std::endl;
       }
       Assert(Norm(y1-y2) < eps*Norm(y1),"Band cv%b");
       y1 = cv%cbi;
       y2 = cv%cm;
       if (showacc) {
-        std::cout<<"cv%cb: Norm(y1-y2) = "<<Norm(y1-y2)<<"  "<<ceps*Norm(y1)<<std::endl;
+	std::cout<<"cv%cb: Norm(y1-y2) = "<<Norm(y1-y2)<<"  "<<ceps*Norm(y1)<<std::endl;
       }
       Assert(Norm(y1-y2) < ceps*Norm(y1),"Band cv%cb");
     }
@@ -191,38 +183,29 @@ template <class T> void TestBandDiv(tmv::DivType dt)
   }
 
   TestBandDiv_A<T>(dt);
-  TestBandDiv_B1<T>(dt);
-  TestBandDiv_B2<T>(dt);
-  TestBandDiv_C1<T>(dt);
-  if (dt == tmv::LU) TestBandDiv_C2<T>(dt);
-  TestBandDiv_D1<T>(dt);
-  if (dt == tmv::LU) TestBandDiv_D2<T>(dt);
-
-  std::cout<<"BandMatrix<"<<tmv::TypeText(T())<<"> Division using ";
+  TestBandDiv_B<T>(dt);
+  TestBandDiv_C<T>(dt);
+  TestBandDiv_D<T>(dt);
+  std::cout<<"BandMatrix<"<<tmv::Type(T())<<"> Division using ";
   std::cout<<tmv::Text(dt)<<" passed all tests\n";
-  for(size_t i=0;i<B.size();++i) delete B[i];
-  for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
 template <class T> void TestAllBandDiv()
 {
-  TestBandDecomp<T,tmv::ColMajor>();
-  TestBandDecomp<T,tmv::RowMajor>();
-  TestBandDecomp<T,tmv::DiagMajor>();
-  std::cout<<"BandMatrix<"<<tmv::TypeText(T())<<"> passed all ";
-  std::cout<<"decomposition tests.\n";
   TestBandDiv<T>(tmv::LU);
   TestBandDiv<T>(tmv::QR);
   TestBandDiv<T>(tmv::SV);
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestAllBandDiv<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestAllBandDiv<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestAllBandDiv<long double>();
 #endif
-
+#ifdef INST_INT
+template void TestAllBandDiv<int>();
+#endif

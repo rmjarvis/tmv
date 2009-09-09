@@ -1,0 +1,15 @@
+#define CT std::complex<T>
+
+#define DefQRD(T)\
+template void GetQFromQR(const MatrixView<T >& Q, \
+    const GenVector<T >& beta); \
+
+DefQRD(T)
+#ifdef INST_COMPLEX
+DefQRD(CT)
+#endif
+
+#undef DefQRD
+
+#undef CT
+

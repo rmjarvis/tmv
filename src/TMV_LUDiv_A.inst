@@ -1,0 +1,9 @@
+
+#define CT std::complex<T>
+
+template void LU_Decompose(const MatrixView<T >& lu, size_t* p, T& det);
+#ifdef INST_COMPLEX
+template void LU_Decompose(const MatrixView<CT >& lu, size_t* p, CT& det);
+#endif
+
+#undef CT

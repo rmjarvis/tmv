@@ -1,0 +1,28 @@
+#define CT std::complex<T>
+
+#define DefInv(T,T1) \
+template void HermCH_Inverse(const GenSymMatrix<T >& m, \
+    const SymMatrixView<T1 >& sinv); \
+    
+DefInv(T,T)
+#ifdef INST_COMPLEX
+DefInv(T,CT)
+DefInv(CT,CT)
+#endif
+
+#undef DefInv
+
+#define DefATA(tf,T) \
+template void SymATASquare<tf,T >(const MatrixView<T >& A); \
+
+DefATA(true,T)
+DefATA(false,T)
+#ifdef INST_COMPLEX
+DefATA(true,CT)
+DefATA(false,CT)
+#endif
+
+#undef DefATA
+
+#undef CT
+

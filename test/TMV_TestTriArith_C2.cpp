@@ -1,11 +1,12 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
 #include "TMV.h"
+#include "TMV_Tri.h"
+#include "TMV_Diag.h"
 
 #define NOADDEQ
 #define NOMULTEQ
-#define NOTRANSMM
+
 #include "TMV_TestMatrixArith.h"
 
 template <class T> void TestTriMatrixArith_C2()
@@ -14,7 +15,7 @@ template <class T> void TestTriMatrixArith_C2()
   const int N = 10;
 
   tmv::Matrix<T> a1(N,N);
-  for(int i=0;i<N;i++) for(int j=0;j<N;j++) a1(i,j) = T(12+3*i-5*j);
+  for(int i=0;i<N;i++) for(int j=0;j<N;j++) a1(i,j) = 12+3*i-5*j;
   tmv::Matrix<std::complex<T> > ca1 = a1 * std::complex<T>(1,2);
 
   tmv::DiagMatrix<T> d1(a1.diag());
@@ -69,27 +70,27 @@ template <class T> void TestTriMatrixArith_C2()
   tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag> cl2x = cl2v;
   tmv::DiagMatrix<std::complex<T> > cd1x = cd1v;
 
-  TestMatrixArith456<T>(u1x,cu1x,d1v,cd1v,u1v,cu1v,"Diag/Tri U");
-  TestMatrixArith456<T>(u1x,cu1x,d1v,cd1v,u2v,cu2v,"Diag/Tri U");
-  TestMatrixArith456<T>(u1x,cu1x,d1v,cd1v,u3v,cu3v,"Diag/Tri U");
-  TestMatrixArith456<T>(u1x,cu1x,d1v,cd1v,u4v,cu4v,"Diag/Tri U");
-  TestMatrixArith456<T>(l1x,cl1x,d1v,cd1v,l1v,cl1v,"Diag/Tri L");
-  TestMatrixArith456<T>(l1x,cl1x,d1v,cd1v,l2v,cl2v,"Diag/Tri L");
-  TestMatrixArith456<T>(l1x,cl1x,d1v,cd1v,l3v,cl3v,"Diag/Tri L");
-  TestMatrixArith456<T>(l1x,cl1x,d1v,cd1v,l4v,cl4v,"Diag/Tri L");
+  TestMatrixArith45<T>(d1x,cd1x,d1v,cd1v,u1v,cu1v,"Diag/Tri U");
+  TestMatrixArith45<T>(d1x,cd1x,d1v,cd1v,u2v,cu2v,"Diag/Tri U");
+  TestMatrixArith45<T>(d1x,cd1x,d1v,cd1v,u3v,cu3v,"Diag/Tri U");
+  TestMatrixArith45<T>(d1x,cd1x,d1v,cd1v,u4v,cu4v,"Diag/Tri U");
+  TestMatrixArith45<T>(d1x,cd1x,d1v,cd1v,l1v,cl1v,"Diag/Tri L");
+  TestMatrixArith45<T>(d1x,cd1x,d1v,cd1v,l2v,cl2v,"Diag/Tri L");
+  TestMatrixArith45<T>(d1x,cd1x,d1v,cd1v,l3v,cl3v,"Diag/Tri L");
+  TestMatrixArith45<T>(d1x,cd1x,d1v,cd1v,l4v,cl4v,"Diag/Tri L");
 #endif
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestTriMatrixArith_C2<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestTriMatrixArith_C2<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestTriMatrixArith_C2<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestTriMatrixArith_C2<int>();
 #endif
 

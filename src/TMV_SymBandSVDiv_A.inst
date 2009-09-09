@@ -1,0 +1,20 @@
+
+#define CT std::complex<T>
+
+#define DefSVD(RT,T)\
+template void HermBandSV_Decompose(const GenSymBandMatrix<T >& A, \
+    const MatrixView<T >* U, const VectorView<RT >& S, T& det); \
+template void SymBandSV_Decompose(const GenSymBandMatrix<T >& A, \
+    const MatrixView<T >* U, const VectorView<RT >& S,  \
+    const MatrixView<T >* V, T& det); \
+
+DefSVD(T,T)
+#ifdef INST_COMPLEX
+DefSVD(T,CT)
+#endif
+
+#undef DefSVD
+
+#undef CT
+
+

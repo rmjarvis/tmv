@@ -1,73 +1,71 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 #include "TMV_Test.h"
 #include "TMV_Test3.h"
-#include "TMV_Mat.h"
+#include "TMV.h"
+#include "TMV_Small.h"
 
 #include "TMV_TestMatrixArith.h"
 
-template <class T, int N> static void DoTestSmallMatrixArith_A4c()
+
+template <class T> void TestSmallMatrixArith_A4c()
 {
-  tmv::SmallMatrix<T,N,N,tmv::RowMajor> a1;
-  for(int i=0;i<N;++i) for(int j=0;j<N;++j) {
-    a1(i,j) = T(2.9+4.3*i-5.1*j);
+  tmv::SmallMatrix<T,4,4,tmv::RowMajor> a1;
+  for(int i=0;i<4;++i) for(int j=0;j<4;++j) {
+    a1(i,j) = 2+4*i-5*j;
   }
-  a1(0,0) = 14;
-  if (N > 1) a1(1,0) = -2;
-  if (N > 2) a1(2,0) = 7;
-  if (N > 3) a1(3,0) = -10;
-  if (N > 2) a1(2,2) = 30;
+  a1(0,0) = 14.;
+  a1(1,0) = -2.;
+  a1(2,0) = 7.;
+  a1(3,0) = -10.;
+  a1(2,2) = 30.;
 
-  tmv::SmallMatrix<std::complex<T>,N,N,tmv::RowMajor> ca1 = 
-  std::complex<T>(3,2)*a1;
-  if (N > 3) ca1(2,3) += std::complex<T>(2.4,3.7);
-  if (N > 1) ca1(1,0) *= std::complex<T>(0.8,2.8);
-  if (N > 1) ca1.col(1) *= std::complex<T>(-1.1,3.6);
-  if (N > 3) ca1.row(3) += 
-    tmv::SmallVector<std::complex<T>,N>(std::complex<T>(1.8,9.2));
+  tmv::SmallMatrix<std::complex<T>,4,4> ca1 = a1;
+  ca1(2,3) += std::complex<T>(2,3);
+  ca1(1,0) *= std::complex<T>(0,2);
+  ca1.col(1) *= std::complex<T>(-1,3);
+  ca1.row(3) += tmv::SmallVector<std::complex<T>,4>(std::complex<T>(1,9));
+  tmv::SmallMatrixView<T,4,4,4,1> a1v = a1.View();
+  tmv::SmallMatrixView<std::complex<T>,4,4,4,1> ca1v = ca1.View();
 
-  if (N > 10) {
-    a1 /= T(N*N); a1 += T(1); 
-    ca1 /= T(N*N); ca1 += T(1); 
-  }
+#ifdef XTEST
+  tmv::SmallMatrix<T,4,4,tmv::ColMajor> a2 = a1.Transpose();
+  a2.row(1) *= T(3);
+  a2.col(2) -= tmv::SmallVector<T,4>(4.);
+  tmv::SmallMatrix<std::complex<T>,4,4,tmv::ColMajor> ca2 = ca1;
+  ca2 -= a2;
+  ca2 *= std::complex<T>(1,-2);
+  tmv::SmallMatrixView<T,4,4,1,4> a2v = a2.View();
+  tmv::SmallMatrixView<std::complex<T>,4,4,1,4> ca2v = ca2.View();
+#endif
 
-  tmv::SmallMatrix<T,N,N,tmv::ColMajor> a2 = a1.Transpose();
-  if (N > 1) a2.row(1) *= T(3.1);
-  if (N > 2) a2.col(2) -= tmv::SmallVector<T,N>(4.9);
-  tmv::SmallMatrix<std::complex<T>,N,N,tmv::ColMajor> ca2 = ca1;
-  ca2 -= T(0.13)*a2;
-  ca2 *= std::complex<T>(1.1,-2.5);
-
-  tmv::SmallMatrix<T,N,N,tmv::RowMajor> a1b = a1;
-  tmv::SmallMatrix<std::complex<T>,N,N,tmv::RowMajor> ca1b = ca1;
+  tmv::SmallMatrix<T,12,16> a3;
+  for(int i=0;i<12;++i) for(int j=0;j<16;++j) a3(i,j) = 1-2*i+3*j;
+  a3.diag().AddToAll(T(30));
+  tmv::SmallMatrix<std::complex<T>,12,16> ca3 = a3*std::complex<T>(1,-2);
+  ca3.diag().AddToAll(std::complex<T>(-22,15));
+  tmv::SmallMatrixView<T,4,4,48,4> a3v = a3.SubMatrix(0,12,0,16,3,4);
+  tmv::SmallMatrixView<std::complex<T>,4,4,48,4> ca3v = 
+    ca3.SubMatrix(0,12,0,16,3,4);
+  tmv::SmallMatrix<T,4,4> a3x = a3v;
+  tmv::SmallMatrix<std::complex<T>,4,4> ca3x = ca3v;
 
   if (showstartdone) {
     std::cout<<"A4c\n";
   }
-  TestMatrixArith4<T>(a1,ca1,a1b,ca1b,"Square");
-}
-
-template <class T> void TestSmallMatrixArith_A4c()
-{
-  DoTestSmallMatrixArith_A4c<T,2>();
-  DoTestSmallMatrixArith_A4c<T,12>();
+  TestMatrixArith4<T>(a3x,ca3x,a3v,ca3v,a1v,ca1v,"Square");
 #ifdef XTEST
-  DoTestSmallMatrixArith_A4c<T,1>();
-  DoTestSmallMatrixArith_A4c<T,3>();
-  DoTestSmallMatrixArith_A4c<T,4>();
-  DoTestSmallMatrixArith_A4c<T,22>();
+  TestMatrixArith4<T>(a3x,ca3x,a3v,ca3v,a2v,ca2v,"Square");
 #endif
 }
 
-
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestSmallMatrixArith_A4c<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestSmallMatrixArith_A4c<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestSmallMatrixArith_A4c<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestSmallMatrixArith_A4c<int>();
 #endif

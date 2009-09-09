@@ -1,0 +1,19 @@
+
+#define CT std::complex<T>
+
+#define DefMV(T1,T)\
+template void Tri_LDivEq(const GenUpperTriMatrix<T1 >& A, \
+    const MatrixView<T >& m); \
+template void Tri_LDivEq(const GenLowerTriMatrix<T1 >& A, \
+    const MatrixView<T >& m); \
+
+DefMV(T,T)
+#ifdef INST_COMPLEX
+DefMV(T,CT)
+DefMV(CT,CT)
+#endif
+
+#undef DefMV
+
+#undef CT
+

@@ -1,0 +1,16 @@
+#define CT std::complex<T>
+
+#define DefInv(T,T1) \
+template void HermBandCH_Inverse(const GenSymBandMatrix<T >& m, \
+    const SymMatrixView<T1 >& sinv); \
+    
+DefInv(T,T)
+#ifdef INST_COMPLEX
+DefInv(T,CT)
+DefInv(CT,CT)
+#endif
+
+#undef DefInv
+
+#undef CT
+

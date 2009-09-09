@@ -1,5 +1,3 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
-
 #define START1 0
 #define START2 0
 
@@ -30,9 +28,7 @@ template <class T> void TestSymMatrixArith_A()
 {
   std::vector<tmv::SymMatrixView<T> > s;
   std::vector<tmv::SymMatrixView<std::complex<T> > > cs;
-  std::vector<tmv::BaseMatrix<T>*> B;
-  std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
-  MakeSymList(s,cs,B,CB,InDef);
+  MakeSymList(s,cs,InDef);
 
   for(size_t i=START1;i<s.size();i++) {
     if (showstartdone) {
@@ -48,11 +44,11 @@ template <class T> void TestSymMatrixArith_A()
       TestMatrixArith123<T>(sx,csx,si,csi,"Herm");
 
       for(size_t j=START2;j<s.size();j++) if (i!=j) {
-        if (showstartdone) {
-          std::cout<<"Start sub-loop j = "<<j<<std::endl;
-          std::cout<<"sj = "<<s[j]<<std::endl;
-        }
-        TestMatrixArith456<T>(sx,csx,si,csi,s[j],cs[j],"Herm/Herm");
+	if (showstartdone) {
+	  std::cout<<"Start sub-loop j = "<<j<<std::endl;
+	  std::cout<<"sj = "<<s[j]<<std::endl;
+	}
+	TestMatrixArith45<T>(sx,csx,si,csi,s[j],cs[j],"Herm/Herm");
       }
     } else {
       tmv::SymMatrix<T> sx = si;
@@ -60,27 +56,25 @@ template <class T> void TestSymMatrixArith_A()
       TestMatrixArith123<T>(sx,csx,si,csi,"Sym");
 
       for(size_t j=START2;j<s.size();j++) if (i!=j) {
-        if (showstartdone) {
-          std::cout<<"Start sub-loop j = "<<j<<std::endl;
-          std::cout<<"sj = "<<s[j]<<std::endl;
-        }
-        TestMatrixArith456<T>(sx,csx,si,csi,s[j],cs[j],"Sym/Sym");
+	if (showstartdone) {
+	  std::cout<<"Start sub-loop j = "<<j<<std::endl;
+	  std::cout<<"sj = "<<s[j]<<std::endl;
+	}
+	TestMatrixArith45<T>(sx,csx,si,csi,s[j],cs[j],"Sym/Sym");
       }
     }
   }
-  for(size_t i=0;i<B.size();++i) delete B[i];
-  for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestSymMatrixArith_A<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestSymMatrixArith_A<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestSymMatrixArith_A<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestSymMatrixArith_A<int>();
 #endif
