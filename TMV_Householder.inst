@@ -1,0 +1,43 @@
+
+#define CT complex<T>
+
+#define DefHR(T)\
+template T Householder_Reflect(const VectorView<T >& v, T& det);  \
+template T Householder_Reflect(const MatrixView<T >& m, T& det);  \
+template void Householder_Unpack(const VectorView<T >& v, T beta); \
+template void Householder_Unpack(const MatrixView<T >& m, T beta); \
+template void BlockHouseholder_Augment(const GenMatrix<T >& Y, \
+    const UpperTriMatrixView<T >& Z, T beta); \
+template void BlockHouseholder_MakeZ(const GenMatrix<T >& Y, \
+    const UpperTriMatrixView<T >& Z, const GenVector<T >& beta); \
+template void BlockHouseholder_Unpack(const MatrixView<T >& Y, \
+    const GenUpperTriMatrix<T >& Z, const MatrixView<T >& m); \
+
+DefHR(T);
+DefHR(CT);
+
+#undef DefHR
+
+#define DefMult(T1,T2)\
+template void Householder_LMult(const GenVector<T1 >& v, T1 beta, \
+    const MatrixView<T2 >& m); \
+template void Householder_LMult(const GenVector<T1 >& v, T1 beta, \
+    const VectorView<T2 >& x); \
+template void Householder_LRMult(const GenVector<T1 >& v, T1 beta, \
+    const SymMatrixView<T2 >& m); \
+template void BlockHouseholder_LMult(const GenMatrix<T1 >& Y, \
+    const GenUpperTriMatrix<T1 >& Z, const MatrixView<T2 >& m); \
+template void BlockHouseholder_RMult(const GenMatrix<T1 >& Y, \
+    const GenUpperTriMatrix<T1 >& Z, const MatrixView<T2 >& m); \
+template void BlockHouseholder_LDiv(const GenMatrix<T1 >& Y, \
+    const GenUpperTriMatrix<T1 >& Z, const MatrixView<T2 >& m); \
+template void BlockHouseholder_RDiv(const GenMatrix<T1 >& Y, \
+    const GenUpperTriMatrix<T1 >& Z, const MatrixView<T2 >& m); \
+
+DefMult(T,T);
+DefMult(T,CT);
+DefMult(CT,CT);
+
+#undef DefMult
+
+#undef CT

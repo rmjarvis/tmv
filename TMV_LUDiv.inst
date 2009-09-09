@@ -1,0 +1,23 @@
+
+#define CT complex<T>
+
+#define DefLUD(T)\
+  template class LUDiv<T >; \
+  template void LU_Decompose(const MatrixView<T >& lu, size_t* p, T& det); \
+
+DefLUD(T);
+DefLUD(CT);
+#undef DefLUD
+
+#define DefDivEq(T1,T2)\
+  template void LU_LDivEq(const GenMatrix<T1 >& A,\
+      const size_t* P, const MatrixView<T2 >& b); \
+  template void LU_RDivEq(const GenMatrix<T1 >& A,\
+      const size_t* P, const MatrixView<T2 >& b); \
+
+DefDivEq(T,T);
+DefDivEq(T,CT);
+DefDivEq(CT,CT);
+#undef DefDivEq
+
+#undef CT
