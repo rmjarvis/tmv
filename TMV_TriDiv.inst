@@ -1,0 +1,26 @@
+
+#define CT complex<T>
+
+template class UpperTriDiv<T>;
+template class UpperTriDiv<CT >;
+template class LowerTriDiv<T>;
+template class LowerTriDiv<CT >;
+
+#define DefMV(T,T1)\
+template void TriLDivEq(const GenUpperTriMatrix<T1 >& A, \
+    const MatrixView<T >& m); \
+template void TriLDivEq(const GenLowerTriMatrix<T1 >& A, \
+    const MatrixView<T >& m); \
+template void TriLDivEq(const GenUpperTriMatrix<T1 >& A, \
+    const UpperTriMatrixView<T >& m); \
+template void TriLDivEq(const GenLowerTriMatrix<T1 >& A, \
+    const LowerTriMatrixView<T >& m); \
+
+DefMV(T,T);
+DefMV(T,CT);
+DefMV(CT,CT);
+
+#undef DefMV
+
+#undef CT
+

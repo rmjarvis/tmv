@@ -1,0 +1,40 @@
+
+#define CT complex<T>
+
+#define DefFuncs(RT,T)\
+  template class GenDiagMatrix<T >;  \
+  template class DiagMatrixView<T >;  \
+  template class DiagMatrix<T >;  \
+  template istream& operator>>(istream& fin, DiagMatrix<T >* m); \
+  template istream& operator>>(istream& fin, const DiagMatrixView<T >& m);  \
+
+DefFuncs(T,T);
+DefFuncs(T,CT);
+
+#undef DefFuncs
+
+#define DefDivEq(T,T1) \
+  template void GenDiagMatrix<T >::DivEq( \
+      const DiagMatrixView<T1 >& m) const;\
+
+DefDivEq(T,T);
+DefDivEq(T,CT);
+DefDivEq(CT,CT);
+
+#undef DefDivEq
+
+#define DefDiv(T,T1,T0) \
+  template void GenDiagMatrix<T >::Div( \
+      const GenDiagMatrix<T1 >& m1, \
+      const DiagMatrixView<T0 >& m0) const;\
+
+DefDiv(T,T,T);
+//DefDiv(T,T,CT);
+DefDiv(T,CT,CT);
+DefDiv(CT,T,CT);
+DefDiv(CT,CT,CT);
+
+#undef DefDiv
+
+#undef CT
+

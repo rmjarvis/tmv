@@ -1,0 +1,26 @@
+
+#define CT complex<T>
+
+#define DefFuncs(T) \
+template class GenSymMatrix<T >; \
+template class SymMatrixView<T >; \
+template istream& operator>>(istream& fin, const SymMatrixView<T >& m); \
+
+DefFuncs(T);
+DefFuncs(CT);
+
+#undef DefFuncs
+
+#define DefClass(T,U,S) \
+template class SymMatrix<T,U,S>; \
+template class HermMatrix<T,U,S>; \
+template istream& operator>>(istream& is, SymMatrix<T,U,S>* m); \
+
+DefClass(T,Upper,RowMajor);
+DefClass(T,Upper,ColMajor);
+DefClass(T,Lower,RowMajor);
+DefClass(T,Lower,ColMajor);
+
+#undef DefClass
+
+#undef CT

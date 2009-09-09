@@ -1,0 +1,40 @@
+
+#define CT complex<T>
+
+#define DefFuncs(RT,T)\
+  template class Matrix<T,RowMajor>; \
+  template class Matrix<T,ColMajor>; \
+  template class GenMatrix<T >;  \
+  template class MatrixView<T >;  \
+  template istream& operator>>(istream& fin, Matrix<T,RowMajor>* m); \
+  template istream& operator>>(istream& fin, Matrix<T,ColMajor>* m); \
+  template istream& operator>>(istream& fin, const MatrixView<T >& m);  \
+  template RT NormSq(const GenMatrix<T >& m); \
+  template RT NormF(const GenMatrix<T >& m); \
+  template RT Norm1(const GenMatrix<T >& m); \
+  template RT NormInf(const GenMatrix<T >& m); \
+  template RT MaxAbsElement(const GenMatrix<T >& m); \
+  template void Swap(const MatrixView<T >& m1, const MatrixView<T >& m2); \
+  template void DoCopySameType<true>(const GenMatrix<T >& m1, \
+      const MatrixView<T >& m2);  \
+  template void DoCopySameType<false>(const GenMatrix<T >& m1, \
+      const MatrixView<T >& m2);  \
+
+DefFuncs(T,T);
+DefFuncs(T,CT);
+
+#undef DefFuncs
+
+#define DefFuncs2(T1,T2)\
+  template bool operator==(const GenMatrix<T1 >& m1, \
+      const GenMatrix<T2 >& m2); \
+
+DefFuncs2(T,T);
+DefFuncs2(T,CT);
+DefFuncs2(CT,T);
+DefFuncs2(CT,CT);
+
+#undef DefFuncs2
+
+#undef CT
+

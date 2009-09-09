@@ -1,0 +1,54 @@
+
+#define CT complex<T>
+
+
+#define DefFuncs(RT,T)\
+  template class GenBandMatrix<T >;  \
+  template class ConstBandMatrixView<T >;  \
+  template class BandMatrixView<T >;  \
+  template RT NormSq(const GenBandMatrix<T >& m); \
+  template RT NormF(const GenBandMatrix<T >& m); \
+  template RT Norm1(const GenBandMatrix<T >& m); \
+  template RT NormInf(const GenBandMatrix<T >& m); \
+  template RT MaxAbsElement(const GenBandMatrix<T >& m); \
+  template void Swap(const BandMatrixView<T >& m1, \
+      const BandMatrixView<T >& m2); \
+  template istream& operator>>(istream& fin, const BandMatrixView<T >& m);  \
+  template BandMatrix<T,DiagMajor> UpperBiDiagMatrix( \
+      const GenVector<T >& v1, const GenVector<T >& v2); \
+  template BandMatrix<T,DiagMajor> LowerBiDiagMatrix( \
+      const GenVector<T >& v1, const GenVector<T >& v2); \
+  template BandMatrix<T,DiagMajor> TriDiagMatrix( \
+      const GenVector<T >& v1, const GenVector<T >& v2, \
+      const GenVector<T >& v3); \
+
+DefFuncs(T,T);
+DefFuncs(T,CT);
+
+#undef DefFuncs
+
+#define DefFuncs2(T1,T2)\
+  template bool operator==(const GenBandMatrix<T1 >& m1, \
+      const GenBandMatrix<T2 >& m2); \
+
+DefFuncs2(T,T);
+DefFuncs2(T,CT);
+DefFuncs2(CT,T);
+DefFuncs2(CT,CT);
+
+#undef DefFuncs2
+
+#define DefClass(T,S)\
+  template class BandMatrix<T,S>; \
+  template istream& operator>>(istream& fin, BandMatrix<T,S>* m); \
+
+DefClass(T,RowMajor);
+DefClass(T,ColMajor);
+DefClass(T,DiagMajor);
+DefClass(CT,RowMajor);
+DefClass(CT,ColMajor);
+DefClass(CT,DiagMajor);
+
+#undef DefClass
+
+#undef CT
