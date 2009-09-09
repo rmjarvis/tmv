@@ -1,0 +1,39 @@
+
+#define CT complex<T>
+
+#define DefMV(T,Ta,Tx)\
+  template void MultMV(const T alpha, const GenUpperTriMatrix<Ta >& A, \
+      const GenVector<Tx >& x, const T beta, const VectorView<T >& y);  \
+  template void MultMV(const T alpha, const GenLowerTriMatrix<Ta >& A, \
+      const GenVector<Tx >& x, const T beta, const VectorView<T >& y);  \
+  template void ColAddMultMV<false>(const GenUpperTriMatrix<Ta >& A, \
+      const GenVector<Tx >& x, const VectorView<T >& y); \
+  template void ColAddMultMV<false>(const GenLowerTriMatrix<Ta >& A, \
+      const GenVector<Tx >& x, const VectorView<T >& y); \
+
+
+DefMV(T,T,T)
+DefMV(CT,T,T)
+DefMV(CT,T,CT)
+DefMV(CT,CT,T)
+DefMV(CT,CT,CT)
+
+#undef DefMV
+
+#define DefMultEq(T,Ta)\
+  template void MultEqMV(const GenUpperTriMatrix<Ta >& A, \
+      const VectorView<T >& x);  \
+  template void MultEqMV(const GenLowerTriMatrix<Ta >& A, \
+      const VectorView<T >& x);  \
+  template void ColMultEqMV<false>(const GenUpperTriMatrix<Ta >& A, \
+      const VectorView<T >& y); \
+  template void ColMultEqMV<false>(const GenLowerTriMatrix<Ta >& A, \
+      const VectorView<T >& y); \
+
+DefMultEq(T,T)
+DefMultEq(CT,T)
+DefMultEq(CT,CT)
+
+#undef DefMultEq
+
+#undef CT

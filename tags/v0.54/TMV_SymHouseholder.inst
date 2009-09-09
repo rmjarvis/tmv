@@ -1,0 +1,14 @@
+
+#define CT complex<T>
+
+#define DefSymMult(T,T1)\
+template void Householder_LRMult(const GenVector<T1 >& v, T1 beta, \
+    const SymMatrixView<T >& m); \
+
+DefSymMult(T,T)
+DefSymMult(CT,T)
+DefSymMult(CT,CT)
+
+#undef SymMult
+
+#undef CT

@@ -1,0 +1,16 @@
+
+#define CT complex<T>
+
+#define DefR1(T,Tx,Ty)\
+  template void Rank1Update(const T alpha,const GenVector<Tx >& x, \
+      const GenVector<Ty >& y, const int beta, const MatrixView<T >& A); 
+
+DefR1(T,T,T)
+DefR1(CT,T,T)
+DefR1(CT,T,CT)
+DefR1(CT,CT,T)
+DefR1(CT,CT,CT)
+
+#undef DefR1
+
+#undef CT

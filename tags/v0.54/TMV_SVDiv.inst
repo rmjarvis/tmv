@@ -1,0 +1,17 @@
+
+#define CT complex<T>
+
+#define DefFuncs(RT,T)\
+  template SVDiv<T >::SVDiv(const GenMatrix<T >& A, \
+      bool _inplace, bool StoreU, bool StoreV); \
+  template bool SVDiv<T >::CheckDecomp( \
+      const BaseMatrix<T >& m, ostream* fout) const; \
+  template void SVDiv<T >::Thresh(RT toler, ostream* debugout) const; \
+  template void SVDiv<T >::Top(size_t neigen, ostream* debugout) const; \
+
+DefFuncs(T,T)
+DefFuncs(T,CT)
+
+#undef DefFuncs
+
+#undef CT

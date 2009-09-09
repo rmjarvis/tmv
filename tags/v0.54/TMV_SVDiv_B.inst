@@ -1,0 +1,21 @@
+
+#define CT complex<T>
+
+#define DefDiv(T,RT1,T1,T2)\
+template void SV_LDiv(const GenMatrix<T1 >& U,\
+    const GenVector<RT1 >& S, const GenMatrix<T1 >& V, const size_t kmax, \
+    const GenMatrix<T2 >& m, const MatrixView<T >& x); \
+template void SV_RDiv(const GenMatrix<T1 >& U,\
+    const GenVector<RT1 >& S, const GenMatrix<T1 >& V, const size_t kmax, \
+    const GenMatrix<T2 >& m, const MatrixView<T >& x); \
+
+DefDiv(T,T,T,T)
+DefDiv(CT,T,T,T)
+DefDiv(CT,T,T,CT)
+DefDiv(CT,T,CT,T)
+DefDiv(CT,T,CT,CT)
+
+#undef DefDiv
+
+#undef CT
+

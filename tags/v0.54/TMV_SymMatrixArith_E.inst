@@ -1,0 +1,18 @@
+
+#define CT complex<T>
+
+#define DefR1(T,Tx)\
+  template void RankKUpdate(const T alpha,const GenMatrix<Tx >& x, \
+      const int beta, const SymMatrixView<T >& A); \
+  template void RankKUpdate(const T alpha,const GenLowerTriMatrix<Tx >& x, \
+      const int beta, const SymMatrixView<T >& A); \
+  template void RankKUpdate(const T alpha,const GenUpperTriMatrix<Tx >& x, \
+      const int beta, const SymMatrixView<T >& A); \
+
+DefR1(T,T)
+DefR1(CT,T)
+DefR1(CT,CT)
+
+#undef DefR1
+
+#undef CT

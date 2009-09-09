@@ -1,0 +1,30 @@
+
+#define CT complex<T>
+
+#define DefFuncs(T) \
+  template HermCHDiv<T >::HermCHDiv(const GenSymMatrix<T >& A, bool _inplace); \
+  template bool HermCHDiv<T >::CheckDecomp( \
+      const BaseMatrix<T >& m, ostream* fout) const; \
+  template T HermCHDiv<T >::Det() const; \
+
+DefFuncs(T)
+DefFuncs(CT)
+
+#undef DefFuncs
+
+#define DefDivEq(T1,T2)\
+  template void HermCH_LDivEq(const GenSymMatrix<T1 >& LL,\
+      const MatrixView<T2 >& b); \
+  template void HermCH_RDivEq(const GenSymMatrix<T1 >& LL,\
+      const MatrixView<T2 >& b); \
+
+DefDivEq(T,T)
+DefDivEq(T,CT)
+DefDivEq(CT,CT)
+
+#undef DefDivEq
+
+#undef CT
+
+
+

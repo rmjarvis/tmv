@@ -1,0 +1,72 @@
+
+#define CT complex<T>
+
+#define DefFuncs(RT,T,RefT) \
+  template T GenSymMatrix<T >::cref(size_t i, size_t j) const; \
+  template RefT SymMatrixView<T,CStyle>::ref(size_t i, size_t j) const; \
+  template void GenSymMatrix<T >::NewDivider() const; \
+  template void GenSymMatrix<T >::Inverse( \
+      const SymMatrixView<T >& sinv) const; \
+  template bool GenSymMatrix<T >::OKSubMatrix( \
+      int i1, int i2, int j1, int j2, int istep, int jstep) const; \
+  template bool GenSymMatrix<T >::OKSubVector( \
+      size_t i, size_t j, int istep, int jstep, size_t n) const ; \
+  template bool GenSymMatrix<T >::OKSubSymMatrix( \
+      int i1, int i2, int istep) const ; \
+  template bool ConstSymMatrixView<T,FortranStyle>::OKSubMatrix( \
+      int i1, int i2, int j1, int j2, int istep, int jstep) const; \
+  template bool ConstSymMatrixView<T,FortranStyle>::OKSubVector( \
+      size_t i, size_t j, int istep, int jstep, size_t n) const ; \
+  template bool ConstSymMatrixView<T,FortranStyle>::OKSubSymMatrix( \
+      int i1, int i2, int istep) const ; \
+  template const SymMatrixView<T,CStyle>& \
+      SymMatrixView<T,CStyle>::SwapRowsCols(size_t i1, size_t i2) const; \
+  template const SymMatrixView<T,CStyle>& \
+      SymMatrixView<T,CStyle>::PermuteRowsCols( \
+	  const size_t* p, size_t i1, size_t i2) const; \
+  template const SymMatrixView<T,CStyle>&  \
+      SymMatrixView<T,CStyle>::ReversePermuteRowsCols( \
+  	  const size_t* p, size_t i1, size_t i2) const; \
+  template RT GenSymMatrix<T >::NormSq() const; \
+  template RT GenSymMatrix<T >::MaxAbsElement() const; \
+  template RT GenSymMatrix<T >::Norm1() const; \
+  template RT GenSymMatrix<T >::NormF() const; \
+  template void GenSymMatrix<T >::Write(ostream& os) const; \
+  template void GenSymMatrix<T >::Write(ostream& os, \
+      RT thresh) const; \
+  template void GenSymMatrix<T >::WriteCompact(ostream& os) const; \
+  template void GenSymMatrix<T >::WriteCompact(ostream& os, \
+      RT thresh) const; \
+  template void SymMatrixReadError<T >::Write(ostream& os) const throw(); \
+  template void HermMatrixReadError<T >::Write(ostream& os) const throw(); \
+  template void SymMatrixView<T,CStyle>::Read(istream& is) const; \
+  template istream& operator>>(istream& fin, const SymMatrixView<T >& m); \
+
+DefFuncs(T,T,T&)
+DefFuncs(T,CT,VarConjRef<complex<T> >)
+
+#undef DefFuncs
+
+#define DefIO(T,U,S) \
+  template istream& operator>>(istream& is, \
+      auto_ptr<SymMatrix<T,U,S> >& m); \
+  template istream& operator>>(istream& is, \
+      auto_ptr<SymMatrix<T,U,S,FortranStyle> >& m); \
+  template istream& operator>>(istream& is, \
+      auto_ptr<HermMatrix<T,U,S> >& m); \
+  template istream& operator>>(istream& is, \
+      auto_ptr<HermMatrix<T,U,S,FortranStyle> >& m); \
+
+DefIO(T,Upper,RowMajor)
+DefIO(T,Upper,ColMajor)
+DefIO(T,Lower,RowMajor)
+DefIO(T,Lower,ColMajor)
+DefIO(CT,Upper,RowMajor)
+DefIO(CT,Upper,ColMajor)
+DefIO(CT,Lower,RowMajor)
+DefIO(CT,Lower,ColMajor)
+
+#undef DefIO
+
+#undef CT
+

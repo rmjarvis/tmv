@@ -1,0 +1,17 @@
+
+#define CT complex<T>
+
+#define DefInv(T) \
+template void UpperTriDiv<T >::Inverse( \
+    const UpperTriMatrixView<T >& minv) const; \
+template void LowerTriDiv<T >::Inverse( \
+    const LowerTriMatrixView<T >& minv) const; \
+template void UpperTriDiv<T >::InverseATA(const MatrixView<T >& minv) const; \
+template void LowerTriDiv<T >::InverseATA(const MatrixView<T >& minv) const; \
+
+DefInv(T)
+DefInv(CT)
+#undef DefInv
+
+#undef CT
+

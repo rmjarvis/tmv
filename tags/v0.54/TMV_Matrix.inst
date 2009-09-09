@@ -1,0 +1,78 @@
+
+#define CT complex<T>
+
+#define DefFuncs(RT,T,RefT)\
+  template T GenMatrix<T >::cref(size_t i, size_t j) const; \
+  template RefT MatrixView<T,CStyle>::ref( \
+      size_t i, size_t j) const; \
+  template void GenMatrix<T >::NewDivider() const; \
+  template Matrix<T,RowMajor,CStyle>::Matrix(const vector<vector<T > >& vv); \
+  template Matrix<T,ColMajor,CStyle>::Matrix(const vector<vector<T > >& vv); \
+  template bool GenMatrix<T >::OKSubMatrix( \
+      int i1, int i2, int j1, int j2, int istep, int jstep) const; \
+  template bool GenMatrix<T >::OKSubVector( \
+      size_t i, size_t j, int istep, int jstep, size_t size) const ; \
+  template bool ConstMatrixView<T,FortranStyle>::OKSubMatrix( \
+      int i1, int i2, int j1, int j2, int istep, int jstep) const; \
+  template bool ConstMatrixView<T,FortranStyle>::OKSubVector( \
+      size_t i, size_t j, int istep, int jstep, size_t size) const ; \
+  template RT GenMatrix<T >::NormSq() const; \
+  template RT GenMatrix<T >::MaxAbsElement() const; \
+  template RT GenMatrix<T >::Norm1() const; \
+  template RT GenMatrix<T >::NormF() const; \
+  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::Clip( \
+      RT thresh) const; \
+  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::SetAllTo( \
+      T x) const; \
+  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::TransposeSelf( \
+      ) const; \
+  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::ConjugateSelf( \
+      ) const; \
+  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::SetToIdentity( \
+      T x) const ; \
+  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::PermuteRows( \
+	const size_t* p, size_t i1, size_t i2) const; \
+  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::ReversePermuteRows( \
+	const size_t* p, size_t i1, size_t i2) const; \
+  template void GenMatrix<T >::Write(ostream& os) const; \
+  template void GenMatrix<T >::Write(ostream& os, RT thresh) const; \
+  template void MatrixReadError<T >::Write(ostream& os) const throw(); \
+  template void MatrixView<T,CStyle>::Read(istream& is) const; \
+  template istream& operator>>(istream& fin, \
+      auto_ptr<Matrix<T,RowMajor> >& m); \
+  template istream& operator>>(istream& fin, \
+      auto_ptr<Matrix<T,ColMajor> >& m); \
+  template istream& operator>>(istream& fin, \
+      auto_ptr<Matrix<T,RowMajor,FortranStyle> >& m); \
+  template istream& operator>>(istream& fin, \
+      auto_ptr<Matrix<T,ColMajor,FortranStyle> >& m); \
+  template istream& operator>>(istream& fin, const MatrixView<T >& m);  \
+  template RT NormSq(const GenMatrix<T >& m); \
+  template RT NormF(const GenMatrix<T >& m); \
+  template RT Norm1(const GenMatrix<T >& m); \
+  template RT NormInf(const GenMatrix<T >& m); \
+  template RT MaxAbsElement(const GenMatrix<T >& m); \
+  template void Swap(const MatrixView<T >& m1, const MatrixView<T >& m2); \
+  template void DoCopySameType<true>(const GenMatrix<T >& m1, \
+      const MatrixView<T >& m2);  \
+  template void DoCopySameType<false>(const GenMatrix<T >& m1, \
+      const MatrixView<T >& m2);  \
+
+DefFuncs(T,T,T&)
+DefFuncs(T,CT,VarConjRef<complex<T> >)
+
+#undef DefFuncs
+
+#define DefFuncs2(T1,T2)\
+  template bool operator==(const GenMatrix<T1 >& m1, \
+      const GenMatrix<T2 >& m2); \
+
+DefFuncs2(T,T)
+DefFuncs2(T,CT)
+DefFuncs2(CT,T)
+DefFuncs2(CT,CT)
+
+#undef DefFuncs2
+
+#undef CT
+

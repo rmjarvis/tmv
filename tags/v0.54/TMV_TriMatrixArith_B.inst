@@ -1,0 +1,36 @@
+
+#define CT complex<T>
+
+#define DefXM(T)\
+  template void MultXM(const T alpha, const UpperTriMatrixView<T >& A); \
+  
+DefXM(T)
+DefXM(CT)
+
+#undef DefXM
+
+#define DefEl(T,T1)\
+  template void ElementProd(const T alpha, \
+      const GenUpperTriMatrix<T1 >& A, const UpperTriMatrixView<T >& B);  \
+
+DefEl(T,T)
+DefEl(CT,T)
+DefEl(CT,CT)
+
+#undef DefEl
+
+#define DefAddEl(T,T1,T2)\
+  template void AddElementProd(const T alpha, \
+      const GenUpperTriMatrix<T1 >& A, const GenUpperTriMatrix<T2 >& B, \
+      const UpperTriMatrixView<T >& C);  \
+
+DefAddEl(T,T,T)
+DefAddEl(CT,T,T)
+DefAddEl(CT,T,CT)
+DefAddEl(CT,CT,T)
+DefAddEl(CT,CT,CT)
+
+#undef DefAddEl
+
+#undef CT
+

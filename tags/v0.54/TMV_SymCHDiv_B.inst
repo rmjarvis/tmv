@@ -1,0 +1,15 @@
+#define CT complex<T>
+
+#define DefInv(T) \
+template void HermCHDiv<T >::Inverse(const SymMatrixView<T >& sinv) const; \
+template void HermCHDiv<T >::Inverse(const MatrixView<T >& minv) const; \
+template void HermCHDiv<T >::InverseATA(const MatrixView<T >& minv) const; \
+template void SymATASquare<true,T >(const MatrixView<T >& A); \
+template void SymATASquare<false,T >(const MatrixView<T >& A); \
+
+DefInv(T)
+DefInv(CT)
+#undef DefInv
+
+#undef CT
+

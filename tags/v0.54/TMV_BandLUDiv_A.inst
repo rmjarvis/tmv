@@ -1,0 +1,13 @@
+
+#define CT complex<T>
+
+#define DefLUD(T1)\
+template void BandLU_Decompose(const BandMatrixView<T1 >& lu, \
+    size_t* p, T1& det, int Anhi); \
+
+DefLUD(T)
+DefLUD(CT)
+#undef DefLUD
+
+#undef CT
+

@@ -1,0 +1,14 @@
+
+#define CT complex<T>
+
+#define DefInv(T) \
+template void SymLUDiv<T >::Inverse(const SymMatrixView<T >& sinv) const; \
+template void SymLUDiv<T >::Inverse(const MatrixView<T >& minv) const; \
+template void SymLUDiv<T >::InverseATA(const MatrixView<T >& minv) const; \
+
+DefInv(T)
+DefInv(CT)
+#undef DefInv
+
+#undef CT
+

@@ -1,0 +1,67 @@
+
+#define CT complex<T>
+
+#define DefV(RT,T,RefT) \
+  template T GenVector<T >::cref(size_t i) const; \
+  template RefT VectorView<T,CStyle>::ref(size_t i) const; \
+  template bool GenVector<T >::OKSubVector(int i1, int i2, int istep) const; \
+  template bool ConstVectorView<T,FortranStyle>::OKSubVector( \
+      int i1, int i2, int istep) const; \
+  template RT GenVector<T >::NormSq() const; \
+  template RT GenVector<T >::Norm2() const; \
+  template T GenVector<T >::SumElements() const; \
+  template RT GenVector<T >::SumAbsElements() const; \
+  template T GenVector<T >::MinElement(size_t* iminout) const; \
+  template T GenVector<T >::MaxElement(size_t* imaxout) const; \
+  template RT GenVector<T >::MinAbsElement(size_t* iminout) const; \
+  template RT GenVector<T >::MaxAbsElement(size_t* imaxout) const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::Clip( \
+      RT thresh) const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::SetAllTo( \
+      T x) const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::AddToAll( \
+      T x) const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::ConjugateSelf( \
+      ) const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::Permute( \
+      const size_t* p, size_t i1, size_t i2) const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::ReversePermute( \
+	const size_t* p, size_t i1, size_t i2) const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::ReverseSelf( \
+      ) const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::Sort( \
+      size_t* P, ADType ad, COMPType comp) const; \
+  template void GenVector<T >::Write(ostream& fout) const; \
+  template void GenVector<T >::Write(ostream& fout, \
+      RT thresh) const; \
+  template void VectorReadError<T >::Write(ostream& os) const throw(); \
+  template void VectorView<T,CStyle>::Read(istream& is) const; \
+  template void DoCopySameType<true,T >(const GenVector<T >& v1, \
+      const VectorView<T >& v2); \
+  template void DoCopySameType<false,T >(const GenVector<T >& v1, \
+      const VectorView<T >& v2); \
+  template void Swap(const VectorView<T >& v1, const VectorView<T >& v2); \
+  template istream& operator>>(istream& fin, const VectorView<T >& v); \
+  template istream& operator>>(istream& fin, \
+      auto_ptr<Vector<T > >& v); \
+  template istream& operator>>(istream& fin, \
+      auto_ptr<Vector<T,FortranStyle> >& v); \
+
+DefV(T,T,T&)
+DefV(T,CT,VarConjRef<complex<T> >)
+
+#undef DefV
+
+#define DefV2(T1,T2) \
+  template bool operator==(const GenVector<T1 >& v1, \
+      const GenVector<T2 >& v2); \
+
+DefV2(T,T)
+DefV2(T,CT)
+DefV2(CT,T)
+DefV2(CT,CT)
+
+#undef DefV2
+
+#undef CT
+

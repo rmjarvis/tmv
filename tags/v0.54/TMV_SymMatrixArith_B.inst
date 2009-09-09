@@ -1,0 +1,14 @@
+
+#define CT complex<T>
+
+#define DefR1(T,Tx)\
+  template void Rank1Update(const T alpha,const GenVector<Tx >& x, \
+      const int beta, const SymMatrixView<T >& A); \
+
+DefR1(T,T)
+DefR1(CT,T)
+DefR1(CT,CT)
+
+#undef DefR1
+
+#undef CT

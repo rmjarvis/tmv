@@ -1,0 +1,144 @@
+
+#define CT complex<T>
+
+#define DefFuncs(RT,T,RefT) \
+  template T GenUpperTriMatrix<T >::cref(size_t i, size_t j) const; \
+  template RefT UpperTriMatrixView<T,CStyle>::ref( \
+      size_t i, size_t j) const; \
+  template void GenUpperTriMatrix<T >::NewDivider() const; \
+  template void GenUpperTriMatrix<T >::Inverse( \
+      const UpperTriMatrixView<T >& minv) const; \
+  template T GenLowerTriMatrix<T >::cref(size_t i, size_t j) const; \
+  template RefT LowerTriMatrixView<T,CStyle>::ref( \
+      size_t i, size_t j) const; \
+  template void GenLowerTriMatrix<T >::NewDivider() const; \
+  template void GenLowerTriMatrix<T >::Inverse( \
+      const LowerTriMatrixView<T >& minv) const; \
+  template bool GenUpperTriMatrix<T >::OKSubMatrix( \
+      int i1, int i2, int j1, int j2, int istep, int jstep) const; \
+  template bool GenUpperTriMatrix<T >::OKSubVector( \
+      size_t i, size_t j, int istep, int jstep, size_t n) const ; \
+  template bool GenUpperTriMatrix<T >::OKSubTriMatrix( \
+      int i1, int i2, int istep) const ; \
+  template bool ConstUpperTriMatrixView<T,FortranStyle>::OKSubMatrix( \
+      int i1, int i2, int j1, int j2, int istep, int jstep) const; \
+  template bool ConstUpperTriMatrixView<T,FortranStyle>::OKSubVector( \
+      size_t i, size_t j, int istep, int jstep, size_t n) const ; \
+  template bool ConstUpperTriMatrixView<T,FortranStyle>::OKSubTriMatrix( \
+      int i1, int i2, int istep) const ; \
+  template RT GenUpperTriMatrix<T >::NormSq() const; \
+  template RT GenUpperTriMatrix<T >::MaxAbsElement() const; \
+  template RT GenUpperTriMatrix<T >::Norm1() const; \
+  template RT GenUpperTriMatrix<T >::NormInf() const; \
+  template RT GenUpperTriMatrix<T >::NormF() const; \
+  template const UpperTriMatrixView<T,CStyle>& \
+      UpperTriMatrixView<T,CStyle>::SetAllTo(T x) const; \
+  template const UpperTriMatrixView<T,CStyle>& \
+      UpperTriMatrixView<T,CStyle>::Clip(RT thresh) const; \
+  template const UpperTriMatrixView<T,CStyle>& \
+      UpperTriMatrixView<T,CStyle>::ConjugateSelf() const; \
+  template const UpperTriMatrixView<T,CStyle>& \
+      UpperTriMatrixView<T,CStyle>::SetToIdentity(T x) const ; \
+  template void GenUpperTriMatrix<T >::Write(ostream& os) const; \
+  template void GenUpperTriMatrix<T >::Write(ostream& os, \
+      RT thresh) const; \
+  template void GenUpperTriMatrix<T >::WriteCompact(ostream& os) const; \
+  template void GenUpperTriMatrix<T >::WriteCompact(ostream& os, \
+      RT thresh) const; \
+  template void UpperTriMatrixReadError<T >::Write( \
+      ostream& os) const throw(); \
+  template void LowerTriMatrixReadError<T >::Write( \
+      ostream& os) const throw(); \
+  template void UpperTriMatrixView<T,CStyle>::Read( \
+      istream& is) const; \
+  template void GenLowerTriMatrix<T >::Write(ostream& os) const; \
+  template void GenLowerTriMatrix<T >::Write(ostream& os, \
+      RT thresh) const; \
+  template void GenLowerTriMatrix<T >::WriteCompact(ostream& os) const; \
+  template void GenLowerTriMatrix<T >::WriteCompact(ostream& os, \
+      RT thresh) const; \
+  template void LowerTriMatrixView<T,CStyle>::Read( \
+      istream& is) const; \
+  template istream& operator>>(istream& fin, const UpperTriMatrixView<T >& m); \
+  template istream& operator>>(istream& fin, const LowerTriMatrixView<T >& m); \
+  template void Swap(const UpperTriMatrixView<T >& m1, \
+      const UpperTriMatrixView<T >& m2); \
+
+DefFuncs(T,T,T&)
+DefFuncs(T,CT,VarConjRef<complex<T> >)
+
+#undef DefFuncs
+
+#define DefFuncs2(T1,T2) \
+  template bool operator==(const GenUpperTriMatrix<T1 >& m1, \
+      const GenUpperTriMatrix<T2 >& m2); \
+
+DefFuncs2(T,T)
+DefFuncs2(T,CT)
+DefFuncs2(CT,T)
+DefFuncs2(CT,CT)
+
+#undef DefFuncs2
+
+#define DefIO(T,D,S) \
+  template istream& operator>>(istream& is, \
+      auto_ptr<UpperTriMatrix<T,D,S> >& m); \
+  template istream& operator>>(istream& is, \
+      auto_ptr<LowerTriMatrix<T,D,S> >& m); \
+  template istream& operator>>(istream& is, \
+      auto_ptr<UpperTriMatrix<T,D,S,FortranStyle> >& m); \
+  template istream& operator>>(istream& is,  \
+      auto_ptr<LowerTriMatrix<T,D,S,FortranStyle> >& m); \
+
+DefIO(T,UnitDiag,RowMajor)
+DefIO(T,UnitDiag,ColMajor)
+DefIO(T,NonUnitDiag,RowMajor)
+DefIO(T,NonUnitDiag,ColMajor)
+DefIO(CT,UnitDiag,RowMajor)
+DefIO(CT,UnitDiag,ColMajor)
+DefIO(CT,NonUnitDiag,RowMajor)
+DefIO(CT,NonUnitDiag,ColMajor)
+
+#undef DefIO
+
+#define DefDivEq(T,T1) \
+  template void GenUpperTriMatrix<T >::LDivEq( \
+      const UpperTriMatrixView<T1 >& m) const;\
+  template void GenUpperTriMatrix<T >::RDivEq( \
+      const UpperTriMatrixView<T1 >& m) const;\
+  template void GenLowerTriMatrix<T >::LDivEq( \
+      const LowerTriMatrixView<T1 >& m) const;\
+  template void GenLowerTriMatrix<T >::RDivEq( \
+      const LowerTriMatrixView<T1 >& m) const;\
+
+DefDivEq(T,T)
+DefDivEq(T,CT)
+DefDivEq(CT,CT)
+
+#undef DefDivEq
+
+#define DefDiv(T,T1,T0) \
+  template void GenUpperTriMatrix<T >::LDiv( \
+      const GenUpperTriMatrix<T1 >& m1, \
+      const UpperTriMatrixView<T0 >& m0) const;\
+  template void GenUpperTriMatrix<T >::RDiv( \
+      const GenUpperTriMatrix<T1 >& m1, \
+      const UpperTriMatrixView<T0 >& m0) const;\
+  template void GenLowerTriMatrix<T >::LDiv( \
+      const GenLowerTriMatrix<T1 >& m1, \
+      const LowerTriMatrixView<T0 >& m0) const;\
+  template void GenLowerTriMatrix<T > ::RDiv( \
+      const GenLowerTriMatrix<T1 >& m1, \
+      const LowerTriMatrixView<T0 >& m0) const;\
+
+DefDiv(T,T,T)
+DefDiv(T,T,CT)
+DefDiv(T,CT,CT)
+DefDiv(CT,T,CT)
+DefDiv(CT,CT,CT)
+
+#undef DefDiv
+
+
+#undef CT
+

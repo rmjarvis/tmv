@@ -1,0 +1,47 @@
+
+#define CT complex<T>
+
+#define DefFuncs(T)\
+  template void GenDiagMatrix<T >::Inverse( \
+      const DiagMatrixView<T >& minv) const; \
+  template void GenDiagMatrix<T >::InverseATA( \
+      const DiagMatrixView<T >& minv) const; \
+  template void GenDiagMatrix<T >::NewDivider() const; \
+  template void DiagMatrixReadError<T >::Write(ostream& os) const throw(); \
+  template istream& operator>>(istream& fin, \
+      auto_ptr<DiagMatrix<T > >& m); \
+  template istream& operator>>(istream& fin, \
+      auto_ptr<DiagMatrix<T,FortranStyle> >& m); \
+  template istream& operator>>(istream& fin, const DiagMatrixView<T >& m);  \
+
+DefFuncs(T)
+DefFuncs(CT)
+
+#undef DefFuncs
+
+#define DefDivEq(T,T1) \
+  template void GenDiagMatrix<T >::DivEq( \
+      const DiagMatrixView<T1 >& m) const;\
+
+DefDivEq(T,T)
+DefDivEq(T,CT)
+DefDivEq(CT,CT)
+
+#undef DefDivEq
+
+#define DefDiv(T,T1,T0) \
+  template void GenDiagMatrix<T >::Div( \
+      const GenDiagMatrix<T1 >& m1, \
+      const DiagMatrixView<T0 >& m0) const;\
+
+DefDiv(T,T,T)
+DefDiv(T,T,CT)
+DefDiv(T,CT,CT)
+DefDiv(CT,T,CT)
+DefDiv(CT,CT,CT)
+
+#undef DefDiv
+
+#undef CT
+
+

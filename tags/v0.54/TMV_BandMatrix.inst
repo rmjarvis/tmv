@@ -1,0 +1,88 @@
+
+#define CT complex<T>
+
+
+#define DefFuncs(RT,T,RefT)\
+  template T GenBandMatrix<T >::cref(size_t i, size_t j) const; \
+  template RefT BandMatrixView<T,CStyle>::ref(size_t i, size_t j) const; \
+  template void GenBandMatrix<T >::NewDivider() const; \
+  template bool GenBandMatrix<T >::OKSubMatrix( \
+      int i1, int i2, int j1, int j2, int istep, int jstep) const; \
+  template bool GenBandMatrix<T >::OKSubVector( \
+      size_t i, size_t j, int istep, int jstep, size_t size) const; \
+  template bool GenBandMatrix<T >::OKSubBandMatrix( \
+      int i1, int i2, int j1, int j2, int newnlo, int newnhi, \
+      int istep, int jstep) const; \
+  template bool ConstBandMatrixView<T,FortranStyle>::OKSubMatrix( \
+      int i1, int i2, int j1, int j2, int istep, int jstep) const; \
+  template bool ConstBandMatrixView<T,FortranStyle>::OKSubVector( \
+      size_t i, size_t j, int istep, int jstep, size_t size) const; \
+  template bool ConstBandMatrixView<T,FortranStyle>::OKSubBandMatrix( \
+      int i1, int i2, int j1, int j2, int newnlo, int newnhi, \
+      int istep, int jstep) const; \
+  template RT GenBandMatrix<T >::NormSq() const; \
+  template RT GenBandMatrix<T >::MaxAbsElement() const; \
+  template RT GenBandMatrix<T >::Norm1() const; \
+  template RT GenBandMatrix<T >::NormF() const; \
+  template const BandMatrixView<T >& BandMatrixView<T,CStyle>::Clip( \
+      RT thresh) const; \
+  template const BandMatrixView<T >& BandMatrixView<T,CStyle>::SetAllTo( \
+      T x) const; \
+  template const BandMatrixView<T >& BandMatrixView<T,CStyle>::ConjugateSelf( \
+      ) const; \
+  template void GenBandMatrix<T >::Write(ostream& os) const; \
+  template void GenBandMatrix<T >::Write(ostream& os, RT thresh) const; \
+  template void GenBandMatrix<T >::WriteCompact(ostream& os) const; \
+  template void GenBandMatrix<T >::WriteCompact(ostream& os, RT thresh) const; \
+  template void BandMatrixReadError<T >::Write(ostream& os) const throw(); \
+  template void BandMatrixView<T,CStyle>::Read(istream& is) const; \
+  template RT NormSq(const GenBandMatrix<T >& m); \
+  template RT NormF(const GenBandMatrix<T >& m); \
+  template RT Norm1(const GenBandMatrix<T >& m); \
+  template RT NormInf(const GenBandMatrix<T >& m); \
+  template RT MaxAbsElement(const GenBandMatrix<T >& m); \
+  template void Swap(const BandMatrixView<T >& m1, \
+      const BandMatrixView<T >& m2); \
+  template istream& operator>>(istream& fin, const BandMatrixView<T >& m);  \
+  template BandMatrix<T,DiagMajor> UpperBiDiagMatrix( \
+      const GenVector<T >& v1, const GenVector<T >& v2); \
+  template BandMatrix<T,DiagMajor> LowerBiDiagMatrix( \
+      const GenVector<T >& v1, const GenVector<T >& v2); \
+  template BandMatrix<T,DiagMajor> TriDiagMatrix( \
+      const GenVector<T >& v1, const GenVector<T >& v2, \
+      const GenVector<T >& v3); \
+
+DefFuncs(T,T,T&)
+DefFuncs(T,CT,VarConjRef<complex<T> >)
+
+#undef DefFuncs
+
+#define DefFuncs2(T1,T2)\
+  template bool operator==(const GenBandMatrix<T1 >& m1, \
+      const GenBandMatrix<T2 >& m2); \
+
+DefFuncs2(T,T)
+DefFuncs2(T,CT)
+DefFuncs2(CT,T)
+DefFuncs2(CT,CT)
+
+#undef DefFuncs2
+
+#define DefIO(T,S)\
+  template istream& operator>>(istream& fin, \
+      auto_ptr<BandMatrix<T,S> >& m); \
+  template istream& operator>>(istream& fin, \
+      auto_ptr<BandMatrix<T,S,FortranStyle> >& m); \
+
+DefIO(T,RowMajor)
+DefIO(T,ColMajor)
+DefIO(T,DiagMajor)
+DefIO(CT,RowMajor)
+DefIO(CT,ColMajor)
+DefIO(CT,DiagMajor)
+
+#undef DefIO
+
+#undef CT
+
+

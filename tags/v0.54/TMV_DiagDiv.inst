@@ -1,0 +1,27 @@
+
+#define CT complex<T>
+
+#define DefFuncs(T) \
+  template bool DiagDiv<T >::CheckDecomp(const BaseMatrix<T >& m, \
+      ostream* fout) const; \
+  template T DiagDiv<T >::Det() const; \
+  template void DiagDiv<T >::Inverse(const DiagMatrixView<T >& minv) const; \
+  template void DiagDiv<T >::InverseATA(const DiagMatrixView<T >& minv) const; \
+
+DefFuncs(T)
+DefFuncs(CT)
+
+#undef DefFuncs
+
+#define DefDivEq(T,T1) \
+template void DiagLDivEq(const GenDiagMatrix<T1 >& A, const MatrixView<T >& m); \
+template void DiagLDivEq(const GenDiagMatrix<T1 >& A, const VectorView<T >& v); \
+
+DefDivEq(T,T)
+DefDivEq(CT,T)
+DefDivEq(CT,CT)
+
+#undef DefDivEq
+
+#undef CT
+

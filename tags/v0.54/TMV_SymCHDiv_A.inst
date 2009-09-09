@@ -1,0 +1,11 @@
+
+#define CT complex<T>
+
+#define DefCHD(T)\
+template void HermCH_Decompose(const SymMatrixView<T >& A); \
+
+DefCHD(T)
+DefCHD(CT)
+#undef DefCHD
+
+#undef CT

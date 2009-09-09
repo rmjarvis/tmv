@@ -1,0 +1,15 @@
+
+#define CT complex<T>
+
+#define DefFuncs(T) \
+  template SymLUDiv<T >::SymLUDiv(const GenSymMatrix<T >& A, bool _inplace); \
+  template bool SymLUDiv<T >::CheckDecomp( \
+      const BaseMatrix<T >& m, ostream* fout) const; \
+  template const Matrix<T > SymLUDiv<T >::GetD() const; \
+
+DefFuncs(T)
+DefFuncs(CT)
+
+#undef DefFuncs
+
+#undef CT
