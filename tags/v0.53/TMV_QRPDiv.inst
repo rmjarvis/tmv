@@ -1,0 +1,7 @@
+#define CT complex<T>
+
+template class QRPDiv<T >;
+template class QRPDiv<CT >;
+
+#undef CT
+

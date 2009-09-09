@@ -1,0 +1,34 @@
+
+#define CT complex<T>
+
+#define DefFuncs(T) \
+template class GenSymMatrix<T >; \
+template class ConstSymMatrixView<T >; \
+template class ConstSymMatrixView<T,FortranStyle>; \
+template class SymMatrixView<T >; \
+template class SymMatrixView<T,FortranStyle>; \
+template istream& operator>>(istream& fin, const SymMatrixView<T >& m); \
+
+DefFuncs(T);
+DefFuncs(CT);
+
+#undef DefFuncs
+
+#define DefClass(T,U,S) \
+template class SymMatrix<T,U,S>; \
+template class HermMatrix<T,U,S>; \
+template class SymMatrix<T,U,S,FortranStyle>; \
+template class HermMatrix<T,U,S,FortranStyle>; \
+template istream& operator>>(istream& is, SymMatrix<T,U,S>*& m); \
+template istream& operator>>(istream& is, SymMatrix<T,U,S,FortranStyle>*& m); \
+template istream& operator>>(istream& is, HermMatrix<T,U,S>*& m); \
+template istream& operator>>(istream& is, HermMatrix<T,U,S,FortranStyle>*& m); \
+
+DefClass(T,Upper,RowMajor);
+DefClass(T,Upper,ColMajor);
+DefClass(T,Lower,RowMajor);
+DefClass(T,Lower,ColMajor);
+
+#undef DefClass
+
+#undef CT
