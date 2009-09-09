@@ -1,0 +1,11 @@
+#define CT complex<T>
+
+#define DefInv(T) \
+template void SVDiv<T >::Inverse(const MatrixView<T >& minv) const; \
+template void SVDiv<T >::DoInverseATA(const MatrixView<T >& minv) const; \
+
+DefInv(T)
+DefInv(CT)
+
+#undef CT
+
