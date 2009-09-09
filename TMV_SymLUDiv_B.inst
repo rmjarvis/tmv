@@ -1,0 +1,24 @@
+
+#define CT complex<T>
+
+#define DefDivEq(RT1,T1,T2)\
+  template void HermLU_LDivEq(const GenSymMatrix<T1 >& L,  \
+      const GenVector<T1 >& xD, const size_t* P, \
+      const MatrixView<T2 >& m); \
+  template void HermLU_RDivEq(const GenSymMatrix<T1 >& L,  \
+      const GenVector<T1 >& xD, const size_t* P, \
+      const MatrixView<T2 >& m); \
+  template void SymLU_LDivEq(const GenSymMatrix<T1 >& L,  \
+      const GenVector<T1 >& xD, const size_t* P, \
+      const MatrixView<T2 >& m); \
+  template void SymLU_RDivEq(const GenSymMatrix<T1 >& L,  \
+      const GenVector<T1 >& xD, const size_t* P, \
+      const MatrixView<T2 >& m); \
+
+DefDivEq(T,T,T);
+DefDivEq(T,T,CT);
+DefDivEq(T,CT,CT);
+#undef DefDivEq
+
+#undef CT
+

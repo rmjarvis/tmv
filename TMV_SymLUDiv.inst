@@ -1,0 +1,10 @@
+
+#define CT complex<T>
+
+template class HermLUDiv<T >; 
+template class SymLUDiv<T >; 
+template class HermLUDiv<CT >; 
+template class SymLUDiv<CT >; 
+
+#undef CT
+

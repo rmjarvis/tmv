@@ -1,0 +1,7 @@
+
+#define CT complex<T>
+
+template class LUDiv<T >;
+template class LUDiv<CT >;
+
+#undef CT

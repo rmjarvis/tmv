@@ -1,0 +1,23 @@
+
+#define CT complex<T>
+
+#define DefClass(T) \
+  template class DiagDiv<T >;
+
+DefClass(T);
+DefClass(CT);
+
+#undef DefClass
+
+#define DefDivEq(T,T1) \
+template void DiagLDivEq(const GenDiagMatrix<T1 >& A, \
+    const MatrixView<T >& m); \
+
+DefDivEq(T,T);
+DefDivEq(CT,T);
+DefDivEq(CT,CT);
+
+#undef DefDivEq
+
+#undef CT
+

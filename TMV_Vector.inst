@@ -1,0 +1,35 @@
+
+#define CT complex<T>
+
+#define DefV(RT,T) \
+  template class GenVector<T >; \
+  template class VectorView<T >; \
+  template class VectorView<T,FortranStyle>; \
+  template class Vector<T >; \
+  template class Vector<T,FortranStyle>; \
+  template void DoCopySameType<true,T >(const GenVector<T >& v1, \
+      const VectorView<T >& v2); \
+  template void DoCopySameType<false,T >(const GenVector<T >& v1, \
+      const VectorView<T >& v2); \
+  template void Swap(const VectorView<T >& v1, const VectorView<T >& v2); \
+  template istream& operator>>(istream& fin, const VectorView<T >& v); \
+  template istream& operator>>(istream& fin, Vector<T >*& v); \
+  template istream& operator>>(istream& fin, Vector<T,FortranStyle>*& v); \
+
+DefV(T,T);
+DefV(T,CT);
+
+#undef DefV
+
+#define DefV2(T1,T2) \
+  template bool operator==(const GenVector<T1 >& v1, \
+      const GenVector<T2 >& v2); \
+
+DefV2(T,T);
+DefV2(T,CT);
+DefV2(CT,T);
+DefV2(CT,CT);
+
+#undef DefV2
+
+#undef CT

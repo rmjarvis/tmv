@@ -1,0 +1,10 @@
+
+#define CT complex<T>
+
+template class HermSVDiv<T >; 
+template class HermSVDiv<CT >; 
+template class SymSVDiv<T >; 
+template class SymSVDiv<CT >; 
+
+#undef CT
+
