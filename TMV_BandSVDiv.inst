@@ -1,0 +1,8 @@
+
+#define CT complex<T>
+
+template class BandSVDiv<T >;
+template class BandSVDiv<CT >;
+
+#undef CT
+

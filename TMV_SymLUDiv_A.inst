@@ -1,0 +1,13 @@
+
+#define CT complex<T>
+
+#define DefLUD(T)\
+template void SymLU_Decompose(const SymMatrixView<T >& A, \
+    const VectorView<T >& xD, size_t* P, T& det); \
+
+DefLUD(T);
+DefLUD(CT);
+#undef DefLUD
+
+#undef CT
+
