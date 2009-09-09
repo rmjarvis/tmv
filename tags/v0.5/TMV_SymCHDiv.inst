@@ -1,0 +1,23 @@
+
+#define CT complex<T>
+
+#define DefCHD(T)\
+template class HermCHDiv<T >; \
+template void HermCH_Decompose(const SymMatrixView<T >& A); \
+
+DefCHD(T);
+DefCHD(CT);
+#undef DefCHD
+
+#define DefDivEq(T1,T2)\
+  template void HermCH_LDivEq(const GenSymMatrix<T1 >& LL,\
+      const MatrixView<T2 >& b); \
+  template void HermCH_RDivEq(const GenSymMatrix<T1 >& LL,\
+      const MatrixView<T2 >& b); \
+
+DefDivEq(T,T);
+DefDivEq(T,CT);
+DefDivEq(CT,CT);
+#undef DefDivEq
+
+#undef CT

@@ -1,0 +1,73 @@
+
+#define CT complex<T>
+
+#define DefFuncs(T) \
+  template class GenUpperTriMatrix<T >; \
+  template class GenLowerTriMatrix<T >; \
+  template class UpperTriMatrixView<T >; \
+  template class LowerTriMatrixView<T >; \
+  template istream& operator>>(istream& fin, const UpperTriMatrixView<T >& m); \
+  template istream& operator>>(istream& fin, const LowerTriMatrixView<T >& m); \
+  template void Swap(const UpperTriMatrixView<T >& m1, \
+      const UpperTriMatrixView<T >& m2); \
+  template bool operator==(const GenUpperTriMatrix<T >& m1, \
+      const GenUpperTriMatrix<T >& m2); \
+
+DefFuncs(T);
+DefFuncs(CT);
+
+#undef DefFuncs
+
+#define DefClass(T,D,S) \
+  template class UpperTriMatrix<T,D,S>; \
+  template class LowerTriMatrix<T,D,S>; \
+  template istream& operator>>(istream& is, UpperTriMatrix<T,D,S>* m); \
+  template istream& operator>>(istream& is, LowerTriMatrix<T,D,S>* m); \
+
+DefClass(T,UnitDiag,RowMajor);
+DefClass(T,UnitDiag,ColMajor);
+DefClass(T,NonUnitDiag,RowMajor);
+DefClass(T,NonUnitDiag,ColMajor);
+
+#undef DefClass
+
+#define DefDivEq(T,T1) \
+  template void GenUpperTriMatrix<T >::LDivEq( \
+      const UpperTriMatrixView<T1 >& m) const;\
+  template void GenUpperTriMatrix<T >::RDivEq( \
+      const UpperTriMatrixView<T1 >& m) const;\
+  template void GenLowerTriMatrix<T >::LDivEq( \
+      const LowerTriMatrixView<T1 >& m) const;\
+  template void GenLowerTriMatrix<T >::RDivEq( \
+      const LowerTriMatrixView<T1 >& m) const;\
+
+DefDivEq(T,T);
+DefDivEq(T,CT);
+DefDivEq(CT,CT);
+
+#undef DefDivEq
+
+#define DefDiv(T,T1,T0) \
+  template void GenUpperTriMatrix<T >::LDiv( \
+      const GenUpperTriMatrix<T1 >& m1, \
+      const UpperTriMatrixView<T0 >& m0) const;\
+  template void GenUpperTriMatrix<T >::RDiv( \
+      const GenUpperTriMatrix<T1 >& m1, \
+      const UpperTriMatrixView<T0 >& m0) const;\
+  template void GenLowerTriMatrix<T >::LDiv( \
+      const GenLowerTriMatrix<T1 >& m1, \
+      const LowerTriMatrixView<T0 >& m0) const;\
+  template void GenLowerTriMatrix<T > ::RDiv( \
+      const GenLowerTriMatrix<T1 >& m1, \
+      const LowerTriMatrixView<T0 >& m0) const;\
+
+DefDiv(T,T,T);
+//DefDiv(T,T,CT);
+DefDiv(T,CT,CT);
+DefDiv(CT,T,CT);
+DefDiv(CT,CT,CT);
+
+#undef DefDiv
+
+
+#undef CT
