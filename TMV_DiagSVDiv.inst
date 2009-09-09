@@ -1,0 +1,30 @@
+
+#define CT complex<T>
+
+template class DiagSVDiv<T>; 
+template class DiagSVDiv<CT>;
+
+#define DefDecomp(T1) \
+template void DiagSV_Decompose( \
+    const GenDiagMatrix<T1>& m, Permutation& P, \
+    const DiagMatrixView<T>& S, \
+    const DiagMatrixView<T1>& V1, T1& det);
+
+DefDecomp(T);
+DefDecomp(CT);
+
+#undef DefDecomp
+
+#define DefDivEq(T1,T2)\
+template void SV_LDivEq(const Permutation& P, const GenDiagMatrix<T>& S, \
+    const GenDiagMatrix<T1>& V1, const size_t kmax,\
+    const MatrixView<T2>& m); \
+
+DefDivEq(T,T);
+DefDivEq(T,CT);
+DefDivEq(CT,CT);
+
+#undef DefDivEq
+
+#undef CT
+

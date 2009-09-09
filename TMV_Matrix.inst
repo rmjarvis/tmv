@@ -1,0 +1,27 @@
+
+#define CT complex<T>
+
+#define DefFuncs(RT,T)\
+  template class Matrix<T,RowMajor>; \
+  template class Matrix<T,ColMajor>; \
+  template class GenMatrix<T>;  \
+  template class MatrixView<T>;  \
+  template istream& operator>>(istream& fin, Matrix<T,RowMajor>* m); \
+  template istream& operator>>(istream& fin, Matrix<T,ColMajor>* m); \
+  template istream& operator>>(istream& fin, const MatrixView<T>& m);  \
+  template RT NormSq(const GenMatrix<T>& m); \
+  template RT NormF(const GenMatrix<T>& m); \
+  template RT Norm1(const GenMatrix<T>& m); \
+  template RT NormInf(const GenMatrix<T>& m); \
+  template RT MaxAbsElement(const GenMatrix<T>& m); \
+  template void Swap(const MatrixView<T>& m1, const MatrixView<T>& m2); \
+  template bool operator==(const GenMatrix<T>& m1, const GenMatrix<T>& m2); \
+  template void Copy(const GenMatrix<T>& m1, const MatrixView<T>& m2);  \
+
+DefFuncs(T,T);
+DefFuncs(T,CT);
+
+#undef DefFuncs
+
+#undef CT
+
