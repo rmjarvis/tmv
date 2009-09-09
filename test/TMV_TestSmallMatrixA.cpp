@@ -1,51 +1,42 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
 #include "TMV_Test.h"
 #include "TMV_Test3.h"
-#include "TMV_Mat.h"
+#include "TMV.h"
+#include "TMV_Small.h"
 #include <fstream>
 
 template <class T> void TestAllSmallMatrixA()
 {
-  TestSmallMatrixArith_A1a<T>();
-  TestSmallMatrixArith_A1b<T>();
+  TestSmallMatrixArith_A1<T>();
   TestSmallMatrixArith_A2a<T>();
   TestSmallMatrixArith_A2b<T>();
   TestSmallMatrixArith_A2c<T>();
   TestSmallMatrixArith_A3a<T>();
   TestSmallMatrixArith_A3b<T>();
   TestSmallMatrixArith_A3c<T>();
-  TestSmallMatrixArith_A3d<T>();
-  TestSmallMatrixArith_A3e<T>();
   TestSmallMatrixArith_A4a<T>();
   TestSmallMatrixArith_A4b<T>();
   TestSmallMatrixArith_A4c<T>();
-  TestSmallMatrixArith_A4d<T>();
-  TestSmallMatrixArith_A4e<T>();
   TestSmallMatrixArith_A5a<T>();
   TestSmallMatrixArith_A5b<T>();
   TestSmallMatrixArith_A5c<T>();
-  TestSmallMatrixArith_A5d<T>();
-  TestSmallMatrixArith_A5e<T>();
   TestSmallMatrixArith_A6a<T>();
   TestSmallMatrixArith_A6b<T>();
   TestSmallMatrixArith_A6c<T>();
-  TestSmallMatrixArith_A6d<T>();
-  TestSmallMatrixArith_A6e<T>();
-  TestSmallMatrixArith_A7a<T>();
-  TestSmallMatrixArith_A7b<T>();
-  TestSmallMatrixArith_A7c<T>();
-  std::cout<<"SmallMatrix<"<<tmv::TypeText(T())<<"> Square Arithmetic passed all tests\n";
+  std::cout<<"SmallMatrix<"<<tmv::Type(T())<<"> Square Arithmetic passed all tests\n";
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestAllSmallMatrixA<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestAllSmallMatrixA<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestAllSmallMatrixA<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestAllSmallMatrixA<int>();
 #endif

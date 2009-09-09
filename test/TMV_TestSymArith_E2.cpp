@@ -1,4 +1,6 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
 #define STARTI 0
 #define STARTJ 0
 
@@ -17,16 +19,13 @@
 
 template <class T> void TestSymMatrixArith_E2()
 {
-#ifdef XTEST
   std::vector<tmv::SymMatrixView<T> > s;
   std::vector<tmv::SymMatrixView<std::complex<T> > > cs;
-  std::vector<tmv::BaseMatrix<T>*> B;
-  std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
-  MakeSymList(s,cs,B,CB,InDef);
+  MakeSymList(s,cs,InDef);
 
   std::vector<tmv::BandMatrixView<T> > b;
   std::vector<tmv::BandMatrixView<std::complex<T> > > cb;
-  MakeBandList(b,cb,B,CB);
+  MakeBandList(b,cb);
 
   for(size_t i=STARTI;i<s.size();i++) {
     if (showstartdone) {
@@ -39,8 +38,8 @@ template <class T> void TestSymMatrixArith_E2()
 
     for(size_t j=STARTJ;j<b.size();j++) {
       if (showstartdone) {
-        std::cerr<<"Start sub-loop "<<j<<std::endl;
-        std::cerr<<"bj = "<<b[j]<<std::endl;
+	std::cerr<<"Start sub-loop "<<j<<std::endl;
+	std::cerr<<"bj = "<<b[j]<<std::endl;
       }
       tmv::BandMatrixView<T> bj = b[j];
       tmv::BandMatrixView<std::complex<T> > cbj = cb[j];
@@ -48,30 +47,27 @@ template <class T> void TestSymMatrixArith_E2()
       tmv::BandMatrix<std::complex<T> > cbx = cbj;
 
       if (csi.isherm()) {
-        tmv::HermMatrix<T> sx = si;
-        tmv::HermMatrix<std::complex<T> > csx = csi;
-        TestMatrixArith456<T>(bx,cbx,bj,cbj,si,csi,"Band/Herm");
+	tmv::HermMatrix<T> sx = si;
+	tmv::HermMatrix<std::complex<T> > csx = csi;
+	TestMatrixArith45<T>(bx,cbx,bj,cbj,si,csi,"Band/Herm");
       } else {
-        tmv::SymMatrix<T> sx = si;
-        tmv::SymMatrix<std::complex<T> > csx = csi;
-        TestMatrixArith456<T>(bx,cbx,bj,cbj,si,csi,"Band/Sym");
+	tmv::SymMatrix<T> sx = si;
+	tmv::SymMatrix<std::complex<T> > csx = csi;
+	TestMatrixArith45<T>(bx,cbx,bj,cbj,si,csi,"Band/Sym");
       }
     }
   }
-  for(size_t i=0;i<B.size();++i) delete B[i];
-  for(size_t i=0;i<CB.size();++i) delete CB[i];
-#endif
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestSymMatrixArith_E2<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestSymMatrixArith_E2<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestSymMatrixArith_E2<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestSymMatrixArith_E2<int>();
 #endif

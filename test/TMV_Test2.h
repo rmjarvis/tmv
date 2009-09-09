@@ -1,7 +1,5 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 #define ALIASOK
 
-#include "tmv/TMV_Base.h"
 
 template <class T> void TestBandMatrix();
 template <class T> void TestBandMatrixArith_A();
@@ -13,14 +11,11 @@ template <class T> void TestBandMatrixArith_D1();
 template <class T> void TestBandMatrixArith_D2();
 template <class T> void TestAllBandDiv();
 template <class T> void TestBandDiv(tmv::DivType dt);
-template <class T, tmv::StorageType stor> void TestBandDecomp();
+template <class T, tmv::StorageType stor> void TestBandDecomp(tmv::DivType dt);
 template <class T> void TestBandDiv_A(tmv::DivType dt);
-template <class T> void TestBandDiv_B1(tmv::DivType dt);
-template <class T> void TestBandDiv_B2(tmv::DivType dt);
-template <class T> void TestBandDiv_C1(tmv::DivType dt);
-template <class T> void TestBandDiv_C2(tmv::DivType dt);
-template <class T> void TestBandDiv_D1(tmv::DivType dt);
-template <class T> void TestBandDiv_D2(tmv::DivType dt);
+template <class T> void TestBandDiv_B(tmv::DivType dt);
+template <class T> void TestBandDiv_C(tmv::DivType dt);
+template <class T> void TestBandDiv_D(tmv::DivType dt);
 
 enum PosDefCode { PosDef, InDef, Sing };
 inline std::string PDLabel(PosDefCode pdc)
@@ -48,14 +43,10 @@ template <class T, tmv::UpLoType uplo, tmv::StorageType stor>
 void TestSymDecomp();
 template <class T, tmv::StorageType stor> void TestPolar();
 template <class T> void TestSymDiv_A(tmv::DivType dt, PosDefCode pc);
-template <class T> void TestSymDiv_B1(tmv::DivType dt, PosDefCode pc);
-template <class T> void TestSymDiv_B2(tmv::DivType dt, PosDefCode pc);
-template <class T> void TestSymDiv_C1(tmv::DivType dt, PosDefCode pc);
-template <class T> void TestSymDiv_C2(tmv::DivType dt, PosDefCode pc);
-template <class T> void TestSymDiv_D1(tmv::DivType dt, PosDefCode pc);
-template <class T> void TestSymDiv_D2(tmv::DivType dt, PosDefCode pc);
-template <class T> void TestSymDiv_E1(tmv::DivType dt, PosDefCode pc);
-template <class T> void TestSymDiv_E2(tmv::DivType dt, PosDefCode pc);
+template <class T> void TestSymDiv_B(tmv::DivType dt, PosDefCode pc);
+template <class T> void TestSymDiv_C(tmv::DivType dt, PosDefCode pc);
+template <class T> void TestSymDiv_D(tmv::DivType dt, PosDefCode pc);
+template <class T> void TestSymDiv_E(tmv::DivType dt, PosDefCode pc);
 
 template <class T> void TestSymBandMatrix();
 template <class T> void TestSymBandMatrixArith_A();
@@ -76,14 +67,9 @@ template <class T, tmv::UpLoType uplo, tmv::StorageType stor>
 void TestSymBandDecomp();
 template <class T> void TestSymBandDiv(tmv::DivType dt, PosDefCode pc);
 template <class T> void TestSymBandDiv_A(tmv::DivType dt, PosDefCode pc);
-template <class T> void TestSymBandDiv_B1(tmv::DivType dt, PosDefCode pc);
-template <class T> void TestSymBandDiv_B2(tmv::DivType dt, PosDefCode pc);
-template <class T> void TestSymBandDiv_C1(tmv::DivType dt, PosDefCode pc);
-template <class T> void TestSymBandDiv_C2(tmv::DivType dt, PosDefCode pc);
-template <class T> void TestSymBandDiv_D1(tmv::DivType dt, PosDefCode pc);
-template <class T> void TestSymBandDiv_D2(tmv::DivType dt, PosDefCode pc);
-template <class T> void TestSymBandDiv_E1(tmv::DivType dt, PosDefCode pc);
-template <class T> void TestSymBandDiv_E2(tmv::DivType dt, PosDefCode pc);
-template <class T> void TestSymBandDiv_F1(tmv::DivType dt, PosDefCode pc);
-template <class T> void TestSymBandDiv_F2(tmv::DivType dt, PosDefCode pc);
+template <class T> void TestSymBandDiv_B(tmv::DivType dt, PosDefCode pc);
+template <class T> void TestSymBandDiv_C(tmv::DivType dt, PosDefCode pc);
+template <class T> void TestSymBandDiv_D(tmv::DivType dt, PosDefCode pc);
+template <class T> void TestSymBandDiv_E(tmv::DivType dt, PosDefCode pc);
+template <class T> void TestSymBandDiv_F(tmv::DivType dt, PosDefCode pc);
 

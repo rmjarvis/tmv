@@ -1,8 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
+// Copyright (C) 2008                                                        //
 //                                                                           //
 // The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
 // where you can find the current version and current documention.           //
@@ -31,75 +30,194 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 
+
+#include "TMV_DiagMatrix.h"
+#include "TMV_Vector.h"
+#include "TMV_Matrix.h"
+#include "TMV_VIt.h"
+#include "TMV_VectorRE.h"
+#include "TMV_DiagMatrixArith.h"
+#include <ostream>
+
 //#define XDEBUG
 
-
+#ifdef XDEBUG
+#include "TMV_VectorArith.h"
+#include "TMV_MatrixArith.h"
 #include <iostream>
-#include "tmv/TMV_DiagMatrix.h"
-#include "tmv/TMV_DiagMatrixIO.h"
+using std::cerr;
+using std::endl;
+#endif
 
 namespace tmv {
 
-  const int XX = UNKNOWN;
+#define RT RealType(T)
 
-#if 0
-  template <class T> 
-  T Det(const ConstDiagMatrixView<T>& m) const
+  template <class T> T GenDiagMatrix<T>::Det() const
   {
     T signdet(1);
-    RT logdet = LogDet(m,&signdet);
+    RT logdet = LogDet(&signdet);
     if (signdet == T(0)) return T(0);
-    else return signdet * EXP(logdet);
+    else return signdet * std::exp(logdet);
   }
-
-  template <class T> 
-  RT LogDet(const ConstDiagMatrixView<T>& m, T* sign) const
+  
+  template <class T> RT GenDiagMatrix<T>::LogDet(T* sign) const
   {
+    const T* di = diag().cptr();
+    const int ds = diag().step();
     T s(1);
     RT logdet(0);
-    const int n=m.size();
-    for(int i=0;i<n;++i) {
-      const T mi = m(i);
-      if (mi == T(0)) { 
-        logdet = LOG(REAL(mi)); // i.e. -inf
-        if (sign) s = T(0); 
+    if (ds == 1)
+      for(int i=size();i>0;--i,++di) {
+	if (*di == T(0)) { 
+	  logdet = std::log(REAL(*di));
+	  if (sign) s = T(0); 
+	}
+	else {
+	  RT a = ABS(*di);
+	  logdet += std::log(a);
+	  if (sign) {
+	    if (IsReal(T())) {
+	      if (REAL(*di) < RT(0)) s = -s;
+	    } else {
+	      s *= (*di/a);
+	    }
+	  }
+	}
       }
-      else {
-        RT a = ABS(mi);
-        logdet += LOG(a);
-        if (sign) {
-          if (IsReal(T())) {
-            if (REAL(mi) < RT(0)) s = -s;
-          } else {
-            s *= (mi/a);
-          }
-        }
+    else
+      for(int i=size();i>0;--i,di+=ds) {
+	if (*di == T(0)) { 
+	  logdet = std::log(REAL(*di));
+	  if (sign) s = T(0); 
+	}
+	else {
+	  RT a = ABS(*di);
+	  logdet += std::log(a);
+	  if (sign) {
+	    if (IsReal(T())) {
+	      if (REAL(*di) < RT(0)) s = -s;
+	    } else {
+	      s *= (*di/a);
+	    }
+	  }
+	}
       }
+    if (sign) {
+      if (diag().isconj()) *sign = CONJ(s);
+      else *sign = s;
     }
-    if (sign) *sign = s;
     return logdet;
   }
 
-  template <class T>
-  void InvertSelf(DiagMatrixView<T> m) 
+  template <class T> auto_ptr<BaseMatrix<T> > GenDiagMatrix<T>::NewCopy() const
   {
-    const int n = m.size();
-    for(int i=0;i<n;++i) {
-      const T mi = m(i);
-      if (mi == T(0)) {
-#ifdef NOTHROW
-        { std::cerr<<"Singular DiagMatrix found\n"; exit(1); }
-#else
-        throw SingularDiagMatrix<T>(*this);
-#endif
-      }
-      if (IMAG(mi) == RT(0))
-        mi = RT(1) / REAL(mi);
-      else
-        mi = RT(1) / mi;
-    }
-    return *this;
+    auto_ptr<BaseMatrix<T> > a(new DiagMatrix<T>(*this));
+    return a;
   }
+
+  template <class T> auto_ptr<BaseMatrix<T> > GenDiagMatrix<T>::NewView() const
+  {
+    auto_ptr<BaseMatrix<T> > a(new ConstDiagMatrixView<T>(View()));
+    return a;
+  }
+
+  template <class T> auto_ptr<BaseMatrix<T> > GenDiagMatrix<T>::NewTranspose() const
+  {
+    auto_ptr<BaseMatrix<T> > a(new ConstDiagMatrixView<T>(Transpose()));
+    return a;
+  }
+
+  template <class T> auto_ptr<BaseMatrix<T> > GenDiagMatrix<T>::NewConjugate() const
+  {
+    auto_ptr<BaseMatrix<T> > a(new ConstDiagMatrixView<T>(Conjugate()));
+    return a;
+  }
+
+  template <class T> auto_ptr<BaseMatrix<T> > GenDiagMatrix<T>::NewAdjoint() const
+  {
+    auto_ptr<BaseMatrix<T> > a(new ConstDiagMatrixView<T>(Adjoint()));
+    return a;
+  }
+
+  template <class T> auto_ptr<BaseMatrix<T> > GenDiagMatrix<T>::NewInverse() const
+  {
+    auto_ptr<DiagMatrix<T> > minv(new DiagMatrix<T>(*this));
+    minv->InvertSelf();
+    BaseMatrix<T>* ret1 = minv.release();
+    auto_ptr<BaseMatrix<T> > ret(ret1);
+    return ret;
+  }
+
+
+  template <class T> class SingularDiagMatrix :
+    public Singular
+  {
+    public:
+      DiagMatrix<T> A;
+
+      SingularDiagMatrix(const GenDiagMatrix<T>& _A) :
+	Singular("DiagMatrix."), A(_A) {}
+      ~SingularDiagMatrix() throw() {}
+      void Write(std::ostream& os) const throw()
+      {
+	Singular::Write(os);
+	os<<A<<std::endl;
+      }
+  };
+
+  template <class T, IndexStyle I> 
+    const DiagMatrixView<T,I>& DiagMatrixView<T,I>::InvertSelf() const
+    {
+      T* di = diag().ptr();
+      const int dstep = diag().step();
+
+      if (dstep == 1)
+	for(int i=size();i>0;--i,++di) {
+	  if (*di == T(0))
+	    throw SingularDiagMatrix<T>(*this);
+#ifdef TMVFLDEBUG
+	  TMVAssert(di >= itsdiag.first);
+	  TMVAssert(di < itsdiag.last);
+#endif
+	  if (IMAG(*di) == RT(0))
+	    *di = RT(1) / REAL(*di);
+	  else
+	    *di = RT(1) / *di;
+	}
+      else {
+	for(int i=size();i>0;--i,di+=dstep) {
+	  if (*di == T(0))
+	    throw SingularDiagMatrix<T>(*this);
+#ifdef TMVFLDEBUG
+	  TMVAssert(di >= itsdiag.first);
+	  TMVAssert(di < itsdiag.last);
+#endif
+	  if (IMAG(*di) == RT(0))
+	    *di = RT(1) / REAL(*di);
+	  else
+	    *di = RT(1) / *di;
+	}
+      }
+      return *this;
+    }
+
+
+  template <class T> template <class T1> void GenDiagMatrix<T>::DoInverse(
+      const MatrixView<T1>& minv) const
+  {
+    bool ss = SameStorage(diag(),minv);
+    if (!ss) minv.Zero();
+    (DiagMatrixViewOf(minv.diag()) = *this).InvertSelf();
+    if (ss && size() > 1) {
+      minv.UpperTri().OffDiag().Zero();
+      minv.LowerTri().OffDiag().Zero();
+    }
+  }
+
+  template <class T> template <class T1> void GenDiagMatrix<T>::DoInverse(
+      const DiagMatrixView<T1>& minv) const
+  { (minv = *this).InvertSelf(); }
 
   template <class T> void GenDiagMatrix<T>::DoInverseATA(
       const DiagMatrixView<T>& ata) const
@@ -110,21 +228,31 @@ namespace tmv {
     if (ds==1)
       for(int i=size();i>0;--i,++mi) {
 #ifdef TMVFLDEBUG
-        TMVAssert(mi >= ata.diag().first);
-        TMVAssert(mi < ata.diag().last);
+	TMVAssert(mi >= ata.diag().first);
+	TMVAssert(mi < ata.diag().last);
 #endif
-        *mi = NORM(*mi);
+	*mi = NORM(*mi);
       }
     else
       for(int i=size();i>0;--i,mi+=ds) {
 #ifdef TMVFLDEBUG
-        TMVAssert(mi >= ata.diag().first);
-        TMVAssert(mi < ata.diag().last);
+	TMVAssert(mi >= ata.diag().first);
+	TMVAssert(mi < ata.diag().last);
 #endif
-        *mi = NORM(*mi);
+	*mi = NORM(*mi);
       }
   }
 
+  template <class T> void GenDiagMatrix<T>::DoInverseATA(
+      const MatrixView<T>& ata) const
+  {
+    ata.Zero();
+    InverseATA(DiagMatrixViewOf(ata.diag()));
+  }
+
+  template <class T> QuotXD<T,T> GenDiagMatrix<T>::QInverse() const
+  { return QuotXD<T,T>(T(1),*this); }
+  
 #define CT std::complex<T>
 
   template <bool cd, class T, class Td> static void DoDiagLDivEq1(
@@ -142,38 +270,30 @@ namespace tmv {
     if (dstep == 1 && vstep == 1)
       for(int i=v.size();i>0;--i,++di,++vi) {
 #ifdef TMVFLDEBUG
-        TMVAssert(vi >= v.first);
-        TMVAssert(vi < v.last);
+	TMVAssert(vi >= v.first);
+	TMVAssert(vi < v.last);
 #endif
-        if (*di == Td(0))
-#ifdef NOTHROW
-        { std::cerr<<"Singular DiagMatrix found\n"; exit(1); }
-#else
-        throw SingularDiagMatrix<Td>(d);
-#endif
-        if (IMAG(*di) == RT(0)) {
-          if (REAL(*di) != RT(1))
-            *vi /= REAL(*di);
-        } else
-          *vi /= (cd?CONJ(*di):*di);
+	if (*di == Td(0))
+	  throw SingularDiagMatrix<Td>(d);
+	if (IMAG(*di) == RT(0)) {
+	  if (REAL(*di) != RT(1))
+	    *vi /= REAL(*di);
+	} else
+	  *vi /= (cd?CONJ(*di):*di);
       }
     else
       for(int i=v.size();i>0;--i,di+=dstep,vi+=vstep) {
 #ifdef TMVFLDEBUG
-        TMVAssert(vi >= v.first);
-        TMVAssert(vi < v.last);
+	TMVAssert(vi >= v.first);
+	TMVAssert(vi < v.last);
 #endif
-        if (*di == Td(0))
-#ifdef NOTHROW
-        { std::cerr<<"Singular DiagMatrix found\n"; exit(1); }
-#else
-        throw SingularDiagMatrix<Td>(d);
-#endif
-        if (IMAG(*di) == RT(0)) {
-          if (REAL(*di) != RT(1))
-            *vi /= REAL(*di);
-        } else
-          *vi /= (cd?CONJ(*di):*di);
+	if (*di == Td(0))
+	  throw SingularDiagMatrix<Td>(d);
+	if (IMAG(*di) == RT(0)) {
+	  if (REAL(*di) != RT(1))
+	    *vi /= REAL(*di);
+	} else
+	  *vi /= (cd?CONJ(*di):*di);
       }
   }
 
@@ -183,6 +303,9 @@ namespace tmv {
     if (d.diag().isconj()) DoDiagLDivEq1<true>(d,v);
     else DoDiagLDivEq1<false>(d,v);
   }
+  template <class T> static inline void DoDiagLDivEq(
+      const GenDiagMatrix<CT>& , const VectorView<T>& )
+  { TMVAssert(FALSE); }
 
   template <class T> template <class T1> void GenDiagMatrix<T>::DoLDivEq(
       const VectorView<T1>& v) const
@@ -193,18 +316,18 @@ namespace tmv {
 #endif
 
     TMVAssert(v.size() == size());
+    TMVAssert(v.ct() == NonConj);
 
-    if (v.size() > 0) {
-      if (v.isconj()) DoDiagLDivEq(Conjugate(),v.Conjugate());
+    if (v.size() > 0)
+      if (v.isconj()) Conjugate().DoLDivEq(v.Conjugate());
       else DoDiagLDivEq(*this,v);
-    }
 
 #ifdef XDEBUG
     Vector<T1> v1 = d0*v;
-    if (Norm(v1-v0) > 0.001*Norm(v0)) {
+    if (tmv::Norm(v1-v0) > 0.001*tmv::Norm(v0)) {
       cerr<<"DiagLDivEq v: \n";
-      cerr<<"d = "<<TypeText(*this)<<"  "<<d0<<endl;
-      cerr<<"v = "<<TypeText(v)<<"  "<<v0<<endl;
+      cerr<<"d = "<<Type(*this)<<"  "<<d0<<endl;
+      cerr<<"v = "<<Type(v)<<"  "<<v0<<endl;
       cerr<<"-> v/d = "<<v<<endl;
       cerr<<"d*(v/d) = "<<v1<<endl;
       abort();
@@ -213,18 +336,18 @@ namespace tmv {
   }
 
   template <class T> template <class T1, class T0> 
-  void GenDiagMatrix<T>::DoLDiv(
-      const ConstVectorView<T1>& v1, const VectorView<T0>& v0) const
-  {
-    TMVAssert(v1.size() == size());
-    TMVAssert(v0.size() == size());
-    if (SameStorage(diag(),v0)) {
-      DiagMatrix<T> temp = *this;
-      temp.DoLDivEq(v0=v1);
-    } else {
-      DoLDivEq(v0=v1);
+    void GenDiagMatrix<T>::DoLDiv(
+	const GenVector<T1>& v1, const VectorView<T0>& v0) const
+    {
+      TMVAssert(v1.size() == size());
+      TMVAssert(v0.size() == size());
+      if (SameStorage(diag(),v0)) {
+	DiagMatrix<T> temp = *this;
+	temp.DoLDivEq(v0=v1);
+      } else {
+	DoLDivEq(v0=v1);
+      }
     }
-  }
 
   template <bool rm, bool cd, class T, class Td> static void RowDiagLDivEq(
       const GenDiagMatrix<Td>& d, const MatrixView<T>& m)
@@ -247,30 +370,26 @@ namespace tmv {
     for(int i=M;i>0;--i,di+=dstep,mrowi+=stepi) {
       T* mij = mrowi;
       if (*di == Td(0))
-#ifdef NOTHROW
-      { std::cerr<<"Singular DiagMatrix found\n"; exit(1); }
-#else
-      throw SingularDiagMatrix<Td>(d);
-#endif
+	throw SingularDiagMatrix<Td>(d);
       else if (IMAG(*di) == RT(0)) {
-        RT invdi = RT(1)/REAL(*di);
-        for(int j=N;j>0;--j,(rm?++mij:mij+=stepj)) {
+	RT invdi = RT(1)/REAL(*di);
+	for(int j=N;j>0;--j,(rm?++mij:mij+=stepj)) {
 #ifdef TMVFLDEBUG
-          TMVAssert(mij >= m.first);
-          TMVAssert(mij < m.last);
+	  TMVAssert(mij >= m.first);
+	  TMVAssert(mij < m.last);
 #endif
-          *mij *= invdi;
-        }
+	  *mij *= invdi;
+	}
       }
       else {
-        Td invdi = RT(1)/(cd?CONJ(*di):*di);
-        for(int j=N;j>0;--j,(rm?++mij:mij+=stepj)) {
+	Td invdi = RT(1)/(cd?CONJ(*di):*di);
+	for(int j=N;j>0;--j,(rm?++mij:mij+=stepj)) {
 #ifdef TMVFLDEBUG
-          TMVAssert(mij >= m.first);
-          TMVAssert(mij < m.last);
+	  TMVAssert(mij >= m.first);
+	  TMVAssert(mij < m.last);
 #endif
-          *mij *= invdi;
-        }
+	  *mij *= invdi;
+	}
       }
     }
   }
@@ -292,31 +411,23 @@ namespace tmv {
 
     if (step == 1)
       for(int i=d.size();i>0;--i,++di,++invdi) {
-        if (*di == Td(0))
-#ifdef NOTHROW
-        { std::cerr<<"Singular DiagMatrix found\n"; exit(1); }
-#else
-        throw SingularDiagMatrix<Td>(d);
-#endif
+	if (*di == Td(0))
+	  throw SingularDiagMatrix<Td>(d);
 #ifdef TMVFLDEBUG
-        TMVAssert(invdi >= invd.diag().first);
-        TMVAssert(invdi < invd.diag().last);
+	TMVAssert(invdi >= invd.diag().first);
+	TMVAssert(invdi < invd.diag().last);
 #endif
-        *invdi = RT(1)/(cd?CONJ(*di):*di);
+	*invdi = RT(1)/(cd?CONJ(*di):*di);
       }
     else
       for(int i=d.size();i>0;--i,di+=step,++invdi) {
-        if (*di == Td(0))
-#ifdef NOTHROW
-        { std::cerr<<"Singular DiagMatrix found\n"; exit(1); }
-#else
-        throw SingularDiagMatrix<Td>(d);
-#endif
+	if (*di == Td(0))
+	  throw SingularDiagMatrix<Td>(d);
 #ifdef TMVFLDEBUG
-        TMVAssert(invdi >= invd.diag().first);
-        TMVAssert(invdi < invd.diag().last);
+	TMVAssert(invdi >= invd.diag().first);
+	TMVAssert(invdi < invd.diag().last);
 #endif
-        *invdi = RT(1)/(cd?CONJ(*di):*di);
+	*invdi = RT(1)/(cd?CONJ(*di):*di);
       }
     m = invd*m;
   }
@@ -335,6 +446,9 @@ namespace tmv {
       else if (m.colsize() > m.rowsize()) ColDiagLDivEq<false,false>(d,m);
       else RowDiagLDivEq<false,false>(d,m);
   }
+  template <class T> static inline void DoDiagLDivEq(
+      const GenDiagMatrix<CT>& , const MatrixView<T>& )
+  { TMVAssert(FALSE); }
 
   template <class T> template <class T1> void GenDiagMatrix<T>::DoLDivEq(
       const MatrixView<T1>& m) const
@@ -346,18 +460,17 @@ namespace tmv {
     Matrix<T1> m0(m);
 #endif
 
-    if (m.colsize() > 0 && m.rowsize() > 0) {
+    if (m.colsize() > 0 && m.rowsize() > 0)
       if (m.isconj()) Conjugate().DoLDivEq(m.Conjugate());
       else if (m.rowsize() == 1) DoLDivEq(m.col(0));
       else DoDiagLDivEq(*this,m);
-    }
 
 #ifdef XDEBUG
     Matrix<T1> m1 = d0*m;
-    if (Norm(m1-m0) > 0.001*Norm(m0)) {
+    if (tmv::Norm(m1-m0) > 0.001*tmv::Norm(m0)) {
       cerr<<"DiagLDivEq m: \n";
-      cerr<<"d = "<<TypeText(*this)<<"  "<<d0<<endl;
-      cerr<<"m = "<<TypeText(m)<<"  "<<m0<<endl;
+      cerr<<"d = "<<Type(*this)<<"  "<<d0<<endl;
+      cerr<<"m = "<<Type(m)<<"  "<<m0<<endl;
       cerr<<"-> m/d = "<<m<<endl;
       cerr<<"d*(m/d) = "<<m1<<endl;
       abort();
@@ -366,46 +479,174 @@ namespace tmv {
   }
 
   template <class T> template <class T1, class T0> 
-  void GenDiagMatrix<T>::DoLDiv(
-      const GenMatrix<T1>& m1, const MatrixView<T0>& m0) const
+    void GenDiagMatrix<T>::DoLDiv(
+	const GenMatrix<T1>& m1, const MatrixView<T0>& m0) const
+    {
+      TMVAssert(m1.rowsize() == m0.rowsize());
+      TMVAssert(m1.colsize() == size());
+      TMVAssert(m0.colsize() == size());
+      if (SameStorage(diag(),m0)) {
+	DiagMatrix<T> temp = *this;
+	temp.DoLDivEq(m0=m1);
+      } else {
+	DoLDivEq(m0=m1);
+      }
+    }
+
+#undef CT
+
+  template <class T> void GenDiagMatrix<T>::Write(std::ostream& os) const
   {
-    TMVAssert(m1.rowsize() == m0.rowsize());
-    TMVAssert(m1.colsize() == size());
-    TMVAssert(m0.colsize() == size());
-    if (SameStorage(diag(),m0)) {
-      DiagMatrix<T> temp = *this;
-      temp.DoLDivEq(m0=m1);
-    } else {
-      DoLDivEq(m0=m1);
+    const int sd = diag().step();
+    const T* di = diag().cptr();
+    os << size() <<' '<< size() << std::endl;
+    for (int i=0,nmi=size();nmi>0;++i,--nmi,di+=sd) {
+      os << "( ";
+      for(int k=i;k>0;--k) os <<' '<<T(0)<<' ';
+      if (diag().isconj())
+	os <<' '<<CONJ(*di)<<' ';
+      else
+	os <<' '<<*di<<' ';
+      for(int k=nmi-1;k>0;--k) os <<' '<<T(0)<<' ';
+      os << " )\n";
     }
   }
 
-#undef CT
-#endif
-
-  template <class T, bool C>
-  void InstWrite(std::ostream& os, const ConstDiagMatrixView<T,XX,C>& m)
+  template <class T> void GenDiagMatrix<T>::Write(std::ostream& os,
+      RT thresh) const
   {
-    if (m.step() == 1)
-      InlineWrite(os,m.CMView()); 
-    else
-      InlineWrite(os,m); 
+    const int sd = diag().step();
+    const T* di = diag().cptr();
+    os << size() <<' '<< size() << std::endl;
+    for (int i=0,nmi=size();nmi>0;++i,--nmi,di+=sd) {
+      os << "( ";
+      for(int k=i;k>0;--k) os <<' '<<T(0)<<' ';
+      if (diag().isconj())
+	os <<' '<<(ABS(*di)<thresh ? T(0) : CONJ(*di))<<' ';
+      else
+	os <<' '<<(ABS(*di)<thresh ? T(0) : *di)<<' ';
+      for(int k=nmi-1;k>0;--k) os <<' '<<T(0)<<' ';
+      os << " )\n";
+    }
   }
 
-  template <class T, bool C>
-  void InstWrite(std::ostream& os, const ConstDiagMatrixView<T,XX,C>& m,
-      RealType(T) thresh)
+  template <class T> class DiagMatrixReadError :
+    public ReadError
   {
-    if (m.step() == 1)
-      InlineWrite(os,m.CMView(),thresh); 
-    else
-      InlineWrite(os,m,thresh); 
+    public :
+      int i;
+      mutable auto_ptr<DiagMatrix<T> > m;
+      char exp,got;
+      size_t s;
+      bool is, iseof, isbad;
+
+      DiagMatrixReadError(std::istream& _is) throw() :
+	ReadError("DiagMatrix."),
+	i(0), m(0), exp(0), got(0), s(0),
+	is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+      DiagMatrixReadError(int _i, const GenDiagMatrix<T>& _m,
+	  char _e, char _g, size_t _s,
+	  bool _is, bool _iseof, bool _isbad) throw() :
+	ReadError("DiagMatrix."),
+	i(_i), m(new DiagMatrix<T>(_m)), exp(_e), got(_g), s(_s),
+	is(_is), iseof(_iseof), isbad(_isbad) {}
+      DiagMatrixReadError(const GenDiagMatrix<T>& _m,
+	  std::istream& _is, size_t _s) throw() :
+	ReadError("DiagMatrix."),
+	i(0), m(new DiagMatrix<T>(_m)), exp(0), got(0), s(_s),
+	is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+      DiagMatrixReadError(std::istream& _is, char _e, char _g) throw() :
+	ReadError("DiagMatrix."),
+	i(0), m(0), exp(_e), got(_g), s(0),
+	is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+
+      DiagMatrixReadError(const DiagMatrixReadError<T>& rhs) :
+	i(rhs.i), m(rhs.m), exp(rhs.exp), got(rhs.got), s(rhs.s),
+	is(rhs.is), iseof(rhs.iseof), isbad(rhs.isbad) {}
+      virtual ~DiagMatrixReadError() throw() {}
+
+      virtual void Write(std::ostream& os) const throw();
+  };
+
+  template <class T> void DiagMatrixReadError<T>::Write(
+      std::ostream& os) const throw()
+  {
+    os<<"TMV Read Error: Reading istream input for DiagMatrix\n";
+    if (exp != got) {
+      os<<"Wrong format: expected '"<<exp<<"', got '"<<got<<"'.\n";
+    }
+    if (m.get() && s != m->size()) {
+      os<<"Wrong size: expected "<<m->size()<<", got "<<s<<".\n";
+    }
+    if (!is) {
+      if (iseof) {
+	os<<"Input stream reached end-of-file prematurely.\n";
+      } else if (isbad) {
+	os<<"Input stream is corrupted.\n";
+      } else {
+	os<<"Input stream cannot read next character.\n";
+      }
+    }
+    if (m.get()) {
+      os<<"The portion of the DiagMatrix which was successfully read is: \n";
+      ConstDiagMatrixView<T> mm = m->View();
+      os<<"( ";
+      for(int ii=0;ii<i;++ii)
+	os<<' '<<mm(ii,ii)<<' ';
+      os<<" )\n";
+    }
+  }
+
+  template <class T, IndexStyle I> std::istream& operator>>(std::istream& is,
+      auto_ptr<DiagMatrix<T,I> >& m)
+  {
+    char d;
+    is >> d;
+    if (!is || d != 'D') 
+      throw DiagMatrixReadError<T>(is,'D',d);
+    size_t size;
+    is >> size;
+    if (!is) 
+      throw DiagMatrixReadError<T>(is);
+    m.reset(new DiagMatrix<T,I>(size));
+    try {
+      m->diag().Read(is);
+    }
+    catch (VectorReadError<T>& ve) {
+      throw DiagMatrixReadError<T>(ve.i,*m,ve.exp,ve.got,ve.s,
+	  ve.is,ve.iseof,ve.isbad);
+    }
+    return is;
+  }
+
+  template <class T> std::istream& operator>>(std::istream& is,
+      const DiagMatrixView<T>& m)
+  {
+    char d;
+    is >> d;
+    if (!is || d != 'D') 
+      throw DiagMatrixReadError<T>(is,'D',d);
+    size_t s;
+    is >> s;
+    if (!is) 
+      throw DiagMatrixReadError<T>(is);
+    if (m.size() != s)
+      throw DiagMatrixReadError<T>(m,is,s);
+    TMVAssert(m.size() == s);
+    try {
+      m.diag().Read(is);
+    }
+    catch (VectorReadError<T>& ve) {
+      throw DiagMatrixReadError<T>(ve.i,m,ve.exp,ve.got,ve.s,
+	  ve.is,ve.iseof,ve.isbad);
+    }
+    return is;
   }
 
 #define InstFile "TMV_DiagMatrix.inst"
 #include "TMV_Inst.h"
 #undef InstFile
 
-} // namespace tmv
+} // namespace mv
 
 

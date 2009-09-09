@@ -1,4 +1,6 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
 #define START 0
 
 #include "TMV_Test.h"
@@ -19,15 +21,13 @@ template <class T> void TestSymMatrixArith_B1()
 
   std::vector<tmv::SymMatrixView<T> > s;
   std::vector<tmv::SymMatrixView<std::complex<T> > > cs;
-  std::vector<tmv::BaseMatrix<T>*> B;
-  std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
-  MakeSymList(s,cs,B,CB,InDef);
+  MakeSymList(s,cs,InDef);
 
   tmv::Matrix<T> a1(N,N);
-  for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) a1(i,j) = T(3+i-5*j);
+  for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) a1(i,j) = 3.+i-5*j;
   tmv::Matrix<std::complex<T> > ca1(N,N);
   for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) ca1(i,j) = 
-    std::complex<T>(3+i-5*j,2-3*i);
+    std::complex<T>(3.+i-5*j,2.-3.*i);
 
   tmv::Vector<T> v = a1.col(0);
   tmv::VectorView<T> vv = v.View();
@@ -39,10 +39,10 @@ template <class T> void TestSymMatrixArith_B1()
 
 #ifdef XTEST
   tmv::Matrix<T> a2(2*N,2*N);
-  for (int i=0; i<2*N; ++i) for (int j=0; j<2*N; ++j) a2(i,j) = T(1-3*i+6*j);
+  for (int i=0; i<2*N; ++i) for (int j=0; j<2*N; ++j) a2(i,j) = 1.-3*i+6*j;
   tmv::Matrix<std::complex<T> > ca2(2*N,2*N);
   for (int i=0; i<2*N; ++i) for (int j=0; j<2*N; ++j) ca2(i,j) = 
-    std::complex<T>(1-3*i+6*j,-4+2*j);
+    std::complex<T>(1.-3.*i+6*j,-4.+2.*j);
 
   tmv::Vector<T> v5(5*N);
   tmv::VectorView<T> vs = v5.SubVector(0,5*N,5);
@@ -52,7 +52,7 @@ template <class T> void TestSymMatrixArith_B1()
   cvs = cv;
 
   tmv::Matrix<T,tmv::RowMajor> a3 = a2.Rows(0,N);
-  tmv::Matrix<std::complex<T> > ca3 = a3 * std::complex<T>(-3,4);
+  tmv::Matrix<std::complex<T> > ca3 = a3 * std::complex<T>(-3,4.);
   tmv::Matrix<T,tmv::RowMajor> a4 = a1.Cols(0,0);
   tmv::Matrix<std::complex<T> > ca4 = a4;
 
@@ -84,39 +84,37 @@ template <class T> void TestSymMatrixArith_B1()
       tmv::HermMatrix<T> sx = si;
       tmv::HermMatrix<std::complex<T> > csx = csi;
 
-      TestMatrixArith456<T>(sx,csx,si,csi,a1v,ca1v,"Herm/SquareM");
-      TestMatrixArith7<T>(sx,csx,si,csi,vv,cvv,vv,cvv.Conjugate(),"Herm");
+      TestMatrixArith45<T>(sx,csx,si,csi,a1v,ca1v,"Herm/SquareM");
+      TestMatrixArith6<T>(sx,csx,si,csi,vv,cvv,vv,cvv.Conjugate(),"Herm");
 #ifdef XTEST
-      TestMatrixArith456<T>(sx,csx,si,csi,a3v,ca3v,"Herm/NonSquareM");
-      TestMatrixArith456<T>(sx,csx,si,csi,a4v,ca4v,"Herm/DegenerateM");
-      TestMatrixArith7<T>(sx,csx,si,csi,vs,cvs,vs,cvs.Conjugate(),"Herm");
+      TestMatrixArith45<T>(sx,csx,si,csi,a3v,ca3v,"Herm/NonSquareM");
+      TestMatrixArith45<T>(sx,csx,si,csi,a4v,ca4v,"Herm/DegenerateM");
+      TestMatrixArith6<T>(sx,csx,si,csi,vs,cvs,vs,cvs.Conjugate(),"Herm");
 #endif
     } else {
       tmv::SymMatrix<T> sx = si;
       tmv::SymMatrix<std::complex<T> > csx = csi;
 
-      TestMatrixArith456<T>(sx,csx,si,csi,a1v,ca1v,"Sym/SquareM");
-      TestMatrixArith7<T>(sx,csx,si,csi,vv,cvv,vv,cvv,"Sym");
+      TestMatrixArith45<T>(sx,csx,si,csi,a1v,ca1v,"Sym/SquareM");
+      TestMatrixArith6<T>(sx,csx,si,csi,vv,cvv,vv,cvv,"Sym");
 #ifdef XTEST
-      TestMatrixArith456<T>(sx,csx,si,csi,a3v,ca3v,"Sym/NonSquareM");
-      TestMatrixArith456<T>(sx,csx,si,csi,a4v,ca4v,"Sym/DegenerateM");
-      TestMatrixArith7<T>(sx,csx,si,csi,vs,cvs,vs,cvs,"Sym");
+      TestMatrixArith45<T>(sx,csx,si,csi,a3v,ca3v,"Sym/NonSquareM");
+      TestMatrixArith45<T>(sx,csx,si,csi,a4v,ca4v,"Sym/DegenerateM");
+      TestMatrixArith6<T>(sx,csx,si,csi,vs,cvs,vs,cvs,"Sym");
 #endif
     }
   }
-  for(size_t i=0;i<B.size();++i) delete B[i];
-  for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestSymMatrixArith_B1<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestSymMatrixArith_B1<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestSymMatrixArith_B1<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestSymMatrixArith_B1<int>();
 #endif

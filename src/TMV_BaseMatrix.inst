@@ -1,0 +1,78 @@
+
+#define CT std::complex<T>
+
+#define Def1(RT,T) \
+  template DivHelper<T >::~DivHelper(); \
+  template void DivHelper<T >::DivideInPlace() const; \
+  template void DivHelper<T >::SaveDiv() const; \
+  template void DivHelper<T >::DivideUsing(DivType dt) const; \
+  template void DivHelper<T >::SetDiv() const; \
+  template void DivHelper<T >::UnSetDiv() const; \
+  template void DivHelper<T >::ReSetDiv() const; \
+  template void DivHelper<T >::DoneDiv() const; \
+  template bool DivHelper<T >::DivIsSet() const; \
+  template bool DivHelper<T >::CheckDecomp(std::ostream* os) const; \
+  template bool DivHelper<T >::CheckDecomp(const BaseMatrix<T >& m2, \
+      std::ostream* os) const; \
+  template const Divider<T >* DivHelper<T >::GetDiv() const; \
+  template void DivHelper<T >::SetDiv(Divider<T >*) const; \
+  template DivType DivHelper<T >::GetDivType() const; \
+  template bool DivHelper<T >::IsDivInPlace() const; \
+  template void DivHelper<T >::SetupDiv() const; \
+  template T DivHelper<T >::DoDet() const; \
+  template RT DivHelper<T >::DoLogDet(T* sign) const; \
+  template void DivHelper<T >::DoInverseATA(const MatrixView<T >& m2) const; \
+  template bool DivHelper<T >::DoSingular() const; \
+  template RT DivHelper<T >::DoNorm2() const; \
+  template RT DivHelper<T >::DoCondition() const; \
+
+Def1(T,T)
+#ifdef INST_COMPLEX
+Def1(T,CT)
+#endif
+
+#undef Def1
+
+#define Def2(T,T1) \
+  template void DivHelper<T >::DoInverse(const MatrixView<T1 >& m) const; \
+  template void DivHelper<T >::DoLDivEq(const VectorView<T1 >& v) const; \
+  template void DivHelper<T >::DoRDivEq(const VectorView<T1 >& v) const; \
+  template void DivHelper<T >::DoLDivEq(const MatrixView<T1 >& m) const; \
+  template void DivHelper<T >::DoRDivEq(const MatrixView<T1 >& m) const; \
+
+Def2(T,T)
+#ifdef INST_COMPLEX
+Def2(T,CT)
+Def2(CT,CT)
+
+Def2(CT,T)
+#endif
+
+#undef Def2
+
+#define Def3(T,T1,T2) \
+  template void DivHelper<T >::DoLDiv(const GenVector<T1 >& v1, \
+      const VectorView<T2 >& v2) const; \
+  template void DivHelper<T >::DoRDiv(const GenVector<T1 >& v1, \
+      const VectorView<T2 >& v2) const; \
+  template void DivHelper<T >::DoLDiv(const GenMatrix<T1 >& v1, \
+      const MatrixView<T2 >& v2) const; \
+  template void DivHelper<T >::DoRDiv(const GenMatrix<T1 >& v1, \
+      const MatrixView<T2 >& v2) const; \
+
+Def3(T,T,T)
+#ifdef INST_COMPLEX
+Def3(T,T,CT)
+Def3(T,CT,CT)
+Def3(CT,T,CT)
+Def3(CT,CT,CT)
+
+Def3(CT,T,T)
+Def3(T,CT,T)
+Def3(CT,CT,T)
+#endif
+
+#undef Def3
+
+#undef CT
+

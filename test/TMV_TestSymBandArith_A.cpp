@@ -1,5 +1,6 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
-
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
 #define START1 0
 #define START2 0
 
@@ -34,9 +35,7 @@ template <class T> void TestSymBandMatrixArith_A()
 {
   std::vector<tmv::SymBandMatrixView<T> > s;
   std::vector<tmv::SymBandMatrixView<std::complex<T> > > cs;
-  std::vector<tmv::BaseMatrix<T>*> B;
-  std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
-  MakeSymBandList(s,cs,B,CB,InDef);
+  MakeSymBandList(s,cs,InDef);
 
   for(size_t i=START1;i<s.size();i++) {
     if (showstartdone) {
@@ -52,11 +51,11 @@ template <class T> void TestSymBandMatrixArith_A()
       TestMatrixArith123<T>(sx,csx,si,csi,"HermBand");
 
       for(size_t j=START2;j<s.size();j++) if (i!=j) {
-        if (showstartdone) {
-          std::cout<<"Start sub-loop j = "<<j<<std::endl;
-          std::cout<<"sj = "<<s[j]<<std::endl;
-        }
-        TestMatrixArith456<T>(sx,csx,si,csi,s[j],cs[j],"HermBand/HermBand");
+	if (showstartdone) {
+	  std::cout<<"Start sub-loop j = "<<j<<std::endl;
+	  std::cout<<"sj = "<<s[j]<<std::endl;
+	}
+	TestMatrixArith45<T>(sx,csx,si,csi,s[j],cs[j],"HermBand/HermBand");
       }
     } else {
       tmv::SymBandMatrix<T> sx = si;
@@ -64,27 +63,25 @@ template <class T> void TestSymBandMatrixArith_A()
       TestMatrixArith123<T>(sx,csx,si,csi,"SymBand");
 
       for(size_t j=START2;j<s.size();j++) if (i!=j) {
-        if (showstartdone) {
-          std::cout<<"Start sub-loop j = "<<j<<std::endl;
-          std::cout<<"sj = "<<s[j]<<std::endl;
-        }
-        TestMatrixArith456<T>(sx,csx,si,csi,s[j],cs[j],"SymBand/SymBand");
+	if (showstartdone) {
+	  std::cout<<"Start sub-loop j = "<<j<<std::endl;
+	  std::cout<<"sj = "<<s[j]<<std::endl;
+	}
+	TestMatrixArith45<T>(sx,csx,si,csi,s[j],cs[j],"SymBand/SymBand");
       }
     }
   }
-  for(size_t i=0;i<B.size();++i) delete B[i];
-  for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestSymBandMatrixArith_A<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestSymBandMatrixArith_A<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestSymBandMatrixArith_A<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestSymBandMatrixArith_A<int>();
 #endif

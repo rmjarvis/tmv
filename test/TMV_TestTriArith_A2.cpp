@@ -1,12 +1,14 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
+#include "TMV_Tri.h"
 #include "TMV.h"
 
 #define NOADDEQ
 #define NOMULTEQ
 #define NOSV
-#define NOTRANSMM
 #include "TMV_TestMatrixArith.h"
 
 template <class T> void TestTriMatrixArith_A2()
@@ -14,7 +16,7 @@ template <class T> void TestTriMatrixArith_A2()
   const int N = 10;
 
   tmv::Matrix<T> a1(N,N);
-  for(int i=0;i<N;i++) for(int j=0;j<N;j++) a1(i,j) = T(13+3*i-5*j);
+  for(int i=0;i<N;i++) for(int j=0;j<N;j++) a1(i,j) = T(12+3*i-5*j);
 
   tmv::UpperTriMatrix<T,tmv::NonUnitDiag,tmv::RowMajor> u1(a1);
   tmv::LowerTriMatrix<T,tmv::NonUnitDiag,tmv::RowMajor> l1(a1);
@@ -30,7 +32,8 @@ template <class T> void TestTriMatrixArith_A2()
   tmv::LowerTriMatrix<T,tmv::NonUnitDiag> l1x = l1v;
   tmv::LowerTriMatrix<std::complex<T>,tmv::NonUnitDiag> cl1x = cl1v;
 
-  TestMatrixArith456<T>(l1x,cl1x,l1v,cl1v,u1v,cu1v,"Tri L/U");
+  TestMatrixArith123<T>(l1x,cl1x,l1v,cl1v,"Tri L");
+  TestMatrixArith45<T>(l1x,cl1x,l1v,cl1v,u1v,cu1v,"Tri L/U");
 
 #ifdef XTEST
   tmv::UpperTriMatrix<T,tmv::UnitDiag,tmv::RowMajor> u2(a1);
@@ -64,50 +67,50 @@ template <class T> void TestTriMatrixArith_A2()
   tmv::LowerTriMatrix<T,tmv::UnitDiag> l2x = l2v;
   tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag> cl2x = cl2v;
 
-  TestMatrixArith456<T>(l1x,cl1x,l1v,cl1v,u2v,cu2v,"Tri L/U");
-  TestMatrixArith456<T>(l2x,cl2x,l2v,cl2v,u1v,cu1v,"Tri L/U");
-  TestMatrixArith456<T>(l2x,cl2x,l2v,cl2v,u2v,cu2v,"Tri L/U");
-  TestMatrixArith456<T>(l1x,cl1x,l1v,cl1v,u3v,cu3v,"Tri L/U");
-  TestMatrixArith456<T>(l1x,cl1x,l1v,cl1v,u4v,cu4v,"Tri L/U");
-  TestMatrixArith456<T>(l2x,cl2x,l2v,cl2v,u3v,cu3v,"Tri L/U");
-  TestMatrixArith456<T>(l2x,cl2x,l2v,cl2v,u4v,cu4v,"Tri L/U");
-  TestMatrixArith456<T>(l1x,cl1x,l3v,cl3v,u1v,cu1v,"Tri L/U");
-  TestMatrixArith456<T>(l1x,cl1x,l3v,cl3v,u2v,cu2v,"Tri L/U");
-  TestMatrixArith456<T>(l1x,cl1x,l3v,cl3v,u3v,cu3v,"Tri L/U");
-  TestMatrixArith456<T>(l1x,cl1x,l3v,cl3v,u4v,cu4v,"Tri L/U");
-  TestMatrixArith456<T>(l2x,cl2x,l4v,cl4v,u1v,cu1v,"Tri L/U");
-  TestMatrixArith456<T>(l2x,cl2x,l4v,cl4v,u2v,cu2v,"Tri L/U");
-  TestMatrixArith456<T>(l2x,cl2x,l4v,cl4v,u3v,cu3v,"Tri L/U");
-  TestMatrixArith456<T>(l2x,cl2x,l4v,cl4v,u4v,cu4v,"Tri L/U");
-  TestMatrixArith456<T>(u1x,cu1x,u1v,cu1v,l1v,cl1v,"Tri U/L");
-  TestMatrixArith456<T>(u1x,cu1x,u1v,cu1v,l2v,cl2v,"Tri U/L");
-  TestMatrixArith456<T>(u1x,cu1x,u1v,cu1v,l3v,cl3v,"Tri U/L");
-  TestMatrixArith456<T>(u1x,cu1x,u1v,cu1v,l4v,cl4v,"Tri U/L");
-  TestMatrixArith456<T>(u2x,cu2x,u2v,cu2v,l1v,cl1v,"Tri U/L");
-  TestMatrixArith456<T>(u2x,cu2x,u2v,cu2v,l2v,cl2v,"Tri U/L");
-  TestMatrixArith456<T>(u2x,cu2x,u2v,cu2v,l3v,cl3v,"Tri U/L");
-  TestMatrixArith456<T>(u2x,cu2x,u2v,cu2v,l4v,cl4v,"Tri U/L");
-  TestMatrixArith456<T>(u1x,cu1x,u3v,cu3v,l1v,cl1v,"Tri U/L");
-  TestMatrixArith456<T>(u1x,cu1x,u3v,cu3v,l2v,cl2v,"Tri U/L");
-  TestMatrixArith456<T>(u1x,cu1x,u3v,cu3v,l3v,cl3v,"Tri U/L");
-  TestMatrixArith456<T>(u1x,cu1x,u3v,cu3v,l4v,cl4v,"Tri U/L");
-  TestMatrixArith456<T>(u2x,cu2x,u4v,cu4v,l1v,cl1v,"Tri U/L");
-  TestMatrixArith456<T>(u2x,cu2x,u4v,cu4v,l2v,cl2v,"Tri U/L");
-  TestMatrixArith456<T>(u2x,cu2x,u4v,cu4v,l3v,cl3v,"Tri U/L");
-  TestMatrixArith456<T>(u2x,cu2x,u4v,cu4v,l4v,cl4v,"Tri U/L");
+  TestMatrixArith45<T>(l1x,cl1x,l1v,cl1v,u2v,cu2v,"Tri L/U");
+  TestMatrixArith45<T>(l2x,cl2x,l2v,cl2v,u1v,cu1v,"Tri L/U");
+  TestMatrixArith45<T>(l2x,cl2x,l2v,cl2v,u2v,cu2v,"Tri L/U");
+  TestMatrixArith45<T>(l1x,cl1x,l1v,cl1v,u3v,cu3v,"Tri L/U");
+  TestMatrixArith45<T>(l1x,cl1x,l1v,cl1v,u4v,cu4v,"Tri L/U");
+  TestMatrixArith45<T>(l2x,cl2x,l2v,cl2v,u3v,cu3v,"Tri L/U");
+  TestMatrixArith45<T>(l2x,cl2x,l2v,cl2v,u4v,cu4v,"Tri L/U");
+  TestMatrixArith45<T>(l1x,cl1x,l3v,cl3v,u1v,cu1v,"Tri L/U");
+  TestMatrixArith45<T>(l1x,cl1x,l3v,cl3v,u2v,cu2v,"Tri L/U");
+  TestMatrixArith45<T>(l1x,cl1x,l3v,cl3v,u3v,cu3v,"Tri L/U");
+  TestMatrixArith45<T>(l1x,cl1x,l3v,cl3v,u4v,cu4v,"Tri L/U");
+  TestMatrixArith45<T>(l2x,cl2x,l4v,cl4v,u1v,cu1v,"Tri L/U");
+  TestMatrixArith45<T>(l2x,cl2x,l4v,cl4v,u2v,cu2v,"Tri L/U");
+  TestMatrixArith45<T>(l2x,cl2x,l4v,cl4v,u3v,cu3v,"Tri L/U");
+  TestMatrixArith45<T>(l2x,cl2x,l4v,cl4v,u4v,cu4v,"Tri L/U");
+  TestMatrixArith45<T>(u1x,cu1x,u1v,cu1v,l1v,cl1v,"Tri U/L");
+  TestMatrixArith45<T>(u1x,cu1x,u1v,cu1v,l2v,cl2v,"Tri U/L");
+  TestMatrixArith45<T>(u1x,cu1x,u1v,cu1v,l3v,cl3v,"Tri U/L");
+  TestMatrixArith45<T>(u1x,cu1x,u1v,cu1v,l4v,cl4v,"Tri U/L");
+  TestMatrixArith45<T>(u2x,cu2x,u2v,cu2v,l1v,cl1v,"Tri U/L");
+  TestMatrixArith45<T>(u2x,cu2x,u2v,cu2v,l2v,cl2v,"Tri U/L");
+  TestMatrixArith45<T>(u2x,cu2x,u2v,cu2v,l3v,cl3v,"Tri U/L");
+  TestMatrixArith45<T>(u2x,cu2x,u2v,cu2v,l4v,cl4v,"Tri U/L");
+  TestMatrixArith45<T>(u1x,cu1x,u3v,cu3v,l1v,cl1v,"Tri U/L");
+  TestMatrixArith45<T>(u1x,cu1x,u3v,cu3v,l2v,cl2v,"Tri U/L");
+  TestMatrixArith45<T>(u1x,cu1x,u3v,cu3v,l3v,cl3v,"Tri U/L");
+  TestMatrixArith45<T>(u1x,cu1x,u3v,cu3v,l4v,cl4v,"Tri U/L");
+  TestMatrixArith45<T>(u2x,cu2x,u4v,cu4v,l1v,cl1v,"Tri U/L");
+  TestMatrixArith45<T>(u2x,cu2x,u4v,cu4v,l2v,cl2v,"Tri U/L");
+  TestMatrixArith45<T>(u2x,cu2x,u4v,cu4v,l3v,cl3v,"Tri U/L");
+  TestMatrixArith45<T>(u2x,cu2x,u4v,cu4v,l4v,cl4v,"Tri U/L");
 #endif
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestTriMatrixArith_A2<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestTriMatrixArith_A2<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestTriMatrixArith_A2<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestTriMatrixArith_A2<int>();
 #endif
 

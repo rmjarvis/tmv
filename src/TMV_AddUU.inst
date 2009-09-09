@@ -1,27 +1,47 @@
 
 #define CT std::complex<T>
 
-#define Def1(T1,D1,C1,T2)\
-  template void InstAddMM(const T2 x, \
-      const ConstUpperTriMatrixView<T1,D1,UNKNOWN,UNKNOWN,C1>& m1, \
-      UpperTriMatrixView<T2,NonUnitDiag> m2); \
-  template void InstAddMM(const T2 x, \
-      const ConstLowerTriMatrixView<T1,D1,UNKNOWN,UNKNOWN,C1>& m1, \
-      LowerTriMatrixView<T2,NonUnitDiag> m2); \
+#define DefAdd(T,Ta)\
+  template void AddMM(const T alpha, const GenUpperTriMatrix<Ta >& A, \
+      const UpperTriMatrixView<T >& B); \
 
-Def1(T,UnitDiag,false,T)
-Def1(T,NonUnitDiag,false,T)
-#ifdef TMV_INST_COMPLEX
-#ifdef TMV_INST_MIX
-Def1(T,UnitDiag,false,CT)
-Def1(T,NonUnitDiag,false,CT)
-#endif
-Def1(CT,UnitDiag,false,CT)
-Def1(CT,NonUnitDiag,false,CT)
-Def1(CT,UnitDiag,true,CT)
-Def1(CT,NonUnitDiag,true,CT)
+DefAdd(T,T)
+#ifdef INST_COMPLEX
+DefAdd(CT,T)
+DefAdd(CT,CT)
 #endif
 
-#undef Def1
+#undef DefAdd
+
+#define DefAdd2(T,Ta,Tb)\
+  template void AddMM(const T alpha, const GenUpperTriMatrix<Ta >& A, \
+      const T beta, const GenUpperTriMatrix<Tb >& B, \
+      const UpperTriMatrixView<T >& C); \
+
+DefAdd2(T,T,T)
+#ifdef INST_COMPLEX
+DefAdd2(CT,T,T)
+DefAdd2(CT,T,CT)
+DefAdd2(CT,CT,CT)
+#endif
+
+#undef DefAdd2
+
+#define DefAdd2(T,Ta,Tb)\
+  template void AddMM(const T alpha, const GenUpperTriMatrix<Ta >& A, \
+      const T beta, const GenMatrix<Tb >& B, const MatrixView<T >& C); \
+  template void AddMM(const T alpha, const GenUpperTriMatrix<Ta >& A, \
+      const T beta, const GenLowerTriMatrix<Tb >& B, \
+      const MatrixView<T >& C); \
+
+DefAdd2(T,T,T)
+#ifdef INST_COMPLEX
+DefAdd2(CT,T,T)
+DefAdd2(CT,CT,T)
+DefAdd2(CT,T,CT)
+DefAdd2(CT,CT,CT)
+#endif
+
+#undef DefAdd2
 
 #undef CT

@@ -1,6 +1,7 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
 
-#include <fstream>
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
 
@@ -12,7 +13,6 @@ bool XXDEBUG5 = false;
 bool XXDEBUG6 = false;
 bool XXDEBUG7 = false;
 bool XXDEBUG8 = false;
-bool XXDEBUG9 = false;
 
 bool showtests = false;
 bool showacc = false;
@@ -24,8 +24,6 @@ bool dontthrow = false;
 std::string lastsuccess = "";
 
 int main() try {
-  std::ofstream log("tmvtest1.log");
-  tmv::WriteWarningsTo(&log);
 
   //showacc=true;
   //showdiv=true;
@@ -35,7 +33,7 @@ int main() try {
 
 #ifndef SKIPREST
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
   TestAllVector<double>();
   TestAllMatrix<double>();
   TestDiagMatrix<double>();
@@ -45,7 +43,7 @@ int main() try {
   TestAllMatrixDiv<double>();
 #endif // DOUBLE
 
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
   TestAllVector<float>();
   TestAllMatrix<float>();
   TestDiagMatrix<float>();
@@ -55,14 +53,7 @@ int main() try {
   TestAllMatrixDiv<float>();
 #endif // FLOAT
 
-#ifdef TEST_INT
-  TestAllVector<int>();
-  TestAllMatrix<int>();
-  TestDiagMatrix<int>();
-  TestTriMatrix<int>();
-#endif  // INT
-
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
   TestAllVector<long double>();
   TestAllMatrix<long double>();
   TestDiagMatrix<long double>();
@@ -72,18 +63,23 @@ int main() try {
   TestAllMatrixDiv<long double>();
 #endif // LONGDOUBLE
 
+#ifdef INST_INT
+  TestAllVector<int>();
+  TestAllMatrix<int>();
+  TestDiagMatrix<int>();
+  TestTriMatrix<int>();
+#endif  // INT
+
 #endif // SKIPREST
 
   return 0;
 }
 #if 1
-#ifndef NOTHROW
 catch (tmv::Error& e) {
   std::cerr<<e<<std::endl;
   std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
   return 1;
 }
-#endif
 catch (std::exception& e) {
   std::cerr<<e.what()<<std::endl;
   std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
@@ -114,12 +110,7 @@ void DoAssert(bool x, std::string s)
   } else { 
     if (showtests) std::cout<<"  Failed"<<std::endl;
     if (dontthrow) std::cout<<"Failed test: "<<s<<std::endl;  
-    else
-#ifdef NOTHROW
-    { std::cerr<<"Error in test: "<<s<<std::endl; exit(1); }
-#else
-    throw tmv::Error("Error in test: ",s);  
-#endif
+    else throw tmv::Error("Error in test: ",s.c_str());  
   } 
 }
 

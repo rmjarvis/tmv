@@ -1,10 +1,13 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
 #define START 0
 
 #include "TMV_Test.h"
 #include "TMV_Test2.h"
 #include "TMV.h"
 #include "TMV_Sym.h"
+#include "TMV_Tri.h"
 #include "TMV_TestSymArith.h"
 
 #define NOADDEQ
@@ -18,15 +21,13 @@ template <class T> void TestSymMatrixArith_D1()
 
   std::vector<tmv::SymMatrixView<T> > s;
   std::vector<tmv::SymMatrixView<std::complex<T> > > cs;
-  std::vector<tmv::BaseMatrix<T>*> B;
-  std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
-  MakeSymList(s,cs,B,CB,InDef);
+  MakeSymList(s,cs,InDef);
 
   tmv::Matrix<T> a1(N,N);
-  for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) a1(i,j) = T(3+i-5*j);
+  for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) a1(i,j) = 3.+i-5*j;
   tmv::Matrix<std::complex<T> > ca1(N,N);
   for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) ca1(i,j) = 
-    std::complex<T>(3+i-5*j,2-3*i);
+    std::complex<T>(3.+i-5*j,2.-3.*i);
 
   tmv::UpperTriMatrix<T,tmv::NonUnitDiag,tmv::RowMajor> u1(a1);
   tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag,tmv::RowMajor> cu1(ca1);
@@ -88,45 +89,43 @@ template <class T> void TestSymMatrixArith_D1()
       tmv::HermMatrix<T> sx = si;
       tmv::HermMatrix<std::complex<T> > csx = csi;
 
-      TestMatrixArith456<T>(sx,csx,si,csi,u1v,cu1v,"Herm/UpperTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,u1v,cu1v,"Herm/UpperTri");
 #ifdef XTEST
-      TestMatrixArith456<T>(sx,csx,si,csi,l1v,cl1v,"Herm/LowerTri");
-      TestMatrixArith456<T>(sx,csx,si,csi,u2v,cu2v,"Herm/UpperTri");
-      TestMatrixArith456<T>(sx,csx,si,csi,l2v,cl2v,"Herm/LowerTri");
-      TestMatrixArith456<T>(sx,csx,si,csi,u3v,cu3v,"Herm/UpperTri");
-      TestMatrixArith456<T>(sx,csx,si,csi,l3v,cl3v,"Herm/LowerTri");
-      TestMatrixArith456<T>(sx,csx,si,csi,u4v,cu4v,"Herm/UpperTri");
-      TestMatrixArith456<T>(sx,csx,si,csi,l4v,cl4v,"Herm/LowerTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,l1v,cl1v,"Herm/LowerTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,u2v,cu2v,"Herm/UpperTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,l2v,cl2v,"Herm/LowerTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,u3v,cu3v,"Herm/UpperTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,l3v,cl3v,"Herm/LowerTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,u4v,cu4v,"Herm/UpperTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,l4v,cl4v,"Herm/LowerTri");
 #endif
     } else {
       tmv::SymMatrix<T> sx = si;
       tmv::SymMatrix<std::complex<T> > csx = csi;
 
-      TestMatrixArith456<T>(sx,csx,si,csi,u1v,cu1v,"Sym/UpperTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,u1v,cu1v,"Sym/UpperTri");
 #ifdef XTEST
-      TestMatrixArith456<T>(sx,csx,si,csi,l1v,cl1v,"Sym/LowerTri");
-      TestMatrixArith456<T>(sx,csx,si,csi,u2v,cu2v,"Sym/UpperTri");
-      TestMatrixArith456<T>(sx,csx,si,csi,l2v,cl2v,"Sym/LowerTri");
-      TestMatrixArith456<T>(sx,csx,si,csi,u3v,cu3v,"Sym/UpperTri");
-      TestMatrixArith456<T>(sx,csx,si,csi,l3v,cl3v,"Sym/LowerTri");
-      TestMatrixArith456<T>(sx,csx,si,csi,u4v,cu4v,"Sym/UpperTri");
-      TestMatrixArith456<T>(sx,csx,si,csi,l4v,cl4v,"Sym/LowerTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,l1v,cl1v,"Sym/LowerTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,u2v,cu2v,"Sym/UpperTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,l2v,cl2v,"Sym/LowerTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,u3v,cu3v,"Sym/UpperTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,l3v,cl3v,"Sym/LowerTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,u4v,cu4v,"Sym/UpperTri");
+      TestMatrixArith45<T>(sx,csx,si,csi,l4v,cl4v,"Sym/LowerTri");
 #endif
     }
   }
-  for(size_t i=0;i<B.size();++i) delete B[i];
-  for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestSymMatrixArith_D1<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestSymMatrixArith_D1<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestSymMatrixArith_D1<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestSymMatrixArith_D1<int>();
 #endif

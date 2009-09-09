@@ -1,8 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
+// Copyright (C) 2008                                                        //
 //                                                                           //
 // The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
 // where you can find the current version and current documention.           //
@@ -57,8 +56,7 @@
 //   BLAS_ -- Append underscore to Blas names.
 //   BLASPTR -- Pass all arguments to Blas calls by pointer, not reference.
 //   BLASSTRLEN -- Last argument of Blas calls need the length of char array.
-//   BLASZDROT -- Include extra routines, zdrot and csrot
-//   BLASIDAMIN -- Include extra routines idamin, isamin, izamin, icamin
+//   BLASAMIN -- Has routines idamin, isamin
 //
 //   LAP -- Use LAPack calls (see below for more specific subsets here)
 //   CLAP -- LAPack calls should use clapack_* calling convention.
@@ -75,14 +73,14 @@
 //          eg. *getrf, *getri, *potrf, *trtri, etc.
 //   ELAP = Extra LAPACK functions included by the standard CLAPACK
 //          distribution, but not some other distributions, eg. ACML.
-//          *lagtm, (z,c)rot, *lacrm, *lacpy, (z,c)lacgv, (z,c)sy(mv,r)
+//          *lagtm, (z,c)rot, *lacrm, *lacpy, (z,c)sy(mv,r)
 //          (also includes AELAP below)
 //   AELAP = An extra routine that ATLAS has that the minimal LAPACK does not:
 //           *lauum
 //   XLAP = The extended "auxilliary and utility" LAPACK routines included by 
 //          the INTEL MKL, but not some other LAPACK distributions
 //          (specifically, not the standard CLAPACK distribution).
-//          (dz,cs)sum1, *lan(ge,gb,gt,tr,sy,he)
+//          (dz,cs)sum1, (z,c)lacgv, *lan(ge,gb,gt,tr,sy,he)
 //
 // Each LAPack version below needs to #define the appropriate ones of these
 // given which routines are included in the distribution.
@@ -105,16 +103,7 @@
 //   BLASZDOTLAST
 //   BLASZDOTFIRST
 //   BLASZDOTRETURN
-//   BLASNORETURN
 // to specify which of these conventions your implementation uses.
-// (The last one lets you punt on this and just use the native
-// calculation of vector dot products.  It uses native routines for
-// ?dot, ?dotc, ?dotu, ?asum and ?nrm2, i.e. the BLAS functions that 
-// return a value, complex or otherwise.  There are difficult portability 
-// issues getting C and Fortran to mesh correctly. So this lets you 
-// avoid these issues for FBLAS.  All the skipped functions are Level 1,
-// so the BLAS versions are not generally much faster than the native
-// code anyway.)
 //
 // You should also define
 //   BLASZDOTSUB
@@ -154,87 +143,6 @@
 //
 
 //
-// CLAPACK and ACML include files define their own "complex".  
-// So both need to be included before #include<complex>
-// For simplicity, we do it here at the top of the file.  But the rest
-// of the ACML and CLAPACK stuff is later.
-
-#ifdef ACML
-#include "acml.h"
-#endif
-#ifdef CLAPACK
-extern "C" {
-#include "f2c.h"
-#include "clapack.h"
-}
-#undef abs
-#undef min
-#undef max
-#endif
-
-#include <complex> 
-
-// 
-// *** Basic CBLAS ***
-//
-
-#ifdef CBLAS
-
-#define BLAS
-extern "C" {
-#include "cblas.h"
-}
-
-#endif // CBLAS
-
-
-
-//
-// *** Basic Fortran BLAS w/out CBLAS interface
-//
-
-#ifdef FBLAS
-
-#define BLAS
-extern "C" {
-#include "util/fblas.h"
-}
-#define BLAS_
-#define BLASSTRLEN
-//#define BLASZDOTFIRST
-#define BLASNORETURN
-
-namespace tmv {
-
-  template <class T> 
-  inline T* FBLAS_ConvertP(T* x) { return x; }
-
-  template <class T> 
-  inline const T* FBLAS_ConvertP(const T* x) { return x; }
-
-  inline cdouble* FBLAS_ConvertP(std::complex<double>* ptr)
-  { return reinterpret_cast<cdouble*>(ptr); }
-  inline const cdouble* FBLAS_ConvertP(const std::complex<double>* ptr)
-  { return reinterpret_cast<const cdouble*>(ptr); }
-  inline cfloat* FBLAS_ConvertP(std::complex<float>* ptr)
-  { return reinterpret_cast<cfloat*>(ptr); }
-  inline const cfloat* FBLAS_ConvertP(const std::complex<float>* ptr)
-  { return reinterpret_cast<const cfloat*>(ptr); }
-  inline std::complex<double> FBLAS_ConvertToComplex(cdouble z)
-  { return std::complex<double>(z.r,z.i); }
-  inline std::complex<float> FBLAS_ConvertToComplex(cfloat z)
-  { return std::complex<float>(z.r,z.i); }
-
-}
-
-#define BLASP(x) FBLAS_ConvertP(x)
-#define BLASCValue(x) FBLAS_ConvertToComplex(x)
-
-#endif
-
-
-
-//
 // *** MKL ***
 //
 #ifdef MKL
@@ -244,32 +152,28 @@ namespace tmv {
 #else
 
 #define BLAS
-#define CBLAS // Use cblas_ calling convention
-#define BLASZDROT
-#define BLASIDAMIN
 
 #include "mkl.h"
 
+#define CBLAS // Use cblas_ calling convention
 
 #ifndef NOLAP
 #ifndef CLAPACK
-#ifndef FLAPACK
 
 #define LAP
 #define ELAP
 #define XLAP
 #define LAPPTR
 
+#include <complex>
+
 namespace tmv {
 
 
-  template <class T> 
-  inline T* MKL_ConvertP(T* x) { return x; }
-
-  template <class T> 
-  inline T* MKL_ConvertP(const T* x) 
+  template <class T> inline T* MKL_ConvertP(T* x) { return x; }
+  template <class T> inline T* MKL_ConvertP(const T* x) 
   { return MKL_ConvertP(const_cast<T*>(x)); }
-
+  
   inline MKL_Complex16* MKL_ConvertP(std::complex<double>* ptr)
   { return reinterpret_cast<MKL_Complex16*>(ptr); }
   inline MKL_Complex8* MKL_ConvertP(std::complex<float>* ptr)
@@ -283,14 +187,11 @@ namespace tmv {
 #define LAPP(x) MKL_ConvertP(x)
 
 #endif // !CLAPACK
-#endif // !FLAPACK
 #endif // LAP
 
 #endif // BLAS
 
 #endif // MKL
-
-
 
 // 
 // *** ACML ***
@@ -302,7 +203,10 @@ namespace tmv {
 #else
 
 #define BLAS
-#define BLASZDROT
+
+#include "acml.h"
+#include <complex> 
+// complex needs to be included _after_ acml, otherwise there are problems.
 
 /* Works with either of these sets of defines: */
 #define BLASZDOTRETURN
@@ -313,15 +217,12 @@ namespace tmv {
 #define BLASSTRLEN
 #define BLASZDOTFIRST
 #define BLASZDOTSUB sub  // This one is optional actually
- */
+*/
 
 namespace tmv {
 
-  template <class T> 
-  inline T* ACML_ConvertP(T* x) { return x; }
-
-  template <class T> 
-  inline T* ACML_ConvertP(const T* x) 
+  template <class T> inline T* ACML_ConvertP(T* x) { return x; }
+  template <class T> inline T* ACML_ConvertP(const T* x) 
   { return const_cast<T*>(x); }
 
   inline ::doublecomplex* ACML_ConvertP(std::complex<double>* ptr)
@@ -345,7 +246,6 @@ namespace tmv {
 
 #ifndef NOLAP
 #ifndef CLAPACK
-#ifndef FLAPACK
 
 #define LAP
 
@@ -356,15 +256,13 @@ namespace tmv {
 #define LAP_
 #define LAPPTR
 #define LAPSTRLEN
- */
+*/
 
 #define LAPP(x) ACML_ConvertP(x)
 
 #endif // !CLAPACK
-#endif // !FLAPACK
 #endif // LAP
 #endif // BLAS
-
 #endif // ACML
 
 
@@ -379,14 +277,12 @@ namespace tmv {
 
 #define BLAS
 #define CBLAS 
-#define BLASZDROT
 
 extern "C" {
 #include "cblas.h"
 
 #ifndef NOLAP
 #ifndef CLAPACK
-#ifndef FLAPACK
 
 #define ALAP 
 #define AELAP 
@@ -396,9 +292,8 @@ extern "C" {
 
 #include "clapack.h"
 
-#endif // !FLAPACK
 #endif // !CLAPACK
-#endif // !NOLAP
+#endif // LAP
 
 }
 
@@ -423,13 +318,19 @@ extern "C" {
 #define LAP_
 #define LAPPTR
 
+extern "C" {
+#include "f2c.h"
+#include "clapack.h"
+#undef abs
+#undef min
+#undef max
+}
+#include <complex> 
+
 namespace tmv {
 
-  template <class T> 
-  inline T* CLAPACK_ConvertP(T* x) { return x; }
-
-  template <class T> 
-  inline T* CLAPACK_ConvertP(const T* x) 
+  template <class T> inline T* CLAPACK_ConvertP(T* x) { return x; }
+  template <class T> inline T* CLAPACK_ConvertP(const T* x) 
   { return const_cast<T*>(x); }
 
   inline ::doublecomplex* CLAPACK_ConvertP(std::complex<double>* ptr)
@@ -456,56 +357,6 @@ namespace tmv {
 
 #endif // CLAPACK
 
-
-//
-// *** Fortran LAPACK ***
-//
-#ifdef FLAPACK
-
-#ifdef NOBLAS
-#define NOLAP
-#else
-
-#ifndef NOLAP
-
-#define LAP 
-#define ELAP 
-#define LAP_
-
-extern "C" {
-#include "util/flapack.h"
-}
-
-namespace tmv {
-
-  template <class T> 
-  inline T* FLAPACK_ConvertP(T* x) { return x; }
-
-  template <class T> 
-  inline const T* FLAPACK_ConvertP(const T* x) { return x; }
-
-  inline cdouble* FLAPACK_ConvertP(std::complex<double>* ptr)
-  { return reinterpret_cast<cdouble*>(ptr); }
-  inline const cdouble* FLAPACK_ConvertP(const std::complex<double>* ptr)
-  { return reinterpret_cast<const cdouble*>(ptr); }
-  inline cfloat* FLAPACK_ConvertP(std::complex<float>* ptr)
-  { return reinterpret_cast<cfloat*>(ptr); }
-  inline const cfloat* FLAPACK_ConvertP(const std::complex<float>* ptr)
-  { return reinterpret_cast<const cfloat*>(ptr); }
-  inline std::complex<double> FLAPACK_ConvertToComplex(cdouble z)
-  { return std::complex<double>(z.r,z.i); }
-  inline std::complex<float> FLAPACK_ConvertToComplex(cfloat z)
-  { return std::complex<float>(z.r,z.i); }
-
-}
-
-#define LAPP(x) FLAPACK_ConvertP(x)
-#define LAPCValue(x) FLAPACK_ConvertToComplex(x)
-
-#endif // LAP
-#endif // BLAS
-#endif // FLAPACK
-
 //
 //
 // PART 2
@@ -522,14 +373,14 @@ namespace tmv {
 #endif // ELAP
 
 namespace tmv {
-  // This are defined in TMV_Vector.cpp
+  // These are defined in TMV_Vector.cpp
   extern int Lap_info; 
-  const char Blas_ch_N = 'N';
-  const char Blas_ch_C = 'C';
-  const char Blas_ch_T = 'T';
-  const char Blas_ch_L = 'L';
-  const char Blas_ch_R = 'R';
-  const char Blas_ch_U = 'U';
+  extern char Blas_ch_N;
+  extern char Blas_ch_C;
+  extern char Blas_ch_T;
+  extern char Blas_ch_L;
+  extern char Blas_ch_R;
+  extern char Blas_ch_U;
 }
 
 #ifdef BLAS
@@ -701,20 +552,116 @@ namespace tmv {
 #define LAPPLUS1 +1
 #endif
 
-#ifdef NOWORKQUERY
-// This is often a good guess, but may not be optimal.
-#define LAP_BLOCKSIZE 64
-#endif
-
-#endif // ALAP
+#include "TMV_Base.h"
 
 namespace tmv {
 
-  // Defined in Vector.cpp
-  void LAP_Results(const char* fn);
-  void LAP_Results(const int lwork_opt, const int m, const int n,
-      const int lwork, const char* fn);
+  inline int* LAP_IPiv(const int n)
+  {
+    static tmv::auto_array<int> ipiv(0);
+    static int currn = 0;
+    if (n > currn) {
+      ipiv.reset(new int[n]);
+      currn = n;
+#ifdef CLAP
+      for(int i=0;i<n;++i) ipiv.get()[i] = i;
+#else
+      for(int i=0;i<n;++i) ipiv.get()[i] = i+1;
+#endif
+    }
+    return ipiv.get();
+  }
+
+#ifndef LAPNOWORK
+
+#ifndef LAP_BLOCKSIZE
+#define LAP_BLOCKSIZE 64
+#endif
+
+  inline int* LAP_IWork(const int n)
+  {
+    static tmv::auto_array<int> work(0);
+    static int currn = 0;
+    if (n > currn) {
+      work.reset(new int[n]);
+      currn = n;
+    }
+    return work.get();
+  }
+
+  inline double* LAP_DWork(const int n)
+  {
+    static tmv::auto_array<double> work(0);
+    static int currn = 0;
+    if (n > currn) {
+      work.reset(new double[n]);
+      currn = n;
+    }
+    return work.get();
+  }
+
+  inline std::complex<double>* LAP_ZWork(const int n)
+  {
+    static tmv::auto_array<std::complex<double> > work(0);
+    static int currn = 0;
+    if (n > currn) {
+      work.reset(new std::complex<double>[n]);
+      currn = n;
+    }
+    return work.get();
+  }
+
+  inline float* LAP_SWork(const int n)
+  {
+    static tmv::auto_array<float> work(0);
+    static int currn = 0;
+    if (n > currn) {
+      work.reset(new float[n]);
+      currn = n;
+    }
+    return work.get();
+  }
+
+  inline std::complex<float>* LAP_CWork(const int n)
+  {
+    static tmv::auto_array<std::complex<float> > work(0);
+    static int currn = 0;
+    if (n > currn) {
+      work.reset(new std::complex<float>[n]);
+      currn = n;
+    }
+    return work.get();
+  }
+
+#endif // !LAPNOWORK
+
+  inline void LAP_Results(const char* fn)
+  {
+    if (Lap_info < 0) {
+      throw Error("info < 0 returned by LAPACK function ",fn);
+    }
+  }
+
+  inline void LAP_Results(
+      const int DEBUGPARAM(lwork_opt), 
+      const int DEBUGPARAM(m), const int DEBUGPARAM(n),
+      const int DEBUGPARAM(lwork), const char* fn)
+  {
+    if (Lap_info < 0) {
+      throw Error("info < 0 returned by LAPACK function ",fn);
+    }
+#ifdef TMVDEBUG
+#ifndef NWARN
+    if (lwork_opt > lwork) {
+      std::cout<<"LAPACK function "<<fn<<" requested more workspace than provided\n";
+      std::cout<<"for matrix with m,n = "<<m<<','<<n<<std::endl;
+      std::cout<<"Given: "<<lwork<<", requested "<<lwork_opt<<std::endl;
+    }
+#endif
+#endif
+  }
 
 }
+#endif // ALAP
 
 #endif // TMV_BLAS_H

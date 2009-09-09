@@ -1,0 +1,161 @@
+
+#define CT std::complex<T>
+
+#define Def1(RT,CCT,T,Ref) \
+  template bool GenBandMatrix<T >::OKSubMatrix( \
+      int i1, int i2, int j1, int j2, int is, int js) const; \
+  template bool GenBandMatrix<T >::OKSubVector( \
+      int i, int j, int is, int js, int s) const; \
+  template bool GenBandMatrix<T >::OKSubBandMatrix( \
+      int i1, int i2, int j1, int j2, int lo, int hi, int is, int js) const; \
+  template bool ConstBandMatrixView<T,FortranStyle>::OKSubMatrix( \
+      int i1, int i2, int j1, int j2, int is, int js) const; \
+  template bool ConstBandMatrixView<T,FortranStyle>::OKSubVector( \
+      int i, int j, int is, int js, int s) const; \
+  template bool ConstBandMatrixView<T,FortranStyle>::OKSubBandMatrix( \
+      int i1, int i2, int j1, int j2, int lo, int hi, int is, int js) const; \
+  template RT GenBandMatrix<T >::NormF() const; \
+  template RT GenBandMatrix<T >::NormSq(const RT scale) const; \
+  template RT GenBandMatrix<T >::Norm1() const; \
+  template RT GenBandMatrix<T >::MaxAbsElement() const; \
+  template RT GenBandMatrix<T >::DoNorm2() const; \
+  template RT GenBandMatrix<T >::DoCondition() const; \
+  template QuotXB<T,T > GenBandMatrix<T >::QInverse() const; \
+  template auto_ptr<BaseMatrix<T > > GenBandMatrix<T >::NewCopy() const; \
+  template auto_ptr<BaseMatrix<T > > GenBandMatrix<T >::NewView() const; \
+  template auto_ptr<BaseMatrix<T > > GenBandMatrix<T >::NewTranspose() const; \
+  template auto_ptr<BaseMatrix<T > > GenBandMatrix<T >::NewConjugate() const; \
+  template auto_ptr<BaseMatrix<T > > GenBandMatrix<T >::NewAdjoint() const; \
+  template auto_ptr<BaseMatrix<T > > GenBandMatrix<T >::NewInverse() const; \
+  template void GenBandMatrix<T >::Write(std::ostream& os) const; \
+  template void GenBandMatrix<T >::Write(std::ostream& os, RT t) const; \
+  template void GenBandMatrix<T >::WriteCompact(std::ostream& os) const; \
+  template void GenBandMatrix<T >::WriteCompact(std::ostream& os, RT t) const;\
+  template T GenBandMatrix<T >::cref(int i, int j) const; \
+  template void GenBandMatrix<T >::NewDivider() const; \
+  template const BandMatrixView<T,CStyle>&  \
+      BandMatrixView<T,CStyle>::Clip(RT thresh) const; \
+  template const BandMatrixView<T,CStyle>&  \
+      BandMatrixView<T,CStyle>::SetAllTo(T x) const; \
+  template const BandMatrixView<T,CStyle>&  \
+      BandMatrixView<T,CStyle>::Zero() const; \
+  template const BandMatrixView<T,CStyle>&  \
+      BandMatrixView<T,CStyle>::ConjugateSelf() const; \
+  template void BandMatrixView<T,CStyle>::DoTransposeSelf() const; \
+  template Ref BandMatrixView<T,CStyle>::ref(int i, int j) const; \
+  template void Swap(const BandMatrixView<T >& m1, \
+      const BandMatrixView<T >& m2); \
+  template void BandMatrixReadError<T >::Write(std::ostream& os) const throw(); \
+  template std::istream& operator>>(std::istream& fin, \
+      const BandMatrixView<T >& m);  \
+  template BandMatrix<T,DiagMajor> UpperBiDiagMatrix( \
+      const GenVector<T >& v1, const GenVector<T >& v2); \
+  template BandMatrix<T,DiagMajor> LowerBiDiagMatrix( \
+      const GenVector<T >& v1, const GenVector<T >& v2); \
+  template BandMatrix<T,DiagMajor> TriDiagMatrix( \
+      const GenVector<T >& v1, const GenVector<T >& v2, \
+      const GenVector<T >& v3); \
+  template ConstBandMatrixView<T > BandMatrixViewOf( \
+      const GenDiagMatrix<T >& m); \
+  template ConstBandMatrixView<T > BandMatrixViewOf( \
+      const GenUpperTriMatrix<T >& m, int nhi); \
+  template ConstBandMatrixView<T > BandMatrixViewOf( \
+      const GenLowerTriMatrix<T >& m, int nlo); \
+  template ConstBandMatrixView<T > BandMatrixViewOf( \
+      const T* m, size_t cs, size_t rs, int nlo, int nhi, StorageType stor); \
+  template BandMatrixView<T > BandMatrixViewOf( \
+      T* m, size_t cs, size_t rs, int nlo, int nhi, StorageType stor); \
+  template bool ConstBandMatrixView<T >::CanLinearize() const; \
+  template bool BandMatrixView<T >::CanLinearize() const; \
+  template void BandMatrixView<T >::Read(std::istream& fin) const; \
+
+Def1(T,CT,T,T&)
+#ifdef INST_COMPLEX
+Def1(T,CT,CT,VarConjRef<CT >)
+#endif
+
+#undef Def1
+
+#define Def2(T1,T2)\
+  template bool operator==(const GenBandMatrix<T1 >& m1, \
+      const GenBandMatrix<T2 >& m2); \
+
+Def2(T,T)
+#ifdef INST_COMPLEX
+Def2(T,CT)
+Def2(CT,T)
+Def2(CT,CT)
+#endif
+
+#undef Def2
+
+#define Def3(T,I)\
+  template ConstBandMatrixView<T,I> BandMatrixViewOf( \
+      const ConstDiagMatrixView<T,I>& m); \
+  template ConstBandMatrixView<T,I> BandMatrixViewOf( \
+      const DiagMatrix<T,I>& m); \
+  template BandMatrixView<T,I> BandMatrixViewOf( \
+      const DiagMatrixView<T,I>& m); \
+  template BandMatrixView<T,I> BandMatrixViewOf( \
+      DiagMatrix<T,I>& m); \
+  template ConstBandMatrixView<T,I> BandMatrixViewOf( \
+      const ConstUpperTriMatrixView<T,I>& m, int nhi); \
+  template BandMatrixView<T,I> BandMatrixViewOf( \
+      const UpperTriMatrixView<T,I>& m, int nhi); \
+  template ConstBandMatrixView<T,I> BandMatrixViewOf( \
+      const ConstLowerTriMatrixView<T,I>& m, int nlo); \
+  template BandMatrixView<T,I> BandMatrixViewOf( \
+      const LowerTriMatrixView<T,I>& m, int nlo); \
+
+Def3(T,CStyle)
+Def3(T,FortranStyle)
+#ifdef INST_COMPLEX
+Def3(CT,CStyle)
+Def3(CT,FortranStyle)
+#endif
+
+#define Def4(T,S,I)\
+  template ConstBandMatrixView<T,I> BandMatrixViewOf( \
+	const UpperTriMatrix<T,NonUnitDiag,S,I>& m, int nhi); \
+  template ConstBandMatrixView<T,I> BandMatrixViewOf( \
+	const LowerTriMatrix<T,NonUnitDiag,S,I>& m, int nlo); \
+  template BandMatrixView<T,I> BandMatrixViewOf( \
+	UpperTriMatrix<T,NonUnitDiag,S,I>& m, int nhi); \
+  template BandMatrixView<T,I> BandMatrixViewOf( \
+	LowerTriMatrix<T,NonUnitDiag,S,I>& m, int nlo); \
+
+Def4(T,RowMajor,CStyle)
+Def4(T,ColMajor,CStyle)
+Def4(T,RowMajor,FortranStyle)
+Def4(T,ColMajor,FortranStyle)
+#ifdef INST_COMPLEX
+Def4(CT,RowMajor,CStyle)
+Def4(CT,ColMajor,CStyle)
+Def4(CT,RowMajor,FortranStyle)
+Def4(CT,ColMajor,FortranStyle)
+#endif
+
+#define Def5(T,S,I)\
+  template std::istream& operator>>(std::istream& fin, \
+      auto_ptr<BandMatrix<T,S,I> >& m); \
+
+Def5(T,RowMajor,CStyle)
+Def5(T,ColMajor,CStyle)
+Def5(T,DiagMajor,CStyle)
+Def5(T,RowMajor,FortranStyle)
+Def5(T,ColMajor,FortranStyle)
+Def5(T,DiagMajor,FortranStyle)
+#ifdef INST_COMPLEX
+Def5(CT,RowMajor,CStyle)
+Def5(CT,ColMajor,CStyle)
+Def5(CT,DiagMajor,CStyle)
+Def5(CT,RowMajor,FortranStyle)
+Def5(CT,ColMajor,FortranStyle)
+Def5(CT,DiagMajor,FortranStyle)
+#endif
+
+#undef Def5
+
+#undef CT
+
+

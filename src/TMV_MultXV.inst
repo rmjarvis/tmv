@@ -1,31 +1,40 @@
 
 #define CT std::complex<T>
 
-#define Def1(T)\
-  template void InstMultXV(const T x, VectorView<T > v); \
+#define Def0(T)\
+  template void MultXV(const T x, const VectorView<T >& v2); \
 
-#ifndef TMV_INST_SKIP_BLAS
-Def1(T)
-#ifdef TMV_INST_COMPLEX
-Def1(CT)
+Def0(T)
+#ifdef INST_COMPLEX
+Def0(CT)
 #endif
+
+#undef Def0
+
+#define Def1(T,T1)\
+  template void MultXV(const T x, const GenVector<T1 >& v1, \
+      const VectorView<T >& v2); \
+  template void ElementProd(const T alpha, \
+      const GenVector<T1 >& x, const VectorView<T >& y);  \
+
+Def1(T,T)
+#ifdef INST_COMPLEX
+Def1(CT,T)
+Def1(CT,CT)
 #endif
 
 #undef Def1
 
-#define Def2(T1,C1,T2)\
-  template void InstMultXV(const T2 x, const ConstVectorView<T1,XX,C1>& v1, \
-      VectorView<T2 > v2); \
+#define Def2(T,T1,T2)\
+  template void AddElementProd(const T alpha, \
+      const GenVector<T1 >& x, const GenVector<T2 >& y, \
+      const VectorView<T >& z);  \
 
-#ifndef TMV_INST_SKIP_BLAS
-Def2(T,false,T)
-#ifdef TMV_INST_COMPLEX
-#ifdef TMV_INST_MIX
-Def2(T,false,CT)
-#endif
-Def2(CT,false,CT)
-Def2(CT,true,CT)
-#endif
+Def2(T,T,T)
+#ifdef INST_COMPLEX
+Def2(CT,T,T)
+Def2(CT,T,CT)
+Def2(CT,CT,CT)
 #endif
 
 #undef Def2
