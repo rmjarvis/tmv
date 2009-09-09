@@ -1,0 +1,20 @@
+
+#define CT std::complex<T>
+
+#define DefCopy(T1,T2) \
+  template void CopyTriToBand(const GenUpperTriMatrix<T1>& m1, \
+    const BandMatrixView<T2>& m2); \
+  template void CopyTriToBand(const GenLowerTriMatrix<T1>& m1, \
+    const BandMatrixView<T2>& m2); \
+
+DefCopy(T,T)
+#ifdef INST_COMPLEX
+DefCopy(T,CT)
+DefCopy(CT,T)
+DefCopy(CT,CT)
+#endif
+
+#undef DefCopy
+
+#undef CT
+

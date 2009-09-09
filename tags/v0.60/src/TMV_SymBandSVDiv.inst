@@ -1,0 +1,55 @@
+
+#define CT std::complex<T>
+
+template class HermBandSVDiv<T >;
+template class SymBandSVDiv<T >;
+#ifdef INST_COMPLEX
+template class HermBandSVDiv<CT >;
+template class SymBandSVDiv<CT >;
+#endif
+
+#define DefDivEq(T,T2)\
+template void HermBandSVDiv<T >::DoLDivEq2(const MatrixView<T2 >& m) const; \
+template void HermBandSVDiv<T >::DoRDivEq2(const MatrixView<T2 >& m) const; \
+template void HermBandSVDiv<T >::DoInverse2(const MatrixView<T2 >& m) const; \
+template void HermBandSVDiv<T >::DoInverse(const SymMatrixView<T2 >& m) const; \
+template void SymBandSVDiv<T >::DoLDivEq2(const MatrixView<T2 >& m) const; \
+template void SymBandSVDiv<T >::DoRDivEq2(const MatrixView<T2 >& m) const; \
+template void SymBandSVDiv<T >::DoInverse2(const MatrixView<T2 >& m) const; \
+template void SymBandSVDiv<T >::DoInverse(const SymMatrixView<T2 >& m) const; \
+
+DefDivEq(T,T)
+#ifdef INST_COMPLEX
+DefDivEq(T,CT)
+DefDivEq(CT,CT)
+
+DefDivEq(CT,T)
+#endif
+
+#undef DefDivEq
+
+#define DefDiv(T,T1,T2) \
+template void HermBandSVDiv<T >::DoLDiv2(const GenMatrix<T1 >& m1, \
+    const MatrixView<T2 >& m2) const; \
+template void HermBandSVDiv<T >::DoRDiv2(const GenMatrix<T1 >& m1, \
+    const MatrixView<T2 >& m2) const; \
+template void SymBandSVDiv<T >::DoLDiv2(const GenMatrix<T1 >& m1, \
+    const MatrixView<T2 >& m2) const; \
+template void SymBandSVDiv<T >::DoRDiv2(const GenMatrix<T1 >& m1, \
+    const MatrixView<T2 >& m2) const; \
+
+DefDiv(T,T,T)
+#ifdef INST_COMPLEX
+DefDiv(T,T,CT)
+DefDiv(T,CT,CT)
+DefDiv(CT,T,CT)
+DefDiv(CT,CT,CT)
+
+DefDiv(CT,T,T)
+DefDiv(CT,CT,T)
+DefDiv(T,CT,T)
+#endif
+
+#undef DefDiv
+
+#undef CT

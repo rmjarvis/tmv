@@ -1,0 +1,107 @@
+
+#define CT std::complex<T>
+
+#define Def1(RT,T,Ref) \
+  template void GenBandMatrix<T >::AssignToM( \
+      const MatrixView<T >& m2) const; \
+  template bool GenBandMatrix<T >::OKSubMatrix( \
+      int i1, int i2, int j1, int j2, int is, int js) const; \
+  template bool GenBandMatrix<T >::OKSubVector( \
+      int i, int j, int is, int js, size_t s) const; \
+  template bool GenBandMatrix<T >::OKSubBandMatrix( \
+      int i1, int i2, int j1, int j2, int lo, int hi, int is, int js) const; \
+  template bool ConstBandMatrixView<T,FortranStyle>::OKSubMatrix( \
+      int i1, int i2, int j1, int j2, int is, int js) const; \
+  template bool ConstBandMatrixView<T,FortranStyle>::OKSubVector( \
+      int i, int j, int is, int js, size_t s) const; \
+  template bool ConstBandMatrixView<T,FortranStyle>::OKSubBandMatrix( \
+      int i1, int i2, int j1, int j2, int lo, int hi, int is, int js) const; \
+  template RT GenBandMatrix<T >::NormF() const; \
+  template RT GenBandMatrix<T >::NormSq() const; \
+  template RT GenBandMatrix<T >::Norm1() const; \
+  template RT GenBandMatrix<T >::MaxAbsElement() const; \
+  template QuotXB<T,T > GenBandMatrix<T >::QInverse() const; \
+  template auto_ptr<BaseMatrix<T > > GenBandMatrix<T >::NewCopy() const; \
+  template auto_ptr<BaseMatrix<T > > GenBandMatrix<T >::NewView() const; \
+  template auto_ptr<BaseMatrix<T > > GenBandMatrix<T >::NewTranspose() const; \
+  template auto_ptr<BaseMatrix<T > > GenBandMatrix<T >::NewConjugate() const; \
+  template auto_ptr<BaseMatrix<T > > GenBandMatrix<T >::NewAdjoint() const; \
+  template auto_ptr<BaseMatrix<T > > GenBandMatrix<T >::NewInverse() const; \
+  template void GenBandMatrix<T >::Write(std::ostream& os) const; \
+  template void GenBandMatrix<T >::Write(std::ostream& os, RT t) const; \
+  template void GenBandMatrix<T >::WriteCompact(std::ostream& os) const; \
+  template void GenBandMatrix<T >::WriteCompact(std::ostream& os, RT t) const;\
+  template T GenBandMatrix<T >::cref(size_t i, size_t j) const; \
+  template void GenBandMatrix<T >::NewDivider() const; \
+  template const BandMatrixView<T,CStyle>&  \
+      BandMatrixView<T,CStyle>::Clip(RT thresh) const; \
+  template const BandMatrixView<T,CStyle>&  \
+      BandMatrixView<T,CStyle>::SetAllTo(T x) const; \
+  template const BandMatrixView<T,CStyle>&  \
+      BandMatrixView<T,CStyle>::ConjugateSelf() const; \
+  template void BandMatrixView<T,CStyle>::DoTransposeSelf() const; \
+  template Ref BandMatrixView<T,CStyle>::ref(size_t i, size_t j) const; \
+  template void Swap(const BandMatrixView<T >& m1, \
+      const BandMatrixView<T >& m2); \
+  template void BandMatrixReadError<T >::Write(std::ostream& os) const throw(); \
+  template std::istream& operator>>(std::istream& fin, \
+      const BandMatrixView<T >& m);  \
+  template BandMatrix<T,DiagMajor> UpperBiDiagMatrix( \
+      const GenVector<T >& v1, const GenVector<T >& v2); \
+  template BandMatrix<T,DiagMajor> LowerBiDiagMatrix( \
+      const GenVector<T >& v1, const GenVector<T >& v2); \
+  template BandMatrix<T,DiagMajor> TriDiagMatrix( \
+      const GenVector<T >& v1, const GenVector<T >& v2, \
+      const GenVector<T >& v3); \
+  template ConstBandMatrixView<T > BandMatrixViewOf( \
+      const T* m, size_t cs, size_t rs, int nlo, int nhi, StorageType stor); \
+  template BandMatrixView<T > BandMatrixViewOf( \
+      T* m, size_t cs, size_t rs, int nlo, int nhi, StorageType stor); \
+  template bool ConstBandMatrixView<T >::CanLinearize() const; \
+  template bool BandMatrixView<T >::CanLinearize() const; \
+  template void BandMatrixView<T >::Read(std::istream& fin) const; \
+
+Def1(T,T,T&)
+#ifdef INST_COMPLEX
+Def1(T,CT,VarConjRef<CT >)
+#endif
+
+#undef Def1
+
+#define Def2(T1,T2)\
+  template bool operator==(const GenBandMatrix<T1 >& m1, \
+      const GenBandMatrix<T2 >& m2); \
+
+Def2(T,T)
+#ifdef INST_COMPLEX
+Def2(T,CT)
+Def2(CT,T)
+Def2(CT,CT)
+#endif
+
+#undef Def2
+
+#define Def3(T,S,I)\
+  template std::istream& operator>>(std::istream& fin, \
+      auto_ptr<BandMatrix<T,S,I> >& m); \
+
+Def3(T,RowMajor,CStyle)
+Def3(T,ColMajor,CStyle)
+Def3(T,DiagMajor,CStyle)
+Def3(T,RowMajor,FortranStyle)
+Def3(T,ColMajor,FortranStyle)
+Def3(T,DiagMajor,FortranStyle)
+#ifdef INST_COMPLEX
+Def3(CT,RowMajor,CStyle)
+Def3(CT,ColMajor,CStyle)
+Def3(CT,DiagMajor,CStyle)
+Def3(CT,RowMajor,FortranStyle)
+Def3(CT,ColMajor,FortranStyle)
+Def3(CT,DiagMajor,FortranStyle)
+#endif
+
+#undef Def3
+
+#undef CT
+
+
