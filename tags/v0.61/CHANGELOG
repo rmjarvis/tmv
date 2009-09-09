@@ -1,0 +1,88 @@
+Changes from version 0.60 to 0.61:  
+(See the History section in the full documentation for changes from previous
+versions to 0.60.)
+
+This release contains a number of updates mostly precipitated by 
+feature requests by me in my own use of the library, as well as some 
+from a few other users.
+I also did a complete systematic edit of the documentation which 
+precipitated some more changes to make the UI a bit more intuitive.
+
+-- Changed the default storage for the Matrix class to ColMajor
+rather than RowMajor, since it seems to be more common that column-major
+storage is the more efficient choice.  Therefore, it makes sense to have this
+be the default.
+
+-- Changed a lot of size_t parameters to int - mostly variables
+which are indices of a matrix or vector, like i and j in m(i,j). 
+These variables used to be of type size_t, and now they are int,
+even though they are usually required to be positive.  
+
+The reason for this change was that the implementation of these
+functions often involves multiplying the index by a step size,
+which is allowed to be negative (and hence is an int), so there 
+were lots of casts to int for these variables.  I decided that it 
+would be better to simply have them be int in the first place.
+
+The particular change that is most likely to require modification to 
+existing code involves permutations, which used to be size_t arrays,
+and are now int arrays.  So if you used them, you might need to change 
+their declarations in your code to (int []).
+
+-- Removed U.MakeUnitDiag(), since the name was counter-intuitive to what it 
+actually did, and the functionality is more obvious through the 
+UpperTriMatrixViewOf function.
+
+-- Sped up matrix multiplication for non-blas implementations, including
+openmp pragmas to allow for multiple threads on machines that support them.
+The code is now within a factor of 2 or 3 of a good optimized BLAS 
+distribution.  So it is still worth it to use BLAS if you have one available,
+but if you don't have one on you machine, the non-blas code is no longer a
+order of magnitude slower.
+
+-- Changed a few things which prevented Microsoft Visual C++ from compiling 
+successfully.  As far as I can tell, these are aspects in which VC++ is 
+not fully compliant with the C++ standard, but there were work-arounds 
+for all of them.
+
+Thanks to Andy Molloy for spearheading this effort and doing the lion's 
+share of the work to make the code compatible with the VC++ compiler.
+
+-- Removed the optional index parameter to the non-method versions of 
+MaxElement, etc.  That is,
+
+vmax = v.MaxElement(&imax)
+
+will work, but not
+
+vmax = MaxElement(v,&imax).
+
+However the functional form without the imax parameter still works as before.
+Basically, this was just a semantic choice.  It seems to me that the meaning 
+of the method form with the index parameter is much clearer than the 
+functional form with two arguments.
+
+I also added an optional scale parameter to m.NormSq(scale).  Again,
+this optional parameter is only allowed in the method version, not 
+the function NormSq(m)
+
+-- Added the explicit decomposition routines.  I also got rid of the SVU,
+SVV and SVS options for m.DivideUsing(...), since the point of these 
+was to do the decomposition without calculation U and/or V.
+This is now done more intuitively with the explicit decomposition routines.
+I also added the (hermitian) eigenvalue/eigenvector routines which used to
+require using the division accessors in non-intuitive ways to calculate.
+
+-- Fixed a couple of places where underflow and overflow could cause 
+problems.  However, I have not put such very large or very small matrices 
+into the test suite, so there are probably other places where these could 
+be a problem.  (Added this to the To Do list.)
+
+-- Updated the native TMV code for the singular value decomposition and 
+hermitian eigenvalue calculation to use the divide-and-conquer algorithm.
+
+-- Added m.LogDet() method.  With very large matrices, it is common 
+for the determinant to overflow, but often the logarithm is sufficient.  
+For example, one may be trying to minimize a likelihood function that
+includes the determinant of a matrix.  Minimizing the log(likelihood) 
+is equivalent, which thus involves the log of the determinant.  

@@ -1,0 +1,32 @@
+
+#define CT std::complex<T>
+
+#define DefDivEq(T,T2)\
+template void CH_LDivEq(const GenSymMatrix<T >& LL,\
+    const MatrixView<T2 >& b); \
+template void CH_RDivEq(const GenSymMatrix<T >& LL,\
+    const MatrixView<T2 >& b); \
+
+DefDivEq(T,T)
+#ifdef INST_COMPLEX
+DefDivEq(T,CT)
+DefDivEq(CT,CT)
+#endif
+
+#undef DefDivEq
+
+#define DefDivEq(T,T2)\
+template <> void CH_LDivEq(const GenSymMatrix<T >& ,\
+    const MatrixView<T2 >& )\
+    { TMVAssert(FALSE); }\
+template <> void CH_RDivEq(const GenSymMatrix<T >& ,\
+    const MatrixView<T2 >& )\
+    { TMVAssert(FALSE); }\
+
+#ifdef INST_COMPLEX
+DefDivEq(CT,T)
+#endif
+
+#undef DefDivEq
+
+#undef CT

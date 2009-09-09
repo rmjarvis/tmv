@@ -1,0 +1,81 @@
+
+#define CT std::complex<T>
+
+#define Def1(T,RT,CT) \
+  template T GenDiagMatrix<T >::Det() const; \
+  template RT GenDiagMatrix<T >::LogDet(T* sign) const; \
+  template const DiagMatrixView<T,CStyle>& \
+      DiagMatrixView<T,CStyle>::InvertSelf() const; \
+  template void GenDiagMatrix<T >::DoInverseATA( \
+      const DiagMatrixView<T >& ) const; \
+  template void GenDiagMatrix<T >::DoInverseATA(const MatrixView<T >& ) const; \
+  template QuotXD<T,T > GenDiagMatrix<T >::QInverse() const; \
+  template void GenDiagMatrix<T >::Write(std::ostream& os) const; \
+  template void GenDiagMatrix<T >::Write(std::ostream& os, RT thresh) const; \
+  template std::istream& operator>>(std::istream& fin,  \
+      const DiagMatrixView<T >& m);  \
+  template auto_ptr<BaseMatrix<T > > GenDiagMatrix<T >::NewCopy() const; \
+  template auto_ptr<BaseMatrix<T > > GenDiagMatrix<T >::NewView() const; \
+  template auto_ptr<BaseMatrix<T > > GenDiagMatrix<T >::NewTranspose() const; \
+  template auto_ptr<BaseMatrix<T > > GenDiagMatrix<T >::NewConjugate() const; \
+  template auto_ptr<BaseMatrix<T > > GenDiagMatrix<T >::NewAdjoint() const; \
+  template auto_ptr<BaseMatrix<T > > GenDiagMatrix<T >::NewInverse() const; \
+  template void DiagMatrixReadError<T >::Write(std::ostream& os) const throw(); \
+
+Def1(T,T,CT)
+#ifdef INST_COMPLEX
+Def1(CT,T,CT)
+#endif
+
+#define Def2(T,I) \
+  template std::istream& operator>>(std::istream& fin, \
+      auto_ptr<DiagMatrix<T,I> >& m); \
+
+Def2(T,CStyle)
+Def2(T,FortranStyle)
+#ifdef INST_COMPLEX
+Def2(CT,CStyle)
+Def2(CT,FortranStyle)
+#endif
+
+#undef Def2
+
+#define Def3(T,T1) \
+  template void GenDiagMatrix<T >::DoLDivEq(const VectorView<T1 >& ) const;\
+  template void GenDiagMatrix<T >::DoLDivEq(const MatrixView<T1 >& ) const;\
+  template void GenDiagMatrix<T >::DoInverse( \
+      const DiagMatrixView<T1 >& m) const;\
+  template void GenDiagMatrix<T >::DoInverse( \
+      const MatrixView<T1 >& m) const;\
+
+Def3(T,T)
+#ifdef INST_COMPLEX
+Def3(T,CT)
+Def3(CT,CT)
+Def3(CT,T)
+#endif
+
+#undef Def3
+
+#define Def4(T,T1,T0) \
+  template void GenDiagMatrix<T >::DoLDiv( \
+      const GenVector<T1 >& , const VectorView<T0 >& ) const;\
+  template void GenDiagMatrix<T >::DoLDiv( \
+      const GenMatrix<T1 >& , const MatrixView<T0 >& ) const;\
+
+Def4(T,T,T)
+#ifdef INST_COMPLEX
+Def4(T,T,CT)
+Def4(T,CT,CT)
+Def4(CT,T,CT)
+Def4(CT,CT,CT)
+Def4(CT,CT,T)
+Def4(T,CT,T)
+Def4(CT,T,T)
+#endif
+
+#undef Def4
+
+#undef CT
+
+

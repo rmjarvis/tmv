@@ -1,0 +1,28 @@
+
+#define CT std::complex<T>
+
+#define DefDivEq(T,T1)\
+template void TriLDivEq(const GenBandMatrix<T1 >& A, \
+    const VectorView<T >& B, DiagType dt); \
+
+DefDivEq(T,T)
+#ifdef INST_COMPLEX
+DefDivEq(CT,T)
+DefDivEq(CT,CT)
+#endif
+
+#undef DefDivEq
+
+#define DefDivEq(T,T1)\
+template <> void TriLDivEq(const GenBandMatrix<T1 >& , \
+    const VectorView<T >& , DiagType ) \
+    { TMVAssert(FALSE); }\
+
+#ifdef INST_COMPLEX
+DefDivEq(T,CT)
+#endif
+
+#undef DefDivEq
+
+#undef CT
+

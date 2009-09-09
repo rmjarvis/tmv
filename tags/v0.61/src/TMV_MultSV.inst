@@ -1,0 +1,27 @@
+
+#define CT std::complex<T>
+
+// Only the real version of these:
+//template class SymMatrixComposite<T >;
+template const T* SymMatrixComposite<T >::cptr() const; 
+template int SymMatrixComposite<T >::stepi() const; 
+template int SymMatrixComposite<T >::stepj() const; 
+
+#define DefMV(T,Ta,Tb)\
+template void MultMV<true>(const T alpha, const GenSymMatrix<Ta >& A, \
+    const GenVector<Tb >& x, const VectorView<T >& y);  \
+template void MultMV<false>(const T alpha, const GenSymMatrix<Ta >& A, \
+    const GenVector<Tb >& x, const VectorView<T >& y);  \
+
+
+DefMV(T,T,T)
+#ifdef INST_COMPLEX
+DefMV(CT,T,T)
+DefMV(CT,T,CT)
+DefMV(CT,CT,T)
+DefMV(CT,CT,CT)
+#endif
+
+#undef DefMV
+
+#undef CT
