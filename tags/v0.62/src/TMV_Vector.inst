@@ -1,0 +1,105 @@
+
+#define CT std::complex<T>
+
+#define Def1(RT,T,Ref) \
+  template RT Epsilon<T >(); \
+  template RT SqrtEpsilon<T >(); \
+  template bool GenVector<T >::OKSubVector(int i1, int i2, int istep) const; \
+  template bool ConstVectorView<T,FortranStyle>::OKSubVector( \
+      int i1, int i2, int istep) const; \
+  template RT GenVector<T >::NormSq(const RT scale) const; \
+  template RT GenVector<T >::Norm2() const; \
+  template T GenVector<T >::SumElements() const; \
+  template RT GenVector<T >::SumAbsElements() const; \
+  template T GenVector<T >::MinElement(int* iminout) const; \
+  template T GenVector<T >::MaxElement(int* imaxout) const; \
+  template RT GenVector<T >::MinAbsElement(int* iminout) const; \
+  template RT GenVector<T >::MaxAbsElement(int* imaxout) const; \
+  template void GenVector<T >::Write(std::ostream& os) const; \
+  template void GenVector<T >::Write(std::ostream& os, RT minnz) const; \
+  template T GenVector<T >::cref(int i) const; \
+  template Ref VectorView<T >::ref(int i) const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::Zero() const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::Clip( \
+      RT thresh) const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::SetAllTo( \
+      T x) const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::AddToAll( \
+      T x) const; \
+  template const VectorView<T,CStyle>& \
+      VectorView<T,CStyle>::ConjugateSelf() const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::DoMakeBasis( \
+      int i) const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::DoSwap( \
+      int i1, int i2) const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::DoPermute( \
+      const int* p, int i1, int i2) const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::DoReversePermute( \
+      const int* p, int i1, int i2) const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::ReverseSelf() const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::Sort( \
+      int* p, ADType ad, COMPType comp) const; \
+  template void VectorView<T,CStyle>::Read( std::istream& is) const; \
+  template void Swap(const VectorView<T >& v1, const VectorView<T >& v2); \
+  template std::istream& operator>>(std::istream& fin, \
+      const VectorView<T >& v); \
+
+Def1(T,T,T&)
+#ifdef INST_COMPLEX
+Def1(T,CT,VarConjRef<CT >)
+#endif
+
+#undef Def1
+
+#ifndef NOTHROW
+  template void VectorReadError<T>::Write(std::ostream& os) const throw();
+  template void VectorReadError<CT>::Write(std::ostream& os) const throw();
+#endif
+
+#define Def2(RT,T,I) \
+  template Vector<T,I>& Vector<T,I>::Zero(); \
+  template Vector<T,I>& Vector<T,I>::Clip(RT thresh); \
+  template Vector<T,I>& Vector<T,I>::SetAllTo(T x); \
+  template Vector<T,I>& Vector<T,I>::AddToAll(T x); \
+  template Vector<T,I>& Vector<T,I>::ConjugateSelf(); \
+  template Vector<T,I>& Vector<T,I>::DoMakeBasis(int i); \
+  template Vector<T,I>& Vector<T,I>::DoSwap(int i1, int i2); \
+  template std::istream& operator>>(std::istream& fin, \
+      std::auto_ptr<Vector<T,I> >& v); \
+  template Vector<T,I> DoBasisVector(size_t,int); \
+
+Def2(T,T,CStyle)
+Def2(T,T,FortranStyle)
+#ifdef INST_COMPLEX
+Def2(T,CT,CStyle)
+Def2(T,CT,FortranStyle)
+#endif
+
+#undef Def2
+
+#define Def3(T1,T2) \
+  template bool operator==(const GenVector<T1 >& v1, \
+      const GenVector<T2 >& v2); \
+
+Def3(T,T)
+#ifdef INST_COMPLEX
+Def3(T,CT)
+Def3(CT,T)
+Def3(CT,CT)
+#endif
+
+#undef Def3
+
+#ifndef INST_SKIP_BLAS
+#define Def4(T) \
+  template void DoCopySameType<T >(const GenVector<T >& v1, \
+      const VectorView<T >& v2); \
+
+Def4(T)
+#ifdef INST_COMPLEX
+Def4(CT)
+#endif
+#endif
+
+#undef CT
+
