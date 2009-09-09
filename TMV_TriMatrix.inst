@@ -1,0 +1,34 @@
+
+#define CT complex<T>
+
+#define DefFuncs(T) \
+template class GenUpperTriMatrix<T>; \
+template class GenLowerTriMatrix<T>; \
+template class UpperTriMatrixView<T>; \
+template class LowerTriMatrixView<T>; \
+template istream& operator>>(istream& fin, const UpperTriMatrixView<T>& m); \
+template istream& operator>>(istream& fin, const LowerTriMatrixView<T>& m); \
+template void Swap(const UpperTriMatrixView<T>& m1, \
+    const UpperTriMatrixView<T>& m2); \
+template bool operator==(const GenUpperTriMatrix<T>& m1, \
+    const GenUpperTriMatrix<T>& m2); \
+
+DefFuncs(T);
+DefFuncs(CT);
+
+#undef DefFuncs
+
+#define DefClass(T,D,S) \
+template class UpperTriMatrix<T,D,S>; \
+template class LowerTriMatrix<T,D,S>; \
+template istream& operator>>(istream& is, UpperTriMatrix<T,D,S>* m); \
+template istream& operator>>(istream& is, LowerTriMatrix<T,D,S>* m); \
+
+DefClass(T,UnitDiag,RowMajor);
+DefClass(T,UnitDiag,ColMajor);
+DefClass(T,NonUnitDiag,RowMajor);
+DefClass(T,NonUnitDiag,ColMajor);
+
+#undef DefClass
+
+#undef CT
