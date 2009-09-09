@@ -1,0 +1,12 @@
+
+#define CT complex<T>
+
+#define DefXM(T)\
+  template void MultXM(const T alpha, const MatrixView<T>& A);
+  
+DefXM(T);
+DefXM(CT);
+
+#undef DefXM
+
+#undef CT

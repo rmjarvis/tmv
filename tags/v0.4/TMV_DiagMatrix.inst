@@ -1,0 +1,17 @@
+
+#define CT complex<T>
+
+#define DefFuncs(RT,T)\
+  template class GenDiagMatrix<T>;  \
+  template class DiagMatrixView<T>;  \
+  template class DiagMatrix<T>;  \
+  template istream& operator>>(istream& fin, DiagMatrix<T>* m); \
+  template istream& operator>>(istream& fin, const DiagMatrixView<T>& m);  \
+
+DefFuncs(T,T);
+DefFuncs(T,CT);
+
+#undef DefFuncs
+
+#undef CT
+

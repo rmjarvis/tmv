@@ -1,0 +1,29 @@
+
+#define CT complex<T>
+
+#define DefMultEq(T)\
+  template void Permutation::LMultEq(const VectorView<T>& v) const; \
+template void Permutation::LDivEq(const VectorView<T>& v) const;  \
+template void Permutation::LMultEq(const MatrixView<T>& m) const; \
+template void Permutation::LDivEq(const MatrixView<T>& m) const;  \
+template void Permutation::LMult(\
+    const GenVector<T>& v2, const VectorView<T>& v1) const; \
+template void Permutation::LDiv(\
+    const GenVector<T>& v2, const VectorView<T>& v1) const; \
+template void Permutation::LMult(\
+    const GenMatrix<T>& m2, const MatrixView<T>& m1) const; \
+template void Permutation::LDiv(\
+    const GenMatrix<T>& m2, const MatrixView<T>& m1) const; \
+template bool operator==(const GenMatrix<T>& m, const Permutation& p); \
+template void MultPV(const Permutation& p1, const bool inv1, \
+    const GenVector<T>& v2, const VectorView<T>& v0); \
+template void MultPM(const Permutation& p1, const bool inv1, \
+    const GenMatrix<T>& m2, const MatrixView<T>& m0); \
+
+DefMultEq(T);
+DefMultEq(CT);
+
+#undef DefMultEq
+
+#undef CT
+

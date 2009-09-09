@@ -1,0 +1,55 @@
+
+#define CT complex<T>
+
+#define DefSVD(RT,T)\
+template class SVDiv<T>; \
+template class SVFDiv<T>; \
+template void SV_Decompose(const MatrixView<T>& U, \
+    const VectorView<RT>& S, const MatrixView<T>& V, T& det, bool StoreU); \
+template void SV_Decompose(const MatrixView<T>& U, \
+    const VectorView<RT>& S, T& det, bool StoreU); \
+template void SV_Decompose(const MatrixView<T>& UV, \
+    const VectorView<T>& Ubeta, const VectorView<T>& Vbeta, \
+    Matrix<T,ColMajor>*& UV2, Vector<T>*& Qbeta, \
+    const MatrixView<RT>& U1, const MatrixView<RT>& V1, \
+    const VectorView<RT>& S, T& det); \
+template void SV_Decompose_From_Bidiagonal(const MatrixView<T>* U, \
+    const VectorView<RT>& D, const VectorView<RT>& E, \
+    const MatrixView<T>* V, bool SetUV);  \
+
+DefSVD(T,T);
+DefSVD(T,CT);
+
+#undef DefSVD
+
+#define DefDiv(RT1,T1,T2,T3)\
+template void SV_LDiv(const GenMatrix<T1>& U,\
+    const GenVector<RT1>& S, const GenMatrix<T1>& V, const size_t kmax, \
+    const GenMatrix<T2>& m, const MatrixView<T3>& x); \
+template void SV_RDiv(const GenMatrix<T1>& U,\
+    const GenVector<RT1>& S, const GenMatrix<T1>& V, const size_t kmax, \
+    const GenMatrix<T2>& m, const MatrixView<T3>& x); \
+template void SV_LDiv(const GenMatrix<T1>& UV,\
+    const GenVector<T1>& Ubeta, const GenVector<T1>& Vbeta, \
+    const GenMatrix<T1>* UV2, const GenVector<T1>* Qbeta, \
+    const GenMatrix<RT1>& U1, const GenMatrix<RT1>& V1, \
+    const GenVector<RT1>& S, const size_t kmax, \
+    const GenMatrix<T2>& m, const MatrixView<T3>& x); \
+template void SV_RDiv(const GenMatrix<T1>& UV,\
+    const GenVector<T1>& Ubeta, const GenVector<T1>& Vbeta, \
+    const GenMatrix<T1>* UV2, const GenVector<T1>* Qbeta, \
+    const GenMatrix<RT1>& U1, const GenMatrix<RT1>& V1, \
+    const GenVector<RT1>& S, const size_t kmax, \
+    const GenMatrix<T2>& m, const MatrixView<T3>& x); \
+
+DefDiv(T,T,T,T);
+DefDiv(T,T,T,CT);
+DefDiv(T,T,CT,CT);
+DefDiv(T,CT,T,CT);
+DefDiv(T,CT,CT,CT);
+
+#undef DefDiv
+
+#undef CT
+#undef ConjCT
+
