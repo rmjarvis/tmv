@@ -40,9 +40,9 @@
 #include "TMV_SmallVector.h"
 #include "TMV_MultMV.h"
 
-//#define XDEBUG
+//#define XDEBUG_PRODMV
 
-#ifdef XDEBUG
+#ifdef XDEBUG_PRODMV
 #include <iostream>
 #endif
 
@@ -161,7 +161,7 @@ namespace tmv {
         Traits2<T2,T3>::sametype &&
 #endif
         checkalias ) };
-#ifdef XDEBUG
+#ifdef XDEBUG_PRODMV
     //std::cout<<"Start MultMV XDEBUG"<<std::endl;
     //std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
     //std::cout<<"m1 = "<<TypeText(m1)<<"  "<<m1<<std::endl;
@@ -182,7 +182,7 @@ namespace tmv {
 #endif
     CallMultMV<checkalias,V3::vconj,inst,add,ix,T,M1,V2,V3>::call(
         x,m1.mat(),v2.vec(),v3.vec());
-#ifdef XDEBUG
+#ifdef XDEBUG_PRODMV
     //std::cout<<"v3 => "<<v3<<std::endl;
     //std::cout<<"Norm(v3 - v3c) => "<<Norm(v3-v3c)<<std::endl;
     if (Norm(v3-v3c) > 1.e-6 * std::abs(T(x)) * Norm(m1) * Norm(v2)) {
@@ -684,9 +684,5 @@ namespace tmv {
   }
 
 } // namespace tmv
-
-#ifdef XDEBUG
-#undef XDEBUG
-#endif
 
 #endif 

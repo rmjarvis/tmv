@@ -1056,7 +1056,7 @@ namespace tmv {
   { warn_out = 0; }
 #else
   inline void TMV_Warning(std::string ) {}
-  inline std::ostream* WriteWarningsTo(std::ostream* ) {}
+  inline std::ostream* WriteWarningsTo(std::ostream* os) { return os; }
   inline void NoWarnings() {}
 #endif
 

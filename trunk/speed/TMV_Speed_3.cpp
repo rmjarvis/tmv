@@ -1,22 +1,22 @@
 
 // How big do you want the matrices to be?
 #if 0
-const int M = 333;
-const int N = 57;
-const int K = 971;
+const int M = 32;
+const int N = 32;
+const int K = 32;
 #elif 0
 const int M = 979;
 const int N = 949;
 const int K = 999;
 #else
-const int M = 4;
-const int N = 128;
-const int K = 128;
+const int M = 35;
+const int N = 43;
+const int K = 39;
 #endif
 
 // Define the type to use:
 //#define TISFLOAT
-//#define TISCOMPLEX
+#define TISCOMPLEX
 
 // Define the parts of the matrices to use
 // 1 = all (rectangle matrix)
@@ -29,20 +29,21 @@ const int K = 128;
 #define PART3 1
 
 // Define whether you want to include the error checks.
-#define ERRORCHECK
+//#define XDEBUG_PRODMM
+//#define ERRORCHECK
 
 // Define which versions you want to test:
 #define DOREG
 #define DOSMALL
 #define DOBLAS
-//#define DOEIGEN
-//#define DOEIGENSMALL
+#define DOEIGEN
+#define DOEIGENSMALL
 
 // Define which batches of functions you want to test:
-//#define DOMULTMM_CCC
-//#define DOMULTMM_RCC
+#define DOMULTMM_CCC
+#define DOMULTMM_RCC
 #define DOMULTMM_CRC
-//#define DOMULTMM_RRC
+#define DOMULTMM_RRC
 
 // Set this if you only want to do a single loop.
 // Not so useful for timing, but useful for debugging.
@@ -62,16 +63,19 @@ const int targetnflops = 100000000; // in real ops
 const int targetmem = 10000000; // in bytes
 
 // Include the BLAS library you want to test TMV against:
-//#include "mkl.h"
+#if 1
+#include "mkl.h"
+#else
 extern "C" {
 #include "util/fblas.h"
 #include "util/flapack.h"
 }
+#endif
 
 // Set these as appropriate given the BLAS and LAPACK libraries included above.
-//#define CBLAS
+#define CBLAS
 //#define CLAPACK
-#define FBLAS
+//#define FBLAS
 #define FLAP
 #define XLAP
 
@@ -316,6 +320,7 @@ const int nloops1 = (
 #define BT cdouble
 #define BP(x) (cdouble*) x
 #else
+#define BT T
 #define BP(x) x
 #endif
 
@@ -487,21 +492,28 @@ UNKNOWN LAP definition....  // Give compile error
 #ifdef DOEIGEN
 #ifdef TISCOMPLEX
 #ifdef TISFLOAT
-#define EIGENV VectorXcf
-#define EIGENM MatrixXcf
+#define EIGENV Eigen::VectorXcf
+#define EIGENM Eigen::MatrixXcf
 #else
-#define EIGENV VectorXcd
-#define EIGENM MatrixXcd
+#define EIGENV Eigen::VectorXcd
+#define EIGENM Eigen::MatrixXcd
 #endif
 #else
 #ifdef TISFLOAT
-#define EIGENV VectorXf
-#define EIGENM MatrixXf
+#define EIGENV Eigen::VectorXf
+#define EIGENM Eigen::MatrixXf
 #else
-#define EIGENV VectorXd
-#define EIGENM MatrixXd
+#define EIGENV Eigen::VectorXd
+#define EIGENM Eigen::MatrixXd
 #endif
 #endif
+
+#define EIGENSMA Eigen::Matrix<T,M,K>
+#define EIGENSMB Eigen::Matrix<T,K,M>
+#define EIGENSMC Eigen::Matrix<T,K,N>
+#define EIGENSMD Eigen::Matrix<T,N,K>
+#define EIGENSME Eigen::Matrix<T,M,N>
+#define ALLOC(X) Eigen::aligned_allocator< X >
 
 #endif
 
@@ -522,8 +534,15 @@ const int nloops2x = (
 
 
 #if (defined(DOEIGEN) || defined(DOEIGENSMALL))
+
+// Supposedly, these are required when using vector's of Eigen types,
+// but they don't seem to work.  
+// And leaving them out does seem to work.
+//#define EIGEN_USE_NEW_STDVECTOR
+//#include "Eigen/StdVector"
 #include "Eigen/Core"
 #include "Eigen/Array"
+
 #endif
 
 static void ClearCache()
@@ -563,9 +582,9 @@ static void MultMM_CCC(
 #endif
 
 #ifdef DOEIGEN
-  std::vector<Eigen::EIGENM> A4(nloops2,Eigen::EIGENM(M,K));
-  std::vector<Eigen::EIGENM> C4(nloops2,Eigen::EIGENM(K,N));
-  std::vector<Eigen::EIGENM> E4(nloops2,Eigen::EIGENM(M,N));
+  std::vector<EIGENM,ALLOC(EIGENM) > A4(nloops2,EIGENM(M,K));
+  std::vector<EIGENM,ALLOC(EIGENM) > C4(nloops2,EIGENM(K,N));
+  std::vector<EIGENM,ALLOC(EIGENM) > E4(nloops2,EIGENM(M,N));
   for(int k=0;k<nloops2;++k) {
     for(int j=0;j<K;++j) for(int i=0;i<M;++i) A4[k](i,j) = A1[k](i,j);
     for(int j=0;j<N;++j) for(int i=0;i<K;++i) C4[k](i,j) = C1[k](i,j);
@@ -573,9 +592,9 @@ static void MultMM_CCC(
 #endif
 
 #ifdef DOEIGENSMALL
-  std::vector<Eigen::Matrix<T,M,K> > A5;
-  std::vector<Eigen::Matrix<T,K,N> > C5;
-  std::vector<Eigen::Matrix<T,M,N> > E5;
+  std::vector<EIGENSMA,ALLOC(EIGENSMA) > A5;
+  std::vector<EIGENSMC,ALLOC(EIGENSMC) > C5;
+  std::vector<EIGENSME,ALLOC(EIGENSME) > E5;
   if (nloops2x) { 
     A5.resize(nloops2x); C5.resize(nloops2x);
     E5.resize(nloops2x); 
@@ -2622,9 +2641,9 @@ static void MultMM_RCC(
 #endif
 
 #ifdef DOEIGEN
-  std::vector<Eigen::EIGENM> B4(nloops2,Eigen::EIGENM(K,M));
-  std::vector<Eigen::EIGENM> C4(nloops2,Eigen::EIGENM(K,N));
-  std::vector<Eigen::EIGENM> E4(nloops2,Eigen::EIGENM(M,N));
+  std::vector<EIGENM,ALLOC(EIGENM) > B4(nloops2,EIGENM(K,M));
+  std::vector<EIGENM,ALLOC(EIGENM) > C4(nloops2,EIGENM(K,N));
+  std::vector<EIGENM,ALLOC(EIGENM) > E4(nloops2,EIGENM(M,N));
   for(int k=0;k<nloops2;++k) {
     for(int j=0;j<K;++j) for(int i=0;i<M;++i) B4[k](j,i) = B1[k](j,i);
     for(int j=0;j<N;++j) for(int i=0;i<K;++i) C4[k](i,j) = C1[k](i,j);
@@ -2632,9 +2651,9 @@ static void MultMM_RCC(
 #endif
 
 #ifdef DOEIGENSMALL
-  std::vector<Eigen::Matrix<T,K,M> > B5;
-  std::vector<Eigen::Matrix<T,K,N> > C5;
-  std::vector<Eigen::Matrix<T,M,N> > E5;
+  std::vector<EIGENSMB,ALLOC(EIGENSMB) > B5;
+  std::vector<EIGENSMC,ALLOC(EIGENSMC) > C5;
+  std::vector<EIGENSME,ALLOC(EIGENSME) > E5;
   if (nloops2x) { 
     B5.resize(nloops2x); C5.resize(nloops2x);
     E5.resize(nloops2x); 
@@ -4674,9 +4693,9 @@ static void MultMM_CRC(
 #endif
 
 #ifdef DOEIGEN
-  std::vector<Eigen::EIGENM> A4(nloops2,Eigen::EIGENM(M,K));
-  std::vector<Eigen::EIGENM> D4(nloops2,Eigen::EIGENM(N,K));
-  std::vector<Eigen::EIGENM> E4(nloops2,Eigen::EIGENM(M,N));
+  std::vector<EIGENM,ALLOC(EIGENM) > A4(nloops2,EIGENM(M,K));
+  std::vector<EIGENM,ALLOC(EIGENM) > D4(nloops2,EIGENM(N,K));
+  std::vector<EIGENM,ALLOC(EIGENM) > E4(nloops2,EIGENM(M,N));
   for(int k=0;k<nloops2;++k) {
     for(int j=0;j<K;++j) for(int i=0;i<M;++i) A4[k](i,j) = A1[k](i,j);
     for(int j=0;j<N;++j) for(int i=0;i<K;++i) D4[k](j,i) = D1[k](j,i);
@@ -4684,9 +4703,9 @@ static void MultMM_CRC(
 #endif
 
 #ifdef DOEIGENSMALL
-  std::vector<Eigen::Matrix<T,M,K> > A5;
-  std::vector<Eigen::Matrix<T,N,K> > D5;
-  std::vector<Eigen::Matrix<T,M,N> > E5;
+  std::vector<EIGENSMA,ALLOC(EIGENSMA) > A5;
+  std::vector<EIGENSMD,ALLOC(EIGENSMD) > D5;
+  std::vector<EIGENSME,ALLOC(EIGENSME) > E5;
   if (nloops2x) { 
     A5.resize(nloops2x); D5.resize(nloops2x);
     E5.resize(nloops2x); 
@@ -4732,7 +4751,7 @@ static void MultMM_CRC(
 
   for (int n=0; n<nloops1; ++n) {
 
-#if 0 // E = A * D.Transpose()
+#if 1 // E = A * D.Transpose()
     ClearCache();
 
 #ifdef ERRORCHECK
@@ -5018,7 +5037,7 @@ static void MultMM_CRC(
 #endif
 #endif
 
-#if 0 // E = 7 * A * D.Transpose()
+#if 1 // E = 7 * A * D.Transpose()
     ClearCache();
 
 #ifdef ERRORCHECK
@@ -5161,7 +5180,7 @@ static void MultMM_CRC(
 #endif
 #endif
 
-#if 0 // E -= A * D.Transpose()
+#if 1 // E -= A * D.Transpose()
     ClearCache();
 
 #ifdef ERRORCHECK
@@ -5306,7 +5325,7 @@ static void MultMM_CRC(
 #endif
 #endif
 
-#if 0 // E += 8 * A * D.Transpose()
+#if 1 // E += 8 * A * D.Transpose()
     ClearCache();
 
 #ifdef ERRORCHECK
@@ -6723,9 +6742,9 @@ static void MultMM_RRC(
 #endif
 
 #ifdef DOEIGEN
-  std::vector<Eigen::EIGENM> B4(nloops2,Eigen::EIGENM(K,M));
-  std::vector<Eigen::EIGENM> D4(nloops2,Eigen::EIGENM(N,K));
-  std::vector<Eigen::EIGENM> E4(nloops2,Eigen::EIGENM(M,N));
+  std::vector<EIGENM,ALLOC(EIGENM) > B4(nloops2,EIGENM(K,M));
+  std::vector<EIGENM,ALLOC(EIGENM) > D4(nloops2,EIGENM(N,K));
+  std::vector<EIGENM,ALLOC(EIGENM) > E4(nloops2,EIGENM(M,N));
   for(int k=0;k<nloops2;++k) {
     for(int j=0;j<K;++j) for(int i=0;i<M;++i) B4[k](j,i) = B1[k](j,i);
     for(int j=0;j<N;++j) for(int i=0;i<K;++i) D4[k](j,i) = D1[k](j,i);
@@ -6733,9 +6752,9 @@ static void MultMM_RRC(
 #endif
 
 #ifdef DOEIGENSMALL
-  std::vector<Eigen::Matrix<T,K,M> > B5;
-  std::vector<Eigen::Matrix<T,N,K> > D5;
-  std::vector<Eigen::Matrix<T,M,N> > E5;
+  std::vector<EIGENSMB,ALLOC(EIGENSMB) > B5;
+  std::vector<EIGENSMD,ALLOC(EIGENSMD) > D5;
+  std::vector<EIGENSME,ALLOC(EIGENSME) > E5;
   if (nloops2x) { 
     B5.resize(nloops2x); D5.resize(nloops2x);
     E5.resize(nloops2x); 

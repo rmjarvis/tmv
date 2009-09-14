@@ -42,6 +42,7 @@
 #include "TMV_SmallMatrix.h"
 #include "TMV_AddMM.h"
 #include "TMV_MultXM.h"
+#include <cstdlib>
 
 //#define TEST_POINTERS
 
@@ -365,6 +366,59 @@ namespace tmv {
   };
 #endif
 
+  // There doesn't seem to be any portable C++ function that guarantees
+  // that the memory allocated will be aligned as necessary for 
+  // SSE functions.
+  // However, the regular C allocator posix_memalign does this job.
+  // So we make this simple class that simply loads memory using
+  // posix_memalign if necessary and takes care of freeing the memory 
+  // (sort of like an auto_ptr).
+  // I think this function is portable, but if it turns out not to be
+  // for some reason, another option would be to allocate 1 or 3 extra
+  // elements (for double, float respectively) and set p to a position that
+  // has the correct alignment regardless of the actual alignment returned
+  // by new.
+
+  // First the regular non-SSE version, where we can simply use new, delete
+  template <class T>
+  struct AlignedMemory
+  {
+    AlignedMemory(const size_t n) : p(new T[n]) {}
+    ~AlignedMemory() { delete[] p; }
+    T* p;
+  };
+  // Now specialize float and double if SSE commands are enabled
+#ifdef __SSE__
+  template <>
+  struct AlignedMemory<float>
+  {
+    AlignedMemory(const size_t n) 
+    {
+      void* vp;
+      if (posix_memalign(&vp,128,n*sizeof(float)))
+        throw std::bad_alloc();
+      p = static_cast<float*>(vp);
+    }
+    ~AlignedMemory() { free(p); }
+    float* p;
+  };
+#endif
+#ifdef __SSE2__
+  template <>
+  struct AlignedMemory<double>
+  {
+    AlignedMemory(const size_t n) 
+    {
+      void* vp;
+      if (posix_memalign(&vp,128,n*sizeof(double)))
+        throw std::bad_alloc();
+      p = static_cast<double*>(vp);
+    }
+    ~AlignedMemory() { free(p); }
+    double* p;
+  };
+#endif
+
 
   // For these algorithms we use a little trick for complex matrices to 
   // enable the use of the optimized kernels, which are only defined for
@@ -395,11 +449,11 @@ namespace tmv {
       std::cout<<"M,N = "<<M<<','<<N<<std::endl;
       std::cout<<"si,sj = "<<si<<','<<sj<<std::endl;
       std::cout<<"m2p = "<<m2p<<"..."<<(m2p+(M-1)*si+(N-1)*sj+1)<<std::endl;
-      //std::cout<<"m1 = "<<m1<<std::endl;
+      std::cout<<"m1 = "<<m1<<std::endl;
 #endif
       CopyM_Helper<-1,cs,rs,M1,M2>::call(m1,m2); 
 #ifdef PRINTALGO_MM_BLOCK
-      //std::cout<<"m2 = "<<m2<<std::endl;
+      std::cout<<"m2 = "<<m2<<std::endl;
       std::cout<<"after copy\n";
 #endif
     }
@@ -418,7 +472,7 @@ namespace tmv {
       TMVAssert(si == 1);
       enum { ix1 = C1 ? -1 : 1 }; // 1 or -1 as required
       const Scaling<ix1,RT> one;
-      const int size = si == 1 ? N*sj : M*si;
+      const int size = N*sj;
       M1r m1r(m1x);
       M1r m1i(m1x.cptr()+1,m1r.colsize(),m1r.rowsize(),m1r.stepi(),m1r.stepj());
       M2r m2r(m2p,M,N,si,sj);
@@ -621,15 +675,16 @@ namespace tmv {
       MatrixView<RT> m2(m2p,K,N,si2,sj2);
       MatrixView<RT> m3(m3p,M,N,si3,sj3);
       std::cout<<"MyProd both real"<<std::endl;
-      //std::cout<<"m1 = "<<m1<<std::endl;
-      //std::cout<<"m2 = "<<m2<<std::endl;
-      //std::cout<<"m3 = "<<m3<<std::endl;
+      std::cout<<"cs,rs,xs = "<<cs<<','<<rs<<','<<xs<<std::endl;
+      std::cout<<"m1 = "<<m1<<std::endl;
+      std::cout<<"m2 = "<<m2<<std::endl;
+      std::cout<<"m3 = "<<m3<<std::endl;
 #endif
       const Scaling<1,RT> one;
       select_multmm<cs,rs,xs,1,RT>::call(M,N,K,one,m1p,m2p,m3p);
 #ifdef PRINTALGO_MM_BLOCK
       std::cout<<"After call to multmm\n";
-      //std::cout<<"m3 => "<<m3<<std::endl;
+      std::cout<<"m3 => "<<m3<<std::endl;
 #endif
     }
   };
@@ -649,6 +704,7 @@ namespace tmv {
       MatrixView<RT> m2(m2p,K,N,si2,sj2);
       MatrixView<CT> m3((CT*)m3p,M,N,si3,sj3);
       std::cout<<"MyProd (m1 complex)"<<std::endl;
+      std::cout<<"cs,rs,xs = "<<cs<<','<<rs<<','<<xs<<std::endl;
       //std::cout<<"m1 = "<<m1<<std::endl;
       //std::cout<<"m2 = "<<m2<<std::endl;
 #endif
@@ -679,6 +735,7 @@ namespace tmv {
       MatrixView<CT> m2((CT*)m2p,K,N,si2,sj2);
       MatrixView<CT> m3((CT*)m3p,M,N,si3,sj3);
       std::cout<<"MyProd (m2 complex)"<<std::endl;
+      std::cout<<"cs,rs,xs = "<<cs<<','<<rs<<','<<xs<<std::endl;
       //std::cout<<"m1 = "<<m1<<std::endl;
       //std::cout<<"m2 = "<<m2<<std::endl;
 #endif
@@ -705,12 +762,14 @@ namespace tmv {
         RT* m3p, const int si3, const int sj3)
     {
 #ifdef PRINTALGO_MM_BLOCK
-      MatrixView<RT> m1(m1p,M,K,si1,sj1);
+      MatrixView<CT> m1((CT*)m1p,M,K,si1,sj1);
       MatrixView<CT> m2((CT*)m2p,K,N,si2,sj2);
       MatrixView<CT> m3((CT*)m3p,M,N,si3,sj3);
       std::cout<<"MyProd (both complex)"<<std::endl;
-      //std::cout<<"m1 = "<<TypeText(m1)<<"  "<<m1<<std::endl;
-      //std::cout<<"m2 = "<<TypeText(m2)<<"  "<<m2<<std::endl;
+      std::cout<<"cs,rs,xs = "<<cs<<','<<rs<<','<<xs<<std::endl;
+      std::cout<<"m1 = "<<TypeText(m1)<<"  "<<m1<<std::endl;
+      std::cout<<"m2 = "<<TypeText(m2)<<"  "<<m2<<std::endl;
+      std::cout<<"m3 = "<<TypeText(m3)<<"  "<<m3<<std::endl;
 #endif
       const int xn1 = M*si1;
       const int xn2 = N*sj2;
@@ -723,7 +782,7 @@ namespace tmv {
       select_multmm<cs,rs,xs,1,RT>::call(M,N,K,one,m1p,m2p+xn2,m3p+xn3);
 #ifdef PRINTALGO_MM_BLOCK
       std::cout<<"After call to multmm\n";
-      //std::cout<<"m3 => "<<m3<<std::endl;
+      std::cout<<"m3 => "<<m3<<std::endl;
 #endif
     }
   };
@@ -747,15 +806,16 @@ namespace tmv {
       MatrixView<RT> m2(m2p,K,N,si2,sj2);
       MatrixView<RT> m3(m3p,M,N,si3,sj3);
       std::cout<<"MyCleanup (both real) \n";
-      //std::cout<<"m1 = "<<TypeText(m1)<<"  "<<m1<<std::endl;
-      //std::cout<<"m2 = "<<TypeText(m2)<<"  "<<m2<<std::endl;
+      std::cout<<"m1 = "<<TypeText(m1)<<"  "<<m1<<std::endl;
+      std::cout<<"m2 = "<<TypeText(m2)<<"  "<<m2<<std::endl;
+      std::cout<<"m3 = "<<TypeText(m3)<<"  "<<m3<<std::endl;
 #endif
       TMVAssert(cleanup);
       const Scaling<1,RT> one;
       (*cleanup)(M,N,K,one,m1p,m2p,m3p); 
 #ifdef PRINTALGO_MM_BLOCK
       std::cout<<"After cleanup call\n";
-      //std::cout<<"m3 => "<<m3<<std::endl;
+      std::cout<<"m3 => "<<m3<<std::endl;
 #endif
     }
   };
@@ -785,10 +845,10 @@ namespace tmv {
 #endif
       TMVAssert(cleanup);
       const Scaling<1,RT> one;
-      const int size1 = si1 == 1 ? K*sj1 : M*si1;
-      const int size3 = si3 == 1 ? N*sj3 : M*si3;
+      const int xn1 = M*si1;
+      const int xn3 = N*sj3;
       (*cleanup)(M,N,K,one,m1p,m2p,m3p);
-      (*cleanup)(M,N,K,one,m1p+size1,m2p,m3p+size3);
+      (*cleanup)(M,N,K,one,m1p+xn1,m2p,m3p+xn3);
 #ifdef PRINTALGO_MM_BLOCK
       std::cout<<"After cleanup call\n";
       //std::cout<<"m3 => "<<m3<<std::endl;
@@ -850,24 +910,28 @@ namespace tmv {
       MatrixView<CT> m2((CT*)m2p,K,N,si2,sj2);
       MatrixView<CT> m3((CT*)m3p,M,N,si3,sj3);
       std::cout<<"MyCleanup (both complex) \n";
-      //std::cout<<"m1 = "<<TypeText(m1)<<"  "<<m1<<std::endl;
-      //std::cout<<"m2 = "<<TypeText(m2)<<"  "<<m2<<std::endl;
+      std::cout<<"m1 = "<<TypeText(m1)<<"  "<<m1<<std::endl;
+      std::cout<<"m2 = "<<TypeText(m2)<<"  "<<m2<<std::endl;
+      std::cout<<"m3 = "<<TypeText(m3)<<"  "<<m3<<std::endl;
 #endif
       TMVAssert(cleanup);
       const Scaling<1,RT> one;
-      const int size1 = si1 == 1 ? K*sj1 : M*si1;
-      const int size2 = si2 == 1 ? N*sj2 : K*si2;
-      const int size3 = si3 == 1 ? N*sj3 : M*si3;
+      const int xn1 = M*si1;
+      const int xn2 = N*sj2;
+      const int xn3 = N*sj3;
 
       (*cleanup)(M,N,K,one,m1p,m2p,m3p);
 #ifdef PRINTALGO_MM_BLOCK
       std::cout<<"MyCleanup (both complex) \n";
+      std::cout<<"si1, si2, si3 = "<<si1<<" "<<si2<<" "<<si3<<std::endl;
+      std::cout<<"sj1, sj2, sj3 = "<<sj1<<" "<<sj2<<" "<<sj3<<std::endl;
+      std::cout<<"xn1, xn2, xn3 = "<<xn1<<" "<<xn2<<" "<<xn3<<std::endl;
       MatrixView<RT> m1r(m1p,M,K,si1,sj1);
       MatrixView<RT> m2r(m2p,K,N,si2,sj2);
       MatrixView<RT> m3r(m3p,M,N,si3,sj3);
-      //std::cout<<"m1r = "<<TypeText(m1r)<<"  "<<m1r<<std::endl;
-      //std::cout<<"m2r = "<<TypeText(m2r)<<"  "<<m2r<<std::endl;
-      //std::cout<<"m3r => "<<TypeText(m3r)<<"  "<<m3r<<std::endl;
+      std::cout<<"m1r = "<<TypeText(m1r)<<"  "<<m1r<<std::endl;
+      std::cout<<"m2r = "<<TypeText(m2r)<<"  "<<m2r<<std::endl;
+      std::cout<<"m3r => "<<TypeText(m3r)<<"  "<<m3r<<std::endl;
 #endif
 
       // This next one is tricky, since we have the wrong function to 
@@ -883,22 +947,22 @@ namespace tmv {
       // that's too much work for something that really doesn't have a huge
       // impact on the speed.
       const Scaling<-1,RT> mone;
-      multmm_M_N_K(M,N,K,mone,m1p+size1,m2p+size2,m3p);
+      multmm_M_N_K(M,N,K,mone,m1p+xn1,m2p+xn2,m3p);
 #ifdef PRINTALGO_MM_BLOCK
-      MatrixView<RT> m1i(m1p+size1,M,K,si1,sj1);
-      MatrixView<RT> m2i(m2p+size2,K,N,si2,sj2);
-      //std::cout<<"m1i = "<<TypeText(m1i)<<"  "<<m1i<<std::endl;
-      //std::cout<<"m2i = "<<TypeText(m2i)<<"  "<<m2i<<std::endl;
-      //std::cout<<"m3r => "<<TypeText(m3r)<<"  "<<m3r<<std::endl;
+      MatrixView<RT> m1i(m1p+xn1,M,K,si1,sj1);
+      MatrixView<RT> m2i(m2p+xn2,K,N,si2,sj2);
+      std::cout<<"m1i = "<<TypeText(m1i)<<"  "<<m1i<<std::endl;
+      std::cout<<"m2i = "<<TypeText(m2i)<<"  "<<m2i<<std::endl;
+      std::cout<<"m3r => "<<TypeText(m3r)<<"  "<<m3r<<std::endl;
 #endif
 
-      (*cleanup)(M,N,K,one,m1p+size1,m2p,m3p+size3);
-      (*cleanup)(M,N,K,one,m1p,m2p+size2,m3p+size3);
+      (*cleanup)(M,N,K,one,m1p+xn1,m2p,m3p+xn3);
+      (*cleanup)(M,N,K,one,m1p,m2p+xn2,m3p+xn3);
 #ifdef PRINTALGO_MM_BLOCK
-      MatrixView<RT> m3i(m3p+size3,M,N,si3,sj3);
-      //std::cout<<"m3i => "<<TypeText(m3i)<<"  "<<m3i<<std::endl;
+      MatrixView<RT> m3i(m3p+xn3,M,N,si3,sj3);
+      std::cout<<"m3i => "<<TypeText(m3i)<<"  "<<m3i<<std::endl;
       std::cout<<"After cleanup call\n";
-      //std::cout<<"m3 => "<<m3<<std::endl;
+      std::cout<<"m3 => "<<m3<<std::endl;
 #endif
     }
   };
@@ -921,16 +985,16 @@ namespace tmv {
 #ifdef PRINTALGO_MM_BLOCK
       std::cout<<"MyAssign real"<<std::endl;
       std::cout<<"x = "<<T(x)<<std::endl;
-      //std::cout<<"m1 = "<<m1<<std::endl;
+      std::cout<<"m1 = "<<m1<<std::endl;
       std::cout<<"cs,rs,M,N,si1,sj1 = "<<cs<<','<<rs<<','<<M<<','<<N<<','<<si1<<','<<sj1<<std::endl;
-      //std::cout<<"m2x = "<<TypeText(m2x)<<std::endl;
+      std::cout<<"m2x = "<<TypeText(m2x)<<std::endl;
 #endif
       M2 m2((T2*)m2x.ptr(),m2x.colsize(),m2x.rowsize(),m2x.stepi(),m2x.stepj());
       // TODO: Use AddMM_Helper 
       Maybe<add>::add(m2 , x * m1); 
 #ifdef PRINTALGO_MM_BLOCK
       std::cout<<"m2p = "<<m2x.ptr()<<"..."<<(m2x.ptr()+(M-1)*m2x.stepi()+(N-1)*m2x.stepj()+1)<<std::endl;
-      //std::cout<<"m2 => "<<m2<<std::endl;
+      std::cout<<"m2 => "<<m2<<std::endl;
 #endif
     }
   };
@@ -972,28 +1036,30 @@ namespace tmv {
 
     static void call(
         const RT* xp,
-        RT* m1p, const int M, const int N, const int si1, const int sj1,
+        RT* m1p, const int M, const int N,
+        const int si1, const int sj1,
         MatrixView<RT> m2x)
     {
       TMVAssert(si1 == 1);
       const Scaling<ix,T>& x(*((T*)(xp)));
       M2r m2r(m2x);
       M2i m2i(m2x.ptr()+1,m2r.colsize(),m2r.rowsize(),m2r.stepi(),m2r.stepj());
-      const int size1 = si1 == 1 ? N*sj1 : M*si1;
+      const int size = N*sj1;
       M1r m1r(m1p,M,N,si1,sj1);
-      M1r m1i(m1p+size1,M,N,si1,sj1);
+      M1r m1i(m1p+size,M,N,si1,sj1);
 #ifdef PRINTALGO_MM_BLOCK
       std::cout<<"MyAssign m2 complex"<<std::endl;
+      std::cout<<"si1,sj1,size = "<<si1<<"  "<<sj1<<"  "<<size<<std::endl;
       std::cout<<"x = "<<T(x)<<std::endl;
-      //std::cout<<"m1r = "<<m1r<<std::endl;
-      //std::cout<<"m1i = "<<m1i<<std::endl;
+      std::cout<<"m1r = "<<m1r<<std::endl;
+      std::cout<<"m1i = "<<m1i<<std::endl;
 #endif
       Maybe<add>::add(m2r , x * m1r);
       Maybe<add>::add(m2i , x * m1i);
 #ifdef PRINTALGO_MM_BLOCK
       std::cout<<"m2p = "<<m2x.ptr()<<"..."<<(m2x.ptr()+(M-1)*m2x.stepi()+(N-1)*m2x.stepj()+1)<<std::endl;
-      //std::cout<<"m1r = "<<m1r<<std::endl;
-      //std::cout<<"m2r => "<<m2r<<std::endl;
+      std::cout<<"m1r = "<<m1r<<std::endl;
+      std::cout<<"m2r => "<<m2r<<std::endl;
 #endif
     }
   };
@@ -1007,21 +1073,22 @@ namespace tmv {
 
     static void call(
         const RT* xp,
-        RT* m1p, const int M, const int N, const int si1, const int sj1,
+        RT* m1p, const int M, const int N,
+        const int si1, const int sj1,
         MatrixView<RT> m2x)
     {
       TMVAssert(si1 == 1);
       const T x(*((T*)(xp)));
       M2r m2r(m2x);
       M2i m2i(m2x.ptr()+1,m2r.colsize(),m2r.rowsize(),m2r.stepi(),m2r.stepj());
-      const int size1 = si1 == 1 ? N*sj1 : M*si1;
+      const int size = N*sj1;
       M1r m1r(m1p,M,N,si1,sj1);
-      M1r m1i(m1p+size1,M,N,si1,sj1);
+      M1r m1i(m1p+size,M,N,si1,sj1);
 #ifdef PRINTALGO_MM_BLOCK
       std::cout<<"MyAssign both complex"<<std::endl;
       std::cout<<"x = "<<T(x)<<std::endl;
-      //std::cout<<"m1r = "<<m1r<<std::endl;
-      //std::cout<<"m1i = "<<m1i<<std::endl;
+      std::cout<<"m1r = "<<m1r<<std::endl;
+      std::cout<<"m1i = "<<m1i<<std::endl;
 #endif
       Maybe<add>::add(m2r , TMV_REAL(x) * m1r);
       m2r -= TMV_IMAG(x) * m1i;
@@ -1029,8 +1096,8 @@ namespace tmv {
       m2i += TMV_IMAG(x) * m1r;
 #ifdef PRINTALGO_MM_BLOCK
       std::cout<<"m2p = "<<m2x.ptr()<<"..."<<(m2x.ptr()+(M-1)*m2x.stepi()+(N-1)*m2x.stepj()+1)<<std::endl;
-      //std::cout<<"m1r = "<<m1r<<std::endl;
-      //std::cout<<"m2r => "<<m2r<<std::endl;
+      std::cout<<"m1r = "<<m1r<<std::endl;
+      std::cout<<"m2r => "<<m2r<<std::endl;
 #endif
     }
   };
@@ -1199,7 +1266,7 @@ namespace tmv {
       const int i2, const int j2, const int k2,
       const int Mb, const int Nb, const int Kb,
       RT* m1p, RT* m2p, RT* m3p,
-      const bool two1, const bool two2, const bool two3,
+      const int two1, const int two2, const int two3,
       bool firstm1, bool firstm2, bool firstm3, bool lastm3,
       CopyF* copy1, CopyF* copy1_k, CopyF* mycopy1, CopyF* mycopy1_k,
       CopyF* copy2, CopyF* copy2_k, CopyF* mycopy2, CopyF* mycopy2_k,
@@ -1216,6 +1283,7 @@ namespace tmv {
     std::cout<<"firstm1 = "<<firstm1<<", firstm2 = "<<firstm2<<std::endl;
     std::cout<<"firstm3 = "<<firstm3<<", lastm3 = "<<lastm3<<std::endl;
     std::cout<<"m1p,m2p,m3p = "<<m1p<<','<<m2p<<','<<m3p<<std::endl;
+    std::cout<<"two1,2,3 = "<<two1<<','<<two2<<','<<two3<<std::endl;
     std::cout<<"First values = "<<*m1p<<','<<*m2p<<','<<*m3p<<std::endl;
     std::cout<<"kf = "<<(size_t)kf<<"  "<<(size_t)kfa<<"  "<<(size_t)kfb<<"  "<<(size_t)mykf<<std::endl;
 #endif
@@ -1365,6 +1433,12 @@ namespace tmv {
     {
 #ifdef PRINTALGO_MM_BLOCK
       std::cout<<"No split (all == 1)"<<std::endl;
+      // For real:
+      //std::cout<<"actual m1 = "<<m1.CSubMatrix(i1,i2,k1,k1+KB)<<std::endl;
+      //std::cout<<"actual m2 = "<<m2.CSubMatrix(k1,k1+KB,j1,j2)<<std::endl;
+      // For complex:
+      std::cout<<"actual m1 = "<<ConstMatrixView<std::complex<RT> >((std::complex<RT>*)m1.cptr(),m1.colsize(),m1.rowsize(),m1.stepi()/2,m1.stepj()/2).CSubMatrix(i1,i2,k1,k1+KB)<<std::endl;
+      std::cout<<"actual m2 = "<<ConstMatrixView<std::complex<RT> >((std::complex<RT>*)m2.cptr(),m2.colsize(),m2.rowsize(),m2.stepi()/2,m2.stepj()/2).CSubMatrix(k1,k1+KB,j1,j2)<<std::endl;
 #endif
 #ifdef TEST_POINTERS
       TMVAssert(m1p < glob_m1p_end);
@@ -1929,7 +2003,15 @@ namespace tmv {
     // = Kc rounded up to multiple of 2 or 4 as required for SSE commands
     const int Ktot_d = (Kb<<lgKB) + Kd;
     TMVAssert(Ktot_d == RoundUp<RT>(K));
+
+    const int two1 = m1_z ? 2 : 1;
+    const int two2 = m2_z ? 2 : 1;
+    const int two3 = m3_z ? 2 : 1;
+
 #ifdef PRINTALGO_MM_BLOCK
+    std::cout<<"RecursiveBlockMultMM2:\n";
+    std::cout<<"m1,2,3_z = "<<m1_z<<','<<m2_z<<','<<m3_z<<std::endl;
+    std::cout<<"two1,2,3 = "<<two1<<','<<two2<<','<<two3<<std::endl;
     std::cout<<"Ma,Na,Ka = "<<Ma<<','<<Na<<','<<Ka<<std::endl;
     std::cout<<"Mb,Nb,Kb = "<<Mb<<','<<Nb<<','<<Kb<<std::endl;
     std::cout<<"Mc,Nc,Kc,Kd = "<<Mc<<','<<Nc<<','<<Kc<<','<<Kd<<std::endl;
@@ -1940,10 +2022,6 @@ namespace tmv {
     TMVAssert(Mb >= 2);
     TMVAssert(Nb >= 2);
     TMVAssert(Kb >= 2);
-
-    const int two1 = m1_z ? 2 : 1;
-    const int two2 = m2_z ? 2 : 1;
-    const int two3 = m3_z ? 2 : 1;
 
     if (Mb >= 3*std::max(Nb,Kb)/2) // M is largest
     {
@@ -1976,12 +2054,12 @@ namespace tmv {
       std::cout<<"m2 size = "<<size2<<std::endl;
       std::cout<<"m3 size = "<<size3<<std::endl;
 #endif
-      auto_array<RT> m1_temp(new RT[size1]);
-      auto_array<RT> m2_temp(new RT[size2]);
-      auto_array<RT> m3_temp(new RT[size3]);
-      RT*const m1p = m1_temp.get();
-      RT*const m2p = m2_temp.get();
-      RT*const m3p = m3_temp.get();
+      AlignedMemory<RT> m1_temp(size1);
+      AlignedMemory<RT> m2_temp(size2);
+      AlignedMemory<RT> m3_temp(size3);
+      RT*const m1p = m1_temp.p;
+      RT*const m2p = m2_temp.p;
+      RT*const m3p = m3_temp.p;
 #ifdef PRINTALGO_MM_BLOCK
       std::cout<<"M >= 3*max(N,K)/2\n";
       std::cout<<"m1p = "<<m1p<<" end = "<<(m1p+size1)<<std::endl;
@@ -2059,12 +2137,12 @@ namespace tmv {
       std::cout<<"m2 size = "<<size2<<std::endl;
       std::cout<<"m3 size = "<<size3<<std::endl;
 #endif
-      auto_array<RT> m1_temp(new RT[size1]);
-      auto_array<RT> m2_temp(new RT[size2]);
-      auto_array<RT> m3_temp(new RT[size3]);
-      RT*const m1p = m1_temp.get();
-      RT*const m2p = m2_temp.get();
-      RT*const m3p = m3_temp.get();
+      AlignedMemory<RT> m1_temp(size1);
+      AlignedMemory<RT> m2_temp(size2);
+      AlignedMemory<RT> m3_temp(size3);
+      RT*const m1p = m1_temp.p;
+      RT*const m2p = m2_temp.p;
+      RT*const m3p = m3_temp.p;
 #ifdef PRINTALGO_MM_BLOCK
       std::cout<<"N >= 3*max(M,K)/2\n";
       std::cout<<"m1p = "<<m1p<<" end = "<<(m1p+size1)<<std::endl;
@@ -2145,12 +2223,12 @@ namespace tmv {
       std::cout<<"m2 size = "<<size2<<std::endl;
       std::cout<<"m3 size = "<<size3<<std::endl;
 #endif
-      auto_array<RT> m1_temp(new RT[size1]);
-      auto_array<RT> m2_temp(new RT[size2]);
-      auto_array<RT> m3_temp(new RT[size3]);
-      RT*const m1p = m1_temp.get();
-      RT*const m2p = m2_temp.get();
-      RT*const m3p = m3_temp.get();
+      AlignedMemory<RT> m1_temp(size1);
+      AlignedMemory<RT> m2_temp(size2);
+      AlignedMemory<RT> m3_temp(size3);
+      RT*const m1p = m1_temp.p;
+      RT*const m2p = m2_temp.p;
+      RT*const m3p = m3_temp.p;
 #ifdef PRINTALGO_MM_BLOCK
       std::cout<<"K >= 2*max(M,N)\n";
       std::cout<<"m1p = "<<m1p<<" end = "<<(m1p+size1)<<std::endl;
@@ -2219,17 +2297,18 @@ namespace tmv {
       std::cout<<"m2 size = "<<size2<<std::endl;
       std::cout<<"m3 size = "<<size3<<std::endl;
 #endif
-      auto_array<RT> m1_temp(new RT[size1]);
-      auto_array<RT> m2_temp(new RT[size2]);
-      auto_array<RT> m3_temp(new RT[size3]);
-      RT*const m1p = m1_temp.get();
-      RT*const m2p = m2_temp.get();
-      RT*const m3p = m3_temp.get();
+      AlignedMemory<RT> m1_temp(size1);
+      AlignedMemory<RT> m2_temp(size2);
+      AlignedMemory<RT> m3_temp(size3);
+      RT*const m1p = m1_temp.p;
+      RT*const m2p = m2_temp.p;
+      RT*const m3p = m3_temp.p;
 #ifdef PRINTALGO_MM_BLOCK
       std::cout<<"None much larger than the others\n";
       std::cout<<"m1p = "<<m1p<<" end = "<<(m1p+size1)<<std::endl;
       std::cout<<"m2p = "<<m2p<<" end = "<<(m2p+size2)<<std::endl;
       std::cout<<"m3p = "<<m3p<<" end = "<<(m3p+size3)<<std::endl;
+      std::cout<<"two1,2,3 = "<<two1<<','<<two2<<','<<two3<<std::endl;
 #endif
 #ifdef TEST_POINTERS
       glob_m1p_end = m1p+size1;
@@ -2624,17 +2703,17 @@ namespace tmv {
     const int size2y = two2*Nc*KB;
     const int size3 = two3*MB*NB;
 
-    auto_array<RT> m3_temp(new RT[size3]);
-    RT*const m3p = m3_temp.get();
+    AlignedMemory<RT> m3_temp(size3);
+    RT*const m3p = m3_temp.p;
     if (N >= M) {
       // Then we loop over the columns of m2 (in blocks).
       // We store a full copy of m1 in block format.
       // Each block column of m2 is copied one at a time into 
       // temporary storage.
-      auto_array<RT> m1_temp(new RT[two1*M*Ktot_d]);
-      auto_array<RT> m2_temp(new RT[two2*NB*Ktot_d]);
-      RT*const m1p0 = m1_temp.get();
-      RT*const m2p0 = m2_temp.get();
+      AlignedMemory<RT> m1_temp(two1*M*Ktot_d);
+      AlignedMemory<RT> m2_temp(two2*NB*Ktot_d);
+      RT*const m1p0 = m1_temp.p;
+      RT*const m2p0 = m2_temp.p;
       const int fullsize1 = two1*MB*Ktot_d;
 #ifdef PRINTALGO_MM_BLOCK
       std::cout<<"N >= M\n";
@@ -2701,10 +2780,10 @@ namespace tmv {
       }
     } else {
       // Then we loop over the rows of m1 and store a full copy of m2.
-      auto_array<RT> m1_temp(new RT[two1*MB*Ktot_d]);
-      auto_array<RT> m2_temp(new RT[two2*N*Ktot_d]);
-      RT*const m1p0 = m1_temp.get();
-      RT*const m2p0 = m2_temp.get();
+      AlignedMemory<RT> m1_temp(two1*MB*Ktot_d);
+      AlignedMemory<RT> m2_temp(two2*N*Ktot_d);
+      RT*const m1p0 = m1_temp.p;
+      RT*const m2p0 = m2_temp.p;
       const int fullsize2 = two2*NB*Ktot_d;
 #ifdef PRINTALGO_MM_BLOCK
       std::cout<<"N <= M\n";
@@ -2902,8 +2981,8 @@ namespace tmv {
         cleanup,kf,kfa,kfb,kfc);
   }
 
-  // These are mostly the same as the above version, but it uses
-  // has the sizes unknown at compile time, and it uses the get_copy
+  // These are mostly the same as the above version, but they have
+  // the sizes unknown at compile time, and they use the get_copy
   // and get_assign functions to find the right copy and assign versions
   // to use by checking at runtime whether m1,m2,m3 are rowmajor or colmajor.
   // (These are called by the instantiating function calls below.)

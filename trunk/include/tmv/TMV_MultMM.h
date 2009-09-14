@@ -1944,7 +1944,7 @@ namespace tmv {
         switch (K)
         {
           case 0 :
-            Maybe<add>::zero(m3);
+            Maybe<!add>::zero(m3);
             break;
           case 1 :
             MultMM_Helper<4,cs,rs,1,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
@@ -2090,7 +2090,7 @@ namespace tmv {
       enum { nosimple = !(ccc || rcc || crc) };
 
 #if 0
-      enum { algo = 69 };
+      enum { algo = 63 };
       enum { algo1 = 21 };
 #else
 #if TMV_OPT == 0 

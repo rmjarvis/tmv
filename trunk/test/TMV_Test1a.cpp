@@ -30,9 +30,9 @@ int main() try {
   //showacc=true;
   //showdiv=true;
   //showtests=true;
-  //showstartdone=true;
-  //XXDEBUG4 = true;
+  showstartdone=true;
 
+  //TestMatrixArith_8<double>();
 //#define SKIPREST
 
 #ifndef SKIPREST

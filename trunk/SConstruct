@@ -153,7 +153,7 @@ def BasicCCFlags(env):
                 env['TEST_FLAGS'] = ['-ansi','-pedantic-errors','-Wall','-Werror']
     
         elif compiler == 'icpc':
-            env.Replace(CCFLAGS=['-O2'])
+            env.Replace(CCFLAGS=['-O3'])
             env['TEST_FLAGS'] = []
             if version >= 10:
                 env.Append(CCFLAGS=['-vec-report0'])
