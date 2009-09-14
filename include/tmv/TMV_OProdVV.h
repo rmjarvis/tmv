@@ -37,7 +37,11 @@
 #include "TMV_ProdXV.h"
 #include "TMV_SumVV.h"
 
-//#define XDEBUG
+//#define XDEBUG_OPRODVV
+
+#ifdef XDEBUG_OPRODVV
+#include <iostream>
+#endif
 
 namespace tmv {
 
@@ -163,7 +167,7 @@ namespace tmv {
         Traits2<T2,T3>::sametype &&
 #endif
         checkalias ) };
-#ifdef XDEBUG
+#ifdef XDEBUG_OPRODVV
     std::cout<<"Start Rank1Update XDEBUG"<<std::endl;
     std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
     std::cout<<"v1 = "<<TypeText(v1)<<"  "<<v1<<std::endl;
@@ -181,7 +185,7 @@ namespace tmv {
 #endif
     return CallRank1Update<checkalias,M3::mconj,M3::mrowmajor,inst,add,ix,T,V1,V2,M3>::call(
         x,v1.vec(),v2.vec(),m3.mat());
-#ifdef XDEBUG
+#ifdef XDEBUG_OPRODVV
     if (Norm(m3.mat()-m3c) > 1.e-6 * Norm(m3c)) {
       std::cout<<"Rank1Update:  add = "<<add<<std::endl;
       std::cout<<"checkalias = "<<checkalias<<"  inst = "<<inst<<std::endl;
@@ -424,9 +428,5 @@ namespace tmv {
   }
 
 } // namespace tmv
-
-#ifdef XDEBUG
-#undef XDEBUG
-#endif
 
 #endif 

@@ -609,13 +609,11 @@ namespace tmv {
         b0 = B0[15];
 
         // 16
-        a0 = A0[15]; c00 = a0 * b0; C00 += c00;
-        Maybe<add && (ix!=1)>::add(C0[0] , x * C00);
+        a0 = A0[15]; c00 = a0 * b0; C00 += c00; A0 += 16;
+        Maybe<add && (ix!=1)>::add(*C0++ , x * C00);
         b1 = B0[31]; c01 = a0 * b1; C01 += c01;
-        Maybe<add && (ix!=1)>::add(C1[0] , x * C01);
+        Maybe<add && (ix!=1)>::add(*C1++ , x * C01);
         b0 = B0[0];
-        C0 += 2;
-        C1 += 2;
       } while (--i);
       A0 -= Mx16;
       B0 += 32;
@@ -1136,6 +1134,8 @@ namespace tmv {
     const T* A1 = A0 + Kd;
     const T* B1 = B0 + Kd;
     T* C1 = C0 + M;
+    //MJ remove this one.
+    const T* C0_init = C0;
 
     int j,i,k;
 
@@ -1901,13 +1901,11 @@ namespace tmv {
         c00 = _mm_mul_ps(A0[ 3],B0[ 3]); d00.xm = _mm_add_ps(C00,c00);
         c01 = _mm_mul_ps(A0[ 3],B0[ 7]); d01.xm = _mm_add_ps(C01,c01);
 
-        Maybe<add>::add(C0[ 0] , x * (
+        Maybe<add>::add(*C0++ , x * (
               d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
-        Maybe<add>::add(C1[ 0] , x * (
+        Maybe<add>::add(*C1++ , x * (
               d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
         A0 += 4;
-        ++C0;
-        ++C1;
       }
       A0 -= Mx4;
       B0 += 8;
@@ -2126,13 +2124,11 @@ namespace tmv {
         c00 = _mm_mul_ps(A0[ 7],B0[ 7]); d00.xm = _mm_add_ps(C00,c00);
         c01 = _mm_mul_ps(A0[ 7],B0[15]); d01.xm = _mm_add_ps(C01,c01);
 
-        Maybe<add>::add(C0[ 0] , x * (
+        Maybe<add>::add(*C0++ , x * (
               d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
-        Maybe<add>::add(C1[ 0] , x * (
+        Maybe<add>::add(*C1++ , x * (
               d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
         A0 += 8;
-        ++C0;
-        ++C1;
       }
       A0 -= Mx8;
       B0 += 16;
@@ -2495,13 +2491,11 @@ namespace tmv {
         c00 = _mm_mul_ps(A0[15],B0[15]); d00.xm = _mm_add_ps(C00,c00);
         c01 = _mm_mul_ps(A0[15],B0[31]); d01.xm = _mm_add_ps(C01,c01);
 
-        Maybe<add>::add(C0[ 0] , x * (
+        Maybe<add>::add(*C0++ , x * (
               d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
-        Maybe<add>::add(C1[ 0] , x * (
+        Maybe<add>::add(*C1++ , x * (
               d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
         A0 += 16;
-        ++C0;
-        ++C1;
       }
       A0 -= Mx16;
       B0 += 32;
@@ -3529,10 +3523,7 @@ namespace tmv {
       const int M, const int N, const int K,
       const Scaling<ix,float>& x,
       const float* A0, const float* B0, float* C0)
-  {
-    const int Kd = (((K-1)>>2)+1)<<2;
-    generic_multmm_M_N_K(M,N,K,Kd,x,A0,B0,C0); 
-  }
+  { generic_multmm_M_N_K(M,N,K,K,x,A0,B0,C0); }
 
 #endif
 
@@ -3744,6 +3735,8 @@ namespace tmv {
       const Scaling<ix,double>& x,
       const double* A, const double* B, double* C0)
   {
+    //std::cout<<"sse2_multmm_16_16_32 "<<std::endl;
+
     TMVAssert( ((unsigned int)(A) & 0x1) == 0 );
     TMVAssert( ((unsigned int)(B) & 0x1) == 0 );
     TMVAssert( ((unsigned int)(C0) & 0x1) == 0 );
@@ -3760,173 +3753,216 @@ namespace tmv {
 
     j2 = 8; do 
     {
+      //std::cout<<"j2 = "<<j2<<std::endl;
       i2 = 4; do 
       {
+        //std::cout<<"i2 = "<<i2<<std::endl;
+        //std::cout<<"A0 = "<<A0<<std::endl;
+        //std::cout<<"B0 = "<<B0<<std::endl;
+        //std::cout<<"*A0 = "<<*((const double*)(A0))<<std::endl;
+        //std::cout<<"*B0 = "<<*((const double*)(B0))<<std::endl;
+        //std::cout<<"C00 (initial) = "<<*((const double*)(&C00))<<std::endl;
         C00 = _mm_mul_pd(A0[ 0],B0[ 0]); 
+        //std::cout<<"C00 = "<<*((const double*)(&C00))<<std::endl;
         C10 = _mm_mul_pd(A0[16],B0[ 0]); 
         C01 = _mm_mul_pd(A0[ 0],B0[16]); 
         C11 = _mm_mul_pd(A0[16],B0[16]); 
 
         c00 = _mm_mul_pd(A0[ 1],B0[ 1]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[17],B0[ 1]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[ 1],B0[17]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[17],B0[17]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[ 2],B0[ 2]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[18],B0[ 2]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[ 2],B0[18]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[18],B0[18]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[ 3],B0[ 3]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[19],B0[ 3]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[ 3],B0[19]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[19],B0[19]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[ 4],B0[ 4]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[20],B0[ 4]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[ 4],B0[20]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[20],B0[20]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[ 5],B0[ 5]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[21],B0[ 5]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[ 5],B0[21]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[21],B0[21]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[ 6],B0[ 6]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[22],B0[ 6]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[ 6],B0[22]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[22],B0[22]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[ 7],B0[ 7]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[23],B0[ 7]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[ 7],B0[23]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[23],B0[23]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[ 8],B0[ 8]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[24],B0[ 8]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[ 8],B0[24]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[24],B0[24]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[ 9],B0[ 9]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[25],B0[ 9]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[ 9],B0[25]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[25],B0[25]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[10],B0[10]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[26],B0[10]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[10],B0[26]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[26],B0[26]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[11],B0[11]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[27],B0[11]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[11],B0[27]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[27],B0[27]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[12],B0[12]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[28],B0[12]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[12],B0[28]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[28],B0[28]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[13],B0[13]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[29],B0[13]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[13],B0[29]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[29],B0[29]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[14],B0[14]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[30],B0[14]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[14],B0[30]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[30],B0[30]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[15],B0[15]); d00.xm = _mm_add_pd(C00,c00);
+        //std::cout<<"d00.xm = "<<*((const double*)(&d00.xm))<<std::endl;
+        //std::cout<<"d00.xd = "<<d00.xd[0]<<std::endl;
         c10 = _mm_mul_pd(A0[31],B0[15]); d10.xm = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[15],B0[31]); d01.xm = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[31],B0[31]); d11.xm = _mm_add_pd(C11,c11);
 
         Maybe<add>::add(C0[ 0] , x * (d00.xd[0] + d00.xd[1]));
+        //std::cout<<"C0[0] = "<<C0[0]<<std::endl;
         C00 = _mm_mul_pd(A0[47],B0[15]);
+        //std::cout<<"C00 = "<<*((const double*)(&C00))<<std::endl;
         C10 = _mm_mul_pd(A0[63],B0[15]);
         C01 = _mm_mul_pd(A0[47],B0[31]);
         C11 = _mm_mul_pd(A0[63],B0[31]);
 
         Maybe<add>::add(C0[ 1] , x * (d10.xd[0] + d10.xd[1]));
         c00 = _mm_mul_pd(A0[46],B0[14]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[62],B0[14]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[46],B0[30]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[62],B0[30]); C11 = _mm_add_pd(C11,c11);
 
         Maybe<add>::add(C0[16] , x * (d01.xd[0] + d01.xd[1]));
         c00 = _mm_mul_pd(A0[45],B0[13]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[61],B0[13]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[45],B0[29]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[61],B0[29]); C11 = _mm_add_pd(C11,c11);
 
         Maybe<add>::add(C0[17] , x * (d11.xd[0] + d11.xd[1]));
         c00 = _mm_mul_pd(A0[44],B0[12]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[60],B0[12]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[44],B0[28]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[60],B0[28]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[43],B0[11]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[59],B0[11]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[43],B0[27]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[59],B0[27]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[42],B0[10]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[58],B0[10]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[42],B0[26]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[58],B0[26]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[41],B0[ 9]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[57],B0[ 9]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[41],B0[25]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[57],B0[25]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[40],B0[ 8]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[56],B0[ 8]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[40],B0[24]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[56],B0[24]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[39],B0[ 7]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[55],B0[ 7]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[39],B0[23]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[55],B0[23]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[38],B0[ 6]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[54],B0[ 6]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[38],B0[22]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[54],B0[22]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[37],B0[ 5]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[53],B0[ 5]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[37],B0[21]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[53],B0[21]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[36],B0[ 4]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[52],B0[ 4]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[36],B0[20]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[52],B0[20]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[35],B0[ 3]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[51],B0[ 3]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[35],B0[19]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[51],B0[19]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[34],B0[ 2]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[50],B0[ 2]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[34],B0[18]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[50],B0[18]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[33],B0[ 1]); C00 = _mm_add_pd(C00,c00);
+        //std::cout<<"C00 => "<<*((const double*)(&C00))<<std::endl;
         c10 = _mm_mul_pd(A0[49],B0[ 1]); C10 = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[33],B0[17]); C01 = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[49],B0[17]); C11 = _mm_add_pd(C11,c11);
 
         c00 = _mm_mul_pd(A0[32],B0[ 0]); d00.xm = _mm_add_pd(C00,c00);
+        //std::cout<<"d00.xm = "<<*((const double*)(&d00.xm))<<std::endl;
+        //std::cout<<"d00.xd = "<<d00.xd[0]<<std::endl;
         c10 = _mm_mul_pd(A0[48],B0[ 0]); d10.xm = _mm_add_pd(C10,c10);
         c01 = _mm_mul_pd(A0[32],B0[16]); d01.xm = _mm_add_pd(C01,c01);
         c11 = _mm_mul_pd(A0[48],B0[16]); d11.xm = _mm_add_pd(C11,c11);
 
         Maybe<add>::add(C0[ 2] , x * (d00.xd[0] + d00.xd[1]));
+        //std::cout<<"C0[2] = "<<C0[2]<<std::endl;
         Maybe<add>::add(C0[ 3] , x * (d10.xd[0] + d10.xd[1]));
         Maybe<add>::add(C0[18] , x * (d01.xd[0] + d01.xd[1]));
         Maybe<add>::add(C0[19] , x * (d11.xd[0] + d11.xd[1]));
@@ -3938,12 +3974,15 @@ namespace tmv {
       B0 += 32;
       C0 += 16; 
     } while (--j2);
+    //std::cout<<"Done sse2 16_16_32"<<std::endl;
   }
   template <int M2, int ix>
   TMV_STATIC void sse2_multmm_M_16_16(const int M1,
       const Scaling<ix,double>& x,
       const double* A, const double* B, double* C0)
   {
+    //std::cout<<"sse2_multmm_M_16_16 "<<M1<<std::endl;
+
     TMVAssert( ((unsigned int)(A) & 0x1) == 0 );
     TMVAssert( ((unsigned int)(B) & 0x1) == 0 );
     TMVAssert( ((unsigned int)(C0) & 0x1) == 0 );
@@ -4139,12 +4178,10 @@ namespace tmv {
         c00 = _mm_mul_pd(A0[ 7],B0[ 7]); d00.xm = _mm_add_pd(C00,c00);
         c01 = _mm_mul_pd(A0[ 7],B0[15]); d01.xm = _mm_add_pd(C01,c01);
 
-        Maybe<add>::add(C0[ 0] , x * (d00.xd[0] + d00.xd[1]));
-        Maybe<add>::add(C1[ 0] , x * (d01.xd[0] + d01.xd[1]));
+        Maybe<add>::add(*C0++ , x * (d00.xd[0] + d00.xd[1]));
+        Maybe<add>::add(*C1++ , x * (d01.xd[0] + d01.xd[1]));
 
         A0 += 8;
-        ++C0;
-        ++C1;
       }
       A0 -= Mx8;
       B0 += 16;
@@ -4157,6 +4194,8 @@ namespace tmv {
       const Scaling<ix,double>& x,
       const double* A, const double* B, double* C0)
   {
+    //std::cout<<"sse2_multmm_M_16_32 "<<M1<<std::endl;
+
     TMVAssert( ((unsigned int)(A) & 0x1) == 0 );
     TMVAssert( ((unsigned int)(B) & 0x1) == 0 );
     TMVAssert( ((unsigned int)(C0) & 0x1) == 0 );
@@ -4496,12 +4535,10 @@ namespace tmv {
         c00 = _mm_mul_pd(A0[15],B0[15]); d00.xm = _mm_add_pd(C00,c00);
         c01 = _mm_mul_pd(A0[15],B0[31]); d01.xm = _mm_add_pd(C01,c01);
 
-        Maybe<add>::add(C0[ 0] , x * (d00.xd[0] + d00.xd[1]));
-        Maybe<add>::add(C1[ 0] , x * (d01.xd[0] + d01.xd[1]));
+        Maybe<add>::add(*C0++ , x * (d00.xd[0] + d00.xd[1]));
+        Maybe<add>::add(*C1++ , x * (d01.xd[0] + d01.xd[1]));
 
         A0 += 16;
-        ++C0;
-        ++C1;
       }
       A0 -= Mx16;
       B0 += 32;
@@ -5310,10 +5347,7 @@ namespace tmv {
       const int M, const int N, const int K,
       const Scaling<ix,double>& x,
       const double* A0, const double* B0, double* C0)
-  {
-    const int Kd = (((K-1)>>1)+1)<<1;
-    generic_multmm_M_N_K(M,N,K,Kd,x,A0,B0,C0); 
-  }
+  { generic_multmm_M_N_K(M,N,K,K,x,A0,B0,C0); }
 
 #endif
 

@@ -1,5 +1,7 @@
 // vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 
+#define XDEBUG
+
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
 #include "TMV_Mat.h"
@@ -10,11 +12,11 @@
 
 template <class T> void TestMatrixArith_8()
 {
-#if 0
+#if 1
   const int NSIZE = 15;
   //const int sizear[NSIZE] = {1,2,3,4,5,6,7,8,9,30,31,32,63,64,65};
-  const int sizear[NSIZE] = {1,2,3,4,5,63,64,65,66,70,111,128,137,256,337};
-  //const int sizear[NSIZE] = {1,2,3,4,5,6,7,8,9,32,128,509,1009,3009,5009};
+  //const int sizear[NSIZE] = {1,2,3,4,5,6,7,8,9,32,128,129,130,1009,5009};
+  const int sizear[NSIZE] = {1,2,3,4,5,63,64,65,66,70,111,128,137,256,637};
 #else
   const int NSIZE = 4;
   const int sizear[NSIZE] = {2,5,77,637};
@@ -121,7 +123,7 @@ template <class T> void TestMatrixArith_8()
       // Now test multiplies
       for(int k1=0;k1<NSIZE;k1++) {
         int k = sizear[k1];
-        if (showstartdone)
+        //if (showstartdone)
           std::cout<<"k = "<<k<<std::endl;
         tmv::Matrix<CT,tmv::ColMajor> ac(m,k);
         tmv::Matrix<CT,tmv::ColMajor> bc(k,n);
@@ -134,6 +136,16 @@ template <class T> void TestMatrixArith_8()
         T eps = T(10) * EPS * (T(1) + Norm(ac)*Norm(bc));
 
         c1 = ac * bc;
+        if (showacc)
+        {
+          std::cout<<"a = "<<ar<<std::endl;
+          std::cout<<"b = "<<br<<std::endl;
+          std::cout<<"c (CC) = "<<c1<<std::endl;
+          std::cout<<"c (RC) = "<<(c=ar*bc)<<Norm((c=ar*bc)-c1)<<std::endl;
+          std::cout<<"c (CR) = "<<(c=ac*br)<<Norm((c=ac*br)-c1)<<std::endl;
+          std::cout<<"c (RR) = "<<(c=ar*br)<<Norm((c=ar*br)-c1)<<std::endl;
+          std::cout<<"cf eps = "<<eps<<std::endl;
+        }
         Assert(Norm((c=ar*bc)-c1) < eps,"ar*bc");
 #ifdef XTEST
         Assert(Norm((c=ar*br)-c1) < eps,"ar*br");

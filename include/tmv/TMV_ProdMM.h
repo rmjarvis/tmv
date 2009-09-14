@@ -36,7 +36,11 @@
 
 #include "TMV_ProdXM.h"
 
-//#define XDEBUG
+//#define XDEBUG_PRODMM
+
+#ifdef XDEBUG_PRODMM
+#include <iostream>
+#endif
 
 namespace tmv {
 
@@ -183,7 +187,7 @@ namespace tmv {
         Traits2<T2,T3>::sametype &&
 #endif
         checkalias ) };
-#ifdef XDEBUG
+#ifdef XDEBUG_PRODMM
     //std::cout<<"Start MultMM XDEBUG"<<std::endl;
     //std::cout<<"add = "<<add<<std::endl;
     //std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
@@ -204,7 +208,7 @@ namespace tmv {
 #endif
     CallMultMM<checkalias,conj,rm,inst,add,ix,T,M1,M2,M3>::call(
         x,m1.mat(),m2.mat(),m3.mat());
-#ifdef XDEBUG
+#ifdef XDEBUG_PRODMM
     if (Norm(m3.mat()-m3c) > 1.e-6 * Norm(m3c)) {
       std::cout<<"MultMM:  add = "<<add<<std::endl;
       std::cout<<"checkalias = "<<checkalias<<"  inst = "<<inst<<std::endl;
@@ -507,9 +511,5 @@ namespace tmv {
   }
 
 } // namespace tmv
-
-#ifdef XDEBUG
-#undef XDEBUG
-#endif
 
 #endif 
