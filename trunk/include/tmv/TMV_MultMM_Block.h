@@ -42,7 +42,6 @@
 #include "TMV_SmallMatrix.h"
 #include "TMV_AddMM.h"
 #include "TMV_MultXM.h"
-#include <cstdlib>
 
 //#define TEST_POINTERS
 
@@ -369,17 +368,12 @@ namespace tmv {
   // There doesn't seem to be any portable C++ function that guarantees
   // that the memory allocated will be aligned as necessary for 
   // SSE functions.
-  // However, the regular C allocator posix_memalign does this job.
-  // So we make this simple class that simply loads memory using
-  // posix_memalign if necessary and takes care of freeing the memory 
-  // (sort of like an auto_ptr).
-  // I think this function is portable, but if it turns out not to be
-  // for some reason, another option would be to allocate 1 or 3 extra
-  // elements (for double, float respectively) and set p to a position that
-  // has the correct alignment regardless of the actual alignment returned
-  // by new.
+  // Sometimes posix_memalign or memalign does this job.
+  // But it doesn't seem to be standard, since some systems don't have it.
+  // So we make this simple class that simply loads a bit more memory
+  // than necessary and then finds the starting point that is 16 byte aligned.
 
-  // First the regular non-SSE version, where we can simply use new, delete
+  // First the regular non-SSE version, where we don't need aligment.
   template <class T>
   struct AlignedMemory
   {
@@ -388,18 +382,17 @@ namespace tmv {
     T* p;
   };
   // Now specialize float and double if SSE commands are enabled
+  // Thie solution is adapted from the web page:
+  // http://stackoverflow.com/questions/227897/solve-the-memory-alignment-in-c-interview-question-that-stumped-me
+  // See that page for more discussion of this kind of problem.
 #ifdef __SSE__
   template <>
   struct AlignedMemory<float>
   {
-    AlignedMemory(const size_t n) 
-    {
-      void* vp;
-      if (posix_memalign(&vp,128,n*sizeof(float)))
-        throw std::bad_alloc();
-      p = static_cast<float*>(vp);
-    }
-    ~AlignedMemory() { free(p); }
+    AlignedMemory(const size_t n) : 
+      mem(new float[n+3]), p( mem + (size_t(mem) & 0x03) ) {}
+    ~AlignedMemory() { delete[] mem; }
+    float* mem;
     float* p;
   };
 #endif
@@ -407,14 +400,10 @@ namespace tmv {
   template <>
   struct AlignedMemory<double>
   {
-    AlignedMemory(const size_t n) 
-    {
-      void* vp;
-      if (posix_memalign(&vp,128,n*sizeof(double)))
-        throw std::bad_alloc();
-      p = static_cast<double*>(vp);
-    }
-    ~AlignedMemory() { free(p); }
+    AlignedMemory(const size_t n) :
+      mem(new double[n+1]), p( mem + (size_t(mem) & 0x01) ) {}
+    ~AlignedMemory() { delete[] mem; }
+    double* mem;
     double* p;
   };
 #endif

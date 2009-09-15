@@ -9,9 +9,9 @@ const int M = 979;
 const int N = 949;
 const int K = 999;
 #else
-const int M = 35;
-const int N = 43;
-const int K = 39;
+const int M = 4;
+const int N = 4;
+const int K = 64;
 #endif
 
 // Define the type to use:
@@ -30,19 +30,19 @@ const int K = 39;
 
 // Define whether you want to include the error checks.
 //#define XDEBUG_PRODMM
-//#define ERRORCHECK
+#define ERRORCHECK
 
 // Define which versions you want to test:
 #define DOREG
-#define DOSMALL
-#define DOBLAS
-#define DOEIGEN
-#define DOEIGENSMALL
+//#define DOSMALL
+//#define DOBLAS
+//#define DOEIGEN
+//#define DOEIGENSMALL
 
 // Define which batches of functions you want to test:
-#define DOMULTMM_CCC
-#define DOMULTMM_RCC
-#define DOMULTMM_CRC
+//#define DOMULTMM_CCC
+//#define DOMULTMM_RCC
+//#define DOMULTMM_CRC
 #define DOMULTMM_RRC
 
 // Set this if you only want to do a single loop.
@@ -63,21 +63,20 @@ const int targetnflops = 100000000; // in real ops
 const int targetmem = 10000000; // in bytes
 
 // Include the BLAS library you want to test TMV against:
-#if 1
+#if 0
 #include "mkl.h"
+#define CBLAS
+#define CLAPACK
+#define XLAP
 #else
 extern "C" {
 #include "util/fblas.h"
 #include "util/flapack.h"
-}
-#endif
-
-// Set these as appropriate given the BLAS and LAPACK libraries included above.
-#define CBLAS
-//#define CLAPACK
-//#define FBLAS
+#define FBLAS
 #define FLAP
 #define XLAP
+}
+#endif
 
 
 // The rest of this is based on the above values.

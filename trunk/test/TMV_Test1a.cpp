@@ -30,7 +30,7 @@ int main() try {
   //showacc=true;
   //showdiv=true;
   //showtests=true;
-  showstartdone=true;
+  //showstartdone=true;
 
   //TestMatrixArith_8<double>();
 //#define SKIPREST
