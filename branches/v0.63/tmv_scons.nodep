@@ -1,0 +1,2 @@
+CXX = 'g++-4'
+FLAGS = '-Wno-deprecated-declarations'

@@ -1,0 +1,32 @@
+Changes from version 0.61 to 0.62:  
+(See the History section in the full documentation for changes from previous
+versions to 0.61.)
+
+Here is a brief list of the more important changes:
+
+- Corrected an error with m.DivIsSet();
+- Corrected the documentation regarding the m.SVD() access, especially
+  that S is now a DiagMatrix, rather than a Vector.
+- Changed behavior of methods like m.SVD().  Now, if SV has not been
+  set already, then it will set it, rather than give an error.
+- Added ListInit method for initializing a vector or matrix.
+- Improved SmallMatrix class.  Now it is not derived from GenMatrix (or
+  even BaseMatrix), thus removing the virtual table.  This greatly speeds
+  up a lot of calculations.  I also specialized some routines for 2x2 and
+  3x3 matrices, like Det and Inverse.  The caveat is that some things
+  that used to be possible with SmallMatrix are not now.  Most importantly,
+  arithmetic results can not be automatically instantiated any more.  They
+  need to be assigned to a location, either SmallMatrix or Matrix.
+  I also inlined all the division routines, rather than have it call
+  the regular Matrix division routines.
+- Removed some ViewOf commands that are clearer with a different notation.
+  d = DiagMatrixViewOf(m) --> d = DiagMatrixViewOf(m.diag())
+  U = UpperTriMatrixViewOf(m) --> U = m.UpperTri()
+  U = UpperTriMatrixViewOf(m,UnitDiag) --> U = m.UpperTri(UnitDiag)
+  U = UpperTriMatrixViewOf(U2,UnitDiag) --> U = U2.ViewAsUnitDiag()
+- Fixed problems with LAPACK functions dstegr and sstegr.
+  Now TMV can detect when stegr fails and run the alternate stedc instead.
+- Added scons installation option.
+- Added ability to use Fortran versions of BLAS and LAPACK.
+- Include CMakeLists.txt files for cmake installations.
+- Include .vcproj and .vcsln files for Visual C++ installations.

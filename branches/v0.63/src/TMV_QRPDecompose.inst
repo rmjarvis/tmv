@@ -1,0 +1,18 @@
+#define CT std::complex<T>
+
+#define DefQRD(T)\
+template void QRP_Decompose(const MatrixView<T >& QR, \
+    const VectorView<T >& beta, int* P, T& det, bool strict); \
+template void QRP_Decompose(const MatrixView<T >& Q, \
+    const UpperTriMatrixView<T >& R, int* P, bool strict); \
+template void QRP_Decompose(const MatrixView<T >& A, bool strict); \
+
+DefQRD(T)
+#ifdef INST_COMPLEX
+DefQRD(CT)
+#endif
+
+#undef DefQRD
+
+#undef CT
+
