@@ -1,5 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
 // Copyright (C) 1998 - 2009                                                 //
@@ -30,161 +29,113 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "TMV_Blas.h"
 #include "tmv/TMV_MultMM.h"
-#include "TMV_MultMM_Blas.h"
 #include "tmv/TMV_Matrix.h"
+#include "tmv/TMV_MultXM.h"
 #include "tmv/TMV_ProdXM.h"
-#include "tmv/TMV_SumMM.h"
+
+#ifdef BLAS
+#include "TMV_MultMM_Blas.h"
+#endif
 
 namespace tmv {
 
-  // Defined in TMV_MultMM_CCC.cpp
-  template <bool add, class T1, bool C1, class T2, bool C2, class T3>
-  void DoInstMultMM(const T3 x,
-      const ConstMatrixView<T1,1,UNKNOWN,C1>& m1,
-      const ConstMatrixView<T2,1,UNKNOWN,C2>& m2, MatrixView<T3,1> m3);
+    // Defined in TMV_MultMM_CCC.cpp
+    template <bool add, class T1, bool C1, class T2, bool C2, class T3>
+    void DoInstMultMM(
+        const T3 x,
+        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1,
+        const ConstMatrixView<T2,1,UNKNOWN,C2>& m2, MatrixView<T3,1> m3);
 
-  // Defined in TMV_MultMM_CRC.cpp
-  template <bool add, class T1, bool C1, class T2, bool C2, class T3>
-  void DoInstMultMM(const T3 x,
-      const ConstMatrixView<T1,1,UNKNOWN,C1>& m1,
-      const ConstMatrixView<T2,UNKNOWN,1,C2>& m2, MatrixView<T3,1> m3);
+    // Defined in TMV_MultMM_CRC.cpp
+    template <bool add, class T1, bool C1, class T2, bool C2, class T3>
+    void DoInstMultMM(
+        const T3 x,
+        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1,
+        const ConstMatrixView<T2,UNKNOWN,1,C2>& m2, MatrixView<T3,1> m3);
 
-  // Defined in TMV_MultMM_RCC.cpp
-  template <bool add, class T1, bool C1, class T2, bool C2, class T3>
-  void DoInstMultMM(const T3 x,
-      const ConstMatrixView<T1,UNKNOWN,1,C1>& m1,
-      const ConstMatrixView<T2,1,UNKNOWN,C2>& m2, MatrixView<T3,1> m3);
+    // Defined in TMV_MultMM_RCC.cpp
+    template <bool add, class T1, bool C1, class T2, bool C2, class T3>
+    void DoInstMultMM(
+        const T3 x,
+        const ConstMatrixView<T1,UNKNOWN,1,C1>& m1,
+        const ConstMatrixView<T2,1,UNKNOWN,C2>& m2, MatrixView<T3,1> m3);
 
-  // Defined in TMV_MultMM_RRC.cpp
-  template <bool add, class T1, bool C1, class T2, bool C2, class T3>
-  void DoInstMultMM(const T3 x,
-      const ConstMatrixView<T1,UNKNOWN,1,C1>& m1,
-      const ConstMatrixView<T2,UNKNOWN,1,C2>& m2, MatrixView<T3,1> m3);
+    // Defined in TMV_MultMM_RRC.cpp
+    template <bool add, class T1, bool C1, class T2, bool C2, class T3>
+    void DoInstMultMM(
+        const T3 x,
+        const ConstMatrixView<T1,UNKNOWN,1,C1>& m1,
+        const ConstMatrixView<T2,UNKNOWN,1,C2>& m2, MatrixView<T3,1> m3);
 
-  template <class T1, bool C1, class T2, bool C2, class T3>
-  void InstMultMM(const T3 x,
-      const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
-      const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, MatrixView<T3> m3)
-  {
-    if (m3.isrm() && !m3.iscm())
-      InstMultMM(x,m2.Transpose(),m1.Transpose(),m3.Transpose());
-    else if (!m3.iscm())
+    template <class T1, bool C1, class T2, bool C2, class T3>
+    void InstMultMM(
+        const T3 x,
+        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
+        const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, MatrixView<T3> m3)
     {
-      Matrix<T3,ColMajor> m3c(m3.colsize(),m3.rowsize());
-      InstMultMM(T3(1),m1,m2,m3c.XView());
-      m3 = x * m3c;
+        if (m3.isrm() && !m3.iscm())
+            InstMultMM(x,m2.transpose(),m1.transpose(),m3.transpose());
+        else if (!(m1.isrm() || m1.iscm()))
+            InstMultMM(
+                T3(1),Matrix<T3,RowMajor>(x*m1).constView().xView(),m2,m3);
+        else if (!(m2.isrm() || m2.iscm()))
+            InstMultMM(
+                T3(1),m1,Matrix<T3,ColMajor>(x*m2).constView().xView(),m3);
+        else if (!m3.iscm()) {
+            Matrix<T3,ColMajor> m3c(m3.colsize(),m3.rowsize());
+            InstMultMM(T3(1),m1,m2,m3c.xView());
+            InstMultXM(x,m3c.constView().xView(),m3);
+        } else {
+            MatrixView<T3,1> m3cm = m3.cmView();
+            if (m1.isrm()) {
+                if (m2.isrm())
+                    DoInstMultMM<false>(x,m1.rmView(),m2.rmView(),m3cm);
+                else 
+                    DoInstMultMM<false>(x,m1.rmView(),m2.cmView(),m3cm);
+            } else {
+                if (m2.isrm())
+                    DoInstMultMM<false>(x,m1.cmView(),m2.rmView(),m3cm);
+                else 
+                    DoInstMultMM<false>(x,m1.cmView(),m2.cmView(),m3cm);
+            }
+        }
     }
-    else 
-    {
-      MatrixView<T3,1> m3cm = m3.CMView();
-      if (m1.isrm())
-      {
-        if (m2.isrm())
-          DoInstMultMM<false>(x,m1.RMView(),m2.RMView(),m3cm);
-        else if (m2.iscm())
-          DoInstMultMM<false>(x,m1.RMView(),m2.CMView(),m3cm);
-        else 
-        {
-          const Matrix<T3,ColMajor> m2c = x*m2;
-          DoInstMultMM<false>(T3(1),m1.RMView(),m2c.View(),m3cm);
-        }
-      }
-      else if (m1.iscm())
-      {
-        if (m2.isrm())
-          DoInstMultMM<false>(x,m1.CMView(),m2.RMView(),m3cm);
-        else if (m2.iscm())
-          DoInstMultMM<false>(x,m1.CMView(),m2.CMView(),m3cm);
-        else 
-        {
-          const Matrix<T3,ColMajor> m2c = x*m2;
-          DoInstMultMM<false>(T3(1),m1.CMView(),m2c.View(),m3cm);
-        }
-      }
-      else 
-      {
-        if (m2.isrm())
-        {
-          const Matrix<T3,ColMajor> m1c = x*m1;
-          DoInstMultMM<false>(T3(1),m1c.View(),m2.RMView(),m3cm);
-        }
-        else if (m2.iscm())
-        {
-          const Matrix<T3,RowMajor> m1c = x*m1;
-          DoInstMultMM<false>(T3(1),m1c.View(),m2.CMView(),m3cm);
-        }
-        else 
-        {
-          const Matrix<T3,RowMajor> m1c = x*m1;
-          const Matrix<T2,ColMajor> m2c = m2;
-          DoInstMultMM<false>(T3(1),m1c.View(),m2c.View(),m3cm);
-        }
-      }
-    }
-  }
 
-  template <class T1, bool C1, class T2, bool C2, class T3>
-  void InstAddMultMM(const T3 x,
-      const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
-      const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, MatrixView<T3> m3)
-  {
-    if (m3.isrm() && !m3.iscm())
-      InstAddMultMM(x,m2.Transpose(),m1.Transpose(),m3.Transpose());
-    else if (!m3.iscm())
+    template <class T1, bool C1, class T2, bool C2, class T3>
+    void InstAddMultMM(
+        const T3 x,
+        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
+        const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, MatrixView<T3> m3)
     {
-      Matrix<T3,ColMajor> m3c(m3.colsize(),m3.rowsize());
-      InstMultMM(T3(1),m1,m2,m3c.XView());
-      m3 += x * m3c;
+        if (m3.isrm() && !m3.iscm())
+            InstAddMultMM(x,m2.transpose(),m1.transpose(),m3.transpose());
+        else if (!(m1.isrm() || m1.iscm()))
+            InstAddMultMM(
+                T3(1),Matrix<T3,RowMajor>(x*m1).constView().xView(),m2,m3);
+        else if (!(m2.isrm() || m2.iscm()))
+            InstAddMultMM(
+                T3(1),m1,Matrix<T3,ColMajor>(x*m2).constView().xView(),m3);
+        else if (!m3.iscm()) {
+            Matrix<T3,ColMajor> m3c(m3.colsize(),m3.rowsize());
+            InstMultMM(T3(1),m1,m2,m3c.xView());
+            InstAddMultXM(x,m3c.constView().xView(),m3);
+        } else {
+            MatrixView<T3,1> m3cm = m3.cmView();
+            if (m1.isrm()) {
+                if (m2.isrm())
+                    DoInstMultMM<true>(x,m1.rmView(),m2.rmView(),m3cm);
+                else if (m2.iscm())
+                    DoInstMultMM<true>(x,m1.rmView(),m2.cmView(),m3cm);
+            } else {
+                if (m2.isrm())
+                    DoInstMultMM<true>(x,m1.cmView(),m2.rmView(),m3cm);
+                else if (m2.iscm())
+                    DoInstMultMM<true>(x,m1.cmView(),m2.cmView(),m3cm);
+            }
+        }
     }
-    else 
-    {
-      MatrixView<T3,1> m3cm = m3.CMView();
-      if (m1.isrm())
-      {
-        if (m2.isrm())
-          DoInstMultMM<true>(x,m1.RMView(),m2.RMView(),m3cm);
-        else if (m2.iscm())
-          DoInstMultMM<true>(x,m1.RMView(),m2.CMView(),m3cm);
-        else 
-        {
-          const Matrix<T3,ColMajor> m2c = x*m2;
-          DoInstMultMM<true>(T3(1),m1.RMView(),m2c.View(),m3cm);
-        }
-      }
-      else if (m1.iscm())
-      {
-        if (m2.isrm())
-          DoInstMultMM<true>(x,m1.CMView(),m2.RMView(),m3cm);
-        else if (m2.iscm())
-          DoInstMultMM<true>(x,m1.CMView(),m2.CMView(),m3cm);
-        else 
-        {
-          const Matrix<T3,ColMajor> m2c = x*m2;
-          DoInstMultMM<true>(T3(1),m1.CMView(),m2c.View(),m3cm);
-        }
-      }
-      else 
-      {
-        if (m2.isrm())
-        {
-          const Matrix<T3,ColMajor> m1c = x*m1;
-          DoInstMultMM<true>(T3(1),m1c.View(),m2.RMView(),m3cm);
-        }
-        else if (m2.iscm())
-        {
-          const Matrix<T3,RowMajor> m1c = x*m1;
-          DoInstMultMM<true>(T3(1),m1c.View(),m2.CMView(),m3cm);
-        }
-        else 
-        {
-          const Matrix<T3,RowMajor> m1c = x*m1;
-          const Matrix<T2,ColMajor> m2c = m2;
-          DoInstMultMM<true>(T3(1),m1c.View(),m2c.View(),m3cm);
-        }
-      }
-    }
-  }
 
 #define InstFile "TMV_MultMM.inst"
 #include "TMV_Inst.h"

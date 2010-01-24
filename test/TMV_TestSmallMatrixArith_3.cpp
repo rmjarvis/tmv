@@ -1,15 +1,14 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 
 #include "TMV_TestSmallMatrixArith_3.h"
 
 template <class T> void TestSmallMatrixArith_3()
 {
-  TestSmallMatrixArith_3a<T>();
-  TestSmallMatrixArith_3b<T>();
-  TestSmallMatrixArith_3c<T>();
-  TestSmallMatrixArith_3d<T>();
-  TestSmallMatrixArith_3e<T>();
-  TestSmallMatrixArith_3f<T>();
+    TestSmallMatrixArith_3a<T>();
+    TestSmallMatrixArith_3b<T>();
+    TestSmallMatrixArith_3c<T>();
+    TestSmallMatrixArith_3d<T>();
+    TestSmallMatrixArith_3e<T>();
+    TestSmallMatrixArith_3f<T>();
 }
 
 #ifdef TEST_DOUBLE

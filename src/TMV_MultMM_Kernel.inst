@@ -26,5 +26,3 @@ DefMM(1,T)
 DefMM(-1,T)
 
 #undef DefMM
-
-#undef CT

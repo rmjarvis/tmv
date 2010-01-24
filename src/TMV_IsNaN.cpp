@@ -1,5 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
 // Copyright (C) 1998 - 2009                                                 //
@@ -35,55 +34,52 @@
 // regular isnan.  But sometimes it doesn't.
 // So writing std::isnan is not portable.
 
-//#include <iostream>
 #include "math.h"
 #include "TMV_IsNaN.h"
 
 namespace tmv {
 
-  template <class T> bool DoIsNaN(T x)
-  {
-    return (x != x) || (x * x < 0);
-  }
+    template <class T> 
+    bool DoIsNaN(T x)
+    {
+        return (x != x) || (x * x < 0);
+    }
 
-  template <> bool DoIsNaN(double x)
-  {
+    template <> 
+    bool DoIsNaN(double x)
+    {
 #ifdef isnan
-    return isnan(x);
+        return isnan(x);
 #else
-    return (x != x) || (x * x < 0);
+        return (x != x) || (x * x < 0);
 #endif
-  }
+    }
 
-  template <> bool DoIsNaN(float x)
-  {
-    //std::cout<<"DoIsNaN x = "<<x<<std::endl;
+    template <> 
+    bool DoIsNaN(float x)
+    {
 #ifdef isnan
-    //std::cout<<"isnan(x) = "<<isnan(x)<<std::endl;
-    //std::cout<<"x!=x = "<<(x!=x)<<std::endl;
-    //std::cout<<"x*x<0 = "<<(x*x<0)<<std::endl;
-    return isnan(x);
+        return isnan(x);
 #else
-    //std::cout<<"x!=x = "<<(x!=x)<<std::endl;
-    //std::cout<<"x*x<0 = "<<(x*x<0)<<std::endl;
-    //std::cout<<"return "<<((x != x) || (x * x < 0))<<std::endl;
-    return (x != x) || (x * x < 0);
+        return (x != x) || (x * x < 0);
 #endif
-  }
+    }
 
-  template <> bool DoIsNaN(long double x)
-  {
+    template <> 
+    bool DoIsNaN(long double x)
+    {
 #ifdef isnan
-    return isnan(x);
+        return isnan(x);
 #else
-    return (x != x) || (x * x < 0);
+        return (x != x) || (x * x < 0);
 #endif
-  }
+    }
 
-  template <class T> bool IsNaN(T x)
-  {
-    return DoIsNaN(x);
-  }
+    template <class T> 
+    bool IsNaN(T x)
+    {
+        return DoIsNaN(x);
+    }
 
 #define InstFile "TMV_IsNaN.inst"
 #include "TMV_Inst.h"

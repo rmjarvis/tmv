@@ -1,5 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
 // Copyright (C) 1998 - 2009                                                 //
@@ -42,7 +41,7 @@
 
 #include "TMV_Tri.h"
 
-// Put the arithmetic header files last, after all the Inline and Inst
+// Put the arithmetic header files last, after all the Mult, Add, etc.
 // functions have been declared.
 #include "tmv/TMV_ProdXM.h"
 #include "tmv/TMV_SumMM.h"
@@ -50,5 +49,7 @@
 #include "tmv/TMV_ProdMV.h"
 #include "tmv/TMV_OProdVV.h"
 #include "tmv/TMV_ProdMM.h"
+#include "tmv/TMV_QuotXM.h"
+#include "tmv/TMV_QuotVM.h"
 
 #endif

@@ -10,21 +10,23 @@
 #endif
 
 #ifndef BLAS
-#define Def1(RT,T) \
-  template void InstCopy(const ConstVectorView<T >& v1, VectorView<T > v2); \
-  template void InstCopy(const ConstVectorView<T,UNKNOWN,true>& v1, \
+#define Def1(T,C) \
+  template void InstCopy(const ConstVectorView<T,UNKNOWN,C>& v1, \
       VectorView<T > v2); \
-  template void InstSwap(VectorView<T > v1, VectorView<T > v2); \
-  template void InstSwap(VectorView<T,UNKNOWN,true> v1, \
-      VectorView<T > v2); \
+  template void InstSwap(VectorView<T,UNKNOWN,C> v1, VectorView<T > v2); \
 
-Def1(T,T)
+Def1(T,false)
 #ifdef TMV_INST_COMPLEX
-Def1(T,CT)
+Def1(CT,false)
+Def1(CT,true)
 #endif
 
 #undef Def1
 #endif // BLAS
+
+#ifdef TMV_INST_MIX
+template void InstCopy(const ConstVectorView<T >& v1, VectorView<CT > v2); 
+#endif
 
 #ifndef ELAP
 #define Def2(T) \
@@ -44,8 +46,8 @@ Def2(CT)
   template T InstMinElement(const ConstVectorView<T >& v, int*const imin); \
   template RT InstNormSq(const ConstVectorView<T >& v);  \
   template RT InstNormSq(const ConstVectorView<T >& v, const RT scale);  \
-  template void InstSort(VectorView<T > v, ADType ad, COMPType comp); \
-  template void InstSort(VectorView<T > v, int* P, ADType ad, COMPType comp); \
+  template void InstSort(VectorView<T > v, ADType ad, CompType comp); \
+  template void InstSort(VectorView<T > v, int* P, ADType ad, CompType comp); \
   template void InstWrite(std::ostream& os, const ConstVectorView<T >& v); \
   template void InstWrite( \
       std::ostream& os, const ConstVectorView<T,UNKNOWN,true>& v); \
@@ -62,7 +64,7 @@ Def3(T,T)
 Def3(T,CT)
 #endif
 
-#undef Def1
+#undef Def3
 
 #ifndef BLAS_SumAbsElements
   template T InstSumAbsElements(const ConstVectorView<T >& v); 

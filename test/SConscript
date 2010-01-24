@@ -16,7 +16,7 @@ test_basic_files = ReadFileList('test_basic.files')
 test_diag_files = ReadFileList('test_diagx.files')
 #test_diag_files = ['TMV_TestDiagArith_B5b.cpp']
 #test_tri_files = ReadFileList('test_tri.files')
-test_tri_files = ['TMV_TestTri.cpp','TMV_TestTriArith_A1.cpp']
+test_tri_files = ReadFileList('test_trix.files')
 test_div_files = ReadFileList('test_div.files')
 test_band_files = ReadFileList('test_band.files')
 test_sym_files = ReadFileList('test_sym.files')
@@ -37,8 +37,8 @@ env1 = env.Clone(CCFLAGS=env['TEST_FLAGS'],
 env1.Append(CPPDEFINES=['TMV_OPT=' + env['TEST_OPT']])
 if env['MEM_TEST']:
     env1.Append(CPPDEFINES=['TMV_MEM_TEST'])
-if env['XTEST']:
-    env1.Append(CPPDEFINES=['XTEST'])
+if env['XTEST'] > 0:
+    env1.Append(CPPDEFINES=['XTEST=' + env['XTEST']])
 if not env['INST_FLOAT']:
     env1.Append(CPPDEFINES=['TMV_NO_INST_FLOAT'])
 if not env['INST_DOUBLE']:
@@ -55,6 +55,8 @@ if env['TEST_LONGDOUBLE']:
     env1.Append(CPPDEFINES=['TEST_LONGDOUBLE'])
 if env['TEST_INT']:
     env1.Append(CPPDEFINES=['TEST_INT'])
+if not env['DEBUG']:
+    env1.Append(CPPDEFINES=['NDEBUG'])
 
 
 env1b = env1.Clone()

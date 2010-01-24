@@ -1,5 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
 // Copyright (C) 1998 - 2009                                                 //
@@ -37,74 +36,82 @@
 namespace tmv {
 
 #ifdef TMV_BLOCKSIZE
-  const int MM_BLOCKSIZE = TMV_BLOCKSIZE;
+    const int MM_BLOCKSIZE = TMV_BLOCKSIZE;
 #else
-  const int MM_BLOCKSIZE = 64;
+    const int MM_BLOCKSIZE = 64;
 #endif
 
 #ifdef TMV_BLOCKSIZE
-  const int MMCCC_BLOCKSIZE_M = 4*TMV_BLOCKSIZE;
-  const int MMCCC_BLOCKSIZE_N = TMV_BLOCKSIZE;
+    const int MMCCC_BLOCKSIZE_M = 4*TMV_BLOCKSIZE;
+    const int MMCCC_BLOCKSIZE_N = TMV_BLOCKSIZE;
 #else
-  const int MMCCC_BLOCKSIZE_M = 4*64;
-  const int MMCCC_BLOCKSIZE_N = 64;
+    const int MMCCC_BLOCKSIZE_M = 4*64;
+    const int MMCCC_BLOCKSIZE_N = 64;
 #endif
 
-  template <bool ca, bool cb, class T, class Ta, class Tb> 
-  void RecursiveCCCMultMM(const int M, const int N, const int K,
-      const Ta* A, const Tb* B, T* C,
-      const int Ask, const int Bsj, const int Csj);
+    template <bool ca, bool cb, class T, class Ta, class Tb> 
+    void RecursiveCCCMultMM(
+        const int M, const int N, const int K,
+        const Ta* A, const Tb* B, T* C,
+        const int Ask, const int Bsj, const int Csj);
 
-  template <bool add, bool ca, bool cb, class T, class Ta, class Tb> 
-  void DoCCCMultMM( 
-      const T alpha, const GenMatrix<Ta>& A,
-      const GenMatrix<Tb>& B, const MatrixView<T>& C);
+    template <bool add, bool ca, bool cb, class T, class Ta, class Tb> 
+    void DoCCCMultMM( 
+        const T alpha, const GenMatrix<Ta>& A,
+        const GenMatrix<Tb>& B, const MatrixView<T>& C);
 
-  template <bool add, class T, class Ta, class Tb> 
-  void CCCMultMM(const T alpha, const GenMatrix<Ta>& A,
-      const GenMatrix<Tb>& B, const MatrixView<T>& C);
+    template <bool add, class T, class Ta, class Tb> 
+    void CCCMultMM(
+        const T alpha, const GenMatrix<Ta>& A,
+        const GenMatrix<Tb>& B, const MatrixView<T>& C);
 
 #ifdef TMV_BLOCKSIZE
-  const int MMCRC_BLOCKSIZE_M = 4*TMV_BLOCKSIZE;
-  const int MMCRC_BLOCKSIZE_N = TMV_BLOCKSIZE;
+    const int MMCRC_BLOCKSIZE_M = 4*TMV_BLOCKSIZE;
+    const int MMCRC_BLOCKSIZE_N = TMV_BLOCKSIZE;
 #else
-  const int MMCRC_BLOCKSIZE_M = 4*64;
-  const int MMCRC_BLOCKSIZE_N = 64;
+    const int MMCRC_BLOCKSIZE_M = 4*64;
+    const int MMCRC_BLOCKSIZE_N = 64;
 #endif
 
-  template <bool ca, bool cb, class T, class Ta, class Tb> 
-  void RecursiveCRCMultMM(const int M, const int N, const int K,
-      const Ta* A, const Tb* B, T* C,
-      const int Ask, const int Bsk, const int Csj);
+    template <bool ca, bool cb, class T, class Ta, class Tb> 
+    void RecursiveCRCMultMM(
+        const int M, const int N, const int K,
+        const Ta* A, const Tb* B, T* C,
+        const int Ask, const int Bsk, const int Csj);
 
-  template <bool add, bool ca, bool cb, class T, class Ta, class Tb> 
-  void DoCRCMultMM(const T alpha, const GenMatrix<Ta>& A,
-      const GenMatrix<Tb>& B, const MatrixView<T>& C);
+    template <bool add, bool ca, bool cb, class T, class Ta, class Tb> 
+    void DoCRCMultMM(
+        const T alpha, const GenMatrix<Ta>& A,
+        const GenMatrix<Tb>& B, const MatrixView<T>& C);
 
-  template <bool add, class T, class Ta, class Tb> 
-  void CRCMultMM(const T alpha, const GenMatrix<Ta>& A,
-      const GenMatrix<Tb>& B, const MatrixView<T>& C);
+    template <bool add, class T, class Ta, class Tb> 
+    void CRCMultMM(
+        const T alpha, const GenMatrix<Ta>& A,
+        const GenMatrix<Tb>& B, const MatrixView<T>& C);
 
 #ifdef TMV_BLOCKSIZE
-  const int MMRCC_BLOCKSIZE_K = 4*TMV_BLOCKSIZE;
-  const int MMRCC_BLOCKSIZE_MN = TMV_BLOCKSIZE;
+    const int MMRCC_BLOCKSIZE_K = 4*TMV_BLOCKSIZE;
+    const int MMRCC_BLOCKSIZE_MN = TMV_BLOCKSIZE;
 #else
-  const int MMRCC_BLOCKSIZE_K = 4*64;
-  const int MMRCC_BLOCKSIZE_MN = 64;
+    const int MMRCC_BLOCKSIZE_K = 4*64;
+    const int MMRCC_BLOCKSIZE_MN = 64;
 #endif
 
-  template <bool ca, bool cb, class T, class Ta, class Tb>
-  void RecursiveRCCMultMM(const int M, const int N, const int K,
-      const Ta* A, const Tb* B, T* C,
-      const int Asi, const int Bsj, const int Csj);
+    template <bool ca, bool cb, class T, class Ta, class Tb>
+    void RecursiveRCCMultMM(
+        const int M, const int N, const int K,
+        const Ta* A, const Tb* B, T* C,
+        const int Asi, const int Bsj, const int Csj);
 
-  template <bool add, bool ca, bool cb, class T, class Ta, class Tb> 
-  void DoRCCMultMM(const T alpha, const GenMatrix<Ta>& A,
-      const GenMatrix<Tb>& B, const MatrixView<T>& C);
+    template <bool add, bool ca, bool cb, class T, class Ta, class Tb> 
+    void DoRCCMultMM(
+        const T alpha, const GenMatrix<Ta>& A,
+        const GenMatrix<Tb>& B, const MatrixView<T>& C);
 
-  template <bool add, class T, class Ta, class Tb> 
-  void RCCMultMM(const T alpha, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
-      const MatrixView<T>& C);
+    template <bool add, class T, class Ta, class Tb> 
+    void RCCMultMM(
+        const T alpha, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
+        const MatrixView<T>& C);
 
 }
 

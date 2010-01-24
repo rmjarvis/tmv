@@ -1,5 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
 // Copyright (C) 1998 - 2009                                                 //
@@ -34,93 +33,92 @@
 
 #include "TMV_Blas.h"
 #include "tmv/TMV_MultMM_Kernel.h"
-#include "TMV_MultMM_Blas.h"
 
 namespace tmv {
 
 #ifndef BLAS
 #ifdef TMV_INST_FLOAT
 #ifdef __SSE__
-  template void multmm_16_16_32(
-      const int M, const int N, const int K,
-      const Scaling<1,float>& x,
-      const float* A, const float* B, float* C0);
-  template void multmm_16_16_32(
-      const int M, const int N, const int K,
-      const Scaling<-1,float>& x,
-      const float* A, const float* B, float* C0);
-  template void multmm_M_16_32(
-      const int M, const int N, const int K,
-      const Scaling<1,float>& x,
-      const float* A, const float* B, float* C0);
-  template void multmm_M_16_32(
-      const int M, const int N, const int K,
-      const Scaling<-1,float>& x,
-      const float* A, const float* B, float* C0);
-  template void multmm_16_N_32(
-      const int M, const int N, const int K,
-      const Scaling<1,float>& x,
-      const float* A, const float* B, float* C0);
-  template void multmm_16_N_32(
-      const int M, const int N, const int K,
-      const Scaling<-1,float>& x,
-      const float* A, const float* B, float* C0);
+    template void multmm_16_16_32(
+        const int M, const int N, const int K,
+        const Scaling<1,float>& x,
+        const float* A, const float* B, float* C0);
+    template void multmm_16_16_32(
+        const int M, const int N, const int K,
+        const Scaling<-1,float>& x,
+        const float* A, const float* B, float* C0);
+    template void multmm_M_16_32(
+        const int M, const int N, const int K,
+        const Scaling<1,float>& x,
+        const float* A, const float* B, float* C0);
+    template void multmm_M_16_32(
+        const int M, const int N, const int K,
+        const Scaling<-1,float>& x,
+        const float* A, const float* B, float* C0);
+    template void multmm_16_N_32(
+        const int M, const int N, const int K,
+        const Scaling<1,float>& x,
+        const float* A, const float* B, float* C0);
+    template void multmm_16_N_32(
+        const int M, const int N, const int K,
+        const Scaling<-1,float>& x,
+        const float* A, const float* B, float* C0);
 
 
 
-  template void multmm_16_16_64(
-      const int M, const int N, const int K,
-      const Scaling<1,float>& x,
-      const float* A, const float* B, float* C0);
-  template void multmm_16_16_64(
-      const int M, const int N, const int K,
-      const Scaling<-1,float>& x,
-      const float* A, const float* B, float* C0);
-  template void multmm_M_16_64(
-      const int M, const int N, const int K,
-      const Scaling<1,float>& x,
-      const float* A, const float* B, float* C0);
-  template void multmm_M_16_64(
-      const int M, const int N, const int K,
-      const Scaling<-1,float>& x,
-      const float* A, const float* B, float* C0);
-  template void multmm_16_N_64(
-      const int M, const int N, const int K,
-      const Scaling<1,float>& x,
-      const float* A, const float* B, float* C0);
-  template void multmm_16_N_64(
-      const int M, const int N, const int K,
-      const Scaling<-1,float>& x,
-      const float* A, const float* B, float* C0);
+    template void multmm_16_16_64(
+        const int M, const int N, const int K,
+        const Scaling<1,float>& x,
+        const float* A, const float* B, float* C0);
+    template void multmm_16_16_64(
+        const int M, const int N, const int K,
+        const Scaling<-1,float>& x,
+        const float* A, const float* B, float* C0);
+    template void multmm_M_16_64(
+        const int M, const int N, const int K,
+        const Scaling<1,float>& x,
+        const float* A, const float* B, float* C0);
+    template void multmm_M_16_64(
+        const int M, const int N, const int K,
+        const Scaling<-1,float>& x,
+        const float* A, const float* B, float* C0);
+    template void multmm_16_N_64(
+        const int M, const int N, const int K,
+        const Scaling<1,float>& x,
+        const float* A, const float* B, float* C0);
+    template void multmm_16_N_64(
+        const int M, const int N, const int K,
+        const Scaling<-1,float>& x,
+        const float* A, const float* B, float* C0);
 #endif
 #endif
 
 #ifdef TMV_INST_DOUBLE
 #ifdef __SSE2__
-  template void multmm_16_16_32(
-      const int M, const int N, const int K,
-      const Scaling<1,double>& x,
-      const double* A, const double* B, double* C0);
-  template void multmm_16_16_32(
-      const int M, const int N, const int K,
-      const Scaling<-1,double>& x,
-      const double* A, const double* B, double* C0);
-  template void multmm_M_16_32(
-      const int M, const int N, const int K,
-      const Scaling<1,double>& x,
-      const double* A, const double* B, double* C0);
-  template void multmm_M_16_32(
-      const int M, const int N, const int K,
-      const Scaling<-1,double>& x,
-      const double* A, const double* B, double* C0);
-  template void multmm_16_N_32(
-      const int M, const int N, const int K,
-      const Scaling<1,double>& x,
-      const double* A, const double* B, double* C0);
-  template void multmm_16_N_32(
-      const int M, const int N, const int K,
-      const Scaling<-1,double>& x,
-      const double* A, const double* B, double* C0);
+    template void multmm_16_16_32(
+        const int M, const int N, const int K,
+        const Scaling<1,double>& x,
+        const double* A, const double* B, double* C0);
+    template void multmm_16_16_32(
+        const int M, const int N, const int K,
+        const Scaling<-1,double>& x,
+        const double* A, const double* B, double* C0);
+    template void multmm_M_16_32(
+        const int M, const int N, const int K,
+        const Scaling<1,double>& x,
+        const double* A, const double* B, double* C0);
+    template void multmm_M_16_32(
+        const int M, const int N, const int K,
+        const Scaling<-1,double>& x,
+        const double* A, const double* B, double* C0);
+    template void multmm_16_N_32(
+        const int M, const int N, const int K,
+        const Scaling<1,double>& x,
+        const double* A, const double* B, double* C0);
+    template void multmm_16_N_32(
+        const int M, const int N, const int K,
+        const Scaling<-1,double>& x,
+        const double* A, const double* B, double* C0);
 
 #endif
 #endif

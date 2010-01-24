@@ -1,2 +1,4 @@
 TMV_DiagMatrix.cpp
 TMV_MultMD.cpp
+TMV_InvertD.cpp
+TMV_DivVD.cpp

@@ -1,5 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
 // Copyright (C) 1998 - 2009                                                 //
@@ -44,45 +43,46 @@ const int TMV_MaxStack = 1024;
 
 namespace tmv
 {
-  template <class T, int N, bool bigN> struct StackArray2;
+    template <class T, int N, bool bigN> 
+    struct StackArray2;
 
-  template <class T, int N>
-  struct StackArray2<T,N,false>
-  {
-    T p[N];
-    inline StackArray2() {}
-    inline ~StackArray2() {}
-  };
+    template <class T, int N>
+    struct StackArray2<T,N,false>
+    {
+        T p[N];
+        inline StackArray2() {}
+        inline ~StackArray2() {}
+    };
 
-  template <class T, int N>
-  struct StackArray2<T,N,true>
-  {
-    T*const p;
-    inline StackArray2() : p(new T[N]) {}
-    inline ~StackArray2() { delete [] p; }
-  };
+    template <class T, int N>
+    struct StackArray2<T,N,true>
+    {
+        T*const p;
+        inline StackArray2() : p(new T[N]) {}
+        inline ~StackArray2() { delete [] p; }
+    };
 
-  template <class T, int N>
-  class StackArray
-  {
-  private :
-    StackArray2<T,N,(N>TMV_MaxStack)> p;
+    template <class T, int N>
+    class StackArray
+    {
+    public :
+        inline StackArray() {}
+        inline ~StackArray() {}
 
-    inline StackArray& operator=(StackArray& p2);
-    inline StackArray(const StackArray& p2);
+        inline T& operator*() { return *(p.p); }
+        inline T* operator->() { return (p.p); }
+        inline operator T*() { return (p.p); }
 
-  public :
-    inline StackArray() {}
-    inline ~StackArray() {}
+        inline const T& operator*() const { return *(p.p); }
+        inline const T* operator->() const { return (p.p); }
+        inline operator const T*() const { return (p.p); }
 
-    inline T& operator*() { return *(p.p); }
-    inline T* operator->() { return (p.p); }
-    inline operator T*() { return (p.p); }
+    private :
+        StackArray2<T,N,(N>TMV_MaxStack)> p;
 
-    inline const T& operator*() const { return *(p.p); }
-    inline const T* operator->() const { return (p.p); }
-    inline operator const T*() const { return (p.p); }
-  };
+        inline StackArray& operator=(StackArray& p2);
+        inline StackArray(const StackArray& p2);
+    };
 
 } // namespace tmv
 
