@@ -1,5 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
 // Copyright (C) 1998 - 2009                                                 //
@@ -53,89 +52,91 @@
 #ifndef TMV_BasisVector_H
 #define TMV_BasisVector_H
 
-#include "tmv/TMV_BaseVector.h"
+#include "TMV_BaseVector.h"
 #include <sstream>
 
 namespace tmv {
 
-  template <class T, IndexStyle I=CStyle>
-  class BasisVector;
+    template <class T, IndexStyle I=CStyle>
+    class BasisVector;
 
-  template <class T, IndexStyle I> 
-  struct Traits<BasisVector<T,I> >
-  {
-    typedef T value_type;
+    template <class T, IndexStyle I> 
+    struct Traits<BasisVector<T,I> >
+    {
+        typedef T value_type;
 
-    typedef typename Traits<T>::real_type real_type;
-    typedef typename Traits<T>::complex_type complex_type;
-    enum { visreal = Traits<T>::isreal };
-    enum { viscomplex = Traits<T>::iscomplex };
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+        enum { visreal = Traits<T>::isreal };
+        enum { viscomplex = Traits<T>::iscomplex };
 
-    typedef BasisVector<T,I> type;
-    typedef Vector<T,I> calc_type;
-    typedef const type& eval_type; 
-    typedef calc_type copy_type;
+        typedef BasisVector<T,I> type;
+        typedef Vector<T,I> calc_type;
+        typedef const type& eval_type; 
+        typedef calc_type copy_type;
 
-    enum { vsize = UNKNOWN }; 
-    enum { vfort = (I == FortranStyle) };
-    enum { vcalc = true };
-  };
+        enum { vsize = UNKNOWN }; 
+        enum { vfort = (I == FortranStyle) };
+        enum { vcalc = true };
+    };
 
-  template <class T, IndexStyle I> 
-  class BasisVector : 
-    public BaseVector<BasisVector<T,I> >
-  {
-  public:
+    template <class T, IndexStyle I> 
+    class BasisVector : public BaseVector<BasisVector<T,I> >
+    {
+    public:
+        typedef BasisVector<T,I> type;
 
-    typedef BasisVector<T,I> type;
-    typedef typename Traits<T>::real_type real_type;
-    typedef typename Traits<T>::complex_type complex_type;
+        enum { vsize = Traits<type>::vsize };
+        enum { vfort = Traits<type>::vfort };
+        enum { vcalc = Traits<type>::vcalc };
+        enum { visreal = Traits<T>::isreal }; 
+        enum { viscomplex = Traits<T>::iscomplex }; 
 
-    enum { visreal = Traits<T>::isreal }; 
-    enum { viscomplex = Traits<T>::iscomplex }; 
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
+        //
+        // Constructors
+        //
+
+        inline BasisVector(size_t n, int i, const T x) : 
+            itssize(n), itsindex(I==FortranStyle?i-1:i), itsval(x) {}
+        inline ~BasisVector() {}
+
+        //
+        // Auxilliary Functions
+        //
+
+        inline T cref(int i) const  { return i==itsindex ? itsval : T(0); }
+        inline size_t size() const { return itssize; }
+        template <class V2>
+        inline void assignTo(BaseVector_Mutable<V2>& v2) const
+        { 
+            TMVAssert(v2.size() == itssize);
+            v2.setZero();
+            v2.ref(itsindex) = itsval; 
+        }
+
+    protected :
+
+        size_t itssize;
+        int itsindex;
+        T itsval;
+
+    }; // BasisVector
+
 
     //
-    // Constructors
+    // TMV_Text functions
     //
 
-    inline BasisVector(size_t n, int i, const T x) : 
-      itssize(n), itsindex(I==FortranStyle?i-1:i), itsval(x) {}
-    inline ~BasisVector() {}
-
-    //
-    // Auxilliary Functions
-    //
-
-    inline T cref(int i) const  { return i==itsindex ? itsval : T(0); }
-    inline size_t size() const { return itssize; }
-    template <class V2>
-    inline void AssignTo(BaseVector_Mutable<V2>& v2) const
+    template <class T, IndexStyle I> 
+    inline std::string TMV_Text(const BasisVector<T,I>& )
     { 
-      TMVAssert(v2.size() == itssize);
-      v2.Zero();
-      v2.ref(itsindex) = itsval; 
+        std::ostringstream s;
+        s << "BasisVector<"<<TMV_Text(T())<<","<<TMV_Text(I)<<">";
+        return s.str();
     }
-
-  protected :
-
-    size_t itssize;
-    int itsindex;
-    T itsval;
-
-  }; // BasisVector
-
-
-  //
-  // TypeText functions
-  //
-
-  template <class T, IndexStyle I> 
-  inline std::string TypeText(const BasisVector<T,I>& )
-  { 
-    std::ostringstream s;
-    s << "BasisVector<"<<TypeText(T())<<","<<Text(I)<<">";
-    return s.str();
-  }
 
 } // namespace tmv
 

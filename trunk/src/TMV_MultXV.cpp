@@ -1,5 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
 // Copyright (C) 1998 - 2009                                                 //
@@ -30,231 +29,238 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #include "TMV_Blas.h"
+#include "tmv/TMV_ScaleV.h"
 #include "tmv/TMV_MultXV.h"
 #include "tmv/TMV_Vector.h"
-#include "tmv/TMV_SwapV.h"
 
 namespace tmv {
 
-  const int XX = UNKNOWN;
+    template <bool add, class T, class V1, class V2>
+    static void DoMultXV3(const T x, const V1& v1, V2& v2)
+    { 
+        if (x == T(-1))
+            InlineMultXV<add>(Scaling<-1,T>(x),v1,v2); 
+        else if (x == T(1))
+            InlineMultXV<add>(Scaling<1,T>(x),v1,v2); 
+        else
+            InlineMultXV<add>(Scaling<0,T>(x),v1,v2); 
+    }
 
-  //
-  // MultXV: v *= x
-  // 
-
-  template <class T, class V> 
-  static void DoMultXV(const T x, V& v)
-  { 
-    if (x == T(-1))
-      InlineMultXV(Scaling<-1,T>(x),v); 
-    else if (x == T(0))
-      v.Zero();
-    else if (x != T(1))
-      InlineMultXV(Scaling<0,T>(x),v); 
-  }
-
-  template <class T, class V> 
-  static void DoMultXV(const std::complex<T> x, V& v)
-  {
-    if (imag(x) == T(0)) 
+    template <bool add, class T, class V1, class V2>
+    static void DoMultXV3(const std::complex<T> x, const V1& v1, V2& v2)
     {
-      if (real(x) == T(-1))
-        InlineMultXV(Scaling<-1,T>(real(x)),v);
-      else if (real(x) == T(0))
-        v.Zero();
-      else if (real(x) != T(1))
-        InlineMultXV(Scaling<0,T>(real(x)),v);
+        if (imag(x) == T(0)) {
+            if (real(x) == T(-1))
+                InlineMultXV<add>(Scaling<-1,T>(real(x)),v1,v2);
+            else if (real(x) == T(1))
+                InlineMultXV<add>(Scaling<1,T>(real(x)),v1,v2);
+            else
+                InlineMultXV<add>(Scaling<0,T>(real(x)),v1,v2);
+        } else 
+            InlineMultXV<add>(Scaling<0,std::complex<T> >(x),v1,v2); 
     }
-    else InlineMultXV(Scaling<0,std::complex<T> >(x),v); 
-  }
 
-  template <class T> 
-  void InstMultXV(const T x, VectorView<T> v)
-  { 
-    if (v.step() == 1) {
-      VectorView<T,1> vu = v.UnitView();
-      DoMultXV(x,vu);
-    }
-    else DoMultXV(x,v); 
-  }
-
-#ifdef BLAS
-#define TMV_INST_SKIP_BLAS
-#ifdef TMV_INST_DOUBLE
-  template <> 
-  void InstMultXV(const double x, VectorView<double> v)
-  {
-    int n=v.size();
-    if (n==0) return;
-    TMVAssert(v.size()>0);
-    int s=v.step();
-    if (s == 0) { v[0] *= x; return; }
-    double* vp = v.ptr();
-    if (s < 0) vp += (n-1)*s;
-    BLASNAME(dscal) (BLASV(n),BLASV(x),BLASP(vp),BLASV(s));
-  }
-  template <> 
-  void InstMultXV(const std::complex<double> x,
-      VectorView<std::complex<double> > v)
-  {
-    if (imag(x) == double(0)) {
-      int n=v.size();
-      if (n==0) return;
-      TMVAssert(v.size()>0);
-      int s=v.step();
-      double xr = real(x);
-      if (s == 0) { v[0] *= x; return; }
-      std::complex<double>* vp = v.ptr();
-      if (s < 0) vp += (n-1)*s;
-      BLASNAME(zdscal) (BLASV(n),BLASV(xr),BLASP(vp),BLASV(s));
-    } else {
-      int n=v.size();
-      if (n==0) return;
-      TMVAssert(v.size()>0);
-      int s=v.step();
-      if (s == 0) { v[0] *= x; return; }
-      std::complex<double>* vp = v.ptr();
-      if (s < 0) vp += (n-1)*s;
-      BLASNAME(zscal) (BLASV(n),BLASP(&x),BLASP(vp),BLASV(s));
-    }
-  }
-#endif
-#ifdef TMV_INST_FLOAT
-  template <> 
-  void InstMultXV(const float x, VectorView<float> v)
-  {
-    int n=v.size();
-    if (n==0) return;
-    TMVAssert(v.size()>0);
-    int s=v.step();
-    if (s == 0) { v[0] *= x; return; }
-    float* vp = v.ptr();
-    if (s < 0) vp += (n-1)*s;
-    BLASNAME(sscal) (BLASV(n),BLASV(x),BLASP(vp),BLASV(s));
-  }
-  template <> 
-  void InstMultXV(const std::complex<float> x,
-      VectorView<std::complex<float> > v)
-  {
-    if (imag(x) == float(0)) {
-      int n=v.size();
-      if (n==0) return;
-      TMVAssert(v.size()>0);
-      int s=v.step();
-      float xr = real(x);
-      if (s == 0) { v[0] *= x; return; }
-      std::complex<float>* vp = v.ptr();
-      if (s < 0) vp += (n-1)*s;
-      BLASNAME(csscal) (BLASV(n),BLASV(xr),BLASP(vp),BLASV(s));
-    } else {
-      int n=v.size();
-      if (n==0) return;
-      TMVAssert(v.size()>0);
-      int s=v.step();
-      if (s == 0) { v[0] *= x; return; }
-      std::complex<float>* vp = v.ptr();
-      if (s < 0) vp += (n-1)*s;
-      BLASNAME(cscal) (BLASV(n),BLASP(&x),BLASP(vp),BLASV(s));
-    }
-  }
-#endif
-#endif
-
-  template <class T, class V1, class V2>
-  static void DoMultXV(const T x, const V1& v1, V2& v2)
-  { 
-    if (x == T(-1))
-      InlineMultXV(Scaling<-1,T>(x),v1,v2); 
-    else if (x == T(1))
-      v2 = v1;
-    else
-      InlineMultXV(Scaling<0,T>(x),v1,v2); 
-  }
-
-  template <class T, class V1, class V2>
-  static void DoMultXV(const std::complex<T> x, const V1& v1, V2& v2)
-  {
-    if (imag(x) == T(0)) {
-      if (x == T(-1))
-        InlineMultXV(Scaling<-1,T>(real(x)),v1,v2);
-      else if (x == T(1))
-        v2 = v1;
-      else
-        InlineMultXV(Scaling<0,T>(real(x)),v1,v2);
-    }
-    else InlineMultXV(Scaling<0,std::complex<T> >(x),v1,v2); 
-  }
-
-  template <class T1, bool C1, class T2>
-  void InstMultXV(
-      const T2 x, const ConstVectorView<T1,XX,C1>& v1, VectorView<T2> v2)
-  {
-    if (v2.step() == 1) 
+    template <bool add, class T, class V1>
+    static void DoMultXV2(const T x, const V1& v1, VectorView<T> v2)
     {
-      VectorView<T2,1> v2unit = v2.UnitView();
-      if (v1.step() == 1) 
-        DoMultXV(x,v1.UnitView(),v2unit);
-      else
-        DoMultXV(x,v1,v2unit);
-    } 
-    else 
-      if (v1.step() == 1)
-        DoMultXV(x,v1.UnitView(),v2); 
-      else
-        DoMultXV(x,v1,v2); 
-  }
+        if (v2.step() == 1) {
+            VectorView<T,1> v2u = v2.unitView();
+            if (v1.step() == 1) 
+                DoMultXV3<add>(x,v1.unitView(),v2u);
+            else
+                DoMultXV3<add>(x,v1,v2u);
+        } else 
+            if (v1.step() == 1)
+                DoMultXV3<add>(x,v1.unitView(),v2); 
+            else
+                DoMultXV3<add>(x,v1,v2); 
+    }
+
+    template <class T1, bool C1, class T2>
+    static void DoMultXV(
+        const T2 x, const ConstVectorView<T1,UNKNOWN,C1>& v1,
+        VectorView<T2> v2)
+    { DoMultXV2<false>(x,v1,v2); }
+    template <class T1, bool C1, class T2>
+    static void DoAddMultXV(
+        const T2 x, const ConstVectorView<T1,UNKNOWN,C1>& v1,
+        VectorView<T2> v2)
+    { DoMultXV2<true>(x,v1,v2); }
 
 #ifdef BLAS
 #ifdef TMV_INST_DOUBLE
-  template <> 
-  void InstMultXV(const double x, 
-      const ConstVectorView<double>& v1, VectorView<double> v2)
-  { InstMultXV(x,v2=v1); }
+    template <> 
+    static void DoMultXV(
+        const double x,
+        const ConstVectorView<double>& v1, VectorView<double> v2)
+    { InstScale(x,v2=v1); }
+    template <> 
+    static void DoMultXV(
+        const std::complex<double> x, 
+        const ConstVectorView<std::complex<double> >& v1, 
+        VectorView<std::complex<double> > v2)
+    { InstScale(x,v2=v1); }
 #ifdef TMV_INST_MIX
-  template <> 
-  void InstMultXV(const std::complex<double> x,
-      const ConstVectorView<double>& v1,
-      VectorView<std::complex<double> > v2)
-  { InstMultXV(x,v2=v1); }
+    template <> 
+    static void DoMultXV(
+        const std::complex<double> x, 
+        const ConstVectorView<double>& v1, 
+        VectorView<std::complex<double> > v2)
+    { InstScale(x,v2=v1); }
 #endif
-  template <> 
-  void InstMultXV(const std::complex<double> x,
-      const ConstVectorView<std::complex<double> >& v1,
-      VectorView<std::complex<double> > v2)
-  { InstMultXV(x,v2=v1); }
-  template <> 
-  void InstMultXV(const std::complex<double> x,
-      const ConstVectorView<std::complex<double>,UNKNOWN,true>& v1,
-      VectorView<std::complex<double> > v2)
-  { InstMultXV(x,v2=v1); }
+    template <> 
+    static void DoAddMultXV(
+        const double x,
+        const ConstVectorView<double>& v1, VectorView<double> v2)
+    { 
+        TMVAssert(v1.size() == v1.size()); 
+        int n=v2.size();
+        int s1=v1.step();
+        int s2=v2.step();
+        const double* v1p = v1.cptr();
+        if (s1<0) v1p += (n-1)*s1;
+        double* v2p = v2.ptr();
+        if (s2<0) v2p += (n-1)*s2;
+        BLASNAME(daxpy) (
+            BLASV(n),BLASV(x),BLASP(v1p),BLASV(s1),
+            BLASP(v2p),BLASV(s2));
+    }
+    template <> 
+    static void DoAddMultXV(
+        const std::complex<double> x, 
+        const ConstVectorView<std::complex<double> >& v1, 
+        VectorView<std::complex<double> > v2)
+    {
+        TMVAssert(v1.size() == v1.size()); 
+        if (imag(x) == 0.) {
+            if (v1.step() == 1 && v2.step() == 1) {
+                DoAddMultXV(
+                    real(x),v1.flatten().xView(),v2.flatten().xView());
+            } else {
+                DoAddMultXV(real(x),v1.realPart(),v2.realPart());
+                DoAddMultXV(real(x),v1.imagPart(),v2.imagPart());
+            }
+        } else {
+            int n=v2.size();
+            int s1=v1.step();
+            int s2=v2.step();
+            const std::complex<double>* v1p = v1.cptr();
+            if (s1<0) v1p += (n-1)*s1;
+            std::complex<double>* v2p = v2.ptr();
+            if (s2<0) v2p += (n-1)*s2;
+            BLASNAME(zaxpy) (
+                BLASV(n),BLASP(&x),BLASP(v1p),BLASV(s1),
+                BLASP(v2p),BLASV(s2));
+        }
+    }
+#ifdef TMV_INST_MIX
+    template <> 
+    static void DoAddMultXV(
+        const std::complex<double> x, 
+        const ConstVectorView<double>& v1, 
+        VectorView<std::complex<double> > v2)
+    {
+        TMVAssert(v1.size() == v1.size()); 
+        double xr = real(x);
+        if (xr != 0.) DoAddMultXV(xr,v1,v2.realPart());
+        double xi = imag(x);
+        if (xi != 0.) DoAddMultXV(xi,v1,v2.imagPart());
+    }
+#endif
 #endif
 #ifdef TMV_INST_FLOAT
-  template <> 
-  void InstMultXV(const float x, 
-      const ConstVectorView<float>& v1, VectorView<float> v2)
-  { InstMultXV(x,v2=v1); }
+    template <> 
+    static void DoMultXV(
+        const float x,
+        const ConstVectorView<float>& v1, VectorView<float> v2)
+    { InstScale(x,v2=v1); }
+    template <> 
+    static void DoMultXV(
+        const std::complex<float> x, 
+        const ConstVectorView<std::complex<float> >& v1, 
+        VectorView<std::complex<float> > v2)
+    { InstScale(x,v2=v1); }
 #ifdef TMV_INST_MIX
-  template <> 
-  void InstMultXV(const std::complex<float> x,
-      const ConstVectorView<float>& v1,
-      VectorView<std::complex<float> > v2)
-  { InstMultXV(x,v2=v1); }
+    template <> 
+    static void DoMultXV(
+        const std::complex<float> x, 
+        const ConstVectorView<float>& v1, 
+        VectorView<std::complex<float> > v2)
+    { InstScale(x,v2=v1); }
 #endif
-  template <> 
-  void InstMultXV(const std::complex<float> x,
-      const ConstVectorView<std::complex<float> >& v1,
-      VectorView<std::complex<float> > v2)
-  { InstMultXV(x,v2=v1); }
-  template <> 
-  void InstMultXV(const std::complex<float> x,
-      const ConstVectorView<std::complex<float>,UNKNOWN,true>& v1,
-      VectorView<std::complex<float> > v2)
-  { InstMultXV(x,v2=v1); }
+    template <> 
+    static void DoAddMultXV(
+        const float x,
+        const ConstVectorView<float>& v1, VectorView<float> v2)
+    {
+        TMVAssert(v1.size() == v1.size()); 
+        int n=v2.size();
+        int s1=v1.step();
+        int s2=v2.step();
+        const float* v1p = v1.cptr();
+        if (s1<0) v1p += (n-1)*s1;
+        float* v2p = v2.ptr();
+        if (s2<0) v2p += (n-1)*s2;
+        BLASNAME(saxpy) (
+            BLASV(n),BLASV(x),BLASP(v1p),BLASV(s1),
+            BLASP(v2p),BLASV(s2));
+    }
+    template <> 
+    static void DoAddMultXV(
+        const std::complex<float> x, 
+        const ConstVectorView<std::complex<float> >& v1, 
+        VectorView<std::complex<float> > v2)
+    {
+        TMVAssert(v1.size() == v1.size()); 
+        if (imag(x) == 0.F) {
+            if (v1.step() == 1 && v2.step() == 1) 
+                DoAddMultXV(
+                    real(x),v1.flatten().xView(),v2.flatten().xView());
+            else {
+                DoAddMultXV(real(x),v1.realPart(),v2.realPart());
+                DoAddMultXV(real(x),v1.imagPart(),v2.imagPart());
+            }
+        } else {
+            int n=v2.size();
+            int s1=v1.step();
+            int s2=v2.step();
+            const std::complex<float>* v1p = v1.cptr();
+            if (s1<0) v1p += (n-1)*s1;
+            std::complex<float>* v2p = v2.ptr();
+            if (s2<0) v2p += (n-1)*s2;
+            BLASNAME(caxpy) (
+                BLASV(n),BLASP(&x),BLASP(v1p),BLASV(s1),
+                BLASP(v2p),BLASV(s2));
+        }
+    }
+#ifdef TMV_INST_MIX
+    template <> 
+    static void DoAddMultXV(
+        const std::complex<float> x, 
+        const ConstVectorView<float>& v1, 
+        VectorView<std::complex<float> > v2)
+    {
+        TMVAssert(v1.size() == v1.size()); 
+        float xr = real(x);
+        if (xr != 0.F) DoAddMultXV(xr,v1,v2.realPart());
+        float xi = imag(x);
+        if (xi != 0.F) DoAddMultXV(xi,v1,v2.imagPart());
+    }
 #endif
 #endif
+#endif // BLAS
 
+    template <class T1, bool C1, class T2>
+    void InstMultXV(
+        const T2 x, const ConstVectorView<T1,UNKNOWN,C1>& v1,
+        VectorView<T2> v2)
+    { DoMultXV(x,v1,v2); }
+    template <class T1, bool C1, class T2>
+    void InstAddMultXV(
+        const T2 x, const ConstVectorView<T1,UNKNOWN,C1>& v1,
+        VectorView<T2> v2)
+    { DoAddMultXV(x,v1,v2); }
 
 #define InstFile "TMV_MultXV.inst"
 #include "TMV_Inst.h"

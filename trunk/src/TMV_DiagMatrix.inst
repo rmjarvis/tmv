@@ -3,9 +3,9 @@
 
 #define Def1(RT,T,C) \
   template void InstWrite(std::ostream& os, \
-      const ConstDiagMatrixView<T,XX,C>& m); \
+      const ConstDiagMatrixView<T,UNKNOWN,C>& m); \
   template void InstWrite(std::ostream& os, \
-      const ConstDiagMatrixView<T,XX,C>& m, RT thresh); \
+      const ConstDiagMatrixView<T,UNKNOWN,C>& m, RT thresh); \
 
 Def1(T,T,false)
 #ifdef TMV_INST_COMPLEX
@@ -13,6 +13,5 @@ Def1(T,CT,false)
 Def1(T,CT,true)
 #endif
 
+#undef Def1
 #undef CT
-
-

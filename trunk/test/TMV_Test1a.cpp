@@ -1,4 +1,3 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 
 #include <fstream>
 #include "TMV_Test.h"
@@ -24,60 +23,59 @@ bool dontthrow = false;
 std::string lastsuccess = "";
 
 int main() try {
-  std::ofstream log("tmvtest1a.log");
-  tmv::WriteWarningsTo(&log);
+    std::ofstream log("tmvtest1a.log");
+    tmv::WriteWarningsTo(&log);
 
-  //showacc=true;
-  //showdiv=true;
-  //showtests=true;
-  //showstartdone=true;
+    //showacc=true;
+    //showdiv=true;
+    //showtests=true;
+    //showstartdone=true;
 
-  //TestMatrixArith_8<double>();
 //#define SKIPREST
 
 #ifndef SKIPREST
 
 #ifdef TEST_DOUBLE
-  TestAllVector<double>();
-  TestAllMatrix<double>();
+    TestAllVector<double>();
+    TestAllMatrix<double>();
 #endif // DOUBLE
 
 #ifdef TEST_FLOAT
-  TestAllVector<float>();
-  TestAllMatrix<float>();
+    TestAllVector<float>();
+    TestAllMatrix<float>();
 #endif // FLOAT
 
 #ifdef TEST_LONGDOUBLE
-  TestAllVector<long double>();
-  TestAllMatrix<long double>();
+    TestAllVector<long double>();
+    TestAllMatrix<long double>();
 #endif // LONGDOUBLE
 
 #ifdef TEST_INT
-  TestAllVector<int>();
-  TestAllMatrix<int>();
+    TestAllVector<int>();
+    TestAllMatrix<int>();
 #endif  // INT
 
 #endif // SKIPREST
 
-  return 0;
+    return 0;
 }
 #if 1
 #ifndef NOTHROW
 catch (tmv::Error& e) {
-  std::cerr<<e<<std::endl;
-  std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
-  return 1;
+    std::cerr<<e<<std::endl;
+    std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
+    return 1;
 }
 #endif
 catch (std::exception& e) {
-  std::cerr<<e.what()<<std::endl;
-  std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
-  return 1;
+    std::cerr<<e.what()<<std::endl;
+    std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
+    return 1;
 }
 catch (...) {
-  std::cerr<<"Unknown exception thrown\n";
-  std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
-  return 1;
+    std::cerr<<"Unknown exception thrown\n";
+    std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
+    return 1;
 }
 #else
 catch (int) {}
@@ -85,26 +83,26 @@ catch (int) {}
 
 void PreAssert(std::string s)
 {
-  if (showtests) { 
-    std::cout<<"Trying: "<<s;  
-    std::cout.flush(); 
-  } 
+    if (showtests) { 
+        std::cout<<"Trying: "<<s;  
+        std::cout.flush(); 
+    } 
 }
 
 void DoAssert(bool x, std::string s)
 {
-  if (x) { 
-    if (showtests) std::cout<<"  Passed"<<std::endl;
-    lastsuccess = s; 
-  } else { 
-    if (showtests) std::cout<<"  Failed"<<std::endl;
-    if (dontthrow) std::cout<<"Failed test: "<<s<<std::endl;  
-    else 
+    if (x) { 
+        if (showtests) std::cout<<"  Passed"<<std::endl;
+        lastsuccess = s; 
+    } else { 
+        if (showtests) std::cout<<"  Failed"<<std::endl;
+        if (dontthrow) std::cout<<"Failed test: "<<s<<std::endl;  
+        else 
 #ifdef NOTHROW
-    { std::cerr<<"Error in test: "<<s<<std::endl; exit(1); }
+        { std::cerr<<"Error in test: "<<s<<std::endl; exit(1); }
 #else
-    throw tmv::Error("Error in test: ",s);  
+        throw tmv::Error("Error in test: ",s);  
 #endif
-  } 
+    } 
 }
 

@@ -1,5 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
 // Copyright (C) 1998 - 2009                                                 //
@@ -38,29 +37,29 @@
 
 namespace tmv {
 
-  template <class T> 
-  struct DivHelper<T>::DivImpl 
-  {
-  public :
+    template <class T> 
+    struct DivHelper<T>::DivImpl 
+    {
+    public :
 
-    DivImpl(const BaseMatrix<T>& _m) : 
-      m(_m), itsdiv(0), itsdt(_m.IsSquare() ? LU : QR),
-      inplace(false), cache(false) {}
-    ~DivImpl() { if (itsdiv) delete itsdiv; itsdiv=0; }
+        DivImpl(const BaseMatrix<T>& _m) : 
+            m(_m), itsdiv(0), itsdt(_m.IsSquare() ? LU : QR),
+            inplace(false), cache(false) {}
+        ~DivImpl() { if (itsdiv) delete itsdiv; itsdiv=0; }
 
-    const BaseMatrix<T>& m;
-    const Divider<T>* itsdiv;
-    DivType itsdt;
-    bool inplace;
-    bool cache;
+        const BaseMatrix<T>& m;
+        const Divider<T>* itsdiv;
+        DivType itsdt;
+        bool inplace;
+        bool cache;
 
-  private :
+    private :
 
-    DivImpl(const DivImpl&)
-    { TMVAssert(FALSE); }
-    DivImpl& operator=(const DivImpl&)
-    { TMVAssert(FALSE); return *this; }
-  };
+        DivImpl(const DivImpl&)
+        { TMVAssert(FALSE); }
+        DivImpl& operator=(const DivImpl&)
+        { TMVAssert(FALSE); return *this; }
+    };
 
 }
 

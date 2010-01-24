@@ -1,16 +1,15 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 
 #include "TMV_TestSmallMatrixArith_1.h"
 
 template <class T> void TestSmallMatrixArith_1()
 {
-  TestSmallMatrixArith_1a<T>();
-  TestSmallMatrixArith_1b<T>();
-  TestSmallMatrixArith_1c<T>();
-  TestSmallMatrixArith_1d<T>();
-  TestSmallMatrixArith_1e<T>();
-  TestSmallMatrixArith_1f<T>();
-  std::cout<<"SmallMatrix<"<<tmv::TypeText(T())<<"> Arithmetic passed all tests\n";
+    TestSmallMatrixArith_1a<T>();
+    TestSmallMatrixArith_1b<T>();
+    TestSmallMatrixArith_1c<T>();
+    TestSmallMatrixArith_1d<T>();
+    TestSmallMatrixArith_1e<T>();
+    TestSmallMatrixArith_1f<T>();
+    std::cout<<"SmallMatrix<"<<tmv::TMV_Text(T())<<"> Arithmetic passed all tests\n";
 }
 
 #ifdef TEST_DOUBLE

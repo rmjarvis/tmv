@@ -1,9 +1,10 @@
 
 #define CT std::complex<T>
 
-#define Def1(RT,T,D)\
+#define Def1a(RT,T,D)\
   template T InstSumElements(const ConstUpperTriMatrixView<T,D>& m); \
   template RT InstSumAbsElements(const ConstUpperTriMatrixView<T,D>& m); \
+  template RT InstSumAbs2Elements(const ConstUpperTriMatrixView<T,D>& m); \
   template RT InstNormSq(const ConstUpperTriMatrixView<T,D>& m);  \
   template RT InstNormSq(const ConstUpperTriMatrixView<T,D>& m, \
       const RT scale);  \
@@ -12,16 +13,15 @@
   template RT InstNorm1(const ConstUpperTriMatrixView<T,D>& m);  \
   template RT InstNormInf(const ConstUpperTriMatrixView<T,D>& m);  \
 
-Def1(T,T,NonUnitDiag)
-Def1(T,T,UnitDiag)
+#define Def1(RT,T)\
+  Def1a(RT,T,UnknownDiag)
+
+Def1(T,T)
 #ifdef TMV_INST_COMPLEX
-Def1(T,CT,NonUnitDiag)
-Def1(T,CT,UnitDiag)
+Def1(T,CT)
 #endif
 
-#undef Def1
-
-#define Def2(T,D,C) \
+#define Def2a(T,D,C) \
   template void InstSwap(UpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,C> m1, \
       UpperTriMatrixView<T,D> m2); \
   template void InstWriteCompact(std::ostream& os, \
@@ -33,35 +33,39 @@ Def1(T,CT,UnitDiag)
   template void InstRead(std::istream& is, \
       LowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,C> m1); \
 
-Def2(T,UnitDiag,false)
-Def2(T,NonUnitDiag,false)
+#define Def2(T,C) \
+  Def2a(T,UnknownDiag,C)
+
+Def2(T,false)
 #ifdef TMV_INST_COMPLEX
-Def2(CT,UnitDiag,false)
-Def2(CT,NonUnitDiag,false)
-Def2(CT,UnitDiag,true)
-Def2(CT,NonUnitDiag,true)
+Def2(CT,false)
+Def2(CT,true)
 #endif
 
-#undef Def2
 
-#define Def3(T,D1,C,D2) \
+#define Def3a(T1,D1,C,T2,D2) \
   template void InstCopy(\
-      const ConstUpperTriMatrixView<T,D1,UNKNOWN,UNKNOWN,C>& m1, \
-      UpperTriMatrixView<T,D2> m2); \
+      const ConstUpperTriMatrixView<T1,D1,UNKNOWN,UNKNOWN,C>& m1, \
+      UpperTriMatrixView<T2,D2> m2); \
 
-Def3(T,UnitDiag,false,UnitDiag)
-Def3(T,UnitDiag,false,NonUnitDiag)
-Def3(T,NonUnitDiag,false,NonUnitDiag)
+#define Def3(T1,C,T2) \
+  Def3a(T1,UnknownDiag,C,T2,UnknownDiag)
+
+Def3(T,false,T)
 #ifdef TMV_INST_COMPLEX
-Def3(CT,UnitDiag,false,UnitDiag)
-Def3(CT,UnitDiag,false,NonUnitDiag)
-Def3(CT,NonUnitDiag,false,NonUnitDiag)
-Def3(CT,UnitDiag,true,UnitDiag)
-Def3(CT,UnitDiag,true,NonUnitDiag)
-Def3(CT,NonUnitDiag,true,NonUnitDiag)
+#ifdef TMV_INST_MIX
+Def3(T,false,CT)
+#endif
+Def3(CT,false,CT)
+Def3(CT,true,CT)
 #endif
 
+#undef Def1a
+#undef Def1
+#undef Def2a
 #undef Def2
+#undef Def3a
+#undef Def3
 
 #undef CT
 

@@ -115,8 +115,8 @@ opts.Add(BoolVariable('WITH_OPENMP',
             'Look for openmp and use if found.', False))
 opts.Add(BoolVariable('STATIC',
             'Use static linkage', False))
-opts.Add(BoolVariable('XTEST',
-            'Do (a LOT of) extra tests in the test suite ', False))
+opts.Add('XTEST',
+            'Do extra tests in the test suite (1=non-unit step, 2=extra sizes/shapes, 4=mix real/complex,  8=degenerate,  16=extra arithmetic, 32=FortranStyle) ', '0')
 opts.Add(BoolVariable('MEM_TEST',
             'Test for memory leaks', False))
 opts.Add(BoolVariable('SMALL_TESTS',
@@ -144,7 +144,7 @@ def BasicCCFlags(env):
         version = env['CXXVERSION_NUMERICAL']
     
         if compiler == 'g++':
-            env.Replace(CCFLAGS=['-O3'])
+            env.Replace(CCFLAGS=['-O2'])
             env['TEST_FLAGS'] = ['-O']
             if version <= 4.2:
                 env.Append(CCFLAGS=['-fno-strict-aliasing'])

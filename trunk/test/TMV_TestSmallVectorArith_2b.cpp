@@ -1,4 +1,3 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 
 #include "TMV_Test.h"
 #include "TMV_Test3.h"
@@ -11,30 +10,32 @@
 
 template <int N, class T> static void DoTestSmallVectorArith_2b()
 {
-  tmv::SmallVector<T,N> a;
-  for(int i=0;i<N;++i) a(i) = T(i+10);
-  tmv::SmallVector<T,N> b;
-  for(int i=0;i<N;++i) b(i) = T(-3*i+2);
+    tmv::SmallVector<T,N> a;
+    for(int i=0;i<N;++i) a(i) = T(i+10);
+    tmv::SmallVector<T,N> b;
+    for(int i=0;i<N;++i) b(i) = T(-3*i+2);
 
-  tmv::SmallVector<std::complex<T>,N> ca = a*std::complex<T>(2,-1);;
-  tmv::SmallVector<std::complex<T>,N> cb = b*std::complex<T>(-5,1);
+    tmv::SmallVector<std::complex<T>,N> ca = a*std::complex<T>(2,-1);;
+    tmv::SmallVector<std::complex<T>,N> cb = b*std::complex<T>(-5,1);
 
-  tmv::VectorView<T> av = a.View();
-  tmv::VectorView<std::complex<T> > cav = ca.View();
-  tmv::VectorView<T> bv = b.View();
-  tmv::VectorView<std::complex<T> > cbv = cb.View();
+    tmv::VectorView<T> av = a.view();
+    tmv::VectorView<std::complex<T> > cav = ca.view();
+    tmv::VectorView<T> bv = b.view();
+    tmv::VectorView<std::complex<T> > cbv = cb.view();
 
-  TestVectorArith2<T>(av,cav,b,cb,"SmallVector/Vector");
+    TestVectorArith2<T>(av,cav,b,cb,"SmallVector/Vector");
 }
 
 template <class T> void TestSmallVectorArith_2b()
 {
-  DoTestSmallVectorArith_2b<2,T>();
-  DoTestSmallVectorArith_2b<5,T>();
+    DoTestSmallVectorArith_2b<2,T>();
+    DoTestSmallVectorArith_2b<5,T>();
 #ifdef XTEST
-  DoTestSmallVectorArith_2b<1,T>();
-  DoTestSmallVectorArith_2b<3,T>();
-  DoTestSmallVectorArith_2b<4,T>();
+#if (XTEST & 2)
+    DoTestSmallVectorArith_2b<1,T>();
+    DoTestSmallVectorArith_2b<3,T>();
+    DoTestSmallVectorArith_2b<4,T>();
+#endif
 #endif
 }
 

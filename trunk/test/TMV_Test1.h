@@ -1,4 +1,3 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 #define ALIASOK
 
 #include "tmv/TMV_Base.h"

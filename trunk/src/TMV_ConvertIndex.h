@@ -1,5 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
 // Copyright (C) 1998 - 2009                                                 //
@@ -38,31 +37,31 @@
 
 namespace tmv {
 
-  template <class VI> 
-  inline void ConvertIndexToPermute(int n, const VI& newindex, int* P)
-  {
-    // newindex[i]=j means value at original j location needs to go to i.
-    std::vector<int> currindex(n);
-    std::vector<int> origindex(n);
-    for(int i=0;i<n;++i) {
-      currindex[i] = i;
-      origindex[i] = i;
-    } 
-    // currindex[i]=j means value at original i location is currently at j.
-    // origindex[j]=i means value at original i location is currently at j.
-    for(int i=0;i<n;++i) {
-      int ip = currindex[newindex[i]];
-      P[i] = ip;
-      if (i != ip) { 
-        int origi = origindex[i];
-        int origip = origindex[ip];
-        currindex[origi] = ip;
-        currindex[origip] = i;
-        origindex[i] = origip;
-        origindex[ip] = origi;
-      } 
-    } 
-  }   
+    template <class VI> 
+    inline void ConvertIndexToPermute(int n, const VI& newindex, int* P)
+    {
+        // newindex[i]=j means value at original j location needs to go to i.
+        std::vector<int> currindex(n);
+        std::vector<int> origindex(n);
+        for(int i=0;i<n;++i) {
+            currindex[i] = i;
+            origindex[i] = i;
+        } 
+        // currindex[i]=j means value at original i location is currently at j.
+        // origindex[j]=i means value at original i location is currently at j.
+        for(int i=0;i<n;++i) {
+            int ip = currindex[newindex[i]];
+            P[i] = ip;
+            if (i != ip) { 
+                int origi = origindex[i];
+                int origip = origindex[ip];
+                currindex[origi] = ip;
+                currindex[origip] = i;
+                origindex[i] = origip;
+                origindex[ip] = origi;
+            } 
+        } 
+    }   
 
 }   
 

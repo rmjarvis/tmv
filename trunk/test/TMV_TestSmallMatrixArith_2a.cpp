@@ -1,10 +1,9 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 
 #include "TMV_TestSmallMatrixArith_2.h"
 
 template <class T> void TestSmallMatrixArith_2a()
 {
-  TestSmallMatrixArith_2<T,2,2>("2 2");
+    TestSmallMatrixArith_2<T,2,2>("2 2");
 }
 
 #ifdef TEST_DOUBLE

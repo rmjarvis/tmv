@@ -1,5 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
 // Copyright (C) 1998 - 2009                                                 //
@@ -35,267 +34,286 @@
 
 namespace tmv {
 
-  enum Shape { Rec, Diag, UpperTri, LowerTri, UnitUpperTri, UnitLowerTri,
-    Band, UpperBand, LowerBand, UnitUpperBand, UnitLowerBand,
-    RealSym, Sym, Herm, RealSymBand, SymBand, HermBand };
+    enum Shape { Rec, Diag, UpperTri, LowerTri, UnitUpperTri, UnitLowerTri,
+        Band, UpperBand, LowerBand, UnitUpperBand, UnitLowerBand,
+        RealSym, Sym, Herm, RealSymBand, SymBand, HermBand };
 
-  template <int S> struct ShapeTraits;
+    template <int S> 
+    struct ShapeTraits;
 
-  template <> struct ShapeTraits<Rec>
-  {
-    enum { square = false };
-    enum { sym = false };
-    enum { herm = false };
-    enum { upper = true };
-    enum { lower = true };
-    enum { band = false };
-    enum { unit = false };
-    enum { inverse_shape = Rec };
-    enum { nonunit_shape = Rec };
-  };
+    template <> 
+    struct ShapeTraits<Rec>
+    {
+        enum { square = false };
+        enum { sym = false };
+        enum { herm = false };
+        enum { upper = true };
+        enum { lower = true };
+        enum { band = false };
+        enum { unit = false };
+        enum { inverse_shape = Rec };
+        enum { nonunit_shape = Rec };
+    };
 
-  template <> struct ShapeTraits<Diag>
-  {
-    enum { square = true };
-    enum { sym = false };
-    enum { herm = false };
-    enum { upper = false };
-    enum { lower = false };
-    enum { band = true };
-    enum { unit = false };
-    enum { inverse_shape = Diag };
-    enum { nonunit_shape = Diag };
-  };
+    template <> 
+    struct ShapeTraits<Diag>
+    {
+        enum { square = true };
+        enum { sym = false };
+        enum { herm = false };
+        enum { upper = false };
+        enum { lower = false };
+        enum { band = true };
+        enum { unit = false };
+        enum { inverse_shape = Diag };
+        enum { nonunit_shape = Diag };
+    };
 
-  template <> struct ShapeTraits<UpperTri>
-  {
-    enum { square = true };
-    enum { sym = false };
-    enum { herm = false };
-    enum { upper = true };
-    enum { lower = false };
-    enum { band = false };
-    enum { unit = false };
-    enum { inverse_shape = UpperTri };
-    enum { nonunit_shape = UpperTri };
-  };
+    template <> 
+    struct ShapeTraits<UpperTri>
+    {
+        enum { square = true };
+        enum { sym = false };
+        enum { herm = false };
+        enum { upper = true };
+        enum { lower = false };
+        enum { band = false };
+        enum { unit = false };
+        enum { inverse_shape = UpperTri };
+        enum { nonunit_shape = UpperTri };
+    };
 
-  template <> struct ShapeTraits<LowerTri>
-  {
-    enum { square = true };
-    enum { sym = false };
-    enum { herm = false };
-    enum { upper = false };
-    enum { lower = true };
-    enum { band = false };
-    enum { unit = false };
-    enum { inverse_shape = LowerTri };
-    enum { nonunit_shape = LowerTri };
-  };
+    template <> 
+    struct ShapeTraits<LowerTri>
+    {
+        enum { square = true };
+        enum { sym = false };
+        enum { herm = false };
+        enum { upper = false };
+        enum { lower = true };
+        enum { band = false };
+        enum { unit = false };
+        enum { inverse_shape = LowerTri };
+        enum { nonunit_shape = LowerTri };
+    };
 
-  template <> struct ShapeTraits<UnitUpperTri>
-  {
-    enum { square = true };
-    enum { sym = false };
-    enum { herm = false };
-    enum { upper = true };
-    enum { lower = false };
-    enum { band = false };
-    enum { unit = true };
-    enum { inverse_shape = UnitUpperTri };
-    enum { nonunit_shape = UpperTri };
-  };
+    template <> 
+    struct ShapeTraits<UnitUpperTri>
+    {
+        enum { square = true };
+        enum { sym = false };
+        enum { herm = false };
+        enum { upper = true };
+        enum { lower = false };
+        enum { band = false };
+        enum { unit = true };
+        enum { inverse_shape = UnitUpperTri };
+        enum { nonunit_shape = UpperTri };
+    };
 
-  template <> struct ShapeTraits<UnitLowerTri>
-  {
-    enum { square = true };
-    enum { sym = false };
-    enum { herm = false };
-    enum { upper = false };
-    enum { lower = true };
-    enum { band = false };
-    enum { unit = true };
-    enum { inverse_shape = UnitLowerTri };
-    enum { nonunit_shape = LowerTri };
-  };
+    template <> 
+    struct ShapeTraits<UnitLowerTri>
+    {
+        enum { square = true };
+        enum { sym = false };
+        enum { herm = false };
+        enum { upper = false };
+        enum { lower = true };
+        enum { band = false };
+        enum { unit = true };
+        enum { inverse_shape = UnitLowerTri };
+        enum { nonunit_shape = LowerTri };
+    };
 
-  template <> struct ShapeTraits<Band>
-  {
-    enum { square = false };
-    enum { sym = false };
-    enum { herm = false };
-    enum { upper = true };
-    enum { lower = true };
-    enum { band = true };
-    enum { unit = false };
-    enum { inverse_shape = Rec };
-    enum { nonunit_shape = Rec };
-  };
+    template <> 
+    struct ShapeTraits<Band>
+    {
+        enum { square = false };
+        enum { sym = false };
+        enum { herm = false };
+        enum { upper = true };
+        enum { lower = true };
+        enum { band = true };
+        enum { unit = false };
+        enum { inverse_shape = Rec };
+        enum { nonunit_shape = Rec };
+    };
 
-  template <> struct ShapeTraits<UpperBand>
-  {
-    enum { square = true };
-    enum { sym = false };
-    enum { herm = false };
-    enum { upper = true };
-    enum { lower = false };
-    enum { band = true };
-    enum { unit = false };
-    enum { inverse_shape = UpperTri };
-    enum { nonunit_shape = UpperBand };
-  };
+    template <> 
+    struct ShapeTraits<UpperBand>
+    {
+        enum { square = true };
+        enum { sym = false };
+        enum { herm = false };
+        enum { upper = true };
+        enum { lower = false };
+        enum { band = true };
+        enum { unit = false };
+        enum { inverse_shape = UpperTri };
+        enum { nonunit_shape = UpperBand };
+    };
 
-  template <> struct ShapeTraits<LowerBand>
-  {
-    enum { square = true };
-    enum { sym = false };
-    enum { herm = false };
-    enum { upper = false };
-    enum { lower = true };
-    enum { band = true };
-    enum { unit = false };
-    enum { inverse_shape = LowerTri };
-    enum { nonunit_shape = LowerBand };
-  };
+    template <> 
+    struct ShapeTraits<LowerBand>
+    {
+        enum { square = true };
+        enum { sym = false };
+        enum { herm = false };
+        enum { upper = false };
+        enum { lower = true };
+        enum { band = true };
+        enum { unit = false };
+        enum { inverse_shape = LowerTri };
+        enum { nonunit_shape = LowerBand };
+    };
 
-  template <> struct ShapeTraits<UnitUpperBand>
-  {
-    enum { square = true };
-    enum { sym = false };
-    enum { herm = false };
-    enum { upper = true };
-    enum { lower = false };
-    enum { band = true };
-    enum { unit = true };
-    enum { inverse_shape = UnitUpperTri };
-    enum { nonunit_shape = UpperBand };
-  };
+    template <> 
+    struct ShapeTraits<UnitUpperBand>
+    {
+        enum { square = true };
+        enum { sym = false };
+        enum { herm = false };
+        enum { upper = true };
+        enum { lower = false };
+        enum { band = true };
+        enum { unit = true };
+        enum { inverse_shape = UnitUpperTri };
+        enum { nonunit_shape = UpperBand };
+    };
 
-  template <> struct ShapeTraits<UnitLowerBand>
-  {
-    enum { square = true };
-    enum { sym = false };
-    enum { herm = false };
-    enum { upper = false };
-    enum { lower = true };
-    enum { band = true };
-    enum { unit = true };
-    enum { inverse_shape = UnitLowerTri };
-    enum { nonunit_shape = LowerBand };
-  };
+    template <> 
+    struct ShapeTraits<UnitLowerBand>
+    {
+        enum { square = true };
+        enum { sym = false };
+        enum { herm = false };
+        enum { upper = false };
+        enum { lower = true };
+        enum { band = true };
+        enum { unit = true };
+        enum { inverse_shape = UnitLowerTri };
+        enum { nonunit_shape = LowerBand };
+    };
 
-  template <> struct ShapeTraits<RealSym>
-  {
-    enum { square = true };
-    enum { sym = true };
-    enum { herm = true };
-    enum { upper = true };
-    enum { lower = true };
-    enum { band = false };
-    enum { unit = false };
-    enum { inverse_shape = RealSym };
-    enum { nonunit_shape = RealSym };
-  };
+    template <> 
+    struct ShapeTraits<RealSym>
+    {
+        enum { square = true };
+        enum { sym = true };
+        enum { herm = true };
+        enum { upper = true };
+        enum { lower = true };
+        enum { band = false };
+        enum { unit = false };
+        enum { inverse_shape = RealSym };
+        enum { nonunit_shape = RealSym };
+    };
 
-  template <> struct ShapeTraits<Sym>
-  {
-    enum { square = true };
-    enum { sym = true };
-    enum { herm = false };
-    enum { upper = true };
-    enum { lower = true };
-    enum { band = false };
-    enum { unit = false };
-    enum { inverse_shape = Sym };
-    enum { nonunit_shape = Sym };
-  };
+    template <> 
+    struct ShapeTraits<Sym>
+    {
+        enum { square = true };
+        enum { sym = true };
+        enum { herm = false };
+        enum { upper = true };
+        enum { lower = true };
+        enum { band = false };
+        enum { unit = false };
+        enum { inverse_shape = Sym };
+        enum { nonunit_shape = Sym };
+    };
 
-  template <> struct ShapeTraits<Herm>
-  {
-    enum { square = true };
-    enum { sym = false };
-    enum { herm = true };
-    enum { upper = true };
-    enum { lower = true };
-    enum { band = false };
-    enum { unit = false };
-    enum { inverse_shape = Herm };
-    enum { nonunit_shape = Herm };
-  };
+    template <> 
+    struct ShapeTraits<Herm>
+    {
+        enum { square = true };
+        enum { sym = false };
+        enum { herm = true };
+        enum { upper = true };
+        enum { lower = true };
+        enum { band = false };
+        enum { unit = false };
+        enum { inverse_shape = Herm };
+        enum { nonunit_shape = Herm };
+    };
 
-  template <> struct ShapeTraits<RealSymBand>
-  {
-    enum { square = true };
-    enum { sym = true };
-    enum { herm = true };
-    enum { upper = true };
-    enum { lower = true };
-    enum { band = true };
-    enum { unit = false };
-    enum { inverse_shape = RealSym };
-    enum { nonunit_shape = RealSymBand };
-  };
+    template <> 
+    struct ShapeTraits<RealSymBand>
+    {
+        enum { square = true };
+        enum { sym = true };
+        enum { herm = true };
+        enum { upper = true };
+        enum { lower = true };
+        enum { band = true };
+        enum { unit = false };
+        enum { inverse_shape = RealSym };
+        enum { nonunit_shape = RealSymBand };
+    };
 
-  template <> struct ShapeTraits<SymBand>
-  {
-    enum { square = true };
-    enum { sym = true };
-    enum { herm = false };
-    enum { upper = true };
-    enum { lower = true };
-    enum { band = true };
-    enum { unit = false };
-    enum { inverse_shape = Sym };
-    enum { nonunit_shape = SymBand };
-  };
+    template <> 
+    struct ShapeTraits<SymBand>
+    {
+        enum { square = true };
+        enum { sym = true };
+        enum { herm = false };
+        enum { upper = true };
+        enum { lower = true };
+        enum { band = true };
+        enum { unit = false };
+        enum { inverse_shape = Sym };
+        enum { nonunit_shape = SymBand };
+    };
 
-  template <> struct ShapeTraits<HermBand>
-  {
-    enum { square = true };
-    enum { sym = false };
-    enum { herm = true };
-    enum { upper = true };
-    enum { lower = true };
-    enum { band = true };
-    enum { unit = false };
-    enum { inverse_shape = Herm };
-    enum { nonunit_shape = HermBand };
-  };
+    template <> 
+    struct ShapeTraits<HermBand>
+    {
+        enum { square = true };
+        enum { sym = false };
+        enum { herm = true };
+        enum { upper = true };
+        enum { lower = true };
+        enum { band = true };
+        enum { unit = false };
+        enum { inverse_shape = Herm };
+        enum { nonunit_shape = HermBand };
+    };
 
-  template <int S1, int S2> struct ShapeTraits2
-  {
-    enum { bothunit = ShapeTraits<S1>::unit && ShapeTraits<S2>::unit };
-    enum { bothband = ShapeTraits<S1>::band && ShapeTraits<S2>::band };
-    enum { noupper = !ShapeTraits<S1>::upper && !ShapeTraits<S2>::upper };
-    enum { nolower = !ShapeTraits<S1>::lower && !ShapeTraits<S2>::lower };
-    enum { bothsym = ShapeTraits<S1>::sym && ShapeTraits<S2>::sym };
-    enum { bothherm = ShapeTraits<S1>::herm && ShapeTraits<S2>::herm };
+    template <int S1, int S2> 
+    struct ShapeTraits2
+    {
+        enum { bothunit = ShapeTraits<S1>::unit && ShapeTraits<S2>::unit };
+        enum { bothband = ShapeTraits<S1>::band && ShapeTraits<S2>::band };
+        enum { noupper = !ShapeTraits<S1>::upper && !ShapeTraits<S2>::upper };
+        enum { nolower = !ShapeTraits<S1>::lower && !ShapeTraits<S2>::lower };
+        enum { bothsym = ShapeTraits<S1>::sym && ShapeTraits<S2>::sym };
+        enum { bothherm = ShapeTraits<S1>::herm && ShapeTraits<S2>::herm };
 
-    enum { prod = (
-        noupper ? (
-          nolower ? Diag : 
-          bothband ? bothunit ? UnitLowerBand : LowerBand :
-          bothunit ? UnitLowerTri : LowerTri ) :
-        nolower ? (
-          bothband ? bothunit ? UnitUpperBand : UpperBand :
-          bothunit ? UnitUpperTri : UpperTri ) :
-        bothband ? Band : Rec ) };
-    enum { sum = (
-        noupper && nolower ? Diag :
-        noupper ? ( bothband ? LowerBand : LowerTri ) :
-        nolower ? ( bothband ? UpperBand : UpperTri ) :
-        bothsym ? ( bothband ? SymBand : Sym ) :
-        bothherm ? ( bothband ? HermBand : Herm ) :
-        bothband ? Band : 
-        Rec ) };
-    enum { assignable = (
-        ( ShapeTraits<S1>::upper && !ShapeTraits<S2>::upper ) ? false :
-        ( ShapeTraits<S1>::lower && !ShapeTraits<S2>::lower ) ? false :
-        ( !ShapeTraits<S1>::unit && ShapeTraits<S2>::unit ) ? false :
-        ( !ShapeTraits<S1>::sym && ShapeTraits<S2>::sym ) ? false :
-        ( !ShapeTraits<S1>::herm && ShapeTraits<S2>::herm ) ? false :
-        true ) };
-  };
+        enum { prod = (
+                noupper ? (
+                    nolower ? Diag : 
+                    bothband ? bothunit ? UnitLowerBand : LowerBand :
+                    bothunit ? UnitLowerTri : LowerTri ) :
+                nolower ? (
+                    bothband ? bothunit ? UnitUpperBand : UpperBand :
+                    bothunit ? UnitUpperTri : UpperTri ) :
+                bothband ? Band : Rec ) };
+        enum { sum = (
+                noupper && nolower ? Diag :
+                noupper ? ( bothband ? LowerBand : LowerTri ) :
+                nolower ? ( bothband ? UpperBand : UpperTri ) :
+                bothsym ? ( bothband ? SymBand : Sym ) :
+                bothherm ? ( bothband ? HermBand : Herm ) :
+                bothband ? Band : 
+                Rec ) };
+        enum { assignable = (
+                ( ShapeTraits<S1>::upper && !ShapeTraits<S2>::upper ) ? false :
+                ( ShapeTraits<S1>::lower && !ShapeTraits<S2>::lower ) ? false :
+                ( !ShapeTraits<S1>::unit && ShapeTraits<S2>::unit ) ? false :
+                ( !ShapeTraits<S1>::sym && ShapeTraits<S2>::sym ) ? false :
+                ( !ShapeTraits<S1>::herm && ShapeTraits<S2>::herm ) ? false :
+                true ) };
+    };
 
 }
 

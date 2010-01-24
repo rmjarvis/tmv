@@ -1,11 +1,10 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 
 #define NONSQUARE
 #include "TMV_TestSmallMatrixArith_3.h"
 
 template <class T> void TestSmallMatrixArith_3d()
 {
-  TestSmallMatrixArith_3<T,3,6>("3 6");
+    TestSmallMatrixArith_3<T,3,6>("3 6");
 }
 
 #ifdef TEST_DOUBLE

@@ -26,5 +26,4 @@ DefMM(CT,true,CT,true,CT)
 #endif
 
 #undef DefMM
-
 #undef CT

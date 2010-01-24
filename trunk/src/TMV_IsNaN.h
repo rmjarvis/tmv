@@ -1,5 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
 // Copyright (C) 1998 - 2009                                                 //
@@ -37,8 +36,8 @@
 
 namespace tmv {
 
-  template <class T> 
-  bool IsNaN(T x);
+    template <class T> 
+    bool IsNaN(T x);
 
 } // namespace mv
 

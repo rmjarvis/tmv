@@ -1,4 +1,3 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 #ifndef TMV_TEST_H
 #define TMV_TEST_H
 
@@ -36,10 +35,10 @@ void PreAssert(std::string s);
 void DoAssert(bool x, std::string s);
 
 #define Assert(x,s) \
-do {  \
-  PreAssert(s);  \
-  DoAssert(x,s); \
-} while (false)
+    do {  \
+        PreAssert(s);  \
+        DoAssert(x,s); \
+    } while (false)
 
 extern bool XXDEBUG1;
 extern bool XXDEBUG2;

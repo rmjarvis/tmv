@@ -1,5 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
 // Copyright (C) 1998 - 2009                                                 //
@@ -33,154 +32,703 @@
 #include "TMV_Blas.h"
 #include "tmv/TMV_MultMV.h"
 #include "tmv/TMV_Matrix.h"
-#include "tmv/TMV_ProdXV.h"
-#include "tmv/TMV_SumVV.h"
+#include "tmv/TMV_MultXV.h"
 #include "tmv/TMV_MultXM.h"
+#include "tmv/TMV_ProdXV.h"
 #include "tmv/TMV_ProdXM.h"
 
 #ifdef BLAS
-#include "TMV_MultMV_Blas.h"
+#include "tmv/TMV_AddVV.h"
+#include "tmv/TMV_SumVV.h"
+#endif
+
+// The CBLAS trick of using RowMajor with ConjTrans when we have a 
+// case of A.conjugate() * x doesn't seem to be working with MKL 10.2.2.
+// I haven't been able to figure out why.  (e.g. Is it a bug in the MKL
+// code, or am I doing something wrong?)  So for now, just disable it.
+#ifdef CBLAS
+#undef CBLAS
 #endif
 
 namespace tmv {
 
-  // 
-  //
-  // MultMV
-  //
-
-  template <bool add, class T, class M1, class V2, class V3>
-  static void DoMultMV(const T x, const M1& m1, const V2& v2, V3& v3)
-  {
-    // Check for non-unit step and x != 1, and do the necessary copies here,
-    // rather than in the InlineMultMV function.  
-    // This is faster to compile, since it keeps the InlineMultMV
-    // algo path to the ones that have vstep == 1.
-
-    typedef RealType(T) RT;
-    const Scaling<1,RT> one;
-
-    if (x == RT(0)) 
-    { Maybe<!add>::zero(v3); }
-    else if (v2.step() != 1) 
+    template <bool add, class T, class M1, class V2>
+    static void DoMultMV(
+        const T x, const M1& m1, const V2& v2, VectorView<T>& v3)
     {
-      Vector<T> v2c = x*v2;
-      if (v3.step() != 1) 
-      {
-        Vector<T> v3c(v3.size());
-        VectorView<T,1> v3u = v3c.UnitView();
-        InlineMultMV<false>(one,m1,v2c.UnitView(),v3u);
-        Maybe<add>::add(v3,v3c);
-      }
-      else 
-      {
-        VectorView<T,1> v3u = v3.UnitView();
-        InlineMultMV<add>(one,m1,v2c.UnitView(),v3u);
-      }
-    } 
-    else if (v3.step() != 1)
-    {
-      Vector<T> v3c(v3.size());
-      VectorView<T,1> v3u = v3c.UnitView();
-      InlineMultMV<false>(one,m1,v2.UnitView(),v3u);
-      Maybe<add>::add(v3,x*v3c);
+        // Check for non-unit step and x != 1, and do the necessary copies here,
+        // rather than in the InlineMultMV function.  
+        // This is faster to compile, since it keeps the InlineMultMV
+        // algo path to the ones that have vstep == 1.
+
+        typedef typename Traits<T>::real_type RT;
+        const Scaling<1,RT> one;
+
+        const int M = m1.colsize();
+        const int N = m1.rowsize();
+
+        if (v3.step() == 1) {
+            VectorView<T,1> v3u = v3.unitView();
+            if (v2.step() == 1) {
+                if (x == RT(1))
+                    InlineMultMV<add>(one,m1,v2.unitView(),v3u);
+                else if (!add) {
+                    if (M > 4*N) {
+                        InlineMultMV<false>(one,m1,(x*v2).calc(),v3u);
+                    } else {
+                        InlineMultMV<false>(one,m1,v2.unitView(),v3u);
+                        Scale(x,v3);
+                    }
+                } else {
+                    if (N > 4*M) {
+                        Vector<T> v3c(v3.size());
+                        VectorView<T,1> v3cu = v3c.unitView();
+                        InlineMultMV<false>(one,m1,v2,v3cu);
+                        InstAddMultXV(x,v3c.constView().xView(),v3);
+                    } else {
+                        InlineMultMV<add>(one,m1,(x*v2).calc(),v3u);
+                    }
+                }
+            } else {
+                InlineMultMV<add>(one,m1,(x*v2).calc(),v3u);
+            }
+        } else {
+            Vector<T> v3c(v3.size());
+            VectorView<T,1> v3u = v3c.unitView();
+            if (v2.step() == 1) {
+                InlineMultMV<false>(one,m1,v2.unitView(),v3u);
+                NoAliasMultXV<add>(x,v3c,v3);
+            } else if (M > N) {
+                InlineMultMV<false>(one,m1,(x*v2).calc(),v3u);
+                NoAliasMultXV<add>(v3c,v3);
+            } else {
+                InlineMultMV<false>(one,m1,v2.copy(),v3u);
+                NoAliasMultXV<add>(x,v3c,v3);
+            }
+        }
     }
-    else 
-    {
-      VectorView<T,1> v3u = v3.UnitView();
-      if (x == RT(1))
-        InlineMultMV<add>(one,m1,v2.UnitView(),v3u);
-      else if (x == RT(-1))
-        InlineMultMV<add>(Scaling<-1,RT>(),m1,v2.UnitView(),v3u);
-      else if (TMV_IMAG(x) == RT(0))
-        InlineMultMV<add>(Scaling<0,RT>(TMV_REAL(x)),m1,v2.UnitView(),v3u);
-      else 
-        InlineMultMV<add>(Scaling<0,T>(x),m1,v2.UnitView(),v3u);
-    }
-  }
 
 #ifdef BLAS
 #ifdef TMV_INST_DOUBLE
-  template <bool add>
-  void DoMultMV(const double x,
-      const ConstMatrixView<double,1>& m1,
-      const ConstVectorView<double>& v2, VectorView<double> v3)
-  { BlasMultMV(x,m1,v2,add?1:0,v3); }
+    template <int Si, int Sj>
+    static void DoMultMV(
+        double alpha,
+        const ConstMatrixView<double,Si,Sj>& A,
+        const ConstVectorView<double>& x,
+        double beta, VectorView<double> y)
+    {
+        TMVAssert(A.rowsize() == x.size());
+        TMVAssert(A.colsize() == y.size());
+        TMVAssert(x.size() > 0);
+        TMVAssert(y.size() > 0);
+        TMVAssert(!SameStorage(x,y));
+        TMVAssert(!SameStorage(A,y));
 
-  template <bool add, class T1, bool C1, class T2, bool C2>
-  void DoMultMV(const std::complex<double>  x,
-      const ConstMatrixView<T1,1,UNKNOWN,C1>& m1,
-      const ConstVectorView<T2,UNKNOWN,C2>& v2,
-      VectorView<std::complex<double> > v3)
-  { BlasMultMV(x,m1,v2,add?1:0,v3); }
+        int m = A.iscm() ? A.colsize() : A.rowsize();
+        int n = A.iscm() ? A.rowsize() : A.colsize();
+        int lda = A.iscm() ? A.stepj() : A.stepi();
+        if (lda < m) { TMVAssert(n==1); lda = m; }
+        int xs = x.step();
+        int ys = y.step();
+        if (xs == 0) { TMVAssert(x.size() == 1); xs = 1; }
+        if (ys == 0) { TMVAssert(y.size() == 1); ys = 1; }
+        const double* xp = x.cptr();
+        if (xs < 0) xp += (x.size()-1)*xs;
+        double* yp = y.ptr();
+        if (ys < 0) yp += (y.size()-1)*ys;
+        BLASNAME(dgemv) (
+            BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+            BLASV(m),BLASV(n),BLASV(alpha),BLASP(A.cptr()),BLASV(lda),
+            BLASP(xp),BLASV(xs),BLASV(beta),BLASP(yp),BLASV(ys)
+            BLAS1);
+    }
+    template <int Si, int Sj, bool C1, bool C2>
+    static void DoMultMV(
+        std::complex<double> alpha,
+        const ConstMatrixView<std::complex<double>,Si,Sj,C1>& A,
+        const ConstVectorView<std::complex<double>,UNKNOWN,C2>& x,
+        double beta, VectorView<std::complex<double> > y)
+    {
+        TMVAssert(A.rowsize() == x.size());
+        TMVAssert(A.colsize() == y.size());
+        TMVAssert(x.size() > 0);
+        TMVAssert(y.size() > 0);
+        TMVAssert(!SameStorage(x,y));
+        TMVAssert(!SameStorage(A,y));
 
-  template <bool add>
-  void DoMultMV(const double x,
-      const ConstMatrixView<double,UNKNOWN,1>& m1,
-      const ConstVectorView<double>& v2, VectorView<double> v3)
-  { BlasMultMV(x,m1,v2,add?1:0,v3); }
+        if (x.isconj()
+#ifndef CBLAS
+            && !(A.isconj() && A.iscm()) 
+#endif
+        ) {
+            const Vector<std::complex<double> > xx = alpha*x;
+            return DoMultMV(std::complex<double>(1.),A,xx.XView(),beta,y);
+        } 
 
-  template <bool add, class T1, bool C1, class T2, bool C2>
-  void DoMultMV(const std::complex<double>  x,
-      const ConstMatrixView<T1,UNKNOWN,1,C1>& m1,
-      const ConstVectorView<T2,UNKNOWN,C2>& v2,
-      VectorView<std::complex<double> > v3)
-  { BlasMultMV(x,m1,v2,add?1:0,v3); }
+        int m = A.iscm() ? A.colsize() : A.rowsize();
+        int n = A.iscm() ? A.rowsize() : A.colsize();
+        int lda = A.iscm() ? A.stepj() : A.stepi();
+        if (lda < m) { TMVAssert(n==1); lda = m; }
+        int xs = x.step();
+        int ys = y.step();
+        if (xs == 0) { TMVAssert(x.size() == 1); xs = 1; }
+        if (ys == 0) { TMVAssert(y.size() == 1); ys = 1; }
+        const std::complex<double>* xp = x.cptr();
+        if (xs < 0) xp += (x.size()-1)*xs;
+        std::complex<double>* yp = y.ptr();
+        if (ys < 0) yp += (y.size()-1)*ys;
+        std::complex<double> xbeta = beta;
+        if (A.isconj() && A.iscm()) {
+#ifdef CBLAS
+            TMV_SWAP(m,n);
+            BLASNAME(zgemv) (
+                BLASRM BLASCH_CT,
+                BLASV(m),BLASV(n),BLASP(&alpha),BLASP(A.cptr()),BLASV(lda),
+                BLASP(xp),BLASV(xs),BLASP(&xbeta),BLASP(yp),BLASV(ys)
+                BLAS1);
+#else
+            std::complex<double> ca = TMV_CONJ(alpha);
+            if (x.isconj()) {
+                y.ConjugateSelf();
+                BLASNAME(zgemv) (
+                    BLASCM BLASCH_NT,
+                    BLASV(m),BLASV(n),BLASP(&ca),BLASP(A.cptr()),BLASV(lda),
+                    BLASP(xp),BLASV(xs),BLASP(&xbeta),BLASP(yp),BLASV(ys)
+                    BLAS1);
+                y.ConjugateSelf();
+            } else {
+                Vector<std::complex<double> > xx = ca*x.Conjugate();
+                ca = std::complex<double>(1.);
+                xs = 1;
+                xp = xx.cptr();
+                y.ConjugateSelf();
+                BLASNAME(zgemv) (
+                    BLASCM BLASCH_NT,
+                    BLASV(m),BLASV(n),BLASP(&ca),BLASP(A.cptr()),BLASV(lda),
+                    BLASP(xp),BLASV(xs),BLASP(&xbeta),BLASP(yp),BLASV(ys)
+                    BLAS1);
+                y.ConjugateSelf();
+            }
+#endif
+        } else {
+            BLASNAME(zgemv) (
+                BLASCM A.isrm()?A.isconj()?BLASCH_CT:BLASCH_T:BLASCH_NT,
+                BLASV(m),BLASV(n),BLASP(&alpha),BLASP(A.cptr()),BLASV(lda),
+                BLASP(xp),BLASV(xs),BLASP(&xbeta),BLASP(yp),BLASV(ys)
+                BLAS1);
+        }
+    }
+    template <int Si, int Sj, bool C1>
+    static void DoMultMV(
+        std::complex<double> alpha,
+        const ConstMatrixView<std::complex<double>,Si,Sj,C1>& A,
+        const ConstVectorView<double>& x,
+        double beta, VectorView<std::complex<double> > y)
+    {
+        TMVAssert(A.rowsize() == x.size());
+        TMVAssert(A.colsize() == y.size());
+        TMVAssert(x.size() > 0);
+        TMVAssert(y.size() > 0);
+        TMVAssert(!SameStorage(x,y));
+
+        if (A.iscm()) {
+            if (y.step() != 1) {
+                Vector<std::complex<double> > yy(y.size());
+                DoMultMV(1.,A,x,0.,yy.View());
+                if (beta == 0.) y = alpha*yy;
+                else y += alpha*yy;
+            } else {
+                if (beta == 0.) {
+                    int m = 2*A.colsize();
+                    int n = A.rowsize();
+                    int lda = 2*A.stepj();
+                    if (lda < m) { TMVAssert(n==1); lda = m; }
+                    int xs = x.step();
+                    int ys = 1;
+                    const double* xp = x.cptr();
+                    if (xs < 0) xp += (x.size()-1)*xs;
+                    double* yp = (double*) y.ptr();
+                    double xalpha(1);
+                    BLASNAME(dgemv) (
+                        BLASCM BLASCH_NT,
+                        BLASV(m),BLASV(n),BLASV(xalpha),
+                        BLASP((double*)A.cptr()),BLASV(lda),
+                        BLASP(xp),BLASV(xs),BLASV(beta),
+                        BLASP(yp),BLASV(ys) BLAS1);
+                    if (A.isconj()) y.ConjugateSelf();
+                    y *= alpha;
+                } else if (A.isconj()) {
+                    Vector<std::complex<double> > yy(y.size());
+                    DoMultMV(1.,A.Conjugate(),x,0.,yy.View());
+                    y += alpha*yy.Conjugate();
+                } else if (TMV_IMAG(alpha) == 0.) {
+                    int m = 2*A.colsize();
+                    int n = A.rowsize();
+                    int lda = 2*A.stepj();
+                    if (lda < m) { TMVAssert(n==1); lda = m; }
+                    int xs = x.step();
+                    int ys = 1;
+                    const double* xp = x.cptr();
+                    if (xs < 0) xp += (x.size()-1)*xs;
+                    double* yp = (double*) y.ptr();
+                    if (ys < 0) yp += (y.size()-1)*ys;
+                    double xalpha(TMV_REAL(alpha));
+                    BLASNAME(dgemv) (
+                        BLASCM BLASCH_NT,
+                        BLASV(m),BLASV(n),BLASV(xalpha),
+                        BLASP((double*)A.cptr()),BLASV(lda),
+                        BLASP(xp),BLASV(xs),BLASV(beta),
+                        BLASP(yp),BLASV(ys) BLAS1);
+                } else {
+                    Vector<std::complex<double> > yy(y.size());
+                    DoMultMV(std::complex<double>(1.),A,x,0.,yy.View());
+                    y += alpha*yy;
+                }
+            }
+        } else { // A.isrm
+            const Vector<std::complex<double> > xx = x;
+            DoMultMV(alpha,A,xx.XView(),beta,y);
+        }
+    }
+    template <int Si, int Sj, bool C2>
+    static void DoMultMV(  
+        std::complex<double> alpha,
+        const ConstMatrixView<double,Si,Sj>& A,
+        const ConstVectorView<std::complex<double>,UNKNOWN,C2>& x,
+        double beta, VectorView<std::complex<double> > y)
+    {
+        TMVAssert(A.rowsize() == x.size());
+        TMVAssert(A.colsize() == y.size());
+        TMVAssert(x.size() > 0);
+        TMVAssert(y.size() > 0);
+        TMVAssert(!SameStorage(x,y));
+
+        if (beta == 0.) {
+            int m = A.iscm() ? A.colsize() : A.rowsize();
+            int n = A.iscm() ? A.rowsize() : A.colsize();
+            int lda = A.iscm() ? A.stepj() : A.stepi();
+            if (lda < m) { TMVAssert(n==1); lda = m; }
+            int xs = 2*x.step();
+            int ys = 2*y.step();
+            if (xs == 0) { TMVAssert(x.size() == 1); xs = 1; }
+            if (ys == 0) { TMVAssert(y.size() == 1); ys = 1; }
+            const double* xp = (const double*) x.cptr();
+            if (xs < 0) xp += (x.size()-1)*xs;
+            double* yp = (double*) y.ptr();
+            if (ys < 0) yp += (y.size()-1)*ys;
+            double xalpha(1);
+            BLASNAME(dgemv) (
+                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
+                BLASP(xp),BLASV(xs),BLASV(beta),
+                BLASP(yp),BLASV(ys) BLAS1);
+            BLASNAME(dgemv) (
+                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
+                BLASP(xp+1),BLASV(xs),BLASV(beta),
+                BLASP(yp+1),BLASV(ys) BLAS1);
+            if (x.isconj()) y.ConjugateSelf();
+            y *= alpha;
+        } else if (TMV_IMAG(alpha) == 0. && !x.isconj()) {
+            int m = A.iscm() ? A.colsize() : A.rowsize();
+            int n = A.iscm() ? A.rowsize() : A.colsize();
+            int lda = A.iscm() ? A.stepj() : A.stepi();
+            if (lda < m) { TMVAssert(n==1); lda = m; }
+            int xs = 2*x.step();
+            int ys = 2*y.step();
+            if (xs == 0) { TMVAssert(x.size() == 1); xs = 1; }
+            if (ys == 0) { TMVAssert(y.size() == 1); ys = 1; }
+            const double* xp = (const double*) x.cptr();
+            if (xs < 0) xp += (x.size()-1)*xs;
+            double* yp = (double*) y.ptr();
+            if (ys < 0) yp += (y.size()-1)*ys;
+            double xalpha(TMV_REAL(alpha));
+            BLASNAME(dgemv) (
+                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
+                BLASP(xp),BLASV(xs),BLASV(beta),
+                BLASP(yp),BLASV(ys) BLAS1);
+            BLASNAME(dgemv) (
+                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
+                BLASP(xp+1),BLASV(xs),BLASV(beta),
+                BLASP(yp+1),BLASV(ys) BLAS1);
+        } else {
+            const Vector<std::complex<double> > xx = alpha*x;
+            DoMultMV(std::complex<double>(1.),A,xx.XView(),1.,y);
+        }
+    }
+    template <int Si, int Sj>
+    static void DoMultMV(
+        std::complex<double> alpha,
+        const ConstMatrixView<double,Si,Sj>& A,
+        const ConstVectorView<double>& x,
+        double beta, VectorView<std::complex<double> > y)
+    {
+        TMVAssert(A.rowsize() == x.size());
+        TMVAssert(A.colsize() == y.size());
+        TMVAssert(x.size() > 0);
+        TMVAssert(y.size() > 0);
+        TMVAssert(!SameStorage(x,y));
+
+        int m = A.iscm() ? A.colsize() : A.rowsize();
+        int n = A.iscm() ? A.rowsize() : A.colsize();
+        int lda = A.iscm() ? A.stepj() : A.stepi();
+        if (lda < m) { TMVAssert(n==1); lda = m; }
+        int xs = x.step();
+        int ys = 2*y.step();
+        if (xs == 0) { TMVAssert(x.size() == 1); xs = 1; }
+        if (ys == 0) { TMVAssert(y.size() == 1); ys = 1; }
+        const double* xp = x.cptr();
+        if (xs < 0) xp += (x.size()-1)*xs;
+        double* yp = (double*) y.ptr();
+        if (ys < 0) yp += (y.size()-1)*ys;
+        double ar(TMV_REAL(alpha));
+        double ai(TMV_IMAG(alpha));
+        if (ar == 0.) {
+            if (beta == 0.) y.Real().Zero();
+        }
+        else 
+            BLASNAME(dgemv) (
+                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASV(m),BLASV(n),BLASV(ar),BLASP(A.cptr()),BLASV(lda),
+                BLASP(xp),BLASV(xs),BLASV(beta),
+                BLASP(yp),BLASV(ys) BLAS1);
+        if (ai == 0.) {
+            if (beta == 0.) y.Imag().Zero();
+        }
+        else
+            BLASNAME(dgemv) (
+                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASV(m),BLASV(n),BLASV(ai),BLASP(A.cptr()),BLASV(lda),
+                BLASP(xp),BLASV(xs),BLASV(beta),
+                BLASP(yp+1),BLASV(ys) BLAS1);
+    }
 #endif // DOUBLE
 #ifdef TMV_INST_FLOAT
-  template <bool add>
-  void DoMultMV(const float x,
-      const ConstMatrixView<float,UNKNOWN,1>& m1,
-      const ConstVectorView<float>& v2, VectorView<float> v3)
-  { BlasMultMV(x,m1,v2,add?1:0,v3); }
+    template <int Si, int Sj>
+    static void DoMultMV(
+        float alpha,
+        const ConstMatrixView<float,Si,Sj>& A,
+        const ConstVectorView<float>& x,
+        float beta, VectorView<float> y)
+    {
+        TMVAssert(A.rowsize() == x.size());
+        TMVAssert(A.colsize() == y.size());
+        TMVAssert(x.size() > 0);
+        TMVAssert(y.size() > 0);
+        TMVAssert(!SameStorage(x,y));
+        TMVAssert(!SameStorage(A,y));
 
-  template <bool add, class T1, bool C1, class T2, bool C2>
-  void DoMultMV(const std::complex<float>  x,
-      const ConstMatrixView<T1,UNKNOWN,1,C1>& m1,
-      const ConstVectorView<T2,UNKNOWN,C2>& v2,
-      VectorView<std::complex<float> > v3)
-  { BlasMultMV(x,m1,v2,add?1:0,v3); }
+        int m = A.iscm() ? A.colsize() : A.rowsize();
+        int n = A.iscm() ? A.rowsize() : A.colsize();
+        int lda = A.iscm() ? A.stepj() : A.stepi();
+        if (lda < m) { TMVAssert(n==1); lda = m; }
+        int xs = x.step();
+        int ys = y.step();
+        if (xs == 0) { TMVAssert(x.size() == 1); xs = 1; }
+        if (ys == 0) { TMVAssert(y.size() == 1); ys = 1; }
+        const float* xp = x.cptr();
+        if (xs < 0) xp += (x.size()-1)*xs;
+        float* yp = y.ptr();
+        if (ys < 0) yp += (y.size()-1)*ys;
+        BLASNAME(sgemv) (
+            BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+            BLASV(m),BLASV(n),BLASV(alpha),BLASP(A.cptr()),BLASV(lda),
+            BLASP(xp),BLASV(xs),BLASV(beta),BLASP(yp),BLASV(ys)
+            BLAS1);
+    }
+    template <int Si, int Sj, bool C1, bool C2>
+    static void DoMultMV(
+        std::complex<float> alpha,
+        const ConstMatrixView<std::complex<float>,Si,Sj,C1>& A,
+        const ConstVectorView<std::complex<float>,UNKNOWN,C2>& x,
+        float beta, VectorView<std::complex<float> > y)
+    {
+        TMVAssert(A.rowsize() == x.size());
+        TMVAssert(A.colsize() == y.size());
+        TMVAssert(x.size() > 0);
+        TMVAssert(y.size() > 0);
+        TMVAssert(!SameStorage(x,y));
+        TMVAssert(!SameStorage(A,y));
 
-  template <bool add>
-  void DoMultMV(const float x,
-      const ConstMatrixView<float,1>& m1,
-      const ConstVectorView<float>& v2, VectorView<float> v3)
-  { BlasMultMV(x,m1,v2,add?1:0,v3); }
+        if (x.isconj()
+#ifndef CBLAS
+            && !(A.isconj() && A.iscm()) 
+#endif
+        ) {
+            const Vector<std::complex<float> > xx = alpha*x;
+            return DoMultMV(std::complex<float>(1.F),A,xx.XView(),beta,y);
+        } 
 
-  template <bool add, class T1, bool C1, class T2, bool C2>
-  void DoMultMV(const std::complex<float>  x,
-      const ConstMatrixView<T1,1,UNKNOWN,C1>& m1,
-      const ConstVectorView<T2,UNKNOWN,C2>& v2,
-      VectorView<std::complex<float> > v3)
-  { BlasMultMV(x,m1,v2,add?1:0,v3); }
+        int m = A.iscm() ? A.colsize() : A.rowsize();
+        int n = A.iscm() ? A.rowsize() : A.colsize();
+        int lda = A.iscm() ? A.stepj() : A.stepi();
+        if (lda < m) { TMVAssert(n==1); lda = m; }
+        int xs = x.step();
+        int ys = y.step();
+        if (xs == 0) { TMVAssert(x.size() == 1); xs = 1; }
+        if (ys == 0) { TMVAssert(y.size() == 1); ys = 1; }
+        const std::complex<float>* xp = x.cptr();
+        if (xs < 0) xp += (x.size()-1)*xs;
+        std::complex<float>* yp = y.ptr();
+        if (ys < 0) yp += (y.size()-1)*ys;
+        std::complex<float> xbeta = beta;
+        if (A.isconj() && A.iscm()) {
+#ifdef CBLAS
+            TMV_SWAP(m,n);
+            BLASNAME(cgemv) (
+                BLASRM BLASCH_CT,
+                BLASV(m),BLASV(n),BLASP(&alpha),BLASP(A.cptr()),BLASV(lda),
+                BLASP(xp),BLASV(xs),BLASP(&xbeta),BLASP(yp),BLASV(ys)
+                BLAS1);
+#else
+            std::complex<float> ca = TMV_CONJ(alpha);
+            if (x.isconj()) {
+                y.ConjugateSelf();
+                BLASNAME(cgemv) (
+                    BLASCM BLASCH_NT,
+                    BLASV(m),BLASV(n),BLASP(&ca),BLASP(A.cptr()),BLASV(lda),
+                    BLASP(xp),BLASV(xs),BLASP(&xbeta),BLASP(yp),BLASV(ys)
+                    BLAS1);
+                y.ConjugateSelf();
+            } else {
+                Vector<std::complex<float> > xx = ca*x.Conjugate();
+                ca = std::complex<float>(1.F);
+                xs = 1;
+                xp = xx.cptr();
+                y.ConjugateSelf();
+                BLASNAME(cgemv) (
+                    BLASCM BLASCH_NT,
+                    BLASV(m),BLASV(n),BLASP(&ca),BLASP(A.cptr()),BLASV(lda),
+                    BLASP(xp),BLASV(xs),BLASP(&xbeta),BLASP(yp),BLASV(ys)
+                    BLAS1);
+                y.ConjugateSelf();
+            }
+#endif
+        } else {
+            BLASNAME(cgemv) (
+                BLASCM A.isrm()?A.isconj()?BLASCH_CT:BLASCH_T:BLASCH_NT,
+                BLASV(m),BLASV(n),BLASP(&alpha),BLASP(A.cptr()),BLASV(lda),
+                BLASP(xp),BLASV(xs),BLASP(&xbeta),BLASP(yp),BLASV(ys)
+                BLAS1);
+        }
+    }
+    template <int Si, int Sj, bool C1>
+    static void DoMultMV(
+        std::complex<float> alpha,
+        const ConstMatrixView<std::complex<float>,Si,Sj,C1>& A,
+        const ConstVectorView<float>& x,
+        float beta, VectorView<std::complex<float> > y)
+    {
+        TMVAssert(A.rowsize() == x.size());
+        TMVAssert(A.colsize() == y.size());
+        TMVAssert(x.size() > 0);
+        TMVAssert(y.size() > 0);
+        TMVAssert(!SameStorage(x,y));
+
+        if (A.iscm()) {
+            if (y.step() != 1) {
+                Vector<std::complex<float> > yy(y.size());
+                DoMultMV(1.F,A,x,0.F,yy.View());
+                if (beta == 0.F) y = alpha*yy;
+                else y += alpha*yy;
+            } else {
+                if (beta == 0.F) {
+                    int m = 2*A.colsize();
+                    int n = A.rowsize();
+                    int lda = 2*A.stepj();
+                    if (lda < m) { TMVAssert(n==1); lda = m; }
+                    int xs = x.step();
+                    int ys = 1;
+                    const float* xp = x.cptr();
+                    if (xs < 0) xp += (x.size()-1)*xs;
+                    float* yp = (float*) y.ptr();
+                    float xalpha(1);
+                    BLASNAME(sgemv) (
+                        BLASCM BLASCH_NT,
+                        BLASV(m),BLASV(n),BLASV(xalpha),
+                        BLASP((float*)A.cptr()),BLASV(lda),
+                        BLASP(xp),BLASV(xs),BLASV(beta),
+                        BLASP(yp),BLASV(ys) BLAS1);
+                    if (A.isconj()) y.ConjugateSelf();
+                    y *= alpha;
+                } else if (A.isconj()) {
+                    Vector<std::complex<float> > yy(y.size());
+                    DoMultMV(1.F,A.Conjugate(),x,0.F,yy.View());
+                    y += alpha*yy.Conjugate();
+                } else if (TMV_IMAG(alpha) == 0.F) {
+                    int m = 2*A.colsize();
+                    int n = A.rowsize();
+                    int lda = 2*A.stepj();
+                    if (lda < m) { TMVAssert(n==1); lda = m; }
+                    int xs = x.step();
+                    int ys = 1;
+                    const float* xp = x.cptr();
+                    if (xs < 0) xp += (x.size()-1)*xs;
+                    float* yp = (float*) y.ptr();
+                    if (ys < 0) yp += (y.size()-1)*ys;
+                    float xalpha(TMV_REAL(alpha));
+                    BLASNAME(sgemv) (
+                        BLASCM BLASCH_NT,
+                        BLASV(m),BLASV(n),BLASV(xalpha),
+                        BLASP((float*)A.cptr()),BLASV(lda),
+                        BLASP(xp),BLASV(xs),BLASV(beta),
+                        BLASP(yp),BLASV(ys) BLAS1);
+                } else {
+                    Vector<std::complex<float> > yy(y.size());
+                    DoMultMV(std::complex<float>(1.F),A,x,0.F,yy.View());
+                    y += alpha*yy;
+                }
+            }
+        } else { // A.isrm
+            const Vector<std::complex<float> > xx = x;
+            DoMultMV(alpha,A,xx.XView(),beta,y);
+        }
+    }
+    template <int Si, int Sj, bool C2>
+    static void DoMultMV(  
+        std::complex<float> alpha,
+        const ConstMatrixView<float,Si,Sj>& A,
+        const ConstVectorView<std::complex<float>,UNKNOWN,C2>& x,
+        float beta, VectorView<std::complex<float> > y)
+    {
+        TMVAssert(A.rowsize() == x.size());
+        TMVAssert(A.colsize() == y.size());
+        TMVAssert(x.size() > 0);
+        TMVAssert(y.size() > 0);
+        TMVAssert(!SameStorage(x,y));
+
+        if (beta == 0.F) {
+            int m = A.iscm() ? A.colsize() : A.rowsize();
+            int n = A.iscm() ? A.rowsize() : A.colsize();
+            int lda = A.iscm() ? A.stepj() : A.stepi();
+            if (lda < m) { TMVAssert(n==1); lda = m; }
+            int xs = 2*x.step();
+            int ys = 2*y.step();
+            if (xs == 0) { TMVAssert(x.size() == 1); xs = 1; }
+            if (ys == 0) { TMVAssert(y.size() == 1); ys = 1; }
+            const float* xp = (const float*) x.cptr();
+            if (xs < 0) xp += (x.size()-1)*xs;
+            float* yp = (float*) y.ptr();
+            if (ys < 0) yp += (y.size()-1)*ys;
+            float xalpha(1);
+            BLASNAME(sgemv) (
+                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
+                BLASP(xp),BLASV(xs),BLASV(beta),
+                BLASP(yp),BLASV(ys) BLAS1);
+            BLASNAME(sgemv) (
+                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
+                BLASP(xp+1),BLASV(xs),BLASV(beta),
+                BLASP(yp+1),BLASV(ys) BLAS1);
+            if (x.isconj()) y.ConjugateSelf();
+            y *= alpha;
+        } else if (TMV_IMAG(alpha) == 0.F && !x.isconj()) {
+            int m = A.iscm() ? A.colsize() : A.rowsize();
+            int n = A.iscm() ? A.rowsize() : A.colsize();
+            int lda = A.iscm() ? A.stepj() : A.stepi();
+            if (lda < m) { TMVAssert(n==1); lda = m; }
+            int xs = 2*x.step();
+            int ys = 2*y.step();
+            if (xs == 0) { TMVAssert(x.size() == 1); xs = 1; }
+            if (ys == 0) { TMVAssert(y.size() == 1); ys = 1; }
+            const float* xp = (const float*) x.cptr();
+            if (xs < 0) xp += (x.size()-1)*xs;
+            float* yp = (float*) y.ptr();
+            if (ys < 0) yp += (y.size()-1)*ys;
+            float xalpha(TMV_REAL(alpha));
+            BLASNAME(sgemv) (
+                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
+                BLASP(xp),BLASV(xs),BLASV(beta),
+                BLASP(yp),BLASV(ys) BLAS1);
+            BLASNAME(sgemv) (
+                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
+                BLASP(xp+1),BLASV(xs),BLASV(beta),
+                BLASP(yp+1),BLASV(ys) BLAS1);
+        } else {
+            const Vector<std::complex<float> > xx = alpha*x;
+            DoMultMV(std::complex<float>(1.F),A,xx.XView(),1.F,y);
+        }
+    }
+    template <int Si, int Sj>
+    static void DoMultMV(
+        std::complex<float> alpha,
+        const ConstMatrixView<float,Si,Sj>& A,
+        const ConstVectorView<float>& x,
+        float beta, VectorView<std::complex<float> > y)
+    {
+        TMVAssert(A.rowsize() == x.size());
+        TMVAssert(A.colsize() == y.size());
+        TMVAssert(x.size() > 0);
+        TMVAssert(y.size() > 0);
+        TMVAssert(!SameStorage(x,y));
+
+        int m = A.iscm() ? A.colsize() : A.rowsize();
+        int n = A.iscm() ? A.rowsize() : A.colsize();
+        int lda = A.iscm() ? A.stepj() : A.stepi();
+        if (lda < m) { TMVAssert(n==1); lda = m; }
+        int xs = x.step();
+        int ys = 2*y.step();
+        if (xs == 0) { TMVAssert(x.size() == 1); xs = 1; }
+        if (ys == 0) { TMVAssert(y.size() == 1); ys = 1; }
+        const float* xp = x.cptr();
+        if (xs < 0) xp += (x.size()-1)*xs;
+        float* yp = (float*) y.ptr();
+        if (ys < 0) yp += (y.size()-1)*ys;
+        float ar(TMV_REAL(alpha));
+        float ai(TMV_IMAG(alpha));
+        if (ar == 0.F) {
+            if (beta == 0.F) y.Real().Zero();
+        }
+        else 
+            BLASNAME(sgemv) (
+                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASV(m),BLASV(n),BLASV(ar),BLASP(A.cptr()),BLASV(lda),
+                BLASP(xp),BLASV(xs),BLASV(beta),
+                BLASP(yp),BLASV(ys) BLAS1);
+        if (ai == 0.F) {
+            if (beta == 0.F) y.Imag().Zero();
+        }
+        else
+            BLASNAME(sgemv) (
+                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASV(m),BLASV(n),BLASV(ai),BLASP(A.cptr()),BLASV(lda),
+                BLASP(xp),BLASV(xs),BLASV(beta),
+                BLASP(yp+1),BLASV(ys) BLAS1);
+    }
 #endif // FLOAT
 #endif // BLAS
 
-  template <class T1, bool C1, class T2, bool C2, class T3>
-  void InstMultMV(const T3 x,
-      const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
-      const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3)
-  {
-    if (m1.isrm())
-      DoMultMV<false>(x,m1.RMView(),v2,v3);
-    else if (m1.iscm())
-      DoMultMV<false>(x,m1.CMView(),v2,v3);
-    else 
-      DoMultMV<false>(T3(1),(x*m1).calc().View(),v2,v3);
-  }
-  template <class T1, bool C1, class T2, bool C2, class T3>
-  void InstAddMultMV(const T3 x,
-      const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
-      const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3)
-  {
-    if (m1.isrm())
-      DoMultMV<true>(x,m1.RMView(),v2,v3);
-    else if (m1.iscm())
-      DoMultMV<true>(x,m1.CMView(),v2,v3);
-    else 
-      DoMultMV<true>(T3(1),(x*m1).calc().View(),v2,v3);
-  }
-
+    template <class T1, bool C1, class T2, bool C2, class T3>
+    void InstMultMV(
+        const T3 x,
+        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
+        const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3)
+    {
+        if (m1.isrm())
+            DoMultMV<false>(x,m1.rmView(),v2,v3);
+        else if (m1.iscm())
+            DoMultMV<false>(x,m1.cmView(),v2,v3);
+        else 
+            DoMultMV<false>(T3(1),(x*m1).calc().view(),v2,v3);
+    }
+    template <class T1, bool C1, class T2, bool C2, class T3>
+    void InstAddMultMV(
+        const T3 x,
+        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
+        const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3)
+    {
+        if (m1.isrm())
+            DoMultMV<true>(x,m1.rmView(),v2,v3);
+        else if (m1.iscm())
+            DoMultMV<true>(x,m1.cmView(),v2,v3);
+        else 
+            DoMultMV<true>(T3(1),(x*m1).calc().view(),v2,v3);
+    }
 
 #define InstFile "TMV_MultMV.inst"
 #include "TMV_Inst.h"

@@ -1,5 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
 // Copyright (C) 1998 - 2009                                                 //
@@ -206,24 +205,24 @@ extern "C" {
 
 namespace tmv {
 
-  template <class T> 
-  inline T* FBLAS_ConvertP(T* x) { return x; }
+    template <class T> 
+    inline T* FBLAS_ConvertP(T* x) { return x; }
 
-  template <class T> 
-  inline const T* FBLAS_ConvertP(const T* x) { return x; }
+    template <class T> 
+    inline const T* FBLAS_ConvertP(const T* x) { return x; }
 
-  inline cdouble* FBLAS_ConvertP(std::complex<double>* ptr)
-  { return reinterpret_cast<cdouble*>(ptr); }
-  inline const cdouble* FBLAS_ConvertP(const std::complex<double>* ptr)
-  { return reinterpret_cast<const cdouble*>(ptr); }
-  inline cfloat* FBLAS_ConvertP(std::complex<float>* ptr)
-  { return reinterpret_cast<cfloat*>(ptr); }
-  inline const cfloat* FBLAS_ConvertP(const std::complex<float>* ptr)
-  { return reinterpret_cast<const cfloat*>(ptr); }
-  inline std::complex<double> FBLAS_ConvertToComplex(cdouble z)
-  { return std::complex<double>(z.r,z.i); }
-  inline std::complex<float> FBLAS_ConvertToComplex(cfloat z)
-  { return std::complex<float>(z.r,z.i); }
+    inline cdouble* FBLAS_ConvertP(std::complex<double>* ptr)
+    { return reinterpret_cast<cdouble*>(ptr); }
+    inline const cdouble* FBLAS_ConvertP(const std::complex<double>* ptr)
+    { return reinterpret_cast<const cdouble*>(ptr); }
+    inline cfloat* FBLAS_ConvertP(std::complex<float>* ptr)
+    { return reinterpret_cast<cfloat*>(ptr); }
+    inline const cfloat* FBLAS_ConvertP(const std::complex<float>* ptr)
+    { return reinterpret_cast<const cfloat*>(ptr); }
+    inline std::complex<double> FBLAS_ConvertToComplex(cdouble z)
+    { return std::complex<double>(z.r,z.i); }
+    inline std::complex<float> FBLAS_ConvertToComplex(cfloat z)
+    { return std::complex<float>(z.r,z.i); }
 
 }
 
@@ -263,21 +262,21 @@ namespace tmv {
 namespace tmv {
 
 
-  template <class T> 
-  inline T* MKL_ConvertP(T* x) { return x; }
+    template <class T> 
+    inline T* MKL_ConvertP(T* x) { return x; }
 
-  template <class T> 
-  inline T* MKL_ConvertP(const T* x) 
-  { return MKL_ConvertP(const_cast<T*>(x)); }
+    template <class T> 
+    inline T* MKL_ConvertP(const T* x) 
+    { return MKL_ConvertP(const_cast<T*>(x)); }
 
-  inline MKL_Complex16* MKL_ConvertP(std::complex<double>* ptr)
-  { return reinterpret_cast<MKL_Complex16*>(ptr); }
-  inline MKL_Complex8* MKL_ConvertP(std::complex<float>* ptr)
-  { return reinterpret_cast<MKL_Complex8*>(ptr); }
-  inline MKL_Complex16* MKL_ConvertP(const std::complex<double>* ptr)
-  { return MKL_ConvertP(const_cast<std::complex<double>*>(ptr)); }
-  inline MKL_Complex8* MKL_ConvertP(const std::complex<float>* ptr)
-  { return MKL_ConvertP(const_cast<std::complex<float>*>(ptr)); }
+    inline MKL_Complex16* MKL_ConvertP(std::complex<double>* ptr)
+    { return reinterpret_cast<MKL_Complex16*>(ptr); }
+    inline MKL_Complex8* MKL_ConvertP(std::complex<float>* ptr)
+    { return reinterpret_cast<MKL_Complex8*>(ptr); }
+    inline MKL_Complex16* MKL_ConvertP(const std::complex<double>* ptr)
+    { return MKL_ConvertP(const_cast<std::complex<double>*>(ptr)); }
+    inline MKL_Complex8* MKL_ConvertP(const std::complex<float>* ptr)
+    { return MKL_ConvertP(const_cast<std::complex<float>*>(ptr)); }
 }
 
 #define LAPP(x) MKL_ConvertP(x)
@@ -313,30 +312,30 @@ namespace tmv {
 #define BLASSTRLEN
 #define BLASZDOTFIRST
 #define BLASZDOTSUB sub  // This one is optional actually
- */
+*/
 
 namespace tmv {
 
-  template <class T> 
-  inline T* ACML_ConvertP(T* x) { return x; }
+    template <class T> 
+    inline T* ACML_ConvertP(T* x) { return x; }
 
-  template <class T> 
-  inline T* ACML_ConvertP(const T* x) 
-  { return const_cast<T*>(x); }
+    template <class T> 
+    inline T* ACML_ConvertP(const T* x) 
+    { return const_cast<T*>(x); }
 
-  inline ::doublecomplex* ACML_ConvertP(std::complex<double>* ptr)
-  { return reinterpret_cast< ::doublecomplex*>(ptr); }
-  inline ::complex* ACML_ConvertP(std::complex<float>* ptr)
-  { return reinterpret_cast< ::complex*>(ptr); }
-  inline ::doublecomplex* ACML_ConvertP(const std::complex<double>* ptr)
-  { return ACML_ConvertP(const_cast<std::complex<double>*>(ptr)); }
-  inline ::complex* ACML_ConvertP(const std::complex<float>* ptr)
-  { return ACML_ConvertP(const_cast<std::complex<float>*>(ptr)); }
+    inline ::doublecomplex* ACML_ConvertP(std::complex<double>* ptr)
+    { return reinterpret_cast< ::doublecomplex*>(ptr); }
+    inline ::complex* ACML_ConvertP(std::complex<float>* ptr)
+    { return reinterpret_cast< ::complex*>(ptr); }
+    inline ::doublecomplex* ACML_ConvertP(const std::complex<double>* ptr)
+    { return ACML_ConvertP(const_cast<std::complex<double>*>(ptr)); }
+    inline ::complex* ACML_ConvertP(const std::complex<float>* ptr)
+    { return ACML_ConvertP(const_cast<std::complex<float>*>(ptr)); }
 
-  inline std::complex<double> ACML_ConvertToComplex(::doublecomplex z)
-  { return std::complex<double>(z.real,z.imag); }
-  inline std::complex<float> ACML_ConvertToComplex(::complex z)
-  { return std::complex<float>(z.real,z.imag); }
+    inline std::complex<double> ACML_ConvertToComplex(::doublecomplex z)
+    { return std::complex<double>(z.real,z.imag); }
+    inline std::complex<float> ACML_ConvertToComplex(::complex z)
+    { return std::complex<float>(z.real,z.imag); }
 
 }
 
@@ -356,7 +355,7 @@ namespace tmv {
 #define LAP_
 #define LAPPTR
 #define LAPSTRLEN
- */
+*/
 
 #define LAPP(x) ACML_ConvertP(x)
 
@@ -425,26 +424,26 @@ extern "C" {
 
 namespace tmv {
 
-  template <class T> 
-  inline T* CLAPACK_ConvertP(T* x) { return x; }
+    template <class T> 
+    inline T* CLAPACK_ConvertP(T* x) { return x; }
 
-  template <class T> 
-  inline T* CLAPACK_ConvertP(const T* x) 
-  { return const_cast<T*>(x); }
+    template <class T> 
+    inline T* CLAPACK_ConvertP(const T* x) 
+    { return const_cast<T*>(x); }
 
-  inline ::doublecomplex* CLAPACK_ConvertP(std::complex<double>* ptr)
-  { return reinterpret_cast< ::doublecomplex*>(ptr); }
-  inline ::complex* CLAPACK_ConvertP(std::complex<float>* ptr)
-  { return reinterpret_cast< ::complex*>(ptr); }
-  inline ::doublecomplex* CLAPACK_ConvertP(const std::complex<double>* ptr)
-  { return CLAPACK_ConvertP(const_cast<std::complex<double>*>(ptr)); }
-  inline ::complex* CLAPACK_ConvertP(const std::complex<float>* ptr)
-  { return CLAPACK_ConvertP(const_cast<std::complex<float>*>(ptr)); }
+    inline ::doublecomplex* CLAPACK_ConvertP(std::complex<double>* ptr)
+    { return reinterpret_cast< ::doublecomplex*>(ptr); }
+    inline ::complex* CLAPACK_ConvertP(std::complex<float>* ptr)
+    { return reinterpret_cast< ::complex*>(ptr); }
+    inline ::doublecomplex* CLAPACK_ConvertP(const std::complex<double>* ptr)
+    { return CLAPACK_ConvertP(const_cast<std::complex<double>*>(ptr)); }
+    inline ::complex* CLAPACK_ConvertP(const std::complex<float>* ptr)
+    { return CLAPACK_ConvertP(const_cast<std::complex<float>*>(ptr)); }
 
-  inline ::integer* CLAPACK_ConvertP(int* ptr)
-  { return reinterpret_cast< ::integer*>(ptr); }
-  inline ::integer* CLAPACK_ConvertP(const int* ptr)
-  { return CLAPACK_ConvertP(const_cast<int*>(ptr)); }
+    inline ::integer* CLAPACK_ConvertP(int* ptr)
+    { return reinterpret_cast< ::integer*>(ptr); }
+    inline ::integer* CLAPACK_ConvertP(const int* ptr)
+    { return CLAPACK_ConvertP(const_cast<int*>(ptr)); }
 
 }
 
@@ -478,24 +477,24 @@ extern "C" {
 
 namespace tmv {
 
-  template <class T> 
-  inline T* FLAPACK_ConvertP(T* x) { return x; }
+    template <class T> 
+    inline T* FLAPACK_ConvertP(T* x) { return x; }
 
-  template <class T> 
-  inline const T* FLAPACK_ConvertP(const T* x) { return x; }
+    template <class T> 
+    inline const T* FLAPACK_ConvertP(const T* x) { return x; }
 
-  inline cdouble* FLAPACK_ConvertP(std::complex<double>* ptr)
-  { return reinterpret_cast<cdouble*>(ptr); }
-  inline const cdouble* FLAPACK_ConvertP(const std::complex<double>* ptr)
-  { return reinterpret_cast<const cdouble*>(ptr); }
-  inline cfloat* FLAPACK_ConvertP(std::complex<float>* ptr)
-  { return reinterpret_cast<cfloat*>(ptr); }
-  inline const cfloat* FLAPACK_ConvertP(const std::complex<float>* ptr)
-  { return reinterpret_cast<const cfloat*>(ptr); }
-  inline std::complex<double> FLAPACK_ConvertToComplex(cdouble z)
-  { return std::complex<double>(z.r,z.i); }
-  inline std::complex<float> FLAPACK_ConvertToComplex(cfloat z)
-  { return std::complex<float>(z.r,z.i); }
+    inline cdouble* FLAPACK_ConvertP(std::complex<double>* ptr)
+    { return reinterpret_cast<cdouble*>(ptr); }
+    inline const cdouble* FLAPACK_ConvertP(const std::complex<double>* ptr)
+    { return reinterpret_cast<const cdouble*>(ptr); }
+    inline cfloat* FLAPACK_ConvertP(std::complex<float>* ptr)
+    { return reinterpret_cast<cfloat*>(ptr); }
+    inline const cfloat* FLAPACK_ConvertP(const std::complex<float>* ptr)
+    { return reinterpret_cast<const cfloat*>(ptr); }
+    inline std::complex<double> FLAPACK_ConvertToComplex(cdouble z)
+    { return std::complex<double>(z.r,z.i); }
+    inline std::complex<float> FLAPACK_ConvertToComplex(cfloat z)
+    { return std::complex<float>(z.r,z.i); }
 
 }
 
@@ -522,14 +521,14 @@ namespace tmv {
 #endif // ELAP
 
 namespace tmv {
-  // This are defined in TMV_Vector.cpp
-  extern int Lap_info; 
-  const char Blas_ch_N = 'N';
-  const char Blas_ch_C = 'C';
-  const char Blas_ch_T = 'T';
-  const char Blas_ch_L = 'L';
-  const char Blas_ch_R = 'R';
-  const char Blas_ch_U = 'U';
+    // This are defined in TMV_Vector.cpp
+    extern int Lap_info; 
+    const char Blas_ch_N = 'N';
+    const char Blas_ch_C = 'C';
+    const char Blas_ch_T = 'T';
+    const char Blas_ch_L = 'L';
+    const char Blas_ch_R = 'R';
+    const char Blas_ch_U = 'U';
 }
 
 #ifdef BLAS
@@ -710,10 +709,10 @@ namespace tmv {
 
 namespace tmv {
 
-  // Defined in Vector.cpp
-  void LAP_Results(const char* fn);
-  void LAP_Results(const int lwork_opt, const int m, const int n,
-      const int lwork, const char* fn);
+    // Defined in Vector.cpp
+    void LAP_Results(const char* fn);
+    void LAP_Results(const int lwork_opt, const int m, const int n,
+                     const int lwork, const char* fn);
 
 }
 

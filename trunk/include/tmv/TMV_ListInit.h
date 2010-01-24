@@ -1,5 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
 // Copyright (C) 1998 - 2009                                                 //
@@ -35,53 +34,62 @@
 
 namespace tmv {
 
-  class ListReadError : 
-    public ReadError
-  {
-  private :
-    int n;
-
-  public :
-    inline ListReadError(int nleft) : n(nleft) {}
-    inline void Write(std::ostream& os) const throw()
+    class ListReadError : public ReadError
     {
-      os<<"TMV Read Error: Reading from List initialization.\n";
-      if (n == 0)
-        os<<"List has more elements than expected.\n";
-      else
-        os<<"Reached end of list, but expecting "<<n<<" more elements.\n";
-    }
-  };
+    private :
+        int n;
 
-  template <class T, class IT>
-  class ListAssigner
-  {
-  public:
-    inline ListAssigner( IT _ptr, int _nleft ) : ptr( _ptr ), nleft(_nleft) {}
+    public :
+        inline ListReadError(int nleft) : n(nleft) {}
+        inline void Write(std::ostream& os) const throw()
+        {
+            os<<"TMV Read Error: Reading from List initialization.\n";
+            if (n == 0)
+                os<<"List has more elements than expected.\n";
+            else
+                os<<"Reached end of list, but expecting "<<n<<
+                    " more elements.\n";
+        }
+    };
 
-    inline ListAssigner( const ListAssigner<T,IT>& rhs ) : 
-      ptr( rhs.ptr ), nleft(rhs.nleft), islast(true)
-    { rhs.islast = false; }
-
-    inline ~ListAssigner()
+    template <class T, class IT>
+    class ListAssigner
     {
-      TMVAssert((nleft == 0 || !islast) && "Too few elements in ListInit");
-    }
+    public:
+        inline ListAssigner(IT ptr, int nLeft ) :
+            _ptr(ptr), _nLeft(nLeft), _isLast(true)
+        {}
 
-    inline ListAssigner<T,IT> operator,( T x )
-    {
-      if (nleft == 0) throw ListReadError(0);
-      TMVAssert((nleft > 0) && "Too many elements in ListInit");
-      *ptr = x;
-      islast = false;
-      return ListAssigner<T,IT>(++ptr,nleft-1);
-    }
+        inline ListAssigner(IT ptr, int nLeft, const T& x) :
+            _ptr(ptr), _nLeft(nLeft), _isLast(false)
+        {
+            if (_nLeft == 0) throw ListReadError(0);
+            TMVAssert((_nLeft > 0) && "Too many elements in ListInit");
+            *_ptr++ = x;
+            --_nLeft;
+        }
 
-  protected:
-    IT  ptr;
-    int nleft;
-    mutable bool islast;
-  };
+        inline ListAssigner( const ListAssigner<T,IT>& rhs ) : 
+            _ptr(rhs._ptr), _nLeft(rhs._nLeft), _isLast(true)
+        { rhs._isLast = false; }
+
+        inline ~ListAssigner()
+        { if (_nLeft > 0 && _isLast) throw ListReadError(_nLeft); }
+
+        inline ListAssigner<T,IT> operator,(const T& x)
+        {
+            if (_nLeft == 0) throw ListReadError(0);
+            TMVAssert((_nLeft > 0) && "Too many elements in ListInit");
+            *_ptr = x;
+            _isLast = false;
+            return ListAssigner<T,IT>(++_ptr,_nLeft-1);
+        }
+
+    protected:
+        IT  _ptr;
+        int _nLeft;
+        mutable bool _isLast;
+    };
 
 
 

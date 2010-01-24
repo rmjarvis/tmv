@@ -1,5 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
 // Copyright (C) 1998 - 2009                                                 //
@@ -41,7 +40,10 @@
 #include "tmv/TMV_MinMax.h"
 #include "tmv/TMV_SortV.h"
 #include "tmv/TMV_SwapV.h"
+#include "tmv/TMV_ReverseV.h"
+#include "tmv/TMV_ConjugateV.h"
 #include "tmv/TMV_NormV.h"
+#include "tmv/TMV_ScaleV.h"
 #include "tmv/TMV_MultXV.h"
 #include "tmv/TMV_AddVV.h"
 #include "tmv/TMV_MultVV.h"

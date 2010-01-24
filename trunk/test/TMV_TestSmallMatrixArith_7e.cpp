@@ -1,4 +1,3 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 
 #define NONSQUARE
 #include "TMV_TestSmallMatrixArith_7.h"
@@ -6,7 +5,9 @@
 template <class T> void TestSmallMatrixArith_7e()
 {
 #ifdef XTEST
-  TestSmallMatrixArith_7<T,1,10>("1 10");
+#if (XTEST & 2)
+    TestSmallMatrixArith_7<T,1,10>("1 10");
+#endif
 #endif
 }
 

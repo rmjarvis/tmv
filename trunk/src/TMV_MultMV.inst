@@ -26,5 +26,4 @@ DefMV(CT,true,CT,true,CT)
 #endif
 
 #undef DefMV
-
 #undef CT

@@ -9,6 +9,7 @@
       const int*const p, const int i1, const int i2); \
   template T InstSumElements(const ConstMatrixView<T>& m); \
   template RT InstSumAbsElements(const ConstMatrixView<T>& m); \
+  template RT InstSumAbs2Elements(const ConstMatrixView<T>& m); \
   template RT InstNormSq(const ConstMatrixView<T>& m);  \
   template RT InstNormSq(const ConstMatrixView<T>& m, const RT scale);  \
   template RT InstMaxAbsElement(const ConstMatrixView<T>& m);  \
@@ -21,7 +22,6 @@ Def1(T,T)
 Def1(T,CT)
 #endif
 
-#undef Def1
 
 #define Def2(RT,T,C) \
   template void InstCopy(const ConstMatrixView<T,UNKNOWN,UNKNOWN,C>& m1, \
@@ -41,7 +41,12 @@ Def2(T,CT,false)
 Def2(T,CT,true)
 #endif
 
-#undef Def2
 
+#ifdef TMV_INST_MIX
+template void InstCopy(const ConstMatrixView<T>& m1, MatrixView<CT> m2); 
+#endif
+
+#undef Def1
+#undef Def2
 #undef CT
 

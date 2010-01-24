@@ -1,5 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
 // Copyright (C) 1998 - 2009                                                 //
@@ -30,68 +29,78 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "TMV_Blas.h"
 #include "tmv/TMV_MultMM.h"
-#include "TMV_MultMM_Blas.h"
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_ProdXM.h"
 #include "tmv/TMV_SumMM.h"
 
+#ifdef BLAS
+#include "TMV_MultMM_Blas.h"
+#endif
+
 
 namespace tmv {
 
-  template <bool add, class T1, bool C1, class T2, bool C2, class T3>
-  static void DoMultMM(const T3 x,
-      const ConstMatrixView<T1,UNKNOWN,1,C1>& m1,
-      const ConstMatrixView<T2,UNKNOWN,1,C2>& m2, MatrixView<T3,1> m3)
-  {
-    typedef RealType(T3) RT;
-    if (x == RT(0))
-      Maybe<!add>::zero(m3); 
-    else if (x == RT(1))
-      InlineMultMM<add>(Scaling<1,RT>(),m1,m2,m3);
-    else if (x == RT(-1))
-      InlineMultMM<add>(Scaling<-1,RT>(),m1,m2,m3);
-    else if (TMV_IMAG(x) == RT(0))
-      InlineMultMM<add>(Scaling<0,RT>(TMV_REAL(x)),m1,m2,m3);
-    else
-      InlineMultMM<add>(Scaling<0,T3>(x),m1,m2,m3);
-  }
+    template <bool add, class T1, bool C1, class T2, bool C2, class T3>
+    static void DoMultMM(
+        const T3 x,
+        const ConstMatrixView<T1,UNKNOWN,1,C1>& m1,
+        const ConstMatrixView<T2,UNKNOWN,1,C2>& m2, MatrixView<T3,1> m3)
+    {
+        typedef typename Traits<T3>::real_type RT;
+        if (x == RT(0))
+            Maybe<!add>::zero(m3); 
+        else if (x == RT(1))
+            InlineMultMM<add>(Scaling<1,RT>(),m1,m2,m3);
+        else if (x == RT(-1))
+            InlineMultMM<add>(Scaling<-1,RT>(),m1,m2,m3);
+        else if (TMV_IMAG(x) == RT(0))
+            InlineMultMM<add>(Scaling<0,RT>(TMV_REAL(x)),m1,m2,m3);
+        else
+            InlineMultMM<add>(Scaling<0,T3>(x),m1,m2,m3);
+    }
 
 #ifdef BLAS
 #ifdef TMV_INST_DOUBLE
-  template <bool add>
-  static void DoMultMM(const double x,
-      const ConstMatrixView<double,UNKNOWN,1>& m1,
-      const ConstMatrixView<double,UNKNOWN,1>& m2, MatrixView<double,1> m3)
-  { BlasMultMM(x,m1,m2,add?1:0,m3); }
-  template <bool add, class T1, bool C1, class T2, bool C2>
-  static void DoMultMM(const std::complex<double> x,
-      const ConstMatrixView<T1,UNKNOWN,1,C1>& m1,
-      const ConstMatrixView<T2,UNKNOWN,1,C2>& m2,
-      MatrixView<std::complex<double>,1> m3)
-  { BlasMultMM(x,m1,m2,add?1:0,m3); }
+    template <bool add>
+    static void DoMultMM(
+        const double x,
+        const ConstMatrixView<double,UNKNOWN,1>& m1,
+        const ConstMatrixView<double,UNKNOWN,1>& m2, MatrixView<double,1> m3)
+    { BlasMultMM(x,m1,m2,add?1:0,m3); }
+    template <bool add, class T1, bool C1, class T2, bool C2>
+    static void DoMultMM(
+        const std::complex<double> x,
+        const ConstMatrixView<T1,UNKNOWN,1,C1>& m1,
+        const ConstMatrixView<T2,UNKNOWN,1,C2>& m2,
+        MatrixView<std::complex<double>,1> m3)
+    { BlasMultMM(x,m1,m2,add?1:0,m3); }
 #endif // TMV_INST_DOUBLE
 #ifdef TMV_INST_FLOAT
-  template <bool add>
-  static void DoMultMM(const float x,
-      const ConstMatrixView<float,UNKNOWN,1>& m1,
-      const ConstMatrixView<float,UNKNOWN,1>& m2, MatrixView<float,1> m3)
-  { BlasMultMM(x,m1,m2,add?1:0,m3); }
-  template <bool add, class T1, bool C1, class T2, bool C2>
-  static void DoMultMM(const std::complex<float> x,
-      const ConstMatrixView<T1,UNKNOWN,1,C1>& m1,
-      const ConstMatrixView<T2,UNKNOWN,1,C2>& m2,
-      MatrixView<std::complex<float>,1> m3)
-  { BlasMultMM(x,m1,m2,add?1:0,m3); }
+    template <bool add>
+    static void DoMultMM(
+        const float x,
+        const ConstMatrixView<float,UNKNOWN,1>& m1,
+        const ConstMatrixView<float,UNKNOWN,1>& m2, MatrixView<float,1> m3)
+    { BlasMultMM(x,m1,m2,add?1:0,m3); }
+    template <bool add, class T1, bool C1, class T2, bool C2>
+    static void DoMultMM(
+        const std::complex<float> x,
+        const ConstMatrixView<T1,UNKNOWN,1,C1>& m1,
+        const ConstMatrixView<T2,UNKNOWN,1,C2>& m2,
+        MatrixView<std::complex<float>,1> m3)
+    { BlasMultMM(x,m1,m2,add?1:0,m3); }
 #endif // TMV_INST_FLOAT
 #endif // BLAS
 
 
-  template <bool add, class T1, bool C1, class T2, bool C2, class T3>
-  void DoInstMultMM(const T3 x,
-      const ConstMatrixView<T1,UNKNOWN,1,C1>& m1, 
-      const ConstMatrixView<T2,UNKNOWN,1,C2>& m2, MatrixView<T3,1> m3)
-  { DoMultMM<add>(x,m1,m2,m3); }
+    template <bool add, class T1, bool C1, class T2, bool C2, class T3>
+    void DoInstMultMM(
+        const T3 x,
+        const ConstMatrixView<T1,UNKNOWN,1,C1>& m1, 
+        const ConstMatrixView<T2,UNKNOWN,1,C2>& m2, MatrixView<T3,1> m3)
+    { DoMultMM<add>(x,m1,m2,m3); }
 
 
 #define InstFile "TMV_MultMM_RRC.inst"

@@ -1,5 +1,4 @@
 ///////////////////////////////////////////////////////////////////////////////
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
 // Copyright (C) 1998 - 2009                                                 //
@@ -38,7 +37,12 @@
 #include "tmv/TMV_DiagMatrix.h"
 #include "tmv/TMV_SmallDiagMatrix.h"
 #include "tmv/TMV_DiagMatrixIO.h"
+#include "tmv/TMV_AddDD.h"
+#include "tmv/TMV_MultXD.h"
+#include "tmv/TMV_MultDV.h"
 #include "tmv/TMV_MultMD.h"
+#include "tmv/TMV_InvertD.h"
+#include "tmv/TMV_DivVD.h"
 
 #ifndef TMV_H
 // In case TMV_Diag.h is included not as part of TMV.h:

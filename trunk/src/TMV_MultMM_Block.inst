@@ -1,14 +1,19 @@
 
 #define CT std::complex<T>
 
-#if TMV_OPT >= 2
+#ifdef TMV_USE_RECURSIVE_BLOCK
 
 #define DefMM(T1, C1, T2, C2, T3) \
-  template void RecursiveBlockMultMM( \
-      const bool add, const T3& x, \
+  template void InstMultMM_RecursiveBlock( \
+      const T3 x, \
       const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1, \
       const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, \
-      MatrixView<T3>& m3); \
+      MatrixView<T3> m3); \
+  template void InstAddMultMM_RecursiveBlock( \
+      const T3 x, \
+      const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1, \
+      const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, \
+      MatrixView<T3> m3); \
 
 DefMM(T,false,T,false,T)
 #ifdef TMV_INST_COMPLEX
@@ -30,11 +35,16 @@ DefMM(CT,true,CT,true,CT)
 #endif
 
 #define DefMM(T1, C1, T2, C2, T3) \
-  template void BlockMultMM( \
-      const bool add, const T3& x, \
+  template void InstMultMM_Block( \
+      const T3 x, \
       const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1, \
       const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, \
-      MatrixView<T3>& m3); \
+      MatrixView<T3> m3); \
+  template void InstAddMultMM_Block( \
+      const T3 x, \
+      const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1, \
+      const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, \
+      MatrixView<T3> m3); \
 
 DefMM(T,false,T,false,T)
 #ifdef TMV_INST_COMPLEX
