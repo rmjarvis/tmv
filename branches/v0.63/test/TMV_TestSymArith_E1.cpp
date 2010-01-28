@@ -1,11 +1,11 @@
 #define STARTI 0
 #define STARTJ 0
 
-#include "TMV_Test.h"
-#include "TMV_Test2.h"
 #include "TMV.h"
 #include "TMV_Sym.h"
 #include "TMV_Band.h"
+#include "TMV_Test.h"
+#include "TMV_Test2.h"
 #include "TMV_TestSymArith.h"
 #include "TMV_TestBandArith.h"
 

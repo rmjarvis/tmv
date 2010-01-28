@@ -180,7 +180,7 @@ namespace tmv {
         TMVAssert(minv.colsize() == pimpl->LLx.size());
         TMVAssert(minv.rowsize() == pimpl->LLx.size());
 
-        if (isComplex(T1())) minv.diag().imag().zero();
+        if (isComplex(T1())) minv.diag().imagPart().setZero();
         doMakeInverse(HermMatrixViewOf(minv,Lower));
         if (minv.colsize() > 1)
             minv.upperTri().offDiag() = minv.lowerTri().offDiag().adjoint();

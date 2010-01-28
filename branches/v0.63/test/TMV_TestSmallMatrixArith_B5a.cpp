@@ -1,8 +1,7 @@
-#include "TMV_Test.h"
-#include "TMV_Test3.h"
 #include "TMV.h"
 #include "TMV_Small.h"
-
+#include "TMV_Test.h"
+#include "TMV_Test3.h"
 #define INORDER
 #include "TMV_TestMatrixArith.h"
 
@@ -29,12 +28,12 @@ static void DoTestSmallMatrixArith_B5a()
 
     tmv::SmallMatrix<T,7,N,tmv::RowMajor> a3;
     for(int i=0;i<7;++i) for(int j=0;j<N;++j) a3(i,j) = T(1-3*i+2*j);
-    a3.SubMatrix(2,N+2,0,N) += a1;
+    a3.subMatrix(2,N+2,0,N) += a1;
     tmv::SmallMatrix<std::complex<T>,7,N,tmv::RowMajor> ca3 = 
         a3*std::complex<T>(1,2);
-    ca3.SubMatrix(2,N+2,0,N) += ca1;
+    ca3.subMatrix(2,N+2,0,N) += ca1;
     if (N > 1) ca3.col(1) *= std::complex<T>(2,1);
-    ca3.row(6).AddToAll(std::complex<T>(-7,2));
+    ca3.row(6).addToAll(std::complex<T>(-7,2));
 
     tmv::SmallMatrix<T,7,N> a3x;
     tmv::SmallMatrix<std::complex<T>,7,N> ca3x;

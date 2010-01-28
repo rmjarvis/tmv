@@ -116,11 +116,11 @@ namespace tmv {
                 }
                 if (ha && isComplex(T())) {
 #ifdef XTEST
-                    TMVAssert(normInf(A.diag().imag()) < 
+                    TMVAssert(normInf(A.diag().imagPart()) < 
                               A.size()*TMV_Epsilon<T>()*
                               (Norm(A)+Norm(x)*Norm(y)));
 #endif
-                    A.diag().imag().zero();
+                    A.diag().imagPart().setZero();
                 }
             }
         } else { // Not <= BLOCKSIZE2, so do recurse...

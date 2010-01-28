@@ -1089,7 +1089,7 @@ namespace tmv {
         TMVAssert(beta.ct() == NonConj);
 
         x.subVector(0,v.size()) = v;
-        x.subVector(v.size(),x.size()).zero();
+        x.subVector(v.size(),x.size()).setZero();
         Q_RDivEq(Q,beta,RowVectorViewOf(x));
     }
 
@@ -1155,7 +1155,7 @@ namespace tmv {
         TMVAssert(beta.ct() == NonConj);
 
         x.colRange(0,m.rowsize()) = m;
-        x.colRange(m.rowsize(),x.rowsize()).zero();
+        x.colRange(m.rowsize(),x.rowsize()).setZero();
         Q_RDivEq(Q,beta,x);
     }
 

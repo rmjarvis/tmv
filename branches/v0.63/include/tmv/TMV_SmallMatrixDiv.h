@@ -382,7 +382,7 @@ namespace tmv {
         DoQRD(QR,beta);
         InvertU(QR);
 
-        //minv.zero();
+        //minv.setZero();
         for(int i=0;i<M*N;++i) minv[i] = T2(0);
         //minv.colRange(0,N)).upperTri() = QR.upperTri()
         for(int j=0;j<N;++j) for(int i=0;i<=j;i++)
@@ -454,7 +454,7 @@ namespace tmv {
             InvertL(LU);
 
             //minv = LU.upperTri() * LU.lowerTri(UnitDiag);
-            //minv.zero();
+            //minv.setZero();
             for(int i=0;i<N*N;++i) minv[i] = T2(0);
             for(int j=0;j<N;++j) {
                 for(int i=0;i<=j;++i) 
@@ -630,7 +630,7 @@ namespace tmv {
         DoQRD(QR,beta);
 
         // m2 = m1 R^-1 Qt
-        //m2.zero();
+        //m2.setZero();
         for(int i=0;i<K*M;++i) m2[i] = T2(0);
         //m2.colRange(0,N) = m1;
         if (S2 == ColMajor) 
@@ -1060,7 +1060,7 @@ namespace tmv {
         InvertU(QR);
 
         //ata = QR.upperTri() * QR.upperTri().adjoint();
-        //ata.zero();
+        //ata.setZero();
         for(int i=0;i<N*N;++i) ata[i] = T(0);
         for(int j=0;j<N;++j) {
             for(int k=j;k<N;++k) {

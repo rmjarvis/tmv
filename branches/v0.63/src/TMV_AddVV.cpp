@@ -164,7 +164,7 @@ namespace tmv {
     }
 
     template <class T, class T1> 
-    static void doAddVV(
+    static void DoAddVV(
         const T x, const GenVector<T1>& v1, const VectorView<T>& v2)
     {
         if (TMV_IMAG(x) == TMV_RealType(T)(0))
@@ -178,7 +178,7 @@ namespace tmv {
 #ifdef BLAS
 #ifdef INST_DOUBLE
     template <> 
-    void doAddVV(
+    void DoAddVV(
         const double x,
         const GenVector<double>& v1, const VectorView<double>& v2)
     { 
@@ -198,7 +198,7 @@ namespace tmv {
                          BLASP(v2p),BLASV(s2));
     }
     template <> 
-    void doAddVV(
+    void DoAddVV(
         const std::complex<double> x, 
         const GenVector<std::complex<double> >& v1, 
         const VectorView<std::complex<double> >& v2)
@@ -219,7 +219,7 @@ namespace tmv {
                          BLASP(v2p),BLASV(s2));
     }
     template <> 
-    void doAddVV(
+    void DoAddVV(
         const std::complex<double> x, 
         const GenVector<double>& v1, 
         const VectorView<std::complex<double> >& v2)
@@ -248,7 +248,7 @@ namespace tmv {
 #endif
 #ifdef INST_FLOAT
     template <> 
-    void doAddVV(
+    void DoAddVV(
         const float x,
         const GenVector<float>& v1, const VectorView<float>& v2)
     { 
@@ -268,7 +268,7 @@ namespace tmv {
                          BLASP(v2p),BLASV(s2));
     }
     template <> 
-    void doAddVV(
+    void DoAddVV(
         const std::complex<float> x, 
         const GenVector<std::complex<float> >& v1, 
         const VectorView<std::complex<float> >& v2)
@@ -289,7 +289,7 @@ namespace tmv {
                          BLASP(v2p),BLASV(s2));
     }
     template <> 
-    void doAddVV(
+    void DoAddVV(
         const std::complex<float> x, 
         const GenVector<float>& v1, 
         const VectorView<std::complex<float> >& v2)
@@ -335,7 +335,7 @@ namespace tmv {
 
         if (v2.size() > 0 && x != T(0)) {
             if (v2.isSameAs(v1)) {
-                if (x == T(-1)) v2.zero();
+                if (x == T(-1)) v2.setZero();
                 else MultXV(x+T(1),v2);
             }
             else if (v2.isconj()) AddVV(TMV_CONJ(x),v1.conjugate(),v2.conjugate());
@@ -343,10 +343,10 @@ namespace tmv {
                 AddVV(x,v1.reverse(),v2.reverse());
 #ifdef BLAS
             else if (v1.isconj())
-                doAddVV(x,Vector<T1>(v1),v2);
+                DoAddVV(x,Vector<T1>(v1),v2);
 #endif
             else
-                doAddVV(x,v1,v2);
+                DoAddVV(x,v1,v2);
         }
 
 #ifdef XDEBUG

@@ -1,8 +1,7 @@
 
+#include "TMV.h"
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
-#include "TMV.h"
-
 #include "TMV_TestMatrixDivArith.h"
 
 template <class T> 
@@ -27,7 +26,7 @@ void TestDiagDiv_A()
     tmv::DiagMatrix<std::complex<T> > cbx(N);
 
     TestMatrixDivArith2<T>(
-        tmv::LU,bx,cbx,a.View(),b.View(),ca.View(),cb.View(),"Diag/Diag");
+        tmv::LU,bx,cbx,a.view(),b.view(),ca.view(),cb.view(),"Diag/Diag");
 }
 
 template <class T> 

@@ -101,7 +101,7 @@ namespace tmv {
             else if (A.nlo() == 1)
                 LDL_Decompose(pimpl->LLx);
             else {
-                if (A.real().diag().minElement() <= TMV_RealType(T)(0)) {
+                if (A.realPart().diag().minElement() <= TMV_RealType(T)(0)) {
 #ifdef NOTHROW
                     std::cerr<<"Non Posdef HermBandMatrix found\n";
                     exit(1); 
@@ -219,7 +219,7 @@ namespace tmv {
         else if (pimpl->LLx.nlo() == 1)
             LDL_Inverse(pimpl->LLx,sinv);
         else
-            sinv = DiagMatrixViewOf(pimpl->LLx.diag().real()).inverse();
+            sinv = DiagMatrixViewOf(pimpl->LLx.diag().realPart()).inverse();
     }
 
     template <class T> template <class T1> 
@@ -228,7 +228,7 @@ namespace tmv {
         TMVAssert(minv.colsize() == pimpl->LLx.size());
         TMVAssert(minv.rowsize() == pimpl->LLx.size());
 
-        if (isComplex(T1())) minv.diag().imag().zero();
+        if (isComplex(T1())) minv.diag().imagPart().setZero();
         doMakeInverse(HermMatrixViewOf(minv,Lower));
         if (minv.colsize() > 1)
             minv.upperTri().offDiag() =

@@ -1,10 +1,10 @@
 
 #define START 0
 
-#include "TMV_Test.h"
-#include "TMV_Test2.h"
 #include "TMV.h"
 #include "TMV_Sym.h"
+#include "TMV_Test.h"
+#include "TMV_Test2.h"
 #include "TMV_TestSymArith.h"
 
 #define NOLDIVEQ
@@ -24,7 +24,7 @@ void TestSymDiv_A(tmv::DivType dt, PosDefCode pdc)
 
     tmv::Matrix<T> a1(N,N);
     for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) a1(i,j) = T(1-3*i+j);
-    a1.diag().AddToAll(T(10)*N);
+    a1.diag().addToAll(T(10)*N);
     a1 /= T(10);
     tmv::Matrix<std::complex<T> > ca1 = a1 * std::complex<T>(3,-4);
 
@@ -46,12 +46,12 @@ void TestSymDiv_A(tmv::DivType dt, PosDefCode pdc)
         tmv::SymMatrixView<T> si = s[i];
         tmv::SymMatrixView<std::complex<T> > csi = cs[i];
         if (dt == tmv::CH && csi.issym()) continue;
-        si.SaveDiv();
-        csi.SaveDiv();
+        si.saveDiv();
+        csi.saveDiv();
 
 
-        TestMatrixDivArith2<T>(dt,s1x,cs1x,si,s1.View(),csi,cs1.View(),"Sym/Sym");
-        TestMatrixDivArith1<T>(dt,h1x,ch1x,si,h1.View(),csi,ch1.View(),"Herm/Sym");
+        TestMatrixDivArith2<T>(dt,s1x,cs1x,si,s1.view(),csi,cs1.view(),"Sym/Sym");
+        TestMatrixDivArith1<T>(dt,h1x,ch1x,si,h1.view(),csi,ch1.view(),"Herm/Sym");
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
     for(size_t i=0;i<CB.size();++i) delete CB[i];

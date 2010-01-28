@@ -143,7 +143,7 @@ namespace tmv {
             TMVAssert(M>0);
             TMVAssert(N>0);
             TMVAssert(S==RowMajor || S==ColMajor);
-            if (x == T(0)) zero();
+            if (x == T(0)) setZero();
             else setAllTo(x);
         }
 
@@ -640,7 +640,7 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline type& zero() 
+        inline type& setZero() 
         { for(int i=0;i<M*N;++i) itsm[i] = T(0); return *this; }
 
         inline type& clip(RT thresh)
@@ -676,7 +676,7 @@ namespace tmv {
         inline type& setToIdentity(const T& x=T(1)) 
         { 
             TMVAssert(M == N);
-            zero();
+            setZero();
             for(int i=0; i<M*N; i+=M+1) itsm[i] = x;
             return *this;
         }
@@ -774,7 +774,7 @@ namespace tmv {
         { reversePermuteCols(p,I==CStyle?0:1,N); return *this; }
 
         TMV_DEPRECATED(type& Zero())
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(type& SetAllTo(const T& x))
         { return setAllTo(x); }
         TMV_DEPRECATED(type& Clip(RT thresh))
@@ -834,11 +834,11 @@ namespace tmv {
         inline const_view_type rowRange(int i1, int i2) const
         { return view().rowRange(i1,i2); }
 
-        inline const_real_type real() const
-        { return view().real(); }
+        inline const_real_type realPart() const
+        { return view().realPart(); }
 
-        inline const_real_type imag() const
-        { return view().imag(); }
+        inline const_real_type imagPart() const
+        { return view().imagPart(); }
 
         inline view_type subMatrix(int i1, int i2, int j1, int j2)
         { return view().subMatrix(i1,i2,j1,j2); }
@@ -862,11 +862,11 @@ namespace tmv {
         inline view_type rowRange(int i1, int i2) 
         { return view().rowRange(i1,i2); }
 
-        inline real_type real() 
-        { return view().real(); }
+        inline real_type realPart() 
+        { return view().realPart(); }
 
-        inline real_type imag() 
-        { return view().imag(); }
+        inline real_type imagPart() 
+        { return view().imagPart(); }
 
         TMV_DEPRECATED(const_view_type SubMatrix(
                 int i1, int i2, int j1, int j2) const)
@@ -892,9 +892,9 @@ namespace tmv {
         TMV_DEPRECATED(const_view_type Rows(int i1, int i2) const)
         { return rowRange(i1,i2); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(view_type SubMatrix(int i1, int i2, int j1, int j2))
         { return subMatrix(i1,i2,j1,j2); }
         TMV_DEPRECATED(view_type SubMatrix(
@@ -916,9 +916,9 @@ namespace tmv {
         TMV_DEPRECATED(view_type Rows(int i1, int i2))
         { return rowRange(i1,i2); }
         TMV_DEPRECATED(real_type Real())
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag())
-        { return imag(); }
+        { return imagPart(); }
 
 
         //

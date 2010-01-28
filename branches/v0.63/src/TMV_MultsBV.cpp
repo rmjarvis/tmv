@@ -359,7 +359,7 @@ namespace tmv {
         const double* Aptr = A.cptr();
         if (A.uplo() == Upper) Aptr -= A.nlo();
         if (ar == 0.) {
-            if (beta == 0) y.real().zero();
+            if (beta == 0) y.realPart().setZero();
         } else
             BLASNAME(dsbmv) (
                 BLASCM A.uplo() == Upper?BLASCH_UP:BLASCH_LO, 
@@ -367,7 +367,7 @@ namespace tmv {
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp),BLASV(ys) BLAS1);
         if (ai == 0.) {
-            if (beta == 0) y.imag().zero();
+            if (beta == 0) y.imagPart().setZero();
         } else 
             BLASNAME(dsbmv) (
                 BLASCM A.uplo() == Upper?BLASCH_UP:BLASCH_LO, 
@@ -561,7 +561,7 @@ namespace tmv {
         const float* Aptr = A.cptr();
         if (A.uplo() == Upper) Aptr -= A.nlo();
         if (ar == 0.F) {
-            if (beta == 0) y.real().zero();
+            if (beta == 0) y.realPart().setZero();
         } else
             BLASNAME(ssbmv) (
                 BLASCM A.uplo() == Upper?BLASCH_UP:BLASCH_LO, 
@@ -569,7 +569,7 @@ namespace tmv {
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp),BLASV(ys) BLAS1);
         if (ai == 0.F) {
-            if (beta == 0) y.imag().zero();
+            if (beta == 0) y.imagPart().setZero();
         } else 
             BLASNAME(ssbmv) (
                 BLASCM A.uplo() == Upper?BLASCH_UP:BLASCH_LO, 
@@ -581,7 +581,7 @@ namespace tmv {
 #endif // BLAS
 
     template <bool add, class T, class Ta, class Tx> 
-    static void doMultMV(
+    static void DoMultMV(
         const T alpha, const GenSymBandMatrix<Ta>& A,
         const GenVector<Tx>& x, const VectorView<T>& y)
     {
@@ -594,20 +594,20 @@ namespace tmv {
 
 #ifdef BLAS
         if (A.isrm()) 
-            if (A.isherm()) doMultMV<add>(alpha,A.adjoint(),x,y);
-            else doMultMV<add>(alpha,A.transpose(),x,y);
+            if (A.isherm()) DoMultMV<add>(alpha,A.adjoint(),x,y);
+            else DoMultMV<add>(alpha,A.transpose(),x,y);
         else if (A.isconj()) 
-            doMultMV<add>(
+            DoMultMV<add>(
                 TMV_CONJ(alpha),A.conjugate(),x.conjugate(),y.conjugate());
         else if (x.step() == 0) {
             if (x.size() <= 1) 
-                doMultMV<add>(
+                DoMultMV<add>(
                     alpha,A,ConstVectorView<Tx>(x.cptr(),x.size(),1,x.ct()),y);
             else 
-                doMultMV<add>(alpha,A,Vector<Tx>(x),y);
+                DoMultMV<add>(alpha,A,Vector<Tx>(x),y);
         } else if (y.step() == 0) {
             TMVAssert(y.size() <= 1);
-            doMultMV<add>(alpha,A,x,VectorView<T>(y.ptr(),y.size(),1,y.ct()));
+            DoMultMV<add>(alpha,A,x,VectorView<T>(y.ptr(),y.size(),1,y.ct()));
         } else {
 #ifdef XDEBUG
             cout<<"BLAS section: alpha = "<<alpha<<endl;
@@ -642,39 +642,39 @@ namespace tmv {
                         if (A.uplo() == Upper) {
                             HermBandMatrix<Ta,Upper,ColMajor> A2 =
                                 TMV_REAL(alpha)*A;
-                            doMultMV<add>(T(1),A2,x,y);
+                            DoMultMV<add>(T(1),A2,x,y);
                         } else {
                             HermBandMatrix<Ta,Lower,ColMajor> A2 =
                                 TMV_REAL(alpha)*A;
-                            doMultMV<add>(T(1),A2,x,y);
+                            DoMultMV<add>(T(1),A2,x,y);
                         }
                     } else {
                         if (A.uplo() == Upper) {
                             SymBandMatrix<Ta,Upper,ColMajor> A2 =
                                 TMV_REAL(alpha)*A;
-                            doMultMV<add>(T(1),A2,x,y);
+                            DoMultMV<add>(T(1),A2,x,y);
                         } else {
                             SymBandMatrix<Ta,Lower,ColMajor> A2 =
                                 TMV_REAL(alpha)*A;
-                            doMultMV<add>(T(1),A2,x,y);
+                            DoMultMV<add>(T(1),A2,x,y);
                         }
                     }
                 } else {
                     if (!A.issym()) {
                         if (A.uplo() == Upper) {
                             HermBandMatrix<Ta,Upper,ColMajor> A2 = A;
-                            doMultMV<add>(alpha,A2,x,y);
+                            DoMultMV<add>(alpha,A2,x,y);
                         } else {
                             HermBandMatrix<Ta,Lower,ColMajor> A2 = A;
-                            doMultMV<add>(alpha,A2,x,y);
+                            DoMultMV<add>(alpha,A2,x,y);
                         }
                     } else {
                         if (A.uplo() == Upper) {
                             SymBandMatrix<T,Upper,ColMajor> A2 = alpha*A;
-                            doMultMV<add>(T(1),A2,x,y);
+                            DoMultMV<add>(T(1),A2,x,y);
                         } else {
                             SymBandMatrix<T,Lower,ColMajor> A2 = alpha*A;
-                            doMultMV<add>(T(1),A2,x,y);
+                            DoMultMV<add>(T(1),A2,x,y);
                         }
                     }
                 }
@@ -710,14 +710,14 @@ namespace tmv {
 
         if (y.size() > 0) {
             if (x.size()==0 || alpha==T(0)) {
-                if (!add) y.zero();
+                if (!add) y.setZero();
             } else if (SameStorage(x,y)) {
                 Vector<T> yy(y.size());
-                doMultMV<false>(T(1),A,x,yy.view());
+                DoMultMV<false>(T(1),A,x,yy.view());
                 if (add) y += alpha*yy;
                 else y = alpha*yy;
             } else {
-                doMultMV<add>(alpha,A,x,y);
+                DoMultMV<add>(alpha,A,x,y);
             } 
         }
 #ifdef XDEBUG

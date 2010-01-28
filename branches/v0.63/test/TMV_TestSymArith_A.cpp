@@ -2,10 +2,10 @@
 #define START1 0
 #define START2 0
 
-#include "TMV_Test.h"
-#include "TMV_Test2.h"
 #include "TMV.h"
 #include "TMV_Sym.h"
+#include "TMV_Test.h"
+#include "TMV_Test2.h"
 #include "TMV_TestSymArith.h"
 
 template <class T> 

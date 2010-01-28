@@ -220,7 +220,7 @@ namespace tmv {
         const int M = QRx.colsize();
         const int N = QRx.rowsize();
 
-        x.colRange(N,M).zero();
+        x.colRange(N,M).setZero();
         x.colRange(0,N) = m;
         TriLDivEq(QRx.subBandMatrix(0,N,0,N,0,QRx.nhi()).transpose(),
                   x.colRange(0,N).transpose(),NonUnitDiag);

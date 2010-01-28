@@ -89,6 +89,9 @@ namespace tmv {
             return ListAssigner<T,IT>(++_ptr,_nLeft-1);
         }
 
+        ListAssigner<T,IT> operator<<(const T& x)
+        { return operator,(x); }
+
     protected:
         IT  _ptr;
         int _nLeft;

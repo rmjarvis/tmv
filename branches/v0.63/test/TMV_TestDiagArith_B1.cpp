@@ -1,7 +1,7 @@
 
+#include "TMV.h"
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
-#include "TMV.h"
 #include <fstream>
 
 #define NOADDEQ
@@ -26,18 +26,18 @@ void TestDiagMatrixArith_B1()
     tmv::DiagMatrix<std::complex<T> > cb = b*std::complex<T>(-5,-1);
 
     tmv::Matrix<T> p(N,N,5);
-    p.diag().AddToAll(N*10);
+    p.diag().addToAll(N*10);
     tmv::Matrix<std::complex<T> > cp = p*std::complex<T>(2,3);
     cp += ca;
 
     tmv::Matrix<T> q(2*N,N,-2);
-    q.Rows(0,N) += p;
-    q.Rows(N,2*N) -= p;
-    q.Rows(N/2,3*N/2) += T(4)*p;
+    q.rowRange(0,N) += p;
+    q.rowRange(N,2*N) -= p;
+    q.rowRange(N/2,3*N/2) += T(4)*p;
     tmv::Matrix<std::complex<T> > cq = q*std::complex<T>(-1,4);
-    cq.Rows(0,N) -= cp;
-    cq.Rows(N,2*N) += cp;
-    cq.Rows(N/2,3*N/2) -= T(4)*cp;
+    cq.rowRange(0,N) -= cp;
+    cq.rowRange(N,2*N) += cp;
+    cq.rowRange(N/2,3*N/2) -= T(4)*cp;
 
     tmv::Matrix<T> r(N,0,T(1));
     tmv::Matrix<std::complex<T> > cr(N,0,T(1));
@@ -45,17 +45,17 @@ void TestDiagMatrixArith_B1()
     tmv::Matrix<T> ax = a;
     tmv::Matrix<std::complex<T> > cax = ca;
 
-    tmv::DiagMatrixView<T> av = a.View();
-    tmv::DiagMatrixView<std::complex<T> > cav = ca.View();
-    tmv::MatrixView<T> pv = p.View();
-    tmv::MatrixView<std::complex<T> > cpv = cp.View();
+    tmv::DiagMatrixView<T> av = a.view();
+    tmv::DiagMatrixView<std::complex<T> > cav = ca.view();
+    tmv::MatrixView<T> pv = p.view();
+    tmv::MatrixView<std::complex<T> > cpv = cp.view();
 
     TestMatrixArith456<T>(ax,cax,av,cav,pv,cpv, "Diag/SquareM");
 
-    tmv::MatrixView<T> qv = q.View();
-    tmv::MatrixView<std::complex<T> > cqv = cq.View();
-    tmv::MatrixView<T> rv = r.View();
-    tmv::MatrixView<std::complex<T> > crv = cr.View();
+    tmv::MatrixView<T> qv = q.view();
+    tmv::MatrixView<std::complex<T> > cqv = cq.view();
+    tmv::MatrixView<T> rv = r.view();
+    tmv::MatrixView<std::complex<T> > crv = cr.view();
 
     TestMatrixArith456<T>(ax,cax,av,cav,qv,cqv, "Diag/NonSquareM");
     TestMatrixArith456<T>(ax,cax,av,cav,rv,crv, "Diag/DegenM");

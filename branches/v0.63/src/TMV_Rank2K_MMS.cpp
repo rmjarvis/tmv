@@ -465,12 +465,12 @@ namespace tmv {
         TMVAssert(y.isrm() || y.iscm());
         TMVAssert(x.stor() == y.stor());
 
-        Matrix<double,ColMajor> x1 = x.real();
+        Matrix<double,ColMajor> x1 = x.realPart();
         SymMatrix<double,Lower,ColMajor> A1(A.size());
         BlasRank2KUpdate(1.,x1,y,0,A1.view());
         if (beta == 0) A = alpha*A1;
         else A += alpha*A1;
-        x1 = x.imag();
+        x1 = x.imagPart();
         BlasRank2KUpdate(1.,x1,y,0,A1.view());
         A += std::complex<double>(0,1)*alpha*A1;
     }
@@ -494,12 +494,12 @@ namespace tmv {
         TMVAssert(y.isrm() || y.iscm());
         TMVAssert(x.stor() == y.stor());
 
-        Matrix<double,RowMajor> y1 = y.real();
+        Matrix<double,RowMajor> y1 = y.realPart();
         SymMatrix<double,Lower,ColMajor> A1(A.size());
         BlasRank2KUpdate(1.,x,y1,0,A1.view());
         if (beta == 0) A = alpha*A1;
         else A += alpha*A1;
-        y1 = y.imag();
+        y1 = y.imagPart();
         BlasRank2KUpdate(1.,x,y1,0,A1.view());
         A += std::complex<double>(0,1)*alpha*A1;
     }
@@ -627,12 +627,12 @@ namespace tmv {
         TMVAssert(y.isrm() || y.iscm());
         TMVAssert(x.stor() == y.stor());
 
-        Matrix<float,ColMajor> x1 = x.real();
+        Matrix<float,ColMajor> x1 = x.realPart();
         SymMatrix<float,Lower,ColMajor> A1(A.size());
         BlasRank2KUpdate(1.F,x1,y,0,A1.view());
         if (beta == 0) A = alpha*A1;
         else A += alpha*A1;
-        x1 = x.imag();
+        x1 = x.imagPart();
         BlasRank2KUpdate(1.F,x1,y,0,A1.view());
         A += std::complex<float>(0,1)*alpha*A1;
     }
@@ -656,12 +656,12 @@ namespace tmv {
         TMVAssert(y.isrm() || y.iscm());
         TMVAssert(x.stor() == y.stor());
 
-        Matrix<float,RowMajor> y1 = y.real();
+        Matrix<float,RowMajor> y1 = y.realPart();
         SymMatrix<float,Lower,ColMajor> A1(A.size());
         BlasRank2KUpdate(1.F,x,y1,0,A1.view());
         if (beta == 0) A = alpha*A1;
         else A += alpha*A1;
-        y1 = y.imag();
+        y1 = y.imagPart();
         BlasRank2KUpdate(1.F,x,y1,0,A1.view());
         A += std::complex<float>(0,1)*alpha*A1;
     }

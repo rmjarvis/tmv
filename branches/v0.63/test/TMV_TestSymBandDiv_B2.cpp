@@ -1,10 +1,10 @@
 
 #define START 0
 
-#include "TMV_Test.h"
-#include "TMV_Test2.h"
 #include "TMV.h"
 #include "TMV_SymBand.h"
+#include "TMV_Test.h"
+#include "TMV_Test2.h"
 #include "TMV_TestSymBandArith.h"
 
 #define NOLDIVEQ
@@ -24,37 +24,37 @@ void TestSymBandDiv_B2(tmv::DivType dt, PosDefCode pdc)
 
     tmv::Matrix<T> a1(N,N);
     for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) a1(i,j) = T(1-3*i+j);
-    a1.diag().AddToAll(T(10)*N);
+    a1.diag().addToAll(T(10)*N);
     a1 /= T(10);
     tmv::Matrix<std::complex<T> > ca1 = a1 * std::complex<T>(3,-4);
-    a1.diag().AddToAll(T(10)*N);
-    ca1.diag().AddToAll(T(10)*N);
+    a1.diag().addToAll(T(10)*N);
+    ca1.diag().addToAll(T(10)*N);
 
-    tmv::MatrixView<T> a1v = a1.View();
-    tmv::MatrixView<std::complex<T> > ca1v = ca1.View();
+    tmv::MatrixView<T> a1v = a1.view();
+    tmv::MatrixView<std::complex<T> > ca1v = ca1.view();
 
 #ifdef XTEST
-    tmv::Matrix<T> a3 = a1.Cols(0,N/2);
-    tmv::Matrix<std::complex<T> > ca3 = ca1.Cols(0,N/2);
-    tmv::Matrix<T> a4 = a1.Rows(0,N/2);
-    tmv::Matrix<std::complex<T> > ca4 = ca1.Rows(0,N/2);
+    tmv::Matrix<T> a3 = a1.colRange(0,N/2);
+    tmv::Matrix<std::complex<T> > ca3 = ca1.colRange(0,N/2);
+    tmv::Matrix<T> a4 = a1.rowRange(0,N/2);
+    tmv::Matrix<std::complex<T> > ca4 = ca1.rowRange(0,N/2);
     tmv::Matrix<T> a5(2*N,N);
-    a5.Rows(0,N) = a1;
-    a5.Rows(N,2*N) = a1;
+    a5.rowRange(0,N) = a1;
+    a5.rowRange(N,2*N) = a1;
     tmv::Matrix<std::complex<T> > ca5(2*N,N);
-    ca5.Rows(0,N) = ca1;
-    ca5.Rows(N,2*N) = ca1;
-    tmv::Matrix<T> a6 = a5.Transpose();
-    tmv::Matrix<std::complex<T> > ca6 = ca5.Transpose();
+    ca5.rowRange(0,N) = ca1;
+    ca5.rowRange(N,2*N) = ca1;
+    tmv::Matrix<T> a6 = a5.transpose();
+    tmv::Matrix<std::complex<T> > ca6 = ca5.transpose();
 
-    tmv::MatrixView<T> a3v = a3.View();
-    tmv::MatrixView<T> a4v = a4.View();
-    tmv::MatrixView<T> a5v = a5.View();
-    tmv::MatrixView<T> a6v = a6.View();
-    tmv::MatrixView<std::complex<T> > ca3v = ca3.View();
-    tmv::MatrixView<std::complex<T> > ca4v = ca4.View();
-    tmv::MatrixView<std::complex<T> > ca5v = ca5.View();
-    tmv::MatrixView<std::complex<T> > ca6v = ca6.View();
+    tmv::MatrixView<T> a3v = a3.view();
+    tmv::MatrixView<T> a4v = a4.view();
+    tmv::MatrixView<T> a5v = a5.view();
+    tmv::MatrixView<T> a6v = a6.view();
+    tmv::MatrixView<std::complex<T> > ca3v = ca3.view();
+    tmv::MatrixView<std::complex<T> > ca4v = ca4.view();
+    tmv::MatrixView<std::complex<T> > ca5v = ca5.view();
+    tmv::MatrixView<std::complex<T> > ca6v = ca6.view();
 #endif
 
     for(size_t i=START;i<sb.size();i++) {
@@ -63,8 +63,8 @@ void TestSymBandDiv_B2(tmv::DivType dt, PosDefCode pdc)
                 "  "<<sb[i]<<std::endl;
         const tmv::SymBandMatrixView<T>& si = sb[i];
         const tmv::SymBandMatrixView<std::complex<T> >& csi = csb[i];
-        si.SaveDiv();
-        csi.SaveDiv();
+        si.saveDiv();
+        csi.saveDiv();
 
         if (csi.issym()) {
             tmv::SymBandMatrix<T> sx = si;

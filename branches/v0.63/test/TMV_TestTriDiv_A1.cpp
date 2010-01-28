@@ -1,6 +1,6 @@
+#include "TMV.h"
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
-#include "TMV.h"
 
 template <class T1, class T2> 
 inline bool CanLDivEq(
@@ -32,21 +32,21 @@ void TestTriDiv()
     tmv::Matrix<T> m(N,N);
     for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) 
         m(i,j) = T(0.4+0.02*i-0.05*j);
-    m.diag().AddToAll(5);
-    m.diag(1).AddToAll(T(0.32));
-    m.diag(-1).AddToAll(T(0.91));
+    m.diag().addToAll(5);
+    m.diag(1).addToAll(T(0.32));
+    m.diag(-1).addToAll(T(0.91));
 
     tmv::UpperTriMatrix<T,D> a(m);
     m = a;
-    a.SaveDiv();
-    m.SaveDiv();
+    a.saveDiv();
+    m.saveDiv();
 
     tmv::Vector<T> b(N);
     for (int i=0;i<N;++i) b(i) = T(i+7);
 
-    a.SetDiv();
-    m.DivideUsing(tmv::LU);
-    m.SetDiv();
+    a.setDiv();
+    m.divideUsing(tmv::LU);
+    m.setDiv();
 
     if (showacc) {
         std::cout<<"b = "<<b<<std::endl;
@@ -54,7 +54,7 @@ void TestTriDiv()
         std::cout<<"m = "<<m<<std::endl;
     }
 
-    T eps = EPS * Norm(m) * Norm(m.Inverse());
+    T eps = EPS * Norm(m) * Norm(m.inverse());
 
     tmv::Vector<T> x1 = b/a;
     tmv::Vector<T> x2 = b/m;
@@ -80,8 +80,8 @@ void TestTriDiv()
     }
     Assert(Norm(x1-x2) < eps*Norm(x1),"Tri b%a");
 
-    tmv::UpperTriMatrix<T,D> ainv = a.Inverse();
-    tmv::Matrix<T> minv = m.Inverse();
+    tmv::UpperTriMatrix<T,D> ainv = a.inverse();
+    tmv::Matrix<T> minv = m.inverse();
     if (showacc) {
         std::cout<<"ainv = "<<ainv<<std::endl;
         std::cout<<"minv = "<<minv<<std::endl;
@@ -91,18 +91,18 @@ void TestTriDiv()
     Assert(Norm(ainv-minv) < eps*Norm(ainv),"Tri Inverse");
 
     if (showacc) {
-        std::cout<<"a.Det = "<<a.Det()<<", m.Det = "<<m.Det()<<std::endl;
-        std::cout<<"abs(adet-mdet) = "<<std::abs(a.Det()-m.Det());
-        std::cout<<"  EPS*abs(mdet) = "<<eps*std::abs(m.Det())<<std::endl;
-        std::cout<<"a.LogDet = "<<a.LogDet();
-        std::cout<<", m.LogDet = "<<m.LogDet()<<std::endl;
+        std::cout<<"Det(a) = "<<Det(a)<<", Det(m) = "<<Det(m)<<std::endl;
+        std::cout<<"abs(adet-mdet) = "<<std::abs(Det(a)-Det(m));
+        std::cout<<"  EPS*abs(mdet) = "<<eps*std::abs(Det(m))<<std::endl;
+        std::cout<<"LogDet(a) = "<<LogDet(a);
+        std::cout<<", LogDet(m) = "<<LogDet(m)<<std::endl;
     }
-    Assert(std::abs(m.Det()-a.Det()) < eps*std::abs(m.Det()),"Tri Det");
+    Assert(std::abs(Det(m)-Det(a)) < eps*std::abs(Det(m)),"Tri Det");
     T asign, msign;
-    Assert(std::abs(m.LogDet(&msign)-a.LogDet(&asign)) < N*eps,"Tri LogDet");
+    Assert(std::abs(m.logDet(&msign)-a.logDet(&asign)) < N*eps,"Tri LogDet");
     Assert(std::abs(asign-msign) < N*eps,"Tri LogDet - sign");
-    Assert(std::abs(a.Det() - asign*std::exp(a.LogDet())) < 
-           eps*std::abs(m.Det()),"Tri Det--LogDet");
+    Assert(std::abs(Det(a) - asign*std::exp(LogDet(a))) < 
+           eps*std::abs(Det(m)),"Tri Det--LogDet");
 
     tmv::Matrix<std::complex<T> > cm(m);
     cm += std::complex<T>(10,2);
@@ -111,26 +111,27 @@ void TestTriDiv()
 
     tmv::UpperTriMatrix<std::complex<T>,D> ca(cm);
     cm = ca;
-    ca.SaveDiv();
-    cm.SaveDiv();
+    ca.saveDiv();
+    cm.saveDiv();
 
-    cm.DivideUsing(tmv::LU);
-    cm.SetDiv();
-    ca.SetDiv();
+    cm.divideUsing(tmv::LU);
+    cm.setDiv();
+    ca.setDiv();
 
-    T ceps = EPS * Norm(cm) * Norm(cm.Inverse());
+    T ceps = EPS * Norm(cm) * Norm(cm.inverse());
 
     if (showacc) {
-        std::cout<<"ca.Det = "<<ca.Det()<<", cm.Det = "<<cm.Det()<<std::endl;
-        std::cout<<"abs(cadet-cmdet) = "<<std::abs(ca.Det()-cm.Det());
-        std::cout<<"  EPS*abs(cmdet) = "<<ceps*std::abs(cm.Det())<<std::endl;
+        std::cout<<"Det(ca) = "<<Det(ca)<<", Det(cm) = "<<Det(cm)<<std::endl;
+        std::cout<<"abs(cadet-cmdet) = "<<std::abs(Det(ca)-Det(cm));
+        std::cout<<"  EPS*abs(cmdet) = "<<ceps*std::abs(Det(cm))<<std::endl;
     }
-    Assert(std::abs(ca.Det()-cm.Det()) < ceps*std::abs(cm.Det()),"Tri CDet");
+    Assert(std::abs(Det(ca)-Det(cm)) < ceps*std::abs(Det(cm)),"Tri CDet");
     std::complex<T> casign, cmsign;
-    Assert(std::abs(cm.LogDet(&cmsign)-ca.LogDet(&casign)) < N*eps,"Tri CLogDet");
+    Assert(std::abs(cm.logDet(&cmsign)-ca.logDet(&casign)) < N*eps,
+           "Tri CLogDet");
     Assert(std::abs(casign-cmsign) < N*eps,"Tri CLogDet - sign");
-    Assert(std::abs(ca.Det() - casign*std::exp(ca.LogDet())) < 
-           eps*std::abs(cm.Det()),"Tri CDet--LogDet");
+    Assert(std::abs(Det(ca) - casign*std::exp(LogDet(ca))) < 
+           eps*std::abs(Det(cm)),"Tri CDet--LogDet");
 
     tmv::Vector<std::complex<T> > e(b);
     e(1) += std::complex<T>(-1,5);
@@ -178,10 +179,11 @@ void TestTriDiv_A1()
     const int N = 10;
 
     tmv::Matrix<T> m(N,N);
-    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) m(i,j) = T(0.4+0.02*i-0.05*j);
-    m.diag().AddToAll(5);
-    m.diag(1).AddToAll(T(0.32));
-    m.diag(-1).AddToAll(T(0.91));
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) 
+        m(i,j) = T(0.4+0.02*i-0.05*j);
+    m.diag().addToAll(5);
+    m.diag(1).addToAll(T(0.32));
+    m.diag(-1).addToAll(T(0.91));
 
     tmv::Matrix<std::complex<T> > cm(m);
     cm += std::complex<T>(10,2);
@@ -192,14 +194,14 @@ void TestTriDiv_A1()
     tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag> ca1(cm);
     tmv::UpperTriMatrix<T,tmv::UnitDiag> a2(m);
     tmv::UpperTriMatrix<std::complex<T>,tmv::UnitDiag> ca2(cm);
-    a1.SaveDiv();
-    a2.SaveDiv();
-    ca1.SaveDiv();
-    ca2.SaveDiv();
-    a1.SetDiv();
-    a2.SetDiv();
-    ca1.SetDiv();
-    ca2.SetDiv();
+    a1.saveDiv();
+    a2.saveDiv();
+    ca1.saveDiv();
+    ca2.saveDiv();
+    a1.setDiv();
+    a2.setDiv();
+    ca1.setDiv();
+    ca2.setDiv();
 
     tmv::UpperTriMatrix<T,tmv::NonUnitDiag> a1x(m);
     tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag> ca1x(cm);
@@ -210,14 +212,14 @@ void TestTriDiv_A1()
     tmv::LowerTriMatrix<T,tmv::UnitDiag> b2x(m);
     tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag> cb2x(cm);
 
-    TestMatrixDivArith2<T>(tmv::LU,a2x,ca2x,a1.View(),a2.View(),
-                           ca1.View(),ca2.View(),"U/U 1");
-    TestMatrixDivArith2<T>(tmv::LU,b2x,cb2x,a1.Transpose(),a2.Transpose(),
-                           ca1.Transpose(),ca2.Transpose(),"L/L 1");
-    TestMatrixDivArith2<T>(tmv::LU,a1x,ca1x,a2.View(),a1.View(),
-                           ca2.View(),ca1.View(),"U/U 2");
-    TestMatrixDivArith2<T>(tmv::LU,b1x,cb1x,a2.Transpose(),a1.Transpose(),
-                           ca2.Transpose(),ca1.Transpose(),"L/L 2");
+    TestMatrixDivArith2<T>(tmv::LU,a2x,ca2x,a1.view(),a2.view(),
+                           ca1.view(),ca2.view(),"U/U 1");
+    TestMatrixDivArith2<T>(tmv::LU,b2x,cb2x,a1.transpose(),a2.transpose(),
+                           ca1.transpose(),ca2.transpose(),"L/L 1");
+    TestMatrixDivArith2<T>(tmv::LU,a1x,ca1x,a2.view(),a1.view(),
+                           ca2.view(),ca1.view(),"U/U 2");
+    TestMatrixDivArith2<T>(tmv::LU,b1x,cb1x,a2.transpose(),a1.transpose(),
+                           ca2.transpose(),ca1.transpose(),"L/L 2");
 
 #ifdef XTEST
     tmv::UpperTriMatrix<T,tmv::NonUnitDiag> a1b(m);
@@ -225,14 +227,14 @@ void TestTriDiv_A1()
     tmv::UpperTriMatrix<T,tmv::UnitDiag> a2b(m);
     tmv::UpperTriMatrix<std::complex<T>,tmv::UnitDiag> ca2b(cm);
 
-    TestMatrixDivArith1<T>(tmv::LU,a1x,ca1x,a1.View(),a1b.View(),
-                           ca1.View(),ca1b.View(),"U/U 3");
-    TestMatrixDivArith1<T>(tmv::LU,b1x,cb1x,a1.Transpose(),a1b.Transpose(),
-                           ca1.Transpose(),ca1b.Transpose(),"L/L 3");
-    TestMatrixDivArith1<T>(tmv::LU,a2x,ca2x,a2.View(),a2b.View(),
-                           ca2.View(),ca2b.View(),"U/U 4");
-    TestMatrixDivArith1<T>(tmv::LU,b2x,cb2x,a2.Transpose(),a2b.Transpose(),
-                           ca2.Transpose(),ca2b.Transpose(),"L/L 4");
+    TestMatrixDivArith1<T>(tmv::LU,a1x,ca1x,a1.view(),a1b.view(),
+                           ca1.view(),ca1b.view(),"U/U 3");
+    TestMatrixDivArith1<T>(tmv::LU,b1x,cb1x,a1.transpose(),a1b.transpose(),
+                           ca1.transpose(),ca1b.transpose(),"L/L 3");
+    TestMatrixDivArith1<T>(tmv::LU,a2x,ca2x,a2.view(),a2b.view(),
+                           ca2.view(),ca2b.view(),"U/U 4");
+    TestMatrixDivArith1<T>(tmv::LU,b2x,cb2x,a2.transpose(),a2b.transpose(),
+                           ca2.transpose(),ca2b.transpose(),"L/L 4");
 #endif
 }
 

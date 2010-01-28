@@ -1,10 +1,10 @@
 
 #define START 0
 
-#include "TMV_Test.h"
-#include "TMV_Test2.h"
 #include "TMV.h"
 #include "TMV_Band.h"
+#include "TMV_Test.h"
+#include "TMV_Test2.h"
 #include "TMV_TestBandArith.h"
 
 #define NOLDIVEQ
@@ -24,17 +24,17 @@ void TestBandDiv_A(tmv::DivType dt)
 
     tmv::Matrix<T> a1(N,N);
     for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) a1(i,j) = T(3+i-2*j);
-    a1.diag().AddToAll(T(10)*N);
+    a1.diag().addToAll(T(10)*N);
     a1 /= T(10);
     tmv::Matrix<std::complex<T> > ca1 = a1 * std::complex<T>(3,-4);
 
     tmv::BandMatrix<T> b1(a1,3,1);
     tmv::BandMatrix<std::complex<T> > cb1 = b1 * std::complex<T>(2,-3);
-    tmv::BandMatrix<T> b2 = b1.SubBandMatrix(0,N/2,0,N,b1.nlo(),b1.nhi());
-    tmv::BandMatrix<std::complex<T> > cb2 = cb1.SubBandMatrix(
+    tmv::BandMatrix<T> b2 = b1.subBandMatrix(0,N/2,0,N,b1.nlo(),b1.nhi());
+    tmv::BandMatrix<std::complex<T> > cb2 = cb1.subBandMatrix(
         0,N/2,0,N,cb1.nlo(),cb1.nhi());
-    tmv::BandMatrix<T> b3 = b1.SubBandMatrix(0,N,0,N/2,b1.nlo(),b1.nhi());
-    tmv::BandMatrix<std::complex<T> > cb3 = cb1.SubBandMatrix(
+    tmv::BandMatrix<T> b3 = b1.subBandMatrix(0,N,0,N/2,b1.nlo(),b1.nhi());
+    tmv::BandMatrix<std::complex<T> > cb3 = cb1.subBandMatrix(
         0,N,0,N/2,cb1.nlo(),cb1.nhi());
 
     tmv::BandMatrix<T> b1x = b1;
@@ -50,17 +50,17 @@ void TestBandDiv_A(tmv::DivType dt)
                 "  "<<b[i]<<std::endl;
         const tmv::BandMatrixView<T>& bi = b[i];
         const tmv::BandMatrixView<std::complex<T> >& cbi = cb[i];
-        if (dt == tmv::LU && !bi.IsSquare()) continue;
+        if (dt == tmv::LU && !bi.isSquare()) continue;
 
-        bi.SaveDiv();
-        cbi.SaveDiv();
+        bi.saveDiv();
+        cbi.saveDiv();
 
-        TestMatrixDivArith2<T>(dt,b1x,cb1x,bi,b1.View(),cbi,cb1.View(),
+        TestMatrixDivArith2<T>(dt,b1x,cb1x,bi,b1.view(),cbi,cb1.view(),
                                "SquareBand/Band");
 #ifdef XTEST
-        TestMatrixDivArith1<T>(dt,b2x,cb2x,bi,b2.View(),cbi,cb2.View(),
+        TestMatrixDivArith1<T>(dt,b2x,cb2x,bi,b2.view(),cbi,cb2.view(),
                                "NonSquareBand/Band");
-        TestMatrixDivArith1<T>(dt,b3x,cb3x,bi,b3.View(),cbi,cb3.View(),
+        TestMatrixDivArith1<T>(dt,b3x,cb3x,bi,b3.view(),cbi,cb3.view(),
                                "NonSquareBand/Band");
 #endif
     }

@@ -60,7 +60,7 @@ namespace tmv {
 #endif
         if (A.rowsize() > 0 && A.colsize() > 0 && alpha != T(1)) {
             if (A.isconj()) MultXM(TMV_CONJ(alpha),A.conjugate());
-            else if (alpha == T(0)) A.zero();
+            else if (alpha == T(0)) A.setZero();
             else if (A.canLinearize()) A.linearView() *= alpha;
             else {
                 for(int i=-A.nlo();i<=A.nhi();++i) A.diag(i) *= alpha;

@@ -663,7 +663,7 @@ namespace tmv {
 
         if (A.colsize() > 0 && A.rowsize() > 0) {
             if (alpha == T(0)) {
-                if (!add) A.zero();
+                if (!add) A.setZero();
             } else {
                 if (A.isconj()) 
                     Rank1Update<add>(
@@ -683,35 +683,35 @@ namespace tmv {
                                 if (x.size() <= y.size()) {
                                     Vector<Tx> xx = TMV_REAL(alpha)*x;
                                     Vector<Ty> yy = y;
-                                    if (!add) A.zero();
+                                    if (!add) A.setZero();
                                     BlasRank1Update(T(1),xx,yy,A);
                                 } else {
                                     Vector<Tx> xx = x;
                                     Vector<Ty> yy = TMV_REAL(alpha)*y;
-                                    if (!add) A.zero();
+                                    if (!add) A.setZero();
                                     BlasRank1Update(T(1),xx,yy,A);
                                 }
                             } else {
                                 if (x.size() <= y.size()) {
                                     Vector<T> xx = alpha*x;
                                     Vector<Ty> yy = y;
-                                    if (!add) A.zero();
+                                    if (!add) A.setZero();
                                     BlasRank1Update(T(1),xx,yy,A);
                                 } else {
                                     Vector<Tx> xx = x;
                                     Vector<T> yy = alpha*y;
-                                    if (!add) A.zero();
+                                    if (!add) A.setZero();
                                     BlasRank1Update(T(1),xx,yy,A);
                                 }
                             }
                         } else {
                             if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
                                 Vector<Tx> xx = TMV_REAL(alpha)*x;
-                                if (!add) A.zero();
+                                if (!add) A.setZero();
                                 BlasRank1Update(T(1),xx,y,A);
                             } else {
                                 Vector<T> xx = alpha*x;
-                                if (!add) A.zero();
+                                if (!add) A.setZero();
                                 BlasRank1Update(T(1),xx,y,A);
                             }
                         }
@@ -719,15 +719,15 @@ namespace tmv {
                         if (SameStorage(A,y)) {
                             if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
                                 Vector<Ty> yy = TMV_REAL(alpha)*y;
-                                if (!add) A.zero();
+                                if (!add) A.setZero();
                                 BlasRank1Update(T(1),x,yy,A);
                             } else {
                                 Vector<T> yy = alpha*y;
-                                if (!add) A.zero();
+                                if (!add) A.setZero();
                                 BlasRank1Update(T(1),x,yy,A);
                             }
                         } else {
-                            if (!add) A.zero();
+                            if (!add) A.setZero();
                             if (x.isconj() && y.isconj()) {
                                 if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
                                     if (x.size() <= y.size()) {

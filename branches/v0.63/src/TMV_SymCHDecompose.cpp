@@ -100,12 +100,12 @@ namespace tmv {
         // These are solved as: (Taking A to be stored in its LowerTriangle part)
         //
         // L(i,0:i) = A(i,0:i) % L(0:i,0:i)t
-        // L(i,i) = sqrt( A(i,i) - normSq(L(i,0:i)) )
+        // L(i,i) = sqrt( A(i,i) - NormSq(L(i,0:i)) )
         // [ ie. row by row from the top. ]
         //
         // or 
         // 
-        // L(i,i) = sqrt( A(i,i) - normSq(L(i,0:i)) )
+        // L(i,i) = sqrt( A(i,i) - NormSq(L(i,0:i)) )
         // L(i+1:N,i) = (A(i+1:N,i) - L(i,0:i) * L(i+1:N,0:i)t) / L(i,i)
         // [ ie. col by col from the left ]
         //
@@ -149,7 +149,7 @@ namespace tmv {
 #endif
 #endif
 
-        const VectorView<RT> Adiag = A.real().diag();
+        const VectorView<RT> Adiag = A.realPart().diag();
         if (cm) {
             RT* Ajj= Adiag.ptr();
             const int ds = Adiag.step();
@@ -163,8 +163,8 @@ namespace tmv {
 #endif
                 }
 #ifdef TMVFLDEBUG
-                TMVAssert(Ajj >= A.real().first);
-                TMVAssert(Ajj < A.real().last);
+                TMVAssert(Ajj >= A.realPart().first);
+                TMVAssert(Ajj < A.realPart().last);
 #endif
                 *Ajj = TMV_SQRT(*Ajj);
                 A.col(j,j+1,N) /= *Ajj;
@@ -180,8 +180,8 @@ namespace tmv {
 #endif
             }
 #ifdef TMVFLDEBUG
-            TMVAssert(Ajj >= A.real().first);
-            TMVAssert(Ajj < A.real().last);
+            TMVAssert(Ajj >= A.realPart().first);
+            TMVAssert(Ajj < A.realPart().last);
 #endif
             *Ajj = TMV_SQRT(*Ajj);
         } else {
@@ -196,18 +196,18 @@ namespace tmv {
 #endif
             }
 #ifdef TMVFLDEBUG
-            TMVAssert(Aii >= A.real().first);
-            TMVAssert(Aii < A.real().last);
+            TMVAssert(Aii >= A.realPart().first);
+            TMVAssert(Aii < A.realPart().last);
 #endif
             *Aii = TMV_SQRT(*Aii);
             for(int i=1; i<N; ++i) {
                 Aii+=ds;
                 A.row(i,0,i) %= A.lowerTri().subTriMatrix(0,i).adjoint();
 #ifdef TMVFLDEBUG
-                TMVAssert(Aii >= A.real().first);
-                TMVAssert(Aii < A.real().last);
+                TMVAssert(Aii >= A.realPart().first);
+                TMVAssert(Aii < A.realPart().last);
 #endif
-                *Aii -= normSq(A.row(i,0,i));
+                *Aii -= NormSq(A.row(i,0,i));
                 if (*Aii <= RT(0)) {
 #ifdef NOTHROW
                     std::cerr<<"Non Posdef HermMatrix found \n"; 
@@ -217,8 +217,8 @@ namespace tmv {
 #endif
                 }
 #ifdef TMVFLDEBUG
-                TMVAssert(Aii >= A.real().first);
-                TMVAssert(Aii < A.real().last);
+                TMVAssert(Aii >= A.realPart().first);
+                TMVAssert(Aii < A.realPart().last);
 #endif
                 *Aii = TMV_SQRT(*Aii);
             }

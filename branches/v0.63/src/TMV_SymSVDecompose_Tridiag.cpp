@@ -101,9 +101,9 @@ namespace tmv {
         }
 
         // The tridiagonal of A is the tridiagonal we want, so copy it to D,E
-        if (isReal(Td())) D = A.diag().real();
+        if (isReal(Td())) D = A.diag().realPart();
         else D = A.diag();
-        E = A.diag(1).real();
+        E = A.diag(1).realPart();
 
         if (!A.isherm()) signdet *= signdet;
     }
@@ -244,7 +244,7 @@ namespace tmv {
         }
 
         // E has already been set, but the diagonal of A needs to be copied to D.
-        if (isReal(Td())) D = A.diag().real();
+        if (isReal(Td())) D = A.diag().realPart();
         else D = A.diag();
 
         if (!A.isherm()) signdet *= signdet;

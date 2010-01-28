@@ -146,9 +146,9 @@ namespace tmv {
 
         if (ha && isComplex(T())) {
 #ifdef XTEST
-            TMVAssert(normInf(A.diag().imag()) <= eps);
+            TMVAssert(normInf(A.diag().imagPart()) <= eps);
 #endif
-            A.diag().imag().zero();
+            A.diag().imagPart().setZero();
         }
     }
 
@@ -223,14 +223,14 @@ namespace tmv {
         }
         if (ha && isComplex(T())) {
 #ifdef XTEST
-            TMVAssert(normInf(A.diag().imag()) <= eps);
+            TMVAssert(normInf(A.diag().imagPart()) <= eps);
 #endif
-            A.diag().imag().zero();
+            A.diag().imagPart().setZero();
         }
     }
 
     template <bool a1, bool cx, bool add, class T, class Ta, class Tx>
-    static void doRank1Update(
+    static void DoRank1Update(
         const Ta alpha, const GenVector<Tx>& x, const SymMatrixView<T>& A)
     {
         TMVAssert(A.size() == x.size());
@@ -270,28 +270,28 @@ namespace tmv {
             Vector<T> xx = x;
             if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) 
                 if (TMV_REAL(alpha) == TMV_RealType(T)(1)) 
-                    doRank1Update<true,false,add>(TMV_REAL(alpha),xx,A);
+                    DoRank1Update<true,false,add>(TMV_REAL(alpha),xx,A);
                 else
-                    doRank1Update<false,false,add>(TMV_REAL(alpha),xx,A);
+                    DoRank1Update<false,false,add>(TMV_REAL(alpha),xx,A);
             else 
-                doRank1Update<false,false,add>(alpha,xx,A);
+                DoRank1Update<false,false,add>(alpha,xx,A);
         } else {
             if (x.isconj())
                 if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) 
                     if (TMV_REAL(alpha) == TMV_RealType(T)(1)) 
-                        doRank1Update<true,true,add>(TMV_REAL(alpha),x,A);
+                        DoRank1Update<true,true,add>(TMV_REAL(alpha),x,A);
                     else
-                        doRank1Update<false,true,add>(TMV_REAL(alpha),x,A);
+                        DoRank1Update<false,true,add>(TMV_REAL(alpha),x,A);
                 else 
-                    doRank1Update<false,true,add>(alpha,x,A);
+                    DoRank1Update<false,true,add>(alpha,x,A);
             else
                 if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) 
                     if (TMV_REAL(alpha) == TMV_RealType(T)(1)) 
-                        doRank1Update<true,false,add>(TMV_REAL(alpha),x,A);
+                        DoRank1Update<true,false,add>(TMV_REAL(alpha),x,A);
                     else
-                        doRank1Update<false,false,add>(TMV_REAL(alpha),x,A);
+                        DoRank1Update<false,false,add>(TMV_REAL(alpha),x,A);
                 else 
-                    doRank1Update<false,false,add>(alpha,x,A);
+                    DoRank1Update<false,false,add>(alpha,x,A);
         }
     }
 
@@ -525,7 +525,7 @@ namespace tmv {
         Vector<Tx> x0 = x;
         Matrix<T> A0 = A;
         Matrix<T> A2 = A;
-        if (!add) A2.zero();
+        if (!add) A2.setZero();
         if (A.isherm())
             A2 += (alpha*x0^x0.conjugate());
         else 
@@ -551,10 +551,10 @@ namespace tmv {
             else if (A.iscm() && A.stepj()>0) {
                 if (x.isconj() || SameStorage(x,A)) {
                     Vector<Tx> xx = x;
-                    if (!add) A.zero();
+                    if (!add) A.setZero();
                     BlasRank1Update(alpha,xx,A);
                 } else {
-                    if (!add) A.zero();
+                    if (!add) A.setZero();
                     BlasRank1Update(alpha,x,A);
                 }
             } else {

@@ -476,12 +476,12 @@ namespace tmv {
                 BLAS1 BLAS1 BLAS1 BLAS1);
             B *= alpha;
         } else {
-            Matrix<double,ColMajor> B1 = B.real();
+            Matrix<double,ColMajor> B1 = B.realPart();
             BlasMultEqMM(1.,A,B1.view());
-            B.real() = B1;
-            B1 = B.imag();
+            B.realPart() = B1;
+            B1 = B.imagPart();
             BlasMultEqMM(1.,A,B1.view());
-            B.imag() = B1;
+            B.imagPart() = B1;
             B *= alpha;
         }
     }
@@ -512,12 +512,12 @@ namespace tmv {
                 BLAS1 BLAS1 BLAS1 BLAS1);
             B *= alpha;
         } else {
-            Matrix<double,ColMajor> B1 = B.real();
+            Matrix<double,ColMajor> B1 = B.realPart();
             BlasMultEqMM(1.,A,B1.view());
-            B.real() = B1;
-            B1 = B.imag();
+            B.realPart() = B1;
+            B1 = B.imagPart();
             BlasMultEqMM(1.,A,B1.view());
-            B.imag() = B1;
+            B.imagPart() = B1;
             B *= alpha;
         }
     }
@@ -673,12 +673,12 @@ namespace tmv {
                 BLAS1 BLAS1 BLAS1 BLAS1);
             B *= alpha;
         } else {
-            Matrix<float,ColMajor> B1 = B.real();
+            Matrix<float,ColMajor> B1 = B.realPart();
             BlasMultEqMM(1.F,A,B1.view());
-            B.real() = B1;
-            B1 = B.imag();
+            B.realPart() = B1;
+            B1 = B.imagPart();
             BlasMultEqMM(1.F,A,B1.view());
-            B.imag() = B1;
+            B.imagPart() = B1;
             B *= alpha;
         }
     }
@@ -709,12 +709,12 @@ namespace tmv {
                 BLAS1 BLAS1 BLAS1 BLAS1);
             B *= alpha;
         } else {
-            Matrix<float,ColMajor> B1 = B.real();
+            Matrix<float,ColMajor> B1 = B.realPart();
             BlasMultEqMM(1.F,A,B1.view());
-            B.real() = B1;
-            B1 = B.imag();
+            B.realPart() = B1;
+            B1 = B.imagPart();
             BlasMultEqMM(1.F,A,B1.view());
-            B.imag() = B1;
+            B.imagPart() = B1;
             B *= alpha;
         }
     }
@@ -826,7 +826,7 @@ namespace tmv {
     }
 
     //
-    // addMultMM: M += U * M
+    // AddMultMM: M += U * M
     //
 
     template <class T, class Ta, class Tb> 
@@ -902,7 +902,7 @@ namespace tmv {
     }
 
     template <class T, class Ta, class Tb> 
-    static void addMultMM(
+    static void AddMultMM(
         T alpha, const GenUpperTriMatrix<Ta>& A, const GenMatrix<Tb>& B,
         const MatrixView<T>& C)
     // C += alpha * A * B
@@ -929,11 +929,11 @@ namespace tmv {
             if (A.isunit() && ((A.isrm()&&C.isrm()) || (A.iscm()&&B.isrm())) ) {
                 if (SameStorage(B,C) && N > 1) {
                     Matrix<Tb> BB = alpha*B;
-                    addMultMM(T(1),A.offDiag(),BB.rowRange(1,N),
+                    AddMultMM(T(1),A.offDiag(),BB.rowRange(1,N),
                               C.rowRange(0,N-1));
                     C += BB;
                 } else {
-                    if (N > 1) addMultMM(alpha,A.offDiag(),B.rowRange(1,N),
+                    if (N > 1) AddMultMM(alpha,A.offDiag(),B.rowRange(1,N),
                                          C.rowRange(0,N-1));
                     C += alpha * B;
                 }
@@ -943,7 +943,7 @@ namespace tmv {
                 CRAddMultMM(alpha,A,B,C);
             } else if (!(A.isrm() || A.iscm())) {
                 UpperTriMatrix<T,NonUnitDiag,ColMajor> AA = A;
-                addMultMM(alpha,AA,B,C);
+                AddMultMM(alpha,AA,B,C);
             }
             else CAddMultMM(alpha,A,B,C);
         } else {
@@ -958,13 +958,13 @@ namespace tmv {
             MatrixView<T> C0 = C.rowRange(0,k);
             MatrixView<T> C1 = C.rowRange(k,N);
 
-            addMultMM(alpha,A00,B0,C0);
+            AddMultMM(alpha,A00,B0,C0);
             C0 += alpha * A01 * B1;
-            addMultMM(alpha,A11,B1,C1);
+            AddMultMM(alpha,A11,B1,C1);
         }
 #ifdef XDEBUG
         if (Norm(C-C2) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(BB0))) {
-            cerr<<"addMultMM alpha = "<<alpha<<endl;
+            cerr<<"AddMultMM alpha = "<<alpha<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"B = "<<TMV_Text(B)<<"  "<<BB0<<endl;
             cerr<<"C = "<<TMV_Text(C)<<"  "<<CC0<<endl;
@@ -978,7 +978,7 @@ namespace tmv {
     }
 
     //
-    // addMultMM: M += L * M
+    // AddMultMM: M += L * M
     //
 
     template <class T, class Ta, class Tb> 
@@ -1041,7 +1041,7 @@ namespace tmv {
     }
 
     template <class T, class Ta, class Tb> 
-    static void addMultMM(
+    static void AddMultMM(
         T alpha, const GenLowerTriMatrix<Ta>& A, const GenMatrix<Tb>& B,
         const MatrixView<T>& C)
     // C += alpha * A * B
@@ -1068,11 +1068,11 @@ namespace tmv {
             if (A.isunit() && ((A.isrm()&&C.isrm()) || (A.iscm()&&B.isrm())) ) {
                 if (SameStorage(B,C) && N > 1) {
                     Matrix<Tb> BB = alpha*B;
-                    addMultMM(T(1),A.offDiag(),BB.rowRange(0,N-1),
+                    AddMultMM(T(1),A.offDiag(),BB.rowRange(0,N-1),
                               C.rowRange(1,N));
                     C += BB;
                 } else {
-                    if (N > 1) addMultMM(alpha,A.offDiag(),B.rowRange(0,N-1),
+                    if (N > 1) AddMultMM(alpha,A.offDiag(),B.rowRange(0,N-1),
                                          C.rowRange(1,N));
                     C += alpha * B;
                 }
@@ -1082,7 +1082,7 @@ namespace tmv {
                 CRAddMultMM(alpha,A,B,C);
             } else if (!(A.isrm() || A.iscm())) {
                 LowerTriMatrix<T,NonUnitDiag,ColMajor> AA = A;
-                addMultMM(alpha,AA,B,C);
+                AddMultMM(alpha,AA,B,C);
             } else {
                 CAddMultMM(alpha,A,B,C); 
             }
@@ -1098,13 +1098,13 @@ namespace tmv {
             MatrixView<T> C0 = C.rowRange(0,k);
             MatrixView<T> C1 = C.rowRange(k,N);
 
-            addMultMM(alpha,A11,B1,C1);
+            AddMultMM(alpha,A11,B1,C1);
             C1 += alpha * A10 * B0;
-            addMultMM(alpha,A00,B0,C0);
+            AddMultMM(alpha,A00,B0,C0);
         }
 #ifdef XDEBUG
         if (Norm(C-C2) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(BB0))) {
-            cerr<<"addMultMM alpha = "<<alpha<<endl;
+            cerr<<"AddMultMM alpha = "<<alpha<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"B = "<<TMV_Text(B)<<"  "<<BB0<<endl;
             cerr<<"C = "<<TMV_Text(C)<<"  "<<CC0<<endl;
@@ -1184,7 +1184,7 @@ namespace tmv {
                 MultMM<add>(
                     TMV_CONJ(alpha),A.conjugate(),B.conjugate(),C.conjugate());
             else if (alpha==T(0)) {
-                if (!add) C.zero();
+                if (!add) C.setZero();
             }
             else if (SameStorage(A,C)) 
                 FullTempMultMM<add>(alpha,A,B,C);
@@ -1198,7 +1198,7 @@ namespace tmv {
                 else
                     FullTempMultMM<add>(alpha,A,B,C);
             else 
-                addMultMM(alpha,A,B,C);
+                AddMultMM(alpha,A,B,C);
         }
 #ifdef XDEBUG
         if (Norm(C-C2) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
@@ -1282,7 +1282,7 @@ namespace tmv {
                 MultMM<add>(
                     TMV_CONJ(alpha),A.conjugate(),B.conjugate(),C.conjugate());
             else if (alpha==T(0)) {
-                if (!add) C.zero();
+                if (!add) C.setZero();
             }
             else if (SameStorage(A,C)) 
                 FullTempMultMM<add>(alpha,A,B,C);
@@ -1296,7 +1296,7 @@ namespace tmv {
                 else
                     FullTempMultMM<add>(alpha,A,B,C);
             else 
-                addMultMM(alpha,A,B,C);
+                AddMultMM(alpha,A,B,C);
         }
 #ifdef XDEBUG
         if (Norm(C-C2) > 0.001*(

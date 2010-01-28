@@ -70,7 +70,7 @@ namespace tmv {
         const int M = QRx.colsize();
         const int N = QRx.rowsize();
         if (QRx.nlo() == 0) {
-            Qbeta.zero();
+            Qbeta.setZero();
         } else {
             int endcol = QRx.nlo()+1;
             int endrow = QRx.nhi()+1;
@@ -127,7 +127,7 @@ namespace tmv {
         } else {
             Vector<T> beta(A.rowsize());
             T d(0);
-            Q.zero();
+            Q.setZero();
             BandMatrixView<T>(Q,A.nlo(),A.nhi()) = A;
             QR_Decompose(BandMatrixViewOf(Q,A.nlo(),A.nlo()+A.nhi()),
                         beta.view(),d);
@@ -155,7 +155,7 @@ namespace tmv {
         BandMatrix<T> QR(
             TMV_MIN(A.colsize(),A.rowsize()+A.nlo()),A.rowsize(),
             A.nlo(),A.nlo()+A.nhi(),T(0));
-        QR.zero();
+        QR.setZero();
         BandMatrixViewOf(QR,A.nlo(),A.nhi()) = A.rowRange(0,QR.colsize());
         QR_Decompose(QR.view(),beta.view(),d);
         R = BandMatrixViewOf(QR,0,A.nlo()+A.nhi());

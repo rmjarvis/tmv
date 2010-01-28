@@ -1,9 +1,8 @@
 
-#include "TMV_Test.h"
-#include "TMV_Test3.h"
 #include "TMV.h"
 #include "TMV_Small.h"
-
+#include "TMV_Test.h"
+#include "TMV_Test3.h"
 #define NOLDIVEQ
 #include "TMV_TestMatrixDivArith.h"
 
@@ -20,24 +19,24 @@ static void TestSmallNonSquareDiv_B4b()
     if (N > 3) m(3,0) = -10;
     if (N > 2) m(2,2) = 30;
 
-    tmv::SmallMatrix<T,N,6,stor> a2 = m.Transpose();
+    tmv::SmallMatrix<T,N,6,stor> a2 = m.transpose();
     tmv::SmallMatrix<std::complex<T>,N,6,stor> c2 = a2 * std::complex<T>(-3,4);
 
     tmv::SmallMatrix<T,N,7,stor> a5;
     for(int i=0;i<N;++i) for(int j=0;j<7;++j) a5(i,j) = T(1-3*i+2*j);
-    a5.SubMatrix(0,N,1,7) -= a2;
+    a5.subMatrix(0,N,1,7) -= a2;
     tmv::SmallMatrix<std::complex<T>,N,7,stor> c5 = a5 * std::complex<T>(2,-2);
-    c5.SubMatrix(0,N,1,7) -= c2;
+    c5.subMatrix(0,N,1,7) -= c2;
     c5.col(3) *= std::complex<T>(-1,3);
-    c5.row(0).AddToAll(std::complex<T>(1,9));
+    c5.row(0).addToAll(std::complex<T>(1,9));
 
     tmv::SmallMatrix<T,6,7,stor> a7;
     for(int i=0;i<6;++i) for(int j=0;j<7;++j) a7(i,j) = T(5+2*i-2*j);
-    a7.SubMatrix(0,6,1,1+N) -= T(2)*a2.Transpose();
+    a7.subMatrix(0,6,1,1+N) -= T(2)*a2.transpose();
     tmv::SmallMatrix<std::complex<T>,6,7,stor> c7 = a7 * std::complex<T>(-1,-3);
-    c7.SubMatrix(0,6,1,1+N) -= T(2)*c2.Transpose();
+    c7.subMatrix(0,6,1,1+N) -= T(2)*c2.transpose();
     c7.col(3) *= std::complex<T>(-1,3);
-    c7.row(4).AddToAll(std::complex<T>(1,9));
+    c7.row(4).addToAll(std::complex<T>(1,9));
 
     tmv::SmallMatrix<T,N,7,stor> a5x;
     tmv::SmallMatrix<std::complex<T>,N,7,stor> c5x;

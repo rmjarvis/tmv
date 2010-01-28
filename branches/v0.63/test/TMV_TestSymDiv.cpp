@@ -1,10 +1,10 @@
 
 #define START 0
 
-#include "TMV_Test.h"
-#include "TMV_Test2.h"
 #include "TMV.h"
 #include "TMV_Sym.h"
+#include "TMV_Test.h"
+#include "TMV_Test2.h"
 #include "TMV_TestSymArith.h"
 
 template <class T> 
@@ -12,14 +12,14 @@ static bool IsPosDef(const tmv::GenSymMatrix<T>& m)
 {
 #ifdef NOTHROW
     for(size_t i=1;i<=m.size();i++) {
-        T d = m.SubSymMatrix(0,i).Det();
+        T d = Det(m.subSymMatrix(0,i));
         if (tmv::REAL(d) < 0) return false;
     }
     return true;
 #else
     try {
         tmv::HermMatrix<T> m2 = m;
-        CH_Decompose(m2.View());
+        CH_Decompose(m2.view());
     }
     catch (tmv::NonPosDef) {
 #ifdef XTEST
@@ -27,7 +27,7 @@ static bool IsPosDef(const tmv::GenSymMatrix<T>& m)
         //std::cout<<"m.size ="<<m.size()<<std::endl;
         for(size_t i=1;i<=m.size();i++) {
             //std::cout<<"i = "<<i<<std::endl;
-            T d = tmv::Matrix<T>(m.SubSymMatrix(0,i)).Det();
+            T d = Det(tmv::Matrix<T>(m.subSymMatrix(0,i)));
             if (showacc) std::cout<<"Det(0.."<<i<<") = "<<d<<std::endl;
             if (!(tmv::REAL(d) > 0)) {
                 //std::cout<<"!>0 "<<tmv::REAL(d)<<std::endl;
@@ -38,7 +38,7 @@ static bool IsPosDef(const tmv::GenSymMatrix<T>& m)
         }
         //std::cout<<"m = "<<TMV_Text(m)<<"  "<<m<<std::endl;
         for(size_t i=1;i<=m.size();i++) {
-            T d = tmv::Matrix<T>(m.SubSymMatrix(0,i)).Det();
+            T d = Det(tmv::Matrix<T>(m.subSymMatrix(0,i)));
             std::cout<<"Det(0.."<<i<<") = "<<d<<std::endl;
         }
         Assert(tmv::FALSE,
@@ -51,7 +51,7 @@ static bool IsPosDef(const tmv::GenSymMatrix<T>& m)
     if (showacc)
         std::cout<<"not caught\n";
     for(size_t i=1;i<=m.size();i++) {
-        T d = tmv::Matrix<T>(m.SubSymMatrix(0,i)).Det();
+        T d = Det(tmv::Matrix<T>(m.subSymMatrix(0,i)));
         if (showacc) 
             std::cout<<"Det(0.."<<i<<") = "<<d<<std::endl;
         if (tmv::REAL(d) < 0) {
@@ -89,8 +89,8 @@ void TestSymDiv(tmv::DivType dt, PosDefCode pdc)
         tmv::SymMatrixView<T> si = s[i];
         tmv::SymMatrixView<std::complex<T> > csi = cs[i];
         if (dt == tmv::CH && csi.issym()) continue;
-        si.SaveDiv();
-        csi.SaveDiv();
+        si.saveDiv();
+        csi.saveDiv();
         if (showstartdone)
             std::cout<<"Start loop: i = "<<i<<", si = "<<tmv::TMV_Text(si)<<
                 "  "<<si<<std::endl;
@@ -101,28 +101,28 @@ void TestSymDiv(tmv::DivType dt, PosDefCode pdc)
         }
 
         tmv::Matrix<T> m(si);
-        m.SaveDiv();
-        if (dt == tmv::CH) m.DivideUsing(tmv::LU);
-        else m.DivideUsing(dt);
-        m.SetDiv();
-        Assert(m.CheckDecomp(checkout),"CheckDecomp m"); 
+        m.saveDiv();
+        if (dt == tmv::CH) m.divideUsing(tmv::LU);
+        else m.divideUsing(dt);
+        m.setDiv();
+        Assert(m.checkDecomp(checkout),"CheckDecomp m"); 
         T eps = EPS;
         if (pdc == Sing) eps *= 1000;
-        else eps *= Norm(m)*Norm(m.Inverse());
-        si.DivideUsing(dt);
-        si.SetDiv();
+        else eps *= Norm(m)*Norm(m.inverse());
+        si.divideUsing(dt);
+        si.setDiv();
         if (si.isherm()) {
             tmv::HermMatrix<T> six = si;
-            six.DivideUsing(dt);
-            six.SetDiv();
-            Assert(six.CheckDecomp(checkout),"CheckDecomp six(herm)"); 
+            six.divideUsing(dt);
+            six.setDiv();
+            Assert(six.checkDecomp(checkout),"CheckDecomp six(herm)"); 
         } else {
             tmv::SymMatrix<T> six = si;
-            six.DivideUsing(dt);
-            six.SetDiv();
-            Assert(six.CheckDecomp(checkout),"CheckDecomp six(sym)"); 
+            six.divideUsing(dt);
+            six.setDiv();
+            Assert(six.checkDecomp(checkout),"CheckDecomp six(sym)"); 
         }
-        Assert(si.CheckDecomp(checkout),"CheckDecomp si"); 
+        Assert(si.checkDecomp(checkout),"CheckDecomp si"); 
 
         tmv::Vector<T> x1 = v1/si;
         tmv::Vector<T> x2 = v1/m;
@@ -144,8 +144,8 @@ void TestSymDiv(tmv::DivType dt, PosDefCode pdc)
                 "  "<<eps*Norm(x1)<<std::endl;
         Assert(Norm(x1-x2) < eps*Norm(x1),"Sym v%b");
 
-        tmv::Matrix<T,tmv::ColMajor> sinv = si.Inverse();
-        tmv::Matrix<T,tmv::ColMajor> minv = m.Inverse();
+        tmv::Matrix<T,tmv::ColMajor> sinv = si.inverse();
+        tmv::Matrix<T,tmv::ColMajor> minv = m.inverse();
         if (showacc) {
             std::cout<<"sinv = "<<sinv<<std::endl;
             std::cout<<"minv = "<<minv<<std::endl;
@@ -157,93 +157,93 @@ void TestSymDiv(tmv::DivType dt, PosDefCode pdc)
         if (pdc != Sing) {
             tmv::Matrix<T> m2 = m;
             if (showacc) {
-                std::cout<<"si.Det = "<<si.Det()<<
-                    ", m.Det = "<<m2.Det()<<std::endl;
-                std::cout<<"abs(sdet-mdet) = "<<std::abs(si.Det()-m2.Det());
+                std::cout<<"Det(si) = "<<Det(si)<<
+                    ", Det(m) = "<<Det(m2)<<std::endl;
+                std::cout<<"abs(sdet-mdet) = "<<std::abs(Det(si)-Det(m2));
                 std::cout<<"  EPS*abs(mdet) = "<<
-                    eps*std::abs(m2.Det())<<std::endl;
+                    eps*std::abs(Det(m2))<<std::endl;
                 std::cout<<"abs(abs(sdet)-abs(mdet)) = "<<
-                    std::abs(std::abs(si.Det())-std::abs(m2.Det()));
+                    std::abs(std::abs(Det(si))-std::abs(Det(m2)));
                 std::cout<<"  EPS*abs(mdet) = "<<
-                    eps*std::abs(m2.Det())<<std::endl;
-                std::cout<<"m.LogDet() = "<<m2.LogDet()<<std::endl;
-                std::cout<<"si.LogDet() = "<<si.LogDet()<<std::endl;
+                    eps*std::abs(Det(m2))<<std::endl;
+                std::cout<<"LogDet(m) = "<<LogDet(m2)<<std::endl;
+                std::cout<<"LogDet(si) = "<<LogDet(si)<<std::endl;
                 std::cout<<"abs(diff) = "<<
-                    std::abs(m2.LogDet()-si.LogDet())<<"   ";
+                    std::abs(LogDet(m2)-LogDet(si))<<"   ";
                 std::cout<<"eps = "<<eps<<std::endl;
                 T msign,ssign;
-                m.LogDet(&msign);
-                si.LogDet(&ssign);
+                m.logDet(&msign);
+                si.logDet(&ssign);
                 std::cout<<"m sign = "<<msign<<std::endl;
                 std::cout<<"si sign = "<<ssign<<std::endl;
                 std::cout<<"abs(diff) = "<<std::abs(msign-ssign)<<"   ";
                 std::cout<<"eps = "<<eps<<std::endl;
             }
-            Assert(std::abs(m2.Det()-si.Det()) < eps*std::abs(m2.Det()),
+            Assert(std::abs(Det(m2)-Det(si)) < eps*std::abs(Det(m2)),
                    "Sym Det");
             T msign,ssign;
-            Assert(std::abs(m2.LogDet(&msign)-si.LogDet(&ssign)) < 10*N*eps,
+            Assert(std::abs(m2.logDet(&msign)-si.logDet(&ssign)) < 10*N*eps,
                    "Sym LogDet");
             Assert(std::abs(msign-ssign) < 10*N*eps,"Sym LogDet - sign");
         }
 
         tmv::Matrix<std::complex<T> > cm(csi);
-        cm.SaveDiv();
-        if (dt == tmv::CH) cm.DivideUsing(tmv::LU);
-        else cm.DivideUsing(dt);
-        cm.SetDiv();
-        Assert(cm.CheckDecomp(checkout),"CheckDecomp cm"); 
-        csi.DivideUsing(dt);
-        csi.SetDiv();
+        cm.saveDiv();
+        if (dt == tmv::CH) cm.divideUsing(tmv::LU);
+        else cm.divideUsing(dt);
+        cm.setDiv();
+        Assert(cm.checkDecomp(checkout),"CheckDecomp cm"); 
+        csi.divideUsing(dt);
+        csi.setDiv();
         if (csi.isherm()) {
             tmv::HermMatrix<std::complex<T> > csix = csi;
-            csix.DivideUsing(dt);
-            csix.SetDiv();
-            Assert(csix.CheckDecomp(checkout),"CheckDecomp csix(herm)"); 
+            csix.divideUsing(dt);
+            csix.setDiv();
+            Assert(csix.checkDecomp(checkout),"CheckDecomp csix(herm)"); 
         } else {
             tmv::SymMatrix<std::complex<T> > csix = csi;
-            csix.DivideUsing(dt);
-            csix.SetDiv();
-            Assert(csix.CheckDecomp(checkout),"CheckDecomp csix(sym)"); 
+            csix.divideUsing(dt);
+            csix.setDiv();
+            Assert(csix.checkDecomp(checkout),"CheckDecomp csix(sym)"); 
         }
-        Assert(csi.CheckDecomp(checkout),"CheckDecomp csi"); 
+        Assert(csi.checkDecomp(checkout),"CheckDecomp csi"); 
 
         T ceps = EPS;
         if (pdc == Sing) ceps *= 1000;
-        else ceps *= Norm(cm)*Norm(cm.Inverse());
+        else ceps *= Norm(cm)*Norm(cm.inverse());
 
         if (pdc != Sing) {
             tmv::Matrix<std::complex<T> > cm2 = cm;
             //std::cout<<"cm2 = "<<cm2<<std::endl;
             if (showacc) {
-                std::cout<<"csi.Det = "<<csi.Det()<<
-                    ", cm.Det = "<<cm2.Det()<<std::endl;
+                std::cout<<"Det(csi) = "<<Det(csi)<<
+                    ", Det(cm) = "<<Det(cm2)<<std::endl;
                 std::cout<<"abs(csidet-cmdet) = "<<
-                    std::abs(csi.Det()-cm2.Det());
-                std::cout<<"  csidet/cmdet = "<<csi.Det()/cm2.Det();
+                    std::abs(Det(csi)-Det(cm2));
+                std::cout<<"  csidet/cmdet = "<<Det(csi)/Det(cm2);
                 std::cout<<"  EPS*abs(cmdet) = "<<
-                    ceps*std::abs(cm2.Det())<<std::endl;
+                    ceps*std::abs(Det(cm2))<<std::endl;
                 std::cout<<"abs(abs(csdet)-abs(cmdet)) = "<<
-                    std::abs(std::abs(csi.Det())-std::abs(cm2.Det()));
+                    std::abs(std::abs(Det(csi))-std::abs(Det(cm2)));
                 std::cout<<"  EPS*abs(cmdet) = "<<
-                    ceps*std::abs(cm2.Det())<<std::endl;
-                std::cout<<"cm.LogDet() = "<<cm2.LogDet()<<std::endl;
-                std::cout<<"csi.LogDet() = "<<csi.LogDet()<<std::endl;
+                    ceps*std::abs(Det(cm2))<<std::endl;
+                std::cout<<"LogDet(cm) = "<<LogDet(cm2)<<std::endl;
+                std::cout<<"LogDet(csi) = "<<LogDet(csi)<<std::endl;
                 std::cout<<"abs(diff) = "<<
-                    std::abs(cm2.LogDet()-csi.LogDet())<<"   ";
+                    std::abs(LogDet(cm2)-LogDet(csi))<<"   ";
                 std::cout<<"eps = "<<eps<<std::endl;
                 std::complex<T> cmsign,cssign;
-                cm2.LogDet(&cmsign);
-                csi.LogDet(&cssign);
+                cm2.logDet(&cmsign);
+                csi.logDet(&cssign);
                 std::cout<<"cm sign = "<<cmsign<<std::endl;
                 std::cout<<"csi sign = "<<cssign<<std::endl;
                 std::cout<<"abs(diff) = "<<std::abs(cmsign-cssign)<<"   ";
                 std::cout<<"eps = "<<eps<<std::endl;
             }
-            Assert(std::abs(csi.Det()-cm2.Det()) < 
-                   ceps*std::abs(cm2.Det()),"Sym CDet");
+            Assert(std::abs(Det(csi)-Det(cm2)) < 
+                   ceps*std::abs(Det(cm2)),"Sym CDet");
             std::complex<T> cmsign,cssign;
-            Assert(std::abs(cm2.LogDet(&cmsign)-csi.LogDet(&cssign)) < 10*N*eps,
+            Assert(std::abs(cm2.logDet(&cmsign)-csi.logDet(&cssign)) < 10*N*eps,
                    "Sym CLogDet");
             Assert(std::abs(cmsign-cssign) < 10*N*eps,"Sym CLogDet - sign");
         }

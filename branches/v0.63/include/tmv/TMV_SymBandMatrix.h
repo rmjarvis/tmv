@@ -165,7 +165,7 @@
 //
 // Modifying Functions:
 //
-//    zero()
+//    setZero()
 //    setAllTo(T x) 
 //        For HermMatrix, x must be real.
 //    clip(RT thresh)
@@ -272,8 +272,8 @@
 //    m.divideUsing(dt)
 //    where dt is LU, CH, or SV
 //     
-//    lud(), chd(), svd(), and symsvd() return the corresponding Divider 
-//        classes.
+//    m.lud(), m.chd(), m.svd(), and m.symsvd() return the corresponding 
+//        Divider classes.
 //
 //    As for SymMatrix, LU actually does an LDLT decomposition.
 //        ie. L(Lower Triangle) * Diagonal * L.transpose()
@@ -468,8 +468,8 @@ namespace tmv {
             TMVAssert(m2.rowsize() == size());
             assignToB(BandMatrixViewOf(m2,nlo(),nlo()));
             if (int(size()) > nlo()+1) {
-                m2.upperTri().offDiag(nlo()+1).zero();
-                m2.lowerTri().offDiag(nlo()+1).zero();
+                m2.upperTri().offDiag(nlo()+1).setZero();
+                m2.lowerTri().offDiag(nlo()+1).setZero();
             }
         }
 
@@ -479,8 +479,8 @@ namespace tmv {
             TMVAssert(m2.rowsize() == size());
             assignToB(BandMatrixViewOf(m2,nlo(),nlo()));
             if (int(size()) > nlo()+1) {
-                m2.upperTri().offDiag(nlo()+1).zero();
-                m2.lowerTri().offDiag(nlo()+1).zero();
+                m2.upperTri().offDiag(nlo()+1).setZero();
+                m2.lowerTri().offDiag(nlo()+1).setZero();
             }
         }
 
@@ -497,7 +497,7 @@ namespace tmv {
             TMVAssert(m2.size() == size());
             TMVAssert(nlo() == 0);
             m2.diag() = diag();
-            if (!issym()) m2.diag().imag().zero();
+            if (!issym()) m2.diag().imagPart().setZero();
         }
 
         inline void assignToB(const BandMatrixView<RT>& m2) const
@@ -510,8 +510,8 @@ namespace tmv {
             assignTosB(SymBandMatrixViewOf(m2,Upper,nlo()));
             if (nlo() > 0) 
                 m2.diagRange(-nlo(),0) = m2.diagRange(1,nlo()+1).transpose();
-            if (m2.nlo() > nlo()) m2.diagRange(-m2.nlo(),-nlo()).zero();
-            if (m2.nhi() > nlo()) m2.diagRange(nlo()+1,m2.nhi()+1).zero();
+            if (m2.nlo() > nlo()) m2.diagRange(-m2.nlo(),-nlo()).setZero();
+            if (m2.nhi() > nlo()) m2.diagRange(nlo()+1,m2.nhi()+1).setZero();
         }
 
         inline void assignToB(const BandMatrixView<CT>& m2) const
@@ -526,13 +526,13 @@ namespace tmv {
                     m2.diagRange(-nlo(),0) =
                         m2.diagRange(1,nlo()+1).transpose();
             } else {
-                m2.diag().imag().zero();
+                m2.diag().imagPart().setZero();
                 assignTosB(HermBandMatrixViewOf(m2,Upper,nlo()));
                 if (nlo() > 0) 
                     m2.diagRange(-nlo(),0) = m2.diagRange(1,nlo()+1).adjoint();
             }
-            if (m2.nlo() > nlo()) m2.diagRange(-m2.nlo(),-nlo()).zero();
-            if (m2.nhi() > nlo()) m2.diagRange(nlo()+1,m2.nhi()+1).zero();
+            if (m2.nlo() > nlo()) m2.diagRange(-m2.nlo(),-nlo()).setZero();
+            if (m2.nhi() > nlo()) m2.diagRange(nlo()+1,m2.nhi()+1).setZero();
         }
 
         inline void assignToS(const SymMatrixView<RT>& m2) const
@@ -540,7 +540,7 @@ namespace tmv {
             TMVAssert(isReal(T()));
             TMVAssert(m2.size() == size());
             assignTosB(SymBandMatrixViewOf(m2,nlo()));
-            if (int(size()) > nlo()+1) m2.upperTri().offDiag(nlo()+1).zero();
+            if (int(size()) > nlo()+1) m2.upperTri().offDiag(nlo()+1).setZero();
         }
 
         inline void assignToS(const SymMatrixView<CT>& m2) const
@@ -549,7 +549,7 @@ namespace tmv {
             TMVAssert(m2.sym() == sym());
             if (issym()) assignTosB(SymBandMatrixViewOf(m2,nlo()));
             else assignTosB(HermBandMatrixViewOf(m2,nlo()));
-            if (int(size()) > nlo()+1) m2.upperTri().offDiag(nlo()+1).zero();
+            if (int(size()) > nlo()+1) m2.upperTri().offDiag(nlo()+1).setZero();
         }
 
         inline void assignTosB(const SymBandMatrixView<RT>& m2) const
@@ -559,7 +559,7 @@ namespace tmv {
             TMVAssert(m2.nlo() >= nlo());
 
             if (!isSameAs(m2)) m2.upperBand() = upperBand();
-            if (m2.nlo() > nlo()) m2.diagRange(-m2.nlo(),-nlo()).zero();
+            if (m2.nlo() > nlo()) m2.diagRange(-m2.nlo(),-nlo()).setZero();
         }
 
         inline void assignTosB(const SymBandMatrixView<CT>& m2) const
@@ -569,7 +569,7 @@ namespace tmv {
             TMVAssert(isReal(T()) || m2.sym() == sym());
 
             if (!isSameAs(m2)) m2.upperBand() = upperBand();
-            if (m2.nlo() > nlo()) m2.diagRange(-m2.nlo(),-nlo()).zero();
+            if (m2.nlo() > nlo()) m2.diagRange(-m2.nlo(),-nlo()).setZero();
         }
 
         //
@@ -817,7 +817,7 @@ namespace tmv {
                     issym()?ct():TMV_ConjOf(T,ct()));
         }
 
-        inline const_real_type real() const
+        inline const_real_type realPart() const
         {
             return const_real_type(
                 reinterpret_cast<const RT*>(cptr()),size(),nlo(),
@@ -827,7 +827,7 @@ namespace tmv {
                 Sym, uplo(), isReal(T()) ? stor() : NoMajor,NonConj);
         }
 
-        inline const_real_type imag() const
+        inline const_real_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             TMVAssert(issym());
@@ -880,9 +880,9 @@ namespace tmv {
         TMV_DEPRECATED(const_band_type LowerBandOff() const)
         { return lowerBandOff(); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
 
 
 
@@ -1203,7 +1203,7 @@ namespace tmv {
         inline bool isHermOK() const
         {
             if (issym()) return true;
-            else return diag().imag().normInf() == RT(0);
+            else return diag().imagPart().normInf() == RT(0);
         }
 
         virtual T cref(int i, int j) const;
@@ -1518,11 +1518,11 @@ namespace tmv {
         inline const_band_type lowerBandOff() const
         { return base::lowerBandOff(); }
 
-        inline const_real_type real() const
-        { return base::real(); }
+        inline const_real_type realPart() const
+        { return base::realPart(); }
 
-        inline const_real_type imag() const
-        { return base::imag(); }
+        inline const_real_type imagPart() const
+        { return base::imagPart(); }
 
         inline const_view_type view() const
         { return base::view(); }
@@ -1581,9 +1581,9 @@ namespace tmv {
         TMV_DEPRECATED(const_band_type LowerBandOff() const)
         { return lowerBandOff(); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(const_view_type View() const)
         { return view(); }
         TMV_DEPRECATED(const_view_type Transpose() const)
@@ -1668,7 +1668,7 @@ namespace tmv {
             TMVAssert(nlo() >= m2.nlo());
             if (!isSameAs(m2)) {
                 upperBand() = m2.upperBand();
-                if (nlo() > m2.nlo()) diagRange(-nlo(),-m2.nlo()).zero();
+                if (nlo() > m2.nlo()) diagRange(-nlo(),-m2.nlo()).setZero();
             }
 #ifdef XTEST
             TMVAssert(this->isHermOK());
@@ -1683,7 +1683,7 @@ namespace tmv {
             TMVAssert(nlo() >= m2.nlo());
             if (!isSameAs(m2)) {
                 upperBand() = m2.upperBand();
-                if (nlo() > m2.nlo()) diagRange(-nlo(),-m2.nlo()).zero();
+                if (nlo() > m2.nlo()) diagRange(-nlo(),-m2.nlo()).setZero();
             }
 #ifdef XTEST
             TMVAssert(this->isHermOK());
@@ -1723,7 +1723,7 @@ namespace tmv {
             TMVAssert(isReal(T2()) || m2.sym() == sym());
             TMVAssert(nlo() >= m2.nlo());
             upperBand() = m2.upperBand();
-            if (nlo() > m2.nlo()) diagRange(-nlo(),-m2.nlo()).zero();
+            if (nlo() > m2.nlo()) diagRange(-nlo(),-m2.nlo()).setZero();
 #ifdef XTEST
             TMVAssert(this->isHermOK());
 #endif
@@ -1764,7 +1764,7 @@ namespace tmv {
         {
             TMVAssert(size() == m2.size());
             m2.assignToD(DiagMatrixViewOf(diag()));
-            if (nlo() > 0) upperBandOff().zero();
+            if (nlo() > 0) upperBandOff().setZero();
 #ifdef XTEST
             TMVAssert(this->isHermOK());
 #endif
@@ -1777,7 +1777,7 @@ namespace tmv {
             TMVAssert(issym());
             TMVAssert(size() == m2.size());
             m2.assignToD(DiagMatrixViewOf(diag()));
-            if (nlo() > 0) upperBandOff().zero();
+            if (nlo() > 0) upperBandOff().setZero();
 #ifdef XTEST
             TMVAssert(this->isHermOK());
 #endif
@@ -1891,8 +1891,8 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline const type& zero() const 
-        { upperBand().zero(); return *this; }
+        inline const type& setZero() const 
+        { upperBand().setZero(); return *this; }
 
         inline const type& setAllTo(const T& x) const
         {
@@ -1912,11 +1912,11 @@ namespace tmv {
         inline const type& setToIdentity(const T& x=T(1)) const
         {
             TMVAssert(TMV_IMAG(x)==RT(0) || this->issym());
-            zero(); diag().setAllTo(x); return *this; 
+            setZero(); diag().setAllTo(x); return *this; 
         }
 
         TMV_DEPRECATED(const type& Zero() const)
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(const type& SetAllTo(const T& x) const)
         { return setAllTo(x); }
         TMV_DEPRECATED(const type& Clip(RT thresh) const)
@@ -2177,7 +2177,7 @@ namespace tmv {
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
-        inline real_type real() const
+        inline real_type realPart() const
         {
             return real_type(
                 reinterpret_cast<RT*>(ptr()),size(),nlo(),
@@ -2192,7 +2192,7 @@ namespace tmv {
             );
         }
 
-        inline real_type imag() const
+        inline real_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             TMVAssert(this->issym());
@@ -2278,9 +2278,9 @@ namespace tmv {
         TMV_DEPRECATED(band_type LowerBandOff() const)
         { return lowerBandOff(); }
         TMV_DEPRECATED(real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(view_type View() const)
         { return view(); }
         TMV_DEPRECATED(view_type Transpose() const)
@@ -2473,8 +2473,8 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline const type& zero() const 
-        { c_type::zero(); return *this; }
+        inline const type& setZero() const 
+        { c_type::setZero(); return *this; }
 
         inline const type& setAllTo(const T& x) const
         { c_type::setAllTo(x); return *this; }
@@ -2492,7 +2492,7 @@ namespace tmv {
         { c_type::setToIdentity(x); return *this; }
 
         TMV_DEPRECATED(const type& Zero() const)
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(const type& SetAllTo(const T& x) const)
         { return setAllTo(x); }
         TMV_DEPRECATED(const type& Clip(RT thresh) const)
@@ -2613,11 +2613,11 @@ namespace tmv {
         inline band_type lowerBandOff() const
         { return c_type::lowerBandOff(); }
 
-        inline real_type real() const
-        { return c_type::real(); }
+        inline real_type realPart() const
+        { return c_type::realPart(); }
 
-        inline real_type imag() const
-        { return c_type::imag(); }
+        inline real_type imagPart() const
+        { return c_type::imagPart(); }
 
         inline view_type view() const
         { return c_type::view(); }
@@ -2673,9 +2673,9 @@ namespace tmv {
         TMV_DEPRECATED(band_type LowerBandOff() const)
         { return lowerBandOff(); }
         TMV_DEPRECATED(real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(view_type View() const)
         { return view(); }
         TMV_DEPRECATED(view_type Transpose() const)
@@ -2914,7 +2914,7 @@ namespace tmv {
             NEW_SIZE(m2.size(),0)
         {
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
-            zero();
+            setZero();
             DiagMatrixViewOf(diag()) = m2;
         }
 
@@ -2945,9 +2945,9 @@ namespace tmv {
             NEW_SIZE(m2.size(),0)
         {
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
-            zero();
+            setZero();
             m2.assignToD(DiagMatrixViewOf(diag()));
-            if (nlo() > 0) upperBandOff().zero();
+            if (nlo() > 0) upperBandOff().setZero();
         }
 
         inline SymBandMatrix(const GenDiagMatrix<CT>& m2) :
@@ -2955,7 +2955,7 @@ namespace tmv {
         {
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             TMVAssert(isComplex(T()));
-            zero();
+            setZero();
             m2.assignToD(DiagMatrixViewOf(diag()));
         }
 
@@ -2979,7 +2979,7 @@ namespace tmv {
             TMVAssert(nlo() >= m2.nlo());
             if (&m2 != this) {
                 if (nlo() > m2.nlo()) 
-                    lowerBand().diagRange(-nlo(),-m2.nlo()).zero();
+                    lowerBand().diagRange(-nlo(),-m2.nlo()).setZero();
                 if (S==DiagMajor) {
                     if (nlo() > m2.nlo()) {
                         std::copy(
@@ -3003,7 +3003,7 @@ namespace tmv {
         {
             TMVAssert(size() == m2.size());
             TMVAssert(nlo() >= m2.nlo());
-            if (nlo() > m2.nlo()) lowerBand().diagRange(-nlo(),-m2.nlo()).zero();
+            if (nlo() > m2.nlo()) lowerBand().diagRange(-nlo(),-m2.nlo()).setZero();
             if (S==DiagMajor) {
                 if (nlo() > m2.nlo()) {
                     std::copy(
@@ -3276,7 +3276,7 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline type& zero() 
+        inline type& setZero() 
         {
             std::fill_n(itsm1.get(),linsize,T(0));
             return *this;
@@ -3295,10 +3295,10 @@ namespace tmv {
         { return *this; }
 
         inline type& setToIdentity(const T& x=T(1)) 
-        { zero(); diag().setAllTo(x); return *this; }
+        { setZero(); diag().setAllTo(x); return *this; }
 
         TMV_DEPRECATED(type& Zero())
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(type& SetAllTo(const T& x))
         { return setAllTo(x); }
         TMV_DEPRECATED(type& Clip(RT thresh))
@@ -3545,7 +3545,7 @@ namespace tmv {
                     diagstep(),TMV_TransOf(S),NonConj);
         }
 
-        inline const_real_type real() const
+        inline const_real_type realPart() const
         {
             return const_real_type(
                 reinterpret_cast<const RT*>(itsm),size(),nlo(),
@@ -3555,7 +3555,7 @@ namespace tmv {
                 Sym,U,isReal(T())?S:NoMajor,NonConj);
         }
 
-        inline const_real_type imag() const
+        inline const_real_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             return const_real_type(
@@ -3825,7 +3825,7 @@ namespace tmv {
                     TMV_TransOf(S),NonConj TMV_FIRSTLAST);
         }
 
-        inline real_type real()
+        inline real_type realPart()
         {
             return real_type(
                 reinterpret_cast<RT*>(itsm),size(),nlo(),
@@ -3840,7 +3840,7 @@ namespace tmv {
             );
         }
 
-        inline real_type imag()
+        inline real_type imagPart()
         {
             TMVAssert(isComplex(T()));
             return real_type(
@@ -3924,9 +3924,9 @@ namespace tmv {
         TMV_DEPRECATED(const_band_type LowerBandOff() const)
         { return lowerBandOff(); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(const_view_type View() const)
         { return view(); }
         TMV_DEPRECATED(const_view_type Transpose() const)
@@ -3979,9 +3979,9 @@ namespace tmv {
         TMV_DEPRECATED(band_type LowerBandOff())
         { return lowerBandOff(); }
         TMV_DEPRECATED(real_type Real())
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag())
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(view_type View())
         { return view(); }
         TMV_DEPRECATED(view_type Transpose())
@@ -4201,7 +4201,7 @@ namespace tmv {
             } else {
                 if (U==Upper) upperBand() = rhs.upperBand();
                 else lowerBand() = rhs.lowerBand();
-                if (isComplex(T())) diag().imag().zero();
+                if (isComplex(T())) diag().imagPart().setZero();
             }
 #ifdef XTEST
             TMVAssert(this->isHermOK());
@@ -4220,7 +4220,7 @@ namespace tmv {
                 upperBand() = rhs.upperBand();
             else 
                 lowerBand() = rhs.lowerBand();
-            if (isComplex(T())) diag().imag().zero();
+            if (isComplex(T())) diag().imagPart().setZero();
 #ifdef XTEST
             TMVAssert(this->isHermOK());
 #endif
@@ -4237,7 +4237,7 @@ namespace tmv {
             TMVAssert(newnlo <= rhs.nlo());
             if (U==Upper) upperBand() = rhs.upperBand().diagRange(0,newnlo+1);
             else lowerBand() = rhs.lowerBand().diagRange(-newnlo,1);
-            if (isComplex(T())) diag().imag().zero();
+            if (isComplex(T())) diag().imagPart().setZero();
 #ifdef XTEST
             TMVAssert(this->isHermOK());
 #endif
@@ -4253,7 +4253,7 @@ namespace tmv {
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             if (U==Upper) upperBand() = rhs.upperBand();
             else lowerBand() = rhs.lowerBand();
-            if (isComplex(T())) diag().imag().zero();
+            if (isComplex(T())) diag().imagPart().setZero();
 #ifdef XTEST
             TMVAssert(this->isHermOK());
 #endif
@@ -4269,7 +4269,7 @@ namespace tmv {
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             if (U==Upper) upperBand() = BandMatrixViewOf(rhs,0,nlo());
             else lowerBand() = BandMatrixViewOf(rhs,nlo(),0);
-            if (isComplex(T())) diag().imag().zero();
+            if (isComplex(T())) diag().imagPart().setZero();
 #ifdef XTEST
             TMVAssert(this->isHermOK());
 #endif
@@ -4285,7 +4285,7 @@ namespace tmv {
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             if (U==Upper) upperBand() = BandMatrixViewOf(rhs,0,nlo());
             else lowerBand() = BandMatrixViewOf(rhs,nlo(),0);
-            if (isComplex(T())) diag().imag().zero();
+            if (isComplex(T())) diag().imagPart().setZero();
 #ifdef XTEST
             TMVAssert(this->isHermOK());
 #endif
@@ -4303,7 +4303,7 @@ namespace tmv {
                 upperBand() = BandMatrixViewOf(rhs.upperTri(),nlo());
             else 
                 lowerBand() = BandMatrixViewOf(rhs.lowerTri(),nlo());
-            if (isComplex(T())) diag().imag().zero();
+            if (isComplex(T())) diag().imagPart().setZero();
 #ifdef XTEST
             TMVAssert(this->isHermOK());
 #endif
@@ -4317,9 +4317,9 @@ namespace tmv {
             setAllTo(T(888));
 #endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
-            zero();
+            setZero();
             DiagMatrixViewOf(diag()) = m2;
-            if (isComplex(T())) diag().imag().zero();
+            if (isComplex(T())) diag().imagPart().setZero();
 #ifdef XTEST
             TMVAssert(this->isHermOK());
 #endif
@@ -4361,7 +4361,7 @@ namespace tmv {
             setAllTo(T(888));
 #endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
-            zero();
+            setZero();
             m2.assignToD(DiagMatrixViewOf(diag()));
 #ifdef XTEST
             TMVAssert(this->isHermOK());
@@ -4376,9 +4376,9 @@ namespace tmv {
 #endif
             TMVAssert(isComplex(T()));
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
-            zero();
+            setZero();
             m2.assignToD(DiagMatrixViewOf(diag()));
-            diag().imag().zero();
+            diag().imagPart().setZero();
 #ifdef XTEST
             TMVAssert(this->isHermOK());
 #endif
@@ -4402,7 +4402,7 @@ namespace tmv {
             TMVAssert(size() == m2.size());
             TMVAssert(nlo() >= m2.nlo());
             if (&m2 != this) {
-                if (nlo() > m2.nlo()) lowerBand().diagRange(-nlo(),-m2.nlo()).zero();
+                if (nlo() > m2.nlo()) lowerBand().diagRange(-nlo(),-m2.nlo()).setZero();
                 if (S==DiagMajor)
                     if (nlo() > m2.nlo())
                         std::copy(
@@ -4428,7 +4428,7 @@ namespace tmv {
         {
             TMVAssert(size() == m2.size());
             TMVAssert(nlo() >= m2.nlo());
-            if (nlo() > m2.nlo()) lowerBand().diagRange(-nlo(),-m2.nlo()).zero();
+            if (nlo() > m2.nlo()) lowerBand().diagRange(-nlo(),-m2.nlo()).setZero();
             if (S==DiagMajor)
                 if (nlo() > m2.nlo())
                     std::copy(
@@ -4721,7 +4721,7 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline type& zero() 
+        inline type& setZero() 
         {
             std::fill_n(itsm1.get(),linsize,T(0));
             return *this; 
@@ -4746,13 +4746,13 @@ namespace tmv {
         inline type& setToIdentity(const T& x=T(1)) 
         {
             TMVAssert(TMV_IMAG(x) == RT(0));
-            zero(); 
+            setZero(); 
             diag().setAllTo(x); 
             return *this; 
         }
 
         TMV_DEPRECATED(type& Zero())
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(type& SetAllTo(const T& x))
         { return setAllTo(x); }
         TMV_DEPRECATED(type& Clip(RT thresh))
@@ -5000,7 +5000,7 @@ namespace tmv {
                     TMV_TransOf(S),TMV_ConjOf(T,NonConj));
         }
 
-        inline const_real_type real() const
+        inline const_real_type realPart() const
         {
             return const_real_type(
                 reinterpret_cast<const RT*>(itsm),size(),nlo(),
@@ -5010,7 +5010,7 @@ namespace tmv {
                 Herm,U,isReal(T())?S:NoMajor,NonConj);
         }
 
-        inline const_real_type imag() const
+        inline const_real_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             return const_real_type(
@@ -5281,7 +5281,7 @@ namespace tmv {
                     TMV_TransOf(S),TMV_ConjOf(T,NonConj) TMV_FIRSTLAST);
         }
 
-        inline real_type real()
+        inline real_type realPart()
         {
             return real_type(
                 reinterpret_cast<RT*>(itsm),size(),nlo(),
@@ -5296,7 +5296,7 @@ namespace tmv {
             );
         }
 
-        inline real_type imag()
+        inline real_type imagPart()
             // The imaginary part of a Hermitian matrix is anti-symmetric
             // so this is illegal.
         {
@@ -5376,9 +5376,9 @@ namespace tmv {
         TMV_DEPRECATED(const_band_type LowerBandOff() const)
         { return lowerBandOff(); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(const_view_type View() const)
         { return view(); }
         TMV_DEPRECATED(const_view_type Transpose() const)
@@ -5429,9 +5429,9 @@ namespace tmv {
         TMV_DEPRECATED(band_type LowerBandOff())
         { return lowerBandOff(); }
         TMV_DEPRECATED(real_type Real())
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag())
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(view_type View())
         { return view(); }
         TMV_DEPRECATED(view_type Transpose())
@@ -5587,7 +5587,7 @@ namespace tmv {
     {
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imag().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
 #endif
         return ConstSymBandMatrixView<T>(
             m.cptr(),m.colsize(),nlo,
@@ -5600,7 +5600,7 @@ namespace tmv {
     {
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imag().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
 #endif
         return ConstSymBandMatrixView<T,I>(
             m.cptr(),m.colsize(),nlo,
@@ -5613,7 +5613,7 @@ namespace tmv {
     {
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imag().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
 #endif
         return ConstSymBandMatrixView<T,I>(
             m.cptr(),m.colsize(),nlo,
@@ -5626,7 +5626,7 @@ namespace tmv {
     {
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imag().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
 #endif
         return SymBandMatrixView<T,I>(
             m.ptr(),m.colsize(),nlo,
@@ -5640,7 +5640,7 @@ namespace tmv {
     {
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imag().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
 #endif
         return SymBandMatrixView<T,I>(
             m.ptr(),m.colsize(),nlo,
@@ -5713,7 +5713,7 @@ namespace tmv {
         if (nlo<0) nlo = (uplo==Upper?m.nhi():m.nlo());
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imag().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
 #endif
         return ConstSymBandMatrixView<T>(
             m.cptr(),m.colsize(),nlo,
@@ -5727,7 +5727,7 @@ namespace tmv {
         if (nlo<0) nlo = (uplo==Upper?m.nhi():m.nlo());
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imag().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
 #endif
         return ConstSymBandMatrixView<T,I>(
             m.cptr(),m.colsize(),nlo,
@@ -5741,7 +5741,7 @@ namespace tmv {
         if (nlo<0) nlo = (uplo==Upper?m.nhi():m.nlo());
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imag().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
 #endif
         return ConstSymBandMatrixView<T,I>(
             m.cptr(),m.colsize(),nlo,
@@ -5755,7 +5755,7 @@ namespace tmv {
         if (nlo<0) nlo = (uplo==Upper?m.nhi():m.nlo());
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imag().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
 #endif
         return SymBandMatrixView<T,I>(
             m.ptr(),m.colsize(),nlo,
@@ -5770,7 +5770,7 @@ namespace tmv {
         if (nlo<0) nlo = (uplo==Upper?m.nhi():m.nlo());
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imag().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
 #endif
         return SymBandMatrixView<T,I>(
             m.ptr(),m.colsize(),nlo,

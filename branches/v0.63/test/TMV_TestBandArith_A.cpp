@@ -2,10 +2,10 @@
 #define START1 0
 #define START2 7
 
-#include "TMV_Test.h"
-#include "TMV_Test2.h"
 #include "TMV.h"
 #include "TMV_Band.h"
+#include "TMV_Test.h"
+#include "TMV_Test2.h"
 #include "TMV_TestBandArith.h"
 
 template <class T1, class T2> 

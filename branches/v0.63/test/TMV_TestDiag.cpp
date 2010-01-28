@@ -1,7 +1,7 @@
 
+#include "TMV.h"
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
-#include "TMV.h"
 #include <fstream>
 #include <cstdio>
 
@@ -21,10 +21,10 @@ void TestDiagMatrix()
         if (i == j) a(i,j) = T(k);
         if (i == j) af(i+1,j+1) = T(k);
     }
-    tmv::ConstDiagMatrixView<T> acv = a.View();
-    tmv::DiagMatrixView<T> av = a.View();
-    tmv::ConstDiagMatrixView<T,tmv::FortranStyle> afcv = af.View();
-    tmv::DiagMatrixView<T,tmv::FortranStyle> afv = af.View();
+    tmv::ConstDiagMatrixView<T> acv = a.view();
+    tmv::DiagMatrixView<T> av = a.view();
+    tmv::ConstDiagMatrixView<T,tmv::FortranStyle> afcv = af.view();
+    tmv::DiagMatrixView<T,tmv::FortranStyle> afv = af.view();
 
     for (int i=0, k=0; i<N; ++i) for (int j=0; j<N; ++j, ++k)
         if (i == j) {
@@ -102,7 +102,7 @@ void TestDiagMatrix()
 #endif
     }
     fout << ca << std::endl;
-    ca.WriteCompact(fout);
+    ca.writeCompact(fout);
     fout.close();
 
     tmv::Matrix<std::complex<T> > xcm1(N,N);

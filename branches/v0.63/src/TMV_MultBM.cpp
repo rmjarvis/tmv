@@ -86,7 +86,7 @@ namespace tmv {
             if (k>0) --k; else ++j1;
             if (j2<N) ++j2;
             else if (j1==N) {
-                if (!add) C.rowRange(i+1,M).zero();
+                if (!add) C.rowRange(i+1,M).setZero();
                 break;
             }
         }
@@ -112,7 +112,7 @@ namespace tmv {
         const int M = A.colsize();
         const int N = A.rowsize();
 
-        if (!add) C.zero();
+        if (!add) C.setZero();
         for(int j=0;j<N;++j) {
             C.rowRange(i1,i2) += alpha * A.col(j,i1,i2) ^ B.row(j);
             if (k>0) --k; else ++i1;
@@ -325,7 +325,7 @@ namespace tmv {
 #endif // ELAP
 
     template <bool add, class T, class Ta, class Tb> 
-    static inline void doTriDiagMultMM(
+    static inline void DoTriDiagMultMM(
         const GenBandMatrix<Ta>& A, const GenMatrix<Tb>& B,
         const MatrixView<T>& C)
     {
@@ -344,26 +344,26 @@ namespace tmv {
     {
         if (alpha == T(1) && A.isdm()) {
             if (A.isconj()) 
-                doTriDiagMultMM<add>(A.conjugate(),B.conjugate(),C.conjugate());
+                DoTriDiagMultMM<add>(A.conjugate(),B.conjugate(),C.conjugate());
             else
-                doTriDiagMultMM<add>(A,B,C);
+                DoTriDiagMultMM<add>(A,B,C);
         } else if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
             BandMatrix<Ta,DiagMajor> A1 = TMV_REAL(alpha)*A;
-            doTriDiagMultMM<add>(A1,B,C);
+            DoTriDiagMultMM<add>(A1,B,C);
         } else {
             BandMatrix<T,DiagMajor> A1 = alpha*A;
-            doTriDiagMultMM<add>(A1,B,C);
+            DoTriDiagMultMM<add>(A1,B,C);
         }
     }
 
     // MJ: Put in a recursive block calculation here.  (Also in Band*Band)
     template <bool add, class T, class Ta, class Tb> 
-    static void doMultMM(
+    static void DoMultMM(
         const T alpha, const GenBandMatrix<Ta>& A, const GenMatrix<Tb>& B,
         const MatrixView<T>& C)
     {
 #ifdef XDEBUG
-        //cout<<"Start doMultMM:\n";
+        //cout<<"Start DoMultMM:\n";
         //cout<<"alpha = "<<alpha<<endl;
         //cout<<"A = "<<TMV_Text(A)<<"  "<<A.cptr()<<"  "<<A<<endl;
         //cout<<"B = "<<TMV_Text(B)<<"  "<<B.cptr()<<"  "<<B<<endl;
@@ -403,7 +403,7 @@ namespace tmv {
         //cout<<"C -> "<<C<<endl;
         if (Norm(C2-C) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
                                 (add?Norm(C0):TMV_RealType(T)(0)))) {
-            cerr<<"doMultMM: alpha = "<<alpha<<endl;
+            cerr<<"DoMultMM: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A.cptr()<<"  "<<A0<<endl;
             cerr<<"B = "<<TMV_Text(B)<<"  "<<B.cptr()<<"  "<<B0<<endl;
@@ -422,12 +422,12 @@ namespace tmv {
     {
         if (C.isrm()) {
             Matrix<T,RowMajor> C2(C.colsize(),C.rowsize());
-            doMultMM<false>(T(1),A,B,C2.view());
+            DoMultMM<false>(T(1),A,B,C2.view());
             if (add) C += alpha*C2;
             else C = alpha*C2;
         } else {
             Matrix<T,ColMajor> C2(C.colsize(),C.rowsize());
-            doMultMM<false>(T(1),A,B,C2.view());
+            DoMultMM<false>(T(1),A,B,C2.view());
             if (add) C += alpha*C2;
             else C = alpha*C2;
         }
@@ -444,18 +444,18 @@ namespace tmv {
             if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
                 if (C.isrm()) {
                     Matrix<Tb,RowMajor> B2 = TMV_REAL(alpha) * B.colRange(j,j2);
-                    doMultMM<add>(T(1),A,B2,C.colRange(j,j2));
+                    DoMultMM<add>(T(1),A,B2,C.colRange(j,j2));
                 } else  {
                     Matrix<Tb,ColMajor> B2 = TMV_REAL(alpha) * B.colRange(j,j2);
-                    doMultMM<add>(T(1),A,B2,C.colRange(j,j2));
+                    DoMultMM<add>(T(1),A,B2,C.colRange(j,j2));
                 }
             } else {
                 if (C.isrm()) {
                     Matrix<T,RowMajor> B2 = alpha * B.colRange(j,j2);
-                    doMultMM<add>(T(1),A,B2,C.colRange(j,j2));
+                    DoMultMM<add>(T(1),A,B2,C.colRange(j,j2));
                 } else  {
                     Matrix<T,ColMajor> B2 = alpha * B.colRange(j,j2);
-                    doMultMM<add>(T(1),A,B2,C.colRange(j,j2));
+                    DoMultMM<add>(T(1),A,B2,C.colRange(j,j2));
                 }
             }
             j=j2;
@@ -491,14 +491,14 @@ namespace tmv {
 
         if (C.colsize() > 0 && C.rowsize() > 0) {
             if (A.rowsize() == 0 || alpha == T(0)) {
-                if (!add) C.zero();
+                if (!add) C.setZero();
             } else if (A.rowsize() > A.colsize()+A.nhi()) {
                 MultMM<add>(alpha,A.colRange(0,A.colsize()+A.nhi()),
                             B.rowRange(0,A.colsize()+A.nhi()),C);
             } else if (A.colsize() > A.rowsize()+A.nlo()) {
                 MultMM<add>(alpha,A.rowRange(0,A.rowsize()+A.nlo()),
                             B,C.rowRange(0,A.rowsize()+A.nlo()));
-                if (!add) C.rowRange(A.rowsize()+A.nlo(),A.colsize()).zero();
+                if (!add) C.rowRange(A.rowsize()+A.nlo(),A.colsize()).setZero();
             } else if (C.isconj()) {
                 MultMM<add>(TMV_CONJ(alpha),A.conjugate(),B.conjugate(),
                             C.conjugate());
@@ -510,7 +510,7 @@ namespace tmv {
                 else 
                     FullTempMultMM<add>(alpha,A,B,C);
             } else {
-                doMultMM<add>(alpha, A, B, C);
+                DoMultMM<add>(alpha, A, B, C);
             }
         }
 #ifdef XDEBUG

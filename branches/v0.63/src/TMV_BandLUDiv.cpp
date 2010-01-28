@@ -74,7 +74,7 @@ namespace tmv {
         int nlo = LUx.nlo();
         if (nlo == 0) L.setToIdentity();
         else {
-            L.zero();
+            L.setZero();
             for(int i=0;i<N;++i) {
                 Swap(L.row(i,0,i),L.row(p[i],0,i));
                 int end = TMV_MIN(i+nlo+1,N);

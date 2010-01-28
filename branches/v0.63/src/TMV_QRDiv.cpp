@@ -80,7 +80,7 @@ namespace tmv {
         }
 
         // Now solve R z = y
-        x.rowRange(N1,x.colsize()).zero();
+        x.rowRange(N1,x.colsize()).setZero();
         //x.rowRange(0,N1) /= QRx.upperTri().subTriMatrix(0,N1);
         QRx.upperTri().subTriMatrix(0,N1).LDivEq(x.rowRange(0,N1));
 
@@ -106,7 +106,7 @@ namespace tmv {
 
         // Solves Q R P x = m in place (m <- x)
         Q_LDivEq(QRx,beta,m);
-        m.rowRange(N1,m.colsize()).zero();
+        m.rowRange(N1,m.colsize()).setZero();
         //m.rowRange(0,N1) /= QRx.upperTri().subTriMatrix(0,N1);
         QRx.upperTri().subTriMatrix(0,N1).LDivEq(m.rowRange(0,N1));;
         if (P) m.reversePermuteRows(P);
@@ -138,7 +138,7 @@ namespace tmv {
         if (P) x.colRange(0,m.rowsize()).permuteCols(P);
 
         // Next solve z R = y by forward substitution
-        x.colRange(N1,x.rowsize()).zero();
+        x.colRange(N1,x.rowsize()).setZero();
         //x.colRange(0,N1) %= QRx.upperTri().subTriMatrix(0,N1);
         QRx.upperTri().subTriMatrix(0,N1).RDivEq(x.colRange(0,N1));;
 
@@ -170,7 +170,7 @@ namespace tmv {
         // Solve x Q R P = m in place (m <- x)
 
         if (P) m.permuteCols(P);
-        m.colRange(N1,m.rowsize()).zero();
+        m.colRange(N1,m.rowsize()).setZero();
         //m.colRange(0,N1) %= QRx.upperTri().subTriMatrix(0,N1);
         QRx.upperTri().subTriMatrix(0,N1).RDivEq(m.colRange(0,N1));
         Q_RDivEq(QRx,beta,m);

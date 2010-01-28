@@ -1,9 +1,8 @@
 
-#include "TMV_Test.h"
-#include "TMV_Test3.h"
 #include "TMV.h"
 #include "TMV_Small.h"
-
+#include "TMV_Test.h"
+#include "TMV_Test3.h"
 #define NOLDIVEQ
 #define NORDIVEQ
 #include "TMV_TestMatrixDivArith.h"

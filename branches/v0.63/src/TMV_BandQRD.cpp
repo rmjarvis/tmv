@@ -112,7 +112,7 @@ namespace tmv {
                     pimpl->istrans ? A.transpose() : A.view()));
             if (pimpl->QRx.nlo() > 0)
                 pimpl->QRx.diagRange(pimpl->QRx.nhi()-pimpl->QRx.nlo()+1,
-                                     pimpl->QRx.nhi()+1).zero();
+                                     pimpl->QRx.nhi()+1).setZero();
         } else {
             if (pimpl->istrans) pimpl->QRx = A.transpose();
             else pimpl->QRx = A;
@@ -238,7 +238,7 @@ namespace tmv {
         TMVAssert(Qbeta.size() == Q.rowsize());
         const int M = Q.colsize();
         const int N = Q.rowsize();
-        Q.upperTri().zero();
+        Q.upperTri().setZero();
         for(int j=N-1;j>=0;j--) {
             if (j+nlo+1 > M)
                 HouseholderUnpack(Q.subMatrix(j,M,j,N),Qbeta(j));

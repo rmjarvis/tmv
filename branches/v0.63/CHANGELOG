@@ -1,32 +1,49 @@
-Changes from version 0.61 to 0.62:  
+Changes from version 0.62 to 0.63:  
 (See the History section in the full documentation for changes from previous
-versions to 0.61.)
+versions to 0.62.)
 
-Here is a brief list of the more important changes:
+Bug fixes:
 
-- Corrected an error with m.DivIsSet();
-- Corrected the documentation regarding the m.SVD() access, especially
-  that S is now a DiagMatrix, rather than a Vector.
-- Changed behavior of methods like m.SVD().  Now, if SV has not been
-  set already, then it will set it, rather than give an error.
-- Added ListInit method for initializing a vector or matrix.
-- Improved SmallMatrix class.  Now it is not derived from GenMatrix (or
-  even BaseMatrix), thus removing the virtual table.  This greatly speeds
-  up a lot of calculations.  I also specialized some routines for 2x2 and
-  3x3 matrices, like Det and Inverse.  The caveat is that some things
-  that used to be possible with SmallMatrix are not now.  Most importantly,
-  arithmetic results can not be automatically instantiated any more.  They
-  need to be assigned to a location, either SmallMatrix or Matrix.
-  I also inlined all the division routines, rather than have it call
-  the regular Matrix division routines.
-- Removed some ViewOf commands that are clearer with a different notation.
-  d = DiagMatrixViewOf(m) --> d = DiagMatrixViewOf(m.diag())
-  U = UpperTriMatrixViewOf(m) --> U = m.UpperTri()
-  U = UpperTriMatrixViewOf(m,UnitDiag) --> U = m.UpperTri(UnitDiag)
-  U = UpperTriMatrixViewOf(U2,UnitDiag) --> U = U2.ViewAsUnitDiag()
-- Fixed problems with LAPACK functions dstegr and sstegr.
-  Now TMV can detect when stegr fails and run the alternate stedc instead.
-- Added scons installation option.
-- Added ability to use Fortran versions of BLAS and LAPACK.
-- Include CMakeLists.txt files for cmake installations.
-- Include .vcproj and .vcsln files for Visual C++ installations.
+-- Fixed some compiling errors with some uses of SmallMatrix.
+-- Disabled the cases where BlasRowMajor was used, since I had problems
+   with it on a particular implementation, and I'm not sure if the error
+   is in my code or in that BLAS implementation. 
+   So, I removed these pathways for now until I can figure out what might 
+   be going on with it.
+-- Fixed the return type of some methods that erroneously returned CStyle
+   views when the source object was FortranStyle.
+
+New features:
+
+First, we added a way to access the version of TMV being used.
+You can do this either in C++ code with the function TMV_Version().
+This returns a string that gives the version being used within your code.
+There is also an executable, tmv-version, that can be used to access
+the TMV version that is installed at the moment.
+
+Second, we added support for ups, which is probably completely irrelevant 
+to the majority of users.  But if you use ups for version control, you can 
+use the command scons install WITH_UPS=true to configure tmv in ups.
+
+Style changes:
+
+In response to feedback from a number of TMV users, I decided to 
+change the names of many of the methods to start with a lowercase.
+The free functions all still start with a capital letter.
+Both use camelCase, with underscores after 2 or 3 letter abbreviations
+such as LU or SV to help them stand out (since the camel case doesn't do it).
+This seems to be a more common standard in the C++ community and is more
+self-consistent than the style I had been using.
+
+The old names are still here for this version, but are marked as deprecated.
+Compiling old code with g++ with the flag -Wno-deprecated-declarations 
+will make is compile without warning.  
+But the deprecated versions will disappear eventually, so you will want to 
+covert your existing code over to the new names at some point.
+
+Also, I changed the syntax for list initialization.
+The old style was v = tmv::ListInit, a0 , a1 , a2 , a3  ...;
+The new style is v << a0 , a1 , a2 , a3 ...;
+Also accepted is v << a0 << a1 << a2 << a3 ...;
+This notation seems clearer, and avoid the global variable tmv::ListInit.
+(Again, the old notation is still present, but deprecated.)

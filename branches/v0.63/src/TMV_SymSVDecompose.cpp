@@ -97,7 +97,7 @@ namespace tmv {
                 // all E(i) with p<=i<q are non-zero.
                 if (U) {
                     DoEigenFromTridiagonal_NZ<T>(
-                        U->Cols(p,q+1),D.subVector(p,q+1),E.subVector(p,q));
+                        U->colRange(p,q+1),D.subVector(p,q+1),E.subVector(p,q));
                 } else {
                     DoEigenFromTridiagonal_NZ<T>(
                         0,D.subVector(p,q+1),E.subVector(p,q));
@@ -873,7 +873,7 @@ namespace tmv {
         // Now U stores Householder vectors for U in lower diagonal columns.
         for(int j=N-1;j>0;--j) U.col(j,j,N) = U.col(j-1,j,N);
         U.col(0).makeBasis(0);
-        U.row(0,1,N).zero();
+        U.row(0,1,N).setZero();
         GetQFromQR(U.subMatrix(1,N,1,N),Ubeta.subVector(0,N-1));
 
         EigenFromTridiagonal<T>(U,SS,E.view());
@@ -1000,7 +1000,7 @@ namespace tmv {
 
         for(int j=N-1;j>0;--j) U.col(j,j,N) = U.col(j-1,j,N);
         U.col(0).makeBasis(0);
-        U.row(0,1,N).zero();
+        U.row(0,1,N).setZero();
         GetQFromQR(U.subMatrix(1,N,1,N),Ubeta.subVector(0,N-1));
         if (V) *V = U.transpose();
         Matrix<T,ColMajor> U1(N,N);

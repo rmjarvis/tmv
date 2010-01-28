@@ -47,7 +47,7 @@ namespace tmv {
 
         const int N = QRx.rowsize();
 
-        minv.zero();
+        minv.setZero();
         UpperTriMatrixView<T1> R = minv.colRange(0,N).upperTri();
         R = QRx.upperTri();
         R.invertSelf();

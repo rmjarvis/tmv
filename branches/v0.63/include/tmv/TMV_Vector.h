@@ -98,7 +98,7 @@
 //
 // Modifying Functions
 //
-//    Vector& zero()
+//    Vector& setZero()
 //        Sets all elements to 0
 //
 //    Vector& clip(RT thresh)
@@ -190,8 +190,8 @@
 //    VectorView view()
 //        Returns a view of a Vector. 
 //
-//    VectorView real()
-//    VectorView imag()
+//    VectorView realPart()
+//    VectorView imagPart()
 //        Returns a view of the real/imag elements of a complex Vector.
 //    VectorView flatten()
 //        For complex vectors with unit step, returns a real vector view to 
@@ -425,14 +425,14 @@ namespace tmv {
         inline const_view_type conjugate() const
         { return const_view_type(cptr(),size(),step(),TMV_ConjOf(T,ct())); }
 
-        inline const_real_type real() const
+        inline const_real_type realPart() const
         { 
             return const_real_type(
                 reinterpret_cast<const RT*>( cptr()),
                 size(), isReal(T()) ? step() : 2*step(), NonConj);
         }
 
-        inline const_real_type imag() const
+        inline const_real_type imagPart() const
         { 
             TMVAssert(isComplex(T()));
             return const_real_type(
@@ -468,9 +468,9 @@ namespace tmv {
         TMV_DEPRECATED(const_view_type Conjugate() const)
         { return conjugate(); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(const_real_type Flatten() const)
         { return flatten(); }
         TMV_DEPRECATED(nonconst_type NonConst() const)
@@ -664,18 +664,19 @@ namespace tmv {
         inline const_view_type conjugate() const
         { return GenVector<T>::conjugate(); }
 
-        inline const_real_type real() const
-        { return GenVector<T>::real(); }
+        inline const_real_type realPart() const
+        { return GenVector<T>::realPart(); }
 
-        inline const_real_type imag() const
-        { return GenVector<T>::imag(); }
+        inline const_real_type imagPart() const
+        { return GenVector<T>::imagPart(); }
 
         inline const_real_type flatten() const
         { return GenVector<T>::flatten(); }
 
         TMV_DEPRECATED(const_view_type SubVector(int i1, int i2) const)
         { return subVector(i1,i2); }
-        TMV_DEPRECATED(const_view_type SubVector(int i1, int i2, int istep) const)
+        TMV_DEPRECATED(const_view_type SubVector(
+                int i1, int i2, int istep) const)
         { return subVector(i1,i2,istep); }
         TMV_DEPRECATED(const_view_type Reverse() const)
         { return reverse(); }
@@ -684,9 +685,9 @@ namespace tmv {
         TMV_DEPRECATED(const_view_type Conjugate() const)
         { return conjugate(); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(const_real_type Flatten() const)
         { return flatten(); }
 
@@ -901,7 +902,7 @@ namespace tmv {
         // Modifying Functions
         //
 
-        const type& zero() const;
+        const type& setZero() const;
 
         const type& clip(RT thresh) const;
 
@@ -951,7 +952,7 @@ namespace tmv {
 
 
         TMV_DEPRECATED(const type& Zero() const)
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(const type& Clip(RT thresh) const)
         { return clip(thresh); }
         TMV_DEPRECATED(const type& SetAllTo(const T& x) const)
@@ -1016,7 +1017,7 @@ namespace tmv {
                         TMV_ConjOf(T,ct()) TMV_FIRSTLAST ); 
         }
 
-        inline real_type real() const
+        inline real_type realPart() const
         { 
             return real_type(
                 reinterpret_cast<RT*>(ptr()),
@@ -1028,7 +1029,7 @@ namespace tmv {
             );
         }
 
-        inline real_type imag() const
+        inline real_type imagPart() const
         { 
             TMVAssert(isComplex(T()));
             return real_type(
@@ -1065,9 +1066,9 @@ namespace tmv {
         TMV_DEPRECATED(view_type Conjugate() const)
         { return conjugate(); }
         TMV_DEPRECATED(real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(real_type Flatten() const)
         { return flatten(); }
 
@@ -1211,7 +1212,7 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline const type& zero() const 
+        inline const type& setZero() const 
         { c_type::aero(); return *this; }
 
         inline const type& clip(RT thresh) const
@@ -1275,7 +1276,7 @@ namespace tmv {
         { c_type::Sort(0,ad,comp); return *this; }
 
         TMV_DEPRECATED(const type& Zero() const)
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(const type& Clip(RT thresh) const)
         { return clip(thresh); }
         TMV_DEPRECATED(const type& SetAllTo(const T& x) const)
@@ -1339,11 +1340,11 @@ namespace tmv {
         inline view_type conjugate() const
         { return c_type::conjugate(); }
 
-        inline real_type real() const
-        { return c_type::real(); }
+        inline real_type realPart() const
+        { return c_type::realPart(); }
 
-        inline real_type imag() const
-        { return c_type::imag(); }
+        inline real_type imagPart() const
+        { return c_type::imagPart(); }
 
         inline real_type flatten() const
         { return c_type::flatten(); }
@@ -1360,9 +1361,9 @@ namespace tmv {
         TMV_DEPRECATED(view_type Conjugate() const)
         { return conjugate(); }
         TMV_DEPRECATED(real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(real_type Flatten() const)
         { return flatten(); }
 
@@ -1714,7 +1715,7 @@ namespace tmv {
         // Modifying Functions
         //
 
-        type& zero();
+        type& setZero();
 
         type& clip(RT thresh);
 
@@ -1769,7 +1770,7 @@ namespace tmv {
 
 
         TMV_DEPRECATED(type& Zero())
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(type& Clip(RT thresh))
         { return clip(thresh); }
         TMV_DEPRECATED(type& SetAllTo(const T& x))
@@ -1853,20 +1854,20 @@ namespace tmv {
         inline view_type conjugate()
         { return view_type(ptr(),size(),1,TMV_ConjOf(T,NonConj) TMV_FIRSTLAST ); }
 
-        inline const_real_type real() const
-        { return view().real(); }
+        inline const_real_type realPart() const
+        { return view().realPart(); }
 
-        inline const_real_type imag() const
-        { return view().imag(); }
+        inline const_real_type imagPart() const
+        { return view().imagPart(); }
 
         inline const_real_type flatten() const
         { return view().flatten(); }
 
-        inline real_type real()
-        { return view().real(); }
+        inline real_type realPart()
+        { return view().realPart(); }
 
-        inline real_type imag()
-        { return view().imag(); }
+        inline real_type imagPart()
+        { return view().imagPart(); }
 
         inline real_type flatten()
         { return view().flatten(); }
@@ -1884,9 +1885,9 @@ namespace tmv {
         TMV_DEPRECATED(const_view_type Conjugate() const)
         { return conjugate(); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(const_real_type Flatten() const)
         { return flatten(); }
 
@@ -1901,9 +1902,9 @@ namespace tmv {
         TMV_DEPRECATED(view_type Conjugate())
         { return conjugate(); }
         TMV_DEPRECATED(real_type Real())
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag())
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(real_type Flatten())
         { return flatten(); }
 

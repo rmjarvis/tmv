@@ -81,7 +81,7 @@ namespace tmv {
         //cout<<"A = "<<TMV_Text(A)<<"  "<<A<<endl;
 #endif
 
-        const VectorView<TMV_RealType(T)> Adiag = A.diag().real();
+        const VectorView<TMV_RealType(T)> Adiag = A.diag().realPart();
         const int nlo = A.nlo();
 
         if (nlo == 0) {
@@ -89,8 +89,8 @@ namespace tmv {
             const int ds = Adiag.step();
             for(int j=0;j<N;++j,Ajj+=ds) {
 #ifdef TMVFLDEBUG
-                TMVAssert(Ajj >= A.real().first);
-                TMVAssert(Ajj < A.real().last);
+                TMVAssert(Ajj >= A.realPart().first);
+                TMVAssert(Ajj < A.realPart().last);
 #endif
                 if (*Ajj <= TMV_RealType(T)(0))  {
 #ifdef NOTHROW
@@ -108,8 +108,8 @@ namespace tmv {
             int endcol = nlo+1;
             for(int j=0;j<N-1;++j,Ajj+=ds) {
 #ifdef TMVFLDEBUG
-                TMVAssert(Ajj >= A.real().first);
-                TMVAssert(Ajj < A.real().last);
+                TMVAssert(Ajj >= A.realPart().first);
+                TMVAssert(Ajj < A.realPart().last);
 #endif
                 if (*Ajj <= TMV_RealType(T)(0))  {
 #ifdef NOTHROW
@@ -126,8 +126,8 @@ namespace tmv {
                 if (endcol < N) ++endcol;
             }
 #ifdef TMVFLDEBUG
-            TMVAssert(Ajj >= A.real().first);
-            TMVAssert(Ajj < A.real().last);
+            TMVAssert(Ajj >= A.realPart().first);
+            TMVAssert(Ajj < A.realPart().last);
 #endif
             if (*Ajj <= TMV_RealType(T)(0))  {
 #ifdef NOTHROW
@@ -143,8 +143,8 @@ namespace tmv {
             const int ds = Adiag.step();
             int startrow = 0;
 #ifdef TMVFLDEBUG
-            TMVAssert(Aii >= A.real().first);
-            TMVAssert(Aii < A.real().last);
+            TMVAssert(Aii >= A.realPart().first);
+            TMVAssert(Aii < A.realPart().last);
 #endif
             if (*Aii <= TMV_RealType(T)(0)) {
 #ifdef NOTHROW
@@ -161,10 +161,10 @@ namespace tmv {
                 A.row(i,startrow,i) %= 
                     A.subSymBandMatrix(startrow,i).lowerBand().adjoint();
 #ifdef TMVFLDEBUG
-                TMVAssert(Aii >= A.real().first);
-                TMVAssert(Aii < A.real().last);
+                TMVAssert(Aii >= A.realPart().first);
+                TMVAssert(Aii < A.realPart().last);
 #endif
-                *Aii -= normSq(A.row(i,startrow,i));
+                *Aii -= NormSq(A.row(i,startrow,i));
                 if (*Aii <= TMV_RealType(T)(0))  {
 #ifdef NOTHROW
                     std::cerr<<"Non Posdef HermBandMatrix found\n"; 
@@ -240,17 +240,17 @@ namespace tmv {
         //cout<<"A = "<<TMV_Text(A)<<"  "<<A<<endl;
 #endif
 
-        const int Dstep = dm ? 0 : A.diag().real().step();
+        const int Dstep = dm ? 0 : A.diag().realPart().step();
         const int Lstep = dm ? 0 : A.diag().step();
-        TMV_RealType(T)* Dj = A.real().ptr();
+        TMV_RealType(T)* Dj = A.realPart().ptr();
         T* Lj = A.diag(-1).ptr();
 
         for(int j=0;j<N-1;++j) {
 #ifdef TMVFLDEBUG
             TMVAssert(Lj >= A.first);
             TMVAssert(Lj < A.last);
-            TMVAssert(Dj >= A.real().first);
-            TMVAssert(Dj < A.real().last);
+            TMVAssert(Dj >= A.realPart().first);
+            TMVAssert(Dj < A.realPart().last);
 #endif
             T Ax0 = *Lj;
             if (*Dj == TMV_RealType(T)(0))  {
@@ -265,8 +265,8 @@ namespace tmv {
             if (dm) { if (isReal(T())) ++Dj; else Dj+=2; }
             else Dj += Dstep;
 #ifdef TMVFLDEBUG
-            TMVAssert(Dj >= A.real().first);
-            TMVAssert(Dj < A.real().last);
+            TMVAssert(Dj >= A.realPart().first);
+            TMVAssert(Dj < A.realPart().last);
 #endif
             *Dj -= TMV_REAL(TMV_CONJ(*Lj) * Ax0);
             if (dm) ++Lj;
@@ -478,11 +478,11 @@ namespace tmv {
 
         int n = A.size();
         // Need A.diag.Real to have unit step...
-        Vector<double> Ad = A.diag().real();
+        Vector<double> Ad = A.diag().realPart();
         LAPNAME(zpttrf) (
             LAPCM LAPV(n), LAPP(Ad.ptr()),
             LAPP(A.ptr()+A.stepi()) LAPINFO);
-        A.diag().real() = Ad;
+        A.diag().realPart() = Ad;
         if (Lap_info > 0)  {
 #ifdef NOTHROW
             std::cerr<<"Non Posdef HermBandMatrix found\n"; 
@@ -525,11 +525,11 @@ namespace tmv {
         TMVAssert(A.isherm());
 
         int n = A.size();
-        Vector<float> Ad = A.diag().real();
+        Vector<float> Ad = A.diag().realPart();
         LAPNAME(cpttrf) (
             LAPCM LAPV(n), LAPP(Ad.ptr()),
             LAPP(A.ptr()+A.stepi()) LAPINFO);
-        A.diag().real() = Ad;
+        A.diag().realPart() = Ad;
         if (Lap_info > 0)  {
 #ifdef NOTHROW
             std::cerr<<"Non Posdef HermBandMatrix found\n"; 

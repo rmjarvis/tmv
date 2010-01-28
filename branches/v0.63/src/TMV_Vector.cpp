@@ -696,7 +696,7 @@ namespace tmv {
     //
 
     template <class T, IndexStyle I> 
-    const VectorView<T,I>& VectorView<T,I>::zero() const
+    const VectorView<T,I>& VectorView<T,I>::setZero() const
     {
         if (step() == 1) std::fill_n(ptr(),size(),T(0));
         else setAllTo(0);
@@ -704,7 +704,7 @@ namespace tmv {
     }
 
     template <class T, IndexStyle I> 
-    Vector<T,I>& Vector<T,I>::zero() 
+    Vector<T,I>& Vector<T,I>::setZero() 
     {
         std::fill_n(ptr(),size(),T(0));
         return *this;
@@ -822,7 +822,7 @@ namespace tmv {
     {
         TMVAssert(v.step() > 0);
 
-        T* p = v.real().ptr();
+        T* p = v.realPart().ptr();
         p++;
 
         if (v.step() == 1) {
@@ -888,7 +888,7 @@ namespace tmv {
     { 
         TMVAssert(I==CStyle);
         TMVAssert(i < int(size()));
-        zero();
+        setZero();
         ref(i) = T(1);
         return *this; 
     }
@@ -903,7 +903,7 @@ namespace tmv {
         }
 
         const int ix = (I==CStyle ? i : i-1);
-        zero();
+        setZero();
         ref(ix) = T(1);
         return *this;
     }

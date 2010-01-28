@@ -1,8 +1,8 @@
 
-#include "TMV_Test.h"
-#include "TMV_Test3.h"
 #include "TMV.h"
 #include "TMV_Small.h"
+#include "TMV_Test.h"
+#include "TMV_Test3.h"
 
 template <class T, tmv::StorageType stor, int N> 
 static void TestSmallSquareDiv()
@@ -29,7 +29,7 @@ static void TestSmallSquareDiv()
     }
 
     tmv::SmallVector<T,N> vtemp;
-    tmv::SmallMatrix<T,N,N> minv = m.Inverse();
+    tmv::SmallMatrix<T,N,N> minv = m.inverse();
     T eps = EPS * Norm(m) * Norm(minv);
 
     tmv::SmallVector<T,N> x = b/m;
@@ -65,30 +65,30 @@ static void TestSmallSquareDiv()
     }
     Assert(Norm(mtemp=id-T(1)) < eps,"Square Inverse");
 
-    tmv::SmallMatrix<T,N,N> mtm = m.Adjoint() * m;
+    tmv::SmallMatrix<T,N,N> mtm = m.adjoint() * m;
     tmv::SmallMatrix<T,N,N> mata;
-    tmv::SmallMatrix<T,N,N> mtminv = mtm.Inverse();
-    m.InverseATA(mata);
+    tmv::SmallMatrix<T,N,N> mtminv = mtm.inverse();
+    m.makeInverseATA(mata);
     if (showacc) {
         std::cout<<"mtm = "<<mtm<<std::endl;
         std::cout<<"mtm.inv = "<<mtminv<<std::endl;
         std::cout<<"m.invata = "<<mata<<std::endl;
-        std::cout<<"minv*minvt = "<<(mtemp=minv*minv.Adjoint())<<std::endl;
+        std::cout<<"minv*minvt = "<<(mtemp=minv*minv.adjoint())<<std::endl;
         std::cout<<"Norm(diff) = "<<Norm(mtemp=mata-mtminv)<<std::endl;
     }
     Assert(Norm(mtemp=mata-mtminv) < eps*Norm(mata),"Square InverseATA");
 
-    T mdet = (tmv::Matrix<T>(m)).Det();
+    T mdet = Det(tmv::Matrix<T>(m));
     if (showacc) {
-        std::cout<<"m.Det = "<<m.Det()<<std::endl;
-        std::cout<<"abs(det-mdet) = "<<std::abs(m.Det()-mdet);
+        std::cout<<"Det(m) = "<<Det(m)<<std::endl;
+        std::cout<<"abs(det-mdet) = "<<std::abs(Det(m)-mdet);
         std::cout<<"  EPS*abs(mdet) = "<<eps*std::abs(mdet)<<std::endl;
         std::cout<<"abs(logdet-log(mdet)) = "<<
-            std::abs(m.LogDet()-std::log(std::abs(mdet)))<<std::endl;
+            std::abs(m.logDet()-std::log(std::abs(mdet)))<<std::endl;
     }
-    Assert(std::abs(m.Det()-mdet) < eps*std::abs(mdet),"Square Det");
+    Assert(std::abs(Det(m)-mdet) < eps*std::abs(mdet),"Square Det");
     T sdet;
-    Assert(std::abs(m.LogDet(&sdet)-std::log(std::abs(mdet))) < eps,
+    Assert(std::abs(m.logDet(&sdet)-std::log(std::abs(mdet))) < eps,
            "Square LogDet");
     Assert(std::abs(sdet-mdet/std::abs(mdet)) < eps,"Square LogDet - sign");
 
@@ -100,21 +100,21 @@ static void TestSmallSquareDiv()
     if (N > 3) c.row(3) += 
         tmv::SmallVector<std::complex<T>,N>(std::complex<T>(1,9));
 
-    tmv::SmallMatrix<std::complex<T>,N,N> cinv = c.Inverse();
+    tmv::SmallMatrix<std::complex<T>,N,N> cinv = c.inverse();
     T ceps = EPS * Norm(c) * Norm(cinv);
 
-    std::complex<T> cdet = (tmv::Matrix<std::complex<T> >(c)).Det();
+    std::complex<T> cdet = Det(tmv::Matrix<std::complex<T> >(c));
     if (showacc) {
         std::cout<<"cdet = "<<cdet<<std::endl;
-        std::cout<<"C.Det = "<<c.Det()<<std::endl;
-        std::cout<<"abs(det-cdet) = "<<std::abs(c.Det()-cdet);
+        std::cout<<"Det(c) = "<<Det(c)<<std::endl;
+        std::cout<<"abs(det-cdet) = "<<std::abs(Det(c)-cdet);
         std::cout<<"  EPS*abs(cdet) = "<<ceps*std::abs(cdet)<<std::endl;
         std::cout<<"abs(logdet-log(cdet)) = "<<
-            std::abs(c.LogDet()-std::log(cdet))<<std::endl;
+            std::abs(c.logDet()-std::log(cdet))<<std::endl;
     }
-    Assert(std::abs(c.Det()-cdet) < ceps*std::abs(cdet),"Square CDet");
+    Assert(std::abs(Det(c)-cdet) < ceps*std::abs(cdet),"Square CDet");
     std::complex<T> csdet;
-    Assert(std::abs(c.LogDet(&csdet)-std::log(std::abs(cdet))) < eps,
+    Assert(std::abs(c.logDet(&csdet)-std::log(std::abs(cdet))) < eps,
            "Square CLogDet");
     Assert(std::abs(csdet-cdet/std::abs(cdet)) < eps,"Square CLogDet - sign");
 
@@ -122,10 +122,10 @@ static void TestSmallSquareDiv()
     tmv::SmallMatrix<std::complex<T>,N,N> ctemp;
     Assert(Norm(ctemp=cid-T(1)) < ceps,"Square CInverse");
 
-    tmv::SmallMatrix<std::complex<T>,N,N> ctc = c.Adjoint() * c;
+    tmv::SmallMatrix<std::complex<T>,N,N> ctc = c.adjoint() * c;
     tmv::SmallMatrix<std::complex<T>,N,N> cata;
-    tmv::SmallMatrix<std::complex<T>,N,N> ctcinv = ctc.Inverse();
-    c.InverseATA(cata);
+    tmv::SmallMatrix<std::complex<T>,N,N> ctcinv = ctc.inverse();
+    c.makeInverseATA(cata);
     Assert(Norm(ctemp=cata-ctcinv) < ceps*Norm(cata),"Square CInverseATA");
 
     tmv::SmallVector<std::complex<T>,N> e;
@@ -184,7 +184,7 @@ static void TestSmallNonSquareDiv()
 
     tmv::SmallMatrix<T,N,6> mn6temp;
 
-    T eps = EPS * Norm(m) * Norm(mn6temp=m.Inverse());
+    T eps = EPS * Norm(m) * Norm(mn6temp=m.inverse());
     tmv::SmallVector<T,6> b = m * x;
     tmv::SmallVector<T,N> x2 = b/m;
     tmv::SmallVector<T,N> vntemp;
@@ -194,7 +194,7 @@ static void TestSmallNonSquareDiv()
     x2 = b2*m;
     Assert(Norm(vntemp=x2-x) < eps*Norm(x),"NonSquare x%m");
 
-    tmv::SmallMatrix<T,N,6> minv = m.Inverse();
+    tmv::SmallMatrix<T,N,6> minv = m.inverse();
     tmv::SmallMatrix<T,N,N> id = minv*m;
     tmv::SmallMatrix<T,6,6> nonid = m*minv;
     tmv::SmallMatrix<T,N,N> mnntemp;
@@ -203,17 +203,17 @@ static void TestSmallNonSquareDiv()
         std::cout<<"minv*m = "<<id<<std::endl;
         std::cout<<"m*minv = "<<nonid<<std::endl;
         std::cout<<"Norm(id-I) = "<<Norm(mnntemp=id-T(1))<<std::endl;
-        std::cout<<"(m*minv)T = "<<nonid.Transpose()<<std::endl;
+        std::cout<<"(m*minv)T = "<<nonid.transpose()<<std::endl;
         std::cout<<"(m*minv) - (m*minv)T = "<<
-            (nonid-nonid.Transpose())<<std::endl;
+            (nonid-nonid.transpose())<<std::endl;
     }
     Assert(Norm(mnntemp=id-T(1)) < eps,"NonSquare Inverse");
-    Assert(Norm(nonid-nonid.Transpose()) < eps,"NonSquare Pseudo-Inverse");
+    Assert(Norm(nonid-nonid.transpose()) < eps,"NonSquare Pseudo-Inverse");
 
     tmv::SmallMatrix<T,N,N> mata;
-    m.InverseATA(mata);
-    tmv::SmallMatrix<T,N,N> mtm = m.Transpose()*m;
-    tmv::SmallMatrix<T,N,N> mtminv = mtm.Inverse();
+    m.makeInverseATA(mata);
+    tmv::SmallMatrix<T,N,N> mtm = m.transpose()*m;
+    tmv::SmallMatrix<T,N,N> mtminv = mtm.inverse();
     Assert(Norm(mnntemp=mata-mtminv) < eps*Norm(mata),"NonSquare InverseATA");
 
     tmv::SmallMatrix<std::complex<T>,6,N,stor> c = m * std::complex<T>(1,2);
@@ -230,7 +230,7 @@ static void TestSmallNonSquareDiv()
     if (N > 3) y(3) = std::complex<T>(-5,-2);
 
     tmv::SmallMatrix<std::complex<T>,N,6> cn6temp;
-    T ceps = EPS * Norm(c) * Norm(cn6temp=c.Inverse());
+    T ceps = EPS * Norm(c) * Norm(cn6temp=c.inverse());
     tmv::SmallVector<std::complex<T>,6> e = c * y;
     tmv::SmallVector<std::complex<T>,N> y2 = e/c;
     tmv::SmallVector<std::complex<T>,N> cvntemp;
@@ -241,22 +241,22 @@ static void TestSmallNonSquareDiv()
     y2 = e2*c;
     Assert(Norm(cvntemp=y2-y) < ceps*Norm(y),"NonSquare e%c");
 
-    tmv::SmallMatrix<std::complex<T>,N,6> cinv = c.Inverse();
+    tmv::SmallMatrix<std::complex<T>,N,6> cinv = c.inverse();
     tmv::SmallMatrix<std::complex<T>,N,N> cid = cinv*c;
     tmv::SmallMatrix<std::complex<T>,N,N> cnntemp;
     Assert(Norm(cnntemp=cid-T(1)) < ceps,"NonSquare CInverse");
     tmv::SmallMatrix<std::complex<T>,6,6 > cnonid = c*cinv;
-    Assert(Norm(cnonid-cnonid.Adjoint()) < ceps,"NonSquare CPseudo-Inverse");
+    Assert(Norm(cnonid-cnonid.adjoint()) < ceps,"NonSquare CPseudo-Inverse");
 
     tmv::SmallMatrix<std::complex<T>,N,N> cata;
-    c.InverseATA(cata);
-    tmv::SmallMatrix<std::complex<T>,N,N> ctc = c.Adjoint()*c;
-    tmv::SmallMatrix<std::complex<T>,N,N> ctcinv = ctc.Inverse();
+    c.makeInverseATA(cata);
+    tmv::SmallMatrix<std::complex<T>,N,N> ctc = c.adjoint()*c;
+    tmv::SmallMatrix<std::complex<T>,N,N> ctcinv = ctc.inverse();
     Assert(Norm(cnntemp=cata-ctcinv) < ceps*Norm(cata),
            "NonSquare CInverseATA");
 
     // Test short matrix (M < N)
-    tmv::SmallMatrix<T,N,6,stor> ms = m.Transpose();
+    tmv::SmallMatrix<T,N,6,stor> ms = m.transpose();
 
     b = x * ms;
     x2 = b%ms;

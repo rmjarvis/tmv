@@ -199,13 +199,13 @@ namespace tmv {
     {
         bool ss = SameStorage(*this,minv);
 
-        if (!ss) minv.zero();
+        if (!ss) minv.setZero();
 
         UpperTriMatrixView<T1> U = minv.upperTri();
         U = *this;
         U.invertSelf();
 
-        if (ss && minv.rowsize() > 1) minv.lowerTri().offDiag().zero();
+        if (ss && minv.rowsize() > 1) minv.lowerTri().offDiag().setZero();
     }
 
     template <class T> template <class T1> 

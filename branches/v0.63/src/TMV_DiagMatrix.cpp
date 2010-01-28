@@ -80,8 +80,7 @@ namespace tmv {
                 if (*di == T(0)) { 
                     logdet = TMV_LOG(TMV_REAL(*di));
                     if (sign) s = T(0); 
-                }
-                else {
+                } else {
                     RT a = TMV_ABS(*di);
                     logdet += TMV_LOG(a);
                     if (sign) {
@@ -98,8 +97,7 @@ namespace tmv {
                 if (*di == T(0)) { 
                     logdet = TMV_LOG(TMV_REAL(*di));
                     if (sign) s = T(0); 
-                }
-                else {
+                } else {
                     RT a = TMV_ABS(*di);
                     logdet += TMV_LOG(a);
                     if (sign) {
@@ -236,11 +234,11 @@ namespace tmv {
     void GenDiagMatrix<T>::doMakeInverse(const MatrixView<T1>& minv) const
     {
         bool ss = SameStorage(diag(),minv);
-        if (!ss) minv.zero();
+        if (!ss) minv.setZero();
         (DiagMatrixViewOf(minv.diag()) = *this).invertSelf();
         if (ss && size() > 1) {
-            minv.upperTri().offDiag().zero();
-            minv.lowerTri().offDiag().zero();
+            minv.upperTri().offDiag().setZero();
+            minv.lowerTri().offDiag().setZero();
         }
     }
 
@@ -276,7 +274,7 @@ namespace tmv {
     template <class T>
     void GenDiagMatrix<T>::doMakeInverseATA(const MatrixView<T>& ata) const
     {
-        ata.zero();
+        ata.setZero();
         makeInverseATA(DiagMatrixViewOf(ata.diag()));
     }
 
@@ -598,8 +596,8 @@ namespace tmv {
             os << "( ";
             for(int k=i;k>0;--k) os <<' '<<Value(T(0))<<' ';
             if (diag().isconj())
-                os <<' '<<Value(TMV_ABS(*di)<thresh ? T(0) :
-                                TMV_CONJ(*di))<<' ';
+                os <<' '<<
+                    Value(TMV_ABS(*di)<thresh ? T(0) : TMV_CONJ(*di))<<' ';
             else
                 os <<' '<<Value(TMV_ABS(*di)<thresh ? T(0) : *di)<<' ';
             for(int k=nmi-1;k>0;--k) os <<' '<<Value(T(0))<<' ';

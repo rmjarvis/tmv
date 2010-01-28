@@ -1,7 +1,7 @@
 
+#include "TMV.h"
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
-#include "TMV.h"
 #include <fstream>
 #include <cstdio>
 
@@ -23,10 +23,10 @@ static void TestBasicUpperTriMatrix_1()
         }
     }
 
-    tmv::UpperTriMatrixView<T> uv = u.View();
-    tmv::ConstUpperTriMatrixView<T> ucv = u.View();
-    tmv::UpperTriMatrixView<T,tmv::FortranStyle> ufv = uf.View();
-    tmv::ConstUpperTriMatrixView<T,tmv::FortranStyle> ufcv = uf.View();
+    tmv::UpperTriMatrixView<T> uv = u.view();
+    tmv::ConstUpperTriMatrixView<T> ucv = u.view();
+    tmv::UpperTriMatrixView<T,tmv::FortranStyle> ufv = uf.view();
+    tmv::ConstUpperTriMatrixView<T,tmv::FortranStyle> ufcv = uf.view();
 
     const tmv::UpperTriMatrix<T,D,S>& ux = u;
     const tmv::UpperTriMatrix<T,D,S,tmv::FortranStyle>& ufx = uf;
@@ -182,10 +182,10 @@ static void TestBasicLowerTriMatrix_1()
         }
     }
 
-    tmv::LowerTriMatrixView<T> lv = l.View();
-    tmv::ConstLowerTriMatrixView<T> lcv = l.View();
-    tmv::LowerTriMatrixView<T,tmv::FortranStyle> lfv = lf.View();
-    tmv::ConstLowerTriMatrixView<T,tmv::FortranStyle> lfcv = lf.View();
+    tmv::LowerTriMatrixView<T> lv = l.view();
+    tmv::ConstLowerTriMatrixView<T> lcv = l.view();
+    tmv::LowerTriMatrixView<T,tmv::FortranStyle> lfv = lf.view();
+    tmv::ConstLowerTriMatrixView<T,tmv::FortranStyle> lfcv = lf.view();
 
     const tmv::LowerTriMatrix<T,D,S>& lx = l;
     const tmv::LowerTriMatrix<T,D,S,tmv::FortranStyle>& lfx = lf;
@@ -359,10 +359,10 @@ static void TestBasicTriMatrix_2()
         Assert(mu(i,j) == ux(i,j),"TriMatrix -> Matrix");
         Assert(ml(i,j) == lx(i,j),"TriMatrix -> Matrix");
     }
-    Assert(u == mu.UpperTri(),"TriMatrix == ");
+    Assert(u == mu.upperTri(),"TriMatrix == ");
     tmv::UpperTriMatrix<T,D,S> umu(mu);
     Assert(u == umu,"TriMatrix == ");
-    Assert(l == ml.LowerTri(),"TriMatrix == ");
+    Assert(l == ml.lowerTri(),"TriMatrix == ");
     tmv::LowerTriMatrix<T,D,S> lml(ml);
     Assert(l == lml,"TriMatrix == ");
 
@@ -420,9 +420,9 @@ static void TestBasicTriMatrix_2()
     for(int i=0;i<N;++i) for(int j=0;j<N;++j) a(i,j) = T(12+3*i-5*j);
 
     tmv::UpperTriMatrix<T,D,S> u1(a);
-    tmv::UpperTriMatrix<T,D,S> u2(a.Transpose());
+    tmv::UpperTriMatrix<T,D,S> u2(a.transpose());
     tmv::LowerTriMatrix<T,D,S> l1(a);
-    tmv::LowerTriMatrix<T,D,S> l2(a.Transpose());
+    tmv::LowerTriMatrix<T,D,S> l2(a.transpose());
     const tmv::UpperTriMatrix<T,D,S>& u1x = u1;
     const tmv::UpperTriMatrix<T,D,S>& u2x = u2;
     const tmv::LowerTriMatrix<T,D,S>& l1x = l1;
@@ -485,46 +485,46 @@ static void TestBasicTriMatrix_2()
 
     tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag,tmv::RowMajor> cunr = u;
     if (D == tmv::UnitDiag)
-        cunr.OffDiag() *= std::complex<T>(1,2);
+        cunr.offDiag() *= std::complex<T>(1,2);
     else
         cunr *= std::complex<T>(1,2);
     tmv::UpperTriMatrix<std::complex<T>,D,S> cu = cunr;
     Assert(cunr == cu,"TriMatrix == TriMatrix<N,R>");
-    Assert(cunr.View() == cu.View(),"TriMatrix View");
-    Assert(cunr.Transpose() == cu.Transpose(),"TriMatrix Transpose");
-    Assert(cunr.Conjugate() == cu.Conjugate(),"TriMatrix Conjugate");
-    Assert(cunr.Adjoint() == cu.Adjoint(),"TriMatrix Adjoint");
-    Assert(cunr.OffDiag() == cu.OffDiag(),"TriMatrix OffDiag");
-    Assert(cunr.Real() == cu.Real(),"TriMatrix Real");
+    Assert(cunr.view() == cu.view(),"TriMatrix View");
+    Assert(cunr.transpose() == cu.transpose(),"TriMatrix Transpose");
+    Assert(cunr.conjugate() == cu.conjugate(),"TriMatrix Conjugate");
+    Assert(cunr.adjoint() == cu.adjoint(),"TriMatrix Adjoint");
+    Assert(cunr.offDiag() == cu.offDiag(),"TriMatrix OffDiag");
+    Assert(cunr.realPart() == cu.realPart(),"TriMatrix Real");
     if (D == tmv::NonUnitDiag)
-        Assert(cunr.Imag() == cu.Imag(),"TriMatrix Imag");
-    Assert(cunr.SubMatrix(0,N/2,N/2,N) == cu.SubMatrix(0,N/2,N/2,N),
+        Assert(cunr.imagPart() == cu.imagPart(),"TriMatrix Imag");
+    Assert(cunr.subMatrix(0,N/2,N/2,N) == cu.subMatrix(0,N/2,N/2,N),
            "TriMatrix SubMatrix");
-    Assert(cunr.SubTriMatrix(0,N/2) == cu.SubTriMatrix(0,N/2),
+    Assert(cunr.subTriMatrix(0,N/2) == cu.subTriMatrix(0,N/2),
            "TriMatrix SubTriMatrix");
-    Assert(cunr.SubTriMatrix(N/2,N) == cu.SubTriMatrix(N/2,N),
+    Assert(cunr.subTriMatrix(N/2,N) == cu.subTriMatrix(N/2,N),
            "TriMatrix SubTriMatrix");
 
     tmv::LowerTriMatrix<std::complex<T>,tmv::NonUnitDiag,tmv::RowMajor> clnr = l;
     if (D == tmv::UnitDiag)
-        clnr.OffDiag() *= std::complex<T>(1,2);
+        clnr.offDiag() *= std::complex<T>(1,2);
     else
         clnr *= std::complex<T>(1,2);
     tmv::LowerTriMatrix<std::complex<T>,D,S> cl = clnr;
     Assert(clnr == cl,"TriMatrix == TriMatrix<N,R>");
-    Assert(clnr.View() == cl.View(),"TriMatrix View");
-    Assert(clnr.Transpose() == cl.Transpose(),"TriMatrix Transpose");
-    Assert(clnr.Conjugate() == cl.Conjugate(),"TriMatrix Conjugate");
-    Assert(clnr.Adjoint() == cl.Adjoint(),"TriMatrix Adjoint");
-    Assert(clnr.OffDiag() == cl.OffDiag(),"TriMatrix OffDiag");
-    Assert(clnr.Real() == cl.Real(),"TriMatrix Real");
+    Assert(clnr.view() == cl.view(),"TriMatrix View");
+    Assert(clnr.transpose() == cl.transpose(),"TriMatrix Transpose");
+    Assert(clnr.conjugate() == cl.conjugate(),"TriMatrix Conjugate");
+    Assert(clnr.adjoint() == cl.adjoint(),"TriMatrix Adjoint");
+    Assert(clnr.offDiag() == cl.offDiag(),"TriMatrix OffDiag");
+    Assert(clnr.realPart() == cl.realPart(),"TriMatrix Real");
     if (D == tmv::NonUnitDiag)
-        Assert(clnr.Imag() == cl.Imag(),"TriMatrix Imag");
-    Assert(clnr.SubMatrix(N/2,N,0,N/2) == cl.SubMatrix(N/2,N,0,N/2),
+        Assert(clnr.imagPart() == cl.imagPart(),"TriMatrix Imag");
+    Assert(clnr.subMatrix(N/2,N,0,N/2) == cl.subMatrix(N/2,N,0,N/2),
            "TriMatrix SubMatrix");
-    Assert(clnr.SubTriMatrix(0,N/2) == cl.SubTriMatrix(0,N/2),
+    Assert(clnr.subTriMatrix(0,N/2) == cl.subTriMatrix(0,N/2),
            "TriMatrix SubTriMatrix");
-    Assert(clnr.SubTriMatrix(N/2,N) == cl.SubTriMatrix(N/2,N),
+    Assert(clnr.subTriMatrix(N/2,N) == cl.subTriMatrix(N/2,N),
            "TriMatrix SubTriMatrix");
 }
 
@@ -556,8 +556,8 @@ static void TestBasicTriMatrix_IO()
 #endif
     }
     fout << u << std::endl << l << std::endl;
-    u.WriteCompact(fout);
-    l.WriteCompact(fout);
+    u.writeCompact(fout);
+    l.writeCompact(fout);
     fout.close();
 
     tmv::Matrix<std::complex<T>,tmv::RowMajor> xum1(N,N);

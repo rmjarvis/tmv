@@ -106,6 +106,8 @@ opts.Add(BoolVariable('CACHE_LIB',
             'Cache the results of the library checks',True))
 opts.Add(BoolVariable('WITH_UPS',
             'Install the ups directory under PREFIX/ups',False))
+opts.Add(BoolVariable('TEST_DEPRECATED',
+            'Test the deprecated method names',False))
 
 opts.Update(initial_env)
 opts.Save(config_file,initial_env)
@@ -154,6 +156,8 @@ def BasicCCFlags(env):
             if env['WARN']:
                 env.Append(CCFLAGS=['-ansi','-pedantic-errors','-Wall','-Werror'])
                 env['TEST_FLAGS'] = ['-ansi','-pedantic-errors','-Wall','-Werror']
+            if env['TEST_DEPRECATED']:
+                env['TEST_FLAGS'] += ['-Wno-deprecated-declarations']
     
         elif compiler == 'icpc':
             env.Replace(CCFLAGS=['-O2'])

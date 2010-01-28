@@ -84,7 +84,7 @@ namespace tmv {
                 LU_Inverse(LUx,p,temp.view());
                 minv = temp;
             } else {
-                minv.zero();
+                minv.setZero();
                 UpperTriMatrixView<T> U = minv.upperTri();
                 U = BandMatrixViewOf(LUx,0,LUx.nhi());
                 TriInverse(U,LUx.nhi());

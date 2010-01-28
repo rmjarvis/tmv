@@ -358,7 +358,7 @@ namespace tmv {
 
         if (N==0) return;
         else if (alpha == T(0)) {
-            if (!add) C.zero();
+            if (!add) C.setZero();
         }
         else if (C.isconj()) 
             DoMultMM<add>(TMV_CONJ(alpha),A.conjugate(),B.conjugate(),
@@ -699,7 +699,7 @@ namespace tmv {
 
         if (N==0) return;
         else if (alpha == T(0)) {
-            if (!add) C.zero();
+            if (!add) C.setZero();
         } else if (C.isconj()) {
             DoMultMM<add>(TMV_CONJ(alpha),A.conjugate(),B.conjugate(),
                           C.conjugate());

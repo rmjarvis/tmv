@@ -1,4 +1,3 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 #define CT std::complex<T>
 
 template <class M1, class M2> inline bool CanAdd(const M1& a, const M2& b)
@@ -8,7 +7,7 @@ template <class M1, class M2> inline bool CanAddEq(const M1& a, const M2& b)
 { return CanAdd(a,b); }
 
 template <class M, class T2> inline bool CanAddX(const M& a, const T2)
-{ return a.IsSquare(); }
+{ return a.isSquare(); }
 
 template <class M, class T2> inline bool CanAddEqX(const M& a, const T2 x)
 { return CanAddX(a,x); }
@@ -100,12 +99,12 @@ template <class T, class MM> static void DoTestMa(const MM& a, std::string label
     std::cout<<"a-m = "<<a-m<<std::endl;
     std::cout<<"Norm(a-m) = "<<Norm(MAT(T,a)-m)<<std::endl;
 #ifndef NONSQUARE
-    if (m.IsSquare()) {
+    if (m.isSquare()) {
       std::cout<<"Trace(a) = "<<Trace(a)<<"  "<<Trace(m)<<std::endl;
       std::cout<<"Det(a) = "<<Det(a)<<"  "<<Det(m)<<std::endl;
-      std::cout<<"diff = "<<std::abs(Det(a)-Det(m))<<"  "<<eps*std::abs(Det(m)+Norm(m.Inverse()))<<std::endl;
+      std::cout<<"diff = "<<std::abs(Det(a)-Det(m))<<"  "<<eps*std::abs(Det(m)+Norm(m.inverse()))<<std::endl;
       std::cout<<"LogDet(a) = "<<LogDet(a)<<"  "<<LogDet(m)<<std::endl;
-      std::cout<<"diff = "<<std::abs(LogDet(a)-LogDet(m))<<"  "<<m.colsize()*eps*Norm(m.Inverse())<<std::endl;
+      std::cout<<"diff = "<<std::abs(LogDet(a)-LogDet(m))<<"  "<<m.colsize()*eps*Norm(m.inverse())<<std::endl;
     }
 #endif
     std::cout<<"NormF(a) = "<<NormF(a)<<"  "<<NormF(m)<<std::endl;
@@ -119,15 +118,15 @@ template <class T, class MM> static void DoTestMa(const MM& a, std::string label
 
   Assert(Norm(MAT(T,a)-m) <= eps,label+" a != m");
 #ifndef NONSQUARE
-  if (m.IsSquare()) {
+  if (m.isSquare()) {
     Assert(std::abs(Trace(a)-Trace(m)) <= eps,label+" Trace");
     T d = Det(m);
     if (std::abs(d) > 0.5) {
-      double eps1 = eps * Norm(m.Inverse());
+      double eps1 = eps * Norm(m.inverse());
       Assert(std::abs(Det(a)-d) <= eps1*std::abs(d),label+" Det");
       Assert(std::abs(LogDet(a)-LogDet(m)) <= m.colsize()*eps1,label+" LogDet");
     } else if (std::abs(d) != 0.0) {
-      double eps1 = eps * Norm(m.Inverse());
+      double eps1 = eps * Norm(m.inverse());
       Assert(std::abs(Det(a)-d) <= eps1*(1.+std::abs(d)),label+" Det");
     } else {
       Assert(std::abs(Det(a)) <= eps,label+" Det");
@@ -138,30 +137,20 @@ template <class T, class MM> static void DoTestMa(const MM& a, std::string label
   Assert(std::abs(Norm(a)-Norm(m)) <= eps,label+" Norm");
   Assert(std::abs(Norm1(a)-Norm1(m)) <= eps,label+" Norm1");
   Assert(std::abs(NormInf(a)-NormInf(m)) <= eps,label+" NormInf");
-#ifdef XTEST
-  Assert(std::abs(a.NormF()-NormF(m)) <= eps,label+" NormF");
-  Assert(std::abs(a.Norm()-Norm(m)) <= eps,label+" Norm");
-  Assert(std::abs(a.Norm1()-Norm1(m)) <= eps,label+" Norm1");
-  Assert(std::abs(a.NormInf()-NormInf(m)) <= eps,label+" NormInf");
-#endif
   if (donorm2) {
     if (XXDEBUG1) {
-      std::cout<<"Norm2(a) = "<<a.DoNorm2()<<"  "<<m.DoNorm2()<<std::endl;
-      std::cout<<"abs(diff) = "<<std::abs(a.DoNorm2()-m.DoNorm2())<<std::endl;
-      std::cout<<"eps*kappa = "<<eps*m.DoCondition()<<std::endl;
+      std::cout<<"Norm2(a) = "<<a.doNorm2()<<"  "<<m.doNorm2()<<std::endl;
+      std::cout<<"abs(diff) = "<<std::abs(a.doNorm2()-m.doNorm2())<<std::endl;
+      std::cout<<"eps*kappa = "<<eps*m.doCondition()<<std::endl;
     }
-    Assert(std::abs(a.DoNorm2()-m.DoNorm2()) <= eps*a.DoCondition(),
-        label+" DoNorm2");
+    Assert(std::abs(a.doNorm2()-m.doNorm2()) <= eps*a.doCondition(),
+        label+" doNorm2");
 #ifndef NOSV
-    a.DivideUsing(tmv::SV);
-    a.SetDiv();
-    m.DivideUsing(tmv::SV);
-    m.SetDiv();
-    Assert(std::abs(Norm2(a)-Norm2(m)) <= eps*a.Condition(),label+" Norm2");
-#ifdef XTEST
-    Assert(std::abs(a.Norm2()-m.DoNorm2()) <= eps*a.Condition(),
-        label+" Norm2");
-#endif
+    a.divideUsing(tmv::SV);
+    a.setDiv();
+    m.divideUsing(tmv::SV);
+    m.setDiv();
+    Assert(std::abs(Norm2(a)-Norm2(m)) <= eps*a.condition(),label+" Norm2");
 #endif
   }
   if (XXDEBUG1) {
@@ -240,7 +229,7 @@ template <class T, IFTEMP1(class M0) class MM, class T2> static void DoTestMX1a(
     Assert(Norm(MAT2(T,T2,IFTEMP(temp=)x*a)-(x*m)) <= eps*std::abs(x),label+" x*a");
 #ifdef XTEST
     Assert(Norm(MAT2(T,T2,IFTEMP(temp=)a*x)-(x*m)) <= eps*std::abs(x),label+" a*x");
-    if (tmv::Epsilon<T>()  != T(0)) {
+    if (tmv::TMV_Epsilon<T>()  != T(0)) {
       Assert(Norm(MAT2(T,T2,IFTEMP(temp=)a/x)-(m/x)) <= eps/std::abs(x),label+" a/x");
     }
 #endif
@@ -346,7 +335,7 @@ template <class T, class BaseM, class MM, class T2> static void DoTestMX2a(
     Assert(Norm(MAT(T,a)-m2) <= eps*std::abs(x),label+" a *= -x");
     Assert(Norm(MAT(T,a*=-x)-(m2*=-x)) <= eps*std::abs(x*x),label+" a *= -x");
     a = a0;
-    if (tmv::Epsilon<T>() != T(0)) {
+    if (tmv::TMV_Epsilon<T>() != T(0)) {
       a /= x;
       m2 = m1/x;
       Assert(Norm(MAT(T,a)-m2) <= eps*std::abs(x),label+" a /= x");
@@ -476,41 +465,41 @@ template <class Ta, class T, IFTEMP1(class V0) IFTEMP1(class CV0) class MM, clas
 {
   DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
 #ifndef NOVIEWS
-  DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b.Reverse(),label);
+  DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b.reverse(),label);
 #endif
 
 #ifdef XTEST
   tmv::Vector<T> b0 = b;
 
-  b.Zero();
+  b.setZero();
   DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
 
   b = b0;
 #ifndef NOVIEWS
-  b.SubVector(0,b.size()/2).Zero();
+  b.subVector(0,b.size()/2).setZero();
   DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
 
   b = b0;
-  b.SubVector(b.size()/2,b.size()).Zero();
+  b.subVector(b.size()/2,b.size()).setZero();
   DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
 
   b = b0;
-  b.SubVector(0,b.size()/4).Zero();
-  b.SubVector(3*b.size()/4,b.size()).Zero();
+  b.subVector(0,b.size()/4).setZero();
+  b.subVector(3*b.size()/4,b.size()).setZero();
   DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
 
   if (b.size() > 1) {
     b = b0;
-    b.SubVector(0,1).Zero();
+    b.subVector(0,1).setZero();
     DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
 
     b = b0;
-    b.SubVector(b.size()-1,b.size()).Zero();
+    b.subVector(b.size()-1,b.size()).setZero();
     DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
 
     b = b0;
-    b.SubVector(0,1).Zero();
-    b.SubVector(b.size()-1,b.size()).Zero();
+    b.subVector(0,1).setZero();
+    b.subVector(b.size()-1,b.size()).setZero();
     DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
   }
   b = b0; 
@@ -523,41 +512,41 @@ template <class Ta, class T, IFTEMP1(class V0) IFTEMP1(class CV0) class MM, clas
 {
   DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
 #ifndef NOVIEWS
-  DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b.Reverse(),label);
+  DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b.reverse(),label);
 #endif
 
 #ifdef XTEST
   tmv::Vector<T> b0 = b;
 
-  b.Zero();
+  b.setZero();
   DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
 
   b = b0;
 #ifndef NOVIEWS
-  b.SubVector(0,b.size()/2).Zero();
+  b.subVector(0,b.size()/2).setZero();
   DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
 
   b = b0;
-  b.SubVector(b.size()/2,b.size()).Zero();
+  b.subVector(b.size()/2,b.size()).setZero();
   DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
 
   b = b0;
-  b.SubVector(0,b.size()/4).Zero();
-  b.SubVector(3*b.size()/4,b.size()).Zero();
+  b.subVector(0,b.size()/4).setZero();
+  b.subVector(3*b.size()/4,b.size()).setZero();
   DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
 
   if (b.size() > 1) {
     b = b0;
-    b.SubVector(0,1).Zero();
+    b.subVector(0,1).setZero();
     DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
 
     b = b0;
-    b.SubVector(b.size()-1,b.size()).Zero();
+    b.subVector(b.size()-1,b.size()).setZero();
     DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
 
     b = b0;
-    b.SubVector(0,1).Zero();
-    b.SubVector(b.size()-1,b.size()).Zero();
+    b.subVector(0,1).setZero();
+    b.subVector(b.size()-1,b.size()).setZero();
     DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
   }
   b = b0;
@@ -570,19 +559,19 @@ template <class Ta, class T, IFTEMP1(class V0) IFTEMP1(class CV0) class MM, clas
 {
   DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
 #ifndef NOVIEWS
-  DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b.Reverse(),label);
+  DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b.reverse(),label);
 
   DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) Conjugate(a),b,label+" Conj");
 #endif
 #ifdef XTEST
 #ifndef NOVIEWS
-  DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) Conjugate(a),b.Reverse(),
+  DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) Conjugate(a),b.reverse(),
       label+" Conj");
 #endif
 
   tmv::Vector<T> b0 = b;
 
-  b.Zero();
+  b.setZero();
   DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
 #ifndef NOVIEWS
   DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) Conjugate(a),b,label+" Conj");
@@ -590,37 +579,37 @@ template <class Ta, class T, IFTEMP1(class V0) IFTEMP1(class CV0) class MM, clas
 
   b = b0; 
 #ifndef NOVIEWS
-  b.SubVector(0,b.size()/2).Zero();
+  b.subVector(0,b.size()/2).setZero();
   DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
   DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) Conjugate(a),b,label+" Conj");
 
   b = b0; 
-  b.SubVector(b.size()/2,b.size()).Zero();
+  b.subVector(b.size()/2,b.size()).setZero();
   DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
   DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) Conjugate(a),b,label+" Conj");
 
   b = b0; 
-  b.SubVector(0,b.size()/4).Zero();
-  b.SubVector(3*b.size()/4,b.size()).Zero();
+  b.subVector(0,b.size()/4).setZero();
+  b.subVector(3*b.size()/4,b.size()).setZero();
   DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
   DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) Conjugate(a),b,label+" Conj");
 
   if (b.size() > 1) {
     b = b0; 
-    b.SubVector(0,1).Zero();
+    b.subVector(0,1).setZero();
     DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
     DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) Conjugate(a),b,
         label+" Conj");
 
     b = b0; 
-    b.SubVector(b.size()-1,b.size()).Zero();
+    b.subVector(b.size()-1,b.size()).setZero();
     DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
     DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) Conjugate(a),b,
         label+" Conj");
 
     b = b0; 
-    b.SubVector(0,1).Zero();
-    b.SubVector(b.size()-1,b.size()).Zero();
+    b.subVector(0,1).setZero();
+    b.subVector(b.size()-1,b.size()).setZero();
     DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
     DoTestMV1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) Conjugate(a),b,
         label+" Conj");
@@ -635,20 +624,20 @@ template <class Ta, class T, IFTEMP1(class V0) IFTEMP1(class CV0) class MM, clas
 {
   DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
 #ifndef NOVIEWS
-  DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b.Reverse(),label);
+  DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b.reverse(),label);
 
   DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) Conjugate(a),b,
       label+" Conj");
 #endif
 #ifdef XTEST
 #ifndef NOVIEWS
-  DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) Conjugate(a),b.Reverse(),
+  DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) Conjugate(a),b.reverse(),
       label+" Conj");
 #endif
 
   tmv::Vector<T> b0 = b;
 
-  b.Zero();
+  b.setZero();
   DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
 #ifndef NOVIEWS
   DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) Conjugate(a),b,label+" Conj");
@@ -656,37 +645,37 @@ template <class Ta, class T, IFTEMP1(class V0) IFTEMP1(class CV0) class MM, clas
 
   b = b0;
 #ifndef NOVIEWS
-  b.SubVector(0,b.size()/2).Zero();
+  b.subVector(0,b.size()/2).setZero();
   DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
   DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) Conjugate(a),b,label+" Conj");
 
   b = b0;
-  b.SubVector(b.size()/2,b.size()).Zero();
+  b.subVector(b.size()/2,b.size()).setZero();
   DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
   DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) Conjugate(a),b,label+" Conj");
 
   b = b0;
-  b.SubVector(0,b.size()/4).Zero();
-  b.SubVector(3*b.size()/4,b.size()).Zero();
+  b.subVector(0,b.size()/4).setZero();
+  b.subVector(3*b.size()/4,b.size()).setZero();
   DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
   DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) Conjugate(a),b,label+" Conj");
 
   if (b.size() > 1) {
     b = b0;
-    b.SubVector(0,1).Zero();
+    b.subVector(0,1).setZero();
     DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
     DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) Conjugate(a),b,
         label+" Conj");
 
     b = b0;
-    b.SubVector(b.size()-1,b.size()).Zero();
+    b.subVector(b.size()-1,b.size()).setZero();
     DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
     DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) Conjugate(a),b,
         label+" Conj");
 
     b = b0;
-    b.SubVector(0,1).Zero();
-    b.SubVector(b.size()-1,b.size()).Zero();
+    b.subVector(0,1).setZero();
+    b.subVector(b.size()-1,b.size()).setZero();
     DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) a,b,label);
     DoTestVM1a<Ta,T>(IFTEMP1(temp) IFTEMP1(ctemp) Conjugate(a),b,
         label+" Conj");
@@ -1174,26 +1163,26 @@ template <class Ta, class T, class MM, class V> static void DoTestMV2R(
 {
   DoTestMV2a<Ta,T>(a,b,label);
 #ifndef NOVIEWS
-  DoTestMV2a<Ta,T>(a,b.Reverse(),label+" Rev");
+  DoTestMV2a<Ta,T>(a,b.reverse(),label+" Rev");
 #endif
 
 #ifdef XTEST
   tmv::Vector<T> b0 = b;
-  b.Zero();
+  b.setZero();
   DoTestMV2a<Ta,T>(a,b,label+" 1");
   b = b0;
 
 #ifndef NOVIEWS
-  b.SubVector(0,b.size()/2).Zero();
+  b.subVector(0,b.size()/2).setZero();
   DoTestMV2a<Ta,T>(a,b,label+" 2");
   b = b0;
 
-  b.SubVector(b.size()/2,b.size()).Zero();
+  b.subVector(b.size()/2,b.size()).setZero();
   DoTestMV2a<Ta,T>(a,b,label+" 3");
   b = b0;
 
-  b.SubVector(0,b.size()/4).Zero();
-  b.SubVector(3*b.size()/4,b.size()).Zero();
+  b.subVector(0,b.size()/4).setZero();
+  b.subVector(3*b.size()/4,b.size()).setZero();
   DoTestMV2a<Ta,T>(a,b,label+" 4");
   b = b0;
 #endif
@@ -1205,26 +1194,26 @@ template <class Ta, class T, class MM, class V> static void DoTestVM2R(
 {
   DoTestVM2a<Ta,T>(a,b,label);
 #ifndef NOVIEWS
-  DoTestMV2a<Ta,T>(a,b.Reverse(),label+" Rev");
+  DoTestMV2a<Ta,T>(a,b.reverse(),label+" Rev");
 #endif
 
 #ifdef XTEST
   tmv::Vector<T> b0 = b;
-  b.Zero();
+  b.setZero();
   DoTestVM2a<Ta,T>(a,b,label+" 1");
   b = b0;
 
 #ifndef NOVIEWS
-  b.SubVector(0,b.size()/2).Zero();
+  b.subVector(0,b.size()/2).setZero();
   DoTestVM2a<Ta,T>(a,b,label+" 2");
   b = b0;
 
-  b.SubVector(b.size()/2,b.size()).Zero();
+  b.subVector(b.size()/2,b.size()).setZero();
   DoTestVM2a<Ta,T>(a,b,label+" 3");
   b = b0;
 
-  b.SubVector(0,b.size()/4).Zero();
-  b.SubVector(3*b.size()/4,b.size()).Zero();
+  b.subVector(0,b.size()/4).setZero();
+  b.subVector(3*b.size()/4,b.size()).setZero();
   DoTestVM2a<Ta,T>(a,b,label+" 4");
   b = b0;
 #endif
@@ -1236,17 +1225,17 @@ template <class Ta, class T, class MM, class V> static void DoTestMV2C(
 {
   DoTestMV2a<Ta,T>(a,b,label);
 #ifndef NOVIEWS
-  DoTestMV2a<Ta,T>(a,b.Reverse(),label+" Rev");
+  DoTestMV2a<Ta,T>(a,b.reverse(),label+" Rev");
 
   DoTestMV2a<Ta,T>(Conjugate(a),b,label+" Conj");
 #endif
 #ifdef XTEST
 #ifndef NOVIEWS
-  DoTestMV2a<Ta,T>(Conjugate(a),b.Reverse(),label+" Rev,Conj");
+  DoTestMV2a<Ta,T>(Conjugate(a),b.reverse(),label+" Rev,Conj");
 #endif
 
   tmv::Vector<T> b0 = b;
-  b.Zero();
+  b.setZero();
   DoTestMV2a<Ta,T>(a,b,label+" 1");
 #ifndef NOVIEWS
   DoTestMV2a<Ta,T>(Conjugate(a),b,label+" Conj1");
@@ -1254,18 +1243,18 @@ template <class Ta, class T, class MM, class V> static void DoTestMV2C(
   b = b0;
 
 #ifndef NOVIEWS
-  b.SubVector(0,b.size()/2).Zero();
+  b.subVector(0,b.size()/2).setZero();
   DoTestMV2a<Ta,T>(a,b,label+" 2");
   DoTestMV2a<Ta,T>(Conjugate(a),b,label+" Conj2");
   b = b0;
 
-  b.SubVector(b.size()/2,b.size()).Zero();
+  b.subVector(b.size()/2,b.size()).setZero();
   DoTestMV2a<Ta,T>(a,b,label+" 3");
   DoTestMV2a<Ta,T>(Conjugate(a),b,label+" Conj3");
   b = b0;
 
-  b.SubVector(0,b.size()/4).Zero();
-  b.SubVector(3*b.size()/4,b.size()).Zero();
+  b.subVector(0,b.size()/4).setZero();
+  b.subVector(3*b.size()/4,b.size()).setZero();
   DoTestMV2a<Ta,T>(a,b,label+" 4");
   DoTestMV2a<Ta,T>(Conjugate(a),b,label+" Conj4");
   b = b0;
@@ -1278,17 +1267,17 @@ template <class Ta, class T, class MM, class V> static void DoTestVM2C(
 {
   DoTestVM2a<Ta,T>(a,b,label);
 #ifndef NOVIEWS
-  DoTestVM2a<Ta,T>(a,b.Reverse(),label+" Rev");
+  DoTestVM2a<Ta,T>(a,b.reverse(),label+" Rev");
 
   DoTestVM2a<Ta,T>(Conjugate(a),b,label+" Conj");
 #endif
 #ifdef XTEST
 #ifndef NOVIEWS
-  DoTestVM2a<Ta,T>(Conjugate(a),b.Reverse(),label+" Rev,Conj");
+  DoTestVM2a<Ta,T>(Conjugate(a),b.reverse(),label+" Rev,Conj");
 #endif
 
   tmv::Vector<T> b0 = b;
-  b.Zero();
+  b.setZero();
   DoTestVM2a<Ta,T>(a,b,label+" 1");
 #ifndef NOVIEWS
   DoTestVM2a<Ta,T>(Conjugate(a),b,label+" Conj1");
@@ -1296,18 +1285,18 @@ template <class Ta, class T, class MM, class V> static void DoTestVM2C(
   b = b0;
 
 #ifndef NOVIEWS
-  b.SubVector(0,b.size()/2).Zero();
+  b.subVector(0,b.size()/2).setZero();
   DoTestVM2a<Ta,T>(a,b,label+" 2");
   DoTestVM2a<Ta,T>(Conjugate(a),b,label+" Conj2");
   b = b0;
 
-  b.SubVector(b.size()/2,b.size()).Zero();
+  b.subVector(b.size()/2,b.size()).setZero();
   DoTestVM2a<Ta,T>(a,b,label+" 3");
   DoTestVM2a<Ta,T>(Conjugate(a),b,label+" Conj3");
   b = b0;
 
-  b.SubVector(0,b.size()/4).Zero();
-  b.SubVector(3*b.size()/4,b.size()).Zero();
+  b.subVector(0,b.size()/4).setZero();
+  b.subVector(3*b.size()/4,b.size()).setZero();
   DoTestVM2a<Ta,T>(a,b,label+" 4");
   DoTestVM2a<Ta,T>(Conjugate(a),b,label+" Conj4");
   b = b0;
@@ -1670,9 +1659,9 @@ static void DoTestMV3R(
 
   DoTestMV3a<Ta,Tb,T>(a,b,c,label);
 #ifndef NOVIEWS
-  DoTestMV3a<Ta,Tb,T>(a,b.Reverse(),c,label);
-  DoTestMV3a<Ta,Tb,T>(a,b,c.Reverse(),label);
-  DoTestMV3a<Ta,Tb,T>(a,b.Reverse(),c.Reverse(),label);
+  DoTestMV3a<Ta,Tb,T>(a,b.reverse(),c,label);
+  DoTestMV3a<Ta,Tb,T>(a,b,c.reverse(),label);
+  DoTestMV3a<Ta,Tb,T>(a,b.reverse(),c.reverse(),label);
 #endif
 
   if (showstartdone)
@@ -1692,9 +1681,9 @@ static void DoTestVM3R(
 
   DoTestVM3a<Ta,Tb,T>(a,b,c,label);
 #ifndef NOVIEWS
-  DoTestVM3a<Ta,Tb,T>(a,b.Reverse(),c,label);
-  DoTestVM3a<Ta,Tb,T>(a,b,c.Reverse(),label);
-  DoTestVM3a<Ta,Tb,T>(a,b.Reverse(),c.Reverse(),label);
+  DoTestVM3a<Ta,Tb,T>(a,b.reverse(),c,label);
+  DoTestVM3a<Ta,Tb,T>(a,b,c.reverse(),label);
+  DoTestVM3a<Ta,Tb,T>(a,b.reverse(),c.reverse(),label);
 #endif
 
   if (showstartdone)
@@ -1714,15 +1703,15 @@ static void DoTestMV3C(
 
   DoTestMV3a<Ta,Tb,T>(a,b,c,label);
 #ifndef NOVIEWS
-  DoTestMV3a<Ta,Tb,T>(a,b.Reverse(),c,label);
-  DoTestMV3a<Ta,Tb,T>(a,b,c.Reverse(),label);
-  DoTestMV3a<Ta,Tb,T>(a,b.Reverse(),c.Reverse(),label);
+  DoTestMV3a<Ta,Tb,T>(a,b.reverse(),c,label);
+  DoTestMV3a<Ta,Tb,T>(a,b,c.reverse(),label);
+  DoTestMV3a<Ta,Tb,T>(a,b.reverse(),c.reverse(),label);
 
   DoTestMV3a<Ta,Tb,T>(Conjugate(a),b,c,label+" Conj");
 #ifdef XTEST
-  DoTestMV3a<Ta,Tb,T>(Conjugate(a),b.Reverse(),c,label+" Conj");
-  DoTestMV3a<Ta,Tb,T>(Conjugate(a),b,c.Reverse(),label+" Conj");
-  DoTestMV3a<Ta,Tb,T>(Conjugate(a),b.Reverse(),c.Reverse(),label+" Conj");
+  DoTestMV3a<Ta,Tb,T>(Conjugate(a),b.reverse(),c,label+" Conj");
+  DoTestMV3a<Ta,Tb,T>(Conjugate(a),b,c.reverse(),label+" Conj");
+  DoTestMV3a<Ta,Tb,T>(Conjugate(a),b.reverse(),c.reverse(),label+" Conj");
 #endif
 #endif
 
@@ -1743,15 +1732,15 @@ static void DoTestVM3C(
 
   DoTestVM3a<Ta,Tb,T>(a,b,c,label);
 #ifndef NOVIEWS
-  DoTestVM3a<Ta,Tb,T>(a,b.Reverse(),c,label);
-  DoTestVM3a<Ta,Tb,T>(a,b,c.Reverse(),label);
-  DoTestVM3a<Ta,Tb,T>(a,b.Reverse(),c.Reverse(),label);
+  DoTestVM3a<Ta,Tb,T>(a,b.reverse(),c,label);
+  DoTestVM3a<Ta,Tb,T>(a,b,c.reverse(),label);
+  DoTestVM3a<Ta,Tb,T>(a,b.reverse(),c.reverse(),label);
 
   DoTestVM3a<Ta,Tb,T>(Conjugate(a),b,c,label+" Conj");
 #ifdef XTEST
-  DoTestVM3a<Ta,Tb,T>(Conjugate(a),b.Reverse(),c,label+" Conj");
-  DoTestVM3a<Ta,Tb,T>(Conjugate(a),b,c.Reverse(),label+" Conj");
-  DoTestVM3a<Ta,Tb,T>(Conjugate(a),b.Reverse(),c.Reverse(),label+" Conj");
+  DoTestVM3a<Ta,Tb,T>(Conjugate(a),b.reverse(),c,label+" Conj");
+  DoTestVM3a<Ta,Tb,T>(Conjugate(a),b,c.reverse(),label+" Conj");
+  DoTestVM3a<Ta,Tb,T>(Conjugate(a),b.reverse(),c.reverse(),label+" Conj");
 #endif
 #endif
 
@@ -1900,8 +1889,8 @@ template <class T, IFTEMP1(class M0) IFTEMP1(class CM0) class M1, class M2> stat
 #ifdef XTEST
 #ifndef NOVIEWS
 #ifdef USETEMP
-  M0 temp2 = temp.Transpose();
-  CM0 ctemp2 = ctemp.Transpose();
+  M0 temp2 = temp.transpose();
+  CM0 ctemp2 = ctemp.transpose();
 #endif
   DoTestMM1a<T,T,T>(IFTEMP1(temp2) IFTEMP1(ctemp2) Transpose(b),Transpose(a),
       label+" TransB TransA");
@@ -1919,7 +1908,7 @@ template <class T, IFTEMP1(class CM0) class M1, class M2> static void DoTestMM1R
   DoTestMM1a<T,CT,CT>(IFTEMP1(ctemp) IFTEMP1(ctemp) a,Conjugate(b),
       label+" ConjB");
 #ifdef USETEMP
-  CM0 ctemp2 = ctemp.Transpose();
+  CM0 ctemp2 = ctemp.transpose();
 #endif
   DoTestMM1a<CT,T,CT>(IFTEMP1(ctemp2) IFTEMP1(ctemp2) Transpose(b),Transpose(a),
       label+" TransB TransA");
@@ -1939,7 +1928,7 @@ template <class T, IFTEMP1(class CM0) class M1, class M2> static void DoTestMM1C
   DoTestMM1a<CT,T,CT>(IFTEMP1(ctemp) IFTEMP1(ctemp) Conjugate(a),b,
       label+" ConjA");
 #ifdef USETEMP
-  CM0 ctemp2 = ctemp.Transpose();
+  CM0 ctemp2 = ctemp.transpose();
 #endif
   DoTestMM1a<T,CT,CT>(IFTEMP1(ctemp2) IFTEMP1(ctemp2) Transpose(b),Transpose(a),
       label+" TransB TransA");
@@ -1963,7 +1952,7 @@ template <class T, IFTEMP1(class CM0) class M1, class M2> static void DoTestMM1C
   DoTestMM1a<CT,CT,CT>(IFTEMP1(ctemp) IFTEMP1(ctemp) Conjugate(a),Conjugate(b),
       label+" ConjA ConjB");
 #ifdef USETEMP
-  CM0 ctemp2 = ctemp.Transpose();
+  CM0 ctemp2 = ctemp.transpose();
 #endif
   DoTestMM1a<CT,CT,CT>(IFTEMP1(ctemp2) IFTEMP1(ctemp2) Transpose(b),
       Transpose(a),label+" TransB TransA");
@@ -2180,7 +2169,7 @@ template <class T, IFTEMP1(class M0) class M1, class M2> static void DoTestMM3RR
 #ifdef XTEST
 #ifndef NOVIEWS
 #ifdef USETEMP
-  M0 temp2 = temp.Transpose();
+  M0 temp2 = temp.transpose();
 #endif
   DoTestMM3a<T,T>(IFTEMP1(temp2) Transpose(b),Transpose(a),
       label+" TransB TransA");
@@ -2197,7 +2186,7 @@ template <class T, IFTEMP1(class M0) class M1, class M2> static void DoTestMM3RC
 #ifndef NOVIEWS
   DoTestMM3a<T,CT>(IFTEMP1(temp) a,Conjugate(b),label+" ConjB");
 #ifdef USETEMP
-  M0 temp2 = temp.Transpose();
+  M0 temp2 = temp.transpose();
 #endif
   DoTestMM3a<CT,T>(IFTEMP1(temp2) Transpose(b),Transpose(a),
       label+" TransB TransA");
@@ -2216,7 +2205,7 @@ template <class T, IFTEMP1(class M0) class M1, class M2> static void DoTestMM3CR
 #ifndef NOVIEWS
   DoTestMM3a<CT,T>(IFTEMP1(temp) Conjugate(a),b,label+" ConjA");
 #ifdef USETEMP
-  M0 temp2 = temp.Transpose();
+  M0 temp2 = temp.transpose();
 #endif
   DoTestMM3a<T,CT>(IFTEMP1(temp2) Transpose(b),Transpose(a),
       label+" TransB TransA");
@@ -2238,7 +2227,7 @@ template <class T, IFTEMP1(class M0) class M1, class M2> static void DoTestMM3CC
   DoTestMM3a<CT,CT>(IFTEMP1(temp) Conjugate(a),Conjugate(b),
       label+" ConjA ConjB");
 #ifdef USETEMP
-  M0 temp2 = temp.Transpose();
+  M0 temp2 = temp.transpose();
 #endif
   DoTestMM3a<CT,CT>(IFTEMP1(temp2) Transpose(b),Transpose(a),
       label+" TransB TransA");
@@ -3341,10 +3330,10 @@ template <class T, class BaseM, class M, class V1, class V2> static void DoTestO
 {
   DoTestOProda<T>(a0,a,v1,v2,label);
 #ifndef NOVIEWS
-  DoTestOProda<T>(a0,a,v1.Reverse(),v2.Reverse(),label+" RevBC");
+  DoTestOProda<T>(a0,a,v1.reverse(),v2.reverse(),label+" RevBC");
 #ifndef SYMOPROD
-  DoTestOProda<T>(a0,a,v1.Reverse(),v2,label+" RevB");
-  DoTestOProda<T>(a0,a,v1,v2.Reverse(),label+" RevC");
+  DoTestOProda<T>(a0,a,v1.reverse(),v2,label+" RevB");
+  DoTestOProda<T>(a0,a,v1,v2.reverse(),label+" RevC");
 #endif
 #endif
 }
@@ -3354,15 +3343,15 @@ template <class T, class BaseM, class M, class V1, class V2> static void DoTestO
 {
   DoTestOProda<T>(a0,a,v1,v2,label);
 #ifndef NOVIEWS
-  DoTestOProda<T>(a0,a,v1.Reverse(),v2.Reverse(),label+" RevBC");
+  DoTestOProda<T>(a0,a,v1.reverse(),v2.reverse(),label+" RevBC");
   DoTestOProda<T>(a0,Conjugate(a),v1,v2,label+" ConjA");
-  DoTestOProda<T>(a0,Conjugate(a),v1.Reverse(),v2.Reverse(),
+  DoTestOProda<T>(a0,Conjugate(a),v1.reverse(),v2.reverse(),
       label+" ConjA RevBC");
 #ifndef SYMOPROD
-  DoTestOProda<T>(a0,a,v1.Reverse(),v2,label+" RevB");
-  DoTestOProda<T>(a0,a,v1,v2.Reverse(),label+" RevC");
-  DoTestOProda<T>(a0,Conjugate(a),v1.Reverse(),v2,label+" ConjA RevB");
-  DoTestOProda<T>(a0,Conjugate(a),v1,v2.Reverse(),label+" ConjA RevC");
+  DoTestOProda<T>(a0,a,v1.reverse(),v2,label+" RevB");
+  DoTestOProda<T>(a0,a,v1,v2.reverse(),label+" RevC");
+  DoTestOProda<T>(a0,Conjugate(a),v1.reverse(),v2,label+" ConjA RevB");
+  DoTestOProda<T>(a0,Conjugate(a),v1,v2.reverse(),label+" ConjA RevC");
 #endif
 #endif
 }
@@ -3516,26 +3505,26 @@ static void TestMatrixArith123(
   tmv::Vector<T> v(a.rowsize());
   for(size_t i=0;i<a.rowsize();i++) v(i) = T(i+3);
   tmv::Vector<CT> cv = CT(4,5) * v;
-  tmv::VectorView<T> vv = v.View();
-  tmv::VectorView<CT> cvv = cv.View();
+  tmv::VectorView<T> vv = v.view();
+  tmv::VectorView<CT> cvv = cv.view();
 
   tmv::Vector<T> v5(5*a.rowsize());
   tmv::Vector<CT> cv5(5*a.rowsize());
-  tmv::VectorView<T> vs = v5.SubVector(0,5*a.rowsize(),5);
-  tmv::VectorView<CT> cvs = cv5.SubVector(0,5*a.rowsize(),5);
+  tmv::VectorView<T> vs = v5.subVector(0,5*a.rowsize(),5);
+  tmv::VectorView<CT> cvs = cv5.subVector(0,5*a.rowsize(),5);
   vs = vv;
   cvs = cvv;
 
   tmv::Vector<T> w(a.colsize());
   for(size_t i=0;i<a.colsize();i++) w(i) = T(2*i+6);
   tmv::Vector<CT> cw = CT(-1,2) * w;
-  tmv::VectorView<T> wv = w.View();
-  tmv::VectorView<CT> cwv = cw.View();
+  tmv::VectorView<T> wv = w.view();
+  tmv::VectorView<CT> cwv = cw.view();
 
   tmv::Vector<T> w5(5*a.colsize());
   tmv::Vector<CT> cw5(5*a.colsize());
-  tmv::VectorView<T> ws = w5.SubVector(0,5*a.colsize(),5);
-  tmv::VectorView<CT> cws = cw5.SubVector(0,5*a.colsize(),5);
+  tmv::VectorView<T> ws = w5.subVector(0,5*a.colsize(),5);
+  tmv::VectorView<CT> cws = cw5.subVector(0,5*a.colsize(),5);
   ws = wv;
   cws = cwv;
 
@@ -3651,16 +3640,16 @@ static void TestMatrixArith456(
     tmv::Matrix<CT,tmv::ColMajor> cc1(ca*cb);
     TestMatrixArith5<T>(a0,ca0,IFTEMP1(c1) IFTEMP1(cc1) a,ca,b,cb,label);
 
-    TestMatrixArith6<T>(a,ca,b,cb,c1.View(),cc1.View(),label);
+    TestMatrixArith6<T>(a,ca,b,cb,c1.view(),cc1.view(),label);
 #ifdef XTEST
     tmv::Matrix<T,tmv::RowMajor> c2(c1);
     tmv::Matrix<CT,tmv::RowMajor> cc2(cc1);
-    TestMatrixArith6<T>(a,ca,b,cb,c2.View(),cc2.View(),label);
+    TestMatrixArith6<T>(a,ca,b,cb,c2.view(),cc2.view(),label);
 
     tmv::Matrix<T> c3(4*c1.colsize(),4*c1.rowsize());
     tmv::Matrix<CT> cc3(4*c1.colsize(),4*c1.rowsize());
-    tmv::MatrixView<T> c3v = c3.SubMatrix(0,c3.colsize(),0,c3.rowsize(),4,4);
-    tmv::MatrixView<CT> cc3v = cc3.SubMatrix(0,c3.colsize(),0,c3.rowsize(),4,4);
+    tmv::MatrixView<T> c3v = c3.subMatrix(0,c3.colsize(),0,c3.rowsize(),4,4);
+    tmv::MatrixView<CT> cc3v = cc3.subMatrix(0,c3.colsize(),0,c3.rowsize(),4,4);
     c3v = c1;
     cc3v = cc1;
     TestMatrixArith6<T>(a,ca,b,cb,c3v,cc3v,label);

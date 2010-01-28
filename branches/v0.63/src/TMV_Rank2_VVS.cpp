@@ -147,9 +147,9 @@ namespace tmv {
         else *A.ptr() = A00;
         if (ha && isComplex(T())) {
 #ifdef XTEST
-            TMVAssert(normInf(A.diag().imag()) <= eps);
+            TMVAssert(normInf(A.diag().imagPart()) <= eps);
 #endif
-            A.diag().imag().zero();
+            A.diag().imagPart().setZero();
         }
     }
 
@@ -233,9 +233,9 @@ namespace tmv {
         }
         if (ha && isComplex(T())) {
 #ifdef XTEST
-            TMVAssert(normInf(A.diag().imag()) <= eps);
+            TMVAssert(normInf(A.diag().imagPart()) <= eps);
 #endif
-            A.diag().imag().zero();
+            A.diag().imagPart().setZero();
         }
     }
 
@@ -471,10 +471,10 @@ namespace tmv {
         TMVAssert(A.iscm());
 
         SymMatrix<double> A1(A.size(),0.);
-        BlasRank2Update(1.,x.real(),y,A1.view());
+        BlasRank2Update(1.,x.realPart(),y,A1.view());
         A += alpha*A1;
-        A1.zero();
-        BlasRank2Update(1.,x.imag(),y,A1.view());
+        A1.setZero();
+        BlasRank2Update(1.,x.imagPart(),y,A1.view());
         A += std::complex<double>(0,1)*alpha*A1;
     }
     template <> 
@@ -494,10 +494,10 @@ namespace tmv {
         TMVAssert(A.iscm());
 
         SymMatrix<double> A1(A.size(),0.);
-        BlasRank2Update(1.,x,y.real(),A1.view());
+        BlasRank2Update(1.,x,y.realPart(),A1.view());
         A += alpha*A1;
-        A1.zero();
-        BlasRank2Update(1.,x,y.imag(),A1.view());
+        A1.setZero();
+        BlasRank2Update(1.,x,y.imagPart(),A1.view());
         A += std::complex<double>(0,1)*alpha*A1;
     }
     template <> 
@@ -619,10 +619,10 @@ namespace tmv {
         TMVAssert(A.iscm());
 
         SymMatrix<float> A1(A.size(),0.F);
-        BlasRank2Update(1.F,x.real(),y,A1.view());
+        BlasRank2Update(1.F,x.realPart(),y,A1.view());
         A += alpha*A1;
-        A1.zero();
-        BlasRank2Update(1.F,x.imag(),y,A1.view());
+        A1.setZero();
+        BlasRank2Update(1.F,x.imagPart(),y,A1.view());
         A += std::complex<float>(0,1)*alpha*A1;
     }
     template <> 
@@ -642,10 +642,10 @@ namespace tmv {
         TMVAssert(A.iscm());
 
         SymMatrix<float> A1(A.size(),0.F);
-        BlasRank2Update(1.F,x,y.real(),A1.view());
+        BlasRank2Update(1.F,x,y.realPart(),A1.view());
         A += alpha*A1;
-        A1.zero();
-        BlasRank2Update(1.F,x,y.imag(),A1.view());
+        A1.setZero();
+        BlasRank2Update(1.F,x,y.imagPart(),A1.view());
         A += std::complex<float>(0,1)*alpha*A1;
     }
     template <> 
@@ -734,22 +734,22 @@ namespace tmv {
                         if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
                             Vector<Tx> xx = TMV_REAL(alpha)*x;
                             Vector<Ty> yy = y;
-                            if (!add) A.zero();
+                            if (!add) A.setZero();
                             BlasRank2Update(T(1),xx,yy,A);
                         } else {
                             Vector<T> xx = alpha*x;
                             Vector<Ty> yy = y;
-                            if (!add) A.zero();
+                            if (!add) A.setZero();
                             BlasRank2Update(T(1),xx,yy,A);
                         }
                     } else {
                         if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
                             Vector<Tx> xx = TMV_REAL(alpha)*x;
-                            if (!add) A.zero();
+                            if (!add) A.setZero();
                             BlasRank2Update(T(1),xx,y,A);
                         } else {
                             Vector<T> xx = alpha*x;
-                            if (!add) A.zero();
+                            if (!add) A.setZero();
                             BlasRank2Update(T(1),xx,y,A);
                         }
                     }
@@ -757,15 +757,15 @@ namespace tmv {
                     if (y.isconj() || y.step()<0 || SameStorage(y,A)) {
                         if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
                             Vector<Ty> yy = TMV_REAL(alpha)*y;
-                            if (!add) A.zero();
+                            if (!add) A.setZero();
                             BlasRank2Update(T(1),x,yy,A);
                         } else {
                             Vector<T> yy = TMV_CONJ(alpha)*y;
-                            if (!add) A.zero();
+                            if (!add) A.setZero();
                             BlasRank2Update(T(1),x,yy,A);
                         }
                     } else {
-                        if (!add) A.zero();
+                        if (!add) A.setZero();
                         BlasRank2Update(alpha,x,y,A);
                     }
                 }

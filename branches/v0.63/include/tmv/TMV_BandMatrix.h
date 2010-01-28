@@ -192,7 +192,7 @@
 //
 // Modifying Functions
 //
-//    BandMatrix& zero()
+//    BandMatrix& setZero()
 //    BandMatrix& setAllTo(T x)
 //    BandMatrix<T>& transposeSelf() 
 //        Must be square, and have nhi=nlo for this function
@@ -305,7 +305,7 @@
 //    m.divideUsing(dt) 
 //    where dt is LU, QR, or SV
 // 
-//    lud(), qrd(), svd() return the corresponding Divider classes.
+//    m.lud(), m.qrd(), m.svd() return the corresponding Divider classes.
 //
 //
 
@@ -454,10 +454,10 @@ namespace tmv {
             assignToB(BandMatrixView<RT>(m2,nlo(),nhi()));
             if (int(rowsize()) > nhi()+1)
                 BandMatrixView<RT>(
-                    m2.colRange(nhi()+1,rowsize()),0,rowsize()-nhi()-2).zero();
+                    m2.colRange(nhi()+1,rowsize()),0,rowsize()-nhi()-2).setZero();
             if (int(colsize()) > nlo()+1)
                 BandMatrixView<RT>(
-                    m2.rowRange(nlo()+1,colsize()),colsize()-nlo()-2,0).zero();
+                    m2.rowRange(nlo()+1,colsize()),colsize()-nlo()-2,0).setZero();
         }
 
         inline void assignToM(const MatrixView<CT>& m2) const
@@ -467,10 +467,10 @@ namespace tmv {
             assignToB(BandMatrixView<CT>(m2,nlo(),nhi()));
             if (int(rowsize()) > nhi()+1)
                 BandMatrixView<CT>(
-                    m2.colRange(nhi()+1,rowsize()),0,rowsize()-nhi()-2).zero();
+                    m2.colRange(nhi()+1,rowsize()),0,rowsize()-nhi()-2).setZero();
             if (int(colsize()) > nlo()+1)
                 BandMatrixView<CT>(
-                    m2.rowRange(nlo()+1,colsize()),colsize()-nlo()-2,0).zero();
+                    m2.rowRange(nlo()+1,colsize()),colsize()-nlo()-2,0).setZero();
         }
 
         inline void assignToB(const BandMatrixView<RT>& m2) const
@@ -695,7 +695,7 @@ namespace tmv {
                 nlo()-1,0,stepi(),stepj(),diagstep(),stor(),ct());
         }
 
-        inline const_real_type real() const
+        inline const_real_type realPart() const
         {
             return const_real_type(
                 reinterpret_cast<const RT*>(cptr()),
@@ -706,7 +706,7 @@ namespace tmv {
                 isReal(T()) ? stor() : NoMajor, NonConj);
         }
 
-        inline const_real_type imag() const
+        inline const_real_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             return const_real_type(
@@ -750,9 +750,9 @@ namespace tmv {
                 DiagType dt=NonUnitDiag) const)
         { return lowerBandOff(dt); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
 
 
         //
@@ -1371,11 +1371,11 @@ namespace tmv {
         inline const_view_type lowerBandOff() const
         { return base::lowerBandOff(); }
 
-        inline const_real_type real() const
-        { return base::real(); }
+        inline const_real_type realPart() const
+        { return base::realPart(); }
 
-        inline const_real_type imag() const
-        { return base::imag(); }
+        inline const_real_type imagPart() const
+        { return base::imagPart(); }
 
         TMV_DEPRECATED(const_rec_type SubMatrix(
                 int i1, int i2, int j1, int j2) const)
@@ -1412,9 +1412,9 @@ namespace tmv {
                 DiagType dt=NonUnitDiag) const)
         { return lowerBandOff(dt); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
 
 
         //
@@ -1681,8 +1681,8 @@ namespace tmv {
             TMVAssert(colsize() == m2.colsize());
             TMVAssert(rowsize() == m2.rowsize());
             m2.assignToD(DiagMatrixViewOf(this->diag()));
-            if (this->nhi() > 0) upperBandOff().zero();
-            if (this->nlo() > 0) lowerBandOff().zero();
+            if (this->nhi() > 0) upperBandOff().setZero();
+            if (this->nlo() > 0) lowerBandOff().setZero();
             return *this;
         }
 
@@ -1692,8 +1692,8 @@ namespace tmv {
             TMVAssert(colsize() == m2.colsize());
             TMVAssert(rowsize() == m2.rowsize());
             m2.assignToD(DiagMatrixViewOf(this->diag()));
-            if (this->nhi() > 0) upperBandOff().zero();
-            if (this->nlo() > 0) lowerBandOff().zero();
+            if (this->nhi() > 0) upperBandOff().setZero();
+            if (this->nlo() > 0) lowerBandOff().setZero();
             return *this;
         }
 
@@ -1706,7 +1706,7 @@ namespace tmv {
                 UpperTriMatrixView<T>(
                     ptr(),colsize(),stepi(),stepj(),
                     NonUnitDiag,isdm()?NoMajor:stor(),ct() TMV_FIRSTLAST));
-            if (nlo() > 0) diagRange(-nlo(),0).zero();
+            if (nlo() > 0) diagRange(-nlo(),0).setZero();
             return *this;
         }
 
@@ -1721,7 +1721,7 @@ namespace tmv {
                 UpperTriMatrixView<T>(
                     ptr(),colsize(),stepi(),stepj(),
                     NonUnitDiag,isdm()?NoMajor:stor(),ct() TMV_FIRSTLAST));
-            if (nlo() > 0) diagRange(-nlo(),0).zero();
+            if (nlo() > 0) diagRange(-nlo(),0).setZero();
             return *this;
         }
 
@@ -1735,7 +1735,7 @@ namespace tmv {
                 LowerTriMatrixView<T>(
                     ptr(),colsize(),stepi(),stepj(),
                     NonUnitDiag,isdm()?NoMajor:stor(),ct() TMV_FIRSTLAST));
-            if (nhi() > 0) diagRange(1,nhi()+1).zero();
+            if (nhi() > 0) diagRange(1,nhi()+1).setZero();
             return *this;
         }
 
@@ -1750,7 +1750,7 @@ namespace tmv {
                 LowerTriMatrixView<T>(
                     ptr(),colsize(),stepi(),stepj(),
                     NonUnitDiag,isdm()?NoMajor:stor(),ct() TMV_FIRSTLAST));
-            if (nhi() > 0) diagRange(1,nhi()+1).zero();
+            if (nhi() > 0) diagRange(1,nhi()+1).setZero();
             return *this;
         }
 
@@ -1829,7 +1829,7 @@ namespace tmv {
         // Modifying Functions
         //
 
-        const type& zero() const;
+        const type& setZero() const;
 
         const type& setAllTo(const T& x) const;
 
@@ -1849,11 +1849,11 @@ namespace tmv {
         inline const type& setToIdentity(const T& x=T(1)) const 
         {
             TMVAssert(colsize() == rowsize());
-            zero(); diag().setAllTo(x); return *this; 
+            setZero(); diag().setAllTo(x); return *this; 
         }
 
         TMV_DEPRECATED(const type& Zero() const)
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(const type& SetAllTo(const T& x) const)
         { return setAllTo(x); }
         TMV_DEPRECATED(const type& Clip(RT thresh) const)
@@ -2014,7 +2014,7 @@ namespace tmv {
                 nlo()-1,0,stepi(),stepj(),diagstep(),stor(),ct() TMV_FIRSTLAST);
         }
 
-        inline real_type real() const
+        inline real_type realPart() const
         {
             return real_type(
                 reinterpret_cast<RT*>(ptr()),
@@ -2030,7 +2030,7 @@ namespace tmv {
             );
         }
 
-        inline real_type imag() const
+        inline real_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             return real_type(
@@ -2116,9 +2116,9 @@ namespace tmv {
                 DiagType dt=NonUnitDiag) const)
         { return lowerBandOff(dt); }
         TMV_DEPRECATED(real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(view_type View() const)
         { return view(); }
         TMV_DEPRECATED(view_type Transpose() const)
@@ -2334,8 +2334,8 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline const type& zero() const 
-        { c_type::zero(); return *this; }
+        inline const type& setZero() const 
+        { c_type::setZero(); return *this; }
 
         inline const type& setAllTo(const T& x) const
         { c_type::setAllTo(x); return *this; }
@@ -2353,7 +2353,7 @@ namespace tmv {
         { c_type::setToIdentity(x); return *this; }
 
         TMV_DEPRECATED(const type& Zero() const)
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(const type& SetAllTo(const T& x) const)
         { return setAllTo(x); }
         TMV_DEPRECATED(const type& Clip(RT thresh) const)
@@ -2454,11 +2454,11 @@ namespace tmv {
         inline view_type lowerBandOff() const
         { return c_type::lowerBandOff(); }
 
-        inline real_type real() const
-        { return c_type::real(); }
+        inline real_type realPart() const
+        { return c_type::realPart(); }
 
-        inline real_type imag() const
-        { return c_type::imag(); }
+        inline real_type imagPart() const
+        { return c_type::imagPart(); }
 
         inline view_type view() const
         { return c_type::view(); }
@@ -2510,9 +2510,9 @@ namespace tmv {
                 DiagType dt=NonUnitDiag) const)
         { return lowerBandOff(dt); }
         TMV_DEPRECATED(real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(view_type View() const)
         { return view(); }
         TMV_DEPRECATED(view_type Transpose() const)
@@ -2704,11 +2704,11 @@ namespace tmv {
             TMVAssert(hi <= m2.nhi());
             Copy(ConstBandMatrixView<T2>(m2,lo,hi),view()); 
             if (I==CStyle) {
-                if (lo > m2.nlo()) diagRange(-lo,-m2.nlo()).zero();
-                if (hi > m2.nhi()) diagRange(m2.nhi()+1,hi+1).zero();
+                if (lo > m2.nlo()) diagRange(-lo,-m2.nlo()).setZero();
+                if (hi > m2.nhi()) diagRange(m2.nhi()+1,hi+1).setZero();
             } else {
-                if (lo > m2.nlo()) diagRange(-lo,-m2.nlo()-1).zero();
-                if (hi > m2.nhi()) diagRange(m2.nhi()+1,hi).zero();
+                if (lo > m2.nlo()) diagRange(-lo,-m2.nlo()-1).setZero();
+                if (hi > m2.nhi()) diagRange(m2.nhi()+1,hi).setZero();
             }
         }
 
@@ -2775,7 +2775,7 @@ namespace tmv {
             NEW_SIZE(m2.size(),m2.size(),0,0)
         { 
             TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
-            zero();
+            setZero();
             m2.assignToD(DiagMatrixViewOf(diag()));
         }
 
@@ -2784,7 +2784,7 @@ namespace tmv {
         { 
             TMVAssert(isComplex(T()));
             TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
-            zero();
+            setZero();
             m2.assignToD(DiagMatrixViewOf(diag()));
         }
 
@@ -2792,7 +2792,7 @@ namespace tmv {
             NEW_SIZE(m2.size(),m2.size(),0,m2.size()-1)
         { 
             TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
-            zero();
+            setZero();
             m2.assignToU(
                 UpperTriMatrixView<T>(
                     itsm,colsize(),stepi(),stepj(),
@@ -2804,7 +2804,7 @@ namespace tmv {
         { 
             TMVAssert(isComplex(T()));
             TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
-            zero();
+            setZero();
             m2.assignToU(
                 UpperTriMatrixView<T>(
                     itsm,colsize(),stepi(),stepj(),
@@ -2815,7 +2815,7 @@ namespace tmv {
             NEW_SIZE(m2.size(),m2.size(),m2.size()-1,0)
         { 
             TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
-            zero();
+            setZero();
             m2.assignToL(
                 LowerTriMatrixView<T>(
                     itsm,colsize(),stepi(),stepj(),
@@ -2827,7 +2827,7 @@ namespace tmv {
         { 
             TMVAssert(isComplex(T()));
             TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
-            zero();
+            setZero();
             m2.assignToL(
                 LowerTriMatrixView<T>(
                     itsm,colsize(),stepi(),stepj(),
@@ -3169,8 +3169,8 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline type& zero() 
-        { linearView().zero(); return *this; }
+        inline type& setZero() 
+        { linearView().setZero(); return *this; }
 
         inline type& setAllTo(const T& x) 
         { linearView().setAllTo(x); return *this; }
@@ -3192,12 +3192,12 @@ namespace tmv {
         inline type& setToIdentity(const T& x=T(1)) 
         { 
             TMVAssert(colsize() == rowsize());
-            zero(); diag().setAllTo(x); 
+            setZero(); diag().setAllTo(x); 
             return *this; 
         }
 
         TMV_DEPRECATED(type& Zero())
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(type& SetAllTo(const T& x))
         { return setAllTo(x); }
         TMV_DEPRECATED(type& Clip(RT thresh))
@@ -3371,7 +3371,7 @@ namespace tmv {
                 nlo()-1,0,stepi(),stepj(),diagstep(),stor(),ct());
         }
 
-        inline const_real_type real() const
+        inline const_real_type realPart() const
         {
             return const_real_type(
                 reinterpret_cast<const RT*>(itsm),
@@ -3382,7 +3382,7 @@ namespace tmv {
                 isReal(T()) ? S : NoMajor, NonConj);
         }
 
-        inline const_real_type imag() const
+        inline const_real_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             return const_real_type(
@@ -3549,7 +3549,7 @@ namespace tmv {
                 nlo()-1,0,stepi(),stepj(),diagstep(),stor(),ct() TMV_FIRSTLAST);
         }
 
-        inline real_type real()
+        inline real_type realPart()
         {
             return real_type(
                 reinterpret_cast<RT*>(itsm),
@@ -3565,7 +3565,7 @@ namespace tmv {
             );
         }
 
-        inline real_type imag()
+        inline real_type imagPart()
         {
             TMVAssert(isComplex(T()));
             return real_type(
@@ -3614,9 +3614,9 @@ namespace tmv {
                 DiagType dt=NonUnitDiag) const)
         { return lowerBandOff(dt); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
 
         TMV_DEPRECATED(rec_type SubMatrix(int i1, int i2, int j1, int j2))
         { return subMatrix(i1,i2,j1,j2); }
@@ -3648,9 +3648,9 @@ namespace tmv {
         TMV_DEPRECATED(view_type LowerBandOff(DiagType dt=NonUnitDiag))
         { return lowerBandOff(dt); }
         TMV_DEPRECATED(real_type Real())
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag())
-        { return imag(); }
+        { return imagPart(); }
 
 
         //
@@ -4214,9 +4214,9 @@ namespace tmv {
         DoCopy1(m1,m2.subBandMatrix(0,m2.colsize(),0,m2.rowsize(),
                                     m1.nlo(),m1.nhi()));
         if (m2.nhi() > m1.nhi())
-            m2.diagRange(m1.nhi()+1,m2.nhi()+1).zero();
+            m2.diagRange(m1.nhi()+1,m2.nhi()+1).setZero();
         if (m2.nlo() > m1.nlo())
-            m2.diagRange(-m2.nlo(),-m1.nlo()).zero();
+            m2.diagRange(-m2.nlo(),-m1.nlo()).setZero();
     }
 
 

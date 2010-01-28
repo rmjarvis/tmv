@@ -3,10 +3,10 @@
 
 //#define XXDEBUG8
 
-#include "TMV_Test.h"
-#include "TMV_Test2.h"
 #include "TMV.h"
 #include "TMV_SymBand.h"
+#include "TMV_Test.h"
+#include "TMV_Test2.h"
 #include "TMV_TestSymBandArith.h"
 #include "TMV_TestSymArith.h"
 

@@ -38,7 +38,7 @@
   template const BandMatrixView<T,CStyle>&  \
       BandMatrixView<T,CStyle>::setAllTo(const T& x) const; \
   template const BandMatrixView<T,CStyle>&  \
-      BandMatrixView<T,CStyle>::zero() const; \
+      BandMatrixView<T,CStyle>::setZero() const; \
   template const BandMatrixView<T,CStyle>&  \
       BandMatrixView<T,CStyle>::conjugateSelf() const; \
   template void BandMatrixView<T,CStyle>::doTransposeSelf() const; \

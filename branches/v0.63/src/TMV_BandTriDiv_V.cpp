@@ -354,7 +354,7 @@ namespace tmv {
         const Ta* Ajj= A.cptr();
         T* bj = b.ptr();
 
-        int i2=MIN(A.nlo()+1,int(A.colsize()));
+        int i2=TMV_MIN(A.nlo()+1,int(A.colsize()));
 
         for(int len=i2-1;len>0;++bj,Ajj+=ds) {
             if (*bj != T(0)) {

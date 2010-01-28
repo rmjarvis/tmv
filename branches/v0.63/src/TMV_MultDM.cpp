@@ -100,7 +100,7 @@ namespace tmv {
     }
 
     template <bool cm, bool ca, class T, class Ta> 
-    static void doColMultEqMM(
+    static void DoColMultEqMM(
         const GenDiagMatrix<Ta>& A, const MatrixView<T>& B)
     {
         // B = A * B 
@@ -139,10 +139,10 @@ namespace tmv {
         const GenDiagMatrix<Ta>& A, const MatrixView<T>& B)
     {
         if (A.diag().step() == 1)
-            doColMultEqMM<cm,ca>(A,B);
+            DoColMultEqMM<cm,ca>(A,B);
         else {
             DiagMatrix<Ta> AA = A;
-            doColMultEqMM<cm,false>(AA,B);
+            DoColMultEqMM<cm,false>(AA,B);
         }
     }
 
@@ -166,18 +166,18 @@ namespace tmv {
                 if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
                     DiagMatrix<Ta> AA = TMV_REAL(alpha) * A;
                     if (B.isrm()) RowMultEqMM<true,false>(AA,B);
-                    else if (B.iscm()) doColMultEqMM<true,false>(AA,B);
+                    else if (B.iscm()) DoColMultEqMM<true,false>(AA,B);
                     else if (B.colsize() > B.rowsize()) 
-                        doColMultEqMM<false,false>(AA,B);
+                        DoColMultEqMM<false,false>(AA,B);
                     else RowMultEqMM<false,false>(AA,B);
                 }
                 else {
                     // AA = alpha * A;
                     DiagMatrix<T> AA = alpha * A;
                     if (B.isrm()) RowMultEqMM<true,false>(AA,B);
-                    else if (B.iscm()) doColMultEqMM<true,false>(AA,B);
+                    else if (B.iscm()) DoColMultEqMM<true,false>(AA,B);
                     else if (B.colsize() > B.rowsize()) 
-                        doColMultEqMM<false,false>(AA,B);
+                        DoColMultEqMM<false,false>(AA,B);
                     else RowMultEqMM<false,false>(AA,B);
                 }
             }
@@ -210,7 +210,7 @@ namespace tmv {
     }
 
     template <bool rm, bool ca, bool cb, class T, class Ta, class Tb>
-    static void doRowAddMultMM(
+    static void DoRowAddMultMM(
         const GenDiagMatrix<Ta>& A, const GenMatrix<Tb>& B,
         const MatrixView<T>& C)
     {
@@ -268,12 +268,12 @@ namespace tmv {
         const GenDiagMatrix<Ta>& A, const GenMatrix<Tb>& B,
         const MatrixView<T>& C)
     {
-        if (B.isconj()) doRowAddMultMM<rm,ca,true>(A,B,C);
-        else doRowAddMultMM<rm,ca,false>(A,B,C);
+        if (B.isconj()) DoRowAddMultMM<rm,ca,true>(A,B,C);
+        else DoRowAddMultMM<rm,ca,false>(A,B,C);
     }
 
     template <bool cm, bool ca, bool cb, class T, class Ta, class Tb> 
-    static void doColAddMultMM(
+    static void DoColAddMultMM(
         const GenDiagMatrix<Ta>& A, const GenMatrix<Tb>& B,
         const MatrixView<T>& C)
     {
@@ -321,20 +321,20 @@ namespace tmv {
     { 
         if (A.diag().step() == 1)
             if (B.isconj())
-                doColAddMultMM<cm,ca,true>(A,B,C);
+                DoColAddMultMM<cm,ca,true>(A,B,C);
             else
-                doColAddMultMM<cm,ca,false>(A,B,C);
+                DoColAddMultMM<cm,ca,false>(A,B,C);
         else {
             DiagMatrix<Ta> AA = A;
             if (B.isconj())
-                doColAddMultMM<cm,ca,true>(AA,B,C);
+                DoColAddMultMM<cm,ca,true>(AA,B,C);
             else
-                doColAddMultMM<cm,ca,false>(AA,B,C);
+                DoColAddMultMM<cm,ca,false>(AA,B,C);
         }
     }
 
     template <class T, class Ta, class Tb> 
-    static void addMultMM(const T alpha,
+    static void AddMultMM(const T alpha,
                           const GenDiagMatrix<Ta>& A, const GenMatrix<Tb>& B,
                           const MatrixView<T>& C)
     // C += alpha * A * B
@@ -351,7 +351,7 @@ namespace tmv {
 #endif
 
         if (C.isconj()) {
-            addMultMM(
+            AddMultMM(
                 TMV_CONJ(alpha),A.conjugate(),B.conjugate(),C.conjugate());
         } else if (C.colsize() > 0 && C.rowsize() > 0) {
             if (alpha != T(1)) {
@@ -403,7 +403,7 @@ namespace tmv {
 #ifdef XDEBUG
         if (Norm(Matrix<T>(C)-C2) > 0.001*(
                 TMV_ABS(alpha)*Norm(A0)*Norm(B0)+Norm(C0))) {
-            cerr<<"addMultMM: alpha = "<<alpha<<endl;
+            cerr<<"AddMultMM: alpha = "<<alpha<<endl;
             cerr<<"A = "<<TMV_Text(A)<<" step "<<
                 A.diag().step()<<"  "<<A0<<endl;
             cerr<<"B = "<<TMV_Text(B)<<"  "<<B0<<endl;
@@ -434,7 +434,7 @@ namespace tmv {
 
         if (C.colsize() > 0 && C.rowsize() > 0) {
             if (alpha==T(0)) {
-                if (!add) C.zero();
+                if (!add) C.setZero();
             } else if (SameStorage(A.diag(),C)) {
                 DiagMatrix<T> tempA = A;
                 MultMM<add>(alpha,tempA,B,C);
@@ -452,7 +452,7 @@ namespace tmv {
                     C += tempB;
                 }
             } else {
-                addMultMM(alpha,A,B,C);
+                AddMultMM(alpha,A,B,C);
             }
         }
 #ifdef XDEBUG

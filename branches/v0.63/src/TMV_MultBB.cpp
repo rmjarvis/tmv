@@ -105,7 +105,7 @@ namespace tmv {
             if (m2<K) ++m2;
             else if (m1==K) {
                 if (!add && ++i < M) 
-                    C.subBandMatrix(i,M,j1,N,0,j2-j1-1).zero();
+                    C.subBandMatrix(i,M,j1,N,0,j2-j1-1).setZero();
                 break;
             }
         }
@@ -141,7 +141,7 @@ namespace tmv {
         const int N = C.rowsize();
         const int K = A.rowsize();
 
-        if (!add) C.zero();
+        if (!add) C.setZero();
         for(int j=0;j<K; ++j) {
             C.subMatrix(i1,i2,m1,m2) += alpha * A.col(j,i1,i2) ^ B.row(j,m1,m2);
             if (k>0) --k; else ++i1;
@@ -154,7 +154,7 @@ namespace tmv {
     }
 
     template <int alpha, class Ta, class Tb, class Tc> 
-    static void doDiagMultMM(
+    static void DoDiagMultMM(
         const GenBandMatrix<Ta>& A,
         const GenBandMatrix<Tb>& B, const BandMatrixView<Tc>& C)
     // C += alpha * A * B
@@ -386,14 +386,14 @@ namespace tmv {
         TMVAssert(C.ct()==NonConj);
 
         if (!add) {
-            C.zero();
-            doDiagMultMM<1>(A,B,C);
+            C.setZero();
+            DoDiagMultMM<1>(A,B,C);
             if (alpha != T(1)) C *= alpha;
         } else if (alpha == T(1)) {
-            doDiagMultMM<1>(A,B,C);
+            DoDiagMultMM<1>(A,B,C);
         } else {
             TMVAssert(alpha == T(-1));
-            doDiagMultMM<-1>(A,B,C);
+            DoDiagMultMM<-1>(A,B,C);
         }
     }
 
@@ -513,7 +513,7 @@ namespace tmv {
 
         if (C.colsize() > 0 && C.rowsize() > 0) {
             if (A.rowsize() == 0 || alpha == T(0)) {
-                if (!add) C.zero();
+                if (!add) C.setZero();
             } else if (A.rowsize() > A.colsize()+A.nhi()) {
                 ConstBandMatrixView<Ta> AA = A.colRange(0,A.colsize()+A.nhi());
                 ConstBandMatrixView<Tb> BB = B.subBandMatrix(
@@ -526,7 +526,7 @@ namespace tmv {
                     0,AA.colsize(),0,C.rowsize(),
                     TMV_MIN(C.nlo(),int(AA.colsize())-1),C.nhi());
                 MultMM<add>(alpha,AA,B,CC);
-                if (!add) C.rowRange(A.rowsize()+A.nlo(),A.colsize()).zero();
+                if (!add) C.rowRange(A.rowsize()+A.nlo(),A.colsize()).setZero();
             } else if (B.colsize() > B.rowsize()+B.nlo()) {
                 ConstBandMatrixView<Tb> BB = B.rowRange(0,B.rowsize()+B.nlo());
                 ConstBandMatrixView<Ta> AA = A.subBandMatrix(
@@ -539,7 +539,7 @@ namespace tmv {
                     0,C.colsize(),0,BB.rowsize(),
                     C.nlo(),TMV_MIN(C.nhi(),int(BB.rowsize())-1));
                 MultMM<add>(alpha,A,BB,CC);
-                if (!add) C.colRange(B.colsize()+B.nhi(),B.rowsize()).zero();
+                if (!add) C.colRange(B.colsize()+B.nhi(),B.rowsize()).setZero();
             } else {
                 int nhi = TMV_MIN(int(C.rowsize()-1),A.nhi()+B.nhi());
                 int nlo = TMV_MIN(int(C.colsize()-1),A.nlo()+B.nlo());
@@ -547,9 +547,9 @@ namespace tmv {
                     MultMM<add>(alpha,A,B,C.diagRange(-nlo,nhi+1));
                     if (!add) {
                         if (C.nlo() > nlo)
-                            C.diagRange(-C.nlo(),-nlo).zero();
+                            C.diagRange(-C.nlo(),-nlo).setZero();
                         if (C.nhi() > nhi)
-                            C.diagRange(nhi+1,C.nhi()+1).zero();
+                            C.diagRange(nhi+1,C.nhi()+1).setZero();
                     }
                 }
                 else if (C.isconj()) 

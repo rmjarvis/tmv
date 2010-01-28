@@ -188,7 +188,7 @@ namespace tmv {
             this->assignTosB(SymBandMatrixViewOf(m0,this->nlo()));
             if (int(m0.size()) > this->nlo()+1)
                 BandMatrixViewOf(m0.upperTri()).diagRange(
-                    this->nlo()+1,m0.size()).zero();
+                    this->nlo()+1,m0.size()).setZero();
         }
         inline void assignToS(const SymMatrixView<CT>& m0) const
         {
@@ -197,7 +197,7 @@ namespace tmv {
             this->assignTosB(SymBandMatrixViewOf(m0,this->nlo()));
             if (int(m0.size()) > this->nlo()+1)
                 BandMatrixViewOf(m0.upperTri()).diagRange(
-                    this->nlo()+1,m0.size()).zero();
+                    this->nlo()+1,m0.size()).setZero();
         }
 
         inline void assignToM(const MatrixView<TMV_RealType(T)>& m0) const

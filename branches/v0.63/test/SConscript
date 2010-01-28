@@ -23,6 +23,8 @@ test_small_nonsq_div_files = ReadFileList('test_small_nonsq_div.files')
 env1 = env.Clone(CCFLAGS=env['TEST_FLAGS'],
     CPPPATH=['#include'],CPPDEFINES=[],LIBS=libs+env['LIBS'])
 # Clear all the BLAS/LAPACK defines and reset the others:
+# Don't do NDEBUG, and add in XDEBUG
+#env1.Append(CPPDEFINES=['XDEBUG'])
 if env['MEM_TEST']:
     env1.Append(CPPDEFINES=['MEMTEST'])
 if env['XTEST']:
@@ -35,6 +37,8 @@ if env['WITH_LONGDOUBLE']:
     env1.Append(CPPDEFINES=['INST_LONGDOUBLE'])
 if env['WITH_INT']:
     env1.Append(CPPDEFINES=['INST_INT'])
+if env['TEST_DEPRECATED']:
+    env1.Append(CPPDEFINES=['TMV_TEST_DEPRECATED'])
 
 
 env1b = env1.Clone()

@@ -119,7 +119,7 @@ namespace tmv {
     }
 
     template <bool a1, class T, class TU> 
-    static inline void doRankKUpdate(
+    static inline void DoRankKUpdate(
         const T alpha, const GenUpperTriMatrix<TU>& U, const SymMatrixView<T>& A)
     {
         if (A.isherm())
@@ -296,8 +296,8 @@ namespace tmv {
                 setUUt(A);
                 if (alpha != T(1)) A *= alpha;
             } else {
-                if (alpha == T(1)) doRankKUpdate<true>(alpha,U,A);
-                else doRankKUpdate<false>(alpha,U,A);
+                if (alpha == T(1)) DoRankKUpdate<true>(alpha,U,A);
+                else DoRankKUpdate<false>(alpha,U,A);
             }
         }
 

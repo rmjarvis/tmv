@@ -683,7 +683,7 @@ namespace tmv {
         if (M > 5*N/3) {
             if (StoreU) {
                 Matrix<T,ColMajor> R(N,N);
-                R.lowerTri().offDiag().zero();
+                R.lowerTri().offDiag().setZero();
                 QR_Decompose(U,R.upperTri(),signdet);
                 SV_Decompose(R.view(),S,V,logdet,signdet,StoreU);
                 // Now R is a Unitary Matrix U'.  Need to multiply U by U'
@@ -691,7 +691,7 @@ namespace tmv {
             } else {
                 Vector<T> Qbeta(N);
                 QR_Decompose(U,Qbeta.view(),signdet);
-                if (N > 1) U.rowRange(0,N).lowerTri().offDiag().zero();
+                if (N > 1) U.rowRange(0,N).lowerTri().offDiag().setZero();
                 SV_Decompose(U.rowRange(0,N),S,V,logdet,signdet,StoreU);
             }
         } else {
@@ -721,7 +721,7 @@ namespace tmv {
             if (V) {
                 V->row(0).makeBasis(0);
                 V->rowRange(1,N) = U.rowRange(0,N-1);
-                V->col(0,1,N).zero();
+                V->col(0,1,N).setZero();
                 GetQFromQR(V->subMatrix(1,N,1,N).transpose(),Vbeta);
             }
             if (StoreU) {

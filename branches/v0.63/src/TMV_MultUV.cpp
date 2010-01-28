@@ -898,7 +898,7 @@ namespace tmv {
 
         if (y.size() > 0) {
             if (alpha==T(0)) {
-                if (!add) y.zero();
+                if (!add) y.setZero();
             } else if (!add && y.step() == 1) {
                 y = x;
                 MultEqMV(A,y);
@@ -944,7 +944,7 @@ namespace tmv {
 
         if (y.size() > 0) {
             if (alpha==T(0)) {
-                if (!add) y.zero();
+                if (!add) y.setZero();
             } else if (!add && y.step() == 1) {
                 y = x;
                 MultEqMV(A,y);

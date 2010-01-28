@@ -1,8 +1,8 @@
 
-#include "TMV_Test.h"
-#include "TMV_Test2.h"
 #include "TMV.h"
 #include "TMV_SymBand.h"
+#include "TMV_Test.h"
+#include "TMV_Test2.h"
 #include <fstream>
 #include <cstdio>
 
@@ -30,10 +30,10 @@ static void TestBasicBandMatrix_1()
             a1f(i+1,j+1) = T(k);
         }
 
-    tmv::ConstBandMatrixView<T> a1cv = a1.View();
-    tmv::BandMatrixView<T> a1v = a1.View();
-    tmv::ConstBandMatrixView<T,tmv::FortranStyle> a1fcv = a1f.View();
-    tmv::BandMatrixView<T,tmv::FortranStyle> a1fv = a1f.View();
+    tmv::ConstBandMatrixView<T> a1cv = a1.view();
+    tmv::BandMatrixView<T> a1v = a1.view();
+    tmv::ConstBandMatrixView<T,tmv::FortranStyle> a1fcv = a1f.view();
+    tmv::BandMatrixView<T,tmv::FortranStyle> a1fv = a1f.view();
 
     for (int i=0, k=0; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         if ( j <= i + nhi && i <= j + nlo) {
@@ -206,7 +206,7 @@ static void TestBasicBandMatrix_IO()
 #endif
     }
     fout << ca1 << std::endl;
-    ca1.WriteCompact(fout);
+    ca1.writeCompact(fout);
     fout.close();
 
     tmv::Matrix<std::complex<T>,tmv::RowMajor> xm1(N,N);

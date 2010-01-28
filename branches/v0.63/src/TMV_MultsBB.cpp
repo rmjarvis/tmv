@@ -62,7 +62,7 @@ namespace tmv {
     //
 
     template <bool add, class T, class Ta, class Tb> 
-    static void doMultMM(
+    static void DoMultMM(
         const T alpha, const GenSymBandMatrix<Ta>& A,
         const GenBandMatrix<Tb>& B, const BandMatrixView<T>& C)
     {
@@ -110,17 +110,17 @@ namespace tmv {
     {
         if (C.isrm()) {
             BandMatrix<T,RowMajor> C2(C.colsize(),C.rowsize(),C.nlo(),C.nhi());
-            doMultMM<false>(T(1),A,B,C2.view());
+            DoMultMM<false>(T(1),A,B,C2.view());
             if (add) C += alpha*C2;
             else C = alpha*C2;
         } else if (C.iscm()) {
             BandMatrix<T,ColMajor> C2(C.colsize(),C.rowsize(),C.nlo(),C.nhi());
-            doMultMM<false>(T(1),A,B,C2.view());
+            DoMultMM<false>(T(1),A,B,C2.view());
             if (add) C += alpha*C2;
             else C = alpha*C2;
         } else {
             BandMatrix<T,DiagMajor> C2(C.colsize(),C.rowsize(),C.nlo(),C.nhi());
-            doMultMM<false>(T(1),A,B,C2.view());
+            DoMultMM<false>(T(1),A,B,C2.view());
             if (add) C += alpha*C2;
             else C = alpha*C2;
         }
@@ -152,14 +152,14 @@ namespace tmv {
 
         if (C.colsize() > 0 && C.rowsize() > 0) {
             if (alpha == T(0)) {
-                if (!add) C.zero();
+                if (!add) C.setZero();
             } else if (C.isconj()) {
                 MultMM<add>(
                     TMV_CONJ(alpha),A.conjugate(),B.conjugate(),C.conjugate());
             } else if (SameStorage(A,C) || SameStorage(B,C)) {
                 TempMultMM<add>(alpha,A,B,C);
             } else {
-                doMultMM<add>(alpha, A, B, C);
+                DoMultMM<add>(alpha, A, B, C);
             }
         }
 
@@ -205,7 +205,7 @@ namespace tmv {
 
         if (C.colsize() > 0 && C.rowsize() > 0) {
             if (alpha == T(0)) {
-                if (!add) C.zero();
+                if (!add) C.setZero();
             } else if (C.isconj()) {
                 MultMM<add>(
                     TMV_CONJ(alpha),A.conjugate(),B.conjugate(),C.conjugate());

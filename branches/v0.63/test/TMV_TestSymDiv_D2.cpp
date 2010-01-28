@@ -1,10 +1,10 @@
 
 #define START 0
 
-#include "TMV_Test.h"
-#include "TMV_Test2.h"
 #include "TMV.h"
 #include "TMV_Sym.h"
+#include "TMV_Test.h"
+#include "TMV_Test2.h"
 #include "TMV_TestSymArith.h"
 
 #define NOLDIVEQ
@@ -24,7 +24,7 @@ void TestSymDiv_D2(tmv::DivType dt, PosDefCode pdc)
 
     tmv::Matrix<T> a1(N,N);
     for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) a1(i,j) = T(1-3*i+j);
-    a1.diag().AddToAll(T(10)*N);
+    a1.diag().addToAll(T(10)*N);
     a1 /= T(10);
     tmv::Matrix<std::complex<T> > ca1 = a1 * std::complex<T>(3,-4);
 
@@ -45,17 +45,17 @@ void TestSymDiv_D2(tmv::DivType dt, PosDefCode pdc)
             tmv::SymMatrix<T> sx = si;
             tmv::SymMatrix<std::complex<T> > csx = csi;
 
-            TestMatrixDivArith1<T>(dt,sx,csx,u.View(),si,cu.View(),csi,
+            TestMatrixDivArith1<T>(dt,sx,csx,u.view(),si,cu.view(),csi,
                                    "Sym/UpperTriMatrix");
-            TestMatrixDivArith1<T>(dt,sx,csx,l.View(),si,cl.View(),csi,
+            TestMatrixDivArith1<T>(dt,sx,csx,l.view(),si,cl.view(),csi,
                                    "Sym/LowerTriMatrix");
         } else {
             tmv::HermMatrix<T> hx = si;
             tmv::HermMatrix<std::complex<T> > chx = csi;
 
-            TestMatrixDivArith1<T>(dt,hx,chx,u.View(),si,cu.View(),csi,
+            TestMatrixDivArith1<T>(dt,hx,chx,u.view(),si,cu.view(),csi,
                                    "Herm/UpperTriMatrix");
-            TestMatrixDivArith1<T>(dt,hx,chx,l.View(),si,cl.View(),csi,
+            TestMatrixDivArith1<T>(dt,hx,chx,l.view(),si,cl.view(),csi,
                                    "Herm/LowerTriMatrix");
         }
     }

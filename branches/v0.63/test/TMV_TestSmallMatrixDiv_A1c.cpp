@@ -1,9 +1,8 @@
 
-#include "TMV_Test.h"
-#include "TMV_Test3.h"
 #include "TMV.h"
 #include "TMV_Small.h"
-
+#include "TMV_Test.h"
+#include "TMV_Test3.h"
 #include "TMV_TestMatrixDivArith.h"
 
 template <class T, tmv::StorageType stor, int N> 
@@ -23,7 +22,7 @@ static void TestSmallSquareDiv_A1c()
 
     tmv::SmallMatrix<T,N,N,stor> a1 = m;
     tmv::SmallMatrix<std::complex<T>,N,N,stor> c1 = a1 * std::complex<T>(1,2);
-    c1.diag().AddToAll(std::complex<T>(3,1));
+    c1.diag().addToAll(std::complex<T>(3,1));
 
     tmv::SmallVector<T,N> b = m.row(0);
     tmv::SmallVector<std::complex<T>,N> e = c.row(0);

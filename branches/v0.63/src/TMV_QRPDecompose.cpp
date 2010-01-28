@@ -142,9 +142,9 @@ namespace tmv
                 // Householder matrices are identities (indicated by 0's 
                 // in the Q part of the matrix).
                 if (maxnormsq < thresh) {
-                    A.subMatrix(j,M,j,N).zero();
+                    A.subMatrix(j,M,j,N).setZero();
                     // Already essentially zero - make it exact
-                    beta.subVector(j,N).zero();
+                    beta.subVector(j,N).setZero();
                     // Set the Householder matrices for these to identities
                     for(;j<N;j++) P[j] = j;
                     break;
@@ -263,8 +263,8 @@ namespace tmv
                     if (j==j1) {
                         // If first in set, then just zero the rest out and 
                         // indicate that we are done.
-                        A.subMatrix(j,M,j,N).zero();
-                        beta.subVector(j,N).zero();
+                        A.subMatrix(j,M,j,N).setZero();
+                        beta.subVector(j,N).setZero();
                         for(;j<N;j++) P[j] = j;
                         j2 = N; 
                     } else {
@@ -316,7 +316,7 @@ namespace tmv
                         VectorView<T> vt = A.col(j,j+1,M).conjugate();
                         // Remember, this doesn't include the implicit 1 
                         // at the top of v.
-                        ZYtA.row(jmj1,j1,j+1).zero();
+                        ZYtA.row(jmj1,j1,j+1).setZero();
                         ZYtA.row(jmj1,j+1,N) = vt * A.subMatrix(j+1,M,j+1,N);
                         ZYtA.row(jmj1,j+1,N) += A.row(j,j+1,N);
                         Vector<T> vtY = vt * A.subMatrix(j+1,M,j1,j);
@@ -324,7 +324,7 @@ namespace tmv
                         ZYtA.row(jmj1,j1,N) -= 
                             vtY * ZYtA.subMatrix(0,jmj1,j1,N);
                         ZYtA.row(jmj1,j1,N) *= *bj;
-                    } else ZYtA.row(jmj1,j1,N).zero();
+                    } else ZYtA.row(jmj1,j1,N).setZero();
 
                     // Update row j of the rest of the matrix:
                     // A(j,j+1:N) -= (Y ZYtA)(j,j+1:N) 
@@ -466,8 +466,8 @@ namespace tmv
 
             if (maxnormsq < thresh) {
                 // Zero the rest out and we are done.
-                A.subMatrix(j1,M,j1,N).zero();
-                beta.subVector(j1,N).zero();
+                A.subMatrix(j1,M,j1,N).setZero();
+                beta.subVector(j1,N).setZero();
                 for(;j1<N;j1++) P[j1] = j1;
                 break;
             } 
@@ -729,8 +729,8 @@ namespace tmv
         for(int i=0;i<n;++i) {
             if (TMV_ABS(A(i,i)) < thresh) {
                 TMVAssert(normInf(A.diag(0,i+1,A.rowsize())) < thresh);
-                A.subMatrix(i,A.colsize(),i,A.rowsize()).zero();
-                beta.subVector(i,n).zero();
+                A.subMatrix(i,A.colsize(),i,A.rowsize()).setZero();
+                beta.subVector(i,n).setZero();
                 break;
             }
         }
@@ -797,8 +797,8 @@ namespace tmv
             TMVAssert(TMV_ABS(TMV_IMAG(*Aii)) < TMV_Epsilon<double>());
             if (TMV_ABS(TMV_REAL(*Aii)) < thresh) {
                 TMVAssert(normInf(A.diag(0,i+1,A.rowsize())) < thresh);
-                A.subMatrix(i,A.colsize(),i,A.rowsize()).zero();
-                beta.subVector(i,n).zero();
+                A.subMatrix(i,A.colsize(),i,A.rowsize()).setZero();
+                beta.subVector(i,n).setZero();
                 break;
             }
         }
@@ -864,8 +864,8 @@ namespace tmv
         for(int i=0;i<n;++i) {
             if (TMV_ABS(A(i,i)) < thresh) {
                 TMVAssert(normInf(A.diag(0,i+1,A.rowsize())) < thresh);
-                A.subMatrix(i,A.colsize(),i,A.rowsize()).zero();
-                beta.subVector(i,n).zero();
+                A.subMatrix(i,A.colsize(),i,A.rowsize()).setZero();
+                beta.subVector(i,n).setZero();
                 break;
             }
         }
@@ -931,8 +931,8 @@ namespace tmv
             TMVAssert(TMV_ABS(TMV_IMAG(*Aii)) < TMV_Epsilon<float>());
             if (TMV_ABS(TMV_REAL(*Aii)) < thresh) {
                 TMVAssert(normInf(A.diag(0,i+1,A.rowsize())) < thresh);
-                A.subMatrix(i,A.colsize(),i,A.rowsize()).zero();
-                beta.subVector(i,n).zero();
+                A.subMatrix(i,A.colsize(),i,A.rowsize()).setZero();
+                beta.subVector(i,n).setZero();
                 break;
             }
         }

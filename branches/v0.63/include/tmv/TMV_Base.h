@@ -168,7 +168,7 @@ namespace tmv {
     template <class M1, class M2> 
     inline bool SameStorage(
         const M1& m1, const M2& m2)
-    { return m1.real().cptr() == m2.real().cptr(); }
+    { return m1.realPart().cptr() == m2.realPart().cptr(); }
 #endif
 
     template <class T> 
@@ -422,17 +422,11 @@ namespace tmv {
         }
     }
 
-    inline std::ostream* writeWarningsTo(std::ostream* os)
+    inline std::ostream* WriteWarningsTo(std::ostream* os)
     { std::ostream* temp = tmv::warn_out; tmv::warn_out = os; return temp; }
 
-    inline void noWarnings()
+    inline void NoWarnings()
     { tmv::warn_out = 0; }
-
-    inline TMV_DEPRECATED(std::ostream* WriteWarningsTo(std::ostream* os));
-    inline std::ostream* WriteWarningsTo(std::ostream* os)
-    { return writeWarningsTo(os); }
-    inline TMV_DEPRECATED(void NoWarnings());
-    inline void NoWarnings() { noWarnings(); }
 
 
     // Put these in Vector.cpp to avoid having to include <limits>.

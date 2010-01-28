@@ -1,11 +1,10 @@
 
-#include "TMV_Test.h"
-#include "TMV_Test3.h"
 #include "tmv/TMV_SmallVector.h"
 #include "tmv/TMV_SmallVectorArith.h"
 #include <fstream>
 #include <cstdio>
-
+#include "TMV_Test.h"
+#include "TMV_Test3.h"
 #include "TMV_TestVectorArith.h"
 
 #define N 100
@@ -20,7 +19,7 @@ static void TestSmallVectorReal()
 
     for (int i=0; i<N; ++i) Assert(v(i) == T(i),"Setting SmallVector");
 
-    tmv::VectorView<T> v1 = v.SubVector(0,N,2);
+    tmv::VectorView<T> v1 = v.subVector(0,N,2);
     for (int i=0; i<N/2; ++i) Assert(v1(i) == T(2*i), "SmallVector stride=2");
 
     for (int i=0; i<N/2; ++i) v1[i] = T(i+1234);
@@ -28,15 +27,15 @@ static void TestSmallVectorReal()
                                      "setting SmallVector with stride = 2");
     for (int i=0; i<N; ++i) v(i) = T(i);
 
-    v.Swap(2,5);
+    v.swap(2,5);
     Assert(v(2) == T(5) && v(5) == T(2),"Swapping elements of SmallVector");
-    v.Swap(2,5);
+    v.swap(2,5);
     Assert(v(2) == T(2) && v(5) == T(5),"Swapping elements of SmallVector");
 
     T sum = N*(N-1)/2;
     Assert(SumElements(v) == sum,"SmallVector SumElements(v)");
 
-    v.ReverseSelf();
+    v.reverseSelf();
     for (int i=0; i<N; ++i) Assert(v(i) == T(N-i-1),"Reversing SmallVector");
 
     for (int i=0; i<N; ++i) v(i) = T(i+10);
@@ -44,19 +43,19 @@ static void TestSmallVectorReal()
     v(42) = T(1)/T(4);
     v(15) = T(-20*N);
     int imax,imin;
-    Assert(v.MaxAbsElement(&imax) == T(20*N),
+    Assert(v.maxAbsElement(&imax) == T(20*N),
            "MaxAbsElement of SmallVector did not return correct value");
     Assert(imax == 15,
            "MaxAbsElement of SmallVector did not return correct index");
-    Assert(v.MinAbsElement(&imin) == T(1)/T(4),
+    Assert(v.minAbsElement(&imin) == T(1)/T(4),
            "MinAbsElement of SmallVector did not return correct value");
     Assert(imin == 42,
            "MinAbsElement of SmallVector did not return correct index");
-    Assert(v.MaxElement(&imax) == T(10*N),
+    Assert(v.maxElement(&imax) == T(10*N),
            "MaxElement of SmallVector did not return correct value");
     Assert(imax == 23,
            "MaxElement of SmallVector did not return correct index");
-    Assert(v.MinElement(&imin) == T(-20*N),
+    Assert(v.minElement(&imin) == T(-20*N),
            "MinElement of SmallVector did not return correct value");
     Assert(imin == 15,
            "MinElement of SmallVector did not return correct index");
@@ -108,7 +107,7 @@ static void TestSmallVectorReal()
     }
     Assert(a*b == T(10240),"Multiplying SmallVectors");
 
-    tmv::SmallVector<T,5> c = v.SubVector(10,70,12);
+    tmv::SmallVector<T,5> c = v.subVector(10,70,12);
     for (int i=0; i<5; ++i) Assert(c(i) == v(10+12*i),"SubSmallVector");
 
     for(int i=0;i<N;++i) a(i) = T(i+10);
@@ -132,20 +131,20 @@ static void TestSmallVectorReal()
 
     if (showacc)
         std::cout<<"unsorted w = "<<w<<std::endl;
-    w.Sort(perm);
+    w.sort(perm);
     for(int i=1;i<NN;++i) {
         Assert(w(i-1) <= w(i),"Sort real SmallVector");
     }
     if (showacc)
         std::cout<<"sorted w = "<<w<<std::endl;
 
-    w.Sort(0);
-    w.ReversePermute(perm);
+    w.sort(0);
+    w.reversePermute(perm);
     if (showacc)
         std::cout<<"Reverse permuted w = "<<w<<std::endl;
     Assert(w==origw,"Reverse permute sorted SmallVector = orig");
-    w.Sort(0);
-    origw.Permute(perm);
+    w.sort(0);
+    origw.permute(perm);
     if (showacc)
         std::cout<<"Sort permuted w = "<<origw<<std::endl;
     Assert(w==origw,"Permute SmallVector = sorted SmallVector");
@@ -157,12 +156,12 @@ static void TestSmallVectorComplex()
     tmv::SmallVector<std::complex<T>,N> v;
     for (int i=0; i<N; ++i) v(i) = std::complex<T>(T(i),T(i+1234));
 
-    for (int i=0; i<N; ++i) Assert(v(i).real() == T(i),
-                                   "CSmallVector set");
-    for (int i=0; i<N; ++i) Assert(v(i).imag() == T(i+1234),
-                                   "CSmallVector set");
+    for (int i=0; i<N; ++i) 
+        Assert(real(v(i)) == T(i),"CSmallVector set");
+    for (int i=0; i<N; ++i) 
+        Assert(imag(v(i)) == T(i+1234),"CSmallVector set");
 
-    tmv::VectorView<std::complex<T> > v1 = v.SubVector(0,N,2);
+    tmv::VectorView<std::complex<T> > v1 = v.subVector(0,N,2);
     for (int i=0; i<N/2; ++i) Assert(v1(i)==std::complex<T>(T(2*i),T(2*i+1234)),
                                      "CSmallVector stride=2");
 
@@ -172,19 +171,20 @@ static void TestSmallVectorComplex()
 
     for (int i=0; i<N; ++i) v(i) = std::complex<T>(T(i),T(i+1234));
 
-    v.Swap(2,5);
+    v.swap(2,5);
     Assert(v[2] == std::complex<T>(5,5+1234),"Swap in CSmallVector");
     Assert(v[5] == std::complex<T>(2,2+1234),"Swap in CSmallVector");
-    v.Swap(2,5);
+    v.swap(2,5);
 
-    tmv::SmallVector<std::complex<T>,N> v2 = v.Conjugate();
+    tmv::SmallVector<std::complex<T>,N> v2 = v.conjugate();
 
-    for (int i=0; i<N; ++i) Assert(v2(i) == std::complex<T>(T(i),T(-i-1234)),
-                                   "Conjugate CSmallVector");
-    Assert(v2 == v.Conjugate(),"Conjugate == CSmallVector");
+    for (int i=0; i<N; ++i) 
+        Assert(v2(i) == std::complex<T>(T(i),T(-i-1234)),
+               "Conjugate CSmallVector");
+    Assert(v2 == v.conjugate(),"Conjugate == CSmallVector");
 
-    Assert(std::abs((v*v2).imag()) <= EPS,"CSmallVector * CSmallVector");
-    T norm1 = tmv::TMV_SQRT((v*v2).real());
+    Assert(std::abs(imag(v*v2)) <= EPS,"CSmallVector * CSmallVector");
+    T norm1 = tmv::TMV_SQRT(real(v*v2));
     T norm2 = Norm(v);
     if (showacc) {
         std::cout<<"v = "<<v<<std::endl;
@@ -195,7 +195,7 @@ static void TestSmallVectorComplex()
     }
     Assert(std::abs(norm1 - norm2) <= EPS*norm1,"Norm CSmallVector");
 
-    Assert(v2 == v.ConjugateSelf(),"ConjugateSelf CSmallVector");
+    Assert(v2 == v.conjugateSelf(),"ConjugateSelf CSmallVector");
 
     tmv::SmallVector<T,N> a;
     for(int i=0;i<N;++i) a(i) = T(i+10);
@@ -223,25 +223,25 @@ static void TestSmallVectorComplex()
     iw <<
         1.4,9.8,-0.2,-8.6,3.0,-4.4,3,9,-1.9,-11.4,
         11.1,-140,-23,11,5.2,-3.8,4.9,99,-71,-0.5;
-    w.Imag() = iw;
+    w.imagPart() = iw;
 
     tmv::SmallVector<std::complex<T>,NN> origw = w;
     int perm[NN];
 
     if (showacc)
         std::cout<<"unsorted w = "<<w<<std::endl;
-    w.Sort(perm);
+    w.sort(perm);
     for(int i=1;i<NN;++i) {
-        Assert(w(i-1).real() <= w(i).real(),"Sort complex SmallVector");
+        Assert(real(w(i-1)) <= real(w(i)),"Sort complex SmallVector");
     }
     if (showacc)
         std::cout<<"sorted w = "<<w<<std::endl;
 
-    //w.Sort(0);
-    w.ReversePermute(perm);
+    //w.sort(0);
+    w.reversePermute(perm);
     Assert(w==origw,"Reverse permute sorted SmallVector = orig");
-    w.Sort(0);
-    origw.Permute(perm);
+    w.sort(0);
+    origw.permute(perm);
     Assert(w==origw,"Permute SmallVector = sorted SmallVector");
 }
 
@@ -274,10 +274,10 @@ static void TestSmallVectorArith()
 
 #ifdef XTEST
     // These tests lead to segmentation faults with ATLAS BLAS.
-    tmv::VectorView<T> av = a.View();
-    tmv::VectorView<std::complex<T> > cav = ca.View();
-    tmv::VectorView<T> bv = b.View();
-    tmv::VectorView<std::complex<T> > cbv = cb.View();
+    tmv::VectorView<T> av = a.view();
+    tmv::VectorView<std::complex<T> > cav = ca.view();
+    tmv::VectorView<T> bv = b.view();
+    tmv::VectorView<std::complex<T> > cbv = cb.view();
 
     TestVectorArith2<T>(a0,ca0,av,cav,b,cb,"SmallVector/Vector");
     TestVectorArith2<T>(a0,ca0,a,ca,bv,cbv,"Vector/SmallVector");

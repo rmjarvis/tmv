@@ -58,7 +58,7 @@ namespace tmv {
     //
 
     template <bool add, class T, class Ta, class Tb> 
-    static void doMultMM(
+    static void DoMultMM(
         const T alpha, const GenSymBandMatrix<Ta>& A, const GenMatrix<Tb>& B,
         const MatrixView<T>& C)
     {
@@ -86,12 +86,12 @@ namespace tmv {
     {
         if (C.isrm()) {
             Matrix<T,RowMajor> C2(C.colsize(),C.rowsize());
-            doMultMM<false>(T(1),A,B,C2.view());
+            DoMultMM<false>(T(1),A,B,C2.view());
             if (add) C += alpha*C2;
             else C = alpha*C2;
         } else {
             Matrix<T,ColMajor> C2(C.colsize(),C.rowsize());
-            doMultMM<false>(T(1),A,B,C2.view());
+            DoMultMM<false>(T(1),A,B,C2.view());
             if (add) C += alpha*C2;
             else C = alpha*C2;
         }
@@ -108,18 +108,18 @@ namespace tmv {
             if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
                 if (C.isrm()) {
                     Matrix<Tb,RowMajor> B2 = TMV_REAL(alpha) * B.colRange(j,j2);
-                    doMultMM<add>(T(1),A,B2,C.colRange(j,j2));
+                    DoMultMM<add>(T(1),A,B2,C.colRange(j,j2));
                 } else {
                     Matrix<Tb,ColMajor> B2 = TMV_REAL(alpha) * B.colRange(j,j2);
-                    doMultMM<add>(T(1),A,B2,C.colRange(j,j2));
+                    DoMultMM<add>(T(1),A,B2,C.colRange(j,j2));
                 }
             } else {
                 if (C.isrm()) {
                     Matrix<T,RowMajor> B2 = alpha * B.colRange(j,j2);
-                    doMultMM<add>(T(1),A,B2,C.colRange(j,j2));
+                    DoMultMM<add>(T(1),A,B2,C.colRange(j,j2));
                 } else {
                     Matrix<T,ColMajor> B2 = alpha * B.colRange(j,j2);
-                    doMultMM<add>(T(1),A,B2,C.colRange(j,j2));
+                    DoMultMM<add>(T(1),A,B2,C.colRange(j,j2));
                 }
             }
             j = j2;
@@ -152,7 +152,7 @@ namespace tmv {
 
         if (C.colsize() > 0 && C.rowsize() > 0) {
             if (alpha == T(0)) {
-                if (!add) C.zero();
+                if (!add) C.setZero();
             } else if (C.isconj()) {
                 MultMM<add>(
                     TMV_CONJ(alpha),A.conjugate(),B.conjugate(),C.conjugate());

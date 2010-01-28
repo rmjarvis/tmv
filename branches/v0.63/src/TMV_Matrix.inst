@@ -33,7 +33,7 @@
       const MatrixView<T >& m2);  \
   template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::clip( \
       RT thresh) const; \
-  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::zero() const; \
+  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::setZero() const; \
   template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::setAllTo( \
       const T& x) const; \
   template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::transposeSelf() const; \

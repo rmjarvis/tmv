@@ -1,10 +1,10 @@
 
 #define START 0
 
-#include "TMV_Test.h"
-#include "TMV_Test2.h"
 #include "TMV.h"
 #include "TMV_SymBand.h"
+#include "TMV_Test.h"
+#include "TMV_Test2.h"
 #include "TMV_TestSymBandArith.h"
 
 template <class T> 
@@ -12,20 +12,20 @@ static bool IsPosDef(const tmv::GenSymBandMatrix<T>& m)
 {
 #ifdef NOTHROW
     for(size_t i=1;i<=m.size();i++) {
-        T d = tmv::Matrix<T>(m.SubSymBandMatrix(0,i)).Det();
+        T d = Det(tmv::Matrix<T>(m.subSymBandMatrix(0,i)));
         if (tmv::REAL(d) < 0) return false;
     }
     return true;
 #else
     try {
         tmv::HermBandMatrix<T> m2 = m;
-        CH_Decompose(m2.View());
+        CH_Decompose(m2.view());
     } catch (tmv::NonPosDef) {
 #ifdef XTEST
         if (showacc)
             std::cout<<"caught\n";
         for(size_t i=1;i<=m.size();i++) {
-            T d = tmv::Matrix<T>(m.SubSymBandMatrix(0,i)).Det();
+            T d = Det(tmv::Matrix<T>(m.subSymBandMatrix(0,i)));
             if (showacc) 
                 std::cout<<"Det(0.."<<i<<") = "<<d<<std::endl;
             if (!(tmv::REAL(d) > 0)) {
@@ -34,7 +34,7 @@ static bool IsPosDef(const tmv::GenSymBandMatrix<T>& m)
         }
         std::cout<<"m = "<<TMV_Text(m)<<"  "<<m<<std::endl;
         for(size_t i=1;i<=m.size();i++) {
-            T d = tmv::Matrix<T>(m.SubSymBandMatrix(0,i)).Det();
+            T d = Det(tmv::Matrix<T>(m.subSymBandMatrix(0,i)));
             std::cout<<"Det(0.."<<i<<") = "<<d<<std::endl;
         }
         Assert(tmv::FALSE,
@@ -47,7 +47,7 @@ static bool IsPosDef(const tmv::GenSymBandMatrix<T>& m)
     if (showacc)
         std::cout<<"not caught\n";
     for(size_t i=1;i<=m.size();i++) {
-        T d = tmv::Matrix<T>(m.SubSymBandMatrix(0,i)).Det();
+        T d = Det(tmv::Matrix<T>(m.subSymBandMatrix(0,i)));
         if (showacc) 
             std::cout<<"Det(0.."<<i<<") = "<<d<<std::endl;
         if (tmv::REAL(d) < 0) {
@@ -88,8 +88,8 @@ void TestSymBandDiv(tmv::DivType dt, PosDefCode pdc)
         tmv::SymBandMatrixView<T> si = sb[i];
         tmv::SymBandMatrixView<std::complex<T> > csi = csb[i];
         if (dt == tmv::CH && csi.issym()) continue;
-        si.SaveDiv();
-        csi.SaveDiv();
+        si.saveDiv();
+        csi.saveDiv();
         if (showstartdone)
             std::cout<<"Start loop: i = "<<i<<", si = "<<tmv::TMV_Text(si)<<
                 "  "<<si<<std::endl;
@@ -100,28 +100,28 @@ void TestSymBandDiv(tmv::DivType dt, PosDefCode pdc)
         }
 
         tmv::Matrix<T> m(si);
-        m.SaveDiv();
-        if (dt == tmv::CH) m.DivideUsing(tmv::LU);
-        else m.DivideUsing(dt);
-        m.SetDiv();
-        Assert(m.CheckDecomp(checkout),"CheckDecomp m"); 
+        m.saveDiv();
+        if (dt == tmv::CH) m.divideUsing(tmv::LU);
+        else m.divideUsing(dt);
+        m.setDiv();
+        Assert(m.checkDecomp(checkout),"CheckDecomp m"); 
         T eps = EPS;
         if (pdc == Sing) eps *= 1000;
-        else eps *= Norm(m)*Norm(m.Inverse());
-        si.DivideUsing(dt);
-        si.SetDiv();
+        else eps *= Norm(m)*Norm(m.inverse());
+        si.divideUsing(dt);
+        si.setDiv();
         if (si.isherm()) {
             tmv::HermMatrix<T> six = si;
-            six.DivideUsing(dt);
-            six.SetDiv();
-            Assert(six.CheckDecomp(checkout),"CheckDecomp six(herm)"); 
+            six.divideUsing(dt);
+            six.setDiv();
+            Assert(six.checkDecomp(checkout),"CheckDecomp six(herm)"); 
         } else {
             tmv::SymBandMatrix<T> six = si;
-            six.DivideUsing(dt);
-            six.SetDiv();
-            Assert(six.CheckDecomp(checkout),"CheckDecomp six(sym)"); 
+            six.divideUsing(dt);
+            six.setDiv();
+            Assert(six.checkDecomp(checkout),"CheckDecomp six(sym)"); 
         }
-        Assert(si.CheckDecomp(checkout),"CheckDecomp si"); 
+        Assert(si.checkDecomp(checkout),"CheckDecomp si"); 
 
         tmv::Vector<T> x1 = v1/si;
         tmv::Vector<T> x2 = v1/m;
@@ -143,8 +143,8 @@ void TestSymBandDiv(tmv::DivType dt, PosDefCode pdc)
                 "  "<<eps*Norm(x1)<<std::endl;
         Assert(Norm(x1-x2) < eps*Norm(x1),"SymBand v%b");
 
-        tmv::Matrix<T,tmv::ColMajor> sinv = si.Inverse();
-        tmv::Matrix<T,tmv::ColMajor> minv = m.Inverse();
+        tmv::Matrix<T,tmv::ColMajor> sinv = si.inverse();
+        tmv::Matrix<T,tmv::ColMajor> minv = m.inverse();
         if (showacc) {
             std::cout<<"sinv = "<<sinv<<std::endl;
             std::cout<<"minv = "<<minv<<std::endl;
@@ -154,64 +154,64 @@ void TestSymBandDiv(tmv::DivType dt, PosDefCode pdc)
         Assert(Norm(sinv-minv) < eps*Norm(sinv),"SymBand Inverse");
 
         if (showacc) {
-            std::cout<<"si.Det = "<<si.Det()<<", m.Det = "<<m.Det()<<std::endl;
-            std::cout<<"abs(sdet-mdet) = "<<std::abs(si.Det()-m.Det());
-            std::cout<<"  EPS*abs(mdet) = "<<eps*std::abs(m.Det())<<std::endl;
+            std::cout<<"Det(si) = "<<Det(si)<<", Det(m) = "<<Det(m)<<std::endl;
+            std::cout<<"abs(sdet-mdet) = "<<std::abs(Det(si)-Det(m));
+            std::cout<<"  EPS*abs(mdet) = "<<eps*std::abs(Det(m))<<std::endl;
             std::cout<<"abs(abs(sdet)-abs(mdet)) = "<<
-                std::abs(std::abs(si.Det())-std::abs(m.Det()));
-            std::cout<<"  EPS*abs(mdet) = "<<eps*std::abs(m.Det())<<std::endl;
+                std::abs(std::abs(Det(si))-std::abs(Det(m)));
+            std::cout<<"  EPS*abs(mdet) = "<<eps*std::abs(Det(m))<<std::endl;
         }
         if (pdc != Sing) {
-            Assert(std::abs(m.Det()-si.Det()) < eps*std::abs(m.Det()),
+            Assert(std::abs(Det(m)-Det(si)) < eps*std::abs(Det(m)),
                    "SymBand Det");
             T msign,ssign;
-            Assert(std::abs(m.LogDet(&msign)-si.LogDet(&ssign)) < 10*N*eps,
+            Assert(std::abs(m.logDet(&msign)-si.logDet(&ssign)) < 10*N*eps,
                    "SymBand LogDet");
             Assert(std::abs(msign-ssign) < 10*N*eps, "SymBand LogDet - sign");
         }
 
         tmv::Matrix<std::complex<T> > cm(csi);
-        cm.SaveDiv();
-        if (dt == tmv::CH) cm.DivideUsing(tmv::LU);
-        else cm.DivideUsing(dt);
-        cm.SetDiv();
-        Assert(cm.CheckDecomp(checkout),"CheckDecomp cm"); 
-        csi.DivideUsing(dt);
-        csi.SetDiv();
+        cm.saveDiv();
+        if (dt == tmv::CH) cm.divideUsing(tmv::LU);
+        else cm.divideUsing(dt);
+        cm.setDiv();
+        Assert(cm.checkDecomp(checkout),"CheckDecomp cm"); 
+        csi.divideUsing(dt);
+        csi.setDiv();
         if (csi.isherm()) {
             tmv::HermMatrix<std::complex<T> > csix = csi;
-            csix.DivideUsing(dt);
-            csix.SetDiv();
-            Assert(csix.CheckDecomp(checkout),"CheckDecomp csix(herm)"); 
+            csix.divideUsing(dt);
+            csix.setDiv();
+            Assert(csix.checkDecomp(checkout),"CheckDecomp csix(herm)"); 
         } else {
             tmv::SymBandMatrix<std::complex<T> > csix = csi;
-            csix.DivideUsing(dt);
-            csix.SetDiv();
-            Assert(csix.CheckDecomp(checkout),"CheckDecomp csix(sym)"); 
+            csix.divideUsing(dt);
+            csix.setDiv();
+            Assert(csix.checkDecomp(checkout),"CheckDecomp csix(sym)"); 
         }
-        Assert(csi.CheckDecomp(checkout),"CheckDecomp csi"); 
+        Assert(csi.checkDecomp(checkout),"CheckDecomp csi"); 
 
         T ceps = EPS;
         if (pdc == Sing) ceps *= 1000;
-        else ceps *= Norm(cm)*Norm(cm.Inverse());
+        else ceps *= Norm(cm)*Norm(cm.inverse());
 
         if (showacc) {
-            std::cout<<"csi.Det = "<<csi.Det()<<
-                ", cm.Det = "<<cm.Det()<<std::endl;
-            std::cout<<"abs(csidet-cmdet) = "<<std::abs(csi.Det()-cm.Det());
-            std::cout<<"  csidet/cmdet = "<<csi.Det()/cm.Det();
+            std::cout<<"Det(csi) = "<<Det(csi)<<
+                ", Det(cm) = "<<Det(cm)<<std::endl;
+            std::cout<<"abs(csidet-cmdet) = "<<std::abs(Det(csi)-Det(cm));
+            std::cout<<"  csidet/cmdet = "<<Det(csi)/Det(cm);
             std::cout<<"  EPS*abs(cmdet) = "<<
-                ceps*std::abs(cm.Det())<<std::endl;
+                ceps*std::abs(Det(cm))<<std::endl;
             std::cout<<"abs(abs(csdet)-abs(cmdet)) = "<<
-                std::abs(std::abs(csi.Det())-std::abs(cm.Det()));
+                std::abs(std::abs(Det(csi))-std::abs(Det(cm)));
             std::cout<<"  EPS*abs(cmdet) = "<<
-                ceps*std::abs(cm.Det())<<std::endl;
+                ceps*std::abs(Det(cm))<<std::endl;
         }
         if (pdc != Sing) {
-            Assert(std::abs(csi.Det()-cm.Det()) < ceps*std::abs(cm.Det()),
+            Assert(std::abs(Det(csi)-Det(cm)) < ceps*std::abs(Det(cm)),
                    "SymBand CDet");
             std::complex<T> cmsign,cssign;
-            Assert(std::abs(cm.LogDet(&cmsign)-csi.LogDet(&cssign)) < 10*N*eps,
+            Assert(std::abs(cm.logDet(&cmsign)-csi.logDet(&cssign)) < 10*N*eps,
                    "SymBand CLogDet");
             Assert(std::abs(cmsign-cssign) < 10*N*eps, 
                    "SymBand CLogDet - sign");

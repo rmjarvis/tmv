@@ -159,7 +159,7 @@ namespace tmv {
 
         if (!add) {
             if (*xj == Tx(0)) {
-                y.zero();
+                y.setZero();
             } else {
                 const Ta* Aij = A0j;
                 T* yi = y0;
@@ -259,7 +259,7 @@ namespace tmv {
         int j2 = N;
         for(const Tx* x2=x.cptr()+N-1; j2>0 && *x2==Tx(0); --j2,--x2);
         if (j2 == 0) {
-            if (!add) y.zero();
+            if (!add) y.setZero();
             return;
         }
         int j1 = 0;
@@ -747,7 +747,7 @@ namespace tmv {
         double ai(TMV_IMAG(alpha));
         double xbeta(beta);
         if (ar == 0.) {
-            if (beta == 0) y.real().zero();
+            if (beta == 0) y.realPart().setZero();
         } else  {
             BLASNAME(dgemv) (
                 BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
@@ -756,7 +756,7 @@ namespace tmv {
                 BLASP(yp),BLASV(ys) BLAS1);
         }
         if (ai == 0.) {
-            if (beta == 0) y.imag().zero();
+            if (beta == 0) y.imagPart().setZero();
         } else {
             BLASNAME(dgemv) (
                 BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
@@ -1033,7 +1033,7 @@ namespace tmv {
         float ai(TMV_IMAG(alpha));
         float xbeta(beta);
         if (ar == 0.F) {
-            if (beta == 0) y.real().zero();
+            if (beta == 0) y.realPart().setZero();
         } else  {
             BLASNAME(sgemv) (
                 BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
@@ -1042,7 +1042,7 @@ namespace tmv {
                 BLASP(yp),BLASV(ys) BLAS1);
         }
         if (ai == 0.F) {
-            if (beta == 0) y.imag().zero();
+            if (beta == 0) y.imagPart().setZero();
         } else {
             BLASNAME(sgemv) (
                 BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
@@ -1054,7 +1054,7 @@ namespace tmv {
 #endif
 #endif // BLAS
 
-    template <bool add, class T, class Ta, class Tx> static void doMultMV(
+    template <bool add, class T, class Ta, class Tx> static void DoMultMV(
         const T alpha, const GenMatrix<Ta>& A,
         const GenVector<Tx>& x, const VectorView<T>& y)
     {
@@ -1068,13 +1068,13 @@ namespace tmv {
 #ifdef BLAS
         if (x.step() == 0) {
             if (x.size() <= 1) 
-                doMultMV<add>(
+                DoMultMV<add>(
                     alpha,A,ConstVectorView<Tx>(x.cptr(),x.size(),1,x.ct()),y);
             else 
-                doMultMV<add>(alpha,A,Vector<Tx>(x),y);
+                DoMultMV<add>(alpha,A,Vector<Tx>(x),y);
         } else if (y.step() == 0) {
             TMVAssert(y.size() <= 1);
-            doMultMV<add>(alpha,A,x,VectorView<T>(y.ptr(),y.size(),1,y.ct()));
+            DoMultMV<add>(alpha,A,x,VectorView<T>(y.ptr(),y.size(),1,y.ct()));
         } else if ((A.isrm()&&A.stepi()>0) || (A.iscm()&&A.stepj()>0)) {
             if (!SameStorage(A,y)) {
                 if (!SameStorage(x,y) && !SameStorage(A,x))
@@ -1100,10 +1100,10 @@ namespace tmv {
         else {
             if (TMV_IMAG(alpha) == T(0)) {
                 Matrix<Ta,RowMajor> A2 = TMV_REAL(alpha)*A;
-                doMultMV<add>(T(1),A2,x,y);
+                DoMultMV<add>(T(1),A2,x,y);
             } else {
                 Matrix<T,RowMajor> A2 = alpha*A;
-                doMultMV<add>(T(1),A2,x,y);
+                DoMultMV<add>(T(1),A2,x,y);
             }
         }
 #else
@@ -1137,12 +1137,12 @@ namespace tmv {
 
         if (y.size() > 0) {
             if (x.size()==0 || alpha==T(0)) {
-                if (!add) y.zero();
+                if (!add) y.setZero();
             } else if (y.isconj()) {
-                doMultMV<add>(
+                DoMultMV<add>(
                     TMV_CONJ(alpha),A.conjugate(),x.conjugate(),y.conjugate());
             } else {
-                doMultMV<add>(alpha,A,x,y);
+                DoMultMV<add>(alpha,A,x,y);
             }
         }
 

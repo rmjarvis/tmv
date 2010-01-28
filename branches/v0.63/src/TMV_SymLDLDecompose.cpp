@@ -368,9 +368,9 @@ namespace tmv {
                 }
                 if (herm && isComplex(T())) {
 #ifdef XTEST
-                    TMVAssert(normInf(A.diag().imag()) <= eps);
+                    TMVAssert(normInf(A.diag().imagPart()) <= eps);
 #endif
-                    A.diag().subVector(j+2,N).imag().zero();
+                    A.diag().subVector(j+2,N).imagPart().setZero();
                 }
 
                 j+=2; Dj += D.step(); // Already did one += D.step() above
@@ -1154,7 +1154,7 @@ namespace tmv {
             if (A.isherm()) LDL_Decompose(A.adjoint(),xD,P,logdet,signdet);
             else LDL_Decompose(A.transpose(),xD,P,logdet,signdet);
         } else {
-            xD.zero();
+            xD.setZero();
 #ifdef LAP
             if (!A.iscm()) {
                 Matrix<T,ColMajor> temp(A.size(),A.size());

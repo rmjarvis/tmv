@@ -1,3 +1,0 @@
-CXX = 'g++-4'
-DEBUG = True
-WARN = True

@@ -189,7 +189,7 @@ namespace tmv {
                         const int ii = i*MB;
                         const int jj = j*NB;
 
-                        Ctemp.zero();
+                        Ctemp.setZero();
                         RecursiveCCCMultMM<ca,cb>(
                             MB,NB,K,Ap+ii,Bp+jj*Bsj,Ct,Ask,Bsj,Ctsj);
                         if (alpha != T(1)) Ctemp *= alpha;
@@ -210,7 +210,7 @@ namespace tmv {
 #endif
                     for(int i=0;i<int(Mb);i++) {
                         const int ii = i*MB;
-                        Ctemp.zero();
+                        Ctemp.setZero();
                         RecursiveCCCMultMM<ca,cb>(
                             MB,N2,K,Ap+ii,Bp+N1*Bsj,Ct,Ask,Bsj,Ctsj);
                         if (alpha != T(1)) Ctemp.colRange(0,N2) *= alpha;
@@ -233,7 +233,7 @@ namespace tmv {
 #endif
                     for(int j=0;j<int(Nb);j++) {
                         const int jj = j*NB;
-                        Ctemp.zero();
+                        Ctemp.setZero();
                         RecursiveCCCMultMM<ca,cb>(
                             M2,NB,K,Ap+M1,Bp+jj*Bsj,Ct,Ask,Bsj,Ctsj);
                         if (alpha != T(1)) Ctemp.rowRange(0,M2) *= alpha;
@@ -255,7 +255,7 @@ namespace tmv {
 #pragma omp single
 #endif
                     {
-                        Ctemp.zero();
+                        Ctemp.setZero();
                         RecursiveCCCMultMM<ca,cb>(
                             M2,N2,K,Ap+M1,Bp+N1*Bsj,Ct,Ask,Bsj,Ctsj);
                         if (alpha != T(1)) Ctemp.subMatrix(0,M2,0,N2) *= alpha;

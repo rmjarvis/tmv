@@ -176,11 +176,11 @@ namespace tmv {
             Vector<T> Vd(N);
             MakeBidiagReal(Ud,Vd,A.diag(),A.diag(1),D,E,signdet);
             if (U) {
-                U->zero();
+                U->setZero();
                 U->diag() = Ud;
             }
             if (V) {
-                V->zero();
+                V->setZero();
                 V->diag() = Vd;
             }
         } else if (A.isSquare() && nlo == 1 && nhi == 0) {
@@ -189,11 +189,11 @@ namespace tmv {
             MakeBidiagReal(Ud,Vd,A.diag().reverse(),A.diag(-1).reverse(),
                            D,E,signdet);
             if (U) {
-                U->zero();
+                U->setZero();
                 U->subVector(N-1,0,-1,1,N) = Ud;
             }
             if (V) {
-                V->zero();
+                V->setZero();
                 V->subVector(0,N-1,1,-1,N) = Vd;
             }
         } else {
@@ -239,12 +239,12 @@ namespace tmv {
             // except for the bidiagonal which is the bidiagonal we want:
 #ifdef XTEST
             if (isComplex(T())) {
-                TMVAssert(normInf(U1->diag().imag()) == RT(0));
-                TMVAssert(normInf(U1->diag(1).imag()) == RT(0));
+                TMVAssert(normInf(U1->diag().imagPart()) == RT(0));
+                TMVAssert(normInf(U1->diag(1).imagPart()) == RT(0));
             }
 #endif
-            D = U1->diag().real();
-            E = U1->diag(1).real();
+            D = U1->diag().realPart();
+            E = U1->diag(1).realPart();
 
             if (V) {
                 V->setToIdentity();
@@ -256,12 +256,12 @@ namespace tmv {
             }
 
             if (U) {
-                U->diag().zero();
-                U->diag(1).zero();
+                U->diag().setZero();
+                U->diag(1).setZero();
                 // Ubj is currently &U(N-1)
                 HouseholderUnpack(U->subMatrix(N-1,vec[N-1],N-1,N),*Ubj);
                 for (int j=N-2;j>=0;--j) {
-                    U->row(j,j,ver[j]).zero();
+                    U->row(j,j,ver[j]).setZero();
                     HouseholderUnpack(U->subMatrix(j,vec[j],j,N),*(--Ubj));
                 }
             }

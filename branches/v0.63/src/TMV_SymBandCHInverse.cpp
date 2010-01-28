@@ -118,7 +118,7 @@ namespace tmv {
         LowerTriMatrixView<T> L = sinv.lowerTri(UnitDiag);
         DiagMatrixView<T> D(sinv.diag());
         TriInverse(L.transpose(),1);
-        D.real().invertSelf();
+        D.realPart().invertSelf();
         SimpleLDLt_CombineInverse(sinv);
     }
 

@@ -950,9 +950,9 @@ namespace tmv {
     }
 
     template <class T, IndexStyle I> 
-    const BandMatrixView<T,I>& BandMatrixView<T,I>::zero() const
+    const BandMatrixView<T,I>& BandMatrixView<T,I>::setZero() const
     {
-        if (this->canLinearize()) linearView().zero();
+        if (this->canLinearize()) linearView().setZero();
         else {
             const int M = colsize();
             const int N = rowsize();
@@ -962,7 +962,7 @@ namespace tmv {
                     int j2=nhi()+1;
                     int k=nlo();
                     for(int i=0;i<M;++i) {
-                        row(i,j1,j2).zero();
+                        row(i,j1,j2).setZero();
                         if (k>0) --k; else ++j1;
                         if (j2<N) ++j2;
                         else if (j1==N) break;
@@ -972,13 +972,13 @@ namespace tmv {
                     int i2=nlo()+1;
                     int k=nhi();
                     for(int j=0;j<N;++j) {
-                        col(j,i1,i2).zero();
+                        col(j,i1,i2).setZero();
                         if (k>0) --k; else ++i1;
                         if (i2<M) ++i2;
                         else if (i1==M) break;
                     }
                 } else {
-                    for(int i=-nlo();i<=nhi();++i) diag(i).zero();
+                    for(int i=-nlo();i<=nhi();++i) diag(i).setZero();
                 }
             }
         }

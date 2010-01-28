@@ -838,20 +838,20 @@ namespace tmv {
     //
 
     template <class T, IndexStyle I> 
-    const UpperTriMatrixView<T,I>& UpperTriMatrixView<T,I>::zero() const
+    const UpperTriMatrixView<T,I>& UpperTriMatrixView<T,I>::setZero() const
     {
         const int N = size();
 
         if (isrm())
             if (isunit())
-                for(int i=0;i<N;++i) row(i,i+1,N).zero();
+                for(int i=0;i<N;++i) row(i,i+1,N).setZero();
             else
-                for(int i=0;i<N;++i) row(i,i,N).zero();
+                for(int i=0;i<N;++i) row(i,i,N).setZero();
         else 
             if (isunit())
-                for(int j=0;j<N;++j) col(j,0,j).zero();
+                for(int j=0;j<N;++j) col(j,0,j).setZero();
             else
-                for(int j=0;j<N;++j) col(j,0,j+1).zero();
+                for(int j=0;j<N;++j) col(j,0,j+1).setZero();
         return *this; 
     } 
 
@@ -917,7 +917,7 @@ namespace tmv {
         const T& x) const 
     {
         TMVAssert(!isunit() || x==T(1));
-        zero();
+        setZero();
         if (!isunit()) diag().setAllTo(x);
         return *this;
     }

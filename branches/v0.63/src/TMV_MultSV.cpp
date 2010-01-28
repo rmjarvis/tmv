@@ -82,7 +82,7 @@ namespace tmv {
     //
 
     template <bool add, class T, class Ta, class Tx> 
-    static void doUnitAMultMV(
+    static void DoUnitAMultMV(
         const GenSymMatrix<Ta>& A, const GenVector<Tx>& x,
         const VectorView<T>& y)
     {
@@ -108,18 +108,18 @@ namespace tmv {
         int j2 = N;
         for(const Tx* x2=x.cptr()+N-1; j2>0 && *x2==Tx(0); --j2,--x2);
         if (j2 == 0) {
-            if (!add) y.zero();
+            if (!add) y.setZero();
             return;
         }
         int j1 = 0;
         for(const Tx* x1=x.cptr(); *x1==Tx(0); ++j1,++x1);
-        if (j1 == 0 && j2 == N) doUnitAMultMV<add>(A,x,y);
+        if (j1 == 0 && j2 == N) DoUnitAMultMV<add>(A,x,y);
         else {
             if (j1 > 0)
                 MultMV<add>(T(1),A.subMatrix(0,j1,j1,j2),x.subVector(j1,j2),
                             y.subVector(0,j1));
             TMVAssert(j1 != j2);
-            doUnitAMultMV<add>(A.subSymMatrix(j1,j2),x.subVector(j1,j2),
+            DoUnitAMultMV<add>(A.subSymMatrix(j1,j2),x.subVector(j1,j2),
                                y.subVector(j1,j2));
             if (j2 < N)
                 MultMV<add>(T(1),A.subMatrix(j2,N,j1,j2),x.subVector(j1,j2),
@@ -379,7 +379,7 @@ namespace tmv {
         double ai(TMV_IMAG(alpha));
         double xbeta(beta);
         if (ar == 0.) {
-            if (beta == 0) y.real().zero();
+            if (beta == 0) y.realPart().setZero();
         }
         else
             BLASNAME(dsymv) (
@@ -388,7 +388,7 @@ namespace tmv {
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp),BLASV(ys) BLAS1);
         if (ai == 0.) {
-            if (beta == 0) y.imag().zero();
+            if (beta == 0) y.imagPart().setZero();
         }
         else
             BLASNAME(dsymv) (
@@ -587,7 +587,7 @@ namespace tmv {
         float ai(TMV_IMAG(alpha));
         float xbeta(beta);
         if (ar == 0.F) {
-            if (beta == 0) y.real().zero();
+            if (beta == 0) y.realPart().setZero();
         }
         else
             BLASNAME(ssymv) (
@@ -596,7 +596,7 @@ namespace tmv {
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp),BLASV(ys) BLAS1);
         if (ai == 0.F) {
-            if (beta == 0) y.imag().zero();
+            if (beta == 0) y.imagPart().setZero();
         }
         else
             BLASNAME(ssymv) (
@@ -732,7 +732,7 @@ namespace tmv {
 
         if (y.size() > 0) {
             if (x.size()==0 || alpha==T(0)) {
-                if (!add) y.zero();
+                if (!add) y.setZero();
             } else if (SameStorage(x,y)) {
                 Vector<T> yy(y.size());
                 DoMultMV<false>(T(1),A,x,yy.view());

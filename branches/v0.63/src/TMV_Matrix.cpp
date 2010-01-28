@@ -623,18 +623,18 @@ namespace tmv {
     }
 
     template <class T, IndexStyle I> 
-    const MatrixView<T,I>& MatrixView<T,I>::zero() const
+    const MatrixView<T,I>& MatrixView<T,I>::setZero() const
     {
         TMVAssert(I==CStyle);
-        if (this->canLinearize()) linearView().zero();
+        if (this->canLinearize()) linearView().setZero();
         else {
             if (this->isrm()) {
                 const int M = colsize();
-                for(int i=0;i<M;++i) row(i).zero();
+                for(int i=0;i<M;++i) row(i).setZero();
             }
             else {
                 const int N = rowsize();
-                for(int j=0;j<N;++j) col(j).zero();
+                for(int j=0;j<N;++j) col(j).setZero();
             }
         }
         return *this; 
@@ -691,7 +691,7 @@ namespace tmv {
     {
         TMVAssert(I==CStyle);
         TMVAssert(colsize() == rowsize());
-        zero();
+        setZero();
         diag().setAllTo(x);
         return *this;
     }

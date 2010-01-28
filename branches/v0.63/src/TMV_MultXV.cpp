@@ -52,9 +52,9 @@ namespace tmv {
     // MultXV
     // 
     template <class T, class Tx> 
-    static void doMultXV(const Tx x, const VectorView<T>& v)
+    static void DoMultXV(const Tx x, const VectorView<T>& v)
     {
-        //cout<<"doMultXV: x = "<<x<<endl;
+        //cout<<"DoMultXV: x = "<<x<<endl;
         TMVAssert(x!=Tx(0));
         TMVAssert(x!=Tx(1)); 
         TMVAssert(v.size()>0);
@@ -98,7 +98,7 @@ namespace tmv {
 #ifdef BLAS
 #ifdef INST_DOUBLE
     template <> 
-    void doMultXV(const double x, const VectorView<double>& v)
+    void DoMultXV(const double x, const VectorView<double>& v)
     {
         TMVAssert(x!=0.);
         TMVAssert(x!=1.);
@@ -109,7 +109,7 @@ namespace tmv {
         BLASNAME(dscal) (BLASV(n),BLASV(x),BLASP(v.ptr()),BLASV(s));
     }
     template <> 
-    void doMultXV(const double x, const VectorView<std::complex<double> >& v)
+    void DoMultXV(const double x, const VectorView<std::complex<double> >& v)
     {
         TMVAssert(x!=0.);
         TMVAssert(x!=1.);
@@ -121,7 +121,7 @@ namespace tmv {
         BLASNAME(zdscal) (BLASV(n),BLASV(x),BLASP(v.ptr()),BLASV(s));
     }
     template <> 
-    void doMultXV(const std::complex<double> x,
+    void DoMultXV(const std::complex<double> x,
                   const VectorView<std::complex<double> >& v)
     { 
         TMVAssert(x!=0.);
@@ -136,7 +136,7 @@ namespace tmv {
 #endif
 #ifdef INST_FLOAT
     template <> 
-    void doMultXV(const float x, const VectorView<float>& v)
+    void DoMultXV(const float x, const VectorView<float>& v)
     {
         TMVAssert(x!=0.F);
         TMVAssert(x!=1.F);
@@ -147,7 +147,7 @@ namespace tmv {
         BLASNAME(sscal) (BLASV(n),BLASV(x),BLASP(v.ptr()),BLASV(s));
     }
     template <> 
-    void doMultXV(const float x, const VectorView<std::complex<float> >& v)
+    void DoMultXV(const float x, const VectorView<std::complex<float> >& v)
     {
         TMVAssert(x!=0.F);
         TMVAssert(x!=1.F);
@@ -159,7 +159,7 @@ namespace tmv {
         BLASNAME(csscal) (BLASV(n),BLASV(x),BLASP(v.ptr()),BLASV(s));
     }
     template <> 
-    void doMultXV(const std::complex<float> x,
+    void DoMultXV(const std::complex<float> x,
                   const VectorView<std::complex<float> >& v)
     { 
         TMVAssert(x!=0.F);
@@ -186,11 +186,11 @@ namespace tmv {
         if (v.size() > 0 && x != T(1)) {
             if (v.step() < 0) MultXV(x,v.reverse());
             else if (v.isconj()) MultXV(TMV_CONJ(x),v.conjugate());
-            else if (x == T(0)) v.zero();
+            else if (x == T(0)) v.setZero();
             else if (isComplex(T()) && TMV_IMAG(x) == TMV_RealType(T)(0))
-                if (v.step() == 1) doMultXV(TMV_REAL(x),v.flatten());
-                else doMultXV(TMV_REAL(x),v);
-            else doMultXV(x,v); 
+                if (v.step() == 1) DoMultXV(TMV_REAL(x),v.flatten());
+                else DoMultXV(TMV_REAL(x),v);
+            else DoMultXV(x,v); 
         }
 
 #ifdef XDEBUG
@@ -208,7 +208,7 @@ namespace tmv {
     }
 
     template <bool c1, class T, class Tx, class T1> 
-    static void doMultXV(
+    static void DoMultXV(
         const Tx x, const GenVector<T1>& v1, const VectorView<T>& v2)
     {
         TMVAssert(v2.size()==v1.size());
@@ -289,7 +289,7 @@ namespace tmv {
             } else if (shouldReverse(v1.step(),v2.step())) {
                 MultXV(x,v1.reverse(),v2.reverse());
             } else if (x == T(0)) {
-                v2.zero();
+                v2.setZero();
             } else if (x == T(1)) {
                 v2 = v1;
             } else if (v1.step() == 0) {
@@ -303,13 +303,13 @@ namespace tmv {
             } else if (isComplex(T()) && TMV_IMAG(x)==TMV_RealType(T)(0)) {
                 if (isComplex(T1()) && v2.isconj() == v1.isconj() &&
                     (v1.step()==1 && v2.step()==1))
-                    doMultXV<false>(TMV_REAL(x),v1.flatten(),v2.flatten());
-                else if (v1.isconj()) doMultXV<true>(TMV_REAL(x),v1,v2);
-                else doMultXV<false>(TMV_REAL(x),v1,v2);
+                    DoMultXV<false>(TMV_REAL(x),v1.flatten(),v2.flatten());
+                else if (v1.isconj()) DoMultXV<true>(TMV_REAL(x),v1,v2);
+                else DoMultXV<false>(TMV_REAL(x),v1,v2);
             } else if (v1.isconj()) {
-                doMultXV<true>(x,v1,v2);
+                DoMultXV<true>(x,v1,v2);
             } else {
-                doMultXV<false>(x,v1,v2);
+                DoMultXV<false>(x,v1,v2);
             }
         }
 
@@ -333,7 +333,7 @@ namespace tmv {
     //
 
     template <bool cx, bool cy, class T, class Ta, class Tx, class Ty>
-    static void doAddElementProd(
+    static void DoAddElementProd(
         const Ta alpha, const GenVector<Tx>& x,
         const GenVector<Ty>& y, const VectorView<T>& z)
     // zi += alpha * xi * yi 
@@ -504,25 +504,25 @@ namespace tmv {
                     const TMV_RealType(T) ralpha = TMV_REAL(alpha);
                     if (x.isconj())
                         if (y.isconj())
-                            doAddElementProd<true,true>(ralpha,x,y,z);
+                            DoAddElementProd<true,true>(ralpha,x,y,z);
                         else
-                            doAddElementProd<true,false>(ralpha,x,y,z);
+                            DoAddElementProd<true,false>(ralpha,x,y,z);
                     else
                         if (y.isconj())
-                            doAddElementProd<false,true>(ralpha,x,y,z);
+                            DoAddElementProd<false,true>(ralpha,x,y,z);
                         else
-                            doAddElementProd<false,false>(ralpha,x,y,z);
+                            DoAddElementProd<false,false>(ralpha,x,y,z);
                 } else {
                     if (x.isconj())
                         if (y.isconj())
-                            doAddElementProd<true,true>(alpha,x,y,z);
+                            DoAddElementProd<true,true>(alpha,x,y,z);
                         else
-                            doAddElementProd<true,false>(alpha,x,y,z);
+                            DoAddElementProd<true,false>(alpha,x,y,z);
                     else
                         if (y.isconj())
-                            doAddElementProd<false,true>(alpha,x,y,z);
+                            DoAddElementProd<false,true>(alpha,x,y,z);
                         else
-                            doAddElementProd<false,false>(alpha,x,y,z);
+                            DoAddElementProd<false,false>(alpha,x,y,z);
                 }
             }
         }
@@ -542,7 +542,7 @@ namespace tmv {
     }
 
     template <bool cx, class T, class Ta, class Tx> 
-    static void doElementProd(
+    static void DoElementProd(
         const Ta alpha, const GenVector<Tx>& x, const VectorView<T>& y)
     {
         // yi = alpha * xi * yi
@@ -657,14 +657,14 @@ namespace tmv {
                 ElementProd(alpha,x.reverse(),y.reverse());
             } else if (TMV_IMAG(alpha) == 0) {
                 if (x.isconj()) 
-                    doElementProd<true>(TMV_REAL(alpha),x,y);
+                    DoElementProd<true>(TMV_REAL(alpha),x,y);
                 else 
-                    doElementProd<false>(TMV_REAL(alpha),x,y);
+                    DoElementProd<false>(TMV_REAL(alpha),x,y);
             } else {
                 if (x.isconj()) 
-                    doElementProd<true>(alpha,x,y);
+                    DoElementProd<true>(alpha,x,y);
                 else 
-                    doElementProd<false>(alpha,x,y);
+                    DoElementProd<false>(alpha,x,y);
             }
         }
 

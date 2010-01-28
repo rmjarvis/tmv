@@ -58,12 +58,12 @@ int main() try
 
     tmv::Vector<double> vx(M*N);
     tmv::Vector<double> vy(M*N);
-    tmv::VectorView<double> vvn = vx.SubVector(0,M*N,M);
-    tmv::VectorView<double> vvm = vy.SubVector(0,M*N,N);
+    tmv::VectorView<double> vvn = vx.subVector(0,M*N,M);
+    tmv::VectorView<double> vvm = vy.subVector(0,M*N,N);
     tmv::Vector<std::complex<double> > cvx(M*N);
     tmv::Vector<std::complex<double> > cvy(M*N);
-    tmv::VectorView<std::complex<double> > cvvn = cvx.SubVector(0,M*N,M);
-    tmv::VectorView<std::complex<double> > cvvm = cvy.SubVector(0,M*N,N);
+    tmv::VectorView<std::complex<double> > cvvn = cvx.subVector(0,M*N,M);
+    tmv::VectorView<std::complex<double> > cvvm = cvy.subVector(0,M*N,N);
     vvn = svn;
     cvvn = csvn;
     vvm = svm;
@@ -88,10 +88,10 @@ int main() try
     }
     tmv::SmallMatrix<std::complex<double>,M,N> csmmn =
         std::complex<double>(3,2)*smmn;
-    tmv::SmallMatrix<double,N,M> smnm = smmn.Transpose();
-    tmv::SmallMatrix<double,N,N> smnn = smmn.Rows(0,N);
-    tmv::SmallMatrix<std::complex<double>,N,M> csmnm = csmmn.Transpose();
-    tmv::SmallMatrix<std::complex<double>,N,N> csmnn = csmmn.Rows(0,N);
+    tmv::SmallMatrix<double,N,M> smnm = smmn.transpose();
+    tmv::SmallMatrix<double,N,N> smnn = smmn.rowRange(0,N);
+    tmv::SmallMatrix<std::complex<double>,N,M> csmnm = csmmn.transpose();
+    tmv::SmallMatrix<std::complex<double>,N,N> csmnn = csmmn.rowRange(0,N);
 
     tmv::Matrix<double> mmn = smmn;
     tmv::Matrix<double> mnm = smnm;
@@ -103,18 +103,18 @@ int main() try
     tmv::Matrix<double> mx(M*N,M*N);
     tmv::Matrix<double> my(M*N,M*N);
     tmv::Matrix<double> mz(M*N,M*N);
-    tmv::MatrixView<double> mvmn = mx.SubMatrix(0,M*N,0,M*N,N,M);
-    tmv::MatrixView<double> mvnm = my.SubMatrix(0,M*N,0,M*N,M,N);
-    tmv::MatrixView<double> mvnn = mz.SubMatrix(0,M*N,0,M*N,M,M);
+    tmv::MatrixView<double> mvmn = mx.subMatrix(0,M*N,0,M*N,N,M);
+    tmv::MatrixView<double> mvnm = my.subMatrix(0,M*N,0,M*N,M,N);
+    tmv::MatrixView<double> mvnn = mz.subMatrix(0,M*N,0,M*N,M,M);
     tmv::Matrix<std::complex<double> > cmx(M*N,M*N);
     tmv::Matrix<std::complex<double> > cmy(M*N,M*N);
     tmv::Matrix<std::complex<double> > cmz(M*N,M*N);
     tmv::MatrixView<std::complex<double> > cmvmn =
-        cmx.SubMatrix(0,M*N,0,M*N,N,M);
+        cmx.subMatrix(0,M*N,0,M*N,N,M);
     tmv::MatrixView<std::complex<double> > cmvnm =
-        cmy.SubMatrix(0,M*N,0,M*N,M,N);
+        cmy.subMatrix(0,M*N,0,M*N,M,N);
     tmv::MatrixView<std::complex<double> > cmvnn =
-        cmz.SubMatrix(0,M*N,0,M*N,M,M);
+        cmz.subMatrix(0,M*N,0,M*N,M,M);
     mvmn = mmn;
     mvnm = mnm;
     mvnn = mnn;

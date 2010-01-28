@@ -205,7 +205,7 @@ namespace tmv {
 
         minv2.colRange(0,N).setToIdentity();
         minv2.colRange(0,N).permuteCols(pimpl->P.get());
-        minv2.colRange(pimpl->N1,M).zero();
+        minv2.colRange(pimpl->N1,M).setZero();
         minv2.colRange(0,pimpl->N1) %= 
             pimpl->QRx.upperTri().subTriMatrix(0,pimpl->N1);
         Q_RDivEq(pimpl->QRx,pimpl->beta,minv2);

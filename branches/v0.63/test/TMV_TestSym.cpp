@@ -1,8 +1,8 @@
 
-#include "TMV_Test.h"
-#include "TMV_Test2.h"
 #include "TMV.h"
 #include "TMV_SymBand.h"
+#include "TMV_Test.h"
+#include "TMV_Test2.h"
 #include <fstream>
 #include <cstdio>
 
@@ -30,16 +30,16 @@ static void TestBasicSymMatrix_1()
         }
     }
 
-    tmv::SymMatrixView<std::complex<T> > s1v = s1.View();
-    tmv::ConstSymMatrixView<std::complex<T> > s1cv = s1.View();
-    tmv::SymMatrixView<std::complex<T> > s2v = s2.View();
-    tmv::ConstSymMatrixView<std::complex<T> > s2cv = s2.View();
-    tmv::SymMatrixView<std::complex<T>,tmv::FortranStyle> s1fv = s1f.View();
+    tmv::SymMatrixView<std::complex<T> > s1v = s1.view();
+    tmv::ConstSymMatrixView<std::complex<T> > s1cv = s1.view();
+    tmv::SymMatrixView<std::complex<T> > s2v = s2.view();
+    tmv::ConstSymMatrixView<std::complex<T> > s2cv = s2.view();
+    tmv::SymMatrixView<std::complex<T>,tmv::FortranStyle> s1fv = s1f.view();
     tmv::ConstSymMatrixView<std::complex<T>,tmv::FortranStyle> s1fcv =
-        s1f.View();
-    tmv::SymMatrixView<std::complex<T>,tmv::FortranStyle> s2fv = s2f.View();
+        s1f.view();
+    tmv::SymMatrixView<std::complex<T>,tmv::FortranStyle> s2fv = s2f.view();
     tmv::ConstSymMatrixView<std::complex<T>,tmv::FortranStyle> s2fcv =
-        s2f.View();
+        s2f.view();
     const tmv::SymMatrix<std::complex<T>,U,S>& s1x = s1;
     const tmv::SymMatrix<std::complex<T>,U,S>& s2x = s2;
     const tmv::SymMatrix<std::complex<T>,U,S,tmv::FortranStyle>& s1fx = s1f;
@@ -275,16 +275,16 @@ static void TestBasicHermMatrix_1()
         }
     }
 
-    tmv::SymMatrixView<std::complex<T> > h1v = h1.View();
-    tmv::ConstSymMatrixView<std::complex<T> > h1cv = h1.View();
-    tmv::SymMatrixView<std::complex<T> > h2v = h2.View();
-    tmv::ConstSymMatrixView<std::complex<T> > h2cv = h2.View();
-    tmv::SymMatrixView<std::complex<T>,tmv::FortranStyle> h1fv = h1f.View();
+    tmv::SymMatrixView<std::complex<T> > h1v = h1.view();
+    tmv::ConstSymMatrixView<std::complex<T> > h1cv = h1.view();
+    tmv::SymMatrixView<std::complex<T> > h2v = h2.view();
+    tmv::ConstSymMatrixView<std::complex<T> > h2cv = h2.view();
+    tmv::SymMatrixView<std::complex<T>,tmv::FortranStyle> h1fv = h1f.view();
     tmv::ConstSymMatrixView<std::complex<T>,tmv::FortranStyle> h1fcv =
-        h1f.View();
-    tmv::SymMatrixView<std::complex<T>,tmv::FortranStyle> h2fv = h2f.View();
+        h1f.view();
+    tmv::SymMatrixView<std::complex<T>,tmv::FortranStyle> h2fv = h2f.view();
     tmv::ConstSymMatrixView<std::complex<T>,tmv::FortranStyle> h2fcv =
-        h2f.View();
+        h2f.view();
     const tmv::HermMatrix<std::complex<T>,U,S>& h1x = h1;
     const tmv::HermMatrix<std::complex<T>,U,S>& h2x = h2;
     const tmv::HermMatrix<std::complex<T>,U,S,tmv::FortranStyle>& h1fx = h1f;
@@ -595,25 +595,27 @@ static void TestBasicSymMatrix_2()
 
     tmv::SymMatrix<std::complex<T>,tmv::Upper,tmv::RowMajor> sur = s1;
     Assert(s1==sur,"SymMatrix == SymMatrix<U,R>");
-    Assert(s1.View()==sur.View(),"SymMatrix.View == SymMatrix<U,R>.View");
-    Assert(s1.Transpose()==sur.Transpose(),
-           "SymMatrix.Transpose == SymMatrix<U,R>.Transpose");
-    Assert(s1.Conjugate()==sur.Conjugate(),
-           "SymMatrix.Conjugate == SymMatrix<U,R>.Conjugate");
-    Assert(s1.Adjoint()==sur.Adjoint(),
-           "SymMatrix.Adjoint == SymMatrix<U,R>.Adjoint");
-    Assert(s1.UpperTri()==sur.UpperTri(),
-           "SymMatrix.UpperTri == SymMatrix<U,R>.UpperTri");
-    Assert(s1.LowerTri()==sur.LowerTri(),
-           "SymMatrix.LowerTri == SymMatrix<U,R>.LowerTri");
-    Assert(s1.Real()==sur.Real(),"SymMatrix.Real == SymMatrix<U,R>.Real");
-    Assert(s1.Imag()==sur.Imag(),"SymMatrix.Imag == SymMatrix<U,R>.Imag");
-    Assert(s1.SubMatrix(N/2,N,0,N/2)==sur.SubMatrix(N/2,N,0,N/2),
-           "SymMatrix.SubMatrix1 == SymMatrix<U,R>.SubMatrix1");
-    Assert(s1.SubMatrix(0,N/2,N/2,N)==sur.SubMatrix(0,N/2,N/2,N),
-           "SymMatrix.SubMatrix2 == SymMatrix<U,R>.SubMatrix2");
-    Assert(s1.SubSymMatrix(0,N/2)==sur.SubSymMatrix(0,N/2),
-           "SymMatrix.SubSymMatrix == SymMatrix<U,R>.SubSymMatrix");
+    Assert(s1.view()==sur.view(),"SymMatrix.view == SymMatrix<U,R>.view");
+    Assert(s1.transpose()==sur.transpose(),
+           "SymMatrix.transpose == SymMatrix<U,R>.transpose");
+    Assert(s1.conjugate()==sur.conjugate(),
+           "SymMatrix.conjugate == SymMatrix<U,R>.conjugate");
+    Assert(s1.adjoint()==sur.adjoint(),
+           "SymMatrix.adjoint == SymMatrix<U,R>.adjoint");
+    Assert(s1.upperTri()==sur.upperTri(),
+           "SymMatrix.upperTri == SymMatrix<U,R>.upperTri");
+    Assert(s1.lowerTri()==sur.lowerTri(),
+           "SymMatrix.lowerTri == SymMatrix<U,R>.lowerTri");
+    Assert(s1.realPart()==sur.realPart(),
+           "SymMatrix.real == SymMatrix<U,R>.real");
+    Assert(s1.imagPart()==sur.imagPart(),
+           "SymMatrix.imag == SymMatrix<U,R>.imag");
+    Assert(s1.subMatrix(N/2,N,0,N/2)==sur.subMatrix(N/2,N,0,N/2),
+           "SymMatrix.subMatrix1 == SymMatrix<U,R>.subMatrix1");
+    Assert(s1.subMatrix(0,N/2,N/2,N)==sur.subMatrix(0,N/2,N/2,N),
+           "SymMatrix.subMatrix2 == SymMatrix<U,R>.subMatrix2");
+    Assert(s1.subSymMatrix(0,N/2)==sur.subSymMatrix(0,N/2),
+           "SymMatrix.subSymMatrix == SymMatrix<U,R>.subSymMatrix");
 }
 
 template <class T, tmv::UpLoType U, tmv::StorageType S> 
@@ -689,24 +691,25 @@ static void TestBasicHermMatrix_2()
 
     tmv::HermMatrix<std::complex<T>,tmv::Upper,tmv::RowMajor> hur = h1;
     Assert(h1==hur,"HermMatrix == HermMatrix<U,R>");
-    Assert(h1.View()==hur.View(),"HermMatrix.View == HermMatrix<U,R>.View");
-    Assert(h1.Transpose()==hur.Transpose(),
-           "HermMatrix.Transpose == HermMatrix<U,R>.Transpose");
-    Assert(h1.Conjugate()==hur.Conjugate(),
-           "HermMatrix.Conjugate == HermMatrix<U,R>.Conjugate");
-    Assert(h1.Adjoint()==hur.Adjoint(),
-           "HermMatrix.Adjoint == HermMatrix<U,R>.Adjoint");
-    Assert(h1.UpperTri()==hur.UpperTri(),
-           "HermMatrix.UpperTri == HermMatrix<U,R>.UpperTri");
-    Assert(h1.LowerTri()==hur.LowerTri(),
-           "HermMatrix.LowerTri == HermMatrix<U,R>.LowerTri");
-    Assert(h1.Real()==hur.Real(),"HermMatrix.Real == HermMatrix<U,R>.Real");
-    Assert(h1.SubMatrix(N/2,N,0,N/2)==hur.SubMatrix(N/2,N,0,N/2),
-           "HermMatrix.SubMatrix1 == HermMatrix<U,R>.SubMatrix1");
-    Assert(h1.SubMatrix(0,N/2,N/2,N)==hur.SubMatrix(0,N/2,N/2,N),
-           "HermMatrix.SubMatrix2 == HermMatrix<U,R>.SubMatrix2");
-    Assert(h1.SubSymMatrix(0,N/2)==hur.SubSymMatrix(0,N/2),
-           "HermMatrix.SubSymMatrix == HermMatrix<U,R>.SubSymMatrix");
+    Assert(h1.view()==hur.view(),"HermMatrix.view == HermMatrix<U,R>.view");
+    Assert(h1.transpose()==hur.transpose(),
+           "HermMatrix.transpose == HermMatrix<U,R>.transpose");
+    Assert(h1.conjugate()==hur.conjugate(),
+           "HermMatrix.conjugate == HermMatrix<U,R>.conjugate");
+    Assert(h1.adjoint()==hur.adjoint(),
+           "HermMatrix.adjoint == HermMatrix<U,R>.adjoint");
+    Assert(h1.upperTri()==hur.upperTri(),
+           "HermMatrix.upperTri == HermMatrix<U,R>.upperTri");
+    Assert(h1.lowerTri()==hur.lowerTri(),
+           "HermMatrix.lowerTri == HermMatrix<U,R>.lowerTri");
+    Assert(h1.realPart()==hur.realPart(),
+           "HermMatrix.real == HermMatrix<U,R>.real");
+    Assert(h1.subMatrix(N/2,N,0,N/2)==hur.subMatrix(N/2,N,0,N/2),
+           "HermMatrix.subMatrix1 == HermMatrix<U,R>.subMatrix1");
+    Assert(h1.subMatrix(0,N/2,N/2,N)==hur.subMatrix(0,N/2,N/2,N),
+           "HermMatrix.subMatrix2 == HermMatrix<U,R>.subMatrix2");
+    Assert(h1.subSymMatrix(0,N/2)==hur.subSymMatrix(0,N/2),
+           "HermMatrix.subSymMatrix == HermMatrix<U,R>.subSymMatrix");
 }
 
 template <class T, tmv::UpLoType U, tmv::StorageType S> 
@@ -728,8 +731,8 @@ static void TestBasicSymMatrix_IO()
 #endif
     }
     fout << s1 << std::endl << h1 << std::endl;
-    s1.WriteCompact(fout);
-    h1.WriteCompact(fout);
+    s1.writeCompact(fout);
+    h1.writeCompact(fout);
     fout.close();
 
     tmv::Matrix<std::complex<T>,tmv::RowMajor> xsm1(N,N);

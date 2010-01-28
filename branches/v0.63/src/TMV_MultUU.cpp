@@ -221,9 +221,9 @@ namespace tmv {
 
         const int nb = TRI_MM_BLOCKSIZE;
         const int N = A.size();
-
-        const bool samestorage = ( SameStorage(A,B) &&
-                                   ((A.stepi()>A.stepj()) == (B.stepi()>B.stepj()) )  );
+        const bool samestorage = ( 
+            SameStorage(A,B) &&
+            ((A.stepi()>A.stepj()) == (B.stepi()>B.stepj()) )  );
 
         if (N <= TRI_MM_BLOCKSIZE2) {
             if (A.isrm() && B.isrm()) {
@@ -634,7 +634,7 @@ namespace tmv {
     }
 
     template <class T, class Ta, class Tb> 
-    static void addMultMM(
+    static void AddMultMM(
         T alpha, const GenUpperTriMatrix<Ta>& A,
         const GenUpperTriMatrix<Tb>& B, const UpperTriMatrixView<T>& C)
         // C += alpha * A * B
@@ -657,10 +657,10 @@ namespace tmv {
             } else if (!A.isrm() && !A.iscm()) {
                 if (A.isunit()) {
                     UpperTriMatrix<T,UnitDiag,ColMajor> AA = A;
-                    addMultMM(alpha,AA,B,C);
+                    AddMultMM(alpha,AA,B,C);
                 } else {
                     UpperTriMatrix<T,NonUnitDiag,ColMajor> AA = A;
-                    addMultMM(alpha,AA,B,C);
+                    AddMultMM(alpha,AA,B,C);
                 }
             } else if (B.iscm() && C.iscm()) {
                 CAddMultMM(alpha,A,B,C);
@@ -668,23 +668,23 @@ namespace tmv {
                 TMVAssert(!B.isrm());
                 if (B.isunit()) {
                     UpperTriMatrix<T,UnitDiag,RowMajor> BB = B;
-                    addMultMM(alpha,A,BB,C);
+                    AddMultMM(alpha,A,BB,C);
                 } else {
                     UpperTriMatrix<T,NonUnitDiag,RowMajor> BB = B;
-                    addMultMM(alpha,A,BB,C);
+                    AddMultMM(alpha,A,BB,C);
                 }
             } else if (C.iscm()) { 
                 TMVAssert(!B.iscm());
                 if (B.isunit()) {
                     UpperTriMatrix<T,UnitDiag,ColMajor> BB = B;
-                    addMultMM(alpha,A,BB,C);
+                    AddMultMM(alpha,A,BB,C);
                 } else {
                     UpperTriMatrix<T,NonUnitDiag,ColMajor> BB = B;
-                    addMultMM(alpha,A,BB,C);
+                    AddMultMM(alpha,A,BB,C);
                 }
             } else {
                 UpperTriMatrix<T,NonUnitDiag,ColMajor> CC = C;
-                addMultMM(alpha,A,B,CC.view());
+                AddMultMM(alpha,A,B,CC.view());
                 C = CC;
             }
         } else {
@@ -704,10 +704,10 @@ namespace tmv {
             MatrixView<T> C01 = C.subMatrix(0,k,k,N);
             UpperTriMatrixView<T> C11 = C.subTriMatrix(k,N);
 
-            addMultMM(alpha,A00,B00,C00);
+            AddMultMM(alpha,A00,B00,C00);
             C01 += alpha * A00 * B01;
             C01 += alpha * A01 * B11;
-            addMultMM(alpha,A11,B11,C11);
+            AddMultMM(alpha,A11,B11,C11);
         }
     }
 
@@ -773,12 +773,12 @@ namespace tmv {
                 MultMM<add>(TMV_CONJ(alpha),A.conjugate(),B.conjugate(),
                             C.conjugate());
             } else if (alpha==T(0)) {
-                if (!add) C.zero();
+                if (!add) C.setZero();
             } else if (add) {
                 if (SameStorage(A,C) || SameStorage(B,C))
                     TempMultMM<add>(alpha,A,B,C);
                 else
-                    addMultMM(alpha,A,B,C);
+                    AddMultMM(alpha,A,B,C);
             } else {
                 if (SameStorage(A,C)) {
                     if (SameStorage(B,C)) {

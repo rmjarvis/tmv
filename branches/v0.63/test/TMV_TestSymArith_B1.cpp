@@ -1,9 +1,9 @@
 #define START 0
 
-#include "TMV_Test.h"
-#include "TMV_Test2.h"
 #include "TMV.h"
 #include "TMV_Sym.h"
+#include "TMV_Test.h"
+#include "TMV_Test2.h"
 #include "TMV_TestSymArith.h"
 
 #define NOADDEQ
@@ -30,12 +30,12 @@ void TestSymMatrixArith_B1()
         std::complex<T>(3+i-5*j,2-3*i);
 
     tmv::Vector<T> v = a1.col(0);
-    tmv::VectorView<T> vv = v.View();
+    tmv::VectorView<T> vv = v.view();
     tmv::Vector<std::complex<T> > cv = ca1.col(0);
-    tmv::VectorView<std::complex<T> > cvv = cv.View();
+    tmv::VectorView<std::complex<T> > cvv = cv.view();
 
-    tmv::MatrixView<T> a1v = a1.View();
-    tmv::MatrixView<std::complex<T> > ca1v = ca1.View();
+    tmv::MatrixView<T> a1v = a1.view();
+    tmv::MatrixView<std::complex<T> > ca1v = ca1.view();
 
 #ifdef XTEST
     tmv::Matrix<T> a2(2*N,2*N);
@@ -45,21 +45,21 @@ void TestSymMatrixArith_B1()
         std::complex<T>(1-3*i+6*j,-4+2*j);
 
     tmv::Vector<T> v5(5*N);
-    tmv::VectorView<T> vs = v5.SubVector(0,5*N,5);
+    tmv::VectorView<T> vs = v5.subVector(0,5*N,5);
     vs = v;
     tmv::Vector<std::complex<T> > cv5(5*N);
-    tmv::VectorView<std::complex<T> > cvs = cv5.SubVector(0,5*N,5);
+    tmv::VectorView<std::complex<T> > cvs = cv5.subVector(0,5*N,5);
     cvs = cv;
 
-    tmv::Matrix<T,tmv::RowMajor> a3 = a2.Rows(0,N);
+    tmv::Matrix<T,tmv::RowMajor> a3 = a2.rowRange(0,N);
     tmv::Matrix<std::complex<T> > ca3 = a3 * std::complex<T>(-3,4);
-    tmv::Matrix<T,tmv::RowMajor> a4 = a1.Cols(0,0);
+    tmv::Matrix<T,tmv::RowMajor> a4 = a1.colRange(0,0);
     tmv::Matrix<std::complex<T> > ca4 = a4;
 
-    tmv::MatrixView<T> a3v = a3.View();
-    tmv::MatrixView<T> a4v = a4.View();
-    tmv::MatrixView<std::complex<T> > ca3v = ca3.View();
-    tmv::MatrixView<std::complex<T> > ca4v = ca4.View();
+    tmv::MatrixView<T> a3v = a3.view();
+    tmv::MatrixView<T> a4v = a4.view();
+    tmv::MatrixView<std::complex<T> > ca3v = ca3.view();
+    tmv::MatrixView<std::complex<T> > ca4v = ca4.view();
 
     tmv::Matrix<T> a1x = a1;
     tmv::Matrix<T> a3x = a3;
@@ -85,11 +85,11 @@ void TestSymMatrixArith_B1()
             tmv::HermMatrix<std::complex<T> > csx = csi;
 
             TestMatrixArith456<T>(sx,csx,si,csi,a1v,ca1v,"Herm/SquareM");
-            TestMatrixArith7<T>(sx,csx,si,csi,vv,cvv,vv,cvv.Conjugate(),"Herm");
+            TestMatrixArith7<T>(sx,csx,si,csi,vv,cvv,vv,cvv.conjugate(),"Herm");
 #ifdef XTEST
             TestMatrixArith456<T>(sx,csx,si,csi,a3v,ca3v,"Herm/NonSquareM");
             TestMatrixArith456<T>(sx,csx,si,csi,a4v,ca4v,"Herm/DegenerateM");
-            TestMatrixArith7<T>(sx,csx,si,csi,vs,cvs,vs,cvs.Conjugate(),"Herm");
+            TestMatrixArith7<T>(sx,csx,si,csi,vs,cvs,vs,cvs.conjugate(),"Herm");
 #endif
         } else {
             tmv::SymMatrix<T> sx = si;

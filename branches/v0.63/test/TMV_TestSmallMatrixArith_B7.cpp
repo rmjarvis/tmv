@@ -1,8 +1,7 @@
-#include "TMV_Test.h"
-#include "TMV_Test3.h"
 #include "TMV.h"
 #include "TMV_Small.h"
-
+#include "TMV_Test.h"
+#include "TMV_Test3.h"
 #include "TMV_TestMatrixArith.h"
 
 template <class T, int N> 
@@ -28,19 +27,19 @@ static void DoTestSmallMatrixArith_B7()
 
     tmv::SmallMatrix<T,7,N,tmv::RowMajor> a3;
     for(int i=0;i<7;++i) for(int j=0;j<N;++j) a3(i,j) = T(1-3*i+2*j);
-    a3.SubMatrix(2,N+2,0,N) += a1;
+    a3.subMatrix(2,N+2,0,N) += a1;
     tmv::SmallMatrix<std::complex<T>,7,N,tmv::RowMajor> ca3 = 
         a3*std::complex<T>(1,2);
-    ca3.SubMatrix(2,N+2,0,N) += ca1;
+    ca3.subMatrix(2,N+2,0,N) += ca1;
     if (N > 1) ca3.col(1) *= std::complex<T>(2,1);
-    ca3.row(6).AddToAll(std::complex<T>(-7,2));
+    ca3.row(6).addToAll(std::complex<T>(-7,2));
 
-    tmv::SmallMatrix<T,N,7,tmv::RowMajor> a5 = a3.Transpose();
-    a5.SubMatrix(0,N,1,N+1) -= a1;
-    tmv::SmallMatrix<std::complex<T>,N,7,tmv::RowMajor> ca5 = ca3.Adjoint();
-    ca5.SubMatrix(0,N,1,N+1) -= ca1;
+    tmv::SmallMatrix<T,N,7,tmv::RowMajor> a5 = a3.transpose();
+    a5.subMatrix(0,N,1,N+1) -= a1;
+    tmv::SmallMatrix<std::complex<T>,N,7,tmv::RowMajor> ca5 = ca3.adjoint();
+    ca5.subMatrix(0,N,1,N+1) -= ca1;
     ca5.col(3) *= std::complex<T>(-1,3);
-    ca5.row(0).AddToAll(std::complex<T>(1,9));
+    ca5.row(0).addToAll(std::complex<T>(1,9));
 
     tmv::SmallMatrix<T,7,N> a3x;
     tmv::SmallMatrix<std::complex<T>,7,N> ca3x;

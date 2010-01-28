@@ -1,6 +1,6 @@
+#include "TMV.h"
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
-#include "TMV.h"
 
 template <class T1, class T2> 
 inline bool CanAddEq(
@@ -67,12 +67,12 @@ void TestTriMatrixArith_C1()
 
     tmv::LowerTriMatrix<T,tmv::NonUnitDiag,tmv::RowMajor> l1(a1);
     tmv::LowerTriMatrix<std::complex<T>,tmv::NonUnitDiag,tmv::RowMajor> cl1(ca1);
-    tmv::LowerTriMatrixView<T> l1v = l1.View();
-    tmv::LowerTriMatrixView<std::complex<T> > cl1v = cl1.View();
+    tmv::LowerTriMatrixView<T> l1v = l1.view();
+    tmv::LowerTriMatrixView<std::complex<T> > cl1v = cl1.view();
     tmv::LowerTriMatrix<T,tmv::NonUnitDiag> l1x = l1v;
     tmv::LowerTriMatrix<std::complex<T>,tmv::NonUnitDiag> cl1x = cl1v;
-    tmv::DiagMatrixView<T> d1v = d1.View();
-    tmv::DiagMatrixView<std::complex<T> > cd1v = cd1.View();
+    tmv::DiagMatrixView<T> d1v = d1.view();
+    tmv::DiagMatrixView<std::complex<T> > cd1v = cd1.view();
 
     TestMatrixArith456<T>(l1x,cl1x,l1v,cl1v,d1v,cd1v,"Tri/Diag L");
 #ifdef XTES6T
@@ -92,20 +92,20 @@ void TestTriMatrixArith_C1()
     tmv::LowerTriMatrix<std::complex<T>,tmv::NonUnitDiag,tmv::ColMajor> cl3(ca1);
     tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag,tmv::ColMajor> cl4(ca1);
 
-    tmv::UpperTriMatrixView<T> u1v = u1.View();
-    tmv::UpperTriMatrixView<T> u2v = u2.View();
-    tmv::UpperTriMatrixView<T> u3v = u3.View();
-    tmv::UpperTriMatrixView<T> u4v = u4.View();
-    tmv::LowerTriMatrixView<T> l2v = l2.View();
-    tmv::LowerTriMatrixView<T> l3v = l3.View();
-    tmv::LowerTriMatrixView<T> l4v = l4.View();
-    tmv::UpperTriMatrixView<std::complex<T> > cu1v = cu1.View();
-    tmv::UpperTriMatrixView<std::complex<T> > cu2v = cu2.View();
-    tmv::UpperTriMatrixView<std::complex<T> > cu3v = cu3.View();
-    tmv::UpperTriMatrixView<std::complex<T> > cu4v = cu4.View();
-    tmv::LowerTriMatrixView<std::complex<T> > cl2v = cl2.View();
-    tmv::LowerTriMatrixView<std::complex<T> > cl3v = cl3.View();
-    tmv::LowerTriMatrixView<std::complex<T> > cl4v = cl4.View();
+    tmv::UpperTriMatrixView<T> u1v = u1.view();
+    tmv::UpperTriMatrixView<T> u2v = u2.view();
+    tmv::UpperTriMatrixView<T> u3v = u3.view();
+    tmv::UpperTriMatrixView<T> u4v = u4.view();
+    tmv::LowerTriMatrixView<T> l2v = l2.view();
+    tmv::LowerTriMatrixView<T> l3v = l3.view();
+    tmv::LowerTriMatrixView<T> l4v = l4.view();
+    tmv::UpperTriMatrixView<std::complex<T> > cu1v = cu1.view();
+    tmv::UpperTriMatrixView<std::complex<T> > cu2v = cu2.view();
+    tmv::UpperTriMatrixView<std::complex<T> > cu3v = cu3.view();
+    tmv::UpperTriMatrixView<std::complex<T> > cu4v = cu4.view();
+    tmv::LowerTriMatrixView<std::complex<T> > cl2v = cl2.view();
+    tmv::LowerTriMatrixView<std::complex<T> > cl3v = cl3.view();
+    tmv::LowerTriMatrixView<std::complex<T> > cl4v = cl4.view();
 
     tmv::UpperTriMatrix<T,tmv::NonUnitDiag> u1x = u1v;
     tmv::UpperTriMatrix<T,tmv::UnitDiag> u2x = u2v;

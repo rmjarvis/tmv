@@ -1,10 +1,10 @@
 
 #define START 0
 
-#include "TMV_Test.h"
-#include "TMV_Test2.h"
 #include "TMV.h"
 #include "TMV_Band.h"
+#include "TMV_Test.h"
+#include "TMV_Test2.h"
 #include "TMV_TestBandArith.h"
 
 #include "TMV_TestMatrixDivArith.h"
@@ -22,7 +22,7 @@ void TestBandDiv_C2(tmv::DivType dt)
 
     tmv::Matrix<T> a1(N,N);
     for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) a1(i,j) = T(1-3*i+j);
-    a1.diag().AddToAll(T(10)*N);
+    a1.diag().addToAll(T(10)*N);
     a1 /= T(10);
     tmv::Matrix<std::complex<T> > ca1 = a1 * std::complex<T>(3,-4);
 
@@ -39,7 +39,7 @@ void TestBandDiv_C2(tmv::DivType dt)
         tmv::BandMatrix<T> bx = bi;
         tmv::BandMatrix<std::complex<T> > cbx = cbi;
 
-        TestMatrixDivArith1<T>(dt,bx,cbx,d.View(),bi,cd.View(),cbi,
+        TestMatrixDivArith1<T>(dt,bx,cbx,d.view(),bi,cd.view(),cbi,
                                "Band/DiagMatrix");
     }
     for(size_t i=0;i<B.size();++i) delete B[i];

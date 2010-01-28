@@ -53,7 +53,7 @@ namespace tmv {
     //
 
     template <bool rm, bool a1, bool ca, class T1, class T2, class T3> 
-    static void doRowAddMM(
+    static void DoRowAddMM(
         const T1 alpha, const GenUpperTriMatrix<T2>& A, 
         const UpperTriMatrixView<T3>& B)
     {
@@ -94,18 +94,18 @@ namespace tmv {
     {
         if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) 
             if (TMV_REAL(alpha) == TMV_RealType(T)(1))
-                if (A.isconj()) doRowAddMM<rm,true,true>(TMV_REAL(alpha),A,B); 
-                else doRowAddMM<rm,true,false>(TMV_REAL(alpha),A,B);
+                if (A.isconj()) DoRowAddMM<rm,true,true>(TMV_REAL(alpha),A,B); 
+                else DoRowAddMM<rm,true,false>(TMV_REAL(alpha),A,B);
             else
-                if (A.isconj()) doRowAddMM<rm,false,true>(TMV_REAL(alpha),A,B); 
-                else doRowAddMM<rm,false,false>(TMV_REAL(alpha),A,B);
+                if (A.isconj()) DoRowAddMM<rm,false,true>(TMV_REAL(alpha),A,B); 
+                else DoRowAddMM<rm,false,false>(TMV_REAL(alpha),A,B);
         else
-            if (A.isconj()) doRowAddMM<rm,false,true>(alpha,A,B); 
-            else doRowAddMM<rm,false,false>(alpha,A,B);
+            if (A.isconj()) DoRowAddMM<rm,false,true>(alpha,A,B); 
+            else DoRowAddMM<rm,false,false>(alpha,A,B);
     }
 
     template <bool cm, bool a1, bool ca, class T1, class T2, class T3> 
-    static void doColAddMM(
+    static void DoColAddMM(
         const T1 alpha, const GenUpperTriMatrix<T2>& A, 
         const UpperTriMatrixView<T3>& B)
     {
@@ -141,18 +141,18 @@ namespace tmv {
     {
         if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) 
             if (TMV_REAL(alpha) == TMV_RealType(T)(1))
-                if (A.isconj()) doColAddMM<cm,true,true>(TMV_REAL(alpha),A,B); 
-                else doColAddMM<cm,true,false>(TMV_REAL(alpha),A,B);
+                if (A.isconj()) DoColAddMM<cm,true,true>(TMV_REAL(alpha),A,B); 
+                else DoColAddMM<cm,true,false>(TMV_REAL(alpha),A,B);
             else
-                if (A.isconj()) doColAddMM<cm,false,true>(TMV_REAL(alpha),A,B); 
-                else doColAddMM<cm,false,false>(TMV_REAL(alpha),A,B);
+                if (A.isconj()) DoColAddMM<cm,false,true>(TMV_REAL(alpha),A,B); 
+                else DoColAddMM<cm,false,false>(TMV_REAL(alpha),A,B);
         else
-            if (A.isconj()) doColAddMM<cm,false,true>(alpha,A,B); 
-            else doColAddMM<cm,false,false>(alpha,A,B);
+            if (A.isconj()) DoColAddMM<cm,false,true>(alpha,A,B); 
+            else DoColAddMM<cm,false,false>(alpha,A,B);
     }
 
     template <class T, class Ta> 
-    static inline void doAddMM(const T alpha,
+    static inline void DoAddMM(const T alpha,
               const GenUpperTriMatrix<Ta>& A, const UpperTriMatrixView<T>& B)
     { 
         TMVAssert(!B.isunit());
@@ -164,7 +164,7 @@ namespace tmv {
         if (A.isunit()) {
             B.diag().addToAll(alpha);
             if (A.size() > 1)
-                doAddMM(alpha,A.offDiag(),B.offDiag());
+                DoAddMM(alpha,A.offDiag(),B.offDiag());
         } else {
             if (A.isrm() && B.isrm()) RowAddMM<true>(alpha,A,B); 
             else if (A.iscm() && B.iscm()) ColAddMM<true>(alpha,A,B); 
@@ -193,14 +193,14 @@ namespace tmv {
                 if (SameStorage(A,B)) {
                     if (B.isrm()) {
                         UpperTriMatrix<Ta,NonUnitDiag,RowMajor> tempA = alpha*A;
-                        doAddMM(T(1),tempA,B);
+                        DoAddMM(T(1),tempA,B);
                     } else {
                         UpperTriMatrix<Ta,NonUnitDiag,ColMajor> tempA = alpha*A;
-                        doAddMM(T(1),tempA,B);
+                        DoAddMM(T(1),tempA,B);
                     }
                 } 
                 else {
-                    doAddMM(alpha,A,B);
+                    DoAddMM(alpha,A,B);
                 }
             }
         }

@@ -151,7 +151,7 @@
 //
 // Modifying Functions
 //
-//    Matrix& zero()
+//    Matrix& setZero()
 //        Sets all elements to 0
 //
 //    Matrix& setAllTo(T x)
@@ -255,8 +255,8 @@
 //    MatrixView rowRange(int i1, int i2)
 //        This is shorthand for subMatrix(i1,i2,0,m.rowsize())
 //
-//    MatrixView real()
-//    MatrixView imag()
+//    MatrixView realPart()
+//    MatrixView imagPart()
 //        Returns a view to the real/imag elements of a complex Matrix.
 //
 //    MatrixView view()
@@ -759,7 +759,7 @@ namespace tmv {
                 stepi(),stepj(),stor(),ct(),(isrm()&&ls())?1:0);
         }
 
-        inline const_real_type real() const
+        inline const_real_type realPart() const
         {
             return const_real_type(
                 reinterpret_cast<const RT*>(cptr()),colsize(),rowsize(),
@@ -768,7 +768,7 @@ namespace tmv {
                 isReal(T()) ? stor() : NoMajor,NonConj);
         }
 
-        inline const_real_type imag() const
+        inline const_real_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             return const_real_type(
@@ -800,9 +800,9 @@ namespace tmv {
         TMV_DEPRECATED(const_view_type Rows(int i1, int i2) const)
         { return rowRange(i1,i2); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
 
 
         //
@@ -1343,11 +1343,11 @@ namespace tmv {
             return base::rowRange(i1-1,i2);
         }
 
-        inline const_real_type real() const
-        { return base::real(); }
+        inline const_real_type realPart() const
+        { return base::realPart(); }
 
-        inline const_real_type imag() const
-        { return base::imag(); }
+        inline const_real_type imagPart() const
+        { return base::imagPart(); }
 
         TMV_DEPRECATED(const_view_type SubMatrix(
                 int i1, int i2, int j1, int j2) const)
@@ -1373,9 +1373,9 @@ namespace tmv {
         TMV_DEPRECATED(const_view_type Rows(int i1, int i2) const)
         { return rowRange(i1,i2); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
 
 
         //
@@ -1693,7 +1693,7 @@ namespace tmv {
         // Modifying Functions
         //
 
-        const type& zero() const;
+        const type& setZero() const;
 
         const type& setAllTo(const T& x) const;
 
@@ -1747,7 +1747,7 @@ namespace tmv {
         { return reversePermuteCols(p,0,rowsize()); }
 
         TMV_DEPRECATED(const type& Zero() const)
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(const type& SetAllTo(const T& x) const)
         { return setAllTo(x); }
         TMV_DEPRECATED(const type& Clip(RT thresh) const)
@@ -1876,7 +1876,7 @@ namespace tmv {
                 TMV_FIRSTLAST);
         }
 
-        inline real_type real() const
+        inline real_type realPart() const
         {
             return real_type(
                 reinterpret_cast<RT*>(ptr()),colsize(),rowsize(),
@@ -1890,7 +1890,7 @@ namespace tmv {
             );
         }
 
-        inline real_type imag() const
+        inline real_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             return real_type(
@@ -1925,9 +1925,9 @@ namespace tmv {
         TMV_DEPRECATED(view_type Rows(int i1, int i2) const)
         { return rowRange(i1,i2); }
         TMV_DEPRECATED(real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
 
 
         //
@@ -2191,8 +2191,8 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline const type& zero() const 
-        { c_type::zero(); return *this; }
+        inline const type& setZero() const 
+        { c_type::setZero(); return *this; }
 
         inline const type& setAllTo(const T& x) const
         { c_type::setAllTo(x); return *this; }
@@ -2262,7 +2262,7 @@ namespace tmv {
         { transpose().reversePermuteRows(p); return *this; }
 
         TMV_DEPRECATED(const type& Zero() const)
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(const type& SetAllTo(const T& x) const)
         { return setAllTo(x); }
         TMV_DEPRECATED(const type& Clip(RT thresh) const)
@@ -2367,11 +2367,11 @@ namespace tmv {
             return c_type::rowRange(i1-1,i2);
         }
 
-        inline real_type real() const
-        { return c_type::real(); }
+        inline real_type realPart() const
+        { return c_type::realPart(); }
 
-        inline real_type imag() const
-        { return c_type::imag(); }
+        inline real_type imagPart() const
+        { return c_type::imagPart(); }
 
         TMV_DEPRECATED(view_type SubMatrix(
                 int i1, int i2, int j1, int j2) const)
@@ -2395,9 +2395,9 @@ namespace tmv {
         TMV_DEPRECATED(view_type Rows(int i1, int i2) const)
         { return rowRange(i1,i2); }
         TMV_DEPRECATED(real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
 
 
         //
@@ -2955,8 +2955,8 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline type& zero() 
-        { linearView().zero(); return *this; }
+        inline type& setZero() 
+        { linearView().setZero(); return *this; }
 
         inline type& setAllTo(const T& x) 
         { linearView().setAllTo(x); return *this; }
@@ -2973,7 +2973,7 @@ namespace tmv {
         inline type& setToIdentity(const T& x=T(1)) 
         { 
             TMVAssert(colsize() == rowsize());
-            zero(); diag().setAllTo(x);
+            setZero(); diag().setAllTo(x);
             return *this; 
         }
 
@@ -3028,7 +3028,7 @@ namespace tmv {
         { view().reversePermuteCols(p); return *this; }
 
         TMV_DEPRECATED(type& Zero())
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(type& SetAllTo(const T& x))
         { return setAllTo(x); }
         TMV_DEPRECATED(type& Clip(RT thresh))
@@ -3178,7 +3178,7 @@ namespace tmv {
                 stepi(),stepj(),S,NonConj,isrm()?1:0);
         }
 
-        inline const_real_type real() const
+        inline const_real_type realPart() const
         {
             return const_real_type(
                 reinterpret_cast<const RT*>(itsm.get()),
@@ -3188,7 +3188,7 @@ namespace tmv {
                 isReal(T()) ? S : NoMajor,NonConj);
         }
 
-        inline const_real_type imag() const
+        inline const_real_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             return const_real_type(
@@ -3312,7 +3312,7 @@ namespace tmv {
                 TMV_FIRSTLAST);
         }
 
-        inline real_type real() 
+        inline real_type realPart() 
         {
             return real_type(
                 reinterpret_cast<RT*>(ptr()),
@@ -3327,7 +3327,7 @@ namespace tmv {
             );
         }
 
-        inline real_type imag() 
+        inline real_type imagPart() 
         {
             TMVAssert(isComplex(T()));
             return real_type(
@@ -3365,9 +3365,9 @@ namespace tmv {
         TMV_DEPRECATED(const_view_type Rows(int i1, int i2) const)
         { return rowRange(i1,i2); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(view_type SubMatrix(int i1, int i2, int j1, int j2))
         { return subMatrix(i1,i2,j1,j2); }
         TMV_DEPRECATED(view_type SubMatrix(
@@ -3389,9 +3389,9 @@ namespace tmv {
         TMV_DEPRECATED(view_type Rows(int i1, int i2))
         { return rowRange(i1,i2); }
         TMV_DEPRECATED(real_type Real())
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag())
-        { return imag(); }
+        { return imagPart(); }
 
 
         //

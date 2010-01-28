@@ -1,8 +1,7 @@
-#include "TMV_Test.h"
-#include "TMV_Test3.h"
 #include "TMV.h"
 #include "TMV_Small.h"
-
+#include "TMV_Test.h"
+#include "TMV_Test3.h"
 #include "TMV_TestMatrixArith.h"
 
 template <class T,int N> 
@@ -36,7 +35,7 @@ static void DoTestSmallMatrixArith_A1()
     TestMatrixArith1<T>(a1x,ca1x,a1,ca1,"Square");
 
 #ifdef XTEST
-    tmv::SmallMatrix<T,N,N,tmv::ColMajor> a2 = a1.Transpose();
+    tmv::SmallMatrix<T,N,N,tmv::ColMajor> a2 = a1.transpose();
     if (N > 1) a2.row(1) *= T(3.1);
     if (N > 2) a2.col(2) -= tmv::SmallVector<T,N>(4.9);
     tmv::SmallMatrix<std::complex<T>,N,N,tmv::ColMajor> ca2 = ca1;

@@ -1,4 +1,3 @@
-// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 template <class T> inline void MakeSymBandList(
     std::vector<tmv::SymBandMatrixView<T> >& s,
     std::vector<tmv::SymBandMatrixView<std::complex<T> > >& cs,
@@ -25,14 +24,14 @@ template <class T> inline void MakeSymBandList(
       std::complex<T>(1+3*i+6*j,4+2*j);
     a1 /= T(N*N);
     a2 /= T(N*N);
-    a1.diag().AddToAll(T(1));
-    a2.diag().AddToAll(T(1));
+    a1.diag().addToAll(T(1));
+    a2.diag().addToAll(T(1));
     for(int i=0;i<N;++i) a1.diag()(i) += T(i);
     for(int i=0;i<2*N;++i) a2.diag()(i) += T(i);
     ca1 /= T(N*N);
     ca2 /= T(N*N);
-    ca1.diag().AddToAll(T(1));
-    ca2.diag().AddToAll(T(1));
+    ca1.diag().addToAll(T(1));
+    ca2.diag().addToAll(T(1));
     for(int i=0;i<N;++i) ca1.diag()(i) += T(i);
     for(int i=0;i<2*N;++i) ca2.diag()(i) += T(i);
     for (int i=0; i<N; ++i) v1(i) = T(16+3*i);
@@ -49,15 +48,15 @@ template <class T> inline void MakeSymBandList(
     a1 /= T(N*N);
     a1 /= T(N);
     a2 /= T(N);
-    a1.diag(0,2,4).Zero();
-    a2.diag(0,2,4).Zero();
+    a1.diag(0,2,4).setZero();
+    a2.diag(0,2,4).setZero();
     a1(4,0) = a1(0,4) = T(50);
-    a1.diag(-1,6,9).AddToAll(T(10));
-    a2.diag(-1,6,9).AddToAll(T(10));
-    a1.diag(1,6,9).AddToAll(T(10));
-    a2.diag(1,6,9).AddToAll(T(10));
-    a1.row(9,0,5).AddToAll(T(10));
-    a2.row(9,0,5).AddToAll(T(10));
+    a1.diag(-1,6,9).addToAll(T(10));
+    a2.diag(-1,6,9).addToAll(T(10));
+    a1.diag(1,6,9).addToAll(T(10));
+    a2.diag(1,6,9).addToAll(T(10));
+    a1.row(9,0,5).addToAll(T(10));
+    a2.row(9,0,5).addToAll(T(10));
     a1(3,3) = T(0);
     a2(3,3) = T(0);
     if (N > 10) {
@@ -66,15 +65,15 @@ template <class T> inline void MakeSymBandList(
     }
     ca1 /= T(N);
     ca2 /= T(N);
-    ca1.diag(0,2,4).Zero();
-    ca2.diag(0,2,4).Zero();
+    ca1.diag(0,2,4).setZero();
+    ca2.diag(0,2,4).setZero();
     ca1(4,0) = a1(0,4) = T(50);
-    ca1.diag(-1,6,9).AddToAll(T(10));
-    ca2.diag(-1,6,9).AddToAll(T(10));
-    ca1.diag(1,6,9).AddToAll(T(10));
-    ca2.diag(1,6,9).AddToAll(T(10));
-    ca1.row(9,0,5).AddToAll(T(10));
-    ca2.row(9,0,5).AddToAll(T(10));
+    ca1.diag(-1,6,9).addToAll(T(10));
+    ca2.diag(-1,6,9).addToAll(T(10));
+    ca1.diag(1,6,9).addToAll(T(10));
+    ca2.diag(1,6,9).addToAll(T(10));
+    ca1.row(9,0,5).addToAll(T(10));
+    ca2.row(9,0,5).addToAll(T(10));
     ca1(3,3) = T(0);
     ca2(3,3) = T(0);
     if (N > 10) {
@@ -93,23 +92,23 @@ template <class T> inline void MakeSymBandList(
     for (int i=0; i<2*N; ++i) for (int j=0; j<2*N; ++j) ca2(i,j) =
       std::complex<T>(-6-3*i+6*j,-4+2*j);
     a1 /= T(N*N);
-    a1.row(2).Zero();
-    a1.col(2).Zero();
+    a1.row(2).setZero();
+    a1.col(2).setZero();
     a1.row(4) = a1.row(5);
     a1.col(4) = a1.col(5);
     a1(4,5) = a1(5,4) = a1(5,5) = a1(4,4);
-    a2.row(2).Zero();
-    a2.col(2).Zero();
+    a2.row(2).setZero();
+    a2.col(2).setZero();
     a2.row(4) = a2.row(5);
     a2.col(4) = a2.col(5);
     a2(4,5) = a2(5,4) = a2(5,5) = a2(4,4);
-    ca1.row(2).Zero();
-    ca1.col(2).Zero();
+    ca1.row(2).setZero();
+    ca1.col(2).setZero();
     ca1.row(4) = ca1.row(5);
     ca1.col(4) = ca1.col(5);
     ca1(4,5) = ca1(5,4) = ca1(5,5) = ca1(4,4);
-    ca2.row(2).Zero();
-    ca2.col(2).Zero();
+    ca2.row(2).setZero();
+    ca2.col(2).setZero();
     ca2.row(4) = ca2.row(5);
     ca2.col(4) = ca2.col(5);
     ca2(4,5) = ca2(5,4) = ca2(5,5) = ca2(4,4);
@@ -117,13 +116,13 @@ template <class T> inline void MakeSymBandList(
     for (int i=0; i<N-1; ++i) v2(i) = T(-6+i);
     for (int i=0; i<N; ++i) cv1(i) = std::complex<T>(18-3*i,i-6);
     for (int i=0; i<N-1; ++i) cv2(i) = std::complex<T>(2*i-3,-6+i);
-    v1.SubVector(N/2,3*N/4).Zero();
-    v2.SubVector(N/2,3*N/4).Zero();
-    cv1.SubVector(N/2,3*N/4).Zero();
-    cv2.SubVector(N/2,3*N/4).Zero();
+    v1.subVector(N/2,3*N/4).setZero();
+    v2.subVector(N/2,3*N/4).setZero();
+    cv1.subVector(N/2,3*N/4).setZero();
+    cv2.subVector(N/2,3*N/4).setZero();
   }
   tmv::Vector<std::complex<T> > cv1r = cv1;
-  cv1r.Imag().Zero();
+  cv1r.imagPart().setZero();
 
   tmv::SymBandMatrix<T,tmv::Upper,tmv::RowMajor>* SUR = new
   tmv::SymBandMatrix<T,tmv::Upper,tmv::RowMajor>(a1,3);
@@ -133,10 +132,10 @@ template <class T> inline void MakeSymBandList(
   tmv::SymBandMatrix<std::complex<T>,tmv::Upper,tmv::RowMajor>(ca1,3);
   tmv::HermBandMatrix<std::complex<T>,tmv::Upper,tmv::RowMajor>* CHUR = new
   tmv::HermBandMatrix<std::complex<T>,tmv::Upper,tmv::RowMajor>(ca1,3);
-  s.push_back(SUR->View());
-  s.push_back(HUR->View());
-  cs.push_back(CSUR->View());
-  cs.push_back(CHUR->View());
+  s.push_back(SUR->view());
+  s.push_back(HUR->view());
+  cs.push_back(CSUR->view());
+  cs.push_back(CHUR->view());
   B.push_back(SUR);
   B.push_back(HUR);
   CB.push_back(CSUR);
@@ -150,10 +149,10 @@ template <class T> inline void MakeSymBandList(
   tmv::SymBandMatrix<std::complex<T>,tmv::Upper,tmv::ColMajor>(ca1,3);
   tmv::HermBandMatrix<std::complex<T>,tmv::Upper,tmv::ColMajor>* CHUC = new
   tmv::HermBandMatrix<std::complex<T>,tmv::Upper,tmv::ColMajor>(ca1,3);
-  s.push_back(SUC->View());
-  s.push_back(HUC->View());
-  cs.push_back(CSUC->View());
-  cs.push_back(CHUC->View());
+  s.push_back(SUC->view());
+  s.push_back(HUC->view());
+  cs.push_back(CSUC->view());
+  cs.push_back(CHUC->view());
   B.push_back(SUC);
   B.push_back(HUC);
   CB.push_back(CSUC);
@@ -167,10 +166,10 @@ template <class T> inline void MakeSymBandList(
   tmv::SymBandMatrix<std::complex<T>,tmv::Upper,tmv::DiagMajor>(ca1,3);
   tmv::HermBandMatrix<std::complex<T>,tmv::Upper,tmv::DiagMajor>* CHUD1 = new
   tmv::HermBandMatrix<std::complex<T>,tmv::Upper,tmv::DiagMajor>(ca1,3);
-  s.push_back(SUD1->View());
-  s.push_back(HUD1->View());
-  cs.push_back(CSUD1->View());
-  cs.push_back(CHUD1->View());
+  s.push_back(SUD1->view());
+  s.push_back(HUD1->view());
+  cs.push_back(CSUD1->view());
+  cs.push_back(CHUD1->view());
   B.push_back(SUD1);
   B.push_back(HUD1);
   CB.push_back(CSUD1);
@@ -188,10 +187,10 @@ template <class T> inline void MakeSymBandList(
   tmv::HermBandMatrix<std::complex<T>,tmv::Upper,tmv::DiagMajor>* CHUD2 = new
   tmv::HermBandMatrix<std::complex<T>,tmv::Upper,tmv::DiagMajor>(
       tmv::HermTriDiagMatrix(v1,cv2,tmv::Upper));
-  s.push_back(SUD2->View());
-  s.push_back(HUD2->View());
-  cs.push_back(CSUD2->View());
-  cs.push_back(CHUD2->View());
+  s.push_back(SUD2->view());
+  s.push_back(HUD2->view());
+  cs.push_back(CSUD2->view());
+  cs.push_back(CHUD2->view());
   B.push_back(SUD2);
   B.push_back(HUD2);
   CB.push_back(CSUD2);
@@ -209,10 +208,10 @@ template <class T> inline void MakeSymBandList(
   tmv::HermBandMatrix<std::complex<T>,tmv::Upper,tmv::DiagMajor>* CHUD3 = new
   tmv::HermBandMatrix<std::complex<T>,tmv::Upper,tmv::DiagMajor>(
       DiagMatrixViewOf(cv1));
-  s.push_back(SUD3->View());
-  s.push_back(HUD3->View());
-  cs.push_back(CSUD3->View());
-  cs.push_back(CHUD3->View());
+  s.push_back(SUD3->view());
+  s.push_back(HUD3->view());
+  cs.push_back(CSUD3->view());
+  cs.push_back(CHUD3->view());
   B.push_back(SUD3);
   B.push_back(HUD3);
   CB.push_back(CSUD3);
@@ -227,10 +226,10 @@ template <class T> inline void MakeSymBandList(
   tmv::SymBandMatrix<std::complex<T>,tmv::Lower,tmv::ColMajor>(ca1,7);
   tmv::HermBandMatrix<std::complex<T>,tmv::Lower,tmv::ColMajor>* CHLC = new
   tmv::HermBandMatrix<std::complex<T>,tmv::Lower,tmv::ColMajor>(ca1,7);
-  s.push_back(SLC->View());
-  s.push_back(HLC->View());
-  cs.push_back(CSLC->View());
-  cs.push_back(CHLC->View());
+  s.push_back(SLC->view());
+  s.push_back(HLC->view());
+  cs.push_back(CSLC->view());
+  cs.push_back(CHLC->view());
   B.push_back(SLC);
   B.push_back(HLC);
   CB.push_back(CSLC);
@@ -244,10 +243,10 @@ template <class T> inline void MakeSymBandList(
   tmv::SymBandMatrix<std::complex<T>,tmv::Lower,tmv::RowMajor>(ca1,7);
   tmv::HermBandMatrix<std::complex<T>,tmv::Lower,tmv::RowMajor>* CHLR = new
   tmv::HermBandMatrix<std::complex<T>,tmv::Lower,tmv::RowMajor>(ca1,7);
-  s.push_back(SLR->View());
-  s.push_back(HLR->View());
-  cs.push_back(CSLR->View());
-  cs.push_back(CHLR->View());
+  s.push_back(SLR->view());
+  s.push_back(HLR->view());
+  cs.push_back(CSLR->view());
+  cs.push_back(CHLR->view());
   B.push_back(SLR);
   B.push_back(HLR);
   CB.push_back(CSLR);
@@ -261,10 +260,10 @@ template <class T> inline void MakeSymBandList(
   tmv::SymBandMatrix<std::complex<T>,tmv::Lower,tmv::DiagMajor>(ca1,7);
   tmv::HermBandMatrix<std::complex<T>,tmv::Lower,tmv::DiagMajor>* CHLD1 = new
   tmv::HermBandMatrix<std::complex<T>,tmv::Lower,tmv::DiagMajor>(ca1,7);
-  s.push_back(SLD1->View());
-  s.push_back(HLD1->View());
-  cs.push_back(CSLD1->View());
-  cs.push_back(CHLD1->View());
+  s.push_back(SLD1->view());
+  s.push_back(HLD1->view());
+  cs.push_back(CSLD1->view());
+  cs.push_back(CHLD1->view());
   B.push_back(SLD1);
   B.push_back(HLD1);
   CB.push_back(CSLD1);
@@ -282,10 +281,10 @@ template <class T> inline void MakeSymBandList(
   tmv::HermBandMatrix<std::complex<T>,tmv::Lower,tmv::DiagMajor>* CHLD2 = new
   tmv::HermBandMatrix<std::complex<T>,tmv::Lower,tmv::DiagMajor>(
       tmv::HermTriDiagMatrix(cv1r,cv2,tmv::Lower));
-  s.push_back(SLD2->View());
-  s.push_back(HLD2->View());
-  cs.push_back(CSLD2->View());
-  cs.push_back(CHLD2->View());
+  s.push_back(SLD2->view());
+  s.push_back(HLD2->view());
+  cs.push_back(CSLD2->view());
+  cs.push_back(CHLD2->view());
   B.push_back(SLD2);
   B.push_back(HLD2);
   CB.push_back(CSLD2);
@@ -303,10 +302,10 @@ template <class T> inline void MakeSymBandList(
   tmv::HermBandMatrix<std::complex<T>,tmv::Lower,tmv::ColMajor>* CHLC2 = new
   tmv::HermBandMatrix<std::complex<T>,tmv::Lower,tmv::ColMajor>(
       DiagMatrixViewOf(cv1));
-  s.push_back(SLC2->View());
-  s.push_back(SLC2->View());
-  cs.push_back(CSLC2->View());
-  cs.push_back(CSLC2->View());
+  s.push_back(SLC2->view());
+  s.push_back(SLC2->view());
+  cs.push_back(CSLC2->view());
+  cs.push_back(CSLC2->view());
   B.push_back(SLC2);
   B.push_back(HLC2);
   CB.push_back(CSLC2);
@@ -316,11 +315,11 @@ template <class T> inline void MakeSymBandList(
   tmv::Matrix<T>* a2b = new tmv::Matrix<T>(a2);
   tmv::Matrix<std::complex<T> >* ca2a = new tmv::Matrix<std::complex<T> >(ca2);
   tmv::Matrix<std::complex<T> >* ca2b = new tmv::Matrix<std::complex<T> >(ca2);
-  ca2b->diag().Imag().Zero();
-  s.push_back(SymBandMatrixViewOf(*a2a,tmv::Upper,6).SubSymBandMatrix(0,2*N,3,2));
-  s.push_back(HermBandMatrixViewOf(*a2b,tmv::Upper,6).SubSymBandMatrix(0,2*N,3,2));
-  cs.push_back(SymBandMatrixViewOf(*ca2a,tmv::Upper,6).SubSymBandMatrix(0,2*N,3,2));
-  cs.push_back(HermBandMatrixViewOf(*ca2b,tmv::Upper,6).SubSymBandMatrix(0,2*N,3,2));
+  ca2b->diag().imagPart().setZero();
+  s.push_back(SymBandMatrixViewOf(*a2a,tmv::Upper,6).subSymBandMatrix(0,2*N,3,2));
+  s.push_back(HermBandMatrixViewOf(*a2b,tmv::Upper,6).subSymBandMatrix(0,2*N,3,2));
+  cs.push_back(SymBandMatrixViewOf(*ca2a,tmv::Upper,6).subSymBandMatrix(0,2*N,3,2));
+  cs.push_back(HermBandMatrixViewOf(*ca2b,tmv::Upper,6).subSymBandMatrix(0,2*N,3,2));
   B.push_back(a2a);
   B.push_back(a2b);
   CB.push_back(ca2a);

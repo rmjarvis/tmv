@@ -73,7 +73,7 @@ namespace tmv {
         // if all of x other than first element are 0, H is identity
         if (normsqx == RT(0) && TMV_IMAG(x0) == RT(0)) {
             // Set them all to x explicitly in case underflow let to the 0.
-            x.zero();
+            x.setZero();
             return 0; 
             // Determinant in this case is 1 (H = I), so leave det alone.
         }
@@ -201,7 +201,7 @@ namespace tmv {
         Matrix<T> H = T(1)-beta*(vv^vv.conjugate());
         Matrix<T> Hm = H * m0;
         Matrix<T> Hm2 = m;
-        Hm2.col(0,1,vv.size()).zero();
+        Hm2.col(0,1,vv.size()).setZero();
         if (Norm(Hm-Hm2) > 0.001*Norm(m0)) {
             cerr<<"Householder Reflect\n";
             cerr<<"Input: m0 = "<<m0<<endl;
@@ -489,7 +489,7 @@ namespace tmv {
 #endif
 
         if (beta == T(0)) {
-            Z.col(N,0,N+1).zero();
+            Z.col(N,0,N+1).setZero();
         } else if (N == 0) {
 #ifdef TMVFLDEBUG
             TMVAssert(Z.ptr() >= Z.first);

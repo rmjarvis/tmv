@@ -118,7 +118,7 @@ namespace tmv {
             if (A.isconj()) {
                 MultXM(TMV_CONJ(alpha),A.conjugate());
             } else if (alpha == T(0)) {
-                A.zero();
+                A.setZero();
             } else if (A.isrm()) {
                 if (TMV_IMAG(alpha) == TMV_RealType(T)(0))
                     RowMajorMultXM(TMV_REAL(alpha),A);

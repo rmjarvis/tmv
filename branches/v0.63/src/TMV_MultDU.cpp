@@ -50,7 +50,7 @@ using std::endl;
 namespace tmv {
 
     template <bool a1, bool ca, class T, class T1,  class Ta> 
-    static void doMultEqMM(
+    static void DoMultEqMM(
         const T1 alpha, const GenDiagMatrix<Ta>& A,
         const UpperTriMatrixView<T>& B)
     {
@@ -83,9 +83,9 @@ namespace tmv {
             UpperTriMatrixView<T> B11 = B.subTriMatrix(k,N);
             MatrixView<T> B01 = B.subMatrix(0,k,k,N);
 
-            doMultEqMM<a1,ca>(alpha,A00,B00);
+            DoMultEqMM<a1,ca>(alpha,A00,B00);
             B01 = alpha * A00 * B01;
-            doMultEqMM<a1,ca>(alpha,A11,B11);
+            DoMultEqMM<a1,ca>(alpha,A11,B11);
         }
     }
 
@@ -111,19 +111,19 @@ namespace tmv {
         else if (A.size() > 0) {
             if (alpha == T(1)) 
                 if (A.diag().isconj())
-                    doMultEqMM<true,true>(TMV_REAL(alpha),A,B);
+                    DoMultEqMM<true,true>(TMV_REAL(alpha),A,B);
                 else
-                    doMultEqMM<true,false>(TMV_REAL(alpha),A,B);
+                    DoMultEqMM<true,false>(TMV_REAL(alpha),A,B);
             else if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) 
                 if (A.diag().isconj())
-                    doMultEqMM<false,true>(TMV_REAL(alpha),A,B);
+                    DoMultEqMM<false,true>(TMV_REAL(alpha),A,B);
                 else
-                    doMultEqMM<false,false>(TMV_REAL(alpha),A,B);
+                    DoMultEqMM<false,false>(TMV_REAL(alpha),A,B);
             else 
                 if (A.diag().isconj())
-                    doMultEqMM<false,true>(alpha,A,B);
+                    DoMultEqMM<false,true>(alpha,A,B);
                 else
-                    doMultEqMM<false,false>(alpha,A,B);
+                    DoMultEqMM<false,false>(alpha,A,B);
         }
 
 #ifdef XDEBUG
@@ -139,7 +139,7 @@ namespace tmv {
     }
 
     template <bool a1, bool ca, bool ub, bool cb, class T, class T1, class Ta, class Tb> 
-    static void doAddMultMM(
+    static void DoAddMultMM(
         const T1 alpha, const GenDiagMatrix<Ta>& A,
         const GenUpperTriMatrix<Tb>& B, const UpperTriMatrixView<T>& C)
     {
@@ -183,27 +183,27 @@ namespace tmv {
             UpperTriMatrixView<T> C11 = C.subTriMatrix(k,N);
             MatrixView<T> C01 = C.subMatrix(0,k,k,N);
 
-            doAddMultMM<a1,ca,ub,cb>(alpha,A00,B00,C00);
+            DoAddMultMM<a1,ca,ub,cb>(alpha,A00,B00,C00);
             C01 += alpha * A00 * B01;
-            doAddMultMM<a1,ca,ub,cb>(alpha,A11,B11,C11);
+            DoAddMultMM<a1,ca,ub,cb>(alpha,A11,B11,C11);
         }
     } 
 
     template <bool a1, bool ca, class T, class T1, class Ta, class Tb> 
-    static inline void doAddMultMMa(
+    static inline void DoAddMultMMa(
         const T1 alpha, const GenDiagMatrix<Ta>& A,
         const GenUpperTriMatrix<Tb>& B, const UpperTriMatrixView<T>& C)
     {
         if (B.isunit())
-            if (B.isconj()) doAddMultMM<a1,ca,true,true>(alpha,A,B,C);
-            else doAddMultMM<a1,ca,false,true>(alpha,A,B,C);
+            if (B.isconj()) DoAddMultMM<a1,ca,true,true>(alpha,A,B,C);
+            else DoAddMultMM<a1,ca,false,true>(alpha,A,B,C);
         else
-            if (B.isconj()) doAddMultMM<a1,ca,true,false>(alpha,A,B,C);
-            else doAddMultMM<a1,ca,false,false>(alpha,A,B,C);
+            if (B.isconj()) DoAddMultMM<a1,ca,true,false>(alpha,A,B,C);
+            else DoAddMultMM<a1,ca,false,false>(alpha,A,B,C);
     }
 
     template <class T, class Ta, class Tb> 
-    static void addMultMM(
+    static void AddMultMM(
         const T alpha, const GenDiagMatrix<Ta>& A,
         const GenUpperTriMatrix<Tb>& B, const UpperTriMatrixView<T>& C)
     // C += alpha * A * B
@@ -213,7 +213,7 @@ namespace tmv {
         TMVAssert(alpha != T(0));
         TMVAssert(C.dt() == NonUnitDiag);
 #ifdef XDEBUG
-        //cout<<"Start addMultMM: alpha = "<<alpha<<endl;
+        //cout<<"Start AddMultMM: alpha = "<<alpha<<endl;
         //cout<<"A = "<<TMV_Text(A)<<"  "<<A<<endl;
         //cout<<"B = "<<TMV_Text(B)<<"  "<<B<<endl;
         //cout<<"C = "<<TMV_Text(C)<<"  "<<C<<endl;
@@ -224,31 +224,31 @@ namespace tmv {
 #endif
 
         if (C.isconj()) {
-            addMultMM(
+            AddMultMM(
                 TMV_CONJ(alpha),A.conjugate(),B.conjugate(),C.conjugate());
         } else if (A.size() > 0) {
             if (alpha == T(1)) {
                 if (A.diag().isconj())
-                    doAddMultMMa<true,true>(TMV_REAL(alpha),A,B,C);
+                    DoAddMultMMa<true,true>(TMV_REAL(alpha),A,B,C);
                 else
-                    doAddMultMMa<true,false>(TMV_REAL(alpha),A,B,C);
+                    DoAddMultMMa<true,false>(TMV_REAL(alpha),A,B,C);
             } else if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
                 if (A.diag().isconj())
-                    doAddMultMMa<false,true>(TMV_REAL(alpha),A,B,C);
+                    DoAddMultMMa<false,true>(TMV_REAL(alpha),A,B,C);
                 else
-                    doAddMultMMa<false,false>(TMV_REAL(alpha),A,B,C);
+                    DoAddMultMMa<false,false>(TMV_REAL(alpha),A,B,C);
             } else {
                 if (A.diag().isconj())
-                    doAddMultMMa<false,true>(alpha,A,B,C);
+                    DoAddMultMMa<false,true>(alpha,A,B,C);
                 else
-                    doAddMultMMa<false,false>(alpha,A,B,C);
+                    DoAddMultMMa<false,false>(alpha,A,B,C);
             }
         }
 
 #ifdef XDEBUG
         if (Norm(Matrix<T>(C)-C2) > 0.001*(
                 TMV_ABS(alpha)*Norm(A0)*Norm(B0)+Norm(C0))) {
-            cerr<<"addMultMM: alpha = "<<alpha<<endl;
+            cerr<<"AddMultMM: alpha = "<<alpha<<endl;
             cerr<<"A = "<<TMV_Text(A)<<" step "<<A.diag().step()<<
                 "  "<<A0<<endl;
             cerr<<"B = "<<TMV_Text(B)<<"  "<<B0<<endl;
@@ -283,7 +283,7 @@ namespace tmv {
 
         if (A.size() > 0) {
             if (alpha==T(0)) {
-                if (!add) C.zero();
+                if (!add) C.setZero();
             } else if (SameStorage(A.diag(),C)) {
                 DiagMatrix<T> tempA = A;
                 MultMM<add>(alpha,tempA,B,C);
@@ -301,7 +301,7 @@ namespace tmv {
                     C += tempB;
                 }
             } else {
-                addMultMM(alpha,A,B,C);
+                AddMultMM(alpha,A,B,C);
             }
         }
 #ifdef XDEBUG
@@ -321,7 +321,7 @@ namespace tmv {
     }
 
     template <bool a1, bool ca, class T, class T1,  class Ta> 
-    static void doMultEqMM(
+    static void DoMultEqMM(
         const T1 alpha, const GenDiagMatrix<Ta>& A,
         const LowerTriMatrixView<T>& B)
     {
@@ -354,9 +354,9 @@ namespace tmv {
             LowerTriMatrixView<T> B11 = B.subTriMatrix(k,N);
             MatrixView<T> B10 = B.subMatrix(k,N,0,k);
 
-            doMultEqMM<a1,ca>(alpha,A00,B00);
+            DoMultEqMM<a1,ca>(alpha,A00,B00);
             B10 = alpha * A11 * B10;
-            doMultEqMM<a1,ca>(alpha,A11,B11);
+            DoMultEqMM<a1,ca>(alpha,A11,B11);
         }
     }
 
@@ -382,19 +382,19 @@ namespace tmv {
         else if (A.size() > 0) {
             if (alpha == T(1)) 
                 if (A.diag().isconj())
-                    doMultEqMM<true,true>(TMV_REAL(alpha),A,B);
+                    DoMultEqMM<true,true>(TMV_REAL(alpha),A,B);
                 else
-                    doMultEqMM<true,false>(TMV_REAL(alpha),A,B);
+                    DoMultEqMM<true,false>(TMV_REAL(alpha),A,B);
             else if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) 
                 if (A.diag().isconj())
-                    doMultEqMM<false,true>(TMV_REAL(alpha),A,B);
+                    DoMultEqMM<false,true>(TMV_REAL(alpha),A,B);
                 else
-                    doMultEqMM<false,false>(TMV_REAL(alpha),A,B);
+                    DoMultEqMM<false,false>(TMV_REAL(alpha),A,B);
             else 
                 if (A.diag().isconj())
-                    doMultEqMM<false,true>(alpha,A,B);
+                    DoMultEqMM<false,true>(alpha,A,B);
                 else
-                    doMultEqMM<false,false>(alpha,A,B);
+                    DoMultEqMM<false,false>(alpha,A,B);
         }
 
 #ifdef XDEBUG
@@ -410,7 +410,7 @@ namespace tmv {
     }
 
     template <bool a1, bool ca, bool ub, bool cb, class T, class T1, class Ta, class Tb> 
-    static void doAddMultMM(
+    static void DoAddMultMM(
         const T1 alpha, const GenDiagMatrix<Ta>& A,
         const GenLowerTriMatrix<Tb>& B, const LowerTriMatrixView<T>& C)
     {
@@ -454,27 +454,27 @@ namespace tmv {
             LowerTriMatrixView<T> C11 = C.subTriMatrix(k,N);
             MatrixView<T> C10 = C.subMatrix(k,N,0,k);
 
-            doAddMultMM<a1,ca,ub,cb>(alpha,A00,B00,C00);
+            DoAddMultMM<a1,ca,ub,cb>(alpha,A00,B00,C00);
             C10 += alpha * A11 * B10;
-            doAddMultMM<a1,ca,ub,cb>(alpha,A11,B11,C11);
+            DoAddMultMM<a1,ca,ub,cb>(alpha,A11,B11,C11);
         }
     } 
 
     template <bool a1, bool ca, class T, class T1, class Ta, class Tb> 
-    static inline void doAddMultMMa(
+    static inline void DoAddMultMMa(
         const T1 alpha, const GenDiagMatrix<Ta>& A,
         const GenLowerTriMatrix<Tb>& B, const LowerTriMatrixView<T>& C)
     {
         if (B.isunit())
-            if (B.isconj()) doAddMultMM<a1,ca,true,true>(alpha,A,B,C);
-            else doAddMultMM<a1,ca,false,true>(alpha,A,B,C);
+            if (B.isconj()) DoAddMultMM<a1,ca,true,true>(alpha,A,B,C);
+            else DoAddMultMM<a1,ca,false,true>(alpha,A,B,C);
         else
-            if (B.isconj()) doAddMultMM<a1,ca,true,false>(alpha,A,B,C);
-            else doAddMultMM<a1,ca,false,false>(alpha,A,B,C);
+            if (B.isconj()) DoAddMultMM<a1,ca,true,false>(alpha,A,B,C);
+            else DoAddMultMM<a1,ca,false,false>(alpha,A,B,C);
     }
 
     template <class T, class Ta, class Tb> 
-    static void addMultMM(
+    static void AddMultMM(
         const T alpha, const GenDiagMatrix<Ta>& A,
         const GenLowerTriMatrix<Tb>& B, const LowerTriMatrixView<T>& C)
     // C += alpha * A * B
@@ -484,7 +484,7 @@ namespace tmv {
         TMVAssert(alpha != T(0));
         TMVAssert(C.dt() == NonUnitDiag);
 #ifdef XDEBUG
-        //cout<<"Start addMultMM: alpha = "<<alpha<<endl;
+        //cout<<"Start AddMultMM: alpha = "<<alpha<<endl;
         //cout<<"A = "<<TMV_Text(A)<<"  "<<A<<endl;
         //cout<<"B = "<<TMV_Text(B)<<"  "<<B<<endl;
         //cout<<"C = "<<TMV_Text(C)<<"  "<<C<<endl;
@@ -495,31 +495,31 @@ namespace tmv {
 #endif
 
         if (C.isconj()) {
-            addMultMM(
+            AddMultMM(
                 TMV_CONJ(alpha),A.conjugate(), B.conjugate(),C.conjugate());
         } else if (A.size() > 0) {
             if (alpha == T(1)) {
                 if (A.diag().isconj())
-                    doAddMultMMa<true,true>(TMV_REAL(alpha),A,B,C);
+                    DoAddMultMMa<true,true>(TMV_REAL(alpha),A,B,C);
                 else
-                    doAddMultMMa<true,false>(TMV_REAL(alpha),A,B,C);
+                    DoAddMultMMa<true,false>(TMV_REAL(alpha),A,B,C);
             } else if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
                 if (A.diag().isconj())
-                    doAddMultMMa<false,true>(TMV_REAL(alpha),A,B,C);
+                    DoAddMultMMa<false,true>(TMV_REAL(alpha),A,B,C);
                 else
-                    doAddMultMMa<false,false>(TMV_REAL(alpha),A,B,C);
+                    DoAddMultMMa<false,false>(TMV_REAL(alpha),A,B,C);
             } else {
                 if (A.diag().isconj())
-                    doAddMultMMa<false,true>(alpha,A,B,C);
+                    DoAddMultMMa<false,true>(alpha,A,B,C);
                 else
-                    doAddMultMMa<false,false>(alpha,A,B,C);
+                    DoAddMultMMa<false,false>(alpha,A,B,C);
             }
         }
 
 #ifdef XDEBUG
         if (Norm(Matrix<T>(C)-C2) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
                                            + Norm(C0))) {
-            cerr<<"addMultMM: alpha = "<<alpha<<endl;
+            cerr<<"AddMultMM: alpha = "<<alpha<<endl;
             cerr<<"A = "<<TMV_Text(A)<<" step "<<A.diag().step()<<
                 "  "<<A0<<endl;
             cerr<<"B = "<<TMV_Text(B)<<"  "<<B0<<endl;
@@ -554,7 +554,7 @@ namespace tmv {
 
         if (A.size() > 0) {
             if (alpha==T(0)) {
-                if (!add) C.zero();
+                if (!add) C.setZero();
             } else if (SameStorage(A.diag(),C)) {
                 DiagMatrix<T> tempA = A;
                 MultMM<add>(alpha,tempA,B,C);
@@ -572,7 +572,7 @@ namespace tmv {
                     C += tempB;
                 }
             } else {
-                addMultMM(alpha,A,B,C);
+                AddMultMM(alpha,A,B,C);
             }
         }
 #ifdef XDEBUG

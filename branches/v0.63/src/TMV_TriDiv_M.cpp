@@ -437,12 +437,12 @@ namespace tmv {
                 BLASV(m),BLASV(n),BLASV(alpha),BLASP(A.cptr()),BLASV(lda),
                 BLASP((double*)B.ptr()),BLASV(ldb) BLAS1 BLAS1 BLAS1 BLAS1);
         } else {
-            Matrix<double,ColMajor> B1 = B.real();
+            Matrix<double,ColMajor> B1 = B.realPart();
             BlasTriLDivEq(A,B1.view());
-            B.real() = B1;
-            B1 = B.imag();
+            B.realPart() = B1;
+            B1 = B.imagPart();
             BlasTriLDivEq(A,B1.view());
-            B.imag() = B1;
+            B.imagPart() = B1;
         }
     }
     template <> 
@@ -473,12 +473,12 @@ namespace tmv {
                 BLASV(m),BLASV(n),BLASV(alpha),BLASP(A.cptr()),BLASV(lda),
                 BLASP((double*)B.ptr()),BLASV(ldb) BLAS1 BLAS1 BLAS1 BLAS1);
         } else {
-            Matrix<double,ColMajor> B1 = B.real();
+            Matrix<double,ColMajor> B1 = B.realPart();
             BlasTriLDivEq(A,B1.view());
-            B.real() = B1;
-            B1 = B.imag();
+            B.realPart() = B1;
+            B1 = B.imagPart();
             BlasTriLDivEq(A,B1.view());
-            B.imag() = B1;
+            B.imagPart() = B1;
         }
     }
 #endif
@@ -635,12 +635,12 @@ namespace tmv {
                 BLASV(m),BLASV(n),BLASV(alpha),BLASP(A.cptr()),BLASV(lda),
                 BLASP((float*)B.ptr()),BLASV(ldb) BLAS1 BLAS1 BLAS1 BLAS1);
         } else {
-            Matrix<float,ColMajor> B1 = B.real();
+            Matrix<float,ColMajor> B1 = B.realPart();
             BlasTriLDivEq(A,B1.view());
-            B.real() = B1;
-            B1 = B.imag();
+            B.realPart() = B1;
+            B1 = B.imagPart();
             BlasTriLDivEq(A,B1.view());
-            B.imag() = B1;
+            B.imagPart() = B1;
         }
     }
     template <> 
@@ -671,12 +671,12 @@ namespace tmv {
                 BLASV(m),BLASV(n),BLASV(alpha),BLASP(A.cptr()),BLASV(lda),
                 BLASP((float*)B.ptr()),BLASV(ldb) BLAS1 BLAS1 BLAS1 BLAS1);
         } else {
-            Matrix<float,ColMajor> B1 = B.real();
+            Matrix<float,ColMajor> B1 = B.realPart();
             BlasTriLDivEq(A,B1.view());
-            B.real() = B1;
-            B1 = B.imag();
+            B.realPart() = B1;
+            B1 = B.imagPart();
             BlasTriLDivEq(A,B1.view());
-            B.imag() = B1;
+            B.imagPart() = B1;
         }
     }
 #endif // FLOAT

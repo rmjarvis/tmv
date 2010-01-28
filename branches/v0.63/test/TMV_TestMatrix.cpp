@@ -1,7 +1,7 @@
 
+#include "TMV.h"
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
-#include "TMV.h"
 #include <fstream>
 #include <cstdio>
 
@@ -24,10 +24,10 @@ static void TestBasicMatrix_1()
         m(i,j) = T(k);
         mf(i+1,j+1) = T(k);
     }
-    tmv::ConstMatrixView<T> mcv = m.View();
-    tmv::MatrixView<T> mv = m.View();
-    tmv::ConstMatrixView<T,tmv::FortranStyle> mfcv = mf.View();
-    tmv::MatrixView<T,tmv::FortranStyle> mfv = mf.View();
+    tmv::ConstMatrixView<T> mcv = m.view();
+    tmv::MatrixView<T> mv = m.view();
+    tmv::ConstMatrixView<T,tmv::FortranStyle> mfcv = mf.view();
+    tmv::MatrixView<T,tmv::FortranStyle> mfv = mf.view();
 
     for (int i=0, k=0; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
         Assert(m(i,j) == k,"Read/Write Matrix");
@@ -132,100 +132,100 @@ static void TestBasicMatrix_2()
         m(i,j) = T(k);
         mf(i+1,j+1) = T(k);
     }
-    tmv::ConstMatrixView<T> mcv = m.View();
-    tmv::MatrixView<T> mv = m.View();
-    tmv::ConstMatrixView<T,tmv::FortranStyle> mfcv = mf.View();
-    tmv::MatrixView<T,tmv::FortranStyle> mfv = mf.View();
+    tmv::ConstMatrixView<T> mcv = m.view();
+    tmv::MatrixView<T> mv = m.view();
+    tmv::ConstMatrixView<T,tmv::FortranStyle> mfcv = mf.view();
+    tmv::MatrixView<T,tmv::FortranStyle> mfv = mf.view();
 
-    Assert(m.SubMatrix(2,5,1,4) == m.SubMatrix(2,5,1,4,1,1),"SubMatrix");
-    Assert(m.SubVector(2,5,4,2,3) == m.SubMatrix(2,14,5,11,4,2).diag(),
+    Assert(m.subMatrix(2,5,1,4) == m.subMatrix(2,5,1,4,1,1),"SubMatrix");
+    Assert(m.subVector(2,5,4,2,3) == m.subMatrix(2,14,5,11,4,2).diag(),
            "SubVector");
-    Assert(m.ColPair(2,5) == m.SubMatrix(0,M,2,8,1,3),"ColPair");
-    Assert(m.ColPair(7,2) == m.SubMatrix(0,M,7,-3,1,-5),"ColPair");
-    Assert(m.RowPair(3,7) == m.SubMatrix(3,11,0,N,4,1),"RowPair");
-    Assert(m.RowPair(2,0) == m.SubMatrix(2,-2,0,N,-2,1),"RowPair");
-    Assert(m.Cols(2,5) == m.SubMatrix(0,M,2,5),"Cols");
-    Assert(m.Rows(3,7) == m.SubMatrix(3,7,0,N),"Rows");
+    Assert(m.colPair(2,5) == m.subMatrix(0,M,2,8,1,3),"colPair");
+    Assert(m.colPair(7,2) == m.subMatrix(0,M,7,-3,1,-5),"colPair");
+    Assert(m.rowPair(3,7) == m.subMatrix(3,11,0,N,4,1),"rowPair");
+    Assert(m.rowPair(2,0) == m.subMatrix(2,-2,0,N,-2,1),"rowPair");
+    Assert(m.colRange(2,5) == m.subMatrix(0,M,2,5),"colRange");
+    Assert(m.rowRange(3,7) == m.subMatrix(3,7,0,N),"rowRange");
 
-    Assert(mf.SubMatrix(3,5,2,4) == mf.SubMatrix(3,5,2,4,1,1),"SubMatrixFF");
-    Assert(mf.SubVector(3,6,4,2,3) == mf.SubMatrix(3,11,6,10,4,2).diag(),
+    Assert(mf.subMatrix(3,5,2,4) == mf.subMatrix(3,5,2,4,1,1),"SubMatrixFF");
+    Assert(mf.subVector(3,6,4,2,3) == mf.subMatrix(3,11,6,10,4,2).diag(),
            "SubVectorFF");
-    Assert(mf.ColPair(3,6) == mf.SubMatrix(1,M,3,6,1,3),"ColPairFF");
-    Assert(mf.ColPair(8,3) == mf.SubMatrix(1,M,8,3,1,-5),"ColPairFF");
-    Assert(mf.RowPair(4,8) == mf.SubMatrix(4,8,1,N,4,1),"RowPairFF");
-    Assert(mf.RowPair(3,1) == mf.SubMatrix(3,1,1,N,-2,1),"RowPairFF");
-    Assert(mf.Cols(3,5) == mf.SubMatrix(1,M,3,5),"ColsFF");
-    Assert(mf.Rows(4,7) == mf.SubMatrix(4,7,1,N),"RowsFF");
+    Assert(mf.colPair(3,6) == mf.subMatrix(1,M,3,6,1,3),"colPairFF");
+    Assert(mf.colPair(8,3) == mf.subMatrix(1,M,8,3,1,-5),"colPairFF");
+    Assert(mf.rowPair(4,8) == mf.subMatrix(4,8,1,N,4,1),"rowPairFF");
+    Assert(mf.rowPair(3,1) == mf.subMatrix(3,1,1,N,-2,1),"rowPairFF");
+    Assert(mf.colRange(3,5) == mf.subMatrix(1,M,3,5),"colRangeFF");
+    Assert(mf.rowRange(4,7) == mf.subMatrix(4,7,1,N),"rowRangeFF");
 
-    Assert(m.SubMatrix(2,5,1,4) == mf.SubMatrix(3,5,2,4),"SubMatrixF");
-    Assert(m.SubMatrix(2,8,1,10,2,3) == mf.SubMatrix(3,7,2,8,2,3),"SubMatrixF");
-    Assert(m.SubVector(2,5,4,2,3) == mf.SubVector(3,6,4,2,3),"SubVectorF");
-    Assert(m.SubVector(8,1,-1,2,4) == mf.SubVector(9,2,-1,2,4),"SubVector2F");
-    Assert(m.SubVector(12,8,-4,-2,2) == mf.SubVector(13,9,-4,-2,2),
+    Assert(m.subMatrix(2,5,1,4) == mf.subMatrix(3,5,2,4),"SubMatrixF");
+    Assert(m.subMatrix(2,8,1,10,2,3) == mf.subMatrix(3,7,2,8,2,3),"SubMatrixF");
+    Assert(m.subVector(2,5,4,2,3) == mf.subVector(3,6,4,2,3),"SubVectorF");
+    Assert(m.subVector(8,1,-1,2,4) == mf.subVector(9,2,-1,2,4),"SubVector2F");
+    Assert(m.subVector(12,8,-4,-2,2) == mf.subVector(13,9,-4,-2,2),
            "SubVector3F");
-    Assert(m.ColPair(2,5) == mf.ColPair(3,6),"ColPairF");
-    Assert(m.ColPair(7,2) == mf.ColPair(8,3),"ColPairF");
-    Assert(m.RowPair(3,7) == mf.RowPair(4,8),"RowPairF");
-    Assert(m.RowPair(2,0) == mf.RowPair(3,1),"RowPairF");
-    Assert(m.Cols(2,5) == mf.Cols(3,5),"ColsF");
-    Assert(m.Rows(3,7) == mf.Rows(4,7),"RowsF");
+    Assert(m.colPair(2,5) == mf.colPair(3,6),"colPairF");
+    Assert(m.colPair(7,2) == mf.colPair(8,3),"colPairF");
+    Assert(m.rowPair(3,7) == mf.rowPair(4,8),"rowPairF");
+    Assert(m.rowPair(2,0) == mf.rowPair(3,1),"rowPairF");
+    Assert(m.colRange(2,5) == mf.colRange(3,5),"colRangeF");
+    Assert(m.rowRange(3,7) == mf.rowRange(4,7),"rowRangeF");
 
-    Assert(m.SubMatrix(2,5,1,4) == mcv.SubMatrix(2,5,1,4),"SubMatrixCV");
-    Assert(m.SubMatrix(2,8,1,10,2,3) == mcv.SubMatrix(2,8,1,10,2,3),
+    Assert(m.subMatrix(2,5,1,4) == mcv.subMatrix(2,5,1,4),"SubMatrixCV");
+    Assert(m.subMatrix(2,8,1,10,2,3) == mcv.subMatrix(2,8,1,10,2,3),
            "SubMatrixCV");
-    Assert(m.SubVector(2,5,4,2,3) == mcv.SubVector(2,5,4,2,3),"SubVectorCV");
-    Assert(m.SubVector(8,1,-1,2,4) == mcv.SubVector(8,1,-1,2,4),"SubVector2CV");
-    Assert(m.SubVector(12,8,-4,-2,2) == mcv.SubVector(12,8,-4,-2,2),
+    Assert(m.subVector(2,5,4,2,3) == mcv.subVector(2,5,4,2,3),"SubVectorCV");
+    Assert(m.subVector(8,1,-1,2,4) == mcv.subVector(8,1,-1,2,4),"SubVector2CV");
+    Assert(m.subVector(12,8,-4,-2,2) == mcv.subVector(12,8,-4,-2,2),
            "SubVector3CV");
-    Assert(m.ColPair(2,5) == mcv.ColPair(2,5),"ColPairCV");
-    Assert(m.ColPair(7,2) == mcv.ColPair(7,2),"ColPairCV");
-    Assert(m.RowPair(3,7) == mcv.RowPair(3,7),"RowPairCV");
-    Assert(m.RowPair(2,0) == mcv.RowPair(2,0),"RowPairCV");
-    Assert(m.Cols(2,5) == mcv.Cols(2,5),"ColsCV");
-    Assert(m.Rows(3,7) == mcv.Rows(3,7),"RowsCV");
+    Assert(m.colPair(2,5) == mcv.colPair(2,5),"colPairCV");
+    Assert(m.colPair(7,2) == mcv.colPair(7,2),"colPairCV");
+    Assert(m.rowPair(3,7) == mcv.rowPair(3,7),"rowPairCV");
+    Assert(m.rowPair(2,0) == mcv.rowPair(2,0),"rowPairCV");
+    Assert(m.colRange(2,5) == mcv.colRange(2,5),"colRangeCV");
+    Assert(m.rowRange(3,7) == mcv.rowRange(3,7),"rowRangeCV");
 
-    Assert(m.SubMatrix(2,5,1,4) == mv.SubMatrix(2,5,1,4),"SubMatrixV");
-    Assert(m.SubMatrix(2,8,1,10,2,3) == mv.SubMatrix(2,8,1,10,2,3),"SubMatrixV");
-    Assert(m.SubVector(2,5,4,2,3) == mv.SubVector(2,5,4,2,3),"SubVectorV");
-    Assert(m.SubVector(8,1,-1,2,4) == mv.SubVector(8,1,-1,2,4),"SubVector2V");
-    Assert(m.SubVector(12,8,-4,-2,2) == mv.SubVector(12,8,-4,-2,2),
+    Assert(m.subMatrix(2,5,1,4) == mv.subMatrix(2,5,1,4),"SubMatrixV");
+    Assert(m.subMatrix(2,8,1,10,2,3) == mv.subMatrix(2,8,1,10,2,3),"SubMatrixV");
+    Assert(m.subVector(2,5,4,2,3) == mv.subVector(2,5,4,2,3),"SubVectorV");
+    Assert(m.subVector(8,1,-1,2,4) == mv.subVector(8,1,-1,2,4),"SubVector2V");
+    Assert(m.subVector(12,8,-4,-2,2) == mv.subVector(12,8,-4,-2,2),
            "SubVector3V");
-    Assert(m.ColPair(2,5) == mv.ColPair(2,5),"ColPairV");
-    Assert(m.ColPair(7,2) == mv.ColPair(7,2),"ColPairV");
-    Assert(m.RowPair(3,7) == mv.RowPair(3,7),"RowPairV");
-    Assert(m.RowPair(2,0) == mv.RowPair(2,0),"RowPairV");
-    Assert(m.Cols(2,5) == mv.Cols(2,5),"ColsV");
-    Assert(m.Rows(3,7) == mv.Rows(3,7),"RowsV");
+    Assert(m.colPair(2,5) == mv.colPair(2,5),"colPairV");
+    Assert(m.colPair(7,2) == mv.colPair(7,2),"colPairV");
+    Assert(m.rowPair(3,7) == mv.rowPair(3,7),"rowPairV");
+    Assert(m.rowPair(2,0) == mv.rowPair(2,0),"rowPairV");
+    Assert(m.colRange(2,5) == mv.colRange(2,5),"colRangeV");
+    Assert(m.rowRange(3,7) == mv.rowRange(3,7),"rowRangeV");
 
-    Assert(mf.SubMatrix(3,5,2,4) == mfcv.SubMatrix(3,5,2,4),"SubMatrixFCV");
-    Assert(mf.SubMatrix(3,7,2,8,2,3) == mfcv.SubMatrix(3,7,2,8,2,3),
+    Assert(mf.subMatrix(3,5,2,4) == mfcv.subMatrix(3,5,2,4),"SubMatrixFCV");
+    Assert(mf.subMatrix(3,7,2,8,2,3) == mfcv.subMatrix(3,7,2,8,2,3),
            "SubMatrixFCV");
-    Assert(mf.SubVector(3,6,4,2,3) == mfcv.SubVector(3,6,4,2,3),"SubVectorFCV");
-    Assert(mf.SubVector(9,2,-1,2,4) == mfcv.SubVector(9,2,-1,2,4),
+    Assert(mf.subVector(3,6,4,2,3) == mfcv.subVector(3,6,4,2,3),"SubVectorFCV");
+    Assert(mf.subVector(9,2,-1,2,4) == mfcv.subVector(9,2,-1,2,4),
            "SubVector2FCV");
-    Assert(mf.SubVector(13,9,-4,-2,2) == mfcv.SubVector(13,9,-4,-2,2),
+    Assert(mf.subVector(13,9,-4,-2,2) == mfcv.subVector(13,9,-4,-2,2),
            "SubVector3FCV");
-    Assert(mf.ColPair(3,6) == mfcv.ColPair(3,6),"ColPairFCV");
-    Assert(mf.ColPair(8,3) == mfcv.ColPair(8,3),"ColPairFCV");
-    Assert(mf.RowPair(4,8) == mfcv.RowPair(4,8),"RowPairFCV");
-    Assert(mf.RowPair(3,1) == mfcv.RowPair(3,1),"RowPairFCV");
-    Assert(mf.Cols(3,5) == mfcv.Cols(3,5),"ColsFCV");
-    Assert(mf.Rows(4,7) == mfcv.Rows(4,7),"RowsFCV");
+    Assert(mf.colPair(3,6) == mfcv.colPair(3,6),"colPairFCV");
+    Assert(mf.colPair(8,3) == mfcv.colPair(8,3),"colPairFCV");
+    Assert(mf.rowPair(4,8) == mfcv.rowPair(4,8),"rowPairFCV");
+    Assert(mf.rowPair(3,1) == mfcv.rowPair(3,1),"rowPairFCV");
+    Assert(mf.colRange(3,5) == mfcv.colRange(3,5),"colRangeFCV");
+    Assert(mf.rowRange(4,7) == mfcv.rowRange(4,7),"rowRangeFCV");
 
-    Assert(mf.SubMatrix(3,5,2,4) == mfv.SubMatrix(3,5,2,4),"SubMatrixFV");
-    Assert(mf.SubMatrix(3,7,2,8,2,3) == mfv.SubMatrix(3,7,2,8,2,3),
+    Assert(mf.subMatrix(3,5,2,4) == mfv.subMatrix(3,5,2,4),"SubMatrixFV");
+    Assert(mf.subMatrix(3,7,2,8,2,3) == mfv.subMatrix(3,7,2,8,2,3),
            "SubMatrixFV");
-    Assert(mf.SubVector(3,6,4,2,3) == mfv.SubVector(3,6,4,2,3),"SubVectorFV");
-    Assert(mf.SubVector(9,2,-1,2,4) == mfv.SubVector(9,2,-1,2,4),
+    Assert(mf.subVector(3,6,4,2,3) == mfv.subVector(3,6,4,2,3),"SubVectorFV");
+    Assert(mf.subVector(9,2,-1,2,4) == mfv.subVector(9,2,-1,2,4),
            "SubVector2FV");
-    Assert(mf.SubVector(13,9,-4,-2,2) == mfv.SubVector(13,9,-4,-2,2),
+    Assert(mf.subVector(13,9,-4,-2,2) == mfv.subVector(13,9,-4,-2,2),
            "SubVector3FV");
-    Assert(mf.ColPair(3,6) == mfv.ColPair(3,6),"ColPairFV");
-    Assert(mf.ColPair(8,3) == mfv.ColPair(8,3),"ColPairFV");
-    Assert(mf.RowPair(4,8) == mfv.RowPair(4,8),"RowPairFV");
-    Assert(mf.RowPair(3,1) == mfv.RowPair(3,1),"RowPairFV");
-    Assert(mf.Cols(3,5) == mfv.Cols(3,5),"ColsFV");
-    Assert(mf.Rows(4,7) == mfv.Rows(4,7),"RowsFV");
+    Assert(mf.colPair(3,6) == mfv.colPair(3,6),"colPairFV");
+    Assert(mf.colPair(8,3) == mfv.colPair(8,3),"colPairFV");
+    Assert(mf.rowPair(4,8) == mfv.rowPair(4,8),"rowPairFV");
+    Assert(mf.rowPair(3,1) == mfv.rowPair(3,1),"rowPairFV");
+    Assert(mf.colRange(3,5) == mfv.colRange(3,5),"colRangeFV");
+    Assert(mf.rowRange(4,7) == mfv.rowRange(4,7),"rowRangeFV");
 
     tmv::Matrix<T,S> a(M,N);
     tmv::Matrix<T,S> b(M,N);
@@ -240,7 +240,7 @@ static void TestBasicMatrix_2()
     std::vector<T> qv(6);
     tmv::Matrix<T,S> q4(2,3);
     tmv::Matrix<T,S> q5t(3,2);
-    tmv::MatrixView<T> q5 = q5t.Transpose();
+    tmv::MatrixView<T> q5 = q5t.transpose();
     if (S == tmv::RowMajor) {
         T qvar[] = { T(0), T(-1), T(-2),
             T(2), T(1), T(0) };

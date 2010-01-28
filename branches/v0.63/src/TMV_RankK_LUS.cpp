@@ -119,7 +119,7 @@ namespace tmv {
     }
 
     template <bool a1, class T, class TL> 
-    static inline void doRankKUpdate(
+    static inline void DoRankKUpdate(
         const T alpha, const GenLowerTriMatrix<TL>& L,
         const SymMatrixView<T>& A)
     {
@@ -215,8 +215,8 @@ namespace tmv {
                 A *= alpha;
             }
             else
-                if (alpha == T(1)) doRankKUpdate<true>(alpha,L,A);
-                else doRankKUpdate<false>(alpha,L,A);
+                if (alpha == T(1)) DoRankKUpdate<true>(alpha,L,A);
+                else DoRankKUpdate<false>(alpha,L,A);
         }
 
 #ifdef XDEBUG

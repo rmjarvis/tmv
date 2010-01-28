@@ -234,29 +234,29 @@ namespace tmv {
             } 
         } else {
             if (TMV_IMAG(alpha) == 0.) {
-                Matrix<double,ColMajor> A1 = A.real();
+                Matrix<double,ColMajor> A1 = A.realPart();
                 Matrix<double,ColMajor> C1 = TMV_REAL(alpha)*A1*B;
-                if (beta == 0) C.real() = C1;
-                else C.real() += C1;
-                A1 = A.imag();
+                if (beta == 0) C.realPart() = C1;
+                else C.realPart() += C1;
+                A1 = A.imagPart();
                 if (A.isconj()) C1 = -TMV_REAL(alpha)*A1*B;
                 else C1 = TMV_REAL(alpha)*A1*B;
-                if (beta == 0) C.imag() = C1;
-                else C.imag() += C1;
+                if (beta == 0) C.imagPart() = C1;
+                else C.imagPart() += C1;
             } else {
-                Matrix<double,ColMajor> Ar = A.real();
-                Matrix<double,ColMajor> Ai = A.imag();
+                Matrix<double,ColMajor> Ar = A.realPart();
+                Matrix<double,ColMajor> Ai = A.imagPart();
                 Matrix<double,ColMajor> C1 = TMV_REAL(alpha)*Ar*B;
                 if (A.isconj()) C1 += TMV_IMAG(alpha)*Ai*B;
                 else C1 -= TMV_IMAG(alpha)*Ai*B;
-                if (beta == 0) C.real() = C1;
-                else C.real() += C1;
+                if (beta == 0) C.realPart() = C1;
+                else C.realPart() += C1;
 
                 if (A.isconj()) C1 = -TMV_REAL(alpha)*Ai*B;
                 else C1 = TMV_REAL(alpha)*Ai*B;
                 C1 += TMV_IMAG(alpha)*Ar*B;
-                if (beta == 0) C.imag() = C1;
-                else C.imag() += C1;
+                if (beta == 0) C.imagPart() = C1;
+                else C.imagPart() += C1;
             }
         }
     }
@@ -280,29 +280,29 @@ namespace tmv {
         TMVAssert(C.iscm());
 
         if (TMV_IMAG(alpha) == 0.) {
-            Matrix<double,ColMajor> B1 = B.real();
+            Matrix<double,ColMajor> B1 = B.realPart();
             Matrix<double,ColMajor> C1 = TMV_REAL(alpha)*A*B1;
-            if (beta == 0) C.real() = C1;
-            else C.real() += C1;
-            B1 = B.imag();
+            if (beta == 0) C.realPart() = C1;
+            else C.realPart() += C1;
+            B1 = B.imagPart();
             if (B.isconj()) C1 = -TMV_REAL(alpha)*A*B1;
             else C1 = TMV_REAL(alpha)*A*B1;
-            if (beta == 0) C.imag() = C1;
-            else C.imag() += C1;
+            if (beta == 0) C.imagPart() = C1;
+            else C.imagPart() += C1;
         } else {
-            Matrix<double,ColMajor> Br = B.real();
-            Matrix<double,ColMajor> Bi = B.imag();
+            Matrix<double,ColMajor> Br = B.realPart();
+            Matrix<double,ColMajor> Bi = B.imagPart();
             Matrix<double,ColMajor> C1 = TMV_REAL(alpha)*A*Br;
             if (B.isconj()) C1 += TMV_IMAG(alpha)*A*Bi;
             else C1 -= TMV_IMAG(alpha)*A*Bi;
-            if (beta == 0) C.real() = C1;
-            else C.real() += C1;
+            if (beta == 0) C.realPart() = C1;
+            else C.realPart() += C1;
 
             if (B.isconj()) C1 = -TMV_REAL(alpha)*A*Bi;
             else C1 = TMV_REAL(alpha)*A*Bi;
             C1 += TMV_IMAG(alpha)*A*Br;
-            if (beta == 0) C.imag() = C1;
-            else C.imag() += C1;
+            if (beta == 0) C.imagPart() = C1;
+            else C.imagPart() += C1;
         }
     }
     template <> 
@@ -454,29 +454,29 @@ namespace tmv {
             } 
         } else {
             if (TMV_IMAG(alpha) == 0.F) {
-                Matrix<float,ColMajor> A1 = A.real();
+                Matrix<float,ColMajor> A1 = A.realPart();
                 Matrix<float,ColMajor> C1 = TMV_REAL(alpha)*A1*B;
-                if (beta == 0) C.real() = C1;
-                else C.real() += C1;
-                A1 = A.imag();
-                if (A.isconj()) C1 = -TMV_REAL(alpha)*A.imag()*B;
+                if (beta == 0) C.realPart() = C1;
+                else C.realPart() += C1;
+                A1 = A.imagPart();
+                if (A.isconj()) C1 = -TMV_REAL(alpha)*A.imagPart()*B;
                 else C1 = TMV_REAL(alpha)*A1*B;
-                if (beta == 0) C.imag() = C1;
-                else C.imag() += C1;
+                if (beta == 0) C.imagPart() = C1;
+                else C.imagPart() += C1;
             } else {
-                Matrix<float,ColMajor> Ar = A.real();
-                Matrix<float,ColMajor> Ai = A.imag();
+                Matrix<float,ColMajor> Ar = A.realPart();
+                Matrix<float,ColMajor> Ai = A.imagPart();
                 Matrix<float,ColMajor> C1 = TMV_REAL(alpha)*Ar*B;
                 if (A.isconj()) C1 += TMV_IMAG(alpha)*Ai*B;
                 else C1 -= TMV_IMAG(alpha)*Ai*B;
-                if (beta == 0) C.real() = C1;
-                else C.real() += C1;
+                if (beta == 0) C.realPart() = C1;
+                else C.realPart() += C1;
 
                 if (A.isconj()) C1 = -TMV_REAL(alpha)*Ai*B;
                 else C1 = TMV_REAL(alpha)*Ai*B;
                 C1 += TMV_IMAG(alpha)*Ar*B;
-                if (beta == 0) C.imag() = C1;
-                else C.imag() += C1;
+                if (beta == 0) C.imagPart() = C1;
+                else C.imagPart() += C1;
             }
         }
     }
@@ -500,29 +500,29 @@ namespace tmv {
         TMVAssert(C.iscm());
 
         if (TMV_IMAG(alpha) == 0.F) {
-            Matrix<float,ColMajor> B1 = B.real();
+            Matrix<float,ColMajor> B1 = B.realPart();
             Matrix<float,ColMajor> C1 = TMV_REAL(alpha)*A*B1;
-            if (beta == 0) C.real() = C1;
-            else C.real() += C1;
-            B1 = B.imag();
+            if (beta == 0) C.realPart() = C1;
+            else C.realPart() += C1;
+            B1 = B.imagPart();
             if (B.isconj()) C1 = -TMV_REAL(alpha)*A*B1;
             else C1 = TMV_REAL(alpha)*A*B1;
-            if (beta == 0) C.imag() = C1;
-            else C.imag() += C1;
+            if (beta == 0) C.imagPart() = C1;
+            else C.imagPart() += C1;
         } else {
-            Matrix<float,ColMajor> Br = B.real();
-            Matrix<float,ColMajor> Bi = B.imag();
+            Matrix<float,ColMajor> Br = B.realPart();
+            Matrix<float,ColMajor> Bi = B.imagPart();
             Matrix<float,ColMajor> C1 = TMV_REAL(alpha)*A*Br;
             if (B.isconj()) C1 += TMV_IMAG(alpha)*A*Bi;
             else C1 -= TMV_IMAG(alpha)*A*Bi;
-            if (beta == 0) C.real() = C1;
-            else C.real() += C1;
+            if (beta == 0) C.realPart() = C1;
+            else C.realPart() += C1;
 
             if (B.isconj()) C1 = -TMV_REAL(alpha)*A*Bi;
             else C1 = TMV_REAL(alpha)*A*Bi;
             C1 += TMV_IMAG(alpha)*A*Br;
-            if (beta == 0) C.imag() = C1;
-            else C.imag() += C1;
+            if (beta == 0) C.imagPart() = C1;
+            else C.imagPart() += C1;
         }
     }
     template <> 
@@ -552,7 +552,7 @@ namespace tmv {
 #endif // BLAS
 
     template <bool add, class T, class Ta, class Tb> 
-    static void doMultMM(
+    static void DoMultMM(
         const T alpha, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
         const MatrixView<T>& C)
     {
@@ -573,10 +573,10 @@ namespace tmv {
             BlasMultMM(alpha,A,B,add?1:0,C);
         else if (!((A.isrm() && A.stepi()>0) || (A.iscm() && A.stepj()>0))) {
             Matrix<T,ColMajor> A2 = alpha*A;
-            doMultMM<add>(T(1),A2,B,C);
+            DoMultMM<add>(T(1),A2,B,C);
         } else if (!((B.isrm() && B.stepi()>0) || (B.iscm() && B.stepj()>0))) {
             Matrix<T,ColMajor> B2 = alpha*B;
-            doMultMM<add>(T(1),A,B2,C);
+            DoMultMM<add>(T(1),A,B2,C);
         } else {
             BlasMultMM(alpha,A,B,add?1:0,C);
         }
@@ -592,7 +592,7 @@ namespace tmv {
         // C (+)= alpha * A * B  via a temporary
     {
         Matrix<T,ColMajor> C2(C.colsize(),C.rowsize());
-        doMultMM<false>(T(1),A,B,C2.view());
+        DoMultMM<false>(T(1),A,B,C2.view());
 
         if (add) C += alpha*C2;
         else C = alpha*C2;
@@ -610,12 +610,12 @@ namespace tmv {
             j2 = TMV_MIN(N,j+MM_BLOCKSIZE);
             if (C.isrm()) {
                 Matrix<T,ColMajor> B2 = alpha * B.colRange(j,j2);
-                doMultMM<add>(
+                DoMultMM<add>(
                     T(1),B2.transpose(),A.transpose(),
                     C.colRange(j,j2).transpose());
             } else {
                 Matrix<T,ColMajor> B2 = alpha * B.colRange(j,j2);
-                doMultMM<add>(T(1),A,B2,C.colRange(j,j2));
+                DoMultMM<add>(T(1),A,B2,C.colRange(j,j2));
             }
         }
     }
@@ -648,7 +648,7 @@ namespace tmv {
 
         if (C.colsize() > 0 && C.rowsize() > 0) {
             if (A.rowsize() == 0 || alpha == T(0))  {
-                if (!add) C.zero();
+                if (!add) C.setZero();
             }
             else if (C.isconj()) 
                 MultMM<add>(
@@ -678,7 +678,7 @@ namespace tmv {
                 else
                     FullTempMultMM<add>(alpha,A,B,C);
             else
-                doMultMM<add>(alpha,A,B,C);
+                DoMultMM<add>(alpha,A,B,C);
         }
 
 #ifdef XDEBUG

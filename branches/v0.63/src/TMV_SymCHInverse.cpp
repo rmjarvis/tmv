@@ -55,7 +55,7 @@ namespace tmv {
         TMVAssert(sinv.isherm());
         // inv = (L Lt)^-1 = Lt^-1 L^-1
         LowerTriMatrixView<T> L = sinv.lowerTri();
-        L.InvertSelf();
+        L.invertSelf();
         sinv = L.adjoint() * L;
     }
 

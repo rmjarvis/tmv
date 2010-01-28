@@ -144,7 +144,7 @@ namespace tmv {
         if (pimpl->LUx.nlo() > 0) {
             int Anhi = pimpl->istrans ? A.nlo() : A.nhi();
             if (Anhi < pimpl->LUx.nhi())
-                pimpl->LUx.diagRange(Anhi+1,pimpl->LUx.nhi()+1).zero();
+                pimpl->LUx.diagRange(Anhi+1,pimpl->LUx.nhi()+1).setZero();
             LU_Decompose(pimpl->LUx,pimpl->P.get(),pimpl->signdet,Anhi);
         } else {
             pimpl->P.get()[0] = 1; // A tag to indicate that P is not set yet.
@@ -187,7 +187,7 @@ namespace tmv {
         if (pimpl->LUx.nlo() > 0) {
             int Anhi = pimpl->istrans ? A.nlo() : A.nhi();
             if (Anhi < pimpl->LUx.nhi())
-                pimpl->LUx.diagRange(Anhi+1,pimpl->LUx.nhi()+1).zero();
+                pimpl->LUx.diagRange(Anhi+1,pimpl->LUx.nhi()+1).setZero();
             LU_Decompose(pimpl->LUx,pimpl->P.get(),pimpl->signdet,Anhi);
         } else {
             pimpl->P.get()[0] = 1; // A tag to indicate that P is not set yet.

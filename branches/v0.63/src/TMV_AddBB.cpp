@@ -53,7 +53,7 @@ namespace tmv {
     //
 
     template <class T, class Ta> 
-    static void doAddMM(
+    static void DoAddMM(
         const T alpha, const GenBandMatrix<Ta>& A, const BandMatrixView<T>& B)
     { 
         TMVAssert(A.colsize() == B.colsize());
@@ -102,16 +102,16 @@ namespace tmv {
                 if (SameStorage(A,B)) {
                     if (B.isrm()) {
                         BandMatrix<Ta,RowMajor> A2 = A;
-                        doAddMM(alpha,A2,B);
+                        DoAddMM(alpha,A2,B);
                     } else if (B.iscm()) {
                         BandMatrix<Ta,ColMajor> A2 = A;
-                        doAddMM(alpha,A2,B);
+                        DoAddMM(alpha,A2,B);
                     } else {
                         BandMatrix<Ta,DiagMajor> A2 = A;
-                        doAddMM(alpha,A2,B);
+                        DoAddMM(alpha,A2,B);
                     }
                 } 
-                else doAddMM(alpha,A,B);
+                else DoAddMM(alpha,A,B);
             }
         }
 #ifdef XDEBUG
@@ -160,23 +160,23 @@ namespace tmv {
                         if (B.isrm()) {
                             BandMatrix<T,RowMajor> tempB = B;
                             C = alpha*A;
-                            doAddMM(beta,tempB,C);
+                            DoAddMM(beta,tempB,C);
                         } else if (C.iscm()) {
                             BandMatrix<T,ColMajor> tempB = B;
                             C = alpha*A;
-                            doAddMM(beta,tempB,C);
+                            DoAddMM(beta,tempB,C);
                         } else {
                             BandMatrix<T,DiagMajor> tempB = B;
                             C = alpha*A;
-                            doAddMM(beta,tempB,C);
+                            DoAddMM(beta,tempB,C);
                         }
                     } else {
                         C = alpha*A;
-                        doAddMM(beta,B,C);
+                        DoAddMM(beta,B,C);
                     }
                 } else {
                     C = beta*B;
-                    doAddMM(alpha,A,C);
+                    DoAddMM(alpha,A,C);
                 }
             }
         }
@@ -224,17 +224,17 @@ namespace tmv {
                         if (A.isrm()) {
                             BandMatrix<Ta,RowMajor> tempA = A;
                             C = beta*B;
-                            doAddMM(alpha,tempA,
+                            DoAddMM(alpha,tempA,
                                     BandMatrixView<T>(C,A.nlo(),A.nhi()));
                         } else if (A.iscm()) {
                             BandMatrix<Ta,ColMajor> tempA = A;
                             C = beta*B;
-                            doAddMM(alpha,tempA,
+                            DoAddMM(alpha,tempA,
                                     BandMatrixView<T>(C,A.nlo(),A.nhi()));
                         } else {
                             BandMatrix<Ta,DiagMajor> tempA = A;
                             C = beta*B;
-                            doAddMM(alpha,tempA,
+                            DoAddMM(alpha,tempA,
                                     BandMatrixView<T>(C,A.nlo(),A.nhi()));
                         }
                     } else {
@@ -243,7 +243,7 @@ namespace tmv {
                     }
                 } else {
                     C = beta*B;
-                    doAddMM(alpha,A,BandMatrixView<T>(C,A.nlo(),A.nhi()));
+                    DoAddMM(alpha,A,BandMatrixView<T>(C,A.nlo(),A.nhi()));
                 }
             }
         }

@@ -127,7 +127,7 @@ namespace tmv {
             TMVAssert(m0.nhi() >= nlo());
             m0.diagRange(0,m0.nhi()+1) = m.upperBand();
             if (m.nlo() > 0) m0.diagRange(-m0.nlo(),0) = m.lowerBandOff();
-            else if (m0.nlo() > 0) m0.diagRange(-m0.nlo(),0).zero();
+            else if (m0.nlo() > 0) m0.diagRange(-m0.nlo(),0).setZero();
             MultXM(x,m0);
         }
         inline void assignToB(const BandMatrixView<xCT>& m0) const
@@ -138,7 +138,7 @@ namespace tmv {
             TMVAssert(m0.nhi() >= nlo());
             m0.diagRange(0,m0.nhi()+1) = m.upperBand();
             if (m.nlo() > 0) m0.diagRange(-m0.nlo(),0) = m.lowerBandOff();
-            else if (m0.nlo() > 0) m0.diagRange(-m0.nlo(),0).zero();
+            else if (m0.nlo() > 0) m0.diagRange(-m0.nlo(),0).setZero();
             MultXM(x,m0);
         }
         inline void assignTosB(const SymBandMatrixView<RT>& m0) const

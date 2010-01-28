@@ -116,7 +116,7 @@
 //
 // Modifying Functions:
 //
-//    zero()
+//    setZero()
 //    setAllTo(T x)
 //    conjugateSelf()
 //    setToIdentity(x = 1)
@@ -161,7 +161,7 @@
 //        Returns the (NonUnitDiag) TriMatrix of all the off-diagonal
 //        elements of a TriMatrix.
 //
-//    real(), imag()
+//    realPart(), imagPart()
 //        For a complex TriMatrix, returns the real or imaginary part
 //        as a real TriMatrix.
 //
@@ -368,7 +368,7 @@ namespace tmv {
             TMVAssert(isReal(T()));
             assignToU(m2.upperTri(dt()));
             if (isunit()) m2.diag().setAllTo(RT(1));
-            if (size() > 0) m2.lowerTri().offDiag().zero();
+            if (size() > 0) m2.lowerTri().offDiag().setZero();
         }
 
         inline void assignToM(const MatrixView<CT>& m2) const
@@ -377,7 +377,7 @@ namespace tmv {
             TMVAssert(m2.rowsize() == size());
             assignToU(m2.upperTri(dt()));
             if (isunit()) m2.diag().setAllTo(T(1));
-            if (size() > 0) m2.lowerTri().offDiag().zero();
+            if (size() > 0) m2.lowerTri().offDiag().setZero();
         }
 
         inline void assignToU(const UpperTriMatrixView<RT>& m2) const
@@ -464,7 +464,7 @@ namespace tmv {
                 stepi(),stepj(),NonUnitDiag,stor(),ct());
         }
 
-        inline const_real_type real() const
+        inline const_real_type realPart() const
         {
             return const_real_type(
                 reinterpret_cast<const RT*>(cptr()), size(),
@@ -473,7 +473,7 @@ namespace tmv {
                 dt(), isReal(T()) ? stor() : NoMajor, NonConj);
         }
 
-        inline const_real_type imag() const
+        inline const_real_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             TMVAssert(!isunit());
@@ -541,9 +541,9 @@ namespace tmv {
         TMV_DEPRECATED(const_uppertri_type OffDiag(int noff=1) const)
         { return offDiag(noff); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(const_uppertri_type View() const)
         { return view(); }
         TMV_DEPRECATED(const_lowertri_type Transpose() const)
@@ -1047,7 +1047,7 @@ namespace tmv {
                 stepi(),stepj(),NonUnitDiag,stor(),ct());
         }
 
-        inline const_real_type real() const
+        inline const_real_type realPart() const
         {
             return const_real_type(
                 reinterpret_cast<const RT*>(cptr()), size(),
@@ -1056,7 +1056,7 @@ namespace tmv {
                 dt(), isReal(T()) ? stor() : NoMajor, NonConj);
         }
 
-        inline const_real_type imag() const
+        inline const_real_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             TMVAssert(!isunit());
@@ -1126,9 +1126,9 @@ namespace tmv {
         TMV_DEPRECATED(const_lowertri_type OffDiag(int noff=1) const)
         { return offDiag(noff); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(const_lowertri_type View() const)
         { return view(); }
         TMV_DEPRECATED(const_uppertri_type Transpose() const)
@@ -1689,11 +1689,11 @@ namespace tmv {
         inline const_uppertri_type offDiag(int noff=1) const
         { return base::offDiag(noff); }
 
-        inline const_real_type real() const
-        { return base::real(); }
+        inline const_real_type realPart() const
+        { return base::realPart(); }
 
-        inline const_real_type imag() const
-        { return base::imag(); }
+        inline const_real_type imagPart() const
+        { return base::imagPart(); }
 
         inline const_uppertri_type view() const
         { return base::view(); }
@@ -1727,9 +1727,9 @@ namespace tmv {
         TMV_DEPRECATED(const_uppertri_type OffDiag(int noff=1) const)
         { return offDiag(noff); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(const_uppertri_type View() const)
         { return view(); }
         TMV_DEPRECATED(const_lowertri_type Transpose() const)
@@ -1878,11 +1878,11 @@ namespace tmv {
         inline const_lowertri_type offDiag(int noff=1) const
         { return base::offDiag(noff); }
 
-        inline const_real_type real() const
-        { return base::real(); }
+        inline const_real_type realPart() const
+        { return base::realPart(); }
 
-        inline const_real_type imag() const
-        { return base::imag(); }
+        inline const_real_type imagPart() const
+        { return base::imagPart(); }
 
         inline const_lowertri_type view() const
         { return base::view(); }
@@ -1916,9 +1916,9 @@ namespace tmv {
         TMV_DEPRECATED(const_lowertri_type OffDiag(int noff=1) const)
         { return offDiag(noff); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(const_lowertri_type View() const)
         { return view(); }
         TMV_DEPRECATED(const_uppertri_type Transpose() const)
@@ -2023,7 +2023,7 @@ namespace tmv {
         { 
             TMVAssert(size() == m2.size());
             m2.assignToD(DiagMatrixViewOf(diag()));
-            offDiag().zero();
+            offDiag().setZero();
             return *this; 
         }
 
@@ -2032,7 +2032,7 @@ namespace tmv {
             TMVAssert(size() == m2.size());
             TMVAssert(isComplex(T()));
             m2.assignToD(DiagMatrixViewOf(diag()));
-            offDiag().zero();
+            offDiag().setZero();
             return *this; 
         }
 
@@ -2130,7 +2130,7 @@ namespace tmv {
         // Modifying Functions
         //
 
-        const type& zero() const;
+        const type& setZero() const;
 
         const type& setAllTo(const T& x) const;
 
@@ -2143,7 +2143,7 @@ namespace tmv {
         const type& setToIdentity(const T& x=T(1)) const;
 
         TMV_DEPRECATED(const type& Zero() const)
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(const type& SetAllTo(const T& x) const)
         { return setAllTo(x); }
         TMV_DEPRECATED(const type& Clip(RT thresh) const)
@@ -2219,7 +2219,7 @@ namespace tmv {
                 stepi(),stepj(),NonUnitDiag,stor(),ct() TMV_FIRSTLAST);
         }
 
-        inline real_type real() const
+        inline real_type realPart() const
         {
             return real_type(
                 reinterpret_cast<RT*>(ptr()), size(),
@@ -2233,7 +2233,7 @@ namespace tmv {
             );
         }
 
-        inline real_type imag() const
+        inline real_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             TMVAssert(!isunit());
@@ -2295,9 +2295,9 @@ namespace tmv {
         TMV_DEPRECATED(uppertri_type OffDiag(int noff=1) const)
         { return offDiag(noff); }
         TMV_DEPRECATED(real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(uppertri_type View() const)
         { return view(); }
         TMV_DEPRECATED(uppertri_type ViewAsUnitDiag() const)
@@ -2541,8 +2541,8 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline const type& zero() const 
-        { transpose().zero(); return *this; }
+        inline const type& setZero() const 
+        { transpose().setZero(); return *this; }
 
         inline const type& setAllTo(const T& x) const
         { transpose().setAllTo(x); return *this; }
@@ -2560,7 +2560,7 @@ namespace tmv {
         { transpose().setToIdentity(x); return *this; }
 
         TMV_DEPRECATED(const type& Zero() const)
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(const type& SetAllTo(const T& x) const)
         { return setAllTo(x); }
         TMV_DEPRECATED(const type& Clip(RT thresh) const)
@@ -2636,7 +2636,7 @@ namespace tmv {
                 stepi(),stepj(),NonUnitDiag,stor(),ct() TMV_FIRSTLAST);
         }
 
-        inline real_type real() const
+        inline real_type realPart() const
         {
             return real_type(
                 reinterpret_cast<RT*>(ptr()), size(),
@@ -2650,7 +2650,7 @@ namespace tmv {
             );
         }
 
-        inline real_type imag() const
+        inline real_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             TMVAssert(!isunit());
@@ -2713,9 +2713,9 @@ namespace tmv {
         TMV_DEPRECATED(lowertri_type OffDiag(int noff=1) const)
         { return offDiag(noff); }
         TMV_DEPRECATED(real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(lowertri_type View() const)
         { return view(); }
         TMV_DEPRECATED(lowertri_type ViewAsUnitDiag() const)
@@ -2894,8 +2894,8 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline const type& zero() const 
-        { c_type::zero(); return *this; }
+        inline const type& setZero() const 
+        { c_type::setZero(); return *this; }
 
         inline const type& setAllTo(const T& x) const
         { c_type::setAllTo(x); return *this; }
@@ -2913,7 +2913,7 @@ namespace tmv {
         { c_type::setToIdentity(x); return *this; }
 
         TMV_DEPRECATED(const type& Zero() const)
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(const type& SetAllTo(const T& x) const)
         { return setAllTo(x); }
         TMV_DEPRECATED(const type& Clip(RT thresh) const)
@@ -2980,11 +2980,11 @@ namespace tmv {
             return c_type::offDiag(noff);
         }
 
-        inline real_type real() const
-        { return c_type::real(); }
+        inline real_type realPart() const
+        { return c_type::realPart(); }
 
-        inline real_type imag() const
-        { return c_type::imag(); }
+        inline real_type imagPart() const
+        { return c_type::imagPart(); }
 
         inline uppertri_type view() const
         { return *this; }
@@ -3018,9 +3018,9 @@ namespace tmv {
         TMV_DEPRECATED(uppertri_type OffDiag(int noff=1) const)
         { return offDiag(noff); }
         TMV_DEPRECATED(real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(uppertri_type View() const)
         { return view(); }
         TMV_DEPRECATED(uppertri_type ViewAsUnitDiag() const)
@@ -3164,8 +3164,8 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline const type& zero() const 
-        { c_type::zero(); return *this; }
+        inline const type& setZero() const 
+        { c_type::setZero(); return *this; }
 
         inline const type& setAllTo(const T& x) const
         { c_type::setAllTo(x); return *this; }
@@ -3183,7 +3183,7 @@ namespace tmv {
         { c_type::setToIdentity(x); return *this; }
 
         TMV_DEPRECATED(const type& Zero() const)
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(const type& SetAllTo(const T& x) const)
         { return setAllTo(x); }
         TMV_DEPRECATED(const type& Clip(RT thresh) const)
@@ -3250,11 +3250,11 @@ namespace tmv {
             return c_type::offDiag(noff);
         }
 
-        inline real_type real() const
-        { return c_type::real(); }
+        inline real_type realPart() const
+        { return c_type::realPart(); }
 
-        inline real_type imag() const
-        { return c_type::imag(); }
+        inline real_type imagPart() const
+        { return c_type::imagPart(); }
 
         inline lowertri_type view() const
         { return *this; }
@@ -3288,9 +3288,9 @@ namespace tmv {
         TMV_DEPRECATED(lowertri_type OffDiag(int noff=1) const)
         { return offDiag(noff); }
         TMV_DEPRECATED(real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(lowertri_type View() const)
         { return view(); }
         TMV_DEPRECATED(lowertri_type ViewAsUnitDiag() const)
@@ -3743,7 +3743,7 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline type& zero() 
+        inline type& setZero() 
         { fill_n(itsm.get(),itslen,T(0)); return *this; }
 
         inline type& setAllTo(const T& x) 
@@ -3761,12 +3761,12 @@ namespace tmv {
         inline type& setToIdentity(const T& x=T(1)) 
         {
             TMVAssert(!isunit() || x==T(1));
-            zero(); if (!isunit()) diag().setAllTo(x);
+            setZero(); if (!isunit()) diag().setAllTo(x);
             return *this;
         }
 
         TMV_DEPRECATED(type& Zero())
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(type& SetAllTo(const T& x))
         { return setAllTo(x); }
         TMV_DEPRECATED(type& Clip(RT thresh))
@@ -3844,7 +3844,7 @@ namespace tmv {
                 size()-noff,stepi(),stepj(),NonUnitDiag,S,NonConj);
         }
 
-        inline const_real_type real() const
+        inline const_real_type realPart() const
         {
             return const_real_type(
                 reinterpret_cast<RT*>(itsm.get()), size(),
@@ -3853,7 +3853,7 @@ namespace tmv {
                 D, isReal(T()) ? S : NoMajor, NonConj);
         }
 
-        inline const_real_type imag() const
+        inline const_real_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             TMVAssert(!isunit());
@@ -3921,7 +3921,7 @@ namespace tmv {
                 stepi(),stepj(),NonUnitDiag,S,NonConj TMV_FIRSTLAST);
         }
 
-        inline real_type real() 
+        inline real_type realPart() 
         {
             return real_type(
                 reinterpret_cast<RT*>(itsm.get()), size(),
@@ -3935,7 +3935,7 @@ namespace tmv {
             );
         }
 
-        inline real_type imag()
+        inline real_type imagPart()
         {
             TMVAssert(isComplex(T()));
             TMVAssert(!isunit());
@@ -4031,9 +4031,9 @@ namespace tmv {
         TMV_DEPRECATED(const_uppertri_type OffDiag(int noff=1) const)
         { return offDiag(noff); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(const_uppertri_type View() const)
         { return view(); }
         TMV_DEPRECATED(const_uppertri_type ViewAsUnitDiag() const)
@@ -4059,9 +4059,9 @@ namespace tmv {
         TMV_DEPRECATED(uppertri_type OffDiag(int noff=1))
         { return offDiag(noff); }
         TMV_DEPRECATED(real_type Real())
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag())
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(uppertri_type View())
         { return view(); }
         TMV_DEPRECATED(uppertri_type ViewAsUnitDiag())
@@ -4543,7 +4543,7 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline type& zero() 
+        inline type& setZero() 
         { fill_n(itsm.get(),itslen,T(0)); return *this; }
 
         inline type& setAllTo(const T& x) 
@@ -4561,12 +4561,12 @@ namespace tmv {
         inline type& setToIdentity(const T& x=T(1)) 
         { 
             TMVAssert(!isunit() || x == T(1));
-            zero(); if (!isunit()) diag().setAllTo(x);
+            setZero(); if (!isunit()) diag().setAllTo(x);
             return *this;
         }
 
         TMV_DEPRECATED(type& Zero() const)
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(type& SetAllTo(const T& x) const)
         { return setAllTo(x); }
         TMV_DEPRECATED(type& Clip(RT thresh) const)
@@ -4645,7 +4645,7 @@ namespace tmv {
                 stepi(),stepj(),NonUnitDiag,S,NonConj);
         }
 
-        inline const_real_type real() const
+        inline const_real_type realPart() const
         {
             return const_real_type(
                 reinterpret_cast<RT*>(itsm.get()), size(),
@@ -4655,7 +4655,7 @@ namespace tmv {
             );
         }
 
-        inline const_real_type imag() const
+        inline const_real_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             TMVAssert(!isunit());
@@ -4725,7 +4725,7 @@ namespace tmv {
                 stepi(),stepj(),NonUnitDiag,S,NonConj TMV_FIRSTLAST);
         }
 
-        inline real_type real() 
+        inline real_type realPart() 
         {
             return real_type(
                 reinterpret_cast<RT*>(itsm.get()), size(),
@@ -4739,7 +4739,7 @@ namespace tmv {
             );
         }
 
-        inline real_type imag()
+        inline real_type imagPart()
         {
             TMVAssert(isComplex(T()));
             TMVAssert(!isunit());
@@ -4835,9 +4835,9 @@ namespace tmv {
         TMV_DEPRECATED(const_lowertri_type OffDiag(int noff=1) const)
         { return offDiag(noff); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(const_lowertri_type View() const)
         { return view(); }
         TMV_DEPRECATED(const_lowertri_type ViewAsUnitDiag() const)
@@ -4863,9 +4863,9 @@ namespace tmv {
         TMV_DEPRECATED(lowertri_type OffDiag(int noff=1))
         { return offDiag(noff); }
         TMV_DEPRECATED(real_type Real())
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag())
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(lowertri_type View())
         { return view(); }
         TMV_DEPRECATED(lowertri_type ViewAsUnitDiag())

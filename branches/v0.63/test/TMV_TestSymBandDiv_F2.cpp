@@ -1,10 +1,10 @@
 
 #define START 0
 
-#include "TMV_Test.h"
-#include "TMV_Test2.h"
 #include "TMV.h"
 #include "TMV_SymBand.h"
+#include "TMV_Test.h"
+#include "TMV_Test2.h"
 #include "TMV_TestSymBandArith.h"
 
 #define NOLDIVEQ
@@ -24,7 +24,7 @@ void TestSymBandDiv_F2(tmv::DivType dt, PosDefCode pdc)
 
     tmv::Matrix<T> a1(N,N);
     for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) a1(i,j) = T(1-3*i+j);
-    a1.diag().AddToAll(T(10)*N);
+    a1.diag().addToAll(T(10)*N);
     a1 /= T(10);
     tmv::Matrix<std::complex<T> > ca1 = a1 * std::complex<T>(3,-4);
 
@@ -45,19 +45,19 @@ void TestSymBandDiv_F2(tmv::DivType dt, PosDefCode pdc)
             tmv::SymBandMatrix<T> sx = si;
             tmv::SymBandMatrix<std::complex<T> > csx = csi;
 
-            TestMatrixDivArith1<T>(dt,sx,csx,h.View(),si,ch.View(),csi,
+            TestMatrixDivArith1<T>(dt,sx,csx,h.view(),si,ch.view(),csi,
                                    "SymBand/HermMatrix");
             if (dt != tmv::CH)
-                TestMatrixDivArith1<T>(dt,sx,csx,s.View(),si,cs.View(),csi,
+                TestMatrixDivArith1<T>(dt,sx,csx,s.view(),si,cs.view(),csi,
                                        "SymBand/SymMatrix");
         } else {
             tmv::HermBandMatrix<T> hx = si;
             tmv::HermBandMatrix<std::complex<T> > chx = csi;
 
-            TestMatrixDivArith1<T>(dt,hx,chx,h.View(),si,ch.View(),csi,
+            TestMatrixDivArith1<T>(dt,hx,chx,h.view(),si,ch.view(),csi,
                                    "SymBand/HermMatrix");
             if (dt != tmv::CH)
-                TestMatrixDivArith1<T>(dt,hx,chx,s.View(),si,cs.View(),csi,
+                TestMatrixDivArith1<T>(dt,hx,chx,s.view(),si,cs.view(),csi,
                                        "SymBand/SymMatrix");
         }
     }

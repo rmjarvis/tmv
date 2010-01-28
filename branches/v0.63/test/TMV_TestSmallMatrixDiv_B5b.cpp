@@ -1,9 +1,8 @@
 
-#include "TMV_Test.h"
-#include "TMV_Test3.h"
 #include "TMV.h"
 #include "TMV_Small.h"
-
+#include "TMV_Test.h"
+#include "TMV_Test3.h"
 #define NORDIVEQ
 #include "TMV_TestMatrixDivArith.h"
 
@@ -20,24 +19,24 @@ static void TestSmallNonSquareDiv_B5b()
     if (N > 3) m(3,0) = -10;
     if (N > 2) m(2,2) = 30;
 
-    tmv::SmallMatrix<T,N,6,stor> a2 = m.Transpose();
+    tmv::SmallMatrix<T,N,6,stor> a2 = m.transpose();
     tmv::SmallMatrix<std::complex<T>,N,6,stor> c2 = a2 * std::complex<T>(-3,4);
 
     tmv::SmallMatrix<T,7,N,stor> a4;
     for(int i=0;i<7;++i) for(int j=0;j<N;++j) a4(i,j) = T(1-3*i+2*j);
-    a4.SubMatrix(0,6,0,N) += a2.Transpose();
+    a4.subMatrix(0,6,0,N) += a2.transpose();
     tmv::SmallMatrix<std::complex<T>,7,N,stor> c4 = a4*std::complex<T>(1,2);
-    c4.SubMatrix(0,6,0,N) += c2.Transpose();
+    c4.subMatrix(0,6,0,N) += c2.transpose();
     if (N > 1) c4.col(1) *= std::complex<T>(2,1);
-    c4.row(2).AddToAll(std::complex<T>(-7,2));
+    c4.row(2).addToAll(std::complex<T>(-7,2));
 
     tmv::SmallMatrix<T,7,6,stor> a6;
     for(int i=0;i<7;++i) for(int j=0;j<6;++j) a6(i,j) = T(5+2*i-2*j);
-    a6.SubMatrix(1,7,1,1+N) += a2.Transpose();
+    a6.subMatrix(1,7,1,1+N) += a2.transpose();
     tmv::SmallMatrix<std::complex<T>,7,6,stor> c6 = a6*std::complex<T>(1,2);
-    c6.SubMatrix(1,7,1,1+N) += c2.Transpose();
+    c6.subMatrix(1,7,1,1+N) += c2.transpose();
     c6.col(1) *= std::complex<T>(2,1);
-    c6.row(5).AddToAll(std::complex<T>(-7,2));
+    c6.row(5).addToAll(std::complex<T>(-7,2));
 
     tmv::SmallMatrix<T,7,6,stor> a6x;
     tmv::SmallMatrix<std::complex<T>,7,6,stor> c6x;

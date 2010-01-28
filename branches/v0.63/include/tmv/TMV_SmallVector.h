@@ -107,7 +107,7 @@ namespace tmv {
         explicit inline SmallVector(const T& x) 
         {
             TMVAssert(N > 0);
-            if (x == T(0)) zero();
+            if (x == T(0)) setZero();
             else setAllTo(x); 
         }
 
@@ -511,7 +511,7 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline type& zero() 
+        inline type& setZero() 
         { 
             for(int i=0;i<N;++i) itsv[i] = T(0);
             return *this;
@@ -549,10 +549,10 @@ namespace tmv {
         { 
             if (I == CStyle) {
                 TMVAssert(i>=0 && i<N);
-                zero(); itsv[i] = T(1);
+                setZero(); itsv[i] = T(1);
             } else {
                 TMVAssert(i>=1 && i<=N);
-                zero(); itsv[i-1] = T(1);
+                setZero(); itsv[i-1] = T(1);
             }
             return *this; 
         }
@@ -612,7 +612,7 @@ namespace tmv {
         { view().sort(P,ad,comp); return *this; }
 
         TMV_DEPRECATED(type& Zero())
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(type& Clip(RT thresh))
         { return clip(thresh); }
         TMV_DEPRECATED(type& SetAllTo(const T& x))
@@ -678,20 +678,20 @@ namespace tmv {
         inline view_type conjugate()
         { return view_type(itsv,N,1,isReal(T())?NonConj:Conj); }
 
-        inline const_real_type real() const
-        { return view().real(); }
+        inline const_real_type realPart() const
+        { return view().realPart(); }
 
-        inline const_real_type imag() const
-        { return view().imag(); }
+        inline const_real_type imagPart() const
+        { return view().imagPart(); }
 
         inline const_real_type flatten() const
         { return view().flatten(); }
 
-        inline real_type real()
-        { return view().real(); }
+        inline real_type realPart()
+        { return view().realPart(); }
 
-        inline real_type imag()
-        { return view().imag(); }
+        inline real_type imagPart()
+        { return view().imagPart(); }
 
         inline real_type flatten()
         { return view().flatten(); }
@@ -708,9 +708,9 @@ namespace tmv {
         TMV_DEPRECATED(const_view_type Conjugate() const)
         { return conjugate(); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(const_real_type Flatten() const)
         { return flatten(); }
 
@@ -725,9 +725,9 @@ namespace tmv {
         TMV_DEPRECATED(view_type Conjugate())
         { return conjugate(); }
         TMV_DEPRECATED(real_type Real())
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag())
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(real_type Flatten())
         { return flatten(); }
 

@@ -1,9 +1,8 @@
 
-#include "TMV_Test.h"
-#include "TMV_Test3.h"
 #include "TMV.h"
 #include "TMV_Small.h"
-
+#include "TMV_Test.h"
+#include "TMV_Test3.h"
 #include "TMV_TestMatrixDivArith.h"
 
 template <class T, tmv::StorageType stor, int N> 
@@ -23,16 +22,16 @@ static void TestSmallSquareDiv_A5()
 
     tmv::SmallMatrix<T,N,N,stor> a1 = m;
     tmv::SmallMatrix<std::complex<T>,N,N,stor> c1 = a1 * std::complex<T>(1,2);
-    c1.diag().AddToAll(std::complex<T>(3,1));
+    c1.diag().addToAll(std::complex<T>(3,1));
 
     tmv::SmallMatrix<T,N,7,stor> a3;
     for(int i=0;i<N;++i) for(int j=0;j<7;++j) a3(i,j) = T(1-3*i+2*j);
-    tmv::SmallMatrix<T,7,N,stor> a4 = a3.Transpose();
-    a4.SubMatrix(1,1+N,0,N) -= a1;
+    tmv::SmallMatrix<T,7,N,stor> a4 = a3.transpose();
+    a4.subMatrix(1,1+N,0,N) -= a1;
 
     tmv::SmallMatrix<std::complex<T>,N,7,stor> c3 = a3*std::complex<T>(1,2);
-    tmv::SmallMatrix<std::complex<T>,7,N,stor> c4 = c3.Adjoint();
-    c4.SubMatrix(1,1+N,0,N) -= c1;
+    tmv::SmallMatrix<std::complex<T>,7,N,stor> c4 = c3.adjoint();
+    c4.subMatrix(1,1+N,0,N) -= c1;
 
     tmv::SmallMatrix<T,7,N,stor> a4x;
     tmv::SmallMatrix<T,7,N,stor> a4b;

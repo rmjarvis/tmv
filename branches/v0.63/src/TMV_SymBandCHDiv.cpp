@@ -61,7 +61,7 @@ namespace tmv {
 
         // m /= LL.lowerBand(UnitDiag)
         TriLDivEq(LL.lowerBand(),m,UnitDiag);
-        m /= DiagMatrixViewOf(LL.diag().real());
+        m /= DiagMatrixViewOf(LL.diag().realPart());
         // m /= LL.upperBand(UnitDiag)
         TriLDivEq(LL.upperBand(),m,UnitDiag);
     }
@@ -88,7 +88,7 @@ namespace tmv {
 
         // mt /= LL.lowerBand(UnitDiag)
         TriLDivEq(LL.lowerBand(),m.adjoint(),UnitDiag);
-        m %= DiagMatrixViewOf(LL.diag().real());
+        m %= DiagMatrixViewOf(LL.diag().realPart());
         // mt /= LL.upperBand(UnitDiag)
         TriLDivEq(LL.upperBand(),m.adjoint(),UnitDiag);
     }

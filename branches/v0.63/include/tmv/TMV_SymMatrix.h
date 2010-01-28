@@ -140,7 +140,7 @@
 //
 // Modifying Functions:
 //
-//    zero()
+//    setZero()
 //    setAllTo(T x) 
 //        For HermMatrix, x must be real.
 //    clip(RT thresh)
@@ -247,7 +247,7 @@
 //    m.divideUsing(dt)
 //    where dt is LU, CH, or SV
 //     
-//    lud(), chd(), svd(), and symsvd() return the
+//    m.lud(), m.chd(), m.svd(), and m.symsvd() return the
 //        corresponding Divider classes.  
 //
 //    For SymMatrixes, LU actually does an LDLT decomposition.
@@ -467,7 +467,7 @@ namespace tmv {
                     m2.lowerTri().offDiag() = 
                         m2.upperTri().offDiag().transpose();
             } else {
-                m2.diag().imag().zero();
+                m2.diag().imagPart().setZero();
                 assignToS(HermMatrixViewOf(m2,Upper));
                 if (size() > 0)
                     m2.lowerTri().offDiag() = 
@@ -594,7 +594,7 @@ namespace tmv {
                     issym()?ct():TMV_ConjOf(T,ct()));
         }
 
-        inline const_real_type real() const
+        inline const_real_type realPart() const
         {
             return const_real_type(
                 reinterpret_cast<const RT*>(cptr()),size(),
@@ -603,7 +603,7 @@ namespace tmv {
                 Sym, uplo(), isReal(T()) ? stor() : NoMajor,NonConj);
         }
 
-        inline const_real_type imag() const
+        inline const_real_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             TMVAssert(issym());
@@ -634,9 +634,9 @@ namespace tmv {
                 DiagType dt = NonUnitDiag) const)
         { return lowerTri(); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
 
 
         // 
@@ -955,7 +955,7 @@ namespace tmv {
         inline bool isHermOK() const
         { 
             if (issym()) return true;
-            else return diag().imag().normInf() == RT(0);
+            else return diag().imagPart().normInf() == RT(0);
         }
 
         virtual T cref(int i, int j) const;
@@ -1198,11 +1198,11 @@ namespace tmv {
         inline const_lowertri_type lowerTri(DiagType dt = NonUnitDiag) const
         { return base::lowerTri(dt); }
 
-        inline const_real_type real() const
-        { return base::real(); }
+        inline const_real_type realPart() const
+        { return base::realPart(); }
 
-        inline const_real_type imag() const
-        { return base::imag(); }
+        inline const_real_type imagPart() const
+        { return base::imagPart(); }
 
         TMV_DEPRECATED(const_rec_type SubMatrix(
                 int i1, int i2, int j1, int j2) const)
@@ -1225,9 +1225,9 @@ namespace tmv {
                 DiagType dt = NonUnitDiag) const)
         { return lowerTri(); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
 
         // 
         // Views
@@ -1411,7 +1411,7 @@ namespace tmv {
         { 
             TMVAssert(size() == m2.size());
             m2.assignToD(DiagMatrixViewOf(diag()));
-            upperTri().offDiag().zero();
+            upperTri().offDiag().setZero();
 #ifdef XTEST
             TMVAssert(this->isHermOK());
 #endif
@@ -1424,7 +1424,7 @@ namespace tmv {
             TMVAssert(size() == m2.size());
             TMVAssert(issym());
             m2.assignToD(DiagMatrixViewOf(diag()));
-            upperTri().offDiag().zero();
+            upperTri().offDiag().setZero();
 #ifdef XTEST
             TMVAssert(this->isHermOK());
 #endif
@@ -1654,8 +1654,8 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline const type& zero() const 
-        { upperTri().zero(); return *this; }
+        inline const type& setZero() const 
+        { upperTri().setZero(); return *this; }
 
         inline const type& setAllTo(const T& x) const
         { 
@@ -1675,7 +1675,7 @@ namespace tmv {
         inline const type& setToIdentity(const T& x=T(1)) const
         { 
             TMVAssert(TMV_IMAG(x)==RT(0) || this->issym());
-            zero(); diag().setAllTo(x); return *this; 
+            setZero(); diag().setAllTo(x); return *this; 
         }
 
         const type& swapRowsCols(int i1, int i2) const;
@@ -1691,7 +1691,7 @@ namespace tmv {
         { return reversePermuteRowsCols(p,0,size()); }
 
         TMV_DEPRECATED(const type& Zero() const)
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(const type& SetAllTo(const T& x) const)
         { return setAllTo(x); }
         TMV_DEPRECATED(const type& Clip(RT thresh) const)
@@ -1811,7 +1811,7 @@ namespace tmv {
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
-        inline real_type real() const
+        inline real_type realPart() const
         {
             return real_type(
                 reinterpret_cast<RT*>(ptr()),size(),
@@ -1825,7 +1825,7 @@ namespace tmv {
             );
         }
 
-        inline real_type imag() const
+        inline real_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             TMVAssert(this->issym());
@@ -1886,9 +1886,9 @@ namespace tmv {
                 DiagType dt = NonUnitDiag) const)
         { return lowerTri(); }
         TMV_DEPRECATED(real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(view_type View() const)
         { return view(); }
         TMV_DEPRECATED(view_type Transpose() const)
@@ -2074,8 +2074,8 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline const type& zero() const 
-        { c_type::zero(); return *this; }
+        inline const type& setZero() const 
+        { c_type::setZero(); return *this; }
 
         inline const type& setAllTo(const T& x) const
         { c_type::setAllTo(x); return *this; }
@@ -2123,7 +2123,7 @@ namespace tmv {
         { c_type::reversePermuteRowsCols(p); return *this; }
 
         TMV_DEPRECATED(const type& Zero() const)
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(const type& SetAllTo(const T& x) const)
         { return setAllTo(x); }
         TMV_DEPRECATED(const type& Clip(RT thresh) const)
@@ -2203,11 +2203,11 @@ namespace tmv {
         inline lowertri_type lowerTri(DiagType dt = NonUnitDiag) const
         { return c_type::lowerTri(dt); }
 
-        inline real_type real() const
-        { return c_type::real(); }
+        inline real_type realPart() const
+        { return c_type::realPart(); }
 
-        inline real_type imag() const
-        { return c_type::imag(); }
+        inline real_type imagPart() const
+        { return c_type::imagPart(); }
 
         inline view_type view() const
         { return c_type::view(); }
@@ -2239,9 +2239,9 @@ namespace tmv {
         TMV_DEPRECATED(lowertri_type LowerTri(DiagType dt = NonUnitDiag) const)
         { return lowerTri(); }
         TMV_DEPRECATED(real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(view_type View() const)
         { return view(); }
         TMV_DEPRECATED(view_type Transpose() const)
@@ -2441,7 +2441,7 @@ namespace tmv {
             NEW_SIZE(m2.size())
         { 
             TMVAssert(size() == m2.size());
-            zero();
+            setZero();
             m2.assignToD(DiagMatrixViewOf(diag()));
         }
 
@@ -2450,7 +2450,7 @@ namespace tmv {
         { 
             TMVAssert(isComplex(T()));
             TMVAssert(size() == m2.size());
-            zero();
+            setZero();
             m2.assignToD(DiagMatrixViewOf(diag()));
         }
 
@@ -2817,7 +2817,7 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline type& zero() 
+        inline type& setZero() 
         { std::fill_n(itsm.get(),itslen,T(0)); return *this; }
 
         inline type& setAllTo(const T& x) 
@@ -2833,7 +2833,7 @@ namespace tmv {
         { return *this; }
 
         inline type& setToIdentity(const T& x=T(1)) 
-        { zero(); diag().setAllTo(x); return *this; }
+        { setZero(); diag().setAllTo(x); return *this; }
 
         inline type& swapRowsCols(int i1, int i2)
         { view().swapRowsCols(i1,i2); return *this; }
@@ -2851,7 +2851,7 @@ namespace tmv {
         { view().reversePermuteRowsCols(p); return *this; }
 
         TMV_DEPRECATED(type& Zero())
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(type& SetAllTo(const T& x))
         { return setAllTo(x); }
         TMV_DEPRECATED(type& Clip(RT thresh))
@@ -2970,7 +2970,7 @@ namespace tmv {
                     stepj(),stepi(),dt,TMV_TransOf(S),NonConj);
         }
 
-        inline const_real_type real() const
+        inline const_real_type realPart() const
         {
             return const_real_type(
                 reinterpret_cast<const RT*>(itsm.get()),size(),
@@ -2979,7 +2979,7 @@ namespace tmv {
                 Sym,U,isReal(T())?S:NoMajor,NonConj);
         }
 
-        inline const_real_type imag() const
+        inline const_real_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             return const_real_type(
@@ -3106,7 +3106,7 @@ namespace tmv {
                     stepj(),stepi(),dt,TMV_TransOf(S),NonConj TMV_FIRSTLAST);
         }
 
-        inline real_type real()
+        inline real_type realPart()
         {
             return real_type(
                 reinterpret_cast<RT*>(itsm.get()),size(),
@@ -3120,7 +3120,7 @@ namespace tmv {
             );
         }
 
-        inline real_type imag()
+        inline real_type imagPart()
         {
             TMVAssert(isComplex(T()));
             return real_type(
@@ -3183,9 +3183,9 @@ namespace tmv {
                 DiagType dt = NonUnitDiag) const)
         { return lowerTri(); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(const_view_type View() const)
         { return view(); }
         TMV_DEPRECATED(const_view_type Transpose() const)
@@ -3212,9 +3212,9 @@ namespace tmv {
         TMV_DEPRECATED(lowertri_type LowerTri(DiagType dt = NonUnitDiag))
         { return lowerTri(); }
         TMV_DEPRECATED(real_type Real())
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag())
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(view_type View())
         { return view(); }
         TMV_DEPRECATED(view_type Transpose())
@@ -3390,7 +3390,7 @@ namespace tmv {
             else {
                 if (U == Upper) upperTri() = rhs.upperTri();
                 else lowerTri() = rhs.lowerTri();
-                diag().imag().zero();
+                diag().imagPart().setZero();
             }
 #ifdef XTEST
             TMVAssert(this->isHermOK());
@@ -3407,7 +3407,7 @@ namespace tmv {
             if (U == Upper) upperTri() = rhs.upperTri();
             else lowerTri() = rhs.lowerTri();
             if (isComplex(T()) && isComplex(T2()) && rhs.issym()) 
-                diag().imag().zero();
+                diag().imagPart().setZero();
 #ifdef XTEST
             TMVAssert(this->isHermOK());
 #endif
@@ -3423,7 +3423,7 @@ namespace tmv {
             TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(rhs.isSquare());
             std::copy(rhs.cptr(),rhs.cptr()+itslen,itsm.get());
-            if (isComplex(T())) diag().imag().zero();
+            if (isComplex(T())) diag().imagPart().setZero();
 #ifdef XTEST
             TMVAssert(this->isHermOK());
 #endif
@@ -3441,7 +3441,7 @@ namespace tmv {
                 upperTri() = rhs.upperTri();
             else
                 lowerTri() = rhs.lowerTri();
-            if (isComplex(T()) && isComplex(T2())) diag().imag().zero();
+            if (isComplex(T()) && isComplex(T2())) diag().imagPart().setZero();
 #ifdef XTEST
             TMVAssert(this->isHermOK());
 #endif
@@ -3480,7 +3480,7 @@ namespace tmv {
             NEW_SIZE(m2.size())
         { 
             TMVAssert(S==RowMajor || S==ColMajor);
-            zero();
+            setZero();
             m2.assignToD(DiagMatrixViewOf(diag()));
 #ifdef XTEST
             TMVAssert(this->isHermOK());
@@ -3491,8 +3491,8 @@ namespace tmv {
             NEW_SIZE(m2.size())
         { 
             TMVAssert(S==RowMajor || S==ColMajor);
-            zero();
-            m2.assignToD(DiagMatrixViewOf(diag().real()));
+            setZero();
+            m2.assignToD(DiagMatrixViewOf(diag().realPart()));
 #ifdef XTEST
             TMVAssert(this->isHermOK());
 #endif
@@ -3921,7 +3921,7 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline type& zero() 
+        inline type& setZero() 
         {
             std::fill_n(itsm.get(),itslen,T(0));
             return *this;
@@ -3946,7 +3946,7 @@ namespace tmv {
         inline type& setToIdentity(const T& x=T(1)) 
         { 
             TMVAssert(TMV_IMAG(x) == RT(0));
-            zero(); 
+            setZero(); 
             diag().setAllTo(x); 
             return *this; 
         }
@@ -3967,7 +3967,7 @@ namespace tmv {
         { view().reversePermuteRowsCols(p); return *this; }
 
         TMV_DEPRECATED(type& Zero())
-        { return zero(); }
+        { return setZero(); }
         TMV_DEPRECATED(type& SetAllTo(const T& x))
         { return setAllTo(x); }
         TMV_DEPRECATED(type& Clip(RT thresh))
@@ -4085,7 +4085,7 @@ namespace tmv {
                     dt,TMV_TransOf(S),TMV_ConjOf(T,NonConj));
         }
 
-        inline const_real_type real() const
+        inline const_real_type realPart() const
         {
             return const_real_type(
                 reinterpret_cast<const RT*>(itsm.get()),size(),
@@ -4094,7 +4094,7 @@ namespace tmv {
                 Herm,U,isReal(T())?S:NoMajor,NonConj);
         }
 
-        inline const_real_type imag() const
+        inline const_real_type imagPart() const
         { 
             // The imaginary part of a Hermitian matrix is anti-symmetric
             // so this is illegal.
@@ -4221,7 +4221,7 @@ namespace tmv {
                     dt,TMV_TransOf(S),TMV_ConjOf(T,NonConj) TMV_FIRSTLAST);
         }
 
-        inline real_type real()
+        inline real_type realPart()
         {
             return real_type(
                 reinterpret_cast<RT*>(
@@ -4236,7 +4236,7 @@ namespace tmv {
             );
         }
 
-        inline real_type imag()
+        inline real_type imagPart()
         { 
             // The imaginary part of a Hermitian matrix is anti-symmetric
             // so this is illegal.
@@ -4294,9 +4294,9 @@ namespace tmv {
                 DiagType dt = NonUnitDiag) const)
         { return lowerTri(); }
         TMV_DEPRECATED(const_real_type Real() const)
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(const_real_type Imag() const)
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(const_view_type View() const)
         { return view(); }
         TMV_DEPRECATED(const_view_type Transpose() const)
@@ -4323,9 +4323,9 @@ namespace tmv {
         TMV_DEPRECATED(lowertri_type LowerTri(DiagType dt = NonUnitDiag))
         { return lowerTri(); }
         TMV_DEPRECATED(real_type Real())
-        { return real(); }
+        { return realPart(); }
         TMV_DEPRECATED(real_type Imag())
-        { return imag(); }
+        { return imagPart(); }
         TMV_DEPRECATED(view_type View())
         { return view(); }
         TMV_DEPRECATED(view_type Transpose())
@@ -4460,7 +4460,7 @@ namespace tmv {
     {
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST
-        TMVAssert(isReal(T()) || m.diag().imag().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
 #endif
         return ConstSymMatrixView<T>(
             m.cptr(),m.rowsize(),m.stepi(),m.stepj(),
@@ -4473,7 +4473,7 @@ namespace tmv {
     { 
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST
-        TMVAssert(isReal(T()) || m.diag().imag().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
 #endif
         return ConstSymMatrixView<T,I>(
             m.cptr(),m.rowsize(),m.stepi(),m.stepj(),
@@ -4486,7 +4486,7 @@ namespace tmv {
     {
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST
-        TMVAssert(isReal(T()) || m.diag().imag().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
 #endif
         return ConstSymMatrixView<T,I>(
             m.cptr(),m.rowsize(),m.stepi(),m.stepj(),
@@ -4499,7 +4499,7 @@ namespace tmv {
     { 
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST
-        TMVAssert(isReal(T()) || m.diag().imag().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
 #endif
         return SymMatrixView<T,I>(
             m.ptr(),m.rowsize(),m.stepi(),m.stepj(),
@@ -4512,7 +4512,7 @@ namespace tmv {
     {
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST
-        TMVAssert(isReal(T()) || m.diag().imag().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
 #endif
         return SymMatrixView<T,I>(
             m.ptr(),m.rowsize(),m.stepi(),m.stepj(),

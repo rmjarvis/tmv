@@ -53,7 +53,7 @@ namespace tmv {
     //
 
     template <bool rm, bool a1, bool ca, class T, class T1, class T2> 
-    static void doRowAddMM(const T1 alpha, const GenMatrix<T2>& A, 
+    static void DoRowAddMM(const T1 alpha, const GenMatrix<T2>& A, 
                            const MatrixView<T>& B)
     {
         TMVAssert(A.colsize() == B.colsize());
@@ -95,17 +95,17 @@ namespace tmv {
     { 
         if (TMV_IMAG(alpha) == TMV_RealType(T)(0))
             if (TMV_REAL(alpha) == TMV_RealType(T)(1))
-                if (A.isconj()) doRowAddMM<rm,true,true>(TMV_REAL(alpha),A,B);
-                else doRowAddMM<rm,true,false>(TMV_REAL(alpha),A,B);
+                if (A.isconj()) DoRowAddMM<rm,true,true>(TMV_REAL(alpha),A,B);
+                else DoRowAddMM<rm,true,false>(TMV_REAL(alpha),A,B);
             else
-                if (A.isconj()) doRowAddMM<rm,false,true>(TMV_REAL(alpha),A,B);
-                else doRowAddMM<rm,false,false>(TMV_REAL(alpha),A,B);
+                if (A.isconj()) DoRowAddMM<rm,false,true>(TMV_REAL(alpha),A,B);
+                else DoRowAddMM<rm,false,false>(TMV_REAL(alpha),A,B);
         else
-            if (A.isconj()) doRowAddMM<rm,false,true>(alpha,A,B);
-            else doRowAddMM<rm,false,false>(alpha,A,B);
+            if (A.isconj()) DoRowAddMM<rm,false,true>(alpha,A,B);
+            else DoRowAddMM<rm,false,false>(alpha,A,B);
     }
 
-    template <class T, class Ta> static void doAddMM(
+    template <class T, class Ta> static void DoAddMM(
         const T alpha, const GenMatrix<Ta>& A, const MatrixView<T>& B)
     { 
         TMVAssert(A.colsize() == B.colsize());
@@ -155,13 +155,13 @@ namespace tmv {
                 if (SameStorage(A,B)) {
                     if (B.isrm()) {
                         Matrix<T,RowMajor> A2 = A;
-                        doAddMM(alpha,A2,B);
+                        DoAddMM(alpha,A2,B);
                     } else {
                         Matrix<T,ColMajor> A2 = A;
-                        doAddMM(alpha,A2,B);
+                        DoAddMM(alpha,A2,B);
                     }
                 } 
-                else doAddMM(alpha,A,B);
+                else DoAddMM(alpha,A,B);
             }
         }
 #ifdef XDEBUG

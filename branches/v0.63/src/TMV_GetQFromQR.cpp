@@ -68,7 +68,7 @@ namespace tmv {
         TMVAssert(beta.ct() == NonConj);
         const int M = Q.colsize();
         const int N = Q.rowsize();
-        Q.upperTri().zero();
+        Q.upperTri().setZero();
         const int sb = beta.step();
         if (sb == 1) {
             const T* bi = beta.cptr()+(N-1);
@@ -96,7 +96,7 @@ namespace tmv {
 #endif
         const int M = Q.colsize();
         const int N = Q.rowsize();
-        Q.upperTri().zero();
+        Q.upperTri().setZero();
         UpperTriMatrix<T,NonUnitDiag,ColMajor> BaseZ(TMV_MIN(QR_BLOCKSIZE,N));
         for(int j2=N;j2>0;) {
             int j1 = j2 > QR_BLOCKSIZE ? j2-QR_BLOCKSIZE : 0;

@@ -397,18 +397,18 @@ namespace tmv {
         TMVAssert(A.isherm() || !C.isconj());
 
         if (TMV_IMAG(alpha) == T(0)) {
-            SymMatrix<T,Lower,ColMajor> A1 = A.real();
+            SymMatrix<T,Lower,ColMajor> A1 = A.realPart();
             Matrix<T,ColMajor> C1 = TMV_REAL(alpha)*A1*B;
-            if (beta == 0) C.real() = C1;
-            else C.real() += C1;
+            if (beta == 0) C.realPart() = C1;
+            else C.realPart() += C1;
             if (A.issym()) {
-                A1 = A.imag();
+                A1 = A.imagPart();
                 if (C.isconj()) C1 = -TMV_REAL(alpha)*A1*B;
                 else C1 = TMV_REAL(alpha)*A1*B;
             } else {
                 LowerTriMatrixView<T> L = A1.lowerTri();
-                L = A.lowerTri().imag();
-                // A.imag() = L - LT
+                L = A.lowerTri().imagPart();
+                // A.imagPart() = L - LT
                 if (A.lowerTri().isconj() != C.isconj()) {
                     C1 = -TMV_REAL(alpha)*L*B;
                     C1 += TMV_REAL(alpha)*L.transpose()*B;
@@ -417,24 +417,24 @@ namespace tmv {
                     C1 -= TMV_REAL(alpha)*L.transpose()*B;
                 }
             }
-            if (beta == 0) C.imag() = C1;
-            else C.imag() += C1;
+            if (beta == 0) C.imagPart() = C1;
+            else C.imagPart() += C1;
         } else {
-            SymMatrix<T,Lower,ColMajor> Ar = A.real();
+            SymMatrix<T,Lower,ColMajor> Ar = A.realPart();
             SymMatrix<T,Lower,ColMajor> Ai(A.size());
             LowerTriMatrixView<T> L = Ai.lowerTri();
             Matrix<T,ColMajor> C1 = TMV_REAL(alpha)*Ar*B;
             if (A.issym()) {
-                Ai = A.imag();
+                Ai = A.imagPart();
                 C1 -= TMV_IMAG(alpha)*Ai*B;
             } else {
-                L = A.lowerTri().imag();
+                L = A.lowerTri().imagPart();
                 if (A.lowerTri().isconj()) L *= T(-1);
                 C1 -= TMV_IMAG(alpha)*L*B;
                 C1 += TMV_IMAG(alpha)*L.transpose()*B;
             }
-            if (beta == 0) C.real() = C1;
-            else C.real() += C1;
+            if (beta == 0) C.realPart() = C1;
+            else C.realPart() += C1;
             C1 = TMV_IMAG(alpha)*Ar*B;
             if (A.issym()) {
                 C1 += TMV_REAL(alpha)*Ai*B;
@@ -443,8 +443,8 @@ namespace tmv {
                 C1 -= TMV_REAL(alpha)*L.transpose()*B;
             }
             if (C.isconj()) C1 *= T(-1);
-            if (beta == 0) C.imag() = C1;
-            else C.imag() += C1;
+            if (beta == 0) C.imagPart() = C1;
+            else C.imagPart() += C1;
         }
     }
     template <class T> 
@@ -469,29 +469,29 @@ namespace tmv {
         TMVAssert(A.isherm() || !C.isconj());
 
         if (TMV_IMAG(alpha) == T(0)) {
-            Matrix<T,ColMajor> B1 = B.real();
+            Matrix<T,ColMajor> B1 = B.realPart();
             Matrix<T,ColMajor> C1 = TMV_REAL(alpha)*A*B1;
-            if (beta == 0) C.real() = C1;
-            else C.real() += C1;
-            B1 = B.imag();
+            if (beta == 0) C.realPart() = C1;
+            else C.realPart() += C1;
+            B1 = B.imagPart();
             if (B.isconj()) C1 = -TMV_REAL(alpha)*A*B1;
             else C1 = TMV_REAL(alpha)*A*B1;
-            if (beta == 0) C.imag() = C1;
-            else C.imag() += C1;
+            if (beta == 0) C.imagPart() = C1;
+            else C.imagPart() += C1;
         } else {
-            Matrix<T,ColMajor> Br = B.real();
-            Matrix<T,ColMajor> Bi = B.imag();
+            Matrix<T,ColMajor> Br = B.realPart();
+            Matrix<T,ColMajor> Bi = B.imagPart();
             Matrix<T,ColMajor> C1 = TMV_REAL(alpha)*A*Br;
             if (B.isconj()) C1 += TMV_IMAG(alpha)*A*Bi;
             else C1 -= TMV_IMAG(alpha)*A*Bi;
-            if (beta == 0) C.real() = C1;
-            else C.real() += C1;
+            if (beta == 0) C.realPart() = C1;
+            else C.realPart() += C1;
 
             if (B.isconj()) C1 = -TMV_REAL(alpha)*A*Bi;
             else C1 = TMV_REAL(alpha)*A*Bi;
             C1 += TMV_IMAG(alpha)*A*Br;
-            if (beta == 0) C.imag() = C1;
-            else C.imag() += C1;
+            if (beta == 0) C.imagPart() = C1;
+            else C.imagPart() += C1;
         }
     }
     template <class T> 
@@ -521,7 +521,7 @@ namespace tmv {
 #endif // BLAS
 
     template <bool add, class T, class Ta, class Tb> 
-    static void doMultMM(
+    static void DoMultMM(
         const T alpha, const GenSymMatrix<Ta>& A, const GenMatrix<Tb>& B,
         const MatrixView<T>& C)
     {
@@ -535,15 +535,15 @@ namespace tmv {
 
 #ifdef BLAS
         if (A.isrm())
-            doMultMM<add>(alpha,A.issym()?A.transpose():A.adjoint(),B,C);
+            DoMultMM<add>(alpha,A.issym()?A.transpose():A.adjoint(),B,C);
         else if (A.isconj())
-            doMultMM<add>(
+            DoMultMM<add>(
                 TMV_CONJ(alpha),A.conjugate(),B.conjugate(),C.conjugate());
         else if ( !((C.isrm() && C.stepi()>0) || (C.iscm() && C.stepj()>0)) ||
                   (C.iscm() && C.isconj()) || 
                   (C.isrm() && C.isconj()==A.issym()) ) {
             Matrix<T,ColMajor> C2(C.colsize(),C.rowsize());
-            doMultMM<false>(T(1),A,B,C2.view());
+            DoMultMM<false>(T(1),A,B,C2.view());
             if (add) C += alpha*C2;
             else C = alpha*C2;
         } else if (!(A.iscm() && A.stepj()>0)) {
@@ -551,18 +551,18 @@ namespace tmv {
                 if (A.isherm()) {
                     if (A.uplo() == Upper) {
                         HermMatrix<Ta,Upper,ColMajor> A2 = TMV_REAL(alpha)*A;
-                        doMultMM<add>(T(1),A2,B,C);
+                        DoMultMM<add>(T(1),A2,B,C);
                     } else {
                         HermMatrix<Ta,Lower,ColMajor> A2 = TMV_REAL(alpha)*A;
-                        doMultMM<add>(T(1),A2,B,C);
+                        DoMultMM<add>(T(1),A2,B,C);
                     }
                 } else {
                     if (A.uplo() == Upper) {
                         SymMatrix<Ta,Upper,ColMajor> A2 = TMV_REAL(alpha)*A;
-                        doMultMM<add>(T(1),A2,B,C);
+                        DoMultMM<add>(T(1),A2,B,C);
                     } else {
                         SymMatrix<Ta,Lower,ColMajor> A2 = TMV_REAL(alpha)*A;
-                        doMultMM<add>(T(1),A2,B,C);
+                        DoMultMM<add>(T(1),A2,B,C);
                     }
                 }
             } else {
@@ -571,18 +571,18 @@ namespace tmv {
                         // alpha * A is not Hermitian, so can't do 
                         // A2 = alpha * A
                         HermMatrix<Ta,Upper,ColMajor> A2 = A;
-                        doMultMM<add>(alpha,A2,B,C);
+                        DoMultMM<add>(alpha,A2,B,C);
                     } else {
                         HermMatrix<Ta,Lower,ColMajor> A2 = A;
-                        doMultMM<add>(alpha,A2,B,C);
+                        DoMultMM<add>(alpha,A2,B,C);
                     }
                 } else {
                     if (A.uplo() == Upper) {
                         SymMatrix<T,Upper,ColMajor> A2 = alpha*A;
-                        doMultMM<add>(T(1),A2,B,C);
+                        DoMultMM<add>(T(1),A2,B,C);
                     } else {
                         SymMatrix<T,Lower,ColMajor> A2 = alpha*A;
-                        doMultMM<add>(T(1),A2,B,C);
+                        DoMultMM<add>(T(1),A2,B,C);
                     }
                 }
             }
@@ -593,36 +593,36 @@ namespace tmv {
                 if (C.isconj()) {
                     if (C.iscm()) {
                         Matrix<Tb,ColMajor> B2 = TMV_REAL(alpha)*B.conjugate();
-                        doMultMM<add>(T(1),A,B2.conjugate(),C);
+                        DoMultMM<add>(T(1),A,B2.conjugate(),C);
                     } else {
                         Matrix<Tb,RowMajor> B2 = TMV_REAL(alpha)*B.conjugate();
-                        doMultMM<add>(T(1),A,B2.conjugate(),C);
+                        DoMultMM<add>(T(1),A,B2.conjugate(),C);
                     }
                 } else {
                     if (C.iscm()) {
                         Matrix<Tb,ColMajor> B2 = TMV_REAL(alpha)*B;
-                        doMultMM<add>(T(1),A,B2,C);
+                        DoMultMM<add>(T(1),A,B2,C);
                     } else {
                         Matrix<Tb,RowMajor> B2 = TMV_REAL(alpha)*B;
-                        doMultMM<add>(T(1),A,B2,C);
+                        DoMultMM<add>(T(1),A,B2,C);
                     }
                 }
             } else {
                 if (C.isconj()) {
                     if (C.iscm()) {
                         Matrix<T,ColMajor> B2 = TMV_CONJ(alpha)*B.conjugate();
-                        doMultMM<add>(T(1),A,B2.conjugate(),C);
+                        DoMultMM<add>(T(1),A,B2.conjugate(),C);
                     } else {
                         Matrix<T,RowMajor> B2 = TMV_CONJ(alpha)*B.conjugate();
-                        doMultMM<add>(T(1),A,B2.conjugate(),C);
+                        DoMultMM<add>(T(1),A,B2.conjugate(),C);
                     }
                 } else {
                     if (C.iscm()) {
                         Matrix<T,ColMajor> B2 = alpha*B;
-                        doMultMM<add>(T(1),A,B2,C);
+                        DoMultMM<add>(T(1),A,B2,C);
                     } else {
                         Matrix<T,RowMajor> B2 = alpha*B;
-                        doMultMM<add>(T(1),A,B2,C);
+                        DoMultMM<add>(T(1),A,B2,C);
                     }
                 }
             }
@@ -641,12 +641,12 @@ namespace tmv {
     {
         if (C.isrm()) {
             Matrix<T,RowMajor> C2(C.colsize(),C.rowsize());
-            doMultMM<false>(T(1),A,B,C2.view());
+            DoMultMM<false>(T(1),A,B,C2.view());
             if (add) C += alpha*C2;
             else C = alpha*C2;
         } else {
             Matrix<T,ColMajor> C2(C.colsize(),C.rowsize());
-            doMultMM<false>(T(1),A,B,C2.view());
+            DoMultMM<false>(T(1),A,B,C2.view());
             if (add) C += alpha*C2;
             else C = alpha*C2;
         }
@@ -663,18 +663,18 @@ namespace tmv {
             if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
                 if (C.isrm()) {
                     Matrix<Tb,RowMajor> B2 = TMV_REAL(alpha) * B.colRange(j,j2);
-                    doMultMM<add>(T(1),A,B2,C.colRange(j,j2));
+                    DoMultMM<add>(T(1),A,B2,C.colRange(j,j2));
                 } else {
                     Matrix<Tb,ColMajor> B2 = TMV_REAL(alpha) * B.colRange(j,j2);
-                    doMultMM<add>(T(1),A,B2,C.colRange(j,j2));
+                    DoMultMM<add>(T(1),A,B2,C.colRange(j,j2));
                 }
             } else {
                 if (C.isrm()) {
                     Matrix<T,RowMajor> B2 = alpha * B.colRange(j,j2);
-                    doMultMM<add>(T(1),A,B2,C.colRange(j,j2));
+                    DoMultMM<add>(T(1),A,B2,C.colRange(j,j2));
                 } else {
                     Matrix<T,ColMajor> B2 = alpha * B.colRange(j,j2);
-                    doMultMM<add>(T(1),A,B2,C.colRange(j,j2));
+                    DoMultMM<add>(T(1),A,B2,C.colRange(j,j2));
                 }
             }
             j = j2;
@@ -707,7 +707,7 @@ namespace tmv {
 
         if (C.colsize() > 0 && C.rowsize() > 0) {
             if (alpha == T(0)) {
-                if (!add) C.zero();
+                if (!add) C.setZero();
             }
             else if (SameStorage(A,C)) 
                 FullTempMultMM<add>(alpha,A,B,C);
@@ -716,7 +716,7 @@ namespace tmv {
                     BlockTempMultMM<add>(alpha,A,B,C);
                 else
                     FullTempMultMM<add>(alpha,A,B,C);
-            else doMultMM<add>(alpha, A, B, C);
+            else DoMultMM<add>(alpha, A, B, C);
         }
 
 #ifdef XDEBUG
@@ -756,13 +756,13 @@ namespace tmv {
                     B2.rowRange(0,j) = TMV_REAL(alpha) * B.subMatrix(0,j,j,j2);
                     B2.rowRange(j,j2) = TMV_REAL(alpha) * B.subSymMatrix(j,j2);
                     B2.rowRange(j2,N) = TMV_REAL(alpha) * B.subMatrix(j2,N,j,j2);
-                    doMultMM<add>(T(1),A,B2.view(),C.colRange(j,j2));
+                    DoMultMM<add>(T(1),A,B2.view(),C.colRange(j,j2));
                 } else {
                     Matrix<Tb,ColMajor> B2(N,j2-j);
                     B2.rowRange(0,j) = TMV_REAL(alpha) * B.subMatrix(0,j,j,j2);
                     B2.rowRange(j,j2) = TMV_REAL(alpha) * B.subSymMatrix(j,j2);
                     B2.rowRange(j2,N) = TMV_REAL(alpha) * B.subMatrix(j2,N,j,j2);
-                    doMultMM<add>(T(1),A,B2.view(),C.colRange(j,j2));
+                    DoMultMM<add>(T(1),A,B2.view(),C.colRange(j,j2));
                 }
             } else {
                 if (C.isrm()) {
@@ -770,13 +770,13 @@ namespace tmv {
                     B2.rowRange(0,j) = alpha * B.subMatrix(0,j,j,j2);
                     B2.rowRange(j,j2) = alpha * B.subSymMatrix(j,j2);
                     B2.rowRange(j2,N) = alpha * B.subMatrix(j2,N,j,j2);
-                    doMultMM<add>(T(1),A,B2.view(),C.colRange(j,j2));
+                    DoMultMM<add>(T(1),A,B2.view(),C.colRange(j,j2));
                 } else {
                     Matrix<T,ColMajor> B2(N,j2-j);
                     B2.rowRange(0,j) = alpha * B.subMatrix(0,j,j,j2);
                     B2.rowRange(j,j2) = alpha * B.subSymMatrix(j,j2);
                     B2.rowRange(j2,N) = alpha * B.subMatrix(j2,N,j,j2);
-                    doMultMM<add>(T(1),A,B2.view(),C.colRange(j,j2));
+                    DoMultMM<add>(T(1),A,B2.view(),C.colRange(j,j2));
                 }
             }
             j = j2;

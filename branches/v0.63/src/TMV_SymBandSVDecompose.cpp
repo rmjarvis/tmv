@@ -127,7 +127,7 @@ namespace tmv {
             *Ej = TMV_ABS(xcEj);
             *Uj = TMV_SIGN(xcEj,*Ej);
         }
-        D = cD.real();
+        D = cD.realPart();
     }
 
     template <class T> 
@@ -178,7 +178,7 @@ namespace tmv {
                 MakeTridiagReal(Ud.view(),A.diag(),A.diag(-1),D,E);
             }
             if (U) {
-                U->zero();
+                U->setZero();
                 U->diag() = Ud;
             }
         } else {
@@ -226,20 +226,20 @@ namespace tmv {
             }
 
             // The tridiagonal of U1 is the tridiagonal we want, so copy it to D,E
-            if (isReal(Td())) D = U1->diag().real();
+            if (isReal(Td())) D = U1->diag().realPart();
             else D = U1->diag();
-            E = U1->diag(-1).real();
+            E = U1->diag(-1).realPart();
 #ifdef XTEST
             if (isComplex(T())) {
                 if (isReal(Td()))
-                    TMVAssert(normInf(U1->diag().imag()) == RT(0));
-                TMVAssert(normInf(U1->diag(-1).imag()) == RT(0));
+                    TMVAssert(normInf(U1->diag().imagPart()) == RT(0));
+                TMVAssert(normInf(U1->diag(-1).imagPart()) == RT(0));
             }
 #endif
 
             if (U) {
-                U->upperTri().zero();
-                U->diag(-1).zero();
+                U->upperTri().setZero();
+                U->diag(-1).setZero();
                 for (int j=N-1;j>0;--j) {
                     endcol = vec[j-1];
                     U->col(j,j+1,endcol) = U->col(j-1,j+1,endcol);
@@ -516,7 +516,7 @@ namespace tmv {
         if (N == 0) return;
 
         if (A.nlo() == 0) {
-            SS = A.diag().real();
+            SS = A.diag().realPart();
             if (U) U->setToIdentity();
         } else {
             // First we reduce A to tridiagonal form: A = U * T * Ut

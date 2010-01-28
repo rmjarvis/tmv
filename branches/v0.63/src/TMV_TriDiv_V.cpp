@@ -67,7 +67,7 @@ namespace tmv {
     //
 
     template <bool rm, bool ca, bool ua, class T, class Ta> 
-    static void doRowTriLDivEq(
+    static void DoRowTriLDivEq(
         const GenUpperTriMatrix<Ta>& A, const VectorView<T>& b)
     {
         // Solve A x = y  where A is an upper triangle matrix
@@ -144,18 +144,18 @@ namespace tmv {
     {
         if (A.isconj())
             if (A.isunit())
-                doRowTriLDivEq<rm,true,true>(A,b);
+                DoRowTriLDivEq<rm,true,true>(A,b);
             else
-                doRowTriLDivEq<rm,true,false>(A,b);
+                DoRowTriLDivEq<rm,true,false>(A,b);
         else
             if (A.isunit())
-                doRowTriLDivEq<rm,false,true>(A,b);
+                DoRowTriLDivEq<rm,false,true>(A,b);
             else
-                doRowTriLDivEq<rm,false,false>(A,b);
+                DoRowTriLDivEq<rm,false,false>(A,b);
     }
 
     template <bool cm, bool ca, bool ua, class T, class Ta> 
-    static void doColTriLDivEq(
+    static void DoColTriLDivEq(
         const GenUpperTriMatrix<Ta>& A, const VectorView<T>& b)
     {
         //cout<<"colmajor upper\n";
@@ -233,18 +233,18 @@ namespace tmv {
     {
         if (A.isconj())
             if (A.isunit())
-                doColTriLDivEq<cm,true,true>(A,b);
+                DoColTriLDivEq<cm,true,true>(A,b);
             else
-                doColTriLDivEq<cm,true,false>(A,b);
+                DoColTriLDivEq<cm,true,false>(A,b);
         else
             if (A.isunit())
-                doColTriLDivEq<cm,false,true>(A,b);
+                DoColTriLDivEq<cm,false,true>(A,b);
             else
-                doColTriLDivEq<cm,false,false>(A,b);
+                DoColTriLDivEq<cm,false,false>(A,b);
     }
 
     template <bool rm, bool ca, bool ua, class T, class Ta> 
-    static void doRowTriLDivEq(
+    static void DoRowTriLDivEq(
         const GenLowerTriMatrix<Ta>& A, const VectorView<T>& b)
     {
         // Solve A x = y  where A is a lower triangle matrix
@@ -318,18 +318,18 @@ namespace tmv {
     {
         if (A.isconj())
             if (A.isunit())
-                doRowTriLDivEq<rm,true,true>(A,b);
+                DoRowTriLDivEq<rm,true,true>(A,b);
             else
-                doRowTriLDivEq<rm,true,false>(A,b);
+                DoRowTriLDivEq<rm,true,false>(A,b);
         else
             if (A.isunit())
-                doRowTriLDivEq<rm,false,true>(A,b);
+                DoRowTriLDivEq<rm,false,true>(A,b);
             else
-                doRowTriLDivEq<rm,false,false>(A,b);
+                DoRowTriLDivEq<rm,false,false>(A,b);
     }
 
     template <bool cm, bool ca, bool ua, class T, class Ta> 
-    static void doColTriLDivEq(
+    static void DoColTriLDivEq(
         const GenLowerTriMatrix<Ta>& A, const VectorView<T>& b)
     {
         // Solve A x = y  where A is a lower triangle matrix
@@ -398,18 +398,18 @@ namespace tmv {
     {
         if (A.isconj())
             if (A.isunit())
-                doColTriLDivEq<cm,true,true>(A,b);
+                DoColTriLDivEq<cm,true,true>(A,b);
             else
-                doColTriLDivEq<cm,true,false>(A,b);
+                DoColTriLDivEq<cm,true,false>(A,b);
         else
             if (A.isunit())
-                doColTriLDivEq<cm,false,true>(A,b);
+                DoColTriLDivEq<cm,false,true>(A,b);
             else
-                doColTriLDivEq<cm,false,false>(A,b);
+                DoColTriLDivEq<cm,false,false>(A,b);
     }
 
     template <class T, class Ta> 
-    static inline void doTriLDivEq(
+    static inline void DoTriLDivEq(
         const GenUpperTriMatrix<Ta>& A, const VectorView<T>& b)
     {
         if (A.isrm()) RowTriLDivEq<true>(A,b);
@@ -418,7 +418,7 @@ namespace tmv {
     }
 
     template <class T, class Ta> 
-    static inline void doTriLDivEq(
+    static inline void DoTriLDivEq(
         const GenLowerTriMatrix<Ta>& A, const VectorView<T>& b)
     {
         if (A.isrm()) RowTriLDivEq<true>(A,b);
@@ -439,7 +439,7 @@ namespace tmv {
             int i2 = b.size();
             for(const T* b2 = b.cptr()+i2-1; i2>0 && *b2==T(0); --i2,--b2);
             if (i2==0) return;
-            else doTriLDivEq(A.subTriMatrix(0,i2),b.subVector(0,i2));
+            else DoTriLDivEq(A.subTriMatrix(0,i2),b.subVector(0,i2));
         } else {
             Vector<T> bb = b;
             NonBlasTriLDivEq(A,bb.view());
@@ -462,7 +462,7 @@ namespace tmv {
             for(const T* b1 = b.cptr(); i1<N && *b1==T(0); ++i1,++b1);
             if (i1==N) return;
             else
-                doTriLDivEq(A.subTriMatrix(i1,N),b.subVector(i1,N));
+                DoTriLDivEq(A.subTriMatrix(i1,N),b.subVector(i1,N));
         } else {
             Vector<T> bb = b;
             NonBlasTriLDivEq(A,bb.view());

@@ -186,7 +186,7 @@ namespace tmv {
 #ifdef XDEBUG
         Matrix<T> L = A;
         if (R > 1)
-            L.upperTri().offDiag().zero();
+            L.upperTri().offDiag().setZero();
         L.diag().setAllTo(T(1));
         Matrix<T> U = A.upperTri();
         Matrix<T> AA = L * U;
@@ -339,7 +339,7 @@ namespace tmv {
         }
 #ifdef XDEBUG
         Matrix<T> L = A;
-        if (R > 1) L.upperTri().offDiag().zero();
+        if (R > 1) L.upperTri().offDiag().setZero();
         L.diag().setAllTo(T(1));
         Matrix<T> U = A.upperTri();
         Matrix<T> AA = L * U;

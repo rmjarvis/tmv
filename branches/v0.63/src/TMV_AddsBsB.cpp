@@ -196,10 +196,10 @@ namespace tmv {
         if (N > 0) {
             if (SameStorage(A,C) || SameStorage(B,C)) {
                 AddMM(alpha,A,beta,B,BandMatrixView<T>(C,k,k));
-                C.subMatrix(0,N-k-1,k+1,N).upperTri().zero();
-                C.subMatrix(k+1,N,0,N-k-1).lowerTri().zero();
+                C.subMatrix(0,N-k-1,k+1,N).upperTri().setZero();
+                C.subMatrix(k+1,N,0,N-k-1).lowerTri().setZero();
             } else {
-                C.zero();
+                C.setZero();
                 AddMM(alpha,A,beta,B,BandMatrixView<T>(C,k,k));
             }
         }

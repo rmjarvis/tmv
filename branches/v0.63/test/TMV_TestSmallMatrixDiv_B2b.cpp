@@ -1,9 +1,8 @@
 
-#include "TMV_Test.h"
-#include "TMV_Test3.h"
 #include "TMV.h"
 #include "TMV_Small.h"
-
+#include "TMV_Test.h"
+#include "TMV_Test3.h"
 #define NOLDIVEQ
 #include "TMV_TestMatrixDivArith.h"
 
@@ -21,10 +20,10 @@ static void TestSmallNonSquareDiv_B2b()
     if (N > 2) m(2,2) = 30;
 
     tmv::SmallMatrix<T,6,N,stor> a1 = m;
-    tmv::SmallMatrix<T,6,6,tmv::RowMajor> a3b = m * m.Transpose();
+    tmv::SmallMatrix<T,6,6,tmv::RowMajor> a3b = m * m.transpose();
     tmv::SmallMatrix<T,N,6,stor> a4;
     a3b.row(5) *= T(7);
-    if (N > 3) a3b.col(3).AddToAll(7);
+    if (N > 3) a3b.col(3).addToAll(7);
     tmv::SmallMatrix<std::complex<T>,6,N,stor> c1 = a1 * std::complex<T>(1,2);
     tmv::SmallMatrix<std::complex<T>,6,6,tmv::RowMajor> c3b =
         a3b * std::complex<T>(-4,8);

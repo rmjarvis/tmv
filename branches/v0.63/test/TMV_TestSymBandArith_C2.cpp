@@ -1,9 +1,9 @@
 #define START 0
 
-#include "TMV_Test.h"
-#include "TMV_Test2.h"
 #include "TMV.h"
 #include "TMV_SymBand.h"
+#include "TMV_Test.h"
+#include "TMV_Test2.h"
 #include "TMV_TestSymBandArith.h"
 
 template <class T1, class T2> 
@@ -54,8 +54,8 @@ void TestSymBandMatrixArith_C2()
 
     tmv::DiagMatrix<T> d1(a1);
     tmv::DiagMatrix<std::complex<T> > cd1(ca1);
-    tmv::DiagMatrixView<T> d1v = d1.View();
-    tmv::DiagMatrixView<std::complex<T> > cd1v = cd1.View();
+    tmv::DiagMatrixView<T> d1v = d1.view();
+    tmv::DiagMatrixView<std::complex<T> > cd1v = cd1.view();
     tmv::DiagMatrix<T> d1x = d1v;
     tmv::DiagMatrix<std::complex<T> > cd1x = cd1v;
 

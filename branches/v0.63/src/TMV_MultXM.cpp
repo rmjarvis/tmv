@@ -94,7 +94,7 @@ namespace tmv {
 
         if (A.colsize() > 0 && A.rowsize() > 0 && alpha != T(1)) {
             if (A.isconj()) MultXM(TMV_CONJ(alpha),A.conjugate());
-            else if (alpha == T(0)) A.zero();
+            else if (alpha == T(0)) A.setZero();
             else if (A.canLinearize()) A.linearView() *= alpha;
             else if (A.isrm())
                 if (isComplex(T()) && TMV_IMAG(alpha) == TMV_RealType(T)(0))
