@@ -315,59 +315,46 @@ namespace tmv {
     //
 
     template <class T, int M, int N, StorageType S> 
-    struct SMDet
-    {
-        T det;
-        SMDet(const T*)
-        { 
-            TMVAssert(M != N); 
-            // M == N code specialized below:
-            TMVAssert(TMV_FALSE);
-        }
-    };
+    struct SMDet;
 
     template <class T, int N, StorageType S> 
     struct SMDet<T,N,N,S>
     {
-        T det;
-        SMDet(const T* m) : det(1)
+        static T det(const T* m)
         {
             SmallMatrix<T,N,N,ColMajor> LU;
             // LU = m;
             DoCopy<N,N,S,ColMajor>(m,LU.ptr());
             int P[N];
-            DoLUD(LU,P,det);
-            if (det != T(0)) for(int i=0;i<N;++i) det *= LU.cref(i,i);
+            T d(1);
+            DoLUD(LU,P,d);
+            if (d != T(0)) for(int i=0;i<N;++i) d *= LU.cref(i,i);
+            return d;
         }
     };
 
     template <class T, StorageType S> 
     struct SMDet<T,1,1,S>
-    {
-        T det;
-        SMDet(const T* m) : det(*m) {}
-    };
+    { static inline T det(const T* m) { return det(*m); } };
 
     template <class T, StorageType S> 
     struct SMDet<T,2,2,S>
-    {
-        T det;
-        SMDet(const T* m) : det(m[0]*m[3] - m[1]*m[2]) {}
-    };
+    { static inline T det(const T* m) { return (m[0]*m[3] - m[1]*m[2]); } };
 
     template <class T, StorageType S> 
     struct SMDet<T,3,3,S>
     {
-        T det;
-        SMDet(const T* m) : det(
-            m[0] * (m[4]*m[8] - m[5]*m[7]) 
-            -m[1] * (m[3]*m[8] - m[5]*m[6])
-            +m[2] * (m[3]*m[7] - m[4]*m[6])) {}
+        static T det(const T* m) {
+            return (
+                m[0] * (m[4]*m[8] - m[5]*m[7]) 
+                -m[1] * (m[3]*m[8] - m[5]*m[6])
+                +m[2] * (m[3]*m[7] - m[4]*m[6])); 
+        }
     };
 
     template <class T, int M, int N, StorageType S, IndexStyle I> 
     inline T DoDet(const SmallMatrix<T,M,N,S,I>& m)
-    { SMDet<T,M,N,S> d(m.cptr()); return d.det; }
+    { return SMDet<T,M,N,S>::det(m.cptr()); }
 
     //
     // Matrix Inverse
@@ -504,8 +491,8 @@ namespace tmv {
     {
         SMInv(const T* m, T2* minv)
         {
-            SMDet<T,2,2,S> d(m); 
-            if (d.det == T(0)) 
+            T det = SMDet<T,2,2,S>::det(m);
+            if (det == T(0)) 
 #ifdef NOTHROW
             { std::cerr<<"Singular SmallMatrix found\n"; exit(1); }
 #else
@@ -515,14 +502,14 @@ namespace tmv {
             //minv.ref(0,1) = -m.cref(0,1)/d;
             //minv.ref(1,0) = -m.cref(1,0)/d;
             //minv.ref(1,1) = m.cref(0,0)/d;
-            minv[0] = m[3]/d.det;
-            minv[3] = m[0]/d.det;
+            minv[0] = m[3]/det;
+            minv[3] = m[0]/det;
             if (S == S2) {
-                minv[1] = -m[1]/d.det;
-                minv[2] = -m[2]/d.det;
+                minv[1] = -m[1]/det;
+                minv[2] = -m[2]/det;
             } else {
-                minv[1] = -m[2]/d.det;
-                minv[2] = -m[1]/d.det;
+                minv[1] = -m[2]/det;
+                minv[2] = -m[1]/det;
             }
         }
     };
@@ -532,30 +519,30 @@ namespace tmv {
     {
         SMInv(const T* m, T2* minv)
         {
-            SMDet<T,3,3,S> d(m); 
-            if (d.det == T(0)) 
+            T det = SMDet<T,3,3,S>::det(m);
+            if (det == T(0)) 
 #ifdef NOTHROW
             { std::cerr<<"Singular SmallMatrix found\n"; exit(1); }
 #else
             { throw Singular(); }
 #endif
-            minv[0] = (m[4]*m[8]-m[7]*m[5])/d.det;
-            minv[4] = (m[0]*m[8]-m[6]*m[2])/d.det;
-            minv[8] = (m[0]*m[4]-m[3]*m[1])/d.det;
+            minv[0] = (m[4]*m[8]-m[7]*m[5])/det;
+            minv[4] = (m[0]*m[8]-m[6]*m[2])/det;
+            minv[8] = (m[0]*m[4]-m[3]*m[1])/det;
             if (S == S2) {
-                minv[1] = -(m[1]*m[8]-m[7]*m[2])/d.det;
-                minv[2] = (m[1]*m[5]-m[4]*m[2])/d.det;
-                minv[3] = -(m[3]*m[8]-m[6]*m[5])/d.det;
-                minv[5] = -(m[0]*m[5]-m[3]*m[2])/d.det;
-                minv[6] = (m[3]*m[7]-m[6]*m[4])/d.det;
-                minv[7] = -(m[0]*m[7]-m[6]*m[1])/d.det;
+                minv[1] = -(m[1]*m[8]-m[7]*m[2])/det;
+                minv[2] = (m[1]*m[5]-m[4]*m[2])/det;
+                minv[3] = -(m[3]*m[8]-m[6]*m[5])/det;
+                minv[5] = -(m[0]*m[5]-m[3]*m[2])/det;
+                minv[6] = (m[3]*m[7]-m[6]*m[4])/det;
+                minv[7] = -(m[0]*m[7]-m[6]*m[1])/det;
             } else {
-                minv[1] = -(m[3]*m[8]-m[6]*m[5])/d.det;
-                minv[2] = (m[3]*m[7]-m[6]*m[4])/d.det;
-                minv[3] = -(m[1]*m[8]-m[7]*m[2])/d.det;
-                minv[5] = -(m[0]*m[7]-m[6]*m[1])/d.det;
-                minv[6] = (m[1]*m[5]-m[4]*m[2])/d.det;
-                minv[7] = -(m[0]*m[5]-m[3]*m[2])/d.det;
+                minv[1] = -(m[3]*m[8]-m[6]*m[5])/det;
+                minv[2] = (m[3]*m[7]-m[6]*m[4])/det;
+                minv[3] = -(m[1]*m[8]-m[7]*m[2])/det;
+                minv[5] = -(m[0]*m[7]-m[6]*m[1])/det;
+                minv[6] = (m[1]*m[5]-m[4]*m[2])/det;
+                minv[7] = -(m[0]*m[5]-m[3]*m[2])/det;
             }
         }
     };

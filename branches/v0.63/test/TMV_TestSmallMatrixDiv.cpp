@@ -81,6 +81,7 @@ static void TestSmallSquareDiv()
     T mdet = Det(tmv::Matrix<T>(m));
     if (showacc) {
         std::cout<<"Det(m) = "<<Det(m)<<std::endl;
+        std::cout<<"mdet = "<<mdet<<std::endl;
         std::cout<<"abs(det-mdet) = "<<std::abs(Det(m)-mdet);
         std::cout<<"  EPS*abs(mdet) = "<<eps*std::abs(mdet)<<std::endl;
         std::cout<<"abs(logdet-log(mdet)) = "<<
