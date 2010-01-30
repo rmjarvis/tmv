@@ -61,15 +61,15 @@ int main() try
 
   // Norms, etc. 
   std::cout<<"Norm1(v3) = "<<Norm1(v3);
-  std::cout<<" = "<<v3.SumAbsElements()<<std::endl;
+  std::cout<<" = "<<v3.sumAbsElements()<<std::endl;
   //! Norm1(v3) = 44.9 = 44.9
 
-  std::cout<<"Norm2(v3) = "<<v3.Norm2();
-  std::cout<<" = "<<v3.Norm()<<std::endl;
+  std::cout<<"Norm2(v3) = "<<Norm2(v3);
+  std::cout<<" = "<<v3.norm()<<std::endl;
   //! Norm2(v3) = 21.9123 = 21.9123
 
-  std::cout<<"NormInf(v3) = "<<v3.NormInf();
-  std::cout<<" = "<<MaxAbsElement(v3)<<std::endl;
+  std::cout<<"NormInf(v3) = "<<NormInf(v3);
+  std::cout<<" = "<<v3.maxAbsElement()<<std::endl;
   //! NormInf(v3) = 15 = 15
 
   std::cout<<"SumElements(v3) = "<<SumElements(v3)<<std::endl;
@@ -77,10 +77,10 @@ int main() try
 
   // Min/Max elements:
   int i1,i2,i3,i4;
-  double x1 = v3.MinAbsElement(&i1);
-  double x2 = v3.MaxAbsElement(&i2);
-  double x3 = v3.MinElement(&i3);
-  double x4 = v3.MaxElement(&i4);
+  double x1 = v3.minAbsElement(&i1);
+  double x2 = v3.maxAbsElement(&i2);
+  double x3 = v3.minElement(&i3);
+  double x4 = v3.maxElement(&i4);
   std::cout<<"|v3("<<i1<<")| = "<<x1<<" is the minimum absolute value\n";
   //! |v3(0)| = 1.1 is the minimum absolute value
   std::cout<<"|v3("<<i2<<")| = "<<x2<<" is the maximum absolute value\n";
@@ -96,54 +96,54 @@ int main() try
   std::cout<<"v1 = "<<v1<<std::endl;
   //! v1 = 6 ( 1  2  4  8  16  32 )
 
-  v1.AddToAll(5.);
-  std::cout<<"v1.AddToAll(5.) = "<<v1<<std::endl;
-  //! v1.AddToAll(5.) = 6 ( 6  7  9  13  21  37 )
+  v1.addToAll(5.);
+  std::cout<<"v1.addToAll(5.) = "<<v1<<std::endl;
+  //! v1.addToAll(5.) = 6 ( 6  7  9  13  21  37 )
 
-  v1.ReverseSelf();
-  std::cout<<"v1.ReverseSelf() = "<<v1<<std::endl;
-  //! v1.ReverseSelf() = 6 ( 37  21  13  9  7  6 )
+  v1.reverseSelf();
+  std::cout<<"v1.reverseSelf() = "<<v1<<std::endl;
+  //! v1.reverseSelf() = 6 ( 37  21  13  9  7  6 )
 
-  v1.Zero();
-  std::cout<<"v1.Zero() = "<<v1<<std::endl;
-  //! v1.Zero() = 6 ( 0  0  0  0  0  0 )
+  v1.setZero();
+  std::cout<<"v1.setZero() = "<<v1<<std::endl;
+  //! v1.setZero() = 6 ( 0  0  0  0  0  0 )
 
-  v1.SetAllTo(20.);
-  std::cout<<"v1.SetAllTo(20.) = "<<v1<<std::endl;
-  //! v1.SetAllTo(20.) = 6 ( 20  20  20  20  20  20 )
+  v1.setAllTo(20.);
+  std::cout<<"v1.setAllTo(20.) = "<<v1<<std::endl;
+  //! v1.setAllTo(20.) = 6 ( 20  20  20  20  20  20 )
 
-  v1.MakeBasis(2);
-  std::cout<<"v1.MakeBasis(2) = "<<v1<<std::endl;
-  //! v1.MakeBasis(2) = 6 ( 0  0  1  0  0  0 )
+  v1.makeBasis(2);
+  std::cout<<"v1.makeBasis(2) = "<<v1<<std::endl;
+  //! v1.makeBasis(2) = 6 ( 0  0  1  0  0  0 )
 
 
   // Views:
   
   std::cout<<"v3 = "<<v3<<std::endl;
   //! v3 = 6 ( 1.1  8  -15  2.5  6.3  -12 )
-  std::cout<<"v3.SubVector(0,3) = "<<v3.SubVector(0,3)<<std::endl;
-  //! v3.SubVector(0,3) = 3 ( 1.1  8  -15 )
-  std::cout<<"v3.SubVector(0,6,2) = "<<v3.SubVector(0,6,2)<<std::endl;
-  //! v3.SubVector(0,6,2) = 3 ( 1.1  -15  6.3 )
-  std::cout<<"v3.Reverse() = "<<v3.Reverse()<<std::endl;
-  // v3.Reverse() = 6 ( -12  6.3  2.5  -15  8  1.1 )
+  std::cout<<"v3.subVector(0,3) = "<<v3.subVector(0,3)<<std::endl;
+  //! v3.subVector(0,3) = 3 ( 1.1  8  -15 )
+  std::cout<<"v3.subVector(0,6,2) = "<<v3.subVector(0,6,2)<<std::endl;
+  //! v3.subVector(0,6,2) = 3 ( 1.1  -15  6.3 )
+  std::cout<<"v3.reverse() = "<<v3.reverse()<<std::endl;
+  // v3.reverse() = 6 ( -12  6.3  2.5  -15  8  1.1 )
 
   // Views can be initialized with << too.
-  v3.Reverse() << 1.2, 9., 12, 2.5, -7.4, 14;
+  v3.reverse() << 1.2, 9., 12, 2.5, -7.4, 14;
   std::cout<<"v3 = "<<v3<<std::endl;
   //! v3 = 6 ( 14  -7.4  2.5  12  9  1.2 )
-  v3.SubVector(0,6,2) << 18, 22, 33;
+  v3.subVector(0,6,2) << 18, 22, 33;
   std::cout<<"v3 = "<<v3<<std::endl;
   //! v3 = 6 ( 18  -7.4  22  12  33  1.2 )
 
   // Can use the views within expressions
-  v3.Reverse() += v4;
-  std::cout<<"v3.Reverse() += v4 => v3 = "<<v3<<std::endl;
-  //! v3.Reverse() += v4 => v3 = 6 ( 32  -14.8  24.5  24  42  2.4 )
+  v3.reverse() += v4;
+  std::cout<<"v3.reverse() += v4 => v3 = "<<v3<<std::endl;
+  //! v3.reverse() += v4 => v3 = 6 ( 32  -14.8  24.5  24  42  2.4 )
 
-  v3.SubVector(0,3) *= 2.;
-  std::cout<<"v3.SubVector(0,3) *= 2 => v3 = "<<v3<<std::endl;
-  //! v3.SubVector(0,3) *= 2 => v3 = 6 ( 64  -29.6  49  24  42  2.4 )
+  v3.subVector(0,3) *= 2.;
+  std::cout<<"v3.subVector(0,3) *= 2 => v3 = "<<v3<<std::endl;
+  //! v3.subVector(0,3) *= 2 => v3 = 6 ( 64  -29.6  49  24  42  2.4 )
 
 
   // Fortran Indexing:
@@ -156,12 +156,12 @@ int main() try
   //! fv3(1) = 64
   std::cout<<"fv3(6) = "<<fv3(6)<<std::endl;
   //! fv3(6) = 2.4
-  std::cout<<"fv3.SubVector(1,3) = "<<fv3.SubVector(1,3)<<std::endl;
-  //! fv3.SubVector(1,3) = 3 ( 64  -29.6  49 )
-  std::cout<<"fv3.SubVector(1,5,2) = "<<fv3.SubVector(1,5,2)<<std::endl;
-  //! fv3.SubVector(1,5,2) = 3 ( 64  49  42 )
-  std::cout<<"fv3.MakeBasis(3) = "<<fv3.MakeBasis(3)<<std::endl;
-  //! fv3.MakeBasis(2) = 6 ( 0  0  1  0  0  0 )
+  std::cout<<"fv3.subVector(1,3) = "<<fv3.subVector(1,3)<<std::endl;
+  //! fv3.subVector(1,3) = 3 ( 64  -29.6  49 )
+  std::cout<<"fv3.subVector(1,5,2) = "<<fv3.subVector(1,5,2)<<std::endl;
+  //! fv3.subVector(1,5,2) = 3 ( 64  49  42 )
+  std::cout<<"fv3.makeBasis(3) = "<<fv3.makeBasis(3)<<std::endl;
+  //! fv3.makeBasis(2) = 6 ( 0  0  1  0  0  0 )
 
 
   // Vector arithmetic:
@@ -202,20 +202,20 @@ int main() try
   //! cv4 = v4 * (1+2i) =
   //! 6 ( (1.2,2.4)  (9,18)  (12,24)  (2.5,5)  (-7.4,-14.8)  (14,28) )
 
-  std::cout<<"cv4.Conjugate() = \n"<<cv4.Conjugate()<<std::endl;
-  //! cv4.Conjugate() =
+  std::cout<<"cv4.conjugate() = \n"<<cv4.conjugate()<<std::endl;
+  //! cv4.conjugate() =
   //! 6 ( (1.2,-2.4)  (9,-18)  (12,-24)  (2.5,-5)  (-7.4,14.8)  (14,-28) )
-  std::cout<<"cv4.Real() = "<<cv4.Real()<<std::endl;
-  //! cv4.Real() = 6 ( 1.2  9  12  2.5  -7.4  14 )
-  std::cout<<"cv4.Imag() = "<<cv4.Imag()<<std::endl;
-  //! cv4.Imag() = 6 ( 2.4  18  24  5  -14.8  28 )
+  std::cout<<"cv4.realPart() = "<<cv4.realPart()<<std::endl;
+  //! cv4.realPart() = 6 ( 1.2  9  12  2.5  -7.4  14 )
+  std::cout<<"cv4.imagPart() = "<<cv4.imagPart()<<std::endl;
+  //! cv4.imagPart() = 6 ( 2.4  18  24  5  -14.8  28 )
   std::cout<<"Norm(cv4) = "<<Norm(cv4)<<std::endl;
   //! Norm(cv4) = 49.1655
-  std::cout<<"sqrt(cv4*cv4.Conjugate()) = "<<
-    sqrt(cv4*cv4.Conjugate())<<std::endl;
-  //! sqrt(cv4*cv4.Conjugate()) = (49.1655,0)
-  std::cout<<"cv4.MaxAbsElement() = "<<cv4.MaxAbsElement()<<std::endl;
-  //! cv4.MaxAbsElement() = 31.305
+  std::cout<<"sqrt(cv4*cv4.conjugate()) = "<<
+    sqrt(cv4*cv4.conjugate())<<std::endl;
+  //! sqrt(cv4*cv4.conjugate()) = (49.1655,0)
+  std::cout<<"cv4.maxAbsElement() = "<<cv4.maxAbsElement()<<std::endl;
+  //! cv4.maxAbsElement() = 31.305
 
   // Can mix real and complex in any combination
   std::cout<<"cv4 - v4 = "<<cv4 - v4<<std::endl;
@@ -231,48 +231,48 @@ int main() try
   std::cout<<"v4 = "<<v4<<std::endl;
   //! v4 = 6 ( 2  5.3  -1.5  -7  0.5  -2.8 )
   int p[6];
-  v4.Sort(p);
+  v4.sort(p);
   std::cout<<"Sorted: v4 = "<<v4<<std::endl;
   //! Sorted: v4 = 6 ( -7  -2.8  -1.5  0.5  2  5.3 )
-  v4.ReversePermute(p);
+  v4.reversePermute(p);
   std::cout<<"Sort undone: v4 = "<<v4<<std::endl;
   //! Sort undone: v4 = 6 ( 2  5.3  -1.5  -7  0.5  -2.8 )
-  v4.Sort(); // Don't necessarily need p.
+  v4.sort(); // Don't necessarily need p.
   std::cout<<"Resorted: v4 = "<<v4<<std::endl;
   //! Resorted: v4 = 6 ( -7  -2.8  -1.5  0.5  2  5.3 )
   
   // Can sort by other criteria:
   // (Note: the 0 here is p.  If p=0, then it is not set.)
-  std::cout<<"v4.Sort(0,DESCEND) = "<<v4.Sort(0,tmv::DESCEND)<<std::endl;
-  //! v4.Sort(0,DESCEND) = 6 ( 5.3  2  0.5  -1.5  -2.8  -7 )
+  std::cout<<"v4.sort(0,Descend) = "<<v4.sort(0,tmv::Descend)<<std::endl;
+  //! v4.sort(0,Descend) = 6 ( 5.3  2  0.5  -1.5  -2.8  -7 )
 
-  cv4.Real() << -3,  1, -2, -1,  7,  3;
-  cv4.Imag() <<  4, -1,  0, -6,  5, -1;
+  cv4.realPart() << -3,  1, -2, -1,  7,  3;
+  cv4.imagPart() <<  4, -1,  0, -6,  5, -1;
   // (I find this complex initialization to be more readable than a list 
   //  filled with values that look like complex<double(-3,4), ...)
   std::cout<<"cv4 = "<<cv4<<std::endl;
   //! cv4 = 6 ( (-3,4)  (1,-1)  (-2,0)  (-1,-6)  (7,5)  (3,-1) )
 
-  std::cout<<"cv4.Sort(0,DESCEND,REAL_COMP) = \n"<<
-    cv4.Sort(0,tmv::DESCEND,tmv::REAL_COMP)<<std::endl;
-  //! cv4.Sort(0,DESCEND,REAL_COMP) = 
+  std::cout<<"cv4.sort(0,Descend,RealComp) = \n"<<
+    cv4.sort(0,tmv::Descend,tmv::RealComp)<<std::endl;
+  //! cv4.sort(0,Descend,RealComp) = 
   //! 6 ( (7,5)  (3,-1)  (1,-1)  (-1,-6)  (-2,0)  (-3,4) )
-  std::cout<<"cv4.Sort(0,ASCEND,IMAG_COMP) = \n"<<
-    cv4.Sort(0,tmv::ASCEND,tmv::IMAG_COMP)<<std::endl;
-  //! cv4.Sort(0,ASCEND,IMAG_COMP) =
+  std::cout<<"cv4.sort(0,Ascend,ImagComp) = \n"<<
+    cv4.sort(0,tmv::Ascend,tmv::ImagComp)<<std::endl;
+  //! cv4.sort(0,Ascend,ImagComp) =
   //! 6 ( (-1,-6)  (3,-1)  (1,-1)  (-2,0)  (-3,4)  (7,5) )
-  std::cout<<"cv4.Sort(0,ASCEND,ABS_COMP) = \n"<<
-    cv4.Sort(0,tmv::ASCEND,tmv::ABS_COMP)<<std::endl;
-  //! cv4.Sort(0,ASCEND,ABS_COMP) =
+  std::cout<<"cv4.sort(0,Ascend,AbsComp) = \n"<<
+    cv4.sort(0,tmv::Ascend,tmv::AbsComp)<<std::endl;
+  //! cv4.sort(0,Ascend,AbsComp) =
   //! 6 ( (1,-1)  (-2,0)  (3,-1)  (-3,4)  (-1,-6)  (7,5) )
-  std::cout<<"cv4.Sort(0,ASCEND,ARG_COMP) = \n"<<
-    cv4.Sort(0,tmv::ASCEND,tmv::ARG_COMP)<<std::endl;
-  //! cv4.Sort(0,ASCEND,ARG_COMP) =
+  std::cout<<"cv4.sort(0,Ascend,ArgComp) = \n"<<
+    cv4.sort(0,tmv::Ascend,tmv::ArgComp)<<std::endl;
+  //! cv4.sort(0,Ascend,ArgComp) =
   //! 6 ( (-1,-6)  (1,-1)  (3,-1)  (7,5)  (-3,4)  (-2,0) )
 
-  // The default component for complex vectors is REAL_COMP:
-  std::cout<<"cv4.Sort() = \n"<< cv4.Sort()<<std::endl;
-  //! cv4.Sort() = 
+  // The default component for complex vectors is RealComp:
+  std::cout<<"cv4.sort() = \n"<< cv4.sort()<<std::endl;
+  //! cv4.sort() = 
   //! 6 ( (-3,4)  (-2,0)  (-1,-6)  (1,-1)  (3,-1)  (7,5) )
 
   return 0;

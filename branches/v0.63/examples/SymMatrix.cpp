@@ -112,8 +112,8 @@ int main() try
   //!  Norm2(m1) = Warning:
   //!  Calling SymMatrix::Norm2 without previously calling DivideUsing(SV)
   //!  24.4968
-  std::cout<<"Norm2(m1) = "<<m1.DoNorm2()<<std::endl;
-  //!  Norm2(m1) = 24.4968
+  std::cout<<"m1.doNorm2() = "<<m1.doNorm2()<<std::endl;
+  //!  m1.doNorm2() = 24.4968
   std::cout<<"NormInf(m1) = "<<NormInf(m1)<<std::endl;
   //!  NormInf(m1) = 32
   std::cout<<"NormF(m1) = "<<NormF(m1);
@@ -143,23 +143,23 @@ int main() try
   //!  m1.diag(1) = 4 ( 4  5  4  1 )
   std::cout<<"m1.diag(-1) = "<<m1.diag(-1)<<std::endl;
   //!  m1.diag(-1) = 4 ( 4  5  4  1 )
-  std::cout<<"m1.SubSymMatrix(0,3) = \n"<<m1.SubSymMatrix(0,3)<<std::endl;
-  //!  m1.SubSymMatrix(0,3) = 
+  std::cout<<"m1.subSymMatrix(0,3) = \n"<<m1.subSymMatrix(0,3)<<std::endl;
+  //!  m1.subSymMatrix(0,3) = 
   //!  3 3
   //!  (  2  4  6  )
   //!  (  4  3  5  )
   //!  (  6  5  2  )
-  std::cout<<"m1.UpperTri() = \n"<<m1.UpperTri()<<std::endl;
-  //!  m1.UpperTri() = 
+  std::cout<<"m1.upperTri() = \n"<<m1.upperTri()<<std::endl;
+  //!  m1.upperTri() = 
   //!  5 5
   //!  (  2  4  6  8  10  )
   //!  (  0  3  5  7  9  )
   //!  (  0  0  2  4  6  )
   //!  (  0  0  0  -1  1  )
   //!  (  0  0  0  0  -6  )
-  std::cout<<"m1.LowerTri(tmv::UnitDiag) = \n"<<
-    m1.LowerTri(tmv::UnitDiag)<<std::endl;
-  //!  m1.LowerTri(tmv::UnitDiag) = 
+  std::cout<<"m1.lowerTri(tmv::UnitDiag) = \n"<<
+    m1.lowerTri(tmv::UnitDiag)<<std::endl;
+  //!  m1.lowerTri(tmv::UnitDiag) = 
   //!  5 5
   //!  (  1  0  0  0  0  )
   //!  (  4  1  0  0  0  )
@@ -183,8 +183,8 @@ int main() try
   //!  fm1(1,1) = 2
   std::cout<<"fm1(4,3) = "<<fm1(4,3)<<std::endl;
   //!  fm1(4,3) = 4
-  std::cout<<"fm1.SubSymMatrix(1,3) = \n"<<fm1.SubSymMatrix(1,3)<<std::endl;
-  //!  fm1.SubSymMatrix(1,3) = 
+  std::cout<<"fm1.subSymMatrix(1,3) = \n"<<fm1.subSymMatrix(1,3)<<std::endl;
+  //!  fm1.subSymMatrix(1,3) = 
   //!  3 3
   //!  (  2  4  6  )
   //!  (  4  3  5  )
@@ -295,40 +295,40 @@ int main() try
   //!  (  (15,30)  (18,36)  (17,34)  (22,44)  (27,54)  )
   //!  (  (20,40)  (23,46)  (22,44)  (17,34)  (22,44)  )
   //!  (  (25,50)  (28,56)  (27,54)  (22,44)  (13,26)  )
-  std::cout<<"cm1.Conjugate() = \n"<<cm1.Conjugate()<<std::endl;
-  //!  cm1.Conjugate() = 
+  std::cout<<"cm1.conjugate() = \n"<<cm1.conjugate()<<std::endl;
+  //!  cm1.conjugate() = 
   //!  5 5
   //!  (  (5,-10)  (10,-20)  (15,-30)  (20,-40)  (25,-50)  )
   //!  (  (10,-20)  (13,-26)  (18,-36)  (23,-46)  (28,-56)  )
   //!  (  (15,-30)  (18,-36)  (17,-34)  (22,-44)  (27,-54)  )
   //!  (  (20,-40)  (23,-46)  (22,-44)  (17,-34)  (22,-44)  )
   //!  (  (25,-50)  (28,-56)  (27,-54)  (22,-44)  (13,-26)  )
-  std::cout<<"cm1.Transpose() = \n"<<cm1.Transpose()<<std::endl;
-  //!  cm1.Transpose() = 
+  std::cout<<"cm1.transpose() = \n"<<cm1.transpose()<<std::endl;
+  //!  cm1.transpose() = 
   //!  5 5
   //!  (  (5,10)  (10,20)  (15,30)  (20,40)  (25,50)  )
   //!  (  (10,20)  (13,26)  (18,36)  (23,46)  (28,56)  )
   //!  (  (15,30)  (18,36)  (17,34)  (22,44)  (27,54)  )
   //!  (  (20,40)  (23,46)  (22,44)  (17,34)  (22,44)  )
   //!  (  (25,50)  (28,56)  (27,54)  (22,44)  (13,26)  )
-  std::cout<<"cm1.Adjoint() = \n"<<cm1.Adjoint()<<std::endl;
-  //!  cm1.Adjoint() = 
+  std::cout<<"cm1.adjoint() = \n"<<cm1.adjoint()<<std::endl;
+  //!  cm1.adjoint() = 
   //!  5 5
   //!  (  (5,-10)  (10,-20)  (15,-30)  (20,-40)  (25,-50)  )
   //!  (  (10,-20)  (13,-26)  (18,-36)  (23,-46)  (28,-56)  )
   //!  (  (15,-30)  (18,-36)  (17,-34)  (22,-44)  (27,-54)  )
   //!  (  (20,-40)  (23,-46)  (22,-44)  (17,-34)  (22,-44)  )
   //!  (  (25,-50)  (28,-56)  (27,-54)  (22,-44)  (13,-26)  )
-  std::cout<<"cm1.Real() = \n"<<cm1.Real()<<std::endl;
-  //!  cm1.Real() = 
+  std::cout<<"cm1.realPart() = \n"<<cm1.realPart()<<std::endl;
+  //!  cm1.realPart() = 
   //!  5 5
   //!  (  5  10  15  20  25  )
   //!  (  10  13  18  23  28  )
   //!  (  15  18  17  22  27  )
   //!  (  20  23  22  17  22  )
   //!  (  25  28  27  22  13  )
-  std::cout<<"cm1.Imag() = \n"<<cm1.Imag()<<std::endl;
-  //!  cm1.Imag() = 
+  std::cout<<"cm1.imagPart() = \n"<<cm1.imagPart()<<std::endl;
+  //!  cm1.imagPart() = 
   //!  5 5
   //!  (  10  20  30  40  50  )
   //!  (  20  26  36  46  56  )
@@ -361,9 +361,9 @@ int main() try
   tmv::Matrix<std::complex<double> > cx(5,2);
   cx.col(0) = v;
   cx.col(1) = cv;
-  cm1 -= cx*cx.Transpose();
-  std::cout<<"cm1 -= cx*cx.Transpose() = \n"<<cm1<<std::endl;
-  //!  cm1 -= cx*cx.Transpose() = 
+  cm1 -= cx*cx.transpose();
+  std::cout<<"cm1 -= cx*cx.transpose() = \n"<<cm1<<std::endl;
+  //!  cm1 -= cx*cx.transpose() = 
   //!  5 5
   //!  (  (5,10)  (10,20)  (15,30)  (20,40)  (25,50)  )
   //!  (  (10,20)  (13,26)  (18,36)  (23,46)  (28,56)  )
@@ -372,7 +372,7 @@ int main() try
   //!  (  (25,50)  (28,56)  (27,54)  (22,44)  (13,26)  )
 
   tmv::HermMatrix<std::complex<double> > cm2 = m1;
-  cm2.UpperTri().OffDiag() *= std::complex<double>(1,2);
+  cm2.upperTri().offDiag() *= std::complex<double>(1,2);
   std::cout<<"cm2 = \n"<<cm2<<std::endl;
   //!  cm2 = 
   //!  5 5
@@ -381,47 +381,46 @@ int main() try
   //!  (  (15,-30)  (18,-36)  (17,0)  (22,44)  (27,54)  )
   //!  (  (20,-40)  (23,-46)  (22,-44)  (17,0)  (22,44)  )
   //!  (  (25,-50)  (28,-56)  (27,-54)  (22,-44)  (13,0)  )
-  std::cout<<"cm2.Conjugate() = \n"<<cm2.Conjugate()<<std::endl;
-  //!  cm2.Conjugate() = 
+  std::cout<<"cm2.conjugate() = \n"<<cm2.conjugate()<<std::endl;
+  //!  cm2.conjugate() = 
   //!  5 5
   //!  (  (5,-0)  (10,-20)  (15,-30)  (20,-40)  (25,-50)  )
   //!  (  (10,20)  (13,-0)  (18,-36)  (23,-46)  (28,-56)  )
   //!  (  (15,30)  (18,36)  (17,-0)  (22,-44)  (27,-54)  )
   //!  (  (20,40)  (23,46)  (22,44)  (17,-0)  (22,-44)  )
   //!  (  (25,50)  (28,56)  (27,54)  (22,44)  (13,-0)  )
-  std::cout<<"cm2.Transpose() = \n"<<cm2.Transpose()<<std::endl;
-  //!  cm2.Transpose() = 
+  std::cout<<"cm2.transpose() = \n"<<cm2.transpose()<<std::endl;
+  //!  cm2.transpose() = 
   //!  5 5
   //!  (  (5,-0)  (10,-20)  (15,-30)  (20,-40)  (25,-50)  )
   //!  (  (10,20)  (13,-0)  (18,-36)  (23,-46)  (28,-56)  )
   //!  (  (15,30)  (18,36)  (17,-0)  (22,-44)  (27,-54)  )
   //!  (  (20,40)  (23,46)  (22,44)  (17,-0)  (22,-44)  )
   //!  (  (25,50)  (28,56)  (27,54)  (22,44)  (13,-0)  )
-  std::cout<<"cm2.Adjoint() = \n"<<cm2.Adjoint()<<std::endl;
-  //!  cm2.Adjoint() = 
+  std::cout<<"cm2.adjoint() = \n"<<cm2.adjoint()<<std::endl;
+  //!  cm2.adjoint() = 
   //!  5 5
   //!  (  (5,0)  (10,20)  (15,30)  (20,40)  (25,50)  )
   //!  (  (10,-20)  (13,0)  (18,36)  (23,46)  (28,56)  )
   //!  (  (15,-30)  (18,-36)  (17,0)  (22,44)  (27,54)  )
   //!  (  (20,-40)  (23,-46)  (22,-44)  (17,0)  (22,44)  )
   //!  (  (25,-50)  (28,-56)  (27,-54)  (22,-44)  (13,0)  )
-  std::cout<<"cm2.Real() = \n"<<cm2.Real()<<std::endl;
-  //!  cm2.Real() = 
+  std::cout<<"cm2.realPart() = \n"<<cm2.realPart()<<std::endl;
+  //!  cm2.realPart() = 
   //!  5 5
   //!  (  5  10  15  20  25  )
   //!  (  10  13  18  23  28  )
   //!  (  15  18  17  22  27  )
   //!  (  20  23  22  17  22  )
   //!  (  25  28  27  22  13  )
-  // Imag is invalid for hermitian matrix, since the result 
+  // imagPart is invalid for hermitian matrix, since the result 
   // would be anti-symmetric, which we don't have as a matrix type.
-  //std::cout<<"cm2.Imag() = \n"<<cm2.Imag()<<std::endl;
   std::cout<<"Norm(cm2) = "<<Norm(cm2)<<std::endl;
   //!  Norm(cm2) = 218.589
 
-  cm2 += cv^cv.Conjugate();
-  std::cout<<"cm2 += cv^cv.Conjugate() = \n"<<cm2<<std::endl;
-  //!  cm2 += cv^cv.Conjugate() = 
+  cm2 += cv^cv.conjugate();
+  std::cout<<"cm2 += cv^cv.conjugate() = \n"<<cm2<<std::endl;
+  //!  cm2 += cv^cv.conjugate() = 
   //!  5 5
   //!  (  (25,0)  (20,20)  (45,30)  (60,40)  (115,50)  )
   //!  (  (20,-20)  (18,0)  (33,36)  (43,46)  (73,56)  )
@@ -437,9 +436,9 @@ int main() try
   //!  (  (51,-30)  (36,-36)  (71,0)  (94,44)  (189,54)  )
   //!  (  (68,-40)  (47,-46)  (94,-44)  (113,0)  (238,44)  )
   //!  (  (133,-50)  (82,-56)  (189,-54)  (238,-44)  (499,0)  )
-  cm2 -= cx*cx.Adjoint();
-  std::cout<<"cm2 -= cx*cx.Adjoint() = \n"<<cm2<<std::endl;
-  //!  cm2 -= cx*cx.Adjoint() = 
+  cm2 -= cx*cx.adjoint();
+  std::cout<<"cm2 -= cx*cx.adjoint() = \n"<<cm2<<std::endl;
+  //!  cm2 -= cx*cx.adjoint() = 
   //!  5 5
   //!  (  (5,0)  (10,20)  (15,30)  (20,40)  (25,50)  )
   //!  (  (10,-20)  (13,0)  (18,36)  (23,46)  (28,56)  )

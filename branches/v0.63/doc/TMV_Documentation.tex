@@ -83,7 +83,7 @@ keywordstyle=\color{Green},
 
 \title{Template Matrix/Vector Library for C++ \\ User Manual \\ Version \tmvversion}
 \author{Mike Jarvis}
-\date{January 20, 2009}
+\date{January 29, 2010}
 \maketitle
 
 \tableofcontents
@@ -105,6 +105,8 @@ a beta-type release.  Hence the ``0.'' version number.  I'm also still adding fu
 so there may be interface changes from one version to the next if I decide I 
 want to do something a different way.  Just be warned.  Any such changes will be 
 mentioned in \S\ref{history} of subsequent releases.
+
+\subsection{Features of TMV}
 
 The Template Matrix/Vector (TMV) Library is a C++ class library designed to make
 writing code with vectors and matrices both transparent and fast.  Transparency 
@@ -133,9 +135,9 @@ Matrix equations look like real math equations in the code.
 For example, one can write 
 \begin{tmvcode}
 v2 = m * v1;
-v2 += m.transpose() * v1;
+v2 += 5 * m.transpose() * v1;
 m *= 3.;
-v2 -= m1*v1 + 3*v2 + m2.transpose()*v3;
+v2 += m1*v1 + 3*v2 + 8*m2.transpose()*v3;
 \end{tmvcode}
 to perform the corresponding mathematical operations.
 
@@ -152,13 +154,13 @@ then the solution will be a least-square solution.
 Equations like the above 
 \begin{tmvcode}
 v2 = m * v1;
-v2 += m.transpose() * v1;
+v2 += 5 * m.transpose() * v1;
 \end{tmvcode}
 do not create a temporary vector before assigning or adding the result to \tt{v2}.  This makes 
 the TMV code just as fast as code which uses a functional form, such as:
 \begin{tmvcode}
 dgemv('N',m,n,1.,mp,ldm,v1p,s1,0.,v2p,s2);
-dgemv('T',m,n,1.,mp,ldm,v1p,s1,1.,v2p,s2);
+dgemv('T',m,n,5.,mp,ldm,v1p,s1,1.,v2p,s2);
 \end{tmvcode}
 In fact, when installed with a BLAS library, the first version with TMV just calls those exact 
 BLAS functions given by the second version.  
@@ -166,7 +168,7 @@ So speed is not sacrificed for the sake of code legibility.
 
 However, a more complicated equation like
 \begin{tmvcode}
-v2 += m1*v1 + 3*v2 + m2.transpose()*v3;
+v2 += m1*v1 + 3*v2 + 8*m2.transpose()*v3;
 \end{tmvcode}
 does not have a specialized routine, 
 so it will require a couple temporary \tt{Vector}s.
@@ -337,6 +339,7 @@ implemented the new RRR
 spending a significant time calculating eigenvectors, it may be worth having it call the
 LAPACK routines.
 
+\begin{comment}
 \item
 \textbf{Comments}
 
@@ -355,8 +358,11 @@ algorithm works, you'll probably do better looking at the comment in the
 TMV code than trying to decipher the LAPACK routines.  Plus, the code itself is
 usually a lot more readable, since the arithmetic is written with the operator
 overloads and such rather than the cryptic BLAS function names.
+\end{comment}
 
 \end{enumerate}
+
+\subsection{Basic usage}
 
 All of the basic TMV classes and functions, including the \tt{Vector} and \tt{Matrix} 
 classes, can be accessed with
@@ -398,9 +404,12 @@ that it is necessary, especially near the
 beginnings of the sections.  
 But for the sake of brevity and readability, I sometimes omit it.
 
-Also, throughout most of the documentation, I will write \tt{T} for the underlying type.
-Wherever you see \tt{T}, you should put \tt{double} or \tt{float} or whatever.
-For a user defined type, like \tt{MyQuadPrecisionType}, for example, the main requirements are that 
+\subsection {Data types}
+
+Throughout most of the documentation, I will write \tt{T} for the underlying type.
+Wherever you see \tt{T}, you should put \tt{double} or \tt{std::complex<float>} or whatever.
+
+For a user defined type, like \tt{MyQuadPrecisionType} for example, the main requirements are that 
 in addition to the usual arithmetic operators, the functions:
 \begin{tmvcode}
 std::numeric_limits<T>::epsilon()
@@ -429,15 +438,18 @@ integer matrices seemed desirable, we do allow them to be used.
 turned off via the compile flag -DNDEBUG), then trying to do anything that requires
 \tt{sqrt} or \tt{epsilon} for \tt{int}s will result in a runtime error.
 
+\subsection {Notations used in this document}
+
 There are three fonts used in this document.  First, times is used for the main text.  
 Second, as you have no doubt already noticed, \tt{typewriter font} is used to 
 indicate bits of code.  And finally, when I discuss the math about matrices, I 
-use $italics$ - for example, $v_2 = m * v_1$.
+use $italics$ -- for example, $v_2 = m * v_1$.
 
-Also, my syntax in this documentation is not very rigorous, aiming to maximize
-readability of the code.  
-I tend to freely mix the syntax with which a function is used with how
-it is declared in order to try to provide all of the information you will need in one line.  
+Also, my code syntax in this documentation is not very rigorous, aiming to maximize
+readability of the code, rather than including all of the type specifications for everything.
+
+I tend to freely mix the syntax of how a function is used with how
+it is declared in order to try to provide all of the information you will need on one line.  
 For example, the constructor listed as:
 \begin{tmvcode}
 tmv::Vector<T,index> v(size_t n, const T* vv)
@@ -623,8 +635,11 @@ The common editor, vim, doesn't seem to think so.
 It flags the braces in red, which is its indicator for a syntax error.  But most compilers
 seem to compile it correctly.}.
 
-So to address this issue, we decided to follow the syntex of \tt{std::ostream}
-and use the \tt{<<} operator to initialize a \tt{Vector}.  After the first 
+So to address this issue, we decided to follow the syntax of \tt{std::ostream}
+and use the \tt{<<} operator to initialize a \tt{Vector}.  The idea is that we are 
+sending information into the vector.  
+
+After the first 
 \tt{<<}, the elements may be separated by either commas or more \tt{<<}
 operators:
 \begin{tmvcode}
@@ -637,7 +652,7 @@ There must be precisely as many values as there are elements in the \tt{Vector},
 or a \tt{tmv::ReadError} will be thrown.
 \index{Exceptions!ReadError}
 
-One advantage of this method is that the values do not need to be simple numbers.
+One advantage of this method for initialization is that the values do not need to be simple numbers.
 Normally the elements in a list initializer need to be numerical literals, or at least to be 
 computable at compile time.
 With the above syntax, the elements can be variables, 
@@ -1028,9 +1043,9 @@ Note that \tt{thresh} should be a real value even for complex valued
 
 \item
 \begin{tmvcode}
-v.AddToAll(T x)
+v.addToAll(T x)
 \end{tmvcode}
-\index{Vector!methods!AddToAll}
+\index{Vector!methods!addToAll}
 Add the value \tt{x} to each element.
 
 \item 
@@ -1055,9 +1070,9 @@ reversed order.
 
 \item
 \begin{tmvcode}
-v.MakeBasis(int i)
+v.makeBasis(int i)
 \end{tmvcode}
-\index{Vector!methods!MakeBasis}
+\index{Vector!methods!makeBasis}
 Set all elements to 0, except for \tt{v(i)} = 1.
 
 \item
@@ -1086,10 +1101,10 @@ the C-style convention, even if \tt{v} uses Fortran-style indexing.
 
 \item
 \begin{tmvcode}
-v.Sort(int* p=0, tmv::ADType ad=tmv::ASCEND, 
+v.sort(int* p=0, tmv::ADType ad=tmv::ASCEND, 
       tmv::COMPType comp=tmv::REAL_COMP)
 \end{tmvcode}
-\index{Vector!methods!Sort}
+\index{Vector!methods!sort}
 Sorts the \tt{Vector~v}, returning the swaps required in the array \tt{p}.
 If you do not care about the swaps, you can set \tt{p = 0}.
 Note: the returned permutation array, \tt{p}, uses the C-style indexing convention
@@ -1667,11 +1682,11 @@ respectively.  (For Fortran-style indexing, replace the 0 with a 1.)
 
 \item
 \begin{tmvcode}
-m.RowPair(i1,i2)
-m.ColPair(i1,i2)
+m.rowPair(i1,i2)
+m.colPair(i1,i2)
 \end{tmvcode}
-\index{Matrix!methods!RowPair}
-\index{Matrix!methods!ColPair}
+\index{Matrix!methods!rowPair}
+\index{Matrix!methods!colPair}
 Another common submatrix is to select a pair of rows or columns, not 
 necessarily adjacent to each other.  These are short hand for:
 \begin{tmvcode}
@@ -1738,8 +1753,8 @@ tmv::MatrixView<double> mi = m.imagPart();
 m.upperTri(DiagType dt = NonUnitDiag)
 m.lowerTri(DiagType dt = NonUnitDiag)
 \end{tmvcode}
-\index{Matrix!methods!UpperTri}
-\index{Matrix!methods!LowerTri}
+\index{Matrix!methods!upperTri}
+\index{Matrix!methods!lowerTri}
 These return an \tt{UpperTriMatrixView} or a \tt{LowerTriMatrixView} which
 views either the upper triangle or the lower triangle of a square \tt{Matrix}.
 If \tt{m} has more rows than columns, then only \tt{UpperTri} is valid, since
@@ -2954,7 +2969,10 @@ as values of type \tt{T2} are convertible into type \tt{T}.
 The assignment operator has the same flexibility.
 
 \item
-\tt{v << \emph{comma-delimited list of values}\vspace{5 pt}\\
+\begin{tmvcode}
+v << v0 , v1 , v2 , v3 ...
+v << v0 << v1 << v2 << v3 ...
+\end{tmvcode}
 Initialize the \tt{SmallVector v} with a list of values.
 \index{Vector!list initialization}
 
@@ -2999,9 +3017,15 @@ as values of type \tt{T2} are convertible into type \tt{T}.
 The assignment operator has the same flexibility.
 
 \item
-\tt{m << \emph{comma-delimited list of values}\vspace{5 pt}\\
+\begin{tmvcode}
+tmv::SmallMatrix<T,M,N,tmv::RowMajor,index> m;
+m << m00 , m01 , m02 ...
+     m10 , m11 , m12 ...
+     ...
+\end{tmvcode}
 Initialize the \tt{SmallMatrix m} with a list of values.  The elements are assigned
-in order according to the storage order of \tt{m}.
+in order according to the storage order of \tt{m}.  This is most intuitive if \tt{stor = RowMajor}
+as shown.
 \index{Matrix!list initialization}
 
 \end{itemize}
@@ -3056,7 +3080,7 @@ version of these read operations, since you need to know the
 size of a \tt{SmallMatrix} or \tt{SmallVector} at compile time anyway, 
 so there is no way to wait until the file is read to determine the size.
 
-Also, the \tt{Sort} command for a \tt{SmallVector} just uses the
+Also, the \tt{sort} command for a \tt{SmallVector} just uses the
 regular \tt{Vector} version.
 
 \subsubsection{Limitations}
@@ -3391,7 +3415,7 @@ d.clip(RT thresh)
 d.setToIdentity(T x = 1)
 d.conjugateSelf()
 d.transposeSelf() // null operation
-d.InvertSelf()
+d.invertSelf()
 Swap(d1,d2)
 \end{tmvcode}
 \index{DiagMatrix!methods!setZero}
@@ -3400,9 +3424,9 @@ Swap(d1,d2)
 \index{DiagMatrix!methods!setToIdentity}
 \index{DiagMatrix!methods!conjugateSelf}
 \index{DiagMatrix!methods!transposeSelf}
-\index{DiagMatrix!methods!InvertSelf}
+\index{DiagMatrix!methods!invertSelf}
 \index{DiagMatrix!functions of!Swap}
-\tt{InvertSelf} is new for \tt{DiagMatrix} and calculates $d^{-1}$ in place.  
+\tt{invertSelf} is new for \tt{DiagMatrix} and calculates $d^{-1}$ in place.  
 It is equivalent to \tt{d = d.inverse()}.
 
 \subsubsection{Arithmetic}
@@ -3761,7 +3785,7 @@ U.setAllTo(T x)
 U.clip(RT thresh)
 U.setToIdentity(T x = 1)
 U.conjugateSelf()
-U.InvertSelf()
+U.invertSelf()
 Swap(U1,U2)
 \end{tmvcode}
 \index{UpperTriMatrix!methods!setZero}
@@ -3769,9 +3793,9 @@ Swap(U1,U2)
 \index{UpperTriMatrix!methods!clip}
 \index{UpperTriMatrix!methods!setToIdentity}
 \index{UpperTriMatrix!methods!conjugateSelf}
-\index{UpperTriMatrix!methods!InvertSelf}
+\index{UpperTriMatrix!methods!invertSelf}
 \index{UpperTriMatrix!functions of!Swap}
-Like for \tt{DiagMatrix}, \tt{InvertSelf} calculates $U^{-1}$ in place.  
+Like for \tt{DiagMatrix}, \tt{invertSelf} calculates $U^{-1}$ in place.  
 It is equivalent to \tt{U = U.inverse()}.
 \vspace{12pt}
 
@@ -4738,8 +4762,8 @@ step in both the \tt{i} and \tt{j} directions.
 s.upperTri(DiagType dt=NonUnitDiag)
 s.lowerTri(DiagType dt=NonUnitDiag)
 \end{tmvcode}
-\index{SymMatrix!methods!UpperTri}
-\index{SymMatrix!methods!LowerTri}
+\index{SymMatrix!methods!upperTri}
+\index{SymMatrix!methods!lowerTri}
 Both of these are valid, regardless
 of which triangle stores the actual data for \tt{s}.
 \begin{tmvcode}
@@ -7162,9 +7186,9 @@ be provided for those.
 
 Along the same lines is another method for a \tt{Vector}:
 \begin{tmvcode}
-tmv::VectorView<RT> v.Flatten()
+tmv::VectorView<RT> v.flatten()
 \end{tmvcode}
-\index{Vector!methods!Flatten}
+\index{Vector!methods!flatten}
 This returns a real view to the real and imaginary elements of a complex \tt{Vector}. 
 The initial \tt{Vector} is required to have unit step.  The returned view has twice the 
 length of \tt{v} and also has unit step.
@@ -8432,7 +8456,7 @@ may be places where matrices with very large or small values are a problem.
 \textbf{Permutations}
 
 I should make it easier to use the permutations that are output from 
-Sort(), as well as from LU and QRP decompositions.   I'd like to write
+sort(), as well as from LU and QRP decompositions.   I'd like to write
 \tt{m *= P}, rather than \tt{m.permuteCols(p)}.  This just needs to be a wrapper
 class for the functions that already exist, so it shouldn't be too hard to write.
 

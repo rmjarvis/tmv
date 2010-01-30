@@ -8,7 +8,7 @@ int main() try
   for(size_t i=0;i<A.nrows();i++) 
     for(size_t j=0;j<A.ncols();j++) 
       A(i,j) = 6.*i-2*j*j+2.; 
-  A.diag().AddToAll(5.);
+  A.diag().addToAll(5.);
 
   tmv::Vector<double> b(4);
   for(size_t i=0;i<b.size();i++) 
@@ -41,15 +41,15 @@ int main() try
   //! A*x = 4 ( 3  5  7  9 )
 
   // If the matrix won't change, but you want to solve with multiple 
-  // vectors, then it's faster to let TMV know this with SaveDiv().
+  // vectors, then it's faster to let TMV know this with saveDiv().
   tmv::Matrix<double> A2 = A;
-  A2.SaveDiv();
+  A2.saveDiv();
   x = b/A2;
   std::cout<<"x1 = "<<x<<std::endl;
   //! x1 = 4 ( 0.133458  0.29877  0.117091  -0.064587 )
   std::cout<<"A*x = "<<A2*x<<std::endl;
   //! A*x = 4 ( 3  5  7  9 )
-  x = b.Reverse()/A2; // Fast, since doesn't recalculate LU decomposition.
+  x = b.reverse()/A2; // Fast, since doesn't recalculate LU decomposition.
   std::cout<<"x2 = "<<x<<std::endl;
   //! x2 = 4 ( 0.136753  0.207381  -0.0775483  -0.362478 )
   std::cout<<"A*x2 = "<<A2*x<<std::endl;
@@ -60,9 +60,9 @@ int main() try
   //! Wrong x = 4 ( 0.133458  0.29877  0.117091  -0.064587 )
   std::cout<<"A*x = "<<A2*x<<std::endl;
   //! A*x = 4 ( 6  5  7  9 )
-  // If the matrix does change when SaveDiv() is set, 
+  // If the matrix does change when saveDiv() is set, 
   // you can manually recalculate the decomposition:
-  A2.ReSetDiv();
+  A2.resetDiv();
   x = b/A2;  // Now it is correct.
   std::cout<<"x = "<<x<<std::endl;
   //! x = 4 ( 0.0703537  0.348858  0.144442  -0.0599736 )
@@ -70,7 +70,7 @@ int main() try
   //! A*x = 4 ( 3  5  7  9 )
 
   // Matrix inverse:
-  tmv::Matrix<double> A2inv = A2.Inverse();
+  tmv::Matrix<double> A2inv = A2.inverse();
   std::cout<<"Ainv = \n"<<A2inv<<std::endl;
   //! Ainv = 
   //! 4  4
@@ -88,7 +88,7 @@ int main() try
   // This is a case where it can be useful to see the 
   // matrix elements that are larger than some threshold value:
   std::cout<<"Ainv*A = \n";
-  (A2inv*A2).Write(std::cout,1.e-8);
+  (A2inv*A2).write(std::cout,1.e-8);
   //! Ainv*A = 
   //! 4  4
   //! (  1  0  0  0  )
@@ -114,20 +114,20 @@ int main() try
   //! (  -0.0455844  -0.321617  0.698155  -0.268893  )
   //! (  -0.00768893  -0.126538  -0.34007  0.304042  )
 
-  // Can also use Inverse() notation instead of /
-  // x = b/A2 inlines to exactly the same thing as x = A2.Inverse() * b;
+  // Can also use inverse() notation instead of /
+  // x = b/A2 inlines to exactly the same thing as x = A2.inverse() * b;
   // ie. accurate back-substitution methods are used rather than 
   // actually computing the inverse and then multiplying:
-  x =  A2.Inverse() * b;
-  std::cout<<"x = A.Inverse() * b = "<<x<<std::endl;
-  //! x = A.Inverse() * b = 4 ( 0.0703537  0.348858  0.144442  -0.0599736 )
+  x =  A2.inverse() * b;
+  std::cout<<"x = A.inverse() * b = "<<x<<std::endl;
+  //! x = A.inverse() * b = 4 ( 0.0703537  0.348858  0.144442  -0.0599736 )
 
   // Division from the other side can either be done with this
-  // Inverse() notation or with the % operator:
+  // inverse() notation or with the % operator:
   // This is the solution to the equation x A = b, rather than A x = b.
-  x = b * A2.Inverse();
-  std::cout<<"x = b * A.Inverse() = "<<x<<std::endl;
-  //! x = b * A.Inverse() = 4 ( -0.0980338  -0.313357  0.0641037  0.426538 )
+  x = b * A2.inverse();
+  std::cout<<"x = b * A.inverse() = "<<x<<std::endl;
+  //! x = b * A.inverse() = 4 ( -0.0980338  -0.313357  0.0641037  0.426538 )
   x = b % A2;
   std::cout<<"x = b % A = "<<x<<std::endl;
   //! x = b % A = 4 ( -0.0980338  -0.313357  0.0641037  0.426538 )
@@ -240,7 +240,7 @@ int main() try
   // that TMV has used to do the division.  Therefore, we provide
   // it as an explicit function:
   tmv::Matrix<double> cov(3,3);
-  A3.InverseATA(cov);
+  A3.makeInverseATA(cov);
   std::cout<<"Cov(x) = \n"<<cov<<std::endl;
   //! Cov(x) = 
   //! 3  3
@@ -255,7 +255,7 @@ int main() try
   // then that would be degenerate with 1 and i.  
   // SVD is able to detect this defect and deal with it appropriately:
   tmv::Matrix<double> A4(10,4);
-  A4.Cols(0,3) = A3*sigma;
+  A4.colRange(0,3) = A3*sigma;
   for(int i=0;i<10;i++) A4(i,3) = 6.*i-5.;
   std::cout<<"Now A*sigma = \n"<<A4<<std::endl;
   //! Now A*sigma = 
@@ -287,10 +287,10 @@ int main() try
   }
     
   // So instead, tell TMV to use SVD for division rather than QR.
-  A4.DivideUsing(tmv::SV);
-  std::cout<<"Singular values for A are "<<A4.SVD().GetS().diag()<<std::endl;
+  A4.divideUsing(tmv::SV);
+  std::cout<<"Singular values for A are "<<A4.svd().getS().diag()<<std::endl;
   //! Singular values for A are 4 (  7618.67  733.074  116.312  0  )
-  std::cout<<"Using only the first "<<A4.SVD().GetKMax()<<" components\n";
+  std::cout<<"Using only the first "<<A4.svd().getKMax()<<" components\n";
   //! Using only the first 3 components
   tmv::Vector<double> x4 = b3/A4;
   std::cout<<"SVD division yields: x = "<<x4<<std::endl;
@@ -301,7 +301,7 @@ int main() try
 
   // QRP can also give useful results, but isn't quite as flexible 
   // as SVD:
-  A4.DivideUsing(tmv::QRP);
+  A4.divideUsing(tmv::QRP);
   x4 = b3/A4;
   std::cout<<"QRP division yields: x = "<<x4<<std::endl;
   std::cout<<"chisq = "<<NormSq(A4*x4-b3);

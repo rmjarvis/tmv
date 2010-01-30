@@ -94,25 +94,6 @@ namespace tmv {
         }
     }
 
-    static void makeTaskList(
-        int M,int N, int i, int j, 
-        std::vector<int>& ilist, std::vector<int>& jlist, int& index)
-    {
-        if (M > N) {
-            int M1 = M/2;
-            makeTaskList(M1,N,i,j,ilist,jlist,index);
-            makeTaskList(M-M1,N,i+M1,j,ilist,jlist,index);
-        } else if (N > 1) {
-            int N1 = N/2;
-            makeTaskList(M,N1,i,j,ilist,jlist,index);
-            makeTaskList(M,N-N1,i,j+N1,ilist,jlist,index);
-        } else {
-            ilist[index] = i;
-            jlist[index] = j;
-            index++;
-        }
-    }
-
     template <bool add, bool ca, bool cb, class T, class Ta, class Tb> 
     extern void DoCCCMultMM(
         const T alpha, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
@@ -141,147 +122,13 @@ namespace tmv {
         const Ta* Ap = A.cptr();
         const Tb* Bp = B.cptr();
 
-        const int MB = MMCCC_BLOCKSIZE_M;
-        const int NB = MMCCC_BLOCKSIZE_N*sizeof(double)/sizeof(T);
-        const int Mb = M/MB;
-        const int Nb = N/NB;
-        if (Mb || Nb) {
-            const int M2 = M-Mb*MB;
-            const int N2 = N-Nb*NB;
-            const int M1 = M-M2;
-            const int N1 = N-N2;
-
-            // This is best done recursively to avoid cache misses as much 
-            // as possible, but openmp doesn't do recursion very well (yet?), 
-            // so I just figure out the recursive order first and do a 
-            // simple loop that openmp can divvy up appropriately.
-            const int MbNb = Mb*Nb;
-            std::vector<int> ilist(MbNb);
-            std::vector<int> jlist(MbNb);
-            if (MbNb) {
-                int listindex=0;
-                makeTaskList(Mb,Nb,0,0,ilist,jlist,listindex);
-            }
-#ifdef _OPENMP
-#pragma omp parallel
-            {
-                // OpenMP seems to have trouble with new [], so just use a 
-                // static array.  
-                // However, the compiler needs to know the size at compile time
-                // so a little wasted memory here, always using the full MB*NB.
-                T Ct[ MB * NB ];
-                MatrixView<T> Ctemp = 
-                    MatrixViewOf(Ct,TMV_MIN(M,MB),TMV_MIN(N,NB),ColMajor);
-#else
-                Matrix<T,ColMajor> Ctemp(TMV_MIN(M,MB),TMV_MIN(N,NB));
-                T* Ct = Ctemp.ptr();
-#endif
-                const int Ctsj = Ctemp.stepj();
-
-                // Full MBxNB blocks in C matrix
-                if (Mb && Nb) {
-#ifdef _OPENMP
-#pragma omp for nowait schedule(guided)
-#endif
-                    for(int ij=0;ij<int(MbNb);ij++) {
-                        const int i=ilist[ij];
-                        const int j=jlist[ij];
-                        const int ii = i*MB;
-                        const int jj = j*NB;
-
-                        Ctemp.setZero();
-                        RecursiveCCCMultMM<ca,cb>(
-                            MB,NB,K,Ap+ii,Bp+jj*Bsj,Ct,Ask,Bsj,Ctsj);
-                        if (alpha != T(1)) Ctemp *= alpha;
-#ifdef _OPENMP
-#pragma omp critical
-#endif
-                        {
-                            if (add) C.subMatrix(ii,ii+MB,jj,jj+NB) += Ctemp;
-                            else C.subMatrix(ii,ii+MB,jj,jj+NB) = Ctemp;
-                        }
-                    }
-                } // Mb && Nb
-
-                // MB x N2 partial blocks:
-                if (Mb && N2) {
-#ifdef _OPENMP
-#pragma omp for nowait schedule(guided)
-#endif
-                    for(int i=0;i<int(Mb);i++) {
-                        const int ii = i*MB;
-                        Ctemp.setZero();
-                        RecursiveCCCMultMM<ca,cb>(
-                            MB,N2,K,Ap+ii,Bp+N1*Bsj,Ct,Ask,Bsj,Ctsj);
-                        if (alpha != T(1)) Ctemp.colRange(0,N2) *= alpha;
-#ifdef _OPENMP
-#pragma omp critical
-#endif
-                        {
-                            if (add) C.subMatrix(ii,ii+MB,N1,N) += 
-                                Ctemp.colRange(0,N2);
-                            else C.subMatrix(ii,ii+MB,N1,N) = 
-                                Ctemp.colRange(0,N2);
-                        }
-                    }
-                } // Mb && N2
-
-                // M2 x NB partial blocks:
-                if (M2 && Nb) {
-#ifdef _OPENMP
-#pragma omp for nowait schedule(guided)
-#endif
-                    for(int j=0;j<int(Nb);j++) {
-                        const int jj = j*NB;
-                        Ctemp.setZero();
-                        RecursiveCCCMultMM<ca,cb>(
-                            M2,NB,K,Ap+M1,Bp+jj*Bsj,Ct,Ask,Bsj,Ctsj);
-                        if (alpha != T(1)) Ctemp.rowRange(0,M2) *= alpha;
-#ifdef _OPENMP
-#pragma omp critical
-#endif
-                        {
-                            if (add) C.subMatrix(M1,M,jj,jj+NB) += 
-                                Ctemp.rowRange(0,M2);
-                            else C.subMatrix(M1,M,jj,jj+NB) = 
-                                Ctemp.rowRange(0,M2);
-                        }
-                    }
-                } // M2 && Nb
-
-                // Final M2 x N2 partial block
-                if (M2 && N2) {
-#ifdef _OPENMP
-#pragma omp single
-#endif
-                    {
-                        Ctemp.setZero();
-                        RecursiveCCCMultMM<ca,cb>(
-                            M2,N2,K,Ap+M1,Bp+N1*Bsj,Ct,Ask,Bsj,Ctsj);
-                        if (alpha != T(1)) Ctemp.subMatrix(0,M2,0,N2) *= alpha;
-#ifdef _OPENMP
-#pragma omp critical
-#endif
-                        {
-                            if (add) C.subMatrix(M1,M,N1,N) += 
-                                Ctemp.subMatrix(0,M2,0,N2);
-                            else C.subMatrix(M1,M,N1,N) = 
-                                Ctemp.subMatrix(0,M2,0,N2);
-                        }
-                    } 
-                } // M2 && N2
-#ifdef _OPENMP
-            } // end parallel
-#endif
-        } else {
-            Matrix<T,ColMajor> Ctemp(M,N,T(0));
-            T* Ct = Ctemp.ptr();
-            const int Ctsj = Ctemp.stepj();
-            RecursiveCCCMultMM<ca,cb>(M,N,K,Ap,Bp,Ct, Ask,Bsj,Ctsj);
-            if (alpha != T(1)) Ctemp *= alpha;
-            if (add) C += Ctemp;
-            else C = Ctemp;
-        }
+        Matrix<T,ColMajor> Ctemp(M,N,T(0));
+        T* Ct = Ctemp.ptr();
+        const int Ctsj = Ctemp.stepj();
+        RecursiveCCCMultMM<ca,cb>(M,N,K,Ap,Bp,Ct, Ask,Bsj,Ctsj);
+        if (alpha != T(1)) Ctemp *= alpha;
+        if (add) C += Ctemp;
+        else C = Ctemp;
     }
 
     template <bool add, class T, class Ta, class Tb> void CCCMultMM(

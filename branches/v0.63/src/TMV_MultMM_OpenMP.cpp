@@ -29,44 +29,61 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef TMV_MultMM_H
-#define TMV_MultMM_H
 
-#include "tmv/TMV_Matrix.h"
+#ifdef _OPENMP
+
+#include "TMV_Blas.h"
+#include "TMV_MultMM.h"
+#include "omp.h"
 
 namespace tmv {
 
     template <bool add, class T, class Ta, class Tb> 
-    void CCCMultMM(
-        const T alpha, const GenMatrix<Ta>& A,
-        const GenMatrix<Tb>& B, const MatrixView<T>& C);
-
-    template <bool add, class T, class Ta, class Tb> 
-    void CRCMultMM(
-        const T alpha, const GenMatrix<Ta>& A,
-        const GenMatrix<Tb>& B, const MatrixView<T>& C);
-
-    template <bool add, class T, class Ta, class Tb> 
-    void RCCMultMM(
-        const T alpha, const GenMatrix<Ta>& A,
-        const GenMatrix<Tb>& B, const MatrixView<T>& C);
-
-    template <bool add, class T, class Ta, class Tb> 
     void OpenMPMultMM(
-        const T alpha, const GenMatrix<Ta>& A,
-        const GenMatrix<Tb>& B, const MatrixView<T>& C);
+        const T x, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
+        const MatrixView<T>& C)
+    {
+        const int M = C.colsize();
+        const int N = C.rowsize();
 
-    template <bool add, class T, class Ta, class Tb> 
-    void BlockMultMM(
-        const T alpha, const GenMatrix<Ta>& A,
-        const GenMatrix<Tb>& B, const MatrixView<T>& C);
+#pragma omp parallel
+        {
+            int num_threads = omp_get_num_threads();
+            int mythread = omp_get_thread_num();
+            if (num_threads == 1) {
+                BlockMultMM<add>(x,A,B,C);
+            } else if (M > N) {
+                int Mx = M / num_threads;
+                Mx = ((((Mx-1)>>4)+1)<<4); // round up to mult of 16
+                int i1 = mythread * Mx;
+                int i2 = (mythread+1) * Mx;
+                if (i2 > M || mythread == num_threads-1) i2 = M;
+                if (i1 < M) {
+                    // Need to make sure, since we rounded up Mx!
+                    BlockMultMM<add>(x,A.rowRange(i1,i2),B,C.rowRange(i1,i2));
+                }
+            } else {
+                int Nx = N / num_threads;
+                Nx = ((((Nx-1)>>4)+1)<<4); 
+                int j1 = mythread * Nx;
+                int j2 = (mythread+1) * Nx;
+                if (j2 > N || mythread == num_threads-1) j2 = N;
+                if (j1 < N) {
+                    BlockMultMM<add>(x,A,B.colRange(j1,j2),C.colRange(j1,j2));
+                }
+            }
+        }
+    }
 
-    template <bool add, class T, class Ta, class Tb> 
-    void RecursiveBlockMultMM(
-        const T alpha, const GenMatrix<Ta>& A,
-        const GenMatrix<Tb>& B, const MatrixView<T>& C);
+#ifdef BLAS
+#define INST_SKIP_BLAS
+#endif
 
+#define InstFile "TMV_MultMM_OpenMP.inst"
+#include "TMV_Inst.h"
+#undef InstFile
 
-}
+} // namespace tmv
 
 #endif
+

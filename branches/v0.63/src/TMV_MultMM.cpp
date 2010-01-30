@@ -39,6 +39,10 @@
 #include "tmv/TMV_MatrixArith.h"
 #include "TMV_MultMM.h"
 
+#ifdef _OPENMP
+#include "omp.h"
+#endif
+
 #ifdef XDEBUG
 #include "tmv/TMV_VectorArith.h"
 #include <iostream>
@@ -66,36 +70,42 @@ namespace tmv {
         TMVAssert(B.isrm() || B.iscm());
         TMVAssert(C.iscm());
 
-        if (A.iscm()) {
-            if (B.iscm()) 
-                CCCMultMM<add>(alpha,A,B,C);
-            else 
-                CRCMultMM<add>(alpha,A,B,C);
-        } else {
-            if (B.iscm()) 
-                RCCMultMM<add>(alpha,A,B,C);
-            else {
-                // With RRC, there is no way to make the innermost loop have
-                // dual unit-stride vectors.  So it is always faster to just
-                // copy one matrix to the opposite storage.  The fastest
-                // algorithm is RCC, so it is best to copy the B matrix.
-                int N=B.rowsize();
-                if (N > MM_BLOCKSIZE) {
-                    int j1=0;
-                    int K=B.colsize();
-                    Matrix<T,ColMajor> B1(K,MM_BLOCKSIZE);
-                    for (int j2=MM_BLOCKSIZE;j2<N;j1=j2,j2+=MM_BLOCKSIZE) {
-                        B1 = B.colRange(j1,j2);
-                        RCCMultMM<add>(alpha,A,B1,C.colRange(j1,j2));
-                    }
-                    B1.colRange(0,N-j1) = B.colRange(j1,N);
-                    RCCMultMM<add>(
-                        alpha,A,B1.colRange(0,N-j1),C.colRange(j1,N));
-                } else {
+        const int M = C.colsize();
+        const int N = C.rowsize();
+        const int K = A.rowsize();
+        const int Mb = (M>>6); // = M/64
+        const int Nb = (N>>6); // = N/64
+        const int Kb = (K>>6); // = K/64
+        const int Mc = M < 16 ? 1 : (M>>4); // = M/16
+        const int Nc = N < 16 ? 1 : (N>>4); // = N/16
+        const int Kc = K < 16 ? 1 : (K>>4); // = K/16
+        const bool twobig = (Mb&&Nb) || (Mb&&Kb) || (Nb&&Kb);
+
+        if ( (M < 16 && N < 16 && K < 16) ||
+             (M <= 3 || N <= 3 || K <= 3) ||
+             ( ( M < 16 || N < 16 || K < 16 ) &&
+               ( !twobig || (Mc * Nc * Kc < 4) ) ) ) {
+            // Use a simple algorithm
+            if (A.iscm()) {
+                if (B.iscm()) 
+                    CCCMultMM<add>(alpha,A,B,C);
+                else 
+                    CRCMultMM<add>(alpha,A,B,C);
+            } else {
+                if (B.iscm()) 
+                    RCCMultMM<add>(alpha,A,B,C);
+                else {
                     Matrix<T,ColMajor> B1 = B;
                     RCCMultMM<add>(alpha,A,B1,C);
                 }
             }
+#ifdef _OPENMP
+        } else if (!omp_in_parallel() && (Mb || Nb) &&
+                 ( Mc * Nc * Kc >= 64 ) ) {
+            OpenMPMultMM<add>(alpha,A,B,C);
+#endif
+        } else {
+            BlockMultMM<add>(alpha,A,B,C);
         }
     }
 
@@ -607,7 +617,7 @@ namespace tmv {
     {
         const int N = C.rowsize();
         for (int j=0,j2;j<N;j=j2) {
-            j2 = TMV_MIN(N,j+MM_BLOCKSIZE);
+            j2 = TMV_MIN(N,j+16);
             if (C.isrm()) {
                 Matrix<T,ColMajor> B2 = alpha * B.colRange(j,j2);
                 DoMultMM<add>(
@@ -649,8 +659,7 @@ namespace tmv {
         if (C.colsize() > 0 && C.rowsize() > 0) {
             if (A.rowsize() == 0 || alpha == T(0))  {
                 if (!add) C.setZero();
-            }
-            else if (C.isconj()) 
+            } else if (C.isconj()) 
                 MultMM<add>(
                     TMV_CONJ(alpha),A.conjugate(),B.conjugate(),C.conjugate());
             else if (C.isrm()) 

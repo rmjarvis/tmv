@@ -712,7 +712,7 @@
   #error internal error in bit width configuration
 #endif
 
-// MJ Added this to avoid icpc warning
+// TMV -- Added this to avoid icpc warning
 #ifndef SIZEOF_VOID_P
 #define SIZEOF_VOID_P 0
 #endif
@@ -722,7 +722,7 @@
 #ifndef _PLATFORM_ARCH_32
 #define _PLATFORM_ARCH_32 0
 #endif
-// MJ End addition
+// TMV -- End addition
 
 #if SIZEOF_VOID_P == 8
   #define PLATFORM_ARCH_64 1

@@ -47,11 +47,11 @@
       const BandMatrixView<T >& m2); \
   template std::istream& operator>>(std::istream& fin, \
       const BandMatrixView<T >& m);  \
-  template BandMatrix<T,DiagMajor> makeUpperBiDiagMatrix( \
+  template BandMatrix<T,DiagMajor> UpperBiDiagMatrix( \
       const GenVector<T >& v1, const GenVector<T >& v2); \
-  template BandMatrix<T,DiagMajor> makeLowerBiDiagMatrix( \
+  template BandMatrix<T,DiagMajor> LowerBiDiagMatrix( \
       const GenVector<T >& v1, const GenVector<T >& v2); \
-  template BandMatrix<T,DiagMajor> makeTriDiagMatrix( \
+  template BandMatrix<T,DiagMajor> TriDiagMatrix( \
       const GenVector<T >& v1, const GenVector<T >& v2, \
       const GenVector<T >& v3); \
   template ConstBandMatrixView<T > BandMatrixViewOf( \

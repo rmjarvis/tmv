@@ -114,15 +114,15 @@
 //
 // Special Constructors
 //
-//    makeUpperBiDiagMatrix(const Vector& v1, const Vector& v2)
+//    UpperBiDiagMatrix(const Vector& v1, const Vector& v2)
 //        Returns a (DiagMajor) BandMatrix with nlo=0, nhi=1, 
 //        v1 on the main diagonal, and v2 on the superdiagonal
 //
-//    makeLowerBiDiagMatrix(const Vector& v1, const Vector& v2)
+//    LowerBiDiagMatrix(const Vector& v1, const Vector& v2)
 //        Returns a (DiagMajor) BandMatrix with nlo=1, nhi=0, 
 //        v1 on the subdiagonal, and v2 on the main diagonal
 //
-//    makeTriDiagMatrix(const Vector& v1, const Vector& v2, const Vector& v3)
+//    TriDiagMatrix(const Vector& v1, const Vector& v2, const Vector& v3)
 //        Returns a (DiagMajor) BandMatrix with nlo=1, nhi=1, 
 //        v1 on the subdiagonal, v2 on the main diagonal, and 
 //        v3 on the superdiagonal
@@ -2198,7 +2198,7 @@ namespace tmv {
         typedef VectorView<T,FortranStyle> vec_type;
         typedef MatrixView<T,FortranStyle> rec_type;
         typedef BandMatrixView<RT,FortranStyle> real_type;
-        typedef ConstBandMatrixView<T,FortranStyle> const_type;
+        typedef ConstBandMatrixView<T,FortranStyle> const_view_type;
 
     public:
 

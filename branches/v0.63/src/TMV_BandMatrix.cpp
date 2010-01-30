@@ -1071,7 +1071,7 @@ namespace tmv {
     //
 
     template <class T> 
-    BandMatrix<T,DiagMajor> makeUpperBiDiagMatrix(
+    BandMatrix<T,DiagMajor> UpperBiDiagMatrix(
         const GenVector<T>& v1, const GenVector<T>& v2)
     {
         if (v1.size() == v2.size()) {
@@ -1089,7 +1089,7 @@ namespace tmv {
     }
 
     template <class T> 
-    BandMatrix<T,DiagMajor> makeLowerBiDiagMatrix(
+    BandMatrix<T,DiagMajor> LowerBiDiagMatrix(
         const GenVector<T>& v1, const GenVector<T>& v2)
     {
         if (v1.size() == v2.size()) {
@@ -1107,7 +1107,7 @@ namespace tmv {
     }
 
     template <class T> 
-    BandMatrix<T,DiagMajor> makeTriDiagMatrix(
+    BandMatrix<T,DiagMajor> TriDiagMatrix(
         const GenVector<T>& v1, const GenVector<T>& v2,
         const GenVector<T>& v3)
     {

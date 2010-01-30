@@ -152,8 +152,8 @@ int main() try
   //!  Norm2(m1) = Warning:
   //!  Calling BandMatrix::Norm2 without previously calling DivideUsing(SV)
   //!  24.0314
-  std::cout<<"Norm2(m1) = "<<m1.DoNorm2()<<std::endl;
-  //!  Norm2(m1) = 24.0314
+  std::cout<<"m1.doNorm2() = "<<m1.doNorm2()<<std::endl;
+  //!  m1.doNorm2() = 24.0314
   std::cout<<"NormInf(m1) = "<<NormInf(m1)<<std::endl;
   //!  NormInf(m1) = 28
   std::cout<<"NormF(m1) = "<<NormF(m1)<<" = "<<Norm(m1)<<std::endl;
@@ -183,15 +183,15 @@ int main() try
   //!  m1.diag(1) = 5 ( 6  6  4  0  -6 )
   std::cout<<"m1.diag(-1) = "<<m1.diag(-1)<<std::endl;
   //!  m1.diag(-1) = 5 ( 10  12  12  10  6 )
-  std::cout<<"m1.SubBandMatrix(0,3,0,3,1,1) = \n"<<
-    m1.SubBandMatrix(0,3,0,3,1,1)<<std::endl;
-  //!  m1.SubBandMatrix(0,3,0,3,1,1) = 
+  std::cout<<"m1.subBandMatrix(0,3,0,3,1,1) = \n"<<
+    m1.subBandMatrix(0,3,0,3,1,1)<<std::endl;
+  //!  m1.subBandMatrix(0,3,0,3,1,1) = 
   //!  3 3
   //!  (  7  6  0  )
   //!  (  10  9  6  )
   //!  (  0  12  9  )
-  std::cout<<"m1.Transpose() = \n"<<m1.Transpose()<<std::endl;
-  //!  m1.Transpose() = 
+  std::cout<<"m1.transpose() = \n"<<m1.transpose()<<std::endl;
+  //!  m1.transpose() = 
   //!  6 6
   //!  (  7  10  0  0  0  0  )
   //!  (  6  9  12  0  0  0  )
@@ -200,25 +200,25 @@ int main() try
   //!  (  0  0  -3  0  3  6  )
   //!  (  0  0  0  -9  -6  -3  )
 
-  // Rows, Cols shrink both dimensions of the matrix to include only
+  // rowRange, colRange shrink both dimensions of the matrix to include only
   // the portions that are in those rows or columns:
-  std::cout<<"m1.Rows(0,4) = \n"<<m1.Rows(0,4)<<std::endl;
-  //!  m1.Rows(0,4) = 
+  std::cout<<"m1.rowRange(0,4) = \n"<<m1.rowRange(0,4)<<std::endl;
+  //!  m1.rowRange(0,4) = 
   //!  4 6
   //!  (  7  6  3  0  0  0  )
   //!  (  10  9  6  1  0  0  )
   //!  (  0  12  9  4  -3  0  )
   //!  (  0  0  12  7  0  -9  )
-  std::cout<<"m1.Cols(1,4) = \n"<<m1.Cols(1,4)<<std::endl;
-  //!  m1.Cols(1,4) = 
+  std::cout<<"m1.colRange(1,4) = \n"<<m1.colRange(1,4)<<std::endl;
+  //!  m1.colRange(1,4) = 
   //!  5 3
   //!  (  6  3  0  )
   //!  (  9  6  1  )
   //!  (  12  9  4  )
   //!  (  0  12  7  )
   //!  (  0  0  10  )
-  std::cout<<"m1.Diags(0,2) = \n"<<m1.Diags(0,2)<<std::endl;
-  //!  m1.Diags(0,2) = 
+  std::cout<<"m1.diagRange(0,2) = \n"<<m1.diagRange(0,2)<<std::endl;
+  //!  m1.diagRange(0,2) = 
   //!  6 6
   //!  (  7  6  0  0  0  0  )
   //!  (  0  9  6  0  0  0  )
@@ -226,8 +226,8 @@ int main() try
   //!  (  0  0  0  7  0  0  )
   //!  (  0  0  0  0  3  -6  )
   //!  (  0  0  0  0  0  -3  )
-  std::cout<<"m1.Diags(-1,1) = \n"<<m1.Diags(-1,1)<<std::endl;
-  //!  m1.Diags(-1,1) = 
+  std::cout<<"m1.diagRange(-1,1) = \n"<<m1.diagRange(-1,1)<<std::endl;
+  //!  m1.diagRange(-1,1) = 
   //!  6 6
   //!  (  7  0  0  0  0  0  )
   //!  (  10  9  0  0  0  0  )
@@ -253,30 +253,30 @@ int main() try
   //!  fm1(1,1) = 7
   std::cout<<"fm1(4,3) = "<<fm1(4,3)<<std::endl;
   //!  fm1(4,3) = 12
-  std::cout<<"fm1.SubBandMatrix(1,3,1,3,1,1) = \n"<<
-    fm1.SubBandMatrix(1,3,1,3,1,1)<<std::endl;
-  //!  fm1.SubBandMatrix(1,3,1,3,1,1) = 
+  std::cout<<"fm1.subBandMatrix(1,3,1,3,1,1) = \n"<<
+    fm1.subBandMatrix(1,3,1,3,1,1)<<std::endl;
+  //!  fm1.subBandMatrix(1,3,1,3,1,1) = 
   //!  3 3
   //!  (  7  6  0  )
   //!  (  10  9  6  )
   //!  (  0  12  9  )
-  std::cout<<"fm1.Rows(1,4) = \n"<<fm1.Rows(1,4)<<std::endl;
-  //!  fm1.Rows(1,4) = 
+  std::cout<<"fm1.rowRange(1,4) = \n"<<fm1.rowRange(1,4)<<std::endl;
+  //!  fm1.rowRange(1,4) = 
   //!  4 6
   //!  (  7  6  3  0  0  0  )
   //!  (  10  9  6  1  0  0  )
   //!  (  0  12  9  4  -3  0  )
   //!  (  0  0  12  7  0  -9  )
-  std::cout<<"fm1.Cols(2,4) = \n"<<fm1.Cols(2,4)<<std::endl;
-  //!  fm1.Cols(2,4) = 
+  std::cout<<"fm1.colRange(2,4) = \n"<<fm1.colRange(2,4)<<std::endl;
+  //!  fm1.colRange(2,4) = 
   //!  5 3
   //!  (  6  3  0  )
   //!  (  9  6  1  )
   //!  (  12  9  4  )
   //!  (  0  12  7  )
   //!  (  0  0  10  )
-  std::cout<<"fm1.Diags(0,1) = \n"<<fm1.Diags(0,1)<<std::endl;
-  //!  fm1.Diags(0,1) = 
+  std::cout<<"fm1.diagRange(0,1) = \n"<<fm1.diagRange(0,1)<<std::endl;
+  //!  fm1.diagRange(0,1) = 
   //!  6 6
   //!  (  7  6  0  0  0  0  )
   //!  (  0  9  6  0  0  0  )
@@ -284,8 +284,8 @@ int main() try
   //!  (  0  0  0  7  0  0  )
   //!  (  0  0  0  0  3  -6  )
   //!  (  0  0  0  0  0  -3  )
-  std::cout<<"fm1.Diags(-1,0) = \n"<<fm1.Diags(-1,0)<<std::endl;
-  //!  fm1.Diags(-1,0) = 
+  std::cout<<"fm1.diagRange(-1,0) = \n"<<fm1.diagRange(-1,0)<<std::endl;
+  //!  fm1.diagRange(-1,0) = 
   //!  6 6
   //!  (  7  0  0  0  0  0  )
   //!  (  10  9  0  0  0  0  )
