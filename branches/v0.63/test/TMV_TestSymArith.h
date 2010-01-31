@@ -160,7 +160,7 @@ template <class T> inline void MakeSymList(
   tmv::Matrix<T>* a2b = new tmv::Matrix<T>(a2);
   tmv::Matrix<std::complex<T> >* ca2a = new tmv::Matrix<std::complex<T> >(ca2);
   tmv::Matrix<std::complex<T> >* ca2b = new tmv::Matrix<std::complex<T> >(ca2);
-  ca2b->diag().imag().setZero();
+  ca2b->diag().imagPart().setZero();
   s.push_back(SymMatrixViewOf(*a2a,tmv::Upper).subSymMatrix(0,2*N,2));
   s.push_back(HermMatrixViewOf(*a2b,tmv::Upper).subSymMatrix(0,2*N,2));
   cs.push_back(SymMatrixViewOf(*ca2a,tmv::Upper).subSymMatrix(0,2*N,2));

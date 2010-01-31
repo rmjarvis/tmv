@@ -13,7 +13,7 @@ static bool IsPosDef(const tmv::GenSymBandMatrix<T>& m)
 #ifdef NOTHROW
     for(size_t i=1;i<=m.size();i++) {
         T d = Det(tmv::Matrix<T>(m.subSymBandMatrix(0,i)));
-        if (tmv::REAL(d) < 0) return false;
+        if (tmv::TMV_REAL(d) < 0) return false;
     }
     return true;
 #else
@@ -28,7 +28,7 @@ static bool IsPosDef(const tmv::GenSymBandMatrix<T>& m)
             T d = Det(tmv::Matrix<T>(m.subSymBandMatrix(0,i)));
             if (showacc) 
                 std::cout<<"Det(0.."<<i<<") = "<<d<<std::endl;
-            if (!(tmv::REAL(d) > 0)) {
+            if (!(tmv::TMV_REAL(d) > 0)) {
                 return false;
             }
         }
@@ -37,7 +37,7 @@ static bool IsPosDef(const tmv::GenSymBandMatrix<T>& m)
             T d = Det(tmv::Matrix<T>(m.subSymBandMatrix(0,i)));
             std::cout<<"Det(0.."<<i<<") = "<<d<<std::endl;
         }
-        Assert(tmv::FALSE,
+        Assert(tmv::TMV_FALSE,
                "Caught NonPosDef, but no determinants of sub-blocks are "
                "negative");
 #endif
@@ -50,10 +50,10 @@ static bool IsPosDef(const tmv::GenSymBandMatrix<T>& m)
         T d = Det(tmv::Matrix<T>(m.subSymBandMatrix(0,i)));
         if (showacc) 
             std::cout<<"Det(0.."<<i<<") = "<<d<<std::endl;
-        if (tmv::REAL(d) < 0) {
+        if (tmv::TMV_REAL(d) < 0) {
             std::cout<<"m = "<<TMV_Text(m)<<"  "<<m<<std::endl;
             std::cout<<"Det(0.."<<i<<") = "<<d<<std::endl;
-            Assert(tmv::FALSE,
+            Assert(tmv::TMV_FALSE,
                    "Didn't catch NonPosDef, but determinant of sub-block "
                    "is negative");
         }

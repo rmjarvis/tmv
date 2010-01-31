@@ -4460,7 +4460,7 @@ namespace tmv {
     {
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return ConstSymMatrixView<T>(
             m.cptr(),m.rowsize(),m.stepi(),m.stepj(),
@@ -4473,7 +4473,7 @@ namespace tmv {
     { 
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return ConstSymMatrixView<T,I>(
             m.cptr(),m.rowsize(),m.stepi(),m.stepj(),
@@ -4486,7 +4486,7 @@ namespace tmv {
     {
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return ConstSymMatrixView<T,I>(
             m.cptr(),m.rowsize(),m.stepi(),m.stepj(),
@@ -4499,7 +4499,7 @@ namespace tmv {
     { 
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return SymMatrixView<T,I>(
             m.ptr(),m.rowsize(),m.stepi(),m.stepj(),
@@ -4512,7 +4512,7 @@ namespace tmv {
     {
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return SymMatrixView<T,I>(
             m.ptr(),m.rowsize(),m.stepi(),m.stepj(),

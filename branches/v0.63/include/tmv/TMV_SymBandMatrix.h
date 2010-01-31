@@ -5587,7 +5587,7 @@ namespace tmv {
     {
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return ConstSymBandMatrixView<T>(
             m.cptr(),m.colsize(),nlo,
@@ -5600,7 +5600,7 @@ namespace tmv {
     {
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return ConstSymBandMatrixView<T,I>(
             m.cptr(),m.colsize(),nlo,
@@ -5613,7 +5613,7 @@ namespace tmv {
     {
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return ConstSymBandMatrixView<T,I>(
             m.cptr(),m.colsize(),nlo,
@@ -5626,7 +5626,7 @@ namespace tmv {
     {
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return SymBandMatrixView<T,I>(
             m.ptr(),m.colsize(),nlo,
@@ -5640,7 +5640,7 @@ namespace tmv {
     {
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return SymBandMatrixView<T,I>(
             m.ptr(),m.colsize(),nlo,
@@ -5713,7 +5713,7 @@ namespace tmv {
         if (nlo<0) nlo = (uplo==Upper?m.nhi():m.nlo());
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return ConstSymBandMatrixView<T>(
             m.cptr(),m.colsize(),nlo,
@@ -5727,7 +5727,7 @@ namespace tmv {
         if (nlo<0) nlo = (uplo==Upper?m.nhi():m.nlo());
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return ConstSymBandMatrixView<T,I>(
             m.cptr(),m.colsize(),nlo,
@@ -5741,7 +5741,7 @@ namespace tmv {
         if (nlo<0) nlo = (uplo==Upper?m.nhi():m.nlo());
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return ConstSymBandMatrixView<T,I>(
             m.cptr(),m.colsize(),nlo,
@@ -5755,7 +5755,7 @@ namespace tmv {
         if (nlo<0) nlo = (uplo==Upper?m.nhi():m.nlo());
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return SymBandMatrixView<T,I>(
             m.ptr(),m.colsize(),nlo,
@@ -5770,7 +5770,7 @@ namespace tmv {
         if (nlo<0) nlo = (uplo==Upper?m.nhi():m.nlo());
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == RT(0));
+        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return SymBandMatrixView<T,I>(
             m.ptr(),m.colsize(),nlo,
