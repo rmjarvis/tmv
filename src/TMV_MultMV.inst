@@ -1,29 +1,39 @@
 
 #define CT std::complex<T>
 
-#define DefMV(T1,C1,T2,C2,T3)\
-  template void InstMultMV(const T3 x, \
-      const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1, \
-      const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3); \
-  template void InstAddMultMV(const T3 x, \
-      const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1, \
-      const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3); \
+#define Def1(T) \
+  template const T* MatrixComposite<T >::cptr() const; \
+  template int MatrixComposite<T >::stepi() const; \
+  template int MatrixComposite<T >::stepj() const; \
+  template size_t MatrixComposite<T >::ls() const; \
 
-
-DefMV(T,false,T,false,T)
-#ifdef TMV_INST_COMPLEX
-#ifdef TMV_INST_MIX
-DefMV(T,false,T,false,CT)
-DefMV(T,false,CT,false,CT)
-DefMV(T,false,CT,true,CT)
-DefMV(CT,false,T,false,CT)
-DefMV(CT,true,T,false,CT)
+Def1(T)
+#ifdef INST_COMPLEX
+Def1(CT)
 #endif
-DefMV(CT,false,CT,false,CT)
-DefMV(CT,false,CT,true,CT)
-DefMV(CT,true,CT,false,CT)
-DefMV(CT,true,CT,true,CT)
+
+#define DefMV(T,Ta,Tx)\
+  template void MultMV<true>(const T alpha, const GenMatrix<Ta >& A, \
+      const GenVector<Tx >& x, const VectorView<T >& y); \
+  template void MultMV<false>(const T alpha, const GenMatrix<Ta >& A, \
+      const GenVector<Tx >& x, const VectorView<T >& y); \
+  template void UnitAMultMV1<true,false>(const GenMatrix<Ta >& A, \
+      const GenVector<Tx >& x, const VectorView<T >& y); \
+  template void UnitAMultMV1<true,true>(const GenMatrix<Ta >& A, \
+      const GenVector<Tx >& x, const VectorView<T >& y); \
+  template void UnitAMultMV1<false,false>(const GenMatrix<Ta >& A, \
+      const GenVector<Tx >& x, const VectorView<T >& y); \
+  template void UnitAMultMV1<false,true>(const GenMatrix<Ta >& A, \
+      const GenVector<Tx >& x, const VectorView<T >& y); \
+
+DefMV(T,T,T)
+#ifdef INST_COMPLEX
+DefMV(CT,T,T)
+DefMV(CT,T,CT)
+DefMV(CT,CT,T)
+DefMV(CT,CT,CT)
 #endif
 
 #undef DefMV
+
 #undef CT

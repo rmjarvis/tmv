@@ -1,26 +1,31 @@
+#include "TMV.h"
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
-#include "TMV.h"
 
-template <class T1, class T2> inline bool CanLDivEq(
+template <class T1, class T2> 
+inline bool CanLDivEq(
     const tmv::UpperTriMatrixView<T1>& a, const tmv::UpperTriMatrixView<T2>& b)
 { return a.size() == b.size() && !a.isunit(); }
 
-template <class T1, class T2> inline bool CanRDivEq(
+template <class T1, class T2> 
+inline bool CanRDivEq(
     const tmv::UpperTriMatrixView<T1>& a, const tmv::UpperTriMatrixView<T2>& b)
 { return a.size() == b.size() && !a.isunit(); }
 
-template <class T1, class T2> inline bool CanLDivEq(
+template <class T1, class T2> 
+inline bool CanLDivEq(
     const tmv::LowerTriMatrixView<T1>& a, const tmv::LowerTriMatrixView<T2>& b)
 { return a.size() == b.size() && !a.isunit(); }
 
-template <class T1, class T2> inline bool CanRDivEq(
+template <class T1, class T2> 
+inline bool CanRDivEq(
     const tmv::LowerTriMatrixView<T1>& a, const tmv::LowerTriMatrixView<T2>& b)
 { return a.size() == b.size() && !a.isunit(); }
 
 #include "TMV_TestMatrixDivArith.h"
 
-template <class T, tmv::DiagType D> void TestTriDiv() 
+template <class T, tmv::DiagType D> 
+void TestTriDiv() 
 {
     const int N = 10;
 
@@ -86,18 +91,18 @@ template <class T, tmv::DiagType D> void TestTriDiv()
     Assert(Norm(ainv-minv) < eps*Norm(ainv),"Tri Inverse");
 
     if (showacc) {
-        std::cout<<"a.det = "<<a.det()<<", m.det = "<<m.det()<<std::endl;
-        std::cout<<"abs(adet-mdet) = "<<std::abs(a.det()-m.det());
-        std::cout<<"  EPS*abs(mdet) = "<<eps*std::abs(m.det())<<std::endl;
-        std::cout<<"a.logDet = "<<a.logDet();
-        std::cout<<", m.logDet = "<<m.logDet()<<std::endl;
+        std::cout<<"Det(a) = "<<Det(a)<<", Det(m) = "<<Det(m)<<std::endl;
+        std::cout<<"abs(adet-mdet) = "<<std::abs(Det(a)-Det(m));
+        std::cout<<"  EPS*abs(mdet) = "<<eps*std::abs(Det(m))<<std::endl;
+        std::cout<<"LogDet(a) = "<<LogDet(a);
+        std::cout<<", LogDet(m) = "<<LogDet(m)<<std::endl;
     }
-    Assert(std::abs(m.det()-a.det()) < eps*std::abs(m.det()),"Tri det");
+    Assert(std::abs(Det(m)-Det(a)) < eps*std::abs(Det(m)),"Tri Det");
     T asign, msign;
-    Assert(std::abs(m.logDet(&msign)-a.logDet(&asign)) < N*eps,"Tri logDet");
-    Assert(std::abs(asign-msign) < N*eps,"Tri logDet - sign");
-    Assert(std::abs(a.det()-asign*std::exp(a.logDet())) < eps*std::abs(m.det()),
-           "Tri det--logDet");
+    Assert(std::abs(m.logDet(&msign)-a.logDet(&asign)) < N*eps,"Tri LogDet");
+    Assert(std::abs(asign-msign) < N*eps,"Tri LogDet - sign");
+    Assert(std::abs(Det(a) - asign*std::exp(LogDet(a))) < 
+           eps*std::abs(Det(m)),"Tri Det--LogDet");
 
     tmv::Matrix<std::complex<T> > cm(m);
     cm += std::complex<T>(10,2);
@@ -116,16 +121,17 @@ template <class T, tmv::DiagType D> void TestTriDiv()
     T ceps = EPS * Norm(cm) * Norm(cm.inverse());
 
     if (showacc) {
-        std::cout<<"ca.det = "<<ca.det()<<", cm.det = "<<cm.det()<<std::endl;
-        std::cout<<"abs(cadet-cmdet) = "<<std::abs(ca.det()-cm.det());
-        std::cout<<"  EPS*abs(cmdet) = "<<ceps*std::abs(cm.det())<<std::endl;
+        std::cout<<"Det(ca) = "<<Det(ca)<<", Det(cm) = "<<Det(cm)<<std::endl;
+        std::cout<<"abs(cadet-cmdet) = "<<std::abs(Det(ca)-Det(cm));
+        std::cout<<"  EPS*abs(cmdet) = "<<ceps*std::abs(Det(cm))<<std::endl;
     }
-    Assert(std::abs(ca.det()-cm.det()) < ceps*std::abs(cm.det()),"Tri CDet");
+    Assert(std::abs(Det(ca)-Det(cm)) < ceps*std::abs(Det(cm)),"Tri CDet");
     std::complex<T> casign, cmsign;
-    Assert(std::abs(cm.logDet(&cmsign)-ca.logDet(&casign)) < N*eps,"Tri CLogDet");
+    Assert(std::abs(cm.logDet(&cmsign)-ca.logDet(&casign)) < N*eps,
+           "Tri CLogDet");
     Assert(std::abs(casign-cmsign) < N*eps,"Tri CLogDet - sign");
-    Assert(std::abs(ca.det() - casign*std::exp(ca.logDet())) < 
-           eps*std::abs(cm.det()),"Tri CDet--logDet");
+    Assert(std::abs(Det(ca) - casign*std::exp(LogDet(ca))) < 
+           eps*std::abs(Det(cm)),"Tri CDet--LogDet");
 
     tmv::Vector<std::complex<T> > e(b);
     e(1) += std::complex<T>(-1,5);
@@ -167,12 +173,14 @@ template <class T, tmv::DiagType D> void TestTriDiv()
     Assert(Norm(y1-y2) < ceps*Norm(y1),"Tri e%c");
 }
 
-template <class T> void TestTriDiv_A1() 
+template <class T> 
+void TestTriDiv_A1() 
 {
     const int N = 10;
 
     tmv::Matrix<T> m(N,N);
-    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) m(i,j) = T(0.4+0.02*i-0.05*j);
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) 
+        m(i,j) = T(0.4+0.02*i-0.05*j);
     m.diag().addToAll(5);
     m.diag(1).addToAll(T(0.32));
     m.diag(-1).addToAll(T(0.91));
@@ -186,14 +194,14 @@ template <class T> void TestTriDiv_A1()
     tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag> ca1(cm);
     tmv::UpperTriMatrix<T,tmv::UnitDiag> a2(m);
     tmv::UpperTriMatrix<std::complex<T>,tmv::UnitDiag> ca2(cm);
-    a1.SaveDiv();
-    a2.SaveDiv();
-    ca1.SaveDiv();
-    ca2.SaveDiv();
-    a1.SetDiv();
-    a2.SetDiv();
-    ca1.SetDiv();
-    ca2.SetDiv();
+    a1.saveDiv();
+    a2.saveDiv();
+    ca1.saveDiv();
+    ca2.saveDiv();
+    a1.setDiv();
+    a2.setDiv();
+    ca1.setDiv();
+    ca2.setDiv();
 
     tmv::UpperTriMatrix<T,tmv::NonUnitDiag> a1x(m);
     tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag> ca1x(cm);
@@ -204,43 +212,34 @@ template <class T> void TestTriDiv_A1()
     tmv::LowerTriMatrix<T,tmv::UnitDiag> b2x(m);
     tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag> cb2x(cm);
 
-    TestMatrixDivArith2<T>(
-        tmv::LU,a2x,ca2x,a1.view(),a2.view(),
-        ca1.view(),ca2.view(),"U/U 1");
-    TestMatrixDivArith2<T>(
-        tmv::LU,b2x,cb2x,a1.transpose(),a2.transpose(),
-        ca1.transpose(),ca2.transpose(),"L/L 1");
-    TestMatrixDivArith2<T>(
-        tmv::LU,a1x,ca1x,a2.view(),a1.view(),
-        ca2.view(),ca1.view(),"U/U 2");
-    TestMatrixDivArith2<T>(
-        tmv::LU,b1x,cb1x,a2.transpose(),a1.transpose(),
-        ca2.transpose(),ca1.transpose(),"L/L 2");
+    TestMatrixDivArith2<T>(tmv::LU,a2x,ca2x,a1.view(),a2.view(),
+                           ca1.view(),ca2.view(),"U/U 1");
+    TestMatrixDivArith2<T>(tmv::LU,b2x,cb2x,a1.transpose(),a2.transpose(),
+                           ca1.transpose(),ca2.transpose(),"L/L 1");
+    TestMatrixDivArith2<T>(tmv::LU,a1x,ca1x,a2.view(),a1.view(),
+                           ca2.view(),ca1.view(),"U/U 2");
+    TestMatrixDivArith2<T>(tmv::LU,b1x,cb1x,a2.transpose(),a1.transpose(),
+                           ca2.transpose(),ca1.transpose(),"L/L 2");
 
 #ifdef XTEST
-#if (XTEST & 2)
     tmv::UpperTriMatrix<T,tmv::NonUnitDiag> a1b(m);
     tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag> ca1b(cm);
     tmv::UpperTriMatrix<T,tmv::UnitDiag> a2b(m);
     tmv::UpperTriMatrix<std::complex<T>,tmv::UnitDiag> ca2b(cm);
 
-    TestMatrixDivArith1<T>(
-        tmv::LU,a1x,ca1x,a1.view(),a1b.view(),
-        ca1.view(),ca1b.view(),"U/U 3");
-    TestMatrixDivArith1<T>(
-        tmv::LU,b1x,cb1x,a1.transpose(),a1b.transpose(),
-        ca1.transpose(),ca1b.transpose(),"L/L 3");
-    TestMatrixDivArith1<T>(
-        tmv::LU,a2x,ca2x,a2.view(),a2b.view(),
-        ca2.view(),ca2b.view(),"U/U 4");
-    TestMatrixDivArith1<T>(
-        tmv::LU,b2x,cb2x,a2.transpose(),a2b.transpose(),
-        ca2.transpose(),ca2b.transpose(),"L/L 4");
-#endif
+    TestMatrixDivArith1<T>(tmv::LU,a1x,ca1x,a1.view(),a1b.view(),
+                           ca1.view(),ca1b.view(),"U/U 3");
+    TestMatrixDivArith1<T>(tmv::LU,b1x,cb1x,a1.transpose(),a1b.transpose(),
+                           ca1.transpose(),ca1b.transpose(),"L/L 3");
+    TestMatrixDivArith1<T>(tmv::LU,a2x,ca2x,a2.view(),a2b.view(),
+                           ca2.view(),ca2b.view(),"U/U 4");
+    TestMatrixDivArith1<T>(tmv::LU,b2x,cb2x,a2.transpose(),a2b.transpose(),
+                           ca2.transpose(),ca2b.transpose(),"L/L 4");
 #endif
 }
 
-template <class T> void TestAllTriDiv()
+template <class T> 
+void TestAllTriDiv()
 {
     TestTriDiv<T,tmv::NonUnitDiag>();
     TestTriDiv<T,tmv::UnitDiag>();
@@ -253,12 +252,12 @@ template <class T> void TestAllTriDiv()
     std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<"> Division passed all tests\n";
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestAllTriDiv<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestAllTriDiv<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestAllTriDiv<long double>();
 #endif

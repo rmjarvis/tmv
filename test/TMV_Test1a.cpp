@@ -22,7 +22,8 @@ bool symoprod = false;
 bool dontthrow = false;
 std::string lastsuccess = "";
 
-int main() try {
+int main() try 
+{
     std::ofstream log("tmvtest1a.log");
     tmv::WriteWarningsTo(&log);
 
@@ -31,31 +32,32 @@ int main() try {
     //showtests=true;
     //showstartdone=true;
 
-//#define SKIPREST
+#if 1
 
-#ifndef SKIPREST
-
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
     TestAllVector<double>();
     TestAllMatrix<double>();
+    TestAllMatrixDiv<double>();
 #endif // DOUBLE
 
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
     TestAllVector<float>();
     TestAllMatrix<float>();
+    TestAllMatrixDiv<float>();
 #endif // FLOAT
 
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
     TestAllVector<long double>();
     TestAllMatrix<long double>();
+    TestAllMatrixDiv<long double>();
 #endif // LONGDOUBLE
 
-#ifdef TEST_INT
+#ifdef INST_INT
     TestAllVector<int>();
     TestAllMatrix<int>();
 #endif  // INT
 
-#endif // SKIPREST
+#endif 
 
     return 0;
 }
@@ -71,8 +73,7 @@ catch (std::exception& e) {
     std::cerr<<e.what()<<std::endl;
     std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
     return 1;
-}
-catch (...) {
+} catch (...) {
     std::cerr<<"Unknown exception thrown\n";
     std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
     return 1;
@@ -97,12 +98,14 @@ void DoAssert(bool x, std::string s)
     } else { 
         if (showtests) std::cout<<"  Failed"<<std::endl;
         if (dontthrow) std::cout<<"Failed test: "<<s<<std::endl;  
-        else 
+        else {
 #ifdef NOTHROW
-        { std::cerr<<"Error in test: "<<s<<std::endl; exit(1); }
+            std::cerr<<"Error in test: "<<s<<std::endl; 
+            exit(1); 
 #else
-        throw tmv::Error("Error in test: ",s);  
+            throw tmv::Error("Error in test: ",s);  
 #endif
+        }
     } 
 }
 

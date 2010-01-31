@@ -1,16 +1,16 @@
+#include "TMV.h"
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
-#include "TMV.h"
 
 #define NOADDEQ
 #define NOMULTEQ
 #define NOTRANSMM
 #include "TMV_TestMatrixArith.h"
 
-template <class T> void TestTriMatrixArith_C2()
+template <class T> 
+void TestTriMatrixArith_C2()
 {
 #ifdef XTEST
-#if (XTEST & 2)
     const int N = 10;
 
     tmv::Matrix<T> a1(N,N);
@@ -78,19 +78,18 @@ template <class T> void TestTriMatrixArith_C2()
     TestMatrixArith456<T>(l1x,cl1x,d1v,cd1v,l3v,cl3v,"Diag/Tri L");
     TestMatrixArith456<T>(l1x,cl1x,d1v,cd1v,l4v,cl4v,"Diag/Tri L");
 #endif
-#endif
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestTriMatrixArith_C2<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestTriMatrixArith_C2<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestTriMatrixArith_C2<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestTriMatrixArith_C2<int>();
 #endif
 

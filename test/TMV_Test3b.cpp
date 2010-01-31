@@ -24,36 +24,35 @@ std::string lastsuccess = "";
 
 //#include "TMV_Small.h"
 
-int main() try {
+int main() try 
+{
     std::ofstream log("tmvtest3b.log");
     tmv::WriteWarningsTo(&log);
 
-    showacc=true;
-    showdiv=true;
-    showtests=true;
-    showstartdone=true;
+    //showacc=true;
+    //showdiv=true;
+    //showtests=true;
+    //showstartdone=true;
 
-    //#define SKIPREST
+#if 1
 
-#ifndef SKIPREST
-
-#ifdef TEST_DOUBLE
-    TestSmallMatrixArith_1<double>();
+#ifdef INST_DOUBLE
+    TestAllSmallMatrixA<double>();
 #endif
 
-#ifdef TEST_FLOAT
-    TestSmallMatrixArith_1<float>();
+#ifdef INST_FLOAT
+    TestAllSmallMatrixA<float>();
 #endif
 
-#ifdef TEST_LONGDOUBLE
-    TestSmallMatrixArith_1<long double>();
+#ifdef INST_LONGDOUBLE
+    TestAllSmallMatrixA<long double>();
 #endif 
 
-#ifdef TEST_INT
-    TestSmallMatrixArith_1<int>();
+#ifdef INST_INT
+    TestAllSmallMatrixA<int>();
 #endif 
 
-#endif // SKIPREST
+#endif
 
     return 0;
 }
@@ -69,16 +68,14 @@ catch (std::exception& e) {
     std::cerr<<e.what()<<std::endl;
     std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
     return 1;
-}
-catch (...) {
+} catch (...) {
     std::cerr<<"Unknown exception thrown\n";
     std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
     return 1;
 }
 #else
-catch (int) {}
+catch (double) {}
 #endif
-
 
 void PreAssert(std::string s)
 {
@@ -96,12 +93,14 @@ void DoAssert(bool x, std::string s)
     } else { 
         if (showtests) std::cout<<"  Failed"<<std::endl;
         if (dontthrow) std::cout<<"Failed test: "<<s<<std::endl;  
-        else
+        else {
 #ifdef NOTHROW
-        { std::cerr<<"Error in test: "<<s<<std::endl; exit(1); }
+            std::cerr<<"Error in test: "<<s<<std::endl; 
+            exit(1); 
 #else
-        throw tmv::Error("Error in test: ",s);  
+            throw tmv::Error("Error in test: ",s);  
 #endif
+        }
     } 
 }
 

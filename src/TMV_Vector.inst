@@ -1,104 +1,103 @@
+
 #define CT std::complex<T>
 
-#ifndef TMV_INST_SKIP_BLAS
-#undef BLAS
-#undef ELAP
-#undef BLAS_MaxAbs
-#undef BLAS_SumAbsElements
-#undef BLAS_SumAbsElements_complex
-#undef BLAS_Norm2
-#endif
+#define Def1(RT,T,Ref) \
+  template RT TMV_Epsilon<T >(); \
+  template RT TMV_SqrtEpsilon<T >(); \
+  template bool GenVector<T >::hasSubVector(int i1, int i2, int istep) const; \
+  template bool ConstVectorView<T,FortranStyle>::hasSubVector( \
+      int i1, int i2, int istep) const; \
+  template RT GenVector<T >::normSq(const RT scale) const; \
+  template RT GenVector<T >::norm2() const; \
+  template T GenVector<T >::sumElements() const; \
+  template RT GenVector<T >::sumAbsElements() const; \
+  template T GenVector<T >::minElement(int* iminout) const; \
+  template T GenVector<T >::maxElement(int* imaxout) const; \
+  template RT GenVector<T >::minAbsElement(int* iminout) const; \
+  template RT GenVector<T >::maxAbsElement(int* imaxout) const; \
+  template void GenVector<T >::write(std::ostream& os) const; \
+  template void GenVector<T >::write(std::ostream& os, RT minnz) const; \
+  template T GenVector<T >::cref(int i) const; \
+  template Ref VectorView<T >::ref(int i) const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::setZero() const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::clip( \
+      RT thresh) const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::setAllTo( \
+      const T& x) const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::addToAll( \
+      const T& x) const; \
+  template const VectorView<T,CStyle>& \
+      VectorView<T,CStyle>::ConjugateSelf() const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::DoBasis( \
+      int i) const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::DoSwap( \
+      int i1, int i2) const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::DoPermute( \
+      const int* p, int i1, int i2) const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::DoReversePermute( \
+      const int* p, int i1, int i2) const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::reverseSelf() const; \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::sort( \
+      int* p, ADType ad, CompType comp) const; \
+  template void VectorView<T,CStyle>::read( std::istream& is) const; \
+  template void Swap(const VectorView<T >& v1, const VectorView<T >& v2); \
+  template std::istream& operator>>(std::istream& fin, \
+      const VectorView<T >& v); \
 
-#ifndef BLAS
-#define Def1(T,C) \
-  template void InstCopy(const ConstVectorView<T,UNKNOWN,C>& v1, \
-      VectorView<T > v2); \
-  template void InstSwap(VectorView<T,UNKNOWN,C> v1, VectorView<T > v2); \
-
-Def1(T,false)
-#ifdef TMV_INST_COMPLEX
-Def1(CT,false)
-Def1(CT,true)
+Def1(T,T,T&)
+#ifdef INST_COMPLEX
+Def1(T,CT,VarConjRef<CT >)
 #endif
 
 #undef Def1
-#endif // BLAS
 
-#ifdef TMV_INST_MIX
-template void InstCopy(const ConstVectorView<T >& v1, VectorView<CT > v2); 
+#ifndef NOTHROW
+  template void VectorReadError<T>::write(std::ostream& os) const throw();
+  template void VectorReadError<CT>::write(std::ostream& os) const throw();
 #endif
 
-#ifndef ELAP
-#define Def2(T) \
-  template void InstConjugateSelf(VectorView<T > v); \
+#define Def2(RT,T,I) \
+  template Vector<T,I>& Vector<T,I>::setZero(); \
+  template Vector<T,I>& Vector<T,I>::clip(RT thresh); \
+  template Vector<T,I>& Vector<T,I>::setAllTo(const T& x); \
+  template Vector<T,I>& Vector<T,I>::addToAll(const T& x); \
+  template Vector<T,I>& Vector<T,I>::conjugateSelf(); \
+  template Vector<T,I>& Vector<T,I>::DoBasis(int i); \
+  template Vector<T,I>& Vector<T,I>::DoSwap(int i1, int i2); \
+  template std::istream& operator>>(std::istream& fin, \
+      std::auto_ptr<Vector<T,I> >& v); \
+  template Vector<T,I> DoBasisVector(size_t,int); \
 
-#ifdef TMV_INST_COMPLEX
-Def2(CT)
+Def2(T,T,CStyle)
+Def2(T,T,FortranStyle)
+#ifdef INST_COMPLEX
+Def2(T,CT,CStyle)
+Def2(T,CT,FortranStyle)
 #endif
 
 #undef Def2
-#endif // ELAP
 
-#define Def3(RT,T) \
-  template void InstReverseSelf(VectorView<T > v); \
-  template T InstSumElements(const ConstVectorView<T >& v); \
-  template T InstMaxElement(const ConstVectorView<T >& v, int*const imax); \
-  template T InstMinElement(const ConstVectorView<T >& v, int*const imin); \
-  template RT InstNormSq(const ConstVectorView<T >& v);  \
-  template RT InstNormSq(const ConstVectorView<T >& v, const RT scale);  \
-  template void InstSort(VectorView<T > v, ADType ad, CompType comp); \
-  template void InstSort(VectorView<T > v, int* P, ADType ad, CompType comp); \
-  template void InstWrite(std::ostream& os, const ConstVectorView<T >& v); \
-  template void InstWrite( \
-      std::ostream& os, const ConstVectorView<T,UNKNOWN,true>& v); \
-  template void InstWrite( \
-      std::ostream& os, const ConstVectorView<T >& v, RT thresh); \
-  template void InstWrite(std::ostream& os, \
-      const ConstVectorView<T,UNKNOWN,true>& v, RT thresh); \
-  template void InstRead(std::istream& is, VectorView<T > v); \
-  template void InstRead( \
-      std::istream& is, VectorView<T,UNKNOWN,true> v); \
+#define Def3(T1,T2) \
+  template bool operator==(const GenVector<T1 >& v1, \
+      const GenVector<T2 >& v2); \
 
 Def3(T,T)
-#ifdef TMV_INST_COMPLEX
+#ifdef INST_COMPLEX
 Def3(T,CT)
+Def3(CT,T)
+Def3(CT,CT)
 #endif
 
 #undef Def3
 
-#ifndef BLAS_SumAbsElements
-  template T InstSumAbsElements(const ConstVectorView<T >& v); 
-  template T InstSumAbs2Elements(const ConstVectorView<T >& v); 
-  template T InstSumAbs2Elements(const ConstVectorView<CT >& v); 
-#endif
-#ifdef TMV_INST_COMPLEX
-#ifndef BLAS_SumAbsElements_complex
-  template T InstSumAbsElements(const ConstVectorView<CT >& v); 
-#endif
-#endif
+#ifndef INST_SKIP_BLAS
+#define Def4(T) \
+  template void DoCopySameType<T >(const GenVector<T >& v1, \
+      const VectorView<T >& v2); \
 
-#ifndef BLASIDAMAX
-  template T InstMaxAbsElement(const ConstVectorView<T >& v, int*const imax); 
-  template T InstMaxAbs2Element(const ConstVectorView<T >& v, int*const imax); 
-#ifdef TMV_INST_COMPLEX
-  template T InstMaxAbs2Element(const ConstVectorView<CT >& v, int*const imax);
-#endif
-#endif
-  template T InstMaxAbsElement(const ConstVectorView<CT >& v, int*const imax);
-
-#ifndef BLASIDAMIN
-  template T InstMinAbsElement(const ConstVectorView<T >& v, int*const imin); 
-  template T InstMinAbs2Element(const ConstVectorView<T >& v, int*const imin); 
-#ifdef TMV_INST_COMPLEX
-  template T InstMinAbs2Element(const ConstVectorView<CT >& v, int*const imin);
-#endif
-#endif
-  template T InstMinAbsElement(const ConstVectorView<CT >& v, int*const imin);
-
-#ifndef BLAS_Norm2
-  template T InstNorm2(const ConstVectorView<T >& v);
-#ifdef TMV_INST_COMPLEX
-  template T InstNorm2(const ConstVectorView<CT >& v);  
+Def4(T)
+#ifdef INST_COMPLEX
+Def4(CT)
 #endif
 #endif
 

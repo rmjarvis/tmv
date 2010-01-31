@@ -34,19 +34,20 @@
 // regular isnan.  But sometimes it doesn't.
 // So writing std::isnan is not portable.
 
+//#include <iostream>
 #include "math.h"
 #include "TMV_IsNaN.h"
 
 namespace tmv {
 
     template <class T> 
-    bool DoIsNaN(T x)
+    static bool DoIsNaN(T x)
     {
         return (x != x) || (x * x < 0);
     }
 
-    template <> 
-    bool DoIsNaN(double x)
+#ifdef INST_DOUBLE
+    static bool DoIsNaN(double x)
     {
 #ifdef isnan
         return isnan(x);
@@ -54,9 +55,10 @@ namespace tmv {
         return (x != x) || (x * x < 0);
 #endif
     }
+#endif
 
-    template <> 
-    bool DoIsNaN(float x)
+#ifdef INST_FLOAT
+    static bool DoIsNaN(float x)
     {
 #ifdef isnan
         return isnan(x);
@@ -64,9 +66,10 @@ namespace tmv {
         return (x != x) || (x * x < 0);
 #endif
     }
+#endif
 
-    template <> 
-    bool DoIsNaN(long double x)
+#ifdef INST_LONGDOUBLE
+    static bool DoIsNaN(long double x)
     {
 #ifdef isnan
         return isnan(x);
@@ -74,12 +77,11 @@ namespace tmv {
         return (x != x) || (x * x < 0);
 #endif
     }
+#endif
 
     template <class T> 
-    bool IsNaN(T x)
-    {
-        return DoIsNaN(x);
-    }
+    bool isNaN(T x)
+    { return DoIsNaN(x); }
 
 #define InstFile "TMV_IsNaN.inst"
 #include "TMV_Inst.h"

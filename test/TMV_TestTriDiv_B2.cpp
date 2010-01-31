@@ -1,6 +1,6 @@
+#include "TMV.h"
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
-#include "TMV.h"
 
 #define NOLDIVEQ
 #define NORDIVEQ
@@ -34,14 +34,12 @@ template <class T> void TestTriDiv_B2()
     tmv::LowerTriMatrix<T,tmv::NonUnitDiag> b1x(m);
     tmv::LowerTriMatrix<std::complex<T>,tmv::NonUnitDiag> cb1x(cm);
 
-    TestMatrixDivArith1<T>(
-        tmv::LU,a1x,ca1x,m.view(),a1.view(),cm.view(),ca1.view(),"U/M");
-    TestMatrixDivArith1<T>(
-        tmv::LU,b1x,cb1x,m.view(),a1.transpose(),cm.view(),ca1.transpose(),
-        "L/M");
+    TestMatrixDivArith1<T>(tmv::LU,a1x,ca1x,m.view(),a1.view(),
+                           cm.view(),ca1.view(),"U/M");
+    TestMatrixDivArith1<T>(tmv::LU,b1x,cb1x,m.view(),a1.transpose(),
+                           cm.view(),ca1.transpose(),"L/M");
 
 #ifdef XTEST
-#if (XTEST & 2)
     tmv::UpperTriMatrix<T,tmv::UnitDiag> a2(m);
     tmv::UpperTriMatrix<std::complex<T>,tmv::UnitDiag> ca2(cm);
     a2.saveDiv();
@@ -53,21 +51,19 @@ template <class T> void TestTriDiv_B2()
     tmv::UpperTriMatrix<std::complex<T>,tmv::UnitDiag> ca2x(cm);
     tmv::LowerTriMatrix<T,tmv::UnitDiag> b2x(m);
     tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag> cb2x(cm);
-    TestMatrixDivArith1<T>(
-        tmv::LU,a2x,ca2x,m.view(),a2.view(),cm.view(),ca2.view(),"U/M");
-    TestMatrixDivArith1<T>(
-        tmv::LU,b2x,cb2x,m.view(),a2.transpose(),cm.view(),ca2.transpose(),
-        "L/M");
-#endif
+    TestMatrixDivArith1<T>(tmv::LU,a2x,ca2x,m.view(),a2.view(),
+                           cm.view(),ca2.view(),"U/M");
+    TestMatrixDivArith1<T>(tmv::LU,b2x,cb2x,m.view(),a2.transpose(),
+                           cm.view(),ca2.transpose(),"L/M");
 #endif
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestTriDiv_B2<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestTriDiv_B2<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestTriDiv_B2<long double>();
 #endif

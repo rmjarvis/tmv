@@ -1,38 +1,54 @@
 
 #define CT std::complex<T>
 
-#define DefMV1(T1,D,C1,T2,C2,T3)\
-  template void InstMultMV(const T3 x, \
-      const ConstUpperTriMatrixView<T1,D,UNKNOWN,UNKNOWN,C1>& m1, \
-      const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3); \
-  template void InstAddMultMV(const T3 x, \
-      const ConstUpperTriMatrixView<T1,D,UNKNOWN,UNKNOWN,C1>& m1, \
-      const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3); \
-  template void InstMultMV(const T3 x, \
-      const ConstLowerTriMatrixView<T1,D,UNKNOWN,UNKNOWN,C1>& m1, \
-      const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3); \
-  template void InstAddMultMV(const T3 x, \
-      const ConstLowerTriMatrixView<T1,D,UNKNOWN,UNKNOWN,C1>& m1, \
-      const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3); \
+#define Def1(T) \
+  template const T* UpperTriMatrixComposite<T >::cptr() const; \
+  template int UpperTriMatrixComposite<T >::stepi() const; \
+  template int UpperTriMatrixComposite<T >::stepj() const; \
+  template const T* LowerTriMatrixComposite<T >::cptr() const; \
+  template int LowerTriMatrixComposite<T >::stepi() const; \
+  template int LowerTriMatrixComposite<T >::stepj() const; \
 
-#define DefMV(T1,C1,T2,C2,T3) \
-  DefMV1(T1,UnknownDiag,C1,T2,C2,T3)
-
-DefMV(T,false,T,false,T)
-#ifdef TMV_INST_COMPLEX
-#ifdef TMV_INST_MIX
-DefMV(T,false,T,false,CT)
-DefMV(T,false,CT,false,CT)
-DefMV(T,false,CT,true,CT)
-DefMV(CT,false,T,false,CT)
-DefMV(CT,true,T,false,CT)
-#endif
-DefMV(CT,false,CT,false,CT)
-DefMV(CT,false,CT,true,CT)
-DefMV(CT,true,CT,false,CT)
-DefMV(CT,true,CT,true,CT)
+Def1(T)
+#ifdef INST_COMPLEX
+Def1(CT)
 #endif
 
-#undef DefMV1
+#undef Def1
+
+#define DefMV(T,Ta,Tx)\
+  template void MultMV<true>(const T alpha, const GenUpperTriMatrix<Ta >& A, \
+      const GenVector<Tx >& x, const VectorView<T >& y);  \
+  template void MultMV<false>(const T alpha, const GenUpperTriMatrix<Ta >& A, \
+      const GenVector<Tx >& x, const VectorView<T >& y);  \
+  template void MultMV<true>(const T alpha, const GenLowerTriMatrix<Ta >& A, \
+      const GenVector<Tx >& x, const VectorView<T >& y);  \
+  template void MultMV<false>(const T alpha, const GenLowerTriMatrix<Ta >& A, \
+      const GenVector<Tx >& x, const VectorView<T >& y);  \
+
+
+DefMV(T,T,T)
+#ifdef INST_COMPLEX
+DefMV(CT,T,T)
+DefMV(CT,T,CT)
+DefMV(CT,CT,T)
+DefMV(CT,CT,CT)
+#endif
+
 #undef DefMV
+
+#define DefMultEq(T,Ta)\
+  template void MultEqMV(const GenUpperTriMatrix<Ta >& A, \
+      const VectorView<T >& x);  \
+  template void MultEqMV(const GenLowerTriMatrix<Ta >& A, \
+      const VectorView<T >& x);  \
+
+DefMultEq(T,T)
+#ifdef INST_COMPLEX
+DefMultEq(CT,T)
+DefMultEq(CT,CT)
+#endif
+
+#undef DefMultEq
+
 #undef CT

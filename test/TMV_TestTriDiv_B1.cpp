@@ -1,10 +1,11 @@
+#include "TMV.h"
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
-#include "TMV.h"
 
 #include "TMV_TestMatrixDivArith.h"
 
-template <class T> void TestTriDiv_B1() 
+template <class T> 
+void TestTriDiv_B1() 
 {
     const int N = 10;
 
@@ -29,31 +30,27 @@ template <class T> void TestTriDiv_B1()
     m.saveDiv();
     m.setDiv();
 
-    TestMatrixDivArith1<T>(
-        tmv::LU,mx,cmx,a1.view(),m.view(),ca1.view(),cm.transpose(),"M/U");
-    TestMatrixDivArith1<T>(
-        tmv::LU,mx,cmx,a1.transpose(),m.view(),ca1.transpose(),cm.view(),
-        "M/L");
+    TestMatrixDivArith1<T>(tmv::LU,mx,cmx,a1.view(),m.view(),
+                           ca1.view(),cm.transpose(),"M/U");
+    TestMatrixDivArith1<T>(tmv::LU,mx,cmx,a1.transpose(),m.view(),
+                           ca1.transpose(),cm.view(),"M/L");
 
 #ifdef XTEST
-#if (XTEST & 2)
     tmv::UpperTriMatrix<T,tmv::UnitDiag> a2(m);
     tmv::UpperTriMatrix<std::complex<T>,tmv::UnitDiag> ca2(cm);
-    TestMatrixDivArith1<T>(
-        tmv::LU,mx,cmx,a2.view(),m.view(),ca2.view(),cm.transpose(),"M/U");
-    TestMatrixDivArith1<T>(
-        tmv::LU,mx,cmx,a2.transpose(),m.view(),ca2.transpose(),cm.view(),
-        "M/L");
-#endif
+    TestMatrixDivArith1<T>(tmv::LU,mx,cmx,a2.view(),m.view(),
+                           ca2.view(),cm.transpose(),"M/U");
+    TestMatrixDivArith1<T>(tmv::LU,mx,cmx,a2.transpose(),m.view(),
+                           ca2.transpose(),cm.view(),"M/L");
 #endif
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestTriDiv_B1<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestTriDiv_B1<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestTriDiv_B1<long double>();
 #endif

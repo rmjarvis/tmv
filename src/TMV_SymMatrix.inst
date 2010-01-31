@@ -1,0 +1,102 @@
+
+#define CT std::complex<T>
+
+#define Def1(T,RT,CCT,Ref) \
+  template bool GenSymMatrix<T >::hasSubMatrix( \
+      int i1, int i2, int j1, int j2, int is, int js) const; \
+  template bool GenSymMatrix<T >::hasSubVector( \
+      int i, int j, int is, int js, int s) const; \
+  template bool GenSymMatrix<T >::hasSubSymMatrix( \
+      int i1, int i2, int is) const; \
+  template bool ConstSymMatrixView<T,FortranStyle>::hasSubMatrix( \
+      int i1, int i2, int j1, int j2, int is, int js) const; \
+  template bool ConstSymMatrixView<T,FortranStyle>::hasSubVector( \
+      int i, int j, int is, int js, int s) const; \
+  template bool ConstSymMatrixView<T,FortranStyle>::hasSubSymMatrix( \
+      int i1, int i2, int is) const; \
+  template RT GenSymMatrix<T >::normF() const; \
+  template RT GenSymMatrix<T >::normSq(const RT scale) const; \
+  template RT GenSymMatrix<T >::norm1() const; \
+  template RT GenSymMatrix<T >::maxAbsElement() const; \
+  template QuotXS<T,T > GenSymMatrix<T >::QInverse() const; \
+  template auto_ptr<BaseMatrix<T > > GenSymMatrix<T >::newCopy() const; \
+  template auto_ptr<BaseMatrix<T > > GenSymMatrix<T >::newView() const; \
+  template auto_ptr<BaseMatrix<T > > GenSymMatrix<T >::newTranspose() const; \
+  template auto_ptr<BaseMatrix<T > > GenSymMatrix<T >::newConjugate() const; \
+  template auto_ptr<BaseMatrix<T > > GenSymMatrix<T >::newAdjoint() const; \
+  template auto_ptr<BaseMatrix<T > > GenSymMatrix<T >::newInverse() const; \
+  template void GenSymMatrix<T >::write(std::ostream& os) const; \
+  template void GenSymMatrix<T >::write(std::ostream& os, RT t) const; \
+  template void GenSymMatrix<T >::writeCompact(std::ostream& os) const; \
+  template void GenSymMatrix<T >::writeCompact(std::ostream& os, RT t) const; \
+  template T GenSymMatrix<T >::cref(int i, int j) const; \
+  template void GenSymMatrix<T >::newDivider() const; \
+  template const SymMatrixView<T,CStyle>&  \
+      SymMatrixView<T,CStyle>::swapRowsCols(int i1, int i2) const;\
+  template const SymMatrixView<T,CStyle>&  \
+      SymMatrixView<T,CStyle>::permuteRowsCols(const int* p, \
+      int i1, int i2) const; \
+  template const SymMatrixView<T,CStyle>& \
+      SymMatrixView<T,CStyle>::reversePermuteRowsCols(const int* p, \
+      int i1, int i2) const; \
+  template void SymMatrixView<T,CStyle>::read(std::istream& is) const; \
+  template Ref SymMatrixView<T,CStyle>::ref(int i, int j) const; \
+  template std::istream& operator>>(std::istream& fin, \
+      const SymMatrixView<T >& m); \
+  template ConstSymMatrixView<T > SymMatrixViewOf( \
+      const T* m, size_t s, UpLoType uplo, StorageType stor); \
+  template SymMatrixView<T > SymMatrixViewOf( \
+      T* m, size_t s, UpLoType uplo, StorageType stor); \
+  template ConstSymMatrixView<T > HermMatrixViewOf( \
+      const T* m, size_t s, UpLoType uplo, StorageType stor); \
+  template SymMatrixView<T > HermMatrixViewOf( \
+      T* m, size_t s, UpLoType uplo, StorageType stor); \
+
+Def1(T,T,CT,T&)
+#ifdef INST_COMPLEX
+Def1(CT,T,CT,VarConjRef<CT >)
+#endif
+
+#undef Def1
+
+#define Def2(T1,T2) \
+  template void GenSymMatrix<T1 >::doMakeInverse( \
+      const SymMatrixView<T2 >& sinv) const; \
+
+Def2(T,T)
+#ifdef INST_COMPLEX
+Def2(T,CT)
+Def2(CT,CT)
+#endif
+
+#undef Def2
+
+#define Def3(T,RT,U,S,I) \
+  template std::istream& operator>>(std::istream& is, \
+      auto_ptr<SymMatrix<T,U,S,I> >& m); \
+  template std::istream& operator>>(std::istream& is, \
+      auto_ptr<HermMatrix<T,U,S,I> >& m); \
+
+Def3(T,T,Upper,RowMajor,CStyle)
+Def3(T,T,Upper,ColMajor,CStyle)
+Def3(T,T,Lower,RowMajor,CStyle)
+Def3(T,T,Lower,ColMajor,CStyle)
+Def3(T,T,Upper,RowMajor,FortranStyle)
+Def3(T,T,Upper,ColMajor,FortranStyle)
+Def3(T,T,Lower,RowMajor,FortranStyle)
+Def3(T,T,Lower,ColMajor,FortranStyle)
+#ifdef INST_COMPLEX
+Def3(CT,T,Upper,RowMajor,CStyle)
+Def3(CT,T,Upper,ColMajor,CStyle)
+Def3(CT,T,Lower,RowMajor,CStyle)
+Def3(CT,T,Lower,ColMajor,CStyle)
+Def3(CT,T,Upper,RowMajor,FortranStyle)
+Def3(CT,T,Upper,ColMajor,FortranStyle)
+Def3(CT,T,Lower,RowMajor,FortranStyle)
+Def3(CT,T,Lower,ColMajor,FortranStyle)
+#endif
+
+#undef Def3
+
+#undef CT
+

@@ -29,123 +29,700 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "tmv/TMV_MultUL.h"
-#include "tmv/TMV_CopyU.h"
-#include "tmv/TMV_MultXM.h"
-#include "tmv/TMV_ScaleM.h"
+
+//#define XDEBUG
+
+
+#include "tmv/TMV_TriMatrixArithFunc.h"
 #include "tmv/TMV_TriMatrix.h"
-#include "tmv/TMV_ProdMM.h"
-#include "tmv/TMV_ProdXM.h"
+#include "tmv/TMV_VectorArith.h"
+#include "tmv/TMV_MatrixArith.h"
+
+#ifdef XDEBUG
+#include <iostream>
+using std::cout;
+using std::cerr;
+using std::endl;
+#endif
 
 namespace tmv {
 
-    template <class M1, class M2, class M3>
-    void DoMultUL(const M1& m1, const M2& m2, M3& m3)
+#ifdef TMV_BLOCKSIZE
+#define TRI_MM_BLOCKSIZE TMV_BLOCKSIZE
+#define TRI_MM_BLOCKSIZE2 (TMV_BLOCKSIZE/2)
+#else
+#define TRI_MM_BLOCKSIZE 64
+#define TRI_MM_BLOCKSIZE2 32
+#endif
+
+    //
+    // MultMM: M = U * L
+    //
+
+    template <bool add, class T, class Ta, class Tb> 
+    static void ColMultMM(
+        const T alpha, const GenUpperTriMatrix<Ta>& A,
+        const GenLowerTriMatrix<Tb>& B, const MatrixView<T>& C)
     {
-        // We are allowed to have m2 in the same storage as m3, so 
-        // we use that fact to save a bit on the rm, cm options,
-        // by explicitly copying m2 to the corresponding portion of m3.
-        TMVAssert(m1.isrm() || m1.iscm());
-        TMVAssert(m3.isrm() || m3.iscm());
+#ifdef XDEBUG
+        //cout<<"MultMM: "<<alpha<<"  "<<TMV_Text(A)<<"  "<<A<<"  "<<TMV_Text(B)<<"  "<<B<<endl;
+        //cout<<TMV_Text(C)<<"  "<<C<<endl;
+        Matrix<T> C2 = C;
+        Matrix<T> C0 = C;
+        Matrix<Ta> A0 = A;
+        Matrix<Tb> B0 = B;
+        if (add) C2 += alpha*A0*B0;
+        else C2 = alpha*A0*B0;
+        //cout<<"ColMultMM UL\n";
+        //cout<<"A = "<<A<<endl;
+        //cout<<"B = "<<B<<endl;
+        //cout<<"C = "<<C<<endl;
+        //cout<<"alpha = "<<alpha<<endl;
+        //cout<<"Correct result = "<<C2<<endl;
+#endif
+        TMVAssert(A.size() == B.size());
+        TMVAssert(A.size() == C.colsize());
+        TMVAssert(B.size() == C.rowsize());
+        TMVAssert(A.size() > 0);
+        TMVAssert(alpha != T(0));
+        TMVAssert(C.ct() == NonConj);
+        TMVAssert(!C.isrm());
+        TMVAssert(!C.isconj());
+        const int N = A.size();
 
-        typedef typename TypeSelect<M2::mupper,
-                typename M3::uppertri_type,
-                typename M3::lowertri_type>::type::xdview_type M2x;
-        M2x m2x = Maybe<M2::mupper>::uppertri(m3);
-
-        if (m2.isunit()) {
-            typename M2x::unitdiag_type::xdview_type m2u = m2x.viewAsUnitDiag();
-            AliasCopy(m2.viewAsUnitDiag(),m2u);
-            if (m3.iscm()) {
-                typename M3::cmview_type m3cm = m3.cmView();
-                if (m1.iscm())
-                    InlineMultMM<false>(m1.cmView(),m2u.cmView(),m3cm);
-                else
-                    InlineMultMM<false>(m1.rmView(),m2u.cmView(),m3cm);
-            } else {
-                typename M3::rmview_type m3rm = m3.rmView();
-                if (m1.iscm())
-                    InlineMultMM<false>(m1.cmView(),m2u.rmView(),m3rm);
-                else
-                    InlineMultMM<false>(m1.rmView(),m2u.rmView(),m3rm);
+        if (SameStorage(A,C) && A.stepj() == C.stepi()) {
+            // Then need temporary (see below)
+            if (A.isrm()) {
+                UpperTriMatrix<Ta,NonUnitDiag,RowMajor> A2 = A;
+                ColMultMM<add>(alpha,A2,B,C);
+            }
+            else {
+                UpperTriMatrix<Ta,NonUnitDiag,ColMajor> A2 = A;
+                ColMultMM<add>(alpha,A2,B,C);
             }
         } else {
-            AliasCopy(m2,m2x);
-            if (m3.iscm()) {
-                typename M3::cmview_type m3cm = m3.cmView();
-                if (m1.iscm())
-                    InlineMultMM<false>(m1.cmView(),m2x.cmView(),m3cm);
-                else
-                    InlineMultMM<false>(m1.rmView(),m2x.cmView(),m3cm);
+            if (A.isunit()) {
+                if (B.isunit()) {
+                    T* Cjj = C.ptr();
+                    const int Cds = C.stepi()+C.stepj();
+                    for(int j=0,jj=1;j<N;++j,++jj,Cjj+=Cds) {
+                        // C.col(j) (+=) alpha*A*B.col(j)
+                        //
+                        // C.col(j) (+=) alpha*A.colRange(j,N)*B.col(j,j,N)
+                        //
+                        // C(j,j) (+=) alpha*A.row(j,j,N) * B.col(j,j,N)
+                        // C.col(j,0,j) (+=) 
+                        //     alpha*A.subMatrix(0,j,j,N)*B.col(j,j,N)
+                        // C.col(j,j+1,N) (+=) 
+                        //     alpha*A.subTriMatrix(j,N)*B.col(j,j+1,N)
+                        //
+                        // Requirements on storage: 
+                        //   B can be stored in either triangle
+                        //   A cannot be stored in C's lower triangle
+
+                        T newcjj = A.row(j,jj,N)*B.col(j,jj,N) + T(1);
+                        if (alpha != T(1)) newcjj *= alpha;
+                        if (add) newcjj += *Cjj;
+
+                        if (add) C.col(j,0,j) += alpha * A.col(j,0,j);
+                        else C.col(j,0,j) = alpha * A.col(j,0,j);
+
+                        C.col(j,0,j) += 
+                            alpha * A.subMatrix(0,j,jj,N) * B.col(j,jj,N);
+
+                        MultMV<add>(alpha,A.subTriMatrix(jj,N),B.col(j,jj,N),
+                                    C.col(j,jj,N));
+
+#ifdef TMVFLDEBUG
+                        TMVAssert(Cjj >= C.first);
+                        TMVAssert(Cjj < C.last);
+#endif
+                        *Cjj = newcjj;
+                    }
+                } else {
+                    const Tb* Bjj = B.cptr();
+                    T* Cjj = C.ptr();
+                    const int Bds = B.stepi()+B.stepj();
+                    const int Cds = C.stepi()+C.stepj();
+                    for(int j=0,jj=1;j<N;++j,++jj,Bjj+=Bds,Cjj+=Cds) {
+                        T xBjj = B.isconj()?TMV_CONJ(*Bjj):*Bjj;
+                        T newcjj = A.row(j,jj,N)*B.col(j,jj,N) + xBjj;
+                        if (alpha != T(1)) {
+                            newcjj *= alpha;
+                            xBjj *= alpha; // xBjj is now alpha*B(j,j)
+                        }
+                        if (add) newcjj += *Cjj;
+
+                        if (add) C.col(j,0,j) += xBjj * A.col(j,0,j);
+                        else C.col(j,0,j) = xBjj * A.col(j,0,j);
+
+                        C.col(j,0,j) += 
+                            alpha * A.subMatrix(0,j,jj,N) * B.col(j,jj,N);
+
+                        MultMV<add>(alpha,A.subTriMatrix(jj,N),B.col(j,jj,N),
+                                    C.col(j,jj,N));
+
+#ifdef TMVFLDEBUG
+                        TMVAssert(Cjj >= C.first);
+                        TMVAssert(Cjj < C.last);
+#endif
+                        *Cjj = newcjj;
+                    }
+                }
             } else {
-                typename M3::rmview_type m3rm = m3.rmView();
-                if (m1.iscm())
-                    InlineMultMM<false>(m1.cmView(),m2x.rmView(),m3rm);
-                else
-                    InlineMultMM<false>(m1.rmView(),m2x.rmView(),m3rm);
+                if (B.isunit()) {
+                    const Ta* Ajj = A.cptr();
+                    T* Cjj = C.ptr();
+                    const int Ads = A.stepi()+A.stepj();
+                    const int Cds = C.stepi()+C.stepj();
+                    for(int j=0,jj=1;j<N;++j,++jj,Ajj+=Ads,Cjj+=Cds) {
+                        Ta xAjj = A.isconj() ? TMV_CONJ(*Ajj) : *Ajj;
+                        T newcjj = A.row(j,jj,N)*B.col(j,jj,N) + xAjj;
+                        if (alpha != T(1)) newcjj *= alpha;
+                        if (add) newcjj += *Cjj;
+
+                        if (add) C.col(j,0,j) += alpha * A.col(j,0,j);
+                        else C.col(j,0,j) = alpha * A.col(j,0,j);
+
+                        C.col(j,0,j) += 
+                            alpha * A.subMatrix(0,j,jj,N) * B.col(j,jj,N);
+
+                        MultMV<add>(alpha,A.subTriMatrix(jj,N),B.col(j,jj,N),
+                                    C.col(j,jj,N));
+
+#ifdef TMVFLDEBUG
+                        TMVAssert(Cjj >= C.first);
+                        TMVAssert(Cjj < C.last);
+#endif
+                        *Cjj = newcjj;
+                    }
+                } else {
+                    const Tb* Bjj = B.cptr();
+                    T* Cjj = C.ptr();
+                    const int Bds = B.stepi()+B.stepj();
+                    const int Cds = C.stepi()+C.stepj();
+                    for(int j=0,jj=1;j<N;++j,++jj,Bjj+=Bds,Cjj+=Cds) {
+                        T xBjj = B.isconj() ? TMV_CONJ(*Bjj) : *Bjj;
+                        T newcjj = A.row(j,j,N)*B.col(j,j,N);
+                        if (alpha != T(1)) {
+                            newcjj *= alpha;
+                            xBjj *= alpha;
+                        }
+                        if (add) newcjj += *Cjj;
+
+                        if (add) C.col(j,0,j) += xBjj * A.col(j,0,j);
+                        else C.col(j,0,j) = xBjj * A.col(j,0,j);
+
+                        C.col(j,0,j) += 
+                            alpha * A.subMatrix(0,j,jj,N) * B.col(j,jj,N);
+
+                        MultMV<add>(alpha,A.subTriMatrix(jj,N),B.col(j,jj,N),
+                                    C.col(j,jj,N));
+
+#ifdef TMVFLDEBUG
+                        TMVAssert(Cjj >= C.first);
+                        TMVAssert(Cjj < C.last);
+#endif
+                        *Cjj = newcjj;
+                    }
+                }
             }
         }
+#ifdef XDEBUG
+        if (Norm(C2-C) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
+                                (add?Norm(C0):TMV_RealType(T)(0)))) {
+            cerr<<"ColMultMM: alpha = "<<alpha<<endl;
+            cerr<<"add = "<<add<<endl;
+            cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
+            cerr<<"B = "<<TMV_Text(B)<<"  "<<B0<<endl;
+            cerr<<"C = "<<TMV_Text(C)<<"  "<<C0<<endl;
+            cerr<<"Aptr = "<<A.cptr()<<", Bptr = "<<B.cptr();
+            cerr<<", Cptr = "<<C.cptr()<<endl;
+            cerr<<"--> C = "<<C<<endl;
+            cerr<<"C2 = "<<C2<<endl;
+            abort();
+        }
+#endif
     }
 
-    template <class T, class M1, class M2>
-    void GenInstMultMM(
-        const T x, const M1& m1, const M2& m2, MatrixView<T>& m3)
+    template <bool add, class T, class Ta, class Tb> 
+    static void DoMultMM(
+        const T alpha, const GenUpperTriMatrix<Ta>& A,
+        const GenLowerTriMatrix<Tb>& B, const MatrixView<T>& C)
+    // C (+)= alpha * A * B
+    // This is designed to work even if A,B are in same storage as C
     {
-        if (!(m1.isrm() || m1.iscm())) 
-            GenInstMultMM(x,m1.copy().constView().xdView(),m2,m3);
-        else if (!(m3.iscm() || m3.isrm())) {
-            Matrix<T,ColMajor> m3c(m3.colsize(),m3.rowsize());
-            DoMultUL(m1,m2,m3c);
-            InstMultXM(x,m3c.constView().xView(),m3);
+#ifdef XDEBUG
+        //cout<<"MultMM: "<<alpha<<"  "<<TMV_Text(A)<<"  "<<A<<"  "<<TMV_Text(B)<<"  "<<B<<endl;
+        //cout<<TMV_Text(C)<<"  "<<C<<endl;
+        Matrix<T> C2 = C;
+        Matrix<T> C0 = C;
+        Matrix<Ta> A0 = A;
+        Matrix<Tb> B0 = B;
+        if (add) C2 += alpha*A0*B0;
+        else C2 = alpha*A0*B0;
+#endif
+        TMVAssert(A.size() == B.size());
+        TMVAssert(A.size() == C.colsize());
+        TMVAssert(B.size() == C.rowsize());
+        TMVAssert(A.size() > 0);
+        TMVAssert(alpha != T(0));
+        TMVAssert(C.ct() == NonConj);
+
+        const int nb = TRI_MM_BLOCKSIZE;
+        const int N = A.size();
+
+        if (N <= TRI_MM_BLOCKSIZE2) {
+            if (C.isrm()) 
+                ColMultMM<add>(alpha,B.transpose(),A.transpose(),
+                               C.transpose());
+            else ColMultMM<add>(alpha,A,B,C);
         } else {
-            DoMultUL(m1,m2,m3);
-            InstScale(x,m3);
+            int k = N/2;
+            if (k > nb) k = k/nb*nb;
+
+            // [ A00 A01 ] [ B00  0  ] = [ A00 B00 + A01 B10   A01 B11 ]
+            // [  0  A11 ] [ B10 B11 ]   [      A11 B10        A11 B11 ]
+
+            ConstUpperTriMatrixView<Ta> A00 = A.subTriMatrix(0,k);
+            ConstMatrixView<Ta> A01 = A.subMatrix(0,k,k,N);
+            ConstUpperTriMatrixView<Ta> A11 = A.subTriMatrix(k,N);
+            ConstLowerTriMatrixView<Tb> B00 = B.subTriMatrix(0,k);
+            ConstMatrixView<Tb> B10 = B.subMatrix(k,N,0,k);
+            ConstLowerTriMatrixView<Tb> B11 = B.subTriMatrix(k,N);
+            MatrixView<T> C00 = C.subMatrix(0,k,0,k);
+            MatrixView<T> C01 = C.subMatrix(0,k,k,N);
+            MatrixView<T> C10 = C.subMatrix(k,N,0,k);
+            MatrixView<T> C11 = C.subMatrix(k,N,k,N);
+
+            DoMultMM<add>(alpha,A00,B00,C00);
+            C00 += alpha*A01*B10;
+            if (SameStorage(A01,C10)) {
+                if (SameStorage(B10,C01)) {
+                    // This is the only case where we need temporary storage,
+                    // and I don't image that it is often needed, but it's 
+                    // worth checking.
+                    Matrix<T> A01x = A01;
+                    MultMM<add>(alpha,A11,B10,C10);
+                    MultMM<add>(alpha,B11.transpose(),A01x.transpose(),
+                                C01.transpose());
+                } else {
+                    MultMM<add>(alpha,B11.transpose(),A01.transpose(),
+                                C01.transpose());
+                    MultMM<add>(alpha,A11,B10,C10);
+                }
+            } else {
+                MultMM<add>(alpha,A11,B10,C10);
+                MultMM<add>(alpha,B11.transpose(),A01.transpose(),
+                            C01.transpose());
+            }
+            DoMultMM<add>(alpha,A11,B11,C11);
         }
+#ifdef XDEBUG
+        if (Norm(C2-C) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
+                                (add?Norm(C0):TMV_RealType(T)(0)))) {
+            cerr<<"DoMultMM: alpha = "<<alpha<<endl;
+            cerr<<"add = "<<add<<endl;
+            cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
+            cerr<<"B = "<<TMV_Text(B)<<"  "<<B0<<endl;
+            cerr<<"C = "<<TMV_Text(C)<<"  "<<C0<<endl;
+            cerr<<"Aptr = "<<A.cptr()<<", Bptr = "<<B.cptr();
+            cerr<<", Cptr = "<<C.cptr()<<endl;
+            cerr<<"--> C = "<<C<<endl;
+            cerr<<"C2 = "<<C2<<endl;
+            abort();
+        }
+#endif
     }
 
-    template <class T, class M1, class M2>
-    void GenInstAddMultMM(
-        const T x, const M1& m1, const M2& m2, MatrixView<T>& m3)
+    template <bool add, class T, class Ta, class Tb> 
+    void MultMM(
+        const T alpha, const GenUpperTriMatrix<Ta>& A,
+        const GenLowerTriMatrix<Tb>& B, const MatrixView<T>& C)
     {
-        if (!(m1.isrm() || m1.iscm()))
-            GenInstAddMultMM(x,m1.copy(),m2,m3);
-        else {
-            Matrix<T,ColMajor> m3c(m3.colsize(),m3.rowsize());
-            DoMultUL(m1,m2,m3c);
-            InstAddMultXM(x,m3c.constView().xView(),m3);
+#ifdef XDEBUG
+        //cout<<"MultMM: "<<alpha<<"  "<<TMV_Text(A)<<"  "<<A<<"  "<<TMV_Text(B)<<"  "<<B<<endl;
+        //cout<<TMV_Text(C)<<"  "<<C<<endl;
+        Matrix<T> C2 = C;
+        Matrix<T> C0 = C;
+        Matrix<Ta> A0 = A;
+        Matrix<Tb> B0 = B;
+        if (add) C2 += alpha*A0*B0;
+        else C2 = alpha*A0*B0;
+#endif
+        TMVAssert(A.size() == B.size());
+        TMVAssert(A.size() == C.colsize());
+        TMVAssert(B.size() == C.rowsize());
+
+        const int N = A.size();
+
+        if (N==0) return;
+        else if (alpha == T(0)) {
+            if (!add) C.setZero();
         }
+        else if (C.isconj()) 
+            DoMultMM<add>(TMV_CONJ(alpha),A.conjugate(),B.conjugate(),
+                          C.conjugate());
+        else
+            DoMultMM<add>(alpha,A,B,C);
+
+#ifdef XDEBUG
+        if (Norm(C2-C) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
+                                (add?Norm(C0):TMV_RealType(T)(0)))) {
+            cerr<<"MultMM: alpha = "<<alpha<<endl;
+            cerr<<"add = "<<add<<endl;
+            cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
+            cerr<<"B = "<<TMV_Text(B)<<"  "<<B0<<endl;
+            cerr<<"C = "<<TMV_Text(C)<<"  "<<C0<<endl;
+            cerr<<"Aptr = "<<A.cptr()<<", Bptr = "<<B.cptr();
+            cerr<<", Cptr = "<<C.cptr()<<endl;
+            cerr<<"--> C = "<<C<<endl;
+            cerr<<"C2 = "<<C2<<endl;
+            abort();
+        }
+#endif
+
     }
 
-    template <class T1, bool C1, class T2, bool C2, class T3>
-    void InstMultMM(
-        const T3 x,
-        const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstLowerTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2,
-        MatrixView<T3> m3)
-    { GenInstMultMM(x,m1,m2,m3); }
-    template <class T1, bool C1, class T2, bool C2, class T3>
-    void InstAddMultMM(
-        const T3 x,
-        const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstLowerTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2,
-        MatrixView<T3> m3)
-    { GenInstAddMultMM(x,m1,m2,m3); }
+    //
+    // MultMM: M = L * U
+    //
 
-    template <class T1, bool C1, class T2, bool C2, class T3>
-    void InstMultMM(
-        const T3 x,
-        const ConstLowerTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstUpperTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2,
-        MatrixView<T3> m3)
-    { GenInstMultMM(x,m1,m2,m3); }
-    template <class T1, bool C1, class T2, bool C2, class T3>
-    void InstAddMultMM(
-        const T3 x,
-        const ConstLowerTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstUpperTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2,
-        MatrixView<T3> m3)
-    { GenInstAddMultMM(x,m1,m2,m3); }
+    template <bool add, class T, class Ta, class Tb> 
+    static void ColMultMM(
+        const T alpha, const GenLowerTriMatrix<Ta>& A,
+        const GenUpperTriMatrix<Tb>& B, const MatrixView<T>& C)
+    {
+#ifdef XDEBUG
+        //cout<<"MultMM: "<<alpha<<"  "<<TMV_Text(A)<<"  "<<A<<"  "<<TMV_Text(B)<<"  "<<B<<endl;
+        //cout<<TMV_Text(C)<<"  "<<C<<endl;
+        Matrix<T> C0 = C;
+        Matrix<Ta> A0 = A;
+        Matrix<Tb> B0 = B;
+        Matrix<T> C2 = C;
+        if (add) C2 += alpha*A0*B0;
+        else C2 = alpha*A0*B0;
+        //cout<<"Start ColMultMM: L * U\n";
+        //cout<<"A = "<<TMV_Text(A)<<"  "<<A<<endl;
+        //cout<<"B = "<<TMV_Text(B)<<"  "<<B<<endl;
+        //cout<<"C = "<<TMV_Text(C)<<"  "<<C<<endl;
+        //cout<<"Correct result = "<<C2<<endl;
+#endif
 
+        if (SameStorage(A,C) && A.stepi() == C.stepj()) {
+            // Then need temporary (see below)
+            if (A.isrm()) {
+                LowerTriMatrix<Ta,NonUnitDiag,RowMajor> A2 = A;
+                ColMultMM<add>(alpha,A2,B,C);
+            }
+            else {
+                LowerTriMatrix<Ta,NonUnitDiag,ColMajor> A2 = A;
+                ColMultMM<add>(alpha,A2,B,C);
+            }
+        } else {
+            if (A.isunit()) {
+                if (B.isunit()) {
+                    const int Cds = C.stepi()+C.stepj();
+                    T* Cjj = C.ptr()+(C.rowsize()-1)*Cds;
+                    for(int jj=C.rowsize(),j=jj-1;jj>0;--jj,--j, Cjj-=Cds) {
+                        // jj = j+1
+                        // C.col(j) (+=) alpha*A*B.col(j)
+                        //
+                        // C.col(j) (+=) alpha*A.colRange(0,j+1)*B.col(j,0,j+1)
+                        //
+                        // C(j,j) (+=) alpha*A.row(j,0,j+1)*B.col(j,0,j+1)
+                        // C.col(j,j+1,N) (+=) 
+                        //     alpha*A.subMatrix(j+1,N,0,j+1)*B.col(j,0,j+1)
+                        // C.col(j,0,j) (+=) 
+                        //     alpha*A.subTriMatrix(0,j)*B.col(j,0,j)
+                        //
+                        // Requirements on storage: 
+                        //   B can be stored in either triangle
+                        //   A cannot be stored in C's upper triangle
+
+                        const int N = A.size();
+
+                        T newcjj = A.row(j,0,j)*B.col(j,0,j) + T(1);
+                        if (alpha != T(1)) newcjj *= alpha;
+                        if (add) newcjj += *Cjj;
+
+                        if (add) C.col(j,jj,N) += alpha * A.col(j,jj,N);
+                        else C.col(j,jj,N) = alpha * A.col(j,jj,N);
+
+                        C.col(j,jj,N) += 
+                            alpha * A.subMatrix(jj,N,0,j) * B.col(j,0,j);
+
+                        MultMV<add>(alpha,A.subTriMatrix(0,j),B.col(j,0,j),
+                                    C.col(j,0,j));
+
+#ifdef TMVFLDEBUG
+                        TMVAssert(Cjj >= C.first);
+                        TMVAssert(Cjj < C.last);
+#endif
+                        *Cjj = newcjj;
+                    }
+                } else {
+                    const int Nm1 = C.rowsize()-1;
+                    const int Bds = B.stepi()+B.stepj();
+                    const int Cds = C.stepi()+C.stepj();
+                    const Tb* Bjj = B.cptr()+Nm1*Bds;
+                    T* Cjj = C.ptr()+Nm1*Cds;
+                    for(int jj=C.rowsize(),j=jj-1;
+                        jj>0;
+                        --jj,--j, Bjj-=Bds,Cjj-=Cds) {
+
+                        const int N = A.size();
+
+                        T xBjj = B.isconj()?TMV_CONJ(*Bjj):*Bjj;
+                        T newcjj = A.row(j,0,j)*B.col(j,0,j) + xBjj;
+                        if (alpha != T(1)) {
+                            newcjj *= alpha;
+                            xBjj *= alpha;
+                        }
+                        if (add) newcjj += *Cjj;
+
+                        if (add) C.col(j,jj,N) += xBjj * A.col(j,jj,N);
+                        else C.col(j,jj,N) = xBjj * A.col(j,jj,N);
+
+                        C.col(j,jj,N) += 
+                            alpha * A.subMatrix(jj,N,0,j) * B.col(j,0,j);
+
+                        MultMV<add>(alpha,A.subTriMatrix(0,j),B.col(j,0,j),
+                                    C.col(j,0,j));
+
+#ifdef TMVFLDEBUG
+                        TMVAssert(Cjj >= C.first);
+                        TMVAssert(Cjj < C.last);
+#endif
+                        *Cjj = newcjj;
+                    }
+                }
+            } else {
+                if (B.isunit()) {
+                    const int Nm1 = C.rowsize()-1;
+                    const int Ads = A.stepi()+A.stepj();
+                    const int Cds = C.stepi()+C.stepj();
+                    const Ta* Ajj = A.cptr()+Nm1*Ads;
+                    T* Cjj = C.ptr()+Nm1*Cds;
+                    for(int jj=C.rowsize(),j=jj-1;
+                        jj>0;
+                        --jj,--j, Ajj-=Ads,Cjj-=Cds) {
+
+                        const int N = A.size();
+
+                        T newcjj = 
+                            A.row(j,0,j)*B.col(j,0,j) +
+                            (A.isconj()?TMV_CONJ(*Ajj):*Ajj);
+                        if (alpha != T(1)) newcjj *= alpha;
+                        if (add) newcjj += *Cjj;
+
+                        if (add) C.col(j,jj,N) += alpha * A.col(j,jj,N);
+                        else C.col(j,jj,N) = alpha * A.col(j,jj,N);
+
+                        C.col(j,jj,N) += 
+                            alpha * A.subMatrix(jj,N,0,j) * B.col(j,0,j);
+
+                        MultMV<add>(alpha,A.subTriMatrix(0,j),B.col(j,0,j),
+                                    C.col(j,0,j));
+
+#ifdef TMVFLDEBUG
+                        TMVAssert(Cjj >= C.first);
+                        TMVAssert(Cjj < C.last);
+#endif
+                        *Cjj = newcjj;
+                    }
+                } else {
+                    const int Nm1 = C.rowsize()-1;
+                    const int Bds = B.stepi()+B.stepj();
+                    const int Cds = C.stepi()+C.stepj();
+                    const Tb* Bjj = B.cptr()+Nm1*Bds;
+                    T* Cjj = C.ptr()+Nm1*Cds;
+                    for(int jj=C.rowsize(),j=jj-1;
+                        jj>0;
+                        --jj,--j, Bjj-=Bds,Cjj-=Cds) {
+
+                        const int N = A.size();
+
+                        T xBjj = B.isconj() ? TMV_CONJ(*Bjj):*Bjj;
+                        T newcjj = A.row(j,0,j+1)*B.col(j,0,j+1);
+                        if (alpha != T(1)) {
+                            newcjj *= alpha;
+                            xBjj *= alpha;
+                        }
+                        if (add) newcjj += *Cjj;
+
+                        if (add) C.col(j,jj,N) += xBjj * A.col(j,jj,N);
+                        else C.col(j,jj,N) = xBjj * A.col(j,jj,N);
+                        C.col(j,jj,N) += 
+                            alpha * A.subMatrix(jj,N,0,j) * B.col(j,0,j);
+
+                        MultMV<add>(alpha,A.subTriMatrix(0,j),B.col(j,0,j),
+                                    C.col(j,0,j));
+
+#ifdef TMVFLDEBUG
+                        TMVAssert(Cjj >= C.first);
+                        TMVAssert(Cjj < C.last);
+#endif
+                        *Cjj = newcjj;
+                    }
+                }
+            }
+        }
+#ifdef XDEBUG
+        if (Norm(C2-C) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
+                                (add?Norm(C0):TMV_RealType(T)(0)))) {
+            cerr<<"MultMM: alpha = "<<alpha<<endl;
+            cerr<<"add = "<<add<<endl;
+            cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
+            cerr<<"B = "<<TMV_Text(B)<<"  "<<B0<<endl;
+            cerr<<"C = "<<TMV_Text(C)<<"  "<<C0<<endl;
+            cerr<<"Aptr = "<<A.cptr()<<", Bptr = "<<B.cptr();
+            cerr<<", Cptr = "<<C.cptr()<<endl;
+            cerr<<"--> C = "<<C<<endl;
+            cerr<<"C2 = "<<C2<<endl;
+            abort();
+        }
+#endif
+    }
+
+    template <bool add, class T, class Ta, class Tb> 
+    static void DoMultMM(
+        const T alpha, const GenLowerTriMatrix<Ta>& A,
+        const GenUpperTriMatrix<Tb>& B, const MatrixView<T>& C)
+    // C (+)= alpha * A * B
+    // This is designed to work even if A,B are in same storage as C
+    {
+#ifdef XDEBUG
+        //cout<<"MultMM: "<<alpha<<"  "<<TMV_Text(A)<<"  "<<A<<"  "<<TMV_Text(B)<<"  "<<B<<endl;
+        //cout<<TMV_Text(C)<<"  "<<C<<endl;
+        Matrix<T> C0 = C;
+        Matrix<Ta> A0 = A;
+        Matrix<Tb> B0 = B;
+        Matrix<T> C2 = C;
+        if (add) C2 += alpha*A0*B0;
+        else C2 = alpha*A0*B0;
+#endif
+        TMVAssert(A.size() == B.size());
+        TMVAssert(A.size() == C.colsize());
+        TMVAssert(B.size() == C.rowsize());
+        TMVAssert(A.size() > 0);
+        TMVAssert(alpha != T(0));
+        TMVAssert(C.ct() == NonConj);
+
+        const int nb = TRI_MM_BLOCKSIZE;
+        const int N = A.size();
+
+        if (N <= TRI_MM_BLOCKSIZE2) {
+            if (C.isrm()) 
+                ColMultMM<add>(alpha,B.transpose(),A.transpose(),
+                               C.transpose());
+            else
+                ColMultMM<add>(alpha,A,B,C);
+        } else {
+            int k = N/2;
+            if (k > nb) k = k/nb*nb;
+
+            // [ A00  0  ] [ B00 B01 ] = [ A00 B00       A00 B01      ]
+            // [ A10 A11 ] [  0  B11 ]   [ A10 B00  A10 B01 + A11 B11 ]
+
+            ConstLowerTriMatrixView<Ta> A00 = A.subTriMatrix(0,k);
+            ConstMatrixView<Ta> A10 = A.subMatrix(k,N,0,k);
+            ConstLowerTriMatrixView<Ta> A11 = A.subTriMatrix(k,N);
+            ConstUpperTriMatrixView<Tb> B00 = B.subTriMatrix(0,k);
+            ConstMatrixView<Tb> B01 = B.subMatrix(0,k,k,N);
+            ConstUpperTriMatrixView<Tb> B11 = B.subTriMatrix(k,N);
+            MatrixView<T> C00 = C.subMatrix(0,k,0,k);
+            MatrixView<T> C01 = C.subMatrix(0,k,k,N);
+            MatrixView<T> C10 = C.subMatrix(k,N,0,k);
+            MatrixView<T> C11 = C.subMatrix(k,N,k,N);
+
+            DoMultMM<add>(alpha,A11,B11,C11);
+            C11 += alpha*A10*B01;
+            if (SameStorage(A10,C01)) {
+                if (SameStorage(B01,C10)) {
+                    // This is the only case where we need temporary storage,
+                    // and I don't image that it is often needed, but it's 
+                    // worth checking.
+                    Matrix<T> A10x = A10;
+                    MultMM<add>(alpha,A00,B01,C01);
+                    MultMM<add>(alpha,B00.transpose(),A10x.transpose(),
+                                C10.transpose());
+                } else {
+                    MultMM<add>(alpha,B00.transpose(),A10.transpose(),
+                                C10.transpose());
+                    MultMM<add>(alpha,A00,B01,C01);
+                }
+            } else {
+                MultMM<add>(alpha,A00,B01,C01);
+                MultMM<add>(alpha,B00.transpose(),A10.transpose(),
+                            C10.transpose());
+            }
+            DoMultMM<add>(alpha,A00,B00,C00);
+        }
+#ifdef XDEBUG
+        if (Norm(C2-C) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
+                                (add?Norm(C0):TMV_RealType(T)(0)))) {
+            cerr<<"MultMM: alpha= "<<alpha<<endl;
+            cerr<<"add = "<<add<<endl;
+            cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
+            cerr<<"B = "<<TMV_Text(B)<<"  "<<B0<<endl;
+            cerr<<"C = "<<TMV_Text(C)<<"  "<<C0<<endl;
+            cerr<<"Aptr = "<<A.cptr()<<", Bptr = "<<B.cptr();
+            cerr<<", Cptr = "<<C.cptr()<<endl;
+            cerr<<"--> C = "<<C<<endl;
+            cerr<<"C2 = "<<C2<<endl;
+            abort();
+        }
+#endif
+    }
+
+    template <bool add, class T, class Ta, class Tb> 
+    void MultMM(
+        const T alpha, const GenLowerTriMatrix<Ta>& A,
+        const GenUpperTriMatrix<Tb>& B, const MatrixView<T>& C)
+    {
+#ifdef XDEBUG
+        //cout<<"MultMM: "<<alpha<<"  "<<TMV_Text(A)<<"  "<<A<<"  "<<TMV_Text(B)<<"  "<<B<<endl;
+        //cout<<TMV_Text(C)<<"  "<<C<<endl;
+        Matrix<T> C0 = C;
+        Matrix<Ta> A0 = A;
+        Matrix<Tb> B0 = B;
+        Matrix<T> C2 = C;
+        if (add) C2 += alpha*A0*B0;
+        else C2 = alpha*A0*B0;
+#endif
+        TMVAssert(A.size() == B.size());
+        TMVAssert(A.size() == C.colsize());
+        TMVAssert(B.size() == C.rowsize());
+
+        const int N = A.size();
+
+        if (N==0) return;
+        else if (alpha == T(0)) {
+            if (!add) C.setZero();
+        } else if (C.isconj()) {
+            DoMultMM<add>(TMV_CONJ(alpha),A.conjugate(),B.conjugate(),
+                          C.conjugate());
+        } else {
+            DoMultMM<add>(alpha,A,B,C);
+        }
+
+#ifdef XDEBUG
+        if (Norm(C2-C) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
+                                (add?Norm(C0):TMV_RealType(T)(0)))) {
+            cerr<<"MultMM: alpha = "<<alpha<<endl;
+            cerr<<"add = "<<add<<endl;
+            cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
+            cerr<<"B = "<<TMV_Text(B)<<"  "<<B0<<endl;
+            cerr<<"C = "<<TMV_Text(C)<<"  "<<C0<<endl;
+            cerr<<"Aptr = "<<A.cptr()<<", Bptr = "<<B.cptr();
+            cerr<<", Cptr = "<<C.cptr()<<endl;
+            cerr<<"--> C = "<<C<<endl;
+            cerr<<"C2 = "<<C2<<endl;
+            abort();
+        }
+#endif
+    }
 
 #define InstFile "TMV_MultUL.inst"
 #include "TMV_Inst.h"

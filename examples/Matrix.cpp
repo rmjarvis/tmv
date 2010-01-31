@@ -60,9 +60,9 @@ int main() try
   //! (  7  8  9  )
   //! (  10  11  12  )
 
-  // Initialize with ListInit.
+  // Initialize with comma-delimited list.
   // Note that this is more intuitive with RowMajor Storage
-  m3 = tmv::ListInit,
+  m3 <<
       2, -5,  1, -3, 
      -4,  8, -7,  1,
      -1,  2,  4,  0;
@@ -74,7 +74,7 @@ int main() try
   //! (  1  -7  4  )
   //! (  -3  1  0  )
 
-  m4 = tmv::ListInit,
+  m4 <<
       2, -4,  1,
      -5,  8,  2,
       1, -7,  4,
@@ -111,7 +111,7 @@ int main() try
   //! 36.452
   // This is potentially inefficient, especially for large matrices.
   // To avoid the warning, you can use:
-  std::cout<<"Norm2(m1) = "<<m1.DoNorm2()<<std::endl;
+  std::cout<<"m1.doNorm2() = "<<m1.doNorm2()<<std::endl;
   //! Norm2(m1) = 36.452
   std::cout<<"NormInf(m1) = "<<NormInf(m1)<<std::endl;
   //! NormInf(m1) = 39
@@ -128,6 +128,13 @@ int main() try
 
   // Views:
 
+  std::cout<<"m1 = \n"<<m1<<std::endl;
+  //! m1 = 
+  //! 4  3
+  //! (  10  7  4  )
+  //! (  12  9  6  )
+  //! (  14  11  8  )
+  //! (  16  13  10  )
   std::cout<<"m1.row(1) = "<<m1.row(1)<<std::endl;
   //! m1.row(1) = 3 ( 12  9  6 )
   std::cout<<"m1.col(2) = "<<m1.col(2)<<std::endl;
@@ -138,39 +145,39 @@ int main() try
   //! m1.diag(1) = 2 ( 7  6 )
   std::cout<<"m1.diag(-1) = "<<m1.diag(-1)<<std::endl;
   //! m1.diag(-1) = 3 ( 12  11  10 )
-  std::cout<<"m1.SubMatrix(2,4,0,2) = \n"<<m1.SubMatrix(2,4,0,2)<<std::endl;
-  //! m1.SubMatrix(2,4,0,2) = 
+  std::cout<<"m1.subMatrix(2,4,0,2) = \n"<<m1.subMatrix(2,4,0,2)<<std::endl;
+  //! m1.subMatrix(2,4,0,2) = 
   //! 2  2
   //! (  14  11  )
   //! (  16  13  )
-  std::cout<<"m1.SubMatrix(0,4,1,3,2,1) = \n"<<
-    m1.SubMatrix(0,4,1,3,2,1)<<std::endl;
-  //! m1.SubMatrix(0,4,1,3,2,1) = 
+  std::cout<<"m1.subMatrix(0,4,1,3,2,1) = \n"<<
+    m1.subMatrix(0,4,1,3,2,1)<<std::endl;
+  //! m1.subMatrix(0,4,1,3,2,1) = 
   //! 2  2
   //! (  7  4  )
   //! (  11  8  )
-  std::cout<<"m1.Transpose() = \n"<<m1.Transpose()<<std::endl;
-  //! m1.Transpose() = 
+  std::cout<<"m1.transpose() = \n"<<m1.transpose()<<std::endl;
+  //! m1.transpose() = 
   //! 3  4
   //! (  10  12  14  16  )
   //! (  7  9  11  13  )
   //! (  4  6  8  10  )
-  std::cout<<"m1.Cols(1,3) = \n"<<m1.Cols(1,3)<<std::endl;
-  //! m1.Cols(1,3) = 
+  std::cout<<"m1.colRange(1,3) = \n"<<m1.colRange(1,3)<<std::endl;
+  //! m1.colRange(1,3) = 
   //! 4  2
   //! (  7  4  )
   //! (  9  6  )
   //! (  11  8  )
   //! (  13  10  )
-  std::cout<<"m1.RowPair(3,0) = \n"<<m1.RowPair(3,0)<<std::endl;
-  //! m1.RowPair(3,0) = 
+  std::cout<<"m1.rowPair(3,0) = \n"<<m1.rowPair(3,0)<<std::endl;
+  //! m1.rowPair(3,0) = 
   //! 2  3
   //! (  16  13  10  )
   //! (  10  7  4  )
   // Can use the views within expressions
-  m1.Rows(0,3) += m5.Transpose();
-  std::cout<<"m1.Rows(0,3) += m5.Transpose() => m1 = \n"<<m1<<std::endl;
-  //! m1.Rows(0,3) += m5.Transpose() => m1 = 
+  m1.rowRange(0,3) += m5.transpose();
+  std::cout<<"m1.rowRange(0,3) += m5.transpose() => m1 = \n"<<m1<<std::endl;
+  //! m1.rowRange(0,3) += m5.transpose() => m1 = 
   //! 4  3
   //! (  10  9  8  )
   //! (  13  9  5  )
@@ -204,26 +211,26 @@ int main() try
   //! fm1.row(1) = 3 ( 20  18  16 )
   std::cout<<"fm1.col(3) = "<<fm1.col(3)<<std::endl;
   //! fm1.col(3) = 4 ( 16  5  2  10 )
-  std::cout<<"fm1.SubMatrix(2,3,1,2) = \n"<<fm1.SubMatrix(2,3,1,2)<<std::endl;
-  //! fm1.SubMatrix(2,3,1,2) = 
+  std::cout<<"fm1.subMatrix(2,3,1,2) = \n"<<fm1.subMatrix(2,3,1,2)<<std::endl;
+  //! fm1.subMatrix(2,3,1,2) = 
   //! 2  2
   //! (  13  9  )
   //! (  16  9  )
-  std::cout<<"fm1.SubMatrix(1,3,2,3,2,1) = \n"<<
-    fm1.SubMatrix(1,3,2,3,2,1)<<std::endl;
-  //! fm1.SubMatrix(1,3,2,3,2,1) = 
+  std::cout<<"fm1.subMatrix(1,3,2,3,2,1) = \n"<<
+    fm1.subMatrix(1,3,2,3,2,1)<<std::endl;
+  //! fm1.subMatrix(1,3,2,3,2,1) = 
   //! 2  2
   //! (  18  16  )
   //! (  9  2  )
-  std::cout<<"fm1.Cols(1,2) = \n"<<fm1.Cols(1,2)<<std::endl;
-  //! fm1.Cols(1,2) = 
+  std::cout<<"fm1.colRange(1,2) = \n"<<fm1.colRange(1,2)<<std::endl;
+  //! fm1.colRange(1,2) = 
   //! 4  2
   //! (  20  18  )
   //! (  13  9  )
   //! (  16  9  )
   //! (  16  13  )
-  std::cout<<"fm1.RowPair(4,1) = \n"<<fm1.RowPair(4,1)<<std::endl;
-  //! fm1.RowPair(4,1) = 
+  std::cout<<"fm1.rowPair(4,1) = \n"<<fm1.rowPair(4,1)<<std::endl;
+  //! fm1.rowPair(4,1) = 
   //! 2  3
   //! (  16  13  10  )
   //! (  20  18  16  )
@@ -312,6 +319,7 @@ int main() try
   //! (m1 * m5)(0,2) = -178
 
   // Can handle aliases:
+  // No alias problem here:
   std::cout<<"m1 + 3*m1-m2 = \n"<<m1+3.*m1-m2<<std::endl;
   //! m1 + 3*m1-m2 = 
   //! 4  3
@@ -319,6 +327,7 @@ int main() try
   //! (  82  102  46  )
   //! (  130  42  30  )
   //! (  114  106  78  )
+  // But this would be a problem for a naive implementation:
   m1 += 3.*m1-m2;
   std::cout<<"m1 += 3*m1-m2 = \n"<<m1<<std::endl;
   //! m1 += 3*m1-m2 = 
@@ -327,12 +336,15 @@ int main() try
   //! (  82  102  46  )
   //! (  130  42  30  )
   //! (  114  106  78  )
+
+  // Again: here is the correct answer:
   std::cout<<"m5 * m5 = \n"<<m5*m5<<std::endl;
   //! m5 * m5 = 
   //! 3  3
   //! (  10  -2  -14  )
   //! (  -8  4  16  )
   //! (  -26  10  46  )
+  // And here, the alias is dealt with correctly:
   m5 *= m5;
   std::cout<<"m5 *= m5 = \n"<<m5<<std::endl;
   //! m5 *= m5 = 
@@ -361,34 +373,34 @@ int main() try
   //! (  (-5,-10)  (8,16)  (2,4)  )
   //! (  (1,2)  (-7,-14)  (4,8)  )
   //! (  (-3,-6)  (1,2)  (0,0)  )
-  std::cout<<"cm4.Conjugate() = \n"<<cm4.Conjugate()<<std::endl;
-  //! cm4.Conjugate() = 
+  std::cout<<"cm4.conjugate() = \n"<<cm4.conjugate()<<std::endl;
+  //! cm4.conjugate() = 
   //! 4  3
   //! (  (2,-4)  (-4,8)  (1,-2)  )
   //! (  (-5,10)  (8,-16)  (2,-4)  )
   //! (  (1,-2)  (-7,14)  (4,-8)  )
   //! (  (-3,6)  (1,-2)  (0,-0)  )
-  std::cout<<"cm4.Transpose() = \n"<<cm4.Transpose()<<std::endl;
-  //! cm4.Transpose() = 
+  std::cout<<"cm4.transpose() = \n"<<cm4.transpose()<<std::endl;
+  //! cm4.transpose() = 
   //! 3  4
   //! (  (2,4)  (-5,-10)  (1,2)  (-3,-6)  )
   //! (  (-4,-8)  (8,16)  (-7,-14)  (1,2)  )
   //! (  (1,2)  (2,4)  (4,8)  (0,0)  )
-  std::cout<<"cm4.Adjoint() = \n"<<cm4.Adjoint()<<std::endl;
-  //! cm4.Adjoint() = 
+  std::cout<<"cm4.adjoint() = \n"<<cm4.adjoint()<<std::endl;
+  //! cm4.adjoint() = 
   //! 3  4
   //! (  (2,-4)  (-5,10)  (1,-2)  (-3,6)  )
   //! (  (-4,8)  (8,-16)  (-7,14)  (1,-2)  )
   //! (  (1,-2)  (2,-4)  (4,-8)  (0,-0)  )
-  std::cout<<"cm4.Real() = \n"<<cm4.Real()<<std::endl;
-  //! cm4.Real() = 
+  std::cout<<"cm4.realPart() = \n"<<cm4.realPart()<<std::endl;
+  //! cm4.realPart() = 
   //! 4  3
   //! (  2  -4  1  )
   //! (  -5  8  2  )
   //! (  1  -7  4  )
   //! (  -3  1  0  )
-  std::cout<<"cm4.Imag() = \n"<<cm4.Imag()<<std::endl;
-  //! cm4.Imag() = 
+  std::cout<<"cm4.imagPart() = \n"<<cm4.imagPart()<<std::endl;
+  //! cm4.imagPart() = 
   //! 4  3
   //! (  4  -8  2  )
   //! (  -10  16  4  )
@@ -396,8 +408,8 @@ int main() try
   //! (  -6  2  0  )
   std::cout<<"Norm(cm4) = "<<Norm(cm4)<<std::endl;
   //! Norm(cm4) = 30.8221
-  std::cout<<"cm4*cm4.Adjoint() = \n"<<cm4*cm4.Adjoint()<<std::endl;
-  //! cm4*cm4.Adjoint() = 
+  std::cout<<"cm4*cm4.adjoint() = \n"<<cm4*cm4.adjoint()<<std::endl;
+  //! cm4*cm4.adjoint() = 
   //! 4  4
   //! (  (105,0)  (-200,0)  (170,0)  (-50,0)  )
   //! (  (-200,0)  (465,0)  (-265,0)  (115,0)  )
@@ -412,9 +424,9 @@ int main() try
   //! (  (0,-10)  (0,16)  (0,4)  )
   //! (  (0,2)  (0,-14)  (0,8)  )
   //! (  (0,-6)  (0,2)  (0,0)  )
-  std::cout<<"cm4 * m4.Transpose() * (1-2i) = \n"<<
-    cm4 * m4.Transpose() * std::complex<double>(1,-2)<<std::endl;
-  //! cm4 * m4.Transpose() * (1-2i) = 
+  std::cout<<"cm4 * m4.transpose() * (1-2i) = \n"<<
+    cm4 * m4.transpose() * std::complex<double>(1,-2)<<std::endl;
+  //! cm4 * m4.transpose() * (1-2i) = 
   //! 4  4
   //! (  (105,0)  (-200,0)  (170,0)  (-50,0)  )
   //! (  (-200,0)  (465,0)  (-265,0)  (115,0)  )
@@ -422,9 +434,7 @@ int main() try
   //! (  (-50,0)  (115,0)  (-50,0)  (50,0)  )
 
   return 0;
-} 
-catch (tmv::Error& e) 
-{
+} catch (tmv::Error& e) {
   std::cerr<<e<<std::endl;
   return 1;
 }

@@ -51,7 +51,7 @@
 //
 // ---------------------------------------------------------------------------------------------------------------------------------
 
-#ifdef TMV_MEM_TEST
+#ifdef MEMTEST
 #ifdef NDEBUG
 #undef NDEBUG
 #endif
@@ -71,8 +71,8 @@
 #include <unistd.h>
 #endif
 
-#include "util/mmgr.h"
-#include "util/extra_mmgr.h"
+#include "mmgr.h"
+#include "extra_mmgr.h"
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 // -DOC- If you're like me, it's hard to gain trust in foreign code. This memory manager will try to INDUCE your code to crash (for

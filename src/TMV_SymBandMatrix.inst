@@ -1,0 +1,109 @@
+
+#define CT std::complex<T>
+
+#define Def1(T,RT,CCT,Ref) \
+  template T GenSymBandMatrix<T >::cref(int i, int j) const; \
+  template Ref SymBandMatrixView<T,CStyle>::ref(int i, int j) const; \
+  template bool GenSymBandMatrix<T >::hasSubMatrix( \
+      int i1, int i2, int j1, int j2, int is, int js) const; \
+  template bool GenSymBandMatrix<T >::hasSubBandMatrix( \
+      int i1, int i2, int j1, int j2, int lo, int hi, int is, int js) const; \
+  template bool GenSymBandMatrix<T >::hasSubVector( \
+      int i, int j, int is, int js, int s) const; \
+  template bool GenSymBandMatrix<T >::hasSubSymMatrix( \
+      int i1, int i2, int is) const; \
+  template bool GenSymBandMatrix<T >::hasSubSymBandMatrix( \
+      int i1, int i2, int lo, int is) const; \
+  template bool ConstSymBandMatrixView<T,FortranStyle>::hasSubMatrix( \
+      int i1, int i2, int j1, int j2, int is, int js) const; \
+  template bool ConstSymBandMatrixView<T,FortranStyle>::hasSubBandMatrix( \
+      int i1, int i2, int j1, int j2, int lo, int hi, int is, int js) const; \
+  template bool ConstSymBandMatrixView<T,FortranStyle>::hasSubVector( \
+      int i, int j, int is, int js, int s) const; \
+  template bool ConstSymBandMatrixView<T,FortranStyle>::hasSubSymMatrix( \
+      int i1, int i2, int is) const; \
+  template bool ConstSymBandMatrixView<T,FortranStyle>::hasSubSymBandMatrix( \
+      int i1, int i2, int lo, int is) const; \
+  template RT GenSymBandMatrix<T >::normF() const; \
+  template RT GenSymBandMatrix<T >::normSq(const RT scale) const; \
+  template RT GenSymBandMatrix<T >::norm1() const; \
+  template RT GenSymBandMatrix<T >::maxAbsElement() const; \
+  template QuotXsB<T,T > GenSymBandMatrix<T >::QInverse() const; \
+  template void GenSymBandMatrix<T >::write(std::ostream& os) const; \
+  template void GenSymBandMatrix<T >::write(std::ostream& os, RT t) const; \
+  template void GenSymBandMatrix<T >::writeCompact(std::ostream& os) const; \
+  template void GenSymBandMatrix<T >::writeCompact(std::ostream& os, RT t) const; \
+  template void GenSymBandMatrix<T >::newDivider() const; \
+  template void SymBandMatrixView<T,CStyle>::read(std::istream& is) const; \
+  template std::istream& operator>>(std::istream& fin, \
+      const SymBandMatrixView<T >& m); \
+  template auto_ptr<BaseMatrix<T > > GenSymBandMatrix<T >::newCopy() const; \
+  template auto_ptr<BaseMatrix<T > > GenSymBandMatrix<T >::newView() const; \
+  template auto_ptr<BaseMatrix<T > > GenSymBandMatrix<T >::newTranspose() const; \
+  template auto_ptr<BaseMatrix<T > > GenSymBandMatrix<T >::newConjugate() const; \
+  template auto_ptr<BaseMatrix<T > > GenSymBandMatrix<T >::newAdjoint() const; \
+  template auto_ptr<BaseMatrix<T > > GenSymBandMatrix<T >::newInverse() const; \
+  template SymBandMatrix<T,Upper,DiagMajor> SymTriDiagMatrix( \
+      const GenVector<T >& v1, const GenVector<T >& v2); \
+  template HermBandMatrix<T,Upper,DiagMajor> HermTriDiagMatrix( \
+      const GenVector<T >& v1, const GenVector<T >& v2, UpLoType U); \
+  template ConstSymBandMatrixView<T > SymBandMatrixViewOf( \
+      const T* m, size_t s, int lo, UpLoType uplo, StorageType stor); \
+  template SymBandMatrixView<T > SymBandMatrixViewOf( \
+      T* m, size_t s, int lo, UpLoType uplo, StorageType stor); \
+  template ConstSymBandMatrixView<T > HermBandMatrixViewOf( \
+      const T* m, size_t s, int lo, UpLoType uplo, StorageType stor); \
+  template SymBandMatrixView<T > HermBandMatrixViewOf( \
+      T* m, size_t s, int lo, UpLoType uplo, StorageType stor); \
+
+Def1(T,T,CT,T&)
+#ifdef INST_COMPLEX
+Def1(CT,T,CT,VarConjRef<CT >)
+#endif
+
+#undef Def1
+
+  template HermBandMatrix<CT,Upper,DiagMajor> HermTriDiagMatrix( 
+      const GenVector<T >& v1, const GenVector<CT >& v2, UpLoType U); 
+
+#define Def2(T1,T2) \
+  template void GenSymBandMatrix<T1 >::doMakeInverse( \
+      const SymMatrixView<T2 >& sinv) const; \
+
+Def2(T,T)
+#ifdef INST_COMPLEX
+Def2(T,CT)
+Def2(CT,CT)
+#endif
+
+#undef Def2
+
+#define Def3(RT,T,U,S,I) \
+  template std::istream& operator>>(std::istream& is, \
+      auto_ptr<SymBandMatrix<T,U,S,I> >& m); \
+  template std::istream& operator>>(std::istream& is, \
+      auto_ptr<HermBandMatrix<T,U,S,I> >& m); \
+
+Def3(T,T,Upper,RowMajor,CStyle)
+Def3(T,T,Upper,ColMajor,CStyle)
+Def3(T,T,Lower,RowMajor,CStyle)
+Def3(T,T,Lower,ColMajor,CStyle)
+Def3(T,T,Upper,RowMajor,FortranStyle)
+Def3(T,T,Upper,ColMajor,FortranStyle)
+Def3(T,T,Lower,RowMajor,FortranStyle)
+Def3(T,T,Lower,ColMajor,FortranStyle)
+#ifdef INST_COMPLEX
+Def3(T,CT,Upper,RowMajor,CStyle)
+Def3(T,CT,Upper,ColMajor,CStyle)
+Def3(T,CT,Lower,RowMajor,CStyle)
+Def3(T,CT,Lower,ColMajor,CStyle)
+Def3(T,CT,Upper,RowMajor,FortranStyle)
+Def3(T,CT,Upper,ColMajor,FortranStyle)
+Def3(T,CT,Lower,RowMajor,FortranStyle)
+Def3(T,CT,Lower,ColMajor,FortranStyle)
+#endif
+
+#undef Def3
+
+#undef CT
+

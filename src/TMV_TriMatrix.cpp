@@ -32,619 +32,1653 @@
 
 
 #include "TMV_Blas.h"
-#include <iostream>
 #include "tmv/TMV_TriMatrix.h"
-#include "tmv/TMV_TriMatrixIO.h"
-#include "tmv/TMV_MatrixIO.h"
-#include "tmv/TMV_CopyU.h"
-#include "tmv/TMV_SwapU.h"
-#include "tmv/TMV_NormU.h"
+#include "tmv/TMV_DiagMatrix.h"
+#include "tmv/TMV_VIt.h"
+#include <iostream>
+#include "portable_platform.h"
 
 namespace tmv {
 
+#define RT TMV_RealType(T)
+
     //
-    // Copy Matrices
+    // Access
     //
 
-    template <class T1, bool C1, class T2>
-    void InstCopy(
-        const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
-        UpperTriMatrixView<T2,UnknownDiag> m2)
+    template <class T>
+    T GenUpperTriMatrix<T>::cref(int i, int j) const
     {
-        if (m2.isrm()) {
-            UpperTriMatrixView<T2,UnknownDiag,UNKNOWN,1> m2rm = m2;
-            if (m1.isrm())
-                InlineCopy(m1.rmView(),m2rm);
-            else if (m1.iscm())
-                InlineCopy(m1.cmView(),m2rm);
-            else
-                InlineCopy(m1,m2rm);
-        } else if (m2.iscm()) {
-            UpperTriMatrixView<T2,UnknownDiag,1> m2cm = m2;
-            if (m1.isrm())
-                InlineCopy(m1.rmView(),m2cm);
-            else if (m1.iscm())
-                InlineCopy(m1.cmView(),m2cm);
-            else
-                InlineCopy(m1,m2cm);
-        } else {
-            if (m1.isrm())
-                InlineCopy(m1.rmView(),m2);
-            else if (m1.iscm())
-                InlineCopy(m1.cmView(),m2);
-            else
-                InlineCopy(m1,m2);
+        if (i==j && isunit()) return T(1);
+        else if (i>j) return T(0);
+        else {
+            const T* mi = cptr() + int(i)*stepi() + int(j)*stepj();
+            return (isconj() ? TMV_CONJ(*mi) : *mi);
         }
     }
 
-
-    //
-    // Swap Matrices
-    //
-
-    template <class T, bool C> 
-    void InstSwap(
-        UpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C> m1,
-        UpperTriMatrixView<T,UnknownDiag> m2)
+    template <class T, IndexStyle I> 
+    TMV_RefType(T) UpperTriMatrixView<T,I>::ref(int i, int j) const
     {
-        if (m2.isrm()) {
-            UpperTriMatrixView<T,UnknownDiag,UNKNOWN,1> m2rm = m2;
-            if (m1.isrm()) {
-                UpperTriMatrixView<T,UnknownDiag,UNKNOWN,1,C> m1rm = m1;
-                InlineSwap(m1rm,m2rm);
-            } else if (m1.iscm()) {
-                UpperTriMatrixView<T,UnknownDiag,1,UNKNOWN,C> m1cm = m1;
-                InlineSwap(m1cm,m2rm);
-            } else
-                InlineSwap(m1,m2rm);
-        } else if (m2.iscm()) {
-            UpperTriMatrixView<T,UnknownDiag,1> m2cm = m2;
-            if (m1.isrm()) {
-                UpperTriMatrixView<T,UnknownDiag,UNKNOWN,1,C> m1rm = m1;
-                InlineSwap(m1rm,m2cm);
-            } else if (m1.iscm()) {
-                UpperTriMatrixView<T,UnknownDiag,1,UNKNOWN,C> m1cm = m1;
-                InlineSwap(m1cm,m2cm);
-            } else
-                InlineSwap(m1,m2cm);
-        } else {
-            if (m1.isrm()) {
-                UpperTriMatrixView<T,UnknownDiag,UNKNOWN,1,C> m1rm = m1;
-                InlineSwap(m1rm,m2);
-            } else if (m1.iscm()) {
-                UpperTriMatrixView<T,UnknownDiag,1,UNKNOWN,C> m1cm = m1;
-                InlineSwap(m1cm,m2);
-            } else
-                InlineSwap(m1,m2);
+        T* mi = ptr() + int(i)*stepi() + int(j)*stepj();
+        return TMV_REF(mi,ct());
+    }
+
+    template <class T>
+    T GenLowerTriMatrix<T>::cref(int i, int j) const
+    {
+        if (i==j && isunit()) return T(1);
+        else if (i<j) return T(0);
+        else {
+            const T* mi = cptr() + int(i)*stepi() + int(j)*stepj();
+            return (isconj() ? TMV_CONJ(*mi) : *mi);
         }
     }
 
+    template <class T, IndexStyle I> 
+    TMV_RefType(T) LowerTriMatrixView<T,I>::ref(int i, int j) const
+    {
+        T* mi = ptr() + int(i)*stepi() + int(j)*stepj();
+        return TMV_REF(mi,ct());
+    }
 
     //
-    // Norms, SumElements
+    // OK? (SubMatrix, etc.)
     //
 
     template <class T>
-    T DoInstSumElements(const ConstUpperTriMatrixView<T>& m)
-    { 
-        if (m.isrm()) return InlineSumElements(m.rmView());
-        else if (m.iscm()) return InlineSumElements(m.cmView());
-        else return InlineSumElements(m);
+    bool GenUpperTriMatrix<T>::hasSubMatrix(
+        int i1, int i2, int j1, int j2, int istep, int jstep) const
+    {
+        if (i1==i2 || j1==j2) return true; // no elements, so whatever...
+        bool ok = true;
+        if (istep == 0) {
+            ok = false;
+            std::cout<<"istep ("<<istep<<") can not be 0\n";
+        }
+        if (i1 < 0 || i1 >= int(size())) {
+            ok = false;
+            std::cout<<"first col element ("<<i1<<") must be in 0 -- ";
+            std::cout<<size()-1<<std::endl;
+        }
+        if (i2-istep < 0 || i2-istep >= int(size())) {
+            ok = false;
+            std::cout<<"last col element ("<<i2-istep<<") must be in 0 -- ";
+            std::cout<<size()-1<<std::endl;
+        }
+        if ((i2-i1)%istep != 0) {
+            ok = false;
+            std::cout<<"col range ("<<i2-i1<<") must be multiple of istep (";
+            std::cout<<istep<<")\n";
+        }
+        if ((i2-i1)/istep < 0) {
+            ok = false;
+            std::cout<<"n col elements ("<<(i2-i1)/istep<<") must be nonnegative\n";
+        }
+        if (jstep == 0) {
+            ok = false;
+            std::cout<<"jstep ("<<jstep<<") can not be 0\n";
+        }
+        if (j1 < 0 || j1 >= int(size())) {
+            ok = false;
+            std::cout<<"first row element ("<<j1<<") must be in 0 -- ";
+            std::cout<<size()-1<<std::endl;
+        }
+        if (j2-jstep < 0 || j2-jstep >= int(size())) {
+            ok = false;
+            std::cout<<"last row element ("<<j2-jstep<<") must be in 0 -- ";
+            std::cout<<size()-1<<std::endl;
+        }
+        if ((j2-j1)%jstep != 0) {
+            ok = false;
+            std::cout<<"row range ("<<j2-j1<<") must be multiple of istep (";
+            std::cout<<jstep<<")\n";
+        }
+        if ((j2-j1)/jstep < 0) {
+            ok = false;
+            std::cout<<"n row elements ("<<(j2-j1)/jstep<<") must be nonnegative\n";
+        }
+        if (!this->okij(i1,j1)) {
+            ok = false;
+            std::cout<<"Upper left corner ("<<i1<<','<<j1;
+            std::cout<<") must be in Upper Triangle\n";
+        }
+        if (!this->okij(i1,j2-jstep)) {
+            ok = false;
+            std::cout<<"Upper right corner ("<<i1<<','<<j2-jstep;
+            std::cout<<") must be in Upper Triangle\n";
+        }
+        if (!this->okij(i2-istep,j1)) {
+            ok = false;
+            std::cout<<"Lower left corner ("<<i2-istep<<','<<j1;
+            std::cout<<") must be in Upper Triangle\n";
+        }
+        if (!this->okij(i2-istep,j2-jstep)) {
+            ok = false;
+            std::cout<<"Lower right corner ("<<i2-istep<<','<<j2-jstep;
+            std::cout<<") must be in Upper Triangle\n";
+        }
+        return ok;
     }
 
     template <class T>
-    typename Traits<T>::real_type DoInstSumAbsElements(
-        const ConstUpperTriMatrixView<T>& m)
+    bool GenUpperTriMatrix<T>::hasSubVector(
+        int i, int j, int istep, int jstep, int n) const 
     {
-        if (m.isrm()) return InlineSumAbsElements(m.rmView());
-        else if (m.iscm()) return InlineSumAbsElements(m.cmView());
-        else return InlineSumAbsElements(m);
+        if (n==0) return true;
+        bool ok = true;
+        if (istep == 0 && jstep == 0) {
+            ok = false;
+            std::cout<<"istep ("<<istep<<") and jstep ("<<jstep;
+            std::cout<<") can not both be 0\n";
+        }
+        if (i<0 || i >= int(size())) {
+            ok = false;
+            std::cout<<"i ("<<i<<") must be in 0 -- "<<size()-1<<std::endl;
+        }
+        if (j<0 || j >= int(size())) {
+            ok = false;
+            std::cout<<"j ("<<j<<") must be in 0 -- "<<size()-1<<std::endl;
+        }
+        int i2 = int(i)+istep*int(n-1);
+        int j2 = int(j)+jstep*int(n-1);
+        if (i2 < 0 || i2 >= int(size())) {
+            ok = false;
+            std::cout<<"last element's i ("<<i2<<") must be in 0 -- ";
+            std::cout<<size()-1<<std::endl;
+        }
+        if (j2 < 0 || j2 >= int(size())) {
+            ok = false;
+            std::cout<<"last element's j ("<<j2<<") must be in 0 -- ";
+            std::cout<<size()-1<<std::endl;
+        }
+        if (!this->okij(i,j)) {
+            ok = false;
+            std::cout<<"First element ("<<i<<','<<j<<") must be in Triangle\n";
+        }
+        if (!this->okij(i2,j2)) {
+            ok = false;
+            std::cout<<"Last element ("<<i2<<','<<j2<<") must be in Triangle\n";
+        }
+        return ok;
     }
 
     template <class T>
-    typename Traits<T>::real_type DoInstSumAbs2Elements(
-        const ConstUpperTriMatrixView<T>& m)
+    bool GenUpperTriMatrix<T>::hasSubTriMatrix(
+        int i1, int i2, int istep) const 
     {
-        if (m.isrm()) return InlineSumAbs2Elements(m.rmView());
-        else if (m.iscm()) return InlineSumAbs2Elements(m.cmView());
-        else return InlineSumAbs2Elements(m);
+        if (i1==i2) return true;
+        bool ok=true;
+        if (istep == 0) {
+            ok = false; 
+            std::cout<<"istep ("<<istep<<") can not be 0\n";
+        }
+        if (i1<0 || i1 >= int(size())) {
+            ok = false;
+            std::cout<<"first diag element ("<<i1<<") must be in 0 -- ";
+            std::cout<<size()-1<<std::endl;
+        }
+        if (i2-istep<0 || i2-istep >= int(size())) {
+            ok = false;
+            std::cout<<"last diag element ("<<i2-istep<<") must be in 0 -- ";
+            std::cout<<size()-1<<std::endl;
+        }
+        if ((i2-i1)%istep != 0) {
+            ok = false;
+            std::cout<<"range ("<<i2-i1<<") must be multiple of istep (";
+            std::cout<<istep<<")\n";
+        }
+        if ((i2-i1)/istep < 0) {
+            ok = false;
+            std::cout<<"n diag elements ("<<(i2-i1)/istep<<") must be nonnegative\n";
+        }
+        return ok;
     }
 
     template <class T>
-    typename Traits<T>::real_type DoInstNormSq(
-        const ConstUpperTriMatrixView<T>& m)
+    bool ConstUpperTriMatrixView<T,FortranStyle>::hasSubMatrix(
+        int i1, int i2, int j1, int j2, int istep, int jstep) const
     {
-        if (m.isrm()) return InlineNormSq(m.rmView());
-        else if (m.iscm()) return InlineNormSq(m.cmView());
-        else return InlineNormSq(m);
+        if (i1==i2 || j1==j2) return true; // no elements, so whatever...
+        bool ok = true;
+        if (istep == 0) {
+            ok = false;
+            std::cout<<"istep ("<<istep<<") can not be 0\n";
+        }
+        if (i1 < 1 || i1 > int(this->size())) {
+            ok = false;
+            std::cout<<"first col element ("<<i1<<") must be in 1 -- ";
+            std::cout<<this->size()<<std::endl;
+        }
+        if (i2 < 1 || i2 > int(this->size())) {
+            ok = false;
+            std::cout<<"last col element ("<<i2<<") must be in 1 -- ";
+            std::cout<<this->size()<<std::endl;
+        }
+        if ((i2-i1)%istep != 0) {
+            ok = false;
+            std::cout<<"col range ("<<i2-i1<<") must be multiple of istep (";
+            std::cout<<istep<<")\n";
+        }
+        if ((i2-i1)/istep < 0) {
+            ok = false;
+            std::cout<<"n col elements ("<<(i2-i1)/istep+1<<") must be positive\n";
+        }
+        if (jstep == 0) {
+            ok = false;
+            std::cout<<"jstep ("<<jstep<<") can not be 0\n";
+        }
+        if (j1 < 1 || j1 > int(this->size())) {
+            ok = false;
+            std::cout<<"first row element ("<<j1<<") must be in 1 -- ";
+            std::cout<<this->size()<<std::endl;
+        }
+        if (j2 < 1 || j2 > int(this->size())) {
+            ok = false;
+            std::cout<<"last row element ("<<j2<<") must be in 1 -- ";
+            std::cout<<this->size()<<std::endl;
+        }
+        if ((j2-j1)%jstep != 0) {
+            ok = false;
+            std::cout<<"row range ("<<j2-j1<<") must be multiple of istep (";
+            std::cout<<jstep<<")\n";
+        }
+        if ((j2-j1)/jstep < 0) {
+            ok = false;
+            std::cout<<"n row elements ("<<(j2-j1)/jstep+1<<") must be positive\n";
+        }
+        if (!this->okij(i1-1,j1-1)) {
+            ok = false;
+            std::cout<<"Upper left corner ("<<i1<<','<<j1;
+            std::cout<<") must be in Upper Triangle\n";
+        }
+        if (!this->okij(i1-1,j2-1)) {
+            ok = false;
+            std::cout<<"Upper right corner ("<<i1<<','<<j2;
+            std::cout<<") must be in Upper Triangle\n";
+        }
+        if (!this->okij(i2-1,j1-1)) {
+            ok = false;
+            std::cout<<"Lower left corner ("<<i2<<','<<j1;
+            std::cout<<") must be in Upper Triangle\n";
+        }
+        if (!this->okij(i2-1,j2-1)) {
+            ok = false;
+            std::cout<<"Lower right corner ("<<i2<<','<<j2;
+            std::cout<<") must be in Upper Triangle\n";
+        }
+        return ok;
     }
 
     template <class T>
-    typename Traits<T>::real_type DoInstNormSq(
-        const ConstUpperTriMatrixView<T>& m,
-        const typename Traits<T>::real_type scale)
+    bool ConstUpperTriMatrixView<T,FortranStyle>::hasSubVector(
+        int i, int j, int istep, int jstep, int n) const 
     {
-        if (m.isrm()) return InlineNormSq(m.rmView());
-        else if (m.iscm()) return InlineNormSq(m.cmView());
-        else return InlineNormSq(m);
+        if (n==0) return true;
+        bool ok = true;
+        if (istep == 0 && jstep == 0) {
+            ok = false;
+            std::cout<<"istep ("<<istep<<") and jstep ("<<jstep;
+            std::cout<<") can not both be 0\n";
+        }
+        if (i < 1 || i > int(this->size())) {
+            ok = false;
+            std::cout<<"i ("<<i<<") must be in 1 -- "<<this->size()<<std::endl;
+        }
+        if (i < 1 || j > int(this->size())) {
+            ok = false;
+            std::cout<<"j ("<<j<<") must be in 1 -- "<<this->size()<<std::endl;
+        }
+        int i2 = int(i)+istep*int(n-1);
+        int j2 = int(j)+jstep*int(n-1);
+        if (i2 < 1 || i2 > int(this->size())) {
+            ok = false;
+            std::cout<<"last element's i ("<<i2<<") must be in 1 -- ";
+            std::cout<<this->size()<<std::endl;
+        }
+        if (j2 < 1 || j2 > int(this->size())) {
+            ok = false;
+            std::cout<<"last element's j ("<<j2<<") must be in 1 -- ";
+            std::cout<<this->size()<<std::endl;
+        }
+        if (!this->okij(i-1,j-1)) {
+            ok = false;
+            std::cout<<"First element ("<<i<<','<<j<<") must be in Triangle\n";
+        }
+        if (!this->okij(i2-1,j2-1)) {
+            ok = false;
+            std::cout<<"Last element ("<<i2<<','<<j2<<") must be in Triangle\n";
+        }
+        return ok;
     }
+
+    template <class T> 
+    bool ConstUpperTriMatrixView<T,FortranStyle>::hasSubTriMatrix(
+        int i1, int i2, int istep) const 
+    {
+        if (i1==i2) return true;
+        bool ok=true;
+        if (istep == 0) {
+            ok = false; 
+            std::cout<<"istep ("<<istep<<") can not be 0\n";
+        }
+        if (i1<1 || i1 > int(this->size())) {
+            ok = false;
+            std::cout<<"first diag element ("<<i1<<") must be in 1 -- ";
+            std::cout<<this->size()<<std::endl;
+        }
+        if (i2<1 || i2 > int(this->size())) {
+            ok = false;
+            std::cout<<"last diag element ("<<i2<<") must be in 1 -- ";
+            std::cout<<this->size()<<std::endl;
+        }
+        if ((i2-i1)%istep != 0) {
+            ok = false;
+            std::cout<<"range ("<<i2-i1<<") must be multiple of istep (";
+            std::cout<<istep<<")\n";
+        }
+        if ((i2-i1)/istep < 0) {
+            ok = false;
+            std::cout<<"n diag elements ("<<(i2-i1)/istep+1;
+            std::cout<<") must be positive\n";
+        }
+        return ok;
+    }
+
+    //
+    // norms
+    //
 
     template <class T>
-    typename Traits<T>::real_type DoInstNormF(
-        const ConstUpperTriMatrixView<T>& m)
+    RT GenUpperTriMatrix<T>::normSq(const RT scale) const
     {
-        if (m.isrm()) return InlineNormF(m.rmView());
-        else if (m.iscm()) return InlineNormF(m.cmView());
-        else return InlineNormF(m);
+        const int N = size();
+        RT sum(0);
+        if (isrm()) 
+            if (isunit())
+                for(int i=0;i<N;++i) 
+                    sum += row(i,i+1,N).normSq(scale);
+            else
+                for(int i=0;i<N;++i) 
+                    sum += row(i,i,N).normSq(scale);
+        else
+            if (isunit())
+                for(int j=0;j<N;++j) 
+                    sum += col(j,0,j).normSq(scale);
+            else
+                for(int j=0;j<N;++j) 
+                    sum += col(j,0,j+1).normSq(scale);
+        if (isunit()) sum += N;
+        return sum;
     }
 
-    template <class T>
-    typename Traits<T>::real_type DoInstMaxAbsElement(
-        const ConstUpperTriMatrixView<T>& m)
+    template <class T> 
+    static RT NonLapNormF(const GenUpperTriMatrix<T>& m)
     {
-        if (m.isrm()) return InlineMaxAbsElement(m.rmView());
-        else if (m.iscm()) return InlineMaxAbsElement(m.cmView());
-        else return InlineMaxAbsElement(m);
+        const RT eps = TMV_Epsilon<T>();
+        const RT inveps = RT(1)/eps;
+
+        RT mmax = m.maxAbsElement();
+        if (mmax == RT(0)) return RT(0);
+        else if (mmax * mmax * eps == RT(0)) {
+            // Then we need to rescale, since underflow has caused rounding errors
+            // TMV_Epsilon is a pure power of 2, so no rounding errors from rescaling.
+            RT scale = inveps;
+            mmax *= scale;
+            while (mmax < eps) { scale *= inveps; mmax *= inveps; }
+            return TMV_SQRT(m.normSq(scale))/scale;
+        } else if (RT(1) / (mmax*mmax) == RT(0)) {
+            // Then we have overflow, so we need to rescale:
+            RT scale = eps;
+            mmax *= scale;
+            while (mmax > RT(1)) { scale *= eps; mmax *= eps; }
+            return TMV_SQRT(m.normSq(scale))/scale;
+        } 
+        return TMV_SQRT(m.normSq());
     }
 
-    template <class T>
-    typename Traits<T>::real_type DoInstNorm1(
-        const ConstUpperTriMatrixView<T>& m)
+    template <class T> 
+    static RT NonLapMaxAbsElement(const GenUpperTriMatrix<T>& m)
     {
-        if (m.isrm()) return InlineNorm1(m.rmView());
-        else if (m.iscm()) return InlineNorm1(m.cmView());
-        else return InlineNorm1(m);
+        const int N = m.size();
+        RT max(0);
+        if (m.isrm()) {
+            for(int i=0;i<N;++i) {
+                RT temp;
+                if (m.isunit())
+                    temp = m.row(i,i+1,N).normInf();
+                else 
+                    temp = m.row(i,i,N).normInf();
+                if (temp > max) max = temp;
+            }
+        } else {
+            for(int j=0;j<N;++j) {
+                RT temp;
+                if (m.isunit())
+                    temp = m.col(j,0,j).normInf();
+                else 
+                    temp = m.col(j,0,j+1).normInf();
+                if (temp > max) max = temp;
+            }
+        }
+        if (m.isunit() && max < RT(1)) max = RT(1);
+        return max;
     }
 
-    template <class T>
-    typename Traits<T>::real_type DoInstNormInf(
-        const ConstUpperTriMatrixView<T>& m)
+    template <class T> 
+    static RT NonLapNorm1(const GenUpperTriMatrix<T>& m)
     {
-        if (m.isrm()) return InlineNormInf(m.rmView());
-        else if (m.iscm()) return InlineNormInf(m.cmView());
-        else return InlineNormInf(m);
-    }
+        RT max(0);
+        const int N = m.size();
+        for(int j=0;j<N;++j) {
+            RT temp;
+            if (m.isunit()) {
+                temp = m.col(j,0,j).norm1();
+                temp += RT(1);
+            } else temp = m.col(j,0,j+1).norm1();
+            if (temp > max) max = temp;
+        }
+        return max;
+    } 
 
+    template <class T> 
+    static RT NonLapNormInf(const GenUpperTriMatrix<T>& m)
+    {
+        RT max(0);
+        const int N = m.size();
+        for(int j=0;j<N;++j) {
+            RT temp;
+            if (m.isunit()) {
+                temp = m.row(j,j+1,N).norm1();
+                temp += RT(1);
+            } else temp = m.row(j,j,N).norm1();
+            if (temp > max) max = temp;
+        }
+        return max;
+    }
 #ifdef XLAP
-#ifdef TMV_INST_DOUBLE
-    template <>
-    double DoInstNormF(const ConstUpperTriMatrixView<double>& m)
-    { 
-        if (!m.iscm() && !m.isrm()) return DoInstNormF(m.copy());
-        char c = 'F';
-        int N = m.size();
-        int M = N;
-        int lda = m.iscm() ? m.stepj() : m.stepi();
-        TMVAssert(lda >= m);
-        double work;
-        double norm = LAPNAME(dlantr) (
-            LAPCM LAPV(c),
-            m.iscm() ? LAPCH_UP : LAPCH_LO , m.isunit() ? LAPCH_U : LAPCH_NU,
-            LAPV(M),LAPV(N), LAPP(m.cptr()),LAPV(lda) LAPWK(&work)
-            LAP1 LAP1 LAP1);
-        return norm;
-    }
-    template <>
-    double DoInstNormF(
-        const ConstUpperTriMatrixView<std::complex<double> >& m)
+    template <class T> 
+    static RT LapNorm(const char c, const GenUpperTriMatrix<T>& m)
     {
-        if (!m.iscm() && !m.isrm()) return DoInstNormF(m.copy());
-        char c = 'F';
-        int N = m.size();
-        int M = N;
-        int lda = m.iscm() ? m.stepj() : m.stepi();
-        TMVAssert(lda >= m);
-        double work;
-        double norm = LAPNAME(zlantr) (
-            LAPCM LAPV(c),
-            m.iscm() ? LAPCH_UP : LAPCH_LO , m.isunit() ? LAPCH_U : LAPCH_NU,
-            LAPV(M),LAPV(N), LAPP(m.cptr()),LAPV(lda) LAPWK(&work)
-            LAP1 LAP1 LAP1);
-        return norm;
+        switch(c) {
+          case 'M' : return NonLapMaxAbsElement(m);
+          case '1' : return NonLapNorm1(m);
+          case 'F' : return NonLapNormF(m);
+          case 'I' : return NonLapNormInf(m);
+          default : TMVAssert(TMV_FALSE);
+        }
+        return RT(0);
     }
-
-    template <>
-    double DoInstMaxAbsElement(const ConstUpperTriMatrixView<double>& m)
-    { 
-        if (!m.iscm() && !m.isrm()) return DoInstMaxAbsElement(m.copy());
-        char c = 'M';
-        int N = m.size();
-        int M = N;
-        int lda = m.iscm() ? m.stepj() : m.stepi();
-        TMVAssert(lda >= m);
-        double work;
-        double norm = LAPNAME(dlantr) (
-            LAPCM LAPV(c),
-            m.iscm() ? LAPCH_UP : LAPCH_LO , m.isunit() ? LAPCH_U : LAPCH_NU,
-            LAPV(M),LAPV(N), LAPP(m.cptr()),LAPV(lda) LAPWK(&work)
-            LAP1 LAP1 LAP1);
-        return norm;
-    }
-    template <>
-    double DoInstMaxAbsElement(
-        const ConstUpperTriMatrixView<std::complex<double> >& m)
+#ifdef INST_DOUBLE
+    template <> 
+    double LapNorm(
+        const char c, const GenUpperTriMatrix<double>& m)
     {
-        if (!m.iscm() && !m.isrm()) return DoInstMaxAbsElement(m.copy());
-        char c = 'M';
-        int N = m.size();
-        int M = N;
+        TMVAssert(m.iscm() || m.isrm());
+        char cc = c;
+        if (m.isrm()) {
+            if (c == '1') cc = 'I';
+            else if (c == 'I') cc = '1';
+        }
+        int M = m.size();
+        int N = M;
         int lda = m.iscm() ? m.stepj() : m.stepi();
-        TMVAssert(lda >= m);
-        double work;
-        double norm = LAPNAME(zlantr) (
-            LAPCM LAPV(c),
-            m.iscm() ? LAPCH_UP : LAPCH_LO , m.isunit() ? LAPCH_U : LAPCH_NU,
-            LAPV(M),LAPV(N), LAPP(m.cptr()),LAPV(lda) LAPWK(&work)
-            LAP1 LAP1 LAP1);
-        return norm;
-    }
-
-    template <>
-    double DoInstNorm1(const ConstUpperTriMatrixView<double>& m)
-    { 
-        if (!m.iscm() && !m.isrm()) return DoInstNorm1(m.copy());
-        char c = m.isrm() ? 'I' : '1';
-        int N = m.size();
-        int M = N;
-        int lda = m.iscm() ? m.stepj() : m.stepi();
-        TMVAssert(lda >= m);
 #ifndef LAPNOWORK
-        auto_array<double> work(c == 'I' ? new double[M] : 0);
+        auto_array<double> work(cc == 'I' ? new double[M] : 0);
 #endif
-        double norm = LAPNAME(dlantr) (
-            LAPCM LAPV(c),
-            m.iscm() ? LAPCH_UP : LAPCH_LO , m.isunit() ? LAPCH_U : LAPCH_NU,
-            LAPV(M),LAPV(N), LAPP(m.cptr()),LAPV(lda) LAPWK(work.get())
-            LAP1 LAP1 LAP1);
+        double norm = LAPNAME(dlantr) (LAPCM LAPV(cc),
+                                       m.iscm() ? LAPCH_UP : LAPCH_LO, m.isunit() ? LAPCH_U : LAPCH_NU,
+                                       LAPV(M),LAPV(N),LAPP(m.cptr()),LAPV(lda) LAPWK(work.get())
+                                       LAP1 LAP1 LAP1);
         return norm;
     }
     template <>
-    double DoInstNorm1(
-        const ConstUpperTriMatrixView<std::complex<double> >& m)
+    double LapNorm(
+        const char c, const GenUpperTriMatrix<std::complex<double> >& m)
     {
-        if (!m.iscm() && !m.isrm()) return DoInstNorm1(m.copy());
-        char c = m.isrm() ? 'I' : '1';
-        int N = m.size();
-        int M = N;
+        TMVAssert(m.iscm() || m.isrm());
+        char cc = c;
+        if (m.isrm()) {
+            if (c == '1') cc = 'I';
+            else if (c == 'I') cc = '1';
+        }
+        int M = m.size();
+        int N = M;
         int lda = m.iscm() ? m.stepj() : m.stepi();
-        TMVAssert(lda >= m);
 #ifndef LAPNOWORK
-        auto_array<double> work(c == 'I' ? new double[M] : 0);
+        auto_array<double> work(cc == 'I' ? new double[M] : 0);
 #endif
-        double norm = LAPNAME(zlantr) (
-            LAPCM LAPV(c),
-            m.iscm() ? LAPCH_UP : LAPCH_LO , m.isunit() ? LAPCH_U : LAPCH_NU,
-            LAPV(M),LAPV(N), LAPP(m.cptr()),LAPV(lda) LAPWK(work.get())
-            LAP1 LAP1 LAP1);
+        double norm = LAPNAME(zlantr) (LAPCM LAPV(cc),
+                                       m.iscm() ? LAPCH_UP : LAPCH_LO, m.isunit() ? LAPCH_U : LAPCH_NU,
+                                       LAPV(M),LAPV(N),LAPP(m.cptr()),LAPV(lda) LAPWK(work.get())
+                                       LAP1 LAP1 LAP1);
         return norm;
     }
-
-    template <>
-    double DoInstNormInf(const ConstUpperTriMatrixView<double>& m)
-    { 
-        if (!m.iscm() && !m.isrm()) return DoInstNormInf(m.copy());
-        char c = m.isrm() ? '1' : 'I';
-        int N = m.size();
-        int M = N;
-        int lda = m.iscm() ? m.stepj() : m.stepi();
-        TMVAssert(lda >= m);
-#ifndef LAPNOWORK
-        auto_array<double> work(c == 'I' ? new double[M] : 0);
 #endif
-        double norm = LAPNAME(dlantr) (
-            LAPCM LAPV(c),
-            m.iscm() ? LAPCH_UP : LAPCH_LO , m.isunit() ? LAPCH_U : LAPCH_NU,
-            LAPV(M),LAPV(N), LAPP(m.cptr()),LAPV(lda) LAPWK(work.get())
-            LAP1 LAP1 LAP1);
-        return norm;
-    }
+#ifdef INST_FLOAT
     template <>
-    double DoInstNormInf(
-        const ConstUpperTriMatrixView<std::complex<double> >& m)
+    float LapNorm(
+        const char c, const GenUpperTriMatrix<float>& m)
     {
-        if (!m.iscm() && !m.isrm()) return DoInstNormInf(m.copy());
-        char c = m.isrm() ? '1' : 'I';
-        int N = m.size();
-        int M = N;
+        TMVAssert(m.iscm() || m.isrm());
+        char cc = c;
+        if (m.isrm()) {
+            if (c == '1') cc = 'I';
+            else if (c == 'I') cc = '1';
+        }
+        int M = m.size();
+        int N = M;
         int lda = m.iscm() ? m.stepj() : m.stepi();
-        TMVAssert(lda >= m);
 #ifndef LAPNOWORK
-        auto_array<double> work(c == 'I' ? new double[M] : 0);
+        auto_array<float> work(cc == 'I' ? new float[M] : 0);
 #endif
-        double norm = LAPNAME(zlantr) (
-            LAPCM LAPV(c),
-            m.iscm() ? LAPCH_UP : LAPCH_LO , m.isunit() ? LAPCH_U : LAPCH_NU,
-            LAPV(M),LAPV(N), LAPP(m.cptr()),LAPV(lda) LAPWK(work.get())
-            LAP1 LAP1 LAP1);
-        return norm;
-    }
-#endif // DOUBLE
-#ifdef TMV_INST_FLOAT
-    template <>
-    float DoInstNormF(const ConstUpperTriMatrixView<float>& m)
-    { 
-        if (!m.iscm() && !m.isrm()) return DoInstNormF(m.copy());
-        char c = 'F';
-        int N = m.size();
-        int M = N;
-        int lda = m.iscm() ? m.stepj() : m.stepi();
-        TMVAssert(lda >= m);
-        float work;
-        float norm = LAPNAME(slantr) (
-            LAPCM LAPV(c),
-            m.iscm() ? LAPCH_UP : LAPCH_LO , m.isunit() ? LAPCH_U : LAPCH_NU,
-            LAPV(M),LAPV(N), LAPP(m.cptr()),LAPV(lda) LAPWK(&work)
-            LAP1 LAP1 LAP1);
+        float norm = LAPNAME(slantr) (LAPCM LAPV(cc),
+                                      m.iscm() ? LAPCH_UP : LAPCH_LO, m.isunit() ? LAPCH_U : LAPCH_NU,
+                                      LAPV(M),LAPV(N),LAPP(m.cptr()),LAPV(lda) LAPWK(work.get())
+                                      LAP1 LAP1 LAP1);
         return norm;
     }
     template <>
-    float DoInstNormF(
-        const ConstUpperTriMatrixView<std::complex<float> >& m)
+    float LapNorm(
+        const char c, const GenUpperTriMatrix<std::complex<float> >& m)
     {
-        if (!m.iscm() && !m.isrm()) return DoInstNormF(m.copy());
-        char c = 'F';
-        int N = m.size();
-        int M = N;
+        TMVAssert(m.iscm() || m.isrm());
+        char cc = c;
+        if (m.isrm()) {
+            if (c == '1') cc = 'I';
+            else if (c == 'I') cc = '1';
+        }
+        int M = m.size();
+        int N = M;
         int lda = m.iscm() ? m.stepj() : m.stepi();
-        TMVAssert(lda >= m);
-        float work;
-        float norm = LAPNAME(clantr) (
-            LAPCM LAPV(c),
-            m.iscm() ? LAPCH_UP : LAPCH_LO , m.isunit() ? LAPCH_U : LAPCH_NU,
-            LAPV(M),LAPV(N), LAPP(m.cptr()),LAPV(lda) LAPWK(&work)
-            LAP1 LAP1 LAP1);
-        return norm;
-    }
-
-    template <>
-    float DoInstMaxAbsElement(const ConstUpperTriMatrixView<float>& m)
-    { 
-        if (!m.iscm() && !m.isrm()) return DoInstMaxAbsElement(m.copy());
-        char c = 'M';
-        int N = m.size();
-        int M = N;
-        int lda = m.iscm() ? m.stepj() : m.stepi();
-        TMVAssert(lda >= m);
-        float work;
-        float norm = LAPNAME(slantr) (
-            LAPCM LAPV(c),
-            m.iscm() ? LAPCH_UP : LAPCH_LO , m.isunit() ? LAPCH_U : LAPCH_NU,
-            LAPV(M),LAPV(N), LAPP(m.cptr()),LAPV(lda) LAPWK(&work)
-            LAP1 LAP1 LAP1);
-        return norm;
-    }
-    template <>
-    float DoInstMaxAbsElement(
-        const ConstUpperTriMatrixView<std::complex<float> >& m)
-    {
-        if (!m.iscm() && !m.isrm()) return DoInstMaxAbsElement(m.copy());
-        char c = 'M';
-        int N = m.size();
-        int M = N;
-        int lda = m.iscm() ? m.stepj() : m.stepi();
-        TMVAssert(lda >= m);
-        float work;
-        float norm = LAPNAME(clantr) (
-            LAPCM LAPV(c),
-            m.iscm() ? LAPCH_UP : LAPCH_LO , m.isunit() ? LAPCH_U : LAPCH_NU,
-            LAPV(M),LAPV(N), LAPP(m.cptr()),LAPV(lda) LAPWK(&work)
-            LAP1 LAP1 LAP1);
-        return norm;
-    }
-
-    template <>
-    float DoInstNorm1(const ConstUpperTriMatrixView<float>& m)
-    { 
-        if (!m.iscm() && !m.isrm()) return DoInstNorm1(m.copy());
-        char c = m.isrm() ? 'I' : '1';
-        int N = m.size();
-        int M = N;
-        int lda = m.iscm() ? m.stepj() : m.stepi();
-        TMVAssert(lda >= m);
 #ifndef LAPNOWORK
-        auto_array<float> work(c == 'I' ? new float[M] : 0);
+        auto_array<float> work(cc == 'I' ? new float[M] : 0);
 #endif
-        float norm = LAPNAME(slantr) (
-            LAPCM LAPV(c),
-            m.iscm() ? LAPCH_UP : LAPCH_LO , m.isunit() ? LAPCH_U : LAPCH_NU,
-            LAPV(M),LAPV(N), LAPP(m.cptr()),LAPV(lda) LAPWK(work.get())
-            LAP1 LAP1 LAP1);
+        float norm = LAPNAME(clantr) (LAPCM LAPV(cc),
+                                      m.iscm() ? LAPCH_UP : LAPCH_LO, m.isunit() ? LAPCH_U : LAPCH_NU,
+                                      LAPV(M),LAPV(N),LAPP(m.cptr()),LAPV(lda) LAPWK(work.get())
+                                      LAP1 LAP1 LAP1);
         return norm;
     }
-    template <>
-    float DoInstNorm1(
-        const ConstUpperTriMatrixView<std::complex<float> >& m)
-    {
-        if (!m.iscm() && !m.isrm()) return DoInstNorm1(m.copy());
-        char c = m.isrm() ? 'I' : '1';
-        int N = m.size();
-        int M = N;
-        int lda = m.iscm() ? m.stepj() : m.stepi();
-        TMVAssert(lda >= m);
-#ifndef LAPNOWORK
-        auto_array<float> work(c == 'I' ? new float[M] : 0);
 #endif
-        float norm = LAPNAME(clantr) (
-            LAPCM LAPV(c),
-            m.iscm() ? LAPCH_UP : LAPCH_LO , m.isunit() ? LAPCH_U : LAPCH_NU,
-            LAPV(M),LAPV(N), LAPP(m.cptr()),LAPV(lda) LAPWK(work.get())
-            LAP1 LAP1 LAP1);
-        return norm;
-    }
-
-    template <>
-    float DoInstNormInf(const ConstUpperTriMatrixView<float>& m)
-    { 
-        if (!m.iscm() && !m.isrm()) return DoInstNormInf(m.copy());
-        char c = m.isrm() ? '1' : 'I';
-        int N = m.size();
-        int M = N;
-        int lda = m.iscm() ? m.stepj() : m.stepi();
-        TMVAssert(lda >= m);
-#ifndef LAPNOWORK
-        auto_array<float> work(c == 'I' ? new float[M] : 0);
-#endif
-        float norm = LAPNAME(slantr) (
-            LAPCM LAPV(c),
-            m.iscm() ? LAPCH_UP : LAPCH_LO , m.isunit() ? LAPCH_U : LAPCH_NU,
-            LAPV(M),LAPV(N), LAPP(m.cptr()),LAPV(lda) LAPWK(work.get())
-            LAP1 LAP1 LAP1);
-        return norm;
-    }
-    template <>
-    float DoInstNormInf(
-        const ConstUpperTriMatrixView<std::complex<float> >& m)
-    {
-        if (!m.iscm() && !m.isrm()) return DoInstNormInf(m.copy());
-        char c = m.isrm() ? '1' : 'I';
-        int N = m.size();
-        int M = N;
-        int lda = m.iscm() ? m.stepj() : m.stepi();
-        TMVAssert(lda >= m);
-#ifndef LAPNOWORK
-        auto_array<float> work(c == 'I' ? new float[M] : 0);
-#endif
-        float norm = LAPNAME(clantr) (
-            LAPCM LAPV(c),
-            m.iscm() ? LAPCH_UP : LAPCH_LO , m.isunit() ? LAPCH_U : LAPCH_NU,
-            LAPV(M),LAPV(N), LAPP(m.cptr()),LAPV(lda) LAPWK(work.get())
-            LAP1 LAP1 LAP1);
-        return norm;
-    }
-#endif // FLOAT
 #endif // XLAP
 
     template <class T>
-    T InstSumElements(const ConstUpperTriMatrixView<T>& m)
-    { return DoInstSumElements(m); }
-
-    template <class T>
-    typename Traits<T>::real_type InstSumAbsElements(
-        const ConstUpperTriMatrixView<T>& m)
-    { return DoInstSumAbsElements(m); }
-
-    template <class T>
-    typename Traits<T>::real_type InstSumAbs2Elements(
-        const ConstUpperTriMatrixView<T>& m)
-    { return DoInstSumAbs2Elements(m); }
-
-    template <class T>
-    typename Traits<T>::real_type InstNormSq(
-        const ConstUpperTriMatrixView<T>& m)
-    { return DoInstNormSq(m); }
-
-    template <class T>
-    typename Traits<T>::real_type InstNormSq(
-        const ConstUpperTriMatrixView<T>& m,
-        const typename Traits<T>::real_type scale)
-    { return DoInstNormSq(m,scale); }
-
-    template <class T>
-    typename Traits<T>::real_type InstNormF(
-        const ConstUpperTriMatrixView<T>& m)
-    { return DoInstNormF(m); }
-
-    template <class T>
-    typename Traits<T>::real_type InstMaxAbsElement(
-        const ConstUpperTriMatrixView<T>& m)
-    { return DoInstMaxAbsElement(m); }
-
-    template <class T>
-    typename Traits<T>::real_type InstNorm1(
-        const ConstUpperTriMatrixView<T>& m)
-    { return DoInstNorm1(m); }
-
-    template <class T>
-    typename Traits<T>::real_type InstNormInf(
-        const ConstUpperTriMatrixView<T>& m)
-    { return DoInstNormInf(m); }
-
-#if 0
-    template <class T> 
-    RT GenUpperTriMatrix<T>::DoNorm2() const
-    { return Matrix<T>(*this).DoNorm2(); }
-
-    template <class T> 
-    RT GenUpperTriMatrix<T>::DoCondition() const
-    { return Matrix<T>(*this).DoCondition(); }
-
-    template <class T> 
-    QuotXU<T,T> GenUpperTriMatrix<T>::QInverse() const
-    { return QuotXU<T,T>(T(1),*this); }
+    RT GenUpperTriMatrix<T>::maxAbsElement() const
+    {
+#ifdef XLAP
+        return LapNorm('M',*this);
+#else
+        return NonLapMaxAbsElement(*this);
 #endif
+    }
+    template <class T>
+    RT GenUpperTriMatrix<T>::norm1() const
+    {
+#ifdef XLAP
+        return LapNorm('1',*this);
+#else
+        return NonLapNorm1(*this);
+#endif
+    }
+    template <class T>
+    RT GenUpperTriMatrix<T>::normInf() const
+    {
+#ifdef XLAP
+        return LapNorm('I',*this);
+#else
+        return NonLapNormInf(*this);
+#endif
+    }
+    template <class T>
+    RT GenUpperTriMatrix<T>::normF() const
+    {
+#ifdef XLAP
+        return LapNorm('F',*this);
+#else
+        return NonLapNormF(*this);
+#endif
+    }
+
+    template <class T>
+    RT GenUpperTriMatrix<T>::doNorm2() const
+    { return Matrix<T>(*this).doNorm2(); }
+
+    template <class T>
+    RT GenUpperTriMatrix<T>::doCondition() const
+    { return Matrix<T>(*this).doCondition(); }
+
+    template <class T>
+    T GenUpperTriMatrix<T>::det() const
+    {
+        if (isunit()) return T(1);
+        else return DiagMatrixViewOf(this->diag()).det(); 
+    }
+
+    template <class T>
+    RT GenUpperTriMatrix<T>::logDet(T* sign) const
+    {
+        if (isunit()) {
+            if (sign) *sign = T(1);
+            return RT(0);
+        } else {
+            return DiagMatrixViewOf(this->diag()).logDet(sign); 
+        }
+    }
+
+    template <class T> 
+    auto_ptr<BaseMatrix<T> > GenUpperTriMatrix<T>::newCopy() const
+    {
+        auto_ptr<BaseMatrix<T> > a;
+        if (isunit()) {
+            if (isrm()) a.reset(new UpperTriMatrix<T,UnitDiag,RowMajor>(*this));
+            else a.reset(new UpperTriMatrix<T,UnitDiag,ColMajor>(*this));
+        } else {
+            if (isrm()) a.reset(
+                new UpperTriMatrix<T,NonUnitDiag,RowMajor>(*this));
+            else a.reset(new UpperTriMatrix<T,NonUnitDiag,ColMajor>(*this));
+        }
+        return a;
+    }
+
+    template <class T> 
+    auto_ptr<BaseMatrix<T> > GenUpperTriMatrix<T>::newView() const
+    {
+        auto_ptr<BaseMatrix<T> > a(new ConstUpperTriMatrixView<T>(view()));
+        return a;
+    }
+
+    template <class T> 
+    auto_ptr<BaseMatrix<T> > GenUpperTriMatrix<T>::newTranspose() const
+    {
+        auto_ptr<BaseMatrix<T> > a(
+            new ConstLowerTriMatrixView<T>(transpose()));
+        return a;
+    }
+
+    template <class T> 
+    auto_ptr<BaseMatrix<T> > GenUpperTriMatrix<T>::newConjugate() const
+    {
+        auto_ptr<BaseMatrix<T> > a(
+            new ConstUpperTriMatrixView<T>(conjugate()));
+        return a;
+    }
+
+    template <class T> 
+    auto_ptr<BaseMatrix<T> > GenUpperTriMatrix<T>::newAdjoint() const
+    {
+        auto_ptr<BaseMatrix<T> > a(new ConstLowerTriMatrixView<T>(adjoint()));
+        return a;
+    }
+
+    template <class T> 
+    auto_ptr<BaseMatrix<T> > GenUpperTriMatrix<T>::newInverse() const
+    {
+        if (isunit()) {
+            if (isrm()) {
+                auto_ptr<UpperTriMatrix<T,UnitDiag,ColMajor> > minv(
+                    new UpperTriMatrix<T,UnitDiag,ColMajor>(*this));
+                minv->invertSelf();
+                BaseMatrix<T>* ret1 = minv.release();
+                auto_ptr<BaseMatrix<T> > ret(ret1);
+                return ret;
+            } else {
+                auto_ptr<UpperTriMatrix<T,UnitDiag,ColMajor> > minv(
+                    new UpperTriMatrix<T,UnitDiag,ColMajor>(*this));
+                minv->invertSelf();
+                BaseMatrix<T>* ret1 = minv.release();
+                auto_ptr<BaseMatrix<T> > ret(ret1);
+                return ret;
+            }
+        } else {
+            if (isrm()) {
+                auto_ptr<UpperTriMatrix<T,NonUnitDiag,ColMajor> > minv(
+                    new UpperTriMatrix<T,NonUnitDiag,ColMajor>(*this));
+                minv->invertSelf();
+                BaseMatrix<T>* ret1 = minv.release();
+                auto_ptr<BaseMatrix<T> > ret(ret1);
+                return ret;
+            } else {
+                auto_ptr<UpperTriMatrix<T,NonUnitDiag,ColMajor> > minv(
+                    new UpperTriMatrix<T,NonUnitDiag,ColMajor>(*this));
+                minv->invertSelf();
+                BaseMatrix<T>* ret1 = minv.release();
+                auto_ptr<BaseMatrix<T> > ret(ret1);
+                return ret;
+            }
+        }
+    }
+
+    template <class T> 
+    auto_ptr<BaseMatrix<T> > GenLowerTriMatrix<T>::newCopy() const
+    {
+        auto_ptr<BaseMatrix<T> > a;
+        if (isunit()) {
+            if (isrm()) a.reset(new LowerTriMatrix<T,UnitDiag,RowMajor>(*this));
+            else a.reset(new LowerTriMatrix<T,UnitDiag,ColMajor>(*this));
+        } else {
+            if (isrm()) a.reset(
+                new LowerTriMatrix<T,NonUnitDiag,RowMajor>(*this));
+            else a.reset(new LowerTriMatrix<T,NonUnitDiag,ColMajor>(*this));
+        }
+        return a;
+    }
+
+    template <class T> 
+    auto_ptr<BaseMatrix<T> > GenLowerTriMatrix<T>::newView() const
+    {
+        auto_ptr<BaseMatrix<T> > a(new ConstLowerTriMatrixView<T>(view()));
+        return a;
+    }
+
+    template <class T> 
+    auto_ptr<BaseMatrix<T> > GenLowerTriMatrix<T>::newTranspose() const
+    {
+        auto_ptr<BaseMatrix<T> > a(
+            new ConstUpperTriMatrixView<T>(transpose()));
+        return a;
+    }
+
+    template <class T> 
+    auto_ptr<BaseMatrix<T> > GenLowerTriMatrix<T>::newConjugate() const
+    {
+        auto_ptr<BaseMatrix<T> > a(
+            new ConstLowerTriMatrixView<T>(conjugate()));
+        return a;
+    }
+
+    template <class T> 
+    auto_ptr<BaseMatrix<T> > GenLowerTriMatrix<T>::newAdjoint() const
+    {
+        auto_ptr<BaseMatrix<T> > a(new ConstUpperTriMatrixView<T>(adjoint()));
+        return a;
+    }
+
+    template <class T> 
+    auto_ptr<BaseMatrix<T> > GenLowerTriMatrix<T>::newInverse() const
+    {
+        if (isunit()) {
+            if (isrm()) {
+                auto_ptr<LowerTriMatrix<T,UnitDiag,ColMajor> > minv(
+                    new LowerTriMatrix<T,UnitDiag,ColMajor>(*this));
+                minv->invertSelf();
+                BaseMatrix<T>* ret1 = minv.release();
+                auto_ptr<BaseMatrix<T> > ret(ret1);
+                return ret;
+            } else {
+                auto_ptr<LowerTriMatrix<T,UnitDiag,ColMajor> > minv(
+                    new LowerTriMatrix<T,UnitDiag,ColMajor>(*this));
+                minv->invertSelf();
+                BaseMatrix<T>* ret1 = minv.release();
+                auto_ptr<BaseMatrix<T> > ret(ret1);
+                return ret;
+            }
+        } else {
+            if (isrm()) {
+                auto_ptr<LowerTriMatrix<T,NonUnitDiag,ColMajor> > minv(
+                    new LowerTriMatrix<T,NonUnitDiag,ColMajor>(*this));
+                minv->invertSelf();
+                BaseMatrix<T>* ret1 = minv.release();
+                auto_ptr<BaseMatrix<T> > ret(ret1);
+                return ret;
+            } else {
+                auto_ptr<LowerTriMatrix<T,NonUnitDiag,ColMajor> > minv(
+                    new LowerTriMatrix<T,NonUnitDiag,ColMajor>(*this));
+                minv->invertSelf();
+                BaseMatrix<T>* ret1 = minv.release();
+                auto_ptr<BaseMatrix<T> > ret(ret1);
+                return ret;
+            }
+        }
+    }
+
+
+    //
+    // Modifying Functions
+    //
+
+    template <class T, IndexStyle I> 
+    const UpperTriMatrixView<T,I>& UpperTriMatrixView<T,I>::setZero() const
+    {
+        const int N = size();
+
+        if (isrm())
+            if (isunit())
+                for(int i=0;i<N;++i) row(i,i+1,N).setZero();
+            else
+                for(int i=0;i<N;++i) row(i,i,N).setZero();
+        else 
+            if (isunit())
+                for(int j=0;j<N;++j) col(j,0,j).setZero();
+            else
+                for(int j=0;j<N;++j) col(j,0,j+1).setZero();
+        return *this; 
+    } 
+
+    template <class T, IndexStyle I> 
+    const UpperTriMatrixView<T,I>& UpperTriMatrixView<T,I>::setAllTo(const T& x) const
+    {
+        const int N = size();
+
+        if (isrm())
+            if (isunit())
+                for(int i=0;i<N;++i) row(i,i+1,N).setAllTo(x); 
+            else
+                for(int i=0;i<N;++i) row(i,i,N).setAllTo(x); 
+        else 
+            if (isunit())
+                for(int j=0;j<N;++j) col(j,0,j).setAllTo(x); 
+            else
+                for(int j=0;j<N;++j) col(j,0,j+1).setAllTo(x); 
+        return *this; 
+    }
+
+    template <class T, IndexStyle I> 
+    const UpperTriMatrixView<T,I>& UpperTriMatrixView<T,I>::clip(
+        RT thresh) const
+    {
+        const int N = size();
+
+        if (isrm())
+            if (isunit())
+                for(int i=0;i<N;++i) row(i,i+1,N).clip(thresh);
+            else
+                for(int i=0;i<N;++i) row(i,i,N).clip(thresh);
+        else 
+            if (isunit())
+                for(int j=0;j<N;++j) col(j,0,j).clip(thresh);
+            else
+                for(int j=0;j<N;++j) col(j,0,j+1).clip(thresh);
+        return *this; 
+    }
+
+    template <class T, IndexStyle I> 
+    const UpperTriMatrixView<T,I>& UpperTriMatrixView<T,I>::conjugateSelf() const
+    {
+        const int N = size();
+
+        if (isComplex(T())) {
+            if (isrm())
+                if (isunit())
+                    for(int i=0;i<N;++i) row(i,i+1,N).conjugateSelf();
+                else
+                    for(int i=0;i<N;++i) row(i,i,N).conjugateSelf();
+            else
+                if (isunit())
+                    for(int j=0;j<N;++j) col(j,0,j).conjugateSelf();
+                else
+                    for(int j=0;j<N;++j) col(j,0,j+1).conjugateSelf();
+        }
+        return *this; 
+    }
+
+    template <class T, IndexStyle I> 
+    const UpperTriMatrixView<T,I>& UpperTriMatrixView<T,I>::setToIdentity(
+        const T& x) const 
+    {
+        TMVAssert(!isunit() || x==T(1));
+        setZero();
+        if (!isunit()) diag().setAllTo(x);
+        return *this;
+    }
+
+    //
+    // Swap
+    //
+
+    template <class T>
+    void Swap(const UpperTriMatrixView<T>& m1, const UpperTriMatrixView<T>& m2)
+    {
+        TMVAssert(m1.size() == m2.size());
+        TMVAssert(m1.dt() == m2.dt());
+        const int N = m1.size();
+
+        if (m1.isrm() && m2.isrm())
+            if (m1.isunit()) 
+                for(int i=0;i<N;++i) 
+                    Swap(m1.row(i,i+1,N), m2.row(i,i+1,N));
+            else
+                for(int i=0;i<N;++i) 
+                    Swap(m1.row(i,i,N), m2.row(i,i,N));
+        else
+            if (m1.isunit()) 
+                for(int j=0;j<N;++j) 
+                    Swap(m1.col(j,0,j), m2.col(j,0,j));
+            else
+                for(int j=0;j<N;++j) 
+                    Swap(m1.col(j,0,j+1), m2.col(j,0,j+1));
+    }
+
+    //
+    // m1 == m2
+    //
+
+    template <class T1, class T2> bool operator==(
+        const GenUpperTriMatrix<T1>& m1, const GenUpperTriMatrix<T2>& m2)
+    {
+        if (m1.size() != m2.size()) return false;
+        else if (m1.isSameAs(m2)) return true;
+        else {
+            const int N = m1.size();
+            for(int j=0;j<N;++j) {
+                if (m1.col(j,0,j) != m2.col(j,0,j)) return false;
+            }
+
+            if (m1.isunit() && !m2.isunit()) {
+                for(int i=0;i<N;++i) if (m2(i,i) != T2(1)) return false;
+            } else if (m2.isunit() && !m1.isunit()) {
+                for(int i=0;i<N;++i) if (m1(i,i) != T1(1)) return false;
+            } else if (!m1.isunit() && !m2.isunit()) {
+                if (m1.diag() != m2.diag()) return false;
+            }
+
+            return true;  
+        }
+    }
 
     //
     // I/O
     //
 
-    template <class T, bool C>
-    void InstWriteCompact(
-        std::ostream& os, 
-        const ConstUpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>& m)
+    // This bit is to workaround a bug in pgCC that was fixed in version 7.
+    // I don't know if versions earlier than 6.1 had the bug, but 
+    // I apply the workaround to all version before 7.
+    template <class T>
+    inline T Value(const T& x) { return x; }
+#ifdef PLATFORM_COMPILER_PGI
+#if PLATFORM_COMPILER_VERSION < 0x070000
+    inline double Value(const long double& x) { return double(x); }
+    inline std::complex<double> Value(const std::complex<long double>& x) 
+    { return std::complex<double>(x); }
+#endif
+#endif
+
+    template <bool conj, bool rm, bool compact, bool th, class T> 
+    static void DoWrite(
+        std::ostream& os, const GenUpperTriMatrix<T>& m, RT thresh)
     {
-        if (m.isrm()) InlineWriteCompact(os,m.rmView());
-        else if (m.iscm()) InlineWriteCompact(os,m.cmView());
-        else InlineWriteCompact(os,m);
+        const T* mrowi = m.cptr();
+        const int sj = rm?1:m.stepj();
+        const int ds = m.stepi()+sj;
+        const int N = m.size();
+        int len = m.size();
+
+        if (m.isunit()) {
+            mrowi += sj;
+            --len;
+        }
+
+        if (compact)
+            os << "U " << N << std::endl;
+        else
+            os << N <<' '<< N << std::endl;
+
+        for(int i=0;i<N;++i,--len,mrowi+=ds) {
+            os << "( ";
+            if (!compact) {
+                for(int j=0;j<i;j++) os << ' '<<Value(T(0))<<' ';
+            }
+            if (m.isunit()) os << ' '<<Value(T(1))<<' ';
+            const T* mij = mrowi;
+            for(int k=len;k>0;--k,rm?++mij:mij+=sj) 
+                if (conj) 
+                    if (th)
+                        os << ' '<<Value(TMV_ABS(*mij) < thresh ?
+                                         T(0) : TMV_CONJ(*mij))<<' ';
+                    else
+                        os << ' '<<Value(TMV_CONJ(*mij))<<' ';
+                else 
+                    if (th)
+                        os << ' '<<Value(TMV_ABS(*mij) < thresh ?
+                                         T(0) : *mij)<<' ';
+                    else
+                        os << ' '<<Value(*mij)<<' '; 
+            os << " )\n";
+        }
     }
 
-    template <class T, bool C>
-    void InstWriteCompact(
-        std::ostream& os, 
-        const ConstLowerTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>& m)
+    template <bool rm, bool compact, bool th, class T> 
+    static inline void DoWrite1(
+        std::ostream& os, const GenUpperTriMatrix<T>& m, T thresh)
+    { DoWrite<false,rm,compact,th>(os,m,thresh); }
+
+    template <bool rm, bool compact, bool th, class T> 
+    static inline void DoWrite1(
+        std::ostream& os, const GenUpperTriMatrix<std::complex<T> >& m,
+        T thresh)
     {
-        if (m.isrm()) InlineWriteCompact(os,m.rmView());
-        else if (m.iscm()) InlineWriteCompact(os,m.cmView());
-        else InlineWriteCompact(os,m);
+        if (m.isconj())
+            DoWrite<true,rm,compact,th>(os,m,thresh); 
+        else
+            DoWrite<false,rm,compact,th>(os,m,thresh); 
     }
 
-    template <class T, bool C>
-    void InstWriteCompact(
-        std::ostream& os,
-        const ConstUpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>& m, 
-        typename Traits<T>::real_type thresh)
+    template <class T>
+    void GenUpperTriMatrix<T>::write(std::ostream& os) const
     {
-        if (m.isrm()) InlineWriteCompact(os,m.rmView(),thresh);
-        else if (m.iscm()) InlineWriteCompact(os,m.cmView(),thresh);
-        else InlineWriteCompact(os,m,thresh);
+        if (isrm())
+            DoWrite1<true,false,false>(os,*this,RT(0));
+        else
+            DoWrite1<false,false,false>(os,*this,RT(0));
     }
 
-    template <class T, bool C>
-    void InstWriteCompact(
-        std::ostream& os,
-        const ConstLowerTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>& m, 
-        typename Traits<T>::real_type thresh)
+    template <class T>
+    void GenUpperTriMatrix<T>::write(std::ostream& os, RT thresh) const
     {
-        if (m.isrm()) InlineWriteCompact(os,m.rmView(),thresh);
-        else if (m.iscm()) InlineWriteCompact(os,m.cmView(),thresh);
-        else InlineWriteCompact(os,m,thresh);
+        if (isrm())
+            DoWrite1<true,false,true>(os,*this,thresh);
+        else
+            DoWrite1<false,false,true>(os,*this,thresh);
     }
 
-    template <class T, bool C>
-    void InstRead(
-        std::istream& is, UpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C> m)
+    template <class T>
+    void GenUpperTriMatrix<T>::writeCompact(std::ostream& os) const
     {
-        if (m.isrm()) {
-            UpperTriMatrixView<T,UnknownDiag,UNKNOWN,1,C> mrm = m.rmView();
-            InlineRead(is,mrm);
-        } else if (m.iscm()) {
-            UpperTriMatrixView<T,UnknownDiag,1,UNKNOWN,C> mcm = m.cmView();
-            InlineRead(is,mcm);
-        } else 
-            InlineRead(is,m);
+        if (isrm())
+            DoWrite1<true,true,false>(os,*this,RT(0));
+        else
+            DoWrite1<false,true,false>(os,*this,RT(0));
     }
-    template <class T, bool C>
-    void InstRead(
-        std::istream& is, LowerTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C> m)
+
+    template <class T>
+    void GenUpperTriMatrix<T>::writeCompact(std::ostream& os, RT thresh) const
     {
-        if (m.isrm()) {
-            LowerTriMatrixView<T,UnknownDiag,UNKNOWN,1,C> mrm = m.rmView();
-            InlineRead(is,mrm);
-        } else if (m.iscm()) {
-            LowerTriMatrixView<T,UnknownDiag,1,UNKNOWN,C> mcm = m.cmView();
-            InlineRead(is,mcm);
-        } else 
-            InlineRead(is,m);
+        if (isrm())
+            DoWrite1<true,true,true>(os,*this,thresh);
+        else
+            DoWrite1<false,true,true>(os,*this,thresh);
     }
+
+#ifndef NOTHROW
+    template <class T>
+    class UpperTriMatrixReadError : public ReadError
+    {
+    public :
+        int i,j;
+        mutable auto_ptr<UpperTriMatrix<T> > m;
+        char exp,got;
+        T unitgot;
+        size_t s;
+        bool is, iseof, isbad;
+
+        UpperTriMatrixReadError(
+            int _i, int _j, const GenUpperTriMatrix<T>& _m, std::istream& _is
+        ) throw() :
+            ReadError("UpperTriMatrix."),
+            i(_i), j(_j), m(new UpperTriMatrix<T>(_m)),
+            exp(0), got(0), unitgot(T(1)), s(_m.size()),
+            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+        UpperTriMatrixReadError(std::istream& _is) throw() :
+            ReadError("UpperTriMatrix."),
+            i(0), j(0), m(0), exp(0), got(0), unitgot(T(1)), s(0),
+            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+        UpperTriMatrixReadError(
+            int _i, int _j, const GenUpperTriMatrix<T>& _m,
+            std::istream& _is, char _e, char _g
+        ) throw() :
+            ReadError("UpperTriMatrix."),
+            i(_i), j(_j), m(new UpperTriMatrix<T>(_m)),
+            exp(_e), got(_g), unitgot(T(1)), s(_m.size()),
+            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+        UpperTriMatrixReadError(std::istream& _is, char _e, char _g) throw() :
+            ReadError("UpperTriMatrix."),
+            i(0), j(0), m(0), exp(_e), got(_g), unitgot(T(1)), s(0),
+            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+        UpperTriMatrixReadError(
+            int _i, int _j, const GenUpperTriMatrix<T>& _m,
+            std::istream& _is, T _u
+        ) throw() :
+            ReadError("UpperTriMatrix."),
+            i(_i), j(_j), m(new UpperTriMatrix<T>(_m)),
+            exp(0), got(0), unitgot(_u), s(_m.size()),
+            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+        UpperTriMatrixReadError(
+            const GenUpperTriMatrix<T>& _m,
+            std::istream& _is, size_t _s
+        ) throw() :
+            ReadError("UpperTriMatrix."),
+            i(0), j(0), m(new UpperTriMatrix<T>(_m)),
+            exp(0), got(0), unitgot(T(1)), s(_s),
+            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+
+        UpperTriMatrixReadError(const UpperTriMatrixReadError<T>& rhs) :
+            i(rhs.i), j(rhs.j), m(rhs.m), exp(rhs.exp), got(rhs.got),
+            unitgot(rhs.unitgot), s(rhs.s),
+            is(rhs.is), iseof(rhs.iseof), isbad(rhs.isbad) {}
+        virtual ~UpperTriMatrixReadError() throw() {}
+
+        virtual void write(std::ostream& os) const throw()
+        {
+            os<<"TMV Read Error: Reading istream input for UpperTriMatrix\n";
+            if (exp != got) {
+                os<<"Wrong format: expected '"<<exp<<"', got '"<<got<<"'.\n";
+            }
+            if (unitgot != T(1)) {
+                os<<"Wrong format: expected 1 on the diagonal, got "<<
+                    unitgot<<".\n";
+            }
+            if (m.get() && s != m->size()) {
+                os<<"Wrong size: expected "<<m->size()<<", got "<<s<<".\n";
+            }
+            if (!is) {
+                if (iseof) {
+                    os<<"Input stream reached end-of-file prematurely.\n";
+                } else if (isbad) {
+                    os<<"Input stream is corrupted.\n";
+                } else {
+                    os<<"Input stream cannot read next character.\n";
+                }
+            }
+            if (m.get()) {
+                os<<"The portion of the UpperTriMatrix which was successfully "
+                    "read is:\n";
+                ConstUpperTriMatrixView<T> mm = m->view();
+                for(int ii=0;ii<i;++ii) {
+                    const int N = mm.rowsize();
+                    os<<"( ";
+                    for(int jj=0;jj<N;++jj)
+                        os<<' '<<mm(ii,jj)<<' ';
+                    os<<" )\n";
+                }
+                os<<"( ";
+                for(int jj=0;jj<j;++jj) os<<' '<<mm(i,jj)<<' ';
+                os<<" )\n";
+            }
+        }
+    };
+#endif
+
+    template <class T, IndexStyle I> 
+    void UpperTriMatrixView<T,I>::read(std::istream& is) const
+    {
+        T* mrowi = ptr();
+        const int sj = stepj();
+        const int ds = stepi()+sj;
+        const int N = size();
+        int len = N;
+        if (isunit()) {
+            mrowi += sj;
+            --len;
+        }
+        char paren;
+        for(int i=0;i<N;++i,--len,mrowi+=ds) {
+            is >> paren;
+            if (!is || paren != '(') {
+#ifdef NOTHROW
+                std::cerr<<"UpperTriMatrix ReadError: "<<paren<<" != (\n";
+                exit(1); 
+#else
+                throw UpperTriMatrixReadError<T>(i,0,*this,is,'(',is?paren:'(');
+#endif
+            }
+            if (isunit()) {
+                T unit;
+                is >> unit;
+                if (!is || unit != T(1)) {
+#ifdef NOTHROW
+                    std::cerr<<"UpperTriMatrix ReadError: "<<unit<<" != 1\n";
+                    exit(1);
+#else
+                    throw UpperTriMatrixReadError<T>(i,i,*this,is,is?unit:T(1));
+#endif
+                }
+            }
+            T* mij = mrowi;
+            if (isrm()) {
+                for(int k=len;k>0;--k,++mij) {
+                    is >> *mij;
+                    if (!is) {
+#ifdef NOTHROW
+                        std::cerr<<"UpperTriMatrix ReadError: !is\n"; 
+                        exit(1); 
+
+#else
+                        throw UpperTriMatrixReadError<T>(i,N-k,*this,is);
+#endif
+                    }
+                }
+            } else  {
+                for(int k=len;k>0;--k,mij+=sj) {
+                    is >> *mij;
+                    if (!is) {
+#ifdef NOTHROW
+                        std::cerr<<"UpperTriMatrix ReadError: !is\n"; 
+                        exit(1); 
+#else
+                        throw UpperTriMatrixReadError<T>(i,N-k,*this,is);
+#endif
+                    }
+                }
+            }
+            is >> paren;
+            if ((!is && i+1<N)  || paren != ')') {
+#ifdef NOTHROW
+                std::cerr<<"UpperTriMatrix ReadError: "<<paren<<" != )\n"; 
+                exit(1); 
+#else
+                throw UpperTriMatrixReadError<T>(i,N,*this,is,')',is?paren:')');
+#endif
+            }
+        }
+        if (isconj()) conjugateSelf();
+    }
+
+    template <class T, DiagType D, StorageType S, IndexStyle I> 
+    std::istream& operator>>(
+        std::istream& is, auto_ptr<UpperTriMatrix<T,D,S,I> >& m)
+    {
+        char ul;
+        is >> ul;
+        if (!is) {
+#ifdef NOTHROW
+            std::cerr<<"UpperTriMatrix ReadError: !is\n"; 
+            exit(1); 
+#else
+            throw UpperTriMatrixReadError<T>(is);
+#endif
+        }
+        if (ul != 'U') {
+#ifdef NOTHROW
+            std::cerr<<"UpperTriMatrix ReadError: "<<ul<<" != U\n"; 
+            exit(1); 
+#else
+            throw UpperTriMatrixReadError<T>(is,'U',ul);
+#endif
+        }
+        size_t size;
+        is >> size;
+        if (!is) {
+#ifdef NOTHROW
+            std::cerr<<"UpperTriMatrix ReadError: !is\n"; 
+            exit(1); 
+#else
+            throw UpperTriMatrixReadError<T>(is);
+#endif
+        }
+        m.reset(new UpperTriMatrix<T,D,S,I>(size));
+        m->view().read(is); 
+        return is;
+    }
+
+    template <class T>
+    std::istream& operator>>(std::istream& is, const UpperTriMatrixView<T>& m)
+    {
+        char ul;
+        is >> ul;
+        if (!is) {
+#ifdef NOTHROW
+            std::cerr<<"UpperTriMatrix ReadError: !is\n"; 
+            exit(1); 
+#else
+            throw UpperTriMatrixReadError<T>(is);
+#endif
+        }
+        if (ul != 'U') {
+#ifdef NOTHROW
+            std::cerr<<"UpperTriMatrix ReadError: "<<ul<<" != U\n"; 
+            exit(1); 
+#else
+            throw UpperTriMatrixReadError<T>(is,'U',ul);
+#endif
+        }
+        size_t s;
+        is >> s;
+        if (!is) {
+#ifdef NOTHROW
+            std::cerr<<"UpperTriMatrix ReadError: !is\n"; 
+            exit(1); 
+#else
+            throw UpperTriMatrixReadError<T>(is);
+#endif
+        }
+        if (m.size() != s) {
+#ifdef NOTHROW
+            std::cerr<<"UpperTriMatrix ReadError: Wrong size\n"; 
+            exit(1); 
+#else
+            throw UpperTriMatrixReadError<T>(m,is,s);
+#endif
+        }
+        TMVAssert(m.size() == s);
+        m.read(is);
+        return is;
+    }
+
+    template <bool conj, bool rm, bool compact, bool th, class T> 
+    static void DoWrite(
+        std::ostream& os, const GenLowerTriMatrix<T>& m, RT thresh)
+    {
+        const T* mrowi = m.cptr();
+        const int sj = rm?1:m.stepj();
+        const int si = m.stepi();
+        const int N = m.size();
+        int len = m.isunit() ? 0 : 1;
+
+        if (compact)
+            os << "L " << N << std::endl;
+        else
+            os << N <<' '<< N << std::endl;
+
+        for(int i=N;i>0;--i,++len,mrowi+=si) {
+            os << "( ";
+            const T* mij = mrowi;
+            for(int k=len;k>0;--k,rm?++mij:mij+=sj) 
+                if (conj) 
+                    if (th)
+                        os << ' '<<Value(TMV_ABS(*mij)<thresh ? T(0) :
+                                         TMV_CONJ(*mij))<<' ';
+                    else
+                        os << ' '<<Value(TMV_CONJ(*mij))<<' ';
+                else
+                    if (th)
+                        os << ' '<<Value(TMV_ABS(*mij)<thresh ? T(0) :
+                                         *mij)<<' ';
+                    else
+                        os << ' '<<Value(*mij)<<' ';
+
+            if (m.isunit()) os << ' '<<Value(T(1))<<' ';
+            if (!compact)
+                for(int j=m.isunit()?len+1:len;j<N;j++) 
+                    os << ' '<<Value(T(0))<<' ';
+            os << " )\n";
+        }
+    }
+
+    template <bool rm, bool compact, bool th, class T> 
+    static inline void DoWrite1(
+        std::ostream& os, const GenLowerTriMatrix<T>& m, T thresh)
+    { DoWrite<false,rm,compact,th>(os,m,thresh); }
+
+    template <bool rm, bool compact, bool th, class T> 
+    static inline void DoWrite1(
+        std::ostream& os, const GenLowerTriMatrix<std::complex<T> >& m,
+        T thresh)
+    {
+        if (m.isconj())
+            DoWrite<true,rm,compact,th>(os,m,thresh); 
+        else
+            DoWrite<false,rm,compact,th>(os,m,thresh); 
+    }
+
+    template <class T>
+    void GenLowerTriMatrix<T>::write(std::ostream& os) const
+    {
+        if (isrm())
+            DoWrite1<true,false,false>(os,*this,RT(0));
+        else
+            DoWrite1<false,false,false>(os,*this,RT(0));
+    }
+
+    template <class T>
+    void GenLowerTriMatrix<T>::write(std::ostream& os, RT thresh) const
+    {
+        if (isrm())
+            DoWrite1<true,false,true>(os,*this,thresh);
+        else
+            DoWrite1<false,false,true>(os,*this,thresh);
+    }
+
+    template <class T>
+    void GenLowerTriMatrix<T>::writeCompact(std::ostream& os) const
+    {
+        if (isrm())
+            DoWrite1<true,true,false>(os,*this,RT(0));
+        else
+            DoWrite1<false,true,false>(os,*this,RT(0));
+    }
+
+    template <class T>
+    void GenLowerTriMatrix<T>::writeCompact(std::ostream& os, RT thresh) const
+    {
+        if (isrm())
+            DoWrite1<true,true,true>(os,*this,thresh);
+        else
+            DoWrite1<false,true,true>(os,*this,thresh);
+    }
+
+#ifndef NOTHROW
+    template <class T>
+    class LowerTriMatrixReadError : public ReadError
+    {
+    public :
+        int i,j;
+        mutable auto_ptr<LowerTriMatrix<T> > m;
+        char exp,got;
+        T unitgot;
+        size_t s;
+        bool is, iseof, isbad;
+
+        LowerTriMatrixReadError(int _i, int _j,
+                                const GenLowerTriMatrix<T>& _m, std::istream& _is) throw() :
+            ReadError("LowerTriMatrix."),
+            i(_i), j(_j), m(new LowerTriMatrix<T>(_m)),
+            exp(0), got(0), unitgot(T(1)), s(_m.size()),
+            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+        LowerTriMatrixReadError(std::istream& _is) throw() :
+            ReadError("LowerTriMatrix."),
+            i(0), j(0), m(0), exp(0), got(0), unitgot(T(1)), s(0),
+            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+        LowerTriMatrixReadError(int _i, int _j,
+                                const GenLowerTriMatrix<T>& _m, std::istream& _is,
+                                char _e, char _g) throw() :
+            ReadError("LowerTriMatrix."),
+            i(_i), j(_j), m(new LowerTriMatrix<T>(_m)),
+            exp(_e), got(_g), unitgot(T(1)), s(_m.size()),
+            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+        LowerTriMatrixReadError(std::istream& _is, char _e, char _g) throw() :
+            ReadError("LowerTriMatrix."),
+            i(0), j(0), m(0), exp(_e), got(_g), unitgot(T(1)), s(0),
+            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+        LowerTriMatrixReadError(int _i, int _j,
+                                const GenLowerTriMatrix<T>& _m, std::istream& _is, T _u) throw() :
+            ReadError("LowerTriMatrix."),
+            i(_i), j(_j), m(new LowerTriMatrix<T>(_m)),
+            exp(0), got(0), unitgot(_u), s(_m.size()),
+            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+        LowerTriMatrixReadError(const GenLowerTriMatrix<T>& _m,
+                                std::istream& _is, size_t _s) throw() :
+            ReadError("LowerTriMatrix."),
+            i(0), j(0), m(new LowerTriMatrix<T>(_m)),
+            exp(0), got(0), unitgot(T(1)), s(_s),
+            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+
+        LowerTriMatrixReadError(const LowerTriMatrixReadError<T>& rhs) throw() :
+            i(rhs.i), j(rhs.j), m(rhs.m), exp(rhs.exp), got(rhs.got),
+            unitgot(rhs.unitgot), s(rhs.s),
+            is(rhs.is), iseof(rhs.iseof), isbad(rhs.isbad) {}
+        virtual ~LowerTriMatrixReadError() throw() {}
+
+        void write(std::ostream& os) const throw()
+        {
+            os<<"TMV Read Error: Reading istream input for LowerTriMatrix\n";
+            if (exp != got) {
+                os<<"Wrong format: expected '"<<exp<<"', got '"<<got<<"'.\n";
+            }
+            if (unitgot != T(1)) {
+                os<<"Wrong format: expected 1 on the diagonal, got "<<unitgot<<".\n";
+            }
+            if (m.get() && s != m->size()) {
+                os<<"Wrong size: expected "<<m->size()<<", got "<<s<<".\n";
+            }
+            if (!is) {
+                if (iseof) {
+                    os<<"Input stream reached end-of-file prematurely.\n";
+                } else if (isbad) {
+                    os<<"Input stream is corrupted.\n";
+                } else {
+                    os<<"Input stream cannot read next character.\n";
+                }
+            }
+            if (m.get()) {
+                os<<"The portion of the LowerTriMatrix which was successfully read is:\n";
+                ConstLowerTriMatrixView<T> mm = m->view();
+                for(int ii=0;ii<i;++ii) {
+                    const int N = mm.size();
+                    os<<"( ";
+                    for(int jj=0;jj<N;++jj)
+                        os<<' '<<mm(ii,jj)<<' ';
+                    os<<" )\n";
+                }
+                os<<"( ";
+                for(int jj=0;jj<j;++jj)
+                    os<<' '<<mm(i,jj)<<' ';
+                os<<" )\n";
+            }
+        }
+    };
+#endif
+
+    template <class T, IndexStyle I> 
+    void LowerTriMatrixView<T,I>::read(std::istream& is) const
+    {
+        T* mrowi = ptr();
+        const int sj = stepj();
+        int len = isunit() ? 0 : 1;
+        char paren;
+        const int N = size();
+        for(int i=0;i<N;++i,++len,mrowi+=stepi()) {
+            is >> paren;
+            if (!is || paren != '(') {
+#ifdef NOTHROW
+                std::cerr<<"LowerTriMatrix ReadError: "<<paren<<" != (\n"; 
+                exit(1); 
+#else
+                throw LowerTriMatrixReadError<T>(i,0,*this,is,'(',is?paren:'(');
+#endif
+            }
+            T* mij = mrowi;
+            if (isrm()) {
+                for(int k=len;k>0;--k,++mij) {
+                    is >> *mij;
+                    if (!is) {
+#ifdef NOTHROW
+                        std::cerr<<"LowerTriMatrix ReadError: !is\n"; 
+                        exit(1); 
+#else
+                        throw LowerTriMatrixReadError<T>(i,len-k,*this,is);
+#endif
+                    }
+                }
+            } else  {
+                for(int k=len;k>0;--k,mij+=sj) {
+                    is >> *mij;
+                    if (!is) {
+#ifdef NOTHROW
+                        std::cerr<<"LowerTriMatrix ReadError: !is\n"; 
+                        exit(1); 
+#else
+                        throw LowerTriMatrixReadError<T>(i,len-k,*this,is);
+#endif
+                    }
+                }
+            }
+            if (isunit()) {
+                T unit;
+                is >> unit;
+                if (!is || unit != T(1)) {
+#ifdef NOTHROW
+                    std::cerr<<"LowerTriMatrix ReadError: "<<unit<<" != 1\n"; 
+                    exit(1); 
+#else
+                    throw LowerTriMatrixReadError<T>(i,i,*this,is,is?unit:T(1));
+#endif
+                }
+            }
+            is >> paren;
+            if ((!is && i+1<N)  || paren != ')') {
+#ifdef NOTHROW
+                std::cerr<<"LowerTriMatrix ReadError: "<<paren<<" != )\n"; 
+                exit(1); 
+#else
+                throw LowerTriMatrixReadError<T>(i,N,*this,is,')',is?paren:')');
+#endif
+            }
+        }
+        if (isconj()) conjugateSelf();
+    }
+
+    template <class T, DiagType D, StorageType S, IndexStyle I>
+    std::istream& operator>>(std::istream& is, 
+                             auto_ptr<LowerTriMatrix<T,D,S,I> >& m)
+    {
+        char ul;
+        is >> ul;
+        if (!is) {
+#ifdef NOTHROW
+            std::cerr<<"LowerTriMatrix ReadError: !is\n"; 
+            exit(1); 
+#else
+            throw LowerTriMatrixReadError<T>(is);
+#endif
+        }
+        if (ul != 'L') {
+#ifdef NOTHROW
+            std::cerr<<"LowerTriMatrix ReadError: "<<ul<<" != L\n"; 
+            exit(1); 
+#else
+            throw LowerTriMatrixReadError<T>(is,'L',ul);
+#endif
+        }
+        size_t size;
+        is >> size;
+        if (!is) {
+#ifdef NOTHROW
+            std::cerr<<"LowerTriMatrix ReadError: !is\n"; 
+            exit(1); 
+#else
+            throw LowerTriMatrixReadError<T>(is);
+#endif
+        }
+        m.reset(new LowerTriMatrix<T,D,S,I>(size));
+        m->view().read(is); 
+        return is;
+    }
+
+    template <class T>
+    std::istream& operator>>(
+        std::istream& is, const LowerTriMatrixView<T>& m)
+    {
+        char ul;
+        is >> ul;
+        if (!is) {
+#ifdef NOTHROW
+            std::cerr<<"LowerTriMatrix ReadError: !is\n"; 
+            exit(1); 
+#else
+            throw LowerTriMatrixReadError<T>(is);
+#endif
+        }
+        if (ul != 'L') {
+#ifdef NOTHROW
+            std::cerr<<"LowerTriMatrix ReadError: "<<ul<<" != L\n"; 
+            exit(1); 
+#else
+            throw LowerTriMatrixReadError<T>(is,'L',ul);
+#endif
+        }
+        size_t s;
+        is >> s;
+        if (!is) {
+#ifdef NOTHROW
+            std::cerr<<"LowerTriMatrix ReadError: !is\n"; 
+            exit(1); 
+#else
+            throw LowerTriMatrixReadError<T>(is);
+#endif
+        }
+        if (m.size() != s) {
+#ifdef NOTHROW
+            std::cerr<<"LowerTriMatrix ReadError: Wrong size\n"; 
+            exit(1); 
+#else
+            throw LowerTriMatrixReadError<T>(m,is,s);
+#endif
+        }
+        TMVAssert(m.size() == s);
+        m.read(is);
+        return is;
+    }
+
 
 #define InstFile "TMV_TriMatrix.inst"
 #include "TMV_Inst.h"

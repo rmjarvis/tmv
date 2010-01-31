@@ -178,6 +178,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\TMV_Array.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\TMV_BaseMatrix.cpp"
 				>
 			</File>
@@ -266,11 +270,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\TMV_MultMM_Block.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\TMV_MultMM_CCC.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\src\TMV_MultMM_CRC.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TMV_MultMM_Kernel.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TMV_MultMM_OpenMP.cpp"
 				>
 			</File>
 			<File

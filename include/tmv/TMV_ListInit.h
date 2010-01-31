@@ -34,16 +34,20 @@
 
 namespace tmv {
 
+    class ListInitClass {};
+
+    extern ListInitClass ListInit;
+
     class ListReadError : public ReadError
     {
     private :
         int n;
 
     public :
-        inline ListReadError(int nleft) : n(nleft) {}
-        inline void Write(std::ostream& os) const throw()
+        inline ListReadError(int nLeft) : n(nLeft) {}
+        inline void write(std::ostream& os) const throw()
         {
-            os<<"TMV Read Error: Reading from List initialization.\n";
+            os<<"TMV Read Error: Reading from list initialization.\n";
             if (n == 0)
                 os<<"List has more elements than expected.\n";
             else
@@ -56,34 +60,37 @@ namespace tmv {
     class ListAssigner
     {
     public:
-        inline ListAssigner(IT ptr, int nLeft ) :
-            _ptr(ptr), _nLeft(nLeft), _isLast(true)
+        ListAssigner(IT ptr, int nLeft) :
+            _ptr(ptr), _nLeft(nLeft), _isLast(true) 
         {}
 
-        inline ListAssigner(IT ptr, int nLeft, const T& x) :
+        ListAssigner(IT ptr, int nLeft, const T& x) : 
             _ptr(ptr), _nLeft(nLeft), _isLast(false)
         {
             if (_nLeft == 0) throw ListReadError(0);
-            TMVAssert((_nLeft > 0) && "Too many elements in ListInit");
+            TMVAssert(_nLeft > 0);
             *_ptr++ = x;
             --_nLeft;
         }
 
-        inline ListAssigner( const ListAssigner<T,IT>& rhs ) : 
+        ListAssigner(const ListAssigner<T,IT>& rhs) : 
             _ptr(rhs._ptr), _nLeft(rhs._nLeft), _isLast(true)
         { rhs._isLast = false; }
 
-        inline ~ListAssigner()
+        ~ListAssigner()
         { if (_nLeft > 0 && _isLast) throw ListReadError(_nLeft); }
 
-        inline ListAssigner<T,IT> operator,(const T& x)
+        ListAssigner<T,IT> operator,(const T& x)
         {
             if (_nLeft == 0) throw ListReadError(0);
-            TMVAssert((_nLeft > 0) && "Too many elements in ListInit");
+            TMVAssert( _nLeft > 0 );
             *_ptr = x;
             _isLast = false;
             return ListAssigner<T,IT>(++_ptr,_nLeft-1);
         }
+
+        ListAssigner<T,IT> operator<<(const T& x)
+        { return operator,(x); }
 
     protected:
         IT  _ptr;

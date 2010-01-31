@@ -1,43 +1,51 @@
+#include "TMV.h"
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
-#include "TMV.h"
 
-template <class T1, class T2> inline bool CanAddEq(
+template <class T1, class T2> 
+inline bool CanAddEq(
     const tmv::UpperTriMatrixView<T1>& a,
     const tmv::DiagMatrixView<T2>& b)
 { return a.size() == b.size() && !a.isunit(); }
 
-template <class T1, class T2> inline bool CanAddEq(
+template <class T1, class T2> 
+inline bool CanAddEq(
     const tmv::LowerTriMatrixView<T1>& a,
     const tmv::DiagMatrixView<T2>& b)
 { return a.size() == b.size() && !a.isunit(); }
 
-template <class T1, class T2, class T3> inline bool CanMultMM(
+template <class T1, class T2, class T3> 
+inline bool CanMultMM(
     const tmv::UpperTriMatrixView<T1>& a, const tmv::DiagMatrixView<T2>& b,
     const tmv::UpperTriMatrixView<T3>& c)
 { return a.size() == b.size() && a.size() == c.size() && !c.isunit(); }
 
-template <class T1, class T2, class T3> inline bool CanMultMM(
+template <class T1, class T2, class T3> 
+inline bool CanMultMM(
     const tmv::DiagMatrixView<T1>& a, const tmv::UpperTriMatrixView<T2>& b,
     const tmv::UpperTriMatrixView<T3>& c)
 { return a.size() == b.size() && a.size() == c.size() && !c.isunit(); }
 
-template <class T1, class T2, class T3> inline bool CanMultMM(
+template <class T1, class T2, class T3> 
+inline bool CanMultMM(
     const tmv::DiagMatrixView<T1>& a, const tmv::DiagMatrixView<T2>& b,
     const tmv::UpperTriMatrixView<T3>& c)
 { return a.size() == b.size() && a.size() == c.size() && !c.isunit(); }
 
-template <class T1, class T2, class T3> inline bool CanMultMM(
+template <class T1, class T2, class T3> 
+inline bool CanMultMM(
     const tmv::LowerTriMatrixView<T1>& a, const tmv::DiagMatrixView<T2>& b,
     const tmv::LowerTriMatrixView<T3>& c)
 { return a.size() == b.size() && a.size() == c.size() && !c.isunit(); }
 
-template <class T1, class T2, class T3> inline bool CanMultMM(
+template <class T1, class T2, class T3> 
+inline bool CanMultMM(
     const tmv::DiagMatrixView<T1>& a, const tmv::LowerTriMatrixView<T2>& b,
     const tmv::LowerTriMatrixView<T3>& c)
 { return a.size() == b.size() && a.size() == c.size() && !c.isunit(); }
 
-template <class T1, class T2, class T3> inline bool CanMultMM(
+template <class T1, class T2, class T3> 
+inline bool CanMultMM(
     const tmv::DiagMatrixView<T1>& a, const tmv::DiagMatrixView<T2>& b,
     const tmv::LowerTriMatrixView<T3>& c)
 { return a.size() == b.size() && a.size() == c.size() && !c.isunit(); }
@@ -45,7 +53,8 @@ template <class T1, class T2, class T3> inline bool CanMultMM(
 #define NOTRANSMM
 #include "TMV_TestMatrixArith.h"
 
-template <class T> void TestTriMatrixArith_C1()
+template <class T> 
+void TestTriMatrixArith_C1()
 {
     const int N = 10;
 
@@ -117,16 +126,16 @@ template <class T> void TestTriMatrixArith_C1()
 #endif
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestTriMatrixArith_C1<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestTriMatrixArith_C1<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestTriMatrixArith_C1<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestTriMatrixArith_C1<int>();
 #endif
 

@@ -1,16 +1,13 @@
+#include "TMV.h"
+#include "TMV_Small.h"
 #include "TMV_Test.h"
 #include "TMV_Test3.h"
-#include "TMV.h"
 #include <fstream>
 #include <cstdio>
 
 template <class T, int M, int N, tmv::StorageType S> 
 inline void TestBasicSmallMatrix()
 {
-    Assert(M >= N,"Matrix must not be short"); 
-    // The checks below implicitly assume this.
-    // So make it explicity here to avoid confusion.
-
     tmv::SmallMatrix<T,M,N,S> m;
     tmv::SmallMatrix<T,M,N,S,tmv::FortranStyle> mf;
     Assert(m.colsize() == size_t(M) && m.rowsize() == size_t(N),
@@ -78,7 +75,7 @@ inline void TestBasicSmallMatrix()
             0, -1, -2,
             2, 1, 0;
         for(int i=0;i<2;i++) for(int j=0;j<3;j++) {
-            Assert(q3(i,j) == T(2*i-j),"Create SmallMatrix from << list");
+            Assert(q3(i,j) == T(2*i-j),"Create SmallMatrix from <<");
         }
     } else {
         const T qar[] = { 
@@ -101,7 +98,7 @@ inline void TestBasicSmallMatrix()
             -1, 1,
             -2, 0;
         for(int i=0;i<2;i++) for(int j=0;j<3;j++) {
-            Assert(q3(i,j) == T(2*i-j),"Create SmallMatrix from << list");
+            Assert(q3(i,j) == T(2*i-j),"Create SmallMatrix from <<");
         }
     }
     // Test Basic Arithmetic 
@@ -159,26 +156,30 @@ inline void TestBasicSmallMatrix()
     // Test I/O
 
     std::ofstream fout("tmvtest_smallmatrix_io.dat");
-    if (!fout) 
+    if (!fout) {
 #ifdef NOTHROW
-    { std::cerr<<"Couldn't open tmvtest_smallmatrix_io.dat for output\n"; exit(1); }
+        std::cerr<<"Couldn't open tmvtest_smallmatrix_io.dat for output\n"; 
+        exit(1); 
 #else
-    throw std::runtime_error(
-        "Couldn't open tmvtest_smallmatrix_io.dat for output");
+        throw std::runtime_error(
+            "Couldn't open tmvtest_smallmatrix_io.dat for output");
 #endif
+    }
     fout << m << std::endl << cm << std::endl;
     fout.close();
 
     tmv::SmallMatrix<T,M,N,tmv::RowMajor> xm1;
     tmv::SmallMatrix<std::complex<T>,M,N,tmv::RowMajor> xcm1;
     std::ifstream fin("tmvtest_smallmatrix_io.dat");
-    if (!fin) 
+    if (!fin) {
 #ifdef NOTHROW
-    { std::cerr<<"Couldn't open tmvtest_smallmatrix_io.dat for input\n"; exit(1); }
+        std::cerr<<"Couldn't open tmvtest_smallmatrix_io.dat for input\n"; 
+        exit(1); 
 #else
-    throw std::runtime_error(
-        "Couldn't open tmvtest_smallmatrix_io.dat for input");
+        throw std::runtime_error(
+            "Couldn't open tmvtest_smallmatrix_io.dat for input");
 #endif
+    }
     fin >> xm1 >> xcm1;
     fin.close();
     Assert(m == xm1,"SmallMatrix I/O check #1");
@@ -187,13 +188,15 @@ inline void TestBasicSmallMatrix()
     tmv::SmallMatrix<T,M,N,tmv::ColMajor> xm2;
     tmv::SmallMatrix<std::complex<T>,M,N,tmv::ColMajor> xcm2;
     fin.open("tmvtest_smallmatrix_io.dat");
-    if (!fin) 
+    if (!fin) {
 #ifdef NOTHROW
-    { std::cerr<<"Couldn't open tmvtest_smallmatrix_io.dat for input\n"; exit(1); }
+        std::cerr<<"Couldn't open tmvtest_smallmatrix_io.dat for input\n"; 
+        exit(1); 
 #else
-    throw std::runtime_error(
-        "Couldn't open tmvtest_smallmatrix_io.dat for input");
+        throw std::runtime_error(
+            "Couldn't open tmvtest_smallmatrix_io.dat for input");
 #endif
+    }
     fin >> xm2 >> xcm2;
     fin.close();
     Assert(m == xm2,"SmallMatrix I/O check #2");
@@ -204,27 +207,24 @@ inline void TestBasicSmallMatrix()
 #endif
 }
 
-template <class T> void TestAllSmallMatrix()
+template <class T> 
+void TestAllSmallMatrix()
 {
-    TestBasicSmallMatrix<T,6,4,tmv::RowMajor>();
-    TestBasicSmallMatrix<T,6,4,tmv::ColMajor>();
-#ifdef XTEST
-    TestBasicSmallMatrix<T,42,10,tmv::RowMajor>();
-    TestBasicSmallMatrix<T,42,10,tmv::ColMajor>();
-#endif
+    TestBasicSmallMatrix<T,15,10,tmv::RowMajor>();
+    TestBasicSmallMatrix<T,15,10,tmv::ColMajor>();
     TestSmallMatrix_Sub<T>();
     std::cout<<"SmallMatrix<"<<tmv::TMV_Text(T())<<"> passed all basic tests\n";
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestAllSmallMatrix<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestAllSmallMatrix<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestAllSmallMatrix<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestAllSmallMatrix<int>();
 #endif

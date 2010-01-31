@@ -32,38 +32,24 @@
 
 //-----------------------------------------------------------------------------
 //
-// This file defines the Vector class.
-//
-// A Vector is a mathematical vector whose size is not necessarily
-// known at compile time.  (c.f. SmallVector in  TMV_SmallVector.h.)
+// This file defines the TMV Vector class.
 //
 // The Vector class and all associated functions are contained
 // in the namespace tmv.  Alse, the Vector class is a template, 
 // so for a Vector of doubles, one would write 
 // tmv::Vector<double>.  
 //
-// An optional second template parameter can tell the Vector to
+// A second optional template argument can tell the Vector to
 // use Fortran-style indexing instead of C-style.
 // ie. the first element is v(1), and the last is v(n).
 // So you would write Vector<T,FortranStyle> v(n), for example.
 // If you want to use the Fortran-style indexing, you should
 // be aware that it only exists for a regular Vector and the two
 // view classes, VectorView and ConstVectorView.  
-//
-// The return type of many of the below methods are given generically
-// as value_type, real_type, iterator, etc.
-// All of these types are typedefs in Vector.  
-// So, you could write, for example:
-//
-// tmv::Vector<double> v(30);
-// typename tmv::Vector<double>::iterator it = v.begin();
-//
-// The same form can be used for any return type that is not obvious.
-// And the same is true of the return types that are vectors.  e.g.:
-//
-// typedef typename tmv::Vector<double>::subvector_type sub;
-// typename sub::reverse_iterator it = v.subVector(10,20).rbegin();
-//
+// GenVector and VectorComposite always use C-style indexing,
+// so (v1+v2)(1) would return the second element in the sum, even
+// if v1 and v2 both use Fortran-style indexing.
+// Also, permutation arrays always use the C-style indexing.
 //
 // Constructors:
 //
@@ -73,174 +59,93 @@
 //    Vector<T>(size_t n, T x)
 //        Makes a Vector of size n with all values = x
 //
-//    Vector<T>(size_t n, const T* v2)
-//    Vector<T>(const std::vector<T>& v2)
-//        Makes a vector which copies the elements of v2
+//    Vector<T>(size_t n, const T* vv)
+//    Vector<T>(const vector<T>& vv)
+//        Makes a vector which copies the elements of vv
 //        For the second one, n specifies the length of the vector
 //
-// Special Creators: 
+// Special Constructors
 //
-//    VectorView VectorViewOf(T* v, size_t n, int step=1) 
-//    ConstVectorView VectorViewOf(const T* v, size_t n, int step=1) 
-//        Makes a VectorView of the memory elements stored at vv 
+//    makeBasisVector(size_t n, int i)
+//        Makes a Vector whose elements are all 0, except v(i) = 1
 //
-// Access
+//    VectorViewOf(T* vv, size_t n)
+//    VectorViewOf(const T* vv, size_t n)
+//        Makes a Vector View (see below) which refers to the exact
+//        elements of vv, not copying them to new storage.
+//        The first one returns a VectorView, the second a ConstVectorView.
+//
+// Access Functions
 //
 //    size_t size() const
 //        Returns the size of the Vector
 //
-//    value_type operator[](int i) const
-//    value_type operator()(int i) const
-//    value_type cref(int i) const
-//        Return the ith element of the vector.
-//        The first two respect the index-style of the underlying vector. 
-//        The third, cref, always uses CStyle indexing, and does not
-//        do any checking of the validity of value of i, so it can
-//        be used to speed-up code that has element access in a critical
-//        section, when you don't otherwise want to compile with -DNDEBUG
+//    T& operator[](int i)
+//    T& operator()(int i)
+//    T operator[](int i) const
+//    T operator()(int i) const
+//        Return the ith element of the Vector
 //
-//    reference operator[](int i)
-//    reference operator()(int i)
-//    reference ref(int i)
-//        Return a reference to the ith element of the vector.
-//        The first two respect the index-style of the underlying vector. 
-//        The third, ref, always uses CStyle indexing, and does not
-//        do any checking of the validity of value of i.
-//        For normal vectors, reference is just value&.  However,
-//        we allow for conjugate views of vectors, so in that case,
-//        the return type is an object that can be used as a reference,
-//        but which applies the conjugation appropriately.
-//
-//    iterator begin()
-//    iterator end()
-//    reverse_iterator rbegin()
-//    reverse_iterator rend()
-//    const_iterator begin() const
-//    const_iterator end() const
-//    const_reverse_iterator rbegin() const
-//    const_reverse_iterator rend() const
-//        Return iterators that work in the usual way to traverse the vector
-//
-// Non-modifying Functions
-//
-//    Most of these are both member functions and functions of a vector,
-//    so Norm(v) and v.norm(), for example, are equivalent.
-//
-//    real_type norm() const    or Norm(v)
-//    real_type norm2() const    or Norm2(v)
-//        Returns the 2-norm of a vector = sqrt( sum_i |v_i|^2 )
-//
-//    real_type normSq() const    or NormSq(v)
-//    real_type normSq(real_type scale) const
-//        Returns the square of norm().
-//        In the method version, you can provide an optional scale, in 
-//        which case the output is equal to NormSq(scale*v).
-//
-//    real_type norm1() const    or Norm1(v) 
-//        Returns the 1-norm of a vector = sum_i |v_i|
-//
-//    real_type normInf() const    or NormInf(v) 
-//        Returns the infinity-norm of a vector = max_i |v_i|
-//
-//    value_type sumElements() const    or SumElements(v) 
-//        Returns the sum of all elements in the vector.
-//
-//    real_type sumAbsElements() const    or SumAbsElements(v) 
-//        Returns the sum of absolute values of elements in the vector.
-//
-//    value_type maxElement() const    or MaxElement(v) 
-//    value_type maxElement(int* imax) const
-//        Returns the maximum value of any element in the vector.
-//        In the method version, you can provide an optional argument imax.
-//        On return, *imax holds the index of the element with the 
-//        maximum value.
-//        The parameter imax can be omitted if it is not desired.
-//        As "max" doesn't make sense for complex values, for these
-//        we use just the real components.
-//
-//    value_type minElement() const    or MinElement(v) 
-//    value_type minElement(int* imin) const
-//        Returns the minimum value of any element in the vector.
-//        On return, (in the method version) *imin holds the index of this 
-//        element.  Again, the parameter imin can be omitted.
-//
-//    real_type maxAbsElement() const    or MaxAbsElement(v) 
-//    real_type maxAbsElement(int* imax) const
-//        The same as MaxElement, except absolute values are used.
-//
-//    real_type minAbsElement() const    or MinAbsElement(v) 
-//    real_type minAbsElement(int* imax) const
-//        The same as minElement, except absolute values are used.
-//
-//    template <class ret_type>
-//    ret_type maxElement(const F& f) const
-//    ret_type maxElement(int* imax, const F& f) const
-//        Returns the minimum value of f(v[i]).  
-//        The funcion f can be any object that has the method:
-//        ret_type operator()(value_type x)
-//        When calling this, you need to specify ret_type as a template
-//        parameter, but F (which is also in fact a template parameter
-//        to this method) is inferred from the argument f.
-//
-//    template <class ret_type>
-//    ret_type minElement(int* imin, const F& f) const
-//        Returns the minimum value of f(v[i]).  
-// 
-//    template <class ret_type>
-//    ret_type sumElements(const F& f) const
-//        Returns the sum of the values f(v[i]).
-//
+//    Vector<T>::iterator begin()
+//    Vector<T>::iterator end()
+//    Vector<T>::reverse_iterator rbegin()
+//    Vector<T>::reverse_iterator rend()
+//    Vector<T>::const_iterator begin() const
+//    Vector<T>::const_iterator end() const
+//    Vector<T>::const_reverse_iterator rbegin() const
+//    Vector<T>::const_reverse_iterator rend() const
+//        Return iterators that work in the usual way to traverse the Vector
 //
 // Modifying Functions
 //
-//    type& zero()
+//    Vector& setZero()
 //        Sets all elements to 0
 //
-//    type& clip(real_type thresh)
+//    Vector& clip(RT thresh)
 //        Set to 0 all elements whose absolute values is < thresh
 //
-//    type& setAllTo(T x)
+//    Vector& setAllTo(T x)
 //        Sets all elements to x
 //        We don't call this v = x, since it doesn't really make sense to
 //        think of v as being 'equal' to a scalar.
 //        Hence the slightly verbose function name setAllTo.
 //
-//    type& addToAll(T x)
+//    Vector& addToAll(T x)
 //        Add x to each element of v
 //
-//    type& conjugateSelf()
+//    Vector& conjugateSelf()
 //        Sets all elements to its conjugate
 //
-//    type& makeBasis(int i)
+//    Vector& makeBasis(int i)
 //        Set all elements to 0, except v(i) = 1
 //
-//    type& swap(int i1, int i2)
+//    Vector& swap(int i1, int i2)
 //        Swap elements v(i1) and v(i2)
 //
-//    type& permute(const int* p)
-//    type& permute(const int* p, int i1, int i2)
+//    Vector& permute(const int* p)
+//    Vector& permute(const int* p, int i1, int i2)
 //        Perform a series of swaps (0,p[0]), (1,p[1])...
 //        In the second case, only do (i1,p[i1])...(i2-1,p[i2-1])
-//    type& reversePermute(const int* p)
-//    type& reversePermute(const int* p, int i1, int i2)
+//    Vector& reversePermute(const int* p)
+//    Vector& reversePermute(const int* p, int i1, int i2)
 //        The same but perform the swaps in reverse order.
-//
-//    type& reverseSelf()
-//        Reverse the order of the elements of v
-//
-//    void sort(ad, comp)
-//    void sort(int* P, ad, comp)
-//        Sorts the vector, returning the swaps required in P.
-//        If you do not care about P, you may omit the P parameter.
-//        ad = Ascend or Descend (Ascend=default)
-//        comp = RealComp, AbsComp, ImagComp, or ArgComp (RealComp=default)
 //
 //    Swap(v1,v2)
 //        Swap vectors v1 and v2
 //
-// VectorView:
+//    Vector& reverseSelf()
+//        Reverse the order of the elements of v
 //
-//    A VectorView object refers to the elements of a regular Vector
+//    sort(AD, COMP)
+//    sort(int* p, AD, COMP)
+//        Sorts the vector, returning the swaps required in P.
+//        If you do not care about P, you may omit the P parameter.
+//        AD = ASCEND or DESCEND (ASCEND=default)
+//        COMP = REAL_COMP, ABS_COMP, IMAG_COMP, or ARG_COMP (REAL_COMP=default)
+//
+// VectorViews:
+//
+//    A VectorView<T> object refers to the elements of a regular Vector
 //    or Matrix, so that altering the elements in the view alters the
 //    corresponding elements in the original object.  A View can have non-unit
 //    steps between elements and can also be a conjugation of the original
@@ -255,105 +160,100 @@
 //    This is akin to the const_iterator and iterator types for the
 //    standard template library.
 //
-//    Both of these take several template arguments:
-//    T = the underlying data type.
-//    S = (int) the step size if known.  (Use UNKNOWN if not known.)
-//    C = (bool) whether the view is the conjugate of the data.
-//    I = (CStyle or FortranStyle) which indexing style to use.
-// 
-//    There are default arguments for all but T:
-//    S = 1, C = false, I = CStyle
-//    so you can omit these in many cases.
+//    Below, VectorView is written for both of these, and I don't bother to
+//    indicate the template modifiers.  In general, a ConstVectorView is 
+//    returned from either a ConstVectorView object, or a const Vector object.
+//    A (mutable) VectorView is returned from either a VectorView object or
+//    a (non-const) Vector object.
 //
-//    ConstVectorView<T,S,C,I>(const T* p, size_t n, int s=S)
-//    VectorView<T,S,C,I>(T* p, size_t n, int s=S)
-//        Make a vector view, starting at memory location p, 
-//        with n elements, stepping over the data with step size s.
-//        Note, that s is generally omitted if you are specifying S
-//        as a template argument.  But if S == UNKNOWN, then you would
-//        need to specify s as an argument.
-//
-//    There are also copy constructors that change S (e.g. from UNKNOWN
-//    to some compile-time-known value), or change VectorView to 
-//    ConstVectorView.  e.g.:
-//
-//    ConstVectorView<T,S,C,I>(const VectorView<T,S,C,I>& v);
-//    ConstVectorView<T,S,C,I>(const VectorView<T,UNKNOWN,C,I>& v);
-//    VectorView<T,S,C,I>(const VectorView<T,UNKNOWN,C,I>& v);
-// 
-// Views:
-//
-//    All of these methods return some kind of view into the vector
-//    data.  The return types are either ConstVectorView or VectorView
-//    with the appropriate values for the template parameters S and C.
-//    The template parameter I is preserved from the original vector.
-//
-//    All of these have a const and non-const version.  For the const
-//    versions, prepend const_ to the return type name.  
-//    e.g. const_subvector_type.  
-//   
-//    subvector_type subVector(int i1, int i2)
-//        This member function returns a subvector view which refers
+//    VectorView subVector(int i1, int i2, int istep=1)
+//        This member function will return a subvector view which refers
 //        to the same physical elements as the original.
 //        i1 is the first element in the subvector.
 //        i2 is the usual "one past the end" of the subvector.
-//        Thus, for a vector, v, of length 10, you could output the 
-//        the first 4 elements of v with:
-//        std::cout << v.subVector(0,4);
-//      
-//    subvector_step_type subVector(int i1, int i2, int istep)
-//        This returns a view with non-unit step through the elements.
+//        istep is an optional step size.
 //        Thus, if you have a vector v of length 10, and you want to
 //        set all the even elements to 0, you could write:
-//        v.subVector(0,10,2).zero();
+//        v.subVector(0,10,2).Zero();
+//        And then to output the first 4 elements of v, you could write:
+//        std::cout << v.subVector(0,4);
 //
-//    reverse_type reverse()
+//    VectorView reverse()
 //        Returns a subvector whose elements are the same as v but 
 //        in the reverse order
 //
-//    conjugate_type conjugate()
+//    VectorView conjugate()
 //        Returns the conjugate of a Vector (as a view, so it still points
 //        to the same physical elements, but modifying this will set the 
 //        actual elements to the conjugate of what you set.
 //
-//    view_type view()
+//    VectorView view()
 //        Returns a view of a Vector. 
 //
-//    cview_type cView()
-//    fview_type fView()
-//        Review the vector with CStyle/FortranStyle respectively.
-//
-//    xview_type xView()
-//        Returns a view of a Vector with the template step parameter 
-//        equal to UNKNOWN, rather than any known value.
-//        Also, it is always CStyle indexing.
-//
-//    unitview_type unitView()
-//        Returns a view of a Vector with the template step parameter 
-//        equal to 1.  This is only useful if the original step parameter
-//        is UNKNOWN, since the actual step size must = 1.
-//
-//    realpart_type realPart()
-//    imagpart_type imagPart()
+//    VectorView realPart()
+//    VectorView imagPart()
 //        Returns a view of the real/imag elements of a complex Vector.
-//
-//    flatten_type flatten()
-//        For complex vectors, this returns a real vector view to 
+//    VectorView flatten()
+//        For complex vectors with unit step, returns a real vector view to 
 //        both the real and imag elements in a single view.
-//        If you call this on a view, it must have unit step.
 //
-//    nonconj_type nonConj()
-//        Returns a view of the underlying memory elements, removing
-//        any vconj that might be set in the current view.
-//        This is sometimes useful when an operation has the same
-//        effect regardless of vconj, so it is better to just ignore
-//        any vconj value.
+// Functions of Vectors:
+//        (These are all both member functions and functions of a Vector,
+//         so Norm(v) and v.norm() for example are equivalent)
 //
-//    nonconst_type nonConst()
-//        Returns a mutable view of a const Vector.
+//    v.norm() or v.norm2() or Norm(v) or Norm2(v) 
+//        Returns the 2-norm of a Vector
+//        = sqrt( sum_i |v_i|^2 )
+//
+//    v.normSq() or NormSq(v)
+//    v.normSq(RT scale=1.)
+//        Returns the square of norm()
+//        In the method version, you can provide an optional scale, in 
+//        which case the output is equal to normSq(scale*v).
+//
+//    v.norm1() or Norm1(v) 
+//        Returns the 1-norm of a Vector
+//        = sum_i |v_i|
+//
+//    v.norminf() or NormInf(v) 
+//        Returns the infinity-norm of a Vector
+//        = max_i |v_i|
+//
+//    v.sumElements() or SumElements(v)
+//        Returns the sum of all elements in the Vector
+//
+//    v.sumAbsElements() or SumAbsElements(v)
+//        Returns the sum of absolute values of  elements in the Vector
+//
+//    v.maxElement() or MaxElement(v)
+//    v.maxElement(int* imax = 0)
+//        Returns the maximum value of any element in the Vector
+//        In the method version, you can provide an optional argument imax.
+//        On return, *imax holds the index of element with the maximum value.
+//        The parameter imax can be omitted if it is not desired.
+//        As "max" doesn't make sense for complex values, for these
+//        we use just the real components.
+//
+//    v.minElement() or MinElement(v)
+//    v.minElement(int* imin = 0)
+//        Returns the minimum value of any element in the Vector
+//        On return, (in the method version) *imin holds the index of this 
+//        element.  Again, the parameter imin can be omitted.
+//
+//    v.maxAbsElement() or MaxAbsElement(v)
+//    v.maxAbsElement(int* imax=0)
+//        The same as maxElement, except absolute values are used
+//
+//    v.minAbsElement() or MinAbsElement(v)
+//    v.minAbsElement(int* imin=0)
+//        The same as minElement, except absolute values are used
+//
 //
 // Operators:
-//    Here we use v for a Vector and x for a Scalar.
+//        Here we use v for a Vector and x for a Scalar.
+//
+//        You can also mix real and complex vectors of the same
+//        underlying type.  eg. Vector<double> and Vector<complex<double> >
 //
 //    -v
 //
@@ -376,27 +276,25 @@
 //    v == v
 //    v != v
 //
-//    These all behave in the logical way for dealing with vectors.
+//       These all behave in the logical way for dealing with vectors.
 //
 //
 // I/O: 
 //
-//    void write(std::ostream& os) const    or os << v
+//    os << v 
 //        Writes v to ostream os in the following format:
 //          n ( v[0] v[1] v[2] ... v[n] )
 //
-//    v.write(ostream& os, real_type thresh)
-//        Write v to os as above, but if |v[i]| < thresh, write 0 instead
+//    v.write(ostream& os, TMV_RealType(T) minnonzero)
+//        Write v to os as above, but if |v[i]| < minnonzero, write 0 instead
 //
-//    void read(std::istream& is)    or is >> v
-//        Reads the vector from istream is in the same format
-//        Note: the vector must already be the correct size
+//    is >> v
+//        Reads v from istream is in the same format
+//        Note: v must already be the correct size
 //
-//    std::auto_ptr<tmv::Vector<T> > vptr;
 //    is >> vptr
-//        If you do not know the size of the vector to be read in, you can
-//        use this form which will allocate the vector to be the correct
-//        size according to the input data.
+//        If you do not know the size of the Vector to be read in, you can
+//        use this form where vptr is an auto_ptr to an undefined Vector.
 //
 //
 
@@ -404,496 +302,472 @@
 #ifndef TMV_Vector_H
 #define TMV_Vector_H
 
+#include "tmv/TMV_BaseVector.h"
 #include <vector>
-#include "TMV_BaseVector.h"
-#include "TMV_VIt.h"
+#include "tmv/TMV_ListInit.h"
+
+#ifdef TMVFLDEBUG
+#include "tmv/TMV_VIt.h"
+#endif
 
 namespace tmv {
 
-    //
-    // Vector
-    //
+    template <class T, class T1> 
+    inline void Copy(const GenVector<T1>& v1, const VectorView<T>& v2);
 
-    template <class T, IndexStyle I>
-    struct Traits<Vector<T,I> >
+    template <class T> 
+    class GenVector : public AssignableToVector<T>
     {
-        typedef T value_type;
+        typedef TMV_RealType(T) RT;
+        typedef TMV_ComplexType(T) CT;
+        typedef GenVector<T> type;
+        typedef ConstVectorView<T> const_view_type;
+        typedef ConstVectorView<RT> const_real_type;
+        typedef VectorView<T> nonconst_type;
 
-        typedef typename Traits<T>::real_type real_type;
-        typedef typename Traits<T>::complex_type complex_type;
-        enum { visreal = Traits<T>::isreal };
-        enum { viscomplex = Traits<T>::iscomplex };
-
-        typedef Vector<T,I> type;
-        typedef const type& calc_type;
-        typedef const type& eval_type;
-        typedef type copy_type;
-
-        enum { vsize = UNKNOWN };
-        enum { vfort = (I == FortranStyle) };
-        enum { vcalc = true };
-        enum { vstep = 1 };
-        enum { vconj = false };
-        enum { twoS = visreal ? 1 : 2 };
-
-        typedef ConstVectorView<T,1,false,I> const_subvector_type;
-        typedef ConstVectorView<T,UNKNOWN,false,I> const_subvector_step_type;
-        typedef ConstVectorView<T,1,false,I> const_view_type;
-        typedef ConstVectorView<T,1,false,CStyle> const_cview_type;
-        typedef ConstVectorView<T,1,false,FortranStyle> const_fview_type;
-        typedef ConstVectorView<T> const_xview_type;
-        typedef ConstVectorView<T,1,false,I> const_unitview_type;
-        typedef ConstVectorView<T,1,viscomplex,I> const_conjugate_type;
-        typedef ConstVectorView<T,-1,false,I> const_reverse_type;
-        typedef ConstVectorView<real_type,twoS,false,I> const_realpart_type;
-        typedef const_realpart_type const_imagpart_type;
-        typedef ConstVectorView<real_type,1,false,I> const_flatten_type;
-        typedef ConstVectorView<T,1,false,I> const_nonconj_type;
-        typedef VectorView<T,1,false,I> nonconst_type;
-
-        typedef CVIt<T,1,false> const_iterator;
-        typedef CVIt<T,-1,false> const_reverse_iterator;
-
-        typedef T& reference;
-
-        typedef VectorView<T,1,false,I> subvector_type;
-        typedef VectorView<T,UNKNOWN,false,I> subvector_step_type;
-        typedef VectorView<T,1,false,I> view_type;
-        typedef VectorView<T,1,false,CStyle> cview_type;
-        typedef VectorView<T,1,false,FortranStyle> fview_type;
-        typedef VectorView<T> xview_type;
-        typedef VectorView<T,1,false,I> unitview_type;
-        typedef VectorView<T,1,viscomplex,I> conjugate_type;
-        typedef VectorView<T,-1,false,I> reverse_type;
-        typedef VectorView<real_type,twoS,false,I> realpart_type;
-        typedef realpart_type imagpart_type;
-        typedef VectorView<real_type,1,false,I> flatten_type;
-        typedef VectorView<T,1,false,I> nonconj_type;
-
-        typedef VIt<T,1,false> iterator;
-        typedef VIt<T,-1,false> reverse_iterator;
-    };
-
-    //#ifdef XTEST
-#ifdef TMV_DEBUG
-#define XTEST_DEBUG
-#endif
-    //#endif
-
-    template <class T, IndexStyle I> 
-    class Vector : public BaseVector_Mutable<Vector<T,I> >
-    {
     public:
 
-        typedef Vector<T,I> type;
-        typedef BaseVector_Mutable<type> base_mut;
-
-        enum { vsize = Traits<type>::vsize };
-        enum { vfort = Traits<type>::vfort };
-        enum { vcalc = Traits<type>::vcalc };
-        enum { visreal = Traits<type>::visreal };
-        enum { viscomplex = Traits<type>::viscomplex };
-        enum { vstep = Traits<type>::vstep };
-        enum { vconj = Traits<type>::vconj };
-
         //
-        // Constructors
+        // Constructor
         //
 
-        explicit inline Vector(size_t n) : itssize(n), itsv(new T[n])
-        {
-#ifdef TMV_DEBUG
-            this->setAllTo(T(888));
-#endif
-        }
-
-        inline Vector(size_t n, T val) : itssize(n), itsv(new T[n])
-        {
-#ifdef TMV_DEBUG
-            this->setAllTo(T(888));
-#endif
-            std::fill(ptr(),ptr()+n,val);
-        }
-
-        inline Vector(size_t n, const T* v2) : itssize(n), itsv(new T[n])
-        {
-#ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
-#endif
-            //std::copy(v2,v2+n,ptr());
-            VectorViewOf(v2,n).newAssignTo(*this);
-        }
-
-        inline explicit Vector(const std::vector<T>& v2) :  
-            itssize(v2.size()), itsv(new T[v2.size()])
-        {
-#ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
-#endif
-            //std::copy(v2.begin(),v2.end(),ptr());
-            VectorViewOf(&v2[0],itssize).newAssignTo(*this);
-        }
-
-        inline Vector(const type& v2) :
-            itssize(v2.size()), itsv(new T[v2.size()])
-        {
-#ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
-#endif
-            v2.newAssignTo(*this);
-        }
-
-        template <class V2>
-        inline Vector(const BaseVector<V2>& v2) : 
-            itssize(v2.size()), itsv(new T[v2.size()])
-        {
-#ifdef TMV_DEBUG
-            this->setAllTo(T(888));
-#endif
-            v2.newAssignTo(*this);
-        }
-
-        inline ~Vector() 
-        {
-#ifdef TMV_DEBUG
-            this->setAllTo(T(999));
-#endif
-        }
+        inline GenVector() {}
+        inline GenVector(const GenVector<T>&) {}
+        virtual inline ~GenVector() {}
 
 
         //
-        // Op =
+        // Access Functions
         //
 
-        inline type& operator=(type& v2)
+        using AssignableToVector<T>::size;
+        void assignToV(const VectorView<RT>& rhs) const
         {
-            TMVAssert(v2.size() == size());
-            if (&v2 != this) v2.assignTo(*this);
-            return *this; 
+            TMVAssert(rhs.size() == size());
+            TMVAssert(isReal(T()));
+            if (!isSameAs(rhs)) Copy(*this,rhs); 
+        }
+        void assignToV(const VectorView<CT>& rhs) const
+        { 
+            TMVAssert(rhs.size() == size());
+            if (!isSameAs(rhs)) Copy(*this,rhs); 
         }
 
-        template <class V2>
-        inline type& operator=(const BaseVector<V2>& v2)
-        { base_mut::operator=(v2); return *this; }
-
-
-        //
-        // Auxilliary Functions
-        //
-
-        inline const T* cptr() const { return itsv.get(); }
-        inline T* ptr() { return itsv.get(); }
-        inline T cref(int i) const  { return itsv[i]; }
-        inline T& ref(int i) { return itsv[i]; }
-
-        inline size_t size() const { return itssize; }
-        inline int step() const { return 1; }
-        inline bool isconj() const { return false; }
-        inline void swapWith(type& v2)
-        {
-            TMVAssert(v2.size() == size());
-            if (itsv.get() == v2.itsv.get()) return;
-            T* temp = itsv.release();
-            itsv.reset(v2.itsv.release());
-            v2.itsv.reset(temp);
+        inline T operator[](int i) const 
+        { 
+            TMVAssert(i>=0 && i<int(size()));
+            return cref(i); 
         }
+        inline T operator()(int i) const 
+        { 
+            TMVAssert(i>=0 && i<int(size()));
+            return cref(i); 
+        }
+
+        typedef T value_type;
+        typedef CVIter<T> const_iterator;
+        typedef CVIter<T> const_reverse_iterator;
+
+        inline const_iterator begin() const
+        { return const_iterator(cptr(),step(),ct()); }
+        inline const_iterator end() const
+        { return begin() + size(); }
+        inline const_reverse_iterator rbegin() const
+        { return const_reverse_iterator(cptr(),step(),ct()); }
+        inline const_reverse_iterator rend() const
+        { return rbegin() + size(); }
+
+        template <class T2> 
+        inline bool isSameAs(const GenVector<T2>&) const
+        { return false; }
+
+        inline bool isSameAs(const GenVector<T>& v2) const
+        {
+            return (
+                this == &v2 || 
+                ( cptr()==v2.cptr() && size()==v2.size() && 
+                  step()==v2.step() && ct()==v2.ct() ) );
+        }
+
+        template <class T2> 
+        TMV_DEPRECATED(bool SameAs(const GenVector<T2>& v2) const);
+        TMV_DEPRECATED(bool SameAs(const GenVector<T>& v2) const)
+        { return isSameAs(v2); }
+
+        //
+        // subVector
+        //
+
+        bool hasSubVector(int i1, int i2, int istep) const;
+
+        inline const_view_type subVector(int i1, int i2) const
+        {
+            TMVAssert(hasSubVector(i1,i2,1));
+            return const_view_type(cptr()+i1*step(),i2-i1,step(),ct());
+        }
+
+        inline const_view_type subVector(int i1, int i2, int istep) const
+        {
+            TMVAssert(hasSubVector(i1,i2,istep));
+            return const_view_type(
+                cptr()+i1*step(),(i2-i1)/istep,istep*step(),ct());
+        }
+
+        inline const_view_type reverse() const
+        { 
+            return const_view_type(
+                cptr()+(int(size())-1)*step(),size(),-step(),ct()); 
+        }
+
+        inline const_view_type view() const
+        { return const_view_type(cptr(),size(),step(),ct()); }
+
+        inline const_view_type conjugate() const
+        { return const_view_type(cptr(),size(),step(),TMV_ConjOf(T,ct())); }
+
+        inline const_real_type realPart() const
+        { 
+            return const_real_type(
+                reinterpret_cast<const RT*>( cptr()),
+                size(), isReal(T()) ? step() : 2*step(), NonConj);
+        }
+
+        inline const_real_type imagPart() const
+        { 
+            TMVAssert(isComplex(T()));
+            return const_real_type(
+                reinterpret_cast<const RT*>( cptr())+1, 
+                size(), 2*step(), NonConj);
+        }
+
+        inline const_real_type flatten() const
+        { 
+            TMVAssert(isComplex(T()));
+            TMVAssert(step() == 1);
+            return const_real_type(
+                reinterpret_cast<const RT*>(cptr()),
+                isReal(T()) ? size() : 2*size(), 1, NonConj);
+        }
+
+        inline nonconst_type nonConst() const
+        { 
+            return nonconst_type(
+                const_cast<T*>(cptr()),
+                size(),step(),ct() TMV_FIRSTLAST1(cptr(),end().getP())); 
+        }
+
+        TMV_DEPRECATED(const_view_type SubVector(int i1, int i2) const)
+        { return subVector(i1,i2); }
+        TMV_DEPRECATED(const_view_type SubVector(
+                int i1, int i2, int istep) const)
+        { return subVector(i1,i2,istep); }
+        TMV_DEPRECATED(const_view_type Reverse() const)
+        { return reverse(); }
+        TMV_DEPRECATED(const_view_type View() const)
+        { return view(); }
+        TMV_DEPRECATED(const_view_type Conjugate() const)
+        { return conjugate(); }
+        TMV_DEPRECATED(const_real_type Real() const)
+        { return realPart(); }
+        TMV_DEPRECATED(const_real_type Imag() const)
+        { return imagPart(); }
+        TMV_DEPRECATED(const_real_type Flatten() const)
+        { return flatten(); }
+        TMV_DEPRECATED(nonconst_type NonConst() const)
+        { return nonConst(); }
+
+
+        //
+        // Functions of Vector
+        //
+
+        inline RT norm() const 
+        { return norm2(); }
+
+        RT normSq(const RT scale = RT(1)) const; 
+
+        inline RT norm1() const 
+        { return sumAbsElements(); }
+
+        RT norm2() const; 
+
+        inline RT normInf() const 
+        { return size() > 0 ? maxAbsElement() : RT(0); }
+
+        T sumElements() const;
+
+        RT sumAbsElements() const;
+
+        T minElement(int* iminout=0) const;
+
+        T maxElement(int* imaxout=0) const;
+
+        RT minAbsElement(int* iminout=0) const;
+
+        RT maxAbsElement(int* imaxout=0) const;
+
+        TMV_DEPRECATED(RT Norm() const)
+        { return norm(); }
+        TMV_DEPRECATED(RT NormSq(const RT scale = RT(1)) const)
+        { return normSq(scale); }
+        TMV_DEPRECATED(RT Norm1() const )
+        { return norm1(); }
+        TMV_DEPRECATED(RT Norm2() const)
+        { return norm2(); }
+        TMV_DEPRECATED(RT NormInf() const )
+        { return normInf(); }
+        TMV_DEPRECATED(T SumElements() const)
+        { return sumElements(); }
+        TMV_DEPRECATED(RT SumAbsElements() const)
+        { return sumAbsElements(); }
+        TMV_DEPRECATED(T MinElement(int* iminout=0) const)
+        { return minElement(iminout); }
+        TMV_DEPRECATED(T MaxElement(int* imaxout=0) const)
+        { return maxElement(imaxout); }
+        TMV_DEPRECATED(RT MinAbsElement(int* iminout=0) const)
+        { return minAbsElement(iminout); }
+        TMV_DEPRECATED(RT MaxAbsElement(int* imaxout=0) const)
+        { return maxAbsElement(imaxout); }
+
+        //
+        // I/O
+        //
+
+        void write(std::ostream& os) const;
+        void write(std::ostream& os, RT minNonZero) const;
+
+        TMV_DEPRECATED(void Write(std::ostream& os) const)
+        { write(os); }
+        TMV_DEPRECATED(void Write(std::ostream& os, RT minNonZero) const)
+        { write(os,minNonZero); }
+
+        virtual const T* cptr() const =0;
+        virtual int step() const =0;
+        virtual ConjType ct() const =0;
+        inline bool isconj() const 
+        { return (isComplex(T()) && ct()==Conj); }
+
+        virtual T cref(int i) const;
 
     private:
 
-        const size_t itssize;
-        auto_array<T> itsv;
+        type& operator=(const GenVector<T>&);
 
-    }; // Vector
+    }; // GenVector
 
-    template <class T>
-    class VectorF : public Vector<T,FortranStyle>
+    template <class T> template <class T2> 
+    inline bool GenVector<T>::SameAs(const GenVector<T2>& v2) const
+    { return isSameAs(v2); }
+
+    template <class T, IndexStyle I> 
+    class ConstVectorView : public GenVector<T>
     {
+        typedef TMV_RealType(T) RT;
+        typedef ConstVectorView<T,I> type;
+        typedef ConstVectorView<RT,I> const_real_type;
+
     public:
 
-        typedef VectorF<T> type;
-        typedef Vector<T,FortranStyle> vtype;
-
-        explicit inline VectorF(size_t n) : vtype(n) {}
-        inline VectorF(size_t n, T val) : vtype(n,val) {}
-        inline VectorF(size_t n, const T* v2) : vtype(v2) {}
-        inline explicit VectorF(const std::vector<T>& v2) : vtype(v2) {}
-        inline VectorF(const type& v2) : vtype(v2) {}
-        template <class V2>
-        inline VectorF(const BaseVector<V2>& v2) : vtype(v2) {}
-        inline ~VectorF() {}
-
-        inline type& operator=(type& v2)
-        { vtype::operator=(v2); return *this; }
-        template <class V2>
-        inline type& operator=(const BaseVector<V2>& v2)
-        { vtype::operator=(v2); return *this; }
-    }; // VectorF
-
-    //
-    // ConstVectorView
-    //
-
-    template <class T, int S, bool C, IndexStyle I>
-    struct Traits<ConstVectorView<T,S,C,I> >
-    {
-        typedef T value_type;
-        typedef typename Traits<T>::real_type real_type;
-        typedef typename Traits<T>::complex_type complex_type;
-        enum { visreal = Traits<T>::isreal };
-        enum { viscomplex = Traits<T>::iscomplex };
-
-        typedef ConstVectorView<T,S,C,I> type;
-        typedef const type& calc_type;
-        typedef const type& eval_type;
-        typedef Vector<T,I> copy_type;
-
-        enum { vsize = UNKNOWN };
-        enum { vfort = (I==FortranStyle) };
-        enum { vcalc = true };
-        enum { vstep = S };
-        enum { vconj = C };
-        enum { negS = IntTraits<S>::negS };
-        enum { twoS = visreal ? S : IntTraits<S>::twoS };
-        enum { notC = !C && viscomplex };
-
-        typedef ConstVectorView<T,S,C,I> const_subvector_type;
-        typedef ConstVectorView<T,UNKNOWN,C,I> const_subvector_step_type;
-        typedef ConstVectorView<T,S,C,I> const_view_type;
-        typedef ConstVectorView<T,S,C,CStyle> const_cview_type;
-        typedef ConstVectorView<T,S,C,FortranStyle> const_fview_type;
-        typedef ConstVectorView<T,UNKNOWN,C> const_xview_type;
-        typedef ConstVectorView<T,1,C,I> const_unitview_type;
-        typedef ConstVectorView<T,S,notC,I> const_conjugate_type;
-        typedef ConstVectorView<T,negS,C,I> const_reverse_type;
-        typedef ConstVectorView<real_type,twoS,false,I> const_realpart_type;
-        typedef const_realpart_type const_imagpart_type;
-        typedef ConstVectorView<real_type,1,false,I> const_flatten_type;
-        typedef ConstVectorView<T,S,false,I> const_nonconj_type;
-        typedef VectorView<T,S,C,I> nonconst_type;
-
-        typedef CVIt<T,S,C> const_iterator;
-        typedef CVIt<T,negS,C> const_reverse_iterator;
-    };
-
-    template <class T, int S, bool C, IndexStyle I>
-    class ConstVectorView : public BaseVector_Calc<ConstVectorView<T,S,C,I> >
-    {
-    public:
-
-        typedef ConstVectorView<T,S,C,I> type;
-
-        enum { vsize = Traits<type>::vsize };
-        enum { vfort = Traits<type>::vfort };
-        enum { vcalc = Traits<type>::vcalc };
-        enum { visreal = Traits<type>::visreal };
-        enum { viscomplex = Traits<type>::viscomplex };
-        enum { vstep = Traits<type>::vstep };
-        enum { vconj = Traits<type>::vconj };
-
-        //
-        // Constructors
-        //
-
-        inline ConstVectorView(const T* v, size_t n, int s) : 
-            itsv(v), itssize(n), itsstep(s) {}
-
-        inline ConstVectorView(const T* v, size_t n) : 
-            itsv(v), itssize(n), itsstep(S) 
-        { TMVStaticAssert(S != UNKNOWN); }
-
-        inline ConstVectorView(const type& v2) : 
-            itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) {}
-
-        inline ConstVectorView(const VectorView<T,S,C,I>& v2) : 
-            itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) {}
-
-        template <int S2, IndexStyle I2>
-        inline ConstVectorView(const ConstVectorView<T,S2,C,I2>& v2) :
-            itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) {}
-
-        template <int S2, IndexStyle I2>
-        inline ConstVectorView(const VectorView<T,S2,C,I2>& v2) :
-            itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) {}
-
-        template <int N2, int S2, IndexStyle I2>
-        inline ConstVectorView(const ConstSmallVectorView<T,N2,S2,C,I2>& v2) :
-            itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) {}
-
-        template <int N2, int S2, IndexStyle I2>
-        inline ConstVectorView(const SmallVectorView<T,N2,S2,C,I2>& v2) :
-            itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) {}
-
-        inline ~ConstVectorView() {
-#ifdef TMV_DEBUG
-            itsv = 0; 
+        inline ConstVectorView(const ConstVectorView<T,I>& rhs) : 
+            _v(rhs._v), _size(rhs._size), _step(rhs._step),
+            _ct(rhs._ct) {}
+        inline ConstVectorView(const GenVector<T>& rhs) : 
+            _v(rhs.cptr()), _size(rhs.size()), _step(rhs.step()),
+            _ct(rhs.ct()) {}
+        inline ConstVectorView(
+            const T* v, size_t size, int step, ConjType ct) : 
+            _v(v), _size(size), _step(step), _ct(ct) {}
+        virtual inline ~ConstVectorView() 
+        {
+#ifdef TMVDEBUG
+            const_cast<const T*&>(_v) = 0;
 #endif
         }
 
-    private :
-        inline void operator=(const type& v2);
-    public :
+        virtual inline size_t size() const { return _size; }
+        virtual inline const T* cptr() const { return _v; }
+        virtual inline int step() const { return _step; }
+        virtual inline ConjType ct() const { return _ct; }
 
-        //
-        // Auxilliary Functions
-        //
+    private:
 
-        inline const T* cptr() const { return itsv; }
+        const T*const _v;
+        const size_t _size;
+        const int _step;
+        const ConjType _ct;
 
-        inline T cref(int i) const  { return DoConj<C>(itsv[i*step()]); }
-
-        inline size_t size() const { return itssize; }
-        inline int step() const { return itsstep; }
-        inline bool isconj() const { return C; }
-
-    protected :
-
-#ifdef TMV_DEBUG
-        const T* itsv;
-#else
-        const T*const itsv;
-#endif
-        const size_t itssize;
-        const CheckedInt<S> itsstep;
+        type& operator=(const ConstVectorView<T,I>&);
 
     }; // ConstVectorView
 
-    template <class T, int S, bool C>
-    class ConstVectorViewF : public ConstVectorView<T,S,C,FortranStyle>
+    template <class T> 
+    class ConstVectorView<T,FortranStyle> : public ConstVectorView<T,CStyle>
     {
-    public:
-        typedef ConstVectorViewF<T,S,C> type;
-        typedef ConstVectorView<T,S,C,FortranStyle> vtype;
+        typedef TMV_RealType(T) RT;
+        typedef ConstVectorView<T,FortranStyle> type;
+        typedef ConstVectorView<T,FortranStyle> const_view_type;
+        typedef ConstVectorView<RT,FortranStyle> const_real_type;
 
-        inline ConstVectorViewF(const T* v, size_t n, int s) : vtype(v,n,s) {}
-        inline ConstVectorViewF(const T* v, size_t n) : vtype(v,n) {}
-        inline ConstVectorViewF(const type& v2) : vtype(v2) {}
-        inline ConstVectorViewF(const VectorView<T,S,C,FortranStyle>& v2) : 
-            vtype(v2) {}
-        template <int S2, IndexStyle I2>
-        inline ConstVectorViewF(const ConstVectorView<T,S2,C,I2>& v2) :
-            vtype(v2) {}
-        template <int S2, IndexStyle I2>
-        inline ConstVectorViewF(const VectorView<T,S2,C,I2>& v2) : vtype(v2) {}
-        template <int N2, int S2, IndexStyle I2>
-        inline ConstVectorViewF(const ConstSmallVectorView<T,N2,S2,C,I2>& v2) :
-            vtype(v2) {}
-        template <int N2, int S2, IndexStyle I2>
-        inline ConstVectorViewF(const SmallVectorView<T,N2,S2,C,I2>& v2) : 
-            vtype(v2) {}
-        inline ~ConstVectorViewF() {}
-
-    private :
-        inline void operator=(const type& v2);
-    }; // ConstVectorViewF
-
-
-    //
-    // VectorView
-    //
-
-    template <class T, int S, bool C, IndexStyle I>
-    struct Traits<VectorView<T,S,C,I> >
-    {
-        typedef T value_type;
-        typedef typename Traits<T>::real_type real_type;
-        typedef typename Traits<T>::complex_type complex_type;
-        enum { visreal = Traits<T>::isreal };
-        enum { viscomplex = Traits<T>::iscomplex };
-
-        typedef VectorView<T,S,C,I> type;
-        typedef const ConstVectorView<T,S,C,I> calc_type;
-        typedef calc_type eval_type;
-        typedef Vector<T,I> copy_type;
-
-        enum { vsize = UNKNOWN };
-        enum { vfort = (I==FortranStyle) };
-        enum { vcalc = true };
-        enum { vstep = S };
-        enum { vconj = C };
-        enum { negS = (S == UNKNOWN ? UNKNOWN : -S) };
-        enum { twoS = (S == UNKNOWN ? UNKNOWN : (visreal ? S : S<<1)) };
-        enum { notC = !C && viscomplex };
-
-        typedef ConstVectorView<T,S,C,I> const_subvector_type;
-        typedef ConstVectorView<T,UNKNOWN,C,I> const_subvector_step_type;
-        typedef ConstVectorView<T,S,C,I> const_view_type;
-        typedef ConstVectorView<T,S,C,CStyle> const_cview_type;
-        typedef ConstVectorView<T,S,C,FortranStyle> const_fview_type;
-        typedef ConstVectorView<T,UNKNOWN,C> const_xview_type;
-        typedef ConstVectorView<T,1,C,I> const_unitview_type;
-        typedef ConstVectorView<T,S,notC,I> const_conjugate_type;
-        typedef ConstVectorView<T,negS,C,I> const_reverse_type;
-        typedef ConstVectorView<real_type,twoS,false,I> const_realpart_type;
-        typedef const_realpart_type const_imagpart_type;
-        typedef ConstVectorView<real_type,1,false,I> const_flatten_type;
-        typedef ConstVectorView<T,S,false,I> const_nonconj_type;
-        typedef VectorView<T,S,C,I> nonconst_type;
-
-        typedef CVIt<T,S,C> const_iterator;
-        typedef CVIt<T,negS,C> const_reverse_iterator;
-
-        typedef typename AuxRef<T,C>::reference reference;
-
-        typedef VectorView<T,S,C,I> subvector_type;
-        typedef VectorView<T,UNKNOWN,C,I> subvector_step_type;
-        typedef VectorView<T,S,C,I> view_type;
-        typedef VectorView<T,S,C,CStyle> cview_type;
-        typedef VectorView<T,S,C,FortranStyle> fview_type;
-        typedef VectorView<T,UNKNOWN,C> xview_type;
-        typedef VectorView<T,1,C,I> unitview_type;
-        typedef VectorView<T,S,notC,I> conjugate_type;
-        typedef VectorView<T,negS,C,I> reverse_type;
-        typedef VectorView<real_type,twoS,false,I> realpart_type;
-        typedef realpart_type imagpart_type;
-        typedef VectorView<real_type,1,false,I> flatten_type;
-        typedef VectorView<T,S,false,I> nonconj_type;
-
-        typedef VIt<T,S,C> iterator;
-        typedef VIt<T,negS,C> reverse_iterator;
-    };
-
-    template <class T, int S, bool C, IndexStyle I>
-    class VectorView : public BaseVector_Mutable<VectorView<T,S,C,I> >
-    {
     public:
 
-        typedef VectorView<T,S,C,I> type;
-        typedef BaseVector_Mutable<type> base_mut;
-        typedef typename base_mut::reference reference;
-
-        enum { vsize = Traits<type>::vsize };
-        enum { vfort = Traits<type>::vfort };
-        enum { vcalc = Traits<type>::vcalc };
-        enum { visreal = Traits<type>::visreal };
-        enum { viscomplex = Traits<type>::viscomplex };
-        enum { vstep = Traits<type>::vstep };
-        enum { vconj = Traits<type>::vconj };
+        inline ConstVectorView(const ConstVectorView<T,FortranStyle>& rhs) : 
+            ConstVectorView<T,CStyle>(rhs) {}
+        inline ConstVectorView(const ConstVectorView<T,CStyle>& rhs) : 
+            ConstVectorView<T,CStyle>(rhs) {}
+        inline ConstVectorView(const GenVector<T>& rhs) : 
+            ConstVectorView<T,CStyle>(rhs) {}
+        inline ConstVectorView(const T* inv, size_t insize, int instep, 
+                               ConjType inct) : 
+            ConstVectorView<T,CStyle>(inv,insize,instep,inct) {}
+        virtual inline ~ConstVectorView() {}
 
         //
-        // Constructors
+        // Access Functions
         //
 
-        inline VectorView(T* v, size_t n, int s) : 
-            itsv(v), itssize(n), itsstep(s) {}
+        inline T operator[](int i) const 
+        { 
+            TMVAssert(i>0 && i<=int(this->size()));
+            return GenVector<T>::cref(i-1); 
+        }
+        inline T operator()(int i) const 
+        { 
+            TMVAssert(i>0 && i<=int(this->size()));
+            return GenVector<T>::cref(i-1); 
+        }
 
-        inline VectorView(T* v, size_t n) : 
-            itsv(v), itssize(n), itsstep(S) 
-        { TMVStaticAssert(S != UNKNOWN); }
+        // 
+        // SubVector
+        //
 
-        inline VectorView(const type& v2) : 
-            itsv(v2.itsv), itssize(v2.itssize), itsstep(v2.itsstep) {}
+        bool hasSubVector(int i1, int i2, int istep) const;
 
-        template <int S2, IndexStyle I2>
-        inline VectorView(VectorView<T,S2,C,I2> v2) :
-            itsv(v2.ptr()), itssize(v2.size()), itsstep(v2.step()) {}
+        inline const_view_type subVector(int i1, int i2) const
+        {
+            TMVAssert(hasSubVector(i1,i2,1));
+            return GenVector<T>::subVector(i1-1,i2);
+        }
 
-        template <int N2, int S2, IndexStyle I2>
-        inline VectorView(SmallVectorView<T,N2,S2,C,I2> v2) :
-            itsv(v2.ptr()), itssize(v2.size()), itsstep(v2.step()) {}
+        inline const_view_type subVector(
+            int i1, int i2, int istep) const
+        {
+            TMVAssert(hasSubVector(i1,i2,istep));
+            return GenVector<T>::subVector(i1-1,i2-1+istep,istep);
+        }
 
-        inline ~VectorView() {
-#ifdef TMV_DEBUG
-            itsv = 0; 
+        inline const_view_type reverse() const
+        { return GenVector<T>::reverse(); }
+
+        inline const_view_type view() const
+        { return GenVector<T>::view(); }
+
+        inline const_view_type conjugate() const
+        { return GenVector<T>::conjugate(); }
+
+        inline const_real_type realPart() const
+        { return GenVector<T>::realPart(); }
+
+        inline const_real_type imagPart() const
+        { return GenVector<T>::imagPart(); }
+
+        inline const_real_type flatten() const
+        { return GenVector<T>::flatten(); }
+
+        TMV_DEPRECATED(const_view_type SubVector(int i1, int i2) const)
+        { return subVector(i1,i2); }
+        TMV_DEPRECATED(const_view_type SubVector(
+                int i1, int i2, int istep) const)
+        { return subVector(i1,i2,istep); }
+        TMV_DEPRECATED(const_view_type Reverse() const)
+        { return reverse(); }
+        TMV_DEPRECATED(const_view_type View() const)
+        { return view(); }
+        TMV_DEPRECATED(const_view_type Conjugate() const)
+        { return conjugate(); }
+        TMV_DEPRECATED(const_real_type Real() const)
+        { return realPart(); }
+        TMV_DEPRECATED(const_real_type Imag() const)
+        { return imagPart(); }
+        TMV_DEPRECATED(const_real_type Flatten() const)
+        { return flatten(); }
+
+        //
+        // Functions of Vector
+        //
+
+        inline T minElement(int* iminout=0) const
+        { 
+            T temp = GenVector<T>::minElement(iminout);
+            if (iminout) ++(*iminout);
+            return temp;
+        }
+
+        inline T maxElement(int* imaxout=0) const
+        { 
+            T temp = GenVector<T>::maxElement(imaxout);
+            if (imaxout) ++(*imaxout);
+            return temp;
+        }
+
+        inline RT minAbsElement(int* iminout=0) const
+        { 
+            RT temp = GenVector<T>::minAbsElement(iminout);
+            if (iminout) ++(*iminout);
+            return temp;
+        }
+
+        inline RT maxAbsElement(int* imaxout=0) const
+        { 
+            RT temp = GenVector<T>::maxAbsElement(imaxout);
+            if (imaxout) ++(*imaxout);
+            return temp;
+        }
+
+        TMV_DEPRECATED(T MinElement(int* iminout=0) const)
+        { return minElement(iminout); }
+        TMV_DEPRECATED(T MaxElement(int* imaxout=0) const)
+        { return maxElement(imaxout); }
+        TMV_DEPRECATED(RT MinAbsElement(int* iminout=0) const)
+        { return minAbsElement(iminout); }
+        TMV_DEPRECATED(RT MaxAbsElement(int* imaxout=0) const)
+        { return maxAbsElement(imaxout); }
+
+
+    private:
+
+        const type& operator=(const type&);
+
+    }; // FortranStyle ConstVectorView
+
+    template <class T, IndexStyle I> 
+    class VectorView : public GenVector<T>
+    {
+        typedef TMV_RealType(T) RT;
+        typedef TMV_ComplexType(T) CT;
+        typedef VectorView<T,I> type;
+        typedef VectorView<T,I> view_type;
+        typedef VectorView<RT,I> real_type;
+
+    public:
+
+        //
+        // Constructors 
+        //
+
+        inline VectorView(const type& rhs) : 
+            _v(rhs._v), _size(rhs._size), _step(rhs._step),
+            _ct(rhs._ct) TMV_DEFFIRSTLAST(rhs._first,rhs._last) {}
+
+        inline VectorView(
+            T* v, size_t size, int step, ConjType ct 
+            TMV_PARAMFIRSTLAST(T) ) :
+            _v(v), _size(size), _step(step),
+            _ct(ct) TMV_DEFFIRSTLAST(_first,_last) {}
+
+        virtual inline ~VectorView() 
+        {
+#ifdef TMVDEBUG
+            const_cast<T*&>(_v) = 0;
 #endif
         }
 
@@ -902,130 +776,1496 @@ namespace tmv {
         // Op =
         //
 
-        template <class V2>
-        inline type& operator=(const BaseVector<V2>& v2)
-        { base_mut::operator=(v2); return *this; }
+        inline const type& operator=(const type& v2) const
+        { 
+            TMVAssert(size() == v2.size());
+            v2.assignToV(*this);
+            return *this; 
+        }
 
-        inline type& operator=(const type& v2)
-        { base_mut::operator=(v2); return *this; }
+        inline const type& operator=(const type& v2) 
+        { 
+            TMVAssert(size() == v2.size());
+            v2.assignToV(*this);
+            return *this; 
+        }
+
+        inline const type& operator=(const GenVector<RT>& v2) const
+        { 
+            TMVAssert(size() == v2.size());
+            v2.assignToV(*this);
+            return *this; 
+        }
+
+        inline const type& operator=(const GenVector<CT>& v2) const
+        { 
+            TMVAssert(size() == v2.size());
+            TMVAssert(isComplex(T()));
+            v2.assignToV(*this);
+            return *this; 
+        }
+
+        template <class T2> 
+        inline const type& operator=(const GenVector<T2>& v2) const
+        { 
+            TMVAssert(isReal(T2()) || isComplex(T()));
+            TMVAssert(size() == v2.size());
+            Copy(v2,*this);
+            return *this; 
+        }
+
+        inline const type& operator=(const AssignableToVector<RT>& v2) const
+        { 
+            TMVAssert(size() == v2.size());
+            v2.assignToV(*this);
+            return *this; 
+        }
+
+        inline const type& operator=(const AssignableToVector<CT>& v2) const
+        { 
+            TMVAssert(size() == v2.size());
+            TMVAssert(isComplex(T()));
+            v2.assignToV(*this);
+            return *this; 
+        }
+
+        template <class T2, int N, IndexStyle I2> 
+        inline const type& operator=(const SmallVector<T2,N,I2>& v2) const
+        { 
+            TMVAssert(size() == v2.size());
+            Copy(v2.view(),*this);
+            return *this; 
+        }
+
+        template <int N> 
+        inline const type& operator=(
+            const SmallVectorComposite<RT,N>& v2) const
+        {
+            TMVAssert(size() == N);
+            v2.assignToV(*this);
+            return *this; 
+        }
+
+        template <int N> 
+        inline const type& operator=(
+            const SmallVectorComposite<CT,N>& v2) const
+        {
+            TMVAssert(size() == N);
+            TMVAssert(isComplex(T()));
+            v2.assignToV(*this);
+            return *this; 
+        }
 
         //
-        // Auxilliary Functions
+        // Access Functions
         //
 
-        inline const T* cptr() const { return itsv; }
-        inline T* ptr() { return itsv; }
+        typedef T value_type;
+        typedef VIter<T> iterator;
+        typedef CVIter<T> const_iterator;
+        typedef VIter<T> reverse_iterator;
+        typedef CVIter<T> const_reverse_iterator;
+        typedef TMV_RefType(T) reference;
 
-        inline T cref(int i) const  { return DoConj<C>(itsv[i*step()]); }
-        inline reference ref(int i) { return reference(itsv[i*step()]); }
+        inline reference operator[](int i) const 
+        { 
+            TMVAssert(i>=0 && i<int(size()));
+            return ref(i); 
+        }
+        inline reference operator()(int i) const 
+        { 
+            TMVAssert(i>=0 && i<int(size()));
+            return ref(i); 
+        }
 
-        inline size_t size() const { return itssize; }
-        inline int step() const { return itsstep; }
-        inline bool isconj() const { return C; }
+        inline iterator begin() const
+        { return iterator(ptr(),step(),ct() TMV_FIRSTLAST ); }
+        inline iterator end() const
+        { return begin() + size(); }
+        inline reverse_iterator rbegin() const
+        {
+            return reverse_iterator(
+                ptr()+step()*(int(size())-1),-step(),ct() TMV_FIRSTLAST ); 
+        }
+        inline reverse_iterator rend() const
+        { return rbegin() + size(); }
 
-    protected :
+        typedef ListAssigner<T,iterator> MyListAssigner;
+        MyListAssigner inline operator<<(const T& x)
+        { return MyListAssigner(begin(),size(),x); }
 
-#ifdef TMV_DEBUG
-        T* itsv;
-#else
-        T*const itsv;
+        TMV_DEPRECATED(MyListAssigner operator=(ListInitClass))
+        { return MyListAssigner(begin(),size()); }
+
+
+        //
+        // Modifying Functions
+        //
+
+        const type& setZero() const;
+
+        const type& clip(RT thresh) const;
+
+        const type& setAllTo(const T& x) const;
+
+        const type& addToAll(const T& x) const;
+
+        const type& conjugateSelf() const;
+
+        const type& DoBasis(int i) const;
+        inline const type& makeBasis(int i) const
+        { TMVAssert(i>=0 && i<int(size())); return DoBasis(i); }
+
+        const type& DoSwap(int i1, int i2) const;
+        inline const type& swap(int i1, int i2) const
+        { 
+            TMVAssert(i1>=0 && i1<int(size()));
+            TMVAssert(i2>=0 && i2<int(size()));
+            return DoSwap(i1,i2);
+        }
+
+        const type& DoPermute(const int* p, int i1, int i2) const;
+        inline const type& permute(const int* p, int i1, int i2) const
+        {
+            TMVAssert(i1>=0 && i1 <= i2 && i2 <= int(size()));
+            return DoPermute(p,i1,i2);
+        }
+        inline const type& permute(const int* p) const
+        { return DoPermute(p,0,size()); }
+
+        const type& DoReversePermute(const int* p, int i1, int i2) const;
+        inline const type& reversePermute(const int* p, int i1, int i2) const
+        {
+            TMVAssert(i1>=0 && i1 <= i2 && i2 <= int(size()));
+            return DoReversePermute(p,i1,i2);
+        }
+        inline const type& reversePermute(const int* p) const
+        { return reversePermute(p,0,size()); }
+
+        const type& reverseSelf() const;
+
+        const type& sort(
+            int* p, ADType ad=Ascend, CompType comp=RealComp) const;
+
+        inline const type& sort(ADType ad=Ascend, CompType comp=RealComp) const
+        { sort(0,ad,comp); return *this; }
+
+
+        TMV_DEPRECATED(const type& Zero() const)
+        { return setZero(); }
+        TMV_DEPRECATED(const type& Clip(RT thresh) const)
+        { return clip(thresh); }
+        TMV_DEPRECATED(const type& SetAllTo(const T& x) const)
+        { return setAllTo(x); }
+        TMV_DEPRECATED(const type& AddToAll(const T& x) const)
+        { return addToAll(x); }
+        TMV_DEPRECATED(const type& ConjugateSelf() const)
+        { return conjugateSelf(); }
+        TMV_DEPRECATED(const type& MakeBasis(int i) const)
+        { return makeBasis(i); }
+        TMV_DEPRECATED(const type& Swap(int i1, int i2) const)
+        { return swap(i1,i2); }
+        TMV_DEPRECATED(const type& Permute(
+                const int* p, int i1, int i2) const)
+        { return permute(p,i1,i2); }
+        TMV_DEPRECATED(const type& Permute(const int* p) const)
+        { return permute(p); }
+        TMV_DEPRECATED(const type& ReversePermute(
+                const int* p, int i1, int i2) const)
+        { return reversePermute(p,i1,i2); }
+        TMV_DEPRECATED(const type& ReversePermute(const int* p) const)
+        { return reversePermute(p); }
+        TMV_DEPRECATED(const type& ReverseSelf() const)
+        { return reverseSelf(); }
+        TMV_DEPRECATED(const type& Sort(
+                int* p, OldADType ad=ASCEND, OldCompType comp=REAL_COMP) const)
+        { return sort(p,ADType(ad),CompType(comp)); }
+        TMV_DEPRECATED(const type& Sort(
+                OldADType ad=ASCEND, OldCompType comp=REAL_COMP) const)
+        { return sort(ADType(ad),CompType(comp)); }
+
+        //
+        // SubVector
+        //
+
+        inline view_type subVector(int i1, int i2) const
+        {
+            TMVAssert(GenVector<T>::hasSubVector(i1,i2,1));
+            return view_type(ptr()+i1*step(),(i2-i1),step(),
+                        ct() TMV_FIRSTLAST );
+        }
+
+        inline view_type subVector(int i1, int i2, int istep) const
+        {
+            TMVAssert(GenVector<T>::hasSubVector(i1,i2,istep));
+            return view_type(ptr()+i1*step(),(i2-i1)/istep,istep*step(),
+                        ct() TMV_FIRSTLAST );
+        }
+
+        inline view_type reverse() const
+        { 
+            return view_type(ptr()+(int(size())-1)*step(),size(),-step(),
+                        ct() TMV_FIRSTLAST ); 
+        }
+
+        inline view_type view() const
+        { return *this; }
+
+        inline view_type conjugate() const
+        {
+            return view_type(ptr(),size(),step(),
+                        TMV_ConjOf(T,ct()) TMV_FIRSTLAST ); 
+        }
+
+        inline real_type realPart() const
+        { 
+            return real_type(
+                reinterpret_cast<RT*>(ptr()),
+                size(), isReal(T()) ? step() : 2*step(), NonConj
+#ifdef TMVFLDEBUG
+                ,reinterpret_cast<const RT*>(_first)
+                ,reinterpret_cast<const RT*>(_last)
 #endif
-        const size_t itssize;
-        const CheckedInt<S> itsstep;
+            );
+        }
+
+        inline real_type imagPart() const
+        { 
+            TMVAssert(isComplex(T()));
+            return real_type(
+                reinterpret_cast<RT*>(ptr())+1,size(),2*step(), NonConj
+#ifdef TMVFLDEBUG
+                ,reinterpret_cast<const RT*>(_first)+1
+                ,reinterpret_cast<const RT*>(_last)+1
+#endif
+            );
+        }
+
+        inline real_type flatten() const
+        { 
+            TMVAssert(isComplex(T()));
+            TMVAssert(step() == 1);
+            return real_type(
+                reinterpret_cast<RT*>(ptr()),
+                isReal(T()) ? size() : 2*size(), 1, NonConj
+#ifdef TMVFLDEBUG
+                ,reinterpret_cast<const RT*>(_first)
+                ,reinterpret_cast<const RT*>(_last)+ (isReal(T())?0:1)
+#endif
+            );
+        }
+
+        TMV_DEPRECATED(view_type SubVector(int i1, int i2) const)
+        { return subVector(i1,i2); }
+        TMV_DEPRECATED(view_type SubVector(int i1, int i2, int istep) const)
+        { return subVector(i1,i2,istep); }
+        TMV_DEPRECATED(view_type Reverse() const)
+        { return reverse(); }
+        TMV_DEPRECATED(view_type View() const)
+        { return view(); }
+        TMV_DEPRECATED(view_type Conjugate() const)
+        { return conjugate(); }
+        TMV_DEPRECATED(real_type Real() const)
+        { return realPart(); }
+        TMV_DEPRECATED(real_type Imag() const)
+        { return imagPart(); }
+        TMV_DEPRECATED(real_type Flatten() const)
+        { return flatten(); }
+
+
+        //
+        // I/O
+        //
+
+        void read(std::istream& is) const;
+
+        TMV_DEPRECATED(void Read(std::istream& is) const)
+        { read(is); }
+
+        // 
+        // Iterator Typedefs
+        //
+
+        virtual inline size_t size() const { return _size; }
+        virtual inline const T* cptr() const { return _v; }
+        virtual inline T* ptr() const { return _v; }
+        virtual inline int step() const { return _step; }
+        virtual inline ConjType ct() const { return _ct; }
+
+        reference ref(int i) const;
+
+    private:
+
+        T*const _v;
+        const size_t _size;
+        const int _step;
+        const ConjType _ct;
+
+#ifdef TMVFLDEBUG
+    public:
+        const T*const _first;
+        const T*const _last;
+#endif
 
     }; // VectorView
 
-    template <class T, int S, bool C>
-    class VectorViewF : public VectorView<T,S,C,FortranStyle>
+    template <class T> 
+    class VectorView<T,FortranStyle> : public VectorView<T,CStyle>
     {
+        typedef TMV_RealType(T) RT;
+        typedef TMV_ComplexType(T) CT;
+        typedef VectorView<T,FortranStyle> type;
+        typedef VectorView<T,CStyle> c_type;
+        typedef VectorView<T,FortranStyle> view_type;
+        typedef VectorView<RT,FortranStyle> real_type;
+        typedef ConstVectorView<T,FortranStyle> const_type;
+
     public:
-        typedef VectorViewF<T,S,C> type;
-        typedef VectorView<T,S,C,FortranStyle> vtype;
 
-        inline VectorViewF(T* v, size_t n, int s) : vtype(v,n,s) {}
-        inline VectorViewF(T* v, size_t n) : vtype(v,n) {}
-        inline VectorViewF(const type& v2) : vtype(v2) {}
-        template <int S2, IndexStyle I2>
-        inline VectorViewF(VectorView<T,S2,C,I2> v2) : vtype(v2) {}
-        template <int N2, int S2, IndexStyle I2>
-        inline VectorViewF(SmallVectorView<T,N2,S2,C,I2> v2) : vtype(v2) {}
-        inline ~VectorViewF() {}
+        //
+        // Constructors 
+        //
 
-        template <class V2>
-        inline type& operator=(const BaseVector<V2>& v2)
-        { vtype::operator=(v2); return *this; }
-        inline type& operator=(const type& v2)
-        { vtype::operator=(v2); return *this; }
-    }; // VectorViewF
+        inline VectorView(const type& rhs) : c_type(rhs) {}
+
+        inline VectorView(const c_type& rhs) : c_type(rhs) {}
+
+        inline VectorView(
+            T* inv, size_t insize, int instep, ConjType inct
+            TMV_PARAMFIRSTLAST(T) ) :
+            c_type(inv,insize,instep,inct TMV_FIRSTLAST1(_first,_last) ) {}
+
+        virtual inline ~VectorView() {}
+
+
+        //
+        // Op =
+        //
+
+        inline const type& operator=(const type& v2) const
+        { c_type::operator=(v2); return *this; }
+
+        inline const type& operator=(const type& v2)
+        { c_type::operator=(v2); return *this; }
+
+        inline const type& operator=(const c_type& v2) const
+        { c_type::operator=(v2); return *this; }
+
+        inline const type& operator=(const c_type& v2)
+        { c_type::operator=(v2); return *this; }
+
+        inline const type& operator=(const GenVector<RT>& v2) 
+        { c_type::operator=(v2); return *this; }
+
+        inline const type& operator=(const GenVector<CT>& v2) const
+        { c_type::operator=(v2); return *this; }
+
+        template <class T2> 
+        inline const type& operator=(const GenVector<T2>& v2) const
+        { c_type::operator=(v2); return *this; }
+
+        inline const type& operator=(
+            const AssignableToVector<RT>& v2) const
+        { c_type::operator=(v2); return *this; }
+
+        inline const type& operator=(
+            const AssignableToVector<CT>& v2) const
+        { c_type::operator=(v2); return *this; }
+
+        template <class T2, int N, IndexStyle I2> 
+        inline const type& operator=(const SmallVector<T2,N,I2>& v2) const
+        { c_type::operator=(v2); return *this; }
+
+        template <int N> 
+        inline const type& operator=(const SmallVectorComposite<RT,N>& v2) const
+        { c_type::operator=(v2); return *this; }
+
+        template <int N> 
+        inline const type& operator=(const SmallVectorComposite<CT,N>& v2) const
+        { c_type::operator=(v2); return *this; }
+
+
+        //
+        // Access Functions
+        //
+
+        inline TMV_RefType(T) operator[](int i) const 
+        { 
+            TMVAssert(i>0 && i<=int(this->size()));
+            return c_type::ref(i-1); 
+        }
+        inline TMV_RefType(T) operator()(int i) const 
+        { 
+            TMVAssert(i>0 && i<=int(this->size()));
+            return c_type::ref(i-1); 
+        }
+
+        typedef ListAssigner<T,VIter<T> > MyListAssigner;
+        inline MyListAssigner operator<<(const T& x)
+        { return c_type::operator<<(x); }
+
+        TMV_DEPRECATED(MyListAssigner operator=(ListInitClass li))
+        { return c_type::operator=(li); }
+
+
+        //
+        // Modifying Functions
+        //
+
+        inline const type& setZero() const 
+        { c_type::aero(); return *this; }
+
+        inline const type& clip(RT thresh) const
+        { c_type::clip(thresh); return *this; }
+
+        inline const type& setAllTo(const T& x) const
+        { c_type::setAllTo(x); return *this; }
+
+        inline const type& addToAll(const T& x) const
+        { c_type::addToAll(x); return *this; }
+
+        inline const type& conjugateSelf() const
+        { c_type::conjugateSelf(); return *this; }
+
+        inline const type& makeBasis(int i) const
+        {
+            TMVAssert(i>0 && i<=int(this->size()));
+            c_type::makeBasis(i-1); 
+            return *this; 
+        }
+
+        inline const type& swap(int i1, int i2) const
+        {
+            TMVAssert(i1>0 && i1<=int(this->size()));
+            TMVAssert(i2>0 && i2<=int(this->size()));
+            if (i1 != i2) c_type::swap(i1-1,i2-1);
+            return *this;
+        }
+
+        inline const type& permute(const int* p, 
+                                   int i1, int i2) const
+        { 
+            TMVAssert(i1>0 && i1 <= i2 && i2 <= int(this->size()));
+            c_type::permute(p,i1-1,i2); 
+            return *this; 
+        }
+
+        inline const type& permute(const int* p) const
+        { c_type::permute(p); return *this; }
+
+        inline const type& reversePermute(
+            const int* p, int i1, int i2) const
+        { 
+            TMVAssert(i1>0 && i1 <= i2 && i2 <= int(this->size()));
+            c_type::reversePermute(p,i1-1,i2); 
+            return *this; 
+        }
+
+        inline const type& reversePermute(
+            const int* p) const
+        { c_type::reversePermute(p); return *this; }
+
+        inline const type& reverseSelf() const
+        { c_type::reverseSelf(); return *this; }
+
+        inline const type& sort(
+            int* p, ADType ad=Ascend, CompType comp=RealComp) const
+        { c_type::sort(p,ad,comp); return *this; }
+
+        inline const type& sort(ADType ad=Ascend, CompType comp=RealComp) const
+        { c_type::Sort(0,ad,comp); return *this; }
+
+        TMV_DEPRECATED(const type& Zero() const)
+        { return setZero(); }
+        TMV_DEPRECATED(const type& Clip(RT thresh) const)
+        { return clip(thresh); }
+        TMV_DEPRECATED(const type& SetAllTo(const T& x) const)
+        { return setAllTo(x); }
+        TMV_DEPRECATED(const type& AddToAll(const T& x) const)
+        { return addToAll(x); }
+        TMV_DEPRECATED(const type& ConjugateSelf() const)
+        { return conjugateSelf(); }
+        TMV_DEPRECATED(const type& MakeBasis(int i) const)
+        { return makeBasis(i); }
+        TMV_DEPRECATED(const type& Swap(int i1, int i2) const)
+        { return swap(i1,i2); }
+        TMV_DEPRECATED(const type& Permute(
+                const int* p, int i1, int i2) const)
+        { return permute(p,i1,i2); }
+        TMV_DEPRECATED(const type& Permute(const int* p) const)
+        { return permute(p); }
+        TMV_DEPRECATED(const type& ReversePermute(
+                const int* p, int i1, int i2) const)
+        { return reversePermute(p,i1,i2); }
+        TMV_DEPRECATED(const type& ReversePermute(const int* p) const)
+        { return reversePermute(p); }
+        TMV_DEPRECATED(const type& ReverseSelf() const)
+        { return reverseSelf(); }
+        TMV_DEPRECATED(const type& Sort(
+                int* p, OldADType ad=ASCEND, OldCompType comp=REAL_COMP) const)
+        { return sort(p,ADType(ad),CompType(comp)); }
+        TMV_DEPRECATED(const type& Sort(
+                OldADType ad=ASCEND, OldCompType comp=REAL_COMP) const)
+        { return sort(ADType(ad),CompType(comp)); }
+
+
+        //
+        // SubVector
+        //
+
+        inline bool hasSubVector(int i1, int i2, int istep) const
+        { 
+            return ConstVectorView<T,FortranStyle>(*this).hasSubVector(
+                i1,i2,istep); 
+        }
+
+        inline view_type subVector(int i1, int i2) const
+        {
+            TMVAssert(hasSubVector(i1,i2,1));
+            return c_type::subVector(i1-1,i2);
+        }
+
+        inline view_type subVector(int i1, int i2, int istep) const
+        {
+            TMVAssert(hasSubVector(i1,i2,istep));
+            return c_type::subVector(i1-1,i2-1+istep,istep);
+        }
+
+        inline view_type reverse() const
+        { return c_type::reverse(); }
+
+        inline view_type view() const
+        { return c_type::view(); }
+
+        inline view_type conjugate() const
+        { return c_type::conjugate(); }
+
+        inline real_type realPart() const
+        { return c_type::realPart(); }
+
+        inline real_type imagPart() const
+        { return c_type::imagPart(); }
+
+        inline real_type flatten() const
+        { return c_type::flatten(); }
+
+
+        TMV_DEPRECATED(view_type SubVector(int i1, int i2) const)
+        { return subVector(i1,i2); }
+        TMV_DEPRECATED(view_type SubVector(int i1, int i2, int istep) const)
+        { return subVector(i1,i2,istep); }
+        TMV_DEPRECATED(view_type Reverse() const)
+        { return reverse(); }
+        TMV_DEPRECATED(view_type View() const)
+        { return view(); }
+        TMV_DEPRECATED(view_type Conjugate() const)
+        { return conjugate(); }
+        TMV_DEPRECATED(real_type Real() const)
+        { return realPart(); }
+        TMV_DEPRECATED(real_type Imag() const)
+        { return imagPart(); }
+        TMV_DEPRECATED(real_type Flatten() const)
+        { return flatten(); }
+
+
+        //
+        // Functions of Vector
+        //
+
+        inline T minElement(int* iminout=0) const
+        { return const_type(*this).minElement(iminout); }
+
+        inline T maxElement(int* imaxout=0) const
+        { return const_type(*this).maxElement(imaxout); }
+
+        inline RT minAbsElement(int* iminout=0) const
+        { return const_type(*this).minAbsElement(iminout); }
+
+        inline RT maxAbsElement(int* imaxout=0) const
+        { return const_type(*this).maxAbsElement(imaxout); }
+
+        TMV_DEPRECATED(T MinElement(int* iminout=0) const)
+        { return minElement(iminout); }
+        TMV_DEPRECATED(T MaxElement(int* imaxout=0) const)
+        { return maxElement(imaxout); }
+        TMV_DEPRECATED(RT MinAbsElement(int* iminout=0) const)
+        { return minAbsElement(iminout); }
+        TMV_DEPRECATED(RT MaxAbsElement(int* imaxout=0) const)
+        { return maxAbsElement(imaxout); }
+
+    }; // FortranStyle VectorView
+
+#ifdef XTEST
+#ifdef TMVDEBUG
+#define XTEST_DEBUG
+#endif
+#endif
+
+    template <class T, IndexStyle I> 
+    class Vector : public GenVector<T>
+    {
+        typedef TMV_RealType(T) RT;
+        typedef TMV_ComplexType(T) CT;
+        typedef Vector<T,I> type;
+        typedef ConstVectorView<T,I> const_view_type;
+        typedef ConstVectorView<RT,I> const_real_type;
+        typedef VectorView<T,I> view_type;
+        typedef VectorView<RT,I> real_type;
+
+    public:
+
+        //
+        // Constructors
+        //
+
+#define NEW_SIZE(n) \
+        _v(new T[(n)]), _size(n) TMV_DEFFIRSTLAST(_v.get(),_v.get()+n)
+
+        explicit inline Vector(size_t n) : NEW_SIZE(n)
+        {
+#ifdef TMVDEBUG
+            setAllTo(T(888));
+#endif
+        }
+
+        inline Vector(size_t n, T val) : NEW_SIZE(n)
+        {
+            setAllTo(val); 
+        }
+
+        inline Vector(size_t n, const T* vv) : NEW_SIZE(n)
+        { 
+#ifdef XTEST_DEBUG
+            setAllTo(T(888));
+#endif
+            std::copy(vv,vv+n,_v.get());
+        }
+
+        inline explicit Vector(const std::vector<T>& vv) : NEW_SIZE(vv.size())
+        {
+#ifdef XTEST_DEBUG
+            setAllTo(T(888));
+#endif
+            std::copy(vv.begin(),vv.end(),_v.get());
+        }
+
+        inline Vector(const Vector<T,I>& rhs) : NEW_SIZE(rhs.size())
+        {
+#ifdef XTEST_DEBUG
+            setAllTo(T(888));
+#endif
+            std::copy(rhs.cptr(),rhs.cptr()+_size,_v.get());
+        }
+
+        template <IndexStyle I2> 
+        inline Vector(const Vector<T,I2>& rhs) : NEW_SIZE(rhs.size())
+        {
+#ifdef TMVDEBUG
+            setAllTo(T(888));
+#endif
+            std::copy(rhs.cptr(),rhs.cptr()+_size,_v.get());
+        }
+
+        inline Vector(const GenVector<RT>& rhs) : NEW_SIZE(rhs.size())
+        {
+#ifdef XTEST_DEBUG
+            setAllTo(T(888));
+#endif
+            if (isReal(T()) && rhs.step() == 1 && !rhs.isconj())
+                std::copy(rhs.cptr(),rhs.cptr()+_size,_v.get());
+            else rhs.assignToV(view());
+        }
+
+        inline Vector(const GenVector<CT>& rhs) : NEW_SIZE(rhs.size())
+        {
+#ifdef XTEST_DEBUG
+            setAllTo(T(888));
+#endif
+            TMVAssert(isComplex(T()));
+            if (rhs.step() == 1 && !rhs.isconj())
+                std::copy(rhs.cptr(),rhs.cptr()+_size,_v.get());
+            else rhs.assignToV(view());
+        }
+
+        template <class T2> 
+        inline Vector(const GenVector<T2>& rhs) : NEW_SIZE(rhs.size())
+        {
+#ifdef XTEST_DEBUG
+            setAllTo(T(888));
+#endif
+            TMVAssert(isReal(T2()) || isComplex(T()));
+            Copy(rhs,view()); 
+        }
+
+        inline Vector(const AssignableToVector<RT>& v2) : NEW_SIZE(v2.size())
+        { 
+#ifdef XTEST_DEBUG
+            setAllTo(T(888));
+#endif
+            v2.assignToV(view()); 
+        }
+
+        inline Vector(const AssignableToVector<CT>& v2) : NEW_SIZE(v2.size())
+        { 
+#ifdef XTEST_DEBUG
+            setAllTo(T(888));
+#endif
+            TMVAssert(isComplex(T()));
+            v2.assignToV(view()); 
+        }
+
+        template <class T2, int N, IndexStyle I2> 
+        inline Vector(const SmallVector<T2,N,I2>& rhs) : 
+            NEW_SIZE(rhs.size())
+        {
+#ifdef XTEST_DEBUG
+            setAllTo(T(888));
+#endif
+            TMVAssert(isReal(T2()) || isComplex(T()));
+            Copy(rhs.view(),view()); 
+        }
+
+        template <int N> 
+        inline Vector(const SmallVectorComposite<RT,N>& v2) : 
+            NEW_SIZE(v2.size())
+        { 
+#ifdef XTEST_DEBUG
+            setAllTo(T(888));
+#endif
+            v2.assignToV(view()); 
+        }
+
+        template <int N> 
+        inline Vector(const SmallVectorComposite<CT,N>& v2) :
+            NEW_SIZE(v2.size())
+        { 
+#ifdef XTEST_DEBUG
+            setAllTo(T(888));
+#endif
+            TMVAssert(isComplex(T()));
+            v2.assignToV(view()); 
+        }
+
+#undef NEW_SIZE
+
+        virtual inline ~Vector() 
+        {
+#ifdef TMVDEBUG
+            setAllTo(T(999));
+#endif
+        }
+
+
+        //
+        // Op =
+        //
+
+        inline type& operator=(type& v2)
+        { 
+            TMVAssert(v2.size() == size());
+            if (&v2 != this) 
+                std::copy(v2.cptr(),v2.cptr()+_size,_v.get());
+            return *this; 
+        }
+
+        template <IndexStyle I2> 
+        inline type& operator=(Vector<T,I2>& v2)
+        { 
+            TMVAssert(v2.size() == size());
+            std::copy(v2.cptr(),v2.cptr()+_size,_v.get());
+            return *this; 
+        }
+
+        inline type& operator=(const GenVector<RT>& v2) 
+        { 
+            TMVAssert(v2.size() == size());
+            v2.assignToV(view());
+            return *this; 
+        }
+
+        inline type& operator=(const GenVector<CT>& v2) 
+        { 
+            TMVAssert(v2.size() == size());
+            TMVAssert(isComplex(T()));
+            v2.assignToV(view());
+            return *this; 
+        }
+
+        template <class T2> 
+        inline type& operator=(const GenVector<T2>& v2) 
+        { 
+            TMVAssert(v2.size() == size());
+            view() = v2; 
+            return *this; 
+        }
+
+        inline type& operator=(const AssignableToVector<RT>& v2)
+        { 
+            TMVAssert(v2.size() == size());
+            v2.assignToV(view()); 
+            return *this; 
+        }
+
+
+        inline type& operator=(const AssignableToVector<CT>& v2)
+        { 
+            TMVAssert(v2.size() == size());
+            TMVAssert(isComplex(T()));
+            v2.assignToV(view()); 
+            return *this; 
+        }
+
+        template <class T2, int N, IndexStyle I2> 
+        inline type& operator=(const SmallVector<T2,N,I2>& v2) 
+        { 
+            TMVAssert(v2.size() == size());
+            view() = v2.view(); 
+            return *this; 
+        }
+
+        template <int N> 
+        inline type& operator=(const SmallVectorComposite<RT,N>& v2)
+        { 
+            TMVAssert(N == size());
+            v2.assignToV(view()); 
+            return *this; 
+        }
+
+        template <int N> 
+        inline type& operator=(const SmallVectorComposite<CT,N>& v2)
+        { 
+            TMVAssert(N == size());
+            TMVAssert(isComplex(T()));
+            v2.assignToV(view()); 
+            return *this; 
+        }
+
+
+        //
+        // Access Functions
+        //
+
+        typedef T value_type;
+        typedef VIt<T,Unit,NonConj> iterator;
+        typedef CVIt<T,Unit,NonConj> const_iterator;
+        typedef VIt<T,Step,NonConj> reverse_iterator;
+        typedef CVIt<T,Step,NonConj> const_reverse_iterator;
+        typedef T& reference;
+
+        inline const_iterator begin() const
+        { return const_iterator(cptr(),1); }
+        inline const_iterator end() const
+        { return begin() + size(); }
+        inline const_reverse_iterator rbegin() const
+        { return const_reverse_iterator(cptr()+(int(size())-1),-1); }
+        inline const_reverse_iterator rend() const
+        { return rbegin() + size(); }
+        inline iterator begin()
+        { return iterator(ptr(),1); }
+        inline iterator end()
+        { return begin() + size(); }
+        inline reverse_iterator rbegin()
+        { return reverse_iterator(ptr()+(int(size())-1),-1); }
+        inline reverse_iterator rend()
+        { return rbegin() + size(); }
+
+        inline T operator[](int i) const 
+        { 
+            if (I == CStyle) { 
+                TMVAssert(i>=0 && i<int(size())); return cref(i); 
+            } else { 
+                TMVAssert(i>0 && i<=int(size())); return cref(i-1); 
+            }
+        }
+        inline T operator()(int i) const 
+        { 
+            if (I == CStyle) {
+                TMVAssert(i>=0 && i<int(size())); return cref(i); 
+            } else { 
+                TMVAssert(i>0 && i<=int(size())); return cref(i-1); 
+            }
+        }
+
+        inline T& operator[](int i) 
+        { 
+            if (I == CStyle) {
+                TMVAssert(i>=0 && i<int(size())); return ref(i); 
+            } else { 
+                TMVAssert(i>0 && i<=int(size())); return ref(i-1); 
+            }
+        }
+        inline T& operator()(int i) 
+        { 
+            if (I == CStyle) {
+                TMVAssert(i>=0 && i<int(size())); return ref(i); 
+            } else { 
+                TMVAssert(i>0 && i<=int(size())); return ref(i-1); 
+            }
+        }
+
+        typedef ListAssigner<T,iterator> MyListAssigner;
+        inline MyListAssigner operator<<(const T& x)
+        { return MyListAssigner(begin(),size(),x); }
+
+        TMV_DEPRECATED(MyListAssigner operator=(ListInitClass))
+        { return MyListAssigner(begin(),size()); }
+
+
+        //
+        // Modifying Functions
+        //
+
+        type& setZero();
+
+        type& clip(RT thresh);
+
+        type& setAllTo(const T& x);
+
+        type& addToAll(const T& x);
+
+        type& conjugateSelf();
+
+        type& DoBasis(int i);
+        inline type& makeBasis(int i)
+        { 
+            if (I == CStyle) TMVAssert(i>=0 && i<int(size()));
+            else TMVAssert(i>0 && i<=int(size()));
+            return DoBasis(i);
+        }
+
+        type& DoSwap(int i1, int i2);
+        inline type& swap(int i1, int i2)
+        {
+            if (I == CStyle) 
+                TMVAssert(i1>=0 && i1<int(size()) && i2>=0 && i2<int(size()));
+            else TMVAssert(i1>0 && i1<=int(size()) && i2>0 && i2<=int(size()));
+            return DoSwap(i1,i2);
+        }
+
+        inline type& permute(const int* p, int i1, int i2)
+        {
+            if (I==FortranStyle) TMVAssert(i1>0);
+            TMVAssert(i1>=0 && i1 <= i2 && i2 <= int(size()));
+            view().permute(p,i1,i2); return *this; 
+        }
+        inline type& permute(const int* p) 
+        { view().permute(p); return *this; }
+        inline type& reversePermute(const int* p, int i1, int i2)
+        {
+            if (I==FortranStyle) TMVAssert(i1>0);
+            TMVAssert(i1>=0 && i1 <= i2 && i2 <= int(size()));
+            view().reversePermute(p,i1,i2); return *this; 
+        }
+        inline type& reversePermute(const int* p) 
+        { view().reversePermute(p,0,size()); return *this; }
+
+        inline type& reverseSelf()
+        { view().reverseSelf(); return *this; }
+
+        inline type& sort(int* p, ADType ad=Ascend, CompType comp=RealComp) 
+        { view().sort(p,ad,comp); return *this; }
+
+        inline type& sort(ADType ad=Ascend, CompType comp=RealComp) 
+        { view().sort(0,ad,comp); return *this; }
+
+
+        TMV_DEPRECATED(type& Zero())
+        { return setZero(); }
+        TMV_DEPRECATED(type& Clip(RT thresh))
+        { return clip(thresh); }
+        TMV_DEPRECATED(type& SetAllTo(const T& x))
+        { return setAllTo(x); }
+        TMV_DEPRECATED(type& AddToAll(const T& x))
+        { return addToAll(x); }
+        TMV_DEPRECATED(type& ConjugateSelf())
+        { return conjugateSelf(); }
+        TMV_DEPRECATED(type& MakeBasis(int i))
+        { return makeBasis(i); }
+        TMV_DEPRECATED(type& Swap(int i1, int i2))
+        { return swap(i1,i2); }
+        TMV_DEPRECATED(type& Permute(
+                const int* p, int i1, int i2))
+        { return permute(p,i1,i2); }
+        TMV_DEPRECATED(type& Permute(const int* p))
+        { return permute(p); }
+        TMV_DEPRECATED(type& ReversePermute(
+                const int* p, int i1, int i2))
+        { return reversePermute(p,i1,i2); }
+        TMV_DEPRECATED(type& ReversePermute(const int* p))
+        { return reversePermute(p); }
+        TMV_DEPRECATED(type& ReverseSelf())
+        { return reverseSelf(); }
+        TMV_DEPRECATED(type& Sort(
+                int* p, OldADType ad=ASCEND, OldCompType comp=REAL_COMP))
+        { return sort(p,ADType(ad),CompType(comp)); }
+        TMV_DEPRECATED(type& Sort(
+                OldADType ad=ASCEND, OldCompType comp=REAL_COMP))
+        { return sort(ADType(ad),CompType(comp)); }
+
+
+        //
+        // SubVector
+        //
+
+        inline const_view_type subVector(int i1, int i2) const
+        {
+            TMVAssert(view().hasSubVector(i1,i2,1));
+            if (I==FortranStyle) --i1;
+            return const_view_type(cptr()+i1,i2-i1,1,NonConj);
+        }
+
+        inline view_type subVector(int i1, int i2)
+        {
+            TMVAssert(view().hasSubVector(i1,i2,1));
+            if (I==FortranStyle) --i1;
+            return view_type(ptr()+i1,i2-i1,1,NonConj TMV_FIRSTLAST );
+        }
+
+        inline const_view_type subVector(int i1, int i2, int istep) const
+        {
+            TMVAssert(view().hasSubVector(i1,i2,istep));
+            if (I==FortranStyle) { --i1; i2 += istep-1; }
+            return const_view_type(cptr()+i1,(i2-i1)/istep,istep,NonConj);
+        }
+
+        inline view_type subVector(int i1, int i2, int istep)
+        {
+            TMVAssert(view().hasSubVector(i1,i2,istep));
+            if (I==FortranStyle) { --i1; i2 += istep-1; }
+            return view_type(
+                ptr()+i1,(i2-i1)/istep,istep,NonConj TMV_FIRSTLAST );
+        }
+
+        inline const_view_type reverse() const
+        { return const_view_type(cptr()+size()-1,size(),-1,NonConj); }
+
+        inline view_type reverse()
+        { return view_type(ptr()+size()-1,size(),-1,NonConj TMV_FIRSTLAST ); }
+
+        inline const_view_type view() const
+        { return const_view_type(cptr(),size(),1,NonConj); }
+
+        inline view_type view()
+        { return view_type(ptr(),size(),1,NonConj TMV_FIRSTLAST ); }
+
+        inline const_view_type conjugate() const
+        { return const_view_type(cptr(),size(),1,TMV_ConjOf(T,NonConj)); }
+
+        inline view_type conjugate()
+        { return view_type(ptr(),size(),1,TMV_ConjOf(T,NonConj) TMV_FIRSTLAST ); }
+
+        inline const_real_type realPart() const
+        { return view().realPart(); }
+
+        inline const_real_type imagPart() const
+        { return view().imagPart(); }
+
+        inline const_real_type flatten() const
+        { return view().flatten(); }
+
+        inline real_type realPart()
+        { return view().realPart(); }
+
+        inline real_type imagPart()
+        { return view().imagPart(); }
+
+        inline real_type flatten()
+        { return view().flatten(); }
+
+
+        TMV_DEPRECATED(const_view_type SubVector(int i1, int i2) const)
+        { return subVector(i1,i2); }
+        TMV_DEPRECATED(const_view_type SubVector(
+                int i1, int i2, int istep) const)
+        { return subVector(i1,i2,istep); }
+        TMV_DEPRECATED(const_view_type Reverse() const)
+        { return reverse(); }
+        TMV_DEPRECATED(const_view_type View() const)
+        { return view(); }
+        TMV_DEPRECATED(const_view_type Conjugate() const)
+        { return conjugate(); }
+        TMV_DEPRECATED(const_real_type Real() const)
+        { return realPart(); }
+        TMV_DEPRECATED(const_real_type Imag() const)
+        { return imagPart(); }
+        TMV_DEPRECATED(const_real_type Flatten() const)
+        { return flatten(); }
+
+        TMV_DEPRECATED(view_type SubVector(int i1, int i2))
+        { return subVector(i1,i2); }
+        TMV_DEPRECATED(view_type SubVector(int i1, int i2, int istep))
+        { return subVector(i1,i2,istep); }
+        TMV_DEPRECATED(view_type Reverse())
+        { return reverse(); }
+        TMV_DEPRECATED(view_type View())
+        { return view(); }
+        TMV_DEPRECATED(view_type Conjugate())
+        { return conjugate(); }
+        TMV_DEPRECATED(real_type Real())
+        { return realPart(); }
+        TMV_DEPRECATED(real_type Imag())
+        { return imagPart(); }
+        TMV_DEPRECATED(real_type Flatten())
+        { return flatten(); }
+
+
+        //
+        // Functions of Vector
+        //
+
+        inline T minElement(int* iminout=0) const
+        { return view().minElement(iminout); }
+
+        inline T maxElement(int* imaxout=0) const
+        { return view().maxElement(imaxout); }
+
+        inline RT minAbsElement(int* iminout=0) const
+        { return view().minAbsElement(iminout); }
+
+        inline RT maxAbsElement(int* imaxout=0) const
+        { return view().maxAbsElement(imaxout); }
+
+        TMV_DEPRECATED(T MinElement(int* iminout=0) const)
+        { return minElement(iminout); }
+        TMV_DEPRECATED(T MaxElement(int* imaxout=0) const)
+        { return maxElement(imaxout); }
+        TMV_DEPRECATED(RT MinAbsElement(int* iminout=0) const)
+        { return minAbsElement(iminout); }
+        TMV_DEPRECATED(RT MaxAbsElement(int* imaxout=0) const)
+        { return maxAbsElement(imaxout); }
+
+
+        // 
+        // I/O
+        //
+
+        inline void read(std::istream& is)
+        { view().read(is); }
+
+        TMV_DEPRECATED(void Read(std::istream& is))
+        { read(is); }
+
+
+        virtual inline size_t size() const { return _size; }
+        virtual inline const T* cptr() const { return _v.get(); }
+        virtual inline T* ptr() { return _v.get(); }
+        virtual inline int step() const { return 1; }
+        virtual inline ConjType ct() const { return NonConj; }
+        inline bool isconj() const { return false; }
+
+        inline T cref(int i) const
+        { return _v.get()[i]; }
+
+        inline T& ref(int i)
+        { return _v.get()[i]; }
+
+    private:
+
+        auto_array<T> _v;
+        const size_t _size;
+
+#ifdef TMVFLDEBUG
+    public:
+        const T*const _first;
+        const T*const _last;
+#endif
+
+    }; // Vector
 
 
     //
-    // Special Creators: 
-    //   VectorViewOf(v,size,step=1) = VectorView of v 
+    // Special Constructors
     //
 
-    // VectorView of raw memory:
+    template <class T, IndexStyle I> 
+    Vector<T,I> DoBasisVector(size_t n, int i);
+    template <class T, IndexStyle I> 
+    inline Vector<T,I> BasisVector(size_t n, int i)
+    { 
+        if (I == CStyle) { TMVAssert(i>=0 && i<n); } 
+        else { TMVAssert(i>0 && i<=n); }
+        return DoBasisVector<T,I>(n,i); 
+    }
     template <class T> 
-    inline VectorView<T,1> VectorViewOf(T* v, size_t size)
-    { return VectorView<T,1>(v,size,1); }
+    inline Vector<T,CStyle> BasisVector(size_t n, int i)
+    { return DoBasisVector<T,CStyle>(n,i); }
+
+    template <IndexStyle I, class T> 
+    inline VectorView<T,I> VectorViewOf(T* v, size_t size)
+    { return VectorView<T,I>(v,size,1,NonConj TMV_FIRSTLAST1(v,v+size)); }
+
+    template <IndexStyle I, class T> 
+    inline ConstVectorView<T,I> VectorViewOf(const T* v, size_t size)
+    { return ConstVectorView<T,I>(v,size,1,NonConj); }
 
     template <class T> 
-    inline VectorView<T,UNKNOWN> VectorViewOf(T* v, size_t size, int step)
-    { return VectorView<T,UNKNOWN>(v,size,step); }
-
-
-    //
-    // Swap
-    //
-
-    template <class T, IndexStyle I>
-    inline void Swap(Vector<T,I>& v1, Vector<T,I>& v2)
-    { v1.swapWith(v2); }
-    template <class V, class T, int S, bool C, IndexStyle I>
-    inline void Swap(BaseVector_Mutable<V>& v1, VectorView<T,S,C,I> v2)
-    { DoSwap(v1,v2); }
-    template <class V, class T, int S, bool C, IndexStyle I>
-    inline void Swap(VectorView<T,S,C,I> v1, BaseVector_Mutable<V>& v2)
-    { DoSwap(v1,v2); }
-    template <class T, int S1, bool C1, IndexStyle I1,
-              int S2, bool C2, IndexStyle I2>
-    inline void Swap(VectorView<T,S1,C1,I1> v1, VectorView<T,S2,C2,I2> v2)
-    { DoSwap(v1,v2); }
-
-
-    //
-    // TMV_Text 
-    //
-
-    template <class T, IndexStyle I>
-    inline std::string TMV_Text(const Vector<T,I>& )
+    inline VectorView<T,CStyle> VectorViewOf(T* v, size_t size)
     {
-        std::ostringstream s;
-        s << "Vector<"<<TMV_Text(T())<<","<<TMV_Text(I)<<">";
-        return s.str();
+        return VectorView<T,CStyle>(
+            v,size,1,NonConj TMV_FIRSTLAST1(v,v+size)); 
     }
 
-    template <class T, int S, bool C, IndexStyle I>
-    inline std::string TMV_Text(const ConstVectorView<T,S,C,I>& v)
+    template <class T> 
+    inline ConstVectorView<T,CStyle> VectorViewOf(const T* v, size_t size)
+    { return ConstVectorView<T,CStyle>(v,size,1,NonConj); }
+
+
+    //
+    // Copy Vectors
+    //
+
+    inline bool shouldReverse(const int step1, const int step2)
     {
-        std::ostringstream s;
-        s << "ConstVectorView<"<<TMV_Text(T());
-        s << ","<<IntTraits<S>::text();
-        if (S == UNKNOWN) s << "("<<v.step()<<")";
-        s <<","<<C<<","<<TMV_Text(I)<<">";
-        return s.str();
+        return ( (step2 < 0 && (step1 != 1 || step2 == -1)) ||
+                 (step1 == -1 && step2 != 1) );
     }
 
-    template <class T, int S, bool C, IndexStyle I>
-    inline std::string TMV_Text(const VectorView<T,S,C,I>& v)
+    template <class T> 
+    void DoCopySameType(const GenVector<T>& v1, const VectorView<T>& v2);
+
+    template <class T> 
+    inline void DoCopy(const GenVector<T>& v1, const VectorView<T>& v2)
+    { if (!v1.isSameAs(v2)) DoCopySameType(v1,v2); }
+
+    template <class T, class T1> 
+    inline void DoCopyDiffType(const GenVector<T1>& v1, const VectorView<T>& v2)
     {
-        std::ostringstream s;
-        s << "VectorView<"<<TMV_Text(T());
-        s << ","<<IntTraits<S>::text();
-        if (S == UNKNOWN) s << "("<<v.step()<<")";
-        s <<","<<C<<","<<TMV_Text(I)<<">";
-        return s.str();
+        TMVAssert(isReal(T1()) || isComplex(T()));
+        TMVAssert(v1.size()==v2.size());
+        TMVAssert(v2.size()>0);
+        TMVAssert(v1.ct()==NonConj);
+        TMVAssert(v2.ct()==NonConj);
+        TMVAssert(v2.step() != -1);
+        TMVAssert(v1.step() != -1 || v2.step() == 1);
+        TMVAssert(v2.step() > 0 || v1.step() == 1);
+        TMVAssert(!v2.isSameAs(v1));
+
+        const T1* v1ptr = v1.cptr();
+        T* v2ptr = v2.ptr();
+        const int step1 = v1.step();
+        const int step2 = v2.step();
+
+        if (step1 == 1 && step2 == 1)
+            for(int i=v2.size();i>0;--i,++v1ptr,++v2ptr) {
+#ifdef TMVFLDEBUG
+                TMVAssert(v2ptr >= v2._first);
+                TMVAssert(v2ptr < v2._last);
+#endif
+                *v2ptr = *v1ptr;
+            }
+        else
+            for(int i=v2.size();i>0;--i,v1ptr+=step1,v2ptr+=step2) {
+#ifdef TMVFLDEBUG
+                TMVAssert(v2ptr >= v2._first);
+                TMVAssert(v2ptr < v2._last);
+#endif
+                *v2ptr = *v1ptr;
+            }
     }
+
+    template <class T, class T1> 
+    inline void DoCopy(const GenVector<T1>& v1, const VectorView<T>& v2)
+    {
+        TMVAssert(isReal(T1()) || isComplex(T()));
+        DoCopyDiffType(v1,v2);
+    }
+
+    template <class T> 
+    inline void DoCopy(const GenVector<std::complex<T> >&, const VectorView<T>&)
+    { TMVAssert(TMV_FALSE); }
+
+    template <class T, class T1> 
+    inline void Copy(const GenVector<T1>& v1, const VectorView<T>& v2)
+    { 
+        TMVAssert(isReal(T1()) || isComplex(T()));
+        TMVAssert(v1.size() == v2.size());
+        TMVAssert(v2.step()!=0 || v1.step() == 0);
+
+        if (v1.size() > 0) {
+            if (shouldReverse(v1.step(),v2.step()))
+                Copy(v1.reverse(),v2.reverse());
+            else {
+                if (v1.isconj()) {
+                    if (v2.isconj()) {
+                        DoCopy(v1.conjugate(),v2.conjugate());
+                    } else {
+                        DoCopy(v1.conjugate(),v2);
+                        v2.conjugateSelf();
+                    }
+                } else {
+                    if (v2.isconj()) {
+                        DoCopy(v1,v2.conjugate());
+                        v2.conjugateSelf();
+                    }
+                    else DoCopy(v1,v2);
+                }
+            }
+        }
+    }
+
+
+    //
+    // Swap Vectors
+    //
+
+    template <class T> 
+    void Swap(const VectorView<T>& v1, const VectorView<T>& v2);
+    template <class T, IndexStyle I> 
+    inline void Swap(const VectorView<T>& v1, Vector<T,I>& v2)
+    { Swap(v1.view(),v2.view()); }
+    template <class T, IndexStyle I> 
+    inline void Swap(Vector<T,I>& v1, const VectorView<T>& v2) 
+    { Swap(v1.view(),v2.view()); }
+    template <class T, IndexStyle I1, IndexStyle I2> 
+    inline void Swap(Vector<T,I1>& v1, Vector<T,I2>& v2)
+    { Swap(v1.view(),v2.view()); }
+
+
+    //
+    // Functions of Vectors
+    //
+
+    template <class T> 
+    inline TMV_RealType(T) Norm(const GenVector<T>& v)
+    { return v.norm(); }
+
+    template <class T> 
+    inline TMV_RealType(T) Norm1(const GenVector<T>& v)
+    { return v.norm1(); }
+
+    template <class T> 
+    inline TMV_RealType(T) NormSq(const GenVector<T>& v)
+    { return v.normSq(); }
+
+    template <class T> 
+    inline TMV_RealType(T) Norm2(const GenVector<T>& v)
+    { return v.norm2(); }
+
+    template <class T> 
+    inline TMV_RealType(T) NormInf(const GenVector<T>& v)
+    { return v.normInf(); }
+
+    template <class T> 
+    inline T SumElements(const GenVector<T>& v)
+    { return v.sumElements(); }
+
+    template <class T> 
+    inline TMV_RealType(T) SumAbsElements(const GenVector<T>& v)
+    { return v.sumAbsElements(); }
+
+    template <class T> 
+    inline T MinElement(const GenVector<T>& v)
+    { return v.minElement(); }
+
+    template <class T, IndexStyle I> 
+    inline T MinElement(const ConstVectorView<T,I>& v)
+    { return v.minElement(); }
+
+    template <class T, IndexStyle I> 
+    inline T MinElement(const VectorView<T,I>& v)
+    { return v.minElement(); }
+
+    template <class T, IndexStyle I> 
+    inline T MinElement(const Vector<T,I>& v)
+    { return v.minElement(); }
+
+    template <class T> 
+    inline T MaxElement(const GenVector<T>& v)
+    { return v.maxElement(); }
+
+    template <class T, IndexStyle I> 
+    inline T MaxElement(const ConstVectorView<T,I>& v)
+    { return v.maxElement(); }
+
+    template <class T, IndexStyle I> 
+    inline T MaxElement(const VectorView<T,I>& v)
+    { return v.maxElement(); }
+
+    template <class T, IndexStyle I> 
+    inline T MaxElement(const Vector<T,I>& v)
+    { return v.maxElement(); }
+
+    template <class T> 
+    inline TMV_RealType(T) MinAbsElement(const GenVector<T>& v)
+    { return v.minAbsElement(); }
+
+    template <class T, IndexStyle I> 
+    inline TMV_RealType(T) MinAbsElement(const ConstVectorView<T,I>& v)
+    { return v.minAbsElement(); }
+
+    template <class T, IndexStyle I> 
+    inline TMV_RealType(T) MinAbsElement(const VectorView<T,I>& v)
+    { return v.minAbsElement(); }
+
+    template <class T, IndexStyle I> 
+    inline TMV_RealType(T) MinAbsElement(const Vector<T,I>& v)
+    { return v.minAbsElement(); }
+
+    template <class T> 
+    inline TMV_RealType(T) MaxAbsElement(const GenVector<T>& v)
+    { return v.maxAbsElement(); }
+
+    template <class T, IndexStyle I> 
+    inline TMV_RealType(T) MaxAbsElement(const ConstVectorView<T,I>& v)
+    { return v.maxAbsElement(); }
+
+    template <class T, IndexStyle I> 
+    inline TMV_RealType(T) MaxAbsElement(const VectorView<T,I>& v)
+    { return v.maxAbsElement(); }
+
+    template <class T, IndexStyle I> 
+    inline TMV_RealType(T) MaxAbsElement(const Vector<T,I>& v)
+    { return v.maxAbsElement(); }
+
+    template <class T> 
+    inline ConstVectorView<T> Conjugate(const GenVector<T>& v)
+    { return v.conjugate(); }
+
+    template <class T, IndexStyle I> 
+    inline ConstVectorView<T,I> Conjugate(const ConstVectorView<T,I>& v)
+    { return v.conjugate(); }
+
+    template <class T, IndexStyle I> 
+    inline ConstVectorView<T,I> Conjugate(const Vector<T,I>& v)
+    { return v.conjugate(); }
+
+    template <class T, IndexStyle I> 
+    inline VectorView<T,I> Conjugate(const VectorView<T,I>& v)
+    { return v.conjugate(); }
+
+    template <class T, IndexStyle I> 
+    inline VectorView<T,I> Conjugate(Vector<T,I>& v)
+    { return v.conjugate(); }
+
+
+    //
+    // Vector ==, != Vector
+    //
+
+    template <class T1, class T2> 
+    bool operator==(const GenVector<T1>& v1, const GenVector<T2>& v2);
+
+    template <class T1, class T2> 
+    inline bool operator!=(const GenVector<T1>& v1, const GenVector<T2>& v2)
+    { return !(v1 == v2); }
+
+    //
+    // I/O
+    //
+
+    template <class T> 
+    inline std::ostream& operator<<(std::ostream& os, const GenVector<T>& v)
+    { v.write(os); return os;}
+
+    template <class T> 
+    std::istream& operator>>(std::istream& is, const VectorView<T>& v);
+
+    template <class T, IndexStyle I> 
+    inline std::istream& operator>>(std::istream& is, Vector<T,I>& v)
+    { return is >> v.view(); }
+
+    template <class T, IndexStyle I> 
+    std::istream& operator>>(std::istream& is, auto_ptr<Vector<T,I> >& v);
 
 } // namespace tmv
 

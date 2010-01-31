@@ -1,4 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
+// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
 // Copyright (C) 1998 - 2009                                                 //
@@ -33,23 +34,23 @@
 #ifndef TMV_H
 #define TMV_H
 
-#include "TMV_Vec.h"
+#include "tmv/TMV_Base.h"
+#include "tmv/TMV_Vector.h"
+#include "tmv/TMV_VIt.h"
+#include "tmv/TMV_Matrix.h"
 
-#include "TMV_Mat.h"
+#include "tmv/TMV_LUD.h"
+#include "tmv/TMV_QRD.h"
+#include "tmv/TMV_QRPD.h"
+#include "tmv/TMV_SVD.h"
+
+#include "tmv/TMV_VectorArith.h"
+#include "tmv/TMV_MatrixArith.h"
+#include "tmv/TMV_PackedQ.h"
 
 #include "TMV_Diag.h"
-
 #include "TMV_Tri.h"
 
-// Put the arithmetic header files last, after all the Mult, Add, etc.
-// functions have been declared.
-#include "tmv/TMV_ProdXM.h"
-#include "tmv/TMV_SumMM.h"
-#include "tmv/TMV_SumMX.h"
-#include "tmv/TMV_ProdMV.h"
-#include "tmv/TMV_OProdVV.h"
-#include "tmv/TMV_ProdMM.h"
-#include "tmv/TMV_QuotXM.h"
-#include "tmv/TMV_QuotVM.h"
+#include "tmv/TMV_Version.h"
 
 #endif

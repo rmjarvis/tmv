@@ -1,6 +1,6 @@
+#include "TMV.h"
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
-#include "TMV.h"
 
 #define NOADDEQ
 #define NOMULTEQ
@@ -8,7 +8,8 @@
 #define NOTRANSMM
 #include "TMV_TestMatrixArith.h"
 
-template <class T> void TestTriMatrixArith_B1()
+template <class T> 
+void TestTriMatrixArith_B1()
 {
     const int N = 10;
 
@@ -30,7 +31,6 @@ template <class T> void TestTriMatrixArith_B1()
     TestMatrixArith456<T>(l1x,cl1x,l1v,cl1v,a1v,ca1v,"Tri/Square L");
 
 #ifdef XTEST
-#if (XTEST & 2)
     tmv::UpperTriMatrix<T,tmv::NonUnitDiag,tmv::RowMajor> u1(a1);
     tmv::UpperTriMatrix<T,tmv::UnitDiag,tmv::RowMajor> u2(a1);
     tmv::UpperTriMatrix<T,tmv::NonUnitDiag,tmv::ColMajor> u3(a1);
@@ -109,19 +109,18 @@ template <class T> void TestTriMatrixArith_B1()
     TestMatrixArith456<T>(u1x,cu1x,u3v,cu3v,a3v,ca3v,"Tri/Degenerate");
     TestMatrixArith456<T>(u2x,cu2x,u4v,cu4v,a3v,ca3v,"Tri/Degenerate");
 #endif
-#endif
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestTriMatrixArith_B1<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestTriMatrixArith_B1<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestTriMatrixArith_B1<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestTriMatrixArith_B1<int>();
 #endif
 

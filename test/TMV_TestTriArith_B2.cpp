@@ -1,6 +1,6 @@
+#include "TMV.h"
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
-#include "TMV.h"
 
 #define NOSV
 #include "TMV_TestMatrixArith.h"
@@ -8,7 +8,6 @@
 template <class T> void TestTriMatrixArith_B2()
 {
 #ifdef XTEST
-#if (XTEST & 2)
     const int N = 10;
 
     tmv::Matrix<T> a1(N,N);
@@ -89,7 +88,6 @@ template <class T> void TestTriMatrixArith_B2()
     TestMatrixArith456<T>(a2x,ca2x,a2v,ca2v,l3v,cl3v,"NonSquare/Tri");
     TestMatrixArith456<T>(a2x,ca2x,a2v,ca2v,l4v,cl4v,"NonSquare/Tri");
 
-#if (XTEST & 8)
     tmv::Matrix<T> a3(10,0,1);
     tmv::Matrix<std::complex<T> > ca3 = a3;
     tmv::MatrixView<T> a3v = a3.view();
@@ -106,20 +104,18 @@ template <class T> void TestTriMatrixArith_B2()
     TestMatrixArith456<T>(a3x,ca3x,a3v,ca3v,l3v,cl3v,"Degenerate/Tri");
     TestMatrixArith456<T>(a3x,ca3x,a3v,ca3v,l4v,cl4v,"Degenerate/Tri");
 #endif
-#endif
-#endif
 }
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
 template void TestTriMatrixArith_B2<double>();
 #endif
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
 template void TestTriMatrixArith_B2<float>();
 #endif
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
 template void TestTriMatrixArith_B2<long double>();
 #endif
-#ifdef TEST_INT
+#ifdef INST_INT
 template void TestTriMatrixArith_B2<int>();
 #endif
 

@@ -2,12 +2,55 @@ Changes from version 0.62 to 0.63:
 (See the History section in the full documentation for changes from previous
 versions to 0.62.)
 
-Here is a brief list of the more important changes:
+Bug fixes:
 
-- Added stepped versions of VectorViewOf and MatrixViewOf.
-- Used template metaprogramming to speed up many SmallMatrix computations.
-- Changed ListInit size checks from run-time checks to Assert statements,
-  so they disappear with -DNDEBUG.
-- Allow SmallMatrix to be used with moderately large M,N by using 
-  StackArray class to use heap for large allocations.
+-- Fixed some compiling errors with some uses of SmallMatrix.
+-- Disabled the cases where BlasRowMajor was used, since I had problems
+   with it on a particular implementation, and I'm not sure if the error
+   is in my code or in that BLAS implementation. 
+   So, I removed these pathways for now until I can figure out what might 
+   be going on with it.
+-- Fixed the return type of some methods that erroneously returned CStyle
+   views when the source object was FortranStyle.
+
+Improved performance:
+
+-- Improved the speed of the native (i.e. non-BLAS) Matrix * Matrix 
+   algorithm.  
+
+New features:
+
+-- Added a way to access the version of TMV being used.  You can do this 
+   either in C++ code with the function TMV_Version().  This returns a 
+   string that gives the version being used within your code.  There is 
+   also an executable, tmv-version, that can be used to access the TMV 
+   version that is installed at the moment.
+
+-- Added support for ups, which is probably completely irrelevant to the 
+   majority of users.  But if you use ups for version control, you can 
+   use the command scons install WITH_UPS=true to configure tmv in ups.
+
+Style changes:
+
+-- Changed the names of many of the methods to start with a lowercase.
+   The free functions all still start with a capital letter.
+   Both use camelCase, with underscores after 2 or 3 letter abbreviations
+   such as LU or SV to help them stand out (since the camel case doesn't do it).
+   This seems to be a more common standard in the C++ community and is more
+   self-consistent than the style I had been using.
+
+   The old names are still here for this version, but are marked as deprecated.
+   Compiling old code with g++ with the flag -Wno-deprecated-declarations 
+   will make is compile without warning.  
+   But the deprecated versions will disappear eventually, so you will want to 
+   covert your existing code over to the new names at some point.
+
+-- Changed the syntax for list initialization.
+   The old style was v = tmv::ListInit, a0 , a1 , a2 , a3  ...;
+   The new style is v << a0 , a1 , a2 , a3 ...;
+   Also accepted is v << a0 << a1 << a2 << a3 ...;
+   This notation seems clearer, and avoid the global variable tmv::ListInit.
+
+   (Again, the old notation is still present, but deprecated.)
+
 

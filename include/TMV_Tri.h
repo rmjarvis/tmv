@@ -1,4 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
+// vim:et:ts=2:sw=2:ci:cino=f0,g0,t0,+0:
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
 // Copyright (C) 1998 - 2009                                                 //
@@ -30,32 +31,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef TMV_Tri_H
-#define TMV_Tri_H
+#ifndef TMV_TRI_H
+#define TMV_TRI_H
 
 #include "tmv/TMV_TriMatrix.h"
-#include "tmv/TMV_SmallTriMatrix.h"
-
-#include "tmv/TMV_TriMatrixIO.h"
-#include "tmv/TMV_CopyU.h"
-#include "tmv/TMV_SwapU.h"
-#include "tmv/TMV_NormU.h"
-
-#include "tmv/TMV_ScaleU.h"
-#include "tmv/TMV_MultXU.h"
-#include "tmv/TMV_AddUU.h"
-#include "tmv/TMV_MultUV.h"
-#include "tmv/TMV_MultUD.h"
-#include "tmv/TMV_MultUM.h"
-#include "tmv/TMV_MultUU.h"
-#include "tmv/TMV_MultUL.h"
-
-#ifndef TMV_H
-#include "tmv/TMV_ProdXM.h"
-#include "tmv/TMV_SumMM.h"
-#include "tmv/TMV_SumMX.h"
-#include "tmv/TMV_ProdMV.h"
-#include "tmv/TMV_ProdMM.h"
-#endif
+#include "tmv/TMV_TriMatrixArith.h"
 
 #endif

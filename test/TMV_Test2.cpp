@@ -22,7 +22,8 @@ bool symoprod = true;
 bool dontthrow = false;
 std::string lastsuccess = "";
 
-int main() try {
+int main() try 
+{
     std::ofstream log("tmvtest2.log");
     tmv::WriteWarningsTo(&log);
 
@@ -30,11 +31,10 @@ int main() try {
     //showacc=true;
     //showdiv=true;
     //showstartdone = true;
-    //#define SKIPREST
 
-#ifndef SKIPREST
+#if 1
 
-#ifdef TEST_DOUBLE
+#ifdef INST_DOUBLE
     TestBandMatrix<double>();
     TestSymMatrix<double>();
     TestSymBandMatrix<double>();
@@ -43,7 +43,7 @@ int main() try {
     TestAllSymBandDiv<double>();
 #endif
 
-#ifdef TEST_FLOAT
+#ifdef INST_FLOAT
     TestBandMatrix<float>();
     TestSymMatrix<float>();
     TestSymBandMatrix<float>();
@@ -52,7 +52,7 @@ int main() try {
     TestAllSymBandDiv<float>();
 #endif
 
-#ifdef TEST_LONGDOUBLE
+#ifdef INST_LONGDOUBLE
     TestBandMatrix<long double>();
     TestSymMatrix<long double>();
     TestSymBandMatrix<long double>();
@@ -61,13 +61,13 @@ int main() try {
     TestAllSymBandDiv<long double>();
 #endif 
 
-#ifdef TEST_INT
+#ifdef INST_INT
     TestBandMatrix<int>();
     TestSymMatrix<int>();
     TestSymBandMatrix<int>();
 #endif 
 
-#endif // SKIPREST
+#endif
 
     return 0;
 }
@@ -83,8 +83,7 @@ catch (std::exception& e) {
     std::cerr<<e.what()<<std::endl;
     std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
     return 1;
-}
-catch (...) {
+} catch (...) {
     std::cerr<<"Unknown exception thrown\n";
     std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
     return 1;
@@ -109,12 +108,14 @@ void DoAssert(bool x, std::string s)
     } else { 
         if (showtests) std::cout<<"  Failed"<<std::endl;
         if (dontthrow) std::cout<<"Failed test: "<<s<<std::endl;  
-        else
+        else {
 #ifdef NOTHROW
-        { std::cerr<<"Error in test: "<<s<<std::endl; exit(1); }
+            std::cerr<<"Error in test: "<<s<<std::endl; 
+            exit(1); 
 #else
-        throw tmv::Error("Error in test: ",s);  
+            throw tmv::Error("Error in test: ",s);  
 #endif
+        }
     } 
 }
 
