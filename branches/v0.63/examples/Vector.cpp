@@ -44,16 +44,14 @@ int main() try
   // If the list is the wrong size, a run time error occurs:
   try {
     v4 << 1.2, 9., 12, 2.5;
-  } 
-  catch (tmv::Error& e) {
+  } catch (tmv::Error& e) {
     std::cout<<"Caught e = "<<e;
     //! Caught e = TMV Read Error: Reading from list initialization.
     //! Reached end of list, but expecting 2 more elements.
   }
   try {
     v4 << 1.2, 9., 12, 2.5, -7.4, 14, 99;
-  } 
-  catch (tmv::Error& e) {
+  } catch (tmv::Error& e) {
     std::cout<<"Caught e = "<<e;
     //! Caught e = TMV Read Error: Reading from list initialization.
     //! List has more elements than expected.
@@ -158,8 +156,6 @@ int main() try
   //! fv3(6) = 2.4
   std::cout<<"fv3.subVector(1,3) = "<<fv3.subVector(1,3)<<std::endl;
   //! fv3.subVector(1,3) = 3 ( 64  -29.6  49 )
-  std::cout<<"fv3.subVector(1,5,2) = "<<fv3.subVector(1,5,2)<<std::endl;
-  //! fv3.subVector(1,5,2) = 3 ( 64  49  42 )
   std::cout<<"fv3.makeBasis(3) = "<<fv3.makeBasis(3)<<std::endl;
   //! fv3.makeBasis(2) = 6 ( 0  0  1  0  0  0 )
 
@@ -249,7 +245,7 @@ int main() try
   cv4.realPart() << -3,  1, -2, -1,  7,  3;
   cv4.imagPart() <<  4, -1,  0, -6,  5, -1;
   // (I find this complex initialization to be more readable than a list 
-  //  filled with values that look like complex<double(-3,4), ...)
+  //  filled with values that look like complex<double>(-3,4), ...)
   std::cout<<"cv4 = "<<cv4<<std::endl;
   //! cv4 = 6 ( (-3,4)  (1,-1)  (-2,0)  (-1,-6)  (7,5)  (3,-1) )
 
@@ -276,9 +272,7 @@ int main() try
   //! 6 ( (-3,4)  (-2,0)  (-1,-6)  (1,-1)  (3,-1)  (7,5) )
 
   return 0;
-} 
-catch (tmv::Error& e) 
-{
+} catch (tmv::Error& e) {
   std::cerr<<e<<std::endl;
   return 1;
 }

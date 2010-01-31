@@ -48,7 +48,11 @@ opts.Add(BoolVariable('WITH_LONGDOUBLE',
             'Instantiate <long double> templates', False))
 opts.Add(BoolVariable('WITH_INT',
             'Instantiate <int> templates', False))
+opts.Add(BoolVariable('WITH_OPENMP',
+            'Look for openmp and use if found.', True))
 
+opts.Add(BoolVariable('IMPORT_ENV',
+            'Import full environment from calling shell', False))
 opts.Add(PathVariable('EXTRA_PATH',
             'Extra paths for executables (separated by : if more than 1)',
             '',PathVariable.PathAccept))
@@ -61,8 +65,6 @@ opts.Add(PathVariable('EXTRA_INCLUDE_PATH',
 opts.Add(BoolVariable('IMPORT_PATHS',
             'Import PATH, C_INCLUDE_PATH and LIBRARY_PATH/LD_LIBRARY_PATH environment variables',
             False))
-opts.Add(BoolVariable('IMPORT_ENV',
-            'Import full environment from calling shell', False))
 
 opts.Add(BoolVariable('WITH_BLAS',
             'Look for blas libraries and link if found.', True))
@@ -88,8 +90,6 @@ opts.Add(BoolVariable('FORCE_FLAPACK',
             'Force scons to use Fortran LAPACK', False))
 opts.Add('LIBS','Libraries to send to the linker','')
 
-opts.Add(BoolVariable('WITH_OPENMP',
-            'Look for openmp and use if found.', False))
 opts.Add(BoolVariable('STATIC',
             'Use static linkage', False))
 opts.Add(BoolVariable('WITH_SSE',

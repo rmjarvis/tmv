@@ -13,37 +13,44 @@ Bug fixes:
 -- Fixed the return type of some methods that erroneously returned CStyle
    views when the source object was FortranStyle.
 
+Improved performance:
+
+-- Improved the speed of the native (i.e. non-BLAS) Matrix * Matrix 
+   algorithm.  
+
 New features:
 
-First, we added a way to access the version of TMV being used.
-You can do this either in C++ code with the function TMV_Version().
-This returns a string that gives the version being used within your code.
-There is also an executable, tmv-version, that can be used to access
-the TMV version that is installed at the moment.
+-- Added a way to access the version of TMV being used.  You can do this 
+   either in C++ code with the function TMV_Version().  This returns a 
+   string that gives the version being used within your code.  There is 
+   also an executable, tmv-version, that can be used to access the TMV 
+   version that is installed at the moment.
 
-Second, we added support for ups, which is probably completely irrelevant 
-to the majority of users.  But if you use ups for version control, you can 
-use the command scons install WITH_UPS=true to configure tmv in ups.
+-- Added support for ups, which is probably completely irrelevant to the 
+   majority of users.  But if you use ups for version control, you can 
+   use the command scons install WITH_UPS=true to configure tmv in ups.
 
 Style changes:
 
-In response to feedback from a number of TMV users, I decided to 
-change the names of many of the methods to start with a lowercase.
-The free functions all still start with a capital letter.
-Both use camelCase, with underscores after 2 or 3 letter abbreviations
-such as LU or SV to help them stand out (since the camel case doesn't do it).
-This seems to be a more common standard in the C++ community and is more
-self-consistent than the style I had been using.
+-- Changed the names of many of the methods to start with a lowercase.
+   The free functions all still start with a capital letter.
+   Both use camelCase, with underscores after 2 or 3 letter abbreviations
+   such as LU or SV to help them stand out (since the camel case doesn't do it).
+   This seems to be a more common standard in the C++ community and is more
+   self-consistent than the style I had been using.
 
-The old names are still here for this version, but are marked as deprecated.
-Compiling old code with g++ with the flag -Wno-deprecated-declarations 
-will make is compile without warning.  
-But the deprecated versions will disappear eventually, so you will want to 
-covert your existing code over to the new names at some point.
+   The old names are still here for this version, but are marked as deprecated.
+   Compiling old code with g++ with the flag -Wno-deprecated-declarations 
+   will make is compile without warning.  
+   But the deprecated versions will disappear eventually, so you will want to 
+   covert your existing code over to the new names at some point.
 
-Also, I changed the syntax for list initialization.
-The old style was v = tmv::ListInit, a0 , a1 , a2 , a3  ...;
-The new style is v << a0 , a1 , a2 , a3 ...;
-Also accepted is v << a0 << a1 << a2 << a3 ...;
-This notation seems clearer, and avoid the global variable tmv::ListInit.
-(Again, the old notation is still present, but deprecated.)
+-- Changed the syntax for list initialization.
+   The old style was v = tmv::ListInit, a0 , a1 , a2 , a3  ...;
+   The new style is v << a0 , a1 , a2 , a3 ...;
+   Also accepted is v << a0 << a1 << a2 << a3 ...;
+   This notation seems clearer, and avoid the global variable tmv::ListInit.
+
+   (Again, the old notation is still present, but deprecated.)
+
+

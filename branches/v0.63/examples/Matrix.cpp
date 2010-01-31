@@ -128,6 +128,13 @@ int main() try
 
   // Views:
 
+  std::cout<<"m1 = \n"<<m1<<std::endl;
+  //! m1 = 
+  //! 4  3
+  //! (  10  7  4  )
+  //! (  12  9  6  )
+  //! (  14  11  8  )
+  //! (  16  13  10  )
   std::cout<<"m1.row(1) = "<<m1.row(1)<<std::endl;
   //! m1.row(1) = 3 ( 12  9  6 )
   std::cout<<"m1.col(2) = "<<m1.col(2)<<std::endl;
@@ -312,6 +319,7 @@ int main() try
   //! (m1 * m5)(0,2) = -178
 
   // Can handle aliases:
+  // No alias problem here:
   std::cout<<"m1 + 3*m1-m2 = \n"<<m1+3.*m1-m2<<std::endl;
   //! m1 + 3*m1-m2 = 
   //! 4  3
@@ -319,6 +327,7 @@ int main() try
   //! (  82  102  46  )
   //! (  130  42  30  )
   //! (  114  106  78  )
+  // But this would be a problem for a naive implementation:
   m1 += 3.*m1-m2;
   std::cout<<"m1 += 3*m1-m2 = \n"<<m1<<std::endl;
   //! m1 += 3*m1-m2 = 
@@ -327,12 +336,15 @@ int main() try
   //! (  82  102  46  )
   //! (  130  42  30  )
   //! (  114  106  78  )
+
+  // Again: here is the correct answer:
   std::cout<<"m5 * m5 = \n"<<m5*m5<<std::endl;
   //! m5 * m5 = 
   //! 3  3
   //! (  10  -2  -14  )
   //! (  -8  4  16  )
   //! (  -26  10  46  )
+  // And here, the alias is dealt with correctly:
   m5 *= m5;
   std::cout<<"m5 *= m5 = \n"<<m5<<std::endl;
   //! m5 *= m5 = 
@@ -422,9 +434,7 @@ int main() try
   //! (  (-50,0)  (115,0)  (-50,0)  (50,0)  )
 
   return 0;
-} 
-catch (tmv::Error& e) 
-{
+} catch (tmv::Error& e) {
   std::cerr<<e<<std::endl;
   return 1;
 }

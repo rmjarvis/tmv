@@ -43,10 +43,12 @@
 \newcommand{\tmvversion}{0.63}
 \newcommand{\mygroupx}{tmv-discuss@googlegroups.com}
 \newcommand{\mygroup}{\href{mailto:\mygroupx}{\mygroupx}}
-\newcommand{\myissuesx}{http://code.google.com/p/tmv-cpp/issues/list}
+\newcommand{\myissuesx}{http://code.google.com/p/tmv-cpp/issues}
 \newcommand{\myissues}{\url{\myissuesx}}
 \newcommand{\websitex}{http://code.google.com/p/tmv-cpp/}
 \newcommand{\website}{\url{\websitex}}
+\newcommand{\altwebsitex}{https://sourceforge.net/projects/tmv-cpp/}
+\newcommand{\altwebsite}{\url{\altwebsitex}}
 
 \usepackage[bookmarks,bookmarksnumbered]{hyperref}
 \usepackage{listings}
@@ -76,14 +78,13 @@ keywordstyle=\color{Green},
 
 \renewcommand{\tt}[1]{{\lstinline {#1}}}
 \lstnewenvironment{tmvcode}{}{}
-%\newcommand{\caret}^
 \newcommand{\inputcode}[1]{\lstinputlisting[basicstyle=\small]{#1}}
 
 \begin{document}
 
 \title{Template Matrix/Vector Library for C++ \\ User Manual \\ Version \tmvversion}
 \author{Mike Jarvis}
-\date{January 29, 2010}
+\date{January 31, 2010}
 \maketitle
 
 \tableofcontents
@@ -7206,21 +7207,21 @@ with \tt{x=complex<double>(2.3,0.0)}, which would be slower.
 \newpage
 \section{Obtaining and Compiling the Library}
 \index{Installation}
+\label{install}
 
 This code is licensed using the Gnu General Public License.  See 
 \S\ref{license} below for more details.
 
-\subsection[Basic installation]
-{Basic installation \textnormal{(But see also \S\ref{scons} and \S\ref{cmake} below)}}
-\label{install}
-The following are step-by-step instructions on how to obtain the code for the library,
-set it up for your system, and compile it:
+\subsection{Obtaining the source code}
+\label{obtain_code}
+\index{Installation!obtaining source code}
+
 \begin{enumerate}
 
 \item
-\index{Installation!downloading code}
-Go to \website\ for a link to a tarball with all of the source code, and copy
-it to the directory where you want to put the TMV library.
+Go to \website\ for a link to a tarball with all of the source code (in the Downloads tab), and copy
+it to the directory where you want to put the TMV library.\footnote{
+If this is unavailable for some reason, I also post the source code to \altwebsite.}
 
 \item
 Unpack the tarball:\\
@@ -7231,6 +7232,231 @@ This will make a directory called \texttt{tmv\tmvversion} with the subdirectorie
 \texttt{doc}, \texttt{examples}, \texttt{include}, \texttt{lib}, \texttt{src} and \texttt{test} 
 along with the files \tt{README}, \tt{INSTALL} and others
 in the top directory.
+
+\end{enumerate}
+
+At this point there are several different choices for how to compile the library.
+The preferred method is to use SCons.  To use this method, continue onto \S\ref{scons_install}.
+However, we also provide instructions for using standard make (\S\ref{make_install}),
+CMake (\S\ref{cmake_install}), or Visual C++ (\S\ref{microsoft_install}).
+
+
+
+\subsection{Installing using SCons}
+\label{scons_install}
+\index{Installation!scons}
+
+With the v0.62 release of TMV, I introduced a new installation method using SCons.  For that 
+release it was considered an alternative method, since it was brand new.  However, by now, I
+have tried it on quite a few platforms and it seems to be working very well.  It usually finds
+the BLAS and LAPACK libraries on your system automatically, which is nicer than having 
+to specify them by hand.
+
+If you have trouble installing with SCons, you can try the 
+\texttt{Makefile} installation instead (\S\ref{make_install}).  And please let me know about 
+the problem you are having either at \mygroup\ or \myissues.
+
+\begin{enumerate}
+\item Download and unpack the tarball as described above (\S\ref{obtain_code}).
+
+\item Make sure you have SCons installed on your system.  
+It is available for free from \url{http://www.scons.org/}.  (It is a
+very quick installation if you have Python installed.)
+
+\item Type \\
+\texttt{scons}
+
+This will make the libraries \texttt{libtmv.a} and \texttt{libtmv\_symband.a}
+and put them into the directory \texttt{lib}.  Like with \texttt{make}, you can add
+the flag \texttt{-j4} to use 4 (or whatever number of) compilers simultaneously.
+Also, the command \texttt{scons -h} will print some help information, and \texttt{scons --help}
+will print information about the options specific to TMV.
+
+There are a number of command-line options that you might need (but try it with no flags
+first -- it can often find everything automatically).  
+The options are listed 
+with their default value.  You change them simply by specifying a different value
+on the command line.  For example:\\
+\texttt{scons CXX=icpc WITH\_LONGDOUBLE=true}\\
+If you need to run SCons multiple times (for example to compile the test suite or install
+the libraries as described below), you only need to specify the new parameter values the first
+time you run the SCons.
+The program automatically saves your options and continues to use them until you
+change a value again.
+\begin{itemize}
+\item \texttt{CXX=g++} specifies which C++ compiler to use.
+\item \texttt{FLAGS=''} specifies the basic flags to pass to the compiler.  The default behavior is to
+automatically choose good flags to use according to which kind of compiler you are using.
+It has defaults for \texttt{g++}, \texttt{icpc} and \texttt{pgCC}.  If you are using a different compiler or don't
+like the default, then you can specify this by hand.  
+Remember to put the flags in quotes,
+so the whitespace doesn't confuse the parser.  e.g. \texttt{scons FLAGS='-O3 -g'}
+\item \texttt{DEBUG=false} specifies whether to keep the debugging assert statements in the compiled library code.  
+\item \texttt{PREFIX=/usr/local} specifies where to install the library when running \texttt{scons install} (see below).
+\item \texttt{WITH\_FLOAT=true} specifies whether to instantiate the \tt{<float>} templates.
+\item \texttt{WITH\_DOUBLE=true} specifies whether to instantiate the \tt{<double>} templates.
+\item \texttt{WITH\_LONGDOUBLE=false} specifies whether to instantiate the \tt{<long double>} templates.
+\item \texttt{WITH\_INT=false} specifies whether to instantiate the \tt{<int>} templates.
+\index{Installation!OpenMP}
+\index{OpenMP}
+\item \texttt{WITH\_OPENMP=true} specifies whether to use OpenMP to parallelize some parts of the code.
+\end{itemize}
+The next flags set up the paths that SCons will use to try to find your BLAS and LAPACK libraries.
+\begin{itemize}
+\item \texttt{IMPORT\_ENV=false} specifies whether to import the entire environment from the calling shell.
+The default
+is to start with a clean environment to be less susceptible to a particular user having an unusual set up.  But sometimes sysadmins set things up in non-standard ways and use
+the environment variables to make everything work.  If this is the case, then 
+\texttt{IMPORT\_ENV} should do the trick.  It imports the environment, but doe not add any
+\texttt{-I} or \texttt{-L} flags when compiling.
+\item \texttt{EXTRA\_PATH=''} specifies directories in which to search for executables (notably the compiler, although you can also just give the full path in the \texttt{CXX} parameter)
+in addition to the standard locations such as \texttt{/usr/bin} and \texttt{/usr/local/bin}.
+If you are giving multiple directories, they should be separated by colons.
+\item \texttt{EXTRA\_INCLUDE\_PATH=''} specifies directories in which to search for header files
+(such as the BLAS or LAPACK header files)
+in addition to the standard locations such as \texttt{/usr/include} and \texttt{/usr/local/include}.
+These directories are specified as \texttt{-I} flags to the compiler.
+If you are giving multiple directories, they should be separated by colons.
+\item \texttt{EXTRA\_LIB\_PATH=''} specifies directories in which to search for libraries
+(such as the BLAS or LAPACK libraries)
+in addition to the standard locations such as \texttt{/usr/lib} and \texttt{/usr/local/lib}.  
+These directories are specified as \texttt{-L} flags to the linker.
+If you are giving multiple directories, they should be separated by colons.
+\item \texttt{IMPORT\_PATHS=false} specifies whether to import extra path directories from the environment variables: 
+\texttt{PATH}, \texttt{C\_INCLUDE\_PATH}, \texttt{LD\_LIBRARY\_PATH} and \texttt{LIBRARY\_PATH}.
+\end{itemize}
+The next options can be used to specify what BLAS and/or LAPACK libraries to use (if any),
+overriding the default of using whatever libraries SCons chooses from searching through your path
+and trying to link the libraries that it finds.  The \texttt{FORCE} options can be useful if SCons finds
+a library before trying the one that you want, or if SCons fails in the linking step even though
+the library should link successfully (I'm still not sure why this happens sometimes), or if
+you want to compile for a library that requires different linking instructions than the 
+ones that SCons tries\footnote{
+If you have a case of needing different linking instructions, and your BLAS or LAPACK is a standard
+installation on your machine (not some goofy personal installation that no one else will duplicate),
+then let me know and I'll add it to the SConstruct file for the next release.}.
+The \texttt{FORCE} options will try to test linking with the library requested,
+but if it fails, then it will just give a warning message.
+\index{LAPACK!scons options}
+\index{BLAS!scons options}
+\begin{itemize}
+\item \texttt{WITH\_BLAS=true} specifies whether to look for and try to use a BLAS library.
+\item \texttt{WITH\_LAPACK=true} specifies whether to look for and try to use a LAPACK library.
+\item \texttt{FORCE\_MKL=false} forces the use of the Intel Math Kernel library. 
+It requires the header file \texttt{"mkl.h"} to be found in your path. 
+\item \texttt{FORCE\_ACML=false} forces the use of the AMD Core Math library.  
+It requires the header file \texttt{"acml.h"} to be found in your path.
+\item \texttt{FORCE\_GOTO=false} forces the use of the GotoBlas library.  
+\item \texttt{FORCE\_ATLAS=false} forces the use of the ATLAS library (for BLAS).  
+It requires the header file \texttt{"cblas.h"} to be found in your path.
+\item \texttt{FORCE\_CBLAS=false} forces the use of a CBLAS library.
+\item \texttt{FORCE\_FBLAS=false} forces the use of a Fortran BLAS library.
+\item \texttt{FORCE\_CLAPACK=false} forces the use of the CLAPACk library. 
+It requires the CLAPACK version of the header file \texttt{"clapack.h"} to be found in your path.
+\item \texttt{FORCE\_ATLAS\_LAPACK=false} forces the use of the LAPACK portion
+of the ATLAS Library.  
+It requires the ATLAS version of the header file \texttt{"clapack.h"} to be found in your path.
+\item \texttt{FORCE\_FLAPACK=false} forces the use of a Fortran LAPACK library.
+\item \texttt{LIBS=''} directly specifies the library flags to use for linking if the automatic methods aren't working for you.  Because of the way SCons works,
+these should omit the \texttt{-l} part of the flag, since SCons will add this to what is provided.
+For example, to specify an alternate name for the CLAPACK library, use 
+\texttt{scons LIBS=lapack\_LINUX}.  Multiple libraries here should be separated by 
+whitespace and enclosed in quotes.
+\end{itemize}
+Finally, some miscellaneous options that you are less likely to need:
+\begin{itemize}
+\item \texttt{STATIC=false} specifies whether to use static linkage.  Some systems have trouble with
+dynamic linkage of libraries.  This usually indicates that something is installed incorrectly, but
+it can be easier to just use static linkage when you compile as a workaround.  This flag does this
+for the test suite executables.
+\item \texttt{WITH\_SSE=true} specifies whether to use the \texttt{-msse2} flag with \texttt{icpc} compilations. 
+It seems like most machines that have \texttt{icpc} are able to use SSE commands.  However, 
+I couldn't figure out a compiler flag that would turn on SSE {\em if and only if} the machine
+supports it.  So the default is to use the flag \texttt{-msse2}, but you can disable it by setting 
+\texttt{WITH\_SSE=false} if your machine doesn't have SSE support.
+\item \texttt{XTEST=false} specifies whether to include extra tests in the test suite.
+\item \texttt{MEM\_TEST=false} specifies whether to include extra memory tests in the library and test suite.
+\item \texttt{SMALL\_TESTS=false} specifies whether to make the smaller test suite programs: \texttt{tmvtest1a}, \texttt{tmvtest1b}, etc. 
+\item \texttt{WARN=false} specifies whether to have the compiler report warning (with -Wall or
+something similar).
+\item \texttt{NOMIX\_SMALL=false} specifies whether to avoid mixing Small and regular arithmetic.  
+(This is automatically selected if GotoBLAS is being used.)
+\item \texttt{CACHE\_LIB=true} specifies whether to cache the results of the library checks.  Scons
+usually detects correctly when something salient has changed to require a recompilation.  However,
+sometimes it doesn't, in which case setting this to false will force recompilation of everything each
+time you type scons.
+\item \texttt{WITH\_UPS=false} specifies whether to install TMV into a ups directory in PREFIX/ups.
+\item \texttt{TEST\_DEPRECATED=false} specifies whether to use the old deprecated method
+names in the test suite.
+\end{itemize}
+
+When SCons starts up, it will look through the standard paths, along with any extra paths you have
+specified with the above options, to find BLAS
+and LAPACK libraries.  This can sometimes require a few iterations to get working correctly.  
+You should look at the initial output from SCons to make sure it finds the correct BLAS
+and LAPACK libraries that you think it should find.  Here is a sample output:\footnote{
+This is the exact output that I get with the default options on my MacBook.}
+\begin{verbatim}
+$ scons
+scons: Reading SConscript files ...
+
+Using compiler: g++-4
+compiler version: 4.3.2
+Debugging turned off
+Checking for MKL... no
+Checking for ACML... no
+Checking for GotoBLAS... no
+Checking for CBLAS... yes
+Using CBLAS
+Checking for CLAPACK... no
+Checking for Fortran LAPACK... yes
+Using Fortran LAPACK
+scons: done reading SConscript files.
+scons: Building targets ...
+\end{verbatim}
+\vspace{-11pt}(\emph{Starts the actual compiling})
+
+If a "\texttt{Checking for}..." line ends with \texttt{no}, even though you think that library is installed
+on your computer, then it probably means that you need to tell SCons which directories
+to search, in addition to the standard locations.  The most straightforward way to do this is
+with the parameters \texttt{EXTRA\_INCLUDE\_PATH} and \texttt{EXTRA\_LIB\_PATH}.  
+These are described in detail above.  See also \texttt{IMPORT\_ENV} and \texttt{IMPORT\_PATHS}.
+
+\item (optional) Type\\
+\texttt{scons test}
+\index{Installation!test suite}
+
+This will make the executables \texttt{tmvtest1}, \texttt{tmvtest2} and \texttt{tmvtest3} in
+the \texttt{test} directory.  As described above, running each of these should output 
+lines that look like \texttt{[Something] passed all tests}.  If the last line indicates
+an error, you should post a bug report at \myissues\ about the problem.
+
+If you specify that \texttt{SMALL\_TESTS=true}, then the smaller test executables
+\texttt{tmvtest1a}, \texttt{tmvtest1b}, \texttt{tmvtest1c}, \texttt{tmvtest2a}, \texttt{tmvtest2b}, \texttt{tmvtest2c},
+\texttt{tmvtest3a}, \texttt{tmvtest3b}, \texttt{tmvtest3c}, and \texttt{tmvtest3d} will be made instead.
+These perform the same tests as the larger test executables, but can be easier
+for some linkers.
+
+\item (optional) Type\\
+\texttt{scons install}
+
+This will install the necessary header files into the directory \texttt{/usr/local/include} and the libraries
+into \texttt{/usr/local/lib}.  As mentioned above, you can also specify a different prefix 
+with the command line option \texttt{PREFIX=}\emph{install-dir}.  A common choice for users
+without \texttt{sudo} privileges is \texttt{PREFIX=$\sim$} which will install the library in \texttt{$\sim$/include}
+and \texttt{$\sim$/lib}.
+
+\end{enumerate}
+
+\subsection{Installing using make}
+\label{make_install}
+This is a more standard installation method if you don't want to bother with SCons, or if you are just
+more familiar with the make program and don't want to deal with SCons.  It requires a bit more
+user input in terms of directly specifying the BLAS and/or LAPACK libraries, but because of that
+it is also a bit easier to exactly customize the installation if you want to do something non-standard.
+
+\begin{enumerate}
+\item Download and unpack the tarball as described above (\S\ref{obtain_code}).
 
 \item
 Edit the makefile.
@@ -7581,201 +7807,8 @@ However, you are probably better off just using an optimized BLAS and LAPACK
 library and let TMV call that instead.
 \end{itemize}
 
-\subsection{Alternate SCons installation}
-\label{scons}
-\index{Installation!scons}
-
-With this release of TMV, I am introducing a new installation method that should be 
-easier in most cases.  The intent is for it to look for what BLAS and LAPACK libraries
-you have on your system and automatically compile with the appropriate flags and linkage.
-
-So far, this is still somewhat in the development stage, so it might not find your LAPACK
-library correctly, in which case, you will need to stick with the above \texttt{Makefile} installation.
-But I have tested it on quite a few BLAS and LAPACK varieties, so
-if you have SCons installed on your system, 
-and you want as simple an installation procedure as possible, you might want to 
-try this first.
-
-If you do try this installation method, I would appreciate it if you could inform me of any problems 
-you have.
-
-\begin{enumerate}
-\item Download and unpack the tarball as described above.
-
-\item Make sure you have SCons installed on your system.  
-It is available for free from \url{http://www.scons.org/}.  (It is a
-very quick installation if you have Python installed.)
-
-\item Type \\
-\texttt{scons}
-
-This will make the libraries \texttt{libtmv.a} and \texttt{libtmv\_symband.a}
-and put them into the directory \texttt{lib}.  Like with \texttt{make}, you can add
-the flag \texttt{-j4} to use 4 (or whatever number of) compilers simultaneously.
-Also, the command \texttt{scons -h} will print some help information.
-
-There are a number of command-line options that you might need (but try it with no flags
-first -- it can often find everything automatically).  
-The options are listed 
-with their default value.  You change them simply by specifying a different value
-on the command line.  For example:\\
-\texttt{scons CXX=icpc WITH\_LONGDOUBLE=true}\\
-If you need to run SCons multiple times (for example to compile the test suite or install
-the libraries as described below), you only need to specify the new parameter values the first
-time you run the SCons.
-The program automatically saves your options and continues to use them until you
-change a value again.
-\begin{itemize}
-\item \texttt{CXX=g++} specifies which C++ compiler to use.
-\item \texttt{FLAGS=''} specifies the basic flags to pass to the compiler.  The default behavior is to
-automatically choose good flags to use according to which kind of compiler you are using.
-It has defaults for \texttt{g++}, \texttt{icpc} and \texttt{pgCC}.  If you are using a different compiler or don't
-like the default, then you can specify this by hand.  
-Remember to put the flags in quotes,
-so the whitespace doesn't confuse the parser.  e.g. \texttt{scons FLAGS='-O3 -g'}
-\item \texttt{DEBUG=false} specifies whether to keep the debugging assert statements in the compiled library code.  
-\item \texttt{PREFIX=/usr/local} specifies where to install the library when running \texttt{scons install} (see below).
-\item \texttt{WITH\_FLOAT=true} specifies whether to instantiate the \tt{<float>} templates.
-\item \texttt{WITH\_DOUBLE=true} specifies whether to instantiate the \tt{<double>} templates.
-\item \texttt{WITH\_LONGDOUBLE=false} specifies whether to instantiate the \tt{<long double>} templates.
-\item \texttt{WITH\_INT=false} specifies whether to instantiate the \tt{<int>} templates.
-\end{itemize}
-The next flags set up the paths that SCons will use to try to find your BLAS and LAPACK libraries.
-\begin{itemize}
-\item \texttt{EXTRA\_PATH=''} specifies directories in which to search for executables (notably the compiler, although you can also just give the full path in the \texttt{CXX} parameter)
-in addition to the standard locations such as \texttt{/usr/bin} and \texttt{/usr/local/bin}.
-If you are giving multiple directories, they should be separated by colons.
-\item \texttt{EXTRA\_INCLUDE\_PATH=''} specifies directories in which to search for header files
-(such as the BLAS or LAPACK header files)
-in addition to the standard locations such as \texttt{/usr/include} and \texttt{/usr/local/include}.
-These directories are specified as \texttt{-I} flags to the compiler.
-If you are giving multiple directories, they should be separated by colons.
-\item \texttt{EXTRA\_LIB\_PATH=''} specifies directories in which to search for libraries
-(such as the BLAS or LAPACK libraries)
-in addition to the standard locations such as \texttt{/usr/lib} and \texttt{/usr/local/lib}.  
-These directories are specified as \texttt{-L} flags to the linker.
-If you are giving multiple directories, they should be separated by colons.
-\item \texttt{IMPORT\_PATHS=false} specifies whether to import extra path directories from the environment variables: 
-\texttt{PATH}, \texttt{C\_INCLUDE\_PATH}, \texttt{LD\_LIBRARY\_PATH} and \texttt{LIBRARY\_PATH}.
-\item \texttt{IMPORT\_ENV=false} specifies whether to import the entire environment from the calling shell.
-The default
-is to start with a clean environment to be less susceptible to a particular user having an unusual set up.  But sometimes sysadmins set things up in non-standard ways and use
-the environment variables to make everything work.  If this is the case, then 
-\texttt{IMPORT\_ENV} should do the trick.  It imports the environment, but doe not add any
-\texttt{-I} or \texttt{-L} flags when compiling.
-\end{itemize}
-The next options can be used to specify what BLAS and/or LAPACK libraries to use (if any),
-overriding the default of using whatever libraries SCons chooses from searching through your path
-and trying to link the libraries that it finds.  The \texttt{FORCE} options can be useful if SCons finds
-a library before trying the one that you want, or if SCons fails in the linking step even though
-the library should link successfully (I'm still not sure why this happens sometimes), or if
-you want to compile for a library that requires different linking instructions than the 
-ones that SCons tries\footnote{
-If you have a case of needing different linking instructions, and your BLAS or LAPACK is a standard
-installation on your machine (not some goofy personal installation that no one else will duplicate),
-then let me know and I'll add it to the SConstruct file for the next release.}.
-The \texttt{FORCE} options will try to test linking with the library requested,
-but if it fails, then it will just give a warning message.
-\index{LAPACK!scons options}
-\index{BLAS!scons options}
-\begin{itemize}
-\item \texttt{WITH\_BLAS=true} specifies whether to look for and try to use a BLAS library.
-\item \texttt{WITH\_LAPACK=true} specifies whether to look for and try to use a LAPACK library.
-\item \texttt{FORCE\_MKL=false} forces the use of the Intel Math Kernel library. 
-It requires the header file \texttt{"mkl.h"} to be found in your path. 
-\item \texttt{FORCE\_ACML=false} forces the use of the AMD Core Math library.  
-It requires the header file \texttt{"acml.h"} to be found in your path.
-\item \texttt{FORCE\_GOTO=false} forces the use of the GotoBlas library.  
-\item \texttt{FORCE\_ATLAS=false} forces the use of the ATLAS library (for BLAS).  
-It requires the header file \texttt{"cblas.h"} to be found in your path.
-\item \texttt{FORCE\_CBLAS=false} forces the use of a CBLAS library.
-\item \texttt{FORCE\_FBLAS=false} forces the use of a Fortran BLAS library.
-\item \texttt{FORCE\_CLAPACK=false} forces the use of the CLAPACk library. 
-It requires the CLAPACK version of the header file \texttt{"clapack.h"} to be found in your path.
-\item \texttt{FORCE\_ATLAS\_LAPACK=false} forces the use of the LAPACK portion
-of the ATLAS Library.  
-It requires the ATLAS version of the header file \texttt{"clapack.h"} to be found in your path.
-\item \texttt{FORCE\_FLAPACK=false} forces the use of a Fortran LAPACK library.
-\item \texttt{LIBS=''} specifies library flags to use for linking.  Because of the way SCons works,
-these should omit the \texttt{-l} part of the flag, since SCons will add this to what is provided.
-For example, to specify an alternate name for the CLAPACK library, use 
-\texttt{scons LIBS=lapack\_LINUX}.  Multiple libraries here should be separated by 
-whitespace and enclosed in quotes.
-\end{itemize}
-Finally, some miscellaneous options that you are less likely to need:
-\begin{itemize}
-\index{Installation!OpenMP}
-\index{OpenMP}
-\item \texttt{WITH\_OPENMP=false} specifies whether to use OpenMP to parallelize some parts of the code.
-\item \texttt{STATIC=false} specifies whether to use static linkage.  Some systems have trouble with
-dynamic linkage of libraries.  This usually indicates that something is installed incorrectly, but
-it can be easier to just use static linkage when you compile as a workaround.  This flag does this
-for the test suite executables.
-\item \texttt{XTEST=false} specifies whether to include extra tests in the test suite.
-\item \texttt{MEM\_TEST=false} specifies whether to include extra memory tests in the library and test suite.
-\item \texttt{SMALL\_TESTS=false} specifies whether to make the smaller test suite programs: \texttt{tmvtest1a}, \texttt{tmvtest1b}, etc. 
-\end{itemize}
-
-When SCons starts up, it will look through the standard paths, along with any extra paths you have
-specified with the above options, to find BLAS
-and LAPACK libraries.  This can sometimes require a few iterations to get working correctly.  
-You should look at the initial output from SCons to make sure it finds the correct BLAS
-and LAPACK libraries that you think it should find.  Here is a sample output:\footnote{
-This is the exact output that I get with the default options on my MacBook.}
-\begin{verbatim}
-$ scons
-scons: Reading SConscript files ...
-
-Using compiler: g++-4
-compiler version: 4.3.2
-Debugging turned off
-Checking for MKL... no
-Checking for ACML... no
-Checking for GotoBLAS... no
-Checking for CBLAS... yes
-Using CBLAS
-Checking for CLAPACK... no
-Checking for Fortran LAPACK... yes
-Using Fortran LAPACK
-scons: done reading SConscript files.
-scons: Building targets ...
-\end{verbatim}
-\vspace{-11pt}(\emph{Starts the actual compiling})
-
-If a "\texttt{Checking for}..." line ends with \texttt{no}, even though you think that library is installed
-on your computer, then it probably means that you need to tell SCons which directories
-to search, in addition to the standard locations.  The most straightforward way to do this is
-with the parameters \texttt{EXTRA\_INCLUDE\_PATH} and \texttt{EXTRA\_LIB\_PATH}.  
-These are described in detail above.  See also \texttt{IMPORT\_ENV} and \texttt{IMPORT\_PATHS}.
-
-\item (optional) Type\\
-\texttt{scons test}
-\index{Installation!test suite}
-
-This will make the executables \texttt{tmvtest1}, \texttt{tmvtest2} and \texttt{tmvtest3} in
-the \texttt{test} directory.  As described above, running each of these should output 
-lines that look like \texttt{[Something] passed all tests}.  If the last line indicates
-an error, you should post a bug report at \myissues\ about the problem.
-
-If you specify that \texttt{SMALL\_TESTS=true}, then the smaller test executables
-\texttt{tmvtest1a}, \texttt{tmvtest1b}, \texttt{tmvtest1c}, \texttt{tmvtest2a}, \texttt{tmvtest2b}, \texttt{tmvtest2c},
-\texttt{tmvtest3a}, \texttt{tmvtest3b}, \texttt{tmvtest3c}, and \texttt{tmvtest3d} will be made instead.
-These perform the same tests as the larger test executables, but can be easier
-for some linkers.
-
-\item (optional) Type\\
-\texttt{scons install}
-
-This will install the necessary header files into the directory \texttt{/usr/local/include} and the libraries
-into \texttt{/usr/local/lib}.  As mentioned above, you can also specify a different prefix 
-with the command line option \texttt{PREFIX=}\emph{install-dir}.  A common choice for users
-without \texttt{sudo} privileges is \texttt{PREFIX=$\sim$} which will install the library in \texttt{$\sim$/include}
-and \texttt{$\sim$/lib}.
-
-\end{enumerate}
-
-\subsection{Alternate cmake installation}
-\label{cmake}
+\subsection{Installing using CMake}
+\label{cmake_install}
 
 CMake is another automated build tool.  I am not very well versed in it, but a user of the 
 TMV library, Andy Molloy, sent me the \texttt{CMakeLists.txt} files that he used to compile TMV,
@@ -7788,7 +7821,7 @@ it out like I did with the SCons installation script.}.
 The basic usage is as follows:
 
 \begin{enumerate}
-\item Download and unpack the tarball as described above.
+\item Download and unpack the tarball as described above (\S\ref{obtain_code}).
 
 \item
 Download CMake from \url{http://www.cmake.org/} if you do not already have it.
@@ -7822,6 +7855,7 @@ But I think all of that is possible with CMake, so if someone who is an expert i
 to do this and send me the CMake files for it, I'll include them in future releases.
 
 \subsection{Installation using Microsoft Visual C++}
+\label{microsoft_install}
 
 Using TMV with Microsoft Visual C++ is a bit different from the other compilers,
 since it has a Windows framework for building programs, rather than a command 
@@ -7833,8 +7867,7 @@ Visual Studio 2008 Command Prompt, using the command:
 \texttt{C:$\backslash$Python26$\backslash$Scripts$\backslash$scons CXX=cl IMPORT\_ENV=true}.}.
 
 \begin{enumerate}
-\item
-Download and unpack the tarball.  
+\item Download and unpack the tarball as described above (\S\ref{obtain_code}).
 
 There are many Windows utilities that can unpack the
 tarball.  With IZArc (\url{http://www.izarc.org/}), for example, you right click on the file 
@@ -7988,7 +8021,7 @@ Now you should be all set to use the TMV library in your program.
 
 I have tested the code using the following compilers:\\
 $\quad$\\
-GNU's g++ -- versions 3.4.6, 4.0.2, 4.1.2, 4.2.2, 4.3.1 and 4.3.2\\
+GNU's g++ -- versions 3.4.6, 4.0.2, 4.1.2, 4.2.2, 4.3.1 and 4.4.2\\
 % chimaera g++, milhouse g++, lupus g++, Clarinet g++-4 (alt fink), Clarinet g++-4.3, Clarinet g++-4
 Apple's g++ -- version 4.0.1, 4.2.1 \\
 % Clarinet g++-4.0, g++-4.2
@@ -8011,7 +8044,8 @@ Either because the compiler fails to support some aspect of the C++ standard, or
 an aspect that I have failed to strictly conform to.}.
   So if you do try to compile on a different compiler, 
 I would appreciate it if you could let me know whether you were successful.  
-Please email the TMV discussion group at \mygroup.
+Please email the TMV discussion group at \mygroup\ with your experience (good or bad) using 
+compilers other than these.
 
 There are a few issues that I have discovered when compiling with various 
 versions of compilers, and I have usually come up with a work-around for
@@ -8029,7 +8063,7 @@ is giving you trouble,
 you should either upgrade to a newer Xcode distribution or download the real GNU gcc instead;  
 I recommend using Fink (\url{http://fink.sourceforge.net/}).
 
-\item {\bf g++ -O2, version 4,1 and 4.2:}
+\item {\bf g++ -O2, versions 4.1 and 4.2:}
 \index{Installation!g++}
 It seems that there is some problem with the -O2 optimization of g++ versions 4.1.2 and 4.2.2
 when used with TMV debugging turned on.  Everything compiles fine when I use
@@ -8055,7 +8089,7 @@ I only have access to pgCC version 6.1, so these notes only refer to that versio
 Apparently pgCC does not by default support exceptions when compiled 
 with openmp turned on.  
 So if you want to use the parallel versions of the algorithms,
-you need to compile with the flags \texttt{-mp --exception}.  This is a documented feature,
+you need to compile with the flags \texttt{-mp --exceptions}.  This is a documented feature,
 but it's not very obvious, so I figured I'd point it out here.
 
 \item 
@@ -8233,6 +8267,7 @@ should fix the problem.
 
 %\begin {comment}
 
+\newpage
 \section{Example Code}
 
 Here are five complete programs that use the TMV library.  They are intended to showcase
@@ -8245,6 +8280,7 @@ The code includes the output as comments that start with \lstinline{//!}, so you
 And each file listed here is also included with the TMV distribution in the \texttt{examples}
 directory, so you can easily compile and run them yourself.
 
+\newpage
 \subsection{Vector}
 
 \inputcode{../examples/Vector.cpp}
@@ -8252,6 +8288,7 @@ directory, so you can easily compile and run them yourself.
 %\verbatiminput{../examples/Vector.cpp}
 \vspace{12pt}
 
+\newpage
 \subsection{Matrix}
 
 \inputcode{../examples/Matrix.cpp}
@@ -8259,6 +8296,7 @@ directory, so you can easily compile and run them yourself.
 %\verbatiminput{../examples/Matrix.cpp}
 \vspace{12pt}
 
+\newpage
 \subsection{Division}
 
 \inputcode{../examples/Division.cpp}
@@ -8266,6 +8304,7 @@ directory, so you can easily compile and run them yourself.
 %\verbatiminput{../examples/Division.cpp}
 \vspace{12pt}
 
+\newpage
 \subsection{BandMatrix}
 
 \inputcode{../examples/BandMatrix.cpp}
@@ -8273,6 +8312,7 @@ directory, so you can easily compile and run them yourself.
 %\verbatiminput{../examples/BandMatrix.cpp}
 \vspace{12pt}
 
+\newpage
 \subsection{SymMatrix}
 
 \inputcode{../examples/SymMatrix.cpp}
@@ -8294,7 +8334,7 @@ distributions.
 If you find something to add to this list, or if you want me to bump something
 to the top of the list, let me know.  Not that the list is currently in any kind of 
 priority order, but you know what I mean.  Please post a feature request
-at \myissues.
+at \myissues, or email the discussion group about what you need at \mygroup.
 
 \begin{enumerate}
 \item
@@ -8337,6 +8377,7 @@ Maybe skew-symmetric and skew-hermitian.  Are these worth adding?  Let me know.
 \textbf{Packed storage}
 \index{SymMatrix!packed storage}
 \index{UpperTriMatrix!packed storage}
+\index{LowerTriMatrix!packed storage}
 
 Triangle and symmetric matrices. can be stored in (approximately) half the 
 memory as a full $N \times N$ matrix using what is known as packed storage.  
@@ -8834,14 +8875,14 @@ Fixed other miscellaneous bugs.
 \end{itemize}
 
 \item[Version 0.63]
-
-\begin{itemize}
 The biggest thing in this version is the new lowercase syntax for the
 methods, which was in response to feedback from a number of TMV users, 
 who didn't like the old syntax.  Hopefully, I'm not responding to the 
 minority here, but I do agree that the new syntax is more conformant 
 to common C++ standards.  There are also a couple of bug fixes, and I've
 started using Google Code for my main website.
+
+\begin{itemize}
 
 \item[$\times$]
 Changed the names of the methods to start with a lowercase.
@@ -8867,6 +8908,26 @@ The new style is v << a0 , a1 , a2 , a3 ...;
 Also accepted is v << a0 << a1 << a2 << a3 ...;
 This notation seems clearer, and avoid the global variable tmv::ListInit.
 (Again, the old notation is still present, but deprecated.)
+
+\item
+Improved the speed of the native (i.e. non-BLAS) Matrix * Matrix algorithm.
+It is now generally within a factor of two or so of optimized BLAS implementations.
+So it's not such a big performance hit if you compile without BLAS anymore.
+But if you are using large matrices, then we still recommend compiling with 
+an optimized BLAS library if possible.
+
+The improvements for large matrices involved:
+\begin{enumerate}
+\item Using a blocked algorithm with copying the 
+sub-matrices to new storage so the block calculations are contiguous in memory,
+\item Using optimized kernels for the single-block calculation, including using
+SSE and SSE2 intrinsics when available,
+\item Implementing complex calculations
+as sequential real operations, rather than try to do the complex arithmetic
+directly, which was significantly slower, and
+\item Using OpenMP to split the 
+calculation into as many parts as there are available threads.
+\end{enumerate}
 
 \item
 Fixed a couple of bugs involving SmallMatrix.  
