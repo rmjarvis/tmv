@@ -352,9 +352,11 @@ namespace tmv {
 #define TMV_DEPRECATED(func) func __attribute__ ((deprecated))
 #elif defined(_MSC_VER)
 #define TMV_DEPRECATED(func) __declspec(deprecated) func
+#elif defined(__PGI)
+#define TMV_DEPRECATED(func) func __attribute__ ((deprecated))
 #else
-#warning "WARNING: You should implement TMV_DEPRECATED for this compiler" \\
-    " in the file TMV_Base.h"
+//#warning "WARNING: You should implement TMV_DEPRECATED for this compiler" \\
+    //" in the file TMV_Base.h"
 #define TMV_DEPRECATED(func) func
 #endif
 

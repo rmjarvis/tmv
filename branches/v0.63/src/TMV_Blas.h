@@ -226,8 +226,8 @@ namespace tmv {
 
 }
 
-#define BLASP(x) FBLAS_ConvertP(x)
-#define BLASCValue(x) FBLAS_ConvertToComplex(x)
+#define BLASP(x) tmv::FBLAS_ConvertP(x)
+#define BLASCValue(x) tmv::FBLAS_ConvertToComplex(x)
 
 #endif
 
@@ -279,7 +279,7 @@ namespace tmv {
     { return MKL_ConvertP(const_cast<std::complex<float>*>(ptr)); }
 }
 
-#define LAPP(x) MKL_ConvertP(x)
+#define LAPP(x) tmv::MKL_ConvertP(x)
 
 #endif // !CLAPACK
 #endif // !FLAPACK
@@ -339,8 +339,8 @@ namespace tmv {
 
 }
 
-#define BLASP(x) ACML_ConvertP(x)
-#define BLASCValue(x) ACML_ConvertToComplex(x)
+#define BLASP(x) tmv::ACML_ConvertP(x)
+#define BLASCValue(x) tmv::ACML_ConvertToComplex(x)
 
 #ifndef NOLAP
 #ifndef CLAPACK
@@ -357,7 +357,7 @@ namespace tmv {
 #define LAPSTRLEN
 */
 
-#define LAPP(x) ACML_ConvertP(x)
+#define LAPP(x) tmv::ACML_ConvertP(x)
 
 #endif // !CLAPACK
 #endif // !FLAPACK
@@ -447,7 +447,7 @@ namespace tmv {
 
 }
 
-#define LAPP(x) CLAPACK_ConvertP(x)
+#define LAPP(x) tmv::CLAPACK_ConvertP(x)
 
 #endif // LAP
 
@@ -498,8 +498,8 @@ namespace tmv {
 
 }
 
-#define LAPP(x) FLAPACK_ConvertP(x)
-#define LAPCValue(x) FLAPACK_ConvertToComplex(x)
+#define LAPP(x) tmv::FLAPACK_ConvertP(x)
+#define LAPCValue(x) tmv::FLAPACK_ConvertToComplex(x)
 
 #endif // LAP
 #endif // BLAS
@@ -566,15 +566,15 @@ namespace tmv {
 #define BLASCH_UP CblasUpper
 #else
 #define BLASCM
-#define BLASCH_NT BLASV(Blas_ch_N)
-#define BLASCH_CT BLASV(Blas_ch_C)
-#define BLASCH_T BLASV(Blas_ch_T)
-#define BLASCH_L BLASV(Blas_ch_L)
-#define BLASCH_R BLASV(Blas_ch_R)
-#define BLASCH_U BLASV(Blas_ch_U)
-#define BLASCH_NU BLASV(Blas_ch_N)
-#define BLASCH_LO BLASV(Blas_ch_L)
-#define BLASCH_UP BLASV(Blas_ch_U)
+#define BLASCH_NT BLASV(tmv::Blas_ch_N)
+#define BLASCH_CT BLASV(tmv::Blas_ch_C)
+#define BLASCH_T BLASV(tmv::Blas_ch_T)
+#define BLASCH_L BLASV(tmv::Blas_ch_L)
+#define BLASCH_R BLASV(tmv::Blas_ch_R)
+#define BLASCH_U BLASV(tmv::Blas_ch_U)
+#define BLASCH_NU BLASV(tmv::Blas_ch_N)
+#define BLASCH_LO BLASV(tmv::Blas_ch_L)
+#define BLASCH_UP BLASV(tmv::Blas_ch_U)
 #endif
 
 #ifdef BLASSTRLEN
@@ -659,15 +659,15 @@ namespace tmv {
 #define LAPCH_UP CblasUpper
 #else
 #define LAPCM
-#define LAPCH_NT LAPV(Blas_ch_N)
-#define LAPCH_CT LAPV(Blas_ch_C)
-#define LAPCH_T LAPV(Blas_ch_T)
-#define LAPCH_L LAPV(Blas_ch_L)
-#define LAPCH_R LAPV(Blas_ch_R)
-#define LAPCH_U LAPV(Blas_ch_U)
-#define LAPCH_NU LAPV(Blas_ch_N)
-#define LAPCH_LO LAPV(Blas_ch_L)
-#define LAPCH_UP LAPV(Blas_ch_U)
+#define LAPCH_NT LAPV(tmv::Blas_ch_N)
+#define LAPCH_CT LAPV(tmv::Blas_ch_C)
+#define LAPCH_T LAPV(tmv::Blas_ch_T)
+#define LAPCH_L LAPV(tmv::Blas_ch_L)
+#define LAPCH_R LAPV(tmv::Blas_ch_R)
+#define LAPCH_U LAPV(tmv::Blas_ch_U)
+#define LAPCH_NU LAPV(tmv::Blas_ch_N)
+#define LAPCH_LO LAPV(tmv::Blas_ch_L)
+#define LAPCH_UP LAPV(tmv::Blas_ch_U)
 #endif
 
 #ifdef LAPSTRLEN

@@ -46,8 +46,8 @@ namespace tmv {
         return (x != x) || (x * x < 0);
     }
 
-    template <> 
-    bool DoIsNaN(double x)
+#ifdef INST_DOUBLE
+    static bool DoIsNaN(double x)
     {
 #ifdef isnan
         return isnan(x);
@@ -55,26 +55,21 @@ namespace tmv {
         return (x != x) || (x * x < 0);
 #endif
     }
+#endif
 
-    template <> 
-    bool DoIsNaN(float x)
+#ifdef INST_FLOAT
+    static bool DoIsNaN(float x)
     {
-        //std::cout<<"DoIsNaN x = "<<x<<std::endl;
 #ifdef isnan
-        //std::cout<<"isnan(x) = "<<isnan(x)<<std::endl;
-        //std::cout<<"x!=x = "<<(x!=x)<<std::endl;
-        //std::cout<<"x*x<0 = "<<(x*x<0)<<std::endl;
         return isnan(x);
 #else
-        //std::cout<<"x!=x = "<<(x!=x)<<std::endl;
-        //std::cout<<"x*x<0 = "<<(x*x<0)<<std::endl;
-        //std::cout<<"return "<<((x != x) || (x * x < 0))<<std::endl;
         return (x != x) || (x * x < 0);
 #endif
     }
+#endif
 
-    template <> 
-    bool DoIsNaN(long double x)
+#ifdef INST_LONGDOUBLE
+    static bool DoIsNaN(long double x)
     {
 #ifdef isnan
         return isnan(x);
@@ -82,6 +77,7 @@ namespace tmv {
         return (x != x) || (x * x < 0);
 #endif
     }
+#endif
 
     template <class T> 
     bool isNaN(T x)
