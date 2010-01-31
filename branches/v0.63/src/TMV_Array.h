@@ -66,26 +66,31 @@ namespace tmv
     };
 
     // Now specialize float and double if SSE commands are enabled
-    // Thie solution is adapted from the web page:
-    // http://stackoverflow.com/questions/227897/
-    //   solve-the-memory-alignment-in-c-interview-question-that-stumped-me
-    // See that page for more discussion of this kind of problem.
+    // TODO: There are non-portable things like memalign, posix_memalign,
+    // etc. that can be used in some cases.  I should use these
+    // when available, since they are probably more efficient that 
+    // the hack I do here.
 #ifdef __SSE__
     template <>
     struct AlignedMemory<float>
     {
+        float* mem;
         float* p;
 
-        AlignedMemory() : p(0) {}
+        AlignedMemory() : mem(0), p(0) {}
         inline void allocate(const size_t n) 
         { 
-            p = reinterpret_cast<float*>(new __m128[(n+3)>>2]);
-            TMVAssert( ((size_t)(p) & 0xf) == 0);
+            mem = new float[n+3];
+            p = mem + ((0x10 - int((size_t)(mem) & 0xf))>>2);
+            TMVAssert( ((size_t)(p) & 0xf) == 0 );
         }
         inline void deallocate()
-        { if (p) delete [] reinterpret_cast<__m128*>(p); p=0; }
+        { if (mem) delete [] mem; mem=0; p=0; }
         inline void swapWith(AlignedMemory<float>& rhs)
-        { float* temp = p; p = rhs.p; rhs.p = temp; }
+        { 
+            float* temp = p; p = rhs.p; rhs.p = temp; 
+            temp = mem; mem = rhs.mem; rhs.mem = temp; 
+        }
         inline float* getP() { return p; }
         inline const float* getP() const { return p; }
     };
@@ -94,18 +99,23 @@ namespace tmv
     template <>
     struct AlignedMemory<double>
     {
+        double* mem;
         double* p;
 
-        AlignedMemory() : p(0) {}
+        AlignedMemory() : mem(0), p(0) {}
         inline void allocate(const size_t n) 
         { 
-            p = reinterpret_cast<double*>(new __m128d[(n+1)>>1]);
-            TMVAssert( ((size_t)(p) & 0xf) == 0);
+            mem = new double[n+1];
+            p = mem + ((0x10 - int((size_t)(mem) & 0xf))>>3);
+            TMVAssert( ((size_t)(p) & 0xf) == 0 );
         }
         inline void deallocate()
-        { if (p) delete [] reinterpret_cast<__m128d*>(p); p=0; }
+        { if (p) delete [] mem; mem=0; p=0; }
         inline void swapWith(AlignedMemory<double>& rhs)
-        { double* temp = p; p = rhs.p; rhs.p = temp; }
+        {
+            double* temp = p; p = rhs.p; rhs.p = temp; 
+            temp = mem; mem = rhs.mem; rhs.mem = temp; 
+        }
         inline double* getP() { return p; }
         inline const double* getP() const { return p; }
     };

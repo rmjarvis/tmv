@@ -92,6 +92,8 @@ opts.Add(BoolVariable('WITH_OPENMP',
             'Look for openmp and use if found.', False))
 opts.Add(BoolVariable('STATIC',
             'Use static linkage', False))
+opts.Add(BoolVariable('WITH_SSE',
+            'For icpc compilations only: Use SSE commands', True))
 opts.Add(BoolVariable('XTEST',
             'Do (a LOT of) extra tests in the test suite ', False))
 opts.Add(BoolVariable('MEM_TEST',
@@ -161,6 +163,8 @@ def BasicCCFlags(env):
     
         elif compiler == 'icpc':
             env.Replace(CCFLAGS=['-O2'])
+            if env['WITH_SSE']:
+                env.Append(CCFLAGS=['-msse2'])
             env['TEST_FLAGS'] = []
             if version >= 10:
                 env.Append(CCFLAGS=['-vec-report0'])
