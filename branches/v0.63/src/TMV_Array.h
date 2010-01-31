@@ -81,7 +81,7 @@ namespace tmv
         inline void allocate(const size_t n) 
         { 
             mem = new float[n+3];
-            p = mem + ((0x10 - int((size_t)(mem) & 0xf))>>2);
+            p = mem + (((0x10 - int((size_t)(mem) & 0xf)) & 0xf)>>2);
             TMVAssert( ((size_t)(p) & 0xf) == 0 );
         }
         inline void deallocate()
@@ -106,7 +106,7 @@ namespace tmv
         inline void allocate(const size_t n) 
         { 
             mem = new double[n+1];
-            p = mem + ((0x10 - int((size_t)(mem) & 0xf))>>3);
+            p = mem + (((0x10 - int((size_t)(mem) & 0xf)) & 0xf)>>3);
             TMVAssert( ((size_t)(p) & 0xf) == 0 );
         }
         inline void deallocate()
