@@ -402,8 +402,7 @@ namespace tmv {
     template <class M>
     inline void ConjugateSelf(BaseMatrix_Tri_Mutable<M>& m);
     template <class M>
-    inline void InvertTri(BaseMatrix_Tri_Mutable<M>& m);
-
+    inline void InvertSelf(BaseMatrix_Tri_Mutable<M>& m);
 
     template <class M>
     class BaseMatrix_Tri : public BaseMatrix_Calc<M>
@@ -962,7 +961,9 @@ namespace tmv {
         {
             CheckRowIndex<mfort>(i,size());
             CheckColIndex<mfort>(j,size());
-            CheckTri<mshape>(isunit(),i,j);
+            // MJ: We don't actually want this next check.
+            // Let TriRef do the check if the reference is assigned to.
+            //CheckTri<mshape>(isunit(),i,j);
             return ref(i,j);
         }
 
@@ -1116,7 +1117,7 @@ namespace tmv {
 
         // Some more that are added for Tri shape:
         inline type& invertSelf() 
-        { tmv::InvertTri(mat()); return mat(); }
+        { tmv::InvertSelf(mat()); return mat(); }
 
         inline type& setToIdentity(const value_type x=value_type(1))
         {

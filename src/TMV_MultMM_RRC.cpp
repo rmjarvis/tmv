@@ -100,7 +100,12 @@ namespace tmv {
         const T3 x,
         const ConstMatrixView<T1,UNKNOWN,1,C1>& m1, 
         const ConstMatrixView<T2,UNKNOWN,1,C2>& m2, MatrixView<T3,1> m3)
-    { DoMultMM<add>(x,m1,m2,m3); }
+    {
+        if (m3.colsize() > 0 && m3.rowsize() > 0) {
+            if (m1.rowsize() == 0) Maybe<!add>::zero(m3);
+            else DoMultMM<add>(x,m1,m2,m3); 
+        }
+    }
 
 
 #define InstFile "TMV_MultMM_RRC.inst"

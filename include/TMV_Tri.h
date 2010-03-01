@@ -50,6 +50,10 @@
 #include "tmv/TMV_MultUU.h"
 #include "tmv/TMV_MultUL.h"
 
+#include "tmv/TMV_InvertU.h"
+#include "tmv/TMV_DivVU.h"
+#include "tmv/TMV_DivMU.h"
+
 #ifndef TMV_H
 #include "tmv/TMV_ProdXM.h"
 #include "tmv/TMV_SumMM.h"

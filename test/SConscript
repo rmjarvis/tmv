@@ -12,9 +12,7 @@ test_basic_files = ReadFileList('test_basic.files')
 #test_basic_files = ['TMV_TestMatrix.cpp']
 #test_basic_files = ['TMV_TestMatrixArith_8.cpp']
 #test_basic_files = ['TMV_TestMatrixArith_7.cpp','TMV_TestMatrixArith_8.cpp']
-#test_diag_files = ReadFileList('test_diag.files')
 test_diag_files = ReadFileList('test_diagx.files')
-#test_diag_files = ['TMV_TestDiagArith_B5b.cpp']
 #test_tri_files = ReadFileList('test_tri.files')
 test_tri_files = ReadFileList('test_trix.files')
 test_div_files = ReadFileList('test_div.files')
@@ -22,10 +20,6 @@ test_band_files = ReadFileList('test_band.files')
 test_sym_files = ReadFileList('test_sym.files')
 test_symband_files = ReadFileList('test_symband.files')
 test_smalla_files = ReadFileList('test_smalla.files')
-#test_small_files = ReadFileList('test_smallv.files')
-#test_small_files = ['TMV_TestSmallVectorArith_1a.cpp']
-#test_small_files = ['TMV_TestSmallVector.cpp']
-#test_small_files = ['TMV_TestSmallMatrix.cpp']
 test_smallb_files = ReadFileList('test_smallb.files')
 test_smallc_files = ReadFileList('test_smallc.files')
 test_smalld_files = ReadFileList('test_smalld.files')
@@ -47,6 +41,10 @@ if env['INST_LONGDOUBLE']:
     env1.Append(CPPDEFINES=['TMV_INST_LONGDOUBLE'])
 if env['INST_INT']:
     env1.Append(CPPDEFINES=['TMV_INST_INT'])
+if not env['INST_COMPLEX']:
+    env1.Append(CPPDEFINES=['TMV_NO_INST_COMPLEX'])
+if env['INST_MIX']:
+    env1.Append(CPPDEFINES=['TMV_INST_MIX'])
 if not env['TEST_FLOAT']:
     env1.Append(CPPDEFINES=['NO_TEST_FLOAT'])
 if not env['TEST_DOUBLE']:

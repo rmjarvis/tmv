@@ -274,26 +274,30 @@ template <class T> static void TestSmallVectorIO()
     }
 
     std::ofstream fout("tmvtest_smallvector_io.dat");
-    if (!fout) 
+    if (!fout) {
 #ifdef NOTHROW
-    { std::cerr<<"Couldn't open tmvtest_smallvector_io.dat for output\n"; exit(1); }
+        std::cerr<<"Couldn't open tmvtest_smallvector_io.dat for output\n";
+        exit(1); 
 #else
-    throw std::runtime_error(
-        "Couldn't open tmvtest_smallvector_io.dat for output");
+        throw std::runtime_error(
+            "Couldn't open tmvtest_smallvector_io.dat for output");
 #endif
+    }
     fout << v << std::endl << cv << std::endl;
     fout.close();
 
     tmv::SmallVector<T,N> xv1;
     tmv::SmallVector<std::complex<T>,N> xcv1;
     std::ifstream fin("tmvtest_smallvector_io.dat");
-    if (!fin) 
+    if (!fin) {
 #ifdef NOTHROW
-    { std::cerr<<"Couldn't open tmvtest_smallvector_io.dat for input\n"; exit(1); }
+        std::cerr<<"Couldn't open tmvtest_smallvector_io.dat for input\n";
+        exit(1); 
 #else
-    throw std::runtime_error(
-        "Couldn't open tmvtest_smallvector_io.dat for input");
+        throw std::runtime_error(
+            "Couldn't open tmvtest_smallvector_io.dat for input");
 #endif
+    }
     fin >> xv1 >> xcv1;
     fin.close();
     Assert(v == xv1,"SmallVector I/O check #1");
@@ -302,24 +306,24 @@ template <class T> static void TestSmallVectorIO()
     std::auto_ptr<tmv::Vector<T> > xv2;
     std::auto_ptr<tmv::Vector<std::complex<T> > > xcv2;
     fin.open("tmvtest_smallvector_io.dat");
-    if (!fin) 
+    if (!fin) {
 #ifdef NOTHROW
-    { std::cerr<<"Couldn't open tmvtest_smallvector_io.dat for input\n"; exit(1); }
+        std::cerr<<"Couldn't open tmvtest_smallvector_io.dat for input\n";
+        exit(1); 
 #else
-    throw std::runtime_error(
-        "Couldn't open tmvtest_smallvector_io.dat for input");
+        throw std::runtime_error(
+            "Couldn't open tmvtest_smallvector_io.dat for input");
 #endif
+    }
     fin >> xv2 >> xcv2;
     fin.close();
     Assert(v == *xv2,"SmallVector I/O check #2");
     Assert(cv == *xcv2,"CSmallVector I/O check #2");
 
-#ifndef XTEST
     std::remove("tmvtest_smallvector_io.dat");
-#endif
 }
 
-template <class T> void TestAllSmallVector()
+template <class T> void TestSmallVector()
 {
 #if 1
     TestSmallVectorReal<T>();
@@ -340,14 +344,14 @@ template <class T> void TestAllSmallVector()
 }
 
 #ifdef TEST_DOUBLE
-template void TestAllSmallVector<double>();
+template void TestSmallVector<double>();
 #endif
 #ifdef TEST_FLOAT
-template void TestAllSmallVector<float>();
+template void TestSmallVector<float>();
 #endif
 #ifdef TEST_LONGDOUBLE
-template void TestAllSmallVector<long double>();
+template void TestSmallVector<long double>();
 #endif
 #ifdef TEST_INT
-template void TestAllSmallVector<int>();
+template void TestSmallVector<int>();
 #endif

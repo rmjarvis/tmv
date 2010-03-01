@@ -34,7 +34,9 @@
 
 namespace tmv {
 
+#ifdef BLAS
 #define TMV_INST_SKIP_BLAS
+#endif
 
     template <class T1, bool C1, class T2, bool C2, class T3>
     void InstMultMM_Block(

@@ -32,6 +32,7 @@
 #include "tmv/TMV_MultXM.h"
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_ProdXM.h"
+#include "tmv/TMV_TransposeM.h"
 
 namespace tmv {
 

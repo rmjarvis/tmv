@@ -11,19 +11,19 @@
 //#define XDEBUG_PRODMV
 //#define XDEBUG_PRODMM
 //#define XDEBUG_OPRODVV
-#undef NDEBUG
+//#undef NDEBUG
 
 #include <iostream>
 #include "TMV.h"
 
 // How big do you want the matrices to be?
-const int M = 4;
-const int N = M;
-#define AISSQUARE
+const int M = 303;
+const int N = 103;
+//#define AISSQUARE
 
 // Define the type to use:
-#define TISFLOAT
-#define TISCOMPLEX
+//#define TISFLOAT
+//#define TISCOMPLEX
 
 // Define the part of the matrix to use
 // 1 = all (rectangle matrix)
@@ -38,18 +38,18 @@ const int N = M;
 
 // Define which versions you want to test:
 #define DOREG
-#define DOSMALL
-#define DOBLAS
-#define DOEIGEN
-#define DOEIGENSMALL
+//#define DOSMALL
+//#define DOBLAS
+//#define DOEIGEN
+//#define DOEIGENSMALL
 
 // Define which batches of functions you want to test:
 //#define DOMULTXM
 //#define DOADDMM
 //#define DONORM
 //#define DOMULTMV
-#define DORANK1
-//#define DOMULTMD
+//#define DORANK1
+#define DOMULTMD
 //#define DOMULTDM
 //#define DOSWAP
 
@@ -64,7 +64,7 @@ const int N = M;
 
 // My algorithms for MultMV are designed to be fast when the vector has lots
 // of zeros.  This option sets the first and last third of the vector to 0's.
-#define ZERO_VALUES
+//#define ZERO_VALUES
 
 // Set up the target number of operations and memory to use for testing
 const int targetnflops = 100000000; // in real ops
@@ -121,8 +121,8 @@ const int nloops1 = targetnflops / (M * N * nloops2) / XFOUR;
 #define EPART(m) m
 #define EPART2(m) m
 #define EPART3(m) m
-#define DO_PERMUTE
-#define DO_TRANSPOSE_SELF
+#define DOPERMUTE
+#define DOTRANSPOSESELF
 #define COL_LEN(j) M
 #define COL_LEN2(j) M
 #define COL_START(j) 0
@@ -6076,7 +6076,7 @@ static void SwapM(
 
     for (int n=0; n<nloops1; ++n) {
 
-#if 1 // Swap(A,Ax);
+#if 1 // Swap(A,Ax)
         ClearCache();
 
 #ifdef ERRORCHECK
@@ -6337,7 +6337,7 @@ static void SwapM(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         // ??? Eigen has a bug where it gets this wrong for N == 1
-        if (N > 1) 
+        if (M > 1 && N > 1) 
             for (int k=0; k<nloops2x; ++k)
                 EPART3(A5[k].block(0,0,M/2,N/2)).swap(EPART3(A5x[k].block(0,0,M/2,N/2)));
 
@@ -6497,7 +6497,7 @@ static void SwapM(
 #endif
 #endif
 
-#ifdef DO_TRANSPOSE_SELF
+#ifdef DOTRANSPOSESELF
 #if 1 // A.transposeSelf()
 #ifdef AISSQUARE
         ClearCache();
@@ -6909,7 +6909,7 @@ static void SwapM(
 #endif
 #endif
 
-#ifdef DO_PERMUTE
+#ifdef DOPERMUTE
 #if 1 // A.permuteRows(P)
         ClearCache();
 
@@ -7434,7 +7434,7 @@ static void SwapM(
     std::cout<<"  "<<t2_eigen<<"  "<<t2_smalleigen<<std::endl;
     std::cout<<"Swap(A,B)               "<<t3_reg<<"  "<<t3_small<<"  "<<t3_blas;
     std::cout<<"  "<<t3_eigen<<"  "<<t3_smalleigen<<std::endl;
-#ifdef DO_TRANSPOSE_SELF
+#ifdef DOTRANSPOSESELF
 #ifdef AISSQUARE
     std::cout<<"A.transposeSelf()       "<<t4_reg<<"  "<<t4_small<<"  "<<t4_blas;
     std::cout<<"  "<<t4_eigen<<"  "<<t4_smalleigen<<std::endl;
@@ -7446,7 +7446,7 @@ static void SwapM(
     std::cout<<"Swap(A,Ax.conjugate())  "<<t6_reg<<"  "<<t6_small<<"  "<<t6_blas;
     std::cout<<"  "<<t6_eigen<<"  "<<t6_smalleigen<<std::endl;
 #endif
-#ifdef DO_PERMUTE
+#ifdef DOPERMUTE
     std::cout<<"A.permuteRows(P)        "<<t7_reg<<"  "<<t7_small<<"  "<<t7_blas;
     std::cout<<"  "<<t7_eigen<<"  "<<t7_smalleigen<<std::endl;
     std::cout<<"A.reversePermuteRows(P) "<<t8_reg<<"  "<<t8_small<<"  "<<t8_blas;
@@ -7465,7 +7465,7 @@ static void SwapM(
     std::cout<<"  "<<e2_eigen<<"  "<<e2_smalleigen<<std::endl;
     std::cout<<"Swap(A,B)               "<<e3_reg<<"  "<<e3_small<<"  "<<e3_blas;
     std::cout<<"  "<<e3_eigen<<"  "<<e3_smalleigen<<std::endl;
-#ifdef DO_TRANSPOSE_SELF
+#ifdef DOTRANSPOSESELF
 #ifdef AISSQUARE
     std::cout<<"A.transposeSelf()       "<<e4_reg<<"  "<<e4_small<<"  "<<e4_blas;
     std::cout<<"  "<<e4_eigen<<"  "<<e4_smalleigen<<std::endl;
@@ -14343,7 +14343,8 @@ static void Rank1Update(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            MPART(A1[k]) = T(7,1) * D1[k].conjugate() ^ C1[k].conjugate();
+            //MPART(A1[k]) = T(7,1) * D1[k].conjugate() ^ C1[k].conjugate();
+            MPART(A1[k]).conjugate() = T(7,-1) * D1[k] ^ C1[k];
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -14363,7 +14364,8 @@ static void Rank1Update(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            MPART(A2[k]) = T(7,1) * D2[k].conjugate() ^ C2[k].conjugate();
+            //MPART(A2[k]) = T(7,1) * D2[k].conjugate() ^ C2[k].conjugate();
+            MPART(A2[k]).conjugate() = T(7,-1) * D2[k] ^ C2[k];
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -14469,7 +14471,8 @@ static void Rank1Update(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            MPART(B1[k].transpose()) = T(7,1) * D1[k].conjugate() ^ C1[k].conjugate();
+            //MPART(B1[k].transpose()) = T(7,1) * D1[k].conjugate() ^ C1[k].conjugate();
+            MPART(B1[k]).adjoint() = T(7,-1) * D1[k] ^ C1[k];
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -14489,7 +14492,8 @@ static void Rank1Update(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            MPART(B2[k].transpose()) = T(7,1) * D2[k].conjugate() ^ C2[k].conjugate();
+            //MPART(B2[k].transpose()) = T(7,1) * D2[k].conjugate() ^ C2[k].conjugate();
+            MPART(B2[k]).adjoint() = T(7,-1) * D2[k] ^ C2[k];
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;

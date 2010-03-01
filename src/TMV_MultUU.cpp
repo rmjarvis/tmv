@@ -70,18 +70,23 @@ namespace tmv {
                     InstMultXM(x,m1,m3.viewAsNonUnitDiag());
                 }
                 DoMultEqUU(m2,m3);
-            } else if (!(m3.iscm() || m3.isrm())) {
-                typename M3::copy_type m3c(m3.size());
-                typename M3::copy_type::xdview_type m3x = m3c.xdView();
+            } else {
                 if (m3.isunit()) {
+                    typename M3::copy_type m3c(m3.size());
+                    typename M3::copy_type::unitdiag_type::xdview_type m3x = 
+                        m3c.viewAsUnitDiag().xdView();
                     TMVAssert(x == T(1));
                     TMVAssert(m1.isunit());
                     InstCopy(m1,m3x);
+                    DoMultEqUU(m2,m3x);
+                    InstCopy(m3x.constView(),m3);
                 } else {
-                    InstMultXM(x,m1,m3.viewAsNonUnitDiag());
+                    typename M3::copy_type m3c(m3.size());
+                    typename M3::copy_type::xdview_type m3x = m3c.xdView();
+                    InstMultXM(x,m1,m3c.xView());
+                    DoMultEqUU(m2,m3x);
+                    InstCopy(m3x.constView(),m3);
                 }
-                DoMultEqUU(m2,m3x);
-                InstCopy(m3x.constView(),m3);
             }
         } else {
             GenInstMultMM(x,m1,m2.copy().constView().xdView(),m3);

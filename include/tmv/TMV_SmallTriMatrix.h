@@ -236,47 +236,51 @@ namespace tmv {
         // Constructors
         //
 
-        inline SmallUpperTriMatrix()
+        inline SmallUpperTriMatrix(size_t n=N)
         {
             TMVStaticAssert(N>0);
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
+            TMVAssert(n==N);
 #ifdef TMVDEBUG
             this->setAllTo(T(888));
 #endif
         }
 
-        explicit inline SmallUpperTriMatrix(T x)
+        explicit inline SmallUpperTriMatrix(size_t n, T x)
         {
             TMVStaticAssert(N>0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
+            TMVAssert(n==N);
             this->setAllTo(x);
         }
 
-        explicit inline SmallUpperTriMatrix(const T* vv) 
+        explicit inline SmallUpperTriMatrix(size_t n, const T* vv) 
         {
             TMVStaticAssert(N>0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
+            TMVAssert(n==N);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif
             SmallVectorView<T,N*N,1> lv(itsm);
-            ConstSmallVectorView<T,N,1>(vv).newAssignTo(lv);
+            ConstSmallVectorView<T,N*N,1>(vv).newAssignTo(lv);
         }
 
-        explicit inline SmallUpperTriMatrix(const std::vector<T>& vv) 
+        explicit inline SmallUpperTriMatrix(size_t n, const std::vector<T>& vv) 
         {
             TMVStaticAssert(N>0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
+            TMVAssert(n==N);
             TMVAssert(vv.size() == N*N);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif
             SmallVectorView<T,N*N,1> lv(itsm);
-            ConstSmallVectorView<T,N,1>(&vv[0]).newAssignTo(lv);
+            ConstSmallVectorView<T,N*N,1>(&vv[0]).newAssignTo(lv);
         }
 
         inline SmallUpperTriMatrix(const type& m2) 
@@ -296,16 +300,16 @@ namespace tmv {
             TMVStaticAssert(N>0);
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
+            const bool assignable = 
+                ShapeTraits2<M2::mshape,mshape>::assignable;
             TMVStaticAssert((
-                (M2::mcalc && M2::mupper) ||
-                ShapeTraits2<M2::mshape,mshape>::assignable));
+                (M2::mcalc && ShapeTraits<M2::mshape>::upper) || assignable));
+            TMVAssert(m2.colsize() == N);
+            TMVAssert(m2.rowsize() == N);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif
-            TMVAssert(m2.colsize() == N);
-            TMVAssert(m2.rowsize() == N);
-            TriCopy<ShapeTraits2<M2::mshape,mshape>::assignable>::copy(
-                m2,*this);
+            TriCopy<assignable>::copy(m2,*this);
         }
 
         template <class M2>
@@ -315,6 +319,7 @@ namespace tmv {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
             TMVStaticAssert(M2::mupper);
+            TMVAssert(m2.size() == N);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif
@@ -327,6 +332,7 @@ namespace tmv {
             TMVStaticAssert(N>0);
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
+            TMVAssert(m2.size() == N);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif
@@ -1205,47 +1211,51 @@ namespace tmv {
         // Constructors
         //
 
-        inline SmallLowerTriMatrix()
+        inline SmallLowerTriMatrix(size_t n=N)
         {
             TMVStaticAssert(N>0);
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
+            TMVAssert(n==N);
 #ifdef TMVDEBUG
             this->setAllTo(T(888));
 #endif
         }
 
-        explicit inline SmallLowerTriMatrix(T x)
+        explicit inline SmallLowerTriMatrix(size_t n, T x)
         {
             TMVStaticAssert(N>0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
+            TMVAssert(n==N);
             this->setAllTo(x);
         }
 
-        explicit inline SmallLowerTriMatrix(const T* vv) 
+        explicit inline SmallLowerTriMatrix(size_t n, const T* vv) 
         {
             TMVStaticAssert(N>0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
+            TMVAssert(n==N);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif
-            ConstSmallMatrixView<T,N,D,mstepi,mstepj> m2(vv);
-            SmallMatrixView<T,N,D,mstepi,mstepj> m1(ptr());
-            m2.newAssignTo(m1);
+            SmallVectorView<T,N*N,1> lv(ptr());
+            ConstSmallVectorView<T,N*N,1>(vv).newAssignTo(lv);
         }
 
-        explicit inline SmallLowerTriMatrix(const std::vector<T>& vv) 
+        explicit inline SmallLowerTriMatrix(size_t n, const std::vector<T>& vv) 
         {
             TMVStaticAssert(N>0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
+            TMVAssert(n==N);
             TMVAssert(vv.size() == N*N);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif
-            std::copy(vv.begin(),vv.end(),itsm.get());
+            SmallVectorView<T,N*N,1> lv(ptr());
+            ConstSmallVectorView<T,N*N,1>(&vv[0]).newAssignTo(lv);
         }
 
         inline SmallLowerTriMatrix(const type& m2) 
@@ -1265,16 +1275,16 @@ namespace tmv {
             TMVStaticAssert(N>0);
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
+            const bool assignable = 
+                ShapeTraits2<M2::mshape,mshape>::assignable;
             TMVStaticAssert((
-                (M2::mcalc && M2::mlower) ||
-                ShapeTraits2<M2::mshape,mshape>::assignable));
+                (M2::mcalc && ShapeTraits<M2::mshape>::lower) || assignable));
+            TMVAssert(m2.colsize() == N);
+            TMVAssert(m2.rowsize() == N);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif
-            TMVAssert(m2.colsize() == N);
-            TMVAssert(m2.rowsize() == N);
-            TriCopy<ShapeTraits2<M2::mshape,mshape>::assignable>::copy(
-                m2,*this);
+            TriCopy<assignable>::copy(m2,*this);
         }
 
         template <class M2>
@@ -1284,6 +1294,7 @@ namespace tmv {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
             TMVStaticAssert(M2::mlower);
+            TMVAssert(m2.size() == N);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif
@@ -1296,6 +1307,7 @@ namespace tmv {
             TMVStaticAssert(N>0);
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
+            TMVAssert(m2.size() == N);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif

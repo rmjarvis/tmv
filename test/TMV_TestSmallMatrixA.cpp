@@ -3,48 +3,25 @@
 #include "TMV.h"
 #include <fstream>
 
-template <class T> void TestAllSmallMatrixA()
+template <class T> void TestSmallMatrixA()
 {
-    TestSmallMatrixArith_A1a<T>();
-    TestSmallMatrixArith_A1b<T>();
-    TestSmallMatrixArith_A2a<T>();
-    TestSmallMatrixArith_A2b<T>();
-    TestSmallMatrixArith_A2c<T>();
-    TestSmallMatrixArith_A3a<T>();
-    TestSmallMatrixArith_A3b<T>();
-    TestSmallMatrixArith_A3c<T>();
-    TestSmallMatrixArith_A3d<T>();
-    TestSmallMatrixArith_A3e<T>();
-    TestSmallMatrixArith_A4a<T>();
-    TestSmallMatrixArith_A4b<T>();
-    TestSmallMatrixArith_A4c<T>();
-    TestSmallMatrixArith_A4d<T>();
-    TestSmallMatrixArith_A4e<T>();
-    TestSmallMatrixArith_A5a<T>();
-    TestSmallMatrixArith_A5b<T>();
-    TestSmallMatrixArith_A5c<T>();
-    TestSmallMatrixArith_A5d<T>();
-    TestSmallMatrixArith_A5e<T>();
-    TestSmallMatrixArith_A6a<T>();
-    TestSmallMatrixArith_A6b<T>();
-    TestSmallMatrixArith_A6c<T>();
-    TestSmallMatrixArith_A6d<T>();
-    TestSmallMatrixArith_A6e<T>();
-    TestSmallMatrixArith_A7a<T>();
-    TestSmallMatrixArith_A7b<T>();
-    TestSmallMatrixArith_A7c<T>();
-    std::cout<<"SmallMatrix<"<<tmv::TMV_Text(T())<<"> Square Arithmetic passed all tests\n";
+    TestSmallMatrixArith_1<T>();
+    TestSmallMatrixArith_2<T>();
+    TestSmallMatrixArith_3<T>();
+    TestSmallMatrixArith_7<T>();
+    std::cout<<"SmallMatrix<"<<tmv::TMV_Text(T())<<
+        "> Square Arithmetic passed all tests\n";
 }
 
 #ifdef TEST_DOUBLE
-template void TestAllSmallMatrixA<double>();
+template void TestSmallMatrixA<double>();
 #endif
 #ifdef TEST_FLOAT
-template void TestAllSmallMatrixA<float>();
+template void TestSmallMatrixA<float>();
 #endif
 #ifdef TEST_LONGDOUBLE
-template void TestAllSmallMatrixA<long double>();
+template void TestSmallMatrixA<long double>();
 #endif
 #ifdef TEST_INT
-template void TestAllSmallMatrixA<int>();
+template void TestSmallMatrixA<int>();
 #endif

@@ -399,51 +399,6 @@ namespace tmv {
     };
 #endif
 
-    // There doesn't seem to be any portable C++ function that guarantees
-    // that the memory allocated will be aligned as necessary for 
-    // SSE functions.
-    // Sometimes posix_memalign or memalign does this job.
-    // But it doesn't seem to be standard, since some systems don't have it.
-    // So we make this simple class that simply loads a bit more memory than
-    // necessary and then finds the starting point that is 16 byte aligned.
-
-    // First the regular non-SSE version, where we don't need aligment.
-    template <class T>
-    struct AlignedMemory
-    {
-        AlignedMemory(const size_t n) : p(new T[n]) {}
-        ~AlignedMemory() { delete[] p; }
-        T* p;
-    };
-    // Now specialize float and double if SSE commands are enabled
-    // Thie solution is adapted from the web page:
-    // http://stackoverflow.com/questions/227897/
-    //   solve-the-memory-alignment-in-c-interview-question-that-stumped-me
-    // See that page for more discussion of this kind of problem.
-#ifdef __SSE__
-    template <>
-    struct AlignedMemory<float>
-    {
-        AlignedMemory(const size_t n) : 
-            mem(new float[n+3]), p( mem + ((4 - (size_t(mem) & 3)) & 3) ) {}
-        ~AlignedMemory() { delete[] mem; }
-        float* mem;
-        float* p;
-    };
-#endif
-#ifdef __SSE2__
-    template <>
-    struct AlignedMemory<double>
-    {
-        AlignedMemory(const size_t n) :
-            mem(new double[n+1]), p( mem + (size_t(mem) & 1) ) {}
-        ~AlignedMemory() { delete[] mem; }
-        double* mem;
-        double* p;
-    };
-#endif
-
-
     // For these algorithms we use a little trick for complex matrices to 
     // enable the use of the optimized kernels, which are only defined for
     // real-valued matrices.
@@ -2135,12 +2090,12 @@ namespace tmv {
             std::cout<<"m2 size = "<<size2<<std::endl;
             std::cout<<"m3 size = "<<size3<<std::endl;
 #endif
-            AlignedMemory<RT> m1_temp(size1);
-            AlignedMemory<RT> m2_temp(size2);
-            AlignedMemory<RT> m3_temp(size3);
-            RT*const m1p = m1_temp.p;
-            RT*const m2p = m2_temp.p;
-            RT*const m3p = m3_temp.p;
+            AlignedArray<RT> m1_temp(size1);
+            AlignedArray<RT> m2_temp(size2);
+            AlignedArray<RT> m3_temp(size3);
+            RT*const m1p = m1_temp;
+            RT*const m2p = m2_temp;
+            RT*const m3p = m3_temp;
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"M >= 3*max(N,K)/2\n";
             std::cout<<"m1p = "<<m1p<<" end = "<<(m1p+size1)<<std::endl;
@@ -2218,12 +2173,12 @@ namespace tmv {
             std::cout<<"m2 size = "<<size2<<std::endl;
             std::cout<<"m3 size = "<<size3<<std::endl;
 #endif
-            AlignedMemory<RT> m1_temp(size1);
-            AlignedMemory<RT> m2_temp(size2);
-            AlignedMemory<RT> m3_temp(size3);
-            RT*const m1p = m1_temp.p;
-            RT*const m2p = m2_temp.p;
-            RT*const m3p = m3_temp.p;
+            AlignedArray<RT> m1_temp(size1);
+            AlignedArray<RT> m2_temp(size2);
+            AlignedArray<RT> m3_temp(size3);
+            RT*const m1p = m1_temp;
+            RT*const m2p = m2_temp;
+            RT*const m3p = m3_temp;
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"N >= 3*max(M,K)/2\n";
             std::cout<<"m1p = "<<m1p<<" end = "<<(m1p+size1)<<std::endl;
@@ -2304,12 +2259,12 @@ namespace tmv {
             std::cout<<"m2 size = "<<size2<<std::endl;
             std::cout<<"m3 size = "<<size3<<std::endl;
 #endif
-            AlignedMemory<RT> m1_temp(size1);
-            AlignedMemory<RT> m2_temp(size2);
-            AlignedMemory<RT> m3_temp(size3);
-            RT*const m1p = m1_temp.p;
-            RT*const m2p = m2_temp.p;
-            RT*const m3p = m3_temp.p;
+            AlignedArray<RT> m1_temp(size1);
+            AlignedArray<RT> m2_temp(size2);
+            AlignedArray<RT> m3_temp(size3);
+            RT*const m1p = m1_temp;
+            RT*const m2p = m2_temp;
+            RT*const m3p = m3_temp;
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"K >= 2*max(M,N)\n";
             std::cout<<"m1p = "<<m1p<<" end = "<<(m1p+size1)<<std::endl;
@@ -2378,12 +2333,12 @@ namespace tmv {
             std::cout<<"m2 size = "<<size2<<std::endl;
             std::cout<<"m3 size = "<<size3<<std::endl;
 #endif
-            AlignedMemory<RT> m1_temp(size1);
-            AlignedMemory<RT> m2_temp(size2);
-            AlignedMemory<RT> m3_temp(size3);
-            RT*const m1p = m1_temp.p;
-            RT*const m2p = m2_temp.p;
-            RT*const m3p = m3_temp.p;
+            AlignedArray<RT> m1_temp(size1);
+            AlignedArray<RT> m2_temp(size2);
+            AlignedArray<RT> m3_temp(size3);
+            RT*const m1p = m1_temp;
+            RT*const m2p = m2_temp;
+            RT*const m3p = m3_temp;
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"None much larger than the others\n";
             std::cout<<"m1p = "<<m1p<<" end = "<<(m1p+size1)<<std::endl;
@@ -3060,17 +3015,17 @@ namespace tmv {
         const int size2y = two2*Nc*KB;
         const int size3 = two3*MB*NB;
 
-        AlignedMemory<RT> m3_temp(size3);
-        RT*const m3p = m3_temp.p;
+        AlignedArray<RT> m3_temp(size3);
+        RT*const m3p = m3_temp;
         if (N >= M) {
             // Then we loop over the columns of m2 (in blocks).
             // We store a full copy of m1 in block format.
             // Each block column of m2 is copied one at a time into 
             // temporary storage.
-            AlignedMemory<RT> m1_temp(two1*M*Ktot_d);
-            AlignedMemory<RT> m2_temp(two2*NB*Ktot_d);
-            RT*const m1p0 = m1_temp.p;
-            RT*const m2p0 = m2_temp.p;
+            AlignedArray<RT> m1_temp(two1*M*Ktot_d);
+            AlignedArray<RT> m2_temp(two2*NB*Ktot_d);
+            RT*const m1p0 = m1_temp;
+            RT*const m2p0 = m2_temp;
             const int fullsize1 = two1*MB*Ktot_d;
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"N >= M\n";
@@ -3137,10 +3092,10 @@ namespace tmv {
             }
         } else {
             // Then we loop over the rows of m1 and store a full copy of m2.
-            AlignedMemory<RT> m1_temp(two1*MB*Ktot_d);
-            AlignedMemory<RT> m2_temp(two2*N*Ktot_d);
-            RT*const m1p0 = m1_temp.p;
-            RT*const m2p0 = m2_temp.p;
+            AlignedArray<RT> m1_temp(two1*MB*Ktot_d);
+            AlignedArray<RT> m2_temp(two2*N*Ktot_d);
+            RT*const m1p0 = m1_temp;
+            RT*const m2p0 = m2_temp;
             const int fullsize2 = two2*NB*Ktot_d;
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"N <= M\n";

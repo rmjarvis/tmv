@@ -56,10 +56,30 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUU_Helper;
 
-    // algo 1: m1 and/or m2 is unitdiag
+    // algo 1: LowerTri, transpose:
     template <int s, int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
     struct AddUU_Helper<1,s,ix1,T1,M1,ix2,T2,M2,M3>
+    {
+        static inline void call(
+            const Scaling<ix1,T1>& x1, const M1& m1, 
+            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
+        {
+            typedef typename M1::const_transpose_type M1t;
+            typedef typename M2::const_transpose_type M2t;
+            typedef typename M3::transpose_type M3t;
+            M1t m1t = m1.transpose();
+            M2t m2t = m2.transpose();
+            M3t m3t = m3.transpose();
+            AddUU_Helper<-1,s,ix1,T1,M1t,ix2,T2,M2t,M3t>::call(
+                x1,m1t,x2,m2t,m3t);
+        }
+    };
+
+    // algo 2: m1 and/or m2 is unitdiag
+    template <int s, int ix1, class T1, class M1,
+              int ix2, class T2, class M2, class M3>
+    struct AddUU_Helper<2,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
         static inline void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
@@ -72,51 +92,39 @@ namespace tmv {
             M2o m2o = m2.offDiag();
             M3o m3o = m3.offDiag();
             const int sm1 = IntTraits2<s,-1>::sum;
-            AddUU_Helper<-1,sm1,ix1,T1,M1o,ix2,T2,M2o,M3o>::call(
+            AddUU_Helper<-2,sm1,ix1,T1,M1o,ix2,T2,M2o,M3o>::call(
                 x1,m1o,x2,m2o,m3o);
-            if (m1.isunit()) m3.diag().setAllTo(T1(x1));
-            else m3.diag() = x1*m1.diag();
-            if (m2.isunit()) m3.diag().addToAll(T2(x2));
-            else m3.diag() += x2*m2.diag();
+            typename M3::diag_type m3d = m3.diag();
+            if (m1.isunit()) m3d.setAllTo(T1(x1));
+            else MultXV<false>(x1,m1.diag(),m3d);
+            if (m2.isunit()) m3d.addToAll(T2(x2));
+            else MultXV<true>(x2,m2.diag(),m3d);
         }
     };
 
-    // algo 2: Loop over rows
+    // algo 3: UnknownDiag
     template <int s, int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    struct AddUU_Helper<2,s,ix1,T1,M1,ix2,T2,M2,M3>
+    struct AddUU_Helper<3,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
         static inline void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
-            int N = (s == UNKNOWN ? m2.size() : s);
-            typedef typename M1::const_row_sub_type M1r;
-            typedef typename M2::const_row_sub_type M2r;
-            typedef typename M3::row_sub_type M3r;
-            typedef typename M1r::const_nonconj_type::const_iterator IT1;
-            typedef typename M2r::const_nonconj_type::const_iterator IT2;
-            typedef typename M3r::iterator IT3;
-            const int step1 = m1.diagstep();
-            const int step2 = m2.diagstep();
-            const int step3 = m3.diagstep();
-            IT1 it1 = m1.get_row(0,0,N).nonConj().begin();
-            IT2 it2 = m2.get_row(0,0,N).nonConj().begin();
-            IT3 it3 = m3.get_row(0,0,N).begin();
-            for(;N;--N) {
-                AddVV_Helper<-3,UNKNOWN,ix1,T1,M1r,ix2,T2,M2r,M3r>::call2(
-                    N,x1,it1,x2,it2,it3);
-                it1.shiftP(step1);
-                it2.shiftP(step2);
-                it3.shiftP(step3);
-            }
+            if (m1.isunit() || m2.isunit())
+                AddUU_Helper<2,s,ix1,T1,M1,ix2,T2,M2,M3>::call(
+                    x1,m1,x2,m2,m3);
+            else
+                AddUU_Helper<-4,s,ix1,T1,M1,ix2,T2,M2,M3>::call(
+                    x1,m1,x2,m2,m3);
         }
     };
 
-    // algo 3: Loop over columns
+
+    // algo 11: Loop over columns
     template <int s, int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    struct AddUU_Helper<3,s,ix1,T1,M1,ix2,T2,M2,M3>
+    struct AddUU_Helper<11,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
         static inline void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
@@ -137,7 +145,7 @@ namespace tmv {
             IT3 it3 = m3.get_col(0,0,1).begin();
             int M=1;
             for(;N;--N) {
-                AddVV_Helper<-3,UNKNOWN,ix1,T1,M1c,ix2,T2,M2c,M3c>::call2(
+                AddVV_Helper<-4,UNKNOWN,ix1,T1,M1c,ix2,T2,M2c,M3c>::call2(
                     M++,x1,it1,x2,it2,it3);
                 it1.shiftP(step1);
                 it2.shiftP(step2);
@@ -146,10 +154,42 @@ namespace tmv {
         }
     };
 
-    // algo 5: Fully unroll by rows
+    // algo 12: Loop over rows
     template <int s, int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    struct AddUU_Helper<5,s,ix1,T1,M1,ix2,T2,M2,M3>
+    struct AddUU_Helper<12,s,ix1,T1,M1,ix2,T2,M2,M3>
+    {
+        static inline void call(
+            const Scaling<ix1,T1>& x1, const M1& m1, 
+            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
+        {
+            int N = (s == UNKNOWN ? m2.size() : s);
+            typedef typename M1::const_row_sub_type M1r;
+            typedef typename M2::const_row_sub_type M2r;
+            typedef typename M3::row_sub_type M3r;
+            typedef typename M1r::const_nonconj_type::const_iterator IT1;
+            typedef typename M2r::const_nonconj_type::const_iterator IT2;
+            typedef typename M3r::iterator IT3;
+            const int step1 = m1.diagstep();
+            const int step2 = m2.diagstep();
+            const int step3 = m3.diagstep();
+            IT1 it1 = m1.get_row(0,0,N).nonConj().begin();
+            IT2 it2 = m2.get_row(0,0,N).nonConj().begin();
+            IT3 it3 = m3.get_row(0,0,N).begin();
+            for(;N;--N) {
+                AddVV_Helper<-4,UNKNOWN,ix1,T1,M1r,ix2,T2,M2r,M3r>::call2(
+                    N,x1,it1,x2,it2,it3);
+                it1.shiftP(step1);
+                it2.shiftP(step2);
+                it3.shiftP(step3);
+            }
+        }
+    };
+
+    // algo 15: Fully unroll by rows
+    template <int s, int ix1, class T1, class M1,
+              int ix2, class T2, class M2, class M3>
+    struct AddUU_Helper<15,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
         template <int I, int M, int J, int N>
         struct Unroller
@@ -201,10 +241,10 @@ namespace tmv {
         { Unroller<0,s,0,s>::unroll(x1,m1,x2,m2,m3); }
     };
 
-    // algo 6: Fully unroll by columns
+    // algo 16: Fully unroll by columns
     template <int s, int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    struct AddUU_Helper<6,s,ix1,T1,M1,ix2,T2,M2,M3>
+    struct AddUU_Helper<16,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
         template <int I, int M, int J, int N>
         struct Unroller
@@ -256,45 +296,44 @@ namespace tmv {
         { Unroller<0,s,0,s>::unroll(x1,m1,x2,m2,m3); }
     };
 
-    // algo 10: LowerTri, transpose:
+    // algo -4: No branches or copies
     template <int s, int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    struct AddUU_Helper<10,s,ix1,T1,M1,ix2,T2,M2,M3>
+    struct AddUU_Helper<-4,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
         static inline void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
-            typedef typename M1::const_transpose_type M1t;
-            typedef typename M2::const_transpose_type M2t;
-            typedef typename M3::transpose_type M3t;
-            M1t m1t = m1.transpose();
-            M2t m2t = m2.transpose();
-            M3t m3t = m3.transpose();
-            AddUU_Helper<-1,s,ix1,T1,M1t,ix2,T2,M2t,M3t>::call(
-                x1,m1t,x2,m2t,m3t);
-        }
-    };
-
-    // algo 90: UnknownDiag
-    template <int s, int ix1, class T1, class M1,
-              int ix2, class T2, class M2, class M3>
-    struct AddUU_Helper<90,s,ix1,T1,M1,ix2,T2,M2,M3>
-    {
-        static inline void call(
-            const Scaling<ix1,T1>& x1, const M1& m1, 
-            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
-        {
-            const int algo2 = 
+            TMVStaticAssert(!M3::mconj);
+            TMVStaticAssert(!M1::munit);
+            TMVStaticAssert(!M2::munit);
+            TMVStaticAssert(!M3::munit);
+            TMVStaticAssert(M1::mupper);
+            TMVStaticAssert(M2::mupper);
+            TMVStaticAssert(M3::mupper);
+            TMVAssert(!m1.isunit());
+            TMVAssert(!m2.isunit());
+            TMVAssert(!m3.isunit());
+            typedef typename M3::value_type T3;
+            const int s2 = s > 20 ? UNKNOWN : s;
+            const int s2p1 = IntTraits<s2>::Sp1;
+            // nops = n(n+1)
+            const int nops = IntTraits2<s2,s2p1>::prod;
+            const bool unroll = 
+                s == UNKNOWN ? false :
+                nops > TMV_Q1 ? false :
+                s <= 10;
+            const int algo = 
+                unroll ? (
+                    ( (M1::mrowmajor && M2::mrowmajor) ||
+                      (M1::mrowmajor && M3::mrowmajor) ||
+                      (M2::mrowmajor && M3::mrowmajor) ) ? 15 : 16 ) :
                 ( (M1::mrowmajor && M2::mrowmajor) ||
                   (M1::mrowmajor && M3::mrowmajor) ||
-                  (M2::mrowmajor && M3::mrowmajor) ) ? 2 : 3;
-            if (m1.isunit() || m2.isunit())
-                AddUU_Helper<1,s,ix1,T1,M1,ix2,T2,M2,M3>::call(
-                    x1,m1,x2,m2,m3);
-            else
-                AddUU_Helper<algo2,s,ix1,T1,M1,ix2,T2,M2,M3>::call(
-                    x1,m1,x2,m2,m3);
+                  (M2::mrowmajor && M3::mrowmajor) ) ? 12 : 11;
+            AddUU_Helper<algo,s,ix1,T1,M1,ix2,T2,M2,M3>::call(
+                x1,m1,x2,m2,m3);
         }
     };
 
@@ -307,6 +346,7 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+            TMVStaticAssert(!M3::mconj);
             typedef typename M3::value_type T3;
             const int s2 = s > 20 ? UNKNOWN : s;
             const int s2p1 = IntTraits<s2>::Sp1;
@@ -317,18 +357,38 @@ namespace tmv {
                 nops > TMV_Q1 ? false :
                 s <= 10;
             const int algo = 
-                M3::mlower ? 10 :
-                ( M1::munit || M2::munit ) ? 1 :
+                M3::mlower ? 1 :
+                ( M1::munit || M2::munit ) ? 2 :
                 unroll ? (
                     ( (M1::mrowmajor && M2::mrowmajor) ||
                       (M1::mrowmajor && M3::mrowmajor) ||
-                      (M2::mrowmajor && M3::mrowmajor) ) ? 5 : 6 ) :
-                (M1::munknowndiag || M2::munknowndiag) ? 90 :
+                      (M2::mrowmajor && M3::mrowmajor) ) ? 15 : 16 ) :
+                (M1::munknowndiag || M2::munknowndiag) ? 3 :
                 ( (M1::mrowmajor && M2::mrowmajor) ||
                   (M1::mrowmajor && M3::mrowmajor) ||
-                  (M2::mrowmajor && M3::mrowmajor) ) ? 2 : 3;
+                  (M2::mrowmajor && M3::mrowmajor) ) ? 12 : 11;
             AddUU_Helper<algo,s,ix1,T1,M1,ix2,T2,M2,M3>::call(
                 x1,m1,x2,m2,m3);
+        }
+    };
+
+    // algo 96: Conjugate
+    template <int s, int ix1, class T1, class M1,
+              int ix2, class T2, class M2, class M3>
+    struct AddUU_Helper<96,s,ix1,T1,M1,ix2,T2,M2,M3>
+    {
+        static inline void call(
+            const Scaling<ix1,T1>& x1, const M1& m1, 
+            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
+        {
+            typedef typename M1::const_conjugate_type M1c;
+            typedef typename M2::const_conjugate_type M2c;
+            typedef typename M3::conjugate_type M3c;
+            M1c m1c = m1.conjugate();
+            M2c m2c = m2.conjugate();
+            M3c m3c = m3.conjugate();
+            AddUU_Helper<-2,s,ix1,T1,M1c,ix2,T2,M2c,M3c>::call(
+                TMV_CONJ(x1),m1c,TMV_CONJ(x2),m2c,m3c);
         }
     };
 
@@ -370,7 +430,9 @@ namespace tmv {
                 Traits2<TM1,TM3>::sametype &&
 #endif
                 Traits<TM3>::isinst;
+            const bool conj = M3::mconj;
             const int algo = 
+                conj ? 96 :
                 inst ? 97 :
                 -3;
             AddUU_Helper<algo,s,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
@@ -441,7 +503,7 @@ namespace tmv {
 
             if (!s1 && !s2) {
                 // No aliasing (or no clobbering)
-                AddUU_Helper<-3,s,ix1,T1,M1,ix2,T2,M2,M3>::call(
+                AddUU_Helper<-2,s,ix1,T1,M1,ix2,T2,M2,M3>::call(
                     x1,m1,x2,m2,m3);
             } else if (!ss2) { 
                 // Alias with m1 only, do m1 first
@@ -625,77 +687,6 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUUM_Helper;
 
-    // algo 1: M = x * U + x * U  (no alias checking)
-    template <int ix1, class T1, class M1,
-              int ix2, class T2, class M2, class M3>
-    struct AddUUM_Helper<1,ix1,T1,M1,ix2,T2,M2,M3>
-    {
-        static inline void call(
-            const Scaling<ix1,T1>& x1, const M1& m1, 
-            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
-        {
-            typename M3::uppertri_type m3u = m3.upperTri();
-            m3.setZero();
-            NoAliasAddMM(x1,m1,x2,m2,m3u);
-            m3.lowerTri().offDiag().setZero();
-        }
-    };
-
-    // algo 2: M = x * U + x * L  (no alias checking)
-    template <int ix1, class T1, class M1,
-              int ix2, class T2, class M2, class M3>
-    struct AddUUM_Helper<2,ix1,T1,M1,ix2,T2,M2,M3>
-    {
-        static inline void call(
-            const Scaling<ix1,T1>& x1, const M1& m1, 
-            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
-        {
-            typename M3::uppertri_type::offdiag_type m3u = 
-                m3.upperTri().offDiag();
-            typename M3::lowertri_type::offdiag_type m3l = 
-                m3.lowerTri().offDiag();
-            typename M3::diag_type m3d = m3.diag();
-            NoAliasMultXM<false>(x1,m1,m3u);
-            NoAliasMultXM<false>(x2,m2,m3l);
-            NoAliasAddVV(x1,m1.diag(),x2,m2.diag(),m3d);
-        }
-    };
-
-    // algo 3: M = x * L + x * U  (no alias checking)
-    template <int ix1, class T1, class M1,
-              int ix2, class T2, class M2, class M3>
-    struct AddUUM_Helper<3,ix1,T1,M1,ix2,T2,M2,M3>
-    {
-        static inline void call(
-            const Scaling<ix1,T1>& x1, const M1& m1, 
-            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
-        {
-            typename M3::uppertri_type::offdiag_type m3u = 
-                m3.upperTri().offDiag();
-            typename M3::lowertri_type::offdiag_type m3l = 
-                m3.lowerTri().offDiag();
-            typename M3::diag_type m3d = m3.diag();
-            NoAliasMultXM<false>(x1,m1,m3l);
-            NoAliasMultXM<false>(x2,m2,m3u);
-            NoAliasAddVV(x1,m1.diag(),x2,m2.diag(),m3d);
-        }
-    };
-
-    // algo 4: M = x * L + x * L  (no alias checking)
-    template <int ix1, class T1, class M1,
-              int ix2, class T2, class M2, class M3>
-    struct AddUUM_Helper<4,ix1,T1,M1,ix2,T2,M2,M3>
-    {
-        static inline void call(
-            const Scaling<ix1,T1>& x1, const M1& m1, 
-            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
-        {
-            typename M3::lowertri_type m3l = m3.lowerTri();
-            m3.setZero();
-            NoAliasAddMM(x1,m1,x2,m2,m3l);
-        }
-    };
-
     // algo 11: M = x * U + x * U  (with alias checking)
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
@@ -725,7 +716,7 @@ namespace tmv {
 
             if (!s1 && !s2) {
                 // No aliasing
-                AddUUM_Helper<2,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
+                AddUUM_Helper<22,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
             } else if (!s2) { 
                 // Alias with m1 only, do m1 first
                 typename M3::uppertri_type m3u = m3.upperTri();
@@ -745,9 +736,9 @@ namespace tmv {
                 typename M3::lowertri_type::offdiag_type m3l =
                     m3.lowerTri().offDiag();
                 typename M3::diag_type m3d = m3.diag();
-                AliasMultXM<false>(x1,m1,m3u);
-                AliasMultXM<false>(x2,m2,m3l);
-                AliasAddVV(x1,m1.diag(),x2,m2.diag(),m3d);
+                AliasMultXM<false>(x1,m1.offDiag(),m3u);
+                AliasMultXM<false>(x2,m2.offDiag(),m3l);
+                AddUUM_Helper<31,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
             } else {
                 // Need a temporary
                 typename M3::uppertri_type m3u = m3.upperTri();
@@ -773,7 +764,7 @@ namespace tmv {
 
             if (!s1 && !s2) {
                 // No aliasing
-                AddUUM_Helper<3,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
+                AddUUM_Helper<23,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
             } else if (!s2) { 
                 // Alias with m1 only, do m1 first
                 typename M3::uppertri_type m3u = m3.upperTri();
@@ -793,9 +784,9 @@ namespace tmv {
                 typename M3::lowertri_type::offdiag_type m3l =
                     m3.lowerTri().offDiag();
                 typename M3::diag_type m3d = m3.diag();
-                AliasMultXM<false>(x1,m1,m3l);
-                AliasMultXM<false>(x2,m2,m3u);
-                AliasAddVV(x1,m1.diag(),x2,m2.diag(),m3d);
+                AliasMultXM<false>(x1,m1.offDiag(),m3l);
+                AliasMultXM<false>(x2,m2.offDiag(),m3u);
+                AddUUM_Helper<31,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
             } else {
                 // Need a temporary
                 typename M3::uppertri_type m3u = m3.upperTri();
@@ -819,6 +810,151 @@ namespace tmv {
             typename M3::lowertri_type m3l = m3.lowerTri();
             AliasAddMM(x1,m1,x2,m2,m3l);
             m3.upperTri().offDiag().setZero();
+        }
+    };
+
+    // algo 21: M = x * U + x * U  (no alias checking)
+    template <int ix1, class T1, class M1,
+              int ix2, class T2, class M2, class M3>
+    struct AddUUM_Helper<21,ix1,T1,M1,ix2,T2,M2,M3>
+    {
+        static inline void call(
+            const Scaling<ix1,T1>& x1, const M1& m1, 
+            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
+        {
+            typename M3::uppertri_type m3u = m3.upperTri();
+            m3.setZero();
+            NoAliasAddMM(x1,m1,x2,m2,m3u);
+            m3.lowerTri().offDiag().setZero();
+        }
+    };
+
+    // algo 22: M = x * U + x * L  (no alias checking)
+    template <int ix1, class T1, class M1,
+              int ix2, class T2, class M2, class M3>
+    struct AddUUM_Helper<22,ix1,T1,M1,ix2,T2,M2,M3>
+    {
+        static inline void call(
+            const Scaling<ix1,T1>& x1, const M1& m1, 
+            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
+        {
+            typename M3::uppertri_type::offdiag_type m3u = 
+                m3.upperTri().offDiag();
+            typename M3::lowertri_type::offdiag_type m3l = 
+                m3.lowerTri().offDiag();
+            NoAliasMultXM<false>(x1,m1.offDiag(),m3u);
+            NoAliasMultXM<false>(x2,m2.offDiag(),m3l);
+            AddUUM_Helper<31,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
+        }
+    };
+
+    // algo 23: M = x * L + x * U  (no alias checking)
+    template <int ix1, class T1, class M1,
+              int ix2, class T2, class M2, class M3>
+    struct AddUUM_Helper<23,ix1,T1,M1,ix2,T2,M2,M3>
+    {
+        static inline void call(
+            const Scaling<ix1,T1>& x1, const M1& m1, 
+            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
+        {
+            typename M3::uppertri_type::offdiag_type m3u = 
+                m3.upperTri().offDiag();
+            typename M3::lowertri_type::offdiag_type m3l = 
+                m3.lowerTri().offDiag();
+            NoAliasMultXM<false>(x1,m1.offDiag(),m3l);
+            NoAliasMultXM<false>(x2,m2.offDiag(),m3u);
+            AddUUM_Helper<31,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
+        }
+    };
+
+    // algo 24: M = x * L + x * L  (no alias checking)
+    template <int ix1, class T1, class M1,
+              int ix2, class T2, class M2, class M3>
+    struct AddUUM_Helper<24,ix1,T1,M1,ix2,T2,M2,M3>
+    {
+        static inline void call(
+            const Scaling<ix1,T1>& x1, const M1& m1, 
+            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
+        {
+            typename M3::lowertri_type m3l = m3.lowerTri();
+            m3.setZero();
+            NoAliasAddMM(x1,m1,x2,m2,m3l);
+        }
+    };
+
+    // 31-34 just handle the diagonals after the offdiagonals have been 
+    // done already.
+    
+    // algo 31: check for unit and unknown diags
+    template <int ix1, class T1, class M1,
+              int ix2, class T2, class M2, class M3>
+    struct AddUUM_Helper<31,ix1,T1,M1,ix2,T2,M2,M3>
+    {
+        static inline void call(
+            const Scaling<ix1,T1>& x1, const M1& m1, 
+            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
+        {
+            const int algo = 
+                (M1::munit || M2::munit) ? 33 :
+                (M1::munknowndiag || M2::munknowndiag) ? 32 :
+                34;
+            AddUUM_Helper<algo,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
+        }
+    };
+
+    // algo 32: UnknownDiag
+    template <int ix1, class T1, class M1,
+              int ix2, class T2, class M2, class M3>
+    struct AddUUM_Helper<32,ix1,T1,M1,ix2,T2,M2,M3>
+    {
+        static inline void call(
+            const Scaling<ix1,T1>& x1, const M1& m1, 
+            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
+        {
+            if (m1.isunit() || m2.isunit())
+                AddUUM_Helper<33,ix1,T1,M1,ix2,T2,M2,M3>::call(
+                    x1,m1,x2,m2,m3);
+            else
+                AddUUM_Helper<34,ix1,T1,M1,ix2,T2,M2,M3>::call(
+                    x1,m1,x2,m2,m3);
+        }
+    };
+
+    // algo 33: m1 and/or m2 is unitdiag
+    template <int ix1, class T1, class M1,
+              int ix2, class T2, class M2, class M3>
+    struct AddUUM_Helper<33,ix1,T1,M1,ix2,T2,M2,M3>
+    {
+        static inline void call(
+            const Scaling<ix1,T1>& x1, const M1& m1, 
+            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
+        {
+            typename M3::diag_type m3d = m3.diag();
+            if (m1.isunit()) {
+                if (m2.isunit()) {
+                    m3d.setAllTo(T1(x1)+T2(x2));
+                } else {
+                    NoAliasMultXV<false>(x2,m2.diag(),m3d);
+                    m3d.addToAll(T1(x1));
+                }
+            } else {
+                NoAliasMultXV<false>(x1,m1.diag(),m3d);
+                m3d.addToAll(T2(x2));
+            }
+        }
+    };
+
+    // algo 34: no unitdiag's
+    template <int ix1, class T1, class M1,
+              int ix2, class T2, class M2, class M3>
+    struct AddUUM_Helper<34,ix1,T1,M1,ix2,T2,M2,M3>
+    {
+        static inline void call(
+            const Scaling<ix1,T1>& x1, const M1& m1, 
+            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
+        {
+            typename M3::diag_type m3d = m3.diag();
+            AddVV(x1,m1.diag(),x2,m2.diag(),m3d);
         }
     };
 
@@ -849,10 +985,10 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
             const int algo = 
-                (M1::mupper && M2::mupper) ? 1 :
-                (M1::mupper && M2::mlower) ? 2 :
-                (M1::mlower && M2::mupper) ? 3 :
-                4;
+                (M1::mupper && M2::mupper) ? 21 :
+                (M1::mupper && M2::mlower) ? 22 :
+                (M1::mlower && M2::mupper) ? 23 :
+                24;
             AddUUM_Helper<algo,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
         }
     };
@@ -937,36 +1073,6 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUMM_Helper;
 
-    // algo 1: M = x * U + x * M  (no alias checking)
-    template <int ix1, class T1, class M1,
-              int ix2, class T2, class M2, class M3>
-    struct AddUMM_Helper<1,ix1,T1,M1,ix2,T2,M2,M3>
-    {
-        static inline void call(
-            const Scaling<ix1,T1>& x1, const M1& m1, 
-            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
-        {
-            typename M3::uppertri_type m3u = m3.upperTri();
-            MultXM<false>(x2,m2,m3);
-            MultXM<true>(x1,m1,m3u);
-        }
-    };
-
-    // algo 2: M = x * L + x * M  (no alias checking)
-    template <int ix1, class T1, class M1,
-              int ix2, class T2, class M2, class M3>
-    struct AddUMM_Helper<4,ix1,T1,M1,ix2,T2,M2,M3>
-    {
-        static inline void call(
-            const Scaling<ix1,T1>& x1, const M1& m1, 
-            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
-        {
-            typename M3::lowertri_type m3l = m3.lowerTri();
-            MultXM<false>(x2,m2,m3);
-            MultXM<true>(x1,m1,m3l);
-        }
-    };
-
     // algo 11: M = x * U + x * M  (with alias checking)
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
@@ -976,12 +1082,13 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+            TMVStaticAssert(M1::mupper);
             const bool s1 = SameStorage(m1,m3);
             const bool s2 = SameStorage(m2,m3);
 
             if (!s1 && !s2) {
                 // No aliasing
-                AddUMM_Helper<1,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
+                AddUMM_Helper<21,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
             } else if (!s2) { 
                 // Alias with m1 only, do m1 first
                 typename M3::uppertri_type m3u = m3.upperTri();
@@ -999,9 +1106,9 @@ namespace tmv {
                 typename M3::lowertri_type::offdiag_type m3l =
                     m3.lowerTri().offDiag();
                 typename M3::diag_type m3d = m3.diag();
-                AliasAddMM(x1,m1,x2,m2.upperTri().offDiag(),m3u);
+                AliasAddMM(x1,m1.offDiag(),x2,m2.upperTri().offDiag(),m3u);
                 AliasMultXM<false>(x2,m2.lowerTri().offDiag(),m3l);
-                AliasAddVV(x1,m1.diag(),x2,m2.diag(),m3d);
+                AddUMM_Helper<31,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
             } else {
                 // Need a temporary
                 typename M3::uppertri_type m3u = m3.upperTri();
@@ -1021,12 +1128,13 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+            TMVStaticAssert(M1::mlower);
             const bool s1 = SameStorage(m1,m3);
             const bool s2 = SameStorage(m2,m3);
 
             if (!s1 && !s2) {
                 // No aliasing
-                AddUMM_Helper<1,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
+                AddUMM_Helper<22,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
             } else if (!s2) { 
                 // Alias with m1 only, do m1 first
                 typename M3::lowertri_type m3l = m3.lowerTri();
@@ -1044,9 +1152,9 @@ namespace tmv {
                 typename M3::lowertri_type::offdiag_type m3l =
                     m3.lowerTri().offDiag();
                 typename M3::diag_type m3d = m3.diag();
-                AliasAddMM(x1,m1,x2,m2.lowerTri().offDiag(),m3l);
+                AliasAddMM(x1,m1.offDiag(),x2,m2.lowerTri().offDiag(),m3l);
                 AliasMultXM<false>(x2,m2.upperTri().offDiag(),m3u);
-                AliasAddVV(x1,m1.diag(),x2,m2.diag(),m3d);
+                AddUMM_Helper<31,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
             } else {
                 // Need a temporary
                 typename M3::lowertri_type m3l = m3.lowerTri();
@@ -1054,6 +1162,119 @@ namespace tmv {
                 AliasMultXM<false>(x2,m2,m3);
                 NoAliasMultXM<true>(x1,m1c,m3l);
             }
+        }
+    };
+
+    // algo 21: M = x * U + x * M  (no alias checking)
+    template <int ix1, class T1, class M1,
+              int ix2, class T2, class M2, class M3>
+    struct AddUMM_Helper<21,ix1,T1,M1,ix2,T2,M2,M3>
+    {
+        static inline void call(
+            const Scaling<ix1,T1>& x1, const M1& m1, 
+            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
+        {
+            TMVStaticAssert(M1::mupper);
+            typename M3::uppertri_type m3u = m3.upperTri();
+            NoAliasMultXM<false>(x2,m2,m3);
+            NoAliasMultXM<true>(x1,m1,m3u);
+        }
+    };
+
+    // algo 22: M = x * L + x * M  (no alias checking)
+    template <int ix1, class T1, class M1,
+              int ix2, class T2, class M2, class M3>
+    struct AddUMM_Helper<22,ix1,T1,M1,ix2,T2,M2,M3>
+    {
+        static inline void call(
+            const Scaling<ix1,T1>& x1, const M1& m1, 
+            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
+        {
+            TMVStaticAssert(M1::mlower);
+            typename M3::lowertri_type m3l = m3.lowerTri();
+            NoAliasMultXM<false>(x2,m2,m3);
+            NoAliasMultXM<true>(x1,m1,m3l);
+        }
+    };
+
+    // 31-34 just handle the diagonals after the offdiagonals have been 
+    // done already.
+    
+    // algo 31: check for unit and unknown diags
+    template <int ix1, class T1, class M1,
+              int ix2, class T2, class M2, class M3>
+    struct AddUMM_Helper<31,ix1,T1,M1,ix2,T2,M2,M3>
+    {
+        static inline void call(
+            const Scaling<ix1,T1>& x1, const M1& m1, 
+            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
+        {
+            const int algo = 
+                M1::munit ? 33 :
+                M1::munknowndiag ? 32 :
+                34;
+            AddUMM_Helper<algo,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
+        }
+    };
+
+    // algo 32: UnknownDiag
+    template <int ix1, class T1, class M1,
+              int ix2, class T2, class M2, class M3>
+    struct AddUMM_Helper<32,ix1,T1,M1,ix2,T2,M2,M3>
+    {
+        static inline void call(
+            const Scaling<ix1,T1>& x1, const M1& m1, 
+            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
+        {
+            if (m1.isunit())
+                AddUMM_Helper<33,ix1,T1,M1,ix2,T2,M2,M3>::call(
+                    x1,m1,x2,m2,m3);
+            else
+                AddUMM_Helper<34,ix1,T1,M1,ix2,T2,M2,M3>::call(
+                    x1,m1,x2,m2,m3);
+        }
+    };
+
+    // algo 33: m1 is UnitDiag
+    template <int ix1, class T1, class M1,
+              int ix2, class T2, class M2, class M3>
+    struct AddUMM_Helper<33,ix1,T1,M1,ix2,T2,M2,M3>
+    {
+        static inline void call(
+            const Scaling<ix1,T1>& x1, const M1& m1, 
+            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
+        {
+            typename M3::diag_type m3d = m3.diag();
+            NoAliasMultXV<false>(x2,m2.diag(),m3d);
+            m3d.addToAll(T1(x1));
+        }
+    };
+
+    // algo 34: m1 is NonUnitDiag
+    template <int ix1, class T1, class M1,
+              int ix2, class T2, class M2, class M3>
+    struct AddUMM_Helper<34,ix1,T1,M1,ix2,T2,M2,M3>
+    {
+        static inline void call(
+            const Scaling<ix1,T1>& x1, const M1& m1, 
+            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
+        {
+            typename M3::diag_type m3d = m3.diag();
+            AddVV(x1,m1.diag(),x2,m2.diag(),m3d);
+        }
+    };
+
+    // algo -2: No alias checking
+    template <int ix1, class T1, class M1,
+              int ix2, class T2, class M2, class M3>
+    struct AddUMM_Helper<-2,ix1,T1,M1,ix2,T2,M2,M3>
+    {
+        static inline void call(
+            const Scaling<ix1,T1>& x1, const M1& m1, 
+            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
+        {
+            const int algo = M1::mupper ? 21 : 22;
+            AddUMM_Helper<algo,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
         }
     };
 
@@ -1067,19 +1288,6 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
             const int algo = M1::mupper ? 11 : 12;
-            AddUMM_Helper<algo,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
-        }
-    };
-    // algo -2: No alias checking
-    template <int ix1, class T1, class M1,
-              int ix2, class T2, class M2, class M3>
-    struct AddUMM_Helper<-2,ix1,T1,M1,ix2,T2,M2,M3>
-    {
-        static inline void call(
-            const Scaling<ix1,T1>& x1, const M1& m1, 
-            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
-        {
-            const int algo = M1::mupper ? 1 : 2;
             AddUMM_Helper<algo,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
         }
     };
@@ -1111,10 +1319,12 @@ namespace tmv {
         const Scaling<ix2,T2>& x2, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     {
-        TMVStaticAssert((Sizes<M1::msize,M2::msize>::same));
+        TMVStaticAssert((Sizes<M1::msize,M2::mcolsize>::same));
+        TMVStaticAssert((Sizes<M1::msize,M2::mrowsize>::same));
         TMVStaticAssert((Sizes<M1::msize,M3::mcolsize>::same));
         TMVStaticAssert((Sizes<M1::msize,M3::mrowsize>::same));
-        TMVAssert(m1.size() == m2.size());
+        TMVAssert(m1.size() == m2.colsize());
+        TMVAssert(m1.size() == m2.rowsize());
         TMVAssert(m1.size() == m3.colsize());
         TMVAssert(m1.size() == m3.rowsize());
         AddUMM_Helper<-1,ix1,T1,M1,ix2,T2,M2,M3>::call(
@@ -1128,10 +1338,12 @@ namespace tmv {
         const Scaling<ix2,T2>& x2, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     {
-        TMVStaticAssert((Sizes<M1::msize,M2::msize>::same));
+        TMVStaticAssert((Sizes<M1::msize,M2::mcolsize>::same));
+        TMVStaticAssert((Sizes<M1::msize,M2::mrowsize>::same));
         TMVStaticAssert((Sizes<M1::msize,M3::mcolsize>::same));
         TMVStaticAssert((Sizes<M1::msize,M3::mrowsize>::same));
-        TMVAssert(m1.size() == m2.size());
+        TMVAssert(m1.size() == m2.colsize());
+        TMVAssert(m1.size() == m2.rowsize());
         TMVAssert(m1.size() == m3.colsize());
         TMVAssert(m1.size() == m3.rowsize());
         AddUMM_Helper<-2,ix1,T1,M1,ix2,T2,M2,M3>::call(
@@ -1145,10 +1357,12 @@ namespace tmv {
         const Scaling<ix2,T2>& x2, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     {
-        TMVStaticAssert((Sizes<M1::msize,M2::msize>::same));
+        TMVStaticAssert((Sizes<M1::msize,M2::mcolsize>::same));
+        TMVStaticAssert((Sizes<M1::msize,M2::mrowsize>::same));
         TMVStaticAssert((Sizes<M1::msize,M3::mcolsize>::same));
         TMVStaticAssert((Sizes<M1::msize,M3::mrowsize>::same));
-        TMVAssert(m1.size() == m2.size());
+        TMVAssert(m1.size() == m2.colsize());
+        TMVAssert(m1.size() == m2.rowsize());
         TMVAssert(m1.size() == m3.colsize());
         TMVAssert(m1.size() == m3.rowsize());
         AddUMM_Helper<99,ix1,T1,M1,ix2,T2,M2,M3>::call(

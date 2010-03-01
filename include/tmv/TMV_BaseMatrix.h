@@ -73,12 +73,13 @@
 #include <sstream>
 #include "TMV_BaseVector.h"
 #include "TMV_Shape.h"
+#include "TMV_Array.h"
 
 namespace tmv {
 
     // BaseMatrix is the base class for all matrix classes.
     // All non-modifying functions are defined for BaseMatrix, such as
-    // Norm, Trace, Det, etc.
+    // norm, trace, det, etc.
     template <class M>
     class BaseMatrix;
 
@@ -302,6 +303,26 @@ namespace tmv {
     template <int ix, class T, class M>
     class QuotXM;
 
+    // Defined in TMV_Det.h
+    template <class M>
+    inline typename M::value_type Det(const BaseMatrix_Calc<M>& m);
+    template <class M>
+    inline typename M::real_type LogDet(
+        const BaseMatrix_Calc<M>& m, typename M::value_type* sign=0);
+    template <class M>
+    inline bool IsSingular(const BaseMatrix_Calc<M>& m);
+
+    // Defined in TMV_InvertM.h
+    template <int ix, class T, class M1, class M2>
+    inline void MakeInverse(
+        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
+        BaseMatrix_Mutable<M2>& minv);
+
+    template <class M1, class M2>
+    inline void MakeInverseATA(
+        const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& mata);
+
+
     template <class M> 
     class BaseMatrix
     {
@@ -391,29 +412,31 @@ namespace tmv {
 
         // 
         // Division Functions
-        // These are overridden for Matrix<>, since it has DivHelper.
         //
 
         inline inverse_type inverse() const
-        { return inverse_type(real_type(1),mat()); }
+        { return inverse_type(real_type(1),calc()); }
 
-#if 0
         inline value_type det() const
         {
             TMVStaticAssert((Sizes<mrowsize,mcolsize>::same));
             TMVAssert(colsize() == rowsize());
-            return tmv::Det(mat());
+            return tmv::Det(calc());
         }
 
         inline real_type logDet(value_type* sign=0) const
         {
             TMVStaticAssert((Sizes<mrowsize,mcolsize>::same));
             TMVAssert(colsize() == rowsize());
-            return tmv::LogDet(mat(),sign);
+            return tmv::LogDet(calc(),sign);
         }
 
         inline bool isSingular() const
-        { return Det() == value_type(0); }
+        { 
+            TMVStaticAssert((Sizes<mrowsize,mcolsize>::same));
+            TMVAssert(colsize() == rowsize());
+            return tmv::IsSingular(calc());
+        }
 
         inline real_type norm2() const
         { return calc().norm2(); }
@@ -423,12 +446,11 @@ namespace tmv {
 
         template <class M2>
         inline void makeInverse(BaseMatrix_Mutable<M2>& minv) const
-        { tmv::DoMakeInverse(mat(),minv.mat()); }
+        { tmv::MakeInverse(Scaling<1,real_type>(),calc(),minv); }
 
         template <class M2>
-        inline void makeInverseATA(BaseMatrix_Mutable<M2>& minv) const
-        { tmv::DoMakeInverseATA(mat(),minv.mat()); }
-#endif
+        inline void makeInverseATA(BaseMatrix_Mutable<M2>& mata) const
+        { tmv::MakeInverseATA(calc(),mata); }
 
 
         // 
@@ -820,54 +842,6 @@ namespace tmv {
 
     }; // BaseMatrix_Mutable
 
-    // A special kind of Matrix that doesn't have any values.
-    // It just stores the size of the matrix.
-    template <class M>
-    class MatrixSizer : public BaseMatrix<MatrixSizer<M> >
-    {
-    public:
-        enum { mcolsize = Traits<M>::mcolsize };
-        enum { mrowsize = Traits<M>::mrowsize };
-
-        inline MatrixSizer(const M& m) :
-            itscolsize(m.colsize()), itsrowsize(m.rowsize()) {}
-        inline MatrixSizer(const MatrixSizer<M>& m) :
-            itscolsize(m.colsize()), itsrowsize(m.rowsize()) {}
-        inline ~MatrixSizer() {}
-
-        template <class M2>
-        inline void assignTo(BaseMatrix_Mutable<M2>& ) const {}
-
-        template <class M2>
-        inline void newAssignTo(BaseMatrix_Mutable<M2>& ) const {}
-
-        inline size_t colsize() const { return itscolsize; }
-        inline size_t rowsize() const { return itsrowsize; }
-
-    private:
-        const CheckedInt<mcolsize> itscolsize;
-        const CheckedInt<mrowsize> itsrowsize;
-        void operator=(const BaseMatrix_Calc<M>&);
-    };
-
-    // Set up the required traits for MatrixSizer:
-    template <class M>
-    struct Traits<MatrixSizer<M> >
-    {
-        enum { mcolsize = Traits<M>::mcolsize };
-        enum { mrowsize = Traits<M>::mrowsize };
-        enum { mshape = Traits<M>::mshape };
-        enum { mfort = false };
-        enum { mcalc = false };
-
-        typedef MatrixSizer<M> type;
-
-        typedef typename M::value_type value_type;
-        typedef type calc_type;
-        typedef type eval_type;
-        typedef type copy_type;
-        typedef MatrixSizer<typename M::inverse_type> inverse_type;
-    };
 
     //
     // Trace

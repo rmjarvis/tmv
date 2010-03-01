@@ -417,7 +417,7 @@ namespace tmv {
         char ul_exp = (M::mupper ? 'U' : 'L');
         is >> ul;
         if (!is) {
-#ifdef NOTHROW
+#ifdef TMV_NO_THROW
             std::cerr<<"TriMatrix ReadError: !is\n"; 
             exit(1); 
 #else
@@ -425,7 +425,7 @@ namespace tmv {
 #endif
         }
         if (ul != ul_exp) {
-#ifdef NOTHROW
+#ifdef TMV_NO_THROW
             std::cerr<<"TriMatrix ReadError: "<<ul<<" != "<<ul_exp; 
             exit(1); 
 #else
@@ -463,7 +463,7 @@ namespace tmv {
         char ul;
         is >> ul;
         if (!is) {
-#ifdef NOTHROW
+#ifdef TMV_NO_THROW
             std::cerr<<"UpperTriMatrix ReadError: !is\n"; 
             exit(1); 
 #else
@@ -471,7 +471,7 @@ namespace tmv {
 #endif
         }
         if (ul != 'U') {
-#ifdef NOTHROW
+#ifdef TMV_NO_THROW
             std::cerr<<"UpperTriMatrix ReadError: "<<ul<<" != U\n"; 
             exit(1); 
 #else
@@ -501,7 +501,7 @@ namespace tmv {
         char ul;
         is >> ul;
         if (!is) {
-#ifdef NOTHROW
+#ifdef TMV_NO_THROW
             std::cerr<<"LowerTriMatrix ReadError: !is\n"; 
             exit(1); 
 #else
@@ -509,7 +509,7 @@ namespace tmv {
 #endif
         }
         if (ul != 'L') {
-#ifdef NOTHROW
+#ifdef TMV_NO_THROW
             std::cerr<<"LowerTriMatrix ReadError: "<<ul<<" != U\n"; 
             exit(1); 
 #else

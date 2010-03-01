@@ -30,12 +30,10 @@ template <class T> void TestSmallVectorArith_2c()
 {
     DoTestSmallVectorArith_2c<2,T>();
     DoTestSmallVectorArith_2c<5,T>();
-#ifdef XTEST
 #if (XTEST & 2)
     DoTestSmallVectorArith_2c<1,T>();
     DoTestSmallVectorArith_2c<3,T>();
     DoTestSmallVectorArith_2c<4,T>();
-#endif
 #endif
 }
 

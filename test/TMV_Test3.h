@@ -12,6 +12,8 @@ template <class T> void TestSmallVectorArith_2c();
 template <class T> void TestSmallVectorArith_2d();
 template <class T> void TestAllSmallMatrix();
 template <class T> void TestSmallMatrix_Sub();
+template <class T> void TestAllSmallMatrixA();
+template <class T> void TestAllSmallMatrixB();
 template <class T> void TestSmallMatrixArith_1();
 template <class T> void TestSmallMatrixArith_2();
 template <class T> void TestSmallMatrixArith_3();

@@ -405,7 +405,7 @@ namespace tmv {
             V2c v2c = v2.conjugate();
             V3c v3c = v3.conjugate();
             ElemMultVV_Helper<-2,size,add,ix,T,V1c,V2c,V3c>::call(
-                x1,v1c,v2c,v3c);
+                TMV_CONJ(x1),v1c,v2c,v3c);
         }
     };
 

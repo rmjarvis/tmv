@@ -26,38 +26,37 @@ int main() try {
     std::ofstream log("tmvtest1c.log");
     tmv::WriteWarningsTo(&log);
 
-    showacc=true;
-    showdiv=true;
-    showtests=true;
-    showstartdone=true;
-    TestTriMatrix<double>();
-#define SKIPREST
+    //showacc=true;
+    //showdiv=true;
+    //showtests=true;
+    //showstartdone=true;
 
-#ifndef SKIPREST
+#if 1
 
 #ifdef TEST_DOUBLE
     TestTriMatrix<double>();
-    TestAllTriDiv<double>();
+    TestTriDiv<double>();
 #endif // DOUBLE
 
 #ifdef TEST_FLOAT
     TestTriMatrix<float>();
-    TestAllTriDiv<float>();
+    TestTriDiv<float>();
 #endif // FLOAT
 
 #ifdef TEST_LONGDOUBLE
     TestTriMatrix<long double>();
-    TestAllTriDiv<long double>();
+    TestTriDiv<long double>();
 #endif // LONGDOUBLE
 
 #ifdef TEST_INT
     TestTriMatrix<int>();
 #endif  // INT
 
-#endif // SKIPREST
+#endif
 
     return 0;
 }
+#if 0
 #ifndef NOTHROW
 catch (tmv::Error& e) {
     std::cerr<<e<<std::endl;
@@ -75,6 +74,9 @@ catch (...) {
     std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
     return 1;
 }
+#else
+catch (int) {}
+#endif
 
 void PreAssert(std::string s)
 {

@@ -42,7 +42,7 @@
 namespace tmv {
 
     template <bool add, class T1, bool C1, class T2, bool C2, class T3>
-    void DoMultMM(
+    static void DoMultMM(
         const T3 x,
         const ConstMatrixView<T1,1,UNKNOWN,C1>& m1,
         const ConstMatrixView<T2,1,UNKNOWN,C2>& m2, MatrixView<T3,1> m3)
@@ -98,7 +98,12 @@ namespace tmv {
         const T3 x,
         const ConstMatrixView<T1,1,UNKNOWN,C1>& m1,
         const ConstMatrixView<T2,1,UNKNOWN,C2>& m2, MatrixView<T3,1> m3)
-    { DoMultMM<add>(x,m1,m2,m3); }
+    { 
+        if (m3.colsize() > 0 && m3.rowsize() > 0) {
+            if (m1.rowsize() == 0) Maybe<!add>::zero(m3);
+            else DoMultMM<add>(x,m1,m2,m3); 
+        }
+    }
 
 #define InstFile "TMV_MultMM_CCC.inst"
 #include "TMV_Inst.h"

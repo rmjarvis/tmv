@@ -521,13 +521,11 @@ template <class T> static void TestVectorArith()
     TestVectorArith2<T>(aa,caa,br,cbr,"Vector C RevB");
     TestVectorArith2<T>(ar,car,br,cbr,"Vector C RevAB");
 
-#ifdef XTEST
 #if (XTEST & 32)
     VF af = a.fView();
     CVF caf = ca.fView();
     TestVectorArith1<T>(af,caf,"Vector F");
 
-#if 1
     VF bf = b.fView();
     CVF cbf = cb.fView();
     TestVectorArith2<T>(af,caf,b,cbb,"Vector FC");
@@ -552,8 +550,6 @@ template <class T> static void TestVectorArith()
     TestVectorArith2<T>(arf,carf,bf,cbf,"Vector F RevA");
     TestVectorArith2<T>(af,caf,brf,cbrf,"Vector F RevB");
     TestVectorArith2<T>(arf,carf,brf,cbrf,"Vector F RevAB");
-#endif
-#endif
 #endif
 
     if (showstartdone) {
@@ -600,16 +596,14 @@ template <class T> static void TestVectorIO()
     Assert(v == *xv2,"Vector I/O check #2");
     Assert(cv == *xcv2,"CVector I/O check #2");
 
-#ifndef XTEST
     std::remove("tmvtest_vector_io.dat");
-#endif
 
     if (showstartdone) {
         std::cout<<"Done Test Vector I/O"<<std::endl;
     }
 }
 
-template <class T> void TestAllVector()
+template <class T> void TestVector()
 {
 #if 1
     TestVectorReal<T>();
@@ -625,14 +619,14 @@ template <class T> void TestAllVector()
 }
 
 #ifdef TEST_DOUBLE
-template void TestAllVector<double>();
+template void TestVector<double>();
 #endif
 #ifdef TEST_FLOAT
-template void TestAllVector<float>();
+template void TestVector<float>();
 #endif
 #ifdef TEST_LONGDOUBLE
-template void TestAllVector<long double>();
+template void TestVector<long double>();
 #endif
 #ifdef TEST_INT
-template void TestAllVector<int>();
+template void TestVector<int>();
 #endif

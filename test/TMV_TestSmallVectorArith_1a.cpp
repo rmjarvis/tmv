@@ -19,7 +19,6 @@ template <int N, class T> static void DoTestSmallVectorArith_1a()
 
     TestVectorArith1<T>(a,ca,"SmallVector C");
 
-#ifdef XTEST
 #if (XTEST & 32)
     tmv::SmallVector<T,N,tmv::FortranStyle> af = a;
     tmv::SmallVector<T,N,tmv::FortranStyle> bf = b;
@@ -28,19 +27,16 @@ template <int N, class T> static void DoTestSmallVectorArith_1a()
 
     TestVectorArith1<T>(af,caf,"SmallVector F");
 #endif
-#endif
 }
 
 template <class T> void TestSmallVectorArith_1a()
 {
     DoTestSmallVectorArith_1a<2,T>();
     DoTestSmallVectorArith_1a<5,T>();
-#ifdef XTEST
 #if (XTEST & 2)
     DoTestSmallVectorArith_1a<1,T>();
     DoTestSmallVectorArith_1a<3,T>();
     DoTestSmallVectorArith_1a<4,T>();
-#endif
 #endif
 }
 

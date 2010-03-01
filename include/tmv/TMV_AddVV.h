@@ -98,7 +98,7 @@ namespace tmv {
             IT2f it2f = it2.flatten();
             IT3f it3f = it3.flatten();
             const int n2 = n<<1;
-            AddVV_Helper<-4,size2,ix1,T1,V1f,ix2,T2,V2f,V3f>::call(
+            AddVV_Helper<-4,size2,ix1,T1,V1f,ix2,T2,V2f,V3f>::call2(
                 n2,x1,it1f,x2,it2f,it3f);
         }
     };
@@ -364,6 +364,26 @@ namespace tmv {
         }
     };
 
+    // algo 96: Conjugate
+    template <int s, int ix1, class T1, class V1,
+              int ix2, class T2, class V2, class V3>
+    struct AddVV_Helper<96,s,ix1,T1,V1,ix2,T2,V2,V3>
+    {
+        static inline void call(
+            const Scaling<ix1,T1>& x1, const V1& v1, 
+            const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
+        {
+            typedef typename V1::const_conjugate_type V1c;
+            typedef typename V2::const_conjugate_type V2c;
+            typedef typename V3::conjugate_type V3c;
+            V1c v1c = v1.conjugate();
+            V2c v2c = v2.conjugate();
+            V3c v3c = v3.conjugate();
+            AddVV_Helper<-2,s,ix1,T1,V1c,ix2,T2,V2c,V3c>::call(
+                TMV_CONJ(x1),v1c,TMV_CONJ(x2),v2c,v3c);
+        }
+    };
+
     // algo 97: Call inst
     template <int s, int ix1, class T1, class V1,
               int ix2, class T2, class V2, class V3>
@@ -401,7 +421,9 @@ namespace tmv {
                 Traits2<TV1,TV3>::sametype &&
 #endif
                 Traits<TV3>::isinst;
+            const bool conj = V3::vconj;
             const int algo = 
+                conj ? 96 :
                 inst ? 97 :
                 -4;
             AddVV_Helper<algo,s,ix1,T1,V1,ix2,T2,V2,V3>::call(x1,v1,x2,v2,v3);
@@ -464,7 +486,7 @@ namespace tmv {
 
             if (!s1 && !s2) {
                 // No aliasing (or no clobbering)
-                AddVV_Helper<-4,s,ix1,T1,V1,ix2,T2,V2,V3>::call(
+                AddVV_Helper<-2,s,ix1,T1,V1,ix2,T2,V2,V3>::call(
                     x1,v1,x2,v2,v3);
             } else if (!ss2) { 
                 // Alias with v1 only, do v1 first
@@ -515,7 +537,7 @@ namespace tmv {
                 // We do a different check alias with the Inst calls.
                 inst ? 98 : 
                 checkalias ? 99 : 
-                -4;
+                -2;
             AddVV_Helper<algo,s,ix1,T1,V1,ix2,T2,V2,V3>::call(x1,v1,x2,v2,v3);
         }
     };

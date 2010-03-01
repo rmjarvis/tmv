@@ -143,7 +143,7 @@ namespace tmv {
         {
 #ifdef PRINTALGO_R1
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
-            std::cout<<"R1 algo 3: M,N,cs,rs,x = "<<1<<','<<N<<
+            std::cout<<"R1 algo 1: M,N,cs,rs,x = "<<1<<','<<N<<
                 ','<<1<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M3::row_type M3r;
@@ -162,7 +162,7 @@ namespace tmv {
         {
 #ifdef PRINTALGO_R1
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
-            std::cout<<"R1 algo 3: M,N,cs,rs,x = "<<M<<','<<1<<
+            std::cout<<"R1 algo 2: M,N,cs,rs,x = "<<M<<','<<1<<
                 ','<<cs<<','<<1<<','<<T(x)<<std::endl;
 #endif
             typedef typename M3::col_type M3c;
@@ -201,9 +201,9 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         { 
-            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
 #ifdef PRINTALGO_R1
+            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             std::cout<<"R1 algo 12: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -893,18 +893,20 @@ namespace tmv {
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
             TMVStaticAssert(TMV_ZeroIX);
-            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             typedef typename V1::value_type T1;
             typedef typename Traits<T>::real_type RT;
             const Scaling<1,RT> one;
 #ifdef PRINTALGO_R1
+            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"R1 algo 31: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const int algo2 = M3::miscomplex ? 16 : 13;
 #ifdef TMV_OPT_SCALE
-            if (N > TMV_Q4 * M) {
+            const int MM = cs == UNKNOWN ? int(m3.colsize()) : cs;
+            const int NN = rs == UNKNOWN ? int(m3.rowsize()) : rs;
+            const int algo2 = M3::miscomplex ? 16 : 13;
+            if (NN > TMV_Q4 * MM) {
 #endif
                 Rank1VVM_Helper<82,cs,rs,add,ix,T,V1,V2,M3>::call(
                     x,v1,v2,m3);
@@ -924,15 +926,15 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
-#ifdef PRINTALGO_MV_R1
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
+#ifdef PRINTALGO_MV_R1
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"R1 algo 81: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename V1::value_type T1;
             typedef typename VCopyHelper<T1,cs,false>::type V1c;
-            V1c v1c = VectorSizer<V1>(v1);
+            V1c v1c(M);
             typedef typename V1c::view_type V1cv;
             typedef typename V1c::const_view_type V1ccv;
             V1cv v1cv = v1c.view();
@@ -951,8 +953,8 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
-#ifdef PRINTALGO_R1
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
+#ifdef PRINTALGO_R1
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"R1 algo 82: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -960,7 +962,7 @@ namespace tmv {
             typedef typename V1::value_type T1;
             typedef typename Traits2<T,T1>::type PT1;
             typedef typename VCopyHelper<PT1,cs,false>::type V1c;
-            V1c v1c = VectorSizer<V1>(v1);
+            V1c v1c(M);
             typedef typename V1c::view_type V1cv;
             typedef typename V1c::const_view_type V1ccv;
             V1cv v1cv = v1c.view();
@@ -1007,15 +1009,15 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
+            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
 #ifdef PRINTALGO_R1
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"R1 algo 84: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename V2::value_type T2;
             typedef typename VCopyHelper<T2,rs,false>::type V2c;
-            V2c v2c = VectorSizer<V2>(v2);
+            V2c v2c(N);
             typedef typename V2c::view_type V2cv;
             typedef typename V2c::const_view_type V2ccv;
             V2cv v2cv = v2c.view();
@@ -1034,16 +1036,16 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
+            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
 #ifdef PRINTALGO_R1
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"R1 algo 85: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename V2::value_type T2;
             typedef typename Traits2<T,T2>::type PT2;
             typedef typename VCopyHelper<PT2,rs,false>::type V2c;
-            V2c v2c = VectorSizer<V2>(v2);
+            V2c v2c(N);
             typedef typename V2c::view_type V2cv;
             typedef typename V2c::const_view_type V2ccv;
             V2cv v2cv = v2c.view();
@@ -1099,7 +1101,7 @@ namespace tmv {
             if (M > N) {
                 typedef typename V1::value_type T1;
                 typedef typename VCopyHelper<T1,cs,false>::type V1c;
-                V1c v1c = VectorSizer<V1>(v1);
+                V1c v1c(M);
                 typedef typename V1c::view_type V1cv;
                 typedef typename V1c::const_view_type V1ccv;
                 V1cv v1cv = v1c.view();
@@ -1109,7 +1111,7 @@ namespace tmv {
                 typedef typename V2::value_type T2;
                 typedef typename Traits2<T,T2>::type PT2;
                 typedef typename VCopyHelper<PT2,rs,false>::type V2c;
-                V2c v2c = VectorSizer<V2>(v2);
+                V2c v2c(N);
                 typedef typename V2c::view_type V2cv;
                 typedef typename V2c::const_view_type V2ccv;
                 V2cv v2cv = v2c.view();
@@ -1124,7 +1126,7 @@ namespace tmv {
                 typedef typename V1::value_type T1;
                 typedef typename Traits2<T,T1>::type PT1;
                 typedef typename VCopyHelper<PT1,cs,false>::type V1c;
-                V1c v1c = VectorSizer<V1>(v1);
+                V1c v1c(M);
                 typedef typename V1c::view_type V1cv;
                 typedef typename V1c::const_view_type V1ccv;
                 V1cv v1cv = v1c.view();
@@ -1133,7 +1135,7 @@ namespace tmv {
 
                 typedef typename V2::value_type T2;
                 typedef typename VCopyHelper<T2,rs,false>::type V2c;
-                V2c v2c = VectorSizer<V2>(v2);
+                V2c v2c(N);
                 typedef typename V2c::view_type V2cv;
                 typedef typename V2c::const_view_type V2ccv;
                 V2cv v2cv = v2c.view();
@@ -1154,15 +1156,15 @@ namespace tmv {
         static inline void call(
             const Scaling<1,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
-#ifdef PRINTALGO_R1
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
+#ifdef PRINTALGO_R1
             std::cout<<"R1 algo 87: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename V1::value_type T1;
             typedef typename VCopyHelper<T1,cs,false>::type V1c;
-            V1c v1c = VectorSizer<V1>(v1);
+            V1c v1c(M);
             typedef typename V1c::view_type V1cv;
             typedef typename V1c::const_view_type V1ccv;
             V1cv v1cv = v1c.view();
@@ -1171,7 +1173,7 @@ namespace tmv {
 
             typedef typename V2::value_type T2;
             typedef typename VCopyHelper<T2,rs,false>::type V2c;
-            V2c v2c = VectorSizer<V2>(v2);
+            V2c v2c(N);
             typedef typename V2c::view_type V2cv;
             typedef typename V2c::const_view_type V2ccv;
             V2cv v2cv = v2c.view();
@@ -1193,6 +1195,7 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
+            TMVStaticAssert(!M3::mconj);
 #if TMV_OPT >= 1
             const int algo = 
                 ( rs == 0 || cs == 0 ) ? 0 : 
@@ -1226,6 +1229,7 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
+            TMVStaticAssert(!M3::mconj);
             // Possible algorithms to choose from:
             //
             //  0 = cs or rs == 0, so nothing to do
@@ -1289,9 +1293,15 @@ namespace tmv {
             std::cout<<"v2 = "<<TMV_Text(v2)<<std::endl;
             std::cout<<"m3 = "<<TMV_Text(m3)<<std::endl;
             std::cout<<"cs,rs,algo = "<<cs<<"  "<<rs<<"  "<<algo<<std::endl;
+            //std::cout<<"v1 = "<<v1<<std::endl;
+            //std::cout<<"v2 = "<<v2<<std::endl;
+            //std::cout<<"m3 = "<<m3<<std::endl;
 #endif
             Rank1VVM_Helper<algo,cs,rs,add,ix,T,V1,V2,M3>::call(
                 x,v1,v2,m3);
+#ifdef PRINTALGO_R1
+            //std::cout<<"m3 => "<<m3<<std::endl;
+#endif
         }
     };
 

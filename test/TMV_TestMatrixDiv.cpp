@@ -5,8 +5,8 @@
 
 #include "TMV_TestMatrixDivArith.h"
 
-template <class T, tmv::StorageType stor> static void TestSquareDiv(
-    tmv::DivType dt)
+template <class T, tmv::StorageType stor> 
+static void TestSquareDiv(tmv::DivType dt)
 {
     tmv::Matrix<T,stor> m(4,4);
 
@@ -173,8 +173,8 @@ template <class T, tmv::StorageType stor> static void TestSquareDiv(
     tmv::Vector<T> R(BIGN,r);
     tmv::Matrix<T,stor> M = P ^ Q;
     tmv::Matrix<std::complex<T>,stor> CM = P ^ (std::complex<T>(-4,10)*Q);
-    M.diag().AddToAll(T(215));
-    CM.diag().AddToAll(std::complex<T>(103,-53));
+    M.diag().addToAll(T(215));
+    CM.diag().addToAll(std::complex<T>(103,-53));
     M.row(size_t(floor(0.23*BIGN))) *= T(12);
     M(size_t(floor(0.12*BIGN)),1) -= T(142);
     CM(size_t(floor(0.06*BIGN)),2) += std::complex<T>(23,89);
@@ -182,11 +182,11 @@ template <class T, tmv::StorageType stor> static void TestSquareDiv(
     M.subVector(size_t(floor(0.65*BIGN)),size_t(floor(0.05*BIGN)),1,3,
                 size_t(floor(0.29*BIGN))) *= T(2);
     M.subVector(size_t(floor(0.98*BIGN)),size_t(floor(0.12*BIGN)),-1,2,
-                size_t(floor(0.18*BIGN))).AddToAll(T(197));
+                size_t(floor(0.18*BIGN))).addToAll(T(197));
     CM.subVector(size_t(floor(0.53*BIGN)),0,1,3,size_t(floor(0.31*BIGN))) *= 
         std::complex<T>(2,-1);
     CM.subVector(size_t(floor(0.88*BIGN)),size_t(floor(0.18*BIGN)),-1,2,
-                 size_t(floor(0.23*BIGN))).AddToAll(std::complex<T>(197,174));
+                 size_t(floor(0.23*BIGN))).addToAll(std::complex<T>(197,174));
     M.divideUsing(dt);
     M.saveDiv();
     CM.divideUsing(dt);
@@ -265,16 +265,15 @@ template <class T, tmv::StorageType stor> static void TestSquareDiv(
 
     tmv::Matrix<std::complex<T>,stor> c1 = a1 * std::complex<T>(1,2);
     tmv::Matrix<std::complex<T>,stor> c2 = a2 * std::complex<T>(-3,4);
-    c1.diag().AddToAll(std::complex<T>(3,1));
-    c2.diag().AddToAll(std::complex<T>(-5,8));
-    c1.row(3).AddToAll(std::complex<T>(1,-6));
-    c2.row(0).AddToAll(std::complex<T>(-2,-11));
+    c1.diag().addToAll(std::complex<T>(3,1));
+    c2.diag().addToAll(std::complex<T>(-5,8));
+    c1.row(3).addToAll(std::complex<T>(1,-6));
+    c2.row(0).addToAll(std::complex<T>(-2,-11));
 
     tmv::Matrix<T> a1x = a1;
     tmv::Matrix<std::complex<T> > c1x = c1;
     TestMatrixDivArith2<T>(
         dt,a1x,c1x,a1.view(),a2.view(),c1.view(),c2.view(),"Square"); 
-#ifdef XTEST
 #if (XTEST & 2)
     tmv::Matrix<T,stor,tmv::FortranStyle> a1f = a1;
     tmv::Matrix<T,stor,tmv::FortranStyle> a2f = a2;
@@ -286,7 +285,6 @@ template <class T, tmv::StorageType stor> static void TestSquareDiv(
         dt,a1x,c1x,a1.view(),a2f.view(),c1.view(),c2f.view(),"Square"); 
     TestMatrixDivArith1<T>(
         dt,a1x,c1x,a1f.view(),a2f.view(),c1f.view(),c2f.view(),"Square"); 
-#endif
 #endif
 
     tmv::Matrix<T,stor> a3(7,4);
@@ -300,9 +298,9 @@ template <class T, tmv::StorageType stor> static void TestSquareDiv(
     c3.subMatrix(2,6,0,4) += c1;
     c4.subMatrix(0,4,1,5) -= c2;
     c3.col(1) *= std::complex<T>(2,1);
-    c3.row(2).AddToAll(std::complex<T>(-7,2));
+    c3.row(2).addToAll(std::complex<T>(-7,2));
     c4.col(3) *= std::complex<T>(-1,3);
-    c4.row(0).AddToAll(std::complex<T>(1,9));
+    c4.row(0).addToAll(std::complex<T>(1,9));
 
     tmv::Matrix<T,stor> a3x = a3;
     tmv::Matrix<T,stor> a4x = a4;
@@ -313,7 +311,6 @@ template <class T, tmv::StorageType stor> static void TestSquareDiv(
     TestMatrixDivArith1<T>(
         dt,a4x,c4x,a1.view(),a4.view(),c1.view(),c4.view(),"Square/NonSquare");
 
-#ifdef XTEST
 #if (XTEST & 8)
     tmv::Matrix<T,stor> a5(4,0);
     tmv::Matrix<T,stor> a6(0,4);
@@ -329,22 +326,19 @@ template <class T, tmv::StorageType stor> static void TestSquareDiv(
     TestMatrixDivArith1<T>(
         dt,a6,c6,a1.view(),a6.view(),c1.view(),c6.view(),"Square/Degenerate");
 #endif
-#endif
 
     if (stor == tmv::ColMajor) {
-#ifdef XTEST
 #if (XTEST & 2)
         TestSquareDiv<T,tmv::RowMajor>(dt);
     } else {
-#endif
 #endif
         std::cout<<"Square Matrix<"<<tmv::TMV_Text(T())<<"> Division using ";
         std::cout<<tmv::Text(dt)<<" passed all tests\n";
     }
 }
 
-template <class T, tmv::StorageType stor> static void TestNonSquareDiv(
-    tmv::DivType dt)
+template <class T, tmv::StorageType stor> 
+static void TestNonSquareDiv(tmv::DivType dt)
 {
     tmv::Matrix<T,stor> m(6,4);
     for(int i=0;i<6;++i) for(int j=0;j<4;++j) m(i,j) = T(2+4*i-5*j);
@@ -589,9 +583,9 @@ template <class T, tmv::StorageType stor> static void TestNonSquareDiv(
     tmv::Matrix<T,stor> a2 = m.transpose() * m;
     tmv::Matrix<T,stor> a3 = m * m.transpose();
     a2.row(1) *= T(3);
-    a2.col(2).AddToAll(-4);
+    a2.col(2).addToAll(-4);
     a3.row(5) *= T(7);
-    a3.col(3).AddToAll(7);
+    a3.col(3).addToAll(7);
     tmv::Matrix<std::complex<T>,stor> c1 = a1 * std::complex<T>(1,2);
     tmv::Matrix<std::complex<T>,stor> c2 = a2 * std::complex<T>(-3,4);
     tmv::Matrix<std::complex<T>,stor> c3 = a3 * std::complex<T>(-4,8);
@@ -615,9 +609,9 @@ template <class T, tmv::StorageType stor> static void TestNonSquareDiv(
     c4.subMatrix(0,6,0,4) += c1;
     c5.subMatrix(0,4,1,5) -= c2;
     c4.col(1) *= std::complex<T>(2,1);
-    c4.row(2).AddToAll(std::complex<T>(-7,2));
+    c4.row(2).addToAll(std::complex<T>(-7,2));
     c5.col(3) *= std::complex<T>(-1,3);
-    c5.row(0).AddToAll(std::complex<T>(1,9));
+    c5.row(0).addToAll(std::complex<T>(1,9));
 
     tmv::Matrix<T,stor> a6(9,6);
     for(int i=0;i<9;++i) for(int j=0;j<6;++j) a6(i,j) = T(5+2*i-2*j);
@@ -629,9 +623,9 @@ template <class T, tmv::StorageType stor> static void TestNonSquareDiv(
     c6.subMatrix(2,8,1,5) += c1;
     c7.subMatrix(0,6,4,8) -= T(2)*c1;
     c6.col(1) *= std::complex<T>(2,1);
-    c6.row(5).AddToAll(std::complex<T>(-7,2));
+    c6.row(5).addToAll(std::complex<T>(-7,2));
     c7.col(7) *= std::complex<T>(-1,3);
-    c7.row(4).AddToAll(std::complex<T>(1,9));
+    c7.row(4).addToAll(std::complex<T>(1,9));
 
     tmv::Matrix<T> a4x = a4;
     tmv::Matrix<T> a5x = a5;
@@ -654,7 +648,6 @@ template <class T, tmv::StorageType stor> static void TestNonSquareDiv(
         dt,a7x,c7x,a1.view(),a7.view(),c1.view(),c7.view(),
         "NonSquare/NonSquare");
 
-#ifdef XTEST
 #if (XTEST & 8)
     tmv::Matrix<T,stor> a8(4,0);
     tmv::Matrix<T,stor> a9(0,4);
@@ -686,21 +679,19 @@ template <class T, tmv::StorageType stor> static void TestNonSquareDiv(
         dt,a11,c11,a1.view(),a11.view(),c1.view(),c11.view(),
         "NonSquare/Degenerate");
 #endif
-#endif
 
     if (stor == tmv::ColMajor) {
-#ifdef XTEST
 #if (XTEST & 2)
         TestNonSquareDiv<T,tmv::RowMajor>(dt);
     } else {
-#endif
 #endif
         std::cout<<"NonSquare Matrix<"<<tmv::TMV_Text(T())<<"> Division using ";
         std::cout<<tmv::Text(dt)<<" passed all tests\n";
     }
 }
 
-template <class T, tmv::StorageType stor> static void TestSingularDiv(tmv::DivType dt)
+template <class T, tmv::StorageType stor> 
+static void TestSingularDiv(tmv::DivType dt)
 {
     tmv::Matrix<T,stor> m(4,4);
     for(int i=0;i<4;++i) for(int j=0;j<4;++j) m(i,j) = T(2+4*i-5*j);
@@ -854,18 +845,16 @@ template <class T, tmv::StorageType stor> static void TestSingularDiv(tmv::DivTy
     Assert(Norm(cbb2-cbb) < eps*Norm(cbb),"Singular exact bb%cc");
 
     if (stor == tmv::ColMajor) {
-#ifdef XTEST
 #if (XTEST & 2)
         TestSingularDiv<T,tmv::RowMajor>(dt);
     } else {
-#endif
 #endif
         std::cout<<"Singular Matrix<"<<tmv::TMV_Text(T())<<"> Division using ";
         std::cout<<tmv::Text(dt)<<" passed all tests\n";
     }
 }
 
-template <class T> void TestAllMatrixDiv()
+template <class T> void TestMatrixDiv()
 {
     TestMatrixDecomp<T,tmv::ColMajor>();
     TestMatrixDecomp<T,tmv::RowMajor>();
@@ -883,11 +872,11 @@ template <class T> void TestAllMatrixDiv()
 }
 
 #ifdef TEST_DOUBLE
-template void TestAllMatrixDiv<double>();
+template void TestMatrixDiv<double>();
 #endif
 #ifdef TEST_FLOAT
-template void TestAllMatrixDiv<float>();
+template void TestMatrixDiv<float>();
 #endif
 #ifdef TEST_LONGDOUBLE
-template void TestAllMatrixDiv<long double>();
+template void TestMatrixDiv<long double>();
 #endif

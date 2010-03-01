@@ -28,7 +28,7 @@ template <class T, int M, int N> void TestSmallMatrixArith_3(std::string label)
     for(int i=0;i<M;++i) for(int j=0;j<N;++j) {
         a1x(i,j) = T(2.9+4.3*i-5.1*j);
     }
-    a1x.diag().AddToAll(T(6));
+    a1x.diag().addToAll(T(6));
     a1x(0,0) = 14; 
     if (M > 1) a1x(1,0) = -2; 
     if (M > 2) a1x(2,0) = 7; 
@@ -39,7 +39,7 @@ template <class T, int M, int N> void TestSmallMatrixArith_3(std::string label)
     if (M > 2 && N > 3) ca1x(2,3) += CT(2.4,3.7);
     if (M > 1) ca1x(1,0) *= CT(0.8,2.8);
     if (N > 1) ca1x.col(1) *= CT(-1.1,3.6);
-    if (M > 3) ca1x.row(3) += tmv::SmallVector<CT,N>(CT(1.8,9.2));
+    if (M > 3) ca1x.row(3) += tmv::SmallVector<CT,N>(N,CT(1.8,9.2));
 
 #ifndef NONSQUARE
     // These next two is to make sure Det is calculable without overflow.
@@ -49,10 +49,10 @@ template <class T, int M, int N> void TestSmallMatrixArith_3(std::string label)
     }
 #endif
 
-    tmv::SmallMatrix<T,N,M,tmv::ColMajor> a2x = a1x.Transpose();
+    tmv::SmallMatrix<T,N,M,tmv::ColMajor> a2x = a1x.transpose();
     if (N > 1) a2x.row(1) *= T(3.1);
-    if (M > 2) a2x.col(2) -= tmv::SmallVector<T,N>(4.9);
-    tmv::SmallMatrix<CT,N,M,tmv::ColMajor> ca2x = ca1x.Transpose();
+    if (M > 2) a2x.col(2) -= tmv::SmallVector<T,N>(N,4.9);
+    tmv::SmallMatrix<CT,N,M,tmv::ColMajor> ca2x = ca1x.transpose();
     ca2x -= T(1.3)*a2x;
     ca2x *= CT(1.1,-2.5);
 
@@ -60,15 +60,15 @@ template <class T, int M, int N> void TestSmallMatrixArith_3(std::string label)
     tmv::SmallVector<T,M> v2x = a1x.col(0);
     tmv::SmallVector<CT,N> cv1x = ca1x.row(0);
     tmv::SmallVector<CT,M> cv2x = ca1x.col(0);
-    tmv::SmallVectorView<T,N,1> v1 = v1.View();
-    tmv::SmallVectorView<T,M,1> v2 = v2.View();
-    tmv::SmallVectorView<CT,N,1> cv1 = cv1.View();
-    tmv::SmallVectorView<CT,M,1> cv2 = cv2.View();
+    tmv::SmallVectorView<T,N,1> v1 = v1x.view();
+    tmv::SmallVectorView<T,M,1> v2 = v2x.view();
+    tmv::SmallVectorView<CT,N,1> cv1 = cv1x.view();
+    tmv::SmallVectorView<CT,M,1> cv2 = cv2x.view();
 
-    tmv::SmallMatrixView<T,M,N,1,M> a1 = a1x.View();
-    tmv::SmallMatrixView<T,N,M,M,1> a2 = a2x.View();
-    tmv::SmallMatrixView<CT,M,N,1,M> ca1 = ca1x.View();
-    tmv::SmallMatrixView<CT,N,M,M,1> ca2 = ca2x.View();
+    tmv::SmallMatrixView<T,M,N,N,1> a1 = a1x.view();
+    tmv::SmallMatrixView<T,N,M,1,N> a2 = a2x.view();
+    tmv::SmallMatrixView<CT,M,N,N,1> ca1 = ca1x.view();
+    tmv::SmallMatrixView<CT,N,M,1,N> ca2 = ca2x.view();
 
     TestMatrixArith3a<T>(a1,ca1,v1,cv1,v2,cv2,label+" ColMajor");
     TestMatrixArith3a<T>(a2,ca2,v2,cv2,v1,cv1,label+" RowMajor");
@@ -76,26 +76,25 @@ template <class T, int M, int N> void TestSmallMatrixArith_3(std::string label)
     TestMatrixArith3b<T>(a1,ca1,v1,cv1,v2,cv2,label+" ColMajor");
     TestMatrixArith3b<T>(a2,ca2,v2,cv2,v1,cv1,label+" RowMajor");
 
-#ifdef XTEST
 #if (XTEST & 1)
     tmv::SmallMatrix<T,3*M,4*N,tmv::ColMajor> a3x;
-    tmv::SmallMatrixView<T,M,N,3,12*M> a3 = a3x.SubMatrix(0,3*M,0,4*N,3,4);
+    tmv::SmallMatrixView<T,M,N,3,12*M> a3 = a3x.subMatrix(0,3*M,0,4*N,3,4);
     a3 = a1;
     tmv::SmallMatrix<CT,3*M,4*N,tmv::ColMajor> ca3x;
-    tmv::SmallMatrixView<CT,M,N,3,12*M> ca3 = ca3x.SubMatrix(0,3*M,0,4*N,3,4);
+    tmv::SmallMatrixView<CT,M,N,3,12*M> ca3 = ca3x.subMatrix(0,3*M,0,4*N,3,4);
     ca3 = ca1;
 
     tmv::SmallVector<T,5*N> v15;
-    tmv::SmallVectorView<T,N,5> v1s = v15.SubVector(0,5*N,5);
+    tmv::SmallVectorView<T,N,5> v1s = v15.subVector(0,5*N,5);
     v1s = v1;
     tmv::SmallVector<T,5*M> v25;
-    tmv::SmallVectorView<T,M,5> v2s = v25.SubVector(0,5*M,5);
+    tmv::SmallVectorView<T,M,5> v2s = v25.subVector(0,5*M,5);
     v2s = v2;
-    tmv::SmallVector<CT,5*N> cv15(20);
-    tmv::SmallVectorView<CT,N,5> cv1s = cv15.SubVector(0,5*N,5);
+    tmv::SmallVector<CT,5*N> cv15;
+    tmv::SmallVectorView<CT,N,5> cv1s = cv15.subVector(0,5*N,5);
     cv1s = cv1;
-    tmv::SmallVector<CT,5*M> cv25(20);
-    tmv::SmallVectorView<CT,M,5> cv2s = cv25.SubVector(0,5*M,5);
+    tmv::SmallVector<CT,5*M> cv25;
+    tmv::SmallVectorView<CT,M,5> cv2s = cv25.subVector(0,5*M,5);
     cv2s = cv2;
 
     TestMatrixArith3a<T>(a1,ca1,v1s,cv1s,v2,cv2,label+" ColMajor Step1");
@@ -120,5 +119,24 @@ template <class T, int M, int N> void TestSmallMatrixArith_3(std::string label)
     TestMatrixArith3b<T>(a3,ca3,v1,cv1,v2s,cv2s,label+" NonMajor Step2");
     TestMatrixArith3b<T>(a3,ca3,v1s,cv1s,v2s,cv2s,label+" NonMajor Step12");
 #endif
+#if (XTEST & 2)
+    tmv::MatrixView<T,N,1> a1m = a1;
+    tmv::MatrixView<T,1,N> a2m = a2;
+    tmv::MatrixView<CT,N,1> ca1m = ca1;
+    tmv::MatrixView<CT,1,N> ca2m = ca2;
+    tmv::VectorView<T,1> v1v = v1;
+    tmv::VectorView<T,1> v2v = v2;
+    tmv::VectorView<CT,1> cv1v = cv1;
+    tmv::VectorView<CT,1> cv2v = cv2;
+
+    TestMatrixArith3a<T>(a1m,ca1m,v1,cv1,v2,cv2,label+" ColMajor");
+    TestMatrixArith3a<T>(a2m,ca2m,v2,cv2,v1,cv1,label+" RowMajor");
+    TestMatrixArith3a<T>(a1,ca1,v1v,cv1v,v2v,cv2v,label+" ColMajor");
+    TestMatrixArith3a<T>(a2,ca2,v2v,cv2v,v1v,cv1v,label+" RowMajor");
+
+    TestMatrixArith3b<T>(a1m,ca1m,v1,cv1,v2,cv2,label+" ColMajor");
+    TestMatrixArith3b<T>(a2m,ca2m,v2,cv2,v1,cv1,label+" RowMajor");
+    TestMatrixArith3b<T>(a1,ca1,v1v,cv1v,v2v,cv2v,label+" ColMajor");
+    TestMatrixArith3b<T>(a2,ca2,v2v,cv2v,v1v,cv1v,label+" RowMajor");
 #endif
 }

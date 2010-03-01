@@ -30,46 +30,45 @@ int main() try {
     //showdiv=true;
     //showtests=true;
     //showstartdone=true;
-    //#define SKIPREST
 
-#ifndef SKIPREST
+#if 1
 
 #ifdef TEST_DOUBLE
-    TestAllSmallVector<double>();
-    TestAllSmallMatrix<double>();
-    TestAllSmallMatrixA<double>();
-    TestAllSmallMatrixB<double>();
-    TestAllSmallMatrixDiv<double>();
-    TestAllSmallMatrixDivA<double>();
-    TestAllSmallMatrixDivB<double>();
+    TestSmallVector<double>();
+    TestSmallMatrix<double>();
+    TestSmallMatrixA<double>();
+    TestSmallMatrixB<double>();
+    TestSmallMatrixDiv<double>();
+    TestSmallMatrixDivA<double>();
+    TestSmallMatrixDivB<double>();
 #endif
 
 #ifdef TEST_FLOAT
-    TestAllSmallVector<float>();
-    TestAllSmallMatrix<float>();
-    TestAllSmallMatrixA<float>();
-    TestAllSmallMatrixB<float>();
-    TestAllSmallMatrixDiv<float>();
-    TestAllSmallMatrixDivA<float>();
-    TestAllSmallMatrixDivB<float>();
+    TestSmallVector<float>();
+    TestSmallMatrix<float>();
+    TestSmallMatrixA<float>();
+    TestSmallMatrixB<float>();
+    TestSmallMatrixDiv<float>();
+    TestSmallMatrixDivA<float>();
+    TestSmallMatrixDivB<float>();
 #endif
 
 #ifdef TEST_LONGDOUBLE
-    TestAllSmallVector<long double>();
-    TestAllSmallMatrix<long double>();
-    TestAllSmallMatrixA<long double>();
-    TestAllSmallMatrixB<long double>();
-    TestAllSmallMatrixDiv<long double>();
-    TestAllSmallMatrixDivA<long double>();
-    TestAllSmallMatrixDivB<long double>();
+    TestSmallVector<long double>();
+    TestSmallMatrix<long double>();
+    TestSmallMatrixA<long double>();
+    TestSmallMatrixB<long double>();
+    TestSmallMatrixDiv<long double>();
+    TestSmallMatrixDivA<long double>();
+    TestSmallMatrixDivB<long double>();
 #endif 
 
 #ifdef TEST_INT
-    TestAllSmallVector<int>();
-    TestAllSmallMatrix<int>();
+    TestSmallVector<int>();
+    TestSmallMatrix<int>();
 #endif 
 
-#endif // SKIPREST
+#endif
 
     return 0;
 }

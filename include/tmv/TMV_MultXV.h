@@ -138,9 +138,10 @@ namespace tmv {
     {
         static inline void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
+            const int n = size == UNKNOWN ? int(v2.size()) : size;
             typedef typename V1::value_type T1;
             typedef typename VCopyHelper<T1,size,false>::type V1c;
-            V1c v1c = VectorSizer<V1>(v1);
+            V1c v1c(n);
             typedef typename V1c::cview_type V1cv;
             typedef typename V1c::const_cview_type V1ccv;
             V1cv v1cv = v1c.cView();
@@ -247,24 +248,24 @@ namespace tmv {
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::iterator IT2;
-        template <int I, int N, bool iscomplex>
+        template <int I, int N>
         struct Unroller
         {
             static inline void unroll(
                 const Scaling<ix,T>& x, const V1& v1, V2& v2)
             {
-                Unroller<I,N/2,iscomplex>::unroll(x,v1,v2);
-                Unroller<I+N/2,N-N/2,iscomplex>::unroll(x,v1,v2);
+                Unroller<I,N/2>::unroll(x,v1,v2);
+                Unroller<I+N/2,N-N/2>::unroll(x,v1,v2);
             }
             static inline void unroll2(
                 const Scaling<ix,T>& x, const IT1& A, const IT2& B)
             {
-                Unroller<I,N/2,iscomplex>::unroll2(x,A,B);
-                Unroller<I+N/2,N-N/2,iscomplex>::unroll2(x,A,B);
+                Unroller<I,N/2>::unroll2(x,A,B);
+                Unroller<I+N/2,N-N/2>::unroll2(x,A,B);
             }
         };
         template <int I>
-        struct Unroller<I,1,false>
+        struct Unroller<I,1>
         {
             static inline void unroll(
                 const Scaling<ix,T>& x, const V1& v1, V2& v2)
@@ -280,29 +281,7 @@ namespace tmv {
             }
         };
         template <int I>
-        struct Unroller<I,1,true>
-        {
-            static inline void unroll(
-                const Scaling<ix,T>& x, const V1& v1, V2& v2)
-            {
-                typedef typename V2::real_type RT;
-                typedef typename V2::value_type VT;
-                const RT rv = ZProd<false,false>::rprod(x,v1.cref(I));
-                const RT iv = ZProd<false,false>::iprod(x,v1.cref(I));
-                Maybe<add>::add(v2.ref(I) , VT(rv,iv));
-            }
-            static inline void unroll2(
-                const Scaling<ix,T>& x, const IT1& A, const IT2& B)
-            {
-                typedef typename V2::real_type RT;
-                typedef typename V2::value_type VT;
-                const RT rv = ZProd<false,false>::rprod(x,A[I]);
-                const RT iv = ZProd<false,false>::iprod(x,A[I]);
-                Maybe<add>::add(B[I] , VT(rv,iv));
-            }
-        };
-        template <int I, bool iscomplex>
-        struct Unroller<I,0,iscomplex>
+        struct Unroller<I,0>
         {
             static inline void unroll(const Scaling<ix,T>& , const V1& , V2& ) 
             {}
@@ -311,10 +290,10 @@ namespace tmv {
             {}
         };
         static inline void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
-        { Unroller<0,size,V2::viscomplex>::unroll(x,v1,v2); }
+        { Unroller<0,size>::unroll(x,v1,v2); }
         static inline void call2(
             const int , const Scaling<ix,T>& x, const IT1& A, const IT2& B)
-        { Unroller<0,size,V2::viscomplex>::unroll2(x,A,B); }
+        { Unroller<0,size>::unroll2(x,A,B); }
     };
 
 #ifdef TMV_USE_SSE_FOR_MULTXV
@@ -730,16 +709,20 @@ namespace tmv {
         {
             const bool c1 = V1::vconj;
             if (n) {
-                const double mone = Maybe<c1>::select( -double(x) , double(x) );
-                // These look backwards, but order is from hi to lo values.
-                __m128d xx = _mm_set_pd(mone, double(x));
                 __m128d xA,xB;
-                __m128d xAc, xnorm, x1, x2; // temp values
-                do {
-                    Maybe<true>::sse_load(xA,A.getP()); ++A;
-                    xB = _mm_mul_pd(xx,xA); 
-                    Maybe2<add,true>::sse_add(B.getP(),xB); ++B;
-                } while (--n);
+                if (((unsigned int)(A.getP()) & 0xf) == 0) {
+                    do {
+                        Maybe<true>::sse_load(xA,A.getP()); ++A;
+                        xB = _mm_mul_pd(xx,xA); 
+                        Maybe2<add,true>::sse_add(B.getP(),xB); ++B;
+                    } while (--n);
+                } else {
+                    do {
+                        Maybe<true>::sse_loadu(xA,A.getP()); ++A;
+                        xB = _mm_mul_pd(xx,xA); 
+                        Maybe2<add,true>::sse_addu(B.getP(),xB); ++B;
+                    } while (--n);
+                }
             }
         }
     };
@@ -903,6 +886,11 @@ namespace tmv {
             const IT1& it1, const IT2& it2)
         { 
             TMVStaticAssert(!V2::vconj);
+#ifdef PRINTALGO_XV
+            std::cout<<"InlineMultXV: x = "<<ix<<"  "<<T(x)<<std::endl;
+            std::cout<<"size = "<<size<<" = "<<n<<std::endl;
+            std::cout<<"add = "<<add<<", algo = "<<algo<<std::endl;
+#endif
             MultXV_Helper<algo,size,add,ix,T,V1,V2>::call2(n,x,it1,it2); 
         }
     };
@@ -925,7 +913,7 @@ namespace tmv {
             typedef typename V2::conjugate_type V2c;
             V1c v1c = v1.conjugate();
             V2c v2c = v2.conjugate();
-            MultXV_Helper<-2,size,add,ix,T,V1c,V2c>::call(x,v1c,v2c);
+            MultXV_Helper<-2,size,add,ix,T,V1c,V2c>::call(TMV_CONJ(x),v1c,v2c);
         }
     };
 
@@ -1031,8 +1019,8 @@ namespace tmv {
         }
     };
 
-    template <bool add, int ix, class T, class V1, class V2>
-    inline void MultXV(
+    template <int algo, bool add, int ix, class T, class V1, class V2>
+    inline void DoMultXV(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         BaseVector_Mutable<V2>& v2)
     {
@@ -1043,53 +1031,32 @@ namespace tmv {
         typedef typename V2::cview_type V2v;
         V1v v1v = v1.cView();
         V2v v2v = v2.cView();
-        MultXV_Helper<-1,size,add,ix,T,V1v,V2v>::call(x,v1v,v2v);
+        MultXV_Helper<algo,size,add,ix,T,V1v,V2v>::call(x,v1v,v2v);
     }
+
+    template <bool add, int ix, class T, class V1, class V2>
+    inline void MultXV(
+        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
+        BaseVector_Mutable<V2>& v2)
+    { DoMultXV<-1,add>(x,v1,v2); }
 
     template <bool add, int ix, class T, class V1, class V2>
     inline void NoAliasMultXV(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         BaseVector_Mutable<V2>& v2)
-    {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same));
-        TMVAssert(v1.size() == v2.size());
-        const int size = Sizes<V1::vsize,V2::vsize>::size;
-        typedef typename V1::const_cview_type V1v;
-        typedef typename V2::cview_type V2v;
-        V1v v1v = v1.cView();
-        V2v v2v = v2.cView();
-        MultXV_Helper<-2,size,add,ix,T,V1v,V2v>::call(x,v1v,v2v);
-    }
+    { DoMultXV<-2,add>(x,v1,v2); }
 
     template <bool add, int ix, class T, class V1, class V2>
     inline void InlineMultXV(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         BaseVector_Mutable<V2>& v2)
-    {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same));
-        TMVAssert(v1.size() == v2.size());
-        const int size = Sizes<V1::vsize,V2::vsize>::size;
-        typedef typename V1::const_cview_type V1v;
-        typedef typename V2::cview_type V2v;
-        V1v v1v = v1.cView();
-        V2v v2v = v2.cView();
-        MultXV_Helper<-4,size,add,ix,T,V1v,V2v>::call(x,v1v,v2v);
-    }
+    { DoMultXV<-3,add>(x,v1,v2); }
 
     template <bool add, int ix, class T, class V1, class V2>
     inline void AliasMultXV(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         BaseVector_Mutable<V2>& v2)
-    {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same));
-        TMVAssert(v1.size() == v2.size());
-        const int size = Sizes<V1::vsize,V2::vsize>::size;
-        typedef typename V1::const_cview_type V1v;
-        typedef typename V2::cview_type V2v;
-        V1v v1v = v1.cView();
-        V2v v2v = v2.cView();
-        MultXV_Helper<99,size,add,ix,T,V1v,V2v>::call(x,v1v,v2v);
-    }
+    { DoMultXV<99,add>(x,v1,v2); }
 
 
 } // namespace tmv

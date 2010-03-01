@@ -395,17 +395,29 @@ namespace tmv {
                 __m128d xxi = _mm_set_pd(xi , -xi);
                 __m128d xA;
                 __m128d x0, x1, x2; // temp vars
-                do {
-                    // r = xr * Ar - xi * Ai
-                    // i = xr * Ai + xi * Ar
-                    Maybe<true>::sse_load(xA,A.getP());
-                    x0 = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(0,1));
-                    x1 = _mm_mul_pd(xxr,xA);
-                    x2 = _mm_mul_pd(xxi,x0);
-                    xA = _mm_add_pd(x1,x2);
-                    Maybe<true>::sse_store(A.getP(),xA);
-                    ++A;
-                } while (--n);
+                if (((unsigned int)(A.getP()) & 0xf) == 0) {
+                    do {
+                        // r = xr * Ar - xi * Ai
+                        // i = xr * Ai + xi * Ar
+                        Maybe<true>::sse_load(xA,A.getP());
+                        x0 = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(0,1));
+                        x1 = _mm_mul_pd(xxr,xA);
+                        x2 = _mm_mul_pd(xxi,x0);
+                        xA = _mm_add_pd(x1,x2);
+                        Maybe<true>::sse_store(A.getP(),xA);
+                        ++A;
+                    } while (--n);
+                } else {
+                    do {
+                        Maybe<true>::sse_loadu(xA,A.getP());
+                        x0 = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(0,1));
+                        x1 = _mm_mul_pd(xxr,xA);
+                        x2 = _mm_mul_pd(xxi,x0);
+                        xA = _mm_add_pd(x1,x2);
+                        Maybe<true>::sse_storeu(A.getP(),xA);
+                        ++A;
+                    } while (--n);
+                }
             }
         }
     };

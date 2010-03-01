@@ -75,31 +75,35 @@ namespace tmv {
         const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
         const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, MatrixView<T3> m3)
     {
-        if (m3.isrm() && !m3.iscm())
-            InstMultMM(x,m2.transpose(),m1.transpose(),m3.transpose());
-        else if (!(m1.isrm() || m1.iscm()))
-            InstMultMM(
-                T3(1),Matrix<T3,RowMajor>(x*m1).constView().xView(),m2,m3);
-        else if (!(m2.isrm() || m2.iscm()))
-            InstMultMM(
-                T3(1),m1,Matrix<T3,ColMajor>(x*m2).constView().xView(),m3);
-        else if (!m3.iscm()) {
-            Matrix<T3,ColMajor> m3c(m3.colsize(),m3.rowsize());
-            InstMultMM(T3(1),m1,m2,m3c.xView());
-            InstMultXM(x,m3c.constView().xView(),m3);
-        } else {
+        if (m3.iscm()) {
             MatrixView<T3,1> m3cm = m3.cmView();
-            if (m1.isrm()) {
-                if (m2.isrm())
-                    DoInstMultMM<false>(x,m1.rmView(),m2.rmView(),m3cm);
-                else 
-                    DoInstMultMM<false>(x,m1.rmView(),m2.cmView(),m3cm);
-            } else {
-                if (m2.isrm())
-                    DoInstMultMM<false>(x,m1.cmView(),m2.rmView(),m3cm);
-                else 
+            if (m1.iscm()) 
+                if (m2.iscm())
                     DoInstMultMM<false>(x,m1.cmView(),m2.cmView(),m3cm);
-            }
+                else if (m2.isrm())
+                    DoInstMultMM<false>(x,m1.cmView(),m2.rmView(),m3cm);
+                else
+                    InstMultMM(
+                        T3(1),m1,
+                        Matrix<T3,ColMajor>(x*m2).constView().xView(),m3);
+            else if (m1.isrm())
+                if (m2.iscm())
+                    DoInstMultMM<false>(x,m1.rmView(),m2.cmView(),m3cm);
+                else if (m2.isrm())
+                    DoInstMultMM<false>(x,m1.rmView(),m2.rmView(),m3cm);
+                else
+                    InstMultMM(
+                        T3(1),m1,
+                        Matrix<T3,ColMajor>(x*m2).constView().xView(),m3);
+            else
+                InstMultMM(
+                    T3(1),Matrix<T3,RowMajor>(x*m1).constView().xView(),m2,m3);
+        } else if (m3.isrm()) {
+            InstMultMM(x,m2.transpose(),m1.transpose(),m3.transpose());
+        } else  {
+            Matrix<T3,ColMajor> m3c(m3.colsize(),m3.rowsize());
+            InstMultMM(x,m1,m2,m3c.xView());
+            InstCopy(m3c.constView().xView(),m3);
         }
     }
 
@@ -109,31 +113,35 @@ namespace tmv {
         const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
         const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, MatrixView<T3> m3)
     {
-        if (m3.isrm() && !m3.iscm())
+        if (m3.iscm()) {
+            MatrixView<T3,1> m3cm = m3.cmView();
+            if (m1.iscm()) 
+                if (m2.iscm())
+                    DoInstMultMM<true>(x,m1.cmView(),m2.cmView(),m3cm);
+                else if (m2.isrm())
+                    DoInstMultMM<true>(x,m1.cmView(),m2.rmView(),m3cm);
+                else
+                    InstAddMultMM(
+                        T3(1),m1,
+                        Matrix<T3,ColMajor>(x*m2).constView().xView(),m3);
+            else if (m1.isrm())
+                if (m2.iscm())
+                    DoInstMultMM<true>(x,m1.rmView(),m2.cmView(),m3cm);
+                else if (m2.isrm())
+                    DoInstMultMM<true>(x,m1.rmView(),m2.rmView(),m3cm);
+                else
+                    InstAddMultMM(
+                        T3(1),m1,
+                        Matrix<T3,ColMajor>(x*m2).constView().xView(),m3);
+            else
+                InstAddMultMM(
+                    T3(1),Matrix<T3,RowMajor>(x*m1).constView().xView(),m2,m3);
+        } else if (m3.isrm()) {
             InstAddMultMM(x,m2.transpose(),m1.transpose(),m3.transpose());
-        else if (!(m1.isrm() || m1.iscm()))
-            InstAddMultMM(
-                T3(1),Matrix<T3,RowMajor>(x*m1).constView().xView(),m2,m3);
-        else if (!(m2.isrm() || m2.iscm()))
-            InstAddMultMM(
-                T3(1),m1,Matrix<T3,ColMajor>(x*m2).constView().xView(),m3);
-        else if (!m3.iscm()) {
+        } else  {
             Matrix<T3,ColMajor> m3c(m3.colsize(),m3.rowsize());
             InstMultMM(T3(1),m1,m2,m3c.xView());
             InstAddMultXM(x,m3c.constView().xView(),m3);
-        } else {
-            MatrixView<T3,1> m3cm = m3.cmView();
-            if (m1.isrm()) {
-                if (m2.isrm())
-                    DoInstMultMM<true>(x,m1.rmView(),m2.rmView(),m3cm);
-                else if (m2.iscm())
-                    DoInstMultMM<true>(x,m1.rmView(),m2.cmView(),m3cm);
-            } else {
-                if (m2.isrm())
-                    DoInstMultMM<true>(x,m1.cmView(),m2.rmView(),m3cm);
-                else if (m2.iscm())
-                    DoInstMultMM<true>(x,m1.cmView(),m2.cmView(),m3cm);
-            }
         }
     }
 

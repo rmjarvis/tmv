@@ -405,8 +405,8 @@ namespace tmv {
     template <class M>
     inline typename M::real_type NormSq(const BaseMatrix_Rec<M>& m);
     template <class M>
-    inline typename M::real_type NormSq(const BaseMatrix_Rec<M>& m, 
-                                        const typename M::real_type scale);
+    inline typename M::real_type NormSq(
+        const BaseMatrix_Rec<M>& m, const typename M::real_type scale);
     template <class M>
     inline typename M::real_type NormF(const BaseMatrix_Rec<M>& m);
     template <class M>
@@ -441,17 +441,6 @@ namespace tmv {
 
 #if 0
     // Defined in TMV_MatrixDiv.h
-    template <class M>
-    inline typename M::value_type Det(const BaseMatrix_Rec<M>& m);
-    template <class M>
-    inline typename M::real_type LogDet(
-        const BaseMatrix_Rec<M>& m, typename M::value_type* sign=0);
-    template <class M, class M2>
-    inline void DoInverse(
-        const BaseMatrix_Rec<M>& m, BaseMatrix_Rec_Mutable<M2>& m2);
-    template <class M, class M2>
-    inline void DoInverseATA(
-        const BaseMatrix_Rec<M>& m, BaseMatrix_Rec_Mutable<M2>& m2);
     template <class M>
     inline typename M::real_type Norm2(const BaseMatrix_Rec<M>& m);
     template <class M>
@@ -838,8 +827,8 @@ namespace tmv {
         inline const_linearview_type linearView() const
         {
             TMVAssert(
-                (stepi() == 1 && stepj() == colsize()) ||
-                (stepj() == 1 && stepi() == rowsize()) );
+                (stepi() == 1 && stepj() == int(colsize())) ||
+                (stepj() == 1 && stepi() == int(rowsize())) );
             return const_linearview_type(cptr(),ls(),1);
         }
 

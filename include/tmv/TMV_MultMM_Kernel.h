@@ -1334,9 +1334,9 @@ namespace tmv {
         const Scaling<ix,float>& x,
         const float* A, const float* B, float* C0)
     {
-        TMVAssert( ((unsigned int)(A) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(B) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(C0) & 0xf) == 0 );
+        TMVAssert( ((size_t)(A) & 0xf) == 0 );
+        TMVAssert( ((size_t)(B) & 0xf) == 0 );
+        TMVAssert( ((size_t)(C0) & 0xf) == 0 );
         const bool add = true;
 
         __m128 C00, C01, C10, C11;
@@ -1420,9 +1420,9 @@ namespace tmv {
         const Scaling<ix,float>& x,
         const float* A, const float* B, float* C0)
     {
-        TMVAssert( ((unsigned int)(A) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(B) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(C0) & 0xf) == 0 );
+        TMVAssert( ((size_t)(A) & 0xf) == 0 );
+        TMVAssert( ((size_t)(B) & 0xf) == 0 );
+        TMVAssert( ((size_t)(C0) & 0xf) == 0 );
         const bool add = true;
 
         __m128 C00, C01, C10, C11;
@@ -1546,9 +1546,9 @@ namespace tmv {
         const Scaling<ix,float>& x,
         const float* A, const float* B, float* C0)
     {
-        TMVAssert( ((unsigned int)(A) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(B) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(C0) & 0xf) == 0 );
+        TMVAssert( ((size_t)(A) & 0xf) == 0 );
+        TMVAssert( ((size_t)(B) & 0xf) == 0 );
+        TMVAssert( ((size_t)(C0) & 0xf) == 0 );
         const bool add = true;
 
         __m128 C00, C01, C10, C11;
@@ -1752,9 +1752,9 @@ namespace tmv {
         const int M1, const Scaling<ix,float>& x,
         const float* A, const float* B, float* C0)
     {
-        TMVAssert( ((unsigned int)(A) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(B) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(C0) & 0xf) == 0 );
+        TMVAssert( ((size_t)(A) & 0xf) == 0 );
+        TMVAssert( ((size_t)(B) & 0xf) == 0 );
+        TMVAssert( ((size_t)(C0) & 0xf) == 0 );
         const int M = (M2 == UNKNOWN ? M1 : M2);
         const int Mx4 = (M<<2);       // = M*4
         const int M_4 = M>>2;        // = M/4
@@ -1899,9 +1899,9 @@ namespace tmv {
         const int M1, const Scaling<ix,float>& x,
         const float* A, const float* B, float* C0)
     {
-        TMVAssert( ((unsigned int)(A) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(B) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(C0) & 0xf) == 0 );
+        TMVAssert( ((size_t)(A) & 0xf) == 0 );
+        TMVAssert( ((size_t)(B) & 0xf) == 0 );
+        TMVAssert( ((size_t)(C0) & 0xf) == 0 );
         const int M = (M2 == UNKNOWN ? M1 : M2);
         const int Mx8 = (M<<3);       // = M*8
         const int M_4 = M>>2;        // = M/4
@@ -2118,9 +2118,9 @@ namespace tmv {
         const int M1, const Scaling<ix,float>& x,
         const float* A, const float* B, float* C0)
     {
-        TMVAssert( ((unsigned int)(A) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(B) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(C0) & 0xf) == 0 );
+        TMVAssert( ((size_t)(A) & 0xf) == 0 );
+        TMVAssert( ((size_t)(B) & 0xf) == 0 );
+        TMVAssert( ((size_t)(C0) & 0xf) == 0 );
         const int M = (M2 == UNKNOWN ? M1 : M2);
         const int Mx16 = (M<<4);      // = M*16
         const int M_4 = M>>2;        // = M/4
@@ -2481,9 +2481,9 @@ namespace tmv {
         const int N1, const Scaling<ix,float>& x,
         const float* A, const float* B, float* C0)
     {
-        TMVAssert( ((unsigned int)(A) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(B) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(C0) & 0xf) == 0 );
+        TMVAssert( ((size_t)(A) & 0xf) == 0 );
+        TMVAssert( ((size_t)(B) & 0xf) == 0 );
+        TMVAssert( ((size_t)(C0) & 0xf) == 0 );
         const int N = (N2 == UNKNOWN ? N1 : N2);
         const int N_2 = N>>1;        // = N/2
         const int Nc = (N-(N_2<<1)); // = N%2
@@ -2609,9 +2609,9 @@ namespace tmv {
         const int N1, const Scaling<ix,float>& x,
         const float* A, const float* B, float* C0)
     {
-        TMVAssert( ((unsigned int)(A) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(B) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(C0) & 0xf) == 0 );
+        TMVAssert( ((size_t)(A) & 0xf) == 0 );
+        TMVAssert( ((size_t)(B) & 0xf) == 0 );
+        TMVAssert( ((size_t)(C0) & 0xf) == 0 );
         const int N = (N2 == UNKNOWN ? N1 : N2);
         const int N_2 = N>>1;        // = N/2
         const int Nc = (N-(N_2<<1)); // = N%2
@@ -2801,9 +2801,9 @@ namespace tmv {
         const int N1, const Scaling<ix,float>& x,
         const float* A, const float* B, float* C0)
     {
-        TMVAssert( ((unsigned int)(A) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(B) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(C0) & 0xf) == 0 );
+        TMVAssert( ((size_t)(A) & 0xf) == 0 );
+        TMVAssert( ((size_t)(B) & 0xf) == 0 );
+        TMVAssert( ((size_t)(C0) & 0xf) == 0 );
         const int N = (N2 == UNKNOWN ? N1 : N2);
         const int N_2 = N>>1;        // = N/2
         const int Nc = (N-(N_2<<1)); // = N%2
@@ -3121,9 +3121,9 @@ namespace tmv {
         const int K1, const Scaling<ix,float>& x, 
         const float* A, const float* B, float* C0)
     {
-        TMVAssert( ((unsigned int)(A) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(B) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(C0) & 0xf) == 0 );
+        TMVAssert( ((size_t)(A) & 0xf) == 0 );
+        TMVAssert( ((size_t)(B) & 0xf) == 0 );
+        TMVAssert( ((size_t)(C0) & 0xf) == 0 );
         const int K = (K2 == UNKNOWN ? K1 : K2);
         TMVAssert(K > 0);
         const int K_4 = K>>2; // K_4 = K/4 
@@ -3562,9 +3562,9 @@ namespace tmv {
         const Scaling<ix,double>& x,
         const double* A, const double* B, double* C0)
     {
-        TMVAssert( ((unsigned int)(A) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(B) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(C0) & 0xf) == 0 );
+        TMVAssert( ((size_t)(A) & 0xf) == 0 );
+        TMVAssert( ((size_t)(B) & 0xf) == 0 );
+        TMVAssert( ((size_t)(C0) & 0xf) == 0 );
         const bool add = true;
 
         __m128d C00, C01, C10, C11;
@@ -3680,9 +3680,9 @@ namespace tmv {
         const Scaling<ix,double>& x,
         const double* A, const double* B, double* C0)
     {
-        TMVAssert( ((unsigned int)(A) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(B) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(C0) & 0xf) == 0 );
+        TMVAssert( ((size_t)(A) & 0xf) == 0 );
+        TMVAssert( ((size_t)(B) & 0xf) == 0 );
+        TMVAssert( ((size_t)(C0) & 0xf) == 0 );
         const bool add = true;
 
         __m128d C00, C01, C10, C11;
@@ -3879,9 +3879,9 @@ namespace tmv {
         const Scaling<ix,double>& x,
         const double* A, const double* B, double* C0)
     {
-        TMVAssert( ((unsigned int)(A) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(B) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(C0) & 0xf) == 0 );
+        TMVAssert( ((size_t)(A) & 0xf) == 0 );
+        TMVAssert( ((size_t)(B) & 0xf) == 0 );
+        TMVAssert( ((size_t)(C0) & 0xf) == 0 );
         const int M = (M2 == UNKNOWN ? M1 : M2);
         const int Mx8 = (M<<3);       // = M*8
         const int M_4 = M>>2;        // = M/4
@@ -4087,9 +4087,9 @@ namespace tmv {
         const Scaling<ix,double>& x,
         const double* A, const double* B, double* C0)
     {
-        TMVAssert( ((unsigned int)(A) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(B) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(C0) & 0xf) == 0 );
+        TMVAssert( ((size_t)(A) & 0xf) == 0 );
+        TMVAssert( ((size_t)(B) & 0xf) == 0 );
+        TMVAssert( ((size_t)(C0) & 0xf) == 0 );
         const int M = (M2 == UNKNOWN ? M1 : M2);
         const int Mx16 = (M<<4);      // = M*16
         const int M_4 = M>>2;        // = M/4
@@ -4439,9 +4439,9 @@ namespace tmv {
         const Scaling<ix,double>& x,
         const double* A, const double* B, double* C0)
     {
-        TMVAssert( ((unsigned int)(A) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(B) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(C0) & 0xf) == 0 );
+        TMVAssert( ((size_t)(A) & 0xf) == 0 );
+        TMVAssert( ((size_t)(B) & 0xf) == 0 );
+        TMVAssert( ((size_t)(C0) & 0xf) == 0 );
         const int N = (N2 == UNKNOWN ? N1 : N2);
         const int N_2 = N>>1;        // = N/2
         const int Nc = (N-(N_2<<1)); // = N%2
@@ -4620,9 +4620,9 @@ namespace tmv {
         const Scaling<ix,double>& x,
         const double* A, const double* B, double* C0)
     {
-        TMVAssert( ((unsigned int)(A) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(B) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(C0) & 0xf) == 0 );
+        TMVAssert( ((size_t)(A) & 0xf) == 0 );
+        TMVAssert( ((size_t)(B) & 0xf) == 0 );
+        TMVAssert( ((size_t)(C0) & 0xf) == 0 );
         const int N = (N2 == UNKNOWN ? N1 : N2);
         const int N_2 = N>>1;        // = N/2
         const int Nc = (N-(N_2<<1)); // = N%2
@@ -4929,9 +4929,9 @@ namespace tmv {
         const Scaling<ix,double>& x,
         const double* A, const double* B, double* C0)
     {
-        TMVAssert( ((unsigned int)(A) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(B) & 0xf) == 0 );
-        TMVAssert( ((unsigned int)(C0) & 0xf) == 0 );
+        TMVAssert( ((size_t)(A) & 0xf) == 0 );
+        TMVAssert( ((size_t)(B) & 0xf) == 0 );
+        TMVAssert( ((size_t)(C0) & 0xf) == 0 );
         const int K = (K2 == UNKNOWN ? K1 : K2);
         TMVAssert(K > 0);
         const int K_2 = K>>1; // K_2 = K/2 
@@ -5481,7 +5481,7 @@ namespace tmv {
     // overload them.  Normally overloading is sufficient, but when we
     // need to take an address of a function and we are writing in terms of
     // a generic T, then the overloaded functions cannot be specified.
-    // So we specifify this one instead.
+    // So we specify this one instead.
 
     template <int ix, class T>
     static void call_multmm_16_16_16(

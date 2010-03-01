@@ -1,6 +1,7 @@
 
 #define CT std::complex<T>
 
+#ifndef TMV_INST_SKIP_BLAS
 #ifdef TMV_USE_WINOGRAD
 
 #define DefMM(T1, C1, T2, C2, T3) \
@@ -32,6 +33,7 @@ DefMM(CT,true,CT,true,CT)
 
 #undef DefMM
 
+#endif
 #endif
 
 #undef CT

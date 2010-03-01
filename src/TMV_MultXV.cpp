@@ -90,26 +90,22 @@ namespace tmv {
 
 #ifdef BLAS
 #ifdef TMV_INST_DOUBLE
-    template <> 
     static void DoMultXV(
         const double x,
         const ConstVectorView<double>& v1, VectorView<double> v2)
     { InstScale(x,v2=v1); }
-    template <> 
     static void DoMultXV(
         const std::complex<double> x, 
         const ConstVectorView<std::complex<double> >& v1, 
         VectorView<std::complex<double> > v2)
     { InstScale(x,v2=v1); }
 #ifdef TMV_INST_MIX
-    template <> 
     static void DoMultXV(
         const std::complex<double> x, 
         const ConstVectorView<double>& v1, 
         VectorView<std::complex<double> > v2)
     { InstScale(x,v2=v1); }
 #endif
-    template <> 
     static void DoAddMultXV(
         const double x,
         const ConstVectorView<double>& v1, VectorView<double> v2)
@@ -126,7 +122,6 @@ namespace tmv {
             BLASV(n),BLASV(x),BLASP(v1p),BLASV(s1),
             BLASP(v2p),BLASV(s2));
     }
-    template <> 
     static void DoAddMultXV(
         const std::complex<double> x, 
         const ConstVectorView<std::complex<double> >& v1, 
@@ -155,7 +150,6 @@ namespace tmv {
         }
     }
 #ifdef TMV_INST_MIX
-    template <> 
     static void DoAddMultXV(
         const std::complex<double> x, 
         const ConstVectorView<double>& v1, 
@@ -170,26 +164,22 @@ namespace tmv {
 #endif
 #endif
 #ifdef TMV_INST_FLOAT
-    template <> 
     static void DoMultXV(
         const float x,
         const ConstVectorView<float>& v1, VectorView<float> v2)
     { InstScale(x,v2=v1); }
-    template <> 
     static void DoMultXV(
         const std::complex<float> x, 
         const ConstVectorView<std::complex<float> >& v1, 
         VectorView<std::complex<float> > v2)
     { InstScale(x,v2=v1); }
 #ifdef TMV_INST_MIX
-    template <> 
     static void DoMultXV(
         const std::complex<float> x, 
         const ConstVectorView<float>& v1, 
         VectorView<std::complex<float> > v2)
     { InstScale(x,v2=v1); }
 #endif
-    template <> 
     static void DoAddMultXV(
         const float x,
         const ConstVectorView<float>& v1, VectorView<float> v2)
@@ -206,7 +196,6 @@ namespace tmv {
             BLASV(n),BLASV(x),BLASP(v1p),BLASV(s1),
             BLASP(v2p),BLASV(s2));
     }
-    template <> 
     static void DoAddMultXV(
         const std::complex<float> x, 
         const ConstVectorView<std::complex<float> >& v1, 
@@ -235,7 +224,6 @@ namespace tmv {
         }
     }
 #ifdef TMV_INST_MIX
-    template <> 
     static void DoAddMultXV(
         const std::complex<float> x, 
         const ConstVectorView<float>& v1, 

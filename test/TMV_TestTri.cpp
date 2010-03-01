@@ -11,7 +11,6 @@ static void TestBasicUpperTriMatrix_1()
     const int N = 10;
 
     tmv::UpperTriMatrix<T,D,S> u(N);
-    tmv::UpperTriMatrix<T,D,S,tmv::FortranStyle> uf(N);
 
     Assert(u.colsize() == size_t(N) && u.rowsize() == size_t(N),
            "Creating UpperTriMatrix(N)");
@@ -19,17 +18,13 @@ static void TestBasicUpperTriMatrix_1()
     for (int i=0,k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         if (i < j || (D==tmv::NonUnitDiag && i==j)) {
             u(i,j) = T(k);
-            uf(i+1,j+1) = T(k);
         }
     }
 
     tmv::UpperTriMatrixView<T,D> uv = u.view();
     tmv::ConstUpperTriMatrixView<T,D> ucv = u.view();
-    tmv::UpperTriMatrixViewF<T,D> ufv = uf.view();
-    tmv::ConstUpperTriMatrixViewF<T,D> ufcv = uf.view();
 
     const tmv::UpperTriMatrix<T,D,S>& ux = u;
-    const tmv::UpperTriMatrix<T,D,S,tmv::FortranStyle>& ufx = uf;
 
     for(int i=0,k=1;i<N;++i) for(int j=0;j<N;++j,++k) {
         if (i < j) {
@@ -37,129 +32,153 @@ static void TestBasicUpperTriMatrix_1()
             Assert(ux(i,j) == T(k),"Access const TriMatrix");
             Assert(ucv(i,j) == T(k),"Access TriMatrix CV");
             Assert(uv(i,j) == T(k),"Access TriMatrix V");
-            Assert(uf(i+1,j+1) == T(k),"Read/Write TriMatrixF");
-            Assert(ufx(i+1,j+1) == T(k),"Access const TriMatrixF");
-            Assert(ufcv(i+1,j+1) == T(k),"Access TriMatrixF CV");
-            Assert(ufv(i+1,j+1) == T(k),"Access TriMatrixF V");
             Assert(u.row(i,i+1,N)(j-i-1) == T(k),"TriMatrix.row1");
             Assert(ux.row(i,i+1,N)(j-i-1) == T(k),"const TriMatrix.row1");
             Assert(ucv.row(i,i+1,N)(j-i-1) == T(k),"TriMatrix.row1 CV");
             Assert(uv.row(i,i+1,N)(j-i-1) == T(k),"TriMatrix.row1 V");
-            Assert(uf.row(i+1,i+2,N)(j-i) == T(k),"TriMatrixF.row1");
-            Assert(ufx.row(i+1,i+2,N)(j-i) == T(k),"const TriMatrixF.row1");
-            Assert(ufcv.row(i+1,i+2,N)(j-i) == T(k),"TriMatrixF.row1 CV");
-            Assert(ufv.row(i+1,i+2,N)(j-i) == T(k),"TriMatrixF.row1 V");
             Assert(u.row(i,j,N)(0) == T(k),"TriMatrix.row2");
             Assert(ux.row(i,j,N)(0) == T(k),"const TriMatrix.row2");
             Assert(ucv.row(i,j,N)(0) == T(k),"TriMatrix.row2 CV");
             Assert(uv.row(i,j,N)(0) == T(k),"TriMatrix.row2 V");
-            Assert(uf.row(i+1,j+1,N)(1) == T(k),"TriMatrixF.row2");
-            Assert(ufx.row(i+1,j+1,N)(1) == T(k),"const TriMatrixF.row2");
-            Assert(ufcv.row(i+1,j+1,N)(1) == T(k),"TriMatrixF.row2 CV");
-            Assert(ufv.row(i+1,j+1,N)(1) == T(k),"TriMatrixF.row2 V");
             Assert(u.col(j,0,j)(i) == T(k),"TriMatrix.col1");
             Assert(ux.col(j,0,j)(i) == T(k),"const TriMatrix.col1");
             Assert(ucv.col(j,0,j)(i) == T(k),"TriMatrix.col1 CV");
             Assert(uv.col(j,0,j)(i) == T(k),"TriMatrix.col1 V");
-            Assert(uf.col(j+1,1,j)(i+1) == T(k),"TriMatrixF.col1");
-            Assert(ufx.col(j+1,1,j)(i+1) == T(k),"const TriMatrixF.col1");
-            Assert(ufcv.col(j+1,1,j)(i+1) == T(k),"TriMatrixF.col1 CV");
-            Assert(ufv.col(j+1,1,j)(i+1) == T(k),"TriMatrixF.col1 V");
             Assert(u.col(j,i,j)(0) == T(k),"TriMatrix.col2");
             Assert(ux.col(j,i,j)(0) == T(k),"const TriMatrix.col2");
             Assert(ucv.col(j,i,j)(0) == T(k),"TriMatrix.col2 CV");
             Assert(uv.col(j,i,j)(0) == T(k),"TriMatrix.col2 V");
-            Assert(uf.col(j+1,i+1,j)(1) == T(k),"TriMatrixF.col2");
-            Assert(ufx.col(j+1,i+1,j)(1) == T(k),"const TriMatrixF.col2");
-            Assert(ufcv.col(j+1,i+1,j)(1) == T(k),"TriMatrixF.col2 CV");
-            Assert(ufv.col(j+1,i+1,j)(1) == T(k),"TriMatrixF.col2 V");
             Assert(u.diag(j-i)(i) == T(k),"TriMatrix.diag1");
             Assert(ux.diag(j-i)(i) == T(k),"const TriMatrix.diag1");
             Assert(ucv.diag(j-i)(i) == T(k),"TriMatrix.diag1 CV ");
             Assert(uv.diag(j-i)(i) == T(k),"TriMatrix.diag1 V");
-            Assert(uf.diag(j-i)(i+1) == T(k),"TriMatrixF.diag1");
-            Assert(ufx.diag(j-i)(i+1) == T(k),"const TriMatrixF.diag1");
-            Assert(ufcv.diag(j-i)(i+1) == T(k),"TriMatrixF.diag1 CV ");
-            Assert(ufv.diag(j-i)(i+1) == T(k),"TriMatrixF.diag1 V");
             Assert(u.diag(j-i,i,N-j+i)(0) == T(k),"TriMatrix.diag2");
             Assert(ux.diag(j-i,i,N-j+i)(0) == T(k),"const TriMatrix.diag2");
             Assert(ucv.diag(j-i,i,N-j+i)(0) == T(k),"TriMatrix.diag2 CV ");
             Assert(uv.diag(j-i,i,N-j+i)(0) == T(k),"TriMatrix.diag2 V");
+        } else if (i==j) {
+            if (D == tmv::UnitDiag) {
+                Assert(ux(i,i) == T(1),"Access const TriMatrix");
+                Assert(ucv(i,i) == T(1),"Access TriMatrix CV");
+            } else {
+                Assert(u(i,i) == T(k),"Read/Write TriMatrix");
+                Assert(ux(i,i) == T(k),"Access const TriMatrix");
+                Assert(ucv(i,i) == T(k),"Access TriMatrix CV");
+                Assert(uv(i,i) == T(k),"Access TriMatrix V");
+                Assert(u.row(i,i,N)(0) == T(k),"TriMatrix.row1");
+                Assert(ux.row(i,i,N)(0) == T(k),"const TriMatrix.row1");
+                Assert(ucv.row(i,i,N)(0) == T(k),"TriMatrix.row1 CV");
+                Assert(uv.row(i,i,N)(0) == T(k),"TriMatrix.row1 V");
+                Assert(u.col(i,0,i+1)(i) == T(k),"TriMatrix.col1");
+                Assert(ux.col(i,0,i+1)(i) == T(k),"const TriMatrix.col1");
+                Assert(ucv.col(i,0,i+1)(i) == T(k),"TriMatrix.col1 CV");
+                Assert(uv.col(i,0,i+1)(i) == T(k),"TriMatrix.col1 V");
+                Assert(u.col(i,i,i+1)(0) == T(k),"TriMatrix.col2");
+                Assert(ux.col(i,i,i+1)(0) == T(k),"const TriMatrix.col2");
+                Assert(ucv.col(i,i,i+1)(0) == T(k),"TriMatrix.col2 CV");
+                Assert(uv.col(i,i,i+1)(0) == T(k),"TriMatrix.col2 V");
+                Assert(u.diag()(i) == T(k),"TriMatrix.diag");
+                Assert(ux.diag()(i) == T(k),"const TriMatrix.diag");
+                Assert(ucv.diag()(i) == T(k),"TriMatrix.diag CV ");
+                Assert(uv.diag()(i) == T(k),"TriMatrix.diag V");
+                Assert(u.diag(0)(i) == T(k),"TriMatrix.diag1");
+                Assert(ux.diag(0)(i) == T(k),"const TriMatrix.diag1");
+                Assert(ucv.diag(0)(i) == T(k),"TriMatrix.diag1 CV ");
+                Assert(uv.diag(0)(i) == T(k),"TriMatrix.diag1 V");
+                Assert(u.diag(0,i,N-i+i)(0) == T(k),"TriMatrix.diag2");
+                Assert(ux.diag(0,i,N-i+i)(0) == T(k),"const TriMatrix.diag2");
+                Assert(ucv.diag(0,i,N-i+i)(0) == T(k),"TriMatrix.diag2 CV ");
+                Assert(uv.diag(0,i,N-i+i)(0) == T(k),"TriMatrix.diag2 V");
+            }
+        } else {
+            Assert(ux(i,j) == T(0),"Access const TriMatrix");
+            Assert(ucv(i,j) == T(0),"Access TriMatrix CV");
+        }
+    }
+
+#if (XTEST & 32)
+    tmv::UpperTriMatrix<T,D,S,tmv::FortranStyle> uf(N);
+    for (int i=0,k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
+        if (i < j || (D==tmv::NonUnitDiag && i==j)) {
+            uf(i+1,j+1) = T(k);
+        }
+    }
+
+    tmv::UpperTriMatrixViewF<T,D> ufv = uf.view();
+    tmv::ConstUpperTriMatrixViewF<T,D> ufcv = uf.view();
+
+    const tmv::UpperTriMatrix<T,D,S,tmv::FortranStyle>& ufx = uf;
+
+    for(int i=0,k=1;i<N;++i) for(int j=0;j<N;++j,++k) {
+        if (i < j) {
+            Assert(uf(i+1,j+1) == T(k),"Read/Write TriMatrixF");
+            Assert(ufx(i+1,j+1) == T(k),"Access const TriMatrixF");
+            Assert(ufcv(i+1,j+1) == T(k),"Access TriMatrixF CV");
+            Assert(ufv(i+1,j+1) == T(k),"Access TriMatrixF V");
+            Assert(uf.row(i+1,i+2,N)(j-i) == T(k),"TriMatrixF.row1");
+            Assert(ufx.row(i+1,i+2,N)(j-i) == T(k),"const TriMatrixF.row1");
+            Assert(ufcv.row(i+1,i+2,N)(j-i) == T(k),"TriMatrixF.row1 CV");
+            Assert(ufv.row(i+1,i+2,N)(j-i) == T(k),"TriMatrixF.row1 V");
+            Assert(uf.row(i+1,j+1,N)(1) == T(k),"TriMatrixF.row2");
+            Assert(ufx.row(i+1,j+1,N)(1) == T(k),"const TriMatrixF.row2");
+            Assert(ufcv.row(i+1,j+1,N)(1) == T(k),"TriMatrixF.row2 CV");
+            Assert(ufv.row(i+1,j+1,N)(1) == T(k),"TriMatrixF.row2 V");
+            Assert(uf.col(j+1,1,j)(i+1) == T(k),"TriMatrixF.col1");
+            Assert(ufx.col(j+1,1,j)(i+1) == T(k),"const TriMatrixF.col1");
+            Assert(ufcv.col(j+1,1,j)(i+1) == T(k),"TriMatrixF.col1 CV");
+            Assert(ufv.col(j+1,1,j)(i+1) == T(k),"TriMatrixF.col1 V");
+            Assert(uf.col(j+1,i+1,j)(1) == T(k),"TriMatrixF.col2");
+            Assert(ufx.col(j+1,i+1,j)(1) == T(k),"const TriMatrixF.col2");
+            Assert(ufcv.col(j+1,i+1,j)(1) == T(k),"TriMatrixF.col2 CV");
+            Assert(ufv.col(j+1,i+1,j)(1) == T(k),"TriMatrixF.col2 V");
+            Assert(uf.diag(j-i)(i+1) == T(k),"TriMatrixF.diag1");
+            Assert(ufx.diag(j-i)(i+1) == T(k),"const TriMatrixF.diag1");
+            Assert(ufcv.diag(j-i)(i+1) == T(k),"TriMatrixF.diag1 CV ");
+            Assert(ufv.diag(j-i)(i+1) == T(k),"TriMatrixF.diag1 V");
             Assert(uf.diag(j-i,i+1,N-j+i)(1) == T(k),"TriMatrixF.diag2");
             Assert(ufx.diag(j-i,i+1,N-j+i)(1) == T(k),"const TriMatrixF.diag2");
             Assert(ufcv.diag(j-i,i+1,N-j+i)(1) == T(k),"TriMatrixF.diag2 CV ");
             Assert(ufv.diag(j-i,i+1,N-j+i)(1) == T(k),"TriMatrixF.diag2 V");
         } else if (i==j) {
             if (D == tmv::UnitDiag) {
-                Assert(ux(i,i) == T(1),"Access const TriMatrix");
-                Assert(ucv(i,i) == T(1),"Access TriMatrix CV");
                 Assert(ufx(i+1,i+1) == T(1),"Access const TriMatrixF");
                 Assert(ufcv(i+1,i+1) == T(1),"Access TriMatrixF CV");
             } else {
-                Assert(u(i,i) == T(k),"Read/Write TriMatrix");
-                Assert(ux(i,i) == T(k),"Access const TriMatrix");
-                Assert(ucv(i,i) == T(k),"Access TriMatrix CV");
-                Assert(uv(i,i) == T(k),"Access TriMatrix V");
                 Assert(uf(i+1,i+1) == T(k),"Read/Write TriMatrixF");
                 Assert(ufx(i+1,i+1) == T(k),"Access const TriMatrixF");
                 Assert(ufcv(i+1,i+1) == T(k),"Access TriMatrixF CV");
                 Assert(ufv(i+1,i+1) == T(k),"Access TriMatrixF V");
-                Assert(u.row(i,i,N)(0) == T(k),"TriMatrix.row1");
-                Assert(ux.row(i,i,N)(0) == T(k),"const TriMatrix.row1");
-                Assert(ucv.row(i,i,N)(0) == T(k),"TriMatrix.row1 CV");
-                Assert(uv.row(i,i,N)(0) == T(k),"TriMatrix.row1 V");
                 Assert(uf.row(i+1,i+1,N)(1) == T(k),"TriMatrixF.row1");
                 Assert(ufx.row(i+1,i+1,N)(1) == T(k),"const TriMatrixF.row1");
                 Assert(ufcv.row(i+1,i+1,N)(1) == T(k),"TriMatrixF.row1 CV");
                 Assert(ufv.row(i+1,i+1,N)(1) == T(k),"TriMatrixF.row1 V");
-                Assert(u.col(i,0,i+1)(i) == T(k),"TriMatrix.col1");
-                Assert(ux.col(i,0,i+1)(i) == T(k),"const TriMatrix.col1");
-                Assert(ucv.col(i,0,i+1)(i) == T(k),"TriMatrix.col1 CV");
-                Assert(uv.col(i,0,i+1)(i) == T(k),"TriMatrix.col1 V");
                 Assert(uf.col(i+1,1,i+1)(i+1) == T(k),"TriMatrixF.col1");
                 Assert(ufx.col(i+1,1,i+1)(i+1) == T(k),"const TriMatrixF.col1");
                 Assert(ufcv.col(i+1,1,i+1)(i+1) == T(k),"TriMatrixF.col1 CV");
                 Assert(ufv.col(i+1,1,i+1)(i+1) == T(k),"TriMatrixF.col1 V");
-                Assert(u.col(i,i,i+1)(0) == T(k),"TriMatrix.col2");
-                Assert(ux.col(i,i,i+1)(0) == T(k),"const TriMatrix.col2");
-                Assert(ucv.col(i,i,i+1)(0) == T(k),"TriMatrix.col2 CV");
-                Assert(uv.col(i,i,i+1)(0) == T(k),"TriMatrix.col2 V");
                 Assert(uf.col(i+1,i+1,i+1)(1) == T(k),"TriMatrixF.col2");
                 Assert(ufx.col(i+1,i+1,i+1)(1) == T(k),"const TriMatrixF.col2");
                 Assert(ufcv.col(i+1,i+1,i+1)(1) == T(k),"TriMatrixF.col2 CV");
                 Assert(ufv.col(i+1,i+1,i+1)(1) == T(k),"TriMatrixF.col2 V");
-                Assert(u.diag()(i) == T(k),"TriMatrix.diag");
-                Assert(ux.diag()(i) == T(k),"const TriMatrix.diag");
-                Assert(ucv.diag()(i) == T(k),"TriMatrix.diag CV ");
-                Assert(uv.diag()(i) == T(k),"TriMatrix.diag V");
                 Assert(uf.diag()(i+1) == T(k),"TriMatrixF.diag");
                 Assert(ufx.diag()(i+1) == T(k),"const TriMatrixF.diag");
                 Assert(ufcv.diag()(i+1) == T(k),"TriMatrixF.diag CV ");
                 Assert(ufv.diag()(i+1) == T(k),"TriMatrixF.diag V");
-                Assert(u.diag(0)(i) == T(k),"TriMatrix.diag1");
-                Assert(ux.diag(0)(i) == T(k),"const TriMatrix.diag1");
-                Assert(ucv.diag(0)(i) == T(k),"TriMatrix.diag1 CV ");
-                Assert(uv.diag(0)(i) == T(k),"TriMatrix.diag1 V");
                 Assert(uf.diag(0)(i+1) == T(k),"TriMatrixF.diag1");
                 Assert(ufx.diag(0)(i+1) == T(k),"const TriMatrixF.diag1");
                 Assert(ufcv.diag(0)(i+1) == T(k),"TriMatrixF.diag1 CV ");
                 Assert(ufv.diag(0)(i+1) == T(k),"TriMatrixF.diag1 V");
-                Assert(u.diag(0,i,N-i+i)(0) == T(k),"TriMatrix.diag2");
-                Assert(ux.diag(0,i,N-i+i)(0) == T(k),"const TriMatrix.diag2");
-                Assert(ucv.diag(0,i,N-i+i)(0) == T(k),"TriMatrix.diag2 CV ");
-                Assert(uv.diag(0,i,N-i+i)(0) == T(k),"TriMatrix.diag2 V");
                 Assert(uf.diag(0,i+1,N-i+i)(1) == T(k),"TriMatrixF.diag2");
                 Assert(ufx.diag(0,i+1,N-i+i)(1) == T(k),"const TriMatrixF.diag2");
                 Assert(ufcv.diag(0,i+1,N-i+i)(1) == T(k),"TriMatrixF.diag2 CV ");
                 Assert(ufv.diag(0,i+1,N-i+i)(1) == T(k),"TriMatrixF.diag2 V");
             }
         } else {
-            Assert(ux(i,j) == T(0),"Access const TriMatrix");
-            Assert(ucv(i,j) == T(0),"Access TriMatrix CV");
             Assert(ufx(i+1,j+1) == T(0),"Access const TriMatrixF");
             Assert(ufcv(i+1,j+1) == T(0),"Access TriMatrixF CV");
         }
     }
+#endif
 }
 
 template <class T, tmv::DiagType D, tmv::StorageType S> 
@@ -168,7 +187,6 @@ static void TestBasicLowerTriMatrix_1()
     const int N = 10;
 
     tmv::LowerTriMatrix<T,D,S> l(N);
-    tmv::LowerTriMatrix<T,D,S,tmv::FortranStyle> lf(N);
 
     Assert(l.colsize() == size_t(N) && l.rowsize() == size_t(N),
            "Creating LowerTriMatrix(N)");
@@ -176,147 +194,168 @@ static void TestBasicLowerTriMatrix_1()
     for (int i=0,k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         if (j < i || (D==tmv::NonUnitDiag && i==j)) {
             l(i,j) = T(k);
-            lf(i+1,j+1) = T(k);
         }
     }
 
     tmv::LowerTriMatrixView<T,D> lv = l.view();
     tmv::ConstLowerTriMatrixView<T,D> lcv = l.view();
-    tmv::LowerTriMatrixViewF<T,D> lfv = lf.view();
-    tmv::ConstLowerTriMatrixViewF<T,D> lfcv = lf.view();
 
     const tmv::LowerTriMatrix<T,D,S>& lx = l;
-    const tmv::LowerTriMatrix<T,D,S,tmv::FortranStyle>& lfx = lf;
 
     for(int i=0,k=1;i<N;++i) for(int j=0;j<N;++j,++k) {
         if (i < j) {
             Assert(lx(i,j) == T(0),"Access const TriMatrix");
             Assert(lcv(i,j) == T(0),"Access TriMatrix CV");
-            Assert(lfx(i+1,j+1) == T(0),"Access const TriMatrixF");
-            Assert(lfcv(i+1,j+1) == T(0),"Access TriMatrixF CV");
         } else if (i==j) {
             if (D == tmv::UnitDiag) {
                 Assert(lx(i,i) == T(1),"Access const TriMatrix");
                 Assert(lcv(i,i) == T(1),"Access TriMatrix CV");
-                Assert(lfx(i+1,i+1) == T(1),"Access const TriMatrixF");
-                Assert(lfcv(i+1,i+1) == T(1),"Access TriMatrixF CV");
             } else {
                 Assert(l(i,i) == T(k),"Read/Write TriMatrix");
                 Assert(lx(i,i) == T(k),"Access const TriMatrix");
                 Assert(lcv(i,i) == T(k),"Access TriMatrix CV");
                 Assert(lv(i,i) == T(k),"Access TriMatrix V");
-                Assert(lf(i+1,i+1) == T(k),"Read/Write TriMatrixF");
-                Assert(lfx(i+1,i+1) == T(k),"Access const TriMatrixF");
-                Assert(lfcv(i+1,i+1) == T(k),"Access TriMatrixF CV");
-                Assert(lfv(i+1,i+1) == T(k),"Access TriMatrixF V");
                 Assert(l.col(i,i,N)(0) == T(k),"TriMatrix.col2");
                 Assert(lx.col(i,i,N)(0) == T(k),"const TriMatrix.col2");
                 Assert(lcv.col(i,i,N)(0) == T(k),"TriMatrix.col2 CV");
                 Assert(lv.col(i,i,N)(0) == T(k),"TriMatrix.col2 V");
-                Assert(lf.col(i+1,i+1,N)(1) == T(k),"TriMatrixF.col2");
-                Assert(lfx.col(i+1,i+1,N)(1) == T(k),"const TriMatrixF.col2");
-                Assert(lfcv.col(i+1,i+1,N)(1) == T(k),"TriMatrixF.col2 CV");
-                Assert(lfv.col(i+1,i+1,N)(1) == T(k),"TriMatrixF.col2 V");
                 Assert(l.row(i,0,i+1)(i) == T(k),"TriMatrix.row1");
                 Assert(lx.row(i,0,i+1)(i) == T(k),"const TriMatrix.row1");
                 Assert(lcv.row(i,0,i+1)(i) == T(k),"TriMatrix.row1 CV");
                 Assert(lv.row(i,0,i+1)(i) == T(k),"TriMatrix.row1 V");
-                Assert(lf.row(i+1,1,i+1)(i+1) == T(k),"TriMatrixF.row1");
-                Assert(lfx.row(i+1,1,i+1)(i+1) == T(k),"const TriMatrixF.row1");
-                Assert(lfcv.row(i+1,1,i+1)(i+1) == T(k),"TriMatrixF.row1 CV");
-                Assert(lfv.row(i+1,1,i+1)(i+1) == T(k),"TriMatrixF.row1 V");
                 Assert(l.row(i,i,i+1)(0) == T(k),"TriMatrix.row2");
                 Assert(lx.row(i,i,i+1)(0) == T(k),"const TriMatrix.row2");
                 Assert(lcv.row(i,i,i+1)(0) == T(k),"TriMatrix.row2 CV");
                 Assert(lv.row(i,i,i+1)(0) == T(k),"TriMatrix.row2 V");
-                Assert(lf.row(i+1,i+1,i+1)(1) == T(k),"TriMatrixF.row2");
-                Assert(lfx.row(i+1,i+1,i+1)(1) == T(k),"const TriMatrixF.row2");
-                Assert(lfcv.row(i+1,i+1,i+1)(1) == T(k),"TriMatrixF.row2 CV");
-                Assert(lfv.row(i+1,i+1,i+1)(1) == T(k),"TriMatrixF.row2 V");
                 Assert(l.diag()(i) == T(k),"TriMatrix.diag");
                 Assert(lx.diag()(i) == T(k),"const TriMatrix.diag");
                 Assert(lcv.diag()(i) == T(k),"TriMatrix.diag CV ");
                 Assert(lv.diag()(i) == T(k),"TriMatrix.diag V");
-                Assert(lf.diag()(i+1) == T(k),"TriMatrixF.diag");
-                Assert(lfx.diag()(i+1) == T(k),"const TriMatrixF.diag");
-                Assert(lfcv.diag()(i+1) == T(k),"TriMatrixF.diag CV ");
-                Assert(lfv.diag()(i+1) == T(k),"TriMatrixF.diag V");
                 Assert(l.diag(0)(i) == T(k),"TriMatrix.diag1");
                 Assert(lx.diag(0)(i) == T(k),"const TriMatrix.diag1");
                 Assert(lcv.diag(0)(i) == T(k),"TriMatrix.diag1 CV ");
                 Assert(lv.diag(0)(i) == T(k),"TriMatrix.diag1 V");
-                Assert(lf.diag(0)(i+1) == T(k),"TriMatrixF.diag1");
-                Assert(lfx.diag(0)(i+1) == T(k),"const TriMatrixF.diag1");
-                Assert(lfcv.diag(0)(i+1) == T(k),"TriMatrixF.diag1 CV ");
-                Assert(lfv.diag(0)(i+1) == T(k),"TriMatrixF.diag1 V");
                 Assert(l.diag(0,i,N-i+i)(0) == T(k),"TriMatrix.diag2");
                 Assert(lx.diag(0,i,N-i+i)(0) == T(k),"const TriMatrix.diag2");
                 Assert(lcv.diag(0,i,N-i+i)(0) == T(k),"TriMatrix.diag2 CV ");
                 Assert(lv.diag(0,i,N-i+i)(0) == T(k),"TriMatrix.diag2 V");
-                Assert(lf.diag(0,i+1,N-i+i)(1) == T(k),"TriMatrixF.diag2");
-                Assert(lfx.diag(0,i+1,N-i+i)(1) == T(k),"const TriMatrixF.diag2");
-                Assert(lfcv.diag(0,i+1,N-i+i)(1) == T(k),"TriMatrixF.diag2 CV ");
-                Assert(lfv.diag(0,i+1,N-i+i)(1) == T(k),"TriMatrixF.diag2 V");
             }
         } else {
             Assert(l(i,j) == T(k),"Read/Write TriMatrix");
             Assert(lx(i,j) == T(k),"Access const TriMatrix");
             Assert(lcv(i,j) == T(k),"Access TriMatrix CV");
             Assert(lv(i,j) == T(k),"Access TriMatrix V");
-            Assert(lf(i+1,j+1) == T(k),"Read/Write TriMatrixF");
-            Assert(lfx(i+1,j+1) == T(k),"Access const TriMatrixF");
-            Assert(lfcv(i+1,j+1) == T(k),"Access TriMatrixF CV");
-            Assert(lfv(i+1,j+1) == T(k),"Access TriMatrixF V");
             Assert(l.col(j,j+1,N)(i-j-1) == T(k),"TriMatrix.col1");
             Assert(lx.col(j,j+1,N)(i-j-1) == T(k),"const TriMatrix.col1");
             Assert(lcv.col(j,j+1,N)(i-j-1) == T(k),"TriMatrix.col1 CV");
             Assert(lv.col(j,j+1,N)(i-j-1) == T(k),"TriMatrix.col1 V");
-            Assert(lf.col(j+1,j+2,N)(i-j) == T(k),"TriMatrixF.col1");
-            Assert(lfx.col(j+1,j+2,N)(i-j) == T(k),"const TriMatrixF.col1");
-            Assert(lfcv.col(j+1,j+2,N)(i-j) == T(k),"TriMatrixF.col1 CV");
-            Assert(lfv.col(j+1,j+2,N)(i-j) == T(k),"TriMatrixF.col1 V");
             Assert(l.col(j,i,N)(0) == T(k),"TriMatrix.col2");
             Assert(lx.col(j,i,N)(0) == T(k),"const TriMatrix.col2");
             Assert(lcv.col(j,i,N)(0) == T(k),"TriMatrix.col2 CV");
             Assert(lv.col(j,i,N)(0) == T(k),"TriMatrix.col2 V");
-            Assert(lf.col(j+1,i+1,N)(1) == T(k),"TriMatrixF.col2");
-            Assert(lfx.col(j+1,i+1,N)(1) == T(k),"const TriMatrixF.col2");
-            Assert(lfcv.col(j+1,i+1,N)(1) == T(k),"TriMatrixF.col2 CV");
-            Assert(lfv.col(j+1,i+1,N)(1) == T(k),"TriMatrixF.col2 V");
             Assert(l.row(i,0,i)(j) == T(k),"TriMatrix.row1");
             Assert(lx.row(i,0,i)(j) == T(k),"const TriMatrix.row1");
             Assert(lcv.row(i,0,i)(j) == T(k),"TriMatrix.row1 CV");
             Assert(lv.row(i,0,i)(j) == T(k),"TriMatrix.row1 V");
-            Assert(lf.row(i+1,1,i)(j+1) == T(k),"TriMatrixF.row1");
-            Assert(lfx.row(i+1,1,i)(j+1) == T(k),"const TriMatrixF.row1");
-            Assert(lfcv.row(i+1,1,i)(j+1) == T(k),"TriMatrixF.row1 CV");
-            Assert(lfv.row(i+1,1,i)(j+1) == T(k),"TriMatrixF.row1 V");
             Assert(l.row(i,j,i)(0) == T(k),"TriMatrix.row2");
             Assert(lx.row(i,j,i)(0) == T(k),"const TriMatrix.row2");
             Assert(lcv.row(i,j,i)(0) == T(k),"TriMatrix.row2 CV");
             Assert(lv.row(i,j,i)(0) == T(k),"TriMatrix.row2 V");
-            Assert(lf.row(i+1,j+1,i)(1) == T(k),"TriMatrixF.row2");
-            Assert(lfx.row(i+1,j+1,i)(1) == T(k),"const TriMatrixF.row2");
-            Assert(lfcv.row(i+1,j+1,i)(1) == T(k),"TriMatrixF.row2 CV");
-            Assert(lfv.row(i+1,j+1,i)(1) == T(k),"TriMatrixF.row2 V");
             Assert(l.diag(-int(i-j))(j) == T(k),"TriMatrix.diag1");
             Assert(lx.diag(-int(i-j))(j) == T(k),"const TriMatrix.diag1");
             Assert(lcv.diag(-int(i-j))(j) == T(k),"TriMatrix.diag1 CV ");
             Assert(lv.diag(-int(i-j))(j) == T(k),"TriMatrix.diag1 V");
-            Assert(lf.diag(-int(i-j))(j+1) == T(k),"TriMatrixF.diag1");
-            Assert(lfx.diag(-int(i-j))(j+1) == T(k),"const TriMatrixF.diag1");
-            Assert(lfcv.diag(-int(i-j))(j+1) == T(k),"TriMatrixF.diag1 CV ");
-            Assert(lfv.diag(-int(i-j))(j+1) == T(k),"TriMatrixF.diag1 V");
             Assert(l.diag(-int(i-j),j,N+j-i)(0) == T(k),"TriMatrix.diag2");
             Assert(lx.diag(-int(i-j),j,N+j-i)(0) == T(k),"const TriMatrix.diag2");
             Assert(lcv.diag(-int(i-j),j,N+j-i)(0) == T(k),"TriMatrix.diag2 CV ");
             Assert(lv.diag(-int(i-j),j,N+j-i)(0) == T(k),"TriMatrix.diag2 V");
+        }
+    }
+
+#if (XTEST & 32)
+    tmv::LowerTriMatrix<T,D,S,tmv::FortranStyle> lf(N);
+
+    for (int i=0,k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
+        if (j < i || (D==tmv::NonUnitDiag && i==j)) {
+            lf(i+1,j+1) = T(k);
+        }
+    }
+
+    tmv::LowerTriMatrixViewF<T,D> lfv = lf.view();
+    tmv::ConstLowerTriMatrixViewF<T,D> lfcv = lf.view();
+
+    const tmv::LowerTriMatrix<T,D,S,tmv::FortranStyle>& lfx = lf;
+
+    for(int i=0,k=1;i<N;++i) for(int j=0;j<N;++j,++k) {
+        if (i < j) {
+            Assert(lfx(i+1,j+1) == T(0),"Access const TriMatrixF");
+            Assert(lfcv(i+1,j+1) == T(0),"Access TriMatrixF CV");
+        } else if (i==j) {
+            if (D == tmv::UnitDiag) {
+                Assert(lfx(i+1,i+1) == T(1),"Access const TriMatrixF");
+                Assert(lfcv(i+1,i+1) == T(1),"Access TriMatrixF CV");
+            } else {
+                Assert(lf(i+1,i+1) == T(k),"Read/Write TriMatrixF");
+                Assert(lfx(i+1,i+1) == T(k),"Access const TriMatrixF");
+                Assert(lfcv(i+1,i+1) == T(k),"Access TriMatrixF CV");
+                Assert(lfv(i+1,i+1) == T(k),"Access TriMatrixF V");
+                Assert(lf.col(i+1,i+1,N)(1) == T(k),"TriMatrixF.col2");
+                Assert(lfx.col(i+1,i+1,N)(1) == T(k),"const TriMatrixF.col2");
+                Assert(lfcv.col(i+1,i+1,N)(1) == T(k),"TriMatrixF.col2 CV");
+                Assert(lfv.col(i+1,i+1,N)(1) == T(k),"TriMatrixF.col2 V");
+                Assert(lf.row(i+1,1,i+1)(i+1) == T(k),"TriMatrixF.row1");
+                Assert(lfx.row(i+1,1,i+1)(i+1) == T(k),"const TriMatrixF.row1");
+                Assert(lfcv.row(i+1,1,i+1)(i+1) == T(k),"TriMatrixF.row1 CV");
+                Assert(lfv.row(i+1,1,i+1)(i+1) == T(k),"TriMatrixF.row1 V");
+                Assert(lf.row(i+1,i+1,i+1)(1) == T(k),"TriMatrixF.row2");
+                Assert(lfx.row(i+1,i+1,i+1)(1) == T(k),"const TriMatrixF.row2");
+                Assert(lfcv.row(i+1,i+1,i+1)(1) == T(k),"TriMatrixF.row2 CV");
+                Assert(lfv.row(i+1,i+1,i+1)(1) == T(k),"TriMatrixF.row2 V");
+                Assert(lf.diag()(i+1) == T(k),"TriMatrixF.diag");
+                Assert(lfx.diag()(i+1) == T(k),"const TriMatrixF.diag");
+                Assert(lfcv.diag()(i+1) == T(k),"TriMatrixF.diag CV ");
+                Assert(lfv.diag()(i+1) == T(k),"TriMatrixF.diag V");
+                Assert(lf.diag(0)(i+1) == T(k),"TriMatrixF.diag1");
+                Assert(lfx.diag(0)(i+1) == T(k),"const TriMatrixF.diag1");
+                Assert(lfcv.diag(0)(i+1) == T(k),"TriMatrixF.diag1 CV ");
+                Assert(lfv.diag(0)(i+1) == T(k),"TriMatrixF.diag1 V");
+                Assert(lf.diag(0,i+1,N-i+i)(1) == T(k),"TriMatrixF.diag2");
+                Assert(lfx.diag(0,i+1,N-i+i)(1) == T(k),"const TriMatrixF.diag2");
+                Assert(lfcv.diag(0,i+1,N-i+i)(1) == T(k),"TriMatrixF.diag2 CV ");
+                Assert(lfv.diag(0,i+1,N-i+i)(1) == T(k),"TriMatrixF.diag2 V");
+            }
+        } else {
+            Assert(lf(i+1,j+1) == T(k),"Read/Write TriMatrixF");
+            Assert(lfx(i+1,j+1) == T(k),"Access const TriMatrixF");
+            Assert(lfcv(i+1,j+1) == T(k),"Access TriMatrixF CV");
+            Assert(lfv(i+1,j+1) == T(k),"Access TriMatrixF V");
+            Assert(lf.col(j+1,j+2,N)(i-j) == T(k),"TriMatrixF.col1");
+            Assert(lfx.col(j+1,j+2,N)(i-j) == T(k),"const TriMatrixF.col1");
+            Assert(lfcv.col(j+1,j+2,N)(i-j) == T(k),"TriMatrixF.col1 CV");
+            Assert(lfv.col(j+1,j+2,N)(i-j) == T(k),"TriMatrixF.col1 V");
+            Assert(lf.col(j+1,i+1,N)(1) == T(k),"TriMatrixF.col2");
+            Assert(lfx.col(j+1,i+1,N)(1) == T(k),"const TriMatrixF.col2");
+            Assert(lfcv.col(j+1,i+1,N)(1) == T(k),"TriMatrixF.col2 CV");
+            Assert(lfv.col(j+1,i+1,N)(1) == T(k),"TriMatrixF.col2 V");
+            Assert(lf.row(i+1,1,i)(j+1) == T(k),"TriMatrixF.row1");
+            Assert(lfx.row(i+1,1,i)(j+1) == T(k),"const TriMatrixF.row1");
+            Assert(lfcv.row(i+1,1,i)(j+1) == T(k),"TriMatrixF.row1 CV");
+            Assert(lfv.row(i+1,1,i)(j+1) == T(k),"TriMatrixF.row1 V");
+            Assert(lf.row(i+1,j+1,i)(1) == T(k),"TriMatrixF.row2");
+            Assert(lfx.row(i+1,j+1,i)(1) == T(k),"const TriMatrixF.row2");
+            Assert(lfcv.row(i+1,j+1,i)(1) == T(k),"TriMatrixF.row2 CV");
+            Assert(lfv.row(i+1,j+1,i)(1) == T(k),"TriMatrixF.row2 V");
+            Assert(lf.diag(-int(i-j))(j+1) == T(k),"TriMatrixF.diag1");
+            Assert(lfx.diag(-int(i-j))(j+1) == T(k),"const TriMatrixF.diag1");
+            Assert(lfcv.diag(-int(i-j))(j+1) == T(k),"TriMatrixF.diag1 CV ");
+            Assert(lfv.diag(-int(i-j))(j+1) == T(k),"TriMatrixF.diag1 V");
             Assert(lf.diag(-int(i-j),j+1,N+j-i)(1) == T(k),"TriMatrixF.diag2");
             Assert(lfx.diag(-int(i-j),j+1,N+j-i)(1) == T(k),"const TriMatrixF.diag2");
             Assert(lfcv.diag(-int(i-j),j+1,N+j-i)(1) == T(k),"TriMatrixF.diag2 CV ");
             Assert(lfv.diag(-int(i-j),j+1,N+j-i)(1) == T(k),"TriMatrixF.diag2 V");
         }
     }
+#endif
 }
 
 template <class T, tmv::DiagType D, tmv::StorageType S> 
@@ -690,23 +729,45 @@ static void TestBasicTriMatrix()
 
 template <class T> void TestTriMatrix()
 {
+#if 1
     TestBasicTriMatrix<T,tmv::UnitDiag,tmv::RowMajor>();
     TestBasicTriMatrix<T,tmv::NonUnitDiag,tmv::RowMajor>();
     TestBasicTriMatrix<T,tmv::UnitDiag,tmv::ColMajor>();
     TestBasicTriMatrix<T,tmv::NonUnitDiag,tmv::ColMajor>();
-
     std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<"> passed all basic tests\n";
+#endif
 
     if (tmv::Epsilon<T>() > T(0)) {
-        TestTriMatrixArith_A1<T>();
-        //TestTriMatrixArith_A2<T>();
+#if 1
+        TestTriMatrixArith_A1a<T>();
+        TestTriMatrixArith_A1b<T>();
+        TestTriMatrixArith_A2<T>();
+        TestTriMatrixArith_A3<T>();
+        TestTriMatrixArith_A4a<T>();
+        TestTriMatrixArith_A4b<T>();
+        TestTriMatrixArith_A5a<T>();
+        TestTriMatrixArith_A5b<T>();
+        TestTriMatrixArith_A6a<T>();
+        TestTriMatrixArith_A6b<T>();
+        TestTriMatrixArith_A6c<T>();
         std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<"> (Tri/Tri) Arithmetic passed all tests\n";
-#if 0
-        TestTriMatrixArith_B1<T>();
-        TestTriMatrixArith_B2<T>();
+#endif
+#if 1
+        TestTriMatrixArith_B4a<T>();
+        TestTriMatrixArith_B4b<T>();
+        TestTriMatrixArith_B5a<T>();
+        TestTriMatrixArith_B5b<T>();
+        TestTriMatrixArith_B6a<T>();
+        TestTriMatrixArith_B6b<T>();
         std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<"> (Matrix/Tri) Arithmetic passed all tests\n";
-        TestTriMatrixArith_C1<T>();
-        TestTriMatrixArith_C2<T>();
+#endif
+#if 1
+        TestTriMatrixArith_C4a<T>();
+        TestTriMatrixArith_C4b<T>();
+        TestTriMatrixArith_C5a<T>();
+        TestTriMatrixArith_C5b<T>();
+        TestTriMatrixArith_C6a<T>();
+        TestTriMatrixArith_C6b<T>();
         std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<"> (Diag/Tri) Arithmetic passed all tests\n";
 #endif
     }

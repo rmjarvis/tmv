@@ -199,9 +199,9 @@ namespace tmv {
             const int M = m3.colsize();
             const int N = m3.rowsize();
             const int K = m1.rowsize();
-            TMVAssert(m1.colsize() == M);
-            TMVAssert(m2.rowsize() == N);
-            TMVAssert(m2.colsize() == K);
+            TMVAssert(int(m1.colsize()) == M);
+            TMVAssert(int(m2.rowsize()) == N);
+            TMVAssert(int(m2.colsize()) == K);
 
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;

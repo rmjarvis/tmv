@@ -30,30 +30,29 @@ int main() try {
     //showdiv=true;
     //showtests=true;
     //showstartdone=true;
-    //#define SKIPREST
 
-#ifndef SKIPREST
+#if 1
 
 #ifdef TEST_DOUBLE
     TestSymMatrix<double>();
-    TestAllSymDiv<double>();
+    TestSymDiv<double>();
 #endif
 
 #ifdef TEST_FLOAT
     TestSymMatrix<float>();
-    TestAllSymDiv<float>();
+    TestSymDiv<float>();
 #endif
 
 #ifdef TEST_LONGDOUBLE
     TestSymMatrix<long double>();
-    TestAllSymDiv<long double>();
+    TestSymDiv<long double>();
 #endif 
 
 #ifdef TEST_INT
     TestSymMatrix<int>();
 #endif 
 
-#endif // SKIPREST
+#endif 
 
     return 0;
 }

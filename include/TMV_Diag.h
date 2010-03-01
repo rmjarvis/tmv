@@ -43,6 +43,7 @@
 #include "tmv/TMV_MultMD.h"
 #include "tmv/TMV_InvertD.h"
 #include "tmv/TMV_DivVD.h"
+#include "tmv/TMV_DivMD.h"
 
 #ifndef TMV_H
 // In case TMV_Diag.h is included not as part of TMV.h:

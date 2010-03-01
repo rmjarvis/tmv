@@ -93,7 +93,7 @@ namespace tmv {
             UpperTriMatrixView<T2,NonUnitDiag,UNKNOWN,1> m2rm = m2;
             if (m1.isrm())
                 DoMultXM<true>(x,m1.rmView(),m2rm);
-            else if (m2.iscm())
+            else if (m1.iscm())
                 DoMultXM<true>(x,m1.cmView(),m2rm);
             else
                 DoMultXM<true>(x,m1,m2rm);
@@ -101,14 +101,14 @@ namespace tmv {
             UpperTriMatrixView<T2,NonUnitDiag,1> m2cm = m2;
             if (m1.isrm())
                 DoMultXM<true>(x,m1.rmView(),m2cm);
-            else if (m2.iscm())
+            else if (m1.iscm())
                 DoMultXM<true>(x,m1.cmView(),m2cm);
             else
                 DoMultXM<true>(x,m1,m2cm);
         } else {
             if (m1.isrm())
                 DoMultXM<true>(x,m1.rmView(),m2);
-            else if (m2.iscm())
+            else if (m1.iscm())
                 DoMultXM<true>(x,m1.cmView(),m2);
             else
                 DoMultXM<true>(x,m1,m2);

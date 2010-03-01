@@ -63,7 +63,6 @@
 
 #include "TMV_BaseMatrix_Diag.h"
 #include "TMV_VIt.h"
-#include "TMV_StackArray.h"
 #include "TMV_DiagMatrix.h"
 #include <vector>
 
@@ -97,55 +96,55 @@ namespace tmv {
         enum { mcolmajor = false };
         enum { mstor = ColMajor }; // arbitrary
         enum { mcalc = true };
-        enum { mstep = 1 };
+        enum { mdiagstep = 1 };
         enum { mconj = false };
         enum { twoS = 2 };
         enum { notC = miscomplex };
 
-        typedef ConstSmallVectorView<T,N,mstep,false,I> const_diag_type;
+        typedef ConstSmallVectorView<T,N,mdiagstep,false,I> const_diag_type;
 
-        typedef ConstDiagMatrixView<T,mstep,false,I> const_subdiagmatrix_type;
+        typedef ConstDiagMatrixView<T,mdiagstep,false,I> const_subdiagmatrix_type;
         typedef ConstDiagMatrixView<T,UNKNOWN,false,I> 
             const_subdiagmatrix_step_type;
-        typedef ConstSmallDiagMatrixView<T,N,mstep,false,I> const_view_type;
-        typedef ConstSmallDiagMatrixView<T,N,mstep,false,CStyle> 
+        typedef ConstSmallDiagMatrixView<T,N,mdiagstep,false,I> const_view_type;
+        typedef ConstSmallDiagMatrixView<T,N,mdiagstep,false,CStyle> 
             const_cview_type;
-        typedef ConstSmallDiagMatrixView<T,N,mstep,false,FortranStyle> 
+        typedef ConstSmallDiagMatrixView<T,N,mdiagstep,false,FortranStyle> 
             const_fview_type;
         typedef ConstDiagMatrixView<T> const_xview_type;
         typedef ConstSmallDiagMatrixView<T,N,1,false> const_rmview_type;
         typedef ConstSmallDiagMatrixView<T,N,1,false> const_cmview_type;
-        typedef ConstSmallDiagMatrixView<T,N,mstep,notC,I> 
+        typedef ConstSmallDiagMatrixView<T,N,mdiagstep,notC,I> 
             const_conjugate_type;
-        typedef ConstSmallDiagMatrixView<T,N,mstep,false,I> 
+        typedef ConstSmallDiagMatrixView<T,N,mdiagstep,false,I> 
             const_transpose_type;
-        typedef ConstSmallDiagMatrixView<T,N,mstep,notC,I> const_adjoint_type;
+        typedef ConstSmallDiagMatrixView<T,N,mdiagstep,notC,I> const_adjoint_type;
         typedef ConstSmallDiagMatrixView<real_type,N,twoS,false,I> 
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstSmallDiagMatrixView<T,N,mstep,false,I> const_nonconj_type;
-        typedef SmallDiagMatrixView<T,N,mstep,false,I> nonconst_type;
+        typedef ConstSmallDiagMatrixView<T,N,mdiagstep,false,I> const_nonconj_type;
+        typedef SmallDiagMatrixView<T,N,mdiagstep,false,I> nonconst_type;
 
         typedef QuotXM<1,real_type,type> inverse_type;
 
         typedef T& reference;
 
-        typedef SmallVectorView<T,N,mstep,false,I> diag_type;
+        typedef SmallVectorView<T,N,mdiagstep,false,I> diag_type;
 
-        typedef DiagMatrixView<T,mstep,false,I> subdiagmatrix_type;
+        typedef DiagMatrixView<T,mdiagstep,false,I> subdiagmatrix_type;
         typedef DiagMatrixView<T,UNKNOWN,false,I> subdiagmatrix_step_type;
-        typedef SmallDiagMatrixView<T,N,mstep,false,I> view_type;
-        typedef SmallDiagMatrixView<T,N,mstep,false,CStyle> cview_type;
-        typedef SmallDiagMatrixView<T,N,mstep,false,FortranStyle> fview_type;
+        typedef SmallDiagMatrixView<T,N,mdiagstep,false,I> view_type;
+        typedef SmallDiagMatrixView<T,N,mdiagstep,false,CStyle> cview_type;
+        typedef SmallDiagMatrixView<T,N,mdiagstep,false,FortranStyle> fview_type;
         typedef DiagMatrixView<T> xview_type;
         typedef SmallDiagMatrixView<T,N,1,false> rmview_type;
         typedef SmallDiagMatrixView<T,N,1,false> cmview_type;
-        typedef SmallDiagMatrixView<T,N,mstep,notC,I> conjugate_type;
-        typedef SmallDiagMatrixView<T,N,mstep,false,I> transpose_type;
-        typedef SmallDiagMatrixView<T,N,mstep,notC,I> adjoint_type;
+        typedef SmallDiagMatrixView<T,N,mdiagstep,notC,I> conjugate_type;
+        typedef SmallDiagMatrixView<T,N,mdiagstep,false,I> transpose_type;
+        typedef SmallDiagMatrixView<T,N,mdiagstep,notC,I> adjoint_type;
         typedef SmallDiagMatrixView<real_type,N,twoS,false,I> realpart_type;
         typedef realpart_type imagpart_type;
-        typedef SmallDiagMatrixView<T,N,mstep,false,I> nonconj_type;
+        typedef SmallDiagMatrixView<T,N,mdiagstep,false,I> nonconj_type;
     };
 
 #ifdef XTEST
@@ -171,30 +170,33 @@ namespace tmv {
         enum { mrowmajor = Traits<type>::mrowmajor };
         enum { mcolmajor = Traits<type>::mcolmajor };
         enum { mcalc = Traits<type>::mcalc };
-        enum { mstep = Traits<type>::mstep };
+        enum { mdiagstep = Traits<type>::mdiagstep };
         enum { mconj = Traits<type>::mconj };
 
         //
         // Constructors
         //
 
-        inline SmallDiagMatrix()
+        inline SmallDiagMatrix(size_t n=N)
         {
             TMVStaticAssert(N > 0);
+            TMVAssert(n==N);
 #ifdef TMV_DEBUG
             this->setAllTo(T(888));
 #endif
         }
 
-        explicit inline SmallDiagMatrix(T x) 
+        explicit inline SmallDiagMatrix(size_t n, T x) 
         {
             TMVStaticAssert(N > 0);
+            TMVAssert(n==N);
             this->setAllTo(x);
         }
 
-        explicit inline SmallDiagMatrix(const T* vv) 
+        explicit inline SmallDiagMatrix(size_t n, const T* vv) 
         {
             TMVStaticAssert(N > 0);
+            TMVAssert(n==N);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif
@@ -204,10 +206,10 @@ namespace tmv {
         inline SmallDiagMatrix(const std::vector<T>& vv)
         {
             TMVStaticAssert(N > 0);
+            TMVAssert(vv.size() == N);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif
-            TMVAssert(vv.size() == N);
             ConstSmallDiagMatrixView<T,N,1>(&vv[0]).newAssignTo(*this);
         }
 
@@ -349,7 +351,7 @@ namespace tmv {
         enum { mcolmajor = (S==1) };
         enum { mstor = ColMajor }; // arbitrary
         enum { mcalc = true };
-        enum { mstep = S };
+        enum { mdiagstep = S };
         enum { mconj = C };
         enum { twoS = misreal ? S : IntTraits<S>::twoS };
         enum { notC = !C && miscomplex };
@@ -394,7 +396,7 @@ namespace tmv {
         enum { mrowmajor = Traits<type>::mrowmajor };
         enum { mcolmajor = Traits<type>::mcolmajor };
         enum { mcalc = Traits<type>::mcalc };
-        enum { mstep = Traits<type>::mstep };
+        enum { mdiagstep = Traits<type>::mdiagstep };
         enum { mconj = Traits<type>::mconj };
 
         //
@@ -537,7 +539,7 @@ namespace tmv {
         enum { mcolmajor = (S==1) }; 
         enum { mstor = ColMajor }; // arbitrary
         enum { mcalc = true };
-        enum { mstep = S };
+        enum { mdiagstep = S };
         enum { mconj = C };
         enum { twoS = misreal ? S : IntTraits<S>::twoS };
         enum { notC = !C && miscomplex };
@@ -603,7 +605,7 @@ namespace tmv {
         enum { mrowmajor = Traits<type>::mrowmajor };
         enum { mcolmajor = Traits<type>::mcolmajor };
         enum { mcalc = Traits<type>::mcalc };
-        enum { mstep = Traits<type>::mstep };
+        enum { mdiagstep = Traits<type>::mdiagstep };
         enum { mconj = Traits<type>::mconj };
 
         //

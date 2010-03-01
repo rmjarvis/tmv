@@ -589,9 +589,8 @@ namespace tmv {
             PT2 X0, X1;
 
             typedef typename V3::value_type T3;
-            typedef typename V3::real_type RT3;
             typedef typename V3::iterator IT3;
-            RT3 rY0, iY0;
+            T3 Y0;
 
             int N_2 = N>>1; // N_2 = N/2
             const int stepj = m1.stepj();
@@ -625,12 +624,10 @@ namespace tmv {
 
                 i=M; do {
                     A00 = *A0++; A01 = *A1++;
-                    rY0 = real(*Y); iY0 = imag(*Y);
-                    rY0 += ZProd<c1,false>::rprod(A00,X0);
-                    rY0 += ZProd<c1,false>::rprod(A01,X1);
-                    iY0 += ZProd<c1,false>::iprod(A00,X0);
-                    iY0 += ZProd<c1,false>::iprod(A01,X1);
-                    *Y++ = T3(rY0,iY0);
+                    Y0 = *Y;
+                    Y0 += ZProd<c1,false>::prod(A00,X0);
+                    Y0 += ZProd<c1,false>::prod(A01,X1);
+                    *Y++ = Y0;
                 } while (--i);
                 A0 += stepj_2; A1 += stepj_2;
                 if (dopref) {
@@ -702,26 +699,22 @@ namespace tmv {
                 const PT2 X1 = ZProd<false,c2>::prod(x,v2.nonConj().cref(1));
 
                 typedef typename V3::value_type T3;
-                typedef typename V3::real_type RT3;
-                typedef typename V3::flatten_type::iterator IT3;
-                RT3 rY0, iY0;
+                typedef typename V3::iterator IT3;
+                T3 Y0;
 
                 const int stepj = m1.stepj();
                 IT1 A0 = m1.get_col(0).nonConj().begin();
                 IT1 A1 = A0; A1.shiftP(stepj);
-                IT3 Y = v3.flatten().begin();
+                IT3 Y = v3.begin();
 
                 const bool c1 = M1::mconj;
 
                 do {
                     A00 = *A0++; A01 = *A1++;
-                    Maybe<add>::set(rY0 , *Y);
-                    Maybe<add>::set(iY0 , Y[1]);
-                    Maybe<add>::add(rY0 , ZProd<c1,false>::rprod(A00,X0));
-                    Maybe<add>::add(iY0 , ZProd<c1,false>::iprod(A00,X0));
-                    rY0 += ZProd<c1,false>::rprod(A01,X1);
-                    iY0 += ZProd<c1,false>::iprod(A01,X1);
-                    *Y = rY0; Y[1] = iY0;  Y += 2;
+                    Maybe<add>::set(Y0 , *Y);
+                    Maybe<add>::add(Y0 , ZProd<c1,false>::prod(A00,X0));
+                    Y0 += ZProd<c1,false>::prod(A01,X1);
+                    *Y++ = Y0; 
                 } while (--M);
             }
         }
@@ -754,29 +747,24 @@ namespace tmv {
                 const PT2 X2 = ZProd<false,c2>::prod(x,v2.nonConj().cref(2));
 
                 typedef typename V3::value_type T3;
-                typedef typename V3::real_type RT3;
-                typedef typename V3::flatten_type::iterator IT3;
-                RT3 rY0, iY0;
+                typedef typename V3::iterator IT3;
+                T3 Y0;
 
                 const int stepj = m1.stepj();
                 IT1 A0 = m1.get_col(0).nonConj().begin();
                 IT1 A1 = A0; A1.shiftP(stepj);
                 IT1 A2 = A1; A2.shiftP(stepj);
-                IT3 Y = v3.flatten().begin();
+                IT3 Y = v3.begin();
 
                 const bool c1 = M1::mconj;
 
                 do {
                     A00 = *A0++; A01 = *A1++; A02 = *A2++;
-                    Maybe<add>::set(rY0 , *Y);
-                    Maybe<add>::set(iY0 , Y[1]);
-                    Maybe<add>::add(rY0 , ZProd<c1,false>::rprod(A00,X0));
-                    Maybe<add>::add(iY0 , ZProd<c1,false>::iprod(A00,X0));
-                    rY0 += ZProd<c1,false>::rprod(A01,X1);
-                    iY0 += ZProd<c1,false>::iprod(A01,X1);
-                    rY0 += ZProd<c1,false>::rprod(A02,X2);
-                    iY0 += ZProd<c1,false>::iprod(A02,X2);
-                    *Y = rY0; Y[1] = iY0;  Y += 2;
+                    Maybe<add>::set(Y0 , *Y);
+                    Maybe<add>::add(Y0 , ZProd<c1,false>::prod(A00,X0));
+                    Y0 += ZProd<c1,false>::prod(A01,X1);
+                    Y0 += ZProd<c1,false>::prod(A02,X2);
+                    *Y++ = Y0; 
                 } while (--M);
             }
         }
@@ -810,32 +798,26 @@ namespace tmv {
                 const PT2 X3 = ZProd<false,c2>::prod(x,v2.nonConj().cref(3));
 
                 typedef typename V3::value_type T3;
-                typedef typename V3::real_type RT3;
-                typedef typename V3::flatten_type::iterator IT3;
-                RT3 rY0, iY0;
+                typedef typename V3::iterator IT3;
+                T3 Y0;
 
                 const int stepj = m1.stepj();
                 IT1 A0 = m1.get_col(0).nonConj().begin();
                 IT1 A1 = A0; A1.shiftP(stepj);
                 IT1 A2 = A1; A2.shiftP(stepj);
                 IT1 A3 = A2; A3.shiftP(stepj);
-                IT3 Y = v3.flatten().begin();
+                IT3 Y = v3.begin();
 
                 const bool c1 = M1::mconj;
 
                 do {
                     A00 = *A0++; A01 = *A1++; A02 = *A2++; A03 = *A3++;
-                    Maybe<add>::set(rY0 , *Y);
-                    Maybe<add>::set(iY0 , Y[1]);
-                    Maybe<add>::add(rY0 , ZProd<c1,false>::rprod(A00,X0));
-                    Maybe<add>::add(iY0 , ZProd<c1,false>::iprod(A00,X0));
-                    rY0 += ZProd<c1,false>::rprod(A01,X1);
-                    iY0 += ZProd<c1,false>::iprod(A01,X1);
-                    rY0 += ZProd<c1,false>::rprod(A02,X2);
-                    iY0 += ZProd<c1,false>::iprod(A02,X2);
-                    rY0 += ZProd<c1,false>::rprod(A03,X3);
-                    iY0 += ZProd<c1,false>::iprod(A03,X3);
-                    *Y = rY0; Y[1] = iY0;  Y += 2;
+                    Maybe<add>::set(Y0 , *Y);
+                    Maybe<add>::add(Y0 , ZProd<c1,false>::prod(A00,X0));
+                    Y0 += ZProd<c1,false>::prod(A01,X1);
+                    Y0 += ZProd<c1,false>::prod(A02,X2);
+                    Y0 += ZProd<c1,false>::prod(A03,X3);
+                    *Y++ = Y0; 
                 } while (--M);
             }
         }
@@ -1270,9 +1252,8 @@ namespace tmv {
             T2 X0;
 
             typedef typename V3::value_type T3;
-            typedef typename V3::real_type RT3;
             typedef typename V3::iterator IT3;
-            RT3 rY0, rY1, iY0, iY1;
+            T3 Y0, Y1;
 
             int M_2 = M>>1; // M_2 = M/2
             const int stepi = m1.stepi();
@@ -1300,26 +1281,21 @@ namespace tmv {
             TMVAssert(M_2 > 0);
             do {
                 X = X_begin;
-                rY0 = Maybe<add && (ix==1)>::select( real(Y[0]) , RT3(0) );
-                iY0 = Maybe<add && (ix==1)>::select( imag(Y[0]) , RT3(0) );
-                rY1 = Maybe<add && (ix==1)>::select( real(Y[1]) , RT3(0) );
-                iY1 = Maybe<add && (ix==1)>::select( imag(Y[1]) , RT3(0) );
+                Y0 = Maybe<add && (ix==1)>::select( Y[0] , T3(0) );
+                Y1 = Maybe<add && (ix==1)>::select( Y[1] , T3(0) );
 
                 j=N; do {
                     X0 = *X++; A00 = *A0++; A10 = *A1++;
-                    rY0 += ZProd<c1,c2>::rprod(A00,X0);
-                    iY0 += ZProd<c1,c2>::iprod(A00,X0);
-                    rY1 += ZProd<c1,c2>::rprod(A10,X0);
-                    iY1 += ZProd<c1,c2>::iprod(A10,X0);
+                    Y0 += ZProd<c1,c2>::prod(A00,X0);
+                    Y1 += ZProd<c1,c2>::prod(A10,X0);
                 } while (--j);
                 A0 += stepi_2; A1 += stepi_2; 
                 if (dopref) {
                     Prefetch_Read(A0.getP());
                     Prefetch_Read(A1.getP());
                 }
-                Maybe<add && (ix!=1)>::add(Y[0] , x * T3(rY0,iY0));
-                Maybe<add && (ix!=1)>::add(Y[1] , x * T3(rY1,iY1));
-                Y += 2;
+                Maybe<add && (ix!=1)>::add(Y[0] , x * Y0);
+                Maybe<add && (ix!=1)>::add(Y[1] , x * Y1); Y+=2;
             } while (--M_2);
         }
         static void call(
@@ -1382,8 +1358,7 @@ namespace tmv {
                 T2 X0;
 
                 typedef typename V3::value_type T3;
-                typedef typename V3::real_type RT3;
-                RT3 rY0, iY0, rY1, iY1;
+                T3 Y0, Y1;
 
                 const int stepi = m1.stepi();
 
@@ -1394,20 +1369,16 @@ namespace tmv {
                 const bool c1 = M1::mconj;
                 const bool c2 = V2::vconj;
 
-                rY0 = Maybe<add && (ix==1)>::select(real(v3.cref(0)) , RT3(0));
-                iY0 = Maybe<add && (ix==1)>::select(imag(v3.cref(0)) , RT3(0));
-                rY1 = Maybe<add && (ix==1)>::select(real(v3.cref(1)) , RT3(0));
-                iY1 = Maybe<add && (ix==1)>::select(imag(v3.cref(1)) , RT3(0));
+                Y0 = Maybe<add && (ix==1)>::select(v3.cref(0) , T3(0));
+                Y1 = Maybe<add && (ix==1)>::select(v3.cref(1) , T3(0));
 
                 do {
                     X0 = *X++; A00 = *A0++; A10 = *A1++;
-                    rY0 += ZProd<c1,c2>::rprod(A00,X0);
-                    iY0 += ZProd<c1,c2>::iprod(A00,X0);
-                    rY1 += ZProd<c1,c2>::rprod(A10,X0);
-                    iY1 += ZProd<c1,c2>::iprod(A10,X0);
+                    Y0 += ZProd<c1,c2>::prod(A00,X0);
+                    Y1 += ZProd<c1,c2>::prod(A10,X0);
                 } while (--N);
-                Maybe<add && (ix!=1)>::add(v3.ref(0) , x * T3(rY0,iY0));
-                Maybe<add && (ix!=1)>::add(v3.ref(1) , x * T3(rY1,iY1));
+                Maybe<add && (ix!=1)>::add(v3.ref(0) , x * Y0);
+                Maybe<add && (ix!=1)>::add(v3.ref(1) , x * Y1);
             } else 
                 Maybe<!add>::zero(v3);
         }
@@ -1437,8 +1408,7 @@ namespace tmv {
                 T2 X0;
 
                 typedef typename V3::value_type T3;
-                typedef typename V3::real_type RT3;
-                RT3 rY0, iY0, rY1, iY1, rY2, iY2;
+                T3 Y0, Y1, Y2;
 
                 const int stepi = m1.stepi();
 
@@ -1450,25 +1420,19 @@ namespace tmv {
                 const bool c1 = M1::mconj;
                 const bool c2 = V2::vconj;
 
-                rY0 = Maybe<add && (ix==1)>::select(real(v3.cref(0)) , RT3(0));
-                iY0 = Maybe<add && (ix==1)>::select(imag(v3.cref(0)) , RT3(0));
-                rY1 = Maybe<add && (ix==1)>::select(real(v3.cref(1)) , RT3(0));
-                iY1 = Maybe<add && (ix==1)>::select(imag(v3.cref(1)) , RT3(0));
-                rY2 = Maybe<add && (ix==1)>::select(real(v3.cref(2)) , RT3(0));
-                iY2 = Maybe<add && (ix==1)>::select(imag(v3.cref(2)) , RT3(0));
+                Y0 = Maybe<add && (ix==1)>::select(v3.cref(0) , T3(0));
+                Y1 = Maybe<add && (ix==1)>::select(v3.cref(1) , T3(0));
+                Y2 = Maybe<add && (ix==1)>::select(v3.cref(2) , T3(0));
 
                 do {
                     X0 = *X++; A00 = *A0++; A10 = *A1++; A20 = *A2++;
-                    rY0 += ZProd<c1,c2>::rprod(A00,X0);
-                    iY0 += ZProd<c1,c2>::iprod(A00,X0);
-                    rY1 += ZProd<c1,c2>::rprod(A10,X0);
-                    iY1 += ZProd<c1,c2>::iprod(A10,X0);
-                    rY2 += ZProd<c1,c2>::rprod(A20,X0);
-                    iY2 += ZProd<c1,c2>::iprod(A20,X0);
+                    Y0 += ZProd<c1,c2>::prod(A00,X0);
+                    Y1 += ZProd<c1,c2>::prod(A10,X0);
+                    Y2 += ZProd<c1,c2>::prod(A20,X0);
                 } while (--N);
-                Maybe<add && (ix!=1)>::add(v3.ref(0) , x * T3(rY0,iY0));
-                Maybe<add && (ix!=1)>::add(v3.ref(1) , x * T3(rY1,iY1));
-                Maybe<add && (ix!=1)>::add(v3.ref(2) , x * T3(rY2,iY2));
+                Maybe<add && (ix!=1)>::add(v3.ref(0) , x * Y0);
+                Maybe<add && (ix!=1)>::add(v3.ref(1) , x * Y1);
+                Maybe<add && (ix!=1)>::add(v3.ref(2) , x * Y2);
             } else 
                 Maybe<!add>::zero(v3);
         }
@@ -1498,8 +1462,7 @@ namespace tmv {
                 T2 X0;
 
                 typedef typename V3::value_type T3;
-                typedef typename V3::real_type RT3;
-                RT3 rY0, iY0, rY1, iY1, rY2, iY2, rY3, iY3;
+                T3 Y0, Y1, Y2, Y3;
 
                 const int stepi = m1.stepi();
 
@@ -1512,31 +1475,23 @@ namespace tmv {
                 const bool c1 = M1::mconj;
                 const bool c2 = V2::vconj;
 
-                rY0 = Maybe<add && (ix==1)>::select(real(v3.cref(0)) , RT3(0));
-                iY0 = Maybe<add && (ix==1)>::select(imag(v3.cref(0)) , RT3(0));
-                rY1 = Maybe<add && (ix==1)>::select(real(v3.cref(1)) , RT3(0));
-                iY1 = Maybe<add && (ix==1)>::select(imag(v3.cref(1)) , RT3(0));
-                rY2 = Maybe<add && (ix==1)>::select(real(v3.cref(2)) , RT3(0));
-                iY2 = Maybe<add && (ix==1)>::select(imag(v3.cref(2)) , RT3(0));
-                rY3 = Maybe<add && (ix==1)>::select(real(v3.cref(3)) , RT3(0));
-                iY3 = Maybe<add && (ix==1)>::select(imag(v3.cref(3)) , RT3(0));
+                Y0 = Maybe<add && (ix==1)>::select(v3.cref(0) , T3(0));
+                Y1 = Maybe<add && (ix==1)>::select(v3.cref(1) , T3(0));
+                Y2 = Maybe<add && (ix==1)>::select(v3.cref(2) , T3(0));
+                Y3 = Maybe<add && (ix==1)>::select(v3.cref(3) , T3(0));
 
                 do {
                     X0 = *X++; 
                     A00 = *A0++; A10 = *A1++; A20 = *A2++; A30 = *A3++;
-                    rY0 += ZProd<c1,c2>::rprod(A00,X0);
-                    iY0 += ZProd<c1,c2>::iprod(A00,X0);
-                    rY1 += ZProd<c1,c2>::rprod(A10,X0);
-                    iY1 += ZProd<c1,c2>::iprod(A10,X0);
-                    rY2 += ZProd<c1,c2>::rprod(A20,X0);
-                    iY2 += ZProd<c1,c2>::iprod(A20,X0);
-                    rY3 += ZProd<c1,c2>::rprod(A30,X0);
-                    iY3 += ZProd<c1,c2>::iprod(A30,X0);
+                    Y0 += ZProd<c1,c2>::prod(A00,X0);
+                    Y1 += ZProd<c1,c2>::prod(A10,X0);
+                    Y2 += ZProd<c1,c2>::prod(A20,X0);
+                    Y3 += ZProd<c1,c2>::prod(A30,X0);
                 } while (--N);
-                Maybe<add && (ix!=1)>::add(v3.ref(0) , x * T3(rY0,iY0));
-                Maybe<add && (ix!=1)>::add(v3.ref(1) , x * T3(rY1,iY1));
-                Maybe<add && (ix!=1)>::add(v3.ref(2) , x * T3(rY2,iY2));
-                Maybe<add && (ix!=1)>::add(v3.ref(3) , x * T3(rY3,iY3));
+                Maybe<add && (ix!=1)>::add(v3.ref(0) , x * Y0);
+                Maybe<add && (ix!=1)>::add(v3.ref(1) , x * Y1);
+                Maybe<add && (ix!=1)>::add(v3.ref(2) , x * Y2);
+                Maybe<add && (ix!=1)>::add(v3.ref(3) , x * Y3);
             } else 
                 Maybe<!add>::zero(v3);
         }
@@ -1838,15 +1793,17 @@ namespace tmv {
         static void call(
             const Scaling<0,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
+#ifdef PRINTALGO_MV
             const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
-#ifdef PRINTALGO_MV
             std::cout<<"MV algo 41: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const int algo2 = V3::viscomplex ? 15 : 12;
 #ifdef TMV_OPT_SCALE
-            if (M >= N)
+            const int algo2 = V3::viscomplex ? 15 : 12;
+            const int MM = cs == UNKNOWN ? int(m1.colsize()) : cs;
+            const int NN = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            if (MM >= NN)
                 MultMV_Helper<algo2,cs,rs,false,0,T,M1,V2,V3>::call(
                     x,m1,v2,v3);
             else 
@@ -1863,9 +1820,9 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
             TMVStaticAssert(TMV_ZeroIX);
+#ifdef PRINTALGO_MV
             const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
-#ifdef PRINTALGO_MV
             std::cout<<"MV algo 42: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -1879,7 +1836,9 @@ namespace tmv {
             // explain why we have the add=true requirement.
 
 #ifdef TMV_OPT_SCALE
-            if (N > TMV_Q4 * M) {
+            const int MM = cs == UNKNOWN ? int(m1.colsize()) : cs;
+            const int NN = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            if (NN > TMV_Q4 * MM) {
 #endif
                 MultMV_Helper<84,cs,rs,true,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
 #ifdef TMV_OPT_SCALE
@@ -1929,10 +1888,10 @@ namespace tmv {
         {
             const int algo1 = 
                 V3::vstep == UNKNOWN ? 43 : ( TMV_ZeroIX && add ) ? 42 : 41;
+#ifdef TMV_OPT_SMALL
             const int algo2 = 
                 V2::vstep == 1 ? ( V3::viscomplex ? 26 : 23 ) : algo1;
 
-#ifdef TMV_OPT_SMALL
             TMVStaticAssert(cs == UNKNOWN);
             const int M = m1.colsize();
 #ifdef PRINTALGO_MV
@@ -2042,9 +2001,9 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
             TMVStaticAssert(TMV_ZeroIX);
+#ifdef PRINTALGO_MV
             const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
-#ifdef PRINTALGO_MV
             std::cout<<"MV algo 52: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -2053,7 +2012,9 @@ namespace tmv {
             // making x*v2 as a temporary.
 
 #ifdef TMV_OPT_SCALE
-            if (M > TMV_Q4 * N) {
+            const int MM = cs == UNKNOWN ? int(m1.colsize()) : cs;
+            const int NN = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            if (MM > TMV_Q4 * NN) {
 #endif
                 MultMV_Helper<82,cs,rs,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
 #ifdef TMV_OPT_SCALE
@@ -2103,8 +2064,8 @@ namespace tmv {
         {
             const int algo1 = 
                 V2::vstep == UNKNOWN ? 53 : TMV_ZeroIX ? 52 : 51;
-            const int algo2 = V3::viscomplex ? 16 : 13;
 #ifdef TMV_OPT_SMALL
+            const int algo2 = V3::viscomplex ? 16 : 13;
             TMVStaticAssert(rs == UNKNOWN);
             const int N = m1.rowsize();
 #ifdef PRINTALGO_MV
@@ -2151,15 +2112,15 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
+            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
 #ifdef PRINTALGO_MV
             const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"MV algo 81: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename V2::value_type T2;
             typedef typename VCopyHelper<T2,rs,false>::type V2c;
-            V2c v2c = VectorSizer<V2>(v2);
+            V2c v2c(N);
             typedef typename V2c::view_type V2cv;
             typedef typename V2c::const_view_type V2ccv;
             V2cv v2cv = v2c.view();
@@ -2177,16 +2138,16 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
+            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
 #ifdef PRINTALGO_MV
             const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"MV algo 82: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename V2::value_type T2;
             typedef typename Traits2<T,T2>::type PT2;
             typedef typename VCopyHelper<PT2,rs,false>::type V2c;
-            V2c v2c = VectorSizer<V2>(v2);
+            V2c v2c(N);
             typedef typename V2c::view_type V2cv;
             typedef typename V2c::const_view_type V2ccv;
             V2cv v2cv = v2c.view();
@@ -2233,8 +2194,8 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-#ifdef PRINTALGO_MV
             const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
+#ifdef PRINTALGO_MV
             const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"MV algo 84: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -2244,7 +2205,7 @@ namespace tmv {
             typedef typename V3::value_type T3;
             typedef typename Traits2<T1,T2>::type PT3;
             typedef typename VCopyHelper<PT3,cs,false>::type V3c;
-            V3c v3c = VectorSizer<V3>(v3);
+            V3c v3c(M);
             typedef typename V3c::view_type V3cv;
             typedef typename V3c::const_view_type V3ccv;
             V3cv v3cv = v3c.view();
@@ -2265,15 +2226,15 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-#ifdef PRINTALGO_MV
             const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
+#ifdef PRINTALGO_MV
             const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"MV algo 85: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename V3::value_type T3;
             typedef typename VCopyHelper<T3,cs,false>::type V3c;
-            V3c v3c = VectorSizer<V3>(v3);
+            V3c v3c(M);
             typedef typename V3c::view_type V3cv;
             typedef typename V3c::const_view_type V3ccv;
             V3cv v3cv = v3c.view();
@@ -2496,9 +2457,15 @@ namespace tmv {
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"v2 = "<<TMV_Text(v2)<<std::endl;
             std::cout<<"v3 = "<<TMV_Text(v3)<<std::endl;
+            std::cout<<"m1 = "<<m1<<std::endl;
+            std::cout<<"v2 = "<<v2<<std::endl;
+            std::cout<<"v3 = "<<v3<<std::endl;
             std::cout<<"cs,rs,algo = "<<cs<<"  "<<rs<<"  "<<algo<<std::endl;
 #endif
             MultMV_Helper<algo,cs,rs,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
+#ifdef PRINTALGO_MV
+            std::cout<<"v3 => "<<v3<<std::endl;
+#endif
         }
     };
 
@@ -2622,8 +2589,8 @@ namespace tmv {
         }
     };
 
-    template <bool add, int ix, class T, class M1, class V2, class V3>
-    inline void MultMV(
+    template <int algo, bool add, int ix, class T, class M1, class V2, class V3>
+    inline void DoMultMV(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseVector_Calc<V2>& v2, 
         BaseVector_Mutable<V3>& v3)
@@ -2641,99 +2608,36 @@ namespace tmv {
         M1v m1v = m1.cView();
         V2v v2v = v2.cView();
         V3v v3v = v3.cView();
-#ifdef XDEBUG_PRODMV
-        Vector<typename V3::value_type> v3i = v3;
-        Vector<typename V3::value_type> v3c = v3;
-        if (!add) v3c.setZero();
-        for(int i=0;i<v3.size();++i) {
-            for(int j=0;j<v2.size();++j) {
-                v3c.ref(i) += T(x) * m1.cref(i,j) * v2.cref(j);
-            }
-        }   
-#endif  
-        MultMV_Helper<-1,cs,rs,add,ix,T,M1v,V2v,V3v>::call(x,m1v,v2v,v3v);
-#ifdef XDEBUG_PRODMV
-        if (Norm(v3-v3c) > 1.e-6 * std::abs(T(x)) * Norm(m1) * Norm(v2)) {
-            std::cout<<"MultMV:  add = "<<add<<std::endl;
-            std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
-            std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1<<std::endl;
-            std::cout<<"v2 = "<<TMV_Text(v2)<<"  "<<v2<<std::endl;
-            std::cout<<"v3 = "<<TMV_Text(v3)<<"  "<<v3i<<std::endl;
-            std::cout<<"v3 -> "<<v3<<std::endl;
-            std::cout<<"correct = "<<v3c<<std::endl;
-            std::cout<<"diff = "<<v3-v3c<<std::endl;
-            std::cout<<"Norm(diff) = "<<Norm(v3-v3c)<<std::endl;
-            exit(1);
-        }
-#endif
-
+        MultMV_Helper<algo,cs,rs,add,ix,T,M1v,V2v,V3v>::call(x,m1v,v2v,v3v);
     }
+
+    template <bool add, int ix, class T, class M1, class V2, class V3>
+    inline void MultMV(
+        const Scaling<ix,T>& x, 
+        const BaseMatrix_Rec<M1>& m1, const BaseVector_Calc<V2>& v2, 
+        BaseVector_Mutable<V3>& v3)
+    { DoMultMV<-1,add>(x,m1,v2,v3); }
 
     template <bool add, int ix, class T, class M1, class V2, class V3>
     inline void NoAliasMultMV(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseVector_Calc<V2>& v2, 
         BaseVector_Mutable<V3>& v3)
-    {
-        TMVStaticAssert((Sizes<M1::mcolsize,V3::vsize>::same));
-        TMVStaticAssert((Sizes<M1::mrowsize,V2::vsize>::same));
-        TMVAssert(m1.colsize() == v3.size());
-        TMVAssert(m1.rowsize() == v2.size());
-        typedef typename M1::value_type T1;
-        const int cs = Sizes<M1::mcolsize,V3::vsize>::size;
-        const int rs = Sizes<M1::mrowsize,V2::vsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename V2::const_cview_type V2v;
-        typedef typename V3::cview_type V3v;
-        M1v m1v = m1.cView();
-        V2v v2v = v2.cView();
-        V3v v3v = v3.cView();
-        MultMV_Helper<-2,cs,rs,add,ix,T,M1v,V2v,V3v>::call(x,m1v,v2v,v3v);
-    }
+    { DoMultMV<-2,add>(x,m1,v2,v3); }
 
     template <bool add, int ix, class T, class M1, class V2, class V3>
     inline void InlineMultMV(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseVector_Calc<V2>& v2, 
         BaseVector_Mutable<V3>& v3)
-    {
-        TMVStaticAssert((Sizes<M1::mcolsize,V3::vsize>::same));
-        TMVStaticAssert((Sizes<M1::mrowsize,V2::vsize>::same));
-        TMVAssert(m1.colsize() == v3.size());
-        TMVAssert(m1.rowsize() == v2.size());
-        typedef typename M1::value_type T1;
-        const int cs = Sizes<M1::mcolsize,V3::vsize>::size;
-        const int rs = Sizes<M1::mrowsize,V2::vsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename V2::const_cview_type V2v;
-        typedef typename V3::cview_type V3v;
-        M1v m1v = m1.cView();
-        V2v v2v = v2.cView();
-        V3v v3v = v3.cView();
-        MultMV_Helper<-3,cs,rs,add,ix,T,M1v,V2v,V3v>::call(x,m1v,v2v,v3v);
-    }
+    { DoMultMV<-3,add>(x,m1,v2,v3); }
 
     template <bool add, int ix, class T, class M1, class V2, class V3>
     inline void AliasMultMV(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseVector_Calc<V2>& v2, 
         BaseVector_Mutable<V3>& v3)
-    {
-        TMVStaticAssert((Sizes<M1::mcolsize,V3::vsize>::same));
-        TMVStaticAssert((Sizes<M1::mrowsize,V2::vsize>::same));
-        TMVAssert(m1.colsize() == v3.size());
-        TMVAssert(m1.rowsize() == v2.size());
-        typedef typename M1::value_type T1;
-        const int cs = Sizes<M1::mcolsize,V3::vsize>::size;
-        const int rs = Sizes<M1::mrowsize,V2::vsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename V2::const_cview_type V2v;
-        typedef typename V3::cview_type V3v;
-        M1v m1v = m1.cView();
-        V2v v2v = v2.cView();
-        V3v v3v = v3.cView();
-        MultMV_Helper<99,cs,rs,add,ix,T,M1v,V2v,V3v>::call(x,m1v,v2v,v3v);
-    }
+    { DoMultMV<99,add>(x,m1,v2,v3); }
 
     template <bool add, int ix, class T, class V1, class M2, class V3>
     inline void MultVM(

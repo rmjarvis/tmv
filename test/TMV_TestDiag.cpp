@@ -85,19 +85,29 @@ template <class T> void TestDiagMatrix()
             Assert(a(i,j) == m(i,j),"DiagMatrix -> Matrix");
     Assert(a == tmv::DiagMatrix<T>(m),"Matrix -> DiagMatrix");
 
+    tmv::DiagMatrix<T> ainv = a;
+    ainv.invertSelf();
+    tmv::DiagMatrix<T> ainv2 = a.inverse();
+    for(int i=0;i<N;++i)
+        Assert(std::abs(a(i)*ainv(i) - T(1)) < 1.e-6,"DiagMatrix invertSelf");
+    for(int i=0;i<N;++i)
+        Assert(std::abs(a(i)*ainv2(i) - T(1)) < 1.e-6,"DiagMatrix inverse()");
+
     tmv::DiagMatrix<std::complex<T> > ca = a*std::complex<T>(1,2);
     tmv::DiagMatrix<std::complex<T> > cb = b*std::complex<T>(-5,-1);
 
     // Test I/O
 
     std::ofstream fout("tmvtest_diagmatrix_io.dat");
-    if (!fout) 
+    if (!fout) {
 #ifdef NOTHROW
-    { std::cerr<<"Couldn't open tmvtest_diagmatrix_io.dat for output\n"; exit(1); }
+        std::cerr<<"Couldn't open tmvtest_diagmatrix_io.dat for output\n"; 
+        exit(1); 
 #else
-    throw std::runtime_error(
-        "Couldn't open tmvtest_diagmatrix_io.dat for output");
+        throw std::runtime_error(
+            "Couldn't open tmvtest_diagmatrix_io.dat for output");
 #endif
+    }
     fout << ca << std::endl;
     ca.writeCompact(fout);
     fout.close();
@@ -105,13 +115,15 @@ template <class T> void TestDiagMatrix()
     tmv::Matrix<std::complex<T> > xcm1(N,N);
     tmv::DiagMatrix<std::complex<T> > xcd1(N);
     std::ifstream fin("tmvtest_diagmatrix_io.dat");
-    if (!fin) 
+    if (!fin) {
 #ifdef NOTHROW
-    { std::cerr<<"Couldn't open tmvtest_diagmatrix_io.dat for input\n"; exit(1); }
+        std::cerr<<"Couldn't open tmvtest_diagmatrix_io.dat for input\n"; 
+        exit(1); 
 #else
-    throw std::runtime_error(
-        "Couldn't open tmvtest_diagmatrix_io.dat for input");
+        throw std::runtime_error(
+            "Couldn't open tmvtest_diagmatrix_io.dat for input");
 #endif
+    }
     fin >> xcm1 >> xcd1;
     fin.close();
     Assert(tmv::Matrix<std::complex<T> >(ca) == xcm1,"DiagMatrix I/O check #1");
@@ -120,13 +132,15 @@ template <class T> void TestDiagMatrix()
     std::auto_ptr<tmv::Matrix<std::complex<T> > > xcm2;
     std::auto_ptr<tmv::DiagMatrix<std::complex<T> > > xcd2;
     fin.open("tmvtest_diagmatrix_io.dat");
-    if (!fin) 
+    if (!fin) {
 #ifdef NOTHROW
-    { std::cerr<<"Couldn't open tmvtest_diagmatrix_io.dat for input\n"; exit(1); }
+        std::cerr<<"Couldn't open tmvtest_diagmatrix_io.dat for input\n"; 
+        exit(1); 
 #else
-    throw std::runtime_error(
-        "Couldn't open tmvtest_diagmatrix_io.dat for input");
+        throw std::runtime_error(
+            "Couldn't open tmvtest_diagmatrix_io.dat for input");
 #endif
+    }
     fin >> xcm2 >> xcd2;
     fin.close();
     Assert(tmv::Matrix<std::complex<T> >(ca) == *xcm2,"DiagMatrix I/O check #2");

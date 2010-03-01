@@ -165,6 +165,7 @@ namespace tmv {
     {
         static inline void call(M1& m)
         {
+            TMVStaticAssert(!M1::mconj);
             const int algo = 
 #if TMV_OPT >= 1
                 ( size != UNKNOWN && size < 8 ) ? 5 :
@@ -206,7 +207,8 @@ namespace tmv {
                 Traits<T>::isinst;
             const bool conj = M1::mconj;
             const int algo = 
-                inst ? (conj ? 97 : 98) :
+                conj ? 97 :
+                inst ? 98 :
                 -3;
             TransposeSelf_Helper<algo,size,M1>::call(m);
         }

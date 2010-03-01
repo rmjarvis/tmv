@@ -343,16 +343,16 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
+            const int N = (rs == UNKNOWN ? m3.rowsize() : rs);
 #ifdef PRINTALGO_MD
             const int M = (cs == UNKNOWN ? m3.colsize() : cs);
-            const int N = (rs == UNKNOWN ? m3.rowsize() : rs);
             std::cout<<"MD algo 82: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M2::value_type T2;
             typedef typename Traits2<T,T2>::type PT2;
             typedef typename MCopyHelper<PT2,Diag,rs,rs,false,false>::type M2c;
-            M2c m2c = MatrixSizer<M2>(m2);
+            M2c m2c(N);
             typedef typename M2::const_diag_type M2d;
             typedef typename M2c::diag_type M2cd;
             typedef typename M2c::const_view_type M2cv;
@@ -411,7 +411,7 @@ namespace tmv {
             const bool bothrm = M1::mrowmajor && M3::mrowmajor;
             const bool bothcm = M1::mcolmajor && M3::mcolmajor;
 #if TMV_OPT >= 1
-            const bool docopy = TMV_ZeroIX || M2::mstep != 1;
+            const bool docopy = TMV_ZeroIX || M2::mdiagstep != 1;
 #else
             const bool docopy = false;
 #endif
@@ -581,8 +581,8 @@ namespace tmv {
         }
     };
 
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void MultMM(
+    template <int algo, bool add, int ix, class T, class M1, class M2, class M3>
+    inline void DoMultMD(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -602,80 +602,36 @@ namespace tmv {
         M1v m1v = m1.cView();
         M2v m2v = m2.cView();
         M3v m3v = m3.cView();
-        MultMD_Helper<-1,cs,rs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
+        MultMD_Helper<algo,cs,rs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
     }
+
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    inline void MultMM(
+        const Scaling<ix,T>& x, 
+        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
+        BaseMatrix_Rec_Mutable<M3>& m3)
+    { DoMultMD<-1,add>(x,m1,m2,m3); }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
     inline void NoAliasMultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M3::mcolsize,M1::mcolsize>::same));
-        TMVStaticAssert((Sizes<M3::mrowsize,M1::mrowsize>::same));
-        TMVStaticAssert((Sizes<M3::mrowsize,M2::msize>::same));
-        TMVAssert(m3.colsize() == m1.colsize());
-        TMVAssert(m3.rowsize() == m1.rowsize());
-        TMVAssert(m3.rowsize() == m2.size());
-        const int cs = Sizes<M3::mcolsize,M1::mcolsize>::size;
-        const int rs1 = Sizes<M3::mrowsize,M1::mrowsize>::size;
-        const int rs = Sizes<rs1,M2::msize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        typedef typename M3::cview_type M3v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        M3v m3v = m3.cView();
-        MultMD_Helper<-2,cs,rs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
-    }
+    { DoMultMD<-2,add>(x,m1,m2,m3); }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
     inline void InlineMultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M3::mcolsize,M1::mcolsize>::same));
-        TMVStaticAssert((Sizes<M3::mrowsize,M1::mrowsize>::same));
-        TMVStaticAssert((Sizes<M3::mrowsize,M2::msize>::same));
-        TMVAssert(m3.colsize() == m1.colsize());
-        TMVAssert(m3.rowsize() == m1.rowsize());
-        TMVAssert(m3.rowsize() == m2.size());
-        const int cs = Sizes<M3::mcolsize,M1::mcolsize>::size;
-        const int rs1 = Sizes<M3::mrowsize,M1::mrowsize>::size;
-        const int rs = Sizes<rs1,M2::msize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        typedef typename M3::cview_type M3v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        M3v m3v = m3.cView();
-        MultMD_Helper<-3,cs,rs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
-    }
+    { DoMultMD<-3,add>(x,m1,m2,m3); }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
     inline void AliasMultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M3::mcolsize,M1::mcolsize>::same));
-        TMVStaticAssert((Sizes<M3::mrowsize,M1::mrowsize>::same));
-        TMVStaticAssert((Sizes<M3::mrowsize,M2::msize>::same));
-        TMVAssert(m3.colsize() == m1.colsize());
-        TMVAssert(m3.rowsize() == m1.rowsize());
-        TMVAssert(m3.rowsize() == m2.size());
-        const int cs = Sizes<M3::mcolsize,M1::mcolsize>::size;
-        const int rs1 = Sizes<M3::mrowsize,M1::mrowsize>::size;
-        const int rs = Sizes<rs1,M2::msize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        typedef typename M3::cview_type M3v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        M3v m3v = m3.cView();
-        MultMD_Helper<99,cs,rs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
-    }
+    { DoMultMD<99,add>(x,m1,m2,m3); }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
     inline void MultMM(

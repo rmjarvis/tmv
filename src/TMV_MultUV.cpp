@@ -190,6 +190,7 @@ namespace tmv {
                 BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
         }
     }
+#ifdef TMV_INST_MIX
     template <DiagType D>
     static void DoMultEqUV( 
         const GenUpperTriMatrix<double,D>& A,
@@ -242,6 +243,7 @@ namespace tmv {
             BLASV(n),BLASP(A.cptr()),BLASV(lda),
             BLASP(xp+1),BLASV(xs) BLAS1 BLAS1 BLAS1);
     }
+#endif
 #endif
 #ifdef INST_FLOAT
     template <DiagType D>
@@ -362,6 +364,7 @@ namespace tmv {
                 BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
         }
     }
+#ifdef TMV_INST_MIX
     template <DiagType D>
     static void DoMultEqUV( 
         const GenUpperTriMatrix<float,D>& A,
@@ -414,6 +417,7 @@ namespace tmv {
             BLASV(n),BLASP(A.cptr()),BLASV(lda),
             BLASP(xp+1),BLASV(xs) BLAS1 BLAS1 BLAS1);
     }
+#endif
 #endif // FLOAT
 #endif // BLAS
 

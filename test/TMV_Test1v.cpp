@@ -30,30 +30,30 @@ int main() try {
     //showdiv=true;
     //showtests=true;
     //showstartdone=true;
-    //#define SKIPREST
 
-#ifndef SKIPREST
+#if 1
 
 #ifdef TEST_DOUBLE
-    TestAllVector<double>();
+    TestVector<double>();
 #endif // DOUBLE
 
 #ifdef TEST_FLOAT
-    TestAllVector<float>();
+    TestVector<float>();
 #endif // FLOAT
 
 #ifdef TEST_LONGDOUBLE
-    TestAllVector<long double>();
+    TestVector<long double>();
 #endif // LONGDOUBLE
 
 #ifdef TEST_INT
-    TestAllVector<int>();
+    TestVector<int>();
 #endif  // INT
 
-#endif // SKIPREST
+#endif
 
     return 0;
 }
+#if 0
 #ifndef NOTHROW
 catch (tmv::Error& e) {
     std::cerr<<e<<std::endl;
@@ -71,6 +71,9 @@ catch (...) {
     std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
     return 1;
 }
+#else
+catch (int) {}
+#endif
 
 void PreAssert(std::string s)
 {
