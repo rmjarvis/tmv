@@ -309,8 +309,8 @@ namespace tmv {
             for(int k=0;k<M;++k) {
                 // m3.rowRange(0,k+1) = m1.col(k,0,k+1) ^ m2.row(k)
                 // ==> 
-                // m3.row(k) = m1(k,k) * m2.row(k)
                 // m3.rowRange(0,k) += m1.col(k,0,k) ^ m2.row(k)
+                // m3.row(k) = m1(k,k) * m2.row(k)
                 M1c m1k = m1.get_col(k,0,k);
                 M2r m2k = m2.get_row(k);
                 M3r m3k = m3.get_row(k);
@@ -717,6 +717,7 @@ namespace tmv {
             {
                 const int M = cs;
                 const int Mx = M > 16 ? ((((M-1)>>5)+1)<<4) : (M>>1);
+                const int My = M - Mx;
 
                 typedef typename M1::const_subtrimatrix_type M1a;
                 typedef typename M1::const_submatrix_type M1b;
@@ -731,7 +732,6 @@ namespace tmv {
                 M3r F = m3.cRowRange(0,Mx);
                 M3r G = m3.cRowRange(Mx,M);
 
-                const int My = M - Mx;
                 MultUM_Helper<17,Mx,rs,add,ix,T,M1a,M2r,M3r>::call(x,A,D,F);
                 MultMM_Helper<-2,Mx,rs,My,true,ix,T,M1b,M2r,M3r>::call(
                     x,B,E,F);
@@ -1254,6 +1254,7 @@ namespace tmv {
             {
                 const int M = cs;
                 const int Mx = M > 16 ? ((((M-1)>>5)+1)<<4) : (M>>1);
+                const int My = M - Mx;
 
                 typedef typename M1::const_subtrimatrix_type M1a;
                 typedef typename M1::const_submatrix_type M1b;
@@ -1268,7 +1269,6 @@ namespace tmv {
                 M3r F = m3.cRowRange(0,Mx);
                 M3r G = m3.cRowRange(Mx,M);
 
-                const int My = M - Mx;
                 MultUM_Helper<27,My,rs,add,ix,T,M1a,M2r,M3r>::call(x,C,E,G);
                 MultMM_Helper<-2,My,rs,Mx,true,ix,T,M1b,M2r,M3r>::call(
                     x,B,D,G);
@@ -1537,8 +1537,8 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_MV_MM
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
+#ifdef PRINTALGO_MV_MM
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"UM algo 81: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -1547,7 +1547,7 @@ namespace tmv {
             const bool rm = M2::mcolmajor || M3::mrowmajor; 
             const int s1 = M1::mshape;
             typedef typename MCopyHelper<T1,s1,cs,cs,rm,false>::type M1c;
-            M1c m1c = MatrixSizer<M1>(m1);
+            M1c m1c(M);
             typedef typename M1c::view_type M1cv;
             typedef typename M1c::const_view_type M1ccv;
             M1cv m1cv = m1c.view();
@@ -1566,8 +1566,8 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_UM
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
+#ifdef PRINTALGO_UM
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"UM algo 82: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -1577,7 +1577,7 @@ namespace tmv {
             const bool rm = M2::mcolmajor || M3::mrowmajor; 
             const int s1 = ShapeTraits<M1::mshape>::nonunit_shape;
             typedef typename MCopyHelper<PT1,s1,cs,cs,rm,false>::type M1c;
-            M1c m1c = MatrixSizer<M1>(m1);
+            M1c m1c(M);
             typedef typename M1c::view_type M1cv;
             typedef typename M1c::const_view_type M1ccv;
             M1cv m1cv = m1c.view();
@@ -1625,16 +1625,16 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_UM
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
+#ifdef PRINTALGO_UM
             std::cout<<"UM algo 84: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M2::value_type T2;
             const bool rm = M1::mcolmajor && M3::mrowmajor;
             typedef typename MCopyHelper<T2,Rec,cs,rs,rm,false>::type M2c;
-            M2c m2c = MatrixSizer<M2>(m2);
+            M2c m2c(M,N);
             typedef typename M2c::view_type M2cv;
             typedef typename M2c::const_view_type M2ccv;
             M2cv m2cv = m2c.view();
@@ -1653,9 +1653,9 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_UM
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
+#ifdef PRINTALGO_UM
             std::cout<<"UM algo 85: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -1663,7 +1663,7 @@ namespace tmv {
             typedef typename Traits2<T,T2>::type PT2;
             const bool rm = M1::mcolmajor && M3::mrowmajor;
             typedef typename MCopyHelper<PT2,Rec,cs,rs,rm,false>::type M2c;
-            M2c m2c = MatrixSizer<M2>(m2);
+            M2c m2c(M,N);
             typedef typename M2c::view_type M2cv;
             typedef typename M2c::const_view_type M2ccv;
             M2cv m2cv = m2c.view();
@@ -1693,7 +1693,7 @@ namespace tmv {
             }
         }
     };
-    // If ix == 1, don't need the branch - just go to 83
+    // If ix == 1, don't need the branch - just go to 84
     template <int cs, int rs, bool add, class T, class M1, class M2, class M3>
     struct MultUM_Helper<86,cs,rs,add,1,T,M1,M2,M3>
     {
@@ -1724,7 +1724,7 @@ namespace tmv {
                 typedef typename Traits2<T1,T2>::type PT3;
                 const bool rm = M1::mrowmajor && M2::mrowmajor;
                 typedef typename MCopyHelper<PT3,Rec,cs,rs,rm,false>::type M3c;
-                M3c m3c = MatrixSizer<M3>(m3);
+                M3c m3c(M,N);
                 typedef typename M3c::view_type M3cv;
                 typedef typename M3c::const_view_type M3ccv;
                 M3cv m3cv = m3c.view();
@@ -1736,7 +1736,7 @@ namespace tmv {
                 typedef typename M3::value_type T3;
                 const bool rm = M1::mrowmajor && M2::mrowmajor;
                 typedef typename MCopyHelper<T3,Rec,cs,rs,rm,false>::type M3c;
-                M3c m3c = MatrixSizer<M3>(m3);
+                M3c m3c(M,N);
                 typedef typename M3c::view_type M3cv;
                 typedef typename M3c::const_view_type M3ccv;
                 M3cv m3cv = m3c.view();
@@ -1755,9 +1755,9 @@ namespace tmv {
         static inline void call(
             const Scaling<1,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_UM
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
+#ifdef PRINTALGO_UM
             std::cout<<"UM algo 87: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -1768,7 +1768,7 @@ namespace tmv {
             typedef typename Traits2<T1,T2>::type PT3;
             const bool rm = M1::mrowmajor && M2::mrowmajor;
             typedef typename MCopyHelper<PT3,Rec,cs,rs,rm,false>::type M3c;
-            M3c m3c = MatrixSizer<M3>(m3);
+            M3c m3c(M,N);
             typedef typename M3c::view_type M3cv;
             typedef typename M3c::const_view_type M3ccv;
             M3cv m3cv = m3c.view();
@@ -1792,8 +1792,10 @@ namespace tmv {
                 ( cs == 0 || rs == 0 ) ? 0 :
                 cs == 1 ? 1 :
                 rs == 1 ? 2 :
-                upper1 ? (cs <= 5 ? 16 : 17 ) :
-                (cs <= 5 ? 26 : 27 );
+                ( cs != UNKNOWN ) ? (
+                    upper1 ? (cs <= 5 ? 16 : 17 ) :
+                    (cs <= 5 ? 26 : 27 ) ) :
+                upper1 ? 17 : 27;
             MultUM_Helper<algo,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };
@@ -1836,6 +1838,17 @@ namespace tmv {
             const bool xcc = M2::mcolmajor && M3::mcolmajor;
             const bool rxr = M1::mrowmajor && M3::mrowmajor;
             const bool crx = M1::mcolmajor && M2::mrowmajor;
+            const bool upper1 = M1::mupper;
+
+#if 0
+            const int algo = 33;
+#else
+#if TMV_OPT == 0 
+            const int algo =
+                upper1 ? 
+                ( rxr ? 12 : crx ? 13 : xcc ? 11 : 13 ) :
+                ( rxr ? 22 : crx ? 23 : xcc ? 21 : 23 );
+#else
             const bool nxx = !(M1::mcolmajor || M1::mrowmajor);
             const bool xxn = !(M3::mcolmajor || M3::mrowmajor);
             // xcc, rxr, crx have fast algorithms already
@@ -1848,17 +1861,6 @@ namespace tmv {
             const int Nc = rs == UNKNOWN ? UNKNOWN : (rs < 16) ? 1 : (rs>>4);
             const int McMcNc = IntTraits2<IntTraits2<Mc,Mc>::prod,Nc>::prod;
 #endif
-            const bool upper1 = M1::mupper;
-
-#if 0
-            const int algo = 33;
-#else
-#if TMV_OPT == 0 
-            const int algo =
-                upper1 ? 
-                ( rxr ? 12 : crx ? 13 : xcc ? 11 : 13 ) :
-                ( rxr ? 22 : crx ? 23 : xcc ? 21 : 23 );
-#else
             const int algo = 
                 ( cs == 0 || rs == 0 ) ? 0 :
                 cs == 1 ? 1 :
@@ -2024,8 +2026,8 @@ namespace tmv {
         }
     };
 
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void MultMM(
+    template <int algo, bool add, int ix, class T, class M1, class M2, class M3>
+    inline void DoMultUM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -2045,79 +2047,59 @@ namespace tmv {
         M1v m1v = m1.cView();
         M2v m2v = m2.cView();
         M3v m3v = m3.cView();
-        MultUM_Helper<-1,cs,rs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
+        MultUM_Helper<algo,cs,rs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
     }
+
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    inline void MultMM(
+        const Scaling<ix,T>& x, 
+        const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Rec<M2>& m2, 
+        BaseMatrix_Rec_Mutable<M3>& m3)
+    { DoMultUM<-1,add>(x,m1,m2,m3); }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
     inline void NoAliasMultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M1::msize,M3::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M2::mcolsize>::same));
-        TMVStaticAssert((Sizes<M2::mrowsize,M3::mrowsize>::same));
-        TMVAssert(m1.size() == m3.colsize());
-        TMVAssert(m1.size() == m2.colsize());
-        TMVAssert(m2.rowsize() == m3.rowsize());
-
-        const int cs = Sizes<M3::mcolsize,M1::msize>::size;
-        const int rs = Sizes<M3::mrowsize,M2::mrowsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        typedef typename M3::cview_type M3v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        M3v m3v = m3.cView();
-        MultUM_Helper<-2,cs,rs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
-    }
+    { DoMultUM<-2,add>(x,m1,m2,m3); }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
     inline void InlineMultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M1::msize,M3::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M2::mcolsize>::same));
-        TMVStaticAssert((Sizes<M2::mrowsize,M3::mrowsize>::same));
-        TMVAssert(m1.size() == m3.colsize());
-        TMVAssert(m1.size() == m2.colsize());
-        TMVAssert(m2.rowsize() == m3.rowsize());
-
-        const int cs = Sizes<M3::mcolsize,M1::msize>::size;
-        const int rs = Sizes<M3::mrowsize,M2::mrowsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        typedef typename M3::cview_type M3v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        M3v m3v = m3.cView();
-        MultUM_Helper<-3,cs,rs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
-    }
+    { DoMultUM<-3,add>(x,m1,m2,m3); }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
     inline void AliasMultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M1::msize,M3::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M2::mcolsize>::same));
-        TMVStaticAssert((Sizes<M2::mrowsize,M3::mrowsize>::same));
-        TMVAssert(m1.size() == m3.colsize());
-        TMVAssert(m1.size() == m2.colsize());
-        TMVAssert(m2.rowsize() == m3.rowsize());
+    { DoMultUM<99,add>(x,m1,m2,m3); }
 
-        const int cs = Sizes<M3::mcolsize,M1::msize>::size;
-        const int rs = Sizes<M3::mrowsize,M2::mrowsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        typedef typename M3::cview_type M3v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        M3v m3v = m3.cView();
-        MultUM_Helper<99,cs,rs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
+    template <int algo, bool add, int ix, class T, class M1, class M2, class M3>
+    inline void DoMultMU(
+        const Scaling<ix,T>& x, 
+        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
+        BaseMatrix_Rec_Mutable<M3>& m3)
+    {
+        TMVStaticAssert((Sizes<M1::mcolsize,M3::mcolsize>::same));
+        TMVStaticAssert((Sizes<M1::mrowsize,M2::msize>::same));
+        TMVStaticAssert((Sizes<M2::msize,M3::mrowsize>::same));
+        TMVAssert(m1.colsize() == m3.colsize());
+        TMVAssert(m1.rowsize() == m2.size());
+        TMVAssert(m2.size() == m3.rowsize());
+
+        const int cs = Sizes<M3::mcolsize,M1::mcolsize>::size;
+        const int rs = Sizes<M3::mrowsize,M2::msize>::size;
+        typedef typename M1::const_transpose_type M1t;
+        typedef typename M2::const_transpose_type M2t;
+        typedef typename M3::transpose_type M3t;
+        M1t m1t = m1.transpose();
+        M2t m2t = m2.transpose();
+        M3t m3t = m3.transpose();
+        MultUM_Helper<algo,rs,cs,add,ix,T,M2t,M1t,M3t>::call(x,m2t,m1t,m3t);
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
@@ -2125,96 +2107,28 @@ namespace tmv {
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M1::mcolsize,M3::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::msize>::same));
-        TMVStaticAssert((Sizes<M2::msize,M3::mrowsize>::same));
-        TMVAssert(m1.colsize() == m3.colsize());
-        TMVAssert(m1.rowsize() == m2.size());
-        TMVAssert(m2.size() == m3.rowsize());
-
-        const int cs = Sizes<M3::mcolsize,M1::mcolsize>::size;
-        const int rs = Sizes<M3::mrowsize,M2::msize>::size;
-        typedef typename M1::const_transpose_type M1t;
-        typedef typename M2::const_transpose_type M2t;
-        typedef typename M3::transpose_type M3t;
-        M1t m1t = m1.transpose();
-        M2t m2t = m2.transpose();
-        M3t m3t = m3.transpose();
-        MultUM_Helper<-1,rs,cs,add,ix,T,M2t,M1t,M3t>::call(x,m2t,m1t,m3t);
-    }
+    { DoMultMU<-1,add>(x,m1,m2,m3); }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
     inline void NoAliasMultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M1::mcolsize,M3::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::msize>::same));
-        TMVStaticAssert((Sizes<M2::msize,M3::mrowsize>::same));
-        TMVAssert(m1.colsize() == m3.colsize());
-        TMVAssert(m1.rowsize() == m2.size());
-        TMVAssert(m2.size() == m3.rowsize());
-
-        const int cs = Sizes<M3::mcolsize,M1::mcolsize>::size;
-        const int rs = Sizes<M3::mrowsize,M2::msize>::size;
-        typedef typename M1::const_transpose_type M1t;
-        typedef typename M2::const_transpose_type M2t;
-        typedef typename M3::transpose_type M3t;
-        M1t m1t = m1.transpose();
-        M2t m2t = m2.transpose();
-        M3t m3t = m3.transpose();
-        MultUM_Helper<-2,rs,cs,add,ix,T,M2t,M1t,M3t>::call(x,m2t,m1t,m3t);
-    }
+    { DoMultMU<-2,add>(x,m1,m2,m3); }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
     inline void InlineMultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M1::mcolsize,M3::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::msize>::same));
-        TMVStaticAssert((Sizes<M2::msize,M3::mrowsize>::same));
-        TMVAssert(m1.colsize() == m3.colsize());
-        TMVAssert(m1.rowsize() == m2.size());
-        TMVAssert(m2.size() == m3.rowsize());
-
-        const int cs = Sizes<M3::mcolsize,M1::mcolsize>::size;
-        const int rs = Sizes<M3::mrowsize,M2::msize>::size;
-        typedef typename M1::const_transpose_type M1t;
-        typedef typename M2::const_transpose_type M2t;
-        typedef typename M3::transpose_type M3t;
-        M1t m1t = m1.transpose();
-        M2t m2t = m2.transpose();
-        M3t m3t = m3.transpose();
-        MultUM_Helper<-3,rs,cs,add,ix,T,M2t,M1t,M3t>::call(x,m2t,m1t,m3t);
-    }
+    { DoMultMU<-3,add>(x,m1,m2,m3); }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
     inline void AliasMultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M1::mcolsize,M3::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::msize>::same));
-        TMVStaticAssert((Sizes<M2::msize,M3::mrowsize>::same));
-        TMVAssert(m1.colsize() == m3.colsize());
-        TMVAssert(m1.rowsize() == m2.size());
-        TMVAssert(m2.size() == m3.rowsize());
-
-        const int cs = Sizes<M3::mcolsize,M1::mcolsize>::size;
-        const int rs = Sizes<M3::mrowsize,M2::msize>::size;
-        typedef typename M1::const_transpose_type M1t;
-        typedef typename M2::const_transpose_type M2t;
-        typedef typename M3::transpose_type M3t;
-        M1t m1t = m1.transpose();
-        M2t m2t = m2.transpose();
-        M3t m3t = m3.transpose();
-        MultUM_Helper<99,rs,cs,add,ix,T,M2t,M1t,M3t>::call(x,m2t,m1t,m3t);
-    }
+    { DoMultMU<99,add>(x,m1,m2,m3); }
 
     template <class M1, int ix, class T, class M2>
     inline void MultEqMM(

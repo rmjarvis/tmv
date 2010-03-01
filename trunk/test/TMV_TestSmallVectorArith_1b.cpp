@@ -22,10 +22,8 @@ template <int N, class T> static void DoTestSmallVectorArith_1b()
 
 template <class T> void TestSmallVectorArith_1b()
 {
-#ifdef XTEST
 #if (XTEST & 2)
     DoTestSmallVectorArith_1b<280,T>(); // this requires heap alloc
-#endif
 #endif
 }
 

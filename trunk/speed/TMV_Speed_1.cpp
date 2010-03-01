@@ -1,14 +1,14 @@
 
-#undef NDEBUG
+//#undef NDEBUG
 //#define PRINTALGO
-#define TMV_INLINE
+//#define TMV_INLINE
 
 #include <iostream>
 #include "TMV.h"
 
 // How big do you want the vectors to be?
 const int N = 1533;
-//const int N = 5;
+//const int N = 2;
 
 // Define the type to use:
 #define TISFLOAT
@@ -21,19 +21,19 @@ const int N = 1533;
 // Note: often it seems that accurate timings only happen when doing one
 // version at a time.  I don't really undrestand why.
 #define DOREG
-#define DOSMALL
-#define DOBLAS
-#define DOEIGEN
+//#define DOSMALL
+//#define DOBLAS
+//#define DOEIGEN
 //#define DOEIGENSMALL
 
 // Define which batches of functions you want to test:
 //#define DOMULTXV
 //#define DOADDVV
 //#define DOMULTVV
-//#define DOMINMAX
+#define DOMINMAX
 //#define DONORM
 //#define DOELEMMULT
-#define DOELEMDIV
+//#define DOELEMDIV
 //#define DOSWAP
 
 // Set this if you only want to do a single loop.
@@ -4904,7 +4904,7 @@ static void MinMaxV(
 
     for (int i=0; i<nloops1; ++i) {
 
-#if 1 // D = MaxElement(A)
+#if 0 // D = MaxElement(A)
 #ifndef TISCOMPLEX
         ClearCache();
 
@@ -5023,7 +5023,7 @@ static void MinMaxV(
 #endif
 #endif
 
-#if 1 // F = MaxAbsElement(A)
+#if 0 // F = MaxAbsElement(A)
         ClearCache();
 
 #ifdef ERRORCHECK
@@ -5148,7 +5148,7 @@ static void MinMaxV(
 #endif
 #endif
 
-#if 1 // D = MinElement(A)
+#if 0 // D = MinElement(A)
 #ifndef TISCOMPLEX
         ClearCache();
 
@@ -5267,7 +5267,7 @@ static void MinMaxV(
 #endif
 #endif
 
-#if 1 // F = MinAbsElement(A)
+#if 0 // F = MinAbsElement(A)
         ClearCache();
 
 #ifdef ERRORCHECK
@@ -5386,7 +5386,7 @@ static void MinMaxV(
 #endif
 #endif
 
-#if 1 // D = MaxElement(A,&i)
+#if 0 // D = MaxElement(A,&i)
 #ifndef TISCOMPLEX
         ClearCache();
 
@@ -5520,7 +5520,7 @@ static void MinMaxV(
 #endif
 #endif
 
-#if 1 // F = MaxAbsElement(A,&i)
+#if 0 // F = MaxAbsElement(A,&i)
         ClearCache();
 
 #ifdef ERRORCHECK
@@ -5660,7 +5660,7 @@ static void MinMaxV(
 #endif
 #endif
 
-#if 1 // D = MinElement(A,&i)
+#if 0 // D = MinElement(A,&i)
 #ifndef TISCOMPLEX
         ClearCache();
 
@@ -5819,7 +5819,7 @@ static void MinMaxV(
         gettimeofday(&tp,0);
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
-        for (int k=0; k<nloops2; ++k)
+        for (int k=0; k<nloops2; ++k) 
             F1[k] = MinAbsElement(A1[k],&E1[k]);
 
         gettimeofday(&tp,0);
@@ -5932,7 +5932,7 @@ static void MinMaxV(
 #endif
 #endif
 
-#if 1 // F = MaxAbs2Element(A)
+#if 0 // F = MaxAbs2Element(A)
 #ifdef TISCOMPLEX
         ClearCache();
 
@@ -6079,7 +6079,7 @@ static void MinMaxV(
 #endif
 #endif
 
-#if 1 // F = MaxAbs2Element(A,&i)
+#if 0 // F = MaxAbs2Element(A,&i)
 #ifdef TISCOMPLEX
         ClearCache();
 

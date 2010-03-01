@@ -39,7 +39,7 @@
 namespace tmv {
     
     //
-    // Scalar * Matrix
+    // Scalar * Matrix^-1
     //
 
     // These are intentionally not defined to make sure we
@@ -47,16 +47,20 @@ namespace tmv {
     // All real calls should go through a more specific version than 
     // just the BaseMatrix_Calc's.
     template <int ix, class T, class M1, class M2>
-    inline void Invert(
+    inline void MakeInverse(
+        const Scaling<ix,T>& one,
         const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2);
     template <int ix, class T, class M1, class M2>
-    inline void NoAliasInvert(
+    inline void NoAliasMakeInverse(
+        const Scaling<ix,T>& one,
         const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2);
     template <int ix, class T, class M1, class M2>
-    inline void InlineInvert(
+    inline void InlineMakeInverse(
+        const Scaling<ix,T>& one,
         const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2);
     template <int ix, class T, class M1, class M2>
-    inline void AliasInvert(
+    inline void AliasMakeInverse(
+        const Scaling<ix,T>& one,
         const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2);
 
 
@@ -70,7 +74,10 @@ namespace tmv {
 
         enum { mcolsize = M::mcolsize };
         enum { mrowsize = M::mrowsize };
-        enum { mshape = ShapeTraits<M::mshape>::nonunit_shape };
+        enum { mshape = 
+            (ix == 1) ?
+                int(M::mshape) :
+                int(ShapeTraits<M::mshape>::nonunit_shape) };
         enum { mfort = M::mfort };
         enum { mcalc = false };
         enum { rm1 = Traits<typename M::calc_type>::mrowmajor };
@@ -117,7 +124,7 @@ namespace tmv {
             TMVAssert(m2.colsize() == colsize());
             TMVAssert(m2.rowsize() == rowsize());
             TMVStaticAssert(type::misreal || M2::miscomplex);
-            Invert(x,m.calc(),m2.mat());
+            MakeInverse(x,m.calc(),m2.mat());
         }
 
         template <class M2>
@@ -130,7 +137,7 @@ namespace tmv {
             TMVAssert(m2.colsize() == colsize());
             TMVAssert(m2.rowsize() == rowsize());
             TMVStaticAssert(type::misreal || M2::miscomplex);
-            NoAliasInvert(x,m.calc(),m2.mat());
+            NoAliasMakeInverse(x,m.calc(),m2.mat());
         }
 
     private:

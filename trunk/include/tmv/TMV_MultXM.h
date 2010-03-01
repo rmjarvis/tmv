@@ -79,7 +79,16 @@ namespace tmv {
     struct MultXM_Helper<0,cs,rs,false,1,T,M1,M2>
     {
         static inline void call(const Scaling<1,T>& , const M1& m1, M2& m2)
-        { CopyM_Helper<-2,cs,rs,M1,M2>::call(m1,m2); }
+        {
+            // Need a quick alias check here, since ExactSameStorage
+            // is allowed for MultXM, but not Copy
+            if (!SameStorage(m1,m2)) {
+                CopyM_Helper<-2,cs,rs,M1,M2>::call(m1,m2); 
+            } else {
+                TMVAssert(ExactSameStorage(m1,m2));
+                Maybe<(M2::mconj != int(M1::mconj))>::conjself(m2);
+            }
+        }
     };
 
     // algo 1: Linearize to vector version
@@ -289,6 +298,9 @@ namespace tmv {
                 ( M1::mrowmajor && M2::mrowmajor ) ? 2 : 
 #endif
                 3;
+#ifdef PRINTALGO_XM
+            std::cout<<"XM: algo = "<<algo<<std::endl;
+#endif
             MultXM_Helper<algo,cs,rs,add,ix,T,M1,M2>::call(x,m1,m2);
         }
     };
@@ -310,6 +322,14 @@ namespace tmv {
                 cs == UNKNOWN || rs == UNKNOWN ? 4 :
 #endif
                 -4;
+#ifdef PRINTALGO_XM
+            std::cout<<"InlineMultXM: x = "<<ix<<"  "<<T(x)<<std::endl;
+            std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
+            std::cout<<"cs,rs = "<<cs<<','<<rs<<
+                " = "<<m2.colsize()<<','<<m2.rowsize()<<std::endl;
+            std::cout<<"add = "<<add<<", algo = "<<algo<<std::endl;
+#endif
             MultXM_Helper<algo,cs,rs,add,ix,T,M1,M2>::call(x,m1,m2);
         }
     };
@@ -376,6 +396,14 @@ namespace tmv {
         }
     };
 
+    // algo 90: trivial: ix == 1, !add, so call Copy (with alias check)
+    template <int cs, int rs, class T, class M1, class M2>
+    struct MultXM_Helper<90,cs,rs,false,1,T,M1,M2>
+    {
+        static inline void call(const Scaling<1,T>& , const M1& m1, M2& m2)
+        { CopyM_Helper<-1,cs,rs,M1,M2>::call(m1,m2); }
+    };
+
     // algo 99: Check for aliases
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct MultXM_Helper<99,cs,rs,true,ix,T,M1,M2>
@@ -423,15 +451,15 @@ namespace tmv {
                 M2::mcolsize == UNKNOWN && M2::mrowsize == UNKNOWN &&
                 !noclobber;
             const int algo = 
-                ( ix == 1 && !add ) ? 0 :
+                ( ix == 1 && !add ) ? 90 :
                 checkalias ? 99 : 
                 -2;
             MultXM_Helper<algo,cs,rs,add,ix,T,M1,M2>::call(x,m1,m2);
         }
     };
 
-    template <bool add, int ix, class T, class M1, class M2>
-    inline void MultXM(
+    template <int algo, bool add, int ix, class T, class M1, class M2>
+    inline void DoMultXM(
         const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1, 
         BaseMatrix_Rec_Mutable<M2>& m2)
     {
@@ -445,62 +473,32 @@ namespace tmv {
         typedef typename M2::cview_type M2v;
         M1v m1v = m1.cView();
         M2v m2v = m2.cView();
-        MultXM_Helper<-1,cs,rs,add,ix,T,M1v,M2v>::call(x,m1v,m2v);
+        MultXM_Helper<algo,cs,rs,add,ix,T,M1v,M2v>::call(x,m1v,m2v);
     }
+
+    template <bool add, int ix, class T, class M1, class M2>
+    inline void MultXM(
+        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1, 
+        BaseMatrix_Rec_Mutable<M2>& m2)
+    { DoMultXM<-1,add>(x,m1,m2); }
 
     template <bool add, int ix, class T, class M1, class M2>
     inline void NoAliasMultXM(
         const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1, 
         BaseMatrix_Rec_Mutable<M2>& m2)
-    {
-        TMVStaticAssert((Sizes<M1::mcolsize,M2::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::mrowsize>::same));
-        TMVAssert(m1.colsize() == m2.colsize());
-        TMVAssert(m1.rowsize() == m2.rowsize());
-        const int cs = Sizes<M1::mcolsize,M2::mcolsize>::size;
-        const int rs = Sizes<M1::mrowsize,M2::mrowsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::cview_type M2v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        MultXM_Helper<-2,cs,rs,add,ix,T,M1v,M2v>::call(x,m1v,m2v);
-    }
+    { DoMultXM<-2,add>(x,m1,m2); }
 
     template <bool add, int ix, class T, class M1, class M2>
     inline void InlineMultXM(
         const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1, 
         BaseMatrix_Rec_Mutable<M2>& m2)
-    {
-        TMVStaticAssert((Sizes<M1::mcolsize,M2::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::mrowsize>::same));
-        TMVAssert(m1.colsize() == m2.colsize());
-        TMVAssert(m1.rowsize() == m2.rowsize());
-        const int cs = Sizes<M1::mcolsize,M2::mcolsize>::size;
-        const int rs = Sizes<M1::mrowsize,M2::mrowsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::cview_type M2v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        MultXM_Helper<-3,cs,rs,add,ix,T,M1v,M2v>::call(x,m1v,m2v);
-    }
+    { DoMultXM<-3,add>(x,m1,m2); }
 
     template <bool add, int ix, class T, class M1, class M2>
     inline void AliasMultXM(
         const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1, 
         BaseMatrix_Rec_Mutable<M2>& m2)
-    {
-        TMVStaticAssert((Sizes<M1::mcolsize,M2::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::mrowsize>::same));
-        TMVAssert(m1.colsize() == m2.colsize());
-        TMVAssert(m1.rowsize() == m2.rowsize());
-        const int cs = Sizes<M1::mcolsize,M2::mcolsize>::size;
-        const int rs = Sizes<M1::mrowsize,M2::mrowsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::cview_type M2v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        MultXM_Helper<99,cs,rs,add,ix,T,M1v,M2v>::call(x,m1v,m2v);
-    }
+    { DoMultXM<99,add>(x,m1,m2); }
 
 } // namespace tmv
 

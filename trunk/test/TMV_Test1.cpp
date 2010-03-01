@@ -30,48 +30,47 @@ int main() try {
     //showdiv=true;
     //showtests=true;
     //showstartdone=true;
-    //#define SKIPREST
 
-#ifndef SKIPREST
+#if 1
 
 #ifdef TEST_DOUBLE
-    TestAllVector<double>();
-    TestAllMatrix<double>();
+    TestVector<double>();
+    TestMatrix<double>();
     TestDiagMatrix<double>();
     TestDiagDiv<double>();
     TestTriMatrix<double>();
-    TestAllTriDiv<double>();
-    TestAllMatrixDiv<double>();
+    TestTriDiv<double>();
+    TestMatrixDiv<double>();
 #endif // DOUBLE
 
 #ifdef TEST_FLOAT
-    TestAllVector<float>();
-    TestAllMatrix<float>();
+    TestVector<float>();
+    TestMatrix<float>();
     TestDiagMatrix<float>();
     TestDiagDiv<float>();
     TestTriMatrix<float>();
-    TestAllTriDiv<float>();
-    TestAllMatrixDiv<float>();
+    TestTriDiv<float>();
+    TestMatrixDiv<float>();
 #endif // FLOAT
 
 #ifdef TEST_INT
-    TestAllVector<int>();
-    TestAllMatrix<int>();
+    TestVector<int>();
+    TestMatrix<int>();
     TestDiagMatrix<int>();
     TestTriMatrix<int>();
 #endif  // INT
 
 #ifdef TEST_LONGDOUBLE
-    TestAllVector<long double>();
-    TestAllMatrix<long double>();
+    TestVector<long double>();
+    TestMatrix<long double>();
     TestDiagMatrix<long double>();
     TestDiagDiv<long double>();
     TestTriMatrix<long double>();
-    TestAllTriDiv<long double>();
-    TestAllMatrixDiv<long double>();
+    TestTriDiv<long double>();
+    TestMatrixDiv<long double>();
 #endif // LONGDOUBLE
 
-#endif // SKIPREST
+#endif
 
     return 0;
 }

@@ -130,24 +130,26 @@ namespace tmv {
         const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
         const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     {
+        Matrix<typename M1::value_type> m1i = m1.mat();
+        Matrix<typename M2::value_type> m2i = m2.mat();
+        Matrix<typename M3::value_type> m3i = m3.mat();
+        Matrix<typename M3::value_type> m3c = m3.mat();
+        if (!add) m3c.setZero();
+        for(size_t i=0;i<m3.colsize();++i) {
+            for(size_t j=0;j<m3.rowsize();++j) {
+                for(size_t k=0;k<m1.rowsize();++k) {
+                    m3c.ref(i,j) += T(x) * m1.cref(i,k) * m2.cref(k,j);
+                }
+            }
+        }
         //std::cout<<"Start MultMM XDEBUG"<<std::endl;
         //std::cout<<"add = "<<add<<std::endl;
         //std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
         //std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1<<std::endl;
         //std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
         //std::cout<<"m3 = "<<TMV_Text(m3)<<"  "<<m3.mat()<<std::endl;
-        Matrix<typename M3::value_type> m3i = m3.mat();
         //std::cout<<"m3i = "<<TMV_Text(m3i)<<"  "<<m3i<<std::endl;
-        Matrix<typename M3::value_type> m3c = m3.mat();
         //std::cout<<"m3c = "<<TMV_Text(m3c)<<"  "<<m3c<<std::endl;
-        if (!add) m3c.setZero();
-        for(int i=0;i<m3.colsize();++i) {
-            for(int j=0;j<m3.rowsize();++j) {
-                for(int k=0;k<m1.rowsize();++k) {
-                    m3c.ref(i,j) += T(x) * m1.cref(i,k) * m2.cref(k,j);
-                }
-            }
-        }
         //std::cout<<"m3c => "<<m3c<<std::endl;
 
         MultMM<add>(x,m1.mat(),m2.mat(),m3.mat());
@@ -157,8 +159,8 @@ namespace tmv {
         if (Norm(m3.mat()-m3c) > 1.e-6 * std::abs(T(x))*Norm(m1)*Norm(m2)) {
             std::cout<<"MultMM:  add = "<<add<<std::endl;
             std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
-            std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1<<std::endl;
-            std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
+            std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1i<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2i<<std::endl;
             std::cout<<"m3 = "<<TMV_Text(m3)<<"  "<<m3i<<std::endl;
             std::cout<<"m3 -> "<<m3.mat()<<std::endl;
             std::cout<<"correct = "<<m3c<<std::endl;
@@ -176,11 +178,12 @@ namespace tmv {
         const Scaling<ix,T>& x, const BaseMatrix_Calc<M2>& m2)
     {
         Matrix<typename M1::value_type> m1i = m1.mat();
+        Matrix<typename M1::value_type> m2i = m2.mat();
         Matrix<typename M1::value_type> m3 = m1.mat();
         m3.setZero();
-        for(int i=0;i<m3.colsize();++i) {
-            for(int j=0;j<m3.rowsize();++j) {
-                for(int k=0;k<m1.rowsize();++k) {
+        for(size_t i=0;i<m3.colsize();++i) {
+            for(size_t j=0;j<m3.rowsize();++j) {
+                for(size_t k=0;k<m1.rowsize();++k) {
                     m3.ref(i,j) += T(x) * m1.cref(i,k) * m2.cref(k,j);
                 }
             }
@@ -192,7 +195,7 @@ namespace tmv {
             std::cout<<"MultEqMM:  \n";
             std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
             std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1i<<std::endl;
-            std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2i<<std::endl;
             std::cout<<"m1 -> "<<m1.mat()<<std::endl;
             std::cout<<"correct = "<<m3<<std::endl;
             std::cout<<"diff = "<<(m3-m1.mat())<<std::endl;

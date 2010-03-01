@@ -85,7 +85,7 @@ namespace tmv {
         static inline PT call(const V1& v1, const V2& v2)
         { return MultVV_Helper<-4,size,V2,V1>::call(v2,v1); }
         static inline PT call2(int n, IT1 it1, IT2 it2)
-        { return MultVV_Helper<-4,size,V2,V1>::call(n,it2,it1); }
+        { return MultVV_Helper<-4,size,V2,V1>::call2(n,it2,it1); }
     };
 
     // algo 2: v2 is conj: conjugate result
@@ -672,16 +672,30 @@ namespace tmv {
                 __m128d xsum1 = _mm_set1_pd(0.);
                 __m128d xsum2 = _mm_set1_pd(0.);
                 __m128d xA,xB,xAr,xAi,x1,x2;
-                do {
-                    Maybe<true>::sse_load(xA,A.getP()); ++A;
-                    Maybe<true>::sse_load(xB,B.getP()); ++B;
-                    xAr = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(0,0));
-                    xAi = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(1,1));
-                    x1 = _mm_mul_pd(xAr,xB);
-                    x2 = _mm_mul_pd(xAi,xB);
-                    xsum1 = _mm_add_pd(xsum1,x1);
-                    xsum2 = _mm_add_pd(xsum2,x2);
-                } while (--n);
+                if ( ((unsigned int)(A.getP()) & 0xf) == 0 &&
+                     ((unsigned int)(A.getP()) & 0xf) == 0 ) {
+                    do {
+                        Maybe<true>::sse_load(xA,A.getP()); ++A;
+                        Maybe<true>::sse_load(xB,B.getP()); ++B;
+                        xAr = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(0,0));
+                        xAi = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(1,1));
+                        x1 = _mm_mul_pd(xAr,xB);
+                        x2 = _mm_mul_pd(xAi,xB);
+                        xsum1 = _mm_add_pd(xsum1,x1);
+                        xsum2 = _mm_add_pd(xsum2,x2);
+                    } while (--n);
+                } else {
+                    do {
+                        Maybe<true>::sse_loadu(xA,A.getP()); ++A;
+                        Maybe<true>::sse_loadu(xB,B.getP()); ++B;
+                        xAr = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(0,0));
+                        xAi = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(1,1));
+                        x1 = _mm_mul_pd(xAr,xB);
+                        x2 = _mm_mul_pd(xAi,xB);
+                        xsum1 = _mm_add_pd(xsum1,x1);
+                        xsum2 = _mm_add_pd(xsum2,x2);
+                    } while (--n);
+                }
                 xsum2 = _mm_shuffle_pd(xsum2,xsum2,_MM_SHUFFLE2(0,1));
                 const double mone = Maybe<c1>::select(1. , -1.);
                 const double one = Maybe<c1>::select(-1. , 1.);

@@ -1,21 +1,12 @@
 
 #define CT std::complex<T>
 
-#define Def1(T1,C1,T2)\
-  template void InstInvert( \
-      const T2 x, \
-      const ConstDiagMatrixView<T1,UNKNOWN,C1>& m1, DiagMatrixView<T2> m2); \
-  template void InstElemInvert( \
-      const T2 x, \
-      const ConstVectorView<T1,UNKNOWN,C1>& v1, VectorView<T2> v2); \
+#define Def1(T1)\
+  template void InstElemInvert(VectorView<T1 > v); \
 
-Def1(T,false,T)
+Def1(T)
 #ifdef TMV_INST_COMPLEX
-#ifdef TMV_INST_MIX
-Def1(T,false,CT)
-#endif
-Def1(CT,false,CT)
-Def1(CT,true,CT)
+Def1(CT)
 #endif
 
 #undef Def1

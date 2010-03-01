@@ -30,34 +30,33 @@ int main() try {
     //showdiv=true;
     //showtests=true;
     //showstartdone=true;
-    //#define SKIPREST
 
-#ifndef SKIPREST
+#if 1
 
 #ifdef TEST_DOUBLE
-    TestAllSmallMatrixDivB<double>();
+    TestSmallMatrixDivB<double>();
 #endif
 
 #ifdef TEST_FLOAT
-    TestAllSmallMatrixDivB<float>();
+    TestSmallMatrixDivB<float>();
 #endif
 
 #ifdef TEST_LONGDOUBLE
-    TestAllSmallMatrixDivB<long double>();
+    TestSmallMatrixDivB<long double>();
 #endif 
 
-#endif // SKIPREST
+#endif
 
     return 0;
 }
-#if 0
-catch (int) {}
-#else
+#if 1
+#ifndef NOTHROW
 catch (tmv::Error& e) {
     std::cerr<<e<<std::endl;
     std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
     return 1;
 }
+#endif
 catch (std::exception& e) {
     std::cerr<<e.what()<<std::endl;
     std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
@@ -68,6 +67,8 @@ catch (...) {
     std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
     return 1;
 }
+#else
+catch (int) {}
 #endif
 
 

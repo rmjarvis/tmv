@@ -90,7 +90,7 @@ namespace tmv {
 
         enum { mcolsize = M1::mcolsize };
         enum { mrowsize = M1::mrowsize };
-        enum { mshape = M1::mshape };
+        enum { mshape = ShapeTraits<M1::mshape>::nonunit_shape };
         enum { mfort = M1::mfort };
         enum { mcalc = false };
         enum { mrowmajor = M1::mrowmajor };

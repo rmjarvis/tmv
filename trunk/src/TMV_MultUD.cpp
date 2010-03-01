@@ -49,7 +49,7 @@ namespace tmv {
     {
         TMVAssert(m1.isrm() || m1.iscm());
         TMVAssert(m3.isrm() || m3.iscm());
-        TMVStaticAssert(M2::mstep == 1);
+        TMVStaticAssert(M2::mdiagstep == 1);
         typedef typename M3::real_type RT;
         Scaling<1,RT> one;
         if (m3.iscm()) {
@@ -81,7 +81,7 @@ namespace tmv {
         else { // !(m3.isrm() || m3.iscm())
             typename M3::copy_type m3c(m3.size());
             DoMultUD<false>(m1,m2.cmView(),m3c);
-            InstCopy(m3c.constView().xdView(),m3);
+            InstCopy(m3c.constView().xdView(),m3.xdView());
         }
     }
 
@@ -109,28 +109,28 @@ namespace tmv {
         const T3 x,
         const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
         const ConstDiagMatrixView<T2,UNKNOWN,C2>& m2,
-        UpperTriMatrixView<T3> m3)
+        UpperTriMatrixView<T3,NonUnitDiag> m3)
     { GenInstMultMM(x,m1,m2,m3); }
     template <class T1, bool C1, class T2, bool C2, class T3>
     void InstAddMultMM(
         const T3 x,
         const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
         const ConstDiagMatrixView<T2,UNKNOWN,C2>& m2,
-        UpperTriMatrixView<T3> m3)
+        UpperTriMatrixView<T3,NonUnitDiag> m3)
     { GenInstAddMultMM(x,m1,m2,m3); }
     template <class T1, bool C1, class T2, bool C2, class T3>
     void InstMultMM(
         const T3 x,
         const ConstLowerTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
         const ConstDiagMatrixView<T2,UNKNOWN,C2>& m2,
-        LowerTriMatrixView<T3> m3)
+        LowerTriMatrixView<T3,NonUnitDiag> m3)
     { GenInstMultMM(x,m1,m2,m3); }
     template <class T1, bool C1, class T2, bool C2, class T3>
     void InstAddMultMM(
         const T3 x,
         const ConstLowerTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
         const ConstDiagMatrixView<T2,UNKNOWN,C2>& m2,
-        LowerTriMatrixView<T3> m3)
+        LowerTriMatrixView<T3,NonUnitDiag> m3)
     { GenInstAddMultMM(x,m1,m2,m3); }
 
 

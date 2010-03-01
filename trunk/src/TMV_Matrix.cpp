@@ -74,11 +74,11 @@ namespace tmv {
     //
 
     template <class T1, bool C1, class T2>
-    void InstCopy(
+    static void NonLapCopy(
         const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1, MatrixView<T2> m2)
     {
         if (m2.isrm() && !m2.iscm()) {
-            InstCopy(m1.transpose(),m2.transpose());
+            NonLapCopy(m1.transpose(),m2.transpose());
         } else if (m2.iscm()) {
             MatrixView<T2,1> m2cm = m2;
             if (m1.isrm())
@@ -102,12 +102,15 @@ namespace tmv {
     }
 
 #ifdef ELAP
+    template <class T1, bool C1, class T2>
+    static void LapCopy(
+        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1, MatrixView<T2> m2)
+    { NonLapCopy(m1,m2); }
 #ifdef TMV_INST_DOUBLE
-    template <> 
-    void InstCopy(
+    static void LapCopy(
         const ConstMatrixView<double>& m1, MatrixView<double> m2)
     {
-        TMVAssert(m1.cptr() != m2.cptr());
+        //TMVAssert(m1.cptr() != m2.cptr());
         TMVAssert(m2.rowsize() == m1.rowsize());
         TMVAssert(m2.colsize() == m1.colsize());
         char c = 'A';
@@ -115,19 +118,18 @@ namespace tmv {
         int n = m1.rowsize();
         int ld1 = m1.stepj();
         int ld2 = m2.stepj();
-        if (ld1 < 0 || ld2 < 0) DoCopy(m1,m2);
+        if (ld1 < 0 || ld2 < 0) NonLapCopy(m1,m2);
         TMVAssert(ld1 >= m);
         TMVAssert(ld2 >= m);
         LAPNAME(dlacpy) (
             LAPCM LAPV(c),LAPV(m),LAPV(n),LAPP(m1.cptr()),LAPV(ld1),
             LAPP(m2.ptr()),LAPV(ld2));
     }
-    template <> 
-    void InstCopy(
+    static void LapCopy(
         const ConstMatrixView<std::complex<double> >& m1,
         MatrixView<std::complex<double> > m2)
     {
-        TMVAssert(m1.cptr() != m2.cptr());
+        //TMVAssert(m1.cptr() != m2.cptr());
         TMVAssert(m2.rowsize() == m1.rowsize());
         TMVAssert(m2.colsize() == m1.colsize());
         char c = 'A';
@@ -135,7 +137,7 @@ namespace tmv {
         int n = m1.rowsize();
         int ld1 = m1.stepj();
         int ld2 = m2.stepj();
-        if (ld1 < 0 || ld2 < 0) DoCopy(m1,m2);
+        if (ld1 < 0 || ld2 < 0) NonLapCopy(m1,m2);
         TMVAssert(ld1 >= m);
         TMVAssert(ld2 >= m);
         LAPNAME(zlacpy) (
@@ -144,11 +146,10 @@ namespace tmv {
     }
 #endif
 #ifdef TMV_INST_FLOAT
-    template <> 
-    void InstCopy(
+    static void LapCopy(
         const ConstMatrixView<float>& m1, MatrixView<float> m2)
     {
-        TMVAssert(m1.cptr() != m2.cptr());
+        //TMVAssert(m1.cptr() != m2.cptr());
         TMVAssert(m2.rowsize() == m1.rowsize());
         TMVAssert(m2.colsize() == m1.colsize());
         char c = 'A';
@@ -156,19 +157,18 @@ namespace tmv {
         int n = m1.rowsize();
         int ld1 = m1.stepj();
         int ld2 = m2.stepj();
-        if (ld1 < 0 || ld2 < 0) DoCopy(m1,m2);
+        if (ld1 < 0 || ld2 < 0) NonLapCopy(m1,m2);
         TMVAssert(ld1 >= m);
         TMVAssert(ld2 >= m);
         LAPNAME(slacpy) (
             LAPCM LAPV(c),LAPV(m),LAPV(n),LAPP(m1.cptr()),LAPV(ld1),
             LAPP(m2.ptr()),LAPV(ld2));
     }
-    template <> 
-    void InstCopy(
+    static void LapCopy(
         const ConstMatrixView<std::complex<float> >& m1,
         MatrixView<std::complex<float> > m2)
     {
-        TMVAssert(m1.cptr() != m2.cptr());
+        //TMVAssert(m1.cptr() != m2.cptr());
         TMVAssert(m2.rowsize() == m1.rowsize());
         TMVAssert(m2.colsize() == m1.colsize());
         char c = 'A';
@@ -176,7 +176,7 @@ namespace tmv {
         int n = m1.rowsize();
         int ld1 = m1.stepj();
         int ld2 = m2.stepj();
-        if (ld1 < 0 || ld2 < 0) DoCopy(m1,m2);
+        if (ld1 < 0 || ld2 < 0) NonLapCopy(m1,m2);
         TMVAssert(ld1 >= m);
         TMVAssert(ld2 >= m);
         LAPNAME(clacpy) (
@@ -185,6 +185,18 @@ namespace tmv {
     }
 #endif
 #endif
+
+    template <class T1, bool C1, class T2>
+    void InstCopy(
+        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1, MatrixView<T2> m2)
+    {
+#ifdef ELAP
+        if (m1.iscm() && m2.iscm() && m1.stepj()>0 && m2.stepj()>0)
+            LapCopy(m1,m2);
+        else
+#endif
+            NonLapCopy(m1,m2); 
+    }
 
     //
     // Swap Matrices
@@ -291,7 +303,7 @@ namespace tmv {
     //
 
     template <class T>
-    T InstSumElements(const ConstMatrixView<T>& m)
+    static T DoInstSumElements(const ConstMatrixView<T>& m)
     {
         if (m.canLinearize()) return m.linearView().sumElements();
         else if (m.iscm()) return InlineSumElements(m.cmView());
@@ -300,7 +312,7 @@ namespace tmv {
     }
 
     template <class T>
-    typename Traits<T>::real_type InstSumAbsElements(
+    static typename Traits<T>::real_type DoInstSumAbsElements(
         const ConstMatrixView<T>& m)
     {
         if (m.canLinearize()) return m.linearView().sumAbsElements();
@@ -310,7 +322,7 @@ namespace tmv {
     }
 
     template <class T>
-    typename Traits<T>::real_type InstSumAbs2Elements(
+    static typename Traits<T>::real_type DoInstSumAbs2Elements(
         const ConstMatrixView<T>& m)
     {
         if (m.canLinearize()) return m.linearView().sumAbs2Elements();
@@ -321,7 +333,7 @@ namespace tmv {
     }
 
     template <class T>
-    typename Traits<T>::real_type InstNormSq(const ConstMatrixView<T>& m)
+    static typename Traits<T>::real_type DoInstNormSq(const ConstMatrixView<T>& m)
     {
         if (m.canLinearize()) return m.linearView().normSq();
         else if (m.iscm()) return InlineNormSq(m.cmView());
@@ -330,7 +342,7 @@ namespace tmv {
     }
 
     template <class T>
-    typename Traits<T>::real_type InstNormSq(
+    static typename Traits<T>::real_type DoInstNormSq(
         const ConstMatrixView<T>& m, const typename Traits<T>::real_type scale)
     {
         if (m.canLinearize()) return m.linearView().normSq(scale);
@@ -340,7 +352,7 @@ namespace tmv {
     }
 
     template <class T>
-    typename Traits<T>::real_type InstNormF(const ConstMatrixView<T>& m)
+    static typename Traits<T>::real_type DoInstNormF(const ConstMatrixView<T>& m)
     {
         if (m.canLinearize()) return m.linearView().norm2();
         else if (m.iscm()) return InlineNormF(m.cmView());
@@ -349,7 +361,8 @@ namespace tmv {
     }
 
     template <class T>
-    typename Traits<T>::real_type InstMaxAbsElement(const ConstMatrixView<T>& m)
+    static typename Traits<T>::real_type DoInstMaxAbsElement(
+        const ConstMatrixView<T>& m)
     {
         if (m.canLinearize()) return m.linearView().maxAbsElement();
         else if (m.iscm()) return InlineMaxAbsElement(m.cmView());
@@ -358,7 +371,7 @@ namespace tmv {
     }
 
     template <class T>
-    typename Traits<T>::real_type InstNorm1(const ConstMatrixView<T>& m)
+    static typename Traits<T>::real_type DoInstNorm1(const ConstMatrixView<T>& m)
     {
         if (m.iscm()) return InlineNorm1(m.cmView());
         else if (m.isrm()) return InlineNormInf(m.transpose().cmView()); 
@@ -366,7 +379,8 @@ namespace tmv {
     }
 
     template <class T>
-    typename Traits<T>::real_type InstNormInf(const ConstMatrixView<T>& m)
+    static typename Traits<T>::real_type DoInstNormInf(
+        const ConstMatrixView<T>& m)
     {
         if (m.iscm()) return InlineNormInf(m.cmView());
         else if (m.isrm()) return InlineNorm1(m.transpose().cmView()); 
@@ -375,10 +389,9 @@ namespace tmv {
 
 #ifdef XLAP
 #ifdef TMV_INST_DOUBLE
-    template <> 
-    double InstNormF(const ConstMatrixView<double>& m)
+    static double DoInstNormF(const ConstMatrixView<double>& m)
     {
-        if (m.isrm() && !m.iscm()) return InstNormF(m.transpose());
+        if (m.isrm() && !m.iscm()) return DoInstNormF(m.transpose());
         if (!m.iscm()) return InlineNormF(m);
         char c = 'F';
         int M = m.colsize();
@@ -391,10 +404,9 @@ namespace tmv {
             LAPP(m.cptr()),LAPV(lda) LAPWK(&work) LAP1);
         return norm;
     }
-    template <> 
-    double InstNormF(const ConstMatrixView<std::complex<double> >& m)
+    static double DoInstNormF(const ConstMatrixView<std::complex<double> >& m)
     {
-        if (m.isrm() && !m.iscm()) return InstNormF(m.transpose());
+        if (m.isrm() && !m.iscm()) return DoInstNormF(m.transpose());
         if (!m.iscm()) return InlineNormF(m);
         char c = 'F';
         int M = m.colsize();
@@ -408,10 +420,9 @@ namespace tmv {
         return norm;
     }
 
-    template <> 
-    double InstMaxAbsElement(const ConstMatrixView<double>& m)
+    static double DoInstMaxAbsElement(const ConstMatrixView<double>& m)
     {
-        if (m.isrm() && !m.iscm()) return InstMaxAbsElement(m.transpose());
+        if (m.isrm() && !m.iscm()) return DoInstMaxAbsElement(m.transpose());
         if (!m.iscm()) return InlineMaxAbsElement(m);
         char c = 'M';
         int M = m.colsize();
@@ -424,10 +435,10 @@ namespace tmv {
             LAPP(m.cptr()),LAPV(lda) LAPWK(&work) LAP1);
         return norm;
     }
-    template <> 
-    double InstMaxAbsElement(const ConstMatrixView<std::complex<double> >& m)
+    static double DoInstMaxAbsElement(
+        const ConstMatrixView<std::complex<double> >& m)
     {
-        if (m.isrm() && !m.iscm()) return InstMaxAbsElement(m.transpose());
+        if (m.isrm() && !m.iscm()) return DoInstMaxAbsElement(m.transpose());
         if (!m.iscm()) return InlineMaxAbsElement(m);
         char c = 'M';
         int M = m.colsize();
@@ -441,10 +452,9 @@ namespace tmv {
         return norm;
     }
 
-    template <> 
-    double InstNorm1(const ConstMatrixView<double>& m)
+    static double DoInstNorm1(const ConstMatrixView<double>& m)
     {
-        if (m.isrm() && !m.iscm()) return InstNormInf(m.transpose());
+        if (m.isrm() && !m.iscm()) return DoInstNormInf(m.transpose());
         if (!m.iscm()) return InlineNorm1(m);
         char c = '1';
         int M = m.colsize();
@@ -457,10 +467,9 @@ namespace tmv {
             LAPP(m.cptr()),LAPV(lda) LAPWK(&work) LAP1);
         return norm;
     }
-    template <> 
-    double InstNorm1(const ConstMatrixView<std::complex<double> >& m)
+    static double DoInstNorm1(const ConstMatrixView<std::complex<double> >& m)
     {
-        if (m.isrm() && !m.iscm()) return InstNormInf(m.transpose());
+        if (m.isrm() && !m.iscm()) return DoInstNormInf(m.transpose());
         if (!m.iscm()) return InlineNorm1(m);
         char c = '1';
         int M = m.colsize();
@@ -474,10 +483,9 @@ namespace tmv {
         return norm;
     }
 
-    template <> 
-    double InstNormInf(const ConstMatrixView<double>& m)
+    static double DoInstNormInf(const ConstMatrixView<double>& m)
     {
-        if (m.isrm() && !m.iscm()) return InstNorm1(m.transpose());
+        if (m.isrm() && !m.iscm()) return DoInstNorm1(m.transpose());
         if (!m.iscm()) return InlineNormInf(m);
         char c = 'I';
         int M = m.colsize();
@@ -492,10 +500,9 @@ namespace tmv {
             LAPP(m.cptr()),LAPV(lda) LAPWK(work.get()) LAP1);
         return norm;
     }
-    template <> 
-    double InstNormInf(const ConstMatrixView<std::complex<double> >& m)
+    static double DoInstNormInf(const ConstMatrixView<std::complex<double> >& m)
     {
-        if (m.isrm() && !m.iscm()) return InstNorm1(m.transpose());
+        if (m.isrm() && !m.iscm()) return DoInstNorm1(m.transpose());
         if (!m.iscm()) return InlineNormInf(m);
         char c = 'I';
         int M = m.colsize();
@@ -512,10 +519,9 @@ namespace tmv {
     }
 #endif // DOUBLE
 #ifdef TMV_INST_FLOAT
-    template <> 
-    float InstNormF(const ConstMatrixView<float>& m)
+    static float DoInstNormF(const ConstMatrixView<float>& m)
     {
-        if (m.isrm() && !m.iscm()) return InstNormF(m.transpose());
+        if (m.isrm() && !m.iscm()) return DoInstNormF(m.transpose());
         if (!m.iscm()) return InlineNormF(m);
         char c = 'F';
         int M = m.colsize();
@@ -528,10 +534,9 @@ namespace tmv {
             LAPP(m.cptr()),LAPV(lda) LAPWK(&work) LAP1);
         return norm;
     }
-    template <> 
-    float InstNormF(const ConstMatrixView<std::complex<float> >& m)
+    static float DoInstNormF(const ConstMatrixView<std::complex<float> >& m)
     {
-        if (m.isrm() && !m.iscm()) return InstNormF(m.transpose());
+        if (m.isrm() && !m.iscm()) return DoInstNormF(m.transpose());
         if (!m.iscm()) return InlineNormF(m);
         char c = 'F';
         int M = m.colsize();
@@ -545,10 +550,9 @@ namespace tmv {
         return norm;
     }
 
-    template <> 
-    float InstMaxAbsElement(const ConstMatrixView<float>& m)
+    static float DoInstMaxAbsElement(const ConstMatrixView<float>& m)
     {
-        if (m.isrm() && !m.iscm()) return InstMaxAbsElement(m.transpose());
+        if (m.isrm() && !m.iscm()) return DoInstMaxAbsElement(m.transpose());
         if (!m.iscm()) return InlineMaxAbsElement(m);
         char c = 'M';
         int M = m.colsize();
@@ -561,10 +565,10 @@ namespace tmv {
             LAPP(m.cptr()),LAPV(lda) LAPWK(&work) LAP1);
         return norm;
     }
-    template <> 
-    float InstMaxAbsElement(const ConstMatrixView<std::complex<float> >& m)
+    static float DoInstMaxAbsElement(
+        const ConstMatrixView<std::complex<float> >& m)
     {
-        if (m.isrm() && !m.iscm()) return InstMaxAbsElement(m.transpose());
+        if (m.isrm() && !m.iscm()) return DoInstMaxAbsElement(m.transpose());
         if (!m.iscm()) return InlineMaxAbsElement(m);
         char c = 'M';
         int M = m.colsize();
@@ -578,10 +582,9 @@ namespace tmv {
         return norm;
     }
 
-    template <> 
-    float InstNorm1(const ConstMatrixView<float>& m)
+    static float DoInstNorm1(const ConstMatrixView<float>& m)
     {
-        if (m.isrm() && !m.iscm()) return InstNormInf(m.transpose());
+        if (m.isrm() && !m.iscm()) return DoInstNormInf(m.transpose());
         if (!m.iscm()) return InlineNorm1(m);
         char c = '1';
         int M = m.colsize();
@@ -594,10 +597,9 @@ namespace tmv {
             LAPP(m.cptr()),LAPV(lda) LAPWK(&work) LAP1);
         return norm;
     }
-    template <> 
-    float InstNorm1(const ConstMatrixView<std::complex<float> >& m)
+    static float DoInstNorm1(const ConstMatrixView<std::complex<float> >& m)
     {
-        if (m.isrm() && !m.iscm()) return InstNormInf(m.transpose());
+        if (m.isrm() && !m.iscm()) return DoInstNormInf(m.transpose());
         if (!m.iscm()) return InlineNorm1(m);
         char c = '1';
         int M = m.colsize();
@@ -611,10 +613,9 @@ namespace tmv {
         return norm;
     }
 
-    template <> 
-    float InstNormInf(const ConstMatrixView<float>& m)
+    static float DoInstNormInf(const ConstMatrixView<float>& m)
     {
-        if (m.isrm() && !m.iscm()) return InstNorm1(m.transpose());
+        if (m.isrm() && !m.iscm()) return DoInstNorm1(m.transpose());
         if (!m.iscm()) return InlineNormInf(m);
         char c = 'I';
         int M = m.colsize();
@@ -629,10 +630,9 @@ namespace tmv {
             LAPP(m.cptr()),LAPV(lda) LAPWK(work.get()) LAP1);
         return norm;
     }
-    template <> 
-    float InstNormInf(const ConstMatrixView<std::complex<float> >& m)
+    static float DoInstNormInf(const ConstMatrixView<std::complex<float> >& m)
     {
-        if (m.isrm() && !m.iscm()) return InstNorm1(m.transpose());
+        if (m.isrm() && !m.iscm()) return DoInstNorm1(m.transpose());
         if (!m.iscm()) return InlineNormInf(m);
         char c = 'I';
         int M = m.colsize();
@@ -649,6 +649,46 @@ namespace tmv {
     }
 #endif // FLOAT
 #endif // XLAP
+
+    template <class T>
+    T InstSumElements(const ConstMatrixView<T>& m)
+    { return DoInstSumElements(m); }
+
+    template <class T>
+    typename Traits<T>::real_type InstSumAbsElements(
+        const ConstMatrixView<T>& m)
+    { return DoInstSumAbsElements(m); }
+
+    template <class T>
+    typename Traits<T>::real_type InstSumAbs2Elements(
+        const ConstMatrixView<T>& m)
+    { return DoInstSumAbs2Elements(m); }
+
+    template <class T>
+    typename Traits<T>::real_type InstNormSq(const ConstMatrixView<T>& m)
+    { return DoInstNormSq(m); }
+
+    template <class T>
+    typename Traits<T>::real_type InstNormSq(
+        const ConstMatrixView<T>& m, const typename Traits<T>::real_type scale)
+    { return DoInstNormSq(m,scale); }
+
+    template <class T>
+    typename Traits<T>::real_type InstNormF(const ConstMatrixView<T>& m)
+    { return DoInstNormF(m); }
+
+    template <class T>
+    typename Traits<T>::real_type InstMaxAbsElement(const ConstMatrixView<T>& m)
+    { return DoInstMaxAbsElement(m); }
+
+    template <class T>
+    typename Traits<T>::real_type InstNorm1(const ConstMatrixView<T>& m)
+    { return DoInstNorm1(m); }
+
+    template <class T>
+    typename Traits<T>::real_type InstNormInf(const ConstMatrixView<T>& m)
+    { return DoInstNormInf(m); }
+
 
 #if 0
     template <class T> 

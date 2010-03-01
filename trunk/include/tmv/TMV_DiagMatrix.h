@@ -144,6 +144,7 @@
 #include "TMV_BaseMatrix_Diag.h"
 #include "TMV_Shape.h"
 #include "TMV_VIt.h"
+#include "TMV_Array.h"
 #include <vector>
 
 namespace tmv {
@@ -172,52 +173,52 @@ namespace tmv {
         enum { mcolmajor = false };
         enum { mstor = ColMajor }; // arbitrary
         enum { mcalc = true };
-        enum { mstep = 1 };
+        enum { mdiagstep = 1 };
         enum { mconj = false };
         enum { twoS = misreal ? 1 : 2 };
         enum { notC = miscomplex };
 
-        typedef ConstVectorView<T,mstep,false,I> const_diag_type;
+        typedef ConstVectorView<T,mdiagstep,false,I> const_diag_type;
 
-        typedef ConstDiagMatrixView<T,mstep,false,I> const_subdiagmatrix_type;
+        typedef ConstDiagMatrixView<T,mdiagstep,false,I> const_subdiagmatrix_type;
         typedef ConstDiagMatrixView<T,UNKNOWN,false,I> 
             const_subdiagmatrix_step_type;
-        typedef ConstDiagMatrixView<T,mstep,false,I> const_view_type;
-        typedef ConstDiagMatrixView<T,mstep,false,CStyle> const_cview_type;
-        typedef ConstDiagMatrixView<T,mstep,false,FortranStyle> 
+        typedef ConstDiagMatrixView<T,mdiagstep,false,I> const_view_type;
+        typedef ConstDiagMatrixView<T,mdiagstep,false,CStyle> const_cview_type;
+        typedef ConstDiagMatrixView<T,mdiagstep,false,FortranStyle> 
             const_fview_type;
         typedef ConstDiagMatrixView<T> const_xview_type;
         typedef ConstDiagMatrixView<T,1,false> const_rmview_type;
         typedef ConstDiagMatrixView<T,1,false> const_cmview_type;
-        typedef ConstDiagMatrixView<T,mstep,notC,I> const_conjugate_type;
-        typedef ConstDiagMatrixView<T,mstep,false,I> const_transpose_type;
-        typedef ConstDiagMatrixView<T,mstep,notC,I> const_adjoint_type;
+        typedef ConstDiagMatrixView<T,mdiagstep,notC,I> const_conjugate_type;
+        typedef ConstDiagMatrixView<T,mdiagstep,false,I> const_transpose_type;
+        typedef ConstDiagMatrixView<T,mdiagstep,notC,I> const_adjoint_type;
         typedef ConstDiagMatrixView<real_type,twoS,false,I> 
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstDiagMatrixView<T,mstep,false,I> const_nonconj_type;
-        typedef DiagMatrixView<T,mstep,false,I> nonconst_type;
+        typedef ConstDiagMatrixView<T,mdiagstep,false,I> const_nonconj_type;
+        typedef DiagMatrixView<T,mdiagstep,false,I> nonconst_type;
 
         typedef QuotXM<1,real_type,type> inverse_type;
 
         typedef T& reference;
 
-        typedef VectorView<T,mstep,false,I> diag_type;
+        typedef VectorView<T,mdiagstep,false,I> diag_type;
 
-        typedef DiagMatrixView<T,mstep,false,I> subdiagmatrix_type;
+        typedef DiagMatrixView<T,mdiagstep,false,I> subdiagmatrix_type;
         typedef DiagMatrixView<T,UNKNOWN,false,I> subdiagmatrix_step_type;
-        typedef DiagMatrixView<T,mstep,false,I> view_type;
-        typedef DiagMatrixView<T,mstep,false,CStyle> cview_type;
-        typedef DiagMatrixView<T,mstep,false,FortranStyle> fview_type;
+        typedef DiagMatrixView<T,mdiagstep,false,I> view_type;
+        typedef DiagMatrixView<T,mdiagstep,false,CStyle> cview_type;
+        typedef DiagMatrixView<T,mdiagstep,false,FortranStyle> fview_type;
         typedef DiagMatrixView<T> xview_type;
         typedef DiagMatrixView<T,1,false> rmview_type;
         typedef DiagMatrixView<T,1,false> cmview_type;
-        typedef DiagMatrixView<T,mstep,notC,I> conjugate_type;
-        typedef DiagMatrixView<T,mstep,false,I> transpose_type;
-        typedef DiagMatrixView<T,mstep,notC,I> adjoint_type;
+        typedef DiagMatrixView<T,mdiagstep,notC,I> conjugate_type;
+        typedef DiagMatrixView<T,mdiagstep,false,I> transpose_type;
+        typedef DiagMatrixView<T,mdiagstep,notC,I> adjoint_type;
         typedef DiagMatrixView<real_type,twoS,false,I> realpart_type;
         typedef realpart_type imagpart_type;
-        typedef DiagMatrixView<T,mstep,false,I> nonconj_type;
+        typedef DiagMatrixView<T,mdiagstep,false,I> nonconj_type;
     };
 
 #ifdef XTEST
@@ -265,7 +266,7 @@ namespace tmv {
         enum { mrowmajor = Traits<type>::mrowmajor };
         enum { mcolmajor = Traits<type>::mcolmajor };
         enum { mcalc = Traits<type>::mcalc };
-        enum { mstep = Traits<type>::mstep };
+        enum { mdiagstep = Traits<type>::mdiagstep };
         enum { mconj = Traits<type>::mconj };
 
         //
@@ -274,22 +275,19 @@ namespace tmv {
 
 #define NEW_SIZE(cs,rs) \
 
-        inline DiagMatrix(size_t s) :
-            itssize(s), itsm(new T[itssize])
+        inline DiagMatrix(size_t n=0) : itssize(n), itsm(n)
         {
 #ifdef TMV_DEBUG
             this->setAllTo(T(888));
 #endif
         }
 
-        inline DiagMatrix(size_t s, T x) :
-            itssize(s), itsm(new T[itssize])
+        inline DiagMatrix(size_t n, T x) : itssize(n), itsm(n)
         {
             this->setAllTo(x);
         }
 
-        inline DiagMatrix(size_t n, const T* vv) :
-            itssize(n), itsm(new T[itssize])
+        inline DiagMatrix(size_t n, const T* vv) : itssize(n), itsm(n)
         {
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
@@ -298,7 +296,7 @@ namespace tmv {
         }
 
         inline DiagMatrix(const std::vector<T>& vv) : 
-            itssize(vv.size()), itsm(new T[itssize])
+            itssize(vv.size()), itsm(itssize)
         {
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
@@ -306,8 +304,7 @@ namespace tmv {
             ConstDiagMatrixView<T,1>(&vv[0],itssize).newAssignTo(*this);
         }
 
-        inline DiagMatrix(const type& m2) :
-            itssize(m2.itssize), itsm(new T[itssize])
+        inline DiagMatrix(const type& m2) : itssize(m2.itssize), itsm(itssize)
         {
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
@@ -317,7 +314,7 @@ namespace tmv {
 
         template <class V2>
         inline DiagMatrix(const BaseVector<V2>& v2) : 
-            itssize(v2.size()), itsm(new T[itssize])
+            itssize(v2.size()), itsm(itssize)
         {
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
@@ -328,7 +325,7 @@ namespace tmv {
 
         template <class M2>
         inline DiagMatrix(const BaseMatrix<M2>& m2) :
-            itssize(m2.colsize()), itsm(new T[itssize])
+            itssize(m2.colsize()), itsm(itssize)
         {
             TMVStaticAssert((Sizes<M2::mrowsize,M2::mcolsize>::same));
             TMVAssert(m2.colsize() == m2.rowsize());
@@ -374,31 +371,36 @@ namespace tmv {
         // Auxilliary Functions
         //
 
-        inline const T* cptr() const { return itsm.get(); }
-        inline T* ptr() { return itsm.get(); }
+        inline const T* cptr() const { return itsm; }
+        inline T* ptr() { return itsm; }
 
         inline T cref(int i, int j) const { return (i!=j ? T(0) : cref(i)); }
         inline T cref(int i) const { return itsm[i]; }
         inline T& ref(int i) { return itsm[i]; }
+
+        inline void swapWith(type& m2)
+        {
+            TMVAssert(m2.size() == size());
+            if (itsm.getP() == m2.itsm.getP()) return;
+            itsm.swapWith(m2.itsm);
+        }
+
+        inline void resize(const size_t n)
+        {
+            itssize = n;
+            itsm.resize(n);
+        }
 
         inline size_t size() const { return itssize; }
         inline int step() const { return 1; }
         inline bool isconj() const { return false; }
         inline bool isrm() const { return true; }
         inline bool iscm() const { return true; }
-        inline void swapWith(type& m2)
-        {
-            TMVAssert(m2.size() == size());
-            if (itsm.get() == m2.itsm.get()) return;
-            T* temp = itsm.release();
-            itsm.reset(m2.itsm.release());
-            m2.itsm.reset(temp);
-        }
 
     private:
 
-        const size_t itssize;
-        auto_array<T> itsm;
+        size_t itssize;
+        AlignedArray<T> itsm;
 
     }; // DiagMatrix
 
@@ -452,7 +454,7 @@ namespace tmv {
         enum { mcolmajor = (S==1) };
         enum { mstor = ColMajor }; // arbitrary
         enum { mcalc = true };
-        enum { mstep = S };
+        enum { mdiagstep = S };
         enum { mconj = C };
         enum { twoS = misreal ? S : IntTraits<S>::twoS };
         enum { notC = !C && miscomplex };
@@ -494,7 +496,7 @@ namespace tmv {
         enum { mrowmajor = Traits<type>::mrowmajor };
         enum { mcolmajor = Traits<type>::mcolmajor };
         enum { mcalc = Traits<type>::mcalc };
-        enum { mstep = Traits<type>::mstep };
+        enum { mdiagstep = Traits<type>::mdiagstep };
         enum { mconj = Traits<type>::mconj };
 
         //
@@ -623,7 +625,7 @@ namespace tmv {
         enum { mcolmajor = (S==1) }; 
         enum { mstor = ColMajor }; // arbitrary
         enum { mcalc = true };
-        enum { mstep = S };
+        enum { mdiagstep = S };
         enum { mconj = C };
         enum { twoS = misreal ? S : IntTraits<S>::twoS };
         enum { notC = !C && miscomplex };
@@ -686,7 +688,7 @@ namespace tmv {
         enum { mrowmajor = Traits<type>::mrowmajor };
         enum { mcolmajor = Traits<type>::mcolmajor };
         enum { mcalc = Traits<type>::mcalc };
-        enum { mstep = Traits<type>::mstep };
+        enum { mdiagstep = Traits<type>::mdiagstep };
         enum { mconj = Traits<type>::mconj };
 
         //

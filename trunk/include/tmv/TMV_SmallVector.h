@@ -84,7 +84,7 @@
 
 #include "TMV_BaseVector.h"
 #include "TMV_VIt.h"
-#include "TMV_StackArray.h"
+#include "TMV_Array.h"
 
 namespace tmv {
 
@@ -188,56 +188,59 @@ namespace tmv {
         // Constructors
         //
 
-        inline SmallVector() 
+        inline SmallVector(size_t n=N) 
         {
             TMVStaticAssert(N > 0);
+            TMVAssert(n == N);
 #ifdef TMV_DEBUG
             this->setAllTo(T(888));
 #endif
         }
 
-        explicit inline SmallVector(T x) 
+        explicit inline SmallVector(size_t n, T x) 
         {
             TMVStaticAssert(N > 0);
+            TMVAssert(n == N);
             this->setAllTo(x); 
         }
 
-        explicit inline SmallVector(const T* v) 
+        explicit inline SmallVector(size_t n, const T* v) 
         {
+            TMVStaticAssert(N > 0);
+            TMVAssert(n == N);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif
-            TMVStaticAssert(N > 0);
             ConstSmallVectorView<T,N>(v).newAssignTo(*this);
         }
 
         explicit inline SmallVector(const std::vector<T>& v2) 
         {
+            TMVStaticAssert(N > 0);
+            TMVAssert(v2.size() == N);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif
-            TMVStaticAssert(N > 0);
             ConstSmallVectorView<T,N>(&v2[0]).newAssignTo(*this);
         }
 
         inline SmallVector(const type& v2) 
         {
+            TMVStaticAssert(N > 0);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif
-            TMVStaticAssert(N > 0);
             v2.newAssignTo(*this);
         }
 
         template <class V2>
         inline SmallVector(const BaseVector<V2>& v2) 
         {
+            TMVStaticAssert(N > 0);
+            TMVAssert(v2.size() == N);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif
-            TMVStaticAssert((Sizes<N,V2::vsize>::same)); 
-            TMVAssert(v2.size() == N);
-            TMVStaticAssert(N > 0);
             v2.newAssignTo(*this);
         }
 
@@ -275,6 +278,7 @@ namespace tmv {
         inline size_t size() const { return N; }
         inline int step() const { return 1; }
         inline bool isconj() const { return false; }
+
 
     protected :
 

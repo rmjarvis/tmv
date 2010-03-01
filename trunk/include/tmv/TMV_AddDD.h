@@ -90,7 +90,7 @@ namespace tmv {
     inline void AddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix_Diag<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3)
+        BaseMatrix_Mutable<M3>& m3)
     {
         typename M1::const_diag_type m1d = m1.diag();
         typename M2::const_diag_type m2d = m2.diag();
@@ -104,7 +104,7 @@ namespace tmv {
     inline void NoAliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix_Diag<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3)
+        BaseMatrix_Mutable<M3>& m3)
     {
         typename M1::const_diag_type m1d = m1.diag();
         typename M2::const_diag_type m2d = m2.diag();
@@ -117,7 +117,7 @@ namespace tmv {
     inline void AliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix_Diag<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3)
+        BaseMatrix_Mutable<M3>& m3)
     {
         typename M1::const_diag_type m1d = m1.diag();
         typename M2::const_diag_type m2d = m2.diag();
@@ -138,17 +138,17 @@ namespace tmv {
     inline void AddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix_Calc<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3)
+        BaseMatrix_Mutable<M3>& m3)
     {
-        if (SameStorage(m1,m3)) {
+        if (SameStorage(m1,m3.mat())) {
             typename M1::copy_type m1c = m1;
             typename M1::copy_type::const_diag_type m1d = m1c.diag();
-            typename M3::diag_type m3d = m3.diag();
+            typename M3::diag_type m3d = m3.mat().diag();
             MultXM<false>(x2,m2.mat(),m3.mat());
             NoAliasMultXV<true>(x1,m1d,m3d);
         } else {
             typename M1::const_diag_type m1d = m1.diag();
-            typename M3::diag_type m3d = m3.diag();
+            typename M3::diag_type m3d = m3.mat().diag();
             MultXM<false>(x2,m2.mat(),m3.mat());
             NoAliasMultXV<true>(x1,m1d,m3d);
         } 
@@ -158,10 +158,10 @@ namespace tmv {
     inline void NoAliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix_Calc<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3)
+        BaseMatrix_Mutable<M3>& m3)
     {
         typename M1::const_diag_type m1d = m1.diag();
-        typename M3::diag_type m3d = m3.diag();
+        typename M3::diag_type m3d = m3.mat().diag();
         NoAliasMultXM<false>(x2,m2.mat(),m3.mat());
         NoAliasMultXV<true>(x1,m1d,m3d);
     }
@@ -170,17 +170,17 @@ namespace tmv {
     inline void AliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix_Calc<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3)
+        BaseMatrix_Mutable<M3>& m3)
     {
-        if (SameStorage(m1,m3)) {
+        if (SameStorage(m1,m3.mat())) {
             typename M1::copy_type m1c = m1;
             typename M1::copy_type::const_diag_type m1d = m1c.diag();
-            typename M3::diag_type m3d = m3.diag();
+            typename M3::diag_type m3d = m3.mat().diag();
             MultXM<false>(x2,m2.mat(),m3.mat());
             NoAliasMultXV<true>(x1,m1d,m3d);
         } else {
             typename M1::const_diag_type m1d = m1.diag();
-            typename M3::diag_type m3d = m3.diag();
+            typename M3::diag_type m3d = m3.mat().diag();
             MultXM<false>(x2,m2.mat(),m3.mat());
             NoAliasMultXV<true>(x1,m1d,m3d);
         } 
@@ -195,21 +195,21 @@ namespace tmv {
     inline void AddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Calc<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix_Diag<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3)
+        BaseMatrix_Mutable<M3>& m3)
     { AddMM(x2,m2,x1,m1,m3); }
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
     inline void NoAliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Calc<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix_Diag<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3)
+        BaseMatrix_Mutable<M3>& m3)
     { NoAliasAddMM(x2,m2,x1,m1,m3); }
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
     inline void AliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Calc<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix_Diag<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3)
+        BaseMatrix_Mutable<M3>& m3)
     { AliasAddMM(x2,m2,x1,m1,m3); }
 
 } // namespace tmv

@@ -30,30 +30,29 @@ int main() try {
     //showdiv=true;
     //showtests=true;
     //showstartdone=true;
-    //#define SKIPREST
 
-#ifndef SKIPREST
+#if 1
 
 #ifdef TEST_DOUBLE
     TestBandMatrix<double>();
-    TestAllBandDiv<double>();
+    TestBandDiv<double>();
 #endif
 
 #ifdef TEST_FLOAT
     TestBandMatrix<float>();
-    TestAllBandDiv<float>();
+    TestBandDiv<float>();
 #endif
 
 #ifdef TEST_LONGDOUBLE
     TestBandMatrix<long double>();
-    TestAllBandDiv<long double>();
+    TestBandDiv<long double>();
 #endif 
 
 #ifdef TEST_INT
     TestBandMatrix<int>();
 #endif 
 
-#endif // SKIPREST
+#endif
 
     return 0;
 }

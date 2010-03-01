@@ -74,35 +74,30 @@ namespace tmv {
             Mo mo = m.offDiag();
             const int sm1 = IntTraits2<s,-1>::sum;
             return SumElementsU_Helper<-1,sm1,comp,ix,Mo>::call(mo,x) 
-                + x*RT(N);
+                + Component<comp,RT>::f(RT(x)) * RT(N);
         }
     };
 
-    // algo 2: loop over rows
+    // algo 2: unknown diag, figure out which it is.
     template <int s, CompType comp, int ix, class M1>
-    struct SumElementsU_Helper<2,s,comp,ix,M1> 
+    struct SumElementsU_Helper<2,s,comp,ix,M1>
     {
         typedef typename M1::value_type MT;
         typedef typename M1::real_type RT;
         typedef typename Maybe<comp!=ValueComp>::
             template RealType<MT>::type ret;
-
         static inline ret call(const M1& m, const Scaling<ix,RT>& x)
         {
-            const int N = (s == UNKNOWN ? m.size() : s);
-            typedef typename M1::const_row_sub_type Mr;
-            ret sum(0);
-            for(int i=0;i<N;++i) {
-                Mr mr = m.get_row(i,i,N);
-                sum += SumElementsV_Helper<-1,UNKNOWN,comp,ix,Mr>::call(mr,x);
-            }
-            return sum;
+            if (m.isunit()) 
+                return SumElementsU_Helper<1,s,comp,ix,M1>::call(m,x);
+            else 
+                return SumElementsU_Helper<-4,s,comp,ix,M1>::call(m,x);
         }
     };
 
-    // algo 3: loop over columns
+    // algo 11: loop over columns
     template <int s, CompType comp, int ix, class M1>
-    struct SumElementsU_Helper<3,s,comp,ix,M1> 
+    struct SumElementsU_Helper<11,s,comp,ix,M1> 
     {
         typedef typename M1::value_type MT;
         typedef typename M1::real_type RT;
@@ -122,9 +117,31 @@ namespace tmv {
         }
     };
 
-    // algo 5: Fully unroll by rows
+    // algo 12: loop over rows
     template <int s, CompType comp, int ix, class M1>
-    struct SumElementsU_Helper<5,s,comp,ix,M1>
+    struct SumElementsU_Helper<12,s,comp,ix,M1> 
+    {
+        typedef typename M1::value_type MT;
+        typedef typename M1::real_type RT;
+        typedef typename Maybe<comp!=ValueComp>::
+            template RealType<MT>::type ret;
+
+        static inline ret call(const M1& m, const Scaling<ix,RT>& x)
+        {
+            const int N = (s == UNKNOWN ? m.size() : s);
+            typedef typename M1::const_row_sub_type Mr;
+            ret sum(0);
+            for(int i=0;i<N;++i) {
+                Mr mr = m.get_row(i,i,N);
+                sum += SumElementsV_Helper<-1,UNKNOWN,comp,ix,Mr>::call(mr,x);
+            }
+            return sum;
+        }
+    };
+
+    // algo 15: Fully unroll by rows
+    template <int s, CompType comp, int ix, class M1>
+    struct SumElementsU_Helper<15,s,comp,ix,M1>
     {
         typedef typename M1::value_type MT;
         typedef typename M1::real_type RT;
@@ -173,9 +190,9 @@ namespace tmv {
         { return Unroller<0,s,0,s>::unroll(m,x); }
     };
 
-    // algo 6: Fully unroll by columns
+    // algo 16: Fully unroll by columns
     template <int s, CompType comp, int ix, class M1>
-    struct SumElementsU_Helper<6,s,comp,ix,M1>
+    struct SumElementsU_Helper<16,s,comp,ix,M1>
     {
         typedef typename M1::value_type MT;
         typedef typename M1::real_type RT;
@@ -224,9 +241,10 @@ namespace tmv {
         { return Unroller<0,s,0,s>::unroll(m,x); }
     };
 
-    // algo 90: unknown diag, figure out which it is.
+    // algo -4: No branches or copies
+    // And m is NonUnitDiag
     template <int s, CompType comp, int ix, class M1>
-    struct SumElementsU_Helper<90,s,comp,ix,M1>
+    struct SumElementsU_Helper<-4,s,comp,ix,M1>
     {
         typedef typename M1::value_type MT;
         typedef typename M1::real_type RT;
@@ -234,21 +252,24 @@ namespace tmv {
             template RealType<MT>::type ret;
         static inline ret call(const M1& m, const Scaling<ix,RT>& x)
         {
+            TMVStaticAssert(M1::mupper);
+            TMVStaticAssert(!M1::munit);
+            TMVAssert(!m.isunit());
             const int s2 = s > 20 ? UNKNOWN : s;
             const int s2p1 = IntTraits<s2>::Sp1;
+            // nops = n(n+1)/2
             const int nops = IntTraits2<s2,s2p1>::prod / 2;
             const bool unroll = 
                 s == UNKNOWN ? false :
+                // Norm is faster with the regular algorithm except for 
+                // very small matrices.
                 (s > 3 && comp == NormComp) ? false :
                 nops > TMV_Q1 ? false :
                 s <= 10;
-            const int algo2 = 
-                unroll ? ( M1::mrowmajor ? 5 : 6 ) :
-                M1::mcolmajor ? 3 : 2;
-            if (m.isunit()) 
-                return SumElementsU_Helper<1,s,comp,ix,M1>::call(m,x);
-            else 
-                return SumElementsU_Helper<algo2,s,comp,ix,M1>::call(m,x);
+            const int algo = 
+                unroll ? ( M1::mrowmajor ? 15 : 16 ) :
+                M1::mcolmajor ? 11 : 12;
+            return SumElementsU_Helper<algo,s,comp,ix,M1>::call(m,x);
         }
     };
 
@@ -263,22 +284,10 @@ namespace tmv {
         static inline ret call(const M1& m, const Scaling<ix,RT>& x)
         {
             TMVStaticAssert(M1::mupper);
-            const int s2 = s > 20 ? UNKNOWN : s;
-            const int s2p1 = IntTraits<s2>::Sp1;
-            // nops = n(n+1)/2
-            const int nops = IntTraits2<s2,s2p1>::prod / 2;
-            const bool unroll = 
-                s == UNKNOWN ? false :
-                // Norm is faster with the regular algorithm except for 
-                // very small matrices.
-                (s > 3 && comp == NormComp) ? false :
-                nops > TMV_Q1 ? false :
-                s <= 10;
             const int algo = 
                 M1::munit ? 1 :
-                M1::munknowndiag ? 90 :
-                unroll ? ( M1::mrowmajor ? 5 : 6 ) :
-                M1::mcolmajor ? 3 : 2;
+                M1::munknowndiag ? 2 :
+                -4;
             return SumElementsU_Helper<algo,s,comp,ix,M1>::call(m,x);
         }
     };

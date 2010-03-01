@@ -58,8 +58,8 @@ namespace tmv {
 
     // Defined in TMV_Matrix.cpp
     template <class T, bool C>
-    void InstWrite(std::ostream& os,
-                   const ConstMatrixView<T,UNKNOWN,UNKNOWN,C>& m);
+    void InstWrite(
+        std::ostream& os, const ConstMatrixView<T,UNKNOWN,UNKNOWN,C>& m);
 
     template <bool inst, class M>
     struct CallWriteM;
@@ -259,113 +259,113 @@ namespace tmv {
                 if (!is) {
 #ifdef TMV_NO_THROW
                     std::cerr<<"Matrix ReadError: !is\n"; 
-                    exit(1); }
+                    exit(1); 
 #else
                     throw MatrixReadError<M>(i,j,m,is);
 #endif
-            }
-            m.ref(i,j) = temp;
-        } 
-        is >> paren;
-        if (!is || paren != ')') {
+                }
+                m.ref(i,j) = temp;
+            } 
+            is >> paren;
+            if (!is || paren != ')') {
 #ifdef TMV_NO_THROW
-            std::cerr<<"Matrix ReadError: "<<paren<<" != )\n"; 
-            exit(1); 
+                std::cerr<<"Matrix ReadError: "<<paren<<" != )\n"; 
+                exit(1); 
 #else
-            throw MatrixReadError<M>(i,ncols,m,is,')',is?paren:')');
+                throw MatrixReadError<M>(i,ncols,m,is,')',is?paren:')');
 #endif
+            }
         }
     }
-}
 
-// Defined in TMV_Matrix.cpp
-template <class T, bool C>
-void InstRead(std::istream& is, MatrixView<T,UNKNOWN,UNKNOWN,C> m);
+    // Defined in TMV_Matrix.cpp
+    template <class T, bool C>
+    void InstRead(std::istream& is, MatrixView<T,UNKNOWN,UNKNOWN,C> m);
 
-template <bool inst, class M>
-struct CallReadM;
+    template <bool inst, class M>
+    struct CallReadM;
 
-template <class M>
-struct CallReadM<false,M> // inst = false
-{
-    static inline void call(std::istream& is, M& m)
-    { InlineRead(is,m); }
-};
-template <class M>
-struct CallReadM<true,M>
-{
-    static inline void call(std::istream& is, M& m)
-    { InstRead(is,m.xView()); }
-};
+    template <class M>
+    struct CallReadM<false,M> // inst = false
+    {
+        static inline void call(std::istream& is, M& m)
+        { InlineRead(is,m); }
+    };
+    template <class M>
+    struct CallReadM<true,M>
+    {
+        static inline void call(std::istream& is, M& m)
+        { InstRead(is,m.xView()); }
+    };
 
-template <class M>
-inline void Read(std::istream& is, BaseMatrix_Rec_Mutable<M>& m)
-{
-    typedef typename M::value_type T;
-    const int inst = 
-        Traits<T>::isinst &&
-        (M::mrowmajor || M::mcolmajor) &&
-        M::mcolsize == UNKNOWN &&
-        M::mrowsize == UNKNOWN;
-    CallReadM<inst,M>::call(is,m.mat());
-}
-
-
-// 
-// Operator overloads for I/O
-// is >> m
-// os << m
-//
-
-template <class M>
-inline std::ostream& operator<<(
-    std::ostream& os, const BaseMatrix<M>& m)
-{ Write(os,m.calc()); return os; }
-
-template <class M>
-inline std::istream& operator>>(
-    std::istream& is, BaseMatrix_Rec_Mutable<M>& m)
-{
-    size_t cs,rs;
-    is >> cs >> rs;
-    if (!is) {
-#ifdef TMV_NO_THROW
-        std::cerr<<"Matrix ReadError: !is \n"; 
-        exit(1); 
-#else
-        throw MatrixReadError<M>(is);
-#endif
+    template <class M>
+    inline void Read(std::istream& is, BaseMatrix_Rec_Mutable<M>& m)
+    {
+        typedef typename M::value_type T;
+        const int inst = 
+            Traits<T>::isinst &&
+            (M::mrowmajor || M::mcolmajor) &&
+            M::mcolsize == UNKNOWN &&
+            M::mrowsize == UNKNOWN;
+        CallReadM<inst,M>::call(is,m.mat());
     }
-    if (cs != m.colsize() || rs != m.rowsize()) {
-#ifdef TMV_NO_THROW
-        std::cerr<<"Matrix ReadError: Wrong size \n"; 
-        exit(1); 
-#else
-        throw MatrixReadError<M>(m,is,cs,rs);
-#endif
-    }
-    Read(is,m);
-    return is;
-}
 
-template <class T, StorageType S, IndexStyle I>
-inline std::istream& operator>>(std::istream& is, 
-                                auto_ptr<Matrix<T,S,I> >& m)
-{
-    size_t cs,rs;
-    is >> cs >> rs;
-    if (!is) {
+
+    // 
+    // Operator overloads for I/O
+    // is >> m
+    // os << m
+    //
+
+    template <class M>
+    inline std::ostream& operator<<(
+        std::ostream& os, const BaseMatrix<M>& m)
+    { Write(os,m.calc()); return os; }
+
+    template <class M>
+    inline std::istream& operator>>(
+        std::istream& is, BaseMatrix_Rec_Mutable<M>& m)
+    {
+        size_t cs,rs;
+        is >> cs >> rs;
+        if (!is) {
 #ifdef TMV_NO_THROW
-        std::cerr<<"Matrix ReadError: !is \n"; 
-        exit(1); 
+            std::cerr<<"Matrix ReadError: !is \n"; 
+            exit(1); 
 #else
-        throw MatrixReadError<Matrix<T,S,I> >(is);
+            throw MatrixReadError<M>(is);
 #endif
+        }
+        if (cs != m.colsize() || rs != m.rowsize()) {
+#ifdef TMV_NO_THROW
+            std::cerr<<"Matrix ReadError: Wrong size \n"; 
+            exit(1); 
+#else
+            throw MatrixReadError<M>(m,is,cs,rs);
+#endif
+        }
+        Read(is,m);
+        return is;
     }
-    m.reset(new Matrix<T,S,I>(cs,rs));
-    Read(is,*m);
-    return is;
-}
+
+    template <class T, StorageType S, IndexStyle I>
+    inline std::istream& operator>>(
+        std::istream& is, auto_ptr<Matrix<T,S,I> >& m)
+    {
+        size_t cs,rs;
+        is >> cs >> rs;
+        if (!is) {
+#ifdef TMV_NO_THROW
+            std::cerr<<"Matrix ReadError: !is \n"; 
+            exit(1); 
+#else
+            throw MatrixReadError<Matrix<T,S,I> >(is);
+#endif
+        }
+        m.reset(new Matrix<T,S,I>(cs,rs));
+        Read(is,*m);
+        return is;
+    }
 } // namespace mv
 
 #endif

@@ -6,7 +6,7 @@
       const T3 x, \
       const ConstVectorView<T1,UNKNOWN,C1>& v1, \
       const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3); \
-  template void InstLDivVM( \
+  template void InstLDiv( \
       const T3 x, \
       const ConstVectorView<T1,UNKNOWN,C1>& v1, \
       const ConstDiagMatrixView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3); \

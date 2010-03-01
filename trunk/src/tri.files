@@ -5,8 +5,6 @@ TMV_MultUV.cpp
 TMV_MultUL.cpp
 TMV_MultUU.cpp
 TMV_MultUD.cpp
-TMV_TriDiv.cpp
-TMV_TriDiv_V.cpp
-TMV_TriDiv_M.cpp
-TMV_TriDiv_L.cpp
-TMV_TriInverse.cpp
+TMV_InvertU.cpp
+TMV_DivVU.cpp
+TMV_DivMU.cpp

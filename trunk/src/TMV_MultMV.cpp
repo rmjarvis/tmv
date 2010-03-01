@@ -162,7 +162,7 @@ namespace tmv {
 #endif
         ) {
             const Vector<std::complex<double> > xx = alpha*x;
-            return DoMultMV(std::complex<double>(1.),A,xx.XView(),beta,y);
+            return DoMultMV(std::complex<double>(1.),A,xx.xView(),beta,y);
         } 
 
         int m = A.iscm() ? A.colsize() : A.rowsize();
@@ -189,25 +189,25 @@ namespace tmv {
 #else
             std::complex<double> ca = TMV_CONJ(alpha);
             if (x.isconj()) {
-                y.ConjugateSelf();
+                y.conjugateSelf();
                 BLASNAME(zgemv) (
                     BLASCM BLASCH_NT,
                     BLASV(m),BLASV(n),BLASP(&ca),BLASP(A.cptr()),BLASV(lda),
                     BLASP(xp),BLASV(xs),BLASP(&xbeta),BLASP(yp),BLASV(ys)
                     BLAS1);
-                y.ConjugateSelf();
+                y.conjugateSelf();
             } else {
-                Vector<std::complex<double> > xx = ca*x.Conjugate();
+                Vector<std::complex<double> > xx = ca*x.conjugate();
                 ca = std::complex<double>(1.);
                 xs = 1;
                 xp = xx.cptr();
-                y.ConjugateSelf();
+                y.conjugateSelf();
                 BLASNAME(zgemv) (
                     BLASCM BLASCH_NT,
                     BLASV(m),BLASV(n),BLASP(&ca),BLASP(A.cptr()),BLASV(lda),
                     BLASP(xp),BLASV(xs),BLASP(&xbeta),BLASP(yp),BLASV(ys)
                     BLAS1);
-                y.ConjugateSelf();
+                y.conjugateSelf();
             }
 #endif
         } else {
@@ -218,6 +218,7 @@ namespace tmv {
                 BLAS1);
         }
     }
+#ifdef TMV_INST_MIX
     template <int Si, int Sj, bool C1>
     static void DoMultMV(
         std::complex<double> alpha,
@@ -234,7 +235,7 @@ namespace tmv {
         if (A.iscm()) {
             if (y.step() != 1) {
                 Vector<std::complex<double> > yy(y.size());
-                DoMultMV(1.,A,x,0.,yy.View());
+                DoMultMV(1.,A,x,0.,yy.xView());
                 if (beta == 0.) y = alpha*yy;
                 else y += alpha*yy;
             } else {
@@ -255,12 +256,12 @@ namespace tmv {
                         BLASP((double*)A.cptr()),BLASV(lda),
                         BLASP(xp),BLASV(xs),BLASV(beta),
                         BLASP(yp),BLASV(ys) BLAS1);
-                    if (A.isconj()) y.ConjugateSelf();
+                    if (A.isconj()) y.conjugateSelf();
                     y *= alpha;
                 } else if (A.isconj()) {
                     Vector<std::complex<double> > yy(y.size());
-                    DoMultMV(1.,A.Conjugate(),x,0.,yy.View());
-                    y += alpha*yy.Conjugate();
+                    DoMultMV(1.,A.conjugate(),x,0.,yy.xView());
+                    y += alpha*yy.conjugate();
                 } else if (TMV_IMAG(alpha) == 0.) {
                     int m = 2*A.colsize();
                     int n = A.rowsize();
@@ -281,13 +282,13 @@ namespace tmv {
                         BLASP(yp),BLASV(ys) BLAS1);
                 } else {
                     Vector<std::complex<double> > yy(y.size());
-                    DoMultMV(std::complex<double>(1.),A,x,0.,yy.View());
+                    DoMultMV(std::complex<double>(1.),A,x,0.,yy.xView());
                     y += alpha*yy;
                 }
             }
         } else { // A.isrm
             const Vector<std::complex<double> > xx = x;
-            DoMultMV(alpha,A,xx.XView(),beta,y);
+            DoMultMV(alpha,A,xx.xView(),beta,y);
         }
     }
     template <int Si, int Sj, bool C2>
@@ -327,7 +328,7 @@ namespace tmv {
                 BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp+1),BLASV(xs),BLASV(beta),
                 BLASP(yp+1),BLASV(ys) BLAS1);
-            if (x.isconj()) y.ConjugateSelf();
+            if (x.isconj()) y.conjugateSelf();
             y *= alpha;
         } else if (TMV_IMAG(alpha) == 0. && !x.isconj()) {
             int m = A.iscm() ? A.colsize() : A.rowsize();
@@ -355,7 +356,7 @@ namespace tmv {
                 BLASP(yp+1),BLASV(ys) BLAS1);
         } else {
             const Vector<std::complex<double> > xx = alpha*x;
-            DoMultMV(std::complex<double>(1.),A,xx.XView(),1.,y);
+            DoMultMV(std::complex<double>(1.),A,xx.xView(),1.,y);
         }
     }
     template <int Si, int Sj>
@@ -386,7 +387,7 @@ namespace tmv {
         double ar(TMV_REAL(alpha));
         double ai(TMV_IMAG(alpha));
         if (ar == 0.) {
-            if (beta == 0.) y.Real().Zero();
+            if (beta == 0.) y.realPart().setZero();
         }
         else 
             BLASNAME(dgemv) (
@@ -395,7 +396,7 @@ namespace tmv {
                 BLASP(xp),BLASV(xs),BLASV(beta),
                 BLASP(yp),BLASV(ys) BLAS1);
         if (ai == 0.) {
-            if (beta == 0.) y.Imag().Zero();
+            if (beta == 0.) y.imagPart().setZero();
         }
         else
             BLASNAME(dgemv) (
@@ -404,6 +405,7 @@ namespace tmv {
                 BLASP(xp),BLASV(xs),BLASV(beta),
                 BLASP(yp+1),BLASV(ys) BLAS1);
     }
+#endif
 #endif // DOUBLE
 #ifdef TMV_INST_FLOAT
     template <int Si, int Sj>
@@ -458,7 +460,7 @@ namespace tmv {
 #endif
         ) {
             const Vector<std::complex<float> > xx = alpha*x;
-            return DoMultMV(std::complex<float>(1.F),A,xx.XView(),beta,y);
+            return DoMultMV(std::complex<float>(1.F),A,xx.xView(),beta,y);
         } 
 
         int m = A.iscm() ? A.colsize() : A.rowsize();
@@ -485,25 +487,25 @@ namespace tmv {
 #else
             std::complex<float> ca = TMV_CONJ(alpha);
             if (x.isconj()) {
-                y.ConjugateSelf();
+                y.conjugateSelf();
                 BLASNAME(cgemv) (
                     BLASCM BLASCH_NT,
                     BLASV(m),BLASV(n),BLASP(&ca),BLASP(A.cptr()),BLASV(lda),
                     BLASP(xp),BLASV(xs),BLASP(&xbeta),BLASP(yp),BLASV(ys)
                     BLAS1);
-                y.ConjugateSelf();
+                y.conjugateSelf();
             } else {
-                Vector<std::complex<float> > xx = ca*x.Conjugate();
+                Vector<std::complex<float> > xx = ca*x.conjugate();
                 ca = std::complex<float>(1.F);
                 xs = 1;
                 xp = xx.cptr();
-                y.ConjugateSelf();
+                y.conjugateSelf();
                 BLASNAME(cgemv) (
                     BLASCM BLASCH_NT,
                     BLASV(m),BLASV(n),BLASP(&ca),BLASP(A.cptr()),BLASV(lda),
                     BLASP(xp),BLASV(xs),BLASP(&xbeta),BLASP(yp),BLASV(ys)
                     BLAS1);
-                y.ConjugateSelf();
+                y.conjugateSelf();
             }
 #endif
         } else {
@@ -514,6 +516,7 @@ namespace tmv {
                 BLAS1);
         }
     }
+#ifdef TMV_INST_MIX
     template <int Si, int Sj, bool C1>
     static void DoMultMV(
         std::complex<float> alpha,
@@ -530,7 +533,7 @@ namespace tmv {
         if (A.iscm()) {
             if (y.step() != 1) {
                 Vector<std::complex<float> > yy(y.size());
-                DoMultMV(1.F,A,x,0.F,yy.View());
+                DoMultMV(1.F,A,x,0.F,yy.xView());
                 if (beta == 0.F) y = alpha*yy;
                 else y += alpha*yy;
             } else {
@@ -551,12 +554,12 @@ namespace tmv {
                         BLASP((float*)A.cptr()),BLASV(lda),
                         BLASP(xp),BLASV(xs),BLASV(beta),
                         BLASP(yp),BLASV(ys) BLAS1);
-                    if (A.isconj()) y.ConjugateSelf();
+                    if (A.isconj()) y.conjugateSelf();
                     y *= alpha;
                 } else if (A.isconj()) {
                     Vector<std::complex<float> > yy(y.size());
-                    DoMultMV(1.F,A.Conjugate(),x,0.F,yy.View());
-                    y += alpha*yy.Conjugate();
+                    DoMultMV(1.F,A.conjugate(),x,0.F,yy.xView());
+                    y += alpha*yy.conjugate();
                 } else if (TMV_IMAG(alpha) == 0.F) {
                     int m = 2*A.colsize();
                     int n = A.rowsize();
@@ -577,13 +580,13 @@ namespace tmv {
                         BLASP(yp),BLASV(ys) BLAS1);
                 } else {
                     Vector<std::complex<float> > yy(y.size());
-                    DoMultMV(std::complex<float>(1.F),A,x,0.F,yy.View());
+                    DoMultMV(std::complex<float>(1.F),A,x,0.F,yy.xView());
                     y += alpha*yy;
                 }
             }
         } else { // A.isrm
             const Vector<std::complex<float> > xx = x;
-            DoMultMV(alpha,A,xx.XView(),beta,y);
+            DoMultMV(alpha,A,xx.xView(),beta,y);
         }
     }
     template <int Si, int Sj, bool C2>
@@ -623,7 +626,7 @@ namespace tmv {
                 BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp+1),BLASV(xs),BLASV(beta),
                 BLASP(yp+1),BLASV(ys) BLAS1);
-            if (x.isconj()) y.ConjugateSelf();
+            if (x.isconj()) y.conjugateSelf();
             y *= alpha;
         } else if (TMV_IMAG(alpha) == 0.F && !x.isconj()) {
             int m = A.iscm() ? A.colsize() : A.rowsize();
@@ -651,7 +654,7 @@ namespace tmv {
                 BLASP(yp+1),BLASV(ys) BLAS1);
         } else {
             const Vector<std::complex<float> > xx = alpha*x;
-            DoMultMV(std::complex<float>(1.F),A,xx.XView(),1.F,y);
+            DoMultMV(std::complex<float>(1.F),A,xx.xView(),1.F,y);
         }
     }
     template <int Si, int Sj>
@@ -682,7 +685,7 @@ namespace tmv {
         float ar(TMV_REAL(alpha));
         float ai(TMV_IMAG(alpha));
         if (ar == 0.F) {
-            if (beta == 0.F) y.Real().Zero();
+            if (beta == 0.F) y.realPart().setZero();
         }
         else 
             BLASNAME(sgemv) (
@@ -691,7 +694,7 @@ namespace tmv {
                 BLASP(xp),BLASV(xs),BLASV(beta),
                 BLASP(yp),BLASV(ys) BLAS1);
         if (ai == 0.F) {
-            if (beta == 0.F) y.Imag().Zero();
+            if (beta == 0.F) y.imagPart().setZero();
         }
         else
             BLASNAME(sgemv) (
@@ -700,6 +703,7 @@ namespace tmv {
                 BLASP(xp),BLASV(xs),BLASV(beta),
                 BLASP(yp+1),BLASV(ys) BLAS1);
     }
+#endif
 #endif // FLOAT
 #endif // BLAS
 
@@ -714,7 +718,7 @@ namespace tmv {
         else if (m1.iscm())
             DoMultMV<false>(x,m1.cmView(),v2,v3);
         else 
-            DoMultMV<false>(T3(1),(x*m1).calc().view(),v2,v3);
+            DoMultMV<false>(T3(1),(x*m1).calc().constView().xView(),v2,v3);
     }
     template <class T1, bool C1, class T2, bool C2, class T3>
     void InstAddMultMV(
@@ -727,7 +731,7 @@ namespace tmv {
         else if (m1.iscm())
             DoMultMV<true>(x,m1.cmView(),v2,v3);
         else 
-            DoMultMV<true>(T3(1),(x*m1).calc().view(),v2,v3);
+            DoMultMV<true>(T3(1),(x*m1).calc().constView().xView(),v2,v3);
     }
 
 #define InstFile "TMV_MultMV.inst"

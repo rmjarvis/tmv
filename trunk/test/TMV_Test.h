@@ -5,6 +5,10 @@
 #undef NDEBUG
 #endif
 
+#ifndef XTEST
+#define XTEST 0
+#endif
+
 #include <iostream>
 
 #define EPS (10*tmv::Epsilon<T>())

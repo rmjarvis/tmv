@@ -415,7 +415,7 @@ template <class T, tmv::StorageType S> static void TestBasicMatrix_IO()
 
 }
 
-template <class T> void TestAllMatrix()
+template <class T> void TestMatrix()
 {
 #if 1
     TestBasicMatrix_1<T,tmv::RowMajor>();
@@ -441,14 +441,14 @@ template <class T> void TestAllMatrix()
 }
 
 #ifdef TEST_DOUBLE
-template void TestAllMatrix<double>();
+template void TestMatrix<double>();
 #endif
 #ifdef TEST_FLOAT
-template void TestAllMatrix<float>();
+template void TestMatrix<float>();
 #endif
 #ifdef TEST_LONGDOUBLE
-template void TestAllMatrix<long double>();
+template void TestMatrix<long double>();
 #endif
 #ifdef TEST_INT
-template void TestAllMatrix<int>();
+template void TestMatrix<int>();
 #endif

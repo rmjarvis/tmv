@@ -234,22 +234,24 @@ namespace tmv {
         static inline void call(const M1& m1, M2& m2)
         {
             typedef typename M2::value_type T2;
+            const bool allrm = M1::mrowmajor && M2::mrowmajor;
+#if TMV_OPT == 0
+            const int algo = allrm ? 21 : 11;
+#else
+            const bool allcm = M1::mcolmajor && M2::mcolmajor;
             const bool canlin = 
-                M1::mcanlin && M2::mcanlin &&
-                ( (M1::mrowmajor && M2::mrowmajor) ||
-                  (M1::mcolmajor && M2::mcolmajor) );
+                M1::mcanlin && M2::mcanlin && (allrm || allcm);
             const int algo = 
                 (cs == 0 || rs == 0) ? 0 :
-#if TMV_OPT >= 1
                 canlin ? 1 :
                 ( cs != UNKNOWN && rs != UNKNOWN ) ? (
                     ( IntTraits2<cs,rs>::prod <= int(128/sizeof(T2)) ) ? (
                         ( M1::mrowmajor && M2::mrowmajor ) ? 25 : 15 ) :
-                    ( M1::mrowmajor && M2::mrowmajor ) ? 21 : 
-                    ( M1::mcolmajor && M2::mcolmajor ) ? 11 :
+                    allrm ? 21 : 
+                    allcm ? 11 :
                     ( cs > rs ) ? 21 : 11 ) :
+                allrm ? 21 : 11;
 #endif
-                ( M1::mrowmajor && M2::mrowmajor ) ? 21 : 11;
             CopyM_Helper<algo,cs,rs,M1,M2>::call(m1,m2);
         }
     };

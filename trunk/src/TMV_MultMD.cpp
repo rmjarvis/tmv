@@ -35,8 +35,6 @@
 #include "tmv/TMV_MultXM.h"
 #include "tmv/TMV_MultXD.h"
 #include "tmv/TMV_ProdXM.h"
-#include "tmv/TMV_AddMM.h"
-#include "tmv/TMV_SumMM.h"
 
 namespace tmv {
 
@@ -50,7 +48,7 @@ namespace tmv {
     {
         TMVAssert(m1.isrm() || m1.iscm());
         TMVAssert(m3.isrm() || m3.iscm());
-        TMVStaticAssert(M2::mstep == 1);
+        TMVStaticAssert(M2::mdiagstep == 1);
         typedef typename M3::real_type RT;
         Scaling<1,RT> one;
         if (m3.iscm()) {

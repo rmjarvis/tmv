@@ -86,7 +86,7 @@ namespace tmv {
 
     // BaseVector is the base class for all vector classes.
     // All non-modifying functions are defined for BaseVector, such as
-    // Norm, SumElements, MinElement, etc.
+    // norm, sumElements, minElement, etc.
     template <class V>
     class BaseVector;
 
@@ -222,7 +222,7 @@ namespace tmv {
     enum ADType { Ascend, Descend };
     enum CompType { 
         RealComp, AbsComp, Abs2Comp, ImagComp,
-        ArgComp, NormComp, ValueComp, InverseComp  };
+        ArgComp, NormComp, ValueComp, InverseComp, LogComp };
     enum OldADType { ASCEND, DESCEND };
     enum OldCOMPType { 
         REAL_COMP, ABS_COMP, ABS2_COMP, IMAG_COMP, ARG_COMP, NORM_COMP, VALUE };
@@ -252,7 +252,7 @@ namespace tmv {
     };
     template <class T> 
     struct Component<AbsComp,T>
-    { 
+    {
         static inline T f(const T& x) { return TMV_ABS(x); } 
         static inline void applyf(T& x) { x = TMV_ABS(x); }
         static inline T get(const T& x) { return x; }
@@ -292,6 +292,13 @@ namespace tmv {
         static inline void applyf(T& x) { x = T(1) / x; }
         static inline T get(const T& x) { return x; }
     };
+    template <class T> 
+    struct Component<LogComp,T>
+    {
+        static inline T f(const T& x) { return TMV_LOG(x); } 
+        static inline void applyf(T& x) { x = TMV_LOG(x); }
+        static inline T get(const T& x) { return x; }
+    };
 
     // Now the complex version:
 #define CT std::complex<T>
@@ -311,7 +318,7 @@ namespace tmv {
     };
     template <class T> 
     struct Component<AbsComp,CT>
-    { 
+    {
         static inline T f(const CT& x) { return TMV_ABS(x); } 
         static inline void applyf(CT& x) { real(x) = TMV_ABS(x); }
         static inline T get(const CT& x) { return real(x); }
@@ -350,6 +357,13 @@ namespace tmv {
         static inline CT f(const CT& x) { return std::conj(x) / TMV_NORM(x); }
         static inline void applyf(CT& x) { x /= TMV_NORM(x); }
         static inline CT get(const CT& x) { return std::conj(x); }
+    };
+    template <class T> 
+    struct Component<LogComp,CT>
+    {
+        static inline T f(const CT& x) { return TMV_LOG(real(x)); } 
+        static inline void applyf(CT& x) { real(x) = TMV_LOG(real(x)); }
+        static inline T get(const CT& x) { return real(x); }
     };
 #undef CT
 
@@ -505,6 +519,15 @@ namespace tmv {
     template <class V>
     inline typename V::real_type SumAbs2Elements(const BaseVector_Calc<V>& v);
 
+    // Defined in TMV_Det.h
+    template <class V>
+    inline typename V::value_type ProdElements(const BaseVector_Calc<V>& v);
+    template <class V>
+    inline typename V::real_type LogProdElements(
+        const BaseVector_Calc<V>& v, typename V::value_type* sign);
+    template <class V>
+    inline bool HasZeroElement(const BaseVector_Calc<V>& v);
+
     // Defined in TMV_MinMax.h
     template <class V>
     inline typename V::value_type MaxElement(
@@ -634,6 +657,15 @@ namespace tmv {
 
         inline real_type normInf() const
         { return size() > 0 ? maxAbsElement() : real_type(0); }
+
+        inline value_type prodElements() const
+        { return tmv::ProdElements(calc()); }
+
+        inline real_type logProdElements(value_type* sign=0) const
+        { return tmv::LogProdElements(calc(),sign); }
+
+        inline bool hasZeroElement() const
+        { return tmv::HasZeroElement(calc()); }
 
 
 
@@ -1305,46 +1337,6 @@ namespace tmv {
 
     }; // BaseVector_Mutable
 
-    // A special kind of Vector that doesn't have any values.
-    // It just stores the size of the vector.
-    template <class V>
-    class VectorSizer : public BaseVector<VectorSizer<V> >
-    {
-    public:
-        enum { vsize = Traits<V>::vsize };
-
-        inline VectorSizer(const V& v) : itssize(v.size()) {}
-        inline VectorSizer(const VectorSizer<V>& v) : itssize(v.size()) {}
-        inline ~VectorSizer() {}
-
-        template <class V2>
-        inline void assignTo(BaseVector_Mutable<V2>& ) const {}
-
-        template <class V2>
-        inline void newAssignTo(BaseVector_Mutable<V2>& ) const {}
-
-        inline size_t size() const { return itssize; }
-
-    private:
-        const CheckedInt<vsize> itssize;
-        void operator=(const BaseVector_Calc<V>&);
-    };
-
-    // Set up the required traits for VectorSizer:
-    template <class V>
-    struct Traits<VectorSizer<V> >
-    {
-        enum { vsize = Traits<V>::vsize };
-        enum { vfort = false };
-        enum { vcalc = false };
-
-        typedef VectorSizer<V> type;
-
-        typedef typename Traits<V>::value_type value_type;
-        typedef type calc_type;
-        typedef type eval_type;
-        typedef type copy_type;
-    };
 
     //
     // Vector ==, != Vector

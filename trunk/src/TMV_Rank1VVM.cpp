@@ -161,6 +161,7 @@ namespace tmv {
                 BLASP(xp),BLASV(xs),BLASP(yp),BLASV(ys),
                 BLASP(A.ptr()),BLASV(lda));
     }
+#ifdef TMV_INST_MIX
     template <bool C2>
     static void BlasRank1Update(
         std::complex<double> alpha, const ConstVectorView<double>& x, 
@@ -278,13 +279,15 @@ namespace tmv {
             BLASP(xp),BLASV(xs),BLASP(yp),BLASV(ys),
             BLASP((double*)A.ptr()),BLASV(lda));
     }
+#endif
     template <bool add>
     static void DoRank1Update(
         const double x, const ConstVectorView<double>& v1,
         const ConstVectorView<double>& v2, MatrixView<double,1> m3)
     { 
         if (!add) m3.setZero();
-        BlasRank1Update(x,v1,v2,m3); 
+        if (v1.size() > 0 && v2.size() > 0)
+            BlasRank1Update(x,v1,v2,m3); 
     }
     template <bool add, class T1, bool C1, class T2, bool C2>
     static void DoRank1Update(
@@ -294,7 +297,8 @@ namespace tmv {
         MatrixView<std::complex<double>,1> m3)
     {
         if (!add) m3.setZero();
-        BlasRank1Update(x,v1,v2,m3); 
+        if (v1.size() > 0 && v2.size() > 0)
+            BlasRank1Update(x,v1,v2,m3); 
     }
 #endif //DOUBLE
 #ifdef TMV_INST_FLOAT
@@ -379,6 +383,7 @@ namespace tmv {
                 BLASP(xp),BLASV(xs),BLASP(yp),BLASV(ys),
                 BLASP(A.ptr()),BLASV(lda));
     }
+#ifdef TMV_INST_MIX
     template <bool C2>
     static void BlasRank1Update(
         std::complex<float> alpha, const ConstVectorView<float>& x, 
@@ -496,13 +501,15 @@ namespace tmv {
             BLASP(xp),BLASV(xs),BLASP(yp),BLASV(ys),
             BLASP((float*)A.ptr()),BLASV(lda));
     }
+#endif
     template <bool add>
     static void DoRank1Update(
         const float x, const ConstVectorView<float>& v1,
         const ConstVectorView<float>& v2, MatrixView<float,1> m3)
     { 
         if (!add) m3.setZero();
-        BlasRank1Update(x,v1,v2,m3); 
+        if (v1.size() > 0 && v2.size() > 0)
+            BlasRank1Update(x,v1,v2,m3); 
     }
     template <bool add, class T1, bool C1, class T2, bool C2>
     static void DoRank1Update(
@@ -512,7 +519,8 @@ namespace tmv {
         MatrixView<std::complex<float>,1> m3)
     {
         if (!add) m3.setZero();
-        BlasRank1Update(x,v1,v2,m3); 
+        if (v1.size() > 0 && v2.size() > 0) 
+            BlasRank1Update(x,v1,v2,m3); 
     }
 #endif // FLOAT
 #endif // BLAS

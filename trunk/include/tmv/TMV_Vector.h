@@ -407,6 +407,7 @@
 #include <vector>
 #include "TMV_BaseVector.h"
 #include "TMV_VIt.h"
+#include "TMV_Array.h"
 
 namespace tmv {
 
@@ -474,11 +475,11 @@ namespace tmv {
         typedef VIt<T,-1,false> reverse_iterator;
     };
 
-    //#ifdef XTEST
+#ifdef XTEST
 #ifdef TMV_DEBUG
 #define XTEST_DEBUG
 #endif
-    //#endif
+#endif
 
     template <class T, IndexStyle I> 
     class Vector : public BaseVector_Mutable<Vector<T,I> >
@@ -500,43 +501,42 @@ namespace tmv {
         // Constructors
         //
 
-        explicit inline Vector(size_t n) : itssize(n), itsv(new T[n])
-        {
+        explicit inline Vector(size_t n=0) : itssize(n), itsv(n)
+        { 
+            TMVAssert(n>=0);
 #ifdef TMV_DEBUG
             this->setAllTo(T(888));
 #endif
         }
 
-        inline Vector(size_t n, T val) : itssize(n), itsv(new T[n])
+        inline Vector(size_t n, T val) : itssize(n), itsv(n)
         {
-#ifdef TMV_DEBUG
-            this->setAllTo(T(888));
-#endif
-            std::fill(ptr(),ptr()+n,val);
+            TMVAssert(n>=0);
+            this->setAllTo(val);
         }
 
-        inline Vector(size_t n, const T* v2) : itssize(n), itsv(new T[n])
+        inline Vector(size_t n, const T* v2) : itssize(n), itsv(n)
         {
+            TMVAssert(n>=0);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif
-            //std::copy(v2,v2+n,ptr());
             VectorViewOf(v2,n).newAssignTo(*this);
         }
 
-        inline explicit Vector(const std::vector<T>& v2) :  
-            itssize(v2.size()), itsv(new T[v2.size()])
+        inline explicit Vector(const std::vector<T>& v2) : 
+            itssize(v2.size()), itsv(itssize)
         {
+            TMVAssert(itssize>=0);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif
-            //std::copy(v2.begin(),v2.end(),ptr());
             VectorViewOf(&v2[0],itssize).newAssignTo(*this);
         }
 
-        inline Vector(const type& v2) :
-            itssize(v2.size()), itsv(new T[v2.size()])
+        inline Vector(const type& v2) : itssize(v2.size()), itsv(itssize)
         {
+            TMVAssert(itssize>=0);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif
@@ -544,10 +544,11 @@ namespace tmv {
         }
 
         template <class V2>
-        inline Vector(const BaseVector<V2>& v2) : 
-            itssize(v2.size()), itsv(new T[v2.size()])
+        inline Vector(const BaseVector<V2>& v2) :
+            itssize(v2.size()), itsv(itssize)
         {
-#ifdef TMV_DEBUG
+            TMVAssert(itssize>=0);
+#ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif
             v2.newAssignTo(*this);
@@ -581,27 +582,34 @@ namespace tmv {
         // Auxilliary Functions
         //
 
-        inline const T* cptr() const { return itsv.get(); }
-        inline T* ptr() { return itsv.get(); }
+        inline const T* cptr() const { return itsv; }
+        inline T* ptr() { return itsv; }
         inline T cref(int i) const  { return itsv[i]; }
         inline T& ref(int i) { return itsv[i]; }
 
         inline size_t size() const { return itssize; }
         inline int step() const { return 1; }
         inline bool isconj() const { return false; }
-        inline void swapWith(type& v2)
+        inline void swapWith(type& rhs)
         {
-            TMVAssert(v2.size() == size());
-            if (itsv.get() == v2.itsv.get()) return;
-            T* temp = itsv.release();
-            itsv.reset(v2.itsv.release());
-            v2.itsv.reset(temp);
+            TMVAssert(rhs.size() == size());
+            if (itsv.getP() == rhs.itsv.getP()) return;
+            itsv.swapWith(rhs.itsv);
+        }
+
+        inline void resize(size_t n)
+        {
+            itssize = n;
+            itsv.resize(n);
+#ifdef TMV_DEBUG
+            this->setAllTo(T(888));
+#endif
         }
 
     private:
 
-        const size_t itssize;
-        auto_array<T> itsv;
+        size_t itssize;
+        AlignedArray<T> itsv;
 
     }; // Vector
 

@@ -31,23 +31,21 @@ int main() try {
     //showtests=true;
     //showstartdone=true;
 
-    //#define SKIPREST
-
-#ifndef SKIPREST
+#if 1
 
 #ifdef TEST_DOUBLE
-    TestAllMatrixDiv<double>();
+    TestMatrixDiv<double>();
 #endif // DOUBLE
 
 #ifdef TEST_FLOAT
-    TestAllMatrixDiv<float>();
+    TestMatrixDiv<float>();
 #endif // FLOAT
 
 #ifdef TEST_LONGDOUBLE
-    TestAllMatrixDiv<long double>();
+    TestMatrixDiv<long double>();
 #endif // LONGDOUBLE
 
-#endif // SKIPREST
+#endif
 
     return 0;
 }

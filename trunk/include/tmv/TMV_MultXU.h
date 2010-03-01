@@ -94,9 +94,36 @@ namespace tmv {
         { CopyU_Helper<-1,s,M1,M2>::call(m1,m2); }
     };
 
-    // algo 1: m1 is unitdiag
+    // algo 1: Transpose (and go back to -3, rather than -2)
     template <int s, bool add, int ix, class T, class M1, class M2>
     struct MultXU_Helper<1,s,add,ix,T,M1,M2>
+    {
+        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        {
+            typedef typename M1::const_transpose_type M1t;
+            typedef typename M2::transpose_type M2t;
+            M1t m1t = m1.transpose();
+            M2t m2t = m2.transpose();
+            MultXU_Helper<-3,s,add,ix,T,M1t,M2t>::call(x,m1t,m2t);
+        }
+    };
+
+    // algo 2: UnknownDiag
+    template <int s, bool add, int ix, class T, class M1, class M2>
+    struct MultXU_Helper<2,s,add,ix,T,M1,M2>
+    {
+        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        {
+            if (m1.isunit())
+                MultXU_Helper<3,s,add,ix,T,M1,M2>::call(x,m1,m2);
+            else
+                MultXU_Helper<-4,s,add,ix,T,M1,M2>::call(x,m1,m2);
+        }
+    };
+
+    // algo 3: m1 is unitdiag
+    template <int s, bool add, int ix, class T, class M1, class M2>
+    struct MultXU_Helper<3,s,add,ix,T,M1,M2>
     {
         static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
@@ -112,33 +139,9 @@ namespace tmv {
         }
     };
 
-    // algo 2: Loop over rows
+    // algo 11: Loop over columns
     template <int s, bool add, int ix, class T, class M1, class M2>
-    struct MultXU_Helper<2,s,add,ix,T,M1,M2>
-    {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
-        {
-            int N = (s == UNKNOWN ? m2.size() : s);
-            typedef typename M1::const_row_sub_type M1r;
-            typedef typename M2::row_sub_type M2r;
-            typedef typename M1r::const_nonconj_type::const_iterator IT1;
-            typedef typename M2r::iterator IT2;
-            const int step1 = m1.diagstep();
-            const int step2 = m2.diagstep();
-            IT1 it1 = m1.get_row(0,0,N).nonConj().begin();
-            IT2 it2 = m2.get_row(0,0,N).begin();
-            for(;N;--N) {
-                MultXV_Helper<-4,UNKNOWN,add,ix,T,M1r,M2r>::call2(
-                    N,x,it1,it2);
-                it1.shiftP(step1);
-                it2.shiftP(step2);
-            }
-        }
-    };
-
-    // algo 3: Loop over columns
-    template <int s, bool add, int ix, class T, class M1, class M2>
-    struct MultXU_Helper<3,s,add,ix,T,M1,M2>
+    struct MultXU_Helper<11,s,add,ix,T,M1,M2>
     {
         static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
@@ -161,9 +164,33 @@ namespace tmv {
         }
     };
 
-    // algo 5: Fully unroll by rows
+    // algo 12: Loop over rows
     template <int s, bool add, int ix, class T, class M1, class M2>
-    struct MultXU_Helper<5,s,add,ix,T,M1,M2>
+    struct MultXU_Helper<12,s,add,ix,T,M1,M2>
+    {
+        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        {
+            int N = (s == UNKNOWN ? m2.size() : s);
+            typedef typename M1::const_row_sub_type M1r;
+            typedef typename M2::row_sub_type M2r;
+            typedef typename M1r::const_nonconj_type::const_iterator IT1;
+            typedef typename M2r::iterator IT2;
+            const int step1 = m1.diagstep();
+            const int step2 = m2.diagstep();
+            IT1 it1 = m1.get_row(0,0,N).nonConj().begin();
+            IT2 it2 = m2.get_row(0,0,N).begin();
+            for(;N;--N) {
+                MultXV_Helper<-4,UNKNOWN,add,ix,T,M1r,M2r>::call2(
+                    N,x,it1,it2);
+                it1.shiftP(step1);
+                it2.shiftP(step2);
+            }
+        }
+    };
+
+    // algo 15: Fully unroll by rows
+    template <int s, bool add, int ix, class T, class M1, class M2>
+    struct MultXU_Helper<15,s,add,ix,T,M1,M2>
     {
         template <int I, int M, int J, int N>
         struct Unroller
@@ -212,9 +239,9 @@ namespace tmv {
         { Unroller<0,s,0,s>::unroll(x,m1,m2); }
     };
 
-    // algo 6: Fully unroll by columns
+    // algo 16: Fully unroll by columns
     template <int s, bool add, int ix, class T, class M1, class M2>
-    struct MultXU_Helper<6,s,add,ix,T,M1,M2>
+    struct MultXU_Helper<16,s,add,ix,T,M1,M2>
     {
         template <int I, int M, int J, int N>
         struct Unroller
@@ -263,40 +290,32 @@ namespace tmv {
         { Unroller<0,s,0,s>::unroll(x,m1,m2); }
     };
 
-    // algo 90: UnknownDiag
+    // algo -4: No branches or copies
+    // And m1 is NonUnitDiag
     template <int s, bool add, int ix, class T, class M1, class M2>
-    struct MultXU_Helper<90,s,add,ix,T,M1,M2>
+    struct MultXU_Helper<-4,s,add,ix,T,M1,M2>
     {
         static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
+            TMVStaticAssert(M1::mupper);
+            TMVStaticAssert(M2::mupper);
+            TMVStaticAssert(!M1::munit);
+            TMVStaticAssert(!M2::munit);
+            TMVAssert(!m1.isunit());
+            TMVAssert(!m2.isunit());
+            typedef typename M2::value_type T2;
             const int s2 = s > 20 ? UNKNOWN : s;
             const int s2p1 = IntTraits<s2>::Sp1;
+            // nops = n(n+1)/2
             const int nops = IntTraits2<s2,s2p1>::prod / 2;
             const bool unroll = 
                 s == UNKNOWN ? false :
                 nops > TMV_Q1 ? false :
                 s <= 10;
-            const int algo2 = 
-                unroll ? ( M2::mrowmajor ? 5 : 6 ) :
-                M2::mrowmajor ? 2 : 3;
-            if (m1.isunit())
-                MultXU_Helper<1,s,add,ix,T,M1,M2>::call(x,m1,m2);
-            else
-                MultXU_Helper<algo2,s,add,ix,T,M1,M2>::call(x,m1,m2);
-        }
-    };
-
-    // algo 95: Transpose (and go back to -3, rather than -2)
-    template <int s, bool add, int ix, class T, class M1, class M2>
-    struct MultXU_Helper<95,s,add,ix,T,M1,M2>
-    {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
-        {
-            typedef typename M1::const_transpose_type M1t;
-            typedef typename M2::transpose_type M2t;
-            M1t m1t = m1.transpose();
-            M2t m2t = m2.transpose();
-            MultXU_Helper<-3,s,add,ix,T,M1t,M2t>::call(x,m1t,m2t);
+            const int algo = 
+                unroll ? ( M2::mrowmajor ? 15 : 16 ) :
+                M2::mrowmajor ? 12 : 11;
+            MultXU_Helper<algo,s,add,ix,T,M1,M2>::call(x,m1,m2);
         }
     };
 
@@ -308,22 +327,12 @@ namespace tmv {
         {
             TMVStaticAssert(M1::mupper == int(M2::mupper));
             TMVStaticAssert(!M2::munit || (!add && ix == 1 && M1::munit));
-            typedef typename M2::value_type T2;
-            const int s2 = s > 20 ? UNKNOWN : s;
-            const int s2p1 = IntTraits<s2>::Sp1;
-            // nops = n(n+1)/2
-            const int nops = IntTraits2<s2,s2p1>::prod / 2;
-            const bool unroll = 
-                s == UNKNOWN ? false :
-                nops > TMV_Q1 ? false :
-                s <= 10;
             const int algo = 
                 (ix == 1 && !add) ? 0 :
-                M2::mlower ? 95 :
-                M1::munknowndiag ? 90 :
-                M1::munit ? 1 :
-                unroll ? ( M2::mrowmajor ? 5 : 6 ) :
-                M2::mrowmajor ? 2 : 3;
+                M2::mlower ? 1 :
+                M1::munknowndiag ? 2 :
+                M1::munit ? 3 :
+                -4;
             MultXU_Helper<algo,s,add,ix,T,M1,M2>::call(x,m1,m2);
         }
     };
@@ -352,7 +361,7 @@ namespace tmv {
             typedef typename M2::conjugate_type M2c;
             M1c m1c = m1.conjugate();
             M2c m2c = m2.conjugate();
-            MultXU_Helper<-2,s,add,ix,T,M1c,M2c>::call(x,m1c,m2c);
+            MultXU_Helper<-2,s,add,ix,T,M1c,M2c>::call(TMV_CONJ(x),m1c,m2c);
         }
     };
 
@@ -464,8 +473,8 @@ namespace tmv {
     };
 
 
-    template <bool add, int ix, class T, class M1, class M2>
-    inline void MultXM(
+    template <int algo, bool add, int ix, class T, class M1, class M2>
+    inline void DoMultXU(
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1, 
         BaseMatrix_Tri_Mutable<M2>& m2)
     {
@@ -479,62 +488,32 @@ namespace tmv {
         typedef typename M2::cview_type M2v;
         M1v m1v = m1.cView();
         M2v m2v = m2.cView();
-        MultXU_Helper<-1,s,add,ix,T,M1v,M2v>::call(x,m1v,m2v);
+        MultXU_Helper<algo,s,add,ix,T,M1v,M2v>::call(x,m1v,m2v);
     }
+
+    template <bool add, int ix, class T, class M1, class M2>
+    inline void MultXM(
+        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1, 
+        BaseMatrix_Tri_Mutable<M2>& m2)
+    { DoMultXU<-1,add>(x,m1,m2); }
 
     template <bool add, int ix, class T, class M1, class M2>
     inline void NoAliasMultXM(
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1, 
         BaseMatrix_Tri_Mutable<M2>& m2)
-    {
-        TMVStaticAssert(M1::mupper == int(M2::mupper));
-        TMVStaticAssert(!M2::munit || (!add && ix == 1 && M1::munit));
-        TMVStaticAssert((Sizes<M1::msize,M2::msize>::same));
-        TMVAssert(m1.size() == m2.size());
-        TMVAssert(!m2.isunit() || (!add && ix == 1 && !m1.isunit()));
-        const int s = Sizes<M1::msize,M2::msize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::cview_type M2v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        MultXU_Helper<-2,s,add,ix,T,M1v,M2v>::call(x,m1v,m2v);
-    }
+    { DoMultXU<-2,add>(x,m1,m2); }
 
     template <bool add, int ix, class T, class M1, class M2>
     inline void InlineMultXM(
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1, 
         BaseMatrix_Tri_Mutable<M2>& m2)
-    {
-        TMVStaticAssert(M1::mupper == int(M2::mupper));
-        TMVStaticAssert(!M2::munit || (!add && ix == 1 && M1::munit));
-        TMVStaticAssert((Sizes<M1::msize,M2::msize>::same));
-        TMVAssert(m1.size() == m2.size());
-        TMVAssert(!m2.isunit() || (!add && ix == 1 && !m1.isunit()));
-        const int s = Sizes<M1::msize,M2::msize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::cview_type M2v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        MultXU_Helper<-3,s,add,ix,T,M1v,M2v>::call(x,m1v,m2v);
-    }
+    { DoMultXU<-3,add>(x,m1,m2); }
 
     template <bool add, int ix, class T, class M1, class M2>
     inline void AliasMultXM(
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1, 
         BaseMatrix_Tri_Mutable<M2>& m2)
-    {
-        TMVStaticAssert(M1::mupper == int(M2::mupper));
-        TMVStaticAssert(!M2::munit || (!add && ix == 1 && M1::munit));
-        TMVStaticAssert((Sizes<M1::msize,M2::msize>::same));
-        TMVAssert(m1.size() == m2.size());
-        TMVAssert(!m2.isunit() || (!add && ix == 1 && !m1.isunit()));
-        const int s = Sizes<M1::msize,M2::msize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::cview_type M2v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        MultXU_Helper<99,s,add,ix,T,M1v,M2v>::call(x,m1v,m2v);
-    }
+    { DoMultXU<99,add>(x,m1,m2); }
 
     template <class T1, bool C1, class T2>
     void InstMultXM(
@@ -578,7 +557,7 @@ namespace tmv {
                 typename M2::lowertri_type>::type M2u;
         M2u m2u = Maybe<upper>::uppertri(m2);
         Maybe<!add>::zero(m2);
-        NoAliasMultXV(x,m1,m2u);
+        NoAliasMultXM<add>(x,m1,m2u);
     }
 
     template <bool add, int ix, class T, class M1, class M2>

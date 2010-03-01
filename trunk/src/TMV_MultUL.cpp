@@ -34,56 +34,41 @@
 #include "tmv/TMV_MultXM.h"
 #include "tmv/TMV_ScaleM.h"
 #include "tmv/TMV_TriMatrix.h"
-#include "tmv/TMV_ProdMM.h"
-#include "tmv/TMV_ProdXM.h"
 
 namespace tmv {
 
     template <class M1, class M2, class M3>
     void DoMultUL(const M1& m1, const M2& m2, M3& m3)
     {
-        // We are allowed to have m2 in the same storage as m3, so 
-        // we use that fact to save a bit on the rm, cm options,
-        // by explicitly copying m2 to the corresponding portion of m3.
         TMVAssert(m1.isrm() || m1.iscm());
+        TMVAssert(m2.isrm() || m2.iscm());
         TMVAssert(m3.isrm() || m3.iscm());
 
-        typedef typename TypeSelect<M2::mupper,
-                typename M3::uppertri_type,
-                typename M3::lowertri_type>::type::xdview_type M2x;
-        M2x m2x = Maybe<M2::mupper>::uppertri(m3);
-
-        if (m2.isunit()) {
-            typename M2x::unitdiag_type::xdview_type m2u = m2x.viewAsUnitDiag();
-            AliasCopy(m2.viewAsUnitDiag(),m2u);
-            if (m3.iscm()) {
-                typename M3::cmview_type m3cm = m3.cmView();
-                if (m1.iscm())
-                    InlineMultMM<false>(m1.cmView(),m2u.cmView(),m3cm);
+        Scaling<1,typename M3::real_type> one;
+        if (m3.iscm()) {
+            typename M3::cmview_type m3cm = m3.cmView();
+            if (m1.iscm())
+                if (m2.iscm())
+                    InlineMultMM<false>(one,m1.cmView(),m2.cmView(),m3cm);
                 else
-                    InlineMultMM<false>(m1.rmView(),m2u.cmView(),m3cm);
-            } else {
-                typename M3::rmview_type m3rm = m3.rmView();
-                if (m1.iscm())
-                    InlineMultMM<false>(m1.cmView(),m2u.rmView(),m3rm);
+                    InlineMultMM<false>(one,m1.cmView(),m2.rmView(),m3cm);
+            else
+                if (m2.iscm())
+                    InlineMultMM<false>(one,m1.rmView(),m2.cmView(),m3cm);
                 else
-                    InlineMultMM<false>(m1.rmView(),m2u.rmView(),m3rm);
-            }
+                    InlineMultMM<false>(one,m1.rmView(),m2.rmView(),m3cm);
         } else {
-            AliasCopy(m2,m2x);
-            if (m3.iscm()) {
-                typename M3::cmview_type m3cm = m3.cmView();
-                if (m1.iscm())
-                    InlineMultMM<false>(m1.cmView(),m2x.cmView(),m3cm);
+            typename M3::rmview_type m3rm = m3.rmView();
+            if (m1.iscm())
+                if (m2.iscm())
+                    InlineMultMM<false>(one,m1.cmView(),m2.cmView(),m3rm);
                 else
-                    InlineMultMM<false>(m1.rmView(),m2x.cmView(),m3cm);
-            } else {
-                typename M3::rmview_type m3rm = m3.rmView();
-                if (m1.iscm())
-                    InlineMultMM<false>(m1.cmView(),m2x.rmView(),m3rm);
+                    InlineMultMM<false>(one,m1.cmView(),m2.rmView(),m3rm);
+            else
+                if (m2.iscm())
+                    InlineMultMM<false>(one,m1.rmView(),m2.cmView(),m3rm);
                 else
-                    InlineMultMM<false>(m1.rmView(),m2x.rmView(),m3rm);
-            }
+                    InlineMultMM<false>(one,m1.rmView(),m2.rmView(),m3rm);
         }
     }
 
@@ -93,6 +78,8 @@ namespace tmv {
     {
         if (!(m1.isrm() || m1.iscm())) 
             GenInstMultMM(x,m1.copy().constView().xdView(),m2,m3);
+        else if (!(m2.isrm() || m2.iscm())) 
+            GenInstMultMM(x,m1,m2.copy().constView().xdView(),m3);
         else if (!(m3.iscm() || m3.isrm())) {
             Matrix<T,ColMajor> m3c(m3.colsize(),m3.rowsize());
             DoMultUL(m1,m2,m3c);
@@ -108,7 +95,9 @@ namespace tmv {
         const T x, const M1& m1, const M2& m2, MatrixView<T>& m3)
     {
         if (!(m1.isrm() || m1.iscm()))
-            GenInstAddMultMM(x,m1.copy(),m2,m3);
+            GenInstAddMultMM(x,m1.copy().constView().xdView(),m2,m3);
+        else if (!(m2.isrm() || m2.iscm()))
+            GenInstAddMultMM(x,m1,m2.copy().constView().xdView(),m3);
         else {
             Matrix<T,ColMajor> m3c(m3.colsize(),m3.rowsize());
             DoMultUL(m1,m2,m3c);

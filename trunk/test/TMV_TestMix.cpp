@@ -118,7 +118,6 @@ int main() try {
     TestMatrixArith2a<double>(smmn,csmmn,svn,csvn,svm,csvm,"MN SmallMatrix,SmallVector,SmallVector");
     TestMatrixArith2a<double>(smmn,csmmn,svn,csvn,vm,cvm,"MN SmallMatrix,SmallVector,Vector");
     TestMatrixArith2a<double>(smmn,csmmn,vn,cvn,svm,csvm,"MN SmallMatrix,Vector,SmallVector");
-#ifdef XTEST
 #if (XTEST & 2)
     TestMatrixArith2a<double>(smmn,csmmn,vn,cvn,vm,cvm,"MN SmallMatrix,Vector,Vector");
     TestMatrixArith2a<double>(smmn,csmmn,svn,csvn,vvm,cvvm,"MN SmallMatrix,SmallVector,VectorView");
@@ -149,12 +148,10 @@ int main() try {
     TestMatrixArith2a<double>(mvnm,cmvnm,svm,csvm,vvn,cvvn,"NM MatrixView,SmallVector,VectorView");
     TestMatrixArith2a<double>(mvnm,cmvnm,vvm,cvvm,svn,csvn,"NM MatrixView,VectorView,SmallVector");
 #endif
-#endif
 
     TestMatrixArith2b<double>(smmn,csmmn,svn,csvn,svm,csvm,"MN SmallMatrix,SmallVector,SmallVector");
     TestMatrixArith2b<double>(smmn,csmmn,svn,csvn,vm,cvm,"MN SmallMatrix,SmallVector,Vector");
     TestMatrixArith2b<double>(smmn,csmmn,vn,cvn,svm,csvm,"MN SmallMatrix,Vector,SmallVector");
-#ifdef XTEST
 #if (XTEST & 2)
     TestMatrixArith2b<double>(smmn,csmmn,vn,cvn,vm,cvm,"MN SmallMatrix,Vector,Vector");
     TestMatrixArith2b<double>(smmn,csmmn,svn,csvn,vvm,cvvm,"MN SmallMatrix,SmallVector,VectorView");
@@ -185,12 +182,10 @@ int main() try {
     TestMatrixArith2b<double>(mvnm,cmvnm,svm,csvm,vvn,cvvn,"NM MatrixView,SmallVector,VectorView");
     TestMatrixArith2b<double>(mvnm,cmvnm,vvm,cvvm,svn,csvn,"NM MatrixView,VectorView,SmallVector");
 #endif
-#endif
 
     TestMatrixArith3<double>(smmn,csmmn,svn,csvn,svm,csvm,"MN SmallMatrix,SmallVector,SmallVector");
     TestMatrixArith3<double>(smmn,csmmn,svn,csvn,vm,cvm,"MN SmallMatrix,SmallVector,Vector");
     TestMatrixArith3<double>(smmn,csmmn,vn,cvn,svm,csvm,"MN SmallMatrix,Vector,SmallVector");
-#ifdef XTEST
 #if (XTEST & 2)
     TestMatrixArith3<double>(smmn,csmmn,vn,cvn,vm,cvm,"MN SmallMatrix,Vector,Vector");
     TestMatrixArith3<double>(smmn,csmmn,svn,csvn,vvm,cvvm,"MN SmallMatrix,SmallVector,VectorView");
@@ -221,11 +216,9 @@ int main() try {
     TestMatrixArith3<double>(mvnm,cmvnm,svm,csvm,vvn,cvvn,"NM MatrixView,SmallVector,VectorView");
     TestMatrixArith3<double>(mvnm,cmvnm,vvm,cvvm,svn,csvn,"NM MatrixView,VectorView,SmallVector");
 #endif
-#endif
 
     TestMatrixArith4<double>(smmn0,csmmn0,mmn,cmmn,smmn,csmmn,"MN Matrix,SmallMatrix");
     TestMatrixArith4<double>(smmn0,csmmn0,smmn,csmmn,mmn,cmmn,"MN SmallMatrix,Matrix");
-#ifdef XTEST
 #if (XTEST & 2)
     TestMatrixArith4<double>(smnm0,csmnm0,mnm,cmnm,smnm,csmnm,"NM Matrix,SmallMatrix");
     TestMatrixArith4<double>(smnm0,csmnm0,smnm,csmnm,mnm,cmnm,"NM SmallMatrix,Matrix");
@@ -234,7 +227,6 @@ int main() try {
     TestMatrixArith4<double>(smnm0,csmnm0,mvnm,cmvnm,smnm,csmnm,"NM MatrixView,SmallMatrix");
     TestMatrixArith4<double>(smnm0,csmnm0,smnm,csmnm,mvnm,cmvnm,"NM SmallMatrix,MatrixView");
 #endif
-#endif
 
     TestMatrixArith5<double>(smmn0,csmmn0,smmn0,csmmn0,smmn,csmmn,smnn,csmnn,"MN*NN SmallMatrix,SmallMatrix");
     TestMatrixArith5<double>(smmn0,csmmn0,smmn0,csmmn0,smmn,csmmn,mnn,cmnn,"MN*NN SmallMatrix,Matrix");
@@ -242,7 +234,6 @@ int main() try {
     TestMatrixArith6<double>(smmn,csmmn,smnn,csmnn,mmn,cmmn,"MN*NN SmallMatrix,SmallMatrix,Matrix");
     TestMatrixArith6<double>(smmn,csmmn,mnn,cmnn,mmn,cmmn,"MN*NN SmallMatrix,Matrix,Matrix");
     TestMatrixArith6<double>(mmn,cmmn,smnn,csmnn,smmn,csmmn,"MN*NN Matrix,SmallMatrix,SmallMatrix");
-#ifdef XTEST
 #if (XTEST & 2)
     TestMatrixArith6<double>(mmn,cmmn,mnn,cmnn,smmn,csmmn,"MN*NN Matrix,Matrix,SmallMatrix");
     TestMatrixArith6<double>(smnn,csmnn,smnm,csmnm,mnm,cmnm,"NN*NM SmallMatrix,SmallMatrix,Matrix");
@@ -275,12 +266,10 @@ int main() try {
     TestMatrixArith6<double>(mvnm,cmvnm,mvmn,cmvmn,smnn,csmnn,"NM*MN MatrixView,MatrixView,SmallMatrix");
     TestMatrixArith6<double>(mvnm,cmvnm,mvmn,cmvmn,mvnn,cmvnn,"NM*MN MatrixView,MatrixView,MatrixView");
 #endif
-#endif
 
     TestMatrixArith7<double>(smmn0,csmmn0,smmn,csmmn,svm,csvm,svn,csvn,"MN SmallMatrix,SmallVector,SmallVector");
     TestMatrixArith7<double>(smmn0,csmmn0,smmn,csmmn,svm,csvm,vn,cvn,"MN SmallMatrix,SmallVector,Vector");
     TestMatrixArith7<double>(smmn0,csmmn0,smmn,csmmn,vm,cvm,svn,csvn,"MN SmallMatrix,Vector,SmallVector");
-#ifdef XTEST
 #if (XTEST & 2)
     TestMatrixArith7<double>(smmn0,csmmn0,smmn,csmmn,vm,cvm,vn,cvn,"MN SmallMatrix,Vector,Vector");
     TestMatrixArith7<double>(smmn0,csmmn0,smmn,csmmn,svm,csvm,vvn,cvvn,"MN SmallMatrix,SmallVector,VectorView");
@@ -310,7 +299,6 @@ int main() try {
     TestMatrixArith7<double>(smnm0,csmnm0,mvnm,cmvnm,vn,cvn,svm,csvm,"NM MatrixView,Vector,SmallVector");
     TestMatrixArith7<double>(smnm0,csmnm0,mvnm,cmvnm,svn,csvn,vvm,cvvm,"NM MatrixView,SmallVector,VectorView");
     TestMatrixArith7<double>(smnm0,csmnm0,mvnm,cmvnm,vvn,cvvn,svm,csvm,"NM MatrixView,VectorView,SmallVector");
-#endif
 #endif
 
     std::cerr<<"No mixing errors\n";

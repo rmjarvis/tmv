@@ -45,9 +45,9 @@ template <class T> void TestMatrixArith_2()
     tmv::MatrixView<T> a3 = a3x.subMatrix(0,12,0,16,3,4);
     tmv::MatrixView<CT> ca3 = ca3x.subMatrix(0,12,0,16,3,4);
 
-#if 1
     TestMatrixArith2<T>(a1,ca1,"Square 1");
     TestMatrixArith2<T>(a2,ca2,"Square 2");
+#if (XTEST & 1)
     TestMatrixArith2<T>(a3,ca3,"Square 3");
 #endif
 
@@ -71,13 +71,9 @@ template <class T> void TestMatrixArith_2()
     tmv::MatrixView<T> a5 = a5x.view();
     tmv::MatrixView<CT> ca5 = ca5x.view();
 
-#if 1
     TestMatrixArith2<T>(a4,ca4,"NonSquare 1");
     TestMatrixArith2<T>(a5,ca5,"NonSquare 2");
-#endif
 
-#if 1
-#ifdef XTEST
 #if (XTEST & 8)
     tmv::Matrix<T> a6x(4,0,1);
     tmv::Matrix<T> a7x(0,4,1);
@@ -91,8 +87,6 @@ template <class T> void TestMatrixArith_2()
 
     TestMatrixArith2<T>(a6,ca6,"Degenerate 1");
     TestMatrixArith2<T>(a7,ca7,"Degenerate 2");
-#endif
-#endif
 #endif
 }
 

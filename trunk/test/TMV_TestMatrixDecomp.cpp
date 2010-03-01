@@ -83,7 +83,6 @@ template <class T, tmv::StorageType stor> void TestMatrixDecomp()
             if (c.LUD().IsTrans()) cPLU.TransposeSelf();
             Assert(Norm(c-cPLU) < ceps*Norm(c),"C LU"); 
 
-#ifdef XTEST
 #if (XTEST & 2)
             tmv::Matrix<T,stor> m2 = m;
             int p2[N];
@@ -109,7 +108,6 @@ template <class T, tmv::StorageType stor> void TestMatrixDecomp()
             cPLU = cL*cU;
             cPLU.ReversePermuteRows(p2);
             Assert(Norm(c-cPLU) < ceps*Norm(c),"C LU3"); 
-#endif
 #endif
             std::cout<<"."; std::cout.flush();
         }
@@ -143,7 +141,6 @@ template <class T, tmv::StorageType stor> void TestMatrixDecomp()
             Assert(Norm(cQ / c.QRD().GetQ()-T(1)) < T(N)*ceps,
                    "C QR - QtQ - PackedQ (first)"); 
 
-#ifdef XTEST
 #if (XTEST & 2)
             Q = m;
             QR_Decompose(Q.View(),R.View());
@@ -185,7 +182,6 @@ template <class T, tmv::StorageType stor> void TestMatrixDecomp()
             QR_Decompose(cQ.Conjugate(),cR.Conjugate());
             cQR = cQ.Conjugate()*cR.Conjugate();
             Assert(Norm(c-cQR) < ceps*Norm(c),"C QR7"); 
-#endif
 #endif
             std::cout<<"."; std::cout.flush();
         }
@@ -237,7 +233,6 @@ template <class T, tmv::StorageType stor> void TestMatrixDecomp()
             }
 #endif
 
-#ifdef XTEST
 #if (XTEST & 2)
             Q = m;
             int p2[N];
@@ -312,7 +307,6 @@ template <class T, tmv::StorageType stor> void TestMatrixDecomp()
             }
 #endif
 #endif
-#endif
             std::cout<<"."; std::cout.flush();
         }
 
@@ -349,7 +343,6 @@ template <class T, tmv::StorageType stor> void TestMatrixDecomp()
             Assert(Norm(cV.Adjoint()*cV-T(1)) < ceps*Norm(c),"C SV - VtV"); 
             Assert(Norm(cV*cV.Adjoint()-T(1)) < ceps*Norm(c),"C SV - VVt"); 
 
-#ifdef XTEST
 #if (XTEST & 2)
             tmv::Matrix<T,stor> U2 = m;
             tmv::DiagMatrix<T> S2(N);
@@ -440,7 +433,6 @@ template <class T, tmv::StorageType stor> void TestMatrixDecomp()
             Assert(Norm(cS2-cS) < ceps*Norm(cS),"C SV13 S"); 
             Assert(Norm(cV2.Transpose()*cS2*cS2*cV2.Conjugate()-c.Adjoint()*c) < 
                    ceps*Norm(c.Adjoint()*c),"C SV13 V"); 
-#endif
 #endif
             std::cout<<"."; std::cout.flush();
         }

@@ -9,7 +9,6 @@
 
 template <class T> void TestDiagMatrixArith_B4b()
 {
-#ifdef XTEST
 #if (XTEST & 2)
     const int N = 10;
 
@@ -63,7 +62,6 @@ template <class T> void TestDiagMatrixArith_B4b()
     TestMatrixArith4<T>(pv,cpv,av,cav, "SquareM/Diag");
     TestMatrixArith4<T>(qv,cqv,av,cav, "NonSquareM/Diag");
     TestMatrixArith4<T>(rv,crv,av,cav, "DegenM/Diag");
-#endif
 #endif
 }
 

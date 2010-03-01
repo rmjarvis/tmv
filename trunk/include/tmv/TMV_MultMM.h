@@ -1802,8 +1802,9 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_MV_MM
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
+            const int K = xs == UNKNOWN ? int(m1.rowsize()) : xs;
+#ifdef PRINTALGO_MV_MM
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"MM algo 81: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
@@ -1811,7 +1812,7 @@ namespace tmv {
             typedef typename M1::value_type T1;
             const bool rm = M2::mcolmajor || M3::mrowmajor; 
             typedef typename MCopyHelper<T1,Rec,cs,xs,rm,false>::type M1c;
-            M1c m1c = MatrixSizer<M1>(m1);
+            M1c m1c(M,K);
             typedef typename M1c::view_type M1cv;
             typedef typename M1c::const_view_type M1ccv;
             M1cv m1cv = m1c.view();
@@ -1830,10 +1831,10 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_MM
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             const int K = xs == UNKNOWN ? int(m1.rowsize()) : xs;
+#ifdef PRINTALGO_MM
+            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"MM algo 82: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -1841,7 +1842,7 @@ namespace tmv {
             typedef typename Traits2<T,T1>::type PT1;
             const bool rm = M2::mcolmajor || M3::mrowmajor; 
             typedef typename MCopyHelper<PT1,Rec,cs,xs,rm,false>::type M1c;
-            M1c m1c = MatrixSizer<M1>(m1);
+            M1c m1c(M,K);
             typedef typename M1c::view_type M1cv;
             typedef typename M1c::const_view_type M1ccv;
             M1cv m1cv = m1c.view();
@@ -1893,17 +1894,17 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_MM
-            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             const int K = xs == UNKNOWN ? int(m1.rowsize()) : rs;
+#ifdef PRINTALGO_MM
+            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             std::cout<<"MM algo 84: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M2::value_type T2;
             const bool rm = M1::mcolmajor && M3::mrowmajor;
             typedef typename MCopyHelper<T2,Rec,xs,rs,rm,false>::type M2c;
-            M2c m2c = MatrixSizer<M2>(m2);
+            M2c m2c(K,N);
             typedef typename M2c::view_type M2cv;
             typedef typename M2c::const_view_type M2ccv;
             M2cv m2cv = m2c.view();
@@ -1922,10 +1923,10 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_MM
-            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             const int K = xs == UNKNOWN ? int(m1.rowsize()) : rs;
+#ifdef PRINTALGO_MM
+            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             std::cout<<"MM algo 85: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -1933,7 +1934,7 @@ namespace tmv {
             typedef typename Traits2<T,T2>::type PT2;
             const bool rm = M1::mcolmajor && M3::mrowmajor;
             typedef typename MCopyHelper<PT2,Rec,xs,rs,rm,false>::type M2c;
-            M2c m2c = MatrixSizer<M2>(m2);
+            M2c m2c(K,N);
             typedef typename M2c::view_type M2cv;
             typedef typename M2c::const_view_type M2ccv;
             M2cv m2cv = m2c.view();
@@ -2002,7 +2003,7 @@ namespace tmv {
                 typedef typename Traits2<T1,T2>::type PT3;
                 const bool rm = M1::mrowmajor && M2::mrowmajor;
                 typedef typename MCopyHelper<PT3,Rec,cs,rs,rm,false>::type M3c;
-                M3c m3c = MatrixSizer<M3>(m3);
+                M3c m3c(M,N);
                 typedef typename M3c::view_type M3cv;
                 typedef typename M3c::const_view_type M3ccv;
                 M3cv m3cv = m3c.view();
@@ -2014,7 +2015,7 @@ namespace tmv {
                 typedef typename M3::value_type T3;
                 const bool rm = M1::mrowmajor && M2::mrowmajor;
                 typedef typename MCopyHelper<T3,Rec,cs,rs,rm,false>::type M3c;
-                M3c m3c = MatrixSizer<M3>(m3);
+                M3c m3c(M,N);
                 typedef typename M3c::view_type M3cv;
                 typedef typename M3c::const_view_type M3ccv;
                 M3cv m3cv = m3c.view();
@@ -2033,9 +2034,9 @@ namespace tmv {
         static inline void call(
             const Scaling<1,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_MM
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
+#ifdef PRINTALGO_MM
             const int K = xs == UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"algo 87: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
@@ -2047,7 +2048,7 @@ namespace tmv {
             typedef typename Traits2<T1,T2>::type PT3;
             const bool rm = M1::mrowmajor && M2::mrowmajor;
             typedef typename MCopyHelper<PT3,Rec,cs,rs,rm,false>::type M3c;
-            M3c m3c = MatrixSizer<M3>(m3);
+            M3c m3c(M,N);
             typedef typename M3c::view_type M3cv;
             typedef typename M3c::const_view_type M3ccv;
             M3cv m3cv = m3c.view();
@@ -2436,8 +2437,8 @@ namespace tmv {
         }
     };
 
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void MultMM(
+    template <int algo, bool add, int ix, class T, class M1, class M2, class M3>
+    inline void DoMultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -2461,83 +2462,36 @@ namespace tmv {
         M1v m1v = m1.cView();
         M2v m2v = m2.cView();
         M3v m3v = m3.cView();
-        MultMM_Helper<-1,cs,rs,xs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
+        MultMM_Helper<algo,cs,rs,xs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
     }
+
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    inline void MultMM(
+        const Scaling<ix,T>& x, 
+        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2, 
+        BaseMatrix_Rec_Mutable<M3>& m3)
+    { DoMultMM<-1,add>(x,m1,m2,m3); }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
     inline void NoAliasMultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M1::mcolsize,M3::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::mcolsize>::same));
-        TMVStaticAssert((Sizes<M2::mrowsize,M3::mrowsize>::same));
-        TMVAssert(m1.colsize() == m3.colsize());
-        TMVAssert(m1.rowsize() == m2.colsize());
-        TMVAssert(m2.rowsize() == m3.rowsize());
-
-        const int cs = Sizes<M3::mcolsize,M1::mcolsize>::size;
-        const int rs = Sizes<M3::mrowsize,M2::mrowsize>::size;
-        const int xs = Sizes<M1::mrowsize,M2::mcolsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        typedef typename M3::cview_type M3v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        M3v m3v = m3.cView();
-        MultMM_Helper<-2,cs,rs,xs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
-    }
+    { DoMultMM<-2,add>(x,m1,m2,m3); }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
     inline void InlineMultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M1::mcolsize,M3::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::mcolsize>::same));
-        TMVStaticAssert((Sizes<M2::mrowsize,M3::mrowsize>::same));
-        TMVAssert(m1.colsize() == m3.colsize());
-        TMVAssert(m1.rowsize() == m2.colsize());
-        TMVAssert(m2.rowsize() == m3.rowsize());
-
-        const int cs = Sizes<M3::mcolsize,M1::mcolsize>::size;
-        const int rs = Sizes<M3::mrowsize,M2::mrowsize>::size;
-        const int xs = Sizes<M1::mrowsize,M2::mcolsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        typedef typename M3::cview_type M3v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        M3v m3v = m3.cView();
-        MultMM_Helper<-3,cs,rs,xs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
-    }
+    { DoMultMM<-3,add>(x,m1,m2,m3); }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
     inline void AliasMultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M1::mcolsize,M3::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::mcolsize>::same));
-        TMVStaticAssert((Sizes<M2::mrowsize,M3::mrowsize>::same));
-        TMVAssert(m1.colsize() == m3.colsize());
-        TMVAssert(m1.rowsize() == m2.colsize());
-        TMVAssert(m2.rowsize() == m3.rowsize());
-
-        const int cs = Sizes<M3::mcolsize,M1::mcolsize>::size;
-        const int rs = Sizes<M3::mrowsize,M2::mrowsize>::size;
-        const int xs = Sizes<M1::mrowsize,M2::mcolsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        typedef typename M3::cview_type M3v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        M3v m3v = m3.cView();
-        MultMM_Helper<99,cs,rs,xs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
-    }
+    { DoMultMM<99,add>(x,m1,m2,m3); }
 
     template <class M1, int ix, class T, class M2>
     inline void MultEqMM(

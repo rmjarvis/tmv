@@ -35,10 +35,13 @@
 
 #include "TMV_BaseMatrix_Tri.h"
 #include "TMV_Vector.h"
-#include "TMV_SmallVector.h"
 #include "TMV_MultVV.h"
 #include "TMV_MultXV.h"
 #include "TMV_Prefetch.h"
+
+#ifdef PRINTALGO_UV
+#include <iostream>
+#endif
 
 namespace tmv {
 
@@ -115,10 +118,6 @@ namespace tmv {
     //
     // Matrix * Vector
     //
-
-#ifdef PRINTALGO_UV
-#include <iostream>
-#endif
 
     // Q1 is the maximum nops to unroll.
 #if TMV_OPT >= 3
@@ -274,9 +273,9 @@ namespace tmv {
             // [ A00 A01 A02 ] [  0 ]   [ A01 B2 ]
             // [  0  A11 A12 ] [ B2 ] = [ A11 B2 ]
             // [  0   0  A22 ] [  0 ]   [    0   ]
-            while (v2(N-1) == T2(0)) Maybe<!add>::set(v3(--N),T3(0));
+            while (N > 0 && v2(N-1) == T2(0)) Maybe<!add>::set(v3(--N),T3(0));
             int i1=0;
-            while (*X == T2(0)) { ++i1; --N; ++X; ++Aii; }
+            while (N > 0 && *X == T2(0)) { ++i1; --N; ++X; ++Aii; }
             for(int i=0;i<i1;++i) {
                 Yi = MultVV_Helper<-4,UNKNOWN,M1r,V2>::call2(N,Aii-1,X);
                 Aii.shiftP(Astepi);
@@ -451,12 +450,12 @@ namespace tmv {
             // [ A20 A21 A22 ] [  0 ]   [ A21 B2 ]
             int i=N-1;
             int i1=0;
-            while (*X0 == T2(0)) { 
+            while (N > 0 && *X0 == T2(0)) { 
                 Maybe<!add>::set(v3(i1++),T3(0));
                 --N; ++Ai0; ++X0;
             }
             int i2=i;
-            while (*X == T2(0)) { --i2; --N; --X; }
+            while (N > 0 && *X == T2(0)) { --i2; --N; --X; }
             for(;i>i2;--i) {
                 Yi = MultVV_Helper<-4,UNKNOWN,M1r,V2>::call2(N,Ai0,X0);
                 Ai0.shiftP(-Astepi);
@@ -542,7 +541,7 @@ namespace tmv {
                 MultUV_Helper<85,s,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
 #ifdef TMV_OPT_SCALE
             } else 
-                MultUV_Helper<algo2,s,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
+                MultUV_Helper<-4,s,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
 #endif
         }
     };
@@ -564,7 +563,7 @@ namespace tmv {
                 MultUV_Helper<81,s,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
 #ifdef TMV_OPT_SCALE
             } else 
-                MultUV_Helper<algo2,s,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
+                MultUV_Helper<-4,s,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
 #endif
         }
     };
@@ -576,13 +575,13 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-#ifdef PRINTALGO_UV
             const int N = s == UNKNOWN ? int(m1.size()) : s;
+#ifdef PRINTALGO_UV
             std::cout<<"UV algo 81: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
             typedef typename V2::value_type T2;
             typedef typename VCopyHelper<T2,s,false>::type V2c;
-            V2c v2c = VectorSizer<V2>(v2);
+            V2c v2c(N);
             typedef typename V2c::view_type V2cv;
             typedef typename V2c::const_view_type V2ccv;
             V2cv v2cv = v2c.view();
@@ -599,13 +598,13 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-#ifdef PRINTALGO_UV
             const int N = s == UNKNOWN ? int(m1.size()) : s;
+#ifdef PRINTALGO_UV
             std::cout<<"UV algo 85: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
             typedef typename V3::value_type T3;
             typedef typename VCopyHelper<T3,s,false>::type V3c;
-            V3c v3c = VectorSizer<V3>(v3);
+            V3c v3c(N);
             typedef typename V3c::view_type V3cv;
             typedef typename V3c::const_view_type V3ccv;
             V3cv v3cv = v3c.view();
@@ -625,7 +624,6 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
             TMVStaticAssert(!V3::vconj);
-            typedef typename M1::value_type T1;
             const int s2 = s > 20 ? UNKNOWN : s;
             const int s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)/2
@@ -788,7 +786,7 @@ namespace tmv {
             typedef typename V2::value_type T2;
             typedef typename V3::value_type T3;
             const bool inst = 
-                M1::mcolsize == UNKNOWN && M1::mrowsize == UNKNOWN &&
+                M1::msize == UNKNOWN &&
                 V2::vsize == UNKNOWN && 
                 V3::vsize == UNKNOWN &&
 #ifdef TMV_INST_MIX
@@ -810,9 +808,8 @@ namespace tmv {
     };
 
     // algo 99: Check for aliases
-    template <int s, bool add, 
-              int ix, class T, class M1, class V2, class V3>
-    struct MultUV_Helper<99,s,add,ix,T,M1,V2,V3>
+    template <int s, int ix, class T, class M1, class V2, class V3>
+    struct MultUV_Helper<99,s,true,ix,T,M1,V2,V3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
@@ -822,14 +819,36 @@ namespace tmv {
                    (M1::mlower && v2.step()<=v3.step()) ||
                    !SameStorage(v2.vec(),v3.vec())) ) {
                 // No aliasing (or no clobbering)
-                MultUV_Helper<-2,s,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
+                MultUV_Helper<-2,s,true,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
             } else if (SameStorage(m1,v3)) {
                 // Use temporary for v3
-                MultUV_Helper<85,s,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
+                MultUV_Helper<85,s,true,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
             } else { 
                 // SameStorage(v2,v3)
                 // Use temporary for v2
-                MultUV_Helper<81,s,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
+                MultUV_Helper<81,s,true,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
+            }
+        }
+    };
+    // if !add, then don't need the temporary if v2,v3 are aliased.
+    template <int s, int ix, class T, class M1, class V2, class V3>
+    struct MultUV_Helper<99,s,false,ix,T,M1,V2,V3>
+    {
+        static inline void call(
+            const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
+        {
+            if ( !SameStorage(m1,v3) &&
+                 ( (M1::mupper && v2.step()>=v3.step()) ||
+                   (M1::mlower && v2.step()<=v3.step()) ||
+                   !SameStorage(v2.vec(),v3.vec())) ) {
+                // No aliasing (or no clobbering)
+                MultUV_Helper<-2,s,false,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
+            } else if (SameStorage(m1,v3)) {
+                // Use temporary for v3
+                MultUV_Helper<85,s,false,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
+            } else { 
+                AliasCopy(v2,v3);
+                NoAliasMultMV<false>(x,m1,v3,v3);
             }
         }
     };
@@ -843,7 +862,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
             const bool checkalias =
-                M1::mcolsize == UNKNOWN && M1::mrowsize == UNKNOWN &&
+                M1::msize == UNKNOWN &&
                 V2::vsize == UNKNOWN && 
                 V3::vsize == UNKNOWN;
             const int algo = 
@@ -855,8 +874,8 @@ namespace tmv {
         }
     };
 
-    template <bool add, int ix, class T, class M1, class V2, class V3>
-    inline void MultMV(
+    template <int algo, bool add, int ix, class T, class M1, class V2, class V3>
+    inline void DoMultUV(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseVector_Calc<V2>& v2, 
         BaseVector_Mutable<V3>& v3)
@@ -874,74 +893,36 @@ namespace tmv {
         M1v m1v = m1.cView();
         V2v v2v = v2.cView();
         V3v v3v = v3.cView();
-        MultUV_Helper<-1,s,add,ix,T,M1v,V2v,V3v>::call(x,m1v,v2v,v3v);
+        MultUV_Helper<algo,s,add,ix,T,M1v,V2v,V3v>::call(x,m1v,v2v,v3v);
     }
+
+    template <bool add, int ix, class T, class M1, class V2, class V3>
+    inline void MultMV(
+        const Scaling<ix,T>& x, 
+        const BaseMatrix_Tri<M1>& m1, const BaseVector_Calc<V2>& v2, 
+        BaseVector_Mutable<V3>& v3)
+    { DoMultUV<-1,add>(x,m1,v2,v3); }
 
     template <bool add, int ix, class T, class M1, class V2, class V3>
     inline void NoAliasMultMV(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseVector_Calc<V2>& v2, 
         BaseVector_Mutable<V3>& v3)
-    {
-        TMVStaticAssert((Sizes<M1::msize,V3::vsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,V2::vsize>::same));
-        TMVStaticAssert((Sizes<V2::vsize,V3::vsize>::same));
-        TMVAssert(m1.size() == v3.size());
-        TMVAssert(m1.size() == v2.size());
-        TMVAssert(v2.size() == v3.size());
-        const int s = Sizes<Sizes<M1::msize,V2::vsize>::size,V3::vsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename V2::const_cview_type V2v;
-        typedef typename V3::cview_type V3v;
-        M1v m1v = m1.cView();
-        V2v v2v = v2.cView();
-        V3v v3v = v3.cView();
-        MultUV_Helper<-2,s,add,ix,T,M1v,V2v,V3v>::call(x,m1v,v2v,v3v);
-    }
+    { DoMultUV<-2,add>(x,m1,v2,v3); }
 
     template <bool add, int ix, class T, class M1, class V2, class V3>
     inline void InlineMultMV(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseVector_Calc<V2>& v2, 
         BaseVector_Mutable<V3>& v3)
-    {
-        TMVStaticAssert((Sizes<M1::msize,V3::vsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,V2::vsize>::same));
-        TMVStaticAssert((Sizes<V2::vsize,V3::vsize>::same));
-        TMVAssert(m1.size() == v3.size());
-        TMVAssert(m1.size() == v2.size());
-        TMVAssert(v2.size() == v3.size());
-        const int s = Sizes<Sizes<M1::msize,V2::vsize>::size,V3::vsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename V2::const_cview_type V2v;
-        typedef typename V3::cview_type V3v;
-        M1v m1v = m1.cView();
-        V2v v2v = v2.cView();
-        V3v v3v = v3.cView();
-        MultUV_Helper<-3,s,add,ix,T,M1v,V2v,V3v>::call(x,m1v,v2v,v3v);
-    }
+    { DoMultUV<-3,add>(x,m1,v2,v3); }
 
     template <bool add, int ix, class T, class M1, class V2, class V3>
     inline void AliasMultMV(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseVector_Calc<V2>& v2, 
         BaseVector_Mutable<V3>& v3)
-    {
-        TMVStaticAssert((Sizes<M1::msize,V3::vsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,V2::vsize>::same));
-        TMVStaticAssert((Sizes<V2::vsize,V3::vsize>::same));
-        TMVAssert(m1.size() == v3.size());
-        TMVAssert(m1.size() == v2.size());
-        TMVAssert(v2.size() == v3.size());
-        const int s = Sizes<Sizes<M1::msize,V2::vsize>::size,V3::vsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename V2::const_cview_type V2v;
-        typedef typename V3::cview_type V3v;
-        M1v m1v = m1.cView();
-        V2v v2v = v2.cView();
-        V3v v3v = v3.cView();
-        MultUV_Helper<99,s,add,ix,T,M1v,V2v,V3v>::call(x,m1v,v2v,v3v);
-    }
+    { DoMultUV<99,add>(x,m1,v2,v3); }
 
     template <bool add, int ix, class T, class V1, class M2, class V3>
     inline void MultVM(

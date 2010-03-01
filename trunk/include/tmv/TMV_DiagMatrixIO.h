@@ -207,8 +207,9 @@ namespace tmv {
         return is;
     }
 
-    template <class M> std::istream& operator>>(std::istream& is,
-              BaseMatrix_Diag_Mutable<M>& m)
+    template <class M> 
+    std::istream& operator>>(
+        std::istream& is, BaseMatrix_Diag_Mutable<M>& m)
     {
         char d;
         is >> d;

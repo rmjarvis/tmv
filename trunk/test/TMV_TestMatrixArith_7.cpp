@@ -81,10 +81,12 @@ template <class T> void TestMatrixArith_7()
     TestMatrixArith7<T>(a2,ca2,v1s,cv1s,v2v,cv2v,"Square 6");
     TestMatrixArith7<T>(a2,ca2,v1v,cv1v,v2s,cv2s,"Square 7");
     TestMatrixArith7<T>(a2,ca2,v1s,cv1s,v2s,cv2s,"Square 8");
+#if (XTEST & 1)
     TestMatrixArith7<T>(a3,ca3,v1v,cv1v,v2v,cv2v,"Square 9");
     TestMatrixArith7<T>(a3,ca3,v1s,cv1s,v2v,cv2v,"Square 10");
     TestMatrixArith7<T>(a3,ca3,v1v,cv1v,v2s,cv2s,"Square 11");
     TestMatrixArith7<T>(a3,ca3,v1s,cv1s,v2s,cv2s,"Square 12");
+#endif
 
     tmv::Matrix<T,tmv::RowMajor> a4x(7,4);
     for(int i=0;i<7;++i) for(int j=0;j<4;++j) a4x(i,j) = T(1-3*i+2*j);
@@ -127,7 +129,6 @@ template <class T> void TestMatrixArith_7()
     TestMatrixArith7<T>(a5,ca5,v1v,cv1v,v3s,cv3s,"NonSquare 7");
     TestMatrixArith7<T>(a5,ca5,v1s,cv1s,v3s,cv3s,"NonSquare 8");
 
-#ifdef XTEST
 #if (XTEST & 8)
     tmv::Matrix<T> a6x(4,0,1);
     tmv::Matrix<T> a7x(0,4,1);
@@ -157,7 +158,6 @@ template <class T> void TestMatrixArith_7()
     TestMatrixArith7<T>(a7,ca7,v4s,cv4s,v2v,cv2v,"Degenerate 6");
     TestMatrixArith7<T>(a7,ca7,v4v,cv4v,v2s,cv2s,"Degenerate 7");
     TestMatrixArith7<T>(a7,ca7,v4s,cv4s,v2s,cv2s,"Degenerate 8");
-#endif
 #endif
 }
 

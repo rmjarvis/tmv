@@ -54,6 +54,22 @@ namespace tmv {
     template <class M>
     static void Read(std::istream& is, BaseMatrix_Diag_Mutable<M>& m);
 
+    // Defined in InvertD.h
+    template <int ix, class T, class M1, class M2>
+    inline void Invert(
+        const Scaling<ix,T>& x,
+        const BaseMatrix_Diag<M1>& m1, BaseMatrix_Mutable<M2>& m2);
+    template <int ix, class T, class M1, class M2>
+    inline void Invert(
+        const Scaling<ix,T>& x,
+        const BaseMatrix_Diag<M1>& m1, BaseMatrix_Diag_Mutable<M2>& m2);
+
+    // Defined in ElemMultVV.h
+    template <bool add, int ix, class T, class V1, class V2, class V3>
+    inline void NoAliasElemMultVV(
+        const Scaling<ix,T>& x1, const BaseVector_Calc<V1>& v1,
+        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3);
+
     // Defined below:
     template <class M1, class M2> 
     static void Copy(
@@ -80,7 +96,7 @@ namespace tmv {
         enum { mrowmajor = Traits<M>::mrowmajor };
         enum { mcolmajor = Traits<M>::mcolmajor };
         enum { mcalc = Traits<M>::mcalc };
-        enum { mstep = Traits<M>::mstep };
+        enum { mdiagstep = Traits<M>::mdiagstep };
         enum { mconj = Traits<M>::mconj };
 
         typedef M type;
@@ -181,9 +197,6 @@ namespace tmv {
         inline real_type norm1() const
         { return diag().maxAbsElement(); }
 
-        inline real_type norm2() const
-        { return diag().maxAbsElement(); }
-
         inline real_type normInf() const
         { return diag().maxAbsElement(); }
 
@@ -191,6 +204,41 @@ namespace tmv {
         inline ret_type sumElements(const F& f) const
         { return diag().sumElements(f); }
 
+
+
+        //
+        // Division Functions
+        //
+
+        inline real_type norm2() const
+        { return diag().maxAbsElement(); }
+
+        inline real_type condition() const
+        { return diag().maxAbsElement() / diag().minAbsElement(); }
+
+#if 0
+        template <class M2>
+        inline void makeInverse(BaseMatrix_Mutable<M2>& minv) const
+        { 
+            TMVStaticAssert((Sizes<msize,M2::msize>::same));
+            TMVAssert(size() == minv.size());
+            tmv::Invert(Scaling<1,real_type>(),*this,minv.mat());
+        }
+
+        template <class M2>
+        inline void makeInverseATA(BaseMatrix_Mutable<M2>& mata) const
+        {
+            TMVStaticAssert((Sizes<msize,M2::mcolsize>::same));
+            TMVStaticAssert((Sizes<msize,M2::mrowsize>::same));
+            TMVAssert(size() == mata.colsize());
+            TMVAssert(size() == mata.rowsize());
+            tmv::Invert(Scaling<1,real_type>(),*this,mata.mat());
+            typename M2::diag_type mata_diag = mata.mat().diag();
+            tmv::NoAliasElemMultVV<false>(
+                Scaling<1,real_type>(),mata_diag.conjugate(),mata_diag,
+                mata_diag);
+        }
+#endif
 
 
         //
@@ -365,7 +413,7 @@ namespace tmv {
         enum { mrowmajor = Traits<M>::mrowmajor };
         enum { mcolmajor = Traits<M>::mcolmajor };
         enum { mcalc = Traits<M>::mcalc };
-        enum { mstep = Traits<M>::mstep };
+        enum { mdiagstep = Traits<M>::mdiagstep };
         enum { mconj = Traits<M>::mconj };
 
         typedef M type;

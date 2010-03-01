@@ -86,6 +86,7 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+            TMVStaticAssert(!M3::mconj);
             const int M = cs == UNKNOWN ? int(m2.colsize()) : cs;
             int N = rs == UNKNOWN ? int(m2.rowsize()) : rs;
             typedef typename M1::const_col_type M1c;
@@ -94,6 +95,7 @@ namespace tmv {
             typedef typename M1c::const_nonconj_type::const_iterator IT1;
             typedef typename M2c::const_nonconj_type::const_iterator IT2;
             typedef typename M3c::iterator IT3;
+            TMVStaticAssert(!M3c::vconj);
             const int step1 = m1.stepj();
             const int step2 = m2.stepj();
             const int step3 = m3.stepj();
@@ -101,7 +103,7 @@ namespace tmv {
             IT2 it2 = m2.get_col(0).nonConj().begin();
             IT3 it3 = m3.get_col(0).begin();
             for(;N;--N) {
-                AddVV_Helper<-3,UNKNOWN,ix1,T1,M1c,ix2,T2,M2c,M3c>::call2(
+                AddVV_Helper<-4,UNKNOWN,ix1,T1,M1c,ix2,T2,M2c,M3c>::call2(
                     M,x1,it1,x2,it2,it3);
                 it1.shiftP(step1);
                 it2.shiftP(step2);
@@ -189,7 +191,7 @@ namespace tmv {
             IT2 it2 = m2.get_row(0).nonConj().begin();
             IT3 it3 = m3.get_row(0).begin();
             for(;M;--M) {
-                AddVV_Helper<-3,UNKNOWN,ix1,T1,M1r,ix2,T2,M2r,M3r>::call2(
+                AddVV_Helper<-4,UNKNOWN,ix1,T1,M1r,ix2,T2,M2r,M3r>::call2(
                     N,x1,it1,x2,it2,it3);
                 it1.shiftP(step1);
                 it2.shiftP(step2);
@@ -292,32 +294,35 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+            TMVStaticAssert(!M3::mconj);
             typedef typename M3::value_type T3;
+            const bool allrm = M1::mrowmajor && M2::mrowmajor && M3::mrowmajor;
+#if TMV_OPT == 0 
+            const int algo = allrm ? 21 : 11;
+#else
+            const bool allcm = M1::mcolmajor && M2::mcolmajor && M3::mcolmajor;
+            const bool tworm = ( 
+                (M1::mrowmajor && M2::mrowmajor) ||
+                (M1::mrowmajor && M3::mrowmajor) ||
+                (M2::mrowmajor && M3::mrowmajor) );
+            const bool twocm = ( 
+                (M1::mcolmajor && M2::mcolmajor) ||
+                (M1::mcolmajor && M3::mcolmajor) ||
+                (M2::mcolmajor && M3::mcolmajor) );
             const bool canlin = 
                 M1::mcanlin && M2::mcanlin && M3::mcanlin &&
-                ( (M1::mrowmajor && M2::mrowmajor && M3::mrowmajor) ||
-                  (M1::mcolmajor && M2::mcolmajor && M3::mcolmajor) );
+                ( allrm || allcm );
             const int algo = 
                 cs == 0 || rs == 0 ? 0 :
-#if TMV_OPT >= 1
                 canlin ? 1 :
                 ( cs != UNKNOWN && rs != UNKNOWN ) ? (
                     ( IntTraits2<cs,rs>::prod <= int(128/sizeof(T2)) ) ? (
-                        ( (M1::mrowmajor && M2::mrowmajor) ||
-                          (M1::mrowmajor && M3::mrowmajor) ||
-                          (M2::mrowmajor && M3::mrowmajor) ) ? 25 : 15 ) :
-                    ( (M1::mrowmajor && M2::mrowmajor) ||
-                      (M1::mrowmajor && M3::mrowmajor) ||
-                      (M2::mrowmajor && M3::mrowmajor) ) ? 21 :
-                    ( (M1::mcolmajor && M2::mcolmajor) ||
-                      (M1::mcolmajor && M3::mcolmajor) ||
-                      (M2::mcolmajor && M3::mcolmajor) ) ? 11 :
+                        tworm ? 25 : 15 ) :
+                    tworm ? 21 : 
+                    twocm ? 11 :
                     ( cs > rs ) ? 21 : 11 ) :
-                ( (M1::mrowmajor && M2::mrowmajor) ||
-                  (M1::mrowmajor && M3::mrowmajor) ||
-                  (M2::mrowmajor && M3::mrowmajor) ) ? 21 :
+                tworm ? 21 : 11;
 #endif
-                11;
             AddMM_Helper<algo,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>::call(
                 x1,m1,x2,m2,m3);
         }
@@ -332,19 +337,43 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+            TMVStaticAssert(!M3::mconj);
+#if TMV_OPT <= 1
+            const int algo = -4;
+#else
+            const bool allrm = M1::mrowmajor && M2::mrowmajor && M3::mrowmajor;
+            const bool allcm = M1::mcolmajor && M2::mcolmajor && M3::mcolmajor;
             const bool canlin = 
                 M1::mcanlin && M2::mcanlin && M3::mcanlin &&
-                ( (M1::mrowmajor && M2::mrowmajor && M3::mrowmajor) ||
-                  (M1::mcolmajor && M2::mcolmajor && M3::mcolmajor) );
+                ( allrm || allcm );
             const int algo = 
                 cs == 0 || rs == 0 ? 0 :
-#if TMV_OPT >= 2
                 canlin ? 1 :
                 ( cs == UNKNOWN || rs == UNKNOWN ) ? 41 :
-#endif
                 -4;
+#endif
             AddMM_Helper<algo,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>::call(
                 x1,m1,x2,m2,m3);
+        }
+    };
+
+    // algo 96: Conjugate
+    template <int cs, int rs, int ix1, class T1, class M1,
+              int ix2, class T2, class M2, class M3>
+    struct AddMM_Helper<96,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
+    {
+        static inline void call(
+            const Scaling<ix1,T1>& x1, const M1& m1, 
+            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
+        {
+            typedef typename M1::const_conjugate_type M1c;
+            typedef typename M2::const_conjugate_type M2c;
+            typedef typename M3::conjugate_type M3c;
+            M1c m1c = m1.conjugate();
+            M2c m2c = m2.conjugate();
+            M3c m3c = m3.conjugate();
+            AddMM_Helper<-2,cs,rs,ix1,T1,M1c,ix2,T2,M2c,M3c>::call(
+                TMV_CONJ(x1),m1c,TMV_CONJ(x2),m2c,m3c);
         }
     };
 
@@ -386,7 +415,9 @@ namespace tmv {
                 Traits2<TM1,TM3>::sametype &&
 #endif
                 Traits<TM3>::isinst;
+            const bool conj = M3::mconj;
             const int algo = 
+                conj ? 96 :
                 inst ? 97 :
                 -3;
             AddMM_Helper<algo,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>::call(
@@ -445,14 +476,12 @@ namespace tmv {
         {
             const bool ss1 = SameStorage(m1,m3);
             const bool ss2 = SameStorage(m2,m3);
-            const bool s1 = ss1 &&
-                !ExactSameStorage(m1,m3);
-            const bool s2 = ss2 &&
-                !ExactSameStorage(m2,m3);
+            const bool s1 = ss1 && !ExactSameStorage(m1,m3);
+            const bool s2 = ss2 && !ExactSameStorage(m2,m3);
 
             if (!s1 && !s2) {
                 // No aliasing (or no clobbering)
-                AddMM_Helper<-3,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>::call(
+                AddMM_Helper<-2,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>::call(
                     x1,m1,x2,m2,m3);
             } else if (!ss2) { 
                 // Alias with m1 only, do m1 first
@@ -506,7 +535,7 @@ namespace tmv {
                 // We do a different alias check for the Inst calls.
                 inst ? 98 :
                 checkalias ? 99 : 
-                -3;
+                -2;
             AddMM_Helper<algo,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>::call(
                 x1,m1,x2,m2,m3);
         }

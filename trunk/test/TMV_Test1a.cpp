@@ -30,32 +30,31 @@ int main() try {
     //showdiv=true;
     //showtests=true;
     //showstartdone=true;
+    //XXDEBUG8 = true;
 
-//#define SKIPREST
-
-#ifndef SKIPREST
+#if 1
 
 #ifdef TEST_DOUBLE
-    TestAllVector<double>();
-    TestAllMatrix<double>();
+    TestVector<double>();
+    TestMatrix<double>();
 #endif // DOUBLE
 
 #ifdef TEST_FLOAT
-    TestAllVector<float>();
-    TestAllMatrix<float>();
+    TestVector<float>();
+    TestMatrix<float>();
 #endif // FLOAT
 
 #ifdef TEST_LONGDOUBLE
-    TestAllVector<long double>();
-    TestAllMatrix<long double>();
+    TestVector<long double>();
+    TestMatrix<long double>();
 #endif // LONGDOUBLE
 
 #ifdef TEST_INT
-    TestAllVector<int>();
-    TestAllMatrix<int>();
+    TestVector<int>();
+    TestMatrix<int>();
 #endif  // INT
 
-#endif // SKIPREST
+#endif
 
     return 0;
 }

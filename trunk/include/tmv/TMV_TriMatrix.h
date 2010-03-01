@@ -345,6 +345,8 @@ namespace tmv {
         { return x1.val()+x2; }
         inline friend T operator+(T x1, const TriRef<T,C>& x2)
         { return x1+x2.val(); }
+        inline friend T& operator+=(T& x1, const TriRef<T,C>& x2)
+        { return x1 += x2.val(); }
 
         inline TriRef<T,C>& operator-=(const TriRef<T,C>& x2) 
         { assign(val() - x2.val()); return *this; }
@@ -356,6 +358,8 @@ namespace tmv {
         { return x1.val()-x2; }
         inline friend T operator-(T x1, const TriRef<T,C>& x2)
         { return x1-x2.val(); }
+        inline friend T& operator-=(T& x1, const TriRef<T,C>& x2)
+        { return x1 -= x2.val(); }
 
         inline TriRef<T,C>& operator*=(const TriRef<T,C>& x2) 
         { assign(x2.val() * val()); return *this; }
@@ -367,6 +371,11 @@ namespace tmv {
         { return x1.val()*x2; }
         inline friend T operator*(T x1, const TriRef<T,C>& x2)
         { return x1*x2.val(); }
+        inline friend T& operator*=(T& x1, const TriRef<T,C>& x2)
+        {
+            if (x2.isunit) return x1;
+            else return x1 *= x2.val(); 
+        }
 
         inline TriRef<T,C>& operator/=(const TriRef<T,C>& x2) 
         { assign(val() / x2.val()); return *this; }
@@ -378,6 +387,11 @@ namespace tmv {
         { return x1.val()/x2; }
         inline friend T operator/(T x1, const TriRef<T,C>& x2)
         { return x1/x2.val(); }
+        inline friend T& operator/=(T& x1, const TriRef<T,C>& x2)
+        {
+            if (x2.isunit) return x1;
+            else return x1 /= x2.val(); 
+        }
 
         inline bool operator==(const TriRef<T,C>& x2) const
         { return val() == x2.val(); }
@@ -536,7 +550,7 @@ namespace tmv {
             const_nonconj_type;
         typedef UpperTriMatrixView<T,D,mstepi,mstepj,false,I> nonconst_type;
 
-        typedef InvalidType inverse_type;
+        typedef QuotXM<1,real_type,type> inverse_type;
 
         typedef TriRef<T,false> reference;
 
@@ -644,63 +658,60 @@ namespace tmv {
         // Constructors
         //
 
-        explicit inline UpperTriMatrix(size_t _size) :
-            itss(_size), itsm(new T[itss*itss])
+        explicit inline UpperTriMatrix(size_t n=0) : itss(n), itsm(n*n)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
 #ifdef TMVDEBUG
-            this->setAllTo(T(888));
+            Maybe<munit>::offdiag(*this).setAllTo(T(888));
 #endif
         }
 
-        inline UpperTriMatrix(size_t _size, T x) : 
-            itss(_size), itsm(new T[itss*itss])
+        inline UpperTriMatrix(size_t n, T x) : itss(n), itsm(n*n)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
-            this->setAllTo(x);
+            Maybe<munit>::offdiag(*this).setAllTo(x);
         }
 
-        inline UpperTriMatrix(size_t _size, const T* vv) :
-            itss(_size), itsm(new T[itss*itss])
-        {
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
-            TMVStaticAssert(D != UnknownDiag);
-#ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
-#endif
-            VectorView<T,1> lv(ptr(),itss*itss);
-            ConstVectorView<T,1>(vv,itss*itss).newAssignTo(lv);
-        }
-
-        inline UpperTriMatrix(size_t _size, const std::vector<T>& vv) :
-            itss(_size), itsm(new T[itss*itss])
+        inline UpperTriMatrix(size_t n, const T* vv) : itss(n), itsm(n*n)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
 #ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
+            Maybe<munit>::offdiag(*this).setAllTo(T(888));
 #endif
-            TMVAssert(vv.size() == itss*itss);
-            VectorView<T,1> lv(ptr(),itss*itss);
-            ConstVectorView<T,1>(&vv[0],itss*itss).newAssignTo(lv);
+            VectorView<T,1> lv(ptr(),n*n);
+            ConstVectorView<T,1>(vv,n*n).newAssignTo(lv);
+        }
+
+        inline UpperTriMatrix(size_t n, const std::vector<T>& vv) :
+            itss(n), itsm(n*n)
+        {
+            TMVStaticAssert(S==RowMajor || S==ColMajor);
+            TMVStaticAssert(D != UnknownDiag);
+#ifdef XTEST_DEBUG
+            Maybe<munit>::offdiag(*this).setAllTo(T(888));
+#endif
+            TMVAssert(vv.size() == n*n);
+            VectorView<T,1> lv(ptr(),n*n);
+            ConstVectorView<T,1>(&vv[0],n*n).newAssignTo(lv);
         }
 
         inline UpperTriMatrix(const type& m2) :
-            itss(m2.size()), itsm(new T[itss*itss])
+            itss(m2.size()), itsm(itss*itss)
         { 
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
 #ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
+            Maybe<munit>::offdiag(*this).setAllTo(T(888));
 #endif
             m2.newAssignTo(*this);
         }
 
         template <class M2> 
         inline UpperTriMatrix(const BaseMatrix<M2>& m2) :
-            itss(m2.rowsize()), itsm(new T[itss*itss])
+            itss(m2.rowsize()), itsm(itss*itss)
         { 
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
@@ -709,7 +720,7 @@ namespace tmv {
             TMVStaticAssert((
                 (M2::mcalc && ShapeTraits<M2::mshape>::upper) || assignable));
 #ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
+            Maybe<munit>::offdiag(*this).setAllTo(T(888));
 #endif
             TMVAssert(m2.colsize() == size());
             TMVAssert(m2.rowsize() == size());
@@ -719,25 +730,25 @@ namespace tmv {
 
         template <class M2>
         inline UpperTriMatrix(const BaseMatrix_Tri<M2>& m2) :
-            itss(m2.size()), itsm(new T[itss*itss])
+            itss(m2.size()), itsm(itss*itss)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
             TMVStaticAssert(M2::mupper);
 #ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
+            Maybe<munit>::offdiag(*this).setAllTo(T(888));
 #endif
             Maybe<munit && !M2::munit>::unitview(m2).newAssignTo(*this);
         }
 
         template <class M2>
         inline UpperTriMatrix(const BaseMatrix_Diag<M2>& m2) :
-            itss(m2.size()), itsm(new T[itss*itss])
+            itss(m2.size()), itsm(itss*itss)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
 #ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
+            Maybe<munit>::offdiag(*this).setAllTo(T(888));
 #endif
             typename type::diag_type d = this->diag();
             this->setZero();
@@ -747,7 +758,7 @@ namespace tmv {
         inline ~UpperTriMatrix()
         {
 #ifdef TMVDEBUG
-            this->setAllTo(T(999));
+            Maybe<munit>::offdiag(*this).setAllTo(T(999));
 #endif
         }
 
@@ -787,8 +798,8 @@ namespace tmv {
         // Auxilliary Functions
         //
 
-        inline const T* cptr() const { return itsm.get(); }
-        inline T* ptr() { return itsm.get(); }
+        inline const T* cptr() const { return itsm; }
+        inline T* ptr() { return itsm; }
 
         inline T cref(int i, int j) const 
         {
@@ -805,6 +816,19 @@ namespace tmv {
                 itsm[S==RowMajor ? i*stepi() + j : i + j*stepj()] ); 
         }
 
+        inline void swapWith(type& m2)
+        {
+            TMVAssert(m2.size() == size());
+            if (itsm.getP() == m2.itsm.getP()) return;
+            itsm.swapWith(m2.itsm);
+        }
+
+        inline void resize(const size_t s)
+        {
+            itss = s;
+            itsm.resize(s*s);
+        }
+
         inline size_t size() const { return itss; }
         inline int stepi() const { return S==RowMajor ? itss : 1; }
         inline int stepj() const { return S==RowMajor ? 1 : itss; }
@@ -814,19 +838,11 @@ namespace tmv {
         inline bool isrm() const { return S==RowMajor; }
         inline bool iscm() const { return S==ColMajor; }
         inline StorageType stor() const { return S; }
-        inline void swapWith(type& m2)
-        {
-            TMVAssert(m2.size() == size());
-            if (itsm.get() == m2.itsm.get()) return;
-            T* temp = itsm.release();
-            itsm.reset(m2.itsm.release());
-            m2.itsm.reset(temp);
-        }
 
     protected :
 
-        const size_t itss;
-        auto_array<T> itsm;
+        size_t itss;
+        AlignedArray<T> itsm;
 
     }; // UpperTriMatrix
 
@@ -881,7 +897,7 @@ namespace tmv {
         enum { DD = (D == UnknownDiag ? NonUnitDiag : D) };
         typedef UpperTriMatrix<T,DiagType(DD),Sj==1?RowMajor:ColMajor,I> 
             copy_type;
-        typedef InvalidType inverse_type;
+        typedef QuotXM<1,real_type,type> inverse_type;
 
         enum { mcolsize = UNKNOWN };
         enum { mrowsize = UNKNOWN };
@@ -1126,7 +1142,7 @@ namespace tmv {
         enum { DD = (D == UnknownDiag ? NonUnitDiag : D) };
         typedef UpperTriMatrix<T,DiagType(DD),Sj==1?RowMajor:ColMajor,I> 
             copy_type;
-        typedef InvalidType inverse_type;
+        typedef QuotXM<1,real_type,type> inverse_type;
 
         enum { mcolsize = UNKNOWN };
         enum { mrowsize = UNKNOWN };
@@ -1502,7 +1518,7 @@ namespace tmv {
             const_nonconj_type;
         typedef LowerTriMatrixView<T,D,mstepi,mstepj,false,I> nonconst_type;
 
-        typedef InvalidType inverse_type;
+        typedef QuotXM<1,real_type,type> inverse_type;
 
         typedef TriRef<T,false> reference;
 
@@ -1580,54 +1596,51 @@ namespace tmv {
         // Constructors
         //
 
-        explicit inline LowerTriMatrix(size_t _size) :
-            itss(_size), itsm(new T[itss*itss])
+        explicit inline LowerTriMatrix(size_t n=0) : itss(n), itsm(n*n)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
 #ifdef TMVDEBUG
-            this->setAllTo(T(888));
+            Maybe<munit>::offdiag(*this).setAllTo(T(888));
 #endif
         }
 
-        inline LowerTriMatrix(size_t _size, T x) : 
-            itss(_size), itsm(new T[itss*itss])
+        inline LowerTriMatrix(size_t n, T x) : itss(n), itsm(n*n)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
-            this->setAllTo(x);
+            Maybe<munit>::offdiag(*this).setAllTo(x);
         }
 
-        inline LowerTriMatrix(size_t _size, const T* vv) :
-            itss(_size), itsm(new T[itss*itss])
+        inline LowerTriMatrix(size_t n, const T* vv) : itss(n), itsm(n*n)
         {
 #ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
+            Maybe<munit>::offdiag(*this).setAllTo(T(888));
 #endif
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
-            VectorView<T,1> lv(ptr(),itss*itss);
-            ConstVectorView<T,1>(vv,itss*itss).newAssignTo(lv);
+            VectorView<T,1> lv(ptr(),n*n);
+            ConstVectorView<T,1>(vv,n*n).newAssignTo(lv);
         }
 
-        inline LowerTriMatrix(size_t _size, const std::vector<T>& vv) :
-            itss(_size), itsm(new T[itss*itss])
+        inline LowerTriMatrix(size_t n, const std::vector<T>& vv) :
+            itss(n), itsm(n*n)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
 #ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
+            Maybe<munit>::offdiag(*this).setAllTo(T(888));
 #endif
-            TMVAssert(vv.size() == itss*itss);
-            VectorView<T,1> lv(ptr(),itss*itss);
-            ConstVectorView<T,1>(&vv[0],itss*itss).newAssignTo(lv);
+            TMVAssert(vv.size() == n*n);
+            VectorView<T,1> lv(ptr(),n*n);
+            ConstVectorView<T,1>(&vv[0],n*n).newAssignTo(lv);
         }
 
         inline LowerTriMatrix(const type& m2) :
-            itss(m2.size()), itsm(new T[itss*itss])
+            itss(m2.size()), itsm(itss*itss)
         { 
 #ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
+            Maybe<munit>::offdiag(*this).setAllTo(T(888));
 #endif
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
@@ -1636,7 +1649,7 @@ namespace tmv {
 
         template <class M2> 
         inline LowerTriMatrix(const BaseMatrix<M2>& m2) :
-            itss(m2.colsize()), itsm(new T[itss*itss])
+            itss(m2.colsize()), itsm(itss*itss)
         { 
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
@@ -1645,7 +1658,7 @@ namespace tmv {
             TMVStaticAssert((
                 (M2::mcalc && ShapeTraits<M2::mshape>::lower) || assignable));
 #ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
+            Maybe<munit>::offdiag(*this).setAllTo(T(888));
 #endif
             TMVAssert(m2.colsize() == size());
             TMVAssert(m2.rowsize() == size());
@@ -1654,25 +1667,25 @@ namespace tmv {
 
         template <class M2>
         inline LowerTriMatrix(const BaseMatrix_Tri<M2>& m2) :
-            itss(m2.size()), itsm(new T[itss*itss])
+            itss(m2.size()), itsm(itss*itss)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
             TMVStaticAssert(M2::mlower);
 #ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
+            Maybe<munit>::offdiag(*this).setAllTo(T(888));
 #endif
             Maybe<munit && !M2::munit>::unitview(m2).newAssignTo(*this);
         }
 
         template <class M2>
         inline LowerTriMatrix(const BaseMatrix_Diag<M2>& m2) :
-            itss(m2.size()), itsm(new T[itss*itss])
+            itss(m2.size()), itsm(itss*itss)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
 #ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
+            Maybe<munit>::offdiag(*this).setAllTo(T(888));
 #endif
             typename type::diag_type d = this->diag();
             this->setZero();
@@ -1682,7 +1695,7 @@ namespace tmv {
         inline ~LowerTriMatrix()
         {
 #ifdef TMVDEBUG
-            this->setAllTo(T(999));
+            Maybe<munit>::offdiag(*this).setAllTo(T(999));
 #endif
         }
 
@@ -1722,8 +1735,8 @@ namespace tmv {
         // Auxilliary Functions
         //
 
-        inline const T* cptr() const { return itsm.get(); }
-        inline T* ptr() { return itsm.get(); }
+        inline const T* cptr() const { return itsm; }
+        inline T* ptr() { return itsm; }
 
         inline T cref(int i, int j) const 
         {
@@ -1740,6 +1753,19 @@ namespace tmv {
                 itsm[S==RowMajor ? i*stepi() + j : i + j*stepj()] ); 
         }
 
+        inline void swapWith(type& m2)
+        {
+            TMVAssert(m2.size() == size());
+            if (itsm.getP() == m2.itsm.getP()) return;
+            itsm.swapWith(m2.itsm);
+        }
+
+        inline void resize(const size_t s)
+        {
+            itss = s;
+            itsm.resize(s*s);
+        }
+
         inline size_t size() const { return itss; }
         inline int stepi() const { return S==RowMajor ? itss : 1; }
         inline int stepj() const { return S==RowMajor ? 1 : itss; }
@@ -1749,19 +1775,11 @@ namespace tmv {
         inline bool isrm() const { return S==RowMajor; }
         inline bool iscm() const { return S==ColMajor; }
         inline StorageType stor() const { return S; }
-        inline void swapWith(type& m2)
-        {
-            TMVAssert(m2.size() == size());
-            if (itsm.get() == m2.itsm.get()) return;
-            T* temp = itsm.release();
-            itsm.reset(m2.itsm.release());
-            m2.itsm.reset(temp);
-        }
 
     protected :
 
-        const size_t itss;
-        auto_array<T> itsm;
+        size_t itss;
+        AlignedArray<T> itsm;
 
     }; // LowerTriMatrix
 
@@ -1816,7 +1834,7 @@ namespace tmv {
         enum { DD = (D == UnknownDiag ? NonUnitDiag : D) };
         typedef LowerTriMatrix<T,DiagType(DD),Sj==1?RowMajor:ColMajor,I> 
             copy_type;
-        typedef InvalidType inverse_type;
+        typedef QuotXM<1,real_type,type> inverse_type;
 
         enum { mcolsize = UNKNOWN };
         enum { mrowsize = UNKNOWN };
@@ -2062,7 +2080,7 @@ namespace tmv {
         enum { DD = (D == UnknownDiag ? NonUnitDiag : D) };
         typedef LowerTriMatrix<T,DiagType(DD),Sj==1?RowMajor:ColMajor,I> 
             copy_type;
-        typedef InvalidType inverse_type;
+        typedef QuotXM<1,real_type,type> inverse_type;
 
         enum { mcolsize = UNKNOWN };
         enum { mrowsize = UNKNOWN };
@@ -2376,9 +2394,9 @@ namespace tmv {
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         if (stor == RowMajor)
-            return UpperTriMatrixView<T,NonUnitDiag>(m,false,size,size,1);
+            return UpperTriMatrixView<T,NonUnitDiag>(m,size,false,size,1);
         else
-            return UpperTriMatrixView<T,NonUnitDiag>(m,false,size,1,size);
+            return UpperTriMatrixView<T,NonUnitDiag>(m,size,false,1,size);
     }
 
     template <class T> 
@@ -2387,20 +2405,20 @@ namespace tmv {
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         if (stor == RowMajor)
-            return ConstUpperTriMatrixView<T,NonUnitDiag>(m,false,size,size,1);
+            return ConstUpperTriMatrixView<T,NonUnitDiag>(m,size,false,size,1);
         else
-            return ConstUpperTriMatrixView<T,NonUnitDiag>(m,false,size,1,size);
+            return ConstUpperTriMatrixView<T,NonUnitDiag>(m,size,false,1,size);
     }
 
     template <class T> 
     inline UpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
         T* m, size_t size, int stepi, int stepj)
-    { return UpperTriMatrixView<T,NonUnitDiag>(m,false,size,stepi,stepj); }
+    { return UpperTriMatrixView<T,NonUnitDiag>(m,size,false,stepi,stepj); }
 
     template <class T> 
     inline ConstUpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
         const T* m, size_t size, int stepi, int stepj)
-    { return ConstUpperTriMatrixView<T,NonUnitDiag>(m,false,size,stepi,stepj); }
+    { return ConstUpperTriMatrixView<T,NonUnitDiag>(m,size,false,stepi,stepj); }
 
     template <class T> 
     inline UpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
@@ -2408,9 +2426,9 @@ namespace tmv {
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         if (stor == RowMajor)
-            return UpperTriMatrixView<T,UnitDiag>(m,true,size,size,1);
+            return UpperTriMatrixView<T,UnitDiag>(m,size,true,size,1);
         else
-            return UpperTriMatrixView<T,UnitDiag>(m,true,size,1,size);
+            return UpperTriMatrixView<T,UnitDiag>(m,size,true,1,size);
     }
 
     template <class T> 
@@ -2419,20 +2437,20 @@ namespace tmv {
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         if (stor == RowMajor)
-            return ConstUpperTriMatrixView<T,UnitDiag>(m,true,size,size,1);
+            return ConstUpperTriMatrixView<T,UnitDiag>(m,size,true,size,1);
         else
-            return ConstUpperTriMatrixView<T,UnitDiag>(m,true,size,1,size);
+            return ConstUpperTriMatrixView<T,UnitDiag>(m,size,true,1,size);
     }
 
     template <class T> 
     inline UpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
         T* m, size_t size, int stepi, int stepj)
-    { return UpperTriMatrixView<T,UnitDiag>(m,true,size,stepi,stepj); }
+    { return UpperTriMatrixView<T,UnitDiag>(m,size,true,stepi,stepj); }
 
     template <class T> 
     inline ConstUpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
         const T* m, size_t size, int stepi, int stepj)
-    { return ConstUpperTriMatrixView<T,UnitDiag>(m,true,size,stepi,stepj); }
+    { return ConstUpperTriMatrixView<T,UnitDiag>(m,size,true,stepi,stepj); }
 
     template <class T> 
     inline LowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
@@ -2440,9 +2458,9 @@ namespace tmv {
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         if (stor == RowMajor)
-            return LowerTriMatrixView<T,NonUnitDiag>(m,false,size,size,1);
+            return LowerTriMatrixView<T,NonUnitDiag>(m,size,false,size,1);
         else
-            return LowerTriMatrixView<T,NonUnitDiag>(m,false,size,1,size);
+            return LowerTriMatrixView<T,NonUnitDiag>(m,size,false,1,size);
     }
 
     template <class T> 
@@ -2451,20 +2469,20 @@ namespace tmv {
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         if (stor == RowMajor)
-            return ConstLowerTriMatrixView<T,NonUnitDiag>(m,false,size,size,1);
+            return ConstLowerTriMatrixView<T,NonUnitDiag>(m,size,false,size,1);
         else
-            return ConstLowerTriMatrixView<T,NonUnitDiag>(m,false,size,1,size);
+            return ConstLowerTriMatrixView<T,NonUnitDiag>(m,size,false,1,size);
     }
 
     template <class T> 
     inline LowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
         T* m, size_t size, int stepi, int stepj)
-    { return LowerTriMatrixView<T,NonUnitDiag>(m,false,size,stepi,stepj); }
+    { return LowerTriMatrixView<T,NonUnitDiag>(m,size,false,stepi,stepj); }
 
     template <class T> 
     inline ConstLowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
         const T* m, size_t size, int stepi, int stepj)
-    { return ConstLowerTriMatrixView<T,NonUnitDiag>(m,false,size,stepi,stepj); }
+    { return ConstLowerTriMatrixView<T,NonUnitDiag>(m,size,false,stepi,stepj); }
 
     template <class T> 
     inline LowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
@@ -2472,9 +2490,9 @@ namespace tmv {
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         if (stor == RowMajor)
-            return LowerTriMatrixView<T,UnitDiag>(m,true,size,size,1);
+            return LowerTriMatrixView<T,UnitDiag>(m,size,true,size,1);
         else
-            return LowerTriMatrixView<T,UnitDiag>(m,true,size,1,size);
+            return LowerTriMatrixView<T,UnitDiag>(m,size,true,1,size);
     }
 
     template <class T> 
@@ -2483,20 +2501,20 @@ namespace tmv {
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         if (stor == RowMajor)
-            return ConstLowerTriMatrixView<T,UnitDiag>(m,true,size,size,1);
+            return ConstLowerTriMatrixView<T,UnitDiag>(m,size,true,size,1);
         else
-            return ConstLowerTriMatrixView<T,UnitDiag>(m,true,size,1,size);
+            return ConstLowerTriMatrixView<T,UnitDiag>(m,size,true,1,size);
     }
 
     template <class T> 
     inline LowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
         T* m, size_t size, int stepi, int stepj)
-    { return LowerTriMatrixView<T,UnitDiag>(m,true,size,stepi,stepj); }
+    { return LowerTriMatrixView<T,UnitDiag>(m,size,true,stepi,stepj); }
 
     template <class T> 
     inline ConstLowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
         const T* m, size_t size, int stepi, int stepj)
-    { return ConstLowerTriMatrixView<T,UnitDiag>(m,true,size,stepi,stepj); }
+    { return ConstLowerTriMatrixView<T,UnitDiag>(m,size,true,stepi,stepj); }
 
 
 
@@ -2550,10 +2568,11 @@ namespace tmv {
     //
 
     template <class T, DiagType D, StorageType S, IndexStyle I>
-    inline std::string TMV_Text(const UpperTriMatrix<T,D,S,I>& )
+    inline std::string TMV_Text(const UpperTriMatrix<T,D,S,I>& m)
     {
         std::ostringstream s;
         s << "UpperTriMatrix<"<<TMV_Text(T())<<","<<TMV_Text(D);
+        if (D == UnknownDiag) s << "("<<(m.isunit()?"Unit":"NonUnit")<<")";
         s << ","<<TMV_Text(S)<<","<<TMV_Text(I)<<">";
         return s.str();
     }
@@ -2564,6 +2583,7 @@ namespace tmv {
     {
         std::ostringstream s;
         s << "ConstUpperTriMatrixView<"<<TMV_Text(T())<<","<<TMV_Text(D);
+        if (D == UnknownDiag) s << "("<<(m.isunit()?"Unit":"NonUnit")<<")";
         s << ","<<IntTraits<Si>::text();
         if (Si == UNKNOWN) s << "("<<m.stepi()<<")";
         s << ","<<IntTraits<Sj>::text();
@@ -2577,6 +2597,7 @@ namespace tmv {
     {
         std::ostringstream s;
         s << "UpperTriMatrixView<"<<TMV_Text(T())<<","<<TMV_Text(D);
+        if (D == UnknownDiag) s << "("<<(m.isunit()?"Unit":"NonUnit")<<")";
         s << ","<<IntTraits<Si>::text();
         if (Si == UNKNOWN) s << "("<<m.stepi()<<")";
         s << ","<<IntTraits<Sj>::text();
@@ -2586,10 +2607,11 @@ namespace tmv {
     }
 
     template <class T, DiagType D, StorageType S, IndexStyle I>
-    inline std::string TMV_Text(const LowerTriMatrix<T,D,S,I>& )
+    inline std::string TMV_Text(const LowerTriMatrix<T,D,S,I>& m)
     {
         std::ostringstream s;
         s << "LowerTriMatrix<"<<TMV_Text(T())<<","<<TMV_Text(D);
+        if (D == UnknownDiag) s << "("<<(m.isunit()?"Unit":"NonUnit")<<")";
         s << ","<<TMV_Text(S)<<","<<TMV_Text(I)<<">";
         return s.str();
     }
@@ -2600,6 +2622,7 @@ namespace tmv {
     {
         std::ostringstream s;
         s << "ConstLowerTriMatrixView<"<<TMV_Text(T())<<","<<TMV_Text(D);
+        if (D == UnknownDiag) s << "("<<(m.isunit()?"Unit":"NonUnit")<<")";
         s << ","<<IntTraits<Si>::text();
         if (Si == UNKNOWN) s << "("<<m.stepi()<<")";
         s << ","<<IntTraits<Sj>::text();
@@ -2613,6 +2636,7 @@ namespace tmv {
     {
         std::ostringstream s;
         s << "LowerTriMatrixView<"<<TMV_Text(T())<<","<<TMV_Text(D);
+        if (D == UnknownDiag) s << "("<<(m.isunit()?"Unit":"NonUnit")<<")";
         s << ","<<IntTraits<Si>::text();
         if (Si == UNKNOWN) s << "("<<m.stepi()<<")";
         s << ","<<IntTraits<Sj>::text();

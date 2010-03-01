@@ -2,99 +2,92 @@
 #include "TMV_Test1.h"
 #include "TMV.h"
 
-#define NOADDEQ
-#define NOMULTEQ
-#define NOSV
-#define NOTRANSMM
 #include "TMV_TestMatrixArith.h"
 
 template <class T> void TestTriMatrixArith_A2()
 {
-    const int N = 10;
+    typedef std::complex<T> CT;
 
-    tmv::Matrix<T> a1(N,N);
-    for(int i=0;i<N;i++) for(int j=0;j<N;j++) a1(i,j) = T(13+3*i-5*j);
+    tmv::Matrix<T,tmv::RowMajor> a1x(4,4);
+    for(int i=0;i<4;++i) for(int j=0;j<4;++j) {
+        a1x(i,j) = T(2+4*i-5*j);
+    }
+    a1x(0,0) = 14; 
+    a1x(1,0) = -2; 
+    a1x(2,0) = 7; 
+    a1x(3,0) = -10;
+    a1x(2,2) = 30;
 
-    tmv::UpperTriMatrix<T,tmv::NonUnitDiag,tmv::RowMajor> u1(a1);
-    tmv::LowerTriMatrix<T,tmv::NonUnitDiag,tmv::RowMajor> l1(a1);
+    tmv::Matrix<CT,tmv::RowMajor> ca1x = a1x;
+    ca1x(2,3) += CT(2,3);
+    ca1x(1,0) *= CT(0,2);
+    ca1x.col(1) *= CT(-1,3);
+    ca1x.row(3) += tmv::Vector<CT>(4,CT(1,9));
 
-    tmv::Matrix<std::complex<T> > c1 = a1 * std::complex<T>(1,2);
-    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag,tmv::RowMajor> cu1(c1);
-    tmv::LowerTriMatrix<std::complex<T>,tmv::NonUnitDiag,tmv::RowMajor> cl1(c1);
+    tmv::Matrix<T,tmv::ColMajor> a2x = a1x.transpose();
+    a2x.row(1) *= T(3);
+    a2x.col(2) -= tmv::Vector<T>(4,4.);
+    tmv::Matrix<CT,tmv::ColMajor> ca2x = ca1x;
+    ca2x -= a2x;
+    ca2x *= CT(1,-2);
 
-    tmv::UpperTriMatrixView<T> u1v = u1.view();
-    tmv::LowerTriMatrixView<T> l1v = l1.view();
-    tmv::UpperTriMatrixView<std::complex<T> > cu1v = cu1.view();
-    tmv::LowerTriMatrixView<std::complex<T> > cl1v = cl1.view();
-    tmv::LowerTriMatrix<T,tmv::NonUnitDiag> l1x = l1v;
-    tmv::LowerTriMatrix<std::complex<T>,tmv::NonUnitDiag> cl1x = cl1v;
+    tmv::Matrix<T> a3x(12,16);
+    for(int i=0;i<12;++i) for(int j=0;j<16;++j) a3x(i,j) = T(1-2*i+3*j);
+    a3x.diag().addToAll(30);
+    tmv::Matrix<CT> ca3x = a3x*CT(1,-2);
+    ca3x.diag().addToAll(CT(-22,15));
 
-    TestMatrixArith456<T>(l1x,cl1x,l1v,cl1v,u1v,cu1v,"Tri L/U");
+    tmv::UpperTriMatrixView<T> u1 = a1x.upperTri();
+    tmv::UpperTriMatrixView<CT> cu1 = ca1x.upperTri();
+    tmv::UpperTriMatrixView<T> u2 = a2x.upperTri();
+    tmv::UpperTriMatrixView<CT> cu2 = ca2x.upperTri();
+    tmv::UpperTriMatrixView<T> u3 = a3x.subMatrix(0,12,0,16,3,4).upperTri();
+    tmv::UpperTriMatrixView<CT> cu3 = ca3x.subMatrix(0,12,0,16,3,4).upperTri();
 
-#ifdef XTEST
+    TestMatrixArith2<T>(u1,cu1,"UpperTri 1");
+    TestMatrixArith2<T>(u2,cu2,"UpperTri 2");
+#if (XTEST & 1)
+    TestMatrixArith2<T>(u3,cu3,"UpperTri 3");
+#endif
+
 #if (XTEST & 2)
-    tmv::UpperTriMatrix<T,tmv::UnitDiag,tmv::RowMajor> u2(a1);
-    tmv::UpperTriMatrix<T,tmv::NonUnitDiag,tmv::ColMajor> u3(a1);
-    tmv::UpperTriMatrix<T,tmv::UnitDiag,tmv::ColMajor> u4(a1);
-    tmv::LowerTriMatrix<T,tmv::UnitDiag,tmv::RowMajor> l2(a1);
-    tmv::LowerTriMatrix<T,tmv::NonUnitDiag,tmv::ColMajor> l3(a1);
-    tmv::LowerTriMatrix<T,tmv::UnitDiag,tmv::ColMajor> l4(a1);
-    tmv::UpperTriMatrix<std::complex<T>,tmv::UnitDiag,tmv::RowMajor> cu2(c1);
-    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag,tmv::ColMajor> cu3(c1);
-    tmv::UpperTriMatrix<std::complex<T>,tmv::UnitDiag,tmv::ColMajor> cu4(c1);
-    tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag,tmv::RowMajor> cl2(c1);
-    tmv::LowerTriMatrix<std::complex<T>,tmv::NonUnitDiag,tmv::ColMajor> cl3(c1);
-    tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag,tmv::ColMajor> cl4(c1);
-    tmv::UpperTriMatrixView<T> u2v = u2.view();
-    tmv::UpperTriMatrixView<T> u3v = u3.view();
-    tmv::UpperTriMatrixView<T> u4v = u4.view();
-    tmv::LowerTriMatrixView<T> l2v = l2.view();
-    tmv::LowerTriMatrixView<T> l3v = l3.view();
-    tmv::LowerTriMatrixView<T> l4v = l4.view();
-    tmv::UpperTriMatrixView<std::complex<T> > cu2v = cu2.view();
-    tmv::UpperTriMatrixView<std::complex<T> > cu3v = cu3.view();
-    tmv::UpperTriMatrixView<std::complex<T> > cu4v = cu4.view();
-    tmv::LowerTriMatrixView<std::complex<T> > cl2v = cl2.view();
-    tmv::LowerTriMatrixView<std::complex<T> > cl3v = cl3.view();
-    tmv::LowerTriMatrixView<std::complex<T> > cl4v = cl4.view();
-    tmv::UpperTriMatrix<T,tmv::NonUnitDiag> u1x = u1v;
-    tmv::UpperTriMatrix<T,tmv::UnitDiag> u2x = u2v;
-    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag> cu1x = cu1v;
-    tmv::UpperTriMatrix<std::complex<T>,tmv::UnitDiag> cu2x = cu2v;
-    tmv::LowerTriMatrix<T,tmv::UnitDiag> l2x = l2v;
-    tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag> cl2x = cl2v;
+    tmv::LowerTriMatrixView<T> l1 = a1x.lowerTri();
+    tmv::LowerTriMatrixView<CT> cl1 = ca1x.lowerTri();
+    tmv::LowerTriMatrixView<T> l2 = a2x.lowerTri();
+    tmv::LowerTriMatrixView<CT> cl2 = ca2x.lowerTri();
+    tmv::LowerTriMatrixView<T> l3 = a3x.subMatrix(0,12,0,16,3,4).lowerTri();
+    tmv::LowerTriMatrixView<CT> cl3 = ca3x.subMatrix(0,12,0,16,3,4).lowerTri();
 
-    TestMatrixArith456<T>(l1x,cl1x,l1v,cl1v,u2v,cu2v,"Tri L/U");
-    TestMatrixArith456<T>(l2x,cl2x,l2v,cl2v,u1v,cu1v,"Tri L/U");
-    TestMatrixArith456<T>(l2x,cl2x,l2v,cl2v,u2v,cu2v,"Tri L/U");
-    TestMatrixArith456<T>(l1x,cl1x,l1v,cl1v,u3v,cu3v,"Tri L/U");
-    TestMatrixArith456<T>(l1x,cl1x,l1v,cl1v,u4v,cu4v,"Tri L/U");
-    TestMatrixArith456<T>(l2x,cl2x,l2v,cl2v,u3v,cu3v,"Tri L/U");
-    TestMatrixArith456<T>(l2x,cl2x,l2v,cl2v,u4v,cu4v,"Tri L/U");
-    TestMatrixArith456<T>(l1x,cl1x,l3v,cl3v,u1v,cu1v,"Tri L/U");
-    TestMatrixArith456<T>(l1x,cl1x,l3v,cl3v,u2v,cu2v,"Tri L/U");
-    TestMatrixArith456<T>(l1x,cl1x,l3v,cl3v,u3v,cu3v,"Tri L/U");
-    TestMatrixArith456<T>(l1x,cl1x,l3v,cl3v,u4v,cu4v,"Tri L/U");
-    TestMatrixArith456<T>(l2x,cl2x,l4v,cl4v,u1v,cu1v,"Tri L/U");
-    TestMatrixArith456<T>(l2x,cl2x,l4v,cl4v,u2v,cu2v,"Tri L/U");
-    TestMatrixArith456<T>(l2x,cl2x,l4v,cl4v,u3v,cu3v,"Tri L/U");
-    TestMatrixArith456<T>(l2x,cl2x,l4v,cl4v,u4v,cu4v,"Tri L/U");
-    TestMatrixArith456<T>(u1x,cu1x,u1v,cu1v,l1v,cl1v,"Tri U/L");
-    TestMatrixArith456<T>(u1x,cu1x,u1v,cu1v,l2v,cl2v,"Tri U/L");
-    TestMatrixArith456<T>(u1x,cu1x,u1v,cu1v,l3v,cl3v,"Tri U/L");
-    TestMatrixArith456<T>(u1x,cu1x,u1v,cu1v,l4v,cl4v,"Tri U/L");
-    TestMatrixArith456<T>(u2x,cu2x,u2v,cu2v,l1v,cl1v,"Tri U/L");
-    TestMatrixArith456<T>(u2x,cu2x,u2v,cu2v,l2v,cl2v,"Tri U/L");
-    TestMatrixArith456<T>(u2x,cu2x,u2v,cu2v,l3v,cl3v,"Tri U/L");
-    TestMatrixArith456<T>(u2x,cu2x,u2v,cu2v,l4v,cl4v,"Tri U/L");
-    TestMatrixArith456<T>(u1x,cu1x,u3v,cu3v,l1v,cl1v,"Tri U/L");
-    TestMatrixArith456<T>(u1x,cu1x,u3v,cu3v,l2v,cl2v,"Tri U/L");
-    TestMatrixArith456<T>(u1x,cu1x,u3v,cu3v,l3v,cl3v,"Tri U/L");
-    TestMatrixArith456<T>(u1x,cu1x,u3v,cu3v,l4v,cl4v,"Tri U/L");
-    TestMatrixArith456<T>(u2x,cu2x,u4v,cu4v,l1v,cl1v,"Tri U/L");
-    TestMatrixArith456<T>(u2x,cu2x,u4v,cu4v,l2v,cl2v,"Tri U/L");
-    TestMatrixArith456<T>(u2x,cu2x,u4v,cu4v,l3v,cl3v,"Tri U/L");
-    TestMatrixArith456<T>(u2x,cu2x,u4v,cu4v,l4v,cl4v,"Tri U/L");
+    TestMatrixArith2<T>(l1,cl1,"LowerTri 1");
+    TestMatrixArith2<T>(l2,cl2,"LowerTri 2");
+#if (XTEST & 1)
+    TestMatrixArith2<T>(l3,cl3,"LowerTri 3");
+#endif
+
+    tmv::UpperTriMatrixView<T> u4 = a1x.unitUpperTri();
+    tmv::UpperTriMatrixView<CT> cu4 = ca1x.unitUpperTri();
+    tmv::UpperTriMatrixView<T> u5 = a2x.unitUpperTri();
+    tmv::UpperTriMatrixView<CT> cu5 = ca2x.unitUpperTri();
+    tmv::UpperTriMatrixView<T> u6 = a3x.subMatrix(0,12,0,16,3,4).unitUpperTri();
+    tmv::UpperTriMatrixView<CT> cu6 = ca3x.subMatrix(0,12,0,16,3,4).unitUpperTri();
+
+    TestMatrixArith2<T>(u4,cu4,"UpperTri 4");
+    TestMatrixArith2<T>(u5,cu5,"UpperTri 5");
+#if (XTEST & 1)
+    TestMatrixArith2<T>(u6,cu6,"UpperTri 6");
+#endif
+
+    tmv::LowerTriMatrixView<T> l4 = a1x.unitLowerTri();
+    tmv::LowerTriMatrixView<CT> cl4 = ca1x.unitLowerTri();
+    tmv::LowerTriMatrixView<T> l5 = a2x.unitLowerTri();
+    tmv::LowerTriMatrixView<CT> cl5 = ca2x.unitLowerTri();
+    tmv::LowerTriMatrixView<T> l6 = a3x.subMatrix(0,12,0,16,3,4).unitLowerTri();
+    tmv::LowerTriMatrixView<CT> cl6 = ca3x.subMatrix(0,12,0,16,3,4).unitLowerTri();
+
+    TestMatrixArith2<T>(l4,cl4,"LowerTri 4");
+    TestMatrixArith2<T>(l5,cl5,"LowerTri 5");
+#if (XTEST & 1)
+    TestMatrixArith2<T>(l6,cl6,"LowerTri 6");
 #endif
 #endif
 }
@@ -111,4 +104,3 @@ template void TestTriMatrixArith_A2<long double>();
 #ifdef TEST_INT
 template void TestTriMatrixArith_A2<int>();
 #endif
-

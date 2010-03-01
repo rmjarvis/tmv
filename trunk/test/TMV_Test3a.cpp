@@ -31,36 +31,33 @@ int main() try {
     //showtests=true;
     //showstartdone=true;
 
-    //TestSmallVectorArith_1a<double>();
-    //TestAllSmallVector<double>();
-    //#define SKIPREST
-
-#ifndef SKIPREST
+#if 1
 
 #ifdef TEST_DOUBLE
-    TestAllSmallVector<double>();
-    TestAllSmallMatrix<double>();
+    TestSmallVector<double>();
+    TestSmallMatrix<double>();
 #endif
 
 #ifdef TEST_FLOAT
-    TestAllSmallVector<float>();
-    TestAllSmallMatrix<float>();
+    TestSmallVector<float>();
+    TestSmallMatrix<float>();
 #endif
 
 #ifdef TEST_LONGDOUBLE
-    TestAllSmallVector<long double>();
-    TestAllSmallMatrix<long double>();
+    TestSmallVector<long double>();
+    TestSmallMatrix<long double>();
 #endif 
 
 #ifdef TEST_INT
-    TestAllSmallVector<int>();
-    TestAllSmallMatrix<int>();
+    TestSmallVector<int>();
+    TestSmallMatrix<int>();
 #endif 
 
-#endif // SKIPREST
+#endif 
 
     return 0;
 }
+#if 1
 #ifndef NOTHROW
 catch (tmv::Error& e) {
     std::cerr<<e<<std::endl;
@@ -78,6 +75,9 @@ catch (...) {
     std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
     return 1;
 }
+#else
+catch (int) {}
+#endif
 
 
 void PreAssert(std::string s)

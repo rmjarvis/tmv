@@ -39,7 +39,7 @@
 namespace tmv {
 
     template <class M1, class M3>
-    void DoMultEqUM(const M1& m1, M3& m3)
+    static void DoMultEqUM(const M1& m1, M3& m3)
     {
         TMVAssert(m1.isrm() || m1.iscm());
         TMVAssert(m3.isrm() || m3.iscm());
@@ -62,8 +62,7 @@ namespace tmv {
 
 #ifdef BLAS
 #ifdef INST_DOUBLE
-    template <> 
-    void DoMultEqMM(
+    static void DoMultEqMM(
         const GenUpperTriMatrix<double>& A, 
         const MatrixView<double>& B)
     {
@@ -87,8 +86,7 @@ namespace tmv {
             BLASV(alpha),BLASP(A.cptr()),BLASV(lda), BLASP(B.ptr()), 
             BLASV(ldb) BLAS1 BLAS1 BLAS1 BLAS1);
     }
-    template <> 
-    void DoMultEqMM(
+    static void DoMultEqMM(
         const GenLowerTriMatrix<double>& A, 
         const MatrixView<double>& B)
     {
@@ -112,8 +110,7 @@ namespace tmv {
             BLASV(alpha),BLASP(A.cptr()),BLASV(lda), BLASP(B.ptr()), 
             BLASV(ldb) BLAS1 BLAS1 BLAS1 BLAS1);
     }
-    template <> 
-    void DoMultEqMM(
+    static void DoMultEqMM(
         const GenUpperTriMatrix<std::complex<double> >& A,
         const MatrixView<std::complex<double> >& B)
     {
@@ -147,8 +144,7 @@ namespace tmv {
                 BLASV(ldb) BLAS1 BLAS1 BLAS1 BLAS1);
         }
     }
-    template <> 
-    void DoMultEqMM(
+    static void DoMultEqMM(
         const GenLowerTriMatrix<std::complex<double> >& A,
         const MatrixView<std::complex<double> >& B)
     {
@@ -182,8 +178,8 @@ namespace tmv {
                 BLASV(ldb) BLAS1 BLAS1 BLAS1 BLAS1);
         }
     }
-    template <> 
-    void DoMultEqMM(
+#ifdef TMV_INST_MIX
+    static void DoMultEqMM(
         const GenUpperTriMatrix<double>& A,
         const MatrixView<std::complex<double> >& B)
     {
@@ -216,8 +212,7 @@ namespace tmv {
             B.imagPart() = B1;
         }
     }
-    template <> 
-    void DoMultEqMM(
+    static void DoMultEqMM(
         const GenLowerTriMatrix<double>& A,
         const MatrixView<std::complex<double> >& B)
     {
@@ -250,9 +245,9 @@ namespace tmv {
         }
     }
 #endif
+#endif
 #ifdef INST_FLOAT
-    template <> 
-    void DoMultEqMM(
+    static void DoMultEqMM(
         const GenUpperTriMatrix<float>& A, 
         const MatrixView<float>& B)
     {
@@ -276,8 +271,7 @@ namespace tmv {
             BLASV(alpha),BLASP(A.cptr()),BLASV(lda), BLASP(B.ptr()), 
             BLASV(ldb) BLAS1 BLAS1 BLAS1 BLAS1);
     }
-    template <> 
-    void DoMultEqMM(
+    static void DoMultEqMM(
         const GenLowerTriMatrix<float>& A, 
         const MatrixView<float>& B)
     {
@@ -301,8 +295,7 @@ namespace tmv {
             BLASV(alpha),BLASP(A.cptr()),BLASV(lda), BLASP(B.ptr()), 
             BLASV(ldb) BLAS1 BLAS1 BLAS1 BLAS1);
     }
-    template <> 
-    void DoMultEqMM(
+    static void DoMultEqMM(
         const GenUpperTriMatrix<std::complex<float> >& A,
         const MatrixView<std::complex<float> >& B)
     {
@@ -336,8 +329,7 @@ namespace tmv {
                 BLASV(ldb) BLAS1 BLAS1 BLAS1 BLAS1);
         }
     }
-    template <> 
-    void DoMultEqMM(
+    static void DoMultEqMM(
         const GenLowerTriMatrix<std::complex<float> >& A,
         const MatrixView<std::complex<float> >& B)
     {
@@ -371,8 +363,8 @@ namespace tmv {
                 BLASV(ldb) BLAS1 BLAS1 BLAS1 BLAS1);
         }
     }
-    template <> 
-    void DoMultEqMM(
+#ifdef TMV_INST_MIX
+    static void DoMultEqMM(
         const GenUpperTriMatrix<float>& A,
         const MatrixView<std::complex<float> >& B)
     {
@@ -405,8 +397,7 @@ namespace tmv {
             B.imagPart() = B1;
         }
     }
-    template <> 
-    void DoMultEqMM(
+    static void DoMultEqMM(
         const GenLowerTriMatrix<float>& A,
         const MatrixView<std::complex<float> >& B)
     {
@@ -439,10 +430,11 @@ namespace tmv {
         }
     }
 #endif
+#endif
 #endif // BLAS
 
     template <class T, class M1, class M2>
-    void GenInstMultMM(
+    static void GenInstMultMM(
         const T x, const M1& m1, const M2& m2, MatrixView<T>& m3)
     {
         if (!(m1.isrm() || m1.iscm())) 
@@ -459,7 +451,7 @@ namespace tmv {
     }
 
     template <class T, class M1, class M2>
-    void GenInstAddMultMM(
+    static void GenInstAddMultMM(
         const T x, const M1& m1, const M2& m2, MatrixView<T>& m3)
     {
         if (!(m1.isrm() || m1.iscm()))

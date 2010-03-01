@@ -32,34 +32,32 @@ int main() try {
     //showstartdone=true;
     //XXDEBUG9 = true;
 
-    //#define SKIPREST
-
-#ifndef SKIPREST
+#if 1
 
 #ifdef TEST_DOUBLE
     TestDiagMatrix<double>();
-    //TestDiagDiv<double>();
+    TestDiagDiv<double>();
 #endif
 
 #ifdef TEST_FLOAT
     TestDiagMatrix<float>();
-    //TestDiagDiv<float>();
+    TestDiagDiv<float>();
 #endif
 
 #ifdef TEST_LONGDOUBLE
     TestDiagMatrix<long double>();
-    //TestDiagDiv<long double>();
+    TestDiagDiv<long double>();
 #endif
 
 #ifdef TEST_INT
     TestDiagMatrix<int>();
 #endif
 
-#endif // SKIPREST
+#endif
 
     return 0;
 }
-#if 0
+#if 1
 #ifndef NOTHROW
 catch (tmv::Error& e) {
     std::cerr<<e<<std::endl;

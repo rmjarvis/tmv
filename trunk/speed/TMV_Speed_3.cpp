@@ -16,7 +16,7 @@
 
 // How big do you want the matrices to be?
 #if 1
-const int M = 133;
+const int M = 339;
 const int N = M;
 const int K = M;
 #elif 1
@@ -30,7 +30,7 @@ const int K = 637;
 #endif
 
 // Define the type to use:
-#define TISFLOAT
+//#define TISFLOAT
 #define TISCOMPLEX
 
 // Define the parts of the matrices to use
@@ -39,26 +39,26 @@ const int K = 637;
 // 3 = unituppertri
 // 4 = lowertri
 // 5 = unitlowertri
-#define PART1 5
-#define PART2 5
-#define PART3 5
+#define PART1 1
+#define PART2 1
+#define PART3 1
 #define DOMULTEQ
 
 // Define whether you want to include the error checks.
-#define ERRORCHECK
+//#define ERRORCHECK
 
 // Define which versions you want to test:
 #define DOREG
-#define DOSMALL
+//#define DOSMALL
 #define DOBLAS
-#define DOEIGEN
-#define DOEIGENSMALL
+//#define DOEIGEN
+//#define DOEIGENSMALL
 
 // Define which batches of functions you want to test:
 #define DOMULTMM_CCC
-#define DOMULTMM_RCC
-#define DOMULTMM_CRC
-#define DOMULTMM_RRC
+//#define DOMULTMM_RCC
+//#define DOMULTMM_CRC
+//#define DOMULTMM_RRC
 
 // Set this if you only want to do a single loop.
 // Not so useful for timing, but useful for debugging.
@@ -75,7 +75,7 @@ const int K = 637;
 //#define SIMPLE_VALUES
 
 // Set up the target number of operations and memory to use for testing
-const int targetnflops = 100000000; // in real ops
+const int targetnflops = 1000000000; // in real ops
 const int targetmem = 10000000; // in bytes
 
 // Include the BLAS library you want to test TMV against:
@@ -86,8 +86,13 @@ const int targetmem = 10000000; // in bytes
 #define XLAP
 #else
 extern "C" {
+#ifdef TMV_V063
+#include "fblas.h"
+#include "flapack.h"
+#else
 #include "util/fblas.h"
 #include "util/flapack.h"
+#endif
 #define FBLAS
 #define FLAP
 #define XLAP
@@ -1000,7 +1005,7 @@ static void MultMM_CCC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            MPART3(E1[k]) = 7 * MPART1(A1[k]) * MPART2(C1[k]);
+            MPART3(E1[k]) = RT(7) * MPART1(A1[k]) * MPART2(C1[k]);
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -1020,7 +1025,7 @@ static void MultMM_CCC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            MPART3(E2[k]) = 7 * MPART1(A2[k]) * MPART2(C2[k]);
+            MPART3(E2[k]) = RT(7) * MPART1(A2[k]) * MPART2(C2[k]);
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -1075,7 +1080,7 @@ static void MultMM_CCC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            EPART3(E4[k]) = 7 * EPART1(A4[k]) * EPART2(C4[k]);
+            EPART3(E4[k]) = RT(7) * EPART1(A4[k]) * EPART2(C4[k]);
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -1097,7 +1102,7 @@ static void MultMM_CCC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2x; ++k)
-            EPART3(E5[k]) = 7 * EPART1(A5[k]) * EPART2(C5[k]);
+            EPART3(E5[k]) = RT(7) * EPART1(A5[k]) * EPART2(C5[k]);
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -1288,7 +1293,7 @@ static void MultMM_CCC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            MPART3(E1[k]) += 8 * MPART1(A1[k]) * MPART2(C1[k]);
+            MPART3(E1[k]) += RT(8) * MPART1(A1[k]) * MPART2(C1[k]);
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -1308,7 +1313,7 @@ static void MultMM_CCC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            MPART3(E2[k]) += 8 * MPART1(A2[k]) * MPART2(C2[k]);
+            MPART3(E2[k]) += RT(8) * MPART1(A2[k]) * MPART2(C2[k]);
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -1365,7 +1370,7 @@ static void MultMM_CCC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            EPART3(E4[k]) += 8 * EPART1(A4[k]) * EPART2(C4[k]);
+            EPART3(E4[k]) += RT(8) * EPART1(A4[k]) * EPART2(C4[k]);
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -1387,7 +1392,7 @@ static void MultMM_CCC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2x; ++k)
-            EPART3(E5[k]) += 8 * EPART1(A5[k]) * EPART2(C5[k]);
+            EPART3(E5[k]) += RT(8) * EPART1(A5[k]) * EPART2(C5[k]);
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -2774,12 +2779,12 @@ static void MultMM_CCC(
             for (int n2=0; n2<nloops2; ++n2) {
 #if (PART1 == 1) 
                 for(int i=0;i<M;++i) 
-                    E0[n2].row(i) = 7 * A0[n2].row(i) * MPART2(C0[n2]);
+                    E0[n2].row(i) = RT(7) * A0[n2].row(i) * MPART2(C0[n2]);
 #else
                 tmv::Matrix<T> temp2 = MPART2(C0[n2]);
                 tmv::Matrix<T> temp3(M,N);
                 for(int j=0;j<N;++j) 
-                    temp3.col(j) = 7 * MPART1(A0[n2]) * temp2.col(j);
+                    temp3.col(j) = RT(7) * MPART1(A0[n2]) * temp2.col(j);
                 E0[n2] = A0[n2];
                 MPART3(E0[n2]) = MPART3(temp3);
 #endif
@@ -2794,7 +2799,7 @@ static void MultMM_CCC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            MPART3(E1[k]) *= 7 * MPART2(C1[k]);
+            MPART3(E1[k]) *= RT(7) * MPART2(C1[k]);
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -2816,7 +2821,7 @@ static void MultMM_CCC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k) 
-            MPART3(E2[k]) *= 7 * MPART2(C2[k]);
+            MPART3(E2[k]) *= RT(7) * MPART2(C2[k]);
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -2888,9 +2893,9 @@ static void MultMM_CCC(
 
         for (int k=0; k<nloops2; ++k) {
 #if (PART3 == 1)
-            EPART3(E4[k]) *= 7 * EPART2(C4[k]);
+            EPART3(E4[k]) *= RT(7) * EPART2(C4[k]);
 #else
-            EPART3(E4[k]) = 7 * EPART1(E4[k]) * EPART2(C4[k]);
+            EPART3(E4[k]) = RT(7) * EPART1(E4[k]) * EPART2(C4[k]);
 #endif
         }
 
@@ -2917,9 +2922,9 @@ static void MultMM_CCC(
 
         for (int k=0; k<nloops2x; ++k) {
 #if (PART3 == 1)
-            EPART3(E5[k]) *= 7 * EPART2(C5[k]);
+            EPART3(E5[k]) *= RT(7) * EPART2(C5[k]);
 #else
-            EPART3(E5[k]) = 7 * EPART1(E5[k]) * EPART2(C5[k]);
+            EPART3(E5[k]) = RT(7) * EPART1(E5[k]) * EPART2(C5[k]);
 #endif
         }
 
@@ -3613,7 +3618,7 @@ static void MultMM_RCC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            MPART3(E1[k]) = 7 * MPART1(B1[k].transpose()) * MPART2(C1[k]);
+            MPART3(E1[k]) = RT(7) * MPART1(B1[k].transpose()) * MPART2(C1[k]);
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -3633,7 +3638,7 @@ static void MultMM_RCC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            MPART3(E2[k]) = 7 * MPART1(B2[k].transpose()) * MPART2(C2[k]);
+            MPART3(E2[k]) = RT(7) * MPART1(B2[k].transpose()) * MPART2(C2[k]);
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -3688,7 +3693,7 @@ static void MultMM_RCC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            EPART3(E4[k]) = 7 * EPART1(B4[k].transpose()) * EPART2(C4[k]);
+            EPART3(E4[k]) = RT(7) * EPART1(B4[k].transpose()) * EPART2(C4[k]);
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -3710,7 +3715,7 @@ static void MultMM_RCC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2x; ++k)
-            EPART3(E5[k]) = 7 * EPART1(B5[k].transpose()) * EPART2(C5[k]);
+            EPART3(E5[k]) = RT(7) * EPART1(B5[k].transpose()) * EPART2(C5[k]);
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -3901,7 +3906,7 @@ static void MultMM_RCC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            MPART3(E1[k]) += 8 * MPART1(B1[k].transpose()) * MPART2(C1[k]);
+            MPART3(E1[k]) += RT(8) * MPART1(B1[k].transpose()) * MPART2(C1[k]);
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -3921,7 +3926,7 @@ static void MultMM_RCC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            MPART3(E2[k]) += 8 * MPART1(B2[k].transpose()) * MPART2(C2[k]);
+            MPART3(E2[k]) += RT(8) * MPART1(B2[k].transpose()) * MPART2(C2[k]);
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -3978,7 +3983,7 @@ static void MultMM_RCC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            EPART3(E4[k]) += 8 * EPART1(B4[k].transpose()) * EPART2(C4[k]);
+            EPART3(E4[k]) += RT(8) * EPART1(B4[k].transpose()) * EPART2(C4[k]);
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -4000,7 +4005,7 @@ static void MultMM_RCC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2x; ++k)
-            EPART3(E5[k]) += 8 * EPART1(B5[k].transpose()) * EPART2(C5[k]);
+            EPART3(E5[k]) += RT(8) * EPART1(B5[k].transpose()) * EPART2(C5[k]);
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -5682,7 +5687,7 @@ static void MultMM_CRC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            MPART3(E1[k]) = 7 * MPART1(A1[k]) * MPART2(D1[k].transpose());
+            MPART3(E1[k]) = RT(7) * MPART1(A1[k]) * MPART2(D1[k].transpose());
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -5702,7 +5707,7 @@ static void MultMM_CRC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            MPART3(E2[k]) = 7 * MPART1(A2[k]) * MPART2(D2[k].transpose());
+            MPART3(E2[k]) = RT(7) * MPART1(A2[k]) * MPART2(D2[k].transpose());
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -5757,7 +5762,7 @@ static void MultMM_CRC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            EPART3(E4[k]) = 7 * EPART1(A4[k]) * EPART2(D4[k].transpose());
+            EPART3(E4[k]) = RT(7) * EPART1(A4[k]) * EPART2(D4[k].transpose());
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -5779,7 +5784,7 @@ static void MultMM_CRC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2x; ++k)
-            EPART3(E5[k]) = 7 * EPART1(A5[k]) * EPART2(D5[k].transpose());
+            EPART3(E5[k]) = RT(7) * EPART1(A5[k]) * EPART2(D5[k].transpose());
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -5970,7 +5975,7 @@ static void MultMM_CRC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            MPART3(E1[k]) += 8 * MPART1(A1[k]) * MPART2(D1[k].transpose());
+            MPART3(E1[k]) += RT(8) * MPART1(A1[k]) * MPART2(D1[k].transpose());
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -5990,7 +5995,7 @@ static void MultMM_CRC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            MPART3(E2[k]) += 8 * MPART1(A2[k]) * MPART2(D2[k].transpose());
+            MPART3(E2[k]) += RT(8) * MPART1(A2[k]) * MPART2(D2[k].transpose());
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -6047,7 +6052,7 @@ static void MultMM_CRC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            EPART3(E4[k]) += 8 * EPART1(A4[k]) * EPART2(D4[k].transpose());
+            EPART3(E4[k]) += RT(8) * EPART1(A4[k]) * EPART2(D4[k].transpose());
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -6069,7 +6074,7 @@ static void MultMM_CRC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2x; ++k)
-            EPART3(E5[k]) += 8 * EPART1(A5[k]) * EPART2(D5[k].transpose());
+            EPART3(E5[k]) += RT(8) * EPART1(A5[k]) * EPART2(D5[k].transpose());
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -7448,12 +7453,12 @@ static void MultMM_CRC(
             for (int n2=0; n2<nloops2; ++n2) {
 #if (PART1 == 1) 
                 for(int i=0;i<M;++i) 
-                    E0[n2].row(i) = 7 * A0[n2].row(i) * MPART2(D0[n2].transpose());
+                    E0[n2].row(i) = RT(7) * A0[n2].row(i) * MPART2(D0[n2].transpose());
 #else
                 tmv::Matrix<T> temp2 = MPART2(D0[n2].transpose());
                 tmv::Matrix<T> temp3(M,N);
                 for(int j=0;j<N;++j) 
-                    temp3.col(j) = 7 * MPART1(A0[n2]) * temp2.col(j);
+                    temp3.col(j) = RT(7) * MPART1(A0[n2]) * temp2.col(j);
                 E0[n2] = A0[n2];
                 MPART3(E0[n2]) = MPART3(temp3);
 #endif
@@ -7468,7 +7473,7 @@ static void MultMM_CRC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            MPART3(E1[k]) *= 7 * MPART2(D1[k].transpose());
+            MPART3(E1[k]) *= RT(7) * MPART2(D1[k].transpose());
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -7490,7 +7495,7 @@ static void MultMM_CRC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            MPART3(E2[k]) *= 7 * MPART2(D2[k].transpose());
+            MPART3(E2[k]) *= RT(7) * MPART2(D2[k].transpose());
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -7562,9 +7567,9 @@ static void MultMM_CRC(
 
         for (int k=0; k<nloops2; ++k) {
 #if (PART3 == 1)
-            EPART3(E4[k]) *= 7 * EPART2(D4[k].transpose());
+            EPART3(E4[k]) *= RT(7) * EPART2(D4[k].transpose());
 #else
-            EPART3(E4[k]) = 7 * EPART1(E4[k]) * EPART2(D4[k].transpose());
+            EPART3(E4[k]) = RT(7) * EPART1(E4[k]) * EPART2(D4[k].transpose());
 #endif
         }
 
@@ -7591,9 +7596,9 @@ static void MultMM_CRC(
 
         for (int k=0; k<nloops2x; ++k) {
 #if (PART3 == 1)
-            EPART3(E5[k]) *= 7 * EPART2(D5[k].transpose());
+            EPART3(E5[k]) *= RT(7) * EPART2(D5[k].transpose());
 #else
-            EPART3(E5[k]) = 7 * EPART1(E5[k]) * EPART2(D5[k].transpose());
+            EPART3(E5[k]) = RT(7) * EPART1(E5[k]) * EPART2(D5[k].transpose());
 #endif
         }
 
@@ -8288,7 +8293,7 @@ static void MultMM_RRC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            MPART3(E1[k]) = 7 * MPART1(B1[k].transpose()) * MPART2(D1[k].transpose());
+            MPART3(E1[k]) = RT(7) * MPART1(B1[k].transpose()) * MPART2(D1[k].transpose());
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -8308,7 +8313,7 @@ static void MultMM_RRC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            MPART3(E2[k]) = 7 * MPART1(B2[k].transpose()) * MPART2(D2[k].transpose());
+            MPART3(E2[k]) = RT(7) * MPART1(B2[k].transpose()) * MPART2(D2[k].transpose());
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -8363,7 +8368,7 @@ static void MultMM_RRC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            EPART3(E4[k]) = 7 * EPART1(B4[k].transpose()) * EPART2(D4[k].transpose());
+            EPART3(E4[k]) = RT(7) * EPART1(B4[k].transpose()) * EPART2(D4[k].transpose());
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -8385,7 +8390,7 @@ static void MultMM_RRC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2x; ++k)
-            EPART3(E5[k]) = 7 * EPART1(B5[k].transpose()) * EPART2(D5[k].transpose());
+            EPART3(E5[k]) = RT(7) * EPART1(B5[k].transpose()) * EPART2(D5[k].transpose());
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -8576,7 +8581,7 @@ static void MultMM_RRC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            MPART3(E1[k]) += 8 * MPART1(B1[k].transpose()) * MPART2(D1[k].transpose());
+            MPART3(E1[k]) += RT(8) * MPART1(B1[k].transpose()) * MPART2(D1[k].transpose());
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -8596,7 +8601,7 @@ static void MultMM_RRC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            MPART3(E2[k]) += 8 * MPART1(B2[k].transpose()) * MPART2(D2[k].transpose());
+            MPART3(E2[k]) += RT(8) * MPART1(B2[k].transpose()) * MPART2(D2[k].transpose());
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -8653,7 +8658,7 @@ static void MultMM_RRC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k)
-            EPART3(E4[k]) += 8 * EPART1(B4[k].transpose()) * EPART2(D4[k].transpose());
+            EPART3(E4[k]) += RT(8) * EPART1(B4[k].transpose()) * EPART2(D4[k].transpose());
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
@@ -8675,7 +8680,7 @@ static void MultMM_RRC(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2x; ++k)
-            EPART3(E5[k]) += 8 * EPART1(B5[k].transpose()) * EPART2(D5[k].transpose());
+            EPART3(E5[k]) += RT(8) * EPART1(B5[k].transpose()) * EPART2(D5[k].transpose());
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;

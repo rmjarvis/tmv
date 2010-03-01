@@ -280,19 +280,35 @@ namespace tmv {
 #endif
         }
 
-        explicit inline SmallMatrix(T x) 
+        inline SmallMatrix(size_t cs, size_t rs) 
         {
             TMVStaticAssert(M>0);
             TMVStaticAssert(N>0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
+            TMVAssert(cs==M);
+            TMVAssert(rs==N);
+#ifdef TMV_DEBUG
+            this->setAllTo(T(888));
+#endif
+        }
+
+        explicit inline SmallMatrix(size_t cs, size_t rs, T x) 
+        {
+            TMVStaticAssert(M>0);
+            TMVStaticAssert(N>0);
+            TMVStaticAssert(S==RowMajor || S==ColMajor);
+            TMVAssert(cs==M);
+            TMVAssert(rs==N);
             this->setAllTo(x);
         }
 
-        explicit inline SmallMatrix(const T* vv) 
+        explicit inline SmallMatrix(size_t cs, size_t rs, const T* vv) 
         {
             TMVStaticAssert(M>0);
             TMVStaticAssert(N>0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
+            TMVAssert(cs==M);
+            TMVAssert(rs==N);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif
@@ -300,11 +316,14 @@ namespace tmv {
             ConstSmallVectorView<T,M*N,1>(vv).newAssignTo(lv);
         }
 
-        explicit inline SmallMatrix(const std::vector<T>& vv) 
+        explicit inline SmallMatrix(
+            size_t cs, size_t rs, const std::vector<T>& vv) 
         {
             TMVStaticAssert(M>0);
             TMVStaticAssert(N>0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
+            TMVAssert(cs==M);
+            TMVAssert(rs==N);
             TMVAssert(vv.size() == M*N);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
@@ -313,8 +332,7 @@ namespace tmv {
             ConstSmallVectorView<T,M*N,1>(&vv[0]).newAssignTo(lv);
         }
 
-        explicit inline SmallMatrix(
-            const std::vector<std::vector<T> >& vv) 
+        explicit inline SmallMatrix(const std::vector<std::vector<T> >& vv) 
         {
             TMVStaticAssert(M>0);
             TMVStaticAssert(N>0);
@@ -348,6 +366,8 @@ namespace tmv {
             TMVStaticAssert(N>0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert((ShapeTraits2<M2::mshape,mshape>::assignable));
+            TMVAssert(m2.colsize() == M);
+            TMVAssert(m2.rowsize() == N);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif

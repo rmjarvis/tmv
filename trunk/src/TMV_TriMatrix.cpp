@@ -125,7 +125,7 @@ namespace tmv {
     //
 
     template <class T>
-    T DoInstSumElements(const ConstUpperTriMatrixView<T>& m)
+    static T DoInstSumElements(const ConstUpperTriMatrixView<T>& m)
     { 
         if (m.isrm()) return InlineSumElements(m.rmView());
         else if (m.iscm()) return InlineSumElements(m.cmView());
@@ -133,7 +133,7 @@ namespace tmv {
     }
 
     template <class T>
-    typename Traits<T>::real_type DoInstSumAbsElements(
+    static typename Traits<T>::real_type DoInstSumAbsElements(
         const ConstUpperTriMatrixView<T>& m)
     {
         if (m.isrm()) return InlineSumAbsElements(m.rmView());
@@ -142,7 +142,7 @@ namespace tmv {
     }
 
     template <class T>
-    typename Traits<T>::real_type DoInstSumAbs2Elements(
+    static typename Traits<T>::real_type DoInstSumAbs2Elements(
         const ConstUpperTriMatrixView<T>& m)
     {
         if (m.isrm()) return InlineSumAbs2Elements(m.rmView());
@@ -151,7 +151,7 @@ namespace tmv {
     }
 
     template <class T>
-    typename Traits<T>::real_type DoInstNormSq(
+    static typename Traits<T>::real_type DoInstNormSq(
         const ConstUpperTriMatrixView<T>& m)
     {
         if (m.isrm()) return InlineNormSq(m.rmView());
@@ -160,7 +160,7 @@ namespace tmv {
     }
 
     template <class T>
-    typename Traits<T>::real_type DoInstNormSq(
+    static typename Traits<T>::real_type DoInstNormSq(
         const ConstUpperTriMatrixView<T>& m,
         const typename Traits<T>::real_type scale)
     {
@@ -170,7 +170,7 @@ namespace tmv {
     }
 
     template <class T>
-    typename Traits<T>::real_type DoInstNormF(
+    static typename Traits<T>::real_type DoInstNormF(
         const ConstUpperTriMatrixView<T>& m)
     {
         if (m.isrm()) return InlineNormF(m.rmView());
@@ -179,7 +179,7 @@ namespace tmv {
     }
 
     template <class T>
-    typename Traits<T>::real_type DoInstMaxAbsElement(
+    static typename Traits<T>::real_type DoInstMaxAbsElement(
         const ConstUpperTriMatrixView<T>& m)
     {
         if (m.isrm()) return InlineMaxAbsElement(m.rmView());
@@ -188,7 +188,7 @@ namespace tmv {
     }
 
     template <class T>
-    typename Traits<T>::real_type DoInstNorm1(
+    static typename Traits<T>::real_type DoInstNorm1(
         const ConstUpperTriMatrixView<T>& m)
     {
         if (m.isrm()) return InlineNorm1(m.rmView());
@@ -197,7 +197,7 @@ namespace tmv {
     }
 
     template <class T>
-    typename Traits<T>::real_type DoInstNormInf(
+    static typename Traits<T>::real_type DoInstNormInf(
         const ConstUpperTriMatrixView<T>& m)
     {
         if (m.isrm()) return InlineNormInf(m.rmView());
@@ -207,8 +207,7 @@ namespace tmv {
 
 #ifdef XLAP
 #ifdef TMV_INST_DOUBLE
-    template <>
-    double DoInstNormF(const ConstUpperTriMatrixView<double>& m)
+    static double DoInstNormF(const ConstUpperTriMatrixView<double>& m)
     { 
         if (!m.iscm() && !m.isrm()) return DoInstNormF(m.copy());
         char c = 'F';
@@ -224,8 +223,7 @@ namespace tmv {
             LAP1 LAP1 LAP1);
         return norm;
     }
-    template <>
-    double DoInstNormF(
+    static double DoInstNormF(
         const ConstUpperTriMatrixView<std::complex<double> >& m)
     {
         if (!m.iscm() && !m.isrm()) return DoInstNormF(m.copy());
@@ -243,8 +241,7 @@ namespace tmv {
         return norm;
     }
 
-    template <>
-    double DoInstMaxAbsElement(const ConstUpperTriMatrixView<double>& m)
+    static double DoInstMaxAbsElement(const ConstUpperTriMatrixView<double>& m)
     { 
         if (!m.iscm() && !m.isrm()) return DoInstMaxAbsElement(m.copy());
         char c = 'M';
@@ -260,8 +257,7 @@ namespace tmv {
             LAP1 LAP1 LAP1);
         return norm;
     }
-    template <>
-    double DoInstMaxAbsElement(
+    static double DoInstMaxAbsElement(
         const ConstUpperTriMatrixView<std::complex<double> >& m)
     {
         if (!m.iscm() && !m.isrm()) return DoInstMaxAbsElement(m.copy());
@@ -279,8 +275,7 @@ namespace tmv {
         return norm;
     }
 
-    template <>
-    double DoInstNorm1(const ConstUpperTriMatrixView<double>& m)
+    static double DoInstNorm1(const ConstUpperTriMatrixView<double>& m)
     { 
         if (!m.iscm() && !m.isrm()) return DoInstNorm1(m.copy());
         char c = m.isrm() ? 'I' : '1';
@@ -298,8 +293,7 @@ namespace tmv {
             LAP1 LAP1 LAP1);
         return norm;
     }
-    template <>
-    double DoInstNorm1(
+    static double DoInstNorm1(
         const ConstUpperTriMatrixView<std::complex<double> >& m)
     {
         if (!m.iscm() && !m.isrm()) return DoInstNorm1(m.copy());
@@ -319,8 +313,7 @@ namespace tmv {
         return norm;
     }
 
-    template <>
-    double DoInstNormInf(const ConstUpperTriMatrixView<double>& m)
+    static double DoInstNormInf(const ConstUpperTriMatrixView<double>& m)
     { 
         if (!m.iscm() && !m.isrm()) return DoInstNormInf(m.copy());
         char c = m.isrm() ? '1' : 'I';
@@ -338,8 +331,7 @@ namespace tmv {
             LAP1 LAP1 LAP1);
         return norm;
     }
-    template <>
-    double DoInstNormInf(
+    static double DoInstNormInf(
         const ConstUpperTriMatrixView<std::complex<double> >& m)
     {
         if (!m.iscm() && !m.isrm()) return DoInstNormInf(m.copy());
@@ -360,8 +352,7 @@ namespace tmv {
     }
 #endif // DOUBLE
 #ifdef TMV_INST_FLOAT
-    template <>
-    float DoInstNormF(const ConstUpperTriMatrixView<float>& m)
+    static float DoInstNormF(const ConstUpperTriMatrixView<float>& m)
     { 
         if (!m.iscm() && !m.isrm()) return DoInstNormF(m.copy());
         char c = 'F';
@@ -377,8 +368,7 @@ namespace tmv {
             LAP1 LAP1 LAP1);
         return norm;
     }
-    template <>
-    float DoInstNormF(
+    static float DoInstNormF(
         const ConstUpperTriMatrixView<std::complex<float> >& m)
     {
         if (!m.iscm() && !m.isrm()) return DoInstNormF(m.copy());
@@ -396,8 +386,7 @@ namespace tmv {
         return norm;
     }
 
-    template <>
-    float DoInstMaxAbsElement(const ConstUpperTriMatrixView<float>& m)
+    static float DoInstMaxAbsElement(const ConstUpperTriMatrixView<float>& m)
     { 
         if (!m.iscm() && !m.isrm()) return DoInstMaxAbsElement(m.copy());
         char c = 'M';
@@ -413,8 +402,7 @@ namespace tmv {
             LAP1 LAP1 LAP1);
         return norm;
     }
-    template <>
-    float DoInstMaxAbsElement(
+    static float DoInstMaxAbsElement(
         const ConstUpperTriMatrixView<std::complex<float> >& m)
     {
         if (!m.iscm() && !m.isrm()) return DoInstMaxAbsElement(m.copy());
@@ -432,8 +420,7 @@ namespace tmv {
         return norm;
     }
 
-    template <>
-    float DoInstNorm1(const ConstUpperTriMatrixView<float>& m)
+    static float DoInstNorm1(const ConstUpperTriMatrixView<float>& m)
     { 
         if (!m.iscm() && !m.isrm()) return DoInstNorm1(m.copy());
         char c = m.isrm() ? 'I' : '1';
@@ -451,8 +438,7 @@ namespace tmv {
             LAP1 LAP1 LAP1);
         return norm;
     }
-    template <>
-    float DoInstNorm1(
+    static float DoInstNorm1(
         const ConstUpperTriMatrixView<std::complex<float> >& m)
     {
         if (!m.iscm() && !m.isrm()) return DoInstNorm1(m.copy());
@@ -472,8 +458,7 @@ namespace tmv {
         return norm;
     }
 
-    template <>
-    float DoInstNormInf(const ConstUpperTriMatrixView<float>& m)
+    static float DoInstNormInf(const ConstUpperTriMatrixView<float>& m)
     { 
         if (!m.iscm() && !m.isrm()) return DoInstNormInf(m.copy());
         char c = m.isrm() ? '1' : 'I';
@@ -491,8 +476,7 @@ namespace tmv {
             LAP1 LAP1 LAP1);
         return norm;
     }
-    template <>
-    float DoInstNormInf(
+    static float DoInstNormInf(
         const ConstUpperTriMatrixView<std::complex<float> >& m)
     {
         if (!m.iscm() && !m.isrm()) return DoInstNormInf(m.copy());

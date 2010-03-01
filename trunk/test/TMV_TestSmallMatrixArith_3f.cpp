@@ -4,10 +4,8 @@
 
 template <class T> void TestSmallMatrixArith_3f()
 {
-#ifdef XTEST
 #if (XTEST & 2)
     TestSmallMatrixArith_3<T,339,607>("339 607");
-#endif
 #endif
 }
 

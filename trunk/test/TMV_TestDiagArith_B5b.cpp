@@ -9,7 +9,6 @@
 
 template <class T> void TestDiagMatrixArith_B5b()
 {
-#ifdef XTEST
 #if (XTEST & 2)
     const int N = 10;
 
@@ -64,7 +63,6 @@ template <class T> void TestDiagMatrixArith_B5b()
     TestMatrixArith5<T>(qv,cqv,av,cav, "NonSquareM/Diag");
 #if (XTEST & 8)
     TestMatrixArith5<T>(rv,crv,av,cav, "DegenM/Diag");
-#endif
 #endif
 #endif
 }

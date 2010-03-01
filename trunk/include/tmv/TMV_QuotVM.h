@@ -40,7 +40,7 @@
 //#define XDEBUG_QUOTVM
 
 #ifdef XDEBUG_QUOTVM
-#include "TMV_ProdMV.h";
+#include "TMV_ProdMV.h"
 #include "TMV_Vector.h"
 #include <iostream>
 #endif
@@ -55,54 +55,73 @@ namespace tmv {
     // get a compiler error if they are used.
     // All real calls should go through a more specific version than 
     // just the BaseMatrix_Calc's.
-    template <class V1, class M2, class V3>
-    inline void LDivVM(
-        const BaseVector_Calc<V1>& v1,
+    template <int ix, class T, class V1, class M2, class V3>
+    inline void LDiv(
+        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
-    template <class V1, class M2, class V3>
-    inline void NoAliasLDivVM(
-        const BaseVector_Calc<V1>& v1,
+    template <int ix, class T, class V1, class M2, class V3>
+    inline void NoAliasLDiv(
+        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
-    template <class V1, class M2, class V3>
-    inline void InlineLDivVM(
-        const BaseVector_Calc<V1>& v1,
+    template <int ix, class T, class V1, class M2, class V3>
+    inline void InlineLDiv(
+        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
-    template <class V1, class M2, class V3>
-    inline void AliasLDivVM(
-        const BaseVector_Calc<V1>& v1,
-        const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
-
-    template <class V1, class M2, class V3>
-    inline void RDivVM(
-        const BaseVector_Calc<V1>& v1,
-        const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
-    template <class V1, class M2, class V3>
-    inline void NoAliasRDivVM(
-        const BaseVector_Calc<V1>& v1,
-        const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
-    template <class V1, class M2, class V3>
-    inline void InlineRDivVM(
-        const BaseVector_Calc<V1>& v1,
-        const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
-    template <class V1, class M2, class V3>
-    inline void AliasRDivVM(
-        const BaseVector_Calc<V1>& v1,
+    template <int ix, class T, class V1, class M2, class V3>
+    inline void AliasLDiv(
+        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
 
+    template <int ix, class T, class V1, class M2, class V3>
+    inline void RDiv(
+        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
+        const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
+    template <int ix, class T, class V1, class M2, class V3>
+    inline void NoAliasRDiv(
+        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
+        const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
+    template <int ix, class T, class V1, class M2, class V3>
+    inline void InlineRDiv(
+        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
+        const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
+    template <int ix, class T, class V1, class M2, class V3>
+    inline void AliasRDiv(
+        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
+        const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
+
+    template <class V1, class M2>
+    inline void LDivEq(
+        BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2);
+    template <class V1, class M2>
+    inline void NoAliasLDivEq(
+        BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2);
+    template <class V1, class M2>
+    inline void AliasLDivEq(
+        BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2);
+
+    template <class V1, class M2>
+    inline void RDivEq(
+        BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2);
+    template <class V1, class M2>
+    inline void NoAliasRDivEq(
+        BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2);
+    template <class V1, class M2>
+    inline void AliasRDivEq(
+        BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2);
 
 #ifdef XDEBUG_QUOTVM
-    template <class V1, class M2, class V3>
-    inline void LDivVM_Debug(
-        const BaseVector_Calc<V1>& v1,
+    template <int ix, class T, class V1, class M2, class V3>
+    inline void LDiv_Debug(
+        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
         // v3 = m2^-1*v1
         // --> m2*v3 = v1
         Vector<typename V3::value_type> v3i = v3;
 
-        LDivVM(v1.vec(),m2.mat(),v3.vec());
+        LDiv(x,v1.vec(),m2.mat(),v3.vec());
 
-        Vector<typename V3::value_type> v1c = m2*v3;
+        Vector<typename V3::value_type> v1c = m2*v3/x;
         const typename V3::real_type kappa = Norm(m2.inverse())*Norm(m2);
 
         if (Norm(v1-v1c) > 1.e-6 * kappa * Norm(v1)) {
@@ -120,16 +139,16 @@ namespace tmv {
 #endif
 
 #ifdef XDEBUG_QUOTVM
-    template <class V1, class M2, class V3>
-    inline void RDivVM_Debug(
-        const BaseVector_Calc<V1>& v1,
+    template <int ix, class T, class V1, class M2, class V3>
+    inline void RDiv_Debug(
+        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
         // v3 = v1*m2^-1
         // --> v3*m2 = v1
         Vector<typename V3::value_type> v3i = v3;
 
-        RDivVM(x,v1.vec(),m2.mat(),v3.vec());
+        RDiv(x,v1.vec(),m2.mat(),v3.vec());
 
         Vector<typename V3::value_type> v1c = v3*m2/x;
         const typename V3::real_type kappa = Norm(m2.inverse())*Norm(m2);
@@ -149,13 +168,13 @@ namespace tmv {
 #endif
 
 #ifdef XDEBUG_QUOTVM
-    template <class V1, class M2>
-    inline void LDivEqVM_Debug(
+    template <int ix, class T, class V1, class M2>
+    inline void LDivEq_Debug(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2)
     {
         Vector<typename V1::value_type> v1i = v1;
 
-        LDivEqVM(v1.vec(),m2.mat());
+        LDivEq(v1.vec(),m2.mat());
 
         Vector<typename V1::value_type> v1c = m2*v1i;
         const typename V1::real_type kappa = Norm(m2.inverse())*Norm(m2);
@@ -174,13 +193,13 @@ namespace tmv {
 #endif
 
 #ifdef XDEBUG_QUOTVM
-    template <class V1, class M2>
-    inline void RDivEqVM_Debug(
+    template <int ix, class T, class V1, class M2>
+    inline void RDivEq_Debug(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2)
     {
         Vector<typename V1::value_type> v1i = v1;
 
-        RDivEqVM(v1.vec(),m2.mat());
+        RDivEq(v1.vec(),m2.mat());
 
         Vector<typename V1::value_type> v1c = v1i*m2;
         const typename V1::real_type kappa = Norm(m2.inverse())*Norm(m2);
@@ -254,11 +273,10 @@ namespace tmv {
             TMVStaticAssert((Sizes<type::vsize,V3::vsize>::same)); 
             TMVAssert(size() == v3.size());
 #ifdef XDEBUG_QUOTVM
-            LDivVM_Debug(v1.calc(),m2.calc(),v3.vec());
+            LDiv_Debug(x,v1.calc(),m2.calc(),v3.vec());
 #else
-            LDivVM(v1.calc(),m2.calc(),v3.vec());
+            LDiv(x,v1.calc(),m2.calc(),v3.vec());
 #endif
-            Scale(x,v3.vec());
         }
 
         template <class V3>
@@ -268,11 +286,10 @@ namespace tmv {
             TMVStaticAssert((Sizes<type::vsize,V3::vsize>::same)); 
             TMVAssert(size() == v3.size());
 #ifdef XDEBUG_QUOTVM
-            LDivVM_Debug(v1.calc(),m2.calc(),v3.vec());
+            LDiv_Debug(x,v1.calc(),m2.calc(),v3.vec());
 #else
-            NoAliasLDivVM(v1.calc(),m2.calc(),v3.vec());
+            NoAliasLDiv(x,v1.calc(),m2.calc(),v3.vec());
 #endif
-            Scale(x,v3.vec());
         }
 
     private:
@@ -291,7 +308,7 @@ namespace tmv {
         typedef typename M2::value_type mtype2;
         typedef typename Traits2<vtype1,mtype2>::type value_type;
 
-        enum { vsize = M2::mrowsize };
+        enum { vsize = M2::mcolsize };
         enum { vfort = M2::mfort && V1::vfort };
         enum { vcalc = false };
 
@@ -317,15 +334,15 @@ namespace tmv {
         ) : 
             x(_x), v1(_v1.vec()), m2(_m2.mat())
         {
-            TMVStaticAssert((Sizes<M2::mcolsize,V1::vsize>::same)); 
-            TMVAssert(m2.colsize() == v1.size());
+            TMVStaticAssert((Sizes<M2::mrowsize,V1::vsize>::same)); 
+            TMVAssert(m2.rowsize() == v1.size());
         }
 
         inline const Scaling<ix,T>& getX() const { return x; }
         inline const V1& getV() const { return v1; }
         inline const M2& getM() const { return m2; }
 
-        inline size_t size() const { return m2.rowsize(); }
+        inline size_t size() const { return m2.colsize(); }
 
         inline value_type cref(int i) const
         { return this->calc().cref(i); }
@@ -337,11 +354,10 @@ namespace tmv {
             TMVStaticAssert((Sizes<type::vsize,V3::vsize>::same)); 
             TMVAssert(size() == v3.size());
 #ifdef XDEBUG_QUOTVM
-            LDivVM_Debug(v1.calc(),m2.calc(),v3.vec());
+            RDiv_Debug(x,v1.calc(),m2.calc(),v3.vec());
 #else
-            LDivVM(v1.calc(),m2.calc(),v3.vec());
+            RDiv(x,v1.calc(),m2.calc(),v3.vec());
 #endif
-            Scale(x,v3.vec());
         }
 
         template <class V3>
@@ -351,11 +367,10 @@ namespace tmv {
             TMVStaticAssert((Sizes<type::vsize,V3::vsize>::same)); 
             TMVAssert(size() == v3.size());
 #ifdef XDEBUG_QUOTVM
-            LDivVM_Debug(v1.calc(),m2.calc(),v3.vec());
+            RDiv_Debug(x,v1.calc(),m2.calc(),v3.vec());
 #else
-            NoAliasLDivVM(v1.calc(),m2.calc(),v3.vec());
+            NoAliasRDiv(x,v1.calc(),m2.calc(),v3.vec());
 #endif
-            Scale(x,v3.vec());
         }
 
     private:
@@ -415,9 +430,9 @@ namespace tmv {
         BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
     { 
 #ifdef XDEBUG_QUOTVM
-        LDivEqVM_Debug(v1,m2.calc()); 
+        LDivEq_Debug(v1,m2.calc()); 
 #else
-        LDivEqVM(v1,m2.calc()); 
+        LDivEq(v1,m2.calc()); 
 #endif
     }
 
@@ -427,9 +442,9 @@ namespace tmv {
         BaseVector_Mutable<V1>& v1, const ProdXM<ix2,T2,M2>& m2)
     { 
 #ifdef XDEBUG_QUOTVM
-        LDivEqVM_Debug(v1,m2.getM().calc()); 
+        LDivEq_Debug(v1,m2.getM().calc()); 
 #else
-        LDivEqVM(v1,m2.getM().calc()); 
+        LDivEq(v1,m2.getM().calc()); 
 #endif
         Scale(typename Traits<T2>::real_type(1)/m2.getX(),v1.vec());
     }
@@ -483,9 +498,9 @@ namespace tmv {
         BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
     { 
 #ifdef XDEBUG_QUOTVM
-        RDivEqVM_Debug(v1,Scaling<1,typename V1::real_type>(),m2.calc()); 
+        RDivEq_Debug(v1,Scaling<1,typename V1::real_type>(),m2.calc()); 
 #else
-        RDivEqVM(v1,Scaling<1,typename V1::real_type>(),m2.calc()); 
+        RDivEq(v1,Scaling<1,typename V1::real_type>(),m2.calc()); 
 #endif
     }
 
@@ -495,9 +510,9 @@ namespace tmv {
         BaseVector_Mutable<V1>& v1, const ProdXM<ix2,T2,M2>& m2)
     { 
 #ifdef XDEBUG_QUOTVM
-        RDivEqVM_Debug(v1,m2.getM().calc()); 
+        RDivEq_Debug(v1,m2.getM().calc()); 
 #else
-        RDivEqVM(v1,m2.getM().calc()); 
+        RDivEq(v1,m2.getM().calc()); 
 #endif
         Scale(typename Traits<T2>::real_type(1)/m2.getX(),v1.vec());
     }
@@ -508,179 +523,179 @@ namespace tmv {
         BaseVector_Mutable<V1>& v1, const QuotXM<ix2,T2,M2>& m2)
     { 
 #ifdef XDEBUG_QUOTVM
-        RDivEqVM_Debug(v1,m2.getX(),m2.getM().calc()); 
+        RDivEq_Debug(v1,m2.getX(),m2.getM().calc()); 
 #else
-        RDivEqVM(v1,m2.getX(),m2.getM().calc()); 
+        RDivEq(v1,m2.getX(),m2.getM().calc()); 
 #endif
     }
 
 
     // Consolidate x*(xv/m) type constructs:
 
-#define RT typename QuotVM<ix,T,M1,V2>::real_type
-#define CT typename QuotVM<ix,T,M1,V2>::complex_type
+#define RT typename QuotVM<ix,T,V1,M2>::real_type
+#define CT typename QuotVM<ix,T,V1,M2>::complex_type
 #define CCT ConjRef<CT>
 
     // -(v/m)
-    template <int ix, class T, class M1, class V2>
-    inline QuotVM<-ix,T,M1,V2> operator-(const QuotVM<ix,T,M1,V2>& mv)
-    { return QuotVM<-ix,T,M1,V2>(-mv.getX(),mv.getM(),mv.getV()); }
+    template <int ix, class T, class V1, class M2>
+    inline QuotVM<-ix,T,V1,M2> operator-(const QuotVM<ix,T,V1,M2>& qvm)
+    { return QuotVM<-ix,T,V1,M2>(-qvm.getX(),qvm.getV(),qvm.getM()); }
 
     // x * (v/m)
-    template <int ix, class T, class M1, class V2>
-    inline QuotVM<0,T,M1,V2> operator*(
-        const RT x, const QuotVM<ix,T,M1,V2>& mv)
-    { return QuotVM<0,T,M1,V2>(x*mv.getX(),mv.getM(),mv.getV()); }
+    template <int ix, class T, class V1, class M2>
+    inline QuotVM<0,T,V1,M2> operator*(
+        const RT x, const QuotVM<ix,T,V1,M2>& qvm)
+    { return QuotVM<0,T,V1,M2>(x*qvm.getX(),qvm.getV(),qvm.getM()); }
 
-    template <int ix, class T, class M1, class V2>
-    inline QuotVM<0,CT,M1,V2> operator*(
-        const CT x, const QuotVM<ix,T,M1,V2>& mv)
-    { return QuotVM<0,CT,M1,V2>(x*mv.getX(),mv.getM(),mv.getV()); }
+    template <int ix, class T, class V1, class M2>
+    inline QuotVM<0,CT,V1,M2> operator*(
+        const CT x, const QuotVM<ix,T,V1,M2>& qvm)
+    { return QuotVM<0,CT,V1,M2>(x*qvm.getX(),qvm.getV(),qvm.getM()); }
 
-    template <int ix, class T, class M1, class V2>
-    inline QuotVM<0,CT,M1,V2> operator*(
-        const CCT x, const QuotVM<ix,T,M1,V2>& mv)
-    { return QuotVM<0,CT,M1,V2>(x*mv.getX(),mv.getM(),mv.getV()); }
+    template <int ix, class T, class V1, class M2>
+    inline QuotVM<0,CT,V1,M2> operator*(
+        const CCT x, const QuotVM<ix,T,V1,M2>& qvm)
+    { return QuotVM<0,CT,V1,M2>(x*qvm.getX(),qvm.getV(),qvm.getM()); }
 
-    template <int ix1, class T1, int ix, class T, class M1, class V2>
-    inline QuotVM<ix1*ix,typename Traits2<T1,T>::type,M1,V2> operator*(
-        const Scaling<ix1,T1>& x, const QuotVM<ix,T,M1,V2>& mv)
+    template <int ix1, class T1, int ix, class T, class V1, class M2>
+    inline QuotVM<ix1*ix,typename Traits2<T1,T>::type,V1,M2> operator*(
+        const Scaling<ix1,T1>& x, const QuotVM<ix,T,V1,M2>& qvm)
     { 
-        return QuotVM<ix1*ix,typename Traits2<T1,T>::type,M1,V2>(
-            T1(x)*mv.getX(),mv.getM(),mv.getV()); 
+        return QuotVM<ix1*ix,typename Traits2<T1,T>::type,V1,M2>(
+            T1(x)*qvm.getX(),qvm.getV(),qvm.getM()); 
     }
 
     // (v/m)*x
-    template <int ix, class T, class M1, class V2>
-    inline QuotVM<0,T,M1,V2> operator*(
-        const QuotVM<ix,T,M1,V2>& mv, const RT x)
-    { return QuotVM<0,T,M1,V2>(x*mv.getX(),mv.getM(),mv.getV()); }
+    template <int ix, class T, class V1, class M2>
+    inline QuotVM<0,T,V1,M2> operator*(
+        const QuotVM<ix,T,V1,M2>& qvm, const RT x)
+    { return QuotVM<0,T,V1,M2>(x*qvm.getX(),qvm.getV(),qvm.getM()); }
 
-    template <int ix, class T, class M1, class V2>
-    inline QuotVM<0,CT,M1,V2> operator*(
-        const QuotVM<ix,T,M1,V2>& mv, const CT x)
-    { return QuotVM<0,CT,M1,V2>(x*mv.getX(),mv.getM(),mv.getV()); }
+    template <int ix, class T, class V1, class M2>
+    inline QuotVM<0,CT,V1,M2> operator*(
+        const QuotVM<ix,T,V1,M2>& qvm, const CT x)
+    { return QuotVM<0,CT,V1,M2>(x*qvm.getX(),qvm.getV(),qvm.getM()); }
 
-    template <int ix, class T, class M1, class V2>
-    inline QuotVM<0,CT,M1,V2> operator*(
-        const QuotVM<ix,T,M1,V2>& mv, const CCT x)
-    { return QuotVM<0,CT,M1,V2>(x*mv.getX(),mv.getM(),mv.getV()); }
+    template <int ix, class T, class V1, class M2>
+    inline QuotVM<0,CT,V1,M2> operator*(
+        const QuotVM<ix,T,V1,M2>& qvm, const CCT x)
+    { return QuotVM<0,CT,V1,M2>(x*qvm.getX(),qvm.getV(),qvm.getM()); }
 
-    template <int ix1, class T1, int ix, class T, class M1, class V2>
-    inline QuotVM<ix1*ix,typename Traits2<T1,T>::type,M1,V2> operator*(
-        const QuotVM<ix,T,M1,V2>& mv, const Scaling<ix1,T1>& x)
+    template <int ix1, class T1, int ix, class T, class V1, class M2>
+    inline QuotVM<ix1*ix,typename Traits2<T1,T>::type,V1,M2> operator*(
+        const QuotVM<ix,T,V1,M2>& qvm, const Scaling<ix1,T1>& x)
     { 
-        return QuotVM<ix1*ix,typename Traits2<T1,T>::type,M1,V2>(
-            T1(x)*mv.getX(),mv.getM(),mv.getV()); 
+        return QuotVM<ix1*ix,typename Traits2<T1,T>::type,V1,M2>(
+            T1(x)*qvm.getX(),qvm.getV(),qvm.getM()); 
     }
 
     // (v/m)/x
-    template <int ix, class T, class M1, class V2>
-    inline QuotVM<0,T,M1,V2> operator/(
-        const QuotVM<ix,T,M1,V2>& mv, const RT x)
-    { return QuotVM<0,T,M1,V2>(mv.getX()/x,mv.getM(),mv.getV()); }
+    template <int ix, class T, class V1, class M2>
+    inline QuotVM<0,T,V1,M2> operator/(
+        const QuotVM<ix,T,V1,M2>& qvm, const RT x)
+    { return QuotVM<0,T,V1,M2>(qvm.getX()/x,qvm.getV(),qvm.getM()); }
 
-    template <int ix, class T, class M1, class V2>
-    inline QuotVM<0,CT,M1,V2> operator/(
-        const QuotVM<ix,T,M1,V2>& mv, const CT x)
-    { return QuotVM<0,CT,M1,V2>(mv.getX()/x,mv.getM(),mv.getV()); }
+    template <int ix, class T, class V1, class M2>
+    inline QuotVM<0,CT,V1,M2> operator/(
+        const QuotVM<ix,T,V1,M2>& qvm, const CT x)
+    { return QuotVM<0,CT,V1,M2>(qvm.getX()/x,qvm.getV(),qvm.getM()); }
 
-    template <int ix, class T, class M1, class V2>
-    inline QuotVM<0,CT,M1,V2> operator/(
-        const QuotVM<ix,T,M1,V2>& mv, const CCT x)
-    { return QuotVM<0,CT,M1,V2>(mv.getX()/x,mv.getM(),mv.getV()); }
+    template <int ix, class T, class V1, class M2>
+    inline QuotVM<0,CT,V1,M2> operator/(
+        const QuotVM<ix,T,V1,M2>& qvm, const CCT x)
+    { return QuotVM<0,CT,V1,M2>(qvm.getX()/x,qvm.getV(),qvm.getM()); }
 
-    template <int ix1, class T1, int ix, class T, class M1, class V2>
-    inline QuotVM<ix1*ix,typename Traits2<T1,T>::type,M1,V2> operator/(
-        const QuotVM<ix,T,M1,V2>& mv, const Scaling<ix1,T1>& x)
+    template <int ix1, class T1, int ix, class T, class V1, class M2>
+    inline QuotVM<ix1*ix,typename Traits2<T1,T>::type,V1,M2> operator/(
+        const QuotVM<ix,T,V1,M2>& qvm, const Scaling<ix1,T1>& x)
     { 
-        return QuotVM<ix1*ix,typename Traits2<T1,T>::type,M1,V2>(
-            mv.getX()/T1(x),mv.getM(),mv.getV()); 
+        return QuotVM<ix1*ix,typename Traits2<T1,T>::type,V1,M2>(
+            qvm.getX()/T1(x),qvm.getV(),qvm.getM()); 
     }
 
 #undef RT
 #undef CT
 #undef CCT
 
-#define RT typename RQuotVM<ix,T,M1,V2>::real_type
-#define CT typename RQuotVM<ix,T,M1,V2>::complex_type
+#define RT typename RQuotVM<ix,T,V1,M2>::real_type
+#define CT typename RQuotVM<ix,T,V1,M2>::complex_type
 #define CCT ConjRef<CT>
 
     // -(v/m)
-    template <int ix, class T, class M1, class V2>
-    inline RQuotVM<-ix,T,M1,V2> operator-(const RQuotVM<ix,T,M1,V2>& mv)
-    { return RQuotVM<-ix,T,M1,V2>(-mv.getX(),mv.getM(),mv.getV()); }
+    template <int ix, class T, class V1, class M2>
+    inline RQuotVM<-ix,T,V1,M2> operator-(const RQuotVM<ix,T,V1,M2>& qvm)
+    { return RQuotVM<-ix,T,V1,M2>(-qvm.getX(),qvm.getV(),qvm.getM()); }
 
     // x * (v/m)
-    template <int ix, class T, class M1, class V2>
-    inline RQuotVM<0,T,M1,V2> operator*(
-        const RT x, const RQuotVM<ix,T,M1,V2>& mv)
-    { return RQuotVM<0,T,M1,V2>(x*mv.getX(),mv.getM(),mv.getV()); }
+    template <int ix, class T, class V1, class M2>
+    inline RQuotVM<0,T,V1,M2> operator*(
+        const RT x, const RQuotVM<ix,T,V1,M2>& qvm)
+    { return RQuotVM<0,T,V1,M2>(x*qvm.getX(),qvm.getV(),qvm.getM()); }
 
-    template <int ix, class T, class M1, class V2>
-    inline RQuotVM<0,CT,M1,V2> operator*(
-        const CT x, const RQuotVM<ix,T,M1,V2>& mv)
-    { return RQuotVM<0,CT,M1,V2>(x*mv.getX(),mv.getM(),mv.getV()); }
+    template <int ix, class T, class V1, class M2>
+    inline RQuotVM<0,CT,V1,M2> operator*(
+        const CT x, const RQuotVM<ix,T,V1,M2>& qvm)
+    { return RQuotVM<0,CT,V1,M2>(x*qvm.getX(),qvm.getV(),qvm.getM()); }
 
-    template <int ix, class T, class M1, class V2>
-    inline RQuotVM<0,CT,M1,V2> operator*(
-        const CCT x, const RQuotVM<ix,T,M1,V2>& mv)
-    { return RQuotVM<0,CT,M1,V2>(x*mv.getX(),mv.getM(),mv.getV()); }
+    template <int ix, class T, class V1, class M2>
+    inline RQuotVM<0,CT,V1,M2> operator*(
+        const CCT x, const RQuotVM<ix,T,V1,M2>& qvm)
+    { return RQuotVM<0,CT,V1,M2>(x*qvm.getX(),qvm.getV(),qvm.getM()); }
 
-    template <int ix1, class T1, int ix, class T, class M1, class V2>
-    inline RQuotVM<ix1*ix,typename Traits2<T1,T>::type,M1,V2> operator*(
-        const Scaling<ix1,T1>& x, const RQuotVM<ix,T,M1,V2>& mv)
+    template <int ix1, class T1, int ix, class T, class V1, class M2>
+    inline RQuotVM<ix1*ix,typename Traits2<T1,T>::type,V1,M2> operator*(
+        const Scaling<ix1,T1>& x, const RQuotVM<ix,T,V1,M2>& qvm)
     { 
-        return RQuotVM<ix1*ix,typename Traits2<T1,T>::type,M1,V2>(
-            T1(x)*mv.getX(),mv.getM(),mv.getV()); 
+        return RQuotVM<ix1*ix,typename Traits2<T1,T>::type,V1,M2>(
+            T1(x)*qvm.getX(),qvm.getV(),qvm.getM()); 
     }
 
     // (v/m)*x
-    template <int ix, class T, class M1, class V2>
-    inline RQuotVM<0,T,M1,V2> operator*(
-        const RQuotVM<ix,T,M1,V2>& mv, const RT x)
-    { return RQuotVM<0,T,M1,V2>(x*mv.getX(),mv.getM(),mv.getV()); }
+    template <int ix, class T, class V1, class M2>
+    inline RQuotVM<0,T,V1,M2> operator*(
+        const RQuotVM<ix,T,V1,M2>& qvm, const RT x)
+    { return RQuotVM<0,T,V1,M2>(x*qvm.getX(),qvm.getV(),qvm.getM()); }
 
-    template <int ix, class T, class M1, class V2>
-    inline RQuotVM<0,CT,M1,V2> operator*(
-        const RQuotVM<ix,T,M1,V2>& mv, const CT x)
-    { return RQuotVM<0,CT,M1,V2>(x*mv.getX(),mv.getM(),mv.getV()); }
+    template <int ix, class T, class V1, class M2>
+    inline RQuotVM<0,CT,V1,M2> operator*(
+        const RQuotVM<ix,T,V1,M2>& qvm, const CT x)
+    { return RQuotVM<0,CT,V1,M2>(x*qvm.getX(),qvm.getV(),qvm.getM()); }
 
-    template <int ix, class T, class M1, class V2>
-    inline RQuotVM<0,CT,M1,V2> operator*(
-        const RQuotVM<ix,T,M1,V2>& mv, const CCT x)
-    { return RQuotVM<0,CT,M1,V2>(x*mv.getX(),mv.getM(),mv.getV()); }
+    template <int ix, class T, class V1, class M2>
+    inline RQuotVM<0,CT,V1,M2> operator*(
+        const RQuotVM<ix,T,V1,M2>& qvm, const CCT x)
+    { return RQuotVM<0,CT,V1,M2>(x*qvm.getX(),qvm.getV(),qvm.getM()); }
 
-    template <int ix1, class T1, int ix, class T, class M1, class V2>
-    inline RQuotVM<ix1*ix,typename Traits2<T1,T>::type,M1,V2> operator*(
-        const RQuotVM<ix,T,M1,V2>& mv, const Scaling<ix1,T1>& x)
+    template <int ix1, class T1, int ix, class T, class V1, class M2>
+    inline RQuotVM<ix1*ix,typename Traits2<T1,T>::type,V1,M2> operator*(
+        const RQuotVM<ix,T,V1,M2>& qvm, const Scaling<ix1,T1>& x)
     { 
-        return RQuotVM<ix1*ix,typename Traits2<T1,T>::type,M1,V2>(
-            T1(x)*mv.getX(),mv.getM(),mv.getV()); 
+        return RQuotVM<ix1*ix,typename Traits2<T1,T>::type,V1,M2>(
+            T1(x)*qvm.getX(),qvm.getV(),qvm.getM()); 
     }
 
     // (v/m)/x
-    template <int ix, class T, class M1, class V2>
-    inline RQuotVM<0,T,M1,V2> operator/(
-        const RQuotVM<ix,T,M1,V2>& mv, const RT x)
-    { return RQuotVM<0,T,M1,V2>(mv.getX()/x,mv.getM(),mv.getV()); }
+    template <int ix, class T, class V1, class M2>
+    inline RQuotVM<0,T,V1,M2> operator/(
+        const RQuotVM<ix,T,V1,M2>& qvm, const RT x)
+    { return RQuotVM<0,T,V1,M2>(qvm.getX()/x,qvm.getV(),qvm.getM()); }
 
-    template <int ix, class T, class M1, class V2>
-    inline RQuotVM<0,CT,M1,V2> operator/(
-        const RQuotVM<ix,T,M1,V2>& mv, const CT x)
-    { return RQuotVM<0,CT,M1,V2>(mv.getX()/x,mv.getM(),mv.getV()); }
+    template <int ix, class T, class V1, class M2>
+    inline RQuotVM<0,CT,V1,M2> operator/(
+        const RQuotVM<ix,T,V1,M2>& qvm, const CT x)
+    { return RQuotVM<0,CT,V1,M2>(qvm.getX()/x,qvm.getV(),qvm.getM()); }
 
-    template <int ix, class T, class M1, class V2>
-    inline RQuotVM<0,CT,M1,V2> operator/(
-        const RQuotVM<ix,T,M1,V2>& mv, const CCT x)
-    { return RQuotVM<0,CT,M1,V2>(mv.getX()/x,mv.getM(),mv.getV()); }
+    template <int ix, class T, class V1, class M2>
+    inline RQuotVM<0,CT,V1,M2> operator/(
+        const RQuotVM<ix,T,V1,M2>& qvm, const CCT x)
+    { return RQuotVM<0,CT,V1,M2>(qvm.getX()/x,qvm.getV(),qvm.getM()); }
 
-    template <int ix1, class T1, int ix, class T, class M1, class V2>
-    inline RQuotVM<ix1*ix,typename Traits2<T1,T>::type,M1,V2> operator/(
-        const RQuotVM<ix,T,M1,V2>& mv, const Scaling<ix1,T1>& x)
+    template <int ix1, class T1, int ix, class T, class V1, class M2>
+    inline RQuotVM<ix1*ix,typename Traits2<T1,T>::type,V1,M2> operator/(
+        const RQuotVM<ix,T,V1,M2>& qvm, const Scaling<ix1,T1>& x)
     { 
-        return RQuotVM<ix1*ix,typename Traits2<T1,T>::type,M1,V2>(
-            mv.getX()/T1(x),mv.getM(),mv.getV()); 
+        return RQuotVM<ix1*ix,typename Traits2<T1,T>::type,V1,M2>(
+            qvm.getX()/T1(x),qvm.getV(),qvm.getM()); 
     }
 
 #undef RT
@@ -690,21 +705,21 @@ namespace tmv {
 
     // TMV_Text
 
-    template <int ix, class T, class M1, class V2>
-    inline std::string TMV_Text(const QuotVM<ix,T,M1,V2>& qvm)
+    template <int ix, class T, class V1, class M2>
+    inline std::string TMV_Text(const QuotVM<ix,T,V1,M2>& qvm)
     {
         std::ostringstream s;
         s << "QuotVM< "<<ix<<","<<TMV_Text(T())<<" , ";
-        s << TMV_Text(qvm.getM())<<" , "<<TMV_Text(qvm.getV())<<" >";
+        s << TMV_Text(qvm.getV())<<" , "<<TMV_Text(qvm.getM())<<" >";
         return s.str();
     }
 
-    template <int ix, class T, class M1, class V2>
-    inline std::string TMV_Text(const RQuotVM<ix,T,M1,V2>& qvm)
+    template <int ix, class T, class V1, class M2>
+    inline std::string TMV_Text(const RQuotVM<ix,T,V1,M2>& qvm)
     {
         std::ostringstream s;
         s << "RQuotVM< "<<ix<<","<<TMV_Text(T())<<" , ";
-        s << TMV_Text(qvm.getM())<<" , "<<TMV_Text(qvm.getV())<<" >";
+        s << TMV_Text(qvm.getV())<<" , "<<TMV_Text(qvm.getM())<<" >";
         return s.str();
     }
 

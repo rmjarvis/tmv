@@ -131,20 +131,20 @@ namespace tmv {
         const BaseVector_Calc<V1>& v1, const BaseVector_Calc<V2>& v2,
         BaseMatrix_Mutable<M3>& m3)
     {
-        std::cout<<"Start Rank1Update XDEBUG"<<std::endl;
-        std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
-        std::cout<<"v1 = "<<TMV_Text(v1)<<"  "<<v1<<std::endl;
-        std::cout<<"v2 = "<<TMV_Text(v2)<<"  "<<v2<<std::endl;
-        std::cout<<"m3 = "<<TMV_Text(m3)<<"  "<<m3.mat()<<std::endl;
+        //std::cout<<"Start Rank1Update XDEBUG"<<std::endl;
+        //std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
+        //std::cout<<"v1 = "<<TMV_Text(v1)<<"  "<<v1<<std::endl;
+        //std::cout<<"v2 = "<<TMV_Text(v2)<<"  "<<v2<<std::endl;
+        //std::cout<<"m3 = "<<TMV_Text(m3)<<"  "<<m3.mat()<<std::endl;
         Matrix<typename M3::value_type> m3i = m3.mat();
         Matrix<typename M3::value_type> m3c = m3.mat();
         if (!add) m3c.setZero();
-        for(int i=0;i<m3.colsize();++i) {
-            for(int j=0;j<m3.rowsize();++j) {
+        for(size_t i=0;i<m3.colsize();++i) {
+            for(size_t j=0;j<m3.rowsize();++j) {
                 m3c.ref(i,j) += T(x) * v1.cref(i) * v2.cref(j);
             }
         }
-        std::cout<<"m3c => "<<m3c<<std::endl;
+        //std::cout<<"m3c => "<<m3c<<std::endl;
 
         Rank1Update<add>(x,v1.vec(),v2.vec(),m3.mat());
 

@@ -22,38 +22,34 @@ bool symoprod = false;
 bool dontthrow = false;
 std::string lastsuccess = "";
 
-//#include "TMV_Small.h"
-
 int main() try {
     std::ofstream log("tmvtest3b.log");
     tmv::WriteWarningsTo(&log);
 
-    showacc=true;
-    showdiv=true;
-    showtests=true;
-    showstartdone=true;
+    //showacc=true;
+    //showdiv=true;
+    //showtests=true;
+    //showstartdone=true;
 
-    //#define SKIPREST
-
-#ifndef SKIPREST
+#if 1
 
 #ifdef TEST_DOUBLE
-    TestSmallMatrixArith_1<double>();
+    TestSmallMatrixA<double>();
 #endif
 
 #ifdef TEST_FLOAT
-    TestSmallMatrixArith_1<float>();
+    TestSmallMatrixA<float>();
 #endif
 
 #ifdef TEST_LONGDOUBLE
-    TestSmallMatrixArith_1<long double>();
+    TestSmallMatrixA<long double>();
 #endif 
 
 #ifdef TEST_INT
-    TestSmallMatrixArith_1<int>();
+    TestSmallMatrixA<int>();
 #endif 
 
-#endif // SKIPREST
+#endif 
 
     return 0;
 }

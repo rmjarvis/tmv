@@ -600,8 +600,8 @@
 #define TMV_Matrix_H
 
 #include "TMV_BaseMatrix_Rec.h"
-#include "TMV_Vector.h"
 #include "TMV_BaseMatrix_Tri.h"
+#include "TMV_Vector.h"
 //#include "TMV_DivHelper.h"
 #include <vector>
 
@@ -754,6 +754,181 @@ namespace tmv {
         enum { mconj = Traits<type>::mconj };
         enum { mcanlin = Traits<type>::mcanlin };
 
+
+        //
+        // Constructors
+        //
+
+        inline Matrix() : itscs(0), itsrs(0), linsize(0), itsm(0)
+        {
+            TMVStaticAssert(S==RowMajor || S==ColMajor);
+#ifdef TMV_DEBUG
+            this->setAllTo(T(888));
+#endif
+        }
+
+        inline Matrix(size_t cs, size_t rs) :
+            itscs(cs), itsrs(rs), linsize(cs*rs), itsm(linsize)
+        {
+            TMVStaticAssert(S==RowMajor || S==ColMajor);
+#ifdef TMV_DEBUG
+            this->setAllTo(T(888));
+#endif
+        }
+
+        inline Matrix(size_t cs, size_t rs, T x) :
+            itscs(cs), itsrs(rs), linsize(cs*rs), itsm(linsize)
+        {
+            TMVStaticAssert(S==RowMajor || S==ColMajor);
+            this->setAllTo(x);
+        }
+
+        inline Matrix(size_t cs, size_t rs, const T* vv) :
+            itscs(cs), itsrs(rs), linsize(cs*rs), itsm(linsize)
+        {
+            TMVStaticAssert(S==RowMajor || S==ColMajor);
+#ifdef XTEST_DEBUG
+            this->setAllTo(T(888));
+#endif
+            typename type::linearview_type lv = this->linearView();
+            ConstVectorView<T,1>(vv,linsize).newAssignTo(lv);
+        }
+
+        inline Matrix(size_t cs, size_t rs, const std::vector<T>& vv) : 
+            itscs(cs), itsrs(rs), linsize(cs*rs), itsm(linsize)
+        {
+            TMVStaticAssert(S==RowMajor || S==ColMajor);
+            TMVAssert(vv.size() == linsize);
+#ifdef XTEST_DEBUG
+            this->setAllTo(T(888));
+#endif
+            typename type::linearview_type lv = this->linearView();
+            ConstVectorView<T,1>(&vv[0],linsize).newAssignTo(lv);
+        }
+
+        inline Matrix(const std::vector<std::vector<T> >& vv) :
+            itscs(vv.size()), itsrs(0), linsize(0), itsm(0)
+        {
+            TMVStaticAssert(S==RowMajor || S==ColMajor);
+#ifdef XTEST_DEBUG
+            this->setAllTo(T(888));
+#endif
+            if (itscs > 0) {
+                resize(itscs,vv[0].size());
+                for(int i=0;i<itscs;++i) {
+                    TMVAssert(vv[i].size() == itsrs);
+                    typename type::row_type mi = this->row(i);
+                    ConstVectorView<T,1>(&vv[i][0],itsrs).newAssignTo(mi);
+                }
+            }
+        }
+
+        inline Matrix(const type& m2) :
+            itscs(m2.itscs), itsrs(m2.itsrs),
+            linsize(m2.linsize), itsm(linsize)
+        {
+            TMVStaticAssert(S==RowMajor || S==ColMajor);
+#ifdef XTEST_DEBUG
+            this->setAllTo(T(888));
+#endif
+            m2.newAssignTo(*this);
+        }
+
+        template <class M2>
+        inline Matrix(const BaseMatrix<M2>& m2) :
+            itscs(m2.colsize()), itsrs(m2.rowsize()),
+            linsize(itscs * itsrs), itsm(linsize)
+        {
+            TMVStaticAssert(S==RowMajor || S==ColMajor);
+            TMVStaticAssert((ShapeTraits2<M2::mshape,mshape>::assignable));
+#ifdef XTEST_DEBUG
+            this->setAllTo(T(888));
+#endif
+            m2.newAssignTo(*this);
+        }
+
+        template <class M2>
+        inline Matrix(const BaseMatrix_Rec<M2>& m2) :
+            itscs(m2.colsize()), itsrs(m2.rowsize()),
+            linsize(m2.ls()), itsm(linsize)
+        {
+            TMVStaticAssert(S==RowMajor || S==ColMajor);
+#ifdef XTEST_DEBUG
+            this->setAllTo(T(888));
+#endif
+            m2.newAssignTo(*this);
+        }
+
+        inline ~Matrix() 
+        {
+#ifdef TMV_DEBUG
+            this->setAllTo(T(999));
+#endif
+        }
+
+        //
+        // Op=
+        //
+
+        inline type& operator=(const type& m2)
+        {
+            if (&m2 != this) base_mut::operator=(m2);
+            return *this; 
+        }
+
+        template <class M2>
+        inline type& operator=(const BaseMatrix<M2>& m2)
+        {
+            base_mut::operator=(m2);
+            return *this; 
+        }
+
+        inline type& operator=(T x)
+        {
+            base_mut::operator=(x);
+            return *this; 
+        }
+
+
+        //
+        // Auxilliary Functions
+        //
+
+        inline const T* cptr() const { return itsm; }
+        inline T* ptr() { return itsm; }
+
+        inline T cref(int i, int j) const
+        { return itsm[S==RowMajor ? i*stepi()+j : i+j*stepj()]; }
+
+        inline T& ref(int i, int j)
+        { return itsm[S==RowMajor ? i*stepi()+j : i+j*stepj()]; }
+
+        inline void swapWith(type& m2)
+        {
+            TMVAssert(m2.colsize() == colsize());
+            TMVAssert(m2.rowsize() == rowsize());
+            if (itsm.getP() == m2.itsm.getP()) return;
+            itsm.swapWith(m2.itsm);
+        }
+        
+        inline void resize(const size_t cs, const size_t rs)
+        {
+            itscs = cs;
+            itsrs = rs;
+            linsize = cs*rs;
+            itsm.resize(linsize);
+        }
+
+        inline size_t ls() const { return linsize; }
+        inline size_t colsize() const { return itscs; }
+        inline size_t rowsize() const { return itsrs; }
+        inline int stepi() const { return S == RowMajor ? itsrs : 1; }
+        inline int stepj() const { return S == RowMajor ? 1 : itscs; }
+        inline bool isconj() const { return false; }
+        inline bool isrm() const { return S == RowMajor; }
+        inline bool iscm() const { return S == ColMajor; }
+        inline StorageType stor() const { return S; }
+
 #if 0
         typedef DivHelper<type> base_div;
 
@@ -849,175 +1024,12 @@ namespace tmv {
         inline const BaseMatrix<T>& getMatrix() const { return *this; }
 #endif
 
-
-        //
-        // Constructors
-        //
-
-        inline Matrix(size_t cs, size_t rs) :
-            itscs(cs), itsrs(rs), linsize(cs*rs), itsm(new T[linsize])
-        {
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
-#ifdef TMV_DEBUG
-            this->setAllTo(T(888));
-#endif
-        }
-
-        inline Matrix(size_t cs, size_t rs, T x) :
-            itscs(cs), itsrs(rs), linsize(cs*rs), itsm(new T[linsize])
-        {
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
-            this->setAllTo(x);
-        }
-
-        inline Matrix(size_t cs, size_t rs, const T* vv) :
-            itscs(cs), itsrs(rs), linsize(cs*rs), itsm(new T[linsize])
-        {
-#ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
-#endif
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
-            typename type::linearview_type lv = this->linearView();
-            ConstVectorView<T,1>(vv,linsize).newAssignTo(lv);
-        }
-
-        inline Matrix(size_t cs, size_t rs, const std::vector<T>& vv) : 
-            itscs(cs), itsrs(rs), linsize(cs*rs), itsm(new T[linsize])
-        {
-#ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
-#endif
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
-            TMVAssert(vv.size() == linsize);
-            typename type::linearview_type lv = this->linearView();
-            ConstVectorView<T,1>(&vv[0],linsize).newAssignTo(lv);
-        }
-
-        inline Matrix(const std::vector<std::vector<T> >& vv) :
-            itscs(vv.size())
-        {
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
-            if (itscs == 0) {
-                itsrs = 0;
-                linsize = 0;
-                itsm.reset(new T[0]);
-            } else {
-                itsrs = vv[0].size();
-                linsize = itscs * itsrs;
-                itsm.reset(new T[linsize]);
-                for(int i=0;i<itscs;++i) {
-                    TMVAssert(vv[i].size() == itsrs);
-                    typename type::row_type mi = this->row(i);
-                    ConstVectorView<T,1>(&vv[i][0],itsrs).newAssignTo(mi);
-                }
-            }
-        }
-
-        inline Matrix(const type& m2) :
-            itscs(m2.itscs), itsrs(m2.itsrs),
-            linsize(m2.linsize), itsm(new T[linsize])
-        {
-#ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
-#endif
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
-            m2.newAssignTo(*this);
-        }
-
-        template <class M2>
-        inline Matrix(const BaseMatrix<M2>& m2) :
-            itscs(m2.colsize()), itsrs(m2.rowsize()),
-            linsize(itscs * itsrs), itsm(new T[linsize])
-        {
-#ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
-#endif
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
-            TMVStaticAssert((ShapeTraits2<M2::mshape,mshape>::assignable));
-            m2.newAssignTo(*this);
-        }
-
-        template <class M2>
-        inline Matrix(const BaseMatrix_Rec<M2>& m2) :
-            itscs(m2.colsize()), itsrs(m2.rowsize()),
-            linsize(m2.ls()), itsm(new T[linsize])
-        {
-#ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
-#endif
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
-            m2.newAssignTo(*this);
-        }
-
-        inline ~Matrix() 
-        {
-#ifdef TMV_DEBUG
-            this->setAllTo(T(999));
-#endif
-        }
-
-        //
-        // Op=
-        //
-
-        inline type& operator=(const type& m2)
-        {
-            if (&m2 != this) base_mut::operator=(m2);
-            return *this; 
-        }
-
-        template <class M2>
-        inline type& operator=(const BaseMatrix<M2>& m2)
-        {
-            base_mut::operator=(m2);
-            return *this; 
-        }
-
-        inline type& operator=(T x)
-        {
-            base_mut::operator=(x);
-            return *this; 
-        }
-
-
-        //
-        // Auxilliary Functions
-        //
-
-        inline const T* cptr() const { return itsm.get(); }
-        inline T* ptr() { return itsm.get(); }
-
-        inline T cref(int i, int j) const
-        { return itsm[S==RowMajor ? i*stepi()+j : i+j*stepj()]; }
-
-        inline T& ref(int i, int j)
-        { return itsm[S==RowMajor ? i*stepi()+j : i+j*stepj()]; }
-
-        inline size_t ls() const { return linsize; }
-        inline size_t colsize() const { return itscs; }
-        inline size_t rowsize() const { return itsrs; }
-        inline int stepi() const { return S == RowMajor ? itsrs : 1; }
-        inline int stepj() const { return S == RowMajor ? 1 : itscs; }
-        inline bool isconj() const { return false; }
-        inline bool isrm() const { return S == RowMajor; }
-        inline bool iscm() const { return S == ColMajor; }
-        inline StorageType stor() const { return S; }
-        inline void swapWith(type& m2)
-        {
-            TMVAssert(m2.colsize() == colsize());
-            TMVAssert(m2.rowsize() == rowsize());
-            if (itsm.get() == m2.itsm.get()) return;
-            T* temp = itsm.release();
-            itsm.reset(m2.itsm.release());
-            m2.itsm.reset(temp);
-        }
-
     private:
 
-        const size_t itscs;
-        const size_t itsrs;
-        const size_t linsize;
-        auto_array<T> itsm;
+        size_t itscs;
+        size_t itsrs;
+        size_t linsize;
+        AlignedArray<T> itsm;
 
     }; // Matrix
 

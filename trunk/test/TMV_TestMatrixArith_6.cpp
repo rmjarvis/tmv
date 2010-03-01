@@ -50,10 +50,10 @@ template <class T> void TestMatrixArith_6()
 
     TestMatrixArith6x<T>(a1,ca1,a2,ca2,"Square 1");
     TestMatrixArith6x<T>(a2,ca2,a1,ca1,"Square 2");
+#if (XTEST & 1)
     TestMatrixArith6x<T>(a3,ca3,a1,ca1,"Square 3");
-#ifdef XTEST
-#if (XTEST & 2)
     TestMatrixArith6x<T>(a1,ca1,a3,ca3,"Square 4");
+#if (XTEST & 2)
     TestMatrixArith6x<T>(a3,ca3,a2,ca2,"Square 5");
     TestMatrixArith6x<T>(a2,ca2,a3,ca3,"Square 6");
 #endif
@@ -79,25 +79,22 @@ template <class T> void TestMatrixArith_6()
     tmv::MatrixView<T> a5 = a5x.view();
     tmv::MatrixView<CT> ca5 = ca5x.view();
 
-    TestMatrixArith6x<T>(a1,ca1,a4,ca4,"NonSquare 1");
+    TestMatrixArith6x<T>(a1,ca1,a5,ca5,"NonSquare 1");
     TestMatrixArith6x<T>(a4,ca4,a1,ca1,"NonSquare 2");
     TestMatrixArith6x<T>(a4,ca4,a5,ca5,"NonSquare 3");
     TestMatrixArith6x<T>(a5,ca5,a4,ca4,"NonSquare 4");
-#ifdef XTEST
 #if (XTEST & 2)
-    TestMatrixArith6x<T>(a2,ca2,a4,ca4,"NonSquare 5");
-    TestMatrixArith6x<T>(a3,ca3,a4,ca4,"NonSquare 6");
     TestMatrixArith6x<T>(a2,ca2,a5,ca5,"NonSquare 8");
-    TestMatrixArith6x<T>(a4,ca4,a2,ca2,"NonSquare 10");
-    TestMatrixArith6x<T>(a4,ca4,a3,ca3,"NonSquare 11");
-    TestMatrixArith6x<T>(a5,ca5,a1,ca1,"NonSquare 12");
-    TestMatrixArith6x<T>(a5,ca5,a2,ca2,"NonSquare 13");
-    TestMatrixArith6x<T>(a5,ca5,a3,ca3,"NonSquare 14");
+    TestMatrixArith6x<T>(a4,ca4,a2,ca2,"NonSquare 5");
+#if (XTEST & 1)
+    TestMatrixArith6x<T>(a3,ca3,a5,ca5,"NonSquare 12");
+    TestMatrixArith6x<T>(a4,ca4,a3,ca3,"NonSquare 13");
+#endif
 #endif
 
 #if (XTEST & 8)
-    tmv::Matrix<T> a6x(4,0,1);
-    tmv::Matrix<T> a7x(0,4,1);
+    tmv::Matrix<T> a6x(4,0);
+    tmv::Matrix<T> a7x(0,4);
     tmv::Matrix<CT> ca6x = a6x;
     tmv::Matrix<CT> ca7x = a7x;
 
@@ -107,28 +104,15 @@ template <class T> void TestMatrixArith_6()
     tmv::MatrixView<CT> ca7 = ca7x.view();
 
     TestMatrixArith6x<T>(a1,ca1,a6,ca6,"Degenerate 1");
-    TestMatrixArith6x<T>(a6,ca6,a1,ca1,"Degenerate 2");
-    TestMatrixArith6x<T>(a6,ca6,a7,ca7,"Degenerate 3");
-    TestMatrixArith6x<T>(a7,ca7,a6,ca6,"Degenerate 4");
-    TestMatrixArith6x<T>(a2,ca2,a6,ca6,"Degenerate 5");
-    TestMatrixArith6x<T>(a3,ca3,a6,ca6,"Degenerate 6");
-    TestMatrixArith6x<T>(a4,ca4,a6,ca6,"Degenerate 7");
-    TestMatrixArith6x<T>(a5,ca5,a6,ca6,"Degenerate 8");
-    TestMatrixArith6x<T>(a1,ca1,a7,ca7,"Degenerate 9");
-    TestMatrixArith6x<T>(a2,ca2,a7,ca7,"Degenerate 10");
-    TestMatrixArith6x<T>(a3,ca3,a7,ca7,"Degenerate 11");
-    TestMatrixArith6x<T>(a4,ca4,a7,ca7,"Degenerate 12");
-    TestMatrixArith6x<T>(a5,ca5,a7,ca7,"Degenerate 13");
-    TestMatrixArith6x<T>(a6,ca6,a2,ca2,"Degenerate 14");
-    TestMatrixArith6x<T>(a6,ca6,a3,ca3,"Degenerate 15");
-    TestMatrixArith6x<T>(a6,ca6,a4,ca4,"Degenerate 16");
-    TestMatrixArith6x<T>(a6,ca6,a5,ca5,"Degenerate 17");
-    TestMatrixArith6x<T>(a7,ca7,a1,ca1,"Degenerate 18");
-    TestMatrixArith6x<T>(a7,ca7,a2,ca2,"Degenerate 19");
-    TestMatrixArith6x<T>(a7,ca7,a3,ca3,"Degenerate 20");
-    TestMatrixArith6x<T>(a7,ca7,a4,ca4,"Degenerate 21");
-    TestMatrixArith6x<T>(a7,ca7,a5,ca5,"Degenerate 22");
-#endif
+    TestMatrixArith6x<T>(a2,ca2,a6,ca6,"Degenerate 2");
+    TestMatrixArith6x<T>(a3,ca3,a6,ca6,"Degenerate 3");
+    TestMatrixArith6x<T>(a4,ca4,a6,ca6,"Degenerate 4");
+    TestMatrixArith6x<T>(a7,ca7,a1,ca1,"Degenerate 16");
+    TestMatrixArith6x<T>(a7,ca7,a2,ca2,"Degenerate 17");
+    TestMatrixArith6x<T>(a7,ca7,a3,ca3,"Degenerate 18");
+    TestMatrixArith6x<T>(a7,ca7,a5,ca5,"Degenerate 20");
+    TestMatrixArith6x<T>(a7,ca7,a6,ca6,"Degenerate 21");
+    TestMatrixArith6x<T>(a6,ca6,a7,ca7,"Degenerate 22");
 #endif
 }
 

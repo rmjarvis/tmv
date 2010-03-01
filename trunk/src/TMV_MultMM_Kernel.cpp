@@ -36,7 +36,7 @@
 
 namespace tmv {
 
-#ifndef BLAS
+#if !defined(BLAS) || !defined(TMV_INST_MIX)
 #ifdef TMV_INST_FLOAT
 #ifdef __SSE__
     template void multmm_16_16_32(
@@ -124,7 +124,9 @@ namespace tmv {
 #endif
 #endif
 
+#ifndef TMV_INST_MIX
 #define TMV_INST_SKIP_BLAS
+#endif
 
 #define InstFile "TMV_MultMM_Kernel.inst"
 #include "TMV_Inst.h"

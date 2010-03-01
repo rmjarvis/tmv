@@ -148,9 +148,9 @@
 #define TMV_INST_COMPLEX
 #endif
 
-#ifndef TMV_NO_INST_MIX
-#define TMV_INST_MIX
-#endif
+// These next three are not instantiated by default:
+
+//#define TMV_INST_MIX
 
 //#define TMV_INST_LONGDOUBLE
 
@@ -557,678 +557,9 @@ namespace tmv {
 
     // A helper struct to pick one of two possibile behaviors
     // according to a template bool argument.  
+    // It is defined below ZProd.
     template <bool yn> 
     struct Maybe;
-
-    template <> 
-    struct Maybe<true>
-    {
-        // T1 or T2
-        template <class T1, class T2>
-        struct SelectType { typedef T1 type; };
-
-        // real_type or T
-        template <class T>
-        struct RealType { typedef typename Traits<T>::real_type type; };
-
-        // Type of T1*T2 or T2
-        template <class T1, class T2>
-        struct ProdType { typedef typename Traits2<T1,T2>::type type; };
-
-        // x or y
-        template <class T>
-        static inline T select(const T& x, const T& /*y*/) { return x; }
-
-        // abs(x) or x
-        template <class T>
-        static inline typename Traits<T>::real_type abs(const T& x) 
-        { return TMV_ABS(x); }
-
-        // conj(x) or x
-        template <class T>
-        static inline T conj(const T& x) { return TMV_CONJ(x); }
-
-        // -x or x
-        template <class T>
-        static inline T neg(const T& x) { return -x; }
-
-        // x<y or x>y
-        template <class T>
-        static inline bool less(const T& x, const T& y) { return x<y; }
-
-        // 2*x or x
-        template <class T>
-        static inline T twox(const T& x)
-        { return 2*x; }
-        static inline int twox(const int& x)
-        { return x>>1; }
-
-        // ++x or nothing
-        template <class T>
-        static inline void increment(T& x) { ++x; }
-
-        // --x or nothing
-        template <class T>
-        static inline void decrement(T& x) { --x; }
-
-        // x += y or x = y
-        template <class T1, class T2>
-        static inline void add(T1& x, const T2& y) { x += y; }
-        template <class T1, class T2>
-        static inline void add(ConjRef<T1> x, const T2& y) { x += y; }
-        template <class T1, bool C, class T2>
-        static inline void add(TriRef<T1,C> x, const T2& y) { x += y; }
-
-        // x + y or y
-        template <class T1, class T2>
-        static inline T2 sum(const T1& x, const T2& y) 
-        { return x + y; }
-
-        template <class T1, int ix2, class T2>
-        static inline typename Traits2<T1,T2>::type sum(
-            const T1& x, const Scaling<ix2,T2>& y) 
-        { return x + T2(y); }
-
-        // x * y or y
-        template <class T1, class T2>
-        static inline typename Traits2<T1,T2>::type prod(
-            const T1& x, const T2& y) 
-        { return x * y; }
-
-        template <class T1, int ix2, class T2>
-        static inline typename Traits2<T1,T2>::type prod(
-            const T1& x, const Scaling<ix2,T2>& y) 
-        { return x * y; }
-
-        // x * y or y
-        template <bool c1, bool c2, class T1, class T2>
-        static inline typename Traits2<T1,T2>::type zprod(
-            const T1& x, const T2& y)
-        { return ZProd<c1,c2>::prod(x , y); }
-
-        // x - y or x + y
-        template <class T>
-        static inline T diff(const T& x, const T& y) { return x - y; }
-
-        // x = y or nothing
-        template <class T1, class T2>
-        static inline void set(T1& x, const T2& y) { x = y; }
-        template <class T1, class T2>
-        static inline void set(ConjRef<T1> x, const T2& y) { x = y; }
-        template <class T1, bool C, class T2>
-        static inline void set(TriRef<T1,C> x, const T2& y) { x = y; }
-
-        // m.ref(i,i) = x or nothing
-        template <class M, class T>
-        static inline void setdiag(M& m, int i, const T& x) { m.ref(i,i) = x; }
-        template <class M, class T>
-        static inline void setdiag2(M m, int i, const T& x) { m.ref(i,i) = x; }
-
-        // m.diag() = x or nothing
-        template <class M, class T>
-        static inline void setdiag(M& m, const T& x) { m.diag().setAllTo(x); }
-        template <class M, class T>
-        static inline void setdiag2(M m, const T& x) { m.diag().setAllTo(x); }
-
-        // m.setZero() or nothing
-        template <class M>
-        static inline void zero(M& m) { m.setZero(); }
-        template <class M>
-        static inline void zero2(M m) { m.setZero(); }
-
-        // m.conjugateSelf() or nothing
-        template <class M>
-        static inline void conjself(M& m) { m.conjugateSelf(); }
-        template <class M>
-        static inline void conjself2(M m) { m.conjugateSelf(); }
-
-        // v.addToAll(x) or v.setAllTo(x)
-        template <class V, class T>
-        static inline void addtoall(V& v, const T& x) { v.addToAll(x); }
-        template <class V, class T>
-        static inline void addtoall2(V v, const T& x) { v.addToAll(x); }
-
-        // m.diag().setAllTo(1) or nothing
-        template <class M>
-        static inline void makeunitdiag(M& m) 
-        { m.diag().setAllTo(typename M::value_type(1)); }
-        template <class M>
-        static inline void makeunitdiag2(M m) 
-        { m.diag().setAllTo(typename M::value_type(1)); }
-
-        // m.offDiag().setZero() or nothing
-        template <class M>
-        static inline void zero_offdiag(M& m) { m.offDiag().setZero(); }
-        template <class M>
-        static inline void zero_offdiag2(M m) { m.offDiag().setZero(); }
-
-        // m2.viewAsUnitDiag() or m2
-        template <class M>
-        static inline typename M::const_unitdiag_type unitview(const M& m) 
-        { return m.viewAsUnitDiag(); }
-        template <class M>
-        static inline typename M::unitdiag_type unitview(M& m) 
-        { return m.viewAsUnitDiag(); }
-
-        // m2.UnitUpperTri() or m2.UpperTri()
-        template <class M>
-        static inline typename M::const_unit_uppertri_type unit_uppertri(
-            const M& m) 
-        { return m.unitUpperTri(); }
-        template <class M>
-        static inline typename M::unit_uppertri_type unit_uppertri(M& m) 
-        { return m.unitUpperTri(); }
-        template <class M>
-        static inline typename M::unit_uppertri_type unit_uppertri2(M m) 
-        { return m.unitUpperTri(); }
-
-        // m2.UnitLowerTri() or m2.LowerTri()
-        template <class M>
-        static inline typename M::const_unit_lowertri_type unit_lowertri(
-            const M& m) 
-        { return m.unitLowerTri(); }
-        template <class M>
-        static inline typename M::unit_lowertri_type unit_lowertri(M& m) 
-        { return m.unitLowerTri(); }
-        template <class M>
-        static inline typename M::unit_lowertri_type unit_lowertri2(M m) 
-        { return m.unitLowerTri(); }
-
-        // m2.UpperTri() or m2.LowerTri()
-        template <class M>
-        static inline typename M::const_uppertri_type uppertri(const M& m) 
-        { return m.upperTri(); }
-        template <class M>
-        static inline typename M::uppertri_type uppertri(M& m) 
-        { return m.upperTri(); }
-        template <class M>
-        static inline typename M::uppertri_type uppertri2(M m) 
-        { return m.upperTri(); }
-
-#ifdef __SSE__
-        // _mm_load_ps or _mm_set_ps
-        static inline void sse_load(
-            __m128& m,
-            const float* x, const float*, const float*, const float*)
-        { m = _mm_load_ps(x); }
-
-        // _mm_loadu_ps or _mm_set_ps
-        static inline void sse_loadu(
-            __m128& m,
-            const float* x, const float*, const float*, const float*)
-        { m = _mm_loadu_ps(x); }
-
-        // _mm_store_ps or cast and assign
-        static inline void sse_store(
-            float* x, float*, float*, float*, const __m128& m)
-        { _mm_store_ps(x,m); }
-
-        // _mm_storeu_ps or cast and assign
-        static inline void sse_storeu(
-            float* x, float*, float*, float*, const __m128& m)
-        { _mm_storeu_ps(x,m); }
-
-        // _mm_add_ps or cast and add
-        static inline void sse_add(
-            float* x, float*, float*, float*, const __m128& m)
-        { _mm_store_ps(x,_mm_add_ps(_mm_load_ps(x),m)); }
-        static inline void sse_addu(
-            float* x, float*, float*, float*, const __m128& m)
-        { _mm_storeu_ps(x,_mm_add_ps(_mm_loadu_ps(x),m)); }
-
-        // _mm_load_ps or two _mm_load_pi's
-        static inline void sse_load(
-            __m128& m,
-            const std::complex<float>* x, const std::complex<float>* )
-        { m = _mm_load_ps( (const float*) x ); }
-
-        // _mm_loadu_ps or two _mm_load?_pi's
-        static inline void sse_loadu(
-            __m128& m,
-            const std::complex<float>* x, const std::complex<float>* )
-        { m = _mm_loadu_ps( (const float*) x ); }
-
-        // _mm_store_ps or two _mm_store?_pi's
-        static inline void sse_store(
-            std::complex<float>* x, std::complex<float>* , const __m128& m)
-        { _mm_store_ps((float*)(x) , m); }
-
-        // _mm_storeu_ps or two _mm_store?_pi's
-        static inline void sse_storeu(
-            std::complex<float>* x, std::complex<float>* , const __m128& m)
-        { _mm_storeu_ps((float*)(x) , m); }
-
-        // _mm_add_ps or cast and add
-        static inline void sse_add(
-            std::complex<float>* x, std::complex<float>* , const __m128& m)
-        { _mm_store_ps((float*)x,_mm_add_ps(_mm_load_ps((float*)x),m)); }
-        static inline void sse_addu(
-            std::complex<float>* x, std::complex<float>* , const __m128& m)
-        { _mm_storeu_ps((float*)x,_mm_add_ps(_mm_loadu_ps((float*)x),m)); }
-#endif
-#ifdef __SSE2__
-        static inline void sse_load(
-            __m128d& m, const double* x, const double* )
-        { m = _mm_load_pd(x); }
-        static inline void sse_loadu(
-            __m128d& m, const double* x, const double* )
-        { m = _mm_loadu_pd(x); }
-
-        static inline void sse_store(double* x, double*, const __m128d& m)
-        { _mm_store_pd(x,m); }
-        static inline void sse_storeu(double* x, double*, const __m128d& m)
-        { _mm_storeu_pd(x,m); }
-
-        static inline void sse_add(double* x, double*, const __m128d& m)
-        { _mm_store_pd(x,_mm_add_pd(_mm_load_pd(x),m)); }
-        static inline void sse_addu(double* x, double*, const __m128d& m)
-        { _mm_storeu_pd(x,_mm_add_pd(_mm_loadu_pd(x),m)); }
-
-        static inline void sse_load(
-            __m128d& m, const std::complex<double>* x)
-        { m = _mm_load_pd((const double*) x); }
-        static inline void sse_loadu(
-            __m128d& m, const std::complex<double>* x)
-        { m = _mm_loadu_pd((const double*) x); }
-
-        static inline void sse_store(std::complex<double>* x, const __m128d& m)
-        { _mm_store_pd((double*) x,m); }
-        static inline void sse_storeu(std::complex<double>* x, const __m128d& m)
-        { _mm_storeu_pd((double*) x,m); }
-
-        static inline void sse_add(std::complex<double>* x, const __m128d& m)
-        { _mm_store_pd((double*)x,_mm_add_pd(_mm_load_pd((double*)x),m)); }
-        static inline void sse_addu(std::complex<double>* x, const __m128d& m)
-        { _mm_storeu_pd((double*)x,_mm_add_pd(_mm_loadu_pd((double*)x),m)); }
-#endif
-    };
-    template <> 
-    struct Maybe<false>
-    {
-        template <class T1, class T2>
-        struct SelectType { typedef T2 type; };
-
-        template <class T>
-        struct RealType { typedef T type; };
-
-        template <class T1, class T2>
-        struct ProdType { typedef T2 type; };
-
-        template <class T>
-        static inline T select(const T& /*x*/, const T& y) { return y; }
-
-        template <class T>
-        static inline T abs(const T& x) { return x; }
-
-        template <class T>
-        static inline T conj(const T& x) { return x; }
-
-        template <class T>
-        static inline T neg(const T& x) { return x; }
-
-        template <class T>
-        static inline bool less(const T& x, const T& y) { return x>y; }
-
-        template <class T>
-        static inline T twox(const T& x) { return x; }
-
-        template <class T>
-        static inline void increment(const T& /*x*/) { }
-
-        template <class T>
-        static inline void decrement(const T& /*x*/) { }
-
-        template <class T1, class T2>
-        static inline void add(T1& x, const T2& y) { x = y; }
-        template <class T1, class T2>
-        static inline void add(ConjRef<T1> x, const T2& y) { x = y; }
-        template <class T1, bool C, class T2>
-        static inline void add(TriRef<T1,C> x, const T2& y) { x = y; }
-
-        template <class T1, class T2>
-        static inline T2 sum(const T1& /*x*/, const T2& y) { return y; }
-
-        template <class T1, class T2>
-        static inline T2 prod(const T1& /*x*/, const T2& y) { return y; }
-
-        template <class T1, int ix2, class T2>
-        static inline Scaling<ix2,T2> prod(
-            const T1& /*x*/, const Scaling<ix2,T2>& y) 
-        { return y; }
-
-        template <bool c1, bool c2, class T1, class T2>
-        static inline T2 zprod(const T1& x, const T2& y)
-        { return Maybe<c2>::conj(y); }
-
-        template <class T>
-        static inline T diff(const T& x, const T& y) { return x + y; }
-
-        template <class T1, class T2>
-        static inline void set(T1& /*x*/, const T2& /*y*/) { }
-        template <class T1, class T2>
-        static inline void set(ConjRef<T1> /*x*/, const T2& /*y*/) { }
-        template <class T1, bool C, class T2>
-        static inline void set(TriRef<T1,C> /*x*/, const T2& /*y*/) { }
-
-        template <class M, class T>
-        static inline void setdiag(M& /*m*/, int /*i*/, const T& /*x*/) { }
-        template <class M, class T>
-        static inline void setdiag2(M /*m*/, int /*i*/, const T& /*x*/) { }
-
-        template <class M, class T>
-        static inline void setdiag(M& /*m*/, const T& /*x*/) { }
-        template <class M, class T>
-        static inline void setdiag2(M /*m*/, const T& /*x*/) { }
-
-        template <class M>
-        static inline void zero(M& /*m*/) { }
-        template <class M>
-        static inline void zero2(M /*m*/) { }
-
-        template <class M>
-        static inline void conjself(M& /*m*/) { }
-        template <class M>
-        static inline void conjself2(M /*m*/) { }
-
-        template <class V, class T>
-        static inline void addtoall(V& v, const T& x) { v.setAllTo(x); }
-        template <class V, class T>
-        static inline void addtoall2(V v, const T& x) { v.setAllTo(x); }
-
-        template <class M>
-        static inline void makeunitdiag(M& /*m*/) { }
-        template <class M>
-        static inline void makeunitdiag2(M /*m*/) { }
-
-        template <class M1, class M2>
-        static inline void offdiag_copy(const M1& m1, M2& m2) { m2 = m1; }
-        template <class M1, class M2>
-        static inline void offdiag_copy2(const M1 m1, M2& m2) { m2 = m1; }
-
-        template <class M>
-        static inline void zero_offdiag(M& /*m*/) { }
-        template <class M>
-        static inline void zero_offdiag2(M /*m*/) { }
-
-        template <class M>
-        static inline const M& unitview(const M& m) 
-        { return m; }
-        template <class M>
-        static inline M& unitview(M& m) 
-        { return m; }
-
-        template <class M>
-        static inline typename M::const_uppertri_type unit_uppertri(const M& m) 
-        { return m.upperTri(); }
-        template <class M>
-        static inline typename M::uppertri_type unit_uppertri(M& m) 
-        { return m.upperTri(); }
-        template <class M>
-        static inline typename M::uppertri_type unit_uppertri2(M m) 
-        { return m.upperTri(); }
-
-        template <class M>
-        static inline typename M::const_lowertri_type unit_lowertri(const M& m) 
-        { return m.lowerTri(); }
-        template <class M>
-        static inline typename M::lowertri_type unit_lowertri(M& m) 
-        { return m.lowerTri(); }
-        template <class M>
-        static inline typename M::lowertri_type unit_lowertri2(M m) 
-        { return m.lowerTri(); }
-
-        template <class M>
-        static inline typename M::const_lowertri_type uppertri(const M& m) 
-        { return m.lowerTri(); }
-        template <class M>
-        static inline typename M::lowertri_type uppertri(M& m) 
-        { return m.lowerTri(); }
-        template <class M>
-        static inline typename M::lowertri_type uppertri2(M m) 
-        { return m.lowerTri(); }
-
-#ifdef __SSE__
-        static inline void sse_load(
-            __m128& m,
-            const float* x1, const float* x2, const float* x3, const float* x4)
-        { m = _mm_set_ps(*x4,*x3,*x2,*x1); }
-        static inline void sse_loadu(
-            __m128& m,
-            const float* x1, const float* x2, const float* x3, const float* x4)
-        { m = _mm_set_ps(*x4,*x3,*x2,*x1); }
-
-        static inline void sse_store(
-            float* x1, float* x2, float* x3, float* x4, const __m128& m)
-        {
-            const float* mf= (const float*)(&m);
-            *x1 = mf[0]; *x2 = mf[1]; *x3 = mf[2]; *x4 = mf[3];
-        }
-        static inline void sse_storeu(
-            float* x1, float* x2, float* x3, float* x4, const __m128& m)
-        {
-            const float* mf= (const float*)(&m);
-            *x1 = mf[0]; *x2 = mf[1]; *x3 = mf[2]; *x4 = mf[3];
-        }
-
-        static inline void sse_add(
-            float* x1, float* x2, float* x3, float* x4, const __m128& m)
-        {
-            const float* mf= (const float*)(&m);
-            *x1 += mf[0]; *x2 += mf[1]; *x3 += mf[2]; *x4 += mf[3];
-        }
-        static inline void sse_addu(
-            float* x1, float* x2, float* x3, float* x4, const __m128& m)
-        {
-            const float* mf= (const float*)(&m);
-            *x1 += mf[0]; *x2 += mf[1]; *x3 += mf[2]; *x4 += mf[3];
-        }
-
-        static inline void sse_load(
-            __m128& m,
-            const std::complex<float>* x1, const std::complex<float>* x2)
-        {
-            // The junk variable is to avoid a warning about m being
-            // used uninitialized.
-            const __m128 junk = _mm_set1_ps(0.F);
-            m = _mm_loadl_pi(junk,(const __m64*)x1);
-            m = _mm_loadh_pi(m,(const __m64*)x2);
-        }
-        static inline void sse_loadu(
-            __m128& m,
-            const std::complex<float>* x1, const std::complex<float>* x2)
-        {
-            const __m128 junk = _mm_set1_ps(0.F);
-            m = _mm_loadl_pi(junk,(const __m64*)x1);
-            m = _mm_loadh_pi(m,(const __m64*)x2);
-        }
-
-        static inline void sse_store(
-            std::complex<float>* x1, std::complex<float>* x2, const __m128& m)
-        {
-            _mm_storel_pi((__m64*)x1,m);
-            _mm_storeh_pi((__m64*)x2,m);
-        }
-        static inline void sse_storeu(
-            std::complex<float>* x1, std::complex<float>* x2, const __m128& m)
-        {
-            _mm_storel_pi((__m64*)x1,m);
-            _mm_storeh_pi((__m64*)x2,m);
-        }
-
-        static inline void sse_add(
-            std::complex<float>* x1, std::complex<float>* x2, const __m128& m)
-        {
-            const float* mf= (const float*)(&m);
-            *x1 += std::complex<float>(mf[0],mf[1]);
-            *x2 += std::complex<float>(mf[2],mf[3]);
-        }
-        static inline void sse_addu(
-            std::complex<float>* x1, std::complex<float>* x2, const __m128& m)
-        {
-            const float* mf= (const float*)(&m);
-            *x1 += std::complex<float>(mf[0],mf[1]);
-            *x2 += std::complex<float>(mf[2],mf[3]);
-        }
-
-#endif
-#ifdef __SSE2__
-        static inline void sse_load(
-            __m128d& m, const double* x1, const double* x2)
-        { m = _mm_set_pd(*x2,*x1); }
-        static inline void sse_loadu(
-            __m128d& m, const double* x1, const double* x2)
-        { m = _mm_set_pd(*x2,*x1); }
-
-        static inline void sse_store(double* x1, double* x2, const __m128d& m)
-        {
-            const double* md= (const double*)(&m);
-            *x1 = md[0]; *x2 = md[1];
-        }
-        static inline void sse_storeu(double* x1, double* x2, const __m128d& m)
-        {
-            const double* mf= (const double*)(&m);
-            *x1 = mf[0]; *x2 = mf[1];
-        }
-
-        static inline void sse_add(double* x1, double* x2, const __m128d& m)
-        {
-            const double* md= (const double*)(&m);
-            *x1 += md[0]; *x2 += md[1];
-        }
-        static inline void sse_addu(double* x1, double* x2, const __m128d& m)
-        {
-            const double* mf= (const double*)(&m);
-            *x1 += mf[0]; *x2 += mf[1];
-        }
-
-        // These are the same for Maybe<true> or Maybe<false>.
-        // I include them to make it easier to write the code that uses
-        // these loads and stores, since it makes the syntax more similar
-        // between all the different varieties (float/double, real/complex).
-        static inline void sse_load(
-            __m128d& m, const std::complex<double>* x)
-        { m = _mm_load_pd((const double*)x); }
-        static inline void sse_loadu(
-            __m128d& m, const std::complex<double>* x)
-        { m = _mm_loadu_pd((const double*)x); }
-
-        static inline void sse_store(std::complex<double>* x, const __m128d& m)
-        { _mm_store_pd((double*)x,m); }
-        static inline void sse_storeu(std::complex<double>* x, const __m128d& m)
-        { _mm_storeu_pd((double*)x,m); }
-
-        static inline void sse_add(std::complex<double>* x, const __m128d& m)
-        { _mm_store_pd((double*)x,_mm_add_pd(_mm_load_pd((double*)x),m)); }
-        static inline void sse_addu(std::complex<double>* x, const __m128d& m)
-        { _mm_storeu_pd((double*)x,_mm_add_pd(_mm_loadu_pd((double*)x),m)); }
-#endif
-    };
-
-    // A couple things benefit from having two compile time booleans
-    template <bool yn1, bool yn2> 
-    struct Maybe2;
-
-    template <bool yn2> 
-    struct Maybe2<true,yn2>
-    {
-#ifdef __SSE__
-        // Maybe<unit>::sse_load or Maybe<unit>::sse_loadu
-        static inline void sse_load(
-            __m128& m,
-            const float* x1, const float* x2, const float* x3, const float* x4)
-        { Maybe<yn2>::sse_load(m,x1,x2,x3,x4); }
-        static inline void sse_load(
-            __m128& m,
-            const std::complex<float>* x1, const std::complex<float>* x2)
-        { Maybe<yn2>::sse_load(m,x1,x2); }
-
-        // Maybe<unit>::sse_add or Maybe<unit>::sse_store
-        static inline void sse_add(
-            float* x1, float* x2, float* x3, float* x4, const __m128& m)
-        { Maybe<yn2>::sse_add(x1,x2,x3,x4,m); }
-        static inline void sse_add(
-            std::complex<float>* x1, std::complex<float>* x2, const __m128& m)
-        { Maybe<yn2>::sse_add(x1,x2,m); }
-
-        // Maybe<unit>::sse_addu or Maybe<unit>::sse_storeu
-        static inline void sse_addu(
-            float* x1, float* x2, float* x3, float* x4, const __m128& m)
-        { Maybe<yn2>::sse_addu(x1,x2,x3,x4,m); }
-        static inline void sse_addu(
-            std::complex<float>* x1, std::complex<float>* x2, const __m128& m)
-        { Maybe<yn2>::sse_addu(x1,x2,m); }
-#endif
-
-#ifdef __SSE2__
-        static inline void sse_load(
-            __m128d& m, const double* x1, const double* x2)
-        { Maybe<yn2>::sse_load(m,x1,x2); }
-
-        static inline void sse_add(
-            double* x1, double* x2, const __m128d& m)
-        { Maybe<yn2>::sse_add(x1,x2,m); }
-        static inline void sse_add(
-            std::complex<double>* x, const __m128d& m)
-        { Maybe<yn2>::sse_add(x,m); }
-
-        static inline void sse_addu(
-            double* x1, double* x2, const __m128d& m)
-        { Maybe<yn2>::sse_addu(x1,x2,m); }
-        static inline void sse_addu(
-            std::complex<double>* x, const __m128d& m)
-        { Maybe<yn2>::sse_addu(x,m); }
-#endif
-    };
-        
-    template <bool yn2> 
-    struct Maybe2<false,yn2>
-    {
-#ifdef __SSE2__
-        static inline void sse_load(
-            __m128& m,
-            const float* x1, const float* x2, const float* x3, const float* x4)
-        { Maybe<yn2>::sse_loadu(m,x1,x2,x3,x4); }
-        static inline void sse_load(
-            __m128& m,
-            const std::complex<float>* x1, const std::complex<float>* x2)
-        { Maybe<yn2>::sse_loadu(m,x1,x2); }
-
-        static inline void sse_add(
-            float* x1, float* x2, float* x3, float* x4, const __m128& m)
-        { Maybe<yn2>::sse_store(x1,x2,x3,x4,m); }
-        static inline void sse_add(
-            std::complex<float>* x1, std::complex<float>* x2, const __m128& m)
-        { Maybe<yn2>::sse_store(x1,x2,m); }
-
-        static inline void sse_addu(
-            float* x1, float* x2, float* x3, float* x4, const __m128& m)
-        { Maybe<yn2>::sse_storeu(x1,x2,x3,x4,m); }
-        static inline void sse_addu(
-            std::complex<float>* x1, std::complex<float>* x2, const __m128& m)
-        { Maybe<yn2>::sse_storeu(x1,x2,m); }
-#endif
-
-#ifdef __SSE2__
-        static inline void sse_load(
-            __m128d& m, const double* x1, const double* x2)
-        { Maybe<yn2>::sse_loadu(m,x1,x2); }
-
-        static inline void sse_add(
-            double* x1, double* x2, const __m128d& m)
-        { Maybe<yn2>::sse_store(x1,x2,m); }
-        static inline void sse_add(
-            std::complex<double>* x, const __m128d& m)
-        { Maybe<yn2>::sse_store(x,m); }
-
-        static inline void sse_addu(
-            double* x1, double* x2, const __m128d& m)
-        { Maybe<yn2>::sse_storeu(x1,x2,m); }
-        static inline void sse_addu(
-            std::complex<double>* x, const __m128d& m)
-        { Maybe<yn2>::sse_storeu(x,m); }
-#endif
-    };
-        
 
     // The way the STL (typically) implements std::complex means
     // that the exporession z = x * y when x,y,z are complex
@@ -1479,6 +810,759 @@ namespace tmv {
 
     };
 
+    template <> 
+    struct Maybe<true>
+    {
+        // T1 or T2
+        template <class T1, class T2>
+        struct SelectType { typedef T1 type; };
+
+        // real_type or T
+        template <class T>
+        struct RealType { typedef typename Traits<T>::real_type type; };
+
+        // Type of T1*T2 or T2
+        template <class T1, class T2>
+        struct ProdType { typedef typename Traits2<T1,T2>::type type; };
+
+        // x or y
+        template <class T>
+        static inline T select(const T& x, const T& /*y*/) { return x; }
+
+        // abs(x) or x
+        template <class T>
+        static inline typename Traits<T>::real_type abs(const T& x) 
+        { return TMV_ABS(x); }
+
+        // conj(x) or x
+        template <class T>
+        static inline T conj(const T& x) { return TMV_CONJ(x); }
+
+        // -x or x
+        template <class T>
+        static inline T neg(const T& x) { return -x; }
+
+        // x<y or x>y
+        template <class T>
+        static inline bool less(const T& x, const T& y) { return x<y; }
+
+        // 2*x or x
+        template <class T>
+        static inline T twox(const T& x)
+        { return 2*x; }
+        static inline int twox(const int& x)
+        { return x>>1; }
+
+        // ++x or nothing
+        template <class T>
+        static inline void increment(T& x) { ++x; }
+
+        // --x or nothing
+        template <class T>
+        static inline void decrement(T& x) { --x; }
+
+        // x += y or x = y
+        template <class T1, class T2>
+        static inline void add(T1& x, const T2& y) { x += y; }
+        template <class T1, class T2>
+        static inline void add(ConjRef<T1> x, const T2& y) { x += y; }
+        template <class T1, bool C, class T2>
+        static inline void add(TriRef<T1,C> x, const T2& y) { x += y; }
+
+        // x *= y or nothing
+        template <class T1, class T2>
+        static inline void scale(T1& x, const T2& y) { x *= y; }
+        template <class T1, class T2>
+        static inline void scale(ConjRef<T1> x, const T2& y) { x *= y; }
+        template <class T1, bool C, class T2>
+        static inline void scale(TriRef<T1,C> x, const T2& y) { x *= y; }
+
+        // x /= y or nothing
+        template <class T1, class T2>
+        static inline void invscale(T1& x, const T2& y) { x /= y; }
+        template <class T1, class T2>
+        static inline void invscale(ConjRef<T1> x, const T2& y) { x /= y; }
+        template <class T1, bool C, class T2>
+        static inline void invscale(TriRef<T1,C> x, const T2& y) { x /= y; }
+
+        // x + y or y
+        template <class T1, class T2>
+        static inline typename Traits2<T1,T2>::type sum(
+            const T1& x, const T2& y) 
+        { return x + y; }
+
+        template <class T1, int ix2, class T2>
+        static inline typename Traits2<T1,T2>::type sum(
+            const T1& x, const Scaling<ix2,T2>& y) 
+        { return x + T2(y); }
+
+        // x * y or y
+        template <class T1, class T2>
+        static inline typename Traits2<T1,T2>::type prod(
+            const T1& x, const T2& y) 
+        { return ZProd<false,false>::prod(x , y); }
+
+        template <class T1, int ix2, class T2>
+        static inline typename Traits2<T1,T2>::type prod(
+            const T1& x, const Scaling<ix2,T2>& y) 
+        { return ZProd<false,false>::prod(x , y); }
+
+        // x^-1 * y or y
+        template <class T1, class T2>
+        static inline typename Traits2<T1,T2>::type invprod(
+            const T1& x, const T2& y) 
+        { return ZProd<false,false>::quot(y , x); }
+
+        template <class T1, int ix2, class T2>
+        static inline typename Traits2<T1,T2>::type invprod(
+            const T1& x, const Scaling<ix2,T2>& y) 
+        { return ZProd<false,false>::quot(y , x); }
+
+        // x * y or y
+        template <bool c1, bool c2, class T1, class T2>
+        static inline typename Traits2<T1,T2>::type zprod(
+            const T1& x, const T2& y)
+        { return ZProd<c1,c2>::prod(x , y); }
+
+        // x - y or x + y
+        template <class T>
+        static inline T diff(const T& x, const T& y) { return x - y; }
+
+        // x = y or nothing
+        template <class T1, class T2>
+        static inline void set(T1& x, const T2& y) { x = y; }
+        template <class T1, class T2>
+        static inline void set(ConjRef<T1> x, const T2& y) { x = y; }
+        template <class T1, bool C, class T2>
+        static inline void set(TriRef<T1,C> x, const T2& y) { x = y; }
+
+        // m.ref(i,i) = x or nothing
+        template <class M, class T>
+        static inline void setdiag(M& m, int i, const T& x) { m.ref(i,i) = x; }
+        template <class M, class T>
+        static inline void setdiag2(M m, int i, const T& x) { m.ref(i,i) = x; }
+
+        // m.diag() = x or nothing
+        template <class M, class T>
+        static inline void setdiag(M& m, const T& x) { m.diag().setAllTo(x); }
+        template <class M, class T>
+        static inline void setdiag2(M m, const T& x) { m.diag().setAllTo(x); }
+
+        // m.setZero() or nothing
+        template <class M>
+        static inline void zero(M& m) { m.setZero(); }
+        template <class M>
+        static inline void zero2(M m) { m.setZero(); }
+
+        // m.conjugateSelf() or nothing
+        template <class M>
+        static inline void conjself(M& m) { m.conjugateSelf(); }
+        template <class M>
+        static inline void conjself2(M m) { m.conjugateSelf(); }
+
+        // v.addToAll(x) or v.setAllTo(x)
+        template <class V, class T>
+        static inline void addtoall(V& v, const T& x) { v.addToAll(x); }
+        template <class V, class T>
+        static inline void addtoall2(V v, const T& x) { v.addToAll(x); }
+
+        // m.diag().setAllTo(1) or nothing
+        template <class M>
+        static inline void makeunitdiag(M& m) 
+        { m.diag().setAllTo(typename M::value_type(1)); }
+        template <class M>
+        static inline void makeunitdiag2(M m) 
+        { m.diag().setAllTo(typename M::value_type(1)); }
+
+        // m.offDiag().setZero() or nothing
+        template <class M>
+        static inline void zero_offdiag(M& m) { m.offDiag().setZero(); }
+        template <class M>
+        static inline void zero_offdiag2(M m) { m.offDiag().setZero(); }
+
+        // m.offDiag() or m.view()
+        template <class M>
+        static inline typename M::offdiag_type offdiag(M& m) 
+        { return m.offDiag(); }
+        template <class M>
+        static inline typename M::offdiag_type offdiag2(M m) 
+        { return m.offDiag(); }
+
+        // m2.viewAsUnitDiag() or m2
+        template <class M>
+        static inline typename M::const_unitdiag_type unitview(const M& m) 
+        { return m.viewAsUnitDiag(); }
+        template <class M>
+        static inline typename M::unitdiag_type unitview(M& m) 
+        { return m.viewAsUnitDiag(); }
+
+        // m2.UnitUpperTri() or m2.UpperTri()
+        template <class M>
+        static inline typename M::const_unit_uppertri_type unit_uppertri(
+            const M& m) 
+        { return m.unitUpperTri(); }
+        template <class M>
+        static inline typename M::unit_uppertri_type unit_uppertri(M& m) 
+        { return m.unitUpperTri(); }
+        template <class M>
+        static inline typename M::unit_uppertri_type unit_uppertri2(M m) 
+        { return m.unitUpperTri(); }
+
+        // m2.UnitLowerTri() or m2.LowerTri()
+        template <class M>
+        static inline typename M::const_unit_lowertri_type unit_lowertri(
+            const M& m) 
+        { return m.unitLowerTri(); }
+        template <class M>
+        static inline typename M::unit_lowertri_type unit_lowertri(M& m) 
+        { return m.unitLowerTri(); }
+        template <class M>
+        static inline typename M::unit_lowertri_type unit_lowertri2(M m) 
+        { return m.unitLowerTri(); }
+
+        // m2.UpperTri() or m2.LowerTri()
+        template <class M>
+        static inline typename M::const_uppertri_type uppertri(const M& m) 
+        { return m.upperTri(); }
+        template <class M>
+        static inline typename M::uppertri_type uppertri(M& m) 
+        { return m.upperTri(); }
+        template <class M>
+        static inline typename M::uppertri_type uppertri2(M m) 
+        { return m.upperTri(); }
+
+#ifdef __SSE__
+        // _mm_load_ps or _mm_set_ps
+        static inline void sse_load(
+            __m128& m,
+            const float* x, const float*, const float*, const float*)
+        { m = _mm_load_ps(x); }
+
+        // _mm_loadu_ps or _mm_set_ps
+        static inline void sse_loadu(
+            __m128& m,
+            const float* x, const float*, const float*, const float*)
+        { m = _mm_loadu_ps(x); }
+
+        // _mm_store_ps or cast and assign
+        static inline void sse_store(
+            float* x, float*, float*, float*, const __m128& m)
+        { _mm_store_ps(x,m); }
+
+        // _mm_storeu_ps or cast and assign
+        static inline void sse_storeu(
+            float* x, float*, float*, float*, const __m128& m)
+        { _mm_storeu_ps(x,m); }
+
+        // _mm_add_ps or cast and add
+        static inline void sse_add(
+            float* x, float*, float*, float*, const __m128& m)
+        { _mm_store_ps(x,_mm_add_ps(_mm_load_ps(x),m)); }
+        static inline void sse_addu(
+            float* x, float*, float*, float*, const __m128& m)
+        { _mm_storeu_ps(x,_mm_add_ps(_mm_loadu_ps(x),m)); }
+
+        // _mm_load_ps or two _mm_load_pi's
+        static inline void sse_load(
+            __m128& m,
+            const std::complex<float>* x, const std::complex<float>* )
+        { m = _mm_load_ps( (const float*) x ); }
+
+        // _mm_loadu_ps or two _mm_load?_pi's
+        static inline void sse_loadu(
+            __m128& m,
+            const std::complex<float>* x, const std::complex<float>* )
+        { m = _mm_loadu_ps( (const float*) x ); }
+
+        // _mm_store_ps or two _mm_store?_pi's
+        static inline void sse_store(
+            std::complex<float>* x, std::complex<float>* , const __m128& m)
+        { _mm_store_ps((float*)(x) , m); }
+
+        // _mm_storeu_ps or two _mm_store?_pi's
+        static inline void sse_storeu(
+            std::complex<float>* x, std::complex<float>* , const __m128& m)
+        { _mm_storeu_ps((float*)(x) , m); }
+
+        // _mm_add_ps or cast and add
+        static inline void sse_add(
+            std::complex<float>* x, std::complex<float>* , const __m128& m)
+        { _mm_store_ps((float*)x,_mm_add_ps(_mm_load_ps((float*)x),m)); }
+        static inline void sse_addu(
+            std::complex<float>* x, std::complex<float>* , const __m128& m)
+        { _mm_storeu_ps((float*)x,_mm_add_ps(_mm_loadu_ps((float*)x),m)); }
+
+        // A = _mm_mul_ps(x,A) or nothing
+        static inline void sse_mult(const __m128& x, __m128& A)
+        { A = _mm_mul_ps(x,A); }
+#endif
+#ifdef __SSE2__
+        static inline void sse_load(
+            __m128d& m, const double* x, const double* )
+        { m = _mm_load_pd(x); }
+        static inline void sse_loadu(
+            __m128d& m, const double* x, const double* )
+        { m = _mm_loadu_pd(x); }
+
+        static inline void sse_store(double* x, double*, const __m128d& m)
+        { _mm_store_pd(x,m); }
+        static inline void sse_storeu(double* x, double*, const __m128d& m)
+        { _mm_storeu_pd(x,m); }
+
+        static inline void sse_add(double* x, double*, const __m128d& m)
+        { _mm_store_pd(x,_mm_add_pd(_mm_load_pd(x),m)); }
+        static inline void sse_addu(double* x, double*, const __m128d& m)
+        { _mm_storeu_pd(x,_mm_add_pd(_mm_loadu_pd(x),m)); }
+
+        static inline void sse_load(
+            __m128d& m, const std::complex<double>* x)
+        { m = _mm_load_pd((const double*) x); }
+        static inline void sse_loadu(
+            __m128d& m, const std::complex<double>* x)
+        { m = _mm_loadu_pd((const double*) x); }
+
+        static inline void sse_store(std::complex<double>* x, const __m128d& m)
+        { _mm_store_pd((double*) x,m); }
+        static inline void sse_storeu(std::complex<double>* x, const __m128d& m)
+        { _mm_storeu_pd((double*) x,m); }
+
+        static inline void sse_add(std::complex<double>* x, const __m128d& m)
+        { _mm_store_pd((double*)x,_mm_add_pd(_mm_load_pd((double*)x),m)); }
+        static inline void sse_addu(std::complex<double>* x, const __m128d& m)
+        { _mm_storeu_pd((double*)x,_mm_add_pd(_mm_loadu_pd((double*)x),m)); }
+
+        static inline void sse_mult(const __m128d& x, __m128d& A)
+        { A = _mm_mul_pd(x,A); }
+#endif
+    };
+    template <> 
+    struct Maybe<false>
+    {
+        template <class T1, class T2>
+        struct SelectType { typedef T2 type; };
+
+        template <class T>
+        struct RealType { typedef T type; };
+
+        template <class T1, class T2>
+        struct ProdType { typedef T2 type; };
+
+        template <class T>
+        static inline T select(const T& /*x*/, const T& y) { return y; }
+
+        template <class T>
+        static inline T abs(const T& x) { return x; }
+
+        template <class T>
+        static inline T conj(const T& x) { return x; }
+
+        template <class T>
+        static inline T neg(const T& x) { return x; }
+
+        template <class T>
+        static inline bool less(const T& x, const T& y) { return x>y; }
+
+        template <class T>
+        static inline T twox(const T& x) { return x; }
+
+        template <class T>
+        static inline void increment(const T& /*x*/) { }
+
+        template <class T>
+        static inline void decrement(const T& /*x*/) { }
+
+        template <class T1, class T2>
+        static inline void add(T1& x, const T2& y) { x = y; }
+        template <class T1, class T2>
+        static inline void add(ConjRef<T1> x, const T2& y) { x = y; }
+        template <class T1, bool C, class T2>
+        static inline void add(TriRef<T1,C> x, const T2& y) { x = y; }
+
+        template <class T1, class T2>
+        static inline void scale(T1& /*x*/, const T2& /*y*/) { }
+        template <class T1, class T2>
+        static inline void scale(ConjRef<T1> /*x*/, const T2& /*y*/) { }
+        template <class T1, bool C, class T2>
+        static inline void scale(TriRef<T1,C> /*x*/, const T2& /*y*/) { }
+
+        template <class T1, class T2>
+        static inline void invscale(T1& /*x*/, const T2& /*y*/) { }
+        template <class T1, class T2>
+        static inline void invscale(ConjRef<T1> /*x*/, const T2& /*y*/) { }
+        template <class T1, bool C, class T2>
+        static inline void invscale(TriRef<T1,C> /*x*/, const T2& /*y*/) { }
+
+        template <class T1, class T2>
+        static inline T2 sum(const T1& /*x*/, const T2& y) { return y; }
+
+        template <class T1, class T2>
+        static inline T2 prod(const T1& /*x*/, const T2& y) { return y; }
+
+        template <class T1, int ix2, class T2>
+        static inline Scaling<ix2,T2> prod(
+            const T1& /*x*/, const Scaling<ix2,T2>& y) 
+        { return y; }
+
+        template <class T1, class T2>
+        static inline T2 invprod(const T1& /*x*/, const T2& y)  { return y; }
+
+        template <class T1, int ix2, class T2>
+        static inline Scaling<ix2,T2> invprod(
+            const T1& /*x*/, const Scaling<ix2,T2>& y) { return y; }
+
+        template <bool c1, bool c2, class T1, class T2>
+        static inline T2 zprod(const T1& /*x*/, const T2& y)
+        { return Maybe<c2>::conj(y); }
+
+        template <class T>
+        static inline T diff(const T& x, const T& y) { return x + y; }
+
+        template <class T1, class T2>
+        static inline void set(T1& /*x*/, const T2& /*y*/) { }
+        template <class T1, class T2>
+        static inline void set(ConjRef<T1> /*x*/, const T2& /*y*/) { }
+        template <class T1, bool C, class T2>
+        static inline void set(TriRef<T1,C> /*x*/, const T2& /*y*/) { }
+
+        template <class M, class T>
+        static inline void setdiag(M& /*m*/, int /*i*/, const T& /*x*/) { }
+        template <class M, class T>
+        static inline void setdiag2(M /*m*/, int /*i*/, const T& /*x*/) { }
+
+        template <class M, class T>
+        static inline void setdiag(M& /*m*/, const T& /*x*/) { }
+        template <class M, class T>
+        static inline void setdiag2(M /*m*/, const T& /*x*/) { }
+
+        template <class M>
+        static inline void zero(M& /*m*/) { }
+        template <class M>
+        static inline void zero2(M /*m*/) { }
+
+        template <class M>
+        static inline void conjself(M& /*m*/) { }
+        template <class M>
+        static inline void conjself2(M /*m*/) { }
+
+        template <class V, class T>
+        static inline void addtoall(V& v, const T& x) { v.setAllTo(x); }
+        template <class V, class T>
+        static inline void addtoall2(V v, const T& x) { v.setAllTo(x); }
+
+        template <class M>
+        static inline void makeunitdiag(M& /*m*/) { }
+        template <class M>
+        static inline void makeunitdiag2(M /*m*/) { }
+
+        template <class M1, class M2>
+        static inline void offdiag_copy(const M1& m1, M2& m2) { m2 = m1; }
+        template <class M1, class M2>
+        static inline void offdiag_copy2(const M1 m1, M2& m2) { m2 = m1; }
+
+        template <class M>
+        static inline void zero_offdiag(M& /*m*/) { }
+        template <class M>
+        static inline void zero_offdiag2(M /*m*/) { }
+
+        template <class M>
+        static inline typename M::view_type offdiag(M& m) { return m.view(); }
+        template <class M>
+        static inline typename M::view_type offdiag2(M m) { return m.view(); }
+
+        template <class M>
+        static inline const M& unitview(const M& m) 
+        { return m; }
+        template <class M>
+        static inline M& unitview(M& m) 
+        { return m; }
+
+        template <class M>
+        static inline typename M::const_uppertri_type unit_uppertri(const M& m) 
+        { return m.upperTri(); }
+        template <class M>
+        static inline typename M::uppertri_type unit_uppertri(M& m) 
+        { return m.upperTri(); }
+        template <class M>
+        static inline typename M::uppertri_type unit_uppertri2(M m) 
+        { return m.upperTri(); }
+
+        template <class M>
+        static inline typename M::const_lowertri_type unit_lowertri(const M& m) 
+        { return m.lowerTri(); }
+        template <class M>
+        static inline typename M::lowertri_type unit_lowertri(M& m) 
+        { return m.lowerTri(); }
+        template <class M>
+        static inline typename M::lowertri_type unit_lowertri2(M m) 
+        { return m.lowerTri(); }
+
+        template <class M>
+        static inline typename M::const_lowertri_type uppertri(const M& m) 
+        { return m.lowerTri(); }
+        template <class M>
+        static inline typename M::lowertri_type uppertri(M& m) 
+        { return m.lowerTri(); }
+        template <class M>
+        static inline typename M::lowertri_type uppertri2(M m) 
+        { return m.lowerTri(); }
+
+#ifdef __SSE__
+        static inline void sse_load(
+            __m128& m,
+            const float* x1, const float* x2, const float* x3, const float* x4)
+        { m = _mm_set_ps(*x4,*x3,*x2,*x1); }
+        static inline void sse_loadu(
+            __m128& m,
+            const float* x1, const float* x2, const float* x3, const float* x4)
+        { m = _mm_set_ps(*x4,*x3,*x2,*x1); }
+
+        static inline void sse_store(
+            float* x1, float* x2, float* x3, float* x4, const __m128& m)
+        {
+            const float* mf= (const float*)(&m);
+            *x1 = mf[0]; *x2 = mf[1]; *x3 = mf[2]; *x4 = mf[3];
+        }
+        static inline void sse_storeu(
+            float* x1, float* x2, float* x3, float* x4, const __m128& m)
+        {
+            const float* mf= (const float*)(&m);
+            *x1 = mf[0]; *x2 = mf[1]; *x3 = mf[2]; *x4 = mf[3];
+        }
+
+        static inline void sse_add(
+            float* x1, float* x2, float* x3, float* x4, const __m128& m)
+        {
+            const float* mf= (const float*)(&m);
+            *x1 += mf[0]; *x2 += mf[1]; *x3 += mf[2]; *x4 += mf[3];
+        }
+        static inline void sse_addu(
+            float* x1, float* x2, float* x3, float* x4, const __m128& m)
+        {
+            const float* mf= (const float*)(&m);
+            *x1 += mf[0]; *x2 += mf[1]; *x3 += mf[2]; *x4 += mf[3];
+        }
+
+        static inline void sse_load(
+            __m128& m,
+            const std::complex<float>* x1, const std::complex<float>* x2)
+        {
+            // The junk variable is to avoid a warning about m being
+            // used uninitialized.
+            const __m128 junk = _mm_set1_ps(0.F);
+            m = _mm_loadl_pi(junk,(const __m64*)x1);
+            m = _mm_loadh_pi(m,(const __m64*)x2);
+        }
+        static inline void sse_loadu(
+            __m128& m,
+            const std::complex<float>* x1, const std::complex<float>* x2)
+        {
+            const __m128 junk = _mm_set1_ps(0.F);
+            m = _mm_loadl_pi(junk,(const __m64*)x1);
+            m = _mm_loadh_pi(m,(const __m64*)x2);
+        }
+
+        static inline void sse_store(
+            std::complex<float>* x1, std::complex<float>* x2, const __m128& m)
+        {
+            _mm_storel_pi((__m64*)x1,m);
+            _mm_storeh_pi((__m64*)x2,m);
+        }
+        static inline void sse_storeu(
+            std::complex<float>* x1, std::complex<float>* x2, const __m128& m)
+        {
+            _mm_storel_pi((__m64*)x1,m);
+            _mm_storeh_pi((__m64*)x2,m);
+        }
+
+        static inline void sse_add(
+            std::complex<float>* x1, std::complex<float>* x2, const __m128& m)
+        {
+            const float* mf= (const float*)(&m);
+            *x1 += std::complex<float>(mf[0],mf[1]);
+            *x2 += std::complex<float>(mf[2],mf[3]);
+        }
+        static inline void sse_addu(
+            std::complex<float>* x1, std::complex<float>* x2, const __m128& m)
+        {
+            const float* mf= (const float*)(&m);
+            *x1 += std::complex<float>(mf[0],mf[1]);
+            *x2 += std::complex<float>(mf[2],mf[3]);
+        }
+
+        static inline void sse_mult(const __m128& , __m128& ) {}
+#endif
+#ifdef __SSE2__
+        static inline void sse_load(
+            __m128d& m, const double* x1, const double* x2)
+        { m = _mm_set_pd(*x2,*x1); }
+        static inline void sse_loadu(
+            __m128d& m, const double* x1, const double* x2)
+        { m = _mm_set_pd(*x2,*x1); }
+
+        static inline void sse_store(double* x1, double* x2, const __m128d& m)
+        {
+            const double* md= (const double*)(&m);
+            *x1 = md[0]; *x2 = md[1];
+        }
+        static inline void sse_storeu(double* x1, double* x2, const __m128d& m)
+        {
+            const double* mf= (const double*)(&m);
+            *x1 = mf[0]; *x2 = mf[1];
+        }
+
+        static inline void sse_add(double* x1, double* x2, const __m128d& m)
+        {
+            const double* md= (const double*)(&m);
+            *x1 += md[0]; *x2 += md[1];
+        }
+        static inline void sse_addu(double* x1, double* x2, const __m128d& m)
+        {
+            const double* mf= (const double*)(&m);
+            *x1 += mf[0]; *x2 += mf[1];
+        }
+
+        // These are the same for Maybe<true> or Maybe<false>.
+        // I include them to make it easier to write the code that uses
+        // these loads and stores, since it makes the syntax more similar
+        // between all the different varieties (float/double, real/complex).
+        static inline void sse_load(
+            __m128d& m, const std::complex<double>* x)
+        { m = _mm_load_pd((const double*)x); }
+        static inline void sse_loadu(
+            __m128d& m, const std::complex<double>* x)
+        { m = _mm_loadu_pd((const double*)x); }
+
+        static inline void sse_store(std::complex<double>* x, const __m128d& m)
+        { _mm_store_pd((double*)x,m); }
+        static inline void sse_storeu(std::complex<double>* x, const __m128d& m)
+        { _mm_storeu_pd((double*)x,m); }
+
+        static inline void sse_add(std::complex<double>* x, const __m128d& m)
+        { _mm_store_pd((double*)x,_mm_add_pd(_mm_load_pd((double*)x),m)); }
+        static inline void sse_addu(std::complex<double>* x, const __m128d& m)
+        { _mm_storeu_pd((double*)x,_mm_add_pd(_mm_loadu_pd((double*)x),m)); }
+
+        static inline void sse_mult(const __m128d& , __m128d& ) {}
+#endif
+    };
+
+    // A couple things benefit from having two compile time booleans
+    template <bool yn1, bool yn2> 
+    struct Maybe2;
+
+    template <bool yn2> 
+    struct Maybe2<true,yn2>
+    {
+        // Maybe<add>::add or nothing
+        template <class T1, class T2>
+        static inline void add(T1& x, const T2& y) 
+        { Maybe<yn2>::add(x,y); }
+        template <class T1, class T2>
+        static inline void add(ConjRef<T1> x, const T2& y) 
+        { Maybe<yn2>::add(x,y); }
+        template <class T1, bool C, class T2>
+        static inline void add(TriRef<T1,C> x, const T2& y) 
+        { Maybe<yn2>::add(x,y); }
+
+#ifdef __SSE__
+        // Maybe<unit>::sse_load or Maybe<unit>::sse_loadu
+        static inline void sse_load(
+            __m128& m,
+            const float* x1, const float* x2, const float* x3, const float* x4)
+        { Maybe<yn2>::sse_load(m,x1,x2,x3,x4); }
+        static inline void sse_load(
+            __m128& m,
+            const std::complex<float>* x1, const std::complex<float>* x2)
+        { Maybe<yn2>::sse_load(m,x1,x2); }
+
+        // Maybe<unit>::sse_add or Maybe<unit>::sse_store
+        static inline void sse_add(
+            float* x1, float* x2, float* x3, float* x4, const __m128& m)
+        { Maybe<yn2>::sse_add(x1,x2,x3,x4,m); }
+        static inline void sse_add(
+            std::complex<float>* x1, std::complex<float>* x2, const __m128& m)
+        { Maybe<yn2>::sse_add(x1,x2,m); }
+
+        // Maybe<unit>::sse_addu or Maybe<unit>::sse_storeu
+        static inline void sse_addu(
+            float* x1, float* x2, float* x3, float* x4, const __m128& m)
+        { Maybe<yn2>::sse_addu(x1,x2,x3,x4,m); }
+        static inline void sse_addu(
+            std::complex<float>* x1, std::complex<float>* x2, const __m128& m)
+        { Maybe<yn2>::sse_addu(x1,x2,m); }
+#endif
+
+#ifdef __SSE2__
+        static inline void sse_load(
+            __m128d& m, const double* x1, const double* x2)
+        { Maybe<yn2>::sse_load(m,x1,x2); }
+
+        static inline void sse_add(
+            double* x1, double* x2, const __m128d& m)
+        { Maybe<yn2>::sse_add(x1,x2,m); }
+        static inline void sse_add(
+            std::complex<double>* x, const __m128d& m)
+        { Maybe<yn2>::sse_add(x,m); }
+
+        static inline void sse_addu(
+            double* x1, double* x2, const __m128d& m)
+        { Maybe<yn2>::sse_addu(x1,x2,m); }
+        static inline void sse_addu(
+            std::complex<double>* x, const __m128d& m)
+        { Maybe<yn2>::sse_addu(x,m); }
+#endif
+    };
+        
+    template <bool yn2> 
+    struct Maybe2<false,yn2>
+    {
+#ifdef __SSE2__
+        static inline void sse_load(
+            __m128& m,
+            const float* x1, const float* x2, const float* x3, const float* x4)
+        { Maybe<yn2>::sse_loadu(m,x1,x2,x3,x4); }
+        static inline void sse_load(
+            __m128& m,
+            const std::complex<float>* x1, const std::complex<float>* x2)
+        { Maybe<yn2>::sse_loadu(m,x1,x2); }
+
+        static inline void sse_add(
+            float* x1, float* x2, float* x3, float* x4, const __m128& m)
+        { Maybe<yn2>::sse_store(x1,x2,x3,x4,m); }
+        static inline void sse_add(
+            std::complex<float>* x1, std::complex<float>* x2, const __m128& m)
+        { Maybe<yn2>::sse_store(x1,x2,m); }
+
+        static inline void sse_addu(
+            float* x1, float* x2, float* x3, float* x4, const __m128& m)
+        { Maybe<yn2>::sse_storeu(x1,x2,x3,x4,m); }
+        static inline void sse_addu(
+            std::complex<float>* x1, std::complex<float>* x2, const __m128& m)
+        { Maybe<yn2>::sse_storeu(x1,x2,m); }
+#endif
+
+#ifdef __SSE2__
+        static inline void sse_load(
+            __m128d& m, const double* x1, const double* x2)
+        { Maybe<yn2>::sse_loadu(m,x1,x2); }
+
+        static inline void sse_add(
+            double* x1, double* x2, const __m128d& m)
+        { Maybe<yn2>::sse_store(x1,x2,m); }
+        static inline void sse_add(
+            std::complex<double>* x, const __m128d& m)
+        { Maybe<yn2>::sse_store(x,m); }
+
+        static inline void sse_addu(
+            double* x1, double* x2, const __m128d& m)
+        { Maybe<yn2>::sse_storeu(x1,x2,m); }
+        static inline void sse_addu(
+            std::complex<double>* x, const __m128d& m)
+        { Maybe<yn2>::sse_storeu(x,m); }
+#endif
+    };
+        
+
 
 #ifndef TMV_NO_THROW
     class Error : public std::runtime_error
@@ -1592,6 +1676,23 @@ namespace tmv {
         }
     };
 
+    template <class M>
+    class SingularMatrix : public Singular
+    {
+    public:
+        typename M::copy_type m;
+
+        SingularMatrix(const M& _m) : 
+            Singular(TMV_Text(_m)), m(_m) {}
+        ~SingularMatrix() throw() {}
+        void write(std::ostream& os) const throw()
+        {
+            Singular::write(os);
+            m.write(os);
+            os << std::endl;
+        }
+    };
+
     class NonPosDef : public Error
     {
     public:
@@ -1604,6 +1705,23 @@ namespace tmv {
         {
             os << "TMV NonPosDef: " << Error::s1 << ' ' << Error::s2 << 
                 std::endl; 
+        }
+    };
+
+    template <class M>
+    class NonPosDefMatrix : public NonPosDef
+    {
+    public:
+        typename M::copy_type m;
+
+        NonPosDefMatrix(const M& _m) : 
+            NonPosDef(TMV_Text(_m)), m(_m) {}
+        ~NonPosDefMatrix() throw() {}
+        void write(std::ostream& os) const throw()
+        {
+            NonPosDef::write(os);
+            m.write(os);
+            os << std::endl;
         }
     };
 #endif
@@ -1752,14 +1870,14 @@ namespace tmv {
 
     inline std::string TMV_Text(StorageType s)
     {
-        return (
+        return 
             s == RowMajor ? "RowMajor" :
             s == ColMajor ? "ColMajor" :
             s == DiagMajor ? "DiagMajor" :
             s == NoMajor ? "NoMajor" :
             s == RowPacked ? "RowPacked" :
             s == ColPacked ? "ColPacked" :
-            "unkown StorageType");
+            "unkown StorageType";
     }
 
     inline std::string TMV_Text(IndexStyle i)
@@ -1767,18 +1885,23 @@ namespace tmv {
 
     inline std::string TMV_Text(DivType d)
     { 
-        return (
+        return 
             d==XXX ? "XXX" :
             d==LU ? "LU" :
             d==CH ? "CH" :
             d==QR ? "QR" :
             d==QRP ? "QRP" :
             d==SV ? "SV" :
-            "unkown DivType");
+            "unkown DivType";
     }
 
     inline std::string TMV_Text(DiagType d)
-    { return d == UnitDiag ? "UnitDiag" : "NonUnitDiag"; }
+    { 
+        return 
+            d == UnitDiag ? "UnitDiag" :
+            d == NonUnitDiag ? "NonUnitDiag" :
+            "UnknownDiag"; 
+    }
 
 #if 0
     inline std::string TMV_Text(UpLoType u)
@@ -1861,75 +1984,6 @@ namespace tmv {
 #else
     using std::auto_ptr;
 #endif
-    // Identical, except delete[]
-    template <class X> 
-    class auto_array {
-
-    private:
-        X* ptr;
-        template <class Y> 
-        struct auto_array_ref {
-            Y* ptr;
-            explicit auto_array_ref(Y* p) : ptr(p) {}
-        };
-
-    public:
-        typedef X element_type;
-        explicit auto_array(X* p = 0) throw() : ptr(p) {}
-        auto_array(auto_array& a) throw() : ptr(a.release()) {}
-        auto_array(auto_array_ref<X> ref) throw() : ptr(ref.ptr) {}
-        template <class Y> 
-        auto_array(auto_array<Y>& a) throw() :
-            ptr(a.release()) {}
-
-        auto_array& operator=(auto_array& a) throw() 
-        {
-            reset(a.release());
-            return *this;
-        }
-        template <class Y> 
-        auto_array& operator=(auto_array<Y>& a) throw() 
-        {
-            reset(a.release());
-            return *this;
-        }
-        auto_array& operator=(auto_array_ref<X> ref) throw() 
-        {
-            if (ref.ptr != this->get())
-            { 
-                delete[] ptr;
-                ptr = ref.ptr;
-            }
-            return *this;
-        }
-
-        ~auto_array() throw() { delete[] ptr; }
-
-        template <class Y> 
-        operator auto_array_ref<Y>() throw()
-        { return auto_array_ref<Y>(this->release()); }
-        template <class Y> 
-        operator auto_array<Y>() throw()
-        { return auto_array<Y>(this->release()); }
-
-        X& operator[](const int i) const throw() { return *(ptr+i); }
-        X& operator*() const throw() { return *ptr; }
-        X* operator->() const throw() { return ptr; }
-        X* get() const throw() { return ptr; }
-        X* release() throw() 
-        {
-            X* tmp = ptr;
-            ptr = 0;
-            return tmp;
-        }
-        void reset(X* p = 0) throw() 
-        {
-            if (p != ptr) {
-                delete[] ptr;
-                ptr = p;
-            }
-        }
-    };
 
     // Use DEBUGPARAM(x) for parameters that are only used in TMVAssert
     // statements.  So then they don't give warnings when compiled with 

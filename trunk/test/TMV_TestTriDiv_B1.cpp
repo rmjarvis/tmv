@@ -35,7 +35,6 @@ template <class T> void TestTriDiv_B1()
         tmv::LU,mx,cmx,a1.transpose(),m.view(),ca1.transpose(),cm.view(),
         "M/L");
 
-#ifdef XTEST
 #if (XTEST & 2)
     tmv::UpperTriMatrix<T,tmv::UnitDiag> a2(m);
     tmv::UpperTriMatrix<std::complex<T>,tmv::UnitDiag> ca2(cm);
@@ -44,7 +43,6 @@ template <class T> void TestTriDiv_B1()
     TestMatrixDivArith1<T>(
         tmv::LU,mx,cmx,a2.transpose(),m.view(),ca2.transpose(),cm.view(),
         "M/L");
-#endif
 #endif
 }
 

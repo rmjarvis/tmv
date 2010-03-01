@@ -37,10 +37,12 @@
 #include "TMV_MultXV.h"
 #include "TMV_MultVV.h"
 #include "TMV_MultUV.h"
-#include "TMV_MultUU.h"
+#include "TMV_MultUM.h"
 
 #ifdef PRINTALGO_UL
 #include <iostream>
+#include "TMV_MatrixIO.h"
+#include "TMV_TriMatrixIO.h"
 #endif
 
 // Use the specialized 1,2,3 sized algorithms for the end of the 
@@ -113,6 +115,29 @@ namespace tmv {
         const ConstLowerTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1, 
         const ConstUpperTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2,
         MatrixView<T3> m3);
+
+    // Defined in TMV_MultUU.h
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    inline void MultMM(
+        const Scaling<ix,T>& x, 
+        const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
+        BaseMatrix_Tri_Mutable<M3>& m3);
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    inline void NoAliasMultMM(
+        const Scaling<ix,T>& x, 
+        const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
+        BaseMatrix_Tri_Mutable<M3>& m3);
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    inline void InlineMultMM(
+        const Scaling<ix,T>& x, 
+        const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
+        BaseMatrix_Tri_Mutable<M3>& m3);
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    inline void AliasMultMM(
+        const Scaling<ix,T>& x, 
+        const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
+        BaseMatrix_Tri_Mutable<M3>& m3);
+
 
     //
     // Matrix * Matrix
@@ -445,6 +470,8 @@ namespace tmv {
                 const int N = m1.size();
 #ifdef TMV_OPT_CLEANUP
                 const int algo2 = 16;
+#elif (TMV_Q2 == 2)
+                const int algo2 = 1;
 #else
                 const bool rxr = M1::mrowmajor && M3::mrowmajor;
                 const bool crx = M1::mcolmajor && M2::mrowmajor;
@@ -693,7 +720,7 @@ namespace tmv {
             const int ix1 = u1 ? ix : 0;
             const int xx = UNKNOWN;
 
-            for(int i=0;i<N;++i) {
+            for(int i=N-1;i>=0;--i) {
                 // m3.row(i,0,i+1) = m1.row(i,0,i+1) * m2.subTriMatrix(0,i+1)
                 // m3.row(i,i+1,N) = m1.row(i,0,i+1) * m2.subMatrix(0,i+1,i+1,N)
                 // ==>
@@ -911,6 +938,8 @@ namespace tmv {
                 const int N = m1.size();
 #ifdef TMV_OPT_CLEANUP
                 const int algo2 = 26;
+#elif (TMV_Q2 == 2)
+                const int algo2 = 1;
 #else
                 const bool rxr = M1::mrowmajor && M3::mrowmajor;
                 const bool crx = M1::mcolmajor && M2::mrowmajor;
@@ -1095,7 +1124,7 @@ namespace tmv {
             typedef typename Traits2<T1,T2>::type PT3;
             const bool rm = M1::mrowmajor && M2::mrowmajor;
             typedef typename MCopyHelper<PT3,Rec,s,s,rm,false>::type M3c;
-            M3c m3c = MatrixSizer<M3>(m3);
+            M3c m3c(N,N);
             typedef typename M3c::view_type M3cv;
             typedef typename M3c::const_view_type M3ccv;
             M3cv m3cv = m3c.view();
@@ -1210,10 +1239,12 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_UL
+            std::cout<<"UL algo 94\n";
+#endif
             Maybe<!add>::zero(m3);
-            typedef typename M3::uppertri_type M3u;
-            M3u m3u = m3.upperTri();
-            MultUU_Helper<-2,s,add,ix,T,M1,M2,M3u>::call(x,m1,m2,m3u);
+            typename M3::uppertri_type m3u = m3.upperTri();
+            NoAliasMultMM(x,m1,m2,m3u);
         }
     };
 
@@ -1225,10 +1256,12 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_UL
+            std::cout<<"UL algo 95\n";
+#endif
             Maybe<!add>::zero(m3);
-            typedef typename M3::lowertri_type M3l;
-            M3l m3l = m3.lowerTri();
-            MultUU_Helper<-2,s,add,ix,T,M1,M2,M3l>::call(x,m1,m2,m3l);
+            typename M3::lowertri_type m3l = m3.lowerTri();
+            NoAliasMultMM(x,m1,m2,m3l);
         }
     };
 
@@ -1239,6 +1272,9 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         { 
+#ifdef PRINTALGO_UL
+            std::cout<<"UL algo 96\n";
+#endif
             typedef typename M1::const_transpose_type M1t;
             typedef typename M2::const_transpose_type M2t;
             typedef typename M3::transpose_type M3t;
@@ -1256,6 +1292,9 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         { 
+#ifdef PRINTALGO_UL
+            std::cout<<"UL algo 97\n";
+#endif
             typedef typename M1::const_conjugate_type M1c;
             typedef typename M2::const_conjugate_type M2c;
             typedef typename M3::conjugate_type M3c;
@@ -1274,6 +1313,9 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_UL
+            std::cout<<"UL algo 98\n";
+#endif
             typename M3::value_type xx(x);
             InstMultMM(xx,m1.xdView(),m2.xdView(),m3.xView());
         }
@@ -1284,6 +1326,9 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_UL
+            std::cout<<"UL algo 98\n";
+#endif
             typename M3::value_type xx(x);
             InstAddMultMM(xx,m1.xdView(),m2.xdView(),m3.xView());
         }
@@ -1319,11 +1364,14 @@ namespace tmv {
                 M3::mconj ? 97 :
                 inst ? 98 : 
                 -3;
+#ifdef PRINTALGO_UL
+            std::cout<<"UL algo 98: algo = "<<algo<<std::endl;
+#endif
             MultUL_Helper<algo,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };
 
-    // algo 940: U*U, so convert to MultUU call (-1, not -2)
+    // algo 940: U*U, so convert to MultUU call (with alias check)
     template <int s, bool add, 
               int ix, class T, class M1, class M2, class M3>
     struct MultUL_Helper<940,s,add,ix,T,M1,M2,M3>
@@ -1331,16 +1379,18 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            typedef typename M3::uppertri_type M3u;
-            M3u m3u = m3.upperTri();
-            MultUU_Helper<-1,s,add,ix,T,M1,M2,M3u>::call(x,m1,m2,m3u);
-            typedef typename M3::lowertri_type::offdiag_type M3lo;
-            M3lo m3lo = m3.lowerTri().offDiag();
+#ifdef PRINTALGO_UL
+            std::cout<<"UL algo 940\n";
+#endif
+            typename M3::uppertri_type m3u = m3.upperTri();
+            MultMM(x,m1,m2,m3u);
+            typename M3::lowertri_type::offdiag_type m3lo = 
+                m3.lowerTri().offDiag();
             Maybe<!add>::zero(m3lo);
         }
     };
 
-    // algo 950: L*L, so convert to MultUU call (-1, not -2)
+    // algo 950: L*L, so convert to MultUU call (with alias check)
     template <int s, bool add, 
               int ix, class T, class M1, class M2, class M3>
     struct MultUL_Helper<950,s,add,ix,T,M1,M2,M3>
@@ -1348,11 +1398,13 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            typedef typename M3::lowertri_type M3l;
-            M3l m3l = m3.lowerTri();
-            MultUU_Helper<-1,s,add,ix,T,M1,M2,M3l>::call(x,m1,m2,m3l);
-            typedef typename M3::uppertri_type::offdiag_type M3uo;
-            M3uo m3uo = m3.upperTri().offDiag();
+#ifdef PRINTALGO_UL
+            std::cout<<"UL algo 950\n";
+#endif
+            typename M3::lowertri_type m3l = m3.lowerTri();
+            MultMM(x,m1,m2,m3l);
+            typename M3::uppertri_type::offdiag_type m3uo = 
+                m3.upperTri().offDiag();
             Maybe<!add>::zero(m3uo);
         }
     };
@@ -1364,20 +1416,23 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            // We set up the storage so that it's ok if all three
+#ifdef PRINTALGO_UL
+            std::cout<<"UL algo 99\n";
+#endif
+            // We set up the algorithm so that it's ok if all three
             // matrices are in the same place with the same steps.
+            // Or if m1 is the same storage and m2 is the opposite storage
+            // (which means that it is really in the same place as m1).
             // Or if m2 is the opposite storage and m1 is somewhere else.
             const bool s1 = SameStorage(m1,m3);
             const bool s2 = SameStorage(m2,m3);
-            if ( ( s1 && ExactSameStorage(m1,m3) && 
-                   ( !s2 || ExactSameStorage(m2,m3) ) ) ||
-                 ( !s1 && ( !s2 ||
-                            ExactSameStorage(m2,m3) || 
-                            OppositeStorage(m2,m3) ) ) ) {
+            const bool ok1 = !s1 || ExactSameStorage(m1,m3);
+            const bool ok2 = !s2 || 
+                ExactSameStorage(m2,m3) || OppositeStorage(m2,m3);
+            if ( ok1 && ok2 ) {
                 // No aliasing (or no clobbering)
                 MultUL_Helper<-2,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
-            } else if ( !s2 && ( ExactSameStorage(m1,m3) || 
-                                 OppositeStorage(m1,m3) ) ) {
+            } else if ( ok2 && OppositeStorage(m1,m3) ) {
                 // Can transpose to get no clobbering storage
                 MultUL_Helper<96,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
             } else { 
@@ -1405,109 +1460,65 @@ namespace tmv {
                 !M1::mupper && !M2::mupper ? 950 :
                 checkalias ? 99 : 
                 -2;
+#ifdef PRINTALGO_UL
+            std::cout<<"UL algo -1: algo = "<<algo<<std::endl;
+#endif
             MultUL_Helper<algo,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };
+
+    template <int algo, bool add, int ix, class T, class M1, class M2, class M3>
+    inline void DoMultUL(
+        const Scaling<ix,T>& x, 
+        const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
+        BaseMatrix_Rec_Mutable<M3>& m3)
+    {
+        TMVStaticAssert((Sizes<M1::msize,M2::msize>::same));
+        TMVStaticAssert((Sizes<M1::msize,M3::mcolsize>::same));
+        TMVStaticAssert((Sizes<M1::msize,M3::mrowsize>::same));
+        TMVAssert(m1.size() == m2.size());
+        TMVAssert(m1.size() == m3.colsize());
+        TMVAssert(m1.size() == m3.rowsize());
+
+        const int s1 = Sizes<M1::msize,M2::msize>::size;
+        const int s2 = Sizes<M3::mcolsize,M3::mrowsize>::size;
+        const int s = Sizes<s1,s2>::size;
+        typedef typename M1::const_cview_type M1v;
+        typedef typename M2::const_cview_type M2v;
+        typedef typename M3::cview_type M3v;
+        M1v m1v = m1.cView();
+        M2v m2v = m2.cView();
+        M3v m3v = m3.cView();
+        MultUL_Helper<algo,s,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
+    }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
     inline void MultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M1::msize,M2::msize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::mrowsize>::same));
-        TMVAssert(m1.size() == m2.size());
-        TMVAssert(m1.size() == m3.colsize());
-        TMVAssert(m1.size() == m3.rowsize());
-
-        const int s1 = Sizes<M1::msize,M2::msize>::size;
-        const int s2 = Sizes<M3::mcolsize,M3::mrowsize>::size;
-        const int s = Sizes<s1,s2>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        typedef typename M3::cview_type M3v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        M3v m3v = m3.cView();
-        MultUL_Helper<-1,s,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
-    }
+    { DoMultUL<-1,add>(x,m1,m2,m3); }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
     inline void NoAliasMultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M1::msize,M2::msize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::mrowsize>::same));
-        TMVAssert(m1.size() == m2.size());
-        TMVAssert(m1.size() == m3.colsize());
-        TMVAssert(m1.size() == m3.rowsize());
-
-        const int s1 = Sizes<M1::msize,M2::msize>::size;
-        const int s2 = Sizes<M3::mcolsize,M3::mrowsize>::size;
-        const int s = Sizes<s1,s2>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        typedef typename M3::cview_type M3v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        M3v m3v = m3.cView();
-        MultUL_Helper<-2,s,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
-    }
+    { DoMultUL<-2,add>(x,m1,m2,m3); }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
     inline void InlineMultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M1::msize,M2::msize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::mrowsize>::same));
-        TMVAssert(m1.size() == m2.size());
-        TMVAssert(m1.size() == m3.colsize());
-        TMVAssert(m1.size() == m3.rowsize());
-
-        const int s1 = Sizes<M1::msize,M2::msize>::size;
-        const int s2 = Sizes<M3::mcolsize,M3::mrowsize>::size;
-        const int s = Sizes<s1,s2>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        typedef typename M3::cview_type M3v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        M3v m3v = m3.cView();
-        MultUL_Helper<-3,s,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
-    }
+    { DoMultUL<-3,add>(x,m1,m2,m3); }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
     inline void AliasMultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M1::msize,M2::msize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::mrowsize>::same));
-        TMVAssert(m1.size() == m2.size());
-        TMVAssert(m1.size() == m3.colsize());
-        TMVAssert(m1.size() == m3.rowsize());
-
-        const int s1 = Sizes<M1::msize,M2::msize>::size;
-        const int s2 = Sizes<M3::mcolsize,M3::mrowsize>::size;
-        const int s = Sizes<s1,s2>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        typedef typename M3::cview_type M3v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        M3v m3v = m3.cView();
-        MultUL_Helper<99,s,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
-    }
+    { DoMultUL<99,add>(x,m1,m2,m3); }
 
 
 } // namespace tmv

@@ -49,7 +49,9 @@ template <class T> void TestMatrixArith_3()
 
     TestMatrixArith3<T>(a1,ca1,"Square 1");
     TestMatrixArith3<T>(a2,ca2,"Square 2");
+#if (XTEST & 1)
     TestMatrixArith3<T>(a3,ca3,"Square 3");
+#endif
 
     tmv::Matrix<T,tmv::RowMajor> a4x(7,4);
     for(int i=0;i<7;++i) for(int j=0;j<4;++j) a4x(i,j) = T(1-3*i+2*j);
@@ -74,7 +76,6 @@ template <class T> void TestMatrixArith_3()
     TestMatrixArith3<T>(a4,ca4,"NonSquare 1");
     TestMatrixArith3<T>(a5,ca5,"NonSquare 2");
 
-#ifdef XTEST
 #if (XTEST & 8)
     tmv::Matrix<T> a6x(4,0,1);
     tmv::Matrix<T> a7x(0,4,1);
@@ -88,7 +89,6 @@ template <class T> void TestMatrixArith_3()
 
     TestMatrixArith3<T>(a6,ca6,"Degenerate 1");
     TestMatrixArith3<T>(a7,ca7,"Degenerate 2");
-#endif
 #endif
 }
 

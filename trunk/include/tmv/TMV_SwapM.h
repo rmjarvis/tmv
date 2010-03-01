@@ -239,13 +239,15 @@ namespace tmv {
     {
         static inline void call(M1& m1, M2& m2)
         {
+#if TMV_OPT == 0
+            const bool algo = ( M1::mrowmajor && M2::mrowmajor ) ? 2 : 3;
+#else
             typedef typename M2::value_type T2;
             const bool canlin = 
                 M1::mcanlin && M2::mcanlin &&
                 ( (M1::mrowmajor && M2::mrowmajor) ||
                   (M1::mcolmajor && M2::mcolmajor) );
             const int algo = 
-#if TMV_OPT >= 1
                 canlin ? 1 :
                 ( cs != UNKNOWN && rs != UNKNOWN ) ? (
                     ( IntTraits2<cs,rs>::prod <= int(128/sizeof(T2)) ) ? (
@@ -253,8 +255,8 @@ namespace tmv {
                     ( M1::mrowmajor && M2::mrowmajor ) ? 2 :
                     ( M1::mcolmajor && M2::mcolmajor ) ? 3 :
                     ( cs > rs ) ? 2 : 3 ) :
-#endif
                 4;
+#endif
             SwapM_Helper<algo,cs,rs,M1,M2>::call(m1,m2);
         }
     };

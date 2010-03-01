@@ -37,94 +37,91 @@ opts = Variables(config_file)
 # Now set up options for the command line
 opts.Add('CXX','Name of c++ compiler')
 opts.Add('FLAGS','Compile flags to send to the compiler','')
-opts.Add(BoolVariable('DEBUG','Turn on debugging statements',False))
 opts.Add(PathVariable('PREFIX',
-            'prefix for installation','', PathVariable.PathAccept))
+        'prefix for installation','', PathVariable.PathAccept))
 
 opts.Add(EnumVariable('OPT',
-            'Set the optimization level for TMV library', '3',
-            allowed_values=('0','1','2','3')))
+        'Set the optimization level for TMV library', '2',
+        allowed_values=('0','1','2','3')))
+opts.Add(BoolVariable('WITH_OPENMP',
+        'Look for openmp and use if found.', True))
 opts.Add(BoolVariable('INST_FLOAT',
-            'Instantiate <float> templates in compiled library', True))
+        'Instantiate <float> templates in compiled library', True))
 opts.Add(BoolVariable('INST_DOUBLE',
-            'Instantiate <double> templates in compiled library', True))
+        'Instantiate <double> templates in compiled library', True))
 opts.Add(BoolVariable('INST_LONGDOUBLE',
-            'Instantiate <long double> templates in compiled library', False))
+        'Instantiate <long double> templates in compiled library', False))
 opts.Add(BoolVariable('INST_INT',
-            'Instantiate <int> templates in compiled library', False))
+        'Instantiate <int> templates in compiled library', False))
 opts.Add(BoolVariable('INST_COMPLEX',
-            'Instantiate complex<T> templates in compiled library', True))
+        'Instantiate complex<T> templates in compiled library', True))
 opts.Add(BoolVariable('INST_MIX',
-            'Instantiate functions that mix real with complex', True))
+        'Instantiate functions that mix real with complex', False))
 
 opts.Add(EnumVariable('TEST_OPT',
-            'Set the optimization level for TMV test suite', '0',
-            allowed_values=('0','1','2','3')))
+        'Set the optimization level for TMV test suite', '0',
+        allowed_values=('0','1','2','3')))
 opts.Add(BoolVariable('TEST_FLOAT',
-            'Instantiate <float> in the test suite', True))
+        'Instantiate <float> in the test suite', True))
 opts.Add(BoolVariable('TEST_DOUBLE',
-            'Instantiate <double> in the test suite', True))
+        'Instantiate <double> in the test suite', True))
 opts.Add(BoolVariable('TEST_LONGDOUBLE',
-            'Instantiate <long double> in the test suite', False))
+        'Instantiate <long double> in the test suite', False))
 opts.Add(BoolVariable('TEST_INT',
-            'Instantiate <int> in the test suite', True))
+        'Instantiate <int> in the test suite', True))
 
 opts.Add(PathVariable('EXTRA_PATH',
-            'Extra paths for executables (separated by : if more than 1)',
-            '',PathVariable.PathAccept))
+        'Extra paths for executables (separated by : if more than 1)',
+        '',PathVariable.PathAccept))
 opts.Add(PathVariable('EXTRA_LIB_PATH',
-            'Extra paths for linking (separated by : if more than 1)',
-            '',PathVariable.PathAccept))
+        'Extra paths for linking (separated by : if more than 1)',
+        '',PathVariable.PathAccept))
 opts.Add(PathVariable('EXTRA_INCLUDE_PATH',
-            'Extra paths for header files (separated by : if more than 1)',
-            '',PathVariable.PathAccept))
+        'Extra paths for header files (separated by : if more than 1)',
+        '',PathVariable.PathAccept))
 opts.Add(BoolVariable('IMPORT_PATHS',
-            'Import PATH, C_INCLUDE_PATH and LIBRARY_PATH/LD_LIBRARY_PATH environment variables',
-            False))
+        'Import PATH, C_INCLUDE_PATH and LIBRARY_PATH/LD_LIBRARY_PATH environment variables',
+        False))
 opts.Add(BoolVariable('IMPORT_ENV',
-            'Import full environment from calling shell', False))
+        'Import full environment from calling shell', False))
 
 opts.Add(BoolVariable('WITH_BLAS',
-            'Look for blas libraries and link if found.', True))
+        'Look for blas libraries and link if found.', True))
 opts.Add(BoolVariable('WITH_LAPACK',
-            'Look for lapack libraries and link if found.', True))
+        'Look for lapack libraries and link if found.', True))
 opts.Add(BoolVariable('FORCE_MKL',
-            'Force scons to use MKL for BLAS and/or LAPACK', False))
+        'Force scons to use MKL for BLAS and/or LAPACK', False))
 opts.Add(BoolVariable('FORCE_ACML',
-            'Force scons to use ACML for BLAS and/or LAPACK', False))
+        'Force scons to use ACML for BLAS and/or LAPACK', False))
 opts.Add(BoolVariable('FORCE_GOTO',
-            'Force scons to use GOTO BLAS', False))
+        'Force scons to use GOTO BLAS', False))
 opts.Add(BoolVariable('FORCE_ATLAS',
-            'Force scons to use ATLAS for BLAS', False))
+        'Force scons to use ATLAS for BLAS', False))
 opts.Add(BoolVariable('FORCE_CBLAS',
-            'Force scons to use CBLAS', False))
+        'Force scons to use CBLAS', False))
 opts.Add(BoolVariable('FORCE_FBLAS',
-            'Force scons to use Fortran BLAS', False))
+        'Force scons to use Fortran BLAS', False))
 opts.Add(BoolVariable('FORCE_CLAPACK',
-            'Force scons to use CLAPACK', False))
+        'Force scons to use CLAPACK', False))
 opts.Add(BoolVariable('FORCE_ATLAS_LAPACK',
-            'Force scons to use ATLAS subset of LAPACK', False))
+        'Force scons to use ATLAS subset of LAPACK', False))
 opts.Add(BoolVariable('FORCE_FLAPACK',
-            'Force scons to use Fortran LAPACK', False))
+        'Force scons to use Fortran LAPACK', False))
 opts.Add('LIBS','Libraries to send to the linker','')
 
-opts.Add(BoolVariable('SMALL_LIB',
-            'Avoid optimizations that cause the library to become very large', 
-            True))
-opts.Add(BoolVariable('WITH_OPENMP',
-            'Look for openmp and use if found.', False))
-opts.Add(BoolVariable('STATIC',
-            'Use static linkage', False))
+opts.Add(BoolVariable('DEBUG',
+        'Turn on debugging statements in compilied library',False))
+opts.Add(BoolVariable('STATIC','Use static linkage', False))
 opts.Add('XTEST',
-            'Do extra tests in the test suite (1=non-unit step, 2=extra sizes/shapes, 4=mix real/complex,  8=degenerate,  16=extra arithmetic, 32=FortranStyle) ', '0')
+        'Do extra tests in the test suite (1=non-unit step, 2=extra sizes/shapes, 4=mix real/complex,  8=degenerate,  16=extra arithmetic, 32=FortranStyle) ', '0')
 opts.Add(BoolVariable('MEM_TEST',
-            'Test for memory leaks', False))
+        'Test for memory leaks', False))
 opts.Add(BoolVariable('SMALL_TESTS',
-            'Make the small test programs: tmvtest1a, tmvtest1b, etc.', False))
+        'Make the small test programs: tmvtest1a, tmvtest1b, etc.', False))
 opts.Add(BoolVariable('WARN',
-            'Add warning compiler flags, like -Wall', False))
+        'Add warning compiler flags, like -Wall', False))
 opts.Add(BoolVariable('NOMIX_SMALL',
-            'Do not test the mixed Small and regular arithmetic', False))
+        'Do not test the mixed Small and regular arithmetic', False))
 
 opts.Update(initial_env)
 opts.Save(config_file,initial_env)
@@ -1018,8 +1015,8 @@ def DoConfig(env):
         env.Append(CPPDEFINES=['TMV_INST_INT'])
     if not env['INST_COMPLEX']:
         env.Append(CPPDEFINES=['TMV_NO_INST_COMPLEX'])
-    if not env['INST_MIX']:
-        env.Append(CPPDEFINES=['TMV_NO_INST_MIX'])
+    if env['INST_MIX']:
+        env.Append(CPPDEFINES=['TMV_INST_MIX'])
     if not env['TEST_FLOAT']:
         env.Append(CPPDEFINES=['NO_TEST_FLOAT'])
     if not env['TEST_DOUBLE']:

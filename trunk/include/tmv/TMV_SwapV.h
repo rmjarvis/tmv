@@ -263,32 +263,31 @@ namespace tmv {
         typedef typename V2::iterator IT2;
         typedef typename V1::real_type RT;
 
-        static inline void call(V1& v1, V2& v2)
-        {
-            const bool allunit = V1::vstep == 1 && V2::vstep == 1;
-            const int algo = 
-#if TMV_OPT >= 1
+#if TMV_OPT == 0
+        enum { algo = 1 };
+#else
+        enum { allunit = V1::vstep == 1 && V2::vstep == 1 };
+        enum { algo = (
                 // Strangely, algo 7 doesn't seem to be faster.
                 //(V1::viscomplex && allunit && !V1::vconj) ? 7 :
-                size != UNKNOWN && size <= int(128/sizeof(RT)) ? 5 :
                 (V1::viscomplex) ? (V1::vconj ? 9 : 8) :
                 (sizeof(RT) == 8 && allunit) ? 2 :
                 (sizeof(RT) == 4 && allunit) ? 3 :
+                1 ) };
 #endif
-                1;
-            SwapV_Helper<algo,size,V1,V2>::call(v1,v2);
+
+        static inline void call(V1& v1, V2& v2)
+        { 
+            TMVStaticAssert(!V2::vconj);
+            const int algo1 = 
+                size != UNKNOWN && size <= int(128/sizeof(RT)) ? 5 :
+                algo;
+            SwapV_Helper<algo1,size,V1,V2>::call(v1,v2); 
         }
         static inline void call2(int n, IT1 it1, IT2 it2)
-        {
-            const bool allunit = V1::vstep == 1 && V2::vstep == 1;
-            const int algo = 
-#if TMV_OPT >= 1
-                (V1::viscomplex) ? (V1::vconj ? 9 : 8) :
-                (sizeof(RT) == 8 && allunit) ? 2 :
-                (sizeof(RT) == 4 && allunit) ? 3 :
-#endif
-                1;
-            SwapV_Helper<algo,size,V1,V2>::call2(n,it1,it2);
+        { 
+            TMVStaticAssert(!V2::vconj);
+            SwapV_Helper<algo,size,V1,V2>::call2(n,it1,it2); 
         }
     };
 

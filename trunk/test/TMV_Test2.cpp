@@ -30,35 +30,34 @@ int main() try {
     //showacc=true;
     //showdiv=true;
     //showstartdone = true;
-    //#define SKIPREST
 
-#ifndef SKIPREST
+#if 1
 
 #ifdef TEST_DOUBLE
     TestBandMatrix<double>();
     TestSymMatrix<double>();
     TestSymBandMatrix<double>();
-    TestAllBandDiv<double>();
-    TestAllSymDiv<double>();
-    TestAllSymBandDiv<double>();
+    TestBandDiv<double>();
+    TestSymDiv<double>();
+    TestSymBandDiv<double>();
 #endif
 
 #ifdef TEST_FLOAT
     TestBandMatrix<float>();
     TestSymMatrix<float>();
     TestSymBandMatrix<float>();
-    TestAllBandDiv<float>();
-    TestAllSymDiv<float>();
-    TestAllSymBandDiv<float>();
+    TestBandDiv<float>();
+    TestSymDiv<float>();
+    TestSymBandDiv<float>();
 #endif
 
 #ifdef TEST_LONGDOUBLE
     TestBandMatrix<long double>();
     TestSymMatrix<long double>();
     TestSymBandMatrix<long double>();
-    TestAllBandDiv<long double>();
-    TestAllSymDiv<long double>();
-    TestAllSymBandDiv<long double>();
+    TestBandDiv<long double>();
+    TestSymDiv<long double>();
+    TestSymBandDiv<long double>();
 #endif 
 
 #ifdef TEST_INT
@@ -67,7 +66,7 @@ int main() try {
     TestSymBandMatrix<int>();
 #endif 
 
-#endif // SKIPREST
+#endif 
 
     return 0;
 }

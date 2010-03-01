@@ -75,7 +75,6 @@ namespace tmv {
 
 #ifdef BLAS
 #ifdef TMV_INST_DOUBLE
-    template <> 
     static void DoScale(const double x, VectorView<double> v)
     {
         int n=v.size();
@@ -87,7 +86,6 @@ namespace tmv {
         if (s < 0) vp += (n-1)*s;
         BLASNAME(dscal) (BLASV(n),BLASV(x),BLASP(vp),BLASV(s));
     }
-    template <> 
     static void DoScale(
         const std::complex<double> x, VectorView<std::complex<double> > v)
     {
@@ -114,7 +112,6 @@ namespace tmv {
     }
 #endif
 #ifdef TMV_INST_FLOAT
-    template <> 
     static void DoScale(const float x, VectorView<float> v)
     {
         int n=v.size();
@@ -126,7 +123,6 @@ namespace tmv {
         if (s < 0) vp += (n-1)*s;
         BLASNAME(sscal) (BLASV(n),BLASV(x),BLASP(vp),BLASV(s));
     }
-    template <> 
     static void DoScale(
         const std::complex<float> x, VectorView<std::complex<float> > v)
     {

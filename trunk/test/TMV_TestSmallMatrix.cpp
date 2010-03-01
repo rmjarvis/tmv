@@ -63,13 +63,13 @@ inline void TestBasicSmallMatrix()
         const T qar[] = { 
             T(0), T(-1), T(-2),
             T(2), T(1), T(0) };
-        tmv::SmallMatrix<T,2,3,S> q1(qar);
+        tmv::SmallMatrix<T,2,3,S> q1(2,3,qar);
         for(int i=0;i<2;i++) for(int j=0;j<3;j++) {
             Assert(q1(i,j) == T(2*i-j),"Create SmallMatrix from T*");
         }
         std::vector<T> qv(6);
         for(int i=0;i<6;i++) qv[i] = qar[i];
-        tmv::SmallMatrix<T,2,3,S> q2(qv);
+        tmv::SmallMatrix<T,2,3,S> q2(2,3,qv);
         for(int i=0;i<2;i++) for(int j=0;j<3;j++) {
             Assert(q2(i,j) == T(2*i-j),"Create SmallMatrix from vector");
         }
@@ -85,13 +85,13 @@ inline void TestBasicSmallMatrix()
             T(0), T(2),
             T(-1), T(1),
             T(-2), T(0) };
-        tmv::SmallMatrix<T,2,3,S> q1(qar);
+        tmv::SmallMatrix<T,2,3,S> q1(2,3,qar);
         for(int i=0;i<2;i++) for(int j=0;j<3;j++) {
             Assert(q1(i,j) == T(2*i-j),"Create SmallMatrix from T*");
         }
         std::vector<T> qv(6);
         for(int i=0;i<6;i++) qv[i] = qar[i];
-        tmv::SmallMatrix<T,2,3,S> q2(qv);
+        tmv::SmallMatrix<T,2,3,S> q2(2,3,qv);
         for(int i=0;i<2;i++) for(int j=0;j<3;j++) {
             Assert(q2(i,j) == T(2*i-j),"Create SmallMatrix from vector");
         }
@@ -159,26 +159,30 @@ inline void TestBasicSmallMatrix()
     // Test I/O
 
     std::ofstream fout("tmvtest_smallmatrix_io.dat");
-    if (!fout) 
+    if (!fout) {
 #ifdef NOTHROW
-    { std::cerr<<"Couldn't open tmvtest_smallmatrix_io.dat for output\n"; exit(1); }
+        std::cerr<<"Couldn't open tmvtest_smallmatrix_io.dat for output\n";
+        exit(1); 
 #else
-    throw std::runtime_error(
-        "Couldn't open tmvtest_smallmatrix_io.dat for output");
+        throw std::runtime_error(
+            "Couldn't open tmvtest_smallmatrix_io.dat for output");
 #endif
+    }
     fout << m << std::endl << cm << std::endl;
     fout.close();
 
     tmv::SmallMatrix<T,M,N,tmv::RowMajor> xm1;
     tmv::SmallMatrix<std::complex<T>,M,N,tmv::RowMajor> xcm1;
     std::ifstream fin("tmvtest_smallmatrix_io.dat");
-    if (!fin) 
+    if (!fin) {
 #ifdef NOTHROW
-    { std::cerr<<"Couldn't open tmvtest_smallmatrix_io.dat for input\n"; exit(1); }
+        std::cerr<<"Couldn't open tmvtest_smallmatrix_io.dat for input\n";
+        exit(1); 
 #else
-    throw std::runtime_error(
-        "Couldn't open tmvtest_smallmatrix_io.dat for input");
+        throw std::runtime_error(
+            "Couldn't open tmvtest_smallmatrix_io.dat for input");
 #endif
+    }
     fin >> xm1 >> xcm1;
     fin.close();
     Assert(m == xm1,"SmallMatrix I/O check #1");
@@ -187,28 +191,28 @@ inline void TestBasicSmallMatrix()
     tmv::SmallMatrix<T,M,N,tmv::ColMajor> xm2;
     tmv::SmallMatrix<std::complex<T>,M,N,tmv::ColMajor> xcm2;
     fin.open("tmvtest_smallmatrix_io.dat");
-    if (!fin) 
+    if (!fin) {
 #ifdef NOTHROW
-    { std::cerr<<"Couldn't open tmvtest_smallmatrix_io.dat for input\n"; exit(1); }
+        std::cerr<<"Couldn't open tmvtest_smallmatrix_io.dat for input\n";
+        exit(1); 
 #else
-    throw std::runtime_error(
-        "Couldn't open tmvtest_smallmatrix_io.dat for input");
+        throw std::runtime_error(
+            "Couldn't open tmvtest_smallmatrix_io.dat for input");
 #endif
+    }
     fin >> xm2 >> xcm2;
     fin.close();
     Assert(m == xm2,"SmallMatrix I/O check #2");
     Assert(cm == xcm2,"CSmallMatrix I/O check #2");
 
-#ifndef XTEST
     std::remove("tmvtest_smallmatrix_io.dat");
-#endif
 }
 
-template <class T> void TestAllSmallMatrix()
+template <class T> void TestSmallMatrix()
 {
     TestBasicSmallMatrix<T,6,4,tmv::RowMajor>();
     TestBasicSmallMatrix<T,6,4,tmv::ColMajor>();
-#ifdef XTEST
+#if (XTEST & 2)
     TestBasicSmallMatrix<T,42,10,tmv::RowMajor>();
     TestBasicSmallMatrix<T,42,10,tmv::ColMajor>();
 #endif
@@ -217,14 +221,14 @@ template <class T> void TestAllSmallMatrix()
 }
 
 #ifdef TEST_DOUBLE
-template void TestAllSmallMatrix<double>();
+template void TestSmallMatrix<double>();
 #endif
 #ifdef TEST_FLOAT
-template void TestAllSmallMatrix<float>();
+template void TestSmallMatrix<float>();
 #endif
 #ifdef TEST_LONGDOUBLE
-template void TestAllSmallMatrix<long double>();
+template void TestSmallMatrix<long double>();
 #endif
 #ifdef TEST_INT
-template void TestAllSmallMatrix<int>();
+template void TestSmallMatrix<int>();
 #endif
