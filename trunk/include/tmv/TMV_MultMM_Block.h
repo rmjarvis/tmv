@@ -431,7 +431,7 @@ namespace tmv {
                 (m2p+(M-1)*si+(N-1)*sj+1)<<std::endl;
             std::cout<<"m1 = "<<m1<<std::endl;
 #endif
-            CopyM_Helper<-2,cs,rs,M1,M2>::call(m1,m2); 
+            CopyM_Helper<-4,cs,rs,M1,M2>::call(m1,m2); 
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"m2 = "<<m2<<std::endl;
             std::cout<<"after copy\n";
@@ -468,8 +468,8 @@ namespace tmv {
 #endif
             const int ix1 = M1::mconj ? -1 : 1; // 1 or -1 as required
             const Scaling<ix1,RT> one;
-            CopyM_Helper<-2,cs,rs,M1r,M2r>::call(m1r,m2r); 
-            MultXM_Helper<-2,cs,rs,false,ix1,RT,M1r,M2r>::call(one,m1i,m2i); 
+            CopyM_Helper<-4,cs,rs,M1r,M2r>::call(m1r,m2r); 
+            MultXM_Helper<-4,cs,rs,false,ix1,RT,M1r,M2r>::call(one,m1i,m2i); 
 #ifdef PRINTALGO_MM_BLOCK
             //std::cout<<"m2r => "<<m2r<<std::endl;
             //std::cout<<"m2i => "<<m2i<<std::endl;
@@ -978,7 +978,7 @@ namespace tmv {
 #endif
             M2 m2((T2*)m2x.ptr(),m2x.colsize(),m2x.rowsize(),
                   m2x.stepi(),m2x.stepj());
-            MultXM_Helper<-2,cs,rs,add,ix,T,M1r,M2>::call(x,m1,m2); 
+            MultXM_Helper<-4,cs,rs,add,ix,T,M1r,M2>::call(x,m1,m2); 
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"m2p = "<<m2x.ptr()<<"..."<<
                 (m2x.ptr()+(M-1)*m2x.stepi()+(N-1)*m2x.stepj()+1)<<std::endl;
@@ -1009,8 +1009,7 @@ namespace tmv {
 #endif
             M2 m2((T2*)m2x.ptr(),m2x.colsize(),m2x.rowsize(),
                   m2x.stepi(),m2x.stepj());
-            //Maybe<add>::add(m2 , x * m1); 
-            MultXM_Helper<-2,cs,rs,add,ix,T,M1r,M2>::call(x,m1,m2); 
+            MultXM_Helper<-4,cs,rs,add,ix,T,M1r,M2>::call(x,m1,m2); 
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"m2p = "<<m2x.ptr()<<"..."<<
                 (m2x.ptr()+(M-1)*m2x.stepi()+(N-1)*m2x.stepj()+1)<<std::endl;
@@ -1048,10 +1047,8 @@ namespace tmv {
             std::cout<<"m1r = "<<m1r<<std::endl;
             std::cout<<"m1i = "<<m1i<<std::endl;
 #endif
-            //Maybe<add>::add(m2r , x * m1r);
-            //Maybe<add>::add(m2i , x * m1i);
-            MultXM_Helper<-2,cs,rs,add,ix,T,M1r,M2r>::call(x,m1r,m2r); 
-            MultXM_Helper<-2,cs,rs,add,ix,T,M1r,M2i>::call(x,m1i,m2i); 
+            MultXM_Helper<-4,cs,rs,add,ix,T,M1r,M2r>::call(x,m1r,m2r); 
+            MultXM_Helper<-4,cs,rs,add,ix,T,M1r,M2i>::call(x,m1i,m2i); 
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"m2p = "<<m2x.ptr()<<"..."<<
                 (m2x.ptr()+(M-1)*m2x.stepi()+(N-1)*m2x.stepj()+1)<<std::endl;
@@ -1088,17 +1085,17 @@ namespace tmv {
             std::cout<<"m1r = "<<m1r<<std::endl;
             std::cout<<"m1i = "<<m1i<<std::endl;
 #endif
-            //Maybe<add>::add(m2r , TMV_REAL(x) * m1r);
-            //m2r -= TMV_IMAG(x) * m1i;
-            //Maybe<add>::add(m2i , TMV_REAL(x) * m1i);
-            //m2i += TMV_IMAG(x) * m1r;
-            MultXM_Helper<-2,cs,rs,add,0,RT,M1r,M2r>::call(
+            //m2r (+)= TMV_REAL(x) * m1r;
+            //m2r -=   TMV_IMAG(x) * m1i;
+            //m2i (+)= TMV_REAL(x) * m1i;
+            //m2i +=   TMV_IMAG(x) * m1r;
+            MultXM_Helper<-4,cs,rs,add,0,RT,M1r,M2r>::call(
                 Scaling<0,RT>(TMV_REAL(x)),m1r,m2r); 
-            MultXM_Helper<-2,cs,rs,true,0,RT,M1r,M2i>::call(
+            MultXM_Helper<-4,cs,rs,true,0,RT,M1r,M2i>::call(
                 Scaling<0,RT>(-TMV_IMAG(x)),m1i,m2r); 
-            MultXM_Helper<-2,cs,rs,add,0,RT,M1r,M2r>::call(
+            MultXM_Helper<-4,cs,rs,add,0,RT,M1r,M2r>::call(
                 Scaling<0,RT>(TMV_REAL(x)),m1i,m2i); 
-            MultXM_Helper<-2,cs,rs,true,0,RT,M1r,M2i>::call(
+            MultXM_Helper<-4,cs,rs,true,0,RT,M1r,M2i>::call(
                 Scaling<0,RT>(TMV_IMAG(x)),m1r,m2i); 
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"m2p = "<<m2x.ptr()<<"..."<<

@@ -390,6 +390,9 @@ namespace tmv {
     template <class M1, class M2>
     inline void Swap(
         BaseMatrix_Rec_Mutable<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
+    template <class M1, class M2>
+    inline void NoAliasSwap(
+        BaseMatrix_Rec_Mutable<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
     template <class M>
     inline void TransposeSelf(BaseMatrix_Rec_Mutable<M>& m);
 
@@ -1229,7 +1232,9 @@ namespace tmv {
         inline type& cSwapRows(int i1, int i2) 
         {
             if (i1 != i2) {
-                tmv::Swap(get_row(i1),get_row(i2));
+                row_type row1 = get_row(i1);
+                row_type row2 = get_row(i2);
+                tmv::NoAliasSwap(row1,row2);
             }
             return mat();
         }
@@ -1243,7 +1248,9 @@ namespace tmv {
         inline type& cSwapCols(int j1, int j2) 
         {
             if (j1 != j2) {
-                tmv::Swap(get_col(j1),get_col(j2));
+                col_type col1 = get_col(j1);
+                col_type col2 = get_col(j2);
+                tmv::NoAliasSwap(col1,col2);
             }
             return mat();
         }

@@ -353,6 +353,143 @@ namespace tmv {
         }
     };
 
+
+    // algo 202: same as 2, but use -2 algo
+    template <int rs, int xs, bool add, 
+              int ix, class T, class M1, class M2, class M3>
+    struct MultMM_Helper<202,1,rs,xs,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+#ifdef PRINTALGO_MM
+            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            std::cout<<"MM algo 202: M,N,K,cs,rs,xs,x = "<<1<<','<<N<<','<<K<<
+                ','<<1<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
+#endif
+            typedef typename M1::const_row_type M1r;
+            typedef typename M2::const_transpose_type M2t;
+            typedef typename M3::row_type M3r;
+            M1r m1r = m1.get_row(0);
+            M2t m2t = m2.transpose();
+            M3r m3r = m3.get_row(0);
+            MultMV_Helper<-2,rs,xs,add,ix,T,M2t,M1r,M3r>::call(x,m2t,m1r,m3r);
+        }
+    };
+
+    // algo 203: same as 3, but use -2 algo
+    template <int cs, int xs, bool add, 
+              int ix, class T, class M1, class M2, class M3>
+    struct MultMM_Helper<203,cs,1,xs,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+#ifdef PRINTALGO_MM
+            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
+            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            std::cout<<"MM algo 203: M,N,K,cs,rs,xs,x = "<<M<<','<<1<<','<<K<<
+                ','<<cs<<','<<1<<','<<xs<<','<<T(x)<<std::endl;
+#endif
+            typedef typename M2::const_col_type M2c;
+            typedef typename M3::col_type M3c;
+            M2c m2c = m2.get_col(0);
+            M3c m3c = m3.get_col(0);
+            MultMV_Helper<-2,cs,xs,add,ix,T,M1,M2c,M3c>::call(x,m1,m2c,m3c);
+        }
+    };
+
+    // algo 204: same as 4, but use -2 algo
+    template <int cs, int rs, bool add, 
+              int ix, class T, class M1, class M2, class M3>
+    struct MultMM_Helper<204,cs,rs,1,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        { 
+#ifdef PRINTALGO_MM
+            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            std::cout<<"MM algo 204: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<1<<
+                ','<<cs<<','<<rs<<','<<1<<','<<T(x)<<std::endl;
+#endif
+            typedef typename M1::const_col_type M1c;
+            typedef typename M2::const_row_type M2r;
+            M1c m1c = m1.get_col(0);
+            M2r m2r = m2.get_row(0);
+            Rank1VVM_Helper<-2,cs,rs,add,ix,T,M1c,M2r,M3>::call(x,m1c,m2r,m3);
+        }
+    };
+
+    // algo 402: same as 2, but use -4 algo
+    template <int rs, int xs, bool add, 
+              int ix, class T, class M1, class M2, class M3>
+    struct MultMM_Helper<402,1,rs,xs,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+#ifdef PRINTALGO_MM
+            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            std::cout<<"MM algo 402: M,N,K,cs,rs,xs,x = "<<1<<','<<N<<','<<K<<
+                ','<<1<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
+#endif
+            typedef typename M1::const_row_type M1r;
+            typedef typename M2::const_transpose_type M2t;
+            typedef typename M3::row_type M3r;
+            M1r m1r = m1.get_row(0);
+            M2t m2t = m2.transpose();
+            M3r m3r = m3.get_row(0);
+            MultMV_Helper<-4,rs,xs,add,ix,T,M2t,M1r,M3r>::call(x,m2t,m1r,m3r);
+        }
+    };
+
+    // algo 403: same as 3, but use -4 algo
+    template <int cs, int xs, bool add, 
+              int ix, class T, class M1, class M2, class M3>
+    struct MultMM_Helper<403,cs,1,xs,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+#ifdef PRINTALGO_MM
+            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
+            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            std::cout<<"MM algo 403: M,N,K,cs,rs,xs,x = "<<M<<','<<1<<','<<K<<
+                ','<<cs<<','<<1<<','<<xs<<','<<T(x)<<std::endl;
+#endif
+            typedef typename M2::const_col_type M2c;
+            typedef typename M3::col_type M3c;
+            M2c m2c = m2.get_col(0);
+            M3c m3c = m3.get_col(0);
+            MultMV_Helper<-4,cs,xs,add,ix,T,M1,M2c,M3c>::call(x,m1,m2c,m3c);
+        }
+    };
+
+    // algo 404: same as 4, but use -4 algo
+    template <int cs, int rs, bool add, 
+              int ix, class T, class M1, class M2, class M3>
+    struct MultMM_Helper<404,cs,rs,1,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        { 
+#ifdef PRINTALGO_MM
+            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            std::cout<<"MM algo 404: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<1<<
+                ','<<cs<<','<<rs<<','<<1<<','<<T(x)<<std::endl;
+#endif
+            typedef typename M1::const_col_type M1c;
+            typedef typename M2::const_row_type M2r;
+            M1c m1c = m1.get_col(0);
+            M2r m2r = m2.get_row(0);
+            Rank1VVM_Helper<-4,cs,rs,add,ix,T,M1c,M2r,M3>::call(x,m1c,m2r,m3);
+        }
+    };
+
     // algo 5: **R, Transpose to get the colmajor version
     template <int cs, int rs, int xs, bool add, 
               int ix, class T, class M1, class M2, class M3>
@@ -379,10 +516,10 @@ namespace tmv {
         }
     };
 
-    // algo 6: same as 5 but go back to -4, rather than -3.
+    // algo 405: same as 5 but go back to -4, rather than -3.
     template <int cs, int rs, int xs, bool add, 
               int ix, class T, class M1, class M2, class M3>
-    struct MultMM_Helper<6,cs,rs,xs,add,ix,T,M1,M2,M3> 
+    struct MultMM_Helper<405,cs,rs,xs,add,ix,T,M1,M2,M3> 
     {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -391,7 +528,7 @@ namespace tmv {
             const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
             const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
-            std::cout<<"MM algo 6: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
+            std::cout<<"MM algo 405: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M1::const_transpose_type M1t;
@@ -601,7 +738,7 @@ namespace tmv {
                     if (nb) {
                         M2c m2na = m2.get_col(na);
                         M3c m3na = m3.get_col(na);
-                        MultMV_Helper<-2,cs,xs,true,ix,T,M1,M2c,M3c>::call(
+                        MultMV_Helper<-4,cs,xs,true,ix,T,M1,M2c,M3c>::call(
                             x,m1,m2na,m3na);
                     }
                 }
@@ -840,7 +977,7 @@ namespace tmv {
                     if (nb) {
                         M2c m2na = m2.get_col(na);
                         M3c m3na = m3.get_col(na);
-                        MultMV_Helper<-2,cs,xs,add,ix,T,M1,M2c,M3c>::call(
+                        MultMV_Helper<-4,cs,xs,add,ix,T,M1,M2c,M3c>::call(
                             x,m1,m2na,m3na);
                     }
                     if (mb) {
@@ -848,7 +985,7 @@ namespace tmv {
                         M2t m2t = m2.cColRange(0,na).transpose();
                         M3r m3ma = m3.get_row(ma,0,na);
                         const int rsx = rs == UNKNOWN ? UNKNOWN : ((rs>>1)<<1);
-                        MultMV_Helper<-2,rsx,xs,add,ix,T,M2t,M1r,M3r>::call(
+                        MultMV_Helper<-4,rsx,xs,add,ix,T,M2t,M1r,M3r>::call(
                             x,m2t,m1ma,m3ma);
                     }
                 } else if (M && N && !add) { // K == 0 && !add
@@ -2075,13 +2212,13 @@ namespace tmv {
             const int algo = 
                 ( cs == 0 || rs == 0 || (xs == 0 && add) ) ? 0 :
                 ( xs == 0 && !add ) ? 1 :
-                cs == 1 ? 2 :
-                rs == 1 ? 3 :
-                xs == 1 ? 4 :
+                cs == 1 ? 402 :
+                rs == 1 ? 403 :
+                xs == 1 ? 404 :
                 rs > 1 && rs <= 3 ? 21 :
-                cs > 1 && cs <= 3 ? 6 :
+                cs > 1 && cs <= 3 ? 405 :
                 xs > 1 && xs <= 3 ? 31 :
-                M3::mrowmajor && !M3::mcolmajor ? 6 :
+                M3::mrowmajor && !M3::mcolmajor ? 405 :
                 ccc ? 11 :
                 rcc ? 21 :
                 crc ? 31 :
@@ -2114,6 +2251,9 @@ namespace tmv {
             //  4 = xs == 1: reduces to trivial Rank1Update function
             //  5 = transpose
             //  6 = transpose, and go back to -4, not -3
+            //  7 = cs == 1 -> -4
+            //  8 = rs == 1 -> -4
+            //  9 = xs == 1 -> -4
             //
             // CCC: 
             // 11 = CCC, loop over n
@@ -2222,9 +2362,9 @@ namespace tmv {
             const int algo = 
                 ( cs == 0 || rs == 0 || (xs == 0 && add) ) ? 0 :
                 ( xs == 0 && !add ) ? 1 :
-                cs == 1 ? 2 :
-                rs == 1 ? 3 :
-                xs == 1 ? 4 :
+                cs == 1 ? 202 :
+                rs == 1 ? 203 :
+                xs == 1 ? 204 :
                 rs > 1 && rs <= 3 ? 21 :
                 cs > 1 && cs <= 3 ? 5 :
                 xs > 1 && xs <= 3 ? 31 :
@@ -2377,9 +2517,9 @@ namespace tmv {
             const int algo = 
                 ( cs == 0 || rs == 0 || (xs == 0 && add) ) ? 0 :
                 ( xs == 0 && !add ) ? 1 :
-                cs == 1 ? 2 :
-                rs == 1 ? 3 :
-                xs == 1 ? 4 :
+                cs == 1 ? 202 :
+                rs == 1 ? 203 :
+                xs == 1 ? 204 :
                 M3::mconj ? 97 :
                 inst ? 98 : 
                 -3;

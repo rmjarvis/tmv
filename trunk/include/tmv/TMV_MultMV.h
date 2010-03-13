@@ -222,7 +222,7 @@ namespace tmv {
             typedef typename V2::value_type T2;
             Maybe<add>::add( 
                 v3.ref(0) ,
-                x * MultVV_Helper<-1,rs,M1r,V2>::call(m1.get_row(0),v2) );
+                x * MultVV_Helper<-2,rs,M1r,V2>::call(m1.get_row(0),v2) );
         }
     };
 
@@ -241,6 +241,64 @@ namespace tmv {
             typedef typename Traits2<T,typename V2::value_type>::type PT2;
             typedef typename M1::const_col_type M1c;
             MultXV_Helper<-1,cs,add,0,PT2,M1c,V3>::call( 
+                Scaling<0,PT2>(x*v2.cref(0)) , m1.get_col(0), v3 ); 
+        }
+    };
+
+    // algo 202: same as 2, but use -2 algo
+    template <int cs, bool add, int ix, class T, class M1, class V2, class V3>
+    struct MultMV_Helper<202,cs,1,add,ix,T,M1,V2,V3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
+        {
+#ifdef PRINTALGO_MV
+            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
+            std::cout<<"MV algo 202: M,N,cs,rs,x = "<<M<<','<<1<<
+                ','<<cs<<','<<1<<','<<T(x)<<std::endl;
+#endif
+            typedef typename Traits2<T,typename V2::value_type>::type PT2;
+            typedef typename M1::const_col_type M1c;
+            MultXV_Helper<-2,cs,add,0,PT2,M1c,V3>::call( 
+                Scaling<0,PT2>(x*v2.cref(0)) , m1.get_col(0), v3 ); 
+        }
+    };
+
+    // algo 401: same as 1, but use -4 algo
+    template <int rs, bool add, int ix, class T, class M1, class V2, class V3>
+    struct MultMV_Helper<401,1,rs,add,ix,T,M1,V2,V3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
+        { 
+#ifdef PRINTALGO_MV
+            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            std::cout<<"MV algo 401: M,N,cs,rs,x = "<<1<<','<<N<<
+                ','<<1<<','<<rs<<','<<T(x)<<std::endl;
+#endif
+            typedef typename M1::const_row_type M1r;
+            typedef typename V2::value_type T2;
+            Maybe<add>::add( 
+                v3.ref(0) ,
+                x * MultVV_Helper<-4,rs,M1r,V2>::call(m1.get_row(0),v2) );
+        }
+    };
+
+    // algo 402: same as 2, but use -4 algo
+    template <int cs, bool add, int ix, class T, class M1, class V2, class V3>
+    struct MultMV_Helper<402,cs,1,add,ix,T,M1,V2,V3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
+        {
+#ifdef PRINTALGO_MV
+            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
+            std::cout<<"MV algo 402: M,N,cs,rs,x = "<<M<<','<<1<<
+                ','<<cs<<','<<1<<','<<T(x)<<std::endl;
+#endif
+            typedef typename Traits2<T,typename V2::value_type>::type PT2;
+            typedef typename M1::const_col_type M1c;
+            MultXV_Helper<-4,cs,add,0,PT2,M1c,V3>::call( 
                 Scaling<0,PT2>(x*v2.cref(0)) , m1.get_col(0), v3 ); 
         }
     };
@@ -430,7 +488,7 @@ namespace tmv {
     {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
-        { MultMV_Helper<2,cs,1,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3); }
+        { MultMV_Helper<402,cs,1,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3); }
     };
     // rs == 2
     template <int cs, bool add, int ix, class T, class M1, class V2, class V3>
@@ -655,7 +713,7 @@ namespace tmv {
                 typedef typename M1::const_col_type M1c;
                 if (na) loop_2_cols(M,na,x,m1,v2,v3);
                 if (nb) {
-                    MultXV_Helper<-2,cs,true,0,PT2,M1c,V3>::call(
+                    MultXV_Helper<-4,cs,true,0,PT2,M1c,V3>::call(
                         Scaling<0,PT2>(x*v2.cref(na)),m1.get_col(na),v3); 
                 }
             }
@@ -669,7 +727,7 @@ namespace tmv {
     {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
-        { MultMV_Helper<2,cs,1,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3); }
+        { MultMV_Helper<402,cs,1,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3); }
     };
     // rs == 2
     template <int cs, bool add, int ix, class T, class M1, class V2, class V3>
@@ -1031,7 +1089,7 @@ namespace tmv {
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
-        { MultMV_Helper<1,1,rs,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3); }
+        { MultMV_Helper<401,1,rs,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3); }
     };
     // cs == 2
     template <int rs, bool add, int ix, class T, class M1, class V2, class V3>
@@ -1331,7 +1389,7 @@ namespace tmv {
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
-        { MultMV_Helper<1,1,rs,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3); }
+        { MultMV_Helper<401,1,rs,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3); }
     };
     // cs == 2
     template <int rs, bool add, int ix, class T, class M1, class V2, class V3>
@@ -1906,7 +1964,7 @@ namespace tmv {
                        // do nothing
                        break;
                   case 1 :
-                       MultMV_Helper<1,1,rs,add,ix,T,M1,V2,V3>::call(
+                       MultMV_Helper<201,1,rs,add,ix,T,M1,V2,V3>::call(
                            x,m1,v2,v3);
                        break;
                   case 2 :
@@ -2326,8 +2384,8 @@ namespace tmv {
                 MultMV_Unroll_Helper<cs,rs,M1::mcolmajor>::unroll;
             const int algo = 
                 ( rs == 0 || cs == 0 ) ? 0 : 
-                ( cs == 1 ) ? 1 :
-                ( rs == 1 ) ? 2 :
+                ( cs == 1 ) ? 401 :
+                ( rs == 1 ) ? 402 :
                 M1::mcolmajor ? (
                     unroll ? (
                         ( cs <= TMV_Q5 ? 
@@ -2417,8 +2475,8 @@ namespace tmv {
                 MultMV_Unroll_Helper<cs,rs,M1::mcolmajor>::unroll;
             const int algo = 
                 ( rs == 0 || cs == 0 ) ? 0 : // trivial - nothing to do
-                ( cs == 1 ) ? 1 : // trivial - cs = 1
-                ( rs == 1 ) ? 2 : // trivial - rs = 1
+                ( cs == 1 ) ? 201 : // trivial - cs = 1
+                ( rs == 1 ) ? 202 : // trivial - rs = 1
                 M1::mcolmajor ? ( // colmajor
                     cs == UNKNOWN ? 44 :
                     rs == UNKNOWN ? (
@@ -2536,7 +2594,7 @@ namespace tmv {
             const int algo = 
                 ( rs == 0 || cs == 0 ) ? 0 : 
                 ( cs == 1 ) ? 1 :
-                ( rs == 1 ) ? 2 :
+                ( rs == 1 ) ? 202 :
                 V3::vconj ? 97 :
                 inst ? 98 : 
                 -3;

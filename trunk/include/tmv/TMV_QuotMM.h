@@ -54,6 +54,7 @@ namespace tmv {
     // get a compiler error if they are used.
     // All real calls should go through a more specific version than 
     // just the BaseMatrix_Calc's.
+#if 0
     template <int ix, class T, class M1, class M2, class M3>
     inline void LDiv(
         const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
@@ -107,6 +108,7 @@ namespace tmv {
     template <class M1, class M2>
     inline void AliasRDivEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix_Calc<M2>& m2);
+#endif
 
 
 #ifdef XDEBUG_QUOTMM
@@ -473,9 +475,9 @@ namespace tmv {
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix<M2>& m2)
     { 
 #ifdef XDEBUG_QUOTMM
-        LDivEq_Debug(m1,m2.calc()); 
+        LDivEq_Debug(m1.mat(),m2.calc()); 
 #else
-        LDivEq(m1,m2.calc()); 
+        LDivEq(m1.mat(),m2.calc()); 
 #endif
     }
 
@@ -485,9 +487,9 @@ namespace tmv {
         BaseMatrix_Mutable<M1>& m1, const ProdXM<ix2,T2,M2>& m2)
     { 
 #ifdef XDEBUG_QUOTMM
-        LDivEq_Debug(m1,m2.getM().calc()); 
+        LDivEq_Debug(m1.mat(),m2.getM().calc()); 
 #else
-        LDivEq(m1,m2.getM().calc()); 
+        LDivEq(m1.mat(),m2.getM().calc()); 
 #endif
         Scale(typename Traits<T2>::real_type(1)/m2.getX(),m1.mat());
     }
@@ -547,9 +549,9 @@ namespace tmv {
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix<M2>& m2)
     { 
 #ifdef XDEBUG_QUOTMM
-        RDivEq_Debug(m1,m2.calc()); 
+        RDivEq_Debug(m1.mat(),m2.calc()); 
 #else
-        RDivEq(m1,m2.calc()); 
+        RDivEq(m1.mat(),m2.calc()); 
 #endif
     }
 
@@ -559,9 +561,9 @@ namespace tmv {
         BaseMatrix_Mutable<M1>& m1, const ProdXM<ix2,T2,M2>& m2)
     { 
 #ifdef XDEBUG_QUOTMM
-        RDivEq_Debug(m1,m2.getM().calc()); 
+        RDivEq_Debug(m1.mat(),m2.getM().calc()); 
 #else
-        RDivEq(m1,m2.getM().calc()); 
+        RDivEq(m1.mat(),m2.getM().calc()); 
 #endif
         Scale(typename Traits<T2>::real_type(1)/m2.getX(),m1.mat());
     }
@@ -572,9 +574,9 @@ namespace tmv {
         BaseMatrix_Mutable<M1>& m1, const QuotXM<ix2,T2,M2>& m2)
     { 
 #ifdef XDEBUG_QUOTMM
-        RDivEq_Debug(m1,m2.getM().calc()); 
+        RDivEq_Debug(m1.mat(),m2.getM().calc()); 
 #else
-        RDivEq(m1,m2.getM().calc()); 
+        RDivEq(m1.mat(),m2.getM().calc()); 
 #endif
         Scale(m2.getX(),m1.mat());
     }

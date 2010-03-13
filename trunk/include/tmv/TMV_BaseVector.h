@@ -499,6 +499,9 @@ namespace tmv {
     // Defined in TMV_SwapV.h
     template <class V1, class V2>
     inline void Swap(BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2);
+    template <class V1, class V2>
+    inline void NoAliasSwap(
+        BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2);
     template <class V>
     inline void ReverseSelf(BaseVector_Mutable<V>& v);
     template <class V>

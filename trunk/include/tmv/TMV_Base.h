@@ -471,13 +471,15 @@ namespace tmv {
                 S == 64 ? 6 : 
                 S == 128 ? 7 : 
                 S == 256 ? 8 : 
-                S == 1024 ? 9 : 
-                S == 2048 ? 9 : 
-                S == 4096 ? 10 :  
+                S == 512 ? 9 : 
+                S == 1024 ? 10 : 
+                S == 2048 ? 11 : 
+                S == 4096 ? 12 :  
                 // Probably this is high enough for any conceivable use.
                 // I only use up to 64 right now, but I provided a few
                 // extra values to be safe.
                 UNKNOWN ) };
+        enum { half_roundup = S > 16 ? ((((S-1)>>5)+1)<<4) : (S>>1) };
         static inline int text() { return S; }
     };
     template <>
@@ -490,31 +492,58 @@ namespace tmv {
         enum { Sp2 = UNKNOWN };
         enum { ispowerof2 = false };
         enum { log = UNKNOWN };
+        enum { half_roundup = UNKNOWN };
         static inline const char* text() { return "UNKNOWN"; }
     };
 
-    template <int Si, int Sj>
+    template <int S1, int S2, bool safe>
+    struct SafeIntTraits2;
+
+    template <int S1, int S2>
     struct IntTraits2
     {
-        enum { sum = Si + Sj };
-        enum { prod = Si * Sj };
+        enum { sum = S1 + S2 };
+        enum { prod = S1 * S2 };
+        enum { safeprod = SafeIntTraits2<S1,S2,(S1<300 && S2<300)>::prod };
+        enum { min = S1 < S2 ? S1 : S2 };
+        enum { max = S1 > S2 ? S1 : S2 };
     };
-    template <int Si>
-    struct IntTraits2<Si,UNKNOWN>
+    template <int S1>
+    struct IntTraits2<S1,UNKNOWN>
     {
         enum { sum = UNKNOWN };
         enum { prod = UNKNOWN };
+        enum { safeprod = UNKNOWN };
+        enum { min = UNKNOWN };
+        enum { max = UNKNOWN };
     };
-    template <int Sj>
-    struct IntTraits2<UNKNOWN,Sj>
+    template <int S2>
+    struct IntTraits2<UNKNOWN,S2>
     {
         enum { sum = UNKNOWN };
         enum { prod = UNKNOWN };
+        enum { safeprod = UNKNOWN };
+        enum { min = UNKNOWN };
+        enum { max = UNKNOWN };
     };
     template <>
     struct IntTraits2<UNKNOWN,UNKNOWN>
     {
         enum { sum = UNKNOWN };
+        enum { prod = UNKNOWN };
+        enum { safeprod = UNKNOWN };
+        enum { min = UNKNOWN };
+        enum { max = UNKNOWN };
+    };
+
+    template <int S1, int S2>
+    struct SafeIntTraits2<S1,S2,true>
+    {
+        enum { prod = IntTraits2<S1,S2>::prod };
+    };
+    template <int S1, int S2>
+    struct SafeIntTraits2<S1,S2,false>
+    {
         enum { prod = UNKNOWN };
     };
 

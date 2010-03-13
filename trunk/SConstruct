@@ -141,8 +141,8 @@ def BasicCCFlags(env):
         version = env['CXXVERSION_NUMERICAL']
     
         if compiler == 'g++':
-            env.Replace(CCFLAGS=['-O2'])
-            env['TEST_FLAGS'] = ['-O']
+            env.Replace(CCFLAGS=['-g','-O2'])
+            env['TEST_FLAGS'] = ['-g','-O']
             if version <= 4.2:
                 env.Append(CCFLAGS=['-fno-strict-aliasing'])
             if env['WARN']:
@@ -150,8 +150,8 @@ def BasicCCFlags(env):
                 env['TEST_FLAGS'] = ['-ansi','-pedantic-errors','-Wall','-Werror']
     
         elif compiler == 'icpc':
-            env.Replace(CCFLAGS=['-O3'])
-            env['TEST_FLAGS'] = []
+            env.Replace(CCFLAGS=['-g','-O3'])
+            env['TEST_FLAGS'] = ['-g']
             if version >= 10:
                 env.Append(CCFLAGS=['-vec-report0'])
                 env['TEST_FLAGS'] += ['-vec-report0']
@@ -172,8 +172,8 @@ def BasicCCFlags(env):
                 env['TEST_FLAGS'] += ['-w']
 
         elif compiler == 'pgCC':
-            env.Replace(CCFLAGS=['-O2','-fast','-Mcache_align'])
-            env['TEST_FLAGS'] = ['-O0']
+            env.Replace(CCFLAGS=['g','-O2','-fast','-Mcache_align'])
+            env['TEST_FLAGS'] = ['g','-O0']
 
         elif compiler == 'cl':
             env.Replace(CCFLAGS=['/EHsc','/nologo','/O2','/Oi'])

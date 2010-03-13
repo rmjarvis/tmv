@@ -175,6 +175,74 @@ namespace tmv {
         }
     };
 
+    // algo 201: same as 1, but use -2 algo
+    template <int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultMD_Helper<201,1,rs,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            typedef typename M1::const_row_type M1r;
+            typedef typename M2::const_diag_type M2d;
+            typedef typename M3::row_type M3r;
+            M1r m10 = m1.get_row(0);
+            M2d m2d = m2.diag();
+            M3r m30 = m3.get_row(0);
+            ElemMultVV_Helper<-2,rs,add,ix,T,M1r,M2d,M3r>::call(x,m10,m2d,m30);
+        }
+    };
+
+    // algo 202: same as 2, but use -2 algo
+    template <int cs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultMD_Helper<202,cs,1,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            typedef typename M1::const_col_type M1c;
+            typedef typename M3::col_type M3c;
+            typedef typename Traits2<T,typename M2::value_type>::type PT2;
+            M1c m10 = m1.get_col(0);
+            PT2 xm2 = ZProd<false,false>::prod(x , m2.cref(0));
+            M3c m30 = m3.get_col(0);
+            MultXV_Helper<-2,cs,add,0,PT2,M1c,M3c>::call(xm2,m10,m30);
+        }
+    };
+
+    // algo 401: same as 1, but use -4 algo
+    template <int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultMD_Helper<401,1,rs,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            typedef typename M1::const_row_type M1r;
+            typedef typename M2::const_diag_type M2d;
+            typedef typename M3::row_type M3r;
+            M1r m10 = m1.get_row(0);
+            M2d m2d = m2.diag();
+            M3r m30 = m3.get_row(0);
+            ElemMultVV_Helper<-4,rs,add,ix,T,M1r,M2d,M3r>::call(x,m10,m2d,m30);
+        }
+    };
+
+    // algo 402: same as 2, but use -4 algo
+    template <int cs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultMD_Helper<402,cs,1,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            typedef typename M1::const_col_type M1c;
+            typedef typename M3::col_type M3c;
+            typedef typename Traits2<T,typename M2::value_type>::type PT2;
+            M1c m10 = m1.get_col(0);
+            PT2 xm2 = ZProd<false,false>::prod(x , m2.cref(0));
+            M3c m30 = m3.get_col(0);
+            MultXV_Helper<-4,cs,add,0,PT2,M1c,M3c>::call(xm2,m10,m30);
+        }
+    };
+
     // algo 11: The basic column major loop
     template <int cs, int rs, bool add, 
               int ix, class T, class M1, class M2, class M3>
@@ -378,8 +446,8 @@ namespace tmv {
             const bool bothcm = M1::mcolmajor && M3::mcolmajor;
             const int algo = 
                 ( rs == 0 || cs == 0 ) ? 0 :
-                ( cs == 1 ) ? 1 :
-                ( rs == 1 ) ? 2 :
+                ( cs == 1 ) ? 401 :
+                ( rs == 1 ) ? 402 :
                 bothrm ? ( 
                     ( rs != UNKNOWN && rs <= 5 && cs > rs ) ? 11 : 
                     ( rs != UNKNOWN && rs <= 10 ) ? 14 : 15 ) :
@@ -418,8 +486,8 @@ namespace tmv {
 
             const int algo = 
                 ( rs == 0 || cs == 0 ) ? 0 :
-                ( cs == 1 ) ? 1 :
-                ( rs == 1 ) ? 2 :
+                ( cs == 1 ) ? 401 :
+                ( rs == 1 ) ? 402 :
                 bothrm ? ( 
                     ( rs != UNKNOWN && rs <= 5 && cs > rs ) ? 11 : 
                     docopy ? 82 : 
@@ -505,8 +573,8 @@ namespace tmv {
                 Traits<T3>::isinst;
             const int algo = 
                 ( rs == 0 || cs == 0 ) ? 0 :
-                ( cs == 1 ) ? 1 :
-                ( rs == 1 ) ? 2 :
+                ( cs == 1 ) ? 201 :
+                ( rs == 1 ) ? 202 :
                 M3::mconj ? 97 :
                 inst ? 98 : 
                 -3;

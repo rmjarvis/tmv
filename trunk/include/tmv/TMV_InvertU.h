@@ -86,9 +86,9 @@ namespace tmv {
     template <int algo, int s, class M>
     struct InvertU_Helper;
 
-    // algo 0: s = 0, so nothing to do
-    template <class M>
-    struct InvertU_Helper<0,0,M>
+    // algo 0: nothing to do (either s==0, or invert diag of unitdiag m.)
+    template <int s, class M>
+    struct InvertU_Helper<0,s,M>
     { static void call(M& ) {} };
 
     // algo 1: s == 1, so simplifies to a scalar quotient
@@ -280,6 +280,7 @@ namespace tmv {
     };
 
     // algo 17: Split U into 3 sections and recurse 
+    // TODO: Combine these the way I do for MultUU, etc.
     template <int s, class M>
     struct InvertU_Helper<17,s,M>
     {
@@ -359,7 +360,7 @@ namespace tmv {
                 const int s2p2 = IntTraits<s2p1>::Sp1;
                 // nops = 1/6 n(n+1)(n+2)
                 const int nops =
-                    IntTraits2<IntTraits2<s2,s2p1>::prod,s2p2>::prod / 6;
+                    IntTraits2<IntTraits2<s2,s2p1>::safeprod,s2p2>::safeprod/6;
                 const bool unroll =
                     s == UNKNOWN ? false :
                     nops > TMV_Q1 ? false :
@@ -471,7 +472,7 @@ namespace tmv {
             const int s2p2 = IntTraits<s2p1>::Sp1;
             // nops = 1/6 n(n+1)(n+2)
             const int nops =
-                IntTraits2<IntTraits2<s2,s2p1>::prod,s2p2>::prod / 6;
+                IntTraits2<IntTraits2<s2,s2p1>::safeprod,s2p2>::safeprod / 6;
             const bool unroll = 
                 s == UNKNOWN ? false :
                 nops > TMV_Q1 ? false :

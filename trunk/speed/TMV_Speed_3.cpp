@@ -589,10 +589,11 @@ const int nloops2x = (
 
 static void ClearCache()
 {
-    tmv::Vector<double> X(100000,8.);
-    tmv::Vector<double> Y(100000,8.);
-    tmv::Vector<double> Z(100000);
+    tmv::Vector<double> X(1000000,8.);
+    tmv::Vector<double> Y(1000000,8.);
+    tmv::Vector<double> Z(1000000);
     Z = X + Y;
+    if (Norm(Z) < 5.) exit(1);
 }
 
 #ifdef DOMULTMM_CCC

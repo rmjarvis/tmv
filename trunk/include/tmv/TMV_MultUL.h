@@ -62,7 +62,7 @@
 #define TMV_Q1 0
 #endif
 
-// Q2 is the minimum size to keep recursing.
+// Q2 is the size to stop recursing.
 #define TMV_Q2 8
 
 namespace tmv {
@@ -458,129 +458,53 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUL_Helper<17,s,add,ix,T,M1,M2,M3> 
     {
-        template <int which, int dummy> 
-        struct Helper2;
-
-        template <int dummy> 
-        struct Helper2<0,dummy> // s == UNKNOWN
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            static void call(
-                const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-            {
-                const int N = m1.size();
-#ifdef TMV_OPT_CLEANUP
-                const int algo2 = 16;
-#elif (TMV_Q2 == 2)
-                const int algo2 = 1;
-#else
-                const bool rxr = M1::mrowmajor && M3::mrowmajor;
-                const bool crx = M1::mcolmajor && M2::mrowmajor;
-                const bool xcc = M2::mcolmajor && M3::mcolmajor;
-                const int algo2 = rxr ? 12 : crx ? 13 : xcc ? 11 : 13;
+            const int N = s==UNKNOWN ? int(m1.size()) : s;
+#ifdef PRINTALGO_UL
+            std::cout<<"UL algo 17: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
 
-                const int xx = UNKNOWN;
-                if (N < TMV_Q2) {
-                    MultUL_Helper<algo2,xx,add,ix,T,M1,M2,M3>::call(
-                        x,m1,m2,m3);
-                } else {
-                    // [ C00 C01 ] = [ A00 A01 ] [ B00  0  ]
-                    // [ C10 C11 ]   [  0  A11 ] [ B10 B11 ]
+#if (TMV_Q2 == 1)
+            const int algo2 = (s == UNKNOWN || s == 1) ? 1 : 0;
+#else
+            const int sp1 = IntTraits<s>::Sp1;
+            const int twosp1 = IntTraits<IntTraits<s>::twoS>::Sp1;
+            // nops = 1/6 n(n+1)(2n+1)
+            const int nops = 
+                IntTraits2<IntTraits2<s,sp1>::safeprod,twosp1>::safeprod / 6;
+            const bool unroll = 
+                s > 20 ? false :
+                s == UNKNOWN ? false :
+                nops > TMV_Q1 ? false :
+                s <= 10;
+            const bool rxr = M1::mrowmajor && M3::mrowmajor;
+            const bool crx = M1::mcolmajor && M2::mrowmajor;
+            const bool xcc = M2::mcolmajor && M3::mcolmajor;
+            const int algo2 = 
+                s == 0 ? 0 :
+                s == 1 ? 1 :
+                (s != UNKNOWN && s > TMV_Q2) ? 0 :
+#ifdef TMV_OPT_CLEANUP
+                s == UNKNOWN ? 16 :
+#endif
+                unroll ? 16 : 
+                rxr ? 12 : crx ? 13 : xcc ? 11 : 13;
+#endif
+            const int algo3 =  // The algorithm for N > Q2
+                (s == UNKNOWN || s > TMV_Q2) ? 17 : 0;
+            const int algo4 =  // The algorithm for MultMM, MultUM
+                s == UNKNOWN ? -2 : s > 16 ? -3 : s > TMV_Q2 ? -4 : 0;
 
-                    const int Nx = N > 16 ? ((((N-1)>>5)+1)<<4) : (N>>1);
-                    // (If N > 16, round N/2 up to a multiple of 16.)
-
-                    typedef typename M1::const_subtrimatrix_type M1st;
-                    typedef typename M1::const_submatrix_type M1sm;
-                    typedef typename M1sm::const_transpose_type M1smt;
-                    typedef typename M2::const_subtrimatrix_type M2st;
-                    typedef typename M2st::const_transpose_type M2stt;
-                    typedef typename M2::const_submatrix_type M2sm;
-                    typedef typename M3::submatrix_type M3sm;
-                    typedef typename M3sm::transpose_type M3smt;
-
-                    M1st A00 = m1.cSubTriMatrix(0,Nx);
-                    M1sm A01 = m1.cSubMatrix(0,Nx,Nx,N);
-                    M1smt A01t = A01.transpose();
-                    M1st A11 = m1.cSubTriMatrix(Nx,N);
-                    M2st B00 = m2.cSubTriMatrix(0,Nx);
-                    M2sm B10 = m2.cSubMatrix(Nx,N,0,Nx);
-                    M2st B11 = m2.cSubTriMatrix(Nx,N);
-                    M2stt B11t = B11.transpose();
-                    M3sm C00 = m3.cSubMatrix(0,Nx,0,Nx);
-                    M3sm C01 = m3.cSubMatrix(0,Nx,Nx,N);
-                    M3smt C01t = C01.transpose();
-                    M3sm C10 = m3.cSubMatrix(Nx,N,0,Nx);
-                    M3sm C11 = m3.cSubMatrix(Nx,N,Nx,N);
-
-                    // C00 (+)= x A00 B00
-                    MultUL_Helper<17,xx,add,ix,T,M1st,M2st,M3sm>::call(
-                        x,A00,B00,C00);
-
-                    // C00 += A01 B10
-                    MultMM_Helper<-2,xx,xx,xx,true,ix,T,M1sm,M2sm,M3sm>::call(
-                        x,A01,B10,C00);
-
-                    // We set up the storage so that it's ok if all three
-                    // matrices are in the same place with the same steps.
-                    // Or if B is the opposite storage and A is somewhere else.
-                    // So in the next lines, it is guaranteed that the 
-                    // C10 assignment doesn't clobber the A01 that is needed
-                    // next.
-                    
-                    // C10 (+)= A11 B10
-                    MultUM_Helper<-2,xx,xx,add,ix,T,M1st,M2sm,M3sm>::call(
-                        x,A11,B10,C10);
-
-                    // C01 (+)= A01 B11
-                    MultUM_Helper<-2,xx,xx,add,ix,T,M2stt,M1smt,M3smt>::
-                        call(x,B11t,A01t,C01t);
-
-                    // C11 (+)= x A11 B11
-                    MultUL_Helper<17,xx,add,ix,T,M1st,M2st,M3sm>::call(
-                        x,A11,B11,C11);
-                }
-            }
-        };
-        template <int dummy> 
-        struct Helper2<1,dummy> // s < TMV_Q2
-        {
-            static void call(
-                const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-            {
-                const int sp1 = IntTraits<s>::Sp1;
-                const int twosp1 = IntTraits<IntTraits<s>::twoS>::Sp1;
-                // nops = 1/6 n(n+1)(2n+1)
-                const int nops = 
-                    IntTraits2<IntTraits2<s,sp1>::prod,twosp1>::prod / 6;
-                const bool unroll = 
-                    s > 20 ? false :
-                    nops > TMV_Q1 ? false :
-                    s <= 10;
-                const bool rxr = M1::mrowmajor && M3::mrowmajor;
-                const bool crx = M1::mcolmajor && M2::mrowmajor;
-                const bool xcc = M2::mcolmajor && M3::mcolmajor;
-                const int algo2 = 
-                    s == 0 ? 0 :
-                    s == 1 ? 1 :
-                    unroll ? 16 : 
-                    rxr ? 12 : crx ? 13 : xcc ? 11 : 13;
-                MultUL_Helper<algo2,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
-            }
-        };
-        template <int dummy> 
-        struct Helper2<2,dummy> // s >= TMV_Q2
-        {
-            static void call(
-                const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-            {
+            if (N > TMV_Q2) {
                 // [ C00 C01 ] = [ A00 A01 ] [ B00  0  ]
                 // [ C10 C11 ]   [  0  A11 ] [ B10 B11 ]
 
-                const int N = s;
                 const int Nx = N > 16 ? ((((N-1)>>5)+1)<<4) : (N>>1);
                 // (If N > 16, round N/2 up to a multiple of 16.)
-                const int Ny = N - Nx;
+                const int sx = IntTraits<s>::half_roundup;
+                const int sy = s == UNKNOWN ? s : s-sx;
 
                 typedef typename M1::const_subtrimatrix_type M1st;
                 typedef typename M1::const_submatrix_type M1sm;
@@ -606,37 +530,34 @@ namespace tmv {
                 M3sm C11 = m3.cSubMatrix(Nx,N,Nx,N);
 
                 // C00 (+)= x A00 B00
-                MultUL_Helper<17,Nx,add,ix,T,M1st,M2st,M3sm>::call(
+                MultUL_Helper<algo3,sx,add,ix,T,M1st,M2st,M3sm>::call(
                     x,A00,B00,C00);
 
                 // C00 += A01 B10
-                MultMM_Helper<-2,Nx,Nx,Ny,true,ix,T,M1sm,M2sm,M3sm>::call(
+                MultMM_Helper<algo4,sx,sx,sy,true,ix,T,M1sm,M2sm,M3sm>::call(
                     x,A01,B10,C00);
 
+                // We set up the storage so that it's ok if all three
+                // matrices are in the same place with the same steps.
+                // Or if B is the opposite storage and A is somewhere else.
+                // So in the next lines, it is guaranteed that the 
+                // C10 assignment doesn't clobber the A01 that is needed
+                // next.
+
                 // C10 (+)= A11 B10
-                MultUM_Helper<-2,Ny,Nx,add,ix,T,M1st,M2sm,M3sm>::call(
+                MultUM_Helper<algo4,sy,sx,add,ix,T,M1st,M2sm,M3sm>::call(
                     x,A11,B10,C10);
 
                 // C01 (+)= A01 B11
-                MultUM_Helper<-2,Ny,Nx,add,ix,T,M2stt,M1smt,M3smt>::
+                MultUM_Helper<algo4,sy,sx,add,ix,T,M2stt,M1smt,M3smt>::
                     call(x,B11t,A01t,C01t);
 
                 // C11 (+)= x A11 B11
-                MultUL_Helper<17,Ny,add,ix,T,M1st,M2st,M3sm>::call(
+                MultUL_Helper<algo3,sy,add,ix,T,M1st,M2st,M3sm>::call(
                     x,A11,B11,C11);
+            } else {
+                MultUL_Helper<algo2,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
             }
-        };
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
-#ifdef PRINTALGO_UL
-            const int N = s==UNKNOWN ? int(m1.size()) : s;
-            std::cout<<"UL algo 17: N,s,x = "<<N<<
-                ','<<s<<','<<T(x)<<std::endl;
-#endif
-            const int s2 = (s >= 0 && s <= 64) ? s : UNKNOWN;
-            const int which = s2 == UNKNOWN ? 0 : s2 < TMV_Q2 ? 1 : 2;
-            Helper2<which,1>::call(x,m1,m2,m3);
         }
     };
 
@@ -926,128 +847,52 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUL_Helper<27,s,add,ix,T,M1,M2,M3> 
     {
-        template <int which, int dummy> 
-        struct Helper2;
-
-        template <int dummy> 
-        struct Helper2<0,dummy> // s == UNKNOWN
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            static void call(
-                const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-            {
-                const int N = m1.size();
-#ifdef TMV_OPT_CLEANUP
-                const int algo2 = 26;
-#elif (TMV_Q2 == 2)
-                const int algo2 = 1;
-#else
-                const bool rxr = M1::mrowmajor && M3::mrowmajor;
-                const bool crx = M1::mcolmajor && M2::mrowmajor;
-                const bool xcc = M2::mcolmajor && M3::mcolmajor;
-                const int algo2 = rxr ? 22 : crx ? 23 : xcc ? 21 : 23;
+            const int N = s==UNKNOWN ? int(m1.size()) : s;
+#ifdef PRINTALGO_UL
+            std::cout<<"UL algo 27: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
 
-                const int xx = UNKNOWN;
-                if (N < TMV_Q2) {
-                    MultUL_Helper<algo2,xx,add,ix,T,M1,M2,M3>::call(
-                        x,m1,m2,m3);
-                } else {
-                    // [ C00 C01 ] = [ A00  0  ] [ B00 B01 ]
-                    // [ C10 C11 ]   [ A10 A11 ] [  0  B11 ]
+#if (TMV_Q2 == 1)
+            const int algo2 = (s == UNKNOWN || s == 1) ? 1 : 0;
+#else
+            const int sp1 = IntTraits<s>::Sp1;
+            const int twosp1 = IntTraits<IntTraits<s>::twoS>::Sp1;
+            // nops = 1/6 n(n+1)(2n+1)
+            const int nops = 
+                IntTraits2<IntTraits2<s,sp1>::safeprod,twosp1>::safeprod / 6;
+            const bool unroll = 
+                s > 20 ? false :
+                nops > TMV_Q1 ? false :
+                s <= 10;
+            const bool rxr = M1::mrowmajor && M3::mrowmajor;
+            const bool crx = M1::mcolmajor && M2::mrowmajor;
+            const bool xcc = M2::mcolmajor && M3::mcolmajor;
+            const int algo2 = 
+                s == 0 ? 0 :
+                s == 1 ? 1 :
+                (s != UNKNOWN && s > TMV_Q2) ? 0 :
+#ifdef TMV_OPT_CLEANUP
+                s == UNKNOWN ? 26 :
+#endif
+                unroll ? 26 : 
+                rxr ? 22 : crx ? 23 : xcc ? 21 : 23;
+#endif
+            const int algo3 =  // The algorithm for N > Q2
+                (s == UNKNOWN || s > TMV_Q2) ? 27 : 0;
+            const int algo4 =  // The algorithm for MultMM, MultUM
+                s == UNKNOWN ? -2 : s > 16 ? -3 : s > TMV_Q2 ? -4 : 0;
 
-                    const int Nx = N > 16 ? ((((N-1)>>5)+1)<<4) : (N>>1);
-                    // (If N > 16, round N/2 up to a multiple of 16.)
-
-                    typedef typename M1::const_subtrimatrix_type M1st;
-                    typedef typename M1::const_submatrix_type M1sm;
-                    typedef typename M1sm::const_transpose_type M1smt;
-                    typedef typename M2::const_subtrimatrix_type M2st;
-                    typedef typename M2st::const_transpose_type M2stt;
-                    typedef typename M2::const_submatrix_type M2sm;
-                    typedef typename M3::submatrix_type M3sm;
-                    typedef typename M3sm::transpose_type M3smt;
-
-                    M1st A00 = m1.cSubTriMatrix(0,Nx);
-                    M1sm A10 = m1.cSubMatrix(Nx,N,0,Nx);
-                    M1smt A10t = A10.transpose();
-                    M1st A11 = m1.cSubTriMatrix(Nx,N);
-                    M2st B00 = m2.cSubTriMatrix(0,Nx);
-                    M2stt B00t = B00.transpose();
-                    M2sm B01 = m2.cSubMatrix(0,Nx,Nx,N);
-                    M2st B11 = m2.cSubTriMatrix(Nx,N);
-                    M3sm C00 = m3.cSubMatrix(0,Nx,0,Nx);
-                    M3sm C01 = m3.cSubMatrix(0,Nx,Nx,N);
-                    M3smt C10t = m3.cSubMatrix(Nx,N,0,Nx).transpose();
-                    M3sm C11 = m3.cSubMatrix(Nx,N,Nx,N);
-
-                    // C11 (+)= x A11 B11
-                    MultUL_Helper<27,xx,add,ix,T,M1st,M2st,M3sm>::call(
-                        x,A11,B11,C11);
-
-                    // C11 += A10 B01
-                    MultMM_Helper<-2,xx,xx,xx,true,ix,T,M1sm,M2sm,M3sm>::call(
-                        x,A10,B01,C11);
-
-                    // We set up the storage so that it's ok if all three
-                    // matrices are in the same place with the same steps.
-                    // Or if B is the opposite storage and A is somewhere else.
-                    // So in the next lines, it is guaranteed that the 
-                    // C01 assignment doesn't clobber the A10 that is needed
-                    // next.
-                    
-                    // C01 (+)= A00 B01
-                    MultUM_Helper<-2,xx,xx,add,ix,T,M1st,M2sm,M3sm>::call(
-                        x,A00,B01,C01);
-
-                    // C10 (+)= A10 B00
-                    MultUM_Helper<-2,xx,xx,add,ix,T,M2stt,M1smt,M3smt>::
-                        call(x,B00t,A10t,C10t);
-
-                    // C00 (+)= x A00 B00
-                    MultUL_Helper<27,xx,add,ix,T,M1st,M2st,M3sm>::call(
-                        x,A00,B00,C00);
-                }
-            }
-        };
-        template <int dummy> 
-        struct Helper2<1,dummy> // s < TMV_Q2
-        {
-            static void call(
-                const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-            {
-                const int sp1 = IntTraits<s>::Sp1;
-                const int twosp1 = IntTraits<IntTraits<s>::twoS>::Sp1;
-                // nops = 1/6 n(n+1)(2n+1)
-                const int nops = 
-                    IntTraits2<IntTraits2<s,sp1>::prod,twosp1>::prod / 6;
-                const bool unroll = 
-                    s > 20 ? false :
-                    nops > TMV_Q1 ? false :
-                    s <= 10;
-                const bool rxr = M1::mrowmajor && M3::mrowmajor;
-                const bool crx = M1::mcolmajor && M2::mrowmajor;
-                const bool xcc = M2::mcolmajor && M3::mcolmajor;
-                const int algo2 = 
-                    s == 0 ? 0 :
-                    s == 1 ? 1 :
-                    unroll ? 26 : 
-                    rxr ? 22 : crx ? 23 : xcc ? 21 : 23;
-                MultUL_Helper<algo2,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
-            }
-        };
-        template <int dummy> 
-        struct Helper2<2,dummy> // s >= TMV_Q2
-        {
-            static void call(
-                const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-            {
+            if (N > TMV_Q2) {
                 // [ C00 C01 ] = [ A00  0  ] [ B00 B01 ]
                 // [ C10 C11 ]   [ A10 A11 ] [  0  B11 ]
 
-                const int N = s;
                 const int Nx = N > 16 ? ((((N-1)>>5)+1)<<4) : (N>>1);
                 // (If N > 16, round N/2 up to a multiple of 16.)
-                const int Ny = N - Nx;
+                const int sx = IntTraits<s>::half_roundup;
+                const int sy = s == UNKNOWN ? s : s-sx;
 
                 typedef typename M1::const_subtrimatrix_type M1st;
                 typedef typename M1::const_submatrix_type M1sm;
@@ -1072,37 +917,27 @@ namespace tmv {
                 M3sm C11 = m3.cSubMatrix(Nx,N,Nx,N);
 
                 // C11 (+)= x A11 B11
-                MultUL_Helper<27,Ny,add,ix,T,M1st,M2st,M3sm>::call(
+                MultUL_Helper<algo3,sy,add,ix,T,M1st,M2st,M3sm>::call(
                     x,A11,B11,C11);
 
                 // C11 += A10 B01
-                MultMM_Helper<-2,Ny,Ny,Nx,true,ix,T,M1sm,M2sm,M3sm>::call(
+                MultMM_Helper<algo4,sy,sy,sx,true,ix,T,M1sm,M2sm,M3sm>::call(
                     x,A10,B01,C11);
 
                 // C01 (+)= A00 B01
-                MultUM_Helper<-2,Nx,Ny,add,ix,T,M1st,M2sm,M3sm>::call(
+                MultUM_Helper<algo4,sx,sy,add,ix,T,M1st,M2sm,M3sm>::call(
                     x,A00,B01,C01);
 
                 // C10 (+)= A10 B00
-                MultUM_Helper<-2,Nx,Ny,add,ix,T,M2stt,M1smt,M3smt>::
+                MultUM_Helper<algo4,sx,sy,add,ix,T,M2stt,M1smt,M3smt>::
                     call(x,B00t,A10t,C10t);
 
                 // C00 (+)= x A00 B00
-                MultUL_Helper<27,Nx,add,ix,T,M1st,M2st,M3sm>::call(
+                MultUL_Helper<algo3,sx,add,ix,T,M1st,M2st,M3sm>::call(
                     x,A00,B00,C00);
+            } else {
+                MultUL_Helper<algo2,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
             }
-        };
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
-#ifdef PRINTALGO_UL
-            const int N = s==UNKNOWN ? int(m1.size()) : s;
-            std::cout<<"UL algo 27: N,s,x = "<<N<<
-                ','<<s<<','<<T(x)<<std::endl;
-#endif
-            const int s2 = (s >= 0 && s <= 64) ? s : UNKNOWN;
-            const int which = s2 == UNKNOWN ? 0 : s2 < TMV_Q2 ? 1 : 2;
-            Helper2<which,1>::call(x,m1,m2,m3);
         }
     };
 
@@ -1205,7 +1040,7 @@ namespace tmv {
             const int twos2p1 = IntTraits<IntTraits<s2>::twoS>::Sp1;
             // nops = 1/6 n(n+1)(2n+1)
             const int nops = 
-                IntTraits2<IntTraits2<s2,s2p1>::prod,twos2p1>::prod / 6;
+                IntTraits2<IntTraits2<s2,s2p1>::safeprod,twos2p1>::safeprod / 6;
             const bool unroll = 
                 s == UNKNOWN ? false :
                 nops > TMV_Q1 ? false :

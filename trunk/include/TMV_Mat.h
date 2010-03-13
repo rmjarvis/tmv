@@ -62,6 +62,7 @@
 #include "tmv/TMV_ProdMM.h"
 #endif
 
+#include "tmv/TMV_LUDecompose.h"
 #if 0
 #include "tmv/TMV_LUD.h"
 #include "tmv/TMV_QRD.h"
