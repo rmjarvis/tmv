@@ -172,6 +172,82 @@ namespace tmv {
         }
     };
 
+    // algo 201: same as 1, but use -2 algo
+    template <int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    struct Rank1VVM_Helper<201,1,rs,add,ix,T,V1,V2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
+        {
+#ifdef PRINTALGO_R1
+            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
+            std::cout<<"R1 algo 201: M,N,cs,rs,x = "<<1<<','<<N<<
+                ','<<1<<','<<rs<<','<<T(x)<<std::endl;
+#endif
+            typedef typename M3::row_type M3r;
+            M3r m30 = m3.get_row(0);
+            typedef typename Traits2<T,typename V1::value_type>::type PT1;
+            MultXV_Helper<-2,rs,add,0,PT1,V2,M3r>::call(x*v1.cref(0),v2,m30); 
+        }
+    };
+
+    // algo 202: same as 2, but use -2 algo
+    template <int cs, bool add, int ix, class T, class V1, class V2, class M3>
+    struct Rank1VVM_Helper<202,cs,1,add,ix,T,V1,V2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
+        {
+#ifdef PRINTALGO_R1
+            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
+            std::cout<<"R1 algo 202: M,N,cs,rs,x = "<<M<<','<<1<<
+                ','<<cs<<','<<1<<','<<T(x)<<std::endl;
+#endif
+            typedef typename M3::col_type M3c;
+            typedef typename Traits2<T,typename V2::value_type>::type PT2;
+            M3c m30 = m3.get_col(0);
+            MultXV_Helper<-2,cs,add,0,PT2,V1,M3c>::call(x*v2.cref(0),v1,m30); 
+        }
+    };
+
+    // algo 401: same as 1, but use -4 algo
+    template <int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    struct Rank1VVM_Helper<401,1,rs,add,ix,T,V1,V2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
+        {
+#ifdef PRINTALGO_R1
+            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
+            std::cout<<"R1 algo 401: M,N,cs,rs,x = "<<1<<','<<N<<
+                ','<<1<<','<<rs<<','<<T(x)<<std::endl;
+#endif
+            typedef typename M3::row_type M3r;
+            M3r m30 = m3.get_row(0);
+            typedef typename Traits2<T,typename V1::value_type>::type PT1;
+            MultXV_Helper<-4,rs,add,0,PT1,V2,M3r>::call(x*v1.cref(0),v2,m30); 
+        }
+    };
+
+    // algo 402: same as 2, but use -4 algo
+    template <int cs, bool add, int ix, class T, class V1, class V2, class M3>
+    struct Rank1VVM_Helper<402,cs,1,add,ix,T,V1,V2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
+        {
+#ifdef PRINTALGO_R1
+            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
+            std::cout<<"R1 algo 402: M,N,cs,rs,x = "<<M<<','<<1<<
+                ','<<cs<<','<<1<<','<<T(x)<<std::endl;
+#endif
+            typedef typename M3::col_type M3c;
+            typedef typename Traits2<T,typename V2::value_type>::type PT2;
+            M3c m30 = m3.get_col(0);
+            MultXV_Helper<-4,cs,add,0,PT2,V1,M3c>::call(x*v2.cref(0),v1,m30); 
+        }
+    };
+
     // algo 3: Transpose
     template <int cs, int rs, bool add, 
               int ix, class T, class V1, class V2, class M3>
@@ -1199,8 +1275,8 @@ namespace tmv {
 #if TMV_OPT >= 1
             const int algo = 
                 ( rs == 0 || cs == 0 ) ? 0 : 
-                ( cs == 1 ) ? 1 :
-                ( rs == 1 ) ? 2 :
+                ( cs == 1 ) ? 401 :
+                ( rs == 1 ) ? 402 :
                 M3::mcolmajor ? ( 
                     ( cs == UNKNOWN || rs == UNKNOWN ) ? (
                         ( M3::miscomplex ? 16 : 13 ) ) :
@@ -1264,8 +1340,8 @@ namespace tmv {
 #if TMV_OPT >= 1
             const int algo = 
                 ( rs == 0 || cs == 0 ) ? 0 : 
-                ( cs == 1 ) ? 1 :
-                ( rs == 1 ) ? 2 :
+                ( cs == 1 ) ? 401 :
+                ( rs == 1 ) ? 402 :
                 M3::mcolmajor ? (
                     ( cs == UNKNOWN || rs == UNKNOWN ) ? (
                         ( V1::vstep != 1 ? 83 : 
@@ -1372,8 +1448,8 @@ namespace tmv {
             const bool conj = M3::mconj;
             const int algo = 
                 ( rs == 0 || cs == 0 ) ? 0 : 
-                ( cs == 1 ) ? 1 :
-                ( rs == 1 ) ? 2 :
+                ( cs == 1 ) ? 201 :
+                ( rs == 1 ) ? 202 :
                 conj ? 97 :
                 inst ? 98 :
                 -3;

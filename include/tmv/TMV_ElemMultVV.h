@@ -345,23 +345,6 @@ namespace tmv {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         typedef typename V3::iterator IT3;
-        static void call(
-            const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
-        { ElemMultVV_Helper<-3,size,add,ix,T,V1,V2,V3>::call(x1,v1,v2,v3); }
-        static void call2(
-            const int n,
-            const Scaling<ix,T>& x1, const IT1& x, const IT2& y, IT3& z)
-        { ElemMultVV_Helper<-3,size,add,ix,T,V1,V2,V3>::call2(n,x1,x,y,z); }
-    };
-
-    // algo -3: Determine which algorithm to use
-    template <int size, bool add, 
-              int ix, class T, class V1, class V2, class V3>
-    struct ElemMultVV_Helper<-3,size,add,ix,T,V1,V2,V3> 
-    {
-        typedef typename V1::const_nonconj_type::const_iterator IT1;
-        typedef typename V2::const_nonconj_type::const_iterator IT2;
-        typedef typename V3::iterator IT3;
         typedef typename V3::real_type RT;
         typedef typename V3::value_type VT;
         enum { allunit =
@@ -388,6 +371,16 @@ namespace tmv {
             TMVStaticAssert(!V3::vconj);
             ElemMultVV_Helper<algo,size,add,ix,T,V1,V2,V3>::call2(n,x1,x,y,z); 
         }
+    };
+
+    // algo -3: Determine which algorithm to use
+    template <int size, bool add, 
+              int ix, class T, class V1, class V2, class V3>
+    struct ElemMultVV_Helper<-3,size,add,ix,T,V1,V2,V3> 
+    {
+        static void call(
+            const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
+        { ElemMultVV_Helper<-4,size,add,ix,T,V1,V2,V3>::call(x1,v1,v2,v3); }
     };
 
     // algo 97: Conjugate
@@ -457,7 +450,7 @@ namespace tmv {
             const int algo =
                 V3::vconj ? 97 : 
                 inst ? 98 : 
-                -3;
+                -4;
             ElemMultVV_Helper<algo,size,add,ix,T,V1,V2,V3>::call(
                 x1,v1,v2,v3); 
         }
@@ -588,7 +581,7 @@ namespace tmv {
         V1v v1v = v1.cView();
         V2v v2v = v2.cView();
         V3v v3v = v3.cView();
-        ElemMultVV_Helper<-3,size,add,ix,T,V1v,V2v,V3v>::call(
+        ElemMultVV_Helper<-4,size,add,ix,T,V1v,V2v,V3v>::call(
             x1,v1v,v2v,v3v);
     }
 

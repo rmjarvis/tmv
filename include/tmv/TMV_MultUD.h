@@ -321,9 +321,9 @@ namespace tmv {
         }
     };
 
-    // algo 17: UpperTri: Unroll by columns
+    // algo 16: UpperTri: Unroll by columns
     template <int s, bool add, int ix, class T, class M1, class M2, class M3>
-    struct MultUD_Helper<17,s,add,ix,T,M1,M2,M3> 
+    struct MultUD_Helper<16,s,add,ix,T,M1,M2,M3> 
     {
         template <int I, int N>
         struct Unroller
@@ -365,7 +365,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UD
-            std::cout<<"UD algo 17: N,s,x = "<<2<<','<<2<<','<<T(x)<<std::endl;
+            std::cout<<"UD algo 16: N,s,x = "<<2<<','<<2<<','<<T(x)<<std::endl;
 #endif
             Unroller<0,s>::unroll(x,m1,m2,m3); 
         }
@@ -550,9 +550,9 @@ namespace tmv {
         }
     };
 
-    // algo 27: LowerTri: Unroll by columns
+    // algo 26: LowerTri: Unroll by columns
     template <int s, bool add, int ix, class T, class M1, class M2, class M3>
-    struct MultUD_Helper<27,s,add,ix,T,M1,M2,M3> 
+    struct MultUD_Helper<26,s,add,ix,T,M1,M2,M3> 
     {
         // [ C00  0  ] = [ A00  0  ] [ B00  0  ]
         // [ C10 C11 ]   [ A10 A11 ] [  0  B11 ]
@@ -596,7 +596,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UD
-            std::cout<<"UD algo 27: N,s,x = "<<2<<','<<2<<','<<T(x)<<std::endl;
+            std::cout<<"UD algo 26: N,s,x = "<<2<<','<<2<<','<<T(x)<<std::endl;
 #endif
             Unroller<0,s>::unroll(x,m1,m2,m3); 
         }
@@ -688,7 +688,7 @@ namespace tmv {
             const int s2 = s > 20 ? UNKNOWN : s;
             const int s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)/2
-            const int nops = IntTraits2<s2,s2p1>::prod / 2;
+            const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
                 s == UNKNOWN ? false :
                 nops > TMV_Q1 ? false :
@@ -702,12 +702,12 @@ namespace tmv {
                 ( s == 0 ) ? 0 :
                 ( s == 1 ) ? 1 :
                 M3::mupper ? ( // UpperTri
-                    unroll ? 17 :
+                    unroll ? 16 :
                     bothrm ? ( ( s != UNKNOWN && s <= 10 ) ? 14 : 15 ) :
                     bothcm ? ( ( s != UNKNOWN && s <= 10 ) ? 11 : 12 ) :
                     ( s != UNKNOWN && s <= 10 ) ? 11 : 12 ) :
                 ( // LowerTri
-                    unroll ? 27 :
+                    unroll ? 26 :
                     bothrm ? ( ( s != UNKNOWN && s <= 10 ) ? 24 : 25 ) :
                     bothcm ? ( ( s != UNKNOWN && s <= 10 ) ? 21 : 22 ) :
                     ( M1::mrowmajor && !docopy ) ? ( 
@@ -735,7 +735,7 @@ namespace tmv {
             // 12 = column major - use iterators
             // 14 = row major - basic loop
             // 15 = row major - use iterators
-            // 17 = unroll
+            // 16 = unroll
             // 19 = m1 is unitdiag
             //
             // LowerTri:
@@ -743,7 +743,7 @@ namespace tmv {
             // 22 = column major - use iterators
             // 24 = row major - basic loop
             // 25 = row major - use iterators
-            // 27 = unroll
+            // 26 = unroll
             // 29 = m1 is unitdiag
             // 
             // 82 = copy x*m2
@@ -759,7 +759,7 @@ namespace tmv {
             const int s2 = s > 20 ? UNKNOWN : s;
             const int s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)/2
-            const int nops = IntTraits2<s2,s2p1>::prod / 2;
+            const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
                 s == UNKNOWN ? false :
                 nops > TMV_Q1 ? false :
@@ -768,7 +768,7 @@ namespace tmv {
                 ( s == 0 ) ? 0 :
                 ( s == 1 ) ? 1 :
                 M3::mupper ? ( // UpperTri
-                    unroll ? 17 :
+                    unroll ? 16 :
                     bothrm ? (
                         docopy ? 82 :
                         ( s != UNKNOWN && s <= 10 ) ? 14 : 15 ) :
@@ -776,7 +776,7 @@ namespace tmv {
                         ( s != UNKNOWN && s <= 10 ) ? 11 : 12 ) :
                     ( s != UNKNOWN && s <= 10 ) ? 11 : 12 ) :
                 ( // LowerTri
-                    unroll ? 27 :
+                    unroll ? 26 :
                     bothrm ? (
                         docopy ? 82 :
                         ( s != UNKNOWN && s <= 10 ) ? 24 : 25 ) :

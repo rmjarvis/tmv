@@ -63,8 +63,6 @@ namespace tmv {
     void InstReversePermuteRows(
         MatrixView<T> m, const int*const p, const int i1, const int i2);
 
-    const int TMV_PERM_BLOCKSIZE = 32;
-
     //
     // PermuteRows
     //

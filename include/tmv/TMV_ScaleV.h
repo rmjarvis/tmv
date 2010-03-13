@@ -495,6 +495,7 @@ namespace tmv {
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
             typename V::value_type xx(x);
+            TMVStaticAssert(!V::vconj);
             InstScale(xx,v.xView());
         }
     };
@@ -538,27 +539,11 @@ namespace tmv {
     }
 
     template <int ix, class T, class V>
-    inline void NoAliasScale(const Scaling<ix,T>& x, BaseVector_Mutable<V>& v)
-    {
-        typedef typename V::cview_type Vv;
-        Vv vv = v.cView();
-        ScaleV_Helper<-2,V::vsize,ix,T,Vv>::call(x,vv);
-    }
-
-    template <int ix, class T, class V>
     inline void InlineScale(const Scaling<ix,T>& x, BaseVector_Mutable<V>& v)
     {
         typedef typename V::cview_type Vv;
         Vv vv = v.cView();
         ScaleV_Helper<-4,V::vsize,ix,T,Vv>::call(x,vv);
-    }
-
-    template <int ix, class T, class V>
-    inline void AliasScale(const Scaling<ix,T>& x, BaseVector_Mutable<V>& v)
-    {
-        typedef typename V::cview_type Vv;
-        Vv vv = v.cView();
-        ScaleV_Helper<-2,V::vsize,ix,T,Vv>::call(x,vv);
     }
 
 } // namespace tmv

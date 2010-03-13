@@ -258,7 +258,7 @@ namespace tmv {
             const int s2 = s > 20 ? UNKNOWN : s;
             const int s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)/2
-            const int nops = IntTraits2<s2,s2p1>::prod / 2;
+            const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
                 s == UNKNOWN ? false :
                 // Norm is faster with the regular algorithm except for 

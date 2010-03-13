@@ -815,7 +815,7 @@ namespace tmv {
     {
         typedef typename ProdType<V1,V2>::type PT;
         static inline PT call(const V1& v1, const V2& v2)
-        { return MultVV_Helper<-1,size,V2,V1>::call(v2,v1); }
+        { return MultVV_Helper<-2,size,V2,V1>::call(v2,v1); }
     };
 
 
@@ -830,7 +830,7 @@ namespace tmv {
             typedef typename V2::const_conjugate_type V2c;
             V1c v1c = v1.conjugate();
             V2c v2c = v2.conjugate();
-            return TMV_CONJ(MultVV_Helper<-1,size,V1c,V2c>::call(v1c,v2c));
+            return TMV_CONJ(MultVV_Helper<-2,size,V1c,V2c>::call(v1c,v2c));
         }
     };
 
@@ -843,9 +843,9 @@ namespace tmv {
         { return InstMultVV(v1.xView(),v2.xView()); }
     };
 
-    // algo -1: Check for inst
+    // algo -2: Check for inst
     template <int size, class V1, class V2>
-    struct MultVV_Helper<-1,size,V1,V2> 
+    struct MultVV_Helper<-2,size,V1,V2> 
     {
         typedef typename ProdType<V1,V2>::type PT;
         static inline PT call(const V1& v1, const V2& v2)
@@ -871,6 +871,15 @@ namespace tmv {
         }
     };
 
+    // algo -1: Check for alias? No.
+    template <int size, class V1, class V2>
+    struct MultVV_Helper<-1,size,V1,V2> 
+    {
+        typedef typename ProdType<V1,V2>::type PT;
+        static inline PT call(const V1& v1, const V2& v2)
+        { return MultVV_Helper<-2,size,V1,V2>::call(v1,v2); }
+    };
+
     template <class V1, class V2> 
     inline typename ProdType<V1,V2>::type MultVV(
         const BaseVector_Calc<V1>& v1, const BaseVector_Calc<V2>& v2)
@@ -882,7 +891,7 @@ namespace tmv {
         typedef typename V2::const_cview_type V2v;
         V1v v1v = v1.cView();
         V2v v2v = v2.cView();
-        return MultVV_Helper<-1,size,V1v,V2v>::call(v1v,v2v);
+        return MultVV_Helper<-2,size,V1v,V2v>::call(v1v,v2v);
     }
 
     template <class V1, class V2> 

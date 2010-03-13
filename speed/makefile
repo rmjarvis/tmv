@@ -15,26 +15,24 @@ EIGEN= -I../eigen
 #INCLUDE= -I../../tags/v0.63/include $(EIGEN) -DTMV_V063
 INCLUDE= -I../include $(EIGEN)
 CC= g++-4
-CFLAGS= $(INCLUDE) -DNDEBUG -g -O2 -DTMV_INLINE -DTMV_OPT=3
+#CFLAGS= $(INCLUDE) -DNDEBUG -g -O2 -DTMV_INLINE -DTMV_OPT=3
 #CFLAGS= $(INCLUDE) -DNDEBUG -g -Wall -O2 -DTMV_INLINE -DTMV_OPT=3 -fopenmp
 #CFLAGS= $(INCLUDE) -DNDEBUG -g -O2 -DTMV_INLINE -DTMV_OPT=3 -fopenmp
+CFLAGS= $(INCLUDE) -DNDEBUG -g -O2 -DTMV_OPT=3 -fopenmp
 #CFLAGS= $(INCLUDE) -g -O -DTMV_INLINE -DTMV_OPT=3 -fopenmp -DTMV_MEM_TEST
 #CFLAGS= $(INCLUDE) -DNDEBUG -g -O2
 #CFLAGS= $(INCLUDE) -DNDEBUG -g -O2 -fopenmp
 #CFLAGS= $(INCLUDE) -g -O
 
-LIB= 
+#LIB= 
 #LIB= -L../../tags/v0.63/lib -ltmv_symband -ltmv -llapack -lblas -lgfortran -lpthread
-#LIB= -L../lib -ltmv -llapack -lblas -lgfortran -lpthread
+LIB= -L../lib -ltmv -llapack -lblas -lgfortran -lpthread
 #LIB= -L../lib -ltmv_3 -llapack -lblas -lgfortran
 #LIB= -L../lib -ltmv_mem -llapack -lblas -lgfortran -lpthread
 #LIB= -L../lib -llapack -lblas -lgfortran -lpthread
 
-all : tmvspeed2x_always_make 
-#all : tmvspeed1 tmvspeed2 tmvspeed3
-
-becker : becker.cpp
-	$(CC) $(CFLAGS) becker.cpp -o becker $(LIB)
+all : tmvspeed4_always_make 
+#all : tmvspeed1 tmvspeed2 tmvspeed3 tmvspeed4
 
 tmvspeed1_always_make :
 	$(CC) $(CFLAGS) TMV_Speed_1.cpp -o tmvspeed1 $(LIB)
@@ -51,6 +49,9 @@ tmvspeed2x_always_make :
 tmvspeed3_always_make :
 	$(CC) $(CFLAGS) TMV_Speed_3.cpp -o tmvspeed3 $(LIB)
 
+tmvspeed4_always_make :
+	$(CC) $(CFLAGS) TMV_Speed_4.cpp -o tmvspeed4 $(LIB)
+
 tmvspeed1 : TMV_Speed_1.cpp
 	$(CC) $(CFLAGS) TMV_Speed_1.cpp -o tmvspeed1 $(LIB)
 
@@ -65,4 +66,7 @@ tmvspeed2x : TMV_Speed_2x.cpp
 
 tmvspeed3 : TMV_Speed_3.cpp
 	$(CC) $(CFLAGS) TMV_Speed_3.cpp -o tmvspeed3 $(LIB)
+
+tmvspeed4 : TMV_Speed_4.cpp
+	$(CC) $(CFLAGS) TMV_Speed_4.cpp -o tmvspeed4 $(LIB)
 
