@@ -180,8 +180,8 @@ namespace tmv {
         {
             const int algo = 
 #if TMV_OPT >= 1
-                (M1::mcolmajor && (rs != UNKNOWN && rs <= 32)) ? 2 :
-                M1::mcolmajor ? 4 : M1::mrowmajor ? 3 :
+                (M1::_colmajor && (rs != UNKNOWN && rs <= 32)) ? 2 :
+                M1::_colmajor ? 4 : M1::_rowmajor ? 3 :
 #endif
                 1;
             PermuteRows_Helper<algo,cs,rs,M1>::call(m,p,i1,i2);
@@ -219,12 +219,11 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
             const bool inst = 
-                M1::mcolsize == UNKNOWN &&
-                M1::mrowsize == UNKNOWN &&
+                M1::unknownsizes &&
                 Traits<T>::isinst;
-            const bool conj = M1::mconj;
             const int algo = 
-                inst ? (conj ? 97 : 98) :
+                M1::_conj ? 97 :
+                inst ? 98 :
                 -3;
             PermuteRows_Helper<algo,cs,rs,M1>::call(m,p,i1,i2);
         }
@@ -237,8 +236,8 @@ namespace tmv {
     {
         typedef typename M::cview_type Mv;
         Mv mv = m.cView();
-        const int cs = M::mcolsize;
-        const int rs = M::mrowsize;
+        const int cs = M::_colsize;
+        const int rs = M::_rowsize;
         PermuteRows_Helper<-1,cs,rs,Mv>::call(mv,p,i1,i2); 
     }
 
@@ -249,8 +248,8 @@ namespace tmv {
     {
         typedef typename M::cview_type Mv;
         Mv mv = m.cView();
-        const int cs = M::mcolsize;
-        const int rs = M::mrowsize;
+        const int cs = M::_colsize;
+        const int rs = M::_rowsize;
         PermuteRows_Helper<-3,cs,rs,Mv>::call(mv,p,i1,i2); 
     }
 
@@ -302,7 +301,7 @@ namespace tmv {
             typedef typename M1r::iterator IT;
             IT it1 = m.get_row(0).begin();
             const int stepi = m.stepi();
-            Prefetch_Write(it1.getP()+i1*stepi);
+            Prefetch_Write(it1.get()+i1*stepi);
             it1.shiftP((i2-1)*stepi);
             p += i2-1;
             for(int i=i2-1;i>=i1;--i,--p) {
@@ -374,8 +373,8 @@ namespace tmv {
         {
             const int algo = 
 #if TMV_OPT >= 1
-                (M1::mrowmajor && (rs != UNKNOWN && rs <= 32)) ? 3 :
-                M1::mcolmajor ? 2 : M1::mrowmajor ? 4 :
+                (M1::_rowmajor && (rs != UNKNOWN && rs <= 32)) ? 3 :
+                M1::_colmajor ? 2 : M1::_rowmajor ? 4 :
 #endif
                 1;
             ReversePermuteRows_Helper<algo,cs,rs,M1>::call(m,p,i1,i2);
@@ -413,12 +412,11 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
             const bool inst = 
-                M1::mcolsize == UNKNOWN &&
-                M1::mrowsize == UNKNOWN &&
+                M1::unknownsizes &&
                 Traits<T>::isinst;
-            const bool conj = M1::mconj;
             const int algo = 
-                inst ? (conj ? 97 : 98) :
+                M1::_conj ? 97 :
+                inst ? 98 :
                 -3;
             ReversePermuteRows_Helper<algo,cs,rs,M1>::call(m,p,i1,i2);
         }
@@ -431,8 +429,8 @@ namespace tmv {
     {
         typedef typename M::cview_type Mv;
         Mv mv = m.cView();
-        const int cs = M::mcolsize;
-        const int rs = M::mrowsize;
+        const int cs = M::_colsize;
+        const int rs = M::_rowsize;
         ReversePermuteRows_Helper<-1,cs,rs,Mv>::call(mv,p,i1,i2); 
     }
 
@@ -443,8 +441,8 @@ namespace tmv {
     {
         typedef typename M::cview_type Mv;
         Mv mv = m.cView();
-        const int cs = M::mcolsize;
-        const int rs = M::mrowsize;
+        const int cs = M::_colsize;
+        const int rs = M::_rowsize;
         ReversePermuteRows_Helper<-3,cs,rs,Mv>::call(mv,p,i1,i2); 
     }
 

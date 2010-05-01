@@ -40,7 +40,7 @@ namespace tmv {
     template <class T> 
     static void LapLU_Decompose(MatrixView<T,1>& A, int* P, int& signdet)
     { InlineLU_Decompose(A,P,signdet); }
-#ifdef INST_DOUBLE
+#ifdef TMV_INST_DOUBLE
     void LapLU_Decompose(MatrixView<double,1>& A, int* P, int& signdet)
     {
         TMVAssert(A.iscm());
@@ -49,15 +49,16 @@ namespace tmv {
         int m = A.colsize();
         int n = A.rowsize();
         int lda = A.stepj();
-        auto_array<int> lap_p(new int[n]);
+        int* lap_p = new int[n];
         LAPNAME(dgetrf) (LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
-                         LAPP(lap_p.get()) LAPINFO);
+                         LAPP(lap_p) LAPINFO);
         LAP_Results("dgetrf");
         const int M = A.colsize();
         for(int i=0;i<M;i++) {
-            P[i] = (lap_p.get())[i] LAPMINUS1;
+            P[i] = lap_p[i] LAPMINUS1;
             if (P[i]!=i) signdet = -signdet;
         }
+        delete [] lap_p;
     }
     void LapLU_Decompose(
         MatrixView<std::complex<double>,1>& A, int* P, int& signdet)
@@ -68,18 +69,19 @@ namespace tmv {
         int m = A.colsize();
         int n = A.rowsize();
         int lda = A.stepj();
-        auto_array<int> lap_p(new int[n]);
+        int* lap_p = new int[n];
         LAPNAME(zgetrf) (LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
-                         LAPP(lap_p.get()) LAPINFO);
+                         LAPP(lap_p) LAPINFO);
         LAP_Results("zgetrf");
         const int M = A.colsize();
         for(int i=0;i<M;i++) {
-            P[i] = (lap_p.get())[i] LAPMINUS1;
+            P[i] = lap_p[i] LAPMINUS1;
             if (P[i]!=i) signdet = -signdet;
         }
+        delete [] lap_p;
     }
 #endif
-#ifdef INST_FLOAT
+#ifdef TMV_INST_FLOAT
 #ifndef MKL
     // This is giving me a weird runtime error sometimes with MKL:
     //   OMP abort: Unable to set worker thread stack size to 2098176 bytes
@@ -90,15 +92,16 @@ namespace tmv {
         int m = A.colsize();
         int n = A.rowsize();
         int lda = A.stepj();
-        auto_array<int> lap_p(new int[n]);
+        int* lap_p = new int[n];
         LAPNAME(sgetrf) (LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
-                         LAPP(lap_p.get()) LAPINFO);
+                         LAPP(lap_p) LAPINFO);
         LAP_Results("sgetrf");
         const int M = A.colsize();
         for(int i=0;i<M;i++) {
-            P[i] = (lap_p.get())[i] LAPMINUS1;
+            P[i] = lap_p[i] LAPMINUS1;
             if (P[i]!=i) signdet = -signdet;
         }
+        delete [] lap_p;
     }
     void LapLU_Decompose(
         MatrixView<std::complex<float>,1>& A, int* P, int& signdet)
@@ -106,22 +109,23 @@ namespace tmv {
         int m = A.colsize();
         int n = A.rowsize();
         int lda = A.stepj();
-        auto_array<int> lap_p(new int[n]);
+        int* lap_p = new int[n];
         LAPNAME(cgetrf) (LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
-                         LAPP(lap_p.get()) LAPINFO);
+                         LAPP(lap_p) LAPINFO);
         LAP_Results("cgetrf");
         const int M = A.colsize();
         for(int i=0;i<M;i++) {
-            P[i] = (lap_p.get())[i] LAPMINUS1;
+            P[i] = lap_p[i] LAPMINUS1;
             if (P[i]!=i) signdet = -signdet;
         }
+        delete [] lap_p;
     }
 #endif // MKL
 #endif // FLOAT
 #endif // ALAP
 
     template <class T> 
-    void InstLU_Decompose(MatrixView<T> A, int* P, int& signdet)
+    void InstLU_Decompose(MatrixView<T,1> A, int* P, int& signdet)
     {
         if (A.colsize() > 0 && A.rowsize() > 0) {
             if (A.iscm()) {
@@ -133,8 +137,8 @@ namespace tmv {
 #endif
             } else {
                 Matrix<T,ColMajor> Acm = A;
-                InstLU_Decompose(Acm.xView(),P,signdet);
-                InstCopy(Acm.xView().constView(),A);
+                InstLU_Decompose(Acm.view(),P,signdet);
+                InstCopy(Acm.xView().constView(),A.xView());
             }
         }
     }

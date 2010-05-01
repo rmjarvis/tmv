@@ -230,15 +230,15 @@ namespace tmv {
         typedef typename V2::value_type vtype2;
         typedef typename Traits2<mtype1,vtype2>::type value_type;
 
-        enum { vsize = M1::mcolsize };
-        enum { vfort = M1::mfort && V2::vfort };
-        enum { vcalc = false };
+        enum { _size = M1::_colsize };
+        enum { _fort = M1::_fort && V2::_fort };
+        enum { _calc = false };
 
         typedef ProdMV<ix,T,M1,V2> type;
-        typedef typename VCopyHelper<value_type,vsize,vfort>::type copy_type;
+        typedef typename VCopyHelper<value_type,_size,_fort>::type copy_type;
         typedef const copy_type calc_type;
         typedef typename TypeSelect<
-            (M1::mcalc && V2::vcalc),const type,calc_type>::type eval_type;
+            (M1::_calc && V2::_calc),const type,calc_type>::type eval_type;
     };
 
     template <int ix, class T, class M1, class V2>
@@ -257,7 +257,7 @@ namespace tmv {
         ) : 
             x(_x), m1(_m1.mat()), v2(_v2.vec())
         {
-            TMVStaticAssert((Sizes<M1::mrowsize,V2::vsize>::same)); 
+            TMVStaticAssert((Sizes<M1::_rowsize,V2::_size>::same)); 
             TMVAssert(m1.rowsize() == v2.size());
         }
 
@@ -273,8 +273,8 @@ namespace tmv {
         template <class V3>
         inline void assignTo(BaseVector_Mutable<V3>& v3) const
         {
-            TMVStaticAssert((type::visreal || V3::viscomplex));
-            TMVStaticAssert((Sizes<type::vsize,V3::vsize>::same)); 
+            TMVStaticAssert((type::isreal || V3::iscomplex));
+            TMVStaticAssert((Sizes<type::_size,V3::_size>::same)); 
             TMVAssert(size() == v3.size());
 #ifdef XDEBUG_PRODMV
             MultMV_Debug<false>(x,m1.calc(),v2.calc(),v3.vec());
@@ -286,8 +286,8 @@ namespace tmv {
         template <class V3>
         inline void newAssignTo(BaseVector_Mutable<V3>& v3) const
         {
-            TMVStaticAssert((type::visreal || V3::viscomplex));
-            TMVStaticAssert((Sizes<type::vsize,V3::vsize>::same)); 
+            TMVStaticAssert((type::isreal || V3::iscomplex));
+            TMVStaticAssert((Sizes<type::_size,V3::_size>::same)); 
             TMVAssert(size() == v3.size());
 #ifdef XDEBUG_PRODMV
             MultMV_Debug<false>(x,m1.calc(),v2.calc(),v3.vec());
@@ -313,15 +313,15 @@ namespace tmv {
         typedef typename ProdXM<ix,T,M2>::value_type mtype2;
         typedef typename Traits2<vtype1,mtype2>::type value_type;
 
-        enum { vsize = M2::mrowsize };
-        enum { vfort = V1::vfort && M2::mfort };
-        enum { vcalc = false };
+        enum { _size = M2::_rowsize };
+        enum { _fort = V1::_fort && M2::_fort };
+        enum { _calc = false };
 
         typedef ProdVM<ix,T,V1,M2> type;
-        typedef typename VCopyHelper<value_type,vsize,vfort>::type copy_type;
+        typedef typename VCopyHelper<value_type,_size,_fort>::type copy_type;
         typedef const copy_type calc_type;
         typedef typename TypeSelect<
-            (V1::vcalc && M2::mcalc),const type,calc_type>::type eval_type;
+            (V1::_calc && M2::_calc),const type,calc_type>::type eval_type;
     };
 
     template <int ix, class T, class V1, class M2>
@@ -340,7 +340,7 @@ namespace tmv {
         ) : 
             x(_x), v1(_v1.vec()), m2(_m2.mat())
         {
-            TMVStaticAssert((Sizes<V1::vsize,M2::mcolsize>::same)); 
+            TMVStaticAssert((Sizes<V1::_size,M2::_colsize>::same)); 
             TMVAssert(v1.size() == m2.colsize());
         }
 
@@ -356,8 +356,8 @@ namespace tmv {
         template <class V3>
         inline void assignTo(BaseVector_Mutable<V3>& v3) const
         {
-            TMVStaticAssert((type::visreal || V3::viscomplex));
-            TMVStaticAssert((Sizes<type::vsize,V3::vsize>::same)); 
+            TMVStaticAssert((type::isreal || V3::iscomplex));
+            TMVStaticAssert((Sizes<type::_size,V3::_size>::same)); 
             TMVAssert(size() == v3.size());
 #ifdef XDEBUG_PRODMV
             MultVM_Debug<false>(x,v1.calc(),m2.calc(),v3.vec());
@@ -369,8 +369,8 @@ namespace tmv {
         template <class V3>
         inline void newAssignTo(BaseVector_Mutable<V3>& v3) const
         {
-            TMVStaticAssert((type::visreal || V3::viscomplex));
-            TMVStaticAssert((Sizes<type::vsize,V3::vsize>::same)); 
+            TMVStaticAssert((type::isreal || V3::iscomplex));
+            TMVStaticAssert((Sizes<type::_size,V3::_size>::same)); 
             TMVAssert(size() == v3.size());
 #ifdef XDEBUG_PRODMV
             MultVM_Debug<false>(x,v1.calc(),m2.calc(),v3.vec());

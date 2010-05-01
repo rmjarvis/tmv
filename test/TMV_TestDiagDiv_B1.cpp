@@ -26,29 +26,17 @@ void TestDiagDiv_B1()
     tmv::Matrix<std::complex<T> > cp = p*std::complex<T>(2,3);
     cp += ca;
 
-    tmv::Matrix<T> q(2*N,N,-2);
-    q.rowRange(0,N) += p;
-    q.rowRange(N,2*N) -= p;
-    q.rowRange(N/2,3*N/2) += T(4)*p;
-    tmv::Matrix<std::complex<T> > cq = q*std::complex<T>(-1,4);
-    cq.rowRange(0,N) -= cp;
-    cq.rowRange(N,2*N) -= cp;
-    cq.rowRange(N/2,3*N/2) -= cp;
-
-    tmv::Matrix<T> r(N,0,T(1));
-    tmv::Matrix<std::complex<T> > cr(N,0,std::complex<T>(1));
+    tmv::MatrixView<T> pv = p.view();
+    tmv::DiagMatrixView<T> bv = b.view();
+    tmv::MatrixView<std::complex<T> > cpv = cp.view();
+    tmv::DiagMatrixView<std::complex<T> > cbv = cb.view();
 
     tmv::Matrix<T> px(N,N);
     tmv::DiagMatrix<T> bx(N);
-    tmv::Matrix<T> qx(2*N,N);
-    tmv::Matrix<T> rx(N,0);
     tmv::Matrix<std::complex<T> > cpx(N,N);
     tmv::DiagMatrix<std::complex<T> > cbx(N);
-    tmv::Matrix<std::complex<T> > cqx(2*N,N);
-    tmv::Matrix<std::complex<T> > crx(N,0);
 
-    TestMatrixDivArith1<T>(
-        tmv::LU,bx,cbx,p.view(),b.view(),cp.view(),cb.view(),"Diag/SquareM");
+    TestMatrixDivArith1<T>(tmv::LU,bx,cbx,pv,bv,cpv,cbv,"Diag/SquareM");
 }
 
 #ifdef TMV_INST_DOUBLE

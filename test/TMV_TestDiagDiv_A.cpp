@@ -25,8 +25,12 @@ void TestDiagDiv_A()
     tmv::DiagMatrix<T> bx(N);
     tmv::DiagMatrix<std::complex<T> > cbx(N);
 
-    TestMatrixDivArith2<T>(
-        tmv::LU,bx,cbx,a.view(),b.view(),ca.view(),cb.view(),"Diag/Diag");
+    tmv::DiagMatrixView<T> av = a.view();
+    tmv::DiagMatrixView<T> bv = b.view();
+    tmv::DiagMatrixView<std::complex<T> > cav = ca.view();
+    tmv::DiagMatrixView<std::complex<T> > cbv = cb.view();
+
+    TestMatrixDivArith2<T>(tmv::LU,bx,cbx,av,bv,cav,cbv,"Diag/Diag");
 }
 
 #ifdef TMV_INST_DOUBLE

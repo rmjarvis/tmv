@@ -133,7 +133,7 @@ template <class T> static void TestVectorReal()
     c = v.subVector(10,70,12);
     for (int i=0; i<5; ++i) Assert(c(i) == v(10+12*i),"SubVector");
 
-    if (tmv::Epsilon<T>() == T(0)) return;
+    if (tmv::TMV_Epsilon<T>() == T(0)) return;
 
     for(int i=0;i<N;++i) a(i) = T(i+10);
     for(int i=0;i<N;++i) b(i) = T(-3*i+191);
@@ -270,7 +270,7 @@ template <class T> static void TestVectorComplex()
         Assert(v2(i) == std::complex<T>(T(i),T(-i-1234)), "Conjugate CVector");
     Assert(v2 == v.conjugate(),"Conjugate == CVector");
 
-    if (tmv::Epsilon<T>() == T(0)) return;
+    if (tmv::TMV_Epsilon<T>() == T(0)) return;
 
     std::complex<T> prod_act(0);
     for (int i=0; i<N; ++i) prod_act += v[i] * v2[i];

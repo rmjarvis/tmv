@@ -53,6 +53,7 @@
 #include "tmv/TMV_InvertU.h"
 #include "tmv/TMV_DivVU.h"
 #include "tmv/TMV_DivMU.h"
+#include "tmv/TMV_DivUU.h"
 
 #ifndef TMV_H
 #include "tmv/TMV_ProdXM.h"

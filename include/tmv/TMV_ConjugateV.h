@@ -157,13 +157,12 @@ namespace tmv {
         {
             typedef typename V::value_type T;
             const bool inst =
-                Traits<T>::isinst &&
-                V::vsize == UNKNOWN;
-            const bool conj = V::vconj;
-            const bool real = V::visreal;
+                V::unknownsizes &&
+                Traits<T>::isinst;
             const int algo = 
-                real ? 0 :
-                inst ? (conj ? 97 : 98) : 
+                V::isreal ? 0 :
+                V::_conj ? 97 :
+                inst ? 98 : 
                 -3;
             ConjugateV_Helper<algo,size,V>::call(v);
         }
@@ -174,7 +173,7 @@ namespace tmv {
     {
         typedef typename V::cview_type Vv;
         Vv vv = v.cView();
-        ConjugateV_Helper<-1,V::vsize,Vv>::call(vv); 
+        ConjugateV_Helper<-1,V::_size,Vv>::call(vv); 
     }
 
     template <class V>
@@ -182,7 +181,7 @@ namespace tmv {
     {
         typedef typename V::cview_type Vv;
         Vv vv = v.cView();
-        ConjugateV_Helper<-3,V::vsize,Vv>::call(vv); 
+        ConjugateV_Helper<-3,V::_size,Vv>::call(vv); 
     }
 
 } // namespace tmv

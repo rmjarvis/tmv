@@ -118,11 +118,11 @@ namespace tmv {
     // Use this type when you need elements in the original vector
     // after overwriting those elements.
     //
-    // vsize = size of vector (Use UNKNOWN if unknown at compile time)
+    // _size = size of vector (Use UNKNOWN if unknown at compile time)
     //
-    // vfort = does the indexing use fortran style?
+    // _fort = does the indexing use fortran style?
     //
-    // vcalc = are the element values already calculated in memory?
+    // _calc = are the element values already calculated in memory?
 
 
     // BaseVector_Calc is derived from BaseVector, and is used
@@ -134,8 +134,8 @@ namespace tmv {
 
     // BaseVector_Calc adds some more requirements to the Traits<V> class:
     //
-    //  vstep = the step size if known (else UNKNOWN)
-    //  vconj = is the vector the conjugate of the underlying data?
+    //  _step = the step size if known (else UNKNOWN)
+    //  _conj = is the vector the conjugate of the underlying data?
     //
     //  const_subvector_type = return type from subVector(i1,i2) const
     //  const_subvector_step_type = return type from 
@@ -370,13 +370,13 @@ namespace tmv {
     // These helper functions check the validity of indices according
     // to whether the vector uses CStyle or FortranStyle indexing.
     // They also update the indices to be consistent with CStyle.
-    template <bool vfort>
+    template <bool _fort>
     inline void CheckIndex(int& i, int n) 
     { TMVAssert(i>=0 && i<n && "index is not valid"); } // CStyle
     template <>
     inline void CheckIndex<true>(int& i, int n) 
     { TMVAssert(i>=1 && i<=n && "index is not valid"); --i; } // FortranStyle
-    template <bool vfort>
+    template <bool _fort>
     inline void CheckRange(int& i1, int i2, int n)
     { // CStyle
         TMVAssert(i1 >= 0 && "first element must be in range");
@@ -392,7 +392,7 @@ namespace tmv {
         TMVAssert(i2 >= i1 && "range must have a positive number of elements");
         --i1;
     }
-    template <bool vfort>
+    template <bool _fort>
     inline void CheckRange(int& i1, int& i2, int istep, int n)
     { // CStyle
         TMVAssert(istep != 0 && "istep cannot be 0");
@@ -431,12 +431,12 @@ namespace tmv {
     };
 
     // This helper class helps decide calc_type for composite classes:
-    template <class T, int vsize, bool vfort>
+    template <class T, int _size, bool _fort>
     struct VCopyHelper
-    { typedef SmallVector<T,vsize,vfort?FortranStyle:CStyle> type; };
-    template <class T, bool vfort>
-    struct VCopyHelper<T,UNKNOWN,vfort>
-    { typedef Vector<T,vfort?FortranStyle:CStyle> type; };
+    { typedef SmallVector<T,_size,_fort?FortranStyle:CStyle> type; };
+    template <class T, bool _fort>
+    struct VCopyHelper<T,UNKNOWN,_fort>
+    { typedef Vector<T,_fort?FortranStyle:CStyle> type; };
 
     // This is a type to use when there is no valid return type for a 
     // particular function. 
@@ -460,7 +460,7 @@ namespace tmv {
     // This next one is sometime used after SameStorage is found to be true.
     // Here we check whether the elements are exactly the same 
     // by whether the steps are the same.
-    // We do not check the vconj values, so that is usually the next 
+    // We do not check the _conj values, so that is usually the next 
     // step depending on why we are checking this.
     template <class V1, class V2>
     inline bool ExactSameStorage(
@@ -477,16 +477,16 @@ namespace tmv {
     struct VStepHelper
     { 
         enum { known = (
-                V1::vstep != UNKNOWN &&
-                V2::vstep != UNKNOWN ) };
+                V1::_step != UNKNOWN &&
+                V2::_step != UNKNOWN ) };
         enum { same = (
                 known &&
-                V1::vstep == int(V2::vstep) ) };
+                V1::_step == int(V2::_step) ) };
         enum { noclobber = (
                 known &&
                 ( same ||
-                  (V2::vstep > 0 && V1::vstep > int(V2::vstep)) ||
-                  (V2::vstep < 0 && V1::vstep < int(V2::vstep)) ) ) };
+                  (V2::_step > 0 && V1::_step > int(V2::_step)) ||
+                  (V2::_step < 0 && V1::_step < int(V2::_step)) ) ) };
     };
 
     // Defined in TMV_CopyV.h
@@ -575,9 +575,9 @@ namespace tmv {
     class BaseVector
     {
     public:
-        enum { vsize = Traits<V>::vsize };
-        enum { vfort = Traits<V>::vfort };
-        enum { vcalc = Traits<V>::vcalc };
+        enum { _size = Traits<V>::_size };
+        enum { _fort = Traits<V>::_fort };
+        enum { _calc = Traits<V>::_calc };
 
         typedef V type;
 
@@ -589,8 +589,9 @@ namespace tmv {
         // Derived values:
         typedef typename Traits<value_type>::real_type real_type;
         typedef typename Traits<value_type>::complex_type complex_type;
-        enum { visreal = Traits<value_type>::isreal };
-        enum { viscomplex = Traits<value_type>::iscomplex };
+        enum { isreal = Traits<value_type>::isreal };
+        enum { iscomplex = Traits<value_type>::iscomplex };
+        enum { unknownsizes = _size == UNKNOWN };
 
         //
         // Constructor
@@ -608,7 +609,7 @@ namespace tmv {
         { return operator()(i); }
         inline value_type operator()(int i) const 
         {
-            CheckIndex<vfort>(i,size());
+            CheckIndex<_fort>(i,size());
             return cref(i);
         }
 
@@ -727,11 +728,11 @@ namespace tmv {
     class BaseVector_Calc : public BaseVector<V>
     {
     public:
-        enum { vsize = Traits<V>::vsize };
-        enum { vfort = Traits<V>::vfort };
-        enum { vcalc = Traits<V>::vcalc };
-        enum { vstep = Traits<V>::vstep };
-        enum { vconj = Traits<V>::vconj };
+        enum { _size = Traits<V>::_size };
+        enum { _fort = Traits<V>::_fort };
+        enum { _calc = Traits<V>::_calc };
+        enum { _step = Traits<V>::_step };
+        enum { _conj = Traits<V>::_conj };
 
         typedef V type;
 
@@ -805,14 +806,14 @@ namespace tmv {
 
         inline const_subvector_type subVector(int i1, int i2) const
         {
-            CheckRange<vfort>(i1,i2,size());
+            CheckRange<_fort>(i1,i2,size());
             return cSubVector(i1,i2);
         }
 
         inline const_subvector_step_type subVector(
             int i1, int i2, int istep) const
         {
-            CheckRange<vfort>(i1,i2,istep,size());
+            CheckRange<_fort>(i1,i2,istep,size());
             return cSubVector(i1,i2,istep);
         }
 
@@ -855,24 +856,24 @@ namespace tmv {
         {
             return const_realpart_type(
                 reinterpret_cast<const real_type*>(cptr()),
-                size(), V::visreal ? step() : 2*step());
+                size(), V::isreal ? step() : 2*step());
         }
 
         inline const_imagpart_type imagPart() const
         {
-            TMVStaticAssert(V::viscomplex);
+            TMVStaticAssert(V::iscomplex);
             return const_imagpart_type(
                 reinterpret_cast<const real_type*>(cptr())+1, size(), 2*step());
         }
 
         inline const_flatten_type flatten() const
         {
-            TMVStaticAssert(V::viscomplex);
-            TMVStaticAssert(vstep == UNKNOWN || vstep == 1);
+            TMVStaticAssert(V::iscomplex);
+            TMVStaticAssert(_step == UNKNOWN || _step == 1);
             TMVAssert(step() == 1);
             return const_flatten_type(
                 reinterpret_cast<const real_type*>(cptr()),
-                V::visreal ? size() : 2*size(), 1);
+                V::isreal ? size() : 2*size(), 1);
         }
 
         inline const_nonconj_type nonConj() const
@@ -899,7 +900,7 @@ namespace tmv {
         inline const type& vec() const
         { return *static_cast<const type*>(this); }
 
-        inline bool isconj() const { return vconj; }
+        inline bool isconj() const { return _conj; }
 
         // Note that these last functions need to be defined in a more derived
         // class than this, or an infinite loop will result when compiling.
@@ -922,11 +923,11 @@ namespace tmv {
     class BaseVector_Mutable : public BaseVector_Calc<V>
     {
     public:
-        enum { vsize = Traits<V>::vsize };
-        enum { vfort = Traits<V>::vfort };
-        enum { vcalc = Traits<V>::vcalc };
-        enum { vstep = Traits<V>::vstep };
-        enum { vconj = Traits<V>::vconj };
+        enum { _size = Traits<V>::_size };
+        enum { _fort = Traits<V>::_fort };
+        enum { _calc = Traits<V>::_calc };
+        enum { _step = Traits<V>::_step };
+        enum { _conj = Traits<V>::_conj };
 
         typedef V type;
         typedef BaseVector_Calc<V> base_inst;
@@ -996,7 +997,7 @@ namespace tmv {
         { return operator()(i); }
         inline reference operator()(int i)
         {
-            CheckIndex<vfort>(i,size());
+            CheckIndex<_fort>(i,size());
             return ref(i);
         }
 
@@ -1040,7 +1041,7 @@ namespace tmv {
         template <class V2>
         inline base_mut& operator=(const BaseVector<V2>& v2) 
         {
-            TMVStaticAssert((Sizes<vsize,V2::vsize>::same));
+            TMVStaticAssert((Sizes<_size,V2::_size>::same));
             TMVAssert(size() == v2.size());
             v2.assignTo(*this);
             return *this; 
@@ -1103,7 +1104,7 @@ namespace tmv {
         }
         inline base_mut& makeBasis(int i, value_type x=value_type(1)) 
         {
-            CheckIndex<vfort>(i,size());
+            CheckIndex<_fort>(i,size());
             return CMakeBasis(i,x);
         }
 
@@ -1114,8 +1115,8 @@ namespace tmv {
         }
         inline base_mut& swap(int i1, int i2) 
         {
-            CheckIndex<vfort>(i1,size());
-            CheckIndex<vfort>(i2,size());
+            CheckIndex<_fort>(i1,size());
+            CheckIndex<_fort>(i2,size());
             return cSwap(i1,i2);
         }
 
@@ -1126,7 +1127,7 @@ namespace tmv {
         }
         inline base_mut& permute(const int*const p, int i1, int i2) 
         {
-            CheckRange<vfort>(i1,i2,size());
+            CheckRange<_fort>(i1,i2,size());
             return cPermute(p,i1,i2);
         }
         inline base_mut& permute(const int*const p) 
@@ -1139,7 +1140,7 @@ namespace tmv {
         }
         inline base_mut& reversePermute(const int*const p, int i1, int i2) 
         {
-            CheckRange<vfort>(i1,i2,size());
+            CheckRange<_fort>(i1,i2,size());
             return cReversePermute(p,i1,i2);
         }
         inline base_mut& reversePermute(const int*const p) 
@@ -1170,13 +1171,13 @@ namespace tmv {
 
         inline subvector_type subVector(int i1, int i2) 
         {
-            CheckRange<vfort>(i1,i2,size());
+            CheckRange<_fort>(i1,i2,size());
             return cSubVector(i1,i2);
         }
 
         inline subvector_step_type subVector(int i1, int i2, int istep) 
         {
-            CheckRange<vfort>(i1,i2,istep,size());
+            CheckRange<_fort>(i1,i2,istep,size());
             return cSubVector(i1,i2,istep);
         }
 
@@ -1209,24 +1210,24 @@ namespace tmv {
         {
             return realpart_type(
                 reinterpret_cast<real_type*>(ptr()),
-                size(), V::visreal ? step() : 2*step());
+                size(), V::isreal ? step() : 2*step());
         }
 
         inline imagpart_type imagPart() 
         {
-            TMVStaticAssert(V::viscomplex);
+            TMVStaticAssert(V::iscomplex);
             return imagpart_type(
                 reinterpret_cast<real_type*>(ptr())+1, size(), 2*step());
         }
 
         inline flatten_type flatten() 
         {
-            TMVStaticAssert(V::viscomplex);
-            TMVStaticAssert(vstep == UNKNOWN || vstep == 1);
+            TMVStaticAssert(V::iscomplex);
+            TMVStaticAssert(_step == UNKNOWN || _step == 1);
             TMVAssert(step() == 1);
             return flatten_type(
                 reinterpret_cast<real_type*>(ptr()),
-                V::visreal ? size() : 2*size(), 1);
+                V::isreal ? size() : 2*size(), 1);
         }
 
         inline nonconj_type nonConj()
@@ -1348,9 +1349,9 @@ namespace tmv {
     template <class V1, class V2>
     static bool operator==(const BaseVector<V1>& v1, const BaseVector<V2>& v2)
     {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same)); 
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
-        const int size = Sizes<V1::vsize,V2::vsize>::size;
+        const int size = Sizes<V1::_size,V2::_size>::size;
         const int n = (size == UNKNOWN ? int(v1.size()) : size);
         for(int i=0;i<n;++i) if (v1.cref(i) != v2.cref(i)) return false;
         return true;

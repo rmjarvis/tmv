@@ -35,6 +35,7 @@
 
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_SmallVector.h"
+#include "tmv/TMV_BasisVector.h"
 #include "tmv/TMV_VectorIO.h"
 #include "tmv/TMV_CopyV.h"
 #include "tmv/TMV_MinMax.h"

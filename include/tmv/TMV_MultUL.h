@@ -181,7 +181,7 @@ namespace tmv {
 #ifdef PRINTALGO_UL
             std::cout<<"UL algo 11: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
-            const bool u2 = M2::munit;
+            const bool u2 = M2::_unit;
             typedef typename M2::value_type T2;
             typedef typename Maybe<!u2>::template ProdType<T2,T>::type PT2;
             typedef typename M1::const_submatrix_type M1sm;
@@ -236,7 +236,7 @@ namespace tmv {
 #ifdef PRINTALGO_UL
             std::cout<<"UL algo 12: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
-            const bool u1 = M1::munit;
+            const bool u1 = M1::_unit;
             typedef typename M1::value_type T1;
             typedef typename Maybe<!u1>::template ProdType<T1,T>::type PT1;
             typedef typename M1::const_row_sub_type M1r;
@@ -294,8 +294,8 @@ namespace tmv {
 #ifdef PRINTALGO_UL
             std::cout<<"UL algo 13: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
-            const bool u1 = M1::munit;
-            const bool u2 = M2::munit;
+            const bool u1 = M1::_unit;
+            const bool u2 = M2::_unit;
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename Maybe<!u1>::template ProdType<T1,T>::type PT1;
@@ -394,8 +394,8 @@ namespace tmv {
             static inline void unroll(
                 const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
             {
-                const bool u1 = M1::munit;
-                const bool u2 = M2::munit;
+                const bool u1 = M1::_unit;
+                const bool u2 = M2::_unit;
                 Maybe<add>::add(
                     m3.ref(I,I), Maybe<!u1>::prod(
                         m1.cref(I,I),Maybe<!u2>::prod(
@@ -429,9 +429,9 @@ namespace tmv {
             std::cout<<"UL algo 16: N,s,x = "<<N<<','<<UNKNOWN<<
                 ','<<T(x)<<std::endl;
 #endif
-            const bool rxr = M1::mrowmajor && M3::mrowmajor;
-            const bool crx = M1::mcolmajor && M2::mrowmajor;
-            const bool xcc = M2::mcolmajor && M3::mcolmajor;
+            const bool rxr = M1::_rowmajor && M3::_rowmajor;
+            const bool crx = M1::_colmajor && M2::_rowmajor;
+            const bool xcc = M2::_colmajor && M3::_colmajor;
             const int algo2 = rxr ? 12 : crx ? 13 : xcc ? 11 : 13;
             switch (N) {
               case 0 :
@@ -479,9 +479,9 @@ namespace tmv {
                 s == UNKNOWN ? false :
                 nops > TMV_Q1 ? false :
                 s <= 10;
-            const bool rxr = M1::mrowmajor && M3::mrowmajor;
-            const bool crx = M1::mcolmajor && M2::mrowmajor;
-            const bool xcc = M2::mcolmajor && M3::mcolmajor;
+            const bool rxr = M1::_rowmajor && M3::_rowmajor;
+            const bool crx = M1::_colmajor && M2::_rowmajor;
+            const bool xcc = M2::_colmajor && M3::_colmajor;
             const int algo2 = 
                 s == 0 ? 0 :
                 s == 1 ? 1 :
@@ -504,7 +504,7 @@ namespace tmv {
                 const int Nx = N > 16 ? ((((N-1)>>5)+1)<<4) : (N>>1);
                 // (If N > 16, round N/2 up to a multiple of 16.)
                 const int sx = IntTraits<s>::half_roundup;
-                const int sy = s == UNKNOWN ? s : s-sx;
+                const int sy = IntTraits2<s,sx>::diff;
 
                 typedef typename M1::const_subtrimatrix_type M1st;
                 typedef typename M1::const_submatrix_type M1sm;
@@ -572,7 +572,7 @@ namespace tmv {
 #ifdef PRINTALGO_UL
             std::cout<<"UL algo 21: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
-            const bool u2 = M2::munit;
+            const bool u2 = M2::_unit;
             typedef typename M2::value_type T2;
             typedef typename Maybe<!u2>::template ProdType<T2,T>::type PT2;
             typedef typename M1::const_submatrix_type M1sm;
@@ -627,7 +627,7 @@ namespace tmv {
 #ifdef PRINTALGO_UL
             std::cout<<"UL algo 22: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
-            const bool u1 = M1::munit;
+            const bool u1 = M1::_unit;
             typedef typename M1::value_type T1;
             typedef typename Maybe<!u1>::template ProdType<T1,T>::type PT1;
             typedef typename M1::const_row_sub_type M1r;
@@ -685,8 +685,8 @@ namespace tmv {
 #ifdef PRINTALGO_UL
             std::cout<<"UL algo 23: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
-            const bool u1 = M1::munit;
-            const bool u2 = M2::munit;
+            const bool u1 = M1::_unit;
+            const bool u2 = M2::_unit;
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename Maybe<!u1>::template ProdType<T1,T>::type PT1;
@@ -784,8 +784,8 @@ namespace tmv {
             static inline void unroll(
                 const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
             {
-                const bool u1 = M1::munit;
-                const bool u2 = M2::munit;
+                const bool u1 = M1::_unit;
+                const bool u2 = M2::_unit;
                 Maybe<add>::add(
                     m3.ref(I,I), Maybe<!u1>::prod(
                         m1.cref(I,I),Maybe<!u2>::prod(
@@ -818,9 +818,9 @@ namespace tmv {
             std::cout<<"UL algo 26: N,s,x = "<<N<<','<<UNKNOWN<<
                 ','<<T(x)<<std::endl;
 #endif
-            const bool rxr = M1::mrowmajor && M3::mrowmajor;
-            const bool crx = M1::mcolmajor && M2::mrowmajor;
-            const bool xcc = M2::mcolmajor && M3::mcolmajor;
+            const bool rxr = M1::_rowmajor && M3::_rowmajor;
+            const bool crx = M1::_colmajor && M2::_rowmajor;
+            const bool xcc = M2::_colmajor && M3::_colmajor;
             const int algo2 = rxr ? 22 : crx ? 23 : xcc ? 21 : 23;
             switch (N) {
               case 0 :
@@ -867,9 +867,9 @@ namespace tmv {
                 s > 20 ? false :
                 nops > TMV_Q1 ? false :
                 s <= 10;
-            const bool rxr = M1::mrowmajor && M3::mrowmajor;
-            const bool crx = M1::mcolmajor && M2::mrowmajor;
-            const bool xcc = M2::mcolmajor && M3::mcolmajor;
+            const bool rxr = M1::_rowmajor && M3::_rowmajor;
+            const bool crx = M1::_colmajor && M2::_rowmajor;
+            const bool xcc = M2::_colmajor && M3::_colmajor;
             const int algo2 = 
                 s == 0 ? 0 :
                 s == 1 ? 1 :
@@ -892,7 +892,7 @@ namespace tmv {
                 const int Nx = N > 16 ? ((((N-1)>>5)+1)<<4) : (N>>1);
                 // (If N > 16, round N/2 up to a multiple of 16.)
                 const int sx = IntTraits<s>::half_roundup;
-                const int sy = s == UNKNOWN ? s : s-sx;
+                const int sy = IntTraits2<s,sx>::diff;
 
                 typedef typename M1::const_subtrimatrix_type M1st;
                 typedef typename M1::const_submatrix_type M1sm;
@@ -957,7 +957,7 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename Traits2<T1,T2>::type PT3;
-            const bool rm = M1::mrowmajor && M2::mrowmajor;
+            const bool rm = M1::_rowmajor && M2::_rowmajor;
             typedef typename MCopyHelper<PT3,Rec,s,s,rm,false>::type M3c;
             M3c m3c(N,N);
             typedef typename M3c::view_type M3cv;
@@ -980,10 +980,10 @@ namespace tmv {
 #ifdef PRINTALGO_UL
             std::cout<<"UL algo 88: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
-            typedef typename TypeSelect<M2::mupper,
+            typedef typename TypeSelect<M2::_upper,
                     typename M3::uppertri_type,
                     typename M3::lowertri_type>::type M3u;
-            M3u m3u = Maybe<M2::mupper>::uppertri(m3);
+            M3u m3u = Maybe<M2::_upper>::uppertri(m3);
             typedef typename M3u::const_view_type M3ucv;
             M3ucv m3ucv = m3u.view();
             CopyU_Helper<-2,s,M2,M3u>::call(m2,m3u);
@@ -998,7 +998,7 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            TMVStaticAssert(M1::mupper != int(M2::mupper));
+            TMVStaticAssert(M1::_upper != int(M2::_upper));
             
             // Possible algorithms are:
             //
@@ -1023,14 +1023,14 @@ namespace tmv {
             // 87 = Use a temporary for m1*m2
             // 88 = Copy m2 to the same storage as m3
 
-            const bool ul = M1::mupper;
+            const bool ul = M1::_upper;
 #if 0
             const int algo = 27;
 #else
 #if TMV_OPT == 0 
-            const bool xcc = M2::mcolmajor && M3::mcolmajor;
-            const bool rxr = M1::mrowmajor && M3::mrowmajor;
-            const bool crx = M1::mcolmajor && M2::mrowmajor;
+            const bool xcc = M2::_colmajor && M3::_colmajor;
+            const bool rxr = M1::_rowmajor && M3::_rowmajor;
+            const bool crx = M1::_colmajor && M2::_rowmajor;
             const int algo =
                 ul ? ( rxr ? 12 : crx ? 13 : xcc ? 11 : 13 ) :
                 ( rxr ? 22 : crx ? 23 : xcc ? 22 : 23 );
@@ -1077,9 +1077,9 @@ namespace tmv {
 #ifdef PRINTALGO_UL
             std::cout<<"UL algo 94\n";
 #endif
-            Maybe<!add>::zero(m3);
             typename M3::uppertri_type m3u = m3.upperTri();
-            NoAliasMultMM(x,m1,m2,m3u);
+            NoAliasMultMM<add>(x,m1,m2,m3u);
+            Maybe<!add>::zero2(m3.lowerTri());
         }
     };
 
@@ -1094,9 +1094,9 @@ namespace tmv {
 #ifdef PRINTALGO_UL
             std::cout<<"UL algo 95\n";
 #endif
-            Maybe<!add>::zero(m3);
             typename M3::lowertri_type m3l = m3.lowerTri();
-            NoAliasMultMM(x,m1,m2,m3l);
+            NoAliasMultMM<add>(x,m1,m2,m3l);
+            Maybe<!add>::zero2(m3.upperTri());
         }
     };
 
@@ -1180,9 +1180,9 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
             const bool inst = 
-                M1::msize == UNKNOWN &&
-                M2::msize == UNKNOWN &&
-                M3::mcolsize == UNKNOWN && M3::mrowsize == UNKNOWN &&
+                M1::unknownsizes &&
+                M2::unknownsizes &&
+                M3::unknownsizes &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -1194,9 +1194,9 @@ namespace tmv {
             const int algo = 
                 s == 0 ? 0 :
                 s == 1 ? 1 :
-                M1::mupper && M2::mupper ? 94 :
-                !M1::mupper && !M2::mupper ? 95 :
-                M3::mconj ? 97 :
+                M1::_upper && M2::_upper ? 94 :
+                !M1::_upper && !M2::_upper ? 95 :
+                M3::_conj ? 97 :
                 inst ? 98 : 
                 -3;
 #ifdef PRINTALGO_UL
@@ -1218,7 +1218,7 @@ namespace tmv {
             std::cout<<"UL algo 940\n";
 #endif
             typename M3::uppertri_type m3u = m3.upperTri();
-            MultMM(x,m1,m2,m3u);
+            MultMM<add>(x,m1,m2,m3u);
             typename M3::lowertri_type::offdiag_type m3lo = 
                 m3.lowerTri().offDiag();
             Maybe<!add>::zero(m3lo);
@@ -1237,7 +1237,7 @@ namespace tmv {
             std::cout<<"UL algo 950\n";
 #endif
             typename M3::lowertri_type m3l = m3.lowerTri();
-            MultMM(x,m1,m2,m3l);
+            MultMM<add>(x,m1,m2,m3l);
             typename M3::uppertri_type::offdiag_type m3uo = 
                 m3.upperTri().offDiag();
             Maybe<!add>::zero(m3uo);
@@ -1285,14 +1285,14 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const bool checkalias =
-                M1::msize == UNKNOWN &&
-                M2::msize == UNKNOWN &&
-                M3::mcolsize == UNKNOWN && M3::mrowsize == UNKNOWN;
+                M1::_size == UNKNOWN &&
+                M2::_size == UNKNOWN &&
+                M3::_colsize == UNKNOWN && M3::_rowsize == UNKNOWN;
             const int algo = 
                 s == 0 ? 0 :
                 s == 1 ? 1 :
-                M1::mupper && M2::mupper ? 940 :
-                !M1::mupper && !M2::mupper ? 950 :
+                M1::_upper && M2::_upper ? 940 :
+                !M1::_upper && !M2::_upper ? 950 :
                 checkalias ? 99 : 
                 -2;
 #ifdef PRINTALGO_UL
@@ -1308,15 +1308,15 @@ namespace tmv {
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     {
-        TMVStaticAssert((Sizes<M1::msize,M2::msize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::mrowsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M2::_size>::same));
+        TMVStaticAssert((Sizes<M1::_size,M3::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M3::_rowsize>::same));
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m1.size() == m3.colsize());
         TMVAssert(m1.size() == m3.rowsize());
 
-        const int s1 = Sizes<M1::msize,M2::msize>::size;
-        const int s2 = Sizes<M3::mcolsize,M3::mrowsize>::size;
+        const int s1 = Sizes<M1::_size,M2::_size>::size;
+        const int s2 = Sizes<M3::_colsize,M3::_rowsize>::size;
         const int s = Sizes<s1,s2>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;

@@ -30,6 +30,8 @@ int main() try {
     //showdiv=true;
     //showtests=true;
     //showstartdone=true;
+    //XXDEBUG1 = true;
+    //XXDEBUG5 = true;
 
 #if 1
 

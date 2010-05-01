@@ -175,20 +175,20 @@ namespace tmv {
         typedef ProdXV<ix,T,V1> const_col_type;
         typedef ProdXV<ix,T,V2> const_row_type;
 
-        enum { mcolsize = V1::vsize };
-        enum { mrowsize = V2::vsize };
-        enum { mshape = Rec };
-        enum { mfort = V1::vfort && V2::vfort };
-        enum { mcalc = false };
-        enum { mrowmajor = false }; // arbitrary
-        enum { mcolmajor = true };
+        enum { _colsize = V1::_size };
+        enum { _rowsize = V2::_size };
+        enum { _shape = Rec };
+        enum { _fort = V1::_fort && V2::_fort };
+        enum { _calc = false };
+        enum { _rowmajor = false }; // arbitrary
+        enum { _colmajor = true };
 
         typedef OProdVV<ix,T,V1,V2> type;
-        typedef typename MCopyHelper<value_type,mshape,mcolsize,mrowsize,
-                mrowmajor,mfort>::type copy_type;
+        typedef typename MCopyHelper<value_type,_shape,_colsize,_rowsize,
+                _rowmajor,_fort>::type copy_type;
         typedef const copy_type calc_type;
         typedef typename TypeSelect<
-            (V1::vcalc && V2::vcalc),const type,calc_type>::type eval_type;
+            (V1::_calc && V2::_calc),const type,calc_type>::type eval_type;
         typedef InvalidType inverse_type;
     };
 
@@ -221,10 +221,10 @@ namespace tmv {
         inline void assignTo(BaseMatrix_Mutable<M3>& m3) const
         {
             TMVStaticAssert((
-                    ShapeTraits2<type::mshape,M3::mshape>::assignable)); 
-            TMVStaticAssert((type::misreal || M3::miscomplex));
-            TMVStaticAssert((Sizes<type::mcolsize,M3::mcolsize>::same)); 
-            TMVStaticAssert((Sizes<type::mrowsize,M3::mrowsize>::same)); 
+                    ShapeTraits2<type::_shape,M3::_shape>::assignable)); 
+            TMVStaticAssert((type::isreal || M3::iscomplex));
+            TMVStaticAssert((Sizes<type::_colsize,M3::_colsize>::same)); 
+            TMVStaticAssert((Sizes<type::_rowsize,M3::_rowsize>::same)); 
             TMVAssert(colsize() == m3.colsize());
             TMVAssert(rowsize() == m3.rowsize());
 #ifdef XDEBUG_OPRODVV
@@ -238,10 +238,10 @@ namespace tmv {
         inline void newAssignTo(BaseMatrix_Mutable<M3>& m3) const
         {
             TMVStaticAssert((
-                    ShapeTraits2<type::mshape,M3::mshape>::assignable)); 
-            TMVStaticAssert((type::misreal || M3::miscomplex));
-            TMVStaticAssert((Sizes<type::mcolsize,M3::mcolsize>::same)); 
-            TMVStaticAssert((Sizes<type::mrowsize,M3::mrowsize>::same)); 
+                    ShapeTraits2<type::_shape,M3::_shape>::assignable)); 
+            TMVStaticAssert((type::isreal || M3::iscomplex));
+            TMVStaticAssert((Sizes<type::_colsize,M3::_colsize>::same)); 
+            TMVStaticAssert((Sizes<type::_rowsize,M3::_rowsize>::same)); 
             TMVAssert(colsize() == m3.colsize());
             TMVAssert(rowsize() == m3.rowsize());
 #ifdef XDEBUG_OPRODVV

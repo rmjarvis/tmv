@@ -144,8 +144,8 @@ namespace tmv {
 #else
             const int algo2 = 
 #if TMV_OPT >= 1
-                ( M1::mrowmajor && M2::mrowmajor ) ? 2 :
-                ( M1::mcolmajor && M2::mcolmajor ) ? 3 :
+                ( M1::_rowmajor && M2::_rowmajor ) ? 2 :
+                ( M1::_colmajor && M2::_colmajor ) ? 3 :
                 ( cs == UNKNOWN || rs == UNKNOWN ) ? 3 :
                 ( cs > rs ) ? 2 : 
 #endif
@@ -240,20 +240,20 @@ namespace tmv {
         static inline void call(M1& m1, M2& m2)
         {
 #if TMV_OPT == 0
-            const bool algo = ( M1::mrowmajor && M2::mrowmajor ) ? 2 : 3;
+            const bool algo = ( M1::_rowmajor && M2::_rowmajor ) ? 2 : 3;
 #else
             typedef typename M2::value_type T2;
             const bool canlin = 
-                M1::mcanlin && M2::mcanlin &&
-                ( (M1::mrowmajor && M2::mrowmajor) ||
-                  (M1::mcolmajor && M2::mcolmajor) );
+                M1::_canlin && M2::_canlin &&
+                ( (M1::_rowmajor && M2::_rowmajor) ||
+                  (M1::_colmajor && M2::_colmajor) );
             const int algo = 
                 canlin ? 1 :
                 ( cs != UNKNOWN && rs != UNKNOWN ) ? (
                     ( IntTraits2<cs,rs>::prod <= int(128/sizeof(T2)) ) ? (
-                        ( M1::mrowmajor && M2::mrowmajor ) ? 5 : 6 ) :
-                    ( M1::mrowmajor && M2::mrowmajor ) ? 2 :
-                    ( M1::mcolmajor && M2::mcolmajor ) ? 3 :
+                        ( M1::_rowmajor && M2::_rowmajor ) ? 5 : 6 ) :
+                    ( M1::_rowmajor && M2::_rowmajor ) ? 2 :
+                    ( M1::_colmajor && M2::_colmajor ) ? 3 :
                     ( cs > rs ) ? 2 : 3 ) :
                 4;
 #endif
@@ -292,15 +292,12 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                M1::mcolsize == UNKNOWN && 
-                M1::mrowsize == UNKNOWN && 
-                M2::mcolsize == UNKNOWN &&
-                M2::mrowsize == UNKNOWN &&
-                Traits<T1>::isinst &&
-                Traits2<T1,T2>::sametype;
-            const bool conj = M2::mconj;
+                M1::unknownsizes &&
+                M2::unknownsizes &&
+                Traits2<T1,T2>::sametype &&
+                Traits<T1>::isinst;
             const int algo =
-                conj ? 97 :
+                M2::_conj ? 97 :
                 inst ? 98 :
                 -3;
             SwapM_Helper<algo,cs,rs,M1,M2>::call(m1,m2);
@@ -318,13 +315,13 @@ namespace tmv {
                 SwapM_Helper<-2,cs,rs,M1,M2>::call(m1,m2);
             } else if (ExactSameStorage(m1,m2)) {
                 // They are equal modulo a conjugation
-                Maybe<M1::mconj != int(M2::mconj)>::conjself(m1);
+                Maybe<M1::_conj != int(M2::_conj)>::conjself(m1);
             } else if (m2.colsize() == m2.rowsize() &&
                        OppositeStorage(m1,m2)) {
                 // Then transpose
                 m2.transposeSelf();
                 // And maybe conjugate
-                Maybe<M1::mconj != int(M2::mconj)>::conjself(m2);
+                Maybe<M1::_conj != int(M2::_conj)>::conjself(m2);
             } else { 
                 // Need a temporary
                 typename M1::copy_type m1c = m1;
@@ -341,10 +338,10 @@ namespace tmv {
         static inline void call(M1& m1, M2& m2)
         {
             const bool checkalias = 
-                M1::mcolsize == UNKNOWN && 
-                M2::mcolsize == UNKNOWN &&
-                M1::mrowsize == UNKNOWN && 
-                M2::mrowsize == UNKNOWN;
+                M1::_colsize == UNKNOWN && 
+                M2::_colsize == UNKNOWN &&
+                M1::_rowsize == UNKNOWN && 
+                M2::_rowsize == UNKNOWN;
             const int algo =
                 checkalias ? 99 : 
                 -2;
@@ -356,12 +353,12 @@ namespace tmv {
     inline void DoSwap(
         BaseMatrix_Rec_Mutable<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
-        TMVStaticAssert((Sizes<M1::mcolsize,M2::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::mrowsize>::same));
+        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same));
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
-        const int cs = Sizes<M1::mcolsize,M2::mcolsize>::size;
-        const int rs = Sizes<M1::mrowsize,M2::mrowsize>::size;
+        const int cs = Sizes<M1::_colsize,M2::_colsize>::size;
+        const int rs = Sizes<M1::_rowsize,M2::_rowsize>::size;
         typedef typename M1::cview_type M1v;
         typedef typename M2::cview_type M2v;
         M1v m1v = m1.cView();
@@ -373,12 +370,12 @@ namespace tmv {
     inline void InlineSwap(
         BaseMatrix_Rec_Mutable<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
-        TMVStaticAssert((Sizes<M1::mcolsize,M2::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::mrowsize>::same));
+        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same));
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
-        const int cs = Sizes<M1::mcolsize,M2::mcolsize>::size;
-        const int rs = Sizes<M1::mrowsize,M2::mrowsize>::size;
+        const int cs = Sizes<M1::_colsize,M2::_colsize>::size;
+        const int rs = Sizes<M1::_rowsize,M2::_rowsize>::size;
         typedef typename M1::cview_type M1v;
         typedef typename M2::cview_type M2v;
         M1v m1v = m1.cView();

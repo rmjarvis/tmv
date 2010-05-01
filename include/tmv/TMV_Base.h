@@ -86,12 +86,15 @@
 // *skQ SymBlockSparseMatrix 
 // *hkQ HermBlockSparseMatrix 
 //
-// TODO:  BlockDiagMatrix and Sym varieties
-// TODO:  SparseMatrix and Sym, Block varieties
+// TODO:  BlockDiagMatrix and related varieties
+// TODO:  SparseMatrix and related varieties
 
 
 #ifndef TMV_Base_H
 #define TMV_Base_H
+
+#define TMV_VERSION_MAJOR 0
+#define TMV_VERSION_MINOR 70
 
 #ifndef NDEBUG
 #define TMV_DEBUG
@@ -159,6 +162,8 @@
 
 namespace tmv {
 
+    inline std::string TMV_Version() { return "0.70"; }
+
     // StorageType defines the order to store the elements of a matrix
     // TODO: I haven't implemented RowPacked and ColPakced yet.
     enum StorageType { 
@@ -167,13 +172,38 @@ namespace tmv {
     // IndexStyle defines which kind of indexing to use for a vector
     enum IndexStyle { CStyle, FortranStyle=789234 };
 
-    // UNKNOWN is the value of vsize or vstep whenever it
+    // UNKNOWN is the value of _size, _step, etc. whenever it
     // is not known at compile time.
     // We use for this value the maximally negative int.
     // In binary, this is a 1 followed by all zeros.
     const int UNKNOWN = (1<<(sizeof(int)*8-1));
 
-    enum DivType { XXX, LU, CH, QR, QRP, SV };
+    enum DivType { 
+        XXX=1, LU=2, CH=4, QR=8, QRP=16, SV=32,
+        // We store the divtype in a binary field integer.
+        // In addition to the above, we also use the same object to 
+        // store the following other flags related to division.
+        // So these values must not clash with the above DivType values.
+        // These aren't technically DivType's but since they are 
+        // stored together, I think this adds to type-safety.
+        DivInPlaceFlag = 64,
+        SaveDivFlag = 128,
+        // And finally shorthand for "one of the real DivType's":
+        DivTypeFlags = 62
+    };
+    // I use things like &, |, |= to manipulate DivType's.  These are legal
+    // in C, but not C++, so write overrides for these functions:
+    inline DivType operator|(DivType a, DivType b) 
+    { return static_cast<DivType>(static_cast<int>(a) | static_cast<int>(b)); }
+    inline DivType operator&(DivType a, DivType b) 
+    { return static_cast<DivType>(static_cast<int>(a) & static_cast<int>(b)); }
+    inline DivType& operator|=(DivType& a, DivType b) 
+    { a = (a|b); return a; }
+    inline DivType& operator&=(DivType& a, DivType b) 
+    { a = (a&b); return a; }
+    inline DivType operator~(DivType a) 
+    { return static_cast<DivType>(~static_cast<int>(a)); }
+
     // TODO: I haven't implemented ZeroDiag yet.
     enum DiagType { UnitDiag, NonUnitDiag, ZeroDiag, UnknownDiag };
 
@@ -478,8 +508,15 @@ namespace tmv {
                 // Probably this is high enough for any conceivable use.
                 // I only use up to 64 right now, but I provided a few
                 // extra values to be safe.
-                UNKNOWN ) };
-        enum { half_roundup = S > 16 ? ((((S-1)>>5)+1)<<4) : (S>>1) };
+                UNKNOWN ) 
+        };
+        enum { half_roundup = (
+                // For very large S, just call it UNKNOWN to keep from 
+                // having big complicated recursive structures.
+                S > 128 ? UNKNOWN :
+                S > 16 ? ((((S-1)>>5)+1)<<4) :
+                (S>>1)  )
+        };
         static inline int text() { return S; }
     };
     template <>
@@ -503,6 +540,7 @@ namespace tmv {
     struct IntTraits2
     {
         enum { sum = S1 + S2 };
+        enum { diff = S1 - S2 };
         enum { prod = S1 * S2 };
         enum { safeprod = SafeIntTraits2<S1,S2,(S1<300 && S2<300)>::prod };
         enum { min = S1 < S2 ? S1 : S2 };
@@ -512,6 +550,7 @@ namespace tmv {
     struct IntTraits2<S1,UNKNOWN>
     {
         enum { sum = UNKNOWN };
+        enum { diff = UNKNOWN };
         enum { prod = UNKNOWN };
         enum { safeprod = UNKNOWN };
         enum { min = UNKNOWN };
@@ -521,6 +560,7 @@ namespace tmv {
     struct IntTraits2<UNKNOWN,S2>
     {
         enum { sum = UNKNOWN };
+        enum { diff = UNKNOWN };
         enum { prod = UNKNOWN };
         enum { safeprod = UNKNOWN };
         enum { min = UNKNOWN };
@@ -530,6 +570,7 @@ namespace tmv {
     struct IntTraits2<UNKNOWN,UNKNOWN>
     {
         enum { sum = UNKNOWN };
+        enum { diff = UNKNOWN };
         enum { prod = UNKNOWN };
         enum { safeprod = UNKNOWN };
         enum { min = UNKNOWN };
@@ -989,6 +1030,14 @@ namespace tmv {
         template <class M>
         static inline void conjself2(M m) { m.conjugateSelf(); }
 
+        // m.conjugate() or m
+        template <class M>
+        static inline typename M::const_conjugate_type conjugate(const M& m) 
+        { return m.conjugate(); }
+        template <class M>
+        static inline typename M::conjugate_type conjugate(M& m) 
+        { return m.conjugate(); }
+
         // v.addToAll(x) or v.setAllTo(x)
         template <class V, class T>
         static inline void addtoall(V& v, const T& x) { v.addToAll(x); }
@@ -1273,6 +1322,11 @@ namespace tmv {
         template <class M>
         static inline void conjself2(M /*m*/) { }
 
+        template <class M>
+        static inline const M& conjugate(const M& m) { return m; }
+        template <class M>
+        static inline M& conjugate(M& m) { return m; }
+
         template <class V, class T>
         static inline void addtoall(V& v, const T& x) { v.setAllTo(x); }
         template <class V, class T>
@@ -1545,6 +1599,13 @@ namespace tmv {
     template <bool yn2> 
     struct Maybe2<false,yn2>
     {
+        template <class T1, class T2>
+        static inline void add(T1& , const T2& ) {}
+        template <class T1, class T2>
+        static inline void add(ConjRef<T1> , const T2& ) {}
+        template <class T1, bool C, class T2>
+        static inline void add(TriRef<T1,C> , const T2& ) {}
+
 #ifdef __SSE2__
         static inline void sse_load(
             __m128& m,
@@ -1852,7 +1913,7 @@ namespace tmv {
     };
 
     template <class T> 
-    inline typename Traits<T>::real_type Epsilon() 
+    inline typename Traits<T>::real_type TMV_Epsilon() 
     { return std::numeric_limits<typename Traits<T>::real_type>::epsilon(); }
 
     inline int TMV_ABS(const std::complex<int>& z)
@@ -1921,7 +1982,11 @@ namespace tmv {
             d==QR ? "QR" :
             d==QRP ? "QRP" :
             d==SV ? "SV" :
-            "unkown DivType";
+            ( std::string("unkown DivType: ") + 
+              // This is a quick and dirty int->string for int < 1000
+              char('0' + (d/100)) + 
+              char('0' + (d%100)/10) + 
+              char('0' + (d%10)) );
     }
 
     inline std::string TMV_Text(DiagType d)

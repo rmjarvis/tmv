@@ -52,6 +52,14 @@
 
 #include "tmv/TMV_Det.h"
 #include "tmv/TMV_InvertM.h"
+#include "tmv/TMV_DivM.h"
+
+#include "tmv/TMV_LUD.h"
+#if 0
+#include "tmv/TMV_QR.h"
+#include "tmv/TMV_QRP.h"
+#include "tmv/TMV_SVD.h"
+#endif
 
 #ifndef TMV_H
 #include "tmv/TMV_ProdXM.h"
@@ -60,15 +68,6 @@
 #include "tmv/TMV_OProdVV.h"
 #include "tmv/TMV_ProdMV.h"
 #include "tmv/TMV_ProdMM.h"
-#endif
-
-#include "tmv/TMV_LUDecompose.h"
-#if 0
-#include "tmv/TMV_LUD.h"
-#include "tmv/TMV_QRD.h"
-#include "tmv/TMV_QRPD.h"
-#include "tmv/TMV_SVD.h"
-#include "tmv/TMV_PackedQ.h"
 #endif
 
 #endif

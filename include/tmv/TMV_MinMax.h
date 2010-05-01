@@ -390,11 +390,11 @@ L2:
         static inline RT call(const V& v, int*const ibest)
         {
             if (ibest) {
-                IT bestit = Helper1<V::vsize,1>::unroll1(v.begin());
+                IT bestit = Helper1<V::_size,1>::unroll1(v.begin());
                 *ibest = bestit - v.begin();
                 return Component<comp,VT>::f(*bestit);
             } else {
-                return Helper1<V::vsize,1>::unroll2(v);
+                return Helper1<V::_size,1>::unroll2(v);
             }
         }
     };
@@ -432,7 +432,7 @@ L2:
             IT it = v.begin();
             RT best = Component<comp,VT>::f(*it);
             IT bestit = it;
-            Helper1<V::vsize,1>::unroll(best,bestit,it);
+            Helper1<V::_size,1>::unroll(best,bestit,it);
             if (ibest) *ibest = bestit - v.begin();
             return best;
         }
@@ -465,7 +465,7 @@ L2:
         struct Helper1<0,x>; 
 
         static inline RT call(const V& v, int*const ibest)
-        { return Helper1<V::vsize,1>::unroll(v,*ibest); }
+        { return Helper1<V::_size,1>::unroll(v,*ibest); }
     };
 #endif
 
@@ -611,23 +611,23 @@ L2:
     {
 #if TMV_OPT >= 2
         const int algo1 = 
-            V::vsize != UNKNOWN ? (
-                V::vsize <= 160 ? 6 :
-                (V::vstep == 1 && V::vsize > 250) ? (
-                    ( V::viscomplex ? 2 : 5 ) ) :
+            V::_size != UNKNOWN ? (
+                V::_size <= 160 ? 6 :
+                (V::_step == 1 && V::_size > 250) ? (
+                    ( V::iscomplex ? 2 : 5 ) ) :
                 1 ) :
-            V::vstep == 1 ? ( V::viscomplex ? 2 : 14 ) :
+            V::_step == 1 ? ( V::iscomplex ? 2 : 14 ) :
             1;
 #endif
         const int algo2 = 
 #if TMV_OPT >= 1
-            V::vsize != UNKNOWN ? (
-                V::vsize <= 12 ? 6 :
-                V::vsize <= 40 ? 7 :
-                (V::vstep == 1 && V::vsize > 250) ? (
-                    ( V::viscomplex ? 1 : 5 ) ) :
+            V::_size != UNKNOWN ? (
+                V::_size <= 12 ? 6 :
+                V::_size <= 40 ? 7 :
+                (V::_step == 1 && V::_size > 250) ? (
+                    ( V::iscomplex ? 1 : 5 ) ) :
                 1 ) :
-            V::vstep == 1 ? ( V::viscomplex ? 1 : 14 ) :
+            V::_step == 1 ? ( V::iscomplex ? 1 : 14 ) :
 #endif
             1;
 #ifdef PRINTALGO
@@ -678,9 +678,9 @@ L2:
         TMVAssert(v.size() > 0);
         typedef typename V::value_type T;
         const bool inst = 
-            Traits<T>::isinst &&
-            V::vsize == UNKNOWN;
-        return CallMaxElementv<V::vconj,inst,V>::call(v.vec(),imax);
+            V::unknownsizes &&
+            Traits<T>::isinst;
+        return CallMaxElementv<V::_conj,inst,V>::call(v.vec(),imax);
     }
 
 
@@ -694,23 +694,23 @@ L2:
     {
 #if TMV_OPT >= 2
         const int algo1 = 
-            V::vsize != UNKNOWN ? (
-                V::viscomplex ? (
-                    ( V::vsize <= 16 ? 6 : V::vstep == 1 ? 8 : 1 ) ) :
-                V::vsize <= 160 ? 6 :
-                (V::vstep == 1 && V::vsize > 250) ?  5 : 1 ) :
-            V::vstep == 1 ? ( V::viscomplex ? 8 : 15 ) :
+            V::_size != UNKNOWN ? (
+                V::iscomplex ? (
+                    ( V::_size <= 16 ? 6 : V::_step == 1 ? 8 : 1 ) ) :
+                V::_size <= 160 ? 6 :
+                (V::_step == 1 && V::_size > 250) ?  5 : 1 ) :
+            V::_step == 1 ? ( V::iscomplex ? 8 : 15 ) :
             1;
 #endif
         const int algo2 = 
 #if TMV_OPT >= 1
-            V::vsize != UNKNOWN ? (
-                V::viscomplex ? (
-                    ( V::vstep == 1 ? 8 : 1 ) ) :
-                V::vsize <= 12 ? 6 :
-                V::vsize <= 40 ? 7 :
-                (V::vstep == 1 && V::vsize > 250) ? 5 : 1 ) :
-            V::vstep == 1 ? ( V::viscomplex ? 8 : 15 ) :
+            V::_size != UNKNOWN ? (
+                V::iscomplex ? (
+                    ( V::_step == 1 ? 8 : 1 ) ) :
+                V::_size <= 12 ? 6 :
+                V::_size <= 40 ? 7 :
+                (V::_step == 1 && V::_size > 250) ? 5 : 1 ) :
+            V::_step == 1 ? ( V::iscomplex ? 8 : 15 ) :
 #endif
             1;
 #ifdef PRINTALGO
@@ -754,8 +754,8 @@ L2:
         typedef typename V::value_type T;
         typedef typename V::const_nonconj_type Vn;
         const bool inst = 
-            Traits<T>::isinst &&
-            V::vsize == UNKNOWN;
+            V::unknownsizes &&
+            Traits<T>::isinst;
         return CallMaxAbsElementv<inst,Vn>::call(v.nonConj(),imax);
     }
 
@@ -770,23 +770,23 @@ L2:
     {
 #if TMV_OPT >= 2
         const int algo1 = 
-            V::vsize != UNKNOWN ? (
-                V::vsize <= 160 ? 6 :
-                (V::vstep == 1 && V::vsize > 250) ? (
-                    ( V::viscomplex ? 2 : 5 ) ) :
+            V::_size != UNKNOWN ? (
+                V::_size <= 160 ? 6 :
+                (V::_step == 1 && V::_size > 250) ? (
+                    ( V::iscomplex ? 2 : 5 ) ) :
                 1 ) :
-            V::vstep == 1 ? ( V::viscomplex ? 2 : 15 ) :
+            V::_step == 1 ? ( V::iscomplex ? 2 : 15 ) :
             1;
 #endif
         const int algo2 = 
 #if TMV_OPT >= 1
-            V::vsize != UNKNOWN ? (
-                V::vsize <= 12 ? 6 :
-                V::vsize <= 40 ? 7 :
-                (V::vstep == 1 && V::vsize > 250) ? (
-                    ( V::viscomplex ? 1 : 5 ) ) :
+            V::_size != UNKNOWN ? (
+                V::_size <= 12 ? 6 :
+                V::_size <= 40 ? 7 :
+                (V::_step == 1 && V::_size > 250) ? (
+                    ( V::iscomplex ? 1 : 5 ) ) :
                 1 ) :
-            V::vstep == 1 ? ( V::viscomplex ? 1 : 15 ) :
+            V::_step == 1 ? ( V::iscomplex ? 1 : 15 ) :
 #endif
             1;
 #ifdef PRINTALGO
@@ -835,8 +835,8 @@ L2:
         typedef typename V::value_type T;
         typedef typename V::const_nonconj_type Vn;
         const bool inst = 
-            Traits<T>::isinst &&
-            V::vsize == UNKNOWN;
+            V::unknownsizes &&
+            Traits<T>::isinst;
         return CallMaxAbs2Elementv<inst,Vn>::call(v.nonConj(),imax);
     }
 
@@ -851,23 +851,23 @@ L2:
     {
 #if TMV_OPT >= 2
         const int algo1 = 
-            V::vsize != UNKNOWN ? (
-                V::vsize <= 160 ? 6 :
-                (V::vstep == 1 && V::vsize > 250) ? (
-                    ( V::viscomplex ? 2 : 5 ) ) :
+            V::_size != UNKNOWN ? (
+                V::_size <= 160 ? 6 :
+                (V::_step == 1 && V::_size > 250) ? (
+                    ( V::iscomplex ? 2 : 5 ) ) :
                 1 ) :
-            V::vstep == 1 ? ( V::viscomplex ? 2 : 14 ) :
+            V::_step == 1 ? ( V::iscomplex ? 2 : 14 ) :
             1;
 #endif
         const int algo2 = 
 #if TMV_OPT >= 1
-            V::vsize != UNKNOWN ? (
-                V::vsize <= 12 ? 6 :
-                V::vsize <= 40 ? 7 :
-                (V::vstep == 1 && V::vsize > 250) ? (
-                    ( V::viscomplex ? 1 : 5 ) ) :
+            V::_size != UNKNOWN ? (
+                V::_size <= 12 ? 6 :
+                V::_size <= 40 ? 7 :
+                (V::_step == 1 && V::_size > 250) ? (
+                    ( V::iscomplex ? 1 : 5 ) ) :
                 1 ) :
-            V::vstep == 1 ? ( V::viscomplex ? 1 : 14 ) :
+            V::_step == 1 ? ( V::iscomplex ? 1 : 14 ) :
 #endif
             1;
 #ifdef PRINTALGO
@@ -918,9 +918,9 @@ L2:
         TMVAssert(v.size() > 0);
         typedef typename V::value_type T;
         const bool inst = 
-            Traits<T>::isinst &&
-            V::vsize == UNKNOWN;
-        return CallMinElementv<V::vconj,inst,V>::call(v.vec(),imin);
+            V::unknownsizes &&
+            Traits<T>::isinst;
+        return CallMinElementv<V::_conj,inst,V>::call(v.vec(),imin);
     }
 
 
@@ -934,23 +934,23 @@ L2:
     {
 #if TMV_OPT >= 2
         const int algo1 = 
-            V::vsize != UNKNOWN ? (
-                V::viscomplex ? (
-                    ( V::vsize <= 40 ? 6 : V::vstep == 1 ? 8 : 1 ) ) :
-                V::vsize <= 160 ? 6 :
-                (V::vstep == 1 && V::vsize > 250) ?  5 : 1 ) :
-            V::vstep == 1 ? ( V::viscomplex ? 8 : 15 ) :
+            V::_size != UNKNOWN ? (
+                V::iscomplex ? (
+                    ( V::_size <= 40 ? 6 : V::_step == 1 ? 8 : 1 ) ) :
+                V::_size <= 160 ? 6 :
+                (V::_step == 1 && V::_size > 250) ?  5 : 1 ) :
+            V::_step == 1 ? ( V::iscomplex ? 8 : 15 ) :
             1;
 #endif
         const int algo2 = 
 #if TMV_OPT >= 1
-            V::vsize != UNKNOWN ? (
-                V::viscomplex ? (
-                    ( V::vstep == 1 ? ( V::vsize <= 20 ? 2 : 8 ) : 1 ) ) :
-                V::vsize <= 12 ? 6 :
-                V::vsize <= 40 ? 7 :
-                (V::vstep == 1 && V::vsize > 250) ? 5 : 1 ) :
-            V::vstep == 1 ? ( V::viscomplex ? 8 : 15 ) :
+            V::_size != UNKNOWN ? (
+                V::iscomplex ? (
+                    ( V::_step == 1 ? ( V::_size <= 20 ? 2 : 8 ) : 1 ) ) :
+                V::_size <= 12 ? 6 :
+                V::_size <= 40 ? 7 :
+                (V::_step == 1 && V::_size > 250) ? 5 : 1 ) :
+            V::_step == 1 ? ( V::iscomplex ? 8 : 15 ) :
 #endif
             1;
 #ifdef PRINTALGO
@@ -999,8 +999,8 @@ L2:
         typedef typename V::value_type T;
         typedef typename V::const_nonconj_type Vn;
         const bool inst = 
-            Traits<T>::isinst &&
-            V::vsize == UNKNOWN;
+            V::unknownsizes &&
+            Traits<T>::isinst;
         return CallMinAbsElementv<inst,Vn>::call(v.nonConj(),imin);
     }
 
@@ -1014,23 +1014,23 @@ L2:
     {
 #if TMV_OPT >= 2
         const int algo1 = 
-            V::vsize != UNKNOWN ? (
-                V::vsize <= 160 ? 6 :
-                (V::vstep == 1 && V::vsize > 250) ? (
-                    ( V::viscomplex ? 2 : 5 ) ) :
+            V::_size != UNKNOWN ? (
+                V::_size <= 160 ? 6 :
+                (V::_step == 1 && V::_size > 250) ? (
+                    ( V::iscomplex ? 2 : 5 ) ) :
                 1 ) :
-            V::vstep == 1 ? ( V::viscomplex ? 2 : 15 ) :
+            V::_step == 1 ? ( V::iscomplex ? 2 : 15 ) :
             1;
 #endif
         const int algo2 = 
 #if TMV_OPT >= 1
-            V::vsize != UNKNOWN ? (
-                V::vsize <= 12 ? 6 :
-                V::vsize <= 40 ? 7 :
-                (V::vstep == 1 && V::vsize > 250) ? (
-                    ( V::viscomplex ? 1 : 5 ) ) :
+            V::_size != UNKNOWN ? (
+                V::_size <= 12 ? 6 :
+                V::_size <= 40 ? 7 :
+                (V::_step == 1 && V::_size > 250) ? (
+                    ( V::iscomplex ? 1 : 5 ) ) :
                 1 ) :
-            V::vstep == 1 ? ( V::viscomplex ? 1 : 15 ) :
+            V::_step == 1 ? ( V::iscomplex ? 1 : 15 ) :
 #endif
             1;
 #ifdef PRINTALGO
@@ -1079,8 +1079,8 @@ L2:
         typedef typename V::value_type T;
         typedef typename V::const_nonconj_type Vn;
         const bool inst = 
-            Traits<T>::isinst &&
-            V::vsize == UNKNOWN;
+            V::unknownsizes &&
+            Traits<T>::isinst;
         return CallMinAbs2Elementv<inst,Vn>::call(v.nonConj(),imin);
     }
 

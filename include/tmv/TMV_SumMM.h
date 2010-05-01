@@ -52,22 +52,22 @@ namespace tmv {
         typedef typename ProdXM<ix2,T2,M2>::value_type mtype2;
         typedef typename Traits2<mtype1,mtype2>::type value_type;
 
-        enum { mcolsize = Sizes<M1::mcolsize,M2::mcolsize>::size };
-        enum { mrowsize = Sizes<M1::mrowsize,M2::mrowsize>::size };
-        enum { mshape = ShapeTraits2<M1::mshape,M2::mshape>::sum };
-        enum { mfort = M1::mfort && M2::mfort };
-        enum { mcalc = false };
-        enum { rm1 = Traits<typename M1::calc_type>::mrowmajor };
-        enum { rm2 = Traits<typename M2::calc_type>::mrowmajor };
-        enum { cm1 = Traits<typename M1::calc_type>::mcolmajor };
-        enum { mrowmajor = ( rm1 || (rm2 && !cm1) ) };
+        enum { _colsize = Sizes<M1::_colsize,M2::_colsize>::size };
+        enum { _rowsize = Sizes<M1::_rowsize,M2::_rowsize>::size };
+        enum { _shape = ShapeTraits2<M1::_shape,M2::_shape>::sum };
+        enum { _fort = M1::_fort && M2::_fort };
+        enum { _calc = false };
+        enum { rm1 = Traits<typename M1::calc_type>::_rowmajor };
+        enum { rm2 = Traits<typename M2::calc_type>::_rowmajor };
+        enum { cm1 = Traits<typename M1::calc_type>::_colmajor };
+        enum { _rowmajor = ( rm1 || (rm2 && !cm1) ) };
 
         typedef SumMM<ix1,T1,M1,ix2,T2,M2> type;
-        typedef typename MCopyHelper<value_type,mshape,mcolsize,mrowsize,
-                mrowmajor,mfort>::type copy_type;
+        typedef typename MCopyHelper<value_type,_shape,_colsize,_rowsize,
+                _rowmajor,_fort>::type copy_type;
         typedef const copy_type calc_type;
         typedef typename TypeSelect<
-            (M1::mcalc && M2::mcalc),const type,calc_type>::type eval_type;
+            (M1::_calc && M2::_calc),const type,calc_type>::type eval_type;
         typedef InvalidType inverse_type;
     };
 
@@ -87,8 +87,8 @@ namespace tmv {
             const T2& _x2, const BaseMatrix<M2>& _m2) :
             x1(_x1), m1(_m1.mat()), x2(_x2), m2(_m2.mat())
         {
-            TMVStaticAssert((Sizes<M1::mcolsize,M2::mcolsize>::same)); 
-            TMVStaticAssert((Sizes<M1::mrowsize,M2::mrowsize>::same)); 
+            TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
+            TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same)); 
             TMVAssert(m1.colsize() == m2.colsize());
             TMVAssert(m1.rowsize() == m2.rowsize());
         }
@@ -108,10 +108,10 @@ namespace tmv {
         inline void assignTo(BaseMatrix_Mutable<M3>& m3) const
         {
             TMVStaticAssert((
-                    ShapeTraits2<type::mshape,M3::mshape>::assignable)); 
-            TMVStaticAssert((type::misreal || M3::miscomplex));
-            TMVStaticAssert((Sizes<type::mcolsize,M3::mcolsize>::same)); 
-            TMVStaticAssert((Sizes<type::mrowsize,M3::mrowsize>::same)); 
+                    ShapeTraits2<type::_shape,M3::_shape>::assignable)); 
+            TMVStaticAssert((type::isreal || M3::iscomplex));
+            TMVStaticAssert((Sizes<type::_colsize,M3::_colsize>::same)); 
+            TMVStaticAssert((Sizes<type::_rowsize,M3::_rowsize>::same)); 
             TMVAssert(colsize() == m3.colsize());
             TMVAssert(rowsize() == m3.rowsize());
             AddMM(x1,m1.calc(),x2,m2.calc(),m3.mat());
@@ -121,10 +121,10 @@ namespace tmv {
         inline void newAssignTo(BaseMatrix_Mutable<M3>& m3) const
         {
             TMVStaticAssert((
-                    ShapeTraits2<type::mshape,M3::mshape>::assignable)); 
-            TMVStaticAssert((type::misreal || M3::miscomplex));
-            TMVStaticAssert((Sizes<type::mcolsize,M3::mcolsize>::same)); 
-            TMVStaticAssert((Sizes<type::mrowsize,M3::mrowsize>::same)); 
+                    ShapeTraits2<type::_shape,M3::_shape>::assignable)); 
+            TMVStaticAssert((type::isreal || M3::iscomplex));
+            TMVStaticAssert((Sizes<type::_colsize,M3::_colsize>::same)); 
+            TMVStaticAssert((Sizes<type::_rowsize,M3::_rowsize>::same)); 
             TMVAssert(colsize() == m3.colsize());
             TMVAssert(rowsize() == m3.rowsize());
             NoAliasAddMM(x1,m1.calc(),x2,m2.calc(),m3.mat());
@@ -143,11 +143,11 @@ namespace tmv {
     inline void AddEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix<M2>& m2) 
     {
-        TMVStaticAssert((Sizes<M1::mcolsize,M2::mcolsize>::same)); 
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::mrowsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same)); 
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
-        TMVStaticAssert(M1::miscomplex || M2::misreal);
+        TMVStaticAssert(M1::iscomplex || M2::isreal);
         MultXM<true>(m2.calc(),m1.mat());
     }
 
@@ -156,11 +156,11 @@ namespace tmv {
     inline void AddEq(
         BaseMatrix_Mutable<M1>& m1, const ProdXM<ix2,T2,M2>& m2) 
     {
-        TMVStaticAssert((Sizes<M1::mcolsize,M2::mcolsize>::same)); 
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::mrowsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same)); 
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
-        TMVStaticAssert(M1::miscomplex || M2::misreal);
+        TMVStaticAssert(M1::iscomplex || M2::isreal);
         MultXM<true>(m2.getX(),m2.getM().calc(),m1.mat());
     }
 
@@ -169,11 +169,11 @@ namespace tmv {
     inline void SubtractEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix<M2>& m2)
     {
-        TMVStaticAssert((Sizes<M1::mcolsize,M2::mcolsize>::same)); 
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::mrowsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same)); 
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
-        TMVStaticAssert(M1::miscomplex || M2::misreal);
+        TMVStaticAssert(M1::iscomplex || M2::isreal);
         MultXM<true>(Scaling<-1,RT>(),m2.calc(),m1.mat());
     }
 
@@ -182,11 +182,11 @@ namespace tmv {
     inline void SubtractEq(
         BaseMatrix_Mutable<M1>& m1, const ProdXM<ix2,T2,M2>& m2) 
     {
-        TMVStaticAssert((Sizes<M1::mcolsize,M2::mcolsize>::same)); 
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::mrowsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same)); 
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
-        TMVStaticAssert(M1::miscomplex || M2::misreal);
+        TMVStaticAssert(M1::iscomplex || M2::isreal);
         MultXM<true>(-m2.getX(),m2.getM().calc(),m1.mat());
     }
 
@@ -195,8 +195,8 @@ namespace tmv {
     inline SumMM<1,RT,M1,1,RT,M2> operator+(
         const BaseMatrix<M1>& m1, const BaseMatrix<M2>& m2)
     {
-        TMVStaticAssert((Sizes<M1::mcolsize,M2::mcolsize>::same)); 
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::mrowsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same)); 
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
         return SumMM<1,RT,M1,1,RT,M2>(RT(1),m1,RT(1),m2); 
@@ -207,8 +207,8 @@ namespace tmv {
     inline SumMM<ix1,T1,M1,1,RT,M2> operator+(
         const ProdXM<ix1,T1,M1>& m1, const BaseMatrix<M2>& m2)
     {
-        TMVStaticAssert((Sizes<M1::mcolsize,M2::mcolsize>::same)); 
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::mrowsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same)); 
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
         return SumMM<ix1,T1,M1,1,RT,M2>(T1(m1.getX()),m1.getM(),RT(1),m2); 
@@ -219,8 +219,8 @@ namespace tmv {
     inline SumMM<1,RT,M1,ix2,T2,M2> operator+(
         const BaseMatrix<M1>& m1, const ProdXM<ix2,T2,M2>& m2)
     {
-        TMVStaticAssert((Sizes<M1::mcolsize,M2::mcolsize>::same)); 
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::mrowsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same)); 
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
         return SumMM<1,RT,M1,ix2,T2,M2>(RT(1),m1,T2(m2.getX()),m2.getM()); 
@@ -231,8 +231,8 @@ namespace tmv {
     inline SumMM<ix1,T1,M1,ix2,T2,M2> operator+(
         const ProdXM<ix1,T1,M1>& m1, const ProdXM<ix2,T2,M2>& m2)
     {
-        TMVStaticAssert((Sizes<M1::mcolsize,M2::mcolsize>::same)); 
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::mrowsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same)); 
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
         return SumMM<ix1,T1,M1,ix2,T2,M2>(
@@ -244,8 +244,8 @@ namespace tmv {
     inline SumMM<1,RT,M1,-1,RT,M2> operator-(
         const BaseMatrix<M1>& m1, const BaseMatrix<M2>& m2)
     {
-        TMVStaticAssert((Sizes<M1::mcolsize,M2::mcolsize>::same)); 
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::mrowsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same)); 
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
         return SumMM<1,RT,M1,-1,RT,M2>(RT(1),m1,RT(-1),m2); 
@@ -256,8 +256,8 @@ namespace tmv {
     inline SumMM<ix1,T1,M1,-1,RT,M2> operator-(
         const ProdXM<ix1,T1,M1>& m1, const BaseMatrix<M2>& m2)
     {
-        TMVStaticAssert((Sizes<M1::mcolsize,M2::mcolsize>::same)); 
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::mrowsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same)); 
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
         return SumMM<ix1,T1,M1,-1,RT,M2>(T1(m1.getX()),m1.getM(),RT(-1),m2); 
@@ -268,8 +268,8 @@ namespace tmv {
     inline SumMM<1,RT,M1,-ix2,T2,M2> operator-(
         const BaseMatrix<M1>& m1, const ProdXM<ix2,T2,M2>& m2)
     {
-        TMVStaticAssert((Sizes<M1::mcolsize,M2::mcolsize>::same)); 
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::mrowsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same)); 
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
         return SumMM<1,RT,M1,-ix2,T2,M2>(RT(1),m1,-T2(m2.getX()),m2.getM()); 
@@ -280,8 +280,8 @@ namespace tmv {
     inline SumMM<ix1,T1,M1,-ix2,T2,M2> operator-(
         const ProdXM<ix1,T1,M1>& m1, const ProdXM<ix2,T2,M2>& m2)
     {
-        TMVStaticAssert((Sizes<M1::mcolsize,M2::mcolsize>::same)); 
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::mrowsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same)); 
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
         return SumMM<ix1,T1,M1,-ix2,T2,M2>(

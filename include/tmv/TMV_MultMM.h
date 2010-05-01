@@ -618,12 +618,12 @@ namespace tmv {
 
             const bool dopref = K * sizeof(T1) >= TMV_Q3;
 
-            Prefetch_MultiRead(A0.getP());
-            Prefetch_MultiRead(A1.getP());
-            Prefetch_Read(B0.getP());
-            Prefetch_Read(B1.getP());
-            Prefetch_MultiWrite(C0.getP());
-            Prefetch_MultiWrite(C1.getP());
+            Prefetch_MultiRead(A0.get());
+            Prefetch_MultiRead(A1.get());
+            Prefetch_Read(B0.get());
+            Prefetch_Read(B1.get());
+            Prefetch_MultiWrite(C0.get());
+            Prefetch_MultiWrite(C1.get());
 
             int j,i,k;
 
@@ -655,10 +655,10 @@ namespace tmv {
                     A2.shiftP(Astepj_4); A3.shiftP(Astepj_4);
                     C0 -= M; C1 -= M; 
                     if (dopref) {
-                        Prefetch_Read(A0.getP());
-                        Prefetch_Read(A1.getP());
-                        Prefetch_Read(A2.getP());
-                        Prefetch_Read(A3.getP());
+                        Prefetch_Read(A0.get());
+                        Prefetch_Read(A1.get());
+                        Prefetch_Read(A2.get());
+                        Prefetch_Read(A3.get());
                     }
                 } while (--k);
                 k = Kc; if (k) do {
@@ -675,7 +675,7 @@ namespace tmv {
                     A0.shiftP(Astepj_1);
                     C0 -= M; C1 -= M;
                     if (dopref) {
-                        Prefetch_Read(A0.getP());
+                        Prefetch_Read(A0.get());
                     }
                 } while (--k);
                 A0.shiftP(Astart); A1.shiftP(Astartx); 
@@ -683,10 +683,10 @@ namespace tmv {
                 B0.shiftP(Bstepj_2); B1.shiftP(Bstepj_2);
                 C0.shiftP(Cstepj_2); C1.shiftP(Cstepj_2);
                 if (dopref) {
-                    Prefetch_Read(B0.getP());
-                    Prefetch_Read(B1.getP());
-                    Prefetch_MultiWrite(C0.getP());
-                    Prefetch_MultiWrite(C1.getP());
+                    Prefetch_Read(B0.get());
+                    Prefetch_Read(B1.get());
+                    Prefetch_MultiWrite(C0.get());
+                    Prefetch_MultiWrite(C1.get());
                 }
             } while (--j);
         }
@@ -852,12 +852,12 @@ namespace tmv {
 
             const bool dopref = K * sizeof(T1) >= TMV_Q3;
 
-            Prefetch_MultiRead(A0.getP());
-            Prefetch_MultiRead(A1.getP());
-            Prefetch_MultiRead(B0.getP());
-            Prefetch_MultiRead(B1.getP());
-            Prefetch_Write(C0.getP());
-            Prefetch_Write(C1.getP());
+            Prefetch_MultiRead(A0.get());
+            Prefetch_MultiRead(A1.get());
+            Prefetch_MultiRead(B0.get());
+            Prefetch_MultiRead(B1.get());
+            Prefetch_Write(C0.get());
+            Prefetch_Write(C1.get());
 
             int j,i,k;
 
@@ -903,18 +903,18 @@ namespace tmv {
                     A0.shiftP(Astepi_2); A1.shiftP(Astepi_2);
                     B0 -= K; B1 -= K;
                     if (dopref) {
-                        Prefetch_Read(A0.getP());
-                        Prefetch_Read(A1.getP());
+                        Prefetch_Read(A0.get());
+                        Prefetch_Read(A1.get());
                     }
                 } while (--i);
                 A0.shiftP(Astart); A1.shiftP(Astart);
                 B0.shiftP(Bstepj_2); B1.shiftP(Bstepj_2);
                 C0.shiftP(Cstepj_2); C1.shiftP(Cstepj_2);
                 if (dopref) {
-                    Prefetch_MultiRead(B0.getP());
-                    Prefetch_MultiRead(B1.getP());
-                    Prefetch_Write(C0.getP());
-                    Prefetch_Write(C1.getP());
+                    Prefetch_MultiRead(B0.get());
+                    Prefetch_MultiRead(B1.get());
+                    Prefetch_Write(C0.get());
+                    Prefetch_Write(C1.get());
                 }
             } while (--j);
         }
@@ -1105,12 +1105,12 @@ namespace tmv {
 
             const bool dopref = K * sizeof(T1) >= TMV_Q3;
 
-            Prefetch_Read(A0.getP());
-            Prefetch_Read(A1.getP());
-            Prefetch_MultiRead(B0.getP());
-            Prefetch_MultiRead(B1.getP());
-            Prefetch_MultiWrite(C0.getP());
-            Prefetch_MultiWrite(C1.getP());
+            Prefetch_Read(A0.get());
+            Prefetch_Read(A1.get());
+            Prefetch_MultiRead(B0.get());
+            Prefetch_MultiRead(B1.get());
+            Prefetch_MultiWrite(C0.get());
+            Prefetch_MultiWrite(C1.get());
 
             int j,i,k;
 
@@ -1167,10 +1167,10 @@ namespace tmv {
                 B0.shiftP(Bstepi_4); B1.shiftP(Bstepi_4);
                 B2.shiftP(Bstepi_4); B3.shiftP(Bstepi_4);
                 if (dopref) {
-                    Prefetch_Read(A0.getP());
-                    Prefetch_Read(A1.getP());
-                    Prefetch_Read(B0.getP());
-                    Prefetch_Read(B1.getP());
+                    Prefetch_Read(A0.get());
+                    Prefetch_Read(A1.get());
+                    Prefetch_Read(B0.get());
+                    Prefetch_Read(B1.get());
                 }
             } while (--k);
         }
@@ -1298,16 +1298,16 @@ namespace tmv {
               int ix, class T, class M1, class M2, class M3>
     struct MultMM_Helper<61,cs,rs,xs,add,ix,T,M1,M2,M3> 
     {
-        enum { ccc = M1::mcolmajor && M2::mcolmajor && M3::mcolmajor };
-        enum { rcc = M1::mrowmajor && M2::mcolmajor && M3::mcolmajor };
-        enum { crc = M1::mcolmajor && M2::mrowmajor && M3::mcolmajor };
+        enum { ccc = M1::_colmajor && M2::_colmajor && M3::_colmajor };
+        enum { rcc = M1::_rowmajor && M2::_colmajor && M3::_colmajor };
+        enum { crc = M1::_colmajor && M2::_rowmajor && M3::_colmajor };
         enum { MB = ccc ? TMV_Q2 : rcc ? TMV_Q2 : TMV_Q2 };
         enum { NB = ccc ? TMV_Q2 : rcc ? TMV_Q2 : TMV_Q2 };
         enum { KB = ccc ? TMV_Q2 : rcc ? TMV_Q2 : TMV_Q2 };
         enum { algo2 = (
-                ccc ? ( M3::miscomplex ? 11 : 12 ) :
-                rcc ? ( M3::miscomplex ? 21 : 22 ) :
-                crc ? ( M3::miscomplex ? 31 : 32 ) :
+                ccc ? ( M3::iscomplex ? 11 : 12 ) :
+                rcc ? ( M3::iscomplex ? 21 : 22 ) :
+                crc ? ( M3::iscomplex ? 31 : 32 ) :
                 21 ) };
         enum { lnMB = IntTraits<MB>::log };
         enum { lnNB = IntTraits<NB>::log };
@@ -1473,13 +1473,13 @@ namespace tmv {
             typedef typename M2::const_colrange_type M2c;
             typedef typename M3::submatrix_type M3s;
 
-            const bool ccc = M1::mcolmajor && M2::mcolmajor && M3::mcolmajor;
-            const bool rcc = M1::mrowmajor && M2::mcolmajor && M3::mcolmajor;
-            const bool crc = M1::mcolmajor && M2::mrowmajor && M3::mcolmajor;
+            const bool ccc = M1::_colmajor && M2::_colmajor && M3::_colmajor;
+            const bool rcc = M1::_rowmajor && M2::_colmajor && M3::_colmajor;
+            const bool crc = M1::_colmajor && M2::_rowmajor && M3::_colmajor;
             const int algo2 = 
-                ccc ? ( M3::miscomplex ? 11 : 12 ) :
-                rcc ? ( M3::miscomplex ? 21 : 22 ) :
-                crc ? ( M3::miscomplex ? 31 : 32 ) :
+                ccc ? ( M3::iscomplex ? 11 : 12 ) :
+                rcc ? ( M3::iscomplex ? 21 : 22 ) :
+                crc ? ( M3::iscomplex ? 31 : 32 ) :
                 21;
 
             try {
@@ -1581,9 +1581,9 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
             const bool inst = 
-                M1::mcolsize == UNKNOWN && M1::mrowsize == UNKNOWN &&
-                M2::mcolsize == UNKNOWN && M2::mrowsize == UNKNOWN &&
-                M3::mcolsize == UNKNOWN && M3::mrowsize == UNKNOWN &&
+                M1::unknownsizes &&
+                M2::unknownsizes &&
+                M3::unknownsizes &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -1668,13 +1668,13 @@ namespace tmv {
 #ifdef TMV_OPT_BAD_ALLOC
             const int algo2 = 66;
 #else
-            const bool ccc = M1::mcolmajor && M2::mcolmajor && M3::mcolmajor;
-            const bool rcc = M1::mrowmajor && M2::mcolmajor && M3::mcolmajor;
-            const bool crc = M1::mcolmajor && M2::mrowmajor && M3::mcolmajor;
+            const bool ccc = M1::_colmajor && M2::_colmajor && M3::_colmajor;
+            const bool rcc = M1::_rowmajor && M2::_colmajor && M3::_colmajor;
+            const bool crc = M1::_colmajor && M2::_rowmajor && M3::_colmajor;
             const int algo2 = 
-                ccc ? ( M3::miscomplex ? 11 : 12 ) :
-                rcc ? ( M3::miscomplex ? 21 : 22 ) :
-                crc ? ( M3::miscomplex ? 31 : 32 ) :
+                ccc ? ( M3::iscomplex ? 11 : 12 ) :
+                rcc ? ( M3::iscomplex ? 21 : 22 ) :
+                crc ? ( M3::iscomplex ? 31 : 32 ) :
                 21;
 #endif
             if (bad_alloc)
@@ -1708,14 +1708,14 @@ namespace tmv {
             const int Kc = K < 16 ? 1 : (K>>4); // = K/16
             const bool twobig = (Mb&&Nb) || (Mb&&Kb) || (Nb&&Kb);
 
-            TMVStaticAssert(!M3::mrowmajor);
-            const bool ccc = M1::mcolmajor && M2::mcolmajor && M3::mcolmajor;
-            const bool rcc = M1::mrowmajor && M2::mcolmajor && M3::mcolmajor;
-            const bool crc = M1::mcolmajor && M2::mrowmajor && M3::mcolmajor;
+            TMVStaticAssert(!M3::_rowmajor);
+            const bool ccc = M1::_colmajor && M2::_colmajor && M3::_colmajor;
+            const bool rcc = M1::_rowmajor && M2::_colmajor && M3::_colmajor;
+            const bool crc = M1::_colmajor && M2::_rowmajor && M3::_colmajor;
             const int algo2 = 
-                ccc ? ( M3::miscomplex ? 11 : 12 ) :
-                rcc ? ( M3::miscomplex ? 21 : 22 ) :
-                crc ? ( M3::miscomplex ? 31 : 32 ) : 
+                ccc ? ( M3::iscomplex ? 11 : 12 ) :
+                rcc ? ( M3::iscomplex ? 21 : 22 ) :
+                crc ? ( M3::iscomplex ? 31 : 32 ) : 
                 21;
             // Strange -- 31,32 are faster than copying to new storage.
             // At least for the sizes I tested on.
@@ -1794,7 +1794,7 @@ namespace tmv {
             const int Kb = (K>>6); // = K/64
 #endif
 
-            TMVStaticAssert(!M3::mrowmajor);
+            TMVStaticAssert(!M3::_rowmajor);
 
 #ifdef TMV_USE_RECURSIVE_BLOCK
             if (Mb*Nb*Kb*Kb >= TMV_Q5)
@@ -1947,7 +1947,7 @@ namespace tmv {
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M1::value_type T1;
-            const bool rm = M2::mcolmajor || M3::mrowmajor; 
+            const bool rm = M2::_colmajor || M3::_rowmajor; 
             typedef typename MCopyHelper<T1,Rec,cs,xs,rm,false>::type M1c;
             M1c m1c(M,K);
             typedef typename M1c::view_type M1cv;
@@ -1977,7 +1977,7 @@ namespace tmv {
 #endif
             typedef typename M1::value_type T1;
             typedef typename Traits2<T,T1>::type PT1;
-            const bool rm = M2::mcolmajor || M3::mrowmajor; 
+            const bool rm = M2::_colmajor || M3::_rowmajor; 
             typedef typename MCopyHelper<PT1,Rec,cs,xs,rm,false>::type M1c;
             M1c m1c(M,K);
             typedef typename M1c::view_type M1cv;
@@ -2039,7 +2039,7 @@ namespace tmv {
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M2::value_type T2;
-            const bool rm = M1::mcolmajor && M3::mrowmajor;
+            const bool rm = M1::_colmajor && M3::_rowmajor;
             typedef typename MCopyHelper<T2,Rec,xs,rs,rm,false>::type M2c;
             M2c m2c(K,N);
             typedef typename M2c::view_type M2cv;
@@ -2069,7 +2069,7 @@ namespace tmv {
 #endif
             typedef typename M2::value_type T2;
             typedef typename Traits2<T,T2>::type PT2;
-            const bool rm = M1::mcolmajor && M3::mrowmajor;
+            const bool rm = M1::_colmajor && M3::_rowmajor;
             typedef typename MCopyHelper<PT2,Rec,xs,rs,rm,false>::type M2c;
             M2c m2c(K,N);
             typedef typename M2c::view_type M2cv;
@@ -2138,7 +2138,7 @@ namespace tmv {
                 typedef typename M1::value_type T1;
                 typedef typename M2::value_type T2;
                 typedef typename Traits2<T1,T2>::type PT3;
-                const bool rm = M1::mrowmajor && M2::mrowmajor;
+                const bool rm = M1::_rowmajor && M2::_rowmajor;
                 typedef typename MCopyHelper<PT3,Rec,cs,rs,rm,false>::type M3c;
                 M3c m3c(M,N);
                 typedef typename M3c::view_type M3cv;
@@ -2150,7 +2150,7 @@ namespace tmv {
                 MultXM_Helper<-2,cs,rs,add,ix,T,M3ccv,M3>::call(x,m3ccv,m3);
             } else {
                 typedef typename M3::value_type T3;
-                const bool rm = M1::mrowmajor && M2::mrowmajor;
+                const bool rm = M1::_rowmajor && M2::_rowmajor;
                 typedef typename MCopyHelper<T3,Rec,cs,rs,rm,false>::type M3c;
                 M3c m3c(M,N);
                 typedef typename M3c::view_type M3cv;
@@ -2183,7 +2183,7 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename Traits2<T1,T2>::type PT3;
-            const bool rm = M1::mrowmajor && M2::mrowmajor;
+            const bool rm = M1::_rowmajor && M2::_rowmajor;
             typedef typename MCopyHelper<PT3,Rec,cs,rs,rm,false>::type M3c;
             M3c m3c(M,N);
             typedef typename M3c::view_type M3cv;
@@ -2204,10 +2204,10 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const bool ccc = M1::mcolmajor && M2::mcolmajor && M3::mcolmajor;
-            const bool rcc = M1::mrowmajor && M2::mcolmajor && M3::mcolmajor;
-            const bool crc = M1::mcolmajor && M2::mrowmajor && M3::mcolmajor;
-            const bool rrc = M1::mrowmajor && M2::mrowmajor && M3::mcolmajor;
+            const bool ccc = M1::_colmajor && M2::_colmajor && M3::_colmajor;
+            const bool rcc = M1::_rowmajor && M2::_colmajor && M3::_colmajor;
+            const bool crc = M1::_colmajor && M2::_rowmajor && M3::_colmajor;
+            const bool rrc = M1::_rowmajor && M2::_rowmajor && M3::_colmajor;
 
             const int algo = 
                 ( cs == 0 || rs == 0 || (xs == 0 && add) ) ? 0 :
@@ -2218,11 +2218,11 @@ namespace tmv {
                 rs > 1 && rs <= 3 ? 21 :
                 cs > 1 && cs <= 3 ? 405 :
                 xs > 1 && xs <= 3 ? 31 :
-                M3::mrowmajor && !M3::mcolmajor ? 405 :
+                M3::_rowmajor && !M3::_colmajor ? 405 :
                 ccc ? 11 :
                 rcc ? 21 :
                 crc ? 31 :
-                ( M2::mstepi != UNKNOWN && M3::mstepi != UNKNOWN ) ? 21 :
+                ( M2::_stepi != UNKNOWN && M3::_stepi != UNKNOWN ) ? 21 :
                 rrc ? 31 : 
                 21;
             MultMM_Helper<algo,cs,rs,xs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
@@ -2305,18 +2305,18 @@ namespace tmv {
             const int algo = 63;
             const int algo1 = 21;
 #else
-            const bool ccc = M1::mcolmajor && M2::mcolmajor && M3::mcolmajor;
-            const bool rcc = M1::mrowmajor && M2::mcolmajor && M3::mcolmajor;
-            const bool crc = M1::mcolmajor && M2::mrowmajor && M3::mcolmajor;
+            const bool ccc = M1::_colmajor && M2::_colmajor && M3::_colmajor;
+            const bool rcc = M1::_rowmajor && M2::_colmajor && M3::_colmajor;
+            const bool crc = M1::_colmajor && M2::_rowmajor && M3::_colmajor;
 #if TMV_OPT == 0 
             const int algo = 
-                (M3::mrowmajor && !M3::mcolmajor) ? 5 :
+                (M3::_rowmajor && !M3::_colmajor) ? 5 :
                 ccc ? 11 :
                 rcc ? 21 :
                 crc ? 31 :
                 21;
 #else
-            const bool rrc = M1::mrowmajor && M2::mrowmajor && M3::mcolmajor;
+            const bool rrc = M1::_rowmajor && M2::_rowmajor && M3::_colmajor;
 
             const int Mb = cs == UNKNOWN ? UNKNOWN : (cs >> 6);
             const int Nb = rs == UNKNOWN ? UNKNOWN : (rs >> 6);
@@ -2368,7 +2368,7 @@ namespace tmv {
                 rs > 1 && rs <= 3 ? 21 :
                 cs > 1 && cs <= 3 ? 5 :
                 xs > 1 && xs <= 3 ? 31 :
-                M3::mrowmajor && !M3::mcolmajor ? 5 :
+                M3::_rowmajor && !M3::_colmajor ? 5 :
                 (cs == UNKNOWN || rs == UNKNOWN || xs == UNKNOWN ) ? (
                     ccc ? ( cs == UNKNOWN ? 75 : cs <= 3 ? 11 : 71 ) :
                     rcc ? ( xs == UNKNOWN ? 77 : xs <= 3 ? 21 : 71 ) :
@@ -2389,13 +2389,13 @@ namespace tmv {
                 // Basically, the non-unit step vectors for MultMV are ok, 
                 // since the non-unit step is known and the lengths of the 
                 // vectors are not too large.
-                ( M2::mstepi != UNKNOWN && M3::mstepi != UNKNOWN )  ? 21 :
+                ( M2::_stepi != UNKNOWN && M3::_stepi != UNKNOWN )  ? 21 :
                 // For rrc, 31 seems to be faster than copying for small
                 // matrices (which is what we have here).
                 rrc ? 31 : 
-                !M3::mcolmajor ? 87 :
-                !(M2::mrowmajor || M2::mcolmajor) ? 86 :
-                !(M1::mrowmajor || M1::mcolmajor) ? 83 :
+                !M3::_colmajor ? 87 :
+                !(M2::_rowmajor || M2::_colmajor) ? 86 :
+                !(M1::_rowmajor || M1::_colmajor) ? 83 :
                 // The above should have caught all possibilities.
                 // So selection should never get here.
                 -999;
@@ -2407,9 +2407,9 @@ namespace tmv {
             const int algo1 = 
                 // Nothing less than 60 should throw a bad_alloc
                 algo < 60 ? algo : 
-                ccc ? ( M3::miscomplex ? 11 : 12 ) :
-                rcc ? ( M3::miscomplex ? 21 : 22 ) :
-                crc ? ( M3::miscomplex ? 31 : 32 ) :
+                ccc ? ( M3::iscomplex ? 11 : 12 ) :
+                rcc ? ( M3::iscomplex ? 21 : 22 ) :
+                crc ? ( M3::iscomplex ? 31 : 32 ) :
                 21;
 #endif
 #endif
@@ -2472,7 +2472,7 @@ namespace tmv {
               int ix, class T, class M1, class M2, class M3>
     struct MultMM_Helper<98,cs,rs,xs,false,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             typename M3::value_type xx(x);
@@ -2483,7 +2483,7 @@ namespace tmv {
               int ix, class T, class M1, class M2, class M3>
     struct MultMM_Helper<98,cs,rs,xs,true,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             typename M3::value_type xx(x);
@@ -2503,9 +2503,9 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
             const bool inst = 
-                M1::mcolsize == UNKNOWN && M1::mrowsize == UNKNOWN &&
-                M2::mcolsize == UNKNOWN && M2::mrowsize == UNKNOWN &&
-                M3::mcolsize == UNKNOWN && M3::mrowsize == UNKNOWN &&
+                M1::unknownsizes &&
+                M2::unknownsizes &&
+                M3::unknownsizes &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -2520,7 +2520,7 @@ namespace tmv {
                 cs == 1 ? 202 :
                 rs == 1 ? 203 :
                 xs == 1 ? 204 :
-                M3::mconj ? 97 :
+                M3::_conj ? 97 :
                 inst ? 98 : 
                 -3;
             MultMM_Helper<algo,cs,rs,xs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
@@ -2562,9 +2562,9 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const bool checkalias =
-                M1::mcolsize == UNKNOWN && M1::mrowsize == UNKNOWN &&
-                M2::mcolsize == UNKNOWN && M2::mrowsize == UNKNOWN &&
-                M3::mcolsize == UNKNOWN && M3::mrowsize == UNKNOWN;
+                M1::_colsize == UNKNOWN && M1::_rowsize == UNKNOWN &&
+                M2::_colsize == UNKNOWN && M2::_rowsize == UNKNOWN &&
+                M3::_colsize == UNKNOWN && M3::_rowsize == UNKNOWN;
             const int algo = 
                 ( cs == 0 || rs == 0 || (xs == 0 && add) ) ? 0 :
                 ( xs == 0 && !add ) ? 1 :
@@ -2583,9 +2583,9 @@ namespace tmv {
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     {
-        TMVStaticAssert((Sizes<M1::mcolsize,M3::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::mcolsize>::same));
-        TMVStaticAssert((Sizes<M2::mrowsize,M3::mrowsize>::same));
+        TMVStaticAssert((Sizes<M1::_colsize,M3::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_rowsize,M2::_colsize>::same));
+        TMVStaticAssert((Sizes<M2::_rowsize,M3::_rowsize>::same));
         TMVAssert(m1.colsize() == m3.colsize());
         TMVAssert(m1.rowsize() == m2.colsize());
         TMVAssert(m2.rowsize() == m3.rowsize());
@@ -2593,9 +2593,9 @@ namespace tmv {
         // cs = m3.colsize
         // rs = m3.rowsize
         // xs = "extra size" = m1.rowsize, m2.colsize
-        const int cs = Sizes<M3::mcolsize,M1::mcolsize>::size;
-        const int rs = Sizes<M3::mrowsize,M2::mrowsize>::size;
-        const int xs = Sizes<M1::mrowsize,M2::mcolsize>::size;
+        const int cs = Sizes<M3::_colsize,M1::_colsize>::size;
+        const int rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
+        const int xs = Sizes<M1::_rowsize,M2::_colsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         typedef typename M3::cview_type M3v;

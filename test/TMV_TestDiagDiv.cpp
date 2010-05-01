@@ -162,11 +162,9 @@ void TestDiagDiv()
     b3 = y*c;
     Assert(Norm(b3-e) < ceps*Norm(e),"Diag e%c");
 
-#if 0
     TestDiagDiv_A<T>();
     TestDiagDiv_B1<T>();
     TestDiagDiv_B2<T>();
-#endif
     std::cout<<"DiagMatrix<"<<tmv::TMV_Text(T())<<
         "> Division passed all tests\n";
 }

@@ -62,7 +62,7 @@ namespace tmv {
     inline PT operator*(
         const BaseVector<V1>& v1, const BaseVector<V2>& v2) 
     {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
         TMVAssert(v1.size() == v2.size());
         return MultVV(v1.calc(),v2.calc()); 
     }
@@ -72,7 +72,7 @@ namespace tmv {
     template <class V1, int ix2, class Tx, class V2>
     inline PT2 operator*(const BaseVector<V1>& v1, const ProdXV<ix2,Tx,V2>& v2) 
     {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
         TMVAssert(v1.size() == v2.size());
         return v2.getX() * (v1 * v2.getV());
     }
@@ -81,7 +81,7 @@ namespace tmv {
     template <int ix1, class Tx, class V1, class V2>
     inline PT2 operator*(const ProdXV<ix1,Tx,V1>& v1, const BaseVector<V2>& v2)
     {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
         TMVAssert(v1.size() == v2.size());
         return v1.getX() * (v1.getV() * v2);
     }
@@ -93,7 +93,7 @@ namespace tmv {
     inline PT2 operator*(
         const ProdXV<ix1,Tx1,V1>& v1, const ProdXV<ix2,Tx2,V2>& v2)
     {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
         TMVAssert(v1.size() == v2.size());
         return v1.getX() * v2.getX() * (v1.getV() * v2.getV());
     }

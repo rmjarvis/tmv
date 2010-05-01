@@ -318,7 +318,7 @@ namespace tmv {
             typedef typename V2::const_nonconj_type::const_iterator IT2;
             PT2 Y0;
             IT2 Y = v2.nonConj().begin();
-            const bool c2 = V2::vconj;
+            const bool c2 = V2::_conj;
 
             typedef typename M3::col_type M3c;
             typedef typename M3c::iterator IT3;
@@ -349,7 +349,7 @@ namespace tmv {
             std::cout<<"R1 algo 13: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(M3::misreal);
+            TMVStaticAssert(M3::isreal);
 
             if (M) {
 
@@ -382,12 +382,12 @@ namespace tmv {
 
                 const bool dopref = M * sizeof(T3) >= TMV_Q3;
 
-                Prefetch_Read(Y.getP());
-                Prefetch_MultiRead(X.getP());
-                Prefetch_Write(A0.getP());
-                Prefetch_Write(A1.getP());
-                Prefetch_Write(A2.getP());
-                Prefetch_Write(A3.getP());
+                Prefetch_Read(Y.get());
+                Prefetch_MultiRead(X.get());
+                Prefetch_Write(A0.get());
+                Prefetch_Write(A1.get());
+                Prefetch_Write(A2.get());
+                Prefetch_Write(A3.get());
 
                 int i;
 
@@ -407,10 +407,10 @@ namespace tmv {
                     A2.shiftP(stepj_4);
                     A3.shiftP(stepj_4);
                     if (dopref) {
-                        Prefetch_Write(A0.getP());
-                        Prefetch_Write(A1.getP());
-                        Prefetch_Write(A2.getP());
-                        Prefetch_Write(A3.getP());
+                        Prefetch_Write(A0.get());
+                        Prefetch_Write(A1.get());
+                        Prefetch_Write(A2.get());
+                        Prefetch_Write(A3.get());
                     }
                 } while (--N4);
                 if (Nb) do {
@@ -422,7 +422,7 @@ namespace tmv {
                     } while (--i);
                     A0.shiftP(stepj_1);
                     if (dopref) {
-                        Prefetch_Write(A0.getP());
+                        Prefetch_Write(A0.get());
                     }
                 } while (--Nb);
             }
@@ -450,7 +450,7 @@ namespace tmv {
             std::cout<<"R1 algo 14 N==2: M,N,cs,rs,x = "<<M<<','<<2<<
                 ','<<cs<<','<<2<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(M3::misreal);
+            TMVStaticAssert(M3::isreal);
 
             typedef typename V1::value_type T1;
             typedef typename V1::const_iterator IT1;
@@ -489,7 +489,7 @@ namespace tmv {
             std::cout<<"R1 algo 14 N==3: M,N,cs,rs,x = "<<M<<','<<3<<
                 ','<<cs<<','<<3<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(M3::misreal);
+            TMVStaticAssert(M3::isreal);
 
             typedef typename V1::value_type T1;
             typedef typename V1::const_iterator IT1;
@@ -531,7 +531,7 @@ namespace tmv {
             std::cout<<"R1 algo 14 N==4: M,N,cs,rs,x = "<<M<<','<<4<<
                 ','<<cs<<','<<4<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(M3::misreal);
+            TMVStaticAssert(M3::isreal);
 
             typedef typename V1::value_type T1;
             typedef typename V1::const_iterator IT1;
@@ -579,7 +579,7 @@ namespace tmv {
             std::cout<<"R1 algo 16: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(M3::miscomplex);
+            TMVStaticAssert(M3::iscomplex);
 
             if (M) {
                 typedef typename V1::value_type T1;
@@ -608,15 +608,15 @@ namespace tmv {
                 const IT1 X_begin = v1.nonConj().begin();
                 IT1 X = X_begin;
 
-                const bool c1 = V1::vconj;
-                const bool c2 = V2::vconj;
+                const bool c1 = V1::_conj;
+                const bool c2 = V2::_conj;
 
                 const bool dopref = M * sizeof(T3) >= TMV_Q3;
 
-                Prefetch_Read(Y.getP());
-                Prefetch_MultiRead(X.getP());
-                Prefetch_Write(A0.getP());
-                Prefetch_Write(A1.getP());
+                Prefetch_Read(Y.get());
+                Prefetch_MultiRead(X.get());
+                Prefetch_Write(A0.get());
+                Prefetch_Write(A1.get());
 
                 int i;
 
@@ -641,8 +641,8 @@ namespace tmv {
                     A0.shiftP(stepj_2);
                     A1.shiftP(stepj_2);
                     if (dopref) {
-                        Prefetch_Write(A0.getP());
-                        Prefetch_Write(A1.getP());
+                        Prefetch_Write(A0.get());
+                        Prefetch_Write(A1.get());
                     }
                 } while (--N2);
                 if (Nb) {
@@ -682,7 +682,7 @@ namespace tmv {
             std::cout<<"R1 algo 17 N==2: M,N,cs,rs,x = "<<M<<','<<2<<
                 ','<<cs<<','<<2<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(M3::miscomplex);
+            TMVStaticAssert(M3::iscomplex);
 
             if (M) {
                 typedef typename V1::value_type T1;
@@ -691,7 +691,7 @@ namespace tmv {
 
                 typedef typename V2::value_type T2;
                 typedef typename Traits2<T,T2>::type PT2;
-                const bool c2 = V2::vconj;
+                const bool c2 = V2::_conj;
                 const PT2 Y0 = ZProd<false,c2>::prod(x,v2.nonConj().cref(0));
                 const PT2 Y1 = ZProd<false,c2>::prod(x,v2.nonConj().cref(1));
 
@@ -706,7 +706,7 @@ namespace tmv {
                 const IT1 X_begin = v1.nonConj().begin();
                 IT1 X = X_begin;
 
-                const bool c1 = V1::vconj;
+                const bool c1 = V1::_conj;
 
                 do {
                     X0 = *X++;
@@ -736,7 +736,7 @@ namespace tmv {
             std::cout<<"R1 algo 17 N==3: M,N,cs,rs,x = "<<M<<','<<3<<
                 ','<<cs<<','<<3<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(M3::miscomplex);
+            TMVStaticAssert(M3::iscomplex);
 
             if (M) {
                 typedef typename V1::value_type T1;
@@ -745,7 +745,7 @@ namespace tmv {
 
                 typedef typename V2::value_type T2;
                 typedef typename Traits2<T,T2>::type PT2;
-                const bool c2 = V2::vconj;
+                const bool c2 = V2::_conj;
                 const PT2 Y0 = ZProd<false,c2>::prod(x,v2.nonConj().cref(0));
                 const PT2 Y1 = ZProd<false,c2>::prod(x,v2.nonConj().cref(1));
                 const PT2 Y2 = ZProd<false,c2>::prod(x,v2.nonConj().cref(2));
@@ -762,7 +762,7 @@ namespace tmv {
                 const IT1 X_begin = v1.nonConj().begin();
                 IT1 X = X_begin;
 
-                const bool c1 = V1::vconj;
+                const bool c1 = V1::_conj;
 
                 do {
                     X0 = *X++;
@@ -797,7 +797,7 @@ namespace tmv {
             std::cout<<"R1 algo 17 N==4: M,N,cs,rs,x = "<<M<<','<<4<<
                 ','<<cs<<','<<4<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(M3::miscomplex);
+            TMVStaticAssert(M3::iscomplex);
             if (M) {
 
                 typedef typename V1::value_type T1;
@@ -806,7 +806,7 @@ namespace tmv {
 
                 typedef typename V2::value_type T2;
                 typedef typename Traits2<T,T2>::type PT2;
-                const bool c2 = V2::vconj;
+                const bool c2 = V2::_conj;
                 const PT2 Y0 = ZProd<false,c2>::prod(x,v2.nonConj().cref(0));
                 const PT2 Y1 = ZProd<false,c2>::prod(x,v2.nonConj().cref(1));
                 const PT2 Y2 = ZProd<false,c2>::prod(x,v2.nonConj().cref(2));
@@ -825,7 +825,7 @@ namespace tmv {
                 const IT1 X_begin = v1.nonConj().begin();
                 IT1 X = X_begin;
 
-                const bool c1 = V1::vconj;
+                const bool c1 = V1::_conj;
 
                 do {
                     X0 = *X++;
@@ -981,7 +981,7 @@ namespace tmv {
 #ifdef TMV_OPT_SCALE
             const int MM = cs == UNKNOWN ? int(m3.colsize()) : cs;
             const int NN = rs == UNKNOWN ? int(m3.rowsize()) : rs;
-            const int algo2 = M3::miscomplex ? 16 : 13;
+            const int algo2 = M3::iscomplex ? 16 : 13;
             if (NN > TMV_Q4 * MM) {
 #endif
                 Rank1VVM_Helper<82,cs,rs,add,ix,T,V1,V2,M3>::call(
@@ -1271,26 +1271,26 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
-            TMVStaticAssert(!M3::mconj);
+            TMVStaticAssert(!M3::_conj);
 #if TMV_OPT >= 1
             const int algo = 
                 ( rs == 0 || cs == 0 ) ? 0 : 
                 ( cs == 1 ) ? 401 :
                 ( rs == 1 ) ? 402 :
-                M3::mcolmajor ? ( 
+                M3::_colmajor ? ( 
                     ( cs == UNKNOWN || rs == UNKNOWN ) ? (
-                        ( M3::miscomplex ? 16 : 13 ) ) :
-                    ( rs > cs && cs <= 4 && V2::vstep == 1 ) ? 3 :
-                    ( rs <= 4 ) ? (M3::miscomplex ? 17 : 14) :
-                    M3::miscomplex ? 16 : 13 ) :
-                M3::mrowmajor ? (
+                        ( M3::iscomplex ? 16 : 13 ) ) :
+                    ( rs > cs && cs <= 4 && V2::_step == 1 ) ? 3 :
+                    ( rs <= 4 ) ? (M3::iscomplex ? 17 : 14) :
+                    M3::iscomplex ? 16 : 13 ) :
+                M3::_rowmajor ? (
                     ( cs == UNKNOWN || rs == UNKNOWN ) ? 3 :
-                    ( cs > rs && rs <= 4 && V1::vstep == 1 ) ? (
-                        (M3::miscomplex ? 17 : 14) ) :
+                    ( cs > rs && rs <= 4 && V1::_step == 1 ) ? (
+                        (M3::iscomplex ? 17 : 14) ) :
                     3 ) :
                 11;
 #else
-            const int algo = M3::mrowmajor ? 3 : 11;
+            const int algo = M3::_rowmajor ? 3 : 11;
 #endif
             Rank1VVM_Helper<algo,cs,rs,add,ix,T,V1,V2,M3>::call(
                 x,v1,v2,m3);
@@ -1305,7 +1305,7 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
-            TMVStaticAssert(!M3::mconj);
+            TMVStaticAssert(!M3::_conj);
             // Possible algorithms to choose from:
             //
             //  0 = cs or rs == 0, so nothing to do
@@ -1342,25 +1342,25 @@ namespace tmv {
                 ( rs == 0 || cs == 0 ) ? 0 : 
                 ( cs == 1 ) ? 401 :
                 ( rs == 1 ) ? 402 :
-                M3::mcolmajor ? (
+                M3::_colmajor ? (
                     ( cs == UNKNOWN || rs == UNKNOWN ) ? (
-                        ( V1::vstep != 1 ? 83 : 
+                        ( V1::_step != 1 ? 83 : 
                           TMV_ZeroIX ? 31 : 
-                          M3::miscomplex ? 16 : 13 ) ) :
-                    ( rs > cs && cs <= 4 && V2::vstep == 1 ) ? 3 :
-                    ( cs > TMV_Q2 && V1::vstep != 1 ) ? 83 :
+                          M3::iscomplex ? 16 : 13 ) ) :
+                    ( rs > cs && cs <= 4 && V2::_step == 1 ) ? 3 :
+                    ( cs > TMV_Q2 && V1::_step != 1 ) ? 83 :
                     ( TMV_ZeroIX && rs > IntTraits2<TMV_Q4,cs>::prod ) ? 31 :
-                    ( rs <= 4 ) ? (M3::miscomplex ? 17 : 14) :
-                    M3::miscomplex ? 16 : 13 ) :
-                M3::mrowmajor ? (
+                    ( rs <= 4 ) ? (M3::iscomplex ? 17 : 14) :
+                    M3::iscomplex ? 16 : 13 ) :
+                M3::_rowmajor ? (
                     ( cs == UNKNOWN || rs == UNKNOWN ) ? 3 :
-                    ( cs > rs && rs <= 4 && V1::vstep == 1 ) ? (
-                        (M3::miscomplex ? 17 : 14) ) :
+                    ( cs > rs && rs <= 4 && V1::_step == 1 ) ? (
+                        (M3::iscomplex ? 17 : 14) ) :
                     3 ) :
                 // nomajor -- don't do anything fancy
                 11;
 #else
-            const int algo = M3::mrowmajor ? 3 : 11;
+            const int algo = M3::_rowmajor ? 3 : 11;
 #endif
 #ifdef PRINTALGO_R1
             std::cout<<"InlineRank1Update_VVM: \n";
@@ -1434,9 +1434,9 @@ namespace tmv {
             typedef typename V2::value_type T2;
             typedef typename M3::value_type T3;
             const bool inst =
-                V1::vsize == UNKNOWN && 
-                V2::vsize == UNKNOWN &&
-                M3::mcolsize == UNKNOWN && M3::mrowsize == UNKNOWN &&
+                V1::unknownsizes &&
+                V2::unknownsizes &&
+                M3::unknownsizes &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -1445,7 +1445,7 @@ namespace tmv {
                 Traits2<T2,T3>::sametype &&
 #endif
                 Traits<T3>::isinst;
-            const bool conj = M3::mconj;
+            const bool conj = M3::_conj;
             const int algo = 
                 ( rs == 0 || cs == 0 ) ? 0 : 
                 ( cs == 1 ) ? 201 :
@@ -1492,9 +1492,9 @@ namespace tmv {
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
             const bool checkalias =
-                V1::vsize == UNKNOWN && 
-                V2::vsize == UNKNOWN &&
-                M3::mcolsize == UNKNOWN && M3::mrowsize == UNKNOWN;
+                V1::_size == UNKNOWN && 
+                V2::_size == UNKNOWN &&
+                M3::_colsize == UNKNOWN && M3::_rowsize == UNKNOWN;
             const int algo = 
                 ( rs == 0 || cs == 0 ) ? 0 : 
                 ( cs == 1 ) ? 1 :
@@ -1511,12 +1511,12 @@ namespace tmv {
         const BaseVector_Calc<V1>& v1, const BaseVector_Calc<V2>& v2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     {
-        TMVStaticAssert((Sizes<M3::mcolsize,V1::vsize>::same));
-        TMVStaticAssert((Sizes<M3::mrowsize,V2::vsize>::same));
+        TMVStaticAssert((Sizes<M3::_colsize,V1::_size>::same));
+        TMVStaticAssert((Sizes<M3::_rowsize,V2::_size>::same));
         TMVAssert(m3.colsize() == v1.size());
         TMVAssert(m3.rowsize() == v2.size());
-        const int cs = Sizes<M3::mcolsize,V1::vsize>::size;
-        const int rs = Sizes<M3::mrowsize,V2::vsize>::size;
+        const int cs = Sizes<M3::_colsize,V1::_size>::size;
+        const int rs = Sizes<M3::_rowsize,V2::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename M3::cview_type M3v;
@@ -1532,12 +1532,12 @@ namespace tmv {
         const BaseVector_Calc<V1>& v1, const BaseVector_Calc<V2>& v2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     {
-        TMVStaticAssert((Sizes<M3::mcolsize,V1::vsize>::same));
-        TMVStaticAssert((Sizes<M3::mrowsize,V2::vsize>::same));
+        TMVStaticAssert((Sizes<M3::_colsize,V1::_size>::same));
+        TMVStaticAssert((Sizes<M3::_rowsize,V2::_size>::same));
         TMVAssert(m3.colsize() == v1.size());
         TMVAssert(m3.rowsize() == v2.size());
-        const int cs = Sizes<M3::mcolsize,V1::vsize>::size;
-        const int rs = Sizes<M3::mrowsize,V2::vsize>::size;
+        const int cs = Sizes<M3::_colsize,V1::_size>::size;
+        const int rs = Sizes<M3::_rowsize,V2::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename M3::cview_type M3v;
@@ -1553,12 +1553,12 @@ namespace tmv {
         const BaseVector_Calc<V1>& v1, const BaseVector_Calc<V2>& v2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     {
-        TMVStaticAssert((Sizes<M3::mcolsize,V1::vsize>::same));
-        TMVStaticAssert((Sizes<M3::mrowsize,V2::vsize>::same));
+        TMVStaticAssert((Sizes<M3::_colsize,V1::_size>::same));
+        TMVStaticAssert((Sizes<M3::_rowsize,V2::_size>::same));
         TMVAssert(m3.colsize() == v1.size());
         TMVAssert(m3.rowsize() == v2.size());
-        const int cs = Sizes<M3::mcolsize,V1::vsize>::size;
-        const int rs = Sizes<M3::mrowsize,V2::vsize>::size;
+        const int cs = Sizes<M3::_colsize,V1::_size>::size;
+        const int rs = Sizes<M3::_rowsize,V2::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename M3::cview_type M3v;
@@ -1574,12 +1574,12 @@ namespace tmv {
         const BaseVector_Calc<V1>& v1, const BaseVector_Calc<V2>& v2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     {
-        TMVStaticAssert((Sizes<M3::mcolsize,V1::vsize>::same));
-        TMVStaticAssert((Sizes<M3::mrowsize,V2::vsize>::same));
+        TMVStaticAssert((Sizes<M3::_colsize,V1::_size>::same));
+        TMVStaticAssert((Sizes<M3::_rowsize,V2::_size>::same));
         TMVAssert(m3.colsize() == v1.size());
         TMVAssert(m3.rowsize() == v2.size());
-        const int cs = Sizes<M3::mcolsize,V1::vsize>::size;
-        const int rs = Sizes<M3::mrowsize,V2::vsize>::size;
+        const int cs = Sizes<M3::_colsize,V1::_size>::size;
+        const int rs = Sizes<M3::_rowsize,V2::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename M3::cview_type M3v;

@@ -8,7 +8,7 @@ template <class T, tmv::StorageType stor> void TestMatrixDecomp()
 {
     for (int mattype = 0; mattype < 4; mattype++) {
         if (showstartdone) {
-            std::cout<<"mattype = "<<mattype<<", stor = "<<tmv::Text(stor)<<std::endl;
+            std::cout<<"mattype = "<<mattype<<", stor = "<<tmv::TMV_Text(stor)<<std::endl;
         }
         // mattype = 0  is Square
         // mattype = 1  is NonSquare slightly tall

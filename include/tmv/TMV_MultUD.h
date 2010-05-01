@@ -215,7 +215,7 @@ namespace tmv {
             std::cout<<"UD algo 12: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
             const bool unit = m1.isunit();
-            const bool c2 = M2::mconj;
+            const bool c2 = M2::_conj;
 
             typedef typename M1::const_col_sub_type M1c;
             typedef typename M1c::const_nonconj_type::const_iterator IT1;
@@ -292,7 +292,7 @@ namespace tmv {
             std::cout<<"UD algo 15: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
             const bool unit = m1.isunit();
-            const bool c2 = M2::mconj;
+            const bool c2 = M2::_conj;
 
             typedef typename M1::const_row_sub_type M1r;
             typedef typename M1r::const_nonconj_type::const_iterator IT1;
@@ -345,7 +345,7 @@ namespace tmv {
                 typedef typename Traits2<T,T2>::type PT2;
                 typedef typename M1::const_col_sub_type M1c;
                 typedef typename M3::col_sub_type M3c;
-                const bool u1 = M1::munit;
+                const bool u1 = M1::_unit;
 
                 PT2 xd = x * m2.cref(I,I);
                 M1c m1c = m1.get_col(I,0,I);
@@ -379,7 +379,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const int N = (s == UNKNOWN ? m3.size() : s);
-            TMVStaticAssert(M1::munit);
+            TMVStaticAssert(M1::_unit);
 #ifdef PRINTALGO_UD
             std::cout<<"UD algo 19: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -445,7 +445,7 @@ namespace tmv {
             std::cout<<"UD algo 22: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
             const bool unit = m1.isunit();
-            const bool c2 = M2::mconj;
+            const bool c2 = M2::_conj;
 
             typedef typename M1::const_col_sub_type M1c;
             typedef typename M1c::const_nonconj_type::const_iterator IT1;
@@ -521,7 +521,7 @@ namespace tmv {
             std::cout<<"UD algo 25: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
             const bool unit = m1.isunit();
-            const bool c2 = M2::mconj;
+            const bool c2 = M2::_conj;
 
             typedef typename M1::const_row_sub_type M1r;
             typedef typename M1r::const_nonconj_type::const_iterator IT1;
@@ -576,7 +576,7 @@ namespace tmv {
                 typedef typename Traits2<T,T2>::type PT2;
                 typedef typename M1::const_col_sub_type M1c;
                 typedef typename M3::col_sub_type M3c;
-                const bool u1 = M1::munit;
+                const bool u1 = M1::_unit;
 
                 PT2 xd = x * m2.cref(I,I);
                 M1c m1c = m1.get_col(I,I+1,s);
@@ -610,7 +610,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const int N = (s == UNKNOWN ? m3.size() : s);
-            TMVStaticAssert(M1::munit);
+            TMVStaticAssert(M1::_unit);
 #ifdef PRINTALGO_UD
             std::cout<<"UD algo 29: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -683,8 +683,8 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const bool bothrm = M1::mrowmajor && M3::mrowmajor;
-            const bool bothcm = M1::mcolmajor && M3::mcolmajor;
+            const bool bothrm = M1::_rowmajor && M3::_rowmajor;
+            const bool bothcm = M1::_colmajor && M3::_colmajor;
             const int s2 = s > 20 ? UNKNOWN : s;
             const int s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)/2
@@ -694,14 +694,14 @@ namespace tmv {
                 nops > TMV_Q1 ? false :
                 s <= 10;
 #if TMV_OPT >= 1
-            const bool docopy = TMV_ZeroIX || M2::mdiagstep != 1;
+            const bool docopy = TMV_ZeroIX || M2::_diagstep != 1;
 #else
             const bool docopy = false;
 #endif
             const int algo = 
                 ( s == 0 ) ? 0 :
                 ( s == 1 ) ? 1 :
-                M3::mupper ? ( // UpperTri
+                M3::_upper ? ( // UpperTri
                     unroll ? 16 :
                     bothrm ? ( ( s != UNKNOWN && s <= 10 ) ? 14 : 15 ) :
                     bothcm ? ( ( s != UNKNOWN && s <= 10 ) ? 11 : 12 ) :
@@ -710,7 +710,7 @@ namespace tmv {
                     unroll ? 26 :
                     bothrm ? ( ( s != UNKNOWN && s <= 10 ) ? 24 : 25 ) :
                     bothcm ? ( ( s != UNKNOWN && s <= 10 ) ? 21 : 22 ) :
-                    ( M1::mrowmajor && !docopy ) ? ( 
+                    ( M1::_rowmajor && !docopy ) ? ( 
                         ( s != UNKNOWN && s <= 10 ) ? 24 : 25 ) :
                     ( s != UNKNOWN && s <= 10 ) ? 21 : 22 ); 
             MultUD_Helper<algo,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
@@ -749,10 +749,10 @@ namespace tmv {
             // 82 = copy x*m2
             // 88 = copy m3 = m1, to make a MultEq op
 
-            const bool bothrm = M1::mrowmajor && M3::mrowmajor;
-            const bool bothcm = M1::mcolmajor && M3::mcolmajor;
+            const bool bothrm = M1::_rowmajor && M3::_rowmajor;
+            const bool bothcm = M1::_colmajor && M3::_colmajor;
 #if TMV_OPT >= 1
-            const bool docopy = (TMV_ZeroIX || M2::mdiagstep != 1);
+            const bool docopy = (TMV_ZeroIX || M2::_diagstep != 1);
 #else
             const bool docopy = false;
 #endif
@@ -767,7 +767,7 @@ namespace tmv {
             const int algo = 
                 ( s == 0 ) ? 0 :
                 ( s == 1 ) ? 1 :
-                M3::mupper ? ( // UpperTri
+                M3::_upper ? ( // UpperTri
                     unroll ? 16 :
                     bothrm ? (
                         docopy ? 82 :
@@ -783,7 +783,7 @@ namespace tmv {
                     bothcm ? (
                         ( s != UNKNOWN && s <= 10 ) ? 21 : 22 ) :
                     // For some reason, this seems to be faster than 22:
-                    M1::mrowmajor ? ( 
+                    M1::_rowmajor ? ( 
                         docopy ? 82 :
                         ( s != UNKNOWN && s <= 10 ) ? 24 : 25 ) :
                     ( s != UNKNOWN && s <= 10 ) ? 21 : 22 ); 
@@ -850,9 +850,9 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
             const bool inst = 
-                M1::msize == UNKNOWN &&
-                M2::msize == UNKNOWN && 
-                M3::msize == UNKNOWN &&
+                M1::unknownsizes &&
+                M2::unknownsizes &&
+                M3::unknownsizes &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -864,7 +864,7 @@ namespace tmv {
             const int algo = 
                 ( s == 0 ) ? 0 :
                 ( s == 1 ) ? 1 :
-                M3::mconj ? 97 :
+                M3::_conj ? 97 :
                 inst ? 98 : 
                 -3;
             MultUD_Helper<algo,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
@@ -926,9 +926,9 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& v2, M3& v3)
         {
             const bool checkalias =
-                M1::msize == UNKNOWN && 
-                M2::msize == UNKNOWN && 
-                M3::msize == UNKNOWN;
+                M1::_size == UNKNOWN && 
+                M2::_size == UNKNOWN && 
+                M3::_size == UNKNOWN;
             const int algo = 
                 ( s == 0 ) ? 0 :
                 ( s == 1 ) ? 1 :
@@ -944,15 +944,15 @@ namespace tmv {
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Tri_Mutable<M3>& m3)
     {
-        TMVStaticAssert(!M3::munit);
-        TMVStaticAssert(M1::mupper == int(M3::mupper));
-        TMVStaticAssert((Sizes<M3::msize,M1::msize>::same));
-        TMVStaticAssert((Sizes<M2::msize,M1::msize>::same));
-        TMVStaticAssert((Sizes<M3::msize,M2::msize>::same));
+        TMVStaticAssert(!M3::_unit);
+        TMVStaticAssert(M1::_upper == int(M3::_upper));
+        TMVStaticAssert((Sizes<M3::_size,M1::_size>::same));
+        TMVStaticAssert((Sizes<M2::_size,M1::_size>::same));
+        TMVStaticAssert((Sizes<M3::_size,M2::_size>::same));
         TMVAssert(m3.size() == m1.size());
         TMVAssert(m3.size() == m2.size());
         TMVAssert(!m3.isunit());
-        const int s = Sizes<Sizes<M3::msize,M1::msize>::size,M2::msize>::size;
+        const int s = Sizes<Sizes<M3::_size,M1::_size>::size,M2::_size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         typedef typename M3::cview_type M3v;
@@ -1014,7 +1014,7 @@ namespace tmv {
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     {
-        const bool upper = M1::mupper;
+        const bool upper = M1::_upper;
         typedef typename TypeSelect<upper,
                 typename M3::uppertri_type,
                 typename M3::lowertri_type>::type M3u;
@@ -1029,7 +1029,7 @@ namespace tmv {
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     { 
-        const bool upper = M1::mupper;
+        const bool upper = M1::_upper;
         typedef typename TypeSelect<upper,
                 typename M3::uppertri_type,
                 typename M3::lowertri_type>::type M3u;
@@ -1044,7 +1044,7 @@ namespace tmv {
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     {
-        const bool upper = M1::mupper;
+        const bool upper = M1::_upper;
         typedef typename TypeSelect<upper,
                 typename M3::uppertri_type,
                 typename M3::lowertri_type>::type M3u;

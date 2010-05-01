@@ -34,6 +34,7 @@
 #define TMV_DivVD_H
 
 #include "TMV_BaseMatrix_Diag.h"
+#include "TMV_BaseMatrix_Tri.h"
 #include "TMV_BaseVector.h"
 
 namespace tmv {
@@ -128,8 +129,8 @@ namespace tmv {
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
-            const bool c1 = V1::vconj;
-            const bool c2 = V2::vconj;
+            const bool c1 = V1::_conj;
+            const bool c2 = V2::_conj;
             if (n) do {
                 *C++ = ZProd<false,false>::prod(
                     x, ZProd<c1,c2>::quot(*A++,*B++));
@@ -153,22 +154,22 @@ namespace tmv {
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
-            const bool unit1 = V1::vstep == 1;
-            const bool unit2 = V2::vstep == 1;
-            const bool unit3 = V2::vstep == 1;
+            const bool unit1 = V1::_step == 1;
+            const bool unit2 = V2::_step == 1;
+            const bool unit3 = V2::_step == 1;
 
             if (unit3) {
-                while (n && (((unsigned int)(C.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(C.get()) & 0xf) != 0) ) {
                     *C++ = x * *A++ / *B++;
                     --n;
                 }
             } else if (unit1) {
-                while (n && (((unsigned int)(A.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
                     *C++ = x * *A++ / *B++;
                     --n;
                 }
             } else if (unit2) {
-                while (n && (((unsigned int)(B.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(B.get()) & 0xf) != 0) ) {
                     *C++ = x * *A++ / *B++;
                     --n;
                 }
@@ -194,15 +195,15 @@ namespace tmv {
                 __m128 xA,xB,xC,x1;
                 do {
                     Maybe2<!unit3,unit1>::sse_load(
-                        xA,A.getP(),A1.getP(),A2.getP(),A3.getP());
+                        xA,A.get(),A1.get(),A2.get(),A3.get());
                     A+=4; A1+=4; A2+=4; A3+=4;
                     Maybe2<!(unit3||unit1),unit2>::sse_load(
-                        xB,B.getP(),B1.getP(),B2.getP(),B3.getP());
+                        xB,B.get(),B1.get(),B2.get(),B3.get());
                     B+=4; B1+=4; B2+=4; B3+=4;
                     xC = _mm_div_ps(xA,xB);
                     Maybe<ix!=1>::sse_mult(xx,xC);
                     Maybe<unit2>::sse_store(
-                        C.getP(),C1.getP(),C2.getP(),C3.getP(),xC);
+                        C.get(),C1.get(),C2.get(),C3.get(),xC);
                     C+=4; C1+=4; C2+=4; C3+=4;
                 } while (--n_4);
             }
@@ -226,11 +227,11 @@ namespace tmv {
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
-            const bool unit1 = V1::vstep == 1;
-            const bool unit2 = V2::vstep == 1;
+            const bool unit1 = V1::_step == 1;
+            const bool unit2 = V2::_step == 1;
 
             if (unit1) {
-                while (n && (((unsigned int)(A.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
                     *B++ = x / *A++;
                     --n;
                 }
@@ -253,13 +254,13 @@ namespace tmv {
                 __m128 xA,xB;
                 do {
                     Maybe<unit1>::sse_load(
-                        xA,A.getP(),A1.getP(),A2.getP(),A3.getP());
+                        xA,A.get(),A1.get(),A2.get(),A3.get());
                     A+=4; A1+=4; A2+=4; A3+=4;
                     xB = _mm_div_ps(xx,xA);
                     Maybe<unit2>::sse_storeu(
-                        B.getP(),B1.getP(),_mm_unpacklo_ps(xB,xzero));
+                        B.get(),B1.get(),_mm_unpacklo_ps(xB,xzero));
                     Maybe<unit2>::sse_storeu(
-                        B2.getP(),B3.getP(),_mm_unpackhi_ps(xB,xzero));
+                        B2.get(),B3.get(),_mm_unpackhi_ps(xB,xzero));
                     B+=4; B1+=4; B2+=4; B3+=4;
                 } while (--n_4);
             }
@@ -283,17 +284,17 @@ namespace tmv {
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
-            const bool unit1 = V1::vstep == 1;
-            const bool unit2 = V2::vstep == 1;
-            const bool c1 = V1::vconj;
+            const bool unit1 = V1::_step == 1;
+            const bool unit2 = V2::_step == 1;
+            const bool c1 = V1::_conj;
 
             if (unit2) {
-                while (n && (((unsigned int)(B.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(B.get()) & 0xf) != 0) ) {
                     *B++ = ZProd<false,c1>::quot(x , *A++);
                     --n;
                 }
             } else if (unit1) {
-                while (n && (((unsigned int)(A.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
                     *B++ = ZProd<false,c1>::quot(x , *A++);
                     --n;
                 }
@@ -312,14 +313,14 @@ namespace tmv {
                 __m128 xA,xB;
                 __m128 xAc, xnorm, x1, x2; // temp values
                 do {
-                    Maybe2<!unit2,unit1>::sse_load(xA,A.getP(),A1.getP());
+                    Maybe2<!unit2,unit1>::sse_load(xA,A.get(),A1.get());
                     A+=2; A1+=2;
                     xAc = _mm_mul_ps(xconj,xA); // conj(xA)
                     x1 = _mm_mul_ps(xA,xA);
                     x2 = _mm_shuffle_ps(x1,x1,_MM_SHUFFLE(2,3,0,1));
                     xnorm = _mm_add_ps(x1,x2); // = norm(xA)
                     xB = _mm_div_ps(xAc,xnorm);  // = x/xA
-                    Maybe<unit2>::sse_store(B.getP(),B1.getP(),xB);
+                    Maybe<unit2>::sse_store(B.get(),B1.get(),xB);
                     B+=2; B1+=2;
                 } while (--n_2);
             }
@@ -345,11 +346,11 @@ namespace tmv {
         {
             TMVStaticAssert(ix == 0);
             TMVStaticAssert((Traits2<T,std::complex<float> >::sametype));
-            const bool unit1 = V1::vstep == 1;
-            const bool unit2 = V2::vstep == 1;
+            const bool unit1 = V1::_step == 1;
+            const bool unit2 = V2::_step == 1;
 
             if (unit1) {
-                while (n && (((unsigned int)(A.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
                     *B++ = x / *A++;
                     --n;
                 }
@@ -373,15 +374,15 @@ namespace tmv {
                 __m128 xA,xBr,xBi,xAinv;
                 do {
                     Maybe<unit1>::sse_load(
-                        xA,A.getP(),A1.getP(),A2.getP(),A3.getP());
+                        xA,A.get(),A1.get(),A2.get(),A3.get());
                     A+=4; A1+=4; A2+=4; A3+=4;
                     xAinv = _mm_div_ps(xone,xA);
                     xBr = _mm_mul_ps(xr,xAinv);
                     xBi = _mm_mul_ps(xi,xAinv);
                     Maybe<unit2>::sse_storeu(
-                        B.getP(),B1.getP(),_mm_unpacklo_ps(xBr,xBi));
+                        B.get(),B1.get(),_mm_unpacklo_ps(xBr,xBi));
                     Maybe<unit2>::sse_storeu(
-                        B2.getP(),B3.getP(),_mm_unpackhi_ps(xBr,xBi));
+                        B2.get(),B3.get(),_mm_unpackhi_ps(xBr,xBi));
                     B+=4; B1+=4; B2+=4; B3+=4;
                 } while (--n_4);
             }
@@ -407,17 +408,17 @@ namespace tmv {
         {
             TMVStaticAssert(ix == 0);
             TMVStaticAssert((Traits2<T,std::complex<float> >::sametype));
-            const bool unit1 = V1::vstep == 1;
-            const bool unit2 = V2::vstep == 1;
-            const bool c1 = V1::vconj;
+            const bool unit1 = V1::_step == 1;
+            const bool unit2 = V2::_step == 1;
+            const bool c1 = V1::_conj;
 
             if (unit2) {
-                while (n && (((unsigned int)(B.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(B.get()) & 0xf) != 0) ) {
                     *B++ = ZProd<false,c1>::quot(x , *A++);
                     --n;
                 }
             } else if (unit1) {
-                while (n && (((unsigned int)(A.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
                     *B++ = ZProd<false,c1>::quot(x , *A++);
                     --n;
                 }
@@ -442,7 +443,7 @@ namespace tmv {
                 __m128 xA,xB;
                 __m128 xnorm, x0, x1, x2, x3, x4, x5; // temp values
                 do {
-                    Maybe2<!unit2,unit1>::sse_load(xA,A.getP(),A1.getP());
+                    Maybe2<!unit2,unit1>::sse_load(xA,A.get(),A1.get());
                     A+=2; A1+=2;
                     x0 = _mm_shuffle_ps(xA,xA,_MM_SHUFFLE(2,3,0,1));
                     x1 = _mm_mul_ps(xA,xA);
@@ -455,7 +456,7 @@ namespace tmv {
                     x4 = _mm_mul_ps(xxi,x0);
                     x5 = _mm_add_ps(x3,x4);
                     xB = _mm_div_ps(x5,xnorm);  // = x/xA
-                    Maybe<unit2>::sse_store(B.getP(),B1.getP(),xB);
+                    Maybe<unit2>::sse_store(B.get(),B1.get(),xB);
                     B+=2; B1+=2;
                 } while (--n_2);
             }
@@ -481,16 +482,16 @@ namespace tmv {
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
-            const bool unit1 = V1::vstep == 1;
-            const bool unit2 = V2::vstep == 1;
+            const bool unit1 = V1::_step == 1;
+            const bool unit2 = V2::_step == 1;
 
             if (unit2) {
-                while (n && (((unsigned int)(B.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(B.get()) & 0xf) != 0) ) {
                     *B++ = x / *A++;
                     --n;
                 }
             } else if (unit1) {
-                while (n && (((unsigned int)(A.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
                     *B++ = x / *A++;
                     --n;
                 }
@@ -506,10 +507,10 @@ namespace tmv {
                 __m128d xx = _mm_set1_pd(double(x));
                 __m128d xA,xB;
                 do {
-                    Maybe2<!unit2,unit1>::sse_load(xA,A.getP(),A1.getP());
+                    Maybe2<!unit2,unit1>::sse_load(xA,A.get(),A1.get());
                     A+=2; A1+=2;
                     xB = _mm_div_pd(xx,xA);
-                    Maybe<unit2>::sse_store(B.getP(),B1.getP(),xB);
+                    Maybe<unit2>::sse_store(B.get(),B1.get(),xB);
                     B+=2; B1+=2;
                 } while (--n_2);
             }
@@ -533,10 +534,10 @@ namespace tmv {
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
-            const bool unit1 = V1::vstep == 1;
+            const bool unit1 = V1::_step == 1;
 
             if (unit1) {
-                while (n && (((unsigned int)(A.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
                     *B++ = x / *A++;
                     --n;
                 }
@@ -553,13 +554,13 @@ namespace tmv {
                 __m128d xzero = _mm_set1_pd(0.);
                 __m128d xA,xB;
                 do {
-                    Maybe<unit1>::sse_load(xA,A.getP(),A1.getP());
+                    Maybe<unit1>::sse_load(xA,A.get(),A1.get());
                     A+=2; A1+=2;
                     xB = _mm_div_pd(xx,xA);
                     Maybe<true>::sse_storeu(
-                        B.getP(),_mm_unpacklo_pd(xB,xzero));
+                        B.get(),_mm_unpacklo_pd(xB,xzero));
                     Maybe<true>::sse_storeu(
-                        B1.getP(),_mm_unpackhi_pd(xB,xzero));
+                        B1.get(),_mm_unpackhi_pd(xB,xzero));
                     B+=2; B1+=2;
                 } while (--n_2);
             }
@@ -583,33 +584,33 @@ namespace tmv {
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
-            const bool c1 = V1::vconj;
+            const bool c1 = V1::_conj;
             if (n) {
                 const double mone = Maybe<c1>::select( double(x) , -double(x) );
                 // These look backwards, but order is from hi to lo values.
                 __m128d xconj = _mm_set_pd(mone, double(x));
                 __m128d xA,xB;
                 __m128d xAc, xnorm, x1, x2; // temp values
-                if (((unsigned int)(A.getP()) & 0xf) == 0 &&
-                    ((unsigned int)(B.getP()) & 0xf) == 0 ) {
+                if (((unsigned int)(A.get()) & 0xf) == 0 &&
+                    ((unsigned int)(B.get()) & 0xf) == 0 ) {
                     do {
-                        Maybe<true>::sse_load(xA,A.getP()); ++A;
+                        Maybe<true>::sse_load(xA,A.get()); ++A;
                         xAc = _mm_mul_pd(xconj,xA); // x*conj(xA)
                         x1 = _mm_mul_pd(xA,xA);
                         x2 = _mm_shuffle_pd(x1,x1,_MM_SHUFFLE2(0,1));
                         xnorm = _mm_add_pd(x1,x2); // = norm(xA)
                         xB = _mm_div_pd(xAc,xnorm);  // = x/xA
-                        Maybe<true>::sse_store(B.getP(),xB); ++B;
+                        Maybe<true>::sse_store(B.get(),xB); ++B;
                     } while (--n);
                 } else {
                     do {
-                        Maybe<true>::sse_loadu(xA,A.getP()); ++A;
+                        Maybe<true>::sse_loadu(xA,A.get()); ++A;
                         xAc = _mm_mul_pd(xconj,xA); // x*conj(xA)
                         x1 = _mm_mul_pd(xA,xA);
                         x2 = _mm_shuffle_pd(x1,x1,_MM_SHUFFLE2(0,1));
                         xnorm = _mm_add_pd(x1,x2); // = norm(xA)
                         xB = _mm_div_pd(xAc,xnorm);  // = x/xA
-                        Maybe<true>::sse_storeu(B.getP(),xB); ++B;
+                        Maybe<true>::sse_storeu(B.get(),xB); ++B;
                     } while (--n);
                 }
             }
@@ -633,10 +634,10 @@ namespace tmv {
         {
             TMVStaticAssert(ix == 0);
             TMVStaticAssert((Traits2<T,std::complex<double> >::sametype));
-            const bool unit1 = V1::vstep == 1;
+            const bool unit1 = V1::_step == 1;
 
             if (unit1) {
-                while (n && (((unsigned int)(A.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
                     *B++ = x / *A++;
                     --n;
                 }
@@ -654,13 +655,13 @@ namespace tmv {
                 __m128d xi = _mm_set1_pd(imag(x.x));
                 __m128d xA,xBr,xBi,xAinv;
                 do {
-                    Maybe<unit1>::sse_load(xA,A.getP(),A1.getP());
+                    Maybe<unit1>::sse_load(xA,A.get(),A1.get());
                     A+=2; A1+=2;
                     xAinv = _mm_div_pd(xone,xA);
                     xBr = _mm_mul_pd(xr,xAinv);
                     xBi = _mm_mul_pd(xi,xAinv);
-                    Maybe<true>::sse_store(B.getP(),_mm_unpacklo_pd(xBr,xBi));
-                    Maybe<true>::sse_store(B1.getP(),_mm_unpackhi_pd(xBr,xBi));
+                    Maybe<true>::sse_store(B.get(),_mm_unpacklo_pd(xBr,xBi));
+                    Maybe<true>::sse_store(B1.get(),_mm_unpackhi_pd(xBr,xBi));
                     B+=2; B1+=2;
                 } while (--n_2);
             }
@@ -686,7 +687,7 @@ namespace tmv {
         {
             TMVStaticAssert(ix == 0);
             TMVStaticAssert((Traits2<T,std::complex<double> >::sametype));
-            const bool c1 = V1::vconj;
+            const bool c1 = V1::_conj;
             if (n) {
                 double xr = real(x.x);
                 double mxr = Maybe<c1>::select(xr,-xr);
@@ -700,7 +701,7 @@ namespace tmv {
                 __m128d xA,xB;
                 __m128d xnorm, x0, x1, x2, x3, x4, x5; // temp values
                 do {
-                    Maybe<true>::sse_load(xA,A.getP()); ++A;
+                    Maybe<true>::sse_load(xA,A.get()); ++A;
                     x0 = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(0,1));
                     x1 = _mm_mul_pd(xA,xA);
                     x2 = _mm_shuffle_pd(x1,x1,_MM_SHUFFLE2(0,1));
@@ -709,7 +710,7 @@ namespace tmv {
                     x4 = _mm_mul_pd(xxi,x0);
                     x5 = _mm_add_pd(x3,x4);
                     xB = _mm_div_pd(x5,xnorm);  // = x/xA
-                    Maybe<true>::sse_store(B.getP(),xB); ++B;
+                    Maybe<true>::sse_store(B.get(),xB); ++B;
                 } while (--n);
             }
         }
@@ -728,12 +729,12 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            TMVStaticAssert(!V3::vconj);
+            TMVStaticAssert(!V3::_conj);
             ElemDivVV_Helper<algo,size,ix,T,V1,V2,V3>::call(x,v1,v2,v3); 
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
-            TMVStaticAssert(!V3::vconj);
+            TMVStaticAssert(!V3::_conj);
             ElemDivVV_Helper<algo,size,ix,T,V1,V2,V3>::call2(n,x,A,B,C);
         }
     };
@@ -788,9 +789,9 @@ namespace tmv {
             typedef typename V2::value_type T2;
             typedef typename V3::value_type T3;
             const bool inst =
-                V1::vsize == UNKNOWN &&
-                V2::vsize == UNKNOWN &&
-                V3::vsize == UNKNOWN &&
+                V1::unknownsizes &&
+                V2::unknownsizes &&
+                V3::unknownsizes &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -800,7 +801,7 @@ namespace tmv {
 #endif
                 Traits<T3>::isinst;
             const int algo =
-                V3::vconj ? 97 : 
+                V3::_conj ? 97 : 
                 inst ? 98 : 
                 -4;
             ElemDivVV_Helper<algo,size,ix,T,V1,V2,V3>::call(x,v1,v2,v3); 
@@ -835,7 +836,7 @@ namespace tmv {
             } else {
                 if (noclobber2) {
                     // Need a temporary for v1
-                    NoAliasElemDivVV(v1.copy(),v2,v3);
+                    NoAliasElemDivVV(x,v1.copy(),v2,v3);
                 } else {
                     // Need a temporary for v3
                     typename V3::copy_type v3c(v3.size());
@@ -857,9 +858,9 @@ namespace tmv {
                 VStepHelper<V1,V3>::noclobber &&
                 VStepHelper<V2,V3>::noclobber;
             const bool checkalias =
-                V1::vsize == UNKNOWN &&
-                V2::vsize == UNKNOWN &&
-                V3::vsize == UNKNOWN &&
+                V1::_size == UNKNOWN &&
+                V2::_size == UNKNOWN &&
+                V3::_size == UNKNOWN &&
                 !noclobber;
             const int algo =
                 checkalias ? 99 : 
@@ -874,12 +875,12 @@ namespace tmv {
         const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same));
-        TMVStaticAssert((Sizes<V1::vsize,V3::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
+        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v1.size() == v3.size());
-        const int s12 = Sizes<V1::vsize,V2::vsize>::size;
-        const int size = Sizes<s12,V3::vsize>::size;
+        const int s12 = Sizes<V1::_size,V2::_size>::size;
+        const int size = Sizes<s12,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2d;
         typedef typename V3::cview_type V3v;
@@ -895,12 +896,12 @@ namespace tmv {
         const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same));
-        TMVStaticAssert((Sizes<V1::vsize,V3::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
+        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v1.size() == v3.size());
-        const int s12 = Sizes<V1::vsize,V2::vsize>::size;
-        const int size = Sizes<s12,V3::vsize>::size;
+        const int s12 = Sizes<V1::_size,V2::_size>::size;
+        const int size = Sizes<s12,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2d;
         typedef typename V3::cview_type V3v;
@@ -916,12 +917,12 @@ namespace tmv {
         const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same));
-        TMVStaticAssert((Sizes<V1::vsize,V3::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
+        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v1.size() == v3.size());
-        const int s12 = Sizes<V1::vsize,V2::vsize>::size;
-        const int size = Sizes<s12,V3::vsize>::size;
+        const int s12 = Sizes<V1::_size,V2::_size>::size;
+        const int size = Sizes<s12,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2d;
         typedef typename V3::cview_type V3v;
@@ -937,12 +938,12 @@ namespace tmv {
         const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same));
-        TMVStaticAssert((Sizes<V1::vsize,V3::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
+        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v1.size() == v3.size());
-        const int s12 = Sizes<V1::vsize,V2::vsize>::size;
-        const int size = Sizes<s12,V3::vsize>::size;
+        const int s12 = Sizes<V1::_size,V2::_size>::size;
+        const int size = Sizes<s12,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2d;
         typedef typename V3::cview_type V3v;
@@ -959,12 +960,12 @@ namespace tmv {
         const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
-        TMVStaticAssert((Sizes<V1::vsize,M2::msize>::same));
-        TMVStaticAssert((Sizes<V1::vsize,V3::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,M2::_size>::same));
+        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
         TMVAssert(v1.size() == m2.size());
         TMVAssert(v1.size() == v3.size());
-        const int s12 = Sizes<V1::vsize,M2::msize>::size;
-        const int size = Sizes<s12,V3::vsize>::size;
+        const int s12 = Sizes<V1::_size,M2::_size>::size;
+        const int size = Sizes<s12,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::const_diag_type::const_cview_type M2d;
         typedef typename V3::cview_type V3v;
@@ -980,12 +981,12 @@ namespace tmv {
         const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
-        TMVStaticAssert((Sizes<V1::vsize,M2::msize>::same));
-        TMVStaticAssert((Sizes<V1::vsize,V3::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,M2::_size>::same));
+        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
         TMVAssert(v1.size() == m2.size());
         TMVAssert(v1.size() == v3.size());
-        const int s12 = Sizes<V1::vsize,M2::msize>::size;
-        const int size = Sizes<s12,V3::vsize>::size;
+        const int s12 = Sizes<V1::_size,M2::_size>::size;
+        const int size = Sizes<s12,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::const_diag_type::const_cview_type M2d;
         typedef typename V3::cview_type V3v;
@@ -1001,12 +1002,12 @@ namespace tmv {
         const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
-        TMVStaticAssert((Sizes<V1::vsize,M2::msize>::same));
-        TMVStaticAssert((Sizes<V1::vsize,V3::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,M2::_size>::same));
+        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
         TMVAssert(v1.size() == m2.size());
         TMVAssert(v1.size() == v3.size());
-        const int s12 = Sizes<V1::vsize,M2::msize>::size;
-        const int size = Sizes<s12,V3::vsize>::size;
+        const int s12 = Sizes<V1::_size,M2::_size>::size;
+        const int size = Sizes<s12,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::const_diag_type::const_cview_type M2d;
         typedef typename V3::cview_type V3v;
@@ -1022,12 +1023,12 @@ namespace tmv {
         const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
-        TMVStaticAssert((Sizes<V1::vsize,M2::msize>::same));
-        TMVStaticAssert((Sizes<V1::vsize,V3::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,M2::_size>::same));
+        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
         TMVAssert(v1.size() == m2.size());
         TMVAssert(v1.size() == v3.size());
-        const int s12 = Sizes<V1::vsize,M2::msize>::size;
-        const int size = Sizes<s12,V3::vsize>::size;
+        const int s12 = Sizes<V1::_size,M2::_size>::size;
+        const int size = Sizes<s12,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::const_diag_type::const_cview_type M2d;
         typedef typename V3::cview_type V3v;
@@ -1044,15 +1045,15 @@ namespace tmv {
     template <class V1, class M2>
     inline void LDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Diag<M2>& m2)
-    { LDiv(v1,m2,v1); }
+    { LDiv(Scaling<1,typename V1::real_type>(),v1.vec(),m2,v1); }
     template <class V1, class M2>
     inline void NoAliasLDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Diag<M2>& m2)
-    { NoAliasLDiv(v1,m2,v1); }
+    { NoAliasLDiv(Scaling<1,typename V1::real_type>(),v1.vec(),m2,v1); }
     template <class V1, class M2>
     inline void AliasLDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Diag<M2>& m2)
-    { AliasLDiv(v1,m2,v1); }
+    { AliasLDiv(Scaling<1,typename V1::real_type>(),v1.vec(),m2,v1); }
 
     //
     // v3 = v1 % m2
@@ -1084,15 +1085,216 @@ namespace tmv {
     template <class V1, class M2>
     inline void RDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Diag<M2>& m2)
-    { LDiv(v1,m2,v1); }
+    { LDivEq(v1,m2); }
     template <class V1, class M2>
     inline void NoAliasRDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Diag<M2>& m2)
-    { NoAliasLDiv(v1,m2,v1); }
+    { NoAliasLDivEq(v1,m2); }
     template <class V1, class M2>
     inline void AliasRDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Diag<M2>& m2)
-    { AliasLDiv(v1,m2,v1); }
+    { AliasLDivEq(v1,m2); }
+
+    //
+    // m3 = m1 / m2
+    //
+    
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void LDiv(
+        const Scaling<ix,T>& x,
+        const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Diag_Mutable<M3>& m3)
+    {
+        typename M3::diag_type m3d = m3.diag();
+        LDiv(x,m1.diag(),m2,m3d); 
+    }
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void NoAliasLDiv(
+        const Scaling<ix,T>& x,
+        const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Diag_Mutable<M3>& m3)
+    { 
+        typename M3::diag_type m3d = m3.diag();
+        NoAliasLDiv(x,m1.diag(),m2,m3d); 
+    }
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void AliasLDiv(
+        const Scaling<ix,T>& x,
+        const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Diag_Mutable<M3>& m3)
+    {
+        typename M3::diag_type m3d = m3.diag();
+        AliasLDiv(x,m1.diag(),m2,m3d); 
+    }
+
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void LDiv(
+        const Scaling<ix,T>& x,
+        const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
+    {
+        typename M3::diag_type m3d = m3.diag();
+        LDiv(x,m1.diag(),m2,m3d); 
+        m3.upperTri().offDiag().setZero();
+        m3.lowerTri().offDiag().setZero();
+    }
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void NoAliasLDiv(
+        const Scaling<ix,T>& x,
+        const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
+    { 
+        typename M3::diag_type m3d = m3.diag();
+        m3.setZero();
+        NoAliasLDiv(x,m1.diag(),m2,m3d); 
+    }
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void AliasLDiv(
+        const Scaling<ix,T>& x,
+        const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
+    {
+        typename M3::diag_type m3d = m3.diag();
+        AliasLDiv(x,m1.diag(),m2,m3d); 
+        m3.upperTri().offDiag().setZero();
+        m3.lowerTri().offDiag().setZero();
+    }
+
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void LDiv(
+        const Scaling<ix,T>& x,
+        const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
+    {
+        typename M3::diag_type m3d = m3.diag();
+        LDiv(x,m1.diag(),m2,m3d); 
+        m3.offDiag().setZero();
+    }
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void NoAliasLDiv(
+        const Scaling<ix,T>& x,
+        const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
+    { 
+        typename M3::diag_type m3d = m3.diag();
+        m3.setZero();
+        NoAliasLDiv(x,m1.diag(),m2,m3d); 
+    }
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void AliasLDiv(
+        const Scaling<ix,T>& x,
+        const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
+    {
+        typename M3::diag_type m3d = m3.diag();
+        AliasLDiv(x,m1.diag(),m2,m3d); 
+        m3.offDiag().setZero();
+    }
+
+
+    //
+    // m1 /= m2
+    //
+
+    template <class M1, class M2>
+    inline void LDivEq(
+        BaseMatrix_Diag_Mutable<M1>& m1, const BaseMatrix_Diag<M2>& m2)
+    {
+        typename M1::diag_type m1d = m1.mat().diag();
+        LDivEq(m1d,m2); 
+    }
+    template <class M1, class M2>
+    inline void NoAliasLDivEq(
+        BaseMatrix_Diag_Mutable<M1>& m1, const BaseMatrix_Diag<M2>& m2)
+    {
+        typename M1::diag_type m1d = m1.mat().diag();
+        NoAliasLDivEq(m1d,m2); 
+    }
+    template <class M1, class M2>
+    inline void AliasLDivEq(
+        BaseMatrix_Diag_Mutable<M1>& m1, const BaseMatrix_Diag<M2>& m2)
+    {
+        typename M1::diag_type m1d = m1.mat().diag();
+        AliasLDivEq(m1d,m2); 
+    }
+
+    //
+    // m3 = m1 % m2
+    //
+
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void RDiv(
+        const Scaling<ix,T>& x,
+        const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Diag_Mutable<M3>& m3)
+    { LDiv(x,m1,m2,m3.mat()); }
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void NoAliasRDiv(
+        const Scaling<ix,T>& x,
+        const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Diag_Mutable<M3>& m3)
+    { NoAliasLDiv(x,m1,m2,m3.mat()); }
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void AliasRDiv(
+        const Scaling<ix,T>& x,
+        const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Diag_Mutable<M3>& m3)
+    { AliasLDiv(x,m1,m2,m3.mat()); }
+
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void RDiv(
+        const Scaling<ix,T>& x,
+        const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
+    { LDiv(x,m1,m2,m3.mat()); }
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void NoAliasRDiv(
+        const Scaling<ix,T>& x,
+        const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
+    { NoAliasLDiv(x,m1,m2,m3.mat()); }
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void AliasRDiv(
+        const Scaling<ix,T>& x,
+        const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
+    { AliasLDiv(x,m1,m2,m3.mat()); }
+
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void RDiv(
+        const Scaling<ix,T>& x,
+        const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
+    { LDiv(x,m1,m2,m3.mat()); }
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void NoAliasRDiv(
+        const Scaling<ix,T>& x,
+        const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
+    { NoAliasLDiv(x,m1,m2,m3.mat()); }
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void AliasRDiv(
+        const Scaling<ix,T>& x,
+        const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
+    { AliasLDiv(x,m1,m2,m3.mat()); }
+
+    //
+    // m1 %= m2
+    //
+
+    template <class M1, class M2>
+    inline void RDivEq(
+        BaseMatrix_Diag_Mutable<M1>& m1, const BaseMatrix_Diag<M2>& m2)
+    { LDivEq(m1,m2); }
+    template <class M1, class M2>
+    inline void NoAliasRDivEq(
+        BaseMatrix_Diag_Mutable<M1>& m1, const BaseMatrix_Diag<M2>& m2)
+    { NoAliasLDivEq(m1,m2); }
+    template <class M1, class M2>
+    inline void AliasRDivEq(
+        BaseMatrix_Diag_Mutable<M1>& m1, const BaseMatrix_Diag<M2>& m2)
+    { AliasLDivEq(m1,m2); }
 
 } // namespace tmv
 

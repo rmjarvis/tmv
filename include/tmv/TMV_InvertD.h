@@ -101,11 +101,11 @@ namespace tmv {
         }
         static void call2(int n, IT A)
         {
-            const bool unit = V::vstep == 1;
+            const bool unit = V::_step == 1;
             const typename V::real_type one(1);
 
             if (unit) {
-                while (n && (((unsigned int)(A.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
                     *A = one / *A;
                     ++A; --n;
                 }
@@ -123,10 +123,10 @@ namespace tmv {
                 __m128 xA,xB;
                 do {
                     Maybe<unit>::sse_load(
-                        xA,A.getP(),A1.getP(),A2.getP(),A3.getP());
+                        xA,A.get(),A1.get(),A2.get(),A3.get());
                     xB = _mm_div_ps(xone,xA);
                     Maybe<unit>::sse_store(
-                        A.getP(),A1.getP(),A2.getP(),A3.getP(),xB);
+                        A.get(),A1.get(),A2.get(),A3.get(),xB);
                     A+=4; A1+=4; A2+=4; A3+=4;
                 } while (--n_4);
             }
@@ -147,11 +147,11 @@ namespace tmv {
         }
         static void call2(int n, IT A)
         {
-            const bool unit = V::vstep == 1;
+            const bool unit = V::_step == 1;
             const typename V::real_type one(1);
 
             if (unit) {
-                while (n && (((unsigned int)(A.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
                     *A = ZProd<false,false>::quot(one , *A);
                     ++A; --n;
                 }
@@ -168,13 +168,13 @@ namespace tmv {
                 __m128 xA, xB;
                 __m128 xAc, xnorm, x1, x2; // temp values
                 do {
-                    Maybe<unit>::sse_load(xA,A.getP(),A1.getP());
+                    Maybe<unit>::sse_load(xA,A.get(),A1.get());
                     xAc = _mm_mul_ps(xmone,xA); // conj(xA)
                     x1 = _mm_mul_ps(xA,xA);
                     x2 = _mm_shuffle_ps(x1,x1,_MM_SHUFFLE(2,3,0,1));
                     xnorm = _mm_add_ps(x1,x2); // = norm(xA)
                     xB = _mm_div_ps(xAc,xnorm);  // = 1/xA
-                    Maybe<unit>::sse_store(A.getP(),A1.getP(),xB);
+                    Maybe<unit>::sse_store(A.get(),A1.get(),xB);
                     A+=2; A1+=2;
                 } while (--n_2);
             }
@@ -197,11 +197,11 @@ namespace tmv {
         }
         static void call2(int n, IT A)
         {
-            const bool unit = V::vstep == 1;
+            const bool unit = V::_step == 1;
             const typename V::real_type one(1);
 
             if (unit) {
-                while (n && (((unsigned int)(A.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
                     *A = one / *A;
                     ++A; --n;
                 }
@@ -216,9 +216,9 @@ namespace tmv {
                 __m128d xone = _mm_set1_pd(1.);
                 __m128d xA,xB;
                 do {
-                    Maybe<unit>::sse_load(xA,A.getP(),A1.getP());
+                    Maybe<unit>::sse_load(xA,A.get(),A1.get());
                     xB = _mm_div_pd(xone,xA);
-                    Maybe<unit>::sse_store(A.getP(),A1.getP(),xB);
+                    Maybe<unit>::sse_store(A.get(),A1.get(),xB);
                     A+=2; A1+=2;
                 } while (--n_2);
             }
@@ -244,25 +244,25 @@ namespace tmv {
                 __m128d xmone = _mm_set_pd(-1 , 1);
                 __m128d xA,xB;
                 __m128d xAc, xnorm, x1, x2; // temp values
-                if (((unsigned int)(A.getP()) & 0xf) == 0) {
+                if (((unsigned int)(A.get()) & 0xf) == 0) {
                     do {
-                        Maybe<true>::sse_load(xA,A.getP());
+                        Maybe<true>::sse_load(xA,A.get());
                         xAc = _mm_mul_pd(xmone,xA); // conj(xA)
                         x1 = _mm_mul_pd(xA,xA);
                         x2 = _mm_shuffle_pd(x1,x1,_MM_SHUFFLE2(0,1));
                         xnorm = _mm_add_pd(x1,x2); // = norm(xA)
                         xB = _mm_div_pd(xAc,xnorm);  // = 1/xA
-                        Maybe<true>::sse_store(A.getP(),xB); ++A;
+                        Maybe<true>::sse_store(A.get(),xB); ++A;
                     } while (--n);
                 } else {
                     do {
-                        Maybe<true>::sse_loadu(xA,A.getP());
+                        Maybe<true>::sse_loadu(xA,A.get());
                         xAc = _mm_mul_pd(xmone,xA); // conj(xA)
                         x1 = _mm_mul_pd(xA,xA);
                         x2 = _mm_shuffle_pd(x1,x1,_MM_SHUFFLE2(0,1));
                         xnorm = _mm_add_pd(x1,x2); // = norm(xA)
                         xB = _mm_div_pd(xAc,xnorm);  // = 1/xA
-                        Maybe<true>::sse_storeu(A.getP(),xB); ++A;
+                        Maybe<true>::sse_storeu(A.get(),xB); ++A;
                     } while (--n);
                 }
             }
@@ -278,9 +278,9 @@ namespace tmv {
         typedef typename V::real_type RT;
         enum { vfloat = Traits2<RT,float>::sametype };
         enum { vdouble = Traits2<RT,double>::sametype };
-        enum { vreal = V::visreal };
-        enum { vcomplex = V::viscomplex };
-        enum { unit = V::vstep == 1 };
+        enum { vreal = V::isreal };
+        enum { vcomplex = V::iscomplex };
+        enum { unit = V::_step == 1 };
 
         enum { algo = (
                 size == 0 ? 0 : 
@@ -297,7 +297,7 @@ namespace tmv {
                 11 ) };
         static inline void call(V& v)
         {
-            TMVStaticAssert(!V::vconj);
+            TMVStaticAssert(!V::_conj);
 #ifdef PRINTALGO_InvD
             std::cout<<"InlineElemInvert:  \n";
             std::cout<<"v = "<<TMV_Text(v)<<std::endl;
@@ -312,7 +312,7 @@ namespace tmv {
         }
         static inline void call2(int n, IT A)
         {
-            TMVStaticAssert(!V::vconj);
+            TMVStaticAssert(!V::_conj);
             ElemInvert_Helper<algo,size,V>::call2(n,A); 
         }
     };
@@ -353,12 +353,11 @@ namespace tmv {
         {
             typedef typename V::value_type T;
             const bool inst = 
-                V::vsize == UNKNOWN &&
+                V::unknownsizes &&
                 Traits<T>::isinst;
-            const bool conj = V::vconj;
             const int algo = 
                 size == 0 ? 0 : 
-                conj ? 97 :
+                V::_conj ? 97 :
                 inst ? 98 :
                 -4;
             ElemInvert_Helper<algo,size,V>::call(v);
@@ -382,7 +381,7 @@ namespace tmv {
     {
         typedef typename V::cview_type Vv;
         Vv vv = v.cView();
-        ElemInvert_Helper<algo,V::vsize,Vv>::call(vv);
+        ElemInvert_Helper<algo,V::_size,Vv>::call(vv);
     }
 
     template <class V>

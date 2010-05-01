@@ -215,24 +215,24 @@ namespace tmv {
         typedef typename M2::value_type mtype2;
         typedef typename Traits2<mtype1,mtype2>::type value_type;
 
-        enum { mcolsize = M1::mcolsize };
-        enum { mrowsize = M2::mrowsize };
-        enum { mshape = ShapeTraits2<M1::mshape,M2::mshape>::prod };
-        enum { mfort = M1::mfort && M2::mfort };
-        enum { mcalc = false };
-        enum { rm1 = Traits<typename M1::calc_type>::mrowmajor };
-        enum { rm2 = Traits<typename M2::calc_type>::mrowmajor };
-        enum { cm1 = Traits<typename M1::calc_type>::mcolmajor };
-        enum { cm2 = Traits<typename M2::calc_type>::mcolmajor };
-        enum { mrowmajor = 
-            (rm1 && rm2) || (!cm1 && !cm2 && mrowsize > int(mcolsize)) };
+        enum { _colsize = M1::_colsize };
+        enum { _rowsize = M2::_rowsize };
+        enum { _shape = ShapeTraits2<M1::_shape,M2::_shape>::prod };
+        enum { _fort = M1::_fort && M2::_fort };
+        enum { _calc = false };
+        enum { rm1 = Traits<typename M1::calc_type>::_rowmajor };
+        enum { rm2 = Traits<typename M2::calc_type>::_rowmajor };
+        enum { cm1 = Traits<typename M1::calc_type>::_colmajor };
+        enum { cm2 = Traits<typename M2::calc_type>::_colmajor };
+        enum { _rowmajor = 
+            (rm1 && rm2) || (!cm1 && !cm2 && _rowsize > int(_colsize)) };
 
         typedef ProdMM<ix,T,M1,M2> type;
-        typedef typename MCopyHelper<value_type,mshape,mcolsize,mrowsize,
-                mrowmajor,mfort>::type copy_type;
+        typedef typename MCopyHelper<value_type,_shape,_colsize,_rowsize,
+                _rowmajor,_fort>::type copy_type;
         typedef const copy_type calc_type;
         typedef typename TypeSelect<
-            (M1::mcalc && M2::mcalc),const type,calc_type>::type eval_type;
+            (M1::_calc && M2::_calc),const type,calc_type>::type eval_type;
         typedef InvalidType inverse_type;
     };
 
@@ -252,7 +252,7 @@ namespace tmv {
         ) :
             x(_x), m1(_m1.mat()), m2(_m2.mat())
         {
-            TMVStaticAssert((Sizes<M1::mrowsize,M2::mcolsize>::same)); 
+            TMVStaticAssert((Sizes<M1::_rowsize,M2::_colsize>::same)); 
             TMVAssert(m1.rowsize() == m2.colsize());
         }
 
@@ -270,10 +270,10 @@ namespace tmv {
         inline void assignTo(BaseMatrix_Mutable<M3>& m3) const
         {
             TMVStaticAssert((
-                    ShapeTraits2<type::mshape,M3::mshape>::assignable)); 
-            TMVStaticAssert((type::misreal || M3::miscomplex));
-            TMVStaticAssert((Sizes<type::mcolsize,M3::mcolsize>::same)); 
-            TMVStaticAssert((Sizes<type::mrowsize,M3::mrowsize>::same)); 
+                    ShapeTraits2<type::_shape,M3::_shape>::assignable)); 
+            TMVStaticAssert((type::isreal || M3::iscomplex));
+            TMVStaticAssert((Sizes<type::_colsize,M3::_colsize>::same)); 
+            TMVStaticAssert((Sizes<type::_rowsize,M3::_rowsize>::same)); 
             TMVAssert(colsize() == m3.colsize());
             TMVAssert(rowsize() == m3.rowsize());
 #ifdef XDEBUG_PRODMM
@@ -287,10 +287,10 @@ namespace tmv {
         inline void newAssignTo(BaseMatrix_Mutable<M3>& m3) const
         {
             TMVStaticAssert((
-                    ShapeTraits2<type::mshape,M3::mshape>::assignable)); 
-            TMVStaticAssert((type::misreal || M3::miscomplex));
-            TMVStaticAssert((Sizes<type::mcolsize,M3::mcolsize>::same)); 
-            TMVStaticAssert((Sizes<type::mrowsize,M3::mrowsize>::same)); 
+                    ShapeTraits2<type::_shape,M3::_shape>::assignable)); 
+            TMVStaticAssert((type::isreal || M3::iscomplex));
+            TMVStaticAssert((Sizes<type::_colsize,M3::_colsize>::same)); 
+            TMVStaticAssert((Sizes<type::_rowsize,M3::_rowsize>::same)); 
             TMVAssert(colsize() == m3.colsize());
             TMVAssert(rowsize() == m3.rowsize());
 #ifdef XDEBUG_PRODMM

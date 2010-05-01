@@ -408,21 +408,21 @@ namespace tmv {
     class BaseMatrix_Tri : public BaseMatrix_Calc<M>
     {
     public:
-        enum { mcolsize = Traits<M>::msize };
-        enum { mrowsize = Traits<M>::msize };
-        enum { msize = Traits<M>::msize };
-        enum { mshape = Traits<M>::mshape };
-        enum { munit = Traits<M>::munit };
-        enum { munknowndiag = Traits<M>::munknowndiag };
-        enum { mfort = Traits<M>::mfort };
-        enum { mcalc = Traits<M>::mcalc };
-        enum { mrowmajor = Traits<M>::mrowmajor }; 
-        enum { mcolmajor = Traits<M>::mcolmajor }; 
-        enum { mstor = Traits<M>::mstor };
-        enum { mconj = Traits<M>::mconj };
-        enum { mstepi = Traits<M>::mstepi };
-        enum { mstepj = Traits<M>::mstepj };
-        enum { mdiagstep = Traits<M>::mdiagstep };
+        enum { _colsize = Traits<M>::_size };
+        enum { _rowsize = Traits<M>::_size };
+        enum { _size = Traits<M>::_size };
+        enum { _shape = Traits<M>::_shape };
+        enum { _unit = Traits<M>::_unit };
+        enum { _unknowndiag = Traits<M>::_unknowndiag };
+        enum { _fort = Traits<M>::_fort };
+        enum { _calc = Traits<M>::_calc };
+        enum { _rowmajor = Traits<M>::_rowmajor }; 
+        enum { _colmajor = Traits<M>::_colmajor }; 
+        enum { _stor = Traits<M>::_stor };
+        enum { _conj = Traits<M>::_conj };
+        enum { _stepi = Traits<M>::_stepi };
+        enum { _stepj = Traits<M>::_stepj };
+        enum { _diagstep = Traits<M>::_diagstep };
 
         typedef M type;
 
@@ -469,8 +469,8 @@ namespace tmv {
         typedef typename Traits<M>::nonconst_type nonconst_type;
 
         // Derived values:
-        enum { mupper = ShapeTraits<Shape(Traits<M>::mshape)>::upper };
-        enum { mlower = ShapeTraits<Shape(Traits<M>::mshape)>::lower };
+        enum { _upper = ShapeTraits<Shape(Traits<M>::_shape)>::upper };
+        enum { _lower = ShapeTraits<Shape(Traits<M>::_shape)>::lower };
         typedef typename Traits<value_type>::real_type real_type;
         typedef typename Traits<value_type>::complex_type complex_type;
 
@@ -487,6 +487,8 @@ namespace tmv {
         void operator=(const BaseMatrix_Tri<M>&);
     public:
 
+        // MJ Temporary -- remove this.
+        inline bool divIsSet() const { return false; }
 
         //
         // Access 
@@ -523,35 +525,35 @@ namespace tmv {
         // The regular versions respect the indexing style for i and j:
         inline const_row_sub_type row(int i, int j1, int j2) const
         {
-            CheckRowIndex<mfort>(i,colsize());
-            CheckColRange<mfort>(j1,j2,rowsize());
+            CheckRowIndex<_fort>(i,colsize());
+            CheckColRange<_fort>(j1,j2,rowsize());
             return get_row(i,j1,j2);
         }
 
         inline const_col_sub_type col(int j, int i1, int i2) const
         {
-            CheckColIndex<mfort>(j,rowsize());
-            CheckRowRange<mfort>(i1,i2,colsize());
+            CheckColIndex<_fort>(j,rowsize());
+            CheckRowRange<_fort>(i1,i2,colsize());
             return get_col(j,i1,i2);
         }
 
         inline const_diag_type diag() const
         {
-            CheckDiagTri<mshape>(isunit(),0);
+            CheckDiagTri<_shape>(isunit(),0);
             return const_diag_type(cptr(),size(),diagstep()); 
         }
 
         inline const_diag_sub_type diag(int i) const
         {
-            CheckDiagIndex<mfort>(i,colsize(),rowsize());
-            CheckDiagTri<mshape>(isunit(),i);
+            CheckDiagIndex<_fort>(i,colsize(),rowsize());
+            CheckDiagTri<_shape>(isunit(),i);
             return get_diag(i);
         }
 
         inline const_diag_sub_type diag(int i, int j1, int j2) const
         {
-            CheckDiagIndex<mfort>(i,j1,j2,colsize(),rowsize());
-            CheckDiagTri<mshape>(isunit(),i);
+            CheckDiagIndex<_fort>(i,j1,j2,colsize(),rowsize());
+            CheckDiagTri<_shape>(isunit(),i);
             return get_diag(i,j1,j2);
         }
 
@@ -636,50 +638,50 @@ namespace tmv {
         inline const_submatrix_type subMatrix(
             int i1, int i2, int j1, int j2) const
         {
-            CheckRowRange<mfort>(i1,i2,colsize());
-            CheckColRange<mfort>(j1,j2,rowsize());
+            CheckRowRange<_fort>(i1,i2,colsize());
+            CheckColRange<_fort>(j1,j2,rowsize());
             // Check each corner of submatrix:
-            CheckTri<mshape>(isunit(),i1,j1);
-            if (j2 > j1) CheckTri<mshape>(isunit(),i1,j2-1);
-            if (i2 > i1) CheckTri<mshape>(isunit(),i2-1,j1);
-            if (i2 > i1 && j2 > j1) CheckTri<mshape>(isunit(),i2-1,j2-1);
+            CheckTri<_shape>(isunit(),i1,j1);
+            if (j2 > j1) CheckTri<_shape>(isunit(),i1,j2-1);
+            if (i2 > i1) CheckTri<_shape>(isunit(),i2-1,j1);
+            if (i2 > i1 && j2 > j1) CheckTri<_shape>(isunit(),i2-1,j2-1);
             return cSubMatrix(i1,i2,j1,j2);
         }
 
         inline const_submatrix_step_type subMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const
         {
-            CheckRowRange<mfort>(i1,i2,istep,colsize());
-            CheckColRange<mfort>(j1,j2,jstep,rowsize());
+            CheckRowRange<_fort>(i1,i2,istep,colsize());
+            CheckColRange<_fort>(j1,j2,jstep,rowsize());
             // Check each corner of submatrix:
-            CheckTri<mshape>(isunit(),i1,j1);
-            if (j2 > j1) CheckTri<mshape>(isunit(),i1,j2-jstep);
-            if (i2 > i1) CheckTri<mshape>(isunit(),i2-istep,j1);
+            CheckTri<_shape>(isunit(),i1,j1);
+            if (j2 > j1) CheckTri<_shape>(isunit(),i1,j2-jstep);
+            if (i2 > i1) CheckTri<_shape>(isunit(),i2-istep,j1);
             if (i2 > i1 && j2 > j1) 
-                CheckTri<mshape>(isunit(),i2-istep,j2-jstep);
+                CheckTri<_shape>(isunit(),i2-istep,j2-jstep);
             return cSubMatrix(i1,i2,j1,j2,istep,jstep);
         }
 
         inline const_subvector_type subVector(
             int i, int j, int istep, int jstep, int s) const
         {
-            CheckMatSubVector<mfort>(i,j,istep,jstep,s,colsize(),rowsize());
+            CheckMatSubVector<_fort>(i,j,istep,jstep,s,colsize(),rowsize());
             // Check each end of subvector:
-            CheckTri<mshape>(isunit(),i,j);
-            if (s) CheckTri<mshape>(isunit(),i+(s-1)*istep,j+(s-1)*jstep);
+            CheckTri<_shape>(isunit(),i,j);
+            if (s) CheckTri<_shape>(isunit(),i+(s-1)*istep,j+(s-1)*jstep);
             return cSubVector(i,j,istep,jstep,s);
         }
 
         inline const_subtrimatrix_type subTriMatrix(int i1, int i2) const
         {
-            CheckRange<mfort>(i1,i2,size());
+            CheckRange<_fort>(i1,i2,size());
             return cSubTriMatrix(i1,i2);
         }
 
         inline const_subtrimatrix_step_type subTriMatrix(
             int i1, int i2, int istep) const
         {
-            CheckRange<mfort>(i1,i2,istep,size());
+            CheckRange<_fort>(i1,i2,istep,size());
             return cSubTriMatrix(i1,i2,istep);
         }
 
@@ -764,13 +766,13 @@ namespace tmv {
         {
             return const_realpart_type(
                 reinterpret_cast<const real_type*>(cptr()), size(), isunit(),
-                M::misreal ? stepi() : 2*stepi(),
-                M::misreal ? stepj() : 2*stepj());
+                M::isreal ? stepi() : 2*stepi(),
+                M::isreal ? stepj() : 2*stepj());
         }
 
         inline const_imagpart_type imagPart() const
         {
-            TMVStaticAssert(M::miscomplex);
+            TMVStaticAssert(M::iscomplex);
             TMVAssert(!isunit());
             return const_imagpart_type(
                 reinterpret_cast<const real_type*>(cptr())+1, size(), false,
@@ -806,14 +808,34 @@ namespace tmv {
         template <class M2>
         inline void assignTo(BaseMatrix_Mutable<M2>& m2) const
         {
-            TMVStaticAssert((ShapeTraits2<mshape,M2::mshape>::assignable));
+            TMVStaticAssert((ShapeTraits2<_shape,M2::_shape>::assignable));
             tmv::Copy(mat(),m2.mat()); 
         }
 
         template <class M2>
         inline void newAssignTo(BaseMatrix_Mutable<M2>& m2) const
         {
-            TMVStaticAssert((ShapeTraits2<mshape,M2::mshape>::assignable));
+            TMVStaticAssert((ShapeTraits2<_shape,M2::_shape>::assignable));
+            tmv::NoAliasCopy(mat(),m2.mat()); 
+        }
+
+        // Need to do BaseMatrix_Tri_Mutable separately to make sure we
+        // check for UnknownDiag correctly.
+        // UnknownDiag -> UnitDiag is naively disallowed by the StaticAssert
+        // in the above methods.
+        template <class M2>
+        inline void assignTo(BaseMatrix_Tri_Mutable<M2>& m2) const
+        {
+            TMVStaticAssert(!M2::_unit || _unit || _unknowndiag);
+            TMVAssert(!m2.isunit() || isunit());
+            tmv::Copy(mat(),m2.mat()); 
+        }
+
+        template <class M2>
+        inline void newAssignTo(BaseMatrix_Tri_Mutable<M2>& m2) const
+        {
+            TMVStaticAssert(!M2::_unit || _unit || _unknowndiag);
+            TMVAssert(!m2.isunit() || isunit());
             tmv::NoAliasCopy(mat(),m2.mat()); 
         }
 
@@ -821,10 +843,10 @@ namespace tmv {
         { return *static_cast<const type*>(this); }
 
         inline int diagstep() const 
-        { return mdiagstep == UNKNOWN ? stepi() + stepj() : mdiagstep; }
-        inline bool isconj() const { return mconj; }
+        { return _diagstep == UNKNOWN ? stepi() + stepj() : _diagstep; }
+        inline bool isconj() const { return _conj; }
         inline bool isunit() const { return mat().isunit(); }
-        inline bool isupper() const { return mupper; }
+        inline bool isupper() const { return _upper; }
         inline bool iscm() const { return mat().iscm(); }
         inline bool isrm() const { return mat().isrm(); }
 
@@ -847,21 +869,21 @@ namespace tmv {
                                    public BaseMatrix_Mutable<M>
     {
     public:
-        enum { mcolsize = Traits<M>::msize };
-        enum { mrowsize = Traits<M>::msize };
-        enum { msize = Traits<M>::msize };
-        enum { mshape = Traits<M>::mshape };
-        enum { munit = Traits<M>::munit };
-        enum { munknowndiag = Traits<M>::munknowndiag };
-        enum { mfort = Traits<M>::mfort };
-        enum { mcalc = Traits<M>::mcalc };
-        enum { mrowmajor = Traits<M>::mrowmajor }; 
-        enum { mcolmajor = Traits<M>::mcolmajor }; 
-        enum { mstor = Traits<M>::mstor };
-        enum { mconj = Traits<M>::mconj };
-        enum { mstepi = Traits<M>::mstepi };
-        enum { mstepj = Traits<M>::mstepj };
-        enum { mdiagstep = Traits<M>::mdiagstep };
+        enum { _colsize = Traits<M>::_size };
+        enum { _rowsize = Traits<M>::_size };
+        enum { _size = Traits<M>::_size };
+        enum { _shape = Traits<M>::_shape };
+        enum { _unit = Traits<M>::_unit };
+        enum { _unknowndiag = Traits<M>::_unknowndiag };
+        enum { _fort = Traits<M>::_fort };
+        enum { _calc = Traits<M>::_calc };
+        enum { _rowmajor = Traits<M>::_rowmajor }; 
+        enum { _colmajor = Traits<M>::_colmajor }; 
+        enum { _stor = Traits<M>::_stor };
+        enum { _conj = Traits<M>::_conj };
+        enum { _stepi = Traits<M>::_stepi };
+        enum { _stepj = Traits<M>::_stepj };
+        enum { _diagstep = Traits<M>::_diagstep };
 
         typedef M type;
         typedef BaseMatrix_Tri<M> base_tri;
@@ -939,7 +961,8 @@ namespace tmv {
         typedef typename Traits<M>::reference reference;
 
         // Derived values:
-        enum { mupper = ShapeTraits<Shape(Traits<M>::mshape)>::upper };
+        enum { _upper = ShapeTraits<Shape(Traits<M>::_shape)>::upper };
+        enum { _lower = ShapeTraits<Shape(Traits<M>::_shape)>::lower };
         typedef typename Traits<value_type>::real_type real_type;
         typedef typename Traits<value_type>::complex_type complex_type;
 
@@ -959,11 +982,11 @@ namespace tmv {
 
         inline reference operator()(int i, int j)
         {
-            CheckRowIndex<mfort>(i,size());
-            CheckColIndex<mfort>(j,size());
+            CheckRowIndex<_fort>(i,size());
+            CheckColIndex<_fort>(j,size());
             // MJ: We don't actually want this next check.
             // Let TriRef do the check if the reference is assigned to.
-            //CheckTri<mshape>(isunit(),i,j);
+            //CheckTri<_shape>(isunit(),i,j);
             return ref(i,j);
         }
 
@@ -992,35 +1015,35 @@ namespace tmv {
         // The regular versions respect the indexing style for i and j:
         inline row_sub_type row(int i, int j1, int j2) 
         {
-            CheckRowIndex<mfort>(i,colsize());
-            CheckColRange<mfort>(j1,j2,rowsize());
+            CheckRowIndex<_fort>(i,colsize());
+            CheckColRange<_fort>(j1,j2,rowsize());
             return get_row(i,j1,j2);
         }
 
         inline col_sub_type col(int j, int i1, int i2) 
         {
-            CheckColIndex<mfort>(j,rowsize());
-            CheckRowRange<mfort>(i1,i2,colsize());
+            CheckColIndex<_fort>(j,rowsize());
+            CheckRowRange<_fort>(i1,i2,colsize());
             return get_col(j,i1,i2);
         }
 
         inline diag_type diag() 
         {
-            CheckDiagTri<mshape>(isunit(),0);
+            CheckDiagTri<_shape>(isunit(),0);
             return diag_type(ptr(),size(),diagstep()); 
         }
 
         inline diag_sub_type diag(int i) 
         {
-            CheckDiagIndex<mfort>(i,colsize(),rowsize());
-            CheckDiagTri<mshape>(isunit(),i);
+            CheckDiagIndex<_fort>(i,colsize(),rowsize());
+            CheckDiagTri<_shape>(isunit(),i);
             return get_diag(i);
         }
 
         inline diag_sub_type diag(int i, int j1, int j2) 
         {
-            CheckDiagIndex<mfort>(i,j1,j2,colsize(),rowsize());
-            CheckDiagTri<mshape>(isunit(),i);
+            CheckDiagIndex<_fort>(i,j1,j2,colsize(),rowsize());
+            CheckDiagTri<_shape>(isunit(),i);
             return get_diag(i,j1,j2);
         }
 
@@ -1064,11 +1087,24 @@ namespace tmv {
         template <class M2>
         inline type& operator=(const BaseMatrix<M2>& m2) 
         {
-            TMVStaticAssert((Sizes<msize,M2::mcolsize>::same));
-            TMVStaticAssert((Sizes<msize,M2::mrowsize>::same));
+            TMVStaticAssert((Sizes<_size,M2::_colsize>::same));
+            TMVStaticAssert((Sizes<_size,M2::_rowsize>::same));
             TMVAssert(colsize() == m2.colsize());
             TMVAssert(rowsize() == m2.rowsize());
-            TMVStaticAssert((ShapeTraits2<M2::mshape,mshape>::assignable));
+            TMVStaticAssert((ShapeTraits2<M2::_shape,_shape>::assignable));
+            m2.assignTo(mat());
+            return mat(); 
+        }
+
+        template <class M2>
+        inline type& operator=(const BaseMatrix_Tri<M2>& m2) 
+        {
+            TMVStaticAssert((Sizes<_size,M2::_colsize>::same));
+            TMVStaticAssert((Sizes<_size,M2::_rowsize>::same));
+            TMVAssert(colsize() == m2.colsize());
+            TMVAssert(rowsize() == m2.rowsize());
+            TMVStaticAssert(!M2::_unit || _unit || _unknowndiag);
+            TMVAssert(!m2.isunit() || isunit());
             m2.assignTo(mat());
             return mat(); 
         }
@@ -1076,7 +1112,7 @@ namespace tmv {
         template <class M2>
         inline type& operator=(const BaseMatrix_Diag<M2>& m2) 
         {
-            TMVStaticAssert((Sizes<msize,M2::msize>::same));
+            TMVStaticAssert((Sizes<_size,M2::_size>::same));
             TMVAssert(size() == m2.size());
             m2.diag().assignTo(diag());
             offDiag().setZero();
@@ -1170,49 +1206,49 @@ namespace tmv {
         // used, and then calls the above CStyle versions.
         inline submatrix_type subMatrix(int i1, int i2, int j1, int j2) 
         {
-            CheckRowRange<mfort>(i1,i2,colsize());
-            CheckColRange<mfort>(j1,j2,rowsize());
+            CheckRowRange<_fort>(i1,i2,colsize());
+            CheckColRange<_fort>(j1,j2,rowsize());
             // Check each corner of submatrix:
-            CheckTri<mshape>(isunit(),i1,j1);
-            if (j2 > j1) CheckTri<mshape>(isunit(),i1,j2-1);
-            if (i2 > i1) CheckTri<mshape>(isunit(),i2-1,j1);
-            if (i2 > i1 && j2 > j1) CheckTri<mshape>(isunit(),i2-1,j2-1);
+            CheckTri<_shape>(isunit(),i1,j1);
+            if (j2 > j1) CheckTri<_shape>(isunit(),i1,j2-1);
+            if (i2 > i1) CheckTri<_shape>(isunit(),i2-1,j1);
+            if (i2 > i1 && j2 > j1) CheckTri<_shape>(isunit(),i2-1,j2-1);
             return cSubMatrix(i1,i2,j1,j2);
         }
 
         inline submatrix_step_type subMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) 
         {
-            CheckRowRange<mfort>(i1,i2,istep,colsize());
-            CheckColRange<mfort>(j1,j2,jstep,rowsize());
+            CheckRowRange<_fort>(i1,i2,istep,colsize());
+            CheckColRange<_fort>(j1,j2,jstep,rowsize());
             // Check each corner of submatrix:
-            CheckTri<mshape>(isunit(),i1,j1);
-            if (j2 > j1) CheckTri<mshape>(isunit(),i1,j2-jstep);
-            if (i2 > i1) CheckTri<mshape>(isunit(),i2-istep,j1);
+            CheckTri<_shape>(isunit(),i1,j1);
+            if (j2 > j1) CheckTri<_shape>(isunit(),i1,j2-jstep);
+            if (i2 > i1) CheckTri<_shape>(isunit(),i2-istep,j1);
             if (i2 > i1 && j2 > j1) 
-                CheckTri<mshape>(isunit(),i2-istep,j2-jstep);
+                CheckTri<_shape>(isunit(),i2-istep,j2-jstep);
             return cSubMatrix(i1,i2,j1,j2,istep,jstep);
         }
 
         inline subvector_type subVector(
             int i, int j, int istep, int jstep, int s) 
         {
-            CheckMatSubVector<mfort>(i,j,istep,jstep,s,colsize(),rowsize());
+            CheckMatSubVector<_fort>(i,j,istep,jstep,s,colsize(),rowsize());
             // Check each end of subvector:
-            CheckTri<mshape>(isunit(),i,j);
-            if (s) CheckTri<mshape>(isunit(),i+(s-1)*istep,j+(s-1)*jstep);
+            CheckTri<_shape>(isunit(),i,j);
+            if (s) CheckTri<_shape>(isunit(),i+(s-1)*istep,j+(s-1)*jstep);
             return cSubVector(i,j,istep,jstep,s);
         }
 
         inline subtrimatrix_type subTriMatrix(int i1, int i2) 
         {
-            CheckRange<mfort>(i1,i2,size());
+            CheckRange<_fort>(i1,i2,size());
             return cSubTriMatrix(i1,i2);
         }
 
         inline subtrimatrix_step_type subTriMatrix(int i1, int i2, int istep) 
         {
-            CheckRange<mfort>(i1,i2,istep,size());
+            CheckRange<_fort>(i1,i2,istep,size());
             return cSubTriMatrix(i1,i2,istep);
         }
 
@@ -1321,13 +1357,13 @@ namespace tmv {
         {
             return realpart_type(
                 reinterpret_cast<real_type*>(ptr()), size(), isunit(),
-                M::misreal ? stepi() : 2*stepi(),
-                M::misreal ? stepj() : 2*stepj());
+                M::isreal ? stepi() : 2*stepi(),
+                M::isreal ? stepj() : 2*stepj());
         }
 
         inline imagpart_type imagPart() 
         {
-            TMVStaticAssert(M::miscomplex);
+            TMVStaticAssert(M::iscomplex);
             TMVAssert(!isunit());
             return imagpart_type(
                 reinterpret_cast<real_type*>(ptr())+1, size(), false,
@@ -1398,7 +1434,7 @@ namespace tmv {
         { return *static_cast<type*>(this); }
 
         inline int diagstep() const
-        { return mdiagstep == UNKNOWN ? stepi() + stepj() : mdiagstep; }
+        { return _diagstep == UNKNOWN ? stepi() + stepj() : _diagstep; }
 
         // Note that these last functions need to be defined in a more derived
         // class than this, or an infinite loop will result when compiling.
@@ -1483,11 +1519,11 @@ namespace tmv {
     template <class M>
     inline void SetZero(BaseMatrix_Tri_Mutable<M>& m)
     {
-        TMVStaticAssert(!M::munit);
+        TMVStaticAssert(!M::_unit);
         TMVAssert(!m.isunit());
         const int algo = 
-            M::mlower ? 1 :
-            M::mrowmajor ? 2 : 3;
+            M::_lower ? 1 :
+            M::_rowmajor ? 2 : 3;
         SetZeroU_Helper<algo,M>::call(m.mat());
     }
 
@@ -1555,9 +1591,9 @@ namespace tmv {
     {
         TMVAssert(!m.isunit() || val == T(1));
         const int algo = 
-            M::mlower ? 1 :
-            M::munit ? M::mrowmajor ? 4 : 5 :
-            M::mrowmajor ? 2 : 3;
+            M::_lower ? 1 :
+            M::_unit ? M::_rowmajor ? 4 : 5 :
+            M::_rowmajor ? 2 : 3;
         SetAllToU_Helper<algo,M,T>::call(m.mat(),val);
     }
 
@@ -1625,11 +1661,11 @@ namespace tmv {
     template <class M, class T>
     inline void AddToAll(BaseMatrix_Tri_Mutable<M>& m, const T& val)
     {
-        TMVStaticAssert(!M::munit);
+        TMVStaticAssert(!M::_unit);
         TMVAssert(!m.isunit());
         const int algo = 
-            M::mlower ? 1 :
-            M::mrowmajor ? 2 : 3;
+            M::_lower ? 1 :
+            M::_rowmajor ? 2 : 3;
         AddToAllU_Helper<algo,M,T>::call(m.mat(),val);
     }
 
@@ -1696,9 +1732,9 @@ namespace tmv {
     inline void Clip(BaseMatrix_Tri_Mutable<M>& m, const RT& thresh)
     {
         const int algo = 
-            M::mlower ? 1 :
-            M::munit ? M::mrowmajor ? 4 : 5 :
-            M::mrowmajor ? 2 : 3;
+            M::_lower ? 1 :
+            M::_unit ? M::_rowmajor ? 4 : 5 :
+            M::_rowmajor ? 2 : 3;
         ClipU_Helper<algo,M,RT>::call(m.mat(),thresh);
     }
 
@@ -1766,12 +1802,12 @@ namespace tmv {
     template <class M, class F>
     inline void ApplyToAll(BaseMatrix_Tri_Mutable<M>& m, const F& f)
     {
-        TMVStaticAssert(!M::munit);
+        TMVStaticAssert(!M::_unit);
         TMVAssert(!m.isunit());
         const int algo = 
-            M::mlower ? 1 :
-            //M::munit ? M::mrowmajor ? 4 : 5 :
-            M::mrowmajor ? 2 : 3;
+            M::_lower ? 1 :
+            //M::_unit ? M::_rowmajor ? 4 : 5 :
+            M::_rowmajor ? 2 : 3;
         ApplyToAllU_Helper<algo,M,F>::call(m.mat(),f);
     }
 
@@ -1843,11 +1879,48 @@ namespace tmv {
     inline void ConjugateSelf(BaseMatrix_Tri_Mutable<M>& m)
     {
         const int algo = 
-            M::mlower ? 1 :
-            M::munit ? M::mrowmajor ? 4 : 5 :
-            M::mrowmajor ? 2 : 3;
+            M::_lower ? 1 :
+            M::_unit ? M::_rowmajor ? 4 : 5 :
+            M::_rowmajor ? 2 : 3;
         ConjugateU_Helper<algo,M>::call(m.mat());
     }
+
+
+
+    //
+    // Trace
+    //
+
+    // The BaseMatrix Trace call is efficient for composite types, since
+    // it avoid calculating all the elements to do the sum.
+    // But if we do have the elements calculated, this overloaded 
+    // version will be faster:
+    // Note that this TriMatrix version needs to check whether the 
+    // diagonal elements are all 1 or not.
+    
+    template <bool unit, class M> 
+    struct TraceU_Helper;
+
+    // algo 1: NonUnit Diag
+    template <class M>
+    struct TraceU_Helper<false,M> 
+    {
+        static typename M::value_type call(const M& m)
+        { return m.diag().sumElements(); }
+    };
+
+    // algo 2: Unit Diag
+    template <class M>
+    struct TraceU_Helper<true,M> 
+    {
+        static typename M::value_type call(const M& m)
+        { return typename M::value_type(m.size()); }
+    };
+
+    template <class M>
+    static typename M::value_type DoTrace(const BaseMatrix_Tri<M>& m)
+    { return TraceU_Helper<M::_unit,M>(m); }
+
 
     //
     // TMV_Text 

@@ -127,7 +127,7 @@ namespace tmv {
         static inline void call2(
             const int n, 
             typename V1::const_iterator it1, typename V2::iterator it2)
-        { memmove(it2.getP(),it1.getP(),n*sizeof(typename V2::value_type)); }
+        { memmove(it2.get(),it1.get(),n*sizeof(typename V2::value_type)); }
     };
 
     // algo 22: std::copy
@@ -155,8 +155,8 @@ namespace tmv {
 #if TMV_OPT > 0
                 ( size != UNKNOWN && size <= 8 ) ? 15 :
                 ( Traits2<T1,T2>::sametype && 
-                  V1::vconj == int(V2::vconj) &&
-                  V1::vstep == 1 && V2::vstep == 1 ) ? 21 :
+                  V1::_conj == int(V2::_conj) &&
+                  V1::_step == 1 && V2::_step == 1 ) ? 21 :
 #endif
                 11;
             CopyV_Helper<algo,size,V1,V2>::call(v1,v2);
@@ -169,8 +169,8 @@ namespace tmv {
                 size == 0 ? 0 :
 #if TMV_OPT > 0
                 ( Traits2<T1,T2>::sametype && 
-                  V1::vconj == int(V2::vconj) &&
-                  V1::vstep == 1 && V2::vstep == 1 ) ? 21 :
+                  V1::_conj == int(V2::_conj) &&
+                  V1::_step == 1 && V2::_step == 1 ) ? 21 :
 #endif
                 11;
             CopyV_Helper<algo,size,V1,V2>::call2(n,it1,it2);
@@ -216,17 +216,17 @@ namespace tmv {
             typedef typename V1::value_type T1;
             typedef typename V2::value_type T2;
             const bool inst = 
-                V1::vsize == UNKNOWN &&
-                V2::vsize == UNKNOWN &&
+                V1::unknownsizes &&
+                V2::unknownsizes &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
                 Traits2<T1,T2>::sametype &&
 #endif
                 Traits<T2>::isinst;
-            const bool conj = V2::vconj;
             const int algo = 
-                inst ? (conj ? 97 : 98) :
+                V2::_conj ? 97 :
+                inst ? 98 :
                 -4;
             CopyV_Helper<algo,size,V1,V2>::call(v1,v2);
         }
@@ -245,7 +245,7 @@ namespace tmv {
                 CopyV_Helper<-2,size,V1,V2>::call(v1,v2);
             } else if (ExactSameStorage(v1,v2)) {
                 // They are already equal modulo a conjugation.
-                Maybe<V1::vconj != int(V2::vconj)>::conjself(v2); 
+                Maybe<V1::_conj != int(V2::_conj)>::conjself(v2); 
             } else {
                 // Need a temporary
                 NoAliasCopy(v1.copy(),v2);
@@ -264,8 +264,8 @@ namespace tmv {
             const bool samestep = VStepHelper<V1,V2>::same;
             const bool noclobber = VStepHelper<V1,V2>::noclobber;
             const bool checkalias =
-                V1::vsize == UNKNOWN &&
-                V2::vsize == UNKNOWN &&
+                V1::_size == UNKNOWN &&
+                V2::_size == UNKNOWN &&
                 (samestep || !noclobber);
             const int algo = 
                 checkalias ? 99 :
@@ -278,9 +278,9 @@ namespace tmv {
     inline void Copy(
         const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2)
     {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same)); 
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
-        const int size = Sizes<V1::vsize,V2::vsize>::size;
+        const int size = Sizes<V1::_size,V2::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::cview_type V2v;
         V1v v1v = v1.cView();
@@ -294,9 +294,9 @@ namespace tmv {
     inline void NoAliasCopy(
         const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2)
     {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same)); 
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
-        const int size = Sizes<V1::vsize,V2::vsize>::size;
+        const int size = Sizes<V1::_size,V2::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::cview_type V2v;
         V1v v1v = v1.cView();
@@ -308,9 +308,9 @@ namespace tmv {
     inline void InlineCopy(
         const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2)
     {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same)); 
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
-        const int size = Sizes<V1::vsize,V2::vsize>::size;
+        const int size = Sizes<V1::_size,V2::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::cview_type V2v;
         V1v v1v = v1.cView();
@@ -322,9 +322,9 @@ namespace tmv {
     inline void AliasCopy(
         const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2)
     {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same)); 
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
-        const int size = Sizes<V1::vsize,V2::vsize>::size;
+        const int size = Sizes<V1::_size,V2::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::cview_type V2v;
         V1v v1v = v1.cView();

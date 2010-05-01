@@ -125,7 +125,7 @@ namespace tmv {
 #ifdef PRINTALGO_InvU
             std::cout<<"InvU algo 11: N,s,x = "<<N<<','<<s<<std::endl;
 #endif
-            const bool u = M::munit;
+            const bool u = M::_unit;
             typedef typename M::col_sub_type Mc;
             typedef typename M::const_col_sub_type Mcc;
             typedef typename M::const_subtrimatrix_type Mst;
@@ -157,7 +157,7 @@ namespace tmv {
 #ifdef PRINTALGO_InvU
             std::cout<<"InvU algo 11: N,s,x = "<<N<<','<<s<<std::endl;
 #endif
-            const bool u = M::munit;
+            const bool u = M::_unit;
             typedef typename M::row_sub_type Mr;
             typedef typename M::const_row_sub_type Mcr;
             typedef typename M::const_subtrimatrix_type Mst;
@@ -259,7 +259,7 @@ namespace tmv {
 #ifdef PRINTALGO_InvU
             std::cout<<"InvU algo 16: N,s,x = "<<N<<','<<UNKNOWN<<std::endl;
 #endif
-            const int algo2 = M::mrowmajor ? 12 : 11;
+            const int algo2 = M::_rowmajor ? 12 : 11;
             switch (N) {
               case 0 :
                    // do nothing
@@ -296,7 +296,7 @@ namespace tmv {
 #ifdef TMV_OPT_CLEANUP
                 const int algo2 = 16;
 #else
-                const int algo2 = M::mrowmajor ? 12 : 11;
+                const int algo2 = M::_rowmajor ? 12 : 11;
 #endif
                 const int xx = UNKNOWN;
                 if (N < TMV_Q2) {
@@ -367,9 +367,9 @@ namespace tmv {
                     s <= 10;
                 const int algo2 =
                     s == 0 ? 0 :
-                    s == 1 ? ( M::munit ? 0 : 1 ) :
+                    s == 1 ? ( M::_unit ? 0 : 1 ) :
                     unroll ? 16 :
-                    M::mrowmajor ? 12 : 11;
+                    M::_rowmajor ? 12 : 11;
                 InvertU_Helper<algo2,s,M>::call(m);
             }
         };
@@ -441,8 +441,8 @@ namespace tmv {
     {
         static void call(M& m)
         {
-            TMVStaticAssert(M::mupper);
-            TMVStaticAssert(!M::munit);
+            TMVStaticAssert(M::_upper);
+            TMVStaticAssert(!M::_unit);
             typedef typename M::diag_type Md;
             Md md = m.diag();
             ElemInvert_Helper<-4,s,Md>::call(md);
@@ -466,7 +466,7 @@ namespace tmv {
     {
         static void call(M& m)
         {
-            TMVStaticAssert(M::mupper);
+            TMVStaticAssert(M::_upper);
             const int s2 = s > 20 ? UNKNOWN : s;
             const int s2p1 = IntTraits<s2>::Sp1;
             const int s2p2 = IntTraits<s2p1>::Sp1;
@@ -478,10 +478,10 @@ namespace tmv {
                 nops > TMV_Q1 ? false :
                 s <= 10;
             const int algo1 = 
-                M::munit ? 0 : M::munknowndiag ? 51 : 50;
+                M::_unit ? 0 : M::_unknowndiag ? 51 : 50;
             const int algo2 = 
                 s == 0 ? 0 :
-                s == 1 ? ( M::munit ? 0 : 1 ) :
+                s == 1 ? ( M::_unit ? 0 : 1 ) :
                 unroll ? 16 :
                 17;
 #ifdef PRINTALGO_InvU
@@ -515,7 +515,7 @@ namespace tmv {
 
             const int algo = 
                 ( s == 0 ) ? 0 :
-                M::mlower ? 2 :
+                M::_lower ? 2 :
                 -4;
 #ifdef PRINTALGO_InvU
             std::cout<<"InlineInvertU: \n";
@@ -554,11 +554,11 @@ namespace tmv {
         {
             typedef typename M::value_type T;
             const bool inst = 
-                M::msize == UNKNOWN && 
+                M::unknownsizes &&
                 Traits<T>::isinst;
             const int algo = 
                 ( s == 0 ) ? 0 :
-                M::mconj ? 97 :
+                M::_conj ? 97 :
                 inst ? 98 : 
                 -3;
             InvertU_Helper<algo,s,M>::call(m);
@@ -586,7 +586,7 @@ namespace tmv {
             throw SingularMatrix<M>(m.mat());
 #endif
         }
-        InvertU_Helper<algo,M::msize,Mv>::call(mv);
+        InvertU_Helper<algo,M::_size,Mv>::call(mv);
     }
 
     template <class M>

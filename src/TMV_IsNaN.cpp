@@ -42,7 +42,7 @@ namespace tmv {
     template <class T> 
     static bool DoIsNaN(T x)
     {
-        return (x != x) || (x * x < 0);
+        return (x != x) || !(x * x >= 0);
     }
 
 #ifdef TMV_INST_DOUBLE
@@ -51,7 +51,7 @@ namespace tmv {
 #ifdef isnan
         return isnan(x);
 #else
-        return (x != x) || (x * x < 0);
+        return (x != x) || !(x * x >= 0);
 #endif
     }
 #endif
@@ -62,7 +62,7 @@ namespace tmv {
 #ifdef isnan
         return isnan(x);
 #else
-        return (x != x) || (x * x < 0);
+        return (x != x) || !(x * x >= 0);
 #endif
     }
 #endif
@@ -73,7 +73,7 @@ namespace tmv {
 #ifdef isnan
         return isnan(x);
 #else
-        return (x != x) || (x * x < 0);
+        return (x != x) || !(x * x >= 0);
 #endif
     }
 #endif

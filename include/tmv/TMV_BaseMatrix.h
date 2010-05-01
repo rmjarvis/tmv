@@ -75,6 +75,9 @@
 #include "TMV_Shape.h"
 #include "TMV_Array.h"
 
+// MJ temporary:
+#include <iostream>
+
 namespace tmv {
 
     // BaseMatrix is the base class for all matrix classes.
@@ -108,21 +111,21 @@ namespace tmv {
     //
     //  copy_type = The type of a new copy of the matrix
     //  This is the return type of copy()
-    //  Use this type when you need elements in the original matrix
-    //  after overwriting those elements.
     //
     //  inverse_type = The type of the inverse of the matrix
-    //  This is the return type of Inverse() const
+    //  This is the return type of inverse()
     //
-    //  mcolsize = column size of matrix (aka number of rows)
-    //  mrowsize = row size of matrix (aka number of columns)
+    //  _colsize = column size of matrix (aka number of rows)
+    //  _rowsize = row size of matrix (aka number of columns)
     //  (Use UNKNOWN if unknown at compile time)
     //
-    //  mshape = The shape of the non-zero elements of the matrix
+    //  _issuqare = is the matrix square?
     //
-    //  mfort = does the indexing use fortran style?
+    //  _shape = The shape of the non-zero elements of the matrix
     //
-    //  mcalc = are the element values already calculated in memory?
+    //  _fort = does the indexing use fortran style?
+    //
+    //  _calc = are the element values already calculated in memory?
 
 
     // BaseMatrix_Calc is derived from BaseMatrix, and is used
@@ -134,10 +137,11 @@ namespace tmv {
 
     // BaseMatrix_Calc adds some more requirements to the Traits<M> class:
     //
-    //  mconj = is the matrix the conjugate of the underlying data?
-    //  mrowmajor = is the matrix RowMajor?
-    //  mcolmajor = is the matrix ColMajor?
-    //  mstor = an appropriate storage class for copying the matrix
+    //  _conj = is the matrix the conjugate of the underlying data?
+    //  _rowmajor = is the matrix RowMajor?
+    //  _colmajor = is the matrix ColMajor?
+    //  _stor = an appropriate storage class for copying the matrix
+    //  _hasdivider = does this matrix have a divider object?
     //
     //  const_view_type = return type from view() const
     //  const_cview_type = return type from cView() const
@@ -153,7 +157,7 @@ namespace tmv {
     //  const_imagpart_type = return type from imagPart() const
     //  const_nonconj_type = return type from nonConj() const
     //  nonconst_type = return type from nonConst() const
-
+    //
 
     // BaseMatrix_Mutable is used for matrices that are allowed to have 
     // their data modified.
@@ -191,13 +195,13 @@ namespace tmv {
     // These helper functions check the validity of indices according
     // to whether the matrix uses CStyle or FortranStyle indexing.
     // They also update the indices to be consistent with CStyle.
-    template <bool mfort>
+    template <bool _fort>
     inline void CheckRowIndex(int& i, int m)
     { // CStyle
         TMVAssert(i >= 0 && "row index must be in matrix");
         TMVAssert(i < m && "row index must be in matrix");
     }
-    template <bool mfort>
+    template <bool _fort>
     inline void CheckColIndex(int& j, int n)
     { // CStyle
         TMVAssert(j >= 0 && "column index must be in matrix");
@@ -266,20 +270,20 @@ namespace tmv {
         typedef typename M1::value_type T1;
         typedef typename M2::value_type T2;
         enum { known = (
-                M1::mstepi != UNKNOWN &&
-                M1::mstepj != UNKNOWN &&
-                M2::mstepi != UNKNOWN &&
-                M2::mstepj != UNKNOWN ) };
+                M1::_stepi != UNKNOWN &&
+                M1::_stepj != UNKNOWN &&
+                M2::_stepi != UNKNOWN &&
+                M2::_stepj != UNKNOWN ) };
         enum { same = (
                 Traits2<T1,T2>::sametype &&
                 known &&
-                M1::mstepi == int(M2::mstepi) &&
-                M1::mstepj == int(M2::mstepj) ) };
+                M1::_stepi == int(M2::_stepi) &&
+                M1::_stepj == int(M2::_stepj) ) };
         enum { opp = (
                 Traits2<T1,T2>::sametype &&
                 known &&
-                M1::mstepi == int(M2::mstepj) &&
-                M1::mstepj == int(M2::mstepi) ) };
+                M1::_stepi == int(M2::_stepj) &&
+                M1::_stepj == int(M2::_stepi) ) };
     };
 
     // This helper class helps decide calc_type for composite classes:
@@ -327,11 +331,11 @@ namespace tmv {
     class BaseMatrix
     {
     public:
-        enum { mcolsize = Traits<M>::mcolsize };
-        enum { mrowsize = Traits<M>::mrowsize };
-        enum { mshape = Traits<M>::mshape };
-        enum { mfort = Traits<M>::mfort };
-        enum { mcalc = Traits<M>::mcalc };
+        enum { _colsize = Traits<M>::_colsize };
+        enum { _rowsize = Traits<M>::_rowsize };
+        enum { _shape = Traits<M>::_shape };
+        enum { _fort = Traits<M>::_fort };
+        enum { _calc = Traits<M>::_calc };
 
         typedef M type;
         typedef typename Traits<M>::value_type value_type;
@@ -343,8 +347,11 @@ namespace tmv {
         // Derived values:
         typedef typename Traits<value_type>::real_type real_type;
         typedef typename Traits<value_type>::complex_type complex_type;
-        enum { misreal = Traits<value_type>::isreal };
-        enum { miscomplex = Traits<value_type>::iscomplex };
+        enum { isreal = Traits<value_type>::isreal };
+        enum { iscomplex = Traits<value_type>::iscomplex };
+        enum { _issquare =
+            ShapeTraits<_shape>::square || Sizes<_colsize,_rowsize>::equal };
+        enum { unknownsizes = _colsize == UNKNOWN && _rowsize == UNKNOWN };
 
         //
         // Constructor
@@ -365,8 +372,8 @@ namespace tmv {
 
         inline value_type operator()(int i, int j) const 
         {
-            CheckRowIndex<mfort>(i,colsize());
-            CheckColIndex<mfort>(j,rowsize());
+            CheckRowIndex<_fort>(i,colsize());
+            CheckColIndex<_fort>(j,rowsize());
             return cref(i,j);
         }
 
@@ -411,49 +418,6 @@ namespace tmv {
 
 
         // 
-        // Division Functions
-        //
-
-        inline inverse_type inverse() const
-        { return inverse_type(real_type(1),calc()); }
-
-        inline value_type det() const
-        {
-            TMVStaticAssert((Sizes<mrowsize,mcolsize>::same));
-            TMVAssert(colsize() == rowsize());
-            return tmv::Det(calc());
-        }
-
-        inline real_type logDet(value_type* sign=0) const
-        {
-            TMVStaticAssert((Sizes<mrowsize,mcolsize>::same));
-            TMVAssert(colsize() == rowsize());
-            return tmv::LogDet(calc(),sign);
-        }
-
-        inline bool isSingular() const
-        { 
-            TMVStaticAssert((Sizes<mrowsize,mcolsize>::same));
-            TMVAssert(colsize() == rowsize());
-            return tmv::IsSingular(calc());
-        }
-
-        inline real_type norm2() const
-        { return calc().norm2(); }
-
-        inline real_type condition() const
-        { return calc().condition(); }
-
-        template <class M2>
-        inline void makeInverse(BaseMatrix_Mutable<M2>& minv) const
-        { tmv::MakeInverse(Scaling<1,real_type>(),calc(),minv); }
-
-        template <class M2>
-        inline void makeInverseATA(BaseMatrix_Mutable<M2>& mata) const
-        { tmv::MakeInverseATA(calc(),mata); }
-
-
-        // 
         // I/O
         //
 
@@ -479,11 +443,10 @@ namespace tmv {
         inline copy_type copy() const 
         { return static_cast<copy_type>(mat()); }
 
-        inline bool IsSquare() const 
-        { return Sizes<mcolsize,mrowsize>::equal || (colsize() == rowsize()); }
-
-        inline size_t nrows() const { return mat().colsize(); }
-        inline size_t ncols() const { return mat().rowsize(); }
+        inline size_t nrows() const { return colsize(); }
+        inline size_t ncols() const { return rowsize(); }
+        inline bool isSquare() const 
+        { return _issquare || (colsize() == rowsize()); }
 
         // Note that these last function need to be defined in a more derived
         // class than this, or an infinite loop will result when compiling.
@@ -495,11 +458,11 @@ namespace tmv {
 
         template <class M2>
         inline void assignTo(BaseMatrix_Mutable<M2>& m2) const
-        { mat().assignTo(m2); }
+        { mat().assignTo(m2.mat()); }
 
         template <class M2>
         inline void newAssignTo(BaseMatrix_Mutable<M2>& m2) const
-        { mat().newAssignTo(m2); }
+        { mat().newAssignTo(m2.mat()); }
 
     }; // BaseMatrix
 
@@ -507,15 +470,16 @@ namespace tmv {
     class BaseMatrix_Calc : public BaseMatrix<M>
     {
     public:
-        enum { mcolsize = Traits<M>::mcolsize };
-        enum { mrowsize = Traits<M>::mrowsize };
-        enum { mshape = Traits<M>::mshape };
-        enum { mfort = Traits<M>::mfort };
-        enum { mcalc = Traits<M>::mcalc };
-        enum { mconj = Traits<M>::mconj };
-        enum { mrowmajor = Traits<M>::mrowmajor }; 
-        enum { mcolmajor = Traits<M>::mcolmajor }; 
-        enum { mstor = Traits<M>::mstor };
+        enum { _colsize = Traits<M>::_colsize };
+        enum { _rowsize = Traits<M>::_rowsize };
+        enum { _shape = Traits<M>::_shape };
+        enum { _fort = Traits<M>::_fort };
+        enum { _calc = Traits<M>::_calc };
+        enum { _conj = Traits<M>::_conj };
+        enum { _rowmajor = Traits<M>::_rowmajor }; 
+        enum { _colmajor = Traits<M>::_colmajor }; 
+        enum { _stor = Traits<M>::_stor };
+        enum { _hasdivider = Traits<M>::_hasdivider };
 
         typedef M type;
         typedef BaseMatrix<M> base;
@@ -540,6 +504,7 @@ namespace tmv {
 
         typedef typename Traits<M>::nonconst_type nonconst_type;
 
+        typedef typename Traits<M>::inverse_type inverse_type;
 
 
         //
@@ -601,7 +566,7 @@ namespace tmv {
         { return mat().realPart(); }
 
         inline const_imagpart_type imagPart() const
-        { TMVStaticAssert(type::miscomplex); return mat().imagPart(); }
+        { TMVStaticAssert(type::iscomplex); return mat().imagPart(); }
 
         inline const_nonconj_type nonConj() const
         { return mat().nonConj(); }
@@ -610,12 +575,55 @@ namespace tmv {
         { return mat().nonConst(); } 
 
 
+        //
+        // Division Routines
+        //
+
+        inline inverse_type inverse() const
+        { return inverse_type(real_type(1),mat()); }
+
+        inline value_type det() const
+        {
+            TMVStaticAssert((Sizes<_rowsize,_colsize>::same));
+            TMVAssert(colsize() == rowsize());
+            return tmv::Det(*this);
+        }
+
+        inline real_type logDet(value_type* sign=0) const
+        {
+            TMVStaticAssert((Sizes<_rowsize,_colsize>::same));
+            TMVAssert(colsize() == rowsize());
+            return tmv::LogDet(*this,sign);
+        }
+
+        inline bool isSingular() const
+        { 
+            TMVStaticAssert((Sizes<_rowsize,_colsize>::same));
+            TMVAssert(colsize() == rowsize());
+            return tmv::IsSingular(*this);
+        }
+
+        template <class M2>
+        inline void makeInverse(BaseMatrix_Mutable<M2>& minv) const
+        { tmv::MakeInverse(Scaling<1,real_type>(),*this,minv); }
+
+        template <class M2>
+        inline void makeInverseATA(BaseMatrix_Mutable<M2>& mata) const
+        { tmv::MakeInverseATA(*this,mata); }
+
+#if 0
+        inline real_type norm2() const
+        { return svd().norm2(); }
+
+        inline real_type condition() const
+        { return svd().condition(); }
+#endif
 
         //
         // Auxilliary routines
         //
 
-        inline bool isconj() const { return mconj; }
+        inline bool isconj() const { return _conj; }
 
         inline bool isrm() const { return mat().isrm(); }
         inline bool iscm() const { return mat().iscm(); }
@@ -635,11 +643,11 @@ namespace tmv {
     {
     public:
 
-        enum { mcolsize = Traits<M>::mcolsize };
-        enum { mrowsize = Traits<M>::mrowsize };
-        enum { mshape = Traits<M>::mshape };
-        enum { mfort = Traits<M>::mfort };
-        enum { mcalc = Traits<M>::mcalc };
+        enum { _colsize = Traits<M>::_colsize };
+        enum { _rowsize = Traits<M>::_rowsize };
+        enum { _shape = Traits<M>::_shape };
+        enum { _fort = Traits<M>::_fort };
+        enum { _calc = Traits<M>::_calc };
 
         typedef M type;
 
@@ -686,13 +694,10 @@ namespace tmv {
 
         inline reference operator()(int i, int j)
         {
-            CheckIndex<mfort>(i,colsize());
-            CheckIndex<mfort>(j,rowsize());
+            CheckIndex<_fort>(i,colsize());
+            CheckIndex<_fort>(j,rowsize());
             return ref(i,j);
         }
-
-        //inline value_type operator()(int i, int j) const
-        //{ return base_calc::operator()(i,j); }
 
 
         //
@@ -710,8 +715,8 @@ namespace tmv {
         template <class M2>
         inline type& operator=(const BaseMatrix<M2>& m2) 
         {
-            TMVStaticAssert((Sizes<mcolsize,M2::mcolsize>::same));
-            TMVStaticAssert((Sizes<mrowsize,M2::mrowsize>::same));
+            TMVStaticAssert((Sizes<_colsize,M2::_colsize>::same));
+            TMVStaticAssert((Sizes<_rowsize,M2::_rowsize>::same));
             TMVAssert(colsize() == m2.colsize());
             TMVAssert(rowsize() == m2.rowsize());
             m2.assignTo(mat());
@@ -856,9 +861,9 @@ namespace tmv {
     template <class M>
     static typename M::value_type DoTrace(const BaseMatrix<M>& m)
     {
-        TMVStaticAssert((Sizes<M::mrowsize,M::mcolsize>::same));
+        TMVStaticAssert((Sizes<M::_rowsize,M::_colsize>::same));
         TMVAssert(m.colsize() == m.rowsize());
-        const int size = Sizes<M::mrowsize,M::mcolsize>::size;
+        const int size = Sizes<M::_rowsize,M::_colsize>::size;
         const int n = size == UNKNOWN ? m.colsize() : size;
         typename M::value_type sum(0);
         for (int i=0;i<n;++i) sum += m.cref(i,i);
@@ -918,13 +923,13 @@ namespace tmv {
     inline bool CallEq(
         const BaseMatrix_Calc<M1>& m1, const BaseMatrix_Calc<M2>& m2)
     {
-        TMVStaticAssert((Sizes<M1::mcolsize,M2::mcolsize>::same)); 
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::mrowsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same)); 
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
-        const int cs = Sizes<M1::mcolsize,M2::mcolsize>::size;
-        const int rs = Sizes<M1::mrowsize,M2::mrowsize>::size;
-        const bool rm = M2::mrowmajor || (M1::mrowmajor && !M2::mcolmajor);
+        const int cs = Sizes<M1::_colsize,M2::_colsize>::size;
+        const int rs = Sizes<M1::_rowsize,M2::_rowsize>::size;
+        const bool rm = M2::_rowmajor || (M1::_rowmajor && !M2::_colmajor);
         return EqMM_Helper<rm,cs,rs,M1,M2>::eq(m1.mat(),m2.mat());
     }
 

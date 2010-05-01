@@ -165,7 +165,7 @@ namespace tmv {
     {
         static inline void call(M1& m)
         {
-            TMVStaticAssert(!M1::mconj);
+            TMVStaticAssert(!M1::_conj);
             const int algo = 
 #if TMV_OPT >= 1
                 ( size != UNKNOWN && size < 8 ) ? 5 :
@@ -203,9 +203,9 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
             const bool inst = 
-                M1::mcolsize == UNKNOWN && M1::mrowsize == UNKNOWN &&
+                M1::unknownsizes &&
                 Traits<T>::isinst;
-            const bool conj = M1::mconj;
+            const bool conj = M1::_conj;
             const int algo = 
                 conj ? 97 :
                 inst ? 98 :
@@ -217,9 +217,9 @@ namespace tmv {
     template <class M1>
     inline void TransposeSelf(BaseMatrix_Rec_Mutable<M1>& m)
     {
-        TMVStaticAssert((Sizes<M1::mcolsize,M1::mrowsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
         TMVAssert(m.colsize() == m.rowsize());
-        const int size = Sizes<M1::mcolsize,M1::mrowsize>::size;
+        const int size = Sizes<M1::_colsize,M1::_rowsize>::size;
         typedef typename M1::cview_type M1v;
         M1v m1v = m.cView();
         TransposeSelf_Helper<-1,size,M1v>::call(m1v);
@@ -228,9 +228,9 @@ namespace tmv {
     template <class M1>
     inline void InlineTransposeSelf(BaseMatrix_Rec_Mutable<M1>& m)
     {
-        TMVStaticAssert((Sizes<M1::mcolsize,M1::mrowsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
         TMVAssert(m.colsize() == m.rowsize());
-        const int size = Sizes<M1::mcolsize,M1::mrowsize>::size;
+        const int size = Sizes<M1::_colsize,M1::_rowsize>::size;
         typedef typename M1::cview_type M1v;
         M1v m1v = m.cView();
         TransposeSelf_Helper<-3,size,M1v>::call(m1v);

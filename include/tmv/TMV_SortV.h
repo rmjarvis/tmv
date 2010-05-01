@@ -188,7 +188,7 @@ namespace tmv {
         static inline void call(V& v, ADType ad, CompType comp)
         {
             // Swap ad if necessary according to the conj status of the vector:
-            if (V::vconj && (comp==ImagComp || comp==ArgComp)) {
+            if (V::_conj && (comp==ImagComp || comp==ArgComp)) {
                 if (ad == Ascend) ad = Descend;
                 else ad = Ascend;
             }
@@ -213,9 +213,9 @@ namespace tmv {
     {
         typedef typename V::value_type T;
         const bool inst = 
-            Traits<T>::isinst &&
-            V::vsize == UNKNOWN;
-        CallSort<V::vconj,inst,V>::call(v.vec(),ad,comp);
+            V::unknownsizes &&
+            Traits<T>::isinst;
+        CallSort<V::_conj,inst,V>::call(v.vec(),ad,comp);
     }
 
 
@@ -323,7 +323,7 @@ namespace tmv {
         static inline void call(V& v, int*const P, ADType ad, CompType comp)
         {
             // Swap ad if necessary according to the conj status of the vector:
-            if (V::vconj && (comp==ImagComp || comp==ArgComp)) {
+            if (V::_conj && (comp==ImagComp || comp==ArgComp)) {
                 if (ad == Ascend) ad = Descend;
                 else ad = Ascend;
             }
@@ -352,9 +352,9 @@ namespace tmv {
         else {
             typedef typename V::value_type T;
             const bool inst = 
-                Traits<T>::isinst &&
-                V::vsize == UNKNOWN;
-            CallSortP<V::vconj,inst,V>::call(v.vec(),P,ad,comp);
+                V::unknownsizes &&
+                Traits<T>::isinst;
+            CallSortP<V::_conj,inst,V>::call(v.vec(),P,ad,comp);
         }
     }
 

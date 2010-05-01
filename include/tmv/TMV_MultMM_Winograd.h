@@ -369,14 +369,14 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         {
-            TMVStaticAssert(!M3::mconj);
+            TMVStaticAssert(!M3::_conj);
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
             const bool inst =
-                M1::mcolsize == UNKNOWN && M1::mrowsize == UNKNOWN &&
-                M2::mcolsize == UNKNOWN && M2::mrowsize == UNKNOWN &&
-                M3::mcolsize == UNKNOWN && M3::mrowsize == UNKNOWN &&
+                M1::unknownsizes &&
+                M2::unknownsizes &&
+                M3::unknownsizes &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&

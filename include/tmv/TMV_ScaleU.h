@@ -142,9 +142,9 @@ namespace tmv {
                 typedef typename M1::real_type RT;
                 typedef typename M1::value_type VT;
                 const RT rm =
-                    ZProd<false,M1::mconj>::rprod(x,m.nonConj().cref(I,J));
+                    ZProd<false,M1::_conj>::rprod(x,m.nonConj().cref(I,J));
                 const RT im =
-                    ZProd<false,M1::mconj>::iprod(x,m.nonConj().cref(I,J));
+                    ZProd<false,M1::_conj>::iprod(x,m.nonConj().cref(I,J));
                 m.ref(I,J) = VT(rm,im);
             }
         };
@@ -153,7 +153,7 @@ namespace tmv {
         { static inline void unroll(const Scaling<ix,T>& , M1& ) {} };
 
         static inline void call(const Scaling<ix,T>& x, M1& m)
-        { Unroller<0,s,0,s,M1::miscomplex>::unroll(x,m); }
+        { Unroller<0,s,0,s,M1::iscomplex>::unroll(x,m); }
     };
 
     // algo 21: Loop over rows
@@ -213,9 +213,9 @@ namespace tmv {
                 typedef typename M1::real_type RT;
                 typedef typename M1::value_type VT;
                 const RT rm =
-                    ZProd<false,M1::mconj>::rprod(x,m.nonConj().cref(I,J));
+                    ZProd<false,M1::_conj>::rprod(x,m.nonConj().cref(I,J));
                 const RT im =
-                    ZProd<false,M1::mconj>::iprod(x,m.nonConj().cref(I,J));
+                    ZProd<false,M1::_conj>::iprod(x,m.nonConj().cref(I,J));
                 m.ref(I,J) = VT(rm,im);
             }
         };
@@ -224,7 +224,7 @@ namespace tmv {
         { static inline void unroll(const Scaling<ix,T>& , M1& ) {} };
 
         static inline void call(const Scaling<ix,T>& x, M1& m)
-        { Unroller<0,s,0,s,M1::miscomplex>::unroll(x,m); }
+        { Unroller<0,s,0,s,M1::iscomplex>::unroll(x,m); }
     };
 
     // algo -4: No branches or copies
@@ -233,7 +233,7 @@ namespace tmv {
     {
         static inline void call(const Scaling<ix,T>& x, M1& m)
         {
-            TMVStaticAssert(!M1::munit || ix == 1);
+            TMVStaticAssert(!M1::_unit || ix == 1);
             typedef typename M1::value_type T1;
             const int s2 = s > 20 ? UNKNOWN : s;
             const int s2p1 = IntTraits<s2>::Sp1;
@@ -245,9 +245,9 @@ namespace tmv {
                 s <= 10;
             const int algo = 
                 (s == 0 || ix == 1) ? 0 :
-                M1::mlower ? 1 :
-                unroll ? ( M1::mrowmajor ? 25 : 15 ) :
-                M1::mrowmajor ? 21 : 11;
+                M1::_lower ? 1 :
+                unroll ? ( M1::_rowmajor ? 25 : 15 ) :
+                M1::_rowmajor ? 21 : 11;
             ScaleU_Helper<algo,s,ix,T,M1>::call(x,m);
         }
     };
@@ -304,12 +304,12 @@ namespace tmv {
         {
             typedef typename M1::value_type T1;
             const bool inst =
-                M1::msize == UNKNOWN &&
+                M1::unknownsizes &&
                 Traits<T1>::isinst;
             const int algo =
                 ix == 1 ? 0 :
-                M1::mlower ? 96 :
-                M1::mconj ? 97 :
+                M1::_lower ? 96 :
+                M1::_conj ? 97 :
                 inst ? 98 :
                 -4;
             ScaleU_Helper<algo,s,ix,T,M1>::call(x,m);
@@ -328,22 +328,22 @@ namespace tmv {
     inline void Scale(
         const Scaling<ix,T>& x, BaseMatrix_Tri_Mutable<M>& m)
     {
-        TMVStaticAssert(!M::munit || ix == 1);
+        TMVStaticAssert(!M::_unit || ix == 1);
         TMVAssert(!m.isunit() || ix == 1);
         typedef typename M::cview_type Mv;
         Mv mv = m.cView();
-        ScaleU_Helper<-2,M::msize,ix,T,Mv>::call(x,mv); 
+        ScaleU_Helper<-2,M::_size,ix,T,Mv>::call(x,mv); 
     }
 
     template <int ix, class T, class M>
     inline void InlineScale(
         const Scaling<ix,T>& x, BaseMatrix_Tri_Mutable<M>& m)
     {
-        TMVStaticAssert(!M::munit || ix == 1);
+        TMVStaticAssert(!M::_unit || ix == 1);
         TMVAssert(!m.isunit() || ix == 1);
         typedef typename M::cview_type Mv;
         Mv mv = m.cView();
-        ScaleU_Helper<-4,M::msize,ix,T,Mv>::call(x,mv); 
+        ScaleU_Helper<-4,M::_size,ix,T,Mv>::call(x,mv); 
     }
 
     template <class T>

@@ -59,9 +59,9 @@ namespace tmv {
 
     // BaseMatrix_Rec adds the following requirements to Traits<M>:
     //
-    //  mstepi = the step size along column if known (else UNKNOWN)
-    //  mstepj = the step size along row if known (else UNKNOWN)
-    //  mdiagstep = the step size along row if known (else UNKNOWN)
+    //  _stepi = the step size along column if known (else UNKNOWN)
+    //  _stepj = the step size along row if known (else UNKNOWN)
+    //  _diagstep = the step size along row if known (else UNKNOWN)
     //
     //  const_row_type = return type from row(i) const
     //  const_col_type = return type from col(j) const
@@ -176,13 +176,13 @@ namespace tmv {
     // These helper functions check the validity of indices according
     // to whether the matrix uses CStyle or FortranStyle indexing.
     // They also update the indices to be consistent with CStyle.
-    template <bool mfort>
+    template <bool _fort>
     inline void CheckDiagIndex(int& i, int m, int n)
     { // CStyle or FortranStyle
         TMVAssert(i >= -m && "negative diag index must be <= nrows");
         TMVAssert(i <= n && "positive diag index must be <= ncols");
     }
-    template <bool mfort>
+    template <bool _fort>
     inline void CheckDiagIndex(int& i, int& j1, int& j2, int m, int n)
     { // CStyle
         TMVAssert(i >= -m && "negative diag index must be <= nrows");
@@ -197,14 +197,14 @@ namespace tmv {
         TMVAssert((i > 0 || -i+j2 <= m) && "last element must be in matrix");
         TMVAssert((i > 0 || j2 <= n) && "last element must be in matrix");
     }
-    template <bool mfort>
+    template <bool _fort>
     inline void CheckRowRange(int& i1, int i2, int m)
     { // CStyle
         TMVAssert(i1 >= 0 && "first row must be in matrix");
         TMVAssert(i2 <= m && "last row must be in matrix");
         TMVAssert(i2 >= i1 && "range must have a non-negative number of rows");
     }
-    template <bool mfort>
+    template <bool _fort>
     inline void CheckColRange(int& j1, int j2, int n)
     { // CStyle
         TMVAssert(j1 >= 0 && "first column must be in matrix");
@@ -212,7 +212,7 @@ namespace tmv {
         TMVAssert(j2 >= j1 && 
                   "range must have a non-negative number of columns");
     }
-    template <bool mfort>
+    template <bool _fort>
     inline void CheckRowRange(int& i1, int& i2, int istep, int m)
     { // CStyle
         TMVAssert(istep != 0 && "istep cannot be 0");
@@ -225,7 +225,7 @@ namespace tmv {
         TMVAssert((i2-i1) / istep >= 0 &&
                   "must have a non-negative number of rows");
     }
-    template <bool mfort>
+    template <bool _fort>
     inline void CheckColRange(int& j1, int& j2, int jstep, int n)
     { // CStyle
         TMVAssert(jstep != 0 && "jstep cannot be 0");
@@ -238,7 +238,7 @@ namespace tmv {
         TMVAssert((j2-j1) / jstep >= 0 &&
                   "must have a non-negative number of columns");
     }
-    template <bool mfort>
+    template <bool _fort>
     inline void CheckMatSubVector(int& i, int& j, int istep, int jstep, 
                                   int size, int m, int n)
     { // CStyle
@@ -454,19 +454,19 @@ namespace tmv {
     class BaseMatrix_Rec : public BaseMatrix_Calc<M>
     {
     public:
-        enum { mcolsize = Traits<M>::mcolsize };
-        enum { mrowsize = Traits<M>::mrowsize };
-        enum { mshape = Traits<M>::mshape };
-        enum { mfort = Traits<M>::mfort };
-        enum { mrowmajor = Traits<M>::mrowmajor }; 
-        enum { mcolmajor = Traits<M>::mcolmajor }; 
-        enum { mstor = Traits<M>::mstor };
-        enum { mcalc = Traits<M>::mcalc };
-        enum { mstepi = Traits<M>::mstepi };
-        enum { mstepj = Traits<M>::mstepj };
-        enum { mdiagstep = Traits<M>::mdiagstep };
-        enum { mconj = Traits<M>::mconj };
-        enum { mcanlin = Traits<M>::mcanlin };
+        enum { _colsize = Traits<M>::_colsize };
+        enum { _rowsize = Traits<M>::_rowsize };
+        enum { _shape = Traits<M>::_shape };
+        enum { _fort = Traits<M>::_fort };
+        enum { _rowmajor = Traits<M>::_rowmajor }; 
+        enum { _colmajor = Traits<M>::_colmajor }; 
+        enum { _stor = Traits<M>::_stor };
+        enum { _calc = Traits<M>::_calc };
+        enum { _stepi = Traits<M>::_stepi };
+        enum { _stepj = Traits<M>::_stepj };
+        enum { _diagstep = Traits<M>::_diagstep };
+        enum { _conj = Traits<M>::_conj };
+        enum { _canlin = Traits<M>::_canlin };
 
         typedef M type;
 
@@ -576,7 +576,7 @@ namespace tmv {
         // The regular versions respect the indexing style for i and j:
         inline const_row_type row(int i) const
         {
-            CheckRowIndex<mfort>(i,colsize());
+            CheckRowIndex<_fort>(i,colsize());
             return get_row(i);
         }
 
@@ -585,21 +585,21 @@ namespace tmv {
 
         inline const_col_type col(int j) const
         {
-            CheckColIndex<mfort>(j,rowsize());
+            CheckColIndex<_fort>(j,rowsize());
             return get_col(j);
         }
 
         inline const_row_sub_type row(int i, int j1, int j2) const
         {
-            CheckRowIndex<mfort>(i,colsize());
-            CheckColRange<mfort>(j1,j2,rowsize());
+            CheckRowIndex<_fort>(i,colsize());
+            CheckColRange<_fort>(j1,j2,rowsize());
             return get_row(i,j1,j2); 
         }
 
         inline const_col_sub_type col(int j, int i1, int i2) const
         {
-            CheckColIndex<mfort>(j,rowsize());
-            CheckRowRange<mfort>(i1,i2,colsize());
+            CheckColIndex<_fort>(j,rowsize());
+            CheckRowRange<_fort>(i1,i2,colsize());
             return get_col(j,i1,i2); 
         }
 
@@ -612,13 +612,13 @@ namespace tmv {
 
         inline const_diag_sub_type diag(int i) const
         {
-            CheckDiagIndex<mfort>(i,colsize(),rowsize());
+            CheckDiagIndex<_fort>(i,colsize(),rowsize());
             return get_diag(i);
         }
 
         inline const_diag_sub_type diag(int i, int j1, int j2) const
         {
-            CheckDiagIndex<mfort>(i,j1,j2,colsize(),rowsize());
+            CheckDiagIndex<_fort>(i,j1,j2,colsize(),rowsize());
             return get_diag(i,j1,j2);
         }
 
@@ -713,49 +713,49 @@ namespace tmv {
         inline const_submatrix_type subMatrix(
             int i1, int i2, int j1, int j2) const
         {
-            CheckRowRange<mfort>(i1,i2,colsize());
-            CheckColRange<mfort>(j1,j2,rowsize());
+            CheckRowRange<_fort>(i1,i2,colsize());
+            CheckColRange<_fort>(j1,j2,rowsize());
             return cSubMatrix(i1,i2,j1,j2);
         }
 
         inline const_submatrix_step_type subMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const
         {
-            CheckRowRange<mfort>(i1,i2,istep,colsize());
-            CheckColRange<mfort>(j1,j2,jstep,rowsize());
+            CheckRowRange<_fort>(i1,i2,istep,colsize());
+            CheckColRange<_fort>(j1,j2,jstep,rowsize());
             return cSubMatrix(i1,i2,j1,j2,istep,jstep);
         }
 
         inline const_subvector_type subVector(
             int i, int j, int istep, int jstep, int s) const
         {
-            CheckMatSubVector<mfort>(i,j,istep,jstep,s,colsize(),rowsize());
+            CheckMatSubVector<_fort>(i,j,istep,jstep,s,colsize(),rowsize());
             return cSubVector(i,j,istep,jstep,s); 
         }
 
         inline const_colpair_type colPair(int j1, int j2) const
         {
-            CheckColIndex<mfort>(j1,rowsize());
-            CheckColIndex<mfort>(j2,rowsize());
+            CheckColIndex<_fort>(j1,rowsize());
+            CheckColIndex<_fort>(j2,rowsize());
             return cColPair(j1,j2);
         }
 
         inline const_rowpair_type rowPair(int i1, int i2) const
         {
-            CheckRowIndex<mfort>(i1,colsize());
-            CheckRowIndex<mfort>(i2,colsize());
+            CheckRowIndex<_fort>(i1,colsize());
+            CheckRowIndex<_fort>(i2,colsize());
             return cRowPair(i1,i2);
         }
 
         inline const_colrange_type colRange(int j1, int j2) const
         {
-            CheckColRange<mfort>(j1,j2,rowsize());
+            CheckColRange<_fort>(j1,j2,rowsize());
             return cColRange(j1,j2);
         }
 
         inline const_rowrange_type rowRange(int i1, int i2) const
         {
-            CheckRowRange<mfort>(i1,i2,colsize());
+            CheckRowRange<_fort>(i1,i2,colsize());
             return cRowRange(i1,i2);
         }
 
@@ -837,21 +837,21 @@ namespace tmv {
 
         inline const_realpart_type realPart() const
         {
-            const bool misreal = Traits<value_type>::isreal;
+            const bool isreal = Traits<value_type>::isreal;
             return const_realpart_type(
                 reinterpret_cast<const real_type*>(cptr()),
                 colsize(), rowsize(),
-                misreal ? stepi() : 2*stepi(), misreal ? stepj() : 2*stepj());
+                isreal ? stepi() : 2*stepi(), isreal ? stepj() : 2*stepj());
         }
 
         inline const_imagpart_type imagPart() const
         {
-            const bool misreal = Traits<value_type>::isreal;
+            const bool isreal = Traits<value_type>::isreal;
             TMVStaticAssert(Traits<value_type>::iscomplex);
             return const_imagpart_type(
                 reinterpret_cast<const real_type*>(cptr())+1,
                 colsize(), rowsize(),
-                misreal ? stepi() : 2*stepi(), misreal ? stepj() : 2*stepj());
+                isreal ? stepi() : 2*stepi(), isreal ? stepj() : 2*stepj());
         }
 
         inline const_nonconj_type nonConj() const
@@ -876,14 +876,14 @@ namespace tmv {
         template <class M2>
         inline void assignTo(BaseMatrix_Mutable<M2>& m2) const
         {
-            TMVStaticAssert((ShapeTraits2<mshape,M2::mshape>::assignable));
+            TMVStaticAssert((ShapeTraits2<_shape,M2::_shape>::assignable));
             tmv::Copy(mat(),m2.mat()); 
         }
 
         template <class M2>
         inline void newAssignTo(BaseMatrix_Mutable<M2>& m2) const
         {
-            TMVStaticAssert((ShapeTraits2<mshape,M2::mshape>::assignable));
+            TMVStaticAssert((ShapeTraits2<_shape,M2::_shape>::assignable));
             tmv::NoAliasCopy(mat(),m2.mat()); 
         }
 
@@ -891,10 +891,10 @@ namespace tmv {
         { return *static_cast<const type*>(this); }
 
         inline int diagstep() const 
-        { return mdiagstep == UNKNOWN ? stepi() + stepj() : mdiagstep; }
-        inline bool isconj() const { return mconj; }
+        { return _diagstep == UNKNOWN ? stepi() + stepj() : _diagstep; }
+        inline bool isconj() const { return _conj; }
         inline bool canLinearize() const 
-        { return (AuxCanLinearize<mcanlin,mcolmajor,mrowmajor,M>::ok(mat())); }
+        { return (AuxCanLinearize<_canlin,_colmajor,_rowmajor,M>::ok(mat())); }
 
         // Note that these last functions need to be defined in a more derived
         // class than this, or an infinite loop will result when compiling.
@@ -917,19 +917,19 @@ namespace tmv {
                                    public BaseMatrix_Mutable<M>
     {
     public:
-        enum { mcolsize = Traits<M>::mcolsize };
-        enum { mrowsize = Traits<M>::mrowsize };
-        enum { mshape = Traits<M>::mshape };
-        enum { mfort = Traits<M>::mfort };
-        enum { mcalc = Traits<M>::mcalc };
-        enum { mrowmajor = Traits<M>::mrowmajor }; 
-        enum { mcolmajor = Traits<M>::mcolmajor }; 
-        enum { mstor = Traits<M>::mstor };
-        enum { mstepi = Traits<M>::mstepi };
-        enum { mstepj = Traits<M>::mstepj };
-        enum { mdiagstep = Traits<M>::mdiagstep };
-        enum { mconj = Traits<M>::mconj };
-        enum { mcanlin = Traits<M>::mcanlin };
+        enum { _colsize = Traits<M>::_colsize };
+        enum { _rowsize = Traits<M>::_rowsize };
+        enum { _shape = Traits<M>::_shape };
+        enum { _fort = Traits<M>::_fort };
+        enum { _calc = Traits<M>::_calc };
+        enum { _rowmajor = Traits<M>::_rowmajor }; 
+        enum { _colmajor = Traits<M>::_colmajor }; 
+        enum { _stor = Traits<M>::_stor };
+        enum { _stepi = Traits<M>::_stepi };
+        enum { _stepj = Traits<M>::_stepj };
+        enum { _diagstep = Traits<M>::_diagstep };
+        enum { _conj = Traits<M>::_conj };
+        enum { _canlin = Traits<M>::_canlin };
 
         typedef M type;
         typedef BaseMatrix_Rec<M> base_rec;
@@ -1031,8 +1031,8 @@ namespace tmv {
 
         inline reference operator()(int i, int j)
         {
-            CheckRowIndex<mfort>(i,colsize());
-            CheckColIndex<mfort>(j,rowsize());
+            CheckRowIndex<_fort>(i,colsize());
+            CheckColIndex<_fort>(j,rowsize());
             return ref(i,j);
         }
 
@@ -1076,7 +1076,7 @@ namespace tmv {
         // The regular versions respect the indexing style for i and j:
         inline row_type row(int i) 
         {
-            CheckRowIndex<mfort>(i,colsize());
+            CheckRowIndex<_fort>(i,colsize());
             return get_row(i);
         }
 
@@ -1085,33 +1085,33 @@ namespace tmv {
 
         inline col_type col(int j) 
         {
-            CheckColIndex<mfort>(j,rowsize());
+            CheckColIndex<_fort>(j,rowsize());
             return get_col(j);
         }
 
         inline row_sub_type row(int i, int j1, int j2) 
         {
-            CheckRowIndex<mfort>(i,colsize());
-            CheckColRange<mfort>(j1,j2,rowsize());
+            CheckRowIndex<_fort>(i,colsize());
+            CheckColRange<_fort>(j1,j2,rowsize());
             return get_row(i,j1,j2); 
         }
 
         inline col_sub_type col(int j, int i1, int i2) 
         {
-            CheckColIndex<mfort>(j,rowsize());
-            CheckRowRange<mfort>(i1,i2,colsize());
+            CheckColIndex<_fort>(j,rowsize());
+            CheckRowRange<_fort>(i1,i2,colsize());
             return get_col(j,i1,i2); 
         }
 
         inline diag_sub_type diag(int i) 
         {
-            CheckDiagIndex<mfort>(i,colsize(),rowsize());
+            CheckDiagIndex<_fort>(i,colsize(),rowsize());
             return get_diag(i);
         }
 
         inline diag_sub_type diag(int i, int j1, int j2) 
         {
-            CheckDiagIndex<mfort>(i,j1,j2,colsize(),rowsize());
+            CheckDiagIndex<_fort>(i,j1,j2,colsize(),rowsize());
             return get_diag(i,j1,j2);
         }
 
@@ -1167,18 +1167,18 @@ namespace tmv {
         template <class M2>
         inline type& operator=(const BaseMatrix<M2>& m2) 
         {
-            TMVStaticAssert((Sizes<mcolsize,M2::mcolsize>::same));
-            TMVStaticAssert((Sizes<mrowsize,M2::mrowsize>::same));
+            TMVStaticAssert((Sizes<_colsize,M2::_colsize>::same));
+            TMVStaticAssert((Sizes<_rowsize,M2::_rowsize>::same));
             TMVAssert(colsize() == m2.colsize());
             TMVAssert(rowsize() == m2.rowsize());
-            TMVStaticAssert((ShapeTraits2<M2::mshape,mshape>::assignable));
+            TMVStaticAssert((ShapeTraits2<M2::_shape,_shape>::assignable));
             m2.assignTo(mat());
             return mat(); 
         }
 
         inline type& operator=(const value_type x)
         {
-            TMVStaticAssert((Sizes<mrowsize,mcolsize>::same));
+            TMVStaticAssert((Sizes<_rowsize,_colsize>::same));
             TMVAssert(colsize() == rowsize());
             setToIdentity(x);
             return mat();
@@ -1223,7 +1223,7 @@ namespace tmv {
 
         inline type& setToIdentity(const value_type x=value_type(1))
         {
-            TMVStaticAssert((Sizes<mrowsize,mcolsize>::same));
+            TMVStaticAssert((Sizes<_rowsize,_colsize>::same));
             TMVAssert(colsize() == rowsize());
             this->setZero(); diag().setAllTo(x);
             return mat();
@@ -1240,8 +1240,8 @@ namespace tmv {
         }
         inline type& swapRows(int i1, int i2) 
         {
-            CheckRowIndex<mfort>(i1,colsize());
-            CheckRowIndex<mfort>(i2,colsize());
+            CheckRowIndex<_fort>(i1,colsize());
+            CheckRowIndex<_fort>(i2,colsize());
             return cSwapRows(i1,i2);
         }
 
@@ -1256,8 +1256,8 @@ namespace tmv {
         }
         inline type& swapCols(int j1, int j2) 
         {
-            CheckColIndex<mfort>(j1,rowsize());
-            CheckColIndex<mfort>(j2,rowsize());
+            CheckColIndex<_fort>(j1,rowsize());
+            CheckColIndex<_fort>(j2,rowsize());
             return cSwapCols(j1,j2);
         }
 
@@ -1265,25 +1265,25 @@ namespace tmv {
         { tmv::PermuteRows(mat(),p,i1,i2); return mat(); }
         inline type& permuteRows(const int*const p, int i1, int i2) 
         {
-            CheckRowRange<mfort>(i1,i2,colsize());
+            CheckRowRange<_fort>(i1,i2,colsize());
             return cPermuteRows(p,i1,i2);
         }
         inline type& permuteRows(const int*const p) 
-        { cPermuteRows(p,0,colsize()); return mat(); }
+        { return cPermuteRows(p,0,colsize()); }
 
         inline type& cReversePermuteRows(const int*const p, int i1, int i2) 
-        { tmv::ReversePermuteRows(mat(),p,i1,i2); }
+        { tmv::ReversePermuteRows(mat(),p,i1,i2); return mat(); }
         inline type& reversePermuteRows(const int*const p, int i1, int i2) 
         {
-            CheckRowRange<mfort>(i1,i2,colsize());
+            CheckRowRange<_fort>(i1,i2,colsize());
             return cReversePermuteRows(p,i1,i2);
         }
         inline type& reversePermuteRows(const int*const p) 
-        { cReversePermuteRows(p,0,colsize()); return mat(); }
+        { return cReversePermuteRows(p,0,colsize()); }
 
         inline type& permuteCols(const int*const p, int j1, int j2) 
         {
-            CheckColRange<mfort>(j1,j2,rowsize());
+            CheckColRange<_fort>(j1,j2,rowsize());
             transpose().cPermuteRows(p,j1,j2);
             return mat();
         }
@@ -1292,7 +1292,7 @@ namespace tmv {
 
         inline type& reversePermuteCols(const int*const p, int j1, int j2) 
         {
-            CheckColRange<mfort>(j1,j2,rowsize());
+            CheckColRange<_fort>(j1,j2,rowsize());
             transpose().cReversePermuteRows(p,j1,j2);
             return mat();
         }
@@ -1356,49 +1356,49 @@ namespace tmv {
         inline submatrix_type subMatrix(
             int i1, int i2, int j1, int j2) 
         {
-            CheckRowRange<mfort>(i1,i2,colsize());
-            CheckColRange<mfort>(j1,j2,rowsize());
+            CheckRowRange<_fort>(i1,i2,colsize());
+            CheckColRange<_fort>(j1,j2,rowsize());
             return cSubMatrix(i1,i2,j1,j2);
         }
 
         inline submatrix_step_type subMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) 
         {
-            CheckRowRange<mfort>(i1,i2,istep,colsize());
-            CheckColRange<mfort>(j1,j2,jstep,rowsize());
+            CheckRowRange<_fort>(i1,i2,istep,colsize());
+            CheckColRange<_fort>(j1,j2,jstep,rowsize());
             return cSubMatrix(i1,i2,j1,j2,istep,jstep);
         }
 
         inline subvector_type subVector(
             int i, int j, int istep, int jstep, int s) 
         {
-            CheckMatSubVector<mfort>(i,j,istep,jstep,s,colsize(),rowsize());
+            CheckMatSubVector<_fort>(i,j,istep,jstep,s,colsize(),rowsize());
             return cSubVector(i,j,istep,jstep,s); 
         }
 
         inline colpair_type colPair(int j1, int j2) 
         {
-            CheckColIndex<mfort>(j1,rowsize());
-            CheckColIndex<mfort>(j2,rowsize());
+            CheckColIndex<_fort>(j1,rowsize());
+            CheckColIndex<_fort>(j2,rowsize());
             return cColPair(j1,j2);
         }
 
         inline rowpair_type rowPair(int i1, int i2) 
         {
-            CheckRowIndex<mfort>(i1,colsize());
-            CheckRowIndex<mfort>(i2,colsize());
+            CheckRowIndex<_fort>(i1,colsize());
+            CheckRowIndex<_fort>(i2,colsize());
             return cRowPair(i1,i2);
         }
 
         inline colrange_type colRange(int j1, int j2) 
         {
-            CheckColRange<mfort>(j1,j2,rowsize());
+            CheckColRange<_fort>(j1,j2,rowsize());
             return cColRange(j1,j2);
         }
 
         inline rowrange_type rowRange(int i1, int i2) 
         {
-            CheckRowRange<mfort>(i1,i2,colsize());
+            CheckRowRange<_fort>(i1,i2,colsize());
             return cRowRange(i1,i2);
         }
 
@@ -1498,19 +1498,19 @@ namespace tmv {
 
         inline realpart_type realPart() 
         {
-            const bool misreal = Traits<value_type>::isreal;
+            const bool isreal = Traits<value_type>::isreal;
             return realpart_type(
                 reinterpret_cast<real_type*>(ptr()), colsize(), rowsize(),
-                misreal ? stepi() : 2*stepi(), misreal ? stepj() : 2*stepj());
+                isreal ? stepi() : 2*stepi(), isreal ? stepj() : 2*stepj());
         }
 
         inline imagpart_type imagPart() 
         {
-            const bool misreal = Traits<value_type>::isreal;
+            const bool isreal = Traits<value_type>::isreal;
             TMVStaticAssert(Traits<value_type>::iscomplex);
             return imagpart_type(
                 reinterpret_cast<real_type*>(ptr())+1, colsize(), rowsize(),
-                misreal ? stepi() : 2*stepi(), misreal ? stepj() : 2*stepj());
+                isreal ? stepi() : 2*stepi(), isreal ? stepj() : 2*stepj());
         }
 
         inline nonconj_type nonConj()
@@ -1574,11 +1574,11 @@ namespace tmv {
         inline type& mat()
         { return *static_cast<type*>(this); }
 
-        inline bool isconj() const { return mconj; }
+        inline bool isconj() const { return _conj; }
         inline int diagstep() const 
-        { return mdiagstep == UNKNOWN ? stepi() + stepj() : mdiagstep; }
+        { return _diagstep == UNKNOWN ? stepi() + stepj() : _diagstep; }
         inline bool canLinearize() const 
-        { return (AuxCanLinearize<mcanlin,mcolmajor,mrowmajor,M>::ok(mat())); }
+        { return (AuxCanLinearize<_canlin,_colmajor,_rowmajor,M>::ok(mat())); }
 
         // Note that these last functions need to be defined in a more derived
         // class than this, or an infinite loop will result when compiling.
@@ -1640,7 +1640,7 @@ namespace tmv {
     {
         static inline void call(M& m) 
         {
-            const int algo2 = M::mcolmajor ? 3 : 2;
+            const int algo2 = M::_colmajor ? 3 : 2;
 #if TMV_OPT >= 2
             if (m.canLinearize())
                 SetZeroM_Helper<1,M>::call(m);
@@ -1654,9 +1654,9 @@ namespace tmv {
     inline void SetZero(BaseMatrix_Rec_Mutable<M>& m)
     {
 #if TMV_OPT == 0
-        const int algo = M::mcolmajor ? 3 : 2;
+        const int algo = M::_colmajor ? 3 : 2;
 #else
-        const int algo = M::mcanlin ? 1 : 4;
+        const int algo = M::_canlin ? 1 : 4;
 #endif
         SetZeroM_Helper<algo,M>::call(m.mat());
     }
@@ -1704,7 +1704,7 @@ namespace tmv {
     {
         static void call(M& m, const T& val) 
         {
-            const int algo2 = M::mcolmajor ? 3 : 2;
+            const int algo2 = M::_colmajor ? 3 : 2;
 #if TMV_OPT >= 2
             if (m.canLinearize())
                 SetAllToM_Helper<1,M,T>::call(m,val);
@@ -1718,9 +1718,9 @@ namespace tmv {
     inline void SetAllTo(BaseMatrix_Rec_Mutable<M>& m, const T& val)
     {
 #if TMV_OPT == 0
-        const int algo = M::mcolmajor ? 3 : 2;
+        const int algo = M::_colmajor ? 3 : 2;
 #else
-        const int algo = M::mcanlin ? 1 : 4;
+        const int algo = M::_canlin ? 1 : 4;
 #endif
         SetAllToM_Helper<algo,M,T>::call(m.mat(),val);
     }
@@ -1768,7 +1768,7 @@ namespace tmv {
     {
         static void call(M& m, const T& val) 
         {
-            const int algo2 = M::mcolmajor ? 3 : 2;
+            const int algo2 = M::_colmajor ? 3 : 2;
 #if TMV_OPT >= 2
             if (m.canLinearize())
                 AddToAllM_Helper<1,M,T>::call(m,val);
@@ -1782,9 +1782,9 @@ namespace tmv {
     inline void AddToAll(BaseMatrix_Rec_Mutable<M>& m, const T& val)
     {
 #if TMV_OPT == 0
-        const int algo = M::mcolmajor ? 3 : 2;
+        const int algo = M::_colmajor ? 3 : 2;
 #else
-        const int algo = M::mcanlin ? 1 : 4;
+        const int algo = M::_canlin ? 1 : 4;
 #endif
         AddToAllM_Helper<algo,M,T>::call(m.mat(),val);
     }
@@ -1832,7 +1832,7 @@ namespace tmv {
     {
         static void call(M& m, const RT& thresh) 
         {
-            const int algo2 = M::mcolmajor ? 3 : 2;
+            const int algo2 = M::_colmajor ? 3 : 2;
 #if TMV_OPT >= 2
             if (m.canLinearize())
                 ClipM_Helper<1,M,RT>::call(m,thresh);
@@ -1846,9 +1846,9 @@ namespace tmv {
     inline void Clip(BaseMatrix_Rec_Mutable<M>& m, const RT& thresh)
     {
 #if TMV_OPT == 0
-        const int algo = M::mcolmajor ? 3 : 2;
+        const int algo = M::_colmajor ? 3 : 2;
 #else
-        const int algo = M::mcanlin ? 1 : 4;
+        const int algo = M::_canlin ? 1 : 4;
 #endif
         ClipM_Helper<algo,M,RT>::call(m.mat(),thresh);
     }
@@ -1896,7 +1896,7 @@ namespace tmv {
     {
         static void call(M& m, const F& f) 
         {
-            const int algo2 = M::mcolmajor ? 3 : 2;
+            const int algo2 = M::_colmajor ? 3 : 2;
 #if TMV_OPT >= 2
             if (m.canLinearize())
                 ApplyToAllM_Helper<1,M,F>::call(m,f);
@@ -1910,9 +1910,9 @@ namespace tmv {
     inline void ApplyToAll(BaseMatrix_Mutable<M>& m, const F& f)
     {
 #if TMV_OPT == 0
-        const int algo = M::mcolmajor ? 3 : 2;
+        const int algo = M::_colmajor ? 3 : 2;
 #else
-        const int algo = M::mcanlin ? 1 : 4;
+        const int algo = M::_canlin ? 1 : 4;
 #endif
         ApplyToAllM_Helper<algo,M,F>::call(m.mat(),f);
     }
@@ -1973,14 +1973,24 @@ namespace tmv {
     template <class M>
     inline void ConjugateSelf(BaseMatrix_Rec_Mutable<M>& m)
     {
-        const bool misreal = Traits<typename M::value_type>::isreal;
+        const bool isreal = Traits<typename M::value_type>::isreal;
 #if TMV_OPT == 0
-        const int algo = misreal ? 0 : 2;
+        const int algo = isreal ? 0 : 2;
 #else
-        const int algo = misreal ? 0 : M::mcanlin ? 1 : 4;
+        const int algo = isreal ? 0 : M::_canlin ? 1 : 4;
 #endif
         ConjugateM_Helper<algo,M>::call(m.mat());
     }
+
+
+
+    // The BaseMatrix Trace call is efficient for composite types, since
+    // it avoid calculating all the elements to do the sum.
+    // But if we do have the elements calculated, this overloaded 
+    // version will be faster:
+    template <class M>
+    static typename M::value_type DoTrace(const BaseMatrix_Rec<M>& m)
+    { return m.diag().sumElements(); }
 
 
     //

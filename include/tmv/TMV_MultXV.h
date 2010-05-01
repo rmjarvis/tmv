@@ -177,7 +177,7 @@ namespace tmv {
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B)
         { 
-            const bool c1 = V1::vconj;
+            const bool c1 = V1::_conj;
             if (n) do {
                 Maybe<add>::add(*B++ , ZProd<false,c1>::prod(x , *A++)); 
             } while (--n);
@@ -199,7 +199,7 @@ namespace tmv {
         {
             int n_2 = (n>>1);
             const int nb = n-(n_2<<1);
-            const bool c1 = V1::vconj;
+            const bool c1 = V1::_conj;
 
             if (n_2) do {
                 Maybe<add>::add(B[0] , ZProd<false,c1>::prod(x , A[0]));
@@ -227,7 +227,7 @@ namespace tmv {
         {
             int n_4 = (n>>2);
             int nb = n-(n_4<<2);
-            const bool c1 = V1::vconj;
+            const bool c1 = V1::_conj;
 
             if (n_4) do {
                 Maybe<add>::add(B[0] , ZProd<false,c1>::prod(x , A[0]));
@@ -276,7 +276,7 @@ namespace tmv {
             static inline void unroll2(
                 const Scaling<ix,T>& x, const IT1& A, const IT2& B)
             {
-                const bool c1 = V1::vconj;
+                const bool c1 = V1::_conj;
                 Maybe<add>::add(B[I] , ZProd<false,c1>::prod(x , A[I])); 
             }
         };
@@ -311,16 +311,16 @@ namespace tmv {
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B)
         {
-            const bool unit1 = V1::vstep == 1;
-            const bool unit2 = V2::vstep == 1;
+            const bool unit1 = V1::_step == 1;
+            const bool unit2 = V2::_step == 1;
 
             if (unit2) {
-                while (n && (((unsigned int)(B.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(B.get()) & 0xf) != 0) ) {
                     Maybe<add>::add(*B++ , x * *A++);
                     --n;
                 }
             } else if (unit1) {
-                while (n && (((unsigned int)(A.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
                     Maybe<add>::add(*B++ , x * *A++);
                     --n;
                 }
@@ -344,11 +344,11 @@ namespace tmv {
                     // If !unit2, then we know that A is aligned, so we 
                     // can use load, otherwise use loadu.
                     Maybe2<!unit2,unit1>::sse_load(
-                        xA,A.getP(),A1.getP(),A2.getP(),A3.getP());
+                        xA,A.get(),A1.get(),A2.get(),A3.get());
                     A+=4; A1+=4; A2+=4; A3+=4;
                     xB = _mm_mul_ps(xx,xA);
                     Maybe2<add,unit2>::sse_add(
-                        B.getP(),B1.getP(),B2.getP(),B3.getP(),xB);
+                        B.get(),B1.get(),B2.get(),B3.get(),xB);
                     B+=4; B1+=4; B2+=4; B3+=4;
                 } while (--n_4);
             }
@@ -372,11 +372,11 @@ namespace tmv {
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B)
         {
-            const bool unit1 = V1::vstep == 1;
-            const bool unit2 = V2::vstep == 1;
+            const bool unit1 = V1::_step == 1;
+            const bool unit2 = V2::_step == 1;
 
             if (unit1) {
-                while (n && (((unsigned int)(A.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
                     Maybe<add>::add(*B++ , x * *A++);
                     --n;
                 }
@@ -399,13 +399,13 @@ namespace tmv {
                 __m128 xA,xB;
                 do {
                     Maybe<unit1>::sse_load(
-                        xA,A.getP(),A1.getP(),A2.getP(),A3.getP());
+                        xA,A.get(),A1.get(),A2.get(),A3.get());
                     A+=4; A1+=4; A2+=4; A3+=4;
                     xB = _mm_mul_ps(xx,xA);
                     Maybe2<add,unit2>::sse_addu(
-                        B.getP(),B1.getP(),_mm_unpacklo_ps(xB,xzero));
+                        B.get(),B1.get(),_mm_unpacklo_ps(xB,xzero));
                     Maybe2<add,unit2>::sse_addu(
-                        B2.getP(),B3.getP(),_mm_unpackhi_ps(xB,xzero));
+                        B2.get(),B3.get(),_mm_unpackhi_ps(xB,xzero));
                     B+=4; B1+=4; B2+=4; B3+=4;
                 } while (--n_4);
             }
@@ -429,17 +429,17 @@ namespace tmv {
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B)
         {
-            const bool unit1 = V1::vstep == 1;
-            const bool unit2 = V2::vstep == 1;
-            const bool c1 = V1::vconj;
+            const bool unit1 = V1::_step == 1;
+            const bool unit2 = V2::_step == 1;
+            const bool c1 = V1::_conj;
 
             if (unit2) {
-                while (n && (((unsigned int)(B.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(B.get()) & 0xf) != 0) ) {
                     Maybe<add>::add(*B++ , ZProd<false,c1>::prod(x , *A++)); 
                     --n;
                 }
             } else if (unit1) {
-                while (n && (((unsigned int)(A.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
                     Maybe<add>::add(*B++ , ZProd<false,c1>::prod(x , *A++)); 
                     --n;
                 }
@@ -457,10 +457,10 @@ namespace tmv {
                 __m128 xx = _mm_set_ps(mx, float(x), mx, float(x));
                 __m128 xA,xB;
                 do {
-                    Maybe2<!unit2,unit1>::sse_load(xA,A.getP(),A1.getP());
+                    Maybe2<!unit2,unit1>::sse_load(xA,A.get(),A1.get());
                     A+=2; A1+=2;
                     xB = _mm_mul_ps(xx,xA); 
-                    Maybe2<add,unit2>::sse_add(B.getP(),B1.getP(),xB);
+                    Maybe2<add,unit2>::sse_add(B.get(),B1.get(),xB);
                     B+=2; B1+=2;
                 } while (--n_2);
             }
@@ -484,11 +484,11 @@ namespace tmv {
         {
             TMVStaticAssert(ix == 0);
             TMVStaticAssert((Traits2<T,std::complex<float> >::sametype));
-            const bool unit1 = V1::vstep == 1;
-            const bool unit2 = V2::vstep == 1;
+            const bool unit1 = V1::_step == 1;
+            const bool unit2 = V2::_step == 1;
 
             if (unit1) {
-                while (n && (((unsigned int)(A.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
                     Maybe<add>::add(*B++ , ZProd<false,false>::prod(x , *A++)); 
                     --n;
                 }
@@ -512,14 +512,14 @@ namespace tmv {
                 __m128 xA,xBr,xBi,xAinv;
                 do {
                     Maybe<unit1>::sse_load(
-                        xA,A.getP(),A1.getP(),A2.getP(),A3.getP());
+                        xA,A.get(),A1.get(),A2.get(),A3.get());
                     A+=4; A1+=4; A2+=4; A3+=4;
                     xBr = _mm_mul_ps(xr,xA);
                     xBi = _mm_mul_ps(xi,xA);
                     Maybe2<add,unit2>::sse_addu(
-                        B.getP(),B1.getP(),_mm_unpacklo_ps(xBr,xBi));
+                        B.get(),B1.get(),_mm_unpacklo_ps(xBr,xBi));
                     Maybe2<add,unit2>::sse_addu(
-                        B2.getP(),B3.getP(),_mm_unpackhi_ps(xBr,xBi));
+                        B2.get(),B3.get(),_mm_unpackhi_ps(xBr,xBi));
                     B+=4; B1+=4; B2+=4; B3+=4;
                 } while (--n_4);
             }
@@ -545,17 +545,17 @@ namespace tmv {
         {
             TMVStaticAssert(ix == 0);
             TMVStaticAssert((Traits2<T,std::complex<float> >::sametype));
-            const bool unit1 = V1::vstep == 1;
-            const bool unit2 = V2::vstep == 1;
-            const bool c1 = V1::vconj;
+            const bool unit1 = V1::_step == 1;
+            const bool unit2 = V2::_step == 1;
+            const bool c1 = V1::_conj;
 
             if (unit2) {
-                while (n && (((unsigned int)(B.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(B.get()) & 0xf) != 0) ) {
                     Maybe<add>::add(*B++ , ZProd<false,c1>::prod(x , *A++)); 
                     --n;
                 }
             } else if (unit1) {
-                while (n && (((unsigned int)(A.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
                     Maybe<add>::add(*B++ , ZProd<false,c1>::prod(x , *A++)); 
                     --n;
                 }
@@ -580,13 +580,13 @@ namespace tmv {
                 __m128 xA,xB;
                 __m128 xnorm, x0, x1, x2, x3, x4, x5; // temp values
                 do {
-                    Maybe2<!unit2,unit1>::sse_load(xA,A.getP(),A1.getP());
+                    Maybe2<!unit2,unit1>::sse_load(xA,A.get(),A1.get());
                     A+=2; A1+=2;
                     x0 = _mm_shuffle_ps(xA,xA,_MM_SHUFFLE(2,3,0,1));
                     x1 = _mm_mul_ps(xxr,xA);
                     x2 = _mm_mul_ps(xxi,x0);
                     xB = _mm_add_ps(x1,x2);
-                    Maybe2<add,unit2>::sse_add(B.getP(),B1.getP(),xB);
+                    Maybe2<add,unit2>::sse_add(B.get(),B1.get(),xB);
                     B+=2; B1+=2;
                 } while (--n_2);
             }
@@ -610,16 +610,16 @@ namespace tmv {
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B)
         {
-            const bool unit1 = V1::vstep == 1;
-            const bool unit2 = V2::vstep == 1;
+            const bool unit1 = V1::_step == 1;
+            const bool unit2 = V2::_step == 1;
 
             if (unit2) {
-                while (n && (((unsigned int)(B.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(B.get()) & 0xf) != 0) ) {
                     Maybe<add>::add(*B++ , x * *A++);
                     --n;
                 }
             } else if (unit1) {
-                while (n && (((unsigned int)(A.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
                     Maybe<add>::add(*B++ , x * *A++);
                     --n;
                 }
@@ -635,10 +635,10 @@ namespace tmv {
                 __m128d xx = _mm_set1_pd(double(x));
                 __m128d xA,xB;
                 do {
-                    Maybe2<!unit2,unit1>::sse_load(xA,A.getP(),A1.getP());
+                    Maybe2<!unit2,unit1>::sse_load(xA,A.get(),A1.get());
                     A+=2; A1+=2;
                     xB = _mm_mul_pd(xx,xA);
-                    Maybe2<add,unit2>::sse_add(B.getP(),B1.getP(),xB);
+                    Maybe2<add,unit2>::sse_add(B.get(),B1.get(),xB);
                     B+=2; B1+=2;
                 } while (--n_2);
             }
@@ -660,11 +660,11 @@ namespace tmv {
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B)
         {
-            const bool unit1 = V1::vstep == 1;
-            const bool unit2 = V2::vstep == 1;
+            const bool unit1 = V1::_step == 1;
+            const bool unit2 = V2::_step == 1;
 
             if (unit1) {
-                while (n && (((unsigned int)(A.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
                     Maybe<add>::add(*B++ , x * *A++);
                     --n;
                 }
@@ -681,11 +681,11 @@ namespace tmv {
                 __m128d xzero = _mm_set1_pd(0.);
                 __m128d xA,xB;
                 do {
-                    Maybe<unit1>::sse_load(xA,A.getP(),A1.getP());
+                    Maybe<unit1>::sse_load(xA,A.get(),A1.get());
                     A+=2; A1+=2;
                     xB = _mm_mul_pd(xx,xA);
-                    Maybe<unit2>::sse_addu(B.getP(),_mm_unpacklo_pd(xB,xzero));
-                    Maybe<unit2>::sse_addu(B1.getP(),_mm_unpackhi_pd(xB,xzero));
+                    Maybe<unit2>::sse_addu(B.get(),_mm_unpacklo_pd(xB,xzero));
+                    Maybe<unit2>::sse_addu(B1.get(),_mm_unpackhi_pd(xB,xzero));
                     B+=2; B1+=2;
                 } while (--n_2);
             }
@@ -707,20 +707,20 @@ namespace tmv {
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B)
         {
-            const bool c1 = V1::vconj;
+            const bool c1 = V1::_conj;
             if (n) {
                 __m128d xA,xB;
-                if (((unsigned int)(A.getP()) & 0xf) == 0) {
+                if (((unsigned int)(A.get()) & 0xf) == 0) {
                     do {
-                        Maybe<true>::sse_load(xA,A.getP()); ++A;
+                        Maybe<true>::sse_load(xA,A.get()); ++A;
                         xB = _mm_mul_pd(xx,xA); 
-                        Maybe2<add,true>::sse_add(B.getP(),xB); ++B;
+                        Maybe2<add,true>::sse_add(B.get(),xB); ++B;
                     } while (--n);
                 } else {
                     do {
-                        Maybe<true>::sse_loadu(xA,A.getP()); ++A;
+                        Maybe<true>::sse_loadu(xA,A.get()); ++A;
                         xB = _mm_mul_pd(xx,xA); 
-                        Maybe2<add,true>::sse_addu(B.getP(),xB); ++B;
+                        Maybe2<add,true>::sse_addu(B.get(),xB); ++B;
                     } while (--n);
                 }
             }
@@ -742,10 +742,10 @@ namespace tmv {
         {
             TMVStaticAssert(ix == 0);
             TMVStaticAssert((Traits2<T,std::complex<double> >::sametype));
-            const bool unit1 = V1::vstep == 1;
+            const bool unit1 = V1::_step == 1;
 
             if (unit1) {
-                while (n && (((unsigned int)(A.getP()) & 0xf) != 0) ) {
+                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
                     Maybe<add>::add(*B++ , ZProd<false,false>::prod(x , *A++)); 
                     --n;
                 }
@@ -762,12 +762,12 @@ namespace tmv {
                 __m128d xi = _mm_set1_pd(imag(x.x));
                 __m128d xA,xBr,xBi,xAinv;
                 do {
-                    Maybe<unit1>::sse_load(xA,A.getP(),A1.getP());
+                    Maybe<unit1>::sse_load(xA,A.get(),A1.get());
                     A+=2; A1+=2;
                     xBr = _mm_mul_pd(xr,xA);
                     xBi = _mm_mul_pd(xi,xA);
-                    Maybe2<add,true>::sse_add(B.getP(),_mm_unpacklo_pd(xBr,xBi));
-                    Maybe2<add,true>::sse_add(B1.getP(),_mm_unpackhi_pd(xBr,xBi));
+                    Maybe2<add,true>::sse_add(B.get(),_mm_unpacklo_pd(xBr,xBi));
+                    Maybe2<add,true>::sse_add(B1.get(),_mm_unpackhi_pd(xBr,xBi));
                     B+=2; B1+=2;
                 } while (--n_2);
             }
@@ -791,7 +791,7 @@ namespace tmv {
         {
             TMVStaticAssert(ix == 0);
             TMVStaticAssert((Traits2<T,std::complex<double> >::sametype));
-            const bool c1 = V1::vconj;
+            const bool c1 = V1::_conj;
             if (n) {
                 double xr = real(x.x);
                 double mxr = Maybe<c1>::select(-xr,xr);
@@ -805,12 +805,12 @@ namespace tmv {
                 __m128d xA,xB;
                 __m128d xnorm, x0, x1, x2, x3, x4, x5; // temp values
                 do {
-                    Maybe<true>::sse_load(xA,A.getP()); ++A;
+                    Maybe<true>::sse_load(xA,A.get()); ++A;
                     x0 = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(0,1));
                     x1 = _mm_mul_pd(xxr,xA);
                     x2 = _mm_mul_pd(xxi,x0);
                     xB = _mm_add_pd(x1,x2);
-                    Maybe2<add,true>::sse_add(B.getP(),xB); ++B;
+                    Maybe2<add,true>::sse_add(B.get(),xB); ++B;
                 } while (--n);
             }
         }
@@ -828,21 +828,21 @@ namespace tmv {
         typedef typename V2::real_type RT2;
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::iterator IT2;
-        enum { unit = V1::vstep == 1 || V2::vstep == 1 };
-        enum { allunit = V1::vstep == 1 && V2::vstep == 1 };
+        enum { unit = V1::_step == 1 || V2::_step == 1 };
+        enum { allunit = V1::_step == 1 && V2::_step == 1 };
         enum { allfloat = 
             Traits2<RT1,float>::sametype && Traits2<RT2,float>::sametype };
         enum { alldouble = 
             Traits2<RT1,double>::sametype && Traits2<RT2,double>::sametype };
         enum { xreal = Traits<T>::isreal };
         enum { xcomplex = Traits<T>::iscomplex };
-        enum { v1real = V1::visreal };
-        enum { v2real = V2::visreal };
-        enum { v1complex = V1::viscomplex };
-        enum { v2complex = V2::viscomplex };
+        enum { v1real = V1::isreal };
+        enum { v2real = V2::isreal };
+        enum { v1complex = V1::iscomplex };
+        enum { v2complex = V2::iscomplex };
         enum { allcomplex = v1complex && v2complex };
         enum { flatten = 
-                xreal && allunit && allcomplex && V1::vconj==int(V2::vconj) };
+                xreal && allunit && allcomplex && V1::_conj==int(V2::_conj) };
         enum { algo = (
                 size == 0 ? 0 : 
                 ( ix == 1 && !add ) ? 1 :
@@ -871,7 +871,7 @@ namespace tmv {
                 11 ) };
         static inline void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
         { 
-            TMVStaticAssert(!V2::vconj);
+            TMVStaticAssert(!V2::_conj);
 #ifdef PRINTALGO_XV
             std::cout<<"InlineMultXV: x = "<<ix<<"  "<<T(x)<<std::endl;
             std::cout<<"v1 = "<<TMV_Text(v1)<<std::endl;
@@ -885,7 +885,7 @@ namespace tmv {
             const int n, const Scaling<ix,T>& x,
             const IT1& it1, const IT2& it2)
         { 
-            TMVStaticAssert(!V2::vconj);
+            TMVStaticAssert(!V2::_conj);
 #ifdef PRINTALGO_XV
             std::cout<<"InlineMultXV: x = "<<ix<<"  "<<T(x)<<std::endl;
             std::cout<<"size = "<<size<<" = "<<n<<std::endl;
@@ -946,19 +946,18 @@ namespace tmv {
             typedef typename V1::value_type T1;
             typedef typename V2::value_type T2;
             const bool inst = 
-                V1::vsize == UNKNOWN &&
-                V2::vsize == UNKNOWN &&
+                V1::unknownsizes &&
+                V2::unknownsizes &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
                 Traits2<T1,T2>::sametype &&
 #endif
                 Traits<T1>::isinst;
-            const bool conj = V2::vconj;
             const int algo = 
                 size == 0 ? 0 : 
                 ( ix == 1 && !add ) ? 1 :
-                conj ? 97 :
+                V2::_conj ? 97 :
                 inst ? 98 :
                 -4;
             MultXV_Helper<algo,size,add,ix,T,V1,V2>::call(x,v1,v2);
@@ -1007,8 +1006,8 @@ namespace tmv {
         {
             const bool noclobber = VStepHelper<V1,V2>::noclobber;
             const bool checkalias =
-                V1::vsize == UNKNOWN &&
-                V2::vsize == UNKNOWN &&
+                V1::_size == UNKNOWN &&
+                V2::_size == UNKNOWN &&
                 !noclobber;
             const int algo = 
                 size == 0 ? 0 : 
@@ -1024,9 +1023,9 @@ namespace tmv {
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         BaseVector_Mutable<V2>& v2)
     {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
         TMVAssert(v1.size() == v2.size());
-        const int size = Sizes<V1::vsize,V2::vsize>::size;
+        const int size = Sizes<V1::_size,V2::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::cview_type V2v;
         V1v v1v = v1.cView();

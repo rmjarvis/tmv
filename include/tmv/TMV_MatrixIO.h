@@ -82,11 +82,10 @@ namespace tmv {
     {
         typedef typename M::value_type T;
         const int inst = 
-                Traits<T>::isinst &&
-                Shape(M::mshape) == Rec &&
-                (M::mrowmajor || M::mcolmajor) &&
-                M::mcolsize == UNKNOWN &&
-                M::mrowsize == UNKNOWN;
+            M::unknownsizes &&
+            Shape(M::_shape) == Rec &&
+            (M::_rowmajor || M::_colmajor) &&
+            Traits<T>::isinst;
         CallWriteM<inst,M>::call(os,m.mat());
     }
 
@@ -142,11 +141,10 @@ namespace tmv {
     {
         typedef typename M::value_type T;
         const int inst = 
-                Traits<T>::isinst &&
-                Shape(M::mshape) == Rec &&
-                (M::mrowmajor || M::mcolmajor) &&
-                M::mcolsize == UNKNOWN &&
-                M::mrowsize == UNKNOWN;
+            M::unknownsizes &&
+            Shape(M::_shape) == Rec &&
+            (M::_rowmajor || M::_colmajor) &&
+            Traits<T>::isinst;
         CallWriteMThresh<inst,M>::call(os,m.mat(),thresh);
     }
 
@@ -303,10 +301,9 @@ namespace tmv {
     {
         typedef typename M::value_type T;
         const int inst = 
-            Traits<T>::isinst &&
-            (M::mrowmajor || M::mcolmajor) &&
-            M::mcolsize == UNKNOWN &&
-            M::mrowsize == UNKNOWN;
+            M::unknownsizes &&
+            (M::_rowmajor || M::_colmajor) &&
+            Traits<T>::isinst;
         CallReadM<inst,M>::call(is,m.mat());
     }
 

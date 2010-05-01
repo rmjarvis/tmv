@@ -119,13 +119,13 @@ namespace tmv {
     struct Traits<ProdXV<ix,T,V> >
     {
         typedef typename Traits2<T,typename V::value_type>::type value_type;
-        enum { vsize = V::vsize };
-        enum { vfort = V::vfort };
-        enum { vcalc = false };
+        enum { _size = V::_size };
+        enum { _fort = V::_fort };
+        enum { _calc = false };
         typedef ProdXV<ix,T,V> type;
-        typedef typename VCopyHelper<value_type,vsize,vfort>::type copy_type;
+        typedef typename VCopyHelper<value_type,_size,_fort>::type copy_type;
         typedef const copy_type calc_type;
-        typedef typename TypeSelect<V::vcalc,const type,calc_type>::type 
+        typedef typename TypeSelect<V::_calc,const type,calc_type>::type 
             eval_type;
     };
 
@@ -152,18 +152,18 @@ namespace tmv {
         template <class V2>
         inline void assignTo(BaseVector_Mutable<V2>& v2) const
         {
-            TMVStaticAssert((Sizes<type::vsize,V2::vsize>::same));
+            TMVStaticAssert((Sizes<type::_size,V2::_size>::same));
             TMVAssert(size() == v2.size());
-            TMVStaticAssert(type::visreal || V2::viscomplex);
+            TMVStaticAssert(type::isreal || V2::iscomplex);
             MultXV<false>(x,v.calc(),v2.vec());
         }
 
         template <class V2>
         inline void newAssignTo(BaseVector_Mutable<V2>& v2) const
         {
-            TMVStaticAssert((Sizes<type::vsize,V2::vsize>::same));
+            TMVStaticAssert((Sizes<type::_size,V2::_size>::same));
             TMVAssert(size() == v2.size());
-            TMVStaticAssert(type::visreal || V2::viscomplex);
+            TMVStaticAssert(type::isreal || V2::iscomplex);
             NoAliasMultXV<false>(x,v.calc(),v2.vec());
         }
 

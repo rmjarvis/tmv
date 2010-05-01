@@ -122,7 +122,7 @@ namespace tmv {
             const int algo = 
 #if TMV_OPT >= 1
                 size != UNKNOWN && size <= 32 ? 5 :
-                V::viscomplex ? 2 :
+                V::iscomplex ? 2 :
 #endif
                 1;
             ReverseV_Helper<algo,size,V>::call(v);
@@ -158,10 +158,10 @@ namespace tmv {
             typedef typename V::value_type T;
             const bool inst =
                 Traits<T>::isinst &&
-                V::vsize == UNKNOWN;
-            const bool conj = V::vconj;
+                V::_size == UNKNOWN;
             const int algo = 
-                inst ? (conj ? 97 : 98) :
+                V::_conj ? 97 :
+                inst ? 98 :
                 -3;
             ReverseV_Helper<algo,size,V>::call(v);
         }
@@ -170,7 +170,7 @@ namespace tmv {
     template <class V>
     inline void ReverseSelf(BaseVector_Mutable<V>& v)
     {
-        const int size = V::vsize;
+        const int size = V::_size;
         typedef typename V::cview_type Vv;
         Vv vv = v.cView();
         ReverseV_Helper<-1,size,Vv>::call(vv);
@@ -179,7 +179,7 @@ namespace tmv {
     template <class V>
     inline void InlineReverseSelf(BaseVector_Mutable<V>& v)
     {
-        const int size = V::vsize;
+        const int size = V::_size;
         typedef typename V::cview_type Vv;
         Vv vv = v.cView();
         ReverseV_Helper<-3,size,Vv>::call(vv);

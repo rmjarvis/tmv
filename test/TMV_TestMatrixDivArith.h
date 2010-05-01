@@ -65,12 +65,6 @@ template <class T> struct ProdType<T,std::complex<T> >
 
 #define ProductType(T1,T2) typename ProdType<T1,T2>::Tprod
 
-#ifdef NOVIEWS
-#define CONST
-#else
-#define CONST const
-#endif
-
 #ifdef NOMIX
 #define VEC(T,v) (tmv::Vector<T>(v))
 #define VEC2(T1,T2,v) (tmv::Vector<ProductType(T1,T2)>(v))
@@ -113,6 +107,12 @@ static void DoTestLDivVM1a(
         RealType(T) x(5);
         ComplexType(T) z(3,4);
         Assert(Norm(VEC2(T,Tb,x*a/b)-x*frac) <= x*eps,label+" x*a/b");
+        if (XXDEBUG1) {
+            std::cout<<"z*a/b = "<<VEC(ComplexType(T),z*a/b)<<std::endl;
+            std::cout<<"z*frac = "<<z*frac<<std::endl;
+            std::cout<<"Norm(diff) = "<<Norm(VEC(ComplexType(T),z*a/b)-z*frac)
+                <<" x*eps = "<<x*eps<<std::endl;
+        }
         Assert(Norm(VEC(ComplexType(T),z*a/b)-z*frac) <= x*eps,label+" z*a/b");
 #if (XTEST & 16)
         Assert(Norm(VEC2(T,Tb,b.inverse()*a)-frac) <= eps,label+" b^-1*a");
@@ -261,7 +261,7 @@ template <class T> inline void SetZ(std::complex<T>& z)
 #ifndef NOLDIVEQ
 template <class T, class Tb, class V, class MM> 
 static void DoTestLDivVM2a(
-    tmv::DivType dt, CONST V& a, const MM& b, std::string label)
+    tmv::DivType dt, V& a, const MM& b, std::string label)
 {
     if (showstartdone) std::cout<<"Start LDiv VM2b: "<<label<<std::endl;
 
@@ -309,11 +309,12 @@ static void DoTestLDivVM2a(
 
 template <class T, class Tb, class V, class MM> 
 static void DoTestLDivVM2R(
-    tmv::DivType dt, CONST V& a, const MM& b, std::string label)
+    tmv::DivType dt, V& a, const MM& b, std::string label)
 {
     DoTestLDivVM2a<T,Tb>(dt,a,b,label);
 #ifndef NOVIEWS
-    DoTestLDivVM2a<T,Tb>(dt,a.reverse(),b,label+" RevA");
+    typename V::reverse_type ar = a.reverse();
+    DoTestLDivVM2a<T,Tb>(dt,ar,b,label+" RevA");
 #endif
 
 #if (XTEST & 16)
@@ -341,12 +342,14 @@ static void DoTestLDivVM2R(
 
 template <class T, class Tb, class V, class MM> 
 static void DoTestLDivVM2C(
-    tmv::DivType dt, CONST V& a, const MM& b, std::string label)
+    tmv::DivType dt, V& a, const MM& b, std::string label)
 {
     DoTestLDivVM2a<T,Tb>(dt,a,b,label);
 #ifndef NOVIEWS
-    DoTestLDivVM2a<T,Tb>(dt,a.reverse(),b,label+" RevA");
-    DoTestLDivVM2a<T,Tb>(dt,a.conjugate(),b,label+" ConjA");
+    typename V::reverse_type ar = a.reverse();
+    typename V::conjugate_type ac = a.conjugate();
+    DoTestLDivVM2a<T,Tb>(dt,ar,b,label+" RevA");
+    DoTestLDivVM2a<T,Tb>(dt,ac,b,label+" ConjA");
 #endif
 
 #if (XTEST & 16)
@@ -376,7 +379,7 @@ static void DoTestLDivVM2C(
 #ifndef NORDIVEQ
 template <class T, class Tb, class V, class MM> 
 static void DoTestRDivVM2a(
-    tmv::DivType dt, CONST V& a, const MM& b, std::string label)
+    tmv::DivType dt, V& a, const MM& b, std::string label)
 {
     if (showstartdone) std::cout<<"Start RDiv VM2a: "<<label<<std::endl;
 
@@ -427,11 +430,12 @@ static void DoTestRDivVM2a(
 
 template <class T, class Tb, class V, class MM> 
 static void DoTestRDivVM2R(
-    tmv::DivType dt, CONST V& a, const MM& b, std::string label)
+    tmv::DivType dt, V& a, const MM& b, std::string label)
 {
     DoTestRDivVM2a<T,Tb>(dt,a,b,label);
 #ifndef NOVIEWS
-    DoTestRDivVM2a<T,Tb>(dt,a.reverse(),b,label+" RevA");
+    typename V::reverse_type ar = a.reverse();
+    DoTestRDivVM2a<T,Tb>(dt,ar,b,label+" RevA");
 #endif
 
 #if (XTEST & 16)
@@ -459,12 +463,14 @@ static void DoTestRDivVM2R(
 
 template <class T, class Tb, class V, class MM> 
 static void DoTestRDivVM2C(
-    tmv::DivType dt, CONST V& a, const MM& b, std::string label)
+    tmv::DivType dt, V& a, const MM& b, std::string label)
 {
     DoTestRDivVM2a<T,Tb>(dt,a,b,label);
 #ifndef NOVIEWS
-    DoTestRDivVM2a<T,Tb>(dt,a.reverse(),b,label+" RevA");
-    DoTestRDivVM2a<T,Tb>(dt,a.conjugate(),b,label+" ConjA");
+    typename V::reverse_type ar = a.reverse();
+    typename V::conjugate_type ac = a.conjugate();
+    DoTestRDivVM2a<T,Tb>(dt,ar,b,label+" RevA");
+    DoTestRDivVM2a<T,Tb>(dt,ac,b,label+" ConjA");
 #endif
 
 #if (XTEST & 16)
@@ -493,7 +499,7 @@ static void DoTestRDivVM2C(
 
 template <class Ta, class Tb, class T, class V1, class MM, class V2>
 static void DoTestLDivVM3a(
-    tmv::DivType dt, const V1& a, const MM& b, CONST V2& c, std::string label)
+    tmv::DivType dt, const V1& a, const MM& b, V2& c, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start LDiv VM3a"<<label<<std::endl;
@@ -550,7 +556,7 @@ static void DoTestLDivVM3a(
 
 template <class Ta, class Tb, class T, class V1, class MM, class V2>
 static void DoTestRDivVM3a(
-    tmv::DivType dt, const V1& a, const MM& b, CONST V2& c, std::string label)
+    tmv::DivType dt, const V1& a, const MM& b, V2& c, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start RDiv VM3a"<<label<<std::endl;
@@ -607,7 +613,7 @@ static void DoTestRDivVM3a(
 
 template <class Ta, class Tb, class T, class V1, class MM, class V2>
 static void DoTestLDivVM3RR(
-    tmv::DivType dt, const V1& a, const MM& b, CONST V2& c, std::string label)
+    tmv::DivType dt, const V1& a, const MM& b, V2& c, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start LDiv VM3"<<label<<std::endl;
@@ -618,9 +624,10 @@ static void DoTestLDivVM3RR(
 
     DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
+    typename V2::reverse_type cr = c.reverse();
     DoTestLDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,c,label+" RevA");
-    DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,c.reverse(),label+" RevC");
-    DoTestLDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,c.reverse(),label+" RevAC");
+    DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,cr,label+" RevC");
+    DoTestLDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,cr,label+" RevAC");
 #endif
 
     if (showstartdone) std::cout<<"Done LDiv VM3"<<std::endl;
@@ -628,7 +635,7 @@ static void DoTestLDivVM3RR(
 
 template <class Ta, class Tb, class T, class V1, class MM, class V2>
 static void DoTestLDivVM3RC(
-    tmv::DivType dt, const V1& a, const MM& b, CONST V2& c, std::string label)
+    tmv::DivType dt, const V1& a, const MM& b, V2& c, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start LDiv VM3"<<label<<std::endl;
@@ -639,12 +646,14 @@ static void DoTestLDivVM3RC(
 
     DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
+    typename V2::reverse_type cr = c.reverse();
     DoTestLDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,c,label+" RevA");
-    DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,c.reverse(),label+" RevC");
-    DoTestLDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,c.reverse(),label+" RevAC");
+    DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,cr,label+" RevC");
+    DoTestLDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,cr,label+" RevAC");
 
 #if (XTEST & 2)
-    DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,Conjugate(c),label+" ConjC");
+    typename M3::conjugate_type cc = c.conjugate();
+    DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,cc,label+" ConjC");
 #endif
 #endif
 
@@ -653,7 +662,7 @@ static void DoTestLDivVM3RC(
 
 template <class Ta, class Tb, class T, class V1, class MM, class V2>
 static void DoTestLDivVM3CR(
-    tmv::DivType dt, const V1& a, const MM& b, CONST V2& c, std::string label)
+    tmv::DivType dt, const V1& a, const MM& b, V2& c, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start LDiv VM3"<<label<<std::endl;
@@ -664,9 +673,10 @@ static void DoTestLDivVM3CR(
 
     DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
+    typename V2::reverse_type cr = c.reverse();
     DoTestLDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,c,label+" RevA");
-    DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,c.reverse(),label+" RevC");
-    DoTestLDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,c.reverse(),label+" RevAC");
+    DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,cr,label+" RevC");
+    DoTestLDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,cr,label+" RevAC");
 
 #if (XTEST & 2)
     DoTestLDivVM3a<Ta,Tb,T>(dt,Conjugate(a),b,c,label+" ConjA");
@@ -678,7 +688,7 @@ static void DoTestLDivVM3CR(
 
 template <class Ta, class Tb, class T, class V1, class MM, class V2>
 static void DoTestLDivVM3CC(
-    tmv::DivType dt, const V1& a, const MM& b, CONST V2& c, std::string label)
+    tmv::DivType dt, const V1& a, const MM& b, V2& c, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start LDiv VM3"<<label<<std::endl;
@@ -689,14 +699,16 @@ static void DoTestLDivVM3CC(
 
     DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
+    typename V2::reverse_type cr = c.reverse();
     DoTestLDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,c,label+" RevA");
-    DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,c.reverse(),label+" RevC");
-    DoTestLDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,c.reverse(),label+" RevAC");
+    DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,cr,label+" RevC");
+    DoTestLDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,cr,label+" RevAC");
 
 #if (XTEST & 2)
+    typename V2::conjugate_type cr = c.conjugate();
     DoTestLDivVM3a<Ta,Tb,T>(dt,Conjugate(a),b,c,label+" ConjA");
-    DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,Conjugate(c),label+" ConjC");
-    DoTestLDivVM3a<Ta,Tb,T>(dt,Conjugate(a),b,Conjugate(c),label+" ConjAC");
+    DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,cc,label+" ConjC");
+    DoTestLDivVM3a<Ta,Tb,T>(dt,Conjugate(a),b,cc,label+" ConjAC");
 #endif
 #endif
 
@@ -705,7 +717,7 @@ static void DoTestLDivVM3CC(
 
 template <class Ta, class Tb, class T, class V1, class MM, class V2>
 static void DoTestRDivVM3RR(
-    tmv::DivType dt, const V1& a, const MM& b, CONST V2& c, std::string label)
+    tmv::DivType dt, const V1& a, const MM& b, V2& c, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start RDiv VM3"<<label<<std::endl;
@@ -716,9 +728,10 @@ static void DoTestRDivVM3RR(
 
     DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
+    typename V2::reverse_type cr = c.reverse();
     DoTestRDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,c,label+" RevA");
-    DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,c.reverse(),label+" RevC");
-    DoTestRDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,c.reverse(),label+" RevAC");
+    DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,cr,label+" RevC");
+    DoTestRDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,cr,label+" RevAC");
 #endif
 
     if (showstartdone) std::cout<<"Done RDiv VM3"<<std::endl;
@@ -726,7 +739,7 @@ static void DoTestRDivVM3RR(
 
 template <class Ta, class Tb, class T, class V1, class MM, class V2>
 static void DoTestRDivVM3RC(
-    tmv::DivType dt, const V1& a, const MM& b, CONST V2& c, std::string label)
+    tmv::DivType dt, const V1& a, const MM& b, V2& c, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start RDiv VM3"<<label<<std::endl;
@@ -737,12 +750,14 @@ static void DoTestRDivVM3RC(
 
     DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
+    typename V2::reverse_type cr = c.reverse();
     DoTestRDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,c,label+" RevA");
-    DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,c.reverse(),label+" RevC");
-    DoTestRDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,c.reverse(),label+" RevAC");
+    DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,cr,label+" RevC");
+    DoTestRDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,cr,label+" RevAC");
 
 #if (XTEST & 2)
-    DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,Conjugate(c),label+" ConjC");
+    typename V2::conjugate_type cr = c.conjugate();
+    DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,cc,label+" ConjC");
 #endif
 #endif
 
@@ -751,7 +766,7 @@ static void DoTestRDivVM3RC(
 
 template <class Ta, class Tb, class T, class V1, class MM, class V2>
 static void DoTestRDivVM3CR(
-    tmv::DivType dt, const V1& a, const MM& b, CONST V2& c, std::string label)
+    tmv::DivType dt, const V1& a, const MM& b, V2& c, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start RDiv VM3"<<label<<std::endl;
@@ -762,9 +777,10 @@ static void DoTestRDivVM3CR(
 
     DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
+    typename V2::reverse_type cr = c.reverse();
     DoTestRDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,c,label+" RevA");
-    DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,c.reverse(),label+" RevC");
-    DoTestRDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,c.reverse(),label+" RevAC");
+    DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,cr,label+" RevC");
+    DoTestRDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,cr,label+" RevAC");
 
 #if (XTEST & 2)
     DoTestRDivVM3a<Ta,Tb,T>(dt,Conjugate(a),b,c,label+" ConjA");
@@ -776,7 +792,7 @@ static void DoTestRDivVM3CR(
 
 template <class Ta, class Tb, class T, class V1, class MM, class V2>
 static void DoTestRDivVM3CC(
-    tmv::DivType dt, const V1& a, const MM& b, CONST V2& c, std::string label)
+    tmv::DivType dt, const V1& a, const MM& b, V2& c, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start RDiv VM3"<<label<<std::endl;
@@ -787,14 +803,16 @@ static void DoTestRDivVM3CC(
 
     DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
+    typename V2::reverse_type cr = c.reverse();
     DoTestRDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,c,label+" RevA");
-    DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,c.reverse(),label+" RevC");
-    DoTestRDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,c.reverse(),label+" RevAC");
+    DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,cr,label+" RevC");
+    DoTestRDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,cr,label+" RevAC");
 
 #if (XTEST & 2)
+    typename V2::conjugate_type cr = c.conjugate();
     DoTestRDivVM3a<Ta,Tb,T>(dt,Conjugate(a),b,c,label+" ConjA");
-    DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,Conjugate(c),label+" ConjC");
-    DoTestRDivVM3a<Ta,Tb,T>(dt,Conjugate(a),b,Conjugate(c),label+" ConjAC");
+    DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,cc,label+" ConjC");
+    DoTestRDivVM3a<Ta,Tb,T>(dt,Conjugate(a),b,cc,label+" ConjAC");
 #endif
 #endif
 
@@ -833,6 +851,12 @@ static void DoTestLDivMM1a(
         RealType(T) x(5);
         ComplexType(T) z(3,4);
         Assert(Norm(MAT2(T,Tb,x*a/b)-x*frac) <= x*eps,label+" x*a/b");
+        if (XXDEBUG5) {
+            std::cout<<"z*a/b = "<<VEC(ComplexType(T),z*a/b)<<std::endl;
+            std::cout<<"z*frac = "<<z*frac<<std::endl;
+            std::cout<<"Norm(diff) = "<<Norm(VEC(ComplexType(T),z*a/b)-z*frac)
+                <<" x*eps = "<<x*eps<<std::endl;
+        }
         Assert(Norm(MAT(ComplexType(T),z*a/b)-z*frac) <= x*eps,label+" z*a/b");
 #if (XTEST & 16)
         Assert(Norm(MAT2(T,Tb,b.inverse()*a)-frac) <= eps,label+" b^-1*a");
@@ -982,7 +1006,7 @@ static void DoTestRDivMM1C(
 #ifndef NOLDIVEQ
 template <class T, class Tb, class M0, class M1, class M2> 
 static void DoTestLDivMM2a(
-    tmv::DivType dt, M0& a0, CONST M1& a, const M2& b, std::string label)
+    tmv::DivType dt, M0& a0, M1& a, const M2& b, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start LDiv MM2b: "<<label<<std::endl;
@@ -1035,18 +1059,19 @@ static void DoTestLDivMM2a(
 
 template <class T, class Tb, class M0, class M1, class M2> 
 static void DoTestLDivMM2R(
-    tmv::DivType dt, M0& a0, CONST M1& a, const M2& b, std::string label)
+    tmv::DivType dt, M0& a0, M1& a, const M2& b, std::string label)
 {
     DoTestLDivMM2a<T,Tb>(dt,a0,a,b,label);
 }
 
 template <class T, class Tb, class M0, class M1, class M2> 
 static void DoTestLDivMM2C(
-    tmv::DivType dt, M0& a0, CONST M1& a, const M2& b, std::string label)
+    tmv::DivType dt, M0& a0, M1& a, const M2& b, std::string label)
 {
     DoTestLDivMM2a<T,Tb>(dt,a0,a,b,label);
 #ifndef NOVIEWS
-    DoTestLDivMM2a<T,Tb>(dt,a0,a.conjugate(),b,label+" ConjA");
+    typename M1::conjugate_type ac = a.conjugate();
+    DoTestLDivMM2a<T,Tb>(dt,a0,ac,b,label+" ConjA");
 #endif
 }
 #endif
@@ -1054,7 +1079,7 @@ static void DoTestLDivMM2C(
 #ifndef NORDIVEQ
 template <class T, class Tb, class M0, class M1, class M2> 
 static void DoTestRDivMM2a(
-    tmv::DivType dt, M0& a0, CONST M1& a, const M2& b, std::string label)
+    tmv::DivType dt, M0& a0, M1& a, const M2& b, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start RDiv MM2a: "<<label<<std::endl;
@@ -1110,25 +1135,26 @@ static void DoTestRDivMM2a(
 
 template <class T, class Tb, class M0, class M1, class M2> 
 static void DoTestRDivMM2R(
-    tmv::DivType dt, M0& a0, CONST M1& a, const M2& b, std::string label)
+    tmv::DivType dt, M0& a0, M1& a, const M2& b, std::string label)
 {
     DoTestRDivMM2a<T,Tb>(dt,a0,a,b,label);
 }
 
 template <class T, class Tb, class M0, class M1, class M2> 
 static void DoTestRDivMM2C(
-    tmv::DivType dt, M0& a0, CONST M1& a, const M2& b, std::string label)
+    tmv::DivType dt, M0& a0, M1& a, const M2& b, std::string label)
 {
     DoTestRDivMM2a<T,Tb>(dt,a0,a,b,label);
 #ifndef NOVIEWS
-    DoTestRDivMM2a<T,Tb>(dt,a0,a.conjugate(),b,label+" ConjA");
+    typename M1::conjugate_type ac = a.conjugate();
+    DoTestRDivMM2a<T,Tb>(dt,a0,ac,b,label+" ConjA");
 #endif
 }
 #endif
 
 template <class Ta, class Tb, class T, class M1, class M2, class M3>
 static void DoTestLDivMM3a(
-    tmv::DivType dt, const M1& a, const M2& b, CONST M3& c, std::string label)
+    tmv::DivType dt, const M1& a, const M2& b, M3& c, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start LDiv MM3a"<<label<<std::endl;
@@ -1185,7 +1211,7 @@ static void DoTestLDivMM3a(
 
 template <class Ta, class Tb, class T, class M1, class M2, class M3>
 static void DoTestRDivMM3a(
-    tmv::DivType dt, const M1& a, const M2& b, CONST M3& c, std::string label)
+    tmv::DivType dt, const M1& a, const M2& b, M3& c, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start RDiv MM3a"<<label<<std::endl;
@@ -1247,7 +1273,7 @@ static void DoTestRDivMM3a(
 
 template <class Ta, class Tb, class T, class M1, class M2, class M3>
 static void DoTestLDivMM3RR(
-    tmv::DivType dt, const M1& a, const M2& b, CONST M3& c, std::string label)
+    tmv::DivType dt, const M1& a, const M2& b, M3& c, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start LDiv MM3"<<label<<std::endl;
@@ -1258,12 +1284,13 @@ static void DoTestLDivMM3RR(
 
     DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
+    typename M3::transpose_type ct = c.transpose();
     if (a.isSquare())
         DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,c,label+" TranA");
     if (c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,Transpose(c),label+" TranC");
+        DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,ct,label+" TranC");
     if (a.isSquare() && c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,Transpose(c),label+" TranAC");
+        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,ct,label+" TranAC");
 #endif
 
     if (showstartdone) std::cout<<"Done LDiv MM3"<<std::endl;
@@ -1271,7 +1298,7 @@ static void DoTestLDivMM3RR(
 
 template <class Ta, class Tb, class T, class M1, class M2, class M3>
 static void DoTestLDivMM3RC(
-    tmv::DivType dt, const M1& a, const M2& b, CONST M3& c, std::string label)
+    tmv::DivType dt, const M1& a, const M2& b, M3& c, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start LDiv MM3"<<label<<std::endl;
@@ -1282,23 +1309,24 @@ static void DoTestLDivMM3RC(
 
     DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
+    typename M3::transpose_type ct = c.transpose();
     if (a.isSquare())
         DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,c,label+" TranA");
     if (c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,Transpose(c),label+" TranC");
+        DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,ct,label+" TranC");
     if (a.isSquare() && c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,Transpose(c),label+" TranAC");
+        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,ct,label+" TranAC");
 
 #if (XTEST & 2)
-    DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,Conjugate(c),label+" ConjC");
+    typename M3::conjugate_type cc = c.conjugate();
+    typename M3::adjoint_type ca = c.adjoint();
+    DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,cc,label+" ConjC");
     if (c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,Adjoint(c),label+" AdjC");
+        DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,ca,label+" AdjC");
     if (a.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,Conjugate(c),
-                                label+" TranA ConjC");
+        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,cc,label+" TranA ConjC");
     if (a.isSquare() && c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,Adjoint(c),
-                                label+" TranA AdjC");
+        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,ca,label+" TranA AdjC");
 #endif
 #endif
 
@@ -1307,7 +1335,7 @@ static void DoTestLDivMM3RC(
 
 template <class Ta, class Tb, class T, class M1, class M2, class M3>
 static void DoTestLDivMM3CR(
-    tmv::DivType dt, const M1& a, const M2& b, CONST M3& c, std::string label)
+    tmv::DivType dt, const M1& a, const M2& b, M3& c, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start LDiv MM3"<<label<<std::endl;
@@ -1318,23 +1346,22 @@ static void DoTestLDivMM3CR(
 
     DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
+    typename M3::transpose_type ct = c.transpose();
     if (a.isSquare())
         DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,c,label+" TranA");
     if (c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,Transpose(c),label+" TranC");
+        DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,ct,label+" TranC");
     if (a.isSquare() && c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,Transpose(c),label+" TranAC");
+        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,ct,label+" TranAC");
 
 #if (XTEST & 2)
     DoTestLDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,c,label+" ConjA");
     if (c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,Transpose(c),
-                                label+" ConjA TranC");
+        DoTestLDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,ct,label+" ConjA TranC");
     if (a.isSquare())
         DoTestLDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,c,label+" AdjA");
     if (a.isSquare() && c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,Transpose(c),
-                                label+" AdjA TranC");
+        DoTestLDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,ct,label+" AdjA TranC");
 #endif
 #endif
 
@@ -1343,7 +1370,7 @@ static void DoTestLDivMM3CR(
 
 template <class Ta, class Tb, class T, class M1, class M2, class M3>
 static void DoTestLDivMM3CC(
-    tmv::DivType dt, const M1& a, const M2& b, CONST M3& c, std::string label)
+    tmv::DivType dt, const M1& a, const M2& b, M3& c, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start LDiv MM3"<<label<<std::endl;
@@ -1354,43 +1381,38 @@ static void DoTestLDivMM3CC(
 
     DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
+    typename M3::transpose_type ct = c.transpose();
     if (a.isSquare())
         DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,c,label+" TranA");
     if (c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,Transpose(c),label+" TranC");
+        DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,ct,label+" TranC");
     if (a.isSquare() && c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,Transpose(c),label+" TranAC");
+        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,ct,label+" TranAC");
 
 #if (XTEST & 2)
+    typename M3::conjugate_type cc = c.conjugate();
+    typename M3::adjoint_type ca = c.adjoint();
     DoTestLDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,c,label+" ConjA");
     if (c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,Transpose(c),
-                                label+" ConjA TranC");
+        DoTestLDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,ct,label+" ConjA TranC");
     if (a.isSquare())
         DoTestLDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,c,label+" AdjA");
     if (a.isSquare() && c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,Transpose(c),
-                                label+" AdjA TranC");
-    DoTestLDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,Conjugate(c),
-                            label+" ConjA ConjC");
+        DoTestLDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,ct,label+" AdjA TranC");
+    DoTestLDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,cc,label+" ConjA ConjC");
     if (c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,Adjoint(c),
-                                label+" ConjA AdjC");
+        DoTestLDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,ca,label+" ConjA AdjC");
     if (a.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,Conjugate(c),
-                                label+" AdjA ConjC");
+        DoTestLDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,cc,label+" AdjA ConjC");
     if (a.isSquare() && c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,Adjoint(c),
-                                label+" AdjA AdjC");
-    DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,Conjugate(c),label+" ConjC");
+        DoTestLDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,ca,label+" AdjA AdjC");
+    DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,cc,label+" ConjC");
     if (c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,Adjoint(c),label+" AdjC");
+        DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,ca,label+" AdjC");
     if (a.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,Conjugate(c),
-                                label+" TranA ConjC");
+        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,cc,label+" TranA ConjC");
     if (a.isSquare() && c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,Adjoint(c),
-                                label+" TranA AdjC");
+        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,ca,label+" TranA AdjC");
 #endif
 #endif
 
@@ -1399,7 +1421,7 @@ static void DoTestLDivMM3CC(
 
 template <class Ta, class Tb, class T, class M1, class M2, class M3>
 static void DoTestRDivMM3RR(
-    tmv::DivType dt, const M1& a, const M2& b, CONST M3& c, std::string label)
+    tmv::DivType dt, const M1& a, const M2& b, M3& c, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start RDiv MM3"<<label<<std::endl;
@@ -1410,12 +1432,13 @@ static void DoTestRDivMM3RR(
 
     DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
+    typename M3::transpose_type ct = c.transpose();
     if (a.isSquare())
         DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,c,label+" TranA");
     if (c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,Transpose(c),label+" TranC");
+        DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,ct,label+" TranC");
     if (a.isSquare() && c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,Transpose(c),label+" TranAC");
+        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,ct,label+" TranAC");
 #endif
 
     if (showstartdone) std::cout<<"Done RDiv MM3"<<std::endl;
@@ -1423,7 +1446,7 @@ static void DoTestRDivMM3RR(
 
 template <class Ta, class Tb, class T, class M1, class M2, class M3>
 static void DoTestRDivMM3RC(
-    tmv::DivType dt, const M1& a, const M2& b, CONST M3& c, std::string label)
+    tmv::DivType dt, const M1& a, const M2& b, M3& c, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start RDiv MM3"<<label<<std::endl;
@@ -1434,23 +1457,24 @@ static void DoTestRDivMM3RC(
 
     DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
+    typename M3::transpose_type ct = c.transpose();
     if (a.isSquare())
         DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,c,label+" TranA");
     if (c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,Transpose(c),label+" TranC");
+        DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,ct,label+" TranC");
     if (a.isSquare() && c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,Transpose(c),label+" TranAC");
+        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,ct,label+" TranAC");
 
 #if (XTEST & 2)
-    DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,Conjugate(c),label+" ConjC");
+    typename M3::conjugate_type cc = c.conjugate();
+    typename M3::adjoint_type ca = c.adjoint();
+    DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,cc,label+" ConjC");
     if (c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,Adjoint(c),label+" AdjC");
+        DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,ca,label+" AdjC");
     if (a.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,Conjugate(c),
-                                label+" TranA ConjC");
+        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,cc,label+" TranA ConjC");
     if (a.isSquare() && c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,Adjoint(c),
-                                label+" TranA AdjC");
+        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,ca,label+" TranA AdjC");
 #endif
 #endif
 
@@ -1459,7 +1483,7 @@ static void DoTestRDivMM3RC(
 
 template <class Ta, class Tb, class T, class M1, class M2, class M3>
 static void DoTestRDivMM3CR(
-    tmv::DivType dt, const M1& a, const M2& b, CONST M3& c, std::string label)
+    tmv::DivType dt, const M1& a, const M2& b, M3& c, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start RDiv MM3"<<label<<std::endl;
@@ -1470,23 +1494,22 @@ static void DoTestRDivMM3CR(
 
     DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
+    typename M3::transpose_type ct = c.transpose();
     if (a.isSquare())
         DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,c,label+" TranA");
     if (c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,Transpose(c),label+" TranC");
+        DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,ct,label+" TranC");
     if (a.isSquare() && c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,Transpose(c),label+" TranAC");
+        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,ct,label+" TranAC");
 
 #if (XTEST & 2)
     DoTestRDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,c,label+" ConjA");
     if (c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,Transpose(c),
-                                label+" ConjA TranC");
+        DoTestRDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,ct,label+" ConjA TranC");
     if (a.isSquare())
         DoTestRDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,c,label+" AdjA");
     if (a.isSquare() && c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,Transpose(c),
-                                label+" AdjA TranC");
+        DoTestRDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,ct,label+" AdjA TranC");
 #endif
 #endif
 
@@ -1495,7 +1518,7 @@ static void DoTestRDivMM3CR(
 
 template <class Ta, class Tb, class T, class M1, class M2, class M3>
 static void DoTestRDivMM3CC(
-    tmv::DivType dt, const M1& a, const M2& b, CONST M3& c, std::string label)
+    tmv::DivType dt, const M1& a, const M2& b, M3& c, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start RDiv MM3"<<label<<std::endl;
@@ -1506,43 +1529,38 @@ static void DoTestRDivMM3CC(
 
     DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
+    typename M3::transpose_type ct = c.transpose();
     if (a.isSquare())
         DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,c,label+" TranA");
     if (c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,Transpose(c),label+" TranC");
+        DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,ct,label+" TranC");
     if (a.isSquare() && c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,Transpose(c),label+" TranAC");
+        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,ct,label+" TranAC");
 
 #if (XTEST & 2)
+    typename M3::conjugate_type cc = c.conjugate();
+    typename M3::adjoint_type ca = c.adjoint();
     DoTestRDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,c,label+" ConjA");
     if (c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,Transpose(c),
-                                label+" ConjA TranC");
+        DoTestRDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,ct,label+" ConjA TranC");
     if (a.isSquare())
         DoTestRDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,c,label+" AdjA");
     if (a.isSquare() && c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,Transpose(c),
-                                label+" AdjA TranC");
-    DoTestRDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,Conjugate(c),
-                            label+" ConjA ConjC");
+        DoTestRDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,ct,label+" AdjA TranC");
+    DoTestRDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,cc,label+" ConjA ConjC");
     if (c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,Adjoint(c),
-                                label+" ConjA AdjC");
+        DoTestRDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,ca,label+" ConjA AdjC");
     if (a.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,Conjugate(c),
-                                label+" AdjA ConjC");
+        DoTestRDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,cc,label+" AdjA ConjC");
     if (a.isSquare() && c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,Adjoint(c),
-                                label+" AdjA AdjC");
-    DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,Conjugate(c),label+" ConjC");
+        DoTestRDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,ca,label+" AdjA AdjC");
+    DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,cc,label+" ConjC");
     if (c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,Adjoint(c),label+" AdjC");
+        DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,ca,label+" AdjC");
     if (a.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,Conjugate(c),
-                                label+" TranA ConjC");
+        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,cc,label+" TranA ConjC");
     if (a.isSquare() && c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,Adjoint(c),
-                                label+" TranA AdjC");
+        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,ca,label+" TranA AdjC");
 #endif
 #endif
 
@@ -1628,8 +1646,8 @@ static void DoTestDivMX(
 
 template <class T, class SM0, class CSM0, class SM1, class SM2, class CSM1, class CSM2> 
 static void TestMatrixDivArith1(
-    tmv::DivType dt, SM0& b0, CSM0& cb0, const SM1& a, const SM2& b,
-    const CSM1& ca, const CSM2& cb, std::string label)
+    tmv::DivType dt, SM0& b0, CSM0& cb0, const SM1& a, SM2& b,
+    const CSM1& ca, CSM2& cb, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start Test Div 1: "<<label<<std::endl;
@@ -1640,11 +1658,6 @@ static void TestMatrixDivArith1(
         std::cout<<"b0 = "<<tmv::TMV_Text(b0)<<"  "<<b0<<std::endl;
         std::cout<<"cb0 = "<<tmv::TMV_Text(cb0)<<"  "<<cb0<<std::endl;
     }
-
-    a.divideUsing(dt);
-    ca.divideUsing(dt);
-    a.saveDiv();
-    ca.saveDiv();
 
     tmv::Matrix<CT> cc(a.rowsize(),b.rowsize());
     tmv::Matrix<CT> cd(b.colsize(),a.colsize());
@@ -1662,40 +1675,39 @@ static void TestMatrixDivArith1(
     DoTestRDivMM1C<CT,CT>(dt,cb,ca,label+" C,C");
 
 #ifndef NOLDIVEQ
-    DoTestLDivMM2R<T,T>(dt,b0,b.view(),a,label+" R,R");
+    DoTestLDivMM2R<T,T>(dt,b0,b,a,label+" R,R");
 #if (XTEST & 4)
-    DoTestLDivMM2C<CT,T>(dt,cb0,cb.view(),a,label+" C,R");
+    DoTestLDivMM2C<CT,T>(dt,cb0,cb,a,label+" C,R");
 #endif
-    DoTestLDivMM2C<CT,CT>(dt,cb0,cb.view(),ca,label+" C,C");
+    DoTestLDivMM2C<CT,CT>(dt,cb0,cb,ca,label+" C,C");
 #endif
 
 #ifndef NORDIVEQ
-    DoTestRDivMM2R<T,T>(dt,b0,b.view(),a,label+" R,R");
+    DoTestRDivMM2R<T,T>(dt,b0,b,a,label+" R,R");
 #if (XTEST & 4)
-    DoTestRDivMM2C<CT,T>(dt,cb0,cb.view(),a,label+" C,R");
+    DoTestRDivMM2C<CT,T>(dt,cb0,cb,a,label+" C,R");
 #endif
-    DoTestRDivMM2C<CT,CT>(dt,cb0,cb.view(),ca,label+" C,C");
+    DoTestRDivMM2C<CT,CT>(dt,cb0,cb,ca,label+" C,C");
 #endif
 
-    DoTestLDivMM3RR<T,T,T>(dt,b,a,c.view(),label+" R,R,R");
-    DoTestRDivMM3RR<T,T,T>(dt,b,a,d.view(),label+" R,R,R");
+    DoTestLDivMM3RR<T,T,T>(dt,b,a,c,label+" R,R,R");
+    DoTestRDivMM3RR<T,T,T>(dt,b,a,d,label+" R,R,R");
 #if (XTEST & 4)
-    DoTestLDivMM3RC<T,T,CT>(dt,b,a,cc.view(),label+" R,R,C");
-    DoTestRDivMM3RC<T,T,CT>(dt,b,a,cd.view(),label+" R,R,C");
-    DoTestLDivMM3RC<T,CT,CT>(dt,b,ca,cc.view(),label+" R,C,C");
-    DoTestRDivMM3RC<T,CT,CT>(dt,b,ca,cd.view(),label+" R,C,C");
-    DoTestLDivMM3CC<CT,T,CT>(dt,cb,a,cc.view(),label+" C,R,C");
-    DoTestRDivMM3CC<CT,T,CT>(dt,cb,a,cd.view(),label+" C,R,C");
+    DoTestLDivMM3RC<T,T,CT>(dt,b,a,cc,label+" R,R,C");
+    DoTestRDivMM3RC<T,T,CT>(dt,b,a,cd,label+" R,R,C");
+    DoTestLDivMM3RC<T,CT,CT>(dt,b,ca,cc,label+" R,C,C");
+    DoTestRDivMM3RC<T,CT,CT>(dt,b,ca,cd,label+" R,C,C");
+    DoTestLDivMM3CC<CT,T,CT>(dt,cb,a,cc,label+" C,R,C");
+    DoTestRDivMM3CC<CT,T,CT>(dt,cb,a,cd,label+" C,R,C");
 #endif
-    DoTestLDivMM3CC<CT,CT,CT>(dt,cb,ca,cc.view(),label+" C,C,C");
-    DoTestRDivMM3CC<CT,CT,CT>(dt,cb,ca,cd.view(),label+" C,C,C");
+    DoTestLDivMM3CC<CT,CT,CT>(dt,cb,ca,cc,label+" C,C,C");
+    DoTestRDivMM3CC<CT,CT,CT>(dt,cb,ca,cd,label+" C,C,C");
 }
 
 template <class T, class SM0, class CSM0, class SM1, class SM2, class CSM1, class CSM2> 
 static void TestMatrixDivArith2(
     tmv::DivType dt, SM0& b0, CSM0& cb0,
-    const SM1& a, const SM2& b,
-    const CSM1& ca, const CSM2& cb, std::string label)
+    const SM1& a, SM2& b, const CSM1& ca, CSM2& cb, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start Test Div 2: "<<label<<std::endl;
@@ -1706,11 +1718,6 @@ static void TestMatrixDivArith2(
         std::cout<<"b0 = "<<tmv::TMV_Text(b0)<<"  "<<b0<<std::endl;
         std::cout<<"cb0 = "<<tmv::TMV_Text(cb0)<<"  "<<cb0<<std::endl;
     }
-
-    a.divideUsing(dt);
-    ca.divideUsing(dt);
-    a.saveDiv();
-    ca.saveDiv();
 
     DoTestDivMX<T>(dt,a,label+" R");
     DoTestDivMX<CT>(dt,ca,label+" C");
@@ -1738,54 +1745,68 @@ static void TestMatrixDivArith2(
         w.setAllTo(1);
         cw.setAllTo(CT(1,2));
     }
-    tmv::Vector<CT> cx(a.rowsize());
-    tmv::Vector<CT> cy(a.colsize());
     tmv::Vector<T> x(a.rowsize());
     tmv::Vector<T> y(a.colsize());
-    DoTestLDivVM1R<T,T>(dt,v,a,label+" R,R");
-    DoTestRDivVM1R<T,T>(dt,w,a,label+" R,R");
+    tmv::Vector<CT> cx(a.rowsize());
+    tmv::Vector<CT> cy(a.colsize());
+    tmv::VectorView<T> vv = v.view();
+    tmv::VectorView<CT> cvv = cv.view();
+    tmv::VectorView<T> wv = w.view();
+    tmv::VectorView<CT> cwv = cw.view();
+    tmv::VectorView<T> xv = x.view();
+    tmv::VectorView<CT> cxv = cx.view();
+    tmv::VectorView<T> yv = y.view();
+    tmv::VectorView<CT> cyv = cy.view();
+
+    DoTestLDivVM1R<T,T>(dt,vv,a,label+" R,R");
+    DoTestRDivVM1R<T,T>(dt,wv,a,label+" R,R");
 #if (XTEST & 4)
-    DoTestLDivVM1R<T,CT>(dt,v,ca,label+" R,C");
-    DoTestRDivVM1R<T,CT>(dt,w,ca,label+" R,C");
-    DoTestLDivVM1C<CT,T>(dt,cv,a,label+" C,R");
-    DoTestRDivVM1C<CT,T>(dt,cw,a,label+" C,R");
+    DoTestLDivVM1R<T,CT>(dt,vv,ca,label+" R,C");
+    DoTestRDivVM1R<T,CT>(dt,wv,ca,label+" R,C");
+    DoTestLDivVM1C<CT,T>(dt,cvv,a,label+" C,R");
+    DoTestRDivVM1C<CT,T>(dt,cwv,a,label+" C,R");
 #endif
-    DoTestLDivVM1C<CT,CT>(dt,cv,ca,label+" C,C");
-    DoTestRDivVM1C<CT,CT>(dt,cw,ca,label+" C,C");
+    DoTestLDivVM1C<CT,CT>(dt,cvv,ca,label+" C,C");
+    DoTestRDivVM1C<CT,CT>(dt,cwv,ca,label+" C,C");
 
 #ifndef NOLDIVEQ
-    DoTestLDivVM2R<T,T>(dt,v.view(),a,label+" R,R");
+    DoTestLDivVM2R<T,T>(dt,vv,a,label+" R,R");
 #if (XTEST & 4)
-    DoTestLDivVM2C<CT,T>(dt,cv.view(),a,label+" C,R");
+    DoTestLDivVM2C<CT,T>(dt,cvv,a,label+" C,R");
 #endif
-    DoTestLDivVM2C<CT,CT>(dt,cv.view(),ca,label+" C,C");
+    DoTestLDivVM2C<CT,CT>(dt,cvv,ca,label+" C,C");
 #endif
 
 #ifndef NORDIVEQ
-    DoTestRDivVM2R<T,T>(dt,w.view(),a,label+" R,R");
+    DoTestRDivVM2R<T,T>(dt,wv,a,label+" R,R");
 #if (XTEST & 4)
-    DoTestRDivVM2C<CT,T>(dt,cw.view(),a,label+" C,R");
+    DoTestRDivVM2C<CT,T>(dt,cwv,a,label+" C,R");
 #endif
-    DoTestRDivVM2C<CT,CT>(dt,cw.view(),ca,label+" C,C");
+    DoTestRDivVM2C<CT,CT>(dt,cwv,ca,label+" C,C");
 #endif
 
-    DoTestLDivVM3RR<T,T,T>(dt,v,a,x.view(),label+" R,R,R");
-    DoTestRDivVM3RR<T,T,T>(dt,w,a,y.view(),label+" R,R,R");
+    DoTestLDivVM3RR<T,T,T>(dt,vv,a,xv,label+" R,R,R");
+    DoTestRDivVM3RR<T,T,T>(dt,wv,a,yv,label+" R,R,R");
 #if (XTEST & 4)
-    DoTestLDivVM3RC<T,T,CT>(dt,v,a,cx.view(),label+" R,R,C");
-    DoTestRDivVM3RC<T,T,CT>(dt,w,a,cy.view(),label+" R,R,C");
-    DoTestLDivVM3RC<T,CT,CT>(dt,v,ca,cx.view(),label+" R,C,C");
-    DoTestRDivVM3RC<T,CT,CT>(dt,w,ca,cy.view(),label+" R,C,C");
-    DoTestLDivVM3CC<CT,T,CT>(dt,cv,a,cx.view(),label+" C,R,C");
-    DoTestRDivVM3CC<CT,T,CT>(dt,cw,a,cy.view(),label+" C,R,C");
+    DoTestLDivVM3RC<T,T,CT>(dt,vv,a,cxv,label+" R,R,C");
+    DoTestRDivVM3RC<T,T,CT>(dt,wv,a,cyv,label+" R,R,C");
+    DoTestLDivVM3RC<T,CT,CT>(dt,vv,ca,cxv,label+" R,C,C");
+    DoTestRDivVM3RC<T,CT,CT>(dt,wv,ca,cyv,label+" R,C,C");
+    DoTestLDivVM3CC<CT,T,CT>(dt,cvv,a,cxv,label+" C,R,C");
+    DoTestRDivVM3CC<CT,T,CT>(dt,cwv,a,cyv,label+" C,R,C");
 #endif
-    DoTestLDivVM3CC<CT,CT,CT>(dt,cv,ca,cx.view(),label+" C,C,C");
-    DoTestRDivVM3CC<CT,CT,CT>(dt,cw,ca,cy.view(),label+" C,C,C");
+    DoTestLDivVM3CC<CT,CT,CT>(dt,cvv,ca,cxv,label+" C,C,C");
+    DoTestRDivVM3CC<CT,CT,CT>(dt,cwv,ca,cyv,label+" C,C,C");
 
     tmv::Matrix<CT> cc(a.rowsize(),b.rowsize());
     tmv::Matrix<CT> cd(b.colsize(),a.colsize());
     tmv::Matrix<T> c(a.rowsize(),b.rowsize());
     tmv::Matrix<T> d(b.colsize(),a.colsize());
+    tmv::MatrixView<T> cV = c.view(); // cV, since cv is already taken.
+    tmv::MatrixView<CT> ccv = cc.view();
+    tmv::MatrixView<T> dv = d.view();
+    tmv::MatrixView<CT> cdv = cd.view();
+
     DoTestLDivMM1R<T,T>(dt,b,a,label+" R,R");
     DoTestRDivMM1R<T,T>(dt,b,a,label+" R,R");
 #if (XTEST & 4)
@@ -1798,33 +1819,33 @@ static void TestMatrixDivArith2(
     DoTestRDivMM1C<CT,CT>(dt,cb,ca,label+" C,C");
 
 #ifndef NOLDIVEQ
-    DoTestLDivMM2R<T,T>(dt,b0,b.view(),a,label+" R,R");
+    DoTestLDivMM2R<T,T>(dt,b0,b,a,label+" R,R");
 #if (XTEST & 4)
-    DoTestLDivMM2C<CT,T>(dt,cb0,cb.view(),a,label+" C,R");
+    DoTestLDivMM2C<CT,T>(dt,cb0,cb,a,label+" C,R");
 #endif
-    DoTestLDivMM2C<CT,CT>(dt,cb0,cb.view(),ca,label+" C,C");
+    DoTestLDivMM2C<CT,CT>(dt,cb0,cb,ca,label+" C,C");
 #endif
 
 #ifndef NORDIVEQ
-    DoTestRDivMM2R<T,T>(dt,b0,b.view(),a,label+" R,R");
+    DoTestRDivMM2R<T,T>(dt,b0,b,a,label+" R,R");
 #if (XTEST & 4)
-    DoTestRDivMM2C<CT,T>(dt,cb0,cb.view(),a,label+" C,R");
+    DoTestRDivMM2C<CT,T>(dt,cb0,cb,a,label+" C,R");
 #endif
-    DoTestRDivMM2C<CT,CT>(dt,cb0,cb.view(),ca,label+" C,C");
+    DoTestRDivMM2C<CT,CT>(dt,cb0,cb,ca,label+" C,C");
 #endif
 
-    DoTestLDivMM3RR<T,T,T>(dt,b,a,c.view(),label+" R,R,R");
-    DoTestRDivMM3RR<T,T,T>(dt,b,a,d.view(),label+" R,R,R");
+    DoTestLDivMM3RR<T,T,T>(dt,b,a,cV,label+" R,R,R");
+    DoTestRDivMM3RR<T,T,T>(dt,b,a,dv,label+" R,R,R");
 #if (XTEST & 4)
-    DoTestLDivMM3RC<T,T,CT>(dt,b,a,cc.view(),label+" R,R,C");
-    DoTestRDivMM3RC<T,T,CT>(dt,b,a,cd.view(),label+" R,R,C");
-    DoTestLDivMM3RC<T,CT,CT>(dt,b,ca,cc.view(),label+" R,C,C");
-    DoTestRDivMM3RC<T,CT,CT>(dt,b,ca,cd.view(),label+" R,C,C");
-    DoTestLDivMM3CC<CT,T,CT>(dt,cb,a,cc.view(),label+" C,R,C");
-    DoTestRDivMM3CC<CT,T,CT>(dt,cb,a,cd.view(),label+" C,R,C");
+    DoTestLDivMM3RC<T,T,CT>(dt,b,a,ccv,label+" R,R,C");
+    DoTestRDivMM3RC<T,T,CT>(dt,b,a,cdv,label+" R,R,C");
+    DoTestLDivMM3RC<T,CT,CT>(dt,b,ca,ccv,label+" R,C,C");
+    DoTestRDivMM3RC<T,CT,CT>(dt,b,ca,cdv,label+" R,C,C");
+    DoTestLDivMM3CC<CT,T,CT>(dt,cb,a,ccv,label+" C,R,C");
+    DoTestRDivMM3CC<CT,T,CT>(dt,cb,a,cdv,label+" C,R,C");
 #endif
-    DoTestLDivMM3CC<CT,CT,CT>(dt,cb,ca,cc.view(),label+" C,C,C");
-    DoTestRDivMM3CC<CT,CT,CT>(dt,cb,ca,cd.view(),label+" C,C,C");
+    DoTestLDivMM3CC<CT,CT,CT>(dt,cb,ca,ccv,label+" C,C,C");
+    DoTestRDivMM3CC<CT,CT,CT>(dt,cb,ca,cdv,label+" C,C,C");
 }
 
 template <class T, class SM1, class CSM1> 
@@ -1843,8 +1864,7 @@ static void TestMatrixDivArith3a(
 
 template <class T, class SM0, class CSM0, class SM1, class SM2, class SM3, class CSM1, class CSM2, class CSM3> 
 static void TestMatrixDivArith3b(
-    tmv::DivType dt, SM0& b0, CSM0& cb0,
-    const SM1& a, SM2& b, SM3& c, 
+    tmv::DivType dt, SM0& b0, CSM0& cb0, const SM1& a, SM2& b, SM3& c, 
     const CSM1& ca, CSM2& cb, CSM3& cc, std::string label)
 {
     if (showstartdone) {
@@ -1885,8 +1905,7 @@ static void TestMatrixDivArith3b(
 
 template <class T, class SM0, class CSM0, class SM1, class SM2, class SM3, class CSM1, class CSM2, class CSM3> 
 static void TestMatrixDivArith3c(
-    tmv::DivType dt, SM0& b0, CSM0& cb0,
-    const SM1& a, SM2& b, SM3& c, 
+    tmv::DivType dt, SM0& b0, CSM0& cb0, const SM1& a, SM2& b, SM3& c, 
     const CSM1& ca, CSM2& cb, CSM3& cc, std::string label)
 {
     if (showstartdone) {
