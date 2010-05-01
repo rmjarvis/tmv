@@ -46,9 +46,6 @@ namespace tmv {
     template <bool add, class M1, class M2, class M3>
     static void DoMultMD(const M1& m1, const M2& m2, M3& m3)
     {
-        TMVAssert(m1.isrm() || m1.iscm());
-        TMVAssert(m3.isrm() || m3.iscm());
-        TMVStaticAssert(M2::mdiagstep == 1);
         typedef typename M3::real_type RT;
         Scaling<1,RT> one;
         if (m3.iscm()) {

@@ -50,67 +50,6 @@ namespace tmv {
     // Matrix (/%) Matrix
     //
 
-    // These are intentionally not defined to make sure we
-    // get a compiler error if they are used.
-    // All real calls should go through a more specific version than 
-    // just the BaseMatrix_Calc's.
-#if 0
-    template <int ix, class T, class M1, class M2, class M3>
-    inline void LDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
-        const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3);
-    template <int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasLDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
-        const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3);
-    template <int ix, class T, class M1, class M2, class M3>
-    inline void InlineLDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
-        const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3);
-    template <int ix, class T, class M1, class M2, class M3>
-    inline void AliasLDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
-        const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3);
-
-    template <int ix, class T, class M1, class M2, class M3>
-    inline void RDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
-        const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3);
-    template <int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasRDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
-        const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3);
-    template <int ix, class T, class M1, class M2, class M3>
-    inline void InlineRDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
-        const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3);
-    template <int ix, class T, class M1, class M2, class M3>
-    inline void AliasRDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
-        const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3);
-
-    template <class M1, class M2>
-    inline void LDivEq(
-        BaseMatrix_Mutable<M1>& m1, const BaseMatrix_Calc<M2>& m2);
-    template <class M1, class M2>
-    inline void NoAliasLDivEq(
-        BaseMatrix_Mutable<M1>& m1, const BaseMatrix_Calc<M2>& m2);
-    template <class M1, class M2>
-    inline void AliasLDivEq(
-        BaseMatrix_Mutable<M1>& m1, const BaseMatrix_Calc<M2>& m2);
-
-    template <class M1, class M2>
-    inline void RDivEq(
-        BaseMatrix_Mutable<M1>& m1, const BaseMatrix_Calc<M2>& m2);
-    template <class M1, class M2>
-    inline void NoAliasRDivEq(
-        BaseMatrix_Mutable<M1>& m1, const BaseMatrix_Calc<M2>& m2);
-    template <class M1, class M2>
-    inline void AliasRDivEq(
-        BaseMatrix_Mutable<M1>& m1, const BaseMatrix_Calc<M2>& m2);
-#endif
-
-
 #ifdef XDEBUG_QUOTMM
     template <int ix, class T, class M1, class M2, class M3>
     inline void LDiv_Debug(
@@ -235,23 +174,23 @@ namespace tmv {
         typedef typename M2::value_type mtype2;
         typedef typename Traits2<mtype1,mtype2>::type value_type;
 
-        enum { mcolsize = M2::mrowsize };
-        enum { mrowsize = M1::mrowsize };
-        enum { mfort = M1::mfort && M2::mfort };
-        enum { mcalc = false };
-        enum { mshape1 = Traits<QuotXM<ix,T,M2> >::mshape };
-        enum { mshape = ShapeTraits2<mshape1,M2::mshape>::prod };
+        enum { _colsize = M2::_rowsize };
+        enum { _rowsize = M1::_rowsize };
+        enum { _fort = M1::_fort && M2::_fort };
+        enum { _calc = false };
+        enum { _shape1 = Traits<QuotXM<ix,T,M2> >::_shape };
+        enum { _shape = ShapeTraits2<_shape1,M1::_shape>::prod };
 
-        enum { rm1 = Traits<typename M1::calc_type>::mrowmajor };
-        enum { rm2 = Traits<typename M2::calc_type>::mrowmajor };
-        enum { cm1 = Traits<typename M1::calc_type>::mcolmajor };
-        enum { cm2 = Traits<typename M2::calc_type>::mcolmajor };
-        enum { mrowmajor = 
-            (rm1 && rm2) || (!cm1 && !cm2 && mrowsize > int(mcolsize)) };
+        enum { rm1 = Traits<typename M1::calc_type>::_rowmajor };
+        enum { rm2 = Traits<typename M2::calc_type>::_rowmajor };
+        enum { cm1 = Traits<typename M1::calc_type>::_colmajor };
+        enum { cm2 = Traits<typename M2::calc_type>::_colmajor };
+        enum { _rowmajor = 
+            (rm1 && rm2) || (!cm1 && !cm2 && _rowsize > int(_colsize)) };
 
         typedef QuotMM<ix,T,M1,M2> type;
-        typedef typename MCopyHelper<value_type,mshape,mcolsize,mrowsize,
-                mrowmajor,mfort>::type copy_type;
+        typedef typename MCopyHelper<value_type,_shape,_colsize,_rowsize,
+                _rowmajor,_fort>::type copy_type;
         typedef const copy_type calc_type;
         typedef const copy_type eval_type;
         typedef typename Traits<calc_type>::inverse_type inverse_type;
@@ -273,7 +212,7 @@ namespace tmv {
         ) : 
             x(_x), m1(_m1.mat()), m2(_m2.mat())
         {
-            TMVStaticAssert((Sizes<M2::mcolsize,M1::mcolsize>::same)); 
+            TMVStaticAssert((Sizes<M2::_colsize,M1::_colsize>::same)); 
             TMVAssert(m2.colsize() == m1.colsize());
         }
 
@@ -290,9 +229,9 @@ namespace tmv {
         template <class M3>
         inline void assignTo(BaseMatrix_Mutable<M3>& m3) const
         {
-            TMVStaticAssert((type::misreal || M3::miscomplex));
-            TMVStaticAssert((Sizes<type::mcolsize,M3::mcolsize>::same)); 
-            TMVStaticAssert((Sizes<type::mrowsize,M3::mrowsize>::same)); 
+            TMVStaticAssert((type::isreal || M3::iscomplex));
+            TMVStaticAssert((Sizes<type::_colsize,M3::_colsize>::same)); 
+            TMVStaticAssert((Sizes<type::_rowsize,M3::_rowsize>::same)); 
             TMVAssert(colsize() == m3.colsize());
             TMVAssert(rowsize() == m3.rowsize());
 #ifdef XDEBUG_QUOTMM
@@ -305,9 +244,9 @@ namespace tmv {
         template <class M3>
         inline void newAssignTo(BaseMatrix_Mutable<M3>& m3) const
         {
-            TMVStaticAssert((type::misreal || M3::miscomplex));
-            TMVStaticAssert((Sizes<type::mcolsize,M3::mcolsize>::same)); 
-            TMVStaticAssert((Sizes<type::mrowsize,M3::mrowsize>::same)); 
+            TMVStaticAssert((type::isreal || M3::iscomplex));
+            TMVStaticAssert((Sizes<type::_colsize,M3::_colsize>::same)); 
+            TMVStaticAssert((Sizes<type::_rowsize,M3::_rowsize>::same)); 
             TMVAssert(colsize() == m3.colsize());
             TMVAssert(rowsize() == m3.rowsize());
 #ifdef XDEBUG_QUOTMM
@@ -333,23 +272,23 @@ namespace tmv {
         typedef typename M2::value_type mtype2;
         typedef typename Traits2<mtype1,mtype2>::type value_type;
 
-        enum { mcolsize = M1::mcolsize };
-        enum { mrowsize = M2::mcolsize };
-        enum { mfort = M1::mfort && M2::mfort };
-        enum { mcalc = false };
-        enum { mshape1 = Traits<QuotXM<ix,T,M2> >::mshape };
-        enum { mshape = ShapeTraits2<M2::mshape,mshape1>::prod };
+        enum { _colsize = M1::_colsize };
+        enum { _rowsize = M2::_colsize };
+        enum { _fort = M1::_fort && M2::_fort };
+        enum { _calc = false };
+        enum { _shape1 = Traits<QuotXM<ix,T,M2> >::_shape };
+        enum { _shape = ShapeTraits2<M1::_shape,_shape1>::prod };
 
-        enum { rm1 = Traits<typename M1::calc_type>::mrowmajor };
-        enum { rm2 = Traits<typename M2::calc_type>::mrowmajor };
-        enum { cm1 = Traits<typename M1::calc_type>::mcolmajor };
-        enum { cm2 = Traits<typename M2::calc_type>::mcolmajor };
-        enum { mrowmajor = 
-            (rm1 && rm2) || (!cm1 && !cm2 && mrowsize > int(mcolsize)) };
+        enum { rm1 = Traits<typename M1::calc_type>::_rowmajor };
+        enum { rm2 = Traits<typename M2::calc_type>::_rowmajor };
+        enum { cm1 = Traits<typename M1::calc_type>::_colmajor };
+        enum { cm2 = Traits<typename M2::calc_type>::_colmajor };
+        enum { _rowmajor = 
+            (rm1 && rm2) || (!cm1 && !cm2 && _rowsize > int(_colsize)) };
 
         typedef RQuotMM<ix,T,M1,M2> type;
-        typedef typename MCopyHelper<value_type,mshape,mcolsize,mrowsize,
-                mrowmajor,mfort>::type copy_type;
+        typedef typename MCopyHelper<value_type,_shape,_colsize,_rowsize,
+                _rowmajor,_fort>::type copy_type;
         typedef const copy_type calc_type;
         typedef const copy_type eval_type;
         typedef typename Traits<calc_type>::inverse_type inverse_type;
@@ -371,7 +310,7 @@ namespace tmv {
         ) : 
             x(_x), m1(_m1.mat()), m2(_m2.mat())
         {
-            TMVStaticAssert((Sizes<M1::mrowsize,M2::mrowsize>::same)); 
+            TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same)); 
             TMVAssert(m1.rowsize() == m2.rowsize());
         }
 
@@ -388,9 +327,9 @@ namespace tmv {
         template <class M3>
         inline void assignTo(BaseMatrix_Mutable<M3>& m3) const
         {
-            TMVStaticAssert((type::misreal || M3::miscomplex));
-            TMVStaticAssert((Sizes<type::mcolsize,M3::mcolsize>::same)); 
-            TMVStaticAssert((Sizes<type::mrowsize,M3::mrowsize>::same)); 
+            TMVStaticAssert((type::isreal || M3::iscomplex));
+            TMVStaticAssert((Sizes<type::_colsize,M3::_colsize>::same)); 
+            TMVStaticAssert((Sizes<type::_rowsize,M3::_rowsize>::same)); 
             TMVAssert(colsize() == m3.colsize());
             TMVAssert(rowsize() == m3.rowsize());
 #ifdef XDEBUG_QUOTMM
@@ -403,9 +342,9 @@ namespace tmv {
         template <class M3>
         inline void newAssignTo(BaseMatrix_Mutable<M3>& m3) const
         {
-            TMVStaticAssert((type::misreal || M3::miscomplex));
-            TMVStaticAssert((Sizes<type::mcolsize,M3::mcolsize>::same)); 
-            TMVStaticAssert((Sizes<type::mrowsize,M3::mrowsize>::same)); 
+            TMVStaticAssert((type::isreal || M3::iscomplex));
+            TMVStaticAssert((Sizes<type::_colsize,M3::_colsize>::same)); 
+            TMVStaticAssert((Sizes<type::_rowsize,M3::_rowsize>::same)); 
             TMVAssert(colsize() == m3.colsize());
             TMVAssert(rowsize() == m3.rowsize());
 #ifdef XDEBUG_QUOTMM

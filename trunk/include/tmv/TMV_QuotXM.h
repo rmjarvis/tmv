@@ -72,22 +72,22 @@ namespace tmv {
     {
         typedef typename Traits2<T,typename M::value_type>::type value_type;
 
-        enum { mcolsize = M::mcolsize };
-        enum { mrowsize = M::mrowsize };
-        enum { mshape = 
+        enum { _colsize = M::_colsize };
+        enum { _rowsize = M::_rowsize };
+        enum { _shape = 
             (ix == 1) ?
-                int(M::mshape) :
-                int(ShapeTraits<M::mshape>::nonunit_shape) };
-        enum { mfort = M::mfort };
-        enum { mcalc = false };
-        enum { rm1 = Traits<typename M::calc_type>::mrowmajor };
-        enum { mrowmajor = rm1 };
+                int(M::_shape) :
+                int(ShapeTraits<M::_shape>::nonunit_shape) };
+        enum { _fort = M::_fort };
+        enum { _calc = false };
+        enum { rm1 = Traits<typename M::calc_type>::_rowmajor };
+        enum { _rowmajor = rm1 };
 
         typedef QuotXM<ix,T,M> type;
-        typedef typename MCopyHelper<value_type,mshape,mcolsize,mrowsize,
-                mrowmajor,mfort>::type copy_type;
+        typedef typename MCopyHelper<value_type,_shape,_colsize,_rowsize,
+                _rowmajor,_fort>::type copy_type;
         typedef const copy_type calc_type;
-        typedef typename TypeSelect<M::mcalc,const type,calc_type>::type 
+        typedef typename TypeSelect<M::_calc,const type,calc_type>::type 
             eval_type;
         typedef InvalidType inverse_type;
     };
@@ -118,12 +118,12 @@ namespace tmv {
         inline void assignTo(BaseMatrix_Mutable<M2>& m2) const
         {
             TMVStaticAssert((
-                    ShapeTraits2<type::mshape,M2::mshape>::assignable)); 
-            TMVStaticAssert((Sizes<type::mcolsize,M2::mcolsize>::same));
-            TMVStaticAssert((Sizes<type::mrowsize,M2::mrowsize>::same));
+                    ShapeTraits2<type::_shape,M2::_shape>::assignable)); 
+            TMVStaticAssert((Sizes<type::_colsize,M2::_colsize>::same));
+            TMVStaticAssert((Sizes<type::_rowsize,M2::_rowsize>::same));
             TMVAssert(m2.colsize() == colsize());
             TMVAssert(m2.rowsize() == rowsize());
-            TMVStaticAssert(type::misreal || M2::miscomplex);
+            TMVStaticAssert(type::isreal || M2::iscomplex);
             MakeInverse(x,m.calc(),m2.mat());
         }
 
@@ -131,12 +131,12 @@ namespace tmv {
         inline void newAssignTo(BaseMatrix_Mutable<M2>& m2) const
         {
             TMVStaticAssert((
-                    ShapeTraits2<type::mshape,M2::mshape>::assignable)); 
-            TMVStaticAssert((Sizes<type::mcolsize,M2::mcolsize>::same));
-            TMVStaticAssert((Sizes<type::mrowsize,M2::mrowsize>::same));
+                    ShapeTraits2<type::_shape,M2::_shape>::assignable)); 
+            TMVStaticAssert((Sizes<type::_colsize,M2::_colsize>::same));
+            TMVStaticAssert((Sizes<type::_rowsize,M2::_rowsize>::same));
             TMVAssert(m2.colsize() == colsize());
             TMVAssert(m2.rowsize() == rowsize());
-            TMVStaticAssert(type::misreal || M2::miscomplex);
+            TMVStaticAssert(type::isreal || M2::iscomplex);
             NoAliasMakeInverse(x,m.calc(),m2.mat());
         }
 
@@ -192,6 +192,51 @@ namespace tmv {
     inline QuotXM<ix1*ix,T,M> operator/(
         const Scaling<ix,T>& x, const ProdXM<ix,T,M>& pxm)
     { return QuotXM<ix1*ix,T,M>(T(x)/pxm.getX(),pxm.getM()); }
+
+    // x % m
+    // In this context, there is no difference between / and %
+    template <class M>
+    inline QuotXM<0,RT,M> operator%(const int x, const BaseMatrix<M>& m)
+    { return x/m; }
+
+    template <class M>
+    inline QuotXM<0,RT,M> operator%(const RT x, const BaseMatrix<M>& m)
+    { return x/m; }
+
+    template <class M>
+    inline QuotXM<0,CT,M> operator%(const CT x, const BaseMatrix<M>& m)
+    { return x/m; }
+
+    template <class M>
+    inline QuotXM<0,CT,M> operator%(const CCT x, const BaseMatrix<M>& m)
+    { return x/m; }
+
+    template <int ix, class T, class M>
+    inline QuotXM<ix,T,M> operator%(
+        const Scaling<ix,T>& x, const BaseMatrix<M>& m)
+    { return x/m; }
+
+    // x % xm
+    template <int ix, class T, class M>
+    inline QuotXM<0,T,M> operator%(const int x, const ProdXM<ix,T,M>& pxm)
+    { return x/pxm; }
+
+    template <int ix, class T, class M>
+    inline QuotXM<0,T,M> operator%(const RT x, const ProdXM<ix,T,M>& pxm)
+    { return x/pxm; }
+
+    template <int ix, class T, class M>
+    inline QuotXM<0,CT,M> operator%(const CT x, const ProdXM<ix,T,M>& pxm)
+    { return x/pxm; }
+
+    template <int ix, class T, class M>
+    inline QuotXM<0,CT,M> operator%(const CCT x, const ProdXM<ix,T,M>& pxm)
+    { return x/pxm; }
+
+    template <int ix1, class T1, int ix, class T, class M>
+    inline QuotXM<ix1*ix,T,M> operator%(
+        const Scaling<ix,T>& x, const ProdXM<ix,T,M>& pxm)
+    { return x/pxm; }
 
 #undef RT
 #undef CT

@@ -8,14 +8,9 @@ libs=['tmv']
 sblibs=['tmv_symband','tmv'] 
 
 test_basic_files = ReadFileList('test_basic.files')
-#test_basic_files = ['TMV_TestVector.cpp']
-#test_basic_files = ['TMV_TestMatrix.cpp']
-#test_basic_files = ['TMV_TestMatrixArith_8.cpp']
-#test_basic_files = ['TMV_TestMatrixArith_7.cpp','TMV_TestMatrixArith_8.cpp']
-test_diag_files = ReadFileList('test_diagx.files')
-#test_tri_files = ReadFileList('test_tri.files')
-test_tri_files = ReadFileList('test_trix.files')
-test_div_files = ReadFileList('test_div.files')
+test_diag_files = ReadFileList('test_diag.files')
+test_tri_files = ReadFileList('test_tri.files')
+test_div_files = ReadFileList('test_divx.files')
 test_band_files = ReadFileList('test_band.files')
 test_sym_files = ReadFileList('test_sym.files')
 test_symband_files = ReadFileList('test_symband.files')
@@ -128,6 +123,7 @@ env.Alias(target='test3', source=prog3)
 env.Alias(target='test1a', source=prog1a)
 env.Alias(target='test1b', source=prog1b)
 env.Alias(target='test1c', source=prog1c)
+env.Alias(target='test1d', source=prog1d)
 env.Alias(target='test2a', source=prog2a)
 env.Alias(target='test2b', source=prog2b)
 env.Alias(target='test2c', source=prog2c)
@@ -142,7 +138,7 @@ env.Alias(target='testmix', source=progmix)
 if env['SMALL_TESTS'] :
 
     env.Alias(target='test', source=[
-        'test1a','test1b','test1c','test2a','test2b','test2c',
+        'test1a','test1b','test1c','test1d','test2a','test2b','test2c',
         'test3a','test3b','test3c','test3d','test3e'])
 
 else :

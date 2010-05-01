@@ -107,14 +107,14 @@ namespace tmv {
         typedef typename V2::value_type vtype2;
         typedef typename Traits2<vtype1,vtype2>::type value_type;
 
-        enum { vsize = Sizes<V1::vsize,V2::vsize>::size };
-        enum { vfort = V1::vfort && V2::vfort };
-        enum { vcalc = false };
+        enum { _size = Sizes<V1::_size,V2::_size>::size };
+        enum { _fort = V1::_fort && V2::_fort };
+        enum { _calc = false };
 
         typedef ElemProdVV<ix,T,V1,V2> type;
-        typedef typename VCopyHelper<value_type,vsize,vfort>::type copy_type;
+        typedef typename VCopyHelper<value_type,_size,_fort>::type copy_type;
         typedef const copy_type calc_type;
-        typedef typename TypeSelect<V1::vcalc&&V2::vcalc,
+        typedef typename TypeSelect<V1::_calc&&V2::_calc,
                 const type,calc_type>::type eval_type;
     };
 
@@ -133,7 +133,7 @@ namespace tmv {
             const T _x, const BaseVector<V1>& _v1,
             const BaseVector<V2>& _v2) : x(_x), v1(_v1.vec()), v2(_v2.vec())
         {
-            TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same)); 
+            TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
             TMVAssert(v1.size() == v2.size());
         }
 
@@ -149,18 +149,18 @@ namespace tmv {
         template <class V3>
         inline void assignTo(BaseVector_Mutable<V3>& v3) const
         {
-            TMVStaticAssert((Sizes<type::vsize,V3::vsize>::same));
+            TMVStaticAssert((Sizes<type::_size,V3::_size>::same));
             TMVAssert(size() == v3.size());
-            TMVStaticAssert(type::visreal || V3::viscomplex);
+            TMVStaticAssert(type::isreal || V3::iscomplex);
             ElemMultVV<false>(x,v1.calc(),v2.calc(),v3.vec());
         }
 
         template <class V3>
         inline void newAssignTo(BaseVector_Mutable<V3>& v3) const
         {
-            TMVStaticAssert((Sizes<type::vsize,V3::vsize>::same));
+            TMVStaticAssert((Sizes<type::_size,V3::_size>::same));
             TMVAssert(size() == v3.size());
-            TMVStaticAssert(type::visreal || V3::viscomplex);
+            TMVStaticAssert(type::isreal || V3::iscomplex);
             NoAliasElemMultVV<false>(x,v1.calc(),v2.calc(),v3.vec());
         }
 
@@ -175,7 +175,7 @@ namespace tmv {
     inline ElemProdVV<1,RT,V1,V2> ElementProd(
         const BaseVector<V1>& v1, const BaseVector<V2>& v2)
     {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
         TMVAssert(v1.size() == v2.size());
         return ElemProdVV<1,RT,V1,V2>(RT(1),v1,v2);
     }

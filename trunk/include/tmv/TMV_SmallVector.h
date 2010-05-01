@@ -99,19 +99,19 @@ namespace tmv {
 
         typedef typename Traits<T>::real_type real_type;
         typedef typename Traits<T>::complex_type complex_type;
-        enum { visreal = Traits<T>::isreal };
-        enum { viscomplex = Traits<T>::iscomplex };
+        enum { isreal = Traits<T>::isreal };
+        enum { iscomplex = Traits<T>::iscomplex };
 
         typedef SmallVector<T,N,I> type;
         typedef const type& calc_type; 
         typedef const type& eval_type; 
         typedef type copy_type;
 
-        enum { vsize = N }; 
-        enum { vfort = (I == FortranStyle) };
-        enum { vcalc = true };
-        enum { vstep = 1 }; 
-        enum { vconj = false }; 
+        enum { _size = N }; 
+        enum { _fort = (I == FortranStyle) };
+        enum { _calc = true };
+        enum { _step = 1 }; 
+        enum { _conj = false }; 
 
         typedef ConstVectorView<T,1,false,I> const_subvector_type;
         typedef ConstVectorView<T,UNKNOWN,false,I> const_subvector_step_type;
@@ -121,12 +121,12 @@ namespace tmv {
             const_fview_type;
         typedef ConstVectorView<T> const_xview_type;
         typedef ConstSmallVectorView<T,N,1,false,I> const_unitview_type;
-        typedef ConstSmallVectorView<T,N,1,viscomplex,I> const_conjugate_type;
+        typedef ConstSmallVectorView<T,N,1,iscomplex,I> const_conjugate_type;
         typedef ConstSmallVectorView<T,N,-1,false,I> const_reverse_type;
-        typedef ConstSmallVectorView<real_type,N,visreal?1:2,false,I> 
+        typedef ConstSmallVectorView<real_type,N,isreal?1:2,false,I> 
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstSmallVectorView<real_type,visreal?N:N*2,1,false,I> 
+        typedef ConstSmallVectorView<real_type,isreal?N:N*2,1,false,I> 
             const_flatten_type;
         typedef ConstSmallVectorView<T,N,1,false,I> const_nonconj_type;
         typedef SmallVectorView<T,N,1,false,I> nonconst_type;
@@ -143,11 +143,11 @@ namespace tmv {
         typedef SmallVectorView<T,N,1,false,FortranStyle> fview_type;
         typedef VectorView<T> xview_type;
         typedef SmallVectorView<T,N,1,false,I> unitview_type;
-        typedef SmallVectorView<T,N,1,viscomplex,I> conjugate_type;
+        typedef SmallVectorView<T,N,1,iscomplex,I> conjugate_type;
         typedef SmallVectorView<T,N,-1,false,I> reverse_type;
-        typedef SmallVectorView<real_type,N,visreal?1:2,false,I> realpart_type;
+        typedef SmallVectorView<real_type,N,isreal?1:2,false,I> realpart_type;
         typedef realpart_type imagpart_type;
-        typedef SmallVectorView<real_type,visreal?N:N*2,1,false,I> 
+        typedef SmallVectorView<real_type,isreal?N:N*2,1,false,I> 
             flatten_type;
         typedef SmallVectorView<T,N,1,false,I> nonconj_type;
 
@@ -176,13 +176,13 @@ namespace tmv {
 
         typedef typename base_mut::iterator iterator;
 
-        enum { vsize = Traits<type>::vsize };
-        enum { vfort = Traits<type>::vfort };
-        enum { vcalc = Traits<type>::vcalc };
-        enum { visreal = Traits<type>::visreal };
-        enum { viscomplex = Traits<type>::viscomplex };
-        enum { vstep = Traits<type>::vstep };
-        enum { vconj = Traits<type>::vconj };
+        enum { _size = Traits<type>::_size };
+        enum { _fort = Traits<type>::_fort };
+        enum { _calc = Traits<type>::_calc };
+        enum { isreal = Traits<type>::isreal };
+        enum { iscomplex = Traits<type>::iscomplex };
+        enum { _step = Traits<type>::_step };
+        enum { _conj = Traits<type>::_conj };
 
         //
         // Constructors
@@ -321,26 +321,26 @@ namespace tmv {
         typedef T value_type;
         typedef typename Traits<T>::real_type real_type;
         typedef typename Traits<T>::complex_type complex_type;
-        enum { visreal = Traits<T>::isreal };
-        enum { viscomplex = Traits<T>::iscomplex };
+        enum { isreal = Traits<T>::isreal };
+        enum { iscomplex = Traits<T>::iscomplex };
 
         typedef ConstSmallVectorView<T,N,S,C,I> type;
         typedef const type& calc_type;
         typedef const type& eval_type;
 
-        enum { vsize = N }; 
-        enum { vfort = (I==FortranStyle) }; 
-        enum { vcalc = true };
-        enum { vstep = S };
-        enum { vconj = C };
+        enum { _size = N }; 
+        enum { _fort = (I==FortranStyle) }; 
+        enum { _calc = true };
+        enum { _step = S };
+        enum { _conj = C };
 
         // In case N == UNKNOWN
-        typedef typename VCopyHelper<T,N,vfort>::type copy_type;
+        typedef typename VCopyHelper<T,N,_fort>::type copy_type;
 
         enum { negS = IntTraits<S>::negS };
-        enum { twoS = visreal ? S : IntTraits<S>::twoS };
-        enum { notC = !C && viscomplex };
-        enum { twoN = visreal ? N : IntTraits<N>::twoS };
+        enum { twoS = isreal ? S : IntTraits<S>::twoS };
+        enum { notC = !C && iscomplex };
+        enum { twoN = isreal ? N : IntTraits<N>::twoS };
 
         typedef ConstVectorView<T,S,C,I> const_subvector_type;
         typedef ConstVectorView<T,UNKNOWN,C,I> const_subvector_step_type;
@@ -374,13 +374,13 @@ namespace tmv {
         typedef typename Traits<T>::real_type real_type;
         typedef typename Traits<T>::complex_type complex_type;
 
-        enum { vsize = Traits<type>::vsize };
-        enum { vfort = Traits<type>::vfort };
-        enum { vcalc = Traits<type>::vcalc };
-        enum { visreal = Traits<type>::visreal };
-        enum { viscomplex = Traits<type>::viscomplex };
-        enum { vstep = Traits<type>::vstep };
-        enum { vconj = Traits<type>::vconj };
+        enum { _size = Traits<type>::_size };
+        enum { _fort = Traits<type>::_fort };
+        enum { _calc = Traits<type>::_calc };
+        enum { isreal = Traits<type>::isreal };
+        enum { iscomplex = Traits<type>::iscomplex };
+        enum { _step = Traits<type>::_step };
+        enum { _conj = Traits<type>::_conj };
 
         //
         // Constructors
@@ -500,26 +500,26 @@ namespace tmv {
         typedef T value_type;
         typedef typename Traits<T>::real_type real_type;
         typedef typename Traits<T>::complex_type complex_type;
-        enum { visreal = Traits<T>::isreal };
-        enum { viscomplex = Traits<T>::iscomplex };
+        enum { isreal = Traits<T>::isreal };
+        enum { iscomplex = Traits<T>::iscomplex };
 
         typedef SmallVectorView<T,N,S,C,I> type;
         typedef const ConstSmallVectorView<T,N,S,C,I> calc_type;
         typedef calc_type eval_type;
 
-        enum { vsize = N }; 
-        enum { vfort = (I==FortranStyle) }; 
-        enum { vcalc = true };
-        enum { vstep = S };
-        enum { vconj = C };
+        enum { _size = N }; 
+        enum { _fort = (I==FortranStyle) }; 
+        enum { _calc = true };
+        enum { _step = S };
+        enum { _conj = C };
 
         // In case N == UNKNOWN
-        typedef typename VCopyHelper<T,N,vfort>::type copy_type;
+        typedef typename VCopyHelper<T,N,_fort>::type copy_type;
 
         enum { negS = IntTraits<S>::negS };
-        enum { twoS = visreal ? S : IntTraits<S>::twoS };
-        enum { notC = !C && viscomplex };
-        enum { twoN = visreal ? N : IntTraits<N>::twoS };
+        enum { twoS = isreal ? S : IntTraits<S>::twoS };
+        enum { notC = !C && iscomplex };
+        enum { twoN = isreal ? N : IntTraits<N>::twoS };
 
         typedef ConstVectorView<T,S,C,I> const_subvector_type;
         typedef ConstVectorView<T,UNKNOWN,C,I> const_subvector_step_type;
@@ -571,13 +571,13 @@ namespace tmv {
         typedef BaseVector_Mutable<type> base_mut;
         typedef typename base_mut::reference reference;
 
-        enum { vsize = Traits<type>::vsize };
-        enum { vfort = Traits<type>::vfort };
-        enum { vcalc = Traits<type>::vcalc };
-        enum { visreal = Traits<type>::visreal };
-        enum { viscomplex = Traits<type>::viscomplex };
-        enum { vstep = Traits<type>::vstep };
-        enum { vconj = Traits<type>::vconj };
+        enum { _size = Traits<type>::_size };
+        enum { _fort = Traits<type>::_fort };
+        enum { _calc = Traits<type>::_calc };
+        enum { isreal = Traits<type>::isreal };
+        enum { iscomplex = Traits<type>::iscomplex };
+        enum { _step = Traits<type>::_step };
+        enum { _conj = Traits<type>::_conj };
 
         //
         // Constructors

@@ -88,16 +88,16 @@ namespace tmv {
     class BaseMatrix_Diag : public BaseMatrix_Calc<M>
     {
     public:
-        enum { mcolsize = Traits<M>::msize };
-        enum { mrowsize = Traits<M>::msize };
-        enum { msize = Traits<M>::msize };
-        enum { mfort = Traits<M>::mfort };
-        enum { mshape = Traits<M>::mshape };
-        enum { mrowmajor = Traits<M>::mrowmajor };
-        enum { mcolmajor = Traits<M>::mcolmajor };
-        enum { mcalc = Traits<M>::mcalc };
-        enum { mdiagstep = Traits<M>::mdiagstep };
-        enum { mconj = Traits<M>::mconj };
+        enum { _colsize = Traits<M>::_size };
+        enum { _rowsize = Traits<M>::_size };
+        enum { _size = Traits<M>::_size };
+        enum { _fort = Traits<M>::_fort };
+        enum { _shape = Traits<M>::_shape };
+        enum { _rowmajor = Traits<M>::_rowmajor };
+        enum { _colmajor = Traits<M>::_colmajor };
+        enum { _calc = Traits<M>::_calc };
+        enum { _diagstep = Traits<M>::_diagstep };
+        enum { _conj = Traits<M>::_conj };
 
         typedef M type;
 
@@ -153,15 +153,15 @@ namespace tmv {
 
         inline value_type operator()(int i, int j) const
         {
-            CheckRowIndex<mfort>(i,size());
-            CheckColIndex<mfort>(j,size());
+            CheckRowIndex<_fort>(i,size());
+            CheckColIndex<_fort>(j,size());
             TMVAssert(i == j);
             return cref(i);
         }
 
         inline value_type operator()(int i) const
         {
-            CheckIndex<mfort>(i,size());
+            CheckIndex<_fort>(i,size());
             return cref(i);
         }
 
@@ -216,30 +216,6 @@ namespace tmv {
         inline real_type condition() const
         { return diag().maxAbsElement() / diag().minAbsElement(); }
 
-#if 0
-        template <class M2>
-        inline void makeInverse(BaseMatrix_Mutable<M2>& minv) const
-        { 
-            TMVStaticAssert((Sizes<msize,M2::msize>::same));
-            TMVAssert(size() == minv.size());
-            tmv::Invert(Scaling<1,real_type>(),*this,minv.mat());
-        }
-
-        template <class M2>
-        inline void makeInverseATA(BaseMatrix_Mutable<M2>& mata) const
-        {
-            TMVStaticAssert((Sizes<msize,M2::mcolsize>::same));
-            TMVStaticAssert((Sizes<msize,M2::mrowsize>::same));
-            TMVAssert(size() == mata.colsize());
-            TMVAssert(size() == mata.rowsize());
-            tmv::Invert(Scaling<1,real_type>(),*this,mata.mat());
-            typename M2::diag_type mata_diag = mata.mat().diag();
-            tmv::NoAliasElemMultVV<false>(
-                Scaling<1,real_type>(),mata_diag.conjugate(),mata_diag,
-                mata_diag);
-        }
-#endif
-
 
         //
         // subDiagMatrix, etc.
@@ -264,14 +240,14 @@ namespace tmv {
         // used, and then calls the above CStyle versions.
         inline const_subdiagmatrix_type subDiagMatrix(int i1, int i2) const
         {
-            CheckRange<mfort>(i1,i2,size());
+            CheckRange<_fort>(i1,i2,size());
             return cSubDiagMatrix(i1,i2);
         }
 
         inline const_subdiagmatrix_step_type subDiagMatrix(
             int i1, int i2, int istep) const
         {
-            CheckRange<mfort>(i1,i2,istep,size());
+            CheckRange<_fort>(i1,i2,istep,size());
             return cSubDiagMatrix(i1,i2,istep);
         }
 
@@ -318,19 +294,19 @@ namespace tmv {
 
         inline const_realpart_type realPart() const
         {
-            const bool misreal = Traits<value_type>::isreal;
+            const bool isreal = Traits<value_type>::isreal;
             return const_realpart_type(
                 reinterpret_cast<const real_type*>(cptr()), size(),
-                misreal ? step() : 2*step());
+                isreal ? step() : 2*step());
         }
 
         inline const_imagpart_type imagPart() const
         {
-            const bool misreal = Traits<value_type>::isreal;
+            const bool isreal = Traits<value_type>::isreal;
             TMVStaticAssert(Traits<value_type>::iscomplex);
             return const_imagpart_type(
                 reinterpret_cast<const real_type*>(cptr())+1, size(),
-                misreal ? step() : 2*step());
+                isreal ? step() : 2*step());
         }
 
         inline const_nonconj_type nonConj() const
@@ -357,21 +333,21 @@ namespace tmv {
         template <class M2>
         inline void assignTo(BaseMatrix_Mutable<M2>& m2) const
         { 
-            TMVStaticAssert((ShapeTraits2<mshape,M2::mshape>::assignable));
+            TMVStaticAssert((ShapeTraits2<_shape,M2::_shape>::assignable));
             tmv::Copy(mat(),m2.mat()); 
         }
 
         template <class M2>
         inline void newAssignTo(BaseMatrix_Mutable<M2>& m2) const
         { 
-            TMVStaticAssert((ShapeTraits2<mshape,M2::mshape>::assignable));
+            TMVStaticAssert((ShapeTraits2<_shape,M2::_shape>::assignable));
             tmv::NoAliasCopy(mat(),m2.mat()); 
         }
 
         inline const type& mat() const
         { return *static_cast<const type*>(this); }
 
-        inline bool isconj() const { return mconj; }
+        inline bool isconj() const { return _conj; }
 
         // Note that these last functions need to be defined in a more derived
         // class than this, or an infinite loop will result.
@@ -405,16 +381,16 @@ namespace tmv {
                                     public BaseMatrix_Mutable<M>
     {
     public:
-        enum { mcolsize = Traits<M>::msize };
-        enum { mrowsize = Traits<M>::msize };
-        enum { msize = Traits<M>::msize };
-        enum { mfort = Traits<M>::mfort };
-        enum { mshape = Traits<M>::mshape };
-        enum { mrowmajor = Traits<M>::mrowmajor };
-        enum { mcolmajor = Traits<M>::mcolmajor };
-        enum { mcalc = Traits<M>::mcalc };
-        enum { mdiagstep = Traits<M>::mdiagstep };
-        enum { mconj = Traits<M>::mconj };
+        enum { _colsize = Traits<M>::_size };
+        enum { _rowsize = Traits<M>::_size };
+        enum { _size = Traits<M>::_size };
+        enum { _fort = Traits<M>::_fort };
+        enum { _shape = Traits<M>::_shape };
+        enum { _rowmajor = Traits<M>::_rowmajor };
+        enum { _colmajor = Traits<M>::_colmajor };
+        enum { _calc = Traits<M>::_calc };
+        enum { _diagstep = Traits<M>::_diagstep };
+        enum { _conj = Traits<M>::_conj };
 
         typedef M type;
         typedef BaseMatrix_Diag<M> base_diag;
@@ -484,13 +460,13 @@ namespace tmv {
         inline reference operator()(int i, int j)
         {
             TMVAssert(i == j);
-            CheckIndex<mfort>(i,size());
+            CheckIndex<_fort>(i,size());
             return ref(i);
         }
 
         inline reference operator()(int i)
         {
-            CheckIndex<mfort>(i,size());
+            CheckIndex<_fort>(i,size());
             return ref(i);
         }
 
@@ -521,8 +497,8 @@ namespace tmv {
         template <class M2>
         inline type& operator=(const BaseMatrix<M2>& m2) 
         {
-            TMVStaticAssert((Sizes<mcolsize,M2::mcolsize>::same));
-            TMVStaticAssert((Sizes<mrowsize,M2::mrowsize>::same));
+            TMVStaticAssert((Sizes<_colsize,M2::_colsize>::same));
+            TMVStaticAssert((Sizes<_rowsize,M2::_rowsize>::same));
             TMVAssert(colsize() == m2.colsize());
             TMVAssert(rowsize() == m2.rowsize());
             m2.assignTo(mat());
@@ -531,7 +507,7 @@ namespace tmv {
 
         inline type& operator=(const value_type x)
         {
-            TMVStaticAssert((Sizes<mrowsize,mcolsize>::same));
+            TMVStaticAssert((Sizes<_rowsize,_colsize>::same));
             TMVAssert(colsize() == rowsize());
             setToIdentity(x);
             return mat();
@@ -576,8 +552,8 @@ namespace tmv {
 
         inline type& swap(int i1, int i2) 
         {
-            CheckIndex<mfort>(i1,size());
-            CheckIndex<mfort>(i2,size());
+            CheckIndex<_fort>(i1,size());
+            CheckIndex<_fort>(i2,size());
             diag().cSwap(i1,i2);
             return mat();
         }
@@ -586,7 +562,7 @@ namespace tmv {
         { diag().permute(p,i1,i2); return mat(); }
         inline type& permute(const int*const p, int i1, int i2) 
         {
-            CheckRange<mfort>(i1,i2,size());
+            CheckRange<_fort>(i1,i2,size());
             return cPermute(p,i1,i2);
         }
         inline type& permute(const int*const p) 
@@ -596,7 +572,7 @@ namespace tmv {
         { diag().reversePermute(p,i1,i2); }
         inline type& reversePermute(const int*const p, int i1, int i2) 
         {
-            CheckRange<mfort>(i1,i2,size());
+            CheckRange<_fort>(i1,i2,size());
             return cReversePermute(p,i1,i2);
         }
         inline type& reversePermute(const int*const p) 
@@ -622,14 +598,14 @@ namespace tmv {
         // used, and then calls the above CStyle versions.
         inline subdiagmatrix_type subDiagMatrix(int i1, int i2) 
         {
-            CheckRange<mfort>(i1,i2,size());
+            CheckRange<_fort>(i1,i2,size());
             return cSubDiagMatrix(i1,i2);
         }
 
         inline subdiagmatrix_step_type subMatrix(
             int i1, int i2, int istep) 
         {
-            CheckRange<mfort>(i1,i2,istep,size());
+            CheckRange<_fort>(i1,i2,istep,size());
             return cSubDiagMatrix(i1,i2,istep);
         }
 
@@ -687,19 +663,19 @@ namespace tmv {
 
         inline realpart_type realPart() 
         {
-            const bool misreal = Traits<value_type>::isreal;
+            const bool isreal = Traits<value_type>::isreal;
             return realpart_type(
                 reinterpret_cast<real_type*>(ptr()), size(),
-                misreal ? step() : 2*step());
+                isreal ? step() : 2*step());
         }
 
         inline imagpart_type imagPart() 
         {
-            const bool misreal = Traits<value_type>::isreal;
+            const bool isreal = Traits<value_type>::isreal;
             TMVStaticAssert(Traits<value_type>::iscomplex);
             return imagpart_type(
                 reinterpret_cast<real_type*>(ptr())+1, size(),
-                misreal ? step() : 2*step());
+                isreal ? step() : 2*step());
         }
 
         inline nonconj_type nonConj()
@@ -763,6 +739,17 @@ namespace tmv {
         inline value_type cref(int i) { return mat().cref(i); }
 
     }; // BaseMatrix_Diag_Mutable
+
+    // The BaseMatrix Trace call is efficient for composite types, since
+    // it avoid calculating all the elements to do the sum.
+    // But if we do have the elements calculated, this overloaded 
+    // version will be faster:
+    template <class M>
+    static typename M::value_type DoTrace(const BaseMatrix_Diag<M>& m)
+    { return m.diag().sumElements(); }
+
+
+
 
     template <class T, IndexStyle I=CStyle>
     class DiagMatrix;
@@ -867,8 +854,8 @@ namespace tmv {
     inline bool operator==(
         const BaseMatrix_Diag<M1>& m1, const BaseMatrix_Diag<M2>& m2)
     {
-        TMVStaticAssert((Sizes<M1::mcolsize,M2::mcolsize>::same)); 
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::mrowsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
+        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same)); 
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
         return m1.diag() == m2.diag();

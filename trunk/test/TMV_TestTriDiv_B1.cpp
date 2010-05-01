@@ -25,24 +25,41 @@ template <class T> void TestTriDiv_B1()
 
     tmv::Matrix<T> mx(m);
     tmv::Matrix<std::complex<T> > cmx(cm);
-    m.divideUsing(tmv::LU);
-    m.saveDiv();
-    m.setDiv();
 
-    TestMatrixDivArith1<T>(
-        tmv::LU,mx,cmx,a1.view(),m.view(),ca1.view(),cm.transpose(),"M/U");
-    TestMatrixDivArith1<T>(
-        tmv::LU,mx,cmx,a1.transpose(),m.view(),ca1.transpose(),cm.view(),
-        "M/L");
+    tmv::UpperTriMatrixView<T> a1v = a1.view();
+    tmv::UpperTriMatrixView<std::complex<T> > ca1v = ca1.view();
+    tmv::LowerTriMatrixView<T> a1t = a1.transpose();
+    tmv::LowerTriMatrixView<std::complex<T> > ca1t = ca1.transpose();
+    tmv::MatrixView<T> mv = m.view();
+    tmv::MatrixView<std::complex<T> > cmv = cm.view();
+    mv.divideUsing(tmv::LU);
+    mv.saveDiv();
+    cmv.divideUsing(tmv::LU);
+    cmv.saveDiv();
+
+    TestMatrixDivArith1<T>(tmv::LU,mx,cmx,a1v,mv,ca1v,cmv,"M/U");
+    TestMatrixDivArith1<T>(tmv::LU,mx,cmx,a1t,mv,ca1t,cmv,"M/L");
 
 #if (XTEST & 2)
     tmv::UpperTriMatrix<T,tmv::UnitDiag> a2(m);
     tmv::UpperTriMatrix<std::complex<T>,tmv::UnitDiag> ca2(cm);
-    TestMatrixDivArith1<T>(
-        tmv::LU,mx,cmx,a2.view(),m.view(),ca2.view(),cm.transpose(),"M/U");
-    TestMatrixDivArith1<T>(
-        tmv::LU,mx,cmx,a2.transpose(),m.view(),ca2.transpose(),cm.view(),
-        "M/L");
+
+    tmv::UpperTriMatrixView<T> a2v = a2.view();
+    tmv::UpperTriMatrixView<std::complex<T> > ca2v = ca2.view();
+    tmv::LowerTriMatrixView<T> a2t = a1.transpose();
+    tmv::LowerTriMatrixView<std::complex<T> > ca2t = ca2.transpose();
+
+    tmv::MatrixView<T> mt = m.transpose();
+    tmv::MatrixView<std::complex<T> > cmt = cm.transpose();
+    mt.divideUsing(tmv::LU);
+    mt.saveDiv();
+    cmt.divideUsing(tmv::LU);
+    cmt.saveDiv();
+
+    TestMatrixDivArith1<T>(tmv::LU,mx,cmx,a2v,mv,ca2v,cmv,"M/U");
+    TestMatrixDivArith1<T>(tmv::LU,mx,cmx,a2t,mv,ca2t,cmv,"M/L");
+    TestMatrixDivArith1<T>(tmv::LU,mx,cmx,a2v,mt,ca2v,cmt,"M/U");
+    TestMatrixDivArith1<T>(tmv::LU,mx,cmx,a2t,mt,ca2t,cmt,"M/L");
 #endif
 }
 

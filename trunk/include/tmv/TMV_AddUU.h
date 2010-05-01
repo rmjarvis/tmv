@@ -305,13 +305,13 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
-            TMVStaticAssert(!M3::mconj);
-            TMVStaticAssert(!M1::munit);
-            TMVStaticAssert(!M2::munit);
-            TMVStaticAssert(!M3::munit);
-            TMVStaticAssert(M1::mupper);
-            TMVStaticAssert(M2::mupper);
-            TMVStaticAssert(M3::mupper);
+            TMVStaticAssert(!M3::_conj);
+            TMVStaticAssert(!M1::_unit);
+            TMVStaticAssert(!M2::_unit);
+            TMVStaticAssert(!M3::_unit);
+            TMVStaticAssert(M1::_upper);
+            TMVStaticAssert(M2::_upper);
+            TMVStaticAssert(M3::_upper);
             TMVAssert(!m1.isunit());
             TMVAssert(!m2.isunit());
             TMVAssert(!m3.isunit());
@@ -326,12 +326,12 @@ namespace tmv {
                 s <= 10;
             const int algo = 
                 unroll ? (
-                    ( (M1::mrowmajor && M2::mrowmajor) ||
-                      (M1::mrowmajor && M3::mrowmajor) ||
-                      (M2::mrowmajor && M3::mrowmajor) ) ? 15 : 16 ) :
-                ( (M1::mrowmajor && M2::mrowmajor) ||
-                  (M1::mrowmajor && M3::mrowmajor) ||
-                  (M2::mrowmajor && M3::mrowmajor) ) ? 12 : 11;
+                    ( (M1::_rowmajor && M2::_rowmajor) ||
+                      (M1::_rowmajor && M3::_rowmajor) ||
+                      (M2::_rowmajor && M3::_rowmajor) ) ? 15 : 16 ) :
+                ( (M1::_rowmajor && M2::_rowmajor) ||
+                  (M1::_rowmajor && M3::_rowmajor) ||
+                  (M2::_rowmajor && M3::_rowmajor) ) ? 12 : 11;
             AddUU_Helper<algo,s,ix1,T1,M1,ix2,T2,M2,M3>::call(
                 x1,m1,x2,m2,m3);
         }
@@ -346,7 +346,7 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
-            TMVStaticAssert(!M3::mconj);
+            TMVStaticAssert(!M3::_conj);
             typedef typename M3::value_type T3;
             const int s2 = s > 20 ? UNKNOWN : s;
             const int s2p1 = IntTraits<s2>::Sp1;
@@ -357,16 +357,16 @@ namespace tmv {
                 nops > TMV_Q1 ? false :
                 s <= 10;
             const int algo = 
-                M3::mlower ? 1 :
-                ( M1::munit || M2::munit ) ? 2 :
+                M3::_lower ? 1 :
+                ( M1::_unit || M2::_unit ) ? 2 :
                 unroll ? (
-                    ( (M1::mrowmajor && M2::mrowmajor) ||
-                      (M1::mrowmajor && M3::mrowmajor) ||
-                      (M2::mrowmajor && M3::mrowmajor) ) ? 15 : 16 ) :
-                (M1::munknowndiag || M2::munknowndiag) ? 3 :
-                ( (M1::mrowmajor && M2::mrowmajor) ||
-                  (M1::mrowmajor && M3::mrowmajor) ||
-                  (M2::mrowmajor && M3::mrowmajor) ) ? 12 : 11;
+                    ( (M1::_rowmajor && M2::_rowmajor) ||
+                      (M1::_rowmajor && M3::_rowmajor) ||
+                      (M2::_rowmajor && M3::_rowmajor) ) ? 15 : 16 ) :
+                (M1::_unknowndiag || M2::_unknowndiag) ? 3 :
+                ( (M1::_rowmajor && M2::_rowmajor) ||
+                  (M1::_rowmajor && M3::_rowmajor) ||
+                  (M2::_rowmajor && M3::_rowmajor) ) ? 12 : 11;
             AddUU_Helper<algo,s,ix1,T1,M1,ix2,T2,M2,M3>::call(
                 x1,m1,x2,m2,m3);
         }
@@ -419,9 +419,9 @@ namespace tmv {
             typedef typename M2::value_type TM2;
             typedef typename M3::value_type TM3;
             const bool inst =
-                M1::msize == UNKNOWN &&
-                M2::msize == UNKNOWN &&
-                M3::msize == UNKNOWN &&
+                M1::unknownsizes &&
+                M2::unknownsizes &&
+                M3::unknownsizes &&
 #ifdef TMV_INST_MIX
                 Traits2<TM1,TM2>::samebase &&
                 Traits2<TM1,TM3>::samebase &&
@@ -430,7 +430,7 @@ namespace tmv {
                 Traits2<TM1,TM3>::sametype &&
 #endif
                 Traits<TM3>::isinst;
-            const bool conj = M3::mconj;
+            const bool conj = M3::_conj;
             const int algo = 
                 conj ? 96 :
                 inst ? 97 :
@@ -538,9 +538,9 @@ namespace tmv {
             typedef typename M2::value_type TM2;
             typedef typename M3::value_type TM3;
             const bool inst =
-                M1::msize == UNKNOWN &&
-                M2::msize == UNKNOWN &&
-                M3::msize == UNKNOWN &&
+                M1::unknownsizes &&
+                M2::unknownsizes &&
+                M3::unknownsizes &&
 #ifdef TMV_INST_MIX
                 Traits2<TM1,TM2>::samebase &&
                 Traits2<TM1,TM3>::samebase &&
@@ -550,9 +550,9 @@ namespace tmv {
 #endif
                 Traits<TM3>::isinst;
             const bool checkalias =
-                M1::msize == UNKNOWN &&
-                M2::msize == UNKNOWN &&
-                M3::msize == UNKNOWN &&
+                M1::_size == UNKNOWN &&
+                M2::_size == UNKNOWN &&
+                M3::_size == UNKNOWN &&
                 !noclobber;
             const int algo = 
                 // We do a different check alias with the Inst calls.
@@ -570,15 +570,15 @@ namespace tmv {
         const Scaling<ix2,T2>& x2, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Tri_Mutable<M3>& m3)
     {
-        TMVStaticAssert(M1::mupper == int(M3::mupper));
-        TMVStaticAssert(M2::mupper == int(M3::mupper));
-        TMVStaticAssert((Sizes<M1::msize,M2::msize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::msize>::same));
-        TMVStaticAssert(!M3::munit);
+        TMVStaticAssert(M1::_upper == int(M3::_upper));
+        TMVStaticAssert(M2::_upper == int(M3::_upper));
+        TMVStaticAssert((Sizes<M1::_size,M2::_size>::same));
+        TMVStaticAssert((Sizes<M1::_size,M3::_size>::same));
+        TMVStaticAssert(!M3::_unit);
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m1.size() == m3.size());
         TMVAssert(!m3.isunit());
-        const int s = Sizes<Sizes<M1::msize,M2::msize>::size,M3::msize>::size;
+        const int s = Sizes<Sizes<M1::_size,M2::_size>::size,M3::_size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         typedef typename M3::cview_type M3v;
@@ -595,15 +595,15 @@ namespace tmv {
         const Scaling<ix2,T2>& x2, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Tri_Mutable<M3>& m3)
     {
-        TMVStaticAssert(M1::mupper == int(M3::mupper));
-        TMVStaticAssert(M2::mupper == int(M3::mupper));
-        TMVStaticAssert((Sizes<M1::msize,M2::msize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::msize>::same));
-        TMVStaticAssert(!M3::munit);
+        TMVStaticAssert(M1::_upper == int(M3::_upper));
+        TMVStaticAssert(M2::_upper == int(M3::_upper));
+        TMVStaticAssert((Sizes<M1::_size,M2::_size>::same));
+        TMVStaticAssert((Sizes<M1::_size,M3::_size>::same));
+        TMVStaticAssert(!M3::_unit);
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m1.size() == m3.size());
         TMVAssert(!m3.isunit());
-        const int s = Sizes<Sizes<M1::msize,M2::msize>::size,M3::msize>::size;
+        const int s = Sizes<Sizes<M1::_size,M2::_size>::size,M3::_size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         typedef typename M3::cview_type M3v;
@@ -620,15 +620,15 @@ namespace tmv {
         const Scaling<ix2,T2>& x2, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Tri_Mutable<M3>& m3)
     {
-        TMVStaticAssert(M1::mupper == int(M3::mupper));
-        TMVStaticAssert(M2::mupper == int(M3::mupper));
-        TMVStaticAssert((Sizes<M1::msize,M2::msize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::msize>::same));
-        TMVStaticAssert(!M3::munit);
+        TMVStaticAssert(M1::_upper == int(M3::_upper));
+        TMVStaticAssert(M2::_upper == int(M3::_upper));
+        TMVStaticAssert((Sizes<M1::_size,M2::_size>::same));
+        TMVStaticAssert((Sizes<M1::_size,M3::_size>::same));
+        TMVStaticAssert(!M3::_unit);
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m1.size() == m3.size());
         TMVAssert(!m3.isunit());
-        const int s = Sizes<Sizes<M1::msize,M2::msize>::size,M3::msize>::size;
+        const int s = Sizes<Sizes<M1::_size,M2::_size>::size,M3::_size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         typedef typename M3::cview_type M3v;
@@ -645,22 +645,22 @@ namespace tmv {
         const Scaling<ix2,T2>& x2, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Tri_Mutable<M3>& m3)
     {
-        TMVStaticAssert(M1::mupper == int(M3::mupper));
-        TMVStaticAssert(M2::mupper == int(M3::mupper));
-        TMVStaticAssert((Sizes<M1::msize,M2::msize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::msize>::same));
-        TMVStaticAssert(!M3::munit);
+        TMVStaticAssert(M1::_upper == int(M3::_upper));
+        TMVStaticAssert(M2::_upper == int(M3::_upper));
+        TMVStaticAssert((Sizes<M1::_size,M2::_size>::same));
+        TMVStaticAssert((Sizes<M1::_size,M3::_size>::same));
+        TMVStaticAssert(!M3::_unit);
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m1.size() == m3.size());
         TMVAssert(!m3.isunit());
-        const int s = Sizes<Sizes<M1::msize,M2::msize>::size,M3::msize>::size;
+        const int s = Sizes<Sizes<M1::_size,M2::_size>::size,M3::_size>::size;
         typedef typename M1::value_type TM1;
         typedef typename M2::value_type TM2;
         typedef typename M3::value_type TM3;
         const bool inst =
-            M1::msize == UNKNOWN &&
-            M2::msize == UNKNOWN &&
-            M3::msize == UNKNOWN &&
+            M1::unknownsizes &&
+            M2::unknownsizes &&
+            M3::unknownsizes &&
 #ifdef TMV_INST_MIX
             Traits2<TM1,TM2>::samebase &&
             Traits2<TM1,TM3>::samebase &&
@@ -895,8 +895,8 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
             const int algo = 
-                (M1::munit || M2::munit) ? 33 :
-                (M1::munknowndiag || M2::munknowndiag) ? 32 :
+                (M1::_unit || M2::_unit) ? 33 :
+                (M1::_unknowndiag || M2::_unknowndiag) ? 32 :
                 34;
             AddUUM_Helper<algo,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
         }
@@ -968,9 +968,9 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
             const int algo = 
-                (M1::mupper && M2::mupper) ? 11 :
-                (M1::mupper && M2::mlower) ? 12 :
-                (M1::mlower && M2::mupper) ? 13 :
+                (M1::_upper && M2::_upper) ? 11 :
+                (M1::_upper && M2::_lower) ? 12 :
+                (M1::_lower && M2::_upper) ? 13 :
                 14;
             AddUUM_Helper<algo,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
         }
@@ -985,9 +985,9 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
             const int algo = 
-                (M1::mupper && M2::mupper) ? 21 :
-                (M1::mupper && M2::mlower) ? 22 :
-                (M1::mlower && M2::mupper) ? 23 :
+                (M1::_upper && M2::_upper) ? 21 :
+                (M1::_upper && M2::_lower) ? 22 :
+                (M1::_lower && M2::_upper) ? 23 :
                 24;
             AddUUM_Helper<algo,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
         }
@@ -1003,9 +1003,9 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
             const bool checkalias =
-                M1::msize == UNKNOWN &&
-                M2::msize == UNKNOWN &&
-                M3::mcolsize == UNKNOWN && M3::mcolsize == UNKNOWN;
+                M1::_size == UNKNOWN &&
+                M2::_size == UNKNOWN &&
+                M3::_colsize == UNKNOWN && M3::_colsize == UNKNOWN;
             const int algo = 
                 checkalias ? 99 :
                 -2;
@@ -1020,9 +1020,9 @@ namespace tmv {
         const Scaling<ix2,T2>& x2, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     {
-        TMVStaticAssert((Sizes<M1::msize,M2::msize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::mrowsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M2::_size>::same));
+        TMVStaticAssert((Sizes<M1::_size,M3::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M3::_rowsize>::same));
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m1.size() == m3.colsize());
         TMVAssert(m1.size() == m3.rowsize());
@@ -1037,9 +1037,9 @@ namespace tmv {
         const Scaling<ix2,T2>& x2, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     {
-        TMVStaticAssert((Sizes<M1::msize,M2::msize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::mrowsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M2::_size>::same));
+        TMVStaticAssert((Sizes<M1::_size,M3::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M3::_rowsize>::same));
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m1.size() == m3.colsize());
         TMVAssert(m1.size() == m3.rowsize());
@@ -1054,9 +1054,9 @@ namespace tmv {
         const Scaling<ix2,T2>& x2, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     {
-        TMVStaticAssert((Sizes<M1::msize,M2::msize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::mrowsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M2::_size>::same));
+        TMVStaticAssert((Sizes<M1::_size,M3::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M3::_rowsize>::same));
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m1.size() == m3.colsize());
         TMVAssert(m1.size() == m3.rowsize());
@@ -1082,7 +1082,7 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
-            TMVStaticAssert(M1::mupper);
+            TMVStaticAssert(M1::_upper);
             const bool s1 = SameStorage(m1,m3);
             const bool s2 = SameStorage(m2,m3);
 
@@ -1128,7 +1128,7 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
-            TMVStaticAssert(M1::mlower);
+            TMVStaticAssert(M1::_lower);
             const bool s1 = SameStorage(m1,m3);
             const bool s2 = SameStorage(m2,m3);
 
@@ -1174,7 +1174,7 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
-            TMVStaticAssert(M1::mupper);
+            TMVStaticAssert(M1::_upper);
             typename M3::uppertri_type m3u = m3.upperTri();
             NoAliasMultXM<false>(x2,m2,m3);
             NoAliasMultXM<true>(x1,m1,m3u);
@@ -1190,7 +1190,7 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
-            TMVStaticAssert(M1::mlower);
+            TMVStaticAssert(M1::_lower);
             typename M3::lowertri_type m3l = m3.lowerTri();
             NoAliasMultXM<false>(x2,m2,m3);
             NoAliasMultXM<true>(x1,m1,m3l);
@@ -1210,8 +1210,8 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
             const int algo = 
-                M1::munit ? 33 :
-                M1::munknowndiag ? 32 :
+                M1::_unit ? 33 :
+                M1::_unknowndiag ? 32 :
                 34;
             AddUMM_Helper<algo,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
         }
@@ -1273,7 +1273,7 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
-            const int algo = M1::mupper ? 21 : 22;
+            const int algo = M1::_upper ? 21 : 22;
             AddUMM_Helper<algo,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
         }
     };
@@ -1287,7 +1287,7 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
-            const int algo = M1::mupper ? 11 : 12;
+            const int algo = M1::_upper ? 11 : 12;
             AddUMM_Helper<algo,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
         }
     };
@@ -1302,9 +1302,9 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
             const bool checkalias =
-                M1::msize == UNKNOWN &&
-                M2::mcolsize == UNKNOWN && M2::mrowsize == UNKNOWN &&
-                M3::mcolsize == UNKNOWN && M3::mcolsize == UNKNOWN;
+                M1::_size == UNKNOWN &&
+                M2::_colsize == UNKNOWN && M2::_rowsize == UNKNOWN &&
+                M3::_colsize == UNKNOWN && M3::_colsize == UNKNOWN;
             const int algo = 
                 checkalias ? 99 :
                 -2;
@@ -1319,10 +1319,10 @@ namespace tmv {
         const Scaling<ix2,T2>& x2, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     {
-        TMVStaticAssert((Sizes<M1::msize,M2::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M2::mrowsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::mrowsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M2::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M2::_rowsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M3::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M3::_rowsize>::same));
         TMVAssert(m1.size() == m2.colsize());
         TMVAssert(m1.size() == m2.rowsize());
         TMVAssert(m1.size() == m3.colsize());
@@ -1338,10 +1338,10 @@ namespace tmv {
         const Scaling<ix2,T2>& x2, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     {
-        TMVStaticAssert((Sizes<M1::msize,M2::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M2::mrowsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::mrowsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M2::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M2::_rowsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M3::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M3::_rowsize>::same));
         TMVAssert(m1.size() == m2.colsize());
         TMVAssert(m1.size() == m2.rowsize());
         TMVAssert(m1.size() == m3.colsize());
@@ -1357,10 +1357,10 @@ namespace tmv {
         const Scaling<ix2,T2>& x2, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     {
-        TMVStaticAssert((Sizes<M1::msize,M2::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M2::mrowsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M3::mrowsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M2::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M2::_rowsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M3::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M3::_rowsize>::same));
         TMVAssert(m1.size() == m2.colsize());
         TMVAssert(m1.size() == m2.rowsize());
         TMVAssert(m1.size() == m3.colsize());

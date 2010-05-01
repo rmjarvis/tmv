@@ -36,15 +36,6 @@
 #include "tmv/TMV_CopyU.h"
 #include "tmv/TMV_ProdXV.h"
 
-// The CBLAS trick of using RowMajor with ConjTrans when we have a 
-// case of A.conjugate() * x doesn't seem to be working with MKL 10.2.2.
-// I haven't been able to figure out why.  (e.g. Is it a bug in the MKL
-// code, or am I doing something wrong?)  So for now, just disable it.
-#ifdef CBLAS
-#undef CBLAS
-#endif
-
-
 namespace tmv {
 
     // To save on compile size, I only compile the MultEq function:
@@ -53,397 +44,215 @@ namespace tmv {
     // fairly rare, and it's not much of a hit on the execution time.
     // If people really want it without a temporary, they should 
     // call InlineMultMV directly, rather than use the Inst version.
+    //
+    // In fact, I wonder if it would be worth not even having an Inst
+    // version for the Add option.  Let that be done inline all the time.
+    // I'll have the think about that...
     
-    template <class T, class M1>
-    static void DoMultEqUV(const M1& m1, VectorView<T> v3)
+    template <class M1, class T2>
+    static void NonBlasMultEq(const M1& m1, VectorView<T2> v2)
     {
-        if (v3.step() == 1) {
-            const Scaling<1,typename Traits<T>::real_type> one;
-            ConstVectorView<T,1> v2u = v3.unitView();
-            VectorView<T,1> v3u = v3.unitView();
-            if (m1.isrm()) InlineMultMV<false>(one,m1.rmView(),v2u,v3u);
-            else InlineMultMV<false>(one,m1.cmView(),v2u,v3u);
+        TMVAssert(m2.iscm() || m2.isrm());
+        if (v2.step() == 1) {
+            const Scaling<1,typename Traits<T2>::real_type> one;
+            VectorView<T2,1> v2u = v2.unitView();
+            if (m1.iscm()) 
+                InlineMultMV<false>(one,m1.cmView(),v2u.constView(),v2u);
+            else 
+                InlineMultMV<false>(one,m1.rmView(),v2u.constView(),v2u);
         } else {
-            Vector<T> v3c = v3;
-            DoMultEqUV(m1,v3c.xView());
-            InstCopy(v3c.constView().xView(),v3);
+            Vector<T2> v2c = v2;
+            DoMultEq(m1,v2c.xView());
+            InstCopy(v2c.constView().xView(),v2);
         }
     }
 
 #ifdef BLAS
-#ifdef INST_DOUBLE
-    template <DiagType D>
-    static void DoMultEqUV( 
-        const GenUpperTriMatrix<double,D>& A, const VectorView<double>& x)
+    template <class M1, class T2, class T1> 
+    static inline void BlasMultEq(const M1& A, VectorView<T2> x, T1)
+    { NonBlasMultEq(A,x); }
+#ifdef TMV_INST_DOUBLE
+    template <class M1>
+    static void BlasMultEq(const M1& A, VectorView<double> x, double)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
-        TMVAssert(x.step() == 1);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-
         int n=A.size();
         int lda=A.isrm()?A.stepi():A.stepj();
         int xs=x.step();
         double* xp = x.ptr();
+        if (xs < 0) xp += (n-1)*xs;
         BLASNAME(dtrmv) (
-            BLASCM A.iscm()?BLASCH_UP:BLASCH_LO,
+            BLASCM A.iscm()==M1::mupper?BLASCH_UP:BLASCH_LO,
             A.iscm()?BLASCH_NT:BLASCH_T, A.isunit()?BLASCH_U:BLASCH_NU,
             BLASV(n),BLASP(A.cptr()),BLASV(lda),
             BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
     }
-    template <DiagType D>
-    static void DoMultEqUV( 
-        const GenLowerTriMatrix<double,D>& A, const VectorView<double>& x)
+    template <class M1>
+    static void BlasMultEq(
+        const M1& A, VectorView<std::complex<double> > x, std::complex<double>)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
-        TMVAssert(x.step() == 1);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-
-        int n=A.size();
-        int lda=A.isrm()?A.stepi():A.stepj();
-        int xs=x.step();
-        double* xp = x.ptr();
-        BLASNAME(dtrmv) (
-            BLASCM A.iscm()?BLASCH_LO:BLASCH_UP,
-            A.iscm()?BLASCH_NT:BLASCH_T, A.isunit()?BLASCH_U:BLASCH_NU,
-            BLASV(n),BLASP(A.cptr()),BLASV(lda),
-            BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
-    }
-    template <DiagType D>
-    static void DoMultEqUV(
-        const GenUpperTriMatrix<std::complex<double>,D>& A,
-        const VectorView<std::complex<double> >& x)
-    {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(x.step() == 1);
-        TMVAssert(x.ct() == NonConj);
-
         int n=A.size();
         int lda=A.isrm()?A.stepi():A.stepj();
         int xs=x.step();
         std::complex<double>* xp = x.ptr();
+        if (xs < 0) xp += (n-1)*xs;
         if (A.iscm() && A.isconj()) {
-#ifdef CBLAS
-            BLASNAME(ztrmv) (
-                BLASRM BLASCH_LO, BLASCH_CT,
-                A.isunit()?BLASCH_U:BLASCH_NU,
-                BLASV(n),BLASP(A.cptr()),BLASV(lda),
-                BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
-#else
             x.conjugateSelf();
             BLASNAME(ztrmv) (
-                BLASCM A.iscm()?BLASCH_UP:BLASCH_LO,
+                BLASCM A.iscm()==M1::mupper?BLASCH_UP:BLASCH_LO,
                 A.iscm()?BLASCH_NT:BLASCH_T, A.isunit()?BLASCH_U:BLASCH_NU,
                 BLASV(n),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
             x.conjugateSelf();
-#endif
         } else {
             BLASNAME(ztrmv) (
-                BLASCM A.iscm()?BLASCH_UP:BLASCH_LO,
+                BLASCM A.iscm()==M1::mupper?BLASCH_UP:BLASCH_LO,
                 A.iscm()?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T, 
                 A.isunit()?BLASCH_U:BLASCH_NU,
                 BLASV(n),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
         }
     }
-    template <DiagType D>
-    static void DoMultEqUV(
-        const GenLowerTriMatrix<std::complex<double>,D>& A,
-        const VectorView<std::complex<double> >& x)
+    template <class M1>
+    static void BlasMultEq( 
+        const M1& A, VectorView<std::complex<double> > x, double)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
-        TMVAssert(x.step() == 1);
-        TMVAssert(x.ct() == NonConj);
-
-        int n=A.size();
-        int lda=A.isrm()?A.stepi():A.stepj();
-        int xs=x.step();
-        std::complex<double>* xp = x.ptr();
-        if (A.iscm() && A.isconj()) {
-#ifdef CBLAS
-            BLASNAME(ztrmv) (
-                BLASRM BLASCH_UP, BLASCH_CT,
-                A.isunit()?BLASCH_U:BLASCH_NU,
-                BLASV(n),BLASP(A.cptr()),BLASV(lda),
-                BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
-#else
-            x.conjugateSelf();
-            BLASNAME(ztrmv) (
-                BLASCM A.iscm()?BLASCH_LO:BLASCH_UP,
-                A.iscm()?BLASCH_NT:BLASCH_T, A.isunit()?BLASCH_U:BLASCH_NU,
-                BLASV(n),BLASP(A.cptr()),BLASV(lda),
-                BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
-            x.conjugateSelf();
-#endif
-        } else {
-            BLASNAME(ztrmv) (
-                BLASCM A.iscm()?BLASCH_LO:BLASCH_UP,
-                A.iscm()?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T, 
-                A.isunit()?BLASCH_U:BLASCH_NU,
-                BLASV(n),BLASP(A.cptr()),BLASV(lda),
-                BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
-        }
-    }
-#ifdef TMV_INST_MIX
-    template <DiagType D>
-    static void DoMultEqUV( 
-        const GenUpperTriMatrix<double,D>& A,
-        const VectorView<std::complex<double> >& x)
-    {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(x.step() == 1);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-
         int n=A.size();
         int lda=A.isrm()?A.stepi():A.stepj();
         int xs=2*x.step();
         double* xp = (double*) x.ptr();
+        if (xs < 0) xp += (n-1)*xs;
         BLASNAME(dtrmv) (
-            BLASCM A.iscm()?BLASCH_UP:BLASCH_LO,
+            BLASCM A.iscm()==M1::mupper?BLASCH_UP:BLASCH_LO,
             A.iscm()?BLASCH_NT:BLASCH_T, A.isunit()?BLASCH_U:BLASCH_NU,
             BLASV(n),BLASP(A.cptr()),BLASV(lda),
             BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
         BLASNAME(dtrmv) (
-            BLASCM A.iscm()?BLASCH_UP:BLASCH_LO,
-            A.iscm()?BLASCH_NT:BLASCH_T, A.isunit()?BLASCH_U:BLASCH_NU,
-            BLASV(n),BLASP(A.cptr()),BLASV(lda),
-            BLASP(xp+1),BLASV(xs) BLAS1 BLAS1 BLAS1);
-    }
-    template <DiagType D>
-    static void DoMultEqUV( 
-        const GenLowerTriMatrix<double,D>& A,
-        const VectorView<std::complex<double> >& x)
-    {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(x.step() == 1);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-
-        int n=A.size();
-        int lda=A.isrm()?A.stepi():A.stepj();
-        int xs=2*x.step();
-        double* xp = (double*) x.ptr();
-        BLASNAME(dtrmv) (
-            BLASCM A.iscm()?BLASCH_LO:BLASCH_UP,
-            A.iscm()?BLASCH_NT:BLASCH_T, A.isunit()?BLASCH_U:BLASCH_NU,
-            BLASV(n),BLASP(A.cptr()),BLASV(lda),
-            BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
-        BLASNAME(dtrmv) (
-            BLASCM A.iscm()?BLASCH_LO:BLASCH_UP,
+            BLASCM A.iscm()==M1::mupper?BLASCH_UP:BLASCH_LO,
             A.iscm()?BLASCH_NT:BLASCH_T, A.isunit()?BLASCH_U:BLASCH_NU,
             BLASV(n),BLASP(A.cptr()),BLASV(lda),
             BLASP(xp+1),BLASV(xs) BLAS1 BLAS1 BLAS1);
     }
 #endif
-#endif
-#ifdef INST_FLOAT
-    template <DiagType D>
-    static void DoMultEqUV( 
-        const GenUpperTriMatrix<float,D>& A, const VectorView<float>& x)
+#ifdef TMV_INST_FLOAT
+    template <class M1>
+    static void BlasMultEq(const M1& A, VectorView<float> x, float)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
-        TMVAssert(x.step() == 1);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-
         int n=A.size();
         int lda=A.isrm()?A.stepi():A.stepj();
         int xs=x.step();
         float* xp = x.ptr();
+        if (xs < 0) xp += (n-1)*xs;
         BLASNAME(strmv) (
-            BLASCM A.iscm()?BLASCH_UP:BLASCH_LO,
+            BLASCM A.iscm()==M1::mupper?BLASCH_UP:BLASCH_LO,
             A.iscm()?BLASCH_NT:BLASCH_T, A.isunit()?BLASCH_U:BLASCH_NU,
             BLASV(n),BLASP(A.cptr()),BLASV(lda),
             BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
     }
-    template <DiagType D>
-    static void DoMultEqUV( 
-        const GenLowerTriMatrix<float,D>& A, const VectorView<float>& x)
+    template <class M1>
+    static void BlasMultEq(
+        const M1& A, VectorView<std::complex<float> > x, std::complex<float>)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
-        TMVAssert(x.step() == 1);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-
-        int n=A.size();
-        int lda=A.isrm()?A.stepi():A.stepj();
-        int xs=x.step();
-        float* xp = x.ptr();
-        BLASNAME(strmv) (
-            BLASCM A.iscm()?BLASCH_LO:BLASCH_UP,
-            A.iscm()?BLASCH_NT:BLASCH_T, A.isunit()?BLASCH_U:BLASCH_NU,
-            BLASV(n),BLASP(A.cptr()),BLASV(lda),
-            BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
-    }
-    template <DiagType D>
-    static void DoMultEqUV(
-        const GenUpperTriMatrix<std::complex<float>,D>& A,
-        const VectorView<std::complex<float> >& x)
-    {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(x.step() == 1);
-        TMVAssert(x.ct() == NonConj);
-
         int n=A.size();
         int lda=A.isrm()?A.stepi():A.stepj();
         int xs=x.step();
         std::complex<float>* xp = x.ptr();
+        if (xs < 0) xp += (n-1)*xs;
         if (A.iscm() && A.isconj()) {
-#ifdef CBLAS
-            BLASNAME(ctrmv) (
-                BLASRM BLASCH_LO, BLASCH_CT,
-                A.isunit()?BLASCH_U:BLASCH_NU,
-                BLASV(n),BLASP(A.cptr()),BLASV(lda),
-                BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
-#else
             x.conjugateSelf();
             BLASNAME(ctrmv) (
-                BLASCM A.iscm()?BLASCH_UP:BLASCH_LO,
+                BLASCM A.iscm()==M1::mupper?BLASCH_UP:BLASCH_LO,
                 A.iscm()?BLASCH_NT:BLASCH_T, A.isunit()?BLASCH_U:BLASCH_NU,
                 BLASV(n),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
             x.conjugateSelf();
-#endif
         } else {
             BLASNAME(ctrmv) (
-                BLASCM A.iscm()?BLASCH_UP:BLASCH_LO,
+                BLASCM A.iscm()==M1::mupper?BLASCH_UP:BLASCH_LO,
                 A.iscm()?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T, 
                 A.isunit()?BLASCH_U:BLASCH_NU,
                 BLASV(n),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
         }
     }
-    template <DiagType D>
-    static void DoMultEqUV(
-        const GenLowerTriMatrix<std::complex<float>,D>& A,
-        const VectorView<std::complex<float> >& x)
+    template <class M1>
+    static void BlasMultEq( 
+        const M1& A, VectorView<std::complex<float> > x, float)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
-        TMVAssert(x.step() == 1);
-        TMVAssert(x.ct() == NonConj);
-
-        int n=A.size();
-        int lda=A.isrm()?A.stepi():A.stepj();
-        int xs=x.step();
-        std::complex<float>* xp = x.ptr();
-        if (A.iscm() && A.isconj()) {
-#ifdef CBLAS
-            BLASNAME(ctrmv) (
-                BLASRM BLASCH_UP, BLASCH_CT,
-                A.isunit()?BLASCH_U:BLASCH_NU,
-                BLASV(n),BLASP(A.cptr()),BLASV(lda),
-                BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
-#else
-            x.conjugateSelf();
-            BLASNAME(ctrmv) (
-                BLASCM A.iscm()?BLASCH_LO:BLASCH_UP,
-                A.iscm()?BLASCH_NT:BLASCH_T, A.isunit()?BLASCH_U:BLASCH_NU,
-                BLASV(n),BLASP(A.cptr()),BLASV(lda),
-                BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
-            x.conjugateSelf();
-#endif
-        } else {
-            BLASNAME(ctrmv) (
-                BLASCM A.iscm()?BLASCH_LO:BLASCH_UP,
-                A.iscm()?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T, 
-                A.isunit()?BLASCH_U:BLASCH_NU,
-                BLASV(n),BLASP(A.cptr()),BLASV(lda),
-                BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
-        }
-    }
-#ifdef TMV_INST_MIX
-    template <DiagType D>
-    static void DoMultEqUV( 
-        const GenUpperTriMatrix<float,D>& A,
-        const VectorView<std::complex<float> >& x)
-    {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(x.step() == 1);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-
         int n=A.size();
         int lda=A.isrm()?A.stepi():A.stepj();
         int xs=2*x.step();
         float* xp = (float*) x.ptr();
+        if (xs < 0) xp += (n-1)*xs;
         BLASNAME(strmv) (
-            BLASCM A.iscm()?BLASCH_UP:BLASCH_LO,
+            BLASCM A.iscm()==M1::mupper?BLASCH_UP:BLASCH_LO,
             A.iscm()?BLASCH_NT:BLASCH_T, A.isunit()?BLASCH_U:BLASCH_NU,
             BLASV(n),BLASP(A.cptr()),BLASV(lda),
             BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
         BLASNAME(strmv) (
-            BLASCM A.iscm()?BLASCH_UP:BLASCH_LO,
-            A.iscm()?BLASCH_NT:BLASCH_T, A.isunit()?BLASCH_U:BLASCH_NU,
-            BLASV(n),BLASP(A.cptr()),BLASV(lda),
-            BLASP(xp+1),BLASV(xs) BLAS1 BLAS1 BLAS1);
-    }
-    template <DiagType D>
-    static void DoMultEqUV( 
-        const GenLowerTriMatrix<float,D>& A,
-        const VectorView<std::complex<float> >& x)
-    {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(x.step() == 1);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-
-        int n=A.size();
-        int lda=A.isrm()?A.stepi():A.stepj();
-        int xs=2*x.step();
-        float* xp = (float*) x.ptr();
-        BLASNAME(strmv) (
-            BLASCM A.iscm()?BLASCH_LO:BLASCH_UP,
-            A.iscm()?BLASCH_NT:BLASCH_T, A.isunit()?BLASCH_U:BLASCH_NU,
-            BLASV(n),BLASP(A.cptr()),BLASV(lda),
-            BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
-        BLASNAME(strmv) (
-            BLASCM A.iscm()?BLASCH_LO:BLASCH_UP,
+            BLASCM A.iscm()==M1::mupper?BLASCH_UP:BLASCH_LO,
             A.iscm()?BLASCH_NT:BLASCH_T, A.isunit()?BLASCH_U:BLASCH_NU,
             BLASV(n),BLASP(A.cptr()),BLASV(lda),
             BLASP(xp+1),BLASV(xs) BLAS1 BLAS1 BLAS1);
     }
 #endif
-#endif // FLOAT
 #endif // BLAS
 
-    template <class T, class M1, class V2>
-    void GenInstMultMV(
-        const T x, const M1& m1, const V2& v2, VectorView<T> v3)
+    template <class M1, class T2>
+    static void DoMultEq(const M1& m1, VectorView<T2> v2)
     {
-        if (m1.isrm() || m1.iscm()) {
-            InstMultXV(x,v2,v3);
-            DoMultEqUV(m1,v3);
+#ifdef BLAS
+        const typename M1::value_type t1(0);
+        if ( (m1.isrm() && m1.stepi()>0) || (m1.iscm() && m1.stepj()>0) ) {
+            BlasMultEq(m1,v2,t1);
         } else {
-            GenInstMultMV(x,m1.copy().constView().xView(),v2,v3);
+            if (m1.isunit()) {
+                BlasMultEq(
+                    m1.copy().viewAsUnitDiag().constView().xdView(),v2,t1);
+            } else {
+                BlasMultEq(m1.copy().constView().xdView(),v2,t1);
+            }
         }
+#else
+        if (m1.isrm() || m1.iscm()) {
+            NonBlasMultEq(m1,v2);
+        } else {
+            if (m1.isunit()) {
+                NonBlasMultEq(
+                    m1.copy().viewAsUnitDiag().constView().xdView(),v2);
+            } else {
+                NonBlasMultEq(m1.copy().constView().xdView(),v2);
+            }
+        }
+#endif
     }
 
     template <class T, class M1, class V2>
-    void GenInstAddMultMV(
+    void DoInstMultMV(
         const T x, const M1& m1, const V2& v2, VectorView<T> v3)
     {
-        if (m1.isrm() || m1.iscm()) {
-            Vector<T> v2c = v2;
-            DoMultEqUV(m1,v2c.xView());
-            InstAddMultXV(x,v2c.constView().xView(),v3);
-        } else {
-            GenInstAddMultMV(x,m1.copy().constView().xView(),v2,v3);
-        }
+        InstMultXV(x,v2,v3);
+        DoMultEq(m1,v3);
+    }
+
+    template <class T, class M1, class V2>
+    void DoInstAddMultMV(
+        const T x, const M1& m1, const V2& v2, VectorView<T> v3)
+    {
+        Vector<T> v2c = v2;
+        DoMultEq(m1,v2c.xView());
+        InstAddMultXV(x,v2c.constView().xView(),v3);
     }
 
     template <class T1, DiagType D, bool C1, class T2, bool C2, class T3>
@@ -451,26 +260,26 @@ namespace tmv {
         const T3 x,
         const ConstUpperTriMatrixView<T1,D,UNKNOWN,UNKNOWN,C1>& m1,
         const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3)
-    { GenInstMultMV(x,m1,v2,v3); }
+    { DoInstMultMV(x,m1,v2,v3); }
     template <class T1, DiagType D, bool C1, class T2, bool C2, class T3>
     void InstAddMultMV(
         const T3 x,
         const ConstUpperTriMatrixView<T1,D,UNKNOWN,UNKNOWN,C1>& m1,
         const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3)
-    { GenInstAddMultMV(x,m1,v2,v3); }
+    { DoInstAddMultMV(x,m1,v2,v3); }
 
     template <class T1, DiagType D, bool C1, class T2, bool C2, class T3>
     void InstMultMV(
         const T3 x,
         const ConstLowerTriMatrixView<T1,D,UNKNOWN,UNKNOWN,C1>& m1,
         const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3)
-    { GenInstMultMV(x,m1,v2,v3); }
+    { DoInstMultMV(x,m1,v2,v3); }
     template <class T1, DiagType D, bool C1, class T2, bool C2, class T3>
     void InstAddMultMV(
         const T3 x,
         const ConstLowerTriMatrixView<T1,D,UNKNOWN,UNKNOWN,C1>& m1,
         const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3)
-    { GenInstAddMultMV(x,m1,v2,v3); }
+    { DoInstAddMultMV(x,m1,v2,v3); }
 
 #define InstFile "TMV_MultUV.inst"
 #include "TMV_Inst.h"

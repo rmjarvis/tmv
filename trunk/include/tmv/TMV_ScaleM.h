@@ -172,9 +172,9 @@ namespace tmv {
                 typedef typename M1::real_type RT;
                 typedef typename M1::value_type VT;
                 const RT rm = 
-                    ZProd<false,M1::mconj>::rprod(x,m.nonConj().cref(I,J));
+                    ZProd<false,M1::_conj>::rprod(x,m.nonConj().cref(I,J));
                 const RT im = 
-                    ZProd<false,M1::mconj>::iprod(x,m.nonConj().cref(I,J));
+                    ZProd<false,M1::_conj>::iprod(x,m.nonConj().cref(I,J));
                 m.ref(I,J) = VT(rm,im);
             }
         };
@@ -183,7 +183,7 @@ namespace tmv {
         { static inline void unroll(const Scaling<ix,T>& , M1& ) {} };
 
         static inline void call(const Scaling<ix,T>& x, M1& m)
-        { Unroller<0,cs,0,rs,M1::miscomplex>::unroll(x,m); }
+        { Unroller<0,cs,0,rs,M1::iscomplex>::unroll(x,m); }
     };
 
     // algo 15: Fully unroll by columns
@@ -225,9 +225,9 @@ namespace tmv {
                 typedef typename M1::real_type RT;
                 typedef typename M1::value_type VT;
                 const RT rm =
-                    ZProd<false,M1::mconj>::rprod(x,m.nonConj().cref(I,J));
+                    ZProd<false,M1::_conj>::rprod(x,m.nonConj().cref(I,J));
                 const RT im =
-                    ZProd<false,M1::mconj>::iprod(x,m.nonConj().cref(I,J));
+                    ZProd<false,M1::_conj>::iprod(x,m.nonConj().cref(I,J));
                 m.ref(I,J) = VT(rm,im);
             }
         };
@@ -236,7 +236,7 @@ namespace tmv {
         { static inline void unroll(const Scaling<ix,T>& , M1& ) {} };
 
         static inline void call(const Scaling<ix,T>& x, M1& m)
-        { Unroller<0,cs,0,rs,M1::miscomplex>::unroll(x,m); }
+        { Unroller<0,cs,0,rs,M1::iscomplex>::unroll(x,m); }
     };
 
     // algo -4: No copies or branches
@@ -249,15 +249,15 @@ namespace tmv {
             const int algo = 
                 (cs == 0 || rs == 0) ? 0 :
                 (ix == 1) ? 1 :
-                M1::mcanlin ? 2 :
+                M1::_canlin ? 2 :
 #if TMV_OPT >= 1
                 ( cs != UNKNOWN && rs != UNKNOWN ) ? (
                     ( IntTraits2<cs,rs>::prod <= int(128/sizeof(T1)) ) ? (
-                        ( M1::mrowmajor ? 25 : 15 ) ) :
-                    M1::mrowmajor ? 21 :
-                    M1::mcolmajor ? 11 :
+                        ( M1::_rowmajor ? 25 : 15 ) ) :
+                    M1::_rowmajor ? 21 :
+                    M1::_colmajor ? 11 :
                     ( cs > rs ) ? 21 : 11 ) :
-                M1::mrowmajor ? 21 :
+                M1::_rowmajor ? 21 :
 #endif
                 11;
             ScaleM_Helper<algo,cs,rs,ix,T,M1>::call(x,m);
@@ -272,7 +272,7 @@ namespace tmv {
         {
             const int algo = 
                 (cs == 0 || rs == 0 || ix == 1) ? 0 :
-                M1::mcanlin ? 1 :
+                M1::_canlin ? 1 :
 #if TMV_OPT >= 2
                 cs == UNKNOWN || rs == UNKNOWN ? 31 :
 #endif
@@ -312,12 +312,11 @@ namespace tmv {
         {
             typedef typename M1::value_type T1;
             const bool inst =
-                M1::mcolsize == UNKNOWN && M1::mrowsize == UNKNOWN &&
+                M1::unknownsizes &&
                 Traits<T1>::isinst;
-            const bool conj = M1::mconj;
             const int algo = 
                 ix == 1 ? 0 :
-                conj ? 97 :
+                M1::_conj ? 97 :
                 inst ? 98 : 
                 -3;
             ScaleM_Helper<algo,cs,rs,ix,T,M1>::call(x,m);
@@ -336,8 +335,8 @@ namespace tmv {
     inline void Scale(
         const Scaling<ix,T>& x, BaseMatrix_Rec_Mutable<M>& m)
     {
-        const int cs = M::mcolsize;
-        const int rs = M::mrowsize;
+        const int cs = M::_colsize;
+        const int rs = M::_rowsize;
         typedef typename M::cview_type Mv;
         Mv mv = m.cView();
         ScaleM_Helper<-2,cs,rs,ix,T,Mv>::call(x,mv);
@@ -347,8 +346,8 @@ namespace tmv {
     inline void InlineScale(
         const Scaling<ix,T>& x, BaseMatrix_Rec_Mutable<M>& m)
     {
-        const int cs = M::mcolsize;
-        const int rs = M::mrowsize;
+        const int cs = M::_colsize;
+        const int rs = M::_rowsize;
         typedef typename M::cview_type Mv;
         Mv mv = m.cView();
         ScaleM_Helper<-3,cs,rs,ix,T,Mv>::call(x,mv);

@@ -347,7 +347,7 @@ namespace tmv {
             std::cout<<"UM algo 12: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const bool unit = M1::munit;
+            const bool unit = M1::_unit;
             typedef typename M1::value_type T1;
             typedef typename Maybe<!unit>::template ProdType<T1,T>::type PT1;
             typedef typename M1::const_row_sub_type M1r;
@@ -388,7 +388,7 @@ namespace tmv {
             std::cout<<"UM algo 13: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const bool unit = M1::munit;
+            const bool unit = M1::_unit;
             typedef typename M1::value_type T1;
             typedef typename Maybe<!unit>::template ProdType<T1,T>::type PT1;
             typedef typename M1::const_col_sub_type M1c;
@@ -427,7 +427,7 @@ namespace tmv {
             std::cout<<"UM algo 16: M,N,cs,rs,x = "<<2<<','<<N<<
                 ','<<2<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const bool unit = M1::munit;
+            const bool unit = M1::_unit;
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
@@ -453,10 +453,10 @@ namespace tmv {
             IT3 C0 = m3.get_row(0).begin();;
             IT3 C1 = C0; C1.shiftP(Cstepi);
 
-            Prefetch_Read(B0.getP());
-            Prefetch_Read(B1.getP());
-            Prefetch_Write(C0.getP());
-            Prefetch_Write(C1.getP());
+            Prefetch_Read(B0.get());
+            Prefetch_Read(B1.get());
+            Prefetch_Write(C0.get());
+            Prefetch_Write(C1.get());
 
             int j;
 
@@ -480,7 +480,7 @@ namespace tmv {
             std::cout<<"UM algo 16: M,N,cs,rs,x = "<<3<<','<<N<<
                 ','<<3<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const bool unit = M1::munit;
+            const bool unit = M1::_unit;
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
@@ -511,12 +511,12 @@ namespace tmv {
             IT3 C1 = C0; C1.shiftP(Cstepi);
             IT3 C2 = C1; C2.shiftP(Cstepi);
 
-            Prefetch_Read(B0.getP());
-            Prefetch_Read(B1.getP());
-            Prefetch_Read(B2.getP());
-            Prefetch_Write(C0.getP());
-            Prefetch_Write(C1.getP());
-            Prefetch_Write(C2.getP());
+            Prefetch_Read(B0.get());
+            Prefetch_Read(B1.get());
+            Prefetch_Read(B2.get());
+            Prefetch_Write(C0.get());
+            Prefetch_Write(C1.get());
+            Prefetch_Write(C2.get());
 
             int j;
 
@@ -542,7 +542,7 @@ namespace tmv {
             std::cout<<"UM algo 16: M,N,cs,rs,x = "<<4<<','<<N<<
                 ','<<4<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const bool unit = M1::munit;
+            const bool unit = M1::_unit;
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
@@ -579,14 +579,14 @@ namespace tmv {
             IT3 C2 = C1; C2.shiftP(Cstepi);
             IT3 C3 = C2; C3.shiftP(Cstepi);
 
-            Prefetch_Read(B0.getP());
-            Prefetch_Read(B1.getP());
-            Prefetch_Read(B2.getP());
-            Prefetch_Read(B3.getP());
-            Prefetch_Write(C0.getP());
-            Prefetch_Write(C1.getP());
-            Prefetch_Write(C2.getP());
-            Prefetch_Write(C3.getP());
+            Prefetch_Read(B0.get());
+            Prefetch_Read(B1.get());
+            Prefetch_Read(B2.get());
+            Prefetch_Read(B3.get());
+            Prefetch_Write(C0.get());
+            Prefetch_Write(C1.get());
+            Prefetch_Write(C2.get());
+            Prefetch_Write(C3.get());
 
             int j;
 
@@ -614,7 +614,7 @@ namespace tmv {
             std::cout<<"UM algo 16: M,N,cs,rs,x = "<<5<<','<<N<<
                 ','<<5<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const bool unit = M1::munit;
+            const bool unit = M1::_unit;
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
@@ -658,16 +658,16 @@ namespace tmv {
             IT3 C3 = C2; C3.shiftP(Cstepi);
             IT3 C4 = C3; C4.shiftP(Cstepi);
 
-            Prefetch_Read(B0.getP());
-            Prefetch_Read(B1.getP());
-            Prefetch_Read(B2.getP());
-            Prefetch_Read(B3.getP());
-            Prefetch_Read(B4.getP());
-            Prefetch_Write(C0.getP());
-            Prefetch_Write(C1.getP());
-            Prefetch_Write(C2.getP());
-            Prefetch_Write(C3.getP());
-            Prefetch_Write(C4.getP());
+            Prefetch_Read(B0.get());
+            Prefetch_Read(B1.get());
+            Prefetch_Read(B2.get());
+            Prefetch_Read(B3.get());
+            Prefetch_Read(B4.get());
+            Prefetch_Write(C0.get());
+            Prefetch_Write(C1.get());
+            Prefetch_Write(C2.get());
+            Prefetch_Write(C3.get());
+            Prefetch_Write(C4.get());
 
             int j;
 
@@ -698,9 +698,9 @@ namespace tmv {
             std::cout<<"UM algo 16: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<UNKNOWN<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const bool rxr = M1::mrowmajor && M3::mrowmajor;
-            const bool crx = M1::mcolmajor && M2::mrowmajor;
-            const bool xcc = M2::mcolmajor && M3::mcolmajor;
+            const bool rxr = M1::_rowmajor && M3::_rowmajor;
+            const bool crx = M1::_colmajor && M2::_rowmajor;
+            const bool xcc = M2::_colmajor && M3::_colmajor;
             const int algo2 = rxr ? 12 : crx ? 13 : xcc ? 11 : 13;
             switch (M) {
               case 0 :
@@ -748,9 +748,9 @@ namespace tmv {
 #if (TMV_Q2 == 1)
             const int algo2 = (cs == UNKNOWN || cs == 1) ? 1 : 0;
 #else
-            const bool rxr = M1::mrowmajor && M3::mrowmajor;
-            const bool crx = M1::mcolmajor && M2::mrowmajor;
-            const bool xcc = M2::mcolmajor && M3::mcolmajor;
+            const bool rxr = M1::_rowmajor && M3::_rowmajor;
+            const bool crx = M1::_colmajor && M2::_rowmajor;
+            const bool xcc = M2::_colmajor && M3::_colmajor;
             const int algo2 = 
                 cs == 0 ? 0 :
                 cs == 1 ? 1 :
@@ -770,7 +770,7 @@ namespace tmv {
                 const int Mx = M > 16 ? ((((M-1)>>5)+1)<<4) : (M>>1);
                 // (If M > 16, round M/2 up to a multiple of 16.)
                 const int csx = IntTraits<cs>::half_roundup;
-                const int csy = cs == UNKNOWN ? cs : cs-csx;
+                const int csy = IntTraits2<cs,csx>::diff;
 
                 typedef typename M1::const_subtrimatrix_type M1a;
                 typedef typename M1::const_submatrix_type M1b;
@@ -835,7 +835,7 @@ namespace tmv {
             std::cout<<"UM algo 22: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const bool unit = M1::munit;
+            const bool unit = M1::_unit;
             typedef typename M1::value_type T1;
             typedef typename Maybe<!unit>::template ProdType<T1,T>::type PT1;
             typedef typename M1::const_row_sub_type M1r;
@@ -876,7 +876,7 @@ namespace tmv {
             std::cout<<"UM algo 23: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const bool unit = M1::munit;
+            const bool unit = M1::_unit;
             typedef typename M1::value_type T1;
             typedef typename Maybe<!unit>::template ProdType<T1,T>::type PT1;
             typedef typename M1::const_col_sub_type M1c;
@@ -914,7 +914,7 @@ namespace tmv {
             std::cout<<"UM algo 26: M,N,cs,rs,x = "<<2<<','<<N<<
                 ','<<2<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const bool unit = M1::munit;
+            const bool unit = M1::_unit;
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
@@ -940,10 +940,10 @@ namespace tmv {
             IT3 C0 = m3.get_row(0).begin();;
             IT3 C1 = C0; C1.shiftP(Cstepi);
 
-            Prefetch_Read(B0.getP());
-            Prefetch_Read(B1.getP());
-            Prefetch_Write(C0.getP());
-            Prefetch_Write(C1.getP());
+            Prefetch_Read(B0.get());
+            Prefetch_Read(B1.get());
+            Prefetch_Write(C0.get());
+            Prefetch_Write(C1.get());
 
             int j;
 
@@ -967,7 +967,7 @@ namespace tmv {
             std::cout<<"UM algo 26: M,N,cs,rs,x = "<<3<<','<<N<<
                 ','<<3<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const bool unit = M1::munit;
+            const bool unit = M1::_unit;
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
@@ -998,12 +998,12 @@ namespace tmv {
             IT3 C1 = C0; C1.shiftP(Cstepi);
             IT3 C2 = C1; C2.shiftP(Cstepi);
 
-            Prefetch_Read(B0.getP());
-            Prefetch_Read(B1.getP());
-            Prefetch_Read(B2.getP());
-            Prefetch_Write(C0.getP());
-            Prefetch_Write(C1.getP());
-            Prefetch_Write(C2.getP());
+            Prefetch_Read(B0.get());
+            Prefetch_Read(B1.get());
+            Prefetch_Read(B2.get());
+            Prefetch_Write(C0.get());
+            Prefetch_Write(C1.get());
+            Prefetch_Write(C2.get());
 
             int j;
 
@@ -1029,7 +1029,7 @@ namespace tmv {
             std::cout<<"UM algo 26: M,N,cs,rs,x = "<<4<<','<<N<<
                 ','<<4<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const bool unit = M1::munit;
+            const bool unit = M1::_unit;
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
@@ -1066,14 +1066,14 @@ namespace tmv {
             IT3 C2 = C1; C2.shiftP(Cstepi);
             IT3 C3 = C2; C3.shiftP(Cstepi);
 
-            Prefetch_Read(B0.getP());
-            Prefetch_Read(B1.getP());
-            Prefetch_Read(B2.getP());
-            Prefetch_Read(B3.getP());
-            Prefetch_Write(C0.getP());
-            Prefetch_Write(C1.getP());
-            Prefetch_Write(C2.getP());
-            Prefetch_Write(C3.getP());
+            Prefetch_Read(B0.get());
+            Prefetch_Read(B1.get());
+            Prefetch_Read(B2.get());
+            Prefetch_Read(B3.get());
+            Prefetch_Write(C0.get());
+            Prefetch_Write(C1.get());
+            Prefetch_Write(C2.get());
+            Prefetch_Write(C3.get());
 
             int j;
 
@@ -1101,7 +1101,7 @@ namespace tmv {
             std::cout<<"UM algo 26: M,N,cs,rs,x = "<<5<<','<<N<<
                 ','<<5<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const bool unit = M1::munit;
+            const bool unit = M1::_unit;
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
@@ -1145,16 +1145,16 @@ namespace tmv {
             IT3 C3 = C2; C3.shiftP(Cstepi);
             IT3 C4 = C3; C4.shiftP(Cstepi);
 
-            Prefetch_Read(B0.getP());
-            Prefetch_Read(B1.getP());
-            Prefetch_Read(B2.getP());
-            Prefetch_Read(B3.getP());
-            Prefetch_Read(B4.getP());
-            Prefetch_Write(C0.getP());
-            Prefetch_Write(C1.getP());
-            Prefetch_Write(C2.getP());
-            Prefetch_Write(C3.getP());
-            Prefetch_Write(C4.getP());
+            Prefetch_Read(B0.get());
+            Prefetch_Read(B1.get());
+            Prefetch_Read(B2.get());
+            Prefetch_Read(B3.get());
+            Prefetch_Read(B4.get());
+            Prefetch_Write(C0.get());
+            Prefetch_Write(C1.get());
+            Prefetch_Write(C2.get());
+            Prefetch_Write(C3.get());
+            Prefetch_Write(C4.get());
 
             int j;
 
@@ -1185,9 +1185,9 @@ namespace tmv {
             std::cout<<"UM algo 26: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<UNKNOWN<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const bool rxr = M1::mrowmajor && M3::mrowmajor;
-            const bool crx = M1::mcolmajor && M2::mrowmajor;
-            const bool xcc = M2::mcolmajor && M3::mcolmajor;
+            const bool rxr = M1::_rowmajor && M3::_rowmajor;
+            const bool crx = M1::_colmajor && M2::_rowmajor;
+            const bool xcc = M2::_colmajor && M3::_colmajor;
             const int algo2 = rxr ? 22 : crx ? 23 : xcc ? 21 : 23;
             switch (M) {
               case 0 :
@@ -1235,9 +1235,9 @@ namespace tmv {
 #if (TMV_Q2 == 1)
             const int algo2 = (cs == UNKNOWN || cs == 1) ? 1 : 0;
 #else
-            const bool rxr = M1::mrowmajor && M3::mrowmajor;
-            const bool crx = M1::mcolmajor && M2::mrowmajor;
-            const bool xcc = M2::mcolmajor && M3::mcolmajor;
+            const bool rxr = M1::_rowmajor && M3::_rowmajor;
+            const bool crx = M1::_colmajor && M2::_rowmajor;
+            const bool xcc = M2::_colmajor && M3::_colmajor;
             const int algo2 = 
                 cs == 0 ? 0 :
                 cs == 1 ? 1 :
@@ -1257,7 +1257,7 @@ namespace tmv {
                 const int Mx = M > 16 ? ((((M-1)>>5)+1)<<4) : (M>>1);
                 // (If M > 16, round M/2 up to a multiple of 16.)
                 const int csx = IntTraits<cs>::half_roundup;
-                const int csy = cs == UNKNOWN ? cs : cs-csx;
+                const int csy = IntTraits2<cs,csx>::diff;
 
                 typedef typename M1::const_subtrimatrix_type M1a;
                 typedef typename M1::const_submatrix_type M1b;
@@ -1297,11 +1297,11 @@ namespace tmv {
             std::cout<<"UM algo 31: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const bool rxr = M1::mrowmajor && M3::mrowmajor;
-            const bool crx = M1::mcolmajor && M2::mrowmajor;
-            const bool xcc = M2::mcolmajor && M3::mcolmajor;
-            const bool nxx = !(M1::mcolmajor || M1::mrowmajor);
-            const bool xxn = !(M3::mcolmajor || M3::mrowmajor);
+            const bool rxr = M1::_rowmajor && M3::_rowmajor;
+            const bool crx = M1::_colmajor && M2::_rowmajor;
+            const bool xcc = M2::_colmajor && M3::_colmajor;
+            const bool nxx = !(M1::_colmajor || M1::_rowmajor);
+            const bool xxn = !(M3::_colmajor || M3::_rowmajor);
             // xcc, rxr, crx have fast algorithms already
             // add can't be turned into a MultEq op
             // nxx, xxn don't benefit from the change
@@ -1309,7 +1309,7 @@ namespace tmv {
             const bool multeq = !(xcc || rxr || crx || add || nxx || xxn);
             const bool maybesmall = 
                 cs==UNKNOWN || (cs<=5 && (rs==UNKNOWN || rs<16)) || cs<=3;
-            const bool upper1 = M1::mupper;
+            const bool upper1 = M1::_upper;
 #ifdef TMV_OPT_CLEANUP
             const int algo2 = maybesmall ? ( upper1 ? 16 : 26 ) : 0;
 #else
@@ -1395,7 +1395,7 @@ namespace tmv {
             std::cout<<"UM algo 36: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const bool upper1 = M1::mupper;
+            const bool upper1 = M1::_upper;
             const int algo2 = upper1 ? 17 : 27;
             bool bad_alloc = false;
 #ifdef PRINTALGO_UM_OMP
@@ -1492,7 +1492,7 @@ namespace tmv {
             std::cout<<"UM algo 38: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const bool upper1 = M1::mupper;
+            const bool upper1 = M1::_upper;
             const int algo2 = upper1 ? 16 : 26;
 
             if (M <= 5) {
@@ -1542,8 +1542,8 @@ namespace tmv {
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M1::value_type T1;
-            const bool rm = M2::mcolmajor || M3::mrowmajor; 
-            const int s1 = M1::mshape;
+            const bool rm = M2::_colmajor || M3::_rowmajor; 
+            const int s1 = M1::_shape;
             typedef typename MCopyHelper<T1,s1,cs,cs,rm,false>::type M1c;
             M1c m1c(M);
             typedef typename M1c::view_type M1cv;
@@ -1572,8 +1572,8 @@ namespace tmv {
 #endif
             typedef typename M1::value_type T1;
             typedef typename Traits2<T,T1>::type PT1;
-            const bool rm = M2::mcolmajor || M3::mrowmajor; 
-            const int s1 = ShapeTraits<M1::mshape>::nonunit_shape;
+            const bool rm = M2::_colmajor || M3::_rowmajor; 
+            const int s1 = ShapeTraits<M1::_shape>::nonunit_shape;
             typedef typename MCopyHelper<PT1,s1,cs,cs,rm,false>::type M1c;
             M1c m1c(M);
             typedef typename M1c::view_type M1cv;
@@ -1630,7 +1630,7 @@ namespace tmv {
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M2::value_type T2;
-            const bool rm = M1::mcolmajor && M3::mrowmajor;
+            const bool rm = M1::_colmajor && M3::_rowmajor;
             typedef typename MCopyHelper<T2,Rec,cs,rs,rm,false>::type M2c;
             M2c m2c(M,N);
             typedef typename M2c::view_type M2cv;
@@ -1659,7 +1659,7 @@ namespace tmv {
 #endif
             typedef typename M2::value_type T2;
             typedef typename Traits2<T,T2>::type PT2;
-            const bool rm = M1::mcolmajor && M3::mrowmajor;
+            const bool rm = M1::_colmajor && M3::_rowmajor;
             typedef typename MCopyHelper<PT2,Rec,cs,rs,rm,false>::type M2c;
             M2c m2c(M,N);
             typedef typename M2c::view_type M2cv;
@@ -1720,7 +1720,7 @@ namespace tmv {
                 typedef typename M1::value_type T1;
                 typedef typename M2::value_type T2;
                 typedef typename Traits2<T1,T2>::type PT3;
-                const bool rm = M1::mrowmajor && M2::mrowmajor;
+                const bool rm = M1::_rowmajor && M2::_rowmajor;
                 typedef typename MCopyHelper<PT3,Rec,cs,rs,rm,false>::type M3c;
                 M3c m3c(M,N);
                 typedef typename M3c::view_type M3cv;
@@ -1732,7 +1732,7 @@ namespace tmv {
                 MultXM_Helper<-2,cs,rs,add,ix,T,M3ccv,M3>::call(x,m3ccv,m3);
             } else {
                 typedef typename M3::value_type T3;
-                const bool rm = M1::mrowmajor && M2::mrowmajor;
+                const bool rm = M1::_rowmajor && M2::_rowmajor;
                 typedef typename MCopyHelper<T3,Rec,cs,rs,rm,false>::type M3c;
                 M3c m3c(M,N);
                 typedef typename M3c::view_type M3cv;
@@ -1764,7 +1764,7 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename Traits2<T1,T2>::type PT3;
-            const bool rm = M1::mrowmajor && M2::mrowmajor;
+            const bool rm = M1::_rowmajor && M2::_rowmajor;
             typedef typename MCopyHelper<PT3,Rec,cs,rs,rm,false>::type M3c;
             M3c m3c(M,N);
             typedef typename M3c::view_type M3cv;
@@ -1785,7 +1785,7 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const bool upper1 = M1::mupper;
+            const bool upper1 = M1::_upper;
             const int algo = 
                 ( cs == 0 || rs == 0 ) ? 0 :
                 cs == 1 ? 401 :
@@ -1833,10 +1833,10 @@ namespace tmv {
             // 36 = Parallelize using openmp 
             // 38 = Check if M is small
 
-            const bool xcc = M2::mcolmajor && M3::mcolmajor;
-            const bool rxr = M1::mrowmajor && M3::mrowmajor;
-            const bool crx = M1::mcolmajor && M2::mrowmajor;
-            const bool upper1 = M1::mupper;
+            const bool xcc = M2::_colmajor && M3::_colmajor;
+            const bool rxr = M1::_rowmajor && M3::_rowmajor;
+            const bool crx = M1::_colmajor && M2::_rowmajor;
+            const bool upper1 = M1::_upper;
 
 #if 0
             const int algo = 33;
@@ -1847,8 +1847,8 @@ namespace tmv {
                 ( rxr ? 12 : crx ? 13 : xcc ? 11 : 13 ) :
                 ( rxr ? 22 : crx ? 23 : xcc ? 21 : 23 );
 #else
-            const bool nxx = !(M1::mcolmajor || M1::mrowmajor);
-            const bool xxn = !(M3::mcolmajor || M3::mrowmajor);
+            const bool nxx = !(M1::_colmajor || M1::_rowmajor);
+            const bool xxn = !(M3::_colmajor || M3::_rowmajor);
             // xcc, rxr, crx have fast algorithms already
             // add can't be turned into a MultEq op
             // nxx, xxn don't benefit from the change
@@ -1953,9 +1953,9 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
             const bool inst = 
-                M1::msize == UNKNOWN &&
-                M2::mcolsize == UNKNOWN && M2::mrowsize == UNKNOWN &&
-                M3::mcolsize == UNKNOWN && M3::mrowsize == UNKNOWN &&
+                M1::unknownsizes &&
+                M2::unknownsizes &&
+                M3::unknownsizes &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -1968,7 +1968,7 @@ namespace tmv {
                 ( cs == 0 || rs == 0 ) ? 0 :
                 cs == 1 ? 201 :
                 rs == 1 ? 202 :
-                M3::mconj ? 97 :
+                M3::_conj ? 97 :
                 inst ? 98 : 
                 -3;
             MultUM_Helper<algo,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
@@ -2011,9 +2011,9 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const bool checkalias =
-                M1::msize == UNKNOWN &&
-                M2::mcolsize == UNKNOWN && M2::mrowsize == UNKNOWN &&
-                M3::mcolsize == UNKNOWN && M3::mrowsize == UNKNOWN;
+                M1::_size == UNKNOWN &&
+                M2::_colsize == UNKNOWN && M2::_rowsize == UNKNOWN &&
+                M3::_colsize == UNKNOWN && M3::_rowsize == UNKNOWN;
             const int algo = 
                 ( cs == 0 || rs == 0 ) ? 0 :
                 cs == 1 ? 1 :
@@ -2030,15 +2030,15 @@ namespace tmv {
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     {
-        TMVStaticAssert((Sizes<M1::msize,M3::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M2::mcolsize>::same));
-        TMVStaticAssert((Sizes<M2::mrowsize,M3::mrowsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M3::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M2::_colsize>::same));
+        TMVStaticAssert((Sizes<M2::_rowsize,M3::_rowsize>::same));
         TMVAssert(m1.size() == m3.colsize());
         TMVAssert(m1.size() == m2.colsize());
         TMVAssert(m2.rowsize() == m3.rowsize());
 
-        const int cs = Sizes<M3::mcolsize,M1::msize>::size;
-        const int rs = Sizes<M3::mrowsize,M2::mrowsize>::size;
+        const int cs = Sizes<M3::_colsize,M1::_size>::size;
+        const int rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         typedef typename M3::cview_type M3v;
@@ -2082,15 +2082,15 @@ namespace tmv {
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     {
-        TMVStaticAssert((Sizes<M1::mcolsize,M3::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::msize>::same));
-        TMVStaticAssert((Sizes<M2::msize,M3::mrowsize>::same));
+        TMVStaticAssert((Sizes<M1::_colsize,M3::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_rowsize,M2::_size>::same));
+        TMVStaticAssert((Sizes<M2::_size,M3::_rowsize>::same));
         TMVAssert(m1.colsize() == m3.colsize());
         TMVAssert(m1.rowsize() == m2.size());
         TMVAssert(m2.size() == m3.rowsize());
 
-        const int cs = Sizes<M3::mcolsize,M1::mcolsize>::size;
-        const int rs = Sizes<M3::mrowsize,M2::msize>::size;
+        const int cs = Sizes<M3::_colsize,M1::_colsize>::size;
+        const int rs = Sizes<M3::_rowsize,M2::_size>::size;
         typedef typename M1::const_transpose_type M1t;
         typedef typename M2::const_transpose_type M2t;
         typedef typename M3::transpose_type M3t;

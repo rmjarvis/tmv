@@ -43,14 +43,14 @@ namespace tmv {
     inline void DoLDivUD(
         const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
     {
-        TMVStaticAssert((Sizes<M3::mcolsize,M1::mcolsize>::same));
-        TMVStaticAssert((Sizes<M3::mrowsize,M1::mrowsize>::same));
-        TMVStaticAssert((Sizes<M3::mcolsize,M2::msize>::same));
+        TMVStaticAssert((Sizes<M3::_colsize,M1::_colsize>::same));
+        TMVStaticAssert((Sizes<M3::_rowsize,M1::_rowsize>::same));
+        TMVStaticAssert((Sizes<M3::_colsize,M2::_size>::same));
         TMVAssert(m3.colsize() == m1.colsize());
         TMVAssert(m3.rowsize() == m1.rowsize());
         TMVAssert(m3.colsize() == m2.size());
-        const int cs1 = Sizes<M3::mcolsize,M1::mcolsize>::size;
-        const int cs = Sizes<cs1,M2::msize>::size;
+        const int cs1 = Sizes<M3::_colsize,M1::_colsize>::size;
+        const int cs = Sizes<cs1,M2::_size>::size;
         const int N = cs == UNKNOWN ? m3.colsize() : cs;
 
         // First calculate x * m2^-1
@@ -72,90 +72,90 @@ namespace tmv {
         M3t m3t = m3.transpose().cView();
         typedef typename Traits<T>::real_type RT;
         Scaling<1,RT> one;
-        MultUD_Helper<algo,cs,rs,add,1,RT,M1t,M2cv,M3t>::call(one,m1t,m2cv,m3t);
+        MultUD_Helper<algo,cs,rs,false,1,RT,M1t,M2cv,M3t>::call(one,m1t,m2cv,m3t);
     }
 
     template <int ix, class T, class M1, class M2, class M3>
-    inline void LDivMM(
+    inline void LDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Tri_Mutable<M3>& m3)
     { DoLDivUD<-1>(x,m1,m2,m3); }
 
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasLDivMM(
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void NoAliasLDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Tri_Mutable<M3>& m3)
     { DoLDivUD<-2>(x,m1,m2,m3); }
 
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void AliasLDivMM(
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void AliasLDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Tri_Mutable<M3>& m3)
     { DoLDivUD<99>(x,m1,m2,m3); }
 
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void LDivMM(
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void LDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     {
-        const bool upper = M1::mupper;
+        const bool upper = M1::_upper;
         typedef typename TypeSelect<upper,
                 typename M3::uppertri_type,
                 typename M3::lowertri_type>::type M3u;
         M3u m3u = Maybe<upper>::uppertri(m3);
-        LDivMM<add>(x,m1,m2,m3u)
+        LDiv(x,m1,m2,m3u)
         Maybe<!upper>::uppertri(m3).offDiag().setZero();
     }
 
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasLDivMM(
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void NoAliasLDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     { 
-        const bool upper = M1::mupper;
+        const bool upper = M1::_upper;
         typedef typename TypeSelect<upper,
                 typename M3::uppertri_type,
                 typename M3::lowertri_type>::type M3u;
         M3u m3u = Maybe<upper>::uppertri(m3);
         m3.setZero();
-        NoAliasLDivMM<add>(x,m1,m2,m3u)
+        NoAliasLDiv(x,m1,m2,m3u)
     }
 
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void AliasLDivMM(
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void AliasLDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     {
-        const bool upper = M1::mupper;
+        const bool upper = M1::_upper;
         typedef typename TypeSelect<upper,
                 typename M3::uppertri_type,
                 typename M3::lowertri_type>::type M3u;
         M3u m3u = Maybe<upper>::uppertri(m3);
-        AliasLDivMM<add>(x,m1,m2,m3u)
+        AliasLDiv(x,m1,m2,m3u)
         Maybe<!upper>::uppertri(m3).offDiag().setZero();
     }
 
 
     template <class M1, int ix, class T, class M2>
-    inline void LDivEqMM(
+    inline void LDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { DoLDivUD<-1>(x,m1.mat(),m2.mat(),m1.mat()); }
 
     template <class M1, int ix, class T, class M2>
-    inline void NoAliasLDivEqMM(
+    inline void NoAliasLDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { DoLDivUD<-2>(x,m1.mat(),m2.mat(),m1.mat()); }
 
     template <class M1, int ix, class T, class M2>
-    inline void AliasLDivEqMM(
+    inline void AliasLDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { DoLDivUD<99>(x,m1.mat(),m2.mat(),m1.mat()); }
@@ -167,14 +167,14 @@ namespace tmv {
     inline void DoRDivUD(
         const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
     {
-        TMVStaticAssert((Sizes<M3::mcolsize,M1::mcolsize>::same));
-        TMVStaticAssert((Sizes<M3::mrowsize,M1::mrowsize>::same));
-        TMVStaticAssert((Sizes<M3::mrolsize,M2::msize>::same));
+        TMVStaticAssert((Sizes<M3::_colsize,M1::_colsize>::same));
+        TMVStaticAssert((Sizes<M3::_rowsize,M1::_rowsize>::same));
+        TMVStaticAssert((Sizes<M3::_rolsize,M2::_size>::same));
         TMVAssert(m3.colsize() == m1.colsize());
         TMVAssert(m3.rowsize() == m1.rowsize());
         TMVAssert(m3.rolsize() == m2.size());
-        const int rs1 = Sizes<M3::mrowsize,M1::mrowsize>::size;
-        const int rs = Sizes<rs1,M2::msize>::size;
+        const int rs1 = Sizes<M3::_rowsize,M1::_rowsize>::size;
+        const int rs = Sizes<rs1,M2::_size>::size;
         const int N = rs == UNKNOWN ? m3.rowsize() : rs;
 
         // First calculate x * m2^-1
@@ -196,90 +196,90 @@ namespace tmv {
         M3v m3v = m3.cView();
         typedef typename Traits<T>::real_type RT;
         Scaling<1,RT> one;
-        MultUD_Helper<algo,cs,rs,add,1,RT,M1v,M2cv,M3v>::call(one,m1v,m2cv,m3v);
+        MultUD_Helper<algo,cs,rs,false,1,RT,M1v,M2cv,M3v>::call(one,m1v,m2cv,m3v);
     }
 
     template <int ix, class T, class M1, class M2, class M3>
-    inline void RDivMM(
+    inline void RDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Tri_Mutable<M3>& m3)
     { DoRDivUD<-1>(x,m1,m2,m3); }
 
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasRDivMM(
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void NoAliasRDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Tri_Mutable<M3>& m3)
     { DoRDivUD<-2>(x,m1,m2,m3); }
 
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void AliasRDivMM(
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void AliasRDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Tri_Mutable<M3>& m3)
     { DoRDivUD<99>(x,m1,m2,m3); }
 
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void RDivMM(
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void RDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     {
-        const bool upper = M1::mupper;
+        const bool upper = M1::_upper;
         typedef typename TypeSelect<upper,
                 typename M3::uppertri_type,
                 typename M3::lowertri_type>::type M3u;
         M3u m3u = Maybe<upper>::uppertri(m3);
-        RDivMM<add>(x,m1,m2,m3u)
+        RDiv(x,m1,m2,m3u)
         Maybe<!upper>::uppertri(m3).offDiag().setZero();
     }
 
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasRDivMM(
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void NoAliasRDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     { 
-        const bool upper = M1::mupper;
+        const bool upper = M1::_upper;
         typedef typename TypeSelect<upper,
                 typename M3::uppertri_type,
                 typename M3::lowertri_type>::type M3u;
         M3u m3u = Maybe<upper>::uppertri(m3);
         m3.setZero();
-        NoAliasRDivMM<add>(x,m1,m2,m3u)
+        NoAliasRDiv(x,m1,m2,m3u)
     }
 
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void AliasRDivMM(
+    template <int ix, class T, class M1, class M2, class M3>
+    inline void AliasRDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     {
-        const bool upper = M1::mupper;
+        const bool upper = M1::_upper;
         typedef typename TypeSelect<upper,
                 typename M3::uppertri_type,
                 typename M3::lowertri_type>::type M3u;
         M3u m3u = Maybe<upper>::uppertri(m3);
-        AliasRDivMM<add>(x,m1,m2,m3u)
+        AliasRDiv(x,m1,m2,m3u)
         Maybe<!upper>::uppertri(m3).offDiag().setZero();
     }
 
 
     template <class M1, int ix, class T, class M2>
-    inline void RDivEqMM(
+    inline void RDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { DoRDivUD<-1>(x,m1.mat(),m2.mat(),m1.mat()); }
 
     template <class M1, int ix, class T, class M2>
-    inline void NoAliasRDivEqMM(
+    inline void NoAliasRDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { DoRDivUD<-2>(x,m1.mat(),m2.mat(),m1.mat()); }
 
     template <class M1, int ix, class T, class M2>
-    inline void AliasRDivEqMM(
+    inline void AliasRDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { DoRDivUD<99>(x,m1.mat(),m2.mat(),m1.mat()); }

@@ -39,35 +39,13 @@
 #include "tmv/TMV_CopyM.h"
 #include "tmv/TMV_SwapM.h"
 #include "tmv/TMV_TransposeM.h"
-#include "tmv/TMV_PermuteM.h"
 #include "tmv/TMV_NormM.h"
+#include "tmv/TMV_PermuteM.h"
 #include "tmv/TMV_ScaleM.h"
 #include "tmv/TMV_MultXM.h"
 #include "tmv/TMV_ProdXM.h"
 
 namespace tmv {
-
-#if 0 // Put this in TMV_DivHelper.cpp
-    template <class T> 
-    void GenMatrix<T>::NewDivider() const
-    {
-        switch (this->GetDivType()) {
-          case LU : this->SetDiv(
-                        new LUDiv<T>(*this, this->IsDivInPlace())); 
-                    break;
-          case QR : this->SetDiv(
-                        new QRDiv<T>(*this, this->IsDivInPlace())); 
-                    break;
-          case QRP : this->SetDiv(
-                         new QRPDiv<T>(*this, this->IsDivInPlace())); 
-                     break;
-          case SV : this->SetDiv(
-                        new SVDiv<T>(*this, this->IsDivInPlace())); 
-                    break;
-          default : TMVAssert(FALSE);
-        }
-    }
-#endif
 
     //
     // Copy Matrices

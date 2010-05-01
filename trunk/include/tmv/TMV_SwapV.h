@@ -189,7 +189,7 @@ namespace tmv {
             typedef typename V1::flatten_type V1f;
             typedef typename V2::flatten_type V2f;
             typedef typename V1::real_type RT;
-            const int size2 = size == UNKNOWN ? UNKNOWN : (size<<1);
+            const int size2 = IntTraits<size>::twoS;
             const int algo2 = 
                 size != UNKNOWN && size <= 32 ? 5 :
                 sizeof(RT) == 8 ? 2 :
@@ -266,11 +266,11 @@ namespace tmv {
 #if TMV_OPT == 0
         enum { algo = 1 };
 #else
-        enum { allunit = V1::vstep == 1 && V2::vstep == 1 };
+        enum { allunit = V1::_step == 1 && V2::_step == 1 };
         enum { algo = (
                 // Strangely, algo 7 doesn't seem to be faster.
-                //(V1::viscomplex && allunit && !V1::vconj) ? 7 :
-                (V1::viscomplex) ? (V1::vconj ? 9 : 8) :
+                //(V1::iscomplex && allunit && !V1::_conj) ? 7 :
+                (V1::iscomplex) ? (V1::_conj ? 9 : 8) :
                 (sizeof(RT) == 8 && allunit) ? 2 :
                 (sizeof(RT) == 4 && allunit) ? 3 :
                 1 ) };
@@ -278,7 +278,7 @@ namespace tmv {
 
         static inline void call(V1& v1, V2& v2)
         { 
-            TMVStaticAssert(!V2::vconj);
+            TMVStaticAssert(!V2::_conj);
             const int algo1 = 
                 size != UNKNOWN && size <= int(128/sizeof(RT)) ? 5 :
                 algo;
@@ -286,7 +286,7 @@ namespace tmv {
         }
         static inline void call2(int n, IT1 it1, IT2 it2)
         { 
-            TMVStaticAssert(!V2::vconj);
+            TMVStaticAssert(!V2::_conj);
             SwapV_Helper<algo,size,V1,V2>::call2(n,it1,it2); 
         }
     };
@@ -322,14 +322,12 @@ namespace tmv {
             typedef typename V1::value_type T1;
             typedef typename V2::value_type T2;
             const bool inst = 
-                V1::vsize == UNKNOWN &&
-                V2::vsize == UNKNOWN &&
-                Traits<T1>::isinst &&
-                Traits<T2>::isinst &&
-                Traits2<T1,T2>::sametype;
-            const bool conj = V2::vconj;
+                V1::unknownsizes &&
+                V2::unknownsizes &&
+                Traits2<T1,T2>::sametype &&
+                Traits<T1>::isinst;
             const int algo = 
-                conj ? 97 :
+                V2::_conj ? 97 :
                 inst ? 98 :
                 -3;
             SwapV_Helper<algo,size,V1,V2>::call(v1,v2);
@@ -348,7 +346,7 @@ namespace tmv {
                 SwapV_Helper<-2,size,V1,V2>::call(v1,v2);
             } else if (ExactSameStorage(v1,v2)) {
                 // They are already equal modulo a conjugation.
-                Maybe<V1::vconj != int(V2::vconj)>::conjself(v2);
+                Maybe<V1::_conj != int(V2::_conj)>::conjself(v2);
             } else {
                 // Need a temporary
                 typename V1::copy_type v1c = v1;
@@ -373,8 +371,8 @@ namespace tmv {
                 VStepHelper<V2,V1>::noclobber &&
                 !VStepHelper<V1,V2>::same;
             const bool checkalias =
-                V1::vsize == UNKNOWN &&
-                V2::vsize == UNKNOWN &&
+                V1::_size == UNKNOWN &&
+                V2::_size == UNKNOWN &&
                 !noclobber;
             const int algo = 
                 checkalias ? 99 : 
@@ -390,9 +388,9 @@ namespace tmv {
         typedef typename V1::value_type T1;
         typedef typename V2::value_type T2;
         TMVStaticAssert((Traits2<T1,T2>::sametype));
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same)); 
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
-        const int size = Sizes<V1::vsize,V2::vsize>::size;
+        const int size = Sizes<V1::_size,V2::_size>::size;
         typedef typename V1::cview_type V1v;
         typedef typename V2::cview_type V2v;
         V1v v1v = v1.cView();
@@ -407,9 +405,9 @@ namespace tmv {
         typedef typename V1::value_type T1;
         typedef typename V2::value_type T2;
         TMVStaticAssert((Traits2<T1,T2>::sametype));
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same)); 
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
-        const int size = Sizes<V1::vsize,V2::vsize>::size;
+        const int size = Sizes<V1::_size,V2::_size>::size;
         typedef typename V1::cview_type V1v;
         typedef typename V2::cview_type V2v;
         V1v v1v = v1.cView();
@@ -424,9 +422,9 @@ namespace tmv {
         typedef typename V1::value_type T1;
         typedef typename V2::value_type T2;
         TMVStaticAssert((Traits2<T1,T2>::sametype));
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same)); 
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
-        const int size = Sizes<V1::vsize,V2::vsize>::size;
+        const int size = Sizes<V1::_size,V2::_size>::size;
         typedef typename V1::cview_type V1v;
         typedef typename V2::cview_type V2v;
         V1v v1v = v1.cView();
@@ -441,9 +439,9 @@ namespace tmv {
         typedef typename V1::value_type T1;
         typedef typename V2::value_type T2;
         TMVStaticAssert((Traits2<T1,T2>::sametype));
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same)); 
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
-        const int size = Sizes<V1::vsize,V2::vsize>::size;
+        const int size = Sizes<V1::_size,V2::_size>::size;
         typedef typename V1::cview_type V1v;
         typedef typename V2::cview_type V2v;
         V1v v1v = v1.cView();

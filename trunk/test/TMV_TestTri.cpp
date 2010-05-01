@@ -737,7 +737,7 @@ template <class T> void TestTriMatrix()
     std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<"> passed all basic tests\n";
 #endif
 
-    if (tmv::Epsilon<T>() > T(0)) {
+    if (tmv::TMV_Epsilon<T>() > T(0)) {
 #if 1
         TestTriMatrixArith_A1a<T>();
         TestTriMatrixArith_A1b<T>();

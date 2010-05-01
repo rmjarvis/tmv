@@ -325,7 +325,7 @@ namespace tmv {
                 typedef typename M1::const_col_type M1c;
                 PT2 Xj;
 
-                const bool c2 = V2::vconj;
+                const bool c2 = V2::_conj;
 
                 typedef typename M1c::const_nonconj_type::const_iterator IT1;
                 typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -390,12 +390,12 @@ namespace tmv {
 
             const bool dopref = M * sizeof(T1) >= TMV_Q3;
 
-            Prefetch_Read(X.getP());
-            Prefetch_Read(A0.getP());
-            Prefetch_Read(A1.getP());
-            Prefetch_Read(A2.getP());
-            Prefetch_Read(A3.getP());
-            Prefetch_MultiWrite(Y.getP());
+            Prefetch_Read(X.get());
+            Prefetch_Read(A0.get());
+            Prefetch_Read(A1.get());
+            Prefetch_Read(A2.get());
+            Prefetch_Read(A3.get());
+            Prefetch_MultiWrite(Y.get());
 
             int i;
 
@@ -413,10 +413,10 @@ namespace tmv {
                 } while (--i);
                 A0 += stepj_4; A1 += stepj_4; A2 += stepj_4; A3 += stepj_4;
                 if (dopref) {
-                    Prefetch_Read(A0.getP());
-                    Prefetch_Read(A1.getP());
-                    Prefetch_Read(A2.getP());
-                    Prefetch_Read(A3.getP());
+                    Prefetch_Read(A0.get());
+                    Prefetch_Read(A1.get());
+                    Prefetch_Read(A2.get());
+                    Prefetch_Read(A3.get());
                 }
             } while (--N_4);
         }
@@ -458,7 +458,7 @@ namespace tmv {
             std::cout<<"MV algo 12: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(V3::visreal);
+            TMVStaticAssert(V3::isreal);
             typedef typename M1::const_colrange_type M1c;
             typedef typename V2::const_subvector_type V2s;
             if (M) {
@@ -502,7 +502,7 @@ namespace tmv {
             std::cout<<"MV algo 13 N==2: M,N,cs,rs,x = "<<M<<','<<2<<
                 ','<<cs<<','<<2<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(V3::visreal);
+            TMVStaticAssert(V3::isreal);
 
             if (M) {
                 typedef typename M1::value_type T1;
@@ -544,7 +544,7 @@ namespace tmv {
             std::cout<<"MV algo 13 N==3: M,N,cs,rs,x = "<<M<<','<<3<<
                 ','<<cs<<','<<3<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(V3::visreal);
+            TMVStaticAssert(V3::isreal);
 
             if (M) {
                 typedef typename M1::value_type T1;
@@ -588,7 +588,7 @@ namespace tmv {
             std::cout<<"MV algo 13 N==4: M,N,cs,rs,x = "<<M<<','<<4<<
                 ','<<cs<<','<<4<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(V3::visreal);
+            TMVStaticAssert(V3::isreal);
 
             if (M) {
                 typedef typename M1::value_type T1;
@@ -661,15 +661,15 @@ namespace tmv {
             const IT3 Y_begin = v3.begin();
             IT3 Y = Y_begin;
 
-            const bool c1 = M1::mconj;
-            const bool c2 = V2::vconj;
+            const bool c1 = M1::_conj;
+            const bool c2 = V2::_conj;
 
             const bool dopref = M * sizeof(T1) >= TMV_Q3;
 
-            Prefetch_Read(X.getP());
-            Prefetch_Read(A0.getP());
-            Prefetch_Read(A1.getP());
-            Prefetch_MultiWrite(Y.getP());
+            Prefetch_Read(X.get());
+            Prefetch_Read(A0.get());
+            Prefetch_Read(A1.get());
+            Prefetch_MultiWrite(Y.get());
 
             int i;
 
@@ -689,8 +689,8 @@ namespace tmv {
                 } while (--i);
                 A0 += stepj_2; A1 += stepj_2;
                 if (dopref) {
-                    Prefetch_Read(A0.getP());
-                    Prefetch_Read(A1.getP());
+                    Prefetch_Read(A0.get());
+                    Prefetch_Read(A1.get());
                 }
             } while (--N_2);
         }
@@ -703,7 +703,7 @@ namespace tmv {
             std::cout<<"MV algo 15: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(V3::viscomplex);
+            TMVStaticAssert(V3::iscomplex);
             if (M) {
                 const int na = ((N>>1)<<1);
                 const int nb = N-na;
@@ -736,13 +736,13 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            TMVStaticAssert(V3::viscomplex);
+            TMVStaticAssert(V3::iscomplex);
             int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
 #ifdef PRINTALGO_MV
             std::cout<<"MV algo 16 N==2: M,N,cs,rs,x = "<<M<<','<<2<<
                 ','<<cs<<','<<2<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(V3::viscomplex);
+            TMVStaticAssert(V3::iscomplex);
 
             if (M) {
                 typedef typename M1::value_type T1;
@@ -752,7 +752,7 @@ namespace tmv {
 
                 typedef typename V2::value_type T2;
                 typedef typename Traits2<T,T2>::type PT2;
-                const bool c2 = V2::vconj;
+                const bool c2 = V2::_conj;
                 const PT2 X0 = ZProd<false,c2>::prod(x,v2.nonConj().cref(0));
                 const PT2 X1 = ZProd<false,c2>::prod(x,v2.nonConj().cref(1));
 
@@ -765,7 +765,7 @@ namespace tmv {
                 IT1 A1 = A0; A1.shiftP(stepj);
                 IT3 Y = v3.begin();
 
-                const bool c1 = M1::mconj;
+                const bool c1 = M1::_conj;
 
                 do {
                     A00 = *A0++; A01 = *A1++;
@@ -789,7 +789,7 @@ namespace tmv {
             std::cout<<"MV algo 16 N==3: M,N,cs,rs,x = "<<M<<','<<3<<
                 ','<<cs<<','<<3<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(V3::viscomplex);
+            TMVStaticAssert(V3::iscomplex);
 
             if (M) {
                 typedef typename M1::value_type T1;
@@ -799,7 +799,7 @@ namespace tmv {
 
                 typedef typename V2::value_type T2;
                 typedef typename Traits2<T,T2>::type PT2;
-                const bool c2 = V2::vconj;
+                const bool c2 = V2::_conj;
                 const PT2 X0 = ZProd<false,c2>::prod(x,v2.nonConj().cref(0));
                 const PT2 X1 = ZProd<false,c2>::prod(x,v2.nonConj().cref(1));
                 const PT2 X2 = ZProd<false,c2>::prod(x,v2.nonConj().cref(2));
@@ -814,7 +814,7 @@ namespace tmv {
                 IT1 A2 = A1; A2.shiftP(stepj);
                 IT3 Y = v3.begin();
 
-                const bool c1 = M1::mconj;
+                const bool c1 = M1::_conj;
 
                 do {
                     A00 = *A0++; A01 = *A1++; A02 = *A2++;
@@ -839,7 +839,7 @@ namespace tmv {
             std::cout<<"MV algo 16 N==4: M,N,cs,rs,x = "<<M<<','<<4<<
                 ','<<cs<<','<<4<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(V3::viscomplex);
+            TMVStaticAssert(V3::iscomplex);
 
             if (M) {
                 typedef typename M1::value_type T1;
@@ -849,7 +849,7 @@ namespace tmv {
 
                 typedef typename V2::value_type T2;
                 typedef typename Traits2<T,T2>::type PT2;
-                const bool c2 = V2::vconj;
+                const bool c2 = V2::_conj;
                 const PT2 X0 = ZProd<false,c2>::prod(x,v2.nonConj().cref(0));
                 const PT2 X1 = ZProd<false,c2>::prod(x,v2.nonConj().cref(1));
                 const PT2 X2 = ZProd<false,c2>::prod(x,v2.nonConj().cref(2));
@@ -866,7 +866,7 @@ namespace tmv {
                 IT1 A3 = A2; A3.shiftP(stepj);
                 IT3 Y = v3.begin();
 
-                const bool c1 = M1::mconj;
+                const bool c1 = M1::_conj;
 
                 do {
                     A00 = *A0++; A01 = *A1++; A02 = *A2++; A03 = *A3++;
@@ -965,12 +965,12 @@ namespace tmv {
 
             const bool dopref = N * sizeof(T1) >= TMV_Q3;
 
-            Prefetch_MultiRead(X.getP());
-            Prefetch_Read(A0.getP());
-            Prefetch_Read(A1.getP());
-            Prefetch_Read(A2.getP());
-            Prefetch_Read(A3.getP());
-            Prefetch_Write(Y.getP());
+            Prefetch_MultiRead(X.get());
+            Prefetch_Read(A0.get());
+            Prefetch_Read(A1.get());
+            Prefetch_Read(A2.get());
+            Prefetch_Read(A3.get());
+            Prefetch_Write(Y.get());
 
             int j;
 
@@ -1010,10 +1010,10 @@ namespace tmv {
                 } while (--j);
                 A0 += stepi_4; A1 += stepi_4; A2 += stepi_4; A3 += stepi_4;
                 if (dopref) {
-                    Prefetch_Read(A0.getP());
-                    Prefetch_Read(A1.getP());
-                    Prefetch_Read(A2.getP());
-                    Prefetch_Read(A3.getP());
+                    Prefetch_Read(A0.get());
+                    Prefetch_Read(A1.get());
+                    Prefetch_Read(A2.get());
+                    Prefetch_Read(A3.get());
                 }
                 Maybe<add && (ix!=1)>::add(Y[0] , x * Y0);
                 Maybe<add && (ix!=1)>::add(Y[1] , x * Y1);
@@ -1060,7 +1060,7 @@ namespace tmv {
             std::cout<<"MV algo 22: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(V3::visreal);
+            TMVStaticAssert(V3::isreal);
             if (N) {
                 if (M > 4) {
                     const int ma = ((M>>2)<<2);
@@ -1103,7 +1103,7 @@ namespace tmv {
             std::cout<<"MV algo 23 M==2: M,N,cs,rs,x = "<<2<<','<<N<<
                 ','<<2<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(V3::visreal);
+            TMVStaticAssert(V3::isreal);
 
             if (N) {
                 typedef typename M1::value_type T1;
@@ -1160,7 +1160,7 @@ namespace tmv {
             std::cout<<"MV algo 23 M==3: M,N,cs,rs,x = "<<3<<','<<N<<
                 ','<<3<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(V3::visreal);
+            TMVStaticAssert(V3::isreal);
 
             if (N) {
                 typedef typename M1::value_type T1;
@@ -1225,7 +1225,7 @@ namespace tmv {
             std::cout<<"MV algo 23 M==4: M,N,cs,rs,x = "<<4<<','<<N<<
                 ','<<4<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(V3::visreal);
+            TMVStaticAssert(V3::isreal);
 
             if (N) {
                 typedef typename M1::value_type T1;
@@ -1324,15 +1324,15 @@ namespace tmv {
             IT2 X = X_begin;
             IT3 Y = v3.nonConj().begin();
 
-            const bool c1 = M1::mconj;
-            const bool c2 = V2::vconj;
+            const bool c1 = M1::_conj;
+            const bool c2 = V2::_conj;
 
             const bool dopref = N * sizeof(T1) >= TMV_Q3;
 
-            Prefetch_MultiRead(X.getP());
-            Prefetch_Read(A0.getP());
-            Prefetch_Read(A1.getP());
-            Prefetch_Write(Y.getP());
+            Prefetch_MultiRead(X.get());
+            Prefetch_Read(A0.get());
+            Prefetch_Read(A1.get());
+            Prefetch_Write(Y.get());
 
             int j;
 
@@ -1349,8 +1349,8 @@ namespace tmv {
                 } while (--j);
                 A0 += stepi_2; A1 += stepi_2; 
                 if (dopref) {
-                    Prefetch_Read(A0.getP());
-                    Prefetch_Read(A1.getP());
+                    Prefetch_Read(A0.get());
+                    Prefetch_Read(A1.get());
                 }
                 Maybe<add && (ix!=1)>::add(Y[0] , x * Y0);
                 Maybe<add && (ix!=1)>::add(Y[1] , x * Y1); Y+=2;
@@ -1365,7 +1365,7 @@ namespace tmv {
             std::cout<<"MV algo 25: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(V3::viscomplex);
+            TMVStaticAssert(V3::iscomplex);
             const int ma = ((M>>1)<<1);
             const int mb = M - ma;
             typedef typename M1::const_row_type M1r;
@@ -1403,7 +1403,7 @@ namespace tmv {
             std::cout<<"MV algo 26: M,N,cs,rs,x = "<<2<<','<<N<<
                 ','<<2<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(V3::viscomplex);
+            TMVStaticAssert(V3::iscomplex);
 
             if (N) {
                 typedef typename M1::value_type T1;
@@ -1424,8 +1424,8 @@ namespace tmv {
                 IT1 A1 = A0; A1.shiftP(stepi);
                 IT2 X = v2.nonConj().begin();
 
-                const bool c1 = M1::mconj;
-                const bool c2 = V2::vconj;
+                const bool c1 = M1::_conj;
+                const bool c2 = V2::_conj;
 
                 Y0 = Maybe<add && (ix==1)>::select(v3.cref(0) , T3(0));
                 Y1 = Maybe<add && (ix==1)>::select(v3.cref(1) , T3(0));
@@ -1453,7 +1453,7 @@ namespace tmv {
             std::cout<<"MV algo 26: M,N,cs,rs,x = "<<3<<','<<N<<
                 ','<<3<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(V3::viscomplex);
+            TMVStaticAssert(V3::iscomplex);
 
             if (N) {
                 typedef typename M1::value_type T1;
@@ -1475,8 +1475,8 @@ namespace tmv {
                 IT1 A2 = A1; A2.shiftP(stepi);
                 IT2 X = v2.nonConj().begin();
 
-                const bool c1 = M1::mconj;
-                const bool c2 = V2::vconj;
+                const bool c1 = M1::_conj;
+                const bool c2 = V2::_conj;
 
                 Y0 = Maybe<add && (ix==1)>::select(v3.cref(0) , T3(0));
                 Y1 = Maybe<add && (ix==1)>::select(v3.cref(1) , T3(0));
@@ -1507,7 +1507,7 @@ namespace tmv {
             std::cout<<"MV algo 26: M,N,cs,rs,x = "<<4<<','<<N<<
                 ','<<4<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(V3::viscomplex);
+            TMVStaticAssert(V3::iscomplex);
 
             if (N) {
                 typedef typename M1::value_type T1;
@@ -1530,8 +1530,8 @@ namespace tmv {
                 IT1 A3 = A2; A3.shiftP(stepi);
                 IT2 X = v2.nonConj().begin();
 
-                const bool c1 = M1::mconj;
-                const bool c2 = V2::vconj;
+                const bool c1 = M1::_conj;
+                const bool c2 = V2::_conj;
 
                 Y0 = Maybe<add && (ix==1)>::select(v3.cref(0) , T3(0));
                 Y1 = Maybe<add && (ix==1)>::select(v3.cref(1) , T3(0));
@@ -1840,7 +1840,7 @@ namespace tmv {
             std::cout<<"MV algo 41: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const int algo2 = V3::viscomplex ? 15 : 12;
+            const int algo2 = V3::iscomplex ? 15 : 12;
             MultMV_Helper<algo2,cs,rs,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
         }
     };
@@ -1858,7 +1858,7 @@ namespace tmv {
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
 #ifdef TMV_OPT_SCALE
-            const int algo2 = V3::viscomplex ? 15 : 12;
+            const int algo2 = V3::iscomplex ? 15 : 12;
             const int MM = cs == UNKNOWN ? int(m1.colsize()) : cs;
             const int NN = rs == UNKNOWN ? int(m1.rowsize()) : rs;
             if (MM >= NN)
@@ -1945,10 +1945,10 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
             const int algo1 = 
-                V3::vstep == UNKNOWN ? 43 : ( TMV_ZeroIX && add ) ? 42 : 41;
+                V3::_step == UNKNOWN ? 43 : ( TMV_ZeroIX && add ) ? 42 : 41;
 #ifdef TMV_OPT_SMALL
             const int algo2 = 
-                V2::vstep == 1 ? ( V3::viscomplex ? 26 : 23 ) : algo1;
+                V2::_step == 1 ? ( V3::iscomplex ? 26 : 23 ) : algo1;
 
             TMVStaticAssert(cs == UNKNOWN);
             const int M = m1.colsize();
@@ -2045,7 +2045,7 @@ namespace tmv {
             std::cout<<"MV algo 51: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const int algo2 = V3::viscomplex ? 25 : 22;
+            const int algo2 = V3::iscomplex ? 25 : 22;
             MultMV_Helper<algo2,cs,rs,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
         }
     };
@@ -2121,9 +2121,9 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
             const int algo1 = 
-                V2::vstep == UNKNOWN ? 53 : TMV_ZeroIX ? 52 : 51;
+                V2::_step == UNKNOWN ? 53 : TMV_ZeroIX ? 52 : 51;
 #ifdef TMV_OPT_SMALL
-            const int algo2 = V3::viscomplex ? 16 : 13;
+            const int algo2 = V3::iscomplex ? 16 : 13;
             TMVStaticAssert(rs == UNKNOWN);
             const int N = m1.rowsize();
 #ifdef PRINTALGO_MV
@@ -2378,33 +2378,33 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            TMVStaticAssert(!V3::vconj);
+            TMVStaticAssert(!V3::_conj);
             typedef typename M1::value_type T1;
             const bool unroll = 
-                MultMV_Unroll_Helper<cs,rs,M1::mcolmajor>::unroll;
+                MultMV_Unroll_Helper<cs,rs,M1::_colmajor>::unroll;
             const int algo = 
                 ( rs == 0 || cs == 0 ) ? 0 : 
                 ( cs == 1 ) ? 401 :
                 ( rs == 1 ) ? 402 :
-                M1::mcolmajor ? (
+                M1::_colmajor ? (
                     unroll ? (
                         ( cs <= TMV_Q5 ? 
                           ( (rs<cs) ? 32 : 31 ) :
                           ( (rs<cs) ? 34 : 33 ) ) ) :
-                    ( cs != UNKNOWN && cs <= 4 && V2::vstep == 1 ) ? (
-                        (V3::viscomplex ? 26 : 23) ) :
+                    ( cs != UNKNOWN && cs <= 4 && V2::_step == 1 ) ? (
+                        (V3::iscomplex ? 26 : 23) ) :
                     ( !add && TMV_ZeroIX ) ? 46 :
                     ( rs != UNKNOWN && rs <= 4 ) ? (
-                        (V3::viscomplex ? 16 : 13) ) :
-                    V3::viscomplex ? 15 : 12 ) :
-                M1::mrowmajor ? (
+                        (V3::iscomplex ? 16 : 13) ) :
+                    V3::iscomplex ? 15 : 12 ) :
+                M1::_rowmajor ? (
                     unroll ? ( (rs<cs) ? 32 : 31 ) :
-                    ( rs != UNKNOWN && rs <= 4 && V3::vstep == 1 ) ? (
-                        (V3::viscomplex ? 16 : 13 ) ) : 
+                    ( rs != UNKNOWN && rs <= 4 && V3::_step == 1 ) ? (
+                        (V3::iscomplex ? 16 : 13 ) ) : 
                     ( cs != UNKNOWN && cs <= 4 ) ? (
-                        (V3::viscomplex ? 26 : 23) ) :
-                    V3::viscomplex ? 25 : 22 ) :
-                V2::vstep == 1 ? 21 : V3::vstep == 1 ? 11 : 21;
+                        (V3::iscomplex ? 26 : 23) ) :
+                    V3::iscomplex ? 25 : 22 ) :
+                V2::_step == 1 ? 21 : V3::_step == 1 ? 11 : 21;
             MultMV_Helper<algo,cs,rs,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
         }
     };
@@ -2417,7 +2417,7 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            TMVStaticAssert(!V3::vconj);
+            TMVStaticAssert(!V3::_conj);
             typedef typename M1::value_type T1;
             // Possible algorithms to choose from:
             //
@@ -2469,45 +2469,45 @@ namespace tmv {
             // 85 = temp v3 = x*m1*v2
             // 86 = temp v3, figure out where to put x
 #if TMV_OPT == 0
-            const int algo = M1::mcolmajor ? 11 : 21;
+            const int algo = M1::_colmajor ? 11 : 21;
 #else
             const bool unroll = 
-                MultMV_Unroll_Helper<cs,rs,M1::mcolmajor>::unroll;
+                MultMV_Unroll_Helper<cs,rs,M1::_colmajor>::unroll;
             const int algo = 
                 ( rs == 0 || cs == 0 ) ? 0 : // trivial - nothing to do
                 ( cs == 1 ) ? 201 : // trivial - cs = 1
                 ( rs == 1 ) ? 202 : // trivial - rs = 1
-                M1::mcolmajor ? ( // colmajor
+                M1::_colmajor ? ( // colmajor
                     cs == UNKNOWN ? 44 :
                     rs == UNKNOWN ? (
-                        ( cs > TMV_Q2 && V3::vstep == UNKNOWN ) ? 86 :
+                        ( cs > TMV_Q2 && V3::_step == UNKNOWN ) ? 86 :
                         ( TMV_ZeroIX && add ) ? 42 : 41 ) : 
                     unroll ? (
                         ( cs <= TMV_Q5 ? 
                           ( (rs<cs) ? 32 : 31 ) :
                           ( (rs<cs) ? 34 : 33 ) ) ) :
-                    ( cs <= 4 && V2::vstep == 1 ) ? V3::viscomplex ? 26 : 23 :
-                    ( cs > TMV_Q2 && V3::vstep == UNKNOWN ) ? (
+                    ( cs <= 4 && V2::_step == 1 ) ? V3::iscomplex ? 26 : 23 :
+                    ( cs > TMV_Q2 && V3::_step == UNKNOWN ) ? (
                         rs > cs ? 84 : 85 ) :
                     ( add && TMV_ZeroIX &&
                       rs > IntTraits2<TMV_Q4,cs>::prod ) ? 84 :
                     ( !add && TMV_ZeroIX && rs > cs ) ? 45 : 
-                    rs <= 4 ? (V3::viscomplex ? 16 : 13) :
-                    V3::viscomplex ? 15 : 12 ) :
-                M1::mrowmajor ? ( // rowmajor
+                    rs <= 4 ? (V3::iscomplex ? 16 : 13) :
+                    V3::iscomplex ? 15 : 12 ) :
+                M1::_rowmajor ? ( // rowmajor
                     rs == UNKNOWN ? 54 :
                     cs == UNKNOWN ? (
-                        ( rs > TMV_Q2 && V2::vstep == UNKNOWN ) ? 83 :
+                        ( rs > TMV_Q2 && V2::_step == UNKNOWN ) ? 83 :
                         TMV_ZeroIX ? 52 : 51 ) : 
                     unroll ? ( (rs<cs) ? 32 : 31 ) :
-                    ( rs <= 4 && V3::vstep == 1 ) ? V3::viscomplex ? 16 : 13 : 
-                    ( rs > TMV_Q2 && V2::vstep == UNKNOWN ) ? (
+                    ( rs <= 4 && V3::_step == 1 ) ? V3::iscomplex ? 16 : 13 : 
+                    ( rs > TMV_Q2 && V2::_step == UNKNOWN ) ? (
                         rs > cs ? 81 : 82 ) :
                     ( cs > IntTraits2<TMV_Q4,rs>::prod && TMV_ZeroIX ) ? 52 :
-                    cs <= 4 ? V3::viscomplex ? 26 : 23 :
-                    V3::viscomplex ? 25 : 22 ) :
+                    cs <= 4 ? V3::iscomplex ? 26 : 23 :
+                    V3::iscomplex ? 25 : 22 ) :
                 // nomajor -- don't do anything fancy
-                V2::vstep == 1 ? 21 : V3::vstep == 1 ? 11 : 21;
+                V2::_step == 1 ? 21 : V3::_step == 1 ? 11 : 21;
 #endif
 #ifdef PRINTALGO_MV
             std::cout<<"InlineMultMV: \n";
@@ -2580,9 +2580,9 @@ namespace tmv {
             typedef typename V2::value_type T2;
             typedef typename V3::value_type T3;
             const bool inst = 
-                M1::mcolsize == UNKNOWN && M1::mrowsize == UNKNOWN &&
-                V2::vsize == UNKNOWN && 
-                V3::vsize == UNKNOWN &&
+                M1::unknownsizes &&
+                V2::unknownsizes &&
+                V3::unknownsizes &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -2595,7 +2595,7 @@ namespace tmv {
                 ( rs == 0 || cs == 0 ) ? 0 : 
                 ( cs == 1 ) ? 1 :
                 ( rs == 1 ) ? 202 :
-                V3::vconj ? 97 :
+                V3::_conj ? 97 :
                 inst ? 98 : 
                 -3;
             MultMV_Helper<algo,cs,rs,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
@@ -2634,9 +2634,9 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
             const bool checkalias =
-                M1::mcolsize == UNKNOWN && M1::mrowsize == UNKNOWN &&
-                V2::vsize == UNKNOWN && 
-                V3::vsize == UNKNOWN;
+                M1::_colsize == UNKNOWN && M1::_rowsize == UNKNOWN &&
+                V2::_size == UNKNOWN && 
+                V3::_size == UNKNOWN;
             const int algo = 
                 ( rs == 0 || cs == 0 ) ? 0 : 
                 ( cs == 1 ) ? 1 :
@@ -2653,13 +2653,13 @@ namespace tmv {
         const BaseMatrix_Rec<M1>& m1, const BaseVector_Calc<V2>& v2, 
         BaseVector_Mutable<V3>& v3)
     {
-        TMVStaticAssert((Sizes<M1::mcolsize,V3::vsize>::same));
-        TMVStaticAssert((Sizes<M1::mrowsize,V2::vsize>::same));
+        TMVStaticAssert((Sizes<M1::_colsize,V3::_size>::same));
+        TMVStaticAssert((Sizes<M1::_rowsize,V2::_size>::same));
         TMVAssert(m1.colsize() == v3.size());
         TMVAssert(m1.rowsize() == v2.size());
         typedef typename M1::value_type T1;
-        const int cs = Sizes<M1::mcolsize,V3::vsize>::size;
-        const int rs = Sizes<M1::mrowsize,V2::vsize>::size;
+        const int cs = Sizes<M1::_colsize,V3::_size>::size;
+        const int rs = Sizes<M1::_rowsize,V2::_size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;
@@ -2702,8 +2702,8 @@ namespace tmv {
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Rec<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
-        TMVStaticAssert((Sizes<V1::vsize,M2::mcolsize>::same));
-        TMVStaticAssert((Sizes<M2::mrowsize,V3::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,M2::_colsize>::same));
+        TMVStaticAssert((Sizes<M2::_rowsize,V3::_size>::same));
         TMVAssert(v1.size() == m2.colsize());
         TMVAssert(m2.rowsize() == v3.size());
         MultMV<add>(x,m2.transpose(),v1.vec(),v3.vec());
@@ -2714,8 +2714,8 @@ namespace tmv {
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Rec<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
-        TMVStaticAssert((Sizes<V1::vsize,M2::mcolsize>::same));
-        TMVStaticAssert((Sizes<M2::mrowsize,V3::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,M2::_colsize>::same));
+        TMVStaticAssert((Sizes<M2::_rowsize,V3::_size>::same));
         TMVAssert(v1.size() == m2.colsize());
         TMVAssert(m2.rowsize() == v3.size());
         NoAliasMultMV<add>(x,m2.transpose(),v1.vec(),v3.vec());
@@ -2726,8 +2726,8 @@ namespace tmv {
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Rec<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
-        TMVStaticAssert((Sizes<V1::vsize,M2::mcolsize>::same));
-        TMVStaticAssert((Sizes<M2::mrowsize,V3::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,M2::_colsize>::same));
+        TMVStaticAssert((Sizes<M2::_rowsize,V3::_size>::same));
         TMVAssert(v1.size() == m2.colsize());
         TMVAssert(m2.rowsize() == v3.size());
         AliasMultMV<add>(x,m2.transpose(),v1.vec(),v3.vec());

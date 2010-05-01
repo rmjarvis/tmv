@@ -99,12 +99,49 @@ void TestBasicTriDiv()
     tmv::Matrix<T,tmv::RowMajor> Pr = P;
     tmv::Matrix<T,tmv::RowMajor> Qr = Pr/m;
     tmv::Matrix<T,tmv::RowMajor> P2r = m*Qr;
+    if (showacc) {
+        std::cout<<"Pr = "<<Pr<<std::endl;
+        std::cout<<"Qr = Pr/m = "<<Qr<<std::endl;
+        std::cout<<"minv * Pr = "<<minv * Pr<<std::endl;
+        std::cout<<"P2r = "<<P2r<<std::endl;
+        std::cout<<"Norm(Pr-P2r) = "<<Norm(Pr-P2r)<<std::endl;
+    }
     Assert(Norm(P2r-Pr) < eps*Norm(Pr),"Tri P/m rowmajor");
 
     Qr = Pr%m;
     P2r = Qr*m;
+    if (showacc) {
+        std::cout<<"Pr = "<<Pr<<std::endl;
+        std::cout<<"Qr = Pr%m = "<<Qr<<std::endl;
+        std::cout<<"Pr * minv = "<<Pr * minv<<std::endl;
+        std::cout<<"P2r = "<<P2r<<std::endl;
+        std::cout<<"Norm(Pr-P2r) = "<<Norm(Pr-P2r)<<std::endl;
+    }
     Assert(Norm(P2r-Pr) < eps*Norm(Pr),"Tri P%m rowmajor");
- 
+
+    M U(P);
+    M V = U/m;
+    M U2 = m*V;
+    if (showacc) {
+        std::cout<<"U = "<<U<<std::endl;
+        std::cout<<"V = U/m = "<<V<<std::endl;
+        std::cout<<"minv * U = "<<minv * U<<std::endl;
+        std::cout<<"U2 = "<<U2<<std::endl;
+        std::cout<<"Norm(U-U2) = "<<Norm(U-U2)<<std::endl;
+    }
+    Assert(Norm(U2-U) < eps*Norm(U),"Tri U/m");
+
+    V = U%m;
+    U2 = V*m;
+    if (showacc) {
+        std::cout<<"U = "<<U<<std::endl;
+        std::cout<<"V = U%m = "<<V<<std::endl;
+        std::cout<<"U * minv = "<<U * minv<<std::endl;
+        std::cout<<"U2 = "<<U2<<std::endl;
+        std::cout<<"Norm(U-U2) = "<<Norm(U-U2)<<std::endl;
+    }
+    Assert(Norm(U2-U) < eps*Norm(U),"Tri U%m");
+
     M minv2 = m.inverse();
     Assert(Norm(minv-minv2) < eps*Norm(minv),"Tri inverse");
 
@@ -258,6 +295,30 @@ void TestBasicTriDiv()
     R2r = Sr*c;
     Assert(Norm(R2r-Rr) < eps*Norm(Rr),"Tri R%c rowmajor");
 
+    // trimatrix complex / real
+    CM W(R);
+    CM X = W/m;
+    CM W2 = m*X;
+    Assert(Norm(W2-W) < eps*Norm(W),"Tri W/m");
+    X = W%m;
+    W2 = X*m;
+    Assert(Norm(W2-W) < eps*Norm(W),"Tri W%m");
+
+    // trimatrix real/complex
+    X = U/c;
+    CM U3 = c*X;
+    Assert(Norm(U3-U) < eps*Norm(U),"Tri U/c");
+    X = U%c;
+    U3 = X*c;
+    Assert(Norm(U3-U) < eps*Norm(P),"Tri U%c");
+
+    // trimatrix complex / complex
+    X = W/c;
+    W2 = c*X;
+    Assert(Norm(W2-W) < eps*Norm(W),"Tri W/c");
+    X = W%c;
+    W2 = X*c;
+    Assert(Norm(W2-W) < eps*Norm(W),"Tri W%c");
 }
 
 template <class T>

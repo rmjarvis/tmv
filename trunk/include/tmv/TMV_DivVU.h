@@ -125,7 +125,7 @@ namespace tmv {
 #ifdef PRINTALGO_DIVVU
             std::cout<<"LDivEqVU algo 1: N,s = "<<1<<','<<1<<std::endl;
 #endif
-            Maybe<!M2::munit>::invscale(v1.ref(0) , m2.cref(0,0)); 
+            Maybe<!M2::_unit>::invscale(v1.ref(0) , m2.cref(0,0)); 
         }
     };
 
@@ -146,7 +146,7 @@ namespace tmv {
             typedef typename M2::const_diag_type M2d;
             T1 Xj;
 
-            const bool unit = M2::munit;
+            const bool unit = M2::_unit;
 
             typedef typename V1::iterator IT1;
             typedef typename M2c::const_nonconj_type::const_iterator IT2;
@@ -159,7 +159,7 @@ namespace tmv {
             const bool dopref = N * Astepj * sizeof(T1) >= TMV_Q3;
 
             Prefetch_MultiWrite(v1.ptr());
-            if (dopref) Prefetch_Read(A0j.getP());
+            if (dopref) Prefetch_Read(A0j.get());
             else Prefetch_Read(m2.cptr());
 
             for(int j=N;j--;) {
@@ -172,10 +172,10 @@ namespace tmv {
                     MultXV_Helper<-4,UNKNOWN,true,0,T1,M2c,V1>::call2(
                         j,Scaling<0,T1>(-Xj),A0j,X0);
                     A0j.shiftP(-Astepj);
-                    if (dopref) Prefetch_Read(A0j.getP());
+                    if (dopref) Prefetch_Read(A0j.get());
                 } else {
                     A0j.shiftP(-Astepj);
-                    if (dopref) Prefetch_Read(A0j.getP());
+                    if (dopref) Prefetch_Read(A0j.get());
                     --X; 
                 }
             }
@@ -201,7 +201,7 @@ namespace tmv {
             typedef typename V1::iterator IT1;
             typedef typename M2r::const_nonconj_type::const_iterator IT2;
 
-            const bool unit = M2::munit;
+            const bool unit = M2::_unit;
 
             IT1 X = v1.begin() + N-1;
             IT2 A00 = m2.get_row(0,0,N).nonConj().begin();
@@ -212,7 +212,7 @@ namespace tmv {
             const bool dopref = N * m2.stepi() * sizeof(T1) >= TMV_Q3;
 
             Prefetch_Write(v1.ptr());
-            if (dopref) Prefetch_Read(Aii.getP());
+            if (dopref) Prefetch_Read(Aii.get());
             else Prefetch_Read(m2.cptr());
 
             // [  A11 A12 ] [ X1 ] = [ A11 X1 ]
@@ -233,7 +233,7 @@ namespace tmv {
                 Xi += *X;
                 Maybe<!unit>::invscale(Xi,m2.cref(i,i));
                 Aii.shiftP(-Adiagstep);
-                if (dopref) Prefetch_Read(Aii.getP()-1);
+                if (dopref) Prefetch_Read(Aii.get()-1);
                 *X-- = Xi;
             }
         } 
@@ -259,7 +259,7 @@ namespace tmv {
             {
                 typedef typename V1::const_subvector_type V1s;
                 typedef typename M2::const_row_sub_type M2r;
-                const bool unit = M2::munit;
+                const bool unit = M2::_unit;
                 v1.ref(I) = Maybe<!unit>::invprod(
                     m2.cref(I,I) , v1.cref(I) -
                         MultVV_Helper<-4,s-I-1,M2r,V1s>::call(
@@ -295,7 +295,7 @@ namespace tmv {
             typedef typename M2::const_diag_type M2d;
             T1 Xj;
 
-            const bool unit = M2::munit;
+            const bool unit = M2::_unit;
 
             typedef typename V1::iterator IT1;
             typedef typename M2c::const_nonconj_type::const_iterator IT2;
@@ -320,11 +320,11 @@ namespace tmv {
                     MultXV_Helper<-4,UNKNOWN,true,0,T1,M2c,V1>::call2(
                         N,Scaling<0,T1>(-Xj),Ajj,X);
                     Ajj.shiftP(Adiagstep);
-                    if (dopref) Prefetch_Read(Ajj.getP()-1);
+                    if (dopref) Prefetch_Read(Ajj.get()-1);
                 } else {
                     ++X;
                     Ajj.shiftP(Adiagstep);
-                    if (dopref) Prefetch_Read(Ajj.getP()-1);
+                    if (dopref) Prefetch_Read(Ajj.get()-1);
                 }
             }
         }
@@ -349,7 +349,7 @@ namespace tmv {
             typedef typename V1::iterator IT1;
             typedef typename M2r::const_nonconj_type::const_iterator IT2;
 
-            const bool unit = M2::munit;
+            const bool unit = M2::_unit;
 
             IT1 X0 = v1.begin();
             IT1 X = X0;
@@ -375,7 +375,7 @@ namespace tmv {
                 //        x(i) - A.row(i,0,i) * x.subVector(0,i))
                 Xi = -MultVV_Helper<-4,UNKNOWN,M2r,V1>::call2(i,Ai0,X0);
                 Ai0.shiftP(Astepi);
-                if (dopref) Prefetch_Read(Ai0.getP());
+                if (dopref) Prefetch_Read(Ai0.get());
                 Xi += *X;
                 Maybe<!unit>::invscale(Xi,m2.cref(i,i));
                 *X++ = Xi;
@@ -403,7 +403,7 @@ namespace tmv {
             {
                 typedef typename M2::const_row_sub_type M2r;
                 typedef typename V1::const_subvector_type V1s;
-                const bool unit = M2::munit;
+                const bool unit = M2::_unit;
                 v1.ref(I) = Maybe<!unit>::invprod(
                     m2.cref(I,I) , v1.cref(I) -
                         MultVV_Helper<-4,I,M2r,V1s>::call(
@@ -475,7 +475,7 @@ namespace tmv {
     {
         static void call(V1& v1, const M2& m2)
         {
-            TMVStaticAssert(!V1::vconj);
+            TMVStaticAssert(!V1::_conj);
             const int s2 = s > 20 ? UNKNOWN : s;
             const int s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)/2
@@ -487,12 +487,12 @@ namespace tmv {
             const int algo = 
                 ( s == 0 ) ? 0 : 
                 ( s == 1 ) ? 1 : 
-                M2::mupper ? (
+                M2::_upper ? (
                     unroll ? 15 :
-                    M2::mcolmajor ? 11 : 12 ) :
+                    M2::_colmajor ? 11 : 12 ) :
                 ( // lowertri
                     unroll ? 25 :
-                    M2::mcolmajor ? 21 : 22 );
+                    M2::_colmajor ? 21 : 22 );
             LDivEqVU_Helper<algo,s,V1,M2>::call(v1,m2); 
         }
     };
@@ -503,7 +503,7 @@ namespace tmv {
     {
         static inline void call(V1& v1, const M2& m2)
         {
-            TMVStaticAssert(!V1::vconj);
+            TMVStaticAssert(!V1::_conj);
             // Possible algorithms to choose from:
             //
             // Trivial:
@@ -525,9 +525,9 @@ namespace tmv {
 
 #if TMV_OPT == 0
             const int algo = 
-                M2::mupper ?
-                ( M2::mcolmajor ? 11 : 12 ) :
-                ( M2::mcolmajor ? 21 : 22 );
+                M2::_upper ?
+                ( M2::_colmajor ? 11 : 12 ) :
+                ( M2::_colmajor ? 21 : 22 );
 #else
             const int s2 = s > 20 ? UNKNOWN : s;
             const int s2p1 = IntTraits<s2>::Sp1;
@@ -540,28 +540,28 @@ namespace tmv {
             const int algo = 
                 ( s == 0 ) ? 0 : // trivial - nothing to do
                 ( s == 1 ) ? 1 : // trivial - s = 1
-                M2::mupper ? (
+                M2::_upper ? (
                     unroll ? 15 :
-                    M2::mcolmajor ? (
-                        V1::vstep == UNKNOWN ? (
+                    M2::_colmajor ? (
+                        V1::_step == UNKNOWN ? (
                             s == UNKNOWN ? 43 :
                             s > TMV_Q2 ? 85 : 11 ) :
                         11 ) :
-                    M2::mrowmajor ? (
-                        V1::vstep == UNKNOWN ? (
+                    M2::_rowmajor ? (
+                        V1::_step == UNKNOWN ? (
                             s == UNKNOWN ? 43 :
                             s > TMV_Q2 ? 85 : 12 ) :
                         12 ) :
                     12 ) :
                 ( // lowertri
                     unroll ? 25 :
-                    M2::mcolmajor ? (
-                        V1::vstep == UNKNOWN ? (
+                    M2::_colmajor ? (
+                        V1::_step == UNKNOWN ? (
                             s == UNKNOWN ? 43 :
                             s > TMV_Q2 ? 85 : 21 ) :
                         21 ) :
-                    M2::mrowmajor ? (
-                        V1::vstep == UNKNOWN ? (
+                    M2::_rowmajor ? (
+                        V1::_step == UNKNOWN ? (
                             s == UNKNOWN ? 43 :
                             s > TMV_Q2 ? 85 : 22 ) :
                         22 ) :
@@ -608,8 +608,8 @@ namespace tmv {
             typedef typename V1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst =
-                V1::vsize == UNKNOWN &&
-                M2::msize == UNKNOWN &&
+                V1::unknownsizes &&
+                M2::unknownsizes &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
@@ -619,7 +619,7 @@ namespace tmv {
             const int algo =
                 ( s == 0 ) ? 0 : 
                 ( s == 1 ) ? 1 :
-                V1::vconj ? 97 : 
+                V1::_conj ? 97 : 
                 inst ? 98 : 
                 -3;
             LDivEqVU_Helper<algo,s,V1,M2>::call(v1,m2); 
@@ -649,8 +649,8 @@ namespace tmv {
         static void call(V1& v1, const M2& m2)
         {
             const bool checkalias =
-                V1::vsize == UNKNOWN &&
-                M2::msize == UNKNOWN;
+                V1::_size == UNKNOWN &&
+                M2::_size == UNKNOWN;
             const int algo =
                 ( s == 0 ) ? 0 : 
                 ( s == 1 ) ? 1 :
@@ -664,9 +664,9 @@ namespace tmv {
     inline void DoLDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Tri<M2>& m2)
     {
-        TMVStaticAssert((Sizes<V1::vsize,M2::msize>::same));
+        TMVStaticAssert((Sizes<V1::_size,M2::_size>::same));
         TMVAssert(v1.size() == m2.size());
-        const int s = Sizes<V1::vsize,M2::msize>::size;
+        const int s = Sizes<V1::_size,M2::_size>::size;
         typedef typename V1::cview_type V1v;
         typedef typename M2::const_cview_type M2v;
         V1v v1v = v1.cView();
@@ -747,9 +747,9 @@ namespace tmv {
             const Scaling<ix,T>& x, const V1& v1, const M2& m2, V3& v3)
         {
             const bool checkalias =
-                V1::vsize == UNKNOWN &&
-                M2::msize == UNKNOWN &&
-                V3::vsize == UNKNOWN;
+                V1::_size == UNKNOWN &&
+                M2::_size == UNKNOWN &&
+                V3::_size == UNKNOWN;
             const int algo =
                 checkalias ? 99 : 
                 -2;
@@ -763,8 +763,8 @@ namespace tmv {
         const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Tri<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
-        TMVStaticAssert((Sizes<V1::vsize,M2::msize>::same));
-        TMVStaticAssert((Sizes<V1::vsize,V3::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,M2::_size>::same));
+        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
         TMVAssert(v1.size() == m2.size());
         TMVAssert(v1.size() == v3.size());
         typedef typename V1::const_cview_type V1v;
@@ -826,13 +826,13 @@ namespace tmv {
         const Scaling<ix,T>& x,
         const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Tri<M2>& m2, BaseVector_Mutable<V3>& v3)
-    { NoAliasLDivq(x,v1,m2.transpose(),v3); }
+    { NoAliasLDiv(x,v1,m2.transpose(),v3); }
     template <int ix, class T, class V1, class M2, class V3>
     inline void AliasRDiv(
         const Scaling<ix,T>& x,
         const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Tri<M2>& m2, BaseVector_Mutable<V3>& v3)
-    { AliasLDivq(x,v1,m2.transpose(),v3); }
+    { AliasLDiv(x,v1,m2.transpose(),v3); }
 
 #undef TMV_Q1
 #undef TMV_Q2

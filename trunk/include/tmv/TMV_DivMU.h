@@ -54,7 +54,7 @@
 #include <iostream>
 #endif
 
-// Use the specialized 1,2,3 sized algorithms for the end of the 
+// Use the specialized 1,2,3,4 sized algorithms for the end of the 
 // recursive algorithm.
 #if TMV_OPT >= 2
 #define TMV_OPT_CLEANUP
@@ -70,7 +70,7 @@
 #endif
 
 // Q2 is the maximum size to stop recursing
-#define TMV_Q2 1
+#define TMV_Q2 4
 
 // Q6 is the minimum value of (M^2*N / 16^3) to use multiple threads.
 // (We also require that N > 64 so we have something to split.)
@@ -127,7 +127,7 @@ namespace tmv {
             std::cout<<"LDivEqMU algo 1: M,N,cs,rs = "<<1<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
-            const bool u2 = M2::munit;
+            const bool u2 = M2::_unit;
             typedef typename M1::row_type M1r;
             typedef typename M2::real_type RT;
             typedef typename M2::value_type T2;
@@ -188,7 +188,7 @@ namespace tmv {
             std::cout<<"LDivEqMU algo 401: M,N,cs,rs = "<<1<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
-            const bool u2 = M2::munit;
+            const bool u2 = M2::_unit;
             typedef typename M1::row_type M1r;
             typedef typename M2::real_type RT;
             typedef typename M2::value_type T2;
@@ -253,7 +253,7 @@ namespace tmv {
             std::cout<<"LDivEqMU algo 12: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
-            const bool u2 = M2::munit;
+            const bool u2 = M2::_unit;
             typedef typename M2::real_type RT;
             typedef typename M2::value_type T2;
             typedef typename Maybe<u2>::template SelectType<RT,T2>::type XT2;
@@ -266,7 +266,7 @@ namespace tmv {
 
             for(int i=M;i--;) {
                 // m1.row(i) -= m2.row(i,i+1,M) * m1.rowRange(i+1,M)
-                // m1.row(i) /= m1(i,i)
+                // m1.row(i) /= m2(i,i)
                 M1r m1i = m1.get_row(i);
                 M1rrt m1rrt = m1.cRowRange(i+1,M).transpose();
                 M2r m2i = m2.get_row(i,i+1,M);
@@ -291,7 +291,7 @@ namespace tmv {
             std::cout<<"LDivEqMU algo 13: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
-            const bool u2 = M2::munit;
+            const bool u2 = M2::_unit;
             typedef typename M2::real_type RT;
             typedef typename M2::value_type T2;
             typedef typename Maybe<u2>::template SelectType<RT,T2>::type XT2;
@@ -331,7 +331,7 @@ namespace tmv {
 #endif
             typedef typename M2::real_type RT;
             typedef typename M2::value_type T2;
-            const DiagType D2 = M2::munit ? UnitDiag : NonUnitDiag;
+            const DiagType D2 = M2::_unit ? UnitDiag : NonUnitDiag;
             SmallUpperTriMatrix<T2,cs,D2> m2inv = m2;
             m2inv.invertSelf();
             const Scaling<1,RT> one;
@@ -349,10 +349,12 @@ namespace tmv {
             std::cout<<"LDivEqMU algo 16: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<UNKNOWN<<','<<rs<<std::endl;
 #endif
-            const bool rr = M1::mrowmajor && M2::mrowmajor;
-            const bool rc = M1::mrowmajor && M2::mcolmajor;
-            const bool cx = M1::mcolmajor;
+#if TMV_Q2 > 4
+            const bool rr = M1::_rowmajor && M2::_rowmajor;
+            const bool rc = M1::_rowmajor && M2::_colmajor;
+            const bool cx = M1::_colmajor;
             const int algo2 = rr ? 12 : rc ? 13 : cx ? 11 : 13;
+#endif
             switch (M) {
               case 0 :
                    // do nothing
@@ -360,14 +362,25 @@ namespace tmv {
               case 1 :
                    LDivEqMU_Helper<401,1,rs,M1,M2>::call(m1,m2);
                    break;
+#if TMV_Q2 > 1
               case 2 :
                    LDivEqMU_Helper<16,2,rs,M1,M2>::call(m1,m2);
                    break;
+#endif
+#if TMV_Q2 > 2
               case 3 :
                    LDivEqMU_Helper<16,3,rs,M1,M2>::call(m1,m2);
                    break;
+#endif
+#if TMV_Q2 > 3
+              case 4 :
+                   LDivEqMU_Helper<16,4,rs,M1,M2>::call(m1,m2);
+                   break;
+#endif
+#if TMV_Q2 > 4
               default :
                    LDivEqMU_Helper<algo2,UNKNOWN,rs,M1,M2>::call(m1,m2);
+#endif
             }
         }
     };
@@ -394,9 +407,9 @@ namespace tmv {
                 ','<<cs<<','<<rs<<std::endl;
 #endif
 
-            const bool rr = M1::mrowmajor && M2::mrowmajor;
-            const bool rc = M1::mrowmajor && M2::mcolmajor;
-            const bool cx = M1::mcolmajor;
+            const bool rr = M1::_rowmajor && M2::_rowmajor;
+            const bool rc = M1::_rowmajor && M2::_colmajor;
+            const bool cx = M1::_colmajor;
             const int algo2 = 
                 cs == 0 ? 0 :
                 cs == 1 ? 401 :
@@ -405,7 +418,7 @@ namespace tmv {
 #ifdef TMV_OPT_CLEANUP
                 cs == UNKNOWN ? 16 :
 #endif
-                cs <= 5 ? 16 :
+                (cs != UNKNOWN && cs <= 5) ? 16 :
                 rr ? 12 : rc ? 13 : cx ? 11 : 13;
             const int algo3 =  // The algorithm for M > 32
                 cs == UNKNOWN || cs > 32 ? 17 : 0;
@@ -429,7 +442,7 @@ namespace tmv {
                 const int Mx = M > 16 ? ((((M-1)>>5)+1)<<4) : (M>>1);
                 // (If M > 16, round M/2 up to a multiple of 16.)
                 const int csx = IntTraits<cs>::half_roundup;
-                const int csy = cs == UNKNOWN ? UNKNOWN : cs-csx;
+                const int csy = IntTraits2<cs,csx>::diff;
 
                 M2a A = m2.cSubTriMatrix(0,Mx);
                 M2b B = m2.cSubMatrix(0,Mx,Mx,M);
@@ -492,7 +505,7 @@ namespace tmv {
             std::cout<<"LDivEqMU algo 22: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
-            const bool u2 = M2::munit;
+            const bool u2 = M2::_unit;
             typedef typename M2::real_type RT;
             typedef typename M2::value_type T2;
             typedef typename Maybe<u2>::template SelectType<RT,T2>::type XT2;
@@ -530,7 +543,7 @@ namespace tmv {
             std::cout<<"LDivEqMU algo 23: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
-            const bool u2 = M2::munit;
+            const bool u2 = M2::_unit;
             typedef typename M2::real_type RT;
             typedef typename M2::value_type T2;
             typedef typename Maybe<u2>::template SelectType<RT,T2>::type XT2;
@@ -570,7 +583,7 @@ namespace tmv {
 #endif
             typedef typename M2::real_type RT;
             typedef typename M2::value_type T2;
-            const DiagType D2 = M2::munit ? UnitDiag : NonUnitDiag;
+            const DiagType D2 = M2::_unit ? UnitDiag : NonUnitDiag;
             SmallLowerTriMatrix<T2,cs,D2> m2inv = m2;
             m2inv.invertSelf();
             const Scaling<1,RT> one;
@@ -588,10 +601,12 @@ namespace tmv {
             std::cout<<"LDivEqMU algo 26: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<UNKNOWN<<','<<rs<<std::endl;
 #endif
-            const bool rr = M1::mrowmajor && M2::mrowmajor;
-            const bool rc = M1::mrowmajor && M2::mcolmajor;
-            const bool cx = M1::mcolmajor;
+#if TMV_Q2 > 4
+            const bool rr = M1::_rowmajor && M2::_rowmajor;
+            const bool rc = M1::_rowmajor && M2::_colmajor;
+            const bool cx = M1::_colmajor;
             const int algo2 = rr ? 22 : rc ? 23 : cx ? 21 : 23;
+#endif
             switch (M) {
               case 0 :
                    // do nothing
@@ -599,14 +614,25 @@ namespace tmv {
               case 1 :
                    LDivEqMU_Helper<401,1,rs,M1,M2>::call(m1,m2);
                    break;
+#if TMV_Q2 > 1
               case 2 :
                    LDivEqMU_Helper<26,2,rs,M1,M2>::call(m1,m2);
                    break;
+#endif
+#if TMV_Q2 > 2
               case 3 :
                    LDivEqMU_Helper<26,3,rs,M1,M2>::call(m1,m2);
                    break;
+#endif
+#if TMV_Q2 > 3
+              case 4 :
+                   LDivEqMU_Helper<26,4,rs,M1,M2>::call(m1,m2);
+                   break;
+#endif
+#if TMV_Q2 > 4
               default :
                    LDivEqMU_Helper<algo2,UNKNOWN,rs,M1,M2>::call(m1,m2);
+#endif
             }
         }
     };
@@ -633,9 +659,9 @@ namespace tmv {
                 ','<<cs<<','<<rs<<std::endl;
 #endif
 
-            const bool rr = M1::mrowmajor && M2::mrowmajor;
-            const bool rc = M1::mrowmajor && M2::mcolmajor;
-            const bool cx = M1::mcolmajor;
+            const bool rr = M1::_rowmajor && M2::_rowmajor;
+            const bool rc = M1::_rowmajor && M2::_colmajor;
+            const bool cx = M1::_colmajor;
             const int algo2 = 
                 cs == 0 ? 0 :
                 cs == 1 ? 401 :
@@ -644,7 +670,7 @@ namespace tmv {
 #ifdef TMV_OPT_CLEANUP
                 cs == UNKNOWN ? 26 :
 #endif
-                cs <= 5 ? 26 :
+                (cs != UNKNOWN && cs <= 5) ? 26 :
                 rr ? 22 : rc ? 23 : cx ? 21 : 23;
             const int algo3 =  // The algorithm for M > Q2
                 cs == UNKNOWN || cs > 32 ? 27 : 0;
@@ -668,7 +694,7 @@ namespace tmv {
                 const int Mx = M > 16 ? ((((M-1)>>5)+1)<<4) : (M>>1);
                 // (If M > 16, round M/2 up to a multiple of 16.)
                 const int csx = IntTraits<cs>::half_roundup;
-                const int csy = cs == UNKNOWN ? UNKNOWN : cs-csx;
+                const int csy = IntTraits2<cs,csx>::diff;
 
                 M2a A = m2.cSubTriMatrix(0,Mx);
                 M2b B = m2.cSubMatrix(Mx,M,0,Mx);
@@ -711,15 +737,16 @@ namespace tmv {
             std::cout<<"LDivEqMU algo 31: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
-            const bool upper2 = M2::mupper;
+            const bool upper2 = M2::_upper;
 #ifdef TMV_OPT_CLEANUP
             const int algo2 = upper2 ? 16 : 26;
 #else
-            const bool rr = M1::mrowmajor && M2::mrowmajor;
-            const bool rc = M1::mrowmajor && M2::mcolmajor;
-            const bool cx = M1::mcolmajor;
+            const bool rr = M1::_rowmajor && M2::_rowmajor;
+            const bool rc = M1::_rowmajor && M2::_colmajor;
+            const bool cx = M1::_colmajor;
             const int algo2 = 
-                upper2 ? ( rr ? 22 : rc ? 23 : cx ? 21 : 23 ) :
+                upper2 ? 
+                ( rr ? 12 : rc ? 13 : cx ? 11 : 13 ) :
                 ( rr ? 22 : rc ? 23 : cx ? 21 : 23 );
 #endif
             const int algo3 = upper2 ? 17 : 27;
@@ -764,7 +791,7 @@ namespace tmv {
             std::cout<<"LDivEqMU algo 36: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
-            const bool upper2 = M2::mupper;
+            const bool upper2 = M2::_upper;
             const int algo2 = upper2 ? 17 : 27;
             bool bad_alloc = false;
 #ifdef PRINTALGO_DIVU_OMP
@@ -853,7 +880,7 @@ namespace tmv {
             std::cout<<"LDivEqMU algo 38: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
-            const bool upper2 = M2::mupper;
+            const bool upper2 = M2::_upper;
             const int algo2 = upper2 ? 16 : 26;
 
             if (M <= 5) {
@@ -897,7 +924,7 @@ namespace tmv {
 #endif
             typedef typename M2::value_type T2;
             const bool rm = false; // I don't think this matters..
-            const int s2 = M2::mshape;
+            const int s2 = M2::_shape;
             typedef typename MCopyHelper<T2,s2,cs,cs,rm,false>::type M2c;
             M2c m2c(M);
             typedef typename M2c::view_type M2cv;
@@ -943,7 +970,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const bool upper2 = M2::mupper;
+            const bool upper2 = M2::_upper;
             const int algo = 
                 ( cs == 0 || rs == 0 ) ? 0 :
                 cs == 1 ? 401 :
@@ -973,14 +1000,14 @@ namespace tmv {
             // 11 = loop over n: MultUV
             // 12 = loop over m: MultMV
             // 13 = loop over k: Rank1 
-            // 16 = specialization for cs = 2,3,4,5
+            // 16 = invert m2 explicitly and do MultEq op
             // 17 = split trimatrix into 3 submatrices
             //
             // LowerTri:
             // 21 = loop over n: MultUV
             // 22 = loop over m: MultMV
             // 23 = loop over k: Rank1
-            // 26 = specialization for cs = 2,3,4,5
+            // 26 = invert m2 explicitly and do MultEq op
             // 27 = split trimatrix into 3 submatrices
             // 
             // Overall drivers:
@@ -988,15 +1015,15 @@ namespace tmv {
             // 36 = Parallelize using openmp 
             // 38 = Check if M is small
 
-            const bool upper2 = M2::mupper;
+            const bool upper2 = M2::_upper;
 #if 0
             //const int algo = upper2 ? 17 : 27;
             const int algo = 36;
 #else
 #if TMV_OPT == 0 
-            const bool rr = M1::mrowmajor && M2::mrowmajor;
-            const bool rc = M1::mrowmajor && M2::mcolmajor;
-            const bool cx = M1::mcolmajor;
+            const bool rr = M1::_rowmajor && M2::_rowmajor;
+            const bool rc = M1::_rowmajor && M2::_colmajor;
+            const bool cx = M1::_colmajor;
             const int algo = 
                 upper2 ? 
                 ( rr ? 12 : rc ? 13 : cx ? 11 : 13 ) :
@@ -1038,8 +1065,13 @@ namespace tmv {
             std::cout<<"M = "<<M<<"  N = "<<N<<std::endl;
             std::cout<<"cs = "<<cs<<"  rs = "<<rs<<std::endl;
             std::cout<<"algo = "<<algo<<std::endl;
+            //std::cout<<"m1 = "<<m1<<std::endl;
+            //std::cout<<"m2 = "<<m2<<std::endl;
 #endif
             LDivEqMU_Helper<algo,cs,rs,M1,M2>::call(m1,m2);
+#ifdef PRINTALGO_DIVU
+            //std::cout<<"m1 => "<<m1<<std::endl;
+#endif
         }
     };
 
@@ -1074,8 +1106,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                M1::mcolsize == UNKNOWN && M1::mrowsize == UNKNOWN &&
-                M2::msize == UNKNOWN &&
+                M1::unknownsizes &&
+                M2::unknownsizes &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
@@ -1086,7 +1118,7 @@ namespace tmv {
                 ( cs == 0 || rs == 0 ) ? 0 :
                 cs == 1 ? 1 :
                 rs == 1 ? 202 :
-                M1::mconj ? 97 :
+                M1::_conj ? 97 :
                 inst ? 98 : 
                 -3;
             LDivEqMU_Helper<algo,cs,rs,M1,M2>::call(m1,m2);
@@ -1119,8 +1151,8 @@ namespace tmv {
         static void call(M1& m1, const M2& m2)
         {
             const bool checkalias =
-                M1::mcolsize == UNKNOWN && M1::mrowsize == UNKNOWN &&
-                M2::msize == UNKNOWN;
+                M1::_colsize == UNKNOWN && M1::_rowsize == UNKNOWN &&
+                M2::_size == UNKNOWN;
             const int algo = 
                 ( cs == 0 || rs == 0 ) ? 0 :
                 cs == 1 ? 1 :
@@ -1135,11 +1167,11 @@ namespace tmv {
     inline void DoLDivEq(
         BaseMatrix_Rec_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2)
     {
-        TMVStaticAssert((Sizes<M2::msize,M1::mcolsize>::same));
+        TMVStaticAssert((Sizes<M2::_size,M1::_colsize>::same));
         TMVAssert(m2.size() == m1.colsize());
 
-        const int cs = Sizes<M1::mcolsize,M2::msize>::size;
-        const int rs = M1::mrowsize;
+        const int cs = Sizes<M1::_colsize,M2::_size>::size;
+        const int rs = M1::_rowsize;
         typedef typename M1::cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         M1v m1v = m1.cView();
@@ -1194,17 +1226,61 @@ namespace tmv {
     template <int ix, class T, class M1, class M2, class M3>
     struct LDivMU_Helper<99,ix,T,M1,M2,M3>
     {
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        template <bool unknowndiag, class M3c>
+        struct copyBack
+        { // unknowndiag = false
+            static inline void call(const M3c& m3c, M3& m3)
+            { NoAliasCopy(m3c,m3); }
+        };
+        template <class M3c>
+        struct copyBack<true,M3c>
         {
-            if ( !SameStorage(m2,m3) ) {
-                AliasMultXM<false>(x,m1,m3);
-                NoAliasLDivEq(m3,m2);
+            static inline void call(const M3c& m3c, M3& m3)
+            {
+                if (m3.isunit()) {
+                    typedef typename M3c::const_unitdiag_type M3cu;
+                    M3cu m3cu = m3c.viewAsUnitDiag();
+                    NoAliasCopy(m3cu,m3);
+                } else {
+                    NoAliasCopy(m3c,m3);
+                }
+            }
+        };
+
+        // The copyBack call is only needed if M3 is a TriMatrix, not if it 
+        // is a regular Matrix.  So break out two options here.
+        template <class M3x>
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, 
+            BaseMatrix_Tri_Mutable<M3x>& m3)
+        {
+            if ( !SameStorage(m2,m3.mat()) ) {
+                AliasMultXM<false>(x,m1,m3.mat());
+                NoAliasLDivEq(m3.mat(),m2);
+            } else {
+                typedef typename M3::copy_type M3c;
+                M3c m3c(m3.size());
+                NoAliasMultXM<false>(x,m1,m3c);
+                NoAliasLDivEq(m3c,m2);
+                const bool unknowndiag = M3::_unknowndiag && ix == 1 && 
+                    (M1::_unit || M1::_unknowndiag) &&
+                    (M2::_unit || M2::_unknowndiag);
+                copyBack<unknowndiag,M3c>::call(m3c,m3.mat());
+            }
+        }
+        template <class M3x>
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2,
+            BaseMatrix_Mutable<M3x>& m3)
+        {
+            if ( !SameStorage(m2,m3.mat()) ) {
+                AliasMultXM<false>(x,m1,m3.mat());
+                NoAliasLDivEq(m3.mat(),m2);
             } else {
                 typename M3::copy_type m3c(m3.colsize(),m3.rowsize());
                 NoAliasMultXM<false>(x,m1,m3c);
                 NoAliasLDivEq(m3c,m2);
-                NoAliasCopy(m3c,m3);
+                NoAliasCopy(m3c,m3.mat());
             }
         }
     };
@@ -1217,9 +1293,9 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const bool checkalias =
-                M1::mcolsize == UNKNOWN && M1::mrowsize == UNKNOWN &&
-                M2::msize == UNKNOWN &&
-                M3::mcolsize == UNKNOWN && M3::mrowsize == UNKNOWN;
+                M1::unknownsizes &&
+                M2::unknownsizes &&
+                M3::unknownsizes;
             const int algo =
                 checkalias ? 99 :
                 -2;
@@ -1230,12 +1306,12 @@ namespace tmv {
     template <int algo, int ix, class T, class M1, class M2, class M3>
     inline void DoLDiv(
         const Scaling<ix,T>& x, 
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3)
+        const BaseMatrix_Calc<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
+        BaseMatrix_Mutable<M3>& m3)
     {
-        TMVStaticAssert((Sizes<M1::mrowsize,M3::mrowsize>::same));
-        TMVStaticAssert((Sizes<M1::mcolsize,M2::msize>::same));
-        TMVStaticAssert((Sizes<M2::msize,M3::mcolsize>::same));
+        TMVStaticAssert((Sizes<M1::_rowsize,M3::_rowsize>::same));
+        TMVStaticAssert((Sizes<M1::_colsize,M2::_size>::same));
+        TMVStaticAssert((Sizes<M2::_size,M3::_colsize>::same));
         TMVAssert(m1.colsize() == m3.colsize());
         TMVAssert(m1.rowsize() == m2.size());
         TMVAssert(m3.rowsize() == m2.size());
@@ -1250,20 +1326,20 @@ namespace tmv {
     template <int ix, class T, class M1, class M2, class M3>
     inline void LDiv(
         const Scaling<ix,T>& x, 
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3)
+        const BaseMatrix_Calc<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
+        BaseMatrix_Mutable<M3>& m3)
     { DoLDiv<-1>(x,m1,m2,m3); }
     template <int ix, class T, class M1, class M2, class M3>
     inline void NoAliasLDiv(
         const Scaling<ix,T>& x, 
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3)
+        const BaseMatrix_Calc<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
+        BaseMatrix_Mutable<M3>& m3)
     { DoLDiv<-2>(x,m1,m2,m3); }
     template <int ix, class T, class M1, class M2, class M3>
     inline void AliasLDiv(
         const Scaling<ix,T>& x, 
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3)
+        const BaseMatrix_Calc<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
+        BaseMatrix_Mutable<M3>& m3)
     { DoLDiv<99>(x,m1,m2,m3); }
 
     //

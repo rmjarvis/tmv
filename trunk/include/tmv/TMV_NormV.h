@@ -254,7 +254,7 @@ namespace tmv {
         {
             typedef typename V::const_flatten_type Vf;
             Vf vf = v.flatten();
-            const int size2 = size == UNKNOWN ? UNKNOWN : (size<<1);
+            const int size2 = IntTraits<size>::twoS;
             const int algo2 = 
 #if TMV_OPT >= 1
                 (size2 != UNKNOWN && size2 <= 64) ? 5 :
@@ -286,10 +286,10 @@ namespace tmv {
                 /* no other options currently */ 0;
             const int algo = 
                 ( ( comp == Abs2Comp || comp == NormComp ) && 
-                  ( V::viscomplex && V::vstep == 1) ) ? 7 :
-                ( V::vsize != UNKNOWN && V::vsize <= int(maxunroll) ) ? 5 :
-                (sizeof(RT) == 8 && V::vstep == 1) ? (V::viscomplex ? 2 : 3) :
-                (sizeof(RT) == 4 && V::vstep == 1) ? (V::viscomplex ? 3 : 4) :
+                  ( V::iscomplex && V::_step == 1) ) ? 7 :
+                ( V::_size != UNKNOWN && V::_size <= int(maxunroll) ) ? 5 :
+                (sizeof(RT) == 8 && V::_step == 1) ? (V::iscomplex ? 2 : 3) :
+                (sizeof(RT) == 4 && V::_step == 1) ? (V::iscomplex ? 3 : 4) :
                 1;
 #else 
             const int algo = 1;
@@ -306,7 +306,7 @@ namespace tmv {
         typedef typename V::real_type RT;
         typedef typename V::const_cview_type Vv;
         Vv vv = v.cView();
-        return SumElementsV_Helper<-1,V::vsize,ValueComp,1,Vv>::call(
+        return SumElementsV_Helper<-1,V::_size,ValueComp,1,Vv>::call(
             vv,Scaling<1,RT>());
     }
 
@@ -342,9 +342,9 @@ namespace tmv {
     {
         typedef typename V::value_type T;
         const bool inst = 
-            Traits<T>::isinst &&
-            V::vsize == UNKNOWN;
-        return CallSumElementsv<V::vconj,inst,V>::call(v.vec());
+            V::unknownsizes &&
+            Traits<T>::isinst;
+        return CallSumElementsv<V::_conj,inst,V>::call(v.vec());
     }
 
 
@@ -364,7 +364,7 @@ namespace tmv {
         typedef typename V::real_type RT;
         typedef typename V::const_cview_type Vv;
         Vv vv = v.cView();
-        return SumElementsV_Helper<-1,V::vsize,AbsComp,1,Vv>::call(
+        return SumElementsV_Helper<-1,V::_size,AbsComp,1,Vv>::call(
             vv,Scaling<1,RT>());
     }
 
@@ -392,8 +392,8 @@ namespace tmv {
         typedef typename V::value_type T;
         typedef typename V::const_nonconj_type Vn;
         const bool inst = 
-            Traits<T>::isinst &&
-            V::vsize == UNKNOWN;
+            V::unknownsizes &&
+            Traits<T>::isinst;
         return CallSumAbsElementsv<inst,Vn>::call(v.nonConj());
     }
 
@@ -410,7 +410,7 @@ namespace tmv {
         typedef typename V::real_type RT;
         typedef typename V::const_cview_type Vv;
         Vv vv = v.cView();
-        return SumElementsV_Helper<-1,V::vsize,Abs2Comp,1,Vv>::call(
+        return SumElementsV_Helper<-1,V::_size,Abs2Comp,1,Vv>::call(
             vv,Scaling<1,RT>());
     }
 
@@ -438,8 +438,8 @@ namespace tmv {
         typedef typename V::value_type T;
         typedef typename V::const_nonconj_type Vn;
         const bool inst = 
-            Traits<T>::isinst &&
-            V::vsize == UNKNOWN;
+            V::unknownsizes &&
+            Traits<T>::isinst;
         return CallSumAbs2Elementsv<inst,Vn>::call(v.nonConj());
     }
 
@@ -455,7 +455,7 @@ namespace tmv {
         typedef typename V::real_type RT;
         typedef typename V::const_cview_type Vv;
         Vv vv = v.cView();
-        return SumElementsV_Helper<-1,V::vsize,NormComp,1,Vv>::call(
+        return SumElementsV_Helper<-1,V::_size,NormComp,1,Vv>::call(
             vv,Scaling<1,RT>());
     }
 
@@ -482,8 +482,8 @@ namespace tmv {
         typedef typename V::value_type T;
         typedef typename V::const_nonconj_type Vn;
         const bool inst = 
-            Traits<T>::isinst &&
-            V::vsize == UNKNOWN;
+            V::unknownsizes &&
+            Traits<T>::isinst;
         return CallNormSqv<inst,Vn>::call(v.nonConj());
     }
 
@@ -500,7 +500,7 @@ namespace tmv {
         typedef typename V::real_type RT;
         typedef typename V::const_cview_type Vv;
         Vv vv = v.cView();
-        return SumElementsV_Helper<-1,V::vsize,NormComp,0,Vv>::call(
+        return SumElementsV_Helper<-1,V::_size,NormComp,0,Vv>::call(
             vv,Scaling<0,RT>(scale));
     }
 
@@ -531,8 +531,8 @@ namespace tmv {
         typedef typename V::value_type T;
         typedef typename V::const_nonconj_type Vn;
         const bool inst = 
-            Traits<T>::isinst &&
-            V::vsize == UNKNOWN;
+            V::unknownsizes &&
+            Traits<T>::isinst;
         return CallNormSq_scalev<inst,Vn>::call(v.nonConj(),scale);
     }
 
@@ -566,7 +566,7 @@ namespace tmv {
         typedef typename V::real_type RT;
         static RT call(const V& v)
         {
-            const RT eps = Epsilon<RT>();
+            const RT eps = TMV_Epsilon<RT>();
 
             // Start with the maximum |v(i)|.  It will tell us how (and if)
             // we need to use a scaling for NormSq().
@@ -618,7 +618,7 @@ namespace tmv {
         typedef typename V::real_type RT;
         static RT call(const V& v)
         {
-            const RT eps = Epsilon<RT>();
+            const RT eps = TMV_Epsilon<RT>();
             const RT vnormsq = v.normSq();
 
             if (vnormsq * eps == RT(0)) {
@@ -708,8 +708,8 @@ namespace tmv {
         typedef typename V::value_type T;
         typedef typename V::const_nonconj_type Vn;
         const bool inst = 
-            Traits<T>::isinst &&
-            V::vsize == UNKNOWN;
+            V::unknownsizes &&
+            Traits<T>::isinst;
         return CallNorm2v<inst,Vn>::call(v.nonConj());
     }
 

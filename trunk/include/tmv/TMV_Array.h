@@ -69,8 +69,8 @@ namespace tmv
         { if (p) delete [] p; p=0; }
         inline void swapWith(AlignedMemory<T>& rhs)
         { T* temp = p; p = rhs.p; rhs.p = temp; }
-        inline T* getP() { return p; }
-        inline const T* getP() const { return p; }
+        inline T* get() { return p; }
+        inline const T* get() const { return p; }
     };
 
     // Now specialize float and double if SSE commands are enabled
@@ -115,8 +115,8 @@ namespace tmv
         inline void swapWith(AlignedMemory<float>& rhs)
         { float* temp = p; p = rhs.p; rhs.p = temp; }
 #endif
-        inline float* getP() { return p; }
-        inline const float* getP() const { return p; }
+        inline float* get() { return p; }
+        inline const float* get() const { return p; }
     };
 #endif
 #ifdef __SSE2__
@@ -156,8 +156,8 @@ namespace tmv
         inline void swapWith(AlignedMemory<double>& rhs)
         { double* temp = p; p = rhs.p; rhs.p = temp; }
 #endif
-        inline double* getP() { return p; }
-        inline const double* getP() const { return p; }
+        inline double* get() { return p; }
+        inline const double* get() const { return p; }
     };
 #endif
 
@@ -172,19 +172,19 @@ namespace tmv
         inline AlignedArray(const size_t n) { p.allocate(n); }
         inline ~AlignedArray() { p.deallocate(); }
 
-        inline T& operator*() { return *getP(); }
-        inline T* operator->() { return getP(); }
-        inline operator T*() { return getP(); }
+        inline T& operator*() { return *get(); }
+        inline T* operator->() { return get(); }
+        inline operator T*() { return get(); }
 
-        inline const T& operator*() const { return *getP(); }
-        inline const T* operator->() const { return getP(); }
-        inline operator const T*() const { return getP(); }
+        inline const T& operator*() const { return *get(); }
+        inline const T* operator->() const { return get(); }
+        inline operator const T*() const { return get(); }
 
         inline void swapWith(AlignedArray<T>& rhs) { p.swapWith(rhs.p); }
         inline void resize(const size_t n) { p.deallocate(); p.allocate(n); }
 
-        inline T* getP() { return p.getP(); }
-        inline const T* getP() const  { return p.getP(); }
+        inline T* get() { return p.get(); }
+        inline const T* get() const  { return p.get(); }
 
     private :
 
@@ -204,20 +204,20 @@ namespace tmv
         inline AlignedArray(const size_t n) { p.allocate(n<<1); }
         inline ~AlignedArray() { p.deallocate(); }
 
-        inline T& operator*() { return *getP(); }
-        inline T* operator->() { return getP(); }
-        inline operator T*() { return getP(); }
+        inline T& operator*() { return *get(); }
+        inline T* operator->() { return get(); }
+        inline operator T*() { return get(); }
 
-        inline const T& operator*() const { return *getP(); }
-        inline const T* operator->() const { return getP(); }
-        inline operator const T*() const { return getP(); }
+        inline const T& operator*() const { return *get(); }
+        inline const T* operator->() const { return get(); }
+        inline operator const T*() const { return get(); }
 
         inline void swapWith(AlignedArray<T>& rhs) { p.swapWith(rhs.p); }
         inline void resize(const size_t n) { p.deallocate(); p.allocate(n<<1); }
 
-        inline T* getP() { return reinterpret_cast<T*>(p.getP()); }
-        inline const T* getP() const 
-        { return reinterpret_cast<const T*>(p.getP()); }
+        inline T* get() { return reinterpret_cast<T*>(p.get()); }
+        inline const T* get() const 
+        { return reinterpret_cast<const T*>(p.get()); }
 
     private :
 
@@ -240,8 +240,8 @@ namespace tmv
     struct StackArray2<T,N,false,false>
     { 
         T p[N]; 
-        inline T* getP() { return p; }
-        inline const T* getP() const { return p; }
+        inline T* get() { return p; }
+        inline const T* get() const { return p; }
     };
 
 #ifdef __SSE__
@@ -249,15 +249,15 @@ namespace tmv
     struct StackArray2<float,N,false,false>
     {
         union { float xf[N]; __m128 xm; } xp;
-        inline float* getP() { return xp.xf; }
-        inline const float* getP() const { return xp.xf; }
+        inline float* get() { return xp.xf; }
+        inline const float* get() const { return xp.xf; }
     };
     template <int N>
     struct StackArray2<float,N,false,true>
     {
         float p[N];
-        inline float* getP() { return p; }
-        inline const float* getP() const { return p; }
+        inline float* get() { return p; }
+        inline const float* get() const { return p; }
     };
 #endif
 #ifdef __SSE2__
@@ -265,15 +265,15 @@ namespace tmv
     struct StackArray2<double,N,false,false>
     { 
         union { double xd[N]; __m128d xm; } xp;
-        inline double* getP() { return xp.xd; }
-        inline const double* getP() const { return xp.xd; }
+        inline double* get() { return xp.xd; }
+        inline const double* get() const { return xp.xd; }
     };
     template <int N>
     struct StackArray2<double,N,false,true>
     {
         double p[N];
-        inline double* getP() { return p; }
-        inline const double* getP() const { return p; }
+        inline double* get() { return p; }
+        inline const double* get() const { return p; }
     };
 #endif
 
@@ -282,8 +282,8 @@ namespace tmv
     {
         AlignedArray<T> p;
         inline StackArray2() : p(N) {}
-        inline T* getP() { return p.getP(); }
-        inline const T* getP() const { return p.getP(); }
+        inline T* get() { return p.get(); }
+        inline const T* get() const { return p.get(); }
     };
 
     // Now the real class that we use: StackArray<T,N>
@@ -294,16 +294,16 @@ namespace tmv
         inline StackArray() {}
         inline ~StackArray() {}
 
-        inline T& operator*() { return *getP(); }
-        inline T* operator->() { return getP(); }
-        inline operator T*() { return getP(); }
+        inline T& operator*() { return *get(); }
+        inline T* operator->() { return get(); }
+        inline operator T*() { return get(); }
 
-        inline const T& operator*() const { return *getP(); }
-        inline const T* operator->() const { return getP(); }
-        inline operator const T*() const { return getP(); }
+        inline const T& operator*() const { return *get(); }
+        inline const T* operator->() const { return get(); }
+        inline operator const T*() const { return get(); }
 
-        inline T* getP() { return p.getP(); }
-        inline const T* getP() const { return p.getP(); }
+        inline T* get() { return p.get(); }
+        inline const T* get() const { return p.get(); }
 
     private :
         enum { bigN = N*int(sizeof(T)) > TMV_MaxStack };
@@ -331,17 +331,17 @@ namespace tmv
         inline StackArray() {}
         inline ~StackArray() {}
 
-        inline T& operator*() { return *getP(); }
-        inline T* operator->() { return getP(); }
-        inline operator T*() { return getP(); }
+        inline T& operator*() { return *get(); }
+        inline T* operator->() { return get(); }
+        inline operator T*() { return get(); }
 
-        inline const T& operator*() const { return *getP(); }
-        inline const T* operator->() const { return getP(); }
-        inline operator const T*() const { return getP(); }
+        inline const T& operator*() const { return *get(); }
+        inline const T* operator->() const { return get(); }
+        inline operator const T*() const { return get(); }
 
-        inline T* getP() { return reinterpret_cast<T*>(p.getP()); }
-        inline const T* getP() const 
-        { return reinterpret_cast<const T*>(p.getP()); }
+        inline T* get() { return reinterpret_cast<T*>(p.get()); }
+        inline const T* get() const 
+        { return reinterpret_cast<const T*>(p.get()); }
 
     private :
 

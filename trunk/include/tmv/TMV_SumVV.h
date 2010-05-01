@@ -51,15 +51,15 @@ namespace tmv {
         typedef typename ProdXV<ix2,T2,V2>::value_type vtype2;
         typedef typename Traits2<vtype1,vtype2>::type value_type;
 
-        enum { vsize = Sizes<V1::vsize,V2::vsize>::size };
-        enum { vfort = V1::vfort && V2::vfort };
-        enum { vcalc = false };
+        enum { _size = Sizes<V1::_size,V2::_size>::size };
+        enum { _fort = V1::_fort && V2::_fort };
+        enum { _calc = false };
 
         typedef SumVV<ix1,T1,V1,ix2,T2,V2> type;
-        typedef typename VCopyHelper<value_type,vsize,vfort>::type copy_type;
+        typedef typename VCopyHelper<value_type,_size,_fort>::type copy_type;
         typedef const copy_type calc_type;
         typedef typename TypeSelect<
-            (V1::vcalc && V2::vcalc),const type,calc_type>::type eval_type;
+            (V1::_calc && V2::_calc),const type,calc_type>::type eval_type;
     };
 
     template <int ix1, class T1, class V1, int ix2, class T2, class V2>
@@ -77,7 +77,7 @@ namespace tmv {
                      const T2& _x2, const BaseVector<V2>& _v2) :
             x1(_x1), v1(_v1.vec()), x2(_x2), v2(_v2.vec())
         { 
-            TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same)); 
+            TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
             TMVAssert(v1.size() == v2.size());
         }
 
@@ -93,18 +93,18 @@ namespace tmv {
         template <class V3>
         inline void assignTo(BaseVector_Mutable<V3>& v3) const
         {
-            TMVStaticAssert((Sizes<type::vsize,V3::vsize>::same)); 
+            TMVStaticAssert((Sizes<type::_size,V3::_size>::same)); 
             TMVAssert(size() == v3.size());
-            TMVStaticAssert(type::visreal || V3::viscomplex);
+            TMVStaticAssert(type::isreal || V3::iscomplex);
             AddVV(x1,v1.calc(),x2,v2.calc(),v3.vec());
         }
 
         template <class V3>
         inline void newAssignTo(BaseVector_Mutable<V3>& v3) const
         {
-            TMVStaticAssert((Sizes<type::vsize,V3::vsize>::same)); 
+            TMVStaticAssert((Sizes<type::_size,V3::_size>::same)); 
             TMVAssert(size() == v3.size());
-            TMVStaticAssert(type::visreal || V3::viscomplex);
+            TMVStaticAssert(type::isreal || V3::iscomplex);
             NoAliasAddVV(x1,v1.calc(),x2,v2.calc(),v3.vec());
         }
 
@@ -121,9 +121,9 @@ namespace tmv {
     inline void AddEq(
         BaseVector_Mutable<V1>& v1, const BaseVector<V2>& v2) 
     {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same)); 
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
-        TMVStaticAssert(V1::viscomplex || V2::visreal);
+        TMVStaticAssert(V1::iscomplex || V2::isreal);
         MultXV<true>(v2.calc(),v1);
     }
 
@@ -132,9 +132,9 @@ namespace tmv {
     inline void AddEq(
         BaseVector_Mutable<V1>& v1, const ProdXV<ix2,T2,V2>& v2) 
     {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same)); 
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
-        TMVStaticAssert(V1::viscomplex || V2::visreal);
+        TMVStaticAssert(V1::iscomplex || V2::isreal);
         MultXV<true>(v2.getX(),v2.getV().calc(),v1);
     }
 
@@ -143,9 +143,9 @@ namespace tmv {
     inline void SubtractEq(
         BaseVector_Mutable<V1>& v1, const BaseVector<V2>& v2)
     {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same)); 
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
-        TMVStaticAssert(V1::viscomplex || V2::visreal);
+        TMVStaticAssert(V1::iscomplex || V2::isreal);
         MultXV<true>(Scaling<-1,RT>(),v2.calc(),v1);
     }
 
@@ -154,9 +154,9 @@ namespace tmv {
     inline void SubtractEq(
         BaseVector_Mutable<V1>& v1, const ProdXV<ix2,T2,V2>& v2) 
     {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same)); 
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
-        TMVStaticAssert(V1::viscomplex || V2::visreal);
+        TMVStaticAssert(V1::iscomplex || V2::isreal);
         MultXV<true>(-v2.getX(),v2.getV().calc(),v1);
     }
 
@@ -165,7 +165,7 @@ namespace tmv {
     inline SumVV<1,RT,V1,1,RT,V2> operator+(
         const BaseVector<V1>& v1, const BaseVector<V2>& v2)
     { 
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same)); 
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
         return SumVV<1,RT,V1,1,RT,V2>(RT(1),v1,RT(1),v2); 
     }
@@ -175,7 +175,7 @@ namespace tmv {
     inline SumVV<ix1,T1,V1,1,RT,V2> operator+(
         const ProdXV<ix1,T1,V1>& v1, const BaseVector<V2>& v2)
     { 
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same)); 
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
         return SumVV<ix1,T1,V1,1,RT,V2>(T1(v1.getX()),v1.getV(),RT(1),v2); 
     }
@@ -185,7 +185,7 @@ namespace tmv {
     inline SumVV<1,RT,V1,ix2,T2,V2> operator+(
         const BaseVector<V1>& v1, const ProdXV<ix2,T2,V2>& v2)
     { 
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same)); 
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
         return SumVV<1,RT,V1,ix2,T2,V2>(RT(1),v1,T2(v2.getX()),v2.getV()); 
     }
@@ -195,7 +195,7 @@ namespace tmv {
     inline SumVV<ix1,T1,V1,ix2,T2,V2> operator+(
         const ProdXV<ix1,T1,V1>& v1, const ProdXV<ix2,T2,V2>& v2)
     { 
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same)); 
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
         return SumVV<ix1,T1,V1,ix2,T2,V2>(
             T1(v1.getX()),v1.getV(),T2(v2.getX()),v2.getV()); 
@@ -206,7 +206,7 @@ namespace tmv {
     inline SumVV<1,RT,V1,-1,RT,V2> operator-(
         const BaseVector<V1>& v1, const BaseVector<V2>& v2)
     { 
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same)); 
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
         return SumVV<1,RT,V1,-1,RT,V2>(RT(1),v1,RT(-1),v2); 
     }
@@ -216,7 +216,7 @@ namespace tmv {
     inline SumVV<ix1,T1,V1,-1,RT,V2> operator-(
         const ProdXV<ix1,T1,V1>& v1, const BaseVector<V2>& v2)
     { 
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same)); 
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
         return SumVV<ix1,T1,V1,-1,RT,V2>(T1(v1.getX()),v1.getV(),RT(-1),v2); 
     }
@@ -226,7 +226,7 @@ namespace tmv {
     inline SumVV<1,RT,V1,-ix2,T2,V2> operator-(
         const BaseVector<V1>& v1, const ProdXV<ix2,T2,V2>& v2)
     { 
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same)); 
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
         return SumVV<1,RT,V1,-ix2,T2,V2>(RT(1),v1,T2(-v2.getX()),v2.getV()); 
     }
@@ -236,7 +236,7 @@ namespace tmv {
     inline SumVV<ix1,T1,V1,-ix2,T2,V2> operator-(
         const ProdXV<ix1,T1,V1>& v1, const ProdXV<ix2,T2,V2>& v2)
     { 
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same)); 
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
         return SumVV<ix1,T1,V1,-ix2,T2,V2>(
             T1(v1.getX()),v1.getV(),T2(-v2.getX()),v2.getV()); 

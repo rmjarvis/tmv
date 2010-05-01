@@ -51,64 +51,6 @@ namespace tmv {
     // Vector (/%) Matrix
     //
 
-    // These are intentionally not defined to make sure we
-    // get a compiler error if they are used.
-    // All real calls should go through a more specific version than 
-    // just the BaseMatrix_Calc's.
-    template <int ix, class T, class V1, class M2, class V3>
-    inline void LDiv(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
-    template <int ix, class T, class V1, class M2, class V3>
-    inline void NoAliasLDiv(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
-    template <int ix, class T, class V1, class M2, class V3>
-    inline void InlineLDiv(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
-    template <int ix, class T, class V1, class M2, class V3>
-    inline void AliasLDiv(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
-
-    template <int ix, class T, class V1, class M2, class V3>
-    inline void RDiv(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
-    template <int ix, class T, class V1, class M2, class V3>
-    inline void NoAliasRDiv(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
-    template <int ix, class T, class V1, class M2, class V3>
-    inline void InlineRDiv(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
-    template <int ix, class T, class V1, class M2, class V3>
-    inline void AliasRDiv(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
-
-    template <class V1, class M2>
-    inline void LDivEq(
-        BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2);
-    template <class V1, class M2>
-    inline void NoAliasLDivEq(
-        BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2);
-    template <class V1, class M2>
-    inline void AliasLDivEq(
-        BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2);
-
-    template <class V1, class M2>
-    inline void RDivEq(
-        BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2);
-    template <class V1, class M2>
-    inline void NoAliasRDivEq(
-        BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2);
-    template <class V1, class M2>
-    inline void AliasRDivEq(
-        BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2);
-
 #ifdef XDEBUG_QUOTVM
     template <int ix, class T, class V1, class M2, class V3>
     inline void LDiv_Debug(
@@ -227,12 +169,12 @@ namespace tmv {
         typedef typename M2::value_type mtype2;
         typedef typename Traits2<vtype1,mtype2>::type value_type;
 
-        enum { vsize = M2::mrowsize };
-        enum { vfort = M2::mfort && V1::vfort };
-        enum { vcalc = false };
+        enum { _size = M2::_rowsize };
+        enum { _fort = M2::_fort && V1::_fort };
+        enum { _calc = false };
 
         typedef QuotVM<ix,T,V1,M2> type;
-        typedef typename VCopyHelper<value_type,vsize,vfort>::type copy_type;
+        typedef typename VCopyHelper<value_type,_size,_fort>::type copy_type;
         typedef const copy_type calc_type;
         typedef const copy_type eval_type;
     };
@@ -253,7 +195,7 @@ namespace tmv {
         ) : 
             x(_x), v1(_v1.vec()), m2(_m2.mat())
         {
-            TMVStaticAssert((Sizes<M2::mcolsize,V1::vsize>::same)); 
+            TMVStaticAssert((Sizes<M2::_colsize,V1::_size>::same)); 
             TMVAssert(m2.colsize() == v1.size());
         }
 
@@ -269,8 +211,8 @@ namespace tmv {
         template <class V3>
         inline void assignTo(BaseVector_Mutable<V3>& v3) const
         {
-            TMVStaticAssert((type::visreal || V3::viscomplex));
-            TMVStaticAssert((Sizes<type::vsize,V3::vsize>::same)); 
+            TMVStaticAssert((type::isreal || V3::iscomplex));
+            TMVStaticAssert((Sizes<type::_size,V3::_size>::same)); 
             TMVAssert(size() == v3.size());
 #ifdef XDEBUG_QUOTVM
             LDiv_Debug(x,v1.calc(),m2.calc(),v3.vec());
@@ -282,8 +224,8 @@ namespace tmv {
         template <class V3>
         inline void newAssignTo(BaseVector_Mutable<V3>& v3) const
         {
-            TMVStaticAssert((type::visreal || V3::viscomplex));
-            TMVStaticAssert((Sizes<type::vsize,V3::vsize>::same)); 
+            TMVStaticAssert((type::isreal || V3::iscomplex));
+            TMVStaticAssert((Sizes<type::_size,V3::_size>::same)); 
             TMVAssert(size() == v3.size());
 #ifdef XDEBUG_QUOTVM
             LDiv_Debug(x,v1.calc(),m2.calc(),v3.vec());
@@ -308,12 +250,12 @@ namespace tmv {
         typedef typename M2::value_type mtype2;
         typedef typename Traits2<vtype1,mtype2>::type value_type;
 
-        enum { vsize = M2::mcolsize };
-        enum { vfort = M2::mfort && V1::vfort };
-        enum { vcalc = false };
+        enum { _size = M2::_colsize };
+        enum { _fort = M2::_fort && V1::_fort };
+        enum { _calc = false };
 
         typedef RQuotVM<ix,T,V1,M2> type;
-        typedef typename VCopyHelper<value_type,vsize,vfort>::type copy_type;
+        typedef typename VCopyHelper<value_type,_size,_fort>::type copy_type;
         typedef const copy_type calc_type;
         typedef const copy_type eval_type;
     };
@@ -334,7 +276,7 @@ namespace tmv {
         ) : 
             x(_x), v1(_v1.vec()), m2(_m2.mat())
         {
-            TMVStaticAssert((Sizes<M2::mrowsize,V1::vsize>::same)); 
+            TMVStaticAssert((Sizes<M2::_rowsize,V1::_size>::same)); 
             TMVAssert(m2.rowsize() == v1.size());
         }
 
@@ -350,8 +292,8 @@ namespace tmv {
         template <class V3>
         inline void assignTo(BaseVector_Mutable<V3>& v3) const
         {
-            TMVStaticAssert((type::visreal || V3::viscomplex));
-            TMVStaticAssert((Sizes<type::vsize,V3::vsize>::same)); 
+            TMVStaticAssert((type::isreal || V3::iscomplex));
+            TMVStaticAssert((Sizes<type::_size,V3::_size>::same)); 
             TMVAssert(size() == v3.size());
 #ifdef XDEBUG_QUOTVM
             RDiv_Debug(x,v1.calc(),m2.calc(),v3.vec());
@@ -363,8 +305,8 @@ namespace tmv {
         template <class V3>
         inline void newAssignTo(BaseVector_Mutable<V3>& v3) const
         {
-            TMVStaticAssert((type::visreal || V3::viscomplex));
-            TMVStaticAssert((Sizes<type::vsize,V3::vsize>::same)); 
+            TMVStaticAssert((type::isreal || V3::iscomplex));
+            TMVStaticAssert((Sizes<type::_size,V3::_size>::same)); 
             TMVAssert(size() == v3.size());
 #ifdef XDEBUG_QUOTVM
             RDiv_Debug(x,v1.calc(),m2.calc(),v3.vec());

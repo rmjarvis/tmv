@@ -223,18 +223,18 @@ namespace tmv {
         inline VIt(const type& rhs) : p(rhs.p), s(rhs.s) {}
 
         template <int S2> 
-        inline VIt(const VIt<T,S2,C>& rhs) : p(rhs.getP()), s(rhs.step()) {}
+        inline VIt(const VIt<T,S2,C>& rhs) : p(rhs.get()), s(rhs.step()) {}
 
         inline type& operator=(const type& rhs) 
         { TMVAssert(step()==rhs.step()); p=rhs.p; return *this; }
 
         template <int S2> 
         inline type& operator=(const VIt<T,S2,C>& rhs) 
-        { TMVAssert(step()==rhs.step()); p=rhs.getP(); return *this; }
+        { TMVAssert(step()==rhs.step()); p=rhs.get(); return *this; }
 
         inline ~VIt() {}
 
-        inline T* getP() const { return p; }
+        inline T* get() const { return p; }
         inline int step() const { return s; }
 
         inline bool operator==(const type& rhs) const { return p == rhs.p; }
@@ -291,25 +291,25 @@ namespace tmv {
         inline CVIt(const type& rhs) : p(rhs.p), s(rhs.s) {}
 
         template <int S2> 
-        inline CVIt(const CVIt<T,S2,C>& rhs) : p(rhs.getP()), s(rhs.step()) {}
+        inline CVIt(const CVIt<T,S2,C>& rhs) : p(rhs.get()), s(rhs.step()) {}
 
         template <int S2> 
-        inline CVIt(const VIt<T,S2,C>& rhs) : p(rhs.getP()), s(rhs.step()) {}
+        inline CVIt(const VIt<T,S2,C>& rhs) : p(rhs.get()), s(rhs.step()) {}
 
         inline type& operator=(const type& rhs)
-        { TMVAssert(step()==rhs.step()); p = rhs.getP(); return *this; }
+        { TMVAssert(step()==rhs.step()); p = rhs.get(); return *this; }
 
         template <int S2> 
         inline type& operator=(const CVIt<T,S2,C>& rhs)
-        { TMVAssert(step()==rhs.step()); p = rhs.getP(); return *this; }
+        { TMVAssert(step()==rhs.step()); p = rhs.get(); return *this; }
 
         template <int S2> 
         inline type& operator=(const VIt<T,S2,C>& rhs)
-        { TMVAssert(step()==rhs.step()); p = rhs.getP(); return *this; }
+        { TMVAssert(step()==rhs.step()); p = rhs.get(); return *this; }
 
         inline ~CVIt() {}
 
-        inline const T* getP() const { return p; }
+        inline const T* get() const { return p; }
         inline int step() const { return s; }
 
         inline bool operator==(const type& rhs) const { return p == rhs.p; }

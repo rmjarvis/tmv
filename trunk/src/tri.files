@@ -7,3 +7,4 @@ TMV_MultUU.cpp
 TMV_MultUD.cpp
 TMV_InvertU.cpp
 TMV_DivVU.cpp
+TMV_DivUU.cpp

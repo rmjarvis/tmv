@@ -168,7 +168,7 @@ namespace tmv {
             Maybe<add>::add( 
                 v3.ref(0) , 
                 ZProd<false,false>::prod(
-                    x, Maybe<!M1::munit>::prod(m1.cref(0,0) , v2.cref(0)))); 
+                    x, Maybe<!M1::_unit>::prod(m1.cref(0,0) , v2.cref(0)))); 
         }
     };
 
@@ -192,8 +192,8 @@ namespace tmv {
             typedef typename M1::const_diag_type M1d;
             PT2 Xj;
 
-            const bool unit = M1::munit;
-            const bool c2 = V2::vconj;
+            const bool unit = M1::_unit;
+            const bool c2 = V2::_conj;
 
             typedef typename M1c::const_nonconj_type::const_iterator IT1;
             typedef typename M1d::const_nonconj_type::const_iterator IT1d;
@@ -219,11 +219,11 @@ namespace tmv {
                     MultXV_Helper<-4,UNKNOWN,true,0,PT2,M1c,V3>::call2(
                         j,Scaling<0,PT2>(Xj),A0j,Y0);
                     A0j.shiftP(Astepj);
-                    if (dopref) Prefetch_Read(A0j.getP());
+                    if (dopref) Prefetch_Read(A0j.get());
                     Maybe<add>::add(*Y++,Maybe<!unit>::prod(m1.cref(j,j),Xj));
                 } else {
                     A0j.shiftP(Astepj);
-                    if (dopref) Prefetch_Read(A0j.getP());
+                    if (dopref) Prefetch_Read(A0j.get());
                     ++X; 
                     Maybe<!add>::set(*Y++,T3(0));
                 }
@@ -254,8 +254,8 @@ namespace tmv {
             typedef typename V2::const_nonconj_type::const_iterator IT2;
             typedef typename V3::iterator IT3;
 
-            const bool unit = M1::munit;
-            const bool c2 = V2::vconj;
+            const bool unit = M1::_unit;
+            const bool c2 = V2::_conj;
 
             // Actually Aii is the address of A(i,i+1)
             IT1 Aii = m1.get_row(0,1,N).nonConj().begin();
@@ -279,7 +279,7 @@ namespace tmv {
             for(int i=0;i<i1;++i) {
                 Yi = MultVV_Helper<-4,UNKNOWN,M1r,V2>::call2(N,Aii-1,X);
                 Aii.shiftP(Astepi);
-                if (dopref) Prefetch_Read(Aii.getP()-1);
+                if (dopref) Prefetch_Read(Aii.get()-1);
                 Maybe<add>::add(*Y++, x * Yi);
             }
 
@@ -291,7 +291,7 @@ namespace tmv {
                 Yi = Maybe<!unit>::template zprod<false,c2>(m1.cref(i,i),*X++);
                 Yi += MultVV_Helper<-4,UNKNOWN,M1r,V2>::call2(N,Aii,X);
                 Aii.shiftP(Adiagstep);
-                if (dopref) Prefetch_Read(Aii.getP()-1);
+                if (dopref) Prefetch_Read(Aii.get()-1);
                 Maybe<add>::add(*Y++, x * Yi);
             }
         }
@@ -319,7 +319,7 @@ namespace tmv {
             {
                 typedef typename M1::const_row_sub_type M1r;
                 typedef typename V2::const_subvector_type V2s;
-                const bool unit = M1::munit;
+                const bool unit = M1::_unit;
                 Maybe<add>::add(
                     v3.ref(I) , x * ( 
                         Maybe<!unit>::prod(m1.cref(I,I) , v2.cref(I)) +
@@ -364,8 +364,8 @@ namespace tmv {
             typedef typename M1::const_diag_type M1d;
             PT2 Xj;
 
-            const bool unit = M1::munit;
-            const bool c2 = V2::vconj;
+            const bool unit = M1::_unit;
+            const bool c2 = V2::_conj;
 
             typedef typename M1c::const_nonconj_type::const_iterator IT1;
             typedef typename M1d::const_nonconj_type::const_iterator IT1d;
@@ -382,7 +382,7 @@ namespace tmv {
 
             Prefetch_Read(v2.cptr());
             Prefetch_MultiWrite(v3.ptr());
-            if (dopref) Prefetch_Read(Ajj.getP());
+            if (dopref) Prefetch_Read(Ajj.get());
             else Prefetch_Read(m1.cptr());
 
             for(int j=N,len=0;j--;++len) {
@@ -393,12 +393,12 @@ namespace tmv {
                     MultXV_Helper<-4,UNKNOWN,true,0,PT2,M1c,V3>::call2(
                         len,Scaling<0,PT2>(Xj),Ajj,Y--);
                     Ajj.shiftP(-Adiagstep);
-                    if (dopref) Prefetch_Read(Ajj.getP()-1);
+                    if (dopref) Prefetch_Read(Ajj.get()-1);
                     // y(j) (+)= x(j) * A(j,j);
                     Maybe<add>::add(*Y , Maybe<!unit>::prod(m1.cref(j,j),Xj));
                 } else {
                     Ajj.shiftP(-Adiagstep);
-                    if (dopref) Prefetch_Read(Ajj.getP()-1);
+                    if (dopref) Prefetch_Read(Ajj.get()-1);
                     --X;
                     Maybe<!add>::set(*--Y,T3(0));
                 }
@@ -429,8 +429,8 @@ namespace tmv {
             typedef typename V2::const_nonconj_type::const_iterator IT2;
             typedef typename V3::iterator IT3;
 
-            const bool unit = M1::munit;
-            const bool c2 = V2::vconj;
+            const bool unit = M1::_unit;
+            const bool c2 = V2::_conj;
 
             IT1 Ai0 = m1.get_row(N-1,0,N-1).nonConj().begin();
             IT2 X0 = v2.nonConj().begin();
@@ -442,7 +442,7 @@ namespace tmv {
 
             Prefetch_MultiRead(v2.cptr());
             Prefetch_Write(v3.ptr());
-            if (dopref) Prefetch_Read(Ai0.getP());
+            if (dopref) Prefetch_Read(Ai0.get());
             else Prefetch_Read(m1.cptr());
 
             // [ A00  0   0  ] [  0 ]   [    0   ]
@@ -459,7 +459,7 @@ namespace tmv {
             for(;i>i2;--i) {
                 Yi = MultVV_Helper<-4,UNKNOWN,M1r,V2>::call2(N,Ai0,X0);
                 Ai0.shiftP(-Astepi);
-                if (dopref) Prefetch_Read(Ai0.getP());
+                if (dopref) Prefetch_Read(Ai0.get());
                 Maybe<add>::add(*Y--, x * Yi);
             }
 
@@ -470,7 +470,7 @@ namespace tmv {
                 //      + A.row(i,0,i) * x.subVector(0,i)
                 Yi = MultVV_Helper<-4,UNKNOWN,M1r,V2>::call2(N,Ai0,X0);
                 Ai0.shiftP(-Astepi);
-                if (dopref) Prefetch_Read(Ai0.getP());
+                if (dopref) Prefetch_Read(Ai0.get());
                 Yi += Maybe<!unit>::template zprod<false,c2>(m1.cref(i,i),*X--);
                 Maybe<add>::add(*Y--, x * Yi);
             } 
@@ -499,7 +499,7 @@ namespace tmv {
             {
                 typedef typename M1::const_row_sub_type M1r;
                 typedef typename V2::const_subvector_type V2s;
-                const bool unit = M1::munit;
+                const bool unit = M1::_unit;
                 Maybe<add>::add(
                     v3.ref(I) , x * ( 
                         Maybe<!unit>::prod(m1.cref(I,I) , v2.cref(I)) +
@@ -623,7 +623,7 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            TMVStaticAssert(!V3::vconj);
+            TMVStaticAssert(!V3::_conj);
             const int s2 = s > 20 ? UNKNOWN : s;
             const int s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)/2
@@ -635,16 +635,16 @@ namespace tmv {
             const int algo = 
                 ( s == 0 ) ? 0 : 
                 ( s == 1 ) ? 1 : 
-                M1::mupper ? (
+                M1::_upper ? (
                     unroll ? 15 :
-                    M1::mcolmajor ? 11 :
-                    M1::mrowmajor ? 12 :
-                    V2::vstep == 1 ? 12 : V3::vstep == 1 ? 11 : 12 ) :
+                    M1::_colmajor ? 11 :
+                    M1::_rowmajor ? 12 :
+                    V2::_step == 1 ? 12 : V3::_step == 1 ? 11 : 12 ) :
                 ( // lowertri
                     unroll ? 25 :
-                    M1::mcolmajor ? 21 :
-                    M1::mrowmajor ? 22 :
-                    V2::vstep == 1 ? 22 : V3::vstep == 1 ? 21 : 22 );
+                    M1::_colmajor ? 21 :
+                    M1::_rowmajor ? 22 :
+                    V2::_step == 1 ? 22 : V3::_step == 1 ? 21 : 22 );
             MultUV_Helper<algo,s,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
         }
     };
@@ -656,7 +656,7 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            TMVStaticAssert(!V3::vconj);
+            TMVStaticAssert(!V3::_conj);
             // Possible algorithms to choose from:
             //
             // Trivial:
@@ -679,9 +679,9 @@ namespace tmv {
 
 #if TMV_OPT == 0
             const int algo = 
-                M1::mupper ?
-                ( M1::mcolmajor ? 11 : 12 ) :
-                ( M1::mcolmajor ? 21 : 22 );
+                M1::_upper ?
+                ( M1::_colmajor ? 11 : 12 ) :
+                ( M1::_colmajor ? 21 : 22 );
 #else
             const int s2 = s > 20 ? UNKNOWN : s;
             const int s2p1 = IntTraits<s2>::Sp1;
@@ -694,32 +694,32 @@ namespace tmv {
             const int algo = 
                 ( s == 0 ) ? 0 : // trivial - nothing to do
                 ( s == 1 ) ? 1 : // trivial - s = 1
-                M1::mupper ? (
+                M1::_upper ? (
                     unroll ? 15 :
-                    M1::mcolmajor ? (
-                        V3::vstep == UNKNOWN ? (
+                    M1::_colmajor ? (
+                        V3::_step == UNKNOWN ? (
                             s == UNKNOWN ? 43 :
                             s > TMV_Q2 ? 85 : 11 ) :
                         11 ) :
-                    M1::mrowmajor ? (
-                        V2::vstep == UNKNOWN ? (
+                    M1::_rowmajor ? (
+                        V2::_step == UNKNOWN ? (
                             s == UNKNOWN ? 53 :
                             s > TMV_Q2 ? 81 : 12 ) :
                         12 ) :
-                    V2::vstep == 1 ? 12 : V3::vstep == 1 ? 11 : 12 ) :
+                    V2::_step == 1 ? 12 : V3::_step == 1 ? 11 : 12 ) :
                 ( // lowertri
                     unroll ? 25 :
-                    M1::mcolmajor ? (
-                        V3::vstep == UNKNOWN ? (
+                    M1::_colmajor ? (
+                        V3::_step == UNKNOWN ? (
                             s == UNKNOWN ? 43 :
                             s > TMV_Q2 ? 85 : 21 ) :
                         21 ) :
-                    M1::mrowmajor ? (
-                        V2::vstep == UNKNOWN ? (
+                    M1::_rowmajor ? (
+                        V2::_step == UNKNOWN ? (
                             s == UNKNOWN ? 53 :
                             s > TMV_Q2 ? 81 : 22 ) :
                         22 ) :
-                    V2::vstep == 1 ? 22 : V3::vstep == 1 ? 21 : 22 );
+                    V2::_step == 1 ? 22 : V3::_step == 1 ? 21 : 22 );
 #endif
 #ifdef PRINTALGO_UV
             std::cout<<"InlineMultUV: \n";
@@ -786,9 +786,9 @@ namespace tmv {
             typedef typename V2::value_type T2;
             typedef typename V3::value_type T3;
             const bool inst = 
-                M1::msize == UNKNOWN &&
-                V2::vsize == UNKNOWN && 
-                V3::vsize == UNKNOWN &&
+                M1::unknownsizes &&
+                V2::unknownsizes &&
+                V3::unknownsizes &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -800,7 +800,7 @@ namespace tmv {
             const int algo = 
                 ( s == 0 ) ? 0 : 
                 ( s == 1 ) ? 1 : 
-                V3::vconj ? 97 :
+                V3::_conj ? 97 :
                 inst ? 98 : 
                 -3;
             MultUV_Helper<algo,s,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
@@ -815,8 +815,8 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
             if ( !SameStorage(m1,v3) &&
-                 ( (M1::mupper && v2.step()>=v3.step()) ||
-                   (M1::mlower && v2.step()<=v3.step()) ||
+                 ( (M1::_upper && v2.step()>=v3.step()) ||
+                   (M1::_lower && v2.step()<=v3.step()) ||
                    !SameStorage(v2.vec(),v3.vec())) ) {
                 // No aliasing (or no clobbering)
                 MultUV_Helper<-2,s,true,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
@@ -838,8 +838,8 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
             if ( !SameStorage(m1,v3) &&
-                 ( (M1::mupper && v2.step()>=v3.step()) ||
-                   (M1::mlower && v2.step()<=v3.step()) ||
+                 ( (M1::_upper && v2.step()>=v3.step()) ||
+                   (M1::_lower && v2.step()<=v3.step()) ||
                    !SameStorage(v2.vec(),v3.vec())) ) {
                 // No aliasing (or no clobbering)
                 MultUV_Helper<-2,s,false,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
@@ -862,9 +862,9 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
             const bool checkalias =
-                M1::msize == UNKNOWN &&
-                V2::vsize == UNKNOWN && 
-                V3::vsize == UNKNOWN;
+                M1::_size == UNKNOWN &&
+                V2::_size == UNKNOWN && 
+                V3::_size == UNKNOWN;
             const int algo = 
                 ( s == 0 ) ? 0 : 
                 ( s == 1 ) ? 1 : 
@@ -880,13 +880,13 @@ namespace tmv {
         const BaseMatrix_Tri<M1>& m1, const BaseVector_Calc<V2>& v2, 
         BaseVector_Mutable<V3>& v3)
     {
-        TMVStaticAssert((Sizes<M1::msize,V3::vsize>::same));
-        TMVStaticAssert((Sizes<M1::msize,V2::vsize>::same));
-        TMVStaticAssert((Sizes<V2::vsize,V3::vsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,V3::_size>::same));
+        TMVStaticAssert((Sizes<M1::_size,V2::_size>::same));
+        TMVStaticAssert((Sizes<V2::_size,V3::_size>::same));
         TMVAssert(m1.size() == v3.size());
         TMVAssert(m1.size() == v2.size());
         TMVAssert(v2.size() == v3.size());
-        const int s = Sizes<Sizes<M1::msize,V2::vsize>::size,V3::vsize>::size;
+        const int s = Sizes<Sizes<M1::_size,V2::_size>::size,V3::_size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;
@@ -929,8 +929,8 @@ namespace tmv {
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Tri<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
-        TMVStaticAssert((Sizes<V1::vsize,M2::mcolsize>::same));
-        TMVStaticAssert((Sizes<M2::mrowsize,V3::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,M2::_colsize>::same));
+        TMVStaticAssert((Sizes<M2::_rowsize,V3::_size>::same));
         TMVAssert(v1.size() == m2.colsize());
         TMVAssert(m2.rowsize() == v3.size());
         MultMV<add>(x,m2.transpose(),v1.vec(),v3.vec());
@@ -941,8 +941,8 @@ namespace tmv {
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Tri<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
-        TMVStaticAssert((Sizes<V1::vsize,M2::mcolsize>::same));
-        TMVStaticAssert((Sizes<M2::mrowsize,V3::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,M2::_colsize>::same));
+        TMVStaticAssert((Sizes<M2::_rowsize,V3::_size>::same));
         TMVAssert(v1.size() == m2.colsize());
         TMVAssert(m2.rowsize() == v3.size());
         NoAliasMultMV<add>(x,m2.transpose(),v1.vec(),v3.vec());
@@ -953,8 +953,8 @@ namespace tmv {
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Tri<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
-        TMVStaticAssert((Sizes<V1::vsize,M2::mcolsize>::same));
-        TMVStaticAssert((Sizes<M2::mrowsize,V3::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,M2::_colsize>::same));
+        TMVStaticAssert((Sizes<M2::_rowsize,V3::_size>::same));
         TMVAssert(v1.size() == m2.colsize());
         TMVAssert(m2.rowsize() == v3.size());
         AliasMultMV<add>(x,m2.transpose(),v1.vec(),v3.vec());

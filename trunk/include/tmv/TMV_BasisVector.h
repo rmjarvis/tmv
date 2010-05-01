@@ -67,17 +67,17 @@ namespace tmv {
 
         typedef typename Traits<T>::real_type real_type;
         typedef typename Traits<T>::complex_type complex_type;
-        enum { visreal = Traits<T>::isreal };
-        enum { viscomplex = Traits<T>::iscomplex };
+        enum { isreal = Traits<T>::isreal };
+        enum { iscomplex = Traits<T>::iscomplex };
 
         typedef BasisVector<T,I> type;
         typedef Vector<T,I> calc_type;
         typedef const type& eval_type; 
         typedef calc_type copy_type;
 
-        enum { vsize = UNKNOWN }; 
-        enum { vfort = (I == FortranStyle) };
-        enum { vcalc = true };
+        enum { _size = UNKNOWN }; 
+        enum { _fort = (I == FortranStyle) };
+        enum { _calc = true };
     };
 
     template <class T, IndexStyle I> 
@@ -86,11 +86,11 @@ namespace tmv {
     public:
         typedef BasisVector<T,I> type;
 
-        enum { vsize = Traits<type>::vsize };
-        enum { vfort = Traits<type>::vfort };
-        enum { vcalc = Traits<type>::vcalc };
-        enum { visreal = Traits<T>::isreal }; 
-        enum { viscomplex = Traits<T>::iscomplex }; 
+        enum { _size = Traits<type>::_size };
+        enum { _fort = Traits<type>::_fort };
+        enum { _calc = Traits<type>::_calc };
+        enum { _real = Traits<T>::_real }; 
+        enum { _complex = Traits<T>::_complex }; 
 
         typedef typename Traits<T>::real_type real_type;
         typedef typename Traits<T>::complex_type complex_type;

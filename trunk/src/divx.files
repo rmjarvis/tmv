@@ -1,2 +1,4 @@
 TMV_Det.cpp
 TMV_LUDecompose.cpp 
+TMV_LUDiv.cpp 
+TMV_LUInverse.cpp

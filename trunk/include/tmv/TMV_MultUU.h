@@ -147,7 +147,7 @@ namespace tmv {
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 1: N,s,x = "<<1<<','<<1<<','<<T(x)<<std::endl;
 #endif
-            TMVStaticAssert(!M3::munit);
+            TMVStaticAssert(!M3::_unit);
             Maybe<add>::add(m3.ref(0,0), x*m1.cref(0,0)*m2.cref(0,0));
         }
     };
@@ -163,8 +163,8 @@ namespace tmv {
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 11: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
-            const bool u1 = M1::munit;
-            const bool u2 = M2::munit;
+            const bool u1 = M1::_unit;
+            const bool u2 = M2::_unit;
             typedef typename M2::value_type T2;
             typedef typename Maybe<!u2>::template ProdType<T2,T>::type PT2;
             typedef typename M1::const_subtrimatrix_type M1s;
@@ -188,7 +188,7 @@ namespace tmv {
                 MultXV_Helper<-4,xx,add,ix2,PT2,M1c,M3c>::call(xd,m1c,m3c);
                 MultUV_Helper<-4,xx,true,ix,T,M1s,M2c,M3c>::call(
                     x,m1s,m2c,m3c);
-                Maybe2<!M3::munit,add>::add(
+                Maybe2<!M3::_unit,add>::add(
                     m3.ref(j,j), Maybe<!u1>::prod(m1.cref(j,j),xd));
             }
         }
@@ -205,8 +205,8 @@ namespace tmv {
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 12: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
-            const bool u1 = M1::munit;
-            const bool u2 = M2::munit;
+            const bool u1 = M1::_unit;
+            const bool u2 = M2::_unit;
             typedef typename M1::value_type T1;
             typedef typename Maybe<!u1>::template ProdType<T1,T>::type PT1;
             typedef typename M1::const_row_sub_type M1r;
@@ -231,7 +231,7 @@ namespace tmv {
                 MultUV_Helper<-4,xx,add,ix,T,M2t,M1r,M3r>::call(
                     x,m2t,m1r,m3r);
                 MultXV_Helper<-4,xx,true,ix1,PT1,M2r,M3r>::call(xd,m2r,m3r);
-                Maybe2<!M3::munit,add>::add(
+                Maybe2<!M3::_unit,add>::add(
                     m3.ref(i,i), Maybe<!u2>::prod(m2.cref(i,i),xd));
             }
         }
@@ -248,8 +248,8 @@ namespace tmv {
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 13: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
-            const bool u1 = M1::munit;
-            const bool u2 = M2::munit;
+            const bool u1 = M1::_unit;
+            const bool u2 = M2::_unit;
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename Maybe<!u1>::template ProdType<T1,T>::type PT1;
@@ -281,7 +281,7 @@ namespace tmv {
                     x,m1c,m2r,m3s);
                 MultXV_Helper<-4,xx,add,ix2,PT2,M1c,M3c>::call(xd2,m1c,m3c);
                 MultXV_Helper<-4,xx,true,ix1,PT1,M2r,M3r>::call(xd1,m2r,m3r);
-                Maybe2<!M3::munit,add>::add(
+                Maybe2<!M3::_unit,add>::add(
                     m3.ref(k,k), Maybe<!u1>::prod(m1.cref(k,k),xd2));
             }
         }
@@ -341,9 +341,9 @@ namespace tmv {
             static inline void unroll(
                 const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
             {
-                const bool u1 = M1::munit;
-                const bool u2 = M2::munit;
-                Maybe2<!M3::munit,add>::add(
+                const bool u1 = M1::_unit;
+                const bool u2 = M2::_unit;
+                Maybe2<!M3::_unit,add>::add(
                     m3.ref(I,I), Maybe<!u1>::prod(
                             m1.cref(I,I),Maybe<!u2>::prod(m2.cref(I,I),x)));
             }
@@ -375,11 +375,11 @@ namespace tmv {
             std::cout<<"UU algo 16: N,s,x = "<<N<<','<<UNKNOWN<<
                 ','<<T(x)<<std::endl;
 #endif
-            const bool rxr = M1::mrowmajor && M3::mrowmajor;
-            const bool crx = M1::mcolmajor && M2::mrowmajor;
-            const bool xcc = M2::mcolmajor && M3::mcolmajor;
+            const bool rxr = M1::_rowmajor && M3::_rowmajor;
+            const bool crx = M1::_colmajor && M2::_rowmajor;
+            const bool xcc = M2::_colmajor && M3::_colmajor;
             const int algo2 = rxr ? 12 : crx ? 13 : xcc ? 11 : 13;
-            const int algo1 = M3::munit ? 0 : 1;
+            const int algo1 = M3::_unit ? 0 : 1;
             switch (N) {
               case 0 :
                    // do nothing
@@ -426,12 +426,12 @@ namespace tmv {
                 s == UNKNOWN ? false :
                 nops > TMV_Q1 ? false :
                 s <= 10;
-            const bool rxr = M1::mrowmajor && M3::mrowmajor;
-            const bool crx = M1::mcolmajor && M2::mrowmajor;
-            const bool xcc = M2::mcolmajor && M3::mcolmajor;
+            const bool rxr = M1::_rowmajor && M3::_rowmajor;
+            const bool crx = M1::_colmajor && M2::_rowmajor;
+            const bool xcc = M2::_colmajor && M3::_colmajor;
             const int algo2 = 
                 s == 0 ? 0 :
-                s == 1 ? ( M3::munit ? 0 : 1 ) :
+                s == 1 ? ( M3::_unit ? 0 : 1 ) :
                 (s != UNKNOWN && s > TMV_Q2) ? 0 :
 #ifdef TMV_OPT_CLEANUP
                 s == UNKNOWN ? 16 :
@@ -451,7 +451,7 @@ namespace tmv {
                 const int Nx = N > 16 ? ((((N-1)>>5)+1)<<4) : (N>>1);
                 // (If N > 16, round N/2 up to a multiple of 16.)
                 const int sx = IntTraits<s>::half_roundup;
-                const int sy = s == UNKNOWN ? s : s-sx;
+                const int sy = IntTraits2<s,sx>::diff;
 
                 typedef typename M1::const_subtrimatrix_type M1st;
                 typedef typename M1::const_submatrix_type M1sm;
@@ -506,8 +506,8 @@ namespace tmv {
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 21: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
-            const bool u1 = M1::munit;
-            const bool u2 = M2::munit;
+            const bool u1 = M1::_unit;
+            const bool u2 = M2::_unit;
             typedef typename M2::value_type T2;
             typedef typename Maybe<!u2>::template ProdType<T2,T>::type PT2;
             typedef typename M1::const_subtrimatrix_type M1s;
@@ -531,7 +531,7 @@ namespace tmv {
                 MultXV_Helper<-4,xx,add,ix2,PT2,M1c,M3c>::call(xd,m1c,m3c);
                 MultUV_Helper<-4,xx,true,ix,T,M1s,M2c,M3c>::call(
                     x,m1s,m2c,m3c);
-                Maybe2<!M3::munit,add>::add(
+                Maybe2<!M3::_unit,add>::add(
                     m3.ref(j,j), Maybe<!u1>::prod(m1.cref(j,j),xd));
             }
         }
@@ -548,8 +548,8 @@ namespace tmv {
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 22: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
-            const bool u1 = M1::munit;
-            const bool u2 = M2::munit;
+            const bool u1 = M1::_unit;
+            const bool u2 = M2::_unit;
             typedef typename M1::value_type T1;
             typedef typename Maybe<!u1>::template ProdType<T1,T>::type PT1;
             typedef typename M1::const_row_sub_type M1r;
@@ -574,7 +574,7 @@ namespace tmv {
                 MultUV_Helper<-4,xx,add,ix,T,M2t,M1r,M3r>::call(
                     x,m2t,m1r,m3r);
                 MultXV_Helper<-4,xx,true,ix1,PT1,M2r,M3r>::call(xd,m2r,m3r);
-                Maybe2<!M3::munit,add>::add(
+                Maybe2<!M3::_unit,add>::add(
                     m3.ref(i,i), Maybe<!u2>::prod(m2.cref(i,i),xd));
             }
         }
@@ -591,8 +591,8 @@ namespace tmv {
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 23: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
-            const bool u1 = M1::munit;
-            const bool u2 = M2::munit;
+            const bool u1 = M1::_unit;
+            const bool u2 = M2::_unit;
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename Maybe<!u1>::template ProdType<T1,T>::type PT1;
@@ -624,7 +624,7 @@ namespace tmv {
                     x,m1c,m2r,m3s);
                 MultXV_Helper<-4,xx,add,ix2,PT2,M1c,M3c>::call(xd2,m1c,m3c);
                 MultXV_Helper<-4,xx,true,ix1,PT1,M2r,M3r>::call(xd1,m2r,m3r);
-                Maybe2<!M3::munit,add>::add(
+                Maybe2<!M3::_unit,add>::add(
                     m3.ref(k,k), Maybe<!u1>::prod(m1.cref(k,k),xd2));
             }
         }
@@ -684,9 +684,9 @@ namespace tmv {
             static inline void unroll(
                 const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
             {
-                const bool u1 = M1::munit;
-                const bool u2 = M2::munit;
-                Maybe2<!M3::munit,add>::add(
+                const bool u1 = M1::_unit;
+                const bool u2 = M2::_unit;
+                Maybe2<!M3::_unit,add>::add(
                     m3.ref(I,I), Maybe<!u1>::prod(
                             m1.cref(I,I),Maybe<!u2>::prod(m2.cref(I,I),x)));
             }
@@ -717,11 +717,11 @@ namespace tmv {
             std::cout<<"UU algo 26: N,s,x = "<<N<<','<<UNKNOWN<<
                 ','<<T(x)<<std::endl;
 #endif
-            const bool rxr = M1::mrowmajor && M3::mrowmajor;
-            const bool crx = M1::mcolmajor && M2::mrowmajor;
-            const bool xcc = M2::mcolmajor && M3::mcolmajor;
+            const bool rxr = M1::_rowmajor && M3::_rowmajor;
+            const bool crx = M1::_colmajor && M2::_rowmajor;
+            const bool xcc = M2::_colmajor && M3::_colmajor;
             const int algo2 = rxr ? 22 : crx ? 23 : xcc ? 21 : 23;
-            const int algo1 = M3::munit ? 0 : 1;
+            const int algo1 = M3::_unit ? 0 : 1;
             switch (N) {
               case 0 :
                    // do nothing
@@ -768,12 +768,12 @@ namespace tmv {
                 s == UNKNOWN ? false :
                 nops > TMV_Q1 ? false :
                 s <= 10;
-            const bool rxr = M1::mrowmajor && M3::mrowmajor;
-            const bool crx = M1::mcolmajor && M2::mrowmajor;
-            const bool xcc = M2::mcolmajor && M3::mcolmajor;
+            const bool rxr = M1::_rowmajor && M3::_rowmajor;
+            const bool crx = M1::_colmajor && M2::_rowmajor;
+            const bool xcc = M2::_colmajor && M3::_colmajor;
             const int algo2 = 
                 s == 0 ? 0 :
-                s == 1 ? ( M3::munit ? 0 : 1 ) :
+                s == 1 ? ( M3::_unit ? 0 : 1 ) :
                 (s != UNKNOWN && s > TMV_Q2) ? 0 :
 #ifdef TMV_OPT_CLEANUP
                 s == UNKNOWN ? 26 :
@@ -793,7 +793,7 @@ namespace tmv {
                 const int Nx = N > 16 ? ((((N-1)>>5)+1)<<4) : (N>>1);
                 // (If N > 16, round N/2 up to a multiple of 16.)
                 const int sx = IntTraits<s>::half_roundup;
-                const int sy = s == UNKNOWN ? s : s-sx;
+                const int sy = IntTraits2<s,sx>::diff;
 
                 typedef typename M1::const_subtrimatrix_type M1st;
                 typedef typename M1::const_submatrix_type M1sm;
@@ -842,7 +842,7 @@ namespace tmv {
     struct MultUU_Helper<87,s,add,ix,T,M1,M2,M3>
     {
         // This algo is slightly complicated by the fact that we allow
-        // UnknownDiag.  If m3 is UnknownDiag, then its mshape dictates
+        // UnknownDiag.  If m3 is UnknownDiag, then its _shape dictates
         // NonUnitDiag.  But that means at m3c is not copyable back to m3 
         // directly (can't copy NonUnitDiag -> UnitDiag).
         // So we have another layer of indirection at the end to make sure 
@@ -883,8 +883,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename Traits2<T1,T2>::type PT3;
-            const bool rm = M1::mrowmajor && M2::mrowmajor;
-            const int s3 = M3::mshape;
+            const bool rm = M1::_rowmajor && M2::_rowmajor;
+            const int s3 = M3::_shape;
             typedef typename MCopyHelper<PT3,s3,s,s,rm,false>::type M3c;
             M3c m3c(N);
             typedef typename M3c::view_type M3cv;
@@ -893,8 +893,10 @@ namespace tmv {
             M3ccv m3ccv = m3c.view();
             MultUU_Helper<-2,s,false,1,RT,M1,M2,M3cv>::call(
                 one,m1,m2,m3cv);
-            // can't be unitdiag unless ix == 1 and !add
-            const bool unknowndiag = M3::munknowndiag && ix == 1 && !add;
+            // can't be unitdiag unless ix == 1 and !add and m1,m2 are unit
+            const bool unknowndiag = M3::_unknowndiag && ix == 1 && !add &&
+                (M1::_unit || M1::_unknowndiag) && 
+                (M2::_unit || M2::_unknowndiag);
             copyBack<unknowndiag,M3ccv>::call(x,m3ccv,m3);
         }
     };
@@ -935,11 +937,11 @@ namespace tmv {
             // 26 = Unroll small case
             // 27 = split each trimatrix into 3 submatrices and recurse
 
-            const bool upper = M1::mupper;
+            const bool upper = M1::_upper;
 #if TMV_OPT == 0 
-            const bool rxr = M1::mrowmajor && M3::mrowmajor;
-            const bool crx = M1::mcolmajor && M2::mrowmajor;
-            const bool xcc = M2::mcolmajor && M3::mcolmajor;
+            const bool rxr = M1::_rowmajor && M3::_rowmajor;
+            const bool crx = M1::_colmajor && M2::_rowmajor;
+            const bool xcc = M2::_colmajor && M3::_colmajor;
             const int algo =
                 upper ? ( rxr ? 12 : crx ? 13 : xcc ? 11 : 13 ) :
                 ( rxr ? 22 : crx ? 23 : xcc ? 21 : 23 );
@@ -956,7 +958,7 @@ namespace tmv {
                 s <= 10;
             const int algo = 
                 s == 0 ? 0 :
-                s == 1 ? ( M3::munit ? 0 : 1 ) :
+                s == 1 ? ( M3::_unit ? 0 : 1 ) :
                 unroll ? ( upper ? 16 : 26 ) :
                 upper ? 17 : 27;
 #endif
@@ -1046,9 +1048,9 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
             const bool inst = 
-                M1::mcolsize == UNKNOWN && M1::mrowsize == UNKNOWN &&
-                M2::mcolsize == UNKNOWN && M2::mrowsize == UNKNOWN &&
-                M3::mcolsize == UNKNOWN && M3::mrowsize == UNKNOWN &&
+                M1::unknownsizes &&
+                M2::unknownsizes &&
+                M3::unknownsizes &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -1059,8 +1061,8 @@ namespace tmv {
                 Traits<T3>::isinst;
             const int algo = 
                 s == 0 ? 0 :
-                s == 1 ? ( M3::munit ? 0 : 1 ) :
-                M3::mconj ? 97 :
+                s == 1 ? ( M3::_unit ? 0 : 1 ) :
+                M3::_conj ? 97 :
                 inst ? 98 : 
                 -3;
             MultUU_Helper<algo,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
@@ -1080,44 +1082,22 @@ namespace tmv {
                 SameStorage(m1,m3) && !OppositeStorage(m1,m3);
             const bool s2 = 
                 SameStorage(m2,m3) && !OppositeStorage(m2,m3);
-#ifdef PRINTALGO_UU
-            std::cout<<"UU algo 99:\n";
-            std::cout<<"s1 = "<<s1<<std::endl;
-            std::cout<<"s2 = "<<s2<<std::endl;
-            std::cout<<"Exact(13) = "<<ExactSameStorage(m1,m3);
-            std::cout<<"Exact(23) = "<<ExactSameStorage(m2,m3);
-#endif
             if ((!s1 || ExactSameStorage(m1,m3)) && !s2) {
-#ifdef PRINTALGO_UU
-                std::cout<<"No alias\n";
-#endif
                 // No aliasing (or no clobbering)
                 MultUU_Helper<-2,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
             } else if ((!s2 || ExactSameStorage(m2,m3)) && !s1) {
-#ifdef PRINTALGO_UU
-                std::cout<<"No alias for transpose\n";
-#endif
                 // Can transpose to get no clobbering storage
                 MultUU_Helper<96,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
             } else if (!s2) {
-#ifdef PRINTALGO_UU
-                std::cout<<"Copy m1 -> m3\n";
-#endif
                 // Copy m1 to m3, becomes MultEq op
                 AliasCopy(m1,m3);
                 NoAliasMultMM<add>(x,m3,m2,m3);
             } else if (!s1) {
-#ifdef PRINTALGO_UU
-                std::cout<<"Copy m2 -> m3\n";
-#endif
                 // Copy m2 to m3, becomes MultEq op
                 AliasCopy(m2,m3);
                 typename M3::transpose_type m3t = m3.transpose();
                 NoAliasMultMM<add>(x,m3t,m1.transpose(),m3t);
             } else { 
-#ifdef PRINTALGO_UU
-                std::cout<<"Temp m3\n";
-#endif
                 // Use temporary for m1*m2
                 MultUU_Helper<87,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
             }
@@ -1132,12 +1112,12 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const bool checkalias =
-                M1::msize == UNKNOWN && 
-                M2::msize == UNKNOWN && 
-                M3::msize == UNKNOWN;
+                M1::_size == UNKNOWN && 
+                M2::_size == UNKNOWN && 
+                M3::_size == UNKNOWN;
             const int algo = 
                 s == 0 ? 0 :
-                s == 1 ? ( M3::munit ? 0 : 1 ) :
+                s == 1 ? ( M3::_unit ? 0 : 1 ) :
                 checkalias ? 99 : 
                 -2;
             MultUU_Helper<algo,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
@@ -1150,16 +1130,16 @@ namespace tmv {
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Tri_Mutable<M3>& m3)
     {
-        TMVStaticAssert(M1::mupper == int(M2::mupper));
-        TMVStaticAssert(M1::mupper == int(M3::mupper));
-        TMVStaticAssert((Sizes<M1::msize,M3::msize>::same));
-        TMVStaticAssert((Sizes<M1::msize,M2::msize>::same));
-        TMVStaticAssert(!M3::munit || ix == 1);
+        TMVStaticAssert(M1::_upper == int(M2::_upper));
+        TMVStaticAssert(M1::_upper == int(M3::_upper));
+        TMVStaticAssert((Sizes<M1::_size,M3::_size>::same));
+        TMVStaticAssert((Sizes<M1::_size,M2::_size>::same));
+        TMVStaticAssert(!M3::_unit || ix == 1);
         TMVAssert(m1.size() == m3.size());
         TMVAssert(m1.size() == m2.size());
         TMVAssert(!m3.isunit() || ix == 1);
 
-        const int s = Sizes<Sizes<M1::msize,M2::msize>::size,M3::msize>::size;
+        const int s = Sizes<Sizes<M1::_size,M2::_size>::size,M3::_size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         typedef typename M3::cview_type M3v;
@@ -1202,8 +1182,8 @@ namespace tmv {
         BaseMatrix_Tri_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M2>& m2)
     {
-        TMVStaticAssert(M1::mupper == int(M2::mupper));
-        TMVStaticAssert(!M1::munit || ix == 1);
+        TMVStaticAssert(M1::_upper == int(M2::_upper));
+        TMVStaticAssert(!M1::_unit || ix == 1);
         TMVAssert(!m1.isunit() || ix == 1);
         MultMM<false>(x,m1.mat(),m2.mat(),m1.mat());
     }
@@ -1213,8 +1193,8 @@ namespace tmv {
         BaseMatrix_Tri_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M2>& m2)
     {
-        TMVStaticAssert(M1::mupper == int(M2::mupper));
-        TMVStaticAssert(!M1::munit || ix == 1);
+        TMVStaticAssert(M1::_upper == int(M2::_upper));
+        TMVStaticAssert(!M1::_unit || ix == 1);
         TMVAssert(!m1.isunit() || ix == 1);
         NoAliasMultMM<false>(x,m1.mat(),m2.mat(),m1.mat());
     }
@@ -1224,8 +1204,8 @@ namespace tmv {
         BaseMatrix_Tri_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M2>& m2)
     {
-        TMVStaticAssert(M1::mupper == int(M2::mupper));
-        TMVStaticAssert(!M1::munit || ix == 1);
+        TMVStaticAssert(M1::_upper == int(M2::_upper));
+        TMVStaticAssert(!M1::_unit || ix == 1);
         TMVAssert(!m1.isunit() || ix == 1);
         AliasMultMM<false>(x,m1.mat(),m2.mat(),m1.mat());
     }

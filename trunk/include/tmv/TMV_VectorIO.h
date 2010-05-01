@@ -84,8 +84,8 @@ namespace tmv {
     {
         typedef typename V::value_type T;
         const bool inst = 
-                Traits<T>::isinst &&
-                V::vsize == UNKNOWN;
+            V::unknownsizes &&
+            Traits<T>::isinst;
         CallWrite<inst,V>::call(os,v.vec());
     }
 
@@ -135,8 +135,8 @@ namespace tmv {
     {
         typedef typename V::value_type T;
         const bool inst = 
-                Traits<T>::isinst &&
-                V::vsize == UNKNOWN;
+            V::unknownsizes &&
+            Traits<T>::isinst;
         CallWriteThresh<inst,V>::call(os,v.vec(),thresh);
     }
 
@@ -273,8 +273,8 @@ namespace tmv {
     {
         typedef typename V::value_type T;
         const bool inst = 
-                Traits<T>::isinst &&
-                V::vsize == UNKNOWN;
+            V::unknownsizes &&
+            Traits<T>::isinst;
         CallRead<inst,V>::call(is,v.vec());
     }
 

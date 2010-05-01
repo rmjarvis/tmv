@@ -102,10 +102,9 @@ namespace tmv {
     {
         typedef typename M::value_type T;
         const bool inst = 
-            Traits<T>::isinst &&
-            (M::mrowmajor || M::mcolmajor) &&
-            M::mcolsize == UNKNOWN &&
-            M::mrowsize == UNKNOWN;
+            M::unknownsizes &&
+            (M::_rowmajor || M::_colmajor) &&
+            Traits<T>::isinst;
         CallWriteU<inst,M>::call(os,m.mat());
     }
 
@@ -181,10 +180,9 @@ namespace tmv {
     {
         typedef typename M::value_type T;
         const bool inst = 
-            Traits<T>::isinst &&
-            (M::mrowmajor || M::mcolmajor) &&
-            M::mcolsize == UNKNOWN &&
-            M::mrowsize == UNKNOWN;
+            M::unknownsizes &&
+            (M::_rowmajor || M::_colmajor) &&
+            Traits<T>::isinst;
         CallWriteUThresh<inst,M>::call(os,m.mat(),thresh);
     }
 
@@ -253,7 +251,7 @@ namespace tmv {
         inline void Write(std::ostream& os) const throw()
         {
             os<<"TMV Read Error: Reading istream input for ";
-            if (M::mupper) os<<"UpperTriMatrix\n";
+            if (M::_upper) os<<"UpperTriMatrix\n";
             else os<<"LowerTriMatrix\n";
             if (exp != got) {
                 os<<"Wrong format: expected '"<<exp<<"', got '"<<got<<"'.\n";
@@ -396,10 +394,9 @@ namespace tmv {
     {
         typedef typename M::value_type T;
         const bool inst = 
-            Traits<T>::isinst &&
-            (M::mrowmajor || M::mcolmajor) &&
-            M::mcolsize == UNKNOWN &&
-            M::mrowsize == UNKNOWN;
+            M::unknownsizes &&
+            (M::_rowmajor || M::_colmajor) &&
+            Traits<T>::isinst;
         CallReadU<inst,M>::call(is,m.mat());
     }
 
@@ -414,7 +411,7 @@ namespace tmv {
         std::istream& is, BaseMatrix_Tri_Mutable<M>& m)
     {
         char ul;
-        char ul_exp = (M::mupper ? 'U' : 'L');
+        char ul_exp = (M::_upper ? 'U' : 'L');
         is >> ul;
         if (!is) {
 #ifdef TMV_NO_THROW

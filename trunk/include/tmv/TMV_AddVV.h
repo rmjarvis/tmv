@@ -124,8 +124,8 @@ namespace tmv {
             int n, const Scaling<ix1,T1>& x1, IT1 it1,
             const Scaling<ix2,T2>& x2, IT2 it2, IT3 it3)
         {
-            const bool c1 = V1::vconj;
-            const bool c2 = V2::vconj;
+            const bool c1 = V1::_conj;
+            const bool c2 = V2::_conj;
             for(;n;--n) 
                 *it3++ = ZProd<false,c1>::prod(x1 , *it1++) + 
                     ZProd<false,c2>::prod(x2 , *it2++); 
@@ -153,8 +153,8 @@ namespace tmv {
         {
             int n_2 = (n>>1);
             const int nb = n-(n_2<<1);
-            const bool c1 = V1::vconj;
-            const bool c2 = V2::vconj;
+            const bool c1 = V1::_conj;
+            const bool c2 = V2::_conj;
 
             if (n_2) do {
                 it3[0] = ZProd<false,c1>::prod(x1 , it1[0]) +
@@ -192,8 +192,8 @@ namespace tmv {
         {
             int n_4 = (n>>2);
             int nb = n-(n_4<<2);
-            const bool c1 = V1::vconj;
-            const bool c2 = V2::vconj;
+            const bool c1 = V1::_conj;
+            const bool c2 = V2::_conj;
 
             if (n_4) do {
                 it3[0] = ZProd<false,c1>::prod(x1 , it1[0]) +
@@ -234,8 +234,8 @@ namespace tmv {
         {
             int n_8 = (n>>3);
             int nb = n-(n_8<<3);
-            const bool c1 = V1::vconj;
-            const bool c2 = V2::vconj;
+            const bool c1 = V1::_conj;
+            const bool c2 = V2::_conj;
 
             if (n_8) do {
                 it3[0] = ZProd<false,c1>::prod(x1 , it1[0]) +
@@ -313,14 +313,14 @@ namespace tmv {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         typedef typename V3::iterator IT3;
-        enum { allreal = V1::visreal && V2::visreal && V3::visreal };
+        enum { allreal = V1::isreal && V2::isreal && V3::isreal };
         enum { allcomplex = (
-                V1::viscomplex && V2::viscomplex && V3::viscomplex ) };
-        enum { allunit = V1::vstep == 1 && V2::vstep == 1 && V3::vstep == 1 };
+                V1::iscomplex && V2::iscomplex && V3::iscomplex ) };
+        enum { allunit = V1::_step == 1 && V2::_step == 1 && V3::_step == 1 };
         enum { flatten = (
                 allunit && allcomplex &&
                 Traits<T1>::isreal && Traits<T2>::isreal &&
-                V1::vconj == int(V3::vconj) && V2::vconj == int(V3::vconj) ) };
+                V1::_conj == int(V3::_conj) && V2::_conj == int(V3::_conj) ) };
         enum { algo =  (
                 size == 0 ? 0 : 
 #if TMV_OPT >= 1
@@ -333,7 +333,7 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
-            TMVStaticAssert(!V3::vconj);
+            TMVStaticAssert(!V3::_conj);
             const int algo1 = 
                 (size != UNKNOWN && size <= int(128/sizeof(VT))) ? 15 :
                 algo;
@@ -344,7 +344,7 @@ namespace tmv {
             const int n, const Scaling<ix1,T1>& x1, const IT1& it1,
             const Scaling<ix2,T2>& x2, const IT2& it2, const IT3& it3)
         {
-            TMVStaticAssert(!V3::vconj);
+            TMVStaticAssert(!V3::_conj);
             AddVV_Helper<algo,size,ix1,T1,V1,ix2,T2,V2,V3>::call2(
                 n,x1,it1,x2,it2,it3);
         } 
@@ -410,9 +410,9 @@ namespace tmv {
             typedef typename V2::value_type TV2;
             typedef typename V3::value_type TV3;
             const bool inst =
-                V1::vsize == UNKNOWN &&
-                V2::vsize == UNKNOWN &&
-                V3::vsize == UNKNOWN &&
+                V1::unknownsizes &&
+                V2::unknownsizes &&
+                V3::unknownsizes &&
 #ifdef TMV_INST_MIX
                 Traits2<TV1,TV2>::samebase &&
                 Traits2<TV1,TV3>::samebase &&
@@ -421,7 +421,7 @@ namespace tmv {
                 Traits2<TV1,TV3>::sametype &&
 #endif
                 Traits<TV3>::isinst;
-            const bool conj = V3::vconj;
+            const bool conj = V3::_conj;
             const int algo = 
                 conj ? 96 :
                 inst ? 97 :
@@ -518,9 +518,9 @@ namespace tmv {
             typedef typename V2::value_type TV2;
             typedef typename V3::value_type TV3;
             const bool inst =
-                V1::vsize == UNKNOWN &&
-                V2::vsize == UNKNOWN &&
-                V3::vsize == UNKNOWN &&
+                V1::unknownsizes &&
+                V2::unknownsizes &&
+                V3::unknownsizes &&
 #ifdef TMV_INST_MIX
                 Traits2<TV1,TV2>::samebase &&
                 Traits2<TV1,TV3>::samebase &&
@@ -530,9 +530,9 @@ namespace tmv {
 #endif
                 Traits<TV3>::isinst;
             const bool checkalias =
-                V1::vsize == UNKNOWN &&
-                V2::vsize == UNKNOWN &&
-                V3::vsize == UNKNOWN;
+                V1::_size == UNKNOWN &&
+                V2::_size == UNKNOWN &&
+                V3::_size == UNKNOWN;
             const int algo = 
                 // We do a different check alias with the Inst calls.
                 inst ? 98 : 
@@ -549,13 +549,13 @@ namespace tmv {
         const Scaling<ix2,T2>& x2, const BaseVector_Calc<V2>& v2,
         BaseVector_Mutable<V3>& v3)
     {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same));
-        TMVStaticAssert((Sizes<V1::vsize,V3::vsize>::same));
-        TMVStaticAssert((Sizes<V1::vsize,V3::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
+        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
+        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v1.size() == v3.size());
         const int size =
-            Sizes<Sizes<V1::vsize,V2::vsize>::size,V3::vsize>::size;
+            Sizes<Sizes<V1::_size,V2::_size>::size,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;
@@ -573,13 +573,13 @@ namespace tmv {
         const Scaling<ix2,T2>& x2, const BaseVector_Calc<V2>& v2,
         BaseVector_Mutable<V3>& v3)
     {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same));
-        TMVStaticAssert((Sizes<V1::vsize,V3::vsize>::same));
-        TMVStaticAssert((Sizes<V1::vsize,V3::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
+        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
+        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v1.size() == v3.size());
         const int size =
-            Sizes<Sizes<V1::vsize,V2::vsize>::size,V3::vsize>::size;
+            Sizes<Sizes<V1::_size,V2::_size>::size,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;
@@ -597,13 +597,13 @@ namespace tmv {
         const Scaling<ix2,T2>& x2, const BaseVector_Calc<V2>& v2,
         BaseVector_Mutable<V3>& v3)
     {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same));
-        TMVStaticAssert((Sizes<V1::vsize,V3::vsize>::same));
-        TMVStaticAssert((Sizes<V1::vsize,V3::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
+        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
+        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v1.size() == v3.size());
         const int size =
-            Sizes<Sizes<V1::vsize,V2::vsize>::size,V3::vsize>::size;
+            Sizes<Sizes<V1::_size,V2::_size>::size,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;
@@ -621,20 +621,20 @@ namespace tmv {
         const Scaling<ix2,T2>& x2, const BaseVector_Calc<V2>& v2,
         BaseVector_Mutable<V3>& v3)
     {
-        TMVStaticAssert((Sizes<V1::vsize,V2::vsize>::same));
-        TMVStaticAssert((Sizes<V1::vsize,V3::vsize>::same));
-        TMVStaticAssert((Sizes<V1::vsize,V3::vsize>::same));
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
+        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
+        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v1.size() == v3.size());
         const int size =
-            Sizes<Sizes<V1::vsize,V2::vsize>::size,V3::vsize>::size;
+            Sizes<Sizes<V1::_size,V2::_size>::size,V3::_size>::size;
         typedef typename V1::value_type TV1;
         typedef typename V2::value_type TV2;
         typedef typename V3::value_type TV3;
         const bool inst =
-            V1::vsize == UNKNOWN &&
-            V2::vsize == UNKNOWN &&
-            V3::vsize == UNKNOWN &&
+            V1::unknownsizes &&
+            V2::unknownsizes &&
+            V3::unknownsizes &&
 #ifdef TMV_INST_MIX
             Traits2<TV1,TV2>::samebase &&
             Traits2<TV1,TV3>::samebase &&

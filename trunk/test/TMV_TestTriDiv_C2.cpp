@@ -23,35 +23,33 @@ template <class T> void TestTriDiv_C2()
 
     tmv::UpperTriMatrix<T,tmv::NonUnitDiag> a1(m);
     tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag> ca1(cm);
-    a1.saveDiv();
-    ca1.saveDiv();
-    a1.setDiv();
-    ca1.setDiv();
+
+    tmv::UpperTriMatrixView<T> a1v = a1.view();
+    tmv::UpperTriMatrixView<std::complex<T> > ca1v = ca1.view();
+    tmv::LowerTriMatrixView<T> a1t = a1.transpose();
+    tmv::LowerTriMatrixView<std::complex<T> > ca1t = ca1.transpose();
 
     tmv::DiagMatrix<T> d(m);
     tmv::DiagMatrix<std::complex<T> > cd(cm);
+    tmv::DiagMatrixView<T> dv = d.view();
+    tmv::DiagMatrixView<std::complex<T> > cdv = cd.view();
     tmv::DiagMatrix<T> dx(m);
     tmv::DiagMatrix<std::complex<T> > cdx(cm);
 
-    TestMatrixDivArith1<T>(
-        tmv::LU,dx,cdx,a1.view(),d.view(),ca1.view(),cd.view(),"D/U");
-    TestMatrixDivArith1<T>(
-        tmv::LU,dx,cdx,a1.transpose(),d.view(),ca1.transpose(),cd.view(),
-        "D/L");
+    TestMatrixDivArith1<T>(tmv::LU,dx,cdx,a1v,dv,ca1v,cdv,"D/U");
+    TestMatrixDivArith1<T>(tmv::LU,dx,cdx,a1t,dv,ca1t,cdv,"D/L");
 
 #if (XTEST & 2)
     tmv::UpperTriMatrix<T,tmv::UnitDiag> a2(m);
     tmv::UpperTriMatrix<std::complex<T>,tmv::UnitDiag> ca2(cm);
-    a2.saveDiv();
-    ca2.saveDiv();
-    a2.setDiv();
-    ca2.setDiv();
 
-    TestMatrixDivArith1<T>(
-        tmv::LU,dx,cdx,a2.view(),d.view(),ca2.view(),cd.view(),"D/U");
-    TestMatrixDivArith1<T>(
-        tmv::LU,dx,cdx,a2.transpose(),d.view(),ca2.transpose(),cd.view(),
-        "D/L");
+    tmv::UpperTriMatrixView<T> a2v = a2.view();
+    tmv::UpperTriMatrixView<std::complex<T> > ca2v = ca2.view();
+    tmv::LowerTriMatrixView<T> a2t = a2.transpose();
+    tmv::LowerTriMatrixView<std::complex<T> > ca2t = ca2.transpose();
+
+    TestMatrixDivArith1<T>(tmv::LU,dx,cdx,a2v,dv,ca2v,cdv,"D/U");
+    TestMatrixDivArith1<T>(tmv::LU,dx,cdx,a2t,dv,ca2t,cdv,"D/L");
 #endif
 }
 

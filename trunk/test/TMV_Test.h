@@ -11,7 +11,7 @@
 
 #include <iostream>
 
-#define EPS (10*tmv::Epsilon<T>())
+#define EPS (10*tmv::TMV_Epsilon<T>())
 
 #ifndef NO_TEST_DOUBLE
 #define TEST_DOUBLE

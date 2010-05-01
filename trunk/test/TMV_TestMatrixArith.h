@@ -21,7 +21,7 @@ static inline bool CanAddEq(
 template <class M, class T2>
 static inline bool CanAddX(
     const BaseMatrix<M>& a, const T2 x)
-{ return a.IsSquare(); }
+{ return a.isSquare(); }
 
 template <class M, class T2>
 static inline bool CanAddEqX(
@@ -125,7 +125,7 @@ static void DoTestMa_Basic(const MM& a, std::string label)
         std::cout<<"a-m = "<<a-m<<std::endl;
         std::cout<<"Norm(a-m) = "<<Norm(MAT(T,a)-m)<<std::endl;
 #ifndef NONSQUARE
-        if (m.IsSquare()) {
+        if (m.isSquare()) {
             std::cout<<"Trace(a) = "<<Trace(a)<<"  "<<Trace(m)<<std::endl;
 #ifndef NODIV
             std::cout<<"Det(a) = "<<Det(a)<<"  "<<Det(m)<<std::endl;
@@ -150,7 +150,7 @@ static void DoTestMa_Basic(const MM& a, std::string label)
 
     Assert(Norm(MAT(T,a)-m) <= eps,label+" a != m");
 #ifndef NONSQUARE
-    if (m.IsSquare()) {
+    if (m.isSquare()) {
         Assert(tmv::TMV_ABS(Trace(a)-Trace(m)) <= eps*tmv::TMV_ABS(Trace(m)),label+" Trace");
 #ifndef NODIV
         T d = Det(m);
@@ -328,7 +328,7 @@ static void DoTestMX1a_Full(const MM& a, T2 x, std::string label)
 #endif
     if (CanMultX(a,x)) {
         Assert(Norm(MAT2(T,T2,a*x)-(x*m)) <= eps*tmv::TMV_ABS(x),label+" a*x");
-        if (tmv::Epsilon<T>()  != T(0)) {
+        if (tmv::TMV_Epsilon<T>()  != T(0)) {
             Assert(Norm(MAT2(T,T2,a/x)-(m/x)) <= eps/tmv::TMV_ABS(x),label+" a/x");
         }
     }
@@ -476,7 +476,7 @@ static void DoTestMX2a_Full(MM& a, T2 x, std::string label)
         Assert(Norm(MAT(T,a)-m2) <= eps*tmv::TMV_ABS(x),label+" a *= -x");
         Assert(Norm(MAT(T,a*=-x)-(m2*=-x)) <= eps*tmv::TMV_ABS(x*x),label+" a *= -x");
         a = a0;
-        if (tmv::Epsilon<T>() != T(0)) {
+        if (tmv::TMV_Epsilon<T>() != T(0)) {
             a /= x;
             m2 = m1/x;
             Assert(Norm(MAT(T,a)-m2) <= eps*tmv::TMV_ABS(x),label+" a /= x");

@@ -60,7 +60,7 @@ namespace tmv {
         {
             typedef typename M1::const_linearview_type Ml;
             Ml ml = m.linearView();
-            return SumElementsV_Helper<-1,Ml::vsize,comp,ix,Ml>::call(ml,x);
+            return SumElementsV_Helper<-1,Ml::_size,comp,ix,Ml>::call(ml,x);
         }
     };
 
@@ -130,8 +130,8 @@ namespace tmv {
 #else
             const int algo2 = 
 #if TMV_OPT >= 1
-                M1::mrowmajor ? 2 :
-                M1::mcolmajor ? 3 :
+                M1::_rowmajor ? 2 :
+                M1::_colmajor ? 3 :
                 ( cs == UNKNOWN || rs == UNKNOWN ) ? 3 :
                 ( cs < rs ) ? 2 :
 #endif
@@ -256,12 +256,12 @@ namespace tmv {
         {
             const int algo = 
 #if TMV_OPT >= 1
-                M1::mcanlin ? 1 :
+                M1::_canlin ? 1 :
                 ( cs != UNKNOWN && rs != UNKNOWN ) ? (
                     ( IntTraits2<cs,rs>::prod <= int(128/sizeof(MT)) ) ? (
-                        M1::mrowmajor ? 5 : 6 ) :
-                    M1::mrowmajor ? 2 : 
-                    M1::mcolmajor ? 3 :
+                        M1::_rowmajor ? 5 : 6 ) :
+                    M1::_rowmajor ? 2 : 
+                    M1::_colmajor ? 3 :
                     cs > rs ? 2 : 3 ) :
 #endif
                 4;
@@ -276,8 +276,8 @@ namespace tmv {
         typedef typename M::real_type RT;
         typedef typename M::const_cview_type Mv;
         Mv mv = m.cView();
-        const int cs = M::mcolsize;
-        const int rs = M::mrowsize;
+        const int cs = M::_colsize;
+        const int rs = M::_rowsize;
         return SumElementsM_Helper<-1,cs,rs,ValueComp,1,Mv>::call(
             mv,Scaling<1,RT>());
     }
@@ -320,9 +320,9 @@ namespace tmv {
     {
         typedef typename M::value_type T;
         const bool inst = 
-            Traits<T>::isinst &&
-            M::mcolsize == UNKNOWN && M::mrowsize == UNKNOWN;
-        return CallSumElementsm<M::mconj,inst,M>::call(m.mat());
+            M::unknownsizes &&
+            Traits<T>::isinst;
+        return CallSumElementsm<M::_conj,inst,M>::call(m.mat());
     }
 
 
@@ -339,7 +339,7 @@ namespace tmv {
         typedef typename M::const_cview_type Mv;
         Mv mv = m.cView();
         return SumElementsM_Helper<
-            -1,M::mcolsize,M::mrowsize,AbsComp,1,Mv>::call(
+            -1,M::_colsize,M::_rowsize,AbsComp,1,Mv>::call(
                 mv,Scaling<1,RT>());
     }
 
@@ -375,8 +375,8 @@ namespace tmv {
         typedef typename M::value_type T;
         typedef typename M::const_nonconj_type Mn;
         const bool inst = 
-            Traits<T>::isinst &&
-            M::mcolsize == UNKNOWN && M::mrowsize == UNKNOWN;
+            M::unknownsizes &&
+            Traits<T>::isinst;
         return CallSumAbsElementsm<inst,Mn>::call(m.nonConj());
     }
 
@@ -394,7 +394,7 @@ namespace tmv {
         typedef typename M::const_cview_type Mv;
         Mv mv = m.cView();
         return SumElementsM_Helper<
-            -1,M::mcolsize,M::mrowsize,Abs2Comp,1,Mv>::call(
+            -1,M::_colsize,M::_rowsize,Abs2Comp,1,Mv>::call(
                 mv,Scaling<1,RT>());
     }
 
@@ -430,8 +430,8 @@ namespace tmv {
         typedef typename M::value_type T;
         typedef typename M::const_nonconj_type Mn;
         const bool inst = 
-            Traits<T>::isinst &&
-            M::mcolsize == UNKNOWN && M::mrowsize == UNKNOWN;
+            M::unknownsizes &&
+            Traits<T>::isinst;
         return CallSumAbs2Elementsm<inst,Mn>::call(m.nonConj());
     }
 
@@ -448,7 +448,7 @@ namespace tmv {
         typedef typename M::const_cview_type Mv;
         Mv mv = m.cView();
         return SumElementsM_Helper<
-            -1,M::mcolsize,M::mrowsize,NormComp,1,Mv>::call(
+            -1,M::_colsize,M::_rowsize,NormComp,1,Mv>::call(
                 mv,Scaling<1,RT>());
     }
 
@@ -483,8 +483,8 @@ namespace tmv {
         typedef typename M::value_type T;
         typedef typename M::const_nonconj_type Mn;
         const bool inst = 
-            Traits<T>::isinst &&
-            M::mcolsize == UNKNOWN && M::mrowsize == UNKNOWN;
+            M::unknownsizes &&
+            Traits<T>::isinst;
         return CallNormSqm<inst,Mn>::call(m.nonConj());
     }
 
@@ -502,7 +502,7 @@ namespace tmv {
         typedef typename M::const_cview_type Mv;
         Mv mv = m.cView();
         return SumElementsM_Helper<
-            -1,M::mcolsize,M::mrowsize,NormComp,0,Mv>::call(
+            -1,M::_colsize,M::_rowsize,NormComp,0,Mv>::call(
                 mv,Scaling<0,RT>(scale));
     }
 
@@ -542,8 +542,8 @@ namespace tmv {
         typedef typename M::value_type T;
         typedef typename M::const_nonconj_type Mn;
         const bool inst = 
-            Traits<T>::isinst &&
-            M::mcolsize == UNKNOWN && M::mrowsize == UNKNOWN;
+            M::unknownsizes &&
+            Traits<T>::isinst;
         return CallNormSq_scalem<inst,Mn>::call(m.nonConj(),scale);
     }
 
@@ -601,8 +601,8 @@ namespace tmv {
         typedef typename M::value_type T;
         typedef typename M::const_nonconj_type Mn;
         const bool inst = 
-            Traits<T>::isinst &&
-            M::mcolsize == UNKNOWN && M::mrowsize == UNKNOWN;
+            M::unknownsizes &&
+            Traits<T>::isinst;
         return CallNormFm<inst,Mn>::call(m.nonConj());
     }
 
@@ -716,19 +716,19 @@ namespace tmv {
     inline typename M::real_type InlineMaxAbsElement(
         const BaseMatrix_Rec<M>& m)
     {
-        const int cs = M::mcolsize;
-        const int rs = M::mrowsize;
+        const int cs = M::_colsize;
+        const int rs = M::_rowsize;
 #if TMV_OPT == 0
         const int algo = 
-            M::mcanlin ? 1 : M::mrowmajor ? 2 : 3;
+            M::_canlin ? 1 : M::_rowmajor ? 2 : 3;
 #else
         const int algo = 
-            M::mcanlin ? 1 :
+            M::_canlin ? 1 :
 #if TMV_OPT >= 2
             ( cs == UNKNOWN || rs == UNKNOWN ) ? 10 :
 #endif
-            M::mrowmajor ? 4 :
-            M::mcolmajor ? 5 :
+            M::_rowmajor ? 4 :
+            M::_colmajor ? 5 :
             cs < rs ? 4 : 5;
 #endif
         typedef typename M::const_cview_type Mv;
@@ -770,8 +770,8 @@ namespace tmv {
         typedef typename M::value_type T;
         typedef typename M::const_nonconj_type Mn;
         const bool inst = 
-            Traits<T>::isinst &&
-            M::mcolsize == UNKNOWN && M::mrowsize == UNKNOWN;
+            M::unknownsizes &&
+            Traits<T>::isinst;
         return CallMaxAbsElementm<inst,Mn>::call(m.nonConj());
     }
 
@@ -843,11 +843,11 @@ namespace tmv {
     template <class M>
     inline typename M::real_type InlineNorm1(const BaseMatrix_Rec<M>& m)
     {
-        const int cs = M::mcolsize;
-        const int rs = M::mrowsize;
+        const int cs = M::_colsize;
+        const int rs = M::_rowsize;
         const int algo = 
 #if TMV_OPT >= 1
-            ( M::mrowmajor && 
+            ( M::_rowmajor && 
               ( cs == UNKNOWN || rs == UNKNOWN || 
                 (cs > 16 && rs < 512) || (cs > 8 && rs >= 512) ) ) ? 2 :
 #endif
@@ -888,8 +888,8 @@ namespace tmv {
         typedef typename M::value_type T;
         typedef typename M::const_nonconj_type Mn;
         const bool inst = 
-            Traits<T>::isinst &&
-            M::mcolsize == UNKNOWN && M::mrowsize == UNKNOWN;
+            M::unknownsizes &&
+            Traits<T>::isinst;
         return CallNorm1M<inst,Mn>::call(m.nonConj());
     }
 
@@ -932,8 +932,8 @@ namespace tmv {
         typedef typename M::value_type T;
         typedef typename M::const_nonconj_type Mn;
         const bool inst = 
-            Traits<T>::isinst &&
-            M::mcolsize == UNKNOWN && M::mrowsize == UNKNOWN;
+            M::unknownsizes &&
+            Traits<T>::isinst;
         return CallNormInfM<inst,Mn>::call(m.nonConj());
     }
 

@@ -1,3 +1,6 @@
+//#define PRINTALGO_LU
+//#define PRINTALGO_DIVU
+//#define PRINTALGO_DIVU_OMP
 
 //#undef NDEBUG
 
@@ -7,11 +10,11 @@
 // How big do you want the matrices to be?
 // (The matrix being inverted is NxN.  
 //  K is the other dimension of the matrix being solved.)
-const int N = 591;
-const int K = 9;
+const int N = 7;
+const int K = 77;
 
 // Define the type to use:
-#define TISFLOAT
+//#define TISFLOAT
 //#define TISCOMPLEX
 
 // Define the parts of the matrices to use
@@ -30,7 +33,7 @@ const int K = 9;
 #define DOSMALL
 #define DOLAP
 #define DOEIGEN
-#define DOEIGENSMALL
+//#define DOEIGENSMALL
 
 // Define which batches of functions you want to test:
 #define DO_C
@@ -47,8 +50,8 @@ const int K = 9;
 //#define SIMPLE_VALUES
 
 // Set up the target number of operations and memory to use for testing
-const long long targetnmegaflops(10000); // in 10^6 real ops
-const long long targetmem(10000000); // in bytes
+const long long targetnmegaflops(1000); // in 10^6 real ops
+const long long targetmem(10000); // in Kbytes
 
 // Include the LAPACK library you want to test TMV against:
 #if 0
@@ -91,17 +94,40 @@ typedef RT T;
 #define XFOUR 1
 #endif
 
-const int M = N;
 #ifdef ONELOOP
 const long long nloops1 = 1;
 const long long nloops2 = 1;
 #else
 const long long nloops2 = (
-    (((long long)(sizeof(T)))*M*N*K > targetmem ? 1 :
-     targetmem / (((long long)(sizeof(T)))*M*N*K)));
+    (((long long)(sizeof(T)))*(N*N+N*K)/1000 > targetmem ? 1 :
+     targetmem*1000 / (((long long)(sizeof(T)))*(N*N+N*K))));
 const long long nloops1 = (
-    (nloops2*M*N*(M+N+K)*XFOUR/1000000 > targetnmegaflops ? 1 :
-     targetnmegaflops*1000000 / (nloops2*M*N*(M+N+K)) / XFOUR ));
+    (nloops2*N*N*(N+K)*XFOUR/1000000 > targetnmegaflops ? 1 :
+     targetnmegaflops*1000000 / (nloops2*N*N*(N+K)) / XFOUR ));
+#endif
+
+#include <sys/time.h>
+#include <algorithm>
+#include <numeric>
+#include <iostream>
+
+#if (defined(DOEIGEN) || defined(DOEIGENSMALL))
+
+#define ALLOC(X) Eigen::aligned_allocator< X >
+#define EIGENP Eigen::VectorXi
+#define EIGENQ Eigen::RowVectorXi
+
+// Supposedly, these are required when using vector's of Eigen types,
+// but they don't seem to work.  
+// And leaving them out does seem to work.
+//#define EIGEN_USE_NEW_STDVECTOR
+//#include "Eigen/StdVector"
+#include "Eigen/Core"
+#if !EIGEN_VERSION_AT_LEAST(2,91,0)
+#include "Eigen/Array"
+#endif
+#include "Eigen/LU"
+
 #endif
 
 #if (PART1 == 1) // Full rectangle
@@ -121,8 +147,15 @@ const long long nloops1 = (
 #define INPART1(i,j) (i<=j)
 #define UNITPART1(i,j) false
 #define MPART1(m) m.upperTri()
+#ifdef EIGEN_VERSION_AT_LEAST
+#if EIGEN_VERSION_AT_LEAST(2,91,0)
+#define EPART1(m) m.triangularView<Eigen::Upper>()
+#define EPART1t(m) m.triangularView<Eigen::Lower>()
+#else
 #define EPART1(m) m.part<Eigen::UpperTriangular>()
 #define EPART1t(m) m.part<Eigen::LowerTriangular>()
+#endif
+#endif
 #define COL_LEN1(j) j+1
 #define COL_START1(j) 0
 #define COL_END1(j) j+1
@@ -135,8 +168,15 @@ const long long nloops1 = (
 #define INPART1(i,j) (i<j)
 #define UNITPART1(i,j) (i==j)
 #define MPART1(m) m.unitUpperTri()
+#ifdef EIGEN_VERSION_AT_LEAST
+#if EIGEN_VERSION_AT_LEAST(2,91,0)
+#define EPART1(m) m.triangularView<Eigen::UnitUpper>()
+#define EPART1t(m) m.triangularView<Eigen::UnitLower>()
+#else
 #define EPART1(m) m.part<Eigen::UnitUpperTriangular>()
 #define EPART1t(m) m.part<Eigen::UnitLowerTriangular>()
+#endif
+#endif
 #define COL_LEN1(j) j
 #define COL_START1(j) 0
 #define COL_END1(j) j
@@ -149,8 +189,15 @@ const long long nloops1 = (
 #define INPART1(i,j) (i>=j)
 #define UNITPART1(i,j) false
 #define MPART1(m) m.lowerTri()
+#ifdef EIGEN_VERSION_AT_LEAST
+#if EIGEN_VERSION_AT_LEAST(2,91,0)
+#define EPART1(m) m.triangularView<Eigen::Lower>()
+#define EPART1t(m) m.triangularView<Eigen::Upper>()
+#else
 #define EPART1(m) m.part<Eigen::LowerTriangular>()
 #define EPART1t(m) m.part<Eigen::UpperTriangular>()
+#endif
+#endif
 #define COL_LEN1(j) N-j
 #define COL_START1(j) j
 #define COL_END1(j) N
@@ -163,8 +210,15 @@ const long long nloops1 = (
 #define INPART1(i,j) (i>j)
 #define UNITPART1(i,j) (i==j)
 #define MPART1(m) m.unitLowerTri()
+#ifdef EIGEN_VERSION_AT_LEAST
+#if EIGEN_VERSION_AT_LEAST(2,91,0)
+#define EPART1(m) m.triangularView<Eigen::UnitLower>()
+#define EPART1t(m) m.triangularView<Eigen::UnitUpper>()
+#else
 #define EPART1(m) m.part<Eigen::UnitLowerTriangular>()
 #define EPART1t(m) m.part<Eigen::UnitUpperTriangular>()
+#endif
+#endif
 #define COL_LEN1(j) N-j-1
 #define COL_START1(j) j+1
 #define COL_END1(j) N
@@ -346,7 +400,7 @@ const T dmone(-1);
 #define LP(x) x
 #endif
 
-const int lap_worksize = (M > N ? M * 128 : N * 128);
+const int lap_worksize = N * 128;
 #ifdef CLAP
 #define LAPNAME1(c,x) clapack_ ## c ## x
 #define LAPCM CblasColMajor,
@@ -364,6 +418,9 @@ RT* lap_rwork = new RT[lap_worksize];
 T* lap_work = new T[lap_worksize];
 #define LAPWORK lap_work
 #define LAPRWORK lap_rwork
+#define LAPNT LapCh_N
+#define LAPT LapCh_T
+#define LAPCT LapCh_C
 #else
 UNKNOWN LAP definition....  // Give compile error
 #define LAPNAME1(c,x) c ## x
@@ -399,10 +456,9 @@ int lapinfo;
 
 #ifdef DOEIGENSMALL
 const int nloops2x = (
-    (M*N*sizeof(T) < 256 * 1024 && 
-     M*K*sizeof(T) < 256 * 1024 && 
-     K*N*sizeof(T) < 256 * 1024 && 
-     N!=10000 && M!=10000 && K!=10000) ? 
+    (N*N*sizeof(T) < 256 * 1024 && 
+     N*K*sizeof(T) < 256 * 1024 && 
+     N!=10000 && K!=10000) ? 
     nloops2 : 0 );
 
 #define EIGENSMA Eigen::Matrix<T,N,N>
@@ -411,28 +467,6 @@ const int nloops2x = (
 #define EIGENSMD Eigen::Matrix<T,N,K>
 #define EIGENSME Eigen::Matrix<T,K,N>
 #define EIGENSMF Eigen::Matrix<T,K,N>
-
-#endif
-
-#include <sys/time.h>
-#include <algorithm>
-#include <numeric>
-#include <iostream>
-
-#if (defined(DOEIGEN) || defined(DOEIGENSMALL))
-
-#define ALLOC(X) Eigen::aligned_allocator< X >
-#define EIGENP Eigen::VectorXi
-#define EIGENQ Eigen::RowVectorXi
-
-// Supposedly, these are required when using vector's of Eigen types,
-// but they don't seem to work.  
-// And leaving them out does seem to work.
-//#define EIGEN_USE_NEW_STDVECTOR
-//#include "Eigen/StdVector"
-#include "Eigen/Core"
-#include "Eigen/Array"
-#include "Eigen/LU"
 
 #endif
 
@@ -471,12 +505,18 @@ static void LU_C(
     std::vector<tmv::SmallMatrix<T,N,K> > D2(nloops2);
     std::vector<tmv::SmallMatrix<T,K,N> > E2(nloops2);
     std::vector<tmv::SmallMatrix<T,K,N> > F2(nloops2);
+#ifdef TMV_V063
     std::vector<tmv::SmallMatrix<T,N,N> > LU2(nloops2);
     std::vector<std::vector<int> > P2(nloops2);
+#else
+    std::vector<tmv::LUD<tmv::SmallMatrix<T,N,N> >*> LU2(nloops2);
+#endif
 
     for(int k=0; k<nloops2; ++k) {
         A2[k] = A1[k]; C2[k] = C1[k]; E2[k] = E1[k];
+#ifdef TMV_V063
         P2[k].resize(N);
+#endif
     }
 #endif
 
@@ -499,17 +539,17 @@ static void LU_C(
     std::vector<EIGENM,ALLOC(EIGENM) > D4(nloops2,EIGENM(N,K));
     std::vector<EIGENM,ALLOC(EIGENM) > E4(nloops2,EIGENM(K,N));
     std::vector<EIGENM,ALLOC(EIGENM) > F4(nloops2,EIGENM(K,N));
-    std::vector<EIGENM,ALLOC(EIGENM) > LU4(nloops2,EIGENM(N,N));
-    std::vector<EIGENP,ALLOC(EIGENP) > P4(nloops2);
-    std::vector<EIGENQ,ALLOC(EIGENQ) > Q4(nloops2);
+#if EIGEN_VERSION_AT_LEAST(2,91,0)
+    std::vector<Eigen::PartialPivLU<EIGENM>*,ALLOC(Eigen::PartialPivLU<EIGENM>*) > LU4(nloops2);
+#else
+    std::vector<Eigen::LU<EIGENM>*,ALLOC(Eigen::LU<EIGENM>*) > LU4(nloops2);
+#endif
     for(int k=0;k<nloops2;++k) {
         for(int j=0;j<N;++j) for(int i=0;i<N;++i) A4[k](i,j) = A1[k](i,j);
         for(int j=0;j<K;++j) for(int i=0;i<N;++i) C4[k](i,j) = C1[k](i,j);
         for(int j=0;j<K;++j) for(int i=0;i<N;++i) D4[k](i,j) = D1[k](i,j);
         for(int j=0;j<N;++j) for(int i=0;i<K;++i) E4[k](i,j) = E1[k](i,j);
         for(int j=0;j<N;++j) for(int i=0;i<K;++i) F4[k](i,j) = F1[k](i,j);
-        P4[k].resize(N);
-        Q4[k].resize(N);
     }
 #endif
 
@@ -519,9 +559,11 @@ static void LU_C(
     std::vector<EIGENSMD,ALLOC(EIGENSMD) > D5;
     std::vector<EIGENSME,ALLOC(EIGENSME) > E5;
     std::vector<EIGENSMF,ALLOC(EIGENSMF) > F5;
-    std::vector<EIGENSMA,ALLOC(EIGENSMA) > LU5;
-    std::vector<EIGENP,ALLOC(EIGENP) > P5;
-    std::vector<EIGENQ,ALLOC(EIGENQ) > Q5;
+#if EIGEN_VERSION_AT_LEAST(2,91,0)
+    std::vector<Eigen::PartialPivLU<EIGENSMA>*,ALLOC(Eigen::PartialPivLU<EIGENSMA>*) > LU5;
+#else
+    std::vector<Eigen::LU<EIGENSMA>*,ALLOC(Eigen::LU<EIGENSMA>*) > LU5;
+#endif
     if (nloops2x) { 
         A5.resize(nloops2x); 
         C5.resize(nloops2x);
@@ -529,8 +571,6 @@ static void LU_C(
         E5.resize(nloops2x); 
         F5.resize(nloops2x); 
         LU5.resize(nloops2x); 
-        P5.resize(nloops2x); 
-        Q5.resize(nloops2x); 
     }
     for(int k=0;k<nloops2x;++k) {
         for(int j=0;j<N;++j) for(int i=0;i<N;++i) A5[k](i,j) = A1[k](i,j);
@@ -538,8 +578,6 @@ static void LU_C(
         for(int j=0;j<K;++j) for(int i=0;i<N;++i) D5[k](i,j) = D1[k](i,j);
         for(int j=0;j<N;++j) for(int i=0;i<K;++i) E5[k](i,j) = E1[k](i,j);
         for(int j=0;j<N;++j) for(int i=0;i<K;++i) F5[k](i,j) = F1[k](i,j);
-        P5[k].resize(N);
-        Q5[k].resize(N);
     }
 #endif
 
@@ -587,17 +625,22 @@ static void LU_C(
 #if 1 // A -> PLU
 #if PART1 == 1
         ClearCache();
+        for (int k=0; k<nloops2; ++k) A1[k].unsetDiv();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k) {
-            LU1[k] = A1[k];
 #ifdef TMV_V063
+            LU1[k] = A1[k];
             LU_Decompose(LU1[k].view(),&P1[k][0]);
 #else
-            LU_Decompose(LU1[k],&P1[k][0]);
+            //LU1[k] = A1[k];
+            //LU_Decompose(LU1[k],&P1[k][0]);
+            A1[k].saveDiv();
+            A1[k].divideUsing(tmv::LU);
+            A1[k].setDiv();
 #endif
         }
 
@@ -610,10 +653,13 @@ static void LU_C(
             for (int k=0; k<nloops2; ++k) {
 #ifdef TMV_V063
                 A0[k] = LU1[k].lowerTri(tmv::UnitDiag) * LU1[k].upperTri();
-#else
-                A0[k] = LU1[k].unitLowerTri() * LU1[k].upperTri();
-#endif
                 A0[k].reversePermuteRows(&P1[k][0]);
+#else
+                //A0[k] = LU1[k].unitLowerTri() * LU1[k].upperTri();
+                //A0[k].reversePermuteRows(&P1[k][0]);
+                A0[k] = A1[k].lud().getL() * A1[k].lud().getU();
+                A0[k].reversePermuteRows(A1[k].lud().getP());
+#endif
                 e1_reg += NormSq(A0[k]-A1[k]);
             }
             e1_reg = sqrt(e1_reg/nloops2);
@@ -627,12 +673,12 @@ static void LU_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k) {
-            LU2[k] = A2[k];
 #ifdef TMV_V063
+            LU2[k] = A2[k];
             T sign=0;
             DoLUD(LU2[k],&P2[k][0],sign);
 #else
-            LU_Decompose(LU2[k],&P2[k][0]);
+            LU2[k] = new tmv::LUD<tmv::SmallMatrix<T,N,N> >(A2[k]);
 #endif
         }
 
@@ -645,10 +691,11 @@ static void LU_C(
             for (int k=0; k<nloops2; ++k) {
 #ifdef TMV_V063
                 A0[k] = LU2[k].lowerTri(tmv::UnitDiag) * LU2[k].upperTri();
-#else
-                A0[k] = LU2[k].unitLowerTri() * LU2[k].upperTri();
-#endif
                 A0[k].reversePermuteRows(&P2[k][0]);
+#else
+                A0[k] = LU2[k]->getL() * LU2[k]->getU();
+                A0[k].reversePermuteRows(LU2[k]->getP());
+#endif
                 e1_small += NormSq(A2[k]-A0[k]);
             }
             e1_small = sqrt(e1_small/nloops2);
@@ -681,6 +728,7 @@ static void LU_C(
                 A0[k] = LU3[k].unitLowerTri() * LU3[k].upperTri();
 #endif
                 A0[k].reversePermuteRows(&P3[k][0]);
+                for(int i=0;i<N;++i) ++P3[k][i];
                 e1_blas += NormSq(A3[k]-A0[k]);
             }
             e1_blas = sqrt(e1_blas/nloops2);
@@ -694,10 +742,11 @@ static void LU_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k) {
-            Eigen::LU<EIGENM> lu = A4[k].lu();
-            LU4[k] = lu.matrixLU();
-            P4[k] = lu.permutationP();
-            Q4[k] = lu.permutationQ();
+#if EIGEN_VERSION_AT_LEAST(2,91,0)
+            LU4[k] = new Eigen::PartialPivLU<EIGENM>(A4[k]);
+#else
+            LU4[k] = new Eigen::LU<EIGENM>(A4[k]);
+#endif
         }
 
         gettimeofday(&tp,0);
@@ -707,13 +756,21 @@ static void LU_C(
         if (n == 0) {
             e1_eigen = 0.;
             for (int k=0; k<nloops2; ++k) {
-                EIGENM temp1 = LU4[k].part<Eigen::UnitLowerTriangular>() *
-                    LU4[k].part<Eigen::UpperTriangular>();
+#if EIGEN_VERSION_AT_LEAST(2,91,0)
+                EIGENM temp1 = 
+                    EIGENM(LU4[k]->matrixLU().triangularView<Eigen::UnitLower>()) *
+                    EIGENM(LU4[k]->matrixLU().triangularView<Eigen::Upper>());
+                temp1 = LU4[k]->permutationP().inverse() * temp1;
+#else
+                EIGENM temp1 = 
+                    LU4[k]->matrixLU().part<Eigen::UnitLowerTriangular>() *
+                    LU4[k]->matrixLU().part<Eigen::UpperTriangular>();
                 EIGENM temp2(temp1.rows(),temp1.cols());
                 for(int i=0;i<temp1.rows();++i) 
-                    temp2.row(i) = temp1.row(P4[k](i));
+                    temp2.row(i) = temp1.row(LU4[k]->permutationP()(i));
                 for(int j=0;j<temp1.cols();++j) 
-                    temp1.col(Q4[k](j)) = temp2.col(j);
+                    temp1.col(LU4[k]->permutationQ()(j)) = temp2.col(j);
+#endif
                 e1_eigen += (A4[k]-temp1).squaredNorm();
             }
             e1_eigen = sqrt(e1_eigen/nloops2);
@@ -727,10 +784,11 @@ static void LU_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2x; ++k) {
-            Eigen::LU<EIGENSMA> lu = A5[k].lu();
-            LU5[k] = lu.matrixLU();
-            P5[k] = lu.permutationP();
-            Q5[k] = lu.permutationQ();
+#if EIGEN_VERSION_AT_LEAST(2,91,0)
+            LU5[k] = new Eigen::PartialPivLU<EIGENSMA>(A5[k]);
+#else
+            LU5[k] = new Eigen::LU<EIGENSMA>(A5[k]);
+#endif
         }
 
         gettimeofday(&tp,0);
@@ -740,13 +798,21 @@ static void LU_C(
         if (n == 0 && nloops2x) {
             e1_smalleigen = 0.;
             for (int k=0; k<nloops2; ++k) {
-                EIGENSMA temp1 = LU5[k].part<Eigen::UnitLowerTriangular>() *
-                    LU5[k].part<Eigen::UpperTriangular>();
-                EIGENSMA temp2(temp1.rows(),temp1.cols());
+#if EIGEN_VERSION_AT_LEAST(2,91,0)
+                EIGENM temp1 = 
+                    EIGENM(LU5[k]->matrixLU().triangularView<Eigen::UnitLower>()) *
+                    EIGENM(LU5[k]->matrixLU().triangularView<Eigen::Upper>());
+                temp1 = LU4[k]->permutationP().inverse() * temp1;
+#else
+                EIGENM temp1 = 
+                    LU5[k]->matrixLU().part<Eigen::UnitLowerTriangular>() *
+                    LU5[k]->matrixLU().part<Eigen::UpperTriangular>();
+                EIGENM temp2(temp1.rows(),temp1.cols());
                 for(int i=0;i<temp1.rows();++i) 
-                    temp2.row(i) = temp1.row(P5[k](i));
+                    temp2.row(i) = temp1.row(LU5[k]->permutationP()(i));
                 for(int j=0;j<temp1.cols();++j) 
-                    temp1.col(Q5[k](j)) = temp2.col(j);
+                    temp1.col(LU5[k]->permutationQ()(j)) = temp2.col(j);
+#endif
                 e1_smalleigen += (A5[k]-temp1).squaredNorm();
             }
             e1_smalleigen = sqrt(e1_smalleigen/nloops2);
@@ -757,7 +823,7 @@ static void LU_C(
 #endif
 #endif
 
-#if 0 // D /= A
+#if 1 // D /= A
         ClearCache();
 
 #ifdef DOREG
@@ -791,7 +857,15 @@ static void LU_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k) {
+#ifdef TMV_V063
             D2[k] /= MPART1(A2[k]);
+#else
+#if PART1 == 1
+            LU2[k]->solveInPlace(D2[k]);
+#else
+            D2[k] /= MPART1(A2[k]);
+#endif
+#endif
         }
 
         gettimeofday(&tp,0);
@@ -816,7 +890,11 @@ static void LU_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k) {
-#if PART1 >= 2 && PART1 <= 5
+#if PART1 == 1
+            LAPNAME(getrs) (
+                LAPCM LAPNT, N,K,LP(LU3[k].ptr()),N,&P3[k][0],
+                LP(D3[k].ptr()),N,&lapinfo);
+#elif PART1 >= 2 && PART1 <= 5
             BLASNAME(trsm) (BLASCM BLASLeft, BLASUPLO1, BLASNT, BLASDIAG1,
                             N,K,one,BP(A3[k].cptr()),N,BP(D3[k].ptr()),N
                             BLAS1 BLAS1 BLAS1 BLAS1);
@@ -840,12 +918,20 @@ static void LU_C(
 #endif
 
 #ifdef DOEIGEN
+#if PART1 >= 2 && PART1 <= 5
         for (int k=0; k<nloops2; ++k) D4[k] = C4[k];
+#endif
         gettimeofday(&tp,0);
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k) {
-#if PART1 >= 2 && PART1 <= 5
+#if PART1 == 1
+#if EIGEN_VERSION_AT_LEAST(2,91,0)
+            D4[k] = LU4[k]->solve(C4[k]);
+#else
+            LU4[k]->solve(C4[k],&D4[k]);
+#endif
+#elif PART1 >= 2 && PART1 <= 5
             EPART1(A4[k]).solveTriangularInPlace(D4[k]);
 #endif
         }
@@ -867,12 +953,22 @@ static void LU_C(
 #endif
 
 #ifdef DOEIGENSMALL
-        for (int k=0; k<nloops2; ++k) D5[k] = C5[k];
+#if PART1 >= 2 && PART1 <= 5
+        for (int k=0; k<nloops2x; ++k) D5[k] = C5[k];
+#endif
         gettimeofday(&tp,0);
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2x; ++k) {
-#if PART1 >= 2 && PART1 <= 5
+#if PART1 == 1
+#if EIGEN_VERSION_AT_LEAST(2,91,0)
+            D5[k] = LU5[k]->solve(C5[k]);
+            //D5[k] = A5[k].lu().solve(C5[k]);
+#else
+            //LU5[k]->solve(C5[k],&D5[k]);
+            A5[k].lu().solve(C5[k],&D5[k]);
+#endif
+#elif PART1 >= 2 && PART1 <= 5
             EPART1(A5[k]).solveTriangularInPlace(D5[k]);
 #endif
         }
@@ -884,7 +980,7 @@ static void LU_C(
         if (n == 0 && nloops2x) {
             e2_smalleigen = 0.;
             for (int k=0; k<nloops2; ++k) {
-                EIGENSMC temp1 = EPART1(A5[k]) * D5[k];
+                EIGENM temp1 = EPART1(A5[k]) * D5[k];
                 e2_smalleigen += (C5[k]-temp1).squaredNorm();
             }
             e2_smalleigen = sqrt(e2_smalleigen/nloops2);
@@ -894,7 +990,7 @@ static void LU_C(
 #endif
 #endif
 
-#if 0 // F %= A
+#if 1 // F %= A
         ClearCache();
 
 #ifdef DOREG
@@ -928,7 +1024,17 @@ static void LU_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k) {
+#ifdef TMV_V063
             F2[k] %= MPART1(A2[k]);
+#else
+#if PART1 == 1
+            tmv::SmallMatrix<T,K,N>::transpose_type F2t = 
+                F2[k].transpose();
+            LU2[k]->solveTransposeInPlace(F2t);
+#else
+            F2[k] %= MPART1(A2[k]);
+#endif
+#endif
         }
 
         gettimeofday(&tp,0);
@@ -953,7 +1059,16 @@ static void LU_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k) {
-#if PART1 >= 2 && PART1 <= 5
+#if PART1 == 1
+            // This only works for RowMajor F3, so need a temporary.
+            // Really, I should use the BLAS commands to effect this
+            // copy, but it's so tedious...
+            tmv::Matrix<T,tmv::RowMajor> temp = F3[k];
+            LAPNAME(getrs) (
+                LAPCM LAPT,N,K,LP(LU3[k].ptr()),N,&P3[k][0],
+                LP(temp.ptr()),N,&lapinfo);
+            F3[k] = temp;
+#elif PART1 >= 2 && PART1 <= 5
             BLASNAME(trsm) (BLASCM BLASRight, BLASUPLO1, BLASNT, BLASDIAG1,
                             K,N,one,BP(A3[k].cptr()),N,BP(F3[k].ptr()),K
                             BLAS1 BLAS1 BLAS1 BLAS1);
@@ -977,12 +1092,26 @@ static void LU_C(
 #endif
 
 #ifdef DOEIGEN
+#if PART1 >= 2 && PART1 <= 5
         for (int k=0; k<nloops2; ++k) F4[k] = E4[k];
+#endif
         gettimeofday(&tp,0);
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k) {
-#if PART1 >= 2 && PART1 <= 5
+#if PART1 == 1
+            EIGENM temp(N,K);
+            // I don't think Eigen has any way to do this once the LU
+            // decomposition of A is already done.  So the comparison is 
+            // a bit unfair, but apparently we are forced to do the 
+            // decomposition over again on A.transpose().
+#if EIGEN_VERSION_AT_LEAST(2,91,0)
+            temp = A4[k].transpose().lu().solve(E4[k].transpose());
+#else
+            A4[k].transpose().lu().solve(E4[k].transpose(),&temp);
+#endif
+            F4[k] = temp.transpose();
+#elif PART1 >= 2 && PART1 <= 5
             EPART1(A4[k]).transpose().solveTriangularInPlace(F4[k].transpose());
 #endif
         }
@@ -1004,12 +1133,22 @@ static void LU_C(
 #endif
 
 #ifdef DOEIGENSMALL
-        for (int k=0; k<nloops2; ++k) F5[k] = E5[k];
+#if PART1 >= 2 && PART1 <= 5
+        for (int k=0; k<nloops2x; ++k) F5[k] = E5[k];
+#endif
         gettimeofday(&tp,0);
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2x; ++k) {
-#if PART1 >= 2 && PART1 <= 5
+#if PART1 == 1
+            EIGENSMC temp;
+#if EIGEN_VERSION_AT_LEAST(2,91,0)
+            temp = A5[k].transpose().lu().solve(E5[k].transpose());
+#else
+            A5[k].transpose().lu().solve(E5[k].transpose(),&temp);
+#endif
+            F5[k] = temp.transpose();
+#elif PART1 >= 2 && PART1 <= 5
             EPART1(A5[k]).transpose().solveTriangularInPlace(F5[k].transpose());
 #endif
         }
@@ -1021,7 +1160,7 @@ static void LU_C(
         if (n == 0 && nloops2x) {
             e3_smalleigen = 0.;
             for (int k=0; k<nloops2; ++k) {
-                EIGENSME temp1 = F5[k] * EPART1(A5[k]);
+                EIGENM temp1 = F5[k] * EPART1(A5[k]);
                 e3_smalleigen += (E5[k]-temp1).squaredNorm();
             }
             e3_smalleigen = sqrt(e3_smalleigen/nloops2);
@@ -1126,12 +1265,12 @@ int main() try
     std::cout<<"N,K = "<<N<<" , "<<K<<std::endl;
     std::cout<<"nloops = "<<nloops1<<" x "<<nloops2;
     std::cout<<" = "<<nloops1*nloops2<<std::endl;
-#ifdef DOEIGENSMALL
+#ifdef DOIGENSMALL
     if (nloops2x == 0)
         std::cout<<"Matrix is too big for the stack, so no \"Eigen Known\" tests.\n";
 #endif
     std::cout<<"\nTime for:               ";
-    std::cout<<"  TMV    "<<" TMV Small"<<"  LAPACK  "<<"  Eigen  "<<"Eigen Known"<<std::endl;
+    std::cout<<" TMV    TMV Small  LAPACK   Eigen Eigen Known"<<std::endl;
 
 #ifdef DO_C
     LU_C(A,C,D,E,F);

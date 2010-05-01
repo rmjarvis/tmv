@@ -26,14 +26,15 @@ template <class T> void TestTriDiv_A2()
     tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag> ca1(cm);
     tmv::UpperTriMatrix<T,tmv::UnitDiag> a2(m);
     tmv::UpperTriMatrix<std::complex<T>,tmv::UnitDiag> ca2(cm);
-    a1.saveDiv();
-    a2.saveDiv();
-    ca1.saveDiv();
-    ca2.saveDiv();
-    a1.setDiv();
-    a2.setDiv();
-    ca1.setDiv();
-    ca2.setDiv();
+
+    tmv::UpperTriMatrixView<T> a1v = a1.view();
+    tmv::UpperTriMatrixView<T> a2v = a2.view();
+    tmv::UpperTriMatrixView<std::complex<T> > ca1v = ca1.view();
+    tmv::UpperTriMatrixView<std::complex<T> > ca2v = ca2.view();
+    tmv::LowerTriMatrixView<T> a1t = a1.transpose();
+    tmv::LowerTriMatrixView<T> a2t = a2.transpose();
+    tmv::LowerTriMatrixView<std::complex<T> > ca1t = ca1.transpose();
+    tmv::LowerTriMatrixView<std::complex<T> > ca2t = ca2.transpose();
 
     tmv::UpperTriMatrix<T,tmv::NonUnitDiag> a1x(m);
     tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag> ca1x(cm);
@@ -44,18 +45,10 @@ template <class T> void TestTriDiv_A2()
     tmv::LowerTriMatrix<T,tmv::UnitDiag> b2x(m);
     tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag> cb2x(cm);
 
-    TestMatrixDivArith1<T>(
-        tmv::LU,b2x,cb2x,a1.view(),a2.transpose(),ca1.view(),ca2.transpose(),
-        "L/U");
-    TestMatrixDivArith1<T>(
-        tmv::LU,a2x,ca2x,a1.transpose(),a2.view(),ca1.transpose(),ca2.view(),
-        "U/L");
-    TestMatrixDivArith1<T>(
-        tmv::LU,b1x,cb1x,a2.view(),a1.transpose(),ca2.view(),ca1.transpose(),
-        "L/U");
-    TestMatrixDivArith1<T>(
-        tmv::LU,a1x,ca1x,a2.transpose(),a1.view(),ca2.transpose(),ca1.view(),
-        "U/L");
+    TestMatrixDivArith1<T>(tmv::LU,b2x,cb2x,a1v,a2t,ca1v,ca2t,"L/U");
+    TestMatrixDivArith1<T>(tmv::LU,a2x,ca2x,a1t,a2v,ca1t,ca2v,"U/L");
+    TestMatrixDivArith1<T>(tmv::LU,b1x,cb1x,a2v,a1t,ca2v,ca1t,"L/U");
+    TestMatrixDivArith1<T>(tmv::LU,a1x,ca1x,a2t,a1v,ca2t,ca1v,"U/L");
 
 #if (XTEST & 2)
     tmv::UpperTriMatrix<T,tmv::NonUnitDiag> a1b(m);
@@ -63,18 +56,19 @@ template <class T> void TestTriDiv_A2()
     tmv::UpperTriMatrix<T,tmv::UnitDiag> a2b(m);
     tmv::UpperTriMatrix<std::complex<T>,tmv::UnitDiag> ca2b(cm);
 
-    TestMatrixDivArith1<T>(
-        tmv::LU,b1x,cb1x,a1.view(),a1b.transpose(),ca1.view(),ca1b.transpose(),
-        "L/U");
-    TestMatrixDivArith1<T>(
-        tmv::LU,a1x,ca1x,a1.transpose(),a1b.view(),ca1.transpose(),ca1b.view(),
-        "U/L");
-    TestMatrixDivArith1<T>(
-        tmv::LU,b2x,cb2x,a2.view(),a2b.transpose(),ca2.view(),ca2b.transpose(),
-        "L/U");
-    TestMatrixDivArith1<T>(
-        tmv::LU,a2x,ca2x,a2.transpose(),a2b.view(),ca2.transpose(),ca2b.view(),
-        "U/L");
+    tmv::UpperTriMatrixView<T> a1bv = a1b.view();
+    tmv::UpperTriMatrixView<T> a2bv = a2b.view();
+    tmv::UpperTriMatrixView<std::complex<T> > ca1bv = ca1b.view();
+    tmv::UpperTriMatrixView<std::complex<T> > ca2bv = ca2b.view();
+    tmv::LowerTriMatrixView<T> a1bt = a1b.transpose();
+    tmv::LowerTriMatrixView<T> a2bt = a2b.transpose();
+    tmv::LowerTriMatrixView<std::complex<T> > ca1bt = ca1b.transpose();
+    tmv::LowerTriMatrixView<std::complex<T> > ca2bt = ca2b.transpose();
+
+    TestMatrixDivArith1<T>(tmv::LU,b1x,cb1x,a1v,a1bt,ca1v,ca1bt,"L/U");
+    TestMatrixDivArith1<T>(tmv::LU,a1x,ca1x,a1t,a1bv,ca1t,ca1bv,"U/L");
+    TestMatrixDivArith1<T>(tmv::LU,b2x,cb2x,a2v,a2bt,ca2v,ca2bt,"L/U");
+    TestMatrixDivArith1<T>(tmv::LU,a2x,ca2x,a2t,a2bv,ca2t,ca2bv,"U/L");
 #endif
 }
 

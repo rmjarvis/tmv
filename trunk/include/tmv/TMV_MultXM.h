@@ -86,7 +86,7 @@ namespace tmv {
                 CopyM_Helper<-2,cs,rs,M1,M2>::call(m1,m2); 
             } else {
                 TMVAssert(ExactSameStorage(m1,m2));
-                Maybe<(M2::mconj != int(M1::mconj))>::conjself(m2);
+                Maybe<(M2::_conj != int(M1::_conj))>::conjself(m2);
             }
         }
     };
@@ -282,20 +282,20 @@ namespace tmv {
         {
             typedef typename M2::value_type T2;
             const bool canlin = 
-                M1::mcanlin && M2::mcanlin &&
-                ( (M1::mrowmajor && M2::mrowmajor) ||
-                  (M1::mcolmajor && M2::mcolmajor) );
+                M1::_canlin && M2::_canlin &&
+                ( (M1::_rowmajor && M2::_rowmajor) ||
+                  (M1::_colmajor && M2::_colmajor) );
             const int algo = 
                 ( ix == 1 && !add ) ? 0 :
                 canlin ? 1 :
 #if TMV_OPT >= 1
                 ( cs != UNKNOWN && rs != UNKNOWN ) ? (
                     ( IntTraits2<cs,rs>::prod <= int(128/sizeof(T2)) ) ? (
-                        ( M1::mrowmajor && M2::mrowmajor ) ? 5 : 6 ) :
-                    ( M1::mrowmajor && M2::mrowmajor ) ? 2 : 
-                    ( M1::mcolmajor && M2::mcolmajor ) ? 3 :
+                        ( M1::_rowmajor && M2::_rowmajor ) ? 5 : 6 ) :
+                    ( M1::_rowmajor && M2::_rowmajor ) ? 2 : 
+                    ( M1::_colmajor && M2::_colmajor ) ? 3 :
                     ( cs > rs ) ? 2 : 3 ) :
-                ( M1::mrowmajor && M2::mrowmajor ) ? 2 : 
+                ( M1::_rowmajor && M2::_rowmajor ) ? 2 : 
 #endif
                 3;
 #ifdef PRINTALGO_XM
@@ -312,9 +312,9 @@ namespace tmv {
         static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             const bool canlin = 
-                M1::mcanlin && M2::mcanlin &&
-                ( (M1::mrowmajor && M2::mrowmajor) ||
-                  (M1::mcolmajor && M2::mcolmajor) );
+                M1::_canlin && M2::_canlin &&
+                ( (M1::_rowmajor && M2::_rowmajor) ||
+                  (M1::_colmajor && M2::_colmajor) );
             const int algo = 
                 ( ix == 1 && !add ) ? 0 :
                 canlin ? 1 :
@@ -378,18 +378,17 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst =
-                M1::mcolsize == UNKNOWN && M1::mrowsize == UNKNOWN &&
-                M2::mcolsize == UNKNOWN && M2::mrowsize == UNKNOWN &&
+                M1::unknownsizes &&
+                M2::unknownsizes &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
                 Traits2<T1,T2>::sametype &&
 #endif
                 Traits<T1>::isinst;
-            const bool conj = M2::mconj;
             const int algo = 
                 ( ix == 1 && !add ) ? 0 :
-                conj ? 97 :
+                M2::_conj ? 97 :
                 inst ? 98 :
                 -3;
             MultXM_Helper<algo,cs,rs,add,ix,T,M1,M2>::call(x,m1,m2);
@@ -429,7 +428,7 @@ namespace tmv {
         {
             if ( !SameStorage(m1,m2) ||
                  ExactSameStorage(m1,m2) ) {
-                // No aliasing
+                // No aliasing (or no clobbering)
                 MultXM_Helper<-2,cs,rs,false,ix,T,M1,M2>::call(x,m1,m2);
             } else {
                 // Let Copy handle the aliasing
@@ -447,8 +446,8 @@ namespace tmv {
         {
             const bool noclobber = MStepHelper<M1,M2>::same;
             const bool checkalias =
-                M1::mcolsize == UNKNOWN && M1::mrowsize == UNKNOWN &&
-                M2::mcolsize == UNKNOWN && M2::mrowsize == UNKNOWN &&
+                M1::_colsize == UNKNOWN && M1::_rowsize == UNKNOWN &&
+                M2::_colsize == UNKNOWN && M2::_rowsize == UNKNOWN &&
                 !noclobber;
             const int algo = 
                 ( ix == 1 && !add ) ? 90 :
@@ -463,12 +462,12 @@ namespace tmv {
         const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1, 
         BaseMatrix_Rec_Mutable<M2>& m2)
     {
-        TMVStaticAssert((Sizes<M1::mcolsize,M2::mcolsize>::same));
-        TMVStaticAssert((Sizes<M1::mrowsize,M2::mrowsize>::same));
+        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same));
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
-        const int cs = Sizes<M1::mcolsize,M2::mcolsize>::size;
-        const int rs = Sizes<M1::mrowsize,M2::mrowsize>::size;
+        const int cs = Sizes<M1::_colsize,M2::_colsize>::size;
+        const int rs = Sizes<M1::_rowsize,M2::_rowsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::cview_type M2v;
         M1v m1v = m1.cView();
