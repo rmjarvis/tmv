@@ -47,29 +47,29 @@
 
 namespace tmv {
 
-    template <class T2>
-    static void NonLapLUInverse(const int* P, MatrixView<T2> m2)
+    template <class T1>
+    static void NonLapLUInverse(MatrixView<T1> m1, const int* P)
     {
-        if (m2.iscm()) {
-            MatrixView<T2,1> m2cm = m2.cmView();
-            InlineLU_Inverse(m2cm.constView(),P,m2cm);
+        if (m1.iscm()) {
+            MatrixView<T1,1> m1cm = m1.cmView();
+            InlineLU_Inverse(m1cm,P);
         } else {
-            MatrixView<T2,UNKNOWN,1> m2rm = m2.rmView();
-            InlineLU_Inverse(m2rm.constView(),P,m2rm);
+            MatrixView<T1,UNKNOWN,1> m1rm = m1.rmView();
+            InlineLU_Inverse(m1rm,P);
         }
     }
 
 #ifdef ALAP
     // ALAP, not LAP, since ATLAS has these routines
-    template <class T2> 
-    static inline void LapLUInverse(const int* P, MatrixView<T2,1> m2)
-    { NonLapLUInverse(P,m2); }
+    template <class T1> 
+    static inline void LapLUInverse(MatrixView<T1,1> m1, const int* P)
+    { NonLapLUInverse(m1,P); }
 #ifdef INST_DOUBLE
     template <>
-    static void LapLUInverse(const int* P, MatrixView<double,1> m2)
+    static void LapLUInverse(MatrixView<double,1> m1, const int* P)
     {
-        int n = m2.colsize();
-        int lda = m2.stepj();
+        int n = m1.colsize();
+        int lda = m1.stepj();
 #ifdef CLAP
         const int* ipiv = P;
 #else
@@ -85,14 +85,14 @@ namespace tmv {
         int lwork = -1;
         auto_array<double> work(new double[1]);
         LAPNAME(dgetri) (
-            LAPCM LAPV(n),LAPP(m2.ptr()),LAPV(lda),
+            LAPCM LAPV(n),LAPP(m1.ptr()),LAPV(lda),
             LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(work[0]);
         work.reset(new double[lwork]);
 #endif
 #endif
         LAPNAME(dgetri) (
-            LAPCM LAPV(n),LAPP(m2.ptr()),LAPV(lda),
+            LAPCM LAPV(n),LAPP(m1.ptr()),LAPV(lda),
             LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
         LAP_Results("dgetri");
@@ -102,10 +102,10 @@ namespace tmv {
     }
     template <>
     static void LapLUInverse(
-        const int* P, MatrixView<std::complex<double>,1> m2)
+        MatrixView<std::complex<double>,1> m1, const int* P)
     {
-        int n = m2.colsize();
-        int lda = m2.stepj();
+        int n = m1.colsize();
+        int lda = m1.stepj();
 #ifdef CLAP
         const int* ipiv = P;
 #else
@@ -121,14 +121,14 @@ namespace tmv {
         int lwork = -1;
         auto_array<std::complex<double> > work(new std::complex<double>[1]);
         LAPNAME(zgetri) (
-            LAPCM LAPV(n),LAPP(m2.ptr()),LAPV(lda),
+            LAPCM LAPV(n),LAPP(m1.ptr()),LAPV(lda),
             LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(std::real(work[0]));
         work.reset(new std::complex<double>[lwork]);
 #endif
 #endif
         LAPNAME(zgetri) (
-            LAPCM LAPV(n),LAPP(m2.ptr()),LAPV(lda),
+            LAPCM LAPV(n),LAPP(m1.ptr()),LAPV(lda),
             LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
         LAP_Results("zgetri");
@@ -139,10 +139,10 @@ namespace tmv {
 #endif
 #ifdef INST_FLOAT
     template <>
-    static void LapLUInverse(const int* P, MatrixView<float,1> m2)
+    static void LapLUInverse(MatrixView<float,1> m1, const int* P)
     {
-        int n = m2.colsize();
-        int lda = m2.stepj();
+        int n = m1.colsize();
+        int lda = m1.stepj();
 #ifdef CLAP
         const int* ipiv = P;
 #else
@@ -158,14 +158,14 @@ namespace tmv {
         int lwork = -1;
         auto_array<float> work(new float[1]);
         LAPNAME(sgetri) (
-            LAPCM LAPV(n),LAPP(m2.ptr()),LAPV(lda),
+            LAPCM LAPV(n),LAPP(m1.ptr()),LAPV(lda),
             LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(work[0]);
         work.reset(new float[lwork]);
 #endif
 #endif
         LAPNAME(sgetri) (
-            LAPCM LAPV(n),LAPP(m2.ptr()),LAPV(lda),
+            LAPCM LAPV(n),LAPP(m1.ptr()),LAPV(lda),
             LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
         LAP_Results("sgetri");
@@ -175,10 +175,10 @@ namespace tmv {
     }
     template <>
     static void LapLUInverse(
-        const int* P, MatrixView<std::complex<float>,1> m2)
+        MatrixView<std::complex<float>,1> m1, const int* P)
     {
-        int n = m2.colsize();
-        int lda = m2.stepj();
+        int n = m1.colsize();
+        int lda = m1.stepj();
 #ifdef CLAP
         const int* ipiv = P;
 #else
@@ -194,14 +194,14 @@ namespace tmv {
         int lwork = -1;
         auto_array<std::complex<float> > work(new std::complex<float>[1]);
         LAPNAME(cgetri) (
-            LAPCM LAPV(n),LAPP(m2.ptr()),LAPV(lda),
+            LAPCM LAPV(n),LAPP(m1.ptr()),LAPV(lda),
             LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(std::real(work[0]));
         work.reset(new std::complex<float>[lwork]);
 #endif
 #endif
         LAPNAME(cgetri) (
-            LAPCM LAPV(n),LAPP(m2.ptr()),LAPV(lda),
+            LAPCM LAPV(n),LAPP(m1.ptr()),LAPV(lda),
             LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
         LAP_Results("cgetri");
@@ -212,28 +212,24 @@ namespace tmv {
 #endif // FLOAT
 #endif // ALAP
 
-    template <class T1, class T2, bool C1>
-    void InstLU_Inverse(
-        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const int* P,
-        MatrixView<T2> m2)
+    template <class T1>
+    void InstLU_Inverse(MatrixView<T1> m1, const int* P)
     {
 #ifdef ALAP
-        if (m2.iscm() && m2.stepj() > 0) {
-            InstCopy(m1.xView(),m2);
-            LapLUInverse(P,m2.cmView());
+        if (m1.iscm() && m1.stepj() > 0) {
+            LapLUInverse(m1.cmView(),P);
         } else {
-            Matrix<T2,ColMajor> m2c(m1);
-            LapLUInverse(P,m2c.view());
-            InstCopy(m2c.xView().constView(),m2);
+            Matrix<T1,ColMajor> m1c(m1);
+            LapLUInverse(m1c.view(),P);
+            InstCopy(m1c.xView().constView(),m1);
         }
 #else
-        if (m2.iscm() || m2.isrm()) {
-            InstCopy(m1.xView(),m2);
-            NonLapLUInverse(P,m2);
+        if (m1.iscm() || m1.isrm()) {
+            NonLapLUInverse(m1,P);
         } else {
-            Matrix<T2,ColMajor> m2c(m1);
-            NonLapLUInverse(P,m2c.xView());
-            InstCopy(m2c.xView().constView(),m2);
+            Matrix<T1,ColMajor> m1c(m1);
+            NonLapLUInverse(m1c.xView(),P);
+            InstCopy(m1c.xView().constView(),m1);
         }
 #endif
     }

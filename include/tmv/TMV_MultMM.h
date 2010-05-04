@@ -133,7 +133,7 @@
 #define TMV_Q3 2048
 
 // Q4 is the minimum size to use a recursive Winograd algorithm
-// (This is repeated in TMV_MultMM_Winograd.h where it is used.
+// (This is repeated in TMV_MultMM_Winograd.h where it is also used.)
 #ifdef TMV_USE_RECURSIVE_BLOCK
 #define TMV_Q4 2048
 #else

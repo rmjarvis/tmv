@@ -69,12 +69,17 @@ namespace tmv {
         if (Norm(m1.mat()-m1c) > 1.e-6 * kappa * Norm(m1.mat())) {
             std::cout<<"LDiv:  \n";
             std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
-            std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1.mat()<<std::endl;
-            std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2.mat()<<std::endl;
-            std::cout<<"m3 = "<<TMV_Text(m3)<<"  "<<m3i<<std::endl;
-            std::cout<<"m3 -> "<<m3.mat()<<std::endl;
-            std::cout<<"m1c = "<<m1c<<std::endl;
-            std::cout<<"diff = "<<m1.mat()-m1c<<std::endl;
+            std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
+            std::cout<<"m3 = "<<TMV_Text(m3)<<std::endl;
+            if (m3.colsize() < 100 && m3.rowsize() < 100 && m1.colsize() < 100) {
+                std::cout<<"m1 = "<<m1.mat()<<std::endl;
+                std::cout<<"m2 = "<<m2.mat()<<std::endl;
+                std::cout<<"m3 = "<<m3i<<std::endl;
+                std::cout<<"m3 -> "<<m3.mat()<<std::endl;
+                std::cout<<"m1c = "<<m1c<<std::endl;
+                std::cout<<"diff = "<<m1.mat()-m1c<<std::endl;
+            }
             std::cout<<"Norm(diff) = "<<Norm(m1.mat()-m1c)<<std::endl;
             exit(1);
         }
@@ -100,12 +105,17 @@ namespace tmv {
         if (Norm(m1.mat()-m1c) > 1.e-6 * kappa * Norm(m1.mat())) {
             std::cout<<"RDiv:  \n";
             std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
-            std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1.mat()<<std::endl;
-            std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2.mat()<<std::endl;
-            std::cout<<"m3 = "<<TMV_Text(m3)<<"  "<<m3i<<std::endl;
-            std::cout<<"m3 -> "<<m3.mat()<<std::endl;
-            std::cout<<"m1c = "<<m1c<<std::endl;
-            std::cout<<"diff = "<<m1.mat()-m1c<<std::endl;
+            std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
+            std::cout<<"m3 = "<<TMV_Text(m3)<<std::endl;
+            if (m3.colsize() < 100 && m3.rowsize() < 100 && m1.colsize() < 100) {
+                std::cout<<"m1 = "<<m1.mat()<<std::endl;
+                std::cout<<"m2 = "<<m2.mat()<<std::endl;
+                std::cout<<"m3 = "<<m3i<<std::endl;
+                std::cout<<"m3 -> "<<m3.mat()<<std::endl;
+                std::cout<<"m1c = "<<m1c<<std::endl;
+                std::cout<<"diff = "<<m1.mat()-m1c<<std::endl;
+            }
             std::cout<<"Norm(diff) = "<<Norm(m1.mat()-m1c)<<std::endl;
             exit(1);
         }
@@ -125,13 +135,17 @@ namespace tmv {
         const typename M1::real_type kappa =
             Norm(m2.mat().inverse())*Norm(m2.mat());
 
-        if (Norm(m1-m1c) > 1.e-6 * kappa * Norm(m1i)) {
+        if (Norm(m1.mat()-m1c) > 1.e-6 * kappa * Norm(m1i)) {
             std::cout<<"LDivEq:  \n";
-            std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1i<<std::endl;
-            std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2.mat()<<std::endl;
-            std::cout<<"m1 -> "<<m1.mat()<<std::endl;
-            std::cout<<"m1c = "<<m1c<<std::endl;
-            std::cout<<"diff = "<<m1.mat()-m1c<<std::endl;
+            std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
+            if (m1.colsize() < 100 && m1.rowsize() < 100) {
+                std::cout<<"m1 = "<<m1i<<std::endl;
+                std::cout<<"m2 = "<<m2.mat()<<std::endl;
+                std::cout<<"m1 -> "<<m1.mat()<<std::endl;
+                std::cout<<"m1c = "<<m1c<<std::endl;
+                std::cout<<"diff = "<<m1.mat()-m1c<<std::endl;
+            }
             std::cout<<"Norm(diff) = "<<Norm(m1.mat()-m1c)<<std::endl;
             exit(1);
         }
@@ -153,11 +167,15 @@ namespace tmv {
 
         if (Norm(m1.mat()-m1c) > 1.e-6 * kappa * Norm(m1i)) {
             std::cout<<"RDivEq:  \n";
-            std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1i<<std::endl;
-            std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2.mat()<<std::endl;
-            std::cout<<"m1 -> "<<m1.mat()<<std::endl;
-            std::cout<<"m1c = "<<m1c<<std::endl;
-            std::cout<<"diff = "<<m1.mat()-m1c<<std::endl;
+            std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
+            if (m1.colsize() < 100 && m1.rowsize() < 100) {
+                std::cout<<"m1 = "<<m1i<<std::endl;
+                std::cout<<"m2 = "<<m2.mat()<<std::endl;
+                std::cout<<"m1 -> "<<m1.mat()<<std::endl;
+                std::cout<<"m1c = "<<m1c<<std::endl;
+                std::cout<<"diff = "<<m1.mat()-m1c<<std::endl;
+            }
             std::cout<<"Norm(diff) = "<<Norm(m1.mat()-m1c)<<std::endl;
             exit(1);
         }

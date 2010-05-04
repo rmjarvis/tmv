@@ -466,10 +466,14 @@ namespace tmv {
     inline bool ExactSameStorage(
         const BaseVector<V1>& v1, const BaseVector<V2>& v2)
     { return false; }
-    template <class V>
+    template <class V1, class V2>
     inline bool ExactSameStorage(
-        const BaseVector_Calc<V>& v1, const BaseVector_Calc<V>& v2)
-    { return v1.step() == v2.step(); }
+        const BaseVector_Calc<V1>& v1, const BaseVector_Calc<V2>& v2)
+    {
+        typedef typename V1::value_type T1;
+        typedef typename V2::value_type T2;
+        return Traits2<T1,T2>::sametype && v1.step() == v2.step(); 
+    }
 
     // This helper class determines if there is ExactSameStorage
     // for two vectors at compile time:

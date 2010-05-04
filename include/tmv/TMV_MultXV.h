@@ -37,6 +37,11 @@
 #include "TMV_Scaling.h"
 #include "TMV_CopyV.h"
 
+#ifdef PRINTALGO_XV
+#include <iostream>
+#include "TMV_VectorIO.h"
+#endif
+
 // The compiler usually does a better job of optimizing the simple 
 // MultXV loops than I did by writing the SSE versions, so I've 
 // turned off the SSE options.
@@ -93,10 +98,26 @@ namespace tmv {
     template <int size, class T, class V1, class V2>
     struct MultXV_Helper<1,size,false,1,T,V1,V2> 
     {
+        static inline void call(const Scaling<1,T>& , const V1& v1, V2& v2)
+        { CopyV_Helper<-1,size,V1,V2>::call(v1,v2); }
+    };
+
+    // algo 201: trivial: ix == 1, !add, so call Copy
+    template <int size, class T, class V1, class V2>
+    struct MultXV_Helper<201,size,false,1,T,V1,V2> 
+    {
+        static inline void call(const Scaling<1,T>& , const V1& v1, V2& v2)
+        { CopyV_Helper<-2,size,V1,V2>::call(v1,v2); }
+    };
+
+    // algo 401: trivial: ix == 1, !add, so call Copy
+    template <int size, class T, class V1, class V2>
+    struct MultXV_Helper<401,size,false,1,T,V1,V2> 
+    {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::iterator IT2;
         static inline void call(const Scaling<1,T>& , const V1& v1, V2& v2)
-        { CopyV_Helper<-1,size,V1,V2>::call(v1,v2); }
+        { CopyV_Helper<-4,size,V1,V2>::call(v1,v2); }
         static inline void call2(int n, const Scaling<1,T>& , IT1 A, IT2 B)
         { CopyV_Helper<-4,size,V1,V2>::call2(A,B); }
     };
@@ -845,7 +866,7 @@ namespace tmv {
                 xreal && allunit && allcomplex && V1::_conj==int(V2::_conj) };
         enum { algo = (
                 size == 0 ? 0 : 
-                ( ix == 1 && !add ) ? 1 :
+                ( ix == 1 && !add ) ? 401 :
 #if TMV_OPT >= 1
                 flatten ? 2 :
                 ( size != UNKNOWN && size <= int(128/sizeof(VT2)) ) ? 15 :
@@ -956,7 +977,7 @@ namespace tmv {
                 Traits<T1>::isinst;
             const int algo = 
                 size == 0 ? 0 : 
-                ( ix == 1 && !add ) ? 1 :
+                ( ix == 1 && !add ) ? 201 :
                 V2::_conj ? 97 :
                 inst ? 98 :
                 -4;

@@ -40,6 +40,7 @@
 #include "tmv/TMV_Det.h"
 #include "tmv/TMV_TriMatrixIO.h"
 #include "tmv/TMV_MatrixIO.h"
+#include "tmv/TMV_Scaling.h"
 
 #ifdef PRINTALGO_InvU
 #include <iostream>
@@ -140,7 +141,7 @@ namespace tmv {
                 //                   m.col(j,0,j) * m(j,j)^-1
                 Mc mj = m.get_col(j,0,j);
                 Mst mst = m.cSubTriMatrix(0,j); 
-                Scaling<ix,XT> invAjj(-m.cref(j,j));
+                Scaling<ix,XT> invAjj(-Maybe<u>::real(m.cref(j,j)));
                 MultUV_Helper<-4,xx,false,ix,XT,Mst,Mcc,Mc>::call(
                     invAjj,mst,mj,mj);
             }
@@ -173,7 +174,7 @@ namespace tmv {
                 //                      m.subTraiMatrix(i+1,N)^-1
                 Mr mi = m.get_row(i,i+1,N);
                 Mstct mstt = m.cSubTriMatrix(i+1,N).transpose();
-                Scaling<ix,XT> invAii(-m.cref(i,i));
+                Scaling<ix,XT> invAii(-Maybe<u>::real(m.cref(i,i)));
                 MultUV_Helper<-4,xx,false,ix,XT,Mstct,Mcr,Mr>::call(
                     invAii,mstt,mi,mi);
             }

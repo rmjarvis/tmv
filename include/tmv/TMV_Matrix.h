@@ -644,6 +644,9 @@ namespace tmv {
         inline void saveDiv() const
         { divtype |= tmv::SaveDivFlag; }
 
+        inline void unsaveDiv() const
+        { divtype &= ~tmv::SaveDivFlag; }
+
         inline bool divIsSaved() const 
         { return divtype & tmv::SaveDivFlag; }
 
@@ -682,6 +685,9 @@ namespace tmv {
         inline void unsetDiv() const
         { divider.reset(); }
 
+        inline bool divIsSet() const
+        { return getDiv(); }
+
         inline void resetDiv() const
         { unsetDiv(); setDiv(); }
 
@@ -690,9 +696,6 @@ namespace tmv {
 
         inline getdiv_type getDiv() const
         { return divider.get(); }
-
-        inline bool divIsSet() const
-        { return getDiv(); }
 
         inline lud_type lud() const
         {

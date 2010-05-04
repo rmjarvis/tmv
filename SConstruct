@@ -120,6 +120,8 @@ opts.Add(BoolVariable('SMALL_TESTS',
         'Make the small test programs: tmvtest1a, tmvtest1b, etc.', False))
 opts.Add(BoolVariable('WARN',
         'Add warning compiler flags, like -Wall', False))
+opts.Add(BoolVariable('PROFILE',
+        'Add profiling compiler flags -pg', False))
 opts.Add(BoolVariable('NOMIX_SMALL',
         'Do not test the mixed Small and regular arithmetic', False))
 
@@ -145,6 +147,9 @@ def BasicCCFlags(env):
             env['TEST_FLAGS'] = ['-g','-O']
             if version <= 4.2:
                 env.Append(CCFLAGS=['-fno-strict-aliasing'])
+            if env['PROFILE']:
+                env.Append(CCFLAGS=['-pg'])
+                env['TEST_FLAGS'] = ['-pg']
             if env['WARN']:
                 env.Append(CCFLAGS=['-ansi','-pedantic-errors','-Wall','-Werror'])
                 env['TEST_FLAGS'] = ['-ansi','-pedantic-errors','-Wall','-Werror']
@@ -155,6 +160,9 @@ def BasicCCFlags(env):
             if version >= 10:
                 env.Append(CCFLAGS=['-vec-report0'])
                 env['TEST_FLAGS'] += ['-vec-report0']
+            if env['PROFILE']:
+                env.Append(CCFLAGS=['-pg'])
+                env['TEST_FLAGS'] = ['-pg']
             if env['WARN']:
                 env.Append(CCFLAGS=['-Wall','-Werror','-wd279,383,810,981'])
                 env['TEST_FLAGS'] += ['-Wall','-Werror','-wd279,383,810,981']
@@ -174,6 +182,10 @@ def BasicCCFlags(env):
         elif compiler == 'pgCC':
             env.Replace(CCFLAGS=['g','-O2','-fast','-Mcache_align'])
             env['TEST_FLAGS'] = ['g','-O0']
+            if env['PROFILE']:
+                # Not sure if this is right...
+                env.Append(CCFLAGS=['-pg'])
+                env['TEST_FLAGS'] = ['-pg']
 
         elif compiler == 'cl':
             env.Replace(CCFLAGS=['/EHsc','/nologo','/O2','/Oi'])

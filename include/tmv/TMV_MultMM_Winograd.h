@@ -280,7 +280,7 @@ namespace tmv {
             InlineMultMM_Winograd<false>(one,X2,Y0,Z2);
 
             // C3 (+=) Z
-            NoAliasMultXM<add>(x,X3,C3);
+            NoAliasMultXM<add>(x,Z3,C3);
 
             // C1 (+=) Z
             NoAliasMultXM<add>(x,Z1,C1);

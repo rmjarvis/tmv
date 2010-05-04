@@ -904,6 +904,11 @@ namespace tmv {
         static inline typename Traits<T>::real_type abs(const T& x) 
         { return TMV_ABS(x); }
 
+        // real(x) or x
+        template <class T>
+        static inline typename Traits<T>::real_type real(const T& x) 
+        { return TMV_REAL(x); }
+
         // conj(x) or x
         template <class T>
         static inline T conj(const T& x) { return TMV_CONJ(x); }
@@ -1230,6 +1235,9 @@ namespace tmv {
 
         template <class T>
         static inline T abs(const T& x) { return x; }
+
+        template <class T>
+        static inline T real(const T& x) { return x; }
 
         template <class T>
         static inline T conj(const T& x) { return x; }

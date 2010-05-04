@@ -1,6 +1,13 @@
 //#define PRINTALGO_LU
 //#define PRINTALGO_DIVU
 //#define PRINTALGO_DIVU_OMP
+//#define PRINTALGO_InvU
+//#define PRINTALGO_UL
+//#define PRINTALGO_XV
+//#define PRINTALGO_MM
+
+//#define XDEBUG_PRODMM
+//#define XDEBUG_QUOTMM
 
 //#undef NDEBUG
 
@@ -10,8 +17,8 @@
 // How big do you want the matrices to be?
 // (The matrix being inverted is NxN.  
 //  K is the other dimension of the matrix being solved.)
-const int N = 7;
-const int K = 77;
+const int N = 206;
+const int K = 109;
 
 // Define the type to use:
 //#define TISFLOAT
@@ -33,7 +40,7 @@ const int K = 77;
 #define DOSMALL
 #define DOLAP
 #define DOEIGEN
-//#define DOEIGENSMALL
+#define DOEIGENSMALL
 
 // Define which batches of functions you want to test:
 #define DO_C
@@ -50,12 +57,13 @@ const int K = 77;
 //#define SIMPLE_VALUES
 
 // Set up the target number of operations and memory to use for testing
-const long long targetnmegaflops(1000); // in 10^6 real ops
+const long long targetnmegaflops(10000); // in 10^6 real ops
 const long long targetmem(10000); // in Kbytes
 
 // Include the LAPACK library you want to test TMV against:
 #if 0
 #include "mkl.h"
+#define MKL
 #define CBLAS
 #define CLAPACK
 #define XLAP
@@ -237,6 +245,8 @@ const long long nloops1 = (
 #endif
 
 #ifdef DOLAP
+
+#define LAP_BLOCKSIZE 64
 
 #ifdef TISCOMPLEX
 #ifdef TISFLOAT
@@ -482,6 +492,7 @@ static void ClearCache()
 #ifdef DO_C
 static void LU_C(
     const std::vector<tmv::Matrix<T> >& A1,
+    std::vector<tmv::Matrix<T> >& B1,
     const std::vector<tmv::Matrix<T> >& C1,
     std::vector<tmv::Matrix<T> >& D1,
     const std::vector<tmv::Matrix<T> >& E1,
@@ -501,6 +512,7 @@ static void LU_C(
 
 #ifdef DOSMALL
     std::vector<tmv::SmallMatrix<T,N,N> > A2(nloops2);
+    std::vector<tmv::SmallMatrix<T,N,N> > B2(nloops2);
     std::vector<tmv::SmallMatrix<T,N,K> > C2(nloops2);
     std::vector<tmv::SmallMatrix<T,N,K> > D2(nloops2);
     std::vector<tmv::SmallMatrix<T,K,N> > E2(nloops2);
@@ -509,7 +521,7 @@ static void LU_C(
     std::vector<tmv::SmallMatrix<T,N,N> > LU2(nloops2);
     std::vector<std::vector<int> > P2(nloops2);
 #else
-    std::vector<tmv::LUD<tmv::SmallMatrix<T,N,N> >*> LU2(nloops2);
+    std::vector<tmv::LUD<tmv::SmallMatrix<T,N,N> >*> LU2(nloops2,0);
 #endif
 
     for(int k=0; k<nloops2; ++k) {
@@ -522,6 +534,7 @@ static void LU_C(
 
 #ifdef DOLAP
     std::vector<tmv::Matrix<T> > A3 = A1;
+    std::vector<tmv::Matrix<T> > B3 = B1;
     std::vector<tmv::Matrix<T> > C3 = C1;
     std::vector<tmv::Matrix<T> > D3 = D1;
     std::vector<tmv::Matrix<T> > E3 = E1;
@@ -535,6 +548,7 @@ static void LU_C(
 
 #ifdef DOEIGEN
     std::vector<EIGENM,ALLOC(EIGENM) > A4(nloops2,EIGENM(N,N));
+    std::vector<EIGENM,ALLOC(EIGENM) > B4(nloops2,EIGENM(N,N));
     std::vector<EIGENM,ALLOC(EIGENM) > C4(nloops2,EIGENM(N,K));
     std::vector<EIGENM,ALLOC(EIGENM) > D4(nloops2,EIGENM(N,K));
     std::vector<EIGENM,ALLOC(EIGENM) > E4(nloops2,EIGENM(K,N));
@@ -542,19 +556,18 @@ static void LU_C(
 #if EIGEN_VERSION_AT_LEAST(2,91,0)
     std::vector<Eigen::PartialPivLU<EIGENM>*,ALLOC(Eigen::PartialPivLU<EIGENM>*) > LU4(nloops2);
 #else
-    std::vector<Eigen::LU<EIGENM>*,ALLOC(Eigen::LU<EIGENM>*) > LU4(nloops2);
+    std::vector<Eigen::LU<EIGENM>*,ALLOC(Eigen::LU<EIGENM>*) > LU4(nloops2,0);
 #endif
     for(int k=0;k<nloops2;++k) {
         for(int j=0;j<N;++j) for(int i=0;i<N;++i) A4[k](i,j) = A1[k](i,j);
         for(int j=0;j<K;++j) for(int i=0;i<N;++i) C4[k](i,j) = C1[k](i,j);
-        for(int j=0;j<K;++j) for(int i=0;i<N;++i) D4[k](i,j) = D1[k](i,j);
         for(int j=0;j<N;++j) for(int i=0;i<K;++i) E4[k](i,j) = E1[k](i,j);
-        for(int j=0;j<N;++j) for(int i=0;i<K;++i) F4[k](i,j) = F1[k](i,j);
     }
 #endif
 
 #ifdef DOEIGENSMALL
     std::vector<EIGENSMA,ALLOC(EIGENSMA) > A5;
+    std::vector<EIGENSMB,ALLOC(EIGENSMB) > B5;
     std::vector<EIGENSMC,ALLOC(EIGENSMC) > C5;
     std::vector<EIGENSMD,ALLOC(EIGENSMD) > D5;
     std::vector<EIGENSME,ALLOC(EIGENSME) > E5;
@@ -566,18 +579,17 @@ static void LU_C(
 #endif
     if (nloops2x) { 
         A5.resize(nloops2x); 
+        B5.resize(nloops2x); 
         C5.resize(nloops2x);
         D5.resize(nloops2x);
         E5.resize(nloops2x); 
         F5.resize(nloops2x); 
-        LU5.resize(nloops2x); 
+        LU5.resize(nloops2x,0); 
     }
     for(int k=0;k<nloops2x;++k) {
         for(int j=0;j<N;++j) for(int i=0;i<N;++i) A5[k](i,j) = A1[k](i,j);
         for(int j=0;j<K;++j) for(int i=0;i<N;++i) C5[k](i,j) = C1[k](i,j);
-        for(int j=0;j<K;++j) for(int i=0;i<N;++i) D5[k](i,j) = D1[k](i,j);
         for(int j=0;j<N;++j) for(int i=0;i<K;++i) E5[k](i,j) = E1[k](i,j);
-        for(int j=0;j<N;++j) for(int i=0;i<K;++i) F5[k](i,j) = F1[k](i,j);
     }
 #endif
 
@@ -622,8 +634,8 @@ static void LU_C(
 
     for (int n=0; n<nloops1; ++n) {
 
-#if 1 // A -> PLU
 #if PART1 == 1
+#if 1 // A -> PLU
         ClearCache();
         for (int k=0; k<nloops2; ++k) A1[k].unsetDiv();
 
@@ -663,7 +675,7 @@ static void LU_C(
                 e1_reg += NormSq(A0[k]-A1[k]);
             }
             e1_reg = sqrt(e1_reg/nloops2);
-            e1_reg /= Norm(A0[0]);
+            e1_reg /= Norm(A1[0]);
         }
 #endif
 #endif
@@ -699,7 +711,7 @@ static void LU_C(
                 e1_small += NormSq(A2[k]-A0[k]);
             }
             e1_small = sqrt(e1_small/nloops2);
-            e1_small /= Norm(A0[0]);
+            e1_small /= Norm(A1[0]);
         }
 #endif
 #endif
@@ -732,7 +744,7 @@ static void LU_C(
                 e1_blas += NormSq(A3[k]-A0[k]);
             }
             e1_blas = sqrt(e1_blas/nloops2);
-            e1_blas /= Norm(A0[0]);
+            e1_blas /= Norm(A1[0]);
         }
 #endif
 #endif
@@ -774,7 +786,7 @@ static void LU_C(
                 e1_eigen += (A4[k]-temp1).squaredNorm();
             }
             e1_eigen = sqrt(e1_eigen/nloops2);
-            e1_eigen /= Norm(A0[0]);
+            e1_eigen /= Norm(A1[0]);
         }
 #endif
 #endif
@@ -802,7 +814,7 @@ static void LU_C(
                 EIGENM temp1 = 
                     EIGENM(LU5[k]->matrixLU().triangularView<Eigen::UnitLower>()) *
                     EIGENM(LU5[k]->matrixLU().triangularView<Eigen::Upper>());
-                temp1 = LU4[k]->permutationP().inverse() * temp1;
+                temp1 = LU5[k]->permutationP().inverse() * temp1;
 #else
                 EIGENM temp1 = 
                     LU5[k]->matrixLU().part<Eigen::UnitLowerTriangular>() *
@@ -816,14 +828,13 @@ static void LU_C(
                 e1_smalleigen += (A5[k]-temp1).squaredNorm();
             }
             e1_smalleigen = sqrt(e1_smalleigen/nloops2);
-            e1_smalleigen /= Norm(A0[0]);
+            e1_smalleigen /= Norm(A1[0]);
         }
 #endif
 #endif
 #endif
-#endif
 
-#if 1 // D /= A
+#if 1 // D /= A (no decomp)
         ClearCache();
 
 #ifdef DOREG
@@ -846,7 +857,7 @@ static void LU_C(
                 e2_reg += NormSq(C0[k]-C1[k]);
             }
             e2_reg = sqrt(e2_reg/nloops2);
-            e2_reg /= Norm(A0[0]);
+            e2_reg /= Norm(A1[0]);
         }
 #endif
 #endif
@@ -879,7 +890,7 @@ static void LU_C(
                 e2_small += NormSq(C0[k]-C2[k]);
             }
             e2_small = sqrt(e2_small/nloops2);
-            e2_small /= Norm(A0[0]);
+            e2_small /= Norm(A1[0]);
         }
 #endif
 #endif
@@ -895,9 +906,10 @@ static void LU_C(
                 LAPCM LAPNT, N,K,LP(LU3[k].ptr()),N,&P3[k][0],
                 LP(D3[k].ptr()),N,&lapinfo);
 #elif PART1 >= 2 && PART1 <= 5
-            BLASNAME(trsm) (BLASCM BLASLeft, BLASUPLO1, BLASNT, BLASDIAG1,
-                            N,K,one,BP(A3[k].cptr()),N,BP(D3[k].ptr()),N
-                            BLAS1 BLAS1 BLAS1 BLAS1);
+            BLASNAME(trsm) (
+                BLASCM BLASLeft, BLASUPLO1, BLASNT, BLASDIAG1,
+                N,K,one,BP(A3[k].cptr()),N,BP(D3[k].ptr()),N
+                BLAS1 BLAS1 BLAS1 BLAS1);
 #endif
         }
 
@@ -912,24 +924,22 @@ static void LU_C(
                 e2_blas += NormSq(C0[k]-C3[k]);
             }
             e2_blas = sqrt(e2_blas/nloops2);
-            e2_blas /= Norm(A0[0]);
+            e2_blas /= Norm(A1[0]);
         }
 #endif
 #endif
 
 #ifdef DOEIGEN
-#if PART1 >= 2 && PART1 <= 5
         for (int k=0; k<nloops2; ++k) D4[k] = C4[k];
-#endif
         gettimeofday(&tp,0);
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k) {
 #if PART1 == 1
 #if EIGEN_VERSION_AT_LEAST(2,91,0)
-            D4[k] = LU4[k]->solve(C4[k]);
+            D4[k] = LU4[k]->solve(D4[k]);
 #else
-            LU4[k]->solve(C4[k],&D4[k]);
+            LU4[k]->solve(D4[k],&D4[k]);
 #endif
 #elif PART1 >= 2 && PART1 <= 5
             EPART1(A4[k]).solveTriangularInPlace(D4[k]);
@@ -947,26 +957,22 @@ static void LU_C(
                 e2_eigen += (C4[k]-temp1).squaredNorm();
             }
             e2_eigen = sqrt(e2_eigen/nloops2);
-            e2_eigen /= Norm(A0[0]);
+            e2_eigen /= Norm(A1[0]);
         }
 #endif
 #endif
 
 #ifdef DOEIGENSMALL
-#if PART1 >= 2 && PART1 <= 5
         for (int k=0; k<nloops2x; ++k) D5[k] = C5[k];
-#endif
         gettimeofday(&tp,0);
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2x; ++k) {
 #if PART1 == 1
 #if EIGEN_VERSION_AT_LEAST(2,91,0)
-            D5[k] = LU5[k]->solve(C5[k]);
-            //D5[k] = A5[k].lu().solve(C5[k]);
+            D5[k] = LU5[k]->solve(D5[k]);
 #else
-            //LU5[k]->solve(C5[k],&D5[k]);
-            A5[k].lu().solve(C5[k],&D5[k]);
+            LU5[k]->solve(D5[k],&D5[k]);
 #endif
 #elif PART1 >= 2 && PART1 <= 5
             EPART1(A5[k]).solveTriangularInPlace(D5[k]);
@@ -984,22 +990,21 @@ static void LU_C(
                 e2_smalleigen += (C5[k]-temp1).squaredNorm();
             }
             e2_smalleigen = sqrt(e2_smalleigen/nloops2);
-            e2_smalleigen /= Norm(A0[0]);
+            e2_smalleigen /= Norm(A1[0]);
         }
 #endif
 #endif
 #endif
 
-#if 1 // F %= A
+#if 1 // D = C / A (no decomp)
         ClearCache();
 
 #ifdef DOREG
-        for (int k=0; k<nloops2; ++k) F1[k] = E1[k];
         gettimeofday(&tp,0);
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k) {
-            F1[k] %= MPART1(A1[k]);
+            D1[k] = C1[k] / MPART1(A1[k]);
         }
 
         gettimeofday(&tp,0);
@@ -1009,30 +1014,27 @@ static void LU_C(
         if (n == 0) {
             e3_reg = 0.;
             for (int k=0; k<nloops2; ++k) {
-                E0[k] = F1[k] * MPART1(A1[k]);
-                e3_reg += NormSq(E0[k]-E1[k]);
+                C0[k] = MPART1(A1[k]) * D1[k];
+                e3_reg += NormSq(C0[k]-C1[k]);
             }
             e3_reg = sqrt(e3_reg/nloops2);
-            e3_reg /= Norm(A0[0]);
+            e3_reg /= Norm(A1[0]);
         }
 #endif
 #endif
 
 #ifdef DOSMALL
-        for (int k=0; k<nloops2; ++k) F2[k] = E2[k];
         gettimeofday(&tp,0);
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k) {
 #ifdef TMV_V063
-            F2[k] %= MPART1(A2[k]);
+            D2[k] = C2[k] / MPART1(A2[k]);
 #else
 #if PART1 == 1
-            tmv::SmallMatrix<T,K,N>::transpose_type F2t = 
-                F2[k].transpose();
-            LU2[k]->solveTransposeInPlace(F2t);
+            LU2[k]->solve(C2[k],D2[k]);
 #else
-            F2[k] %= MPART1(A2[k]);
+            D2[k] = C2[k] / MPART1(A2[k]);
 #endif
 #endif
         }
@@ -1044,11 +1046,963 @@ static void LU_C(
         if (n == 0) {
             e3_small = 0.;
             for (int k=0; k<nloops2; ++k) {
-                E0[k] = F2[k] * MPART1(A2[k]);
-                e3_small += NormSq(E0[k]-E2[k]);
+                C0[k] = MPART1(A2[k]) * D2[k];
+                e3_small += NormSq(C0[k]-C2[k]);
             }
             e3_small = sqrt(e3_small/nloops2);
-            e3_small /= Norm(A0[0]);
+            e3_small /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOLAP
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+#if PART1 == 1
+            D3[k] = C3[k];
+            LAPNAME(getrs) (
+                LAPCM LAPNT, N,K,LP(LU3[k].ptr()),N,&P3[k][0],
+                LP(D3[k].ptr()),N,&lapinfo);
+#elif PART1 >= 2 && PART1 <= 5
+            D3[k] = C3[k];
+            BLASNAME(trsm) (
+                BLASCM BLASLeft, BLASUPLO1, BLASNT, BLASDIAG1,
+                N,K,one,BP(A3[k].cptr()),N,BP(D3[k].ptr()),N
+                BLAS1 BLAS1 BLAS1 BLAS1);
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t3_blas += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e3_blas = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                C0[k] = MPART1(A3[k]) * D3[k];
+                e3_blas += NormSq(C0[k]-C3[k]);
+            }
+            e3_blas = sqrt(e3_blas/nloops2);
+            e3_blas /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOEIGEN
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+#if PART1 == 1
+#if EIGEN_VERSION_AT_LEAST(2,91,0)
+            D4[k] = LU4[k]->solve(C4[k]);
+#else
+            LU4[k]->solve(C4[k],&D4[k]);
+#endif
+#elif PART1 >= 2 && PART1 <= 5
+            D4[k] = EPART1(A4[k]).solveTriangular(C4[k]);
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t3_eigen += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e3_eigen = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                EIGENM temp1 = EPART1(A4[k]) * D4[k];
+                e3_eigen += (C4[k]-temp1).squaredNorm();
+            }
+            e3_eigen = sqrt(e3_eigen/nloops2);
+            e3_eigen /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOEIGENSMALL
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2x; ++k) {
+#if PART1 == 1
+#if EIGEN_VERSION_AT_LEAST(2,91,0)
+            D5[k] = LU5[k]->solve(C5[k]);
+#else
+            LU5[k]->solve(C5[k],&D5[k]);
+#endif
+#elif PART1 >= 2 && PART1 <= 5
+            D5[k] = EPART1(A5[k]).solveTriangular(C5[k]);
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t3_smalleigen += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0 && nloops2x) {
+            e3_smalleigen = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                EIGENM temp1 = EPART1(A5[k]) * D5[k];
+                e3_smalleigen += (C5[k]-temp1).squaredNorm();
+            }
+            e3_smalleigen = sqrt(e3_smalleigen/nloops2);
+            e3_smalleigen /= Norm(A1[0]);
+        }
+#endif
+#endif
+#endif
+
+#if 1 // B = A.inverse() (no decomp)
+        ClearCache();
+
+#ifdef DOREG
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+            B1[k] = MPART1(A1[k]).inverse();
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t4_reg += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e4_reg = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                A0[k] = MPART1(A1[k]) * B1[k];
+                e4_reg += NormSq(A0[k]-1);
+            }
+            e4_reg = sqrt(e4_reg/nloops2);
+            e4_reg /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOSMALL
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+#if (PART1 == 1)
+            LU2[k]->makeInverse(B2[k]);
+#else
+            B2[k] = MPART1(A2[k]).inverse();
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t4_small += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e4_small = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                A0[k] = MPART1(A2[k]) * B2[k];
+                e4_small += NormSq(A0[k]-1);
+            }
+            e4_small = sqrt(e4_small/nloops2);
+            e4_small /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOLAP
+#if (PART1 == 1) && defined(TISCOMPLEX) && (!defined(MKL))
+        if (N <= 321) {
+            // Atlas LAPACK gives me a segmentation fault for zgetri
+            // for N > 321
+#endif
+            gettimeofday(&tp,0);
+            ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+            for (int k=0; k<nloops2; ++k) {
+#if PART1 == 1
+                B3[k] = LU3[k];
+                int lwork = 10*N*LAP_BLOCKSIZE;
+                std::vector<double> work(lwork);
+                LAPNAME(getri) (
+                    LAPCM N,LP(B3[k].ptr()),N,&P3[k][0],
+                    LP(&work[0]),lwork,&lapinfo);
+#elif PART1 >= 2 && PART1 <= 5
+                B3[k].setToIdentity();
+                BLASNAME(trsm) (
+                    BLASCM BLASLeft, BLASUPLO1, BLASNT, BLASDIAG1,
+                    N,N,one,BP(A3[k].cptr()),N,BP(B3[k].ptr()),N
+                    BLAS1 BLAS1 BLAS1 BLAS1);
+#endif
+            }
+
+            gettimeofday(&tp,0);
+            tb = tp.tv_sec + tp.tv_usec/1.e6;
+            t4_blas += tb-ta;
+#ifdef ERRORCHECK
+            if (n == 0) {
+                e4_blas = 0.;
+                for (int k=0; k<nloops2; ++k) {
+                    A0[k] = MPART1(A3[k]) * B3[k];
+                    e4_blas += NormSq(A0[k]-1);
+                }
+                e4_blas = sqrt(e4_blas/nloops2);
+                e4_blas /= Norm(A1[0]);
+            }
+#endif
+#if (PART1 == 1) && defined(TISCOMPLEX) && (!defined(MKL))
+        }
+#endif
+#endif
+
+#ifdef DOEIGEN
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+#if PART1 == 1
+#if EIGEN_VERSION_AT_LEAST(2,91,0)
+            B4[k] = LU4[k]->solve(B4[k].Identity(N,N));
+#else
+            LU4[k]->solve(B4[k].Identity(N,N),&B4[k]);
+#endif
+#elif PART1 >= 2 && PART1 <= 5
+            B4[k] = EPART1(A4[k]).solveTriangular(B4[k].Identity(N,N));
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t4_eigen += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e4_eigen = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                EIGENM temp1 = EPART1(A4[k]) * B4[k];
+                e4_eigen += (temp1-temp1.Identity(N,N)).squaredNorm();
+            }
+            e4_eigen = sqrt(e4_eigen/nloops2);
+            e4_eigen /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOEIGENSMALL
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2x; ++k) {
+#if PART1 == 1
+#if EIGEN_VERSION_AT_LEAST(2,91,0)
+            B5[k] = LU5[k]->solve(B5[k].Identity());
+#else
+            LU5[k]->solve(B5[k].Identity(),&B5[k]);
+#endif
+#elif PART1 >= 2 && PART1 <= 5
+            B5[k] = EPART1(A5[k]).solveTriangular(B5[k].Identity());
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t4_smalleigen += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0 && nloops2x) {
+            e4_smalleigen = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                EIGENM temp1 = EPART1(A5[k]) * B5[k];
+                e4_smalleigen += (temp1-B5[k].Identity()).squaredNorm();
+            }
+            e4_smalleigen = sqrt(e4_smalleigen/nloops2);
+            e4_smalleigen /= Norm(A1[0]);
+        }
+#endif
+#endif
+#endif
+#endif
+
+#if 1 // D /= A
+        ClearCache();
+
+#ifdef DOREG
+        for (int k=0; k<nloops2; ++k) 
+        { D1[k] = C1[k]; A1[k].unsetDiv(); A1[k].unsaveDiv(); }
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+            D1[k] /= MPART1(A1[k]);
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t5_reg += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e5_reg = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                C0[k] = MPART1(A1[k]) * D1[k];
+                e5_reg += NormSq(C0[k]-C1[k]);
+            }
+            e5_reg = sqrt(e5_reg/nloops2);
+            e5_reg /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOSMALL
+        for (int k=0; k<nloops2; ++k) D2[k] = C2[k];
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+            D2[k] /= MPART1(A2[k]);
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t5_small += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e5_small = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                C0[k] = MPART1(A2[k]) * D2[k];
+                e5_small += NormSq(C0[k]-C2[k]);
+            }
+            e5_small = sqrt(e5_small/nloops2);
+            e5_small /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOLAP
+        for (int k=0; k<nloops2; ++k) D3[k] = C3[k];
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+#if PART1 == 1
+            LU3[k] = A3[k];
+            LAPNAME(getrf) (
+                LAPCM N,N,LP(LU3[k].ptr()),N,&P3[k][0],&lapinfo);
+            LAPNAME(getrs) (
+                LAPCM LAPNT, N,K,LP(LU3[k].ptr()),N,&P3[k][0],
+                LP(D3[k].ptr()),N,&lapinfo);
+#elif PART1 >= 2 && PART1 <= 5
+            BLASNAME(trsm) (
+                BLASCM BLASLeft, BLASUPLO1, BLASNT, BLASDIAG1,
+                N,K,one,BP(A3[k].cptr()),N,BP(D3[k].ptr()),N
+                BLAS1 BLAS1 BLAS1 BLAS1);
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t5_blas += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e5_blas = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                C0[k] = MPART1(A3[k]) * D3[k];
+                e5_blas += NormSq(C0[k]-C3[k]);
+            }
+            e5_blas = sqrt(e5_blas/nloops2);
+            e5_blas /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOEIGEN
+        for (int k=0; k<nloops2; ++k) D4[k] = C4[k];
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+#if PART1 == 1
+#if EIGEN_VERSION_AT_LEAST(2,91,0)
+            D4[k] = A4[k].lu().solve(D4[k]);
+#else
+            A4[k].lu().solve(D4[k],&D4[k]);
+#endif
+#elif PART1 >= 2 && PART1 <= 5
+            EPART1(A4[k]).solveTriangularInPlace(D4[k]);
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t5_eigen += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e5_eigen = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                EIGENM temp1 = EPART1(A4[k]) * D4[k];
+                e5_eigen += (C4[k]-temp1).squaredNorm();
+            }
+            e5_eigen = sqrt(e5_eigen/nloops2);
+            e5_eigen /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOEIGENSMALL
+        for (int k=0; k<nloops2x; ++k) D5[k] = C5[k];
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2x; ++k) {
+#if PART1 == 1
+#if EIGEN_VERSION_AT_LEAST(2,91,0)
+            D5[k] = A5[k].lu().solve(D5[k]);
+#else
+            A5[k].lu().solve(D5[k],&D5[k]);
+#endif
+#elif PART1 >= 2 && PART1 <= 5
+            EPART1(A5[k]).solveTriangularInPlace(D5[k]);
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t5_smalleigen += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0 && nloops2x) {
+            e5_smalleigen = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                EIGENM temp1 = EPART1(A5[k]) * D5[k];
+                e5_smalleigen += (C5[k]-temp1).squaredNorm();
+            }
+            e5_smalleigen = sqrt(e5_smalleigen/nloops2);
+            e5_smalleigen /= Norm(A1[0]);
+        }
+#endif
+#endif
+#endif
+
+#if 1 // D = C / A
+        ClearCache();
+
+#ifdef DOREG
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+            D1[k] = C1[k] / MPART1(A1[k]);
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t6_reg += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e6_reg = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                C0[k] = MPART1(A1[k]) * D1[k];
+                e6_reg += NormSq(C0[k]-C1[k]);
+            }
+            e6_reg = sqrt(e6_reg/nloops2);
+            e6_reg /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOSMALL
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+            D2[k] = C2[k] / MPART1(A2[k]);
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t6_small += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e6_small = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                C0[k] = MPART1(A2[k]) * D2[k];
+                e6_small += NormSq(C0[k]-C2[k]);
+            }
+            e6_small = sqrt(e6_small/nloops2);
+            e6_small /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOLAP
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+#if PART1 == 1
+            LU3[k] = A3[k];
+            LAPNAME(getrf) (
+                LAPCM N,N,LP(LU3[k].ptr()),N,&P3[k][0],&lapinfo);
+            D3[k] = C3[k];
+            LAPNAME(getrs) (
+                LAPCM LAPNT, N,K,LP(LU3[k].ptr()),N,&P3[k][0],
+                LP(D3[k].ptr()),N,&lapinfo);
+#elif PART1 >= 2 && PART1 <= 5
+            D3[k] = C3[k];
+            BLASNAME(trsm) (
+                BLASCM BLASLeft, BLASUPLO1, BLASNT, BLASDIAG1,
+                N,K,one,BP(A3[k].cptr()),N,BP(D3[k].ptr()),N
+                BLAS1 BLAS1 BLAS1 BLAS1);
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t6_blas += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e6_blas = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                C0[k] = MPART1(A3[k]) * D3[k];
+                e6_blas += NormSq(C0[k]-C3[k]);
+            }
+            e6_blas = sqrt(e6_blas/nloops2);
+            e6_blas /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOEIGEN
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+#if PART1 == 1
+#if EIGEN_VERSION_AT_LEAST(2,91,0)
+            D4[k] = A4[k].lu().solve(C4[k]);
+#else
+            A4[k].lu().solve(C4[k],&D4[k]);
+#endif
+#elif PART1 >= 2 && PART1 <= 5
+            D4[k] = EPART1(A4[k]).solveTriangular(C4[k]);
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t6_eigen += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e6_eigen = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                EIGENM temp1 = EPART1(A4[k]) * D4[k];
+                e6_eigen += (C4[k]-temp1).squaredNorm();
+            }
+            e6_eigen = sqrt(e6_eigen/nloops2);
+            e6_eigen /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOEIGENSMALL
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2x; ++k) {
+#if PART1 == 1
+#if EIGEN_VERSION_AT_LEAST(2,91,0)
+            D5[k] = A5[k].lu().solve(C5[k]);
+#else
+            A5[k].lu().solve(C5[k],&D5[k]);
+#endif
+#elif PART1 >= 2 && PART1 <= 5
+            D5[k] = EPART1(A5[k]).solveTriangular(C5[k]);
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t6_smalleigen += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0 && nloops2x) {
+            e6_smalleigen = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                EIGENM temp1 = EPART1(A5[k]) * D5[k];
+                e6_smalleigen += (C5[k]-temp1).squaredNorm();
+            }
+            e6_smalleigen = sqrt(e6_smalleigen/nloops2);
+            e6_smalleigen /= Norm(A1[0]);
+        }
+#endif
+#endif
+#endif
+
+#if 1 // B = A.inverse()
+        ClearCache();
+
+#ifdef DOREG
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+            B1[k] = MPART1(A1[k]).inverse();
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t7_reg += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e7_reg = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                A0[k] = MPART1(A1[k]) * B1[k];
+                e7_reg += NormSq(A0[k]-1);
+            }
+            e7_reg = sqrt(e7_reg/nloops2);
+            e7_reg /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOSMALL
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+            B2[k] = MPART1(A2[k]).inverse();
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t7_small += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e7_small = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                A0[k] = MPART1(A2[k]) * B2[k];
+                e7_small += NormSq(A0[k]-1);
+            }
+            e7_small = sqrt(e7_small/nloops2);
+            e7_small /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOLAP
+#if (PART1 == 1) && defined(TISCOMPLEX) && (!defined(MKL))
+        if (N <= 321) {
+#endif
+            gettimeofday(&tp,0);
+            ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+            for (int k=0; k<nloops2; ++k) {
+#if PART1 == 1
+                B3[k] = A3[k];
+                LAPNAME(getrf) (
+                    LAPCM N,N,LP(B3[k].ptr()),N,&P3[k][0],&lapinfo);
+                int lwork = N*LAP_BLOCKSIZE;
+                std::vector<double> work(lwork);
+                LAPNAME(getri) (
+                    LAPCM N,LP(B3[k].ptr()),N,&P3[k][0],
+                    LP(&work[0]),lwork,&lapinfo);
+#elif PART1 >= 2 && PART1 <= 5
+                B3[k].setToIdentity();
+                BLASNAME(trsm) (
+                    BLASCM BLASLeft, BLASUPLO1, BLASNT, BLASDIAG1,
+                    N,N,one,BP(A3[k].cptr()),N,BP(B3[k].ptr()),N
+                    BLAS1 BLAS1 BLAS1 BLAS1);
+#endif
+            }
+
+            gettimeofday(&tp,0);
+            tb = tp.tv_sec + tp.tv_usec/1.e6;
+            t7_blas += tb-ta;
+#ifdef ERRORCHECK
+            if (n == 0) {
+                e7_blas = 0.;
+                for (int k=0; k<nloops2; ++k) {
+                    A0[k] = MPART1(A3[k]) * B3[k];
+                    e7_blas += NormSq(A0[k]-1);
+                }
+                e7_blas = sqrt(e7_blas/nloops2);
+                e7_blas /= Norm(A1[0]);
+            }
+#endif
+#if (PART1 == 1) && defined(TISCOMPLEX) && (!defined(MKL))
+        }
+#endif
+#endif
+
+#ifdef DOEIGEN
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+#if PART1 == 1
+            B4[k] = A4[k].inverse();
+#elif PART1 >= 2 && PART1 <= 5
+            B4[k] = EPART1(A4[k]).solveTriangular(B4[k].Identity(N,N));
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t7_eigen += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e7_eigen = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                EIGENM temp1 = EPART1(A4[k]) * B4[k];
+                e7_eigen += (temp1-temp1.Identity(N,N)).squaredNorm();
+            }
+            e7_eigen = sqrt(e7_eigen/nloops2);
+            e7_eigen /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOEIGENSMALL
+#if PART1 >= 2 && PART1 <= 5
+        for (int k=0; k<nloops2x; ++k) D5[k] = C5[k];
+#endif
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2x; ++k) {
+#if PART1 == 1
+            B5[k] = A5[k].inverse();
+#elif PART1 >= 2 && PART1 <= 5
+            B5[k] = EPART1(A5[k]).solveTriangular(B5[k].Identity());
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t7_smalleigen += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0 && nloops2x) {
+            e7_smalleigen = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                EIGENM temp1 = EPART1(A5[k]) * B5[k];
+                e7_smalleigen += (temp1-B5[k].Identity()).squaredNorm();
+            }
+            e7_smalleigen = sqrt(e7_smalleigen/nloops2);
+            e7_smalleigen /= Norm(A1[0]);
+        }
+#endif
+#endif
+#endif
+
+#if 1 // B = B.inverse()
+        ClearCache();
+
+#ifdef DOREG
+        for (int k=0; k<nloops2; ++k) { B1[k] = A1[k]; }
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+#if PART1 >= 2 && PART1 <= 5
+            MPART1(B1[k]).invertSelf();
+#else
+            B1[k] = MPART1(B1[k]).inverse();
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t8_reg += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e8_reg = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                A0[k] = MPART1(A1[k]) * MPART1(B1[k]);
+                e8_reg += NormSq(A0[k]-1);
+            }
+            e8_reg = sqrt(e8_reg/nloops2);
+            e8_reg /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOSMALL
+        for (int k=0; k<nloops2; ++k) { B2[k] = A2[k]; }
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+#if PART1 >= 2 && PART1 <= 5
+            MPART1(B2[k]).invertSelf();
+#else
+            B2[k] = MPART1(B2[k]).inverse();
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t8_small += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e8_small = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                A0[k] = MPART1(A2[k]) * MPART1(B2[k]);
+                e8_small += NormSq(A0[k]-1);
+            }
+            e8_small = sqrt(e8_small/nloops2);
+            e8_small /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOLAP
+#if (PART1 == 1) && defined(TISCOMPLEX) && (!defined(MKL))
+        if (N <= 321) {
+#endif
+            for (int k=0; k<nloops2; ++k) { B3[k] = A3[k]; }
+            gettimeofday(&tp,0);
+            ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+            for (int k=0; k<nloops2; ++k) {
+#if PART1 == 1
+                LAPNAME(getrf) (
+                    LAPCM N,N,LP(B3[k].ptr()),N,&P3[k][0],&lapinfo);
+                int lwork = N*LAP_BLOCKSIZE;
+                std::vector<double> work(lwork);
+                LAPNAME(getri) (
+                    LAPCM N,LP(B3[k].ptr()),N,&P3[k][0],
+                    LP(&work[0]),lwork,&lapinfo);
+#elif PART1 >= 2 && PART1 <= 5
+                B3[k].setToIdentity();
+                BLASNAME(trsm) (
+                    BLASCM BLASLeft, BLASUPLO1, BLASNT, BLASDIAG1,
+                    N,N,one,BP(A3[k].cptr()),N,BP(B3[k].ptr()),N
+                    BLAS1 BLAS1 BLAS1 BLAS1);
+#endif
+            }
+
+            gettimeofday(&tp,0);
+            tb = tp.tv_sec + tp.tv_usec/1.e6;
+            t8_blas += tb-ta;
+#ifdef ERRORCHECK
+            if (n == 0) {
+                e8_blas = 0.;
+                for (int k=0; k<nloops2; ++k) {
+                    A0[k] = MPART1(A3[k]) * MPART1(B3[k]);
+                    e8_blas += NormSq(A0[k]-1);
+                }
+                e8_blas = sqrt(e8_blas/nloops2);
+                e8_blas /= Norm(A1[0]);
+            }
+#endif
+#if (PART1 == 1) && defined(TISCOMPLEX) && (!defined(MKL))
+        }
+#endif
+#endif
+
+#ifdef DOEIGEN
+        for (int k=0; k<nloops2; ++k) { B4[k] = A4[k]; }
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+#if PART1 == 1
+            B4[k] = B4[k].inverse();
+#elif PART1 >= 2 && PART1 <= 5
+            B4[k] = EPART1(A4[k]).solveTriangular(B4[k].Identity(N,N));
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t8_eigen += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e8_eigen = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                EIGENM temp1 = EPART1(A4[k]) * EPART1(B4[k]);
+                e8_eigen += (temp1-temp1.Identity(N,N)).squaredNorm();
+            }
+            e8_eigen = sqrt(e8_eigen/nloops2);
+            e8_eigen /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOEIGENSMALL
+        for (int k=0; k<nloops2; ++k) { B5[k] = A5[k]; }
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2x; ++k) {
+#if PART1 == 1
+            B5[k] = B5[k].inverse();
+#elif PART1 >= 2 && PART1 <= 5
+            B5[k] = EPART1(A5[k]).solveTriangular(B5[k].Identity());
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t8_smalleigen += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0 && nloops2x) {
+            e8_smalleigen = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                EIGENM temp1 = EPART1(A5[k]) * EPART1(B5[k]);
+                e8_smalleigen += (temp1-B5[k].Identity()).squaredNorm();
+            }
+            e8_smalleigen = sqrt(e8_smalleigen/nloops2);
+            e8_smalleigen /= Norm(A1[0]);
+        }
+#endif
+#endif
+#endif
+
+#if 1 // F %= A
+        ClearCache();
+
+#ifdef DOREG
+        for (int k=0; k<nloops2; ++k) { F1[k] = E1[k]; }
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+            F1[k] %= MPART1(A1[k]);
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t9_reg += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e9_reg = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                E0[k] = F1[k] * MPART1(A1[k]);
+                e9_reg += NormSq(E0[k]-E1[k]);
+            }
+            e9_reg = sqrt(e9_reg/nloops2);
+            e9_reg /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOSMALL
+        for (int k=0; k<nloops2; ++k) F2[k] = E2[k];
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+            F2[k] %= MPART1(A2[k]);
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t9_small += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e9_small = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                E0[k] = F2[k] * MPART1(A2[k]);
+                e9_small += NormSq(E0[k]-E2[k]);
+            }
+            e9_small = sqrt(e9_small/nloops2);
+            e9_small /= Norm(A1[0]);
         }
 #endif
 #endif
@@ -1060,94 +2014,89 @@ static void LU_C(
 
         for (int k=0; k<nloops2; ++k) {
 #if PART1 == 1
+            LU3[k] = A3[k];
+            LAPNAME(getrf) (
+                LAPCM N,N,LP(LU3[k].ptr()),N,&P3[k][0],&lapinfo);
             // This only works for RowMajor F3, so need a temporary.
-            // Really, I should use the BLAS commands to effect this
-            // copy, but it's so tedious...
             tmv::Matrix<T,tmv::RowMajor> temp = F3[k];
             LAPNAME(getrs) (
                 LAPCM LAPT,N,K,LP(LU3[k].ptr()),N,&P3[k][0],
                 LP(temp.ptr()),N,&lapinfo);
             F3[k] = temp;
 #elif PART1 >= 2 && PART1 <= 5
-            BLASNAME(trsm) (BLASCM BLASRight, BLASUPLO1, BLASNT, BLASDIAG1,
-                            K,N,one,BP(A3[k].cptr()),N,BP(F3[k].ptr()),K
-                            BLAS1 BLAS1 BLAS1 BLAS1);
+            BLASNAME(trsm) (
+                BLASCM BLASRight, BLASUPLO1, BLASNT, BLASDIAG1,
+                K,N,one,BP(A3[k].cptr()),N,BP(F3[k].ptr()),K
+                BLAS1 BLAS1 BLAS1 BLAS1);
 #endif
         }
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
-        t3_blas += tb-ta;
+        t9_blas += tb-ta;
 #ifdef ERRORCHECK
         if (n == 0) {
-            e3_blas = 0.;
+            e9_blas = 0.;
             for (int k=0; k<nloops2; ++k) {
                 E0[k] = F3[k] * MPART1(A3[k]);
-                e3_blas += NormSq(E0[k]-E3[k]);
+                e9_blas += NormSq(E0[k]-E3[k]);
             }
-            e3_blas = sqrt(e3_blas/nloops2);
-            e3_blas /= Norm(A0[0]);
+            e9_blas = sqrt(e9_blas/nloops2);
+            e9_blas /= Norm(A1[0]);
         }
 #endif
 #endif
 
 #ifdef DOEIGEN
-#if PART1 >= 2 && PART1 <= 5
         for (int k=0; k<nloops2; ++k) F4[k] = E4[k];
-#endif
         gettimeofday(&tp,0);
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k) {
 #if PART1 == 1
-            EIGENM temp(N,K);
-            // I don't think Eigen has any way to do this once the LU
-            // decomposition of A is already done.  So the comparison is 
-            // a bit unfair, but apparently we are forced to do the 
-            // decomposition over again on A.transpose().
 #if EIGEN_VERSION_AT_LEAST(2,91,0)
-            temp = A4[k].transpose().lu().solve(E4[k].transpose());
+            F4[k].transpose() = A4[k].transpose().lu().solve(F4[k].transpose());
 #else
-            A4[k].transpose().lu().solve(E4[k].transpose(),&temp);
-#endif
+            EIGENM temp(N,K);
+            A4[k].transpose().lu().solve(F4[k].transpose(),&temp);
             F4[k] = temp.transpose();
+#endif
 #elif PART1 >= 2 && PART1 <= 5
-            EPART1(A4[k]).transpose().solveTriangularInPlace(F4[k].transpose());
+            F4[k].transpose() = 
+                EPART1(A4[k]).transpose().solveTriangular(F4[k].transpose());
 #endif
         }
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
-        t3_eigen += tb-ta;
+        t9_eigen += tb-ta;
 #ifdef ERRORCHECK
         if (n == 0) {
-            e3_eigen = 0.;
+            e9_eigen = 0.;
             for (int k=0; k<nloops2; ++k) {
                 EIGENM temp1 = F4[k] * EPART1(A4[k]);
-                e3_eigen += (E4[k]-temp1).squaredNorm();
+                e9_eigen += (E4[k]-temp1).squaredNorm();
             }
-            e3_eigen = sqrt(e3_eigen/nloops2);
-            e3_eigen /= Norm(A0[0]);
+            e9_eigen = sqrt(e9_eigen/nloops2);
+            e9_eigen /= Norm(A1[0]);
         }
 #endif
 #endif
 
 #ifdef DOEIGENSMALL
-#if PART1 >= 2 && PART1 <= 5
         for (int k=0; k<nloops2x; ++k) F5[k] = E5[k];
-#endif
         gettimeofday(&tp,0);
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2x; ++k) {
 #if PART1 == 1
-            EIGENSMC temp;
 #if EIGEN_VERSION_AT_LEAST(2,91,0)
-            temp = A5[k].transpose().lu().solve(E5[k].transpose());
+            F4[k].transpose() = A5[k].transpose().lu().solve(F5[k].transpose());
 #else
-            A5[k].transpose().lu().solve(E5[k].transpose(),&temp);
-#endif
+            EIGENSMC temp;
+            A5[k].transpose().lu().solve(F5[k].transpose(),&temp);
             F5[k] = temp.transpose();
+#endif
 #elif PART1 >= 2 && PART1 <= 5
             EPART1(A5[k]).transpose().solveTriangularInPlace(F5[k].transpose());
 #endif
@@ -1155,16 +2104,177 @@ static void LU_C(
 
         gettimeofday(&tp,0);
         tb = tp.tv_sec + tp.tv_usec/1.e6;
-        t3_smalleigen += tb-ta;
+        t9_smalleigen += tb-ta;
 #ifdef ERRORCHECK
         if (n == 0 && nloops2x) {
-            e3_smalleigen = 0.;
+            e9_smalleigen = 0.;
             for (int k=0; k<nloops2; ++k) {
                 EIGENM temp1 = F5[k] * EPART1(A5[k]);
-                e3_smalleigen += (E5[k]-temp1).squaredNorm();
+                e9_smalleigen += (E5[k]-temp1).squaredNorm();
             }
-            e3_smalleigen = sqrt(e3_smalleigen/nloops2);
-            e3_smalleigen /= Norm(A0[0]);
+            e9_smalleigen = sqrt(e9_smalleigen/nloops2);
+            e9_smalleigen /= Norm(A1[0]);
+        }
+#endif
+#endif
+#endif
+
+#if 1 // F = E % A
+        ClearCache();
+
+#ifdef DOREG
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+            F1[k] = E1[k] % MPART1(A1[k]);
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t10_reg += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e10_reg = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                E0[k] = F1[k] * MPART1(A1[k]);
+                e10_reg += NormSq(E0[k]-E1[k]);
+            }
+            e10_reg = sqrt(e10_reg/nloops2);
+            e10_reg /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOSMALL
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+            F2[k] = E2[k] % MPART1(A2[k]);
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t10_small += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e10_small = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                E0[k] = F2[k] * MPART1(A2[k]);
+                e10_small += NormSq(E0[k]-E2[k]);
+            }
+            e10_small = sqrt(e10_small/nloops2);
+            e10_small /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOLAP
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+#if PART1 == 1
+            LU3[k] = A3[k];
+            LAPNAME(getrf) (
+                LAPCM N,N,LP(LU3[k].ptr()),N,&P3[k][0],&lapinfo);
+            tmv::Matrix<T,tmv::RowMajor> temp = E3[k];
+            LAPNAME(getrs) (
+                LAPCM LAPT,N,K,LP(LU3[k].ptr()),N,&P3[k][0],
+                LP(temp.ptr()),N,&lapinfo);
+            F3[k] = temp;
+#elif PART1 >= 2 && PART1 <= 5
+            F3[k] = E3[k];
+            BLASNAME(trsm) (
+                BLASCM BLASRight, BLASUPLO1, BLASNT, BLASDIAG1,
+                K,N,one,BP(A3[k].cptr()),N,BP(F3[k].ptr()),K
+                BLAS1 BLAS1 BLAS1 BLAS1);
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t10_blas += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e10_blas = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                E0[k] = F3[k] * MPART1(A3[k]);
+                e10_blas += NormSq(E0[k]-E3[k]);
+            }
+            e10_blas = sqrt(e10_blas/nloops2);
+            e10_blas /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOEIGEN
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+#if PART1 == 1
+#if EIGEN_VERSION_AT_LEAST(2,91,0)
+            F4[k].transpose() = A4[k].transpose().lu().solve(E4[k].transpose());
+#else
+            EIGENM temp(N,K);
+            A4[k].transpose().lu().solve(E4[k].transpose(),&temp);
+            F4[k] = temp.transpose();
+#endif
+#elif PART1 >= 2 && PART1 <= 5
+            F4[k].transpose() =
+                EPART1(A4[k]).transpose().solveTriangular(E4[k].transpose());
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t10_eigen += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e10_eigen = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                EIGENM temp1 = F4[k] * EPART1(A4[k]);
+                e10_eigen += (E4[k]-temp1).squaredNorm();
+            }
+            e10_eigen = sqrt(e10_eigen/nloops2);
+            e10_eigen /= Norm(A1[0]);
+        }
+#endif
+#endif
+
+#ifdef DOEIGENSMALL
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2x; ++k) {
+#if PART1 == 1
+#if EIGEN_VERSION_AT_LEAST(2,91,0)
+            F5[k].transpose() = A5[k].transpose().lu().solve(E5[k].transpose());
+#else
+            EIGENSMC temp;
+            A5[k].transpose().lu().solve(E5[k].transpose(),&temp);
+            F5[k] = temp.transpose();
+#endif
+#elif PART1 >= 2 && PART1 <= 5
+            F5[k].transpose() = 
+                EPART1(A5[k]).transpose().solveTriangular(E5[k].transpose());
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t10_smalleigen += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0 && nloops2x) {
+            e10_smalleigen = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                EIGENM temp1 = F5[k] * EPART1(A5[k]);
+                e10_smalleigen += (E5[k]-temp1).squaredNorm();
+            }
+            e10_smalleigen = sqrt(e10_smalleigen/nloops2);
+            e10_smalleigen /= Norm(A1[0]);
         }
 #endif
 #endif
@@ -1174,23 +2284,62 @@ static void LU_C(
 #if PART1 == 1
     std::cout<<"A -> PLU               "<<t1_reg<<"  "<<t1_small<<"  "<<t1_blas;
     std::cout<<"  "<<t1_eigen<<"  "<<t1_smalleigen<<std::endl;
-#endif
+    std::cout<<"No decomposition:\n";
     std::cout<<"D /= A                 "<<t2_reg<<"  "<<t2_small<<"  "<<t2_blas;
     std::cout<<"  "<<t2_eigen<<"  "<<t2_smalleigen<<std::endl;
-    std::cout<<"F %= A                 "<<t3_reg<<"  "<<t3_small<<"  "<<t3_blas;
+    std::cout<<"D = C / A              "<<t3_reg<<"  "<<t3_small<<"  "<<t3_blas;
     std::cout<<"  "<<t3_eigen<<"  "<<t3_smalleigen<<std::endl;
+    std::cout<<"B = A.inverse()        "<<t4_reg<<"  "<<t4_small<<"  "<<t4_blas;
+    std::cout<<"  "<<t4_eigen<<"  "<<t4_smalleigen<<std::endl;
+    std::cout<<"Including decomposition:\n";
+#endif
+    std::cout<<"D /= A                 "<<t5_reg<<"  "<<t5_small<<"  "<<t5_blas;
+    std::cout<<"  "<<t5_eigen<<"  "<<t5_smalleigen<<std::endl;
+    std::cout<<"D = C / A              "<<t6_reg<<"  "<<t6_small<<"  "<<t6_blas;
+    std::cout<<"  "<<t6_eigen<<"  "<<t6_smalleigen<<std::endl;
+    std::cout<<"B = A.inverse()        "<<t7_reg<<"  "<<t7_small<<"  "<<t7_blas;
+    std::cout<<"  "<<t7_eigen<<"  "<<t7_smalleigen<<std::endl;
+    std::cout<<"B = B.inverse()        "<<t8_reg<<"  "<<t8_small<<"  "<<t8_blas;
+    std::cout<<"  "<<t8_eigen<<"  "<<t8_smalleigen<<std::endl;
+    std::cout<<"F %= A                 "<<t9_reg<<"  "<<t9_small<<"  "<<t9_blas;
+    std::cout<<"  "<<t9_eigen<<"  "<<t9_smalleigen<<std::endl;
+    std::cout<<"F = E % A              "<<t10_reg<<"  "<<t10_small<<"  "<<t10_blas;
+    std::cout<<"  "<<t10_eigen<<"  "<<t10_smalleigen<<std::endl;
 
 #ifdef ERRORCHECK
     std::cout<<"errors:\n";
 #if PART1 == 1
     std::cout<<"A -> PLU               "<<e1_reg<<"  "<<e1_small<<"  "<<e1_blas;
     std::cout<<"  "<<e1_eigen<<"  "<<e1_smalleigen<<std::endl;
-#endif
-    std::cout<<"D /= A                 "<<e2_reg<<"  "<<e2_small<<"  "<<e2_blas;
+    std::cout<<"D /= A ND              "<<e2_reg<<"  "<<e2_small<<"  "<<e2_blas;
     std::cout<<"  "<<e2_eigen<<"  "<<e2_smalleigen<<std::endl;
-    std::cout<<"F %= A                 "<<e3_reg<<"  "<<e3_small<<"  "<<e3_blas;
+    std::cout<<"D = C / A ND           "<<e3_reg<<"  "<<e3_small<<"  "<<e3_blas;
     std::cout<<"  "<<e3_eigen<<"  "<<e3_smalleigen<<std::endl;
+    std::cout<<"B = A.inverse() ND     "<<e4_reg<<"  "<<e4_small<<"  "<<e4_blas;
+    std::cout<<"  "<<e4_eigen<<"  "<<e4_smalleigen<<std::endl;
+#endif
+    std::cout<<"D /= A                 "<<e5_reg<<"  "<<e5_small<<"  "<<e5_blas;
+    std::cout<<"  "<<e5_eigen<<"  "<<e5_smalleigen<<std::endl;
+    std::cout<<"D = C / A              "<<e6_reg<<"  "<<e6_small<<"  "<<e6_blas;
+    std::cout<<"  "<<e6_eigen<<"  "<<e6_smalleigen<<std::endl;
+    std::cout<<"B = A.inverse()        "<<e7_reg<<"  "<<e7_small<<"  "<<e7_blas;
+    std::cout<<"  "<<e7_eigen<<"  "<<e7_smalleigen<<std::endl;
+    std::cout<<"B = B.inverse()        "<<e8_reg<<"  "<<e8_small<<"  "<<e8_blas;
+    std::cout<<"  "<<e8_eigen<<"  "<<e8_smalleigen<<std::endl;
+    std::cout<<"F %= A                 "<<e9_reg<<"  "<<e9_small<<"  "<<e9_blas;
+    std::cout<<"  "<<e9_eigen<<"  "<<e9_smalleigen<<std::endl;
+    std::cout<<"F = E % A              "<<e10_reg<<"  "<<e10_small<<"  "<<e10_blas;
+    std::cout<<"  "<<e10_eigen<<"  "<<e10_smalleigen<<std::endl;
     std::cout<<"\n\n";
+#endif
+#ifdef DOSMALL
+    for(int i=0;i<nloops2;++i) if (LU2[i]) delete LU2[i];
+#endif
+#ifdef DOEIGEN
+    for(int i=0;i<nloops2;++i) if (LU4[i]) delete LU4[i];
+#endif
+#ifdef DOEIGENSMALL
+    for(int i=0;i<nloops2x;++i) if (LU5[i]) delete LU5[i];
 #endif
 }
 #endif
@@ -1273,13 +2422,13 @@ int main() try
     std::cout<<" TMV    TMV Small  LAPACK   Eigen Eigen Known"<<std::endl;
 
 #ifdef DO_C
-    LU_C(A,C,D,E,F);
+    LU_C(A,B,C,D,E,F);
 #endif
 
     for(int k=0;k<nloops2;++k) E[k].setZero();
 
 #ifdef DO_R
-    LU_R(B,C,D,E,F);
+    LU_R(A,B,C,D,E,F);
 #endif
 
     return 0;

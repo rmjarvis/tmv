@@ -190,7 +190,7 @@ namespace tmv {
 
         inline SmallVector(size_t n=N) 
         {
-            TMVStaticAssert(N > 0);
+            TMVStaticAssert(N >= 0);
             TMVAssert(n == N);
 #ifdef TMV_DEBUG
             this->setAllTo(T(888));
@@ -199,14 +199,14 @@ namespace tmv {
 
         explicit inline SmallVector(size_t n, T x) 
         {
-            TMVStaticAssert(N > 0);
+            TMVStaticAssert(N >= 0);
             TMVAssert(n == N);
             this->setAllTo(x); 
         }
 
         explicit inline SmallVector(size_t n, const T* v) 
         {
-            TMVStaticAssert(N > 0);
+            TMVStaticAssert(N >= 0);
             TMVAssert(n == N);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
@@ -216,7 +216,7 @@ namespace tmv {
 
         explicit inline SmallVector(const std::vector<T>& v2) 
         {
-            TMVStaticAssert(N > 0);
+            TMVStaticAssert(N >= 0);
             TMVAssert(v2.size() == N);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
@@ -226,7 +226,7 @@ namespace tmv {
 
         inline SmallVector(const type& v2) 
         {
-            TMVStaticAssert(N > 0);
+            TMVStaticAssert(N >= 0);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif
@@ -236,7 +236,7 @@ namespace tmv {
         template <class V2>
         inline SmallVector(const BaseVector<V2>& v2) 
         {
-            TMVStaticAssert(N > 0);
+            TMVStaticAssert(N >= 0);
             TMVAssert(v2.size() == N);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));

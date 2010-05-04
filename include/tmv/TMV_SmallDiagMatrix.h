@@ -180,7 +180,7 @@ namespace tmv {
 
         inline SmallDiagMatrix(size_t n=N)
         {
-            TMVStaticAssert(N > 0);
+            TMVStaticAssert(N >= 0);
             TMVAssert(n==N);
 #ifdef TMV_DEBUG
             this->setAllTo(T(888));
@@ -189,14 +189,14 @@ namespace tmv {
 
         explicit inline SmallDiagMatrix(size_t n, T x) 
         {
-            TMVStaticAssert(N > 0);
+            TMVStaticAssert(N >= 0);
             TMVAssert(n==N);
             this->setAllTo(x);
         }
 
         explicit inline SmallDiagMatrix(size_t n, const T* vv) 
         {
-            TMVStaticAssert(N > 0);
+            TMVStaticAssert(N >= 0);
             TMVAssert(n==N);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
@@ -206,7 +206,7 @@ namespace tmv {
 
         inline SmallDiagMatrix(const std::vector<T>& vv)
         {
-            TMVStaticAssert(N > 0);
+            TMVStaticAssert(N >= 0);
             TMVAssert(vv.size() == N);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
@@ -216,7 +216,7 @@ namespace tmv {
 
         inline SmallDiagMatrix(const type& m2) 
         {
-            TMVStaticAssert(N > 0);
+            TMVStaticAssert(N >= 0);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif
@@ -226,7 +226,7 @@ namespace tmv {
         template <class V2>
         inline SmallDiagMatrix(const BaseVector<V2>& v2) 
         {
-            TMVStaticAssert(N > 0);
+            TMVStaticAssert(N >= 0);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif
@@ -237,7 +237,7 @@ namespace tmv {
         template <class M2>
         inline SmallDiagMatrix(const BaseMatrix<M2>& m2) 
         {
-            TMVStaticAssert(N > 0);
+            TMVStaticAssert(N >= 0);
             TMVStaticAssert((Sizes<M2::_rowsize,M2::_colsize>::same));
             TMVAssert(m2.colsize() == m2.rowsize());
 #ifdef XTEST_DEBUG
