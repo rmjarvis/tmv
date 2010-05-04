@@ -62,6 +62,15 @@ namespace tmv
         inline ~StackArray2() { delete [] p; }
     };
 
+    // I'm not sure if it's legal to declare: "T p[0]", so specialize N=0:
+    template <class T>
+    struct StackArray2<T,0,false>
+    {
+        T*const p;
+        inline StackArray2() : p(0) {}
+        inline ~StackArray2() {}
+    };
+
     template <class T, int N>
     class StackArray
     {

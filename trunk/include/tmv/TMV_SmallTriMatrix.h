@@ -238,18 +238,18 @@ namespace tmv {
 
         inline SmallUpperTriMatrix(size_t n=N)
         {
-            TMVStaticAssert(N>0);
+            TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
             TMVAssert(n==N);
 #ifdef TMVDEBUG
-            this->setAllTo(T(888));
+            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
 #endif
         }
 
         explicit inline SmallUpperTriMatrix(size_t n, T x)
         {
-            TMVStaticAssert(N>0);
+            TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
             TMVAssert(n==N);
@@ -258,12 +258,12 @@ namespace tmv {
 
         explicit inline SmallUpperTriMatrix(size_t n, const T* vv) 
         {
-            TMVStaticAssert(N>0);
+            TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
             TMVAssert(n==N);
 #ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
+            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
 #endif
             SmallVectorView<T,N*N,1> lv(itsm);
             ConstSmallVectorView<T,N*N,1>(vv).newAssignTo(lv);
@@ -271,13 +271,13 @@ namespace tmv {
 
         explicit inline SmallUpperTriMatrix(size_t n, const std::vector<T>& vv) 
         {
-            TMVStaticAssert(N>0);
+            TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
             TMVAssert(n==N);
             TMVAssert(vv.size() == N*N);
 #ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
+            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
 #endif
             SmallVectorView<T,N*N,1> lv(itsm);
             ConstSmallVectorView<T,N*N,1>(&vv[0]).newAssignTo(lv);
@@ -285,11 +285,11 @@ namespace tmv {
 
         inline SmallUpperTriMatrix(const type& m2) 
         { 
-            TMVStaticAssert(N>0);
+            TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
 #ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
+            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
 #endif
             m2.newAssignTo(*this);
         }
@@ -297,7 +297,7 @@ namespace tmv {
         template <class M2> 
         inline SmallUpperTriMatrix(const BaseMatrix<M2>& m2) 
         { 
-            TMVStaticAssert(N>0);
+            TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
             const bool assignable = 
@@ -307,7 +307,7 @@ namespace tmv {
             TMVAssert(m2.colsize() == N);
             TMVAssert(m2.rowsize() == N);
 #ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
+            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
 #endif
             TriCopy<assignable>::copy(m2,*this);
         }
@@ -315,13 +315,13 @@ namespace tmv {
         template <class M2>
         inline SmallUpperTriMatrix(const BaseMatrix_Tri<M2>& m2) 
         {
-            TMVStaticAssert(N>0);
+            TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
             TMVStaticAssert(M2::_upper);
             TMVAssert(m2.size() == N);
 #ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
+            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
 #endif
             Maybe<_unit && !M2::_unit>::unitview(m2).newAssignTo(*this);
         }
@@ -329,12 +329,12 @@ namespace tmv {
         template <class M2> 
         inline SmallUpperTriMatrix(const BaseMatrix_Diag<M2>& m2) 
         { 
-            TMVStaticAssert(N>0);
+            TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
             TMVAssert(m2.size() == N);
 #ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
+            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
 #endif
             typename type::diag_type d = this->diag();
             this->setZero();
@@ -344,7 +344,7 @@ namespace tmv {
         inline ~SmallUpperTriMatrix()
         {
 #ifdef TMVDEBUG
-            this->setAllTo(T(999));
+            Maybe<_unit>::offdiag(*this).setAllTo(T(999));
 #endif
         }
 
@@ -1235,18 +1235,18 @@ namespace tmv {
 
         inline SmallLowerTriMatrix(size_t n=N)
         {
-            TMVStaticAssert(N>0);
+            TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
             TMVAssert(n==N);
 #ifdef TMVDEBUG
-            this->setAllTo(T(888));
+            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
 #endif
         }
 
         explicit inline SmallLowerTriMatrix(size_t n, T x)
         {
-            TMVStaticAssert(N>0);
+            TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
             TMVAssert(n==N);
@@ -1255,12 +1255,12 @@ namespace tmv {
 
         explicit inline SmallLowerTriMatrix(size_t n, const T* vv) 
         {
-            TMVStaticAssert(N>0);
+            TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
             TMVAssert(n==N);
 #ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
+            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
 #endif
             SmallVectorView<T,N*N,1> lv(ptr());
             ConstSmallVectorView<T,N*N,1>(vv).newAssignTo(lv);
@@ -1268,13 +1268,13 @@ namespace tmv {
 
         explicit inline SmallLowerTriMatrix(size_t n, const std::vector<T>& vv) 
         {
-            TMVStaticAssert(N>0);
+            TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
             TMVAssert(n==N);
             TMVAssert(vv.size() == N*N);
 #ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
+            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
 #endif
             SmallVectorView<T,N*N,1> lv(ptr());
             ConstSmallVectorView<T,N*N,1>(&vv[0]).newAssignTo(lv);
@@ -1282,11 +1282,11 @@ namespace tmv {
 
         inline SmallLowerTriMatrix(const type& m2) 
         { 
-            TMVStaticAssert(N>0);
+            TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
 #ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
+            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
 #endif
             m2.newAssignTo(*this);
         }
@@ -1294,7 +1294,7 @@ namespace tmv {
         template <class M2> 
         inline SmallLowerTriMatrix(const BaseMatrix<M2>& m2) 
         { 
-            TMVStaticAssert(N>0);
+            TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
             const bool assignable = 
@@ -1304,7 +1304,7 @@ namespace tmv {
             TMVAssert(m2.colsize() == N);
             TMVAssert(m2.rowsize() == N);
 #ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
+            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
 #endif
             TriCopy<assignable>::copy(m2,*this);
         }
@@ -1312,13 +1312,13 @@ namespace tmv {
         template <class M2>
         inline SmallLowerTriMatrix(const BaseMatrix_Tri<M2>& m2) 
         {
-            TMVStaticAssert(N>0);
+            TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
             TMVStaticAssert(M2::_lower);
             TMVAssert(m2.size() == N);
 #ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
+            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
 #endif
             Maybe<_unit && !M2::_unit>::unitview(m2).newAssignTo(*this);
         }
@@ -1326,12 +1326,12 @@ namespace tmv {
         template <class M2> 
         inline SmallLowerTriMatrix(const BaseMatrix_Diag<M2>& m2) 
         { 
-            TMVStaticAssert(N>0);
+            TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
             TMVAssert(m2.size() == N);
 #ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
+            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
 #endif
             typename type::diag_type d = this->diag();
             this->setZero();
@@ -1341,7 +1341,7 @@ namespace tmv {
         inline ~SmallLowerTriMatrix()
         {
 #ifdef TMVDEBUG
-            this->setAllTo(T(999));
+            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
 #endif
         }
 

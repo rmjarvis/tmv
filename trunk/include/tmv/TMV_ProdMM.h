@@ -159,12 +159,17 @@ namespace tmv {
         if (Norm(m3.mat()-m3c) > 1.e-6 * std::abs(T(x))*Norm(m1)*Norm(m2)) {
             std::cout<<"MultMM:  add = "<<add<<std::endl;
             std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
-            std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1i<<std::endl;
-            std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2i<<std::endl;
-            std::cout<<"m3 = "<<TMV_Text(m3)<<"  "<<m3i<<std::endl;
-            std::cout<<"m3 -> "<<m3.mat()<<std::endl;
-            std::cout<<"correct = "<<m3c<<std::endl;
-            std::cout<<"diff = "<<(m3c-m3.mat())<<std::endl;
+            std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
+            std::cout<<"m3 = "<<TMV_Text(m3)<<std::endl;
+            if (m3.colsize() < 100 && m3.rowsize() < 100 && m1.colsize() < 100) {
+                std::cout<<"m1 = "<<m1i<<std::endl;
+                std::cout<<"m2 = "<<m2i<<std::endl;
+                std::cout<<"m3 = "<<m3i<<std::endl;
+                std::cout<<"m3 -> "<<m3.mat()<<std::endl;
+                std::cout<<"correct = "<<m3c<<std::endl;
+                std::cout<<"diff = "<<(m3c-m3.mat())<<std::endl;
+            }
             std::cout<<"Norm(diff) = "<<Norm(m3c-m3.mat())<<std::endl;
             exit(1);
         }
@@ -194,11 +199,15 @@ namespace tmv {
         if (Norm(m1.mat()-m3) > 1.e-6 * std::abs(T(x))*Norm(m1i)*Norm(m2)) {
             std::cout<<"MultEqMM:  \n";
             std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
-            std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1i<<std::endl;
-            std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2i<<std::endl;
-            std::cout<<"m1 -> "<<m1.mat()<<std::endl;
-            std::cout<<"correct = "<<m3<<std::endl;
-            std::cout<<"diff = "<<(m3-m1.mat())<<std::endl;
+            std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
+            if (m1.colsize() < 100 && m1.rowsize() < 100) {
+                std::cout<<"m1 = "<<m1i<<std::endl;
+                std::cout<<"m2 = "<<m2i<<std::endl;
+                std::cout<<"m1 -> "<<m1.mat()<<std::endl;
+                std::cout<<"correct = "<<m3<<std::endl;
+                std::cout<<"diff = "<<(m3-m1.mat())<<std::endl;
+            }
             std::cout<<"Norm(diff) = "<<Norm(m3-m1.mat())<<std::endl;
             exit(1);
         }

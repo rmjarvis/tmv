@@ -11,12 +11,15 @@
 //#define XDEBUG_PRODMV
 //#undef NDEBUG
 
+#define XDEBUG_PRODMM
+#define XDEBUG_QUOTMM
+
 //#define TMV_INLINE
 #include "TMV.h"
 
 // How big do you want the matrices to be?
 #if 1
-const int M = 339;
+const int M = 40;
 const int N = M;
 const int K = M;
 #elif 1
@@ -31,7 +34,7 @@ const int K = 637;
 
 // Define the type to use:
 //#define TISFLOAT
-#define TISCOMPLEX
+//#define TISCOMPLEX
 
 // Define the parts of the matrices to use
 // 1 = all (rectangle matrix)
@@ -42,15 +45,15 @@ const int K = 637;
 #define PART1 1
 #define PART2 1
 #define PART3 1
-#define DOMULTEQ
+//#define DOMULTEQ
 
 // Define whether you want to include the error checks.
-//#define ERRORCHECK
+#define ERRORCHECK
 
 // Define which versions you want to test:
-#define DOREG
-//#define DOSMALL
-#define DOBLAS
+//#define DOREG
+#define DOSMALL
+//#define DOBLAS
 //#define DOEIGEN
 //#define DOEIGENSMALL
 
@@ -63,11 +66,11 @@ const int K = 637;
 // Set this if you only want to do a single loop.
 // Not so useful for timing, but useful for debugging.
 // Also useful if M,N,K are very large to avoid overflow in product
-//#define ONELOOP
+#define ONELOOP
 
 // Set this to just do the basic C = A * B multiplication, rather than
 // incluing all the various conjugates, +=, and scalings.
-//#define BASIC_ONLY
+#define BASIC_ONLY
 
 // Normally I fill the matrices and vectors with random values, but 
 // that can make it difficult to debug the arithmetic.

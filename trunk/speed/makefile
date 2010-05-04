@@ -20,12 +20,12 @@ CC= g++-4
 #CFLAGS= $(INCLUDE) -DNDEBUG -g3 -O2 -DTMV_INLINE -DTMV_OPT=3 -fopenmp
 #CFLAGS= $(INCLUDE) -DNDEBUG -g3 -O2 -DTMV_OPT=3 -fopenmp
 #CFLAGS= $(INCLUDE) -g3 -O -DTMV_INLINE -DTMV_OPT=3 -fopenmp -DTMV_MEM_TEST
-CFLAGS= $(INCLUDE) -DNDEBUG -g3 -O2 -fopenmp
+CFLAGS= $(INCLUDE) -DNDEBUG -g3 -O2 -DTMV_OPT=2 -fopenmp
 #CFLAGS= $(INCLUDE) -g3 -O
 
 #LIB= 
 #LIB= -L../../tags/v0.63/lib -ltmv_symband -ltmv -llapack -lblas -lgfortran -lpthread
-LIB= -L../lib -ltmv -llapack -lblas -lgfortran -lpthread
+LIB= -L../lib -ltmv /usr/lib/liblapack.dylib /usr/lib/libblas.dylib -lgfortran -lpthread
 #LIB= -L../lib -ltmv_3 -llapack -lblas -lgfortran
 #LIB= -L../lib -ltmv_mem -llapack -lblas -lgfortran -lpthread
 #LIB= -L../lib -llapack -lblas -lgfortran -lpthread

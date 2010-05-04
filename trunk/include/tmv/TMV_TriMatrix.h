@@ -330,80 +330,120 @@ namespace tmv {
         inline reference getRef() { return ref(); }
         inline T operator-() const { return -val(); }
 
-        inline TriRef<T,C>& operator=(const TriRef<T,C>& rhs)
+        template <class T2>
+        inline TriRef<T,C>& operator=(const TriRef<T2,C>& rhs)
         { assign(rhs.val()); return *this; }
-        inline TriRef<T,C>& operator=(T rhs)
+        template <class T2>
+        inline TriRef<T,C>& operator=(T2 rhs)
         { assign(rhs); return *this; }
 
-        inline TriRef<T,C>& operator+=(const TriRef<T,C>& x2)
+        template <class T2>
+        inline TriRef<T,C>& operator+=(const TriRef<T2,C>& x2)
         { assign(val() + x2.val()); return *this; }
-        inline TriRef<T,C>& operator+=(T x2)
+        template <class T2>
+        inline TriRef<T,C>& operator+=(T2 x2)
         { assign(val() + x2); return *this; }
-        inline T operator+(const TriRef<T,C>& x2)
+        template <class T2>
+        inline typename Traits2<T,T2>::type operator+(const TriRef<T2,C>& x2)
         { return val() + x2.val(); }
-        inline friend T operator+(const TriRef<T,C>& x1, T x2)
+        template <class T2>
+        inline friend typename Traits2<T,T2>::type operator+(
+            const TriRef<T,C>& x1, T2 x2)
         { return x1.val()+x2; }
-        inline friend T operator+(T x1, const TriRef<T,C>& x2)
+        template <class T2>
+        inline friend typename Traits2<T,T2>::type operator+(
+            T2 x1, const TriRef<T,C>& x2)
         { return x1+x2.val(); }
-        inline friend T& operator+=(T& x1, const TriRef<T,C>& x2)
+        template <class T2>
+        inline friend T2& operator+=(T2& x1, const TriRef<T,C>& x2)
         { return x1 += x2.val(); }
 
-        inline TriRef<T,C>& operator-=(const TriRef<T,C>& x2) 
+        template <class T2>
+        inline TriRef<T,C>& operator-=(const TriRef<T2,C>& x2) 
         { assign(val() - x2.val()); return *this; }
-        inline TriRef<T,C>& operator-=(T x2)
+        template <class T2>
+        inline TriRef<T,C>& operator-=(T2 x2)
         { assign(val() - x2); return *this; }
-        inline T operator-(const TriRef<T,C>& x2)
+        template <class T2>
+        inline typename Traits2<T,T2>::type operator-(const TriRef<T2,C>& x2)
         { return val()-x2.val(); }
-        inline friend T operator-(const TriRef<T,C>& x1, T x2)
+        template <class T2>
+        inline friend typename Traits2<T,T2>::type operator-(
+            const TriRef<T,C>& x1, T2 x2)
         { return x1.val()-x2; }
-        inline friend T operator-(T x1, const TriRef<T,C>& x2)
+        template <class T2>
+        inline friend typename Traits2<T,T2>::type operator-(
+            T2 x1, const TriRef<T,C>& x2)
         { return x1-x2.val(); }
-        inline friend T& operator-=(T& x1, const TriRef<T,C>& x2)
+        template <class T2>
+        inline friend T2& operator-=(T2& x1, const TriRef<T,C>& x2)
         { return x1 -= x2.val(); }
 
-        inline TriRef<T,C>& operator*=(const TriRef<T,C>& x2) 
+        template <class T2>
+        inline TriRef<T,C>& operator*=(const TriRef<T2,C>& x2) 
         { assign(x2.val() * val()); return *this; }
-        inline TriRef<T,C>& operator*=(T x2) 
+        template <class T2>
+        inline TriRef<T,C>& operator*=(T2 x2) 
         { assign(x2 * val()); return *this; }
-        inline T operator*(const TriRef<T,C> x2)
+        template <class T2>
+        inline typename Traits2<T,T2>::type operator*(const TriRef<T2,C> x2)
         { return val()*x2.val(); }
-        inline friend T operator*(const TriRef<T,C>& x1, T x2)
+        template <class T2>
+        inline friend typename Traits2<T,T2>::type operator*(
+            const TriRef<T,C>& x1, T2 x2)
         { return x1.val()*x2; }
-        inline friend T operator*(T x1, const TriRef<T,C>& x2)
+        template <class T2>
+        inline friend typename Traits2<T,T2>::type operator*(
+            T2 x1, const TriRef<T,C>& x2)
         { return x1*x2.val(); }
-        inline friend T& operator*=(T& x1, const TriRef<T,C>& x2)
+        template <class T2>
+        inline friend T2& operator*=(T2& x1, const TriRef<T,C>& x2)
         {
             if (x2.isunit) return x1;
             else return x1 *= x2.val(); 
         }
 
-        inline TriRef<T,C>& operator/=(const TriRef<T,C>& x2) 
+        template <class T2>
+        inline TriRef<T,C>& operator/=(const TriRef<T2,C>& x2) 
         { assign(val() / x2.val()); return *this; }
-        inline TriRef<T,C>& operator/=(T x2) 
+        template <class T2>
+        inline TriRef<T,C>& operator/=(T2 x2) 
         { assign(val() / x2); return *this; }
-        inline T operator/(const TriRef<T,C>& x2)
+        template <class T2>
+        inline typename Traits2<T,T2>::type operator/(const TriRef<T2,C>& x2)
         { return val()/x2.val(); }
-        inline friend T operator/(const TriRef<T,C>& x1, T x2)
+        template <class T2>
+        inline friend typename Traits2<T,T2>::type operator/(
+            const TriRef<T,C>& x1, T2 x2)
         { return x1.val()/x2; }
-        inline friend T operator/(T x1, const TriRef<T,C>& x2)
+        template <class T2>
+        inline friend typename Traits2<T,T2>::type operator/(
+            T2 x1, const TriRef<T,C>& x2)
         { return x1/x2.val(); }
-        inline friend T& operator/=(T& x1, const TriRef<T,C>& x2)
+        template <class T2>
+        inline friend T2& operator/=(T2& x1, const TriRef<T,C>& x2)
         {
             if (x2.isunit) return x1;
             else return x1 /= x2.val(); 
         }
 
-        inline bool operator==(const TriRef<T,C>& x2) const
+        template <class T2>
+        inline bool operator==(const TriRef<T2,C>& x2) const
         { return val() == x2.val(); }
-        inline bool operator==(T x2) const 
+        template <class T2>
+        inline bool operator==(T2 x2) const 
         { return val() == x2; }
-        inline friend bool operator==(T x1, const TriRef<T,C>& x2)
+        template <class T2>
+        inline friend bool operator==(T2 x1, const TriRef<T,C>& x2)
         { return x1 == val(); }
-        inline bool operator!=(const TriRef<T,C>& x2) const
+        template <class T2>
+        inline bool operator!=(const TriRef<T2,C>& x2) const
         { return !(operator==(x2)); }
-        inline bool operator!=(T x2) const 
+        template <class T2>
+        inline bool operator!=(T2 x2) const 
         { return !(operator==(x2)); }
-        inline friend bool operator!=(T x1, const TriRef<T,C>& x2)
+        template <class T2>
+        inline friend bool operator!=(T2 x1, const TriRef<T,C>& x2)
         { return !(x2==x1); }
 
         inline friend std::ostream& operator<<(std::ostream& os, TriRef<T,C> x)
@@ -413,10 +453,11 @@ namespace tmv {
 
     private:
 
-        void check(T x) const
+        template <class T2>
+        void check(T2 x) const
         {
             TMVAssert(
-                (!isunit || x == T(1)) && 
+                (!isunit || x == T2(1)) && 
                 "Trying to assign to the diagonal of a UnitDiag TriMatrix.");
         }
         void check() const
@@ -426,7 +467,8 @@ namespace tmv {
                 "Trying to assign to the diagonal of a UnitDiag TriMatrix.");
         }
         reference ref() { check(); return itsref; }
-        void assign(T x) { check(x); if (!isunit) itsref = x; }
+        template <class T2>
+        void assign(T2 x) { check(x); if (!isunit) itsref = x; }
         T val() const { return isunit ? T(1) : T(itsref); }
 
         const bool isunit;

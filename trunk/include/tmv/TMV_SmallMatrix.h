@@ -288,8 +288,8 @@ namespace tmv {
 
         inline SmallMatrix() 
         {
-            TMVStaticAssert(M>0);
-            TMVStaticAssert(N>0);
+            TMVStaticAssert(M>=0);
+            TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
 #ifdef TMV_DEBUG
             this->setAllTo(T(888));
@@ -298,8 +298,8 @@ namespace tmv {
 
         inline SmallMatrix(size_t cs, size_t rs) 
         {
-            TMVStaticAssert(M>0);
-            TMVStaticAssert(N>0);
+            TMVStaticAssert(M>=0);
+            TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVAssert(cs==M);
             TMVAssert(rs==N);
@@ -310,8 +310,8 @@ namespace tmv {
 
         explicit inline SmallMatrix(size_t cs, size_t rs, T x) 
         {
-            TMVStaticAssert(M>0);
-            TMVStaticAssert(N>0);
+            TMVStaticAssert(M>=0);
+            TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVAssert(cs==M);
             TMVAssert(rs==N);
@@ -320,8 +320,8 @@ namespace tmv {
 
         explicit inline SmallMatrix(size_t cs, size_t rs, const T* vv) 
         {
-            TMVStaticAssert(M>0);
-            TMVStaticAssert(N>0);
+            TMVStaticAssert(M>=0);
+            TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVAssert(cs==M);
             TMVAssert(rs==N);
@@ -335,8 +335,8 @@ namespace tmv {
         explicit inline SmallMatrix(
             size_t cs, size_t rs, const std::vector<T>& vv) 
         {
-            TMVStaticAssert(M>0);
-            TMVStaticAssert(N>0);
+            TMVStaticAssert(M>=0);
+            TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVAssert(cs==M);
             TMVAssert(rs==N);
@@ -350,8 +350,8 @@ namespace tmv {
 
         explicit inline SmallMatrix(const std::vector<std::vector<T> >& vv) 
         {
-            TMVStaticAssert(M>0);
-            TMVStaticAssert(N>0);
+            TMVStaticAssert(M>=0);
+            TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVAssert(vv.size() == M);
 #ifdef XTEST_DEBUG
@@ -366,8 +366,8 @@ namespace tmv {
 
         inline SmallMatrix(const type& m2) 
         {
-            TMVStaticAssert(M>0);
-            TMVStaticAssert(N>0);
+            TMVStaticAssert(M>=0);
+            TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
@@ -378,8 +378,8 @@ namespace tmv {
         template <class M2>
         inline SmallMatrix(const BaseMatrix<M2>& m2) 
         {
-            TMVStaticAssert(M>0);
-            TMVStaticAssert(N>0);
+            TMVStaticAssert(M>=0);
+            TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert((ShapeTraits2<M2::_shape,_shape>::assignable));
             TMVAssert(m2.colsize() == M);

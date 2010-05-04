@@ -46,14 +46,13 @@
 namespace tmv {
 
     // Defined below:
-    template <class M1, class M2> 
+    template <class M1> 
     void LU_Inverse(
-        const BaseMatrix_Rec<M1>& m1, const int* P,
-        BaseMatrix_Rec_Mutable<M2>& m2);
-    template <class M1, class M2> 
+        BaseMatrix_Rec_Mutable<M1>& m1, const int* P);
+    template <class M1>
     void InlineLU_Inverse(
-        const BaseMatrix_Rec<M1>& m1, const int* P,
-        BaseMatrix_Rec_Mutable<M2>& m2);
+        BaseMatrix_Rec_Mutable<M1>& m1, const int* P);
+
     template <class M1, class M2> 
     void LU_InverseATA(
         const BaseMatrix_Rec<M1>& m1, const int* P,
@@ -64,150 +63,129 @@ namespace tmv {
         const bool trans, BaseMatrix_Rec_Mutable<M2>& m2);
 
     // Defined in TMV_LUInverse.cpp
-    template <class T1, class T2, bool C1> 
-    void InstLU_Inverse(
-        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const int* P, 
-        MatrixView<T2> m2);
+    template <class T1>
+    void InstLU_Inverse(MatrixView<T1> m1, const int* P);
+
     template <class T1, class T2, bool C1> 
     void InstLU_InverseATA(
         const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const int* P, 
         const bool trans, MatrixView<T2> m2);
 
-    template <int algo, int cs, int rs, class M1, class M2>
+
+    template <int algo, int cs, int rs, class M2>
     struct LU_Inverse_Helper;
 
     // algo 0: Trivial, nothing to do (M == 0 or N == 0)
-    // Also used for invalid real/complex combination from the virtual calls.
-    template <int cs, int rs, class M1, class M2>
-    struct LU_Inverse_Helper<0,cs,rs,M1,M2>
-    { static inline void call(const M1& , const int* , M2& ) {} };
+    template <int cs, int rs, class M1>
+    struct LU_Inverse_Helper<0,cs,rs,M1>
+    { static inline void call(M1& , const int* ) {} };
 
     // algo 11: Normal case
-    template <int cs, int rs, class M1, class M2>
-    struct LU_Inverse_Helper<11,cs,rs,M1,M2>
+    template <int cs, int rs, class M1>
+    struct LU_Inverse_Helper<11,cs,rs,M1>
     {
-        static void call(const M1& m1, const int* P, M2& m2)
+        static void call(M1& m1, const int* P)
         {
 #ifdef PRINTALGO_LU
             std::cout<<"LUInverse algo 11: cs,rs = "<<cs<<','<<rs<<std::endl;
 #endif
-            // m2 = (PLU)^-1
-            //      = U^-1 L^-1 Pt
-            AliasCopy(m1,m2);
-            typename M2::uppertri_type U = m2.upperTri();
-            typename M2::unit_lowertri_type L = m2.unitLowerTri();
+            // m1 = (PLU)^-1
+            //    = U^-1 L^-1 Pt
+            typename M1::uppertri_type U = m1.upperTri();
+            typename M1::unit_lowertri_type L = m1.unitLowerTri();
             U.invertSelf();
             L.invertSelf();
-            const Scaling<1,typename M2::real_type> one;
-            NoAliasMultMM<false>(one,U,L,m2);
-            m2.reversePermuteCols(P);
+            const Scaling<1,typename M1::real_type> one;
+            NoAliasMultMM<false>(one,U,L,m1);
+            m1.reversePermuteCols(P);
         }
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, class M1, class M2>
-    struct LU_Inverse_Helper<-3,cs,rs,M1,M2>
+    template <int cs, int rs, class M1>
+    struct LU_Inverse_Helper<-3,cs,rs,M1>
     {
-        static inline void call(const M1& m1, const int* P, M2& m2)
+        static inline void call(M1& m1, const int* P)
         {
-            const bool invalid =
-                M1::iscomplex && M2::isreal;
             const int algo = 
-                cs == 0 || rs == 0 || invalid ? 0 : 
+                cs == 0 || rs == 0 ? 0 : 
                 11;
 #ifdef PRINTALGO_LU
             std::cout<<"Inline LUInverse\n";
             std::cout<<"cs,rs = "<<cs<<','<<rs<<std::endl;
             std::cout<<"algo = "<<algo<<std::endl;
 #endif
-            LU_Inverse_Helper<algo,cs,rs,M1,M2>::call(m1,P,m2);
+            LU_Inverse_Helper<algo,cs,rs,M1>::call(m1,P);
         }
     };
 
     // algo 97: Conjugate
-    template <int cs, int rs, class M1, class M2>
-    struct LU_Inverse_Helper<97,cs,rs,M1,M2>
+    template <int cs, int rs, class M1>
+    struct LU_Inverse_Helper<97,cs,rs,M1>
     {
-        static inline void call(const M1& m1, const int* P, M2& m2)
+        static inline void call(M1& m1, const int* P)
         { 
-            typedef typename M1::const_conjugate_type M1c;
-            typedef typename M2::conjugate_type M2c;
+            typedef typename M1::conjugate_type M1c;
             M1c m1c = m1.conjugate();
-            M2c m2c = m2.conjugate();
-            LU_Inverse_Helper<-2,cs,rs,M1c,M2c>::call(m1c,P,m2c);
+            LU_Inverse_Helper<-2,cs,rs,M1c>::call(m1c,P);
         }
     };
 
     // algo 98: call InstLU_Inverse
-    template <int cs, int rs, class M1, class M2>
-    struct LU_Inverse_Helper<98,cs,rs,M1,M2>
+    template <int cs, int rs, class M1>
+    struct LU_Inverse_Helper<98,cs,rs,M1>
     {
-        static inline void call(const M1& m1, const int* P, M2& m2)
-        { InstLU_Inverse(m1.xView().cmView(),P,m2.xView()); }
+        static inline void call(M1& m1, const int* P)
+        { InstLU_Inverse(m1.xView(),P); }
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, class M1, class M2>
-    struct LU_Inverse_Helper<-2,cs,rs,M1,M2>
+    template <int cs, int rs, class M1>
+    struct LU_Inverse_Helper<-2,cs,rs,M1>
     {
-        static inline void call(const M1& m1, const int* P, M2& m2)
+        static inline void call(M1& m1, const int* P)
         {
-            typedef typename M1::value_type T1;
-            typedef typename M2::value_type T2;
+            typedef typename M1::value_type T2;
             const bool inst = 
                 M1::unknownsizes &&
-                M2::unknownsizes &&
-#ifdef TMV_INST_MIX
-                Traits2<T1,T2>::samebase &&
-#else
-                Traits2<T1,T2>::sametype &&
-#endif
                 Traits<T2>::isinst;
-            const bool invalid =
-                M1::iscomplex && M2::isreal;
             const int algo = 
-                cs == 0 || rs == 0 || invalid ? 0 : 
-                M2::_conj ? 97 :
+                cs == 0 || rs == 0 ? 0 : 
+                M1::_conj ? 97 :
                 inst ? 98 :
                 -3;
-            LU_Inverse_Helper<algo,cs,rs,M1,M2>::call(m1,P,m2);
+            LU_Inverse_Helper<algo,cs,rs,M1>::call(m1,P);
         }
     };
 
     // algo -1: Check for aliases? No.
-    template <int cs, int rs, class M1, class M2>
-    struct LU_Inverse_Helper<-1,cs,rs,M1,M2>
+    template <int cs, int rs, class M1>
+    struct LU_Inverse_Helper<-1,cs,rs,M1>
     {
-        static inline void call(const M1& m1, const int* P, M2& m2)
-        { LU_Inverse_Helper<-2,cs,rs,M1,M2>::call(m1,P,m2); }
+        static inline void call(M1& m1, const int* P)
+        { LU_Inverse_Helper<-2,cs,rs,M1>::call(m1,P); }
     };
 
-    template <class M1, class M2> 
+    template <class M1> 
     inline void InlineLU_Inverse(
-        const BaseMatrix_Rec<M1>& m1, const int* P,
-        BaseMatrix_Rec_Mutable<M2>& m2)
+        BaseMatrix_Rec_Mutable<M1>& m1, const int* P)
     {
-        const int cs = M2::_colsize;
-        const int rs = M2::_rowsize;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::cview_type M2v;
+        const int cs = M1::_colsize;
+        const int rs = M1::_rowsize;
+        typedef typename M1::cview_type M1v;
         M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        LU_Inverse_Helper<-3,cs,rs,M1v,M2v>::call(m1v,P,m2v);
+        LU_Inverse_Helper<-3,cs,rs,M1v>::call(m1v,P);
     }
 
-    template <class M1, class M2> 
+    template <class M1> 
     inline void LU_Inverse(
-        const BaseMatrix_Rec<M1>& m1, const int* P,
-        BaseMatrix_Rec_Mutable<M2>& m2)
+        BaseMatrix_Rec_Mutable<M1>& m1, const int* P)
     {
-        const int cs = M2::_colsize;
-        const int rs = M2::_rowsize;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::cview_type M2v;
+        const int cs = M1::_colsize;
+        const int rs = M1::_rowsize;
+        typedef typename M1::cview_type M1v;
         M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        LU_Inverse_Helper<-2,cs,rs,M1v,M2v>::call(m1v,P,m2v);
+        LU_Inverse_Helper<-2,cs,rs,M1v>::call(m1v,P);
     }
 
     template <int algo, int cs, int rs, class M1, class M2>
@@ -299,7 +277,10 @@ namespace tmv {
     {
         static inline void call(
             const M1& m1, const int* P, const bool trans, M2& m2)
-        { InstLU_InverseATA(m1.xView().cmView(),P,trans,m2.xView()); }
+        { 
+            TMVAssert(m1.iscm());
+            InstLU_InverseATA(m1.xView().cmView(),P,trans,m2.xView()); 
+        }
     };
 
     // algo -2: Check for inst

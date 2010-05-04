@@ -186,11 +186,23 @@ namespace tmv {
             const int N = m1.rowsize();
             std::cout<<"InvM algo 11: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
+            std::cout<<"m1.divIsSet = "<<m1.divIsSet()<<std::endl;
 #endif
-            m1.setDiv();
-            m1.getDiv()->makeInverse(m2);
-            m1.doneDiv();
-            Scale(x,m2);
+            if (m1.divIsSet() || m1.getDivType() != tmv::LU) {
+                m1.setDiv();
+                m1.getDiv()->makeInverse(m2);
+                m1.doneDiv();
+                Scale(x,m2);
+            } else {
+                // Special case: if LU and not set already,
+                // do the LU decomposition on m2 instead of m1.
+                Copy(m1,m2);
+                int P[m1.rowsize()];
+                int detp=0;
+                LU_Decompose(m2,P,detp);
+                LU_Inverse(m2,P);
+                Scale(x,m2);
+            }
         }
     };
 
@@ -206,7 +218,17 @@ namespace tmv {
             std::cout<<"InvM algo 12: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
+#if 1
+            // This way is slightly faster than going through m1.lud()
+            // since it skips the temporary LU matrix.
+            Copy(m1,m2);
+            int P[m1.rowsize()];
+            int detp=0;
+            LU_Decompose(m2,P,detp);
+            LU_Inverse(m2,P);
+#else
             m1.lud().makeInverse(m2);
+#endif
             Scale(x,m2);
         }
     };
@@ -426,7 +448,7 @@ namespace tmv {
             if (m1.isSingular()) InvertM_ThrowSingular(m1);
             typename M2::uppertri_type m2u = m2.upperTri();
             typename M2::lowertri_type::offdiag_type m2l = 
-                m2.upperTri().offDiag();
+                m2.lowerTri().offDiag();
             AliasCopy(m1,m2u);
             InvertSelf(m2u);
             Scale(x,m2u);
@@ -664,8 +686,8 @@ namespace tmv {
         static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             const bool checkalias = 
-                M1::_colsize == UNKNOWN && M1::_rowsize == UNKNOWN &&
-                M2::_colsize == UNKNOWN && M2::_rowsize == UNKNOWN;
+                M1::unknownsizes &&
+                M2::unknownsizes;
             const int algo = 
                 cs == 0 || rs == 0 ? 0 :
                 cs == 1 && rs == 1 ? 1 :

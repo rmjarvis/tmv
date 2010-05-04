@@ -45,12 +45,6 @@
 #include "TMV_TriMatrixIO.h"
 #endif
 
-// Use the specialized 1,2,3 sized algorithms for the end of the 
-// recursive algorithm.
-#if TMV_OPT >= 2
-#define TMV_OPT_CLEANUP
-#endif
-
 // Q1 is the maximum nops to unroll.
 #if TMV_OPT >= 3
 #define TMV_Q1 200 
@@ -212,7 +206,10 @@ namespace tmv {
                 M3c m3a = m3.get_col(j,0,j);
                 M3c m3b = m3.get_col(j,j+1,N);
 
-                MultXV_Helper<-4,xx,add,ix2,PT2,M1c,M3c>::call(xd,m1a,m3a);
+                // This first one is -1, not -4, since m1,m3 are allowed to
+                // be the same storage (and often are), so it saves a bit
+                // of computation to check.
+                MultXV_Helper<-1,xx,add,ix2,PT2,M1c,M3c>::call(xd,m1a,m3a);
                 MultMV_Helper<-4,xx,xx,true,ix,T,M1sm,M2c,M3c>::call(
                     x,m1m,m2b,m3a);
                 Maybe<add>::add(
@@ -270,7 +267,7 @@ namespace tmv {
                 M3r m3a = m3.get_row(i,0,i);
                 M3r m3b = m3.get_row(i,i+1,N);
 
-                MultXV_Helper<-4,xx,add,ix1,PT1,M2r,M3r>::call(xd,m2a,m3a);
+                MultXV_Helper<-1,xx,add,ix1,PT1,M2r,M3r>::call(xd,m2a,m3a);
                 MultMV_Helper<-4,xx,xx,true,ix,T,M2smt,M1r,M3r>::call(
                     x,m2m,m1b,m3a);
                 Maybe<add>::add(
@@ -466,9 +463,6 @@ namespace tmv {
             std::cout<<"UL algo 17: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
 
-#if (TMV_Q2 == 1)
-            const int algo2 = (s == UNKNOWN || s == 1) ? 1 : 0;
-#else
             const int sp1 = IntTraits<s>::Sp1;
             const int twosp1 = IntTraits<IntTraits<s>::twoS>::Sp1;
             // nops = 1/6 n(n+1)(2n+1)
@@ -485,19 +479,17 @@ namespace tmv {
             const int algo2 = 
                 s == 0 ? 0 :
                 s == 1 ? 1 :
-                (s != UNKNOWN && s > TMV_Q2) ? 0 :
-#ifdef TMV_OPT_CLEANUP
-                s == UNKNOWN ? 16 :
-#endif
                 unroll ? 16 : 
+                // For known s, always recurse down to unroll size
+                s != UNKNOWN ? 0 :
                 rxr ? 12 : crx ? 13 : xcc ? 11 : 13;
-#endif
             const int algo3 =  // The algorithm for N > Q2
-                (s == UNKNOWN || s > TMV_Q2) ? 17 : 0;
+                unroll || s == 1 ? 0 : 17;
             const int algo4 =  // The algorithm for MultMM, MultUM
-                s == UNKNOWN ? -2 : s > 16 ? -3 : s > TMV_Q2 ? -4 : 0;
+                unroll || s == 1 ? 0 :
+                s == UNKNOWN ? -2 : s > 16 ? -3 : -4;
 
-            if (N > TMV_Q2) {
+            if (s==UNKNOWN ? (N > TMV_Q2) : (s > 1 && !unroll)) {
                 // [ C00 C01 ] = [ A00 A01 ] [ B00  0  ]
                 // [ C10 C11 ]   [  0  A11 ] [ B10 B11 ]
 
@@ -603,7 +595,7 @@ namespace tmv {
                 M3c m3a = m3.get_col(j,0,j);
                 M3c m3b = m3.get_col(j,j+1,N);
 
-                MultXV_Helper<-4,xx,add,ix2,PT2,M1c,M3c>::call(xd,m1b,m3b);
+                MultXV_Helper<-1,xx,add,ix2,PT2,M1c,M3c>::call(xd,m1b,m3b);
                 MultMV_Helper<-4,xx,xx,true,ix,T,M1sm,M2c,M3c>::call(
                     x,m1m,m2a,m3b);
                 Maybe<add>::add(
@@ -661,7 +653,7 @@ namespace tmv {
                 M3r m3a = m3.get_row(i,0,i);
                 M3r m3b = m3.get_row(i,i+1,N);
 
-                MultXV_Helper<-4,xx,add,ix1,PT1,M2r,M3r>::call(xd,m2b,m3b);
+                MultXV_Helper<-1,xx,add,ix1,PT1,M2r,M3r>::call(xd,m2b,m3b);
                 MultMV_Helper<-4,xx,xx,true,ix,T,M2smt,M1r,M3r>::call(
                     x,m2m,m1a,m3b);
                 Maybe<add>::add(
@@ -855,9 +847,6 @@ namespace tmv {
             std::cout<<"UL algo 27: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
 
-#if (TMV_Q2 == 1)
-            const int algo2 = (s == UNKNOWN || s == 1) ? 1 : 0;
-#else
             const int sp1 = IntTraits<s>::Sp1;
             const int twosp1 = IntTraits<IntTraits<s>::twoS>::Sp1;
             // nops = 1/6 n(n+1)(2n+1)
@@ -865,6 +854,7 @@ namespace tmv {
                 IntTraits2<IntTraits2<s,sp1>::safeprod,twosp1>::safeprod / 6;
             const bool unroll = 
                 s > 20 ? false :
+                s == UNKNOWN ? false :
                 nops > TMV_Q1 ? false :
                 s <= 10;
             const bool rxr = M1::_rowmajor && M3::_rowmajor;
@@ -873,19 +863,17 @@ namespace tmv {
             const int algo2 = 
                 s == 0 ? 0 :
                 s == 1 ? 1 :
-                (s != UNKNOWN && s > TMV_Q2) ? 0 :
-#ifdef TMV_OPT_CLEANUP
-                s == UNKNOWN ? 26 :
-#endif
                 unroll ? 26 : 
+                // For known s, always recurse down to unroll size
+                s != UNKNOWN ? 0 :
                 rxr ? 22 : crx ? 23 : xcc ? 21 : 23;
-#endif
             const int algo3 =  // The algorithm for N > Q2
-                (s == UNKNOWN || s > TMV_Q2) ? 27 : 0;
+                unroll || s == 1 ? 0 : 27;
             const int algo4 =  // The algorithm for MultMM, MultUM
-                s == UNKNOWN ? -2 : s > 16 ? -3 : s > TMV_Q2 ? -4 : 0;
+                unroll || s == 1 ? 0 :
+                s == UNKNOWN ? -2 : s > 16 ? -3 : -4;
 
-            if (N > TMV_Q2) {
+            if (s==UNKNOWN ? (N > TMV_Q2) : (s > 1 && !unroll)) {
                 // [ C00 C01 ] = [ A00  0  ] [ B00 B01 ]
                 // [ C10 C11 ]   [ A10 A11 ] [  0  B11 ]
 
@@ -1200,7 +1188,7 @@ namespace tmv {
                 inst ? 98 : 
                 -3;
 #ifdef PRINTALGO_UL
-            std::cout<<"UL algo 98: algo = "<<algo<<std::endl;
+            std::cout<<"UL algo -2: algo = "<<algo<<std::endl;
 #endif
             MultUL_Helper<algo,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
@@ -1358,7 +1346,6 @@ namespace tmv {
 
 } // namespace tmv
 
-#undef TMV_OPT_CLEANUP
 #undef TMV_Q1
 #undef TMV_Q2
 
