@@ -1,0 +1,72 @@
+#define CT std::complex<T>
+
+#define DefDivEq(T,T1)\
+template void QR_LDivEq(const GenMatrix<T1 >& QRx,\
+    const GenVector<T1 >& beta, const int* P, \
+    const MatrixView<T >& m, int N1); \
+template void QR_RDivEq(const GenMatrix<T1 >& QRx,\
+    const GenVector<T1 >& beta, const int* P, \
+    const MatrixView<T >& m, int N1); \
+
+DefDivEq(T,T)
+#ifdef INST_COMPLEX
+DefDivEq(CT,T)
+DefDivEq(CT,CT)
+#endif
+
+#undef DefDivEq
+
+#define DefDiv(T,T1,T2)\
+template void QR_LDiv(const GenMatrix<T1 >& QRx,\
+    const GenVector<T1 >& beta, const int* P, \
+    const GenMatrix<T2 >& m, const MatrixView<T >& x, int N1); \
+template void QR_RDiv(const GenMatrix<T1 >& QRx,\
+    const GenVector<T1 >& beta, const int* P, \
+    const GenMatrix<T2 >& m, const MatrixView<T >& x, int N1); \
+
+DefDiv(T,T,T)
+#ifdef INST_COMPLEX
+DefDiv(CT,T,T)
+DefDiv(CT,T,CT)
+DefDiv(CT,CT,T)
+DefDiv(CT,CT,CT)
+#endif
+
+#undef DefDiv
+
+#define DefDivEq(T,T1)\
+template <> void QR_LDivEq(const GenMatrix<T1 >& ,\
+    const GenVector<T1 >& , const int* , \
+    const MatrixView<T >& , int )\
+    { TMVAssert(TMV_FALSE); }\
+template <> void QR_RDivEq(const GenMatrix<T1 >& ,\
+    const GenVector<T1 >& , const int* , \
+    const MatrixView<T >& , int )\
+    { TMVAssert(TMV_FALSE); }\
+
+#ifdef INST_COMPLEX
+DefDivEq(T,CT)
+#endif
+
+#undef DefDivEq
+
+#define DefDiv(T,T1,T2)\
+template <> void QR_LDiv(const GenMatrix<T1 >& ,\
+    const GenVector<T1 >& , const int* , \
+    const GenMatrix<T2 >& , const MatrixView<T >& , int )\
+    { TMVAssert(TMV_FALSE); }\
+template <> void QR_RDiv(const GenMatrix<T1 >& ,\
+    const GenVector<T1 >& , const int* , \
+    const GenMatrix<T2 >& , const MatrixView<T >& , int )\
+    { TMVAssert(TMV_FALSE); }\
+
+#ifdef INST_COMPLEX
+DefDiv(T,T,CT)
+DefDiv(T,CT,T)
+DefDiv(T,CT,CT)
+#endif
+
+#undef DefDiv
+
+#undef CT
+

@@ -1,0 +1,101 @@
+# vim: set filetype=python :
+
+import os
+
+Import('env')
+
+ReadFileList=env['__readfunc']
+
+# Source lists
+basic = ReadFileList('basic.files')
+basic_omp = ReadFileList('basic_omp.files')
+diag = ReadFileList('diag.files')
+tri = ReadFileList('tri.files')
+
+band = ReadFileList('band.files')
+sym = ReadFileList('sym.files')
+sym_omp = ReadFileList('sym_omp.files')
+symband = ReadFileList('symband.files')
+
+lib_files= basic + diag + tri
+lib_omp_files= basic_omp
+sblib_files= band + sym + symband
+sblib_omp_files= sym_omp
+
+env1 = env.Clone()
+
+if env['MEM_TEST']:
+  print 'Using mmgr.cpp'
+  lib_files += ['mmgr.cpp']
+
+env2 = env1.Clone()
+if env['WITH_OPENMP'] :
+  env2.Append(CCFLAGS=env['OMP_FLAGS'])
+
+obj_lib = env1.Object(lib_files)
+obj_sblib = env1.Object(sblib_files)
+obj_omp_lib = env2.Object(lib_omp_files)
+obj_omp_sblib = env2.Object(sblib_omp_files)
+
+lib = env1.Library('#lib/tmv',obj_lib+obj_omp_lib)
+sblib = env1.Library('#lib/tmv_symband',obj_sblib+obj_omp_sblib)
+
+env.Alias(target='lib', source=lib)
+env.Alias(target='sblib', source=sblib)
+
+Default(['lib','sblib'])
+
+#
+# install/uninstall
+#
+
+# Relative install paths from prefix
+lib_dir = 'lib'
+header_dir = 'include'
+header_dir_sub = os.path.join(header_dir,'tmv')
+
+# Add the prefix to the installation directories
+lib_install_dir = os.path.join(env['INSTALL_PREFIX'], lib_dir)
+header_install_dir = os.path.join(env['INSTALL_PREFIX'], header_dir)
+header_install_dir_sub = os.path.join(env['INSTALL_PREFIX'], header_dir_sub)
+
+lib_targets = [lib,sblib]
+
+if 'install' in COMMAND_LINE_TARGETS: 
+
+
+    env.Alias(target='install', 
+              source=env1.Install(dir=lib_install_dir, source=lib_targets))
+
+    hglob = os.path.join('#'+header_dir,'*.h')
+    env.Alias(target='install', 
+              source=env1.Install(dir=header_install_dir, 
+                                 source=Glob(hglob)))
+    hglob = os.path.join('#'+header_dir_sub,'*.h')
+    env.Alias(target='install', 
+              source=env1.Install(dir=header_install_dir_sub, 
+                                 source=Glob(hglob)))
+
+if 'uninstall' in COMMAND_LINE_TARGETS:
+    # There is no env.Uninstall method, we must build our own
+    deltarget = Delete("$TARGET")
+
+    # delete lib/*tmv.a files
+    libfiles = [os.path.join(lib_install_dir, os.path.basename(str(f[0]))) for f in lib_targets]
+
+    for f in libfiles:
+        env.Alias('uninstall', env1.Command(f, None, deltarget))
+
+    # Delete files from include/tmv
+    hfiles = Glob(os.path.join(header_install_dir_sub, '*'))
+    for f in hfiles:
+        env.Alias('uninstall', env1.Command(f, None, deltarget))
+    # delete include/tmv subdirectory
+    env.Alias('uninstall', env1.Command(header_install_dir_sub, None, deltarget))
+
+    # Delete include/TMV*.h files
+    hfiles = Glob(os.path.join(header_install_dir, 'TMV*.h'))
+    for f in hfiles:
+        env.Alias('uninstall', env1.Command(f, None, deltarget))
+
+

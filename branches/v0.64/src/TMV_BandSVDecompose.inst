@@ -1,0 +1,25 @@
+
+#define CT std::complex<T>
+
+#define DefSVD(RT,T)\
+template void SV_Decompose(const GenBandMatrix<T >& A,\
+    MVP<T > U, const DiagMatrixView<RT >& S, MVP<T > V, RT& ld, T& d);\
+template void SV_Decompose(const GenBandMatrix<T >& A,\
+    const MatrixView<T >& U, const DiagMatrixView<RT >& S, \
+    const MatrixView<T >& V);\
+template void SV_Decompose(const GenBandMatrix<T >& A,\
+    const MatrixView<T >& U, const DiagMatrixView<RT >& S);\
+template void SV_Decompose(const GenBandMatrix<T >& A,\
+    const DiagMatrixView<RT >& S, const MatrixView<T >& V);\
+template void SV_Decompose(const GenBandMatrix<T >& A,\
+    const DiagMatrixView<RT >& S);\
+
+DefSVD(T,T)
+#ifdef INST_COMPLEX
+DefSVD(T,CT)
+#endif
+
+#undef DefSVD
+
+#undef CT
+

@@ -1,0 +1,34 @@
+Note: More complete installation information is contained in 
+doc/TMV_Documentation.pdf,
+
+First, see INSTALL for instructions on downloading and unpacking the 
+tarball if you have not already done so.
+
+This file give the instructions for installing TMV using the program CMake.
+
+1. Download CMake from http://www.cmake.org/ if you do not already have it.
+
+2. In TMV directory, type either of the commands:
+
+   cmake -i .    (For interactive text-based configuration)
+   ccmake .      (For menu-based configuration)
+
+   for Unix, or run CMakeSetup.exe in Windows.
+
+   Answer the configuration questions and/or set the options listed.
+
+3. Type:
+
+   make tmv
+   make tmv_symband
+    
+   to make the libraries.
+
+4. (Optional) Type:
+
+   make tmvtest1
+   make tmvtest2
+   make tmvtest3
+
+   to make the test suites.
+
