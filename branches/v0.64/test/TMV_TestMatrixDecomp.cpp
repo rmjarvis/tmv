@@ -7,7 +7,7 @@
 template <class T, tmv::StorageType stor> 
 void TestMatrixDecomp()
 {
-    for (int mattype = 0; mattype < 4; mattype++) {
+    for (int mattype = 0; mattype < 5; mattype++) {
         if (showstartdone) {
             std::cout<<"mattype = "<<mattype<<", stor = "<<
                 tmv::TMV_Text(stor)<<std::endl;
@@ -16,6 +16,7 @@ void TestMatrixDecomp()
         // mattype = 1  is NonSquare slightly tall
         // mattype = 2  is NonSquare very tall
         // mattype = 3  is Singular
+        // mattype = 4  is Singular with seriously bad defects
 
         const int N = 200;
         int M = N;
@@ -24,31 +25,42 @@ void TestMatrixDecomp()
 
         tmv::Matrix<T,stor> m(M,N);
         for(int i=0;i<M;++i) for(int j=0;j<N;++j) m(i,j) = T(2+4*i-5*j);
-        if (mattype != 3) m /= T(10*N);
+        if (mattype < 3) m /= T(10*N);
         m(3,3) = 14;
         m(3,4) = -2;
         m(0,2) = 7;
         m(M-1,N-4) = 23;
         m(M-1,N-2) = 13;
         m(M-1,N-1) = -10;
-        if (mattype != 3) m.diag() *= T(30*N);
+        if (mattype < 3) m.diag() *= T(30*N);
+        if (mattype >= 3) { m.col(1).setZero(); m.row(7) = m.row(6); }
 
         tmv::Matrix<std::complex<T>,stor> c(M,N);
         for(int i=0;i<M;++i) for(int j=0;j<N;++j) 
             c(i,j) = std::complex<T>(2+4*i-5*j,3-i);
-        if (mattype != 3) c /= T(10*N);
+        if (mattype < 3) c /= T(10*N);
         c(3,3) = 14;
         c(3,4) = -2;
         c(0,2) = 7;
         c(M-1,N-4) = 23;
         c(M-1,N-2) = 13;
         c(M-1,N-1) = -10;
-        if (mattype != 3) c.diag() *= T(30*N);
+        if (mattype < 3) c.diag() *= T(30*N);
+        if (mattype >= 3) { c.col(1).setZero(); c.row(7) = c.row(6); }
+
+        if (mattype == 4) {
+            for(int i=10;i<N;i+=10) {
+                m.colRange(i,N) *= T(1.e-10);
+                c.colRange(i,N) *= T(1.e-10);
+                m.rowRange(i+5,N) *= T(1.e-10);
+                c.rowRange(i+5,N) *= T(1.e-10);
+            }
+        }
 
         T eps = EPS;
         T ceps = EPS;
         if (showacc) std::cout<<"eps = "<<eps<<"  "<<ceps<<std::endl;
-        if (mattype != 3) {
+        if (mattype < 3) {
             T kappa = Norm(m) * Norm(m.inverse());
             if (showacc) std::cout<<"kappa = "<<kappa<<std::endl;
             eps *= kappa;
@@ -116,7 +128,9 @@ void TestMatrixDecomp()
         }
 
         // QR Decomposition
-        if (mattype != 4) {
+        {
+            // QR Decomposition always works.  It just can't be used for
+            // solving equations if the matrix is singular.
             if (showstartdone) {
                 std::cout<<"QR\n";
             }
@@ -327,6 +341,10 @@ void TestMatrixDecomp()
             tmv::DiagMatrix<T> S = m.svd().getS();
             tmv::Matrix<T> V = m.svd().getV();
             if (showacc) {
+                std::cout<<"U = "<<U<<std::endl;
+                std::cout<<"V = "<<V<<std::endl;
+                std::cout<<"S = "<<S<<std::endl;
+                std::cout<<"m-USV = "<<m-U*S*V<<std::endl;
                 std::cout<<"Norm(m-USV) = "<<Norm(m-U*S*V)<<
                     "  cf "<<eps*Norm(m)<<std::endl;
                 std::cout<<"Norm(UtU-1) = "<<Norm(U.transpose()*U-T(1))<<

@@ -45,6 +45,7 @@
 #include "tmv/TMV_MatrixArith.h"
 #include "tmv/TMV_DiagMatrix.h"
 #include "tmv/TMV_DiagMatrixArith.h"
+#include "tmv/TMV_VIt.h"
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -270,32 +271,76 @@ namespace tmv {
         //
         // The solution is 
         //    t2 = b / ( d +- sqrt(d^2 + b^2) )
-        //       = (-d +- sqrt(d^2 + b^2)) / b
         // where d = (c-a)/2 and we choose the smaller solution.
         //
         // From this, c2 = 1 / sqrt(1+t2^2)  and  s2 = t2 c2
         // Then t1 = -(t2 d0 + e) / d1
         // c1 = 1 / sqrt(1+t1^2) and s1 = t1 c1
         // 
-        // D(0) <- d0 c1/c2
-        // D(1) <- d1 c2/c1
+        // D(0) <- c1 c2 d0 - c1 s2 e - s1 s2 d1
+        //       = c1 c2 ( d0 - t2 e - t1 t2 d1 )
+        //       = c1 c2 ( d0 - t2 e - t2 (-t2 d0 - e) )
+        //       = c1 c2 ( d0 - t2 e + t2^2 d0 + t2 e )
+        //       = c1 c2 d0 (1 + t2^2)
+        //       = c1/c2 d0
+        // Similarly,
+        // D(1) <- c2/c1 d1
         //
         // However, these formulae are not stable for the typically small
         // values of b and (sometimes) d.
         //
-        // We use the following formulae which are more stable.
-        // The derivations are messy, so we leave them as "an exercise 
-        // for the interested reader". :)
+        // Let b' = b/abs(d)
+        //     a' = a/abs(d)
+        //     z = sqrt(1+b'^2)
         //
-        // Let x = sqrt(d^2+b^2) if |d1| >= |d0|
-        //     or -sqrt(d^2+b^2) if |d1| <  |d0|
+        // t2 = b' / (sign(d) +- z) 
         //
-        // s2 = b / (x sqrt(2(1+d/x)))
-        // s1 = -s2 sign(d0 d1) sqrt(1+(x+d)/a); // if x>0
-        // s1 = -s2 d1/d0 sqrt(1-xmd/a);         // if x<0
-        // D(0) -= d0 xmd / (a + sqrt(a(a-xmd)))
-        // D(1) += d1 xmd / (a-xmd + sqrt(a(a-xmd)))
-        //         where xmd = x-d = b^2/(x+d)
+        // if (d > 0): choose + solution.
+        //
+        //     t2 = b' / (1+z)
+        //     t2^2 = b'^2 / (1 + 2z + z^2))
+        //     Lemma: x = a/b ==> 1/(1+x) = b/(b+a) = 1 - a/(a+b)
+        //     1/(1+t2^2) = 1 - b'^2/(1+b'^2+2z+z^2) = 1 - b'^2/(2z^2+2z)
+        //                = 1 - b'^2/(2z(1+z)) = c2^2 = 1-s2^2
+        //     s2 = b' / sqrt(2z*(1+z))
+        //
+        //     t1 = t2 d1 / (t2 e - d0)
+        //        = (b'/(1+z)) d1 / (b'/(1+z) e - d0)
+        //        = b' d1 / (b' e - d0(1+z) )
+        //     t1^2 = b'^2 d1^2 / (b'^2 e^2 - 2b'e d0 (1+z) + d0^2(1+z)^2 )
+        //     1/(1+t1^2) = 1 - b'^2 d1^2 /
+        //                      (b'^2 (d1^2+e^2) - 2b'e d0(1+z) + d0^2(1+z)^2 )
+        //     s1 = (sign?) b' d1 / sqrt( b'^2 c - 2b' b (1+z) + a (1+z)^2 )
+        //        () = b'^2 (2d+a) - 2b'^2 d (1+z) + a (2+2z+b'^2)
+        //           = b'^2 (2a-2zd) +(2a+2az)
+        //           = 2a (z+z^2) -2zdb'^2
+        //           = 2z(1+z) (a - b'^2 d/(1+z) )
+        //     s1 = (sign?) s2 (d1/d0) / sqrt(1-(b'^2/a')/(1+z))
+        //     Examining the other formula for t1, it is clear that sign = -1
+        //     s1 = -s2 (d1/d0) / sqrt(1-(b'^2/a') / (1+z))
+        //
+        //
+        // if (d < 0): choose - solution.
+        //
+        //     t2 = b' / (-1-z) = -b' / (1+z)
+        //     s2 = -b' / sqrt(2z*(1+z))
+        //
+        //     t1 = t2 d1 / (t2 e - d0)
+        //        = (-b'/(1+z)) d1 / (-b'/(1+z) e - d0)
+        //        = b' d1 / (b' e + d0(1+z) )
+        //     t1^2 = b'^2 d1^2 / (b'^2 e^2 + 2b'e d0 (1+z) + d0^2(1+z)^2 )
+        //     1/(1+t1^2) = 1 - b'^2 d1^2 /
+        //                      (b'^2 (d1^2+e^2) + 2b'e d0(1+z) + d0^2(1+z)^2 )
+        //     s1 = (sign?) b' d1 / sqrt( b'^2 c + 2b' b (1+z) + a (1+z)^2 )
+        //        () = b'^2 (2d+a) - 2b'^2 d (1+z) + a (2+2z+b'^2)
+        //           = b'^2 (2a-2zd) + (2a+2az)
+        //           = 2a(1+b'^2+z) - 2d(b'^2)z
+        //           = 2az(1+z) - 2db'^2z
+        //           = 2z(1+z) (a - b'^2 d/(1+z))  (so same as above)
+        //     And as before, sign = -1, so
+        //     s1 = -s2 (d1/d0) / sqrt(1-(b'^2 d/a)/(1+z))
+        //     s1 = -s2 (d1/d0) / sqrt(1+(b'^2/a')/(1+z))
+        //
         //
 
         TMVAssert(D.size() == 2);
@@ -307,21 +352,23 @@ namespace tmv {
         RT d1 = D(1);
         RT e = E(0);
 
-        RT a = d0*d0;
-        RT b = d0*e;
-        RT d = ((d1-d0)*(d1+d0)+e*e)/RT(2);
-        RT x = TMV_SQRT(d*d+b*b);
-        if (TMV_ABS(d1) < TMV_ABS(d0)) x = -x;
-        RT xmd = b*b/(x+d);
+        // Rescale to help avoid underflow:
+        RT max = TMV_MAX(d0,TMV_MAX(d1,e));
+        d0 /= max;
+        d1 /= max;
+        e /= max;
 
-        RT s2 = b / (x * TMV_SQRT(RT(2)*(RT(1)+d/x)));
-        RT s1;
-        if (x > RT(0)) {
-            s1 = -s2 * TMV_SQRT(RT(1)+(x+d)/a);
-            if (d0*d1 < 0) s1 = -s1;
-        } else {
-            s1 = -s2 * d1/(d0*TMV_SQRT(RT(1)-xmd/a));
-        }
+        RT d = ((d1-d0)*(d1+d0)+e*e)/RT(2);
+        RT absd = TMV_ABS(d);
+        RT a = d0*d0/absd; // This is a' above
+        RT b = d0*e/absd;  // This is b' above
+        RT z = TMV_SQRT(RT(1)+b*b);
+
+        RT s2 = b / TMV_SQRT(RT(2)*z*(z+RT(1)));
+        if (d < 0) s2 = -s2;
+        RT temp = (b/a)*b/(RT(1)+z);
+        if (d<0) temp = -temp;
+        RT s1 = -s2 * (d1/d0) / TMV_SQRT(RT(1)-temp);
 
         RT c1 = TMV_SQRT(RT(1)-s1*s1);
         RT c2 = TMV_SQRT(RT(1)-s2*s2);
@@ -333,17 +380,18 @@ namespace tmv {
         if (TMV_ABS(s2) < RT(1.e-2)) c2 = RT(1) - s2*s2/(RT(1)+c2);
 
 #ifdef XDEBUG
-        Matrix<RT> B(2,2); B(0,0) = d0; B(0,1) = e; B(1,0) = RT(0); B(1,1) = d1;
+        Matrix<RT> B(2,2); B(0,0) = D(0); B(0,1) = E(0); B(1,0) = RT(0); B(1,1) = D(1);
         Matrix<RT> g1(2,2); g1(0,0) = c1; g1(0,1) = s1; g1(1,0) = -s1; g1(1,1) = c1;
         Matrix<RT> g2(2,2); g2(0,0) = c2; g2(0,1) = s2; g2(1,0) = -s2; g2(1,1) = c2;
         Matrix<RT> S = g1 * B * g2;
         Matrix<T> A(U&&V ? U->colsize() : 0, U&&V ? V->rowsize() : 0);
         if (U && V) A = *U * B * *V;
+        //std::cout<<"Initial B = "<<B<<endl;
+        //std::cout<<"Initial UBV = "<<A<<endl;
 #endif
 
-        RT temp = a+TMV_SQRT(a*(a-xmd));
-        D(0) -= d0*xmd/temp;
-        D(1) += d1*xmd/(temp-xmd);
+        D(0) *= c1/c2;
+        D(1) *= c2/c1;
         E(0) = RT(0);
 
         if (U) {
@@ -359,11 +407,10 @@ namespace tmv {
             B.diag() = D;
             B.diag(1) = E;
             Matrix<T> A2 = *U * B * *V;
-            //cout<<"B = "<<B<<endl;
-            //cout<<"V = "<<*V<<endl;
-            //cout<<"UBV = "<<A2<<endl;
-            //cout<<"Done 22: Norm(A2-A) = "<<Norm(A2-A)<<endl;
-            if (Norm(A2-A) > 0.001*Norm(A)) {
+            //std::cout<<"B = "<<B<<endl;
+            //std::cout<<"UBV = "<<A2<<endl;
+            //std::cout<<"Done 22: Norm(A2-A) = "<<Norm(A2-A)<<endl;
+            if (Norm(A2-A) > 1.e-8*Norm(A)) {
                 cerr<<"ReduceBidiagonal22\n";
                 cerr<<"B = "<<B<<endl;
                 cerr<<"A = "<<A<<endl;
@@ -371,6 +418,7 @@ namespace tmv {
                 cerr<<"G1 = "<<g1<<endl;
                 cerr<<"G2 = "<<g2<<endl;
                 cerr<<"A2 = "<<A2<<endl;
+                cerr<<"diff = "<<A2-A<<endl;
                 cerr<<"Norm(diff) = "<<Norm(A2-A)<<endl;
                 abort();
             }
@@ -383,9 +431,9 @@ namespace tmv {
         MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E, MVP<T> V)
     {
 #ifdef XDEBUG
-        //cout<<"Start Reduce Bidiagonal QR:\n";
-        //cout<<"D = "<<D<<endl;
-        //cout<<"E = "<<E<<endl;
+        //std::cout<<"Start Reduce Bidiagonal QR:\n";
+        //std::cout<<"D = "<<D<<endl;
+        //std::cout<<"E = "<<E<<endl;
         Matrix<RT> B(D.size(),D.size(),RT(0));
         Vector<RT> D0 = D;
         Vector<RT> E0 = E;
@@ -395,7 +443,7 @@ namespace tmv {
                      U&&V ? V->rowsize() : D.size());
         if (U && V) A0 = (*U) * B * (*V);
         else A0 = B;
-        //cout<<"A0 = "<<A0<<endl;
+        //std::cout<<"A0 = "<<A0<<endl;
 #endif
         // Reduce the superdiagonal elements of Bidiagonal Matrix B 
         // (given by D,E) while maintaining U B V. 
@@ -457,6 +505,7 @@ namespace tmv {
         RT* Ei = E.ptr();
 
         RT mu = BidiagonalTrailingEigenValue(D,E);
+        //std::cout<<"mu = "<<mu<<std::endl;
         RT y = TMV_NORM(*Di) - mu;  // = T00 - mu
         RT x = TMV_CONJ(*Di)*(*Ei);  // = T10
         Givens<RT> G = GivensRotate(y,x);
@@ -508,11 +557,11 @@ namespace tmv {
         MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E, MVP<T> V)
     {
 #ifdef XDEBUG
-        //cout<<"Start Decompose from Bidiagonal QR:\n";
-        //if (U) cout<<"U = "<<*U<<endl;
-        //if (V) cout<<"V = "<<*V<<endl;
-        //cout<<"D = "<<D<<endl;
-        //cout<<"E = "<<E<<endl;
+        //std::cout<<"Start Decompose from Bidiagonal QR:\n";
+        //if (U) std::cout<<"U = "<<*U<<endl;
+        //if (V) std::cout<<"V = "<<*V<<endl;
+        //std::cout<<"D = "<<D<<endl;
+        //std::cout<<"E = "<<E<<endl;
         Matrix<RT> B(D.size(),D.size(),RT(0));
         B.diag() = D;
         B.diag(1) = E;
@@ -520,7 +569,7 @@ namespace tmv {
                      U&&V ? V->rowsize() : D.size());
         if (U && V) A0 = (*U) * B * (*V);
         else A0 = B;
-        //cout<<"A0 = "<<A0<<endl;
+        //std::cout<<"A0 = "<<A0<<endl;
 #endif
 
 
@@ -592,10 +641,10 @@ namespace tmv {
 #ifdef XDEBUG
         if (U && V) {
             Matrix<T> AA = (*U) * DiagMatrixViewOf(D) * (*V);
-            //cout<<"Done QR Norm(A0-AA) = "<<Norm(A0-AA)<<endl;
-            //cout<<"Norm(UtU-1) = "<<Norm(U->adjoint()*(*U)-T(1))<<endl;
-            //cout<<"Norm(VtV-1) = "<<Norm(V->adjoint()*(*V)-T(1))<<endl;
-            //cout<<"Norm(VVt-1) = "<<Norm((*V)*V->adjoint()-T(1))<<endl;
+            //std::cout<<"Done QR Norm(A0-AA) = "<<Norm(A0-AA)<<endl;
+            //std::cout<<"Norm(UtU-1) = "<<Norm(U->adjoint()*(*U)-T(1))<<endl;
+            //std::cout<<"Norm(VtV-1) = "<<Norm(V->adjoint()*(*V)-T(1))<<endl;
+            //std::cout<<"Norm(VVt-1) = "<<Norm((*V)*V->adjoint()-T(1))<<endl;
             if (Norm(A0-AA) > 0.001*Norm(A0)) {
                 cerr<<"SV_DecomposeFromBidiagonal QR: \n";
                 cerr<<"input B = "<<B<<endl;
