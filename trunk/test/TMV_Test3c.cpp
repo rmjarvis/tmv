@@ -34,26 +34,26 @@ int main() try {
 #if 1
 
 #ifdef TEST_DOUBLE
-    TestSmallMatrixB<double>();
+    TestAllSmallMatrixB<double>();
 #endif
 
 #ifdef TEST_FLOAT
-    TestSmallMatrixB<float>();
+    TestAllSmallMatrixB<float>();
 #endif
 
 #ifdef TEST_LONGDOUBLE
-    TestSmallMatrixB<long double>();
+    TestAllSmallMatrixB<long double>();
 #endif 
 
 #ifdef TEST_INT
-    TestSmallMatrixB<int>();
+    TestAllSmallMatrixB<int>();
 #endif 
 
 #endif 
 
     return 0;
 }
-#if 1
+#if 0
 #ifndef NOTHROW
 catch (tmv::Error& e) {
     std::cerr<<e<<std::endl;

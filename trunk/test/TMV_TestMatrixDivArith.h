@@ -394,10 +394,21 @@ static void DoTestRDivVM2a(
         tmv::Vector<T> a0 = a;
         tmv::Vector<T> frac = v%m;
         eps *= Norm(frac);
+        if (XXDEBUG2) {
+            std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a.step()<<"  "<<a<<std::endl;
+            std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
+            std::cout<<"a % b = "<<frac<<std::endl;
+        }
         a %= b;
+        if (XXDEBUG2) {
+            std::cout<<"a %= b = "<<a<<std::endl;
+        }
         Assert(Norm(VEC(T,a)-frac) <= eps,label+" a%=b");
         a = a0;
         a *= b.inverse();
+        if (XXDEBUG2) {
+            std::cout<<"a *= b.inv = "<<a<<std::endl;
+        }
         Assert(Norm(VEC(T,a)-frac) <= eps,label+" a*=b^-1");
         a = a0;
 #ifdef ALIASOK
@@ -652,7 +663,7 @@ static void DoTestLDivVM3RC(
     DoTestLDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,cr,label+" RevAC");
 
 #if (XTEST & 2)
-    typename M3::conjugate_type cc = c.conjugate();
+    typename V2::conjugate_type cc = c.conjugate();
     DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,cc,label+" ConjC");
 #endif
 #endif
@@ -705,7 +716,7 @@ static void DoTestLDivVM3CC(
     DoTestLDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,cr,label+" RevAC");
 
 #if (XTEST & 2)
-    typename V2::conjugate_type cr = c.conjugate();
+    typename V2::conjugate_type cc = c.conjugate();
     DoTestLDivVM3a<Ta,Tb,T>(dt,Conjugate(a),b,c,label+" ConjA");
     DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,cc,label+" ConjC");
     DoTestLDivVM3a<Ta,Tb,T>(dt,Conjugate(a),b,cc,label+" ConjAC");
@@ -756,7 +767,7 @@ static void DoTestRDivVM3RC(
     DoTestRDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,cr,label+" RevAC");
 
 #if (XTEST & 2)
-    typename V2::conjugate_type cr = c.conjugate();
+    typename V2::conjugate_type cc = c.conjugate();
     DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,cc,label+" ConjC");
 #endif
 #endif
@@ -809,7 +820,7 @@ static void DoTestRDivVM3CC(
     DoTestRDivVM3a<Ta,Tb,T>(dt,a.reverse(),b,cr,label+" RevAC");
 
 #if (XTEST & 2)
-    typename V2::conjugate_type cr = c.conjugate();
+    typename V2::conjugate_type cc = c.conjugate();
     DoTestRDivVM3a<Ta,Tb,T>(dt,Conjugate(a),b,c,label+" ConjA");
     DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,cc,label+" ConjC");
     DoTestRDivVM3a<Ta,Tb,T>(dt,Conjugate(a),b,cc,label+" ConjAC");
@@ -954,11 +965,6 @@ static void DoTestLDivMM1R(
     tmv::DivType dt, const M1& a, const M2& b, std::string label)
 {
     DoTestLDivMM1a<T,Tb>(dt,a,b,label);
-
-#ifndef NOVIEWS
-    if (a.isSquare())
-        DoTestLDivMM1a<T,Tb>(dt,a.transpose(),b,label+" TranA");
-#endif
 }
 
 template <class T, class Tb, class M1, class M2> 
@@ -969,10 +975,6 @@ static void DoTestLDivMM1C(
 
 #ifndef NOVIEWS
     DoTestLDivMM1a<T,Tb>(dt,a.conjugate(),b,label+" ConjA");
-    if (a.isSquare()) {
-        DoTestLDivMM1a<T,Tb>(dt,a.transpose(),b,label+" TranA");
-        DoTestLDivMM1a<T,Tb>(dt,a.adjoint(),b,label+" AdjA");
-    }
 #endif
 }
 
@@ -981,11 +983,6 @@ static void DoTestRDivMM1R(
     tmv::DivType dt, const M1& a, const M2& b, std::string label)
 {
     DoTestRDivMM1a<T,Tb>(dt,a,b,label);
-
-#ifndef NOVIEWS
-    if (a.isSquare())
-        DoTestRDivMM1a<T,Tb>(dt,a.transpose(),b,label+" TranA");
-#endif
 }
 
 template <class T, class Tb, class M1, class M2> 
@@ -996,10 +993,6 @@ static void DoTestRDivMM1C(
 
 #ifndef NOVIEWS
     DoTestRDivMM1a<T,Tb>(dt,a.conjugate(),b,label+" ConjA");
-    if (a.isSquare()) {
-        DoTestRDivMM1a<T,Tb>(dt,a.transpose(),b,label+" TranA");
-        DoTestRDivMM1a<T,Tb>(dt,a.adjoint(),b,label+" AdjA");
-    }
 #endif
 }
 
@@ -1283,15 +1276,6 @@ static void DoTestLDivMM3RR(
     }
 
     DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
-#ifndef NOVIEWS
-    typename M3::transpose_type ct = c.transpose();
-    if (a.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,c,label+" TranA");
-    if (c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,ct,label+" TranC");
-    if (a.isSquare() && c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,ct,label+" TranAC");
-#endif
 
     if (showstartdone) std::cout<<"Done LDiv MM3"<<std::endl;
 }
@@ -1309,24 +1293,9 @@ static void DoTestLDivMM3RC(
 
     DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
-    typename M3::transpose_type ct = c.transpose();
-    if (a.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,c,label+" TranA");
-    if (c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,ct,label+" TranC");
-    if (a.isSquare() && c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,ct,label+" TranAC");
-
 #if (XTEST & 2)
     typename M3::conjugate_type cc = c.conjugate();
-    typename M3::adjoint_type ca = c.adjoint();
     DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,cc,label+" ConjC");
-    if (c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,ca,label+" AdjC");
-    if (a.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,cc,label+" TranA ConjC");
-    if (a.isSquare() && c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,ca,label+" TranA AdjC");
 #endif
 #endif
 
@@ -1346,22 +1315,8 @@ static void DoTestLDivMM3CR(
 
     DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
-    typename M3::transpose_type ct = c.transpose();
-    if (a.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,c,label+" TranA");
-    if (c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,ct,label+" TranC");
-    if (a.isSquare() && c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,ct,label+" TranAC");
-
 #if (XTEST & 2)
     DoTestLDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,c,label+" ConjA");
-    if (c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,ct,label+" ConjA TranC");
-    if (a.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,c,label+" AdjA");
-    if (a.isSquare() && c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,ct,label+" AdjA TranC");
 #endif
 #endif
 
@@ -1381,38 +1336,11 @@ static void DoTestLDivMM3CC(
 
     DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
-    typename M3::transpose_type ct = c.transpose();
-    if (a.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,c,label+" TranA");
-    if (c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,ct,label+" TranC");
-    if (a.isSquare() && c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,ct,label+" TranAC");
-
 #if (XTEST & 2)
     typename M3::conjugate_type cc = c.conjugate();
-    typename M3::adjoint_type ca = c.adjoint();
     DoTestLDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,c,label+" ConjA");
-    if (c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,ct,label+" ConjA TranC");
-    if (a.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,c,label+" AdjA");
-    if (a.isSquare() && c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,ct,label+" AdjA TranC");
     DoTestLDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,cc,label+" ConjA ConjC");
-    if (c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,ca,label+" ConjA AdjC");
-    if (a.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,cc,label+" AdjA ConjC");
-    if (a.isSquare() && c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,ca,label+" AdjA AdjC");
     DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,cc,label+" ConjC");
-    if (c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,ca,label+" AdjC");
-    if (a.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,cc,label+" TranA ConjC");
-    if (a.isSquare() && c.isSquare())
-        DoTestLDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,ca,label+" TranA AdjC");
 #endif
 #endif
 
@@ -1431,15 +1359,6 @@ static void DoTestRDivMM3RR(
     }
 
     DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
-#ifndef NOVIEWS
-    typename M3::transpose_type ct = c.transpose();
-    if (a.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,c,label+" TranA");
-    if (c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,ct,label+" TranC");
-    if (a.isSquare() && c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,ct,label+" TranAC");
-#endif
 
     if (showstartdone) std::cout<<"Done RDiv MM3"<<std::endl;
 }
@@ -1457,24 +1376,9 @@ static void DoTestRDivMM3RC(
 
     DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
-    typename M3::transpose_type ct = c.transpose();
-    if (a.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,c,label+" TranA");
-    if (c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,ct,label+" TranC");
-    if (a.isSquare() && c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,ct,label+" TranAC");
-
 #if (XTEST & 2)
     typename M3::conjugate_type cc = c.conjugate();
-    typename M3::adjoint_type ca = c.adjoint();
     DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,cc,label+" ConjC");
-    if (c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,ca,label+" AdjC");
-    if (a.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,cc,label+" TranA ConjC");
-    if (a.isSquare() && c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,ca,label+" TranA AdjC");
 #endif
 #endif
 
@@ -1494,22 +1398,8 @@ static void DoTestRDivMM3CR(
 
     DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
-    typename M3::transpose_type ct = c.transpose();
-    if (a.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,c,label+" TranA");
-    if (c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,ct,label+" TranC");
-    if (a.isSquare() && c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,ct,label+" TranAC");
-
 #if (XTEST & 2)
     DoTestRDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,c,label+" ConjA");
-    if (c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,ct,label+" ConjA TranC");
-    if (a.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,c,label+" AdjA");
-    if (a.isSquare() && c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,ct,label+" AdjA TranC");
 #endif
 #endif
 
@@ -1529,38 +1419,11 @@ static void DoTestRDivMM3CC(
 
     DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
-    typename M3::transpose_type ct = c.transpose();
-    if (a.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,c,label+" TranA");
-    if (c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,ct,label+" TranC");
-    if (a.isSquare() && c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,ct,label+" TranAC");
-
 #if (XTEST & 2)
     typename M3::conjugate_type cc = c.conjugate();
-    typename M3::adjoint_type ca = c.adjoint();
     DoTestRDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,c,label+" ConjA");
-    if (c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,ct,label+" ConjA TranC");
-    if (a.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,c,label+" AdjA");
-    if (a.isSquare() && c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,ct,label+" AdjA TranC");
     DoTestRDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,cc,label+" ConjA ConjC");
-    if (c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Conjugate(a),b,ca,label+" ConjA AdjC");
-    if (a.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,cc,label+" AdjA ConjC");
-    if (a.isSquare() && c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Adjoint(a),b,ca,label+" AdjA AdjC");
     DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,cc,label+" ConjC");
-    if (c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,ca,label+" AdjC");
-    if (a.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,cc,label+" TranA ConjC");
-    if (a.isSquare() && c.isSquare())
-        DoTestRDivMM3a<Ta,Tb,T>(dt,Transpose(a),b,ca,label+" TranA AdjC");
 #endif
 #endif
 

@@ -57,7 +57,7 @@
 // Use the specialized 1,2,3,4 sized algorithms for the end of the 
 // recursive algorithm.
 #if TMV_OPT >= 2
-#define TMV_OPT_CLEANUP
+#define TMV_DIVMU_OPT_CLEANUP
 #endif
 
 // Check for small (<=5) values of cs or rs
@@ -66,15 +66,15 @@
 // that it only benefits a few particular sizes of matrices mean that
 // we require TMV_OPT = 3 for it.
 #if TMV_OPT >= 3
-#define TMV_OPT_SMALL
+#define TMV_DIVMU_OPT_SMALL
 #endif
 
 // Q2 is the maximum size to stop recursing
-#define TMV_Q2 4
+#define TMV_DIVMU_MAX_RECURSE 4
 
 // Q6 is the minimum value of (M^2*N / 16^3) to use multiple threads.
 // (We also require that N > 64 so we have something to split.)
-#define TMV_Q6 64
+#define TMV_DIVMU_OPENMP_THRESH 64
 
 namespace tmv {
 
@@ -274,7 +274,7 @@ namespace tmv {
                     mone,m1rrt,m2i,m1i);
                 const Scaling<ix2,XT2> invii(
                     Maybe<!u2>::invprod( m2.cref(i,i) , RT(1) ));
-                ScaleV_Helper<-4,rs,ix2,T2,M1r>::call(invii,m1i);
+                ScaleV_Helper<-4,rs,ix2,XT2,M1r>::call(invii,m1i);
             }
         }
     };
@@ -349,7 +349,7 @@ namespace tmv {
             std::cout<<"LDivEqMU algo 16: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<UNKNOWN<<','<<rs<<std::endl;
 #endif
-#if TMV_Q2 > 4
+#if TMV_DIVMU_MAX_RECURSE > 4
             const bool rr = M1::_rowmajor && M2::_rowmajor;
             const bool rc = M1::_rowmajor && M2::_colmajor;
             const bool cx = M1::_colmajor;
@@ -362,22 +362,22 @@ namespace tmv {
               case 1 :
                    LDivEqMU_Helper<401,1,rs,M1,M2>::call(m1,m2);
                    break;
-#if TMV_Q2 > 1
+#if TMV_DIVMU_MAX_RECURSE > 1
               case 2 :
                    LDivEqMU_Helper<16,2,rs,M1,M2>::call(m1,m2);
                    break;
 #endif
-#if TMV_Q2 > 2
+#if TMV_DIVMU_MAX_RECURSE > 2
               case 3 :
                    LDivEqMU_Helper<16,3,rs,M1,M2>::call(m1,m2);
                    break;
 #endif
-#if TMV_Q2 > 3
+#if TMV_DIVMU_MAX_RECURSE > 3
               case 4 :
                    LDivEqMU_Helper<16,4,rs,M1,M2>::call(m1,m2);
                    break;
 #endif
-#if TMV_Q2 > 4
+#if TMV_DIVMU_MAX_RECURSE > 4
               default :
                    LDivEqMU_Helper<algo2,UNKNOWN,rs,M1,M2>::call(m1,m2);
 #endif
@@ -413,22 +413,22 @@ namespace tmv {
             const int algo2 = 
                 cs == 0 ? 0 :
                 cs == 1 ? 401 :
-                (cs != UNKNOWN && cs > TMV_Q2) ? 0 :
-                TMV_Q2 == 1 ? 401 :
-#ifdef TMV_OPT_CLEANUP
+                (cs != UNKNOWN && cs > TMV_DIVMU_MAX_RECURSE) ? 0 :
+                TMV_DIVMU_MAX_RECURSE == 1 ? 401 :
+#ifdef TMV_DIVMU_OPT_CLEANUP
                 cs == UNKNOWN ? 16 :
 #endif
-                (cs != UNKNOWN && cs <= 5) ? 16 :
+                (cs != UNKNOWN && cs <= TMV_DIVMU_MAX_RECURSE) ? 16 :
                 rr ? 12 : rc ? 13 : cx ? 11 : 13;
             const int algo3 =  // The algorithm for M > 32
                 cs == UNKNOWN || cs > 32 ? 17 : 0;
             const int algo4 =  // The algorithm for MultMM
                 cs == UNKNOWN ? -2 : cs > 32 ? -3 : 0;
-#if TMV_Q2 < 32
+#if TMV_DIVMU_MAX_RECURSE < 32
             const int algo3b =  // The algorithm for M > Q2
-                cs == UNKNOWN || cs > TMV_Q2 ? 17 : 0;
+                cs == UNKNOWN || cs > TMV_DIVMU_MAX_RECURSE ? 17 : 0;
             const int algo4b =  // The algorithm for MultMM
-                cs == UNKNOWN || cs > TMV_Q2 ? -4 : 0;
+                cs == UNKNOWN || cs > TMV_DIVMU_MAX_RECURSE ? -4 : 0;
 #endif
 
             typedef typename M2::real_type RT;
@@ -438,7 +438,7 @@ namespace tmv {
             typedef typename M1::rowrange_type M1r;
             const Scaling<-1,RT> mone;
 
-            if (M > TMV_Q2) { 
+            if (M > TMV_DIVMU_MAX_RECURSE) { 
                 const int Mx = M > 16 ? ((((M-1)>>5)+1)<<4) : (M>>1);
                 // (If M > 16, round M/2 up to a multiple of 16.)
                 const int csx = IntTraits<cs>::half_roundup;
@@ -450,7 +450,7 @@ namespace tmv {
                 M1r D = m1.cRowRange(0,Mx);
                 M1r E = m1.cRowRange(Mx,M);
 
-#if TMV_Q2 < 32
+#if TMV_DIVMU_MAX_RECURSE < 32
                 if (M > 32) {
                     // For large M, make sure to use good MultMM algo
 #endif
@@ -458,7 +458,7 @@ namespace tmv {
                     MultMM_Helper<algo4,csx,rs,csy,true,-1,RT,M2b,M1rc,M1r>::
                         call(mone,B,E,D);
                     LDivEqMU_Helper<algo3,csx,rs,M1r,M2a>::call(D,A);
-#if TMV_Q2 < 32
+#if TMV_DIVMU_MAX_RECURSE < 32
                 } else {
                     // For smaller M, do the no branching algorithms
                     LDivEqMU_Helper<algo3b,csy,rs,M1r,M2a>::call(E,C);
@@ -587,7 +587,14 @@ namespace tmv {
             SmallLowerTriMatrix<T2,cs,D2> m2inv = m2;
             m2inv.invertSelf();
             const Scaling<1,RT> one;
+#ifdef PRINTALGO_DIVU
+            std::cout<<"m2inv = "<<m2inv<<std::endl;
+            std::cout<<"m1 = "<<m1<<std::endl;
+#endif
             NoAliasMultMM<false>(one,m2inv,m1,m1);
+#ifdef PRINTALGO_DIVU
+            std::cout<<"m1 => "<<m1<<std::endl;
+#endif
         }
     };
     template <int rs, class M1, class M2>
@@ -601,7 +608,7 @@ namespace tmv {
             std::cout<<"LDivEqMU algo 26: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<UNKNOWN<<','<<rs<<std::endl;
 #endif
-#if TMV_Q2 > 4
+#if TMV_DIVMU_MAX_RECURSE > 4
             const bool rr = M1::_rowmajor && M2::_rowmajor;
             const bool rc = M1::_rowmajor && M2::_colmajor;
             const bool cx = M1::_colmajor;
@@ -614,22 +621,22 @@ namespace tmv {
               case 1 :
                    LDivEqMU_Helper<401,1,rs,M1,M2>::call(m1,m2);
                    break;
-#if TMV_Q2 > 1
+#if TMV_DIVMU_MAX_RECURSE > 1
               case 2 :
                    LDivEqMU_Helper<26,2,rs,M1,M2>::call(m1,m2);
                    break;
 #endif
-#if TMV_Q2 > 2
+#if TMV_DIVMU_MAX_RECURSE > 2
               case 3 :
                    LDivEqMU_Helper<26,3,rs,M1,M2>::call(m1,m2);
                    break;
 #endif
-#if TMV_Q2 > 3
+#if TMV_DIVMU_MAX_RECURSE > 3
               case 4 :
                    LDivEqMU_Helper<26,4,rs,M1,M2>::call(m1,m2);
                    break;
 #endif
-#if TMV_Q2 > 4
+#if TMV_DIVMU_MAX_RECURSE > 4
               default :
                    LDivEqMU_Helper<algo2,UNKNOWN,rs,M1,M2>::call(m1,m2);
 #endif
@@ -665,22 +672,22 @@ namespace tmv {
             const int algo2 = 
                 cs == 0 ? 0 :
                 cs == 1 ? 401 :
-                (cs != UNKNOWN && cs > TMV_Q2) ? 0 :
-                TMV_Q2 == 1 ? 401 :
-#ifdef TMV_OPT_CLEANUP
+                (cs != UNKNOWN && cs > TMV_DIVMU_MAX_RECURSE) ? 0 :
+                TMV_DIVMU_MAX_RECURSE == 1 ? 401 :
+#ifdef TMV_DIVMU_OPT_CLEANUP
                 cs == UNKNOWN ? 26 :
 #endif
-                (cs != UNKNOWN && cs <= 5) ? 26 :
+                (cs != UNKNOWN && cs <= TMV_DIVMU_MAX_RECURSE) ? 26 :
                 rr ? 22 : rc ? 23 : cx ? 21 : 23;
             const int algo3 =  // The algorithm for M > Q2
                 cs == UNKNOWN || cs > 32 ? 27 : 0;
             const int algo4 =  // The algorithm for MultMM
                 cs == UNKNOWN ? -2 : cs > 32 ? -3 : 0;
-#if TMV_Q2 < 32
+#if TMV_DIVMU_MAX_RECURSE < 32
             const int algo3b =  // The algorithm for M > Q2
-                cs == UNKNOWN || cs > TMV_Q2 ? 27 : 0;
+                cs == UNKNOWN || cs > TMV_DIVMU_MAX_RECURSE ? 27 : 0;
             const int algo4b =  // The algorithm for MultMM
-                cs == UNKNOWN || cs > TMV_Q2 ? -4 : 0;
+                cs == UNKNOWN || cs > TMV_DIVMU_MAX_RECURSE ? -4 : 0;
 #endif
 
             typedef typename M2::real_type RT;
@@ -690,7 +697,7 @@ namespace tmv {
             typedef typename M1::rowrange_type M1r;
             const Scaling<-1,RT> mone;
 
-            if (M > TMV_Q2) {
+            if (M > TMV_DIVMU_MAX_RECURSE) {
                 const int Mx = M > 16 ? ((((M-1)>>5)+1)<<4) : (M>>1);
                 // (If M > 16, round M/2 up to a multiple of 16.)
                 const int csx = IntTraits<cs>::half_roundup;
@@ -702,7 +709,7 @@ namespace tmv {
                 M1r D = m1.cRowRange(0,Mx);
                 M1r E = m1.cRowRange(Mx,M);
 
-#if TMV_Q2 < 32
+#if TMV_DIVMU_MAX_RECURSE < 32
                 if (M > 32) {
                     // For large M, make sure to use good MultMM algo
 #endif
@@ -710,7 +717,7 @@ namespace tmv {
                     MultMM_Helper<algo4,csy,rs,csx,true,-1,RT,M2b,M1rc,M1r>::
                         call(mone,B,D,E);
                     LDivEqMU_Helper<algo3,csy,rs,M1r,M2a>::call(E,C);
-#if TMV_Q2 < 32
+#if TMV_DIVMU_MAX_RECURSE < 32
                 } else {
                     // For smaller M, do the no branching algorithms
                     LDivEqMU_Helper<algo3b,csx,rs,M1r,M2a>::call(D,A);
@@ -738,7 +745,7 @@ namespace tmv {
                 ','<<cs<<','<<rs<<std::endl;
 #endif
             const bool upper2 = M2::_upper;
-#ifdef TMV_OPT_CLEANUP
+#ifdef TMV_DIVMU_OPT_CLEANUP
             const int algo2 = upper2 ? 16 : 26;
 #else
             const bool rr = M1::_rowmajor && M2::_rowmajor;
@@ -759,10 +766,10 @@ namespace tmv {
             // Put the small matrix option first, so it doesn't have to 
             // go through a bunch of if/else statements.  For large matrices,
             // all these if/else's don't matter for the total time.
-            if ((M <= 5 && N < 16) || (M <= 3))
+            if ((M <= TMV_DIVMU_MAX_RECURSE && N < 16) || (M <= 3))
                 LDivEqMU_Helper<algo2,cs,rs,M1,M2>::call(m1,m2);
 #ifdef _OPENMP
-            else if (!omp_in_parallel() && N >= 64 && Mc*Mc*Nc > TMV_Q6)
+            else if (!omp_in_parallel() && N >= 64 && Mc*Mc*Nc > TMV_DIVMU_OPENMP_THRESH)
                 LDivEqMU_Helper<36,cs,rs,M1,M2>::call(m1,m2);
 #endif
             else
@@ -872,7 +879,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-#ifdef TMV_OPT_SMALL
+#ifdef TMV_DIVMU_OPT_SMALL
             TMVStaticAssert(cs == UNKNOWN);
             const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
 #ifdef PRINTALGO_DIVU
@@ -882,6 +889,14 @@ namespace tmv {
 #endif
             const bool upper2 = M2::_upper;
             const int algo2 = upper2 ? 16 : 26;
+#if TMV_DIVMU_MAX_RECURSE < 5
+            const bool rr = M1::_rowmajor && M2::_rowmajor;
+            const bool rc = M1::_rowmajor && M2::_colmajor;
+            const bool cx = M1::_colmajor;
+            const int algo3 = upper ?
+                rr ? 12 : rc ? 13 : cx ? 11 : 13 :
+                rr ? 22 : rc ? 23 : cx ? 21 : 23;
+#endif
 
             if (M <= 5) {
                 // then it is worth figuring out what M is.
@@ -890,19 +905,35 @@ namespace tmv {
                        // do nothing
                        break;
                   case 1 :
-                       LDivEqMU_Helper<1,1,rs,M1,M2>::call(m1,m2);
+                       LDivEqMU_Helper<201,1,rs,M1,M2>::call(m1,m2);
                        break;
                   case 2 :
+#if TMV_DIVMU_MAX_RECURSE < 2
+                       LDivEqMU_Helper<algo3,2,rs,M1,M2>::call(m1,m2);
+#else
                        LDivEqMU_Helper<algo2,2,rs,M1,M2>::call(m1,m2);
+#endif
                        break;
                   case 3 :
+#if TMV_DIVMU_MAX_RECURSE < 3
+                       LDivEqMU_Helper<algo3,3,rs,M1,M2>::call(m1,m2);
+#else
                        LDivEqMU_Helper<algo2,3,rs,M1,M2>::call(m1,m2);
+#endif
                        break;
                   case 4 :
+#if TMV_DIVMU_MAX_RECURSE < 4
+                       LDivEqMU_Helper<algo3,4,rs,M1,M2>::call(m1,m2);
+#else
                        LDivEqMU_Helper<algo2,4,rs,M1,M2>::call(m1,m2);
+#endif
                        break;
                   case 5 :
+#if TMV_DIVMU_MAX_RECURSE < 5
+                       LDivEqMU_Helper<algo3,5,rs,M1,M2>::call(m1,m2);
+#else
                        LDivEqMU_Helper<algo2,5,rs,M1,M2>::call(m1,m2);
+#endif
                 }
             } else 
 #endif
@@ -916,23 +947,13 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
 #ifdef PRINTALGO_MV_MM
+            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"LDivEqMU algo 81: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
-            typedef typename M2::value_type T2;
-            const bool rm = false; // I don't think this matters..
-            const int s2 = M2::_shape;
-            typedef typename MCopyHelper<T2,s2,cs,cs,rm,false>::type M2c;
-            M2c m2c(M);
-            typedef typename M2c::view_type M2cv;
-            typedef typename M2c::const_view_type M2ccv;
-            M2cv m2cv = m2c.view();
-            M2ccv m2ccv = m2c.view();
-            CopyU_Helper<-2,cs,M2,M2cv>::call(m2,m2cv);
-            LDivEqMU_Helper<-2,cs,rs,M1,M2ccv>::call(m1,m2ccv);
+            NoAliasLDivEq(m1,m2.copy());
         }
     };
 
@@ -942,9 +963,9 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
+#ifdef PRINTALGO_DIVU
             const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
-#ifdef PRINTALGO_DIVU
             std::cout<<"LDivEqMU algo 84: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -953,14 +974,9 @@ namespace tmv {
             // the diagonal elements of m2 once each.
             const bool rm = true; 
             typedef typename MCopyHelper<T1,Rec,cs,rs,rm,false>::type M1c;
-            M1c m1c(M,N);
-            typedef typename M1c::view_type M1cv;
-            typedef typename M1c::const_view_type M1ccv;
-            M1cv m1cv = m1c.view();
-            M1ccv m1ccv = m1c.view();
-            CopyM_Helper<-2,cs,rs,M1,M1cv>::call(m1,m1cv);
-            LDivEqMU_Helper<-2,cs,rs,M1cv,M2>::call(m1cv,m2);
-            CopyM_Helper<-2,cs,rs,M1ccv,M1>::call(m1ccv,m1);
+            M1c m1c = m1;
+            NoAliasLDivEq(m1c,m2);
+            NoAliasCopy(m1c,m1);
         }
     };
 
@@ -976,8 +992,8 @@ namespace tmv {
                 cs == 1 ? 401 :
                 rs == 1 ? 402 :
                 ( cs != UNKNOWN ) ? (
-                    upper2 ? (cs <= 5 ? 16 : 17 ) :
-                    (cs <= 5 ? 26 : 27 ) ) :
+                    upper2 ? (cs <= TMV_DIVMU_MAX_RECURSE ? 16 : 17 ) :
+                    (cs <= TMV_DIVMU_MAX_RECURSE ? 26 : 27 ) ) :
                 upper2 ? 17 : 27;
             LDivEqMU_Helper<algo,cs,rs,M1,M2>::call(m1,m2);
         }
@@ -1040,18 +1056,18 @@ namespace tmv {
                 rs == 1 ? 202 :
                 upper2 ? (
                     cs == UNKNOWN ? 38 : 
-                    cs <= 5 ? 16 :
+                    cs <= TMV_DIVMU_MAX_RECURSE ? 16 :
                     rs == UNKNOWN ? 31 :
 #ifdef _OPENMP
-                    (rs >= 64 && McMcNc >= TMV_Q6) ? 36 :
+                    (rs >= 64 && McMcNc >= TMV_DIVMU_OPENMP_THRESH) ? 36 :
 #endif
                     17 ) :
                 ( // lowertri
                     cs == UNKNOWN ? 38 : 
-                    cs <= 5 ? 26 :
+                    cs <= TMV_DIVMU_MAX_RECURSE ? 26 :
                     rs == UNKNOWN ? 31 :
 #ifdef _OPENMP
-                    (rs >= 64 && McMcNc >= TMV_Q6) ? 36 :
+                    (rs >= 64 && McMcNc >= TMV_DIVMU_OPENMP_THRESH) ? 36 :
 #endif
                     27 );
 #endif
@@ -1399,11 +1415,6 @@ namespace tmv {
         typename M3::transpose_type m3t = m3.transpose();
         AliasLDiv(x,m1.transpose(),m2.transpose(),m3t); 
     }
-
-#undef TMV_OPT_SMALL
-#undef TMV_OPT_CLEANUP
-#undef TMV_Q2
-#undef TMV_Q6
 
 } // namespace tmv
 

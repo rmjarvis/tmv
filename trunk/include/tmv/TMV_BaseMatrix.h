@@ -119,7 +119,7 @@ namespace tmv {
     //  _rowsize = row size of matrix (aka number of columns)
     //  (Use UNKNOWN if unknown at compile time)
     //
-    //  _issuqare = is the matrix square?
+    //  _issquare = is the matrix square?
     //
     //  _shape = The shape of the non-zero elements of the matrix
     //
@@ -432,7 +432,7 @@ namespace tmv {
         //
 
         inline const type& mat() const 
-        { return *static_cast<const type*>(this); }
+        { return static_cast<const type&>(*this); }
 
         inline calc_type calc() const 
         { return static_cast<calc_type>(mat()); }
@@ -448,7 +448,7 @@ namespace tmv {
         inline bool isSquare() const 
         { return _issquare || (colsize() == rowsize()); }
 
-        // Note that these last function need to be defined in a more derived
+        // Note that these last functions need to be defined in a more derived
         // class than this, or an infinite loop will result when compiling.
 
         inline size_t colsize() const { return mat().colsize(); }
@@ -847,6 +847,45 @@ namespace tmv {
 
     }; // BaseMatrix_Mutable
 
+#if 0
+    template <class T>
+    class MatrixSizer : public BaseMatrix<MatrixSizer<T> >
+    {
+    public:
+        inline MatrixSizer(const int _cs, const int _rs) : cs(_cs), rs(_rs) {}
+        inline size_t colsize() const { return cs; }
+        inline size_t rowsize() const { return rs; }
+
+        inline T cref(int , int ) const  { return T(0); }
+
+        template <class M2>
+        inline void assignTo(BaseMatrix_Mutable<M2>& ) const {}
+
+        template <class M2>
+        inline void newAssignTo(BaseMatrix_Mutable<M2>& ) const {}
+
+    private :
+        const int cs, rs;
+
+    }; // MatrixSizer
+
+    template <class T>
+    class Traits<MatrixSizer<T> >
+    {
+        typedef T value_type;
+        typedef MatrixSizer<T> type;
+        typedef InvalidType calc_type;
+        typedef InvalidType eval_type;
+        typedef InvalidType copy_type;
+        typedef InvalidType inverse_type;
+
+        enum { _colsize = UNKNOWN };
+        enum { _rowsize = UNKNOWN };
+        enum { _shape = Rec };
+        enum { _fort = false };
+        enum { _calc = false };
+    };
+#endif
 
     //
     // Trace

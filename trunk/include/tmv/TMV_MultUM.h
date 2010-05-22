@@ -423,6 +423,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            if (!N) return;
 #ifdef PRINTALGO_UM
             std::cout<<"UM algo 16: M,N,cs,rs,x = "<<2<<','<<N<<
                 ','<<2<<','<<rs<<','<<T(x)<<std::endl;
@@ -476,6 +477,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            if (!N) return;
 #ifdef PRINTALGO_UM
             std::cout<<"UM algo 16: M,N,cs,rs,x = "<<3<<','<<N<<
                 ','<<3<<','<<rs<<','<<T(x)<<std::endl;
@@ -538,6 +540,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            if (!N) return;
 #ifdef PRINTALGO_UM
             std::cout<<"UM algo 16: M,N,cs,rs,x = "<<4<<','<<N<<
                 ','<<4<<','<<rs<<','<<T(x)<<std::endl;
@@ -610,6 +613,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            if (!N) return;
 #ifdef PRINTALGO_UM
             std::cout<<"UM algo 16: M,N,cs,rs,x = "<<5<<','<<N<<
                 ','<<5<<','<<rs<<','<<T(x)<<std::endl;
@@ -910,6 +914,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            if (!N) return;
 #ifdef PRINTALGO_UM
             std::cout<<"UM algo 26: M,N,cs,rs,x = "<<2<<','<<N<<
                 ','<<2<<','<<rs<<','<<T(x)<<std::endl;
@@ -963,6 +968,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            if (!N) return;
 #ifdef PRINTALGO_UM
             std::cout<<"UM algo 26: M,N,cs,rs,x = "<<3<<','<<N<<
                 ','<<3<<','<<rs<<','<<T(x)<<std::endl;
@@ -1025,6 +1031,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            if (!N) return;
 #ifdef PRINTALGO_UM
             std::cout<<"UM algo 26: M,N,cs,rs,x = "<<4<<','<<N<<
                 ','<<4<<','<<rs<<','<<T(x)<<std::endl;
@@ -1097,6 +1104,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            if (!N) return;
 #ifdef PRINTALGO_UM
             std::cout<<"UM algo 26: M,N,cs,rs,x = "<<5<<','<<N<<
                 ','<<5<<','<<rs<<','<<T(x)<<std::endl;
@@ -1366,9 +1374,7 @@ namespace tmv {
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             NoAliasCopy(m2,m3);
-            typedef typename M3::const_view_type M3cv;
-            MultUM_Helper<-2,cs,rs,add,ix,T,M1,M3cv,M3>::call(
-                x,m1,m3.view(),m3);
+            NoAliasMultMM<add>(x,m1,m3,m3);
         }
     };
 
@@ -1535,8 +1541,8 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
 #ifdef PRINTALGO_MV_MM
+            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"UM algo 81: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -1545,14 +1551,7 @@ namespace tmv {
             const bool rm = M2::_colmajor || M3::_rowmajor; 
             const int s1 = M1::_shape;
             typedef typename MCopyHelper<T1,s1,cs,cs,rm,false>::type M1c;
-            M1c m1c(M);
-            typedef typename M1c::view_type M1cv;
-            typedef typename M1c::const_view_type M1ccv;
-            M1cv m1cv = m1c.view();
-            M1ccv m1ccv = m1c.view();
-            CopyU_Helper<-2,cs,M1,M1cv>::call(m1,m1cv);
-            MultUM_Helper<-2,cs,rs,add,ix,T,M1ccv,M2,M3>::call(
-                x,m1ccv,m2,m3);
+            NoAliasMultMM<add>(x,M1c(m1),m2,m3);
         }
     };
 
@@ -1564,27 +1563,20 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
 #ifdef PRINTALGO_UM
+            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"UM algo 82: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M1::value_type T1;
+            typedef typename Traits<T>::real_type RT;
+            const Scaling<1,RT> one;
             typedef typename Traits2<T,T1>::type PT1;
             const bool rm = M2::_colmajor || M3::_rowmajor; 
             const int s1 = ShapeTraits<M1::_shape>::nonunit_shape;
             typedef typename MCopyHelper<PT1,s1,cs,cs,rm,false>::type M1c;
-            M1c m1c(M);
-            typedef typename M1c::view_type M1cv;
-            typedef typename M1c::const_view_type M1ccv;
-            M1cv m1cv = m1c.view();
-            M1ccv m1ccv = m1c.view();
-            typedef typename Traits<T>::real_type RT;
-            const Scaling<1,RT> one;
-            MultXU_Helper<-2,cs,false,ix,T,M1,M1cv>::call(x,m1,m1cv);
-            MultUM_Helper<-2,cs,rs,add,1,RT,M1ccv,M2,M3>::call(
-                one,m1ccv,m2,m3);
+            NoAliasMultMM<add>(one,M1c(x*m1),m2,m3);
         }
     };
 
@@ -1623,23 +1615,16 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_UM
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
-#ifdef PRINTALGO_UM
             std::cout<<"UM algo 84: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M2::value_type T2;
             const bool rm = M1::_colmajor && M3::_rowmajor;
             typedef typename MCopyHelper<T2,Rec,cs,rs,rm,false>::type M2c;
-            M2c m2c(M,N);
-            typedef typename M2c::view_type M2cv;
-            typedef typename M2c::const_view_type M2ccv;
-            M2cv m2cv = m2c.view();
-            M2ccv m2ccv = m2c.view();
-            CopyM_Helper<-2,cs,rs,M2,M2cv>::call(m2,m2cv);
-            MultUM_Helper<-2,cs,rs,add,ix,T,M1,M2ccv,M3>::call(
-                x,m1,m2ccv,m3);
+            NoAliasMultMM<add>(x,m1,M2c(m2),m3);
         }
     };
 
@@ -1651,26 +1636,19 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_UM
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
-#ifdef PRINTALGO_UM
             std::cout<<"UM algo 85: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M2::value_type T2;
+            typedef typename Traits<T>::real_type RT;
+            const Scaling<1,RT> one;
             typedef typename Traits2<T,T2>::type PT2;
             const bool rm = M1::_colmajor && M3::_rowmajor;
             typedef typename MCopyHelper<PT2,Rec,cs,rs,rm,false>::type M2c;
-            M2c m2c(M,N);
-            typedef typename M2c::view_type M2cv;
-            typedef typename M2c::const_view_type M2ccv;
-            M2cv m2cv = m2c.view();
-            M2ccv m2ccv = m2c.view();
-            typedef typename Traits<T>::real_type RT;
-            const Scaling<1,RT> one;
-            MultXM_Helper<-2,cs,rs,false,ix,T,M2,M2cv>::call(x,m2,m2cv);
-            MultUM_Helper<-2,cs,rs,add,1,RT,M1,M2ccv,M3>::call(
-                one,m1,m2ccv,m3);
+            NoAliasMultMM<add>(one,m1,M2c(x*m2),m3);
         }
     };
 
@@ -1714,34 +1692,20 @@ namespace tmv {
             std::cout<<"UM algo 87: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            typedef typename Traits<T>::real_type RT;
-            const Scaling<1,RT> one;
             if (N > M) {
                 typedef typename M1::value_type T1;
                 typedef typename M2::value_type T2;
                 typedef typename Traits2<T1,T2>::type PT3;
                 const bool rm = M1::_rowmajor && M2::_rowmajor;
                 typedef typename MCopyHelper<PT3,Rec,cs,rs,rm,false>::type M3c;
-                M3c m3c(M,N);
-                typedef typename M3c::view_type M3cv;
-                typedef typename M3c::const_view_type M3ccv;
-                M3cv m3cv = m3c.view();
-                M3ccv m3ccv = m3c.view();
-                MultUM_Helper<-2,cs,rs,false,1,RT,M1,M2,M3cv>::call(
-                    one,m1,m2,m3cv);
-                MultXM_Helper<-2,cs,rs,add,ix,T,M3ccv,M3>::call(x,m3ccv,m3);
+                NoAliasMultXM<add>(x,M3c(m1*m2),m3);
             } else {
                 typedef typename M3::value_type T3;
+                typedef typename Traits<T>::real_type RT;
+                const Scaling<1,RT> one;
                 const bool rm = M1::_rowmajor && M2::_rowmajor;
                 typedef typename MCopyHelper<T3,Rec,cs,rs,rm,false>::type M3c;
-                M3c m3c(M,N);
-                typedef typename M3c::view_type M3cv;
-                typedef typename M3c::const_view_type M3ccv;
-                M3cv m3cv = m3c.view();
-                M3ccv m3ccv = m3c.view();
-                MultUM_Helper<-2,cs,rs,false,ix,T,M1,M2,M3cv>::call(
-                    x,m1,m2,m3cv);
-                MultXM_Helper<-2,cs,rs,add,1,RT,M3ccv,M3>::call(one,m3ccv,m3);
+                NoAliasMultXM<add>(one,M3c(x*m1*m2),m3);
             }
         }
     };
@@ -1753,27 +1717,18 @@ namespace tmv {
         static inline void call(
             const Scaling<1,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_UM
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
-#ifdef PRINTALGO_UM
             std::cout<<"UM algo 87: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            typedef typename Traits<T>::real_type RT;
-            const Scaling<1,RT> one;
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename Traits2<T1,T2>::type PT3;
             const bool rm = M1::_rowmajor && M2::_rowmajor;
             typedef typename MCopyHelper<PT3,Rec,cs,rs,rm,false>::type M3c;
-            M3c m3c(M,N);
-            typedef typename M3c::view_type M3cv;
-            typedef typename M3c::const_view_type M3ccv;
-            M3cv m3cv = m3c.view();
-            M3ccv m3ccv = m3c.view();
-            MultUM_Helper<-2,cs,rs,false,1,RT,M1,M2,M3cv>::call(
-                one,m1,m2,m3cv);
-            MultXM_Helper<-2,cs,rs,add,1,T,M3ccv,M3>::call(x,m3ccv,m3);
+            NoAliasMultXM<add>(x,M3c(m1*m2),m3);
         }
     };
 

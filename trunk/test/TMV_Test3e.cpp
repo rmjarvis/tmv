@@ -34,15 +34,15 @@ int main() try {
 #if 1
 
 #ifdef TEST_DOUBLE
-    TestSmallMatrixDivB<double>();
+    TestAllSmallMatrixDivB<double>();
 #endif
 
 #ifdef TEST_FLOAT
-    TestSmallMatrixDivB<float>();
+    TestAllSmallMatrixDivB<float>();
 #endif
 
 #ifdef TEST_LONGDOUBLE
-    TestSmallMatrixDivB<long double>();
+    TestAllSmallMatrixDivB<long double>();
 #endif 
 
 #endif

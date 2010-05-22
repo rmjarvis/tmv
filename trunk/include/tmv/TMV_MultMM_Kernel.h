@@ -306,7 +306,7 @@ namespace tmv {
 
         T* C1 = C0 + M;
 
-        int j,i,k;
+        int i,j;
 
         j = 8; do {
             b0 = B0[0]; 
@@ -628,7 +628,7 @@ namespace tmv {
         T C00, C01, C10, C11;
         T c00, c01, c10, c11;
 
-        int j,i,k;
+        int i,j;
 
         j = N_2; if (j) do {
             b0 = B0[0]; 

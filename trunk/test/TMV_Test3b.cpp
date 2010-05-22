@@ -34,19 +34,19 @@ int main() try {
 #if 1
 
 #ifdef TEST_DOUBLE
-    TestSmallMatrixA<double>();
+    TestAllSmallMatrixA<double>();
 #endif
 
 #ifdef TEST_FLOAT
-    TestSmallMatrixA<float>();
+    TestAllSmallMatrixA<float>();
 #endif
 
 #ifdef TEST_LONGDOUBLE
-    TestSmallMatrixA<long double>();
+    TestAllSmallMatrixA<long double>();
 #endif 
 
 #ifdef TEST_INT
-    TestSmallMatrixA<int>();
+    TestAllSmallMatrixA<int>();
 #endif 
 
 #endif 

@@ -159,16 +159,7 @@ namespace tmv {
     {
         static inline void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
-            const int n = size == UNKNOWN ? int(v2.size()) : size;
-            typedef typename V1::value_type T1;
-            typedef typename VCopyHelper<T1,size,false>::type V1c;
-            V1c v1c(n);
-            typedef typename V1c::cview_type V1cv;
-            typedef typename V1c::const_cview_type V1ccv;
-            V1cv v1cv = v1c.cView();
-            V1ccv v1ccv = v1c.cView();
-            CopyV_Helper<-4,size,V1,V1cv>::call(v1,v1cv);
-            MultXV_Helper<-4,size,true,ix,T,V1ccv,V2>::call(x,v1ccv,v2);
+            NoAliasMultXV<true>(x,v1.copy(),v2);
         }
     };
 

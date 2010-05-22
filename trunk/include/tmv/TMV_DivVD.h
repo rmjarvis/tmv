@@ -116,7 +116,7 @@ namespace tmv {
 
     // algo 11: simple for loop
     template <int size, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<1,size,ix,T,V1,V2,V3> 
+    struct ElemDivVV_Helper<11,size,ix,T,V1,V2,V3> 
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -131,6 +131,10 @@ namespace tmv {
         {
             const bool c1 = V1::_conj;
             const bool c2 = V2::_conj;
+#ifdef PRINTALGO_DIVVD
+            std::cout<<"ElemDivVV algo 11: N,s = "<<n<<','<<size<<std::endl;
+            std::cout<<"c1,c2 = "<<c1<<','<<c2<<std::endl;
+#endif
             if (n) do {
                 *C++ = ZProd<false,false>::prod(
                     x, ZProd<c1,c2>::quot(*A++,*B++));
@@ -154,6 +158,9 @@ namespace tmv {
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
+#ifdef PRINTALGO_DIVVD
+            std::cout<<"ElemDivVV algo 21: N,s = "<<n<<','<<size<<std::endl;
+#endif
             const bool unit1 = V1::_step == 1;
             const bool unit2 = V2::_step == 1;
             const bool unit3 = V2::_step == 1;
@@ -227,6 +234,9 @@ namespace tmv {
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
+#ifdef PRINTALGO_DIVVD
+            std::cout<<"ElemDivVV algo 22: N,s = "<<n<<','<<size<<std::endl;
+#endif
             const bool unit1 = V1::_step == 1;
             const bool unit2 = V2::_step == 1;
 
@@ -284,6 +294,9 @@ namespace tmv {
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
+#ifdef PRINTALGO_DIVVD
+            std::cout<<"ElemDivVV algo 23: N,s = "<<n<<','<<size<<std::endl;
+#endif
             const bool unit1 = V1::_step == 1;
             const bool unit2 = V2::_step == 1;
             const bool c1 = V1::_conj;
@@ -344,6 +357,9 @@ namespace tmv {
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
+#ifdef PRINTALGO_DIVVD
+            std::cout<<"ElemDivVV algo 24: N,s = "<<n<<','<<size<<std::endl;
+#endif
             TMVStaticAssert(ix == 0);
             TMVStaticAssert((Traits2<T,std::complex<float> >::sametype));
             const bool unit1 = V1::_step == 1;
@@ -406,6 +422,9 @@ namespace tmv {
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
+#ifdef PRINTALGO_DIVVD
+            std::cout<<"ElemDivVV algo 25: N,s = "<<n<<','<<size<<std::endl;
+#endif
             TMVStaticAssert(ix == 0);
             TMVStaticAssert((Traits2<T,std::complex<float> >::sametype));
             const bool unit1 = V1::_step == 1;
@@ -482,6 +501,9 @@ namespace tmv {
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
+#ifdef PRINTALGO_DIVVD
+            std::cout<<"ElemDivVV algo 31: N,s = "<<n<<','<<size<<std::endl;
+#endif
             const bool unit1 = V1::_step == 1;
             const bool unit2 = V2::_step == 1;
 
@@ -534,6 +556,9 @@ namespace tmv {
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
+#ifdef PRINTALGO_DIVVD
+            std::cout<<"ElemDivVV algo 32: N,s = "<<n<<','<<size<<std::endl;
+#endif
             const bool unit1 = V1::_step == 1;
 
             if (unit1) {
@@ -584,6 +609,9 @@ namespace tmv {
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
+#ifdef PRINTALGO_DIVVD
+            std::cout<<"ElemDivVV algo 33: N,s = "<<n<<','<<size<<std::endl;
+#endif
             const bool c1 = V1::_conj;
             if (n) {
                 const double mone = Maybe<c1>::select( double(x) , -double(x) );
@@ -632,6 +660,9 @@ namespace tmv {
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
+#ifdef PRINTALGO_DIVVD
+            std::cout<<"ElemDivVV algo 34: N,s = "<<n<<','<<size<<std::endl;
+#endif
             TMVStaticAssert(ix == 0);
             TMVStaticAssert((Traits2<T,std::complex<double> >::sametype));
             const bool unit1 = V1::_step == 1;
@@ -685,6 +716,9 @@ namespace tmv {
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
+#ifdef PRINTALGO_DIVVD
+            std::cout<<"ElemDivVV algo 35: N,s = "<<n<<','<<size<<std::endl;
+#endif
             TMVStaticAssert(ix == 0);
             TMVStaticAssert((Traits2<T,std::complex<double> >::sametype));
             const bool c1 = V1::_conj;
@@ -725,11 +759,19 @@ namespace tmv {
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         typedef typename V3::iterator IT3;
         enum { algo = (
-                1 ) };
+                // SSE stuff doesn't seem to be faster.  Huh.
+                11 ) };
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
             TMVStaticAssert(!V3::_conj);
+#ifdef PRINTALGO_DIVVD
+            std::cout<<"Inline ElemDivVV: s = "<<size<<std::endl;
+            std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
+            std::cout<<"v1 = "<<TMV_Text(v1)<<std::endl;
+            std::cout<<"v2 = "<<TMV_Text(v2)<<std::endl;
+            std::cout<<"v3 = "<<TMV_Text(v3)<<std::endl;
+#endif
             ElemDivVV_Helper<algo,size,ix,T,V1,V2,V3>::call(x,v1,v2,v3); 
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)

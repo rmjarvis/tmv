@@ -30,10 +30,9 @@ int main() try {
     //showdiv=true;
     //showtests=true;
     //showstartdone=true;
-    //XXDEBUG1 = true;
-    //XXDEBUG5 = true;
+    TestMatrixDiv<double>();
 
-#if 1
+#if 0
 
 #ifdef TEST_DOUBLE
     TestMatrixDiv<double>();

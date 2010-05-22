@@ -1,7 +1,7 @@
 
 #include "TMV_Test.h"
 #include "TMV_Test3.h"
-#include "TMV_Vec.h"
+#include "TMV.h"
 #include <fstream>
 #include <cstdio>
 
@@ -136,7 +136,7 @@ template <class T> static void TestSmallVectorReal()
 
     if (showacc)
         std::cout<<"unsorted w = "<<w<<std::endl;
-    w.sort(perm);
+    tmv::Permutation P = w.sort(perm);
     for(int i=1;i<20;++i) {
         Assert(w(i-1) <= w(i),"Sort real SmallVector");
     }
@@ -144,12 +144,14 @@ template <class T> static void TestSmallVectorReal()
         std::cout<<"sorted w = "<<w<<std::endl;
 
     w.sort(0);
-    w.reversePermute(perm);
+    w = P.inverse() * w;
+    //w.reversePermute(perm);
     if (showacc)
         std::cout<<"Reverse permuted w = "<<w<<std::endl;
     Assert(w==origw,"Reverse permute sorted SmallVector = orig");
     w.sort(0);
-    origw.permute(perm);
+    origw = P * origw;
+    //origw.permute(perm);
     if (showacc)
         std::cout<<"Sort permuted w = "<<origw<<std::endl;
     Assert(w==origw,"Permute SmallVector = sorted SmallVector");
@@ -247,7 +249,7 @@ template <class T> static void TestSmallVectorComplex()
 
     if (showacc)
         std::cout<<"unsorted w = "<<w<<std::endl;
-    w.sort(perm);
+    tmv::Permutation P = w.sort(perm);
     for(int i=1;i<20;++i) {
         Assert(w(i-1).real() <= w(i).real(),"Sort complex SmallVector");
     }
@@ -255,10 +257,12 @@ template <class T> static void TestSmallVectorComplex()
         std::cout<<"sorted w = "<<w<<std::endl;
 
     //w.sort(0);
-    w.reversePermute(perm);
+    w = P.inverse() * w;
+    //w.reversePermute(perm);
     Assert(w==origw,"Reverse permute sorted SmallVector = orig");
     w.sort(0);
-    origw.permute(perm);
+    origw = P * origw;
+    //origw.permute(perm);
     Assert(w==origw,"Permute SmallVector = sorted SmallVector");
 }
 
@@ -323,7 +327,7 @@ template <class T> static void TestSmallVectorIO()
     std::remove("tmvtest_smallvector_io.dat");
 }
 
-template <class T> void TestSmallVector()
+template <class T> void TestAllSmallVector()
 {
 #if 1
     TestSmallVectorReal<T>();
@@ -344,14 +348,14 @@ template <class T> void TestSmallVector()
 }
 
 #ifdef TEST_DOUBLE
-template void TestSmallVector<double>();
+template void TestAllSmallVector<double>();
 #endif
 #ifdef TEST_FLOAT
-template void TestSmallVector<float>();
+template void TestAllSmallVector<float>();
 #endif
 #ifdef TEST_LONGDOUBLE
-template void TestSmallVector<long double>();
+template void TestAllSmallVector<long double>();
 #endif
 #ifdef TEST_INT
-template void TestSmallVector<int>();
+template void TestAllSmallVector<int>();
 #endif

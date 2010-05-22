@@ -34,16 +34,16 @@ template <class T> void TestMatrixArith_2()
 
     tmv::Matrix<T> a3x(12,16);
     for(int i=0;i<12;++i) for(int j=0;j<16;++j) a3x(i,j) = T(1-2*i+3*j);
-    a3x.diag().addToAll(30);
+    tmv::MatrixView<T> a3 = a3x.subMatrix(0,12,0,16,3,4);
+    a3.diag().addToAll(30);
     tmv::Matrix<CT> ca3x = a3x*CT(1,-2);
-    ca3x.diag().addToAll(CT(-22,15));
+    tmv::MatrixView<CT> ca3 = ca3x.subMatrix(0,12,0,16,3,4);
+    ca3.diag().addToAll(CT(-22,15));
 
     tmv::MatrixView<T> a1 = a1x.view();
     tmv::MatrixView<CT> ca1 = ca1x.view();
     tmv::MatrixView<T> a2 = a2x.view();
     tmv::MatrixView<CT> ca2 = ca2x.view();
-    tmv::MatrixView<T> a3 = a3x.subMatrix(0,12,0,16,3,4);
-    tmv::MatrixView<CT> ca3 = ca3x.subMatrix(0,12,0,16,3,4);
 
     TestMatrixArith2<T>(a1,ca1,"Square 1");
     TestMatrixArith2<T>(a2,ca2,"Square 2");

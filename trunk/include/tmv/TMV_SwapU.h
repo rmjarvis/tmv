@@ -61,15 +61,15 @@ namespace tmv {
     // Swap Matrices
     //
 
-    // Q1 is the maximum nops to unroll.
+    // UNROLL is the maximum nops to unroll.
 #if TMV_OPT >= 3
-#define TMV_Q1 200
+#define TMV_SWAPU_UNROLL 200
 #elif TMV_OPT >= 2
-#define TMV_Q1 25
+#define TMV_SWAPU_UNROLL 25
 #elif TMV_OPT >= 1
-#define TMV_Q1 9
+#define TMV_SWAPU_UNROLL 9
 #else
-#define TMV_Q1 0
+#define TMV_SWAPU_UNROLL 0
 #endif
 
     template <int algo, int s, class M1, class M2>
@@ -225,7 +225,7 @@ namespace tmv {
             const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
                 s == UNKNOWN ? false :
-                nops > TMV_Q1 ? false :
+                nops > TMV_SWAPU_UNROLL ? false :
                 s <= 10;
             const int algo2 = 
                 unroll ? ( M2::_rowmajor ? 5 : 6 ) :
@@ -266,7 +266,7 @@ namespace tmv {
             const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
                 s == UNKNOWN ? false :
-                nops > TMV_Q1 ? false :
+                nops > TMV_SWAPU_UNROLL ? false :
                 s <= 10;
             const int algo = 
                 M1::_unit || M2::_unit ? 1 :
@@ -462,8 +462,6 @@ namespace tmv {
     inline void Swap(
         BaseMatrix_Tri_Mutable<M1>& m1, BaseMatrix_Tri_Mutable<M2>& m2)
     { DoSwap(m1,m2); }
-
-#undef TMV_Q1
 
 } // namespace tmv
 

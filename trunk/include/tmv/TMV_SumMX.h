@@ -51,7 +51,7 @@ namespace tmv {
 
     template <int ix1, class T1, class M1, class T2, class M3>
     inline void AddMX(
-        const Scaling<ix1,T1>& x1, const BaseMatrix_Calc<M1>& m1,
+        const Scaling<ix1,T1>& x1, const BaseMatrix<M1>& m1,
         const T2& x2, BaseMatrix_Mutable<M3>& m3)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
@@ -66,7 +66,7 @@ namespace tmv {
 
     template <int ix1, class T1, class M1, class T2, class M3>
     inline void NoAliasAddMX(
-        const Scaling<ix1,T1>& x1, const BaseMatrix_Calc<M1>& m1,
+        const Scaling<ix1,T1>& x1, const BaseMatrix<M1>& m1,
         const T2& x2, BaseMatrix_Mutable<M3>& m3)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
@@ -93,7 +93,7 @@ namespace tmv {
         enum { _shape = ShapeTraits<M1::_shape>::nonunit_shape };
         enum { _fort = M1::_fort };
         enum { _calc = false };
-        enum { _rowmajor = M1::_rowmajor };
+        enum { _rowmajor = Traits<typename M1::calc_type>::_rowmajor };
         enum { _colmajor = !_rowmajor };
 
         typedef SumMX<ix1,T1,M1,T2> type;
@@ -142,7 +142,7 @@ namespace tmv {
             TMVStaticAssert((Sizes<type::_rowsize,M3::_rowsize>::same)); 
             TMVAssert(colsize() == m3.colsize());
             TMVAssert(rowsize() == m3.rowsize());
-            AddMX(x1,m1.calc(),x2,m3.mat());
+            AddMX(x1,m1.mat(),x2,m3.mat());
         }
 
         template <class M3>
@@ -153,7 +153,7 @@ namespace tmv {
             TMVStaticAssert((Sizes<type::_rowsize,M3::_rowsize>::same)); 
             TMVAssert(colsize() == m3.colsize());
             TMVAssert(rowsize() == m3.rowsize());
-            NoAliasAddMX(x1,m1.calc(),x2,m3.mat());
+            NoAliasAddMX(x1,m1.mat(),x2,m3.mat());
         }
 
     private:

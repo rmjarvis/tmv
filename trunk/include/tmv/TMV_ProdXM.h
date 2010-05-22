@@ -41,66 +41,52 @@ namespace tmv {
     // Scalar * Matrix
     //
 
-    // These first few are intentionally not defined to make sure we
-    // get a compiler error if they are used.
-    // All real calls should go through a more specific version than 
-    // just the BaseMatrix_Calc's.
+    // These first few are for when an argument is a composite matrix
+    // and needs to be calculated before running MultXM.
     template <bool add, int ix, class T, class M1, class M2>
     inline void MultXM(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1, 
-        BaseMatrix_Mutable<M2>& m2);
+        const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
+        BaseMatrix_Mutable<M2>& m2)
+    { MultXM<add>(x,m1.calc(),m2.mat()); }
     template <bool add, int ix, class T, class M1, class M2>
     inline void NoAliasMultXM(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1, 
-        BaseMatrix_Mutable<M2>& m2);
-    template <bool add, int ix, class T, class M1, class M2>
-    inline void InlineMultXM(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1, 
-        BaseMatrix_Mutable<M2>& m2);
+        const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
+        BaseMatrix_Mutable<M2>& m2)
+    { MultXM<add>(x,m1.calc(),m2.mat()); }
     template <bool add, int ix, class T, class M1, class M2>
     inline void AliasMultXM(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1, 
-        BaseMatrix_Mutable<M2>& m2);
+        const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
+        BaseMatrix_Mutable<M2>& m2)
+    { MultXM<add>(x,m1.calc(),m2.mat()); }
 
     // These are helpers to allow the caller to not use a Scaling object.
     template <bool add, class T, class M1, class M2>
     inline void MultXM(
-        const T& x, const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2)
+        const T& x, const BaseMatrix<M1>& m1, BaseMatrix_Mutable<M2>& m2)
     { MultXM<add>(Scaling<0,T>(x),m1.mat(),m2.mat()); }
     template <bool add, class T, class M1, class M2>
     inline void NoAliasMultXM(
-        const T& x, const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2)
+        const T& x, const BaseMatrix<M1>& m1, BaseMatrix_Mutable<M2>& m2)
     { NoAliasMultXM<add>(Scaling<0,T>(x),m1.mat(),m2.mat()); }
     template <bool add, class T, class M1, class M2>
-    inline void InlineMultXM(
-        const T& x, const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2)
-    { InlineMultXM<add>(Scaling<0,T>(x),m1.mat(),m2.mat()); }
-    template <bool add, class T, class M1, class M2>
     inline void AliasMultXM(
-        const T& x, const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2)
+        const T& x, const BaseMatrix<M1>& m1, BaseMatrix_Mutable<M2>& m2)
     { AliasMultXM<add>(Scaling<0,T>(x),m1.mat(),m2.mat()); }
 
     template <bool add, class M1, class M2>
     inline void MultXM(
-        const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2)
+        const BaseMatrix<M1>& m1, BaseMatrix_Mutable<M2>& m2)
     { MultXM<add>(Scaling<1,typename M2::real_type>(),m1.mat(),m2.mat()); }
     template <bool add, class M1, class M2>
     inline void NoAliasMultXM(
-        const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2)
+        const BaseMatrix<M1>& m1, BaseMatrix_Mutable<M2>& m2)
     {
         NoAliasMultXM<add>(
             Scaling<1,typename M2::real_type>(),m1.mat(),m2.mat()); 
     }
     template <bool add, class M1, class M2>
-    inline void InlineMultXM(
-        const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2)
-    {
-        InlineMultXM<add>(
-            Scaling<1,typename M2::real_type>(),m1.mat(),m2.mat()); 
-    }
-    template <bool add, class M1, class M2>
     inline void AliasMultXM(
-        const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2)
+        const BaseMatrix<M1>& m1, BaseMatrix_Mutable<M2>& m2)
     { 
         AliasMultXM<add>(
             Scaling<1,typename M2::real_type>(),m1.mat(),m2.mat()); 
@@ -109,10 +95,6 @@ namespace tmv {
     template <class T, class M>
     inline void Scale(const T& x, BaseMatrix_Mutable<M>& m)
     { Scale(Scaling<0,T>(x),m.mat()); }
-
-    template <class T, class M>
-    inline void InlineScale(const T& x, BaseMatrix_Mutable<M>& m)
-    { InlineScale(Scaling<0,T>(x),m.mat()); }
 
 
     template <int ix, class T, class M>
@@ -125,7 +107,10 @@ namespace tmv {
 
         enum { _colsize = M::_colsize };
         enum { _rowsize = M::_rowsize };
-        enum { _shape = ShapeTraits<M::_shape>::nonunit_shape };
+        enum { _shape = 
+            (ix == 1) ?
+                int(M::_shape) :
+                int(ShapeTraits<M::_shape>::nonunit_shape) };
         enum { _fort = M::_fort };
         enum { _calc = false };
         enum { rm1 = Traits<typename M::calc_type>::_rowmajor };
@@ -172,7 +157,7 @@ namespace tmv {
             TMVAssert(m2.colsize() == colsize());
             TMVAssert(m2.rowsize() == rowsize());
             TMVStaticAssert(type::isreal || M2::iscomplex);
-            MultXM<false>(x,m.calc(),m2.mat());
+            MultXM<false>(x,m.mat(),m2.mat());
         }
 
         template <class M2>
@@ -185,7 +170,7 @@ namespace tmv {
             TMVAssert(m2.colsize() == colsize());
             TMVAssert(m2.rowsize() == rowsize());
             TMVStaticAssert(type::isreal || M2::iscomplex);
-            NoAliasMultXM<false>(x,m.calc(),m2.mat());
+            NoAliasMultXM<false>(x,m.mat(),m2.mat());
         }
 
     private:
@@ -424,16 +409,16 @@ namespace tmv {
     // Have SameStorage look into a ProdXM object:
     template <int ix1, class T1, class M1, class M2>
     inline bool SameStorage(
-        const ProdXM<ix1,T1,M1>& m1, const BaseMatrix_Calc<M2>& m2)
-    { return SameStorage(m1.getM(),m2); }
+        const ProdXM<ix1,T1,M1>& m1, const BaseMatrix<M2>& m2)
+    { return SameStorage(m1.getM().mat(),m2.mat()); }
     template <class M1, int ix2, class T2, class M2>
     inline bool SameStorage(
-        const BaseMatrix_Calc<M1>& m1, const ProdXM<ix2,T2,M2>& m2)
-    { return SameStorage(m1,m2.getM()); }
+        const BaseMatrix<M1>& m1, const ProdXM<ix2,T2,M2>& m2)
+    { return SameStorage(m1.mat(),m2.getM().mat()); }
     template <int ix1, class T1, class M1, int ix2, class T2, class M2>
     inline bool SameStorage(
         const ProdXM<ix1,T1,M1>& m1, const ProdXM<ix2,T2,M2>& m2)
-    { return SameStorage(m1.getM(),m2.getM()); }
+    { return SameStorage(m1.getM().mat(),m2.getM().mat()); }
 #endif
     template <int ix, class T, class M>
     inline std::string TMV_Text(const ProdXM<ix,T,M>& pxm)

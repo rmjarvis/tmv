@@ -1253,13 +1253,13 @@ namespace tmv {
         typedef ConstLowerTriMatrixView<T,D,_stepj,_stepi,notC,I> 
             const_adjoint_type;
 
-        typedef ConstUpperTriMatrixView<T,NonUnitDiag,_stepi,1,C,I> 
+        typedef ConstUpperTriMatrixView<T,NonUnitDiag,_stepi,_stepj,C,I> 
             const_offdiag_type;
-        typedef ConstUpperTriMatrixView<T,UnitDiag,_stepi,1,C,I> 
+        typedef ConstUpperTriMatrixView<T,UnitDiag,_stepi,_stepj,C,I> 
             const_unitdiag_type;
-        typedef ConstUpperTriMatrixView<T,NonUnitDiag,_stepi,1,C,I> 
+        typedef ConstUpperTriMatrixView<T,NonUnitDiag,_stepi,_stepj,C,I> 
             const_nonunitdiag_type;
-        typedef ConstUpperTriMatrixView<T,UnknownDiag,_stepi,1,C,I> 
+        typedef ConstUpperTriMatrixView<T,UnknownDiag,_stepi,_stepj,C,I> 
             const_unknowndiag_type;
         typedef ConstUpperTriMatrixView<real_type,D,twoSi,twoSj,false,I> 
             const_realpart_type;
@@ -2214,13 +2214,13 @@ namespace tmv {
         typedef ConstUpperTriMatrixView<T,D,_stepj,_stepi,notC,I> 
             const_adjoint_type;
 
-        typedef ConstLowerTriMatrixView<T,NonUnitDiag,_stepi,1,C,I> 
+        typedef ConstLowerTriMatrixView<T,NonUnitDiag,_stepi,_stepj,C,I> 
             const_offdiag_type;
-        typedef ConstLowerTriMatrixView<T,UnitDiag,_stepi,1,C,I> 
+        typedef ConstLowerTriMatrixView<T,UnitDiag,_stepi,_stepj,C,I> 
             const_unitdiag_type;
-        typedef ConstLowerTriMatrixView<T,NonUnitDiag,_stepi,1,C,I> 
+        typedef ConstLowerTriMatrixView<T,NonUnitDiag,_stepi,_stepj,C,I> 
             const_nonunitdiag_type;
-        typedef ConstLowerTriMatrixView<T,UnknownDiag,_stepi,1,C,I> 
+        typedef ConstLowerTriMatrixView<T,UnknownDiag,_stepi,_stepj,C,I> 
             const_unknowndiag_type;
         typedef ConstLowerTriMatrixView<real_type,D,twoSi,twoSj,false,I> 
             const_realpart_type;

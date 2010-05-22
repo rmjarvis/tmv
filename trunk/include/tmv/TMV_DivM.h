@@ -77,6 +77,17 @@ namespace tmv {
     //  a matrix, so the same Helper structure is used for both.)
     //
 
+    template <class M1>
+    static void DivM_ThrowSingular(const M1& m1)
+    {
+#ifdef TMV_NO_THROW
+        std::cerr<<"Singular Matrix found in Division\n";
+        exit(1);
+#else
+        throw SingularMatrix<M1>(m1.mat());
+#endif
+    }
+
     template <int algo, int s, int xs, class M1, class M2>
     struct LDivEqM_Helper;
 
@@ -105,7 +116,7 @@ namespace tmv {
             std::cout<<"LDivEq algo 1: s,xs = "<<1<<','<<xs<<std::endl;
 #endif
             typedef typename M2::value_type T2;
-            if (m2.cref(0,0) == T2(0)) DivVM_ThrowSingular(m2);
+            if (m2.cref(0,0) == T2(0)) DivM_ThrowSingular(m2);
             call2(m1,m2);
         }
     };
@@ -122,12 +133,13 @@ namespace tmv {
         struct Helper2<1,dummy>
         {
             // M1 is a vector, so do the whole calculation directly
-            static void call(BaseVector_Mutable<M1>& v1, const M2& m2)
+            template <class V1x>
+            static void call(BaseVector_Mutable<V1x>& v1, const M2& m2)
             {
-                typedef typename M1::value_type T1;
+                typedef typename V1x::value_type T1;
                 typedef typename M2::value_type T2;
                 T2 det = DetM_Helper<2,2,M2>::call(m2);
-                if (det == T2(0)) DivVM_ThrowSingular(m2);
+                if (det == T2(0)) DivM_ThrowSingular(m2);
                 T1 a = (v1.cref(0) * m2.cref(1,1) - 
                         v1.cref(1) * m2.cref(0,1))/det;
                 T1 b = (v1.cref(1) * m2.cref(0,0) -
@@ -136,9 +148,10 @@ namespace tmv {
                 v1.ref(1) = b;
             }
             // M1 is a matrix, but only one column. 
-            static void call(BaseMatrix_Mutable<M1>& m1, const M2& m2)
+            template <class M1x>
+            static void call(BaseMatrix_Mutable<M1x>& m1, const M2& m2)
             {
-                typedef typename M1::col_type M1c;
+                typedef typename M1x::col_type M1c;
                 M1c m1c = m1.col(0);
                 LDivEqM_Helper<2,2,1,M1c,M2>::call(m1c,m2);
             }
@@ -159,12 +172,12 @@ namespace tmv {
                 // For now, just write a simple loop.
                 const int K = xs == UNKNOWN ? m1.rowsize() : xs;
                 for(int k=0;k<K;++k) {
-                    T1 a = (m1.cref(0,k) * m2inv.cref(0,0) - 
+                    T1 a = (m1.cref(0,k) * m2inv.cref(0,0) + 
                             m1.cref(1,k) * m2inv.cref(0,1));
-                    T1 b = (m1.cref(1,k) * m2inv.cref(1,1) -
-                            m1.cref(0,k) * m2inv.cref(1,0));
-                    m1.cref(0,k) = a;
-                    m1.cref(1,k) = b;
+                    T1 b = (m1.cref(0,k) * m2inv.cref(1,0) +
+                            m1.cref(1,k) * m2inv.cref(1,1));
+                    m1.ref(0,k) = a;
+                    m1.ref(1,k) = b;
                 }
             }
         };
@@ -462,40 +475,38 @@ namespace tmv {
     struct LDivM_Helper<1,1,1,xs,ix,T,M1,M2,M3> 
     {
         // This one is different for vector and matrix, so break it out here.
-        template <class M3x>
+        template <class M1x, class M3x>
         static void call2(
-            const Scaling<ix,T>& x, const BaseVector<M1>& v1, 
+            const Scaling<ix,T>& x, const BaseVector<M1x>& v1, 
             const M2& m2, BaseVector_Mutable<M3x>& v3)
         { v3.ref(0) = x * v1.cref(0) / m2.cref(0,0); }
-        template <class M3x>
+        template <class M1x, class M3x>
         static void call2(
-            const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
+            const Scaling<ix,T>& x, const BaseMatrix_Calc<M1x>& m1,
             const M2& m2, BaseMatrix_Mutable<M3x>& m3)
         {
             m3.row(0,0,m1.rowsize()) =
                 x * m1.row(0,0,m1.rowsize()) / m2.cref(0,0); 
         }
-        template <class M3x>
+        template <class M1x, class M3x>
         static void call2(
-            const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
+            const Scaling<ix,T>& x, const BaseMatrix_Calc<M1x>& m1,
             const M2& m2, BaseMatrix_Rec_Mutable<M3x>& m3)
         { m3.row(0) = x * m1.row(0,0,m1.rowsize()) / m2.cref(0,0); }
-        template <class M3x>
+        template <class M1x, class M3x>
         static void call2(
-            const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
+            const Scaling<ix,T>& x, const BaseMatrix_Rec<M1x>& m1,
             const M2& m2, BaseMatrix_Rec_Mutable<M3x>& m3)
         { m3.row(0) = x * m1.row(0) / m2.cref(0,0); }
-        template <class M3x>
         static void call(
-            const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
-            const M2& m2, BaseMatrix_Mutable<M3>& m3)
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_LU
             std::cout<<"LDiv algo 1: cs,rs,xs = "<<
                 1<<','<<1<<','<<xs<<std::endl;
 #endif
             typedef typename M2::value_type T2;
-            if (m2.cref(0,0) == T2(0)) DivVM_ThrowSingular(m2);
+            if (m2.cref(0,0) == T2(0)) DivM_ThrowSingular(m2);
             call2(x,m1,m2,m3);
         }
     };
@@ -511,26 +522,28 @@ namespace tmv {
         struct Helper2<1,dummy>
         {
             // M1,M3 are vectors
+            template <class V1x, class V3x>
             static void call(
-                const Scaling<ix,T>& x, const BaseVector<M1>& v1, 
-                const M2& m2, BaseVector_Mutable<M3>& v3)
+                const Scaling<ix,T>& x, const BaseVector<V1x>& v1, 
+                const M2& m2, BaseVector_Mutable<V3x>& v3)
             {
-                typedef typename M3::value_type T3;
+                typedef typename V3x::value_type T3;
                 typedef typename M2::value_type T2;
                 T2 det = DetM_Helper<2,2,M2>::call(m2);
-                if (det == T2(0)) DivVM_ThrowSingular(m2);
-                v3.ref(0) = (v1.cref(0) * m2.cref(1,1) -
+                if (det == T2(0)) DivM_ThrowSingular(m2);
+                v3.ref(0) = x*(v1.cref(0) * m2.cref(1,1) -
                              v1.cref(1) * m2.cref(0,1))/det;
-                v3.ref(1) = (v1.cref(1) * m2.cref(0,0) -
+                v3.ref(1) = x*(v1.cref(1) * m2.cref(0,0) -
                              v1.cref(0) * m2.cref(1,0))/det;
             }
             // M1,m3 are matrices, but only one column. 
+            template <class M1x, class M3x>
             static void call(
-                const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1, 
-                const M2& m2, BaseMatrix_Mutable<M3>& m3)
+                const Scaling<ix,T>& x, const BaseMatrix_Calc<M1x>& m1, 
+                const M2& m2, BaseMatrix_Mutable<M3x>& m3)
             {
-                typedef typename M1::const_col_type M1c;
-                typedef typename M3::col_type M3c;
+                typedef typename M1x::const_col_type M1c;
+                typedef typename M3x::col_type M3c;
                 M1c m1c = m1.col(0);
                 M3c m3c = m3.col(0);
                 LDivM_Helper<2,2,2,1,ix,T,M1c,M2,M3c>::call(x,m1c,m2,m3c);

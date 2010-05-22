@@ -31,7 +31,7 @@
 
 #include "tmv/TMV_ScaleU.h"
 #include "tmv/TMV_TriMatrix.h"
-#include "tmv/TMV_ProdXM.h"
+//#include "tmv/TMV_ProdXM.h"
 
 namespace tmv {
 
@@ -43,7 +43,7 @@ namespace tmv {
         else if (x == T(0))
             m.setZero();
         else if (x != T(1))
-            InlineScale(x,m); 
+            InlineScale(Scaling<0,T>(x),m); 
     }
 
     template <class T, class M>
@@ -55,9 +55,9 @@ namespace tmv {
             else if (real(x) == T(0))
                 m.setZero();
             else if (real(x) != T(1))
-                InlineScale(real(x),m); 
+                InlineScale(Scaling<0,T>(real(x)),m); 
         } else 
-            InlineScale(x,m);
+            InlineScale(Scaling<0,std::complex<T> >(x),m);
     }
 
     template <class T>

@@ -104,6 +104,7 @@ namespace tmv {
         enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
         enum { notC = iscomplex };
+        enum { Nm1 = IntTraits<N>::Sm1 };
 
         typedef ConstVectorView<T,_stepi,false,I> const_col_sub_type;
         typedef ConstVectorView<T,_stepj,false,I> const_row_sub_type;
@@ -138,7 +139,7 @@ namespace tmv {
         typedef ConstSmallLowerTriMatrixView<T,N,D,_stepj,_stepi,notC,I> 
             const_adjoint_type;
 
-        typedef ConstUpperTriMatrixView<T,NonUnitDiag,_stepi,_stepj,false,I> 
+        typedef ConstSmallUpperTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,false,I> 
             const_offdiag_type;
         typedef ConstSmallUpperTriMatrixView<T,N,UnitDiag,_stepi,_stepj,
                 false,I> const_unitdiag_type;
@@ -185,7 +186,7 @@ namespace tmv {
         typedef SmallLowerTriMatrixView<T,N,D,_stepj,_stepi,notC,I> 
             adjoint_type;
 
-        typedef UpperTriMatrixView<T,NonUnitDiag,_stepi,_stepj,false,I> 
+        typedef SmallUpperTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,false,I> 
             offdiag_type;
         typedef SmallUpperTriMatrixView<T,N,UnitDiag,_stepi,_stepj,false,I> 
             unitdiag_type;
@@ -505,6 +506,7 @@ namespace tmv {
         enum { twoSi = isreal ? Si : IntTraits<Si>::twoS };
         enum { twoSj = isreal ? Sj : IntTraits<Sj>::twoS };
         enum { notC = !C && iscomplex };
+        enum { Nm1 = IntTraits<N>::Sm1 };
 
         typedef ConstVectorView<T,_stepi,C,I> const_col_sub_type;
         typedef ConstVectorView<T,_stepj,C,I> const_row_sub_type;
@@ -541,7 +543,7 @@ namespace tmv {
         typedef ConstSmallLowerTriMatrixView<T,N,D,_stepj,_stepi,notC,I> 
             const_adjoint_type;
 
-        typedef ConstUpperTriMatrixView<T,NonUnitDiag,_stepi,_stepj,C,I> 
+        typedef ConstSmallUpperTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,C,I> 
             const_offdiag_type;
         typedef ConstSmallUpperTriMatrixView<T,N,UnitDiag,_stepi,_stepj,C,I> 
             const_unitdiag_type;
@@ -765,6 +767,7 @@ namespace tmv {
         enum { twoSi = isreal ? Si : IntTraits<Si>::twoS };
         enum { twoSj = isreal ? Sj : IntTraits<Sj>::twoS };
         enum { notC = !C && iscomplex };
+        enum { Nm1 = IntTraits<N>::Sm1 };
 
         typedef ConstVectorView<T,_stepi,C,I> const_col_type;
         typedef ConstVectorView<T,_stepi,C,I> const_col_sub_type;
@@ -803,13 +806,13 @@ namespace tmv {
         typedef ConstSmallLowerTriMatrixView<T,N,D,_stepj,_stepi,notC,I> 
             const_adjoint_type;
 
-        typedef ConstUpperTriMatrixView<T,NonUnitDiag,_stepi,1,C,I> 
+        typedef ConstSmallUpperTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,C,I> 
             const_offdiag_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,UnitDiag,_stepi,1,C,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,UnitDiag,_stepi,_stepj,C,I> 
             const_unitdiag_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,NonUnitDiag,_stepi,1,C,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,C,I> 
             const_nonunitdiag_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,UnknownDiag,_stepi,1,C,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,C,I> 
             const_unknowndiag_type;
         typedef ConstSmallUpperTriMatrixView<real_type,N,D,twoSi,twoSj,false,I> 
             const_realpart_type;
@@ -849,7 +852,7 @@ namespace tmv {
         typedef SmallLowerTriMatrixView<T,N,D,_stepj,_stepi,notC,I> 
             adjoint_type;
 
-        typedef UpperTriMatrixView<T,NonUnitDiag,_stepi,_stepj,C,I> 
+        typedef SmallUpperTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,C,I> 
             offdiag_type;
         typedef SmallUpperTriMatrixView<T,N,UnitDiag,_stepi,_stepj,C,I> 
             unitdiag_type;
@@ -1101,6 +1104,7 @@ namespace tmv {
         enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
         enum { notC = iscomplex };
+        enum { Nm1 = IntTraits<N>::Sm1 };
 
         typedef ConstVectorView<T,_stepi,false,I> const_col_sub_type;
         typedef ConstVectorView<T,_stepj,false,I> const_row_sub_type;
@@ -1135,7 +1139,7 @@ namespace tmv {
         typedef ConstSmallUpperTriMatrixView<T,N,D,_stepj,_stepi,notC,I> 
             const_adjoint_type;
 
-        typedef ConstLowerTriMatrixView<T,NonUnitDiag,_stepi,_stepj,false,I> 
+        typedef ConstSmallLowerTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,false,I> 
             const_offdiag_type;
         typedef ConstSmallLowerTriMatrixView<T,N,UnitDiag,_stepi,_stepj,
                 false,I> const_unitdiag_type;
@@ -1182,7 +1186,7 @@ namespace tmv {
         typedef SmallUpperTriMatrixView<T,N,D,_stepj,_stepi,notC,I> 
             adjoint_type;
 
-        typedef LowerTriMatrixView<T,NonUnitDiag,_stepi,_stepj,false,I> 
+        typedef SmallLowerTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,false,I> 
             offdiag_type;
         typedef SmallLowerTriMatrixView<T,N,UnitDiag,_stepi,_stepj,false,I> 
             unitdiag_type;
@@ -1502,6 +1506,7 @@ namespace tmv {
         enum { twoSi = isreal ? Si : IntTraits<Si>::twoS };
         enum { twoSj = isreal ? Sj : IntTraits<Sj>::twoS };
         enum { notC = !C && iscomplex };
+        enum { Nm1 = IntTraits<N>::Sm1 };
 
         typedef ConstVectorView<T,_stepi,C,I> const_col_sub_type;
         typedef ConstVectorView<T,_stepj,C,I> const_row_sub_type;
@@ -1538,7 +1543,7 @@ namespace tmv {
         typedef ConstSmallUpperTriMatrixView<T,N,D,_stepj,_stepi,notC,I> 
             const_adjoint_type;
 
-        typedef ConstLowerTriMatrixView<T,NonUnitDiag,_stepi,_stepj,C,I> 
+        typedef ConstSmallLowerTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,C,I> 
             const_offdiag_type;
         typedef ConstSmallLowerTriMatrixView<T,N,UnitDiag,_stepi,_stepj,C,I> 
             const_unitdiag_type;
@@ -1762,6 +1767,7 @@ namespace tmv {
         enum { twoSi = isreal ? Si : IntTraits<Si>::twoS };
         enum { twoSj = isreal ? Sj : IntTraits<Sj>::twoS };
         enum { notC = !C && iscomplex };
+        enum { Nm1 = IntTraits<N>::Sm1 };
 
         typedef ConstVectorView<T,_stepi,C,I> const_col_type;
         typedef ConstVectorView<T,_stepi,C,I> const_col_sub_type;
@@ -1800,13 +1806,13 @@ namespace tmv {
         typedef ConstSmallUpperTriMatrixView<T,N,D,_stepj,_stepi,notC,I> 
             const_adjoint_type;
 
-        typedef ConstLowerTriMatrixView<T,NonUnitDiag,_stepi,1,C,I> 
+        typedef ConstSmallLowerTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,C,I> 
             const_offdiag_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,UnitDiag,_stepi,1,C,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,UnitDiag,_stepi,_stepj,C,I> 
             const_unitdiag_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,NonUnitDiag,_stepi,1,C,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,C,I> 
             const_nonunitdiag_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,UnknownDiag,_stepi,1,C,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,C,I> 
             const_unknowndiag_type;
         typedef ConstSmallLowerTriMatrixView<real_type,N,D,twoSi,twoSj,false,I> 
             const_realpart_type;
@@ -1846,7 +1852,7 @@ namespace tmv {
         typedef SmallUpperTriMatrixView<T,N,D,_stepj,_stepi,notC,I> 
             adjoint_type;
 
-        typedef LowerTriMatrixView<T,NonUnitDiag,_stepi,_stepj,C,I> 
+        typedef SmallLowerTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,C,I> 
             offdiag_type;
         typedef SmallLowerTriMatrixView<T,N,UnitDiag,_stepi,_stepj,C,I> 
             unitdiag_type;

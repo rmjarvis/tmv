@@ -38,6 +38,30 @@
 
 namespace tmv {
 
+#if 1
+    template <int ix1, class T1, class M1,
+              int ix2, class T2, class M2, class M3>
+    inline void AddMM(
+        const Scaling<ix1,T1>& x1, const BaseMatrix<M1>& m1,
+        const Scaling<ix2,T2>& x2, const BaseMatrix<M2>& m2,
+        BaseMatrix_Mutable<M3>& m3)
+    { AddMM(x1,m1.calc(),x2,m2.calc(),m3.mat()); }
+    template <int ix1, class T1, class M1,
+              int ix2, class T2, class M2, class M3>
+    inline void NoAliasAddMM(
+        const Scaling<ix1,T1>& x1, const BaseMatrix<M1>& m1,
+        const Scaling<ix2,T2>& x2, const BaseMatrix<M2>& m2,
+        BaseMatrix_Mutable<M3>& m3)
+    { NoAliasAddMM(x1,m1.calc(),x2,m2.calc(),m3.mat()); }
+    template <int ix1, class T1, class M1,
+              int ix2, class T2, class M2, class M3>
+    inline void AliasAddMM(
+        const Scaling<ix1,T1>& x1, const BaseMatrix<M1>& m1,
+        const Scaling<ix2,T2>& x2, const BaseMatrix<M2>& m2,
+        BaseMatrix_Mutable<M3>& m3)
+    { AliasAddMM(x1,m1.calc(),x2,m2.calc(),m3.mat()); }
+#endif
+
     //
     // Matrix + Matrix
     //
@@ -114,7 +138,7 @@ namespace tmv {
             TMVStaticAssert((Sizes<type::_rowsize,M3::_rowsize>::same)); 
             TMVAssert(colsize() == m3.colsize());
             TMVAssert(rowsize() == m3.rowsize());
-            AddMM(x1,m1.calc(),x2,m2.calc(),m3.mat());
+            AddMM(x1,m1.mat(),x2,m2.mat(),m3.mat());
         }
 
         template <class M3>
@@ -127,7 +151,7 @@ namespace tmv {
             TMVStaticAssert((Sizes<type::_rowsize,M3::_rowsize>::same)); 
             TMVAssert(colsize() == m3.colsize());
             TMVAssert(rowsize() == m3.rowsize());
-            NoAliasAddMM(x1,m1.calc(),x2,m2.calc(),m3.mat());
+            NoAliasAddMM(x1,m1.mat(),x2,m2.mat(),m3.mat());
         }
 
     private:
@@ -148,7 +172,7 @@ namespace tmv {
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
         TMVStaticAssert(M1::iscomplex || M2::isreal);
-        MultXM<true>(m2.calc(),m1.mat());
+        MultXM<true>(m2.mat(),m1.mat());
     }
 
     // m += xm
@@ -161,7 +185,7 @@ namespace tmv {
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
         TMVStaticAssert(M1::iscomplex || M2::isreal);
-        MultXM<true>(m2.getX(),m2.getM().calc(),m1.mat());
+        MultXM<true>(m2.getX(),m2.getM().mat(),m1.mat());
     }
 
     // m -= m
@@ -174,7 +198,7 @@ namespace tmv {
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
         TMVStaticAssert(M1::iscomplex || M2::isreal);
-        MultXM<true>(Scaling<-1,RT>(),m2.calc(),m1.mat());
+        MultXM<true>(Scaling<-1,RT>(),m2.mat(),m1.mat());
     }
 
     // m -= xm
@@ -187,7 +211,7 @@ namespace tmv {
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
         TMVStaticAssert(M1::iscomplex || M2::isreal);
-        MultXM<true>(-m2.getX(),m2.getM().calc(),m1.mat());
+        MultXM<true>(-m2.getX(),m2.getM().mat(),m1.mat());
     }
 
     // m + m

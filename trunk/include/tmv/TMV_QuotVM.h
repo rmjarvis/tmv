@@ -47,6 +47,68 @@
 
 namespace tmv {
 
+    template <int ix, class T, class V1, class M2, class V3>
+    inline void LDiv(
+        const Scaling<ix,T>& x, const BaseVector<V1>& v1,
+        const BaseMatrix<M2>& m2, BaseVector_Mutable<V3>& v3)
+    { LDiv(x,v1.calc(),m2.calc(),v3.vec()); }
+    template <int ix, class T, class V1, class M2, class V3>
+    inline void NoAliasLDiv(
+        const Scaling<ix,T>& x, const BaseVector<V1>& v1,
+        const BaseMatrix<M2>& m2, BaseVector_Mutable<V3>& v3)
+    { NoAliasLDiv(x,v1.calc(),m2.calc(),v3.vec()); }
+    template <int ix, class T, class V1, class M2, class V3>
+    inline void AliasLDiv(
+        const Scaling<ix,T>& x, const BaseVector<V1>& v1,
+        const BaseMatrix<M2>& m2, BaseVector_Mutable<V3>& v3)
+    { AliasLDiv(x,v1.calc(),m2.calc(),v3.vec()); }
+
+    template <class V1, class M2>
+    inline void LDivEq(
+        BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
+    { LDivEq(v1.vec(),m2.calc()); }
+    template <class V1, class M2>
+    inline void NoAliasLDivEq(
+        BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
+    { NoAliasLDivEq(v1.vec(),m2.calc()); }
+    template <class V1, class M2>
+    inline void AliasLDivEq(
+        BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
+    { AliasLDivEq(v1.vec(),m2.calc()); }
+
+    template <int ix, class T, class V1, class M2, class V3>
+    inline void RDiv(
+        const Scaling<ix,T>& x, const BaseVector<V1>& v1,
+        const BaseMatrix<M2>& m2, BaseVector_Mutable<V3>& v3)
+    { RDiv(x,v1.calc(),m2.calc(),v3.vec()); }
+    template <int ix, class T, class V1, class M2, class V3>
+    inline void NoAliasRDiv(
+        const Scaling<ix,T>& x, const BaseVector<V1>& v1,
+        const BaseMatrix<M2>& m2, BaseVector_Mutable<V3>& v3)
+    { NoAliasRDiv(x,v1.calc(),m2.calc(),v3.vec()); }
+    template <int ix, class T, class V1, class M2, class V3>
+    inline void AliasRDiv(
+        const Scaling<ix,T>& x, const BaseVector<V1>& v1,
+        const BaseMatrix<M2>& m2, BaseVector_Mutable<V3>& v3)
+    { AliasRDiv(x,v1.calc(),m2.calc(),v3.vec()); }
+
+#if 0
+    // Defined below...
+    template <class V1, class M2>
+    inline void RDivEq(
+        BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
+    { RDivEq(v1.vec(),m2.calc()); }
+#endif
+    template <class V1, class M2>
+    inline void NoAliasRDivEq(
+        BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
+    { NoAliasRDivEq(v1.vec(),m2.calc()); }
+    template <class V1, class M2>
+    inline void AliasRDivEq(
+        BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
+    { AliasRDivEq(v1.vec(),m2.calc()); }
+
+
     //
     // Vector (/%) Matrix
     //
@@ -54,27 +116,30 @@ namespace tmv {
 #ifdef XDEBUG_QUOTVM
     template <int ix, class T, class V1, class M2, class V3>
     inline void LDiv_Debug(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3)
+        const Scaling<ix,T>& x, const BaseVector<V1>& v1,
+        const BaseMatrix<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
-        // v3 = m2^-1*v1
-        // --> m2*v3 = v1
+        // v3 = x*m2^-1*v1
+        // --> m2*v3/x = v1
+        Vector<typename V1::value_type> v1i = v1;
+        Matrix<typename M2::value_type> m2i = m2;
         Vector<typename V3::value_type> v3i = v3;
 
         LDiv(x,v1.vec(),m2.mat(),v3.vec());
 
-        Vector<typename V3::value_type> v1c = m2*v3/x;
-        const typename V3::real_type kappa = Norm(m2.inverse())*Norm(m2);
+        Vector<typename V3::value_type> v1c = m2i*v3/x;
+        const typename V3::real_type kappa = Norm(m2i.inverse())*Norm(m2i);
 
-        if (Norm(v1-v1c) > 1.e-6 * kappa * Norm(v1)) {
+        if (Norm(v1i-v1c) > 1.e-6 * kappa * Norm(v1i)) {
             std::cout<<"LDivVM:  \n";
-            std::cout<<"v1 = "<<TMV_Text(v1)<<"  "<<v1<<std::endl;
-            std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
+            std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
+            std::cout<<"v1 = "<<TMV_Text(v1)<<"  "<<v1i<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2i<<std::endl;
             std::cout<<"v3 = "<<TMV_Text(v3)<<"  "<<v3i<<std::endl;
             std::cout<<"v3 -> "<<v3<<std::endl;
             std::cout<<"v1c = "<<v1c<<std::endl;
-            std::cout<<"diff = "<<v1-v1c<<std::endl;
-            std::cout<<"Norm(diff) = "<<Norm(v1-v1c)<<std::endl;
+            std::cout<<"diff = "<<v1i-v1c<<std::endl;
+            std::cout<<"Norm(diff) = "<<Norm(v1i-v1c)<<std::endl;
             exit(1);
         }
     }
@@ -83,77 +148,82 @@ namespace tmv {
 #ifdef XDEBUG_QUOTVM
     template <int ix, class T, class V1, class M2, class V3>
     inline void RDiv_Debug(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3)
+        const Scaling<ix,T>& x, const BaseVector<V1>& v1,
+        const BaseMatrix<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
-        // v3 = v1*m2^-1
-        // --> v3*m2 = v1
+        // v3 = x*v1*m2^-1
+        // --> v3*m2/x = v1
+        Vector<typename V1::value_type> v1i = v1;
+        Matrix<typename M2::value_type> m2i = m2;
         Vector<typename V3::value_type> v3i = v3;
 
         RDiv(x,v1.vec(),m2.mat(),v3.vec());
 
-        Vector<typename V3::value_type> v1c = v3*m2/x;
-        const typename V3::real_type kappa = Norm(m2.inverse())*Norm(m2);
+        Vector<typename V3::value_type> v1c = v3*m2i/x;
+        const typename V3::real_type kappa = Norm(m2i.inverse())*Norm(m2i);
 
-        if (Norm(v1-v1c) > 1.e-6 * kappa * Norm(v1)) {
+        if (Norm(v1i-v1c) > 1.e-6 * kappa * Norm(v1i)) {
             std::cout<<"RDivVM:  \n";
-            std::cout<<"v1 = "<<TMV_Text(v1)<<"  "<<v1<<std::endl;
-            std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
+            std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
+            std::cout<<"v1 = "<<TMV_Text(v1)<<"  "<<v1i<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2i<<std::endl;
             std::cout<<"v3 = "<<TMV_Text(v3)<<"  "<<v3i<<std::endl;
             std::cout<<"v3 -> "<<v3<<std::endl;
             std::cout<<"v1c = "<<v1c<<std::endl;
-            std::cout<<"diff = "<<v1-v1c<<std::endl;
-            std::cout<<"Norm(diff) = "<<Norm(v1-v1c)<<std::endl;
+            std::cout<<"diff = "<<v1i-v1c<<std::endl;
+            std::cout<<"Norm(diff) = "<<Norm(v1i-v1c)<<std::endl;
             exit(1);
         }
     }
 #endif
 
 #ifdef XDEBUG_QUOTVM
-    template <int ix, class T, class V1, class M2>
+    template <class V1, class M2>
     inline void LDivEq_Debug(
-        BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2)
+        BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
     {
         Vector<typename V1::value_type> v1i = v1;
+        Matrix<typename M2::value_type> m2i = m2;
 
         LDivEq(v1.vec(),m2.mat());
 
-        Vector<typename V1::value_type> v1c = m2*v1i;
-        const typename V1::real_type kappa = Norm(m2.inverse())*Norm(m2);
+        Vector<typename V1::value_type> v1c = m2i*v1;
+        const typename V1::real_type kappa = Norm(m2i.inverse())*Norm(m2i);
 
-        if (Norm(v1-v1c) > 1.e-6 * kappa * Norm(v1i)) {
+        if (Norm(v1i-v1c) > 1.e-6 * kappa * Norm(v1i)) {
             std::cout<<"LDivEqVM:  \n";
             std::cout<<"v1 = "<<TMV_Text(v1)<<"  "<<v1i<<std::endl;
-            std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2i<<std::endl;
             std::cout<<"v1 -> "<<v1<<std::endl;
             std::cout<<"v1c = "<<v1c<<std::endl;
-            std::cout<<"diff = "<<v1-v1c<<std::endl;
-            std::cout<<"Norm(diff) = "<<Norm(v1-v1c)<<std::endl;
+            std::cout<<"diff = "<<v1i-v1c<<std::endl;
+            std::cout<<"Norm(diff) = "<<Norm(v1i-v1c)<<std::endl;
             exit(1);
         }
     }
 #endif
 
 #ifdef XDEBUG_QUOTVM
-    template <int ix, class T, class V1, class M2>
+    template <class V1, class M2>
     inline void RDivEq_Debug(
-        BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2)
+        BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
     {
         Vector<typename V1::value_type> v1i = v1;
+        Matrix<typename M2::value_type> m2i = m2;
 
         RDivEq(v1.vec(),m2.mat());
 
-        Vector<typename V1::value_type> v1c = v1i*m2;
-        const typename V1::real_type kappa = Norm(m2.inverse())*Norm(m2);
+        Vector<typename V1::value_type> v1c = v1*m2i;
+        const typename V1::real_type kappa = Norm(m2i.inverse())*Norm(m2i);
 
-        if (Norm(v1-v1c) > 1.e-6 * kappa * Norm(v1i)) {
+        if (Norm(v1i-v1c) > 1.e-6 * kappa * Norm(v1i)) {
             std::cout<<"RDivEqVM:  \n";
             std::cout<<"v1 = "<<TMV_Text(v1)<<"  "<<v1i<<std::endl;
-            std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2i<<std::endl;
             std::cout<<"v1 -> "<<v1<<std::endl;
             std::cout<<"v1c = "<<v1c<<std::endl;
-            std::cout<<"diff = "<<v1-v1c<<std::endl;
-            std::cout<<"Norm(diff) = "<<Norm(v1-v1c)<<std::endl;
+            std::cout<<"diff = "<<v1i-v1c<<std::endl;
+            std::cout<<"Norm(diff) = "<<Norm(v1i-v1c)<<std::endl;
             exit(1);
         }
     }
@@ -215,9 +285,9 @@ namespace tmv {
             TMVStaticAssert((Sizes<type::_size,V3::_size>::same)); 
             TMVAssert(size() == v3.size());
 #ifdef XDEBUG_QUOTVM
-            LDiv_Debug(x,v1.calc(),m2.calc(),v3.vec());
+            LDiv_Debug(x,v1.vec(),m2.mat(),v3.vec());
 #else
-            LDiv(x,v1.calc(),m2.calc(),v3.vec());
+            LDiv(x,v1.vec(),m2.mat(),v3.vec());
 #endif
         }
 
@@ -228,9 +298,9 @@ namespace tmv {
             TMVStaticAssert((Sizes<type::_size,V3::_size>::same)); 
             TMVAssert(size() == v3.size());
 #ifdef XDEBUG_QUOTVM
-            LDiv_Debug(x,v1.calc(),m2.calc(),v3.vec());
+            LDiv_Debug(x,v1.vec(),m2.mat(),v3.vec());
 #else
-            NoAliasLDiv(x,v1.calc(),m2.calc(),v3.vec());
+            NoAliasLDiv(x,v1.vec(),m2.mat(),v3.vec());
 #endif
         }
 
@@ -296,9 +366,9 @@ namespace tmv {
             TMVStaticAssert((Sizes<type::_size,V3::_size>::same)); 
             TMVAssert(size() == v3.size());
 #ifdef XDEBUG_QUOTVM
-            RDiv_Debug(x,v1.calc(),m2.calc(),v3.vec());
+            RDiv_Debug(x,v1.vec(),m2.mat(),v3.vec());
 #else
-            RDiv(x,v1.calc(),m2.calc(),v3.vec());
+            RDiv(x,v1.vec(),m2.mat(),v3.vec());
 #endif
         }
 
@@ -309,9 +379,9 @@ namespace tmv {
             TMVStaticAssert((Sizes<type::_size,V3::_size>::same)); 
             TMVAssert(size() == v3.size());
 #ifdef XDEBUG_QUOTVM
-            RDiv_Debug(x,v1.calc(),m2.calc(),v3.vec());
+            RDiv_Debug(x,v1.vec(),m2.mat(),v3.vec());
 #else
-            NoAliasRDiv(x,v1.calc(),m2.calc(),v3.vec());
+            NoAliasRDiv(x,v1.vec(),m2.mat(),v3.vec());
 #endif
         }
 
@@ -335,7 +405,10 @@ namespace tmv {
     template <class M, int ix, class T, class V>
     inline QuotVM<ix,T,V,M> operator/(
         const BaseVector<V>& v, const ProdXM<ix,T,M>& m)
-    { return QuotVM<ix,T,V,M>(Traits<T>::real_type(1)/m.getX(),v,m.getM()); }
+    { 
+        return QuotVM<ix,T,V,M>(
+            typename Traits<T>::real_type(1)/m.getX(),v,m.getM()); 
+    }
 
     // xv / m
     template <int ix, class T, class M, class V>
@@ -348,7 +421,7 @@ namespace tmv {
     template <int ix1, class T1, class M, int ix2, class T2, class V>
     inline QuotVM<ix1*ix2,PT,V,M> operator/(
         const ProdXV<ix1,T1,V>& v, const ProdXM<ix2,T2,M>& m)
-    { return QuotVM<ix1*ix2,PT,V,M>(m.getX()/v.getX(),v.getV(),m.getM()); }
+    { return QuotVM<ix1*ix2,PT,V,M>(v.getX()/m.getX(),v.getV(),m.getM()); }
 #undef PT
 
     // x/m * v
@@ -372,9 +445,9 @@ namespace tmv {
         BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
     { 
 #ifdef XDEBUG_QUOTVM
-        LDivEq_Debug(v1,m2.calc()); 
+        LDivEq_Debug(v1.vec(),m2.mat()); 
 #else
-        LDivEq(v1,m2.calc()); 
+        LDivEq(v1.vec(),m2.mat()); 
 #endif
     }
 
@@ -384,9 +457,9 @@ namespace tmv {
         BaseVector_Mutable<V1>& v1, const ProdXM<ix2,T2,M2>& m2)
     { 
 #ifdef XDEBUG_QUOTVM
-        LDivEq_Debug(v1,m2.getM().calc()); 
+        LDivEq_Debug(v1.vec(),m2.getM().mat()); 
 #else
-        LDivEq(v1,m2.getM().calc()); 
+        LDivEq(v1.vec(),m2.getM().mat()); 
 #endif
         Scale(typename Traits<T2>::real_type(1)/m2.getX(),v1.vec());
     }
@@ -404,7 +477,10 @@ namespace tmv {
     template <class V, class M, int ix, class T>
     inline RQuotVM<ix,T,V,M> operator%(
         const BaseVector<V>& v, const ProdXM<ix,T,M>& m)
-    { return RQuotVM<ix,T,V,M>(Traits<T>::real_type(1)/m.getX(),v,m.getM()); }
+    {
+        return RQuotVM<ix,T,V,M>(
+            typename Traits<T>::real_type(1)/m.getX(),v,m.getM()); 
+    }
 
     // xv % m
     template <int ix, class T, class V, class M>
@@ -417,7 +493,7 @@ namespace tmv {
     template <int ix1, class T1, class V, int ix2, class T2, class M>
     inline RQuotVM<ix1*ix2,PT,V,M> operator%(
         const ProdXV<ix1,T1,V>& v, const ProdXM<ix2,T2,M>& m)
-    { return RQuotVM<ix1*ix2,PT,V,M>(m.getX()/v.getX(),v.getV(),m.getM()); }
+    { return RQuotVM<ix1*ix2,PT,V,M>(v.getX()/m.getX(),v.getV(),m.getM()); }
 #undef PT
 
     // v * x/m
@@ -440,9 +516,9 @@ namespace tmv {
         BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
     { 
 #ifdef XDEBUG_QUOTVM
-        RDivEq_Debug(v1,Scaling<1,typename V1::real_type>(),m2.calc()); 
+        RDivEq_Debug(v1.vec(),m2.mat()); 
 #else
-        RDivEq(v1,Scaling<1,typename V1::real_type>(),m2.calc()); 
+        RDivEq(v1.vec(),m2.calc()); 
 #endif
     }
 
@@ -452,23 +528,24 @@ namespace tmv {
         BaseVector_Mutable<V1>& v1, const ProdXM<ix2,T2,M2>& m2)
     { 
 #ifdef XDEBUG_QUOTVM
-        RDivEq_Debug(v1,m2.getM().calc()); 
+        RDivEq_Debug(v1.vec(),m2.getM().mat()); 
 #else
-        RDivEq(v1,m2.getM().calc()); 
+        RDivEq(v1.vec(),m2.getM().calc()); 
 #endif
         Scale(typename Traits<T2>::real_type(1)/m2.getX(),v1.vec());
     }
 
     // v *= x/m
     template <class V1, int ix2, class T2, class M2>
-    inline void RDivEq(
+    inline void MultEq(
         BaseVector_Mutable<V1>& v1, const QuotXM<ix2,T2,M2>& m2)
     { 
 #ifdef XDEBUG_QUOTVM
-        RDivEq_Debug(v1,m2.getX(),m2.getM().calc()); 
+        RDivEq_Debug(v1.vec(),m2.getM().mat()); 
 #else
-        RDivEq(v1,m2.getX(),m2.getM().calc()); 
+        RDivEq(v1.vec(),m2.getM().calc()); 
 #endif
+        Scale(m2.getX(),v1.vec());
     }
 
 

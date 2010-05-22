@@ -39,6 +39,9 @@
 
 #ifdef XDEBUG_PRODMM
 #include "TMV_Matrix.h"
+#include "TMV_SumMM.h"
+#include "TMV_AddMM.h"
+#include "TMV_NormM.h"
 #include <iostream>
 #endif
 
@@ -48,77 +51,67 @@ namespace tmv {
     // Matrix * Matrix
     //
 
-    // These first few are intentionally not defined to make sure we
-    // get a compiler error if they are used.
-    // All real calls should go through a more specific version than 
-    // just the BaseMatrix_Calc's.
+#if 1
+    // These first few are for matrices that aren't calculated yet.
+    // Some BaseMatrix objects are overloaded (e.g. Permutation), but
+    // others aren't, in which case they calculate the matrix first
+    // and then call MultMM.  If a BaseMatrix_Calc type doesn't overload
+    // this function, then an infinite loop will result, so make sure
+    // to remember to overload these for any new matrix types
     template <bool add, int ix, class T, class M1, class M2, class M3>
     inline void MultMM(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1, 
-        const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3);
+        const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
+        const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
+    { MultMM<add>(x,m1.calc(),m2.calc(),m3.mat()); }
     template <bool add, int ix, class T, class M1, class M2, class M3>
     inline void NoAliasMultMM(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1, 
-        const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3);
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void InlineMultMM(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1, 
-        const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3);
+        const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
+        const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
+    { NoAliasMultMM<add>(x,m1.calc(),m2.calc(),m3.mat()); }
     template <bool add, int ix, class T, class M1, class M2, class M3>
     inline void AliasMultMM(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1, 
-        const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3);
+        const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
+        const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
+    { AliasMultMM<add>(x,m1.calc(),m2.calc(),m3.mat()); }
 
     // These are helpers to allow the caller to not use a Scaling object.
     template <bool add, class T, class M1, class M2, class M3>
     inline void MultMM(
-        const T& x, const BaseMatrix_Calc<M1>& m1,
-        const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3)
+        const T& x, const BaseMatrix<M1>& m1,
+        const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     { MultMM<add>(Scaling<0,T>(x),m1.mat(),m2.mat(),m3.mat()); }
     template <bool add, class T, class M1, class M2, class M3>
     inline void NoAliasMultMM(
-        const T& x, const BaseMatrix_Calc<M1>& m1,
-        const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3)
+        const T& x, const BaseMatrix<M1>& m1,
+        const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     { NoAliasMultMM<add>(Scaling<0,T>(x),m1.mat(),m2.mat(),m3.mat()); }
     template <bool add, class T, class M1, class M2, class M3>
-    inline void InlineMultMM(
-        const T& x, const BaseMatrix_Calc<M1>& m1,
-        const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3)
-    { InlineMultMM<add>(Scaling<0,T>(x),m1.mat(),m2.mat(),m3.mat()); }
-    template <bool add, class T, class M1, class M2, class M3>
     inline void AliasMultMM(
-        const T& x, const BaseMatrix_Calc<M1>& m1,
-        const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3)
+        const T& x, const BaseMatrix<M1>& m1,
+        const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     { AliasMultMM<add>(Scaling<0,T>(x),m1.mat(),m2.mat(),m3.mat()); }
+#endif
 
     template <bool add, class M1, class M2, class M3>
     inline void MultMM(
-        const BaseMatrix_Calc<M1>& m1,
-        const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3)
+        const BaseMatrix<M1>& m1,
+        const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     {
         MultMM<add>(
             Scaling<1,typename M3::real_type>(),m1.mat(),m2.mat(),m3.mat()); 
     }
     template <bool add, class M1, class M2, class M3>
     inline void NoAliasMultMM(
-        const BaseMatrix_Calc<M1>& m1,
-        const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3)
+        const BaseMatrix<M1>& m1,
+        const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     { 
         NoAliasMultMM<add>(
             Scaling<1,typename M3::real_type>(),m1.mat(),m2.mat(),m3.mat()); 
     }
     template <bool add, class M1, class M2, class M3>
-    inline void InlineMultMM(
-        const BaseMatrix_Calc<M1>& m1,
-        const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3)
-    { 
-        InlineMultMM<add>(
-            Scaling<1,typename M3::real_type>(),m1.mat(),m2.mat(),m3.mat()); 
-    }
-    template <bool add, class M1, class M2, class M3>
     inline void AliasMultMM(
-        const BaseMatrix_Calc<M1>& m1,
-        const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3)
+        const BaseMatrix<M1>& m1,
+        const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     {
         AliasMultMM<add>(
             Scaling<1,typename M3::real_type>(),m1.mat(),m2.mat(),m3.mat()); 
@@ -127,8 +120,8 @@ namespace tmv {
 #ifdef XDEBUG_PRODMM
     template <bool add, int ix, class T, class M1, class M2, class M3>
     inline void MultMM_Debug(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
-        const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3)
+        const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
+        const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     {
         Matrix<typename M1::value_type> m1i = m1.mat();
         Matrix<typename M2::value_type> m2i = m2.mat();
@@ -142,21 +135,23 @@ namespace tmv {
                 }
             }
         }
-        //std::cout<<"Start MultMM XDEBUG"<<std::endl;
-        //std::cout<<"add = "<<add<<std::endl;
-        //std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
-        //std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1<<std::endl;
-        //std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
-        //std::cout<<"m3 = "<<TMV_Text(m3)<<"  "<<m3.mat()<<std::endl;
-        //std::cout<<"m3i = "<<TMV_Text(m3i)<<"  "<<m3i<<std::endl;
-        //std::cout<<"m3c = "<<TMV_Text(m3c)<<"  "<<m3c<<std::endl;
-        //std::cout<<"m3c => "<<m3c<<std::endl;
+        std::cout<<"Start MultMM XDEBUG"<<std::endl;
+        std::cout<<"add = "<<add<<std::endl;
+        std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
+        std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1<<std::endl;
+        std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
+        std::cout<<"m3 = "<<TMV_Text(m3)<<"  "<<m3.mat()<<std::endl;
+        std::cout<<"m3i = "<<TMV_Text(m3i)<<"  "<<m3i<<std::endl;
+        std::cout<<"m3c = "<<TMV_Text(m3c)<<"  "<<m3c<<std::endl;
+        std::cout<<"m3c => "<<m3c<<std::endl;
 
         MultMM<add>(x,m1.mat(),m2.mat(),m3.mat());
 
-        //std::cout<<"diff = "<<m3.mat()-m3c<<std::endl;
-        //std::cout<<"Norm(diff) = "<<Norm(m3.mat()-m3c)<<std::endl;
-        if (Norm(m3.mat()-m3c) > 1.e-6 * std::abs(T(x))*Norm(m1)*Norm(m2)) {
+        std::cout<<"m3 => "<<m3.mat()<<std::endl;
+        Matrix<typename M3::value_type> m3f = m3.mat();
+        std::cout<<"diff = "<<m3.mat()-m3c<<std::endl;
+        std::cout<<"Norm(diff) = "<<Norm(m3.mat()-m3c)<<std::endl;
+        if (Norm(m3f-m3c) > 1.e-6 * std::abs(T(x))*Norm(m1i)*Norm(m2i)) {
             std::cout<<"MultMM:  add = "<<add<<std::endl;
             std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
@@ -166,11 +161,11 @@ namespace tmv {
                 std::cout<<"m1 = "<<m1i<<std::endl;
                 std::cout<<"m2 = "<<m2i<<std::endl;
                 std::cout<<"m3 = "<<m3i<<std::endl;
-                std::cout<<"m3 -> "<<m3.mat()<<std::endl;
+                std::cout<<"m3 -> "<<m3f<<std::endl;
                 std::cout<<"correct = "<<m3c<<std::endl;
-                std::cout<<"diff = "<<(m3c-m3.mat())<<std::endl;
+                std::cout<<"diff = "<<(m3c-m3f)<<std::endl;
             }
-            std::cout<<"Norm(diff) = "<<Norm(m3c-m3.mat())<<std::endl;
+            std::cout<<"Norm(diff) = "<<Norm(m3c-m3f)<<std::endl;
             exit(1);
         }
     }
@@ -180,7 +175,7 @@ namespace tmv {
     template <class M1, int ix, class T, class M2>
     inline void MultEqMM_Debug(
         BaseMatrix_Mutable<M1>& m1,
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M2>& m2)
+        const Scaling<ix,T>& x, const BaseMatrix<M2>& m2)
     {
         Matrix<typename M1::value_type> m1i = m1.mat();
         Matrix<typename M1::value_type> m2i = m2.mat();
@@ -196,7 +191,8 @@ namespace tmv {
 
         MultEqMM(m1.mat(),x,m2.mat());
 
-        if (Norm(m1.mat()-m3) > 1.e-6 * std::abs(T(x))*Norm(m1i)*Norm(m2)) {
+        Matrix<typename M1::value_type> m1f = m1.mat();
+        if (Norm(m1f-m3) > 1.e-6 * std::abs(T(x))*Norm(m1i)*Norm(m2i)) {
             std::cout<<"MultEqMM:  \n";
             std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
@@ -204,11 +200,11 @@ namespace tmv {
             if (m1.colsize() < 100 && m1.rowsize() < 100) {
                 std::cout<<"m1 = "<<m1i<<std::endl;
                 std::cout<<"m2 = "<<m2i<<std::endl;
-                std::cout<<"m1 -> "<<m1.mat()<<std::endl;
+                std::cout<<"m1 -> "<<m1f<<std::endl;
                 std::cout<<"correct = "<<m3<<std::endl;
-                std::cout<<"diff = "<<(m3-m1.mat())<<std::endl;
+                std::cout<<"diff = "<<(m3-m1f)<<std::endl;
             }
-            std::cout<<"Norm(diff) = "<<Norm(m3-m1.mat())<<std::endl;
+            std::cout<<"Norm(diff) = "<<Norm(m3-m1f)<<std::endl;
             exit(1);
         }
     }
@@ -226,7 +222,8 @@ namespace tmv {
 
         enum { _colsize = M1::_colsize };
         enum { _rowsize = M2::_rowsize };
-        enum { _shape = ShapeTraits2<M1::_shape,M2::_shape>::prod };
+        enum { shape1 = Traits<ProdXM<ix,T,M2> >::_shape };
+        enum { _shape = ShapeTraits2<shape1,M1::_shape>::prod };
         enum { _fort = M1::_fort && M2::_fort };
         enum { _calc = false };
         enum { rm1 = Traits<typename M1::calc_type>::_rowmajor };
@@ -286,9 +283,9 @@ namespace tmv {
             TMVAssert(colsize() == m3.colsize());
             TMVAssert(rowsize() == m3.rowsize());
 #ifdef XDEBUG_PRODMM
-            MultMM_Debug<false>(x,m1.calc(),m2.calc(),m3.mat());
+            MultMM_Debug<false>(x,m1.mat(),m2.mat(),m3.mat());
 #else
-            MultMM<false>(x,m1.calc(),m2.calc(),m3.mat());
+            MultMM<false>(x,m1.mat(),m2.mat(),m3.mat());
 #endif
         }
 
@@ -303,9 +300,9 @@ namespace tmv {
             TMVAssert(colsize() == m3.colsize());
             TMVAssert(rowsize() == m3.rowsize());
 #ifdef XDEBUG_PRODMM
-            MultMM_Debug<false>(x,m1.calc(),m2.calc(),m3.mat());
+            MultMM_Debug<false>(x,m1.mat(),m2.mat(),m3.mat());
 #else
-            NoAliasMultMM<false>(x,m1.calc(),m2.calc(),m3.mat());
+            NoAliasMultMM<false>(x,m1.mat(),m2.mat(),m3.mat());
 #endif
         }
 
@@ -355,9 +352,9 @@ namespace tmv {
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix<M2>& m2)
     {
 #ifdef XDEBUG_PRODMM
-        MultEqMM_Debug(m1.mat(),Scaling<1,RT>(),m2.calc()); 
+        MultEqMM_Debug(m1.mat(),Scaling<1,RT>(),m2.mat()); 
 #else
-        MultEqMM(m1.mat(),Scaling<1,RT>(),m2.calc()); 
+        MultEqMM(m1.mat(),Scaling<1,RT>(),m2.mat()); 
 #endif
     }
 #undef RT
@@ -368,9 +365,9 @@ namespace tmv {
         BaseMatrix_Mutable<M1>& m1, const ProdXM<ix2,T2,M2>& m2)
     { 
 #ifdef XDEBUG_PRODMM
-        MultEqMM_Debug(m1.mat(),m2.getX(),m2.getM().calc()); 
+        MultEqMM_Debug(m1.mat(),m2.getX(),m2.getM().mat()); 
 #else
-        MultEqMM(m1.mat(),m2.getX(),m2.getM().calc()); 
+        MultEqMM(m1.mat(),m2.getX(),m2.getM().mat()); 
 #endif
     }
 
@@ -381,9 +378,9 @@ namespace tmv {
     { 
 #ifdef XDEBUG_PRODMM
         MultMM_Debug<true>(
-            mm.getX(),mm.getM1().calc(),mm.getM2().calc(),m3.mat()); 
+            mm.getX(),mm.getM1().mat(),mm.getM2().mat(),m3.mat()); 
 #else
-        MultMM<true>(mm.getX(),mm.getM1().calc(),mm.getM2().calc(),m3.mat()); 
+        MultMM<true>(mm.getX(),mm.getM1().mat(),mm.getM2().mat(),m3.mat()); 
 #endif
     }
 
@@ -394,9 +391,9 @@ namespace tmv {
     { 
 #ifdef XDEBUG_PRODMM
         MultMM_Debug<true>(
-            -mm.getX(),mm.getM1().calc(),mm.getM2().calc(),m3.mat()); 
+            -mm.getX(),mm.getM1().mat(),mm.getM2().mat(),m3.mat()); 
 #else
-        MultMM<true>(-mm.getX(),mm.getM1().calc(),mm.getM2().calc(),m3.mat()); 
+        MultMM<true>(-mm.getX(),mm.getM1().mat(),mm.getM2().mat(),m3.mat()); 
 #endif
     }
 

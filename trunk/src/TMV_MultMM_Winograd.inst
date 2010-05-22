@@ -2,7 +2,7 @@
 #define CT std::complex<T>
 
 #ifndef TMV_INST_SKIP_BLAS
-#ifdef TMV_USE_WINOGRAD
+#ifdef TMV_MM_USE_WINOGRAD
 
 #define DefMM(T1, C1, T2, C2, T3) \
   template void InstMultMM_Winograd( \

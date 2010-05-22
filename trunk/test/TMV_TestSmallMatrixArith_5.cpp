@@ -1,7 +1,7 @@
 
 #include "TMV_TestSmallMatrixArith_5.h"
 
-template <class T> void TestSmallMatrixArith()
+template <class T> void TestSmallMatrixArith_5()
 {
     TestSmallMatrixArith_5a<T>();
     TestSmallMatrixArith_5b<T>();
@@ -9,6 +9,10 @@ template <class T> void TestSmallMatrixArith()
     TestSmallMatrixArith_5d<T>();
     TestSmallMatrixArith_5e<T>();
     TestSmallMatrixArith_5f<T>();
+    TestSmallMatrixArith_5g<T>();
+    TestSmallMatrixArith_5h<T>();
+    TestSmallMatrixArith_5i<T>();
+    TestSmallMatrixArith_5j<T>();
 }
 
 #ifdef TEST_DOUBLE

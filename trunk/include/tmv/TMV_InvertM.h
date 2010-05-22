@@ -34,6 +34,11 @@
 #define TMV_InvertM_H
 
 #include "TMV_BaseMatrix.h"
+#include "TMV_MultMM.h"
+#include "TMV_MultUL.h"
+#include "TMV_InvertD.h"
+#include "TMV_InvertU.h"
+#include "TMV_ElemMultVV.h"
 
 #ifdef PRINTALGO_InvM
 #include <iostream>
@@ -64,41 +69,6 @@ namespace tmv {
     template <class M1, class M2>
     inline void AliasMakeInverseATA(
         const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2);
-
-    // Defined in TMV_InvertD.h
-    template <class V>
-    inline void ElemInvert(BaseVector_Mutable<V>& v);
-    template <class V>
-    inline void NoAliasElemInvert(BaseVector_Mutable<V>& v);
-
-    // Defined in TMV_InvertU.h
-    template <class M>
-    inline void InvertSelf(BaseMatrix_Tri_Mutable<M>& m);
-    template <class M>
-    inline void NoAliasInvertSelf(BaseMatrix_Tri_Mutable<M>& m);
-
-    // Defined in TMV_MultUL.h
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void MultMM(
-        const Scaling<ix,T>& x,
-        const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Tri<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3);
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasMultMM(
-        const Scaling<ix,T>& x,
-        const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Tri<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3);
-
-    // Defined in TMV_ElemMultVV.h
-    template <bool add, int ix, class T, class V1, class V2, class V3>
-    inline void ElemMultVV(
-        const Scaling<ix,T>& x1, const BaseVector_Calc<V1>& v1,
-        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3);
-    template <bool add, int ix, class T, class V1, class V2, class V3>
-    inline void NoAliasElemMultVV(
-        const Scaling<ix,T>& x1, const BaseVector_Calc<V1>& v1,
-        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3);
-
 
     //
     // minv = x * m^-1
@@ -197,7 +167,7 @@ namespace tmv {
                 // Special case: if LU and not set already,
                 // do the LU decomposition on m2 instead of m1.
                 Copy(m1,m2);
-                int P[m1.rowsize()];
+                AlignedArray<int> P(m1.rowsize());
                 int detp=0;
                 LU_Decompose(m2,P,detp);
                 LU_Inverse(m2,P);
@@ -222,13 +192,36 @@ namespace tmv {
             // This way is slightly faster than going through m1.lud()
             // since it skips the temporary LU matrix.
             Copy(m1,m2);
-            int P[m1.rowsize()];
+            StackArray<int,rs> P;
             int detp=0;
             LU_Decompose(m2,P,detp);
             LU_Inverse(m2,P);
 #else
             m1.lud().makeInverse(m2);
 #endif
+            Scale(x,m2);
+        }
+    };
+    template <int cs, int ix, class T, class M1, class M2>
+    struct InvertM_Helper<12,cs,UNKNOWN,ix,T,M1,M2>
+    {
+        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        { 
+#ifdef PRINTALGO_InvM
+            const int M = m1.colsize();
+            const int N = m1.rowsize();
+            std::cout<<"InvM algo 12: M,N,cs,rs = "<<M<<','<<N<<','<<
+                cs<<','<<UNKNOWN<<std::endl;
+#endif
+            // Normally algo 12 will only be called for SmallMatrices
+            // which will have a known value for rs.
+            // But it is possible to get here, so we need to have a 
+            // version that doesn't use StackArray.
+            Copy(m1,m2);
+            AlignedArray<int> P(m1.rowsize());
+            int detp=0;
+            LU_Decompose(m2,P,detp);
+            LU_Inverse(m2,P);
             Scale(x,m2);
         }
     };
@@ -796,8 +789,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M1::real_type RT;
             SmallMatrix<T1,2,2> ata;
-            NoAliasMultMM(Scaling<1,RT>(),m1.adjoint(),m1,ata);
-            NoAliasMakeInverse(ata,m2);
+            NoAliasMultMM<false>(Scaling<1,RT>(),m1.adjoint(),m1,ata);
+            NoAliasMakeInverse(Scaling<1,RT>(),ata,m2);
         }
     };
 

@@ -1,7 +1,5 @@
-//#define PRINTALGO_InvM
-//#define PRINTALGO_Det
-//#define PRINTALGO_LU
-//#define PRINTALGO_DIVU
+//#define XTEST_QUOTVM
+//#define XTEST_QUOTMM
 
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
@@ -960,7 +958,7 @@ static void TestSingularDiv(tmv::DivType dt)
 
 template <class T> void TestMatrixDiv()
 {
-#if 0
+#if 1
     TestMatrixDecomp<T,tmv::ColMajor>();
     TestMatrixDecomp<T,tmv::RowMajor>();
     std::cout<<"Matrix<"<<tmv::TMV_Text(T())<<"> passed all ";

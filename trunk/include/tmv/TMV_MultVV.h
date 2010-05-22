@@ -673,7 +673,7 @@ namespace tmv {
                 __m128d xsum2 = _mm_set1_pd(0.);
                 __m128d xA,xB,xAr,xAi,x1,x2;
                 if ( ((unsigned int)(A.get()) & 0xf) == 0 &&
-                     ((unsigned int)(A.get()) & 0xf) == 0 ) {
+                     ((unsigned int)(B.get()) & 0xf) == 0 ) {
                     do {
                         Maybe<true>::sse_load(xA,A.get()); ++A;
                         Maybe<true>::sse_load(xB,B.get()); ++B;

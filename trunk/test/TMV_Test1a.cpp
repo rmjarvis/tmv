@@ -30,7 +30,6 @@ int main() try {
     //showdiv=true;
     //showtests=true;
     //showstartdone=true;
-    //XXDEBUG8 = true;
 
 #if 1
 
@@ -38,6 +37,8 @@ int main() try {
     TestVector<double>();
     TestMatrix<double>();
 #endif // DOUBLE
+
+    TestPermutation();
 
 #ifdef TEST_FLOAT
     TestVector<float>();

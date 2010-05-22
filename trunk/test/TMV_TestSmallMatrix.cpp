@@ -63,13 +63,13 @@ inline void TestBasicSmallMatrix()
         const T qar[] = { 
             T(0), T(-1), T(-2),
             T(2), T(1), T(0) };
-        tmv::SmallMatrix<T,2,3,S> q1(2,3,qar);
+        tmv::SmallMatrix<T,2,3,S> q1(qar);
         for(int i=0;i<2;i++) for(int j=0;j<3;j++) {
             Assert(q1(i,j) == T(2*i-j),"Create SmallMatrix from T*");
         }
         std::vector<T> qv(6);
         for(int i=0;i<6;i++) qv[i] = qar[i];
-        tmv::SmallMatrix<T,2,3,S> q2(2,3,qv);
+        tmv::SmallMatrix<T,2,3,S> q2(qv);
         for(int i=0;i<2;i++) for(int j=0;j<3;j++) {
             Assert(q2(i,j) == T(2*i-j),"Create SmallMatrix from vector");
         }
@@ -85,13 +85,13 @@ inline void TestBasicSmallMatrix()
             T(0), T(2),
             T(-1), T(1),
             T(-2), T(0) };
-        tmv::SmallMatrix<T,2,3,S> q1(2,3,qar);
+        tmv::SmallMatrix<T,2,3,S> q1(qar);
         for(int i=0;i<2;i++) for(int j=0;j<3;j++) {
             Assert(q1(i,j) == T(2*i-j),"Create SmallMatrix from T*");
         }
         std::vector<T> qv(6);
         for(int i=0;i<6;i++) qv[i] = qar[i];
-        tmv::SmallMatrix<T,2,3,S> q2(2,3,qv);
+        tmv::SmallMatrix<T,2,3,S> q2(qv);
         for(int i=0;i<2;i++) for(int j=0;j<3;j++) {
             Assert(q2(i,j) == T(2*i-j),"Create SmallMatrix from vector");
         }
@@ -208,7 +208,7 @@ inline void TestBasicSmallMatrix()
     std::remove("tmvtest_smallmatrix_io.dat");
 }
 
-template <class T> void TestSmallMatrix()
+template <class T> void TestAllSmallMatrix()
 {
     TestBasicSmallMatrix<T,6,4,tmv::RowMajor>();
     TestBasicSmallMatrix<T,6,4,tmv::ColMajor>();
@@ -221,14 +221,14 @@ template <class T> void TestSmallMatrix()
 }
 
 #ifdef TEST_DOUBLE
-template void TestSmallMatrix<double>();
+template void TestAllSmallMatrix<double>();
 #endif
 #ifdef TEST_FLOAT
-template void TestSmallMatrix<float>();
+template void TestAllSmallMatrix<float>();
 #endif
 #ifdef TEST_LONGDOUBLE
-template void TestSmallMatrix<long double>();
+template void TestAllSmallMatrix<long double>();
 #endif
 #ifdef TEST_INT
-template void TestSmallMatrix<int>();
+template void TestAllSmallMatrix<int>();
 #endif

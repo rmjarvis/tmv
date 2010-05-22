@@ -1,5 +1,6 @@
 TMV_TestVector.cpp
 TMV_TestMatrix.cpp
+TMV_TestPermutation.cpp
 TMV_TestMatrixArith_1.cpp
 TMV_TestMatrixArith_2.cpp
 TMV_TestMatrixArith_3.cpp

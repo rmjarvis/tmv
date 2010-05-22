@@ -53,7 +53,7 @@
 // that it only benefits a few particular sizes of matrices mean that
 // we require TMV_OPT = 3 for it.
 #if TMV_OPT >= 3
-#define TMV_OPT_SMALL
+#define TMV_MM_OPT_SMALL
 #endif
 
 // Select the cleanup code for the edge that doesn't fit into KB-sized
@@ -62,16 +62,16 @@
 // are not a negligible fraction of the calculation. So we only 
 // require TMV_OPT = 2
 #if TMV_OPT >= 2
-#define TMV_OPT_CLEANUP
+#define TMV_MM_OPT_CLEANUP
 #endif
 
 // For very large matrices, a recursive block algorithm is faster than
 // the simpler looping block algorithm.  The dividing line is governed
-// by the parameter TMV_Q5 (see below).  It is not all that expensive 
-// with respect to code bloat, and it is significantly faster for large 
-// matrices, so we only require TMV_OPT = 2.
+// by the parameter TMV_MM_MIN_RECURSIVE (see below).  It is not all that 
+// expensive with respect to code bloat, and it is significantly faster for 
+// large matrices, so we only require TMV_OPT = 2.
 #if TMV_OPT >= 2
-#define TMV_USE_RECURSIVE_BLOCK
+#define TMV_MM_USE_RECURSIVE_BLOCK
 #endif
 
 // For extremely large matrices, it is worth using a recursive Winograd
@@ -80,11 +80,11 @@
 // [ A B ] * [ E F ] = [ I J ]
 // [ C D ]   [ G H ]   [ K L ]
 // This trick is repeated recursively until the minimum size is less than
-// TMV_Q4 (see below), and then we call a more standard algorithm.
+// MIN_WINOGRAD (see below), and then we call a more standard algorithm.
 // It is only used for extremely large matrices, but it isn't too expensive
 // for the code size, so we require TMV_OPT = 2.
 #if TMV_OPT >= 2
-#define TMV_USE_WINOGRAD
+#define TMV_MM_USE_WINOGRAD
 #endif
 
 // The algorithms for large matrices usually involve making temporary
@@ -96,7 +96,7 @@
 // this adds a non-trivial amount of code bloat (although not huge by 
 // any stretch), I require TMV_OPT=3.
 #if TMV_OPT >= 3
-#define TMV_OPT_BAD_ALLOC
+#define TMV_MM_OPT_BAD_ALLOC
 #endif
 
 // There are a number of values used in the algorithm selection
@@ -104,18 +104,10 @@
 // So I put them all here to make them easier to change and to  
 // track down in the code.
 
-// Q1 is the maximum nops to unroll.
+// UNROLL is the maximum nops to unroll.
 // This doesn't seem to be necessary.  The non-unrolling versions are
 // very fast even for very small matrices.
-#if TMV_OPT >= 3
-#define TMV_Q1 200 
-#elif TMV_OPT >= 2
-#define TMV_Q1 25
-#elif TMV_OPT >= 1
-#define TMV_Q1 9
-#else
-#define TMV_Q1 0
-#endif
+#define TMV_MM_UNROLL 0
 
 // Q2 is the block size to use for large matrices.  The value should
 // be chosen such that three Q2xQ2 sized matrices all fit into the 
@@ -124,20 +116,20 @@
 // since I find that for this algorithm, it is better to use smaller
 // blocks.  Also there are special choices when using SSE.
 // So Q2 is just for the regular recursion when not copying (algo 61).
-#define TMV_Q2 64
+#define TMV_MM_BLOCK_SIZE 64
 
-// Q3 is the crossover memory size to start using prefetch commands.
+// PREFETCH is the crossover memory size to start using prefetch commands.
 // This is undoubtedly a function of the L1 (and L2?) cache size,
 // but 2KBytes is probably not too bad for most machines.
 // (That's an empirical value for my Intel Core 2 Duo.)
-#define TMV_Q3 2048
+#define TMV_MM_PREFETCH 2048
 
 // Q4 is the minimum size to use a recursive Winograd algorithm
 // (This is repeated in TMV_MultMM_Winograd.h where it is also used.)
-#ifdef TMV_USE_RECURSIVE_BLOCK
-#define TMV_Q4 2048
+#ifdef TMV_MM_USE_RECURSIVE_BLOCK
+#define TMV_MM_MIN_WINOGRAD 2048
 #else
-#define TMV_Q4 1024
+#define TMV_MM_MIN_WINOGRAD 1024
 #endif
 
 // Q5 is the minimum value of Mb*Nb*Kb*Kb to use recursive algorithm.
@@ -148,14 +140,14 @@
 // isn't _that_ extreme.  At most I've seen about a factor of 2, so
 // if I use the less optimal algorithm for some sizes, it's not that
 // terrible a mistake.
-#define TMV_Q5 16*1024
+#define TMV_MM_MIN_RECURSIVE 16*1024
 
 // Q6 is the minimum value of (M*N*K / 16^3) to use multiple threads.
 // (We also require that M or N > 64 so we have something to split.)
 // The computer that I did most of the testing on only has 2 processors,
 // so this optimization might be particular to having 2 threads.
 // TODO: Investigate the timings when more than 2 threads are available.
-#define TMV_Q6 64
+#define TMV_MM_OPENMP_THRESH 64
 // There are some sizes where this selection formula doesn't quite work,
 // but it seems to be not too bad.  But maybe this deserves a bit more
 // work to find a better formula, since the ratio of time for omp to
@@ -197,11 +189,11 @@
 
 // Q7 is the minimum value of (M*N*K / 16^3) to use copying algorithm
 // where each block is copied to temporary storage in a block structure.
-#define TMV_Q7 4
+#define TMV_MM_MIN_COPY_ALGO 4
 
 // ZeroIX controls whether ix = -1 should act like ix = 1 or ix = 0.
-#define TMV_ZeroIX (ix==0)
-//#define TMV_ZeroIX (ix!=1)
+#define TMV_MM_ZeroIX (ix==0)
+//#define TMV_MM_ZeroIX (ix!=1)
 
 // We split off some of the parts of the calculation to other files.
 // First, this helps us compile them into separate object files, so the
@@ -616,7 +608,7 @@ namespace tmv {
             IT3 C0 = m3.get_col(0).begin();
             IT3 C1 = C0; C1.shiftP(Cstepj);
 
-            const bool dopref = K * sizeof(T1) >= TMV_Q3;
+            const bool dopref = K * sizeof(T1) >= TMV_MM_PREFETCH;
 
             Prefetch_MultiRead(A0.get());
             Prefetch_MultiRead(A1.get());
@@ -850,7 +842,7 @@ namespace tmv {
             IT3 C0 = m3.get_col(0).begin();
             IT3 C1 = C0; C1.shiftP(Cstepj);
 
-            const bool dopref = K * sizeof(T1) >= TMV_Q3;
+            const bool dopref = K * sizeof(T1) >= TMV_MM_PREFETCH;
 
             Prefetch_MultiRead(A0.get());
             Prefetch_MultiRead(A1.get());
@@ -1103,7 +1095,7 @@ namespace tmv {
             IT3 C0 = m3.get_col(0).begin();
             IT3 C1 = C0; C1.shiftP(Cstepj);
 
-            const bool dopref = K * sizeof(T1) >= TMV_Q3;
+            const bool dopref = K * sizeof(T1) >= TMV_MM_PREFETCH;
 
             Prefetch_Read(A0.get());
             Prefetch_Read(A1.get());
@@ -1262,10 +1254,11 @@ namespace tmv {
     // be quite as specific in terms of what size to expect, since these
     // numbers change a lot from one system to another.  
     //
-    // So we have a single parameter, TMV_Q2, to define what is a good choice
-    // for the block size.  64 is a good choice for many systems, but if you
-    // want to mess around with this number, you might be able to slightly
-    // improve the speed of matrix multiplication with a different value.
+    // So we have a single parameter, TMV_MM_BLOCK_SIZE, to define what is a 
+    // good choice for the block size.  64 is a good choice for many systems,
+    // but if you want to mess around with this number, you might be able to 
+    // slightly improve the speed of matrix multiplication with a different 
+    // value.
     //
     // For algo 63 (see description below), we actually find that a smaller
     // block is better.  We hard code its blocks to be 16x16 (for MxN) and
@@ -1301,9 +1294,18 @@ namespace tmv {
         enum { ccc = M1::_colmajor && M2::_colmajor && M3::_colmajor };
         enum { rcc = M1::_rowmajor && M2::_colmajor && M3::_colmajor };
         enum { crc = M1::_colmajor && M2::_rowmajor && M3::_colmajor };
-        enum { MB = ccc ? TMV_Q2 : rcc ? TMV_Q2 : TMV_Q2 };
-        enum { NB = ccc ? TMV_Q2 : rcc ? TMV_Q2 : TMV_Q2 };
-        enum { KB = ccc ? TMV_Q2 : rcc ? TMV_Q2 : TMV_Q2 };
+        enum { MB = (
+                ccc ? TMV_MM_BLOCK_SIZE :
+                rcc ? TMV_MM_BLOCK_SIZE :
+                TMV_MM_BLOCK_SIZE ) };
+        enum { NB = (
+                ccc ? TMV_MM_BLOCK_SIZE :
+                rcc ? TMV_MM_BLOCK_SIZE :
+                TMV_MM_BLOCK_SIZE ) };
+        enum { KB = (
+                ccc ? TMV_MM_BLOCK_SIZE :
+                rcc ? TMV_MM_BLOCK_SIZE :
+                TMV_MM_BLOCK_SIZE ) };
         enum { algo2 = (
                 ccc ? ( M3::iscomplex ? 11 : 12 ) :
                 rcc ? ( M3::iscomplex ? 21 : 22 ) :
@@ -1427,7 +1429,7 @@ namespace tmv {
     // storage.  However, simply loop over M,N and then do the full K
     // row/column block in one set.  This is faster than algo 63 for
     // smaller matrices.  The dividing line between the two algorithms is 
-    // set by TMV_Q5.
+    // set by TMV_MM_MIN_RECURSIVE.
     template <int cs, int rs, int xs, bool add, 
               int ix, class T, class M1, class M2, class M3>
     struct MultMM_Helper<64,cs,rs,xs,add,ix,T,M1,M2,M3> 
@@ -1570,7 +1572,7 @@ namespace tmv {
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
 
-#ifdef TMV_USE_RECURSIVE_BLOCK
+#ifdef TMV_MM_USE_RECURSIVE_BLOCK
             const int Mb = cs == UNKNOWN ? UNKNOWN : (cs >> 6);
             const int Nb = rs == UNKNOWN ? UNKNOWN : (rs >> 6);
             const int Kb = xs == UNKNOWN ? UNKNOWN : (xs >> 6);
@@ -1607,11 +1609,12 @@ namespace tmv {
             const int algo1 = 
                 inst ? -2 : 
                 (cs == UNKNOWN || rs == UNKNOWN || xs == UNKNOWN) ? 72 :
-#ifdef TMV_USE_WINOGRAD
-                (cs >= TMV_Q4 && rs >= TMV_Q4 && xs >= TMV_Q4) ? 68 :
+#ifdef TMV_MM_USE_WINOGRAD
+                (cs >= TMV_MM_MIN_WINOGRAD && rs >= TMV_MM_MIN_WINOGRAD && 
+                 xs >= TMV_MM_MIN_WINOGRAD) ? 68 :
 #endif
-#ifdef TMV_USE_RECURSIVE_BLOCK
-                (MbNbKb2 >= TMV_Q5) ? 63 :
+#ifdef TMV_MM_USE_RECURSIVE_BLOCK
+                (MbNbKb2 >= TMV_MM_MIN_RECURSIVE) ? 63 :
 #endif
                 64;
 
@@ -1665,7 +1668,7 @@ namespace tmv {
                     bad_alloc = true;
                 }
             }
-#ifdef TMV_OPT_BAD_ALLOC
+#ifdef TMV_MM_OPT_BAD_ALLOC
             const int algo2 = 66;
 #else
             const bool ccc = M1::_colmajor && M2::_colmajor && M3::_colmajor;
@@ -1727,12 +1730,12 @@ namespace tmv {
             if ( (M < 16 && N < 16 && K < 16) ||
                  (M <= 3 || N <= 3 || K <= 3) ||
                  ( ( M < 16 || N < 16 || K < 16 ) &&
-                   ( !twobig || (Mc * Nc * Kc < TMV_Q7) ) ) )
+                   ( !twobig || (Mc * Nc * Kc < TMV_MM_MIN_COPY_ALGO) ) ) )
                 MultMM_Helper<algo2,cs,rs,xs,add,ix,T,M1,M2,M3>::call(
                     x,m1,m2,m3);
 #ifdef _OPENMP
             else if (!omp_in_parallel() && (Mb || Nb) && 
-                     ( Mc * Nc * Kc >= TMV_Q6 ) )
+                     ( Mc * Nc * Kc >= TMV_MM_OPENMP_THRESH ) )
                 MultMM_Helper<69,cs,rs,xs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
 #endif
             else 
@@ -1756,14 +1759,15 @@ namespace tmv {
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
 
-#ifdef TMV_USE_WINOGRAD
+#ifdef TMV_MM_USE_WINOGRAD
             const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
             const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
 #endif
 
-#ifdef TMV_USE_WINOGRAD
-            if (M >= TMV_Q4 && N >= TMV_Q4 && K >= TMV_Q4)
+#ifdef TMV_MM_USE_WINOGRAD
+            if (M >= TMV_MM_MIN_WINOGRAD && N >= TMV_MM_MIN_WINOGRAD && 
+                K >= TMV_MM_MIN_WINOGRAD)
                 MultMM_Helper<68,cs,rs,xs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
             else
 #endif
@@ -1785,7 +1789,7 @@ namespace tmv {
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
 
-#ifdef TMV_USE_RECURSIVE_BLOCK
+#ifdef TMV_MM_USE_RECURSIVE_BLOCK
             const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
             const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
@@ -1796,8 +1800,8 @@ namespace tmv {
 
             TMVStaticAssert(!M3::_rowmajor);
 
-#ifdef TMV_USE_RECURSIVE_BLOCK
-            if (Mb*Nb*Kb*Kb >= TMV_Q5)
+#ifdef TMV_MM_USE_RECURSIVE_BLOCK
+            if (Mb*Nb*Kb*Kb >= TMV_MM_MIN_RECURSIVE)
                 MultMM_Helper<63,cs,rs,xs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
             else
 #endif
@@ -1813,7 +1817,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef TMV_OPT_SMALL
+#ifdef TMV_MM_OPT_SMALL
             TMVStaticAssert(cs == UNKNOWN);
             const int M = m3.colsize();
 #ifdef PRINTALGO_MM
@@ -1855,7 +1859,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef TMV_OPT_SMALL
+#ifdef TMV_MM_OPT_SMALL
             TMVStaticAssert(rs == UNKNOWN);
             const int N = m3.rowsize();
 #ifdef PRINTALGO_MM
@@ -1897,7 +1901,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef TMV_OPT_SMALL
+#ifdef TMV_MM_OPT_SMALL
             TMVStaticAssert(xs == UNKNOWN);
             const int K = m1.rowsize();
 #ifdef PRINTALGO_MM
@@ -1939,9 +1943,9 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_MV_MM
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             const int K = xs == UNKNOWN ? int(m1.rowsize()) : xs;
-#ifdef PRINTALGO_MV_MM
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"MM algo 81: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
@@ -1949,14 +1953,7 @@ namespace tmv {
             typedef typename M1::value_type T1;
             const bool rm = M2::_colmajor || M3::_rowmajor; 
             typedef typename MCopyHelper<T1,Rec,cs,xs,rm,false>::type M1c;
-            M1c m1c(M,K);
-            typedef typename M1c::view_type M1cv;
-            typedef typename M1c::const_view_type M1ccv;
-            M1cv m1cv = m1c.view();
-            M1ccv m1ccv = m1c.view();
-            CopyM_Helper<-2,cs,xs,M1,M1cv>::call(m1,m1cv);
-            MultMM_Helper<-2,cs,rs,xs,add,ix,T,M1ccv,M2,M3>::call(
-                x,m1ccv,m2,m3);
+            NoAliasMultMM<add>(x,M1c(m1),m2,m3);
         }
     };
 
@@ -1968,27 +1965,20 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_MM
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             const int K = xs == UNKNOWN ? int(m1.rowsize()) : xs;
-#ifdef PRINTALGO_MM
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"MM algo 82: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M1::value_type T1;
+            typedef typename M3::real_type RT;
+            const Scaling<1,RT> one;
             typedef typename Traits2<T,T1>::type PT1;
             const bool rm = M2::_colmajor || M3::_rowmajor; 
             typedef typename MCopyHelper<PT1,Rec,cs,xs,rm,false>::type M1c;
-            M1c m1c(M,K);
-            typedef typename M1c::view_type M1cv;
-            typedef typename M1c::const_view_type M1ccv;
-            M1cv m1cv = m1c.view();
-            M1ccv m1ccv = m1c.view();
-            typedef typename Traits<T>::real_type RT;
-            const Scaling<1,RT> one;
-            MultXM_Helper<-2,cs,xs,false,ix,T,M1,M1cv>::call(x,m1,m1cv);
-            MultMM_Helper<-2,cs,rs,xs,add,1,RT,M1ccv,M2,M3>::call(
-                one,m1ccv,m2,m3);
+            NoAliasMultMM<add>(one,M1c(x*m1),m2,m3);
         }
     };
 
@@ -2031,9 +2021,9 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_MM
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             const int K = xs == UNKNOWN ? int(m1.rowsize()) : rs;
-#ifdef PRINTALGO_MM
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             std::cout<<"MM algo 84: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
@@ -2041,14 +2031,7 @@ namespace tmv {
             typedef typename M2::value_type T2;
             const bool rm = M1::_colmajor && M3::_rowmajor;
             typedef typename MCopyHelper<T2,Rec,xs,rs,rm,false>::type M2c;
-            M2c m2c(K,N);
-            typedef typename M2c::view_type M2cv;
-            typedef typename M2c::const_view_type M2ccv;
-            M2cv m2cv = m2c.view();
-            M2ccv m2ccv = m2c.view();
-            CopyM_Helper<-2,xs,rs,M2,M2cv>::call(m2,m2cv);
-            MultMM_Helper<-2,cs,rs,xs,add,ix,T,M1,M2ccv,M3>::call(
-                x,m1,m2ccv,m3);
+            NoAliasMultMM<add>(x,m1,M2c(m2),m3);
         }
     };
 
@@ -2060,27 +2043,20 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_MM
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             const int K = xs == UNKNOWN ? int(m1.rowsize()) : rs;
-#ifdef PRINTALGO_MM
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             std::cout<<"MM algo 85: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M2::value_type T2;
+            typedef typename M3::real_type RT;
+            const Scaling<1,RT> one;
             typedef typename Traits2<T,T2>::type PT2;
             const bool rm = M1::_colmajor && M3::_rowmajor;
             typedef typename MCopyHelper<PT2,Rec,xs,rs,rm,false>::type M2c;
-            M2c m2c(K,N);
-            typedef typename M2c::view_type M2cv;
-            typedef typename M2c::const_view_type M2ccv;
-            M2cv m2cv = m2c.view();
-            M2ccv m2ccv = m2c.view();
-            typedef typename Traits<T>::real_type RT;
-            const Scaling<1,RT> one;
-            MultXM_Helper<-2,xs,rs,false,ix,T,M2,M2cv>::call(x,m2,m2cv);
-            MultMM_Helper<-2,cs,rs,xs,add,1,RT,M1,M2ccv,M3>::call(
-                one,m1,m2ccv,m3);
+            NoAliasMultMM<add>(one,m1,M2c(x*m2),m3);
         }
     };
 
@@ -2132,34 +2108,20 @@ namespace tmv {
             const int size1 = M*K;
             const int size2 = K*N;
             const int size3 = M*N;
-            typedef typename Traits<T>::real_type RT;
-            const Scaling<1,RT> one;
             if (size3 > size1 || size3 > size2) {
                 typedef typename M1::value_type T1;
                 typedef typename M2::value_type T2;
                 typedef typename Traits2<T1,T2>::type PT3;
                 const bool rm = M1::_rowmajor && M2::_rowmajor;
                 typedef typename MCopyHelper<PT3,Rec,cs,rs,rm,false>::type M3c;
-                M3c m3c(M,N);
-                typedef typename M3c::view_type M3cv;
-                typedef typename M3c::const_view_type M3ccv;
-                M3cv m3cv = m3c.view();
-                M3ccv m3ccv = m3c.view();
-                MultMM_Helper<-2,cs,rs,xs,false,1,RT,M1,M2,M3cv>::call(
-                    one,m1,m2,m3cv);
-                MultXM_Helper<-2,cs,rs,add,ix,T,M3ccv,M3>::call(x,m3ccv,m3);
+                NoAliasMultXM<add>(x,M3c(m1*m2),m3);
             } else {
                 typedef typename M3::value_type T3;
+                typedef typename Traits<T>::real_type RT;
+                const Scaling<1,RT> one;
                 const bool rm = M1::_rowmajor && M2::_rowmajor;
                 typedef typename MCopyHelper<T3,Rec,cs,rs,rm,false>::type M3c;
-                M3c m3c(M,N);
-                typedef typename M3c::view_type M3cv;
-                typedef typename M3c::const_view_type M3ccv;
-                M3cv m3cv = m3c.view();
-                M3ccv m3ccv = m3c.view();
-                MultMM_Helper<-2,cs,rs,xs,false,ix,T,M1,M2,M3cv>::call(
-                    x,m1,m2,m3cv);
-                MultXM_Helper<-2,cs,rs,add,1,RT,M3ccv,M3>::call(one,m3ccv,m3);
+                NoAliasMultXM<add>(one,M3c(x*m1*m2),m3);
             }
         }
     };
@@ -2171,28 +2133,20 @@ namespace tmv {
         static inline void call(
             const Scaling<1,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_MM
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
-#ifdef PRINTALGO_MM
             const int K = xs == UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"algo 87: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
             typedef typename Traits<T>::real_type RT;
-            const Scaling<1,RT> one;
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename Traits2<T1,T2>::type PT3;
             const bool rm = M1::_rowmajor && M2::_rowmajor;
             typedef typename MCopyHelper<PT3,Rec,cs,rs,rm,false>::type M3c;
-            M3c m3c(M,N);
-            typedef typename M3c::view_type M3cv;
-            typedef typename M3c::const_view_type M3ccv;
-            M3cv m3cv = m3c.view();
-            M3ccv m3ccv = m3c.view();
-            MultMM_Helper<-2,cs,rs,xs,false,1,RT,M1,M2,M3cv>::call(
-                one,m1,m2,m3cv);
-            MultXM_Helper<-2,cs,rs,add,1,T,M3ccv,M3>::call(x,m3ccv,m3);
+            NoAliasMultXM<add>(x,M3c(m1*m2),m3);
         }
     };
 
@@ -2335,29 +2289,32 @@ namespace tmv {
             // g++ 4.3.  So for now, I'm just disabling OPENMP for small 
             // sizes. But really, I should try to figure out what is 
             // going on here.
-            //const bool do_openmp = (Mb || Nb) && (McNcKc >= TMV_Q6);
-            const bool do_openmp = (Mb && Nb && Kb) && (McNcKc >= TMV_Q6);
+            //const bool do_openmp = 
+            //    (Mb || Nb) && (McNcKc >= TMV_MM_OPENMP_THRESH);
+            const bool do_openmp = 
+                (Mb && Nb && Kb) && (McNcKc >= TMV_MM_OPENMP_THRESH);
 #else
             const bool do_openmp = false;
 #endif
 
-#ifdef TMV_USE_WINOGRAD
+#ifdef TMV_MM_USE_WINOGRAD
             const bool do_winograd =
-                cs >= TMV_Q4 && rs >= TMV_Q4 && xs >= TMV_Q4;
+                cs >= TMV_MM_MIN_WINOGRAD && rs >= TMV_MM_MIN_WINOGRAD && 
+                xs >= TMV_MM_MIN_WINOGRAD;
 #else 
             const bool do_winograd = false;
 #endif
 
-#ifdef TMV_USE_RECURSIVE_BLOCK
+#ifdef TMV_MM_USE_RECURSIVE_BLOCK
             const int Kb2 = IntTraits2<Kb,Kb>::prod;
             const int MbNbKb2 = IntTraits2<IntTraits2<Mb,Nb>::prod,Kb2>::prod;
-            const bool do_recursive = MbNbKb2 >= TMV_Q5;
+            const bool do_recursive = MbNbKb2 >= TMV_MM_MIN_RECURSIVE;
 #else
             const bool do_recursive = false;
 #endif
             const bool do_block = 
                 (cs >= 16 && rs >= 16 && xs >= 16) ||
-                ( twobig && McNcKc >= TMV_Q7 );
+                ( twobig && McNcKc >= TMV_MM_MIN_COPY_ALGO );
 
             const int algo = 
                 ( cs == 0 || rs == 0 || (xs == 0 && add) ) ? 0 :
@@ -2401,7 +2358,7 @@ namespace tmv {
                 -999;
             TMVStaticAssert(algo != -999);
 #endif
-#ifdef TMV_OPT_BAD_ALLOC
+#ifdef TMV_MM_OPT_BAD_ALLOC
             const int algo1 = algo < 60 ? algo : 66;
 #else
             const int algo1 = 
@@ -2424,17 +2381,18 @@ namespace tmv {
             std::cout<<"M = "<<M<<"  N = "<<N<<"  K = "<<K<<std::endl;
 #ifdef _OPENMP
             std::cout<<"69 ? McNcKc = "<<McNcKc<<
-                " >= Q6 = "<<TMV_Q6<<std::endl;
+                " >= Q6 = "<<TMV_MM_OPENMP_THRESH<<std::endl;
 #endif
-#ifdef TMV_USE_WINOGRAD
-            std::cout<<"68 ? all cs,rs,xs >= Q4 = "<<TMV_Q4<<std::endl;
+#ifdef TMV_MM_USE_WINOGRAD
+            std::cout<<"68 ? all cs,rs,xs >= Q4 = "<<
+                TMV_MM_MIN_WINOGRAD<<std::endl;
 #endif
-#ifdef TMV_USE_RECURSIVE_BLOCK
+#ifdef TMV_MM_USE_RECURSIVE_BLOCK
             std::cout<<"63 ? MbNbKb2 = "<<MbNbKb2<<
-                " >= Q5 = "<<TMV_Q5<<std::endl;
+                " >= Q5 = "<<TMV_MM_MIN_RECURSIVE<<std::endl;
 #endif
             std::cout<<"64 ? McNcKc = "<<McNcKc<<
-                " >= Q7 = "<<TMV_Q7<<std::endl;
+                " >= Q7 = "<<TMV_MM_MIN_COPY_ALGO<<std::endl;
             std::cout<<"cs = "<<cs<<"  rs = "<<rs<<"  xs = "<<xs<<std::endl;
             std::cout<<"add = "<<add<<", algo = "<<algo<<std::endl;
 #endif
@@ -2651,23 +2609,6 @@ namespace tmv {
         const Scaling<ix,T>& x, const BaseMatrix_Rec<M2>& m2)
     { AliasMultMM<false>(x,m1.copy(),m2.mat(),m1.mat()); }
 
-
-#undef TMV_OPT_SMALL
-#undef TMV_OPT_CLEANUP
-    // Don't undef these, since they are needed in other files.
-    // It's ok, since they don't conflict with a define in any other file.
-//#undef TMV_USE_RECURSIVE_BLOCK
-//#undef TMV_USE_WINOGRAD
-#undef TMV_OPT_BAD_ALLOC
-
-#undef TMV_Q1
-#undef TMV_Q2
-#undef TMV_Q3
-#undef TMV_Q4
-#undef TMV_Q5
-#undef TMV_Q6
-#undef TMV_Q7
-#undef TMV_ZeroIX
 
 } // namespace tmv
 

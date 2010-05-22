@@ -680,8 +680,11 @@ namespace tmv {
 #if TMV_OPT == 0
         return Norm_Helper<1,Vv>::call(vv);
 #else
-        if (v.size() == 0) return typename V::real_type(0);
-        else return Norm_Helper<3,Vv>::call(vv);
+        typedef typename V::real_type RT;
+        const bool isint = std::numeric_limits<RT>::is_integer;
+        const int algo = isint ? 1 : 3;
+        if (v.size() == 0) return RT(0);
+        else return Norm_Helper<algo,Vv>::call(vv);
 #endif
     }
 

@@ -29,6 +29,8 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
+#define PRINTALGO_UV
+
 #include "TMV_Blas.h"
 #include "tmv/TMV_MultUV.h"
 #include "tmv/TMV_TriMatrix.h"

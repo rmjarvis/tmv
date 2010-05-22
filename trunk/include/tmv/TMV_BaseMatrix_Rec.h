@@ -82,8 +82,10 @@ namespace tmv {
     //
     //  const_uppertri_type = return type from upperTri() const
     //  const_unit_uppertri_type = return type from unitUpperTri() const
+    //  const_unknown_uppertri_type = return type from upperTri(dt) const
     //  const_lowertri_type = return type from lowerTri() const
     //  const_unit_lowertri_type = return type from unitLowerTri() const
+    //  const_unknown_lowertri_type = return type from lowerTri(dt) const
     //  const_linearview_type = return type from linearView() const
     //  
 
@@ -113,8 +115,10 @@ namespace tmv {
     //
     //  uppertri_type = return type from upperTri() 
     //  unit_uppertri_type = return type from unitUpperTri() 
+    //  unknown_uppertri_type = return type from upperTri(dt) 
     //  lowertri_type = return type from lowerTri() 
     //  unit_lowertri_type = return type from unitLowerTri() 
+    //  unknown_lowertri_type = return type from lowerTri(dt) 
     //  realpart_type = return type from realPart()
     //  imagpart_type = return type from imagPart() 
     //  nonconj_type = return type from nonConj() 
@@ -325,7 +329,7 @@ namespace tmv {
 
     template <class T, int cs, int rs, bool rm, bool fort>
     struct MCopyHelper<T,Rec,cs,rs,rm,fort>
-    { 
+    {
         typedef SmallMatrix<T,cs,rs,rm?RowMajor:ColMajor,(
             fort?FortranStyle:CStyle)> type; 
     };
@@ -337,6 +341,21 @@ namespace tmv {
     { typedef Matrix<T,rm?RowMajor:ColMajor,fort?FortranStyle:CStyle> type; };
     template <class T, bool rm, bool fort>
     struct MCopyHelper<T,Rec,UNKNOWN,UNKNOWN,rm,fort>
+    { typedef Matrix<T,rm?RowMajor:ColMajor,fort?FortranStyle:CStyle> type; };
+    template <class T, int cs, int rs, bool rm, bool fort>
+    struct MCopyHelper<T,SquareRec,cs,rs,rm,fort>
+    {
+        typedef SmallMatrix<T,cs,rs,rm?RowMajor:ColMajor,(
+            fort?FortranStyle:CStyle)> type; 
+    };
+    template <class T, int rs, bool rm, bool fort>
+    struct MCopyHelper<T,SquareRec,UNKNOWN,rs,rm,fort>
+    { typedef Matrix<T,rm?RowMajor:ColMajor,fort?FortranStyle:CStyle> type; };
+    template <class T, int cs, bool rm, bool fort>
+    struct MCopyHelper<T,SquareRec,cs,UNKNOWN,rm,fort>
+    { typedef Matrix<T,rm?RowMajor:ColMajor,fort?FortranStyle:CStyle> type; };
+    template <class T, bool rm, bool fort>
+    struct MCopyHelper<T,SquareRec,UNKNOWN,UNKNOWN,rm,fort>
     { typedef Matrix<T,rm?RowMajor:ColMajor,fort?FortranStyle:CStyle> type; };
 
     // A quick auxilliary function for canLinearize.
@@ -503,9 +522,13 @@ namespace tmv {
         typedef typename Traits<M>::const_uppertri_type const_uppertri_type;
         typedef typename Traits<M>::const_unit_uppertri_type 
             const_unit_uppertri_type;
+        typedef typename Traits<M>::const_unknown_uppertri_type 
+            const_unknown_uppertri_type;
         typedef typename Traits<M>::const_lowertri_type const_lowertri_type;
         typedef typename Traits<M>::const_unit_lowertri_type 
             const_unit_lowertri_type;
+        typedef typename Traits<M>::const_unknown_lowertri_type 
+            const_unknown_lowertri_type;
         typedef typename Traits<M>::const_linearview_type 
             const_linearview_type;
         typedef typename Traits<M>::const_realpart_type const_realpart_type;
@@ -818,6 +841,12 @@ namespace tmv {
                 cptr(),rowsize(),true,stepi(),stepj()); 
         }
 
+        inline const_unknown_uppertri_type upperTri(DiagType dt) const
+        {
+            return const_unknown_uppertri_type(
+                cptr(),rowsize(),dt==UnitDiag,stepi(),stepj()); 
+        }
+
         inline const_lowertri_type lowerTri() const
         { return const_lowertri_type(cptr(),colsize(),false,stepi(),stepj()); }
 
@@ -825,6 +854,12 @@ namespace tmv {
         {
             return const_unit_lowertri_type(
                 cptr(),colsize(),true,stepi(),stepj()); 
+        }
+
+        inline const_unknown_lowertri_type lowerTri(DiagType dt) const
+        {
+            return const_unknown_lowertri_type(
+                cptr(),colsize(),dt==UnitDiag,stepi(),stepj()); 
         }
 
         inline const_linearview_type linearView() const
@@ -967,9 +1002,13 @@ namespace tmv {
         typedef typename Traits<M>::const_uppertri_type const_uppertri_type;
         typedef typename Traits<M>::const_unit_uppertri_type 
             const_unit_uppertri_type;
+        typedef typename Traits<M>::const_unknown_uppertri_type 
+            const_unknown_uppertri_type;
         typedef typename Traits<M>::const_lowertri_type const_lowertri_type;
         typedef typename Traits<M>::const_unit_lowertri_type 
             const_unit_lowertri_type;
+        typedef typename Traits<M>::const_unknown_lowertri_type 
+            const_unknown_lowertri_type;
         typedef typename Traits<M>::const_linearview_type 
             const_linearview_type;
         typedef typename Traits<M>::const_realpart_type const_realpart_type;
@@ -1002,8 +1041,12 @@ namespace tmv {
         typedef typename Traits<M>::adjoint_type adjoint_type;
         typedef typename Traits<M>::uppertri_type uppertri_type;
         typedef typename Traits<M>::unit_uppertri_type unit_uppertri_type;
+        typedef typename Traits<M>::unknown_uppertri_type 
+            unknown_uppertri_type;
         typedef typename Traits<M>::lowertri_type lowertri_type;
         typedef typename Traits<M>::unit_lowertri_type unit_lowertri_type;
+        typedef typename Traits<M>::unknown_lowertri_type 
+            unknown_lowertri_type;
         typedef typename Traits<M>::linearview_type linearview_type;
         typedef typename Traits<M>::realpart_type realpart_type;
         typedef typename Traits<M>::imagpart_type imagpart_type;
@@ -1484,11 +1527,23 @@ namespace tmv {
         inline unit_uppertri_type unitUpperTri() 
         { return unit_uppertri_type(ptr(),rowsize(),true,stepi(),stepj()); }
 
+        inline unknown_uppertri_type upperTri(DiagType dt)
+        {
+            return unknown_uppertri_type(
+                ptr(),rowsize(),dt==UnitDiag,stepi(),stepj()); 
+        }
+
         inline lowertri_type lowerTri() 
         { return lowertri_type(ptr(),colsize(),false,stepi(),stepj()); }
 
         inline unit_lowertri_type unitLowerTri() 
         { return unit_lowertri_type(ptr(),colsize(),true,stepi(),stepj()); }
+
+        inline unknown_lowertri_type lowerTri(DiagType dt)
+        {
+            return unknown_lowertri_type(
+                ptr(),rowsize(),dt==UnitDiag,stepi(),stepj()); 
+        }
 
         inline linearview_type linearView() 
         {
@@ -1540,10 +1595,14 @@ namespace tmv {
         { return base_rec::upperTri(); }
         inline const_unit_uppertri_type unitUpperTri() const
         { return base_rec::unitUpperTri(); }
+        inline const_unknown_uppertri_type upperTri(DiagType dt) const
+        { return base_rec::upperTri(dt); }
         inline const_lowertri_type lowerTri() const
         { return base_rec::lowerTri(); }
         inline const_unit_lowertri_type unitLowerTri() const
         { return base_rec::unitLowerTri(); }
+        inline const_unknown_lowertri_type lowerTri(DiagType dt) const
+        { return base_rec::lowerTri(dt); }
         inline const_linearview_type linearView() const
         { return base_rec::linearView(); }
         inline const_realpart_type realPart() const

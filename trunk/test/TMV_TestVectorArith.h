@@ -6,7 +6,8 @@
 #define RealType(T) typename tmv::Traits<T>::real_type
 #define ComplexType(T) typename tmv::Traits<T>::complex_type
 
-template <class T, class V> inline void TestV(const V& a, std::string label)
+template <class T, class V> 
+inline void TestV(const V& a, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start V "<<label<<std::endl;
@@ -31,8 +32,10 @@ template <class T, class V> inline void TestV(const V& a, std::string label)
 
     Assert(Norm(a-v) <= eps*Norm(v),label+" a != v");
 
-    Assert(tmv::TMV_ABS(Norm1(a)-Norm1(v)) <= eps*tmv::TMV_ABS(Norm1(v)),label+" Norm1");
-    Assert(tmv::TMV_ABS(Norm2(a)-Norm2(v)) <= eps*tmv::TMV_ABS(Norm2(v)),label+" Norm2");
+    Assert(tmv::TMV_ABS(Norm1(a)-Norm1(v)) <= eps*tmv::TMV_ABS(Norm1(v)),
+           label+" Norm1");
+    Assert(tmv::TMV_ABS(Norm2(a)-Norm2(v)) <= eps*tmv::TMV_ABS(Norm2(v)),
+           label+" Norm2");
     Assert(tmv::TMV_ABS(NormInf(a)-NormInf(v)) <= eps*tmv::TMV_ABS(NormInf(v)),
            label+" NormInf");
     Assert(tmv::TMV_ABS(NormSq(a)-NormSq(v)) <= eps*tmv::TMV_ABS(NormSq(v)),
@@ -43,8 +46,8 @@ template <class T, class V> inline void TestV(const V& a, std::string label)
     }
 }
 
-template <class T, class V, class T2> inline void TestVX(
-    const V& a, T2 x, std::string label)
+template <class T, class V, class T2> 
+inline void TestVX(const V& a, T2 x, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start VX "<<label<<std::endl;
@@ -76,8 +79,8 @@ template <class T, class V, class T2> inline void TestVX(
     }
 }
 
-template <class T, class V, class T2> inline void TestVX2(
-    V& a, T2 x, std::string label)
+template <class T, class V, class T2> 
+inline void TestVX2(V& a, T2 x, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start VX2 "<<label<<std::endl;
@@ -135,8 +138,8 @@ template <class T, class V, class T2> inline void TestVX2(
     }
 }
 
-template <class T, class T2, class V1, class V2> inline void TestVV(
-    const V1& a, const V2& b, std::string label)
+template <class T, class T2, class V1, class V2> 
+inline void TestVV(const V1& a, const V2& b, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start VV "<<label<<std::endl;
@@ -213,18 +216,22 @@ template <class T, class T2, class V1, class V2> inline void TestVV(
     Assert(tmv::TMV_ABS((a*(z*b))-(z*v1*v2)) <= x*eps2,label+" a*(z*b)");
     Assert(tmv::TMV_ABS((z*(a*b))-(z*v1*v2)) <= x*eps2,label+" z*(a*b)");
 
-    Assert(tmv::TMV_ABS(((x*a)*(x*b))-(x*x*v1*v2)) <= x*x*eps2,label+" (x*a)*(x*b)");
-    Assert(tmv::TMV_ABS(((z*a)*(x*b))-(z*x*v1*v2)) <= x*x*eps2,label+" (z*a)*(x*b)");
-    Assert(tmv::TMV_ABS(((x*a)*(z*b))-(x*z*v1*v2)) <= x*x*eps2,label+" (x*a)*(z*b)");
-    Assert(tmv::TMV_ABS(((z*a)*(z*b))-(z*z*v1*v2)) <= x*x*eps2,label+" (z*a)*(z*b)");
+    Assert(tmv::TMV_ABS(((x*a)*(x*b))-(x*x*v1*v2)) <= x*x*eps2,
+           label+" (x*a)*(x*b)");
+    Assert(tmv::TMV_ABS(((z*a)*(x*b))-(z*x*v1*v2)) <= x*x*eps2,
+           label+" (z*a)*(x*b)");
+    Assert(tmv::TMV_ABS(((x*a)*(z*b))-(x*z*v1*v2)) <= x*x*eps2,
+           label+" (x*a)*(z*b)");
+    Assert(tmv::TMV_ABS(((z*a)*(z*b))-(z*z*v1*v2)) <= x*x*eps2,
+           label+" (z*a)*(z*b)");
 
     if (showstartdone) {
         std::cout<<"Done VV "<<std::endl;
     }
 }
 
-template <class T, class T2, class V1, class V2> inline void TestVV2(
-    V1& a, const V2& b, std::string label)
+template <class T, class T2, class V1, class V2> 
+inline void TestVV2(V1& a, const V2& b, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start VV2 "<<label<<std::endl;
@@ -357,7 +364,8 @@ template <class T, class T2, class V1, class V2> inline void TestVV2(
     }
 }
 
-template <class T, class V, class CV> inline void TestVectorArith1(
+template <class T, class V, class CV> 
+inline void TestVectorArith1(
     V& a, CV& ca, std::string label)
 {
     if (showstartdone) {
@@ -387,9 +395,10 @@ template <class T, class V, class CV> inline void TestVectorArith1(
 #endif
 
 }
-    template <class T, class V1, class CV1, class V2, class CV2> 
-    inline void TestVectorArith2(V1& a, CV1& ca, const V2& b, const CV2& cb,
-                                 std::string label)
+
+template <class T, class V1, class CV1, class V2, class CV2> 
+inline void TestVectorArith2(
+    V1& a, CV1& ca, const V2& b, const CV2& cb, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start VectorArith2 "<<label<<std::endl;

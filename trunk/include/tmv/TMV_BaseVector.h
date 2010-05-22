@@ -214,6 +214,10 @@ namespace tmv {
     template <class T, int N, int S=1, bool C=false>
     class SmallVectorViewF;
 
+    // Returned by sort(p)
+    class Permutation;
+
+
     //
     // Helper functions and values:
     //
@@ -1109,7 +1113,7 @@ namespace tmv {
         inline base_mut& makeBasis(int i, value_type x=value_type(1)) 
         {
             CheckIndex<_fort>(i,size());
-            return CMakeBasis(i,x);
+            return cMakeBasis(i,x);
         }
 
         inline base_mut& cSwap(int i1, int i2) 
@@ -1153,12 +1157,12 @@ namespace tmv {
         inline base_mut& reverseSelf() 
         { tmv::ReverseSelf(*this); return *this; }
 
-        inline base_mut& sort(ADType ad=Ascend, CompType comp=RealComp) 
-        { tmv::Sort(*this,ad,comp); return *this; }
+        inline void sort(ADType ad=Ascend, CompType comp=RealComp) 
+        { tmv::Sort(*this,ad,comp); }
 
-        inline base_mut& sort(
-            int*const P, ADType ad=Ascend, CompType comp=RealComp)
-        { tmv::Sort(*this,P,ad,comp); return *this; }
+        // Defined in TMV_Permutation.h
+        inline Permutation sort(
+            int*const P, ADType ad=Ascend, CompType comp=RealComp);
 
         //
         // SubVector

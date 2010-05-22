@@ -29,6 +29,7 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
+//#define PRINTALGO_DIVVD
 
 #include "tmv/TMV_DivVD.h"
 #include "tmv/TMV_Vector.h"

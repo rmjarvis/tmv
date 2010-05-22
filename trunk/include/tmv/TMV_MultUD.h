@@ -124,15 +124,15 @@ namespace tmv {
     // Matrix * DiagMatrix
     //
 
-    // Q1 is the maximum nops to unroll.
+    // UNROLL is the maximum nops to unroll.
 #if TMV_OPT >= 3
-#define TMV_Q1 200 
+#define TMV_UD_UNROLL 200 
 #elif TMV_OPT >= 2
-#define TMV_Q1 25
+#define TMV_UD_UNROLL 25
 #elif TMV_OPT >= 1
-#define TMV_Q1 9
+#define TMV_UD_UNROLL 9
 #else
-#define TMV_Q1 0
+#define TMV_UD_UNROLL 0
 #endif
 
     // ZeroIX controls whether ix = -1 should act like ix = 1 or ix = 0.
@@ -637,24 +637,13 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = (s == UNKNOWN ? m3.size() : s);
 #ifdef PRINTALGO_UD
+            const int N = (s == UNKNOWN ? m3.size() : s);
             std::cout<<"UD algo 82: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
-            typedef typename M2::value_type T2;
-            typedef typename Traits2<T,T2>::type PT2;
-            typedef typename MCopyHelper<PT2,Diag,s,s,false,false>::type M2c;
-            M2c m2c(N);
-            typedef typename M2::const_diag_type M2d;
-            typedef typename M2c::diag_type M2cd;
-            typedef typename M2c::const_view_type M2cv;
-            M2d m2d = m2.diag();
-            M2cd m2cd = m2c.diag();
-            M2cv m2cv = m2c.view();
-            typedef typename Traits<T>::real_type RT;
+            typedef typename M3::real_type RT;
             const Scaling<1,RT> one;
-            MultXV_Helper<-2,s,false,ix,T,M2d,M2cd>::call(x,m2d,m2cd);
-            MultUD_Helper<-2,s,add,1,RT,M1,M2cv,M3>::call(one,m1,m2cv,m3);
+            NoAliasMultMM<add>(one,m1,(x*m2).calc(),m3);
         }
     };
 
@@ -691,7 +680,7 @@ namespace tmv {
             const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
                 s == UNKNOWN ? false :
-                nops > TMV_Q1 ? false :
+                nops > TMV_UD_UNROLL ? false :
                 s <= 10;
 #if TMV_OPT >= 1
             const bool docopy = TMV_ZeroIX || M2::_diagstep != 1;
@@ -762,7 +751,7 @@ namespace tmv {
             const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
                 s == UNKNOWN ? false :
-                nops > TMV_Q1 ? false :
+                nops > TMV_UD_UNROLL ? false :
                 s <= 10;
             const int algo = 
                 ( s == 0 ) ? 0 :
@@ -1086,7 +1075,6 @@ namespace tmv {
 
 
 #undef TMV_ZeroIX
-#undef TMV_Q1
 
 } // namespace tmv
 

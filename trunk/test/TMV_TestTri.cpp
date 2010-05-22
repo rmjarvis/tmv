@@ -1,3 +1,5 @@
+#define XDEBUG_PRODMM
+#define PRINTALGO_UL
 
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
@@ -738,6 +740,11 @@ template <class T> void TestTriMatrix()
 #endif
 
     if (tmv::TMV_Epsilon<T>() > T(0)) {
+#if 1
+        TestAllAliasMultUL<T>();
+        std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<"> passed all aliased multiplication tests\n";
+#endif
+
 #if 1
         TestTriMatrixArith_A1a<T>();
         TestTriMatrixArith_A1b<T>();
