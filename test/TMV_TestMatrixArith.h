@@ -1,6 +1,22 @@
 #define CT std::complex<T>
 #define XXD // Turn this off to reduce the compiled code size.
 
+// Preprocessor options:
+// NONSQUARE    Don't do anything that requires a square matrix to compile
+//              such as += x, etc.
+// NODIV        Don't do Det, Norm2, etc.
+// NOSV         Only skip division stuff that requires SVD, like Norm2.
+// NOMIX        Don't do arithmetic that mixes with regular Vector/Matrix.
+// ALIASOK      Include alised arithmetic, like m = m + x.
+// SYMOPROD     Require outer product statements to be symmetric (v1 ^ v1).
+// NOADDEQ      Skip m += m2 and similar.
+// NOADDEQX     Skip m += x and similar.
+// NOMULTEQ     Skip m *= m2 and similar.
+// NOMULTEQX    Skip m *= x and similar.
+// BASIC_MULTMM_ONLY Skip all matrix multiplication other than simple c=a*b.
+// NO_COMPLEX_ARITH  Skip all complex tests.
+
+
 using tmv::BaseMatrix;
 using tmv::BaseVector;
 using tmv::BaseMatrix_Calc;
@@ -129,9 +145,9 @@ static void DoTestMa_Basic(const MM& a, std::string label)
             std::cout<<"Trace(a) = "<<Trace(a)<<"  "<<Trace(m)<<std::endl;
 #ifndef NODIV
             std::cout<<"Det(a) = "<<Det(a)<<"  "<<Det(m)<<std::endl;
-            std::cout<<"diff = "<<tmv::TMV_ABS(Det(a)-Det(m))<<"  "<<eps*Norm(m)*Norm(m.Inverse())*tmv::TMV_ABS(Det(m))<<std::endl;
+            std::cout<<"diff = "<<tmv::TMV_ABS(Det(a)-Det(m))<<"  "<<eps*Norm(m)*Norm(m.inverse())*tmv::TMV_ABS(Det(m))<<std::endl;
             std::cout<<"LogDet(a) = "<<LogDet(a)<<"  "<<LogDet(m)<<std::endl;
-            std::cout<<"diff = "<<tmv::TMV_ABS(LogDet(a)-LogDet(m))<<"  "<<eps*Norm(m)*Norm(m.Inverse())<<std::endl;
+            std::cout<<"diff = "<<tmv::TMV_ABS(LogDet(a)-LogDet(m))<<"  "<<eps*Norm(m)*Norm(m.inverse())<<std::endl;
 #endif
         }
 #endif
@@ -155,11 +171,11 @@ static void DoTestMa_Basic(const MM& a, std::string label)
 #ifndef NODIV
         T d = Det(m);
         if (tmv::TMV_ABS(d) > 0.5) {
-            double eps1 = eps * Norm(m) * Norm(m.Inverse());
+            double eps1 = eps * Norm(m) * Norm(m.inverse());
             Assert(tmv::TMV_ABS(Det(a)-d) <= eps1*tmv::TMV_ABS(d),label+" Det");
             Assert(tmv::TMV_ABS(LogDet(a)-LogDet(m)) <= eps1,label+" LogDet");
         } else if (tmv::TMV_ABS(d) != 0.0) {
-            double eps1 = eps * Norm(m) * Norm(m.Inverse());
+            double eps1 = eps * Norm(m) * Norm(m.inverse());
             Assert(tmv::TMV_ABS(Det(a)-d) <= eps1*(1.+tmv::TMV_ABS(d)),label+" Det");
         } else {
             Assert(tmv::TMV_ABS(Det(a)) <= eps,label+" Det");
@@ -168,12 +184,15 @@ static void DoTestMa_Basic(const MM& a, std::string label)
     }
 #endif
 
-    Assert(tmv::TMV_ABS(NormF(a)-NormF(m)) <= eps*NormF(m),label+" NormF");
-    Assert(tmv::TMV_ABS(Norm(a)-Norm(m)) <= eps*Norm(m),label+" Norm");
+    if (tmv::TMV_Epsilon<T>()  != T(0)) {
+        Assert(tmv::TMV_ABS(NormF(a)-NormF(m)) <= eps*NormF(m),label+" NormF");
+        Assert(tmv::TMV_ABS(Norm(a)-Norm(m)) <= eps*Norm(m),label+" Norm");
+    }
     Assert(tmv::TMV_ABS(NormSq(a)-NormSq(m)) <= eps*NormSq(m),label+" NormSq");
     Assert(tmv::TMV_ABS(Norm1(a)-Norm1(m)) <= eps*Norm1(m),label+" Norm1");
     Assert(tmv::TMV_ABS(NormInf(a)-NormInf(m)) <= eps*NormInf(m),label+" NormInf");
 #ifndef NODIV
+#ifndef NOSV
     if (donorm2) {
 #ifdef XXD
         if (XXDEBUG1) {
@@ -184,14 +203,9 @@ static void DoTestMa_Basic(const MM& a, std::string label)
 #endif
         Assert(tmv::TMV_ABS(a.doNorm2()-m.doNorm2()) <= eps*m.doCondition()*m.doNorm2(),
                label+" DoNorm2");
-#ifndef NOSV
-        a.divideUsing(tmv::SV);
-        a.setDiv();
-        m.divideUsing(tmv::SV);
-        m.setDiv();
-        Assert(tmv::TMV_ABS(Norm2(a)-Norm2(m)) <= eps*m.Condition()*m.doNorm2(),label+" Norm2");
-#endif
+        Assert(tmv::TMV_ABS(Norm2(a)-Norm2(m)) <= eps*m.condition()*m.doNorm2(),label+" Norm2");
     }
+#endif
 #endif
 #ifdef XXD
     if (XXDEBUG1) {
@@ -235,8 +249,10 @@ static void DoTestMa_Full(const MM& a, std::string label)
         std::cout<<"a.normInf() = "<<a.normInf()<<"  "<<NormInf(m)<<std::endl;
     }
 #endif
-    Assert(tmv::TMV_ABS(a.normF()-NormF(m)) <= eps*NormF(m),label+" NormF");
-    Assert(tmv::TMV_ABS(a.norm()-Norm(m)) <= eps*Norm(m),label+" Norm");
+    if (tmv::TMV_Epsilon<T>()  != T(0)) {
+        Assert(tmv::TMV_ABS(a.normF()-NormF(m)) <= eps*NormF(m),label+" NormF");
+        Assert(tmv::TMV_ABS(a.norm()-Norm(m)) <= eps*Norm(m),label+" Norm");
+    }
     Assert(tmv::TMV_ABS(a.normSq()-NormSq(m)) <= eps*NormSq(m),label+" NormSq");
     Assert(tmv::TMV_ABS(a.normSq(1.e-3)-NormSq(m*T(1.e-3))) <= eps*1.e-6*NormSq(m),label+" NormSq,scale");
     Assert(tmv::TMV_ABS(a.norm1()-Norm1(m)) <= eps*Norm1(m),label+" Norm1");
@@ -244,7 +260,7 @@ static void DoTestMa_Full(const MM& a, std::string label)
 #ifndef NODIV
 #ifndef NOSV
     if (donorm2) {
-        Assert(tmv::TMV_ABS(a.norm2()-m.doNorm2()) <= eps*m.Condition()*m.doNorm2(),
+        Assert(tmv::TMV_ABS(a.norm2()-m.doNorm2()) <= eps*m.condition()*m.doNorm2(),
                label+" Norm2");
     }
 #endif
@@ -2954,23 +2970,31 @@ static void TestMatrixArith1(M& a, CM& ca, std::string label)
 
 #if 1
     DoTestMR<T>(a.mat(),label+" R");
+#ifndef NO_COMPLEX_ARITH
     DoTestMC<CT>(ca.mat(),label+" C");
+#endif
 #endif
 
 #if 1
     DoTestMX1R<T>(a.mat(),x,label+" R,R");
+#ifndef NO_COMPLEX_ARITH
     DoTestMX1C<CT>(ca.mat(),z,label+" C,C");
 #if (XTEST & 4)
     DoTestMX1R<T>(a.mat(),z,label+" R,C");
     DoTestMX1C<CT>(ca.mat(),x,label+" C,R");
 #endif
 #endif
+#endif
+
+#ifndef NOASSIGN
 
 #if 1
     DoTestMX2R<T>(a.mat(),x,label+" R,R");
+#ifndef NO_COMPLEX_ARITH
     DoTestMX2C<CT>(ca.mat(),z,label+" C,C");
 #if (XTEST & 4)
     DoTestMX2C<CT>(ca.mat(),x,label+" C,R");
+#endif
 #endif
 #endif
 
@@ -2978,9 +3002,13 @@ static void TestMatrixArith1(M& a, CM& ca, std::string label)
 #ifdef ALIASOK
     DoTestMM2RR<T>(a,a.mat(),label+" self_arith");
     DoTestMM4RR<T>(a,a.mat(),label+" self_arith");
+#ifndef NO_COMPLEX_ARITH
     DoTestMM2CC<T>(ca,ca.mat(),label+" self_arith");
     DoTestMM4CC<T>(ca,ca.mat(),label+" self_arith");
 #endif
+#endif
+#endif
+
 #endif
 
     if (showstartdone) std::cout<<"Done Test1"<<std::endl;
@@ -3001,17 +3029,21 @@ static void TestMatrixArith2a(
         std::cout<<"cc = "<<tmv::TMV_Text(cc)<<std::endl;
     }
     DoTestMV1R<T,T>(a,b,label+" R,R");
+#ifndef NO_COMPLEX_ARITH
     DoTestMV1C<CT,CT>(ca,cb,label+" C,C");
 #if (XTEST & 4)
     DoTestMV1R<T,CT>(a,cb,label+" R,C");
     DoTestMV1C<CT,T>(ca,b,label+" C,R");
 #endif
+#endif
 
 #ifndef NONSQUARE
     DoTestMV2R<T,T>(a,b,label+" R,R");
+#ifndef NO_COMPLEX_ARITH
     DoTestMV2C<CT,CT>(ca,cb,label+" C,C");
 #if (XTEST & 4)
     DoTestMV2R<T,CT>(a,cb,label+" R,C");
+#endif
 #endif
 #endif
 
@@ -3034,17 +3066,21 @@ static void TestMatrixArith2b(
     }
 
     DoTestVM1R<T,T>(a,c,label+" R,R");
+#ifndef NO_COMPLEX_ARITH
     DoTestVM1C<CT,CT>(ca,cc,label+" C,C");
 #if (XTEST & 4)
     DoTestVM1R<T,CT>(a,cc,label+" R,C");
     DoTestVM1C<CT,T>(ca,c,label+" C,R");
 #endif
+#endif
 
 #ifndef NONSQUARE
     DoTestVM2R<T,T>(a,c,label+" R,R");
+#ifndef NO_COMPLEX_ARITH
     DoTestVM2C<CT,CT>(ca,cc,label+" C,C");
 #if (XTEST & 4)
     DoTestVM2R<T,CT>(a,cc,label+" R,C");
+#endif
 #endif
 #endif
 
@@ -3098,11 +3134,13 @@ static void TestMatrixArith3a(
     }
 
     DoTestMV3R<T,T,T>(a,b,c,label+" R,R,R");
+#ifndef NO_COMPLEX_ARITH
     DoTestMV3C<CT,CT,CT>(ca,cb,cc,label+" C,C,C");
 #if (XTEST & 4)
     DoTestMV3R<T,T,CT>(a,b,cc,label+" C,R,R");
     DoTestMV3R<T,CT,CT>(a,cb,cc,label+" C,R,C");
     DoTestMV3C<CT,T,CT>(ca,b,cc,label+" C,C,R");
+#endif
 #endif
 
     if (showstartdone) std::cout<<"Done Test3a"<<std::endl;
@@ -3124,11 +3162,13 @@ static void TestMatrixArith3b(
     }
 
     DoTestVM3R<T,T,T>(a,c,b,label+" R,R,R");
+#ifndef NO_COMPLEX_ARITH
     DoTestVM3C<CT,CT,CT>(ca,cc,cb,label+" C,C,C");
 #if (XTEST & 4)
     DoTestVM3R<T,T,CT>(a,c,cb,label+" C,R,R");
     DoTestVM3R<T,CT,CT>(a,cc,cb,label+" C,R,C");
     DoTestVM3C<CT,T,CT>(ca,c,cb,label+" C,C,R");
+#endif
 #endif
 
     if (showstartdone) std::cout<<"Done Test3b"<<std::endl;
@@ -3187,13 +3227,21 @@ static void TestMatrixArith4(
     }
 
     DoTestMM1RR<T>(a,b,label+" R,R");
+#ifndef NOASSIGN
     DoTestMM2RR<T>(a,b,label+" R,R");
+#endif
+#ifndef NO_COMPLEX_ARITH
     DoTestMM1CC<T>(ca,cb,label+" C,C");
+#ifndef NOASSIGN
     DoTestMM2CC<T>(ca,cb,label+" C,C");
+#endif
 #if (XTEST & 4)
     DoTestMM1RC<T>(a,cb,label+" R,C");
     DoTestMM1CR<T>(ca,b,label+" C,R");
+#ifndef NOASSIGN
     DoTestMM2CR<T>(ca,b,label+" C,R");
+#endif
+#endif
 #endif
 
     if (showstartdone) std::cout<<"Done Test4"<<std::endl;
@@ -3212,13 +3260,21 @@ static void TestMatrixArith5(
     }
 
     DoTestMM3RR<T>(a,b,label+" R,R");
+#ifndef NOASSIGN
     DoTestMM4RR<T>(a,b,label+" R,R");
+#endif
+#ifndef NO_COMPLEX_ARITH
     DoTestMM3CC<T>(ca,cb,label+" C,C");
+#ifndef NOASSIGN
     DoTestMM4CC<T>(ca,cb,label+" C,C");
+#endif
 #if (XTEST & 4)
     DoTestMM3RC<T>(a,cb,label+" R,C");
     DoTestMM3CR<T>(ca,b,label+" C,R");
+#ifndef NOASSIGN
     DoTestMM4CR<T>(ca,b,label+" C,R");
+#endif
+#endif
 #endif
 
     if (showstartdone) std::cout<<"Done Test5"<<std::endl;
@@ -3240,11 +3296,13 @@ static void TestMatrixArith6(
     }
 
     DoTestMM5R<T,T,T>(a,b,c,label+" R,R,R");
+#ifndef NO_COMPLEX_ARITH
     DoTestMM5C<CT,CT,CT>(ca,cb,cc,label+" C,C,C");
 #if (XTEST & 4)
     DoTestMM5R<T,T,CT>(a,b,cc,label+" C,R,R");
     DoTestMM5R<T,CT,CT>(a,cb,cc,label+" C,R,C");
     DoTestMM5R<CT,T,CT>(ca,b,cc,label+" C,C,R");
+#endif
 #endif
 
     if (showstartdone) std::cout<<"Done Test6"<<std::endl;
@@ -3293,12 +3351,14 @@ static void TestMatrixArith7(
     }
 
     DoTestOProdR<T>(a,v1,v2,label+" R,R,R");
+#ifndef NO_COMPLEX_ARITH
     DoTestOProdC<CT>(ca,cv1,cv2,label+" C,C,C");
 #if (XTEST & 4)
     DoTestOProdC<CT>(ca,v1,v2,label+" C,R,R");
 #ifndef SYMOPROD
     DoTestOProdC<CT>(ca,cv1,v2,label+" C,C,R");
     DoTestOProdC<CT>(ca,v1,cv2,label+" C,R,C");
+#endif
 #endif
 #endif
 

@@ -41,6 +41,8 @@
 
 #ifdef PRINTALGO_LU
 #include <iostream>
+#include "TMV_MatrixIO.h"
+#include "TMV_TriMatrixIO.h"
 #endif
 
 namespace tmv {
@@ -205,6 +207,9 @@ namespace tmv {
         {
 #ifdef PRINTALGO_LU
             std::cout<<"LUInverseATA algo 11: cs,rs = "<<cs<<','<<rs<<std::endl;
+            std::cout<<"m1 (=LU) = "<<m1<<std::endl;
+            std::cout<<"trans = "<<trans<<std::endl;
+            std::cout<<"m2 = "<<m2<<std::endl;
 #endif
             // (At A)^-1 = A^-1 (A^-1)t
             // = (U^-1 L^-1 Pt) (P L^-1t U^-1t)
@@ -219,18 +224,59 @@ namespace tmv {
 
             if (trans) {
                 typename M2::uppertri_type uinv = m2.upperTri();
+#ifdef PRINTALGO_LU
+                std::cout<<"u = "<<U<<std::endl;
+#endif
                 uinv = U.inverse();
-                m2 = uinv.transpose() * uinv.conjugate();
+#ifdef PRINTALGO_LU
+                std::cout<<"uinv = "<<uinv<<std::endl;
+#endif
+                //m2 = uinv.transpose() * uinv.conjugate();
+                // This has to be done this way becuase only the second
+                // matrix can be in the opposite storage for m=L*U,
+                // and if these are known sized matrices, the alias check 
+                // won't get called.
+                m2.transpose() = uinv.adjoint() * uinv;
+#ifdef PRINTALGO_LU
+                std::cout<<"m2 => "<<m2<<std::endl;
+#endif
                 m2 /= L.transpose();
+#ifdef PRINTALGO_LU
+                std::cout<<"m2 => "<<m2<<std::endl;
+#endif
                 m2 %= L.conjugate();
+#ifdef PRINTALGO_LU
+                std::cout<<"m2 => "<<m2<<std::endl;
+#endif
                 m2.reversePermuteCols(P);
+#ifdef PRINTALGO_LU
+                std::cout<<"m2 => "<<m2<<std::endl;
+#endif
                 m2.reversePermuteRows(P);
+#ifdef PRINTALGO_LU
+                std::cout<<"m2 => "<<m2<<std::endl;
+#endif
             } else {
                 typename M2::unit_lowertri_type linv = m2.unitLowerTri();
+#ifdef PRINTALGO_LU
+                std::cout<<"l = "<<L<<std::endl;
+#endif
                 linv = L.inverse();
+#ifdef PRINTALGO_LU
+                std::cout<<"linv = "<<linv<<std::endl;
+#endif
                 m2 = linv * linv.adjoint();
+#ifdef PRINTALGO_LU
+                std::cout<<"m2 => "<<m2<<std::endl;
+#endif
                 m2 /= U;
+#ifdef PRINTALGO_LU
+                std::cout<<"m2 => "<<m2<<std::endl;
+#endif
                 m2 %= U.adjoint();
+#ifdef PRINTALGO_LU
+                std::cout<<"m2 => "<<m2<<std::endl;
+#endif
             }
         }
     };
@@ -248,7 +294,7 @@ namespace tmv {
                 cs == 0 || rs == 0 || invalid ? 0 : 
                 11;
 #ifdef PRINTALGO_LU
-            std::cout<<"Inline LUInverse\n";
+            std::cout<<"Inline LUInverseATA\n";
             std::cout<<"cs,rs = "<<cs<<','<<rs<<std::endl;
             std::cout<<"algo = "<<algo<<std::endl;
 #endif

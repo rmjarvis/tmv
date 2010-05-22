@@ -119,25 +119,25 @@ namespace tmv {
     // Matrix * Vector
     //
 
-    // Q1 is the maximum nops to unroll.
+    // UNROLL is the maximum nops to unroll.
 #if TMV_OPT >= 3
-#define TMV_Q1 200 
+#define TMV_UV_UNROLL 200 
 #elif TMV_OPT >= 2
-#define TMV_Q1 25
+#define TMV_UV_UNROLL 25
 #elif TMV_OPT >= 1
-#define TMV_Q1 9
+#define TMV_UV_UNROLL 9
 #else
-#define TMV_Q1 0
+#define TMV_UV_UNROLL 0
 #endif
 
     // Q2 is the minimum size to copy a vector if its step == UNKNOWN.
 #define TMV_Q2 4
 
-    // Q3 is the crossover memory size to start using prefetch commands.
+    // PREFETCH is the crossover memory size to start using prefetch commands.
     // This is undoubtedly a function of the L1 (and L2?) cache size,
     // but 2KBytes is probably not too bad for most machines.
     // (That's an empirical value for my Intel Core 2 Duo.)
-#define TMV_Q3 2048
+#define TMV_UV_PREFETCH 2048
 
 
     // Note: all algorithms here are designed to work if v2 and v3 are 
@@ -205,7 +205,7 @@ namespace tmv {
             IT3 Y = Y0;
             const int Astepj = m1.stepj();
 
-            const bool dopref = N * sizeof(T1) >= TMV_Q3;
+            const bool dopref = N * sizeof(T1) >= TMV_UV_PREFETCH;
 
             Prefetch_Read(m1.cptr());
             Prefetch_Read(v2.cptr());
@@ -264,7 +264,7 @@ namespace tmv {
             const int Adiagstep = m1.diagstep();
             const int Astepi = m1.stepi();
 
-            const bool dopref = N * sizeof(T1) >= TMV_Q3;
+            const bool dopref = N * sizeof(T1) >= TMV_UV_PREFETCH;
 
             Prefetch_Read(m1.cptr());
             Prefetch_MultiRead(v2.cptr());
@@ -378,7 +378,7 @@ namespace tmv {
             IT3 Y = v3.begin() + N;
             const int Adiagstep = m1.diagstep();
 
-            const bool dopref = N * Adiagstep * sizeof(T1) >= TMV_Q3;
+            const bool dopref = N * Adiagstep * sizeof(T1) >= TMV_UV_PREFETCH;
 
             Prefetch_Read(v2.cptr());
             Prefetch_MultiWrite(v3.ptr());
@@ -438,7 +438,8 @@ namespace tmv {
             IT3 Y = v3.begin() + N-1;
             const int Astepi = m1.stepi();
 
-            const bool dopref = N * m1.diagstep() * sizeof(T1) >= TMV_Q3;
+            const bool dopref = 
+                N * m1.diagstep() * sizeof(T1) >= TMV_UV_PREFETCH;
 
             Prefetch_MultiRead(v2.cptr());
             Prefetch_Write(v3.ptr());
@@ -531,12 +532,13 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int N = s == UNKNOWN ? int(m1.size()) : s;
 #ifdef PRINTALGO_UV
+            const int N = s == UNKNOWN ? int(m1.size()) : s;
             std::cout<<"UV algo 43: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
 #ifdef TMV_OPT_SCALE
-            if (N > TMV_Q2) {
+            const int NN = s == UNKNOWN ? int(m1.size()) : s;
+            if (NN > TMV_Q2) {
 #endif
                 MultUV_Helper<85,s,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
 #ifdef TMV_OPT_SCALE
@@ -553,12 +555,13 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int N = s == UNKNOWN ? int(m1.size()) : s;
 #ifdef PRINTALGO_UV
+            const int N = s == UNKNOWN ? int(m1.size()) : s;
             std::cout<<"UV algo 53: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
 #ifdef TMV_OPT_SCALE
-            if (N > TMV_Q2) {
+            const int NN = s == UNKNOWN ? int(m1.size()) : s;
+            if (NN > TMV_Q2) {
 #endif
                 MultUV_Helper<81,s,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
 #ifdef TMV_OPT_SCALE
@@ -575,19 +578,11 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int N = s == UNKNOWN ? int(m1.size()) : s;
 #ifdef PRINTALGO_UV
+            const int N = s == UNKNOWN ? int(m1.size()) : s;
             std::cout<<"UV algo 81: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
-            typedef typename V2::value_type T2;
-            typedef typename VCopyHelper<T2,s,false>::type V2c;
-            V2c v2c(N);
-            typedef typename V2c::view_type V2cv;
-            typedef typename V2c::const_view_type V2ccv;
-            V2cv v2cv = v2c.view();
-            V2ccv v2ccv = v2c.view();
-            CopyV_Helper<-2,s,V2,V2cv>::call(v2,v2cv);
-            MultUV_Helper<-2,s,add,ix,T,M1,V2ccv,V3>::call(x,m1,v2ccv,v3);
+            NoAliasMultMV<add>(x,m1,v2.copy(),v3);
         }
     };
 
@@ -598,21 +593,13 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int N = s == UNKNOWN ? int(m1.size()) : s;
 #ifdef PRINTALGO_UV
+            const int N = s == UNKNOWN ? int(m1.size()) : s;
             std::cout<<"UV algo 85: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
-            typedef typename V3::value_type T3;
-            typedef typename VCopyHelper<T3,s,false>::type V3c;
-            V3c v3c(N);
-            typedef typename V3c::view_type V3cv;
-            typedef typename V3c::const_view_type V3ccv;
-            V3cv v3cv = v3c.view();
-            V3ccv v3ccv = v3c.view();
             typedef typename Traits<T>::real_type RT;
             const Scaling<1,RT> one;
-            MultUV_Helper<-2,s,false,ix,T,M1,V2,V3cv>::call(x,m1,v2,v3cv);
-            MultXV_Helper<-2,s,add,1,RT,V3ccv,V3>::call(one,v3ccv,v3);
+            NoAliasMultXV<add>(one,(x*m1*v2).calc(),v3);
         }
     };
 
@@ -630,7 +617,7 @@ namespace tmv {
             const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
                 s == UNKNOWN ? false :
-                nops > TMV_Q1 ? false :
+                nops > TMV_UV_UNROLL ? false :
                 s <= 10;
             const int algo = 
                 ( s == 0 ) ? 0 : 
@@ -689,7 +676,7 @@ namespace tmv {
             const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
                 s == UNKNOWN ? false :
-                nops > TMV_Q1 ? false :
+                nops > TMV_UV_UNROLL ? false :
                 s <= 10;
             const int algo = 
                 ( s == 0 ) ? 0 : // trivial - nothing to do
@@ -980,8 +967,7 @@ namespace tmv {
 
 } // namespace tmv
 
-#undef TMV_Q1
+#undef TMV_UV_UNROLL
 #undef TMV_Q2
-#undef TMV_Q3
 
 #endif 

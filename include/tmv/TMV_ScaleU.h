@@ -53,15 +53,15 @@ namespace tmv {
     // Matrix *= Scalar 
     //
 
-    // Q1 is the maximum nops to unroll.
+    // UNROLL is the maximum nops to unroll.
 #if TMV_OPT >= 3
-#define TMV_Q1 200 
+#define TMV_SCALEU_UNROLL 200 
 #elif TMV_OPT >= 2
-#define TMV_Q1 25
+#define TMV_SCALEU_UNROLL 25
 #elif TMV_OPT >= 1
-#define TMV_Q1 9
+#define TMV_SCALEU_UNROLL 9
 #else
-#define TMV_Q1 0
+#define TMV_SCALEU_UNROLL 0
 #endif
 
     template <int algo, int s, int ix, class T, class M1>
@@ -241,7 +241,7 @@ namespace tmv {
             const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
                 s == UNKNOWN ? false :
-                nops > TMV_Q1 ? false :
+                nops > TMV_SCALEU_UNROLL ? false :
                 s <= 10;
             const int algo = 
                 (s == 0 || ix == 1) ? 0 :
@@ -350,8 +350,6 @@ namespace tmv {
     inline void InstScale(const T x, LowerTriMatrixView<T,NonUnitDiag> m)
     { InstScale(x,m.transpose()); }
 
-
-#undef TMV_Q1
 
 } // namespace tmv
 

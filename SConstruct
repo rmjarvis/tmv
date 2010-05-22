@@ -149,10 +149,10 @@ def BasicCCFlags(env):
                 env.Append(CCFLAGS=['-fno-strict-aliasing'])
             if env['PROFILE']:
                 env.Append(CCFLAGS=['-pg'])
-                env['TEST_FLAGS'] = ['-pg']
+                env['TEST_FLAGS'] += ['-pg']
             if env['WARN']:
                 env.Append(CCFLAGS=['-ansi','-pedantic-errors','-Wall','-Werror'])
-                env['TEST_FLAGS'] = ['-ansi','-pedantic-errors','-Wall','-Werror']
+                env['TEST_FLAGS'] += ['-ansi','-pedantic-errors','-Wall','-Werror']
     
         elif compiler == 'icpc':
             env.Replace(CCFLAGS=['-g','-O3'])
@@ -162,7 +162,7 @@ def BasicCCFlags(env):
                 env['TEST_FLAGS'] += ['-vec-report0']
             if env['PROFILE']:
                 env.Append(CCFLAGS=['-pg'])
-                env['TEST_FLAGS'] = ['-pg']
+                env['TEST_FLAGS'] += ['-pg']
             if env['WARN']:
                 env.Append(CCFLAGS=['-Wall','-Werror','-wd279,383,810,981'])
                 env['TEST_FLAGS'] += ['-Wall','-Werror','-wd279,383,810,981']
@@ -185,7 +185,7 @@ def BasicCCFlags(env):
             if env['PROFILE']:
                 # Not sure if this is right...
                 env.Append(CCFLAGS=['-pg'])
-                env['TEST_FLAGS'] = ['-pg']
+                env['TEST_FLAGS'] += ['-pg']
 
         elif compiler == 'cl':
             env.Replace(CCFLAGS=['/EHsc','/nologo','/O2','/Oi'])

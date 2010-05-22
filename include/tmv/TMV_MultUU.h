@@ -41,25 +41,19 @@
 #include <iostream>
 #endif
 
-// Use the specialized 1,2,3,4 sized algorithms for the end of the 
-// recursive algorithm.
-#if TMV_OPT >= 2
-#define TMV_OPT_CLEANUP
-#endif
-
-// Q1 is the maximum nops to unroll.
+// UNROLL is the maximum nops to unroll.
 #if TMV_OPT >= 3
-#define TMV_Q1 200 
+#define TMV_UU_UNROLL 200 
 #elif TMV_OPT >= 2
-#define TMV_Q1 25
+#define TMV_UU_UNROLL 25
 #elif TMV_OPT >= 1
-#define TMV_Q1 9
+#define TMV_UU_UNROLL 9
 #else
-#define TMV_Q1 0
+#define TMV_UU_UNROLL 0
 #endif
 
-// Q2 is the minimum size to keep recursing.
-#define TMV_Q2 8
+// MIN_RECURSE is the minimum size to keep recursing.
+#define TMV_UU_MIN_RECURSE 8
 
 namespace tmv {
 
@@ -413,9 +407,6 @@ namespace tmv {
             std::cout<<"UU algo 17: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
 
-#if (TMV_Q2 == 1)
-            const int algo2 = (s == UNKNOWN || s == 1) ? 1 : 0;
-#else
             const int sp1 = IntTraits<s>::Sp1;
             const int sp2 = IntTraits<sp1>::Sp1;
             // nops = 1/6 n(n+1)(n+2)
@@ -424,7 +415,7 @@ namespace tmv {
             const bool unroll = 
                 s > 20 ? false :
                 s == UNKNOWN ? false :
-                nops > TMV_Q1 ? false :
+                nops > TMV_UU_UNROLL ? false :
                 s <= 10;
             const bool rxr = M1::_rowmajor && M3::_rowmajor;
             const bool crx = M1::_colmajor && M2::_rowmajor;
@@ -432,19 +423,17 @@ namespace tmv {
             const int algo2 = 
                 s == 0 ? 0 :
                 s == 1 ? ( M3::_unit ? 0 : 1 ) :
-                (s != UNKNOWN && s > TMV_Q2) ? 0 :
-#ifdef TMV_OPT_CLEANUP
-                s == UNKNOWN ? 16 :
-#endif
                 unroll ? 16 : 
+                // For known s, always recurse down to unroll size
+                s != UNKNOWN ? 0 :
                 rxr ? 12 : crx ? 13 : xcc ? 11 : 13;
-#endif
-            const int algo3 =  // The algorithm for N > Q2
-                (s == UNKNOWN || s > TMV_Q2) ? 17 : 0;
+            const int algo3 =  // The algorithm for N > UU_MIN_RECURSE
+                unroll || s == 1 ? 0 : 17;
             const int algo4 =  // The algorithm for MultUM
-                s == UNKNOWN ? -2 : s > 16 ? -3 : s > TMV_Q2 ? -4 : 0;
+                unroll || s == 1 ? 0 :
+                s == UNKNOWN ? -2 : s > 16 ? -3 : -4;
 
-            if (N > TMV_Q2) {
+            if (s==UNKNOWN ? (N > TMV_UU_MIN_RECURSE) : (s > 1 && !unroll)) {
                 // [ C00 C01 ] = [ A00 A01 ] [ B00 B01 ]
                 // [  0  C11 ]   [  0  A11 ] [  0  B11 ]
 
@@ -490,8 +479,9 @@ namespace tmv {
                 // C11 (+)= x A11 B11
                 MultUU_Helper<algo3,sy,add,ix,T,M1st,M2st,M3st>::call(
                     x,A11,B11,C11);
+            } else {
+                MultUU_Helper<algo2,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
             }
-            else MultUU_Helper<algo2,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };
 
@@ -560,7 +550,7 @@ namespace tmv {
             const int ix1 = u1 ? ix : 0;
             const int xx = UNKNOWN;
 
-            for(int i=0;i<N;++i) {
+            for(int i=N;i--;) {
                 // m3.row(i,0,i+1) = m1.row(i,0,i+1) * m2.subTriMatrix(0,i+1)
                 // ==>
                 // m3.row(i,0,i) = m1.row(i,0,i) * m2.subTriMatrix(0,i) +
@@ -755,9 +745,6 @@ namespace tmv {
             std::cout<<"UU algo 27: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
 
-#if (TMV_Q2 == 1)
-            const int algo2 = (s == UNKNOWN || s == 1) ? 1 : 0;
-#else
             const int sp1 = IntTraits<s>::Sp1;
             const int sp2 = IntTraits<sp1>::Sp1;
             // nops = 1/6 n(n+1)(n+2)
@@ -766,7 +753,7 @@ namespace tmv {
             const bool unroll = 
                 s > 20 ? false :
                 s == UNKNOWN ? false :
-                nops > TMV_Q1 ? false :
+                nops > TMV_UU_UNROLL ? false :
                 s <= 10;
             const bool rxr = M1::_rowmajor && M3::_rowmajor;
             const bool crx = M1::_colmajor && M2::_rowmajor;
@@ -774,19 +761,17 @@ namespace tmv {
             const int algo2 = 
                 s == 0 ? 0 :
                 s == 1 ? ( M3::_unit ? 0 : 1 ) :
-                (s != UNKNOWN && s > TMV_Q2) ? 0 :
-#ifdef TMV_OPT_CLEANUP
-                s == UNKNOWN ? 26 :
-#endif
                 unroll ? 26 : 
+                // For known s, always recurse down to unroll size
+                s != UNKNOWN ? 0 :
                 rxr ? 22 : crx ? 23 : xcc ? 21 : 23;
-#endif
-            const int algo3 =  // The algorithm for N > Q2
-                (s == UNKNOWN || s > TMV_Q2) ? 27 : 0;
+            const int algo3 =  // The algorithm for N > UU_MIN_RECURSE
+                unroll || s == 1 ? 0 : 27;
             const int algo4 =  // The algorithm for MultUM
-                s == UNKNOWN ? -2 : s > 16 ? -3 : s > TMV_Q2 ? -4 : 0;
+                unroll || s == 1 ? 0 :
+                s == UNKNOWN ? -2 : s > 16 ? -3 : -4;
 
-            if (N > TMV_Q2) {
+            if (s==UNKNOWN ? (N > TMV_UU_MIN_RECURSE) : (s > 1 && !unroll)) {
                 // [ C00  0  ] = [ A00  0  ] [ B00  0  ]
                 // [ C10 C11 ]   [ A10 A11 ] [ B10 B11 ]
 
@@ -832,8 +817,9 @@ namespace tmv {
                 // C11 (+)= x A11 B11
                 MultUU_Helper<algo3,sy,add,ix,T,M1st,M2st,M3st>::call(
                     x,A11,B11,C11);
+            } else {
+                MultUU_Helper<algo2,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
             }
-            else MultUU_Helper<algo2,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };
 
@@ -847,16 +833,18 @@ namespace tmv {
         // directly (can't copy NonUnitDiag -> UnitDiag).
         // So we have another layer of indirection at the end to make sure 
         // that an UnknownDiag m3 is copied correctly.
-        template <bool unknowndiag, class M3c> 
+        template <bool unknowndiag, int dummy>
         struct copyBack
         { // unknowndiag = false
+            template <class M3c>
             static inline void call(
                 const Scaling<ix,T>& x, const M3c& m3c, M3& m3)
             { MultXU_Helper<-2,s,add,ix,T,M3c,M3>::call(x,m3c,m3); }
         };
-        template <class M3c>
-        struct copyBack<true,M3c>
+        template <int dummy>
+        struct copyBack<true,dummy>
         {
+            template <class M3c>
             static inline void call(
                 const Scaling<1,T>& , const M3c& m3c, M3& m3)
             {
@@ -874,8 +862,8 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s == UNKNOWN ? int(m3.size()) : s;
 #ifdef PRINTALGO_UU
+            const int N = s == UNKNOWN ? int(m3.size()) : s;
             std::cout<<"UU algo 87: N,s,x = "<<N<< ','<<s<<','<<T(x)<<std::endl;
 #endif
             typedef typename Traits<T>::real_type RT;
@@ -886,18 +874,12 @@ namespace tmv {
             const bool rm = M1::_rowmajor && M2::_rowmajor;
             const int s3 = M3::_shape;
             typedef typename MCopyHelper<PT3,s3,s,s,rm,false>::type M3c;
-            M3c m3c(N);
-            typedef typename M3c::view_type M3cv;
-            typedef typename M3c::const_view_type M3ccv;
-            M3cv m3cv = m3c.view();
-            M3ccv m3ccv = m3c.view();
-            MultUU_Helper<-2,s,false,1,RT,M1,M2,M3cv>::call(
-                one,m1,m2,m3cv);
             // can't be unitdiag unless ix == 1 and !add and m1,m2 are unit
-            const bool unknowndiag = M3::_unknowndiag && ix == 1 && !add &&
+            const bool unknowndiag = 
+                M3::_unknowndiag && ix == 1 && !add &&
                 (M1::_unit || M1::_unknowndiag) && 
                 (M2::_unit || M2::_unknowndiag);
-            copyBack<unknowndiag,M3ccv>::call(x,m3ccv,m3);
+            copyBack<unknowndiag,1>::call(x,M3c(m1*m2),m3);
         }
     };
 
@@ -927,14 +909,14 @@ namespace tmv {
             // 11 = loop over n: MultUV
             // 12 = loop over m: MultUV 
             // 13 = loop over k: Rank1
-            // 16 = Unroll small case
+            // 16 = unroll small case
             // 17 = split each trimatrix into 3 submatrices and recurse
             // 
             // LowerTri:
             // 21 = loop over n: MultUV
             // 22 = loop over m: MultUV 
             // 23 = loop over k: Rank1
-            // 26 = Unroll small case
+            // 26 = unroll small case
             // 27 = split each trimatrix into 3 submatrices and recurse
 
             const bool upper = M1::_upper;
@@ -954,7 +936,7 @@ namespace tmv {
                 IntTraits2<IntTraits2<s2,s2p1>::safeprod,s2p2>::safeprod / 6;
             const bool unroll = 
                 s == UNKNOWN ? false :
-                nops > TMV_Q1 ? false :
+                nops > TMV_UU_UNROLL ? false :
                 s <= 10;
             const int algo = 
                 s == 0 ? 0 :
@@ -1209,10 +1191,6 @@ namespace tmv {
         TMVAssert(!m1.isunit() || ix == 1);
         AliasMultMM<false>(x,m1.mat(),m2.mat(),m1.mat());
     }
-
-#undef TMV_Q1
-#undef TMV_OPT_CLEANUP
-#undef TMV_Q2
 
 } // namespace tmv
 

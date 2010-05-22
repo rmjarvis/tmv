@@ -48,77 +48,61 @@ namespace tmv {
     // Vector ^ Vector
     //
 
-    // These first few are intentionally not defined to make sure we
-    // get a compiler error if they are used.
-    // All real calls should go through a more specific version than 
-    // just the BaseMatrix_Calc's.
+    // These first few are for when an argument is a composite vector
+    // and needs to be calculated before running Rank1Update
     template <bool add, int ix, class T, class V1, class V2, class M3>
     inline void Rank1Update(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1, 
-        const BaseVector_Calc<V2>& v2, BaseMatrix_Mutable<M3>& m3);
+        const Scaling<ix,T>& x, const BaseVector<V1>& v1, 
+        const BaseVector<V2>& v2, BaseMatrix_Mutable<M3>& m3)
+    { Rank1Update<add>(x,v1.calc(),v2.calc(),m3.mat()); }
     template <bool add, int ix, class T, class V1, class V2, class M3>
     inline void NoAliasRank1Update(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1, 
-        const BaseVector_Calc<V2>& v2, BaseMatrix_Mutable<M3>& m3);
-    template <bool add, int ix, class T, class V1, class V2, class M3>
-    inline void InlineRank1Update(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1, 
-        const BaseVector_Calc<V2>& v2, BaseMatrix_Mutable<M3>& m3);
+        const Scaling<ix,T>& x, const BaseVector<V1>& v1, 
+        const BaseVector<V2>& v2, BaseMatrix_Mutable<M3>& m3)
+    { NoAliasRank1Update<add>(x,v1.calc(),v2.calc(),m3.mat()); }
     template <bool add, int ix, class T, class V1, class V2, class M3>
     inline void AliasRank1Update(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1, 
-        const BaseVector_Calc<V2>& v2, BaseMatrix_Mutable<M3>& m3);
+        const Scaling<ix,T>& x, const BaseVector<V1>& v1, 
+        const BaseVector<V2>& v2, BaseMatrix_Mutable<M3>& m3)
+    { AliasRank1Update<add>(x,v1.calc(),v2.calc(),m3.mat()); }
 
     // These are helpers to allow the caller to not use a Scaling object.
     template <bool add, class T, class V1, class V2, class M3>
     inline void Rank1Update(
-        const T& x, const BaseVector_Calc<V1>& v1,
-        const BaseVector_Calc<V2>& v2, BaseMatrix_Mutable<M3>& m3)
+        const T& x, const BaseVector<V1>& v1,
+        const BaseVector<V2>& v2, BaseMatrix_Mutable<M3>& m3)
     { Rank1Update<add>(Scaling<0,T>(x),v1.vec(),v2.vec(),m3.mat()); }
     template <bool add, class T, class V1, class V2, class M3>
     inline void NoAliasRank1Update(
-        const T& x, const BaseVector_Calc<V1>& v1,
-        const BaseVector_Calc<V2>& v2, BaseMatrix_Mutable<M3>& m3)
+        const T& x, const BaseVector<V1>& v1,
+        const BaseVector<V2>& v2, BaseMatrix_Mutable<M3>& m3)
     { NoAliasRank1Update<add>(Scaling<0,T>(x),v1.vec(),v2.vec(),m3.mat()); }
     template <bool add, class T, class V1, class V2, class M3>
-    inline void InlineRank1Update(
-        const T& x, const BaseVector_Calc<V1>& v1,
-        const BaseVector_Calc<V2>& v2, BaseMatrix_Mutable<M3>& m3)
-    { InlineRank1Update<add>(Scaling<0,T>(x),v1.vec(),v2.vec(),m3.mat()); }
-    template <bool add, class T, class V1, class V2, class M3>
     inline void AliasRank1Update(
-        const T& x, const BaseVector_Calc<V1>& v1,
-        const BaseVector_Calc<V2>& v2, BaseMatrix_Mutable<M3>& m3)
+        const T& x, const BaseVector<V1>& v1,
+        const BaseVector<V2>& v2, BaseMatrix_Mutable<M3>& m3)
     { AliasRank1Update<add>(Scaling<0,T>(x),v1.vec(),v2.vec(),m3.mat()); }
 
     template <bool add, class V1, class V2, class M3>
     inline void Rank1Update(
-        const BaseVector_Calc<V1>& v1,
-        const BaseVector_Calc<V2>& v2, BaseMatrix_Mutable<M3>& m3)
+        const BaseVector<V1>& v1,
+        const BaseVector<V2>& v2, BaseMatrix_Mutable<M3>& m3)
     { 
         Rank1Update<add>(
             Scaling<1,typename M3::real_type>(),v1.vec(),v2.vec(),m3.mat()); 
     }
     template <bool add, class V1, class V2, class M3>
     inline void NoAliasRank1Update(
-        const BaseVector_Calc<V1>& v1,
-        const BaseVector_Calc<V2>& v2, BaseMatrix_Mutable<M3>& m3)
+        const BaseVector<V1>& v1,
+        const BaseVector<V2>& v2, BaseMatrix_Mutable<M3>& m3)
     { 
         NoAliasRank1Update<add>(
             Scaling<1,typename M3::real_type>(),v1.vec(),v2.vec(),m3.mat()); 
     }
     template <bool add, class V1, class V2, class M3>
-    inline void InlineRank1Update(
-        const BaseVector_Calc<V1>& v1,
-        const BaseVector_Calc<V2>& v2, BaseMatrix_Mutable<M3>& m3)
-    {
-        InlineRank1Update<add>(
-            Scaling<1,typename M3::real_type>(),v1.vec(),v2.vec(),m3.mat()); 
-    }
-    template <bool add, class V1, class V2, class M3>
     inline void AliasRank1Update(
-        const BaseVector_Calc<V1>& v1,
-        const BaseVector_Calc<V2>& v2, BaseMatrix_Mutable<M3>& m3)
+        const BaseVector<V1>& v1,
+        const BaseVector<V2>& v2, BaseMatrix_Mutable<M3>& m3)
     {
         AliasRank1Update<add>(
             Scaling<1,typename M3::real_type>(),v1.vec(),v2.vec(),m3.mat()); 
@@ -128,7 +112,7 @@ namespace tmv {
     template <bool add, int ix, class T, class V1, class V2, class M3>
     inline void Rank1Update_Debug(
         const Scaling<ix,T>& x,
-        const BaseVector_Calc<V1>& v1, const BaseVector_Calc<V2>& v2,
+        const BaseVector<V1>& v1, const BaseVector<V2>& v2,
         BaseMatrix_Mutable<M3>& m3)
     {
         //std::cout<<"Start Rank1Update XDEBUG"<<std::endl;
@@ -228,9 +212,9 @@ namespace tmv {
             TMVAssert(colsize() == m3.colsize());
             TMVAssert(rowsize() == m3.rowsize());
 #ifdef XDEBUG_OPRODVV
-            Rank1Update_Debug<false>(x,v1.calc(),v2.calc(),m3.mat());
+            Rank1Update_Debug<false>(x,v1.vec(),v2.vec(),m3.mat());
 #else
-            Rank1Update<false>(x,v1.calc(),v2.calc(),m3.mat());
+            Rank1Update<false>(x,v1.vec(),v2.vec(),m3.mat());
 #endif
         }
 
@@ -245,9 +229,9 @@ namespace tmv {
             TMVAssert(colsize() == m3.colsize());
             TMVAssert(rowsize() == m3.rowsize());
 #ifdef XDEBUG_OPRODVV
-            Rank1Update_Debug<false>(x,v1.calc(),v2.calc(),m3.mat());
+            Rank1Update_Debug<false>(x,v1.vec(),v2.vec(),m3.mat());
 #else
-            NoAliasRank1Update<false>(x,v1.calc(),v2.calc(),m3.mat());
+            NoAliasRank1Update<false>(x,v1.vec(),v2.vec(),m3.mat());
 #endif
         }
 
@@ -297,10 +281,10 @@ namespace tmv {
     { 
 #ifdef XDEBUG_OPRODVV
         Rank1Update_Debug<true>(
-            vv.getX(),vv.getV1().calc(),vv.getV2().calc(),m.mat()); 
+            vv.getX(),vv.getV1().vec(),vv.getV2().vec(),m.mat()); 
 #else
         Rank1Update<true>(
-            vv.getX(),vv.getV1().calc(),vv.getV2().calc(),m.mat()); 
+            vv.getX(),vv.getV1().vec(),vv.getV2().vec(),m.mat()); 
 #endif
     }
 
@@ -311,10 +295,10 @@ namespace tmv {
     { 
 #ifdef XDEBUG_OPRODVV
         Rank1Update_Debug<true>(
-            -vv.getX(),vv.getV1().calc(),vv.getV2().calc(),m.mat()); 
+            -vv.getX(),vv.getV1().vec(),vv.getV2().vec(),m.mat()); 
 #else
         Rank1Update<true>(
-            -vv.getX(),vv.getV1().calc(),vv.getV2().calc(),m.mat()); 
+            -vv.getX(),vv.getV1().vec(),vv.getV2().vec(),m.mat()); 
 #endif
     }
 

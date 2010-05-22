@@ -87,28 +87,28 @@
 // So I put them all here to make them easier to change and to
 // track down in the code.
 
-// Q1 is the maximum nops to unroll.
+// UNROLL is the maximum nops to unroll.
 // We have other cuts that are based purely on timings in algo -1.
 // (Search for "unroll = ".)  This parameter supersedes that value
 // to turn off unrolling for larger matrices to reduce code bloat.
 #if TMV_OPT >= 3
-#define TMV_Q1 200 
+#define TMV_MV_UNROLL 200 
 #elif TMV_OPT >= 2
-#define TMV_Q1 25
+#define TMV_MV_UNROLL 25
 #elif TMV_OPT >= 1
-#define TMV_Q1 9
+#define TMV_MV_UNROLL 9
 #else
-#define TMV_Q1 0
+#define TMV_MV_UNROLL 0
 #endif
 
 // Q2 is the minimum size to copy a vector if its step == UNKNOWN.
 #define TMV_Q2 4
 
-// Q3 is the crossover memory size to start using prefetch commands.
+// PREFETCH is the crossover memory size to start using prefetch commands.
 // This is undoubtedly a function of the L1 (and L2?) cache size,
 // but 2KBytes is probably not too bad for most machines.
 // (That's an empirical value for my Intel Core 2 Duo.)
-#define TMV_Q3 2048
+#define TMV_MV_PREFETCH 2048
 
 // Q4 is the ratio of the time to copy a vector to the time to scale it.
 // ( Or technically Q4 is 1 + this ratio. )
@@ -388,7 +388,7 @@ namespace tmv {
             const IT3 Y_begin = v3.begin();
             IT3 Y = Y_begin;
 
-            const bool dopref = M * sizeof(T1) >= TMV_Q3;
+            const bool dopref = M * sizeof(T1) >= TMV_MV_PREFETCH;
 
             Prefetch_Read(X.get());
             Prefetch_Read(A0.get());
@@ -664,7 +664,7 @@ namespace tmv {
             const bool c1 = M1::_conj;
             const bool c2 = V2::_conj;
 
-            const bool dopref = M * sizeof(T1) >= TMV_Q3;
+            const bool dopref = M * sizeof(T1) >= TMV_MV_PREFETCH;
 
             Prefetch_Read(X.get());
             Prefetch_Read(A0.get());
@@ -963,7 +963,7 @@ namespace tmv {
             const int Nx = N-(N_4<<2);
             IT3 Y = v3.begin();
 
-            const bool dopref = N * sizeof(T1) >= TMV_Q3;
+            const bool dopref = N * sizeof(T1) >= TMV_MV_PREFETCH;
 
             Prefetch_MultiRead(X.get());
             Prefetch_Read(A0.get());
@@ -1327,7 +1327,7 @@ namespace tmv {
             const bool c1 = M1::_conj;
             const bool c2 = V2::_conj;
 
-            const bool dopref = N * sizeof(T1) >= TMV_Q3;
+            const bool dopref = N * sizeof(T1) >= TMV_MV_PREFETCH;
 
             Prefetch_MultiRead(X.get());
             Prefetch_Read(A0.get());
@@ -2170,21 +2170,13 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
 #ifdef PRINTALGO_MV
+            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
             const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
             std::cout<<"MV algo 81: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            typedef typename V2::value_type T2;
-            typedef typename VCopyHelper<T2,rs,false>::type V2c;
-            V2c v2c(N);
-            typedef typename V2c::view_type V2cv;
-            typedef typename V2c::const_view_type V2ccv;
-            V2cv v2cv = v2c.view();
-            V2ccv v2ccv = v2c.view();
-            CopyV_Helper<-2,rs,V2,V2cv>::call(v2,v2cv);
-            MultMV_Helper<-2,cs,rs,add,ix,T,M1,V2ccv,V3>::call(x,m1,v2ccv,v3);
+            NoAliasMultMV<add>(x,m1,v2.copy(),v3);
         }
     };
 
@@ -2196,25 +2188,15 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
 #ifdef PRINTALGO_MV
+            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
             const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
             std::cout<<"MV algo 82: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            typedef typename V2::value_type T2;
-            typedef typename Traits2<T,T2>::type PT2;
-            typedef typename VCopyHelper<PT2,rs,false>::type V2c;
-            V2c v2c(N);
-            typedef typename V2c::view_type V2cv;
-            typedef typename V2c::const_view_type V2ccv;
-            V2cv v2cv = v2c.view();
-            V2ccv v2ccv = v2c.view();
             typedef typename Traits<T>::real_type RT;
             const Scaling<1,RT> one;
-            MultXV_Helper<-2,rs,false,ix,T,V2,V2cv>::call(x,v2,v2cv);
-            MultMV_Helper<-2,cs,rs,add,1,RT,M1,V2ccv,V3>::call(
-                one,m1,v2ccv,v3);
+            NoAliasMultMV<add>(one,m1,(x*v2).calc(),v3);
         }
     };
 
@@ -2252,27 +2234,13 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
 #ifdef PRINTALGO_MV
+            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"MV algo 84: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            typedef typename M1::value_type T1;
-            typedef typename V2::value_type T2;
-            typedef typename V3::value_type T3;
-            typedef typename Traits2<T1,T2>::type PT3;
-            typedef typename VCopyHelper<PT3,cs,false>::type V3c;
-            V3c v3c(M);
-            typedef typename V3c::view_type V3cv;
-            typedef typename V3c::const_view_type V3ccv;
-            V3cv v3cv = v3c.view();
-            V3ccv v3ccv = v3c.view();
-            typedef typename Traits<T>::real_type RT;
-            const Scaling<1,RT> one;
-            MultMV_Helper<-2,cs,rs,false,1,RT,M1,V2,V3cv>::call(
-                one,m1,v2,v3cv);
-            MultXV_Helper<-2,cs,add,ix,T,V3ccv,V3>::call(x,v3ccv,v3);
+            NoAliasMultXV<add>(x,(m1*v2).calc(),v3);
         }
     };
 
@@ -2284,23 +2252,15 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
 #ifdef PRINTALGO_MV
+            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"MV algo 85: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            typedef typename V3::value_type T3;
-            typedef typename VCopyHelper<T3,cs,false>::type V3c;
-            V3c v3c(M);
-            typedef typename V3c::view_type V3cv;
-            typedef typename V3c::const_view_type V3ccv;
-            V3cv v3cv = v3c.view();
-            V3ccv v3ccv = v3c.view();
             typedef typename Traits<T>::real_type RT;
             const Scaling<1,RT> one;
-            MultMV_Helper<-2,cs,rs,false,ix,T,M1,V2,V3cv>::call(x,m1,v2,v3cv);
-            MultXV_Helper<-2,cs,add,1,RT,V3ccv,V3>::call(one,v3ccv,v3);
+            NoAliasMultXV<add>(one,(x*m1*v2).calc(),v3);
         }
     };
 
@@ -2335,7 +2295,7 @@ namespace tmv {
     {
         enum { unroll = (
                 ( cs == UNKNOWN || rs == UNKNOWN ) ? false :
-                IntTraits2<cs,rs>::prod > TMV_Q1 ? false :
+                IntTraits2<cs,rs>::prod > TMV_MV_UNROLL ? false :
                 // These maxunroll values are empirical for my machine,
                 // comparing the speed for the fully unrolled algorithm
                 // to the regular, non-unrolled algorithm, so they might
@@ -2757,9 +2717,9 @@ namespace tmv {
 #undef TMV_OPT_CLEANUP
 #undef TMV_OPT_SCALE
 
-#undef TMV_Q1
+#undef TMV_MV_UNROLL
 #undef TMV_Q2
-#undef TMV_Q3
+#undef TMV_MV_PREFETCH
 #undef TMV_Q4
 #undef TMV_Q5
 #undef TMV_ZeroIX

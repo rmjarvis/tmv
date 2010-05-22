@@ -34,23 +34,23 @@ int main() try {
 #if 1
 
 #ifdef TEST_DOUBLE
-    TestSmallVector<double>();
-    TestSmallMatrix<double>();
+    TestAllSmallVector<double>();
+    TestAllSmallMatrix<double>();
 #endif
 
 #ifdef TEST_FLOAT
-    TestSmallVector<float>();
-    TestSmallMatrix<float>();
+    TestAllSmallVector<float>();
+    TestAllSmallMatrix<float>();
 #endif
 
 #ifdef TEST_LONGDOUBLE
-    TestSmallVector<long double>();
-    TestSmallMatrix<long double>();
+    TestAllSmallVector<long double>();
+    TestAllSmallMatrix<long double>();
 #endif 
 
 #ifdef TEST_INT
-    TestSmallVector<int>();
-    TestSmallMatrix<int>();
+    TestAllSmallVector<int>();
+    TestAllSmallMatrix<int>();
 #endif 
 
 #endif 

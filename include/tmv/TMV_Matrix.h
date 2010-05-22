@@ -437,12 +437,20 @@
 //        Returns a view to the upper triangle portion of the matrix
 //        where the diagonal elements are all taken to be equal to 1.
 //
+//    unknown_uppertri_type upperTri(dt)
+//        Returns a view to the upper triangle portion of the matrix
+//        with the specification of UnitDiag or NonUnitDiag given by dt.
+//
 //    lowertri_type lowerTri()
 //        Returns a view to the lower triangle portion of the matrix.
 //
 //    unit_lowertri_type unitLowerTri()
 //        Returns a view to the lower triangle portion of the matrix
 //        where the diagonal elements are all taken to be equal to 1.
+//
+//    unknown_lowertri_type lowerTri(dt)
+//        Returns a view to the lower triangle portion of the matrix
+//        with the specification of UnitDiag or NonUnitDiag given by dt.
 //
 //    linearview_type linearView()
 //        Returns a VectorView with all the elements of the matrix.
@@ -826,10 +834,14 @@ namespace tmv {
             const_uppertri_type;
         typedef ConstUpperTriMatrixView<T,UnitDiag,_stepi,_stepj,false,I> 
             const_unit_uppertri_type;
+        typedef ConstUpperTriMatrixView<T,UnknownDiag,_stepi,_stepj,false,I> 
+            const_unknown_uppertri_type;
         typedef ConstLowerTriMatrixView<T,NonUnitDiag,_stepi,_stepj,false,I> 
             const_lowertri_type;
         typedef ConstLowerTriMatrixView<T,UnitDiag,_stepi,_stepj,false,I> 
             const_unit_lowertri_type;
+        typedef ConstLowerTriMatrixView<T,UnknownDiag,_stepi,_stepj,false,I> 
+            const_unknown_lowertri_type;
         typedef ConstMatrixView<real_type,twoSi,twoSj,false,I> 
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
@@ -869,10 +881,14 @@ namespace tmv {
             uppertri_type;
         typedef UpperTriMatrixView<T,UnitDiag,_stepi,_stepj,false,I> 
             unit_uppertri_type;
+        typedef UpperTriMatrixView<T,UnknownDiag,_stepi,_stepj,false,I> 
+            unknown_uppertri_type;
         typedef LowerTriMatrixView<T,NonUnitDiag,_stepi,_stepj,false,I> 
             lowertri_type;
         typedef LowerTriMatrixView<T,UnitDiag,_stepi,_stepj,false,I> 
             unit_lowertri_type;
+        typedef LowerTriMatrixView<T,UnknownDiag,_stepi,_stepj,false,I> 
+            unknown_lowertri_type;
         typedef MatrixView<real_type,twoSi,twoSj,false,I> realpart_type;
         typedef realpart_type imagpart_type;
         typedef VectorView<T,1,false,I> linearview_type;
@@ -978,7 +994,7 @@ namespace tmv {
 #endif
             if (itscs > 0) {
                 resize(itscs,vv[0].size());
-                for(int i=0;i<itscs;++i) {
+                for(size_t i=0;i<itscs;++i) {
                     TMVAssert(vv[i].size() == itsrs);
                     typename type::row_type mi = this->row(i);
                     ConstVectorView<T,1>(&vv[i][0],itsrs).newAssignTo(mi);
@@ -1211,10 +1227,14 @@ namespace tmv {
             const_uppertri_type;
         typedef ConstUpperTriMatrixView<T,UnitDiag,_stepi,_stepj,C,I> 
             const_unit_uppertri_type;
+        typedef ConstUpperTriMatrixView<T,UnknownDiag,_stepi,_stepj,C,I> 
+            const_unknown_uppertri_type;
         typedef ConstLowerTriMatrixView<T,NonUnitDiag,_stepi,_stepj,C,I> 
             const_lowertri_type;
         typedef ConstLowerTriMatrixView<T,UnitDiag,_stepi,_stepj,C,I> 
             const_unit_lowertri_type;
+        typedef ConstLowerTriMatrixView<T,UnknownDiag,_stepi,_stepj,C,I> 
+            const_unknown_lowertri_type;
         typedef ConstMatrixView<real_type,twoSi,twoSj,false,I> 
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
@@ -1471,10 +1491,14 @@ namespace tmv {
             const_uppertri_type;
         typedef ConstUpperTriMatrixView<T,UnitDiag,_stepi,_stepj,C,I> 
             const_unit_uppertri_type;
+        typedef ConstUpperTriMatrixView<T,UnknownDiag,_stepi,_stepj,C,I> 
+            const_unknown_uppertri_type;
         typedef ConstLowerTriMatrixView<T,NonUnitDiag,_stepi,_stepj,C,I> 
             const_lowertri_type;
         typedef ConstLowerTriMatrixView<T,UnitDiag,_stepi,_stepj,C,I> 
             const_unit_lowertri_type;
+        typedef ConstLowerTriMatrixView<T,UnknownDiag,_stepi,_stepj,C,I> 
+            const_unknown_lowertri_type;
         typedef ConstMatrixView<real_type,twoSi,twoSj,false,I> 
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
@@ -1512,10 +1536,14 @@ namespace tmv {
             uppertri_type;
         typedef UpperTriMatrixView<T,UnitDiag,_stepi,_stepj,C,I> 
             unit_uppertri_type;
+        typedef UpperTriMatrixView<T,UnknownDiag,_stepi,_stepj,C,I> 
+            unknown_uppertri_type;
         typedef LowerTriMatrixView<T,NonUnitDiag,_stepi,_stepj,C,I> 
             lowertri_type;
         typedef LowerTriMatrixView<T,UnitDiag,_stepi,_stepj,C,I> 
             unit_lowertri_type;
+        typedef LowerTriMatrixView<T,UnknownDiag,_stepi,_stepj,C,I> 
+            unknown_lowertri_type;
         typedef MatrixView<real_type,twoSi,twoSj,false,I> realpart_type;
         typedef realpart_type imagpart_type;
         typedef VectorView<T,1,C,I> linearview_type;

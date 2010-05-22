@@ -41,6 +41,8 @@
 
 #ifdef PRINTALGO_LU
 #include <iostream>
+#include "TMV_ProdMV.h"
+#include "TMV_ProdMM.h"
 #endif
 
 namespace tmv {
@@ -125,12 +127,25 @@ namespace tmv {
 #ifdef PRINTALGO_LU
             std::cout<<"LUSolve algo 11: trans,cs,rs = "<<
                 false<<','<<cs<<','<<rs<<std::endl;
+            std::cout<<"m1 = "<<m1<<std::endl;
+            std::cout<<"m2 = "<<m2<<std::endl;
 #endif
             // m2 = (PLU)^-1 m2
             //    = U^-1 L^-1 Pt m2
             PermuteRows(m2,P);
+#ifdef PRINTALGO_LU
+            std::cout<<"after permute m2 => "<<m2<<std::endl;
+#endif
             NoAliasLDivEq(m2,m1.unitLowerTri());
+#ifdef PRINTALGO_LU
+            std::cout<<"after L^-1 m2 => "<<m2<<std::endl;
+            std::cout<<"L*m2 = "<<m1.unitLowerTri()*m2<<std::endl;
+#endif
             NoAliasLDivEq(m2,m1.upperTri());
+#ifdef PRINTALGO_LU
+            std::cout<<"after U^-1 m2 => "<<m2<<std::endl;
+            std::cout<<"U*m2 = "<<m1.upperTri()*m2<<std::endl;
+#endif
         }
     };
     template <int cs, int rs, class M1, class M2>
@@ -149,13 +164,26 @@ namespace tmv {
 #ifdef PRINTALGO_LU
             std::cout<<"LUSolve algo 11: trans,cs,rs = "<<
                 true<<','<<cs<<','<<rs<<std::endl;
+            std::cout<<"m1 = "<<m1<<std::endl;
+            std::cout<<"m2 = "<<m2<<std::endl;
 #endif
             // m2 = (PLU)^-1t m2
             //    = (U^-1 L^-1 Pt)t m2
             //    = P L^-1t U^-1t m2
             NoAliasLDivEq(m2,m1.upperTri().transpose());
+#ifdef PRINTALGO_LU
+            std::cout<<"after UT^-1 m2 => "<<m2<<std::endl;
+            std::cout<<"Ut*m2 = "<<m1.upperTri().transpose()*m2<<std::endl;
+#endif
             NoAliasLDivEq(m2,m1.unitLowerTri().transpose());
+#ifdef PRINTALGO_LU
+            std::cout<<"after LT^-1 m2 => "<<m2<<std::endl;
+            std::cout<<"LT*m2 = "<<m1.unitLowerTri().transpose()*m2<<std::endl;
+#endif
             ReversePermuteRows(m2,P);
+#ifdef PRINTALGO_LU
+            std::cout<<"after reverse permute m2 => "<<m2<<std::endl;
+#endif
         }
     };
 

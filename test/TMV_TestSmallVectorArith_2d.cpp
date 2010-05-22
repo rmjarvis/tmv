@@ -1,7 +1,7 @@
 
 #include "TMV_Test.h"
 #include "TMV_Test3.h"
-#include "TMV_Vec.h"
+#include "TMV.h"
 #include <fstream>
 #include <fstream>
 #include <cstdio>

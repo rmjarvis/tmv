@@ -42,26 +42,21 @@ namespace tmv {
     // Scalar * Matrix^-1
     //
 
-    // These are intentionally not defined to make sure we
-    // get a compiler error if they are used.
-    // All real calls should go through a more specific version than 
-    // just the BaseMatrix_Calc's.
     template <int ix, class T, class M1, class M2>
     inline void MakeInverse(
-        const Scaling<ix,T>& one,
-        const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2);
+        const Scaling<ix,T>& x,
+        const BaseMatrix<M1>& m1, BaseMatrix_Mutable<M2>& m2)
+    { MakeInverse(x,m1.calc(),m2.mat()); }
     template <int ix, class T, class M1, class M2>
     inline void NoAliasMakeInverse(
-        const Scaling<ix,T>& one,
-        const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2);
-    template <int ix, class T, class M1, class M2>
-    inline void InlineMakeInverse(
-        const Scaling<ix,T>& one,
-        const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2);
+        const Scaling<ix,T>& x,
+        const BaseMatrix<M1>& m1, BaseMatrix_Mutable<M2>& m2)
+    { NoAliasMakeInverse(x,m1.calc(),m2.mat()); }
     template <int ix, class T, class M1, class M2>
     inline void AliasMakeInverse(
-        const Scaling<ix,T>& one,
-        const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2);
+        const Scaling<ix,T>& x,
+        const BaseMatrix<M1>& m1, BaseMatrix_Mutable<M2>& m2)
+    { AliasMakeInverse(x,m1.calc(),m2.mat()); }
 
 
     template <int ix, class T, class M>
@@ -74,10 +69,11 @@ namespace tmv {
 
         enum { _colsize = M::_colsize };
         enum { _rowsize = M::_rowsize };
+        enum { shape1 = ShapeTraits<M::_shape>::inverse_shape };
         enum { _shape = 
             (ix == 1) ?
-                int(M::_shape) :
-                int(ShapeTraits<M::_shape>::nonunit_shape) };
+                int(shape1) :
+                int(ShapeTraits<shape1>::nonunit_shape) };
         enum { _fort = M::_fort };
         enum { _calc = false };
         enum { rm1 = Traits<typename M::calc_type>::_rowmajor };
@@ -124,7 +120,7 @@ namespace tmv {
             TMVAssert(m2.colsize() == colsize());
             TMVAssert(m2.rowsize() == rowsize());
             TMVStaticAssert(type::isreal || M2::iscomplex);
-            MakeInverse(x,m.calc(),m2.mat());
+            MakeInverse(x,m.mat(),m2.mat());
         }
 
         template <class M2>
@@ -137,7 +133,7 @@ namespace tmv {
             TMVAssert(m2.colsize() == colsize());
             TMVAssert(m2.rowsize() == rowsize());
             TMVStaticAssert(type::isreal || M2::iscomplex);
-            NoAliasMakeInverse(x,m.calc(),m2.mat());
+            NoAliasMakeInverse(x,m.mat(),m2.mat());
         }
 
     private:

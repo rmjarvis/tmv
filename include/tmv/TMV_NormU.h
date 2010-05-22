@@ -44,15 +44,15 @@ namespace tmv {
     // SumElements
     //
 
-    // Q1 is the maximum nops to unroll.
+    // UNROLL is the maximum nops to unroll.
 #if TMV_OPT >= 3
-#define TMV_Q1 200 
+#define TMV_NORMU_UNROLL 200 
 #elif TMV_OPT >= 2
-#define TMV_Q1 25
+#define TMV_NORMU_UNROLL 25
 #elif TMV_OPT >= 1
-#define TMV_Q1 9
+#define TMV_NORMU_UNROLL 9
 #else
-#define TMV_Q1 0
+#define TMV_NORMU_UNROLL 0
 #endif
 
     template <int algo, int s, CompType comp, int ix, class M1>
@@ -264,7 +264,7 @@ namespace tmv {
                 // Norm is faster with the regular algorithm except for 
                 // very small matrices.
                 (s > 3 && comp == NormComp) ? false :
-                nops > TMV_Q1 ? false :
+                nops > TMV_NORMU_UNROLL ? false :
                 s <= 10;
             const int algo = 
                 unroll ? ( M1::_rowmajor ? 15 : 16 ) :
@@ -1141,8 +1141,6 @@ namespace tmv {
         const bool lower = M::_lower;
         return CallNormInfU<lower,inst,Mn>::call(m.nonConj());
     }
-
-#undef TMV_Q1
 
 } // namespace tmv
 

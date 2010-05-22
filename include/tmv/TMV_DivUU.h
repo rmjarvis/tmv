@@ -487,48 +487,34 @@ namespace tmv {
     template <int s, class M1, class M2>
     struct LDivEqUU_Helper<87,s,M1,M2>
     {
-        template <bool unknowndiag, class M1c>
+        template <bool unknowndiag, int dummy>
         struct copyBack
         { // unknowndiag = false
+            template <class M1c>
             static inline void call(const M1c& m1c, M1& m1)
-            { CopyU_Helper<-2,s,M1c,M1>::call(m1c,m1); }
+            { NoAliasCopy(m1c,m1); }
         };
-        template <class M1c>
-        struct copyBack<true,M1c>
+        template <int dummy>
+        struct copyBack<true,dummy>
         {
+            template <class M1c>
             static void call(const M1c& m1c, M1& m1)
             {
-                if (m1.isunit()) {
-                    typedef typename M1c::const_unitdiag_type M1cu;
-                    M1cu m1cu = m1c.viewAsUnitDiag();
-                    CopyU_Helper<-2,s,M1cu,M1>::call(m1cu,m1);
-                } else {
-                    CopyU_Helper<-2,s,M1c,M1>::call(m1c,m1);
-                }
+                if (m1.isunit()) NoAliasCopy(m1c.viewAsUnitDiag(),m1); 
+                else NoAliasCopy(m1c,m1); 
             }
         };
         static void call(M1& m1, const M2& m2)
         {
-            const int N = s == UNKNOWN ? int(m1.size()) : s;
 #ifdef PRINTALGO_UU
+            const int N = s == UNKNOWN ? int(m1.size()) : s;
             std::cout<<"UU algo 87: N,s = "<<N<< ','<<s<<std::endl;
 #endif
-            typedef typename M1::value_type T1;
-            const bool rm = M1::_rowmajor && M2::_rowmajor;
-            const int s1 = M1::_shape;
-            typedef typename MCopyHelper<T1,s1,s,s,rm,false>::type M1c;
-            M1c m1c(N);
-            typedef typename M1c::view_type M1cv;
-            typedef typename M1c::const_view_type M1ccv;
-            typedef typename M1::const_view_type M1const;
-            M1cv m1cv = m1c.view();
-            M1ccv m1ccv = m1c.view();
-            M1const m1const = m1.constView();
-            CopyU_Helper<-2,s,M1const,M1cv>::call(m1const,m1cv);
-            LDivEqUU_Helper<-2,s,M1cv,M2>::call(m1cv,m2);
+            typename M1::copy_type m1c = m1;
+            NoAliasLDivEq(m1c,m2);
             const bool unknowndiag = M1::_unknowndiag && 
                 (M2::_unit || M2::_unknowndiag);
-            copyBack<unknowndiag,M1ccv>::call(m1ccv,m1);
+            copyBack<unknowndiag,1>::call(m1c,m1);
         }
     };
 

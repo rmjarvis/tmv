@@ -37,6 +37,28 @@
 
 namespace tmv {
 
+    template <int ix1, class T1, class V1,
+              int ix2, class T2, class V2, class V3>
+    inline void AddVV(
+        const Scaling<ix1,T1>& x1, const BaseVector<V1>& v1,
+        const Scaling<ix2,T2>& x2, const BaseVector<V2>& v2,
+        BaseVector_Mutable<V3>& v3)
+    { AddVV(x1,v1.calc(),x2,v2.calc(),v3.vec()); }
+    template <int ix1, class T1, class V1,
+              int ix2, class T2, class V2, class V3>
+    inline void NoAliasAddVV(
+        const Scaling<ix1,T1>& x1, const BaseVector<V1>& v1,
+        const Scaling<ix2,T2>& x2, const BaseVector<V2>& v2,
+        BaseVector_Mutable<V3>& v3)
+    { NoAliasAddVV(x1,v1.calc(),x2,v2.calc(),v3.vec()); }
+    template <int ix1, class T1, class V1,
+              int ix2, class T2, class V2, class V3>
+    inline void AliasAddVV(
+        const Scaling<ix1,T1>& x1, const BaseVector<V1>& v1,
+        const Scaling<ix2,T2>& x2, const BaseVector<V2>& v2,
+        BaseVector_Mutable<V3>& v3)
+    { AliasAddVV(x1,v1.calc(),x2,v2.calc(),v3.vec()); }
+
     //
     // Vector + Vector
     //
@@ -96,7 +118,7 @@ namespace tmv {
             TMVStaticAssert((Sizes<type::_size,V3::_size>::same)); 
             TMVAssert(size() == v3.size());
             TMVStaticAssert(type::isreal || V3::iscomplex);
-            AddVV(x1,v1.calc(),x2,v2.calc(),v3.vec());
+            AddVV(x1,v1.vec(),x2,v2.vec(),v3.vec());
         }
 
         template <class V3>
@@ -105,7 +127,7 @@ namespace tmv {
             TMVStaticAssert((Sizes<type::_size,V3::_size>::same)); 
             TMVAssert(size() == v3.size());
             TMVStaticAssert(type::isreal || V3::iscomplex);
-            NoAliasAddVV(x1,v1.calc(),x2,v2.calc(),v3.vec());
+            NoAliasAddVV(x1,v1.vec(),x2,v2.vec(),v3.vec());
         }
 
     private:
@@ -124,7 +146,7 @@ namespace tmv {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
         TMVStaticAssert(V1::iscomplex || V2::isreal);
-        MultXV<true>(v2.calc(),v1);
+        MultXV<true>(v2.vec(),v1);
     }
 
     // v += xv
@@ -135,7 +157,7 @@ namespace tmv {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
         TMVStaticAssert(V1::iscomplex || V2::isreal);
-        MultXV<true>(v2.getX(),v2.getV().calc(),v1);
+        MultXV<true>(v2.getX(),v2.getV().vec(),v1);
     }
 
     // v -= v
@@ -146,7 +168,7 @@ namespace tmv {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
         TMVStaticAssert(V1::iscomplex || V2::isreal);
-        MultXV<true>(Scaling<-1,RT>(),v2.calc(),v1);
+        MultXV<true>(Scaling<-1,RT>(),v2.vec(),v1);
     }
 
     // v -= xv
@@ -157,7 +179,7 @@ namespace tmv {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
         TMVStaticAssert(V1::iscomplex || V2::isreal);
-        MultXV<true>(-v2.getX(),v2.getV().calc(),v1);
+        MultXV<true>(-v2.getX(),v2.getV().vec(),v1);
     }
 
     // v + v

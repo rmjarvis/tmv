@@ -43,6 +43,8 @@ int main() try {
     TestMatrixDiv<double>();
 #endif // DOUBLE
 
+    TestPermutation();
+
 #ifdef TEST_FLOAT
     TestVector<float>();
     TestMatrix<float>();

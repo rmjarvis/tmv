@@ -29,6 +29,8 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
+//#define PRINTALGO_LU
+
 #include "TMV_Blas.h"
 #include "tmv/TMV_LUDecompose.h"
 #include "tmv/TMV_Matrix.h"

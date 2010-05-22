@@ -29,6 +29,8 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
+//#define PRINTALGO_UL
+
 #include "tmv/TMV_MultUL.h"
 #include "tmv/TMV_CopyU.h"
 #include "tmv/TMV_MultXM.h"

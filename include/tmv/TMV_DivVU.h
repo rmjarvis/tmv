@@ -204,7 +204,7 @@ namespace tmv {
             const bool unit = M2::_unit;
 
             IT1 X = v1.begin() + N-1;
-            IT2 A00 = m2.get_row(0,0,N).nonConj().begin();
+            //IT2 A00 = m2.get_row(0,0,N).nonConj().begin();
             // Actually Aii is the address of A(i,i+1)
             IT2 Aii = m2.get_row(N-1,N,N).nonConj().begin();
             const int Adiagstep = m2.diagstep();
@@ -221,15 +221,15 @@ namespace tmv {
             // at the start of v1.
             int i=N-1;
             while (N > 0 && *X == T2(0)) {
-                --N; --X; --i; Aii.shiftP(Adiagstep); 
+                --N; --X; --i; Aii.shiftP(-Adiagstep); 
             }
 
-            for(int len=0;N--;++len,--i) {
+            for(int len=0;N--;--i) {
                 // loop from i = N-1..0
                 // x(i) = A.row(i,i,N) * x.subVector(i,N)
                 //      = A(i,i)^-1 * (
                 //        x(i) - A.row(i,i+1,N) * x.subVector(i+1,N) )
-                Xi = -MultVV_Helper<-4,UNKNOWN,M2r,V1>::call2(len,Aii,X+1);
+                Xi = -MultVV_Helper<-4,UNKNOWN,M2r,V1>::call2(len++,Aii,X+1);
                 Xi += *X;
                 Maybe<!unit>::invscale(Xi,m2.cref(i,i));
                 Aii.shiftP(-Adiagstep);
@@ -364,16 +364,16 @@ namespace tmv {
 
             // [ A00  0  ] [  0 ]   [    0   ]
             // [ A10 A11 ] [ B1 ] = [ A11 B1 ]
-            int i = 0;
+            int i=0;
             while (N > 0 && *X == T2(0)) { 
-                --N; ++X; ++i; Ai0.shiftP(Adiagstep);
+                --N; ++X; ++X0; ++i; Ai0.shiftP(Adiagstep);
             }
-            for(;N--;++i) {
+            for(int len=0;N--;++i) {
                 // loop from i = 0 .. N-1
                 // Yi = A.row(i,0,i+1) * x.subVector(0,i+1)
                 //    = A(i,i)^-1 * (
                 //        x(i) - A.row(i,0,i) * x.subVector(0,i))
-                Xi = -MultVV_Helper<-4,UNKNOWN,M2r,V1>::call2(i,Ai0,X0);
+                Xi = -MultVV_Helper<-4,UNKNOWN,M2r,V1>::call2(len++,Ai0,X0);
                 Ai0.shiftP(Astepi);
                 if (dopref) Prefetch_Read(Ai0.get());
                 Xi += *X;
@@ -450,22 +450,13 @@ namespace tmv {
     {
         static inline void call(V1& v1, const M2& m2)
         {
-            const int N = s == UNKNOWN ? int(m2.size()) : s;
 #ifdef PRINTALGO_DIVVU
+            const int N = s == UNKNOWN ? int(m2.size()) : s;
             std::cout<<"LDivEqVU algo 85: N,s = "<<N<<','<<s<<std::endl;
 #endif
-            typedef typename V1::value_type T1;
-            typedef typename VCopyHelper<T1,s,false>::type V1c;
-            V1c v1c(N);
-            typedef typename V1::const_view_type V1const;
-            typedef typename V1c::view_type V1cv;
-            typedef typename V1c::const_view_type V1ccv;
-            V1const v1const = v1;
-            V1cv v1cv = v1c.view();
-            V1ccv v1ccv = v1c.view();
-            CopyV_Helper<-2,s,V1const,V1cv>::call(v1const,v1cv);
-            LDivEqVU_Helper<-2,s,V1cv,M2>::call(v1cv,m2);
-            CopyV_Helper<-2,s,V1ccv,V1>::call(v1ccv,v1);
+            typename V1::copy_type v1c(v1);
+            NoAliasLDivEq(v1c,m2);
+            NoAliasCopy(v1c,v1);
         }
     };
 

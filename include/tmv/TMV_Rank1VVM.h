@@ -34,16 +34,16 @@
 #define TMV_Rank1VVM_H
 
 #include "TMV_BaseMatrix_Rec.h"
-#include "TMV_MultVV.h"
+//#include "TMV_MultVV.h"
 #include "TMV_MultXV.h"
 #include "TMV_Vector.h"
 #include "TMV_SmallVector.h"
 #include "TMV_Prefetch.h"
 
-// TMV_OPT_SCALE determines whether to use the Q4 parameter to 
+// TMV_R1_OPT_SCALE determines whether to use the Q4 parameter to 
 // determine whether to apply the scaling to v1 or v2.
 #if TMV_OPT >= 2
-#define TMV_OPT_SCALE
+#define TMV_R1_OPT_SCALE
 #endif
 
 //#define PRINTALGO_R1
@@ -97,29 +97,29 @@ namespace tmv {
     // So I put them all here to make them easier to change and to
     // track down in the code.
 
-    // Q1 is the maximum value of cs*rs for which we fully unroll.
+    // UNROLL is the maximum value of cs*rs for which we fully unroll.
     // It seems like unrolling is never faster, so I set this to 0, 
     // but I'm leaving the code here in case some improvement in the 
     // unrolled code changes that.
-#define TMV_Q1 0
+#define TMV_R1_UNROLL 0
 
-    // Q2 is the minimum size to copy a vector if its step != 1.
-#define TMV_Q2 4
+    // MIN_COPY_SIZE is the minimum size to copy a vector if its step != 1.
+#define TMV_R1_MIN_COPY_SIZE 4
 
-    // Q3 is the crossover memory size to start using prefetch commands.
+    // PREFETCH is the crossover memory size to start using prefetch commands.
     // This is undoubtedly a function of the L1 (and L2?) cache size,
     // but 2KBytes is probably not too bad for most machines.
     // (That's an empirical value for my Intel Core 2 Duo.)
-#define TMV_Q3 2048
+#define TMV_R1_PREFETCH 2048
 
-    // Q4 is the ratio of the time to copy a vector to the time to scale it.
-    // ( Or technically Q4 is 1 + this ratio. )
-#define TMV_Q4 4
+    // COPY_SCALE_RATIO is the ratio of the time to copy a vector to the 
+    // time to scale it.  ( Or technically Q4 is 1 + this ratio. )
+#define TMV_R1_COPY_SCALE_RATIO 4
 
     // ZeroIX controls whether ix = -1 should act like ix = 1 or ix = 0.
     // It doesn't really seem to matter much either way.
-#define TMV_ZeroIX (ix == 0)
-    //#define TMV_ZeroIX (ix != 1)
+#define TMV_R1_ZeroIX (ix == 0)
+    //#define TMV_R1_ZeroIX (ix != 1)
 
     template <int algo, int cs, int rs, bool add, 
               int ix, class T, class V1, class V2, class M3>
@@ -380,7 +380,7 @@ namespace tmv {
                 const IT1 X_begin = v1.begin();
                 IT1 X = X_begin;
 
-                const bool dopref = M * sizeof(T3) >= TMV_Q3;
+                const bool dopref = M * sizeof(T3) >= TMV_R1_PREFETCH;
 
                 Prefetch_Read(Y.get());
                 Prefetch_MultiRead(X.get());
@@ -611,7 +611,7 @@ namespace tmv {
                 const bool c1 = V1::_conj;
                 const bool c2 = V2::_conj;
 
-                const bool dopref = M * sizeof(T3) >= TMV_Q3;
+                const bool dopref = M * sizeof(T3) >= TMV_R1_PREFETCH;
 
                 Prefetch_Read(Y.get());
                 Prefetch_MultiRead(X.get());
@@ -968,25 +968,22 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
-            TMVStaticAssert(TMV_ZeroIX);
-            typedef typename V1::value_type T1;
-            typedef typename Traits<T>::real_type RT;
-            const Scaling<1,RT> one;
+            TMVStaticAssert(TMV_R1_ZeroIX);
 #ifdef PRINTALGO_R1
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"R1 algo 31: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-#ifdef TMV_OPT_SCALE
+#ifdef TMV_R1_OPT_SCALE
             const int MM = cs == UNKNOWN ? int(m3.colsize()) : cs;
             const int NN = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             const int algo2 = M3::iscomplex ? 16 : 13;
-            if (NN > TMV_Q4 * MM) {
+            if (NN > TMV_R1_COPY_SCALE_RATIO * MM) {
 #endif
                 Rank1VVM_Helper<82,cs,rs,add,ix,T,V1,V2,M3>::call(
                     x,v1,v2,m3);
-#ifdef TMV_OPT_SCALE
+#ifdef TMV_R1_OPT_SCALE
             } else 
                 Rank1VVM_Helper<algo2,cs,rs,add,ix,T,V1,V2,M3>::call(
                     x,v1,v2,m3);
@@ -1002,22 +999,13 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
-            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
 #ifdef PRINTALGO_MV_R1
+            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"R1 algo 81: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            typedef typename V1::value_type T1;
-            typedef typename VCopyHelper<T1,cs,false>::type V1c;
-            V1c v1c(M);
-            typedef typename V1c::view_type V1cv;
-            typedef typename V1c::const_view_type V1ccv;
-            V1cv v1cv = v1c.view();
-            V1ccv v1ccv = v1c.view();
-            CopyV_Helper<-2,cs,V1,V1cv>::call(v1,v1cv);
-            Rank1VVM_Helper<-2,cs,rs,add,ix,T,V1ccv,V2,M3>::call(
-                x,v1ccv,v2,m3);
+            NoAliasRank1Update<add>(x,v1.copy(),v2,m3);
         }
     };
 
@@ -1029,25 +1017,15 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
-            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
 #ifdef PRINTALGO_R1
+            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"R1 algo 82: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            typedef typename V1::value_type T1;
-            typedef typename Traits2<T,T1>::type PT1;
-            typedef typename VCopyHelper<PT1,cs,false>::type V1c;
-            V1c v1c(M);
-            typedef typename V1c::view_type V1cv;
-            typedef typename V1c::const_view_type V1ccv;
-            V1cv v1cv = v1c.view();
-            V1ccv v1ccv = v1c.view();
             typedef typename Traits<T>::real_type RT;
             const Scaling<1,RT> one;
-            MultXV_Helper<-2,cs,false,ix,T,V1,V1cv>::call(x,v1,v1cv);
-            Rank1VVM_Helper<-2,cs,rs,add,1,RT,V1ccv,V2,M3>::call(
-                one,v1ccv,v2,m3);
+            NoAliasRank1Update<add>(one,(x*v1).calc(),v2,m3);
         }
     };
 
@@ -1085,22 +1063,13 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
-            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
 #ifdef PRINTALGO_R1
+            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             std::cout<<"R1 algo 84: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            typedef typename V2::value_type T2;
-            typedef typename VCopyHelper<T2,rs,false>::type V2c;
-            V2c v2c(N);
-            typedef typename V2c::view_type V2cv;
-            typedef typename V2c::const_view_type V2ccv;
-            V2cv v2cv = v2c.view();
-            V2ccv v2ccv = v2c.view();
-            CopyV_Helper<-2,rs,V2,V2cv>::call(v2,v2cv);
-            Rank1VVM_Helper<-2,cs,rs,add,ix,T,V1,V2ccv,M3>::call(
-                x,v1,v2ccv,m3);
+            NoAliasRank1Update<add>(x,v1,v2.copy(),m3);
         }
     };
 
@@ -1112,25 +1081,15 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
-            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
 #ifdef PRINTALGO_R1
+            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             std::cout<<"R1 algo 85: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            typedef typename V2::value_type T2;
-            typedef typename Traits2<T,T2>::type PT2;
-            typedef typename VCopyHelper<PT2,rs,false>::type V2c;
-            V2c v2c(N);
-            typedef typename V2c::view_type V2cv;
-            typedef typename V2c::const_view_type V2ccv;
-            V2cv v2cv = v2c.view();
-            V2ccv v2ccv = v2c.view();
             typedef typename Traits<T>::real_type RT;
             const Scaling<1,RT> one;
-            MultXV_Helper<-2,rs,false,ix,T,V2,V2cv>::call(x,v2,v2cv);
-            Rank1VVM_Helper<-2,cs,rs,add,1,RT,V1,V2ccv,M3>::call(
-                one,v1,v2ccv,m3);
+            NoAliasRank1Update<add>(one,v1,(x*v2).calc(),m3);
         }
     };
 
@@ -1174,54 +1133,12 @@ namespace tmv {
             std::cout<<"R1 algo 87: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
+            typedef typename Traits<T>::real_type RT;
+            const Scaling<1,RT> one;
             if (M > N) {
-                typedef typename V1::value_type T1;
-                typedef typename VCopyHelper<T1,cs,false>::type V1c;
-                V1c v1c(M);
-                typedef typename V1c::view_type V1cv;
-                typedef typename V1c::const_view_type V1ccv;
-                V1cv v1cv = v1c.view();
-                V1ccv v1ccv = v1c.view();
-                CopyV_Helper<-2,cs,V1,V1cv>::call(v1,v1cv);
-
-                typedef typename V2::value_type T2;
-                typedef typename Traits2<T,T2>::type PT2;
-                typedef typename VCopyHelper<PT2,rs,false>::type V2c;
-                V2c v2c(N);
-                typedef typename V2c::view_type V2cv;
-                typedef typename V2c::const_view_type V2ccv;
-                V2cv v2cv = v2c.view();
-                V2ccv v2ccv = v2c.view();
-                MultXV_Helper<-2,rs,false,ix,T,V2,V2cv>::call(x,v2,v2cv);
-
-                typedef typename Traits<T>::real_type RT;
-                const Scaling<1,RT> one;
-                Rank1VVM_Helper<-2,cs,rs,add,1,RT,V1ccv,V2ccv,M3>::call(
-                    one,v1ccv,v2ccv,m3);
+                NoAliasRank1Update<add>(one,v1.copy(),(x*v2).calc(),m3);
             } else {
-                typedef typename V1::value_type T1;
-                typedef typename Traits2<T,T1>::type PT1;
-                typedef typename VCopyHelper<PT1,cs,false>::type V1c;
-                V1c v1c(M);
-                typedef typename V1c::view_type V1cv;
-                typedef typename V1c::const_view_type V1ccv;
-                V1cv v1cv = v1c.view();
-                V1ccv v1ccv = v1c.view();
-                MultXV_Helper<-2,cs,false,ix,T,V1,V1cv>::call(x,v1,v1cv);
-
-                typedef typename V2::value_type T2;
-                typedef typename VCopyHelper<T2,rs,false>::type V2c;
-                V2c v2c(N);
-                typedef typename V2c::view_type V2cv;
-                typedef typename V2c::const_view_type V2ccv;
-                V2cv v2cv = v2c.view();
-                V2ccv v2ccv = v2c.view();
-                CopyV_Helper<-2,rs,V2,V2cv>::call(v2,v2cv);
-
-                typedef typename Traits<T>::real_type RT;
-                const Scaling<1,RT> one;
-                Rank1VVM_Helper<-2,cs,rs,add,1,RT,V1ccv,V2ccv,M3>::call(
-                    one,v1ccv,v2ccv,m3);
+                NoAliasRank1Update<add>(one,(x*v1).calc(),v2.copy(),m3);
             }
         }
     };
@@ -1232,34 +1149,13 @@ namespace tmv {
         static inline void call(
             const Scaling<1,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
+#ifdef PRINTALGO_R1
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
-#ifdef PRINTALGO_R1
             std::cout<<"R1 algo 87: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            typedef typename V1::value_type T1;
-            typedef typename VCopyHelper<T1,cs,false>::type V1c;
-            V1c v1c(M);
-            typedef typename V1c::view_type V1cv;
-            typedef typename V1c::const_view_type V1ccv;
-            V1cv v1cv = v1c.view();
-            V1ccv v1ccv = v1c.view();
-            CopyV_Helper<-2,cs,V1,V1cv>::call(v1,v1cv);
-
-            typedef typename V2::value_type T2;
-            typedef typename VCopyHelper<T2,rs,false>::type V2c;
-            V2c v2c(N);
-            typedef typename V2c::view_type V2cv;
-            typedef typename V2c::const_view_type V2ccv;
-            V2cv v2cv = v2c.view();
-            V2ccv v2ccv = v2c.view();
-            CopyV_Helper<-2,rs,V2,V2cv>::call(v2,v2cv);
-
-            typedef typename Traits<T>::real_type RT;
-            const Scaling<1,RT> one;
-            Rank1VVM_Helper<-2,cs,rs,add,1,RT,V1ccv,V2ccv,M3>::call(
-                one,v1ccv,v2ccv,m3);
+            NoAliasRank1Update<add>(x,v1.copy(),v2.copy(),m3);
         }
     };
 
@@ -1345,11 +1241,12 @@ namespace tmv {
                 M3::_colmajor ? (
                     ( cs == UNKNOWN || rs == UNKNOWN ) ? (
                         ( V1::_step != 1 ? 83 : 
-                          TMV_ZeroIX ? 31 : 
+                          TMV_R1_ZeroIX ? 31 : 
                           M3::iscomplex ? 16 : 13 ) ) :
                     ( rs > cs && cs <= 4 && V2::_step == 1 ) ? 3 :
-                    ( cs > TMV_Q2 && V1::_step != 1 ) ? 83 :
-                    ( TMV_ZeroIX && rs > IntTraits2<TMV_Q4,cs>::prod ) ? 31 :
+                    ( cs > TMV_R1_MIN_COPY_SIZE && V1::_step != 1 ) ? 83 :
+                    ( TMV_R1_ZeroIX && 
+                      rs > IntTraits2<TMV_R1_COPY_SCALE_RATIO,cs>::prod ) ? 31 :
                     ( rs <= 4 ) ? (M3::iscomplex ? 17 : 14) :
                     M3::iscomplex ? 16 : 13 ) :
                 M3::_rowmajor ? (
@@ -1590,13 +1487,5 @@ namespace tmv {
     }
 
 } // namespace tmv
-
-#undef TMV_OPT_SCALE
-
-#undef TMV_Q1
-#undef TMV_Q2
-#undef TMV_Q3
-#undef TMV_Q4
-#undef TMV_ZeroIX
 
 #endif 

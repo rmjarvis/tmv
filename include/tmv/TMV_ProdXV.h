@@ -42,63 +42,52 @@ namespace tmv {
     // Scalar * Vector
     //
 
-    // These first few are defined in TMV_MultXV.h
+    // These first few are for when an argument is a composite vector
+    // and needs to be calculated before running MultXV.
     template <bool add, int ix, class T, class M1, class M2>
     inline void MultXV(
-        const Scaling<ix,T>& x, const BaseVector_Calc<M1>& m1, 
-        BaseVector_Mutable<M2>& m2);
+        const Scaling<ix,T>& x, const BaseVector<M1>& m1, 
+        BaseVector_Mutable<M2>& m2)
+    { MultXV(x,m1.calc(),m2.mat()); }
     template <bool add, int ix, class T, class M1, class M2>
     inline void NoAliasMultXV(
-        const Scaling<ix,T>& x, const BaseVector_Calc<M1>& m1, 
-        BaseVector_Mutable<M2>& m2);
-    template <bool add, int ix, class T, class M1, class M2>
-    inline void InlineMultXV(
-        const Scaling<ix,T>& x, const BaseVector_Calc<M1>& m1, 
-        BaseVector_Mutable<M2>& m2);
+        const Scaling<ix,T>& x, const BaseVector<M1>& m1, 
+        BaseVector_Mutable<M2>& m2)
+    { NoAliasMultXV(x,m1.calc(),m2.mat()); }
     template <bool add, int ix, class T, class M1, class M2>
     inline void AliasMultXV(
-        const Scaling<ix,T>& x, const BaseVector_Calc<M1>& m1, 
-        BaseVector_Mutable<M2>& m2);
+        const Scaling<ix,T>& x, const BaseVector<M1>& m1, 
+        BaseVector_Mutable<M2>& m2)
+    { AliasMultXV(x,m1.calc(),m2.mat()); }
 
     // These are helpers to allow the caller to not use a Scaling object.
     template <bool add, class T, class V1, class V2>
     inline void MultXV(
-        const T& x, const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2)
+        const T& x, const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2)
     { MultXV<add>(Scaling<0,T>(x),v1.vec(),v2.vec()); }
     template <bool add, class T, class V1, class V2>
     inline void NoAliasMultXV(
-        const T& x, const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2)
+        const T& x, const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2)
     { NoAliasMultXV<add>(Scaling<0,T>(x),v1.vec(),v2.vec()); }
     template <bool add, class T, class V1, class V2>
-    inline void InlineMultXV(
-        const T& x, const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2)
-    { InlineMultXV<add>(Scaling<0,T>(x),v1.vec(),v2.vec()); }
-    template <bool add, class T, class V1, class V2>
     inline void AliasMultXV(
-        const T& x, const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2)
+        const T& x, const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2)
     { AliasMultXV<add>(Scaling<0,T>(x),v1.vec(),v2.vec()); }
 
     template <bool add, class V1, class V2>
     inline void MultXV(
-        const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2)
+        const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2)
     { MultXV<add>(Scaling<1,typename V2::real_type>(),v1.vec(),v2.vec()); }
     template <bool add, class V1, class V2>
     inline void NoAliasMultXV(
-        const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2)
+        const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2)
     {
         NoAliasMultXV<add>(
             Scaling<1,typename V2::real_type>(),v1.vec(),v2.vec()); 
     }
     template <bool add, class V1, class V2>
-    inline void InlineMultXV(
-        const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2)
-    {
-        InlineMultXV<add>(
-            Scaling<1,typename V2::real_type>(),v1.vec(),v2.vec()); 
-    }
-    template <bool add, class V1, class V2>
     inline void AliasMultXV(
-        const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2)
+        const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2)
     { 
         AliasMultXV<add>(
             Scaling<1,typename V2::real_type>(),v1.vec(),v2.vec()); 
@@ -107,10 +96,6 @@ namespace tmv {
     template <class T, class V>
     inline void Scale(const T& x, BaseVector_Mutable<V>& v)
     { Scale(Scaling<0,T>(x),v); }
-
-    template <class T, class V>
-    inline void InlineScale(const T& x, BaseVector_Mutable<V>& v)
-    { InlineScale(Scaling<0,T>(x),v); }
 
     template <int ix, class T, class V>
     class ProdXV;
@@ -155,7 +140,7 @@ namespace tmv {
             TMVStaticAssert((Sizes<type::_size,V2::_size>::same));
             TMVAssert(size() == v2.size());
             TMVStaticAssert(type::isreal || V2::iscomplex);
-            MultXV<false>(x,v.calc(),v2.vec());
+            MultXV<false>(x,v.vec(),v2.vec());
         }
 
         template <class V2>
@@ -164,7 +149,7 @@ namespace tmv {
             TMVStaticAssert((Sizes<type::_size,V2::_size>::same));
             TMVAssert(size() == v2.size());
             TMVStaticAssert(type::isreal || V2::iscomplex);
-            NoAliasMultXV<false>(x,v.calc(),v2.vec());
+            NoAliasMultXV<false>(x,v.vec(),v2.vec());
         }
 
     private:
@@ -404,15 +389,15 @@ namespace tmv {
     template <int ix1, class T1, class V1, class V2>
     inline bool SameStorage(
         const ProdXV<ix1,T1,V1>& v1, const BaseVector_Calc<V2>& v2)
-    { return SameStorage(v1.getV(),v2); }
+    { return SameStorage(v1.getV().vec(),v2.vec()); }
     template <class V1, int ix2, class T2, class V2>
     inline bool SameStorage(
         const BaseVector_Calc<V1>& v1, const ProdXV<ix2,T2,V2>& v2)
-    { return SameStorage(v1,v2.getV()); }
+    { return SameStorage(v1.vec(),v2.getV().vec()); }
     template <int ix1, class T1, class V1, int ix2, class T2, class V2>
     inline bool SameStorage(
         const ProdXV<ix1,T1,V1>& v1, const ProdXV<ix2,T2,V2>& v2)
-    { return SameStorage(v1.getV(),v2.getV()); }
+    { return SameStorage(v1.getV().vec(),v2.getV().vec()); }
 #endif
 
 

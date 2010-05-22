@@ -29,81 +29,52 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
+//#define PRINTALGO_UU
+
 #include "tmv/TMV_MultUU.h"
 #include "tmv/TMV_CopyU.h"
 #include "tmv/TMV_MultXU.h"
+#include "tmv/TMV_ScaleU.h"
 #include "tmv/TMV_TriMatrix.h"
-#include "tmv/TMV_ProdMM.h"
+#include "tmv/TMV_ProdXM.h"
+
+#include "tmv/TMV_TriMatrixIO.h"
+#include "tmv/TMV_MatrixIO.h"
 
 namespace tmv {
 
-    template <class M2, class M3>
-    void DoMultEqUU(const M2& m2, M3& m3)
+    template <class M1, class M2, class M3>
+    void DoMultUU(const M1& m1, const M2& m2, M3& m3)
     {
+        TMVAssert(m1.isrm() || m1.iscm());
         TMVAssert(m2.isrm() || m2.iscm());
         TMVAssert(m3.isrm() || m3.iscm());
+
+        Scaling<1,typename M3::real_type> one;
         if (m3.iscm()) {
             typename M3::cmview_type m3cm = m3.cmView();
-            if (m2.iscm())
-                InlineMultMM<false>(m3cm,m2.cmView(),m3cm);
-            else 
-                InlineMultMM<false>(m3cm,m2.rmView(),m3cm);
+            if (m1.iscm())
+                if (m2.iscm())
+                    InlineMultMM<false>(one,m1.cmView(),m2.cmView(),m3cm);
+                else
+                    InlineMultMM<false>(one,m1.cmView(),m2.rmView(),m3cm);
+            else
+                if (m2.iscm())
+                    InlineMultMM<false>(one,m1.rmView(),m2.cmView(),m3cm);
+                else
+                    InlineMultMM<false>(one,m1.rmView(),m2.rmView(),m3cm);
         } else {
             typename M3::rmview_type m3rm = m3.rmView();
-            if (m2.iscm())
-                InlineMultMM<false>(m3rm,m2.cmView(),m3rm);
+            if (m1.iscm())
+                if (m2.iscm())
+                    InlineMultMM<false>(one,m1.cmView(),m2.cmView(),m3rm);
+                else
+                    InlineMultMM<false>(one,m1.cmView(),m2.rmView(),m3rm);
             else
-                InlineMultMM<false>(m3rm,m2.rmView(),m3rm);
-        }
-    }
-
-    template <class T, class M1, class M2, class M3>
-    void GenInstMultMM(const T x, const M1& m1, const M2& m2, M3& m3)
-    {
-        if (m2.iscm() || m2.isrm()) {
-            if (m3.iscm() || m3.isrm()) {
-                if (m3.isunit()) {
-                    TMVAssert(x == T(1));
-                    TMVAssert(m1.isunit());
-                    InstCopy(m1,m3);
-                } else {
-                    InstMultXM(x,m1,m3.viewAsNonUnitDiag());
-                }
-                DoMultEqUU(m2,m3);
-            } else {
-                if (m3.isunit()) {
-                    typename M3::copy_type m3c(m3.size());
-                    typename M3::copy_type::unitdiag_type::xdview_type m3x = 
-                        m3c.viewAsUnitDiag().xdView();
-                    TMVAssert(x == T(1));
-                    TMVAssert(m1.isunit());
-                    InstCopy(m1,m3x);
-                    DoMultEqUU(m2,m3x);
-                    InstCopy(m3x.constView(),m3);
-                } else {
-                    typename M3::copy_type m3c(m3.size());
-                    typename M3::copy_type::xdview_type m3x = m3c.xdView();
-                    InstMultXM(x,m1,m3c.xView());
-                    DoMultEqUU(m2,m3x);
-                    InstCopy(m3x.constView(),m3);
-                }
-            }
-        } else {
-            GenInstMultMM(x,m1,m2.copy().constView().xdView(),m3);
-        }
-    }
-
-
-    template <class T, class M1, class M2, class M3>
-    void GenInstAddMultMM(const T x, const M1& m1, const M2& m2, M3& m3)
-    {
-        if (m2.iscm() || m2.isrm()) {
-            typename M3::copy_type m3c(m3.size());
-            InstMultXM(x,m1,m3c.xView());
-            DoMultEqUU(m2,m3c);
-            InstAddMultXM(T(1),m3c.constView().xdView(),m3);
-        } else {
-            GenInstAddMultMM(x,m1,m2.copy().constView().xdView(),m3);
+                if (m2.iscm())
+                    InlineMultMM<false>(one,m1.rmView(),m2.cmView(),m3rm);
+                else
+                    InlineMultMM<false>(one,m1.rmView(),m2.rmView(),m3rm);
         }
     }
 
@@ -113,7 +84,21 @@ namespace tmv {
         const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
         const ConstUpperTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2,
         UpperTriMatrixView<T3,UnknownDiag> m3)
-    { GenInstMultMM(x,m1,m2,m3); }
+    {
+        if (!(m1.isrm() || m1.iscm())) 
+            InstMultMM(x,m1.copy().constView().xdView(),m2,m3);
+        else if (!(m2.isrm() || m2.iscm())) 
+            InstMultMM(x,m1,m2.copy().constView().xdView(),m3);
+        else if (!(m3.iscm() || m3.isrm())) {
+            UpperTriMatrix<T3,NonUnitDiag,ColMajor> m3c(m3.size());
+            UpperTriMatrixView<T3,UnknownDiag> m3v = m3c.xdView();
+            DoMultUU(m1,m2,m3v);
+            MultXM<false>(x,m3v.constView(),m3);
+        } else {
+            DoMultUU(m1,m2,m3);
+            Scale(x,m3);
+        }
+    }
 
     template <class T1, bool C1, class T2, bool C2, class T3>
     void InstAddMultMM(
@@ -121,7 +106,18 @@ namespace tmv {
         const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
         const ConstUpperTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2,
         UpperTriMatrixView<T3,NonUnitDiag> m3)
-    { GenInstAddMultMM(x,m1,m2,m3); }
+    {
+        if (!(m1.isrm() || m1.iscm()))
+            InstAddMultMM(x,m1.copy().constView().xdView(),m2,m3);
+        else if (!(m2.isrm() || m2.iscm()))
+            InstAddMultMM(x,m1,m2.copy().constView().xdView(),m3);
+        else {
+            UpperTriMatrix<T3,NonUnitDiag,ColMajor> m3c(m3.size());
+            UpperTriMatrixView<T3,UnknownDiag> m3v = m3c.xdView();
+            DoMultUU(m1,m2,m3v);
+            MultXM<true>(x,m3v.constView(),m3);
+        }
+    }
 
     template <class T1, bool C1, class T2, bool C2, class T3>
     void InstMultMM(
@@ -129,7 +125,21 @@ namespace tmv {
         const ConstLowerTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
         const ConstLowerTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2,
         LowerTriMatrixView<T3,UnknownDiag> m3)
-    { GenInstMultMM(x,m1,m2,m3); }
+    {
+        if (!(m1.isrm() || m1.iscm())) 
+            InstMultMM(x,m1.copy().constView().xdView(),m2,m3);
+        else if (!(m2.isrm() || m2.iscm())) 
+            InstMultMM(x,m1,m2.copy().constView().xdView(),m3);
+        else if (!(m3.iscm() || m3.isrm())) {
+            LowerTriMatrix<T3,NonUnitDiag,ColMajor> m3c(m3.size());
+            LowerTriMatrixView<T3,UnknownDiag> m3v = m3c.xdView();
+            DoMultUU(m1,m2,m3v);
+            MultXM<false>(x,m3v.constView(),m3);
+        } else {
+            DoMultUU(m1,m2,m3);
+            Scale(x,m3);
+        }
+    }
 
     template <class T1, bool C1, class T2, bool C2, class T3>
     void InstAddMultMM(
@@ -137,7 +147,18 @@ namespace tmv {
         const ConstLowerTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
         const ConstLowerTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2,
         LowerTriMatrixView<T3,NonUnitDiag> m3)
-    { GenInstAddMultMM(x,m1,m2,m3); }
+    {
+        if (!(m1.isrm() || m1.iscm()))
+            InstAddMultMM(x,m1.copy().constView().xdView(),m2,m3);
+        else if (!(m2.isrm() || m2.iscm()))
+            InstAddMultMM(x,m1,m2.copy().constView().xdView(),m3);
+        else {
+            LowerTriMatrix<T3,NonUnitDiag,ColMajor> m3c(m3.size());
+            LowerTriMatrixView<T3,UnknownDiag> m3v = m3c.xdView();
+            DoMultUU(m1,m2,m3v);
+            MultXM<true>(x,m3v.constView(),m3);
+        }
+    }
 
 
 #define InstFile "TMV_MultUU.inst"

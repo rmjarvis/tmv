@@ -43,19 +43,20 @@ namespace tmv {
 
 #define PT typename ProdType<V1,V2>::type
 
-    // These are defined in TMV_MultVV.h
+    // These first few are for when an argument is a composite vector
+    // and needs to be calculated before running MultVV.
     template <class V1, class V2>
     inline PT MultVV(
-        const BaseVector<V1>& v1, const BaseVector<V2>& v2);
+        const BaseVector<V1>& v1, const BaseVector<V2>& v2)
+    { return MultVV(v1.calc(),v2.calc()); }
     template <class V1, class V2>
     inline PT NoAliasMultVV(
-        const BaseVector<V1>& v1, const BaseVector<V2>& v2);
-    template <class V1, class V2>
-    inline PT InlineMultVV(
-        const BaseVector<V1>& v1, const BaseVector<V2>& v2);
+        const BaseVector<V1>& v1, const BaseVector<V2>& v2)
+    { return NoAliasMultVV(v1.calc(),v2.calc()); }
     template <class V1, class V2>
     inline PT AliasMultVV(
-        const BaseVector<V1>& v1, const BaseVector<V2>& v2);
+        const BaseVector<V1>& v1, const BaseVector<V2>& v2)
+    { return AliasMultVV(v1.calc(),v2.calc()); }
 
     // v * v
     template <class V1, class V2>
@@ -64,7 +65,7 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
         TMVAssert(v1.size() == v2.size());
-        return MultVV(v1.calc(),v2.calc()); 
+        return MultVV(v1.vec(),v2.vec()); 
     }
 
 #define PT2 typename Traits2<Tx,PT>::type
@@ -74,7 +75,7 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
         TMVAssert(v1.size() == v2.size());
-        return v2.getX() * (v1 * v2.getV());
+        return v2.getX() * (v1.vec() * v2.getV().vec());
     }
 
     // (x*v) * v
@@ -83,7 +84,7 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
         TMVAssert(v1.size() == v2.size());
-        return v1.getX() * (v1.getV() * v2);
+        return v1.getX() * (v1.getV().vec() * v2.vec());
     }
 #undef PT2
 
@@ -95,7 +96,7 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
         TMVAssert(v1.size() == v2.size());
-        return v1.getX() * v2.getX() * (v1.getV() * v2.getV());
+        return v1.getX() * v2.getX() * (v1.getV().vec() * v2.getV().vec());
     }
 #undef PT2
 

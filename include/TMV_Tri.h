@@ -45,10 +45,10 @@
 #include "tmv/TMV_MultXU.h"
 #include "tmv/TMV_AddUU.h"
 #include "tmv/TMV_MultUV.h"
-#include "tmv/TMV_MultUD.h"
 #include "tmv/TMV_MultUM.h"
 #include "tmv/TMV_MultUU.h"
 #include "tmv/TMV_MultUL.h"
+#include "tmv/TMV_MultUD.h"
 
 #include "tmv/TMV_InvertU.h"
 #include "tmv/TMV_DivVU.h"

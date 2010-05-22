@@ -45,19 +45,19 @@
 #include "TMV_TriMatrixIO.h"
 #endif
 
-// Q1 is the maximum nops to unroll.
+// UNROLL is the maximum nops to unroll.
 #if TMV_OPT >= 3
-#define TMV_Q1 200 
+#define TMV_UL_UNROLL 200 
 #elif TMV_OPT >= 2
-#define TMV_Q1 25
+#define TMV_UL_UNROLL 25
 #elif TMV_OPT >= 1
-#define TMV_Q1 9
+#define TMV_UL_UNROLL 9
 #else
-#define TMV_Q1 0
+#define TMV_UL_UNROLL 0
 #endif
 
-// Q2 is the size to stop recursing.
-#define TMV_Q2 8
+// MIN_RECURSE is the size to stop recursing.
+#define TMV_UL_MIN_RECURSE 8
 
 namespace tmv {
 
@@ -164,7 +164,7 @@ namespace tmv {
         }
     };
 
-    // algo 11: U*L loop over n
+    // algo 11: U*L loop over columns
     template <int s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUL_Helper<11,s,add,ix,T,M1,M2,M3> 
     {
@@ -222,7 +222,7 @@ namespace tmv {
         }
     };
 
-    // algo 12: U*L loop over m
+    // algo 12: U*L loop over rows
     template <int s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUL_Helper<12,s,add,ix,T,M1,M2,M3> 
     {
@@ -233,6 +233,20 @@ namespace tmv {
 #ifdef PRINTALGO_UL
             std::cout<<"UL algo 12: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
+            // This (and the corresponding algo 22) is the only algorithm
+            // that doesn't work if m2 is in opposite storage as m3.
+            // That is if we are doing the statement:
+            // m = m.upperTri() * m.upperTri().transpose()
+            // The problem is that the calculation of m3a below needs 
+            // the part of the matrix that has already been overwritten
+            // by the m3b assignments from previous rows.
+            // So I have a different algorithm for this special case.
+            // TODO: I need to investigate whether it is faster to 
+            // check for the alias and call algo 14 if there is one,
+            // or if it is faster to always use algo 14 regardless.
+            if (SameStorage(m2,m3) && OppositeStorage(m2,m3))
+                return MultUL_Helper<14,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+
             const bool u1 = M1::_unit;
             typedef typename M1::value_type T1;
             typedef typename Maybe<!u1>::template ProdType<T1,T>::type PT1;
@@ -327,6 +341,72 @@ namespace tmv {
                 MultXV_Helper<-4,xx,add,ix2,PT2,M1c,M3c>::call(xd2,m1c,m3c);
                 Maybe<add>::add(
                     m3.ref(k,k),Maybe<!u2>::prod(m2.cref(k,k),xd1));
+            }
+        }
+    };
+
+    // algo 14: U*L hybrid loop over rows/columns
+    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUL_Helper<14,s,add,ix,T,M1,M2,M3> 
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            const int N = s==UNKNOWN ? int(m1.size()) : s;
+#ifdef PRINTALGO_UL
+            std::cout<<"UL algo 14: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
+#endif
+            TMVAssert(SameStorage(m2,m3));
+            TMVAssert(OppositeStorage(m2,m3));
+            const bool u1 = M1::_unit;
+            const bool u2 = M2::_unit;
+            typedef typename M1::value_type T1;
+            typedef typename M2::value_type T2;
+            typedef typename Maybe<!u1>::template ProdType<T1,T>::type PT1;
+            typedef typename Maybe<!u2>::template ProdType<T2,T>::type PT2;
+            typedef typename M1::const_row_sub_type M1r;
+            typedef typename M1::const_col_sub_type M1c;
+            typedef typename M2::const_row_sub_type M2r;
+            typedef typename M2::const_col_sub_type M2c;
+            typedef typename M2::const_submatrix_type M2sm;
+            typedef typename M2sm::const_transpose_type M2smt;
+            typedef typename M1::const_submatrix_type M1sm;
+            typedef typename M3::row_sub_type M3r;
+            typedef typename M3::col_sub_type M3c;
+            const int ix1 = u1 ? ix : 0;
+            const int ix2 = u2 ? ix : 0;
+            const int xx = UNKNOWN;
+
+            for(int i=0;i<N;++i) {
+                // m3.row(i,0,i) = m1(i,i) * m2.row(i,0,i) +
+                //                 m1.row(i,i+1,N) * m2.subMatrix(i+1,N,0,i) 
+                // m3.col(i,0,i) = m1.col(i,0,i) * m2(i,i) +
+                //                 m1.subMatrix(0,i,i+1,N) * m2.col(i,i+1,N)
+                // m3(i,i) = m1.row(i,i+1,N) * m2.col(i,i+1,N) +
+                //           m1(i,i) * m2(i,i)
+
+                const Scaling<ix1,PT1> xd1(Maybe<!u1>::prod(m1.cref(i,i),x));
+                const Scaling<ix2,PT2> xd2(Maybe<!u2>::prod(m2.cref(i,i),x));
+
+                M1c m1c = m1.get_col(i,0,i);
+                M2r m2r = m2.get_row(i,0,i);
+                M1r m1r = m1.get_row(i,i+1,N);
+                M2c m2c = m2.get_col(i,i+1,N);
+                M1sm m1m = m1.cSubMatrix(0,i,i+1,N);
+                M2smt m2m = m2.cSubMatrix(i+1,N,0,i).transpose();
+                M3r m3r = m3.get_row(i,0,i);
+                M3c m3c = m3.get_col(i,0,i);
+
+                MultXV_Helper<-1,xx,add,ix1,PT1,M2r,M3r>::call(xd1,m2r,m3r);
+                MultXV_Helper<-1,xx,add,ix2,PT2,M1c,M3c>::call(xd2,m1c,m3c);
+                MultMV_Helper<-4,xx,xx,true,ix,T,M2smt,M1r,M3r>::call(
+                    x,m2m,m1r,m3r);
+                MultMV_Helper<-4,xx,xx,true,ix,T,M1sm,M2c,M3c>::call(
+                    x,m1m,m2c,m3c);
+                Maybe<add>::add(
+                    m3.ref(i,i) ,
+                    x * (MultVV_Helper<-4,xx,M1r,M2c>::call(m1r,m2c) +
+                         Maybe<!u1>::prod(m1.cref(i,i) , m2.cref(i,i))));
             }
         }
     };
@@ -471,7 +551,7 @@ namespace tmv {
             const bool unroll = 
                 s > 20 ? false :
                 s == UNKNOWN ? false :
-                nops > TMV_Q1 ? false :
+                nops > TMV_UL_UNROLL ? false :
                 s <= 10;
             const bool rxr = M1::_rowmajor && M3::_rowmajor;
             const bool crx = M1::_colmajor && M2::_rowmajor;
@@ -483,13 +563,13 @@ namespace tmv {
                 // For known s, always recurse down to unroll size
                 s != UNKNOWN ? 0 :
                 rxr ? 12 : crx ? 13 : xcc ? 11 : 13;
-            const int algo3 =  // The algorithm for N > Q2
+            const int algo3 =  // The algorithm for N > UL_MIN_RECURSE
                 unroll || s == 1 ? 0 : 17;
             const int algo4 =  // The algorithm for MultMM, MultUM
                 unroll || s == 1 ? 0 :
                 s == UNKNOWN ? -2 : s > 16 ? -3 : -4;
 
-            if (s==UNKNOWN ? (N > TMV_Q2) : (s > 1 && !unroll)) {
+            if (s==UNKNOWN ? (N > TMV_UL_MIN_RECURSE) : (s > 1 && !unroll)) {
                 // [ C00 C01 ] = [ A00 A01 ] [ B00  0  ]
                 // [ C10 C11 ]   [  0  A11 ] [ B10 B11 ]
 
@@ -529,9 +609,9 @@ namespace tmv {
                 MultMM_Helper<algo4,sx,sx,sy,true,ix,T,M1sm,M2sm,M3sm>::call(
                     x,A01,B10,C00);
 
-                // We set up the storage so that it's ok if all three
-                // matrices are in the same place with the same steps.
-                // Or if B is the opposite storage and A is somewhere else.
+                // We set up the storage so that it's ok if A has the 
+                // same storage as C, and if B has either the same storage
+                // or opposite storage as C.
                 // So in the next lines, it is guaranteed that the 
                 // C10 assignment doesn't clobber the A01 that is needed
                 // next.
@@ -553,7 +633,7 @@ namespace tmv {
         }
     };
 
-    // algo 21: L*U loop over n
+    // algo 21: L*U loop over columns
     template <int s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUL_Helper<21,s,add,ix,T,M1,M2,M3> 
     {
@@ -608,7 +688,7 @@ namespace tmv {
         }
     };
 
-    // algo 22: L*U loop over m
+    // algo 22: L*U loop over rows
     template <int s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUL_Helper<22,s,add,ix,T,M1,M2,M3> 
     {
@@ -619,6 +699,10 @@ namespace tmv {
 #ifdef PRINTALGO_UL
             std::cout<<"UL algo 22: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
+            // See above comments in algo 12
+            if (SameStorage(m2,m3) && OppositeStorage(m2,m3))
+                return MultUL_Helper<24,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+
             const bool u1 = M1::_unit;
             typedef typename M1::value_type T1;
             typedef typename Maybe<!u1>::template ProdType<T1,T>::type PT1;
@@ -712,6 +796,70 @@ namespace tmv {
                 MultXV_Helper<-4,xx,add,ix2,PT2,M1c,M3c>::call(xd2,m1c,m3c);
                 Maybe<add>::add(
                     m3.ref(k,k),Maybe<!u2>::prod(m2.cref(k,k),xd1));
+            }
+        }
+    };
+
+    // algo 24: L*U hybrid loop over rows/columns
+    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUL_Helper<24,s,add,ix,T,M1,M2,M3> 
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            const int N = s==UNKNOWN ? int(m1.size()) : s;
+#ifdef PRINTALGO_UL
+            std::cout<<"UL algo 24: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
+#endif
+            const bool u1 = M1::_unit;
+            const bool u2 = M2::_unit;
+            typedef typename M1::value_type T1;
+            typedef typename M2::value_type T2;
+            typedef typename Maybe<!u1>::template ProdType<T1,T>::type PT1;
+            typedef typename Maybe<!u2>::template ProdType<T2,T>::type PT2;
+            typedef typename M1::const_row_sub_type M1r;
+            typedef typename M1::const_col_sub_type M1c;
+            typedef typename M2::const_row_sub_type M2r;
+            typedef typename M2::const_col_sub_type M2c;
+            typedef typename M1::const_submatrix_type M1sm;
+            typedef typename M2::const_submatrix_type M2sm;
+            typedef typename M2sm::const_transpose_type M2smt;
+            typedef typename M3::row_sub_type M3r;
+            typedef typename M3::col_sub_type M3c;
+            const int ix1 = u1 ? ix : 0;
+            const int ix2 = u2 ? ix : 0;
+            const int xx = UNKNOWN;
+
+            for(int i=N-1;i>=0;--i) {
+                // m3.row(i,i+1,N) = m1(i,i) * m2.row(i,i+1,N) +
+                //                   m1.row(i,0,i) * m2.subMatrix(0,i,i+1,N) 
+                // m3.col(i,i+1,N) = m1.col(i,i+1,N) * m2(i,i) +
+                //                   m1.subMatrix(i+1,N,0,i) * m2.col(i,0,i)
+                // m3(i,i) = m1.row(i,0,i) * m2.col(i,0,i) +
+                //           m1(i,i) * m2(i,i)
+
+                const Scaling<ix1,PT1> xd1(Maybe<!u1>::prod(m1.cref(i,i),x));
+                const Scaling<ix2,PT2> xd2(Maybe<!u2>::prod(m2.cref(i,i),x));
+
+                M1c m1c = m1.get_col(i,i+1,N);
+                M2r m2r = m2.get_row(i,i+1,N);
+                M1r m1r = m1.get_row(i,0,i);
+                M2c m2c = m2.get_col(i,0,i);
+                M1sm m1m = m1.cSubMatrix(i+1,N,0,i);
+                M2smt m2m = m2.cSubMatrix(0,i,i+1,N).transpose();
+                M3r m3r = m3.get_row(i,i+1,N);
+                M3c m3c = m3.get_col(i,i+1,N);
+
+                MultXV_Helper<-1,xx,add,ix1,PT1,M2r,M3r>::call(xd1,m2r,m3r);
+                MultXV_Helper<-1,xx,add,ix2,PT2,M1c,M3c>::call(xd2,m1c,m3c);
+                MultMV_Helper<-4,xx,xx,true,ix,T,M2smt,M1r,M3r>::call(
+                    x,m2m,m1r,m3r);
+                MultMV_Helper<-4,xx,xx,true,ix,T,M1sm,M2c,M3c>::call(
+                    x,m1m,m2c,m3c);
+                Maybe<add>::add(
+                    m3.ref(i,i) ,
+                    x * (MultVV_Helper<-4,xx,M1r,M2c>::call(m1r,m2c) +
+                         Maybe<!u1>::prod(m1.cref(i,i) , m2.cref(i,i))));
             }
         }
     };
@@ -855,7 +1003,7 @@ namespace tmv {
             const bool unroll = 
                 s > 20 ? false :
                 s == UNKNOWN ? false :
-                nops > TMV_Q1 ? false :
+                nops > TMV_UL_UNROLL ? false :
                 s <= 10;
             const bool rxr = M1::_rowmajor && M3::_rowmajor;
             const bool crx = M1::_colmajor && M2::_rowmajor;
@@ -867,13 +1015,13 @@ namespace tmv {
                 // For known s, always recurse down to unroll size
                 s != UNKNOWN ? 0 :
                 rxr ? 22 : crx ? 23 : xcc ? 21 : 23;
-            const int algo3 =  // The algorithm for N > Q2
+            const int algo3 =  // The algorithm for N > UL_MIN_RECURSE
                 unroll || s == 1 ? 0 : 27;
             const int algo4 =  // The algorithm for MultMM, MultUM
                 unroll || s == 1 ? 0 :
                 s == UNKNOWN ? -2 : s > 16 ? -3 : -4;
 
-            if (s==UNKNOWN ? (N > TMV_Q2) : (s > 1 && !unroll)) {
+            if (s==UNKNOWN ? (N > TMV_UL_MIN_RECURSE) : (s > 1 && !unroll)) {
                 // [ C00 C01 ] = [ A00  0  ] [ B00 B01 ]
                 // [ C10 C11 ]   [ A10 A11 ] [  0  B11 ]
 
@@ -912,6 +1060,13 @@ namespace tmv {
                 MultMM_Helper<algo4,sy,sy,sx,true,ix,T,M1sm,M2sm,M3sm>::call(
                     x,A10,B01,C11);
 
+                // We set up the storage so that it's ok if A has the 
+                // same storage as C, and if B has either the same storage
+                // or opposite storage as C.
+                // So in the next lines, it is guaranteed that the 
+                // C01 assignment doesn't clobber the A10 that is needed
+                // next.
+                
                 // C01 (+)= A00 B01
                 MultUM_Helper<algo4,sx,sy,add,ix,T,M1st,M2sm,M3sm>::call(
                     x,A00,B01,C01);
@@ -936,24 +1091,16 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==UNKNOWN ? int(m1.size()) : s;
 #ifdef PRINTALGO_UL
+            const int N = s==UNKNOWN ? int(m1.size()) : s;
             std::cout<<"UL algo 87: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
-            typedef typename Traits<T>::real_type RT;
-            const Scaling<1,RT> one;
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename Traits2<T1,T2>::type PT3;
             const bool rm = M1::_rowmajor && M2::_rowmajor;
             typedef typename MCopyHelper<PT3,Rec,s,s,rm,false>::type M3c;
-            M3c m3c(N,N);
-            typedef typename M3c::view_type M3cv;
-            typedef typename M3c::const_view_type M3ccv;
-            M3cv m3cv = m3c.view();
-            M3ccv m3ccv = m3c.view();
-            MultUL_Helper<-2,s,false,1,RT,M1,M2,M3cv>::call(one,m1,m2,m3cv);
-            MultXM_Helper<-2,s,s,add,ix,T,M3ccv,M3>::call(x,m3ccv,m3);
+            NoAliasMultXM<add>(x,M3c(m1*m2),m3);
         }
     };
 
@@ -972,10 +1119,8 @@ namespace tmv {
                     typename M3::uppertri_type,
                     typename M3::lowertri_type>::type M3u;
             M3u m3u = Maybe<M2::_upper>::uppertri(m3);
-            typedef typename M3u::const_view_type M3ucv;
-            M3ucv m3ucv = m3u.view();
-            CopyU_Helper<-2,s,M2,M3u>::call(m2,m3u);
-            MultUL_Helper<-2,s,false,ix,T,M1,M3ucv,M3>::call(x,m1,m3ucv,m3);
+            NoAliasCopy(m2,m3u);
+            NoAliasMultMM<false>(x,m1,m3u,m3);
         }
     };
 
@@ -995,30 +1140,29 @@ namespace tmv {
             //  1 = s == 1: reduces to trivial scalar product function
             //
             // U * L:
-            // 11 = loop over n: MultUV
-            // 12 = loop over m: MultUV
+            // 11 = loop over columns: MultUV
+            // 12 = loop over rows: MultUV
             // 13 = loop over k: Rank1
-            // 16 = Unroll small case
+            // 14 = hybrid loop over rows/columns
+            // 16 = unroll small case
             // 17 = split each trimatrix into 3 submatrices and recurse
             //
             // L * U:
-            // 21 = loop over n: MultUV
-            // 22 = loop over m: MultUV
+            // 21 = loop over columns: MultUV
+            // 22 = loop over rows: MultUV
             // 23 = loop over k: Rank1
-            // 26 = Unroll small case
+            // 24 = hybrid loop over rows/columns
+            // 26 = unroll small case
             // 27 = split each trimatrix into 3 submatrices and recurse
             //
-            // 87 = Use a temporary for m1*m2
-            // 88 = Copy m2 to the same storage as m3
+            // 87 = use a temporary for m1*m2
+            // 88 = copy m2 to the same storage as m3
 
             const bool ul = M1::_upper;
-#if 0
-            const int algo = 27;
-#else
 #if TMV_OPT == 0 
-            const bool xcc = M2::_colmajor && M3::_colmajor;
             const bool rxr = M1::_rowmajor && M3::_rowmajor;
             const bool crx = M1::_colmajor && M2::_rowmajor;
+            const bool xcc = M2::_colmajor && M3::_colmajor;
             const int algo =
                 ul ? ( rxr ? 12 : crx ? 13 : xcc ? 11 : 13 ) :
                 ( rxr ? 22 : crx ? 23 : xcc ? 22 : 23 );
@@ -1031,14 +1175,13 @@ namespace tmv {
                 IntTraits2<IntTraits2<s2,s2p1>::safeprod,twos2p1>::safeprod / 6;
             const bool unroll = 
                 s == UNKNOWN ? false :
-                nops > TMV_Q1 ? false :
+                nops > TMV_UL_UNROLL ? false :
                 s <= 10;
             const int algo = 
                 s == 0 ? 0 :
                 s == 1 ? 1 :
                 unroll ? ( ul ? 16 : 26 ) :
                 ul ? 17 : 27;
-#endif
 #endif
 #ifdef PRINTALGO_UL
             const int N = s==UNKNOWN ? int(m1.size()) : s;
@@ -1104,7 +1247,7 @@ namespace tmv {
             M1t m1t = m1.transpose();
             M2t m2t = m2.transpose();
             M3t m3t = m3.transpose();
-            MultUL_Helper<-2,s,add,ix,T,M1t,M2t,M3t>::call(x,m1t,m2t,m3t);
+            MultUL_Helper<-2,s,add,ix,T,M2t,M1t,M3t>::call(x,m2t,m1t,m3t);
         }
     };
 
@@ -1232,7 +1375,7 @@ namespace tmv {
         }
     };
 
-    // algo 99: Check for aliases
+    // algo 99: Check for aliases for UL algorithm
     template <int s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUL_Helper<99,s,add,ix,T,M1,M2,M3>
     {
@@ -1255,7 +1398,8 @@ namespace tmv {
             if ( ok1 && ok2 ) {
                 // No aliasing (or no clobbering)
                 MultUL_Helper<-2,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
-            } else if ( ok2 && OppositeStorage(m1,m3) ) {
+            } else if ( 
+                ok2 && OppositeStorage(m1,m3) && !OppositeStorage(m2,m3) ) {
                 // Can transpose to get no clobbering storage
                 MultUL_Helper<96,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
             } else { 
@@ -1281,8 +1425,7 @@ namespace tmv {
                 s == 1 ? 1 :
                 M1::_upper && M2::_upper ? 940 :
                 !M1::_upper && !M2::_upper ? 950 :
-                checkalias ? 99 : 
-                -2;
+                checkalias ? 99 : -2;
 #ifdef PRINTALGO_UL
             std::cout<<"UL algo -1: algo = "<<algo<<std::endl;
 #endif
@@ -1345,8 +1488,5 @@ namespace tmv {
 
 
 } // namespace tmv
-
-#undef TMV_Q1
-#undef TMV_Q2
 
 #endif 

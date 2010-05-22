@@ -35,11 +35,12 @@
 
 #include "TMV_Matrix.h"
 
-// Q4 is the minimum size to use a recursive Winograd algorithm
+#ifndef TMV_MM_MIN_WINOGRAD
 #ifdef TMV_USE_RECURSIVE_BLOCK
-#define TMV_Q4 2048
+#define TMV_MM_MIN_WINOGRAD 2048
 #else
-#define TMV_Q4 1024
+#define TMV_MM_MIN_WINOGRAD 1024
+#endif
 #endif
 
 namespace tmv {
@@ -127,7 +128,7 @@ namespace tmv {
             //
             // Notation: (+=) means = if add=false, or += if add=true
             //
-            // if (min(m,n,k) < TMV_Q4) { Call direct algorithm }
+            // if (min(m,n,k) < TMV_MM_MIN_WINOGRAD) { Call direct algorithm }
             // else {
             //   X = A2 + A3
             //   Y = B1 - B0
@@ -210,7 +211,8 @@ namespace tmv {
             Scaling<1,RT> one;
             Scaling<-1,RT> mone;
 
-            if (M < TMV_Q4 && N < TMV_Q4 && K < TMV_Q4) {
+            if (M < TMV_MM_MIN_WINOGRAD && N < TMV_MM_MIN_WINOGRAD && 
+                K < TMV_MM_MIN_WINOGRAD) {
                 return MultMM_Winograd_Helper<0,add,ix,T,M1,M2,M3>::call(
                     x,m1,m2,m3);
             }

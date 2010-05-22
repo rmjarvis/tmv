@@ -5,9 +5,6 @@
 #include "TMV.h"
 #include <fstream>
 
-// Remove this once it's ok to test Det()
-#define NODIV
-
 #include "TMV_TestMatrixArith.h"
 #define CT std::complex<T>
 
@@ -28,7 +25,7 @@ template <class T, int M, int N> void TestSmallMatrixArith_3(std::string label)
     for(int i=0;i<M;++i) for(int j=0;j<N;++j) {
         a1x(i,j) = T(2.9+4.3*i-5.1*j);
     }
-    a1x.diag().addToAll(T(6));
+    a1x.diag(0,0,std::min(M,N)).addToAll(T(6));
     a1x(0,0) = 14; 
     if (M > 1) a1x(1,0) = -2; 
     if (M > 2) a1x(2,0) = 7; 
@@ -39,19 +36,11 @@ template <class T, int M, int N> void TestSmallMatrixArith_3(std::string label)
     if (M > 2 && N > 3) ca1x(2,3) += CT(2.4,3.7);
     if (M > 1) ca1x(1,0) *= CT(0.8,2.8);
     if (N > 1) ca1x.col(1) *= CT(-1.1,3.6);
-    if (M > 3) ca1x.row(3) += tmv::SmallVector<CT,N>(N,CT(1.8,9.2));
-
-#ifndef NONSQUARE
-    // These next two is to make sure Det is calculable without overflow.
-    if (N > 10) {
-        a1x /= T(N*N); a1x += T(1);
-        ca1x /= T(N*N); ca1x += T(1);
-    }
-#endif
+    if (M > 3) ca1x.row(3) += tmv::SmallVector<CT,N>(CT(1.8,9.2));
 
     tmv::SmallMatrix<T,N,M,tmv::ColMajor> a2x = a1x.transpose();
     if (N > 1) a2x.row(1) *= T(3.1);
-    if (M > 2) a2x.col(2) -= tmv::SmallVector<T,N>(N,4.9);
+    if (M > 2) a2x.col(2) -= tmv::SmallVector<T,N>(4.9);
     tmv::SmallMatrix<CT,N,M,tmv::ColMajor> ca2x = ca1x.transpose();
     ca2x -= T(1.3)*a2x;
     ca2x *= CT(1.1,-2.5);

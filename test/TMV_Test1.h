@@ -4,6 +4,7 @@
 
 template <class T> void TestVector();
 template <class T> void TestMatrix();
+void TestPermutation();
 template <class T> void TestMatrixArith_1();
 template <class T> void TestMatrixArith_2();
 template <class T> void TestMatrixArith_3();
@@ -34,6 +35,7 @@ template <class T> void TestDiagDiv_B1();
 template <class T> void TestDiagDiv_B2();
 
 template <class T> void TestTriMatrix();
+template <class T> void TestAllAliasMultUL();
 template <class T> void TestTriMatrixArith_A1a();
 template <class T> void TestTriMatrixArith_A1b();
 template <class T> void TestTriMatrixArith_A2();

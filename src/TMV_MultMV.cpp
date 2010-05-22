@@ -83,7 +83,7 @@ namespace tmv {
                     if (N > 4*M) {
                         Vector<T> v3c(v3.size());
                         VectorView<T,1> v3cu = v3c.unitView();
-                        InlineMultMV<false>(one,m1,v2,v3cu);
+                        InlineMultMV<false>(one,m1,v2.unitView(),v3cu);
                         InstAddMultXV(x,v3c.constView().xView(),v3);
                     } else {
                         InlineMultMV<add>(one,m1,(x*v2).calc(),v3u);

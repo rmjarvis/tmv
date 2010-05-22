@@ -47,6 +47,9 @@
 #include "TMV_VectorIO.h"
 #include "TMV_TriMatrixIO.h"
 
+#include "TMV_Matrix.h"
+#include "TMV_SmallMatrix.h"
+
 #ifdef PRINTALGO_LU
 #include <iostream>
 #endif
@@ -767,6 +770,35 @@ namespace tmv {
     template <class M> 
     inline void LU_Decompose(BaseMatrix_Rec_Mutable<M>& m, int* P)
     { int d(0); LU_Decompose(m,P,d); }
+
+
+    // Allow views as an argument by value (for convenience)
+    template <class T, int Si, int Sj, bool C, IndexStyle I>
+    inline void LU_Decompose(MatrixView<T,Si,Sj,C,I> m, int* P, int& detp)
+    { 
+        typedef MatrixView<T,Si,Sj,C,I> M;
+        LU_Decompose(static_cast<BaseMatrix_Rec_Mutable<M>&>(m),P,detp); 
+    }
+    template <class T, int Si, int Sj, bool C, IndexStyle I>
+    inline void LU_Decompose(MatrixView<T,Si,Sj,C,I> m, int* P)
+    { 
+        typedef MatrixView<T,Si,Sj,C,I> M;
+        LU_Decompose(static_cast<BaseMatrix_Rec_Mutable<M>&>(m),P); 
+    }
+    template <class T, int M, int N, int Si, int Sj, bool C, IndexStyle I>
+    inline void LU_Decompose(
+        SmallMatrixView<T,M,N,Si,Sj,C,I> m, int* P, int& detp)
+    { 
+        typedef SmallMatrixView<T,M,N,Si,Sj,C,I> MM;
+        LU_Decompose(static_cast<BaseMatrix_Rec_Mutable<MM>&>(m),P,detp); 
+    }
+    template <class T, int M, int N, int Si, int Sj, bool C, IndexStyle I>
+    inline void LU_Decompose(SmallMatrixView<T,M,N,Si,Sj,C,I> m, int* P)
+    { 
+        typedef SmallMatrixView<T,M,N,Si,Sj,C,I> MM;
+        LU_Decompose(static_cast<BaseMatrix_Rec_Mutable<MM>&>(m),P); 
+    }
+
 
 #undef TMV_Q2
 #undef TMV_LU_BLOCKSIZE

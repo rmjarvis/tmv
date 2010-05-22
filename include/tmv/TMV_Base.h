@@ -875,7 +875,7 @@ namespace tmv {
         {
             typedef typename Traits2<T1,T2>::type PT;
             static inline PT call(const T1& x, const T2& y)
-            { return x/y; }
+            { return Maybe<conj1>::conj(x/y); }
         };
 
     };
@@ -1042,6 +1042,14 @@ namespace tmv {
         template <class M>
         static inline typename M::conjugate_type conjugate(M& m) 
         { return m.conjugate(); }
+
+        // m.transpose() or m
+        template <class M>
+        static inline typename M::const_transpose_type transpose(const M& m) 
+        { return m.transpose(); }
+        template <class M>
+        static inline typename M::transpose_type transpose(M& m) 
+        { return m.transpose(); }
 
         // v.addToAll(x) or v.setAllTo(x)
         template <class V, class T>
@@ -1334,6 +1342,11 @@ namespace tmv {
         static inline const M& conjugate(const M& m) { return m; }
         template <class M>
         static inline M& conjugate(M& m) { return m; }
+
+        template <class M>
+        static inline const M& transpose(const M& m) { return m; }
+        template <class M>
+        static inline M& transpose(M& m) { return m; }
 
         template <class V, class T>
         static inline void addtoall(V& v, const T& x) { v.setAllTo(x); }

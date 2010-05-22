@@ -111,7 +111,7 @@ namespace tmv {
         }
     };
 
-#ifndef TMV_OPT_CLEANUP
+#ifndef TMV_MM_OPT_CLEANUP
     template <int KB, class T>
     struct get_Kcleanup<UNKNOWN,KB,T>
     {

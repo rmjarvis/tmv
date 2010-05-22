@@ -3,24 +3,24 @@
 #include "TMV.h"
 #include <fstream>
 
-template <class T> void TestSmallMatrixB()
+template <class T> void TestAllSmallMatrixB()
 {
     TestSmallMatrixArith_4<T>();
     TestSmallMatrixArith_5<T>();
     TestSmallMatrixArith_6<T>();
     std::cout<<"SmallMatrix<"<<tmv::TMV_Text(T())<<
-        "> NonSquare Arithmetic passed all tests\n";
+        "> Arithmetic passed all MM tests\n";
 }
 
 #ifdef TEST_DOUBLE
-template void TestSmallMatrixB<double>();
+template void TestAllSmallMatrixB<double>();
 #endif
 #ifdef TEST_FLOAT
-template void TestSmallMatrixB<float>();
+template void TestAllSmallMatrixB<float>();
 #endif
 #ifdef TEST_LONGDOUBLE
-template void TestSmallMatrixB<long double>();
+template void TestAllSmallMatrixB<long double>();
 #endif
 #ifdef TEST_INT
-template void TestSmallMatrixB<int>();
+template void TestAllSmallMatrixB<int>();
 #endif

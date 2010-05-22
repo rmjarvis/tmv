@@ -117,14 +117,14 @@ namespace tmv {
         template <class M2> 
         inline void solveInPlace(BaseMatrix_Rec_Mutable<M2>& m2) const
         { 
-            TMVStaticAssert(Traits<T>::iscomplex || M2::isreal);
+            TMVStaticAssert(Traits<T>::isreal || M2::iscomplex);
             TMVStaticAssert((Traits2<T,typename M2::value_type>::samebase));
             doSolveInPlace(m2.mat().xView()); 
         }
         template <class V2> 
         inline void solveInPlace(BaseVector_Mutable<V2>& v2) const
         {
-            TMVStaticAssert(Traits<T>::iscomplex || V2::isreal);
+            TMVStaticAssert(Traits<T>::isreal || V2::iscomplex);
             TMVStaticAssert((Traits2<T,typename V2::value_type>::samebase));
             doSolveInPlace(v2.vec().xView()); 
         }
@@ -132,14 +132,14 @@ namespace tmv {
         template <class M2> 
         inline void solveTransposeInPlace(BaseMatrix_Rec_Mutable<M2>& m2) const
         {
-            TMVStaticAssert(Traits<T>::iscomplex || M2::isreal);
+            TMVStaticAssert(Traits<T>::isreal || M2::iscomplex);
             TMVStaticAssert((Traits2<T,typename M2::value_type>::samebase));
             doSolveTransposeInPlace(m2.mat().xView()); 
         }
         template <class V2>
         inline void solveTransposeInPlace(BaseVector_Mutable<V2>& v2) const
         {
-            TMVStaticAssert(Traits<T>::iscomplex || V2::isreal);
+            TMVStaticAssert(Traits<T>::isreal || V2::iscomplex);
             TMVStaticAssert((Traits2<T,typename V2::value_type>::samebase));
             doSolveTransposeInPlace(v2.vec().xView()); 
         }

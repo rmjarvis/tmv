@@ -188,26 +188,23 @@ namespace tmv {
         // Constructors
         //
 
-        inline SmallVector(size_t n=N) 
+        inline SmallVector()
         {
             TMVStaticAssert(N >= 0);
-            TMVAssert(n == N);
 #ifdef TMV_DEBUG
             this->setAllTo(T(888));
 #endif
         }
 
-        explicit inline SmallVector(size_t n, T x) 
+        explicit inline SmallVector(T x) 
         {
             TMVStaticAssert(N >= 0);
-            TMVAssert(n == N);
             this->setAllTo(x); 
         }
 
-        explicit inline SmallVector(size_t n, const T* v) 
+        explicit inline SmallVector(const T* v) 
         {
             TMVStaticAssert(N >= 0);
-            TMVAssert(n == N);
 #ifdef XTEST_DEBUG
             this->setAllTo(T(888));
 #endif
@@ -654,8 +651,8 @@ namespace tmv {
         typedef SmallVectorViewF<T,N,S,C> type;
         typedef SmallVectorView<T,N,S,C,FortranStyle> vtype;
 
-        inline SmallVectorViewF(T* v, size_t n=N, int s=S) : vtype(v,n,s) {}
-        inline SmallVectorViewF(T* v, size_t n=N) : vtype(v,n) {}
+        inline SmallVectorViewF(T* v, size_t n, int s) : vtype(v,n,s) {}
+        inline SmallVectorViewF(T* v, size_t n) : vtype(v,n) {}
         inline SmallVectorViewF(T* v) : vtype(v) {}
         inline SmallVectorViewF(const type& v2) : vtype(v2) {}
         template <IndexStyle I2>

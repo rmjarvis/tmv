@@ -3,25 +3,25 @@
 #include "TMV.h"
 #include <fstream>
 
-template <class T> void TestSmallMatrixA()
+template <class T> void TestAllSmallMatrixA()
 {
     TestSmallMatrixArith_1<T>();
     TestSmallMatrixArith_2<T>();
     TestSmallMatrixArith_3<T>();
     TestSmallMatrixArith_7<T>();
     std::cout<<"SmallMatrix<"<<tmv::TMV_Text(T())<<
-        "> Square Arithmetic passed all tests\n";
+        "> Arithmetic passed all MV tests\n";
 }
 
 #ifdef TEST_DOUBLE
-template void TestSmallMatrixA<double>();
+template void TestAllSmallMatrixA<double>();
 #endif
 #ifdef TEST_FLOAT
-template void TestSmallMatrixA<float>();
+template void TestAllSmallMatrixA<float>();
 #endif
 #ifdef TEST_LONGDOUBLE
-template void TestSmallMatrixA<long double>();
+template void TestAllSmallMatrixA<long double>();
 #endif
 #ifdef TEST_INT
-template void TestSmallMatrixA<int>();
+template void TestAllSmallMatrixA<int>();
 #endif

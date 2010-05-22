@@ -61,6 +61,9 @@
 #include "tmv/TMV_SVD.h"
 #endif
 
+#include "tmv/TMV_Permutation.h"
+#include "tmv/TMV_MultPM.h"
+
 #ifndef TMV_H
 #include "tmv/TMV_ProdXM.h"
 #include "tmv/TMV_SumMM.h"

@@ -13,6 +13,10 @@ TMV_TestSmallMatrixArith_5c.cpp
 TMV_TestSmallMatrixArith_5d.cpp
 TMV_TestSmallMatrixArith_5e.cpp
 TMV_TestSmallMatrixArith_5f.cpp
+TMV_TestSmallMatrixArith_5g.cpp
+TMV_TestSmallMatrixArith_5h.cpp
+TMV_TestSmallMatrixArith_5i.cpp
+TMV_TestSmallMatrixArith_5j.cpp
 TMV_TestSmallMatrixArith_6.cpp
 TMV_TestSmallMatrixArith_6a.cpp
 TMV_TestSmallMatrixArith_6b.cpp
@@ -20,3 +24,7 @@ TMV_TestSmallMatrixArith_6c.cpp
 TMV_TestSmallMatrixArith_6d.cpp
 TMV_TestSmallMatrixArith_6e.cpp
 TMV_TestSmallMatrixArith_6f.cpp
+TMV_TestSmallMatrixArith_6g.cpp
+TMV_TestSmallMatrixArith_6h.cpp
+TMV_TestSmallMatrixArith_6i.cpp
+TMV_TestSmallMatrixArith_6j.cpp

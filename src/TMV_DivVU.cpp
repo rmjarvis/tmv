@@ -29,6 +29,7 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
+//#define PRINTALGO_DIVVU
 
 #include "tmv/TMV_DivVU.h"
 #include "tmv/TMV_TriMatrix.h"

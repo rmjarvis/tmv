@@ -563,10 +563,13 @@ namespace tmv {
 #if TMV_OPT == 0
         return Norm_Helper<1,Mv>::call(mv);
 #else
+        typedef typename M::real_type RT;
+        const bool isint = std::numeric_limits<RT>::is_integer;
+        const int algo = isint ? 1 : 3;
         if (m.colsize() == 0 || m.rowsize() == 0) 
             return typename M::real_type(0);
         else 
-            return Norm_Helper<3,Mv>::call(mv);
+            return Norm_Helper<algo,Mv>::call(mv);
 #endif
     }
 

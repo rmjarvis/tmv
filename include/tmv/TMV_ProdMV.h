@@ -49,77 +49,61 @@ namespace tmv {
     // Matrix * Vector
     //
 
-    // These first few are intentionally not defined to make sure we
-    // get a compiler error if they are used.
-    // All real calls should go through a more specific version than 
-    // just the BaseMatrix_Calc's.
+    // These first few are for when an argument is a composite matrix
+    // and needs to be calculated before running MultMV.
     template <bool add, int ix, class T, class M1, class V2, class V3>
-    inline void MultMM(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1, 
-        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3);
+    inline void MultMV(
+        const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
+        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
+    { MultMV<add>(x,m1.calc(),v2.calc(),v3.vec()); }
     template <bool add, int ix, class T, class M1, class V2, class V3>
-    inline void NoAliasMultMM(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1, 
-        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3);
+    inline void NoAliasMultMV(
+        const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
+        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
+    { NoAliasMultMV<add>(x,m1.calc(),v2.calc(),v3.vec()); }
     template <bool add, int ix, class T, class M1, class V2, class V3>
-    inline void InlineMultMM(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1, 
-        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3);
-    template <bool add, int ix, class T, class M1, class V2, class V3>
-    inline void AliasMultMM(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1, 
-        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3);
+    inline void AliasMultMV(
+        const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
+        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
+    { AliasMultMV<add>(x,m1.calc(),v2.calc(),v3.vec()); }
 
     // These are helpers to allow the caller to not use a Scaling object.
     template <bool add, class T, class M1, class V2, class V3>
     inline void MultMV(
-        const T& x, const BaseMatrix_Calc<M1>& m1,
-        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
+        const T& x, const BaseMatrix<M1>& m1,
+        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
     { MultMV<add>(Scaling<0,T>(x),m1.mat(),v2.vec(),v3.vec()); }
     template <bool add, class T, class M1, class V2, class V3>
     inline void NoAliasMultMV(
-        const T& x, const BaseMatrix_Calc<M1>& m1,
-        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
+        const T& x, const BaseMatrix<M1>& m1,
+        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
     { NoAliasMultMV<add>(Scaling<0,T>(x),m1.mat(),v2.vec(),v3.vec()); }
     template <bool add, class T, class M1, class V2, class V3>
-    inline void InlineMultMV(
-        const T& x, const BaseMatrix_Calc<M1>& m1,
-        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
-    { InlineMultMV<add>(Scaling<0,T>(x),m1.mat(),v2.vec(),v3.vec()); }
-    template <bool add, class T, class M1, class V2, class V3>
     inline void AliasMultMV(
-        const T& x, const BaseMatrix_Calc<M1>& m1,
-        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
+        const T& x, const BaseMatrix<M1>& m1,
+        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
     { AliasMultMV<add>(Scaling<0,T>(x),m1.mat(),v2.vec(),v3.vec()); }
 
     template <bool add, class M1, class V2, class V3>
     inline void MultMV(
-        const BaseMatrix_Calc<M1>& m1,
-        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
+        const BaseMatrix<M1>& m1,
+        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
         MultMV<add>(
             Scaling<1,typename V3::real_type>(),m1.mat(),v2.vec(),v3.vec()); 
     }
     template <bool add, class M1, class V2, class V3>
     inline void NoAliasMultMV(
-        const BaseMatrix_Calc<M1>& m1,
-        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
+        const BaseMatrix<M1>& m1,
+        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
     { 
         NoAliasMultMV<add>(
             Scaling<1,typename V3::real_type>(),m1.mat(),v2.vec(),v3.vec()); 
     }
     template <bool add, class M1, class V2, class V3>
-    inline void InlineMultMV(
-        const BaseMatrix_Calc<M1>& m1,
-        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
-    { 
-        InlineMultMV<add>(
-            Scaling<1,typename V3::real_type>(),m1.mat(),v2.vec(),v3.vec()); 
-    }
-    template <bool add, class M1, class V2, class V3>
     inline void AliasMultMV(
-        const BaseMatrix_Calc<M1>& m1,
-        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
+        const BaseMatrix<M1>& m1,
+        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
     { 
         AliasMultMV<add>(
             Scaling<1,typename V3::real_type>(),m1.mat(),v2.vec(),v3.vec());
@@ -128,8 +112,8 @@ namespace tmv {
 #ifdef XDEBUG_PRODMV
     template <bool add, int ix, class T, class M1, class V2, class V3>
     inline void MultMV_Debug(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
-        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
+        const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
+        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
         Vector<typename V3::value_type> v3i = v3;
         Vector<typename V3::value_type> v3c = v3;
@@ -160,8 +144,8 @@ namespace tmv {
 #ifdef XDEBUG_PRODMV
     template <bool add, int ix, class T, class V1, class M2, class V3>
     inline void MultVM_Debug(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3)
+        const Scaling<ix,T>& x, const BaseVector<V1>& v1,
+        const BaseMatrix<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
         Vector<typename V3::value_type> v3i = v3;
         Vector<typename V3::value_type> v3c = v3;
@@ -193,7 +177,7 @@ namespace tmv {
     template <class V1, int ix, class T, class M2>
     inline void MultEqVM_Debug(
         BaseVector_Mutable<V1>& v1,
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M2>& m2)
+        const Scaling<ix,T>& x, const BaseMatrix<M2>& m2)
     {
         Vector<typename V1::value_type> v1i = v1;
         Vector<typename V1::value_type> v3 = v1;
@@ -277,9 +261,9 @@ namespace tmv {
             TMVStaticAssert((Sizes<type::_size,V3::_size>::same)); 
             TMVAssert(size() == v3.size());
 #ifdef XDEBUG_PRODMV
-            MultMV_Debug<false>(x,m1.calc(),v2.calc(),v3.vec());
+            MultMV_Debug<false>(x,m1.mat(),v2.vec(),v3.vec());
 #else
-            MultMV<false>(x,m1.calc(),v2.calc(),v3.vec());
+            MultMV<false>(x,m1.mat(),v2.vec(),v3.vec());
 #endif
         }
 
@@ -290,9 +274,9 @@ namespace tmv {
             TMVStaticAssert((Sizes<type::_size,V3::_size>::same)); 
             TMVAssert(size() == v3.size());
 #ifdef XDEBUG_PRODMV
-            MultMV_Debug<false>(x,m1.calc(),v2.calc(),v3.vec());
+            MultMV_Debug<false>(x,m1.mat(),v2.vec(),v3.vec());
 #else
-            NoAliasMultMV<false>(x,m1.calc(),v2.calc(),v3.vec());
+            NoAliasMultMV<false>(x,m1.mat(),v2.vec(),v3.vec());
 #endif
         }
 
@@ -360,9 +344,9 @@ namespace tmv {
             TMVStaticAssert((Sizes<type::_size,V3::_size>::same)); 
             TMVAssert(size() == v3.size());
 #ifdef XDEBUG_PRODMV
-            MultVM_Debug<false>(x,v1.calc(),m2.calc(),v3.vec());
+            MultVM_Debug<false>(x,v1.vec(),m2.mat(),v3.vec());
 #else
-            MultVM<false>(x,v1.calc(),m2.calc(),v3.vec());
+            MultVM<false>(x,v1.vec(),m2.mat(),v3.vec());
 #endif
         }
 
@@ -373,9 +357,9 @@ namespace tmv {
             TMVStaticAssert((Sizes<type::_size,V3::_size>::same)); 
             TMVAssert(size() == v3.size());
 #ifdef XDEBUG_PRODMV
-            MultVM_Debug<false>(x,v1.calc(),m2.calc(),v3.vec());
+            MultVM_Debug<false>(x,v1.vec(),m2.mat(),v3.vec());
 #else
-            NoAliasMultVM<false>(x,v1.calc(),m2.calc(),v3.vec());
+            NoAliasMultVM<false>(x,v1.vec(),m2.mat(),v3.vec());
 #endif
         }
 
@@ -451,9 +435,9 @@ namespace tmv {
         BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
     { 
 #ifdef XDEBUG_PRODMV
-        MultEqVM_Debug(v1,Scaling<1,typename V1::real_type>(),m2.calc()); 
+        MultEqVM_Debug(v1,Scaling<1,typename V1::real_type>(),m2.mat()); 
 #else
-        MultEqVM(v1,Scaling<1,typename V1::real_type>(),m2.calc()); 
+        MultEqVM(v1,Scaling<1,typename V1::real_type>(),m2.mat()); 
 #endif
     }
 
@@ -463,9 +447,9 @@ namespace tmv {
         BaseVector_Mutable<V1>& v1, const ProdXM<ix2,T2,M2>& m2)
     { 
 #ifdef XDEBUG_PRODMV
-        MultEqVM_Debug(v1,m2.getX(),m2.getM().calc()); 
+        MultEqVM_Debug(v1,m2.getX(),m2.getM().mat()); 
 #else
-        MultEqVM(v1,m2.getX(),m2.getM().calc()); 
+        MultEqVM(v1,m2.getX(),m2.getM().mat()); 
 #endif
     }
 
@@ -476,9 +460,9 @@ namespace tmv {
     { 
 #ifdef XDEBUG_PRODMV
         MultMV_Debug<true>(
-            mv.getX(),mv.getM().calc(),mv.getV().calc(),v3.vec()); 
+            mv.getX(),mv.getM().mat(),mv.getV().vec(),v3.vec()); 
 #else
-        MultMV<true>(mv.getX(),mv.getM().calc(),mv.getV().calc(),v3.vec()); 
+        MultMV<true>(mv.getX(),mv.getM().mat(),mv.getV().vec(),v3.vec()); 
 #endif
     }
 
@@ -489,9 +473,9 @@ namespace tmv {
     {
 #ifdef XDEBUG_PRODMV
         MultMV_Debug<true>(
-            -mv.getX(),mv.getM().calc(),mv.getV().calc(),v3.vec()); 
+            -mv.getX(),mv.getM().mat(),mv.getV().vec(),v3.vec()); 
 #else
-        MultMV<true>(-mv.getX(),mv.getM().calc(),mv.getV().calc(),v3.vec()); 
+        MultMV<true>(-mv.getX(),mv.getM().mat(),mv.getV().vec(),v3.vec()); 
 #endif
     }
 
@@ -502,9 +486,9 @@ namespace tmv {
     { 
 #ifdef XDEBUG_PRODMV
         MultVM_Debug<true>(
-            vm.getX(),vm.getV().calc(),vm.getM().calc(),v3.vec()); 
+            vm.getX(),vm.getV().vec(),vm.getM().mat(),v3.vec()); 
 #else
-        MultVM<true>(vm.getX(),vm.getV().calc(),vm.getM().calc(),v3.vec()); 
+        MultVM<true>(vm.getX(),vm.getV().vec(),vm.getM().mat(),v3.vec()); 
 #endif
     }
 
@@ -515,9 +499,9 @@ namespace tmv {
     { 
 #ifdef XDEBUG_PRODMV
         MultVM_Debug<true>(
-            -vm.getX(),vm.getV().calc(),vm.getM().calc(),v3.vec()); 
+            -vm.getX(),vm.getV().vec(),vm.getM().mat(),v3.vec()); 
 #else
-        MultVM<true>(-vm.getX(),vm.getV().calc(),vm.getM().calc(),v3.vec()); 
+        MultVM<true>(-vm.getX(),vm.getV().vec(),vm.getM().mat(),v3.vec()); 
 #endif
     }
 

@@ -117,16 +117,16 @@ namespace tmv {
     // Matrix * DiagMatrix
     //
 
-    // Q3 is the crossover memory size to start using prefetch commands.
+    // PREFETCH is the crossover memory size to start using prefetch commands.
     // This is undoubtedly a function of the L1 (and L2?) cache size,
     // but 2KBytes is probably not too bad for most machines.
     // (That's an empirical value for my Intel Core 2 Duo.)
-#define TMV_Q3 2048
+#define TMV_MD_PREFETCH 2048
 
     // ZeroIX controls whether ix = -1 should act like ix = 1 or ix = 0.
     // It doesn't really seem to matter much either way.
-#define TMV_ZeroIX (ix == 0)
-    //#define TMV_ZeroIX (ix != 1)
+#define TMV_MD_ZeroIX (ix == 0)
+    //#define TMV_MD_ZeroIX (ix != 1)
 
     template <int algo, int cs, int rs, bool add, 
               int ix, class T, class M1, class M2, class M3>
@@ -306,7 +306,7 @@ namespace tmv {
             const int Bstepj = m3.stepj();
             IT3 B = m3.get_col(0).begin();
 
-            const bool dopref = M * sizeof(T1) >= TMV_Q3;
+            const bool dopref = M * sizeof(T1) >= TMV_MD_PREFETCH;
 
             Prefetch_Read(D.get());
             Prefetch_Read(A.get());
@@ -384,7 +384,7 @@ namespace tmv {
             const int Bstepi = m3.stepi();
             IT3 B = m3.get_row(0).begin();
 
-            const bool dopref = N * sizeof(T1) >= TMV_Q3;
+            const bool dopref = N * sizeof(T1) >= TMV_MD_PREFETCH;
 
             Prefetch_MultiRead(D.get());
             Prefetch_Read(A.get());
@@ -411,26 +411,14 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = (rs == UNKNOWN ? m3.rowsize() : rs);
 #ifdef PRINTALGO_MD
+            const int N = (rs == UNKNOWN ? m3.rowsize() : rs);
             const int M = (cs == UNKNOWN ? m3.colsize() : cs);
             std::cout<<"MD algo 82: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            typedef typename M2::value_type T2;
-            typedef typename Traits2<T,T2>::type PT2;
-            typedef typename MCopyHelper<PT2,Diag,rs,rs,false,false>::type M2c;
-            M2c m2c(N);
-            typedef typename M2::const_diag_type M2d;
-            typedef typename M2c::diag_type M2cd;
-            typedef typename M2c::const_view_type M2cv;
-            M2d m2d = m2.diag();
-            M2cd m2cd = m2c.diag();
-            M2cv m2cv = m2c.view();
-            typedef typename Traits<T>::real_type RT;
-            const Scaling<1,RT> one;
-            MultXV_Helper<-2,rs,false,ix,T,M2d,M2cd>::call(x,m2d,m2cd);
-            MultMD_Helper<-2,cs,rs,add,1,RT,M1,M2cv,M3>::call(one,m1,m2cv,m3);
+            typedef typename M3::real_type RT;
+            NoAliasMultMM<add>(Scaling<1,RT>(),m1,(x*m2).calc(),m3);
         }
     };
 
@@ -479,7 +467,7 @@ namespace tmv {
             const bool bothrm = M1::_rowmajor && M3::_rowmajor;
             const bool bothcm = M1::_colmajor && M3::_colmajor;
 #if TMV_OPT >= 1
-            const bool docopy = TMV_ZeroIX || M2::_diagstep != 1;
+            const bool docopy = TMV_MD_ZeroIX || M2::_diagstep != 1;
 #else
             const bool docopy = false;
 #endif
@@ -760,7 +748,5 @@ namespace tmv {
     { AliasMultMM<false>(x,m1.mat(),m2.mat(),m1.mat()); }
 
 } // namespace tmv
-
-#undef TMV_ZeroIX
 
 #endif 

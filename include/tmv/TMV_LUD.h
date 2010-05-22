@@ -35,18 +35,9 @@
 // This file contains the driver code for doing division using 
 // LU Decomposition.
 //
-// The name LU Decomposition is traditional, but somewhat
-// annoying.  In other contexts, U usually represents a unitary matrix,
-// not an upper traiangular matrix.  The latter are usually represented
-// with R.  (for "Right Triangular")  
-// For example, in a QR decomposition, the R is an upper
-// trianular matrix.  (Q also typically represents unitary matrices.)
-// However, I will use U rather than R here, since that is 
-// the usual representation in this context.
-//
 // The basic idea of an LU decomposition is that any 
 // square matrix A can be decomposed into a lower triangular
-// matrix time an upper triangular matrix.
+// matrix times an upper triangular matrix.
 //
 // For stability reasons, we actually decompose a permutation
 // of A instead, so:
@@ -80,6 +71,9 @@
 #include "TMV_BaseMatrix_Rec.h"
 #include "TMV_BaseMatrix_Tri.h"
 #include "TMV_Matrix.h"
+#include "TMV_NormU.h"
+#include "TMV_MultUL.h"
+#include "TMV_Permutation.h"
 
 #include "TMV_LUDiv.h"
 #include "TMV_LUDecompose.h"
@@ -108,7 +102,7 @@ namespace tmv {
         typedef typename lu_type::const_view_type getlu_type;
         typedef typename lu_type::const_unit_lowertri_type getl_type;
         typedef typename lu_type::const_uppertri_type getu_type;
-        typedef const int* getp_type;
+        typedef Permutation getp_type;
 
         //
         // Constructors
@@ -121,7 +115,7 @@ namespace tmv {
         // This way an LUD object can be returned by value, and the 
         // copy is cheap.  I don't think there is any reason to use
         // a more sophisticated technique like shared_ptr or something
-        // similar.
+        // similar, since there are no non-const methods.
         LUD(const LUD<M>& rhs);
 
         // Clean up the internal storage
@@ -374,7 +368,7 @@ namespace tmv {
     private :
 
         enum { small = (
-                !M::unknownsizes && 
+                M::_colsize != UNKNOWN && M::_rowsize != UNKNOWN &&
                 M::_colsize <= 8 && M::_rowsize <= 8 ) };
 
         mutable std::auto_ptr<LUD_Impl<small,M> > pimpl;
@@ -386,10 +380,10 @@ namespace tmv {
         LUD<M>& operator=(const LUD<M>&);
     };
     
-    template <bool isvalid, bool istrans> struct LUTransHelper;
+    template <bool isvalid, bool istrans> struct LUHelper;
 
     template <>
-    struct LUTransHelper<true,false>
+    struct LUHelper<true,false>
     {
         template <class M1, class M2>
         static void copy(const M1& m1, M2& m2)
@@ -398,17 +392,14 @@ namespace tmv {
         static void makeInverse(const M1& LUx, const int* P, M2& m2)
         {
             // This one might be same storage if LUx was done in place.
-            // e.g. A.divideInPlace;  A = A.inverse();
-            // So go ahead and check.
+            // e.g. { A.divideInPlace(); A = A.inverse(); }
+            // So go ahead and check. (i.e. Don't use NoAliasCopy.)
             Copy(LUx,m2);
             LU_Inverse(m2,P);
         }
         template <class M1, class M2>
         static void solveInPlace(const M1& LUx, const int* P, M2& m2)
         { LU_SolveInPlace(LUx,P,m2); }
-        template <class M1, class M2>
-        static void solveTransposeInPlace(const M1& LUx, const int* P, M2& m2)
-        { LU_SolveTransposeInPlace(LUx,P,m2); }
         template <class M1>
         static typename M1::const_view_type view(const M1& m)
         { return m.view(); }
@@ -417,7 +408,7 @@ namespace tmv {
         { return m.stepj(); }
     };
     template <>
-    struct LUTransHelper<true,true>
+    struct LUHelper<true,true>
     {
         template <class M1, class M2>
         static void copy(const M1& m1, M2& m2)
@@ -432,9 +423,6 @@ namespace tmv {
         template <class M1, class M2>
         static void solveInPlace(const M1& LUx, const int* P, M2& m2)
         { LU_SolveTransposeInPlace(LUx,P,m2); }
-        template <class M1, class M2>
-        static void solveTransposeInPlace(const M1& LUx, const int* P, M2& m2)
-        { LU_SolveInPlace(LUx,P,m2); }
         template <class M1>
         static typename M1::const_transpose_type view(const M1& m)
         { return m.transpose(); }
@@ -443,7 +431,7 @@ namespace tmv {
         { return m.stepi(); }
     };
     template <bool istrans>
-    struct LUTransHelper<false,istrans>
+    struct LUHelper<false,istrans>
     {
         template <class M1, class M2>
         static void copy(const M1& , M2& ) {}
@@ -451,8 +439,6 @@ namespace tmv {
         static void makeInverse(const M1& , const int* , M2& ) {}
         template <class M1, class M2>
         static void solveInPlace(const M1& , const int* , M2& ) {}
-        template <class M1, class M2>
-        static void solveTransposeInPlace(const M1& , const int* , M2& ) {}
         template <class M1>
         static void view(const M1& ) {}
     };
@@ -470,10 +456,8 @@ namespace tmv {
             TMVStaticAssert(M::_colsize != UNKNOWN);
             TMVStaticAssert(M::_colsize == int(LUD<M>::lu_type::_colsize));
             TMVStaticAssert(M::_rowsize == int(LUD<M>::lu_type::_rowsize));
+            LUHelper<true,istrans>::copy(A,LUx); 
         }
-
-        void copyAtoLU(const M& A)
-        { LUTransHelper<true,istrans>::copy(A,LUx); }
 
         typename LUD<M>::lu_type SmallLUx;
         lux_type LUx;
@@ -495,29 +479,25 @@ namespace tmv {
             Aptr( inplace ? 0 : A.rowsize()*A.rowsize() ),
             // LUx views this memory as the LU matrix
             LUx(
-                ( inplace ? A.nonConst().ptr() : 
-                  Aptr.get() ),
+                inplace ? A.nonConst().ptr() : Aptr.get() , // ptr
                 // A is square, so no need to check istrans for the right
                 // values of rowsize,colsize here.
                 A.rowsize() ,  // colsize
                 A.rowsize() ,  // rowsize
                 1 ,  // stepi
                 // Here we do need to check istrans for the right step.
-                ( inplace ? LUTransHelper<true,istrans>::stepj(A) :
+                ( inplace ? LUHelper<true,istrans>::stepj(A) :
                   int(A.rowsize()) ) // stepj
             ),
             // allocate memory for the permutation
-            P(A.rowsize()), detp(1) {}
-
-        void copyAtoLU(const M& A)
-        {
-            if (!inplace) {
-                LUTransHelper<true,istrans>::copy(A,LUx);
-            } else {
-                //if (A.isconj()) LUx.conjugateSelf();
-                Maybe<M::_conj>::conjself(LUx);
+            P(A.rowsize()), detp(1) 
+            {
+                if (!inplace) {
+                    LUHelper<true,istrans>::copy(A,LUx);
+                } else {
+                    Maybe<M::_conj>::conjself(LUx);
+                }
             }
-        }
 
         const bool inplace;
         AlignedArray<typename M::value_type> Aptr;
@@ -532,8 +512,6 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same));
         TMVAssert(A.isSquare());
-        const bool istrans = LUD_Impl<small,M>::istrans;
-        pimpl->copyAtoLU(A);
         LU_Decompose(pimpl->LUx,pimpl->P,pimpl->detp);
     }
 
@@ -550,7 +528,7 @@ namespace tmv {
         TMVAssert(m2.colsize() == colsize());
         const bool isvalid = M::isreal || M2::iscomplex;
         const bool istrans = LUD_Impl<small,M>::istrans;
-        LUTransHelper<isvalid,istrans>::solveInPlace(pimpl->LUx,pimpl->P,m2);
+        LUHelper<isvalid,istrans>::solveInPlace(pimpl->LUx,pimpl->P,m2);
     }
 
     template <class M> template <class M2> 
@@ -560,8 +538,7 @@ namespace tmv {
         TMVAssert(m2.colsize() == rowsize());
         const bool isvalid = M::isreal || M2::iscomplex;
         const bool istrans = LUD_Impl<small,M>::istrans;
-        LUTransHelper<isvalid,istrans>::solveTransposeInPlace(
-            pimpl->LUx,pimpl->P,m2);
+        LUHelper<isvalid,!istrans>::solveInPlace(pimpl->LUx,pimpl->P,m2);
     }
 
     template <class M> template <class V2> 
@@ -571,7 +548,7 @@ namespace tmv {
         TMVAssert(v2.size() == colsize());
         const bool isvalid = M::isreal || V2::iscomplex;
         const bool istrans = LUD_Impl<small,M>::istrans;
-        LUTransHelper<isvalid,istrans>::solveInPlace(pimpl->LUx,pimpl->P,v2);
+        LUHelper<isvalid,istrans>::solveInPlace(pimpl->LUx,pimpl->P,v2);
     }
 
     template <class M> template <class V2> 
@@ -581,8 +558,7 @@ namespace tmv {
         TMVAssert(v2.size() == rowsize());
         const bool isvalid = M::isreal || V2::iscomplex;
         const bool istrans = LUD_Impl<small,M>::istrans;
-        LUTransHelper<isvalid,istrans>::solveTransposeInPlace(
-            pimpl->LUx,pimpl->P,v2);
+        LUHelper<isvalid,!istrans>::solveInPlace(pimpl->LUx,pimpl->P,v2);
     }
 
     template <class M> 
@@ -608,7 +584,7 @@ namespace tmv {
         TMVAssert(minv.rowsize() == colsize());
         const bool isvalid = M::isreal || M2::iscomplex;
         const bool istrans = LUD_Impl<small,M>::istrans;
-        LUTransHelper<isvalid,istrans>::makeInverse(pimpl->LUx,pimpl->P,minv);
+        LUHelper<isvalid,istrans>::makeInverse(pimpl->LUx,pimpl->P,minv);
     }
 
     template <class M> template <class M2>
@@ -637,7 +613,7 @@ namespace tmv {
 
     template <class M> 
     typename LUD<M>::getp_type LUD<M>::getP() const 
-    { return pimpl->P; }
+    { return Permutation(rowsize(),pimpl->P,true,pimpl->detp); }
 
     template <class M> 
     typename M::real_type LUD<M>::condition(RT normInf) const 
@@ -659,21 +635,30 @@ namespace tmv {
     {
         const bool istrans = LUD_Impl<small,M>::istrans;
         typename M2::calc_type mm = m2.calc();
-        if (fout) {
+        bool printmat = fout && m2.colsize() < 100 && m2.rowsize() < 100;
+        if (printmat) {
             *fout << "LU:\n";
-            *fout << LUTransHelper<true,istrans>::view(mm) << std::endl;
+            *fout << LUHelper<true,istrans>::view(mm) << std::endl;
             *fout << "L = "<<getL()<<std::endl;
             *fout << "U = "<<getU()<<std::endl;
         }
         typename M::copy_type lu = getL()*getU();
-        lu.reversePermuteRows(getP());
-        RT nm = Norm(lu-LUTransHelper<true,istrans>::view(mm));
-        nm /= Norm(getL())*Norm(getU());
-        if (fout) {
-            *fout << "PLU = "<<lu<<std::endl;
-            *fout << "Norm(M-PLU)/Norm(PLU) = "<<nm<<std::endl;
+        if (printmat) {
+            *fout << "LU = "<<lu<<std::endl;
         }
-        return nm < condition(mm.normInf())*mm.colsize()*TMV_Epsilon<T>();
+        lu = getP() * lu;
+        if (printmat) {
+            *fout << "PLU = "<<lu<<std::endl;
+        }
+        RT nm = Norm(lu-LUHelper<true,istrans>::view(mm));
+        nm /= Norm(getL())*Norm(getU());
+        RT kappa = condition(mm.normInf());
+        if (fout) {
+            *fout << "Norm(M-PLU)/Norm(PLU) = "<<nm<<" <? ";
+            *fout << kappa<<"*"<<RT(mm.colsize())<<"*"<<TMV_Epsilon<T>();
+            *fout << " = "<<kappa*RT(mm.colsize())*TMV_Epsilon<T>()<<std::endl;
+        }
+        return nm < kappa*RT(mm.colsize())*TMV_Epsilon<T>();
     }
 
     template <class M> size_t LUD<M>::colsize() const

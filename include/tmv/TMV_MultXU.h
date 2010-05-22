@@ -72,15 +72,15 @@ namespace tmv {
     // U (+)= x * U
     //
 
-    // Q1 is the maximum nops to unroll.
+    // UNROLL is the maximum nops to unroll.
 #if TMV_OPT >= 3
-#define TMV_Q1 200 
+#define TMV_XU_UNROLL 200 
 #elif TMV_OPT >= 2
-#define TMV_Q1 25
+#define TMV_XU_UNROLL 25
 #elif TMV_OPT >= 1
-#define TMV_Q1 9
+#define TMV_XU_UNROLL 9
 #else
-#define TMV_Q1 0
+#define TMV_XU_UNROLL 0
 #endif
 
     template <int algo, int s, bool add, int ix, class T, class M1, class M2>
@@ -310,7 +310,7 @@ namespace tmv {
             const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
                 s == UNKNOWN ? false :
-                nops > TMV_Q1 ? false :
+                nops > TMV_XU_UNROLL ? false :
                 s <= 10;
             const int algo = 
                 unroll ? ( M2::_rowmajor ? 15 : 16 ) :
@@ -612,7 +612,7 @@ namespace tmv {
         Maybe<!add>::zero_offdiag(m2);
     }
 
-#undef TMV_Q1
+#undef TMV_XU_UNROLL
 
 } // namespace tmv
 

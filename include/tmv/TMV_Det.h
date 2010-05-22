@@ -153,9 +153,9 @@ namespace tmv {
             std::cout<<"Det algo 3: N,s = "<<N<<','<<3<<std::endl;
 #endif
             return 
-                m.cref(0,0)(m.cref(1,1)*m.cref(2,2)-m.cref(1,2)*m.cref(2,1)) -
-                m.cref(0,1)(m.cref(1,0)*m.cref(2,2)-m.cref(1,2)*m.cref(2,0)) +
-                m.cref(0,2)(m.cref(1,0)*m.cref(2,1)-m.cref(1,1)*m.cref(2,0));
+                m.cref(0,0)*(m.cref(1,1)*m.cref(2,2)-m.cref(1,2)*m.cref(2,1)) -
+                m.cref(0,1)*(m.cref(1,0)*m.cref(2,2)-m.cref(1,2)*m.cref(2,0)) +
+                m.cref(0,2)*(m.cref(1,0)*m.cref(2,1)-m.cref(1,1)*m.cref(2,0));
         }
     };
 

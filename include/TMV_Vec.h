@@ -53,4 +53,7 @@
 #include "tmv/TMV_SumVV.h"
 #include "tmv/TMV_ProdVV.h"
 
+#include "tmv/TMV_Permutation.h"
+#include "tmv/TMV_MultPV.h"
+
 #endif

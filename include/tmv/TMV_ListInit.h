@@ -41,7 +41,7 @@ namespace tmv {
 
     public :
         inline ListReadError(int nleft) : n(nleft) {}
-        inline void Write(std::ostream& os) const throw()
+        inline void write(std::ostream& os) const throw()
         {
             os<<"TMV Read Error: Reading from List initialization.\n";
             if (n == 0)
