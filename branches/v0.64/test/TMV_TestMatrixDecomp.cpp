@@ -33,7 +33,7 @@ void TestMatrixDecomp()
         m(M-1,N-2) = 13;
         m(M-1,N-1) = -10;
         if (mattype < 3) m.diag() *= T(30*N);
-        if (mattype >= 3) { m.col(1).setZero(); m.row(7) = m.row(6); }
+        else { m.col(1).setZero(); m.row(7) = m.row(6); }
 
         tmv::Matrix<std::complex<T>,stor> c(M,N);
         for(int i=0;i<M;++i) for(int j=0;j<N;++j) 
@@ -46,7 +46,7 @@ void TestMatrixDecomp()
         c(M-1,N-2) = 13;
         c(M-1,N-1) = -10;
         if (mattype < 3) c.diag() *= T(30*N);
-        if (mattype >= 3) { c.col(1).setZero(); c.row(7) = c.row(6); }
+        else { c.col(1).setZero(); c.row(7) = c.row(6); }
 
         if (mattype == 4) {
             for(int i=10;i<N;i+=10) {
@@ -77,7 +77,7 @@ void TestMatrixDecomp()
         }
 
         // LU Decomposition
-        if (mattype == 0) {
+        if (m.isSquare()) {
             if (showstartdone) {
                 std::cout<<"LU\n";
             }

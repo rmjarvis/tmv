@@ -30,7 +30,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 
-//#define XDEBUG
+#define XDEBUG
 
 #include "TMV_Blas.h"
 #include "TMV_SymLDLDiv.h"
@@ -195,6 +195,11 @@ namespace tmv {
         const int N = A.size();
         const RT alpha = (TMV_SQRT(RT(17))+1)/8;
 
+        // I use x*halfeps to check for underflow.  Normally x*eps should
+        // be sufficient.  But if x is complex, then 1/x can still overflow
+        // if x*eps != 0, but x*halfeps == 0.
+        const RT halfeps = TMV_Epsilon<RT>()/RT(2);
+
 #ifdef XTEST 
         TMVAssert(A.isHermOK());
 #endif
@@ -210,6 +215,11 @@ namespace tmv {
                 RT ajj = herm ? TMV_ABS(TMV_REAL(*Dj)) : TMV_ABS(*Dj);
                 int p; // p is relative to j index, not absolute.
                 RT apj = A.col(j,j,N).maxAbsElement(&p);
+                // Check for underflow:
+                if (apj * halfeps == RT(0)) {
+                    *Dj = apj = ajj = RT(0);
+                    A.col(j,j+1,N).setZero();
+                }
 
                 if (p == 0 || ajj >= alpha * apj) {
                     // No permutation
@@ -372,7 +382,6 @@ namespace tmv {
 #endif
                     A.diag().subVector(j+2,N).imagPart().setZero();
                 }
-
                 j+=2; Dj += D.step(); // Already did one += D.step() above
             }
         }
@@ -401,6 +410,7 @@ namespace tmv {
 #endif
 
         const RT alpha = (TMV_SQRT(RT(17))+1)/8;
+        const RT halfeps = TMV_Epsilon<RT>()/RT(2);
         const int N = A.size();
 
         VectorView<T> D = A.diag();
@@ -430,6 +440,11 @@ namespace tmv {
                         RT ajj = TMV_ABS(*LDjj);
                         int p; // p is relative to j+1 index, not absolute.
                         RT apj = LD.col(jj,j+1,N).maxAbsElement(&p);
+                        // Check for underflow:
+                        if (apj * halfeps == RT(0)) {
+                            *LDjj = apj = ajj = RT(0);
+                            LD.col(jj,j+1,N).setZero();
+                        }
 
                         if (ajj >= alpha * apj) {
                             // No permutation
@@ -656,9 +671,11 @@ namespace tmv {
         TMVAssert(A.ct()==NonConj);
         TMVAssert(A.uplo()==Lower);
 
+#if 0
         if (A.size() > SYM_LDL_BLOCKSIZE) 
             BlockLDL_Decompose<herm>(A,xD,P,logdet,signdet);
         else 
+#endif
             NonBlockLDL_Decompose<herm>(A,xD,P,logdet,signdet);
     }
 
@@ -1179,7 +1196,7 @@ namespace tmv {
         TMVAssert(A.isHermOK());
 #endif
 #ifdef XDEBUG
-        LowerTriMatrix<T,UnitDiag> L = A.LowerTri(UnitDiag);
+        LowerTriMatrix<T,UnitDiag> L = A.lowerTri(UnitDiag);
         Matrix<T> DD(A.size(),A.size(),T(0));
         DD.diag() = A.diag();
         DD.diag(-1) = xD;
@@ -1187,7 +1204,7 @@ namespace tmv {
         Matrix<T> A2 = L*DD*(A.isherm() ? L.adjoint() : L.transpose());
         A2.reversePermuteRows(P);
         A2.reversePermuteCols(P);
-        if (Norm(A2-A0) > 0.0001*(Norm(A0)+normSq(L)*Norm(DD))) {
+        if (Norm(A2-A0) > 0.0001*(Norm(A0)+NormSq(L)*Norm(DD))) {
             cerr<<"LDL_Decompose\n";
             cerr<<"A0 = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"A -> "<<A<<endl;
@@ -1249,20 +1266,20 @@ namespace tmv {
         LDL_Decompose(A,D.diag(-1),P,ld,d);
         D.diag() = A.diag();
 #ifdef XDEBUG
-        LowerTriMatrix<T,UnitDiag> L = A.LowerTri(UnitDiag);
+        LowerTriMatrix<T,UnitDiag> L = A.lowerTri(UnitDiag);
         Matrix<T> A2 = L * D * (A.isherm() ? L.adjoint() : L.transpose());
         A2.reversePermuteRows(P);
         A2.reversePermuteCols(P);
-        //cerr<<"LDL_Decompose: A0 = "<<TMV_Text(A)<<"  "<<A0<<std::endl;
-        //cerr<<"A -> "<<A<<std::endl;
-        //cerr<<"D = "<<TMV_Text(D)<<"  "<<D<<std::endl;
-        //cerr<<"L = "<<L<<std::endl;
-        //cerr<<"LDLt = "<<L*D*(A.isherm()?L.adjoint():L.transpose());
-        //cerr<<"D.-1 = "<<TMV_Text(D.diag(-1))<<"  "<<D.diag(-1)<<std::endl;
-        //cerr<<"D.0 = "<<D.diag()<<std::endl;
-        //cerr<<"D.1 = "<<D.diag(1)<<std::endl;
-        //cerr<<"PLDLtPt = "<<A2<<std::endl;
-        //cerr<<"cf A0 = "<<A0<<std::endl;
+        //cout<<"LDL_Decompose: A0 = "<<TMV_Text(A)<<"  "<<A0<<std::endl;
+        //cout<<"A -> "<<A<<std::endl;
+        //cout<<"D = "<<TMV_Text(D)<<"  "<<D<<std::endl;
+        //cout<<"L = "<<L<<std::endl;
+        //cout<<"LDLt = "<<L*D*(A.isherm()?L.adjoint():L.transpose());
+        //cout<<"D.-1 = "<<TMV_Text(D.diag(-1))<<"  "<<D.diag(-1)<<std::endl;
+        //cout<<"D.0 = "<<D.diag()<<std::endl;
+        //cout<<"D.1 = "<<D.diag(1)<<std::endl;
+        //cout<<"PLDLtPt = "<<A2<<std::endl;
+        //cout<<"cf A0 = "<<A0<<std::endl;
         if (Norm(A2-A0) > 0.001*Norm(A0)) {
             cerr<<"LDL_Decompose: A0 = "<<TMV_Text(A)<<"  "<<A0<<std::endl;
             cerr<<"A -> "<<A<<std::endl;

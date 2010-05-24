@@ -33,4 +33,3 @@ TMV_SVDecompose.cpp
 TMV_SVDecompose_Bidiag.cpp 
 TMV_SVDecompose_QR.cpp 
 TMV_SVDiv.cpp
-TMV_Version.cpp

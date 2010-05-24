@@ -115,6 +115,9 @@ namespace tmv {
         TMVAssert(A.isSquare());
         const int N = A.rowsize();
 
+        typedef TMV_RealType(T) RT;
+        const RT halfeps = TMV_Epsilon<RT>()/RT(2);
+
         const int ds = A.diagstep();
         T* Ujj = A.ptr();
         int* Pj=P;
@@ -124,7 +127,13 @@ namespace tmv {
         for (int j=0; j<N-1; ++j,Ujj+=ds,++Pj) {
             // Find the pivot element
             int ip;
-            A.col(j,j,endcol).maxAbsElement(&ip);
+            T piv = A.col(j,j,endcol).maxAbsElement(&ip);
+
+            if (piv * halfeps == RT(0)) {
+                ip = 0;
+                A.col(j,j,endcol).setZero();
+            }
+
             if (ip != 0) {
                 ip += j;
                 Swap(A.row(ip,j,endrow),A.row(j,j,endrow));
@@ -164,14 +173,16 @@ namespace tmv {
         TMVAssert(A.isSquare());
         const int N = A.rowsize();
 
+        typedef TMV_RealType(T) RT;
+        const RT halfeps = TMV_Epsilon<RT>()/RT(2);
+
         T* Ujj = A.ptr(); // = U(j,j)
         T* Lj = Ujj+A.stepi();  // = L(j+1,j)
         T* Uj1 = Ujj+A.stepj(); // = U(j,j+1)
         T* Uj2 = Uj1+A.stepj(); // = U(j,j+2)
         int* Pj=P;
 
-        for (int j=0; j<N-1; ++j,++Ujj,++Lj,++Uj1,++Uj2,++Pj)
-        {
+        for (int j=0; j<N-1; ++j,++Ujj,++Lj,++Uj1,++Uj2,++Pj) {
             bool pivot = TMV_ABS(*Lj) > TMV_ABS(*Ujj);
 
             if (pivot) {
@@ -187,7 +198,11 @@ namespace tmv {
             TMVAssert(Lj >= A.first);
             TMVAssert(Lj < A.last);
 #endif
-            if (*Ujj != T(0)) *Lj /= *Ujj;
+            if (*Ujj * halfeps == T(0)) {
+                *Ujj = *Lj = T(0);
+            } else {
+                *Lj /= *Ujj;
+            }
 
             //A.row(j+1,j+1,endrow) -= *Lj * A.row(j,j+1,endrow);
 #ifdef TMVFLDEBUG

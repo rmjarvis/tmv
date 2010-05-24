@@ -1,6 +1,4 @@
 
-#define START 0
-
 #include "TMV.h"
 #include "TMV_Sym.h"
 #include "TMV_Band.h"
@@ -12,25 +10,43 @@
 template <class T, tmv::UpLoType uplo, tmv::StorageType stor> 
 void TestHermDecomp()
 {
-    for (int mattype = 0; mattype < 3; mattype++) {
-        //std::cout<<"mattype = "<<mattype<<std::endl;
+    for (int mattype = 0; mattype < 4; mattype++) {
+        if (showstartdone) {
+            std::cout<<"Herm: mattype = "<<mattype<<std::endl;
+            std::cout<<"uplo, stor = "<<TMV_Text(uplo)<<
+                "  "<<TMV_Text(stor)<<std::endl;
+        }
         // mattype = 0  is PosDef
         // mattype = 1  is Indef
         // mattype = 2  is Singular
+        // mattype = 3  is Singular with seriously bad defects
 
-        const int N = 200;
+        const int N = 200; // Must be multiple of 8
+        const bool posdef = mattype == 0;
+        const bool singular = mattype == 2 || mattype == 3;
+        if (showstartdone) {
+            std::cout<<"posdef = "<<posdef<<
+                ", singular = "<<singular<<std::endl;
+        }
 
         tmv::HermMatrix<T,uplo,stor> m(N);
         for(int i=0;i<N;++i) for(int j=0;j<N;++j) 
             if ((uplo == tmv::Upper && j>=i) || (uplo == tmv::Lower && i>=j)) 
                 m(i,j) = T(2+4*i-5*j);
-        if (mattype == 0) {
+        if (posdef) {
             m /= T(10*N);
             m.diag().addToAll(T(1));
             for(int i=0;i<N;i++) m.diag()(i) += T(i);
             m.diag(0,N/4,N/2) *= T(10);
             m.subSymMatrix(N/2,3*N/4,2) *= T(100);
-        } else if (mattype == 1) {
+        } else if (singular) {
+            m.row(2,0,2).setZero();
+            m.row(2,2,N).setZero();
+            m.row(4,0,4) = m.row(5,0,4);
+            m.row(4,5,N) = m.row(5,5,N);
+            m(4,5) = m(4,4) = m(5,5);
+        } else {
+            // indef
             m /= T(N);
             m.diag(0,N/10,N/5).setZero();
             m.col(0,N/3,3*N/7).addToAll(T(50));
@@ -38,12 +54,6 @@ void TestHermDecomp()
             m.row(7,0,5).addToAll(T(10));
             m.diag(0,N/4,N/2) *= T(10);
             m.subSymMatrix(N/2,3*N/4,2) /= T(100);
-        } else {
-            m.row(2,0,2).setZero();
-            m.row(2,2,8).setZero();
-            m.row(4,0,4) = m.row(5,0,4);
-            m.row(4,5,8) = m.row(5,5,8);
-            m(4,5) = m(4,4) = m(5,5);
         }
 
         tmv::HermMatrix<std::complex<T>,uplo,stor> c(N);
@@ -51,13 +61,20 @@ void TestHermDecomp()
             if ((uplo == tmv::Upper && j>=i) || (uplo == tmv::Lower && i>=j)) 
                 c(i,j) = std::complex<T>(2+4*i-5*j,3-i);
         c.diag().imagPart().setZero();
-        if (mattype == 0) {
+        if (posdef) {
             c /= T(10*N);
             c.diag().addToAll(T(1));
             for(int i=0;i<N;i++) c.diag()(i) += T(i);
             c.diag(0,N/4,N/2) *= T(10);
             c.subSymMatrix(N/2,3*N/4,2) *= T(100);
-        } else if (mattype == 1) {
+        } else if (singular) {
+            c.row(2,0,2).setZero();
+            c.row(2,2,N).setZero();
+            c.row(4,0,4) = c.row(5,0,4);
+            c.row(4,5,N) = c.row(5,5,N);
+            c(4,5) = c(4,4) = c(5,5);
+        } else {
+            // indef
             c /= T(N);
             c.diag(0,N/10,N/5).setZero();
             c.col(0,N/3,3*N/7).addToAll(T(50));
@@ -65,19 +82,21 @@ void TestHermDecomp()
             c.row(7,0,5).addToAll(T(10));
             c.diag(0,N/4,N/2) *= T(10);
             c.subSymMatrix(N/2,3*N/4,2) /= T(100);
-        } else {
-            c.row(2,0,2).setZero();
-            c.row(2,2,8).setZero();
-            c.row(4,0,4) = c.row(5,0,4);
-            c.row(4,5,8) = c.row(5,5,8);
-            c(4,5) = c(4,4) = c(5,5);
         }
 
+        if (mattype == 3) {
+            for(int i=10;i<N;i+=10) {
+                m.subMatrix(0,i,i,N) *= T(1.e-10);
+                m.subSymMatrix(i,N) *= T(1.e-10);
+                c.subMatrix(0,i,i,N) *= T(1.e-10);
+                c.subSymMatrix(i,N) *= T(1.e-10);
+            }
+        }
 
         T eps = EPS;
         T ceps = EPS;
         if (showacc) std::cout<<"eps = "<<eps<<"  "<<ceps<<std::endl;
-        if (mattype != 2) {
+        if (mattype < 2) {
             T kappa = Norm(m) * Norm(m.inverse());
             if (showacc) std::cout<<"kappa = "<<kappa<<std::endl;
             eps *= kappa;
@@ -89,12 +108,9 @@ void TestHermDecomp()
         }
         if (showacc) std::cout<<"eps => "<<eps<<"  "<<ceps<<std::endl;
 
-        //std::cout<<"m = "<<m<<std::endl;
-        //std::cout<<"c = "<<c<<std::endl;
-
         // CH Decomposition
 #ifdef NOTHROW
-        if (mattype == 0) {
+        if (posdef) {
 #else
             try  {
 #endif
@@ -124,22 +140,19 @@ void TestHermDecomp()
                 cL = c2.conjugate().lowerTri();
                 cLLt = cL*cL.adjoint();
                 Assert(Norm(c-cLLt) < ceps*Norm(c),"Herm C CH2");
-                Assert(mattype == 0,
-                       "Didn't throw NonPosDef, mattype != pos def");
+                Assert(posdef, "Didn't throw NonPosDef, and mattype != pos def");
 #endif
                 std::cout<<"."; std::cout.flush();
 #ifndef NOTHROW
-            }
-            catch(tmv::NonPosDef) 
-            {
-                Assert(mattype != 0,"Caught NonPosDef, mattype == pos def"); 
+            } catch(tmv::NonPosDef) {
+                Assert(!posdef,"Caught NonPosDef, but mattype == pos def"); 
             }
 #else
         }
 #endif
 
         // LDL Decomposition
-        {
+        try {
             tmv::LowerTriMatrix<T,tmv::UnitDiag> L = m.lud().getL();
             tmv::BandMatrix<T> D = m.lud().getD();
             const int* p = m.lud().getP();
@@ -201,6 +214,11 @@ void TestHermDecomp()
             Assert(Norm(c-cLDL) < ceps*Norm(c),"Herm C LDL5");
 #endif
             std::cout<<"."; std::cout.flush();
+        } catch (tmv::NonPosDef) {
+            // The Lapack version throws whenever mattype is not posdef, 
+            // but native algorithm succeeds when mattype is indefinite,
+            // or even singular.  
+            Assert(!posdef,"caught NonPosDef but mattype == posdef");
         }
 
         // SV Decomposition
@@ -309,7 +327,7 @@ void TestHermDecomp()
 
         // Square Root
 #ifdef NOTHROW
-        if (mattype == 0) {
+        if (posdef) {
 #else
             try {
 #endif
@@ -326,12 +344,11 @@ void TestHermDecomp()
                 Assert(Norm(c-cS.conjugate()*cS.conjugate()) < eps*Norm(c),
                        "Herm C Square Root 2");
 #endif
-                Assert(mattype == 0,
-                       "Didn't throw NonPosDef, mattype != pos def");
+                Assert(posdef,"Didn't throw NonPosDef, and mattype != pos def");
                 std::cout<<"."; std::cout.flush();
 #ifndef NOTHROW
             } catch(tmv::NonPosDef) { 
-                Assert(mattype != 0,"Caught NonPosDef, mattype == pos def"); 
+                Assert(!posdef,"Caught NonPosDef, but mattype == pos def"); 
             }
 #else
         }
@@ -342,23 +359,43 @@ void TestHermDecomp()
 template <class T, tmv::UpLoType uplo, tmv::StorageType stor> 
 void TestSymDecomp()
 {
-    for (int mattype = 0; mattype < 2; mattype++) {
+    for (int mattype = 0; mattype < 3; mattype++) {
+        if (showstartdone) {
+            std::cout<<"Symm: mattype = "<<mattype<<std::endl;
+            std::cout<<"uplo, stor = "<<TMV_Text(uplo)<<
+                "  "<<TMV_Text(stor)<<std::endl;
+        }
         // mattype = 0  is Normal
         // mattype = 1  is Singular
+        // mattype = 2  is Singular with seriously bad defects
 
         const int N = 200;
+        const bool posdef = mattype == 0;
+        // Note: posdef isn't really positive definite for complex matrices.
+        const bool singular = mattype == 2 || mattype == 3;
+        if (showstartdone) {
+            std::cout<<"posdef = "<<posdef<<
+                ", singular = "<<singular<<std::endl;
+        }
 
         tmv::SymMatrix<T,uplo,stor> m(N);
         for(int i=0;i<N;++i) for(int j=0;j<N;++j) 
             if ((uplo == tmv::Upper && j>=i) || (uplo == tmv::Lower && i>=j)) 
                 m(i,j) = T(2+4*i-5*j);
-        if (mattype == 0) {
+        if (posdef) {
             m /= T(10*N);
             m.diag().addToAll(T(1));
             for(int i=0;i<N;i++) m.diag()(i) += T(i);
             m.diag(0,N/4,N/2) *= T(10);
             m.subSymMatrix(N/2,3*N/4,2) *= T(100);
-        } else if (mattype == 1) {
+        } else if (singular) {
+            m.row(2,0,2).setZero();
+            m.row(2,2,N).setZero();
+            m.row(4,0,4) = m.row(5,0,4);
+            m.row(4,5,N) = m.row(5,5,N);
+            m(4,5) = m(4,4) = m(5,5);
+        } else {
+            // indef
             m /= T(N);
             m.diag(0,N/10,N/5).setZero();
             m.col(0,N/3,3*N/7).addToAll(T(50));
@@ -366,25 +403,25 @@ void TestSymDecomp()
             m.row(7,0,5).addToAll(T(10));
             m.diag(0,N/4,N/2) *= T(10);
             m.subSymMatrix(N/2,3*N/4,2) /= T(100);
-        } else {
-            m.row(2,0,2).setZero();
-            m.row(2,2,8).setZero();
-            m.row(4,0,4) = m.row(5,0,4);
-            m.row(4,5,8) = m.row(5,5,8);
-            m(4,5) = m(4,4) = m(5,5);
-        }
-
+        } 
 
         tmv::SymMatrix<std::complex<T>,uplo,stor> c(N);
         for(int i=0;i<N;++i) for(int j=0;j<N;++j) 
             c(i,j) = std::complex<T>(2+4*i-5*j,3-i);
-        if (mattype == 0) {
+        if (posdef) {
             c /= T(10*N);
             c.diag().addToAll(T(1));
             for(int i=0;i<N;i++) c.diag()(i) += T(i);
             c.diag(0,N/4,N/2) *= T(10);
             c.subSymMatrix(N/2,3*N/4,2) *= T(100);
-        } else if (mattype == 1) {
+        } else if (singular) {
+            c.row(2,0,2).setZero();
+            c.row(2,2,N).setZero();
+            c.row(4,0,4) = c.row(5,0,4);
+            c.row(4,5,N) = c.row(5,5,N);
+            c(4,5) = c(4,4) = c(5,5);
+        } else {
+            // indef
             c /= T(N);
             c.diag(0,N/10,N/5).setZero();
             c.col(0,N/3,3*N/7).addToAll(T(50));
@@ -392,24 +429,31 @@ void TestSymDecomp()
             c.row(7,0,5).addToAll(T(10));
             c.diag(0,N/4,N/2) *= T(10);
             c.subSymMatrix(N/2,3*N/4,2) /= T(100);
-        } else {
-            c.row(2,0,2).setZero();
-            c.row(2,2,8).setZero();
-            c.row(4,0,4) = c.row(5,0,4);
-            c.row(4,5,8) = c.row(5,5,8);
-            c(4,5) = c(4,4) = c(5,5);
         }
 
+        if (mattype == 2) {
+            for(int i=10;i<N;i+=10) {
+                m.subMatrix(0,i,i,N) *= T(1.e-10);
+                m.subSymMatrix(i,N) *= T(1.e-10);
+                c.subMatrix(0,i,i,N) *= T(1.e-10);
+                c.subSymMatrix(i,N) *= T(1.e-10);
+            }
+        }
 
         T eps = EPS;
         T ceps = EPS;
-        if (mattype != 1) {
-            eps *= Norm(m) * Norm(m.inverse());
-            ceps *= Norm(c) * Norm(c.inverse());
+        if (showacc) std::cout<<"eps = "<<eps<<"  "<<ceps<<std::endl;
+        if (!singular) {
+            T kappa = Norm(m) * Norm(m.inverse());
+            if (showacc) std::cout<<"kappa = "<<kappa<<std::endl;
+            eps *= kappa;
+            ceps *= kappa;
         } else {
+            if (showacc) std::cout<<"eps *= "<<T(10*N)<<std::endl;
             eps *= T(10*N);
             ceps *= T(10*N);
         }
+        if (showacc) std::cout<<"eps => "<<eps<<"  "<<ceps<<std::endl;
 
         // LDL Decomposition
         {
@@ -538,17 +582,24 @@ void TestSymDecomp()
 template <class T, tmv::StorageType stor> 
 void TestPolar()
 {
-    for (int mattype = 0; mattype < 4; mattype++) {
-        //std::cout<<"mattype = "<<mattype<<std::endl;
+    if (showstartdone) std::cout<<"PolarDecomp "<<TMV_Text(stor)<<std::endl;
+
+    for (int mattype = 0; mattype < 5; mattype++) {
+        if (showstartdone) {
+            std::cout<<"Polar: mattype = "<<mattype<<std::endl;
+            std::cout<<"stor = "<<TMV_Text(stor)<<std::endl;
+        }
         // mattype = 0  is Square
         // mattype = 1  is NonSquare slightly tall
         // mattype = 2  is NonSquare very tall
         // mattype = 3  is Singular
+        // mattype = 4  is Singular with seriously bad defects
 
         const int N = 200;
         int M = N;
         if (mattype == 1) M = 211;
         else if (mattype == 2) M = 545;
+        const bool singular = mattype == 3 || mattype == 4;
 
         tmv::Matrix<T,stor> m(M,N);
         for(int i=0;i<M;++i) for(int j=0;j<N;++j) m(i,j) = T(2+4*i-5*j);
@@ -556,7 +607,8 @@ void TestPolar()
         m(1,0) = T(-2);
         m(2,0) = T(7);
         m(3,4) = T(-10);
-        if (mattype != 3) m.diag() *= T(30);
+        if (!singular) m.diag() *= T(30);
+        else { m.col(1).setZero(); m.row(7) = m.row(6); }
 
         tmv::Matrix<std::complex<T>,stor> c(M,N);
         for(int i=0;i<M;++i) for(int j=0;j<N;++j) 
@@ -565,17 +617,32 @@ void TestPolar()
         c(1,0) *= T(-2);
         c(2,0) *= T(7);
         c(7,6) *= T(-10);
-        if (mattype != 3) c.diag() *= T(30);
+        if (!singular) c.diag() *= T(30);
+        else { c.col(1).setZero(); c.row(7) = c.row(6); }
+
+        if (mattype == 4) {
+            for(int i=10;i<N;i+=10) {
+                m.colRange(i,N) *= T(1.e-10);
+                c.colRange(i,N) *= T(1.e-10);
+                m.rowRange(i+5,N) *= T(1.e-10);
+                c.rowRange(i+5,N) *= T(1.e-10);
+            }
+        }
 
         T eps = EPS;
         T ceps = EPS;
-        if (mattype != 3) {
-            eps *= Norm(m) * Norm(m.inverse());
-            ceps *= Norm(c) * Norm(c.inverse());
+        if (showacc) std::cout<<"eps = "<<eps<<"  "<<ceps<<std::endl;
+        if (!singular) {
+            T kappa = Norm(m) * Norm(m.inverse());
+            if (showacc) std::cout<<"kappa = "<<kappa<<std::endl;
+            eps *= kappa;
+            ceps *= kappa;
         } else {
-            eps *= T(100);
-            ceps *= T(100);
+            if (showacc) std::cout<<"eps *= "<<T(10*N)<<std::endl;
+            eps *= T(10*N);
+            ceps *= T(10*N);
         }
+        if (showacc) std::cout<<"eps => "<<eps<<"  "<<ceps<<std::endl;
 
         // Matrix Polar Decomposition
         {
@@ -691,29 +758,6 @@ void TestPolar()
             std::cout<<"."; std::cout.flush();
         }
     }
-}
-
-template <class T> 
-void TestAllSymDiv()
-{
-    TestHermDecomp<T,tmv::Upper,tmv::ColMajor>();
-    TestHermDecomp<T,tmv::Upper,tmv::RowMajor>();
-    TestHermDecomp<T,tmv::Lower,tmv::ColMajor>();
-    TestHermDecomp<T,tmv::Lower,tmv::RowMajor>();
-    TestSymDecomp<T,tmv::Upper,tmv::ColMajor>();
-    TestSymDecomp<T,tmv::Upper,tmv::RowMajor>();
-    TestSymDecomp<T,tmv::Lower,tmv::ColMajor>();
-    TestSymDecomp<T,tmv::Lower,tmv::RowMajor>();
-    TestPolar<T,tmv::RowMajor>();
-    TestPolar<T,tmv::ColMajor>();
-    std::cout<<"SymMatrix<"<<tmv::TMV_Text(T())<<"> passed all ";
-    std::cout<<"decomposition tests.\n";
-    TestSymDiv<T>(tmv::CH,PosDef);
-    TestSymDiv<T>(tmv::LU,PosDef);
-    TestSymDiv<T>(tmv::LU,InDef);
-    TestSymDiv<T>(tmv::SV,PosDef);
-    TestSymDiv<T>(tmv::SV,InDef);
-    TestSymDiv<T>(tmv::SV,Sing);
 }
 
 #ifdef INST_DOUBLE

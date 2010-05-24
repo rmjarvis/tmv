@@ -79,6 +79,14 @@ namespace tmv {
         eps *= A.size() * TMV_Epsilon<T>();
 #endif
 
+        //std::cout<<"Start Upper"<<std::endl;
+        //std::cout<<"x = "<<x<<std::endl;
+        //std::cout<<"x.step = "<<x.step()<<std::endl;
+        //std::cout<<"y = "<<x<<std::endl;
+        //std::cout<<"y.step = "<<y.step()<<std::endl;
+        //std::cout<<"A = "<<x<<std::endl;
+        //std::cout<<"A.step = "<<A.stepi()<<" "<<A.stepj()<<std::endl;
+
         const int sj = A.stepj();
         const int N = A.size();
         const Tx*const x0 = x.cptr();
@@ -112,7 +120,7 @@ namespace tmv {
                         else *Aij = temp;
                     }
                 } else {
-                    for(int i=j+1;i>0;--j,++yi,++Aij) {
+                    for(int i=j+1;i>0;--i,++yi,++Aij) {
                         const T temp = *yi * (ha ? TMV_CONJ(*xj) : *xj);
 #ifdef TMVFLDEBUG
                         TMVAssert(Aij >= A.first);
@@ -151,6 +159,7 @@ namespace tmv {
 #endif
             A.diag().imagPart().setZero();
         }
+        //std::cout<<"Done Upper"<<std::endl;
     }
 
     template <bool ha, bool add, class T, class Tx, class Ty> 
@@ -178,6 +187,7 @@ namespace tmv {
         eps *= A.size() * TMV_Epsilon<T>();
 #endif
 
+        //std::cout<<"Start Lower"<<std::endl;
         const int ds = A.stepj() + 1;
         const int N = A.size();
         const Tx* xj = x.cptr()+N-1;
@@ -237,6 +247,7 @@ namespace tmv {
 #endif
             A.diag().imagPart().setZero();
         }
+        //std::cout<<"Done Lower"<<std::endl;
     }
 
     template <bool add, class T, class Tx, class Ty> 
@@ -297,6 +308,7 @@ namespace tmv {
         TMVAssert(A.ct() == NonConj);
         TMVAssert(alpha != T(0));
         TMVAssert(A.size() > 0);
+        //std::cout<<"start NonBlas Rank2Update"<<std::endl;
 
         if (x.step() != 1 || x.isconj()) {
             // Copy x to new storage
@@ -364,6 +376,7 @@ namespace tmv {
         } else {
             UnitARank2Update<add,T,Tx,Ty>::F(x,y,A);
         }
+        //std::cout<<"Done NonBlas"<<std::endl;
     }
 
 #ifdef BLAS
@@ -776,6 +789,8 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
+        //cout<<"Done Rank2Update: \n";
+        //cout<<"Norm(A-A2) = "<<Norm(A-A2)<<endl;
         if (Norm(A-A2) > 0.001*(TMV_ABS(alpha)*Norm(x0)*Norm(y0)+Norm(A0))) {
             cerr<<"Rank2Update: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;

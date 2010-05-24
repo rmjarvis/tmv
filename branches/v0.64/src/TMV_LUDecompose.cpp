@@ -134,9 +134,17 @@ namespace tmv {
         // a permutation to swap it into the j spot.  This element then becomes 
         // U(j,j), which is then the divisor for the rest of the vector.  This 
         // will minimize the possibility of roundoff errors due to small U(j,j)'s.
-        // 
+         
+        
         TMVAssert(A.ct()==NonConj);
         TMVAssert(A.iscm());
+        typedef TMV_RealType(T) RT;
+
+        // I use x*halfeps to check for underflow.  Normally x*eps should
+        // be sufficient.  But if x is complex, then 1/x can still overflow
+        // if x*eps != 0, but x*halfeps == 0.
+        const RT halfeps = TMV_Epsilon<RT>()/RT(2);
+
         const int N = A.rowsize();
         const int M = A.colsize();
         const int R = TMV_MIN(N,M);
@@ -148,8 +156,7 @@ namespace tmv {
         const int Ads = A.stepj()+1;
         int* Pj = P;
 
-        for (int j=0; j<R; ++j,Ujj+=Ads,++Pj)
-        {
+        for (int j=0; j<R; ++j,Ujj+=Ads,++Pj) {
             if (j > 0) {
                 // Solve for U(0:j,j))
                 A.col(j,0,j) /= A.subMatrix(0,j,0,j).lowerTri(UnitDiag);
@@ -160,8 +167,14 @@ namespace tmv {
 
             // Find the pivot element
             int ip;
-            A.col(j,j,M).maxAbsElement(&ip);
+            T piv = A.col(j,j,M).maxAbsElement(&ip);
             // ip is relative to j index, not absolute.
+            
+            // Check for underflow:
+            if (piv * halfeps == RT(0)) {
+                ip = 0;
+                A.col(j,j,M).setZero();
+            }
 
             // Swap the pivot row with j if necessary
             if (ip != 0) {
@@ -191,7 +204,7 @@ namespace tmv {
         Matrix<T> U = A.upperTri();
         Matrix<T> AA = L * U;
         AA.reversePermuteRows(P,0,R);
-        if (Norm(AA-A0) > 0.001*Norm(A0)) {
+        if (Norm(AA-A0) > 0.001*Norm(A0) && Norm(A0)*halfeps > RT(0)) {
             cerr<<"Done NonBlock LU: \n";
             cerr<<"A0 = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"LU = "<<A<<endl;
@@ -200,6 +213,7 @@ namespace tmv {
             cerr<<")\n";
             cerr<<"AA = "<<AA<<endl;
             cerr<<"Norm(A0-AA) = "<<Norm(AA-A0)<<endl;
+            cerr<<"Norm(A0) = "<<Norm(A0)<<endl;
             abort();
         }
 #endif
@@ -218,10 +232,13 @@ namespace tmv {
 #ifdef XDEBUG
         Matrix<T> A0 = A;
         Matrix<T,ColMajor> A2 = A;
-        int P2[A.colsize()];
+        std::vector<int> P2(A.colsize());
         T signdet2=1;
-        NonBlockLUDecompose(A2.view(),P2,signdet2);
+        NonBlockLUDecompose(A2.view(),&P2[0],signdet2);
 #endif
+
+        typedef TMV_RealType(T) RT;
+        const RT halfeps = TMV_Epsilon<RT>()/RT(2);
 
         TMVAssert(A.ct()==NonConj);
         TMVAssert(A.iscm());
@@ -268,8 +285,16 @@ namespace tmv {
             VectorView<T> A1 = A.col(1);
 
             int ip0,ip1;
-            TMV_RealType(T) piv = A0.maxAbsElement(&ip0);
-            if (piv != TMV_RealType(T)(0)) {
+            RT piv = A0.maxAbsElement(&ip0);
+
+            // Check for underflow:
+            if (piv * halfeps == RT(0)) {
+                ip0 = 0;
+                piv = RT(0);
+                A0.setZero();
+            }
+
+            if (piv != RT(0)) {
                 if (ip0 != 0) {
                     A0.swap(ip0,0);
                     A1.swap(ip0,0);
@@ -278,9 +303,9 @@ namespace tmv {
 
                 // A0.subVector(1,M) /= A00;
                 // A1.subVector(1,M) -= A0.subVector(1,M) * A01;
-                const T invA00 = TMV_RealType(T)(1)/(*A0.cptr());
+                const T invA00 = RT(1)/(*A0.cptr());
                 const T A01 = (*A1.cptr());
-                piv = TMV_RealType(T)(0); // next pivot element
+                piv = RT(0); // next pivot element
                 ip1 = 1;
                 T* Ai0 = A0.ptr()+1;
                 T* Ai1 = A1.ptr()+1;
@@ -293,15 +318,22 @@ namespace tmv {
 #endif
                     *Ai0 *= invA00;
                     *Ai1 -= *Ai0 * A01;
-                    TMV_RealType(T) absAi1 = TMV_ABS(*Ai1);
+                    RT absAi1 = TMV_ABS(*Ai1);
                     if (absAi1 > piv) { piv = absAi1; ip1=i; }
                 }
             } else {
                 piv = A1.subVector(1,M).maxAbsElement(&ip1); 
-                ip1++;
+                ++ip1;
             }
 
-            if (piv != TMV_RealType(T)(0) && M>2) {
+            // Check for underflow:
+            if (piv * halfeps == RT(0)) {
+                piv = RT(0);
+                ip1 = 1;
+                A1.subVector(1,M).setZero();
+            }
+
+            if (piv != RT(0) && M>2) {
                 if (ip1 != 1) {
                     A1.swap(ip1,1);
                     A0.swap(ip1,1);
@@ -327,9 +359,16 @@ namespace tmv {
             // Same as NonBlock version, but with R==1 hard coded
             VectorView<T> A0 = A.col(0);
 
-            TMV_RealType(T) piv = A0.maxAbsElement(P);
+            RT piv = A0.maxAbsElement(P);
 
-            if (piv != TMV_RealType(T)(0)) {
+            // Check for underflow:
+            if (piv * halfeps == RT(0)) {
+                piv = RT(0);
+                *P = 0;
+                A0.setZero();
+            }
+
+            if (piv != RT(0)) {
                 if (*P != 0) {
                     A0.swap(*P,0);
                     signdet = -signdet;
@@ -344,7 +383,7 @@ namespace tmv {
         Matrix<T> U = A.upperTri();
         Matrix<T> AA = L * U;
         AA.reversePermuteRows(P,0,R);
-        if (Norm(AA-A0) > 0.001*Norm(A0)) {
+        if (Norm(AA-A0) > 0.001*Norm(A0) && Norm(A0)*halfeps > RT(0)) {
             cerr<<"Done Recursive LU: \n";
             cerr<<"A0 = "<<A0<<endl;
             cerr<<"LU = "<<A<<endl;

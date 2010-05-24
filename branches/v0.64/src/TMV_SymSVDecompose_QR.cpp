@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
 // Copyright (C) 1998 - 2009                                                 //
@@ -58,35 +58,32 @@ namespace tmv {
     {
         // This routines sets to 0 any elements in E or D which
         // are essentially 0, given the machine precision:
-        // if |E(i)| < TMV_Epsilon() * (|D(i)| + |D(i+1)|) then E(i) <- 0
-        // if |D(i)| < TMV_Epsilon() * |T| then D(i) <- 0
+        // if |D(i)| * Epsilon == 0 then D(i) = 0
+        // if |E(i)| < Epsilon * (|D(i)| + |D(i+1)|) then E(i) = 0
         TMVAssert(isReal(T()));
         TMVAssert(E.size() == D.size()-1);
         TMVAssert(D.step() == 1);
         TMVAssert(E.step() == 1);
-        RT eps = TMV_Epsilon<T>();
-        RT dthresh = eps * TMV_SQRT(NormSq(D) + 2*NormSq(E));
+        T eps = TMV_Epsilon<T>();
 
         T* Di = D.ptr();
         T* Ei = E.ptr();
-        RT absDim1 = TMV_ABS(*Di);
-        if (absDim1 < dthresh) *Di = T(0);
+        if (*Di * eps == T(0)) { *Di = T(0); }
         ++Di;
         for(int k=E.size();k>0;--k,++Di,++Ei) {
-            RT absDi = TMV_ABS(*Di);
 #ifdef TMVFLDEBUG
             TMVAssert(Di >= D.first);
             TMVAssert(Di < D.last);
 #endif
-            if (absDi < dthresh) *Di = T(0);
-            RT ethresh = eps * (absDi + absDim1);
-            if (ethresh == RT(0)) ethresh = dthresh;
+            if (*Di * eps == T(0)) { *Di = T(0); }
 #ifdef TMVFLDEBUG
             TMVAssert(Ei >= E.first);
             TMVAssert(Ei < E.last);
 #endif
-            if (TMV_ABS(*Ei) < ethresh) *Ei = T(0);
-            absDim1 = absDi;
+            if ( TMV_ABS(*Ei) <= eps*(TMV_ABS(*Di)+TMV_ABS(*(Di-1))) ||
+                 *Ei * eps == T(0) ) {
+                *Ei = T(0);
+            }
         }
     }
 
@@ -106,8 +103,7 @@ namespace tmv {
         // if d>0 we use +, if d<0 we use -.
         // 
         // For stability when |b| is small, we rearrange this to:
-        // mu = c + |b|^2/(d +- sqrt(d^2+|b|^2))
-        //    = c +- |b|^2/|d|(1 + sqrt(1+|b|^2/d^2))
+        // mu = c + |b|^2/d / (1 + sqrt(1+|b|^2/d^2))
         TMVAssert(isReal(T()));
         const int N = D.size();
         TMVAssert(int(E.size()) == N-1);
@@ -116,17 +112,15 @@ namespace tmv {
         T a = D(N-2);
         T c = D(N-1);
         T b = E(N-2);
-        T bsq = b*b;
         T d = (c-a)/2;
-        T dsq = d*d;
-        if (dsq < bsq) {
-            RT x = TMV_SQRT(dsq+bsq);
-            if (d > 0) return c - d + x;
-            else return c - d - x;
+        T absb = TMV_ABS(b);
+        if (d == T(0)) {
+            // Just in case...
+            return c + absb;
         } else {
-            RT x = bsq/TMV_ABS(d)/(1 + TMV_SQRT(1+bsq/dsq));
-            if (d > 0) return c + x;
-            else return c - x;
+            T bod = absb/d;
+            T x = absb*bod/(T(1) + TMV_SQRT(RT(1)+TMV_NORM(bod)));
+            return c+x;
         }
     }
 
@@ -145,6 +139,9 @@ namespace tmv {
         TMVAssert(E.step()==1);
 
 #ifdef XDEBUG
+        std::cout<<"Start Reduce Tridiagonal QR:\n";
+        std::cout<<"D = "<<D<<std::endl;
+        std::cout<<"E = "<<E<<std::endl;
         Matrix<RT> TT(N,N,RT(0));
         TT.diag() = D;
         TT.diag(1) = TT.diag(-1) = E;
@@ -152,6 +149,7 @@ namespace tmv {
         Matrix<T> A0(M,M);
         if (U) {
             A0 = *U * TT * U->adjoint();
+            std::cout<<"A0 = "<<A0<<std::endl;
         }
 #endif
 
@@ -202,6 +200,9 @@ namespace tmv {
         RT* Ei = E.ptr();
 
         RT mu = TridiagonalTrailingEigenValue(D,E);
+#ifdef XDEBUG
+        std::cout<<"mu = "<<mu<<std::endl;
+#endif
         RT y = *Di - mu;  // = T00 - mu
         RT x = *Ei;       // = T10
         Givens<RT> G = GivensRotate(y,x);
@@ -235,8 +236,15 @@ namespace tmv {
             TT.diag() = D;
             TT.diag(-1) = TT.diag(1) = E;
             Matrix<T> A2 = *U * TT * U->adjoint();
+            std::cout<<"Done Reduce Tridiagonal\n";
+            std::cout<<"U = "<<*U<<std::endl;
+            std::cout<<"TT = "<<TT<<std::endl;
+            std::cout<<"A2 = "<<A2<<std::endl;
+            std::cout<<"A0 = "<<A0<<std::endl;
+            std::cout<<"A2-A0 = "<<A2-A0<<std::endl;
+            std::cout<<"Norm(A2-A0) = "<<Norm(A2-A0)<<std::endl;
             if (Norm(A2-A0) > 0.001*Norm(A0)) {
-                cerr<<"Decompose from Tridiagonal:\n";
+                cerr<<"Reduce Tridiagonal:\n";
                 cerr<<"A0 = "<<A0<<endl;
                 cerr<<"A2 = "<<A2<<endl;
                 cerr<<"U = "<<*U<<endl;
@@ -251,12 +259,27 @@ namespace tmv {
     void EigenFromTridiagonal_QR(
         MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E)
     {
+        const int N = D.size();
+        if (N <= 1) return;
+
+#ifdef XDEBUG
+        std::cout<<"Start Eigen From Tridiagonal QR:\n";
+        std::cout<<"D = "<<D<<std::endl;
+        std::cout<<"E = "<<E<<std::endl;
+        Matrix<RT> TT(N,N,RT(0));
+        TT.diag() = D;
+        TT.diag(1) = TT.diag(-1) = E;
+        const int M = U ? U->colsize() : 0;
+        Matrix<T> A0(M,M);
+        if (U) {
+            A0 = *U * TT * U->adjoint();
+            std::cout<<"A0 = "<<A0<<std::endl;
+        }
+#endif
         TMVAssert(D.size() == E.size()+1);
         if (U) {
             TMVAssert(U->rowsize() == D.size());
         }
-
-        const int N = D.size();
 
         // We successively reduce the offdiagonals of T (E) to 0
         // using a sequence of Givens rotations. 
@@ -266,13 +289,13 @@ namespace tmv {
         // Loop invariant: all E(i) with i>=q are 0.
         // Initially q = N-1. (ie. All E(i) are potentially non-zero.)
         // When q = 0, we are done.
-        HermTridiagonalChopSmallElements(D,E);
         for(int q = N-1; q>0; ) {
             if (E(q-1) == T(0)) --q;
             else {
                 int p=q-1;
                 while (p > 0 && (E(p-1) != T(0))) --p; 
-                // Set p such that E(p-1) = 0 and all E(i) with p<=i<q are non-zero.
+                // Set p such that E(p-1) = 0 and all E(i) with p<=i<q are 
+                // non-zero.
                 if (U) {
                     ReduceHermTridiagonal<T>(
                         U->colRange(p,q+1),D.subVector(p,q+1),E.subVector(p,q));
@@ -280,9 +303,28 @@ namespace tmv {
                     ReduceHermTridiagonal<T>(
                         0,D.subVector(p,q+1),E.subVector(p,q));
                 }
-                HermTridiagonalChopSmallElements(D,E);
+
+                HermTridiagonalChopSmallElements(
+                    D.subVector(p,q+1),E.subVector(p,q));
             }
         }
+#ifdef XDEBUG
+        if (U) {
+            TT.diag() = D;
+            TT.diag(-1) = TT.diag(1) = E;
+            Matrix<T> A2 = *U * TT * U->adjoint();
+            std::cout<<"Done QR: Norm(A2-A0) = "<<Norm(A2-A0)<<std::endl;
+            std::cout<<"cf. Norm(A0) = "<<Norm(A0)<<std::endl;
+            if (Norm(A2-A0) > 0.001*Norm(A0)) {
+                cerr<<"Decompose from Tridiagonal QR:\n";
+                cerr<<"A0 = "<<A0<<endl;
+                cerr<<"A2 = "<<A2<<endl;
+                cerr<<"U = "<<*U<<endl;
+                cerr<<"TT = "<<TT<<endl;
+                abort();
+            }
+        } 
+#endif
     }
 
 #undef RT

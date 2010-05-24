@@ -136,6 +136,13 @@
 
 namespace tmv {
 
+    inline std::string TMV_Version() { return "0.64"; }
+#define TMV_MAJOR_VERSION 0
+#define TMV_MINOR_VERSION 64
+#define TMV_VERSION_AT_LEAST(major,minor) \
+    ( (major > TMV_MAJOR_VERSION) || \
+      (major == TMV_MAJOR_VERSION && minor >= TMV_MINOR_VERSION) )
+
     enum DivType { XXX, LU, CH, QR, QRP, SV };
     // MJ: Add the packed storage varieties: RowPack, ColPack, DiagPack
     enum StorageType { RowMajor, ColMajor, DiagMajor, NoMajor };

@@ -44,6 +44,7 @@ using std::endl;
 #ifdef XDEBUG
 #include "tmv/TMV_DiagMatrix.h"
 #include "tmv/TMV_DiagMatrixArith.h"
+#define THRESH 1.e-12
 #define dbgcout std::cout
 //#define dbgcout if (false) std::cout
 using std::cerr;
@@ -133,13 +134,13 @@ namespace tmv {
         // we proceed similarly anyway.
         T psi(0);
         for(int j=0;j<kk;j++) {
-            psi += zsq[j] / ( diff[j] * sum[j] );
+            psi += (zsq[j] / sum[j]) / diff[j];
             dbgcout<<"psi += "<<zsq[j]<<" / ("<<
                 diff[j]<<" * "<<sum[k]<<") = "<<psi<<endl;
         }
         T phi(0);
         for(int j=N-1;j>kk+1;j--) {
-            phi += zsq[j] / ( diff[j] * sum[j] );
+            phi += (zsq[j] / sum[j]) / diff[j];
             dbgcout<<"phi += "<<zsq[j]<<" / ("<<
                 diff[j]<<" * "<<sum[k]<<") = "<<phi<<endl;
         }
@@ -147,8 +148,8 @@ namespace tmv {
         dbgcout<<"c = "<<c<<endl;
 
         // Finish calculating f = f(s)
-        T f = c + zsq[kk] / ( diff[kk] * sum[kk] ) + 
-            zsq[kk+1] / ( diff[kk+1] * sum[kk+1] );
+        T f = c + (zsq[kk] / sum[kk]) / diff[kk] + 
+            (zsq[kk+1] / sum[kk+1]) / diff[kk+1];
         dbgcout<<"f = c + "<<zsq[kk]<<" / ("<<diff[kk]<<" * "<<sum[kk]<<")\n";
         dbgcout<<"      + "<<zsq[kk+1]<<" / ("<<
             diff[kk+1]<<" * "<<sum[kk+1]<<")\n";
@@ -164,13 +165,14 @@ namespace tmv {
                 lowerbound = T(0);
                 upperbound = tau;
                 dbgcout<<"bounds = 0,tau = "<<tau<<endl;
-                T a = c*delta + zsq[k] + zsq[k+1];
-                T b = zsq[k]*delta;
+                T a = c + zsq[k]/delta + zsq[k+1]/delta;
+                T b = zsq[k]/delta;
                 T d = a*a-T(4)*b*c;
                 if (d < T(0)) d = T(0); // Then rounding error.  Use d = 0
                 else d = TMV_SQRT(d);
                 // Our initial estimate for s_k^2 is D_k^2 + tau
                 tau = (a > 0) ? T(2)*b/(a+d) : (a-d)/(T(2)*c);
+                tau *= delta;
                 if (tau > upperbound) tau = upperbound;
             } else {
                 dbgcout<<"f < 0\n";
@@ -178,14 +180,15 @@ namespace tmv {
                 lowerbound = -tau;
                 upperbound = T(0);
                 dbgcout<<"bounds = -tau,0 = "<<-tau<<endl;
-                T a = -c*delta + zsq[k] + zsq[k+1];
-                T b = -zsq[k+1]*delta;
+                T a = -c + zsq[k]/delta + zsq[k+1]/delta;
+                T b = -zsq[k+1]/delta;
                 T d = a*a-T(4)*b*c;
                 if (d < T(0)) d = T(0); 
                 else d = TMV_SQRT(d);
                 // Our initial estimate for s_k^2 is D_k+1^2 + tau 
                 // (where tau < 0)
                 tau = (a > 0) ? T(2)*b/(a+d) : (a-d)/(T(2)*c);
+                tau *= delta;
                 if (tau < lowerbound) tau = lowerbound;
             }
         } else { // k == N-1
@@ -207,12 +210,13 @@ namespace tmv {
                     // In this case there is no positive solution.  Best guess
                     // is just to start at upper bound.
                 }
-                T a = -c*delta + zsq[k-1] + zsq[k];
-                T b = -zsq[k]*delta;
+                T a = -c + zsq[k-1]/delta + zsq[k]/delta;
+                T b = -zsq[k]/delta;
                 T d = a*a-T(4)*b*c;
                 if (d < T(0)) d = T(0); 
                 else d = TMV_SQRT(d);
                 tau = (a < 0) ? T(2)*b/(a-d) : (a+d)/(T(2)*c);
+                tau *= delta;
                 if (tau > upperbound) tau = upperbound;
                 // The other times we check this are basically for rounding 
                 // error reasons.
@@ -251,14 +255,14 @@ namespace tmv {
             // Calculate psi, phi
             psi = phi = e = dpsi = dphi = T(0);
             for(int j=0;j<k1;j++) {
-                T temp = z[j] / ( diff[j] * sum[j] );
+                T temp = (z[j] / sum[j]) / diff[j];
                 psix = psi; dpsix = dpsi;
                 psi += z[j] * temp;
                 dpsi += temp * temp;
                 e -= psi;
             }
             for(int j=N-1;j>k1;j--) {
-                T temp = z[j] / ( diff[j] * sum[j] );
+                T temp = (z[j] / sum[j]) / diff[j];
                 phix = phi; dphix = dphi;
                 phi += z[j] * temp;
                 dphi += temp * temp;
@@ -268,7 +272,7 @@ namespace tmv {
             // Finish calculating f
             fk = rho + psi + phi; // == f(s) without z_k1^2/(D_k1^2-s^2) term
             dfk = dpsi + dphi;
-            T temp = z[k1] / ( diff[k1] * sum[k1] );
+            T temp = (z[k1] / sum[k1]) / diff[k1];
             k1term = temp*z[k1];
             dk1term = temp*temp;
             f = fk + k1term;
@@ -280,8 +284,12 @@ namespace tmv {
             dbgcout<<"phi = "<<phi<<endl;
             dbgcout<<"fk = "<<fk<<endl;
             dbgcout<<"k1 = "<<k1<<"  k = "<<k<<endl;
-            dbgcout<<"f = "<<f<<endl;
+            dbgcout<<"sum = "<<sum[k1]<<endl;
+            dbgcout<<"diff = "<<diff[k1]<<endl;
+            dbgcout<<"z = "<<z[k1]<<endl;
+            dbgcout<<"temp = "<<temp<<endl;
             dbgcout<<"k1term = "<<k1term<<endl;
+            dbgcout<<"f = "<<f<<endl;
 
             if (k == N-1) break;
             if (TMV_ABS(f) <= eps*e) break; 
@@ -362,8 +370,9 @@ namespace tmv {
                     else c = fk - d1*dfk;
                 else c = fk - d1*dpsi - d2*dphi;
                 // c eta^2 - a eta + b = 0
-                T a = (d1+d2)*f - d1*d2*df;
-                T b = d1*d2*f;
+                T d1x = d1/d2;
+                T a = (d1x+T(1))*f - d1*df;
+                T b = d1x*f;
                 dbgcout<<"c,a,b = "<<c<<", "<<a<<", "<<b<<endl;
                 if (c == T(0)) {
                     if (a == T(0)) {
@@ -378,7 +387,7 @@ namespace tmv {
                             //   = d2^2*dfk + (d1+d2)*k1term - d1*d2*(k1term/d1)
                             //   = d2^2*dfk + d1 zsq(k1)/d1
                             // For k1 == k+1 case, swap d1,d2
-                            a = zsq[k1] + (k1==kk ? d2*d2 : d1*d1)*dfk;
+                            a = zsq[k1]/d2 + (k1==kk ? d2 : d1*d1x)*dfk;
                         else
                             // a = (d1+d2)*f - d1*d2*df
                             // with f = d1*dpsi + d2*dphi + k1term
@@ -386,10 +395,11 @@ namespace tmv {
                             //      - d1*d2*(dpsi+dphi) 
                             //      + (d1+d2) k1term - d1*d2*dk1term
                             //   = d1*d1*dpsi + d2*d2*dphi + d1 k1term
-                            a = d1*d1*dpsi + d2*d2*dphi + 
-                                (k1==kk ? d1 : d2)*k1term;
+                            a = d1x*d1*dpsi + d2*dphi + 
+                                (k1==kk ? d1x : T(1))*k1term;
                     }
                     eta = b/a;
+                    eta *= d2;
                     dbgcout<<"c=0  eta = "<<eta<<endl;
                     if (k==N-1)
                         TMVAssert(eta > -tau);
@@ -403,6 +413,7 @@ namespace tmv {
                     if (k==N-1) {
                         // Then we want the solutionn with other sign for d
                         eta = a >= 0 ? (a+d)/(T(2)*c) : T(2)*b/(a-d);
+                        eta *= d2;
                         dbgcout<<"eta = "<<eta<<endl;
                         if (eta <= -tau) // Then rounding errors - use bisect
                             eta = -tau/RT(2);
@@ -410,6 +421,7 @@ namespace tmv {
                     }
                     else {
                         eta = a <= 0 ? (a-d)/(T(2)*c) : T(2)*b/(a+d);
+                        eta *= d2;
                         dbgcout<<"eta = "<<eta<<endl;
                         if (eta <= d1) // Then rounding errors - use bisect
                             eta = d1/RT(2);
@@ -460,19 +472,25 @@ namespace tmv {
                 //           - (dpsix + zsq[k1-1]/d1^2 + dphi)(d1 d2)
                 //         = (rho+psix+phi)(d1+d2) - (dpsix+dphi)(d1 d2) 
                 //           + zsq[k1-1]
+                //
+                // Also, to help avoid problems with underflow, we effectively
+                // measure eta in units of d2.
+                // So a /= d2, b /= d2^2, g /= d2^3
+                T d1x = d1/d2;
+                T taux = tau/d2;
                 T temp = (
                     k1==k ? 
-                    (d1+d2)*(rho+psix+phi) - d1*d2*(dpsix+dphi) + zsq[k1-1] :
-                    (d1+d2)*(rho+psi+phix) - d1*d2*(dpsi+dphix) + zsq[k1+1]);
+                    (d1x+T(1))*(rho+psix+phi) - d1*(dpsix+dphi) + zsq[k1-1]/d2 :
+                    (d1x+T(1))*(rho+psi+phix) - d1*(dpsi+dphix) + zsq[k1+1]/d2);
                 dbgcout<<"temp = "<<temp<<endl;
-                T a = temp + zsq[k1] - c*tau;
+                T a = temp + zsq[k1]/d2 - c*taux;
                 dbgcout<<"a = "<<a<<endl;
-                T b = d1*d2*fk - tau*(temp + (d1+d2)*k1term);
+                T b = d1x*fk - taux*(temp + (d1x+T(1))*k1term);
                 dbgcout<<"b = "<<b<<endl;
-                T g = d1*d2*tau*f; 
+                T g = d1x*taux*f; 
                 dbgcout<<"g = "<<g<<endl;
-                T mineta = lowerbound - tau;
-                T maxeta = upperbound - tau;
+                T mineta = (lowerbound - tau)/d2;
+                T maxeta = (upperbound - tau)/d2;
                 dbgcout<<"mineta, maxeta = "<<mineta<<", "<<maxeta<<endl;
 
                 // Bounds on eta are:
@@ -555,10 +573,9 @@ namespace tmv {
                         //     + b de
                         // h + c de^3 + (3ce-a) de^2 + (3ce^2-2ae+b) de
                         h + ((c*deta + T(3)*c*eta-a)*deta + 
-                             (T(3)*c*eta-T(2)*a)*eta+b )*deta
-                        :
-                            // Else regular calculation is ok.
-                            ((c*etanew - a)*etanew + b)*etanew + g;
+                             (T(3)*c*eta-T(2)*a)*eta+b )*deta :
+                        // Else regular calculation is ok.
+                        ((c*etanew - a)*etanew + b)*etanew + g;
                     dbgcout<<"hnew = "<<hnew<<endl;
                     if ( (h > T(0)) != (hnew > T(0)) ) { eta2 = eta; h2 = h; }
                     eta = etanew;
@@ -575,6 +592,8 @@ namespace tmv {
                     }
 #endif
                 }
+                eta *= d2;
+                dbgcout<<"rescaled eta => "<<eta<<endl;
             }
             dbgcout<<"eta = "<<eta<<endl;
 
@@ -614,7 +633,7 @@ namespace tmv {
             dpsi = T(0);
             e = T(0);
             for(int j=0;j<k1;j++) {
-                T temp = z[j] / ( diff[j] * sum[j] );
+                T temp = (z[j] / sum[j]) / diff[j];
                 psix = psi; dpsix = dpsi;
                 psi += z[j] * temp;
                 dpsi += temp * temp;
@@ -623,7 +642,7 @@ namespace tmv {
             phi = T(0);
             dphi = T(0);
             for(int j=N-1;j>k1;j--) {
-                T temp = z[j] / ( diff[j] * sum[j] );
+                T temp = (z[j] / sum[j]) / diff[j];
                 phix = phi; dphix = dphi;
                 phi += z[j] * temp;
                 dphi += temp * temp;
@@ -631,7 +650,7 @@ namespace tmv {
             }
             fk = rho + psi + phi; 
             dfk = dpsi+dphi;
-            T temp = z[k1] / ( diff[k1] * sum[k1] );
+            T temp = (z[k1] / sum[k1]) / diff[k1];
             k1term = temp*z[k1];
             dk1term = temp*temp;
             T fnew = fk + k1term;
@@ -668,6 +687,13 @@ namespace tmv {
         }
         dbgcout<<"Found Singularvalue S("<<k<<") = "<<s<<endl;
         //std::cout<<"Found Singularvalue S("<<k<<") = "<<s<<endl;
+#ifdef XDEBUG
+        // f(s) = rho + Sum_i=1..N z_i^2/(D_i^2-s^2)
+        T ff = rho;
+        for(int j=0;j<N;j++) ff += (z[j]/diff[j])*(z[j]/sum[j]);
+        dbgcout<<"f(s) = "<<ff<<std::endl;
+        if (std::abs(ff) > THRESH*rho) abort();
+#endif
 
         return s;
     }
@@ -1023,9 +1049,9 @@ namespace tmv {
                 dbgcout<<"M = "<<M<<endl;
                 dbgcout<<"UMV = "<<*U * M * *V<<endl;
                 dbgcout<<"Norm(UMV-A0) = "<<Norm(*U * M * *V -A0)<<endl;
-                if (Norm(*U*M**V-A0) > 0.001*normA0) abort();
+                if (Norm(*U*M**V-A0) > THRESH*normA0) abort();
                 dbgcout<<"Norm(VVt-1) = "<<Norm((*V)*V->adjoint() -T(1))<<endl;
-                if (Norm((*V)*V->adjoint()-T(1)) > 0.001*normA0) abort();
+                if (Norm((*V)*V->adjoint()-T(1)) > THRESH*normA0) abort();
             }
 #endif
 
@@ -1061,9 +1087,9 @@ namespace tmv {
                 dbgcout<<"M = "<<M<<endl;
                 dbgcout<<"UMV = "<<*U * M * *V<<endl;
                 dbgcout<<"Norm(UMV-A0) = "<<Norm(*U * M * *V -A0)<<endl;
-                if (Norm(*U*M**V-A0) > 0.001*normA0) abort();
+                if (Norm(*U*M**V-A0) > THRESH*normA0) abort();
                 dbgcout<<"Norm(VVt-1) = "<<Norm((*V)*V->adjoint() -T(1))<<endl;
-                if (Norm((*V)*V->adjoint()-T(1)) > 0.001*normA0) abort();
+                if (Norm((*V)*V->adjoint()-T(1)) > THRESH*normA0) abort();
             }
 #endif
 
@@ -1086,10 +1112,10 @@ namespace tmv {
                     dbgcout<<"V = "<<*V<<endl;
                     dbgcout<<"UMV = "<<*U * M * *V<<endl;
                     dbgcout<<"Norm(UMV-A0) = "<<Norm(*U * M * *V -A0)<<endl;
-                    if (Norm(*U*M**V-A0) > 0.001*normA0) abort();
+                    if (Norm(*U*M**V-A0) > THRESH*normA0) abort();
                     dbgcout<<"Norm(VVt-1) = "<<
                         Norm((*V)*V->adjoint() -T(1))<<endl;
-                    if (Norm((*V)*V->adjoint()-T(1)) > 0.001*normA0) abort();
+                    if (Norm((*V)*V->adjoint()-T(1)) > THRESH*normA0) abort();
                 }
 #endif
 
@@ -1147,10 +1173,10 @@ namespace tmv {
                     dbgcout<<"V = "<<*V<<endl;
                     dbgcout<<"UMV = "<<*U * M * *V<<endl;
                     dbgcout<<"Norm(UMV-A0) = "<<Norm(*U * M * *V -A0)<<endl;
-                    if (Norm(*U*M**V-A0) > 0.001*normA0) abort();
+                    if (Norm(*U*M**V-A0) > THRESH*normA0) abort();
                     dbgcout<<"Norm(VVt-1) = "<<
                         Norm((*V)*V->adjoint() -T(1))<<endl;
-                    if (Norm((*V)*V->adjoint()-T(1)) > 0.001*normA0) abort();
+                    if (Norm((*V)*V->adjoint()-T(1)) > THRESH*normA0) abort();
                 }
 #endif
 
@@ -1174,10 +1200,10 @@ namespace tmv {
                     dbgcout<<"M = "<<M<<endl;
                     dbgcout<<"UMV = "<<*U * M * *V<<endl;
                     dbgcout<<"Norm(UMV-A0) = "<<Norm(*U * M * *V -A0)<<endl;
-                    if (Norm(*U*M**V-A0) > 0.001*normA0) abort();
+                    if (Norm(*U*M**V-A0) > THRESH*normA0) abort();
                     dbgcout<<"Norm(VVt-1) = "<<
                         Norm((*V)*V->adjoint() -T(1))<<endl;
-                    if (Norm((*V)*V->adjoint()-T(1)) > 0.001*normA0) abort();
+                    if (Norm((*V)*V->adjoint()-T(1)) > THRESH*normA0) abort();
                 }
 #endif
             }
@@ -1230,7 +1256,7 @@ namespace tmv {
                         Vector<RT> diff_j = yj; // copy current values
                         yj(0) = -z(0)/(S(j)*S(j));
                         for(int i=1;i<N;i++) 
-                            yj(i) = z(i) / (diff_j(i)*(D(i)+S(j)));
+                            yj(i) = (z(i) / diff_j(i)) / (D(i)+S(j));
                         dbgcout<<"Norm(y.row("<<j<<")) = "<<Norm(yj)<<endl;
                     }
                     if (V) {
@@ -1282,10 +1308,10 @@ namespace tmv {
                     dbgcout<<"M = "<<M<<endl;
                     dbgcout<<"UMV = "<<*U * M * *V<<endl;
                     dbgcout<<"Norm(UMV-A0) = "<<Norm(*U * M * *V -A0)<<endl;
-                    if (Norm(*U*M**V-A0) > 0.001*normA0) abort();
+                    if (Norm(*U*M**V-A0) > THRESH*normA0) abort();
                     dbgcout<<"Norm(VVt-1) = "<<
                         Norm((*V)*V->adjoint() -T(1))<<endl;
-                    if (Norm((*V)*V->adjoint()-T(1)) > 0.001*normA0) abort();
+                    if (Norm((*V)*V->adjoint()-T(1)) > THRESH*normA0) abort();
                 }
 #endif
             } else if (N==1) {
@@ -1299,10 +1325,10 @@ namespace tmv {
                     dbgcout<<"M = "<<M<<endl;
                     dbgcout<<"UMV = "<<*U * M * *V<<endl;
                     dbgcout<<"Norm(UMV-A0) = "<<Norm(*U * M * *V -A0)<<endl;
-                    if (Norm(*U*M**V-A0) > 0.001*normA0) abort();
+                    if (Norm(*U*M**V-A0) > THRESH*normA0) abort();
                     dbgcout<<"Norm(VVt-1) = "<<
                         Norm((*V)*V->adjoint() -T(1))<<endl;
-                    if (Norm((*V)*V->adjoint()-T(1)) > 0.001*normA0) abort();
+                    if (Norm((*V)*V->adjoint()-T(1)) > THRESH*normA0) abort();
                 }
 #endif
             }
@@ -1312,9 +1338,9 @@ namespace tmv {
                 dbgcout<<"M = "<<M<<endl;
                 dbgcout<<"UMV = "<<*U * M * *V<<endl;
                 dbgcout<<"Norm(UMV-A0) = "<<Norm(*U * M * *V -A0)<<endl;
-                if (Norm(*U*M**V-A0) > 0.001*normA0) abort();
+                if (Norm(*U*M**V-A0) > THRESH*normA0) abort();
                 dbgcout<<"Norm(VVt-1) = "<<Norm((*V)*V->adjoint() -T(1))<<endl;
-                if (Norm((*V)*V->adjoint()-T(1)) > 0.001*normA0) abort();
+                if (Norm((*V)*V->adjoint()-T(1)) > THRESH*normA0) abort();
             }
 #endif
         }
@@ -1329,13 +1355,13 @@ namespace tmv {
             dbgcout<<"Norm(VtV-1) = "<<Norm(V->adjoint()*(*V)-T(1))<<endl;
             dbgcout<<"Norm(VVt-1) = "<<Norm((*V)*V->adjoint()-T(1))<<endl;
             dbgcout<<"Norm(UtU-1) = "<<Norm(U->adjoint()*(*U)-T(1))<<endl;
-            if (Norm(A2-A0) > 0.001*normA0 || 
+            if (Norm(A2-A0) > THRESH*normA0 || 
                 ( V->colsize()>=V->rowsize() && 
-                  Norm(V->adjoint()*(*V)-T(1)) > 0.001*normA0 ) ||
+                  Norm(V->adjoint()*(*V)-T(1)) > THRESH*normA0 ) ||
                 ( V->rowsize()>=V->colsize() && 
-                  Norm((*V)*V->adjoint()-T(1)) > 0.001*normA0 ) ||
+                  Norm((*V)*V->adjoint()-T(1)) > THRESH*normA0 ) ||
                 ( U->colsize()>=U->rowsize() && 
-                  Norm(U->adjoint()*(*U)-T(1)) > 0.001*normA0 ) 
+                  Norm(U->adjoint()*(*U)-T(1)) > THRESH*normA0 ) 
             ) {
                 cerr<<"SV_Decompose_DC: \n";
                 cerr<<"input D = "<<D0<<endl;

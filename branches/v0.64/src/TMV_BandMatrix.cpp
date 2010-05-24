@@ -707,22 +707,33 @@ namespace tmv {
     static RT NonLapNormF(const GenBandMatrix<T>& m)
     {
         const RT eps = TMV_Epsilon<T>();
-        const RT inveps = RT(1)/eps;
 
         RT mmax = m.maxAbsElement();
         if (mmax == RT(0)) return RT(0);
         else if (mmax * mmax * eps == RT(0)) {
+            // Then we need to rescale, since underflow has caused 
+            // rounding errors.
+            // Epsilon is a pure power of 2, so no rounding errors from 
+            // rescaling.
+            const RT inveps = RT(1)/eps;
             RT scale = inveps;
             mmax *= scale;
-            while (mmax < eps) { scale *= inveps; mmax *= inveps; }
+            const RT eps2 = eps*eps;
+            while (mmax < eps2) { scale *= inveps; mmax *= inveps; }
             return TMV_SQRT(m.normSq(scale))/scale;
+        } else if (RT(1) / mmax == RT(0)) {
+            // Then mmax is already inf, so no hope of making it more accurate.
+            return mmax;
         } else if (RT(1) / (mmax*mmax) == RT(0)) {
+            // Then we have overflow, so we need to rescale:
+            const RT inveps = RT(1)/eps;
             RT scale = eps;
             mmax *= scale;
-            while (mmax > RT(1)) { scale *= eps; mmax *= eps; }
+            while (mmax > inveps) { scale *= eps; mmax *= eps; }
             return TMV_SQRT(m.normSq(scale))/scale;
-        } 
-        return TMV_SQRT(m.normSq());
+        }  else {
+            return TMV_SQRT(m.normSq());
+        }
     }
 
     template <class T> 

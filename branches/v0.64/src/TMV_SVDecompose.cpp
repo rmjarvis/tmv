@@ -78,8 +78,11 @@ namespace tmv {
 
         // Find sub-problems to solve:
         for(int q = N-1; q>0; ) {
+            //std::cout<<"Looking for sub-problem:\n";
+            //std::cout<<"q = "<<q<<std::endl;
             if (E(q-1) == T(0)) --q;
             else if (D(q) == T(0)) {
+                //std::cout<<"D(q) == 0, so do ZeroLastCol\n";
                 // We have the end looking like:
                 //   ? ?
                 //     ? x
@@ -98,8 +101,10 @@ namespace tmv {
             } else {
                 // Find first p before q with either E(p) = 0 or D(p) = 0
                 int p=q-1;
-                while (p > 0 && (E(p-1) != T(0)) && D(p) != T(0)) --p; 
-                if (p > 0 && D(p) == T(0)) {
+                while (p>0 && E(p-1)!=T(0) && D(p)!=T(0)) --p; 
+                //std::cout<<"p = "<<p<<std::endl;
+                if (D(p) == T(0)) {
+                    //std::cout<<"D(p) == 0, so do ZeroFirstRow\n";
                     // We have a block looking like:
                     //   0 x
                     //     x x 
@@ -116,6 +121,9 @@ namespace tmv {
                     ++p;
                 }
                 if (q > p) {
+                    //std::cout<<"No zeros in D,E:\n";
+                    //std::cout<<"D = "<<D.subVector(p,q+1)<<std::endl;
+                    //std::cout<<"E = "<<E.subVector(p,q)<<std::endl;
                     if (U)
                         if (V) 
                             DoSVDecomposeFromBidiagonal_NZ<T>(
@@ -149,12 +157,15 @@ namespace tmv {
         const VectorView<RT>& E, MVP<T> V, bool setUV)
     {
 #ifdef XDEBUG
-        //cout<<"Start Decompose from Bidiag:\n";
-        //if (U) cout<<"U = "<<TMV_Text(*U)<<"  "<<*U<<endl;
-        //cout<<"D = "<<TMV_Text(D)<<"  step "<<D.step()<<"  "<<D<<endl;
-        //cout<<"E = "<<TMV_Text(E)<<"  step "<<E.step()<<"  "<<E<<endl;
-        //if (V) cout<<"V = "<<TMV_Text(*V)<<"  "<<*V<<endl;
-        //cout<<"setUV = "<<setUV<<endl;
+        cout<<"Start Decompose from Bidiag:\n";
+        if (U) cout<<"U = "<<TMV_Text(*U)<<endl;
+        if (V) cout<<"V = "<<TMV_Text(*V)<<endl;
+        cout<<"D = "<<TMV_Text(D)<<"  step "<<D.step()<<"  "<<D<<endl;
+        cout<<"E = "<<TMV_Text(E)<<"  step "<<E.step()<<"  "<<E<<endl;
+        //if (U) cout<<"U = "<<*U<<endl;
+        //if (V) cout<<"V = "<<*V<<endl;
+
+        cout<<"setUV = "<<setUV<<endl;
         Matrix<RT> B(D.size(),D.size(),RT(0));
         B.diag() = D;
         B.diag(1) = E;
@@ -602,8 +613,12 @@ namespace tmv {
 #ifdef XDEBUG
         if (U && V) {
             Matrix<T> AA = (*U) * DiagMatrixViewOf(D) * (*V);
-            //cout<<"SVDecomposeFromBidiag: Norm(A0-AA) = "<<Norm(A0-AA)<<std::endl;
-            //cout<<"cf "<<0.001*Norm(A0)<<std::endl;
+            //cout<<"U = "<<*U<<std::endl;
+            cout<<"D = "<<D<<std::endl;
+            //cout<<"V = "<<*V<<std::endl;
+            //cout<<"AA = "<<AA<<std::endl;
+            cout<<"SVDecomposeFromBidiag: Norm(A0-AA) = "<<Norm(A0-AA)<<std::endl;
+            cout<<"cf "<<0.001*Norm(A0)<<std::endl;
             if (Norm(A0-AA) > 0.001*Norm(A0)) {
                 cerr<<"SV_DecomposeFromBidiagonal: \n";
                 cerr<<"input B = "<<B<<endl;
@@ -651,9 +666,9 @@ namespace tmv {
     {
 #ifdef XDEBUG
         Matrix<T> A0(U);
-        //cout<<"SVDecompose:\n";
+        cout<<"SVDecompose:\n";
         //cout<<"A0 = "<<A0<<std::endl;
-        //cout<<"StoreU = "<<StoreU<<std::endl;
+        cout<<"StoreU = "<<StoreU<<std::endl;
 #endif
         // Decompose A (input as U) into U S V
         // where S is a diagonal real matrix, and U,V are unitary matrices.
@@ -735,8 +750,8 @@ namespace tmv {
 #ifdef XDEBUG
         if (StoreU && V && S.size()>0) {
             Matrix<T> A2 = U * S * (*V);
-            //cout<<"SVDecompose: Norm(A0-A2) = "<<Norm(A0-A2)<<std::endl;
-            //cout<<"cf "<<0.001*Norm(U)*Norm(S)*Norm(*V)<<std::endl;
+            cout<<"SVDecompose: Norm(A0-A2) = "<<Norm(A0-A2)<<std::endl;
+            cout<<"cf "<<0.001*Norm(U)*Norm(S)*Norm(*V)<<std::endl;
             if (Norm(A0-A2) > 0.0001 * Norm(U) * Norm(S) * Norm(*V)) {
                 cerr<<"SV_Decompose:\n";
                 cerr<<"A = "<<A0<<endl;

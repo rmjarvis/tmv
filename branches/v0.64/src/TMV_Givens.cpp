@@ -36,6 +36,8 @@
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_VIt.h"
 
+//#include <iostream>
+
 namespace tmv {
 
 #define RT TMV_RealType(T)

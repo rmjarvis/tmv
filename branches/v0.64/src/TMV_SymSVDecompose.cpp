@@ -52,6 +52,7 @@
 #include "tmv/TMV_DiagMatrixArith.h"
 #include "tmv/TMV_SymMatrixArith.h"
 #include "tmv/TMV_BandMatrixArith.h"
+#include <iostream>
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -806,23 +807,25 @@ namespace tmv {
 
 #ifdef XDEBUG
         if (U) {
-            cout<<"Done EigenFromTridiag: Norm(U) = "<<Norm(*U)<<endl;
-            cout<<"D = "<<D<<endl;
+            //cout<<"Done EigenFromTridiag: Norm(U) = "<<Norm(*U)<<endl;
+            //cout<<"D = "<<D<<endl;
             Matrix<T> UDU = *U * DiagMatrixViewOf(D)*U->adjoint();
-            cout<<"Norm(UDUt) = "<<Norm(UDU)<<endl;
-            cout<<"Norm(UDUt-A0) = "<<Norm(UDU-A0)<<endl;
-            cout<<"Norm(U) = "<<Norm(*U)<<endl;
-            cout<<"Norm(UD) = "<<Norm(*U*DiagMatrixViewOf(D))<<endl;
-            cout<<"Norm(A0U) = "<<Norm(A0*(*U))<<endl;
-            cout<<"Norm(UD-A0U) = "<<Norm((*U)*DiagMatrixViewOf(D)-A0*(*U))<<endl;
+            //cout<<"Norm(UDUt) = "<<Norm(UDU)<<endl;
+            //cout<<"Norm(UDUt-A0) = "<<Norm(UDU-A0)<<endl;
+            //cout<<"Norm(U) = "<<Norm(*U)<<endl;
+            //cout<<"Norm(UD) = "<<Norm(*U*DiagMatrixViewOf(D))<<endl;
+            //cout<<"Norm(A0U) = "<<Norm(A0*(*U))<<endl;
+            //cout<<"Norm(UD-A0U) = "<<Norm((*U)*DiagMatrixViewOf(D)-A0*(*U))<<endl;
             if (!(Norm(UDU-A0) < 0.001*Norm(A0))) {
                 cerr<<"EigenFromTridiagonal:\n";
                 cerr<<"D = "<<D0<<endl;
                 cerr<<"E = "<<E0<<endl;
                 cerr<<"Done: D = "<<D<<endl;
                 cerr<<"U = "<<*U<<endl;
+#ifdef LAP
                 cerr<<"U2 = "<<U2<<endl;
                 cerr<<"diff = "<<(*U-U2)<<endl;
+#endif
                 cerr<<"Norm(UDU-A0) = "<<Norm(UDU-A0)<<endl;
                 cerr<<"Norm(A0) = "<<Norm(A0)<<endl;
                 throw int(1);
@@ -929,6 +932,9 @@ namespace tmv {
 #ifdef XDEBUG
         Matrix<T> A0(U);
         A0.upperTri() = A0.lowerTri().adjoint();
+        std::cout<<"Start SymSV_Decompose\n";
+        std::cout<<"U = "<<U<<endl;
+        std::cout<<"A0 = "<<A0<<endl;
 #endif
 
         UnsortedHermEigen(U,SS.diag());
@@ -938,6 +944,12 @@ namespace tmv {
 
 #ifdef XDEBUG
         Matrix<T> A2 = U * SS * U.adjoint();
+        std::cout<<"Done HermSV_Decompose\n";
+        std::cout<<"U = "<<U<<endl;
+        std::cout<<"SS = "<<SS<<endl;
+        std::cout<<"A0 = "<<A0<<endl;
+        std::cout<<"A2 = "<<A2<<endl;
+        std::cout<<"Norm(A0-A2) = "<<Norm(A0-A2)<<std::endl;
         if (!(Norm(A0-A2) < 0.0001 * TMV_NORM(Norm(U)) * Norm(SS))) {
             cerr<<"HermSV_Decompose:\n";
             cerr<<"A = "<<A0<<endl;
@@ -967,6 +979,9 @@ namespace tmv {
 #ifdef XDEBUG
         Matrix<T> A0(U);
         A0.upperTri() = A0.lowerTri().transpose();
+        std::cout<<"Start SymSV_Decompose\n";
+        std::cout<<"U = "<<U<<endl;
+        std::cout<<"A0 = "<<A0<<endl;
 #endif
 
         TMVAssert(isComplex(T()));
@@ -1012,6 +1027,13 @@ namespace tmv {
 #ifdef XDEBUG
         if (V) {
             Matrix<T> A2 = U * SS * (*V);
+            std::cout<<"Done SymSV_Decompose\n";
+            std::cout<<"U = "<<U<<endl;
+            std::cout<<"SS = "<<SS<<endl;
+            std::cout<<"V = "<<*V<<endl;
+            std::cout<<"A0 = "<<A0<<endl;
+            std::cout<<"A2 = "<<A2<<endl;
+            std::cout<<"Norm(A0-A2) = "<<Norm(A0-A2)<<std::endl;
             if (!(Norm(A0-A2) < 0.0001 * Norm(U) * Norm(SS) * Norm(*V))) {
                 cerr<<"SymSV_Decompose:\n";
                 cerr<<"A = "<<A0<<endl;

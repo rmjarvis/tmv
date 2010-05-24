@@ -223,7 +223,6 @@ namespace tmv {
     static RT DoNorm2(const GenVector<T>& v)
     { 
         const RT eps = TMV_Epsilon<T>();
-        const RT inveps = RT(1)/eps;
 
         RT vmax = v.maxAbsElement();
         if (vmax == RT(0)) return RT(0);
@@ -232,9 +231,11 @@ namespace tmv {
             // rounding errors
             // Epsilon is a pure power of 2, so this scaling doesn't 
             // introduce any no rounding errors.
+            const RT inveps = RT(1)/eps;
             RT scale = inveps;
             vmax *= scale;
-            while (vmax < eps) { scale *= inveps; vmax *= inveps; }
+            const RT eps2 = eps*eps;
+            while (vmax < eps2) { scale *= inveps; vmax *= inveps; }
             return TMV_SQRT(v.normSq(scale))/scale;
         } else if (RT(1) / (vmax) == RT(0)) {
             // Then vmax is already inf, so no hope of making more accurate.
@@ -242,9 +243,10 @@ namespace tmv {
             return vmax;
         } else if (RT(1) / (vmax*vmax) == RT(0)) {
             // Then we have overflow, so we need to rescale:
+            const RT inveps = RT(1)/eps;
             RT scale = eps;
             vmax *= scale;
-            while (vmax > RT(1)) { scale *= eps; vmax *= eps; }
+            while (vmax > inveps) { scale *= eps; vmax *= eps; }
             return TMV_SQRT(v.normSq(scale))/scale;
         } 
         return TMV_SQRT(v.normSq());

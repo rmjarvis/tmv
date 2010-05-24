@@ -43,8 +43,9 @@ using std::endl;
 
 #ifdef XDEBUG
 #include "tmv/TMV_DiagMatrixArith.h"
-//#define dbgcout std::cout
-#define dbgcout if (false) std::cout
+#define THRESH 1.e-10
+#define dbgcout std::cout
+//#define dbgcout if (false) std::cout
 using std::cerr;
 #else
 #define dbgcout if (false) std::cout
@@ -323,8 +324,9 @@ namespace tmv {
                     else c = fk - d1*dfk;
                 else  c = fk - d1*dpsi - d2*dphi;
                 // c eta^2 - a eta + b = 0
-                T a = (d1+d2)*f - d1*d2*df;
-                T b = d1*d2*f;
+                T d1x = d1/d2;
+                T a = (d1x+T(1))*f - d1*df;
+                T b = d1x*f;
                 dbgcout<<"c,a,b = "<<c<<", "<<a<<", "<<b<<endl;
                 if (c == T(0)) {
                     if (a == T(0)) {
@@ -338,16 +340,17 @@ namespace tmv {
                             //   = d2^2*df + (d1+d2)*(d1-d2)*dk1term
                             //   = d2^2*(df-dk1term) + d1^2 zsq(k1)/d1^2
                             // For k1 == k+1 case, swap d1,d2
-                            a = zsq[k1] + (k1==kk ? d2*d2 : d1*d1)*dfk;
+                            a = zsq[k1]/d2 + (k1==kk ? d2 : d1*d1x)*dfk;
                         else
                             // a = (d1+d2)*f - d1*d2*df
                             // with f = d1*dpsi + d2*dphi + k1term
                             // a = (d1+d2)*d1*dpsi + (d1+d2)*d2*dphi - d1*d2*(dpsi+dphi) 
                             //           + (d1+d2) k1term - d1*d2*dk1term
                             //   = d1*d1*dpsi + d2*d2*dphi + d1 k1term
-                            a = d1*d1*dpsi + d2*d2*dphi + (k1==kk ? d1 : d2)*k1term;
+                            a = d1x*d1*dpsi + d2*dphi + (k1==kk ? d1x : T(1))*k1term;
                     }
                     eta = b/a;
+                    eta *= d2;
                     dbgcout<<"c=0  eta = "<<eta<<endl;
                     if (k==N-1)
                         TMVAssert(eta > -tau);
@@ -360,13 +363,19 @@ namespace tmv {
                     else d = TMV_SQRT(d);
                     if (k==N-1) { // Then we want the solutionn with other sign for d
                         eta = a >= 0 ? (a+d)/(T(2)*c) : T(2)*b/(a-d);
+                        eta *= d2;
                         dbgcout<<"eta = "<<eta<<endl;
                         if (eta <= -tau) // Then rounding errors - use bisect
                             eta = -tau/RT(2);
                         TMVAssert(eta > -tau);
-                    }
-                    else {
+                    } else {
                         eta = a <= 0 ? (a-d)/(T(2)*c) : T(2)*b/(a+d);
+                        if (a <= 0) {
+                            dbgcout<<"eta/d2 = ("<<a<<" - "<<d<<")/2*"<<c<<" = "<<a-d<<" / "<<T(2)*c<<" = "<<eta<<endl;
+                        } else {
+                            dbgcout<<"eta/d2 = 2*"<<b<<" / ("<<a<<" + "<<d<<") = "<<T(2)*b<<" / "<<(a+d)<<" = "<<eta<<endl;
+                        }
+                        eta *= d2;
                         dbgcout<<"eta = "<<eta<<endl;
                         if (eta <= d1) // Then rounding errors - use bisect
                             eta = d1/RT(2);
@@ -399,14 +408,16 @@ namespace tmv {
                 //      {} = (rho + psix + zsq[k1-1]/d1 + phi)(d1+d2) 
                 //           - (dpsix + zsq[k1-1]/d1^2 + dphi)(d1 d2)
                 //         = (rho+psix+phi)(d1+d2) - (dpsix+dphi)(d1 d2) + zsq[k1-1]
+                T d1x = d1/d2;
+                T taux = tau/d2;
                 T temp = (k1==k ?
-                          (d1+d2)*(rho+psix+phi) - d1*d2*(dpsix+dphi) + zsq[k1-1] :
-                          (d1+d2)*(rho+psi+phix) - d1*d2*(dpsi+dphix) + zsq[k1+1]);
-                T a = temp + zsq[k1] - c*tau;
-                T b = d1*d2*fk - tau*(temp + (d1+d2)*k1term);
-                T g = d1*d2*tau*f;
-                T mineta = lowerbound - tau;
-                T maxeta = upperbound - tau;
+                          (d1x+T(1))*(rho+psix+phi) - d1*(dpsix+dphi) + zsq[k1-1]/d2 :
+                          (d1x+T(1))*(rho+psi+phix) - d1*(dpsi+dphix) + zsq[k1+1]/d2);
+                T a = temp + zsq[k1]/d2 - c*taux;
+                T b = d1x*fk - taux*(temp + (d1x+T(1))*k1term);
+                T g = d1x*taux*f;
+                T mineta = (lowerbound - tau)/d2;
+                T maxeta = (upperbound - tau)/d2;
                 dbgcout<<"temp = "<<temp<<endl;
                 dbgcout<<"a = "<<a<<endl;
                 dbgcout<<"b = "<<b<<endl;
@@ -502,6 +513,7 @@ namespace tmv {
                     }
 #endif
                 }
+                eta *= d2;
             }
             dbgcout<<"eta = "<<eta<<endl;
 
@@ -584,7 +596,13 @@ namespace tmv {
 #endif
         }
         dbgcout<<"Found Eigenvalue S("<<k<<") = "<<s<<endl;
-
+#ifdef XDEBUG
+        // f(s) = rho + Sum_i=1..N z_i^2/(D_i-s)
+        T ff = rho;
+        for(int j=0;j<N;j++) ff += zsq[j]/diff[j];
+        dbgcout<<"f(s) = "<<ff<<std::endl;
+        if (std::abs(ff) > THRESH*rho) abort();
+#endif
         return s;
     }
 
@@ -854,10 +872,11 @@ namespace tmv {
             dbgcout<<"D = "<<D<<endl;
             dbgcout<<"z = "<<z<<endl;
             if (U) {
-                //dbgcout<<"M = "<<M<<endl;
-                //dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                dbgcout<<"M = "<<M<<endl;
+                dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
                 dbgcout<<"Norm(UMUt-A0) = "<<Norm(*U*M*U->adjoint()-A0)<<endl;
-                if (Norm(*U*M*U->adjoint()-A0) > 0.01*Norm(A0)) abort();
+                if (Norm(*U*M*U->adjoint()-A0) > THRESH*Norm(A0)) abort();
             }
 #endif
 
@@ -891,10 +910,11 @@ namespace tmv {
             dbgcout<<"DN = "<<D.subVector(0,N)<<endl;
             dbgcout<<"zN = "<<z.subVector(0,N)<<endl;
             if (U) {
-                //dbgcout<<"M = "<<M<<endl;
-                //dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                dbgcout<<"M = "<<M<<endl;
+                dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
                 dbgcout<<"Norm(UMUt-A0) = "<<Norm(*U*M*U->adjoint()-A0)<<endl;
-                if (Norm(*U*M*U->adjoint()-A0) > 0.01*Norm(A0)) abort();
+                if (Norm(*U*M*U->adjoint()-A0) > THRESH*Norm(A0)) abort();
             }
 #endif
 
@@ -911,11 +931,12 @@ namespace tmv {
                 if (U) {
                     M.colRange(0,N).permuteCols(P.get());
                     M.rowRange(0,N).permuteRows(P.get());
-                    //dbgcout<<"M = "<<M<<endl;
-                    //dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                    dbgcout<<"M = "<<M<<endl;
+                    dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                    dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
                     dbgcout<<"Norm(UMUt-A0) = "<<
                         Norm(*U*M*U->adjoint()-A0)<<endl;
-                    if (Norm(*U*M*U->adjoint()-A0) > 0.01*Norm(A0)) abort();
+                    if (Norm(*U*M*U->adjoint()-A0) > THRESH*Norm(A0)) abort();
                 }
 #endif
 
@@ -949,11 +970,12 @@ namespace tmv {
                 dbgcout<<"DN = "<<D.subVector(0,N)<<endl;
                 dbgcout<<"zN = "<<z.subVector(0,N)<<endl;
                 if (U) {
-                    //dbgcout<<"M = "<<M<<endl;
-                    //dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                    dbgcout<<"M = "<<M<<endl;
+                    dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                    dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
                     dbgcout<<"Norm(UMUt-A0) = "<<
                         Norm(*U*M*U->adjoint()-A0)<<endl;
-                    if (Norm(*U*M*U->adjoint()-A0) > 0.01*Norm(A0)) abort();
+                    if (Norm(*U*M*U->adjoint()-A0) > THRESH*Norm(A0)) abort();
                 }
 #endif
 
@@ -973,10 +995,11 @@ namespace tmv {
                         M.colRange(i_firstswap,N).permuteCols(P.get());
                         M.rowRange(i_firstswap,N).permuteRows(P.get());
                     }
-                    //dbgcout<<"M = "<<M<<endl;
-                    //dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                    dbgcout<<"M = "<<M<<endl;
+                    dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                    dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
                     dbgcout<<"Norm(UMUt-A0) = "<<Norm(*U*M*U->adjoint()-A0)<<endl;
-                    if (Norm(*U*M*U->adjoint()-A0) > 0.01*Norm(A0)) abort();
+                    if (Norm(*U*M*U->adjoint()-A0) > THRESH*Norm(A0)) abort();
                 }
 #endif
             }
@@ -1033,10 +1056,11 @@ namespace tmv {
                         M.subMatrix(0,N,0,N) = 
                             W.adjoint() * M.subMatrix(0,N,0,N) * W;
                         dbgcout<<"M = "<<M.subMatrix(0,N,0,N)<<endl;
-                        //dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                        dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                        dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
                         dbgcout<<"Norm(UMUt-A0) = "<<
                             Norm(*U*M*U->adjoint()-A0)<<endl;
-                        if (Norm(*U*M*U->adjoint()-A0) > 0.01*Norm(A0)) abort();
+                        if (Norm(*U*M*U->adjoint()-A0) > THRESH*Norm(A0)) abort();
                     }
 #endif
                 } else {
@@ -1053,11 +1077,12 @@ namespace tmv {
                 if (U) {
                     M.subMatrix(0,N,0,N) = DiagMatrixViewOf(S);
                     dbgcout<<"M = "<<M<<endl;
-                    //dbgcout<<"U = "<<*U<<endl;
-                    //dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                    dbgcout<<"U = "<<*U<<endl;
+                    dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                    dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
                     dbgcout<<"Norm(UMUt-A0) = "<<
                         Norm(*U*M*U->adjoint()-A0)<<endl;
-                    if (Norm(*U*M*U->adjoint()-A0) > 0.01*Norm(A0)) abort();
+                    if (Norm(*U*M*U->adjoint()-A0) > THRESH*Norm(A0)) abort();
                 }
 #endif
             } else if (N == 1) {
@@ -1065,21 +1090,24 @@ namespace tmv {
 #ifdef XDEBUG
                 if (U) {
                     M(0,0) = D(0);
-                    //dbgcout<<"M = "<<M<<endl;
-                    //dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                    dbgcout<<"M = "<<M<<endl;
+                    dbgcout<<"U = "<<*U<<endl;
+                    dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                    dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
                     dbgcout<<"Norm(UMUt-A0) = "<<
                         Norm(*U*M*U->adjoint()-A0)<<endl;
-                    if (Norm(*U*M*U->adjoint()-A0) > 0.01*Norm(A0)) abort();
+                    if (Norm(*U*M*U->adjoint()-A0) > THRESH*Norm(A0)) abort();
                 }
 #endif
             }
 #ifdef XDEBUG
             if (U) {
                 M = DiagMatrixViewOf(D);
-                //dbgcout<<"M = "<<M<<endl;
-                //dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                dbgcout<<"M = "<<M<<endl;
+                dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
                 dbgcout<<"Norm(UMUt-A0) = "<<Norm(*U*M*U->adjoint()-A0)<<endl;
-                if (Norm(*U*M*U->adjoint()-A0) > 0.01*Norm(A0)) abort();
+                if (Norm(*U*M*U->adjoint()-A0) > THRESH*Norm(A0)) abort();
             }
 #endif
         }
@@ -1095,8 +1123,8 @@ namespace tmv {
         Vector<RT> D2 = D_QR;
         D2.sort(Descend,AbsComp);
         if (U) dbgcout<<"Norm(A2-A0) = "<<Norm(A2-A0)<<endl;
-        if (Norm(D1-D2) > 0.001*Norm(T0) ||
-            (U && Norm(A2-A0) > 0.001*Norm(A0)) ) {
+        if (Norm(D1-D2) > THRESH*Norm(T0) ||
+            (U && Norm(A2-A0) > THRESH*Norm(A0)) ) {
             cerr<<"Eigen_DC: \n";
             cerr<<"input D = "<<D0<<endl;
             cerr<<"input E = "<<E0<<endl;

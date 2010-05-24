@@ -559,6 +559,7 @@ namespace tmv {
 
 #ifdef XDEBUG
         Matrix<T> A0(A);
+#ifdef LAP
         BandMatrix<T> A2(A);
         Vector<RT> D2(D);
         Vector<RT> E2(E);
@@ -568,6 +569,7 @@ namespace tmv {
         T signdet2(1);
         NonLapBidiagonalize<T>(
             A2,U2.view(),D2.view(),E2.view(),V2.view(),logdet2,signdet2);
+#endif
 #endif
 
         if (A.rowsize() > 0) {
@@ -581,21 +583,29 @@ namespace tmv {
         }
 #ifdef XDEBUG
         if (U && V) {
+            std::cout<<"Done Band Bidiagonalize:\n";
+            std::cout<<"U = "<<*U<<std::endl;
+            std::cout<<"D = "<<D<<std::endl;
+            std::cout<<"E = "<<E<<std::endl;
+            std::cout<<"V = "<<*V<<std::endl;
             Matrix<T> UBV = *U*UpperBiDiagMatrix(D,E)*(*V);
+            std::cout<<"UBV = "<<UBV<<std::endl;
+            std::cout<<"Norm(UBV-A0) = "<<Norm(UBV-A0)<<std::endl;
             if (Norm(UBV-A0) > 0.001*Norm(A0)) {
                 cerr<<"Bidiagonalize:\n";
                 cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
                 cerr<<"-> D = "<<D<<endl;
-                cerr<<"Nonlap D = "<<D2<<endl;
-                cerr<<"Norm(diff) = "<<Norm(D-D2)<<endl;
                 cerr<<"E = "<<E<<endl;
-                cerr<<"Nonlap E = "<<E2<<endl;
-                cerr<<"Norm(diff) = "<<Norm(E-E2)<<endl;
                 cerr<<"U = "<<*U<<endl;
                 cerr<<"V = "<<*V<<endl;
+#ifdef LAP
+                cerr<<"Nonlap D = "<<D2<<endl;
+                cerr<<"Norm(diff) = "<<Norm(D-D2)<<endl;
+                cerr<<"Nonlap E = "<<E2<<endl;
+                cerr<<"Norm(diff) = "<<Norm(E-E2)<<endl;
                 cerr<<"U2 = "<<U2<<endl;
                 cerr<<"V2 = "<<V2<<endl;
-                cerr<<"A0 = "<<A0<<endl;
+#endif
                 cerr<<"UBV = "<<UBV<<endl;
                 cerr<<"Norm(UBV-A0) = "<<Norm(UBV-A0)<<endl;
                 abort();

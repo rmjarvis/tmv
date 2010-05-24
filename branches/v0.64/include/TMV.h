@@ -51,6 +51,4 @@
 #include "TMV_Diag.h"
 #include "TMV_Tri.h"
 
-#include "tmv/TMV_Version.h"
-
 #endif

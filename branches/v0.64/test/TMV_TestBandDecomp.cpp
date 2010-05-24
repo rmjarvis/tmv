@@ -10,7 +10,7 @@
 template <class T, tmv::StorageType stor> 
 void TestBandDecomp()
 {
-    for (int mattype = 0; mattype < 7; mattype++) {
+    for (int mattype = 0; mattype < 8; mattype++) {
         // mattype = 0  is Square
         // mattype = 1  is NonSquare short
         // mattype = 2  is NonSquare tall
@@ -18,6 +18,7 @@ void TestBandDecomp()
         // mattype = 4  is Singular
         // mattype = 5  is Lower BiDiag
         // mattype = 6  is Upper BiDiag
+        // mattype = 7  is Singular with seriously bad defects
 
         const int N = 200;
         int M = N;
@@ -28,11 +29,12 @@ void TestBandDecomp()
         else if (mattype == 3) nlo = nhi = 1;
         else if (mattype == 5) { nlo = 1; nhi = 0; }
         else if (mattype == 6) { nlo = 0; nhi = 1; }
+        const bool singular = mattype == 4 || mattype == 7;
 
         tmv::BandMatrix<T,stor> m(M,N,nlo,nhi);
         for(int i=0;i<M;++i) for(int j=0;j<N;++j) 
             if (i<=j+nlo && j<=i+nhi) m(i,j) = T(2+4*i-5*j);
-        if (mattype != 4) {
+        if (!singular) {
             m(0,0) = T(14);
             if (m.nlo() >= 1) m(1,0) = T(-2);
             if (m.nhi() >= 1) m(4,5) = T(7);
@@ -43,7 +45,7 @@ void TestBandDecomp()
         tmv::BandMatrix<std::complex<T>,stor> c(M,N,nlo,nhi);
         for(int i=0;i<M;++i) for(int j=0;j<N;++j) 
             if (i<=j+nlo && j<=i+nhi) c(i,j) = std::complex<T>(2+4*i-5*j,3-i);
-        if (mattype != 4) {
+        if (!singular) {
             c(0,0) = T(14);
             if (c.nlo() >= 1) c(1,0) = T(-2);
             if (c.nhi() >= 1) c(4,5) = T(7);
@@ -51,10 +53,19 @@ void TestBandDecomp()
             c.diag() *= T(30);
         }
 
+        if (mattype == 7) {
+            for(int i=10;i<N;i+=10) {
+                m.colRange(i,N) *= T(1.e-10);
+                c.colRange(i,N) *= T(1.e-10);
+                m.rowRange(i+5,N) *= T(1.e-10);
+                c.rowRange(i+5,N) *= T(1.e-10);
+            }
+        }
+
         T eps = EPS;
         T ceps = EPS;
         if (showacc) std::cout<<"eps = "<<eps<<"  "<<ceps<<std::endl;
-        if (mattype != 3) {
+        if (!singular) {
             T kappa = Norm(m) * Norm(m.inverse());
             if (showacc) std::cout<<"kappa = "<<kappa<<std::endl;
             eps *= kappa;
@@ -68,7 +79,7 @@ void TestBandDecomp()
 
 
         // LU Decomposition
-        if (mattype == 0) {
+        if (m.isSquare()) {
             tmv::LowerTriMatrix<T,tmv::UnitDiag> L = m.lud().getL();
             tmv::UpperTriMatrix<T> U = m.lud().getU();
             const int* p = m.lud().getP();
@@ -141,7 +152,7 @@ void TestBandDecomp()
         }
 
         // QR Decomposition
-        if (mattype != 4) {
+        {
             tmv::Matrix<T> Q = m.qrd().getQ();
             tmv::BandMatrix<T> R = m.qrd().getR();
             tmv::Matrix<T> QR = Q*R;

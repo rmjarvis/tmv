@@ -480,7 +480,7 @@ namespace tmv {
                 cerr<<"E = "<<E<<endl;
                 cerr<<"TT = "<<TT<<endl;
                 cerr<<"UU * TT * UUt = ";
-                A2.Write(cerr,RT(1.e-12));
+                A2.write(cerr,RT(1.e-12));
                 cerr<<endl;
                 cerr<<"A0 = "<<A0<<endl;
                 cerr<<"A2-A0 = "<<A2-A0<<endl;

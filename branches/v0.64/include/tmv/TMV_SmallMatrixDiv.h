@@ -335,7 +335,7 @@ namespace tmv {
 
     template <class T, StorageType S> 
     struct SMDet<T,1,1,S>
-    { static inline T det(const T* m) { return det(*m); } };
+    { static inline T det(const T* m) { return *m; } };
 
     template <class T, StorageType S> 
     struct SMDet<T,2,2,S>
