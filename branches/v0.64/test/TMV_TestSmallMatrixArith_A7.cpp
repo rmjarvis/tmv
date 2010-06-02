@@ -30,13 +30,10 @@ static void DoTestSmallMatrixArith_A7()
     tmv::SmallVector<std::complex<T>,N> cv1 = ca1.col(0);
     tmv::SmallVector<std::complex<T>,N> cv2 = ca1.row(0);
 
-    tmv::SmallMatrix<T,N,N> a1x;
-    tmv::SmallMatrix<std::complex<T>,N,N> ca1x;
-
     if (showstartdone) {
         std::cout<<"A7\n";
     }
-    TestMatrixArith7<T>(a1x,ca1x,a1,ca1,v1,cv1,v2,cv2,"Square");
+    TestMatrixArith7<T>(a1,ca1,v1,cv1,v2,cv2,"Square");
 #ifdef XTEST
     tmv::SmallMatrix<T,N,N,tmv::ColMajor> a2 = a1;
     tmv::SmallMatrix<std::complex<T>,N,N,tmv::ColMajor> ca2 = ca1;
@@ -49,10 +46,10 @@ static void DoTestSmallMatrixArith_A7()
     tmv::SmallVector<T,N,tmv::FortranStyle> v2f = v1;
     tmv::SmallVector<std::complex<T>,N,tmv::FortranStyle> cv2f = cv1;
 
-    TestMatrixArith7<T>(a1x,ca1x,a2,ca2,v1,cv1,v2,cv2,"Square");
-    TestMatrixArith7<T>(a1x,ca1x,a1f,ca1f,v1,cv1,v2,cv2,"Square");
-    TestMatrixArith7<T>(a1x,ca1x,a1f,ca1f,v1f,cv1f,v2,cv2,"Square");
-    TestMatrixArith7<T>(a1x,ca1x,a1f,ca1f,v1f,cv1f,v2f,cv2f,"Square");
+    TestMatrixArith7<T>(a2,ca2,v1,cv1,v2,cv2,"Square");
+    TestMatrixArith7<T>(a1f,ca1f,v1,cv1,v2,cv2,"Square");
+    TestMatrixArith7<T>(a1f,ca1f,v1f,cv1f,v2,cv2,"Square");
+    TestMatrixArith7<T>(a1f,ca1f,v1f,cv1f,v2f,cv2f,"Square");
 #endif
 }
 
@@ -69,15 +66,15 @@ void TestSmallMatrixArith_A7()
 }
 
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSmallMatrixArith_A7<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSmallMatrixArith_A7<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSmallMatrixArith_A7<long double>();
 #endif
-#ifdef INST_INT
+#ifdef TEST_INT
 template void TestSmallMatrixArith_A7<int>();
 #endif

@@ -61,58 +61,31 @@ void TestSymDiv_B2(tmv::DivType dt, PosDefCode pdc)
         if (showstartdone)
             std::cout<<"Start loop: i = "<<i<<", si = "<<
                 tmv::TMV_Text(s[i])<<"  "<<s[i]<<std::endl;
-        const tmv::SymMatrixView<T>& si = s[i];
-        const tmv::SymMatrixView<std::complex<T> >& csi = cs[i];
+        tmv::SymMatrixView<T> si = s[i];
+        tmv::SymMatrixView<std::complex<T> > csi = cs[i];
 
         si.saveDiv();
         csi.saveDiv();
 
-        if (csi.issym()) {
-            tmv::SymMatrix<T> sx = si;
-            tmv::SymMatrix<std::complex<T> > csx = csi;
-
-            TestMatrixDivArith1<T>(dt,sx,csx,a1v,si,ca1v,csi,
-                                   "Sym/SquareMatrix");
-            if (dt == tmv::LU) continue;
+        TestMatrixDivArith1<T>(dt,a1v,si,ca1v,csi,"Sym/SquareMatrix");
+        if (dt == tmv::LU) continue;
 #ifdef XTEST
-            TestMatrixDivArith1<T>(dt,sx,csx,a3v,si,ca3v,csi,
-                                   "Sym/NonSquareMatrix");
-            TestMatrixDivArith1<T>(dt,sx,csx,a4v,si,ca4v,csi,
-                                   "Sym/NonSquareMatrix");
-            TestMatrixDivArith1<T>(dt,sx,csx,a5v,si,ca5v,csi,
-                                   "Sym/NonSquareMatrix");
-            TestMatrixDivArith1<T>(dt,sx,csx,a6v,si,ca6v,csi,
-                                   "Sym/NonSquareMatrix");
+        TestMatrixDivArith1<T>(dt,a3v,si,ca3v,csi,"Sym/NonSquareMatrix");
+        TestMatrixDivArith1<T>(dt,a4v,si,ca4v,csi,"Sym/NonSquareMatrix");
+        TestMatrixDivArith1<T>(dt,a5v,si,ca5v,csi,"Sym/NonSquareMatrix");
+        TestMatrixDivArith1<T>(dt,a6v,si,ca6v,csi,"Sym/NonSquareMatrix");
 #endif
-        } else {
-            tmv::HermMatrix<T> hx = si;
-            tmv::HermMatrix<std::complex<T> > chx = csi;
-
-            TestMatrixDivArith1<T>(dt,hx,chx,a1v,si,ca1v,csi,
-                                   "Herm/SquareMatrix");
-            if (dt == tmv::LU) continue;
-#ifdef XTEST
-            TestMatrixDivArith1<T>(dt,hx,chx,a3v,si,ca3v,csi,
-                                   "Herm/NonSquareMatrix");
-            TestMatrixDivArith1<T>(dt,hx,chx,a4v,si,ca4v,csi,
-                                   "Herm/NonSquareMatrix");
-            TestMatrixDivArith1<T>(dt,hx,chx,a5v,si,ca5v,csi,
-                                   "Herm/NonSquareMatrix");
-            TestMatrixDivArith1<T>(dt,hx,chx,a6v,si,ca6v,csi,
-                                   "Herm/NonSquareMatrix");
-#endif
-        }
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
     for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSymDiv_B2<double>(tmv::DivType dt, PosDefCode pdc);
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSymDiv_B2<float>(tmv::DivType dt, PosDefCode pdc);
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSymDiv_B2<long double>(tmv::DivType dt, PosDefCode pdc);
 #endif

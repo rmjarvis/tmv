@@ -44,18 +44,10 @@ void TestSymMatrixArith_E2()
             }
             tmv::BandMatrixView<T> bj = b[j];
             tmv::BandMatrixView<std::complex<T> > cbj = cb[j];
-            tmv::BandMatrix<T> bx = bj;
-            tmv::BandMatrix<std::complex<T> > cbx = cbj;
 
-            if (csi.isherm()) {
-                tmv::HermMatrix<T> sx = si;
-                tmv::HermMatrix<std::complex<T> > csx = csi;
-                TestMatrixArith456<T>(bx,cbx,bj,cbj,si,csi,"Band/Herm");
-            } else {
-                tmv::SymMatrix<T> sx = si;
-                tmv::SymMatrix<std::complex<T> > csx = csi;
-                TestMatrixArith456<T>(bx,cbx,bj,cbj,si,csi,"Band/Sym");
-            }
+            TestMatrixArith4<T>(bj,cbj,si,csi,"Band/Sym");
+            TestMatrixArith5<T>(bj,cbj,si,csi,"Band/Sym");
+            TestMatrixArith6x<T>(bj,cbj,si,csi,"Band/Sym");
         }
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
@@ -63,15 +55,15 @@ void TestSymMatrixArith_E2()
 #endif
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSymMatrixArith_E2<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSymMatrixArith_E2<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSymMatrixArith_E2<long double>();
 #endif
-#ifdef INST_INT
+#ifdef TEST_INT
 template void TestSymMatrixArith_E2<int>();
 #endif

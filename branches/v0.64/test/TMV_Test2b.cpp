@@ -34,22 +34,22 @@ int main() try
 
 #if 1
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
     TestSymMatrix<double>();
     TestAllSymDiv<double>();
 #endif
 
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
     TestSymMatrix<float>();
     TestAllSymDiv<float>();
 #endif
 
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
     TestSymMatrix<long double>();
     TestAllSymDiv<long double>();
 #endif 
 
-#ifdef INST_INT
+#ifdef TEST_INT
     TestSymMatrix<int>();
 #endif 
 

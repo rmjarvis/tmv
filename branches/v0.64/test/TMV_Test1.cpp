@@ -22,8 +22,7 @@ bool symoprod = true;
 bool dontthrow = false;
 std::string lastsuccess = "";
 
-int main() try 
-{
+int main() try {
     std::ofstream log("tmvtest1.log");
     tmv::WriteWarningsTo(&log);
 
@@ -34,44 +33,48 @@ int main() try
 
 #if 1
 
-#ifdef INST_DOUBLE
-    TestAllVector<double>();
-    TestAllMatrix<double>();
+#ifdef TEST_DOUBLE
+    TestVector<double>();
+    TestPermutation<double>();
+    TestMatrix<double>();
     TestDiagMatrix<double>();
     TestDiagDiv<double>();
     TestTriMatrix<double>();
-    TestAllTriDiv<double>();
-    TestAllMatrixDiv<double>();
+    TestTriDiv<double>();
+    TestMatrixDiv<double>();
 #endif // DOUBLE
 
-#ifdef INST_FLOAT
-    TestAllVector<float>();
-    TestAllMatrix<float>();
+#ifdef TEST_FLOAT
+    TestVector<float>();
+    TestPermutation<float>();
+    TestMatrix<float>();
     TestDiagMatrix<float>();
     TestDiagDiv<float>();
     TestTriMatrix<float>();
-    TestAllTriDiv<float>();
-    TestAllMatrixDiv<float>();
+    TestTriDiv<float>();
+    TestMatrixDiv<float>();
 #endif // FLOAT
 
-#ifdef INST_INT
-    TestAllVector<int>();
-    TestAllMatrix<int>();
+#ifdef TEST_INT
+    TestVector<int>();
+    TestPermutation<int>();
+    TestMatrix<int>();
     TestDiagMatrix<int>();
     TestTriMatrix<int>();
 #endif  // INT
 
-#ifdef INST_LONGDOUBLE
-    TestAllVector<long double>();
-    TestAllMatrix<long double>();
+#ifdef TEST_LONGDOUBLE
+    TestVector<long double>();
+    TestPermutation<long double>();
+    TestMatrix<long double>();
     TestDiagMatrix<long double>();
     TestDiagDiv<long double>();
     TestTriMatrix<long double>();
-    TestAllTriDiv<long double>();
-    TestAllMatrixDiv<long double>();
+    TestTriDiv<long double>();
+    TestMatrixDiv<long double>();
 #endif // LONGDOUBLE
 
-#endif 
+#endif
 
     return 0;
 }
@@ -87,7 +90,8 @@ catch (std::exception& e) {
     std::cerr<<e.what()<<std::endl;
     std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
     return 1;
-} catch (...) {
+}
+catch (...) {
     std::cerr<<"Unknown exception thrown\n";
     std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
     return 1;
@@ -112,14 +116,12 @@ void DoAssert(bool x, std::string s)
     } else { 
         if (showtests) std::cout<<"  Failed"<<std::endl;
         if (dontthrow) std::cout<<"Failed test: "<<s<<std::endl;  
-        else {
+        else
 #ifdef NOTHROW
-            std::cerr<<"Error in test: "<<s<<std::endl; 
-            exit(1); 
+        { std::cerr<<"Error in test: "<<s<<std::endl; exit(1); }
 #else
-            throw tmv::Error("Error in test: ",s);  
+        throw tmv::Error("Error in test: ",s);  
 #endif
-        }
     } 
 }
 

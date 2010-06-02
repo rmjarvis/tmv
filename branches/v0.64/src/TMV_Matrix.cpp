@@ -328,6 +328,40 @@ namespace tmv {
     //
 
     template <class T>
+    T GenMatrix<T>::sumElements() const
+    {
+        if (canLinearize()) return constLinearView().sumElements();
+        else {
+            T sum(0);
+            if (iscm()) {
+                const int N = rowsize();
+                for(int j=0;j<N;++j) sum += col(j).sumElements();
+            } else {
+                const int M = colsize();
+                for(int i=0;i<M;++i) sum += row(i).sumElements();
+            }
+            return sum;
+        }
+    }
+
+    template <class T>
+    RT GenMatrix<T>::sumAbsElements() const
+    {
+        if (canLinearize()) return constLinearView().sumAbsElements();
+        else {
+            RT sum(0);
+            if (iscm()) {
+                const int N = rowsize();
+                for(int j=0;j<N;++j) sum += col(j).sumAbsElements();
+            } else {
+                const int M = colsize();
+                for(int i=0;i<M;++i) sum += row(i).sumAbsElements();
+            }
+            return sum;
+        }
+    }
+
+    template <class T>
     RT GenMatrix<T>::normSq(const RT scale) const
     {
         if (canLinearize()) return constLinearView().normSq(scale);
@@ -335,12 +369,10 @@ namespace tmv {
             RT sum(0);
             if (isrm()) {
                 const int M = colsize();
-                for(int i=0;i<M;++i) 
-                    sum += row(i).normSq(scale);
+                for(int i=0;i<M;++i) sum += row(i).normSq(scale);
             } else {
                 const int N = rowsize();
-                for(int j=0;j<N;++j) 
-                    sum += col(j).normSq(scale);
+                for(int j=0;j<N;++j) sum += col(j).normSq(scale);
             }
             return sum;
         }

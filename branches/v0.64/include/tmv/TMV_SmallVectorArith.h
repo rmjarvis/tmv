@@ -43,7 +43,7 @@
 namespace tmv {
 
     template <class T, int N> 
-    class SmallVectorComposite 
+    class SmallVectorComposite : public VectorComposite<T>
     {
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) xCT;
@@ -833,7 +833,8 @@ namespace tmv {
 #define X2 ,N,I2
 #define X3 ,N,I1,I2
 #define Y ,int N, IndexStyle I1, IndexStyle I2
-#define GETM .getV()
+#define GETM1 .getV()
+#define GETM2 .getV()
 #include "tmv/TMV_AuxSumMM.h"
     // These get undef'ed in TMV_AuxSumMM.h
 #define SUMMM_1_1 Sumvv_1_1
@@ -843,7 +844,8 @@ namespace tmv {
 #define SUMMM_x_m1 Sumvv_x_m1
 #define X3 ,N,I1,I2
 #define Y ,int N, IndexStyle I1, IndexStyle I2
-#define GETM .getV()
+#define GETM1 .getV1()
+#define GETM2 .getV2()
 #include "tmv/TMV_AuxSumMMa.h"
 #undef GENMATRIX1
 #undef GENMATRIX2
@@ -859,7 +861,8 @@ namespace tmv {
 #define X1 ,N,I
 #define X3 ,N,I
 #define Y ,int N, IndexStyle I
-#define GETM .getV()
+#define GETM1 .getV()
+#define GETM2 .getV()
 #include "tmv/TMV_AuxSumMM.h"
 #undef GENMATRIX1
 #undef GENMATRIX2
@@ -875,7 +878,8 @@ namespace tmv {
 #define X2 ,N,I
 #define X3 ,N,I
 #define Y ,int N, IndexStyle I
-#define GETM .getV()
+#define GETM1 .getV()
+#define GETM2 .getV()
 #include "tmv/TMV_AuxSumMM.h"
 #undef GENMATRIX1
 #undef GENMATRIX2

@@ -109,8 +109,25 @@ namespace tmv {
     // Decompose A (input as Q) into Q R P.
     template <class T> 
     void QRP_Decompose(
-        const MatrixView<T>& Q,
-        const UpperTriMatrixView<T>& R, int* P, bool strict=false);
+        const MatrixView<T>& Q, const UpperTriMatrixView<T>& R,
+        int* P, bool strict=false);
+
+    template <class T> 
+    void QRP_Decompose(
+        const MatrixView<T>& QRx, const VectorView<T>& beta,
+        int* P, T& signdet, bool strict=false);
+
+    class Permutation;
+
+    template <class T> 
+    void QRP_Decompose(
+        const MatrixView<T>& Q, const UpperTriMatrixView<T>& R,
+        Permutation& P, bool strict=false);
+
+    template <class T> 
+    void QRP_Decompose(
+        const MatrixView<T>& QRx, const VectorView<T>& beta,
+        Permutation& P, T& signdet, bool strict=false);
 
     // Decompose A into Q R P, but don't return Q or P.
     // R is returned as A.upperTri().
@@ -170,7 +187,7 @@ namespace tmv {
         ConstUpperTriMatrixView<T> getR() const;
         const GenMatrix<T>& getQRx() const;
         const GenVector<T>& getBeta() const;
-        const int* getP() const;
+        const Permutation& getP() const;
 
         bool checkDecomp(const BaseMatrix<T>& m, std::ostream* fout) const;
 
@@ -185,7 +202,7 @@ namespace tmv {
         TMV_DEPRECATED(const GenVector<T>& Getbeta() const)
         { return getBeta(); }
         TMV_DEPRECATED(const int* GetP() const)
-        { return getP(); }
+        { return getP().getValues(); }
 
     protected :
 

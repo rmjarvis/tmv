@@ -61,36 +61,28 @@ void TestBandDiv_B2(tmv::DivType dt)
         if (showstartdone) 
             std::cout<<"Start loop: i = "<<i<<"\nbi = "<<tmv::TMV_Text(b[i])<<
                 "  "<<b[i]<<std::endl;
-        const tmv::BandMatrixView<T>& bi = b[i];
-        const tmv::BandMatrixView<std::complex<T> >& cbi = cb[i];
+        tmv::BandMatrixView<T> bi = b[i];
+        tmv::BandMatrixView<std::complex<T> > cbi = cb[i];
 
-        tmv::BandMatrix<T> bx = bi;
-        tmv::BandMatrix<std::complex<T> > cbx = cbi;
-
-        TestMatrixDivArith1<T>(dt,bx,cbx,a1v,bi,ca1v,cbi, 
-                               "Band/SquareMatrix");
+        TestMatrixDivArith1<T>(dt,a1v,bi,ca1v,cbi,"Band/SquareMatrix");
         if (dt == tmv::LU) continue;
 #ifdef XTEST
-        TestMatrixDivArith1<T>(dt,bx,cbx,a3v,bi,ca3v,cbi, 
-                               "Band/NonSquareMatrix");
-        TestMatrixDivArith1<T>(dt,bx,cbx,a4v,bi,ca4v,cbi, 
-                               "Band/NonSquareMatrix");
-        TestMatrixDivArith1<T>(dt,bx,cbx,a5v,bi,ca5v,cbi, 
-                               "Band/NonSquareMatrix");
-        TestMatrixDivArith1<T>(dt,bx,cbx,a6v,bi,ca6v,cbi, 
-                               "Band/NonSquareMatrix");
+        TestMatrixDivArith1<T>(dt,a3v,bi,ca3v,cbi,"Band/NonSquareMatrix");
+        TestMatrixDivArith1<T>(dt,a4v,bi,ca4v,cbi,"Band/NonSquareMatrix");
+        TestMatrixDivArith1<T>(dt,a5v,bi,ca5v,cbi,"Band/NonSquareMatrix");
+        TestMatrixDivArith1<T>(dt,a6v,bi,ca6v,cbi,"Band/NonSquareMatrix");
 #endif
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
     for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestBandDiv_B2<double>(tmv::DivType dt);
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestBandDiv_B2<float>(tmv::DivType dt);
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestBandDiv_B2<long double>(tmv::DivType dt);
 #endif

@@ -47,8 +47,10 @@
 #include "tmv/TMV_VectorArith.h"
 #include "tmv/TMV_MatrixArith.h"
 #include "tmv/TMV_PackedQ.h"
+#include "tmv/TMV_PermutationArith.h"
 
 #include "TMV_Diag.h"
 #include "TMV_Tri.h"
+#include "TMV_Small.h"
 
 #endif

@@ -42,6 +42,7 @@
 #include "tmv/TMV_MatrixArith.h"
 #include "tmv/TMV_BandMatrix.h"
 #include "tmv/TMV_BandMatrixArith.h"
+#include "tmv/TMV_PermutationArith.h"
 #include <ostream>
 
 namespace tmv {
@@ -57,7 +58,7 @@ namespace tmv {
         T* Aptr;
         SymMatrixView<T> LLx;
         Vector<T> xD;
-        auto_array<int> P;
+        Permutation P;
         mutable TMV_RealType(T) logdet;
         mutable T signdet;
     };
@@ -79,7 +80,7 @@ namespace tmv {
     ) :
         inplace(_inplace && (A.isrm() || A.iscm())), 
         Aptr1(APTR1), Aptr(APTR), LLx(LLX), xD(A.size()-1),
-        P(new int[A.colsize()]), logdet(0), signdet(1) {}
+        P(A.colsize()), logdet(0), signdet(1) {}
 
 #undef APTR1
 #undef APTR
@@ -95,7 +96,7 @@ namespace tmv {
         if (inplace) TMVAssert(A == pimpl->LLx); 
         else pimpl->LLx = A;
 
-        LDL_Decompose(pimpl->LLx,pimpl->xD.view(),pimpl->P.get(),
+        LDL_Decompose(pimpl->LLx,pimpl->xD.view(),pimpl->P,
                       pimpl->logdet,pimpl->signdet);
 #ifdef XTEST
         TMVAssert(pimpl->LLx.isHermOK());
@@ -107,21 +108,21 @@ namespace tmv {
 
     template <class T> template <class T1> 
     void SymLDLDiv<T>::doLDivEq(const MatrixView<T1>& m) const
-    { LDL_LDivEq(pimpl->LLx,pimpl->xD,pimpl->P.get(),m); }
+    { LDL_LDivEq(pimpl->LLx,pimpl->xD,pimpl->P.getValues(),m); }
 
     template <class T> template <class T1> 
     void SymLDLDiv<T>::doRDivEq(const MatrixView<T1>& m) const
-    { LDL_RDivEq(pimpl->LLx,pimpl->xD,pimpl->P.get(),m); }
+    { LDL_RDivEq(pimpl->LLx,pimpl->xD,pimpl->P.getValues(),m); }
 
     template <class T> template <class T1, class T2> 
     void SymLDLDiv<T>::doLDiv(
         const GenMatrix<T1>& m1, const MatrixView<T2>& m0) const
-    { LDL_LDivEq(pimpl->LLx,pimpl->xD,pimpl->P.get(),m0=m1); }
+    { LDL_LDivEq(pimpl->LLx,pimpl->xD,pimpl->P.getValues(),m0=m1); }
 
     template <class T> template <class T1, class T2> 
     void SymLDLDiv<T>::doRDiv(
         const GenMatrix<T1>& m1, const MatrixView<T2>& m0) const
-    { LDL_RDivEq(pimpl->LLx,pimpl->xD,pimpl->P.get(),m0=m1); }
+    { LDL_RDivEq(pimpl->LLx,pimpl->xD,pimpl->P.getValues(),m0=m1); }
 
     template <class T>
     T SymLDLDiv<T>::det() const 
@@ -142,7 +143,7 @@ namespace tmv {
     { 
         TMVAssert(isReal(T()) || issym() == sinv.issym());
         TMVAssert(isReal(T()) || isherm() == sinv.isherm());
-        LDL_Inverse(pimpl->LLx,pimpl->xD,pimpl->P.get(),sinv); 
+        LDL_Inverse(pimpl->LLx,pimpl->xD,pimpl->P.getValues(),sinv); 
 #ifdef XTEST
         TMVAssert(sinv.isHermOK());
 #endif
@@ -183,7 +184,7 @@ namespace tmv {
 
     template <class T>
     bool SymLDLDiv<T>::isSingular() const 
-    { return det() == T(0); }
+    { return pimpl->signdet == T(0); }
 
     template <class T>
     const ConstLowerTriMatrixView<T> SymLDLDiv<T>::getL() const
@@ -201,8 +202,8 @@ namespace tmv {
     }
 
     template <class T>
-    const int* SymLDLDiv<T>::getP() const 
-    { return pimpl->P.get(); }
+    const Permutation& SymLDLDiv<T>::getP() const 
+    { return pimpl->P; }
 
     template <class T>
     const GenSymMatrix<T>& SymLDLDiv<T>::getLL() const 
@@ -222,14 +223,15 @@ namespace tmv {
             *fout << "M = "<<mm<<std::endl;
             *fout << "L = "<<getL()<<std::endl;
             *fout << "D = "<<getD()<<std::endl;
-            *fout << "P = ";
-            for(int i=0;i<int(mm.colsize());i++) *fout<<pimpl->P.get()[i]<<" ";
+            *fout << "P = "<<getP()<<std::endl;
+            *fout << "  or by interchanges: ";
+            for(int i=0;i<int(getP().size());i++)
+                *fout<<(getP().getValues())[i]<<" ";
             *fout <<std::endl;
         }
-        Matrix<T> lu = getL()*getD()*
-            (pimpl->LLx.isherm()?getL().adjoint():getL().transpose());
-        lu.reversePermuteRows(pimpl->P.get());
-        lu.reversePermuteCols(pimpl->P.get());
+        Matrix<T> lu = getP()*getL()*getD()*
+            (pimpl->LLx.isherm()?getL().adjoint():getL().transpose())*
+            getP().transpose();
         TMV_RealType(T) nm = Norm(lu-mm);
         nm /= TMV_SQR(Norm(getL()))*Norm(getD());
         if (fout) {

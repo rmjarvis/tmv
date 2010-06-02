@@ -36,10 +36,6 @@
 
 namespace tmv {
 
-    template <class T> 
-    void LU_Decompose(
-        const BandMatrixView<T>& LUx, int* p, T& signdet, int Anhi);
-    // Decompose A (input as LUx) into L * U
 
     template <class T, class T1> 
     void TriLDivEq(

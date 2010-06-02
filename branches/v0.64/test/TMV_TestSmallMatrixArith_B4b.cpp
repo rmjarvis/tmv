@@ -36,13 +36,10 @@ static void DoTestSmallMatrixArith_B4b()
     tmv::SmallMatrix<T,7,N,tmv::ColMajor> a4 = a3;
     tmv::SmallMatrix<std::complex<T>,7,N,tmv::ColMajor> ca4 = ca3;
 
-    tmv::SmallMatrix<T,7,N> a3x;
-    tmv::SmallMatrix<std::complex<T>,7,N> ca3x;
-
     if (showstartdone) {
         std::cout<<"B4b\n";
     }
-    TestMatrixArith4<T>(a3x,ca3x,a4,ca4,a3,ca3,"NonSquare");
+    TestMatrixArith4<T>(a4,ca4,a3,ca3,"NonSquare");
 
 #ifdef XTEST
     tmv::SmallMatrix<T,7,N,tmv::ColMajor> a4b = a4;
@@ -53,9 +50,9 @@ static void DoTestSmallMatrixArith_B4b()
     tmv::SmallMatrix<T,7,N,tmv::ColMajor,tmv::FortranStyle> a4f = a4;
     tmv::SmallMatrix<std::complex<T>,7,N,tmv::ColMajor,tmv::FortranStyle> ca4f = ca4;
 
-    TestMatrixArith4<T>(a3x,ca3x,a4,ca4,a4b,ca4b,"NonSquare");
-    TestMatrixArith4<T>(a3x,ca3x,a4f,ca4f,a3,ca3,"NonSquare");
-    TestMatrixArith4<T>(a3x,ca3x,a4f,ca4f,a3f,ca3f,"NonSquare");
+    TestMatrixArith4<T>(a4,ca4,a4b,ca4b,"NonSquare");
+    TestMatrixArith4<T>(a4f,ca4f,a3,ca3,"NonSquare");
+    TestMatrixArith4<T>(a4f,ca4f,a3f,ca3f,"NonSquare");
 #endif
 }
 
@@ -72,15 +69,15 @@ void TestSmallMatrixArith_B4b()
 }
 
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSmallMatrixArith_B4b<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSmallMatrixArith_B4b<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSmallMatrixArith_B4b<long double>();
 #endif
-#ifdef INST_INT
+#ifdef TEST_INT
 template void TestSmallMatrixArith_B4b<int>();
 #endif

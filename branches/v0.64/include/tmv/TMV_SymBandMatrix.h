@@ -225,6 +225,8 @@
 //    m.det() or Det(m)
 //    m.logDet() or m.logDet(T* sign) or LogDet(m)
 //    m.trace() or Trace(m)
+//    m.sumElements() or SumElements(m)
+//    m.sumAbsElements() or SumAbsElements(m)
 //    m.norm() or m.normF() or Norm(m) or NormF(m)
 //    m.normSq() or NormSq(m)
 //    m.norm1() or Norm1(m)
@@ -308,6 +310,13 @@
 
 namespace tmv {
 
+    template <class T>
+    struct SymBandCopyHelper // real
+    { typedef SymBandMatrix<T> type; };
+    template <class T>
+    struct SymBandCopyHelper<std::complex<T> > // complex
+    { typedef BandMatrix<std::complex<T> > type; };
+
     template <class T> 
     class GenSymBandMatrix : 
         virtual public AssignableToSymBandMatrix<T>,
@@ -315,18 +324,25 @@ namespace tmv {
         public BaseMatrix<T>,
         private DivHelper<T>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
+        typedef T value_type;
+        typedef RT real_type;
+        typedef CT complex_type;
         typedef GenSymBandMatrix<T> type;
+        typedef typename SymBandCopyHelper<T>::type copy_type;
         typedef ConstSymBandMatrixView<T> const_view_type;
+        typedef const_view_type const_transpose_type;
+        typedef const_view_type const_conjugate_type;
+        typedef const_view_type const_adjoint_type;
         typedef ConstVectorView<T> const_vec_type;
         typedef ConstMatrixView<T> const_rec_type;
         typedef ConstSymMatrixView<T> const_sym_type;
         typedef ConstBandMatrixView<T> const_band_type;
-        typedef ConstSymBandMatrixView<RT> const_real_type;
+        typedef ConstSymBandMatrixView<RT> const_realpart_type;
         typedef SymBandMatrixView<T> nonconst_type;
-
-    public:
 
         //
         // Constructors
@@ -817,9 +833,9 @@ namespace tmv {
                     issym()?ct():TMV_ConjOf(T,ct()));
         }
 
-        inline const_real_type realPart() const
+        inline const_realpart_type realPart() const
         {
-            return const_real_type(
+            return const_realpart_type(
                 reinterpret_cast<const RT*>(cptr()),size(),nlo(),
                 isReal(T()) ? stepi() : 2*stepi(),
                 isReal(T()) ? stepj() : 2*stepj(),
@@ -827,12 +843,12 @@ namespace tmv {
                 Sym, uplo(), isReal(T()) ? stor() : NoMajor,NonConj);
         }
 
-        inline const_real_type imagPart() const
+        inline const_realpart_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             TMVAssert(issym());
             // The imaginary part of a Hermitian matrix is anti-symmetric
-            return const_real_type(
+            return const_realpart_type(
                 reinterpret_cast<const RT*>(cptr())+1,
                 size(),nlo(),2*stepi(),2*stepj(),2*diagstep(),
                 Sym,uplo(),NoMajor,NonConj);
@@ -879,9 +895,9 @@ namespace tmv {
         { return upperBandOff(); }
         TMV_DEPRECATED(const_band_type LowerBandOff() const)
         { return lowerBandOff(); }
-        TMV_DEPRECATED(const_real_type Real() const)
+        TMV_DEPRECATED(const_realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(const_real_type Imag() const)
+        TMV_DEPRECATED(const_realpart_type Imag() const)
         { return imagPart(); }
 
 
@@ -951,6 +967,10 @@ namespace tmv {
 
         inline T trace() const
         { return diag().sumElements(); }
+
+        T sumElements() const;
+
+        RT sumAbsElements() const;
 
         inline RT norm() const 
         { return normF(); }
@@ -1259,11 +1279,12 @@ namespace tmv {
     template <class T, IndexStyle I> 
     class ConstSymBandMatrixView : public GenSymBandMatrix<T>
     {
+    public :
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef ConstSymBandMatrixView<T,I> type;
         typedef GenSymBandMatrix<T> base;
-    public :
 
         inline ConstSymBandMatrixView(const type& rhs) :
             itsm(rhs.itsm), itss(rhs.itss), itslo(rhs.itslo),
@@ -1344,19 +1365,23 @@ namespace tmv {
     class ConstSymBandMatrixView<T,FortranStyle> : 
         public ConstSymBandMatrixView<T,CStyle>
     {
+    public :
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef ConstSymBandMatrixView<T,FortranStyle> type;
         typedef ConstSymBandMatrixView<T,CStyle> c_type;
         typedef GenSymBandMatrix<T> base;
         typedef ConstSymBandMatrixView<T,FortranStyle> const_view_type;
+        typedef const_view_type const_transpose_type;
+        typedef const_view_type const_conjugate_type;
+        typedef const_view_type const_adjoint_type;
         typedef ConstVectorView<T,FortranStyle> const_vec_type;
         typedef ConstMatrixView<T,FortranStyle> const_rec_type;
         typedef ConstSymMatrixView<T,FortranStyle> const_sym_type;
         typedef ConstBandMatrixView<T,FortranStyle> const_band_type;
-        typedef ConstSymBandMatrixView<RT,FortranStyle> const_real_type;
+        typedef ConstSymBandMatrixView<RT,FortranStyle> const_realpart_type;
         typedef SymBandMatrixView<T,FortranStyle> nonconst_type;
-    public :
 
         inline ConstSymBandMatrixView(const type& rhs) : c_type(rhs) {}
 
@@ -1518,10 +1543,10 @@ namespace tmv {
         inline const_band_type lowerBandOff() const
         { return base::lowerBandOff(); }
 
-        inline const_real_type realPart() const
+        inline const_realpart_type realPart() const
         { return base::realPart(); }
 
-        inline const_real_type imagPart() const
+        inline const_realpart_type imagPart() const
         { return base::imagPart(); }
 
         inline const_view_type view() const
@@ -1580,9 +1605,9 @@ namespace tmv {
         { return upperBandOff(); }
         TMV_DEPRECATED(const_band_type LowerBandOff() const)
         { return lowerBandOff(); }
-        TMV_DEPRECATED(const_real_type Real() const)
+        TMV_DEPRECATED(const_realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(const_real_type Imag() const)
+        TMV_DEPRECATED(const_realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(const_view_type View() const)
         { return view(); }
@@ -1605,18 +1630,22 @@ namespace tmv {
     template <class T, IndexStyle I> 
     class SymBandMatrixView : public GenSymBandMatrix<T>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef SymBandMatrixView<T,I> type;
         typedef GenSymBandMatrix<T> base;
         typedef SymBandMatrixView<T,I> view_type;
+        typedef view_type transpose_type;
+        typedef view_type conjugate_type;
+        typedef view_type adjoint_type;
         typedef VectorView<T,I> vec_type;
         typedef MatrixView<T,I> rec_type;
         typedef SymMatrixView<T,I> sym_type;
         typedef BandMatrixView<T,I> band_type;
-        typedef SymBandMatrixView<RT,I> real_type;
-
-    public:
+        typedef SymBandMatrixView<RT,I> realpart_type;
+        typedef TMV_RefType(T) reference;
 
         //
         // Constructors
@@ -1787,8 +1816,6 @@ namespace tmv {
         //
         // Access
         //
-
-        typedef TMV_RefType(T) reference;
 
         inline reference operator()(int i,int j) const 
         {
@@ -2177,9 +2204,9 @@ namespace tmv {
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
-        inline real_type realPart() const
+        inline realpart_type realPart() const
         {
-            return real_type(
+            return realpart_type(
                 reinterpret_cast<RT*>(ptr()),size(),nlo(),
                 isReal(T()) ? stepi() : 2*stepi(),
                 isReal(T()) ? stepj() : 2*stepj(),
@@ -2192,11 +2219,11 @@ namespace tmv {
             );
         }
 
-        inline real_type imagPart() const
+        inline realpart_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             TMVAssert(this->issym());
-            return real_type(
+            return realpart_type(
                 reinterpret_cast<RT*>(ptr())+1,
                 size(),nlo(),2*stepi(),2*stepj(),2*diagstep(),
                 sym(),uplo(),NoMajor, NonConj
@@ -2277,9 +2304,9 @@ namespace tmv {
         { return upperBandOff(); }
         TMV_DEPRECATED(band_type LowerBandOff() const)
         { return lowerBandOff(); }
-        TMV_DEPRECATED(real_type Real() const)
+        TMV_DEPRECATED(realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(real_type Imag() const)
+        TMV_DEPRECATED(realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(view_type View() const)
         { return view(); }
@@ -2343,20 +2370,23 @@ namespace tmv {
     class SymBandMatrixView<T,FortranStyle> : 
         public SymBandMatrixView<T,CStyle>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef SymBandMatrixView<T,FortranStyle> type;
         typedef GenSymBandMatrix<T> base;
         typedef ConstSymBandMatrixView<T,FortranStyle> const_type;
         typedef SymBandMatrixView<T,FortranStyle> view_type;
+        typedef view_type transpose_type;
+        typedef view_type conjugate_type;
+        typedef view_type adjoint_type;
         typedef SymBandMatrixView<T,CStyle> c_type;
         typedef VectorView<T,FortranStyle> vec_type;
         typedef MatrixView<T,FortranStyle> rec_type;
         typedef SymMatrixView<T,FortranStyle> sym_type;
         typedef BandMatrixView<T,FortranStyle> band_type;
-        typedef SymBandMatrixView<RT,FortranStyle> real_type;
-
-    public:
+        typedef SymBandMatrixView<RT,FortranStyle> realpart_type;
 
         //
         // Constructors
@@ -2613,10 +2643,10 @@ namespace tmv {
         inline band_type lowerBandOff() const
         { return c_type::lowerBandOff(); }
 
-        inline real_type realPart() const
+        inline realpart_type realPart() const
         { return c_type::realPart(); }
 
-        inline real_type imagPart() const
+        inline realpart_type imagPart() const
         { return c_type::imagPart(); }
 
         inline view_type view() const
@@ -2672,9 +2702,9 @@ namespace tmv {
         { return upperBandOff(); }
         TMV_DEPRECATED(band_type LowerBandOff() const)
         { return lowerBandOff(); }
-        TMV_DEPRECATED(real_type Real() const)
+        TMV_DEPRECATED(realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(real_type Imag() const)
+        TMV_DEPRECATED(realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(view_type View() const)
         { return view(); }
@@ -2697,24 +2727,32 @@ namespace tmv {
     template <class T, UpLoType U, StorageType S, IndexStyle I> 
     class SymBandMatrix : public GenSymBandMatrix<T>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef SymBandMatrix<T,U,S,I> type;
+        typedef type copy_type;
         typedef GenSymBandMatrix<T> base;
         typedef ConstSymBandMatrixView<T,I> const_view_type;
+        typedef const_view_type const_transpose_type;
+        typedef const_view_type const_conjugate_type;
+        typedef const_view_type const_adjoint_type;
         typedef ConstVectorView<T,I> const_vec_type;
         typedef ConstMatrixView<T,I> const_rec_type;
         typedef ConstSymMatrixView<T,I> const_sym_type;
         typedef ConstBandMatrixView<T,I> const_band_type;
-        typedef ConstSymBandMatrixView<RT,I> const_real_type;
+        typedef ConstSymBandMatrixView<RT,I> const_realpart_type;
         typedef SymBandMatrixView<T,I> view_type;
+        typedef view_type transpose_type;
+        typedef view_type conjugate_type;
+        typedef view_type adjoint_type;
         typedef VectorView<T,I> vec_type;
         typedef MatrixView<T,I> rec_type;
         typedef SymMatrixView<T,I> sym_type;
         typedef BandMatrixView<T,I> band_type;
-        typedef SymBandMatrixView<RT,I> real_type;
-
-    public:
+        typedef SymBandMatrixView<RT,I> realpart_type;
+        typedef T& reference;
 
         //
         // Constructors
@@ -3088,8 +3126,6 @@ namespace tmv {
         //
         // Access
         //
-
-        typedef T& reference;
 
         inline T operator()(int i, int j) const
         {
@@ -3545,9 +3581,9 @@ namespace tmv {
                     diagstep(),TMV_TransOf(S),NonConj);
         }
 
-        inline const_real_type realPart() const
+        inline const_realpart_type realPart() const
         {
-            return const_real_type(
+            return const_realpart_type(
                 reinterpret_cast<const RT*>(itsm),size(),nlo(),
                 isReal(T()) ? stepi() : 2*stepi(),
                 isReal(T()) ? stepj() : 2*stepj(),
@@ -3555,10 +3591,10 @@ namespace tmv {
                 Sym,U,isReal(T())?S:NoMajor,NonConj);
         }
 
-        inline const_real_type imagPart() const
+        inline const_realpart_type imagPart() const
         {
             TMVAssert(isComplex(T()));
-            return const_real_type(
+            return const_realpart_type(
                 reinterpret_cast<const RT*>(itsm)+1,size(),nlo(),
                 2*stepi(),2*stepj(),2*diagstep(),Sym,U,NoMajor,NonConj);
         } 
@@ -3825,9 +3861,9 @@ namespace tmv {
                     TMV_TransOf(S),NonConj TMV_FIRSTLAST);
         }
 
-        inline real_type realPart()
+        inline realpart_type realPart()
         {
-            return real_type(
+            return realpart_type(
                 reinterpret_cast<RT*>(itsm),size(),nlo(),
                 isReal(T()) ? stepi() : 2*stepi(),
                 isReal(T()) ? stepj() : 2*stepj(),
@@ -3840,10 +3876,10 @@ namespace tmv {
             );
         }
 
-        inline real_type imagPart()
+        inline realpart_type imagPart()
         {
             TMVAssert(isComplex(T()));
-            return real_type(
+            return realpart_type(
                 reinterpret_cast<RT*>(itsm)+1,size(),nlo(),
                 2*stepi(),2*stepj(),2*diagstep(),Sym,U,NoMajor,NonConj
 #ifdef TMVFLDEBUG
@@ -3923,9 +3959,9 @@ namespace tmv {
         { return upperBandOff(); }
         TMV_DEPRECATED(const_band_type LowerBandOff() const)
         { return lowerBandOff(); }
-        TMV_DEPRECATED(const_real_type Real() const)
+        TMV_DEPRECATED(const_realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(const_real_type Imag() const)
+        TMV_DEPRECATED(const_realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(const_view_type View() const)
         { return view(); }
@@ -3978,9 +4014,9 @@ namespace tmv {
         { return upperBandOff(); }
         TMV_DEPRECATED(band_type LowerBandOff())
         { return lowerBandOff(); }
-        TMV_DEPRECATED(real_type Real())
+        TMV_DEPRECATED(realpart_type Real())
         { return realPart(); }
-        TMV_DEPRECATED(real_type Imag())
+        TMV_DEPRECATED(realpart_type Imag())
         { return imagPart(); }
         TMV_DEPRECATED(view_type View())
         { return view(); }
@@ -4037,17 +4073,33 @@ namespace tmv {
         const int itssi;
         const int itssj;
         const int itssd;
-        T*const itsm;
+        T* itsm;
 
 #ifdef TMVFLDEBUG
     public:
-        const T*const _first;
-        const T*const _last;
+        const T* _first;
+        const T* _last;
     protected :
 #endif
 
         inline bool okij(int i, int j) const
         { return (j+nlo() >= i && i+nlo() >= j); }
+
+        template <IndexStyle I2>
+        friend void Swap(
+            SymBandMatrix<T,U,S,I>& m1, SymBandMatrix<T,U,S,I2>& m2)
+        {
+            TMVAssert(m1.size() == m2.size());
+            TMVAssert(m1.nlo() == m2.nlo());
+            T* temp = m1.itsm1.release();
+            m1.itsm1.reset(m2.itsm1.release());
+            m2.itsm1.reset(temp);
+            TMV_SWAP(m1.itsm,m2.itsm);
+#ifdef TMVFLDEBUG
+            TMV_SWAP(m1._first,m2._first);
+            TMV_SWAP(m1._last,m2._last);
+#endif
+        }
 
     }; // SymBandMatrix
 
@@ -4055,24 +4107,32 @@ namespace tmv {
     class HermBandMatrix : 
         public GenSymBandMatrix<T>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef HermBandMatrix<T,U,S,I> type;
+        typedef type copy_type;
         typedef GenSymBandMatrix<T> base;
         typedef ConstSymBandMatrixView<T,I> const_view_type;
+        typedef const_view_type const_transpose_type;
+        typedef const_view_type const_conjugate_type;
+        typedef const_view_type const_adjoint_type;
         typedef ConstVectorView<T,I> const_vec_type;
         typedef ConstMatrixView<T,I> const_rec_type;
         typedef ConstSymMatrixView<T,I> const_sym_type;
         typedef ConstBandMatrixView<T,I> const_band_type;
-        typedef ConstSymBandMatrixView<RT,I> const_real_type;
+        typedef ConstSymBandMatrixView<RT,I> const_realpart_type;
         typedef SymBandMatrixView<T,I> view_type;
+        typedef view_type transpose_type;
+        typedef view_type conjugate_type;
+        typedef view_type adjoint_type;
         typedef VectorView<T,I> vec_type;
         typedef MatrixView<T,I> rec_type;
         typedef SymMatrixView<T,I> sym_type;
         typedef BandMatrixView<T,I> band_type;
-        typedef SymBandMatrixView<RT,I> real_type;
-
-    public:
+        typedef SymBandMatrixView<RT,I> realpart_type;
+        typedef TMV_RefType(T) reference;
 
         //
         // Constructors
@@ -4527,8 +4587,6 @@ namespace tmv {
         //
         // Access
         //
-
-        typedef TMV_RefType(T) reference;
 
         inline T operator()(int i, int j) const
         {
@@ -5000,9 +5058,9 @@ namespace tmv {
                     TMV_TransOf(S),TMV_ConjOf(T,NonConj));
         }
 
-        inline const_real_type realPart() const
+        inline const_realpart_type realPart() const
         {
-            return const_real_type(
+            return const_realpart_type(
                 reinterpret_cast<const RT*>(itsm),size(),nlo(),
                 isReal(T()) ? stepi() : 2*stepi(),
                 isReal(T()) ? stepj() : 2*stepj(),
@@ -5010,10 +5068,10 @@ namespace tmv {
                 Herm,U,isReal(T())?S:NoMajor,NonConj);
         }
 
-        inline const_real_type imagPart() const
+        inline const_realpart_type imagPart() const
         {
             TMVAssert(isComplex(T()));
-            return const_real_type(
+            return const_realpart_type(
                 reinterpret_cast<const RT*>(itsm)+1,size(),nlo(),
                 2*stepi(),2*stepj(),2*diagstep(),Herm,U,NoMajor,NonConj);
         } 
@@ -5281,9 +5339,9 @@ namespace tmv {
                     TMV_TransOf(S),TMV_ConjOf(T,NonConj) TMV_FIRSTLAST);
         }
 
-        inline real_type realPart()
+        inline realpart_type realPart()
         {
-            return real_type(
+            return realpart_type(
                 reinterpret_cast<RT*>(itsm),size(),nlo(),
                 isReal(T()) ? stepi() : 2*stepi(),
                 isReal(T()) ? stepj() : 2*stepj(),
@@ -5296,12 +5354,12 @@ namespace tmv {
             );
         }
 
-        inline real_type imagPart()
+        inline realpart_type imagPart()
             // The imaginary part of a Hermitian matrix is anti-symmetric
             // so this is illegal.
         {
             TMVAssert(TMV_FALSE);
-            return real_type(
+            return realpart_type(
                 0,0,0,0,0,0,Herm,U,S,NonConj TMV_FIRSTLAST1(0,0) );
         } 
 
@@ -5375,9 +5433,9 @@ namespace tmv {
         { return upperBandOff(); }
         TMV_DEPRECATED(const_band_type LowerBandOff() const)
         { return lowerBandOff(); }
-        TMV_DEPRECATED(const_real_type Real() const)
+        TMV_DEPRECATED(const_realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(const_real_type Imag() const)
+        TMV_DEPRECATED(const_realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(const_view_type View() const)
         { return view(); }
@@ -5428,9 +5486,9 @@ namespace tmv {
         { return upperBandOff(); }
         TMV_DEPRECATED(band_type LowerBandOff())
         { return lowerBandOff(); }
-        TMV_DEPRECATED(real_type Real())
+        TMV_DEPRECATED(realpart_type Real())
         { return realPart(); }
-        TMV_DEPRECATED(real_type Imag())
+        TMV_DEPRECATED(realpart_type Imag())
         { return imagPart(); }
         TMV_DEPRECATED(view_type View())
         { return view(); }
@@ -5490,13 +5548,29 @@ namespace tmv {
 
 #ifdef TMVFLDEBUG
     public:
-        const T*const _first;
-        const T*const _last;
+        const T* _first;
+        const T* _last;
     protected:
 #endif
 
         inline bool okij(int i, int j) const
         { return (j+nlo() >= i && i+nlo() >= j); }
+
+        template <IndexStyle I2>
+        friend void Swap(
+            HermBandMatrix<T,U,S,I>& m1, HermBandMatrix<T,U,S,I2>& m2)
+        {
+            TMVAssert(m1.size() == m2.size());
+            TMVAssert(m1.nlo() == m2.nlo());
+            T* temp = m1.itsm1.release();
+            m1.itsm1.reset(m2.itsm1.release());
+            m2.itsm1.reset(temp);
+            TMV_SWAP(m1.itsm,m2.itsm);
+#ifdef TMVFLDEBUG
+            TMV_SWAP(m1._first,m2._first);
+            TMV_SWAP(m1._last,m2._last);
+#endif
+        }
 
     }; // HermBandMatrix
 

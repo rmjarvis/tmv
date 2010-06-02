@@ -33,44 +33,33 @@ void TestSymBandDiv_F2(tmv::DivType dt, PosDefCode pdc)
     tmv::SymMatrix<T> s(a1);
     tmv::SymMatrix<std::complex<T> > cs(ca1);
 
+    tmv::SymMatrixView<T> hv = h.view();
+    tmv::SymMatrixView<std::complex<T> > chv = ch.view();
+    tmv::SymMatrixView<T> sv = s.view();
+    tmv::SymMatrixView<std::complex<T> > csv = cs.view();
+
     for(size_t i=START;i<sb.size();i++) {
         if (showstartdone)
             std::cout<<"Start loop: i = "<<i<<", si = "<<tmv::TMV_Text(sb[i])<<
                 "  "<<sb[i]<<std::endl;
-        const tmv::SymBandMatrixView<T>& si = sb[i];
-        const tmv::SymBandMatrixView<std::complex<T> >& csi = csb[i];
+        tmv::SymBandMatrixView<T> si = sb[i];
+        tmv::SymBandMatrixView<std::complex<T> > csi = csb[i];
         if (dt == tmv::CH && csi.issym()) continue;
 
-        if (csi.issym()) {
-            tmv::SymBandMatrix<T> sx = si;
-            tmv::SymBandMatrix<std::complex<T> > csx = csi;
-
-            TestMatrixDivArith1<T>(dt,sx,csx,h.view(),si,ch.view(),csi,
-                                   "SymBand/HermMatrix");
-            if (dt != tmv::CH)
-                TestMatrixDivArith1<T>(dt,sx,csx,s.view(),si,cs.view(),csi,
-                                       "SymBand/SymMatrix");
-        } else {
-            tmv::HermBandMatrix<T> hx = si;
-            tmv::HermBandMatrix<std::complex<T> > chx = csi;
-
-            TestMatrixDivArith1<T>(dt,hx,chx,h.view(),si,ch.view(),csi,
-                                   "SymBand/HermMatrix");
-            if (dt != tmv::CH)
-                TestMatrixDivArith1<T>(dt,hx,chx,s.view(),si,cs.view(),csi,
-                                       "SymBand/SymMatrix");
-        }
+        TestMatrixDivArith1<T>(dt,hv,si,chv,csi,"SymBand/HermMatrix");
+        if (dt != tmv::CH)
+            TestMatrixDivArith1<T>(dt,sv,si,csv,csi,"SymBand/SymMatrix");
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
     for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSymBandDiv_F2<double>(tmv::DivType dt, PosDefCode pdc);
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSymBandDiv_F2<float>(tmv::DivType dt, PosDefCode pdc);
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSymBandDiv_F2<long double>(tmv::DivType dt, PosDefCode pdc);
 #endif

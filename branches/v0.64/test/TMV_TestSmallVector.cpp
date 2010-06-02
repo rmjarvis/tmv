@@ -256,21 +256,18 @@ static void TestSmallVectorArith()
     tmv::SmallVector<std::complex<T>,NN> ca = a*std::complex<T>(2,-1);;
     tmv::SmallVector<std::complex<T>,NN> cb = b*std::complex<T>(-5,1);
 
-    tmv::SmallVector<T,NN> a0;
-    tmv::SmallVector<std::complex<T>,NN> ca0;
-
-    TestVectorArith1<T>(a0,ca0,a,ca,"SmallVector C");
-    TestVectorArith2<T>(a0,ca0,a,ca,b,cb,"SmallVector CC");
+    TestVectorArith1<T>(a,ca,"SmallVector C");
+    TestVectorArith2<T>(a,ca,b,cb,"SmallVector CC");
 
     tmv::SmallVector<T,NN,tmv::FortranStyle> af = a;
     tmv::SmallVector<T,NN,tmv::FortranStyle> bf = b;
     tmv::SmallVector<std::complex<T>,NN,tmv::FortranStyle> caf = ca;
     tmv::SmallVector<std::complex<T>,NN,tmv::FortranStyle> cbf = cb;
 
-    TestVectorArith1<T>(a0,ca0,af,caf,"SmallVector F");
-    TestVectorArith2<T>(a0,ca0,af,caf,bf,cbf,"SmallVector FF");
-    TestVectorArith2<T>(a0,ca0,a,ca,bf,cbf,"SmallVector CF");
-    TestVectorArith2<T>(a0,ca0,af,caf,b,cb,"SmallVector FC");
+    TestVectorArith1<T>(af,caf,"SmallVector F");
+    TestVectorArith2<T>(af,caf,bf,cbf,"SmallVector FF");
+    TestVectorArith2<T>(a,ca,bf,cbf,"SmallVector CF");
+    TestVectorArith2<T>(af,caf,b,cb,"SmallVector FC");
 
 #ifdef XTEST
     // These tests lead to segmentation faults with ATLAS BLAS.
@@ -279,8 +276,8 @@ static void TestSmallVectorArith()
     tmv::VectorView<T> bv = b.view();
     tmv::VectorView<std::complex<T> > cbv = cb.view();
 
-    TestVectorArith2<T>(a0,ca0,av,cav,b,cb,"SmallVector/Vector");
-    TestVectorArith2<T>(a0,ca0,a,ca,bv,cbv,"Vector/SmallVector");
+    TestVectorArith2<T>(av,cav,b,cb,"SmallVector/Vector");
+    TestVectorArith2<T>(a,ca,bv,cbv,"Vector/SmallVector");
 #endif
 }
 
@@ -359,15 +356,15 @@ void TestAllSmallVector()
     std::cout<<"SmallVector<"<<tmv::TMV_Text(T())<<"> passed all tests\n";
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestAllSmallVector<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestAllSmallVector<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestAllSmallVector<long double>();
 #endif
-#ifdef INST_INT
+#ifdef TEST_INT
 template void TestAllSmallVector<int>();
 #endif

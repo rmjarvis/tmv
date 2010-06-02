@@ -1,15 +1,15 @@
 
-#include "TMV.h"
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
+#include "TMV.h"
 #include <fstream>
 
 #define NOSV
 #include "TMV_TestMatrixArith.h"
 
-template <class T> 
-void TestDiagMatrixArith_A()
+template <class T> void TestDiagMatrixArith_B6b()
 {
+#if (XTEST & 2)
     const int N = 10;
 
     tmv::DiagMatrix<T> a(N);
@@ -51,24 +51,31 @@ void TestDiagMatrixArith_A()
 
     tmv::DiagMatrixView<T> av = a.view();
     tmv::DiagMatrixView<std::complex<T> > cav = ca.view();
+    tmv::MatrixView<T> pv = p.view();
+    tmv::MatrixView<std::complex<T> > cpv = cp.view();
 
-    TestMatrixArith123<T>(ax,cax,av,cav, "Diag");
+    tmv::MatrixView<T> qv = q.view();
+    tmv::MatrixView<std::complex<T> > cqv = cq.view();
+    tmv::MatrixView<T> rv = r.view();
+    tmv::MatrixView<std::complex<T> > crv = cr.view();
 
-    tmv::DiagMatrixView<T> bv = b.view();
-    tmv::DiagMatrixView<std::complex<T> > cbv = cb.view();
-
-    TestMatrixArith456<T>(ax,cax,av,cav,bv,cbv, "Diag/Diag");
+    TestMatrixArith6x<T>(pv,cpv,av,cav, "SquareM/Diag");
+    TestMatrixArith6x<T>(qv,cqv,av,cav, "NonSquareM/Diag");
+#if (XTEST & 8)
+    TestMatrixArith6x<T>(rv,crv,av,cav, "DegenM/Diag");
+#endif
+#endif
 }
 
-#ifdef INST_DOUBLE
-template void TestDiagMatrixArith_A<double>();
+#ifdef TEST_DOUBLE
+template void TestDiagMatrixArith_B6b<double>();
 #endif
-#ifdef INST_FLOAT
-template void TestDiagMatrixArith_A<float>();
+#ifdef TEST_FLOAT
+template void TestDiagMatrixArith_B6b<float>();
 #endif
-#ifdef INST_LONGDOUBLE
-template void TestDiagMatrixArith_A<long double>();
+#ifdef TEST_LONGDOUBLE
+template void TestDiagMatrixArith_B6b<long double>();
 #endif
-#ifdef INST_INT
-template void TestDiagMatrixArith_A<int>();
+#ifdef TEST_INT
+template void TestDiagMatrixArith_B6b<int>();
 #endif

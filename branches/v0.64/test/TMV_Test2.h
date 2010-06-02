@@ -1,5 +1,6 @@
 #define ALIASOK
 
+#include "tmv/TMV_Base.h"
 
 template <class T> void TestBandMatrix();
 template <class T> void TestBandMatrixArith_A();
@@ -23,9 +24,9 @@ template <class T> void TestBandDiv_D2(tmv::DivType dt);
 enum PosDefCode { PosDef, InDef, Sing };
 inline std::string PDLabel(PosDefCode pdc)
 {
-  if (pdc == PosDef) return "Positive Definite";
-  else if (pdc == InDef) return "Indefinite";
-  else return "Singular";
+    if (pdc == PosDef) return "Positive Definite";
+    else if (pdc == InDef) return "Indefinite";
+    else return "Singular";
 }
 
 template <class T> void TestSymMatrix();

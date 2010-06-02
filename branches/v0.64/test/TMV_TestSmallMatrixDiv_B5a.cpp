@@ -38,10 +38,7 @@ static void TestSmallNonSquareDiv_B5a()
     c6.col(1) *= std::complex<T>(2,1);
     c6.row(5).addToAll(std::complex<T>(-7,2));
 
-    tmv::SmallMatrix<T,7,N,stor> a4x;
-    tmv::SmallMatrix<std::complex<T>,7,N,stor> c4x;
-
-    TestMatrixDivArith3c<T>(tmv::QR,a4x,c4x,a1,a4,a6,c1,c4,c6,
+    TestMatrixDivArith3c<T>(tmv::QR,a1,a4,a6,c1,c4,c6,
                             "NonSquare/NonSquare"); 
 #ifdef XTEST
     tmv::SmallMatrix<T,6,N,stor,tmv::FortranStyle> a1f = a1;
@@ -51,11 +48,11 @@ static void TestSmallNonSquareDiv_B5a()
     tmv::SmallMatrix<T,7,6,stor,tmv::FortranStyle> a6f = a6;
     tmv::SmallMatrix<std::complex<T>,7,6,stor,tmv::FortranStyle> c6f = c6;
 
-    TestMatrixDivArith3c<T>(tmv::QR,a4x,c4x,a1f,a4,a6,c1f,c4,c6,
+    TestMatrixDivArith3c<T>(tmv::QR,a1f,a4,a6,c1f,c4,c6,
                             "NonSquare/NonSquare"); 
-    TestMatrixDivArith3c<T>(tmv::QR,a4x,c4x,a1f,a4f,a6,c1f,c4f,c6,
+    TestMatrixDivArith3c<T>(tmv::QR,a1f,a4f,a6,c1f,c4f,c6,
                             "NonSquare/NonSquare"); 
-    TestMatrixDivArith3c<T>(tmv::QR,a4x,c4x,a1f,a4f,a6f,c1f,c4f,c6f,
+    TestMatrixDivArith3c<T>(tmv::QR,a1f,a4f,a6f,c1f,c4f,c6f,
                             "NonSquare/NonSquare"); 
 
 #endif
@@ -78,12 +75,12 @@ void TestSmallMatrixDiv_B5a()
 #endif
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSmallMatrixDiv_B5a<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSmallMatrixDiv_B5a<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSmallMatrixDiv_B5a<long double>();
 #endif

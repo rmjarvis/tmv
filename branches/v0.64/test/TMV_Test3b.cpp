@@ -36,19 +36,19 @@ int main() try
 
 #if 1
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
     TestAllSmallMatrixA<double>();
 #endif
 
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
     TestAllSmallMatrixA<float>();
 #endif
 
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
     TestAllSmallMatrixA<long double>();
 #endif 
 
-#ifdef INST_INT
+#ifdef TEST_INT
     TestAllSmallMatrixA<int>();
 #endif 
 

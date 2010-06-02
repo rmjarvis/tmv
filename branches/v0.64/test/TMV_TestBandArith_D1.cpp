@@ -141,13 +141,6 @@ void TestBandMatrixArith_D1()
     tmv::LowerTriMatrixView<std::complex<T> > cl2v = cl2.view();
     tmv::LowerTriMatrixView<std::complex<T> > cl3v = cl3.view();
     tmv::LowerTriMatrixView<std::complex<T> > cl4v = cl4.view();
-
-    tmv::UpperTriMatrix<T,tmv::UnitDiag> u2x = u2v;
-    tmv::LowerTriMatrix<T,tmv::NonUnitDiag> l1x = l1v;
-    tmv::LowerTriMatrix<T,tmv::UnitDiag> l2x = l2v;
-    tmv::UpperTriMatrix<std::complex<T>,tmv::UnitDiag> cu2x = cu2v;
-    tmv::LowerTriMatrix<std::complex<T>,tmv::NonUnitDiag> cl1x = cl1v;
-    tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag> cl2x = cl2v;
 #endif
 
     for(size_t i=START;i<b.size();i++) {
@@ -157,33 +150,47 @@ void TestBandMatrixArith_D1()
         }
         tmv::BandMatrixView<T> bi = b[i];
         tmv::BandMatrixView<std::complex<T> > cbi = cb[i];
-        tmv::BandMatrix<T> bx = bi;
-        tmv::BandMatrix<std::complex<T> > cbx = cbi;
 
-        TestMatrixArith456<T>(bx,cbx,bi,cbi,u1v,cu1v,"Band/UpperTri");
+        TestMatrixArith4<T>(bi,cbi,u1v,cu1v,"Band/UpperTri");
+        TestMatrixArith5<T>(bi,cbi,u1v,cu1v,"Band/UpperTri");
+        TestMatrixArith6x<T>(bi,cbi,u1v,cu1v,"Band/UpperTri");
 #ifdef XTEST
-        TestMatrixArith456<T>(bx,cbx,bi,cbi,l1v,cl1v,"Band/LowerTri");
-        TestMatrixArith456<T>(bx,cbx,bi,cbi,u2v,cu2v,"Band/UpperTri");
-        TestMatrixArith456<T>(bx,cbx,bi,cbi,l2v,cl2v,"Band/LowerTri");
-        TestMatrixArith456<T>(bx,cbx,bi,cbi,u3v,cu3v,"Band/UpperTri");
-        TestMatrixArith456<T>(bx,cbx,bi,cbi,l3v,cl3v,"Band/LowerTri");
-        TestMatrixArith456<T>(bx,cbx,bi,cbi,u4v,cu4v,"Band/UpperTri");
-        TestMatrixArith456<T>(bx,cbx,bi,cbi,l4v,cl4v,"Band/LowerTri");
+        TestMatrixArith4<T>(bi,cbi,l1v,cl1v,"Band/LowerTri");
+        TestMatrixArith5<T>(bi,cbi,l1v,cl1v,"Band/LowerTri");
+        TestMatrixArith6x<T>(bi,cbi,l1v,cl1v,"Band/LowerTri");
+        TestMatrixArith4<T>(bi,cbi,u2v,cu2v,"Band/UpperTri");
+        TestMatrixArith5<T>(bi,cbi,u2v,cu2v,"Band/UpperTri");
+        TestMatrixArith6x<T>(bi,cbi,u2v,cu2v,"Band/UpperTri");
+        TestMatrixArith4<T>(bi,cbi,l2v,cl2v,"Band/LowerTri");
+        TestMatrixArith5<T>(bi,cbi,l2v,cl2v,"Band/LowerTri");
+        TestMatrixArith6x<T>(bi,cbi,l2v,cl2v,"Band/LowerTri");
+        TestMatrixArith4<T>(bi,cbi,u3v,cu3v,"Band/UpperTri");
+        TestMatrixArith5<T>(bi,cbi,u3v,cu3v,"Band/UpperTri");
+        TestMatrixArith6x<T>(bi,cbi,u3v,cu3v,"Band/UpperTri");
+        TestMatrixArith4<T>(bi,cbi,l3v,cl3v,"Band/LowerTri");
+        TestMatrixArith5<T>(bi,cbi,l3v,cl3v,"Band/LowerTri");
+        TestMatrixArith6x<T>(bi,cbi,l3v,cl3v,"Band/LowerTri");
+        TestMatrixArith4<T>(bi,cbi,u4v,cu4v,"Band/UpperTri");
+        TestMatrixArith5<T>(bi,cbi,u4v,cu4v,"Band/UpperTri");
+        TestMatrixArith6x<T>(bi,cbi,u4v,cu4v,"Band/UpperTri");
+        TestMatrixArith4<T>(bi,cbi,l4v,cl4v,"Band/LowerTri");
+        TestMatrixArith5<T>(bi,cbi,l4v,cl4v,"Band/LowerTri");
+        TestMatrixArith6x<T>(bi,cbi,l4v,cl4v,"Band/LowerTri");
 #endif
     }
     for(size_t i=0;i<B.size();i++) delete B[i];
     for(size_t i=0;i<CB.size();i++) delete CB[i];
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestBandMatrixArith_D1<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestBandMatrixArith_D1<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestBandMatrixArith_D1<long double>();
 #endif
-#ifdef INST_INT
+#ifdef TEST_INT
 template void TestBandMatrixArith_D1<int>();
 #endif

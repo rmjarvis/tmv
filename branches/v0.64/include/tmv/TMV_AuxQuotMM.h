@@ -91,7 +91,12 @@
 #endif
 
 // m/m
-
+#ifdef INTT2
+template <class T Y> 
+inline QUOTMM_1<T,T,int X3> operator/(
+    const GENMATRIX1<T X1>& m1, const GENMATRIX2<int X2>& m2)
+{ return QUOTMM_1<T,T,int X3>(T(1),m1,m2); }
+#else
 template <class T Y> 
 inline QUOTMM_1<T,T,T X3> operator/(
     const GENMATRIX1<T X1>& m1, const GENMATRIX2<T X2>& m2)
@@ -106,9 +111,15 @@ template <class T Y>
 inline QUOTMM_1<CT,T,CT X3> operator/(
     const GENMATRIX1<T X1>& m1, const GENMATRIX2<CT X2>& m2)
 { return QUOTMM_1<CT,T,CT X3>(CT(1),m1,m2); }
+#endif
 
 // m%m
-
+#ifdef INTT2
+template <class T Yb> 
+inline RQUOTMM_1<T,T,int X3b> operator%(
+    const GENMATRIX1<T X1b>& m1, const GENMATRIX2<int X2b>& m2)
+{ return RQUOTMM_1<T,T,int X3b>(T(1),m1,m2); }
+#else
 template <class T Yb> 
 inline RQUOTMM_1<T,T,T X3b> operator%(
     const GENMATRIX1<T X1b>& m1, const GENMATRIX2<T X2b>& m2)
@@ -123,9 +134,15 @@ template <class T Yb>
 inline RQUOTMM_1<CT,T,CT X3b> operator%(
     const GENMATRIX1<T X1b>& m1, const GENMATRIX2<CT X2b>& m2)
 { return RQUOTMM_1<CT,T,CT X3b>(CT(1),m1,m2); }
+#endif
 
 // (x*m)/m
-
+#ifdef INTT2
+template <class T, class T1 Y> 
+inline QUOTMM<T,T1,int X3> operator/(
+    const PRODXM1<T,T1 X1>& pxm, const GENMATRIX2<int X2>& m)
+{ return QUOTMM<T,T1,int X3>(pxm.getX(),pxm GETM1,m); }
+#else
 template <class T, class T1 Y> 
 inline QUOTMM<T,T1,T X3> operator/(
     const PRODXM1<T,T1 X1>& pxm, const GENMATRIX2<T X2>& m)
@@ -140,9 +157,16 @@ template <class T, class T1 Y>
 inline QUOTMM<CT,T1,T X3> operator/(
     const PRODXM1<CT,T1 X1>& pxm, const GENMATRIX2<T X2>& m)
 { return QUOTMM<CT,T1,T X3>(pxm.getX(),pxm GETM1,m); }
+#endif
 
 // (x*m)%m
-
+#ifdef INTT2
+template <class T, class T1 Yb> 
+inline RQUOTMM<T,T1,int X3b> operator%(
+    const PRODXM1<T,T1 X1b>& pxm, const GENMATRIX2<int X2b>& m)
+{ return RQUOTMM<T,T1,int X3b>(pxm.getX(),pxm GETM1,m); }
+#undef INTT2
+#else
 template <class T, class T1 Yb> 
 inline RQUOTMM<T,T1,T X3b> operator%(
     const PRODXM1<T,T1 X1b>& pxm, const GENMATRIX2<T X2b>& m)
@@ -157,6 +181,7 @@ template <class T, class T1 Yb>
 inline RQUOTMM<CT,T1,T X3b> operator%(
     const PRODXM1<CT,T1 X1b>& pxm, const GENMATRIX2<T X2b>& m)
 { return RQUOTMM<CT,T1,T X3b>(pxm.getX(),pxm GETM1,m); }
+#endif
 
 // m/(x*m)
 

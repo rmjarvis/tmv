@@ -50,6 +50,10 @@ void TestBandDiv_D2(tmv::DivType dt)
     tmv::UpperTriMatrix<std::complex<T> > cu(ca1);
     tmv::LowerTriMatrix<T> l(a1);
     tmv::LowerTriMatrix<std::complex<T> > cl(ca1);
+    tmv::UpperTriMatrixView<T> uv = u.view();
+    tmv::UpperTriMatrixView<std::complex<T> > cuv = cu.view();
+    tmv::LowerTriMatrixView<T> lv = l.view();
+    tmv::LowerTriMatrixView<std::complex<T> > clv = cl.view();
 
     for(size_t i=START;i<b.size();i++) {
         if (showstartdone) {
@@ -59,27 +63,22 @@ void TestBandDiv_D2(tmv::DivType dt)
             std::cout<<"l = "<<tmv::TMV_Text(l)<<"  "<<l<<std::endl;
         }
 
-        const tmv::BandMatrixView<T>& bi = b[i];
-        const tmv::BandMatrixView<std::complex<T> >& cbi = cb[i];
+        tmv::BandMatrixView<T> bi = b[i];
+        tmv::BandMatrixView<std::complex<T> > cbi = cb[i];
 
-        tmv::BandMatrix<T> bx = bi;
-        tmv::BandMatrix<std::complex<T> > cbx = cbi;
-
-        TestMatrixDivArith1<T>(dt,bx,cbx,u.view(),bi,cu.view(),cbi,
-                               "Band/UpperTriMatrix");
-        TestMatrixDivArith1<T>(dt,bx,cbx,l.view(),bi,cl.view(),cbi,
-                               "Band/LowerTriMatrix");
+        TestMatrixDivArith1<T>(dt,uv,bi,cuv,cbi,"Band/UpperTriMatrix");
+        TestMatrixDivArith1<T>(dt,lv,bi,clv,cbi,"Band/LowerTriMatrix");
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
     for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestBandDiv_D2<double>(tmv::DivType dt);
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestBandDiv_D2<float>(tmv::DivType dt);
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestBandDiv_D2<long double>(tmv::DivType dt);
 #endif

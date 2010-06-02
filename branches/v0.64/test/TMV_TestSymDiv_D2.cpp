@@ -33,42 +33,32 @@ void TestSymDiv_D2(tmv::DivType dt, PosDefCode pdc)
     tmv::LowerTriMatrix<T> l(a1);
     tmv::LowerTriMatrix<std::complex<T> > cl(ca1);
 
+    tmv::UpperTriMatrixView<T> uv = u.view();
+    tmv::UpperTriMatrixView<std::complex<T> > cuv = cu.view();
+    tmv::LowerTriMatrixView<T> lv = l.view();
+    tmv::LowerTriMatrixView<std::complex<T> > clv = cl.view();
+
     for(size_t i=START;i<s.size();i++) {
         if (showstartdone)
             std::cout<<"Start loop: i = "<<i<<", si = "<<tmv::TMV_Text(s[i])<<
                 "  "<<s[i]<<std::endl;
 
-        const tmv::SymMatrixView<T>& si = s[i];
-        const tmv::SymMatrixView<std::complex<T> >& csi = cs[i];
+        tmv::SymMatrixView<T> si = s[i];
+        tmv::SymMatrixView<std::complex<T> > csi = cs[i];
 
-        if (csi.issym()) {
-            tmv::SymMatrix<T> sx = si;
-            tmv::SymMatrix<std::complex<T> > csx = csi;
-
-            TestMatrixDivArith1<T>(dt,sx,csx,u.view(),si,cu.view(),csi,
-                                   "Sym/UpperTriMatrix");
-            TestMatrixDivArith1<T>(dt,sx,csx,l.view(),si,cl.view(),csi,
-                                   "Sym/LowerTriMatrix");
-        } else {
-            tmv::HermMatrix<T> hx = si;
-            tmv::HermMatrix<std::complex<T> > chx = csi;
-
-            TestMatrixDivArith1<T>(dt,hx,chx,u.view(),si,cu.view(),csi,
-                                   "Herm/UpperTriMatrix");
-            TestMatrixDivArith1<T>(dt,hx,chx,l.view(),si,cl.view(),csi,
-                                   "Herm/LowerTriMatrix");
-        }
+        TestMatrixDivArith1<T>(dt,uv,si,cuv,csi,"Sym/UpperTriMatrix");
+        TestMatrixDivArith1<T>(dt,lv,si,clv,csi,"Sym/LowerTriMatrix");
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
     for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSymDiv_D2<double>(tmv::DivType dt, PosDefCode pc);
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSymDiv_D2<float>(tmv::DivType dt, PosDefCode pc);
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSymDiv_D2<long double>(tmv::DivType dt, PosDefCode pc);
 #endif

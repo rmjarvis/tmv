@@ -34,17 +34,17 @@ int main() try
 
 #if 1
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
     TestAllSmallMatrixDiv<double>();
     TestAllSmallMatrixDivA<double>();
 #endif
 
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
     TestAllSmallMatrixDiv<float>();
     TestAllSmallMatrixDivA<float>();
 #endif
 
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
     TestAllSmallMatrixDiv<long double>();
     TestAllSmallMatrixDivA<long double>();
 #endif 

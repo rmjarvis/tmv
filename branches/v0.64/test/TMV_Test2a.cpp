@@ -34,22 +34,22 @@ int main() try
 
 #if 1
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
     TestBandMatrix<double>();
     TestAllBandDiv<double>();
 #endif
 
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
     TestBandMatrix<float>();
     TestAllBandDiv<float>();
 #endif
 
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
     TestBandMatrix<long double>();
     TestAllBandDiv<long double>();
 #endif 
 
-#ifdef INST_INT
+#ifdef TEST_INT
     TestBandMatrix<int>();
 #endif 
 

@@ -201,6 +201,8 @@
 //    m.det() or Det(m)
 //    m.logDet() or m.logDet(T* sign) or LogDet(m)
 //    m.trace() or Trace(m)
+//    m.sumElements() or SumElements(m)
+//    m.sumAbsElements() or SumAbsElements(m)
 //    m.norm() or m.normF() or Norm(m) or NormF(m)
 //    m.normSq() or NormSq(m)
 //    m.norm1() or Norm1(m)
@@ -302,24 +304,39 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class ProdLU;
 
+    template <class T>
+    struct SymCopyHelper // real
+    { typedef SymMatrix<T> type; };
+    template <class T>
+    struct SymCopyHelper<std::complex<T> > // complex
+    // Have to copy to matrix, since don't know whether herm or sym.
+    { typedef Matrix<std::complex<T> > type; };
+
     template <class T> 
     class GenSymMatrix : 
         virtual public AssignableToSymMatrix<T>,
         public BaseMatrix<T>,
         private DivHelper<T>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
+        typedef T value_type;
+        typedef RT real_type;
+        typedef CT complex_type;
         typedef GenSymMatrix<T> type;
+        typedef typename SymCopyHelper<T>::type copy_type;
         typedef ConstSymMatrixView<T> const_view_type;
+        typedef const_view_type const_transpose_type;
+        typedef const_view_type const_conjugate_type;
+        typedef const_view_type const_adjoint_type;
         typedef ConstVectorView<T> const_vec_type;
         typedef ConstMatrixView<T> const_rec_type;
         typedef ConstUpperTriMatrixView<T> const_uppertri_type;
         typedef ConstLowerTriMatrixView<T> const_lowertri_type;
-        typedef ConstSymMatrixView<RT> const_real_type;
+        typedef ConstSymMatrixView<RT> const_realpart_type;
         typedef SymMatrixView<T> nonconst_type;
-
-    public:
 
         //
         // Constructors
@@ -594,21 +611,21 @@ namespace tmv {
                     issym()?ct():TMV_ConjOf(T,ct()));
         }
 
-        inline const_real_type realPart() const
+        inline const_realpart_type realPart() const
         {
-            return const_real_type(
+            return const_realpart_type(
                 reinterpret_cast<const RT*>(cptr()),size(),
                 isReal(T()) ? stepi() : 2*stepi(),
                 isReal(T()) ? stepj() : 2*stepj(),
                 Sym, uplo(), isReal(T()) ? stor() : NoMajor,NonConj);
         }
 
-        inline const_real_type imagPart() const
+        inline const_realpart_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             TMVAssert(issym());
             // The imaginary part of a Hermitian matrix is anti-symmetric
-            return const_real_type(
+            return const_realpart_type(
                 reinterpret_cast<const RT*>(cptr())+1,
                 size(),2*stepi(),2*stepj(), Sym,uplo(),NoMajor,NonConj);
         }
@@ -633,9 +650,9 @@ namespace tmv {
         TMV_DEPRECATED(const_lowertri_type LowerTri(
                 DiagType dt = NonUnitDiag) const)
         { return lowerTri(); }
-        TMV_DEPRECATED(const_real_type Real() const)
+        TMV_DEPRECATED(const_realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(const_real_type Imag() const)
+        TMV_DEPRECATED(const_realpart_type Imag() const)
         { return imagPart(); }
 
 
@@ -705,6 +722,10 @@ namespace tmv {
 
         inline T trace() const
         { return diag().sumElements(); }
+
+        T sumElements() const;
+
+        RT sumAbsElements() const;
 
         inline RT norm() const 
         { return normF(); }
@@ -1007,9 +1028,10 @@ namespace tmv {
     template <class T, IndexStyle I> 
     class ConstSymMatrixView : public GenSymMatrix<T>
     {
+    public :
+
         typedef ConstSymMatrixView<T,I> type;
         typedef GenSymMatrix<T> base;
-    public :
 
         inline ConstSymMatrixView(const type& rhs) :
             itsm(rhs.itsm), itss(rhs.itss), itssi(rhs.itssi), itssj(rhs.itssj),
@@ -1084,18 +1106,22 @@ namespace tmv {
     class ConstSymMatrixView<T,FortranStyle> : 
         public ConstSymMatrixView<T,CStyle>
     {
+    public :
+
         typedef TMV_RealType(T) RT;
         typedef ConstSymMatrixView<T,FortranStyle> type;
         typedef ConstSymMatrixView<T,CStyle> c_type;
         typedef GenSymMatrix<T> base;
         typedef ConstSymMatrixView<T,FortranStyle> const_view_type;
+        typedef const_view_type const_transpose_type;
+        typedef const_view_type const_conjugate_type;
+        typedef const_view_type const_adjoint_type;
         typedef ConstVectorView<T,FortranStyle> const_vec_type;
         typedef ConstMatrixView<T,FortranStyle> const_rec_type;
         typedef ConstUpperTriMatrixView<T,FortranStyle> const_uppertri_type;
         typedef ConstLowerTriMatrixView<T,FortranStyle> const_lowertri_type;
-        typedef ConstSymMatrixView<RT,FortranStyle> const_real_type;
+        typedef ConstSymMatrixView<RT,FortranStyle> const_realpart_type;
         typedef SymMatrixView<T,FortranStyle> nonconst_type;
-    public :
 
         inline ConstSymMatrixView(const type& rhs) : c_type(rhs) {}
 
@@ -1198,10 +1224,10 @@ namespace tmv {
         inline const_lowertri_type lowerTri(DiagType dt = NonUnitDiag) const
         { return base::lowerTri(dt); }
 
-        inline const_real_type realPart() const
+        inline const_realpart_type realPart() const
         { return base::realPart(); }
 
-        inline const_real_type imagPart() const
+        inline const_realpart_type imagPart() const
         { return base::imagPart(); }
 
         TMV_DEPRECATED(const_rec_type SubMatrix(
@@ -1224,9 +1250,9 @@ namespace tmv {
         TMV_DEPRECATED(const_lowertri_type LowerTri(
                 DiagType dt = NonUnitDiag) const)
         { return lowerTri(); }
-        TMV_DEPRECATED(const_real_type Real() const)
+        TMV_DEPRECATED(const_realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(const_real_type Imag() const)
+        TMV_DEPRECATED(const_realpart_type Imag() const)
         { return imagPart(); }
 
         // 
@@ -1269,17 +1295,22 @@ namespace tmv {
     template <class T, IndexStyle I> 
     class SymMatrixView : public GenSymMatrix<T>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef SymMatrixView<T,I> type;
         typedef GenSymMatrix<T> base;
         typedef SymMatrixView<T,I> view_type;
+        typedef view_type transpose_type;
+        typedef view_type conjugate_type;
+        typedef view_type adjoint_type;
         typedef VectorView<T,I> vec_type;
         typedef MatrixView<T,I> rec_type;
         typedef UpperTriMatrixView<T,I> uppertri_type;
         typedef LowerTriMatrixView<T,I> lowertri_type;
-        typedef SymMatrixView<RT,I> real_type;
-    public:
+        typedef SymMatrixView<RT,I> realpart_type;
+        typedef TMV_RefType(T) reference;
 
         //
         // Constructors
@@ -1560,8 +1591,6 @@ namespace tmv {
         // Access
         //
 
-        typedef TMV_RefType(T) reference;
-
         inline reference operator()(int i,int j) const 
         {
             TMVAssert(i>=0 && i<int(size()));
@@ -1811,9 +1840,9 @@ namespace tmv {
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
-        inline real_type realPart() const
+        inline realpart_type realPart() const
         {
-            return real_type(
+            return realpart_type(
                 reinterpret_cast<RT*>(ptr()),size(),
                 isReal(T()) ? stepi() : 2*stepi(),
                 isReal(T()) ? stepj() : 2*stepj(),
@@ -1825,11 +1854,11 @@ namespace tmv {
             );
         }
 
-        inline real_type imagPart() const
+        inline realpart_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             TMVAssert(this->issym());
-            return real_type(
+            return realpart_type(
                 reinterpret_cast<RT*>(ptr())+1,
                 size(),2*stepi(),2*stepj(),sym(),uplo(),NoMajor, NonConj
 #ifdef TMVFLDEBUG
@@ -1885,9 +1914,9 @@ namespace tmv {
         TMV_DEPRECATED(lowertri_type LowerTri(
                 DiagType dt = NonUnitDiag) const)
         { return lowerTri(); }
-        TMV_DEPRECATED(real_type Real() const)
+        TMV_DEPRECATED(realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(real_type Imag() const)
+        TMV_DEPRECATED(realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(view_type View() const)
         { return view(); }
@@ -1943,20 +1972,23 @@ namespace tmv {
     template <class T> 
     class SymMatrixView<T,FortranStyle> : public SymMatrixView<T,CStyle>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef SymMatrixView<T,FortranStyle> type;
         typedef SymMatrixView<T,CStyle> c_type;
         typedef GenSymMatrix<T> base;
         typedef SymMatrixView<T,FortranStyle> view_type;
+        typedef view_type transpose_type;
+        typedef view_type conjugate_type;
+        typedef view_type adjoint_type;
         typedef VectorView<T,FortranStyle> vec_type;
         typedef MatrixView<T,FortranStyle> rec_type;
         typedef UpperTriMatrixView<T,FortranStyle> uppertri_type;
         typedef LowerTriMatrixView<T,FortranStyle> lowertri_type;
-        typedef SymMatrixView<RT,FortranStyle> real_type;
+        typedef SymMatrixView<RT,FortranStyle> realpart_type;
         typedef ConstSymMatrixView<T,FortranStyle> const_type;
-
-    public:
 
         //
         // Constructors
@@ -2203,10 +2235,10 @@ namespace tmv {
         inline lowertri_type lowerTri(DiagType dt = NonUnitDiag) const
         { return c_type::lowerTri(dt); }
 
-        inline real_type realPart() const
+        inline realpart_type realPart() const
         { return c_type::realPart(); }
 
-        inline real_type imagPart() const
+        inline realpart_type imagPart() const
         { return c_type::imagPart(); }
 
         inline view_type view() const
@@ -2238,9 +2270,9 @@ namespace tmv {
         { return upperTri(); }
         TMV_DEPRECATED(lowertri_type LowerTri(DiagType dt = NonUnitDiag) const)
         { return lowerTri(); }
-        TMV_DEPRECATED(real_type Real() const)
+        TMV_DEPRECATED(realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(real_type Imag() const)
+        TMV_DEPRECATED(realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(view_type View() const)
         { return view(); }
@@ -2262,24 +2294,32 @@ namespace tmv {
     template <class T, UpLoType U, StorageType S, IndexStyle I> 
     class SymMatrix : public GenSymMatrix<T>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef SymMatrix<T,U,S,I> type;
+        typedef type copy_type;
         typedef GenSymMatrix<T> base;
         typedef ConstSymMatrixView<T,I> const_view_type;
+        typedef const_view_type const_transpose_type;
+        typedef const_view_type const_conjugate_type;
+        typedef const_view_type const_adjoint_type;
         typedef ConstVectorView<T,I> const_vec_type;
         typedef ConstMatrixView<T,I> const_rec_type;
         typedef ConstUpperTriMatrixView<T,I> const_uppertri_type;
         typedef ConstLowerTriMatrixView<T,I> const_lowertri_type;
-        typedef ConstSymMatrixView<RT,I> const_real_type;
+        typedef ConstSymMatrixView<RT,I> const_realpart_type;
         typedef SymMatrixView<T,I> view_type;
+        typedef view_type transpose_type;
+        typedef view_type conjugate_type;
+        typedef view_type adjoint_type;
         typedef VectorView<T,I> vec_type;
         typedef MatrixView<T,I> rec_type;
         typedef UpperTriMatrixView<T,I> uppertri_type;
         typedef LowerTriMatrixView<T,I> lowertri_type;
-        typedef SymMatrixView<RT,I> real_type;
-
-    public:
+        typedef SymMatrixView<RT,I> realpart_type;
+        typedef T& reference;
 
         //
         // Constructors
@@ -2638,8 +2678,6 @@ namespace tmv {
         // Access
         //
 
-        typedef T& reference;
-
         inline T operator()(int i, int j) const
         { 
             if (I==CStyle) {
@@ -2970,19 +3008,19 @@ namespace tmv {
                     stepj(),stepi(),dt,TMV_TransOf(S),NonConj);
         }
 
-        inline const_real_type realPart() const
+        inline const_realpart_type realPart() const
         {
-            return const_real_type(
+            return const_realpart_type(
                 reinterpret_cast<const RT*>(itsm.get()),size(),
                 isReal(T()) ? stepi() : 2*stepi(),
                 isReal(T()) ? stepj() : 2*stepj(),
                 Sym,U,isReal(T())?S:NoMajor,NonConj);
         }
 
-        inline const_real_type imagPart() const
+        inline const_realpart_type imagPart() const
         {
             TMVAssert(isComplex(T()));
-            return const_real_type(
+            return const_realpart_type(
                 reinterpret_cast<const RT*>(itsm.get())+1,size(),
                 2*stepi(),2*stepj(),Sym,U,NoMajor,NonConj);
         } 
@@ -3106,9 +3144,9 @@ namespace tmv {
                     stepj(),stepi(),dt,TMV_TransOf(S),NonConj TMV_FIRSTLAST);
         }
 
-        inline real_type realPart()
+        inline realpart_type realPart()
         {
-            return real_type(
+            return realpart_type(
                 reinterpret_cast<RT*>(itsm.get()),size(),
                 isReal(T()) ? stepi() : 2*stepi(),
                 isReal(T()) ? stepj() : 2*stepj(),
@@ -3120,10 +3158,10 @@ namespace tmv {
             );
         }
 
-        inline real_type imagPart()
+        inline realpart_type imagPart()
         {
             TMVAssert(isComplex(T()));
-            return real_type(
+            return realpart_type(
                 reinterpret_cast<RT*>(itsm.get())+1,size(),
                 2*stepi(),2*stepj(),Sym,U,NoMajor,NonConj
 #ifdef TMVFLDEBUG
@@ -3182,9 +3220,9 @@ namespace tmv {
         TMV_DEPRECATED(const_lowertri_type LowerTri(
                 DiagType dt = NonUnitDiag) const)
         { return lowerTri(); }
-        TMV_DEPRECATED(const_real_type Real() const)
+        TMV_DEPRECATED(const_realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(const_real_type Imag() const)
+        TMV_DEPRECATED(const_realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(const_view_type View() const)
         { return view(); }
@@ -3211,9 +3249,9 @@ namespace tmv {
         { return upperTri(); }
         TMV_DEPRECATED(lowertri_type LowerTri(DiagType dt = NonUnitDiag))
         { return lowerTri(); }
-        TMV_DEPRECATED(real_type Real())
+        TMV_DEPRECATED(realpart_type Real())
         { return realPart(); }
-        TMV_DEPRECATED(real_type Imag())
+        TMV_DEPRECATED(realpart_type Imag())
         { return imagPart(); }
         TMV_DEPRECATED(view_type View())
         { return view(); }
@@ -3269,33 +3307,54 @@ namespace tmv {
 
 #ifdef TMVFLDEBUG
     public:
-        const T*const _first;
-        const T*const _last;
+        const T* _first;
+        const T* _last;
 #endif
+
+        template <IndexStyle I2>
+        friend void Swap(SymMatrix<T,U,S,I>& m1, SymMatrix<T,U,S,I2>& m2)
+        {
+            TMVAssert(m1.size() == m2.size());
+            T* temp = m1.itsm.release();
+            m1.itsm.reset(m2.itsm.release());
+            m2.itsm.reset(temp);
+#ifdef TMVFLDEBUG
+            TMV_SWAP(m1._first,m2._first);
+            TMV_SWAP(m1._last,m2._last);
+#endif
+        }
 
     }; // SymMatrix
 
     template <class T, UpLoType U, StorageType S, IndexStyle I> 
     class HermMatrix : public GenSymMatrix<T>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef HermMatrix<T,U,S,I> type;
+        typedef type copy_type;
         typedef GenSymMatrix<T> base;
         typedef ConstSymMatrixView<T,I> const_view_type;
+        typedef const_view_type const_transpose_type;
+        typedef const_view_type const_conjugate_type;
+        typedef const_view_type const_adjoint_type;
         typedef ConstVectorView<T,I> const_vec_type;
         typedef ConstMatrixView<T,I> const_rec_type;
         typedef ConstUpperTriMatrixView<T,I> const_uppertri_type;
         typedef ConstLowerTriMatrixView<T,I> const_lowertri_type;
-        typedef ConstSymMatrixView<RT,I> const_real_type;
+        typedef ConstSymMatrixView<RT,I> const_realpart_type;
         typedef SymMatrixView<T,I> view_type;
+        typedef view_type transpose_type;
+        typedef view_type conjugate_type;
+        typedef view_type adjoint_type;
         typedef VectorView<T,I> vec_type;
         typedef MatrixView<T,I> rec_type;
         typedef UpperTriMatrixView<T,I> uppertri_type;
         typedef LowerTriMatrixView<T,I> lowertri_type;
-        typedef SymMatrixView<RT,I> real_type;
-
-    public:
+        typedef SymMatrixView<RT,I> realpart_type;
+        typedef TMV_RefType(T) reference;
 
         //
         // Constructors
@@ -3735,8 +3794,6 @@ namespace tmv {
         // Access
         //
 
-        typedef TMV_RefType(T) reference;
-
         inline T operator()(int i, int j) const
         {
             if (I==CStyle) {
@@ -4085,21 +4142,21 @@ namespace tmv {
                     dt,TMV_TransOf(S),TMV_ConjOf(T,NonConj));
         }
 
-        inline const_real_type realPart() const
+        inline const_realpart_type realPart() const
         {
-            return const_real_type(
+            return const_realpart_type(
                 reinterpret_cast<const RT*>(itsm.get()),size(),
                 isReal(T()) ? stepi() : 2*stepi(),
                 isReal(T()) ? stepj() : 2*stepj(),
                 Herm,U,isReal(T())?S:NoMajor,NonConj);
         }
 
-        inline const_real_type imagPart() const
+        inline const_realpart_type imagPart() const
         { 
             // The imaginary part of a Hermitian matrix is anti-symmetric
             // so this is illegal.
             TMVAssert(TMV_FALSE);
-            return const_real_type(0,0,0,0,Herm,U,S,NonConj);
+            return const_realpart_type(0,0,0,0,Herm,U,S,NonConj);
         }
 
         inline const_view_type view() const
@@ -4221,9 +4278,9 @@ namespace tmv {
                     dt,TMV_TransOf(S),TMV_ConjOf(T,NonConj) TMV_FIRSTLAST);
         }
 
-        inline real_type realPart()
+        inline realpart_type realPart()
         {
-            return real_type(
+            return realpart_type(
                 reinterpret_cast<RT*>(
                     itsm.get()),size(),
                 isReal(T()) ? stepi() : 2*stepi(),
@@ -4236,12 +4293,12 @@ namespace tmv {
             );
         }
 
-        inline real_type imagPart()
+        inline realpart_type imagPart()
         { 
             // The imaginary part of a Hermitian matrix is anti-symmetric
             // so this is illegal.
             TMVAssert(TMV_FALSE);
-            return real_type(0,0,0,0,Herm,U,S,NonConj TMV_FIRSTLAST1(0,0) );
+            return realpart_type(0,0,0,0,Herm,U,S,NonConj TMV_FIRSTLAST1(0,0) );
         }
 
         inline view_type view() 
@@ -4293,9 +4350,9 @@ namespace tmv {
         TMV_DEPRECATED(const_lowertri_type LowerTri(
                 DiagType dt = NonUnitDiag) const)
         { return lowerTri(); }
-        TMV_DEPRECATED(const_real_type Real() const)
+        TMV_DEPRECATED(const_realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(const_real_type Imag() const)
+        TMV_DEPRECATED(const_realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(const_view_type View() const)
         { return view(); }
@@ -4322,9 +4379,9 @@ namespace tmv {
         { return upperTri(); }
         TMV_DEPRECATED(lowertri_type LowerTri(DiagType dt = NonUnitDiag))
         { return lowerTri(); }
-        TMV_DEPRECATED(real_type Real())
+        TMV_DEPRECATED(realpart_type Real())
         { return realPart(); }
-        TMV_DEPRECATED(real_type Imag())
+        TMV_DEPRECATED(realpart_type Imag())
         { return imagPart(); }
         TMV_DEPRECATED(view_type View())
         { return view(); }
@@ -4391,6 +4448,19 @@ namespace tmv {
         const T*const _first;
         const T*const _last;
 #endif
+
+        template <IndexStyle I2>
+        friend void Swap(HermMatrix<T,U,S,I>& m1, HermMatrix<T,U,S,I2>& m2)
+        {
+            TMVAssert(m1.size() == m2.size());
+            T* temp = m1.itsm.release();
+            m1.itsm.reset(m2.itsm.release());
+            m2.itsm.reset(temp);
+#ifdef TMVFLDEBUG
+            TMV_SWAP(m1._first,m2._first);
+            TMV_SWAP(m1._last,m2._last);
+#endif
+        }
 
     }; // HermMatrix
 

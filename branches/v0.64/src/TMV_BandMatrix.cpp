@@ -607,7 +607,75 @@ namespace tmv {
     //
     // Norms
     //
+    
+    template <class T>
+    T GenBandMatrix<T>::sumElements() const
+    {
+        const int M = colsize();
+        const int N = rowsize();
+        T sum = 0;
+        if (M > 0 && N > 0) {
+            if (isrm()) {
+                int j1=0;
+                int j2=nhi()+1;
+                int k=nlo();
+                for(int i=0;i<M;++i) {
+                    sum += row(i,j1,j2).sumElements();
+                    if (k>0) --k; else ++j1;
+                    if (j2<N) ++j2;
+                    else if (j1==N) break;
+                }
+            } else if (iscm()) {
+                int i1=0;
+                int i2=nlo()+1;
+                int k=nhi();
+                for(int j=0;j<N;++j) {
+                    sum += col(j,i1,i2).sumElements();
+                    if (k>0) --k; else ++i1;
+                    if (i2<M) ++i2;
+                    else if (i1==M) break;
+                }
+            } else {
+                for(int i=-nlo();i<=nhi();++i) sum += diag(i).sumElements();
+            }
+        }
+        return sum;
+    }
 
+    template <class T>
+    RT GenBandMatrix<T>::sumAbsElements() const
+    {
+        const int M = colsize();
+        const int N = rowsize();
+        RT sum = 0;
+        if (M > 0 && N > 0) {
+            if (isrm()) {
+                int j1=0;
+                int j2=nhi()+1;
+                int k=nlo();
+                for(int i=0;i<M;++i) {
+                    sum += row(i,j1,j2).sumAbsElements();
+                    if (k>0) --k; else ++j1;
+                    if (j2<N) ++j2;
+                    else if (j1==N) break;
+                }
+            } else if (iscm()) {
+                int i1=0;
+                int i2=nlo()+1;
+                int k=nhi();
+                for(int j=0;j<N;++j) {
+                    sum += col(j,i1,i2).sumAbsElements();
+                    if (k>0) --k; else ++i1;
+                    if (i2<M) ++i2;
+                    else if (i1==M) break;
+                }
+            } else {
+                for(int i=-nlo();i<=nhi();++i) sum += diag(i).sumAbsElements();
+            }
+        }
+        return sum;
+    }
+ 
     template <class T> 
     RT GenBandMatrix<T>::normSq(RT scale) const
     {

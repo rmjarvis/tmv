@@ -34,12 +34,12 @@ This file give the instructions for installing TMV using the program SCons.
              in the compiled library code.  
        PREFIX=/usr/local specifies where to install the library when running 
              scons install (see below).
-       WITH_FLOAT=true specifies whether to instantiate the <float> templates.
-       WITH_DOUBLE=true specifies whether to instantiate the <double> 
+       INST_FLOAT=true specifies whether to instantiate the <float> templates.
+       INST_DOUBLE=true specifies whether to instantiate the <double> 
              templates.
-       WITH_LONGDOUBLE=false specifies whether to instantiate the <long double> 
+       INST_LONGDOUBLE=false specifies whether to instantiate the <long double> 
              templates.
-       WITH_INT=false specifies whether to instantiate the <int> templates.
+       INST_INT=false specifies whether to instantiate the <int> templates.
        WITH_OPENMP=true specifies whether to use OpenMP to parallelize some 
              parts of the code.
    

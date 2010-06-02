@@ -49,37 +49,31 @@ namespace tmv {
     template <class T>
     T GenUpperTriMatrix<T>::cref(int i, int j) const
     {
-        if (i==j && isunit()) return T(1);
-        else if (i>j) return T(0);
-        else {
-            const T* mi = cptr() + int(i)*stepi() + int(j)*stepj();
-            return (isconj() ? TMV_CONJ(*mi) : *mi);
-        }
+        const T* mi = cptr() + int(i)*stepi() + int(j)*stepj();
+        return (isconj() ? TMV_CONJ(*mi) : *mi);
     }
 
     template <class T, IndexStyle I> 
-    TMV_RefType(T) UpperTriMatrixView<T,I>::ref(int i, int j) const
+    typename UpperTriMatrixView<T,I>::reference
+    UpperTriMatrixView<T,I>::ref(int i, int j) const
     {
         T* mi = ptr() + int(i)*stepi() + int(j)*stepj();
-        return TMV_REF(mi,ct());
+        return reference(isunit() && i==j,*mi,ct());
     }
 
     template <class T>
     T GenLowerTriMatrix<T>::cref(int i, int j) const
     {
-        if (i==j && isunit()) return T(1);
-        else if (i<j) return T(0);
-        else {
-            const T* mi = cptr() + int(i)*stepi() + int(j)*stepj();
-            return (isconj() ? TMV_CONJ(*mi) : *mi);
-        }
+        const T* mi = cptr() + int(i)*stepi() + int(j)*stepj();
+        return (isconj() ? TMV_CONJ(*mi) : *mi);
     }
 
     template <class T, IndexStyle I> 
-    TMV_RefType(T) LowerTriMatrixView<T,I>::ref(int i, int j) const
+    typename LowerTriMatrixView<T,I>::reference
+    LowerTriMatrixView<T,I>::ref(int i, int j) const
     {
         T* mi = ptr() + int(i)*stepi() + int(j)*stepj();
-        return TMV_REF(mi,ct());
+        return reference(isunit() && i==j,*mi,ct());
     }
 
     //
@@ -390,6 +384,52 @@ namespace tmv {
     //
 
     template <class T>
+    T GenUpperTriMatrix<T>::sumElements() const
+    {
+        const int N = size();
+        T sum(0);
+        if (isrm()) 
+            if (isunit())
+                for(int i=0;i<N;++i) 
+                    sum += row(i,i+1,N).sumElements();
+            else
+                for(int i=0;i<N;++i) 
+                    sum += row(i,i,N).sumElements();
+        else
+            if (isunit())
+                for(int j=0;j<N;++j) 
+                    sum += col(j,0,j).sumElements();
+            else
+                for(int j=0;j<N;++j) 
+                    sum += col(j,0,j+1).sumElements();
+        if (isunit()) sum += N;
+        return sum;
+    }
+
+    template <class T>
+    RT GenUpperTriMatrix<T>::sumAbsElements() const
+    {
+        const int N = size();
+        RT sum(0);
+        if (isrm()) 
+            if (isunit())
+                for(int i=0;i<N;++i) 
+                    sum += row(i,i+1,N).sumAbsElements();
+            else
+                for(int i=0;i<N;++i) 
+                    sum += row(i,i,N).sumAbsElements();
+        else
+            if (isunit())
+                for(int j=0;j<N;++j) 
+                    sum += col(j,0,j).sumAbsElements();
+            else
+                for(int j=0;j<N;++j) 
+                    sum += col(j,0,j+1).sumAbsElements();
+        if (isunit()) sum += N;
+        return sum;
+    }
+
+    template <class T>
     RT GenUpperTriMatrix<T>::normSq(const RT scale) const
     {
         const int N = size();
@@ -408,7 +448,10 @@ namespace tmv {
             else
                 for(int j=0;j<N;++j) 
                     sum += col(j,0,j+1).normSq(scale);
-        if (isunit()) sum += N;
+        if (isunit()) {
+            if (scale == RT(1)) sum += N;
+            else sum += N * scale * scale;
+        }
         return sum;
     }
 

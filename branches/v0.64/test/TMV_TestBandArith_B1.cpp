@@ -69,13 +69,6 @@ void TestBandMatrixArith_B1()
     tmv::MatrixView<T> a4v = a4.view();
     tmv::MatrixView<std::complex<T> > ca3v = ca3.view();
     tmv::MatrixView<std::complex<T> > ca4v = ca4.view();
-
-    tmv::Matrix<T> a1x = a1;
-    tmv::Matrix<T> a3x = a3;
-    tmv::Matrix<T> a4x = a4;
-    tmv::Matrix<std::complex<T> > ca1x = ca1;
-    tmv::Matrix<std::complex<T> > ca3x = ca3;
-    tmv::Matrix<std::complex<T> > ca4x = ca4;
 #endif
 
     for(size_t i=START;i<b.size();i++) {
@@ -88,25 +81,31 @@ void TestBandMatrixArith_B1()
         tmv::Matrix<T> mx = bi;
         tmv::Matrix<std::complex<T> > cmx = cbi;
 
-        TestMatrixArith456<T>(mx,cmx,bi,cbi,a1v,ca1v,"Band/SquareM");
+        TestMatrixArith4<T>(bi,cbi,a1v,ca1v,"Band/SquareM");
+        TestMatrixArith5<T>(bi,cbi,a1v,ca1v,"Band/SquareM");
+        TestMatrixArith6x<T>(bi,cbi,a1v,ca1v,"Band/SquareM");
 #ifdef XTEST
-        TestMatrixArith456<T>(mx,cmx,bi,cbi,a3v,ca3v,"Band/NonSquareM");
-        TestMatrixArith456<T>(mx,cmx,bi,cbi,a4v,ca4v,"Band/DegenerateM");
+        TestMatrixArith4<T>(bi,cbi,a3v,ca3v,"Band/NonSquareM");
+        TestMatrixArith5<T>(bi,cbi,a3v,ca3v,"Band/NonSquareM");
+        TestMatrixArith6x<T>(bi,cbi,a3v,ca3v,"Band/NonSquareM");
+        TestMatrixArith4<T>(bi,cbi,a4v,ca4v,"Band/DegenerateM");
+        TestMatrixArith5<T>(bi,cbi,a4v,ca4v,"Band/DegenerateM");
+        TestMatrixArith6x<T>(bi,cbi,a4v,ca4v,"Band/DegenerateM");
 #endif
     }
     for(size_t i=0;i<B.size();i++) delete B[i];
     for(size_t i=0;i<CB.size();i++) delete CB[i];
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestBandMatrixArith_B1<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestBandMatrixArith_B1<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestBandMatrixArith_B1<long double>();
 #endif
-#ifdef INST_INT
+#ifdef TEST_INT
 template void TestBandMatrixArith_B1<int>();
 #endif

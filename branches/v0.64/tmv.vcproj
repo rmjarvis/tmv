@@ -594,6 +594,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\tmv\TMV_Permutation.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\tmv\TMV_PermutationArith.h"
+				>
+			</File>
+			<File
 				RelativePath=".\include\tmv\TMV_QRD.h"
 				>
 			</File>

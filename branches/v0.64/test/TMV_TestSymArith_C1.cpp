@@ -36,8 +36,6 @@ void TestSymMatrixArith_C1()
     tmv::DiagMatrix<std::complex<T> > cd1(ca1);
     tmv::DiagMatrixView<T> d1v = d1.view();
     tmv::DiagMatrixView<std::complex<T> > cd1v = cd1.view();
-    tmv::DiagMatrix<T> d1x = d1v;
-    tmv::DiagMatrix<std::complex<T> > cd1x = cd1v;
 
     for(size_t i=START;i<s.size();i++) {
         if (showstartdone) {
@@ -48,29 +46,23 @@ void TestSymMatrixArith_C1()
         tmv::SymMatrixView<T> si = s[i];
         tmv::SymMatrixView<std::complex<T> > csi = cs[i];
 
-        if (csi.isherm()) {
-            tmv::HermMatrix<T> sx = si;
-            tmv::HermMatrix<std::complex<T> > csx = csi;
-            TestMatrixArith456<T>(sx,csx,si,csi,d1v,cd1v,"Herm/Diag");
-        } else {
-            tmv::SymMatrix<T> sx = si;
-            tmv::SymMatrix<std::complex<T> > csx = csi;
-            TestMatrixArith456<T>(sx,csx,si,csi,d1v,cd1v,"Sym/Diag");
-        }
+        TestMatrixArith4<T>(si,csi,d1v,cd1v,"Sym/Diag");
+        TestMatrixArith5<T>(si,csi,d1v,cd1v,"Sym/Diag");
+        TestMatrixArith6x<T>(si,csi,d1v,cd1v,"Sym/Diag");
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
     for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSymMatrixArith_C1<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSymMatrixArith_C1<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSymMatrixArith_C1<long double>();
 #endif
-#ifdef INST_INT
+#ifdef TEST_INT
 template void TestSymMatrixArith_C1<int>();
 #endif

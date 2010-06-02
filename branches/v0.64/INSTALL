@@ -7,10 +7,10 @@ http://sourceforge.net/projects/tmv-cpp/.
 
 Unpack the tarball with:
 
-gunzip tmv0.63.tar.gz
-tar xf tmv0.63.tar
+gunzip tmv0.64.tar.gz
+tar xf tmv0.64.tar
 
-This will make a directory called tmv0.63 with subdirectories:
+This will make a directory called tmv0.64 with subdirectories:
   doc
   examples
   include
@@ -69,7 +69,6 @@ Each .cpp file that uses the TMV library will need to have
 at the top.  Furthermore, if you are using some of the special matrix
 varieties, you will need to include their .h files as well:
 
-#include "TMV_Small.h"
 #include "TMV_Band.h"
 #include "TMV_Sym.h"
 #include "TMV_SymBand.h"

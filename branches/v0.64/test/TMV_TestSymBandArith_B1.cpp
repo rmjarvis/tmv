@@ -16,11 +16,11 @@ void TestSymBandMatrixArith_B1()
 {
     const int N = 10;
 
-    std::vector<tmv::SymBandMatrixView<T> > s;
-    std::vector<tmv::SymBandMatrixView<std::complex<T> > > cs;
+    std::vector<tmv::SymBandMatrixView<T> > sb;
+    std::vector<tmv::SymBandMatrixView<std::complex<T> > > csb;
     std::vector<tmv::BaseMatrix<T>*> B;
     std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
-    MakeSymBandList(s,cs,B,CB,InDef);
+    MakeSymBandList(sb,csb,B,CB,InDef);
 
     tmv::Matrix<T> a1(N,N);
     for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) a1(i,j) = T(3+i-5*j);
@@ -47,57 +47,42 @@ void TestSymBandMatrixArith_B1()
     tmv::MatrixView<T> a4v = a4.view();
     tmv::MatrixView<std::complex<T> > ca3v = ca3.view();
     tmv::MatrixView<std::complex<T> > ca4v = ca4.view();
-
-    tmv::Matrix<T> a1x = a1;
-    tmv::Matrix<T> a3x = a3;
-    tmv::Matrix<T> a4x = a4;
-    tmv::Matrix<std::complex<T> > ca1x = ca1;
-    tmv::Matrix<std::complex<T> > ca3x = ca3;
-    tmv::Matrix<std::complex<T> > ca4x = ca4;
 #endif
 
-    for(size_t i=START;i<s.size();i++) {
+    for(size_t i=START;i<sb.size();i++) {
         if (showstartdone) {
             std::cout<<"Start loop i = "<<i<<std::endl;
-            std::cout<<"si = "<<s[i]<<std::endl;
+            std::cout<<"si = "<<sb[i]<<std::endl;
         }
 
-        tmv::SymBandMatrixView<T> si = s[i];
-        tmv::SymBandMatrixView<std::complex<T> > csi = cs[i];
+        tmv::SymBandMatrixView<T> si = sb[i];
+        tmv::SymBandMatrixView<std::complex<T> > csi = csb[i];
 
-        if (csi.isherm()) {
-            tmv::HermBandMatrix<T> sx = si;
-            tmv::HermBandMatrix<std::complex<T> > csx = csi;
-
-            TestMatrixArith456<T>(sx,csx,si,csi,a1v,ca1v,"HermBand/SquareM");
+        TestMatrixArith4<T>(si,csi,a1v,ca1v,"SymBand/SquareM");
+        TestMatrixArith5<T>(si,csi,a1v,ca1v,"SymBand/SquareM");
+        TestMatrixArith6x<T>(si,csi,a1v,ca1v,"SymBand/SquareM");
 #ifdef XTEST
-            TestMatrixArith456<T>(sx,csx,si,csi,a3v,ca3v,"HermBand/NonSquareM");
-            TestMatrixArith456<T>(sx,csx,si,csi,a4v,ca4v,"HermBand/DegenerateM");
+        TestMatrixArith4<T>(si,csi,a3v,ca3v,"SymBand/NonSquareM");
+        TestMatrixArith5<T>(si,csi,a3v,ca3v,"SymBand/NonSquareM");
+        TestMatrixArith6x<T>(si,csi,a3v,ca3v,"SymBand/NonSquareM");
+        TestMatrixArith4<T>(si,csi,a4v,ca4v,"SymBand/DegenerateM");
+        TestMatrixArith5<T>(si,csi,a4v,ca4v,"SymBand/DegenerateM");
+        TestMatrixArith6x<T>(si,csi,a4v,ca4v,"SymBand/DegenerateM");
 #endif
-        } else {
-            tmv::SymBandMatrix<T> sx = si;
-            tmv::SymBandMatrix<std::complex<T> > csx = csi;
-
-            TestMatrixArith456<T>(sx,csx,si,csi,a1v,ca1v,"SymBand/SquareM");
-#ifdef XTEST
-            TestMatrixArith456<T>(sx,csx,si,csi,a3v,ca3v,"SymBand/NonSquareM");
-            TestMatrixArith456<T>(sx,csx,si,csi,a4v,ca4v,"SymBand/DegenerateM");
-#endif
-        }
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
     for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSymBandMatrixArith_B1<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSymBandMatrixArith_B1<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSymBandMatrixArith_B1<long double>();
 #endif
-#ifdef INST_INT
+#ifdef TEST_INT
 template void TestSymBandMatrixArith_B1<int>();
 #endif

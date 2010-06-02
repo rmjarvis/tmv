@@ -80,43 +80,39 @@ void TestSymMatrixArith_B1()
         tmv::SymMatrixView<T> si = s[i];
         tmv::SymMatrixView<std::complex<T> > csi = cs[i];
 
-        if (csi.isherm()) {
-            tmv::HermMatrix<T> sx = si;
-            tmv::HermMatrix<std::complex<T> > csx = csi;
-
-            TestMatrixArith456<T>(sx,csx,si,csi,a1v,ca1v,"Herm/SquareM");
-            TestMatrixArith7<T>(sx,csx,si,csi,vv,cvv,vv,cvv.conjugate(),"Herm");
+        TestMatrixArith4<T>(si,csi,a1v,ca1v,"Sym/SquareM");
+        TestMatrixArith5<T>(si,csi,a1v,ca1v,"Sym/SquareM");
+        TestMatrixArith6x<T>(si,csi,a1v,ca1v,"Sym/SquareM");
+        if (csi.isherm())
+            TestMatrixArith7<T>(si,csi,vv,cvv,vv,cvv.conjugate(),"Herm");
+        else
+            TestMatrixArith7<T>(si,csi,vv,cvv,vv,cvv,"Sym");
 #ifdef XTEST
-            TestMatrixArith456<T>(sx,csx,si,csi,a3v,ca3v,"Herm/NonSquareM");
-            TestMatrixArith456<T>(sx,csx,si,csi,a4v,ca4v,"Herm/DegenerateM");
-            TestMatrixArith7<T>(sx,csx,si,csi,vs,cvs,vs,cvs.conjugate(),"Herm");
+        TestMatrixArith4<T>(si,csi,a3v,ca3v,"Sym/NonSquareM");
+        TestMatrixArith5<T>(si,csi,a3v,ca3v,"Sym/NonSquareM");
+        TestMatrixArith6x<T>(si,csi,a3v,ca3v,"Sym/NonSquareM");
+        TestMatrixArith4<T>(si,csi,a4v,ca4v,"Sym/DegenerateM");
+        TestMatrixArith5<T>(si,csi,a4v,ca4v,"Sym/DegenerateM");
+        TestMatrixArith6x<T>(si,csi,a4v,ca4v,"Sym/DegenerateM");
+        if (csi.isherm())
+            TestMatrixArith7<T>(si,csi,vs,cvs,vs,cvs.conjugate(),"Herm");
+        else
+            TestMatrixArith7<T>(si,csi,vs,cvs,vs,cvs,"Sym");
 #endif
-        } else {
-            tmv::SymMatrix<T> sx = si;
-            tmv::SymMatrix<std::complex<T> > csx = csi;
-
-            TestMatrixArith456<T>(sx,csx,si,csi,a1v,ca1v,"Sym/SquareM");
-            TestMatrixArith7<T>(sx,csx,si,csi,vv,cvv,vv,cvv,"Sym");
-#ifdef XTEST
-            TestMatrixArith456<T>(sx,csx,si,csi,a3v,ca3v,"Sym/NonSquareM");
-            TestMatrixArith456<T>(sx,csx,si,csi,a4v,ca4v,"Sym/DegenerateM");
-            TestMatrixArith7<T>(sx,csx,si,csi,vs,cvs,vs,cvs,"Sym");
-#endif
-        }
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
     for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSymMatrixArith_B1<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSymMatrixArith_B1<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSymMatrixArith_B1<long double>();
 #endif
-#ifdef INST_INT
+#ifdef TEST_INT
 template void TestSymMatrixArith_B1<int>();
 #endif

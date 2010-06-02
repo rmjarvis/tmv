@@ -1,12 +1,11 @@
 
-#include "TMV.h"
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
+#include "TMV.h"
 #include <fstream>
 #include <cstdio>
 
-template <class T> 
-void TestDiagMatrix()
+template <class T> void TestDiagMatrix()
 {
     const int N = 10;
 
@@ -48,15 +47,6 @@ void TestDiagMatrix()
     Assert(a==afcv,"Matrix == FortranStyle ConstMatrixView");
     Assert(a==afv,"Matrix == FortranStyle MatrixView");
 
-    tmv::DiagMatrix<T> b(N);
-    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) 
-        if (i == j) {
-            a(i,j) = T(3+i+5*j);
-            b(i,j) = T(5+2*i+4*j);
-        }
-    af = a;
-    Assert(a==af,"Copy CStyle DiagMatrix to FotranStyle");
-
     T qar[] = { T(0), T(3), T(6) };
     std::vector<T> qv(3);
     for(int i=0;i<3;i++) qv[i] = qar[i];
@@ -68,6 +58,15 @@ void TestDiagMatrix()
         Assert(q2(i,i) == T(3*i),"Create DiagMatrix from vector");
         Assert(q3(i,i) == T(3*i),"Create DiagMatrixView of T*");
     }
+
+    tmv::DiagMatrix<T> b(N);
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) 
+        if (i == j) {
+            a(i,j) = T(3+i+5*j);
+            b(i,j) = T(5+2*i+4*j);
+        }
+    af = a;
+    Assert(a==af,"Copy CStyle DiagMatrix to FotranStyle");
 
     tmv::DiagMatrix<T> c(N);
     c = a+b;
@@ -85,6 +84,14 @@ void TestDiagMatrix()
         if (i == j)
             Assert(a(i,j) == m(i,j),"DiagMatrix -> Matrix");
     Assert(a == tmv::DiagMatrix<T>(m),"Matrix -> DiagMatrix");
+
+    tmv::DiagMatrix<T> ainv = a;
+    ainv.invertSelf();
+    tmv::DiagMatrix<T> ainv2 = a.inverse();
+    for(int i=0;i<N;++i)
+        Assert(std::abs(a(i)*ainv(i) - T(1)) < 1.e-6,"DiagMatrix invertSelf");
+    for(int i=0;i<N;++i)
+        Assert(std::abs(a(i)*ainv2(i) - T(1)) < 1.e-6,"DiagMatrix inverse()");
 
     tmv::DiagMatrix<std::complex<T> > ca = a*std::complex<T>(1,2);
     tmv::DiagMatrix<std::complex<T> > cb = b*std::complex<T>(-5,-1);
@@ -136,32 +143,40 @@ void TestDiagMatrix()
     }
     fin >> xcm2 >> xcd2;
     fin.close();
-    Assert(tmv::Matrix<std::complex<T> >(ca) == *xcm2,
-           "DiagMatrix I/O check #2");
+    Assert(tmv::Matrix<std::complex<T> >(ca) == *xcm2,"DiagMatrix I/O check #2");
     Assert(ca == *xcd2,"DiagMatrix Compact I/O check #2");
 
 #ifndef XTEST
     std::remove("tmvtest_diagmatrix_io.dat");
 #endif
 
-    if (tmv::TMV_Epsilon<T>() > T(0)) {
-        TestDiagMatrixArith_A<T>();
-        TestDiagMatrixArith_B1<T>();
-        TestDiagMatrixArith_B2<T>();
-    }
+#if 1
+    TestDiagMatrixArith_A1<T>();
+    TestDiagMatrixArith_A2<T>();
+    TestDiagMatrixArith_A3<T>();
+    TestDiagMatrixArith_A4<T>();
+    TestDiagMatrixArith_A5<T>();
+    TestDiagMatrixArith_A6<T>();
+    TestDiagMatrixArith_B4a<T>();
+    TestDiagMatrixArith_B4b<T>();
+    TestDiagMatrixArith_B5a<T>();
+    TestDiagMatrixArith_B5b<T>();
+    TestDiagMatrixArith_B6a<T>();
+    TestDiagMatrixArith_B6b<T>();
+#endif
 
     std::cout<<"DiagMatrix<"<<tmv::TMV_Text(T())<<"> passed all tests\n";
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestDiagMatrix<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestDiagMatrix<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestDiagMatrix<long double>();
 #endif
-#ifdef INST_INT
+#ifdef TEST_INT
 template void TestDiagMatrix<int>();
 #endif

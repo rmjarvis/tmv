@@ -38,10 +38,6 @@ namespace tmv {
     // Decompose A (input as QRx) into Q R P.
     // On output, Q is stored in the lower triangle part of QRx as
     // Householder vectors.  The upper triangle part and beta hold R.
-    template <class T> 
-    void QRP_Decompose(
-        const MatrixView<T>& QRx, const VectorView<T>& beta,
-        int* P, T& signdet, bool strict);
 }
 
 #endif

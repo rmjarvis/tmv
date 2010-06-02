@@ -70,6 +70,23 @@ namespace tmv {
         const SymMatrixView<T>& A, const SymBandMatrixView<T>& D, int* P);
 
     template <class T> 
+    void LDL_Decompose(
+        const SymMatrixView<T>& A, const VectorView<T>& xD,
+        int* P, TMV_RealType(T)& logdet, T& signdet);
+
+    class Permutation;
+
+    template <class T> 
+    void LDL_Decompose(
+        const SymMatrixView<T>& A, const SymBandMatrixView<T>& D, 
+        Permutation& P);
+
+    template <class T> 
+    void LDL_Decompose(
+        const SymMatrixView<T>& A, const VectorView<T>& xD,
+        Permutation& P, TMV_RealType(T)& logdet, T& signdet);
+
+    template <class T> 
     class SymLDLDiv : public SymDivider<T> 
     {
 
@@ -137,7 +154,7 @@ namespace tmv {
 
         const ConstLowerTriMatrixView<T> getL() const;
         const BandMatrix<T> getD() const;
-        const int* getP() const;
+        const Permutation& getP() const;
         const GenSymMatrix<T>& getLL() const;
         const GenVector<T>& getxD() const;
 
@@ -148,7 +165,7 @@ namespace tmv {
         TMV_DEPRECATED(BandMatrix<T> GetD() const)
         { return getD(); }
         TMV_DEPRECATED(const int* GetP() const)
-        { return getP(); }
+        { return getP().getValues(); }
         TMV_DEPRECATED(const GenSymMatrix<T>& GetLL() const)
         { return getLL(); }
         TMV_DEPRECATED(const GenVector<T>& GetxD() const)

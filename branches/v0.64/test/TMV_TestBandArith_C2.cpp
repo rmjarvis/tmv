@@ -60,8 +60,6 @@ void TestBandMatrixArith_C2()
     tmv::DiagMatrix<std::complex<T> > cd1(ca1);
     tmv::DiagMatrixView<T> d1v = d1.view();
     tmv::DiagMatrixView<std::complex<T> > cd1v = cd1.view();
-    tmv::DiagMatrix<T> d1x = d1v;
-    tmv::DiagMatrix<std::complex<T> > cd1x = cd1v;
 
     for(size_t i=START;i<b.size();i++) {
         if (showstartdone) {
@@ -70,25 +68,25 @@ void TestBandMatrixArith_C2()
         }
         tmv::BandMatrixView<T> bi = b[i];
         tmv::BandMatrixView<std::complex<T> > cbi = cb[i];
-        tmv::BandMatrix<T> bx = bi;
-        tmv::BandMatrix<std::complex<T> > cbx = cbi;
 
-        TestMatrixArith456<T>(d1x,cd1x,d1v,cd1v,bi,cbi,"Diag/Band");
+        TestMatrixArith4<T>(d1v,cd1v,bi,cbi,"Diag/Band");
+        TestMatrixArith5<T>(d1v,cd1v,bi,cbi,"Diag/Band");
+        TestMatrixArith6x<T>(d1v,cd1v,bi,cbi,"Diag/Band");
     }
     for(size_t i=0;i<B.size();i++) delete B[i];
     for(size_t i=0;i<CB.size();i++) delete CB[i];
 #endif
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestBandMatrixArith_C2<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestBandMatrixArith_C2<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestBandMatrixArith_C2<long double>();
 #endif
-#ifdef INST_INT
+#ifdef TEST_INT
 template void TestBandMatrixArith_C2<int>();
 #endif

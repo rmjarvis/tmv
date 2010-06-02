@@ -1,16 +1,18 @@
 
+#define START 0
+
 #include "TMV.h"
 #include "TMV_SymBand.h"
 #include "TMV_Test.h"
 #include "TMV_Test2.h"
-#include "TMV_TestSymBandArith.h"
+//#include "TMV_TestSymBandArith.h"
 
-#include "TMV_TestMatrixDivArith.h"
+//#include "TMV_TestMatrixDivArith.h"
 
 template <class T, tmv::UpLoType uplo, tmv::StorageType stor> 
 void TestHermBandDecomp()
 {
-    for (int mattype = 0; mattype < 12; mattype++) {
+    for (int mattype = START; mattype <= 17; mattype++) {
         if (showstartdone) {
             std::cout<<"HermBand: mattype = "<<mattype<<std::endl;
             std::cout<<"uplo, stor = "<<TMV_Text(uplo)<<
@@ -20,19 +22,26 @@ void TestHermBandDecomp()
         // mattype = 1  is Indef, nlo = 8
         // mattype = 2  is Singular, nlo = 8
         // mattype = 3  is Singular, nlo = 8, seriously bad defects
-        // mattype = 4  is PosDef, nlo = 1
-        // mattype = 5  is Indef, nlo = 1
-        // mattype = 6  is Singular, nlo = 1
-        // mattype = 7  is Singular, nlo = 1, seriously bad defects
-        // mattype = 8  is PosDef, nlo = 0
-        // mattype = 9  is Indef, nlo = 0
-        // mattype = 10  is Singular, nlo = 0
-        // mattype = 11  is Singular, nlo = 0, seriously bad defects
+        // mattype = 4  is Singular, nlo = 8, nearly zero
+        // mattype = 5  is Singular, nlo = 8, nearly overflow
+        // mattype = 6  is PosDef, nlo = 1
+        // mattype = 7  is Indef, nlo = 1
+        // mattype = 8  is Singular, nlo = 1
+        // mattype = 9  is Singular, nlo = 1, seriously bad defects
+        // mattype = 10  is Singular, nlo = 1, nearly zero
+        // mattype = 11  is Singular, nlo = 1, nearly overflow
+        // mattype = 12  is PosDef, nlo = 0
+        // mattype = 13  is Indef, nlo = 0
+        // mattype = 14  is Singular, nlo = 0
+        // mattype = 15  is Singular, nlo = 0, seriously bad defects
+        // mattype = 16  is Singular, nlo = 0, nearly zero
+        // mattype = 17  is Singular, nlo = 0, nearly overflow
 
         const int N = 200;
-        const bool posdef = mattype % 4 == 0;
-        const bool singular = mattype % 4 == 2 || mattype % 4 == 3;
-        const int nlo = mattype / 4 == 0 ? 8 : mattype / 4 == 1 ? 1 : 0;
+        const bool posdef = mattype % 6 == 0;
+        const bool singular = mattype % 6 >= 2;
+        const bool nearoverflow = mattype % 6 == 5;
+        const int nlo = mattype / 6 == 0 ? 8 : mattype / 6 == 1 ? 1 : 0;
         if (showstartdone) {
             std::cout<<"posdef = "<<posdef<<", singular = "<<singular<<
                 ", nlo = "<<nlo<<std::endl;
@@ -111,21 +120,60 @@ void TestHermBandDecomp()
         }
         //std::cout<<"c = "<<c<<std::endl;
 
-        if (mattype % 4 == 3) {
+        if (mattype % 6 == 3) {
             for(int i=10;i<N;i+=10) {
-                m.subSymBandMatrix(i,N) *= T(1.e-10);
-                c.subSymBandMatrix(i,N) *= T(1.e-10);
+                m.subSymBandMatrix(i,N) *= T(-1.e-10);
+                c.subSymBandMatrix(i,N) *= T(-1.e-10);
             }
         }
 
+        if (mattype % 6 == 4) {
+            T x = std::numeric_limits<T>::min();
+            m.setAllTo(x);
+            c.upperBandOff().setAllTo(std::complex<T>(x,2*x));
+            c.diag().setAllTo(x);
+            for(int i=1;i<N;++i) {
+                int start = i-nlo; if (start < 0) start = 0;
+                m.col(i,start,i+1) /= T(i);
+                c.col(i,start,i+1) /= T(i);
+            }
+            m(N/2,N/2) = x/std::numeric_limits<T>::epsilon();
+            c(N/2,N/2) = x/std::numeric_limits<T>::epsilon();
+            m.diag(0,N/5,2*N/5).setZero();
+            c.diag(0,N/5,2*N/5).setZero();
+            m.diag(0,N/2+1,N) *= T(-1);
+            c.diag(0,N/2+1,N) *= T(-1);
+        }
+
+        if (mattype % 6 == 5) {
+            T x = std::numeric_limits<T>::max();
+            x /= N;
+            m.setAllTo(x);
+            c.upperBandOff().setAllTo(std::complex<T>(x,x/2));
+            c.diag().setAllTo(x);
+            for(int i=1;i<N;++i) {
+                int start = i-nlo;  if (start < 0) start = 0;
+                m.col(i,start,i+1) /= T(i);
+                c.col(i,start,i+1) /= T(i);
+            }
+            m.diag(0,N/5,2*N/5).setZero();
+            c.diag(0,N/5,2*N/5).setZero();
+            m.diag(0,N/2,N) *= T(-1);
+            c.diag(0,N/2,N) *= T(-1);
+        }
+
+
         T eps = EPS;
         T ceps = EPS;
+        T normm = Norm(m);
+        T normc = Norm(c);
         if (showacc) std::cout<<"eps = "<<eps<<"  "<<ceps<<std::endl;
         if (!singular) {
-            T kappa = Norm(m) * Norm(m.inverse());
-            if (showacc) std::cout<<"kappa = "<<kappa<<std::endl;
+            T kappa = normm * Norm(m.inverse());
+            T ckappa = normc * Norm(c.inverse());
+            if (showacc) std::cout<<"kappa = "<<kappa<<"  "<<ckappa<<std::endl;
             eps *= kappa;
-            ceps *= kappa;
+            ceps *= ckappa;
         } else {
             if (showacc) std::cout<<"eps *= "<<T(10*N)<<std::endl;
             eps *= T(10*N);
@@ -141,7 +189,11 @@ void TestHermBandDecomp()
             if (nlo > 1) {
                 L = m.chd().getL();
                 LLt = L*L.adjoint();
-                Assert(Norm(m-LLt) < eps*Norm(m),"HermBand CH");
+                if (showacc) {
+                    std::cout<<"Norm(m-LLt) = "<<Norm(m-LLt)<<std::endl;
+                    std::cout<<"cf eps*Norm(m) = "<<eps*normm<<std::endl;
+                }
+                Assert(Norm(m-LLt) <= eps*normm,"HermBand CH");
             }
 
             tmv::BandMatrix<std::complex<T> > cL(N,N,nlo,0);
@@ -149,7 +201,11 @@ void TestHermBandDecomp()
             if (nlo > 1) {
                 cL = c.chd().getL();
                 cLLt = cL*cL.adjoint();
-                Assert(Norm(c-cLLt) < ceps*Norm(c),"HermBand C CH");
+                if (showacc) {
+                    std::cout<<"Norm(c-cLcLt) = "<<Norm(c-cLLt)<<std::endl;
+                    std::cout<<"cf eps*Norm(c) = "<<eps*normc<<std::endl;
+                }
+                Assert(Norm(c-cLLt) <= ceps*normc,"HermBand C CH");
             }
 
 #ifdef XTEST
@@ -157,19 +213,19 @@ void TestHermBandDecomp()
             CH_Decompose(m2.view());
             L = m2.lowerBand();
             LLt = L*L.adjoint();
-            Assert(Norm(m-LLt) < eps*Norm(m),"HermBand CH2");
+            Assert(Norm(m-LLt) <= eps*normm,"HermBand CH2");
 
             tmv::HermBandMatrix<std::complex<T>,uplo,stor> c2 = c;
             CH_Decompose(c2.view());
             cL = c2.lowerBand();
             cLLt = cL*cL.adjoint();
-            Assert(Norm(c-cLLt) < ceps*Norm(c),"HermBand C CH2");
+            Assert(Norm(c-cLLt) <= ceps*normc,"HermBand C CH2");
 
             c2.conjugate() = c;
             CH_Decompose(c2.conjugate());
             cL = c2.conjugate().lowerBand();
             cLLt = cL*cL.adjoint();
-            Assert(Norm(c-cLLt) < ceps*Norm(c),"HermBand C CH2");
+            Assert(Norm(c-cLLt) <= ceps*normc,"HermBand C CH2");
 #endif
             std::cout<<"."; std::cout.flush();
         }
@@ -189,7 +245,7 @@ void TestHermBandDecomp()
                 L = m.chd().getL();
                 D = m.chd().getD();
                 LDL = L*D*L.adjoint();
-                Assert(Norm(m-LDL) < eps*Norm(m),"HermBand LDL");
+                Assert(Norm(m-LDL) <= eps*normm,"HermBand LDL");
             }
 
             tmv::BandMatrix<std::complex<T> > cL(N,N,nlo,0);
@@ -199,7 +255,7 @@ void TestHermBandDecomp()
                 cL = c.chd().getL();
                 cD = c.chd().getD();
                 cLDL = cL*cD*cL.adjoint();
-                Assert(Norm(c-cLDL) < ceps*Norm(c),"HermBand C LDL");
+                Assert(Norm(c-cLDL) <= ceps*normc,"HermBand C LDL");
             }
 
 #ifdef XTEST
@@ -208,7 +264,7 @@ void TestHermBandDecomp()
             (L = m2.lowerBand()).diag().setAllTo(T(1));
             D = DiagMatrixViewOf(m2.diag());
             LDL = L*D*L.adjoint();
-            Assert(Norm(m-LDL) < eps*Norm(m),"HermBand LDL2");
+            Assert(Norm(m-LDL) <= eps*normm,"HermBand LDL2");
 
             // Alt calculation:
             // (I + L) D (I + Lt)
@@ -219,15 +275,15 @@ void TestHermBandDecomp()
             LDL.diag(-1) = (E*D.subDiagMatrix(0,N-1)).diag();
             LDL += D;
             LDL.diag(1) = LDL.diag(-1);
-            Assert(Norm(m-LDL) < eps*Norm(m),"HermBand LDL2 Alt");
+            Assert(Norm(m-LDL) <= eps*normm,"HermBand LDL2 Alt");
 
             tmv::HermBandMatrix<std::complex<T>,uplo,stor> c2 = c;
             LDL_Decompose(c2.view());
             (cL = c2.lowerBand()).diag().setAllTo(T(1));
             cD = DiagMatrixViewOf(c2.diag());
             cLDL = cL*cD*cL.adjoint();
-            Assert(Norm(c-cLDL) < ceps*Norm(c),"HermBand C LDL2");
-            Assert(Norm(cD.imagPart()) < ceps*Norm(c),
+            Assert(Norm(c-cLDL) <= ceps*normc,"HermBand C LDL2");
+            Assert(Norm(cD.imagPart()) <= ceps*normc,
                    "HermBand C LDL2 - D");
 
             // Alt calculation:
@@ -238,15 +294,15 @@ void TestHermBandDecomp()
             cLDL.diag(-1) = (cE*cD.subDiagMatrix(0,N-1)).diag();
             cLDL += cD;
             cLDL.diag(1) = cLDL.diag(-1).conjugate();
-            Assert(Norm(c-cLDL) < ceps*Norm(c),"HermBand C LDL2 Alt");
+            Assert(Norm(c-cLDL) <= ceps*normc,"HermBand C LDL2 Alt");
 
             c2.conjugate() = c;
             LDL_Decompose(c2.conjugate());
             (cL = c2.conjugate().lowerBand()).diag().setAllTo(T(1));
             cD = DiagMatrixViewOf(c2.conjugate().diag());
             cLDL = cL*cD*cL.adjoint();
-            Assert(Norm(c-cLDL) < ceps*Norm(c),"HermBand C LDL3");
-            Assert(Norm(cD.imagPart()) < ceps*Norm(c),
+            Assert(Norm(c-cLDL) <= ceps*normc,"HermBand C LDL3");
+            Assert(Norm(cD.imagPart()) <= ceps*normc,
                    "HermBand C LDL2 - D");
 #endif
             std::cout<<"."; std::cout.flush();
@@ -264,23 +320,19 @@ void TestHermBandDecomp()
             tmv::DiagMatrix<T> S = m.svd().getS();
             tmv::Matrix<T> V = m.svd().getV();
             if (showacc) {
-                std::cout<<"Norm(U) = "<<Norm(U)<<std::endl;
                 std::cout<<"Norm(m-U*S*V) = "<<Norm(m-U*S*V)<<std::endl;
-                std::cout<<"Norm(m) = "<<Norm(m)<<std::endl;
-                std::cout<<"eps * Norm(m) = "<<eps*Norm(m)<<std::endl;
+                std::cout<<"eps * normm = "<<eps*normm<<std::endl;
             }
-            Assert(Norm(m-U*S*V) < eps*Norm(m),"HermBand SV");
+            Assert(Norm(m-U*S*V) <= eps*normm,"HermBand SV");
 
             tmv::Matrix<std::complex<T> > cU = c.svd().getU();
             tmv::DiagMatrix<T> cS = c.svd().getS();
             tmv::Matrix<std::complex<T> > cV = c.svd().getV();
             if (showacc) {
-                std::cout<<"Norm(cU) = "<<Norm(cU)<<std::endl;
                 std::cout<<"Norm(c-cU*cS*cV) = "<<Norm(c-cU*cS*cV)<<std::endl;
-                std::cout<<"Norm(c) = "<<Norm(c)<<std::endl;
-                std::cout<<"ceps * Norm(c) = "<<ceps*Norm(c)<<std::endl;
+                std::cout<<"ceps * normc = "<<ceps*normc<<std::endl;
             }
-            Assert(Norm(c-cU*cS*cV) < ceps*Norm(c),"HermBand C SV");
+            Assert(Norm(c-cU*cS*cV) <= ceps*normc,"HermBand C SV");
 
 #ifdef XTEST
             tmv::Matrix<T> U2(N,N);
@@ -288,52 +340,57 @@ void TestHermBandDecomp()
             tmv::Matrix<T> V2(N,N);
             SV_Decompose(m,U2.view(),S2.view(),V2.view());
             if (showacc) {
-                std::cout<<"Norm(U) = "<<Norm(U2)<<std::endl;
                 std::cout<<"Norm(m-U*S*V) = "<<Norm(m-U2*S2*V2)<<std::endl;
-                std::cout<<"Norm(m) = "<<Norm(m)<<std::endl;
-                std::cout<<"eps * Norm(m) = "<<eps*Norm(m)<<std::endl;
+                std::cout<<"eps * normm = "<<eps*normm<<std::endl;
             }
-            Assert(Norm(m-U2*S2*V2) < eps*Norm(m),"HermBand SV2");
+            Assert(Norm(m-U2*S2*V2) <= eps*normm,"HermBand SV2");
 
             SV_Decompose(m,S2.view());
-            Assert(Norm(S2-S) < eps*Norm(S),"HermBand SV3");
+            Assert(Norm(S2-S) <= eps*normm,"HermBand SV3");
             SV_Decompose(m,U2.view(),S2.view());
-            Assert(Norm(S2-S) < eps*Norm(S),"HermBand SV4 S");
-            Assert(Norm(U2*S2*S2*U2.adjoint()-m*m.adjoint()) < 
-                   eps*Norm(m)*Norm(m),"HermBand SV4 U");
+            Assert(Norm(S2-S) <= eps*normm,"HermBand SV4 S");
+            if (!nearoverflow)
+                Assert(Norm(U2*S2*S2*U2.adjoint()-m*m.adjoint()) <= 
+                       eps*normm*normm,"HermBand SV4 U");
             SV_Decompose(m,S2.view(),V2.view());
-            Assert(Norm(S2-S) < eps*Norm(S),"HermBand SV5 S");
-            Assert(Norm(m.adjoint()*m-V2.adjoint()*S2*S2*V2) < 
-                   eps*Norm(m)*Norm(m),"HermBand SV5 V");
+            Assert(Norm(S2-S) <= eps*normm,"HermBand SV5 S");
+            if (!nearoverflow)
+                Assert(Norm(m.adjoint()*m-V2.adjoint()*S2*S2*V2) <= 
+                       eps*normm*normm,"HermBand SV5 V");
 
             tmv::Matrix<std::complex<T> > cU2(N,N);
             tmv::DiagMatrix<T> cS2(N);
             tmv::Matrix<std::complex<T> > cV2(N,N);
             SV_Decompose(c,cU2.view(),cS2.view(),cV2.view());
-            Assert(Norm(c-cU2*cS2*cV2) < ceps*Norm(c),"HermBand C SV2");
+            Assert(Norm(c-cU2*cS2*cV2) <= ceps*normc,"HermBand C SV2");
 
             SV_Decompose(c,cS2.view());
-            Assert(Norm(cS2-cS) < ceps*Norm(cS),"HermBand C SV3");
+            Assert(Norm(cS2-cS) <= ceps*normc,"HermBand C SV3");
             SV_Decompose(c,cU2.view(),cS2.view());
-            Assert(Norm(cS2-cS) < ceps*Norm(cS),"HermBand C SV4 S");
-            Assert(Norm(cU2*cS2*cS2*cU2.adjoint()-c*c.adjoint()) < 
-                   ceps*Norm(c)*Norm(c),"HermBand C SV4 U");
+            Assert(Norm(cS2-cS) <= ceps*normc,"HermBand C SV4 S");
+            if (!nearoverflow)
+                Assert(Norm(cU2*cS2*cS2*cU2.adjoint()-c*c.adjoint()) <= 
+                       ceps*normc*normc,"HermBand C SV4 U");
             SV_Decompose(c,cS2.view(),cV2.view());
-            Assert(Norm(cS2-cS) < ceps*Norm(cS),"HermBand C SV5 S");
-            Assert(Norm(c.adjoint()*c-cV2.adjoint()*cS2*cS2*cV2) < 
-                   ceps*Norm(c)*Norm(c),"Herm C SV5 V");
+            Assert(Norm(cS2-cS) <= ceps*normc,"HermBand C SV5 S");
+            if (!nearoverflow)
+                Assert(Norm(c.adjoint()*c-cV2.adjoint()*cS2*cS2*cV2) <= 
+                       ceps*normc*normc,"Herm C SV5 V");
 
             SV_Decompose(c.conjugate(),cS2.view());
-            Assert(Norm(cS2-cS) < ceps*Norm(cS),"HermBand C SV6");
+            Assert(Norm(cS2-cS) <= ceps*normc,"HermBand C SV6");
             SV_Decompose(c.conjugate(),cU2.view(),cS2.view());
-            Assert(Norm(cS2-cS) < ceps*Norm(cS),"HermBand C SV7 S");
-            Assert(Norm(cU2*cS2*cS2*cU2.adjoint()-c.conjugate()*c.transpose()) <
-                   ceps*Norm(c)*Norm(c),"HermBand C SV7 U");
+            Assert(Norm(cS2-cS) <= ceps*normc,"HermBand C SV7 S");
+            if (!nearoverflow)
+                Assert(Norm(cU2*cS2*cS2*cU2.adjoint()-
+                            c.conjugate()*c.transpose()) <=
+                       ceps*normc*normc,"HermBand C SV7 U");
             SV_Decompose(c.conjugate(),cU2.conjugate(),cS2.view());
-            Assert(Norm(cS2-cS) < ceps*Norm(cS),"HermBand C SV8 S");
-            Assert(Norm(cU2.conjugate()*cS2*cS2*cU2.transpose()-
-                        c.conjugate()*c.transpose()) < ceps*Norm(c)*Norm(c),
-                   "HermBand C SV8 U");
+            Assert(Norm(cS2-cS) <= ceps*normc,"HermBand C SV8 S");
+            if (!nearoverflow)
+                Assert(Norm(cU2.conjugate()*cS2*cS2*cU2.transpose()-
+                            c.conjugate()*c.transpose()) <= ceps*normc*normc,
+                       "HermBand C SV8 U");
 #endif
             std::cout<<"."; std::cout.flush();
         }
@@ -344,30 +401,30 @@ void TestHermBandDecomp()
             tmv::Matrix<T> V(N,N);
             tmv::Vector<T> L(N);
             Eigen(m,V.view(),L.view());
-            Assert(Norm(m*V-V*DiagMatrixViewOf(L)) < eps*Norm(m),
+            Assert(Norm(m*V-V*DiagMatrixViewOf(L)) <= eps*normm,
                    "HermBand Eigen");
 
             tmv::Matrix<std::complex<T> > cV(N,N);
             tmv::Vector<T> cL(N);
             Eigen(c,cV.view(),cL.view());
-            Assert(Norm(c*cV-cV*DiagMatrixViewOf(cL)) < ceps*Norm(c),
+            Assert(Norm(c*cV-cV*DiagMatrixViewOf(cL)) <= ceps*normc,
                    "HermBand C Eigen");
 
 #ifdef XTEST
             tmv::Vector<T> L2(N);
             Eigen(m,L2.view());
-            Assert(Norm(L2-L) < eps*Norm(L),"HermBand Eigen2");
+            Assert(Norm(L2-L) <= eps*normm,"HermBand Eigen2");
 
             tmv::Vector<T> cL2(N);
             Eigen(c,cL2.view());
-            Assert(Norm(cL2-cL) < ceps*Norm(cL),"HermBand C Eigen2");
+            Assert(Norm(cL2-cL) <= ceps*normc,"HermBand C Eigen2");
 
             Eigen(c,cV.conjugate(),cL.view());
-            Assert(Norm(c*cV.conjugate()-cV.conjugate()*DiagMatrixViewOf(cL)) < 
-                   ceps*Norm(c),"HermBand C Eigen3");
+            Assert(Norm(c*cV.conjugate()-cV.conjugate()*DiagMatrixViewOf(cL)) 
+                   <= ceps*normc,"HermBand C Eigen3");
 
             Eigen(c.conjugate(),cL2.view());
-            Assert(Norm(cL2-cL) < ceps*Norm(cL),"HermBand C Eigen4");
+            Assert(Norm(cL2-cL) <= ceps*normc,"HermBand C Eigen4");
 #endif
             std::cout<<"."; std::cout.flush();
         }
@@ -381,43 +438,40 @@ void TestHermBandDecomp()
                 if (showstartdone) std::cout<<"Square Root"<<std::endl;
                 tmv::HermMatrix<T,uplo,stor> S(N);
                 SquareRoot(m,S.view());
-                Assert(Norm(m-S*S) < eps*Norm(m),"HermBand Square Root");
+                Assert(Norm(m-S*S) <= eps*normm,"HermBand Square Root");
 
                 tmv::HermMatrix<std::complex<T>,uplo,stor> cS(N);
                 SquareRoot(c,cS.view());
-                Assert(Norm(c-cS*cS) < eps*Norm(c),"HermBand C Square Root");
+                Assert(Norm(c-cS*cS) <= eps*normc,"HermBand C Square Root");
 
 #ifdef XTEST
                 SquareRoot(c,cS.conjugate());
-                Assert(Norm(c-cS.conjugate()*cS.conjugate()) < ceps*Norm(c),
+                Assert(Norm(c-cS.conjugate()*cS.conjugate()) <= ceps*normc,
                        "HermBand C Square Root2");
 
                 SquareRoot(c,cS.transpose());
-                Assert(Norm(c-cS.transpose()*cS.transpose()) < ceps*Norm(c),
+                Assert(Norm(c-cS.transpose()*cS.transpose()) <= ceps*normc,
                        "HermBand C Square Root3");
 
                 SquareRoot(c,cS.adjoint());
-                Assert(Norm(c-cS.adjoint()*cS.adjoint()) < ceps*Norm(c),
+                Assert(Norm(c-cS.adjoint()*cS.adjoint()) <= ceps*normc,
                        "HermBand C Square Root4");
 
                 SquareRoot(c.conjugate(),cS.view());
-                Assert(Norm(c.conjugate()-cS*cS) < ceps*Norm(c),
+                Assert(Norm(c.conjugate()-cS*cS) <= ceps*normc,
                        "HermBand C Square Root5");
 
                 SquareRoot(c.conjugate(),cS.conjugate());
-                Assert(Norm(c.conjugate()-cS.conjugate()*cS.conjugate()) < 
-                       ceps*Norm(c),
-                       "HermBand C Square Root6");
+                Assert(Norm(c.conjugate()-cS.conjugate()*cS.conjugate()) <= 
+                       ceps*normc, "HermBand C Square Root6");
 
                 SquareRoot(c.conjugate(),cS.transpose());
-                Assert(Norm(c.conjugate()-cS.transpose()*cS.transpose()) < 
-                       ceps*Norm(c),
-                       "HermBand C Square Root7");
+                Assert(Norm(c.conjugate()-cS.transpose()*cS.transpose()) <= 
+                       ceps*normc, "HermBand C Square Root7");
 
                 SquareRoot(c.conjugate(),cS.adjoint());
-                Assert(Norm(c.conjugate()-cS.adjoint()*cS.adjoint()) < 
-                       ceps*Norm(c),
-                       "HermBand C Square Root8");
+                Assert(Norm(c.conjugate()-cS.adjoint()*cS.adjoint()) <= 
+                       ceps*normc, "HermBand C Square Root8");
 #endif
                 Assert(posdef, "didn't throw NonPosDef, and mattype != pos def"); 
                 std::cout<<"."; std::cout.flush();
@@ -435,7 +489,7 @@ void TestHermBandDecomp()
 template <class T, tmv::UpLoType uplo, tmv::StorageType stor> 
 void TestSymBandDecomp()
 {
-    for (int mattype = 0; mattype < 12; mattype++) {
+    for (int mattype = 0; mattype <= 14; mattype++) {
         if (showstartdone) {
             std::cout<<"SymBand: mattype = "<<mattype<<std::endl;
             std::cout<<"uplo, stor = "<<TMV_Text(uplo)<<"  "<<TMV_Text(stor)<<std::endl;
@@ -444,19 +498,26 @@ void TestSymBandDecomp()
         // mattype = 1  is Indef, nlo = 8
         // mattype = 2  is Singular, nlo = 8
         // mattype = 3  is Singular, nlo = 8, seriously bad defects
-        // mattype = 4  is PosDef, nlo = 1
-        // mattype = 5  is Indef, nlo = 1
-        // mattype = 6  is Singular, nlo = 1
-        // mattype = 7  is Singular, nlo = 1, seriously bad defects
-        // mattype = 8  is PosDef, nlo = 0
-        // mattype = 9  is Indef, nlo = 0
-        // mattype = 10  is Singular, nlo = 0
-        // mattype = 11  is Singular, nlo = 0, seriously bad defects
+        // mattype = 4  is Singular, nlo = 8, nearly zero
+        // mattype = 5  is Singular, nlo = 8, nearly overflow
+        // mattype = 6  is PosDef, nlo = 1
+        // mattype = 7  is Indef, nlo = 1
+        // mattype = 8  is Singular, nlo = 1
+        // mattype = 9  is Singular, nlo = 1, seriously bad defects
+        // mattype = 10  is Singular, nlo = 1, nearly zero
+        // mattype = 11  is Singular, nlo = 1, nearly overflow
+        // mattype = 12  is PosDef, nlo = 0
+        // mattype = 13  is Indef, nlo = 0
+        // mattype = 14  is Singular, nlo = 0
+        // mattype = 15  is Singular, nlo = 0, seriously bad defects
+        // mattype = 16  is Singular, nlo = 0, nearly zero
+        // mattype = 17  is Singular, nlo = 0, nearly overflow
 
         const int N = 200;
-        const bool posdef = mattype % 4 == 0;
-        const bool singular = mattype % 4 == 2 || mattype % 4 == 3;
-        const int nlo = mattype / 4 == 0 ? 8 : mattype / 4 == 1 ? 1 : 0;
+        const bool posdef = mattype % 6 == 0;
+        const bool singular = mattype % 6 >= 2;
+        const bool nearoverflow = mattype % 6 == 5;
+        const int nlo = mattype / 6 == 0 ? 8 : mattype / 6 == 1 ? 1 : 0;
         if (showstartdone) {
             std::cout<<"posdef = "<<posdef<<", singular = "<<singular<<
                 ", nlo = "<<nlo<<std::endl;
@@ -530,22 +591,63 @@ void TestSymBandDecomp()
         }
         //std::cout<<"c = "<<c<<std::endl;
         
-        if (mattype % 4 == 3) {
+        if (mattype % 6 == 3) {
             for(int i=10;i<N;i+=10) {
-                m.subSymBandMatrix(i,N) *= T(1.e-10);
-                c.subSymBandMatrix(i,N) *= T(1.e-10);
+                m.subSymBandMatrix(i,N) *= T(-1.e-10);
+                c.subSymBandMatrix(i,N) *= T(-1.e-10);
             }
+        }
+
+        if (mattype % 6 == 4) {
+            T x = std::numeric_limits<T>::min();
+            m.setAllTo(x);
+            c.upperBand().setAllTo(std::complex<T>(x,2*x));
+            for(int i=1;i<N;++i) {
+                int start = i-nlo; if (start < 0) start = 0;
+                m.col(i,start,i+1) /= T(i);
+                c.col(i,start,i+1) /= T(i);
+            }
+            m(N/2,N/2) = x/std::numeric_limits<T>::epsilon();
+            c(N/2,N/2) = x/std::numeric_limits<T>::epsilon();
+            m.diag(0,N/5,2*N/5).setZero();
+            c.diag(0,N/5,2*N/5).setZero();
+            m.diag(0,N/2+1,N) *= T(-1);
+            c.diag(0,N/2+1,N) *= T(-1);
+        }
+
+        if (mattype % 6 == 5) {
+            T x = std::numeric_limits<T>::max();
+            x /= N;
+            m.setAllTo(x);
+            c.upperBand().setAllTo(std::complex<T>(x,x/2));
+            for(int i=1;i<N;++i) {
+                int start = i-nlo;  if (start < 0) start = 0;
+                m.col(i,start,i+1) /= T(i);
+                c.col(i,start,i+1) /= T(i);
+            }
+            m.diag(0,N/5,2*N/5).setZero();
+            c.diag(0,N/5,2*N/5).setZero();
+            m.diag(0,N/2,N) *= T(-1);
+            c.diag(0,N/2,N) *= T(-1);
         }
 
         T eps = EPS;
         T ceps = EPS;
+        T normm = Norm(m);
+        T normc = Norm(c);
+        if (showacc) std::cout<<"eps = "<<eps<<"  "<<ceps<<std::endl;
         if (!singular) {
-            eps *= Norm(m) * Norm(m.inverse());
-            ceps *= Norm(c) * Norm(c.inverse());
+            T kappa = normm * Norm(m.inverse());
+            T ckappa = normc * Norm(c.inverse());
+            if (showacc) std::cout<<"kappa = "<<kappa<<"  "<<ckappa<<std::endl;
+            eps *= kappa;
+            ceps *= ckappa;
         } else {
+            if (showacc) std::cout<<"eps *= "<<T(10*N)<<std::endl;
             eps *= T(10*N);
             ceps *= T(10*N);
         }
+        if (showacc) std::cout<<"eps => "<<eps<<"  "<<ceps<<std::endl;
 
         // LDL Decomposition
         const bool doLDL = nlo == 1
@@ -564,7 +666,7 @@ void TestSymBandDecomp()
             (L = m2.lowerBand()).diag().setAllTo(T(1));
             D = DiagMatrixViewOf(m2.diag());
             LDL = L*D*L.transpose();
-            Assert(Norm(m-LDL) < eps*Norm(m),"SymBand LDL2");
+            Assert(Norm(m-LDL) <= eps*normm,"SymBand LDL2");
 
 #ifdef XTEST
             // Alt calculation:
@@ -576,7 +678,7 @@ void TestSymBandDecomp()
             LDL.diag(-1) = (E*D.subDiagMatrix(0,N-1)).diag();
             LDL += D;
             LDL.diag(1) = LDL.diag(-1);
-            Assert(Norm(m-LDL) < eps*Norm(m),"SymBand LDL2 Alt");
+            Assert(Norm(m-LDL) <= eps*normm,"SymBand LDL2 Alt");
 #endif
 
             tmv::BandMatrix<std::complex<T> > cL(N,N,nlo,0);
@@ -588,7 +690,7 @@ void TestSymBandDecomp()
             (cL = c2.lowerBand()).diag().setAllTo(T(1));
             cD = DiagMatrixViewOf(c2.diag());
             cLDL = cL*cD*cL.transpose();
-            Assert(Norm(c-cLDL) < ceps*Norm(c),"SymBand C LDL2");
+            Assert(Norm(c-cLDL) <= ceps*normc,"SymBand C LDL2");
 
 #ifdef XTEST
             // Alt calculation:
@@ -598,14 +700,14 @@ void TestSymBandDecomp()
             cLDL.diag(-1) = (cE*cD.subDiagMatrix(0,N-1)).diag();
             cLDL += cD;
             cLDL.diag(1) = cLDL.diag(-1);
-            Assert(Norm(c-cLDL) < eps*Norm(m),"SymBand C LDL2 Alt");
+            Assert(Norm(c-cLDL) <= eps*normm,"SymBand C LDL2 Alt");
 
             c2.conjugate() = c;
             LDL_Decompose(c2.conjugate());
             (cL = c2.conjugate().lowerBand()).diag().setAllTo(T(1));
             cD = DiagMatrixViewOf(c2.conjugate().diag());
             cLDL = cL*cD*cL.transpose();
-            Assert(Norm(c-cLDL) < ceps*Norm(c),"SymBand C LDL3");
+            Assert(Norm(c-cLDL) <= ceps*normc,"SymBand C LDL3");
 #endif
             std::cout<<"."; std::cout.flush();
         } catch (tmv::NonPosDef) {
@@ -618,66 +720,73 @@ void TestSymBandDecomp()
             tmv::Matrix<T> U = m.svd().getU();
             tmv::DiagMatrix<T> S = m.svd().getS();
             tmv::Matrix<T> V = m.svd().getV();
-            Assert(Norm(m-U*S*V) < eps*Norm(m),"SymBand SV");
+            Assert(Norm(m-U*S*V) <= eps*normm,"SymBand SV");
 
             tmv::Matrix<std::complex<T> > cU = c.symsvd().getU();
             tmv::DiagMatrix<T> cS = c.symsvd().getS();
             tmv::Matrix<std::complex<T> > cV = c.symsvd().getV();
-            Assert(Norm(c-cU*cS*cV) < ceps*Norm(c),"SymBand C SV");
+            Assert(Norm(c-cU*cS*cV) <= ceps*normc,"SymBand C SV");
 
 #ifdef XTEST
             tmv::Matrix<T> U2(N,N);
             tmv::DiagMatrix<T> S2(N);
             tmv::Matrix<T> V2(N,N);
             SV_Decompose(m,U2.view(),S2.view(),V2.view());
-            Assert(Norm(m-U2*S2*V2) < eps*Norm(m),"SymBand SV2");
+            Assert(Norm(m-U2*S2*V2) <= eps*normm,"SymBand SV2");
 
             SV_Decompose(m,S2.view());
-            Assert(Norm(S2-S) < eps*Norm(S),"SymBand SV3");
+            Assert(Norm(S2-S) <= eps*normm,"SymBand SV3");
             SV_Decompose(m,U2.view(),S2.view());
-            Assert(Norm(S2-S) < eps*Norm(S),"SymBand SV4 S");
-            Assert(Norm(U2*S2*S2*U2.transpose()-m*m.transpose()) <
-                   eps*Norm(m)*Norm(m),"SymBand SV4 U");
+            Assert(Norm(S2-S) <= eps*normm,"SymBand SV4 S");
+            if (!nearoverflow)
+                Assert(Norm(U2*S2*S2*U2.transpose()-m*m.transpose()) <=
+                       eps*normm*normm,"SymBand SV4 U");
             SV_Decompose(m,S2.view(),V2.view());
-            Assert(Norm(S2-S) < eps*Norm(S),"SymBand SV5 S");
-            Assert(Norm(m.adjoint()*m-V2.adjoint()*S2*S2*V2) < 
-                   eps*Norm(m)*Norm(m),"SymBand SV5 V");
+            Assert(Norm(S2-S) <= eps*normm,"SymBand SV5 S");
+            if (!nearoverflow)
+                Assert(Norm(m.adjoint()*m-V2.adjoint()*S2*S2*V2) <= 
+                       eps*normm*normm,"SymBand SV5 V");
 
             tmv::Matrix<std::complex<T> > cU2(N,N);
             tmv::DiagMatrix<T> cS2(N);
             tmv::Matrix<std::complex<T> > cV2(N,N);
             SV_Decompose(c,cU2.view(),cS2.view(),cV2.view());
-            Assert(Norm(c-cU2*cS2*cV2) < ceps*Norm(c),"SymBand C SV2");
+            Assert(Norm(c-cU2*cS2*cV2) <= ceps*normc,"SymBand C SV2");
 
             SV_Decompose(c,cS2.view());
-            Assert(Norm(cS2-cS) < ceps*Norm(cS),"SymBand C SV3");
+            Assert(Norm(cS2-cS) <= ceps*normc,"SymBand C SV3");
             SV_Decompose(c,cU2.view(),cS2.view());
-            Assert(Norm(cS2-cS) < ceps*Norm(cS),"SymBand C SV4 S");
-            Assert(Norm(cU2*cS2*cS2*cU2.adjoint()-c*c.adjoint()) <
-                   ceps*Norm(c*c.adjoint()),"SymBand C SV4 U");
+            Assert(Norm(cS2-cS) <= ceps*normc,"SymBand C SV4 S");
+            if (!nearoverflow)
+                Assert(Norm(cU2*cS2*cS2*cU2.adjoint()-c*c.adjoint()) <=
+                       ceps*normc*normc,"SymBand C SV4 U");
             SV_Decompose(c,cS2.view(),cV2.view());
-            Assert(Norm(cS2-cS) < ceps*Norm(cS),"SymBand C SV5 S");
-            Assert(Norm(c.adjoint()*c-cV2.adjoint()*cS2*cS2*cV2) < 
-                   ceps*Norm(c)*Norm(c),"SymBand C SV5 V");
+            Assert(Norm(cS2-cS) <= ceps*normc,"SymBand C SV5 S");
+            if (!nearoverflow)
+                Assert(Norm(c.adjoint()*c-cV2.adjoint()*cS2*cS2*cV2) <= 
+                       ceps*normc*normc,"SymBand C SV5 V");
 
             SV_Decompose(c.conjugate(),cS2.view());
-            Assert(Norm(cS2-cS) < ceps*Norm(cS),"SymBand C SV6");
+            Assert(Norm(cS2-cS) <= ceps*normc,"SymBand C SV6");
             SV_Decompose(c.conjugate(),cU2.view(),cS2.view());
-            Assert(Norm(cS2-cS) < ceps*Norm(cS),"SymBand C SV7 S");
-            Assert(Norm(cU2*cS2*cS2*cU2.adjoint()-c.conjugate()*c.transpose()) <
-                   ceps*Norm(c.conjugate()*c.transpose()),"SymBand C SV7 U");
+            Assert(Norm(cS2-cS) <= ceps*normc,"SymBand C SV7 S");
+            if (!nearoverflow)
+                Assert(Norm(cU2*cS2*cS2*cU2.adjoint()-
+                            c.conjugate()*c.transpose()) <= 
+                       ceps*normc*normc,"SymBand C SV7 U");
             SV_Decompose(c.conjugate(),cU2.conjugate(),cS2.view());
-            Assert(Norm(cS2-cS) < ceps*Norm(cS),"SymBand C SV8 S");
-            Assert(Norm(cU2.conjugate()*cS2*cS2*cU2.transpose()-
-                        c.conjugate()*c.transpose()) <
-                   ceps*Norm(c.conjugate()*c.transpose()),"SymBand C SV8 U");
+            Assert(Norm(cS2-cS) <= ceps*normc,"SymBand C SV8 S");
+            if (!nearoverflow)
+                Assert(Norm(cU2.conjugate()*cS2*cS2*cU2.transpose()-
+                            c.conjugate()*c.transpose()) <=
+                       ceps*normc*normc,"SymBand C SV8 U");
 #endif
             std::cout<<"."; std::cout.flush();
         }
     }
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestHermBandDecomp<double,tmv::Upper,tmv::ColMajor>();
 template void TestHermBandDecomp<double,tmv::Upper,tmv::RowMajor>();
 template void TestHermBandDecomp<double,tmv::Lower,tmv::ColMajor>();
@@ -687,7 +796,7 @@ template void TestSymBandDecomp<double,tmv::Upper,tmv::RowMajor>();
 template void TestSymBandDecomp<double,tmv::Lower,tmv::ColMajor>();
 template void TestSymBandDecomp<double,tmv::Lower,tmv::RowMajor>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestHermBandDecomp<float,tmv::Upper,tmv::ColMajor>();
 template void TestHermBandDecomp<float,tmv::Upper,tmv::RowMajor>();
 template void TestHermBandDecomp<float,tmv::Lower,tmv::ColMajor>();
@@ -697,7 +806,7 @@ template void TestSymBandDecomp<float,tmv::Upper,tmv::RowMajor>();
 template void TestSymBandDecomp<float,tmv::Lower,tmv::ColMajor>();
 template void TestSymBandDecomp<float,tmv::Lower,tmv::RowMajor>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestHermBandDecomp<long double,tmv::Upper,tmv::ColMajor>();
 template void TestHermBandDecomp<long double,tmv::Upper,tmv::RowMajor>();
 template void TestHermBandDecomp<long double,tmv::Lower,tmv::ColMajor>();

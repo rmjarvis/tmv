@@ -23,15 +23,15 @@ void TestAllSmallMatrixA()
         "> Square Arithmetic passed all tests\n";
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestAllSmallMatrixA<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestAllSmallMatrixA<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestAllSmallMatrixA<long double>();
 #endif
-#ifdef INST_INT
+#ifdef TEST_INT
 template void TestAllSmallMatrixA<int>();
 #endif

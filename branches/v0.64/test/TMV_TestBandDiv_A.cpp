@@ -37,43 +37,40 @@ void TestBandDiv_A(tmv::DivType dt)
     tmv::BandMatrix<std::complex<T> > cb3 = cb1.subBandMatrix(
         0,N,0,N/2,cb1.nlo(),cb1.nhi());
 
-    tmv::BandMatrix<T> b1x = b1;
-    tmv::BandMatrix<std::complex<T> > cb1x = cb1;
-    tmv::BandMatrix<T> b2x = b2;
-    tmv::BandMatrix<std::complex<T> > cb2x = cb2;
-    tmv::BandMatrix<T> b3x = b3;
-    tmv::BandMatrix<std::complex<T> > cb3x = cb3;
+    tmv::BandMatrixView<T> b1v = b1.view();
+    tmv::BandMatrixView<std::complex<T> > cb1v = cb1.view();
+    tmv::BandMatrixView<T> b2v = b2.view();
+    tmv::BandMatrixView<std::complex<T> > cb2v = cb2.view();
+    tmv::BandMatrixView<T> b3v = b3.view();
+    tmv::BandMatrixView<std::complex<T> > cb3v = cb3.view();
 
     for(size_t i=START;i<b.size();i++) {
         if (showstartdone) 
             std::cout<<"Start loop: i = "<<i<<"\nbi = "<<tmv::TMV_Text(b[i])<<
                 "  "<<b[i]<<std::endl;
-        const tmv::BandMatrixView<T>& bi = b[i];
-        const tmv::BandMatrixView<std::complex<T> >& cbi = cb[i];
+        tmv::BandMatrixView<T> bi = b[i];
+        tmv::BandMatrixView<std::complex<T> > cbi = cb[i];
         if (dt == tmv::LU && !bi.isSquare()) continue;
 
         bi.saveDiv();
         cbi.saveDiv();
 
-        TestMatrixDivArith2<T>(dt,b1x,cb1x,bi,b1.view(),cbi,cb1.view(),
-                               "SquareBand/Band");
+        TestMatrixDivArith2<T>(dt,bi,b1v,cbi,cb1v,"SquareBand/Band");
 #ifdef XTEST
-        TestMatrixDivArith1<T>(dt,b2x,cb2x,bi,b2.view(),cbi,cb2.view(),
-                               "NonSquareBand/Band");
-        TestMatrixDivArith1<T>(dt,b3x,cb3x,bi,b3.view(),cbi,cb3.view(),
-                               "NonSquareBand/Band");
+        TestMatrixDivArith1<T>(dt,bi,b2v,cbi,cb2v,"NonSquareBand/Band");
+        TestMatrixDivArith1<T>(dt,bi,b3v,cbi,cb3v,"NonSquareBand/Band");
 #endif
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
     for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestBandDiv_A<double>(tmv::DivType dt);
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestBandDiv_A<float>(tmv::DivType dt);
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestBandDiv_A<long double>(tmv::DivType dt);
 #endif

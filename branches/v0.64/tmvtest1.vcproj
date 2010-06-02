@@ -250,6 +250,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\TMV_TestPermutation.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\test\TMV_TestTri.cpp"
 				>
 			</File>

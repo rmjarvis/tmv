@@ -44,7 +44,7 @@
 namespace tmv {
 
     template <class T, int M, int N> 
-    class SmallMatrixComposite 
+    class SmallMatrixComposite : public MatrixComposite<T>
     {
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) xCT;
@@ -3060,8 +3060,9 @@ namespace tmv {
         if (v.step() == 1 && !v.isconj()) {
             SmallVector<T,N> v_copy(v);
             MultVM_1<N,N,S>(v_copy.cptr(),m.cptr(),v.ptr());
-        } 
-        else MultMV<false>(T(1),m.transpose(),v,v); 
+        } else {
+            MultMV<false>(T(1),m.transpose(),v,v); 
+        }
         return v; 
     }
 
@@ -3073,8 +3074,9 @@ namespace tmv {
         if (v.step() == 1) { // conj is ok
             SmallVector<CT,N> v_copy(v);
             MultVM_1<N,N,S>(v_copy.cptr(),m.cptr(),v.ptr());
-        } 
-        else MultMV<false>(T(1),m.transpose(),v,v); 
+        } else {
+            MultMV<false>(T(1),m.transpose(),v,v); 
+        }
         return v; 
     }
 
@@ -3084,7 +3086,7 @@ namespace tmv {
     {
         TMVAssert(m.colsize() == N);
         TMVAssert(m.rowsize() == N);
-        MultMV<false>(T(1),m.transpose(),v,v); 
+        MultMV<false>(T(1),m.transpose(),v.view(),v.view()); 
         return v; 
     }
 
@@ -3094,7 +3096,7 @@ namespace tmv {
     {
         TMVAssert(m.colsize() == N);
         TMVAssert(m.rowsize() == N);
-        MultMV<false>(T(1),m.transpose(),v,v); 
+        MultMV<false>(T(1),m.transpose(),v.view(),v.view()); 
         return v; 
     }
 
@@ -3125,8 +3127,9 @@ namespace tmv {
         if (v.step() == 1 && !v.isconj()) {
             SmallVector<T,N> v_copy(v);
             MultVM<N,N,S>(pxm.getX(),v_copy.cptr(),pxm.getM().cptr(),v.ptr());
-        } 
-        else MultMV<false>(pxm.getX(),pxm.getM().transpose(),v,v);
+        } else {
+            MultMV<false>(pxm.getX(),pxm.getM().transpose(),v,v);
+        }
         return v;
     }
 
@@ -3138,8 +3141,9 @@ namespace tmv {
         if (v.step() == 1) { // conj is ok
             SmallVector<CT,N> v_copy(v);
             MultVM<N,N,S>(pxm.getX(),v_copy.cptr(),pxm.getM().cptr(),v.ptr());
-        } 
-        else MultMV<false>(pxm.getX(),pxm.getM().transpose(),v,v);
+        } else {
+            MultMV<false>(pxm.getX(),pxm.getM().transpose(),v,v);
+        }
         return v;
     }
 
@@ -3149,7 +3153,7 @@ namespace tmv {
     { 
         TMVAssert(pxm.colsize() == N);
         TMVAssert(pxm.rowsize() == N);
-        MultMV<false>(pxm.getX(),pxm.getM().transpose(),v,v);
+        MultMV<false>(pxm.getX(),pxm.getM().transpose(),v.view(),v.view());
         return v;
     }
 
@@ -3159,7 +3163,7 @@ namespace tmv {
     {
         TMVAssert(pxm.colsize() == N);
         TMVAssert(pxm.rowsize() == N);
-        MultMV<false>(pxm.getX(),pxm.getM().transpose(),v,v);
+        MultMV<false>(pxm.getX(),pxm.getM().transpose(),v.view(),v.view());
         return v;
     }
 
@@ -3411,8 +3415,8 @@ namespace tmv {
     {
         TMVAssert(v.size() == M);
         if (v.step() == 1 && !v.isconj()) 
-            AddMultMV<M,N,S>(-pmv.getX(),pmv.getM().cptr(),pmv.getV().cptr(),
-                             v.ptr());
+            AddMultMV<M,N,S>(
+                -pmv.getX(),pmv.getM().cptr(),pmv.getV().cptr(),v.ptr());
         else 
             MultMV<true>(-pmv.getX(),pmv.getM().view(),pmv.getV().view(),v);
         return v; 
@@ -3424,8 +3428,8 @@ namespace tmv {
     {
         TMVAssert(v.size() == M);
         if (v.step() == 1)  // conj is ok
-            AddMultMV<M,N,S>(-pmv.getX(),pmv.getM().cptr(),pmv.getV().cptr(),
-                             v.ptr());
+            AddMultMV<M,N,S>(
+                -pmv.getX(),pmv.getM().cptr(),pmv.getV().cptr(),v.ptr());
         else 
             MultMV<true>(-pmv.getX(),pmv.getM().view(),pmv.getV().view(),v);
         return v; 
@@ -3690,6 +3694,7 @@ namespace tmv {
         ) :
             m(_m) 
         { TMVAssert(_x == T(1)); }
+        inline StorageType stor() const { return ColMajor; }
         inline const SmallMatrix<Tm,M,N,S,I>& getM() const { return m; }
         inline void assignTom(
             SmallMatrix<RT,N,M,RowMajor,CStyle>& m0) const

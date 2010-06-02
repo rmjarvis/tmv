@@ -886,15 +886,15 @@ template <class T> void TestSymMatrix()
     }
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSymMatrix<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSymMatrix<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSymMatrix<long double>();
 #endif
-#ifdef INST_INT
+#ifdef TEST_INT
 template void TestSymMatrix<int>();
 #endif

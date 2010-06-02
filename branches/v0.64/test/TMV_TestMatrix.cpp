@@ -1,14 +1,13 @@
 
-#include "TMV.h"
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
+#include "TMV.h"
 #include <fstream>
 #include <cstdio>
 
 #define CT std::complex<T>
 
-template <class T, tmv::StorageType S> 
-static void TestBasicMatrix_1()
+template <class T, tmv::StorageType S> static void TestBasicMatrix_1()
 {
     const int M = 15;
     const int N = 10;
@@ -119,8 +118,7 @@ static void TestBasicMatrix_1()
     Assert(m == mfv,"Matrix == FortranStyle MatrixView");
 }
 
-template <class T, tmv::StorageType S> 
-static void TestBasicMatrix_2()
+template <class T, tmv::StorageType S> static void TestBasicMatrix_2()
 {
     const int M = 15;
     const int N = 10;
@@ -137,9 +135,9 @@ static void TestBasicMatrix_2()
     tmv::ConstMatrixView<T,tmv::FortranStyle> mfcv = mf.view();
     tmv::MatrixView<T,tmv::FortranStyle> mfv = mf.view();
 
-    Assert(m.subMatrix(2,5,1,4) == m.subMatrix(2,5,1,4,1,1),"SubMatrix");
+    Assert(m.subMatrix(2,5,1,4) == m.subMatrix(2,5,1,4,1,1),"subMatrix");
     Assert(m.subVector(2,5,4,2,3) == m.subMatrix(2,14,5,11,4,2).diag(),
-           "SubVector");
+           "subVector");
     Assert(m.colPair(2,5) == m.subMatrix(0,M,2,8,1,3),"colPair");
     Assert(m.colPair(7,2) == m.subMatrix(0,M,7,-3,1,-5),"colPair");
     Assert(m.rowPair(3,7) == m.subMatrix(3,11,0,N,4,1),"rowPair");
@@ -147,9 +145,9 @@ static void TestBasicMatrix_2()
     Assert(m.colRange(2,5) == m.subMatrix(0,M,2,5),"colRange");
     Assert(m.rowRange(3,7) == m.subMatrix(3,7,0,N),"rowRange");
 
-    Assert(mf.subMatrix(3,5,2,4) == mf.subMatrix(3,5,2,4,1,1),"SubMatrixFF");
+    Assert(mf.subMatrix(3,5,2,4) == mf.subMatrix(3,5,2,4,1,1),"subMatrixFF");
     Assert(mf.subVector(3,6,4,2,3) == mf.subMatrix(3,11,6,10,4,2).diag(),
-           "SubVectorFF");
+           "subVectorFF");
     Assert(mf.colPair(3,6) == mf.subMatrix(1,M,3,6,1,3),"colPairFF");
     Assert(mf.colPair(8,3) == mf.subMatrix(1,M,8,3,1,-5),"colPairFF");
     Assert(mf.rowPair(4,8) == mf.subMatrix(4,8,1,N,4,1),"rowPairFF");
@@ -157,12 +155,12 @@ static void TestBasicMatrix_2()
     Assert(mf.colRange(3,5) == mf.subMatrix(1,M,3,5),"colRangeFF");
     Assert(mf.rowRange(4,7) == mf.subMatrix(4,7,1,N),"rowRangeFF");
 
-    Assert(m.subMatrix(2,5,1,4) == mf.subMatrix(3,5,2,4),"SubMatrixF");
-    Assert(m.subMatrix(2,8,1,10,2,3) == mf.subMatrix(3,7,2,8,2,3),"SubMatrixF");
-    Assert(m.subVector(2,5,4,2,3) == mf.subVector(3,6,4,2,3),"SubVectorF");
-    Assert(m.subVector(8,1,-1,2,4) == mf.subVector(9,2,-1,2,4),"SubVector2F");
+    Assert(m.subMatrix(2,5,1,4) == mf.subMatrix(3,5,2,4),"subMatrixF");
+    Assert(m.subMatrix(2,8,1,10,2,3) == mf.subMatrix(3,7,2,8,2,3),"subMatrixF");
+    Assert(m.subVector(2,5,4,2,3) == mf.subVector(3,6,4,2,3),"subVectorF");
+    Assert(m.subVector(8,1,-1,2,4) == mf.subVector(9,2,-1,2,4),"subVector2F");
     Assert(m.subVector(12,8,-4,-2,2) == mf.subVector(13,9,-4,-2,2),
-           "SubVector3F");
+           "subVector3F");
     Assert(m.colPair(2,5) == mf.colPair(3,6),"colPairF");
     Assert(m.colPair(7,2) == mf.colPair(8,3),"colPairF");
     Assert(m.rowPair(3,7) == mf.rowPair(4,8),"rowPairF");
@@ -170,13 +168,13 @@ static void TestBasicMatrix_2()
     Assert(m.colRange(2,5) == mf.colRange(3,5),"colRangeF");
     Assert(m.rowRange(3,7) == mf.rowRange(4,7),"rowRangeF");
 
-    Assert(m.subMatrix(2,5,1,4) == mcv.subMatrix(2,5,1,4),"SubMatrixCV");
+    Assert(m.subMatrix(2,5,1,4) == mcv.subMatrix(2,5,1,4),"subMatrixCV");
     Assert(m.subMatrix(2,8,1,10,2,3) == mcv.subMatrix(2,8,1,10,2,3),
-           "SubMatrixCV");
-    Assert(m.subVector(2,5,4,2,3) == mcv.subVector(2,5,4,2,3),"SubVectorCV");
-    Assert(m.subVector(8,1,-1,2,4) == mcv.subVector(8,1,-1,2,4),"SubVector2CV");
+           "subMatrixCV");
+    Assert(m.subVector(2,5,4,2,3) == mcv.subVector(2,5,4,2,3),"subVectorCV");
+    Assert(m.subVector(8,1,-1,2,4) == mcv.subVector(8,1,-1,2,4),"subVector2CV");
     Assert(m.subVector(12,8,-4,-2,2) == mcv.subVector(12,8,-4,-2,2),
-           "SubVector3CV");
+           "subVector3CV");
     Assert(m.colPair(2,5) == mcv.colPair(2,5),"colPairCV");
     Assert(m.colPair(7,2) == mcv.colPair(7,2),"colPairCV");
     Assert(m.rowPair(3,7) == mcv.rowPair(3,7),"rowPairCV");
@@ -184,12 +182,12 @@ static void TestBasicMatrix_2()
     Assert(m.colRange(2,5) == mcv.colRange(2,5),"colRangeCV");
     Assert(m.rowRange(3,7) == mcv.rowRange(3,7),"rowRangeCV");
 
-    Assert(m.subMatrix(2,5,1,4) == mv.subMatrix(2,5,1,4),"SubMatrixV");
-    Assert(m.subMatrix(2,8,1,10,2,3) == mv.subMatrix(2,8,1,10,2,3),"SubMatrixV");
-    Assert(m.subVector(2,5,4,2,3) == mv.subVector(2,5,4,2,3),"SubVectorV");
-    Assert(m.subVector(8,1,-1,2,4) == mv.subVector(8,1,-1,2,4),"SubVector2V");
+    Assert(m.subMatrix(2,5,1,4) == mv.subMatrix(2,5,1,4),"subMatrixV");
+    Assert(m.subMatrix(2,8,1,10,2,3) == mv.subMatrix(2,8,1,10,2,3),"subMatrixV");
+    Assert(m.subVector(2,5,4,2,3) == mv.subVector(2,5,4,2,3),"subVectorV");
+    Assert(m.subVector(8,1,-1,2,4) == mv.subVector(8,1,-1,2,4),"subVector2V");
     Assert(m.subVector(12,8,-4,-2,2) == mv.subVector(12,8,-4,-2,2),
-           "SubVector3V");
+           "subVector3V");
     Assert(m.colPair(2,5) == mv.colPair(2,5),"colPairV");
     Assert(m.colPair(7,2) == mv.colPair(7,2),"colPairV");
     Assert(m.rowPair(3,7) == mv.rowPair(3,7),"rowPairV");
@@ -197,14 +195,14 @@ static void TestBasicMatrix_2()
     Assert(m.colRange(2,5) == mv.colRange(2,5),"colRangeV");
     Assert(m.rowRange(3,7) == mv.rowRange(3,7),"rowRangeV");
 
-    Assert(mf.subMatrix(3,5,2,4) == mfcv.subMatrix(3,5,2,4),"SubMatrixFCV");
+    Assert(mf.subMatrix(3,5,2,4) == mfcv.subMatrix(3,5,2,4),"subMatrixFCV");
     Assert(mf.subMatrix(3,7,2,8,2,3) == mfcv.subMatrix(3,7,2,8,2,3),
-           "SubMatrixFCV");
-    Assert(mf.subVector(3,6,4,2,3) == mfcv.subVector(3,6,4,2,3),"SubVectorFCV");
+           "subMatrixFCV");
+    Assert(mf.subVector(3,6,4,2,3) == mfcv.subVector(3,6,4,2,3),"subVectorFCV");
     Assert(mf.subVector(9,2,-1,2,4) == mfcv.subVector(9,2,-1,2,4),
-           "SubVector2FCV");
+           "subVector2FCV");
     Assert(mf.subVector(13,9,-4,-2,2) == mfcv.subVector(13,9,-4,-2,2),
-           "SubVector3FCV");
+           "subVector3FCV");
     Assert(mf.colPair(3,6) == mfcv.colPair(3,6),"colPairFCV");
     Assert(mf.colPair(8,3) == mfcv.colPair(8,3),"colPairFCV");
     Assert(mf.rowPair(4,8) == mfcv.rowPair(4,8),"rowPairFCV");
@@ -212,14 +210,12 @@ static void TestBasicMatrix_2()
     Assert(mf.colRange(3,5) == mfcv.colRange(3,5),"colRangeFCV");
     Assert(mf.rowRange(4,7) == mfcv.rowRange(4,7),"rowRangeFCV");
 
-    Assert(mf.subMatrix(3,5,2,4) == mfv.subMatrix(3,5,2,4),"SubMatrixFV");
-    Assert(mf.subMatrix(3,7,2,8,2,3) == mfv.subMatrix(3,7,2,8,2,3),
-           "SubMatrixFV");
-    Assert(mf.subVector(3,6,4,2,3) == mfv.subVector(3,6,4,2,3),"SubVectorFV");
-    Assert(mf.subVector(9,2,-1,2,4) == mfv.subVector(9,2,-1,2,4),
-           "SubVector2FV");
+    Assert(mf.subMatrix(3,5,2,4) == mfv.subMatrix(3,5,2,4),"subMatrixFV");
+    Assert(mf.subMatrix(3,7,2,8,2,3) == mfv.subMatrix(3,7,2,8,2,3),"subMatrixFV");
+    Assert(mf.subVector(3,6,4,2,3) == mfv.subVector(3,6,4,2,3),"subVectorFV");
+    Assert(mf.subVector(9,2,-1,2,4) == mfv.subVector(9,2,-1,2,4),"subVector2FV");
     Assert(mf.subVector(13,9,-4,-2,2) == mfv.subVector(13,9,-4,-2,2),
-           "SubVector3FV");
+           "subVector3FV");
     Assert(mf.colPair(3,6) == mfv.colPair(3,6),"colPairFV");
     Assert(mf.colPair(8,3) == mfv.colPair(8,3),"colPairFV");
     Assert(mf.rowPair(4,8) == mfv.rowPair(4,8),"rowPairFV");
@@ -237,46 +233,70 @@ static void TestBasicMatrix_2()
     mf = a;
     Assert(a == mf,"Copy CStyle Matrix to FortranStyle");
 
-    std::vector<T> qv(6);
-    tmv::Matrix<T,S> q4(2,3);
-    tmv::Matrix<T,S> q5t(3,2);
+    std::vector<T> qv(12);
+    tmv::Matrix<T,S> q4(3,4);
+    tmv::Matrix<T,S> q5t(4,3);
     tmv::MatrixView<T> q5 = q5t.transpose();
     if (S == tmv::RowMajor) {
-        T qvar[] = { T(0), T(-1), T(-2),
-            T(2), T(1), T(0) };
-        for(int i=0;i<6;i++) qv[i] = qvar[i];
+        T qvar[] = { 
+            T(0), T(-1), T(-2), T(-3),
+            T(2), T(1), T(0), T(-1),
+            T(4), T(3), T(2), T(1) 
+        };
+        for(int i=0;i<12;i++) qv[i] = qvar[i];
         q4 <<
-            0, -1, -2,
-            2, 1, 0;
+            0, -1, -2, -3,
+            2, 1, 0, -1,
+            4, 3, 2, 1;
         q5 <<
-            0, 2,
-            -1, 1,
-            -2, 0;
+            0, 2, 4,
+            -1, 1, 3,
+            -2, 0, 2,
+            -3, -1, 1;
     } else {
-        T qvar[] = { T(0), T(2),
-            T(-1), T(1),
-            T(-2), T(0) };
-        for(int i=0;i<6;i++) qv[i] = qvar[i];
+        T qvar[] = {
+            T(0), T(2), T(4),
+            T(-1), T(1), T(3),
+            T(-2), T(0), T(2),
+            T(-3), T(-1), T(1) 
+        };
+        for(int i=0;i<12;i++) qv[i] = qvar[i];
         q4 <<
-            0, 2,
-            -1, 1,
-            -2, 0;
+            0, 2, 4,
+            -1, 1, 3,
+            -2, 0, 2,
+            -3, -1, 1;
         q5 <<
-            0, -1, -2,
-            2, 1, 0;
+            0, -1, -2, -3,
+            2, 1, 0, -1,
+            4, 3, 2, 1;
     }
-    T qar[6];
-    for(int i=0;i<6;i++) qar[i] = qv[i];
-    tmv::Matrix<T,S> q1(2,3,qar);
-    tmv::Matrix<T,S> q2(2,3,qv);
-    tmv::ConstMatrixView<T> q3 = tmv::MatrixViewOf(qar,2,3,S);
+    const int Si = (S == tmv::RowMajor ? 4 : 1);
+    const int Sj = (S == tmv::RowMajor ? 1 : 3);
+    T qar[12];
+    for(int i=0;i<12;i++) qar[i] = qv[i];
+    tmv::Matrix<T,S> q1(3,4,qar);
+    tmv::Matrix<T,S> q2(3,4,qv);
 
-    for(int i=0;i<2;i++) for(int j=0;j<3;j++) {
+    tmv::ConstMatrixView<T> q3 = tmv::MatrixViewOf(qar,3,4,S);
+    tmv::ConstMatrixView<T> q6 = tmv::MatrixViewOf(qar,3,4,Si,Sj);
+
+    if (showacc) {
+        std::cout<<"q1 = "<<q1<<std::endl;
+        std::cout<<"q2 = "<<q2<<std::endl;
+        std::cout<<"q3 = "<<q3<<std::endl;
+        std::cout<<"q4 = "<<q4<<std::endl;
+        std::cout<<"q5 = "<<q5<<std::endl;
+        std::cout<<"q6 = "<<q6<<std::endl;
+    }
+
+    for(int i=0;i<3;i++) for(int j=0;j<4;j++) {
         Assert(q1(i,j) == T(2*i-j),"Create Matrix from T*");
         Assert(q2(i,j) == T(2*i-j),"Create Matrix from vector");
-        Assert(q3(i,j) == T(2*i-j),"Create MatrixView of T*");
-        Assert(q4(i,j) == T(2*i-j),"Create Matrix from <<");
-        Assert(q5(i,j) == T(2*i-j),"Create MatrixView of <<");
+        Assert(q3(i,j) == T(2*i-j),"Create MatrixView of T* (S)");
+        Assert(q4(i,j) == T(2*i-j),"Create Matrix from << list");
+        Assert(q5(i,j) == T(2*i-j),"Create MatrixView from << list");
+        Assert(q6(i,j) == T(2*i-j),"Create MatrixView of T* (Si,Sj)");
     }
 
     c = a+b;
@@ -320,8 +340,7 @@ static void TestBasicMatrix_2()
         Assert(cm(i,j) == ca(i,j),"Copy CMatrix");
 }
 
-template <class T, tmv::StorageType S> 
-static void TestBasicMatrix_IO()
+template <class T, tmv::StorageType S> static void TestBasicMatrix_IO()
 {
     const int M = 15;
     const int N = 10;
@@ -335,30 +354,26 @@ static void TestBasicMatrix_IO()
     }
 
     std::ofstream fout("tmvtest_matrix_io.dat");
-    if (!fout) {
+    if (!fout) 
 #ifdef NOTHROW
-        std::cerr<<"Couldn't open tmvtest_matrix_io.dat for output\n"; 
-        exit(1); 
+    { std::cerr<<"Couldn't open tmvtest_matrix_io.dat for output\n"; exit(1); }
 #else
-        throw std::runtime_error(
-            "Couldn't open tmvtest_matrix_io.dat for output");
+    throw std::runtime_error(
+        "Couldn't open tmvtest_matrix_io.dat for output");
 #endif
-    }
     fout << m << std::endl << cm << std::endl;
     fout.close();
 
     tmv::Matrix<T,tmv::RowMajor> xm1(M,N);
     tmv::Matrix<CT,tmv::RowMajor> xcm1(M,N);
     std::ifstream fin("tmvtest_matrix_io.dat");
-    if (!fin) {
+    if (!fin) 
 #ifdef NOTHROW
-        std::cerr<<"Couldn't open tmvtest_matrix_io.dat for input\n"; 
-        exit(1); 
+    { std::cerr<<"Couldn't open tmvtest_matrix_io.dat for input\n"; exit(1); }
 #else
-        throw std::runtime_error(
-            "Couldn't open tmvtest_matrix_io.dat for input");
+    throw std::runtime_error(
+        "Couldn't open tmvtest_matrix_io.dat for input");
 #endif
-    }
     fin >> xm1 >> xcm1;
     fin.close();
     Assert(m == xm1,"Matrix I/O check #1");
@@ -367,15 +382,13 @@ static void TestBasicMatrix_IO()
     tmv::Matrix<T,tmv::ColMajor> xm2(M,N);
     tmv::Matrix<CT,tmv::ColMajor> xcm2(M,N);
     fin.open("tmvtest_matrix_io.dat");
-    if (!fin) {
+    if (!fin) 
 #ifdef NOTHROW
-        std::cerr<<"Couldn't open tmvtest_matrix_io.dat for input\n"; 
-        exit(1); 
+    { std::cerr<<"Couldn't open tmvtest_matrix_io.dat for input\n"; exit(1); }
 #else
-        throw std::runtime_error(
-            "Couldn't open tmvtest_matrix_io.dat for input");
+    throw std::runtime_error(
+        "Couldn't open tmvtest_matrix_io.dat for input");
 #endif
-    }
     fin >> xm2 >> xcm2;
     fin.close();
     Assert(m == xm2,"Matrix I/O check #2");
@@ -384,15 +397,13 @@ static void TestBasicMatrix_IO()
     std::auto_ptr<tmv::Matrix<T> > xm3;
     std::auto_ptr<tmv::Matrix<CT> > xcm3;
     fin.open("tmvtest_matrix_io.dat");
-    if (!fin) {
+    if (!fin) 
 #ifdef NOTHROW
-        std::cerr<<"Couldn't open tmvtest_matrix_io.dat for input\n"; 
-        exit(1); 
+    { std::cerr<<"Couldn't open tmvtest_matrix_io.dat for input\n"; exit(1); }
 #else
-        throw std::runtime_error(
-            "Couldn't open tmvtest_matrix_io.dat for input");
+    throw std::runtime_error(
+        "Couldn't open tmvtest_matrix_io.dat for input");
 #endif
-    }
     fin >> xm3 >> xcm3;
     fin.close();
     Assert(m == *xm3,"Matrix I/O check #3");
@@ -400,14 +411,13 @@ static void TestBasicMatrix_IO()
 
 #ifndef XTEST
     std::remove("tmvtest_matrix_io.dat");
-    //system("rm tmvtest_matrix_io.dat");
 #endif
 
 }
 
-template <class T> 
-void TestAllMatrix()
+template <class T> void TestMatrix()
 {
+#if 1
     TestBasicMatrix_1<T,tmv::RowMajor>();
     TestBasicMatrix_1<T,tmv::ColMajor>();
     TestBasicMatrix_2<T,tmv::RowMajor>();
@@ -415,22 +425,30 @@ void TestAllMatrix()
     TestBasicMatrix_IO<T,tmv::RowMajor>();
     TestBasicMatrix_IO<T,tmv::ColMajor>();
     std::cout<<"Matrix<"<<tmv::TMV_Text(T())<<"> passed all basic tests\n";
+#endif
 
-    if (tmv::TMV_Epsilon<T>() > T(0)) {
-        TestAllMatrixArith<T>();
-        std::cout<<"Matrix<"<<tmv::TMV_Text(T())<<"> Arithmetic passed all tests\n";
-    }
+#if 1
+    TestMatrixArith_1<T>();
+    TestMatrixArith_2<T>();
+    TestMatrixArith_3<T>();
+    TestMatrixArith_4<T>();
+    TestMatrixArith_5<T>();
+    TestMatrixArith_6<T>();
+    TestMatrixArith_7<T>();
+    TestMatrixArith_8<T>();
+    std::cout<<"Matrix<"<<tmv::TMV_Text(T())<<"> Arithmetic passed all tests\n";
+#endif
 }
 
-#ifdef INST_DOUBLE
-template void TestAllMatrix<double>();
+#ifdef TEST_DOUBLE
+template void TestMatrix<double>();
 #endif
-#ifdef INST_FLOAT
-template void TestAllMatrix<float>();
+#ifdef TEST_FLOAT
+template void TestMatrix<float>();
 #endif
-#ifdef INST_LONGDOUBLE
-template void TestAllMatrix<long double>();
+#ifdef TEST_LONGDOUBLE
+template void TestMatrix<long double>();
 #endif
-#ifdef INST_INT
-template void TestAllMatrix<int>();
+#ifdef TEST_INT
+template void TestMatrix<int>();
 #endif

@@ -36,61 +36,47 @@ inline bool CanMultEqX(
 template <class T> 
 void TestSymBandMatrixArith_A()
 {
-    std::vector<tmv::SymBandMatrixView<T> > s;
-    std::vector<tmv::SymBandMatrixView<std::complex<T> > > cs;
+    std::vector<tmv::SymBandMatrixView<T> > sb;
+    std::vector<tmv::SymBandMatrixView<std::complex<T> > > csb;
     std::vector<tmv::BaseMatrix<T>*> B;
     std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
-    MakeSymBandList(s,cs,B,CB,InDef);
+    MakeSymBandList(sb,csb,B,CB,InDef);
 
-    for(size_t i=START1;i<s.size();i++) {
+    for(size_t i=START1;i<sb.size();i++) {
         if (showstartdone) {
             std::cout<<"Start loop i = "<<i<<std::endl;
-            std::cout<<"si = "<<s[i]<<std::endl;
+            std::cout<<"si = "<<sb[i]<<std::endl;
         }
-        tmv::SymBandMatrixView<T> si = s[i];
-        tmv::SymBandMatrixView<std::complex<T> > csi = cs[i];
+        tmv::SymBandMatrixView<T> si = sb[i];
+        tmv::SymBandMatrixView<std::complex<T> > csi = csb[i];
 
-        if (cs[i].isherm()) {
-            tmv::HermBandMatrix<T> sx = si;
-            tmv::HermBandMatrix<std::complex<T> > csx = csi;
-            TestMatrixArith123<T>(sx,csx,si,csi,"HermBand");
+        TestMatrixArith1<T>(si,csi,"SymBand");
+        TestMatrixArith2<T>(si,csi,"SymBand");
+        TestMatrixArith3<T>(si,csi,"SymBand");
 
-            for(size_t j=START2;j<s.size();j++) if (i!=j) {
-                if (showstartdone) {
-                    std::cout<<"Start sub-loop j = "<<j<<std::endl;
-                    std::cout<<"sj = "<<s[j]<<std::endl;
-                }
-                TestMatrixArith456<T>(sx,csx,si,csi,s[j],cs[j],
-                                      "HermBand/HermBand");
+        for(size_t j=START2;j<sb.size();j++) if (i!=j) {
+            if (showstartdone) {
+                std::cout<<"Start sub-loop j = "<<j<<std::endl;
+                std::cout<<"sj = "<<sb[j]<<std::endl;
             }
-        } else {
-            tmv::SymBandMatrix<T> sx = si;
-            tmv::SymBandMatrix<std::complex<T> > csx = csi;
-            TestMatrixArith123<T>(sx,csx,si,csi,"SymBand");
-
-            for(size_t j=START2;j<s.size();j++) if (i!=j) {
-                if (showstartdone) {
-                    std::cout<<"Start sub-loop j = "<<j<<std::endl;
-                    std::cout<<"sj = "<<s[j]<<std::endl;
-                }
-                TestMatrixArith456<T>(sx,csx,si,csi,s[j],cs[j],
-                                      "SymBand/SymBand");
-            }
+            TestMatrixArith4<T>(si,csi,sb[j],csb[j],"SymBand/SymBand");
+            TestMatrixArith5<T>(si,csi,sb[j],csb[j],"SymBand/SymBand");
+            TestMatrixArith6x<T>(si,csi,sb[j],csb[j],"SymBand/SymBand");
         }
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
     for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSymBandMatrixArith_A<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSymBandMatrixArith_A<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSymBandMatrixArith_A<long double>();
 #endif
-#ifdef INST_INT
+#ifdef TEST_INT
 template void TestSymBandMatrixArith_A<int>();
 #endif

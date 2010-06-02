@@ -45,30 +45,24 @@ void TestSymMatrixArith_C2()
         tmv::SymMatrixView<T> si = s[i];
         tmv::SymMatrixView<std::complex<T> > csi = cs[i];
 
-        if (csi.isherm()) {
-            tmv::HermMatrix<T> sx = si;
-            tmv::HermMatrix<std::complex<T> > csx = csi;
-            TestMatrixArith456<T>(d1x,cd1x,d1v,cd1v,si,csi,"Diag/Herm");
-        } else {
-            tmv::SymMatrix<T> sx = si;
-            tmv::SymMatrix<std::complex<T> > csx = csi;
-            TestMatrixArith456<T>(d1x,cd1x,d1v,cd1v,si,csi,"Diag/Sym");
-        }
+        TestMatrixArith4<T>(d1v,cd1v,si,csi,"Diag/Sym");
+        TestMatrixArith5<T>(d1v,cd1v,si,csi,"Diag/Sym");
+        TestMatrixArith6x<T>(d1v,cd1v,si,csi,"Diag/Sym");
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
     for(size_t i=0;i<CB.size();++i) delete CB[i];
 #endif
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSymMatrixArith_C2<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSymMatrixArith_C2<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSymMatrixArith_C2<long double>();
 #endif
-#ifdef INST_INT
+#ifdef TEST_INT
 template void TestSymMatrixArith_C2<int>();
 #endif

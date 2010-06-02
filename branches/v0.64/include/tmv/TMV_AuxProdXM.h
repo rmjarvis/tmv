@@ -65,7 +65,32 @@ inline PRODXM<T,T X> operator-(const GENMATRIX<T X>& m)
 { return PRODXM<T,T X>(T(-1),m); }
 
 // x*m
+#ifdef INTT
+inline PRODXM<int,int> operator*(int x, const GENMATRIX<int>& m) 
+{ return PRODXM<int,int>(x,m); }
 
+inline PRODXM<float,int> operator*(float x, const GENMATRIX<int>& m) 
+{ return PRODXM<float,int>(x,m); }
+
+inline PRODXM<double,int> operator*(double x, const GENMATRIX<int>& m) 
+{ return PRODXM<double,int>(x,m); }
+
+inline PRODXM<long double,int> operator*(
+    long double x, const GENMATRIX<int>& m) 
+{ return PRODXM<long double,int>(x,m); }
+
+template <class T Y> 
+inline PRODXM<CT,int X> operator*(CT x, const GENMATRIX<int X>& m)
+{ return PRODXM<CT,int X>(x,m); }
+
+template <class T Y> 
+inline PRODXM<CT,int X> operator*(CCT x, const GENMATRIX<int X>& m)
+{ return PRODXM<CT,int X>(CT(x),m); }
+
+template <class T Y> 
+inline PRODXM<CT,int X> operator*(VCT x, const GENMATRIX<int X>& m)
+{ return PRODXM<CT,int X>(CT(x),m); }
+#else
 template <class T Y> 
 inline PRODXM<T,T X> operator*(T x, const GENMATRIX<T X>& m) 
 { return PRODXM<T,T X>(x,m); }
@@ -73,6 +98,10 @@ inline PRODXM<T,T X> operator*(T x, const GENMATRIX<T X>& m)
 template <class T Y> 
 inline PRODXM<CT,T X> operator*(CT x, const GENMATRIX<T X>& m)
 { return PRODXM<CT,T X>(x,m); }
+
+template <class T Y> 
+inline PRODXM<CT,CT X> operator*(T x, const GENMATRIX<CT X>& m) 
+{ return PRODXM<CT,CT X>(CT(x),m); }
 
 template <class T Y> 
 inline PRODXM<CT,T X> operator*(CCT x, const GENMATRIX<T X>& m)
@@ -83,25 +112,47 @@ inline PRODXM<CT,T X> operator*(VCT x, const GENMATRIX<T X>& m)
 { return PRODXM<CT,T X>(CT(x),m); }
 
 template <class T Y> 
-inline PRODXM<CT,CT X> operator*(T x, const GENMATRIX<CT X>& m) 
-{ return PRODXM<CT,CT X>(CT(x),m); }
-
-template <class T Y> 
 inline PRODXM<CT,CT X> operator*(CCT x, const GENMATRIX<CT X>& m)
 { return PRODXM<CT,CT X>(CT(x),m); }
 
 template <class T Y> 
 inline PRODXM<CT,CT X> operator*(VCT x, const GENMATRIX<CT X>& m)
 { return PRODXM<CT,CT X>(CT(x),m); }
+#endif
 
 // m*x
+#ifdef INTT
+inline PRODXM<int,int> operator*(const GENMATRIX<int>& m, int x) 
+{ return PRODXM<int,int>(x,m); }
 
+inline PRODXM<float,int> operator*(const GENMATRIX<int>& m, float x) 
+{ return PRODXM<float,int>(x,m); }
+
+inline PRODXM<double,int> operator*(const GENMATRIX<int>& m, double x) 
+{ return PRODXM<double,int>(x,m); }
+
+inline PRODXM<long double,int> operator*(
+    const GENMATRIX<int>& m, long double x) 
+{ return PRODXM<long double,int>(x,m); }
+
+template <class T Y> 
+inline PRODXM<CT,int X> operator*(const GENMATRIX<int X>& m, CT x)
+{ return PRODXM<CT,int X>(x,m); }
+
+template <class T Y> 
+inline PRODXM<CT,int X> operator*(const GENMATRIX<int X>& m, CCT x)
+{ return PRODXM<CT,int X>(CT(x),m); }
+
+template <class T Y> 
+inline PRODXM<CT,int X> operator*(const GENMATRIX<int X>& m, VCT x)
+{ return PRODXM<CT,int X>(CT(x),m); }
+#else
 template <class T Y> 
 inline PRODXM<T,T X> operator*(const GENMATRIX<T X>& m, T x) 
 { return PRODXM<T,T X>(x,m); }
 
 template <class T Y> 
-inline PRODXM<CT,T X> operator*(const GENMATRIX<T X>& m,CT x)
+inline PRODXM<CT,T X> operator*(const GENMATRIX<T X>& m, CT x)
 { return PRODXM<CT,T X>(x,m); }
 
 template <class T Y> 
@@ -123,9 +174,36 @@ inline PRODXM<CT,CT X> operator*(const GENMATRIX<CT X>& m, VCT x)
 template <class T Y> 
 inline PRODXM<CT,CT X> operator*(const GENMATRIX<CT X>& m, T x) 
 { return PRODXM<CT,CT X>(CT(x),m); }
+#endif
 
 // m/x
+#ifdef INTT
+inline PRODXM<int,int> operator/(const GENMATRIX<int>& m, int x) 
+{ return PRODXM<int,int>(int(1)/int(x),m); }
 
+inline PRODXM<float,int> operator/(const GENMATRIX<int>& m, float x) 
+{ return PRODXM<float,int>(float(1)/float(x),m); }
+
+inline PRODXM<double,int> operator/(const GENMATRIX<int>& m, double x) 
+{ return PRODXM<double,int>(double(1)/double(x),m); }
+
+inline PRODXM<long double,int> operator/(
+    const GENMATRIX<int>& m, long double x) 
+{ return PRODXM<long double,int>((long double)(1)/(long double)(x),m); }
+
+template <class T Y> 
+inline PRODXM<CT,int X> operator/(const GENMATRIX<int X>& m, CT x)
+{ return PRODXM<CT,int X>(T(1)/x,m); }
+
+template <class T Y> 
+inline PRODXM<CT,T X> operator/(const GENMATRIX<int X>& m, CCT x)
+{ return PRODXM<CT,T X>(T(1)/CT(x),m); }
+
+template <class T Y> 
+inline PRODXM<CT,int X> operator/(const GENMATRIX<int X>& m, VCT x)
+{ return PRODXM<CT,int X>(T(1)/CT(x),m); }
+#undef INTT
+#else
 template <class T Y> 
 inline PRODXM<T,T X> operator/(const GENMATRIX<T X>& m, T x) 
 { return PRODXM<T,T X>(TMV_RealType(T)(1)/x,m); }
@@ -153,6 +231,7 @@ inline PRODXM<CT,CT X> operator/(const GENMATRIX<CT X>& m, VCT x)
 template <class T Y> 
 inline PRODXM<CT,CT X> operator/(const GENMATRIX<CT X>& m, T x)
 { return PRODXM<CT,CT X>(CT(T(1)/x),m); }
+#endif
 
 // -(x*m)
 

@@ -39,24 +39,24 @@ void TestBandMatrixArith_C1()
         }
         tmv::BandMatrixView<T> bi = b[i];
         tmv::BandMatrixView<std::complex<T> > cbi = cb[i];
-        tmv::BandMatrix<T> bx = bi;
-        tmv::BandMatrix<std::complex<T> > cbx = cbi;
 
-        TestMatrixArith456<T>(bx,cbx,bi,cbi,d1v,cd1v,"Band/Diag");
+        TestMatrixArith4<T>(bi,cbi,d1v,cd1v,"Band/Diag");
+        TestMatrixArith5<T>(bi,cbi,d1v,cd1v,"Band/Diag");
+        TestMatrixArith6x<T>(bi,cbi,d1v,cd1v,"Band/Diag");
     }
     for(size_t i=0;i<B.size();i++) delete B[i];
     for(size_t i=0;i<CB.size();i++) delete CB[i];
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestBandMatrixArith_C1<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestBandMatrixArith_C1<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestBandMatrixArith_C1<long double>();
 #endif
-#ifdef INST_INT
+#ifdef TEST_INT
 template void TestBandMatrixArith_C1<int>();
 #endif

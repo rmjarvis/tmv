@@ -89,6 +89,14 @@ namespace tmv {
     void LU_Decompose(const MatrixView<T>& A, int* P);
 
     template <class T> 
+    void LU_Decompose(const MatrixView<T>& A, int* P, int& detp);
+
+    class Permutation;
+
+    template <class T> 
+    void LU_Decompose(const MatrixView<T>& A, Permutation& P);
+
+    template <class T> 
     class LUDiv : public Divider<T> 
     {
 
@@ -142,7 +150,7 @@ namespace tmv {
         ConstLowerTriMatrixView<T> getL() const;
         ConstUpperTriMatrixView<T> getU() const;
         const GenMatrix<T>& getLU() const;
-        const int* getP() const;
+        const Permutation& getP() const;
 
         bool checkDecomp(const BaseMatrix<T>& m, std::ostream* fout) const;
 
@@ -155,7 +163,7 @@ namespace tmv {
         TMV_DEPRECATED(const GenMatrix<T>& GetLU() const)
         { return getLU(); }
         TMV_DEPRECATED(const int* GetP() const)
-        { return getP(); }
+        { return getP().getValues(); }
 
     private :
 

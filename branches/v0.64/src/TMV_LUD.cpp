@@ -37,6 +37,7 @@
 #include "tmv/TMV_DiagMatrix.h"
 #include "tmv/TMV_TriMatrixArith.h"
 #include "tmv/TMV_MatrixArith.h"
+#include "tmv/TMV_PermutationArith.h"
 #include <ostream>
 
 namespace tmv {
@@ -52,7 +53,7 @@ namespace tmv {
         auto_array<T> Aptr1;
         T* Aptr;
         MatrixView<T> LUx;
-        auto_array<int> P;
+        Permutation P;
         mutable TMV_RealType(T) logdet;
         mutable T signdet;
         mutable bool donedet;
@@ -70,7 +71,7 @@ namespace tmv {
     LUDiv<T>::LUDiv_Impl::LUDiv_Impl(
         const GenMatrix<T>& A, bool _inplace) :
         istrans(A.isrm()), inplace(_inplace && (A.iscm() || A.isrm())),
-        Aptr1(APTR1), Aptr(APTR), LUx(LUX), P(new int[A.colsize()]),
+        Aptr1(APTR1), Aptr(APTR), LUx(LUX), P(A.colsize()),
         logdet(0), signdet(1), donedet(false) {}
 
 #undef LUX
@@ -88,7 +89,7 @@ namespace tmv {
             if (inplace) TMVAssert(A == pimpl->LUx);
             else pimpl->LUx = A;
         }
-        LU_Decompose(pimpl->LUx,pimpl->P.get(),pimpl->signdet);
+        LU_Decompose(pimpl->LUx,pimpl->P);
     }
 
     template <class T> 
@@ -98,16 +99,20 @@ namespace tmv {
     void LUDiv<T>::doLDivEq(const MatrixView<T1>& m) const
     {
         TMVAssert(pimpl->LUx.colsize() == m.colsize());
-        if (pimpl->istrans) LU_RDivEq(pimpl->LUx,pimpl->P.get(),m.transpose());
-        else LU_LDivEq(pimpl->LUx,pimpl->P.get(),m);
+        if (pimpl->istrans) 
+            LU_RDivEq(pimpl->LUx,pimpl->P.getValues(),m.transpose());
+        else 
+            LU_LDivEq(pimpl->LUx,pimpl->P.getValues(),m);
     }
 
     template <class T> template <class T1> 
     void LUDiv<T>::doRDivEq(const MatrixView<T1>& m) const
     {
         TMVAssert(pimpl->LUx.colsize() == m.rowsize());
-        if (pimpl->istrans) LU_LDivEq(pimpl->LUx,pimpl->P.get(),m.transpose());
-        else LU_RDivEq(pimpl->LUx,pimpl->P.get(),m);
+        if (pimpl->istrans) 
+            LU_LDivEq(pimpl->LUx,pimpl->P.getValues(),m.transpose());
+        else 
+            LU_RDivEq(pimpl->LUx,pimpl->P.getValues(),m);
     }
 
     template <class T> template <class T1, class T2> 
@@ -136,7 +141,7 @@ namespace tmv {
         if (!pimpl->donedet) {
             T s;
             pimpl->logdet = DiagMatrixViewOf(pimpl->LUx.diag()).logDet(&s);
-            pimpl->signdet *= s;
+            pimpl->signdet = T(pimpl->P.det()) * s;
             pimpl->donedet = true;
         }         
         if (pimpl->signdet == T(0)) return T(0);
@@ -149,7 +154,7 @@ namespace tmv {
         if (!pimpl->donedet) {
             T s;
             pimpl->logdet = DiagMatrixViewOf(pimpl->LUx.diag()).logDet(&s);
-            pimpl->signdet *= s;
+            pimpl->signdet = T(pimpl->P.det()) * s;
             pimpl->donedet = true;
         }
         if (sign) *sign = pimpl->signdet;
@@ -164,9 +169,9 @@ namespace tmv {
         // m = P L U
         // m^-1 = U^-1 L^-1 Pt
         if (pimpl->istrans) 
-            LU_Inverse(pimpl->LUx,pimpl->P.get(),minv.transpose());
+            LU_Inverse(pimpl->LUx,pimpl->P.getValues(),minv.transpose());
         else 
-            LU_Inverse(pimpl->LUx,pimpl->P.get(),minv);
+            LU_Inverse(pimpl->LUx,pimpl->P.getValues(),minv);
     }
 
     template <class T> 
@@ -191,8 +196,8 @@ namespace tmv {
             ata = uinv.transpose() * uinv.conjugate();
             ata /= L.transpose();
             ata %= L.conjugate();
-            ata.reversePermuteCols(pimpl->P.get());
-            ata.reversePermuteRows(pimpl->P.get());
+            ata.reversePermuteCols(pimpl->P.getValues());
+            ata.reversePermuteRows(pimpl->P.getValues());
         } else {
             LowerTriMatrixView<T> linv = ata.lowerTri(UnitDiag);
             linv = L.inverse();
@@ -223,8 +228,8 @@ namespace tmv {
     { return pimpl->LUx; }
 
     template <class T> 
-    const int* LUDiv<T>::getP() const 
-    { return pimpl->P.get(); }
+    const Permutation& LUDiv<T>::getP() const 
+    { return pimpl->P; }
 
     template <class T> 
     bool LUDiv<T>::checkDecomp(const BaseMatrix<T>& m, std::ostream* fout) const
@@ -236,9 +241,12 @@ namespace tmv {
                 (pimpl->istrans?mm.transpose():mm.view())<<std::endl;
             *fout << "L = "<<getL()<<std::endl;
             *fout << "U = "<<getU()<<std::endl;
+            *fout << "P = "<<getP()<<std::endl;
+            *fout << "  or by interchanges: ";
+            for(int i=0;i<int(getP().size());i++)
+                *fout<<(getP().getValues())[i]<<" ";
         }
-        Matrix<T> lu = getL()*getU();
-        lu.reversePermuteRows(getP());
+        Matrix<T> lu = getP()*getL()*getU();
         TMV_RealType(T) nm = 
             Norm(lu-(pimpl->istrans ? mm.transpose() : mm.view()));
         nm /= Norm(getL())*Norm(getU());

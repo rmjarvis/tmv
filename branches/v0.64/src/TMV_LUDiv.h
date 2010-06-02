@@ -35,10 +35,6 @@
 
 namespace tmv {
 
-    template <class T> 
-    void LU_Decompose(
-        const MatrixView<T>& A, int* P, T& signdet);
-
     template <class T, class T1> 
     void LU_LDivEq(
         const GenMatrix<T1>& LUx, const int* P, const MatrixView<T>& m);

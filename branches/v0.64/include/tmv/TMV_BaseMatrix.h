@@ -101,8 +101,9 @@ namespace tmv {
     template <class T> 
     class BaseMatrix : virtual public AssignableToMatrix<T>
     {
-        typedef TMV_RealType(T) RT;
     public :
+        typedef TMV_RealType(T) RT;
+
         //
         // Access Functions
         //
@@ -117,6 +118,8 @@ namespace tmv {
         virtual T det() const = 0;
         virtual RT logDet(T* sign=0) const = 0;
         virtual T trace() const = 0;
+        virtual T sumElements() const = 0;
+        virtual RT sumAbsElements() const = 0;
 
         virtual RT norm() const  = 0;
         virtual RT normSq(const RT scale = RT(1)) const = 0;
@@ -205,9 +208,9 @@ namespace tmv {
     template <class T> 
     class DivHelper : virtual public AssignableToMatrix<T>
     {
-        typedef TMV_RealType(T) RT;
-
     public:
+
+        typedef TMV_RealType(T) RT;
 
         //
         // Constructors
@@ -474,6 +477,14 @@ namespace tmv {
     template <class T> 
     inline T Trace(const BaseMatrix<T>& m)
     { return m.trace(); }
+
+    template <class T> 
+    inline T SumElements(const BaseMatrix<T>& m)
+    { return m.sumElements(); }
+
+    template <class T> 
+    inline TMV_RealType(T) SumAbsElements(const BaseMatrix<T>& m)
+    { return m.sumAbsElements(); }
 
     template <class T> 
     inline TMV_RealType(T) Norm(const BaseMatrix<T>& m)

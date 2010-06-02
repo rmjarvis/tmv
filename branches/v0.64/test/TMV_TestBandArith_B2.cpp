@@ -45,13 +45,6 @@ void TestBandMatrixArith_B2()
     tmv::MatrixView<std::complex<T> > ca3v = ca3.view();
     tmv::MatrixView<std::complex<T> > ca4v = ca4.view();
 
-    tmv::Matrix<T> a1x = a1;
-    tmv::Matrix<T> a3x = a3;
-    tmv::Matrix<T> a4x = a4;
-    tmv::Matrix<std::complex<T> > ca1x = ca1;
-    tmv::Matrix<std::complex<T> > ca3x = ca3;
-    tmv::Matrix<std::complex<T> > ca4x = ca4;
-
     for(size_t i=START;i<b.size();i++) {
         if (showstartdone) {
             std::cerr<<"Start loop "<<i<<std::endl;
@@ -59,27 +52,31 @@ void TestBandMatrixArith_B2()
         }
         tmv::BandMatrixView<T> bi = b[i];
         tmv::BandMatrixView<std::complex<T> > cbi = cb[i];
-        tmv::BandMatrix<T> bx = bi;
-        tmv::BandMatrix<std::complex<T> > cbx = cbi;
 
-        TestMatrixArith456<T>(a1x,ca1x,a1v,ca1v,bi,cbi,"SquareM/Band");
-        TestMatrixArith456<T>(a3x,ca3x,a3v,ca3v,bi,cbi,"NonSquareM/Band");
-        TestMatrixArith456<T>(a4x,ca4x,a4v,ca4v,bi,cbi,"DegenerateM/Band");
+        TestMatrixArith4<T>(a1v,ca1v,bi,cbi,"SquareM/Band");
+        TestMatrixArith5<T>(a1v,ca1v,bi,cbi,"SquareM/Band");
+        TestMatrixArith6x<T>(a1v,ca1v,bi,cbi,"SquareM/Band");
+        TestMatrixArith4<T>(a3v,ca3v,bi,cbi,"NonSquareM/Band");
+        TestMatrixArith5<T>(a3v,ca3v,bi,cbi,"NonSquareM/Band");
+        TestMatrixArith6x<T>(a3v,ca3v,bi,cbi,"NonSquareM/Band");
+        TestMatrixArith4<T>(a4v,ca4v,bi,cbi,"DegenerateM/Band");
+        TestMatrixArith5<T>(a4v,ca4v,bi,cbi,"DegenerateM/Band");
+        TestMatrixArith6x<T>(a4v,ca4v,bi,cbi,"DegenerateM/Band");
     }
     for(size_t i=0;i<B.size();i++) delete B[i];
     for(size_t i=0;i<CB.size();i++) delete CB[i];
 #endif
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestBandMatrixArith_B2<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestBandMatrixArith_B2<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestBandMatrixArith_B2<long double>();
 #endif
-#ifdef INST_INT
+#ifdef TEST_INT
 template void TestBandMatrixArith_B2<int>();
 #endif

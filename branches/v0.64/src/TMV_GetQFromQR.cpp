@@ -72,13 +72,14 @@ namespace tmv {
         const int sb = beta.step();
         if (sb == 1) {
             const T* bi = beta.cptr()+(N-1);
-            for(int i=N-1;i>=0;--i,--bi) 
+            for(int i=N-1;i>=0;--i,--bi) {
                 HouseholderUnpack(Q.subMatrix(i,M,i,N),*bi);
-        }
-        else {
+            }
+        } else {
             const T* bi = beta.cptr()+(N-1)*sb;
-            for(int i=N-1;i>=0;--i,bi-=sb) 
+            for(int i=N-1;i>=0;--i,bi-=sb) {
                 HouseholderUnpack(Q.subMatrix(i,M,i,N),*bi);
+            }
         }
     }
 
@@ -93,6 +94,7 @@ namespace tmv {
         Matrix<T> Q0(Q);
         Matrix<T> Q2(Q);
         NonBlockGetQFromQR(Q2.view(),beta);
+        std::cout<<"Start Block GetQFromQR"<<std::endl;
 #endif
         const int M = Q.colsize();
         const int N = Q.rowsize();
@@ -416,6 +418,9 @@ namespace tmv {
             Vector<T> b2 = beta;
             GetQFromQR(Q,b2.view());
         } else {
+#ifdef XDEBUG
+            std::cout<<"Start GetQFromQR: Q = "<<Q<<"beta = "<<beta<<std::endl;
+#endif
 #ifdef LAP
 #ifdef XDEBUG
             Matrix<T> Q0(Q);
@@ -434,6 +439,9 @@ namespace tmv {
 #endif
 #else
             NonLapGetQFromQR(Q,beta);
+#endif
+#ifdef XDEBUG
+            std::cout<<"Done GetQFromQR: Q = "<<Q<<std::endl;
 #endif
         }
     }

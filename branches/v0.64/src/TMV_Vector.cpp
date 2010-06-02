@@ -46,20 +46,11 @@ namespace tmv {
 
 #define RT TMV_RealType(T)
 
-    // First the things from TMV_Base.h
-    template <class T> 
-    RT TMV_Epsilon()
-    { return std::numeric_limits<RT>::epsilon(); }
-
-    template <class T> 
-    RT TMV_SqrtEpsilon()
-    { return TMV_SQRT(TMV_Epsilon<T>()); }
-
+    // First two things from TMV_Base.h
     bool TMV_FALSE = false;
     std::ostream* warn_out = &std::cout;
 
     // Next one thing from TMV_ListInit.h
-
     ListInitClass ListInit;
 
     // And also some things from TMV_Blas.h

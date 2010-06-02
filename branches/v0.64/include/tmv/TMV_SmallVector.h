@@ -82,15 +82,26 @@ namespace tmv {
     template <class T, int N, IndexStyle I> 
     class SmallVector 
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef SmallVector<T,N,I> type;
+        typedef type copy_type;
         typedef ConstVectorView<T,I> const_view_type;
+        typedef const_view_type const_conjugate_type;
+        typedef const_view_type const_reverse_type;
         typedef VectorView<T,I> view_type;
+        typedef view_type conjugate_type;
+        typedef view_type reverse_type;
         typedef ConstVectorView<RT,I> const_real_type;
         typedef VectorView<RT,I> real_type;
-
-    public:
+        typedef T value_type;
+        typedef VIt<T,Unit,NonConj> iterator;
+        typedef CVIt<T,Unit,NonConj> const_iterator;
+        typedef VIt<T,Step,NonConj> reverse_iterator;
+        typedef CVIt<T,Step,NonConj> const_reverse_iterator;
+        typedef T& reference;
 
         //
         // Constructors
@@ -306,13 +317,6 @@ namespace tmv {
         //
         // Access Functions
         //
-
-        typedef T value_type;
-        typedef VIt<T,Unit,NonConj> iterator;
-        typedef CVIt<T,Unit,NonConj> const_iterator;
-        typedef VIt<T,Step,NonConj> reverse_iterator;
-        typedef CVIt<T,Step,NonConj> const_reverse_iterator;
-        typedef T& reference;
 
         inline const_iterator begin() const 
         { return const_iterator(itsv,1); }
@@ -648,14 +652,26 @@ namespace tmv {
         // subVector
         //
 
+        inline const_view_type cSubVector(int i1, int i2) const
+        { return view().cSubVector(i1,i2); }
+
         inline const_view_type subVector(int i1, int i2) const
         { return view().subVector(i1,i2); }
+
+        inline view_type cSubVector(int i1, int i2)
+        { return view().cSubVector(i1,i2); }
 
         inline view_type subVector(int i1, int i2)
         { return view().subVector(i1,i2); }
 
+        inline const_view_type cSubVector(int i1, int i2, int istep) const
+        { return view().cSubVector(i1,i2,istep); }
+
         inline const_view_type subVector(int i1, int i2, int istep) const
         { return view().subVector(i1,i2,istep); }
+
+        inline view_type cSubVector(int i1, int i2, int istep)
+        { return view().cSubVector(i1,i2,istep); }
 
         inline view_type subVector(int i1, int i2, int istep)
         { return view().subVector(i1,i2,istep); }

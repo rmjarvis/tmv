@@ -100,6 +100,7 @@
 #endif
 
 #include <iosfwd>
+#include <limits>
 #include <cmath>
 #include <complex>
 #include <memory>
@@ -262,24 +263,84 @@ namespace tmv {
     inline void TMV_SWAP(T& x, T& y)
     { T z = x; x = y; y = z; }
 
-    template <class T> 
-    class RCTypeClass 
+    template <class T>
+    struct Traits
     {
-    public:
+        enum { isreal = true };
+        enum { iscomplex = false };
+        enum { isinteger = std::numeric_limits<T>::is_integer };
+
         typedef T real_type;
         typedef std::complex<T> complex_type;
     };
 
-    template <class T> 
-    class RCTypeClass<std::complex<T> >
+    template <class T>
+    struct Traits<std::complex<T> >
     {
-    public:
+        enum { isreal = false };
+        enum { iscomplex = true };
+        enum { isinteger = Traits<T>::isinteger };
+
         typedef T real_type;
         typedef std::complex<T> complex_type;
     };
 
-#define TMV_RealType(T) typename tmv::RCTypeClass<T>::real_type
-#define TMV_ComplexType(T) typename tmv::RCTypeClass<T>::complex_type
+    template <class T>
+    struct Traits<T&> : public Traits<T> {};
+    template <class T>
+    struct Traits<const T> : public Traits<T> {};
+    template <class T>
+    struct Traits<const T&> : public Traits<T> {};
+
+    template <class T1, class T2>
+    struct Traits2
+    { typedef T1 type; };
+    template <class T1, class T2>
+    struct Traits2<T1,std::complex<T2> >
+    { typedef std::complex<typename Traits2<T1,T2>::type> type; };
+    template <class T1, class T2>
+    struct Traits2<std::complex<T1>,T2>
+    { typedef std::complex<typename Traits2<T1,T2>::type> type; };
+    template <class T1, class T2>
+    struct Traits2<std::complex<T1>,std::complex<T2> >
+    { typedef std::complex<typename Traits2<T1,T2>::type> type; };
+    template <class T>
+    struct Traits2<T,T>
+    { typedef T type; };
+    template <class T>
+    struct Traits2<std::complex<T>,T>
+    { typedef std::complex<T> type; };
+    template <class T>
+    struct Traits2<T,std::complex<T> >
+    { typedef std::complex<T> type; };
+    template <class T>
+    struct Traits2<std::complex<T>,std::complex<T> >
+    { typedef std::complex<T> type; };
+    // Specialize the real pairs for which the second value is the type to
+    // use for sums and products rather than the first.
+    template <>
+    struct Traits2<int,float>
+    { typedef float type; };
+    template <>
+    struct Traits2<int,double>
+    { typedef double type; };
+    template <>
+    struct Traits2<int,long double>
+    { typedef long double type; };
+    template <>
+    struct Traits2<float,double>
+    { typedef double type; };
+    template <>
+    struct Traits2<float,long double>
+    { typedef long double type; };
+    template <>
+    struct Traits2<double,long double>
+    { typedef long double type; };
+
+
+
+#define TMV_RealType(T) typename tmv::Traits<T>::real_type
+#define TMV_ComplexType(T) typename tmv::Traits<T>::complex_type
 
     template <class T> 
     inline bool isReal(T) 
@@ -437,13 +498,9 @@ namespace tmv {
     { tmv::warn_out = 0; }
 
 
-    // Put these in Vector.cpp to avoid having to include <limits>.
-    // (The fewer includes, the quicker the compile, and it 
-    // takes long enough as it is.)
     template <class T> 
-    TMV_RealType(T) TMV_Epsilon();
-    template <class T> 
-    TMV_RealType(T) TMV_SqrtEpsilon();
+    inline TMV_RealType(T) TMV_Epsilon()
+    { return std::numeric_limits<typename Traits<T>::real_type>::epsilon(); }
 
     extern bool TMV_FALSE; 
     // = false (in TMV_Vector.cpp), but without the unreachable returns

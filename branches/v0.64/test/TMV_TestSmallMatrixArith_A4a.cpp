@@ -32,13 +32,10 @@ static void DoTestSmallMatrixArith_A4a()
     ca2 -= T(0.13)*a2;
     ca2 *= std::complex<T>(1.1,-2.5);
 
-    tmv::SmallMatrix<T,N,N> a1x;
-    tmv::SmallMatrix<std::complex<T>,N,N> ca1x;
-
     if (showstartdone) {
         std::cout<<"A4a\n";
     }
-    TestMatrixArith4<T>(a1x,ca1x,a1,ca1,a2,ca2,"Square");
+    TestMatrixArith4<T>(a1,ca1,a2,ca2,"Square");
 
 #ifdef XTEST
     tmv::SmallMatrix<T,N,N,tmv::RowMajor> a1b = a1;
@@ -48,9 +45,9 @@ static void DoTestSmallMatrixArith_A4a()
     tmv::SmallMatrix<T,N,N,tmv::ColMajor,tmv::FortranStyle> a2f = a2;
     tmv::SmallMatrix<std::complex<T>,N,N,tmv::ColMajor,tmv::FortranStyle> ca2f = ca2;
 
-    TestMatrixArith4<T>(a1x,ca1x,a1,ca1,a1b,ca1b,"Square");
-    TestMatrixArith4<T>(a1x,ca1x,a1f,ca1f,a2,ca2,"Square");
-    TestMatrixArith4<T>(a1x,ca1x,a1f,ca1f,a2f,ca2f,"Square");
+    TestMatrixArith4<T>(a1,ca1,a1b,ca1b,"Square");
+    TestMatrixArith4<T>(a1f,ca1f,a2,ca2,"Square");
+    TestMatrixArith4<T>(a1f,ca1f,a2f,ca2f,"Square");
 #endif
 }
 
@@ -67,15 +64,15 @@ void TestSmallMatrixArith_A4a()
 }
 
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSmallMatrixArith_A4a<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSmallMatrixArith_A4a<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSmallMatrixArith_A4a<long double>();
 #endif
-#ifdef INST_INT
+#ifdef TEST_INT
 template void TestSmallMatrixArith_A4a<int>();
 #endif

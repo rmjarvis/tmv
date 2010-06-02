@@ -1,16 +1,15 @@
 
-#include "TMV.h"
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
+#include "TMV.h"
 #include <fstream>
 
 #define NOSV
 #include "TMV_TestMatrixArith.h"
 
-template <class T> 
-void TestDiagMatrixArith_B2()
+template <class T> void TestDiagMatrixArith_B4b()
 {
-#ifdef XTEST
+#if (XTEST & 2)
     const int N = 10;
 
     tmv::DiagMatrix<T> a(N);
@@ -60,21 +59,21 @@ void TestDiagMatrixArith_B2()
     tmv::MatrixView<T> rv = r.view();
     tmv::MatrixView<std::complex<T> > crv = cr.view();
 
-    TestMatrixArith456<T>(px,cpx,pv,cpv,av,cav, "SquareM/Diag");
-    TestMatrixArith456<T>(qx,cqx,qv,cqv,av,cav, "NonSquareM/Diag");
-    TestMatrixArith456<T>(rx,crx,rv,crv,av,cav, "DegenM/Diag");
+    TestMatrixArith4<T>(pv,cpv,av,cav, "SquareM/Diag");
+    TestMatrixArith4<T>(qv,cqv,av,cav, "NonSquareM/Diag");
+    TestMatrixArith4<T>(rv,crv,av,cav, "DegenM/Diag");
 #endif
 }
 
-#ifdef INST_DOUBLE
-template void TestDiagMatrixArith_B2<double>();
+#ifdef TEST_DOUBLE
+template void TestDiagMatrixArith_B4b<double>();
 #endif
-#ifdef INST_FLOAT
-template void TestDiagMatrixArith_B2<float>();
+#ifdef TEST_FLOAT
+template void TestDiagMatrixArith_B4b<float>();
 #endif
-#ifdef INST_LONGDOUBLE
-template void TestDiagMatrixArith_B2<long double>();
+#ifdef TEST_LONGDOUBLE
+template void TestDiagMatrixArith_B4b<long double>();
 #endif
-#ifdef INST_INT
-template void TestDiagMatrixArith_B2<int>();
+#ifdef TEST_INT
+template void TestDiagMatrixArith_B4b<int>();
 #endif

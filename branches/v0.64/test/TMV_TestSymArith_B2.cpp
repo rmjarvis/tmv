@@ -54,15 +54,6 @@ void TestSymMatrixArith_B2()
     tmv::MatrixView<std::complex<T> > ca3v = ca3.view();
     tmv::MatrixView<std::complex<T> > ca4v = ca4.view();
 
-    tmv::Matrix<T> a1x = a1;
-    tmv::Matrix<T> a3x = a3;
-    tmv::Matrix<T> a4x = a4;
-    tmv::Matrix<std::complex<T> > ca1x = ca1;
-    tmv::Matrix<std::complex<T> > ca3x = ca3;
-    tmv::Matrix<std::complex<T> > ca4x = ca4;
-
-    symoprod = true;
-
     for(size_t i=START;i<s.size();i++) {
         if (showstartdone) {
             std::cout<<"Start loop i = "<<i<<std::endl;
@@ -72,36 +63,30 @@ void TestSymMatrixArith_B2()
         tmv::SymMatrixView<T> si = s[i];
         tmv::SymMatrixView<std::complex<T> > csi = cs[i];
 
-        if (csi.isherm()) {
-            tmv::HermMatrix<T> sx = si;
-            tmv::HermMatrix<std::complex<T> > csx = csi;
-
-            TestMatrixArith456<T>(a1x,ca1x,a1v,ca1v,si,csi,"SquareM/Herm");
-            TestMatrixArith456<T>(a3x,ca3x,a3v,ca3v,si,csi,"NonSquareM/Herm");
-            TestMatrixArith456<T>(a4x,ca4x,a4v,ca4v,si,csi,"DegenerateM/Herm");
-        } else {
-            tmv::SymMatrix<T> sx = si;
-            tmv::SymMatrix<std::complex<T> > csx = csi;
-
-            TestMatrixArith456<T>(a1x,ca1x,a1v,ca1v,si,csi,"SquareM/Sym");
-            TestMatrixArith456<T>(a3x,ca3x,a3v,ca3v,si,csi,"NonSquareM/Sym");
-            TestMatrixArith456<T>(a4x,ca4x,a4v,ca4v,si,csi,"DegenerateM/Sym");
-        }
+        TestMatrixArith4<T>(a1v,ca1v,si,csi,"SquareM/Sym");
+        TestMatrixArith5<T>(a1v,ca1v,si,csi,"SquareM/Sym");
+        TestMatrixArith6x<T>(a1v,ca1v,si,csi,"SquareM/Sym");
+        TestMatrixArith4<T>(a3v,ca3v,si,csi,"NonSquareM/Sym");
+        TestMatrixArith5<T>(a3v,ca3v,si,csi,"NonSquareM/Sym");
+        TestMatrixArith6x<T>(a3v,ca3v,si,csi,"NonSquareM/Sym");
+        TestMatrixArith4<T>(a4v,ca4v,si,csi,"DegenerateM/Sym");
+        TestMatrixArith5<T>(a4v,ca4v,si,csi,"DegenerateM/Sym");
+        TestMatrixArith6x<T>(a4v,ca4v,si,csi,"DegenerateM/Sym");
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
     for(size_t i=0;i<CB.size();++i) delete CB[i];
 #endif
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSymMatrixArith_B2<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSymMatrixArith_B2<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSymMatrixArith_B2<long double>();
 #endif
-#ifdef INST_INT
+#ifdef TEST_INT
 template void TestSymMatrixArith_B2<int>();
 #endif

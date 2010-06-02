@@ -240,8 +240,8 @@ static void TestBasicBandMatrix_IO()
     fin.close();
     Assert(ca1 == xb3,"BandMatrix Compact I/O check #3");
 
-    std::auto_ptr<tmv::Matrix<std::complex<T> > > xm4;
-    std::auto_ptr<tmv::BandMatrix<std::complex<T> > > xb4;
+    std::auto_ptr<tmv::Matrix<std::complex<T>,tmv::RowMajor> > xm4;
+    std::auto_ptr<tmv::BandMatrix<std::complex<T>,tmv::RowMajor> > xb4;
     fin.open("tmvtest_bandmatrix_io.dat");
     fin >> xm4 >> xb4;
     fin.close();
@@ -289,15 +289,15 @@ void TestBandMatrix()
     }
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestBandMatrix<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestBandMatrix<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestBandMatrix<long double>();
 #endif
-#ifdef INST_INT
+#ifdef TEST_INT
 template void TestBandMatrix<int>();
 #endif

@@ -71,13 +71,21 @@
 //        Makes a TriMatrix which copies the corresponding elements of m.
 //
 //    ConstUpperTriMatrixView<T> UpperTriMatrixViewOf(
-//        const T* m, size, dt, stor)
-//    UpperTriMatrixView<T> UpperTriMatrixViewOf(T* m, size, dt, stor)
+//        const T* m, size, stor)
+//    UpperTriMatrixView<T> UpperTriMatrixViewOf(T* m, size, stor)
 //    ConstLowerTriMatrixView<T> LowerTriMatrixViewOf(
-//        const T* m, size, dt, stor)
-//    LowerTriMatrixView<T> LowerTriMatrixViewOf(T* m, size, dt, stor)
+//        const T* m, size, stor)
+//    LowerTriMatrixView<T> LowerTriMatrixViewOf(T* m, size, stor)
 //        Make a TriMatrix view of the specific location in memory
-//        specified by m.  The size, diagtype and storage are parameters.
+//        specified by m.  The size and storage are parameters.
+//
+//    ConstUpperTriMatrixView<T> UnitUpperTriMatrixViewOf(
+//        const T* m, size, stor)
+//    UpperTriMatrixView<T> UnitUpperTriMatrixViewOf(T* m, size, stor)
+//    ConstLowerTriMatrixView<T> UnitLowerTriMatrixViewOf(
+//        const T* m, size, stor)
+//    LowerTriMatrixView<T> UnitLowerTriMatrixViewOf(T* m, size, stor)
+//        Same as above, but with unit-diagonal.
 //
 // Access Functions
 //
@@ -183,6 +191,8 @@
 //    m.det() or Det(m)
 //    m.logDet() or m.logDet(T* sign) or LogDet(m)
 //    m.trace() or Trace(m)
+//    m.sumElements() or SumElements(m)
+//    m.sumAbsElements() or SumAbsElements(m)
 //    m.norm() or m.normF() or Norm(m) or NormF(m)
 //    m.normSq() or NormSq(m)
 //    m.norm1() or Norm1(m)
@@ -255,22 +265,277 @@
 
 namespace tmv {
 
+    template <class T, bool C>
+    struct TriRefHelper // C = false
+    {
+        typedef T& reference;
+        TriRefHelper(T& _r, bool ) : itsref(_r) {}
+        TriRefHelper(const TriRefHelper& rhs) : itsref(rhs.itsref) {}
+        reference itsref;
+    };
+
+    template <class T>
+    struct TriRefHelper<T,true> // T is real
+    {
+        typedef T& reference;
+        TriRefHelper(T& _r, bool ) : itsref(_r) {}
+        TriRefHelper(const TriRefHelper& rhs) : itsref(rhs.itsref) {}
+        reference itsref;
+    };
+
+    template <class T>
+    struct TriRefHelper<std::complex<T>,true> // complex and maybe conj
+    {
+        typedef VarConjRef<std::complex<T> > reference;
+        TriRefHelper(std::complex<T>& _r, bool _c) : 
+            itsref(_r,_c?Conj:NonConj) {}
+        TriRefHelper(const TriRefHelper& rhs) : itsref(rhs.itsref) {}
+        reference itsref;
+    };
+
+    // A helper struct to provide a valid reference when the DiagType
+    // is UnitDiag (or UnknownDiag)
+    // It is very similar to VarConjRef, but also has a boolean isunit
+    // which indicates whether the reference is on the diagonal of a 
+    // UnitDiag TriMatrix.  If so, it can be an rhs with the value 1, 
+    // but not a lhs.
+    // If C is true, then the underlying reference is a VarCojRef.
+    // Otherwise it is a simple T&.
+    template <class T, bool C>
+    class TriRef
+    {
+    public:
+        typedef typename TriRefHelper<T,C>::reference reference;
+        explicit inline TriRef(bool _u, T& _v, bool _c) :
+            isunit(_u), helper(_v,_c) {}
+        inline TriRef(const TriRef<T,C>& rhs) :
+            isunit(rhs.isunit), helper(rhs.helper) {}
+        inline ~TriRef() {}
+
+        inline operator T() const { return val(); }
+        inline reference getRef() { return ref(); }
+        inline T operator-() const { return -val(); }
+
+        template <class T2>
+        inline TriRef<T,C>& operator=(const TriRef<T2,C>& rhs)
+        { assign(rhs.val()); return *this; }
+        template <class T2>
+        inline TriRef<T,C>& operator=(T2 rhs)
+        { assign(rhs); return *this; }
+
+        template <class T2>
+        inline TriRef<T,C>& operator+=(const TriRef<T2,C>& x2)
+        { assign(val() + x2.val()); return *this; }
+        template <class T2>
+        inline TriRef<T,C>& operator+=(T2 x2)
+        { assign(val() + x2); return *this; }
+        template <class T2>
+        inline typename Traits2<T,T2>::type operator+(const TriRef<T2,C>& x2)
+        { return val() + x2.val(); }
+        template <class T2>
+        inline friend typename Traits2<T,T2>::type operator+(
+            const TriRef<T,C>& x1, T2 x2)
+        { return x1.val()+x2; }
+        template <class T2>
+        inline friend typename Traits2<T,T2>::type operator+(
+            T2 x1, const TriRef<T,C>& x2)
+        { return x1+x2.val(); }
+        template <class T2>
+        inline friend T2& operator+=(T2& x1, const TriRef<T,C>& x2)
+        { return x1 += x2.val(); }
+
+        template <class T2>
+        inline TriRef<T,C>& operator-=(const TriRef<T2,C>& x2)
+        { assign(val() - x2.val()); return *this; }
+        template <class T2>
+        inline TriRef<T,C>& operator-=(T2 x2)
+        { assign(val() - x2); return *this; }
+        template <class T2>
+        inline typename Traits2<T,T2>::type operator-(const TriRef<T2,C>& x2)
+        { return val()-x2.val(); }
+        template <class T2>
+        inline friend typename Traits2<T,T2>::type operator-(
+            const TriRef<T,C>& x1, T2 x2)
+        { return x1.val()-x2; }
+        template <class T2>
+        inline friend typename Traits2<T,T2>::type operator-(
+            T2 x1, const TriRef<T,C>& x2)
+        { return x1-x2.val(); }
+        template <class T2>
+        inline friend T2& operator-=(T2& x1, const TriRef<T,C>& x2)
+        { return x1 -= x2.val(); }
+
+        template <class T2>
+        inline TriRef<T,C>& operator*=(const TriRef<T2,C>& x2)
+        { assign(x2.val() * val()); return *this; }
+        template <class T2>
+        inline TriRef<T,C>& operator*=(T2 x2)
+        { assign(x2 * val()); return *this; }
+        template <class T2>
+        inline typename Traits2<T,T2>::type operator*(const TriRef<T2,C> x2)
+        { return val()*x2.val(); }
+        template <class T2>
+        inline friend typename Traits2<T,T2>::type operator*(
+            const TriRef<T,C>& x1, T2 x2)
+        { return x1.val()*x2; }
+        template <class T2>
+        inline friend typename Traits2<T,T2>::type operator*(
+            T2 x1, const TriRef<T,C>& x2)
+        { return x1*x2.val(); }
+        template <class T2>
+        inline friend T2& operator*=(T2& x1, const TriRef<T,C>& x2)
+        {
+            if (x2.isunit) return x1;
+            else return x1 *= x2.val();
+        }
+
+        template <class T2>
+        inline TriRef<T,C>& operator/=(const TriRef<T2,C>& x2)
+        { assign(val() / x2.val()); return *this; }
+        template <class T2>
+        inline TriRef<T,C>& operator/=(T2 x2)
+        { assign(val() / x2); return *this; }
+        template <class T2>
+        inline typename Traits2<T,T2>::type operator/(const TriRef<T2,C>& x2)
+        { return val()/x2.val(); }
+        template <class T2>
+        inline friend typename Traits2<T,T2>::type operator/(
+            const TriRef<T,C>& x1, T2 x2)
+        { return x1.val()/x2; }
+        template <class T2>
+        inline friend typename Traits2<T,T2>::type operator/(
+            T2 x1, const TriRef<T,C>& x2)
+        { return x1/x2.val(); }
+        template <class T2>
+        inline friend T2& operator/=(T2& x1, const TriRef<T,C>& x2)
+        {
+            if (x2.isunit) return x1;
+            else return x1 /= x2.val();
+        }
+
+        template <class T2>
+        inline bool operator==(const TriRef<T2,C>& x2) const
+        { return val() == x2.val(); }
+        template <class T2>
+        inline bool operator==(T2 x2) const
+        { return val() == x2; }
+        template <class T2>
+        inline friend bool operator==(T2 x1, const TriRef<T,C>& x2)
+        { return x1 == val(); }
+        template <class T2>
+        inline bool operator!=(const TriRef<T2,C>& x2) const
+        { return !(operator==(x2)); }
+        template <class T2>
+        inline bool operator!=(T2 x2) const
+        { return !(operator==(x2)); }
+        template <class T2>
+        inline friend bool operator!=(T2 x1, const TriRef<T,C>& x2)
+        { return !(x2==x1); }
+
+        inline friend std::ostream& operator<<(std::ostream& os, TriRef<T,C> x)
+        { os << x.val(); return os; }
+        inline friend std::istream& operator>>(std::istream& is, TriRef<T,C> x)
+        { is >> x.ref(); return is; }
+
+    private:
+
+        template <class T2>
+        void check(T2 x) const
+        {
+            TMVAssert(
+                (!isunit || x == T2(1)) &&
+                "Trying to assign to the diagonal of a UnitDiag TriMatrix.");
+        }
+        void check() const
+        {
+            TMVAssert(
+                !isunit &&
+                "Trying to assign to the diagonal of a UnitDiag TriMatrix.");
+        }
+        reference ref() { check(); return helper.itsref; }
+        template <class T2>
+        void assign(T2 x) { check(x); if (!isunit) helper.itsref = x; }
+        T val() const { return isunit ? T(1) : T(helper.itsref); }
+
+        const bool isunit;
+        const TriRefHelper<T,C> helper;
+    };
+
+    // Overload some functions to work with TriRef
+    template <class T, bool C>
+    inline T TMV_CONJ(const TriRef<T,C>& x)
+    { return TMV_CONJ(T(x)); }
+    template <class T, bool C>
+    inline typename Traits<T>::real_type TMV_NORM(const TriRef<T,C>& x)
+    { return TMV_NORM(T(x)); }
+    template <class T, bool C>
+    inline typename Traits<T>::real_type TMV_ABS(const TriRef<T,C>& x)
+    { return TMV_ABS(T(x)); }
+    template <class T, bool C>
+    inline T TMV_SQR(const TriRef<T,C>& x)
+    { return TMV_SQR(T(x)); }
+    template <class T, bool C>
+    inline T TMV_SQRT(const TriRef<T,C>& x)
+    { return TMV_SQRT(T(x)); }
+    template <class T, bool C>
+    inline typename Traits<T>::real_type TMV_REAL(const TriRef<T,C>& x)
+    { return TMV_REAL(T(x)); }
+    template <class T, bool C>
+    inline typename Traits<T>::real_type TMV_IMAG(const TriRef<T,C>& x)
+    { return TMV_IMAG(T(x)); }
+
+    template <class T, bool C1, bool C2>
+    inline void TMV_SWAP(TriRef<T,C1> x1, TriRef<T,C2> x2)
+    { return TMV_SWAP(x1.getRef(),x2.getRef()); }
+    template <class T, bool C2>
+    inline void TMV_SWAP(T& x1, TriRef<T,C2> x2)
+    { return TMV_SWAP(x1,x2.getRef()); }
+    template <class T, bool C1>
+    inline void TMV_SWAP(TriRef<T,C1> x1, T& x2)
+    { return TMV_SWAP(x1.getRef(),x2); }
+
+    // Another helper class to deal with the case of the regular 
+    // UpperTriMatrix and LowerTriMatrix classes (i.e. not views)
+    // Here, we can use a simple T& for the reference if D is NonUnitDiag
+    // Also, here C is always false.
+    template <class T, DiagType D>
+    struct TriRefHelper2 // D = NonUnitDiag
+    {
+        typedef T& reference;
+        static reference makeRef(bool, T& r) { return r; }
+    };
+    template <class T>
+    struct TriRefHelper2<T,UnitDiag>
+    {
+        typedef TriRef<T,false> reference;
+        static reference makeRef(bool ondiag, T& r) 
+        { return reference(ondiag,r,false); }
+    };
+
     template <class T> 
     class GenUpperTriMatrix : 
         virtual public AssignableToUpperTriMatrix<T>,
         public BaseMatrix<T>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
+        typedef T value_type;
+        typedef RT real_type;
+        typedef CT complex_type;
         typedef GenUpperTriMatrix<T> type;
+        typedef UpperTriMatrix<T> copy_type;
         typedef ConstVectorView<T> const_vec_type;
         typedef ConstMatrixView<T> const_rec_type;
         typedef ConstUpperTriMatrixView<T> const_uppertri_type;
         typedef ConstLowerTriMatrixView<T> const_lowertri_type;
-        typedef ConstUpperTriMatrixView<RT> const_real_type;
+        typedef const_uppertri_type const_view_type;
+        typedef const_lowertri_type const_transpose_type;
+        typedef const_uppertri_type const_conjugate_type;
+        typedef const_lowertri_type const_adjoint_type;
+        typedef ConstUpperTriMatrixView<RT> const_realpart_type;
         typedef UpperTriMatrixView<T> nonconst_type;
-
-    public:
 
         //
         // Constructors
@@ -407,53 +672,82 @@ namespace tmv {
 
         bool hasSubTriMatrix(int i1, int i2, int istep) const;
 
-        inline const_rec_type subMatrix(
+        inline const_rec_type cSubMatrix(
             int i1, int i2, int j1, int j2) const
         {
-            TMVAssert(hasSubMatrix(i1,i2,j1,j2,1,1));
             return const_rec_type(
                 cptr()+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1, stepi(), stepj(), stor(), ct());
         }
 
         inline const_rec_type subMatrix(
+            int i1, int i2, int j1, int j2) const
+        {
+            TMVAssert(hasSubMatrix(i1,i2,j1,j2,1,1));
+            return cSubMatrix(i1,i2,j1,j2);
+        }
+
+        inline const_rec_type cSubMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const
         {
             const StorageType newstor =
                 iscm() ? (istep == 1 ? ColMajor : NoMajor) :
                 isrm() ? (jstep == 1 ? RowMajor : NoMajor) : NoMajor;
-            TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
             return const_rec_type(
                 cptr()+i1*stepi()+j1*stepj(),
                 (i2-i1)/istep,(j2-j1)/jstep,istep*stepi(),jstep*stepj(), 
                 newstor, ct());
         }
 
-        inline const_vec_type subVector(
+        inline const_rec_type subMatrix(
+            int i1, int i2, int j1, int j2, int istep, int jstep) const
+        {
+            TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
+            return cSubMatrix(i1,i2,j1,j2,istep,jstep);
+        }
+
+        inline const_vec_type cSubVector(
             int i, int j, int istep, int jstep, int size) const
         {
-            TMVAssert(hasSubVector(i,j,istep,jstep,size));
             return const_vec_type(
                 cptr()+i*stepi()+j*stepj(),size,
                 istep*stepi()+jstep*stepj(),ct());
         }
 
-        inline const_uppertri_type subTriMatrix(int i1, int i2) const
+        inline const_vec_type subVector(
+            int i, int j, int istep, int jstep, int size) const
         {
-            TMVAssert(hasSubTriMatrix(i1,i2,1));
+            TMVAssert(hasSubVector(i,j,istep,jstep,size));
+            return cSubVector(i,j,istep,jstep,size);
+        }
+
+        inline const_uppertri_type cSubTriMatrix(int i1, int i2) const
+        {
             return const_uppertri_type(
                 cptr()+i1*(stepi()+stepj()),
                 i2-i1,stepi(),stepj(),dt(),stor(),ct());
+        }
+
+        inline const_uppertri_type subTriMatrix(int i1, int i2) const
+        {
+            TMVAssert(hasSubTriMatrix(i1,i2,1));
+            return cSubTriMatrix(i1,i2);
+        }
+
+        inline const_uppertri_type cSubTriMatrix(
+            int i1, int i2, int istep) const
+        {
+            return const_uppertri_type(
+                cptr()+i1*(stepi()+stepj()),
+                (i2-i1)/istep,istep*stepi(),istep*stepj(),dt(),
+                istep==1 ? stor() : NoMajor,ct());
         }
 
         inline const_uppertri_type subTriMatrix(
             int i1, int i2, int istep) const
         {
             TMVAssert(hasSubTriMatrix(i1,i2,istep));
-            return const_uppertri_type(
-                cptr()+i1*(stepi()+stepj()),
-                (i2-i1)/istep,istep*stepi(),istep*stepj(),dt(),
-                istep==1 ? stor() : NoMajor,ct());
+            return cSubTriMatrix(i1,i2,istep);
         }
 
         inline const_uppertri_type offDiag(int noff=1) const
@@ -464,21 +758,21 @@ namespace tmv {
                 stepi(),stepj(),NonUnitDiag,stor(),ct());
         }
 
-        inline const_real_type realPart() const
+        inline const_realpart_type realPart() const
         {
-            return const_real_type(
+            return const_realpart_type(
                 reinterpret_cast<const RT*>(cptr()), size(),
                 isReal(T()) ? stepi() : 2*stepi(),
                 isReal(T()) ? stepj() : 2*stepj(),
                 dt(), isReal(T()) ? stor() : NoMajor, NonConj);
         }
 
-        inline const_real_type imagPart() const
+        inline const_realpart_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             TMVAssert(!isunit());
             // Since Imag of a UnitDiag TriMatrix has 0's on diagonal.
-            return const_real_type(
+            return const_realpart_type(
                 reinterpret_cast<const RT*>(cptr())+1, size(),
                 2*stepi(), 2*stepj(), dt(), NoMajor, NonConj);
         }
@@ -540,9 +834,9 @@ namespace tmv {
         { return subTriMatrix(i1,i2,istep); }
         TMV_DEPRECATED(const_uppertri_type OffDiag(int noff=1) const)
         { return offDiag(noff); }
-        TMV_DEPRECATED(const_real_type Real() const)
+        TMV_DEPRECATED(const_realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(const_real_type Imag() const)
+        TMV_DEPRECATED(const_realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(const_uppertri_type View() const)
         { return view(); }
@@ -566,6 +860,10 @@ namespace tmv {
 
         inline T trace() const
         { return isunit() ? T(RT(size())) : diag().sumElements(); }
+
+        T sumElements() const;
+
+        RT sumAbsElements() const;
 
         RT norm() const
         { return normF(); }
@@ -867,17 +1165,25 @@ namespace tmv {
         virtual public AssignableToLowerTriMatrix<T>,
         public BaseMatrix<T>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
+        typedef T value_type;
+        typedef RT real_type;
+        typedef CT complex_type;
         typedef GenLowerTriMatrix<T> type;
+        typedef LowerTriMatrix<T> copy_type;
         typedef ConstVectorView<T> const_vec_type;
         typedef ConstMatrixView<T> const_rec_type;
         typedef ConstUpperTriMatrixView<T> const_uppertri_type;
         typedef ConstLowerTriMatrixView<T> const_lowertri_type;
-        typedef ConstLowerTriMatrixView<RT> const_real_type;
+        typedef const_lowertri_type const_view_type;
+        typedef const_uppertri_type const_transpose_type;
+        typedef const_lowertri_type const_conjugate_type;
+        typedef const_uppertri_type const_adjoint_type;
+        typedef ConstLowerTriMatrixView<RT> const_realpart_type;
         typedef LowerTriMatrixView<T> nonconst_type;
-
-    public:
 
         //
         // Constructors
@@ -990,53 +1296,82 @@ namespace tmv {
         inline bool hasSubTriMatrix(int i1, int i2, int istep) const
         { return transpose().hasSubTriMatrix(i1,i2,istep); }
 
-        inline const_rec_type subMatrix(
+        inline const_rec_type cSubMatrix(
             int i1, int i2, int j1, int j2) const
         {
-            TMVAssert(hasSubMatrix(i1,i2,j1,j2,1,1));
             return const_rec_type(
                 cptr()+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1, stepi(), stepj(), stor(), ct());
         }
 
         inline const_rec_type subMatrix(
+            int i1, int i2, int j1, int j2) const
+        {
+            TMVAssert(hasSubMatrix(i1,i2,j1,j2,1,1));
+            return cSubMatrix(i1,i2,j1,j2);
+        }
+
+        inline const_rec_type cSubMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const
         {
             const StorageType newstor =
                 iscm() ? (istep == 1 ? ColMajor : NoMajor) :
                 isrm() ? (jstep == 1 ? RowMajor : NoMajor) : NoMajor;
-            TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
             return const_rec_type(
                 cptr()+i1*stepi()+j1*stepj(),
                 (i2-i1)/istep,(j2-j1)/jstep,istep*stepi(),jstep*stepj(), 
                 newstor,ct());
         }
 
-        inline const_vec_type subVector(
+        inline const_rec_type subMatrix(
+            int i1, int i2, int j1, int j2, int istep, int jstep) const
+        {
+            TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
+            return cSubMatrix(i1,i2,j1,j2,istep,jstep);
+        }
+
+        inline const_vec_type cSubVector(
             int i, int j, int istep, int jstep, int size) const
         {
-            TMVAssert(hasSubVector(i,j,istep,jstep,size));
             return const_vec_type(
                 cptr()+i*stepi()+j*stepj(),size,
                 istep*stepi()+jstep*stepj(),ct());
         }
 
-        inline const_lowertri_type subTriMatrix(int i1, int i2) const
+        inline const_vec_type subVector(
+            int i, int j, int istep, int jstep, int size) const
         {
-            TMVAssert(hasSubTriMatrix(i1,i2,1));
+            TMVAssert(hasSubVector(i,j,istep,jstep,size));
+            return cSubVector(i,j,istep,jstep,size);
+        }
+
+        inline const_lowertri_type cSubTriMatrix(int i1, int i2) const
+        {
             return const_lowertri_type(
                 cptr()+i1*(stepi()+stepj()),
                 i2-i1,stepi(),stepj(),dt(),stor(),ct());
+        }
+
+        inline const_lowertri_type subTriMatrix(int i1, int i2) const
+        {
+            TMVAssert(hasSubTriMatrix(i1,i2,1));
+            return cSubTriMatrix(i1,i2);
+        }
+
+        inline const_lowertri_type cSubTriMatrix(
+            int i1, int i2, int istep) const
+        {
+            return const_lowertri_type(
+                cptr()+i1*(stepi()+stepj()),
+                (i2-i1)/istep,istep*stepi(),istep*stepj(),dt(),
+                istep==1 ? stor() : NoMajor,ct());
         }
 
         inline const_lowertri_type subTriMatrix(
             int i1, int i2, int istep) const
         {
             TMVAssert(hasSubTriMatrix(i1,i2,istep));
-            return const_lowertri_type(
-                cptr()+i1*(stepi()+stepj()),
-                (i2-i1)/istep,istep*stepi(),istep*stepj(),dt(),
-                istep==1 ? stor() : NoMajor,ct());
+            return cSubTriMatrix(i1,i2,istep);
         }
 
         inline const_lowertri_type offDiag(int noff=1) const
@@ -1047,20 +1382,20 @@ namespace tmv {
                 stepi(),stepj(),NonUnitDiag,stor(),ct());
         }
 
-        inline const_real_type realPart() const
+        inline const_realpart_type realPart() const
         {
-            return const_real_type(
+            return const_realpart_type(
                 reinterpret_cast<const RT*>(cptr()), size(),
                 isReal(T()) ? stepi() : 2*stepi(),
                 isReal(T()) ? stepj() : 2*stepj(),
                 dt(), isReal(T()) ? stor() : NoMajor, NonConj);
         }
 
-        inline const_real_type imagPart() const
+        inline const_realpart_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             TMVAssert(!isunit());
-            return const_real_type(
+            return const_realpart_type(
                 reinterpret_cast<const RT*>(cptr())+1, size(),
                 2*stepi(), 2*stepj(), dt(), NoMajor, NonConj);
         }
@@ -1125,9 +1460,9 @@ namespace tmv {
         { return subTriMatrix(i1,i2,istep); }
         TMV_DEPRECATED(const_lowertri_type OffDiag(int noff=1) const)
         { return offDiag(noff); }
-        TMV_DEPRECATED(const_real_type Real() const)
+        TMV_DEPRECATED(const_realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(const_real_type Imag() const)
+        TMV_DEPRECATED(const_realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(const_lowertri_type View() const)
         { return view(); }
@@ -1153,6 +1488,12 @@ namespace tmv {
 
         inline T trace() const
         { return isunit() ? T(RT(size())) : diag().sumElements(); }
+
+        inline T sumElements() const
+        { return transpose().sumElements(); }
+
+        inline RT sumAbsElements() const
+        { return transpose().sumAbsElements(); }
 
         inline RT norm() const 
         { return transpose().normF(); }
@@ -1456,9 +1797,10 @@ namespace tmv {
     template <class T, IndexStyle I> 
     class ConstUpperTriMatrixView : public GenUpperTriMatrix<T>
     {
+    public :
+
         typedef GenUpperTriMatrix<T> base;
         typedef ConstUpperTriMatrixView<T,I> type;
-    public :
 
         inline ConstUpperTriMatrixView(const type& rhs) :
             itsm(rhs.itsm), itss(rhs.itss), itssi(rhs.itssi), itssj(rhs.itssj),
@@ -1513,9 +1855,10 @@ namespace tmv {
     template <class T, IndexStyle I> 
     class ConstLowerTriMatrixView : public GenLowerTriMatrix<T>
     {
+    public :
+
         typedef GenLowerTriMatrix<T> base;
         typedef ConstLowerTriMatrixView<T,I> type;
-    public :
 
         inline ConstLowerTriMatrixView(const type& rhs) :
             itsm(rhs.itsm), itss(rhs.itss), itssi(rhs.itssi), itssj(rhs.itssj),
@@ -1571,6 +1914,8 @@ namespace tmv {
     class ConstUpperTriMatrixView<T,FortranStyle> : 
         public ConstUpperTriMatrixView<T,CStyle>
     {
+    public :
+
         typedef TMV_RealType(T) RT;
         typedef GenUpperTriMatrix<T> base;
         typedef ConstUpperTriMatrixView<T,FortranStyle> type;
@@ -1579,8 +1924,11 @@ namespace tmv {
         typedef ConstMatrixView<T,FortranStyle> const_rec_type;
         typedef ConstLowerTriMatrixView<T,FortranStyle> const_lowertri_type;
         typedef ConstUpperTriMatrixView<T,FortranStyle> const_uppertri_type;
-        typedef ConstUpperTriMatrixView<RT,FortranStyle> const_real_type;
-    public :
+        typedef const_uppertri_type const_view_type;
+        typedef const_lowertri_type const_transpose_type;
+        typedef const_uppertri_type const_conjugate_type;
+        typedef const_lowertri_type const_adjoint_type;
+        typedef ConstUpperTriMatrixView<RT,FortranStyle> const_realpart_type;
 
         inline ConstUpperTriMatrixView(const type& rhs) : c_type(rhs) {}
 
@@ -1655,14 +2003,14 @@ namespace tmv {
             int i1, int i2, int j1, int j2) const
         {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,1,1));
-            return base::subMatrix(i1-1,i2,j1-1,j2);
+            return base::cSubMatrix(i1-1,i2,j1-1,j2);
         }
 
         inline const_rec_type subMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const
         {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
-            return base::subMatrix(
+            return base::cSubMatrix(
                 i1-1,i2-1+istep,j1-1,j2-1+jstep,istep,jstep);
         }
 
@@ -1670,29 +2018,29 @@ namespace tmv {
             int i, int j, int istep, int jstep, int size) const
         {
             TMVAssert(hasSubVector(i,j,istep,jstep,size));
-            return base::subVector(i-1,j-1,istep,jstep,size);
+            return base::cSubVector(i-1,j-1,istep,jstep,size);
         }
 
         inline const_uppertri_type subTriMatrix(int i1, int i2) const
         {
             TMVAssert(hasSubTriMatrix(i1,i2,1));
-            return base::subTriMatrix(i1-1,i2);
+            return base::cSubTriMatrix(i1-1,i2);
         }
 
         inline const_uppertri_type subTriMatrix(
             int i1, int i2, int istep) const
         {
             TMVAssert(hasSubTriMatrix(i1,i2,istep));
-            return base::subTriMatrix(i1-1,i2-1+istep,istep);
+            return base::cSubTriMatrix(i1-1,i2-1+istep,istep);
         }
 
         inline const_uppertri_type offDiag(int noff=1) const
         { return base::offDiag(noff); }
 
-        inline const_real_type realPart() const
+        inline const_realpart_type realPart() const
         { return base::realPart(); }
 
-        inline const_real_type imagPart() const
+        inline const_realpart_type imagPart() const
         { return base::imagPart(); }
 
         inline const_uppertri_type view() const
@@ -1726,9 +2074,9 @@ namespace tmv {
         { return subTriMatrix(i1,i2,istep); }
         TMV_DEPRECATED(const_uppertri_type OffDiag(int noff=1) const)
         { return offDiag(noff); }
-        TMV_DEPRECATED(const_real_type Real() const)
+        TMV_DEPRECATED(const_realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(const_real_type Imag() const)
+        TMV_DEPRECATED(const_realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(const_uppertri_type View() const)
         { return view(); }
@@ -1757,6 +2105,8 @@ namespace tmv {
     class ConstLowerTriMatrixView<T,FortranStyle> : 
         public ConstLowerTriMatrixView<T,CStyle>
     {
+    public :
+
         typedef TMV_RealType(T) RT;
         typedef GenLowerTriMatrix<T> base;
         typedef ConstLowerTriMatrixView<T,FortranStyle> type;
@@ -1765,8 +2115,11 @@ namespace tmv {
         typedef ConstMatrixView<T,FortranStyle> const_rec_type;
         typedef ConstUpperTriMatrixView<T,FortranStyle> const_uppertri_type;
         typedef ConstLowerTriMatrixView<T,FortranStyle> const_lowertri_type;
-        typedef ConstLowerTriMatrixView<RT,FortranStyle> const_real_type;
-    public :
+        typedef const_lowertri_type const_view_type;
+        typedef const_uppertri_type const_transpose_type;
+        typedef const_lowertri_type const_conjugate_type;
+        typedef const_uppertri_type const_adjoint_type;
+        typedef ConstLowerTriMatrixView<RT,FortranStyle> const_realpart_type;
 
         inline ConstLowerTriMatrixView(const type& rhs) : c_type(rhs) {}
 
@@ -1844,14 +2197,14 @@ namespace tmv {
             int i1, int i2, int j1, int j2) const
         {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,1,1));
-            return base::subMatrix(i1-1,i2,j1-1,j2);
+            return base::cSubMatrix(i1-1,i2,j1-1,j2);
         }
 
         inline const_rec_type subMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const
         {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
-            return base::subMatrix(
+            return base::cSubMatrix(
                 i1-1,i2-1+istep,j1-1,j2-1+jstep,istep,jstep);
         }
 
@@ -1859,29 +2212,29 @@ namespace tmv {
             int i, int j, int istep, int jstep, int size) const
         {
             TMVAssert(hasSubVector(i,j,istep,jstep,size));
-            return base::subVector(i-1,j-1,istep,jstep,size);
+            return base::cSubVector(i-1,j-1,istep,jstep,size);
         }
 
         inline const_lowertri_type subTriMatrix(int i1, int i2) const
         {
             TMVAssert(hasSubTriMatrix(i1,i2,1));
-            return base::subTriMatrix(i1-1,i2);
+            return base::cSubTriMatrix(i1-1,i2);
         }
 
         inline const_lowertri_type subTriMatrix(
             int i1, int i2, int istep) const
         {
             TMVAssert(hasSubTriMatrix(i1,i2,istep));
-            return base::subTriMatrix(i1-1,i2-1+istep,istep);
+            return base::cSubTriMatrix(i1-1,i2-1+istep,istep);
         }
 
         inline const_lowertri_type offDiag(int noff=1) const
         { return base::offDiag(noff); }
 
-        inline const_real_type realPart() const
+        inline const_realpart_type realPart() const
         { return base::realPart(); }
 
-        inline const_real_type imagPart() const
+        inline const_realpart_type imagPart() const
         { return base::imagPart(); }
 
         inline const_lowertri_type view() const
@@ -1915,9 +2268,9 @@ namespace tmv {
         { return subTriMatrix(i1,i2,istep); }
         TMV_DEPRECATED(const_lowertri_type OffDiag(int noff=1) const)
         { return offDiag(noff); }
-        TMV_DEPRECATED(const_real_type Real() const)
+        TMV_DEPRECATED(const_realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(const_real_type Imag() const)
+        TMV_DEPRECATED(const_realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(const_lowertri_type View() const)
         { return view(); }
@@ -1945,17 +2298,22 @@ namespace tmv {
     template <class T, IndexStyle I> 
     class UpperTriMatrixView : public GenUpperTriMatrix<T>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef GenUpperTriMatrix<T> base;
         typedef UpperTriMatrixView<T,I> type;
         typedef LowerTriMatrixView<T,I> lowertri_type;
         typedef UpperTriMatrixView<T,I> uppertri_type;
+        typedef uppertri_type view_type;
+        typedef lowertri_type transpose_type;
+        typedef uppertri_type conjugate_type;
+        typedef lowertri_type adjoint_type;
         typedef MatrixView<T,I> rec_type;
         typedef VectorView<T,I> vec_type;
-        typedef UpperTriMatrixView<RT,I> real_type;
-
-    public:
+        typedef UpperTriMatrixView<RT,I> realpart_type;
+        typedef TriRef<T,true> reference;
 
         //
         // Constructors
@@ -2072,13 +2430,11 @@ namespace tmv {
         // Access
         //
 
-        typedef TMV_RefType(T) reference;
-
         inline reference operator()(int i,int j) const 
         {
             TMVAssert(i>=0 && i<int(size()));
             TMVAssert(j>=0 && j<int(size()));
-            TMVAssert(okij(i,j));
+            TMVAssert(i<=j);
             return ref(i,j); 
         }
 
@@ -2164,51 +2520,78 @@ namespace tmv {
         using base::hasSubVector;
         using base::hasSubTriMatrix;
 
-        inline rec_type subMatrix(int i1, int i2, int j1, int j2) const
+        inline rec_type cSubMatrix(int i1, int i2, int j1, int j2) const
         {
-            TMVAssert(hasSubMatrix(i1,i2,j1,j2,1,1));
             return rec_type(
                 ptr()+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1, stepi(),stepj(),stor(),ct() TMV_FIRSTLAST );
         }
 
-        inline rec_type subMatrix(
+        inline rec_type subMatrix(int i1, int i2, int j1, int j2) const
+        {
+            TMVAssert(hasSubMatrix(i1,i2,j1,j2,1,1));
+            return cSubMatrix(i1,i2,j1,j2);
+        }
+
+        inline rec_type cSubMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const
         {
             const StorageType newstor =
                 iscm() ? (istep == 1 ? ColMajor : NoMajor) :
                 isrm() ? (jstep == 1 ? RowMajor : NoMajor) : NoMajor;
-            TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
             return rec_type(
                 ptr()+i1*stepi()+j1*stepj(),
                 (i2-i1)/istep, (j2-j1)/jstep, istep*stepi(), jstep*stepj(),
                 newstor,ct() TMV_FIRSTLAST );
         }
 
-        inline vec_type subVector(
+        inline rec_type subMatrix(
+            int i1, int i2, int j1, int j2, int istep, int jstep) const
+        {
+            TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
+            return cSubMatrix(i1,i2,j1,j2,istep,jstep);
+        }
+
+        inline vec_type cSubVector(
             int i, int j, int istep, int jstep, int size) const
         {
-            TMVAssert(hasSubVector(i,j,istep,jstep,size));
             return vec_type(
                 ptr()+i*stepi()+j*stepj(),size,
                 istep*stepi()+jstep*stepj(),ct() TMV_FIRSTLAST );
         }
 
-        inline uppertri_type subTriMatrix(int i1, int i2) const
+        inline vec_type subVector(
+            int i, int j, int istep, int jstep, int size) const
         {
-            TMVAssert(hasSubTriMatrix(i1,i2,1));
+            TMVAssert(hasSubVector(i,j,istep,jstep,size));
+            return cSubVector(i,j,istep,jstep,size);
+        }
+
+        inline uppertri_type cSubTriMatrix(int i1, int i2) const
+        {
             return uppertri_type(
                 ptr()+i1*(stepi()+stepj()),i2-i1,
                 stepi(),stepj(),dt(),stor(),ct() TMV_FIRSTLAST);
         }
 
-        inline uppertri_type subTriMatrix(int i1, int i2, int istep) const
+        inline uppertri_type subTriMatrix(int i1, int i2) const
         {
-            TMVAssert(hasSubTriMatrix(i1,i2,istep));
+            TMVAssert(hasSubTriMatrix(i1,i2,1));
+            return cSubTriMatrix(i1,i2);
+        }
+
+        inline uppertri_type cSubTriMatrix(int i1, int i2, int istep) const
+        {
             return uppertri_type(
                 ptr()+i1*(stepi()+stepj()),
                 (i2-i1)/istep,istep*stepi(),istep*stepj(),dt(),
                 istep==1 ? stor() : NoMajor,ct() TMV_FIRSTLAST);
+        }
+
+        inline uppertri_type subTriMatrix(int i1, int i2, int istep) const
+        {
+            TMVAssert(hasSubTriMatrix(i1,i2,istep));
+            return cSubTriMatrix(i1,i2,istep);
         }
 
         inline uppertri_type offDiag(int noff=1) const
@@ -2219,9 +2602,9 @@ namespace tmv {
                 stepi(),stepj(),NonUnitDiag,stor(),ct() TMV_FIRSTLAST);
         }
 
-        inline real_type realPart() const
+        inline realpart_type realPart() const
         {
-            return real_type(
+            return realpart_type(
                 reinterpret_cast<RT*>(ptr()), size(),
                 isReal(T()) ? stepi() : 2*stepi(),
                 isReal(T()) ? stepj() : 2*stepj(),
@@ -2233,11 +2616,11 @@ namespace tmv {
             );
         }
 
-        inline real_type imagPart() const
+        inline realpart_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             TMVAssert(!isunit());
-            return real_type(
+            return realpart_type(
                 reinterpret_cast<RT*>(ptr())+1, size(),
                 2*stepi(), 2*stepj(), dt(), NoMajor, NonConj
 #ifdef TMVFLDEBUG
@@ -2294,9 +2677,9 @@ namespace tmv {
         { return subTriMatrix(i1,i2,istep); }
         TMV_DEPRECATED(uppertri_type OffDiag(int noff=1) const)
         { return offDiag(noff); }
-        TMV_DEPRECATED(real_type Real() const)
+        TMV_DEPRECATED(realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(real_type Imag() const)
+        TMV_DEPRECATED(realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(uppertri_type View() const)
         { return view(); }
@@ -2357,17 +2740,22 @@ namespace tmv {
     template <class T, IndexStyle I> 
     class LowerTriMatrixView : public GenLowerTriMatrix<T>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef GenLowerTriMatrix<T> base;
         typedef LowerTriMatrixView<T,I> type;
         typedef UpperTriMatrixView<T,I> uppertri_type;
         typedef LowerTriMatrixView<T,I> lowertri_type;
+        typedef lowertri_type view_type;
+        typedef uppertri_type transpose_type;
+        typedef lowertri_type conjugate_type;
+        typedef uppertri_type adjoint_type;
         typedef MatrixView<T,I> rec_type;
         typedef VectorView<T,I> vec_type;
-        typedef LowerTriMatrixView<RT,I> real_type;
-
-    public:
+        typedef LowerTriMatrixView<RT,I> realpart_type;
+        typedef TriRef<T,true> reference;
 
         //
         // Constructors
@@ -2484,13 +2872,11 @@ namespace tmv {
         // Access
         //
 
-        typedef TMV_RefType(T) reference;
-
         inline reference operator()(int i,int j) const 
         {
             TMVAssert(i>=0 && i<int(size()));
             TMVAssert(j>=0 && j<int(size()));
-            TMVAssert(okij(i,j));
+            TMVAssert(i>=j);
             return ref(i,j); 
         }
 
@@ -2581,51 +2967,78 @@ namespace tmv {
         using base::hasSubVector;
         using base::hasSubTriMatrix;
 
-        inline rec_type subMatrix(int i1, int i2, int j1, int j2) const
+        inline rec_type cSubMatrix(int i1, int i2, int j1, int j2) const
         {
-            TMVAssert(hasSubMatrix(i1,i2,j1,j2,1,1));
             return rec_type(
                 ptr()+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1, stepi(),stepj(),stor(),ct() TMV_FIRSTLAST );
         }
 
-        inline rec_type subMatrix(
+        inline rec_type subMatrix(int i1, int i2, int j1, int j2) const
+        {
+            TMVAssert(hasSubMatrix(i1,i2,j1,j2,1,1));
+            return cSubMatrix(i1,i2,j1,j2);
+        }
+
+        inline rec_type cSubMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const
         {
             const StorageType newstor =
                 iscm() ? (istep == 1 ? ColMajor : NoMajor) :
                 isrm() ? (jstep == 1 ? RowMajor : NoMajor) : NoMajor;
-            TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
             return rec_type(
                 ptr()+i1*stepi()+j1*stepj(),
                 (i2-i1)/istep, (j2-j1)/jstep, istep*stepi(), jstep*stepj(),
                 newstor,ct() TMV_FIRSTLAST );
         }
 
-        inline vec_type subVector(
+        inline rec_type subMatrix(
+            int i1, int i2, int j1, int j2, int istep, int jstep) const
+        {
+            TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
+            return cSubMatrix(i1,i2,j1,j2,istep,jstep);
+        }
+
+        inline vec_type cSubVector(
             int i, int j, int istep, int jstep, int size) const
         {
-            TMVAssert(hasSubVector(i,j,istep,jstep,size));
             return vec_type(
                 ptr()+i*stepi()+j*stepj(),size,
                 istep*stepi()+jstep*stepj(),ct() TMV_FIRSTLAST );
         }
 
-        inline lowertri_type subTriMatrix(int i1, int i2) const
+        inline vec_type subVector(
+            int i, int j, int istep, int jstep, int size) const
         {
-            TMVAssert(hasSubTriMatrix(i1,i2,1));
+            TMVAssert(hasSubVector(i,j,istep,jstep,size));
+            return cSubVector(i,j,istep,jstep,size);
+        }
+
+        inline lowertri_type cSubTriMatrix(int i1, int i2) const
+        {
             return lowertri_type(
                 ptr()+i1*(stepi()+stepj()),
                 i2-i1,stepi(),stepj(),dt(),stor(),ct() TMV_FIRSTLAST);
         }
 
-        inline lowertri_type subTriMatrix(int i1, int i2, int istep) const
+        inline lowertri_type subTriMatrix(int i1, int i2) const
         {
-            TMVAssert(hasSubTriMatrix(i1,i2,istep));
+            TMVAssert(hasSubTriMatrix(i1,i2,1));
+            return cSubTriMatrix(i1,i2);
+        }
+
+        inline lowertri_type cSubTriMatrix(int i1, int i2, int istep) const
+        {
             return lowertri_type(
                 ptr()+i1*(stepi()+stepj()),
                 (i2-i1)/istep,istep*stepi(),istep*stepj(),dt(),
                 istep==1 ? stor() : NoMajor,ct() TMV_FIRSTLAST);
+        }
+
+        inline lowertri_type subTriMatrix(int i1, int i2, int istep) const
+        {
+            TMVAssert(hasSubTriMatrix(i1,i2,istep));
+            return cSubTriMatrix(i1,i2,istep);
         }
 
         inline lowertri_type offDiag(int noff=1) const
@@ -2636,9 +3049,9 @@ namespace tmv {
                 stepi(),stepj(),NonUnitDiag,stor(),ct() TMV_FIRSTLAST);
         }
 
-        inline real_type realPart() const
+        inline realpart_type realPart() const
         {
-            return real_type(
+            return realpart_type(
                 reinterpret_cast<RT*>(ptr()), size(),
                 isReal(T()) ? stepi() : 2*stepi(),
                 isReal(T()) ? stepj() : 2*stepj(),
@@ -2650,11 +3063,11 @@ namespace tmv {
             );
         }
 
-        inline real_type imagPart() const
+        inline realpart_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             TMVAssert(!isunit());
-            return real_type(
+            return realpart_type(
                 reinterpret_cast<RT*>(ptr())+1, size(),
                 2*stepi(), 2*stepj(), dt(), NoMajor, NonConj
 #ifdef TMVFLDEBUG
@@ -2712,9 +3125,9 @@ namespace tmv {
         { return subTriMatrix(i1,i2,istep); }
         TMV_DEPRECATED(lowertri_type OffDiag(int noff=1) const)
         { return offDiag(noff); }
-        TMV_DEPRECATED(real_type Real() const)
+        TMV_DEPRECATED(realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(real_type Imag() const)
+        TMV_DEPRECATED(realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(lowertri_type View() const)
         { return view(); }
@@ -2776,6 +3189,8 @@ namespace tmv {
     class UpperTriMatrixView<T,FortranStyle> : 
         public UpperTriMatrixView<T,CStyle>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef GenUpperTriMatrix<T> base;
@@ -2784,11 +3199,14 @@ namespace tmv {
         typedef ConstUpperTriMatrixView<T,FortranStyle> const_type;
         typedef LowerTriMatrixView<T,FortranStyle> lowertri_type;
         typedef UpperTriMatrixView<T,FortranStyle> uppertri_type;
+        typedef uppertri_type view_type;
+        typedef lowertri_type transpose_type;
+        typedef uppertri_type conjugate_type;
+        typedef lowertri_type adjoint_type;
         typedef MatrixView<T,FortranStyle> rec_type;
         typedef VectorView<T,FortranStyle> vec_type;
-        typedef UpperTriMatrixView<RT,FortranStyle> real_type;
-
-    public:
+        typedef UpperTriMatrixView<RT,FortranStyle> realpart_type;
+        typedef TriRef<T,true> reference;
 
         //
         // Constructors
@@ -2856,11 +3274,11 @@ namespace tmv {
         // Access
         //
 
-        inline TMV_RefType(T) operator()(int i,int j) const 
+        inline reference operator()(int i,int j) const 
         { 
             TMVAssert(i>0 && i <= int(size()));
             TMVAssert(j>0 && j <= int(size()));
-            TMVAssert(okij(i-1,j-1));
+            TMVAssert(i<=j);
             return ref(i-1,j-1); 
         }
 
@@ -2944,14 +3362,14 @@ namespace tmv {
         inline rec_type subMatrix(int i1, int i2, int j1, int j2) const
         {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,1,1));
-            return c_type::subMatrix(i1-1,i2,j1-1,j2);
+            return c_type::cSubMatrix(i1-1,i2,j1-1,j2);
         }
 
         inline rec_type subMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const
         {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
-            return c_type::subMatrix(
+            return c_type::cSubMatrix(
                 i1-1,i2-1+istep,j1-1,j2-1+jstep,istep,jstep);
         }
 
@@ -2959,19 +3377,19 @@ namespace tmv {
             int i, int j, int istep, int jstep, int s) const
         {
             TMVAssert(hasSubVector(i,j,istep,jstep,s));
-            return c_type::subVector(i-1,j-1,istep,jstep,s);
+            return c_type::cSubVector(i-1,j-1,istep,jstep,s);
         }
 
         inline uppertri_type subTriMatrix(int i1, int i2) const
         {
             TMVAssert(hasSubTriMatrix(i1,i2,1));
-            return c_type::subTriMatrix(i1-1,i2);
+            return c_type::cSubTriMatrix(i1-1,i2);
         }
 
         inline uppertri_type subTriMatrix(int i1, int i2, int istep) const
         {
             TMVAssert(hasSubTriMatrix(i1,i2,istep));
-            return c_type::subTriMatrix(i1-1,i2-1+istep,istep);
+            return c_type::cSubTriMatrix(i1-1,i2-1+istep,istep);
         }
 
         inline uppertri_type offDiag(int noff=1) const
@@ -2980,10 +3398,10 @@ namespace tmv {
             return c_type::offDiag(noff);
         }
 
-        inline real_type realPart() const
+        inline realpart_type realPart() const
         { return c_type::realPart(); }
 
-        inline real_type imagPart() const
+        inline realpart_type imagPart() const
         { return c_type::imagPart(); }
 
         inline uppertri_type view() const
@@ -3017,9 +3435,9 @@ namespace tmv {
         { return subTriMatrix(i1,i2,istep); }
         TMV_DEPRECATED(uppertri_type OffDiag(int noff=1) const)
         { return offDiag(noff); }
-        TMV_DEPRECATED(real_type Real() const)
+        TMV_DEPRECATED(realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(real_type Imag() const)
+        TMV_DEPRECATED(realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(uppertri_type View() const)
         { return view(); }
@@ -3046,6 +3464,8 @@ namespace tmv {
     class LowerTriMatrixView<T,FortranStyle> : 
         public LowerTriMatrixView<T,CStyle>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef GenLowerTriMatrix<T> base;
@@ -3054,11 +3474,14 @@ namespace tmv {
         typedef ConstLowerTriMatrixView<T,FortranStyle> const_type;
         typedef UpperTriMatrixView<T,FortranStyle> uppertri_type;
         typedef LowerTriMatrixView<T,FortranStyle> lowertri_type;
+        typedef lowertri_type view_type;
+        typedef uppertri_type transpose_type;
+        typedef lowertri_type conjugate_type;
+        typedef uppertri_type adjoint_type;
         typedef MatrixView<T,FortranStyle> rec_type;
         typedef VectorView<T,FortranStyle> vec_type;
-        typedef LowerTriMatrixView<RT,FortranStyle> real_type;
-
-    public:
+        typedef LowerTriMatrixView<RT,FortranStyle> realpart_type;
+        typedef TriRef<T,true> reference;
 
         //
         // Constructors
@@ -3126,11 +3549,11 @@ namespace tmv {
         // Access
         //
 
-        inline TMV_RefType(T) operator()(int i,int j) const 
+        inline reference operator()(int i,int j) const 
         { 
             TMVAssert(i>0 && i <= int(size()));
             TMVAssert(j>0 && j <= int(size()));
-            TMVAssert(okij(i-1,j-1));
+            TMVAssert(i>=j);
             return ref(i-1,j-1); 
         }
 
@@ -3214,14 +3637,14 @@ namespace tmv {
         inline rec_type subMatrix(int i1, int i2, int j1, int j2) const
         {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,1,1));
-            return c_type::subMatrix(i1-1,i2,j1-1,j2);
+            return c_type::cSubMatrix(i1-1,i2,j1-1,j2);
         }
 
         inline rec_type subMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const
         {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
-            return c_type::subMatrix(
+            return c_type::cSubMatrix(
                 i1-1,i2-1+istep,j1-1,j2-1+jstep,istep,jstep);
         }
 
@@ -3229,19 +3652,19 @@ namespace tmv {
             int i, int j, int istep, int jstep, int s) const
         {
             TMVAssert(hasSubVector(i,j,istep,jstep,s));
-            return c_type::subVector(i-1,j-1,istep,jstep,s);
+            return c_type::cSubVector(i-1,j-1,istep,jstep,s);
         }
 
         inline lowertri_type subTriMatrix(int i1, int i2) const
         {
             TMVAssert(hasSubTriMatrix(i1,i2,1));
-            return c_type::subTriMatrix(i1-1,i2);
+            return c_type::cSubTriMatrix(i1-1,i2);
         }
 
         inline lowertri_type subTriMatrix(int i1, int i2, int istep) const
         {
             TMVAssert(hasSubTriMatrix(i1,i2,istep));
-            return c_type::subTriMatrix(i1-1,i2-1+istep,istep);
+            return c_type::cSubTriMatrix(i1-1,i2-1+istep,istep);
         }
 
         inline lowertri_type offDiag(int noff=1) const
@@ -3250,10 +3673,10 @@ namespace tmv {
             return c_type::offDiag(noff);
         }
 
-        inline real_type realPart() const
+        inline realpart_type realPart() const
         { return c_type::realPart(); }
 
-        inline real_type imagPart() const
+        inline realpart_type imagPart() const
         { return c_type::imagPart(); }
 
         inline lowertri_type view() const
@@ -3287,9 +3710,9 @@ namespace tmv {
         { return subTriMatrix(i1,i2,istep); }
         TMV_DEPRECATED(lowertri_type OffDiag(int noff=1) const)
         { return offDiag(noff); }
-        TMV_DEPRECATED(real_type Real() const)
+        TMV_DEPRECATED(realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(real_type Imag() const)
+        TMV_DEPRECATED(realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(lowertri_type View() const)
         { return view(); }
@@ -3321,6 +3744,8 @@ namespace tmv {
     template <class T, DiagType D, StorageType S, IndexStyle I> 
     class UpperTriMatrix : public GenUpperTriMatrix<T>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef GenUpperTriMatrix<T> base;
@@ -3329,14 +3754,21 @@ namespace tmv {
         typedef ConstMatrixView<T,I> const_rec_type;
         typedef ConstUpperTriMatrixView<T,I> const_uppertri_type;
         typedef ConstLowerTriMatrixView<T,I> const_lowertri_type;
-        typedef ConstUpperTriMatrixView<RT,I> const_real_type;
+        typedef const_uppertri_type const_view_type;
+        typedef const_lowertri_type const_transpose_type;
+        typedef const_uppertri_type const_conjugate_type;
+        typedef const_lowertri_type const_adjoint_type;
+        typedef ConstUpperTriMatrixView<RT,I> const_realpart_type;
         typedef VectorView<T,I> vec_type;
         typedef MatrixView<T,I> rec_type;
         typedef UpperTriMatrixView<T,I> uppertri_type;
         typedef LowerTriMatrixView<T,I> lowertri_type;
-        typedef UpperTriMatrixView<RT,I> real_type;
-
-    public:
+        typedef uppertri_type view_type;
+        typedef lowertri_type transpose_type;
+        typedef uppertri_type conjugate_type;
+        typedef lowertri_type adjoint_type;
+        typedef UpperTriMatrixView<RT,I> realpart_type;
+        typedef typename TriRefHelper2<T,D>::reference reference;
 
         //
         // Constructors
@@ -3592,8 +4024,6 @@ namespace tmv {
         // Access
         //
 
-        typedef T& reference;
-
         inline T operator()(int i, int j) const
         {
             if (I == CStyle) {
@@ -3608,17 +4038,17 @@ namespace tmv {
             else { TMVAssert(okij(i,j)); return cref(i,j); }
         }
 
-        inline T& operator()(int i, int j) 
+        inline reference operator()(int i, int j) 
         { 
             if (I == CStyle) {
                 TMVAssert(i>=0 && i<int(size()));
                 TMVAssert(j>=0 && j<int(size()));
-                TMVAssert(okij(i,j));
+                TMVAssert(i<=j);
                 return ref(i,j);
             } else {
                 TMVAssert(i>0 && i<= int(size()));
                 TMVAssert(j>0 && j<= int(size()));
-                TMVAssert(okij(i-1,j-1));
+                TMVAssert(i<=j);
                 return ref(i-1,j-1);
             }
         }
@@ -3783,27 +4213,46 @@ namespace tmv {
         // subMatrix
         //
 
-        inline const_rec_type subMatrix(int i1, int i2, int j1, int j2) const
+        inline const_rec_type cSubMatrix(int i1, int i2, int j1, int j2) const
         {
-            TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,1,1));
-            if (I==FortranStyle) { --i1; --j1; }
             return const_rec_type(
                 itsm.get()+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1,stepi(),stepj(),S,NonConj);
         }
 
-        inline const_rec_type subMatrix(
+        inline const_rec_type subMatrix(int i1, int i2, int j1, int j2) const
+        {
+            TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,1,1));
+            if (I==FortranStyle) { --i1; --j1; }
+            return cSubMatrix(i1,i2,j1,j2);
+        }
+
+        inline const_rec_type cSubMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const
         {
             StorageType newstor = S==RowMajor ?
                 jstep == 1 ? RowMajor : NoMajor :
                 istep == 1 ? ColMajor : NoMajor;
-            TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,istep,jstep));
-            if (I==FortranStyle) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
             return const_rec_type(
                 itsm.get()+i1*stepi()+j1*stepj(),
                 (i2-i1)/istep, (j2-j1)/jstep, istep*stepi(), jstep*stepj(),
                 newstor, NonConj);
+        }
+
+        inline const_rec_type subMatrix(
+            int i1, int i2, int j1, int j2, int istep, int jstep) const
+        {
+            TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,istep,jstep));
+            if (I==FortranStyle) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
+            return cSubMatrix(i1,i2,j1,j2,istep,jstep);
+        }
+
+        inline const_vec_type cSubVector(
+            int i, int j, int istep, int jstep, int size) const
+        {
+            return const_vec_type(
+                itsm.get()+i*stepi()+j*stepj(),size,
+                istep*stepi()+jstep*stepj(),NonConj);
         }
 
         inline const_vec_type subVector(
@@ -3811,18 +4260,30 @@ namespace tmv {
         {
             TMVAssert(view().hasSubVector(i,j,istep,jstep,size));
             if (I==FortranStyle) { --i; --j; }
-            return const_vec_type(
-                itsm.get()+i*stepi()+j*stepj(),size,
-                istep*stepi()+jstep*stepj(),NonConj);
+            return cSubVector(i,j,istep,jstep,size);
+        }
+
+        inline const_uppertri_type cSubTriMatrix(int i1, int i2) const
+        {
+            return const_uppertri_type(
+                itsm.get()+i1*(stepi()+stepj()),
+                i2-i1,stepi(),stepj(),D,S,NonConj);
         }
 
         inline const_uppertri_type subTriMatrix(int i1, int i2) const
         {
             TMVAssert(view().hasSubTriMatrix(i1,i2,1));
             if (I==FortranStyle) { --i1; }
+            return cSubTriMatrix(i1,i2);
+        }
+
+        inline const_uppertri_type cSubTriMatrix(
+            int i1, int i2, int istep) const
+        {
             return const_uppertri_type(
                 itsm.get()+i1*(stepi()+stepj()),
-                i2-i1,stepi(),stepj(),D,S,NonConj);
+                (i2-i1)/istep, istep*stepi(),istep*stepj(), D,
+                istep==1 ? S : NoMajor, NonConj);
         }
 
         inline const_uppertri_type subTriMatrix(
@@ -3830,10 +4291,7 @@ namespace tmv {
         {
             TMVAssert(view().hasSubTriMatrix(i1,i2,istep));
             if (I==FortranStyle) { --i1; i2+=istep-1; }
-            return const_uppertri_type(
-                itsm.get()+i1*(stepi()+stepj()),
-                (i2-i1)/istep, istep*stepi(),istep*stepj(), D,
-                istep==1 ? S : NoMajor, NonConj);
+            return cSubTriMatrix(i1,i2,istep);
         }
 
         inline const_uppertri_type offDiag(int noff=1) const
@@ -3844,73 +4302,99 @@ namespace tmv {
                 size()-noff,stepi(),stepj(),NonUnitDiag,S,NonConj);
         }
 
-        inline const_real_type realPart() const
+        inline const_realpart_type realPart() const
         {
-            return const_real_type(
+            return const_realpart_type(
                 reinterpret_cast<RT*>(itsm.get()), size(),
                 isReal(T()) ? stepi() : 2*stepi(),
                 isReal(T()) ? stepj() : 2*stepj(),
                 D, isReal(T()) ? S : NoMajor, NonConj);
         }
 
-        inline const_real_type imagPart() const
+        inline const_realpart_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             TMVAssert(!isunit());
-            return const_real_type(
+            return const_realpart_type(
                 reinterpret_cast<RT*>(itsm.get())+1, size(),
                 2*stepi(), 2*stepj(), NonUnitDiag, NoMajor, NonConj);
+        }
+
+        inline rec_type cSubMatrix(int i1, int i2, int j1, int j2) 
+        {
+            return rec_type(
+                itsm.get()+i1*stepi()+j1*stepj(),
+                i2-i1, j2-j1, stepi(),stepj(),S,NonConj TMV_FIRSTLAST);
         }
 
         inline rec_type subMatrix(int i1, int i2, int j1, int j2) 
         {
             TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,1,1));
             if (I==FortranStyle) { --i1; --j1; }
-            return rec_type(
-                itsm.get()+i1*stepi()+j1*stepj(),
-                i2-i1, j2-j1, stepi(),stepj(),S,NonConj TMV_FIRSTLAST);
+            return cSubMatrix(i1,i2,j1,j2);
         }
 
-        inline rec_type subMatrix(
+        inline rec_type cSubMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep)
         {
             StorageType newstor = S == RowMajor ?
                 jstep == 1 ? RowMajor : NoMajor :
                 istep == 1 ? ColMajor : NoMajor;
-            TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,istep,jstep));
-            if (I==FortranStyle) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
             return rec_type(
                 itsm.get()+i1*stepi()+j1*stepj(),
                 (i2-i1)/istep, (j2-j1)/jstep, istep*stepi(), jstep*stepj(),
                 newstor,NonConj TMV_FIRSTLAST);
         }
 
+        inline rec_type subMatrix(
+            int i1, int i2, int j1, int j2, int istep, int jstep)
+        {
+            TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,istep,jstep));
+            if (I==FortranStyle) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
+            return cSubMatrix(i1,i2,j1,j2,istep,jstep);
+        }
+
+        inline vec_type cSubVector(int i, int j, int istep, int jstep, int size)
+        {
+            return vec_type(
+                itsm.get()+i*stepi()+j*stepj(),size,
+                istep*stepi()+jstep*stepj(),NonConj TMV_FIRSTLAST);
+        }
+
         inline vec_type subVector(int i, int j, int istep, int jstep, int size)
         {
             TMVAssert(view().hasSubVector(i,j,istep,jstep,size));
             if (I==FortranStyle) { --i; --j; }
-            return vec_type(
-                itsm.get()+i*stepi()+j*stepj(),size,
-                istep*stepi()+jstep*stepj(),NonConj TMV_FIRSTLAST);
+            return cSubVector(i,j,istep,jstep,size);
+        }
+
+        inline uppertri_type cSubTriMatrix(int i1, int i2)
+        {
+            return uppertri_type(
+                itsm.get()+i1*(stepi()+stepj()),
+                i2-i1,stepi(),stepj(),D,S,NonConj TMV_FIRSTLAST);
         }
 
         inline uppertri_type subTriMatrix(int i1, int i2)
         {
             TMVAssert(view().hasSubTriMatrix(i1,i2,1));
             if (I==FortranStyle) { --i1; }
+            return cSubTriMatrix(i1,i2);
+        }
+
+        inline uppertri_type cSubTriMatrix(int i1, int i2, int istep) 
+        {
             return uppertri_type(
                 itsm.get()+i1*(stepi()+stepj()),
-                i2-i1,stepi(),stepj(),D,S,NonConj TMV_FIRSTLAST);
+                (i2-i1)/istep,istep*stepi(),istep*stepj(),D,
+                istep==1 ? S : NoMajor,NonConj TMV_FIRSTLAST);
         }
 
         inline uppertri_type subTriMatrix(int i1, int i2, int istep) 
         {
             TMVAssert(view().hasSubTriMatrix(i1,i2,istep));
             if (I==FortranStyle) { --i1; i2+=istep-1; }
-            return uppertri_type(
-                itsm.get()+i1*(stepi()+stepj()),
-                (i2-i1)/istep,istep*stepi(),istep*stepj(),D,
-                istep==1 ? S : NoMajor,NonConj TMV_FIRSTLAST);
+            return cSubTriMatrix(i1,i2,istep);
         }
 
         inline uppertri_type offDiag(int noff=1)
@@ -3921,9 +4405,9 @@ namespace tmv {
                 stepi(),stepj(),NonUnitDiag,S,NonConj TMV_FIRSTLAST);
         }
 
-        inline real_type realPart() 
+        inline realpart_type realPart() 
         {
-            return real_type(
+            return realpart_type(
                 reinterpret_cast<RT*>(itsm.get()), size(),
                 isReal(T()) ? stepi() : 2*stepi(),
                 isReal(T()) ? stepj() : 2*stepj(),
@@ -3935,11 +4419,11 @@ namespace tmv {
             );
         }
 
-        inline real_type imagPart()
+        inline realpart_type imagPart()
         {
             TMVAssert(isComplex(T()));
             TMVAssert(!isunit());
-            return real_type(
+            return realpart_type(
                 reinterpret_cast<RT*>(itsm.get())+1, size(),
                 2*stepi(), 2*stepj(), NonUnitDiag, NoMajor, NonConj
 #ifdef TMVFLDEBUG
@@ -4030,9 +4514,9 @@ namespace tmv {
         { return subTriMatrix(i1,i2,istep); }
         TMV_DEPRECATED(const_uppertri_type OffDiag(int noff=1) const)
         { return offDiag(noff); }
-        TMV_DEPRECATED(const_real_type Real() const)
+        TMV_DEPRECATED(const_realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(const_real_type Imag() const)
+        TMV_DEPRECATED(const_realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(const_uppertri_type View() const)
         { return view(); }
@@ -4058,9 +4542,9 @@ namespace tmv {
         { return subTriMatrix(i1,i2,istep); }
         TMV_DEPRECATED(uppertri_type OffDiag(int noff=1))
         { return offDiag(noff); }
-        TMV_DEPRECATED(real_type Real())
+        TMV_DEPRECATED(realpart_type Real())
         { return realPart(); }
-        TMV_DEPRECATED(real_type Imag())
+        TMV_DEPRECATED(realpart_type Imag())
         { return imagPart(); }
         TMV_DEPRECATED(uppertri_type View())
         { return view(); }
@@ -4087,14 +4571,15 @@ namespace tmv {
         inline bool isunit() const { return D == UnitDiag; }
         inline bool isconj() const { return false; }
 
-        inline T& ref(int i, int j)
-        { return itsm.get()[S==RowMajor ? i*itss + j : j*itss + i]; }
+        inline reference ref(int i, int j)
+        {
+            return TriRefHelper2<T,D>::makeRef(
+                i==j,
+                itsm.get()[S==RowMajor ? i*itss + j : j*itss + i]); 
+        }
 
         inline T cref(int i, int j) const 
-        { 
-            return i==j && D==UnitDiag ? T(1) : i>j ? T(0) :
-                itsm.get()[S==RowMajor ? i*itss + j : j*itss + i]; 
-        }
+        { return itsm.get()[S==RowMajor ? i*itss + j : j*itss + i]; }
 
     protected :
 
@@ -4104,8 +4589,8 @@ namespace tmv {
 
 #ifdef TMVFLDEBUG
     public :
-        const T*const _first;
-        const T*const _last;
+        const T* _first;
+        const T* _last;
     protected :
 #endif
 
@@ -4116,11 +4601,27 @@ namespace tmv {
             if (isunit()) return i<j; else return i<=j;
         }
 
+        template <IndexStyle I2>
+        friend void Swap(
+            UpperTriMatrix<T,D,S,I>& m1, UpperTriMatrix<T,D,S,I2>& m2)
+        {
+            TMVAssert(m1.size() == m2.size());
+            T* temp = m1.itsm.release();
+            m1.itsm.reset(m2.itsm.release());
+            m2.itsm.reset(temp);
+#ifdef TMVFLDEBUG
+            TMV_SWAP(m1._first,m2._first);
+            TMV_SWAP(m1._last,m2._last);
+#endif
+        }
+
     }; // UpperTriMatrix
 
     template <class T, DiagType D, StorageType S, IndexStyle I> 
     class LowerTriMatrix : public GenLowerTriMatrix<T>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef GenLowerTriMatrix<T> base;
@@ -4129,14 +4630,21 @@ namespace tmv {
         typedef ConstMatrixView<T,I> const_rec_type;
         typedef ConstUpperTriMatrixView<T,I> const_uppertri_type;
         typedef ConstLowerTriMatrixView<T,I> const_lowertri_type;
-        typedef ConstLowerTriMatrixView<RT,I> const_real_type;
+        typedef const_lowertri_type const_view_type;
+        typedef const_uppertri_type const_transpose_type;
+        typedef const_lowertri_type const_conjugate_type;
+        typedef const_uppertri_type const_adjoint_type;
+        typedef ConstLowerTriMatrixView<RT,I> const_realpart_type;
         typedef VectorView<T,I> vec_type;
         typedef MatrixView<T,I> rec_type;
         typedef UpperTriMatrixView<T,I> uppertri_type;
         typedef LowerTriMatrixView<T,I> lowertri_type;
-        typedef LowerTriMatrixView<RT,I> real_type;
-
-    public:
+        typedef lowertri_type view_type;
+        typedef uppertri_type transpose_type;
+        typedef lowertri_type conjugate_type;
+        typedef uppertri_type adjoint_type;
+        typedef LowerTriMatrixView<RT,I> realpart_type;
+        typedef typename TriRefHelper2<T,D>::reference reference;
 
         //
         // Constructors
@@ -4392,8 +4900,6 @@ namespace tmv {
         // Access
         //
 
-        typedef T& reference;
-
         inline T operator()(int i, int j) const
         {
             if (I == CStyle) {
@@ -4408,17 +4914,17 @@ namespace tmv {
             else { TMVAssert(okij(i,j)); return cref(i,j); }
         }
 
-        inline T& operator()(int i, int j) 
+        inline reference operator()(int i, int j) 
         { 
             if (I == CStyle) {
                 TMVAssert(i>=0 && i<int(size()));
                 TMVAssert(j>=0 && j<int(size()));
-                TMVAssert(okij(i,j));
+                TMVAssert(i>=j);
                 return ref(i,j);
             } else {
                 TMVAssert(i>0 && i<= int(size()));
                 TMVAssert(j>0 && j<= int(size()));
-                TMVAssert(okij(i-1,j-1));
+                TMVAssert(i>=j);
                 return ref(i-1,j-1);
             }
         }
@@ -4583,28 +5089,48 @@ namespace tmv {
         // subMatrix
         //
 
-        inline const_rec_type subMatrix(
+        inline const_rec_type cSubMatrix(
             int i1, int i2, int j1, int j2) const
         {
-            TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,1,1));
-            if (I==FortranStyle) { --i1; --j1; }
             return const_rec_type(
                 itsm.get()+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1,stepi(),stepj(),S,NonConj);
         }
 
         inline const_rec_type subMatrix(
+            int i1, int i2, int j1, int j2) const
+        {
+            TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,1,1));
+            if (I==FortranStyle) { --i1; --j1; }
+            return cSubMatrix(i1,i2,j1,j2);
+        }
+
+        inline const_rec_type cSubMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const
         {
             StorageType newstor = S==RowMajor ?
                 jstep == 1 ? RowMajor : NoMajor :
                 istep == 1 ? ColMajor : NoMajor;
-            TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,istep,jstep));
-            if (I==FortranStyle) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
             return const_rec_type(
                 itsm.get()+i1*stepi()+j1*stepj(),
                 (i2-i1)/istep, (j2-j1)/jstep, istep*stepi(), jstep*stepj(),
                 newstor,NonConj);
+        }
+
+        inline const_rec_type subMatrix(
+            int i1, int i2, int j1, int j2, int istep, int jstep) const
+        {
+            TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,istep,jstep));
+            if (I==FortranStyle) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
+            return cSubMatrix(i1,i2,j1,j2,istep,jstep);
+        }
+
+        inline const_vec_type cSubVector(
+            int i, int j, int istep, int jstep, int size) const
+        {
+            return const_vec_type(
+                itsm.get()+i*stepi()+j*stepj(),size,
+                istep*stepi()+jstep*stepj(),NonConj);
         }
 
         inline const_vec_type subVector(
@@ -4612,18 +5138,30 @@ namespace tmv {
         {
             TMVAssert(view().hasSubVector(i,j,istep,jstep,size));
             if (I==FortranStyle) { --i; --j; }
-            return const_vec_type(
-                itsm.get()+i*stepi()+j*stepj(),size,
-                istep*stepi()+jstep*stepj(),NonConj);
+            return cSubVector(i,j,istep,jstep,size);
+        }
+
+        inline const_lowertri_type cSubTriMatrix(int i1, int i2) const
+        {
+            return const_lowertri_type(
+                itsm.get()+i1*(stepi()+stepj()),
+                i2-i1,stepi(),stepj(),D,S,NonConj);
         }
 
         inline const_lowertri_type subTriMatrix(int i1, int i2) const
         {
             TMVAssert(view().hasSubTriMatrix(i1,i2,1));
             if (I==FortranStyle) { --i1; }
+            return cSubTriMatrix(i1,i2);
+        }
+
+        inline const_lowertri_type cSubTriMatrix(
+            int i1, int i2, int istep) const
+        {
             return const_lowertri_type(
                 itsm.get()+i1*(stepi()+stepj()),
-                i2-i1,stepi(),stepj(),D,S,NonConj);
+                (i2-i1)/istep,istep*stepi(),istep*stepj(),D,
+                istep==1 ? S : NoMajor, NonConj);
         }
 
         inline const_lowertri_type subTriMatrix(
@@ -4631,10 +5169,7 @@ namespace tmv {
         {
             TMVAssert(view().hasSubTriMatrix(i1,i2,istep));
             if (I==FortranStyle) { --i1; i2+=istep-1; }
-            return const_lowertri_type(
-                itsm.get()+i1*(stepi()+stepj()),
-                (i2-i1)/istep,istep*stepi(),istep*stepj(),D,
-                istep==1 ? S : NoMajor, NonConj);
+            return cSubTriMatrix(i1,i2,istep);
         }
 
         inline const_lowertri_type offDiag(int noff=1) const
@@ -4645,9 +5180,9 @@ namespace tmv {
                 stepi(),stepj(),NonUnitDiag,S,NonConj);
         }
 
-        inline const_real_type realPart() const
+        inline const_realpart_type realPart() const
         {
-            return const_real_type(
+            return const_realpart_type(
                 reinterpret_cast<RT*>(itsm.get()), size(),
                 isReal(T()) ? stepi() : 2*stepi(),
                 isReal(T()) ? stepj() : 2*stepj(),
@@ -4655,37 +5190,56 @@ namespace tmv {
             );
         }
 
-        inline const_real_type imagPart() const
+        inline const_realpart_type imagPart() const
         {
             TMVAssert(isComplex(T()));
             TMVAssert(!isunit());
-            return const_real_type(
+            return const_realpart_type(
                 reinterpret_cast<RT*>(itsm.get())+1, size(),
                 2*stepi(), 2*stepj(), NonUnitDiag, NoMajor, NonConj
             );
+        }
+
+        inline rec_type cSubMatrix(int i1, int i2, int j1, int j2) 
+        {
+            return rec_type(
+                itsm.get()+i1*stepi()+j1*stepj(),
+                i2-i1, j2-j1, stepi(),stepj(),S,NonConj TMV_FIRSTLAST );
         }
 
         inline rec_type subMatrix(int i1, int i2, int j1, int j2) 
         {
             TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,1,1));
             if (I==FortranStyle) { --i1; --j1; }
-            return rec_type(
-                itsm.get()+i1*stepi()+j1*stepj(),
-                i2-i1, j2-j1, stepi(),stepj(),S,NonConj TMV_FIRSTLAST );
+            return cSubMatrix(i1,i2,j1,j2);
         }
 
-        inline rec_type subMatrix(
+        inline rec_type cSubMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep)
         {
             StorageType newstor = S==RowMajor ?
                 jstep == 1 ? RowMajor : NoMajor :
                 istep == 1 ? ColMajor : NoMajor;
-            TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,istep,jstep));
-            if (I==FortranStyle) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
             return rec_type(
                 itsm.get()+i1*stepi()+j1*stepj(),
                 (i2-i1)/istep, (j2-j1)/jstep, istep*stepi(), jstep*stepj(),
                 newstor,NonConj TMV_FIRSTLAST );
+        }
+
+        inline rec_type subMatrix(
+            int i1, int i2, int j1, int j2, int istep, int jstep)
+        {
+            TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,istep,jstep));
+            if (I==FortranStyle) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
+            return cSubMatrix(i1,i2,j1,j2,istep,jstep);
+        }
+
+        inline vec_type cSubVector(
+            int i, int j, int istep, int jstep, int size)
+        {
+            return vec_type(
+                itsm.get()+i*stepi()+j*stepj(),size,
+                istep*stepi()+jstep*stepj(),NonConj TMV_FIRSTLAST );
         }
 
         inline vec_type subVector(
@@ -4693,28 +5247,36 @@ namespace tmv {
         {
             TMVAssert(view().hasSubVector(i,j,istep,jstep,size));
             if (I==FortranStyle) { --i; --j; }
-            return vec_type(
-                itsm.get()+i*stepi()+j*stepj(),size,
-                istep*stepi()+jstep*stepj(),NonConj TMV_FIRSTLAST );
+            return cSubVector(i,j,istep,jstep,size);
+        }
+
+        inline lowertri_type cSubTriMatrix(int i1, int i2)
+        {
+            return lowertri_type(
+                itsm.get()+i1*(stepi()+stepj()),
+                i2-i1,stepi(),stepj(),D,S,NonConj TMV_FIRSTLAST);
         }
 
         inline lowertri_type subTriMatrix(int i1, int i2)
         {
             TMVAssert(view().hasSubTriMatrix(i1,i2,1));
             if (I==FortranStyle) { --i1; }
+            return cSubTriMatrix(i1,i2);
+        }
+
+        inline lowertri_type cSubTriMatrix(int i1, int i2, int istep) 
+        {
             return lowertri_type(
                 itsm.get()+i1*(stepi()+stepj()),
-                i2-i1,stepi(),stepj(),D,S,NonConj TMV_FIRSTLAST);
+                (i2-i1)/istep,istep*stepi(),istep*stepj(),D,
+                istep==1 ? S : NoMajor,NonConj TMV_FIRSTLAST);
         }
 
         inline lowertri_type subTriMatrix(int i1, int i2, int istep) 
         {
             TMVAssert(view().hasSubTriMatrix(i1,i2,istep));
             if (I==FortranStyle) { --i1; i2+=istep-1; }
-            return lowertri_type(
-                itsm.get()+i1*(stepi()+stepj()),
-                (i2-i1)/istep,istep*stepi(),istep*stepj(),D,
-                istep==1 ? S : NoMajor,NonConj TMV_FIRSTLAST);
+            return cSubTriMatrix(i1,i2,istep);
         }
 
         inline lowertri_type offDiag(int noff=1)
@@ -4725,9 +5287,9 @@ namespace tmv {
                 stepi(),stepj(),NonUnitDiag,S,NonConj TMV_FIRSTLAST);
         }
 
-        inline real_type realPart() 
+        inline realpart_type realPart() 
         {
-            return real_type(
+            return realpart_type(
                 reinterpret_cast<RT*>(itsm.get()), size(),
                 isReal(T()) ? stepi() : 2*stepi(),
                 isReal(T()) ? stepj() : 2*stepj(),
@@ -4739,11 +5301,11 @@ namespace tmv {
             );
         }
 
-        inline real_type imagPart()
+        inline realpart_type imagPart()
         {
             TMVAssert(isComplex(T()));
             TMVAssert(!isunit());
-            return real_type(
+            return realpart_type(
                 reinterpret_cast<RT*>(itsm.get())+1,
                 size(), 2*stepi(), 2*stepj(), NonUnitDiag, NoMajor, NonConj
 #ifdef TMVFLDEBUG
@@ -4834,9 +5396,9 @@ namespace tmv {
         { return subTriMatrix(i1,i2,istep); }
         TMV_DEPRECATED(const_lowertri_type OffDiag(int noff=1) const)
         { return offDiag(noff); }
-        TMV_DEPRECATED(const_real_type Real() const)
+        TMV_DEPRECATED(const_realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(const_real_type Imag() const)
+        TMV_DEPRECATED(const_realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(const_lowertri_type View() const)
         { return view(); }
@@ -4862,9 +5424,9 @@ namespace tmv {
         { return subTriMatrix(i1,i2,istep); }
         TMV_DEPRECATED(lowertri_type OffDiag(int noff=1))
         { return offDiag(noff); }
-        TMV_DEPRECATED(real_type Real())
+        TMV_DEPRECATED(realpart_type Real())
         { return realPart(); }
-        TMV_DEPRECATED(real_type Imag())
+        TMV_DEPRECATED(realpart_type Imag())
         { return imagPart(); }
         TMV_DEPRECATED(lowertri_type View())
         { return view(); }
@@ -4891,14 +5453,15 @@ namespace tmv {
         inline bool isunit() const { return D == UnitDiag; }
         inline bool isconj() const { return false; }
 
-        inline T& ref(int i, int j)
-        { return itsm.get()[S==RowMajor ? i*itss + j : j*itss + i]; }
+        inline reference ref(int i, int j)
+        { 
+            return TriRefHelper2<T,D>::makeRef(
+                i==j,
+                itsm.get()[S==RowMajor ? i*itss + j : j*itss + i]); 
+        }
 
         inline T cref(int i, int j) const 
-        {
-            return (i==j && D==UnitDiag) ? T(1) : (i<j) ? T(0) :
-                itsm.get()[S==RowMajor ? i*itss + j : j*itss + i]; 
-        }
+        { return itsm.get()[S==RowMajor ? i*itss + j : j*itss + i]; }
 
     protected :
 
@@ -4908,8 +5471,8 @@ namespace tmv {
 
 #ifdef TMVFLDEBUG
     public:
-        const T*const _first;
-        const T*const _last;
+        const T* _first;
+        const T* _last;
     protected :
 #endif
 
@@ -4920,13 +5483,27 @@ namespace tmv {
             return isunit() ? i>j : i>=j;
         }
 
+        template <IndexStyle I2>
+        friend void Swap(
+            LowerTriMatrix<T,D,S,I>& m1, LowerTriMatrix<T,D,S,I2>& m2)
+        {
+            TMVAssert(m1.size() == m2.size());
+            T* temp = m1.itsm.release();
+            m1.itsm.reset(m2.itsm.release());
+            m2.itsm.reset(temp);
+#ifdef TMVFLDEBUG
+            TMV_SWAP(m1._first,m2._first);
+            TMV_SWAP(m1._last,m2._last);
+#endif
+        }
+
     }; // LowerTriMatrix
 
     //-------------------------------------------------------------------------
 
     //
     // Special Creators: 
-    //   UpperTriMatrixViewOf(T* m, n, S, D)
+    //   UpperTriMatrixViewOf(T* m, n, S)
     //   LowerTriMatrixViewOf(m)
     //   UnitTriMatrixViewOf(t)
     //
@@ -4984,6 +5561,62 @@ namespace tmv {
         else
             return LowerTriMatrixView<T>(
                 vv,size,1,size,dt,ColMajor,NonConj 
+                TMV_FIRSTLAST1(vv,vv+size*size));
+    }
+
+    template <class T> 
+    inline ConstUpperTriMatrixView<T> UnitUpperTriMatrixViewOf(
+        const T* vv, size_t size, StorageType stor)
+    {
+        TMVAssert(stor == RowMajor || stor == ColMajor);
+        if (stor == RowMajor)
+            return ConstUpperTriMatrixView<T>(
+                vv,size,size,1,UnitDiag,RowMajor,NonConj);
+        else
+            return ConstUpperTriMatrixView<T>(
+                vv,size,1,size,UnitDiag,ColMajor,NonConj);
+    }
+
+    template <class T> 
+    inline UpperTriMatrixView<T> UnitUpperTriMatrixViewOf(
+        T* vv, size_t size, StorageType stor)
+    {
+        TMVAssert(stor == RowMajor || stor == ColMajor);
+        if (stor == RowMajor)
+            return UpperTriMatrixView<T>(
+                vv,size,size,1,UnitDiag,RowMajor,NonConj 
+                TMV_FIRSTLAST1(vv,vv+size*size));
+        else
+            return UpperTriMatrixView<T>(
+                vv,size,1,size,UnitDiag,ColMajor,NonConj 
+                TMV_FIRSTLAST1(vv,vv+size*size));
+    }
+
+    template <class T> 
+    inline ConstLowerTriMatrixView<T> UnitLowerTriMatrixViewOf(
+        const T* vv, size_t size, StorageType stor)
+    {
+        TMVAssert(stor == RowMajor || stor == ColMajor);
+        if (stor == RowMajor)
+            return ConstLowerTriMatrixView<T>(
+                vv,size,size,1,UnitDiag,RowMajor,NonConj);
+        else
+            return ConstLowerTriMatrixView<T>(
+                vv,size,1,size,UnitDiag,ColMajor,NonConj);
+    }
+
+    template <class T> 
+    inline LowerTriMatrixView<T> UnitLowerTriMatrixViewOf(
+        T* vv, size_t size, StorageType stor)
+    {
+        TMVAssert(stor == RowMajor || stor == ColMajor);
+        if (stor == RowMajor)
+            return LowerTriMatrixView<T>(
+                vv,size,size,1,UnitDiag,RowMajor,NonConj 
+                TMV_FIRSTLAST1(vv,vv+size*size));
+        else
+            return LowerTriMatrixView<T>(
+                vv,size,1,size,UnitDiag,ColMajor,NonConj 
                 TMV_FIRSTLAST1(vv,vv+size*size));
     }
 

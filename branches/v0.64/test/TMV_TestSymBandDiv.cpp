@@ -310,12 +310,12 @@ void TestAllSymBandDiv()
     TestSymBandDiv<T>(tmv::SV,Sing);
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestAllSymBandDiv<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestAllSymBandDiv<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestAllSymBandDiv<long double>();
 #endif

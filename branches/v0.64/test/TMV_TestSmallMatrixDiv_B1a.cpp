@@ -23,15 +23,12 @@ static void TestSmallNonSquareDiv_B1a()
     tmv::SmallMatrix<T,6,N,stor> a1 = m;
     tmv::SmallMatrix<std::complex<T>,6,N,stor> c1 = a1 * std::complex<T>(1,2);
 
-    tmv::SmallMatrix<T,N,6,stor> a0;
-    tmv::SmallMatrix<std::complex<T>,N,6,stor> c0;
-
-    TestMatrixDivArith3a<T>(tmv::QR,a0,c0,a1,c1,"NonSquare"); 
+    TestMatrixDivArith3a<T>(tmv::QR,a1,c1,"NonSquare"); 
 #ifdef XTEST
     tmv::SmallMatrix<T,6,N,stor,tmv::FortranStyle> a1f = a1;
     tmv::SmallMatrix<std::complex<T>,6,N,stor,tmv::FortranStyle> c1f = c1;
 
-    TestMatrixDivArith3a<T>(tmv::QR,a0,c0,a1f,c1f,"NonSquare"); 
+    TestMatrixDivArith3a<T>(tmv::QR,a1f,c1f,"NonSquare"); 
 #endif
 }
 
@@ -52,12 +49,12 @@ void TestSmallMatrixDiv_B1a()
 #endif
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSmallMatrixDiv_B1a<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSmallMatrixDiv_B1a<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSmallMatrixDiv_B1a<long double>();
 #endif

@@ -84,15 +84,15 @@ void TestSmallMatrix_Sub()
     DoTestSmallMatrix_Sub<T,15,10,tmv::ColMajor>();
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSmallMatrix_Sub<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSmallMatrix_Sub<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSmallMatrix_Sub<long double>();
 #endif
-#ifdef INST_INT
+#ifdef TEST_INT
 template void TestSmallMatrix_Sub<int>();
 #endif

@@ -34,10 +34,13 @@
 #include "tmv/TMV_BandLUD.h"
 #include "TMV_BandLUDiv.h"
 #include "tmv/TMV_BandMatrix.h"
+#include "tmv/TMV_Permutation.h"
 #include "tmv/TMV_TriMatrix.h"
 #include "tmv/TMV_DiagMatrix.h"
 #include "tmv/TMV_MatrixArith.h"
+#include "tmv/TMV_PermutationArith.h"
 #include "tmv/TMV_TriMatrixArith.h"
+#include "tmv/TMV_BandMatrixArith.h"
 #include <ostream>
 
 namespace tmv {
@@ -54,7 +57,7 @@ namespace tmv {
         auto_array<T> Aptr1;
         T* Aptr;
         BandMatrixView<T> LUx;
-        auto_array<int> P;
+        Permutation P;
         mutable TMV_RealType(T) logdet;
         mutable T signdet;
         mutable bool donedet;
@@ -98,7 +101,7 @@ namespace tmv {
                  ((A.isrm() && istrans) || (A.iscm() && !istrans) || 
                   (A.isdm() && A.nlo()==1 && A.nhi()==1)))),
         Aptr1(APTR1), Aptr(APTR), LUx(LUX),
-        P(new int[A.colsize()]), logdet(0), signdet(1), donedet(false) {}
+        P(A.colsize()), logdet(0), signdet(1), donedet(false) {}
 
 #undef LUX
 #undef APTR
@@ -145,9 +148,7 @@ namespace tmv {
             int Anhi = pimpl->istrans ? A.nlo() : A.nhi();
             if (Anhi < pimpl->LUx.nhi())
                 pimpl->LUx.diagRange(Anhi+1,pimpl->LUx.nhi()+1).setZero();
-            LU_Decompose(pimpl->LUx,pimpl->P.get(),pimpl->signdet,Anhi);
-        } else {
-            pimpl->P.get()[0] = 1; // A tag to indicate that P is not set yet.
+            LU_Decompose(pimpl->LUx,pimpl->P,Anhi);
         }
     }
 
@@ -166,7 +167,7 @@ namespace tmv {
         const AssignableToBandMatrix<T>& A) :
         istrans(A.nhi()<A.nlo()), inplace(false),
         Aptr1(APTR1), Aptr(APTR), LUx(LUX),
-        P(new int[A.colsize()]), logdet(0), signdet(1), donedet(false) {}
+        P(A.colsize()), logdet(0), signdet(1), donedet(false) {}
 
 #undef LUX
 #undef APTR
@@ -188,9 +189,7 @@ namespace tmv {
             int Anhi = pimpl->istrans ? A.nlo() : A.nhi();
             if (Anhi < pimpl->LUx.nhi())
                 pimpl->LUx.diagRange(Anhi+1,pimpl->LUx.nhi()+1).setZero();
-            LU_Decompose(pimpl->LUx,pimpl->P.get(),pimpl->signdet,Anhi);
-        } else {
-            pimpl->P.get()[0] = 1; // A tag to indicate that P is not set yet.
+            LU_Decompose(pimpl->LUx,pimpl->P,Anhi);
         }
     }
 
@@ -200,15 +199,15 @@ namespace tmv {
     template <class T> template <class T1> 
     void BandLUDiv<T>::doLDivEq(const MatrixView<T1>& m) const
     {
-        if (pimpl->istrans) LU_RDivEq(pimpl->LUx,pimpl->P.get(),m.transpose());
-        else LU_LDivEq(pimpl->LUx,pimpl->P.get(),m);
+        if (pimpl->istrans) LU_RDivEq(pimpl->LUx,pimpl->P.getValues(),m.transpose());
+        else LU_LDivEq(pimpl->LUx,pimpl->P.getValues(),m);
     }
 
     template <class T> template <class T1> 
     void BandLUDiv<T>::doRDivEq(const MatrixView<T1>& m) const
     {
-        if (pimpl->istrans) LU_LDivEq(pimpl->LUx,pimpl->P.get(),m.transpose());
-        else LU_RDivEq(pimpl->LUx,pimpl->P.get(),m);
+        if (pimpl->istrans) LU_LDivEq(pimpl->LUx,pimpl->P.getValues(),m.transpose());
+        else LU_RDivEq(pimpl->LUx,pimpl->P.getValues(),m);
     }
 
     template <class T> template <class T1, class T2> 
@@ -216,8 +215,8 @@ namespace tmv {
         const GenMatrix<T1>& m, const MatrixView<T2>& x) const
     {
         if (pimpl->istrans) 
-            LU_RDivEq(pimpl->LUx,pimpl->P.get(),(x=m).transpose());
-        else LU_LDivEq(pimpl->LUx,pimpl->P.get(),x=m);
+            LU_RDivEq(pimpl->LUx,pimpl->P.getValues(),(x=m).transpose());
+        else LU_LDivEq(pimpl->LUx,pimpl->P.getValues(),x=m);
     }
 
     template <class T> template <class T1, class T2> 
@@ -225,8 +224,8 @@ namespace tmv {
         const GenMatrix<T1>& m, const MatrixView<T2>& x) const
     {
         if (pimpl->istrans) 
-            LU_LDivEq(pimpl->LUx,pimpl->P.get(),(x=m).transpose());
-        else LU_RDivEq(pimpl->LUx,pimpl->P.get(),x=m);
+            LU_LDivEq(pimpl->LUx,pimpl->P.getValues(),(x=m).transpose());
+        else LU_RDivEq(pimpl->LUx,pimpl->P.getValues(),x=m);
     }
 
     template <class T> T BandLUDiv<T>::det() const
@@ -234,12 +233,12 @@ namespace tmv {
         if (!pimpl->donedet) {
             T s;
             pimpl->logdet = DiagMatrixViewOf(pimpl->LUx.diag()).logDet(&s);
-            pimpl->signdet *= s;
+            pimpl->signdet = T(pimpl->P.det()) * s;
             pimpl->donedet = true;
         }         
         if (pimpl->signdet == T(0)) return T(0);
         else return pimpl->signdet * TMV_EXP(pimpl->logdet);  
-    }                  
+    }
 
     template <class T> 
     TMV_RealType(T) BandLUDiv<T>::logDet(T* sign) const
@@ -247,7 +246,7 @@ namespace tmv {
         if (!pimpl->donedet) {
             T s;
             pimpl->logdet = DiagMatrixViewOf(pimpl->LUx.diag()).logDet(&s);
-            pimpl->signdet *= s;
+            pimpl->signdet = T(pimpl->P.det()) * s;
             pimpl->donedet = true;
         }
         if (sign) *sign = pimpl->signdet;
@@ -258,9 +257,9 @@ namespace tmv {
     void BandLUDiv<T>::doMakeInverse(const MatrixView<T1>& minv) const
     {
         if (pimpl->istrans)
-            LU_Inverse(pimpl->LUx,pimpl->P.get(),minv.transpose());
+            LU_Inverse(pimpl->LUx,pimpl->P.getValues(),minv.transpose());
         else
-            LU_Inverse(pimpl->LUx,pimpl->P.get(),minv);
+            LU_Inverse(pimpl->LUx,pimpl->P.getValues(),minv);
     }
 
     template <class T> 
@@ -275,15 +274,15 @@ namespace tmv {
             // ata /= L.transpose()
             // ata = LT^-1 ata
             // ataT = ataT L^-1
-            LU_PackedPL_RDivEq(pimpl->LUx,pimpl->P.get(),ata.transpose());
+            LU_PackedPL_RDivEq(pimpl->LUx,pimpl->P.getValues(),ata.transpose());
             // ata %= L.conjugate()
             // ata* = ata* L^-1
-            LU_PackedPL_RDivEq(pimpl->LUx,pimpl->P.get(),ata.conjugate());
+            LU_PackedPL_RDivEq(pimpl->LUx,pimpl->P.getValues(),ata.conjugate());
         } else {
             LowerTriMatrixView<T> linv = ata.lowerTri(UnitDiag);
             // linv = L.inverse()
             ata.setToIdentity();
-            LU_PackedPL_LDivEq(pimpl->LUx,pimpl->P.get(),ata);
+            LU_PackedPL_LDivEq(pimpl->LUx,pimpl->P.getValues(),ata);
             ata = linv * linv.adjoint();
             ConstBandMatrixView<T> U = getU();
             // ata /= U;
@@ -311,7 +310,7 @@ namespace tmv {
     LowerTriMatrix<T,UnitDiag> BandLUDiv<T>::getL() const
     {
         LowerTriMatrix<T,UnitDiag> L(pimpl->LUx.colsize());
-        LU_PackedPL_Unpack(pimpl->LUx,pimpl->P.get(),L.view());
+        LU_PackedPL_Unpack(pimpl->LUx,pimpl->P.getValues(),L.view());
         return L;
     }
 
@@ -320,16 +319,8 @@ namespace tmv {
     { return pimpl->LUx; }
 
     template <class T> 
-    const int* BandLUDiv<T>::getP() const
-    {
-        if (pimpl->LUx.nlo() == 0 && pimpl->LUx.colsize() > 0 && 
-            pimpl->P.get()[0] == 1) {
-            // Then P hasn't been set up yet.
-            const int N = pimpl->LUx.colsize();
-            for(int i=0;i<N;++i) pimpl->P.get()[i] = i;
-        }
-        return pimpl->P.get();
-    }
+    const Permutation& BandLUDiv<T>::getP() const
+    { return pimpl->P; }
 
     template <class T> 
     bool BandLUDiv<T>::checkDecomp(
@@ -343,8 +334,7 @@ namespace tmv {
             *fout << "L = "<<getL()<<std::endl;
             *fout << "U = "<<getU()<<std::endl;
         }
-        Matrix<T> lu = getL() * Matrix<T>(getU());
-        lu.reversePermuteRows(getP());
+        Matrix<T> lu = getP() * getL() * getU();
         TMV_RealType(T) nm = Norm(
             lu-(pimpl->istrans ? mm.transpose() : mm.view()));
         nm /= Norm(getL())*Norm(getU());

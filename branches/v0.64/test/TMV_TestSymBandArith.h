@@ -1,3 +1,15 @@
+
+template <class T>
+inline void CopyBackM(
+    const tmv::BandMatrix<std::complex<T> >& m0,
+    tmv::SymBandMatrixView<std::complex<T> >& m)
+{ 
+    if (m.issym()) m = SymBandMatrixViewOf(m0,m.uplo()); 
+    else m = HermBandMatrixViewOf(m0,m.uplo());
+}
+
+
+
 template <class T> inline void MakeSymBandList(
     std::vector<tmv::SymBandMatrixView<T> >& s,
     std::vector<tmv::SymBandMatrixView<std::complex<T> > >& cs,

@@ -1,4 +1,6 @@
 
+#include "tmv/TMV_Base.h"
+
 #define NOVIEWS
 #define NOSV
 #define USETEMP

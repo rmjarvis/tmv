@@ -2,8 +2,6 @@
 #define CT std::complex<T>
 
 #define Def1(RT,T,Ref) \
-  template RT TMV_Epsilon<T >(); \
-  template RT TMV_SqrtEpsilon<T >(); \
   template bool GenVector<T >::hasSubVector(int i1, int i2, int istep) const; \
   template bool ConstVectorView<T,FortranStyle>::hasSubVector( \
       int i1, int i2, int istep) const; \

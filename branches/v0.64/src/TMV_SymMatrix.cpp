@@ -551,11 +551,36 @@ namespace tmv {
     // Norms
     //
 
-    template <class T> RT GenSymMatrix<T>::normSq(const RT scale) const
+    template <class T> 
+    T GenSymMatrix<T>::sumElements() const
     {
-        RT ans = diag().normSq(scale);
-        if (size() > 1) ans += RT(2) * upperTri().offDiag().normSq(scale);
-        return ans;
+        T sum = diag().sumElements();
+        if (size() > 1) {
+            T temp = upperTri().offDiag().sumElements();
+            if (issym()) {
+                sum += RT(2) * temp;
+            } else {
+                // temp + conj(temp) = 2*real(temp)
+                sum += RT(2) * TMV_REAL(temp);
+            }
+        }
+        return sum;
+    }
+
+    template <class T> 
+    RT GenSymMatrix<T>::sumAbsElements() const
+    {
+        RT sum = diag().sumAbsElements();
+        if (size() > 1) sum += RT(2) * upperTri().offDiag().sumAbsElements();
+        return sum;
+    }
+
+    template <class T> 
+    RT GenSymMatrix<T>::normSq(const RT scale) const
+    {
+        RT sum = diag().normSq(scale);
+        if (size() > 1) sum += RT(2) * upperTri().offDiag().normSq(scale);
+        return sum;
     }
 
     template <class T> 

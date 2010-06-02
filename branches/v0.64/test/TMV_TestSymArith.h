@@ -1,4 +1,15 @@
-template <class T> inline void MakeSymList(
+
+template <class T>
+inline void CopyBackM(
+    const tmv::Matrix<std::complex<T> >& m0,
+    tmv::SymMatrixView<std::complex<T> >& m)
+{ 
+    if (m.issym()) m = SymMatrixViewOf(m0,m.uplo()); 
+    else m = HermMatrixViewOf(m0,m.uplo());
+}
+
+template <class T> 
+inline void MakeSymList(
     std::vector<tmv::SymMatrixView<T> >& s,
     std::vector<tmv::SymMatrixView<std::complex<T> > >& cs,
     std::vector<tmv::BaseMatrix<T>*>& B,

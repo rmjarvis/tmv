@@ -30,33 +30,32 @@ void TestSymDiv_C1(tmv::DivType dt, PosDefCode pdc)
 
     tmv::DiagMatrix<T> d(a1);
     tmv::DiagMatrix<std::complex<T> > cd(ca1);
-    tmv::DiagMatrix<T> dx = d;
-    tmv::DiagMatrix<std::complex<T> > cdx = cd;
+    tmv::DiagMatrixView<T> dv = d.view();
+    tmv::DiagMatrixView<std::complex<T> > cdv = cd.view();
 
     for(size_t i=START;i<s.size();i++) {
         if (showstartdone)
             std::cout<<"Start loop: i = "<<i<<", si = "<<tmv::TMV_Text(s[i])<<
                 "  "<<s[i]<<std::endl;
-        const tmv::SymMatrixView<T>& si = s[i];
-        const tmv::SymMatrixView<std::complex<T> >& csi = cs[i];
+        tmv::SymMatrixView<T> si = s[i];
+        tmv::SymMatrixView<std::complex<T> > csi = cs[i];
         if (dt == tmv::CH && csi.issym()) continue;
 
         si.saveDiv();
         csi.saveDiv();
 
-        TestMatrixDivArith1<T>(dt,dx,cdx,si,d.view(),csi,cd.view(),
-                               "DiagMatrix/Sym");
+        TestMatrixDivArith1<T>(dt,si,dv,csi,cdv,"DiagMatrix/Sym");
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
     for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSymDiv_C1<double>(tmv::DivType dt, PosDefCode pc);
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSymDiv_C1<float>(tmv::DivType dt, PosDefCode pc);
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSymDiv_C1<long double>(tmv::DivType dt, PosDefCode pc);
 #endif

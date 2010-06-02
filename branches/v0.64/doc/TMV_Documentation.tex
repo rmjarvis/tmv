@@ -40,7 +40,9 @@
 \usepackage{times}
 %\renewcommand{\tt}[1]{{\texttt {#1}}}
 %\renewcommand{\tt}[1]{\rm #1}
-\newcommand{\tmvversion}{0.63}
+\newcommand{\tmvversion}{0.64}
+\newcommand{\tmvmajorversion}{0}
+\newcommand{\tmvminorversion}{64}
 \newcommand{\mygroupx}{tmv-discuss@googlegroups.com}
 \newcommand{\mygroup}{\href{mailto:\mygroupx}{\mygroupx}}
 \newcommand{\myissuesx}{http://code.google.com/p/tmv-cpp/issues}
@@ -84,7 +86,7 @@ keywordstyle=\color{Green},
 
 \title{Template Matrix/Vector Library for C++ \\ User Manual \\ Version \tmvversion}
 \author{Mike Jarvis}
-\date{January 31, 2010}
+\date{June 1, 2010}
 \maketitle
 
 \tableofcontents
@@ -105,7 +107,7 @@ there may still be a few lurking in there.  That means the code should definitel
 a beta-type release.  Hence the ``0.'' version number.  I'm also still adding functionality,
 so there may be interface changes from one version to the next if I decide I 
 want to do something a different way.  Just be warned.  Any such changes will be 
-mentioned in \S\ref{history} of subsequent releases.
+mentioned in \S\ref{History} of subsequent releases.
 
 \subsection{Features of TMV}
 
@@ -419,7 +421,7 @@ exp(T x)
 log(T x)
 \end{tmvcode}
 \index{User-defined types}
-need to be defined appropriately, where \tt{T} is your type name.  See \S\ref{install} for details about
+need to be defined appropriately, where \tt{T} is your type name.  See \S\ref{Install} for details about
 compiling the library for types other than \tt{double} and \tt{float}.
 
 Some functions in this documentation will return a real value or require a real argument, 
@@ -473,6 +475,7 @@ declarations.
 \newpage
 \section{Vectors}
 \index{Vector}
+\label{Vector}
 
 The \tt{Vector} class is our mathematical vector.  Not to be confused with
 the standard template library's \tt{vector} class.  
@@ -487,7 +490,7 @@ modify the data are actually defined in \tt{GenVector} rather than \tt{Vector}, 
 some routines are overridden in \tt{Vector} for speed reasons.  
 
 The other classes that inherit from \tt{GenVector} are \tt{VectorView}, 
-\tt{ConstVectorView} (both described in more detail below - see \S\ref{VViews}), and
+\tt{ConstVectorView} (both described in more detail below - see \S\ref{Vector_Views}), and
 \tt{VectorComposite}, which is the base class for all arithmetic operations that
 return a (logical) \tt{Vector}.  This means that any of these other objects can be used
 any time a \tt{Vector} can be used in a non-assignable capacity.  For example,
@@ -529,6 +532,7 @@ as a \tt{Vector<T,FortranStyle>}.
 
 \subsection{Constructors}
 \index{Vector!constructors}
+\label{Vector_Constructors}
 
 Here, \tt{T} is used to represent the data type of the elements of the \tt{Vector}
 (e.g. \tt{double}, \tt{complex<double>}, \tt{int}, etc.) and \tt{index} is either
@@ -588,7 +592,7 @@ tmv::ConstVectorView<T,index> v =
       tmv::VectorViewOf(const T* vv, size_t n, int step = 1)
 \end{tmvcode}
 \index{Vector!view of raw memory}
-Makes a \tt{VectorView} (see \S\ref{VViews} below) which refers to the exact
+Makes a \tt{VectorView} (see \S\ref{Vector_Views} below) which refers to the exact
 elements of \tt{vv}, not copying them to new storage.  The parameter \tt{n}
 is the number of values to include in the view.
 The optional \tt{step} parameter allows a non-unit spacing between 
@@ -598,6 +602,7 @@ successive vector elements in memory.
 
 \subsection{Initialization}
 \index{Vector!initialization}
+\label{Vector_Initialization}
 
 There are a number of ways to initialize the elements of a \tt{Vector}:
 
@@ -622,7 +627,7 @@ in my opinion would be to put the list initializer as a parameter in the constru
 tmv::Vector<double> v(5, 
     { 1.2, 3.2, -9.2, -1, 3.3 }); // Error - invalid
 \end{tmvcode}
-Unfortunately, there is not valid C++ syntax\footnote{
+Unfortunately, this is not valid C++ syntax\footnote{
 Apparently they are working on this shortcoming as part of the new so-called C++0x 
 standards update.}.
 One way to get around this is to use:
@@ -665,7 +670,7 @@ initialization at construction.  And finally, \tt{v} can be a \tt{VectorView}, n
 
 \subsection{Access}
 \index{Vector!access methods}
-\label{vectoraccess}
+\label{Vector_Access}
 
 \begin{itemize}
 \item
@@ -739,7 +744,7 @@ etc. instead.
 \subsection{Views}
 \index{Vector!VectorView}
 \index{Vector!views}
-\label{VViews}
+\label{Vector_Views}
 
 A \tt{VectorView<T>} object refers to the elements of some other object, such as a regular
 \tt{Vector<T>} or \tt{Matrix<T>},
@@ -860,6 +865,15 @@ or even a \tt{VectorComposite}.
 
 \item
 \begin{tmvcode}
+v.cView()
+v.fView()
+\end{tmvcode}
+\index{Vector!methods!cView}
+\index{Vector!methods!vView}
+Like \tt{view()} but forces the result to have C- or Fortran-style indexing respectively.
+
+\item
+\begin{tmvcode}
 v.realPart()
 v.imagPart()
 \end{tmvcode}
@@ -877,7 +891,7 @@ tmv::VectorView<double> vi = v.imagPart();
 
 \subsection{Functions of a vector }
 \index{Vector!functions of}
-\label{vectorfunctions}
+\label{Vector_Functions}
 
 Functions that do not modify the \tt{Vector} are defined in 
 \tt{GenVector}, and so can be used for any type derived from \tt{GenVector}:
@@ -1100,43 +1114,59 @@ The last two work the same way, but do the swaps in the opposite order.
 Note: The indices listed in a permutation array (\tt{p}) always use 
 the C-style convention, even if \tt{v} uses Fortran-style indexing.
 
+These functions should not generally be needed in normal usage, since we now 
+have a \tt{Permutation} class to encapsulate the most common of these kinds of 
+operations.  See \S\ref{Permutation}
+
 \item
 \begin{tmvcode}
-v.sort(int* p=0, tmv::ADType ad=tmv::ASCEND, 
+v.sort(Permutation& p, tmv::ADType ad=tmv::ASCEND, 
+      tmv::COMPType comp=tmv::REAL_COMP)
+v.sort(tmv::ADType ad=tmv::ASCEND, 
       tmv::COMPType comp=tmv::REAL_COMP)
 \end{tmvcode}
 \index{Vector!methods!sort}
-Sorts the \tt{Vector~v}, returning the swaps required in the array \tt{p}.
-If you do not care about the swaps, you can set \tt{p = 0}.
-Note: the returned permutation array, \tt{p}, uses the C-style indexing convention
-even if \tt{v} uses Fortran-style indexing.
+\index{Permutation|Vector sort}
+Sorts the vector \tt{v}, optionally returning the corresponding permutation in \tt{p}.
+If you do not care about the permutation, the second form is slightly more efficient.
 
-The second parameter, \tt{ad}, determines whether the sorted \tt{Vector} 
+The next parameter, \tt{ad}, determines whether the sorted \tt{Vector} 
 will have its elements in ascending or descending order.  The possible values
-are \tt{ASCEND} and \tt{DESCEND}. 
+are \tt{ASCEND} and \tt{DESCEND}.  The default if omitted is to sort
+in ascending order.
 
-The third parameter, \tt{comp}, determines what component of the
+The final parameter, \tt{comp}, determines what component of the
 elements to use for the sorting.  This is especially relevant if T is complex, 
 since complex values are not intrinsically sortable.
 The possible values are
 \tt{REAL\_COMP}, \tt{ABS\_COMP},
 \tt{IMAG\_COMP}, and \tt{ARG\_COMP}.
-Only the first two make sense for non-complex \tt{Vector}s.  
+Only the first two make sense for non-complex vectors.  The default if
+omitted is to sort the real values of the elements.
 
 \item
 \begin{tmvcode}
 Swap(v1,v2)
 \end{tmvcode}
 \index{Vector!functions of!Swap}
-Swap the corresponding elements of \tt{v1} and \tt{v2}.  Note that this does physically
-swap the data elements, not just some pointers to the data.  That's because this function
-is mostly called on views into larger data fields: for example, swapping two rows of a 
-\tt{Matrix}.  In any case, it always takes $O(N)$ time, not $O(1)$.
+Swap the corresponding elements of \tt{v1} and \tt{v2}.  Note that if v1 and/or v2 are
+views, this does physically
+swap the data elements, not just some pointers to the data.  This is the intuitive 
+meaning of a statement like
+\begin{tmvcode}
+Swap(m.row(4),m.row(5));
+\end{tmvcode}
+Clearly what is desired by that is to swap the actual values, and this is what we actually do.
+
+However, if \tt{v1} and \tt{v2} are both \tt{tmv::Vector} objects, rather than views, then the 
+swap efficiently swaps the pointers to the data, and so takes $O(1)$ time, rather than
+$O(N)$.
 
 \end{itemize}
 
 \subsection{Arithmetic}
 \index{Vector!arithmetic}
+\label{Vector_Arithmetic}
 
 \subsubsection{Operators}
 
@@ -1244,6 +1274,7 @@ how complicated the equation is.
 
 \subsection{Input/Output}
 \index{Vector!input/output}
+\label{Vector_IO}
 
 The simplest output is the usual:
 \begin{tmvcode}
@@ -1260,14 +1291,14 @@ The same format can be read back in one of two ways:
 \begin{tmvcode}
 tmv::Vector<T> v(n);
 is >> v;
-std::auto_ptr<tmv::Vector<T> > pv;
-is >> pv;
+std::auto_ptr<tmv::Vector<T> > vptr;
+is >> vptr;
 \end{tmvcode}
 For the first version, the \tt{Vector} must already be declared, which 
 requires knowing how big it needs to be.  If the input \tt{Vector} does not
 match in size, an exception of type \tt{tmv::ReadError} is thrown.
 The second version allows you to automatically get the size from the input.  
-The \tt{Vector} pointed to by \tt{pv}
+The \tt{Vector} pointed to by \tt{vptr}
 will be created according to whatever size the input \tt{Vector} is.
 \index{Exceptions!ReadError}
 
@@ -1286,13 +1317,14 @@ but without requiring the temporary \tt{Vector}.
 \newpage
 \section{Dense Rectangular Matrices}
 \index{Matrix}
+\label{Matrix}
 
 The \tt{Matrix} class is our dense matrix class.  It inherits from \tt{GenMatrix},
 which has the definitions of all the methods that 
 do not modify the \tt{Matrix}.
 
 The other classes that inherit from \tt{GenMatrix} are \tt{ConstMatrixView},
-\tt{MatrixView} (see \S\ref{MViews} below), and \tt{MatrixComposite}, which 
+\tt{MatrixView} (see \S\ref{Matrix_Views} below), and \tt{MatrixComposite}, which 
 is the base class for the various arithmetic operations that return a 
 (logical) \tt{Matrix}.  
 \index{Matrix!MatrixView}
@@ -1345,6 +1377,7 @@ to include the storage argument.
 
 \subsection{Constructors}
 \index{Matrix!constructors}
+\label{Matrix_Constructors}
 
 We use \tt{stor} to indicate the storage template argument. 
 This argument must be either 
@@ -1408,15 +1441,29 @@ The assignment operator has the same flexibility.
 \item
 \begin{tmvcode}
 tmv::MatrixView<T,index> m = 
-      tmv::MatrixViewOf(T* vv, size_t nrows, size_t ncols, 
+      tmv::MatrixViewOf(T* mm, size_t nrows, size_t ncols, 
       StorageType stor)
 tmv::ConstMatrixView<T,index> m = 
-      tmv::MatrixViewOf(const T* vv,  size_t nrows, size_t ncols, 
+      tmv::MatrixViewOf(const T* mm,  size_t nrows, size_t ncols, 
       StorageType stor)
+tmv::MatrixView<T,index> m = 
+      tmv::MatrixViewOf(T* mm, size_t nrows, size_t ncols, 
+      int stepi, int stepj)
+tmv::ConstMatrixView<T,index> m = 
+      tmv::MatrixViewOf(const T* mm,  size_t nrows, size_t ncols, 
+      int stepi, int stepj)
 \end{tmvcode}
 \index{Matrix!view of raw memory}
-Makes a \tt{MatrixView} (see \S\ref{MViews} below) that refers to the exact
-elements of \tt{vv}, not copying them to new storage.
+Makes a \tt{MatrixView} (see \S\ref{Matrix_Views} below) that refers to the exact
+elements of \tt{mm}, not copying them to new storage.  The first two versions
+indicate the ordering of the elements using the normal \tt{StorageType}
+designation, which must be either \tt{RowMajor} or \tt{ColMajor}.
+  
+The next two versions allow you to provide an arbitrary step through
+the data in the $i$ and $j$ directions.  This means that (for C-style indexing):
+\begin{tmvcode}
+m(i,j) == *(mm + i*stepi + j*stepj)
+\end{tmvcode}
 
 \item
 \begin{tmvcode}
@@ -1444,6 +1491,7 @@ Makes a view of the \tt{Vector}, which treats it as an $n \times 1$ \tt{Matrix}
 
 \subsection{Initialization}
 \index{Matrix!initialization}
+\label{Matrix_Initialization}
 
 A \tt{Matrix} can be initialized with a comma-delimited list using
 the \tt{<<} operator, just like with a \tt{Vector}.  For example:
@@ -1465,10 +1513,11 @@ list elements are assigned in order of the columns instead.
 
 Also, the list initialization works for a \tt{MatrixView} as well.  However, it only works
 if the \tt{MatrixView}'s elements are all contiguous in memory.  You can check
-if this is the case with the \tt{canLinearize()} method described in \S\ref{linearviews}.
+if this is the case with the \tt{canLinearize()} method described in \S\ref{LinearViews}.
 
 \subsection{Access}
 \index{Matrix!access methods}
+\label{Matrix_Access}
 
 \begin{itemize}
 \item
@@ -1601,7 +1650,7 @@ would be obtained by: \tt{m.subVector(n-1,0,-1,1,n)} for C-style or
 \index{Matrix!MatrixView}
 \index{Matrix!ConstMatrixView}
 \index{Matrix!views}
-\label{MViews}
+\label{Matrix_Views}
 
 A \tt{MatrixView} object refers to some or all of the elements of a regular \tt{Matrix},
 so that altering the elements in the view alters the
@@ -1636,7 +1685,6 @@ m.subMatrix(int i1, int i2, int j1, int j2, int istep, int jstep)
 \end{tmvcode}
 \index{Matrix!methods!subMatrix}
 This returns a view to a submatrix contained within the original matrix.
-\label{matrixaccess}
 
 If \tt{m} uses C-style indexing, 
 the upper-left corner of the returned view is \tt{m(i1,j1)},
@@ -1736,6 +1784,15 @@ This lets you convert the first into the second.
 
 \item
 \begin{tmvcode}
+m.cView()
+m.fView()
+\end{tmvcode}
+\index{Matrix!methods!cView}
+\index{Matrix!methods!vView}
+Like \tt{view()} but forces the result to have C- or Fortran-style indexing respectively.
+
+\item
+\begin{tmvcode}
 m.realPart()
 m.imagPart()
 \end{tmvcode}
@@ -1753,26 +1810,34 @@ tmv::MatrixView<double> mi = m.imagPart();
 \begin{tmvcode}
 m.upperTri(DiagType dt = NonUnitDiag)
 m.lowerTri(DiagType dt = NonUnitDiag)
+m.unitUpperTri()
+m.unitLowerTri()
 \end{tmvcode}
 \index{Matrix!methods!upperTri}
 \index{Matrix!methods!lowerTri}
+\index{Matrix!methods!unitUpperTri}
+\index{Matrix!methods!unitLowerTri}
 These return an \tt{UpperTriMatrixView} or a \tt{LowerTriMatrixView} which
 views either the upper triangle or the lower triangle of a square \tt{Matrix}.
 If \tt{m} has more rows than columns, then only \tt{UpperTri} is valid, since
 the portion below the diagonal is not triangular.
 Likewise, if \tt{m} has more columns than rows, then only \tt{LowerTri} is valid.
 
-In both cases, you may provide an optional parameter \tt{dt}, which
+In first two cases, you may provide an optional parameter \tt{dt}, which
 declares whether the diagonal elements are treated as all $1$s
 (\tt{dt = UnitDiag}) or as their actual values (\tt{dt = NonUnitDiag}). 
-See \S\ref{trimatrix} for more details about this parameter and
+See \S\ref{TriMatrix} for more details about this parameter and
 triangular matrices in general.
+For now, the latter two versions are equivalent to \tt{m.upperTri(UnitDiag)} and 
+\tt{m.lowerTri(UnitDiag)} respectively.  However, future versions of TMV
+(specifically version 0.70, which is in development) will be able to exploit
+the compile-time knowledge of \tt{dt} to make this more efficient.
 
 \end{itemize}
 
 \subsection{Functions of a matrix}
 \index{Matrix!functions of}
-\label{matrixfunctions}
+\label{Matrix_Functions}
 
 Functions that do not modify the \tt{Matrix} are defined in 
 \tt{GenMatrix}, and so can be used for any type derived from \tt{GenMatrix}:
@@ -1821,7 +1886,7 @@ output a warning to \tt{stdout} if there is no SV decomposition already set.
 
 If you understand that you are asking TMV to perform an SV decomposition
 to calculate $||m||_2$, and you are ok with it, you can either change the warning
-behavior -- see \S\ref{warnings} for how to do this --
+behavior -- see \S\ref{Warnings} for how to do this --
 or you can just call \tt{doNorm2()} instead, which will do the 
 necessary SV decomposition without any warnings.
 
@@ -1867,7 +1932,7 @@ The square of the Frobenius norm of \tt{m}:
 $(||m||_F)^2 = \sum_{i,j} |m(i,j)|^2$.
 
 In the method version of this function, you may provide an optional scale factor,
-in which case the return value is equal to NormSq(scale*v) instead, 
+in which case the return value is equal to \tt{NormSq(scale*v)} instead, 
 which can help avoid underflow or overflow problems.
 
 \item
@@ -1891,6 +1956,24 @@ The trace of \tt{m}: $\mathrm{Tr}(m) = \sum_i m(i,i)$.
 
 \item
 \begin{tmvcode}
+T m.sumElements() const
+T SumElements(m)
+\end{tmvcode}
+\index{Matrix!methods!sumElements}
+\index{Matrix!functions of!SumElements}
+The sum of all elements of \tt{m}: $\sum_{i,j} m(i,j)$.
+
+\item
+\begin{tmvcode}
+RT m.sumAbsElements() const
+RT SumAbsElements(m)
+\end{tmvcode}
+\index{Matrix!methods!sumAbsElements}
+\index{Matrix!functions of!SumAbsElements}
+The sum of the absolute values of all elements of \tt{m}: $\sum_{i,j} |m(i,j)|$.
+
+\item
+\begin{tmvcode}
 T m.det() const
 T Det(m)
 \end{tmvcode}
@@ -1898,7 +1981,7 @@ T Det(m)
 \index{Matrix!methods!det}
 \index{Matrix!functions of!Det}
 The determinant of \tt{m}, $\det(m)$.  For speed issues regarding this function, see 
-\S\ref{division} below on division.
+\S\ref{Matrix_Division} below on division.
 
 \item
 \begin{tmvcode}
@@ -1909,7 +1992,7 @@ RT LogDet(m)
 \index{Matrix!methods!logDet}
 \index{Matrix!functions of!LogDet}
 The log of the absolute value of the determinant of \tt{m}.  If the optional argument \tt{sign} is 
-provided (possible in the method version only), then on output \tt{*sign} records the sign of the determinant.  See \ref{determinants} 
+provided (possible in the method version only), then on output \tt{*sign} records the sign of the determinant.  See \ref{Matrix_Division_Determinants} 
 for more details.
 
 \item
@@ -1918,7 +2001,7 @@ bool m.isSingular() const
 \end{tmvcode}
 \index{Matrix!methods!isSingular}
 Return whether \tt{m} is singular, i.e. $\det(m) = 0$.
-(Singular matrices are discussed in more detail in \S\ref{singular}.)
+(Singular matrices are discussed in more detail in \S\ref{Matrix_Division_Singular}.)
 
 \item
 \begin{tmvcode}
@@ -1938,7 +2021,7 @@ outputs a warning to \tt{stdout} if there is no SV decomposition already set for
 
 And as with \tt{norm2}, you can bypass the warning by calling \tt{doCondition()} instead,
 which will do the necessary SV decomposition without any warnings.  
-Also, see \S\ref{warnings} for how to change the warning behavior of TMV.
+Also, see \S\ref{Warnings} for how to change the warning behavior of TMV.
 
 \item
 \begin{tmvcode}
@@ -1954,7 +2037,7 @@ Set \tt{minv} to the inverse of \tt{m}.
 If \tt{m} is not square, then \tt{minv} is set to the pseudo-inverse, or an approximate
 pseudo-inverse.  If \tt{m} is singular, then an error may result, or the pseudo-inverse
 may be returned, depending on the division method specified for the matrix.  
-See \S\ref{pseudoinverse} and \S\ref{singular} 
+See \S\ref{Matrix_Division_Pseudoinverse} and \S\ref{Matrix_Division_Singular} 
 on pseudo-inverses and singular matrices for more details.
 
 Note that the first two forms do not actually require a 
@@ -1978,7 +2061,7 @@ solution.  And the covariance matrix for the solution vector $x$ is
 $\Sigma = (A^\dagger A)^{-1}$.
 It turns out that computing this matrix is generally easy to do once you have 
 performed the decomposition needed to solve for $x$ (either a QR or SV 
-decomposition - see \S\ref{divtypes}).  
+decomposition - see \S\ref{Matrix_Division_Decompositions}).  
 Thus this function is provided, which sets the
 argument \tt{cov} to the equivalent of \tt{Inverse(m.adjoint()*m)}, 
 but generally does so much more efficiently than doing this explicitly, 
@@ -2091,6 +2174,7 @@ swap the data elements, not just some pointers to the data, so it takes $O(N^2)$
 
 \subsection{Arithmetic}
 \index{Matrix!arithmetic}
+\label{Matrix_Arithmetic}
 
 \subsubsection{Basic Operators}
 
@@ -2234,7 +2318,7 @@ if \tt{add} is true and ``\tt{=}'' if \tt{add} is false.
 \subsection{Matrix division}
 \index{Matrix!arithmetic!division}
 \index{Linear equations!exact solution}
-\label{division}
+\label{Matrix_Division}
 
 One of the main things people often want to do with a matrix is use it to solve a 
 set of linear equations.  The set of equations can be written as a single matrix
@@ -2249,7 +2333,7 @@ multiple systems to be solved using the same coefficients, in which case
 $x$ and $b$ become matrices as well.
 
 \subsubsection{Operators}
-\label{divops}
+\label{Matrix_Division_Operators}
 
 Using the TMV classes, one would solve this equations by writing simply:
 \begin{tmvcode}
@@ -2290,13 +2374,13 @@ which delay the calculation in exactly the same way that the above forms do.
 These forms
 do not ever explicitly calculate the matrix inverse, since this is not (numerically) a
 good way to perform these calculations.  Instead, the appropriate decomposition 
-(see \S\ref{divtypes})
+(see \S\ref{Matrix_Division_Decompositions})
 is used to calculate \tt{v2} and \tt{v3}.
 
 \subsubsection{Least-square solutions}
 \index{Matrix!arithmetic!division}
 \index{Linear equations!least square solution}
-\label{leastsquare}
+\label{Matrix_Division_Leastsquare}
 
 If $A$ is not square, then the equation $A x = b$ does not have a unique solution.
 If $A$ has more rows than columns, then there is in general no solution.
@@ -2335,12 +2419,12 @@ needed for the division, it is quite easy.  So we provide the routine
 A.makeInverseATA(Matrix<T>& cov)
 \end{tmvcode}
 to perform the calculation efficiently.  (Make sure you save the decomposition with 
-\tt{A.saveDiv()} - see \S\ref{efficiency} for more about this.)
+\tt{A.saveDiv()} - see \S\ref{Matrix_Division_Efficiency} for more about this.)
 
 \subsubsection{Decompositions}
 \index{Matrix!decompositions}
 \index{Matrix!arithmetic!division}
-\label{divtypes}
+\label{Matrix_Division_Decompositions}
 
 There are quite a few ways to go about solving the equations written above.  
 The more efficient ways involve decomposing $A$ into a product of
@@ -2388,7 +2472,7 @@ If $M < N$, then $A^T$ is actually decomposed into $Q R$.
 upper-triangle, and $P$ is a permutation.  This decomposition is somewhat
 slower than a simple QR decomposition, but it is numerically more stable if
 $A$ is singular, or nearly so.  
-(Singular matrices are discussed in more detail in \S\ref{singular}.)
+(Singular matrices are discussed in more detail in \S\ref{Matrix_Division_Singular}.)
 
 There are two slightly different algorithms for doing a QRP decomposition, controlled by a global
 \tt{bool} variable: \tt{tmv::QRPDiv<T>::StrictQRP}.
@@ -2412,14 +2496,14 @@ singular matrices, and it is much faster than the strict algorithm.
 be non-negative and will decrease along the diagonal.
 The singular value decomposition is most useful
 for matrices that are singular or nearly so.  
-We will discuss this decomposition in more detail in \S\ref{singular} on
+We will discuss this decomposition in more detail in \S\ref{Matrix_Division_Singular} on
 singular matrices below.
 
 \end{enumerate}
 
 \subsubsection{Pseudo-inverse}
 \index{Matrix!pseudo-inverse}
-\label{pseudoinverse}
+\label{Matrix_Division_Pseudoinverse}
 
 If \tt{m} is not square, then \tt{m.inverse()} should return what is called the pseudo-inverse.
 If \tt{m} has more rows than columns, then \tt{m.inverse() * m} is the identity matrix, 
@@ -2448,12 +2532,12 @@ but not the last one.  With the SV decomposition, however,
 $X$ is the true pseudo-inverse and all four equations are satisfied.
 
 For singular matrices, QR will fail to give a good pseudo-inverse (and may throw the
-\tt{tmv::Singular} exception - c.f. \S\ref{error}), QRP will be close to correct
+\tt{tmv::Singular} exception - c.f. \S\ref{Exceptions}), QRP will be close to correct
 (again failing only the last equation) and will not throw an exception, and SV will be correct.
 \index{Exceptions!Singular}
 
 \subsubsection{Efficiency issues}
-\label{efficiency}
+\label{Matrix_Division_Efficiency}
 \index{Matrix!arithmetic!division}
 
 Let's say you compute a matrix decomposition for a particular division calculation, and
@@ -2493,7 +2577,6 @@ After this call, whenever a decomposition is set, it is saved for any future use
 You are telling the program to assume that the values of \tt{m} will not change after 
 that point (technically after
 the next decomposition is calculated).
-\label{matrixsetdiv}
 
 If you do modify \tt{m} after a call to \tt{saveDiv()}, 
 you can manually reset the decomposition with
@@ -2552,7 +2635,7 @@ m.divideInPlace()
 \subsubsection{Determinants}
 \index{Matrix!determinant}
 \index{Determinant}
-\label{determinants}
+\label{Matrix_Division_Determinants}
 \index{Matrix!methods!det}
 \index{Matrix!methods!logDet}
 
@@ -2596,6 +2679,7 @@ the \tt{logDet()} function is exactly what is needed to calculate the log likeli
 
 \subsubsection{Accessing the decompositions}
 \index{Matrix!decompositions}
+\label{Matrix_Division_Access}
 
 Sometimes, you may want to access the components of the decomposition directly,
 rather than just use them for performing the division or calculating the determinant.
@@ -2606,23 +2690,21 @@ For the LU decomposition, we have:
 \begin{tmvcode}
 tmv::ConstLowerTriMatrixView<T> m.lud().getL()
 tmv::ConstUpperTriMatrixView<T> m.lud().getU()
-int* m.lud().getP()
+Permutation m.lud().getP()
 bool m.lud().IsTrans()
 \end{tmvcode}
 \index{Matrix!methods!lud}
 \index{Matrix!LU decomposition}
 \index{LU Decomposition!Matrix}
 \tt{getL()} and \tt{getU()} return $L$ and $U$.
-\tt{getP()} returns the permutation array, $P$, in a form
-that can be used as an argument 
-to the routines like \tt{m.permuteRows(P)}.  Finally, \tt{IsTrans()} returns whether
+\tt{getP()} returns the permutation, $P$.
+Finally, \tt{IsTrans()} returns whether
 the product $PLU$ is equal to \tt{m} or \tt{m.transpose()}.  
 
 The following should result in a \tt{Matrix m2}, which is numerically very close to
 the original \tt{Matrix m}:
 \begin{tmvcode}
-tmv::Matrix<T> m2 = m.lud().getL() * m.lud().getU();
-m2.reversePermuteRows(m.lud().getP());
+tmv::Matrix<T> m2 = m.lud().getP() * m.lud().getL() * m.lud().getU();
 if (m.lud().IsTrans()) m2.transposeSelf();
 \end{tmvcode}
 
@@ -2656,16 +2738,16 @@ m2v = m.qrd().getQ() * m.qrd().getR();
 \item
 For the QRP decomposition, we have:
 \begin{tmvcode}
-tmv::PackedQ<T> m.qprd().getQ()
-tmv::ConstUpperTriMatrixView<T> m.qprd().getR()
-int* m.qprd().getP()
-bool m.qprd().IsTrans()
+tmv::PackedQ<T> m.qrpd().getQ()
+tmv::ConstUpperTriMatrixView<T> m.qrpd().getR()
+Permutation m.qrpd().getP()
+bool m.qrpd().IsTrans()
 \end{tmvcode}
-\index{Matrix!methods!qprd}
+\index{Matrix!methods!qrpd}
 \index{Matrix!QRP decomposition}
 \index{QRP Decomposition!Matrix}
 \tt{getQ()} and \tt{getR()} return $Q$ and $R$.
-\tt{getP()} returns the permutation array, $P$.
+\tt{getP()} returns the permutation, $P$.
 \tt{IsTrans()} returns whether
 the decomposition is equal to \tt{m} or \tt{m.transpose()}.  
 
@@ -2674,14 +2756,12 @@ the original \tt{Matrix m}:
 \begin{tmvcode}
 tmv::Matrix<T> m2(m.nrows(),m.ncols());
 tmv::MatrixView<T> m2v = 
-      m.qprd().IsTrans() ? m2.transpose() : m2.view();
-m2v = m.qprd().getQ() * m.qprd().getR();
-m2v.reversePermuteCols(m.qprd().getP())
+      m.qrpd().IsTrans() ? m2.transpose() : m2.view();
+m2v = m.qrpd().getQ() * m.qrpd().getR() * m.qrpd().getP();
 \end{tmvcode}
 
 \item
 For the SV decomposition, we have:
-\label{matrixsvd}
 \begin{tmvcode}
 tmv::ConstMatrixView<T> m.svd().getU()
 tmv::ConstDiagMatrixView<RT> m.svd().getS()
@@ -2701,7 +2781,7 @@ tmv::Matrix<T> m2 = m.svd().getU() * m.svd().getS() * m.svd().getV();
 
 Each of the above access methods may also be used to perform the decomposition.
 You do not need to have used the matrix to perform a division before
-calling \tt{m.lud()}, \tt{m.qrd()}, \tt{m.qprd()}, or \tt{m.svd()}.  Also, calling
+calling \tt{m.lud()}, \tt{m.qrd()}, \tt{m.qrpd()}, or \tt{m.svd()}.  Also, calling
 \tt{m.lud()} implicitly calls \tt{m.divideUsing(tmv::LU)} (likewise for the other 
 decompositions).  Thus, if you use one of these decomposition methods, any
 subsequent division statement will use that decomposition, unless you explicitly
@@ -2715,7 +2795,7 @@ it will have to be recalculated.
 \subsubsection{Singular matrices}
 \index{Matrix!singular}
 \index{Singular matrices}
-\label{singular}
+\label{Matrix_Division_Singular}
 
 If a matrix is singular (i.e. its determinant is 0), 
 then LU and QR decompositions
@@ -2842,6 +2922,7 @@ some purpose.  See section \S\ref{Decompositions} for how to do this.
 
 \subsection{Input/Output}
 \index{Matrix!input/output}
+\label{Matrix_IO}
 
 The simplest output is the usual:
 \begin{tmvcode}
@@ -2856,19 +2937,18 @@ nrows ncols
 ...
 ( m(nrows-1,0) ...  ...  m(nrows-1,ncols-1) )
 \end{tmvcode}
-\label{matrixio}
 
 The same format can be read back in one of two ways:
 \begin{tmvcode}
 tmv::Matrix<T> m(nrows,ncols);
 is >> m;
-std::auto_ptr<tmv::Matrix<T> > pm;
-is >> pm;
+std::auto_ptr<tmv::Matrix<T> > mptr;
+is >> mptr;
 \end{tmvcode}
 For the first version, the \tt{Matrix} must already be declared, which 
 requires knowing how big it needs to be.  If the input \tt{Matrix} does not
 match in size, a runtime error will occur.
-The second version allows you to get the size from the input.  \tt{m2}
+The second version allows you to get the size from the input.  \tt{mptr}
 will be created (with \tt{new}) 
 according to whatever size the input \tt{Matrix} is.
 
@@ -2887,7 +2967,7 @@ but without requiring the temporary \tt{Matrix}.
 \subsection{Small matrices}
 \index{SmallVector}
 \index{SmallMatrix}
-\label{smallmatrix}
+\label{SmallMatrix}
 
 The algorithms for regular \tt{Matrix} operations are optimized to be
 fast for large matrices.  Usually, this makes sense, since any code with
@@ -2920,6 +3000,7 @@ essentially all the same methods, functions, and arithmetic operators.
 \subsubsection{Constructors}
 \index{SmallVector!constructors}
 \index{SmallMatrix!constructors}
+\label{SmallMatrix_Constructors}
 
 The template arguments \tt{M} and \tt{N} below are both integers and
 represent the size of the matrix or vector as indicated.
@@ -3035,9 +3116,10 @@ as shown.
 \subsubsection{Access}
 \index{SmallVector!access methods}
 \index{SmallMatrix!access methods}
+\label{SmallMatrix_Access}
 
 The basic access methods are the same as for a regular \tt{Vector} or \tt{Matrix}.
-(See \ref{vectoraccess}, \ref{matrixaccess}.)
+(See \ref{Vector_Access}, \ref{Matrix_Access}.)
 However, since the size is known to the compiler, the inline calculation is able
 to be a lot faster, often reducing to a trivial memory access.
 
@@ -3066,10 +3148,11 @@ will both be done inline, even though \tt{m1.transpose()} is not a \tt{SmallMatr
 \subsubsection{Functions}
 \index{SmallVector!functions of}
 \index{SmallMatrix!functions of}
+\label{SmallMatrix_Functions}
 
 \tt{SmallVector}s and \tt{SmallMatrix}es all have exactly the same
 function methods as the regular varieties.  
-(See \ref{vectorfunctions}, \ref{matrixfunctions}.)
+(See \ref{Vector_Functions}, \ref{Matrix_Functions}.)
 Likewise, the syntax of the
 arithmetic is identical.  There are only a few methods that 
 are not done inline.  
@@ -3085,8 +3168,8 @@ Also, the \tt{sort} command for a \tt{SmallVector} just uses the
 regular \tt{Vector} version.
 
 \subsubsection{Limitations}
-\label{smallmatrixlimitations}
 \index{SmallMatrix!limitations}
+\label{SmallMatrix_Limitations}
 
 There are a few limitations on \tt{SmallMatrix} and \tt{SmallVector} objects
 that we impose in order to give the compiler the ability to
@@ -3145,36 +3228,6 @@ Similarly, a non-\tt{const} \tt{SmallMatrix} can be viewed as a \tt{MatrixView}
 with the same method.
 
 \item
-\textbf{No implicit instantiation}
-\index{SmallVector!arithmetic!no implicit instantiation}
-\index{SmallMatrix!arithmetic!no implicit instantiation}
-
-Expressions that involve arithmetic of ``\tt{Small}'' objects do not automatically
-instantiate a temporary matrix when necessary.  Therefore, arithmetic 
-expressions cannot get as complicated as with regular \tt{Matrix} and 
-\tt{Vector} objects.
-
-For example:
-\begin{tmvcode}
-v3 = m*v2 + 8*v1;
-\end{tmvcode}
-will not compile.  You need to do this in two steps: first the matrix-vector product, 
-and then the addition:
-\begin{tmvcode}
-v3 = m*v2;
-v3 += 8*v1;
-\end{tmvcode}
-
-Similarly, you cannot simply output the result of an arithmetic expression without
-first assigning it to a result object:
-\begin{tmvcode}
-std::cout<<"Result is "<<m*v<<std::endl;          // Wrong.
-tmv::SmallVector<double,N> result;
-std::cout<<"Result is "<<(result=m*v)<<std::endl; // Right.
-std::cout<<"Result is "<<tmv::Vector<double>(m*v)<<std::endl; // Right.
-\end{tmvcode}
-
-\item
 \textbf{Views are not ``\tt{Small}''}
 \index{SmallVector!views}
 \index{SmallMatrix!views}
@@ -3220,6 +3273,7 @@ we will explain the difference.
 
 \subsection{Diagonal matrices}
 \index{DiagMatrix}
+\label{DiagMatrix}
 
 The \tt{DiagMatrix} class is our diagonal matrix class.  
 A diagonal matrix is only non-zero
@@ -3237,6 +3291,7 @@ also inherit from \tt{GenDiagMatrix}.
 
 \subsubsection{Constructors}
 \index{DiagMatrix!constructors}
+\label{DiagMatrix_Constructors}
 
 As usual, the optional \tt{index} template argument specifies which indexing
 style to use.
@@ -3310,6 +3365,7 @@ Make a \tt{DiagMatrixView} whose diagonal consists of the actual memory elements
 
 \subsubsection{Access}
 \index{DiagMatrix!access methods}
+\label{DiagMatrix_Access}
 
 \begin{tmvcode}
 d.nrows() = d.ncols() = d.colsize() = d.rowsize() = d.size()
@@ -3339,6 +3395,8 @@ This is equivalent to \tt{DiagMatrixViewOf(d.diag().subVector(i1,i2,istep))}.
 \begin{tmvcode}
 d.transpose() = d.view()
 d.conjugate() = d.adjoint()
+d.cview()
+d.fview()
 d.realPart()
 d.imagPart()
 \end{tmvcode}
@@ -3347,11 +3405,14 @@ d.imagPart()
 \index{DiagMatrix!methods!conjugate}
 \index{DiagMatrix!methods!adjoint}
 \index{DiagMatrix!methods!view}
+\index{DiagMatrix!methods!cView}
+\index{DiagMatrix!methods!fView}
 \index{DiagMatrix!methods!realPart}
 \index{DiagMatrix!methods!imagPart}
 
 \subsubsection{Functions}
 \index{DiagMatrix!functions of}
+\label{DiagMatrix_Functions}
 
 \begin{tmvcode}
 RT d.norm1() = Norm1(d)
@@ -3374,6 +3435,8 @@ RT d.normF() = NormF(d) = d.norm() = Norm(d)
 RT d.normSq() = NormSq(d)
 RT d.normSq(RT scale)
 T d.trace() = Trace(d)
+T d.sumElements() = SumElements(d)
+RT d.sumAbsElements() = SumAbsElements(d)
 T d.det() = Det(d)
 RT d.logDet(T* sign=0) = LogDet(d)
 bool d.isSingular()
@@ -3389,6 +3452,8 @@ d.makeInverseATA(DiagMatrix<T>& cov)
 \index{DiagMatrix!functions of!NormF}
 \index{DiagMatrix!functions of!NormSq}
 \index{DiagMatrix!functions of!Trace}
+\index{DiagMatrix!functions of!SumElements}
+\index{DiagMatrix!functions of!SumAbsElements}
 \index{DiagMatrix!functions of!Det}
 \index{DiagMatrix!functions of!LogDet}
 \index{DiagMatrix!functions of!Inverse}
@@ -3396,6 +3461,8 @@ d.makeInverseATA(DiagMatrix<T>& cov)
 \index{DiagMatrix!methods!normF}
 \index{DiagMatrix!methods!normSq}
 \index{DiagMatrix!methods!trace}
+\index{DiagMatrix!methods!sumElements}
+\index{DiagMatrix!methods!sumAbsElements}
 \index{DiagMatrix!methods!det}
 \index{DiagMatrix!methods!logDet}
 \index{DiagMatrix!methods!isSingular}
@@ -3432,6 +3499,7 @@ It is equivalent to \tt{d = d.inverse()}.
 
 \subsubsection{Arithmetic}
 \index{DiagMatrix!arithmetic}
+\label{DiagMatrix_Arithmetic}
 
 In addition to \tt{x}, \tt{v}, and \tt{m} from before, we now add \tt{d} for a \tt{DiagMatrix}.
 
@@ -3461,6 +3529,7 @@ d = x
 
 \subsubsection{Division}
 \index{DiagMatrix!arithmetic!division}
+\label{DiagMatrix_Division}
 
 The division operations are:
 \begin{tmvcode}
@@ -3488,6 +3557,7 @@ treat the \tt{DiagMatrix} as a \tt{BandMatrix}, which can use SVD.
 
 \subsubsection{Input/Output}
 \index{DiagMatrix!input/output}
+\label{DiagMatrix_IO}
 
 The simplest output is the usual:
 \begin{tmvcode}
@@ -3495,7 +3565,7 @@ os << d
 \end{tmvcode}
 where \tt{os} is any \tt{std::ostream}.
 The output format is the same as for a \tt{Matrix}, including all the 0's.
-(See \ref{matrixio}.)
+(See \ref{Matrix_IO}.)
 
 
 There is also a compact format:
@@ -3512,8 +3582,8 @@ The same (compact, that is) format can be read back in the usual two ways:
 \begin{tmvcode}
 tmv::DiagMatrix<T> d(n);
 is >> d;
-std::auto_ptr<tmv::DiagMatrix<T> > pd;
-is >> pd;
+std::auto_ptr<tmv::DiagMatrix<T> > dptr;
+is >> dptr;
 \end{tmvcode}
 where the first gives an error if \tt{d} is the wrong size and the second allocates
 a new \tt{DiagMatrix} that is the correct size.
@@ -3529,7 +3599,7 @@ m.writeCompact(std::ostream& os, RT thresh)
 \subsection{Upper/lower triangle matrices}
 \index{UpperTriMatrix}
 \index{LowerTriMatrix|see{UpperTriMatrix}}
-\label{trimatrix}
+\label{TriMatrix}
 
 The \tt{UpperTriMatrix} class is our upper triangle matrix class, which is non-zero
 only on the main diagonal and above.  \tt{LowerTriMatrix} is our class for lower
@@ -3568,6 +3638,7 @@ definiteness).
 
 \subsubsection{Constructors}
 \index{UpperTriMatrix!constructors}
+\label{TriMatrix_Constructors}
 
 \begin{itemize}
 \item 
@@ -3637,6 +3708,7 @@ elements must be in memory, even though they are never used.
 
 \subsubsection{Access}
 \index{UpperTriMatrix!access methods}
+\label{TriMatrix_Access}
 
 \begin{tmvcode}
 U.nrows() = U.ncols() = U.colsize() = U.rowsize() = U.size()
@@ -3673,7 +3745,7 @@ U.subMatrix(int i1, int i2, int j1, int j2, int istep, int jstep)
 \index{UpperTriMatrix!methods!subVector}
 \index{UpperTriMatrix!methods!subMatrix}
 This works the same as for \tt{Matrix}
-(See \ref{matrixaccess}),
+(See \ref{Matrix_Access}),
 except that all of the elements in the 
 subvector or submatrix must be completely within the upper or lower triangle, as
 appropriate.  If \tt{dt} is \tt{UnitDiag}, then no elements may be on the 
@@ -3710,6 +3782,8 @@ U.transpose()
 U.conjugate()
 U.adjoint()
 U.view()
+U.cView()
+U.fView()
 U.realPart()
 U.imagPart()
 \end{tmvcode}
@@ -3717,6 +3791,8 @@ U.imagPart()
 \index{UpperTriMatrix!methods!conjugate}
 \index{UpperTriMatrix!methods!adjoint}
 \index{UpperTriMatrix!methods!view}
+\index{UpperTriMatrix!methods!cView}
+\index{UpperTriMatrix!methods!fView}
 \index{UpperTriMatrix!methods!realPart}
 \index{UpperTriMatrix!methods!imagPart}
 Note that the transpose and adjoint of an \tt{UpperTriMatrix} is an
@@ -3725,6 +3801,7 @@ Note that the transpose and adjoint of an \tt{UpperTriMatrix} is an
 
 \subsubsection{Functions}
 \index{UpperTriMatrix!functions of}
+\label{TriMatrix_Functions}
 
 \begin{tmvcode}
 RT U.norm1() = Norm1(U)
@@ -3735,6 +3812,8 @@ RT U.normSq() = NormSq(U)
 RT U.normSq(RT scale)
 RT U.maxAbsElement() = MaxAbsElement(U)
 T U.trace() = Trace(U)
+T U.sumElements() = SumElements(U)
+RT U.sumAbsElements() = SumAbsElements(U)
 T U.det() = Det(U)
 RT U.logDet(T* sign=0) = LogDet(U)
 bool U.isSingular()
@@ -3758,6 +3837,8 @@ U.makeInverseATA(Matrix<T>& cov)
 \index{UpperTriMatrix!functions of!NormF}
 \index{UpperTriMatrix!functions of!NormSq}
 \index{UpperTriMatrix!functions of!Trace}
+\index{UpperTriMatrix!functions of!SumElements}
+\index{UpperTriMatrix!functions of!SumAbsElements}
 \index{UpperTriMatrix!functions of!Det}
 \index{UpperTriMatrix!functions of!LogDet}
 \index{UpperTriMatrix!functions of!Inverse}
@@ -3765,6 +3846,8 @@ U.makeInverseATA(Matrix<T>& cov)
 \index{UpperTriMatrix!methods!normF}
 \index{UpperTriMatrix!methods!normSq}
 \index{UpperTriMatrix!methods!trace}
+\index{UpperTriMatrix!methods!sumElements}
+\index{UpperTriMatrix!methods!sumAbsElements}
 \index{UpperTriMatrix!methods!det}
 \index{UpperTriMatrix!methods!logDet}
 \index{UpperTriMatrix!methods!isSingular}
@@ -3802,6 +3885,7 @@ It is equivalent to \tt{U = U.inverse()}.
 
 \subsubsection{Arithmetic}
 \index{UpperTriMatrix!arithmetic}
+\label{TriMatrix_Arithmetic}
 
 In addition to \tt{x}, \tt{v}, and \tt{m} from before, 
 we now add \tt{U} and \tt{L} for a \tt{UpperTriMatrix}
@@ -3837,6 +3921,7 @@ U [+-]= x
 
 \subsubsection{Division}
 \index{UpperTriMatrix!arithmetic!division}
+\label{TriMatrix_Division}
 
 The division operations are: (again omitting the L forms when redundant)
 \begin{tmvcode}
@@ -3870,6 +3955,7 @@ treat the \tt{TriMatrix} as a \tt{BandMatrix}, which can use SVD.
 
 \subsubsection{Input/Output}
 \index{UpperTriMatrix!input/output}
+\label{TriMatrix_IO}
 
 The simplest output is the usual:
 \begin{tmvcode}
@@ -3877,7 +3963,7 @@ os << U << L
 \end{tmvcode}
 where \tt{os} is any \tt{std::ostream}.
 The output format is the same as for a \tt{Matrix}, including all the 0's.
-(See \ref{matrixio}.)
+(See \ref{Matrix_IO}.)
 
 There is also a compact format.  For an \tt{UpperTriMatrix},
 \begin{tmvcode}
@@ -3910,9 +3996,9 @@ In each case, the compact format can be read back in the usual two ways:
 tmv::UpperTriMatrix<T> U(n);
 tmv::LowerTriMatrix<T> L(n);
 is >> U >> L;
-std::auto_ptr<tmv::UpperTriMatrix<T> > pU;
-std::auto_ptr<tmv::LowerTriMatrix<T> > pL;
-is >> pU >> pL;
+std::auto_ptr<tmv::UpperTriMatrix<T> > Uptr;
+std::auto_ptr<tmv::LowerTriMatrix<T> > Lptr;
+is >> Uptr >> Lptr;
 \end{tmvcode}
 
 One can write small values as 0 with
@@ -3925,6 +4011,7 @@ m.writeCompact(std::ostream& os, RT thresh)
 
 \subsection{Band matrices}
 \index{BandMatrix}
+\label{BandMatrix}
 
 The \tt{BandMatrix} class is our band-diagonal matrix, which is only non-zero
 on the main diagonal and a few sub- and super-diagonals.  While band-diagonal
@@ -3998,7 +4085,6 @@ size_t BandStorageLength(StorageType stor, size_t nrows, size_t ncols,
 \end{tmvcode}
 \index{BandMatrix!storage length}
 For the mutable \tt{d(i,j)} version, 
-\label{bandmatrixstoragesize}
   
 For square matrices, all three methods always need the same amount of memory 
 (and for non-square, they aren't very different), so the 
@@ -4017,6 +4103,7 @@ the start of the array needs to be at the start of the lowest sub-diagonal.
 
 \subsubsection{Constructors}
 \index{BandMatrix!constructors}
+\label{BandMatrix_Constructors}
 
 \begin{itemize}
 \item 
@@ -4168,6 +4255,7 @@ Make a \tt{BandMatrixView} of the actual memory elements, \tt{vv}.
 
 \subsubsection{Access}
 \index{BandMatrix!access methods}
+\label{BandMatrix_Access}
 
 \begin{tmvcode}
 b.nrows() = b.colsize()
@@ -4200,10 +4288,9 @@ b.subMatrix(int i1, int i2, int j1, int j2, int istep, int jstep)
 \index{BandMatrix!methods!subVector}
 \index{BandMatrix!methods!subMatrix}
 These work the same as for a \tt{Matrix}
-(See \ref{matrixaccess}),
+(See \ref{Matrix_Access}),
 except that the entire
 subvector or submatrix must be completely within the band.
-\label{bandmatrixaccess}
 
 \begin{tmvcode}
 b.subBandMatrix(int i1, int i2, int j1, int j2, int newnlo, int newnhi)
@@ -4271,6 +4358,8 @@ b.transpose()
 b.conjugate()
 b.adjoint()
 b.view()
+b.cView()
+b.fView()
 b.realPart()
 b.imagPart()
 \end{tmvcode}
@@ -4278,12 +4367,15 @@ b.imagPart()
 \index{BandMatrix!methods!conjugate}
 \index{BandMatrix!methods!adjoint}
 \index{BandMatrix!methods!view}
+\index{BandMatrix!methods!cView}
+\index{BandMatrix!methods!fView}
 \index{BandMatrix!methods!realPart}
 \index{BandMatrix!methods!imagPart}
 \vspace{12pt}
 
 \subsubsection{Functions}
 \index{BandMatrix!functions of}
+\label{BandMatrix_Functions}
 
 \begin{tmvcode}
 RT b.norm1() = Norm1(b)
@@ -4294,6 +4386,8 @@ RT b.normSq() = NormSq(b)
 RT b.normSq(RT scale)
 RT b.maxAbsElement() = MaxAbsElement(b)
 T b.trace() = Trace(b)
+T b.sumElements() = SumElements(b)
+RT b.sumAbsElements() = SumAbsElements(b)
 T b.det() = Det(b)
 RT b.logDet(T* sign=0) = LogDet(b)
 bool b.isSingular()
@@ -4316,6 +4410,8 @@ b.makeInverseATA(Matrix<T>& cov)
 \index{BandMatrix!functions of!NormF}
 \index{BandMatrix!functions of!NormSq}
 \index{BandMatrix!functions of!Trace}
+\index{BandMatrix!functions of!SumElements}
+\index{BandMatrix!functions of!SumAbsElements}
 \index{BandMatrix!functions of!Det}
 \index{BandMatrix!functions of!LogDet}
 \index{BandMatrix!functions of!Inverse}
@@ -4323,6 +4419,8 @@ b.makeInverseATA(Matrix<T>& cov)
 \index{BandMatrix!methods!normF}
 \index{BandMatrix!methods!normSq}
 \index{BandMatrix!methods!trace}
+\index{BandMatrix!methods!sumElements}
+\index{BandMatrix!methods!sumAbsElements}
 \index{BandMatrix!methods!det}
 \index{BandMatrix!methods!logDet}
 \index{BandMatrix!methods!isSingular}
@@ -4354,6 +4452,7 @@ Swap(b1,b2)
 
 \subsubsection{Arithmetic}
 \index{BandMatrix!arithmetic}
+\label{BandMatrix_Arithmetic}
 
 In addition to \tt{x}, \tt{v}, and \tt{m} from before, we now add \tt{b} 
 for a \tt{BandMatrix}.
@@ -4383,6 +4482,7 @@ b = x
 
 \subsubsection{Division}
 \index{BandMatrix!arithmetic!division}
+\label{BandMatrix_Division}
 
 The division operations are:
 \begin{tmvcode}
@@ -4425,15 +4525,14 @@ To access this decomposition, use:
 bool b.lud().IsTrans()
 tmv::LowerTriMatrix<T,UnitDiag> b.lud().getL()
 tmv::ConstBandMatrixView<T> b.lud().getU()
-int* b.lud().getP()
+Permutation b.lud().getP()
 \end{tmvcode}
 \index{BandMatrix!methods!lud}
 \index{BandMatrix!LU decomposition}
 \index{LU Decomposition!BandMatrix}
 The following should result in a matrix numerically very close to \tt{b}.
 \begin{tmvcode}
-tmv::Matrix<T> m2 = b.lud().getL() * b.lud().getU();
-m2.reversePermuteRows(b.lud().getP());
+tmv::Matrix<T> m2 = b.lud().getP() * b.lud().getL() * b.lud().getU();
 if (b.lud().IsTrans()) m2.transposeSelf();
 \end{tmvcode}
 
@@ -4482,7 +4581,7 @@ The product of these three
 should result in a matrix numerically very close to \tt{b}.
 
 There are the same control and access routines as for a regular SVD
-(See \ref{matrixsvd}),
+(See \ref{Matrix_Division_Access}),
 \begin{tmvcode}
 b.svd().thresh(RT thresh)
 b.svd().top(int nsing)
@@ -4507,10 +4606,11 @@ b.divideInPlace()
 \index{BandMatrix!methods!divIsSet}
 \index{BandMatrix!methods!divideInPlace}
 work the same as for regular \tt{Matrix}es.
-(See \ref{matrixsetdiv}.)
+(See \ref{Matrix_Division_Efficiency}.)
 
 \subsubsection{Input/Output}
 \index{BandMatrix!input/output}
+\label{BandMatrix_IO}
 
 The simplest output is the usual:
 \begin{tmvcode}
@@ -4518,7 +4618,7 @@ os << b
 \end{tmvcode}
 where \tt{os} is any \tt{std::ostream}.
 The output format is the same as for a \tt{Matrix}.
-(See \ref{matrixio}.)
+(See \ref{Matrix_IO}.)
 
 There is also a compact format for a \tt{BandMatrix}:
 \begin{tmvcode}
@@ -4544,8 +4644,8 @@ The same compact format can be read back in the usual two ways:
 \begin{tmvcode}
 tmv::BandMatrix<T> b(nrows,ncols,nlo,nhi);
 is >> b;
-std::auto_ptr<tmv::BandMatrix<T> > pb;
-is >> pb;
+std::auto_ptr<tmv::BandMatrix<T> > bptr;
+is >> bptr;
 \end{tmvcode}
 
 One can write small values as 0 with
@@ -4559,6 +4659,7 @@ b.writeCompact(std::ostream& os, RT thresh)
 \subsection{Symmetric and hermitian matrices}
 \index{SymMatrix}
 \index{HermMatrix|see{SymMatrix}}
+\label{SymMatrix}
 
 The \tt{SymMatrix} class is our symmetric matrix class.  A symmetric matrix is
 one for which $m = m^T$.  We also have a class called
@@ -4614,6 +4715,7 @@ from a \tt{SymMatrix}.
 
 \subsubsection{Constructors}
 \index{SymMatrix!constructors}
+\label{SymMatrix_Constructors}
 
 \begin{itemize}
 \item 
@@ -4706,6 +4808,7 @@ of the values are actually used,
 
 \subsubsection{Access}
 \index{SymMatrix!access methods}
+\label{SymMatrix_Access}
 
 \begin{tmvcode}
 s.nrows() = s.ncols() = s.colsize() = s.rowsize() = s.size()
@@ -4746,7 +4849,7 @@ s.subMatrix(int i1, int i2, int j1, int j2, int istep, int jstep)
 \index{SymMatrix!methods!subVector}
 \index{SymMatrix!methods!subMatrix}
 These work the same as for a \tt{Matrix}
-(See \ref{matrixaccess}.)
+(See \ref{Matrix_Access}.)
 except that the entire
 subvector or submatrix must be completely within the upper or lower triangle.
 
@@ -4762,9 +4865,13 @@ step in both the \tt{i} and \tt{j} directions.
 \begin{tmvcode}
 s.upperTri(DiagType dt=NonUnitDiag)
 s.lowerTri(DiagType dt=NonUnitDiag)
+s.unitUpperTri()
+s.unitLowerTri()
 \end{tmvcode}
 \index{SymMatrix!methods!upperTri}
 \index{SymMatrix!methods!lowerTri}
+\index{SymMatrix!methods!unitUpperTri}
+\index{SymMatrix!methods!unitLowerTri}
 Both of these are valid, regardless
 of which triangle stores the actual data for \tt{s}.
 \begin{tmvcode}
@@ -4772,6 +4879,8 @@ s.transpose()
 s.conjugate()
 s.adjoint()
 s.view()
+s.cView()
+s.fView()
 s.realPart()
 s.imagPart()
 \end{tmvcode}
@@ -4779,6 +4888,8 @@ s.imagPart()
 \index{SymMatrix!methods!conjugate}
 \index{SymMatrix!methods!adjoint}
 \index{SymMatrix!methods!view}
+\index{SymMatrix!methods!cView}
+\index{SymMatrix!methods!fView}
 \index{SymMatrix!methods!realPart}
 \index{SymMatrix!methods!imagPart}
 Note that the imaginary part of a complex hermitian matrix is skew-symmetric,
@@ -4791,6 +4902,7 @@ you could also use \tt{s.upperTri().offDiag().imagPart()}.
 
 \subsubsection{Functions}
 \index{SymMatrix!functions of}
+\label{SymMatrix_Functions}
 
 \begin{tmvcode}
 RT s.norm1() = Norm1(s)
@@ -4801,6 +4913,8 @@ RT s.normSq() = NormSq(s)
 RT s.normSq(RT scale)
 RT s.maxAbsElement() = MaxAbsElement(s)
 T s.trace() = Trace(s)
+T s.sumElements() = SumElements(s)
+RT s.sumAbsElements() = SumAbsElements(s)
 T s.det() = Det(s)
 RT s.logDet(T* sign=0) = LogDet(s)
 bool s.isSingular()
@@ -4824,6 +4938,8 @@ s.makeInverseATA(Matrix<T>& cov)
 \index{SymMatrix!functions of!NormF}
 \index{SymMatrix!functions of!NormSq}
 \index{SymMatrix!functions of!Trace}
+\index{SymMatrix!functions of!SumElements}
+\index{SymMatrix!functions of!SumAbsElements}
 \index{SymMatrix!functions of!Det}
 \index{SymMatrix!functions of!LogDet}
 \index{SymMatrix!functions of!Inverse}
@@ -4831,6 +4947,8 @@ s.makeInverseATA(Matrix<T>& cov)
 \index{SymMatrix!methods!normF}
 \index{SymMatrix!methods!normSq}
 \index{SymMatrix!methods!trace}
+\index{SymMatrix!methods!sumElements}
+\index{SymMatrix!methods!sumAbsElements}
 \index{SymMatrix!methods!det}
 \index{SymMatrix!methods!logDet}
 \index{SymMatrix!methods!isSingular}
@@ -4886,7 +5004,7 @@ combined swaps.
 
 \subsubsection{Arithmetic}
 \index{SymMatrix!arithmetic}
-\label{symarith}
+\label{SymMatrix_Arithmetic}
 
 In addition to \tt{x}, \tt{v}, and \tt{m} from before,
 we now add \tt{s} for a \tt{SymMatrix}.
@@ -4992,6 +5110,8 @@ s3 += s2;
 
 \subsubsection{Division}
 \index{SymMatrix!arithmetic!division}
+\label{SymMatrix_Division}
+
 The division operations are:
 \begin{tmvcode}
 v2 = v1 [/%] s
@@ -5021,7 +5141,7 @@ To access this decomposition, use:
 \begin{tmvcode}
 ConstLowerTriMatrixView<T> s.lud().getL()
 Matrix<T> s.lud().getD()
-int* s.lud().getP()
+Permutation s.lud().getP()
 \end{tmvcode}
 \index{SymMatrix!methods!lud}
 \index{SymMatrix!LU Decomposition|see{SymMatrix!Bunch-Kaufman decomposition}}
@@ -5029,10 +5149,8 @@ int* s.lud().getP()
 \index{Bunch-Kaufman Decomposition!SymMatrix}
 The following should result in a matrix numerically very close to \tt{s}.
 \begin{tmvcode}
-Matrix<T> m2 = s.lud().getL() * s.lud().getD() * 
-      s.lud().getL().transpose();
-m2.reversePermuteRows(s.lud().getP());
-m2.reversePermuteCols(s.lud().getP());
+Matrix<T> m2 = s.lud().getP() * s.lud().getL() * s.lud().getD() * 
+      s.lud().getL().transpose() * s.lud().getP().transpose();
 \end{tmvcode}
 For a complex hermitian \tt{s}, you would need to replace
 \tt{transpose} with \tt{adjoint}.
@@ -5061,7 +5179,7 @@ When the decomposition fails, it throws an object of type
 \tt{NonPosDef}.
 \index{Exceptions!NonPosDef}
 
-See \S\ref{nonposdef} for some more discussion about positive-definite
+See \S\ref{NonPosDef} for some more discussion about positive-definite
 matrices.
 
 The only advantage of Cholesky over Bunch-Kaufman is speed.  (And only about
@@ -5128,7 +5246,7 @@ new accessor: \tt{s.symsvd()}.  Its \tt{getS} and \tt{getV} methods return Views
 rather than instantiated matrices.
 
 Both versions also have the same control and access routines as a regular SVD
-(See \ref{matrixsvd}):
+(See \ref{Matrix_Division_Access}):
 \begin{tmvcode}
 s.svd().thresh(RT thresh)
 s.svd().top(int nsing)
@@ -5154,10 +5272,11 @@ s.divideInPlace()
 \index{SymMatrix!methods!divIsSet}
 \index{SymMatrix!methods!divideInPlace}
 work the same as for regular \tt{Matrix}es.
-(See \ref{matrixsetdiv}.)
+(See \ref{Matrix_Division_Efficiency}.)
 
 \subsubsection{Input/Output}
 \index{SymMatrix!input/output}
+\label{SymMatrix_IO}
 
 The simplest output is the usual:
 \begin{tmvcode}
@@ -5186,9 +5305,9 @@ In each case, the same compact format can be read back in the usual two ways:
 tmv::SymMatrix<T> s(n);
 tmv::HermMatrix<T> h(n);
 is >> s >> h;
-std::auto_ptr<tmv::SymMatrix<T> > ps;
-std::auto_ptr<tmv::HermMatrix<T> > ph;
-is >> ps >> ph;
+std::auto_ptr<tmv::SymMatrix<T> > sptr;
+std::auto_ptr<tmv::HermMatrix<T> > hptr;
+is >> sptr >> hptr;
 \end{tmvcode}
 One can write small values as 0 with
 \begin{tmvcode}
@@ -5201,6 +5320,7 @@ s.writeCompact(std::ostream& os, RT thresh)
 \subsection{Symmetric and hermitian band matrices}
 \index{SymBandMatrix}
 \index{HermBandMatrix|see{SymBandMatrix}}
+\label{SymBandMatrix}
 
 The \tt{SymBandMatrix} class is our symmetric band matrix, which combines
 the properties of SymMatrix and BandMatrix; it has a banded structure and
@@ -5244,7 +5364,7 @@ or \tt{tmv::FortranStyle}.  The default values for these are
 
 The storage size required is the same as for the \tt{BandMatrix} of
 the upper or lower band portion.
-(See \ref{bandmatrixstoragesize}.)
+(See \ref{BandMatrix}.)
 As with square band matrices, 
 all three storage methods always need the same amount of memory, so the 
 decision about which method to use should generally be based on performance 
@@ -5262,6 +5382,7 @@ the start of the array needs to be at the start of the lowest sub-diagonal.
 
 \subsubsection{Constructors}
 \index{SymBandMatrix!constructors}
+\label{SymBandMatrix_Constructors}
 
 \begin{itemize}
 \item 
@@ -5387,6 +5508,7 @@ Make a \tt{SymBandMatrixView} of the actual memory elements, \tt{vv}.
 
 \subsubsection{Access}
 \index{SymBandMatrix!access methods}
+\label{SymBandMatrix_Access}
 
 \begin{tmvcode}
 sb.nrows() = sb.ncols() = sb.colsize() = sb.rowsize() = sb.size()
@@ -5436,7 +5558,7 @@ sb.lowerBandOff()
 \index{SymBandMatrix!methods!upperBandOff}
 \index{SymBandMatrix!methods!lowerBandOff}
 These work the same as for a \tt{BandMatrix}
-(See \ref{bandmatrixaccess}),
+(See \ref{BandMatrix_Access}),
 except that the entire
 subvector or submatrix must be completely within the upper or lower band.
 
@@ -5467,6 +5589,8 @@ sb.transpose()
 sb.conjugate()
 sb.adjoint()
 sb.view()
+sb.cView()
+sb.fView()
 sb.realPart()
 sb.imagPart()
 \end{tmvcode}
@@ -5474,6 +5598,8 @@ sb.imagPart()
 \index{SymBandMatrix!methods!conjugate}
 \index{SymBandMatrix!methods!adjoint}
 \index{SymBandMatrix!methods!view}
+\index{SymBandMatrix!methods!cView}
+\index{SymBandMatrix!methods!fView}
 \index{SymBandMatrix!methods!realPart}
 \index{SymBandMatrix!methods!imagPart}
 Note that the imaginary part of a complex hermitian band matrix is
@@ -5486,6 +5612,7 @@ you could use
 
 \subsubsection{Functions}
 \index{SymBandMatrix!functions of}
+\label{SymBandMatrix_Functions}
 
 \begin{tmvcode}
 RT sb.norm1() = Norm1(sb)
@@ -5496,6 +5623,8 @@ RT sb.normSq() = NormSq(sb)
 RT sb.normSq(RT scale)
 RT sb.maxAbsElement() = MaxAbsElement(sb)
 T sb.trace() = Trace(sb)
+T sb.sumElements() = SumElements(sb)
+RT sb.sumAbsElements() = SumAbsElements(sb)
 T sb.det() = Det(sb)
 RT sb.logDet(T* sign=0) = LogDet(sb)
 sinv = sb.inverse() = Inverse(sb)
@@ -5519,6 +5648,8 @@ sb.makeInverseATA(Matrix<T>& cov)
 \index{SymBandMatrix!functions of!NormF}
 \index{SymBandMatrix!functions of!NormSq}
 \index{SymBandMatrix!functions of!Trace}
+\index{SymBandMatrix!functions of!SumElements}
+\index{SymBandMatrix!functions of!SumAbsElements}
 \index{SymBandMatrix!functions of!Det}
 \index{SymBandMatrix!functions of!LogDet}
 \index{SymBandMatrix!functions of!Inverse}
@@ -5526,6 +5657,8 @@ sb.makeInverseATA(Matrix<T>& cov)
 \index{SymBandMatrix!methods!normF}
 \index{SymBandMatrix!methods!normSq}
 \index{SymBandMatrix!methods!trace}
+\index{SymBandMatrix!methods!sumElements}
+\index{SymBandMatrix!methods!sumAbsElements}
 \index{SymBandMatrix!methods!det}
 \index{SymBandMatrix!methods!logDet}
 \index{SymBandMatrix!methods!isSingular}
@@ -5558,6 +5691,7 @@ Swap(sb1,sb2)
 
 \subsubsection{Arithmetic}
 \index{SymBandMatrix!arithmetic}
+\label{SymBandMatrix_Arithmetic}
 
 In addition to \tt{x}, \tt{v}, \tt{m}, \tt{b} and \tt{s} from before, 
 we now add \tt{sb} for a \tt{SymBandMatrix}.
@@ -5598,6 +5732,7 @@ sb = x
 
 \subsubsection{Division}
 \index{SymBandMatrix!arithmetic!division}
+\label{SymBandMatrix_Division}
 
 The division operations are:
 \begin{tmvcode}
@@ -5623,7 +5758,7 @@ To access this decomposition, use:
 bool sb.lud().IsTrans()
 tmv::LowerTriMatrix<T,UnitDiag> sb.lud().getL()
 tmv::ConstBandMatrixView<T> sb.lud().getU()
-int* sb.lud().getP()
+Permutation sb.lud().getP()
 \end{tmvcode}
 \index{SymBandMatrix!methods!lud}
 \index{SymBandMatrix!LU decomposition}
@@ -5633,8 +5768,7 @@ The following should result in a matrix numerically very close to \tt{sb}.
 tmv::Matrix<T> m2(sb.nrows(),sb.ncols);
 tmv::MatrixView<T> m2v = 
       sb.lud().IsTrans() ? m2.transpose() : m2.view();
-m2v = sb.lud().getL() * sb.lud().getU();
-m2v.reversePermuteRows(sb.lud().getP());
+m2v = sb.lud().getP() * sb.lud().getL() * sb.lud().getU();
 \end{tmvcode}
 
 \item
@@ -5699,7 +5833,7 @@ Matrix<T> m2 = sb.svd().getU() * sb.svd().getS() * sb.svd().getV()
 \end{tmvcode}
 
 Both versions also have the same control and access routines as a regular SVD:
-(See \ref{matrixsvd}),
+(See \ref{Matrix_Division_Access}):
 \begin{tmvcode}
 sb.svd().thresh(RT thresh)
 sb.svd().top(int nsing)
@@ -5725,10 +5859,11 @@ sb.divideInPlace()
 \index{SymBandMatrix!methods!divIsSet}
 \index{SymBandMatrix!methods!divideInPlace}
 work the same as for regular \tt{Matrix}es.
-(See \ref{matrixsetdiv}.)
+(See \ref{Matrix_Division_Efficiency}.)
 
 \subsubsection{Input/Output}
 \index{SymBandMatrix!input/output}
+\label{SymBandMatrix_IO}
 
 The simplest output is the usual:
 \begin{tmvcode}
@@ -5736,12 +5871,12 @@ os << sb
 \end{tmvcode}
 where \tt{os} is any \tt{std::ostream}.
 The output format is the same as for a \tt{Matrix}.
-(See \ref{matrixio}.)
+(See \ref{Matrix_IO}.)
 
 There is also a compact format for a \tt{BandMatrix}:
 \begin{tmvcode}
 sb.writeCompact(os)
-\index{SymMatrix!methods!writeCompact}
+\index{SymBandMatrix!methods!writeCompact}
 \end{tmvcode}
 outputs in the format:
 \begin{tmvcode}
@@ -5762,9 +5897,9 @@ The same compact format can be read back in the usual two ways:
 tmv::SymBandMatrix<T> sb(n,nlo);
 tmv::HermBandMatrix<T> hb(n,nlo);
 is >> sb >> hb;
-std::auto_ptr<tmv::SymBandMatrix<T> > psb;
-std::auto_ptr<tmv::HermBandMatrix<T> > phb;
-is >> psb >> phb;
+std::auto_ptr<tmv::SymBandMatrix<T> > sbptr;
+std::auto_ptr<tmv::HermBandMatrix<T> > hbptr;
+is >> sbptr >> hbptr;
 \end{tmvcode}
 
 One can write small values as 0 with
@@ -5772,13 +5907,236 @@ One can write small values as 0 with
 sb.write(std::ostream& os, RT thresh)
 sb.writeCompact(std::ostream& os, RT thresh)
 \end{tmvcode}
-\index{SymMatrix!methods!writeCompact}
-\index{SymMatrix!methods!write}
+\index{SymBandMatrix!methods!writeCompact}
+\index{SymBandMatrix!methods!write}
+
+\subsection{Permutations}
+\index{Permutation}
+\label{Permutation}
+
+The \tt{Permutation} class is our permutation matrix class.
+A permutation matrix is square matrix with exactly one 1 in each row and
+column, and all the rest of the elements equal to zero.
+
+However, internally we do not store a permutation this way.
+Instead, we treat a permutation as a series of pair-wise interchanges.
+This seems to be the fastest way to apply a permutation to a matrix or
+vector, rather than using an index-based method.
+
+Also, I didn't bother to have a PermutationView class.  Instead, the 
+Permutation object keeps track of whether it owns its data or is just
+referencing values kept somewhere else.  Whenever you perform 
+a mutable action on the object, it copies the values if necessary.
+So you cannot indirectly modify another Permutation the way you can
+with MatrixView.
+
+\subsubsection{Constructors}
+\index{Permutation!constructors}
+\label{Permutation_Constructors}
+
+\begin{itemize}
+\item 
+\begin{tmvcode}
+tmv::Permutation p(size_t n)
+\end{tmvcode}
+Makes an \tt{n} $\times$ \tt{n} \tt{Permutation} set initially to the identity matrix.
+
+\item
+\begin{tmvcode}
+tmv::Permutation p(size_t n, const int* pp, bool isinv, int det)
+\end{tmvcode}
+Makes an \tt{n} $\times$ \tt{n} \tt{Permutation} using the provided values as the 
+list of interchanges.  The meaning of pp is that \tt{v=p*v} is equivalent to
+\begin{tmvcode}
+if (isinv) v.reversePermute(pp);
+else v.permute(pp);
+\end{tmvcode}
+The last two parameters may be omitted.  If \tt{det} is omitted, it will be calculated
+from the input values.  And if \tt{isinv} is omitted, it is taken to be \tt{false}.
+
+\end{itemize}
+
+
+\subsubsection{Access}
+\index{Permutation!access methods}
+\label{Permutation_Access}
+
+\begin{tmvcode}
+p.nrows() = p.ncols() = p.colsize() = p.rowsize() = p.size()
+p(i,j)
+\end{tmvcode}
+\index{Permutation!methods!nrows}
+\index{Permutation!methods!ncols}
+\index{Permutation!methods!rowsize}
+\index{Permutation!methods!colsize}
+\index{Permutation!methods!size}
+\index{Permutation!methods!operator()}
+Note: Because of the way the permutation is stored, \tt{p(i,j)} is not
+terribly efficient.  It takes $O(N)$ time to calculate.  Also, there is no
+mutable version like there is for most matrices.
+
+\begin{tmvcode}
+p.transpose() = p.inverse()
+\end{tmvcode}
+\index{Permutation!methods!transpose}
+\index{Permutation!methods!inverse}
+These are the same, and they do not create new storage.  So statements like
+\tt{v = p.transpose() * v} are efficient.
+
+\begin{tmvcode}
+const int* p.getValues()
+\end{tmvcode}
+Get the indices of the interchanges.  These are equivalent to the \tt{pp} values
+described above for the constructor.
+
+\begin{tmvcode}
+bool p.isInverse()
+\end{tmvcode}
+Returns true the the interchange values are taken in the reverse order (last to first)
+or false if not.
+\vspace{12pt}
+
+\subsubsection{Functions}
+\index{Permutation!functions of}
+\label{Permutation_Functions}
+
+Most of these functions aren't very interesting, since most of them have 
+trivial values like 1 or n.  But we provide them all for consistency with the 
+functions that other matrices provide.
+
+\begin{tmvcode}
+int p.norm1() = Norm1(p)
+int p.norm2() = Norm2(p) = p.doNorm2()
+int p.normInf() = NormInf(p)
+int p.maxAbsElement() = MaxAbsElement(p)
+double p.normF() = NormF(p) = p.norm() = Norm(p)
+int p.normSq() = NormSq(p)
+int p.normSq(RT scale)
+int p.trace() = Trace(p)
+int p.sumElements() = SumElements(p)
+int p.sumAbsElements() = SumAbsElements(p)
+int p.det() = Det(p)
+int p.logDet(int* sign=0) = LogDet(p)
+bool p.isSingular()
+int p.condition()
+int p.doCondition()
+pinv = p.inverse() = Inverse(p)
+p.makeInverse(Matrix<T>& minv)
+p.makeInverseATA(Matrix<T>& cov)
+\end{tmvcode}
+\index{Permutation!functions of!Norm1}
+\index{Permutation!functions of!Norm2}
+\index{Permutation!functions of!NormInf}
+\index{Permutation!functions of!MaxAbsElement}
+\index{Permutation!methods!norm1}
+\index{Permutation!methods!norm2}
+\index{Permutation!methods!doNorm2}
+\index{Permutation!methods!normInf}
+\index{Permutation!methods!maxAbsElement}
+\index{Permutation!functions of!Norm}
+\index{Permutation!functions of!NormF}
+\index{Permutation!functions of!NormSq}
+\index{Permutation!functions of!Trace}
+\index{Permutation!functions of!SumElements}
+\index{Permutation!functions of!SumAbsElements}
+\index{Permutation!functions of!Det}
+\index{Permutation!functions of!LogDet}
+\index{Permutation!functions of!Inverse}
+\index{Permutation!methods!norm}
+\index{Permutation!methods!normF}
+\index{Permutation!methods!normSq}
+\index{Permutation!methods!trace}
+\index{Permutation!methods!sumElements}
+\index{Permutation!methods!sumAbsElements}
+\index{Permutation!methods!det}
+\index{Permutation!methods!logDet}
+\index{Permutation!methods!isSingular}
+\index{Permutation!methods!condition}
+\index{Permutation!methods!doCondition}
+\index{Permutation!methods!inverse}
+\index{Permutation!methods!makeInverse}
+\index{Permutation!methods!makeInverseATA}
+
+\begin{tmvcode}
+p.setToIdentity()
+p.transposeSelf()
+p.invertSelf()
+Swap(p1,p2)
+\end{tmvcode}
+\index{Permutation!methods!setToIdentity}
+\index{Permutation!methods!transposeSelf}
+\index{Permutation!methods!invertSelf}
+\index{Permutation!functions of!Swap}
+
+\subsubsection{Arithmetic}
+\index{Permutation!arithmetic}
+\label{Permutation_Arithmetic}
+
+\begin{tmvcode}
+v2 = p * v1
+v2 = v1 * p
+v2 = v1 / p
+v2 = v1 % p
+v *= p
+v /= p
+v %= p
+m2 = p * m1
+m2 = m1 * p
+m2 = m1 / p
+m2 = m1 % p
+m *= p
+m /= p
+m %= p
+p1 == p2
+p1 != p2
+\end{tmvcode}
+
+\subsubsection{Input/Output}
+\index{Permutation!input/output}
+\label{Permutation_IO}
+
+The simplest output is the usual:
+\begin{tmvcode}
+os << p
+\end{tmvcode}
+where \tt{os} is any \tt{std::ostream}.
+The output format is the same as for a \tt{Matrix}, including all the 0's.
+(See \ref{Matrix_IO}.)
+
+There is also a compact format:
+\begin{tmvcode}
+p.writeCompact(os)
+\end{tmvcode}
+\index{Permutation!methods!writeCompact}
+which outputs in the format:
+\begin{tmvcode}
+P n isinv ( pp[0]  pp[1]  ...  pp[n-1] )
+\end{tmvcode}
+where \tt{isinv} is a boolean (1 or 0), and the \tt{pp} values are the 
+indices of the interchanges.
+In other words, the permutation could be created as
+\begin{tmvcode}
+Permutation p(n,pp,isinv);
+\end{tmvcode}
+
+The same (compact, that is) format can be read back in the usual two ways:
+\begin{tmvcode}
+tmv::Permutation p(n);
+is >> p;
+std::auto_ptr<tmv::Permutation> pptr;
+is >> pptr;
+\end{tmvcode}
+where the first gives an error if \tt{p} is the wrong size and the second allocates
+a new \tt{Permutation} that is the correct size.
+\index{Permutation!methods!write}
+\index{Permutation!methods!writeCompact}
+\index{Permutation!methods!read}
+
 
 \newpage
 \section{Errors and Exceptions}
 \index{Exceptions}
-\label{error}
+\label{Exceptions}
 
 There are two kinds of errors that the TMV library looks for.  The first are 
 coding errors.  Some examples are:
@@ -5847,6 +6205,8 @@ If you want to be more specific, there are a number of classes that derive from
 
 \subsection{FailedAssert}
 \index{Exceptions!FailedAssert}
+\label{FailedAssert}
+
 \tt{tmv::FailedAssert} indicates that one of the assert statements failed.
 Since these are coding errors,
 if you catch this one, you'll probably just want to print out the error and abort
@@ -5862,6 +6222,8 @@ rather than your own code, please post a bug report at \myissues.
 
 \subsection{Singular}
 \index{Exceptions!Singular}
+\label{Singular}
+
 \tt{tmv::Singular} indicates that you tried to invert or divide by a matrix
 that is (numerically) singular.  This may be useful to catch specifically,
 since you may want to do something different when you encounter a singular
@@ -5872,6 +6234,8 @@ unreliable.
 
 \subsection{ReadError}
 \index{Exceptions!ReadError}
+\label{ReadError}
+
 \tt{tmv::ReadError} indicates that there was some problem reading in a matrix or 
 vector from an \tt{istream} input.  If you catch this by reference and write it,
 it will give you a fairly specific description of what the problem was as well as
@@ -5880,7 +6244,8 @@ writing the part of the matrix or vector that was read in successfully.
 \subsection{NonPosDef}
 \index{Exceptions!NonPosDef}
 \index{Cholesky Decomposition!NonPosDef exception}
-\label{nonposdef}
+\label{NonPosDef}
+
 \tt{tmv::NonPosDef} indicates that you tried to do some operation that requires
 a matrix to be positive definite, and it turned out not to be positive definite.
 The most common example would be performing a Cholesky decomposition on a 
@@ -5925,12 +6290,12 @@ want to guard against one failing the Cholesky decomposition due to round-off
 errors.
 
 \index{QR Decomposition!Downdate!NonPosDef exception}
-It is also worth mentioning that the routine \tt{QR\_Downdate} described in \S\ref{downdate}
+It is also worth mentioning that the routine \tt{QR\_Downdate} described in \S\ref{QRDowndate}
 below will also throw the exception \tt{NonPosDef} when it fails.
 
 \subsection{Warnings}
 \index{Warnings}
-\label{warnings}
+\label{Warnings}
 
 There are also a few things that are not really errors, but where the user might be doing
 something wrong, or where something unexpected happened, but TMV was able to handle it.
@@ -5965,7 +6330,7 @@ for this is still there.
 \index{LAPACK!workspace warnings}
 \end{itemize}
 
-The default way of handling these situations is to print a message to \tt{stdout}.  This is often
+The default way of handling these situations is to print a message to \tt{std::cout}.  This is often
 appropriate, since it is probably something the programmer wants to know about.
 The first two items, in fact, are probably coding errors.
 
@@ -5975,13 +6340,15 @@ turn off the warnings:
 void tmv::NoWarnings();
 \end{tmvcode}
 \index{Warnings!turn off}
+\index{NoWarnings}
 
-If you want to keep the warnings active, but don't like them being written to \tt{stdout}, then 
+If you want to keep the warnings active, but don't like them being written to \tt{std::cout}, then 
 you can use:
 \begin{tmvcode}
 std::ostream* tmv::WriteWarningsTo(std::ostream* newos)
 \end{tmvcode}
 \index{Warnings!redirect to a file}
+\index{WriteWarningsTo}
 This lets you redirect the warnings to some other \tt{ostream}.  It could be some log file
 that you look at later.  Or it could even be a \tt{stringstream} so you can examine the text
 of the warnings within your code and take appropriate action.
@@ -6006,6 +6373,7 @@ tmv::WriteWarnignsTo(tempos);
 
 \subsection{Eigenvalues and eigenvectors}
 \index{Eigenvalues}
+\label{Eigenvalues}
 
 The eigenvalues of a matrix are important quantities in many matrix applications.
 A number, $\lambda$, is an eigenvalue of a square matrix, $A$, if for some
@@ -6162,13 +6530,13 @@ $A \rightarrow P L U$ where $L$ is lower triangular,
 $U$ is upper triangular, and $P$ is a permutation.
 
 \begin{tmvcode}
-void LU_Decompose(const MatrixView<T>& A, int* P);
-L = A.lowerTri(UnitDiag);
-U = A.upperTri(NonUnitDiag);
+void LU_Decompose(const MatrixView<T>& A, Permutation& P);
+L = A.unitLowerTri();
+U = A.upperTri();
 
 void LU_Decompose(const GenBandMatrix<T>& A, 
       const LowerTriMatrixView<T>& L, 
-      const BandMatrixView<T>& U, int* P);
+      const BandMatrixView<T>& U, Permutation& P);
 \end{tmvcode}
 \index{LU Decomposition!Matrix}
 \index{LU Decomposition!BandMatrix}
@@ -6180,8 +6548,7 @@ In both cases, \tt{P} must have \tt{A.ncols()} elements of memory allocated.
 
 The original matrix \tt{A} can be obtained from:
 \begin{tmvcode}
-A = L * U;
-A.reversePermuteRows(P);
+A = P * L * U;
 \end{tmvcode}
 
 \item Cholesky Decomposition 
@@ -6224,8 +6591,8 @@ non-zero elements along the off-diagonal.
 
 \begin{tmvcode}
 void LDL_Decompose(const SymMatrixView<T>& A, 
-      const SymBandMatrixView<T>& D, int* P);
-L = A.lowerTri(UnitDiag);
+      const SymBandMatrixView<T>& D, Permutation& P);
+L = A.unitLowerTri();
 \end{tmvcode}
 \index{Bunch-Kaufman Decomposition!SymMatrix}
 \index{SymMatrix!Bunch-Kaufman decomposition}
@@ -6233,9 +6600,8 @@ L = A.lowerTri(UnitDiag);
 
 The original matrix \tt{A} can be obtained from:
 \begin{tmvcode}
-A = L * D * (A.isherm() ? L.adjoint() : L.transpose());
-A.reversePermuteRows(P);
-A.reversePermuteCols(P);
+A = P * L * D * (A.isherm() ? L.adjoint() : L.transpose())
+        P.transpose();
 \end{tmvcode}
 
 \item Tridiagonal LDL$^\dagger$ Decomposition 
@@ -6263,7 +6629,7 @@ quality is only defined for hermitian matrices).  Furthermore,
 hermitian matrices that are not positive definite will probably be decomposed successfully
 without throwing, resulting in D having negative values.
 
-Also, the LAPACK implementation gives an error for matrices that the native code
+Also, the LAPACK implementation throws an exception for matrices that the native code
 successfully decomposes.  It throws for hermitian matrices whenever they are 
 not positive definite, whereas the native code succeeds for many indefinite matrices.
 }
@@ -6272,7 +6638,8 @@ not positive definite, whereas the native code succeeds for many indefinite matr
 
 \begin{tmvcode}
 void LDL_Decompose(const SymBandMatrixView<T>& A);
-(L = A.lowerBand()).diag().setAllTo(T(1));
+L = A.lowerBand();
+L.diag().setAllTo(T(1));
 D = DiagMatrixViewOf(A.diag());
 \end{tmvcode}
 \index{Tridiagonal LDL Decomposition!SymBandMatrix}
@@ -6327,14 +6694,15 @@ and $A$ is either square or has more rows than columns.
 
 \begin{tmvcode}
 void QRP_Decompose(const MatrixView<T>& A, 
-      const UpperTriMatrixView<T>& R, int* P, bool strict=false);
+      const UpperTriMatrixView<T>& R, Permutation& P, 
+      bool strict=false);
 Q = A;
 \end{tmvcode}
 \index{QRP Decomposition!Matrix}
 \index{Matrix!QRP decomposition}
 \tt{P} must have \tt{A.ncols()} elements of memory allocated.
 
-As discussed in \S\ref{divtypes}, 
+As discussed in \S\ref{Matrix_Division_Decompositions}, 
 there are two slightly different algorithms for doing a QRP decomposition.  
 If \tt{strict = true}, then the diagonal elements
 of $R$ be strictly decreasing (in absolute value) from upper-left to lower-right\footnote{
@@ -6345,7 +6713,7 @@ is not always strictly decreasing, although it will usually be close.  If strict
 diagonal elements are important for you, you can use the native TMV algorithm instead
 by compiling with the flag \texttt{-DNOGEQP3}.}.
 
-If \tt{strict} is false, however (the default), then the diagonal elements of $R$ will not
+If \tt{strict} is false however (the default), then the diagonal elements of $R$ will not
 be strictly decreasing.  Rather, there will be no diagonal element
 of $R$ below and to the right of one which is more than a factor of $\epsilon^{1/4}$ 
 smaller in absolute value, where 
@@ -6355,8 +6723,7 @@ singular matrices, and it is much faster than the strict algorithm.
 
 The original matrix \tt{A} is obtained from:
 \begin{tmvcode}
-A = Q * R;
-A.reversePermuteCols(P);
+A = Q * R * P;
 \end{tmvcode}
 
 If you only need $R$, the following versions is faster, since it does
@@ -6517,6 +6884,7 @@ If $A$ is found to be not positive definite, a \tt{NonPosDef} exception is throw
 
 \subsection{Update a QR decomposition}
 \index{QR Decomposition!Update}
+\label{QRUpdate}
 
 One reason that it can be useful to create and deal with the QR decomposition directly,
 rather than 
@@ -6528,7 +6896,7 @@ least-square fit to a large number of linear equations, you can write the system
 a matrix equation: 
 $A x = b$, where $A$ is a matrix with more rows than columns, and you are seeking,
 not an exact solution for $x$, but rather the value of $x$ which minimizes
-$||b-Ax||_2$.  See \S\ref{leastsquare} for a more in depth discussion of this topic.
+$||b-Ax||_2$.  See \S\ref{Matrix_Division_Leastsquare} for a more in depth discussion of this topic.
 
 It may be the case that you
 have more rows (i.e. constraints) than would allow the entire matrix to fit in memory.  
@@ -6663,7 +7031,7 @@ x /= R;
 
 \subsection{Downdate a QR decomposition}
 \index{QR Decomposition!Downdate}
-\label{downdate}
+\label{QRDowndate}
 
 When performing a least-square fit of some data to a model,
 it is common to do some kind of outlier rejection to remove data that
@@ -6829,6 +7197,7 @@ which gains some additional Level 3 BLAS calls, for a bit more speed-up.
 \index{SymMatrix!arithmetic!rank-2 Update}
 \index{SymMatrix!arithmetic!rank-2k Update}
 \index{SymMatrix!arithmetic!product of two regular matrices}
+\label{SymMatrix_Ops}
 
 There are three more arithmetic routines that we provide for \tt{SymMatrix},
 which do not have
@@ -6889,6 +7258,7 @@ symmetric and that this calculation is ok.  Therefore it is provided as a subrou
 \index{BandMatrix!arithmetic!element by element product}
 \index{SymMatrix!arithmetic!element by element product}
 \index{SymBandMatrix!arithmetic!element by element product}
+\label{ElementProd}
 
 The two usual kinds of multiplication for vectors are the inner product and 
 the outer product, which result in a scalar and a matrix respectively.
@@ -6941,6 +7311,7 @@ if the matrices use the same storage.
 \index{BaseMatrix!views of}
 \index{BaseMatrix!copy of}
 \index{BaseMatrix!inverse of}
+\label{BaseMatrixViews}
 
 If you are dealing with objects that are only known to be \tt{BaseMatrix}es
 (i.e. they could be a \tt{Matrix} or a \tt{DiagMatrix} or a \tt{SymMatrix}, etc.),
@@ -6966,6 +7337,7 @@ matrix.
 
 \subsection{Iterators}
 \index{Vector!iterators}
+\label{Iterators}
 
 We mentioned that the iterators through a \tt{Vector} are:
 \begin{tmvcode}
@@ -7038,6 +7410,7 @@ without any performance drop.
 \index{BandMatrix!direct access to memory}
 \index{SymMatrix!direct access to memory}
 \index{SymBandMatrix!direct access to memory}
+\label{DirectAccess}
 
 We provide methods for accessing the memory of a matrix or vector directly.
 This is especially useful for meshing the TMV objects with other libraries
@@ -7146,7 +7519,7 @@ The last one tells you whether the actual elements to be accessed are stored
 in the upper triangle half of the matrix (true) or the lower (false).
 
 \subsection{``Linear'' views}
-\label{linearviews}
+\label{LinearViews}
 
 Our matrices generally store the data contiguously in memory with all of the 
 methods like \tt{row} and \tt{col} returning the appropriate slice through the
@@ -7204,16 +7577,57 @@ v *= 2.3;
 to call the BLAS routine \tt{dscal} with \tt{x=2.3}, rather than \tt{zscal}
 with \tt{x=complex<double>(2.3,0.0)}, which would be slower.
 
+\subsection{Getting the Version of TMV}
+\index{Version of TMV}
+
+At times it can be useful to be able to access what version of TMV is installed on a 
+particular machine, either to log the information as part of the meta-data about a
+run of a program, or even to modify the code depending on which features of TMV
+are available.  To address this, we provide two kinds of ways to access this information.
+
+First, there is a function:
+\begin{tmvcode}
+std::string TMV_Version();
+\end{tmvcode}
+\index{TMV_Version}
+For this release, this function returns the string ``\tmvversion''.  This is useful for inserting
+into a log file, but it not useful for conditionally controlling the user code.
+
+So we also provide three C preprocessor definitions:
+\begin{tmvcode}
+TMV_MAJOR_VERSION
+TMV_MINOR_VERSION
+TMV_VERSION_AT_LEAST(major,minor)
+\end{tmvcode}
+\index{TMV_MAJOR_VERSION}
+\index{TMV_MINOR_VERSION}
+\index{TMV_VERSION_AT_LEAST}
+\index{Conditional compilation}
+The first two are defined to be \tmvmajorversion\ and \tmvminorversion\ for this release.
+The third can be used with an \tt{#if} directive to change what the code is.
+For example, in version 0.64 we added the \tt{m.unitUpperTri()} feature.  So you could
+write\footnote{
+Well, technically, this wouldn't work, since the \tt{TMV_VERSION_AT_LEAST} macro
+wasn't introduced until version 0.64 either...}:
+\begin{tmvcode}
+#if TMV_VERSION_AT_LEAST(0,64)
+U = m.unitUpperTri();
+#else
+U = m.upperTri(tmv::UnitDiag);
+#endif
+\end{tmvcode}
+to conditionally use the feature if your installed TMV library supports it.
+
 \newpage
 \section{Obtaining and Compiling the Library}
 \index{Installation}
-\label{install}
+\label{Install}
 
 This code is licensed using the Gnu General Public License.  See 
-\S\ref{license} below for more details.
+\S\ref{License} below for more details.
 
 \subsection{Obtaining the source code}
-\label{obtain_code}
+\label{Install_Obtain}
 \index{Installation!obtaining source code}
 
 \begin{enumerate}
@@ -7236,28 +7650,29 @@ in the top directory.
 \end{enumerate}
 
 At this point there are several different choices for how to compile the library.
-The preferred method is to use SCons.  To use this method, continue onto \S\ref{scons_install}.
-However, we also provide instructions for using standard make (\S\ref{make_install}),
-CMake (\S\ref{cmake_install}), or Visual C++ (\S\ref{microsoft_install}).
+The preferred method is to use SCons.  To use this method, continue onto \S\ref{Install_SCons}.
+However, we also provide instructions for using standard make (\S\ref{Install_Make}),
+CMake (\S\ref{Install_CMake}), or Visual C++ (\S\ref{Install_Microsoft}).
 
 
 
 \subsection{Installing using SCons}
-\label{scons_install}
+\label{Install_SCons}
 \index{Installation!scons}
 
-With the v0.62 release of TMV, I introduced a new installation method using SCons.  For that 
+With the version 0.62 release of TMV, I introduced a new installation method using SCons.  
+For that 
 release it was considered an alternative method, since it was brand new.  However, by now, I
 have tried it on quite a few platforms and it seems to be working very well.  It usually finds
 the BLAS and LAPACK libraries on your system automatically, which is nicer than having 
 to specify them by hand.
 
 If you have trouble installing with SCons, you can try the 
-\texttt{Makefile} installation instead (\S\ref{make_install}).  And please let me know about 
+\texttt{Makefile} installation instead (\S\ref{Install_Make}).  And please let me know about 
 the problem you are having either at \mygroup\ or \myissues.
 
 \begin{enumerate}
-\item Download and unpack the tarball as described above (\S\ref{obtain_code}).
+\item Download and unpack the tarball as described above (\S\ref{Install_Obtain}).
 
 \item Make sure you have SCons installed on your system.  
 It is available for free from \url{http://www.scons.org/}.  (It is a
@@ -7449,14 +7864,14 @@ and \texttt{$\sim$/lib}.
 \end{enumerate}
 
 \subsection{Installing using make}
-\label{make_install}
+\label{Install_Make}
 This is a more standard installation method if you don't want to bother with SCons, or if you are just
 more familiar with the make program and don't want to deal with SCons.  It requires a bit more
 user input in terms of directly specifying the BLAS and/or LAPACK libraries, but because of that
 it is also a bit easier to exactly customize the installation if you want to do something non-standard.
 
 \begin{enumerate}
-\item Download and unpack the tarball as described above (\S\ref{obtain_code}).
+\item Download and unpack the tarball as described above (\S\ref{Install_Obtain}).
 
 \item
 Edit the makefile.
@@ -7631,6 +8046,7 @@ the same thing, or something slightly different, including possibly
 \end{enumerate}
 
 \subsection{Compiler flags}
+\label{Install_Flags}
 \index{Installation!compiler flags}
 
 Here are some compiler define flags to consider using:
@@ -7808,7 +8224,7 @@ library and let TMV call that instead.
 \end{itemize}
 
 \subsection{Installing using CMake}
-\label{cmake_install}
+\label{Install_CMake}
 
 CMake is another automated build tool.  I am not very well versed in it, but a user of the 
 TMV library, Andy Molloy, sent me the \texttt{CMakeLists.txt} files that he used to compile TMV,
@@ -7821,7 +8237,7 @@ it out like I did with the SCons installation script.}.
 The basic usage is as follows:
 
 \begin{enumerate}
-\item Download and unpack the tarball as described above (\S\ref{obtain_code}).
+\item Download and unpack the tarball as described above (\S\ref{Install_Obtain}).
 
 \item
 Download CMake from \url{http://www.cmake.org/} if you do not already have it.
@@ -7855,7 +8271,7 @@ But I think all of that is possible with CMake, so if someone who is an expert i
 to do this and send me the CMake files for it, I'll include them in future releases.
 
 \subsection{Installation using Microsoft Visual C++}
-\label{microsoft_install}
+\label{Install_Microsoft}
 
 Using TMV with Microsoft Visual C++ is a bit different from the other compilers,
 since it has a Windows framework for building programs, rather than a command 
@@ -7867,7 +8283,7 @@ Visual Studio 2008 Command Prompt, using the command:
 \texttt{C:$\backslash$Python26$\backslash$Scripts$\backslash$scons CXX=cl IMPORT\_ENV=true}.}.
 
 \begin{enumerate}
-\item Download and unpack the tarball as described above (\S\ref{obtain_code}).
+\item Download and unpack the tarball as described above (\S\ref{Install_Obtain}).
 
 There are many Windows utilities that can unpack the
 tarball.  With IZArc (\url{http://www.izarc.org/}), for example, you right click on the file 
@@ -7959,7 +8375,7 @@ Now you should be all set to use the TMV library in your program.
 
 \subsection{Known compiler issues}
 \index{Installation!known problems}
-\label{compilerissues}
+\label{Install_Issues}
 
 %Done:
 % pgCC ACML 
@@ -8323,11 +8739,12 @@ directory, so you can easily compile and run them yourself.
 
 \newpage
 \section{Known Bugs and Deficiencies (aka To Do List)}
+\label{Bugs}
 
 Here is a list of various problems with the current version of the TMV library.
 These are mostly features that are not yet included, rather than bugs per se.
 If you are looking for issues with getting TMV compiled correctly, you should
-probably see \S\ref{compilerissues} instead where I discuss various known
+probably see \S\ref{Install_Issues} instead where I discuss various known
 problems that are specific to particular compilers or BLAS or LAPACK 
 distributions.  
 
@@ -8343,10 +8760,10 @@ at \myissues, or email the discussion group about what you need at \mygroup.
 
 When writing complicated equations involving complex symmetric or hermitian matrices, 
 you may find that an equation that seems perfectly ok does not compile.
-The reason for this problem is explained in \S\ref{symarith} in some detail, 
+The reason for this problem is explained in \S\ref{SymMatrix_Ops} in some detail, 
 so you should read about it there.  But basically, the workaround is usually
 to break your equation up into smaller steps that do not require the code to 
-explicitly instantiate any matrices.  For example: (this is the example from \S\ref{symarith})
+explicitly instantiate any matrices.  For example: (this is the example from \S\ref{SymMatrix_Ops})
 \begin{tmvcode}
 s3 += x*s1 + s2;
 \end{tmvcode}
@@ -8486,14 +8903,6 @@ any out-of-memory throws and use a less memory-intesive algorithm
 when necessary.
 
 \item
-\textbf{Overflow and underflow}
-
-For some algorithms, I check for overflow and underflow problems.
-(e.g. \tt{Norm(m)}), but I have not put potentially problematic matrices
-into the test suite to systematically search for such problems.  So there still
-may be places where matrices with very large or small values are a problem.
-
-\item
 \textbf{Permutations}
 
 I should make it easier to use the permutations that are output from 
@@ -8505,7 +8914,7 @@ class for the functions that already exist, so it shouldn't be too hard to write
 
 \newpage
 \section{History}
-\label{history}
+\label{History}
 
 Here is a list of the changes from version to version.  Whenever a change 
 is not backward compatible, meaning that code using the previous version
@@ -8785,7 +9194,7 @@ Added the \tt{ListInit} method for initializing the values of a \tt{Vector} or \
 Sarli for this suggestion.  The implementation is based somewhat on a similar 
 initialization syntax in the Little Template Library (LTL) by Niv Drory et al.
 \item[$\times$]
-Significantly changed the \tt{SmallMatrix} class.  See \S\ref{smallmatrix}, on the \tt{SmallMatrix} class 
+Significantly changed the \tt{SmallMatrix} class.  See \S\ref{SmallMatrix}, on the \tt{SmallMatrix} class 
 in the documentation
 for the full details of how it works now.  But in brief, here are the main changes:
 \begin{itemize}
@@ -8903,14 +9312,17 @@ covert your existing code over to the new names at some point.
 
 \item[$\times$]
 Changed the syntax for list initialization.
-The old style was v = tmv::ListInit, a0 , a1 , a2 , a3  ...;
-The new style is v << a0 , a1 , a2 , a3 ...;
-Also accepted is v << a0 << a1 << a2 << a3 ...;
-This notation seems clearer, and avoid the global variable tmv::ListInit.
+The old style was \\
+\tt{v = tmv::ListInit, a0 , a1 , a2 , a3  ...}\\
+The new style is \\
+\tt{v << a0 , a1 , a2 , a3 ...}\\
+Also accepted is \\
+\tt{v << a0 << a1 << a2 << a3 ...}\\
+This notation seems clearer, and avoid the global variable \tt{tmv::ListInit}.
 (Again, the old notation is still present, but deprecated.)
 
 \item
-Improved the speed of the native (i.e. non-BLAS) Matrix * Matrix algorithm.
+Improved the speed of the native (i.e. non-BLAS) matrix multiplication algorithm.
 It is now generally within a factor of two or so of optimized BLAS implementations.
 So it's not such a big performance hit if you compile without BLAS anymore.
 But if you are using large matrices, then we still recommend compiling with 
@@ -8930,9 +9342,9 @@ calculation into as many parts as there are available threads.
 \end{enumerate}
 
 \item
-Fixed a couple of bugs involving SmallMatrix.  
-m.setZero() didn't return *this as it should have,
-and there were two DoCopy helper functions that caused 
+Fixed a couple of bugs involving \tt{SmallMatrix}.  
+\tt{m.setZero()} didn't return \tt{*this} as it should have,
+and there were two \tt{DoCopy} helper functions that caused 
 ambiguity problems for some compilers.
 
 \item
@@ -8945,8 +9357,8 @@ be going on with it.  Most calls were with BlasColMajor anyway, so this
 doesn't affect very many calls.
 
 \item
-Fixed the return type of some methods that erroneously returned CStyle
-views when the source object was FortranStyle.
+Fixed the return type of some methods that erroneously returned \tt{CStyle}
+views when the source object was \tt{FortranStyle}.
 
 \item
 Added a way to access the version of TMV being used.
@@ -8962,11 +9374,80 @@ use the command \tt{scons install WITH\_UPS=true} to configure tmv in ups.
 
 \end{itemize}
 
+\item[Version 0.64]
+This update mostly addresses problems involving underflow and overflow.  This had 
+been item 13 on the to-do list (\S\ref{Bugs}), and it was bumped to top priority from
+a bug report where underflow problems were leading to an infinite loop in the 
+singular value decomposition code.  So I added more matrices to the test suite -- 
+specifically a matrix with an extremely large dynamic range of singular values
+(which reproduced the behavior of the bug report), a matrix that is nearly zero,
+and a matrix that is very close to overflow.  These tests uncovered quite a few bugs 
+in the code.  Some from overflow and underflow issues of course, but also some
+imprecision issues, and some just plain bugs that I hadn't uncovered before.  So 
+I think this version should be much more stable for a wider range of input matrices.
+
+There are also a couple of feature additions as well -- most notably the Permutation class.
+
+\begin{itemize}
+
+\item Added a some very difficult matrices to the test suite, and found and fixed quite a few 
+bugs as a result.
+
+\item Fixed a bug that \tt{U(i,i)} was invalid if \tt{U} is non-const and is \tt{UnitDiag} even 
+if the resulting value is not used in a mutable context.  
+e.g. \tt{T diag_i = U(i,i)}.  This used to give an error.  Now, \tt{U(i,j)} returns a special reference
+that can always be used as a value, even if \tt{i==j} and \tt{U} is \tt{UnitDiag}.  
+However, if the user tries to modify the value through this reference type, then it gives
+an error.  This was probably not causing anyone any problems, and the workarounds 
+weren't too onerous, but it seemed worth getting the syntax right.
+
+\item Added a new Permutation class to encapsulate permutation operations.  
+This is basically a wrapper around the old functions
+like \tt{m.permuteRows(p)}.  Now you can write \tt{m = P * m} instead.  All of the routines
+which returned a permutation in an \tt{int* p} object now returns it as a Permutation object.
+This includes \tt{Vector::sort}, \tt{LU_Decompose}, \tt{QRP_Decompose}, and 
+\tt{LDL_Decompose}.  The old functions still work, but are now undocumented.
+
+\item[$\times$] The \tt{getP()} methods from the LU and QRP divider objects now return
+a \tt{Permutation} rather than a \tt{const int*}.  As described above, this should make the 
+code clearer when the permutation is used.  However, it will break code that uses 
+the old syntax.
+
+\item Added \tt{m.sumElements()} and \tt{m.sumAbsElements()}.
+
+\item Added \tt{m.unitUpperTri()} and \tt{m.unitLowerTri()}.
+
+\item Made \tt{Swap(m1,m2)} and \tt{Swap(v1,v2)} efficient when the arguments are both
+complete matrices or vectors, rather than views, so they now take $O(1)$ time rather than
+$O(MN)$ and $O(N)$ respectively.
+
+\item Added \tt{cView()} and \tt{fView()} methods to switch indexing styles of a matrix or vector.
+
+\item Made arithmetic with \tt{SmallVector} and \tt{SmallMatrix} somewhat more flexible in that
+the composite objects now (again actually) derive from the normal \tt{GenVector} and
+\tt{GenMatrix} classes.  This removes the "No implicit instantiation" item that had appeared
+in the list of limitations of the \tt{Small} classes.
+
+I had removed that inheritance in my attempt to get rid of the expensive virtual
+tables from all small operations.  However, the vtable here is almost never expensive 
+(unlike the one that had been in \tt{SmallVector} and \tt{SmallMatrix}), and
+it allows for a greater freedom of expression with the \tt{Small} objects.
+
+\item Added a version of \tt{MatrixViewOf} with arbitrary steps.
+
+\item Added the three C preprocessor definitions: \tt{TMV_MAJOR_VERSION}, 
+\tt{TMV_MINOR_VERSION},
+and \tt{TMV_VERSION_AT_LEAST(major,minor)} to help users customize
+their code depending on the version of TMV that is installed on a particular
+computer.  Also documented the \tt{TMV_Version} function that had been there
+for a couple versions now, but wasn't yet documented.
+\end{itemize}
+
 \end{description}
 
 \newpage
 \section{License}
-\label{license}
+\label{License}
 \index{License}
 \index{GNU General Public License}
 

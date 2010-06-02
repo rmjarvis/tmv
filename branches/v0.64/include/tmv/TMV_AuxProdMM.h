@@ -74,6 +74,19 @@
 #endif
 
 // m*m
+#ifdef INTT1
+template <class T2 Y> 
+inline PRODMM_1<T2,int,T2 X3> OP(
+    const GENMATRIX1<int X1>& m1, const GENMATRIX2<T2 X2>& m2)
+{ return PRODMM_1<T2,int,T2 X3>(T2(1),m1,m2); }
+#undef INTT1
+#elif defined(INTT2)
+template <class T1 Y> 
+inline PRODMM_1<T1,T1,int X3> OP(
+    const GENMATRIX1<T1 X1>& m1, const GENMATRIX2<int X2>& m2)
+{ return PRODMM_1<T1,T1,int X3>(T1(1),m1,m2); }
+#undef INTT2
+#else
 template <class T Y> 
 inline PRODMM_1<T,T,T X3> OP(
     const GENMATRIX1<T X1>& m1, const GENMATRIX2<T X2>& m2)
@@ -88,6 +101,7 @@ template <class T Y>
 inline PRODMM_1<CT,T,CT X3> OP(
     const GENMATRIX1<T X1>& m1, const GENMATRIX2<CT X2>& m2)
 { return PRODMM_1<CT,T,CT X3>(CT(1),m1,m2); }
+#endif
 
 // m*(x*m)
 template <class T, class T2 Y> 

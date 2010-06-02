@@ -34,7 +34,7 @@ int main() try
 
 #if 1
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
     TestBandMatrix<double>();
     TestSymMatrix<double>();
     TestSymBandMatrix<double>();
@@ -43,7 +43,7 @@ int main() try
     TestAllSymBandDiv<double>();
 #endif
 
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
     TestBandMatrix<float>();
     TestSymMatrix<float>();
     TestSymBandMatrix<float>();
@@ -52,7 +52,7 @@ int main() try
     TestAllSymBandDiv<float>();
 #endif
 
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
     TestBandMatrix<long double>();
     TestSymMatrix<long double>();
     TestSymBandMatrix<long double>();
@@ -61,7 +61,7 @@ int main() try
     TestAllSymBandDiv<long double>();
 #endif 
 
-#ifdef INST_INT
+#ifdef TEST_INT
     TestBandMatrix<int>();
     TestSymMatrix<int>();
     TestSymBandMatrix<int>();

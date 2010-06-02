@@ -117,6 +117,8 @@
 //    m.det() or Det(m)
 //    m.logDet() or m.logDet(T* sign) or LogDet(m)
 //    m.trace() or Trace(m)
+//    m.sumElements() or SumElements(m)
+//    m.sumAbsElements() or SumAbsElements(m)
 //    m.norm() or m.normF() or Norm(m) or NormF(m)
 //    m.normSq() or NormSq(m)
 //    m.norm1() or Norm1(m)
@@ -163,15 +165,22 @@ namespace tmv {
         virtual public AssignableToLowerTriMatrix<T>,
         public BaseMatrix<T>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
+        typedef T value_type;
+        typedef RT real_type;
+        typedef CT complex_type;
         typedef GenDiagMatrix<T> type;
+        typedef DiagMatrix<T> copy_type;
         typedef ConstDiagMatrixView<T> const_view_type;
-        typedef ConstDiagMatrixView<RT> const_real_type;
+        typedef const_view_type const_transpose_type;
+        typedef const_view_type const_conjugate_type;
+        typedef const_view_type const_adjoint_type;
+        typedef ConstDiagMatrixView<RT> const_realpart_type;
         typedef ConstVectorView<T> const_vec_type;
         typedef DiagMatrixView<T> nonconst_type;
-
-    public:
 
         //
         // Constructors
@@ -283,23 +292,29 @@ namespace tmv {
         // subDiagMatrix
         //
 
+        inline const_view_type cSubDiagMatrix(int i1, int i2) const
+        { return const_view_type(diag().cSubVector(i1,i2)); }
+
         inline const_view_type subDiagMatrix(int i1, int i2) const
-        { 
+        {
             TMVAssert(diag().hasSubVector(i1,i2,1));
-            return const_view_type(diag().subVector(i1,i2)); 
+            return cSubDiagMatrix(i1,i2);
         }
+
+        inline const_view_type cSubDiagMatrix(int i1, int i2, int istep) const
+        { return const_view_type(diag().cSubVector(i1,i2,istep)); }
 
         inline const_view_type subDiagMatrix(int i1, int i2, int istep) const
-        { 
+        {
             TMVAssert(diag().hasSubVector(i1,i2,istep));
-            return const_view_type(diag().subVector(i1,i2,istep)); 
+            return cSubDiagMatrix(i1,i2,istep);
         }
 
-        inline const_real_type realPart() const
-        { return const_real_type(diag().realPart()); }
+        inline const_realpart_type realPart() const
+        { return const_realpart_type(diag().realPart()); }
 
-        inline const_real_type imagPart() const
-        { return const_real_type(diag().imagPart()); }
+        inline const_realpart_type imagPart() const
+        { return const_realpart_type(diag().imagPart()); }
 
         inline const_view_type view() const
         { return const_view_type(diag()); }
@@ -322,9 +337,9 @@ namespace tmv {
         TMV_DEPRECATED(const_view_type SubDiagMatrix(
                 int i1, int i2, int istep) const)
         { return subDiagMatrix(i1,i2,istep); }
-        TMV_DEPRECATED(const_real_type Real() const)
+        TMV_DEPRECATED(const_realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(const_real_type Imag() const)
+        TMV_DEPRECATED(const_realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(const_view_type View() const)
         { return view(); }
@@ -348,6 +363,12 @@ namespace tmv {
 
         inline T trace() const
         { return diag().sumElements(); }
+
+        inline T sumElements() const
+        { return diag().sumElements(); }
+
+        inline RT sumAbsElements() const
+        { return diag().sumAbsElements(); }
 
         inline RT norm() const 
         { return normF(); }
@@ -588,6 +609,10 @@ namespace tmv {
 
         inline T cref(int i, int j) const
         { return i==j ? cdiag()(i) : 0; }
+        inline const T* cptr() const
+        { return cdiag().cptr(); }
+        inline int step() const
+        { return cdiag().step(); }
 
     protected :
 
@@ -639,10 +664,11 @@ namespace tmv {
     template <class T, IndexStyle I> 
     class ConstDiagMatrixView : public GenDiagMatrix<T>
     {
+    public :
+
         typedef GenDiagMatrix<T> base;
         typedef ConstDiagMatrixView<T,I> type;
         typedef ConstVectorView<T> const_vec_type;
-    public :
 
         inline ConstDiagMatrixView(const type& rhs) : itsdiag(rhs.cdiag()) {}
 
@@ -668,15 +694,19 @@ namespace tmv {
     class ConstDiagMatrixView<T,FortranStyle> : 
         public ConstDiagMatrixView<T,CStyle>
     {
+    public :
+
         typedef TMV_RealType(T) RT;
         typedef GenDiagMatrix<T> base;
         typedef ConstDiagMatrixView<T,FortranStyle> type;
         typedef ConstVectorView<T,FortranStyle> const_vec_type;
         typedef ConstDiagMatrixView<T,FortranStyle> const_view_type;
-        typedef ConstDiagMatrixView<RT,FortranStyle> const_real_type;
+        typedef const_view_type const_transpose_type;
+        typedef const_view_type const_conjugate_type;
+        typedef const_view_type const_adjoint_type;
+        typedef ConstDiagMatrixView<RT,FortranStyle> const_realpart_type;
         typedef ConstDiagMatrixView<T,CStyle> c_type;
         typedef DiagMatrixView<T,FortranStyle> nonconst_type;
-    public :
 
         inline ConstDiagMatrixView(const type& rhs) : c_type(rhs) {}
 
@@ -714,21 +744,21 @@ namespace tmv {
 
         inline const_view_type subDiagMatrix(int i1, int i2) const
         {
-            TMVAssert(diag().hasSubVector(i1-1,i2,1));
-            return const_view_type(diag().subVector(i1,i2)); 
+            TMVAssert(diag().hasSubVector(i1,i2,1));
+            return base::cSubDiagMatrix(i1-1,i2);
         }
 
         inline const_view_type subDiagMatrix(int i1, int i2, int istep) const
         {
-            TMVAssert(diag().hasSubVector(i1-1,i2-1+istep,istep));
-            return const_view_type(diag().subVector(i1,i2,istep)); 
+            TMVAssert(diag().hasSubVector(i1,i2,istep));
+            return base::cSubDiagMatrix(i1-1,i2-1+istep,istep);
         }
 
-        inline const_real_type realPart() const
-        { return const_real_type(diag().realPart()); }
+        inline const_realpart_type realPart() const
+        { return const_realpart_type(diag().realPart()); }
 
-        inline const_real_type imagPart() const
-        { return const_real_type(diag().imagPart()); }
+        inline const_realpart_type imagPart() const
+        { return const_realpart_type(diag().imagPart()); }
 
         inline const_view_type view() const
         { return const_view_type(diag()); }
@@ -750,9 +780,9 @@ namespace tmv {
         TMV_DEPRECATED(const_view_type SubDiagMatrix(
                 int i1, int i2, int istep) const)
         { return subDiagMatrix(i1,i2,istep); }
-        TMV_DEPRECATED(const_real_type Real() const)
+        TMV_DEPRECATED(const_realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(const_real_type Imag() const)
+        TMV_DEPRECATED(const_realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(const_view_type View() const)
         { return view(); }
@@ -774,16 +804,20 @@ namespace tmv {
     template <class T, IndexStyle I> 
     class DiagMatrixView : public GenDiagMatrix<T>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef GenDiagMatrix<T> base;
         typedef DiagMatrixView<T,I> type;
         typedef DiagMatrixView<T,I> view_type;
-        typedef DiagMatrixView<RT,I> real_type;
+        typedef view_type transpose_type;
+        typedef view_type conjugate_type;
+        typedef view_type adjoint_type;
+        typedef DiagMatrixView<RT,I> realpart_type;
         typedef VectorView<T,I> vec_type;
         typedef ConstVectorView<T,I> const_vec_type;
-
-    public:
+        typedef TMV_RefType(T) reference;
 
         //
         // Constructors
@@ -837,8 +871,6 @@ namespace tmv {
         //
         // Access
         //
-
-        typedef TMV_RefType(T) reference;
 
         inline reference operator()(int i) const 
         { 
@@ -898,17 +930,29 @@ namespace tmv {
         // subDiagMatrix
         //
 
+        inline view_type cSubDiagMatrix(int i1, int i2) const
+        { return view_type(itsdiag.cSubVector(i1,i2)); }
+
         inline view_type subDiagMatrix(int i1, int i2) const
-        { return view_type(itsdiag.subVector(i1,i2)); }
+        {
+            TMVAssert(diag().hasSubVector(i1,i2,1));
+            return cSubDiagMatrix(i1,i2);
+        }
+
+        inline view_type cSubDiagMatrix(int i1, int i2, int istep) const
+        { return view_type(itsdiag.cSubVector(i1,i2,istep)); }
 
         inline view_type subDiagMatrix(int i1, int i2, int istep) const
-        { return view_type(itsdiag.subVector(i1,i2,istep)); }
+        {
+            TMVAssert(diag().hasSubVector(i1,i2,istep));
+            return cSubDiagMatrix(i1,i2,istep);
+        }
 
-        inline real_type realPart() const
-        { return real_type(diag().realPart()); }
+        inline realpart_type realPart() const
+        { return realpart_type(diag().realPart()); }
 
-        inline real_type imagPart() const
-        { return real_type(diag().imagPart()); }
+        inline realpart_type imagPart() const
+        { return realpart_type(diag().imagPart()); }
 
         inline view_type view() const
         { return *this; }
@@ -927,9 +971,9 @@ namespace tmv {
         TMV_DEPRECATED(view_type SubDiagMatrix(
                 int i1, int i2, int istep) const)
         { return subDiagMatrix(i1,i2,istep); }
-        TMV_DEPRECATED(real_type Real() const)
+        TMV_DEPRECATED(realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(real_type Imag() const)
+        TMV_DEPRECATED(realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(view_type View() const)
         { return view(); }
@@ -953,16 +997,19 @@ namespace tmv {
     template <class T> 
     class DiagMatrixView<T,FortranStyle> : public DiagMatrixView<T,CStyle>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef GenDiagMatrix<T> base;
         typedef DiagMatrixView<T,FortranStyle> type;
         typedef DiagMatrixView<T,CStyle> c_type;
         typedef DiagMatrixView<T,FortranStyle> view_type;
-        typedef DiagMatrixView<RT,FortranStyle> real_type;
+        typedef view_type transpose_type;
+        typedef view_type conjugate_type;
+        typedef view_type adjoint_type;
+        typedef DiagMatrixView<RT,FortranStyle> realpart_type;
         typedef VectorView<T,FortranStyle> vec_type;
-
-    public:
 
         //
         // Constructors
@@ -1076,11 +1123,17 @@ namespace tmv {
         // subDiagMatrix
         //
 
+        inline view_type cSubDiagMatrix(int i1, int i2) const
+        { return view_type(diag().cSubVector(i1,i2)); }
+
         inline view_type subDiagMatrix(int i1, int i2) const
-        { 
+        {
             TMVAssert(diag().hasSubVector(i1,i2,1));
             return view_type(diag().subVector(i1,i2)); 
         }
+
+        inline view_type cSubDiagMatrix(int i1, int i2, int istep) const
+        { return view_type(diag().cSubVector(i1,i2,istep)); }
 
         inline view_type subDiagMatrix(int i1, int i2, int istep) const
         {
@@ -1088,11 +1141,11 @@ namespace tmv {
             return view_type(diag().subVector(i1,i2,istep)); 
         }
 
-        inline real_type realPart() const
-        { return real_type(diag().realPart()); }
+        inline realpart_type realPart() const
+        { return realpart_type(diag().realPart()); }
 
-        inline real_type imagPart() const
-        { return real_type(diag().imagPart()); }
+        inline realpart_type imagPart() const
+        { return realpart_type(diag().imagPart()); }
 
         inline view_type view() const
         { return *this; }
@@ -1111,9 +1164,9 @@ namespace tmv {
         TMV_DEPRECATED(view_type SubDiagMatrix(
                 int i1, int i2, int istep) const)
         { return subDiagMatrix(i1,i2,istep); }
-        TMV_DEPRECATED(real_type Real() const)
+        TMV_DEPRECATED(realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(real_type Imag() const)
+        TMV_DEPRECATED(realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(view_type View() const)
         { return view(); }
@@ -1132,18 +1185,25 @@ namespace tmv {
     template <class T, IndexStyle I> 
     class DiagMatrix : public GenDiagMatrix<T>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef GenDiagMatrix<T> base;
         typedef DiagMatrix<T,I> type;
         typedef DiagMatrixView<T,I> view_type;
-        typedef DiagMatrixView<RT,I> real_type;
+        typedef view_type transpose_type;
+        typedef view_type conjugate_type;
+        typedef view_type adjoint_type;
+        typedef DiagMatrixView<RT,I> realpart_type;
         typedef VectorView<T,I> vec_type;
         typedef ConstDiagMatrixView<T,I> const_view_type;
-        typedef ConstDiagMatrixView<RT,I> const_real_type;
+        typedef const_view_type const_transpose_type;
+        typedef const_view_type const_conjugate_type;
+        typedef const_view_type const_adjoint_type;
+        typedef ConstDiagMatrixView<RT,I> const_realpart_type;
         typedef ConstVectorView<T,I> const_vec_type;
-
-    public:
+        typedef T& reference;
 
         //
         // Constructors
@@ -1260,8 +1320,6 @@ namespace tmv {
         // Access
         //
 
-        typedef T& reference;
-
         inline T& operator()(int i) 
         { 
             if (I==CStyle) { 
@@ -1359,29 +1417,53 @@ namespace tmv {
         // subDiagMatrix
         //
 
+        inline view_type cSubDiagMatrix(int i1, int i2) 
+        { return view_type(itsdiag.cSubVector(i1,i2)); }
+
         inline view_type subDiagMatrix(int i1, int i2) 
-        { return view_type(itsdiag.subVector(i1,i2)); }
+        { 
+            TMVAssert(diag().hasSubVector(i1,i2,1));
+            return view_type(itsdiag.subVector(i1,i2)); 
+        }
+
+        inline view_type cSubDiagMatrix(int i1, int i2, int istep) 
+        { return view_type(itsdiag.cSubVector(i1,i2,istep)); }
 
         inline view_type subDiagMatrix(int i1, int i2, int istep) 
-        { return view_type(itsdiag.subVector(i1,i2,istep)); }
+        { 
+            TMVAssert(diag().hasSubVector(i1,i2,istep));
+            return view_type(itsdiag.subVector(i1,i2,istep)); 
+        }
 
-        inline real_type realPart()
-        { return real_type(diag().realPart()); }
+        inline realpart_type realPart()
+        { return realpart_type(diag().realPart()); }
 
-        inline real_type imagPart()
-        { return real_type(diag().imagPart()); }
+        inline realpart_type imagPart()
+        { return realpart_type(diag().imagPart()); }
+
+        inline const_view_type cSubDiagMatrix(int i1, int i2) const
+        { return const_view_type(itsdiag.cSubVector(i1,i2)); }
 
         inline const_view_type subDiagMatrix(int i1, int i2) const
-        { return const_view_type(itsdiag.subVector(i1,i2)); }
+        {
+            TMVAssert(diag().hasSubVector(i1,i2,1));
+            return const_view_type(itsdiag.subVector(i1,i2)); 
+        }
+
+        inline const_view_type cSubDiagMatrix(int i1, int i2, int istep) const
+        { return const_view_type(itsdiag.cSubVector(i1,i2,istep)); }
 
         inline const_view_type subDiagMatrix(int i1, int i2, int istep) const
-        { return const_view_type(itsdiag.subVector(i1,i2,istep)); }
+        { 
+            TMVAssert(diag().hasSubVector(i1,i2,istep));
+            return const_view_type(itsdiag.subVector(i1,i2,istep)); 
+        }
 
-        inline const_real_type realPart() const
-        { return const_real_type(diag().realPart()); }
+        inline const_realpart_type realPart() const
+        { return const_realpart_type(diag().realPart()); }
 
-        inline const_real_type imagPart() const
-        { return const_real_type(diag().imagPart()); }
+        inline const_realpart_type imagPart() const
+        { return const_realpart_type(diag().imagPart()); }
 
         inline const_view_type view() const
         { return const_view_type(itsdiag); }
@@ -1412,9 +1494,9 @@ namespace tmv {
         TMV_DEPRECATED(const_view_type SubDiagMatrix(
                 int i1, int i2, int istep) const)
         { return subDiagMatrix(i1,i2,istep); }
-        TMV_DEPRECATED(const_real_type Real() const)
+        TMV_DEPRECATED(const_realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(const_real_type Imag() const)
+        TMV_DEPRECATED(const_realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(const_view_type View() const)
         { return view(); }
@@ -1429,9 +1511,9 @@ namespace tmv {
         { return subDiagMatrix(i1,i2); }
         TMV_DEPRECATED(view_type SubDiagMatrix(int i1, int i2, int istep))
         { return subDiagMatrix(i1,i2,istep); }
-        TMV_DEPRECATED(real_type Real())
+        TMV_DEPRECATED(realpart_type Real())
         { return realPart(); }
-        TMV_DEPRECATED(real_type Imag())
+        TMV_DEPRECATED(realpart_type Imag())
         { return imagPart(); }
         TMV_DEPRECATED(view_type View())
         { return view(); }
@@ -1448,6 +1530,13 @@ namespace tmv {
 
         Vector<T> itsdiag;
         inline ConstVectorView<T> cdiag() const { return itsdiag.view(); }
+
+        template <IndexStyle I2>
+        friend void Swap(DiagMatrix<T,I>& m1, DiagMatrix<T,I2>& m2)
+        {
+            TMVAssert(m1.size() == m2.size());
+            Swap(m1.itsdiag,m2.itsdiag);
+        }
 
     }; // DiagMatrix
 
@@ -1503,11 +1592,6 @@ namespace tmv {
     template <class T, IndexStyle I> 
     inline void Swap(const DiagMatrixView<T>& m1, const DiagMatrix<T,I>& m2)
     { Swap(m1.diag(),m2.diag()); }
-
-    template <class T, IndexStyle I1, IndexStyle I2> 
-    inline void Swap(const DiagMatrix<T,I1>& m1, const DiagMatrix<T,I2>& m2)
-    { Swap(m1.diag(),m2.diag()); }
-
 
     //
     // Views:

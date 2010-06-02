@@ -196,9 +196,9 @@ namespace tmv {
     {
         if (B.isunit())
             if (B.isconj()) DoAddMultMM<a1,ca,true,true>(alpha,A,B,C);
-            else DoAddMultMM<a1,ca,false,true>(alpha,A,B,C);
+            else DoAddMultMM<a1,ca,true,false>(alpha,A,B,C);
         else
-            if (B.isconj()) DoAddMultMM<a1,ca,true,false>(alpha,A,B,C);
+            if (B.isconj()) DoAddMultMM<a1,ca,false,true>(alpha,A,B,C);
             else DoAddMultMM<a1,ca,false,false>(alpha,A,B,C);
     }
 
@@ -467,9 +467,9 @@ namespace tmv {
     {
         if (B.isunit())
             if (B.isconj()) DoAddMultMM<a1,ca,true,true>(alpha,A,B,C);
-            else DoAddMultMM<a1,ca,false,true>(alpha,A,B,C);
+            else DoAddMultMM<a1,ca,true,false>(alpha,A,B,C);
         else
-            if (B.isconj()) DoAddMultMM<a1,ca,true,false>(alpha,A,B,C);
+            if (B.isconj()) DoAddMultMM<a1,ca,false,true>(alpha,A,B,C);
             else DoAddMultMM<a1,ca,false,false>(alpha,A,B,C);
     }
 

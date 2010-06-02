@@ -1,4 +1,3 @@
-
 #include "TMV.h"
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
@@ -22,32 +21,20 @@ void TestDiagDiv_A()
     tmv::Matrix<T> r(N,0,T(1));
     tmv::Matrix<std::complex<T> > cr(N,0,std::complex<T>(1));
 
-    tmv::DiagMatrix<T> bx(N);
-    tmv::DiagMatrix<std::complex<T> > cbx(N);
+    tmv::DiagMatrixView<T> av = a.view();
+    tmv::DiagMatrixView<T> bv = b.view();
+    tmv::DiagMatrixView<std::complex<T> > cav = ca.view();
+    tmv::DiagMatrixView<std::complex<T> > cbv = cb.view();
 
-    TestMatrixDivArith2<T>(
-        tmv::LU,bx,cbx,a.view(),b.view(),ca.view(),cb.view(),"Diag/Diag");
+    TestMatrixDivArith2<T>(tmv::LU,av,bv,cav,cbv,"Diag/Diag");
 }
 
-template <class T> 
-void TestDiagDiv()
-{
-    TestDiagDiv_A<T>();
-    TestDiagDiv_B1<T>();
-    TestDiagDiv_B2<T>();
-    std::cout<<"DiagMatrix<"<<tmv::TMV_Text(T())<<
-        "> Division passed all tests\n";
-}
-
-#ifdef INST_DOUBLE
-template void TestDiagDiv<double>();
+#ifdef TEST_DOUBLE
 template void TestDiagDiv_A<double>();
 #endif
-#ifdef INST_FLOAT
-template void TestDiagDiv<float>();
+#ifdef TEST_FLOAT
 template void TestDiagDiv_A<float>();
 #endif
-#ifdef INST_LONGDOUBLE
-template void TestDiagDiv<long double>();
+#ifdef TEST_LONGDOUBLE
 template void TestDiagDiv_A<long double>();
 #endif

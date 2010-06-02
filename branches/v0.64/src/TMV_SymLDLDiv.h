@@ -35,12 +35,6 @@
 
 namespace tmv {
 
-    template <class T> 
-    void LDL_Decompose(
-        const SymMatrixView<T>& A, const VectorView<T>& xD,
-        int* P, TMV_RealType(T)& logdet, T& signdet);
-    // Decompose A into P * L * D * Lt * Pt
-
     template <class T, class T1> 
     void LDL_LDivEq(
         const GenSymMatrix<T1>& L, const GenVector<T1>& xD,

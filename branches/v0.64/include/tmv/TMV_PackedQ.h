@@ -158,7 +158,7 @@ namespace tmv {
         inline size_t rowsize() const { return q.rowsize(); }
         inline StorageType stor() const { return ColMajor; }
         inline T getX() const { return x; }
-        inline const GenMatrix<Tm>& getQ() const { return q; }
+        inline const PackedQ<Tm>& getQ() const { return q; }
         inline void assignToM(const MatrixView<TMV_RealType(T)>& m0) const
         {
             TMVAssert(m0.colsize() == colsize() && m0.rowsize() == rowsize());
@@ -583,7 +583,7 @@ namespace tmv {
         inline StorageType stor() const { return ColMajor; }
         inline T getX() const { return x; }
         inline const GenMatrix<T1>& getM() const { return m; }
-        inline const GenMatrix<T2>& getQ() const { return q; }
+        inline const PackedQ<T2>& getQ() const { return q; }
         inline void assignToM(const MatrixView<TMV_RealType(T)>& m0) const
         {
             TMVAssert(m0.colsize() == colsize() && m0.rowsize() == rowsize());
@@ -617,7 +617,7 @@ namespace tmv {
         inline StorageType stor() const { return ColMajor; }
         inline T getX() const { return x; }
         inline const GenMatrix<T1>& getM() const { return m; }
-        inline const GenMatrix<T2>& getQ() const { return q; }
+        inline const PackedQ<T2>& getQ() const { return q; }
         inline void assignToM(const MatrixView<TMV_RealType(T)>& m0) const
         {
             TMVAssert(m0.colsize() == colsize() && m0.rowsize() == rowsize());

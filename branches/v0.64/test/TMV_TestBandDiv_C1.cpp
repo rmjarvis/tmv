@@ -30,33 +30,32 @@ void TestBandDiv_C1(tmv::DivType dt)
 
     tmv::DiagMatrix<T> d(a1);
     tmv::DiagMatrix<std::complex<T> > cd(ca1);
-    tmv::DiagMatrix<T> dx = d;
-    tmv::DiagMatrix<std::complex<T> > cdx = cd;
+    tmv::DiagMatrixView<T> dv = d.view();
+    tmv::DiagMatrixView<std::complex<T> > cdv = cd.view();
 
     for(size_t i=START;i<b.size();i++) {
         if (showstartdone) 
             std::cout<<"Start loop: i = "<<i<<"\nbi = "<<tmv::TMV_Text(b[i])<<
                 "  "<<b[i]<<std::endl;
-        const tmv::BandMatrixView<T>& bi = b[i];
-        const tmv::BandMatrixView<std::complex<T> >& cbi = cb[i];
+        tmv::BandMatrixView<T> bi = b[i];
+        tmv::BandMatrixView<std::complex<T> > cbi = cb[i];
         if (dt == tmv::LU && !bi.isSquare()) continue;
 
         bi.saveDiv();
         cbi.saveDiv();
 
-        TestMatrixDivArith1<T>(dt,dx,cdx,bi,d.view(),cbi,cd.view(),
-                               "DiagMatrix/Band");
+        TestMatrixDivArith1<T>(dt,bi,dv,cbi,cdv,"DiagMatrix/Band");
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
     for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestBandDiv_C1<double>(tmv::DivType dt);
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestBandDiv_C1<float>(tmv::DivType dt);
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestBandDiv_C1<long double>(tmv::DivType dt);
 #endif

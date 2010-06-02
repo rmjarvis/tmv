@@ -24,15 +24,12 @@ static void TestSmallSquareDiv_A1a()
     tmv::SmallMatrix<std::complex<T>,N,N,stor> c1 = a1 * std::complex<T>(1,2);
     c1.diag().addToAll(std::complex<T>(3,1));
 
-    tmv::SmallMatrix<T,N,N,stor> a0;
-    tmv::SmallMatrix<std::complex<T>,N,N,stor> c0;
-
-    TestMatrixDivArith3a<T>(tmv::LU,a0,c0,a1,c1,"Square"); 
+    TestMatrixDivArith3a<T>(tmv::LU,a1,c1,"Square"); 
 #ifdef XTEST
     tmv::SmallMatrix<T,N,N,stor,tmv::FortranStyle> a1f = a1;
     tmv::SmallMatrix<std::complex<T>,N,N,stor,tmv::FortranStyle> c1f = c1;
 
-    TestMatrixDivArith3a<T>(tmv::LU,a0,c0,a1f,c1f,"Square"); 
+    TestMatrixDivArith3a<T>(tmv::LU,a1f,c1f,"Square"); 
 #endif
 }
 
@@ -53,12 +50,12 @@ void TestSmallMatrixDiv_A1a()
 #endif
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSmallMatrixDiv_A1a<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSmallMatrixDiv_A1a<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSmallMatrixDiv_A1a<long double>();
 #endif

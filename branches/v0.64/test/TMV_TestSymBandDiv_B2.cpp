@@ -61,57 +61,30 @@ void TestSymBandDiv_B2(tmv::DivType dt, PosDefCode pdc)
         if (showstartdone)
             std::cout<<"Start loop: i = "<<i<<", si = "<<tmv::TMV_Text(sb[i])<<
                 "  "<<sb[i]<<std::endl;
-        const tmv::SymBandMatrixView<T>& si = sb[i];
-        const tmv::SymBandMatrixView<std::complex<T> >& csi = csb[i];
+        tmv::SymBandMatrixView<T> si = sb[i];
+        tmv::SymBandMatrixView<std::complex<T> > csi = csb[i];
         si.saveDiv();
         csi.saveDiv();
 
-        if (csi.issym()) {
-            tmv::SymBandMatrix<T> sx = si;
-            tmv::SymBandMatrix<std::complex<T> > csx = csi;
-
-            TestMatrixDivArith1<T>(dt,sx,csx,a1v,si,ca1v,csi,
-                                   "SymBand/SquareMatrix");
-            if (dt == tmv::LU) continue;
+        TestMatrixDivArith1<T>(dt,a1v,si,ca1v,csi,"SymBand/SquareMatrix");
+        if (dt == tmv::LU) continue;
 #ifdef XTEST
-            TestMatrixDivArith1<T>(dt,sx,csx,a3v,si,ca3v,csi,
-                                   "SymBand/NonSquareMatrix");
-            TestMatrixDivArith1<T>(dt,sx,csx,a4v,si,ca4v,csi,
-                                   "SymBand/NonSquareMatrix");
-            TestMatrixDivArith1<T>(dt,sx,csx,a5v,si,ca5v,csi,
-                                   "SymBand/NonSquareMatrix");
-            TestMatrixDivArith1<T>(dt,sx,csx,a6v,si,ca6v,csi,
-                                   "SymBand/NonSquareMatrix");
+        TestMatrixDivArith1<T>(dt,a3v,si,ca3v,csi,"SymBand/NonSquareMatrix");
+        TestMatrixDivArith1<T>(dt,a4v,si,ca4v,csi,"SymBand/NonSquareMatrix");
+        TestMatrixDivArith1<T>(dt,a5v,si,ca5v,csi,"SymBand/NonSquareMatrix");
+        TestMatrixDivArith1<T>(dt,a6v,si,ca6v,csi,"SymBand/NonSquareMatrix");
 #endif
-        } else {
-            tmv::HermBandMatrix<T> hx = si;
-            tmv::HermBandMatrix<std::complex<T> > chx = csi;
-
-            TestMatrixDivArith1<T>(dt,hx,chx,a1v,si,ca1v,csi,
-                                   "SymBand/SquareMatrix");
-            if (dt == tmv::LU) continue;
-#ifdef XTEST
-            TestMatrixDivArith1<T>(dt,hx,chx,a3v,si,ca3v,csi,
-                                   "SymBand/NonSquareMatrix");
-            TestMatrixDivArith1<T>(dt,hx,chx,a4v,si,ca4v,csi,
-                                   "SymBand/NonSquareMatrix");
-            TestMatrixDivArith1<T>(dt,hx,chx,a5v,si,ca5v,csi,
-                                   "SymBand/NonSquareMatrix");
-            TestMatrixDivArith1<T>(dt,hx,chx,a6v,si,ca6v,csi,
-                                   "SymBand/NonSquareMatrix");
-#endif
-        }
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
     for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSymBandDiv_B2<double>(tmv::DivType dt, PosDefCode pdc);
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSymBandDiv_B2<float>(tmv::DivType dt, PosDefCode pdc);
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSymBandDiv_B2<long double>(tmv::DivType dt, PosDefCode pdc);
 #endif

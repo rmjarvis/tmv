@@ -60,12 +60,28 @@ namespace tmv {
     // Decompose A into P L U 
     // L, U, and P must have the same size as A.
     // L should be UnitDiag.
-    // U shoudl be NonUnitDiag.
+    // U should be NonUnitDiag.
     template <class T> 
     void LU_Decompose(
         const GenBandMatrix<T>& A, const LowerTriMatrixView<T>& L,
         const BandMatrixView<T>& U, int* P);
 
+    // Do the decomposition in compressed form.
+    template <class T> 
+    void LU_Decompose(
+        const BandMatrixView<T>& LUx, int* P, int& signdet, int Anhi);
+
+    class Permutation;
+
+    template <class T> 
+    void LU_Decompose(
+        const GenBandMatrix<T>& A, const LowerTriMatrixView<T>& L,
+        const BandMatrixView<T>& U, Permutation& P);
+
+    template <class T> 
+    void LU_Decompose(
+        const BandMatrixView<T>& LUx, Permutation& P, int Anhi);
+    
     template <class T> 
     class BandLUDiv : public Divider<T> 
     {
@@ -117,7 +133,7 @@ namespace tmv {
         LowerTriMatrix<T,UnitDiag> getL() const;
         ConstBandMatrixView<T> getU() const;
         const GenBandMatrix<T>& getLU() const;
-        const int* getP() const;
+        const Permutation& getP() const;
 
         bool checkDecomp(const BaseMatrix<T>& m, std::ostream* fout) const;
 
@@ -131,7 +147,7 @@ namespace tmv {
         TMV_DEPRECATED(const GenBandMatrix<T>& GetLU() const)
         { return getLU(); }
         TMV_DEPRECATED(const int* GetP() const)
-        { return getP(); }
+        { return getP().getValues(); }
 
     private :
 

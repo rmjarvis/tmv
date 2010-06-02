@@ -16,6 +16,16 @@ Bug fixes:
 -- Added a check in the test suite to run SVD with the kind of 
    severely defective matrix that had led to the above bug, so this kind 
    of error can be discovered more reliably.
+
+-- Also added nearly zero and nearly overflowing matrices to the test 
+   suites.  These found more bugs involving overflow, underflow, and 
+   loss of precision in these cases, which I have now fixed.
+
+-- Significantly increased the scope of the test suite in general, and found
+   a few more obscure bugs.  I feel justified in saying obscure, since 
+   the never turned up in my code, and no one issued a bug report about
+   them.  :)  But worth getting right, obviously.
+
    
 New features:
 
@@ -26,5 +36,38 @@ New features:
    (There had been a function TMV_Version() which returned a string, which
    was useful for outputting the TMV version in a log file, but not so
    useful for doing a compile-time check of which version it is.)
+
+-- Added TriRef as a reference type for UnitDiag TriMatrix m(i,j).
+   The problem was that x = m(i,i) was invalid if m is UnitDiag and 
+   non-const, rather than just letting x = 1.  Now the TriRef only gives
+   an error if the value is used in modifying context (like m(i,i) = 3),
+   but allows all non-modifying uses without error.
+
+-- Added m.unitUpperTri() and m.unitLowerTri(), in anticipation of their
+   more efficient implementation in v0.70.
+
+-- Added m.sumElements() and m.sumAbsElements().
+
+-- Added Permutation class, including all related changes to make it the 
+   preferred way to access permutations.  e.g. m.lud().getP() now returns
+   a Permutation rather than a const int*.
+
+-- Made Swap(m1,m2) (and Swap(v1,v2)) efficient if m1 and m2 (or v1 and v2)
+   are really full Matrix (or Vector) objects rather than views.
+
+-- Added cView and fView methods.
+
+-- Made SmallMatrixComposite derive from MatrixComposite, which allows it
+   to be automatically instantiated rather than just assigned to a 
+   matrix object.  This used to be how it worked in v0.61 I think, and I 
+   got rid of it along with the other changes to remove vtables from 
+   SmallMatrix operations.  However, this particular virtual inheritance
+   does not usually have any negative effects on the running time, since
+   the compiler is usually able to resolve the virtual functions at 
+   compile time.  
+
+-- Likewise with SmallVectorComposite
+
+-- Added version of MatrixViewOf with arbitrary steps.
 
 

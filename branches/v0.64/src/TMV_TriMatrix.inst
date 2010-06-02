@@ -1,11 +1,11 @@
 
 #define CT std::complex<T>
 
-#define Def1(T,RT,CCT,Ref) \
+#define Def1(T,RT,CCT) \
   template T GenUpperTriMatrix<T >::cref(int i, int j) const; \
   template T GenLowerTriMatrix<T >::cref(int i, int j) const; \
-  template Ref UpperTriMatrixView<T,CStyle>::ref(int i, int j) const; \
-  template Ref LowerTriMatrixView<T,CStyle>::ref(int i, int j) const; \
+  template TriRef<T,true> UpperTriMatrixView<T,CStyle>::ref(int i, int j) const; \
+  template TriRef<T,true> LowerTriMatrixView<T,CStyle>::ref(int i, int j) const; \
   template bool GenUpperTriMatrix<T >::hasSubMatrix( \
       int i1, int i2, int j1, int j2, int istep, int jstep) const; \
   template bool GenUpperTriMatrix<T >::hasSubVector( \
@@ -66,9 +66,9 @@
   template void Swap(const UpperTriMatrixView<T >& m1, \
       const UpperTriMatrixView<T >& m2); \
 
-Def1(T,T,CT,T&)
+Def1(T,T,CT)
 #ifdef INST_COMPLEX
-Def1(CT,T,CT,VarConjRef<CT >)
+Def1(CT,T,CT)
 #endif
 
 #undef Def1

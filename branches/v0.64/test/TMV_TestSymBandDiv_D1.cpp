@@ -33,36 +33,34 @@ void TestSymBandDiv_D1(tmv::DivType dt, PosDefCode pdc)
     tmv::LowerTriMatrix<T> l(a1);
     tmv::LowerTriMatrix<std::complex<T> > cl(ca1);
 
-    tmv::UpperTriMatrix<T> ux = u;
-    tmv::UpperTriMatrix<std::complex<T> > cux = cu;
-    tmv::LowerTriMatrix<T> lx = l;
-    tmv::LowerTriMatrix<std::complex<T> > clx = cl;
+    tmv::UpperTriMatrixView<T> uv = u.view();
+    tmv::UpperTriMatrixView<std::complex<T> > cuv = cu.view();
+    tmv::LowerTriMatrixView<T> lv = l.view();
+    tmv::LowerTriMatrixView<std::complex<T> > clv = cl.view();
 
     for(size_t i=START;i<sb.size();i++) {
         if (showstartdone)
             std::cout<<"Start loop: i = "<<i<<", si = "<<tmv::TMV_Text(sb[i])<<
                 "  "<<sb[i]<<std::endl;
-        const tmv::SymBandMatrixView<T>& si = sb[i];
-        const tmv::SymBandMatrixView<std::complex<T> >& csi = csb[i];
+        tmv::SymBandMatrixView<T> si = sb[i];
+        tmv::SymBandMatrixView<std::complex<T> > csi = csb[i];
         if (dt == tmv::CH && csi.issym()) continue;
         si.saveDiv();
         csi.saveDiv();
 
-        TestMatrixDivArith1<T>(dt,ux,cux,si,u.view(),csi,cu.view(),
-                               "UpperTriMatrix/SymBand");
-        TestMatrixDivArith1<T>(dt,lx,clx,si,l.view(),csi,cl.view(),
-                               "LowerTriMatrix/SymBand");
+        TestMatrixDivArith1<T>(dt,si,uv,csi,cuv,"UpperTriMatrix/SymBand");
+        TestMatrixDivArith1<T>(dt,si,lv,csi,clv,"LowerTriMatrix/SymBand");
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
     for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSymBandDiv_D1<double>(tmv::DivType dt, PosDefCode pdc);
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSymBandDiv_D1<float>(tmv::DivType dt, PosDefCode pdc);
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSymBandDiv_D1<long double>(tmv::DivType dt, PosDefCode pdc);
 #endif

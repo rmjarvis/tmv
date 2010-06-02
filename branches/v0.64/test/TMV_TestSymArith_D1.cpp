@@ -66,13 +66,6 @@ void TestSymMatrixArith_D1()
     tmv::LowerTriMatrixView<std::complex<T> > cl2v = cl2.view();
     tmv::LowerTriMatrixView<std::complex<T> > cl3v = cl3.view();
     tmv::LowerTriMatrixView<std::complex<T> > cl4v = cl4.view();
-
-    tmv::UpperTriMatrix<T,tmv::UnitDiag> u2x = u2v;
-    tmv::LowerTriMatrix<T,tmv::NonUnitDiag> l1x = l1v;
-    tmv::LowerTriMatrix<T,tmv::UnitDiag> l2x = l2v;
-    tmv::UpperTriMatrix<std::complex<T>,tmv::UnitDiag> cu2x = cu2v;
-    tmv::LowerTriMatrix<std::complex<T>,tmv::NonUnitDiag> cl1x = cl1v;
-    tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag> cl2x = cl2v;
 #endif
 
     for(size_t i=START;i<s.size();i++) {
@@ -84,49 +77,46 @@ void TestSymMatrixArith_D1()
         tmv::SymMatrixView<T> si = s[i];
         tmv::SymMatrixView<std::complex<T> > csi = cs[i];
 
-        if (csi.isherm()) {
-            tmv::HermMatrix<T> sx = si;
-            tmv::HermMatrix<std::complex<T> > csx = csi;
-
-            TestMatrixArith456<T>(sx,csx,si,csi,u1v,cu1v,"Herm/UpperTri");
+        TestMatrixArith4<T>(si,csi,u1v,cu1v,"Sym/UpperTri");
+        TestMatrixArith5<T>(si,csi,u1v,cu1v,"Sym/UpperTri");
+        TestMatrixArith6x<T>(si,csi,u1v,cu1v,"Sym/UpperTri");
 #ifdef XTEST
-            TestMatrixArith456<T>(sx,csx,si,csi,l1v,cl1v,"Herm/LowerTri");
-            TestMatrixArith456<T>(sx,csx,si,csi,u2v,cu2v,"Herm/UpperTri");
-            TestMatrixArith456<T>(sx,csx,si,csi,l2v,cl2v,"Herm/LowerTri");
-            TestMatrixArith456<T>(sx,csx,si,csi,u3v,cu3v,"Herm/UpperTri");
-            TestMatrixArith456<T>(sx,csx,si,csi,l3v,cl3v,"Herm/LowerTri");
-            TestMatrixArith456<T>(sx,csx,si,csi,u4v,cu4v,"Herm/UpperTri");
-            TestMatrixArith456<T>(sx,csx,si,csi,l4v,cl4v,"Herm/LowerTri");
+        TestMatrixArith4<T>(si,csi,l1v,cl1v,"Sym/LowerTri");
+        TestMatrixArith5<T>(si,csi,l1v,cl1v,"Sym/LowerTri");
+        TestMatrixArith6x<T>(si,csi,l1v,cl1v,"Sym/LowerTri");
+        TestMatrixArith4<T>(si,csi,u2v,cu2v,"Sym/UpperTri");
+        TestMatrixArith5<T>(si,csi,u2v,cu2v,"Sym/UpperTri");
+        TestMatrixArith6x<T>(si,csi,u2v,cu2v,"Sym/UpperTri");
+        TestMatrixArith4<T>(si,csi,l2v,cl2v,"Sym/LowerTri");
+        TestMatrixArith5<T>(si,csi,l2v,cl2v,"Sym/LowerTri");
+        TestMatrixArith6x<T>(si,csi,l2v,cl2v,"Sym/LowerTri");
+        TestMatrixArith4<T>(si,csi,u3v,cu3v,"Sym/UpperTri");
+        TestMatrixArith5<T>(si,csi,u3v,cu3v,"Sym/UpperTri");
+        TestMatrixArith6x<T>(si,csi,u3v,cu3v,"Sym/UpperTri");
+        TestMatrixArith4<T>(si,csi,l3v,cl3v,"Sym/LowerTri");
+        TestMatrixArith5<T>(si,csi,l3v,cl3v,"Sym/LowerTri");
+        TestMatrixArith6x<T>(si,csi,l3v,cl3v,"Sym/LowerTri");
+        TestMatrixArith4<T>(si,csi,u4v,cu4v,"Sym/UpperTri");
+        TestMatrixArith5<T>(si,csi,u4v,cu4v,"Sym/UpperTri");
+        TestMatrixArith6x<T>(si,csi,u4v,cu4v,"Sym/UpperTri");
+        TestMatrixArith4<T>(si,csi,l4v,cl4v,"Sym/LowerTri");
+        TestMatrixArith5<T>(si,csi,l4v,cl4v,"Sym/LowerTri");
+        TestMatrixArith6x<T>(si,csi,l4v,cl4v,"Sym/LowerTri");
 #endif
-        } else {
-            tmv::SymMatrix<T> sx = si;
-            tmv::SymMatrix<std::complex<T> > csx = csi;
-
-            TestMatrixArith456<T>(sx,csx,si,csi,u1v,cu1v,"Sym/UpperTri");
-#ifdef XTEST
-            TestMatrixArith456<T>(sx,csx,si,csi,l1v,cl1v,"Sym/LowerTri");
-            TestMatrixArith456<T>(sx,csx,si,csi,u2v,cu2v,"Sym/UpperTri");
-            TestMatrixArith456<T>(sx,csx,si,csi,l2v,cl2v,"Sym/LowerTri");
-            TestMatrixArith456<T>(sx,csx,si,csi,u3v,cu3v,"Sym/UpperTri");
-            TestMatrixArith456<T>(sx,csx,si,csi,l3v,cl3v,"Sym/LowerTri");
-            TestMatrixArith456<T>(sx,csx,si,csi,u4v,cu4v,"Sym/UpperTri");
-            TestMatrixArith456<T>(sx,csx,si,csi,l4v,cl4v,"Sym/LowerTri");
-#endif
-        }
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
     for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSymMatrixArith_D1<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSymMatrixArith_D1<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSymMatrixArith_D1<long double>();
 #endif
-#ifdef INST_INT
+#ifdef TEST_INT
 template void TestSymMatrixArith_D1<int>();
 #endif

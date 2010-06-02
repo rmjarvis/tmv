@@ -48,6 +48,7 @@
 #include "TMV_IsNaN.h"
 
 #ifdef XDEBUG
+#define THRESH 1.e-10
 #include "tmv/TMV_MatrixArith.h"
 #include "tmv/TMV_DiagMatrixArith.h"
 #include "tmv/TMV_SymMatrixArith.h"
@@ -788,6 +789,18 @@ namespace tmv {
 #endif // LAP
 #endif // XDEBUG
 
+        // Before running the normal algorithms, rescale D,E by the maximum
+        // value to help avoid overflow and underflow.
+        RT scale = TMV_MAX(D.maxAbsElement(),E.maxAbsElement());
+        if (scale * TMV_Epsilon<T>() == RT(0)) {
+            // Hopeless case.  Just zero out D,E and call it done.
+            D.setZero();
+            E.setZero();
+            return;
+        }
+        D /= scale;
+        E /= scale;
+
 #ifdef LAP
         LapEigenFromTridiagonal(U,D,E);
 #else 
@@ -805,6 +818,9 @@ namespace tmv {
         D.sort(sortp.get(),Descend,AbsComp);
         if (U) U->permuteCols(sortp.get());
 
+        // Now undo the scaling
+        D *= scale;
+
 #ifdef XDEBUG
         if (U) {
             //cout<<"Done EigenFromTridiag: Norm(U) = "<<Norm(*U)<<endl;
@@ -816,7 +832,7 @@ namespace tmv {
             //cout<<"Norm(UD) = "<<Norm(*U*DiagMatrixViewOf(D))<<endl;
             //cout<<"Norm(A0U) = "<<Norm(A0*(*U))<<endl;
             //cout<<"Norm(UD-A0U) = "<<Norm((*U)*DiagMatrixViewOf(D)-A0*(*U))<<endl;
-            if (!(Norm(UDU-A0) < 0.001*Norm(A0))) {
+            if (!(Norm(UDU-A0) < THRESH*Norm(A0))) {
                 cerr<<"EigenFromTridiagonal:\n";
                 cerr<<"D = "<<D0<<endl;
                 cerr<<"E = "<<E0<<endl;
@@ -828,7 +844,7 @@ namespace tmv {
 #endif
                 cerr<<"Norm(UDU-A0) = "<<Norm(UDU-A0)<<endl;
                 cerr<<"Norm(A0) = "<<Norm(A0)<<endl;
-                throw int(1);
+                abort();
             }
         }
 #endif // XDEBUG
@@ -883,7 +899,7 @@ namespace tmv {
 
 #ifdef XDEBUG
         Matrix<T> A2 = U * DiagMatrixViewOf(SS) * U.adjoint();
-        if (!(Norm(A0-A2) < 0.0001 * Norm(U) * Norm(SS) * Norm(U))) {
+        if (!(Norm(A0-A2) < THRESH * Norm(U) * Norm(SS) * Norm(U))) {
             cerr<<"UnsortedHermEigen:\n";
             cerr<<"A = "<<A0<<endl;
             cerr<<"U = "<<U<<endl;
@@ -950,7 +966,7 @@ namespace tmv {
         std::cout<<"A0 = "<<A0<<endl;
         std::cout<<"A2 = "<<A2<<endl;
         std::cout<<"Norm(A0-A2) = "<<Norm(A0-A2)<<std::endl;
-        if (!(Norm(A0-A2) < 0.0001 * TMV_NORM(Norm(U)) * Norm(SS))) {
+        if (!(Norm(A0-A2) < THRESH * TMV_NORM(Norm(U)) * Norm(SS))) {
             cerr<<"HermSV_Decompose:\n";
             cerr<<"A = "<<A0<<endl;
             cerr<<"U = "<<U<<endl;
@@ -1034,7 +1050,7 @@ namespace tmv {
             std::cout<<"A0 = "<<A0<<endl;
             std::cout<<"A2 = "<<A2<<endl;
             std::cout<<"Norm(A0-A2) = "<<Norm(A0-A2)<<std::endl;
-            if (!(Norm(A0-A2) < 0.0001 * Norm(U) * Norm(SS) * Norm(*V))) {
+            if (!(Norm(A0-A2) < THRESH * Norm(U) * Norm(SS) * Norm(*V))) {
                 cerr<<"SymSV_Decompose:\n";
                 cerr<<"A = "<<A0<<endl;
                 cerr<<"U = "<<U<<endl;
@@ -1227,7 +1243,7 @@ namespace tmv {
         SymMultMM<false>(T(1),VtS,V,P);
 #ifdef XDEBUG
         Matrix<T> A2 = U*P;
-        if (!(Norm(A2-A0) < 0.001*Norm(A0))) {
+        if (!(Norm(A2-A0) < THRESH*Norm(A0))) {
             cerr<<"PolarDecompose "<<TMV_Text(U)<<"  "<<A0<<endl;
             cerr<<"U = "<<U<<endl;
             cerr<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<endl;
@@ -1252,7 +1268,7 @@ namespace tmv {
         SymMultMM<false>(T(1),VtS,V,P);
 #ifdef XDEBUG
         Matrix<T> A2 = U*P;
-        if (Norm(A2-A) > 0.001*Norm(A)) {
+        if (Norm(A2-A) > THRESH*Norm(A)) {
             cerr<<"PolarDecompose "<<TMV_Text(A)<<"  "<<A<<endl;
             cerr<<"U = "<<U<<endl;
             cerr<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<endl;

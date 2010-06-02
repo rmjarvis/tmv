@@ -26,8 +26,9 @@ void TestSymDiv_B1(tmv::DivType dt, PosDefCode pdc)
     a1 /= T(10);
     tmv::Matrix<std::complex<T> > ca1 = a1 * std::complex<T>(3,-4);
 
-    tmv::Matrix<T> a1x = a1;
-    tmv::Matrix<std::complex<T> > ca1x = ca1;
+    tmv::MatrixView<T> a1v = a1.view();
+    tmv::MatrixView<std::complex<T> > ca1v = ca1.view();
+
 #ifdef XTEST
     tmv::Matrix<T> a3 = a1.colRange(0,N/2);
     tmv::Matrix<std::complex<T> > ca3 = ca1.colRange(0,N/2);
@@ -38,50 +39,45 @@ void TestSymDiv_B1(tmv::DivType dt, PosDefCode pdc)
     tmv::Matrix<T> a6 = a1.rowRange(0,0);
     tmv::Matrix<std::complex<T> > ca6 = ca1.rowRange(0,0);
 
-    tmv::Matrix<T> a3x = a3;
-    tmv::Matrix<T> a4x = a4;
-    tmv::Matrix<T> a5x = a5;
-    tmv::Matrix<T> a6x = a6;
-    tmv::Matrix<std::complex<T> > ca3x = ca3;
-    tmv::Matrix<std::complex<T> > ca4x = ca4;
-    tmv::Matrix<std::complex<T> > ca5x = ca5;
-    tmv::Matrix<std::complex<T> > ca6x = ca6;
+    tmv::MatrixView<T> a3v = a3.view();
+    tmv::MatrixView<std::complex<T> > ca3v = ca3.view();
+    tmv::MatrixView<T> a4v = a4.view();
+    tmv::MatrixView<std::complex<T> > ca4v = ca4.view();
+    tmv::MatrixView<T> a5v = a5.view();
+    tmv::MatrixView<std::complex<T> > ca5v = ca5.view();
+    tmv::MatrixView<T> a6v = a6.view();
+    tmv::MatrixView<std::complex<T> > ca6v = ca6.view();
 #endif
 
     for(size_t i=START;i<s.size();i++) {
         if (showstartdone)
             std::cout<<"Start loop: i = "<<i<<", si = "<<
                 tmv::TMV_Text(s[i])<<"  "<<s[i]<<std::endl;
-        const tmv::SymMatrixView<T>& si = s[i];
-        const tmv::SymMatrixView<std::complex<T> >& csi = cs[i];
+        tmv::SymMatrixView<T> si = s[i];
+        tmv::SymMatrixView<std::complex<T> > csi = cs[i];
         if (dt == tmv::CH && csi.issym()) continue;
 
         si.saveDiv();
         csi.saveDiv();
 
-        TestMatrixDivArith1<T>(dt,a1x,ca1x,si,a1.view(),csi,ca1.view(),
-                               "SquareMatrix/Sym");
+        TestMatrixDivArith1<T>(dt,si,a1v,csi,ca1v,"SquareMatrix/Sym");
 #ifdef XTEST
-        TestMatrixDivArith1<T>(dt,a3x,ca3x,si,a3.view(),csi,ca3.view(),
-                               "NonSquareMatrix/Sym");
-        TestMatrixDivArith1<T>(dt,a4x,ca4x,si,a4.view(),csi,ca4.view(),
-                               "NonSquareMatrix/Sym");
-        TestMatrixDivArith1<T>(dt,a5x,ca5x,si,a5.view(),csi,ca5.view(),
-                               "DegenerateMatrix/Sym");
-        TestMatrixDivArith1<T>(dt,a6x,ca6x,si,a6.view(),csi,ca6.view(),
-                               "DegenerateMatrix/Sym");
+        TestMatrixDivArith1<T>(dt,si,a3v,csi,ca3v,"NonSquareMatrix/Sym");
+        TestMatrixDivArith1<T>(dt,si,a4v,csi,ca4v,"NonSquareMatrix/Sym");
+        TestMatrixDivArith1<T>(dt,si,a5v,csi,ca5v,"DegenerateMatrix/Sym");
+        TestMatrixDivArith1<T>(dt,si,a6v,csi,ca6v,"DegenerateMatrix/Sym");
 #endif
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
     for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSymDiv_B1<double>(tmv::DivType dt, PosDefCode pdc);
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSymDiv_B1<float>(tmv::DivType dt, PosDefCode pdc);
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSymDiv_B1<long double>(tmv::DivType dt, PosDefCode pdc);
 #endif

@@ -17,11 +17,11 @@ void TestSymBandMatrixArith_D2()
 #ifdef XTEST
     const int N = 10;
 
-    std::vector<tmv::SymBandMatrixView<T> > s;
-    std::vector<tmv::SymBandMatrixView<std::complex<T> > > cs;
+    std::vector<tmv::SymBandMatrixView<T> > sb;
+    std::vector<tmv::SymBandMatrixView<std::complex<T> > > csb;
     std::vector<tmv::BaseMatrix<T>*> B;
     std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
-    MakeSymBandList(s,cs,B,CB,InDef);
+    MakeSymBandList(sb,csb,B,CB,InDef);
 
     tmv::Matrix<T> a1(N,N);
     for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) a1(i,j) = T(3+i-5*j);
@@ -67,62 +67,54 @@ void TestSymBandMatrixArith_D2()
     tmv::LowerTriMatrixView<std::complex<T> > cl3v = cl3.view();
     tmv::LowerTriMatrixView<std::complex<T> > cl4v = cl4.view();
 
-    tmv::UpperTriMatrix<T,tmv::UnitDiag> u2x = u2v;
-    tmv::LowerTriMatrix<T,tmv::NonUnitDiag> l1x = l1v;
-    tmv::LowerTriMatrix<T,tmv::UnitDiag> l2x = l2v;
-    tmv::UpperTriMatrix<std::complex<T>,tmv::UnitDiag> cu2x = cu2v;
-    tmv::LowerTriMatrix<std::complex<T>,tmv::NonUnitDiag> cl1x = cl1v;
-    tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag> cl2x = cl2v;
-
-    for(size_t i=START;i<s.size();i++) {
+    for(size_t i=START;i<sb.size();i++) {
         if (showstartdone) {
             std::cout<<"Start loop i = "<<i<<std::endl;
-            std::cout<<"si = "<<s[i]<<std::endl;
+            std::cout<<"si = "<<sb[i]<<std::endl;
         }
 
-        tmv::SymBandMatrixView<T> si = s[i];
-        tmv::SymBandMatrixView<std::complex<T> > csi = cs[i];
+        tmv::SymBandMatrixView<T> si = sb[i];
+        tmv::SymBandMatrixView<std::complex<T> > csi = csb[i];
 
-        if (csi.isherm()) {
-            tmv::HermBandMatrix<T> sx = si;
-            tmv::HermBandMatrix<std::complex<T> > csx = csi;
-
-            TestMatrixArith456<T>(u1x,cu1x,u1v,cu1v,si,csi,"UpperTri/HermBand");
-            TestMatrixArith456<T>(l1x,cl1x,l1v,cl1v,si,csi,"LowerTri/HermBand");
-            TestMatrixArith456<T>(u2x,cu2x,u2v,cu2v,si,csi,"UpperTri/HermBand");
-            TestMatrixArith456<T>(l2x,cl2x,l2v,cl2v,si,csi,"LowerTri/HermBand");
-            TestMatrixArith456<T>(u1x,cu1x,u3v,cu3v,si,csi,"UpperTri/HermBand");
-            TestMatrixArith456<T>(l1x,cl1x,l3v,cl3v,si,csi,"LowerTri/HermBand");
-            TestMatrixArith456<T>(u2x,cu2x,u4v,cu4v,si,csi,"UpperTri/HermBand");
-            TestMatrixArith456<T>(l2x,cl2x,l4v,cl4v,si,csi,"LowerTri/HermBand");
-        } else {
-            tmv::SymBandMatrix<T> sx = si;
-            tmv::SymBandMatrix<std::complex<T> > csx = csi;
-
-            TestMatrixArith456<T>(u1x,cu1x,u1v,cu1v,si,csi,"UpperTri/SymBand");
-            TestMatrixArith456<T>(l1x,cl1x,l1v,cl1v,si,csi,"LowerTri/SymBand");
-            TestMatrixArith456<T>(u2x,cu2x,u2v,cu2v,si,csi,"UpperTri/SymBand");
-            TestMatrixArith456<T>(l2x,cl2x,l2v,cl2v,si,csi,"LowerTri/SymBand");
-            TestMatrixArith456<T>(u1x,cu1x,u3v,cu3v,si,csi,"UpperTri/SymBand");
-            TestMatrixArith456<T>(l1x,cl1x,l3v,cl3v,si,csi,"LowerTri/SymBand");
-            TestMatrixArith456<T>(u2x,cu2x,u4v,cu4v,si,csi,"UpperTri/SymBand");
-            TestMatrixArith456<T>(l2x,cl2x,l4v,cl4v,si,csi,"LowerTri/SymBand");
-        }
+        TestMatrixArith4<T>(u1v,cu1v,si,csi,"UpperTri/SymBand");
+        TestMatrixArith5<T>(u1v,cu1v,si,csi,"UpperTri/SymBand");
+        TestMatrixArith6x<T>(u1v,cu1v,si,csi,"UpperTri/SymBand");
+        TestMatrixArith4<T>(l1v,cl1v,si,csi,"LowerTri/SymBand");
+        TestMatrixArith5<T>(l1v,cl1v,si,csi,"LowerTri/SymBand");
+        TestMatrixArith6x<T>(l1v,cl1v,si,csi,"LowerTri/SymBand");
+        TestMatrixArith4<T>(u2v,cu2v,si,csi,"UpperTri/SymBand");
+        TestMatrixArith5<T>(u2v,cu2v,si,csi,"UpperTri/SymBand");
+        TestMatrixArith6x<T>(u2v,cu2v,si,csi,"UpperTri/SymBand");
+        TestMatrixArith4<T>(l2v,cl2v,si,csi,"LowerTri/SymBand");
+        TestMatrixArith5<T>(l2v,cl2v,si,csi,"LowerTri/SymBand");
+        TestMatrixArith6x<T>(l2v,cl2v,si,csi,"LowerTri/SymBand");
+        TestMatrixArith4<T>(u3v,cu3v,si,csi,"UpperTri/SymBand");
+        TestMatrixArith5<T>(u3v,cu3v,si,csi,"UpperTri/SymBand");
+        TestMatrixArith6x<T>(u3v,cu3v,si,csi,"UpperTri/SymBand");
+        TestMatrixArith4<T>(l3v,cl3v,si,csi,"LowerTri/SymBand");
+        TestMatrixArith5<T>(l3v,cl3v,si,csi,"LowerTri/SymBand");
+        TestMatrixArith6x<T>(l3v,cl3v,si,csi,"LowerTri/SymBand");
+        TestMatrixArith4<T>(u4v,cu4v,si,csi,"UpperTri/SymBand");
+        TestMatrixArith5<T>(u4v,cu4v,si,csi,"UpperTri/SymBand");
+        TestMatrixArith6x<T>(u4v,cu4v,si,csi,"UpperTri/SymBand");
+        TestMatrixArith4<T>(l4v,cl4v,si,csi,"LowerTri/SymBand");
+        TestMatrixArith5<T>(l4v,cl4v,si,csi,"LowerTri/SymBand");
+        TestMatrixArith6x<T>(l4v,cl4v,si,csi,"LowerTri/SymBand");
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
     for(size_t i=0;i<CB.size();++i) delete CB[i];
 #endif
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSymBandMatrixArith_D2<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSymBandMatrixArith_D2<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSymBandMatrixArith_D2<long double>();
 #endif
-#ifdef INST_INT
+#ifdef TEST_INT
 template void TestSymBandMatrixArith_D2<int>();
 #endif

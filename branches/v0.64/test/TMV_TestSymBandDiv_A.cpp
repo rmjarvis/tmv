@@ -33,10 +33,10 @@ void TestSymBandDiv_A(tmv::DivType dt, PosDefCode pdc)
     tmv::HermBandMatrix<T> h1(a1,2);
     tmv::HermBandMatrix<std::complex<T> > ch1(ca1,2);
 
-    tmv::SymBandMatrix<T> s1x = s1;
-    tmv::SymBandMatrix<std::complex<T> > cs1x = s1;
-    tmv::HermBandMatrix<T> h1x = h1;
-    tmv::HermBandMatrix<std::complex<T> > ch1x = ch1;
+    tmv::SymBandMatrixView<T> s1v = s1.view();
+    tmv::SymBandMatrixView<std::complex<T> > cs1v = cs1.view();
+    tmv::SymBandMatrixView<T> h1v = h1.view();
+    tmv::SymBandMatrixView<std::complex<T> > ch1v = ch1.view();
 
     for(size_t i=START;i<sb.size();i++) {
         if (showstartdone)
@@ -49,21 +49,19 @@ void TestSymBandDiv_A(tmv::DivType dt, PosDefCode pdc)
         si.saveDiv();
         csi.saveDiv();
 
-        TestMatrixDivArith2<T>(dt,s1x,cs1x,si,s1.view(),csi,cs1.view(),
-                               "SymBand/SymBand");
-        TestMatrixDivArith1<T>(dt,h1x,ch1x,si,h1.view(),csi,ch1.view(),
-                               "HermBand/SymBand");
+        TestMatrixDivArith2<T>(dt,si,s1v,csi,cs1v,"SymBand/SymBand");
+        TestMatrixDivArith1<T>(dt,si,h1v,csi,ch1v,"HermBand/SymBand");
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
     for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSymBandDiv_A<double>(tmv::DivType dt, PosDefCode pdc);
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSymBandDiv_A<float>(tmv::DivType dt, PosDefCode pdc);
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSymBandDiv_A<long double>(tmv::DivType dt, PosDefCode pdc);
 #endif

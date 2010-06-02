@@ -63,8 +63,10 @@ namespace tmv {
         TMVAssert(Qbeta.step() == 1);
 
 #ifdef XDEBUG
-        //cout<<"QRx = "<<TMV_Text(QRx)<<endl;
-        //cout<<"M N lo hi = "<<QRx.colsize()<<"  "<<QRx.rowsize()<<"  "<<QRx.nlo()<<"  "<<QRx.nhi()<<endl;
+        std::cout<<"Start Band QR_Decompose\n";
+        cout<<"QRx = "<<TMV_Text(QRx)<<endl;
+        cout<<"= "<<QRx<<std::endl;
+        cout<<"M N lo hi = "<<QRx.colsize()<<"  "<<QRx.rowsize()<<"  "<<QRx.nlo()<<"  "<<QRx.nhi()<<endl;
         Matrix<T> A0(QRx);
 #endif
         const int M = QRx.colsize();
@@ -87,12 +89,18 @@ namespace tmv {
             }
         }
 #ifdef XDEBUG
+        std::cout<<"Done Band QR_Decompose\n";
+        std::cout<<"QRx => "<<QRx<<std::endl;
+        std::cout<<"beta => "<<Qbeta<<std::endl;
         Matrix<T> Q(M,N);
         Q = QRx;
         GetQFromBandQR(Q.view(),Qbeta,QRx.nlo());
+        std::cout<<"Q = "<<Q<<std::endl;
         Matrix<T> R(QRx.diagRange(0,QRx.nhi()+1));
+        std::cout<<"R = "<<R<<std::endl;
         Matrix<T> QR = Q*R;
-        //cout<<"Norm(QR-A0) = "<<Norm(QR-A0)<<endl;
+        std::cout<<"QR = "<<QR<<std::endl;
+        cout<<"Norm(QR-A0) = "<<Norm(QR-A0)<<endl;
         if (Norm(QR-A0) > 0.00001*Norm(A0)) {
             cerr<<"QR_Decompose: \n";
             cerr<<"A = "<<TMV_Text(QRx)<<"  "<<A0<<endl;
@@ -129,9 +137,10 @@ namespace tmv {
             T d(0);
             Q.setZero();
             BandMatrixView<T>(Q,A.nlo(),A.nhi()) = A;
-            QR_Decompose(BandMatrixViewOf(Q,A.nlo(),A.nlo()+A.nhi()),
+            int newnhi = TMV_MIN(A.nlo()+A.nhi(),int(A.rowsize()-1));
+            QR_Decompose(BandMatrixViewOf(Q,A.nlo(),newnhi),
                         beta.view(),d);
-            R = BandMatrixViewOf(Q,0,A.nlo()+A.nhi());
+            R = BandMatrixViewOf(Q,0,newnhi);
             GetQFromBandQR(Q,beta.view(),A.nlo());
         }
     }
@@ -152,13 +161,14 @@ namespace tmv {
 
         Vector<T> beta(A.rowsize());
         T d(0);
+        int newnhi = TMV_MIN(A.nlo()+A.nhi(),int(A.rowsize()-1));
         BandMatrix<T> QR(
             TMV_MIN(A.colsize(),A.rowsize()+A.nlo()),A.rowsize(),
-            A.nlo(),A.nlo()+A.nhi(),T(0));
+            A.nlo(),newnhi,T(0));
         QR.setZero();
         BandMatrixViewOf(QR,A.nlo(),A.nhi()) = A.rowRange(0,QR.colsize());
         QR_Decompose(QR.view(),beta.view(),d);
-        R = BandMatrixViewOf(QR,0,A.nlo()+A.nhi());
+        R = BandMatrixViewOf(QR,0,newnhi);
     }
 
 #define InstFile "TMV_BandQRDecompose.inst"

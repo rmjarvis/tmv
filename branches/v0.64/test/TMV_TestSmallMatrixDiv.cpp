@@ -300,12 +300,12 @@ void TestAllSmallMatrixDiv()
     std::cout<<" passed all basic tests\n";
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestAllSmallMatrixDiv<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestAllSmallMatrixDiv<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestAllSmallMatrixDiv<long double>();
 #endif

@@ -37,19 +37,29 @@ opts = Variables(config_file)
 # Now set up options for the command line
 opts.Add('CXX','Name of c++ compiler')
 opts.Add('FLAGS','Compile flags to send to the compiler','')
-opts.Add(BoolVariable('DEBUG','Turn on debugging statements',False))
 opts.Add(PathVariable('PREFIX',
             'prefix for installation','', PathVariable.PathAccept))
-opts.Add(BoolVariable('WITH_FLOAT',
-            'Instantiate <float> templates', True))
-opts.Add(BoolVariable('WITH_DOUBLE',
-            'Instantiate <double> templates', True))
-opts.Add(BoolVariable('WITH_LONGDOUBLE',
-            'Instantiate <long double> templates', False))
-opts.Add(BoolVariable('WITH_INT',
-            'Instantiate <int> templates', False))
+
 opts.Add(BoolVariable('WITH_OPENMP',
-            'Look for openmp and use if found.', True))
+        'Look for openmp and use if found.', True))
+opts.Add(BoolVariable('INST_FLOAT',
+        'Instantiate <float> templates in compiled library', True))
+opts.Add(BoolVariable('INST_DOUBLE',
+        'Instantiate <double> templates in compiled library', True))
+opts.Add(BoolVariable('INST_LONGDOUBLE',
+        'Instantiate <long double> templates in compiled library', False))
+opts.Add(BoolVariable('INST_INT',
+        'Instantiate <int> templates in compiled library', False))
+
+#opts.Add(BoolVariable('TEST_FLOAT',
+#        'Instantiate <float> in the test suite', True))
+#opts.Add(BoolVariable('TEST_DOUBLE',
+#        'Instantiate <double> in the test suite', True))
+#opts.Add(BoolVariable('TEST_LONGDOUBLE',
+#        'Instantiate <long double> in the test suite', False))
+#opts.Add(BoolVariable('TEST_INT',
+#        'Instantiate <int> in the test suite', True))
+
 
 opts.Add(BoolVariable('IMPORT_ENV',
             'Import full environment from calling shell', False))
@@ -90,12 +100,13 @@ opts.Add(BoolVariable('FORCE_FLAPACK',
             'Force scons to use Fortran LAPACK', False))
 opts.Add('LIBS','Libraries to send to the linker','')
 
-opts.Add(BoolVariable('STATIC',
-            'Use static linkage', False))
+opts.Add(BoolVariable('DEBUG',
+        'Turn on debugging statements in compilied library',False))
+opts.Add(BoolVariable('STATIC','Use static linkage', False))
 opts.Add(BoolVariable('WITH_SSE',
-            'For icpc compilations only: Use SSE commands', True))
-opts.Add(BoolVariable('XTEST',
-            'Do (a LOT of) extra tests in the test suite ', False))
+            'Only necessary for icpc compilations: Use SSE commands', True))
+opts.Add('XTEST',
+        'Do extra tests in the test suite (1=non-unit step, 2=extra sizes/shapes, 4=mix real/complex,  8=degenerate,  16=extra arithmetic, 32=FortranStyle) ', '0')
 opts.Add(BoolVariable('MEM_TEST',
             'Test for memory leaks', False))
 opts.Add(BoolVariable('SMALL_TESTS',
@@ -1011,14 +1022,27 @@ def DoConfig(env):
             env.Append(LINKFLAGS=['-Bstatic'])
         else:
             env.Append(LINKFLAGS=['-static'])
-    if not env['WITH_FLOAT']:
-        env.Append(CPPDEFINES=['NO_INST_FLOAT'])
-    if not env['WITH_DOUBLE']:
-        env.Append(CPPDEFINES=['NO_INST_DOUBLE'])
-    if env['WITH_LONGDOUBLE']:
-        env.Append(CPPDEFINES=['INST_LONGDOUBLE'])
-    if env['WITH_INT']:
-        env.Append(CPPDEFINES=['INST_INT'])
+    env['TEST_FLOAT'] = env['INST_FLOAT']
+    env['TEST_DOUBLE'] = env['INST_DOUBLE']
+    env['TEST_LONGDOUBLE'] = env['INST_LONGDOUBLE']
+    env['TEST_INT'] = env['INST_INT']
+    if not env['INST_FLOAT']:
+        env.Append(CPPDEFINES=['TMV_NO_INST_FLOAT'])
+    if not env['INST_DOUBLE']:
+        env.Append(CPPDEFINES=['TMV_NO_INST_DOUBLE'])
+    if env['INST_LONGDOUBLE']:
+        env.Append(CPPDEFINES=['TMV_INST_LONGDOUBLE'])
+    if env['INST_INT']:
+        env.Append(CPPDEFINES=['TMV_INST_INT'])
+    if not env['TEST_FLOAT']:
+        env.Append(CPPDEFINES=['NO_TEST_FLOAT'])
+    if not env['TEST_DOUBLE']:
+        env.Append(CPPDEFINES=['NO_TEST_DOUBLE'])
+    if env['TEST_LONGDOUBLE']:
+        env.Append(CPPDEFINES=['TEST_LONGDOUBLE'])
+    if env['TEST_INT']:
+        env.Append(CPPDEFINES=['TEST_INT'])
+
 
     import SCons.SConf
 
@@ -1082,5 +1106,9 @@ if not GetOption('help'):
             script_files.append(os.path.join(d,'SConscript'))
 
     SConscript(script_files, exports=['env'])
+
+    print 'To link programs using the TMV library, use:'
+    str = '-ltmv ' + env['LINKFLAGS'] + env['_LIBFLAGS']
+    print str
 
 

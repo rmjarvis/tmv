@@ -105,24 +105,35 @@ namespace tmv {
     template <class T, int M, int N, StorageType S, IndexStyle I> 
     class SmallMatrix 
     {
+    public:
+
         enum { Si = (S == RowMajor ? N : 1) };
         enum { Sj = (S == RowMajor ? 1 : M) };
 
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
+        typedef T value_type;
+        typedef RT real_type;
+        typedef CT complex_type;
         typedef SmallMatrix<T,M,N,S,I> type;
+        typedef type copy_type;
         typedef ConstMatrixView<T,I> const_view_type;
+        typedef const_view_type const_transpose_type;
+        typedef const_view_type const_conjugate_type;
+        typedef const_view_type const_adjoint_type;
         typedef ConstVectorView<T,I> const_vec_type;
         typedef ConstUpperTriMatrixView<T,I> const_uppertri_type;
         typedef ConstLowerTriMatrixView<T,I> const_lowertri_type;
-        typedef ConstMatrixView<RT,I> const_real_type;
+        typedef ConstMatrixView<RT,I> const_realpart_type;
         typedef MatrixView<T,I> view_type;
+        typedef view_type transpose_type;
+        typedef view_type conjugate_type;
+        typedef view_type adjoint_type;
         typedef VectorView<T,I> vec_type;
         typedef UpperTriMatrixView<T,I> uppertri_type;
         typedef LowerTriMatrixView<T,I> lowertri_type;
-        typedef MatrixView<RT,I> real_type;
-
-    public:
+        typedef MatrixView<RT,I> realpart_type;
+        typedef T& reference;
 
         //
         // Constructors
@@ -384,8 +395,6 @@ namespace tmv {
         // Access
         //
 
-        typedef T& reference;
-
         inline T operator()(int i,int j) const
         { 
             if (I == CStyle) {
@@ -469,6 +478,20 @@ namespace tmv {
             TMVAssert(M == N);
             T sum(0);
             for(int i=0; i<M*N; i+=M+1) sum += itsm[i];
+            return sum;
+        }
+
+        inline T sumElements() const
+        {
+            T sum(0);
+            for(int i=0;i<M*N; ++i) sum += itsm[i];
+            return sum;
+        }
+
+        inline RT sumAbsElements() const
+        {
+            RT sum(0);
+            for(int i=0;i<M*N; ++i) sum += TMV_ABS(itsm[i]);
             return sum;
         }
 
@@ -811,12 +834,23 @@ namespace tmv {
         // SubMatrix
         //
 
+        inline const_view_type cSubMatrix(int i1, int i2, int j1, int j2) const
+        { return view().cSubMatrix(i1,i2,j1,j2); }
+
         inline const_view_type subMatrix(int i1, int i2, int j1, int j2) const
         { return view().subMatrix(i1,i2,j1,j2); }
+
+        inline const_view_type cSubMatrix(
+            int i1, int i2, int j1, int j2, int istep, int jstep) const
+        { return view().cSubMatrix(i1,i2,j1,j2,istep,jstep); }
 
         inline const_view_type subMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const
         { return view().subMatrix(i1,i2,j1,j2,istep,jstep); }
+
+        inline const_vec_type cSubVector(
+            int i, int j, int istep, int jstep, int s) const
+        { return view().cSubVector(i,j,istep,jstep,s); }
 
         inline const_vec_type subVector(
             int i, int j, int istep, int jstep, int s) const
@@ -834,18 +868,28 @@ namespace tmv {
         inline const_view_type rowRange(int i1, int i2) const
         { return view().rowRange(i1,i2); }
 
-        inline const_real_type realPart() const
+        inline const_realpart_type realPart() const
         { return view().realPart(); }
 
-        inline const_real_type imagPart() const
+        inline const_realpart_type imagPart() const
         { return view().imagPart(); }
+
+        inline view_type cSubMatrix(int i1, int i2, int j1, int j2)
+        { return view().cSubMatrix(i1,i2,j1,j2); }
 
         inline view_type subMatrix(int i1, int i2, int j1, int j2)
         { return view().subMatrix(i1,i2,j1,j2); }
 
+        inline view_type cSubMatrix(
+            int i1, int i2, int j1, int j2, int istep, int jstep) 
+        { return view().cSubMatrix(i1,i2,j1,j2,istep,jstep); }
+
         inline view_type subMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) 
         { return view().subMatrix(i1,i2,j1,j2,istep,jstep); }
+
+        inline vec_type cSubVector(int i, int j, int istep, int jstep, int s) 
+        { return view().cSubVector(i,j,istep,jstep,s); }
 
         inline vec_type subVector(int i, int j, int istep, int jstep, int s) 
         { return view().subVector(i,j,istep,jstep,s); }
@@ -862,10 +906,10 @@ namespace tmv {
         inline view_type rowRange(int i1, int i2) 
         { return view().rowRange(i1,i2); }
 
-        inline real_type realPart() 
+        inline realpart_type realPart() 
         { return view().realPart(); }
 
-        inline real_type imagPart() 
+        inline realpart_type imagPart() 
         { return view().imagPart(); }
 
         TMV_DEPRECATED(const_view_type SubMatrix(
@@ -891,9 +935,9 @@ namespace tmv {
         { return colRange(j1,j2); }
         TMV_DEPRECATED(const_view_type Rows(int i1, int i2) const)
         { return rowRange(i1,i2); }
-        TMV_DEPRECATED(const_real_type Real() const)
+        TMV_DEPRECATED(const_realpart_type Real() const)
         { return realPart(); }
-        TMV_DEPRECATED(const_real_type Imag() const)
+        TMV_DEPRECATED(const_realpart_type Imag() const)
         { return imagPart(); }
         TMV_DEPRECATED(view_type SubMatrix(int i1, int i2, int j1, int j2))
         { return subMatrix(i1,i2,j1,j2); }
@@ -915,9 +959,9 @@ namespace tmv {
         { return colRange(j1,j2); }
         TMV_DEPRECATED(view_type Rows(int i1, int i2))
         { return rowRange(i1,i2); }
-        TMV_DEPRECATED(real_type Real())
+        TMV_DEPRECATED(realpart_type Real())
         { return realPart(); }
-        TMV_DEPRECATED(real_type Imag())
+        TMV_DEPRECATED(realpart_type Imag())
         { return imagPart(); }
 
 

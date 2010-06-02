@@ -35,7 +35,7 @@
 #include "TMV_Eigen.h"
 #include "TMV_Matrix.h"
 
-#define XDEBUG
+//#define XDEBUG
 
 #ifdef XDEBUG
 #include <iostream>

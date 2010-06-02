@@ -52,6 +52,7 @@ namespace tmv {
         // G [ x ] = [ r ]
         //   [ y ]   [ 0 ]
         // Also, return the Givens matrix used to do so.
+        const RT sqrteps = TMV_SQRT(TMV_Epsilon<T>());
 
         RT maxabs_x = TMV_MAXABS(x);
         RT maxabs_y = TMV_MAXABS(y);
@@ -71,7 +72,7 @@ namespace tmv {
             // since it saves 2 sqrt's and has roughly the same effect
             // of preventing overflow and reducing rounding errors.
             if (maxabs_x > maxabs_y) {
-                if (maxabs_y <= TMV_SqrtEpsilon<T>()*maxabs_x) {
+                if (maxabs_y <= sqrteps*maxabs_x) {
                     // Then everything simplifies:
                     // c = 1
                     // s = (y/x)* 

@@ -33,10 +33,10 @@ void TestSymDiv_A(tmv::DivType dt, PosDefCode pdc)
     tmv::HermMatrix<T> h1(a1);
     tmv::HermMatrix<std::complex<T> > ch1(ca1);
 
-    tmv::SymMatrix<T> s1x = s1;
-    tmv::SymMatrix<std::complex<T> > cs1x = s1;
-    tmv::HermMatrix<T> h1x = h1;
-    tmv::HermMatrix<std::complex<T> > ch1x = ch1;
+    tmv::SymMatrixView<T> s1v = s1.view();
+    tmv::SymMatrixView<std::complex<T> > cs1v = cs1.view();
+    tmv::SymMatrixView<T> h1v = h1.view();
+    tmv::SymMatrixView<std::complex<T> > ch1v = ch1.view();
 
     for(size_t i=START;i<s.size();i++) {
         if (showstartdone)
@@ -49,20 +49,19 @@ void TestSymDiv_A(tmv::DivType dt, PosDefCode pdc)
         si.saveDiv();
         csi.saveDiv();
 
-
-        TestMatrixDivArith2<T>(dt,s1x,cs1x,si,s1.view(),csi,cs1.view(),"Sym/Sym");
-        TestMatrixDivArith1<T>(dt,h1x,ch1x,si,h1.view(),csi,ch1.view(),"Herm/Sym");
+        TestMatrixDivArith2<T>(dt,si,s1v,csi,cs1v,"Sym/Sym");
+        TestMatrixDivArith1<T>(dt,si,h1v,csi,ch1v,"Herm/Sym");
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
     for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSymDiv_A<double>(tmv::DivType dt, PosDefCode pc);
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSymDiv_A<float>(tmv::DivType dt, PosDefCode pc);
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSymDiv_A<long double>(tmv::DivType dt, PosDefCode pc);
 #endif

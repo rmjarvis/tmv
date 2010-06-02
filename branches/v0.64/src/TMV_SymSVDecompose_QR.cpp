@@ -40,6 +40,7 @@
 #include "TMV_Givens.h"
 
 #ifdef XDEBUG
+#define THRESH 1.e-10
 #include "tmv/TMV_MatrixArith.h"
 #include "tmv/TMV_DiagMatrixArith.h"
 #include <iostream>
@@ -96,8 +97,8 @@ namespace tmv {
         // to the last diagonal element of T.
         //
         // Trailing 2x2 block =  (Use i = N-2, j = N-1)
-        // [ a  b ] = [ |Di|^2 + |Ei-1|^2      Di Ei      ]
-        // [ b* c ]   [     Di* Ei*       |Dj|^2 + |Ei|^2 ]
+        // [ a  b ] = [ Di   Ei ]
+        // [ b* c ]   [ Ei*  Dj ]
         // 
         // mu = c - d +- sqrt(d^2+|b|^2), where d = (c-a)/2
         // if d>0 we use +, if d<0 we use -.
@@ -243,7 +244,7 @@ namespace tmv {
             std::cout<<"A0 = "<<A0<<std::endl;
             std::cout<<"A2-A0 = "<<A2-A0<<std::endl;
             std::cout<<"Norm(A2-A0) = "<<Norm(A2-A0)<<std::endl;
-            if (Norm(A2-A0) > 0.001*Norm(A0)) {
+            if (Norm(A2-A0) > THRESH*Norm(A0)) {
                 cerr<<"Reduce Tridiagonal:\n";
                 cerr<<"A0 = "<<A0<<endl;
                 cerr<<"A2 = "<<A2<<endl;
@@ -315,7 +316,7 @@ namespace tmv {
             Matrix<T> A2 = *U * TT * U->adjoint();
             std::cout<<"Done QR: Norm(A2-A0) = "<<Norm(A2-A0)<<std::endl;
             std::cout<<"cf. Norm(A0) = "<<Norm(A0)<<std::endl;
-            if (Norm(A2-A0) > 0.001*Norm(A0)) {
+            if (Norm(A2-A0) > THRESH*Norm(A0)) {
                 cerr<<"Decompose from Tridiagonal QR:\n";
                 cerr<<"A0 = "<<A0<<endl;
                 cerr<<"A2 = "<<A2<<endl;

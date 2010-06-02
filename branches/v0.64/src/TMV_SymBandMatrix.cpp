@@ -775,12 +775,37 @@ namespace tmv {
     //
 
     template <class T> 
+    T GenSymBandMatrix<T>::sumElements() const
+    {
+        T sum = diag().sumElements();
+        if (size() > 1 && nlo() > 0) {
+            T temp = upperBandOff().sumElements();
+            if (issym()) {
+                sum += RT(2) * temp;
+            } else {
+                // temp + conj(temp) = 2*real(temp)
+                sum += RT(2) * TMV_REAL(temp);
+            }
+        }
+        return sum;
+    }
+
+    template <class T> 
+    RT GenSymBandMatrix<T>::sumAbsElements() const
+    {
+        RT sum = diag().sumAbsElements();
+        if (size() > 1 && nlo() > 0) 
+            sum += RT(2) * upperBandOff().sumAbsElements();
+        return sum;
+    }
+
+    template <class T> 
     RT GenSymBandMatrix<T>::normSq(const RT scale) const
     {
-        RT ans = diag().normSq(scale);
-        if (size() > 0 && nlo() > 0) 
-            ans += RT(2) * upperBandOff().normSq(scale);
-        return ans;
+        RT sum = diag().normSq(scale);
+        if (size() > 1 && nlo() > 0) 
+            sum += RT(2) * upperBandOff().normSq(scale);
+        return sum;
     }
 
     template <class T> 

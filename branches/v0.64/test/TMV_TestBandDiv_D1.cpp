@@ -32,38 +32,35 @@ void TestBandDiv_D1(tmv::DivType dt)
     tmv::UpperTriMatrix<std::complex<T> > cu(ca1);
     tmv::LowerTriMatrix<T> l(a1);
     tmv::LowerTriMatrix<std::complex<T> > cl(ca1);
-
-    tmv::UpperTriMatrix<T> ux = u;
-    tmv::UpperTriMatrix<std::complex<T> > cux = cu;
-    tmv::LowerTriMatrix<T> lx = l;
-    tmv::LowerTriMatrix<std::complex<T> > clx = cl;
+    tmv::UpperTriMatrixView<T> uv = u.view();
+    tmv::UpperTriMatrixView<std::complex<T> > cuv = cu.view();
+    tmv::LowerTriMatrixView<T> lv = l.view();
+    tmv::LowerTriMatrixView<std::complex<T> > clv = cl.view();
 
     for(size_t i=START;i<b.size();i++) {
         if (showstartdone) 
             std::cout<<"Start loop: i = "<<i<<"\nbi = "<<tmv::TMV_Text(b[i])<<
                 "  "<<b[i]<<std::endl;
-        const tmv::BandMatrixView<T>& bi = b[i];
-        const tmv::BandMatrixView<std::complex<T> >& cbi = cb[i];
+        tmv::BandMatrixView<T> bi = b[i];
+        tmv::BandMatrixView<std::complex<T> > cbi = cb[i];
         if (dt == tmv::LU && !bi.isSquare()) continue;
 
         bi.saveDiv();
         cbi.saveDiv();
 
-        TestMatrixDivArith1<T>(dt,ux,cux,bi,u.view(),cbi,cu.view(),
-                               "UpperTriMatrix/Band");
-        TestMatrixDivArith1<T>(dt,lx,clx,bi,l.view(),cbi,cl.view(),
-                               "LowerTriMatrix/Band");
+        TestMatrixDivArith1<T>(dt,bi,uv,cbi,cuv,"UpperTriMatrix/Band");
+        TestMatrixDivArith1<T>(dt,bi,lv,cbi,clv,"LowerTriMatrix/Band");
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
     for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestBandDiv_D1<double>(tmv::DivType dt);
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestBandDiv_D1<float>(tmv::DivType dt);
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestBandDiv_D1<long double>(tmv::DivType dt);
 #endif

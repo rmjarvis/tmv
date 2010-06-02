@@ -34,7 +34,7 @@ int main() try
 
 #if 1
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
     TestAllSmallVector<double>();
     TestAllSmallMatrix<double>();
     TestAllSmallMatrixA<double>();
@@ -44,7 +44,7 @@ int main() try
     TestAllSmallMatrixDivB<double>();
 #endif
 
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
     TestAllSmallVector<float>();
     TestAllSmallMatrix<float>();
     TestAllSmallMatrixA<float>();
@@ -54,7 +54,7 @@ int main() try
     TestAllSmallMatrixDivB<float>();
 #endif
 
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
     TestAllSmallVector<long double>();
     TestAllSmallMatrix<long double>();
     TestAllSmallMatrixA<long double>();
@@ -64,7 +64,7 @@ int main() try
     TestAllSmallMatrixDivB<long double>();
 #endif 
 
-#ifdef INST_INT
+#ifdef TEST_INT
     TestAllSmallVector<int>();
     TestAllSmallMatrix<int>();
 #endif 

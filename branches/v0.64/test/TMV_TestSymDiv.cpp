@@ -23,20 +23,28 @@ static bool IsPosDef(const tmv::GenSymMatrix<T>& m)
     }
     catch (tmv::NonPosDef) {
 #ifdef XTEST
-        if (showacc) std::cout<<"caught nonposdef\n";
-        //std::cout<<"m.size ="<<m.size()<<std::endl;
+        if (showacc) {
+            std::cout<<"caught nonposdef\n";
+            std::cout<<"m.size ="<<m.size()<<std::endl;
+        }
         for(size_t i=1;i<=m.size();i++) {
-            //std::cout<<"i = "<<i<<std::endl;
+            if (showacc) {
+                std::cout<<"i = "<<i<<std::endl;
+            }
             T d = Det(tmv::Matrix<T>(m.subSymMatrix(0,i)));
             if (showacc) std::cout<<"Det(0.."<<i<<") = "<<d<<std::endl;
             if (!(tmv::TMV_REAL(d) > 0)) {
-                //std::cout<<"!>0 "<<tmv::TMV_REAL(d)<<std::endl;
+                if (showacc) {
+                    std::cout<<"!>0 "<<tmv::TMV_REAL(d)<<std::endl;
+                }
                 return false;
             } else {
-                //std::cout<<">0 "<<tmv::TMV_REAL(d)<<std::endl;
+                if (showacc) {
+                    std::cout<<">0 "<<tmv::TMV_REAL(d)<<std::endl;
+                }
             }
         }
-        //std::cout<<"m = "<<TMV_Text(m)<<"  "<<m<<std::endl;
+        std::cout<<"m = "<<TMV_Text(m)<<"  "<<m<<std::endl;
         for(size_t i=1;i<=m.size();i++) {
             T d = Det(tmv::Matrix<T>(m.subSymMatrix(0,i)));
             std::cout<<"Det(0.."<<i<<") = "<<d<<std::endl;
@@ -321,14 +329,14 @@ void TestSymDiv(tmv::DivType dt, PosDefCode pdc)
 template <class T> 
 void TestAllSymDiv()
 {
-    TestHermDecomp<T,tmv::Upper,tmv::ColMajor>();
-    TestHermDecomp<T,tmv::Upper,tmv::RowMajor>();
-    TestHermDecomp<T,tmv::Lower,tmv::ColMajor>();
-    TestHermDecomp<T,tmv::Lower,tmv::RowMajor>();
     TestSymDecomp<T,tmv::Upper,tmv::ColMajor>();
     TestSymDecomp<T,tmv::Upper,tmv::RowMajor>();
     TestSymDecomp<T,tmv::Lower,tmv::ColMajor>();
     TestSymDecomp<T,tmv::Lower,tmv::RowMajor>();
+    TestHermDecomp<T,tmv::Lower,tmv::ColMajor>();
+    TestHermDecomp<T,tmv::Lower,tmv::RowMajor>();
+    TestHermDecomp<T,tmv::Upper,tmv::ColMajor>();
+    TestHermDecomp<T,tmv::Upper,tmv::RowMajor>();
     TestPolar<T,tmv::RowMajor>();
     TestPolar<T,tmv::ColMajor>();
     std::cout<<"SymMatrix<"<<tmv::TMV_Text(T())<<"> passed all ";
@@ -341,12 +349,12 @@ void TestAllSymDiv()
     TestSymDiv<T>(tmv::SV,Sing);
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestAllSymDiv<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestAllSymDiv<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestAllSymDiv<long double>();
 #endif

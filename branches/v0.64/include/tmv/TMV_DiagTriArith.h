@@ -67,15 +67,27 @@ namespace tmv {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             TMVAssert(m0.dt() == dt());
-            MultXM(x2,m0=m2);
-            AddVV(x1,m1.diag(),m0.diag());
+            if (SameStorage(m0,m1)) {
+                DiagMatrix<T1> temp = m1;
+                MultXM(x2,m0=m2);
+                AddVV(x1,temp.diag(),m0.diag());
+            } else {
+                MultXM(x2,m0=m2);
+                AddVV(x1,m1.diag(),m0.diag());
+            }
         }
         inline void assignToU(const UpperTriMatrixView<xCT>& m0) const
         { 
             TMVAssert(m0.size() == size());
             TMVAssert(m0.dt() == dt());
-            MultXM(x2,m0=m2);
-            AddVV(x1,m1.diag(),m0.diag());
+            if (SameStorage(m0,m1)) {
+                DiagMatrix<T1> temp = m1;
+                MultXM(x2,m0=m2);
+                AddVV(x1,temp.diag(),m0.diag());
+            } else {
+                MultXM(x2,m0=m2);
+                AddVV(x1,m1.diag(),m0.diag());
+            }
         }
     private:
         const T x1;
@@ -188,15 +200,27 @@ namespace tmv {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             TMVAssert(m0.dt() == dt());
-            MultXM(x2,m0=m2);
-            AddVV(x1,m1.diag(),m0.diag());
+            if (SameStorage(m0,m1)) {
+                DiagMatrix<T1> temp = m1;
+                MultXM(x2,m0=m2);
+                AddVV(x1,temp.diag(),m0.diag());
+            } else {
+                MultXM(x2,m0=m2);
+                AddVV(x1,m1.diag(),m0.diag());
+            }
         }
         inline void assignToL(const LowerTriMatrixView<xCT>& m0) const
         { 
             TMVAssert(m0.size() == size());
             TMVAssert(m0.dt() == dt());
-            MultXM(x2,m0=m2);
-            AddVV(x1,m1.diag(),m0.diag());
+            if (SameStorage(m0,m1)) {
+                DiagMatrix<T1> temp = m1;
+                MultXM(x2,m0=m2);
+                AddVV(x1,temp.diag(),m0.diag());
+            } else {
+                MultXM(x2,m0=m2);
+                AddVV(x1,m1.diag(),m0.diag());
+            }
         }
     private:
         const T x1;

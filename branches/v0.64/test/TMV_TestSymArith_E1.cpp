@@ -46,30 +46,24 @@ void TestSymMatrixArith_E1()
             tmv::BandMatrix<T> bx = bj;
             tmv::BandMatrix<std::complex<T> > cbx = cbj;
 
-            if (csi.isherm()) {
-                tmv::HermMatrix<T> sx = si;
-                tmv::HermMatrix<std::complex<T> > csx = csi;
-                TestMatrixArith456<T>(sx,csx,si,csi,bj,cbj,"Herm/Band");
-            } else {
-                tmv::SymMatrix<T> sx = si;
-                tmv::SymMatrix<std::complex<T> > csx = csi;
-                TestMatrixArith456<T>(sx,csx,si,csi,bj,cbj,"Sym/Band");
-            }
+            TestMatrixArith4<T>(si,csi,bj,cbj,"Sym/Band");
+            TestMatrixArith5<T>(si,csi,bj,cbj,"Sym/Band");
+            TestMatrixArith6x<T>(si,csi,bj,cbj,"Sym/Band");
         }
     }
     for(size_t i=0;i<B.size();++i) delete B[i];
     for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestSymMatrixArith_E1<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestSymMatrixArith_E1<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestSymMatrixArith_E1<long double>();
 #endif
-#ifdef INST_INT
+#ifdef TEST_INT
 template void TestSymMatrixArith_E1<int>();
 #endif

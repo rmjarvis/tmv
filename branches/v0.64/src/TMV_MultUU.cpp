@@ -583,7 +583,7 @@ namespace tmv {
             if (B.isunit()) {
                 for(int j=0; j<N; ++j) {
                     C.subMatrix(0,j+1,j+1,N) += alpha * A.col(j,0,j+1)^B.row(j,j+1,N);
-                    C.row(j,0,j+1) += alpha * A.col(j,0,j+1);
+                    C.col(j,0,j+1) += alpha * A.col(j,0,j+1);
                 }
             } else {
                 for(int j=0; j<N; ++j) 
@@ -751,12 +751,12 @@ namespace tmv {
         // C (+)= alpha * A * B
     { 
 #ifdef XDEBUG
-        //cout<<"MultMM:  alpha = "<<alpha<<endl;
-        //cout<<"A = "<<A.cptr()<<"  "<<TMV_Text(A)<<"  "<<A<<endl;
-        //cout<<"B = "<<B.cptr()<<"  "<<TMV_Text(B)<<"  "<<B<<endl;
-        //cout<<"C = "<<C.cptr()<<"  "<<TMV_Text(C);
-        //if (add) cout<<"  "<<C;
-        //cout<<endl;
+        cout<<"MultMM:  alpha = "<<alpha<<endl;
+        cout<<"A = "<<A.cptr()<<"  "<<TMV_Text(A)<<"  "<<A<<endl;
+        cout<<"B = "<<B.cptr()<<"  "<<TMV_Text(B)<<"  "<<B<<endl;
+        cout<<"C = "<<C.cptr()<<"  "<<TMV_Text(C);
+        if (add) cout<<"  "<<C;
+        cout<<endl;
         Matrix<Ta> A0 = A;
         Matrix<Tb> B0 = B;
         Matrix<T> C0 = C;
@@ -775,10 +775,12 @@ namespace tmv {
             } else if (alpha==T(0)) {
                 if (!add) C.setZero();
             } else if (add) {
-                if (SameStorage(A,C) || SameStorage(B,C))
+                if (SameStorage(A,C) || SameStorage(B,C)) {
                     TempMultMM<add>(alpha,A,B,C);
-                else
+                }
+                else {
                     AddMultMM(alpha,A,B,C);
+                }
             } else {
                 if (SameStorage(A,C)) {
                     if (SameStorage(B,C)) {
@@ -795,7 +797,7 @@ namespace tmv {
             }
         }
 #ifdef XDEBUG
-        //cout<<"Done: C = "<<C<<endl;
+        cout<<"Done: C = "<<C<<endl;
         if (Norm(C-C2) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
                                 (add?Norm(C0):TMV_RealType(T)(0)))) {
             cerr<<"MultMM alpha = "<<alpha<<endl;

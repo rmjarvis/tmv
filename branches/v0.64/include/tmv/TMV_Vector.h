@@ -137,7 +137,8 @@
 //        Reverse the order of the elements of v
 //
 //    sort(AD, COMP)
-//    sort(int* p, AD, COMP)
+//    sort(int* P, AD, COMP)
+//    sort(Permutation& P, AD, COMP)
 //        Sorts the vector, returning the swaps required in P.
 //        If you do not care about P, you may omit the P parameter.
 //        AD = ASCEND or DESCEND (ASCEND=default)
@@ -189,6 +190,11 @@
 //
 //    VectorView view()
 //        Returns a view of a Vector. 
+//
+//    VectorView cView()
+//    VectorView fView()
+//        Returns a view of a Vector in either CStyle or FortranStyle
+//        form, respectively.
 //
 //    VectorView realPart()
 //    VectorView imagPart()
@@ -315,17 +321,29 @@ namespace tmv {
     template <class T, class T1> 
     inline void Copy(const GenVector<T1>& v1, const VectorView<T>& v2);
 
+    class Permutation;
+
     template <class T> 
     class GenVector : public AssignableToVector<T>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
+        typedef T value_type;
+        typedef RT real_type;
+        typedef CT complex_type;
         typedef GenVector<T> type;
+        typedef Vector<T> copy_type;
         typedef ConstVectorView<T> const_view_type;
+        typedef const_view_type const_conjugate_type;
+        typedef const_view_type const_reverse_type;
+        typedef ConstVectorView<T,CStyle> const_cview_type;
+        typedef ConstVectorView<T,FortranStyle> const_fview_type;
         typedef ConstVectorView<RT> const_real_type;
         typedef VectorView<T> nonconst_type;
-
-    public:
+        typedef CVIter<T> const_iterator;
+        typedef CVIter<T> const_reverse_iterator;
 
         //
         // Constructor
@@ -364,10 +382,6 @@ namespace tmv {
             return cref(i); 
         }
 
-        typedef T value_type;
-        typedef CVIter<T> const_iterator;
-        typedef CVIter<T> const_reverse_iterator;
-
         inline const_iterator begin() const
         { return const_iterator(cptr(),step(),ct()); }
         inline const_iterator end() const
@@ -400,17 +414,25 @@ namespace tmv {
 
         bool hasSubVector(int i1, int i2, int istep) const;
 
+        inline const_view_type cSubVector(int i1, int i2) const
+        { return const_view_type(cptr()+i1*step(),i2-i1,step(),ct()); }
+
         inline const_view_type subVector(int i1, int i2) const
         {
             TMVAssert(hasSubVector(i1,i2,1));
-            return const_view_type(cptr()+i1*step(),i2-i1,step(),ct());
+            return cSubVector(i1,i2);
+        }
+
+        inline const_view_type cSubVector(int i1, int i2, int istep) const
+        {
+            return const_view_type(
+                cptr()+i1*step(),(i2-i1)/istep,istep*step(),ct());
         }
 
         inline const_view_type subVector(int i1, int i2, int istep) const
         {
             TMVAssert(hasSubVector(i1,i2,istep));
-            return const_view_type(
-                cptr()+i1*step(),(i2-i1)/istep,istep*step(),ct());
+            return cSubVector(i1,i2,istep);
         }
 
         inline const_view_type reverse() const
@@ -421,6 +443,12 @@ namespace tmv {
 
         inline const_view_type view() const
         { return const_view_type(cptr(),size(),step(),ct()); }
+
+        inline const_cview_type cView() const
+        { return view(); }
+
+        inline const_fview_type fView() const
+        { return view(); }
 
         inline const_view_type conjugate() const
         { return const_view_type(cptr(),size(),step(),TMV_ConjOf(T,ct())); }
@@ -562,11 +590,11 @@ namespace tmv {
     template <class T, IndexStyle I> 
     class ConstVectorView : public GenVector<T>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef ConstVectorView<T,I> type;
         typedef ConstVectorView<RT,I> const_real_type;
-
-    public:
 
         inline ConstVectorView(const ConstVectorView<T,I>& rhs) : 
             _v(rhs._v), _size(rhs._size), _step(rhs._step),
@@ -603,12 +631,16 @@ namespace tmv {
     template <class T> 
     class ConstVectorView<T,FortranStyle> : public ConstVectorView<T,CStyle>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef ConstVectorView<T,FortranStyle> type;
         typedef ConstVectorView<T,FortranStyle> const_view_type;
+        typedef const_view_type const_conjugate_type;
+        typedef const_view_type const_reverse_type;
+        typedef ConstVectorView<T,CStyle> const_cview_type;
+        typedef ConstVectorView<T,FortranStyle> const_fview_type;
         typedef ConstVectorView<RT,FortranStyle> const_real_type;
-
-    public:
 
         inline ConstVectorView(const ConstVectorView<T,FortranStyle>& rhs) : 
             ConstVectorView<T,CStyle>(rhs) {}
@@ -645,14 +677,14 @@ namespace tmv {
         inline const_view_type subVector(int i1, int i2) const
         {
             TMVAssert(hasSubVector(i1,i2,1));
-            return GenVector<T>::subVector(i1-1,i2);
+            return GenVector<T>::cSubVector(i1-1,i2);
         }
 
         inline const_view_type subVector(
             int i1, int i2, int istep) const
         {
             TMVAssert(hasSubVector(i1,i2,istep));
-            return GenVector<T>::subVector(i1-1,i2-1+istep,istep);
+            return GenVector<T>::cSubVector(i1-1,i2-1+istep,istep);
         }
 
         inline const_view_type reverse() const
@@ -660,6 +692,12 @@ namespace tmv {
 
         inline const_view_type view() const
         { return GenVector<T>::view(); }
+
+        inline const_cview_type cView() const
+        { return view(); }
+
+        inline const_fview_type fView() const
+        { return view(); }
 
         inline const_view_type conjugate() const
         { return GenVector<T>::conjugate(); }
@@ -742,13 +780,23 @@ namespace tmv {
     template <class T, IndexStyle I> 
     class VectorView : public GenVector<T>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef VectorView<T,I> type;
         typedef VectorView<T,I> view_type;
+        typedef view_type conjugate_type;
+        typedef view_type reverse_type;
+        typedef VectorView<T,CStyle> cview_type;
+        typedef VectorView<T,FortranStyle> fview_type;
         typedef VectorView<RT,I> real_type;
-
-    public:
+        typedef T value_type;
+        typedef VIter<T> iterator;
+        typedef CVIter<T> const_iterator;
+        typedef VIter<T> reverse_iterator;
+        typedef CVIter<T> const_reverse_iterator;
+        typedef TMV_RefType(T) reference;
 
         //
         // Constructors 
@@ -837,6 +885,7 @@ namespace tmv {
             return *this; 
         }
 
+#if 0
         template <int N> 
         inline const type& operator=(
             const SmallVectorComposite<RT,N>& v2) const
@@ -855,17 +904,11 @@ namespace tmv {
             v2.assignToV(*this);
             return *this; 
         }
+#endif
 
         //
         // Access Functions
         //
-
-        typedef T value_type;
-        typedef VIter<T> iterator;
-        typedef CVIter<T> const_iterator;
-        typedef VIter<T> reverse_iterator;
-        typedef CVIter<T> const_reverse_iterator;
-        typedef TMV_RefType(T) reference;
 
         inline reference operator[](int i) const 
         { 
@@ -947,6 +990,9 @@ namespace tmv {
         const type& sort(
             int* p, ADType ad=Ascend, CompType comp=RealComp) const;
 
+        inline const type& sort(
+            Permutation& P, ADType ad=Ascend, CompType comp=RealComp) const;
+
         inline const type& sort(ADType ad=Ascend, CompType comp=RealComp) const
         { sort(0,ad,comp); return *this; }
 
@@ -988,18 +1034,28 @@ namespace tmv {
         // SubVector
         //
 
+        inline view_type cSubVector(int i1, int i2) const
+        {
+            return view_type(ptr()+i1*step(),(i2-i1),step(),
+                        ct() TMV_FIRSTLAST );
+        }
+
         inline view_type subVector(int i1, int i2) const
         {
             TMVAssert(GenVector<T>::hasSubVector(i1,i2,1));
-            return view_type(ptr()+i1*step(),(i2-i1),step(),
+            return cSubVector(i1,i2);
+        }
+
+        inline view_type cSubVector(int i1, int i2, int istep) const
+        {
+            return view_type(ptr()+i1*step(),(i2-i1)/istep,istep*step(),
                         ct() TMV_FIRSTLAST );
         }
 
         inline view_type subVector(int i1, int i2, int istep) const
         {
             TMVAssert(GenVector<T>::hasSubVector(i1,i2,istep));
-            return view_type(ptr()+i1*step(),(i2-i1)/istep,istep*step(),
-                        ct() TMV_FIRSTLAST );
+            return cSubVector(i1,i2,istep);
         }
 
         inline view_type reverse() const
@@ -1010,6 +1066,12 @@ namespace tmv {
 
         inline view_type view() const
         { return *this; }
+
+        inline cview_type cView() const
+        { return view(); }
+
+        inline fview_type fView() const
+        { return view(); }
 
         inline view_type conjugate() const
         {
@@ -1112,15 +1174,19 @@ namespace tmv {
     template <class T> 
     class VectorView<T,FortranStyle> : public VectorView<T,CStyle>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef VectorView<T,FortranStyle> type;
         typedef VectorView<T,CStyle> c_type;
         typedef VectorView<T,FortranStyle> view_type;
+        typedef view_type conjugate_type;
+        typedef view_type reverse_type;
+        typedef VectorView<T,CStyle> cview_type;
+        typedef VectorView<T,FortranStyle> fview_type;
         typedef VectorView<RT,FortranStyle> real_type;
         typedef ConstVectorView<T,FortranStyle> const_type;
-
-    public:
 
         //
         // Constructors 
@@ -1176,6 +1242,7 @@ namespace tmv {
         inline const type& operator=(const SmallVector<T2,N,I2>& v2) const
         { c_type::operator=(v2); return *this; }
 
+#if 0
         template <int N> 
         inline const type& operator=(const SmallVectorComposite<RT,N>& v2) const
         { c_type::operator=(v2); return *this; }
@@ -1183,6 +1250,7 @@ namespace tmv {
         template <int N> 
         inline const type& operator=(const SmallVectorComposite<CT,N>& v2) const
         { c_type::operator=(v2); return *this; }
+#endif
 
 
         //
@@ -1213,7 +1281,7 @@ namespace tmv {
         //
 
         inline const type& setZero() const 
-        { c_type::aero(); return *this; }
+        { c_type::setZero(); return *this; }
 
         inline const type& clip(RT thresh) const
         { c_type::clip(thresh); return *this; }
@@ -1272,6 +1340,10 @@ namespace tmv {
             int* p, ADType ad=Ascend, CompType comp=RealComp) const
         { c_type::sort(p,ad,comp); return *this; }
 
+        inline const type& sort(
+            Permutation& P, ADType ad=Ascend, CompType comp=RealComp) const
+        { c_type::sort(P,ad,comp); return *this; }
+
         inline const type& sort(ADType ad=Ascend, CompType comp=RealComp) const
         { c_type::Sort(0,ad,comp); return *this; }
 
@@ -1322,13 +1394,13 @@ namespace tmv {
         inline view_type subVector(int i1, int i2) const
         {
             TMVAssert(hasSubVector(i1,i2,1));
-            return c_type::subVector(i1-1,i2);
+            return c_type::cSubVector(i1-1,i2);
         }
 
         inline view_type subVector(int i1, int i2, int istep) const
         {
             TMVAssert(hasSubVector(i1,i2,istep));
-            return c_type::subVector(i1-1,i2-1+istep,istep);
+            return c_type::cSubVector(i1-1,i2-1+istep,istep);
         }
 
         inline view_type reverse() const
@@ -1336,6 +1408,12 @@ namespace tmv {
 
         inline view_type view() const
         { return c_type::view(); }
+
+        inline cview_type cView() const
+        { return view(); }
+
+        inline fview_type fView() const
+        { return view(); }
 
         inline view_type conjugate() const
         { return c_type::conjugate(); }
@@ -1404,15 +1482,29 @@ namespace tmv {
     template <class T, IndexStyle I> 
     class Vector : public GenVector<T>
     {
+    public:
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef Vector<T,I> type;
         typedef ConstVectorView<T,I> const_view_type;
+        typedef const_view_type const_conjugate_type;
+        typedef const_view_type const_reverse_type;
+        typedef ConstVectorView<T,CStyle> const_cview_type;
+        typedef ConstVectorView<T,FortranStyle> const_fview_type;
         typedef ConstVectorView<RT,I> const_real_type;
         typedef VectorView<T,I> view_type;
+        typedef view_type conjugate_type;
+        typedef view_type reverse_type;
+        typedef VectorView<T,CStyle> cview_type;
+        typedef VectorView<T,FortranStyle> fview_type;
         typedef VectorView<RT,I> real_type;
-
-    public:
+        typedef T value_type;
+        typedef VIt<T,Unit,NonConj> iterator;
+        typedef CVIt<T,Unit,NonConj> const_iterator;
+        typedef VIt<T,Step,NonConj> reverse_iterator;
+        typedef CVIt<T,Step,NonConj> const_reverse_iterator;
+        typedef T& reference;
 
         //
         // Constructors
@@ -1525,6 +1617,7 @@ namespace tmv {
             Copy(rhs.view(),view()); 
         }
 
+#if 0
         template <int N> 
         inline Vector(const SmallVectorComposite<RT,N>& v2) : 
             NEW_SIZE(v2.size())
@@ -1545,6 +1638,7 @@ namespace tmv {
             TMVAssert(isComplex(T()));
             v2.assignToV(view()); 
         }
+#endif
 
 #undef NEW_SIZE
 
@@ -1623,6 +1717,7 @@ namespace tmv {
             return *this; 
         }
 
+#if 0
         template <int N> 
         inline type& operator=(const SmallVectorComposite<RT,N>& v2)
         { 
@@ -1639,18 +1734,12 @@ namespace tmv {
             v2.assignToV(view()); 
             return *this; 
         }
+#endif
 
 
         //
         // Access Functions
         //
-
-        typedef T value_type;
-        typedef VIt<T,Unit,NonConj> iterator;
-        typedef CVIt<T,Unit,NonConj> const_iterator;
-        typedef VIt<T,Step,NonConj> reverse_iterator;
-        typedef CVIt<T,Step,NonConj> const_reverse_iterator;
-        typedef T& reference;
 
         inline const_iterator begin() const
         { return const_iterator(cptr(),1); }
@@ -1765,6 +1854,10 @@ namespace tmv {
         inline type& sort(int* p, ADType ad=Ascend, CompType comp=RealComp) 
         { view().sort(p,ad,comp); return *this; }
 
+        inline type& sort(
+            Permutation& P, ADType ad=Ascend, CompType comp=RealComp)
+        { view().sort(P,ad,comp); return *this; }
+
         inline type& sort(ADType ad=Ascend, CompType comp=RealComp) 
         { view().sort(0,ad,comp); return *this; }
 
@@ -1807,33 +1900,47 @@ namespace tmv {
         // SubVector
         //
 
+        inline const_view_type cSubVector(int i1, int i2) const
+        { return const_view_type(cptr()+i1,i2-i1,1,NonConj); }
+
         inline const_view_type subVector(int i1, int i2) const
         {
             TMVAssert(view().hasSubVector(i1,i2,1));
             if (I==FortranStyle) --i1;
-            return const_view_type(cptr()+i1,i2-i1,1,NonConj);
+            return cSubVector(i1,i2);
         }
+
+        inline view_type cSubVector(int i1, int i2)
+        { return view_type(ptr()+i1,i2-i1,1,NonConj TMV_FIRSTLAST ); }
 
         inline view_type subVector(int i1, int i2)
         {
             TMVAssert(view().hasSubVector(i1,i2,1));
             if (I==FortranStyle) --i1;
-            return view_type(ptr()+i1,i2-i1,1,NonConj TMV_FIRSTLAST );
+            return cSubVector(i1,i2);
         }
+
+        inline const_view_type cSubVector(int i1, int i2, int istep) const
+        { return const_view_type(cptr()+i1,(i2-i1)/istep,istep,NonConj); }
 
         inline const_view_type subVector(int i1, int i2, int istep) const
         {
             TMVAssert(view().hasSubVector(i1,i2,istep));
             if (I==FortranStyle) { --i1; i2 += istep-1; }
-            return const_view_type(cptr()+i1,(i2-i1)/istep,istep,NonConj);
+            return cSubVector(i1,i2,istep);
+        }
+
+        inline view_type cSubVector(int i1, int i2, int istep)
+        {
+            return view_type(
+                ptr()+i1,(i2-i1)/istep,istep,NonConj TMV_FIRSTLAST );
         }
 
         inline view_type subVector(int i1, int i2, int istep)
         {
             TMVAssert(view().hasSubVector(i1,i2,istep));
             if (I==FortranStyle) { --i1; i2 += istep-1; }
-            return view_type(
-                ptr()+i1,(i2-i1)/istep,istep,NonConj TMV_FIRSTLAST );
+            return cSubVector(i1,i2,istep);
         }
 
         inline const_view_type reverse() const
@@ -1847,6 +1954,18 @@ namespace tmv {
 
         inline view_type view()
         { return view_type(ptr(),size(),1,NonConj TMV_FIRSTLAST ); }
+
+        inline const_cview_type cView() const
+        { return view(); }
+
+        inline cview_type cView()
+        { return view(); }
+
+        inline const_fview_type fView() const
+        { return view(); }
+
+        inline fview_type fView() 
+        { return view(); }
 
         inline const_view_type conjugate() const
         { return const_view_type(cptr(),size(),1,TMV_ConjOf(T,NonConj)); }
@@ -1966,9 +2085,23 @@ namespace tmv {
 
 #ifdef TMVFLDEBUG
     public:
-        const T*const _first;
-        const T*const _last;
+        const T* _first;
+        const T* _last;
 #endif
+
+        template <IndexStyle I2>
+        friend void Swap(Vector<T,I>& v1, Vector<T,I2>& v2)
+        {
+            TMVAssert(v1.size() == v2.size());
+            T* temp = v1._v.release();
+            v1._v.reset(v2._v.release());
+            v2._v.reset(temp);
+#ifdef TMVFLDEBUG
+            TMV_SWAP(v1._first,v2._first);
+            TMV_SWAP(v1._last,v2._last);
+#endif
+        }
+
 
     }; // Vector
 
@@ -2115,9 +2248,6 @@ namespace tmv {
     { Swap(v1.view(),v2.view()); }
     template <class T, IndexStyle I> 
     inline void Swap(Vector<T,I>& v1, const VectorView<T>& v2) 
-    { Swap(v1.view(),v2.view()); }
-    template <class T, IndexStyle I1, IndexStyle I2> 
-    inline void Swap(Vector<T,I1>& v1, Vector<T,I2>& v2)
     { Swap(v1.view(),v2.view()); }
 
 

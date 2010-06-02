@@ -40,6 +40,7 @@
 #include "TMV_QRDiv.h"
 #include "tmv/TMV_MatrixArith.h"
 #include "tmv/TMV_PackedQ.h"
+#include "tmv/TMV_PermutationArith.h"
 #include <ostream>
 
 namespace tmv {
@@ -59,7 +60,7 @@ namespace tmv {
         T* Aptr;
         MatrixView<T> QRx;
         Vector<T> beta;
-        auto_array<int> P;
+        Permutation P;
         mutable TMV_RealType(T) logdet;
         mutable T signdet;
         mutable bool donedet;
@@ -80,7 +81,7 @@ namespace tmv {
         istrans(A.colsize()<A.rowsize()),
         inplace(_inplace && (A.iscm() || A.isrm())), 
         Aptr1(APTR1), Aptr(APTR), QRx(QRX), 
-        beta(QRx.rowsize()), P(new int[beta.size()]),
+        beta(QRx.rowsize()), P(beta.size()),
         logdet(0), signdet(1), donedet(false), N1(beta.size()) {}
 
 #undef QRX
@@ -97,8 +98,8 @@ namespace tmv {
             if (inplace) TMVAssert(A == pimpl->QRx); 
             else pimpl->QRx = A;
         }
-        QRP_Decompose(pimpl->QRx,pimpl->beta.view(),pimpl->P.get(),
-                      pimpl->signdet, StrictQRP);
+        QRP_Decompose(pimpl->QRx,pimpl->beta.view(),pimpl->P,pimpl->signdet,
+                      StrictQRP);
         int sd = pimpl->QRx.diag().step();
         TMVAssert(pimpl->N1>0);
         const T* endofdiag = pimpl->QRx.diag().cptr() + (pimpl->N1-1)*sd;
@@ -117,10 +118,10 @@ namespace tmv {
         TMVAssert(pimpl->QRx.isSquare());
         TMVAssert(m.colsize() == pimpl->QRx.colsize());
         if (pimpl->istrans) 
-            QR_LDivEq(pimpl->QRx,pimpl->beta,pimpl->P.get(),m.transpose(),
+            QR_LDivEq(pimpl->QRx,pimpl->beta,pimpl->P.getValues(),m.transpose(),
                       pimpl->N1);
         else 
-            QR_LDivEq(pimpl->QRx,pimpl->beta,pimpl->P.get(),m,pimpl->N1);
+            QR_LDivEq(pimpl->QRx,pimpl->beta,pimpl->P.getValues(),m,pimpl->N1);
     }
 
     template <class T> template <class T1> 
@@ -129,10 +130,10 @@ namespace tmv {
         TMVAssert(pimpl->QRx.isSquare());
         TMVAssert(m.rowsize() == pimpl->QRx.rowsize());
         if (pimpl->istrans) 
-            QR_RDivEq(pimpl->QRx,pimpl->beta,pimpl->P.get(),m.transpose(),
+            QR_RDivEq(pimpl->QRx,pimpl->beta,pimpl->P.getValues(),m.transpose(),
                       pimpl->N1);
         else 
-            QR_RDivEq(pimpl->QRx,pimpl->beta,pimpl->P.get(),m,pimpl->N1);
+            QR_RDivEq(pimpl->QRx,pimpl->beta,pimpl->P.getValues(),m,pimpl->N1);
     }
 
     template <class T> template <class T1, class T2> 
@@ -145,10 +146,10 @@ namespace tmv {
         TMVAssert(x.colsize() == (pimpl->istrans ? pimpl->QRx.colsize() : 
                                   pimpl->QRx.rowsize()));
         if (pimpl->istrans) 
-            QR_RDiv(pimpl->QRx,pimpl->beta,pimpl->P.get(),
+            QR_RDiv(pimpl->QRx,pimpl->beta,pimpl->P.getValues(),
                     m.transpose(),x.transpose(),pimpl->N1);
         else 
-            QR_LDiv(pimpl->QRx,pimpl->beta,pimpl->P.get(),m,x,pimpl->N1);
+            QR_LDiv(pimpl->QRx,pimpl->beta,pimpl->P.getValues(),m,x,pimpl->N1);
     }
 
     template <class T> template <class T1, class T2> 
@@ -160,9 +161,9 @@ namespace tmv {
                                   pimpl->QRx.rowsize()));
         TMVAssert(x.rowsize() == (pimpl->istrans ? pimpl->QRx.rowsize() :
                                   pimpl->QRx.colsize()));
-        if (pimpl->istrans) QR_LDiv(pimpl->QRx,pimpl->beta,pimpl->P.get(),
+        if (pimpl->istrans) QR_LDiv(pimpl->QRx,pimpl->beta,pimpl->P.getValues(),
                                     m.transpose(),x.transpose(),pimpl->N1);
-        else QR_RDiv(pimpl->QRx,pimpl->beta,pimpl->P.get(),m,x,pimpl->N1);
+        else QR_RDiv(pimpl->QRx,pimpl->beta,pimpl->P.getValues(),m,x,pimpl->N1);
     }
 
 
@@ -204,7 +205,7 @@ namespace tmv {
         const int M = pimpl->QRx.colsize();
 
         minv2.colRange(0,N).setToIdentity();
-        minv2.colRange(0,N).permuteCols(pimpl->P.get());
+        minv2.colRange(0,N).permuteCols(pimpl->P.getValues());
         minv2.colRange(pimpl->N1,M).setZero();
         minv2.colRange(0,pimpl->N1) %= 
             pimpl->QRx.upperTri().subTriMatrix(0,pimpl->N1);
@@ -218,8 +219,8 @@ namespace tmv {
         // (At A)^-1 = (Pt Rt R P)^-1 = Pt R^-1 R^-1t P
         UpperTriMatrix<T> rinv = pimpl->QRx.upperTri().inverse();
         ata = rinv * rinv.adjoint();
-        ata.reversePermuteRows(pimpl->P.get());
-        ata.reversePermuteCols(pimpl->P.get());
+        ata.reversePermuteRows(pimpl->P.getValues());
+        ata.reversePermuteCols(pimpl->P.getValues());
     }
 
     template <class T> 
@@ -247,8 +248,8 @@ namespace tmv {
     { return pimpl->beta; }
 
     template <class T> 
-    const int* QRPDiv<T>::getP() const 
-    { return pimpl->P.get(); }
+    const Permutation& QRPDiv<T>::getP() const 
+    { return pimpl->P; }
 
     template <class T> 
     bool QRPDiv<T>::checkDecomp(
@@ -262,13 +263,13 @@ namespace tmv {
                 (pimpl->istrans?mm.transpose():mm.view())<<std::endl;
             *fout << "Q = "<<getQ()<<std::endl;
             *fout << "R = "<<getR()<<std::endl;
-            *fout << "P = ";
-            for(int i=0;i<int(pimpl->QRx.rowsize());i++)
-                *fout<<(pimpl->P.get())[i]<<" ";
+            *fout << "P = "<<getP()<<std::endl;
+            *fout << "  or by interchanges: ";
+            for(int i=0;i<int(getP().size());i++)
+                *fout<<(getP().getValues())[i]<<" ";
             *fout<<std::endl;
         }
-        Matrix<T> qr = getQ()*getR();
-        qr.reversePermuteCols(getP());
+        Matrix<T> qr = getQ()*getR()*getP();
         TMV_RealType(T) nm = 
             Norm(qr-(pimpl->istrans ? mm.transpose() : mm.view()));
         nm /= Norm(getQ())*Norm(getR());

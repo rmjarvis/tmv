@@ -51,8 +51,8 @@ void TestBandDiv(tmv::DivType dt)
         if (showstartdone) 
             std::cout<<"Start loop: i = "<<i<<"\nbi = "<<tmv::TMV_Text(b[i])<<
                 "  "<<b[i]<<std::endl;
-        const tmv::BandMatrixView<T>& bi = b[i];
-        const tmv::BandMatrixView<std::complex<T> >& cbi = cb[i];
+        tmv::BandMatrixView<T> bi = b[i];
+        tmv::BandMatrixView<std::complex<T> > cbi = cb[i];
         if (dt == tmv::LU && !bi.isSquare()) continue;
 
         bi.saveDiv();
@@ -237,13 +237,13 @@ template <class T> void TestAllBandDiv()
     TestBandDiv<T>(tmv::SV);
 }
 
-#ifdef INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestAllBandDiv<double>();
 #endif
-#ifdef INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestAllBandDiv<float>();
 #endif
-#ifdef INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestAllBandDiv<long double>();
 #endif
 

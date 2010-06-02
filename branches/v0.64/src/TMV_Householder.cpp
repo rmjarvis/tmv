@@ -60,7 +60,23 @@ namespace tmv {
         Vector<T> xx(x.size()+1);
         xx(0) = x0;
         xx.subVector(1,xx.size()) = x;
+        std::cout<<"Start reflect: x0 = "<<x0<<", x = "<<x<<std::endl;
 #endif
+
+        // Since this routine involves squares of elements, we risk overflow
+        // and underflow problems if done naively.  The simplest (although
+        // probably not the most efficient) is to scale all the intermediate
+        // values by the maximum abs value in the vector.
+        RT scale = x.maxAbsElement();
+        RT absx0 = TMV_ABS(x0);
+        if (absx0 > scale) scale = absx0;
+        if (scale * TMV_Epsilon<T>() == RT(0)) {
+            // Then the situation is hopeless, and we should just zero out
+            // the whole vector.
+            x.setZero();
+            x0 = T(0);
+            return T(0);
+        }
 
         // Finds the Householder matrix H which rotates v into y e0.
         // The vector v of the Householder matrix is stored in v,
@@ -68,70 +84,56 @@ namespace tmv {
         // Beta is the return value.
 
         // Determine normx = |x|
-        RT normsqx = NormSq(x);
+        RT invscale = RT(1)/scale;
+        RT normsqx = x.normSq(invscale);
 
         // if all of x other than first element are 0, H is identity
         if (normsqx == RT(0) && TMV_IMAG(x0) == RT(0)) {
+            //std::cout<<"no reflection necessary\n";
             // Set them all to x explicitly in case underflow let to the 0.
             x.setZero();
-            return 0; 
+            return T(0); 
             // Determinant in this case is 1 (H = I), so leave det alone.
         }
 
         // Finish calculating normx in usual case
-        RT normsqx0 = TMV_NORM(x0);
+        absx0 *= invscale;
+        x0 *= invscale;
+        //std::cout<<"absx0 => "<<absx0<<", x0 => "<<x0<<std::endl;
+        RT normsqx0 = absx0*absx0;
         normsqx += normsqx0;
         RT normx = TMV_SQRT(normsqx);
+        //std::cout<<"normx = "<<normx<<std::endl;
 
-        T beta;
-        if (normsqx * TMV_Epsilon<T>() == RT(0)) {
-            // Then we need to rescale, since underflow will cause 
-            // rounding errors
-            const RT eps = TMV_Epsilon<T>();
-            // Epsilon is a pure power of 2, so no rounding errors from 
-            // rescaling.
-            x /= eps;
-            x0 /= eps;
-            beta = HouseholderReflect(x0,x,det);
-            x0 *= eps;
-        } else if (RT(1)/normsqx == RT(0)) {
-            // Then we have overflow, so we need to rescale:
-            const RT eps = TMV_Epsilon<T>();
-            RT scale = eps; normx *= eps;
-            while (normx > RT(1)) { scale *= eps; normx *= eps; }
-            x *= scale;
-            x0 *= scale;
-            beta = HouseholderReflect(x0,x,det);
-            x0 /= scale;
-        } else {
-            // The usual case with no rescaling required:
+        // y = +- |x|
+        RT y =  TMV_REAL(x0) > 0 ? -normx : normx;
+        //std::cout<<"y = "<<y<<std::endl;
 
-            // y = +- |x|
-            RT y =  TMV_REAL(x0) > 0 ? -normx : normx;
+        // beta = 1 / (|x|^2 + |x| x0)
+        // H = I - beta v vt
+        // with v = x - y e0 in first column
+        // Renormalize beta,v so that v(0) = 1
+        T v0 = x0-y;
+        RT normv0 = TMV_NORM(v0);
+        T beta = normv0 / (normsqx - y * x0);
+        T invv0 = RT(1)/v0;
+        //std::cout<<"v0 = "<<v0<<", normv0 = "<<normv0<<", beta = "<<beta<<", invv0 = "<<invv0<<std::endl;
 
-            // beta = 1 / (|x|^2 + |x| x0)
-            // H = I - beta v vt
-            // with v = x - y e0 in first column
-            // Renormalize beta,v so that v(0) = 1
-            T v0 = x0-y;
-            RT normv0 = TMV_NORM(v0);
-            beta = normv0 / (normsqx - y * x0);
-            T invv0 = RT(1)/v0;
+        x *= invv0*invscale;
+        //std::cout<<"x = "<<x<<std::endl;
 
-            x *= invv0;
+        x0 = y*scale;
+        //std::cout<<"x0 = "<<x0<<std::endl;
 
-            x0 = y;
-
-            // Determinant of H = -beta^2/|beta|^2
-            // But we are actually keeping track of the determinant of 
-            // Q which is now multiplied by Ht.
-            // The determinant of Ht = -conj(beta)^2/|beta|^2
-            if (det != T(0)) {
-                if (TMV_IMAG(beta) == RT(0))
-                    det = -det;
-                else 
-                    det *= -TMV_CONJ(beta*beta)/TMV_NORM(beta);
-            }
+        // Determinant of H = -beta^2/|beta|^2
+        // But we are actually keeping track of the determinant of 
+        // Q which is now multiplied by Ht.
+        // The determinant of Ht = -conj(beta)^2/|beta|^2
+        if (det != T(0)) {
+            if (TMV_IMAG(beta) == RT(0))
+                det = -det;
+            else 
+                det *= -TMV_CONJ(beta*beta)/TMV_NORM(beta);
         }
 #ifdef XDEBUG
         Vector<T> vv(xx.size());

@@ -251,7 +251,8 @@ namespace tmv {
 #define SUMMM SumVV
 #define PRODXM1 ProdXV
 #define PRODXM2 ProdXV
-#define GETM .getV()
+#define GETM1 .getV()
+#define GETM2 .getV()
 #include "tmv/TMV_AuxSumMM.h"
 #define GETM1 .getV1()
 #define GETM2 .getV2()
