@@ -21,8 +21,8 @@ MYNAME='bin/tmv-version'
 
 # The following line will include a URL name after the colon
 # for any SVN version.
-svnURL='$HeadURL: https://desweb.cosmology.illinois.edu/svn/desdm/devel/tmv/trunk/bin/tmv-version $'
-svnRev='$Rev: 3519 $'
+svnURL='$HeadURL$'
+svnRev='$Rev$'
 
 
 # extract the revision
