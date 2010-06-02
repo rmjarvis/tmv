@@ -9391,11 +9391,11 @@ There are also a couple of feature additions as well -- most notably the Permuta
 \begin{itemize}
 
 \item Added a some very difficult matrices to the test suite, and found and fixed quite a few 
-bugs as a result.
+bugs as a result involving underflow, overflow, and loss of precision.
 
 \item Fixed a bug that \tt{U(i,i)} was invalid if \tt{U} is non-const and is \tt{UnitDiag} even 
 if the resulting value is not used in a mutable context.  
-e.g. \tt{T diag_i = U(i,i)}.  This used to give an error.  Now, \tt{U(i,j)} returns a special reference
+e.g. \tt{T diag\_i = U(i,i)}.  This used to give an error.  Now, \tt{U(i,j)} returns a special reference
 that can always be used as a value, even if \tt{i==j} and \tt{U} is \tt{UnitDiag}.  
 However, if the user tries to modify the value through this reference type, then it gives
 an error.  This was probably not causing anyone any problems, and the workarounds 
@@ -9405,8 +9405,8 @@ weren't too onerous, but it seemed worth getting the syntax right.
 This is basically a wrapper around the old functions
 like \tt{m.permuteRows(p)}.  Now you can write \tt{m = P * m} instead.  All of the routines
 which returned a permutation in an \tt{int* p} object now returns it as a Permutation object.
-This includes \tt{Vector::sort}, \tt{LU_Decompose}, \tt{QRP_Decompose}, and 
-\tt{LDL_Decompose}.  The old functions still work, but are now undocumented.
+This includes \tt{Vector::sort}, \tt{LU\_Decompose}, \tt{QRP\_Decompose}, and 
+\tt{LDL\_Decompose}.  The old functions still work, but are now undocumented.
 
 \item[$\times$] The \tt{getP()} methods from the LU and QRP divider objects now return
 a \tt{Permutation} rather than a \tt{const int*}.  As described above, this should make the 
@@ -9435,12 +9435,22 @@ it allows for a greater freedom of expression with the \tt{Small} objects.
 
 \item Added a version of \tt{MatrixViewOf} with arbitrary steps.
 
-\item Added the three C preprocessor definitions: \tt{TMV_MAJOR_VERSION}, 
-\tt{TMV_MINOR_VERSION},
-and \tt{TMV_VERSION_AT_LEAST(major,minor)} to help users customize
+\item Added the three C preprocessor definitions: \tt{TMV\_MAJOR\_VERSION}, 
+\tt{TMV\_MINOR\_VERSION},
+and \tt{TMV\_VERSION\_AT\_LEAST(major,minor)} to help users customize
 their code depending on the version of TMV that is installed on a particular
-computer.  Also documented the \tt{TMV_Version} function that had been there
+computer.  Also documented the \tt{TMV\_Version} function that had been there
 for a couple versions now, but wasn't yet documented.
+
+\item Fixed a bug in BLAS versions of U*M and L*M when U or L is real and
+M is complex.
+
+\item Fixed a bug in m.det() when m is a SmallMatrix<T,1,1>.
+
+\item Fixed a bug in an (apparently) uncommon pathway of Rank2Update.
+I say uncommon since it never turned up until I expanded the scope of
+the test suite to include more combinations of matrix types.
+
 \end{itemize}
 
 \end{description}

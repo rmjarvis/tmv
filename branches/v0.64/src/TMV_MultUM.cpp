@@ -152,7 +152,6 @@ namespace tmv {
         const int nb = TRI_MM_BLOCKSIZE;
         const int N = A.size();
 
-        //cout<<"A,TriMMB = "<<N<<","<<TRI_MM_BLOCKSIZE2<<endl;
         if (N <= TRI_MM_BLOCKSIZE2) {
             if (A.isrm() && B.isrm()) {
                 RRMultEqMM(alpha,A,B);
@@ -460,30 +459,29 @@ namespace tmv {
         TMVAssert(A.ct() == NonConj);
         TMVAssert(B.ct() == NonConj);
 
-        if (B.isrm()) {
-            int m = 2*B.rowsize();
-            int n = B.colsize();
-            int lda = A.isrm()?A.stepi():A.stepj();
-            int ldb = 2*B.stepi();
-            double xalpha(1);
-            BLASNAME(dtrmm) (
-                BLASCM BLASCH_R, 
-                A.iscm()?BLASCH_LO:BLASCH_UP, 
-                A.isrm()?BLASCH_NT:BLASCH_T,
-                A.isunit()?BLASCH_U:BLASCH_NU, BLASV(m),BLASV(n),
-                BLASV(xalpha),BLASP(A.cptr()),BLASV(lda), 
-                BLASP((double*)B.ptr()), BLASV(ldb)
-                BLAS1 BLAS1 BLAS1 BLAS1);
-            B *= alpha;
-        } else {
-            Matrix<double,ColMajor> B1 = B.realPart();
-            BlasMultEqMM(1.,A,B1.view());
-            B.realPart() = B1;
-            B1 = B.imagPart();
-            BlasMultEqMM(1.,A,B1.view());
-            B.imagPart() = B1;
-            B *= alpha;
-        }
+        // The four possibilities from cm or rm are:
+        //   A    B      L/R     op(A) 
+        //  cm   cm       L       NT
+        //  cm   rm       R        T
+        //  rm   cm       L        T
+        //  rm   rm       R       NT
+        //
+        // If we are doing A * B, then normally we can convert  B
+        // to a real version if B is rm using 2*stepj for the new step.
+        // However, if L/R == R, then this doesn't work.
+        // Then it is really a B * A action, and we can switch
+        // B to real if B is cm using 2*stepi for the new step.
+        // However, looking at the chart above, we can see that this
+        // never happens.  B=cm -> L, B=rm -> R.  So we always need
+        // to use the version where we make a temporary matrix for B.
+
+        Matrix<double,ColMajor> B1 = B.realPart();
+        BlasMultEqMM(1.,A,B1.view());
+        B.realPart() = B1;
+        B1 = B.imagPart();
+        BlasMultEqMM(1.,A,B1.view());
+        B.imagPart() = B1;
+        B *= alpha;
     }
     template <> 
     void BlasMultEqMM(
@@ -496,30 +494,13 @@ namespace tmv {
         TMVAssert(alpha != 0.);
         TMVAssert(B.ct() == NonConj);
 
-        if (B.isrm()) {
-            int m=2*B.rowsize();
-            int n=B.colsize();
-            int lda = A.isrm()?A.stepi():A.stepj();
-            int ldb = B.stepi();
-            double xalpha(1);
-            BLASNAME(dtrmm) (
-                BLASCM B.iscm()?BLASCH_L:BLASCH_R, 
-                A.iscm()?BLASCH_LO:BLASCH_UP, 
-                A.iscm()==B.iscm()?BLASCH_NT:BLASCH_T,
-                A.isunit()?BLASCH_U:BLASCH_NU, BLASV(m),BLASV(n),
-                BLASV(xalpha),BLASP(A.cptr()),BLASV(lda), 
-                BLASP((double*)B.ptr()), BLASV(ldb)
-                BLAS1 BLAS1 BLAS1 BLAS1);
-            B *= alpha;
-        } else {
-            Matrix<double,ColMajor> B1 = B.realPart();
-            BlasMultEqMM(1.,A,B1.view());
-            B.realPart() = B1;
-            B1 = B.imagPart();
-            BlasMultEqMM(1.,A,B1.view());
-            B.imagPart() = B1;
-            B *= alpha;
-        }
+        Matrix<double,ColMajor> B1 = B.realPart();
+        BlasMultEqMM(1.,A,B1.view());
+        B.realPart() = B1;
+        B1 = B.imagPart();
+        BlasMultEqMM(1.,A,B1.view());
+        B.imagPart() = B1;
+        B *= alpha;
     }
 #endif
 #ifdef INST_FLOAT
@@ -657,30 +638,13 @@ namespace tmv {
         TMVAssert(A.ct() == NonConj);
         TMVAssert(B.ct() == NonConj);
 
-        if (B.isrm()) {
-            int m = 2*B.rowsize();
-            int n = B.colsize();
-            int lda = A.isrm()?A.stepi():A.stepj();
-            int ldb = 2*B.stepi();
-            float xalpha(1);
-            BLASNAME(strmm) (
-                BLASCM BLASCH_R, 
-                A.iscm()?BLASCH_LO:BLASCH_UP, 
-                A.isrm()?BLASCH_NT:BLASCH_T,
-                A.isunit()?BLASCH_U:BLASCH_NU, BLASV(m),BLASV(n),
-                BLASV(xalpha),BLASP(A.cptr()),BLASV(lda), 
-                BLASP((float*)B.ptr()), BLASV(ldb)
-                BLAS1 BLAS1 BLAS1 BLAS1);
-            B *= alpha;
-        } else {
-            Matrix<float,ColMajor> B1 = B.realPart();
-            BlasMultEqMM(1.F,A,B1.view());
-            B.realPart() = B1;
-            B1 = B.imagPart();
-            BlasMultEqMM(1.F,A,B1.view());
-            B.imagPart() = B1;
-            B *= alpha;
-        }
+        Matrix<float,ColMajor> B1 = B.realPart();
+        BlasMultEqMM(1.F,A,B1.view());
+        B.realPart() = B1;
+        B1 = B.imagPart();
+        BlasMultEqMM(1.F,A,B1.view());
+        B.imagPart() = B1;
+        B *= alpha;
     }
     template <> 
     void BlasMultEqMM(
@@ -693,30 +657,13 @@ namespace tmv {
         TMVAssert(alpha != 0.F);
         TMVAssert(B.ct() == NonConj);
 
-        if (B.isrm()) {
-            int m=2*B.rowsize();
-            int n=B.colsize();
-            int lda = A.isrm()?A.stepi():A.stepj();
-            int ldb = B.stepi();
-            float xalpha(1);
-            BLASNAME(strmm) (
-                BLASCM B.iscm()?BLASCH_L:BLASCH_R, 
-                A.iscm()?BLASCH_LO:BLASCH_UP, 
-                A.iscm()==B.iscm()?BLASCH_NT:BLASCH_T,
-                A.isunit()?BLASCH_U:BLASCH_NU, BLASV(m),BLASV(n),
-                BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
-                BLASP((float*)B.ptr()), BLASV(ldb)
-                BLAS1 BLAS1 BLAS1 BLAS1);
-            B *= alpha;
-        } else {
-            Matrix<float,ColMajor> B1 = B.realPart();
-            BlasMultEqMM(1.F,A,B1.view());
-            B.realPart() = B1;
-            B1 = B.imagPart();
-            BlasMultEqMM(1.F,A,B1.view());
-            B.imagPart() = B1;
-            B *= alpha;
-        }
+        Matrix<float,ColMajor> B1 = B.realPart();
+        BlasMultEqMM(1.F,A,B1.view());
+        B.realPart() = B1;
+        B1 = B.imagPart();
+        BlasMultEqMM(1.F,A,B1.view());
+        B.imagPart() = B1;
+        B *= alpha;
     }
 #endif
 #endif // BLAS
@@ -726,7 +673,7 @@ namespace tmv {
         T alpha, const GenUpperTriMatrix<Ta>& A, const MatrixView<T>& B)
     {
 #ifdef XDEBUG
-        //cout<<"MultEqMM: "<<alpha<<"  "<<TMV_Text(A)<<"  "<<A<<"  "<<TMV_Text(B)<<"  "<<B<<endl;
+        cout<<"MultEqMM: "<<alpha<<"  "<<TMV_Text(A)<<"  "<<A<<"  "<<TMV_Text(B)<<"  "<<B<<endl;
         Matrix<T> B0 = B;
         Matrix<Ta> A0 = A;
         Matrix<T> B2 = alpha * A0 * B0;
@@ -738,9 +685,9 @@ namespace tmv {
         TMVAssert(B.ct() == NonConj);
 #ifdef BLAS
         if ( !((B.isrm() && B.stepi()>0) || (B.iscm() && B.stepj()>0)) ||
-             !SameStorage(A,B)) {
+             SameStorage(A,B)) {
             Matrix<T> BB = alpha*B;
-            BlasMultEqMM(T(1),A,BB.view());
+            MultEqMM(T(1),A,BB.view());
             B = BB;
         } else if (!((A.isrm() && A.stepi()>0) || (A.iscm() && A.stepj()>0))) {
             if (A.isunit()) {
@@ -761,6 +708,7 @@ namespace tmv {
 #endif
 
 #ifdef XDEBUG
+        cout<<"Norm(B-B2) = "<<Norm(B-B2)<<endl;
         if (Norm(B-B2) > 0.001*(Norm(A0)*Norm(B0))) {
             cerr<<"MultEqMM alpha = "<<alpha<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
@@ -778,7 +726,7 @@ namespace tmv {
         T alpha, const GenLowerTriMatrix<Ta>& A, const MatrixView<T>& B)
     {
 #ifdef XDEBUG
-        //cout<<"MultEqMM: "<<alpha<<"  "<<TMV_Text(A)<<"  "<<A<<"  "<<TMV_Text(B)<<"  "<<B<<endl;
+        cout<<"MultEqMM: "<<alpha<<"  "<<TMV_Text(A)<<"  "<<A<<"  "<<TMV_Text(B)<<"  "<<B<<endl;
         Matrix<T> B0 = B;
         Matrix<Ta> A0 = A;
         Matrix<T> B2 = alpha * A0 * B0;
@@ -790,9 +738,9 @@ namespace tmv {
         TMVAssert(B.ct() == NonConj);
 #ifdef BLAS
         if ( !((B.isrm() && B.stepi()>0) || (B.iscm() && B.stepj()>0)) ||
-             !SameStorage(A,B)) {
+             SameStorage(A,B)) {
             Matrix<T> BB = alpha*B;
-            BlasMultEqMM(T(1),A,BB.view());
+            MultEqMM(T(1),A,BB.view());
             B = BB;
         } else if (!((A.isrm() && A.stepi()>0) || (A.iscm() && A.stepj()>0))) {
             if (A.isunit()) {
@@ -813,6 +761,7 @@ namespace tmv {
 #endif
 
 #ifdef XDEBUG
+        cout<<"Norm(B-B2) = "<<Norm(B-B2)<<endl;
         if (Norm(B-B2) > 0.001*(Norm(A0)*Norm(B0))) {
             cerr<<"MultEqMM alpha = "<<alpha<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
@@ -916,6 +865,8 @@ namespace tmv {
         TMVAssert(C.ct() == NonConj);
 
 #ifdef XDEBUG
+        cout<<"AddMultMM: "<<alpha<<"  "<<TMV_Text(A)<<"  "<<A<<"  "<<TMV_Text(B)<<"  "<<B<<endl;
+        cout<<TMV_Text(C)<<"  "<<C<<endl;
         Matrix<Ta> A0 = A;
         Matrix<Tb> BB0 = B;
         Matrix<T> CC0 = C;
@@ -963,6 +914,7 @@ namespace tmv {
             AddMultMM(alpha,A11,B1,C1);
         }
 #ifdef XDEBUG
+        cout<<"Norm(C-C2) = "<<Norm(C-C2)<<endl;
         if (Norm(C-C2) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(BB0))) {
             cerr<<"AddMultMM alpha = "<<alpha<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
@@ -1055,6 +1007,8 @@ namespace tmv {
         TMVAssert(C.ct() == NonConj);
 
 #ifdef XDEBUG
+        cout<<"AddMultMM: "<<alpha<<"  "<<TMV_Text(A)<<"  "<<A<<"  "<<TMV_Text(B)<<"  "<<B<<endl;
+        cout<<TMV_Text(C)<<"  "<<C<<endl;
         Matrix<Ta> A0 = A;
         Matrix<Tb> BB0 = B;
         Matrix<T> CC0 = C;
@@ -1103,6 +1057,7 @@ namespace tmv {
             AddMultMM(alpha,A00,B0,C0);
         }
 #ifdef XDEBUG
+        cout<<"Norm(C-C2) = "<<Norm(C-C2)<<endl;
         if (Norm(C-C2) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(BB0))) {
             cerr<<"AddMultMM alpha = "<<alpha<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
@@ -1167,8 +1122,8 @@ namespace tmv {
         // C (+)= alpha * A * B
     { 
 #ifdef XDEBUG
-        //cout<<"MultMM: "<<alpha<<"  "<<TMV_Text(A)<<"  "<<A<<"  "<<TMV_Text(B)<<"  "<<B<<endl;
-        //cout<<TMV_Text(C)<<"  "<<C<<endl;
+        cout<<"MultMM: "<<alpha<<"  "<<TMV_Text(A)<<"  "<<A<<"  "<<TMV_Text(B)<<"  "<<B<<endl;
+        cout<<TMV_Text(C)<<"  "<<C<<endl;
         Matrix<Ta> A0 = A;
         Matrix<Tb> B0 = B;
         Matrix<T> C0 = C;
@@ -1201,6 +1156,7 @@ namespace tmv {
                 AddMultMM(alpha,A,B,C);
         }
 #ifdef XDEBUG
+        cout<<"Norm(C-C2) = "<<Norm(C-C2)<<endl;
         if (Norm(C-C2) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
                                 (add?Norm(C0):TMV_RealType(T)(0)))) {
             cerr<<"MultMM alpha = "<<alpha<<endl;
@@ -1265,8 +1221,8 @@ namespace tmv {
     // C (+)= alpha * A * B
     { 
 #ifdef XDEBUG
-        //cout<<"MultMM: "<<alpha<<"  "<<TMV_Text(A)<<"  "<<A<<"  "<<TMV_Text(B)<<"  "<<B<<endl;
-        //cout<<TMV_Text(C)<<"  "<<C<<endl;
+        cout<<"MultMM: "<<alpha<<"  "<<TMV_Text(A)<<"  "<<A<<"  "<<TMV_Text(B)<<"  "<<B<<endl;
+        cout<<TMV_Text(C)<<"  "<<C<<endl;
         Matrix<T> C0 = C;
         Matrix<Ta> A0 = A;
         Matrix<Tb> B0 = B;
@@ -1299,6 +1255,7 @@ namespace tmv {
                 AddMultMM(alpha,A,B,C);
         }
 #ifdef XDEBUG
+        cout<<"Norm(C-C2) = "<<Norm(C-C2)<<endl;
         if (Norm(C-C2) > 0.001*(
                 TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
                 (add?Norm(C0):TMV_RealType(T)(0)))) {

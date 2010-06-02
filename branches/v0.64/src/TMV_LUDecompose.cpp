@@ -30,7 +30,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 
-//#define XDEBUG
+#define XDEBUG
 
 
 #include "TMV_Blas.h"
@@ -509,8 +509,11 @@ namespace tmv {
     template <class T> 
     void LU_Decompose(const MatrixView<T>& A, int* P, int& detp)
     {
-        //std::cout<<"Start LUDecompose:"<<std::endl;
-        //std::cout<<"A = "<<A<<std::endl;
+#ifdef XDEBUG
+        std::cout<<"Start LUDecompose:"<<std::endl;
+        std::cout<<"A = "<<A<<std::endl;
+        Matrix<T> A0 = A;
+#endif
         TMVAssert(A.ct()==NonConj);
         TMVAssert(A.iscm());
 
@@ -521,7 +524,25 @@ namespace tmv {
             NonLapLUDecompose(A,P,detp);
 #endif
         }
-        //std::cout<<"A => "<<A<<std::endl;
+#ifdef XDEBUG
+        std::cout<<"A => "<<A<<std::endl;
+        Matrix<T> A2 = A.unitLowerTri() * A.upperTri();
+        A2.reversePermuteRows(P);
+        std::cout<<"Norm(A0-A2) = "<<Norm(A0-A2)<<std::endl;
+        typedef TMV_RealType(T) RT;
+        const RT halfeps = TMV_Epsilon<RT>()/RT(2);
+        if (Norm(A2-A0) > 0.001*Norm(A0) && Norm(A0)*halfeps > RT(0)) {
+            cerr<<"Done LU_Decompose: \n";
+            cerr<<"A0 = "<<A0<<endl;
+            cerr<<"LU = "<<A<<endl;
+            cerr<<"P = (";
+            for(int i=0;i<int(A.rowsize());i++) cerr<<P[i]<<" ";
+            cerr<<")\n";
+            cerr<<"A2 = "<<A2<<endl;
+            cerr<<"Norm(A0-A2) = "<<Norm(A0-A2)<<endl;
+            abort();
+        }
+#endif
     }
 
     template <class T> 

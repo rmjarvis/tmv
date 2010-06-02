@@ -174,7 +174,7 @@ void TestBasicTriDiv()
     Assert(std::abs(m.logDet(&signdet)-std::log(det1)) < eps,"Tri logDet");
     Assert(std::abs(signdet-1.) < eps,"Tri logDet - sign");
 
-    tmv::Matrix<std::complex<double> > ca = a * std::complex<T>(1,2);
+    tmv::Matrix<std::complex<T> > ca = a * std::complex<T>(1,2);
     CM c(ca);
 
     T ceps = EPS * Norm(c) * Norm(c.inverse());

@@ -1108,7 +1108,6 @@ if not GetOption('help'):
     SConscript(script_files, exports=['env'])
 
     print 'To link programs using the TMV library, use:'
-    str = '-ltmv ' + env['LINKFLAGS'] + env['_LIBFLAGS']
-    print str
+    print '-ltmv ' , env['LINKFLAGS'] , env['_LIBFLAGS']
 
 
