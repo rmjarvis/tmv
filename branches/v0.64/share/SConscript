@@ -1,0 +1,47 @@
+# vim: set filetype=python :
+
+import os
+Import('env')
+
+libs=['tmv'] 
+
+installed_linkfile = File('share/tmv-link',env['PREFIX']).abspath
+#print "installed_linkfile =" , installed_linkfile
+
+linkfile = File('#share/tmv-link').abspath
+#print "linkfile =" , linkfile
+
+cmd = 'echo $LINKFLAGS > ' + File('#share/linkflags').abspath + '; '
+cmd += 'echo $_LIBDIRFLAGS > ' + File('#share/libdirs').abspath + '; '
+cmd += 'echo $_LIBFLAGS > ' + File('#share/libflags').abspath + '; '
+cmd += 'cd ' + Dir('#share').abspath + '; '
+cmd += './make-tmv-link $LINKFILE $INSTALLED_LINKFILE'
+
+#print "cmd = " , cmd
+
+env1 = env.Clone(LIBS=libs+env['LIBS'],
+    LINKFILE=linkfile, INSTALLED_LINKFILE=installed_linkfile,
+    LIBPATH=os.path.join(env['PREFIX'], 'lib'))
+
+#print "LIBPATH= " , env['LIBPATH']
+#print "LIBPATH1= " , env1['LIBPATH']
+#print "PREFIX= " , env['PREFIX']
+
+env1.Command('#share/tmv-link','#share/make-tmv-link',cmd)
+
+RunInstall = env['_InstallProgram']
+RunUninstall = env['_UninstallProgram']
+
+for fname in ['tmv-link']:
+
+    cfile=env.File(fname)
+    install_subdir = 'share'
+    targets = [cfile]
+
+    if 'install' in COMMAND_LINE_TARGETS:
+        RunInstall(env, targets, install_subdir)
+
+    if 'uninstall' in COMMAND_LINE_TARGETS:
+        RunUninstall(env, targets, install_subdir)
+
+

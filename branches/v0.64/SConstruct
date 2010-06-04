@@ -13,7 +13,7 @@ import sys
 # there are some other optional ones
 src_dir = 'src'
 #subdirs=['test','examples','doc']
-subdirs=['test','examples','bin']
+subdirs=['test','examples','bin','share']
 
 # Configurations will be saved here so command line options don't
 # have to be sent more than once
@@ -106,7 +106,7 @@ opts.Add(BoolVariable('STATIC','Use static linkage', False))
 opts.Add(BoolVariable('WITH_SSE',
             'Only necessary for icpc compilations: Use SSE commands', True))
 opts.Add('XTEST',
-        'Do extra tests in the test suite (1=non-unit step, 2=extra sizes/shapes, 4=mix real/complex,  8=degenerate,  16=extra arithmetic, 32=FortranStyle) ', '0')
+        'Do extra tests in the test suite (1=non-unit step, 2=extra sizes/shapes, 4=mix real/complex,  8=degenerate,  16=extra arithmetic, 32=FortranStyle, 64=extreme matrices) ', 0)
 opts.Add(BoolVariable('MEM_TEST',
             'Test for memory leaks', False))
 opts.Add(BoolVariable('SMALL_TESTS',
@@ -1106,8 +1106,3 @@ if not GetOption('help'):
             script_files.append(os.path.join(d,'SConscript'))
 
     SConscript(script_files, exports=['env'])
-
-    print 'To link programs using the TMV library, use:'
-    print '-ltmv ' , env['LINKFLAGS'] , env['_LIBFLAGS']
-
-

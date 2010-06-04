@@ -1126,7 +1126,7 @@ v.sort(tmv::ADType ad=tmv::ASCEND,
       tmv::COMPType comp=tmv::REAL_COMP)
 \end{tmvcode}
 \index{Vector!methods!sort}
-\index{Permutation|Vector sort}
+\index{Permutation!Vector sort}
 Sorts the vector \tt{v}, optionally returning the corresponding permutation in \tt{p}.
 If you do not care about the permutation, the second form is slightly more efficient.
 
@@ -3259,19 +3259,7 @@ the library will not save the decomposition between statements.
 \end{enumerate}
 
 \newpage
-\section{Special Matrices}
-
-Most functions and methods for the various special matrix varieties work the same
-as the for regular dense, rectangular matrices.  
-In these cases, we will just list the functions
-that are allowed for each special matrix with the
-effect understood to be the same as for a regular \tt{Matrix}.  Of course, there are usually 
-algorithmic speed-ups, which the code will use to take advantage of the 
-particular structure.
-Whenever there is a difference in how a function works,
-we will explain the difference.
-
-\subsection{Diagonal matrices}
+\section{Diagonal matrices}
 \index{DiagMatrix}
 \label{DiagMatrix}
 
@@ -3289,7 +3277,17 @@ also inherit from \tt{GenDiagMatrix}.
 \index{DiagMatrix!DiagMatrixComposite}
 \index{BaseMatrix}
 
-\subsubsection{Constructors}
+Most functions and methods for \tt{DiagMatrix} work the same
+as they do for \tt{Matrix}.
+In these cases, we will just list the functions
+that are allowed with the
+effect understood to be the same as for a regular \tt{Matrix}.  Of course, there are 
+almost always algorithmic speed-ups, which the code will use to take advantage of the 
+diagonal structure.
+Whenever there is a difference in how a function works,
+we will explain the difference.
+
+\subsection{Constructors}
 \index{DiagMatrix!constructors}
 \label{DiagMatrix_Constructors}
 
@@ -3363,7 +3361,7 @@ Make a \tt{DiagMatrixView} whose diagonal consists of the actual memory elements
 \end{itemize}
 
 
-\subsubsection{Access}
+\subsection{Access}
 \index{DiagMatrix!access methods}
 \label{DiagMatrix_Access}
 
@@ -3410,7 +3408,7 @@ d.imagPart()
 \index{DiagMatrix!methods!realPart}
 \index{DiagMatrix!methods!imagPart}
 
-\subsubsection{Functions}
+\subsection{Functions}
 \index{DiagMatrix!functions of}
 \label{DiagMatrix_Functions}
 
@@ -3497,7 +3495,7 @@ Swap(d1,d2)
 \tt{invertSelf} is new for \tt{DiagMatrix} and calculates $d^{-1}$ in place.  
 It is equivalent to \tt{d = d.inverse()}.
 
-\subsubsection{Arithmetic}
+\subsection{Arithmetic}
 \index{DiagMatrix!arithmetic}
 \label{DiagMatrix_Arithmetic}
 
@@ -3527,7 +3525,7 @@ d [+-]= x
 d = x
 \end{tmvcode}
 
-\subsubsection{Division}
+\subsection{Division}
 \index{DiagMatrix!arithmetic!division}
 \label{DiagMatrix_Division}
 
@@ -3555,7 +3553,7 @@ but there is no direct way to use SVD for the division and skip any
 divisions by 0.  If you want to do this, you should use \tt{BandMatrixViewOf(d)} to 
 treat the \tt{DiagMatrix} as a \tt{BandMatrix}, which can use SVD.
 
-\subsubsection{Input/Output}
+\subsection{Input/Output}
 \index{DiagMatrix!input/output}
 \label{DiagMatrix_IO}
 
@@ -3596,7 +3594,8 @@ m.writeCompact(std::ostream& os, RT thresh)
 \index{DiagMatrix!methods!write}
 \index{DiagMatrix!methods!writeCompact}
 
-\subsection{Upper/lower triangle matrices}
+\newpage
+\section{Upper/lower triangle matrices}
 \index{UpperTriMatrix}
 \index{LowerTriMatrix|see{UpperTriMatrix}}
 \label{TriMatrix}
@@ -3636,7 +3635,16 @@ All of the routines are analogous for \tt{UpperTriMatrix} and
 (the \tt{UpperTriMatrix} version for
 definiteness).  
 
-\subsubsection{Constructors}
+Most functions and methods for \tt{UpperTriMatrix} and \tt{LowerTriMatrix}
+work the same as they do for \tt{Matrix}.
+In these cases, we will just list the functions that are allowed with the
+effect understood to be the same as for a regular \tt{Matrix}.  Of course, there are 
+almost always algorithmic speed-ups, which the code will use to take advantage of the 
+triangle structure.
+Whenever there is a difference in how a function works,
+we will explain the difference.
+
+\subsection{Constructors}
 \index{UpperTriMatrix!constructors}
 \label{TriMatrix_Constructors}
 
@@ -3706,7 +3714,7 @@ elements must be in memory, even though they are never used.
 
 \end{itemize}
 
-\subsubsection{Access}
+\subsection{Access}
 \index{UpperTriMatrix!access methods}
 \label{TriMatrix_Access}
 
@@ -3799,7 +3807,7 @@ Note that the transpose and adjoint of an \tt{UpperTriMatrix} is an
 \tt{LowerTriMatrixView} and vice versa.
 \vspace{12pt}
 
-\subsubsection{Functions}
+\subsection{Functions}
 \index{UpperTriMatrix!functions of}
 \label{TriMatrix_Functions}
 
@@ -3883,7 +3891,7 @@ Like for \tt{DiagMatrix}, \tt{invertSelf} calculates $U^{-1}$ in place.
 It is equivalent to \tt{U = U.inverse()}.
 \vspace{12pt}
 
-\subsubsection{Arithmetic}
+\subsection{Arithmetic}
 \index{UpperTriMatrix!arithmetic}
 \label{TriMatrix_Arithmetic}
 
@@ -3919,7 +3927,7 @@ U2 = x [+-] U1
 U [+-]= x
 \end{tmvcode}
 
-\subsubsection{Division}
+\subsection{Division}
 \index{UpperTriMatrix!arithmetic!division}
 \label{TriMatrix_Division}
 
@@ -3953,7 +3961,7 @@ but there is no direct way to use SVD for the division and avoid any
 divisions by 0.  If you want to do this use \tt{BandMatrixViewOf(m)} to 
 treat the \tt{TriMatrix} as a \tt{BandMatrix}, which can use SVD.
 
-\subsubsection{Input/Output}
+\subsection{Input/Output}
 \index{UpperTriMatrix!input/output}
 \label{TriMatrix_IO}
 
@@ -4009,7 +4017,8 @@ m.writeCompact(std::ostream& os, RT thresh)
 \index{UpperTriMatrix!methods!write}
 \index{UpperTriMatrix!methods!writeCompact}
 
-\subsection{Band matrices}
+\newpage
+\section{Band-diagonal matrices}
 \index{BandMatrix}
 \label{BandMatrix}
 
@@ -4101,7 +4110,17 @@ So for the constructors that
 take the matrix information from an array (\tt{T*} or \tt{vector<T>}), 
 the start of the array needs to be at the start of the lowest sub-diagonal.  
 
-\subsubsection{Constructors}
+Most functions and methods for \tt{BandMatrix} 
+work the same as they do for \tt{Matrix}.
+In these cases, we will just list the functions that are allowed with the
+effect understood to be the same as for a regular \tt{Matrix}.  Of course, there are 
+almost always algorithmic speed-ups, which the code will use to take advantage of the 
+banded structure.
+Whenever there is a difference in how a function works,
+we will explain the difference.
+
+
+\subsection{Constructors}
 \index{BandMatrix!constructors}
 \label{BandMatrix_Constructors}
 
@@ -4253,7 +4272,7 @@ Make a \tt{BandMatrixView} of the actual memory elements, \tt{vv}.
 
 \end{itemize}
 
-\subsubsection{Access}
+\subsection{Access}
 \index{BandMatrix!access methods}
 \label{BandMatrix_Access}
 
@@ -4373,7 +4392,7 @@ b.imagPart()
 \index{BandMatrix!methods!imagPart}
 \vspace{12pt}
 
-\subsubsection{Functions}
+\subsection{Functions}
 \index{BandMatrix!functions of}
 \label{BandMatrix_Functions}
 
@@ -4450,7 +4469,7 @@ Swap(b1,b2)
 \index{BandMatrix!functions of!Swap}
 \vspace{12pt}
 
-\subsubsection{Arithmetic}
+\subsection{Arithmetic}
 \index{BandMatrix!arithmetic}
 \label{BandMatrix_Arithmetic}
 
@@ -4480,7 +4499,7 @@ b [+-]= x
 b = x
 \end{tmvcode}
 
-\subsubsection{Division}
+\subsection{Division}
 \index{BandMatrix!arithmetic!division}
 \label{BandMatrix_Division}
 
@@ -4608,7 +4627,7 @@ b.divideInPlace()
 work the same as for regular \tt{Matrix}es.
 (See \ref{Matrix_Division_Efficiency}.)
 
-\subsubsection{Input/Output}
+\subsection{Input/Output}
 \index{BandMatrix!input/output}
 \label{BandMatrix_IO}
 
@@ -4656,7 +4675,8 @@ b.writeCompact(std::ostream& os, RT thresh)
 \index{BandMatrix!methods!writeCompact}
 \index{BandMatrix!methods!write}
 
-\subsection{Symmetric and hermitian matrices}
+\newpage
+\section{Symmetric and hermitian matrices}
 \index{SymMatrix}
 \index{HermMatrix|see{SymMatrix}}
 \label{SymMatrix}
@@ -4713,7 +4733,17 @@ Usually, the symmetric/hermitian distinction does not affect the use of the clas
 \tt{s} for both, and just point out whenever a \tt{HermMatrix} acts differently
 from a \tt{SymMatrix}.
 
-\subsubsection{Constructors}
+Most functions and methods for \tt{SymMatrix} and \tt{HermMatrix}
+work the same as they do for \tt{Matrix}.
+In these cases, we will just list the functions that are allowed with the
+effect understood to be the same as for a regular \tt{Matrix}.  Of course, there are 
+almost always algorithmic speed-ups, which the code will use to take advantage of the 
+symmetric or hermitian structure.
+Whenever there is a difference in how a function works,
+we will explain the difference.
+
+
+\subsection{Constructors}
 \index{SymMatrix!constructors}
 \label{SymMatrix_Constructors}
 
@@ -4806,7 +4836,7 @@ of the values are actually used,
 
 \end{itemize}
 
-\subsubsection{Access}
+\subsection{Access}
 \index{SymMatrix!access methods}
 \label{SymMatrix_Access}
 
@@ -4900,7 +4930,7 @@ since the diagonal elements are all real.
 you could also use \tt{s.upperTri().offDiag().imagPart()}. 
 \vspace{12pt}
 
-\subsubsection{Functions}
+\subsection{Functions}
 \index{SymMatrix!functions of}
 \label{SymMatrix_Functions}
 
@@ -5002,7 +5032,7 @@ a method.  The permute methods performs a series of these
 combined swaps.
 \vspace{12pt}
 
-\subsubsection{Arithmetic}
+\subsection{Arithmetic}
 \index{SymMatrix!arithmetic}
 \label{SymMatrix_Arithmetic}
 
@@ -5108,7 +5138,7 @@ s3 += x*s1;
 s3 += s2;
 \end{tmvcode}
 
-\subsubsection{Division}
+\subsection{Division}
 \index{SymMatrix!arithmetic!division}
 \label{SymMatrix_Division}
 
@@ -5274,7 +5304,7 @@ s.divideInPlace()
 work the same as for regular \tt{Matrix}es.
 (See \ref{Matrix_Division_Efficiency}.)
 
-\subsubsection{Input/Output}
+\subsection{Input/Output}
 \index{SymMatrix!input/output}
 \label{SymMatrix_IO}
 
@@ -5317,7 +5347,8 @@ s.writeCompact(std::ostream& os, RT thresh)
 \index{SymMatrix!methods!writeCompact}
 \index{SymMatrix!methods!write}
 
-\subsection{Symmetric and hermitian band matrices}
+\newpage
+\section{Symmetric and hermitian band matrices}
 \index{SymBandMatrix}
 \index{HermBandMatrix|see{SymBandMatrix}}
 \label{SymBandMatrix}
@@ -5380,7 +5411,16 @@ So for the constructors that
 take the matrix information from an array (\tt{T*} or \tt{vector<T>}), 
 the start of the array needs to be at the start of the lowest sub-diagonal.  
 
-\subsubsection{Constructors}
+Most functions and methods for \tt{SymBandMatrix} and \tt{HermBandMatrix}
+work the same as they do for \tt{Matrix}.
+In these cases, we will just list the functions that are allowed with the
+effect understood to be the same as for a regular \tt{Matrix}.  Of course, there are 
+almost always algorithmic speed-ups, which the code will use to take advantage of the 
+symmetric (or hermitian) banded structure.
+Whenever there is a difference in how a function works,
+we will explain the difference.
+
+\subsection{Constructors}
 \index{SymBandMatrix!constructors}
 \label{SymBandMatrix_Constructors}
 
@@ -5506,7 +5546,7 @@ Make a \tt{SymBandMatrixView} of the actual memory elements, \tt{vv}.
 
 \end{itemize}
 
-\subsubsection{Access}
+\subsection{Access}
 \index{SymBandMatrix!access methods}
 \label{SymBandMatrix_Access}
 
@@ -5610,7 +5650,7 @@ you could use
 (since all the diagonal elements are real).
 \vspace{12pt}
 
-\subsubsection{Functions}
+\subsection{Functions}
 \index{SymBandMatrix!functions of}
 \label{SymBandMatrix_Functions}
 
@@ -5689,7 +5729,7 @@ Swap(sb1,sb2)
 \index{SymBandMatrix!functions of!Swap}
 \vspace{12pt}
 
-\subsubsection{Arithmetic}
+\subsection{Arithmetic}
 \index{SymBandMatrix!arithmetic}
 \label{SymBandMatrix_Arithmetic}
 
@@ -5730,7 +5770,7 @@ sb [+-]= x
 sb = x
 \end{tmvcode}
 
-\subsubsection{Division}
+\subsection{Division}
 \index{SymBandMatrix!arithmetic!division}
 \label{SymBandMatrix_Division}
 
@@ -5861,7 +5901,7 @@ sb.divideInPlace()
 work the same as for regular \tt{Matrix}es.
 (See \ref{Matrix_Division_Efficiency}.)
 
-\subsubsection{Input/Output}
+\subsection{Input/Output}
 \index{SymBandMatrix!input/output}
 \label{SymBandMatrix_IO}
 
@@ -5910,7 +5950,8 @@ sb.writeCompact(std::ostream& os, RT thresh)
 \index{SymBandMatrix!methods!writeCompact}
 \index{SymBandMatrix!methods!write}
 
-\subsection{Permutations}
+\newpage
+\section{Permutations}
 \index{Permutation}
 \label{Permutation}
 
@@ -5930,7 +5971,7 @@ a mutable action on the object, it copies the values if necessary.
 So you cannot indirectly modify another Permutation the way you can
 with MatrixView.
 
-\subsubsection{Constructors}
+\subsection{Constructors}
 \index{Permutation!constructors}
 \label{Permutation_Constructors}
 
@@ -5957,7 +5998,7 @@ from the input values.  And if \tt{isinv} is omitted, it is taken to be \tt{fals
 \end{itemize}
 
 
-\subsubsection{Access}
+\subsection{Access}
 \index{Permutation!access methods}
 \label{Permutation_Access}
 
@@ -5996,7 +6037,7 @@ Returns true the the interchange values are taken in the reverse order (last to 
 or false if not.
 \vspace{12pt}
 
-\subsubsection{Functions}
+\subsection{Functions}
 \index{Permutation!functions of}
 \label{Permutation_Functions}
 
@@ -6068,7 +6109,7 @@ Swap(p1,p2)
 \index{Permutation!methods!invertSelf}
 \index{Permutation!functions of!Swap}
 
-\subsubsection{Arithmetic}
+\subsection{Arithmetic}
 \index{Permutation!arithmetic}
 \label{Permutation_Arithmetic}
 
@@ -6091,7 +6132,7 @@ p1 == p2
 p1 != p2
 \end{tmvcode}
 
-\subsubsection{Input/Output}
+\subsection{Input/Output}
 \index{Permutation!input/output}
 \label{Permutation_IO}
 
@@ -7589,7 +7630,7 @@ First, there is a function:
 \begin{tmvcode}
 std::string TMV_Version();
 \end{tmvcode}
-\index{TMV_Version}
+\index{TMV\_Version}
 For this release, this function returns the string ``\tmvversion''.  This is useful for inserting
 into a log file, but it not useful for conditionally controlling the user code.
 
@@ -7599,9 +7640,9 @@ TMV_MAJOR_VERSION
 TMV_MINOR_VERSION
 TMV_VERSION_AT_LEAST(major,minor)
 \end{tmvcode}
-\index{TMV_MAJOR_VERSION}
-\index{TMV_MINOR_VERSION}
-\index{TMV_VERSION_AT_LEAST}
+\index{TMV\_MAJOR\_VERSION}
+\index{TMV\_MINOR\_VERSION}
+\index{TMV\_VERSION\_AT\_LEAST}
 \index{Conditional compilation}
 The first two are defined to be \tmvmajorversion\ and \tmvminorversion\ for this release.
 The third can be used with an \tt{#if} directive to change what the code is.
@@ -7692,7 +7733,7 @@ first -- it can often find everything automatically).
 The options are listed 
 with their default value.  You change them simply by specifying a different value
 on the command line.  For example:\\
-\texttt{scons CXX=icpc WITH\_LONGDOUBLE=true}\\
+\texttt{scons CXX=icpc INST\_LONGDOUBLE=true}\\
 If you need to run SCons multiple times (for example to compile the test suite or install
 the libraries as described below), you only need to specify the new parameter values the first
 time you run the SCons.
@@ -7708,10 +7749,10 @@ Remember to put the flags in quotes,
 so the whitespace doesn't confuse the parser.  e.g. \texttt{scons FLAGS='-O3 -g'}
 \item \texttt{DEBUG=false} specifies whether to keep the debugging assert statements in the compiled library code.  
 \item \texttt{PREFIX=/usr/local} specifies where to install the library when running \texttt{scons install} (see below).
-\item \texttt{WITH\_FLOAT=true} specifies whether to instantiate the \tt{<float>} templates.
-\item \texttt{WITH\_DOUBLE=true} specifies whether to instantiate the \tt{<double>} templates.
-\item \texttt{WITH\_LONGDOUBLE=false} specifies whether to instantiate the \tt{<long double>} templates.
-\item \texttt{WITH\_INT=false} specifies whether to instantiate the \tt{<int>} templates.
+\item \texttt{INST\_FLOAT=true} specifies whether to instantiate the \tt{<float>} templates.
+\item \texttt{INST\_DOUBLE=true} specifies whether to instantiate the \tt{<double>} templates.
+\item \texttt{INST\_LONGDOUBLE=false} specifies whether to instantiate the \tt{<long double>} templates.
+\item \texttt{INST\_INT=false} specifies whether to instantiate the \tt{<int>} templates.
 \index{Installation!OpenMP}
 \index{OpenMP}
 \item \texttt{WITH\_OPENMP=true} specifies whether to use OpenMP to parallelize some parts of the code.
@@ -7789,7 +7830,10 @@ It seems like most machines that have \texttt{icpc} are able to use SSE commands
 I couldn't figure out a compiler flag that would turn on SSE {\em if and only if} the machine
 supports it.  So the default is to use the flag \texttt{-msse2}, but you can disable it by setting 
 \texttt{WITH\_SSE=false} if your machine doesn't have SSE support.
-\item \texttt{XTEST=false} specifies whether to include extra tests in the test suite.
+\item \texttt{XTEST=0} specifies whether to include extra tests in the test suite.  \texttt{XTEST}
+is treated as a bit set, with each non-zero bit turning on particular tests.  Type ``scons -h'' for 
+more information.
+
 \item \texttt{MEM\_TEST=false} specifies whether to include extra memory tests in the library and test suite.
 \item \texttt{SMALL\_TESTS=false} specifies whether to make the smaller test suite programs: \texttt{tmvtest1a}, \texttt{tmvtest1b}, etc. 
 \item \texttt{WARN=false} specifies whether to have the compiler report warning (with -Wall or
@@ -8566,8 +8610,8 @@ type \texttt{scons test SMALL\_TESTS=true}.  Or you can make them one
 at a time by typing \texttt{scons test1a},~ \texttt{scons test1b}, etc.
 
 You might also try testing only one type at a time: First compile with \texttt{-DNO\_INST\_FLOAT},
-and then with \texttt{-DNO\_INST\_DOUBLE} (or with SCons, use \texttt{WITH\_FLOAT=false}
-and then \texttt{WITH\_FLOAT=true WITH\_DOUBLE=false}).  This cuts the size of the executables
+and then with \texttt{-DNO\_INST\_DOUBLE} (or with SCons, use \texttt{INST\_FLOAT=false}
+and then \texttt{INST\_FLOAT=true INST\_DOUBLE=false}).  This cuts the size of the executables
 in half, which can also help if the above trick doesn't work.  (I had to do this on one 
 of my test systems for test2c.)
 
@@ -8760,10 +8804,10 @@ at \myissues, or email the discussion group about what you need at \mygroup.
 
 When writing complicated equations involving complex symmetric or hermitian matrices, 
 you may find that an equation that seems perfectly ok does not compile.
-The reason for this problem is explained in \S\ref{SymMatrix_Ops} in some detail, 
+The reason for this problem is explained in \S\ref{SymMatrix_Arithmetic} in some detail, 
 so you should read about it there.  But basically, the workaround is usually
 to break your equation up into smaller steps that do not require the code to 
-explicitly instantiate any matrices.  For example: (this is the example from \S\ref{SymMatrix_Ops})
+explicitly instantiate any matrices.  For example: (this is the example from \S\ref{SymMatrix_Arithmetic})
 \begin{tmvcode}
 s3 += x*s1 + s2;
 \end{tmvcode}
@@ -9391,7 +9435,11 @@ There are also a couple of feature additions as well -- most notably the Permuta
 \begin{itemize}
 
 \item Added a some very difficult matrices to the test suite, and found and fixed quite a few 
-bugs as a result involving underflow, overflow, and loss of precision.
+bugs as a result involving underflow, overflow, and loss of precision.  It is worth noting that
+when compiled to use LAPACK, rather than the native TMV code, some of these tests
+(which are enabled with \tt{XTEST=64}) fail.  So if you find your program having problems with
+problematic input matrices, it might be worth compiling TMV with \tt{WITH\_LAPACK=false} to
+see if that helps.
 
 \item Fixed a bug that \tt{U(i,i)} was invalid if \tt{U} is non-const and is \tt{UnitDiag} even 
 if the resulting value is not used in a mutable context.  

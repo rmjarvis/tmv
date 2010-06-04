@@ -13,6 +13,9 @@ template <class T, tmv::UpLoType uplo, tmv::StorageType stor>
 void TestHermBandDecomp()
 {
     for (int mattype = START; mattype <= 17; mattype++) {
+#if !(XTEST & 64)
+        if (mattype % 6 >= 3) continue;
+#endif
         if (showstartdone) {
             std::cout<<"HermBand: mattype = "<<mattype<<std::endl;
             std::cout<<"uplo, stor = "<<TMV_Text(uplo)<<
@@ -490,6 +493,9 @@ template <class T, tmv::UpLoType uplo, tmv::StorageType stor>
 void TestSymBandDecomp()
 {
     for (int mattype = 0; mattype <= 14; mattype++) {
+#if !(XTEST & 64)
+        if (mattype % 6 >= 3) continue;
+#endif
         if (showstartdone) {
             std::cout<<"SymBand: mattype = "<<mattype<<std::endl;
             std::cout<<"uplo, stor = "<<TMV_Text(uplo)<<"  "<<TMV_Text(stor)<<std::endl;

@@ -11,6 +11,9 @@ template <class T, tmv::StorageType stor>
 void TestBandDecomp()
 {
     for (int mattype = START; mattype <= 9; mattype++) {
+#if !(XTEST & 64)
+        if (mattype >= 7) break;
+#endif
         if (showstartdone) {
             std::cout<<"mattype = "<<mattype<<", stor = "<<
                 tmv::TMV_Text(stor)<<std::endl;

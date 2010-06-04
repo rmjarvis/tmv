@@ -13,6 +13,9 @@ template <class T, tmv::UpLoType uplo, tmv::StorageType stor>
 void TestHermDecomp()
 {
     for (int mattype = START; mattype <= 5; mattype++) {
+#if !(XTEST & 64)
+        if (mattype >= 3) break;
+#endif
         if (showstartdone) {
             std::cout<<"Herm: mattype = "<<mattype<<std::endl;
             std::cout<<"uplo, stor = "<<TMV_Text(uplo)<<
@@ -402,6 +405,9 @@ template <class T, tmv::UpLoType uplo, tmv::StorageType stor>
 void TestSymDecomp()
 {
     for (int mattype = START; mattype <= 5; mattype++) {
+#if !(XTEST & 64)
+        if (mattype >= 3) break;
+#endif
         if (showstartdone) {
             std::cout<<"Symm: mattype = "<<mattype<<std::endl;
             std::cout<<"uplo, stor = "<<TMV_Text(uplo)<<
@@ -661,6 +667,9 @@ void TestPolar()
     if (showstartdone) std::cout<<"PolarDecomp "<<TMV_Text(stor)<<std::endl;
 
     for (int mattype = 0; mattype <= 6; mattype++) {
+#if !(XTEST & 64)
+        if (mattype >= 4) break;
+#endif
         if (showstartdone) {
             std::cout<<"Polar: mattype = "<<mattype<<std::endl;
             std::cout<<"stor = "<<TMV_Text(stor)<<std::endl;

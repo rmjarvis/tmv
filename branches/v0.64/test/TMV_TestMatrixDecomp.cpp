@@ -10,6 +10,9 @@ template <class T, tmv::StorageType stor>
 void TestMatrixDecomp()
 {
     for (int mattype = START; mattype <= 6; mattype++) {
+#if !(XTEST & 64)
+        if (mattype >= 4) break;
+#endif
         if (showstartdone) {
             std::cout<<"mattype = "<<mattype<<", stor = "<<
                 tmv::TMV_Text(stor)<<std::endl;

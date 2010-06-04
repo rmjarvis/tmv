@@ -26,7 +26,7 @@ env1 = env.Clone(CCFLAGS=env['TEST_FLAGS'],
 if env['MEM_TEST']:
     env1.Append(CPPDEFINES=['TMV_MEM_TEST'])
 if env['XTEST'] > 0:
-    env1.Append(CPPDEFINES=['XTEST=' + `env['XTEST']`])
+    env1.Append(CPPDEFINES=['XTEST=' + env['XTEST']])
 if not env['INST_FLOAT']:
     env1.Append(CPPDEFINES=['TMV_NO_INST_FLOAT'])
 if not env['INST_DOUBLE']:
