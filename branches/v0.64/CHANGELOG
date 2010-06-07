@@ -84,4 +84,6 @@ New features:
 
 -- Added version of MatrixViewOf with arbitrary steps.
 
+-- Added the tmv-link feature to make it easier to automate correct linkage
+   of the TMV library.
 

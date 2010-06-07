@@ -684,8 +684,8 @@ static void TestBasicTriMatrix_IO()
         fin >> xum1 >> xlm1;
         fin >> xu4 >> xl4;
         fin.close();
-        Assert(u == xu2,"NonUnitDiag UpperTriMatrix Compact I/O check #4");
-        Assert(l == xl2,"NonUnitDiag LowerTriMatrix Compact I/O check #4");
+        Assert(u == xu4,"NonUnitDiag UpperTriMatrix Compact I/O check #4");
+        Assert(l == xl4,"NonUnitDiag LowerTriMatrix Compact I/O check #4");
     } else {
         fin.open("tmvtest_trimatrix_io.dat");
         if (!fin) 
@@ -701,14 +701,13 @@ static void TestBasicTriMatrix_IO()
             tmv::UpperTriMatrix<std::complex<T>,tmv::UnitDiag,tmv::RowMajor> xu4(N);
             fin >> xu4;
             Assert(false,"Throw ReadError for UnitDiag read");
-        } catch (tmv::ReadError) {
+        } catch (tmv::ReadError&) {
             Assert(true,"Catch ReadError for UnitDiag read");
         }
         try {
             tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag,tmv::RowMajor> xl4(N);
             fin >> xl4;
-            Assert(false,"Throw ReadError for UnitDiag read");
-        } catch (tmv::ReadError) {
+        } catch (tmv::ReadError&) {
             Assert(true,"Catch ReadError for UnitDiag read");
         }
 #endif

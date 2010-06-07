@@ -22,8 +22,6 @@ bool symoprod = false;
 bool dontthrow = false;
 std::string lastsuccess = "";
 
-//#include "TMV_Small.h"
-
 int main() try 
 {
     std::ofstream log("tmvtest3b.log");

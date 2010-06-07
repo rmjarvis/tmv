@@ -757,6 +757,15 @@ namespace tmv {
     { return x.real(); }
     template <class T> inline TMV_RealType(T) TMV_IMAG(const ConjRef<T>& x) 
     { return x.imag(); }
+    template <class T> inline void TMV_SWAP(
+        tmv::ConjRef<std::complex<T> > x1, tmv::ConjRef<std::complex<T> > x2)
+    { return x1.swapWith(x2); }
+    template <class T> inline void TMV_SWAP(
+        std::complex<T>& x1, tmv::ConjRef<std::complex<T> > x2)
+    { return x2.swapWith(x1); }
+    template <class T> inline void TMV_SWAP(
+        tmv::ConjRef<std::complex<T> > x1, std::complex<T>& x2)
+    { return x1.swapWith(x2); }
 }
 
 namespace std {
@@ -1361,6 +1370,16 @@ namespace tmv {
     { return x.real(); }
     template <class T> inline TMV_RealType(T) TMV_IMAG(const VarConjRef<T>& x) 
     { return x.imag(); }
+    template <class T> inline void TMV_SWAP(
+        tmv::VarConjRef<std::complex<T> > x1,
+        tmv::VarConjRef<std::complex<T> > x2)
+    { return x1.swapWith(x2); }
+    template <class T> inline void TMV_SWAP(
+        std::complex<T>& x1, tmv::VarConjRef<std::complex<T> > x2)
+    { return x2.swapWith(x1); }
+    template <class T> inline void TMV_SWAP(
+        tmv::VarConjRef<std::complex<T> > x1, std::complex<T>& x2)
+    { return x1.swapWith(x2); }
 }
 
 namespace std {

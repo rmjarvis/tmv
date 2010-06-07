@@ -1,7 +1,8 @@
 CC= g++
 INCLUDE= -Iinclude
-CFLAGS= $(INCLUDE) -O -DNOBLAS -DNDEBUG
-BLASLIBS=
+CFLAGS= $(INCLUDE) -O2 -DNOBLAS
+TESTCFLAGS= $(INCLUDE)
+BLASLIBS= 
 PREFIX=/usr/local
 
 # The above values should be the only things you will need to change.
@@ -16,6 +17,10 @@ PREFIX=/usr/local
 #
 # CFLAGS include both compiler optimizations (like -O) and some
 # defines (-D...) which tell the TMV library how to act.
+#
+# TESTCFLAGS specifies the flags to use when compiling the test suite.
+# Typically, this should not include -DNDEBUG.  You might also want a 
+# different level of optimization to speed up compilation.
 #
 # BLASLIBS specifies the linkage requirements for your BLAS/LAPACK
 # libraries.  Remember to include any appropriate -L flags to specify
@@ -96,14 +101,18 @@ CP= cp
 AR= ar
 ARFLAGS= -cr
 RANLIB= ranlib
-# RM, CP, AR, ARFLAGS, RANLIB are all pretty standard, but change them if 
-# necessary.
+MKDIR= mkdir -p
+# RM, CP, AR, ARFLAGS, RANLIB, and MKDIR are all pretty standard,
+# but change them if necessary.
 LIBDIR= lib
 SRCDIR= src
 TESTDIR= test
 EXDIR= examples
+LINKFILE= tmv-link
 # LIBDIR indicates where to put the compiled libraries.
 # SRCDIR, TESTDIR and EXDIR indicate where the various source files are.
+# LINKFILE is the name of the file in the share directory that stores the 
+# required linkage flags to compile programs that use the TMV library.
 
 # Make.1 has all the real meat of the makefile.
 include Make.1

@@ -650,10 +650,10 @@ namespace tmv {
                 C2(i,j) = A0.row(i) * B0.col(j);
         C2 *= alpha;
         if (add) C2 += C0;
-        //cout<<"MultMM: add = "<<add<<", alpha = "<<alpha<<endl;
-        //cout<<"A = "<<TMV_Text(A)<<" "<<A0<<endl;
-        //cout<<"B = "<<TMV_Text(B)<<" "<<B0<<endl;
-        //cout<<"C = "<<TMV_Text(C)<<" "<<C0<<endl;
+        cout<<"Start MultMM: add = "<<add<<", alpha = "<<alpha<<endl;
+        cout<<"A = "<<TMV_Text(A)<<" "<<A0<<endl;
+        cout<<"B = "<<TMV_Text(B)<<" "<<B0<<endl;
+        cout<<"C = "<<TMV_Text(C)<<" "<<C0<<endl;
 #endif
 
         if (C.colsize() > 0 && C.rowsize() > 0) {
@@ -691,9 +691,10 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
-        //cout<<"Done MultMM\n";
-        //cout<<"C = "<<C<<std::endl;
-        //cout<<"Norm(C-C2) = "<<Norm(C-C2)<<std::endl;
+        cout<<"Done MultMM\n";
+        cout<<"C = "<<C<<std::endl;
+        cout<<"C2 = "<<C2<<std::endl;
+        cout<<"Norm(C-C2) = "<<Norm(C-C2)<<std::endl;
         if (Norm(C2-C) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
                                 (add?Norm(C0):TMV_RealType(T)(0)))) {
             cerr<<"MultMM: alpha = "<<alpha<<endl;

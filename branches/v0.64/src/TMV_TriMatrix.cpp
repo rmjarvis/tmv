@@ -1192,10 +1192,11 @@ namespace tmv {
             exp(0), got(0), unitgot(T(1)), s(_s),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
 
-        UpperTriMatrixReadError(const UpperTriMatrixReadError<T>& rhs) :
+        UpperTriMatrixReadError(const UpperTriMatrixReadError<T>& rhs) throw():
             i(rhs.i), j(rhs.j), m(rhs.m), exp(rhs.exp), got(rhs.got),
             unitgot(rhs.unitgot), s(rhs.s),
-            is(rhs.is), iseof(rhs.iseof), isbad(rhs.isbad) {}
+            is(rhs.is), iseof(rhs.iseof), isbad(rhs.isbad) 
+        {}
         virtual ~UpperTriMatrixReadError() throw() {}
 
         virtual void write(std::ostream& os) const throw()
@@ -1499,8 +1500,9 @@ namespace tmv {
         size_t s;
         bool is, iseof, isbad;
 
-        LowerTriMatrixReadError(int _i, int _j,
-                                const GenLowerTriMatrix<T>& _m, std::istream& _is) throw() :
+        LowerTriMatrixReadError(
+            int _i, int _j, const GenLowerTriMatrix<T>& _m,
+            std::istream& _is) throw() :
             ReadError("LowerTriMatrix."),
             i(_i), j(_j), m(new LowerTriMatrix<T>(_m)),
             exp(0), got(0), unitgot(T(1)), s(_m.size()),
@@ -1509,9 +1511,9 @@ namespace tmv {
             ReadError("LowerTriMatrix."),
             i(0), j(0), m(0), exp(0), got(0), unitgot(T(1)), s(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        LowerTriMatrixReadError(int _i, int _j,
-                                const GenLowerTriMatrix<T>& _m, std::istream& _is,
-                                char _e, char _g) throw() :
+        LowerTriMatrixReadError(
+            int _i, int _j, const GenLowerTriMatrix<T>& _m, std::istream& _is,
+            char _e, char _g) throw() :
             ReadError("LowerTriMatrix."),
             i(_i), j(_j), m(new LowerTriMatrix<T>(_m)),
             exp(_e), got(_g), unitgot(T(1)), s(_m.size()),
@@ -1520,14 +1522,16 @@ namespace tmv {
             ReadError("LowerTriMatrix."),
             i(0), j(0), m(0), exp(_e), got(_g), unitgot(T(1)), s(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        LowerTriMatrixReadError(int _i, int _j,
-                                const GenLowerTriMatrix<T>& _m, std::istream& _is, T _u) throw() :
+        LowerTriMatrixReadError(
+            int _i, int _j, const GenLowerTriMatrix<T>& _m,
+            std::istream& _is, T _u) throw() :
             ReadError("LowerTriMatrix."),
             i(_i), j(_j), m(new LowerTriMatrix<T>(_m)),
             exp(0), got(0), unitgot(_u), s(_m.size()),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        LowerTriMatrixReadError(const GenLowerTriMatrix<T>& _m,
-                                std::istream& _is, size_t _s) throw() :
+        LowerTriMatrixReadError(
+            const GenLowerTriMatrix<T>& _m,
+            std::istream& _is, size_t _s) throw() :
             ReadError("LowerTriMatrix."),
             i(0), j(0), m(new LowerTriMatrix<T>(_m)),
             exp(0), got(0), unitgot(T(1)), s(_s),
@@ -1649,8 +1653,8 @@ namespace tmv {
     }
 
     template <class T, DiagType D, StorageType S, IndexStyle I>
-    std::istream& operator>>(std::istream& is, 
-                             auto_ptr<LowerTriMatrix<T,D,S,I> >& m)
+    std::istream& operator>>(
+        std::istream& is, auto_ptr<LowerTriMatrix<T,D,S,I> >& m)
     {
         char ul;
         is >> ul;

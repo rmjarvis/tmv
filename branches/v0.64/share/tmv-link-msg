@@ -8,22 +8,12 @@
 
 LOCAL_FILENAME="$1"
 INSTALLED_FILENAME="$2"
-
-FLAGS="`cat libdirs` `cat libflags` `cat linkflags`"
-
-#echo "\$* = $*"
-#echo "\$0 = $0"
-#echo "\$1 = $1"
-#echo "\$2 = $2"
-#echo "\$FLAGS = $FLAGS"
-#echo "\$LOCAL_FILENAME = $LOCAL_FILENAME"
-#echo "\$INSTALLED_FILENAME = $INSTALLED_FILENAME"
-
-echo $FLAGS > $LOCAL_FILENAME
+FLAGS="`cat $LOCAL_FILENAME`"
 
 echo
 echo "The TMV library was successfully installed.  "
-echo "To link your code against the TMV library, you should use the link flags: "
+echo "To link your code against the TMV library, you should use the "
+echo "link flags: "
 echo
 echo $FLAGS
 echo
@@ -31,12 +21,13 @@ echo "Or if you are using Band, Sym or SymBand matrices, use: "
 echo
 echo "-ltmv_symband" $FLAGS
 echo
-echo "These flags (except for the optional -ltmv_symband) have been saved in the file"
+echo "These flags (except for the optional -ltmv_symband) have been"
+echo "saved in the file:"
 echo
 echo $INSTALLED_FILENAME
 echo
-echo "so you can automatically use the correct flags in a makefile (for example)"
-echo "by using lines such as:"
+echo "so you can automatically use the correct flags in a makefile"
+echo "(for example) by using lines such as:"
 echo
 echo "TMVLINK := \$(shell cat $INSTALLED_FILENAME)"
 echo "LIBS = \$(TMVLINK) [... other libs ...]"

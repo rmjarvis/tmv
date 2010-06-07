@@ -492,6 +492,7 @@ namespace tmv {
         TMVAssert(Q.isrm() || Q.iscm());
         TMVAssert(Q.ct() == NonConj);
         TMVAssert(beta.ct() == NonConj);
+
 #ifdef XDEBUG
         Matrix<T1> QQ(Q.colsize(),Q.colsize(),0.);
         QQ.setToIdentity();
@@ -499,8 +500,28 @@ namespace tmv {
         Vector<T1> bb(Q.colsize(),0.);
         bb.subVector(0,beta.size()) = beta;
         GetQFromQR(QQ.view(),bb);
+        Matrix<T1> Qx = Q;
+        Vector<T1> bx = beta;
+        GetQFromQR(Qx.view(),bx);
         Matrix<T> m0 = m;
         Matrix<T> m2 = QQ.adjoint() * m;
+        std::cout<<"Start Q_LDivEq: \n";
+        std::cout<<"Q = "<<TMV_Text(Q)<<std::endl;
+        std::cout<<"beta = "<<TMV_Text(beta)<<std::endl;
+        std::cout<<"m = "<<TMV_Text(m)<<std::endl;
+        std::cout<<"Q = "<<Q<<std::endl;
+        std::cout<<"beta = "<<beta<<std::endl;
+        std::cout<<"QQ = "<<QQ<<std::endl;
+        std::cout<<"Qx = "<<Qx<<std::endl;
+        std::cout<<"Norm(Qx-QQx) = "<<Norm(Qx-QQ.colRange(0,Q.rowsize()))<<std::endl;
+        std::cout<<"m0 = "<<m<<std::endl;
+        std::cout<<"m2 = "<<m2<<std::endl;
+        std::cout<<"m2' = "<<(Qx.adjoint() * m)<<std::endl;
+#ifdef LAP
+        Matrix<T> m3 = m;
+        NonLapQLDivEq(Q,beta,m3.view());
+        std::cout<<"m3 = "<<m3<<std::endl;
+#endif
 #endif
 
         if (m.colsize() > 0 && m.rowsize() > 0) {
@@ -511,7 +532,12 @@ namespace tmv {
 #endif
                 NonLapQLDivEq(Q,beta,m);
         }
+
 #ifdef XDEBUG
+        std::cout<<"m = "<<m<<std::endl;
+        std::cout<<"m2 = "<<m2<<std::endl;
+        std::cout<<"m-m2 = "<<m-m2<<std::endl;
+        std::cout<<"Norm(m-m2) = "<<Norm(m-m2)<<std::endl;
         if (Norm(m-m2) > 0.001*Norm(m0)) {
             cerr<<"Q_LDivEq\n";
             cerr<<"Q = "<<Q<<endl;
@@ -958,6 +984,7 @@ namespace tmv {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(beta.size() == Q.rowsize());
         TMVAssert(m.rowsize() == Q.colsize());
+        TMVAssert(Q.isrm() || Q.iscm());
         TMVAssert(Q.ct() == NonConj);
         TMVAssert(beta.ct() == NonConj);
 
@@ -970,11 +997,18 @@ namespace tmv {
         GetQFromQR(QQ.view(),bb);
         Matrix<T> m0 = m;
         Matrix<T> m2 = m * QQ.adjoint();
+        std::cout<<"Start Q_RDivEq: \n";
+        std::cout<<"Q = "<<TMV_Text(Q)<<std::endl;
+        std::cout<<"beta = "<<TMV_Text(beta)<<std::endl;
+        std::cout<<"m = "<<TMV_Text(m)<<std::endl;
+        std::cout<<"Q = "<<Q<<std::endl;
+        std::cout<<"beta = "<<beta<<std::endl;
+        std::cout<<"m = "<<m<<std::endl;
 #endif
 
         if (m.colsize() > 0 && m.rowsize() > 0) {
 #ifdef LAP
-            if (m.isrm() || m.iscm())
+            if ( m.isrm() || m.iscm() )
                 LapQRDivEq(Q,beta,m);
             else
 #endif
@@ -982,6 +1016,7 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
+        std::cout<<"Norm(m-m2) = "<<Norm(m-m2)<<std::endl;
         if (Norm(m-m2) > 0.001*Norm(m0)) {
             cerr<<"Q_RDivEq\n";
             cerr<<"Q = "<<Q<<endl;

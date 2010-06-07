@@ -157,10 +157,22 @@ def RunUninstall(env, targets, subdir):
 def BasicCCFlags(env):
     """
     """
+
+    compiler = env['CXXTYPE']
+    version = env['CXXVERSION_NUMERICAL']
+
+    # First parse the LIBS options if present
+    if env['LIBS'] == '':
+        env.Replace(LIBS=[])
+    else:
+        libs = env['LIBS'].split(' ')
+        env.Replace(LIBS=libs)
+    if compiler == 'g++':
+        if version >= 4.4:
+            # Workaround for a bug in the g++ v4.4 exception handling
+            env.AppendUnique(LIBS='pthread')
+
     if env['FLAGS'] == '':
-        compiler = env['CXXTYPE']
-        version = env['CXXVERSION_NUMERICAL']
-    
         if compiler == 'g++':
             env.Replace(CCFLAGS=['-O2'])
             env['TEST_FLAGS'] = []
@@ -214,13 +226,6 @@ def BasicCCFlags(env):
         cxx_flags = env['FLAGS'].split(' ')
         env.Replace(CCFLAGS=cxx_flags)
         env['TEST_FLAGS'] = cxx_flags
-
-    # Also parse the LIBS options if present
-    if env['LIBS'] == '':
-        env.Replace(LIBS=[])
-    else:
-        libs = env['LIBS'].split(' ')
-        env.Replace(LIBS=libs)
 
 
 def AddOpenMPFlag(env):
@@ -366,12 +371,13 @@ def AddExtraPaths(env):
     # directory even when we are in a sub-directory (src,test,etc.)
     bin_paths = []
     cpp_paths = ['#include']
-    lib_paths = ['#lib']
+    lib_paths1 = ['#lib']
+    lib_paths2 = []
 
     # Paths specified in EXTRA_*
     bin_paths += env['EXTRA_PATH'].split(':')
-    lib_paths += env['EXTRA_LIB_PATH'].split(':')
     cpp_paths += env['EXTRA_INCLUDE_PATH'].split(':')
+    lib_paths2 += env['EXTRA_LIB_PATH'].split(':')
 
     # Paths found in environment paths
     if env['IMPORT_PATHS'] and os.environ.has_key('PATH'):
@@ -387,12 +393,12 @@ def AddExtraPaths(env):
     if env['IMPORT_PATHS'] and os.environ.has_key('LIBRARY_PATH'):
         paths=os.environ['LIBRARY_PATH']
         paths=paths.split(os.pathsep)
-        AddPath(lib_paths, paths)
+        AddPath(lib_paths2, paths)
 
     if env['IMPORT_PATHS'] and os.environ.has_key('LD_LIBRARY_PATH'):
         paths=os.environ['LD_LIBRARY_PATH']
         paths=paths.split(os.pathsep)
-        AddPath(lib_paths, paths)
+        AddPath(lib_paths2, paths)
 
     # PREFIX directory
     # If none given, then don't add them to the -L and -I directories.
@@ -401,8 +407,8 @@ def AddExtraPaths(env):
         env['INSTALL_PREFIX'] = default_prefix
     else:
         AddPath(bin_paths, os.path.join(env['PREFIX'], 'bin'))
-        AddPath(lib_paths, os.path.join(env['PREFIX'], 'lib'))
         AddPath(cpp_paths, os.path.join(env['PREFIX'], 'include'))
+        AddPath(lib_paths1, os.path.join(env['PREFIX'], 'lib'))
         env['INSTALL_PREFIX'] = env['PREFIX']
     
 
@@ -414,8 +420,10 @@ def AddExtraPaths(env):
     #env.Append(LIBPATH= lib_paths)
     #env.Append(CPPPATH= cpp_paths)
     env.PrependENVPath('PATH', bin_paths)
-    env.Prepend(LIBPATH= lib_paths)
     env.Prepend(CPPPATH= cpp_paths)
+    env.Prepend(LIBPATH= lib_paths1)
+    env.Prepend(LIBPATH= lib_paths2)
+    env['LIBPATH2'] = lib_paths2    # used for the tmv-link file
 
 def ReadFileList(fname):
     """

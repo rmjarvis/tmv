@@ -361,7 +361,6 @@ namespace tmv {
         }
         inline void assignToM(const MatrixView<xCT>& m0) const
         {
-            TMVAssert(isReal(T()));
             if (m0.stepi() == 1 && m0.stepj() == N && !SameStorage(m0,m)) {
                 DoCopy<N,N,S,ColMajor>(m.cptr(),m0.ptr());
                 xCT* m0p = m0.ptr();

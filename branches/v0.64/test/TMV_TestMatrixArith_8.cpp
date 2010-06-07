@@ -25,12 +25,13 @@ template <class T> void TestMatrixArith_8()
             std::cout<<"m,n = "<<m<<','<<n<<std::endl;
         else 
             std::cout<<"."; std::cout.flush();
-        tmv::Matrix<CT,tmv::ColMajor> c(m,n);
-        tmv::Matrix<CT,tmv::ColMajor> c1(m,n);
 
 #if 1
         // Test various adds:
         {
+            tmv::Matrix<CT,tmv::ColMajor> c(m,n);
+            tmv::Matrix<CT,tmv::ColMajor> c1(m,n);
+
             tmv::Matrix<CT,tmv::ColMajor> ac(m,n);
             tmv::Matrix<CT,tmv::ColMajor> bc(m,n);
             for(int i=0;i<m;i++) for(int j=0;j<n;j++) 
@@ -120,6 +121,9 @@ template <class T> void TestMatrixArith_8()
 #if 1
         // Now test multiplies
         for(int k1=0;k1<NSIZE;k1++) {
+            tmv::Matrix<CT,tmv::ColMajor> c(m,n);
+            tmv::Matrix<CT,tmv::ColMajor> c1(m,n);
+
             int k = sizear[k1];
             if (showstartdone)
                 std::cout<<"k = "<<k<<std::endl;
@@ -284,6 +288,62 @@ template <class T> void TestMatrixArith_8()
                    "+zcar*cbc");
             Assert(Norm(((c=c0)+=z1*ac.conjugate()*br.conjugate())-c1) < eps,
                    "+zcac*cbr");
+#endif
+        }
+#endif
+
+#if 0 
+        // Do real version
+        for(int k1=0;k1<NSIZE;k1++) {
+            tmv::Matrix<T,tmv::ColMajor> c(m,n);
+            tmv::Matrix<T,tmv::ColMajor> c1(m,n);
+
+            int k = sizear[k1];
+            if (showstartdone)
+                std::cout<<"k = "<<k<<std::endl;
+            tmv::Matrix<T,tmv::ColMajor> ac(m,k);
+            tmv::Matrix<T,tmv::ColMajor> bc(k,n);
+            for(int i=0;i<m;i++) for(int j=0;j<k;j++) 
+                ac(i,j) = T(i+j+5);
+            for(int i=0;i<k;i++) for(int j=0;j<n;j++) 
+                bc(i,j) = T(2*i-3*j+13);
+            tmv::Matrix<T,tmv::RowMajor> ar = ac;
+            tmv::Matrix<T,tmv::RowMajor> br = bc;
+            T eps = T(10) * EPS * (T(1) + Norm(ac)*Norm(bc));
+
+            c1 = ac * bc;
+            if (showacc)
+            {
+                std::cout<<"a = "<<ar<<std::endl;
+                std::cout<<"b = "<<br<<std::endl;
+                std::cout<<"c (CC) = "<<c1<<std::endl;
+                std::cout<<"c (RC) = "<<(c=ar*bc)<<Norm((c=ar*bc)-c1)<<std::endl;
+                std::cout<<"c (CR) = "<<(c=ac*br)<<Norm((c=ac*br)-c1)<<std::endl;
+                std::cout<<"c (RR) = "<<(c=ar*br)<<Norm((c=ar*br)-c1)<<std::endl;
+                std::cout<<"cf eps = "<<eps<<std::endl;
+            }
+            Assert(Norm((c=ar*bc)-c1) < eps,"ar*bc");
+#if (XTEST & 2)
+            Assert(Norm((c=ar*br)-c1) < eps,"ar*br");
+            Assert(Norm((c=ac*br)-c1) < eps,"ac*br");
+
+            tmv::Matrix<T> c0 = c1;
+            c1 = c0 + ac * bc;
+            Assert(Norm(((c=c0)+=ar*br)-c1) < eps,"+ar*br");
+            Assert(Norm(((c=c0)+=ar*bc)-c1) < eps,"+ar*bc");
+            Assert(Norm(((c=c0)+=ac*br)-c1) < eps,"+ac*br");
+
+            T x1(7);
+            eps *= x1;
+            c1 = x1*ac * bc;
+            Assert(Norm((c=x1*ar*br)-c1) < eps,"xar*br");
+            Assert(Norm((c=x1*ar*bc)-c1) < eps,"xar*bc");
+            Assert(Norm((c=x1*ac*br)-c1) < eps,"xac*br");
+
+            c1 = c0 + x1*ac * bc;
+            Assert(Norm(((c=c0)+=x1*ar*br)-c1) < eps,"+xar*br");
+            Assert(Norm(((c=c0)+=x1*ar*bc)-c1) < eps,"+xar*bc");
+            Assert(Norm(((c=c0)+=x1*ac*br)-c1) < eps,"+xac*br");
 #endif
         }
 #endif

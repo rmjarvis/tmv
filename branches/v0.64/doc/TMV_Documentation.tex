@@ -43,8 +43,9 @@
 \newcommand{\tmvversion}{0.64}
 \newcommand{\tmvmajorversion}{0}
 \newcommand{\tmvminorversion}{64}
+\newcommand{\tttmvversion}{\texttt \tmvversion}
 \newcommand{\mygroupx}{tmv-discuss@googlegroups.com}
-\newcommand{\mygroup}{\href{mailto:\mygroupx}{\mygroupx}}
+\newcommand{\mygroup}{\url{mailto:\mygroupx}{\mygroupx}}
 \newcommand{\myissuesx}{http://code.google.com/p/tmv-cpp/issues}
 \newcommand{\myissues}{\url{\myissuesx}}
 \newcommand{\websitex}{http://code.google.com/p/tmv-cpp/}
@@ -7020,15 +7021,15 @@ The commands is
 void QR_Update(const UpperTriMatrixView<T>& R, const MatrixView<T>& M)
 \end{tmvcode}
 which updates the value of $R$ such that $R_{\rm out}^\dagger R_{\rm out} =
-R_{\rm in}^\dagger R_{\rm in} + M^\dagger M$.
-(The input matrix \tt{M} is destroyed in the process.)  This is equivalent to the QR
+R_{\rm in}^\dagger R_{\rm in} + X^\dagger X$.
+(The input matrix \tt{X} is destroyed in the process.)  This is equivalent to the QR
 definition of the update described above.
 
 So the entire process might be coded using TMV as:
 \begin{tmvcode}
 int n_full = nrows_for_full_A_matrix;
 int n_mem = nrows_that_fit_in_memory;
-assert(n_mem < n_full);
+assert(n_mem <= n_full);
 assert(n_mem > ncols);
 
 tmv::Matrix<double> A(n_mem,ncols); 
@@ -7037,7 +7038,7 @@ tmv::Vector<double> b(n_mem);
 // Import_Ab sets A to the first n_mem rows of the full matrix, 
 // and also sets b to the same components of the full rhs vector.
 // Maybe it reads from a file, or performs a calculation, etc.
-Import_Ab(0,n_mem,A.view(),b.view());
+Import_Ab(0,n_mem,A,b);
 
 // x will be the solution to A_full x = b_full when we are done
 // But for now, it is accumulating A_full.transpose() * b_full.
@@ -7053,12 +7054,13 @@ while (n2 < n_full)
 {
     n1 = n2; n2 += n_mem;
     if (n2 > n_full) n2 = n_full;
+
+    // Import the next bit:
+    Import_Ab(n1,n2,A,b);
+
     // (Usually, A1==A, b1==b, but not the last time through the loop.)
     tmv::MatrixView<double> A1 = A.rowRange(0,n2-n1);
     tmv::VectorView<double> b1 = b.subVector(0,n2-n1);
-
-    // Import the next bit:
-    Import_Ab(n1,n2,A1,b1);
 
     // Update, x, R:
     x += A1.transpose() * b1;
@@ -7083,13 +7085,13 @@ find the QR decomposition that results from
 removing a few rows from $A$.  This is called a QR ``downdate'', and is performed
 using the subroutine:
 \begin{tmvcode}
-void QR_Downdate(const UpperTriMatrixView<T>& R, const GenMatrix<T>& M)
+void QR_Downdate(const UpperTriMatrixView<T>& R, const GenMatrix<T>& X)
 \end{tmvcode}
-\tt{M} represents the rows from the original matrix to remove from the 
+\tt{X} represents the rows from the original matrix to remove from the 
 QR decomposition.
 
 It is possible for the downdate to fail (and throw an exception) 
-if the matrix $M$ does not represent rows
+if the matrix $X$ does not represent rows
 of the matrix that was originally used to create $R$.
 Furthermore,
 with round-off errors, the error may still result with actual rows from the 
@@ -7097,56 +7099,80 @@ original $A$
 if $R$ gets too close to singular.  In this case, \tt{QR\_Downdate} throws
 a \tt{NonPosDef} exception.  This might seem like a strange choice, but the 
 logic is that $R^\dagger R$ is the Cholesky decomposition of $A^\dagger A$,
-and \tt{QR\_Downdate(R,M)} basically updates $R$ to be the Cholesky decomposition
-of $A^\dagger A - M^\dagger M$.  The procedure fails (and throws) when this latter 
+and \tt{QR\_Downdate(R,X)} basically updates $R$ to be the Cholesky decomposition
+of $A^\dagger A - X^\dagger X$.  The procedure fails (and throws) when this latter 
 matrix is found not to be positive definite.
 \index{QR Decomposition!Downdate!NonPosDef exception}
 \index{Exceptions!NonPosDef}
 
-It is worth pointing out that most of the texts and online resources that discuss the 
+It is worth pointing out that the algorithm used in TMV is a new one developed by
+Mike Jarvis.  Most of the texts and online resources that discuss the 
 QR downdate algorithm only explain how to do one row at a time, using a 
 modification of the QR update using Givens rotations.  
 If you are doing many rows, it is common that roundoff errors in such a 
 procedure accumulate sufficiently for the routine to fail.  The TMV algorithm
 instead downdates all of the rows together using a modification of the 
 Householder reflection algorithm for updates.  This algorithm seems to be
-much more stable that the former one.  I have not seen this algorithm discussed
-anywhere (although I am sure that I am not the first to come up with it), so
-I'll provide a short summary here.
+much more stable than ones that use Givens rotations.  
+
+The only references to a similar algorithm that I could find in the literature is 
+"Stability Analysis of a Householder-based Algorithm for Downdating the Cholesky Factorization", Bojanczyk and Steinhardt, 1991, Siam J. Sci. Stat. Comput. 12, 6, 
+1255\footnote{
+It seems that this paper has become a bit forgotten.  A recent paper,
+``Efficient Algorithms for Block Downdating of Least Squares Solutions'', Yanev and Kontoghiorghes, 2004, Applied Numerical Mathematics, 49, 3, evaluates
+five algorithms for doing the downdate.  However, all
+of them are block versions of the Given matrix approach.  They do not consider 
+any algorithms that use Householder matrices to do the downdate, and do not reference
+the above paper by Bojanczyk and Steinhardt.  In addition, none of the papers that
+do cite the Bojanczyk and Steinhardt paper seem to be about the general problem 
+of QR (or Cholesky) downdating.
+}.
+This paper describes a similar algorithm to compute the downdated $R$ matrix
+using Householder matrices.  However, the details of the computation are somewhat
+different from the TMV algorithm.  Also, they only consider real matrices, and they 
+do not include the block-householder techniques in their description to employ more
+so-called ``level-3'' matrix operations.
+
+Therefore, I will describe the TMV downdate algorithm here.  I think it is clearer to 
+begin by describing the update algorithm in \S\ref{QRUpdate_Algorithm}, since it 
+is quite similar to the algorithm we use for downdating, but is a bit easier to 
+understand.  Then the downdate algorithm
+is described in \S\ref{QRDowndate_Algorithm}.
 
 \subsubsection{The update algorithm}
 \index{QR Decomposition!Update!algorithm}
+\label{QRUpdate_Algorithm}
 
 First lets look at the Householder algorithm for QR update (since the downdate algorithm
 is intimately related):
 
 Given the initial decomposition $A_0 = Q_0 R_0$, we want to find $R$ such that
 \begin{align*}
-A = \left(\begin{array}{c}A_0 \\ A_1 \end{array}\right) &= Q_1 R \\
-\left(\begin{array}{c}Q_0 R_0 \\ A_1 \end{array}\right) &= Q_1 R \\
+A_1 = \left(\begin{array}{c}A_0 \\ X \end{array}\right) &= Q_1 R_1 \\
+\left(\begin{array}{c}Q_0 R_0 \\ X \end{array}\right) &= Q_1 R_1 \\
 \left(\begin{array}{cc}Q_0 & 0 \\ 0 & 1 \end{array}\right) 
-\left(\begin{array}{c}R_0 \\ A_1 \end{array}\right) &= Q_1 R 
+\left(\begin{array}{c}R_0 \\ X \end{array}\right) &= Q_1 R_1 
 \end{align*}
 So if we perform a QR decomposition: 
 \begin{equation*}
-A_2 \equiv \left(\begin{array}{c}R_0 \\ A_1 \end{array}\right) = Q_2 R 
+S \equiv \left(\begin{array}{c}R_0 \\ X \end{array}\right) = Q_S R_S
 \end{equation*}
-Then this is the $R$ we want, and 
+Then this is the $R$ we want: $R_1 = R_S$, and 
 \begin{equation*}
-Q_1 = \left(\begin{array}{cc}Q_0 & 0 \\ 0 & 1 \end{array}\right)  Q_2
+Q_1 = \left(\begin{array}{cc}Q_0 & 0 \\ 0 & 1 \end{array}\right)  Q_S
 \end{equation*}
 
 For the following discussion, let $N$ be the number of rows (and columns) in $R_0$,
-and $M$ be the number of rows in $A_1$.
+and $M$ be the number of rows in $X$.
 
-To perform the decomposition, we multiply $A_2$ by a series of Householder reflections
-on the left to zero out each column of $A_1$ one at a time.  Householder reflections 
-are unitary, so their product in the reverse order is $Q_2$:
+To perform the decomposition, we multiply $S$ by a series of Householder reflections
+on the left to zero out each column of $X$ one at a time.  Householder reflections 
+are unitary, so their product in the reverse order is $Q_S$:
 \begin{align*}
-\left(\begin{array}{c}R \\ 0 \end{array}\right) &=
+\left(\begin{array}{c}R_1 \\ 0 \end{array}\right) &=
   H_N H_{N-1} ... H_2 H_1 
   \left(\begin{array}{c}R_0 \\ A_1 \end{array}\right)  \\
-Q_2 &= H_1^\dagger H_2^\dagger ... H_{N-1}^\dagger H_N^\dagger 
+Q_S &= H_1^\dagger H_2^\dagger ... H_{N-1}^\dagger H_N^\dagger 
 \end{align*}
 
 Householder reflections are defined as $H = I - \beta (x - y e_1)  (x - y e_1)^\dagger$
@@ -7155,84 +7181,89 @@ basis vector whose only non-zero element is the first: $e_1(1) = 1$, and
 $\beta = (||x||_2^2 - y^* x(1))^{-1}$.
 They have the useful properties that $H x = y e_1$ and they are unitary:
 $H^\dagger H = H H^\dagger = I$.
-Furthermore, if $\beta$ is real
-\footnote{
-Unfortunately, LAPACK chose to implement complex Householder matrices 
-with $y$ chosen to be real, which means that $\beta$ is complex.  Hence
-$H$ is not Hermitian, which complicates a lot of the calling routines which use
-Householder matrices.  Since TMV is designed to be able to call LAPACK
+Furthermore, if $\beta$ is real, they are also hermitian: $H = H^\dagger$.
+
+$H_1$ is defined for the vector 
+$x = (R_0(1,1), 0, 0, ... , 0, 0, X(1,1), X(2,1), ... , X(M,1) )$ 
+where the stretch of $0$'s includes a total of $(N-1)$ $0$'s. This value of 
+$x$ completely determines the Householder matrix $H_1$ up to an arbitrary sign
+on either $y$ or $\beta$ (or in general an arbitrary factor $e^{i \theta}$) which is 
+chosen to minimize rounding errors.  The optimal choice is to choose
+$y = -||x||_2\:x(1)/|x(1)|$, which makes $\beta$ real.  
+However, the LAPACK choice is $y = -||x||_2 \:sign(\Re(x(1))$, which means
+$\beta$ is complex, and $H$ is not Hermitian\footnote{
+This choice complicates a lot of the calling routines which use
+Householder matrices, since you need to keep track of conjugation of the 
+$\beta$ values.  Since TMV is designed to be able to call LAPACK
 when possible, it is forced to follow the same convention.
 
-In fact, it could be argued that their convention is even ``wrong'' in the sense that
+In fact, it could be argued that the LAPACK convention is even ``wrong'' in the sense that
 their Householder matrices are not actually ``reflections''.  A reflection is a 
 unitary matrix whose determinant is $-1$.  The determinant of a Householder 
 matrix as defined here is $-\beta^2/|\beta|^2$ which is $-1$ for real $\beta$, 
 but not for complex $\beta$.  But we are stuck with their choice, so we allow $\beta$
 to be complex in this discussion.
-}, they are also hermitian: $H = H^\dagger$.
+}.
 \index{LAPACK!Householder matrices}
 
-$H_1$ is defined for the vector 
-$x = (R_0(1,1), 0, 0, ... , 0, 0, A_1(1,1), A_1(2,1), ... , A_1(M,1) )$ 
-where the stretch of $0$'s includes a total of $(N-1)$ $0$'s. This value of 
-$x$ completely determines the Householder matrix $H_1$ up to an arbitrary sign
-on either $y$ or $\beta$ (or in general an arbitrary factor $e^{i \theta}$) which is 
-chosen to minimize rounding errors.
-
-The product $H_1 A_2$ ``reflects'' the first column
-of $A_1$ into the first diagonal element of $R_0$.  Because of all the $0$'s, 
-most of $R_0$ is unaffected -- only the first row of $R_0$ and the rest of $A_1$
+The product $H_1 S$ ``reflects'' the first column
+of $X$ into the first diagonal element of $R_0$.  Because of all the $0$'s, 
+most of $R_0$ is unaffected -- only the first row of $R_0$ and the rest of $X$
 are changed.
 The subsequent Householder reflections are defined similarly, each zeroing out
-a column of $A_1$, and modifying the corresponding row of $R_0$ and the 
-remaining elements of $A_1$.
+a column of $X$, and modifying the corresponding row of $R_0$ and the 
+remaining elements of $X$.
 
 At the end of this procedure, the matrix $R_0$ will be changed into the 
-matrix $R$.  If desired, $Q$ may also be calculated in the process, but the 
-TMV implementation of the QR update does not calculate $Q$.
+matrix $R_1$.  If desired, $Q_S$ (and then $Q_1$) 
+may also be calculated in the process, but the 
+TMV implementation of the QR update does not calculate $Q_1$.
+If there is a demand for such a routine, it would not be hard to add it, 
+but I think most applications of the update do not use the $Q$ matrix explicitly.
 
 \subsubsection{The downdate algorithm}
 \index{QR Decomposition!Downdate!algorithm}
+\label{QRDowndate_Algorithm}
 
 Given the initial decomposition
 \begin{equation*}
-A = \left(\begin{array}{c}A_0 \\ A_1 \end{array}\right) = Q_1 R 
+A_1 = \left(\begin{array}{c}A_0 \\ X \end{array}\right) = Q_1 R_1 
 \end{equation*}
 we want to find $R_0$ such that $A_0 = Q_0 R_0$.
 
-The algorithm to do this essentially performs the same steps as in the update
+The TMV algorithm to do this essentially performs the same steps as in the update
 algorithm above,
-but instead removes the effect of each $H$ from $R$.
+but instead removes the effect of each $H$ from $R_1$.
 This is easy to
 do if we can determine what each $H$ is, since $H^{-1} = H^\dagger$, so we just
-apply $H^\dagger$ to update each row of $R$.  The $A_1$ update takes
+apply $H^\dagger$ to update each row of $R_1$.  The $X$ update takes
 the regular $H$ matrix, since we need to replicate the steps that we would do
-for an update to keep finding the correct values for the remaining columns of $A_1$.
+for an update to keep finding the correct values for the remaining columns of $X$.
 
 All of the values in the vector $x$ needed to define $H_1$ are given, except for the first,
 $R_0(0,0)$.  But this is easy to calculate, since
 \begin{equation*}
-|R(0,0)|^2 = |R_0(0,0)|^2 + ||A_1(1:M,0)||^2
+|R_1(0,0)|^2 = |R_0(0,0)|^2 + ||X(1:M,0)||_2^2
 \end{equation*}
 This determines the $x$ vector, which in turn defines $H_1$
 (modulo an arbitrary sign, which again is chosen to minimize rounding errors).
 Thus, we can calculate $H_1$ and apply it as described above.  Each subsequent Householder
-matrix is created and applied similarly for each column of $A_1$.  When we have finished
-this process, we are left with $R_0$ in the place of $R$.
+matrix is created and applied similarly for each column of $X$.  When we have finished
+this process, we are left with $R_0$ in the place of $R_1$.
 
 If at any point in the process, we find the calculated $|R_0(k,k)|^2 < 0$, then 
 the algorithm fails.  In the TMV implementation, a \tt{NonPosDef} exception is thrown.
 
 In practice, for both of these algorithms, we actually use a blocked implementation for updating
-the $R$ and $A_1$ matrices.  We accumulate the effect of the Householder matrices until 
+the $R$ and $X$ matrices.  We accumulate the effect of the Householder matrices until 
 there are sufficiently many (e.g. 64), at which point we update the appropriate rows of the $R$
-matrix and the rest of $A_1$.  Implementing this correctly is mostly a matter of keeping track
+matrix and the rest of $X$.  Implementing this correctly is mostly a matter of keeping track
 of which elements have been updated yet, making sure that whenever an element is used,
 it is already updated, while delaying as much of the calculation as possible in order 
 to make maximum
-use of the so-called Level 3 BLAS functions, which are the most efficient on modern computers.
+use of the so-called ``level-3'' matrix functions, which are the most efficient on modern computers.
 We also make the additional improvement of using a recursive algorithm within each block,
-which gains some additional Level 3 BLAS calls, for a bit more speed-up.
+which gains some additional level-3 operations, for a bit more efficiency.
 
 \subsection{Other SymMatrix operations}
 \index{SymMatrix!arithmetic!rank-2 Update}
@@ -7476,9 +7507,9 @@ bool v.isconj() const
 \index{Vector!methods!step}
 \index{Vector!methods!isconj}
 
-For matrices, the corresponding routines actually return the upper-left element
-of the matrix.  For some matrices, (e.g. \tt{BandMatrix<T,DiagMatrix>}) 
-this is not actually the first element in memory.  We also need to know the 
+For matrices, the corresponding routines return the upper-left element
+of the matrix.  Note that for some matrices, (e.g. \tt{BandMatrix<T,DiagMatrix>}) 
+this is not necessarily the first element in memory.  We also need to know the 
 step size in both directions:
 \begin{tmvcode}
 T* m.ptr()
@@ -7569,8 +7600,8 @@ as a single vector of elements.  We use this internally for implementing routine
 like \tt{setAllTo} and matrix addition, among others.  These are faster than
 accessing the data in ways that use the actual matrix structure.
 
-Anyway, this same kind of access may be useful for some users of the library, 
-so the following two methods are available:
+This kind of access may be useful for some users of the library, 
+so the following methods are available:
 \begin{tmvcode}
 tmv::VectorView<T> m.linearView()
 tmv::ConstVectorView<T> m.constLinearView()
@@ -7624,17 +7655,17 @@ with \tt{x=complex<double>(2.3,0.0)}, which would be slower.
 At times it can be useful to be able to access what version of TMV is installed on a 
 particular machine, either to log the information as part of the meta-data about a
 run of a program, or even to modify the code depending on which features of TMV
-are available.  To address this, we provide two kinds of ways to access this information.
+are available.  To address this, we provide three ways to access this information.
 
-First, there is a function:
+First, there is a function you can call from within your program:
 \begin{tmvcode}
 std::string TMV_Version();
 \end{tmvcode}
 \index{TMV\_Version}
-For this release, this function returns the string ``\tmvversion''.  This is useful for inserting
-into a log file, but it not useful for conditionally controlling the user code.
+For this release, this function returns the string ``\tttmvversion''.  This is useful for inserting
+into a log file or anywhere else that you want to record the version somewhere.
 
-So we also provide three C preprocessor definitions:
+Second we also provide three C preprocessor definitions:
 \begin{tmvcode}
 TMV_MAJOR_VERSION
 TMV_MINOR_VERSION
@@ -7645,10 +7676,12 @@ TMV_VERSION_AT_LEAST(major,minor)
 \index{TMV\_VERSION\_AT\_LEAST}
 \index{Conditional compilation}
 The first two are defined to be \tmvmajorversion\ and \tmvminorversion\ for this release.
-The third can be used with an \tt{#if} directive to change what the code is.
+The third can be used with an \tt{#if} directive to change what code you want to compile
+according the the version of TMV that is installed.
 For example, in version 0.64 we added the \tt{m.unitUpperTri()} feature.  So you could
 write\footnote{
-Well, technically, this wouldn't work, since the \tt{TMV_VERSION_AT_LEAST} macro
+Well, technically, this wouldn't wouldn't be very useful, 
+since the \tt{TMV_VERSION_AT_LEAST} macro
 wasn't introduced until version 0.64 either...}:
 \begin{tmvcode}
 #if TMV_VERSION_AT_LEAST(0,64)
@@ -7657,7 +7690,20 @@ U = m.unitUpperTri();
 U = m.upperTri(tmv::UnitDiag);
 #endif
 \end{tmvcode}
-to conditionally use the feature if your installed TMV library supports it.
+
+And finally, we also include a bash script called \tt{tmv-version} that will output
+the version number, so you can run this
+directly from the command line.  For this release, this script produces the output:\\ \\
+\texttt{\$ tmv-version} \\
+\tttmvversion \\
+\texttt{\$}\\ \\
+This can be useful as part of a larger script if you want to log the TMV version from that
+rather than from within a C++ program.  
+
+Hopefully these three methods will satisfy any potential manner in which you might want 
+to access the version of TMV that is on your system.  If there is something I missed, and 
+none of these work for you, please
+let me know, and I'll probably be happy to provide another mechanism in future releases.
 
 \newpage
 \section{Obtaining and Compiling the Library}
@@ -7674,7 +7720,8 @@ This code is licensed using the Gnu General Public License.  See
 \begin{enumerate}
 
 \item
-Go to \website\ for a link to a tarball with all of the source code (in the Downloads tab), and copy
+Go to \website\ for a link to a tarball with all of the source code (on the right hand side as a
+``Featured Download'', or also in the ``Downloads'' tab), and copy
 it to the directory where you want to put the TMV library.\footnote{
 If this is unavailable for some reason, I also post the source code to \altwebsite.}
 
@@ -7797,7 +7844,19 @@ but if it fails, then it will just give a warning message.
 \index{BLAS!scons options}
 \begin{itemize}
 \item \texttt{WITH\_BLAS=true} specifies whether to look for and try to use a BLAS library.
-\item \texttt{WITH\_LAPACK=true} specifies whether to look for and try to use a LAPACK library.
+\item \texttt{WITH\_LAPACK=false} specifies whether to look for and try to use a LAPACK library.
+Note: the default here used to be \tt{true}.  But my experience has been that the TMV code
+is more stable than typical LAPACK distributions, especially with regard to overflow and 
+underflow.  And it is generally equally fast, and sometimes faster.  The only exception is 
+finding Eigenvectors for extremely large hermitian matrices\footnote{
+LAPACK implements an algorithm called Relatively Robust Representation (RRR) to 
+find the eigenvectors, rather than the divide and conquer algorithm used by TMV.
+RRR is faster, but only when the matrix size is sufficiently large.  Including this algorithm 
+in TMV is \#\ref{Bugs_RRR} on my To-do list (\S\ref{Bugs}).
+}.  And even then, TMV may still be faster 
+if you use a machine with multiple 
+cores, since TMV seems to have better parallelization of this algorithm
+ (if \tt{WITH_OPENMP=true}) than many LAPACK libraries.
 \item \texttt{FORCE\_MKL=false} forces the use of the Intel Math Kernel library. 
 It requires the header file \texttt{"mkl.h"} to be found in your path. 
 \item \texttt{FORCE\_ACML=false} forces the use of the AMD Core Math library.  
@@ -7831,7 +7890,7 @@ I couldn't figure out a compiler flag that would turn on SSE {\em if and only if
 supports it.  So the default is to use the flag \texttt{-msse2}, but you can disable it by setting 
 \texttt{WITH\_SSE=false} if your machine doesn't have SSE support.
 \item \texttt{XTEST=0} specifies whether to include extra tests in the test suite.  \texttt{XTEST}
-is treated as a bit set, with each non-zero bit turning on particular tests.  Type ``scons -h'' for 
+is treated as a bit set, with each non-zero bit turning on particular tests.  Type ``\tt{scons -h}'' for 
 more information.
 
 \item \texttt{MEM\_TEST=false} specifies whether to include extra memory tests in the library and test suite.
@@ -7844,7 +7903,7 @@ something similar).
 usually detects correctly when something salient has changed to require a recompilation.  However,
 sometimes it doesn't, in which case setting this to false will force recompilation of everything each
 time you type scons.
-\item \texttt{WITH\_UPS=false} specifies whether to install TMV into a ups directory in PREFIX/ups.
+\item \texttt{WITH\_UPS=false} specifies whether to install TMV information for ups into the \tt{PREFIX/ups} directory.
 \item \texttt{TEST\_DEPRECATED=false} specifies whether to use the old deprecated method
 names in the test suite.
 \end{itemize}
@@ -7873,37 +7932,90 @@ Using Fortran LAPACK
 scons: done reading SConscript files.
 scons: Building targets ...
 \end{verbatim}
-\vspace{-11pt}(\emph{Starts the actual compiling})
+\vspace{-8pt}(\emph{Starts the actual compiling})
 
-If a "\texttt{Checking for}..." line ends with \texttt{no}, even though you think that library is installed
+If a ``\texttt{Checking for}...'' line ends with \texttt{no}, even though you think that library is installed
 on your computer, then it probably means that you need to tell SCons which directories
 to search, in addition to the standard locations.  The most straightforward way to do this is
 with the parameters \texttt{EXTRA\_INCLUDE\_PATH} and \texttt{EXTRA\_LIB\_PATH}.  
 These are described in detail above.  See also \texttt{IMPORT\_ENV} and \texttt{IMPORT\_PATHS}.
 
-\item (optional) Type\\
+\item (Optional) Type\\
 \texttt{scons test}
 \index{Installation!test suite}
 
-This will make the executables \texttt{tmvtest1}, \texttt{tmvtest2} and \texttt{tmvtest3} in
-the \texttt{test} directory.  As described above, running each of these should output 
-lines that look like \texttt{[Something] passed all tests}.  If the last line indicates
-an error, you should post a bug report at \myissues\ about the problem.
+This will make three executables called \texttt{tmvtest1}, 
+\texttt{tmvtest2} and \texttt{tmvtest3} in the \texttt{test} directory.
 
-If you specify that \texttt{SMALL\_TESTS=true}, then the smaller test executables
-\texttt{tmvtest1a}, \texttt{tmvtest1b}, \texttt{tmvtest1c}, \texttt{tmvtest2a}, \texttt{tmvtest2b}, \texttt{tmvtest2c},
-\texttt{tmvtest3a}, \texttt{tmvtest3b}, \texttt{tmvtest3c}, and \texttt{tmvtest3d} will be made instead.
+Warning: this step may take a long time to finish, since
+the test code tests
+for lots of different combinations of matrix types in all the various 
+arithmetic operators.
+So plan on letting this run for a while.
+(On my laptop using a single processor, it takes about 2 hours to make all the tests, whereas
+it only takes about 20 minutes to make the libraries.)
+
+Then you should run the three test suites.
+They should output a bunch of lines reading \texttt{[{\em Something}] passed all tests}.
+If one of them ends in a line that starts with \texttt{Error}, 
+then please post a bug report at \myissues\ about the problem including what compiler
+you are using, some details about your system, and what (if any) BLAS and LAPACK
+libraries you are linking to.
+
+If you specify \texttt{SMALL\_TESTS=true}, then the smaller test executables
+\texttt{tmvtest1a-d}, \texttt{tmvtest2a-c}, and \texttt{tmvtest3a-e} (where \tt{a-d} means 
+four files with each of \tt{a}, \tt{b}, \tt{c} and \tt{d})
+will be made instead.
 These perform the same tests as the larger test executables, but can be easier
 for some linkers.
 
-\item (optional) Type\\
-\texttt{scons install}
+\item Type\\
+\texttt{scons install}\\
+(or possibly \tt{sudo scons install} if you are installing into \tt{/usr/local} or somewhere similar).
 
 This will install the necessary header files into the directory \texttt{/usr/local/include} and the libraries
 into \texttt{/usr/local/lib}.  As mentioned above, you can also specify a different prefix 
 with the command line option \texttt{PREFIX=}\emph{install-dir}.  A common choice for users
 without \texttt{sudo} privileges is \texttt{PREFIX=$\sim$} which will install the library in \texttt{$\sim$/include}
 and \texttt{$\sim$/lib}.
+
+At the end of the installation process, you should see a message similar to:
+\begin{verbatim}
+The TMV library was successfully installed.  
+To link your code against the TMV library, you should use the 
+link flags: 
+
+-ltmv -llapack -lblas -lpthread -fopenmp
+
+Or if you are using Band, Sym or SymBand matrices, use: 
+
+-ltmv_symband -ltmv -llapack -lblas -lpthread -fopenmp
+
+These flags (except for the optional -ltmv_symband) have been
+saved in the file:
+
+/usr/local/share/tmv-link
+
+so you can automatically use the correct flags in a makefile
+(for example) by using lines such as:
+
+TMVLINK := $(shell cat /usr/local/share/tmv-link)
+LIBS = $(TMVLINK) [... other libs ...]
+
+
+scons: done building targets.
+\end{verbatim}
+(Again, this is the actual output on my laptop when I type \tt{sudo scons install}.)
+These instructions tell you what BLAS and LAPACK libraries were found on your system and 
+are needed for proper linkage of your code.  The linkage flags are stored in a file on your
+computer so that you can automatically get the linkage correct according to what options
+you decide to use when installing TMV.  This is especially useful on systems where a
+system administrator installs the library, which is then used by many users.  
+
+You can have your makefiles read this file as described above.  Or if you are using SCons
+to build your software, you can similarly add the contents of the file into \tt{env[LIBS]}.
+The \tt{examples} directory has a makefile that uses the above lines
+(using the local \tt{share} directory rather than the installed location).
 
 \end{enumerate}
 
@@ -7930,13 +8042,13 @@ The default setup is:
 \begin{verbatim}
 CC= g++
 INCLUDE= -Iinclude
-CFLAGS= $(INCLUDE) -O -DNOBLAS -DNDEBUG
+CFLAGS= $(INCLUDE) -O2 -DNOBLAS -DNDEBUG
 BLASLIBS=
 PREFIX=/usr/local
 \end{verbatim}
 but you will probably want to change this\footnote{
 The original version of the \texttt{Makefile}
-is copied in the file \texttt{Makefile.orig} in case your copy gets messed up, and you want to 
+is copied in the file \texttt{Makefile.original} in case your copy gets messed up, and you want to 
 go back to the original.}.
 
 This default setup will compile using g++ without any BLAS or LAPACK library and 
@@ -7964,7 +8076,8 @@ starting point for you to figure out what you want to use.
 
 See the next section below for a complete list of compiler flags that control how the TMV library is built.
 
-\item{(advanced usage) Edit Inst and Blas files}
+\item
+(Advanced usage) Edit the Inst and Blas files.
 
 By default, the library will include instantiations of all classes and 
 functions
@@ -7973,8 +8086,8 @@ There are a few flags, such as
 \texttt{-DNO\_INST\_FLOAT} and \texttt{-DINST\_LONGDOUBLE},
 that change this as described below.  
 But if you want to compile routines for some other class, such as a user-defined
-\texttt{MyQuadPrecisionType} class, then you will need to modify the file \texttt{TMV\_Inst.h} 
-(in the \texttt{src} directory).
+\texttt{MyQuadPrecisionType} class, then you will need to modify the file 
+\texttt{src/TMV\_Inst.h}.
 You simply need to add the lines:
 \begin{tmvcode}
 #define T MyQuadPrecisionType
@@ -7986,13 +8099,13 @@ to the end of the file before compiling.  (Obviously, you should
 replace \tt{MyQuadPrecisionType} with whatever
 type you want to be instantiated in the library.)
 
-Also, the file \texttt{TMV\_Blas.h} (also in the \texttt{src} directory)
+Also, the file \texttt{src/TMV\_Blas.h}
 sets up all the BLAS and LAPACK calling structures,
 as well as the necessary \texttt{\#include} statements.  
 So if the BLAS or LAPACK options aren't working 
 for your system, you may need to edit these files as well.
 This is especially true if your BLAS or LAPACK versions are not one of 
-ATLAS, CLAPACK, MKL, or ACML.  The comments at the beginning of 
+ATLAS, CLAPACK, FLAPACK, MKL, or ACML.  The comments at the beginning of 
 \texttt{TMV\_Blas.h} gives instructions on how to set up the file for 
 other installations.
 \index{LAPACK!setup TMV\_Blas.h file}
@@ -8006,8 +8119,9 @@ This will make the TMV libraries, \texttt{libtmv.a} and \texttt{libtmv\_symband.
 which will be located in the directory \texttt{lib}.
 
 \item
-(optional) Next type:\\
+(Optional) Next type:\\
 \texttt{make test}
+\index{Installation!test suite}
 
 This will make three executables called \texttt{tmvtest1}, 
 \texttt{tmvtest2} and \texttt{tmvtest3} in the \texttt{bin} directory.
@@ -8016,8 +8130,9 @@ Warning: this step may take a long time to finish, since
 the test code tests
 for lots of different combinations of matrix types in all the various 
 arithmetic operators.
-So plan on letting this run
-for a couple of hours (depending on your machine and compiler of course).
+So plan on letting this run for a while.
+(On my laptop using a single processor, it takes about 2 hours to make all the tests, whereas
+it only takes about 20 minutes to make the libraries.)
 
 Then you should run the three test suites.
 They should output a bunch of lines reading \texttt{[{\em Something}] passed all tests}.
@@ -8026,7 +8141,17 @@ then please post a bug report at \myissues\ about the problem including what com
 you are using, some details about your system, and what (if any) BLAS and LAPACK
 libraries you are linking to.
 
-You may also want to make the example programs by typing:\\
+\item
+Next type:\\
+\texttt{make install}\\
+(or possibly \tt{sudo make install} if you are installing into \tt{/usr/local} or somewhere similar).
+
+This will copy the header files and the libraries to \texttt{PREFIX/include} and 
+\texttt{PREFIX/lib}.  The default \texttt{PREFIX} is \texttt{/usr/local}, but you can change
+this in the \texttt{Makefile} to some other installation directory if you want.
+
+\item
+(Optional) You may also want to make the example programs by typing:\\
 \texttt{make examples}
 
 This will make five executables called \texttt{vector}, \texttt{matrix}, \texttt{division},
@@ -8037,13 +8162,10 @@ to do with the TMV library.  They don't really try to be comprehensive,
 but they do give a pretty good overview of the main features,
 so looking at them may be a useful way to get started programming with TMV.
 
-\item
-(optional) Next type:\\
-\texttt{make install}
-
-This will copy the header files and the libraries to \texttt{PREFIX/include} and 
-\texttt{PREFIX/lib}.  The default \texttt{PREFIX} is \texttt{/usr/local}, but you can change
-this in the \texttt{Makefile} to some other installation directory if you want.
+Also, they are a lot quicker to compile than the test suite, so they can provide a 
+quick way to make sure that you have specified the correct linking flags for any
+BLAS or LAPACK libraries that you might need (according to the \tt{-D} flags
+you specified for building the TMV library.
 
 \item
 Compile you program
@@ -8070,7 +8192,7 @@ For the linking step, you need to compile with the flag
 \texttt{-ltmv}.
 If you are using band, symmetric or symmetric band matrices
 in your code, then you will 
-need to link with the flags \texttt{-ltmv\_symband -ltmv} (in that order).
+need to link with the flags \texttt{-ltmv\_symband -ltmv}.
 And if you did not install the libraries to a directory in your linking path,
 then you need to include the flag
 \texttt{-L[tmvdir]/lib} to tell the linker where the libraries are.
@@ -8097,13 +8219,17 @@ Here are some compiler define flags to consider using:
 \begin{itemize}
 \item
 \texttt{-DNDEBUG} will turn off debugging.  My recommendation is to leave debugging
-on, since it doesn't slow things down too much.  Then when you decide to 
-export a version of the code that needs to be as fast as possible, recompile
-with this flag.  That said, the internal TMV code should be pretty well debugged
-when you get it, so for compiling the library, you could go ahead and use this flag.
-I keep two versions of the library for my own use - one with and one without 
-this flag.  Then when I encounter a problem I can try linking to the debugging 
-version to make sure it's not a bug in the TMV code.
+on in your own code that is calling TMV routines, since it doesn't slow things down too 
+much.  Then when you decide to export a version of the code that needs to be as fast 
+as possible, recompile with this flag.
+On the other hand, the internal TMV code should be pretty well debugged
+when you get it, so for compiling the library, you should go ahead and use this flag.
+\end{itemize}
+The rest of the flags are only relevant when compiling the TMV library, so you won't 
+need any of them when compiling your own code that uses TMV routines.  And if you 
+install with SCons, it will determine which flags to set according to the somewhat simpler 
+list of SCons options.
+\begin{itemize}
 \item
 \texttt{-DNO\_INST\_FLOAT} will not instantiate any \tt{<float>} classes or routines.
 \item
@@ -8170,16 +8296,12 @@ The next set of compiler defines are not usually necessary.  But
 if you have problems, these might be useful:
 \begin{itemize}
 \item
-\texttt{-DXTEST} will do extra testing in the test suite, as well as add a few $O(N)$
+\texttt{-DXTEST=[num]} will do extra testing in the test suite, as well as add a few $O(N)$
 time assert statements.  (Most of the assert statements that are normally run only take
-$O(1)$ time.)  I always do tests with this turned on before releasing a version, but the
+$O(1)$ time.)  I always do tests with \tt{XTEST=127} to turn on all of the extra tests
+before releasing a version, but the
 executable gets quite large, as do many of the \texttt{TMV\_Test*.o} files.  Plus it takes
-a lot longer to compile.  So the default is to not use it.
-
-\texttt{XTEST} mostly does additional checks
-of the algorithms for different specific matrix pairs in the various
-arithmetic operations to test possible failure modes.  If the shorter test suite
-(i.e. without \texttt{XTEST}) works ok for you, you should be fine.
+a lot longer to compile.  So the default is to not use it.  
 
 \item
 \texttt{-DMEMTEST} will do extra testing of the memory usage to look for memory leaks
@@ -8287,7 +8409,7 @@ The basic usage is as follows:
 Download CMake from \url{http://www.cmake.org/} if you do not already have it.
 
 \item
-In TMV directory, type\\
+In the TMV directory, type\\
 \texttt{cmake -i .}\\
 or\\
 \texttt{ccmake .}\\
@@ -8481,8 +8603,8 @@ Now you should be all set to use the TMV library in your program.
 
 I have tested the code using the following compilers:\\
 $\quad$\\
-GNU's g++ -- versions 3.4.6, 4.0.2, 4.1.2, 4.2.2, 4.3.1 and 4.4.2\\
-% chimaera g++, milhouse g++, lupus g++, Clarinet g++-4 (alt fink), Clarinet g++-4.3, Clarinet g++-4
+GNU's g++ -- versions 3.4.6, 4.0.2, 4.1.2, 4.2.4, 4.3.5 and 4.4.2\\
+% chimaera g++, milhouse g++, Flute g++-4.1.2 or lupus g++, Flute g++-4.2.4, Flute g++-4.3.5, Flute g++
 Apple's g++ -- version 4.0.1, 4.2.1 \\
 % Clarinet g++-4.0, g++-4.2
 Intel's icpc -- versions 9.0, 9.1, 10.1 and 11.0\\
@@ -8513,15 +8635,20 @@ the problems.  So if you have a problem, check this list to see if a solution
 is given for you.  
 
 \begin{itemize}
-\item {\bf Apple g++:}
+\item {\bf g++ version 4.4 on Snow Leopard:}
 \index{Installation!g++}
-Older versions of Apple's version of g++ that they shipped with the Tiger OS did not work for 
-compilation of the TMV library.  It was called version 4.0, but I do not remember the build number.
-They seem to have fixed the problem with a later XCode update,
-but if you have an older Mac and want to compile TMV on it and the native g++ 
-is giving you trouble,
-you should either upgrade to a newer Xcode distribution or download the real GNU gcc instead;  
-I recommend using Fink (\url{http://fink.sourceforge.net/}).
+g++ 4.4 (at least 4.4.2 through 4.4.4) has a pretty egregious bug in its exception handling that 
+can cause the code to abort rather than allow a thrown value to be caught.  
+This is a reported bug (42159), and according to the bug report it seems to only occur in
+conjunction with MacOS 10.6 (Snow Leopard), however it is certainly possible that it 
+may show up in other systems too.
+
+However, I have discovered a workaround that seems to fix the problem.  Link with 
+\tt{-lpthread} even if you are not using OpenMP or have any other reason to use that
+library.  Something about linking with that library fixes the exception handling problems.
+In a SCons installation, this is done automatically for g++ versions 4.4 and 4.5.  
+If you are installing with make, then you'll have to add this yourself.
+Likewise, you'll need to link your own code with \tt{-lpthread} as well.
 
 \item {\bf g++ -O2, versions 4.1 and 4.2:}
 \index{Installation!g++}
@@ -8540,6 +8667,16 @@ Another option, which might be a good idea anyway is to just use \texttt{-O}
 when you want a version that 
 includes the TMV assert statements, and make sure to use \texttt{-DNDEBUG} 
 when you want a more optimized version.
+
+\item {\bf Apple g++:}
+\index{Installation!g++}
+Older versions of Apple's version of g++ that they shipped with the Tiger OS did not work for 
+compilation of the TMV library.  It was called version 4.0, but I do not remember the build number.
+They seem to have fixed the problem with later XCode update,
+but if you have an older Mac and want to compile TMV on it and the native g++ 
+is giving you trouble,
+you should either upgrade to a newer Xcode distribution or download the real GNU gcc instead;  
+I recommend using Fink (\url{http://fink.sourceforge.net/}).
 
 \item {\bf pgCC:}
 \index{Installation!pgCC}
@@ -8639,20 +8776,39 @@ If you get an error that looks something like:\\
 then this probably means that your LAPACK distribution does not support
 workspace size queries.  The solution is to use the flag \texttt{-DNOWORKQUERY}.
 
-\item {\bf Unable to link CLAPACK:}
-\index{LAPACK!Problems linking CLAPACK}
-I get a linking error on my Mac when combining CLAPACK with a Fortran-style BLAS library.
+\item {\bf Unable to link LAPACK on Mac:}
+\index{LAPACK!Problems linking LAPACK}
+I get a linking error on my Mac when combining the XCode LAPACK library
+(either libclapack.dylib or liblapack.dylib) with a non-XCode BLAS library.
 Specifically, it can't find the \texttt{?getri} functions.   Basically, the reason is that
-this LAPACK library, libclapack.dylib, is designed to be used with the BLAS
-library, libcblas.dylib, in the same directory, and that BLAS library has the \texttt{getri}
+the XCode LAPACK libraries are designed to be used with one of the BLAS
+libraries, libcblas.dylib or libblas.dylib, in the same directory, 
+and that BLAS library has the \texttt{getri}
 functions, even though they are properly LAPACK functions.
 Anyway, it's basically a bug in the Apple XCode distribution of these files,
 and the result is that if you use a different BLAS library, the linking fails.
 
-The solution is either to use the Apple CBLAS library or to install your own CLAPACK
+The solution is either to use one of the XCode BLAS library or to install your own CLAPACK
 library.  If you do the latter, you will probably want to rename (or delete) these Mac
 library files, since they are in the /usr/lib directory, and \tt{-L} flags usually can't take 
 precedence over /usr/lib.
+
+\item {\bf Errors in \tt{Matrix<float>} calculations using BLAS on Mac}
+\index{LAPACK!Errors with float}
+I have found that some XCode BLAS libraries seem to have errors in the 
+calculations for large \tt{<float>} matrices.  I think it is an error in the \tt{sgemm}
+function.  Since very many of the other algorithms use this function, the error
+propagates to lots of other routines as well.  The errors seem to be only for
+large matrices with at least one dimension $N > 100$ or so.  (I'm not sure of the 
+exact crossover point from working to non-working code.)
+
+I haven't surveyed which versions of XCode have this bug, but it seems to be in version
+3.2.2 at least, so the best thing to do 
+is to install the test suite and make sure that it runs without errors.  If it makes it 
+through without errors, then you don't have to worry about it.
+
+If you do get an error in the test suite, the only workaround I can suggest is to either compile without using BLAS or download and make a different BLAS library.
+For example ATLAS or GOTO BLAS are free to download and are both pretty fast.
 
 \item {\bf Segmentation faults with \tt{SmallMatrix}:}
 \index{LAPACK!Problems with SmallMatrix}
@@ -8677,6 +8833,17 @@ If you want to test the mixed arithmetic specifically, you can use \texttt{scons
 to compile the test program \texttt{tmvtestmix}.  I am planning on having scons
 compile and run this program before compiling \texttt{tmvtest3} to see whether it needs
 the flag, but I haven't figured out how to do that yet.
+
+\item {\bf Overflow and underflow when using LAPACK:}
+\index{LAPACK!overflow/underflow problems}
+The normal distribution of LAPACK algorithms are not as careful as the TMV code when 
+it comes to guarding against overflow and underflow.  As a result, you may find
+matrix decompositions resulting in values with nan or inf when using TMV
+with LAPACK support enabled.  The solution is to compile TMV without the LAPACK
+library (e.g. by using \tt{WITH_LAPACK=false} in the SCons installation method).
+This does not generally result in slower code, since the native TMV code is almost always
+as fast (usually using the same algorithm) as the LAPACK distribution, but has better
+guards against overflow and underflow.
 
 \end{itemize}
 
@@ -8875,6 +9042,7 @@ the disccussion group (\mygroup) about them.
 \textbf{Hermitian eigenvector algorithm}
 \index{SymMatrix!eigenvalues and eigenvectors}
 \index{SymBandMatrix!eigenvalues and eigenvectors}
+\label{Bugs_RRR}
 
 There is a faster algorithm for calculating eigenvectors of a hermitian
 matrix given the eigenvalues, which uses a technique know as

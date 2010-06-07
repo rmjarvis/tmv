@@ -458,7 +458,7 @@ namespace tmv {
         T val() const { return isunit ? T(1) : T(helper.itsref); }
 
         const bool isunit;
-        const TriRefHelper<T,C> helper;
+        TriRefHelper<T,C> helper;
     };
 
     // Overload some functions to work with TriRef
@@ -486,13 +486,13 @@ namespace tmv {
 
     template <class T, bool C1, bool C2>
     inline void TMV_SWAP(TriRef<T,C1> x1, TriRef<T,C2> x2)
-    { return TMV_SWAP(x1.getRef(),x2.getRef()); }
+    { TMV_SWAP(x1.getRef(),x2.getRef()); }
     template <class T, bool C2>
     inline void TMV_SWAP(T& x1, TriRef<T,C2> x2)
-    { return TMV_SWAP(x1,x2.getRef()); }
+    { TMV_SWAP(x1,x2.getRef()); }
     template <class T, bool C1>
     inline void TMV_SWAP(TriRef<T,C1> x1, T& x2)
-    { return TMV_SWAP(x1.getRef(),x2); }
+    { TMV_SWAP(x1.getRef(),x2); }
 
     // Another helper class to deal with the case of the regular 
     // UpperTriMatrix and LowerTriMatrix classes (i.e. not views)

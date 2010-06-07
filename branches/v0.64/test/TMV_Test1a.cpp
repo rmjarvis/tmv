@@ -30,9 +30,8 @@ int main() try {
     //showdiv=true;
     //showtests=true;
     //showstartdone=true;
-    TestPermutation<double>();
 
-#if 0
+#if 1
 
 #ifdef TEST_DOUBLE
     TestVector<double>();
@@ -43,16 +42,19 @@ int main() try {
 #ifdef TEST_FLOAT
     TestVector<float>();
     TestMatrix<float>();
+    TestPermutation<float>();
 #endif // FLOAT
 
 #ifdef TEST_LONGDOUBLE
     TestVector<long double>();
     TestMatrix<long double>();
+    TestPermutation<long double>();
 #endif // LONGDOUBLE
 
 #ifdef TEST_INT
     TestVector<int>();
     TestMatrix<int>();
+    TestPermutation<int>();
 #endif  // INT
 
 #endif

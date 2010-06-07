@@ -109,7 +109,7 @@ namespace tmv {
         // rows in the remaining parts of A without swapping rows for L.
         // This makes the LDivEq, RDivEq functions a bit more complicated.
         //
-        TMVAssert(A.nhi() > A.nlo());
+        TMVAssert(A.nhi() >= A.nlo());
         TMVAssert(A.iscm());
         TMVAssert(A.ct() == NonConj);
         TMVAssert(A.isSquare());
@@ -418,31 +418,39 @@ namespace tmv {
     {
 #ifdef XDEBUG
         BandMatrix<T> A0 = A;
+        std::cout<<"Start BandLU_Decompose:\n";
+        std::cout<<"A = "<<TMV_Text(A)<<std::endl;
+        std::cout<<"A0 = "<<A0<<std::endl;
 #endif
 
         TMVAssert(A.isSquare());
         TMVAssert(A.ct()==NonConj);
-        TMVAssert(A.nlo()>0);
         TMVAssert(A.iscm() || (A.isdm() && A.nlo()==1 && A.nhi()==2));
-        if (A.colsize() > 0 && A.rowsize() > 0) {
-            if (A.iscm()) {
+        if (A.nlo() > 0) {
+            if (A.colsize() > 0 && A.rowsize() > 0) {
+                if (A.iscm()) {
 #ifdef LAP
-                if (A.nlo()+Anhi+1 > int(A.rowsize())) {
-                    TMVAssert(A.nhi()+1 == int(A.rowsize()));
+                    if (A.nlo()+Anhi+1 > int(A.rowsize())) {
+                        TMVAssert(A.nhi()+1 == int(A.rowsize()));
+                        NonLapBandLU_Decompose(A,P,det);
+                    } else {
+                        LapBandLU_Decompose(A,P,det);
+                    }
+#else
                     NonLapBandLU_Decompose(A,P,det);
+#endif
                 } else {
-                    LapBandLU_Decompose(A,P,det);
-                }
-#else
-                NonLapBandLU_Decompose(A,P,det);
-#endif
-            } else {
 #ifdef LAP
-                LapTriDiagLU_Decompose(A,P,det);
+                    LapTriDiagLU_Decompose(A,P,det);
 #else
-                NonLapTriDiagLU_Decompose(A,P,det);
+                    NonLapTriDiagLU_Decompose(A,P,det);
 #endif
+                }
             }
+        } else {
+            // Marix is already LU decomposed, since no sub-diagonals.
+            // Just set P values appropriately.
+            for(int i=0;i<A.colsize();++i) P[i] = i;
         }
 
 #ifdef XDEBUG
@@ -458,6 +466,7 @@ namespace tmv {
         Matrix<T> U(BandMatrixViewOf(A,0,A.nhi()));
         Matrix<T> AA = L*U;
         AA.reversePermuteRows(P);
+        std::cout<<"Done: Norm(AA-A0) = "<<Norm(AA-A0)<<std::endl;
         if (!(Norm(AA-A0) < 0.001 * Norm(A0))) {
             cerr<<"LU_Decompose: A = "<<TMV_Text(A)<<A0<<endl;
             cerr<<"AA = "<<AA<<endl;
