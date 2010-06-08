@@ -6,7 +6,7 @@
 #include <cstdio>
 
 template <class T, class M, class CM> 
-void TestBasicTriDiv()
+static void TestBasicTriDiv()
 {
     tmv::Matrix<T,tmv::ColMajor> a(10,10);
 
@@ -352,14 +352,13 @@ void TestTriDiv()
         tmv::LowerTriMatrix<CT,tmv::UnitDiag,tmv::RowMajor> >();
 #endif
 
-#if 0
     TestTriDiv_A1<T>();
     TestTriDiv_A2<T>();
     TestTriDiv_B1<T>();
     TestTriDiv_B2<T>();
     TestTriDiv_C1<T>();
     TestTriDiv_C2<T>();
-#endif
+
     std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<
         "> Division passed all tests\n";
 }

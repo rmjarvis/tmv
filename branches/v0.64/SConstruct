@@ -193,8 +193,8 @@ def BasicCCFlags(env):
                 env.Append(CCFLAGS=['-vec-report0'])
                 env['TEST_FLAGS'] += ['-vec-report0']
             if env['WARN']:
-                env.Append(CCFLAGS=['-Wall','-Werror','-wd383,810,981'])
-                env['TEST_FLAGS'] += ['-Wall','-Werror','-wd383,810,981']
+                env.Append(CCFLAGS=['-Wall','-Werror','-wd279,383,810,981'])
+                env['TEST_FLAGS'] += ['-Wall','-Werror','-wd279,383,810,981']
                 if version >= 9:
                     env.Append(CCFLAGS=['-wd1572'])
                     env['TEST_FLAGS'] += ['-wd1572']

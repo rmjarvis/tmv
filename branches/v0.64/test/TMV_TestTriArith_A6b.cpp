@@ -33,22 +33,10 @@ void TestTriMatrixArith_A6b()
     ca2x -= a2x;
     ca2x *= CT(1,-2);
 
-    tmv::Matrix<T> a3x(12,16);
-    for(int i=0;i<12;++i) for(int j=0;j<16;++j) a3x(i,j) = T(1-2*i+3*j);
-    a3x.diag().addToAll(30);
-    tmv::Matrix<CT> ca3x = a3x*CT(1,-2);
-    ca3x.diag().addToAll(CT(-22,15));
-
     tmv::UpperTriMatrixView<T> u4 = a1x.unitUpperTri();
     tmv::UpperTriMatrixView<CT> cu4 = ca1x.unitUpperTri();
     tmv::UpperTriMatrixView<T> u5 = a2x.unitUpperTri();
     tmv::UpperTriMatrixView<CT> cu5 = ca2x.unitUpperTri();
-    tmv::UpperTriMatrixView<T> u5b = a2x.unitUpperTri();
-    tmv::UpperTriMatrixView<CT> cu5b = ca2x.unitUpperTri();
-    tmv::UpperTriMatrixView<T> u5c = a2x.unitUpperTri();
-    tmv::UpperTriMatrixView<CT> cu5c = ca2x.unitUpperTri();
-    tmv::UpperTriMatrixView<T> u6 = a3x.subMatrix(0,12,0,16,3,4).unitUpperTri();
-    tmv::UpperTriMatrixView<CT> cu6 = ca3x.subMatrix(0,12,0,16,3,4).unitUpperTri();
 
     TestMatrixArith6<T>(u4,cu4,u4,cu4,u4,cu4,"UpperTri 75");
     TestMatrixArith6<T>(u5,cu5,u5,cu5,u4,cu4,"UpperTri 76");
@@ -61,6 +49,14 @@ void TestTriMatrixArith_A6b()
     TestMatrixArith6<T>(u5,cu5,u5,cu5,u5,cu5,"UpperTri 82");
 #endif
 #if (XTEST & 1)
+    tmv::Matrix<T> a3x(12,16);
+    for(int i=0;i<12;++i) for(int j=0;j<16;++j) a3x(i,j) = T(1-2*i+3*j);
+    a3x.diag().addToAll(30);
+    tmv::Matrix<CT> ca3x = a3x*CT(1,-2);
+    ca3x.diag().addToAll(CT(-22,15));
+
+    tmv::UpperTriMatrixView<T> u6 = a3x.subMatrix(0,12,0,16,3,4).unitUpperTri();
+    tmv::UpperTriMatrixView<CT> cu6 = ca3x.subMatrix(0,12,0,16,3,4).unitUpperTri();
     TestMatrixArith6<T>(u6,cu6,u4,cu4,u4,cu4,"UpperTri 83");
     TestMatrixArith6<T>(u6,cu6,u5,cu5,u4,cu4,"UpperTri 84");
     TestMatrixArith6<T>(u4,cu4,u6,cu6,u4,cu4,"UpperTri 85");
@@ -75,8 +71,6 @@ void TestTriMatrixArith_A6b()
     tmv::LowerTriMatrixView<CT> cl4 = ca1x.unitLowerTri();
     tmv::LowerTriMatrixView<T> l5 = a2x.unitLowerTri();
     tmv::LowerTriMatrixView<CT> cl5 = ca2x.unitLowerTri();
-    tmv::LowerTriMatrixView<T> l6 = a3x.subMatrix(0,12,0,16,3,4).unitLowerTri();
-    tmv::LowerTriMatrixView<CT> cl6 = ca3x.subMatrix(0,12,0,16,3,4).unitLowerTri();
 
     TestMatrixArith6<T>(l4,cl4,l4,cl4,l4,cl4,"LowerTri 75");
     TestMatrixArith6<T>(l5,cl5,l5,cl5,l4,cl4,"LowerTri 76");
@@ -89,6 +83,8 @@ void TestTriMatrixArith_A6b()
     TestMatrixArith6<T>(l5,cl5,l5,cl5,l5,cl5,"LowerTri 82");
 #endif
 #if (XTEST & 1)
+    tmv::LowerTriMatrixView<T> l6 = a3x.subMatrix(0,12,0,16,3,4).unitLowerTri();
+    tmv::LowerTriMatrixView<CT> cl6 = ca3x.subMatrix(0,12,0,16,3,4).unitLowerTri();
     TestMatrixArith6<T>(l6,cl6,l4,cl4,l4,cl4,"LowerTri 83");
     TestMatrixArith6<T>(l6,cl6,l5,cl5,l4,cl4,"LowerTri 84");
     TestMatrixArith6<T>(l4,cl4,l6,cl6,l4,cl4,"LowerTri 85");

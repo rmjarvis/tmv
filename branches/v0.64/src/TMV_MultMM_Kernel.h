@@ -1214,25 +1214,25 @@ namespace tmv {
     // as necessary depending on the INST_* definitions.
     template <class T>
     static void multmm_16_16_16(
-        const int M, const int N, const int K,
+        const int , const int , const int ,
         const T* A0, const T* B0, T* C0)
     { generic_multmm_16_16_16(A0,B0,C0); }
 
     template <class T>
     static void multmm_M_16_16(
-        const int M, const int N, const int K,
+        const int M, const int , const int ,
         const T* A0, const T* B0, T* C0)
     { generic_multmm_M_16_16(M,A0,B0,C0); }
 
     template <class T>
     static void multmm_16_N_16(
-        const int M, const int N, const int K,
+        const int , const int N, const int ,
         const T* A0, const T* B0, T* C0)
     { generic_multmm_16_N_16(N,A0,B0,C0); }
 
     template <class T>
     static void multmm_16_16_K(
-        const int M, const int N, const int K,
+        const int , const int , const int K,
         const T* A0, const T* B0, T* C0)
     { generic_multmm_16_16_K(K,A0,B0,C0); }
 
@@ -2259,7 +2259,7 @@ namespace tmv {
 
 #ifdef __SSE__
     static void multmm_16_16_K(
-        const int M, const int N, const int K,
+        const int , const int , const int K,
         const float* A0, const float* B0, float* C0)
     { sse_multmm_16_16_K(K,A0,B0,C0); }
 
@@ -2272,39 +2272,39 @@ namespace tmv {
     }
 
     static void multmm_16_16_64(
-        const int M, const int N, const int K,
+        const int , const int , const int ,
         const float* A0, const float* B0, float* C0)
     { sse_multmm_16_16_64(A0,B0,C0); }
 
     static void multmm_M_16_64(
-        const int M, const int N, const int K,
+        const int M, const int , const int ,
         const float* A0, const float* B0, float* C0)
     { sse_multmm_M_16_64(M,A0,B0,C0); }
 
     static void multmm_16_N_64(
-        const int M, const int N, const int K,
+        const int , const int N, const int ,
         const float* A0, const float* B0, float* C0)
     { sse_multmm_16_N_64(N,A0,B0,C0); }
 
 #else
     // If no SSE, then repeat the 16 block version to call generic.
     static void multmm_16_16_16(
-        const int M, const int N, const int K,
+        const int , const int , const int ,
         const float* A0, const float* B0, float* C0)
     { generic_multmm_16_16_16(A0,B0,C0); }
 
     static void multmm_M_16_16(
-        const int M, const int N, const int K,
+        const int M, const int , const int ,
         const float* A0, const float* B0, float* C0)
     { generic_multmm_M_16_16(M,A0,B0,C0); }
 
     static void multmm_16_N_16(
-        const int M, const int N, const int K,
+        const int , const int N, const int ,
         const float* A0, const float* B0, float* C0)
     { generic_multmm_16_N_16(N,A0,B0,C0); }
 
     static void multmm_16_16_K(
-        const int M, const int N, const int K,
+        const int , const int , const int K,
         const float* A0, const float* B0, float* C0)
     { generic_multmm_16_16_K(K,A0,B0,C0); }
 
@@ -3315,22 +3315,22 @@ namespace tmv {
 
 #ifdef __SSE2__
     static void multmm_16_16_32(
-        const int M, const int N, const int K,
+        const int , const int , const int ,
         const double* A0, const double* B0, double* C0)
     { sse2_multmm_16_16_32(A0,B0,C0); }
 
     static void multmm_M_16_32(
-        const int M, const int N, const int K,
+        const int M, const int , const int ,
         const double* A0, const double* B0, double* C0)
     { sse2_multmm_M_16_32(M,A0,B0,C0); }
 
     static void multmm_16_N_32(
-        const int M, const int N, const int K,
+        const int , const int N, const int ,
         const double* A0, const double* B0, double* C0)
     { sse2_multmm_16_N_32(N,A0,B0,C0); }
 
     static void multmm_16_16_K(
-        const int M, const int N, const int K,
+        const int , const int , const int K,
         const double* A0, const double* B0, double* C0)
     { sse2_multmm_16_16_K(K,A0,B0,C0); }
 
@@ -3345,22 +3345,22 @@ namespace tmv {
 #else
     // If no SSE2, then repeat the 16 block version to call generic.
     static void multmm_16_16_16(
-        const int M, const int N, const int K,
+        const int , const int , const int ,
         const double* A0, const double* B0, double* C0)
     { generic_multmm_16_16_16(A0,B0,C0); }
 
     static void multmm_M_16_16(
-        const int M, const int N, const int K,
+        const int M, const int , const int ,
         const double* A0, const double* B0, double* C0)
     { generic_multmm_M_16_16(M,A0,B0,C0); }
 
     static void multmm_16_N_16(
-        const int M, const int N, const int K,
+        const int , const int N, const int ,
         const double* A0, const double* B0, double* C0)
     { generic_multmm_16_N_16(N,A0,B0,C0); }
 
     static void multmm_16_16_K(
-        const int M, const int N, const int K,
+        const int , const int , const int K,
         const double* A0, const double* B0, double* C0)
     { generic_multmm_16_16_K(K,A0,B0,C0); }
 
@@ -3379,22 +3379,22 @@ namespace tmv {
     //
 
     static void multmm_16_16_16(
-        const int M, const int N, const int K,
+        const int , const int , const int ,
         const int* A0, const int* B0, int* C0)
     { generic_multmm_16_16_16(A0,B0,C0); }
 
     static void multmm_M_16_16(
-        const int M, const int N, const int K,
+        const int M, const int , const int ,
         const int* A0, const int* B0, int* C0)
     { generic_multmm_M_16_16(M,A0,B0,C0); }
 
     static void multmm_16_N_16(
-        const int M, const int N, const int K,
+        const int , const int N, const int ,
         const int* A0, const int* B0, int* C0)
     { generic_multmm_16_N_16(N,A0,B0,C0); }
 
     static void multmm_16_16_K(
-        const int M, const int N, const int K,
+        const int , const int , const int K,
         const int* A0, const int* B0, int* C0)
     { generic_multmm_16_16_K(K,A0,B0,C0); }
 
@@ -3412,22 +3412,22 @@ namespace tmv {
     //
 
     static void multmm_16_16_16(
-        const int M, const int N, const int K,
+        const int , const int , const int ,
         const long double* A0, const long double* B0, long double* C0)
     { generic_multmm_16_16_16(A0,B0,C0); }
 
     static void multmm_M_16_16(
-        const int M, const int N, const int K,
+        const int M, const int , const int ,
         const long double* A0, const long double* B0, long double* C0)
     { generic_multmm_M_16_16(M,A0,B0,C0); }
 
     static void multmm_16_N_16(
-        const int M, const int N, const int K,
+        const int , const int N, const int ,
         const long double* A0, const long double* B0, long double* C0)
     { generic_multmm_16_N_16(N,A0,B0,C0); }
 
     static void multmm_16_16_K(
-        const int M, const int N, const int K,
+        const int , const int , const int K,
         const long double* A0, const long double* B0, long double* C0)
     { generic_multmm_16_16_K(K,A0,B0,C0); }
 

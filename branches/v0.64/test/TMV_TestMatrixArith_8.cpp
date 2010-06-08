@@ -9,14 +9,14 @@
 
 template <class T> void TestMatrixArith_8()
 {
-#if 0
+#if 1
+    const int NSIZE = 4;
+    const int sizear[NSIZE] = {2,5,77,637};
+#else
     const int NSIZE = 15;
     //const int sizear[NSIZE] = {1,2,3,4,5,6,7,8,9,30,31,32,63,64,65};
     //const int sizear[NSIZE] = {1,2,3,4,5,6,7,8,9,32,128,129,130,1009,3777};
     const int sizear[NSIZE] = {1,2,3,4,5,63,64,65,66,77,111,128,137,256,637};
-#else
-    const int NSIZE = 4;
-    const int sizear[NSIZE] = {2,5,77,637};
 #endif
     for(int m1=0;m1<NSIZE;m1++) for(int n1=0;n1<NSIZE;n1++) {
         int m = sizear[m1];
@@ -292,7 +292,7 @@ template <class T> void TestMatrixArith_8()
         }
 #endif
 
-#if 0 
+#if 1 
         // Do real version
         for(int k1=0;k1<NSIZE;k1++) {
             tmv::Matrix<T,tmv::ColMajor> c(m,n);

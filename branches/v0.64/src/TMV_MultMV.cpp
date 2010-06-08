@@ -193,7 +193,7 @@ namespace tmv {
     }
 
     template <bool add, bool cx, class T, class Ta, class Tx> 
-    extern void UnitAMultMV1(
+    void UnitAMultMV1(
         const GenMatrix<Ta>& A, const GenVector<Tx>& x, const VectorView<T>& y)
     {
         TMVAssert(A.rowsize() == x.size());

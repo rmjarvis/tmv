@@ -35,22 +35,22 @@ template <class T> void TestMatrixArith_1()
     ca2x -= a2x;
     ca2x *= CT(1,-2);
 
+    tmv::MatrixView<T> a1 = a1x.view();
+    tmv::MatrixView<CT> ca1 = ca1x.view();
+    tmv::MatrixView<T> a2 = a2x.view();
+    tmv::MatrixView<CT> ca2 = ca2x.view();
+
+    TestMatrixArith1<T>(a1,ca1,"Square 1");
+    TestMatrixArith1<T>(a2,ca2,"Square 2");
+#if (XTEST & 1)
     tmv::Matrix<T> a3x(12,16);
     for(int i=0;i<12;++i) for(int j=0;j<16;++j) a3x(i,j) = T(1-2*i+3*j);
     a3x.diag().addToAll(30);
     tmv::Matrix<CT> ca3x = a3x*CT(1,-2);
     ca3x.diag().addToAll(CT(-22,15));
 
-    tmv::MatrixView<T> a1 = a1x.view();
-    tmv::MatrixView<CT> ca1 = ca1x.view();
-    tmv::MatrixView<T> a2 = a2x.view();
-    tmv::MatrixView<CT> ca2 = ca2x.view();
     tmv::MatrixView<T> a3 = a3x.subMatrix(0,12,0,16,3,4);
     tmv::MatrixView<CT> ca3 = ca3x.subMatrix(0,12,0,16,3,4);
-
-    TestMatrixArith1<T>(a1,ca1,"Square 1");
-    TestMatrixArith1<T>(a2,ca2,"Square 2");
-#if (XTEST & 1)
     TestMatrixArith1<T>(a3,ca3,"Square 3");
 #endif
 

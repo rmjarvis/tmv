@@ -636,7 +636,7 @@ namespace tmv {
     }
 
     template <bool ca, bool cb, class T, class Ta, class Tb>
-    extern void RecursiveRCCMultMM(
+    static void RecursiveRCCMultMM(
         const int M, const int N, const int K,
         const Ta* A, const Tb* B, T* C,
         const int Asi, const int Bsj, const int Csj)
@@ -690,7 +690,7 @@ namespace tmv {
     }
 
     template <bool add, bool ca, bool cb, class T, class Ta, class Tb> 
-    extern void DoRCCMultMM(
+    static void DoRCCMultMM(
         const T alpha, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
         const MatrixView<T>& C)
     {

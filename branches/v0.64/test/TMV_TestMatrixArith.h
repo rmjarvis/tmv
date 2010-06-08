@@ -364,7 +364,6 @@ static void DoTestMX2a_Basic(MM& a, T2 x, std::string label)
     }
 #endif
 
-    typename MM::copy_type a0(a);
     tmv::Matrix<T> m1 = a;
     tmv::Matrix<T> temp = a;
     Assert(Norm(MAT(T,a)-m1) <= EPS * (a.colsize()+a.rowsize())*Norm(m1),label+" a = m1");
@@ -372,6 +371,7 @@ static void DoTestMX2a_Basic(MM& a, T2 x, std::string label)
 #ifndef NOADDEQX
 #ifndef NONSQUARE
     if (CanAddEqX(a,x)) {
+        typename MM::copy_type a0(a);
         double eps = EPS * (a.colsize()+a.rowsize()) * Norm(m1);
 #ifdef XXD
         if (XXDEBUG3) {
@@ -393,6 +393,7 @@ static void DoTestMX2a_Basic(MM& a, T2 x, std::string label)
 #endif
 #ifndef NOMULTEQX
     if (CanMultEqX(a,x)) {
+        typename MM::copy_type a0(a);
         double eps = EPS * (a.colsize()+a.rowsize()) * Norm(m1);
 #ifdef XXD
         if (XXDEBUG3) {
@@ -428,7 +429,6 @@ static void DoTestMX2a_Full(MM& a, T2 x, std::string label)
     DoTestMX2a_Basic<T>(a,x,label);
 
 #if (XTEST & 2)
-    typename MM::copy_type a0(a);
     tmv::Matrix<T> m1 = a;
     tmv::Matrix<T> temp = a;
     Assert(Norm(MAT(T,a)-m1) <= EPS * (a.colsize()+a.rowsize())*Norm(m1),label+" a = m1");
@@ -436,6 +436,7 @@ static void DoTestMX2a_Full(MM& a, T2 x, std::string label)
 #ifndef NOADDEQX
 #ifndef NONSQUARE
     if (CanAddEqX(a,x)) {
+        typename MM::copy_type a0(a);
         double eps = EPS * (a.colsize()+a.rowsize()) * Norm(m1);
         tmv::Matrix<T> m2 = m1;
         a += -x;
@@ -470,6 +471,7 @@ static void DoTestMX2a_Full(MM& a, T2 x, std::string label)
 #endif
 #ifndef NOMULTEQX
     if (CanMultEqX(a,x)) {
+        typename MM::copy_type a0(a);
         double eps = EPS * (a.colsize()+a.rowsize()) * Norm(m1);
         tmv::Matrix<T> m2 = m1;
         a *= -x;
@@ -1438,12 +1440,11 @@ static void DoTestMV3a_Basic(
 
     tmv::Matrix<Ta> m = a;
     tmv::Matrix<Ta> mt = Transpose(a);
-    typename V2::copy_type c0 = c;
     tmv::Vector<Tb> v1 = b;
     tmv::Vector<T> v2 = c;
 
     double eps = EPS * (a.colsize()+a.rowsize()) * Norm(b) * Norm(a);
-    double eps2 = EPS * (a.colsize()+a.rowsize()) * (Norm(c0) + Norm(b) * Norm(a));
+    double eps2 = EPS * (a.colsize()+a.rowsize()) * (Norm(c) + Norm(b) * Norm(a));
 
 #ifdef XXD
     if (XXDEBUG6) {
@@ -1455,6 +1456,7 @@ static void DoTestMV3a_Basic(
 #endif
 
     if (CanMultMV(a,b,c)) {
+        typename V2::copy_type c0 = c;
         c = a*b;
         v2 = m*v1;
         Assert(Norm(VEC(T,c)-v2) <= eps,label+" c=a*b");
@@ -1503,14 +1505,14 @@ static void DoTestMV3a_Full(const MM& a, const V1& b, V2& c, std::string label)
 #if (XTEST & 2)
     tmv::Matrix<Ta> m = a;
     tmv::Matrix<Ta> mt = Transpose(a);
-    tmv::Vector<T> c0 = c;
     tmv::Vector<Tb> v1 = b;
     tmv::Vector<T> v2 = c;
 
     double eps = EPS * (a.colsize()+a.rowsize()) * Norm(b) * Norm(a);
-    double eps2 = EPS * (a.colsize()+a.rowsize()) * (Norm(c0) + Norm(b) * Norm(a));
+    double eps2 = EPS * (a.colsize()+a.rowsize()) * (Norm(c) + Norm(b) * Norm(a));
 
     if (CanMultMV(a,b,c)) {
+        tmv::Vector<T> c0 = c;
         RealType(T) x(5);
         T z; SetZ(z);
         CopyBackV(c0,c);
@@ -1630,12 +1632,11 @@ static void DoTestVM3a_Basic(
 
     tmv::Matrix<Ta> m = a;
     tmv::Matrix<Ta> mt = Transpose(a);
-    typename V2::copy_type c0 = c;
     tmv::Vector<Tb> v1 = b;
     tmv::Vector<T> v2 = c;
 
     double eps = EPS * (a.colsize()+a.rowsize()) * Norm(b) * Norm(a);
-    double eps2 = EPS * (a.colsize()+a.rowsize()) * (Norm(c0) + Norm(b) * Norm(a));
+    double eps2 = EPS * (a.colsize()+a.rowsize()) * (Norm(c) + Norm(b) * Norm(a));
 
 #ifdef XXD
     if (XXDEBUG6) {
@@ -1647,6 +1648,7 @@ static void DoTestVM3a_Basic(
 #endif
 
     if (CanMultVM(b,a,c)) {
+        typename V2::copy_type c0 = c;
         c = b*a;
         v2 = v1*m;
         Assert(Norm(VEC(T,c)-v2) <= eps,label+" c=b*a");
@@ -1695,14 +1697,14 @@ static void DoTestVM3a_Full(const MM& a, const V1& b, V2& c, std::string label)
 #if (XTEST & 2)
     tmv::Matrix<Ta> m = a;
     tmv::Matrix<Ta> mt = Transpose(a);
-    typename V2::copy_type c0 = c;
     tmv::Vector<Tb> v1 = b;
     tmv::Vector<T> v2 = c;
 
     double eps = EPS * (a.colsize()+a.rowsize()) * Norm(b) * Norm(a);
-    double eps2 = EPS * (a.colsize()+a.rowsize()) * (Norm(c0) + Norm(b) * Norm(a));
+    double eps2 = EPS * (a.colsize()+a.rowsize()) * (Norm(c) + Norm(b) * Norm(a));
 
     if (CanMultVM(b,a,c)) {
+        typename V2::copy_type c0 = c;
         RealType(T) x(5);
         ComplexType(T) z(3,4);
         CopyBackV(c0,c);
@@ -2032,7 +2034,6 @@ static void DoTestMM2a_Basic(M1& a, const M2& b, std::string label)
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
     }
 #endif
-    typename M1::copy_type a0 = a;
     const tmv::Matrix<T> m1 = a;
     const tmv::Matrix<Tb> m2 = b;
 #ifdef XXD
@@ -2050,6 +2051,7 @@ static void DoTestMM2a_Basic(M1& a, const M2& b, std::string label)
 #endif
 
     if (CanAddEq(a,b)) {
+        typename M1::copy_type a0 = a;
 #ifdef XXD
         if (XXDEBUG8) {
             std::cout<<"CanAddEq("<<tmv::TMV_Text(a)<<","<<tmv::TMV_Text(b)<<")\n";
@@ -2099,12 +2101,12 @@ static void DoTestMM2a_Full(M1& a, const M2& b, std::string label)
 
 #if (XTEST & 2)
 #ifndef NOADDEQ
-    typename M1::copy_type a0 = a;
     const tmv::Matrix<T> m1 = a;
     const tmv::Matrix<Tb> m2 = b;
     double eps = EPS * (a.colsize()+a.rowsize())*(Norm(m1)+Norm(m2));
 
     if (CanAddEq(a,b)) {
+        typename M1::copy_type a0 = a;
         tmv::Matrix<T> m4 = a;
         a += -b;
         m4 = m1-m2;
@@ -2300,7 +2302,6 @@ static void DoTestMM4a_Basic(M1& a, const M2& b, std::string label)
             std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
         }
 #endif
-        typename M1::copy_type a0 = a;
         const tmv::Matrix<T> m1 = a;
         const tmv::Matrix<Tb> m2 = b;
 #ifdef XXD
@@ -2361,7 +2362,6 @@ static void DoTestMM4a_Basic(M1& a, const M2& b, std::string label)
                     <<","<<tmv::TMV_Text(a)<<")\n";
             }
 #endif
-            tmv::Matrix<T> m4 = mm;
             a *= b;
             m4 = mm;
 #ifdef XXD
@@ -2372,6 +2372,7 @@ static void DoTestMM4a_Basic(M1& a, const M2& b, std::string label)
 #endif
             Assert(Norm(MAT(T,a)-m4) <= eps,label+" a *= b");
 #ifndef BASIC_MULTMM_ONLY
+            typename M1::copy_type a0 = a;
             CopyBackM(a0,a);
 #ifdef ALIASOK
             a = a*b;
@@ -2394,7 +2395,6 @@ static void DoTestMM4a_Full(M1& a, const M2& b, std::string label)
 
 #if (XTEST & 2)
     if (CanMultMM(a,b)) {
-        typename M1::copy_type a0 = a;
         const tmv::Matrix<T> m1 = a;
         const tmv::Matrix<Tb> m2 = b;
 
@@ -2469,6 +2469,7 @@ static void DoTestMM4a_Full(M1& a, const M2& b, std::string label)
 #ifndef BASIC_MULTMM_ONLY
 #ifndef NOMULTEQ
         if (CanMultXMM(a,b,a)) {
+            typename M1::copy_type a0 = a;
 #ifdef XXD
             if (XXDEBUG8) {
                 std::cout<<"CanMultXM("<<tmv::TMV_Text(a)<<","<<tmv::TMV_Text(b)
@@ -2585,7 +2586,6 @@ static void DoTestMM5a_Basic(
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
-    typename M3::copy_type c0 = c;
     tmv::Matrix<Ta> m = a;
     tmv::Matrix<Tb> m2 = b;
     tmv::Matrix<T> m3 = c;
@@ -2612,6 +2612,7 @@ static void DoTestMM5a_Basic(
 #endif
         Assert(Norm(MAT(T,c)-m3) <= eps,label+" c=a*b");
 #ifndef BASIC_MULTMM_ONLY
+        typename M3::copy_type c0 = c;
         CopyBackM(c0,c);
         c += a*b;
         m3 = c0 + mm;
@@ -2655,15 +2656,15 @@ static void DoTestMM5a_Full(const M1& a, const M2& b, M3& c, std::string label)
 
 #ifndef BASIC_MULTMM_ONLY
 #if (XTEST & 2)
-    typename M3::copy_type c0 = c;
     tmv::Matrix<Ta> m = a;
     tmv::Matrix<Tb> m2 = b;
     tmv::Matrix<T> m3 = c;
 
     double eps = EPS * (a.colsize()+a.rowsize()+b.rowsize()) * Norm(b) * Norm(a);
-    double eps2 = EPS * (a.colsize()+a.rowsize()+b.rowsize()) * (Norm(c0) + Norm(b) * Norm(a));
+    double eps2 = EPS * (a.colsize()+a.rowsize()+b.rowsize()) * (Norm(c) + Norm(b) * Norm(a));
 
     if (CanMultMM(a,b,c)) {
+        typename M3::copy_type c0 = c;
         tmv::Matrix<T> mm = m*m2;
         RealType(T) x(5);
         T z; SetZ(z);
@@ -2731,10 +2732,10 @@ static void DoTestMM5R(const M1& a, const M2& b, M3& c, std::string label)
 template <class Ta, class Tb, class T, class M1, class M2, class M3> 
 static void DoTestMM5C(const M1& a, const M2& b, M3& c, std::string label)
 {
-    typename M3::conjugate_type cc = c.conjugate();
     DoTestMM5a_Full<Ta,Tb,T>(a,b,c,label);
     DoTestMM5a_Basic<Ta,Tb,T>(Conjugate(a),b,c,label+" ConjA");
 #if (XTEST & 2)
+    typename M3::conjugate_type cc = c.conjugate();
     DoTestMM5a_Basic<Ta,Tb,T>(a,Conjugate(b),c,label+" ConjB");
     DoTestMM5a_Basic<Ta,Tb,T>(Conjugate(a),Conjugate(b),c,label+" ConjAB");
     DoTestMM5a_Basic<Ta,Tb,T>(a,b,cc,label+" ConjC");

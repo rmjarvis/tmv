@@ -32,43 +32,43 @@ template <class T> void TestTriMatrixArith_B4b()
     ca2x -= a2x;
     ca2x *= CT(1,-2);
 
+    tmv::UpperTriMatrixView<T> u1 = a1x.upperTri();
+    tmv::UpperTriMatrixView<CT> cu1 = ca1x.upperTri();
+    tmv::UpperTriMatrixView<T> u2 = a2x.upperTri();
+    tmv::UpperTriMatrixView<CT> cu2 = ca2x.upperTri();
+    tmv::UpperTriMatrixView<T> u4 = a1x.unitUpperTri();
+    tmv::UpperTriMatrixView<CT> cu4 = ca1x.unitUpperTri();
+    tmv::UpperTriMatrixView<T> u5 = a2x.unitUpperTri();
+    tmv::UpperTriMatrixView<CT> cu5 = ca2x.unitUpperTri();
+
+    tmv::MatrixView<T> a1 = a1x.view();
+    tmv::MatrixView<CT> ca1 = ca1x.view();
+    tmv::MatrixView<T> a2 = a2x.view();
+    tmv::MatrixView<CT> ca2 = ca2x.view();
+
+    TestMatrixArith4<T>(u1,cu1,a1,ca1,"UpperTri/Square 1");
+    TestMatrixArith4<T>(u2,cu2,a1,ca1,"UpperTri/Square 2");
+    TestMatrixArith4<T>(u4,cu4,a1,ca1,"UpperTri/Square 3");
+    TestMatrixArith4<T>(u5,cu5,a1,ca1,"UpperTri/Square 4");
+    TestMatrixArith4<T>(u1,cu1,a2,ca2,"UpperTri/Square 5");
+#if (XTEST & 2)
+    TestMatrixArith4<T>(u2,cu2,a2,ca2,"UpperTri/Square 6");
+    TestMatrixArith4<T>(u4,cu4,a2,ca2,"UpperTri/Square 7");
+    TestMatrixArith4<T>(u5,cu5,a2,ca2,"UpperTri/Square 8");
+#endif
+#if (XTEST & 1)
     tmv::Matrix<T> a3x(12,16);
     for(int i=0;i<12;++i) for(int j=0;j<16;++j) a3x(i,j) = T(1-2*i+3*j);
     a3x.diag().addToAll(30);
     tmv::Matrix<CT> ca3x = a3x*CT(1,-2);
     ca3x.diag().addToAll(CT(-22,15));
 
-    tmv::UpperTriMatrixView<T> u1 = a1x.upperTri();
-    tmv::UpperTriMatrixView<CT> cu1 = ca1x.upperTri();
-    tmv::UpperTriMatrixView<T> u2 = a2x.upperTri();
-    tmv::UpperTriMatrixView<CT> cu2 = ca2x.upperTri();
     tmv::UpperTriMatrixView<T> u3 = a3x.subMatrix(0,12,0,16,3,4).upperTri();
     tmv::UpperTriMatrixView<CT> cu3 = ca3x.subMatrix(0,12,0,16,3,4).upperTri();
-    tmv::UpperTriMatrixView<T> u4 = a1x.unitUpperTri();
-    tmv::UpperTriMatrixView<CT> cu4 = ca1x.unitUpperTri();
-    tmv::UpperTriMatrixView<T> u5 = a2x.unitUpperTri();
-    tmv::UpperTriMatrixView<CT> cu5 = ca2x.unitUpperTri();
     tmv::UpperTriMatrixView<T> u6 = a3x.subMatrix(0,12,0,16,3,4).unitUpperTri();
     tmv::UpperTriMatrixView<CT> cu6 = ca3x.subMatrix(0,12,0,16,3,4).unitUpperTri();
-
-    tmv::MatrixView<T> a1 = a1x.view();
-    tmv::MatrixView<CT> ca1 = ca1x.view();
-    tmv::MatrixView<T> a2 = a2x.view();
-    tmv::MatrixView<CT> ca2 = ca2x.view();
     tmv::MatrixView<T> a3 = a3x.view();
     tmv::MatrixView<CT> ca3 = ca3x.view();
-
-    TestMatrixArith4<T>(u1,cu1,a1,ca1,"UpperTri/Square 1");
-    TestMatrixArith4<T>(u2,cu2,a1,ca1,"UpperTri/Square 2");
-    TestMatrixArith4<T>(u4,cu4,a1,ca1,"UpperTri/Square 3");
-    TestMatrixArith4<T>(u5,cu5,a1,ca1,"UpperTri/Square 4");
-#if (XTEST & 2)
-    TestMatrixArith4<T>(u1,cu1,a2,ca2,"UpperTri/Square 5");
-    TestMatrixArith4<T>(u2,cu2,a2,ca2,"UpperTri/Square 6");
-    TestMatrixArith4<T>(u4,cu4,a2,ca2,"UpperTri/Square 7");
-    TestMatrixArith4<T>(u5,cu5,a2,ca2,"UpperTri/Square 8");
-#endif
-#if (XTEST & 1)
     TestMatrixArith4<T>(u3,cu3,a1,ca1,"UpperTri/Square 9");
     TestMatrixArith4<T>(u3,cu3,a2,ca2,"UpperTri/Square 10");
     TestMatrixArith4<T>(u3,cu3,a3,ca3,"UpperTri/Square 11");
@@ -85,14 +85,10 @@ template <class T> void TestTriMatrixArith_B4b()
     tmv::LowerTriMatrixView<CT> cl1 = ca1x.lowerTri();
     tmv::LowerTriMatrixView<T> l2 = a2x.lowerTri();
     tmv::LowerTriMatrixView<CT> cl2 = ca2x.lowerTri();
-    tmv::LowerTriMatrixView<T> l3 = a3x.subMatrix(0,12,0,16,3,4).lowerTri();
-    tmv::LowerTriMatrixView<CT> cl3 = ca3x.subMatrix(0,12,0,16,3,4).lowerTri();
     tmv::LowerTriMatrixView<T> l4 = a1x.unitLowerTri();
     tmv::LowerTriMatrixView<CT> cl4 = ca1x.unitLowerTri();
     tmv::LowerTriMatrixView<T> l5 = a2x.unitLowerTri();
     tmv::LowerTriMatrixView<CT> cl5 = ca2x.unitLowerTri();
-    tmv::LowerTriMatrixView<T> l6 = a3x.subMatrix(0,12,0,16,3,4).unitLowerTri();
-    tmv::LowerTriMatrixView<CT> cl6 = ca3x.subMatrix(0,12,0,16,3,4).unitLowerTri();
 
     TestMatrixArith4<T>(l1,cl1,a1,ca1,"LowerTri/Square 1");
     TestMatrixArith4<T>(l2,cl2,a1,ca1,"LowerTri/Square 2");
@@ -105,6 +101,10 @@ template <class T> void TestTriMatrixArith_B4b()
     TestMatrixArith4<T>(l5,cl5,a2,ca2,"LowerTri/Square 8");
 #endif
 #if (XTEST & 1)
+    tmv::LowerTriMatrixView<T> l3 = a3x.subMatrix(0,12,0,16,3,4).lowerTri();
+    tmv::LowerTriMatrixView<CT> cl3 = ca3x.subMatrix(0,12,0,16,3,4).lowerTri();
+    tmv::LowerTriMatrixView<T> l6 = a3x.subMatrix(0,12,0,16,3,4).unitLowerTri();
+    tmv::LowerTriMatrixView<CT> cl6 = ca3x.subMatrix(0,12,0,16,3,4).unitLowerTri();
     TestMatrixArith4<T>(l3,cl3,a1,ca1,"LowerTri/Square 9");
     TestMatrixArith4<T>(l3,cl3,a2,ca2,"LowerTri/Square 10");
     TestMatrixArith4<T>(l3,cl3,a3,ca3,"LowerTri/Square 11");
