@@ -168,6 +168,7 @@
 #include "TMV_BaseBandMatrix.h"
 #include "TMV_BaseSymMatrix.h"
 #include "TMV_BaseSymBandMatrix.h"
+#include "TMV_Vector.h"
 
 namespace tmv {
 
@@ -499,7 +500,7 @@ namespace tmv {
         template <class T>
         friend inline void QRP_Decompose(
             const MatrixView<T>& Q, const UpperTriMatrixView<T>& R,
-            Permutation& P, bool strict)
+            Permutation& P, bool strict=false)
         {
             TMVAssert(P.size() == Q.rowsize());
             P.allocateMem();
@@ -511,7 +512,7 @@ namespace tmv {
         template <class T>
         friend inline void QRP_Decompose(
             const MatrixView<T>& QRx, const VectorView<T>& beta,
-            Permutation& P, T& signdet, bool strict)
+            Permutation& P, T& signdet, bool strict=false)
         {
             TMVAssert(P.size() == QRx.rowsize());
             P.allocateMem();

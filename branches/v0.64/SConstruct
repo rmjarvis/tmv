@@ -244,6 +244,7 @@ def AddOpenMPFlag(env):
     if compiler == 'g++':
         if version < openmp_mingcc_vers: 
             print 'No OpenMP support for g++ versions before ',openmp_mingcc_vers
+            env['WITH_OPENMP'] = False
             return
         flag = ['-fopenmp']
         ldflag = ['-fopenmp']
@@ -251,6 +252,7 @@ def AddOpenMPFlag(env):
     elif compiler == 'icpc':
         if version < openmp_minicpc_vers:
             print 'No OpenMP support for icpc versions before ',openmp_minicpc_vers
+            env['WITH_OPENMP'] = False
             return
         flag = ['-openmp']
         ldflag = ['-openmp']
@@ -258,6 +260,7 @@ def AddOpenMPFlag(env):
     elif compiler == 'pgCC':
         if version < openmp_minpgcc_vers:
             print 'No OpenMP support for pgCC versions before ',openmp_minpgcc_vers
+            env['WITH_OPENMP'] = False
             return
         flag = ['-mp','--exceptions']
         ldflag = ['-mp']

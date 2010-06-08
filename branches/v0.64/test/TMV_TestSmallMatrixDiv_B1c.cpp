@@ -23,10 +23,10 @@ static void TestSmallNonSquareDiv_B1c()
     tmv::SmallMatrix<T,6,N,stor> a1 = m;
     tmv::SmallMatrix<std::complex<T>,6,N,stor> c1 = a1 * std::complex<T>(1,2);
 
-    tmv::SmallVector<T,N> b = m.row(0);
-    tmv::SmallVector<std::complex<T>,N> e = c1.row(0);
-    tmv::SmallVector<T,6> x = m.col(0);
-    tmv::SmallVector<std::complex<T>,6> y = c1.col(0);
+    tmv::SmallVector<T,N> b = m.row(1);
+    tmv::SmallVector<std::complex<T>,N> e = c1.row(1);
+    tmv::SmallVector<T,6> x = m.col(1);
+    tmv::SmallVector<std::complex<T>,6> y = c1.col(1);
 
     TestMatrixDivArith3e<T>(tmv::QR,a1,b,x,c1,e,y,"V/NonSquare"); 
 #ifdef XTEST

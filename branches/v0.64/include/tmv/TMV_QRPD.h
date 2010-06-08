@@ -103,6 +103,7 @@
 #include "tmv/TMV_Divider.h"
 #include "tmv/TMV_BaseTriMatrix.h"
 #include "tmv/TMV_QRD.h"
+#include "tmv/TMV_Permutation.h"
 
 namespace tmv {
 
@@ -122,12 +123,12 @@ namespace tmv {
     template <class T> 
     void QRP_Decompose(
         const MatrixView<T>& Q, const UpperTriMatrixView<T>& R,
-        Permutation& P, bool strict=false);
+        Permutation& P, bool strict);
 
     template <class T> 
     void QRP_Decompose(
         const MatrixView<T>& QRx, const VectorView<T>& beta,
-        Permutation& P, T& signdet, bool strict=false);
+        Permutation& P, T& signdet, bool strict);
 
     // Decompose A into Q R P, but don't return Q or P.
     // R is returned as A.upperTri().

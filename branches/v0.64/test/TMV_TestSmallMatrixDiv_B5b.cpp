@@ -38,8 +38,7 @@ static void TestSmallNonSquareDiv_B5b()
     c6.col(1) *= std::complex<T>(2,1);
     c6.row(5).addToAll(std::complex<T>(-7,2));
 
-    TestMatrixDivArith3c<T>(tmv::QR,a2,a6,a4,c2,c6,c4,
-                            "NonSquare/NonSquare"); 
+    TestMatrixDivArith3c<T>(tmv::QR,a2,a6,a4,c2,c6,c4,"NonSquare/NonSquare"); 
 #ifdef XTEST
     tmv::SmallMatrix<T,N,6,stor,tmv::FortranStyle> a2f = a2;
     tmv::SmallMatrix<std::complex<T>,N,6,stor,tmv::FortranStyle> c2f = c2;

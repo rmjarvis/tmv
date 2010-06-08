@@ -24,10 +24,10 @@ static void TestSmallSquareDiv_A1b()
     tmv::SmallMatrix<std::complex<T>,N,N,stor> c1 = a1 * std::complex<T>(1,2);
     c1.diag().addToAll(std::complex<T>(3,1));
 
-    tmv::SmallVector<T,N> b = m.row(0);
-    tmv::SmallVector<std::complex<T>,N> e = c.row(0);
-    tmv::SmallVector<T,N> x;
-    tmv::SmallVector<std::complex<T>,N> y;
+    tmv::SmallVector<T,N> b = m.row(1);
+    tmv::SmallVector<std::complex<T>,N> e = c.row(1);
+    tmv::SmallVector<T,N> x = m.col(1);;
+    tmv::SmallVector<std::complex<T>,N> y = c.col(1);
 
     TestMatrixDivArith3d<T>(tmv::LU,a1,b,x,c1,e,y,"V/Square"); 
 #ifdef XTEST
