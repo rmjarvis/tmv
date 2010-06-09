@@ -2,8 +2,24 @@
 #include "TMV_Test1.h"
 #include "TMV.h"
 
-// MJ: Remove once norm2, etc. are defined.
-#define NODIV
+template <class T>
+inline void CopyBackM(
+    const tmv::UpperTriMatrix<T>& m0,
+    tmv::UpperTriMatrixView<T>& m1)
+{
+    if (m1.isunit()) m1 = m0.viewAsUnitDiag();
+    else m1 = m0;
+}
+
+template <class T>
+inline void CopyBackM(
+    const tmv::LowerTriMatrix<T>& m0,
+    tmv::LowerTriMatrixView<T>& m1)
+{
+    if (m1.isunit()) m1 = m0.viewAsUnitDiag();
+    else m1 = m0;
+}
+
 
 #define NOADDEQ
 #define NOADDEQX

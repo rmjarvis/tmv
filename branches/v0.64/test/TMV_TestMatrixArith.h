@@ -2373,13 +2373,11 @@ static void DoTestMM4a_Basic(M1& a, const M2& b, std::string label)
 #endif
             Assert(Norm(MAT(T,a)-m4) <= eps,label+" a *= b");
             CopyBackM(a0,a);
-#ifndef BASIC_MULTMM_ONLY
 #ifdef ALIASOK
             a = a*b;
             m4 = mm;
             Assert(Norm(MAT(T,a)-m4) <= eps,label+" a = a*b");
             CopyBackM(a0,a);
-#endif
 #endif
         }
 #endif // NOMULTEQ
@@ -2601,6 +2599,7 @@ static void DoTestMM5a_Basic(
 #endif
 
     if (CanMultMM(a,b,c)) {
+        typename M3::copy_type c0 = c;
         tmv::Matrix<T> mm = m*m2;
         c = a*b;
         m3 = mm;
@@ -2611,9 +2610,8 @@ static void DoTestMM5a_Basic(
         }
 #endif
         Assert(Norm(MAT(T,c)-m3) <= eps,label+" c=a*b");
-#ifndef BASIC_MULTMM_ONLY
-        typename M3::copy_type c0 = c;
         CopyBackM(c0,c);
+#ifndef BASIC_MULTMM_ONLY
         c += a*b;
         m3 = c0 + mm;
 #ifdef XXD
