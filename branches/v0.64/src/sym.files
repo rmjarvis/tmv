@@ -22,7 +22,6 @@ TMV_SymCHDiv.cpp
 TMV_SymCHInverse.cpp
 TMV_SymSVD.cpp
 TMV_SymSVInverse.cpp
-TMV_SymSVDecompose.cpp
 TMV_IsNaN.cpp
 TMV_SymSVDecompose_Tridiag.cpp
 TMV_SymSVDecompose_QR.cpp

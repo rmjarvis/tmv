@@ -98,6 +98,8 @@ opts.Add(BoolVariable('FORCE_ATLAS_LAPACK',
             'Force scons to use ATLAS subset of LAPACK', False))
 opts.Add(BoolVariable('FORCE_FLAPACK',
             'Force scons to use Fortran LAPACK', False))
+opts.Add(BoolVariable('USE_STEGR',
+            'Use the LAPACK function ?stegr for finding eigenvectors', True))
 opts.Add('LIBS','Libraries to send to the linker','')
 
 opts.Add(BoolVariable('DEBUG',

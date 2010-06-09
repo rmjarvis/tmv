@@ -366,12 +366,22 @@ namespace tmv {
         int ldb = B.isrm()?B.stepi():B.stepj();
         int ldc = C.stepj();
         float xbeta(beta);
+        //std::cout<<"Before sgemm"<<std::endl;
+        //std::cout<<"A = "<<TMV_Text(A)<<std::endl;
+        //std::cout<<"B = "<<TMV_Text(B)<<std::endl;
+        //std::cout<<"C = "<<TMV_Text(C)<<std::endl;
+        //std::cout<<"A.ptr = "<<A.cptr()<<" .. "<<A.cptr()+(A.colsize()-1)*A.stepi()+(A.rowsize()-1)*A.stepj()<<std::endl;
+        //std::cout<<"B.ptr = "<<B.cptr()<<" .. "<<B.cptr()+(B.colsize()-1)*B.stepi()+(B.rowsize()-1)*B.stepj()<<std::endl;
+        //std::cout<<"C.ptr = "<<C.cptr()<<" .. "<<C.cptr()+(C.colsize()-1)*C.stepi()+(C.rowsize()-1)*C.stepj()<<std::endl;
+        //std::cout<<"m n k = "<<m<<"  "<<n<<"  "<<k<<std::endl;
+        //std::cout<<"lda b c = "<<lda<<"  "<<ldb<<"  "<<ldc<<std::endl;
         BLASNAME(sgemm) (
             BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
             B.iscm()?BLASCH_NT:BLASCH_T,
             BLASV(m),BLASV(n),BLASV(k),BLASV(alpha),
             BLASP(A.cptr()),BLASV(lda),BLASP(B.cptr()),BLASV(ldb),
             BLASV(xbeta),BLASP(C.ptr()),BLASV(ldc) BLAS1 BLAS1);
+        //std::cout<<"After sgemm"<<std::endl;
     }
     template <> 
     void BlasMultMM(
@@ -406,12 +416,14 @@ namespace tmv {
             int ldb = B.isrm()?B.stepi():B.stepj();
             int ldc = C.stepj();
             std::complex<float> xbeta(beta);
+            //std::cout<<"Before cgemm"<<std::endl;
             BLASNAME(cgemm) (
                 BLASCM A.iscm()?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
                 B.iscm()?BLASCH_NT:B.isconj()?BLASCH_CT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(k),BLASP(&alpha),
                 BLASP(A.cptr()),BLASV(lda),BLASP(B.cptr()),BLASV(ldb),
                 BLASP(&xbeta),BLASP(C.ptr()),BLASV(ldc) BLAS1 BLAS1);
+            //std::cout<<"After cgemm"<<std::endl;
         }
     }
     template <> 
@@ -695,6 +707,9 @@ namespace tmv {
         cout<<"C = "<<C<<std::endl;
         cout<<"C2 = "<<C2<<std::endl;
         cout<<"Norm(C-C2) = "<<Norm(C-C2)<<std::endl;
+        cout<<"Norm(A0) = "<<Norm(A0)<<std::endl;
+        cout<<"Norm(B0) = "<<Norm(B0)<<std::endl;
+        cout<<"Norm(C0) = "<<Norm(C0)<<std::endl;
         if (Norm(C2-C) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
                                 (add?Norm(C0):TMV_RealType(T)(0)))) {
             cerr<<"MultMM: alpha = "<<alpha<<endl;

@@ -1,5 +1,5 @@
 
-#define START 0
+#define START 3
 
 #include "TMV.h"
 #include "TMV_SymBand.h"
@@ -334,6 +334,10 @@ void TestHermBandDecomp()
             if (showacc) {
                 std::cout<<"Norm(c-cU*cS*cV) = "<<Norm(c-cU*cS*cV)<<std::endl;
                 std::cout<<"ceps * normc = "<<ceps*normc<<std::endl;
+                std::cout<<"Norm(cUt*cU-1) = "<<Norm(cU.adjoint()*cU-T(1))<<std::endl;
+                std::cout<<"Norm(cU*cUt-1) = "<<Norm(cU*cU.adjoint()-T(1))<<std::endl;
+                std::cout<<"Norm(cVt*cV-1) = "<<Norm(cV.adjoint()*cV-T(1))<<std::endl;
+                std::cout<<"Norm(cV*cVt-1) = "<<Norm(cV*cV.adjoint()-T(1))<<std::endl;
             }
             Assert(Norm(c-cU*cS*cV) <= ceps*normc,"HermBand C SV");
 

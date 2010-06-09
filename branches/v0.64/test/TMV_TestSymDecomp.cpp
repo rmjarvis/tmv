@@ -1,6 +1,7 @@
 
 #define START 0
 
+#include "../src/TMV_Blas.h"
 #include "TMV.h"
 #include "TMV_Sym.h"
 #include "TMV_Band.h"
@@ -198,55 +199,60 @@ void TestHermDecomp()
 
         // LDL Decomposition
         try {
-            if (showstartdone) std::cout<<"LDL"<<std::endl;
-            tmv::LowerTriMatrix<T,tmv::UnitDiag> L = m.lud().getL();
-            tmv::BandMatrix<T> D = m.lud().getD();
-            tmv::Permutation P = m.lud().getP();
-            tmv::Matrix<T> LDL = P*L*D*L.adjoint()*P.transpose();
-            Assert(Norm(m-LDL) <= eps*normm,"Herm LDL");
+            do {
+#if (XTEST & 64) && defined(LAP)
+                if (mattype >= 3) break;
+#endif
+                if (showstartdone) std::cout<<"LDL"<<std::endl;
+                tmv::LowerTriMatrix<T,tmv::UnitDiag> L = m.lud().getL();
+                tmv::BandMatrix<T> D = m.lud().getD();
+                tmv::Permutation P = m.lud().getP();
+                tmv::Matrix<T> LDL = P*L*D*L.adjoint()*P.transpose();
+                Assert(Norm(m-LDL) <= eps*normm,"Herm LDL");
 
-            tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag> cL = c.lud().getL();
-            tmv::BandMatrix<std::complex<T> > cD = c.lud().getD();
-            tmv::Permutation cP = c.lud().getP();
-            tmv::Matrix<std::complex<T> > cLDL = 
-                cP*cL*cD*cL.adjoint()*cP.transpose();
-            Assert(Norm(c-cLDL) <= ceps*normc,"Herm C LDL");
+                tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag> cL = c.lud().getL();
+                tmv::BandMatrix<std::complex<T> > cD = c.lud().getD();
+                tmv::Permutation cP = c.lud().getP();
+                tmv::Matrix<std::complex<T> > cLDL = 
+                    cP*cL*cD*cL.adjoint()*cP.transpose();
+                Assert(Norm(c-cLDL) <= ceps*normc,"Herm C LDL");
 
 #ifdef XTEST
-            tmv::HermMatrix<T,uplo,stor> m2 = m;
-            tmv::HermBandMatrix<T,uplo,stor> D2(N,1);
-            tmv::Permutation P2(N);
-            LDL_Decompose(m2.view(),D2.view(),P2);
-            L = m2.lowerTri(tmv::UnitDiag);
-            LDL = P2*L*D2*L.adjoint()*P2.transpose();
-            Assert(Norm(m-LDL) <= eps*normm,"Herm LDL2");
+                tmv::HermMatrix<T,uplo,stor> m2 = m;
+                tmv::HermBandMatrix<T,uplo,stor> D2(N,1);
+                tmv::Permutation P2(N);
+                LDL_Decompose(m2.view(),D2.view(),P2);
+                L = m2.lowerTri(tmv::UnitDiag);
+                LDL = P2*L*D2*L.adjoint()*P2.transpose();
+                Assert(Norm(m-LDL) <= eps*normm,"Herm LDL2");
 
-            tmv::HermMatrix<std::complex<T>,uplo,stor> c2 = c;
-            tmv::HermBandMatrix<std::complex<T>,uplo,stor> cD2(N,1);
-            LDL_Decompose(c2.view(),cD2.view(),P2);
-            cL = c2.lowerTri(tmv::UnitDiag);
-            cLDL = P2*cL*cD2*cL.adjoint()*P2.transpose();
-            Assert(Norm(c-cLDL) <= ceps*normc,"Herm C LDL2");
+                tmv::HermMatrix<std::complex<T>,uplo,stor> c2 = c;
+                tmv::HermBandMatrix<std::complex<T>,uplo,stor> cD2(N,1);
+                LDL_Decompose(c2.view(),cD2.view(),P2);
+                cL = c2.lowerTri(tmv::UnitDiag);
+                cLDL = P2*cL*cD2*cL.adjoint()*P2.transpose();
+                Assert(Norm(c-cLDL) <= ceps*normc,"Herm C LDL2");
 
-            c2.conjugate() = c;
-            LDL_Decompose(c2.conjugate(),cD2.view(),P2);
-            cL = c2.conjugate().lowerTri(tmv::UnitDiag);
-            cLDL = P2*cL*cD2*cL.adjoint()*P2.transpose();
-            Assert(Norm(c-cLDL) <= ceps*normc,"Herm C LDL3");
+                c2.conjugate() = c;
+                LDL_Decompose(c2.conjugate(),cD2.view(),P2);
+                cL = c2.conjugate().lowerTri(tmv::UnitDiag);
+                cLDL = P2*cL*cD2*cL.adjoint()*P2.transpose();
+                Assert(Norm(c-cLDL) <= ceps*normc,"Herm C LDL3");
 
-            c2 = c;
-            LDL_Decompose(c2.view(),cD2.conjugate(),P2);
-            cL = c2.lowerTri(tmv::UnitDiag);
-            cLDL = P2*cL*cD2.conjugate()*cL.adjoint()*P2.transpose();
-            Assert(Norm(c-cLDL) <= ceps*normc,"Herm C LDL4");
+                c2 = c;
+                LDL_Decompose(c2.view(),cD2.conjugate(),P2);
+                cL = c2.lowerTri(tmv::UnitDiag);
+                cLDL = P2*cL*cD2.conjugate()*cL.adjoint()*P2.transpose();
+                Assert(Norm(c-cLDL) <= ceps*normc,"Herm C LDL4");
 
-            c2.conjugate() = c;
-            LDL_Decompose(c2.conjugate(),cD2.conjugate(),P2);
-            cL = c2.conjugate().lowerTri(tmv::UnitDiag);
-            cLDL = P2*cL*cD2.conjugate()*cL.adjoint()*P2.transpose();
-            Assert(Norm(c-cLDL) <= ceps*normc,"Herm C LDL5");
+                c2.conjugate() = c;
+                LDL_Decompose(c2.conjugate(),cD2.conjugate(),P2);
+                cL = c2.conjugate().lowerTri(tmv::UnitDiag);
+                cLDL = P2*cL*cD2.conjugate()*cL.adjoint()*P2.transpose();
+                Assert(Norm(c-cLDL) <= ceps*normc,"Herm C LDL5");
 #endif
-            std::cout<<"."; std::cout.flush();
+                std::cout<<"."; std::cout.flush();
+            } while (false);
         } catch (tmv::NonPosDef) {
             // The Lapack version throws whenever mattype is not posdef, 
             // but native algorithm succeeds when mattype is indefinite,
@@ -542,7 +548,10 @@ void TestSymDecomp()
         if (showacc) std::cout<<"eps => "<<eps<<"  "<<ceps<<std::endl;
 
         // LDL Decomposition
-        {
+        do {
+#if (XTEST & 64) && defined(LAP)
+            if (mattype >= 3) break;
+#endif
             if (showstartdone) std::cout<<"LDL"<<std::endl;
             tmv::LowerTriMatrix<T,tmv::UnitDiag> L = m.lud().getL();
             tmv::BandMatrix<T> D = m.lud().getD();
@@ -593,7 +602,7 @@ void TestSymDecomp()
             Assert(Norm(c-cLDL) <= ceps*normc,"Sym C LDL5");
 #endif
             std::cout<<"."; std::cout.flush();
-        }
+        } while (false);
 
         // SV Decomposition
         {
@@ -666,7 +675,7 @@ void TestPolar()
 {
     if (showstartdone) std::cout<<"PolarDecomp "<<TMV_Text(stor)<<std::endl;
 
-    for (int mattype = 0; mattype <= 6; mattype++) {
+    for (int mattype = START; mattype <= 6; mattype++) {
 #if !(XTEST & 64)
         if (mattype >= 4) break;
 #endif
@@ -761,7 +770,10 @@ void TestPolar()
         if (showacc) std::cout<<"eps => "<<eps<<"  "<<ceps<<std::endl;
 
         // Matrix Polar Decomposition
-        {
+        do {
+#if (XTEST & 64) && defined(LAP)
+            if (mattype >= 4) break;
+#endif
             if (showstartdone) std::cout<<"Polar"<<std::endl;
             tmv::HermMatrix<T,tmv::Lower,tmv::ColMajor> P(N);
             tmv::Matrix<T,stor> U = m;
@@ -819,10 +831,13 @@ void TestPolar()
             Assert(Norm(cU.adjoint()*cU-T(1)) <= ceps,"C Polar8 UtU");
 #endif
             std::cout<<"."; std::cout.flush();
-        }
+        } while (false);
 
         // BandMatrix Polar Decomposition
-        {
+        do {
+#if (XTEST & 64) && defined(LAP)
+            if (mattype >= 4) break;
+#endif
             if (showstartdone) std::cout<<"Band Polar"<<std::endl;
             tmv::BandMatrixView<T> b(m.view(),5,11);
             tmv::BandMatrixView<std::complex<T> > cb(c.view(),5,11);
@@ -832,12 +847,20 @@ void TestPolar()
             tmv::HermMatrix<T,tmv::Lower,tmv::ColMajor> P(N);
             tmv::Matrix<T,stor> U(b.colsize(),N);
             PolarDecompose(b,U.view(),P.view());
+            if (showacc) {
+                std::cout<<"Norm(b-UP) = "<<Norm(b-U*P)<<"  "<<eps*normb<<std::endl;
+                std::cout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<"  "<<eps<<std::endl;
+            }
             Assert(Norm(b-U*P) <= eps*normb,"Band Polar");
             Assert(Norm(U.adjoint()*U-T(1)) <= eps,"Band Polar UtU");
 
             tmv::HermMatrix<std::complex<T>,tmv::Lower,tmv::ColMajor> cP(N);
             tmv::Matrix<std::complex<T>,stor> cU(cb.colsize(),N);
             PolarDecompose(cb,cU.view(),cP.view());
+            if (showacc) {
+                std::cout<<"Norm(cb-UP) = "<<Norm(cb-cU*cP)<<"  "<<ceps*normcb<<std::endl;
+                std::cout<<"Norm(UtU-1) = "<<Norm(cU.adjoint()*cU-T(1))<<"  "<<ceps<<std::endl;
+            }
             Assert(Norm(cb-cU*cP) <= ceps*normcb,"C Band Polar");
             Assert(Norm(cU.adjoint()*cU-T(1)) <= ceps,"C Band Polar UtU");
 
@@ -877,7 +900,7 @@ void TestPolar()
             Assert(Norm(cU.adjoint()*cU-T(1)) <= ceps,"C Band Polar8 UtU");
 #endif
             std::cout<<"."; std::cout.flush();
-        }
+        } while (false);
     }
 }
 

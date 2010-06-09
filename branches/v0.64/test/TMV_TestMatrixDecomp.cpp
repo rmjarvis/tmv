@@ -123,7 +123,10 @@ void TestMatrixDecomp()
         }
 
         // LU Decomposition
-        if (m.isSquare()) {
+        if (m.isSquare()) do {
+#if (XTEST & 64) && defined(LAP)
+            if (mattype >= 4) break;
+#endif
             if (showstartdone) {
                 std::cout<<"LU\n";
             }
@@ -170,7 +173,7 @@ void TestMatrixDecomp()
             Assert(Norm(c-cPLU) <= ceps*normc,"C LU3"); 
 #endif
             std::cout<<"."; std::cout.flush();
-        }
+        } while (false);
 
         // QR Decomposition
         {
@@ -250,6 +253,9 @@ void TestMatrixDecomp()
 
         // QRP Decomposition
         for (int istrict = 0; istrict <= 1; istrict++) {
+#if (XTEST & 64) && defined(LAP)
+            if (mattype >= 4) break;
+#endif
             if (showstartdone) {
                 std::cout<<"QRP\n";
             }

@@ -1,2 +1,2 @@
 
-template bool isNaN(T);
+template bool isNaN(T x);

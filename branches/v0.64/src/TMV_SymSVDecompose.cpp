@@ -463,7 +463,7 @@ namespace tmv {
         }
     }
 #endif
-#ifndef NOSTEGR
+#ifdef NOSTEGR
 #ifdef INST_DOUBLE
     template <> 
     inline void LapEigenFromTridiagonal(
@@ -538,7 +538,7 @@ namespace tmv {
             //     In addition to the above problem, the dstegr routine seems to
             //     not be very careful about nan issues.  So we also check for nan's
             //     in U1, and call dstedc if there are any.
-            double nantest = U1.linearview().sumElements();
+            double nantest = U1.linearView().sumElements();
             if (Lap_info > 0 || E1(n-1) > 0.F || neigen < n || isNaN(nantest)) {
                 std::ostringstream ss;
                 ss << "Error in LAPACK function dstegr: ";
@@ -599,7 +599,7 @@ namespace tmv {
                 LAPP(&neigen),LAPP(Dout.ptr()),LAPP(U1.ptr()),LAPV(ldu),
                 LAPP(isuppz.get()) LAPWK(work.get()) LAPVWK(lwork) 
                 LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1 LAP1);
-            double nantest = U1.linearview().sumElements();
+            double nantest = U1.linearView().sumElements();
             if (Lap_info > 0 || E1(n-1) > 0.F || neigen < n || isNaN(nantest)) {
                 std::ostringstream ss;
                 ss << "Error in LAPACK function dstegr: ";
@@ -1267,9 +1267,16 @@ namespace tmv {
         Matrix<T> VtS = V.adjoint() * S;
         SymMultMM<false>(T(1),VtS,V,P);
 #ifdef XDEBUG
+        std::cout<<"Band PolarDecompose "<<TMV_Text(A)<<"  "<<A<<endl;
+        std::cout<<"U = "<<U<<endl;
+        std::cout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<endl;
+        //std::cout<<"P = "<<P<<endl;
         Matrix<T> A2 = U*P;
+        //std::cout<<"UP = "<<A2<<endl;
+        std::cout<<"Norm(A2-A0) = "<<Norm(A2-A)<<endl;
+        std::cout<<"Norm(A0) = "<<Norm(A)<<endl;
         if (Norm(A2-A) > THRESH*Norm(A)) {
-            cerr<<"PolarDecompose "<<TMV_Text(A)<<"  "<<A<<endl;
+            cerr<<"Band PolarDecompose "<<TMV_Text(A)<<"  "<<A<<endl;
             cerr<<"U = "<<U<<endl;
             cerr<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<endl;
             cerr<<"P = "<<P<<endl;

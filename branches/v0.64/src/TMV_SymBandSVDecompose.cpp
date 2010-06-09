@@ -291,9 +291,10 @@ namespace tmv {
         int lwork = n;
         auto_array<double> work(new double[lwork]);
 #endif
-        LAPNAME(dsbtrd) (LAPCM LAPV(vect),LAPCH_LO,LAPV(n),LAPV(kl),
-                         LAPP(A2.cptr()),LAPV(lda),LAPP(D.ptr()),LAPP(E.ptr()),
-                         LAPP(UU),LAPV(ldu) LAPWK(work.get()) LAPINFO LAP1 LAP1 );
+        LAPNAME(dsbtrd) (
+            LAPCM LAPV(vect),LAPCH_LO,LAPV(n),LAPV(kl),
+            LAPP(A2.cptr()),LAPV(lda),LAPP(D.ptr()),LAPP(E.ptr()),
+            LAPP(UU),LAPV(ldu) LAPWK(work.get()) LAPINFO LAP1 LAP1 );
         LAP_Results("dsbtrd");
     }
     template <> 
@@ -331,9 +332,10 @@ namespace tmv {
         int lwork = n;
         auto_array<std::complex<double> > work(new std::complex<double>[lwork]);
 #endif
-        LAPNAME(zhbtrd) (LAPCM LAPV(vect),LAPCH_LO,LAPV(n),LAPV(kl),
-                         LAPP(A2.cptr()),LAPV(lda),LAPP(D.ptr()),LAPP(E.ptr()),
-                         LAPP(UU),LAPV(ldu) LAPWK(work.get()) LAPINFO LAP1 LAP1 );
+        LAPNAME(zhbtrd) (
+            LAPCM LAPV(vect),LAPCH_LO,LAPV(n),LAPV(kl),
+            LAPP(A2.cptr()),LAPV(lda),LAPP(D.ptr()),LAPP(E.ptr()),
+            LAPP(UU),LAPV(ldu) LAPWK(work.get()) LAPINFO LAP1 LAP1 );
         LAP_Results("zhbtrd");
     }
 #endif
@@ -370,9 +372,10 @@ namespace tmv {
         int lwork = n;
         auto_array<float> work(new float[lwork]);
 #endif
-        LAPNAME(ssbtrd) (LAPCM LAPV(vect),LAPCH_LO,LAPV(n),LAPV(kl),
-                         LAPP(A2.cptr()),LAPV(lda),LAPP(D.ptr()),LAPP(E.ptr()),
-                         LAPP(UU),LAPV(ldu) LAPWK(work.get()) LAPINFO LAP1 LAP1 );
+        LAPNAME(ssbtrd) (
+            LAPCM LAPV(vect),LAPCH_LO,LAPV(n),LAPV(kl),
+            LAPP(A2.cptr()),LAPV(lda),LAPP(D.ptr()),LAPP(E.ptr()),
+            LAPP(UU),LAPV(ldu) LAPWK(work.get()) LAPINFO LAP1 LAP1 );
         LAP_Results("dsbtrd");
     }
     template <> 
@@ -410,9 +413,10 @@ namespace tmv {
         int lwork = n;
         auto_array<std::complex<float> > work(new std::complex<float>[lwork]);
 #endif
-        LAPNAME(chbtrd) (LAPCM LAPV(vect),LAPCH_LO,LAPV(n),LAPV(kl),
-                         LAPP(A2.cptr()),LAPV(lda),LAPP(D.ptr()),LAPP(E.ptr()),
-                         LAPP(UU),LAPV(ldu) LAPWK(work.get()) LAPINFO LAP1 LAP1 );
+        LAPNAME(chbtrd) (
+            LAPCM LAPV(vect),LAPCH_LO,LAPV(n),LAPV(kl),
+            LAPP(A2.cptr()),LAPV(lda),LAPP(D.ptr()),LAPP(E.ptr()),
+            LAPP(UU),LAPV(ldu) LAPWK(work.get()) LAPINFO LAP1 LAP1 );
         LAP_Results("chbtrd");
     }
 #endif 
@@ -472,6 +476,9 @@ namespace tmv {
             TT.diag() = D;
             TT.diag(1) = TT.diag(-1) = E;
             Matrix<T> A2 = (*U)*TT*(A.isherm() ? U->adjoint() : U->transpose());
+            std::cout<<"After Tridiag: Norm(A2-A0) = "<<Norm(A2-A0)<<std::endl;
+            std::cout<<"Norm(UtU-1) = "<<Norm(U->adjoint()*(*U)-T(1))<<std::endl;
+            std::cout<<"Norm(UUt-1) = "<<Norm((*U)*U->adjoint()-T(1))<<std::endl;
             if (Norm(A2-A0) > 0.001*Norm(A0)) {
                 cerr<<"Tridiagonalize: \n";
                 cerr<<"A0 = "<<TMV_Text(A)<<"  "<<A0<<endl;
@@ -534,12 +541,15 @@ namespace tmv {
 #ifdef XDEBUG
         if (U) {
             Matrix<T> A2 = (*U) * DiagMatrixViewOf(SS) * U->adjoint();
+            std::cout<<"After UnsortedEigen: Norm(A2-A0) = "<<Norm(A2-A0)<<std::endl;
+            std::cout<<"Norm(UtU-1) = "<<Norm(U->adjoint()*(*U)-T(1))<<std::endl;
+            std::cout<<"Norm(UUt-1) = "<<Norm((*U)*U->adjoint()-T(1))<<std::endl;
             if (Norm(A0-A2) > 0.0001 * Norm(*U) * Norm(SS) * Norm(*U)) {
                 cerr<<"Unsorted Eigen:\n";
                 //cerr<<"A = "<<A0<<endl;
                 //cerr<<"U = "<<*U<<endl;
                 cerr<<"S = "<<SS<<endl;
-                //cerr<<"USUt = "<<A2<<endl;
+                cerr<<"A-USUt = "<<Matrix<T>(A0-A2).clip(1.e-5)<<endl;
                 cerr<<"Norm(A0-A2) = "<<Norm(A0-A2)<<endl;
                 cerr<<"Norm(U) = "<<Norm(*U)<<endl;
                 cerr<<"Norm(SS) = "<<Norm(SS)<<endl;

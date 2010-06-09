@@ -1,6 +1,7 @@
 
 #define START 0
 
+#include "../src/TMV_Blas.h"
 #include "TMV.h"
 #include "TMV_Band.h"
 #include "TMV_Test.h"
@@ -130,7 +131,10 @@ void TestBandDecomp()
 
 
         // LU Decomposition
-        if (m.isSquare()) {
+        if (m.isSquare()) do {
+#if (XTEST & 64) && defined(LAP)
+            if (mattype >= 7) break;
+#endif
             if (showstartdone) {
                 std::cout<<"LU\n";
             }
@@ -193,7 +197,7 @@ void TestBandDecomp()
             Assert(Norm(c.conjugate()-cPLU) <= ceps*normc,"Band C LU9");
 #endif
             std::cout<<"."; std::cout.flush();
-        }
+        } while (false);
 
         // QR Decomposition
         {

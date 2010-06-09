@@ -450,7 +450,8 @@ namespace tmv {
         } else {
             // Marix is already LU decomposed, since no sub-diagonals.
             // Just set P values appropriately.
-            for(int i=0;i<A.colsize();++i) P[i] = i;
+            const int n = A.colsize();
+            for(int i=0;i<n;++i) P[i] = i;
         }
 
 #ifdef XDEBUG

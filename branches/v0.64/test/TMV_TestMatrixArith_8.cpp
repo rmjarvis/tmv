@@ -170,6 +170,7 @@ template <class T> void TestMatrixArith_8()
 
             tmv::Matrix<CT> c0 = c1;
             c1 = c0 + ac * bc;
+            eps = T(10) * EPS * (Norm(c0) + Norm(ac)*Norm(bc));
             Assert(Norm(((c=c0)+=ar*br)-c1) <= eps,"+ar*br");
             Assert(Norm(((c=c0)+=ar*bc)-c1) <= eps,"+ar*bc");
             Assert(Norm(((c=c0)+=ac*br)-c1) <= eps,"+ac*br");
@@ -190,8 +191,8 @@ template <class T> void TestMatrixArith_8()
             Assert(Norm(((c=c0)+=ac.conjugate()*br.conjugate())-c1) <= eps,"+cac*cbr");
 
             T x1(7);
-            eps *= x1;
             c1 = x1*ac * bc;
+            eps = T(10) * EPS * (T(1) + x1*Norm(ac)*Norm(bc));
             Assert(Norm((c=x1*ar*br)-c1) <= eps,"xar*br");
             Assert(Norm((c=x1*ar*bc)-c1) <= eps,"xar*bc");
             Assert(Norm((c=x1*ac*br)-c1) <= eps,"xac*br");
@@ -216,6 +217,7 @@ template <class T> void TestMatrixArith_8()
                    "xcac*cbr");
 
             c1 = c0 + x1*ac * bc;
+            eps = T(10) * EPS * (Norm(c0) + x1*Norm(ac)*Norm(bc));
             Assert(Norm(((c=c0)+=x1*ar*br)-c1) <= eps,"+xar*br");
             Assert(Norm(((c=c0)+=x1*ar*bc)-c1) <= eps,"+xar*bc");
             Assert(Norm(((c=c0)+=x1*ac*br)-c1) <= eps,"+xac*br");
@@ -240,8 +242,8 @@ template <class T> void TestMatrixArith_8()
                    "+xcac*cbr");
 
             CT z1(7,-9);
-            eps *= std::norm(z1)/x1;
             c1 = z1*ac * bc;
+            eps = T(10) * EPS * (T(1) + std::abs(z1)*Norm(ac)*Norm(bc));
             Assert(Norm((c=z1*ar*br)-c1) <= eps,"zar*br");
             Assert(Norm((c=z1*ar*bc)-c1) <= eps,"zar*bc");
             Assert(Norm((c=z1*ac*br)-c1) <= eps,"zac*br");
@@ -266,6 +268,7 @@ template <class T> void TestMatrixArith_8()
                    "zcac*cbr");
 
             c1 = c0 + z1*ac * bc;
+            eps = T(10) * EPS * (Norm(c0) + std::abs(z1)*Norm(ac)*Norm(bc));
             Assert(Norm(((c=c0)+=z1*ar*br)-c1) <= eps,"+zar*br");
             Assert(Norm(((c=c0)+=z1*ar*bc)-c1) <= eps,"+zar*bc");
             Assert(Norm(((c=c0)+=z1*ac*br)-c1) <= eps,"+zac*br");
@@ -300,7 +303,8 @@ template <class T> void TestMatrixArith_8()
 
             int k = sizear[k1];
             if (showstartdone)
-                std::cout<<"k = "<<k<<std::endl;
+                std::cout<<"(real) k = "<<k<<std::endl;
+            std::cout<<m1<<"  "<<n1<<"  "<<k1<<std::endl;
             tmv::Matrix<T,tmv::ColMajor> ac(m,k);
             tmv::Matrix<T,tmv::ColMajor> bc(k,n);
             for(int i=0;i<m;i++) for(int j=0;j<k;j++) 
@@ -329,18 +333,20 @@ template <class T> void TestMatrixArith_8()
 
             tmv::Matrix<T> c0 = c1;
             c1 = c0 + ac * bc;
+            eps = T(10) * EPS * (Norm(c0) + Norm(ac)*Norm(bc));
             Assert(Norm(((c=c0)+=ar*br)-c1) <= eps,"+ar*br");
             Assert(Norm(((c=c0)+=ar*bc)-c1) <= eps,"+ar*bc");
             Assert(Norm(((c=c0)+=ac*br)-c1) <= eps,"+ac*br");
 
             T x1(7);
-            eps *= x1;
             c1 = x1*ac * bc;
+            eps = T(10) * EPS * (T(1) + x1*Norm(ac)*Norm(bc));
             Assert(Norm((c=x1*ar*br)-c1) <= eps,"xar*br");
             Assert(Norm((c=x1*ar*bc)-c1) <= eps,"xar*bc");
             Assert(Norm((c=x1*ac*br)-c1) <= eps,"xac*br");
 
             c1 = c0 + x1*ac * bc;
+            eps = T(10) * EPS * (Norm(c0) + x1*Norm(ac)*Norm(bc));
             Assert(Norm(((c=c0)+=x1*ar*br)-c1) <= eps,"+xar*br");
             Assert(Norm(((c=c0)+=x1*ar*bc)-c1) <= eps,"+xar*bc");
             Assert(Norm(((c=c0)+=x1*ac*br)-c1) <= eps,"+xac*br");
