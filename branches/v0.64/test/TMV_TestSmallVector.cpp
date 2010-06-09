@@ -211,7 +211,7 @@ static void TestSmallVectorComplex()
     std::complex<T> prod = T(29)*std::complex<T>(-28,96)*T(25);
     T normsum = tmv::TMV_SQRT(T(1373700)*T(25));
     T normdiff = tmv::TMV_SQRT(T(1362100)*T(25));
-    Assert(std::abs(ca*cb - prod) <= EPS*Norm(ca)*Norm(cb),"CInner Product");
+    Assert(tmv::TMV_ABS(ca*cb - prod) <= EPS*Norm(ca)*Norm(cb),"CInner Product");
     Assert(std::abs(Norm(temp=ca+cb) - normsum) <= EPS*std::abs(Norm(ca)+Norm(cb)),"CSmallVector Sum");
     Assert(std::abs(Norm(temp=ca-cb) - normdiff) <= EPS*std::abs(Norm(ca)+Norm(cb)),"CSmallVector Diff");
 
@@ -237,7 +237,6 @@ static void TestSmallVectorComplex()
     if (showacc)
         std::cout<<"sorted w = "<<w<<std::endl;
 
-    //w.sort(0);
     w.reversePermute(perm);
     Assert(w==origw,"Reverse permute sorted SmallVector = orig");
     w.sort(0);

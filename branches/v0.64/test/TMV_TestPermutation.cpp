@@ -47,10 +47,12 @@ void TestPermutation()
     // Test construction
     //
 
-    Assert(p1.det() == m1.det(),"Identity permutation determinant");
-    Assert(p2.det() == m2.det(),"Reversal permutation determinant");
-    Assert(p3.det() == m3.det(),"Random permutation determinant");
-    Assert(p3i.det() == m3.det(),"Inverse permutation determinant");
+    if (!(std::numeric_limits<T>::is_integer)) {
+        Assert(p1.det() == m1.det(),"Identity permutation determinant");
+        Assert(p2.det() == m2.det(),"Reversal permutation determinant");
+        Assert(p3.det() == m3.det(),"Random permutation determinant");
+        Assert(p3i.det() == m3.det(),"Inverse permutation determinant");
+    }
 
     for(int i=0;i<10;++i) for(int j=0;j<10;++j) {
         Assert(p1.cref(i,j) == m1.cref(i,j),"Identity permutation cref");
@@ -124,38 +126,44 @@ void TestPermutation()
     v = v0 * m3.transpose();
     Assert(v == v3l,"Random permutation from right -- transpose matrix");
 
-    v = v0 / p1;
-    Assert(v == v1,"Identity permutation left division");
-    v = v0 % p1;
-    Assert(v == v1,"Identity permutation right division");
-    v = v0 / p2;
-    Assert(v == v2,"Reversal permutation left division");
-    v = v0 % p2;
-    Assert(v == v2,"Reversal permutation right division");
-    v = v0 / p3;
-    Assert(v == v3r,"Random permutation left division");
-    v = v0 % p3;
-    Assert(v == v3l,"Random permutation right division");
-    v = v0 / p3i;
-    Assert(v == v3r,"Inverse permutation left division");
-    v = v0 % p3i;
-    Assert(v == v3l,"Inverse permutation right division");
+    if (!(std::numeric_limits<T>::is_integer)) {
+        v = v0 / p1;
+        Assert(v == v1,"Identity permutation left division");
+        v = v0 % p1;
+        Assert(v == v1,"Identity permutation right division");
+        v = v0 / p2;
+        Assert(v == v2,"Reversal permutation left division");
+        v = v0 % p2;
+        Assert(v == v2,"Reversal permutation right division");
+        v = v0 / p3;
+        Assert(v == v3r,"Random permutation left division");
+        v = v0 % p3;
+        Assert(v == v3l,"Random permutation right division");
+        v = v0 / p3i;
+        Assert(v == v3r,"Inverse permutation left division");
+        v = v0 % p3i;
+        Assert(v == v3l,"Inverse permutation right division");
+    }
 
     v = v0;
     v *= p3;
     Assert(v == v3r,"Random permutation *=");
-    v %= p3;
-    Assert(v == v0,"Random permutation %=");
-    v /= p3;
-    Assert(v == v3r,"Random permutation /=");
+    if (!(std::numeric_limits<T>::is_integer)) {
+        v %= p3;
+        Assert(v == v0,"Random permutation %=");
+        v /= p3;
+        Assert(v == v3r,"Random permutation /=");
+    }
 
     v = v0;
     v *= p3i;
     Assert(v == v3r,"Inverse permutation *=");
-    v %= p3i;
-    Assert(v == v0,"Inverse permutation %=");
-    v /= p3i;
-    Assert(v == v3r,"Inverse permutation /=");
+    if (!(std::numeric_limits<T>::is_integer)) {
+        v %= p3i;
+        Assert(v == v0,"Inverse permutation %=");
+        v /= p3i;
+        Assert(v == v3r,"Inverse permutation /=");
+    }
 
     //
     // Test arithmetic with a Matrix
@@ -202,43 +210,49 @@ void TestPermutation()
     m = m0 * p3i.transpose();
     Assert(Norm(m - (m0*m3.transpose())) < 1.e-6,"Inverse permutation m*pt");
 
-    m = m0 / p1;
-    Assert(Norm(m - (m0/m1)) < 1.e-6,"Identity permutation m/p");
-    m = m0 / p2;
-    Assert(Norm(m - (m0/m2)) < 1.e-6,"Reversal permutation m/p");
-    m = m0 / p3;
-    Assert(Norm(m - (m0/m3)) < 1.e-6,"Random permutation m/p");
-    m = m0 / p3i;
-    Assert(Norm(m - (m0/m3)) < 1.e-6,"Inverse permutation m/p");
+    if (!(std::numeric_limits<T>::is_integer)) {
+        m = m0 / p1;
+        Assert(Norm(m - (m0/m1)) < 1.e-6,"Identity permutation m/p");
+        m = m0 / p2;
+        Assert(Norm(m - (m0/m2)) < 1.e-6,"Reversal permutation m/p");
+        m = m0 / p3;
+        Assert(Norm(m - (m0/m3)) < 1.e-6,"Random permutation m/p");
+        m = m0 / p3i;
+        Assert(Norm(m - (m0/m3)) < 1.e-6,"Inverse permutation m/p");
 
-    m = m0 % p1;
-    Assert(Norm(m - (m0%m1)) < 1.e-6,"Identity permutation m%p");
-    m = m0 % p2;
-    Assert(Norm(m - (m0%m2)) < 1.e-6,"Reversal permutation m%p");
-    m = m0 % p3;
-    Assert(Norm(m - (m0%m3)) < 1.e-6,"Random permutation m%p");
-    m = m0 % p3i;
-    Assert(Norm(m - (m0%m3)) < 1.e-6,"Inverse permutation m%p");
+        m = m0 % p1;
+        Assert(Norm(m - (m0%m1)) < 1.e-6,"Identity permutation m%p");
+        m = m0 % p2;
+        Assert(Norm(m - (m0%m2)) < 1.e-6,"Reversal permutation m%p");
+        m = m0 % p3;
+        Assert(Norm(m - (m0%m3)) < 1.e-6,"Random permutation m%p");
+        m = m0 % p3i;
+        Assert(Norm(m - (m0%m3)) < 1.e-6,"Inverse permutation m%p");
+    }
 
     m = m0;
     m *= p3;
     Assert(Norm(m - (m0*m3)) < 1.e-6,"Random permutation m*=p");
-    m = m0;
-    m %= p3;
-    Assert(Norm(m - (m0%m3)) < 1.e-6,"Random permutation m%=p");
-    m = m0;
-    m /= p3;
-    Assert(Norm(m - (m0/m3)) < 1.e-6,"Random permutation m/=p");
+    if (!(std::numeric_limits<T>::is_integer)) {
+        m = m0;
+        m %= p3;
+        Assert(Norm(m - (m0%m3)) < 1.e-6,"Random permutation m%=p");
+        m = m0;
+        m /= p3;
+        Assert(Norm(m - (m0/m3)) < 1.e-6,"Random permutation m/=p");
+    }
 
     m = m0;
     m *= p3i;
     Assert(Norm(m - (m0*m3)) < 1.e-6,"Inverse permutation m*=p");
-    m = m0;
-    m %= p3i;
-    Assert(Norm(m - (m0%m3)) < 1.e-6,"Inverse permutation m%=p");
-    m = m0;
-    m /= p3i;
-    Assert(Norm(m - (m0/m3)) < 1.e-6,"Inverse permutation m/=p");
+    if (!(std::numeric_limits<T>::is_integer)) {
+        m = m0;
+        m %= p3i;
+        Assert(Norm(m - (m0%m3)) < 1.e-6,"Inverse permutation m%=p");
+        m = m0;
+        m /= p3i;
+        Assert(Norm(m - (m0/m3)) < 1.e-6,"Inverse permutation m/=p");
+    }
 
     // 
     // Test various functions of a Permutation
@@ -264,17 +278,23 @@ void TestPermutation()
     tmv::Permutation p1x(10);
     Assert(p1x == p1,"Permutation identity constructor");
 
-    Assert(std::abs(Norm(p3) - Norm(m3)) < 1.e-6,"Permutation Norm");
-    Assert(std::abs(NormF(p3) - NormF(m3)) < 1.e-6,"Permutation NormF");
+    if (!(std::numeric_limits<T>::is_integer)) {
+        Assert(std::abs(Norm(p3) - Norm(m3)) < 1.e-6,"Permutation Norm");
+        Assert(std::abs(NormF(p3) - NormF(m3)) < 1.e-6,"Permutation NormF");
+    }
     Assert(std::abs(NormSq(p3) - NormSq(m3)) < 1.e-6,"Permutation NormSq");
     Assert(std::abs(Norm1(p3) - Norm1(m3)) < 1.e-6,"Permutation Norm1");
-    Assert(std::abs(Norm2(p3) - Norm2(m3)) < 1.e-6,"Permutation Norm2");
+    if (!(std::numeric_limits<T>::is_integer)) {
+        Assert(std::abs(Norm2(p3) - Norm2(m3)) < 1.e-6,"Permutation Norm2");
+    }
     Assert(std::abs(NormInf(p3) - NormInf(m3)) < 1.e-6,"Permutation NormInf");
     Assert(std::abs(MaxAbsElement(p3) - MaxAbsElement(m3)) < 1.e-6,
            "Permutation MaxAbsElement");
     Assert(std::abs(Trace(p3) - Trace(m3)) < 1.e-6,"Permutation Trace");
-    Assert(std::abs(Det(p3) - Det(m3)) < 1.e-6,"Permutation Det");
-    Assert(std::abs(LogDet(p3) - LogDet(m3)) < 1.e-6,"Permutation LogDet");
+    if (!(std::numeric_limits<T>::is_integer)) {
+        Assert(std::abs(Det(p3) - Det(m3)) < 1.e-6,"Permutation Det");
+        Assert(std::abs(LogDet(p3) - LogDet(m3)) < 1.e-6,"Permutation LogDet");
+    }
 
 
     //

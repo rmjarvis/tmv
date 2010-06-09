@@ -85,13 +85,15 @@ template <class T> void TestDiagMatrix()
             Assert(a(i,j) == m(i,j),"DiagMatrix -> Matrix");
     Assert(a == tmv::DiagMatrix<T>(m),"Matrix -> DiagMatrix");
 
-    tmv::DiagMatrix<T> ainv = a;
-    ainv.invertSelf();
-    tmv::DiagMatrix<T> ainv2 = a.inverse();
-    for(int i=0;i<N;++i)
-        Assert(std::abs(a(i)*ainv(i) - T(1)) < 1.e-6,"DiagMatrix invertSelf");
-    for(int i=0;i<N;++i)
-        Assert(std::abs(a(i)*ainv2(i) - T(1)) < 1.e-6,"DiagMatrix inverse()");
+    if (!(std::numeric_limits<T>::is_integer)) {
+        tmv::DiagMatrix<T> ainv = a;
+        ainv.invertSelf();
+        tmv::DiagMatrix<T> ainv2 = a.inverse();
+        for(int i=0;i<N;++i)
+            Assert(std::abs(a(i)*ainv(i) - T(1)) < 1.e-6,"DiagMatrix invertSelf");
+        for(int i=0;i<N;++i)
+            Assert(std::abs(a(i)*ainv2(i) - T(1)) < 1.e-6,"DiagMatrix inverse()");
+    }
 
     tmv::DiagMatrix<std::complex<T> > ca = a*std::complex<T>(1,2);
     tmv::DiagMatrix<std::complex<T> > cb = b*std::complex<T>(-5,-1);

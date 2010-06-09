@@ -118,6 +118,7 @@ namespace tmv {
         static int RoundUp(int x) { return x; }
     };
 
+#ifdef INST_DOUBLE
 #ifdef __SSE2__
     template <>
     struct BlockHelper<double>
@@ -141,6 +142,8 @@ namespace tmv {
         { return (x == 0 ? 0 : (((x-1)>>1)+1)<<1); }
     };
 #endif
+#endif
+#ifdef INST_FLOAT
 #ifdef __SSE__
     template <>
     struct BlockHelper<float>
@@ -163,6 +166,7 @@ namespace tmv {
         static int RoundUp(int x) 
         { return (x == 0 ? 0 : (((x-1)>>2)+1)<<2); }
     };
+#endif
 #endif
 
 

@@ -1038,13 +1038,13 @@ def DoConfig(env):
     env['TEST_LONGDOUBLE'] = env['INST_LONGDOUBLE']
     env['TEST_INT'] = env['INST_INT']
     if not env['INST_FLOAT']:
-        env.Append(CPPDEFINES=['TMV_NO_INST_FLOAT'])
+        env.Append(CPPDEFINES=['NO_INST_FLOAT'])
     if not env['INST_DOUBLE']:
-        env.Append(CPPDEFINES=['TMV_NO_INST_DOUBLE'])
+        env.Append(CPPDEFINES=['NO_INST_DOUBLE'])
     if env['INST_LONGDOUBLE']:
-        env.Append(CPPDEFINES=['TMV_INST_LONGDOUBLE'])
+        env.Append(CPPDEFINES=['INST_LONGDOUBLE'])
     if env['INST_INT']:
-        env.Append(CPPDEFINES=['TMV_INST_INT'])
+        env.Append(CPPDEFINES=['INST_INT'])
     if not env['TEST_FLOAT']:
         env.Append(CPPDEFINES=['NO_TEST_FLOAT'])
     if not env['TEST_DOUBLE']:

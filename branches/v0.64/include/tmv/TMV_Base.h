@@ -131,10 +131,6 @@
 #define INST_COMPLEX
 #endif
 
-//#define INST_LONGDOUBLE
-
-//#define INST_INT
-
 namespace tmv {
 
     inline std::string TMV_Version() { return "0.64"; }

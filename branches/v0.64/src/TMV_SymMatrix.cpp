@@ -595,6 +595,13 @@ namespace tmv {
         return max;
     } 
 
+#ifdef INST_INT
+    static int NonLapNormF(const GenSymMatrix<int>& m)
+    { return TMV_SQRT(m.normSq()); }
+    static int NonLapNormF(const GenSymMatrix<std::complex<int> >& m)
+    { return TMV_SQRT(m.normSq()); }
+#endif
+
     template <class T> 
     static RT NonLapNormF(const GenSymMatrix<T>& m)
     {

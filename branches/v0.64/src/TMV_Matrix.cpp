@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
 // Copyright (C) 1998 - 2009                                                 //
@@ -323,6 +323,7 @@ namespace tmv {
         return ok;
     }
 
+
     //
     // Norms
     //
@@ -412,6 +413,13 @@ namespace tmv {
         }
         return max;
     }
+
+#ifdef INST_INT
+    static int NonLapNormF(const GenMatrix<int>& m)
+    { return TMV_SQRT(m.normSq()); }
+    static int NonLapNormF(const GenMatrix<std::complex<int> >& m)
+    { return TMV_SQRT(m.normSq()); }
+#endif
 
     template <class T>
     static RT NonLapNormF(const GenMatrix<T>& m)

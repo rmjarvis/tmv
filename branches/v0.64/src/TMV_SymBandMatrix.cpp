@@ -832,6 +832,13 @@ namespace tmv {
         }
     } 
 
+#ifdef INST_INT
+    static int NonLapNormF(const GenSymBandMatrix<int>& m)
+    { return TMV_SQRT(m.normSq()); }
+    static int NonLapNormF(const GenSymBandMatrix<std::complex<int> >& m)
+    { return TMV_SQRT(m.normSq()); }
+#endif
+
     template <class T> 
     static RT NonLapNormF(const GenSymBandMatrix<T>& m)
     {

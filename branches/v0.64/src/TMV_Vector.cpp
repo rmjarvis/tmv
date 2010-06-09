@@ -210,6 +210,13 @@ namespace tmv {
         }
     }
 
+#ifdef INST_INT
+    static int DoNorm2(const GenVector<int>& v)
+    { return TMV_SQRT(v.normSq()); }
+    static int DoNorm2(const GenVector<std::complex<int> >& v)
+    { return TMV_SQRT(v.normSq()); }
+#endif
+
     template <class T> 
     static RT DoNorm2(const GenVector<T>& v)
     { 

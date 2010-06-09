@@ -285,6 +285,16 @@ static void DoTestLDivVM2a(
         tmv::Vector<T> frac = v/m;
         eps *= Norm(frac);
         a /= b;
+        if (XXDEBUG2) {
+            std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
+            std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
+            std::cout<<"v = "<<tmv::TMV_Text(v)<<"  "<<v<<std::endl;
+            std::cout<<"m = "<<tmv::TMV_Text(m)<<"  "<<m<<std::endl;
+            std::cout<<"a/b = "<<a/b<<std::endl;
+            std::cout<<"v/m = "<<frac<<std::endl;
+            std::cout<<"a /= b = "<<a<<std::endl;
+            std::cout<<"eps = "<<eps<<std::endl;
+        }
         Assert(Norm(VEC(T,a)-frac) <= eps,label+" a/=b");
         CopyBackV(a0,a);
 #ifdef ALIASOK
@@ -1027,6 +1037,16 @@ static void DoTestLDivMM2a(
         tmv::Matrix<T> frac = v/m;
         eps *= Norm(frac);
         a /= b;
+        if (XXDEBUG6) {
+            std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
+            std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
+            std::cout<<"m1 = "<<tmv::TMV_Text(v)<<"  "<<v<<std::endl;
+            std::cout<<"m2 = "<<tmv::TMV_Text(m)<<"  "<<m<<std::endl;
+            std::cout<<"a/b = "<<a/b<<std::endl;
+            std::cout<<"m1/m2 = "<<frac<<std::endl;
+            std::cout<<"a /= b = "<<a<<std::endl;
+            std::cout<<"eps = "<<eps<<std::endl;
+        }
         Assert(Norm(MAT(T,a)-frac) <= eps,label+" a/=b");
         CopyBackM(a0,a);
 #ifdef ALIASOK

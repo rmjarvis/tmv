@@ -25,10 +25,10 @@ static void DoTestSmallMatrixArith_A7()
     if (N > 3) ca1.row(3) += 
         tmv::SmallVector<std::complex<T>,N>(std::complex<T>(1.8,9.2));
 
-    tmv::SmallVector<T,N> v1 = a1.col(0);
-    tmv::SmallVector<T,N> v2 = a1.row(0);
-    tmv::SmallVector<std::complex<T>,N> cv1 = ca1.col(0);
-    tmv::SmallVector<std::complex<T>,N> cv2 = ca1.row(0);
+    tmv::SmallVector<T,N> v1 = a1.row(0);
+    tmv::SmallVector<std::complex<T>,N> cv1 = ca1.row(0);
+    tmv::SmallVector<T,N> v2 = a1.col(0);
+    tmv::SmallVector<std::complex<T>,N> cv2 = ca1.col(0);
 
     if (showstartdone) {
         std::cout<<"A7\n";

@@ -41,8 +41,8 @@ static void DoTestSmallMatrixArith_B7()
     ca5.col(3) *= std::complex<T>(-1,3);
     ca5.row(0).addToAll(std::complex<T>(1,9));
 
-    tmv::SmallVector<T,N> v1 = a1.col(0);
-    tmv::SmallVector<std::complex<T>,N> cv1 = ca1.col(0);
+    tmv::SmallVector<T,N> v1 = a1.row(0);
+    tmv::SmallVector<std::complex<T>,N> cv1 = ca1.row(0);
     tmv::SmallVector<T,7> v2 = a3.col(0);
     tmv::SmallVector<std::complex<T>,7> cv2 = ca3.col(0);
 

@@ -372,6 +372,3 @@ template void TestTriDiv<float>();
 #ifdef TEST_LONGDOUBLE
 template void TestTriDiv<long double>();
 #endif
-#ifdef TEST_INT
-template void TestTriDiv<int>();
-#endif

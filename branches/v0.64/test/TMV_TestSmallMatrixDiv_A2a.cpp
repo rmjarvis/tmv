@@ -29,8 +29,6 @@ static void TestSmallSquareDiv_A2a()
     c2a.diag().addToAll(std::complex<T>(-5,8));
     c2a.row(0).addToAll(std::complex<T>(-2,-11));
 
-    tmv::SmallMatrix<T,N,N,stor> a0;
-    tmv::SmallMatrix<std::complex<T>,N,N,stor> c0;
     tmv::SmallMatrix<T,N,N,stor> a3;
     tmv::SmallMatrix<std::complex<T>,N,N,stor> c3;
 

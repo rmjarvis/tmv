@@ -28,13 +28,13 @@ if env['MEM_TEST']:
 if env['XTEST'] > 0:
     env1.Append(CPPDEFINES=['XTEST=' + env['XTEST']])
 if not env['INST_FLOAT']:
-    env1.Append(CPPDEFINES=['TMV_NO_INST_FLOAT'])
+    env1.Append(CPPDEFINES=['NO_INST_FLOAT'])
 if not env['INST_DOUBLE']:
-    env1.Append(CPPDEFINES=['TMV_NO_INST_DOUBLE'])
+    env1.Append(CPPDEFINES=['NO_INST_DOUBLE'])
 if env['INST_LONGDOUBLE']:
-    env1.Append(CPPDEFINES=['TMV_INST_LONGDOUBLE'])
+    env1.Append(CPPDEFINES=['INST_LONGDOUBLE'])
 if env['INST_INT']:
-    env1.Append(CPPDEFINES=['TMV_INST_INT'])
+    env1.Append(CPPDEFINES=['INST_INT'])
 if not env['TEST_FLOAT']:
     env1.Append(CPPDEFINES=['NO_TEST_FLOAT'])
 if not env['TEST_DOUBLE']:

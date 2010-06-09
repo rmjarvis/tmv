@@ -2356,6 +2356,7 @@ static void DoTestMM4a_Basic(M1& a, const M2& b, std::string label)
 
 #ifndef NOMULTEQ
         if (CanMultMM(a,b,a)) {
+            typename M1::copy_type a0 = a;
 #ifdef XXD
             if (XXDEBUG8) {
                 std::cout<<"CanMult("<<tmv::TMV_Text(a)<<","<<tmv::TMV_Text(b)
@@ -2371,9 +2372,8 @@ static void DoTestMM4a_Basic(M1& a, const M2& b, std::string label)
             }
 #endif
             Assert(Norm(MAT(T,a)-m4) <= eps,label+" a *= b");
-#ifndef BASIC_MULTMM_ONLY
-            typename M1::copy_type a0 = a;
             CopyBackM(a0,a);
+#ifndef BASIC_MULTMM_ONLY
 #ifdef ALIASOK
             a = a*b;
             m4 = mm;
