@@ -27,8 +27,8 @@ static void DoTestSmallMatrixArith_A3a()
 
     tmv::SmallVector<T,N> v1 = a1.row(0);
     tmv::SmallVector<std::complex<T>,N> cv1 = ca1.row(0);
-    tmv::SmallVector<T,N> v2 = v1.col(0);
-    tmv::SmallVector<std::complex<T>,N> cv2 = cv1.col(0);
+    tmv::SmallVector<T,N> v2 = a1.col(0);
+    tmv::SmallVector<std::complex<T>,N> cv2 = ca1.col(0);
 
     if (showstartdone) {
         std::cout<<"A3a\n";
