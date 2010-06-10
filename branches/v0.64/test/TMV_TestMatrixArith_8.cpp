@@ -304,7 +304,6 @@ template <class T> void TestMatrixArith_8()
             int k = sizear[k1];
             if (showstartdone)
                 std::cout<<"(real) k = "<<k<<std::endl;
-            std::cout<<m1<<"  "<<n1<<"  "<<k1<<std::endl;
             tmv::Matrix<T,tmv::ColMajor> ac(m,k);
             tmv::Matrix<T,tmv::ColMajor> bc(k,n);
             for(int i=0;i<m;i++) for(int j=0;j<k;j++) 

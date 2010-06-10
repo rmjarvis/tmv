@@ -229,7 +229,7 @@ template <class T> inline void MakeSymBandList(
   CB.push_back(CSUD3);
   CB.push_back(CHUD3);
 
-#ifdef XTEST
+#if (XTEST & 2)
   tmv::SymBandMatrix<T,tmv::Lower,tmv::ColMajor>* SLC = new
   tmv::SymBandMatrix<T,tmv::Lower,tmv::ColMajor>(a1,7);
   tmv::HermBandMatrix<T,tmv::Lower,tmv::ColMajor>* HLC = new

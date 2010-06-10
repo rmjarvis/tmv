@@ -54,7 +54,7 @@ void TestBandMatrixArith_B1()
     tmv::MatrixView<T> a1v = a1.view();
     tmv::MatrixView<std::complex<T> > ca1v = ca1.view();
 
-#ifdef XTEST
+#if (XTEST & 2)
     tmv::Matrix<T> a2(2*N,2*N);
     for (int i=0; i<2*N; ++i) for (int j=0; j<2*N; ++j) a2(i,j) = T(1-3*i+3*j);
     tmv::Matrix<std::complex<T> > ca2(2*N,2*N);
@@ -84,7 +84,7 @@ void TestBandMatrixArith_B1()
         TestMatrixArith4<T>(bi,cbi,a1v,ca1v,"Band/SquareM");
         TestMatrixArith5<T>(bi,cbi,a1v,ca1v,"Band/SquareM");
         TestMatrixArith6x<T>(bi,cbi,a1v,ca1v,"Band/SquareM");
-#ifdef XTEST
+#if (XTEST & 2)
         TestMatrixArith4<T>(bi,cbi,a3v,ca3v,"Band/NonSquareM");
         TestMatrixArith5<T>(bi,cbi,a3v,ca3v,"Band/NonSquareM");
         TestMatrixArith6x<T>(bi,cbi,a3v,ca3v,"Band/NonSquareM");

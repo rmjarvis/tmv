@@ -36,7 +36,7 @@ static void DoTestSmallMatrixArith_A3a()
     TestMatrixArith3a<T>(a1,ca1,v1,cv1,v2,cv2,"Square");
     TestMatrixArith3b<T>(a1,ca1,v1,cv1,v2,cv2,"Square");
 
-#ifdef XTEST
+#if (XTEST & 32)
     tmv::SmallMatrix<T,N,N,tmv::RowMajor,tmv::FortranStyle> a1f = a1;
     tmv::SmallMatrix<std::complex<T>,N,N,tmv::RowMajor,tmv::FortranStyle> ca1f = ca1;
 
@@ -59,7 +59,7 @@ void TestSmallMatrixArith_A3a()
 {
     DoTestSmallMatrixArith_A3a<T,2>();
     DoTestSmallMatrixArith_A3a<T,5>();
-#ifdef XTEST
+#if (XTEST & 2)
     DoTestSmallMatrixArith_A3a<T,1>();
     DoTestSmallMatrixArith_A3a<T,3>();
     DoTestSmallMatrixArith_A3a<T,4>();

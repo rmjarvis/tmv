@@ -55,7 +55,7 @@ template <class T> inline void MakeBandList(
   b.push_back(BC.back()->view());
   cb.push_back(CBC.back()->view());
 
-#ifdef XTEST
+#if (XTEST & 2)
   BC.push_back(new tmv::BandMatrix<T,tmv::ColMajor>(a2,6,6)); 
   CBC.push_back(new tmv::BandMatrix<std::complex<T>,tmv::ColMajor>(ca2,6,6));
   b.push_back(BC.back()->subBandMatrix(0,2*N,0,N,3,3));

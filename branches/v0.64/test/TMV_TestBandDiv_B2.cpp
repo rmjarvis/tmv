@@ -33,7 +33,7 @@ void TestBandDiv_B2(tmv::DivType dt)
     tmv::MatrixView<T> a1v = a1.view();
     tmv::MatrixView<std::complex<T> > ca1v = ca1.view();
 
-#ifdef XTEST
+#if (XTEST & 2)
     tmv::Matrix<T> a3 = a1.colRange(0,N/2);
     tmv::Matrix<std::complex<T> > ca3 = ca1.colRange(0,N/2);
     tmv::Matrix<T> a4 = a1.rowRange(0,N/2);
@@ -66,7 +66,7 @@ void TestBandDiv_B2(tmv::DivType dt)
 
         TestMatrixDivArith1<T>(dt,a1v,bi,ca1v,cbi,"Band/SquareMatrix");
         if (dt == tmv::LU) continue;
-#ifdef XTEST
+#if (XTEST & 2)
         TestMatrixDivArith1<T>(dt,a3v,bi,ca3v,cbi,"Band/NonSquareMatrix");
         TestMatrixDivArith1<T>(dt,a4v,bi,ca4v,cbi,"Band/NonSquareMatrix");
         TestMatrixDivArith1<T>(dt,a5v,bi,ca5v,cbi,"Band/NonSquareMatrix");

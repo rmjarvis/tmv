@@ -53,7 +53,7 @@ if env['TEST_DEPRECATED']:
 
 env1b = env1.Clone()
 if env['LAP']:
-  env1b.Append(CPPDEFINES=env1['CPPDEFINES']+['LAP'])
+    env1b.Append(CPPDEFINES=['LAP'])
 
 env2 = env1.Clone(LIBS=sblibs+env['LIBS'])
 env2b = env1b.Clone(LIBS=sblibs+env['LIBS'])
@@ -66,7 +66,7 @@ progmix = env1.Program('tmvtestmix', obj_mix)
 
 env3 = env1.Clone()
 if env['NOMIX_SMALL']:
-  env3.Append(CPPDEFINES=['NOMIX_SMALL'])
+    env3.Append(CPPDEFINES=['NOMIX_SMALL'])
 
 obj_basic = env1.Object(test_basic_files)
 obj_diag = env1.Object(test_diag_files)

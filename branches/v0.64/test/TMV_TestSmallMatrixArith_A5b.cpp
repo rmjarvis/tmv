@@ -36,15 +36,18 @@ static void DoTestSmallMatrixArith_A5b()
         std::cout<<"A5b\n";
     }
     TestMatrixArith5<T>(a2,ca2,a1,ca1,"Square");
-#ifdef XTEST
+#if (XTEST & 2)
     tmv::SmallMatrix<T,N,N,tmv::ColMajor> a2b = a2;
     tmv::SmallMatrix<std::complex<T>,N,N,tmv::ColMajor> ca2b = ca2;
+    TestMatrixArith5<T>(a2,ca2,a2b,ca2b,"Square");
+#endif
+
+#if (XTEST & 32)
     tmv::SmallMatrix<T,N,N,tmv::RowMajor,tmv::FortranStyle> a1f = a1;
     tmv::SmallMatrix<std::complex<T>,N,N,tmv::RowMajor,tmv::FortranStyle> ca1f = ca1;
     tmv::SmallMatrix<T,N,N,tmv::ColMajor,tmv::FortranStyle> a2f = a2;
     tmv::SmallMatrix<std::complex<T>,N,N,tmv::ColMajor,tmv::FortranStyle> ca2f = ca2;
 
-    TestMatrixArith5<T>(a2,ca2,a2b,ca2b,"Square");
     TestMatrixArith5<T>(a2f,ca2f,a1,ca1,"Square");
     TestMatrixArith5<T>(a2f,ca2f,a1f,ca1f,"Square");
 #endif
@@ -55,7 +58,7 @@ void TestSmallMatrixArith_A5b()
 {
     DoTestSmallMatrixArith_A5b<T,2>();
     DoTestSmallMatrixArith_A5b<T,5>();
-#ifdef XTEST
+#if (XTEST & 2)
     DoTestSmallMatrixArith_A5b<T,1>();
     DoTestSmallMatrixArith_A5b<T,3>();
     DoTestSmallMatrixArith_A5b<T,4>();

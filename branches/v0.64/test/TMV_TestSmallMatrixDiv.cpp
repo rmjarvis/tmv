@@ -276,7 +276,7 @@ void TestAllSmallMatrixDiv()
     TestSmallNonSquareDiv<T,tmv::ColMajor,2>();
     TestSmallNonSquareDiv<T,tmv::ColMajor,5>();
 
-#ifdef XTEST
+#if (XTEST & 2)
     TestSmallSquareDiv<T,tmv::ColMajor,1>();
     TestSmallSquareDiv<T,tmv::ColMajor,3>();
     TestSmallSquareDiv<T,tmv::ColMajor,4>();

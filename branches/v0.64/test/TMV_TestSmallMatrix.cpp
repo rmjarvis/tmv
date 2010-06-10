@@ -202,9 +202,7 @@ inline void TestBasicSmallMatrix()
     Assert(m == xm2,"SmallMatrix I/O check #2");
     Assert(cm == xcm2,"CSmallMatrix I/O check #2");
 
-#ifndef XTEST
     std::remove("tmvtest_smallmatrix_io.dat");
-#endif
 }
 
 template <class T> 

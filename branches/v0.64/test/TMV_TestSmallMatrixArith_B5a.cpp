@@ -40,12 +40,14 @@ static void DoTestSmallMatrixArith_B5a()
     }
     TestMatrixArith5<T>(a3,ca3,a1,ca1,"NonSquare");
 
-#ifdef XTEST
+#if (XTEST & 2)
     tmv::SmallMatrix<T,N,N,tmv::ColMajor> a2 = a1;
     tmv::SmallMatrix<std::complex<T>,N,N,tmv::ColMajor> ca2 = ca1;
     tmv::SmallMatrix<T,7,N,tmv::ColMajor> a4 = a3;
     tmv::SmallMatrix<std::complex<T>,7,N,tmv::ColMajor> ca4 = ca3;
+#endif
 
+#if (XTEST & 32)
     tmv::SmallMatrix<T,N,N,tmv::RowMajor,tmv::FortranStyle> a1f = a1;
     tmv::SmallMatrix<std::complex<T>,N,N,tmv::RowMajor,tmv::FortranStyle> ca1f = ca1;
     tmv::SmallMatrix<T,7,N,tmv::RowMajor,tmv::FortranStyle> a3f = a3;
@@ -64,7 +66,7 @@ void TestSmallMatrixArith_B5a()
 {
     DoTestSmallMatrixArith_B5a<T,2>();
     DoTestSmallMatrixArith_B5a<T,5>();
-#ifdef XTEST
+#if (XTEST & 2)
     DoTestSmallMatrixArith_B5a<T,1>();
     DoTestSmallMatrixArith_B5a<T,3>();
     DoTestSmallMatrixArith_B5a<T,4>();

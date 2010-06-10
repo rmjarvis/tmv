@@ -100,6 +100,8 @@ opts.Add(BoolVariable('FORCE_FLAPACK',
             'Force scons to use Fortran LAPACK', False))
 opts.Add(BoolVariable('USE_STEGR',
             'Use the LAPACK function ?stegr for finding eigenvectors', True))
+opts.Add(BoolVariable('USE_GEQP3',
+            'Use the LAPACK function ?qeqp3 for finding strict QRP decomposition', True))
 opts.Add('LIBS','Libraries to send to the linker','')
 
 opts.Add(BoolVariable('DEBUG',

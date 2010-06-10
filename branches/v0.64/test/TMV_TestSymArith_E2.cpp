@@ -17,7 +17,7 @@
 template <class T> 
 void TestSymMatrixArith_E2()
 {
-#ifdef XTEST
+#if (XTEST & 2)
     std::vector<tmv::SymMatrixView<T> > s;
     std::vector<tmv::SymMatrixView<std::complex<T> > > cs;
     std::vector<tmv::BaseMatrix<T>*> B;

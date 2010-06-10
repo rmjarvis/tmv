@@ -37,7 +37,7 @@ inline bool CanMultMM(
 template <class T> 
 void TestSymBandMatrixArith_C2()
 {
-#ifdef XTEST
+#if (XTEST & 2)
     const int N = 10;
 
     std::vector<tmv::SymBandMatrixView<T> > sb;

@@ -22,7 +22,7 @@ static bool IsPosDef(const tmv::GenSymMatrix<T>& m)
         CH_Decompose(m2.view());
     }
     catch (tmv::NonPosDef) {
-#ifdef XTEST
+#if (XTEST & 16)
         if (showacc) {
             std::cout<<"caught nonposdef\n";
             std::cout<<"m.size ="<<m.size()<<std::endl;
@@ -55,7 +55,7 @@ static bool IsPosDef(const tmv::GenSymMatrix<T>& m)
 #endif
         return false;
     }
-#ifdef XTEST
+#if (XTEST & 16)
     if (showacc)
         std::cout<<"not caught\n";
     for(size_t i=1;i<=m.size();i++) {

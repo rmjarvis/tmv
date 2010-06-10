@@ -41,7 +41,7 @@ inline bool CanMultMM(
 template <class T> 
 void TestBandMatrixArith_C2()
 {
-#ifdef XTEST
+#if (XTEST & 2)
     const int N = 10;
 
     std::vector<tmv::BandMatrixView<T> > b;

@@ -837,9 +837,7 @@ static void TestBasicSymMatrix_IO()
     Assert(s1 == *xs5,"SymMatrix Compact I/O check #5");
     Assert(h1 == *xh5,"HermMatrix Compact I/O check #5");
 
-#ifndef XTEST
     std::remove("tmvtest_symmatrix_io.dat");
-#endif
 }
 
 template <class T, tmv::UpLoType U, tmv::StorageType S> 
@@ -856,7 +854,7 @@ template <class T> void TestSymMatrix()
 {
     TestBasicSymMatrix<T,tmv::Upper,tmv::ColMajor>();
     TestBasicSymMatrix<T,tmv::Lower,tmv::ColMajor>();
-#ifdef XTEST
+#if (XTEST & 2)
     TestBasicSymMatrix<T,tmv::Upper,tmv::RowMajor>();
     TestBasicSymMatrix<T,tmv::Lower,tmv::RowMajor>();
 #endif

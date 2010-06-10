@@ -31,7 +31,7 @@ void TestSymBandMatrixArith_B1()
     tmv::MatrixView<T> a1v = a1.view();
     tmv::MatrixView<std::complex<T> > ca1v = ca1.view();
 
-#ifdef XTEST
+#if (XTEST & 2)
     tmv::Matrix<T> a2(2*N,2*N);
     for (int i=0; i<2*N; ++i) for (int j=0; j<2*N; ++j) a2(i,j) = T(1-3*i+6*j);
     tmv::Matrix<std::complex<T> > ca2(2*N,2*N);
@@ -61,7 +61,7 @@ void TestSymBandMatrixArith_B1()
         TestMatrixArith4<T>(si,csi,a1v,ca1v,"SymBand/SquareM");
         TestMatrixArith5<T>(si,csi,a1v,ca1v,"SymBand/SquareM");
         TestMatrixArith6x<T>(si,csi,a1v,ca1v,"SymBand/SquareM");
-#ifdef XTEST
+#if (XTEST & 2)
         TestMatrixArith4<T>(si,csi,a3v,ca3v,"SymBand/NonSquareM");
         TestMatrixArith5<T>(si,csi,a3v,ca3v,"SymBand/NonSquareM");
         TestMatrixArith6x<T>(si,csi,a3v,ca3v,"SymBand/NonSquareM");

@@ -35,7 +35,7 @@ void TestSymMatrixArith_D1()
     tmv::UpperTriMatrix<T,tmv::NonUnitDiag> u1x = u1v;
     tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag> cu1x = cu1v;
 
-#ifdef XTEST
+#if (XTEST & 2)
     tmv::UpperTriMatrix<T,tmv::UnitDiag,tmv::RowMajor> u2(a1);
     tmv::UpperTriMatrix<T,tmv::NonUnitDiag,tmv::ColMajor> u3(a1);
     tmv::UpperTriMatrix<T,tmv::UnitDiag,tmv::ColMajor> u4(a1);
@@ -80,7 +80,7 @@ void TestSymMatrixArith_D1()
         TestMatrixArith4<T>(si,csi,u1v,cu1v,"Sym/UpperTri");
         TestMatrixArith5<T>(si,csi,u1v,cu1v,"Sym/UpperTri");
         TestMatrixArith6x<T>(si,csi,u1v,cu1v,"Sym/UpperTri");
-#ifdef XTEST
+#if (XTEST & 2)
         TestMatrixArith4<T>(si,csi,l1v,cl1v,"Sym/LowerTri");
         TestMatrixArith5<T>(si,csi,l1v,cl1v,"Sym/LowerTri");
         TestMatrixArith6x<T>(si,csi,l1v,cl1v,"Sym/LowerTri");

@@ -54,7 +54,7 @@ inline bool CanMultMM(
 template <class T> 
 void TestSymBandMatrixArith_E2()
 {
-#ifdef XTEST
+#if (XTEST & 2)
     std::vector<tmv::SymBandMatrixView<T> > sb;
     std::vector<tmv::SymBandMatrixView<std::complex<T> > > csb;
     std::vector<tmv::BaseMatrix<T>*> B;

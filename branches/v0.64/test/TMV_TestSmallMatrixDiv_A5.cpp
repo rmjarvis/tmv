@@ -37,7 +37,7 @@ static void TestSmallSquareDiv_A5()
     tmv::SmallMatrix<std::complex<T>,7,N,stor> c4b;
 
     TestMatrixDivArith3c<T>(tmv::LU,a1,a4,a4b,c1,c4,c4b,"NonSquare/Square");
-#ifdef XTEST
+#if (XTEST & 32)
     tmv::SmallMatrix<T,N,N,stor,tmv::FortranStyle> a1f = a1;
     tmv::SmallMatrix<std::complex<T>,N,N,stor,tmv::FortranStyle> c1f = c1;
 
@@ -57,7 +57,7 @@ void TestSmallMatrixDiv_A5()
 {
     TestSmallSquareDiv_A5<T,tmv::ColMajor,2>();
     TestSmallSquareDiv_A5<T,tmv::ColMajor,5>();
-#ifdef XTEST
+#if (XTEST & 2)
     TestSmallSquareDiv_A5<T,tmv::ColMajor,1>();
     TestSmallSquareDiv_A5<T,tmv::ColMajor,3>();
     TestSmallSquareDiv_A5<T,tmv::ColMajor,4>();

@@ -14,7 +14,7 @@
 template <class T> 
 void TestSymMatrixArith_C2()
 {
-#ifdef XTEST
+#if (XTEST & 2)
     const int N = 10;
 
     std::vector<tmv::SymMatrixView<T> > s;

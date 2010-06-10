@@ -9,6 +9,7 @@ ReadFileList=env['__readfunc']
 # Source lists
 basic = ReadFileList('basic.files')
 basic_omp = ReadFileList('basic_omp.files')
+basic_geqp3 = ReadFileList('basic_geqp3.files')
 diag = ReadFileList('diag.files')
 tri = ReadFileList('tri.files')
 
@@ -20,6 +21,7 @@ symband = ReadFileList('symband.files')
 
 lib_files= basic + diag + tri
 lib_omp_files= basic_omp
+lib_geqp3_files= basic_geqp3
 sblib_files= band + sym + symband
 sblib_omp_files= sym_omp
 sblib_stegr_files= sym_stegr
@@ -39,13 +41,19 @@ if env['LAP'] :
     if not env['USE_STEGR']:
         env3.Append(CPPDEFINES=['NOSTEGR'])
 
+env4 = env1.Clone()
+if env['LAP'] :
+    if not env['USE_GEQP3']:
+        env3.Append(CPPDEFINES=['NOGEQP3'])
+
 obj_lib = env1.Object(lib_files)
 obj_omp_lib = env2.Object(lib_omp_files)
+obj_geqp3_lib = env3.Object(lib_geqp3_files)
 obj_sblib = env1.Object(sblib_files)
 obj_omp_sblib = env2.Object(sblib_omp_files)
 obj_stegr_sblib = env3.Object(sblib_stegr_files)
 
-lib = env1.Library('#lib/tmv',obj_lib+obj_omp_lib)
+lib = env1.Library('#lib/tmv',obj_lib+obj_omp_lib+obj_geqp3_lib)
 sblib = env1.Library('#lib/tmv_symband',obj_sblib+obj_omp_sblib+obj_stegr_sblib)
 
 env.Alias(target='lib', source=lib)

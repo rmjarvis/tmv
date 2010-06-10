@@ -33,7 +33,7 @@ void TestSymBandMatrixArith_D1()
     tmv::UpperTriMatrixView<T> u1v = u1.view();
     tmv::UpperTriMatrixView<std::complex<T> > cu1v = cu1.view();
 
-#ifdef XTEST
+#if (XTEST & 2)
     tmv::UpperTriMatrix<T,tmv::UnitDiag,tmv::RowMajor> u2(a1);
     tmv::UpperTriMatrix<T,tmv::NonUnitDiag,tmv::ColMajor> u3(a1);
     tmv::UpperTriMatrix<T,tmv::UnitDiag,tmv::ColMajor> u4(a1);
@@ -78,7 +78,7 @@ void TestSymBandMatrixArith_D1()
         TestMatrixArith4<T>(si,csi,u1v,cu1v,"SymBand/UpperTri");
         TestMatrixArith5<T>(si,csi,u1v,cu1v,"SymBand/UpperTri");
         TestMatrixArith6x<T>(si,csi,u1v,cu1v,"SymBand/UpperTri");
-#ifdef XTEST
+#if (XTEST & 2)
         TestMatrixArith4<T>(si,csi,l1v,cl1v,"SymBand/LowerTri");
         TestMatrixArith5<T>(si,csi,l1v,cl1v,"SymBand/LowerTri");
         TestMatrixArith6x<T>(si,csi,l1v,cl1v,"SymBand/LowerTri");

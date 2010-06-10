@@ -34,7 +34,7 @@ void TestSymBandDiv_E2(tmv::DivType dt, PosDefCode pdc)
     tmv::BandMatrixView<T> b1v = b1.view();
     tmv::BandMatrixView<std::complex<T> > cb1v = cb1.view();
 
-#ifdef XTEST
+#if (XTEST & 2)
     tmv::BandMatrix<T> b3(a1.colRange(0,N-2),1,3);
     tmv::BandMatrix<std::complex<T> > cb3(ca1.colRange(0,N-2),1,3);
     tmv::BandMatrix<T> b4(a1.rowRange(0,N-2),1,3);
@@ -55,7 +55,7 @@ void TestSymBandDiv_E2(tmv::DivType dt, PosDefCode pdc)
 
         TestMatrixDivArith1<T>(dt,b1v,si,cb1v,csi,"SymBand/SquareBandMatrix");
         if (dt == tmv::LU) continue;
-#ifdef XTEST
+#if (XTEST & 2)
         TestMatrixDivArith1<T>(dt,b3v,si,cb3v,csi,"SymBand/NonSquareBandMatrix");
         TestMatrixDivArith1<T>(dt,b4v,si,cb4v,csi,"SymBand/NonSquareBandMatrix");
 #endif

@@ -35,7 +35,7 @@ static void DoTestSmallMatrixArith_A2b()
     }
     TestMatrixArith2b<T>(a1,ca1,v1,cv1,v2,cv2,"Square");
 
-#ifdef XTEST
+#if (XTEST & 2)
     tmv::SmallMatrix<T,N,N,tmv::ColMajor> a2 = a1.transpose();
     if (N > 1) a2.row(1) *= T(3.1);
     if (N > 2) a2.col(2) -= tmv::SmallVector<T,N>(4.9);
@@ -43,6 +43,10 @@ static void DoTestSmallMatrixArith_A2b()
     ca2 -= T(0.13)*a2;
     ca2 *= std::complex<T>(1.1,-2.5);
 
+    TestMatrixArith2b<T>(a2,ca2,v1,cv1,v2,cv2,"Square");
+#endif
+
+#if (XTEST & 32)
     tmv::SmallMatrix<T,N,N,tmv::RowMajor,tmv::FortranStyle> a1f = a1;
     tmv::SmallMatrix<std::complex<T>,N,N,tmv::RowMajor,tmv::FortranStyle> ca1f = ca1;
     tmv::SmallMatrix<T,N,N,tmv::ColMajor,tmv::FortranStyle> a2f = a2;
@@ -53,7 +57,6 @@ static void DoTestSmallMatrixArith_A2b()
     tmv::SmallVector<T,N,tmv::FortranStyle> v2f = v1;
     tmv::SmallVector<std::complex<T>,N,tmv::FortranStyle> cv2f = cv1;
 
-    TestMatrixArith2b<T>(a2,ca2,v1,cv1,v2,cv2,"Square");
     TestMatrixArith2b<T>(a1f,ca1f,v1,cv1,v2,cv2,"Square");
     TestMatrixArith2b<T>(a2f,ca2f,v1,cv1,v2,cv2,"Square");
     TestMatrixArith2b<T>(a1f,ca1f,v1f,cv1f,v2,cv2,"Square");
@@ -68,7 +71,7 @@ void TestSmallMatrixArith_A2b()
 {
     DoTestSmallMatrixArith_A2b<T,2>();
     DoTestSmallMatrixArith_A2b<T,5>();
-#ifdef XTEST
+#if (XTEST & 2)
     DoTestSmallMatrixArith_A2b<T,1>();
     DoTestSmallMatrixArith_A2b<T,3>();
     DoTestSmallMatrixArith_A2b<T,4>();

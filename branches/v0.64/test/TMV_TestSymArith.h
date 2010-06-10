@@ -134,7 +134,7 @@ inline void MakeSymList(
   CB.push_back(CSUC);
   CB.push_back(CHUC);
 
-#ifdef XTEST
+#if (XTEST & 2)
   tmv::SymMatrix<T,tmv::Lower,tmv::RowMajor>* SLR = new
   tmv::SymMatrix<T,tmv::Lower,tmv::RowMajor>(a1);
   tmv::HermMatrix<T,tmv::Lower,tmv::RowMajor>* HLR = new

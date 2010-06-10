@@ -21,7 +21,7 @@ static bool IsPosDef(const tmv::GenSymBandMatrix<T>& m)
         tmv::HermBandMatrix<T> m2 = m;
         CH_Decompose(m2.view());
     } catch (tmv::NonPosDef) {
-#ifdef XTEST
+#if (XTEST & 16)
         if (showacc)
             std::cout<<"caught\n";
         for(size_t i=1;i<=m.size();i++) {
@@ -43,7 +43,7 @@ static bool IsPosDef(const tmv::GenSymBandMatrix<T>& m)
 #endif
         return false;
     }
-#ifdef XTEST
+#if (XTEST & 16)
     if (showacc)
         std::cout<<"not caught\n";
     for(size_t i=1;i<=m.size();i++) {

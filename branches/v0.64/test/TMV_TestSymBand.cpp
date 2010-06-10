@@ -1114,9 +1114,7 @@ static void TestBasicSymBandMatrix_IO()
     Assert(s1 == *xs5,"SymBandMatrix Compact I/O check #5");
     Assert(h1 == *xh5,"HermBandMatrix Compact I/O check #5");
 
-#ifndef XTEST
     std::remove("tmvtest_symbandmatrix_io.dat");
-#endif
 }
 
 template <class T, tmv::UpLoType U, tmv::StorageType S>
@@ -1134,7 +1132,7 @@ void TestSymBandMatrix()
 {
     TestBasicSymBandMatrix<T,tmv::Upper,tmv::ColMajor>();
     TestBasicSymBandMatrix<T,tmv::Lower,tmv::ColMajor>();
-#ifdef XTEST
+#if (XTEST & 2)
     TestBasicSymBandMatrix<T,tmv::Upper,tmv::RowMajor>();
     TestBasicSymBandMatrix<T,tmv::Lower,tmv::RowMajor>();
 #endif

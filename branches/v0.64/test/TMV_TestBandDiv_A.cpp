@@ -39,10 +39,12 @@ void TestBandDiv_A(tmv::DivType dt)
 
     tmv::BandMatrixView<T> b1v = b1.view();
     tmv::BandMatrixView<std::complex<T> > cb1v = cb1.view();
+#if (XTEST & 2)
     tmv::BandMatrixView<T> b2v = b2.view();
     tmv::BandMatrixView<std::complex<T> > cb2v = cb2.view();
     tmv::BandMatrixView<T> b3v = b3.view();
     tmv::BandMatrixView<std::complex<T> > cb3v = cb3.view();
+#endif
 
     for(size_t i=START;i<b.size();i++) {
         if (showstartdone) 
@@ -56,7 +58,7 @@ void TestBandDiv_A(tmv::DivType dt)
         cbi.saveDiv();
 
         TestMatrixDivArith2<T>(dt,bi,b1v,cbi,cb1v,"SquareBand/Band");
-#ifdef XTEST
+#if (XTEST & 2)
         TestMatrixDivArith1<T>(dt,bi,b2v,cbi,cb2v,"NonSquareBand/Band");
         TestMatrixDivArith1<T>(dt,bi,b3v,cbi,cb3v,"NonSquareBand/Band");
 #endif

@@ -268,8 +268,7 @@ static void TestSmallVectorArith()
     TestVectorArith2<T>(a,ca,bf,cbf,"SmallVector CF");
     TestVectorArith2<T>(af,caf,b,cb,"SmallVector FC");
 
-#ifdef XTEST
-    // These tests lead to segmentation faults with ATLAS BLAS.
+#ifndef NOMIX_SMALL
     tmv::VectorView<T> av = a.view();
     tmv::VectorView<std::complex<T> > cav = ca.view();
     tmv::VectorView<T> bv = b.view();
@@ -337,9 +336,7 @@ static void TestSmallVectorIO()
     Assert(v == *xv2,"SmallVector I/O check #2");
     Assert(cv == *xcv2,"CSmallVector I/O check #2");
 
-#ifndef XTEST
     std::remove("tmvtest_smallvector_io.dat");
-#endif
 }
 
 template <class T> 
