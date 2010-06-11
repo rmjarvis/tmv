@@ -262,6 +262,7 @@
 //    m.norm2() or Norm2(m)
 //    m.normInf() or NormInf(m)
 //    m.maxAbsElement() or MaxAbsElements(m)
+//    m.maxAbs2Element() or MaxAbs2Elements(m)
 //
 //    m.inverse() or Inverse(m)
 //    m.makeInverse(minv)
@@ -881,6 +882,7 @@ namespace tmv {
         { return transpose().norm1(); }
 
         RT maxAbsElement() const;
+        RT maxAbs2Element() const;
 
         QuotXB<T,T> QInverse() const;
         inline QuotXB<T,T> inverse() const

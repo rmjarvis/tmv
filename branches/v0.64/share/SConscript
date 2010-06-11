@@ -5,21 +5,15 @@ Import('env')
 
 libs=['tmv'] 
 
-installed_linkfile = File('share/tmv-link',env['INSTALL_PREFIX']).abspath
+installed_link_file = File('share/tmv-link',env['INSTALL_PREFIX']).abspath
 #print "prefix = ",env['INSTALL_PREFIX']
-#print "installed_linkfile =" , installed_linkfile
+#print "installed_link_file =" , installed_link_file
 
-linkfile = File('#share/tmv-link').abspath
-#print "linkfile =" , linkfile
-
-cmd = 'rm -f $LINKFILE; '
-cmd += 'echo $_LIBDIRFLAGS $_LIBFLAGS $LINKFLAGS > $LINKFILE; '
-cmd += 'share/tmv-link-msg $LINKFILE $INSTALLED_LINKFILE'
-
-#print "cmd = " , cmd
+link_file = File('#share/tmv-link')
+#print "link_file =" , link_file
 
 env1 = env.Clone(LIBS=libs+env['LIBS'],
-    LINKFILE=linkfile, INSTALLED_LINKFILE=installed_linkfile,
+    LINKFILE=link_file, INSTALLED_LINKFILE=installed_link_file,
     LIBPATH=env['LIBPATH2'])
 
 if env['PREFIX'] != '':
@@ -29,10 +23,14 @@ if env['PREFIX'] != '':
 #print "LIBPATH1= " , env1['LIBPATH']
 #print "INSTALL_PREFIX= " , env['INSTALL_PREFIX']
 
-env1.Command('#share/tmv-link','#share/tmv-link-msg',cmd)
+lib_files = ['#lib/libtmv.a', '#lib/libtmv_symband.a']
+cmd1 = 'rm -f $LINKFILE; '
+cmd1 += 'echo $_LIBDIRFLAGS $_LIBFLAGS $LINKFLAGS > $TARGET '
+env1.Command(link_file,lib_files,cmd1)
 
-env.Depends('#share/tmv-link', '#lib/libtmv.a')
-env.Depends('#share/tmv-link', '#lib/libtmv_symband.a')
+cmd2 = 'share/tmv-link-msg $LINKFILE $INSTALLED_LINKFILE'
+done_install = env1.Command(
+    '#share/done_install', env['INSTALL_PREFIX']+'/share/tmv-link', cmd2)
 
 RunInstall = env['_InstallProgram']
 RunUninstall = env['_UninstallProgram']
@@ -44,6 +42,7 @@ for fname in ['tmv-link']:
     targets = [cfile]
 
     if 'install' in COMMAND_LINE_TARGETS:
+        env.Alias('install', done_install)
         RunInstall(env, targets, install_subdir)
 
     if 'uninstall' in COMMAND_LINE_TARGETS:

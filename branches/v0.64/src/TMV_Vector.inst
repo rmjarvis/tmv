@@ -13,6 +13,8 @@
   template T GenVector<T >::maxElement(int* imaxout) const; \
   template RT GenVector<T >::minAbsElement(int* iminout) const; \
   template RT GenVector<T >::maxAbsElement(int* imaxout) const; \
+  template RT GenVector<T >::minAbs2Element(int* iminout) const; \
+  template RT GenVector<T >::maxAbs2Element(int* imaxout) const; \
   template void GenVector<T >::write(std::ostream& os) const; \
   template void GenVector<T >::write(std::ostream& os, RT minnz) const; \
   template T GenVector<T >::cref(int i) const; \

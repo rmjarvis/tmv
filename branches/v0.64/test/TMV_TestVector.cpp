@@ -78,6 +78,14 @@ template <class T> static void TestVectorReal()
            "MinElement of Vector did not return correct value");
     Assert(imin == 15,
            "MinElement of Vector did not return correct index");
+    Assert(v.maxAbs2Element(&imax) == T(20*N),
+           "MaxAbs2Element of Vector did not return correct value");
+    Assert(imax == 15,
+           "MaxAbs2Element of Vector did not return correct index");
+    Assert(v.minAbs2Element(&imin) == T(0.25),
+           "MinAbs2Element of Vector did not return correct value");
+    Assert(imin == 42,
+           "MinAbs2Element of Vector did not return correct index");
 
     tmv::Vector<T> a(N);
     tmv::Vector<T> b(N);
@@ -239,18 +247,20 @@ template <class T> static void TestVectorComplex()
     tmv::Vector<std::complex<T> > v(N);
     for (int i=0; i<N; ++i) v(i) = std::complex<T>(T(i),T(i+1234));
 
-    for (int i=0; i<N; ++i) Assert(v(i).real() == T(i),
-                                   "CVector set");
-    for (int i=0; i<N; ++i) Assert(v(i).imag() == T(i+1234),
-                                   "CVector set");
+    for (int i=0; i<N; ++i) 
+        Assert(v(i).real() == T(i), "CVector set");
+    for (int i=0; i<N; ++i) 
+        Assert(v(i).imag() == T(i+1234), "CVector set");
 
     tmv::VectorView<std::complex<T> > v1(v.subVector(0,N,2));
-    for (int i=0; i<N/2; ++i) Assert(v1(i) == std::complex<T>(T(2*i),T(2*i+1234)),
-                                     "CVector stride=2");
+    for (int i=0; i<N/2; ++i) 
+        Assert(v1(i) == std::complex<T>(T(2*i),T(2*i+1234)),
+               "CVector stride=2");
 
     for (int i=0; i<N/2; ++i) v1[i] = std::complex<T>(T(i),T(i+1234));
-    for (int i=0; i<N/2; ++i) Assert(v[2*i] == std::complex<T>(T(i),T(i+1234)),
-                                     "setting CVector with stride = 2");
+    for (int i=0; i<N/2; ++i) 
+        Assert(v[2*i] == std::complex<T>(T(i),T(i+1234)),
+               "setting CVector with stride = 2");
 
     for (int i=0; i<N; ++i) v(i) = std::complex<T>(T(i),T(i+1234));
 
@@ -265,6 +275,36 @@ template <class T> static void TestVectorComplex()
         Assert(v2(i) == std::complex<T>(T(i),T(-i-1234)), "Conjugate CVector");
     Assert(v2 == v.conjugate(),"Conjugate == CVector");
 
+    tmv::Vector<std::complex<T> > v3(N);
+    for (int i=0; i<N; ++i) v3(i) = std::complex<T>(i+10,2*i);
+    v3(23) = std::complex<T>(40*N,9*N);
+    v3(42) = std::complex<T>(0.15,-0.20);
+    v3(15) = std::complex<T>(-32*N,24*N);
+    int imax,imin;
+    if (showacc) {
+        std::cout<<"v = "<<v3<<std::endl;
+        std::cout<<"v.MaxAbs = "<<v3.maxAbsElement(&imax)<<std::endl;
+        std::cout<<"imax = "<<imax<<std::endl;
+        std::cout<<"v.MinAbs = "<<v3.minAbsElement(&imin)<<std::endl;
+        std::cout<<"imin = "<<imin<<std::endl;
+    }
+    Assert(std::abs(v3.maxAbsElement(&imax) - T(41*N)) < tmv::TMV_Epsilon<T>(),
+           "MaxAbsElement of Vector did not return correct value");
+    Assert(imax == 23,
+           "MaxAbsElement of Vector did not return correct index");
+    Assert(std::abs(v3.minAbsElement(&imin) - T(0.25)) < tmv::TMV_Epsilon<T>(),
+           "MinAbsElement of Vector did not return correct value");
+    Assert(imin == 42,
+           "MinAbsElement of Vector did not return correct index");
+    Assert(std::abs(v3.maxAbs2Element(&imax) - T(56*N)) < tmv::TMV_Epsilon<T>(),
+           "MaxAbs2Element of Vector did not return correct value");
+    Assert(imax == 15,
+           "MaxAbs2Element of Vector did not return correct index");
+    Assert(std::abs(v3.minAbs2Element(&imin) - T(0.35)) < tmv::TMV_Epsilon<T>(),
+           "MinAbs2Element of Vector did not return correct value");
+    Assert(imin == 42,
+           "MinAbs2Element of Vector did not return correct index");
+ 
     if (tmv::TMV_Epsilon<T>() == T(0)) return;
 
     std::complex<T> prod_act(0);
@@ -273,6 +313,8 @@ template <class T> static void TestVectorComplex()
     Assert(tmv::TMV_ABS(prod-prod_act) < EPS*tmv::TMV_ABS(prod_act),
            "CVector * CVector");
     prod = v*v.conjugate();
+    prod_act = T(0);
+    for (int i=0; i<N; ++i) prod_act += v[i] * std::conj(v[i]);
     Assert(tmv::TMV_ABS(prod.imag()) < EPS,"prod is real");
     Assert(tmv::TMV_ABS(prod-prod_act) < EPS*tmv::TMV_ABS(prod_act),
            "CVector * conj(CVector)");
@@ -296,7 +338,8 @@ template <class T> static void TestVectorComplex()
         std::cout<<"sumact = "<<sum_act<<std::endl;
         std::cout<<"diff = "<<tmv::TMV_ABS(sumel-sum_act)<<std::endl;
     }
-    Assert(tmv::TMV_ABS(sumel-sum_act) < EPS*tmv::TMV_ABS(sum_act),"CVector SumElements");
+    Assert(tmv::TMV_ABS(sumel-sum_act) < EPS*tmv::TMV_ABS(sum_act),
+           "CVector SumElements");
 
     T sumabs_act(0);
     for (int i=0; i<N; ++i) sumabs_act += tmv::TMV_ABS(v[i]);
@@ -330,8 +373,10 @@ template <class T> static void TestVectorComplex()
         std::cout<<"eps = "<<EPS*Norm(ca)*Norm(cb)<<std::endl;
     }
     Assert(tmv::TMV_ABS(ca*cb - prod) < EPS*Norm(ca)*Norm(cb),"CInner Product");
-    Assert(tmv::TMV_ABS(Norm(ca+cb) - normsum) < EPS*tmv::TMV_ABS(Norm(ca)+Norm(cb)),"CVector Sum");
-    Assert(tmv::TMV_ABS(Norm(ca-cb) - normdiff) < EPS*tmv::TMV_ABS(Norm(ca)+Norm(cb)),"CVector Diff");
+    Assert(tmv::TMV_ABS(Norm(ca+cb) - normsum) < 
+           EPS*tmv::TMV_ABS(Norm(ca)+Norm(cb)),"CVector Sum");
+    Assert(tmv::TMV_ABS(Norm(ca-cb) - normdiff) < 
+           EPS*tmv::TMV_ABS(Norm(ca)+Norm(cb)),"CVector Diff");
 
     const int NN=20;
     tmv::Vector<std::complex<T> > w(NN);

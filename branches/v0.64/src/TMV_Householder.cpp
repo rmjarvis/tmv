@@ -67,7 +67,7 @@ namespace tmv {
         // and underflow problems if done naively.  The simplest (although
         // probably not the most efficient) is to scale all the intermediate
         // values by the maximum abs value in the vector.
-        RT scale = x.maxAbsElement();
+        RT scale = x.maxAbs2Element();
         RT absx0 = TMV_ABS(x0);
         if (absx0 > scale) scale = absx0;
         if (scale * TMV_Epsilon<T>() == RT(0)) {

@@ -28,6 +28,7 @@
   template RT GenSymBandMatrix<T >::normSq(const RT scale) const; \
   template RT GenSymBandMatrix<T >::norm1() const; \
   template RT GenSymBandMatrix<T >::maxAbsElement() const; \
+  template RT GenSymBandMatrix<T >::maxAbs2Element() const; \
   template QuotXsB<T,T > GenSymBandMatrix<T >::QInverse() const; \
   template void GenSymBandMatrix<T >::write(std::ostream& os) const; \
   template void GenSymBandMatrix<T >::write(std::ostream& os, RT t) const; \

@@ -1,4 +1,4 @@
-
+///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
 // Copyright (C) 1998 - 2009                                                 //
@@ -403,6 +403,29 @@ namespace tmv {
     }
 
     template <class T>
+    static RT NonLapMaxAbs2Element(const GenMatrix<T>& m)
+    {
+        if (m.canLinearize()) return m.constLinearView().maxAbs2Element();
+        else {
+            RT max(0);
+            if (m.iscm()) {
+                const int N = m.rowsize();
+                for(int j=0;j<N;++j) {
+                    RT temp = m.col(j).maxAbs2Element();
+                    if (temp > max) max = temp;
+                }
+            } else {
+                const int M = m.colsize();
+                for(int i=0;i<M;++i) {
+                    RT temp = m.row(i).maxAbs2Element();
+                    if (temp > max) max = temp;
+                }
+            }
+            return max;
+        }
+    }
+
+    template <class T>
     static RT NonLapNorm1(const GenMatrix<T>& m)
     {
         RT max(0);
@@ -425,10 +448,11 @@ namespace tmv {
     static RT NonLapNormF(const GenMatrix<T>& m)
     {
         const RT eps = TMV_Epsilon<T>();
+        const RT halfeps = eps/RT(2);
 
-        RT mmax = m.maxAbsElement();
+        RT mmax = m.maxAbs2Element();
         if (mmax == RT(0)) return RT(0);
-        else if (mmax * mmax * eps == RT(0)) {
+        else if (mmax * mmax * halfeps == RT(0)) {
             // Then we need to rescale, since underflow has caused 
             // rounding errors.
             // Epsilon is a pure power of 2, so no rounding errors from 
@@ -550,6 +574,17 @@ namespace tmv {
         else
 #endif
             return NonLapMaxAbsElement(*this);
+    }
+    template <class T>
+    RT GenMatrix<T>::maxAbs2Element() const
+    {
+#ifdef XLAP
+        if (Traits<T>::iscomplex) return NonLapMaxAbs2Element(*this);
+        else if (isrm() && stepi() > 0) return LapNorm('M',transpose());
+        else if (iscm() && stepj() > 0) return LapNorm('M',*this);
+        else
+#endif
+            return NonLapMaxAbs2Element(*this);
     }
     template <class T>
     RT GenMatrix<T>::norm1() const

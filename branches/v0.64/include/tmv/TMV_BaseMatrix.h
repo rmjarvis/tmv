@@ -129,6 +129,7 @@ namespace tmv {
         virtual RT doNorm2() const  = 0;
         virtual RT normInf() const = 0;
         virtual RT maxAbsElement() const = 0;
+        virtual RT maxAbs2Element() const = 0;
 
         virtual void makeInverse(const MatrixView<T>& minv) const = 0;
         virtual void makeInverseATA(const MatrixView<T>& ata) const = 0;
@@ -513,6 +514,10 @@ namespace tmv {
     template <class T> 
     inline TMV_RealType(T) MaxAbsElement(const BaseMatrix<T>& m)
     { return m.maxAbsElement(); }
+
+    template <class T> 
+    inline TMV_RealType(T) MaxAbs2Element(const BaseMatrix<T>& m)
+    { return m.maxAbs2Element(); }
 
 
     //

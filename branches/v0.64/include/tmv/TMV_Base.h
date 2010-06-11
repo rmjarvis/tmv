@@ -240,6 +240,14 @@ namespace tmv {
     { return std::abs(x); }
 
     template <class T> 
+    inline T TMV_ABS2(T x)
+    { return std::abs(x); }
+
+    template <class T> 
+    inline T TMV_ABS2(std::complex<T> x)
+    { return std::abs(std::real(x)) + std::abs(std::imag(x)); }
+
+    template <class T> 
     inline T TMV_SIGN(T x, T )
     { return x > 0 ? T(1) : T(-1); }
 

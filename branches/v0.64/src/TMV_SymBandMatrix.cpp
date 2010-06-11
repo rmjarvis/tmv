@@ -843,10 +843,11 @@ namespace tmv {
     static RT NonLapNormF(const GenSymBandMatrix<T>& m)
     {
         const RT eps = TMV_Epsilon<T>();
+        const RT halfeps = eps/RT(2);
 
-        RT mmax = m.maxAbsElement();
+        RT mmax = m.maxAbs2Element();
         if (mmax == RT(0)) return RT(0);
-        else if (mmax * mmax * eps == RT(0)) {
+        else if (mmax * mmax * halfeps == RT(0)) {
             // Then we need to rescale, since underflow has caused 
             // rounding errors.
             // Epsilon is a pure power of 2, so no rounding errors from 
@@ -875,6 +876,10 @@ namespace tmv {
     template <class T> 
     static inline RT NonLapMaxAbsElement(const GenSymBandMatrix<T>& m)
     { return m.upperBand().maxAbsElement(); }
+
+    template <class T> 
+    static inline RT NonLapMaxAbs2Element(const GenSymBandMatrix<T>& m)
+    { return m.upperBand().maxAbs2Element(); }
 
 #ifdef XLAP
     template <class T> 
@@ -1001,6 +1006,17 @@ namespace tmv {
         else
 #endif
             return NonLapMaxAbsElement(*this);
+    }
+    template <class T> 
+    RT GenSymBandMatrix<T>::maxAbs2Element() const
+    {
+#ifdef XLAP
+        if (Traits<T>::iscomplex) return NonLapMaxAbs2Element(*this);
+        else if ((isrm() && stepi()>0) || (iscm() && stepj()>0))
+            return LapNorm('M',*this);
+        else
+#endif
+            return NonLapMaxAbs2Element(*this);
     }
     template <class T> 
     RT GenSymBandMatrix<T>::norm1() const

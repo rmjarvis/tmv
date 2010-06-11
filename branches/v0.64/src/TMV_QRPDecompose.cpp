@@ -108,7 +108,10 @@ namespace tmv
         // Keep track of the norm of each column
         // When considering column j, these are actually just the norm
         // of each column from j:M, not 0:M.
-        RT scale = RT(1) / A.maxAbsElement(); // for more stable normSq
+        RT scale = RT(1) / A.maxAbs2Element(); // for more stable normSq
+        //std::cout<<"scale = "<<scale<<std::endl;
+        //std::cout<<"maxAbs = "<<A.maxAbsElement()<<std::endl;
+        //std::cout<<"maxAbs2 = "<<A.maxAbs2Element()<<std::endl;
         Vector<RT> colnormsq(N);
         for(int j=0;j<N;++j) colnormsq(j) = A.col(j).normSq(scale);
         //std::cout<<"colnormsq = "<<colnormsq<<std::endl;
@@ -218,6 +221,9 @@ namespace tmv
             for(int i=0;i<int(A.rowsize());i++) cerr<<P[i]<<" ";
             cerr<<endl;
             cerr<<"QRP = "<<AA<<endl;
+            cerr<<"A0 = "<<A0<<endl;
+            cerr<<"diff = "<<Matrix<T>(AA-A0).clip(1.e-5)<<endl;
+            cerr<<"Norm(diff) = "<<Norm(AA-A0)<<endl;
             abort(); 
         }
 #endif
@@ -250,7 +256,10 @@ namespace tmv
         const int Astepj = A.stepj();
         const RT sqrteps = TMV_SQRT(TMV_Epsilon<T>());
 
-        RT scale = RT(1) / A.maxAbsElement(); // for more stable normSq
+        RT scale = RT(1) / A.maxAbs2Element(); // for more stable normSq
+        //std::cout<<"scale = "<<scale<<std::endl;
+        //std::cout<<"maxAbs = "<<A.maxAbsElement()<<std::endl;
+        //std::cout<<"maxAbs2 = "<<A.maxAbs2Element()<<std::endl;
         Vector<RT> colnormsq(N);
         for(int j=0;j<N;++j) colnormsq(j) = A.col(j).normSq(scale);
         RT anormsq = colnormsq.sumElements();
@@ -386,6 +395,9 @@ namespace tmv
             for(int i=0;i<int(A.rowsize());i++) cerr<<P[i]<<" ";
             cerr<<endl;
             cerr<<"QRP = "<<AA<<endl;
+            cerr<<"A0 = "<<A0<<endl;
+            cerr<<"diff = "<<Matrix<T>(AA-A0).clip(1.e-5)<<endl;
+            cerr<<"Norm(diff) = "<<Norm(AA-A0)<<endl;
             abort(); 
         }
 #endif
@@ -469,7 +481,10 @@ namespace tmv
         const int Astepj = A.stepj();
         const RT sqrteps = TMV_SQRT(TMV_Epsilon<T>());
 
-        RT scale = RT(1) / A.maxAbsElement(); // for more stable normSq
+        RT scale = RT(1) / A.maxAbs2Element(); // for more stable normSq
+        //std::cout<<"scale = "<<scale<<std::endl;
+        //std::cout<<"maxAbs = "<<A.maxAbsElement()<<std::endl;
+        //std::cout<<"maxAbs2 = "<<A.maxAbs2Element()<<std::endl;
         Vector<RT> colnormsq(N);
         for(int j=0;j<N;++j) colnormsq(j) = A.col(j).normSq(scale);
         //std::cout<<"colnormsq = "<<colnormsq<<std::endl;
@@ -602,7 +617,7 @@ namespace tmv
                     // from scratch anyway.)
                     const T* Ajk = A.row(j,j+1,j2).cptr();
                     for(int k=j+1;k<j2;++k,Ajk+=Astepj) 
-                        colnormsq(k) -= tmv::TMV_NORM(*Ajk*scale);
+                        colnormsq(k) -= TMV_NORM(*Ajk*scale);
                 }
 
                 if (j1 < j2) {
@@ -674,12 +689,11 @@ namespace tmv
                 for(int i=0;i<N;i++) cerr<<P[i]<<" ";
                 cerr<<endl;
                 cerr<<"QRP = "<<AA<<endl;
-                Matrix<T> diff = AA-A0;
-                diff.clip(0.0001);
-                cerr<<"diff = "<<diff<<endl;
+                cerr<<"A0 = "<<A0<<endl;
+                cerr<<"diff = "<<Matrix<T>(AA-A0).clip(1.e-5)<<endl;
             }
+            cerr<<"Norm(diff) = "<<Norm(AA-A0)<<endl;
             cerr<<"Rdiag = "<<A.diag()<<endl;
-            cerr<<"Norm(A-QRP) = "<<Norm(AA-A0)<<endl;
             abort(); 
         }
 #endif
@@ -1049,12 +1063,15 @@ namespace tmv
             for(int i=0;i<int(A.rowsize());i++) cerr<<P[i]<<" ";
             cerr<<endl;
             cerr<<"QRP = "<<AA<<endl;
+            cerr<<"A0 = "<<A0<<endl;
+            cerr<<"diff = "<<Matrix<T>(AA-A0).clip(1.e-5)<<endl;
+            cerr<<"Norm(diff) = "<<Norm(AA-A0)<<endl;
 #ifdef LAP
             cerr<<"NonLap: A = "<<A2<<endl;
+            cerr<<"diff = "<<Matrix<T>(A-A2).clip(1.e-5)<<endl;
             cerr<<"beta2 = "<<beta2<<endl;
             cerr<<"det2 = "<<det2<<endl;
 #endif
-            cerr<<"Norm(AA-A0) = "<<Norm(A0-AA)<<endl;
             abort(); 
         }
 #endif

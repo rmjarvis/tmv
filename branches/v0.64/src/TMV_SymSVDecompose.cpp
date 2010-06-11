@@ -791,7 +791,7 @@ namespace tmv {
 
         // Before running the normal algorithms, rescale D,E by the maximum
         // value to help avoid overflow and underflow.
-        RT scale = TMV_MAX(D.maxAbsElement(),E.maxAbsElement());
+        RT scale = TMV_MAX(D.maxAbs2Element(),E.maxAbs2Element());
         if (scale * TMV_Epsilon<T>() == RT(0)) {
             // Hopeless case.  Just zero out D,E and call it done.
             D.setZero();

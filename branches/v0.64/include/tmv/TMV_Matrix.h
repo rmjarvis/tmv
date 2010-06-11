@@ -980,6 +980,9 @@ namespace tmv {
         // = max_i,j (|a_ij|)
         RT maxAbsElement() const;
 
+        // = max_i,j (|real(a_ij)|+|imag(a_ij)|)
+        RT maxAbs2Element() const;
+
         inline bool isSingular() const
         { return DivHelper<T>::isSingular(); }
 

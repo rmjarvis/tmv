@@ -603,8 +603,10 @@ namespace tmv {
         if (V) TMVAssert(int(V->colsize()) == N);
         TMVAssert(D.step()==1);
         TMVAssert(E.step()==1);
-        TMVAssert(D.minAbsElement() > RT(0));
-        TMVAssert(E.minAbsElement() > RT(0));
+#ifdef XTEST
+        TMVAssert(D.minAbs2Element() > RT(0));
+        TMVAssert(E.minAbs2Element() > RT(0));
+#endif
 
         if (N == 1) return;
         if (N == 2) return ReduceBidiagonal22(U,D,E,V);
@@ -739,8 +741,10 @@ namespace tmv {
         TMVAssert(D.size() == E.size()+1);
         if (U) TMVAssert(U->rowsize() == D.size());
         if (V) TMVAssert(V->colsize() == D.size());
-        TMVAssert(D.minAbsElement() > RT(0));
-        TMVAssert(E.minAbsElement() > RT(0));
+#ifdef XTEST
+        TMVAssert(D.minAbs2Element() > RT(0));
+        TMVAssert(E.minAbs2Element() > RT(0));
+#endif
 
         // We successively reduce the superdiagonal of B (E) to 0
         // using a sequence of Givens rotations. 

@@ -134,12 +134,12 @@ namespace tmv {
                 RecursiveRankKUpdate<false,false,a1>(alpha,U,A);
     }
 
-    template <bool ha, class T> 
+    template <bool sa, class T> 
     static void RecursiveSetUUt(const SymMatrixView<T>& A)
     {
         TMVAssert(A.ct() == NonConj);
         TMVAssert(A.uplo() == Upper);
-        TMVAssert(ha == A.isherm());
+        TMVAssert(sa == A.issym());
 
         int N = A.size();
 
@@ -148,7 +148,7 @@ namespace tmv {
             TMVAssert(A.ptr() >= A.first);
             TMVAssert(A.ptr() < A.last);
 #endif
-            *(A.ptr()) = ha ? TMV_NORM(*(A.cptr())) : TMV_SQR(*(A.cptr()));
+            *(A.ptr()) = sa ? TMV_SQR(*(A.cptr())) : TMV_NORM(*(A.cptr()));
         } else {
             //
             // [ A11 A12 ] = alpha [ U11 U12 ] [ U11t  0   ]
@@ -163,25 +163,25 @@ namespace tmv {
             MatrixView<T> A12 = A.subMatrix(0,k,k,N);
             ConstUpperTriMatrixView<T> U22 = A22.upperTri();
 
-            RecursiveSetUUt<ha>(A11);
+            RecursiveSetUUt<sa>(A11);
 
             // The transpose's here are because these RankKUpdate routines
             // want A11 to be stored in the Lower triangle.
-            if (ha)
-                RankKUpdate<true>(T(1),A12.conjugate(),A11.transpose());
-            else
+            if (sa)
                 RankKUpdate<true>(T(1),A12,A11.transpose());
+            else
+                RankKUpdate<true>(T(1),A12.conjugate(),A11.transpose());
 
-            A12 *= (ha ? U22.adjoint() : U22.transpose());
+            A12 *= (sa ? U22.transpose() : U22.adjoint());
 
-            RecursiveSetUUt<ha>(A22);
+            RecursiveSetUUt<sa>(A22);
         }
     }
 
 #ifdef AELAP
     template <class T> 
     static inline void LapSetUUt(const SymMatrixView<T>& A)
-    { RecursiveSetUUt<false>(A); }
+    { RecursiveSetUUt<true>(A); }
 #ifdef INST_DOUBLE
     template<> 
     void LapSetUUt(const SymMatrixView<double>& A)
@@ -257,7 +257,7 @@ namespace tmv {
             LapSetUUt(A);
         else
 #endif
-            if (A.isherm()) RecursiveSetUUt<true>(A);
+            if (A.issym()) RecursiveSetUUt<true>(A);
             else RecursiveSetUUt<false>(A);
     }
 

@@ -1,6 +1,6 @@
 
 #define START1 0
-#define START2 7
+#define START2 0
 
 #include "TMV.h"
 #include "TMV_Band.h"

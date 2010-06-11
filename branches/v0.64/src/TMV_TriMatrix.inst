@@ -25,6 +25,7 @@
   template RT GenUpperTriMatrix<T >::doCondition() const; \
   template RT GenUpperTriMatrix<T >::normInf() const; \
   template RT GenUpperTriMatrix<T >::maxAbsElement() const; \
+  template RT GenUpperTriMatrix<T >::maxAbs2Element() const; \
   template auto_ptr<BaseMatrix<T > > GenUpperTriMatrix<T >::newCopy() const; \
   template auto_ptr<BaseMatrix<T > > GenUpperTriMatrix<T >::newView() const; \
   template auto_ptr<BaseMatrix<T > > GenUpperTriMatrix<T >::newTranspose() const; \

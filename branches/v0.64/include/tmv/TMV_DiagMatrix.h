@@ -125,6 +125,7 @@
 //    m.norm2() or Norm2(m)
 //    m.normInf() or NormInf(m)
 //    m.maxAbsElement() or MaxAbsElements(m)
+//    m.maxAbs2Element() or MaxAbs2Elements(m)
 //        (Note - for diagonal matrices, 
 //        norm1 = norm2 = normInf = maxAbsElement.)
 //
@@ -399,6 +400,9 @@ namespace tmv {
 
         inline RT maxAbsElement() const
         { return diag().maxAbsElement(); }
+
+        inline RT maxAbs2Element() const
+        { return diag().maxAbs2Element(); }
 
         inline bool isSingular() const 
         { return diag().minAbsElement() == RT(0); }

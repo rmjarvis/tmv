@@ -140,10 +140,10 @@ static void DoTestMa_Basic(const MM& a, std::string label)
         std::cout<<"abs(diff) = "<<tmv::TMV_ABS(NormSq(a)-NormSq(m))<<std::endl;
         std::cout<<"eps*normsq = "<<eps*NormSq(m)<<std::endl;
         std::cout<<"Norm1(a) = "<<Norm1(a)<<"  "<<Norm1(m)<<std::endl;
-        std::cout<<"Norm1(m) = "<<Norm1(m)<<std::endl;
         std::cout<<"NormInf(a) = "<<NormInf(a)<<"  "<<NormInf(m)<<std::endl;
         std::cout<<"abs(diff) = "<<tmv::TMV_ABS(NormInf(a)-NormInf(m))<<std::endl;
         std::cout<<"eps*norminf = "<<eps*NormInf(m)<<std::endl;
+        std::cout<<"MaxAbsElement(a) = "<<MaxAbsElement(a)<<"  "<<MaxAbsElement(m)<<std::endl;
     }
 #endif
 
@@ -174,6 +174,8 @@ static void DoTestMa_Basic(const MM& a, std::string label)
     Assert(tmv::TMV_ABS(NormSq(a)-NormSq(m)) <= eps*NormSq(m),label+" NormSq");
     Assert(tmv::TMV_ABS(Norm1(a)-Norm1(m)) <= eps*Norm1(m),label+" Norm1");
     Assert(tmv::TMV_ABS(NormInf(a)-NormInf(m)) <= eps*NormInf(m),label+" NormInf");
+    Assert(tmv::TMV_ABS(MaxAbsElement(a)-MaxAbsElement(m)) <= eps*MaxAbsElement(m),label+" MaxAbsElement");
+    Assert(tmv::TMV_ABS(MaxAbs2Element(a)-MaxAbs2Element(m)) <= eps*MaxAbs2Element(m),label+" MaxAbs2Element");
 #ifndef NODIV
 #ifndef NOSV
     if (donorm2) {
@@ -242,6 +244,8 @@ static void DoTestMa_Full(const MM& a, std::string label)
     Assert(tmv::TMV_ABS(a.normSq(1.e-3)-NormSq(m*T(1.e-3))) <= eps*1.e-6*NormSq(m),label+" NormSq,scale");
     Assert(tmv::TMV_ABS(a.norm1()-Norm1(m)) <= eps*Norm1(m),label+" Norm1");
     Assert(tmv::TMV_ABS(a.normInf()-NormInf(m)) <= eps*NormInf(m),label+" NormInf");
+    Assert(tmv::TMV_ABS(a.maxAbsElement()-MaxAbsElement(m)) <= eps*MaxAbsElement(m),label+" MaxAbsElement");
+    Assert(tmv::TMV_ABS(a.maxAbs2Element()-MaxAbs2Element(m)) <= eps*MaxAbs2Element(m),label+" MaxAbs2Element");
 #ifndef NODIV
 #ifndef NOSV
     if (donorm2) {

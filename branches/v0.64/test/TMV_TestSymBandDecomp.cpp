@@ -1,13 +1,10 @@
 
-#define START 3
+#define START 0
 
 #include "TMV.h"
 #include "TMV_SymBand.h"
 #include "TMV_Test.h"
 #include "TMV_Test2.h"
-//#include "TMV_TestSymBandArith.h"
-
-//#include "TMV_TestMatrixDivArith.h"
 
 template <class T, tmv::UpLoType uplo, tmv::StorageType stor> 
 void TestHermBandDecomp()

@@ -466,10 +466,11 @@ namespace tmv {
     static RT NonLapNormF(const GenUpperTriMatrix<T>& m)
     {
         const RT eps = TMV_Epsilon<T>();
+        const RT halfeps = eps/RT(2);
 
-        RT mmax = m.maxAbsElement();
+        RT mmax = m.maxAbs2Element();
         if (mmax == RT(0)) return RT(0);
-        else if (mmax * mmax * eps == RT(0)) {
+        else if (mmax * mmax * halfeps == RT(0)) {
             // Then we need to rescale, since underflow has caused 
             // rounding errors.
             // Epsilon is a pure power of 2, so no rounding errors from 
@@ -516,6 +517,34 @@ namespace tmv {
                     temp = m.col(j,0,j).normInf();
                 else 
                     temp = m.col(j,0,j+1).normInf();
+                if (temp > max) max = temp;
+            }
+        }
+        if (m.isunit() && max < RT(1)) max = RT(1);
+        return max;
+    }
+
+    template <class T> 
+    static RT NonLapMaxAbs2Element(const GenUpperTriMatrix<T>& m)
+    {
+        const int N = m.size();
+        RT max(0);
+        if (m.isrm()) {
+            for(int i=0;i<N;++i) {
+                RT temp;
+                if (m.isunit())
+                    temp = m.row(i,i+1,N).maxAbs2Element();
+                else 
+                    temp = m.row(i,i,N).maxAbs2Element();
+                if (temp > max) max = temp;
+            }
+        } else {
+            for(int j=0;j<N;++j) {
+                RT temp;
+                if (m.isunit())
+                    temp = m.col(j,0,j).maxAbs2Element();
+                else 
+                    temp = m.col(j,0,j+1).maxAbs2Element();
                 if (temp > max) max = temp;
             }
         }
@@ -584,10 +613,11 @@ namespace tmv {
 #ifndef LAPNOWORK
         auto_array<double> work(cc == 'I' ? new double[M] : 0);
 #endif
-        double norm = LAPNAME(dlantr) (LAPCM LAPV(cc),
-                                       m.iscm() ? LAPCH_UP : LAPCH_LO, m.isunit() ? LAPCH_U : LAPCH_NU,
-                                       LAPV(M),LAPV(N),LAPP(m.cptr()),LAPV(lda) LAPWK(work.get())
-                                       LAP1 LAP1 LAP1);
+        double norm = LAPNAME(dlantr) (
+            LAPCM LAPV(cc),
+            m.iscm() ? LAPCH_UP : LAPCH_LO, m.isunit() ? LAPCH_U : LAPCH_NU,
+            LAPV(M),LAPV(N),LAPP(m.cptr()),LAPV(lda) LAPWK(work.get())
+            LAP1 LAP1 LAP1);
         return norm;
     }
     template <>
@@ -606,10 +636,11 @@ namespace tmv {
 #ifndef LAPNOWORK
         auto_array<double> work(cc == 'I' ? new double[M] : 0);
 #endif
-        double norm = LAPNAME(zlantr) (LAPCM LAPV(cc),
-                                       m.iscm() ? LAPCH_UP : LAPCH_LO, m.isunit() ? LAPCH_U : LAPCH_NU,
-                                       LAPV(M),LAPV(N),LAPP(m.cptr()),LAPV(lda) LAPWK(work.get())
-                                       LAP1 LAP1 LAP1);
+        double norm = LAPNAME(zlantr) (
+            LAPCM LAPV(cc),
+            m.iscm() ? LAPCH_UP : LAPCH_LO, m.isunit() ? LAPCH_U : LAPCH_NU,
+            LAPV(M),LAPV(N),LAPP(m.cptr()),LAPV(lda) LAPWK(work.get())
+            LAP1 LAP1 LAP1);
         return norm;
     }
 #endif
@@ -630,10 +661,11 @@ namespace tmv {
 #ifndef LAPNOWORK
         auto_array<float> work(cc == 'I' ? new float[M] : 0);
 #endif
-        float norm = LAPNAME(slantr) (LAPCM LAPV(cc),
-                                      m.iscm() ? LAPCH_UP : LAPCH_LO, m.isunit() ? LAPCH_U : LAPCH_NU,
-                                      LAPV(M),LAPV(N),LAPP(m.cptr()),LAPV(lda) LAPWK(work.get())
-                                      LAP1 LAP1 LAP1);
+        float norm = LAPNAME(slantr) (
+            LAPCM LAPV(cc),
+            m.iscm() ? LAPCH_UP : LAPCH_LO, m.isunit() ? LAPCH_U : LAPCH_NU,
+            LAPV(M),LAPV(N),LAPP(m.cptr()),LAPV(lda) LAPWK(work.get())
+            LAP1 LAP1 LAP1);
         return norm;
     }
     template <>
@@ -652,10 +684,11 @@ namespace tmv {
 #ifndef LAPNOWORK
         auto_array<float> work(cc == 'I' ? new float[M] : 0);
 #endif
-        float norm = LAPNAME(clantr) (LAPCM LAPV(cc),
-                                      m.iscm() ? LAPCH_UP : LAPCH_LO, m.isunit() ? LAPCH_U : LAPCH_NU,
-                                      LAPV(M),LAPV(N),LAPP(m.cptr()),LAPV(lda) LAPWK(work.get())
-                                      LAP1 LAP1 LAP1);
+        float norm = LAPNAME(clantr) (
+            LAPCM LAPV(cc),
+            m.iscm() ? LAPCH_UP : LAPCH_LO, m.isunit() ? LAPCH_U : LAPCH_NU,
+            LAPV(M),LAPV(N),LAPP(m.cptr()),LAPV(lda) LAPWK(work.get())
+            LAP1 LAP1 LAP1);
         return norm;
     }
 #endif
@@ -665,37 +698,52 @@ namespace tmv {
     RT GenUpperTriMatrix<T>::maxAbsElement() const
     {
 #ifdef XLAP
-        return LapNorm('M',*this);
-#else
-        return NonLapMaxAbsElement(*this);
+        if ((isrm() && stepi()>0) || (iscm() && stepj()>0))
+            return LapNorm('M',*this);
+        else
 #endif
+            return NonLapMaxAbsElement(*this);
+    }
+    template <class T>
+    RT GenUpperTriMatrix<T>::maxAbs2Element() const
+    {
+#ifdef XLAP
+        if (Traits<T>::iscomplex) return NonLapMaxAbs2Element(*this);
+        else if ((isrm() && stepi()>0) || (iscm() && stepj()>0))
+            return LapNorm('M',*this);
+        else
+#endif
+            return NonLapMaxAbs2Element(*this);
     }
     template <class T>
     RT GenUpperTriMatrix<T>::norm1() const
     {
 #ifdef XLAP
-        return LapNorm('1',*this);
-#else
-        return NonLapNorm1(*this);
+        if ((isrm() && stepi()>0) || (iscm() && stepj()>0))
+            return LapNorm('1',*this);
+        else
 #endif
+            return NonLapNorm1(*this);
     }
     template <class T>
     RT GenUpperTriMatrix<T>::normInf() const
     {
 #ifdef XLAP
-        return LapNorm('I',*this);
-#else
-        return NonLapNormInf(*this);
+        if ((isrm() && stepi()>0) || (iscm() && stepj()>0))
+            return LapNorm('I',*this);
+        else
 #endif
+            return NonLapNormInf(*this);
     }
     template <class T>
     RT GenUpperTriMatrix<T>::normF() const
     {
 #ifdef XLAP
-        return LapNorm('F',*this);
-#else
-        return NonLapNormF(*this);
+        if ((isrm() && stepi()>0) || (iscm() && stepj()>0))
+            return LapNorm('F',*this);
+        else
 #endif
+            return NonLapNormF(*this);
     }
 
     template <class T>

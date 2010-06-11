@@ -16,6 +16,7 @@
   template RT GenMatrix<T >::normF() const; \
   template RT GenMatrix<T >::norm1() const; \
   template RT GenMatrix<T >::maxAbsElement() const; \
+  template RT GenMatrix<T >::maxAbs2Element() const; \
   template QuotXM<T,T > GenMatrix<T >::QInverse() const; \
   template auto_ptr<BaseMatrix<T > > GenMatrix<T >::newCopy() const; \
   template auto_ptr<BaseMatrix<T > > GenMatrix<T >::newView() const; \

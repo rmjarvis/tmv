@@ -188,7 +188,7 @@ namespace tmv {
 
         // Before running the normal algorithms, rescale D,E by the maximum
         // value to help avoid overflow and underflow.
-        RT scale = TMV_MAX(D.maxAbsElement(),E.maxAbsElement());
+        RT scale = TMV_MAX(D.maxAbs2Element(),E.maxAbs2Element());
         if (scale * TMV_Epsilon<T>() == RT(0)) {
             // Hopeless case.  Just zero out D,E and call it done.
             D.setZero();
@@ -628,8 +628,8 @@ namespace tmv {
         if (D.size() > 0) {
 #ifdef LAP
             LapSVDecomposeFromBidiagonal(U,D,E,V,setUV);
-            RT Dmax = MaxAbsElement(D);
-            D.clip(TMV_Epsilon<T>()*Dmax);
+            //RT Dmax = MaxAbsElement(D);
+            //D.clip(TMV_Epsilon<T>()*Dmax);
 #else 
             NonLapSVDecomposeFromBidiagonal(U,D,E,V,setUV);
 #endif

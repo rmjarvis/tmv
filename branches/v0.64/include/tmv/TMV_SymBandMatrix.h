@@ -233,6 +233,7 @@
 //    m.norm2() or Norm2(m)
 //    m.normInf() or NormInf(m)
 //    m.maxAbsElement() or MaxAbsElements(m)
+//    m.maxAbs2Element() or MaxAbs2Elements(m)
 //
 //    m.inverse() or Inverse(m)
 //    m.makeInverse(minv) // Takes either a SymMatrix or Matrix argument
@@ -995,6 +996,7 @@ namespace tmv {
         { return norm1(); }
 
         RT maxAbsElement() const;
+        RT maxAbs2Element() const;
 
         RT doCondition() const;
         inline RT condition() const

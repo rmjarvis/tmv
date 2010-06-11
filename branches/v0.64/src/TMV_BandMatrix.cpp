@@ -749,6 +749,45 @@ namespace tmv {
         return max;
     }
 
+    template <class T> 
+    static RT NonLapMaxAbs2Element(const GenBandMatrix<T>& m)
+    {
+        RT max = 0;
+        const int M = m.colsize();
+        const int N = m.rowsize();
+        if (M > 0 && N > 0) {
+            if (m.isrm()) {
+                int j1=0;
+                int j2=m.nhi()+1;
+                int k=m.nlo();
+                for(int i=0;i<M;++i) {
+                    RT temp = m.row(i,j1,j2).maxAbs2Element();
+                    if (temp > max) max = temp;
+                    if (k>0) --k; else ++j1;
+                    if (j2<N) ++j2;
+                    else if (j1==N) break;
+                }
+            } else if (m.iscm()) {
+                int i1=0;
+                int i2=m.nlo()+1;
+                int k=m.nhi();
+                for(int j=0;j<N;++j) {
+                    RT temp = m.col(j,i1,i2).maxAbs2Element();
+                    if (temp > max) max = temp;
+                    if (k>0) --k; else ++i1;
+                    if (i2<M) ++i2;
+                    else if (i1==M) break;
+                }
+            } else {
+                for(int i=-m.nlo();i<=m.nhi();++i) {
+                    RT temp = m.diag(i).maxAbs2Element();
+                    if (temp > max) max = temp;
+                }
+            }
+        }
+        return max;
+    }
+
     // 1-norm = max_j (sum_i |a_ij|)
     template <class T> 
     static RT NonLapNorm1(const GenBandMatrix<T>& m)
@@ -782,10 +821,11 @@ namespace tmv {
     static RT NonLapNormF(const GenBandMatrix<T>& m)
     {
         const RT eps = TMV_Epsilon<T>();
+        const RT halfeps = eps/RT(2);
 
-        RT mmax = m.maxAbsElement();
+        RT mmax = m.maxAbs2Element();
         if (mmax == RT(0)) return RT(0);
-        else if (mmax * mmax * eps == RT(0)) {
+        else if (mmax * mmax * halfeps == RT(0)) {
             // Then we need to rescale, since underflow has caused 
             // rounding errors.
             // Epsilon is a pure power of 2, so no rounding errors from 
@@ -949,6 +989,19 @@ namespace tmv {
         else
 #endif
             return NonLapMaxAbsElement(*this);
+    }
+    template <class T> 
+    RT GenBandMatrix<T>::maxAbs2Element() const
+    {
+#ifdef XLAP
+        if (Traits<T>::iscomplex) return NonLapMaxAbs2Element(*this);
+        else if (isrm() && this->isSquare()) return LapNorm('M',transpose());
+        else if (iscm() && this->isSquare()) return LapNorm('M',*this);
+        else if (isdm() && this->isSquare() && nlo()==1 && nhi()==1)
+            return LapNorm('M',*this);
+        else
+#endif
+            return NonLapMaxAbs2Element(*this);
     }
     template <class T> 
     RT GenBandMatrix<T>::norm1() const

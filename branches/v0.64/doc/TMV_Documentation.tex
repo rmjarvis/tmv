@@ -974,10 +974,6 @@ The infinity-norm of \tt{v}: $||v||_\infty = \max_i |v(i)|$.
 
 \item
 \begin{tmvcode}
-RT v.maxAbsElement(int* i=0) const
-RT MaxAbsElement(v)
-RT v.minAbsElement(int* i=0) const
-RT MinAbsElement(v)
 T v.maxElement(int* i=0) const
 T MaxElement(v)
 T v.minElement(int* i=0) const
@@ -987,16 +983,40 @@ T MinElement(v)
 \index{Vector!functions of!MaxElement}
 \index{Vector!methods!minElement}
 \index{Vector!functions of!MinElement}
-\index{Vector!methods!maxAbsElement}
-\index{Vector!functions of!MaxAbsElement}
-\index{Vector!methods!minAbsElement}
-\index{Vector!functions of!MinAbsElement}
-The maximum/minimum element either by absolute value (the first four cases) or actual value
-(the last four cases).  For complex values, there is no way to define a 
+The maximum/minimum element.  For complex values, there is no way to define a 
 max or min element, so just the real component of each element is used.
 The \tt{i} argument is available in the method versions of these function, and it is optional.
 If it is present (and not 0), then \tt{*i} is set to the 
 index of the max/min element returned.
+
+\item
+\begin{tmvcode}
+RT v.maxAbsElement(int* i=0) const
+RT MaxAbsElement(v)
+RT v.minAbsElement(int* i=0) const
+RT MinAbsElement(v)
+RT v.maxAbs2Element(int* i=0) const
+RT MaxAbs2Element(v)
+RT v.minAbs2Element(int* i=0) const
+RT MinAbs2Element(v)
+\end{tmvcode}
+\index{Vector!methods!maxAbsElement}
+\index{Vector!functions of!MaxAbsElement}
+\index{Vector!methods!minAbsElement}
+\index{Vector!functions of!MinAbsElement}
+\index{Vector!methods!maxAbs2Element}
+\index{Vector!functions of!MaxAbs2Element}
+\index{Vector!methods!minAbs2Element}
+\index{Vector!functions of!MinAbs2Element}
+The maximum/minimum element by absolute value.  
+The \tt{i} argument is available in the method versions of these function, and it is optional.
+If it is present (and not 0), then \tt{*i} is set to the 
+index of the max/min element returned.
+
+For real vectors, the last four cases with \tt{Abs2} instead of \tt{Abs} are identical, but 
+for complex vectors, they use $|real(v(i))| + |imag(v(i))|$ instead.  This is faster than doing
+the normal absolute value, and for many purposes (such as finding a suitably large value
+with which to scale a vector), it is just as useful.
 
 \item
 \begin{tmvcode}
@@ -1945,6 +1965,16 @@ RT MaxAbsElement(m)
 \index{Matrix!functions of!MaxAbsElement}
 The element of \tt{m} with the maximum absolute value: 
 $||m||_\Delta = \max_{i,j} |m(i,j)|$.
+
+\item
+\begin{tmvcode}
+RT m.maxAbs2Element() const
+RT MaxAbs2Element(m)
+\end{tmvcode}
+\index{Matrix!methods!maxAbs2Element}
+\index{Matrix!functions of!MaxAbs2Element}
+The same as \tt{maxAbsElement}, but using $|real(m(i,j)| + |imag(m(i,j))|$ instead
+of the normal absolute value for complex matrices.
 
 \item
 \begin{tmvcode}
@@ -3430,6 +3460,7 @@ RT d.maxAbsElement() = MaxAbsElement(d)
 \index{DiagMatrix!methods!maxAbsElement}
 (Actually for a diagonal matrix, all of the above norms are equal.)
 \begin{tmvcode}
+RT d.maxAbs2Element() = MaxAbs2Element(d)
 RT d.normF() = NormF(d) = d.norm() = Norm(d)
 RT d.normSq() = NormSq(d)
 RT d.normSq(RT scale)
@@ -3447,6 +3478,7 @@ d.makeInverse(DiagMatrix<T>& dinv)
 d.makeInverseATA(Matrix<T>& cov)
 d.makeInverseATA(DiagMatrix<T>& cov)
 \end{tmvcode}
+\index{DiagMatrix!functions of!MaxAbs2Element}
 \index{DiagMatrix!functions of!Norm}
 \index{DiagMatrix!functions of!NormF}
 \index{DiagMatrix!functions of!NormSq}
@@ -3456,6 +3488,7 @@ d.makeInverseATA(DiagMatrix<T>& cov)
 \index{DiagMatrix!functions of!Det}
 \index{DiagMatrix!functions of!LogDet}
 \index{DiagMatrix!functions of!Inverse}
+\index{DiagMatrix!methods!maxAbs2Element}
 \index{DiagMatrix!methods!norm}
 \index{DiagMatrix!methods!normF}
 \index{DiagMatrix!methods!normSq}
@@ -3820,6 +3853,7 @@ RT U.normF() = NormF(U) = U.norm() = Norm(U)
 RT U.normSq() = NormSq(U)
 RT U.normSq(RT scale)
 RT U.maxAbsElement() = MaxAbsElement(U)
+RT U.maxAbs2Element() = MaxAbs2Element(U)
 T U.trace() = Trace(U)
 T U.sumElements() = SumElements(U)
 RT U.sumAbsElements() = SumAbsElements(U)
@@ -3837,11 +3871,13 @@ U.makeInverseATA(Matrix<T>& cov)
 \index{UpperTriMatrix!functions of!Norm2}
 \index{UpperTriMatrix!functions of!NormInf}
 \index{UpperTriMatrix!functions of!MaxAbsElement}
+\index{UpperTriMatrix!functions of!MaxAbs2Element}
 \index{UpperTriMatrix!methods!norm1}
 \index{UpperTriMatrix!methods!norm2}
 \index{UpperTriMatrix!methods!doNorm2}
 \index{UpperTriMatrix!methods!normInf}
 \index{UpperTriMatrix!methods!maxAbsElement}
+\index{UpperTriMatrix!methods!maxAbs2Element}
 \index{UpperTriMatrix!functions of!Norm}
 \index{UpperTriMatrix!functions of!NormF}
 \index{UpperTriMatrix!functions of!NormSq}
@@ -4405,6 +4441,7 @@ RT b.normF() = NormF(b) = b.norm() = Norm(b)
 RT b.normSq() = NormSq(b)
 RT b.normSq(RT scale)
 RT b.maxAbsElement() = MaxAbsElement(b)
+RT b.maxAbs2Element() = MaxAbs2Element(b)
 T b.trace() = Trace(b)
 T b.sumElements() = SumElements(b)
 RT b.sumAbsElements() = SumAbsElements(b)
@@ -4421,11 +4458,13 @@ b.makeInverseATA(Matrix<T>& cov)
 \index{BandMatrix!functions of!Norm2}
 \index{BandMatrix!functions of!NormInf}
 \index{BandMatrix!functions of!MaxAbsElement}
+\index{BandMatrix!functions of!MaxAbs2Element}
 \index{BandMatrix!methods!norm1}
 \index{BandMatrix!methods!norm2}
 \index{BandMatrix!methods!doNorm2}
 \index{BandMatrix!methods!normInf}
 \index{BandMatrix!methods!maxAbsElement}
+\index{BandMatrix!methods!maxAbs2Element}
 \index{BandMatrix!functions of!Norm}
 \index{BandMatrix!functions of!NormF}
 \index{BandMatrix!functions of!NormSq}
@@ -4943,6 +4982,7 @@ RT s.normF() = NormF(s) = s.norm() = Norm(s)
 RT s.normSq() = NormSq(s)
 RT s.normSq(RT scale)
 RT s.maxAbsElement() = MaxAbsElement(s)
+RT s.maxAbs2Element() = MaxAbs2Element(s)
 T s.trace() = Trace(s)
 T s.sumElements() = SumElements(s)
 RT s.sumAbsElements() = SumAbsElements(s)
@@ -4960,11 +5000,13 @@ s.makeInverseATA(Matrix<T>& cov)
 \index{SymMatrix!functions of!Norm2}
 \index{SymMatrix!functions of!NormInf}
 \index{SymMatrix!functions of!MaxAbsElement}
+\index{SymMatrix!functions of!MaxAbs2Element}
 \index{SymMatrix!methods!norm1}
 \index{SymMatrix!methods!norm2}
 \index{SymMatrix!methods!doNorm2}
 \index{SymMatrix!methods!normInf}
 \index{SymMatrix!methods!maxAbsElement}
+\index{SymMatrix!methods!maxAbs2Element}
 \index{SymMatrix!functions of!Norm}
 \index{SymMatrix!functions of!NormF}
 \index{SymMatrix!functions of!NormSq}
@@ -5663,6 +5705,7 @@ RT sb.normF() = NormF(sb) = sb.norm() = Norm(sb)
 RT sb.normSq() = NormSq(sb)
 RT sb.normSq(RT scale)
 RT sb.maxAbsElement() = MaxAbsElement(sb)
+RT sb.maxAbs2Element() = MaxAbs2Element(sb)
 T sb.trace() = Trace(sb)
 T sb.sumElements() = SumElements(sb)
 RT sb.sumAbsElements() = SumAbsElements(sb)
@@ -5680,11 +5723,13 @@ sb.makeInverseATA(Matrix<T>& cov)
 \index{SymBandMatrix!functions of!Norm2}
 \index{SymBandMatrix!functions of!NormInf}
 \index{SymBandMatrix!functions of!MaxAbsElement}
+\index{SymBandMatrix!functions of!MaxAbs2Element}
 \index{SymBandMatrix!methods!norm1}
 \index{SymBandMatrix!methods!norm2}
 \index{SymBandMatrix!methods!doNorm2}
 \index{SymBandMatrix!methods!normInf}
 \index{SymBandMatrix!methods!maxAbsElement}
+\index{SymBandMatrix!methods!maxAbs2Element}
 \index{SymBandMatrix!functions of!Norm}
 \index{SymBandMatrix!functions of!NormF}
 \index{SymBandMatrix!functions of!NormSq}
@@ -6051,6 +6096,7 @@ int p.norm1() = Norm1(p)
 int p.norm2() = Norm2(p) = p.doNorm2()
 int p.normInf() = NormInf(p)
 int p.maxAbsElement() = MaxAbsElement(p)
+int p.maxAbs2Element() = MaxAbs2Element(p)
 double p.normF() = NormF(p) = p.norm() = Norm(p)
 int p.normSq() = NormSq(p)
 int p.normSq(RT scale)
@@ -6070,11 +6116,13 @@ p.makeInverseATA(Matrix<T>& cov)
 \index{Permutation!functions of!Norm2}
 \index{Permutation!functions of!NormInf}
 \index{Permutation!functions of!MaxAbsElement}
+\index{Permutation!functions of!MaxAbs2Element}
 \index{Permutation!methods!norm1}
 \index{Permutation!methods!norm2}
 \index{Permutation!methods!doNorm2}
 \index{Permutation!methods!normInf}
 \index{Permutation!methods!maxAbsElement}
+\index{Permutation!methods!maxAbs2Element}
 \index{Permutation!functions of!Norm}
 \index{Permutation!functions of!NormF}
 \index{Permutation!functions of!NormSq}
@@ -7116,6 +7164,7 @@ Householder reflection algorithm for updates.  This algorithm seems to be
 much more stable than ones that use Givens rotations.  
 
 The only references to a similar algorithm that I could find in the literature is 
+described in the paper,
 "Stability Analysis of a Householder-based Algorithm for Downdating the Cholesky Factorization", Bojanczyk and Steinhardt, 1991, Siam J. Sci. Stat. Comput. 12, 6, 
 1255\footnote{
 It seems that this paper has become a bit forgotten.  A recent paper,
@@ -7143,8 +7192,7 @@ is described in \S\ref{QRDowndate_Algorithm}.
 \index{QR Decomposition!Update!algorithm}
 \label{QRUpdate_Algorithm}
 
-First lets look at the Householder algorithm for QR update (since the downdate algorithm
-is intimately related):
+First lets look at the Householder algorithm for QR update:
 
 Given the initial decomposition $A_0 = Q_0 R_0$, we want to find $R$ such that
 \begin{align*}
@@ -7190,7 +7238,7 @@ $x$ completely determines the Householder matrix $H_1$ up to an arbitrary sign
 on either $y$ or $\beta$ (or in general an arbitrary factor $e^{i \theta}$) which is 
 chosen to minimize rounding errors.  The optimal choice is to choose
 $y = -||x||_2\:x(1)/|x(1)|$, which makes $\beta$ real.  
-However, the LAPACK choice is $y = -||x||_2 \:sign(\Re(x(1))$, which means
+However, the LAPACK choice is $y = -||x||_2 \:sign(real(x(1))$, which means
 $\beta$ is complex, and $H$ is not Hermitian\footnote{
 This choice complicates a lot of the calling routines which use
 Householder matrices, since you need to keep track of conjugation of the 
@@ -7894,6 +7942,20 @@ is treated as a bit set, with each non-zero bit turning on particular tests.  Ty
 more information.
 
 \item \texttt{MEM\_TEST=false} specifies whether to include extra memory tests in the library and test suite.
+\item \texttt{USE\_STEGR=true} specifies whether to use the LAPACK algorithm called
+\tt{dstegr} (or \tt{sstegr} for \tt{<float>}) for symmetric
+eigenvector calculation.  If it is false, the divide-and-conquer algorithm,
+named \tt{dstedc} (or \tt{sstedc}) will be used instead.
+\index{Singular Value Decomposition!LAPACK ?stegr}
+\index{Eigenvalues!LAPACK ?stegr}
+\index{Warnings!LAPACK ?stegr}
+\index{LAPACK!Problems with ?stegr}
+\item
+\texttt{USE\_GEQP3=true} specifies whether to use the LAPACK algorithm called
+\tt{dgeqp3} (or its variants) for the strict QRP decomposition.  If it is false,
+the native TMV code will be used instead.
+\index{QRP Decomposition!LAPACK ?geqp3}
+\index{LAPACK!Problems with QRP decomposition}
 \item \texttt{SMALL\_TESTS=false} specifies whether to make the smaller test suite programs: \texttt{tmvtest1a}, \texttt{tmvtest1b}, etc. 
 \item \texttt{WARN=false} specifies whether to have the compiler report warning (with -Wall or
 something similar).
@@ -7946,14 +8008,6 @@ These are described in detail above.  See also \texttt{IMPORT\_ENV} and \texttt{
 
 This will make three executables called \texttt{tmvtest1}, 
 \texttt{tmvtest2} and \texttt{tmvtest3} in the \texttt{test} directory.
-
-Warning: this step may take a long time to finish, since
-the test code tests
-for lots of different combinations of matrix types in all the various 
-arithmetic operators.
-So plan on letting this run for a while.
-(On my laptop using a single processor, it takes about 2 hours to make all the tests, whereas
-it only takes about 20 minutes to make the libraries.)
 
 Then you should run the three test suites.
 They should output a bunch of lines reading \texttt{[{\em Something}] passed all tests}.
@@ -8126,14 +8180,6 @@ which will be located in the directory \texttt{lib}.
 This will make three executables called \texttt{tmvtest1}, 
 \texttt{tmvtest2} and \texttt{tmvtest3} in the \texttt{bin} directory.
 
-Warning: this step may take a long time to finish, since
-the test code tests
-for lots of different combinations of matrix types in all the various 
-arithmetic operators.
-So plan on letting this run for a while.
-(On my laptop using a single processor, it takes about 2 hours to make all the tests, whereas
-it only takes about 20 minutes to make the libraries.)
-
 Then you should run the three test suites.
 They should output a bunch of lines reading \texttt{[{\em Something}] passed all tests}.
 If one of them ends in a line that starts with \texttt{Error}, 
@@ -8231,15 +8277,15 @@ install with SCons, it will determine which flags to set according to the somewh
 list of SCons options.
 \begin{itemize}
 \item
-\texttt{-DNO\_TMV\_INST\_FLOAT} will not instantiate any \tt{<float>} classes or routines.
+\texttt{-DNO\_INST\_FLOAT} will not instantiate any \tt{<float>} classes or routines.
 \item
-\texttt{-DNO\_TMV\_INST\_DOUBLE} will not instantiate any \tt{<double>} classes or routines.
+\texttt{-DNO\_INST\_DOUBLE} will not instantiate any \tt{<double>} classes or routines.
 \item
-\texttt{-DNO\_TMV\_INST\_COMPLEX} will not instantiate any complex classes or routines.
+\texttt{-DNO\_INST\_COMPLEX} will not instantiate any complex classes or routines.
 \item
-\texttt{-DTMV\_INST\_LONGDOUBLE} will instantiate \tt{<long double>} classes and routines.
+\texttt{-DINST\_LONGDOUBLE} will instantiate \tt{<long double>} classes and routines.
 \item
-\texttt{-DTMV\_INST\_INT} will instantiate \tt{<int>} classes and routines.
+\texttt{-DINST\_INT} will instantiate \tt{<int>} classes and routines.
 \end{itemize}
 The next flags specify what BLAS and/or LAPACK libraries to use (if any):
 \index{LAPACK!compiler flags}
@@ -8603,12 +8649,12 @@ Now you should be all set to use the TMV library in your program.
 
 I have tested the code using the following compilers:\\
 $\quad$\\
-GNU's g++ -- versions 3.4.6, 4.0.2, 4.1.2, 4.2.4, 4.3.5 and 4.4.2\\
-% chimaera g++, milhouse g++, Flute g++-4.1.2 or lupus g++, Flute g++-4.2.4, Flute g++-4.3.5, Flute g++
+GNU's g++ -- versions 3.4.6, 4.1.2, 4.3.3, 4.4.2, and 4.4.4\\
+% chimaera g++, susi g++, susi g++-4.3.3, Flute g++, Flute g++-4.4.4
 Apple's g++ -- version 4.0.1, 4.2.1 \\
-% Clarinet g++-4.0, g++-4.2
-Intel's icpc -- versions 9.0, 9.1, 10.1 and 11.0\\
-% milhouse, lupus, lupus (alt paths, static), des1
+% Flute g++-4.0, g++-4.2
+Intel's icpc -- versions 9.1, 10.1, 11.1\\
+% lupus (alt paths, static), lupus, abe
 Portland's pgCC -- version 6.1\\
 % chimaera pgCC
 Microsoft's cl -- Visual C++ 2008 Express Edition\\
@@ -8803,11 +8849,13 @@ large matrices with at least one dimension $N > 100$ or so.  (I'm not sure of th
 exact crossover point from working to non-working code.)
 
 I haven't surveyed which versions of XCode have this bug, but it seems to be in version
-3.2.2 at least, so the best thing to do 
+3.2.2 at least.  I reported the bug to Apple (ID 8069848) fairly soon before this release, 
+so they have understandably not fixed it yet.  The best thing to do to see if your 
+XCode installation has this problem
 is to install the test suite and make sure that it runs without errors.  If it makes it 
 through without errors, then you don't have to worry about it.
 
-If you do get an error in the test suite, the only workaround I can suggest is to either compile without using BLAS or download and make a different BLAS library.
+If you do get an error in the test suite, and you want to use \tt{<float>} matrices, then the only workaround I can suggest is to either compile without using BLAS or download and make a different BLAS library.
 For example ATLAS or GOTO BLAS are free to download and are both pretty fast.
 
 \item {\bf Segmentation faults with \tt{SmallMatrix}:}
@@ -9631,6 +9679,8 @@ the old syntax.
 
 \item Added \tt{m.sumElements()} and \tt{m.sumAbsElements()}.
 
+\item Added \tt{v.minAbs2Element()}, \tt{v.maxAbs2Element()} and \tt{m.maxAbs2Element()}.
+
 \item Added \tt{m.unitUpperTri()} and \tt{m.unitLowerTri()}.
 
 \item Made \tt{Swap(m1,m2)} and \tt{Swap(v1,v2)} efficient when the arguments are both
@@ -9666,6 +9716,12 @@ M is complex.
 \item Fixed a bug in an (apparently) uncommon pathway of Rank2Update.
 I say uncommon since it never turned up until I expanded the scope of
 the test suite to include more combinations of matrix types.
+
+\item Researched my QRDowndate algorithm to see if it is in the literature already.
+The only similar algorithm I could find was in Bojanczyk and Steinhardt (1991), 
+a paper which seems to have been overlooked by the matrix algorithms community.
+It's not quite the same as mine in detail, but it is based on the same basic idea.
+I added this reference to the discussion in the documentation about my algorithm.
 
 \end{itemize}
 

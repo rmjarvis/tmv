@@ -254,6 +254,17 @@
 //    v.minAbsElement(int* imin=0)
 //        The same as minElement, except absolute values are used
 //
+//    v.maxAbs2Element() or MaxAbs2Element(v)
+//    v.maxAbs2Element(int* imax=0)
+//    v.minAbs2Element() or MinAbs2Element(v)
+//    v.minAbs2Element(int* imin=0)
+//        For real v, these are identical to the regular AbsElement routines.
+//        But for complex v, instead of calculating |v(i)| for each
+//        element, it calculates |v(i).real()| + |v(i).imag()|.
+//        This is significantly faster than the full complex abs,
+//        and for many purposes, the answer is equally usable.
+//        e.g. for scaling a vector by it's "largest" value, this is 
+//        often just a useful a definition of "largest".
 //
 // Operators:
 //        Here we use v for a Vector and x for a Scalar.
@@ -534,6 +545,10 @@ namespace tmv {
 
         RT maxAbsElement(int* imaxout=0) const;
 
+        RT minAbs2Element(int* iminout=0) const;
+
+        RT maxAbs2Element(int* imaxout=0) const;
+
         TMV_DEPRECATED(RT Norm() const)
         { return norm(); }
         TMV_DEPRECATED(RT NormSq(const RT scale = RT(1)) const)
@@ -757,6 +772,20 @@ namespace tmv {
         inline RT maxAbsElement(int* imaxout=0) const
         { 
             RT temp = GenVector<T>::maxAbsElement(imaxout);
+            if (imaxout) ++(*imaxout);
+            return temp;
+        }
+
+        inline RT minAbs2Element(int* iminout=0) const
+        { 
+            RT temp = GenVector<T>::minAbs2Element(iminout);
+            if (iminout) ++(*iminout);
+            return temp;
+        }
+
+        inline RT maxAbs2Element(int* imaxout=0) const
+        { 
+            RT temp = GenVector<T>::maxAbs2Element(imaxout);
             if (imaxout) ++(*imaxout);
             return temp;
         }
@@ -1462,6 +1491,12 @@ namespace tmv {
         inline RT maxAbsElement(int* imaxout=0) const
         { return const_type(*this).maxAbsElement(imaxout); }
 
+        inline RT minAbs2Element(int* iminout=0) const
+        { return const_type(*this).minAbs2Element(iminout); }
+
+        inline RT maxAbs2Element(int* imaxout=0) const
+        { return const_type(*this).maxAbs2Element(imaxout); }
+
         TMV_DEPRECATED(T MinElement(int* iminout=0) const)
         { return minElement(iminout); }
         TMV_DEPRECATED(T MaxElement(int* imaxout=0) const)
@@ -2044,6 +2079,12 @@ namespace tmv {
         inline RT maxAbsElement(int* imaxout=0) const
         { return view().maxAbsElement(imaxout); }
 
+        inline RT minAbs2Element(int* iminout=0) const
+        { return view().minAbs2Element(iminout); }
+
+        inline RT maxAbs2Element(int* imaxout=0) const
+        { return view().maxAbs2Element(imaxout); }
+
         TMV_DEPRECATED(T MinElement(int* iminout=0) const)
         { return minElement(iminout); }
         TMV_DEPRECATED(T MaxElement(int* imaxout=0) const)
@@ -2332,6 +2373,22 @@ namespace tmv {
     { return v.minAbsElement(); }
 
     template <class T> 
+    inline TMV_RealType(T) MinAbs2Element(const GenVector<T>& v)
+    { return v.minAbs2Element(); }
+
+    template <class T, IndexStyle I> 
+    inline TMV_RealType(T) MinAbs2Element(const ConstVectorView<T,I>& v)
+    { return v.minAbs2Element(); }
+
+    template <class T, IndexStyle I> 
+    inline TMV_RealType(T) MinAbs2Element(const VectorView<T,I>& v)
+    { return v.minAbs2Element(); }
+
+    template <class T, IndexStyle I> 
+    inline TMV_RealType(T) MinAbs2Element(const Vector<T,I>& v)
+    { return v.minAbs2Element(); }
+
+    template <class T> 
     inline TMV_RealType(T) MaxAbsElement(const GenVector<T>& v)
     { return v.maxAbsElement(); }
 
@@ -2346,6 +2403,22 @@ namespace tmv {
     template <class T, IndexStyle I> 
     inline TMV_RealType(T) MaxAbsElement(const Vector<T,I>& v)
     { return v.maxAbsElement(); }
+
+    template <class T> 
+    inline TMV_RealType(T) MaxAbs2Element(const GenVector<T>& v)
+    { return v.maxAbs2Element(); }
+
+    template <class T, IndexStyle I> 
+    inline TMV_RealType(T) MaxAbs2Element(const ConstVectorView<T,I>& v)
+    { return v.maxAbs2Element(); }
+
+    template <class T, IndexStyle I> 
+    inline TMV_RealType(T) MaxAbs2Element(const VectorView<T,I>& v)
+    { return v.maxAbs2Element(); }
+
+    template <class T, IndexStyle I> 
+    inline TMV_RealType(T) MaxAbs2Element(const Vector<T,I>& v)
+    { return v.maxAbs2Element(); }
 
     template <class T> 
     inline ConstVectorView<T> Conjugate(const GenVector<T>& v)

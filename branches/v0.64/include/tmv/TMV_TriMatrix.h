@@ -199,6 +199,7 @@
 //    m.norm2() or Norm2(m)
 //    m.normInf() or NormInf(m)
 //    m.maxAbsElement() or MaxAbsElements(m)
+//    m.maxAbs2Element() or MaxAbs2Elements(m)
 //
 //    m.inverse() or Inverse(m)
 //    m.makeInverse(minv) // Takes either a TriMatrix or Matrix argument
@@ -893,6 +894,7 @@ namespace tmv {
         RT normInf() const;
 
         RT maxAbsElement() const;
+        RT maxAbs2Element() const;
 
         bool isSingular() const { return det() == T(0); }
 
@@ -1524,6 +1526,9 @@ namespace tmv {
 
         inline RT maxAbsElement() const
         { return transpose().maxAbsElement(); }
+
+        inline RT maxAbs2Element() const
+        { return transpose().maxAbs2Element(); }
 
         bool isSingular() const { return det() == T(0); }
 

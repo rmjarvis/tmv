@@ -304,6 +304,9 @@ namespace tmv {
         inline int maxAbsElement() const
         { return 1; }
 
+        inline int maxAbs2Element() const
+        { return 1; }
+
         inline int normSq() const
         { return itsn; }
 
@@ -658,6 +661,8 @@ namespace tmv {
     { return m.normInf(); }
     inline int MaxAbsElement(const Permutation& m)
     { return m.maxAbsElement(); }
+    inline int MaxAbs2Element(const Permutation& m)
+    { return m.maxAbs2Element(); }
     inline int Trace(const Permutation& m)
     { return m.trace(); }
     inline int Det(const Permutation& m)

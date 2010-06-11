@@ -192,9 +192,9 @@ void TestMatrixDecomp()
                    "QR - PackedQ"); 
             Assert(Norm(Q.transpose()*Q-T(1)) <= T(N)*eps,"QR - QtQ"); 
             Assert(Norm(Q.transpose()*m.qrd().getQ()-T(1)) <= T(N)*eps,
-                   "QR - QtQ - PackedQ (second)"); 
+                   "QR - QtQ - PackedQ (1)"); 
             Assert(Norm(Q / m.qrd().getQ()-T(1)) <= T(N)*eps,
-                   "QR - QtQ - PackedQ (first)"); 
+                   "QR - QtQ - PackedQ (2)"); 
 
             tmv::Matrix<std::complex<T>,stor> cQ = c.qrd().getQ();
             tmv::UpperTriMatrix<std::complex<T> > cR = c.qrd().getR();
@@ -204,9 +204,9 @@ void TestMatrixDecomp()
                    "C QR - PackedQ"); 
             Assert(Norm(cQ.adjoint()*cQ-T(1)) <= T(N)*ceps,"C QR - QtQ"); 
             Assert(Norm(cQ.adjoint()*c.qrd().getQ()-T(1)) <= T(N)*ceps,
-                   "C QR - QtQ - PackedQ (second)"); 
+                   "C QR - QtQ - PackedQ (1)"); 
             Assert(Norm(cQ / c.qrd().getQ()-T(1)) <= T(N)*ceps,
-                   "C QR - QtQ - PackedQ (first)"); 
+                   "C QR - QtQ - PackedQ (2)"); 
 
 #if (XTEST & 16)
             Q = m;
@@ -275,9 +275,9 @@ void TestMatrixDecomp()
             Assert(Norm(m-QRP) <= eps*normm,"QRP - Packed"); 
             Assert(Norm(Q.transpose()*Q-T(1)) <= T(N)*eps,"QRP - QtQ"); 
             Assert(Norm(Q.transpose()*m.qrpd().getQ()-T(1)) <= T(N)*eps,
-                   "QR - QtQ - PackedQ (first)"); 
+                   "QR - QtQ - PackedQ (1)"); 
             Assert(Norm(Q / m.qrpd().getQ()-T(1)) <= T(N)*eps,
-                   "QR - QtQ - PackedQ (second)"); 
+                   "QR - QtQ - PackedQ (2)"); 
 #ifndef LAP
             if (strict) for(size_t i=1;i<R.size();i++) {
                 Assert(std::abs(R(i,i))<=std::abs(R(i-1,i-1)),"QRP - strict"); 
@@ -291,9 +291,9 @@ void TestMatrixDecomp()
             Assert(Norm(c-cQRP) <= ceps*normc,"C QRP"); 
             Assert(Norm(cQ.adjoint()*cQ-T(1)) <= T(N)*ceps,"C QRP - QtQ"); 
             Assert(Norm(cQ.adjoint()*c.qrpd().getQ()-T(1)) <= T(N)*ceps,
-                   "C QRP - QtQ - PackedQ (first)"); 
+                   "C QRP - QtQ - PackedQ (1)"); 
             Assert(Norm(cQ / c.qrpd().getQ()-T(1)) <= T(N)*ceps,
-                   "C QRP - QtQ - PackedQ (second)"); 
+                   "C QRP - QtQ - PackedQ (2)"); 
 #ifndef LAP
             if (strict) for(size_t i=1;i<cR.size();i++) {
                 Assert(std::abs(cR(i,i))<=std::abs(cR(i-1,i-1)),

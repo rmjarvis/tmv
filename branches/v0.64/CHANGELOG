@@ -62,6 +62,8 @@ New features:
 
 -- Added m.sumElements() and m.sumAbsElements().
 
+-- Added v.maxAbs2Element() and m.maxAbs2Element().
+
 -- Added Permutation class, including all related changes to make it the 
    preferred way to access permutations.  e.g. m.lud().getP() now returns
    a Permutation rather than a const int*.

@@ -538,10 +538,21 @@ namespace tmv {
 
         // = max_i,j (|a_ij|)
         inline RT maxAbsElement() const
-        { 
+        {
             RT max(0);
             for(int i=0;i<M*N; ++i) {
                 RT temp = TMV_ABS(itsm[i]);
+                if (temp > max) max = temp;
+            }
+            return max;
+        }
+
+        // = max_i,j (|real(a_ij)|+|imag(a_ij)|)
+        inline RT maxAbs2Element() const
+        {
+            RT max(0);
+            for(int i=0;i<M*N; ++i) {
+                RT temp = TMV_ABS2(itsm[i]);
                 if (temp > max) max = temp;
             }
             return max;
@@ -1225,6 +1236,10 @@ namespace tmv {
     template <class T, int M, int N, StorageType S, IndexStyle I>
     inline TMV_RealType(T) MaxAbsElement(const SmallMatrix<T,M,N,S,I>& m)
     { return m.maxAbsElement(); }
+
+    template <class T, int M, int N, StorageType S, IndexStyle I>
+    inline TMV_RealType(T) MaxAbs2Element(const SmallMatrix<T,M,N,S,I>& m)
+    { return m.maxAbs2Element(); }
 
     template <class T, int M, int N, StorageType S, IndexStyle I> 
     inline ConstMatrixView<T,I> Transpose(const SmallMatrix<T,M,N,S,I>& m)

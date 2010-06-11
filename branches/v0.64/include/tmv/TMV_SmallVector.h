@@ -456,34 +456,62 @@ namespace tmv {
 
         inline RT minAbsElement(int* iminout=0) const
         {
-            RT min = N>0 ? 
-                (isReal(T()) ? TMV_ABS(itsv[0]) : TMV_NORM(itsv[0])) : RT(0);
+            RT min = N>0 ? TMV_ABS(itsv[0]) : RT(0);
             if (iminout) *iminout = 0;
             for(int i=1;i<N;++i) {
-                RT absvi = isReal(T()) ? TMV_ABS(itsv[i]) : TMV_NORM(itsv[i]);
+                RT absvi = TMV_ABS(itsv[i]);
                 if (absvi < min) {
                     min = absvi;
                     if (iminout) *iminout = i;
                 }
             }
             if (I == FortranStyle && iminout) ++(*iminout);
-            return isReal(T()) ? min : TMV_SQRT(min);
+            return min;
         }
 
         inline RT maxAbsElement(int* imaxout=0) const
         {
-            RT max = N>0 ? 
-                (isReal(T()) ? TMV_ABS(itsv[0]) : TMV_NORM(itsv[0])) : RT(0);
+            RT max = N>0 ? TMV_ABS(itsv[0]) : RT(0);
             if (imaxout) *imaxout = 0;
             for(int i=1;i<N;++i) {
-                RT absvi = isReal(T()) ? TMV_ABS(itsv[i]) : TMV_NORM(itsv[i]);
+                RT absvi = TMV_ABS(itsv[i]);
                 if (absvi > max) {
                     max = absvi;
                     if (imaxout) *imaxout = i;
                 }
             }
             if (I == FortranStyle && imaxout) ++(*imaxout);
-            return isReal(T()) ? max : TMV_SQRT(max);
+            return max;
+        }
+
+        inline RT minAbs2Element(int* iminout=0) const
+        {
+            RT min = N>0 ? TMV_ABS2(itsv[0]) : RT(0);
+            if (iminout) *iminout = 0;
+            for(int i=1;i<N;++i) {
+                RT absvi = TMV_ABS2(itsv[i]);
+                if (absvi < min) {
+                    min = absvi;
+                    if (iminout) *iminout = i;
+                }
+            }
+            if (I == FortranStyle && iminout) ++(*iminout);
+            return min;
+        }
+
+        inline RT maxAbs2Element(int* imaxout=0) const
+        {
+            RT max = N>0 ? TMV_ABS2(itsv[0]) : RT(0);
+            if (imaxout) *imaxout = 0;
+            for(int i=1;i<N;++i) {
+                RT absvi = TMV_ABS2(itsv[i]);
+                if (absvi > max) {
+                    max = absvi;
+                    if (imaxout) *imaxout = i;
+                }
+            }
+            if (I == FortranStyle && imaxout) ++(*imaxout);
+            return max;
         }
 
         TMV_DEPRECATED(RT Norm() const)

@@ -1,5 +1,5 @@
 
-#define START 2
+#define START 0
 
 #include "../src/TMV_Blas.h"
 #include "TMV.h"
@@ -428,7 +428,7 @@ void TestSymDecomp()
         // mattype = 4  is Singular and nearly zero
         // mattype = 5  is Singular and nearly overflow
 
-        const int N = 20;
+        const int N = 200;
         const bool posdef = mattype == 0;
         const bool baddefect = mattype == 3;
         const bool nearunderflow = mattype == 4;

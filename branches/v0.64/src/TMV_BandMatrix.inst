@@ -18,6 +18,7 @@
   template RT GenBandMatrix<T >::normSq(const RT scale) const; \
   template RT GenBandMatrix<T >::norm1() const; \
   template RT GenBandMatrix<T >::maxAbsElement() const; \
+  template RT GenBandMatrix<T >::maxAbs2Element() const; \
   template RT GenBandMatrix<T >::doNorm2() const; \
   template RT GenBandMatrix<T >::doCondition() const; \
   template QuotXB<T,T > GenBandMatrix<T >::QInverse() const; \

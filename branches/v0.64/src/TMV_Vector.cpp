@@ -221,11 +221,12 @@ namespace tmv {
     static RT DoNorm2(const GenVector<T>& v)
     { 
         const RT eps = TMV_Epsilon<T>();
+        const RT halfeps = eps/RT(2);
 
-        RT vmax = v.maxAbsElement();
+        RT vmax = v.maxAbs2Element();
         if (vmax == RT(0)) return RT(0);
-        else if (vmax * vmax * eps == RT(0)) {
-            // Then we need to rescale, since underflow has caused 
+        else if (vmax * vmax * halfeps == RT(0)) {
+            // Then we need to rescale, since underflow will cause 
             // rounding errors
             // Epsilon is a pure power of 2, so this scaling doesn't 
             // introduce any no rounding errors.
@@ -496,8 +497,7 @@ namespace tmv {
         return max;
     }
     template <class T> 
-    static RT FindMinAbsElement(
-        const GenVector<T>& v, int& imin)
+    static RT FindMinAbsElement(const GenVector<T>& v, int& imin)
     {
         TMVAssert(v.size() > 0);
         TMVAssert(v.step() > 0);
@@ -526,15 +526,77 @@ namespace tmv {
                 }
             }
         }
-        return isReal(T()) ? min : TMV_SQRT(min);
+        return min;
+    }
+    template <class T> 
+    static RT FindMaxAbs2Element(const GenVector<T>& v, int& imax)
+    {
+        TMVAssert(v.size() > 0);
+        TMVAssert(v.step() > 0);
+
+        const T* p = v.cptr();
+        const int s = v.step();
+        RT max = TMV_ABS2(*p);
+        imax = 0;
+        int i=1;
+        if (s == 1) {
+            ++p;
+            for(int k=v.size()-1;k>0; --k,++p,++i) {
+                RT absval = TMV_ABS2(*p);
+                if (absval > max) { 
+                    max = absval; 
+                    imax = i;
+                }
+            }
+        } else {
+            p += s;
+            for(int k=v.size()-1;k>0; --k,p+=s,++i) {
+                RT absval = TMV_ABS2(*p);
+                if (absval > max) { 
+                    max = absval; 
+                    imax = i;
+                }
+            }
+        }
+        return max;
+    }
+    template <class T> 
+    static RT FindMinAbs2Element(const GenVector<T>& v, int& imin)
+    {
+        TMVAssert(v.size() > 0);
+        TMVAssert(v.step() > 0);
+
+        const T* p = v.cptr();
+        const int s = v.step();
+        RT min = TMV_ABS2(*p);
+        imin = 0;
+        int i=1;
+        if (s == 1) {
+            ++p;
+            for(int k=v.size()-1;k>0; --k,++p,++i) {
+                RT absval = TMV_ABS2(*p);
+                if (absval < min) {
+                    min = absval; 
+                    imin = i;
+                }
+            }
+        } else {
+            p += s;
+            for(int k=v.size()-1;k>0; --k,p+=s,++i) {
+                RT absval = TMV_ABS2(*p);
+                if (absval < min) {
+                    min = absval; 
+                    imin = i;
+                }
+            }
+        }
+        return min;
     }
 #ifdef BLAS
     // These return values seem to work, so I don't guard this segment 
     // with BLASNORETURN
 #ifdef INST_DOUBLE
-    template <> 
-    double FindMaxAbsElement(
-        const GenVector<double>& v, int& imax)
+    static double FindMaxAbsElement(const GenVector<double>& v, int& imax)
     {
         int n=v.size();
         int s=v.step();
@@ -545,10 +607,22 @@ namespace tmv {
         TMVAssert(imax < int(v.size()));
         return TMV_ABS(v[imax]);
     }
+    static double FindMaxAbs2Element(const GenVector<double>& v, int& imax)
+    { return FindMaxAbsElement(v,imax); }
+    static double FindMaxAbs2Element(
+        const GenVector<std::complex<double> >& v, int& imax)
+    {
+        int n=v.size();
+        int s=v.step();
+        imax = BLASNAME(izamax) (BLASV(n),BLASP(v.cptr()),BLASV(s));
+#ifndef CBLAS
+        --imax;
+#endif
+        TMVAssert(imax < int(v.size()));
+        return TMV_ABS2(v[imax]);
+    }
 #ifdef BLASIDAMIN
-    template <> 
-    double FindMinAbsElement(
-        const GenVector<double>& v, int& imin)
+    static double FindMinAbsElement(const GenVector<double>& v, int& imin)
     {
         int n=v.size();
         int s=v.step();
@@ -559,12 +633,24 @@ namespace tmv {
         TMVAssert(imin < int(v.size()));
         return TMV_ABS(v[imin]);
     }
+    static double FindMinAbs2Element(const GenVector<double>& v, int& imin)
+    { return FindMinAbsElement(v,imin); }
+    static double FindMinAbs2Element(
+        const GenVector<std::complex<double> >& v, int& imin)
+    {
+        int n=v.size();
+        int s=v.step();
+        imin = BLASNAME(izamin) (BLASV(n),BLASP(v.cptr()),BLASV(s));
+#ifndef CBLAS
+        --imin;
+#endif
+        TMVAssert(imin < int(v.size()));
+        return TMV_ABS2(v[imin]);
+    }
 #endif // BLASIDAMIN
 #endif
 #ifdef INST_FLOAT
-    template <> 
-    float FindMaxAbsElement(
-        const GenVector<float>& v, int& imax)
+    static float FindMaxAbsElement(const GenVector<float>& v, int& imax)
     {
         int n=v.size();
         int s=v.step();
@@ -575,10 +661,22 @@ namespace tmv {
         TMVAssert(imax < int(v.size()));
         return TMV_ABS(v[imax]);
     }
+    static float FindMaxAbs2Element(const GenVector<float>& v, int& imax)
+    { return FindMaxAbsElement(v,imax); }
+    static float FindMaxAbs2Element(
+        const GenVector<std::complex<float> >& v, int& imax)
+    {
+        int n=v.size();
+        int s=v.step();
+        imax = BLASNAME(icamax) (BLASV(n),BLASP(v.cptr()),BLASV(s));
+#ifndef CBLAS
+        --imax;
+#endif
+        TMVAssert(imax < int(v.size()));
+        return TMV_ABS2(v[imax]);
+    }
 #ifdef BLASIDAMIN
-    template <> 
-    float FindMinAbsElement(
-        const GenVector<float>& v, int& imin)
+    static float FindMinAbsElement(const GenVector<float>& v, int& imin)
     {
         int n=v.size();
         int s=v.step();
@@ -588,6 +686,20 @@ namespace tmv {
 #endif
         TMVAssert(imin < int(v.size()));
         return TMV_ABS(v[imin]);
+    }
+    static float FindMinAbs2Element(const GenVector<float>& v, int& imin)
+    { return FindMinAbsElement(v,imin); }
+    static float FindMinAbs2Element(
+        const GenVector<std::complex<float> >& v, int& imin)
+    {
+        int n=v.size();
+        int s=v.step();
+        imin = BLASNAME(icamin) (BLASV(n),BLASP(v.cptr()),BLASV(s));
+#ifndef CBLAS
+        --imin;
+#endif
+        TMVAssert(imin < int(v.size()));
+        return TMV_ABS2(v[imin]);
     }
 #endif // BLASAMIN
 #endif // FLOAT
@@ -639,8 +751,7 @@ namespace tmv {
     }
 
     template <class T> 
-    RT GenVector<T>::minAbsElement(
-        int* iminout) const
+    RT GenVector<T>::minAbsElement(int* iminout) const
     {
         if (size() == 0) {
             if (iminout) *iminout = -1;
@@ -662,8 +773,7 @@ namespace tmv {
         }
     }
     template <class T> 
-    RT GenVector<T>::maxAbsElement( 
-        int* imaxout) const
+    RT GenVector<T>::maxAbsElement(int* imaxout) const
     {
         if (size() == 0) {
             if (imaxout) *imaxout = -1;
@@ -680,6 +790,51 @@ namespace tmv {
             return TMV_ABS(*cptr());
         } else {
             RT max = reverse().maxAbsElement(imaxout);
+            if (imaxout) *imaxout = size()-1-(*imaxout);
+            return max;
+        }
+    }
+
+    template <class T> 
+    RT GenVector<T>::minAbs2Element(int* iminout) const
+    {
+        if (size() == 0) {
+            if (iminout) *iminout = -1;
+            return RT(0);
+        }
+        if (step() > 0) {
+            int imin;
+            RT min = FindMinAbs2Element(*this,imin);
+            TMVAssert(imin < int(size()));
+            if (iminout) *iminout = imin;
+            return min;
+        } else if (step() == 0) {
+            if (iminout) *iminout = 0;
+            return TMV_ABS2(*cptr());
+        } else {
+            RT min = reverse().minAbs2Element(iminout);
+            if (iminout) *iminout = size()-1-(*iminout);
+            return min;
+        }
+    }
+    template <class T> 
+    RT GenVector<T>::maxAbs2Element(int* imaxout) const
+    {
+        if (size() == 0) {
+            if (imaxout) *imaxout = -1;
+            return RT(0);
+        }
+        if (step() > 0) {
+            int imax;
+            RT max = FindMaxAbs2Element(*this,imax);
+            TMVAssert(imax < int(size()));
+            if (imaxout) *imaxout = imax;
+            return max;
+        } else if (step() == 0) {
+            if (imaxout) *imaxout = 0;
+            return TMV_ABS2(*cptr());
+        } else {
+            RT max = reverse().maxAbs2Element(imaxout);
             if (imaxout) *imaxout = size()-1-(*imaxout);
             return max;
         }

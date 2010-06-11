@@ -208,6 +208,36 @@ static void TestSmallVectorComplex()
     ca *= std::complex<T>(3,4);
     tmv::SmallVector<std::complex<T>,N> cb = b*std::complex<T>(3,4);
 
+    tmv::SmallVector<std::complex<T>,N> v3;
+    for (int i=0; i<N; ++i) v3(i) = std::complex<T>(i+10,2*i);
+    v3(23) = std::complex<T>(40*N,9*N);
+    v3(42) = std::complex<T>(0.15,-0.20);
+    v3(15) = std::complex<T>(-32*N,24*N);
+    int imax,imin;
+    if (showacc) {
+        std::cout<<"v = "<<v3<<std::endl;
+        std::cout<<"v.MaxAbs = "<<v3.maxAbsElement(&imax)<<std::endl;
+        std::cout<<"imax = "<<imax<<std::endl;
+        std::cout<<"v.MinAbs = "<<v3.minAbsElement(&imin)<<std::endl;
+        std::cout<<"imin = "<<imin<<std::endl;
+    }
+    Assert(std::abs(v3.maxAbsElement(&imax) - T(41*N)) < tmv::TMV_Epsilon<T>(),
+           "MaxAbsElement of Vector did not return correct value");
+    Assert(imax == 23,
+           "MaxAbsElement of Vector did not return correct index");
+    Assert(std::abs(v3.minAbsElement(&imin) - T(0.25)) < tmv::TMV_Epsilon<T>(),
+           "MinAbsElement of Vector did not return correct value");
+    Assert(imin == 42,
+           "MinAbsElement of Vector did not return correct index");
+    Assert(std::abs(v3.maxAbs2Element(&imax) - T(56*N)) < tmv::TMV_Epsilon<T>(),
+           "MaxAbs2Element of Vector did not return correct value");
+    Assert(imax == 15,
+           "MaxAbs2Element of Vector did not return correct index");
+    Assert(std::abs(v3.minAbs2Element(&imin) - T(0.35)) < tmv::TMV_Epsilon<T>(),
+           "MinAbs2Element of Vector did not return correct value");
+    Assert(imin == 42,
+           "MinAbs2Element of Vector did not return correct index");
+ 
     std::complex<T> prod = T(29)*std::complex<T>(-28,96)*T(25);
     T normsum = tmv::TMV_SQRT(T(1373700)*T(25));
     T normdiff = tmv::TMV_SQRT(T(1362100)*T(25));

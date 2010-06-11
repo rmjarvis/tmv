@@ -18,6 +18,7 @@
   template RT GenSymMatrix<T >::normSq(const RT scale) const; \
   template RT GenSymMatrix<T >::norm1() const; \
   template RT GenSymMatrix<T >::maxAbsElement() const; \
+  template RT GenSymMatrix<T >::maxAbs2Element() const; \
   template QuotXS<T,T > GenSymMatrix<T >::QInverse() const; \
   template auto_ptr<BaseMatrix<T > > GenSymMatrix<T >::newCopy() const; \
   template auto_ptr<BaseMatrix<T > > GenSymMatrix<T >::newView() const; \

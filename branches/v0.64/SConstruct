@@ -280,7 +280,7 @@ def AddOpenMPFlag(env):
     print 'Using OpenMP'
     env['OMP_FLAGS'] = flag 
     env.Append(LINKFLAGS=ldflag)
-    env.Append(LIBS=xlib)
+    env.AppendUnique(LIBS=xlib)
 
 def GetCompilerVersion(env):
     """
@@ -680,12 +680,13 @@ int main()
 }
 """
 
-    context.Message('Checking for Fotran BLAS... ')
+    context.Message('Checking for Fortran BLAS... ')
 
     if context.TryCompile(fblas_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],fblas_source_file) or
             CheckLibs(context,['blas'],fblas_source_file) or
+            CheckLibs(context,['blas','gfortran'],fblas_source_file) or
             CheckLibs(context,['blas','pgftnrtl'],fblas_source_file) )
 
         context.Result(result)
@@ -840,6 +841,7 @@ int main()
         result = (
             CheckLibs(context,[],flapack_source_file) or
             CheckLibs(context,['lapack'],flapack_source_file) or
+            CheckLibs(context,['lapack','gfortran'],flapack_source_file) or
             CheckLibs(context,['lapack','pgftnrtl'],flapack_source_file) )
 
         context.Result(result)
