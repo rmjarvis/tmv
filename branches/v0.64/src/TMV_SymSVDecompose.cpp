@@ -48,7 +48,7 @@
 #include "TMV_IsNaN.h"
 
 #ifdef XDEBUG
-#define THRESH 1.e-10
+#define THRESH 1.e-5
 #include "tmv/TMV_MatrixArith.h"
 #include "tmv/TMV_DiagMatrixArith.h"
 #include "tmv/TMV_SymMatrixArith.h"
@@ -535,11 +535,30 @@ namespace tmv {
             //     We test for all info > 0 just to be sure.
             //     When this happens, we call dstedc instead.
             //
-            //     In addition to the above problem, the dstegr routine seems to
-            //     not be very careful about nan issues.  So we also check for nan's
-            //     in U1, and call dstedc if there are any.
+	    //     Also, sometimes, the U matrix comes back with a column
+	    //     of all zeros.  No error is indicated by Lap_info in 
+	    //     these (rare) cases, so I'm not sure what is going on,
+	    //     but I check for it here too.
+	    //
+            //     In addition to the above problem, the dstegr routine 
+	    //     seems to not be very careful about nan issues.  
+	    //     So we also check for nan's in U1, and call dstedc if 
+	    //     there are any.
             double nantest = U1.linearView().sumElements();
-            if (Lap_info > 0 || E1(n-1) > 0.F || neigen < n || isNaN(nantest)) {
+	    int badcol = -1;
+	    for(int j=0;j<n;++j) {
+	        if (U1.col(j).sumElements() < TMV_Epsilon<double>()) badcol = j;
+	    }
+	    //cout<<"After dstegr\n";
+	    //cout<<"lapinfo = "<<Lap_info<<endl;
+	    //cout<<"E(n-1) = "<<E1(n-1)<<endl;
+	    //cout<<"neigen = "<<neigen<<endl;
+	    //cout<<"Norm(UtU-1) = "<<Norm(U1.adjoint()*U1-1.)<<endl;
+	    //cout<<"UtU.diag() = "<<(U1.adjoint()*U1).diag()<<endl;
+	    //cout<<"nantest = "<<nantest<<endl;
+	    //cout<<"badcol = "<<badcol<<endl;
+            if (Lap_info > 0 || E1(n-1) > 0.F || neigen < n ||
+		badcol >= 0 || isNaN(nantest)) {
                 std::ostringstream ss;
                 ss << "Error in LAPACK function dstegr: ";
                 if (Lap_info > 0) 
@@ -548,6 +567,9 @@ namespace tmv {
                     ss << "Returned non-zero E(n) = "<<E1(n-1)<<".  ";
                 else if (neigen < n) 
                     ss << "Only found "<<neigen<<" / "<<n<<" eigenvectors.  ";
+                else if (badcol >= 0) 
+                    ss << "U found to be not unitary: U.col("<<badcol<<") = "<<
+		        U1.col(badcol)<<".  ";
                 else 
                     ss <<  "NaN found in eigenvector matrix.  ";
                 ss << "Calling dstedc instead.";
@@ -600,7 +622,20 @@ namespace tmv {
                 LAPP(isuppz.get()) LAPWK(work.get()) LAPVWK(lwork) 
                 LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1 LAP1);
             double nantest = U1.linearView().sumElements();
-            if (Lap_info > 0 || E1(n-1) > 0.F || neigen < n || isNaN(nantest)) {
+	    int badcol = -1;
+	    for(int j=0;j<n;++j) {
+	        if (U1.col(j).sumElements() < TMV_Epsilon<double>()) badcol = j;
+	    }
+	    //cout<<"After dstegr\n";
+	    //cout<<"lapinfo = "<<Lap_info<<endl;
+	    //cout<<"E(n-1) = "<<E1(n-1)<<endl;
+	    //cout<<"neigen = "<<neigen<<endl;
+	    //cout<<"Norm(UtU-1) = "<<Norm(U1.adjoint()*U1-1.)<<endl;
+	    //cout<<"UtU.diag() = "<<(U1.adjoint()*U1).diag()<<endl;
+	    //cout<<"nantest = "<<nantest<<endl;
+	    //cout<<"badcol = "<<badcol<<endl;
+            if (Lap_info > 0 || E1(n-1) > 0.F || neigen < n ||
+		badcol >= 0 || isNaN(nantest)) {
                 std::ostringstream ss;
                 ss << "Error in LAPACK function dstegr: ";
                 if (Lap_info > 0) 
@@ -609,6 +644,9 @@ namespace tmv {
                     ss << "Returned non-zero E(n) = "<<E1(n-1)<<".  ";
                 else if (neigen < n) 
                     ss << "Only found "<<neigen<<" / "<<n<<" eigenvectors.  ";
+                else if (badcol >= 0) 
+                    ss << "U found to be not unitary: U.col("<<badcol<<") = "<<
+		        U1.col(badcol)<<".  ";
                 else 
                     ss <<  "NaN found in eigenvector matrix.  ";
                 ss << "Calling dstedc instead.";
@@ -662,8 +700,21 @@ namespace tmv {
                 LAPP(&neigen),LAPP(Dout.ptr()),LAPP(U1.ptr()),LAPV(ldu),
                 LAPP(isuppz.get()) LAPWK(work.get()) LAPVWK(lwork)
                 LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1 LAP1);
-            float nantest = U1.linearView().sumElements();
-            if (Lap_info > 0 || E1(n-1) > 0.F || neigen < n || isNaN(nantest)) {
+	    float nantest = U1.linearView().sumElements();
+	    int badcol = -1;
+	    for(int j=0;j<n;++j) {
+	        if (U1.col(j).sumElements() < TMV_Epsilon<float>()) badcol = j;
+	    }
+	    //cout<<"After sstegr\n";
+	    //cout<<"lapinfo = "<<Lap_info<<endl;
+	    //cout<<"E(n-1) = "<<E1(n-1)<<endl;
+	    //cout<<"neigen = "<<neigen<<endl;
+	    //cout<<"Norm(UtU-1) = "<<Norm(U1.adjoint()*U1-1.F)<<endl;
+	    //cout<<"UtU.diag() = "<<(U1.adjoint()*U1).diag()<<endl;
+	    //cout<<"nantest = "<<nantest<<endl;
+	    //cout<<"badcol = "<<badcol<<endl;
+            if (Lap_info > 0 || E1(n-1) > 0.F || neigen < n || 
+		badcol >= 0 || isNaN(nantest)) {
                 std::ostringstream ss;
                 ss << "Error in LAPACK function sstegr: ";
                 if (Lap_info > 0) 
@@ -672,6 +723,9 @@ namespace tmv {
                     ss << "Returned non-zero E(n) = "<<E1(n-1)<<".  ";
                 else if (neigen < n) 
                     ss << "Only found "<<neigen<<" / "<<n<<" eigenvectors.  ";
+                else if (badcol >= 0) 
+                    ss << "U found to be not unitary: U.col("<<badcol<<") = "<<
+		        U1.col(badcol)<<".  ";
                 else 
                     ss <<  "NaN found in eigenvector matrix.  ";
                 ss << "Calling sstedc instead.";
@@ -724,7 +778,20 @@ namespace tmv {
                 LAPP(isuppz.get()) LAPWK(work.get()) LAPVWK(lwork) 
                 LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1 LAP1);
             float nantest = U1.linearView().sumElements();
-            if (Lap_info > 0 || E1(n-1) > 0.F || neigen < n || isNaN(nantest)) {
+	    int badcol = -1;
+	    for(int j=0;j<n;++j) {
+	        if (U1.col(j).sumElements() < TMV_Epsilon<float>()) badcol = j;
+	    }
+	    //cout<<"After sstegr\n";
+	    //cout<<"lapinfo = "<<Lap_info<<endl;
+	    //cout<<"E(n-1) = "<<E1(n-1)<<endl;
+	    //cout<<"neigen = "<<neigen<<endl;
+	    //cout<<"Norm(UtU-1) = "<<Norm(U1.adjoint()*U1-1.F)<<endl;
+	    //cout<<"UtU.diag() = "<<(U1.adjoint()*U1).diag()<<endl;
+	    //cout<<"nantest = "<<nantest<<endl;
+	    //cout<<"badcol = "<<badcol<<endl;
+            if (Lap_info > 0 || E1(n-1) > 0.F || neigen < n ||
+		badcol >= 0 || isNaN(nantest)) {
                 std::ostringstream ss;
                 ss << "Error in LAPACK function sstegr: ";
                 if (Lap_info > 0) 
@@ -733,6 +800,9 @@ namespace tmv {
                     ss << "Returned non-zero E(n) = "<<E1(n-1)<<".  ";
                 else if (neigen < n) 
                     ss << "Only found "<<neigen<<" / "<<n<<" eigenvectors.  ";
+                else if (badcol >= 0) 
+                    ss << "U found to be not unitary: U.col("<<badcol<<") = "<<
+		        U1.col(badcol)<<".  ";
                 else 
                     ss <<  "NaN found in eigenvector matrix.  ";
                 ss << "Calling sstedc instead.";
@@ -823,15 +893,19 @@ namespace tmv {
 
 #ifdef XDEBUG
         if (U) {
-            //cout<<"Done EigenFromTridiag: Norm(U) = "<<Norm(*U)<<endl;
-            //cout<<"D = "<<D<<endl;
+            cout<<"Done EigenFromTridiag: Norm(U) = "<<Norm(*U)<<endl;
+            cout<<"D = "<<D<<endl;
             Matrix<T> UDU = *U * DiagMatrixViewOf(D)*U->adjoint();
-            //cout<<"Norm(UDUt) = "<<Norm(UDU)<<endl;
-            //cout<<"Norm(UDUt-A0) = "<<Norm(UDU-A0)<<endl;
-            //cout<<"Norm(U) = "<<Norm(*U)<<endl;
-            //cout<<"Norm(UD) = "<<Norm(*U*DiagMatrixViewOf(D))<<endl;
-            //cout<<"Norm(A0U) = "<<Norm(A0*(*U))<<endl;
-            //cout<<"Norm(UD-A0U) = "<<Norm((*U)*DiagMatrixViewOf(D)-A0*(*U))<<endl;
+            cout<<"Norm(UDUt) = "<<Norm(UDU)<<endl;
+            cout<<"Norm(UDUt-A0) = "<<Norm(UDU-A0)<<endl;
+            cout<<"Norm(U) = "<<Norm(*U)<<endl;
+            cout<<"Norm(UD) = "<<Norm(*U*DiagMatrixViewOf(D))<<endl;
+            cout<<"Norm(A0U) = "<<Norm(A0*(*U))<<endl;
+            cout<<"Norm(UD-A0U) = "<<Norm((*U)*DiagMatrixViewOf(D)-A0*(*U))<<endl;
+            cout<<"Norm(UUt-1) = "<<Norm((*U)*U->adjoint()-T(1))<<endl;
+            cout<<"Norm(UtU-1) = "<<Norm(U->adjoint()*(*U)-T(1))<<endl;
+	    cout<<"UUt.diag = "<<(*U)*(U->adjoint()).diag()<<endl;
+	    cout<<"UtU.diag = "<<(U->adjoint()*(*U)).diag()<<endl;
             if (!(Norm(UDU-A0) < THRESH*Norm(A0))) {
                 cerr<<"EigenFromTridiagonal:\n";
                 cerr<<"D = "<<D0<<endl;
@@ -949,8 +1023,8 @@ namespace tmv {
         Matrix<T> A0(U);
         A0.upperTri() = A0.lowerTri().adjoint();
         std::cout<<"Start SymSV_Decompose\n";
-        std::cout<<"U = "<<U<<endl;
-        std::cout<<"A0 = "<<A0<<endl;
+        //std::cout<<"U = "<<U<<endl;
+        //std::cout<<"A0 = "<<A0<<endl;
 #endif
 
         UnsortedHermEigen(U,SS.diag());
@@ -961,10 +1035,10 @@ namespace tmv {
 #ifdef XDEBUG
         Matrix<T> A2 = U * SS * U.adjoint();
         std::cout<<"Done HermSV_Decompose\n";
-        std::cout<<"U = "<<U<<endl;
+        //std::cout<<"U = "<<U<<endl;
         std::cout<<"SS = "<<SS<<endl;
-        std::cout<<"A0 = "<<A0<<endl;
-        std::cout<<"A2 = "<<A2<<endl;
+        //std::cout<<"A0 = "<<A0<<endl;
+        //std::cout<<"A2 = "<<A2<<endl;
         std::cout<<"Norm(A0-A2) = "<<Norm(A0-A2)<<std::endl;
         if (!(Norm(A0-A2) < THRESH * TMV_NORM(Norm(U)) * Norm(SS))) {
             cerr<<"HermSV_Decompose:\n";
@@ -996,8 +1070,8 @@ namespace tmv {
         Matrix<T> A0(U);
         A0.upperTri() = A0.lowerTri().transpose();
         std::cout<<"Start SymSV_Decompose\n";
-        std::cout<<"U = "<<U<<endl;
-        std::cout<<"A0 = "<<A0<<endl;
+        //std::cout<<"U = "<<U<<endl;
+        //std::cout<<"A0 = "<<A0<<endl;
 #endif
 
         TMVAssert(isComplex(T()));
@@ -1044,11 +1118,11 @@ namespace tmv {
         if (V) {
             Matrix<T> A2 = U * SS * (*V);
             std::cout<<"Done SymSV_Decompose\n";
-            std::cout<<"U = "<<U<<endl;
+            //std::cout<<"U = "<<U<<endl;
             std::cout<<"SS = "<<SS<<endl;
-            std::cout<<"V = "<<*V<<endl;
-            std::cout<<"A0 = "<<A0<<endl;
-            std::cout<<"A2 = "<<A2<<endl;
+            //std::cout<<"V = "<<*V<<endl;
+            //std::cout<<"A0 = "<<A0<<endl;
+            //std::cout<<"A2 = "<<A2<<endl;
             std::cout<<"Norm(A0-A2) = "<<Norm(A0-A2)<<std::endl;
             if (!(Norm(A0-A2) < THRESH * Norm(U) * Norm(SS) * Norm(*V))) {
                 cerr<<"SymSV_Decompose:\n";
@@ -1268,7 +1342,7 @@ namespace tmv {
         SymMultMM<false>(T(1),VtS,V,P);
 #ifdef XDEBUG
         std::cout<<"Band PolarDecompose "<<TMV_Text(A)<<"  "<<A<<endl;
-        std::cout<<"U = "<<U<<endl;
+        //std::cout<<"U = "<<U<<endl;
         std::cout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<endl;
         //std::cout<<"P = "<<P<<endl;
         Matrix<T> A2 = U*P;
