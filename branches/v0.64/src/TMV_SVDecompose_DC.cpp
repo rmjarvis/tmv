@@ -360,6 +360,7 @@ namespace tmv {
         bool fixedweight = true;
         if (threepoles) dbgcout<<"USE THREE POLES\n";
 
+        bool last = false;
         for(int iter = 0; iter < TMV_MAXITER; iter++) {
             dbgcout<<"k = "<<k<<", loop 2: iter = "<<iter<<std::endl;
             dbgcout<<"Main iter = "<<iter<<", f = "<<f<<
@@ -368,10 +369,13 @@ namespace tmv {
                 ", s^2 = "<<D[k1]*D[k1]+tau<<endl;
             dbgcout<<"df = "<<df<<", eta_newt = -f/df = "<<-f/df<<std::endl;
 
-            if (TMV_ABS(f) <= eps*e) break;
-
             T eta; // = the change to be added to s
-            if (!threepoles) { // The normal case: only 2 poles used for approx
+
+            if (TMV_ABS(f) <= eps*e) {
+                last = true;
+                eta = T(0); // This will trigger a Newton step below.
+            } else if (!threepoles) {
+                // The normal case: only 2 poles used for approx
                 T d1 = diff[kk] * sum[kk];
                 T d2 = diff[kk+1] * sum[kk+1];
                 dbgcout<<"d1,d2 = "<<d1<<", "<<d2<<endl;
@@ -446,7 +450,8 @@ namespace tmv {
                         TMVAssert(eta > d1 && eta < d2);
                     }
                 }
-            } else { // More complicated case using 3 poles. 
+            } else {
+                // More complicated case using 3 poles. 
                 dbgcout<<"threepoles section\n";
                 T d1 = diff[k1-1] * sum[k1-1];
                 T d2 = diff[k1+1] * sum[k1+1];
@@ -497,15 +502,15 @@ namespace tmv {
                     k1==k ? 
                     (d1x+T(1))*(rho+psix+phi) - d1*(dpsix+dphi) + zsq[k1-1]/d2 :
                     (d1x+T(1))*(rho+psi+phix) - d1*(dpsi+dphix) + zsq[k1+1]/d2);
-                dbgcout<<"temp = "<<temp<<endl;
                 T a = temp + zsq[k1]/d2 - c*taux;
-                dbgcout<<"a = "<<a<<endl;
                 T b = d1x*fk - taux*(temp + (d1x+T(1))*k1term);
-                dbgcout<<"b = "<<b<<endl;
                 T g = d1x*taux*f; 
-                dbgcout<<"g = "<<g<<endl;
                 T mineta = (lowerbound - tau)/d2;
                 T maxeta = (upperbound - tau)/d2;
+                dbgcout<<"temp = "<<temp<<endl;
+                dbgcout<<"a = "<<a<<endl;
+                dbgcout<<"b = "<<b<<endl;
+                dbgcout<<"g = "<<g<<endl;
                 dbgcout<<"mineta, maxeta = "<<mineta<<", "<<maxeta<<endl;
 
                 // Bounds on eta are:
@@ -570,24 +575,25 @@ namespace tmv {
                         if ((eta2 > eta && (deta < 0 || deta > eta2-eta)) || 
                             (eta2 < eta && (deta > 0 || deta < eta2-eta)) ) {
 #if 1
-                            dbgcout<<"deta is wrong direction or too big - "
-                                "use bisection.\n";
-                            deta = (eta2-eta)/T(2);
-                            dbgcout<<"deta -> "<<deta<<endl;
-#else
-                            // This seems to work too.  I'm not sure which
-                            // one is the better choice in general.
+                            // This seems to work a bit better when 
+                            // adjacent poles differ by orders of magnitude.
+                            // I'm not sure if it is always the better
+                            // choice in general.
                             dbgcout<<"deta is wrong direction or too big - "
                                 "use Newton step and break out of 3-poles.\n";
                             eta = (-f/df)/d2;
                             break;
+#else
+                            dbgcout<<"deta is wrong direction or too big - "
+                                "use bisection.\n";
+                            deta = (eta2-eta)/T(2);
+                            dbgcout<<"deta -> "<<deta<<endl;
 #endif
                         }
                     }
                     TMVAssert(eta + deta <= maxeta);
                     TMVAssert(eta + deta >= mineta);
                     T etanew = eta + deta;
-                    dbgcout<<"etanew = "<<etanew<<endl;
                     T hnew = 
                         (TMV_ABS(deta) < RT(1.e-3)*TMV_ABS(eta)) ?
                         // If change in eta is small compared to eta, then
@@ -600,11 +606,13 @@ namespace tmv {
                              (T(3)*c*eta-T(2)*a)*eta+b )*deta :
                         // Else regular calculation is ok.
                         ((c*etanew - a)*etanew + b)*etanew + g;
+                    dbgcout<<"etanew = "<<etanew<<endl;
                     dbgcout<<"hnew = "<<hnew<<endl;
                     if ( (h > T(0)) != (hnew > T(0)) ) { eta2 = eta; h2 = h; }
                     eta = etanew;
                     h = hnew;
-                    if (TMV_ABS(deta) < eps*TMV_ABS(eta) || TMV_ABS(h) < eps*g) break;
+                    if (TMV_ABS(deta) < eps*TMV_ABS(eta) || 
+                        TMV_ABS(h) < eps*g) break;
 #ifdef TMVDEBUG
                     if (iter3 == TMV_MAXITER-1) {
                         std::cout<<
@@ -613,6 +621,7 @@ namespace tmv {
                         std::cout<<
                             "No solution after "<<TMV_MAXITER<<
                             " iterations.\n";
+                        exit(1);
                     }
 #endif
                 }
@@ -658,6 +667,8 @@ namespace tmv {
             } else {
                 for(int j=0;j<N;j++) { sum[j] = D[j]+s; diff[j] -= eta; }
             }
+
+            if (last) break;
 
             // Update psi, phi, etc.
             psi = T(0);
@@ -715,15 +726,17 @@ namespace tmv {
                 std::cout<<"Warning - Unable to find solution in "
                     "FindDCSingularValue\n";
                 std::cout<<"No solution after "<<TMV_MAXITER<<" iterations.\n";
+                exit(1);
             }
 #endif
         }
         dbgcout<<"Found Singularvalue S("<<k<<") = "<<s<<endl;
-        dbgcout<<"eta = "<<-f/df<<", tau = "<<tau<<", eta/tau = "<<-f/df/tau<<std::endl;
+        dbgcout<<"eta = "<<-f/df<<", tau = "<<tau<<
+            ", eta/tau = "<<-f/df/tau<<std::endl;
 #ifdef XDEBUG
         // f(s) = rho + Sum_i=1..N z_i^2/(D_i^2-s^2)
         T ff = rho;
-        dbgcout<<"f(s) = 1 + ";
+        dbgcout<<"f(s) = "<<rho<<" + ";
         for(int j=0;j<N;j++) {
             dbgcout<<(z[j]/diff[j])*(z[j]/sum[j])<<" + ";
             ff += (z[j]/diff[j])*(z[j]/sum[j]);

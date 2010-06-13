@@ -132,7 +132,8 @@ void TestHermBandDecomp()
         if (nearunderflow) {
             T x = std::numeric_limits<T>::min();
             m.setAllTo(x);
-            c.upperBandOff().setAllTo(std::complex<T>(x,2*x));
+            if (nlo > 0)
+                c.upperBandOff().setAllTo(std::complex<T>(x,2*x));
             c.diag().setAllTo(x);
             for(int i=1;i<N;++i) {
                 int start = i-nlo; if (start < 0) start = 0;
@@ -151,7 +152,8 @@ void TestHermBandDecomp()
             T x = std::numeric_limits<T>::max();
             x /= N;
             m.setAllTo(x);
-            c.upperBandOff().setAllTo(std::complex<T>(x,x/2));
+            if (nlo > 0) 
+                c.upperBandOff().setAllTo(std::complex<T>(x,x/2));
             c.diag().setAllTo(x);
             for(int i=1;i<N;++i) {
                 int start = i-nlo;  if (start < 0) start = 0;
