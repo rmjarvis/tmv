@@ -320,6 +320,13 @@ void TestBandDecomp()
             Assert(Norm(m-U2*S2*V2) <= eps*normm,"SV2");
 
             SV_Decompose(m,S2.view());
+            if (showacc) {
+                std::cout<<"S = "<<S.diag()<<std::endl;
+                std::cout<<"S2 = "<<S2.diag()<<std::endl;
+                std::cout<<"S2-S = "<<S2.diag()-S.diag()<<std::endl;
+                std::cout<<"Norm(S2-S) = "<<Norm(S2-S)<<
+                    "  cf "<<eps*normm<<std::endl;
+            }
             Assert(Norm(S2-S) <= eps*normm,"SV3");
             SV_Decompose(m,U2.view(),S2.view());
             Assert(Norm(S2-S) <= eps*normm,"SV4 S");

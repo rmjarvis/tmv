@@ -48,8 +48,8 @@
 #include "tmv/TMV_DiagMatrix.h"
 #include "tmv/TMV_DiagMatrixArith.h"
 #include "tmv/TMV_VIt.h"
-//#define dbgcout std::cout
-#define dbgcout if(false) std::cout
+#define dbgcout std::cout
+//#define dbgcout if(false) std::cout
 using std::cerr;
 using std::endl;
 #else
@@ -343,6 +343,15 @@ namespace tmv {
         e /= max;
         dbgcout<<"d0,d1,e => "<<d0<<','<<d1<<','<<e<<std::endl;
 
+        // If e is small coming in, then this calculation will be 
+        // the best we can do to reduce it to zero.  
+        // However, if it is largish, then there are some cases where
+        // rounding errors keep if from going all the way to zero.
+        // So in this case, just do the calculation for what E(0) should
+        // be and let ChopSmallElements figure out whether it is small 
+        // enough to go the rest of the way to 0.
+        bool exact = (std::abs(e) < 1.e-3);
+
         RT d = ((d1-d0)*(d1+d0)+e*e)/RT(2);
         RT absd = TMV_ABS(d);
         dbgcout<<"d,absd = "<<d<<','<<absd<<std::endl;
@@ -354,7 +363,7 @@ namespace tmv {
         // it usually means that some cancellation happened, and the 
         // normal calculation has significant inaccuracies.  So do the 
         // alternate calculation below which is specialized for small d.
-        if (absd > 1.e-2) {
+        if (absd > 0.1) {
             dbgcout<<"absd = "<<absd<<std::endl;
             RT b = d0*e/absd;  // This is b' above
             RT z = TMV_SQRT(RT(1)+b*b);
@@ -366,13 +375,13 @@ namespace tmv {
             // For small s, improve calculation of c:
             // s^2 = 1-c^2 = (1-c)(1+c)
             // c = 1 - s^2/(1+c)
-            if (TMV_ABS(s2) < RT(1.e-2)) c2 = RT(1) - s2*s2/(RT(1)+c2);
+            if (TMV_ABS(s2) < RT(0.1)) c2 = RT(1) - s2*s2/(RT(1)+c2);
             dbgcout<<"c2 => "<<c2<<std::endl;
 
             // t1 = t2 d1 / (t2 e - d0) = s2 d1 / (s2 e - d0 c2)
             s1 = s2 * d1;
             c1 = s2 * e - c2 * d0;
-            if (TMV_ABS(c1) < 1.e-2 * TMV_ABS(s1)) {
+            if (TMV_ABS(c1) < 0.1 * TMV_ABS(s1)) {
                 dbgcout<<"Small c1 = "<<c1<<std::endl;
                 // Then do a calculation that is more accurate for small c1.
                 // c1 = s2 e - c2 d0 = e*(s2 - d0/e sqrt(1-s2^2))
@@ -421,7 +430,7 @@ namespace tmv {
             s1 /= norm1;
             c1 /= norm1;
             dbgcout<<"s1,c1 = "<<s1<<','<<c1<<std::endl;
-            if (TMV_ABS(s1) < RT(1.e-2)) c1 = RT(1) - s1*s1/(RT(1)+c1);
+            if (TMV_ABS(s1) < RT(0.1)) c1 = RT(1) - s1*s1/(RT(1)+c1);
             dbgcout<<"c1 => "<<c1<<std::endl;
         } else {
             dbgcout<<"d ~= 0\n";
@@ -507,7 +516,6 @@ namespace tmv {
             s1 /= norm1;
             c1 /= norm1;
             dbgcout<<"s1,c1  => "<<s1<<','<<c1<<std::endl;
-
         }
 #ifdef XDEBUG
         Matrix<RT> B(2,2); B(0,0) = D(0); B(0,1) = E(0); B(1,0) = RT(0); B(1,1) = D(1);
@@ -522,23 +530,22 @@ namespace tmv {
         dbgcout<<"g1 = "<<g1<<std::endl;
         dbgcout<<"g2 = "<<g2<<std::endl;
         dbgcout<<"S = g1 B g2 = "<<S<<std::endl;
-        dbgcout<<"Initial UBV = "<<A<<endl;
+        //if (U && V) dbgcout<<"Initial UBV = "<<A<<endl;
 #endif
-        if (c2*eps != RT(0)) {
+        if (exact) {
+            dbgcout<<"Use Exact solution for D,E\n";
             D(0) *= c1/c2;
-        } else {
-            // D(0) = c1 c2 d0 - c1 s2 e - s1 s2 d1
-            //      = -s2(c1 e + s1 d1)
-            D(0) = -s2 * (c1 * e + s1 * d1) * max;
-        }
-        if (c1*eps != RT(0)) {
             D(1) *= c2/c1;
+            E(0) = RT(0);
         } else {
-            // D(1) = -s1 s2 d0 - s1 c2 e + c1 c2 d1
-            //      = -s1(s2 d0 + c2 e)
-            D(1) = -s1 * (s2 * d0 + c2 * e) * max;
+            dbgcout<<"Use Calculated solution for D,E\n";
+            d0 = D(0);
+            d1 = D(1);
+            e = E(0);
+            D(0) = c1*c2*d0 - c1*s2*e - s1*s2*d1;
+            D(1) = -s1*s2*d0 - s1*c2*e + c1*c2*d1;
+            E(0) = c1*s2*d0 + c1*c2*e + s1*c2*d1;
         }
-        E(0) = RT(0);
 
         if (U) {
             Givens<RT> G1(c1,s1);
@@ -554,7 +561,10 @@ namespace tmv {
             B.diag(1) = E;
             Matrix<T> A2 = *U * B * *V;
             dbgcout<<"Done: B = "<<B<<endl;
-            dbgcout<<"UBV = "<<A2<<endl;
+            dbgcout<<"B-S = "<<B-S<<endl;
+            dbgcout<<"Norm(B-S) = "<<Norm(B-S)<<endl;
+            //dbgcout<<"UBV = "<<A2<<endl;
+            //dbgcout<<"A2-A = "<<Matrix<T>(A2-A).clip(0.1*MaxAbsElement(A2))<<endl;
             dbgcout<<"Done 22: Norm(A2-A) = "<<Norm(A2-A)<<endl;
             dbgcout<<"Norm(A) = "<<Norm(A)<<std::endl;
             if (Norm(A2-A) > THRESH*Norm(A)) {

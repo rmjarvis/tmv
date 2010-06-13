@@ -75,7 +75,7 @@ namespace tmv {
     //
     //                      TMV Non-Lap code     Direct LAPACK calls
     //
-    // Decomposition              1.4	              1.3
+    // Decomposition              1.4                   1.3
     // (dsytrf)
     //
     // Divide into
