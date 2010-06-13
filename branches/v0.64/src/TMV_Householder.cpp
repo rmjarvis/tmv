@@ -65,14 +65,18 @@ namespace tmv {
 
         // Since this routine involves squares of elements, we risk overflow
         // and underflow problems if done naively.  The simplest (although
-        // probably not the most efficient) is to scale all the intermediate
-        // values by the maximum abs value in the vector.
+        // probably not the most efficient) solution is to scale all the 
+        // intermediate values by the maximum abs value in the vector.
         RT scale = x.maxAbs2Element();
+        //std::cout<<"scale = "<<scale<<std::endl;
         RT absx0 = TMV_ABS(x0);
+        //std::cout<<"x0,absx0 = "<<x0<<"  "<<absx0<<std::endl;
         if (absx0 > scale) scale = absx0;
+        //std::cout<<"scale => "<<scale<<std::endl;
         if (scale * TMV_Epsilon<T>() == RT(0)) {
             // Then the situation is hopeless, and we should just zero out
             // the whole vector.
+            //std::cout<<"scale is essentially 0\n";
             x.setZero();
             x0 = T(0);
             return T(0);
@@ -86,6 +90,8 @@ namespace tmv {
         // Determine normx = |x|
         RT invscale = RT(1)/scale;
         RT normsqx = x.normSq(invscale);
+        //std::cout<<"invscale = "<<invscale<<std::endl;
+        //std::cout<<"new normsqx = "<<normsqx<<std::endl;
 
         // if all of x other than first element are 0, H is identity
         if (normsqx == RT(0) && TMV_IMAG(x0) == RT(0)) {
@@ -144,9 +150,9 @@ namespace tmv {
         // H * xx = (Norm(xx),0,0.0...)
         // x0 = Norm(xx)
         Vector<T> Hxx = H * xx;
-        if (TMV_ABS(TMV_ABS(Hxx(0))-TMV_ABS(x0)) > 0.0001*TMV_ABS(x0) ||
-            TMV_ABS(Norm(xx)-TMV_ABS(x0)) > 0.0001*TMV_ABS(x0) ||
-            Norm(Hxx.subVector(1,Hxx.size())) > 0.0001*TMV_ABS(x0)) {
+        if (TMV_ABS(TMV_ABS(Hxx(0)/scale)-TMV_ABS(x0/scale)) > 0.0001*TMV_ABS(x0/scale) ||
+            TMV_ABS(Norm(xx/scale)-TMV_ABS(x0/scale)) > 0.0001*TMV_ABS(x0/scale) ||
+            Norm(Hxx.subVector(1,Hxx.size())/scale) > 0.0001*TMV_ABS(x0/scale)) {
             cerr<<"Householder Reflect:\n";
             cerr<<"Input: x = "<<xx<<endl;
             cerr<<"x0 = "<<x0<<endl;
@@ -156,6 +162,9 @@ namespace tmv {
             cerr<<"H = "<<H<<endl;
             cerr<<"xx = "<<xx<<endl;
             cerr<<"Hxx = "<<Hxx<<endl;
+            cerr<<"abs(hxx(0)) = "<<TMV_ABS(Hxx(0))<<std::endl;
+            cerr<<"abs(x0) = "<<TMV_ABS(x0)<<std::endl;
+            cerr<<"abs(hxx(0))-abs(x0) = "<<TMV_ABS(Hxx(0))-TMV_ABS(x0)<<endl;
             cerr<<"abs(abs(hxx(0))-abs(x0)) = "<<
                 TMV_ABS(TMV_ABS(Hxx(0))-TMV_ABS(x0))<<endl;
             cerr<<"abs(Norm(xx)-abs(x0)) = "<<

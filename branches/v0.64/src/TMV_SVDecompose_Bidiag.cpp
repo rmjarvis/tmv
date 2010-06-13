@@ -106,9 +106,9 @@ namespace tmv {
 #endif
             //cout<<"j = "<<j<<endl;
             *Uj = HouseholderReflect(A.subMatrix(j,M,j,N),signdet);
-            //cout<<"U reflect: A->"<<A<<endl;
+            //cout<<"U reflect: A("<<j<<","<<j<<") = "<<A.cref(j,j)<<endl;
             *Vj = HouseholderReflect(A.transpose().subMatrix(j+1,N,j,M),signdet);
-            //cout<<"V reflect: A->"<<A<<endl;
+            //cout<<"V reflect: A("<<j<<","<<j+1<<") = "<<A.cref(j,j+1)<<endl;
         }
 #ifdef TMVFLDEBUG
         TMVAssert(Uj >= Ubeta.first);
@@ -116,7 +116,7 @@ namespace tmv {
 #endif
         //cout<<"j = "<<N-1<<endl;
         *Uj = HouseholderReflect(A.col(N-1,N-1,M),signdet);
-        //cout<<"U reflect: A->"<<A<<endl;
+        //cout<<"U reflect: A("<<N-1<<","<<N-1<<") = "<<A.cref(N-1,N-1)<<endl;
 
         // The bidiagonal of A is the bidiagonal we want, so copy it to D,E
 #ifdef XTEST
@@ -127,6 +127,8 @@ namespace tmv {
 #endif
         D = A.diag().realPart();
         E = A.diag(1).realPart();
+        //cout<<"D = "<<D<<std::endl;
+        //cout<<"E = "<<E<<std::endl;
 
 #ifdef XDEBUG
         Matrix<T> U(A);

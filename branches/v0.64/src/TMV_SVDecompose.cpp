@@ -42,15 +42,17 @@
 #include "TMV_QRDiv.h"
 #include "tmv/TMV_MatrixArith.h"
 #include "tmv/TMV_VectorArith.h"
+#include <iostream>
 
 #ifdef XDEBUG
-#define THRESH 1.e-8
-#include "tmv/TMV_MatrixArith.h"
+#define THRESH 1.e-5
 #include "tmv/TMV_DiagMatrixArith.h"
-#include <iostream>
-using std::cout;
+#define dbgcout std::cout 
+//#define dbgcout if(false) std::cout
 using std::cerr;
 using std::endl;
+#else
+#define dbgcout if(false) std::cout
 #endif
 
 namespace tmv {
@@ -76,16 +78,16 @@ namespace tmv {
 
         // First chop any small elements in D,E
         BidiagonalChopSmallElements(D,E);
-        //std::cout<<"After Chop: D = "<<D<<std::endl;
-        //std::cout<<"After Chop: E = "<<E<<std::endl;
+        dbgcout<<"After Chop: D = "<<D<<std::endl;
+        dbgcout<<"After Chop: E = "<<E<<std::endl;
 
         // Find sub-problems to solve:
         for(int q = N-1; q>0; ) {
-            //std::cout<<"Looking for sub-problem:\n";
-            //std::cout<<"q = "<<q<<std::endl;
+            dbgcout<<"Looking for sub-problem:\n";
+            dbgcout<<"q = "<<q<<std::endl;
             if (E(q-1) == T(0)) --q;
             else if (D(q) == T(0)) {
-                //std::cout<<"D(q) == 0, so do ZeroLastCol\n";
+                dbgcout<<"D(q) == 0, so do ZeroLastCol\n";
                 // We have the end looking like:
                 //   ? ?
                 //     ? x
@@ -105,9 +107,9 @@ namespace tmv {
                 // Find first p before q with either E(p) = 0 or D(p) = 0
                 int p=q-1;
                 while (p>0 && E(p-1)!=T(0) && D(p)!=T(0)) --p; 
-                //std::cout<<"p = "<<p<<std::endl;
+                dbgcout<<"p = "<<p<<std::endl;
                 if (D(p) == T(0)) {
-                    //std::cout<<"D(p) == 0, so do ZeroFirstRow\n";
+                    dbgcout<<"D(p) == 0, so do ZeroFirstRow\n";
                     // We have a block looking like:
                     //   0 x
                     //     x x 
@@ -124,9 +126,9 @@ namespace tmv {
                     ++p;
                 }
                 if (q > p) {
-                    //std::cout<<"No zeros in D,E:\n";
-                    //std::cout<<"D = "<<D.subVector(p,q+1)<<std::endl;
-                    //std::cout<<"E = "<<E.subVector(p,q)<<std::endl;
+                    dbgcout<<"No zeros in D,E:\n";
+                    dbgcout<<"D = "<<D.subVector(p,q+1)<<std::endl;
+                    dbgcout<<"E = "<<E.subVector(p,q)<<std::endl;
                     if (U)
                         if (V) 
                             DoSVDecomposeFromBidiagonal_NZ<T>(
@@ -160,22 +162,22 @@ namespace tmv {
         const VectorView<RT>& E, MVP<T> V, bool setUV)
     {
 #ifdef XDEBUG
-        cout<<"Start Decompose from Bidiag (NonLap):\n";
-        if (U) cout<<"U = "<<TMV_Text(*U)<<endl;
-        if (V) cout<<"V = "<<TMV_Text(*V)<<endl;
-        cout<<"D = "<<TMV_Text(D)<<"  step "<<D.step()<<"  "<<D<<endl;
-        cout<<"E = "<<TMV_Text(E)<<"  step "<<E.step()<<"  "<<E<<endl;
-        if (U) cout<<"U = "<<*U<<endl;
-        if (V) cout<<"V = "<<*V<<endl;
+        dbgcout<<"Start Decompose from Bidiag (NonLap):\n";
+        if (U) dbgcout<<"U = "<<TMV_Text(*U)<<endl;
+        if (V) dbgcout<<"V = "<<TMV_Text(*V)<<endl;
+        dbgcout<<"D = "<<TMV_Text(D)<<"  step "<<D.step()<<"  "<<D<<endl;
+        dbgcout<<"E = "<<TMV_Text(E)<<"  step "<<E.step()<<"  "<<E<<endl;
+        //if (U) dbgcout<<"U = "<<*U<<endl;
+        //if (V) dbgcout<<"V = "<<*V<<endl;
 
-        cout<<"setUV = "<<setUV<<endl;
+        dbgcout<<"setUV = "<<setUV<<endl;
         Matrix<RT> B(D.size(),D.size(),RT(0));
         B.diag() = D;
         B.diag(1) = E;
         Matrix<T> A0(U&&V ? U->colsize() : D.size(),D.size());
         if (U && V && !setUV) A0 = (*U) * B * (*V);
         else A0 = B;
-        cout<<"A0 = "<<A0<<endl;
+        //dbgcout<<"A0 = "<<A0<<endl;
 #endif
 
         const int N = D.size();
@@ -189,6 +191,8 @@ namespace tmv {
         // Before running the normal algorithms, rescale D,E by the maximum
         // value to help avoid overflow and underflow.
         RT scale = TMV_MAX(D.maxAbs2Element(),E.maxAbs2Element());
+        dbgcout<<"scale = "<<scale<<std::endl;
+        dbgcout<<"1/scale = "<<RT(1)/scale<<std::endl;
         if (scale * TMV_Epsilon<T>() == RT(0)) {
             // Hopeless case.  Just zero out D,E and call it done.
             D.setZero();
@@ -197,10 +201,13 @@ namespace tmv {
         }
         D /= scale;
         E /= scale;
+        dbgcout<<"After scale: \n";
+        dbgcout<<"D = "<<D<<std::endl;
+        dbgcout<<"E = "<<E<<std::endl;
 
-        //std::cout<<"Before Call DoSVDecompose: D = "<<D<<std::endl;
+        dbgcout<<"Before Call DoSVDecompose: D = "<<D<<std::endl;
         DoSVDecomposeFromBidiagonal<T>(U,D,E,V,setUV,setUV);
-        //std::cout<<"After Call DoSVDecompose: D = "<<D<<std::endl;
+        dbgcout<<"After Call DoSVDecompose: D = "<<D<<std::endl;
 
         // Make all of the singular values positive
         RT* Di = D.ptr();
@@ -212,6 +219,8 @@ namespace tmv {
             *Di = -(*Di);
             if (V) V->row(i) = -V->row(i);
         }
+        dbgcout<<"After make positive: \n";
+        dbgcout<<"D = "<<D<<std::endl;
 
         // Now A = U * S * V
         // Sort output singular values 
@@ -222,6 +231,8 @@ namespace tmv {
 
         // Undo the scaling
         D *= scale;
+        dbgcout<<"After undo scale: \n";
+        dbgcout<<"D = "<<D<<std::endl;
 
 #ifdef XDEBUG
         if (U && V) {
@@ -238,6 +249,7 @@ namespace tmv {
                 (A0-AA).write(cerr,(A0-AA).maxAbsElement()*1.e-3);
                 cerr<<endl;
                 cerr<<"Norm(diff) = "<<Norm(A0-AA)<<std::endl;
+                cerr<<"THRESH*Norm(A0) = "<<THRESH<<"*"<<Norm(A0)<<" = "<<THRESH*Norm(A0)<<std::endl;
                 abort();
             }
         }
@@ -637,16 +649,14 @@ namespace tmv {
 #ifdef XDEBUG
         if (U && V) {
             Matrix<T> AA = (*U) * DiagMatrixViewOf(D) * (*V);
-            cout<<"U = "<<*U<<std::endl;
-            cout<<"D = "<<D<<std::endl;
-            cout<<"V = "<<*V<<std::endl;
-            cout<<"AA = "<<AA<<std::endl;
-            cout<<"A0 = "<<A0<<std::endl;
-            cout<<"A0-AA = ";
-            (A0-AA).write(cout,(A0-AA).maxAbsElement()*1.e-3);
-            cout<<std::endl;
-            cout<<"SVDecomposeFromBidiag: Norm(A0-AA) = "<<Norm(A0-AA)<<std::endl;
-            cout<<"cf "<<THRESH*Norm(A0)<<std::endl;
+            dbgcout<<"U = "<<*U<<std::endl;
+            dbgcout<<"D = "<<D<<std::endl;
+            dbgcout<<"V = "<<*V<<std::endl;
+            dbgcout<<"AA = "<<AA<<std::endl;
+            dbgcout<<"A0 = "<<A0<<std::endl;
+            dbgcout<<"A0-AA = "<<Matrix<T>(A0-AA).clip(1.e-3)<<std::endl;
+            dbgcout<<"SVDecomposeFromBidiag: Norm(A0-AA) = "<<Norm(A0-AA)<<std::endl;
+            dbgcout<<"cf "<<THRESH*Norm(A0)<<std::endl;
             if (Norm(A0-AA) > THRESH*Norm(A0)) {
                 cerr<<"SV_DecomposeFromBidiagonal: \n";
                 cerr<<"input B = "<<B<<endl;
@@ -697,9 +707,9 @@ namespace tmv {
     {
 #ifdef XDEBUG
         Matrix<T> A0(U);
-        cout<<"SVDecompose:\n";
-        //cout<<"A0 = "<<A0<<std::endl;
-        cout<<"StoreU = "<<StoreU<<std::endl;
+        dbgcout<<"SVDecompose:\n";
+        //dbgcout<<"A0 = "<<A0<<std::endl;
+        dbgcout<<"StoreU = "<<StoreU<<std::endl;
 #endif
         // Decompose A (input as U) into U S V
         // where S is a diagonal real matrix, and U,V are unitary matrices.
@@ -748,8 +758,16 @@ namespace tmv {
             Vector<RT> E(N-1);
             Vector<T> Ubeta(N);
             Vector<T> Vbeta(N-1);
+            dbgcout<<"Before Bidiagonalize:\n";
+            dbgcout<<"U.maxAbs = "<<U.maxAbsElement()<<std::endl;
             Bidiagonalize(
                 U,Ubeta.view(),Vbeta.view(),S.diag(),E.view(),signdet);
+            dbgcout<<"After Bidiagonalize:\n";
+            dbgcout<<"U.maxAbs = "<<U.maxAbsElement()<<std::endl;
+            dbgcout<<"D.maxAbs = "<<S.maxAbsElement()<<std::endl;
+            dbgcout<<"E.maxAbs = "<<E.maxAbsElement()<<std::endl;
+            dbgcout<<"D = "<<S.diag()<<std::endl;
+            dbgcout<<"E = "<<E<<std::endl;
             // The determinant of B is just the product of the diagonal elements:
             if (signdet != T(0)) {
                 RT s;
@@ -773,16 +791,19 @@ namespace tmv {
             if (StoreU) {
                 GetQFromQR(U,Ubeta);
             }
+            dbgcout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<std::endl;
 
             if (StoreU) SV_DecomposeFromBidiagonal<T>(U,S.diag(),E.view(),V);
             else SV_DecomposeFromBidiagonal<T>(0,S.diag(),E.view(),V);
+            dbgcout<<"After DecomposeFromBidiag: Norm(UtU-1) = "<<
+                Norm(U.adjoint()*U-T(1))<<std::endl;
 
         }
 #ifdef XDEBUG
         if (StoreU && V && S.size()>0) {
             Matrix<T> A2 = U * S * (*V);
-            cout<<"SVDecompose: Norm(A0-A2) = "<<Norm(A0-A2)<<std::endl;
-            cout<<"cf "<<THRESH*Norm(U)*Norm(S)*Norm(*V)<<std::endl;
+            dbgcout<<"SVDecompose: Norm(A0-A2) = "<<Norm(A0-A2)<<std::endl;
+            dbgcout<<"cf "<<THRESH*Norm(U)*Norm(S)*Norm(*V)<<std::endl;
             if (Norm(A0-A2) > THRESH * Norm(U) * Norm(S) * Norm(*V)) {
                 cerr<<"SV_Decompose:\n";
                 cerr<<"A = "<<A0<<endl;

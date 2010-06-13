@@ -38,18 +38,22 @@
 #include "TMV_Givens.h"
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_Matrix.h"
+#include <iostream>
 
 #ifdef XDEBUG
-#define THRESH 1.e-8
+#define THRESH 1.e-5
 #include <iostream>
 #include "tmv/TMV_VectorArith.h"
 #include "tmv/TMV_MatrixArith.h"
 #include "tmv/TMV_DiagMatrix.h"
 #include "tmv/TMV_DiagMatrixArith.h"
 #include "tmv/TMV_VIt.h"
-using std::cout;
+//#define dbgcout std::cout
+#define dbgcout if(false) std::cout
 using std::cerr;
 using std::endl;
+#else
+#define dbgcout if(false) std::cout
 #endif
 
 namespace tmv {
@@ -330,18 +334,18 @@ namespace tmv {
         RT d0 = D(0);
         RT d1 = D(1);
         RT e = E(0);
-        //std::cout<<"d0,d1,e = "<<d0<<','<<d1<<','<<e<<std::endl;
+        dbgcout<<"d0,d1,e = "<<d0<<','<<d1<<','<<e<<std::endl;
 
         // Rescale to help avoid underflow:
         RT max = TMV_MAX(TMV_ABS(d0),TMV_MAX(TMV_ABS(d1),TMV_ABS(e)));
         d0 /= max;
         d1 /= max;
         e /= max;
-        //std::cout<<"d0,d1,e => "<<d0<<','<<d1<<','<<e<<std::endl;
+        dbgcout<<"d0,d1,e => "<<d0<<','<<d1<<','<<e<<std::endl;
 
         RT d = ((d1-d0)*(d1+d0)+e*e)/RT(2);
         RT absd = TMV_ABS(d);
-        //std::cout<<"d,absd = "<<d<<','<<absd<<std::endl;
+        dbgcout<<"d,absd = "<<d<<','<<absd<<std::endl;
 
         RT c1,c2,s1,s2;
         // Usually, d is a largish value compared to the other numbers
@@ -351,25 +355,25 @@ namespace tmv {
         // normal calculation has significant inaccuracies.  So do the 
         // alternate calculation below which is specialized for small d.
         if (absd > 1.e-2) {
-            //std::cout<<"absd = "<<absd<<std::endl;
+            dbgcout<<"absd = "<<absd<<std::endl;
             RT b = d0*e/absd;  // This is b' above
             RT z = TMV_SQRT(RT(1)+b*b);
-            //std::cout<<"b,z = "<<b<<','<<z<<std::endl;
+            dbgcout<<"b,z = "<<b<<','<<z<<std::endl;
 
             s2 = b / TMV_SQRT(RT(2)*z*(z+RT(1))); if (d < 0) s2 = -s2;
             c2 = TMV_SQRT(RT(1)-s2*s2);
-            //std::cout<<"s2,c2 = "<<s2<<','<<c2<<std::endl;
+            dbgcout<<"s2,c2 = "<<s2<<','<<c2<<std::endl;
             // For small s, improve calculation of c:
             // s^2 = 1-c^2 = (1-c)(1+c)
             // c = 1 - s^2/(1+c)
             if (TMV_ABS(s2) < RT(1.e-2)) c2 = RT(1) - s2*s2/(RT(1)+c2);
-            //std::cout<<"c2 => "<<c2<<std::endl;
+            dbgcout<<"c2 => "<<c2<<std::endl;
 
             // t1 = t2 d1 / (t2 e - d0) = s2 d1 / (s2 e - d0 c2)
             s1 = s2 * d1;
             c1 = s2 * e - c2 * d0;
             if (TMV_ABS(c1) < 1.e-2 * TMV_ABS(s1)) {
-                //std::cout<<"Small c1 = "<<c1<<std::endl;
+                dbgcout<<"Small c1 = "<<c1<<std::endl;
                 // Then do a calculation that is more accurate for small c1.
                 // c1 = s2 e - c2 d0 = e*(s2 - d0/e sqrt(1-s2^2))
                 //    = (s2^2 - (d0^2/e^2) (1-s2^2)) /
@@ -403,9 +407,9 @@ namespace tmv {
                 //       = d0^2-d1^2 - d b^2 + d(1-z^2)/(1+z)
                 //       = d0^2-d1^2 - d b^2 + d(-b^2)/(1+z)
                 //       = d0^2-d1^2 - d b^2 (1+1/(1+z))
-                //std::cout<<"Easy W = "<<1.-d*z*(1.+z)/(e*e)<<std::endl;
+                dbgcout<<"Easy W = "<<1.-d*z*(1.+z)/(e*e)<<std::endl;
                 RT W = ((d0-d1)*(d0+d1) - d*b*b*(RT(1)+RT(1)/(RT(1)+z)))/(e*e);
-                //std::cout<<"Better W = "<<W<<std::endl;
+                dbgcout<<"Better W = "<<W<<std::endl;
                 RT d0sq = d0*d0/d;
                 RT esq = e*e/d;
                 c1 = d0sq * esq * (d0*d0+(d0-d1)*(d0+d1)+RT(2)*W*d) /
@@ -416,11 +420,11 @@ namespace tmv {
             if (c1 < RT(0)) norm1 = -norm1;
             s1 /= norm1;
             c1 /= norm1;
-            //std::cout<<"s1,c1 = "<<s1<<','<<c1<<std::endl;
+            dbgcout<<"s1,c1 = "<<s1<<','<<c1<<std::endl;
             if (TMV_ABS(s1) < RT(1.e-2)) c1 = RT(1) - s1*s1/(RT(1)+c1);
-            //std::cout<<"c1 => "<<c1<<std::endl;
+            dbgcout<<"c1 => "<<c1<<std::endl;
         } else {
-            //std::cout<<"d ~= 0\n";
+            dbgcout<<"d ~= 0\n";
             // d = (d1^2 + e^2 - d0^2)/2
             // So this means that d0^2 ~= d1^2 + e^2
             // Thus, it is safe to assume that d0 is not small.
@@ -428,16 +432,16 @@ namespace tmv {
             RT b = e/d0; // Now scaling by d0^2 instead of |d|
             d /= d0*d0;
             RT f = d1/d0;
-            //std::cout<<"b,d = "<<b<<','<<d<<std::endl;
+            dbgcout<<"b,d = "<<b<<','<<d<<std::endl;
 
             // t2 = b sgn(d) / ( |d| + sqrt(d^2 + b^2) )
             s2 = b; if (d < RT(0)) s2 = -s2;
             c2 = absd + TMV_SQRT((d*d + b*b));
-            //std::cout<<"s2,c2 = "<<s2<<','<<c2<<std::endl;
+            dbgcout<<"s2,c2 = "<<s2<<','<<c2<<std::endl;
             RT norm2 = TMV_SQRT(s2*s2 + c2*c2);
             s2 /= norm2;
             c2 /= norm2;
-            //std::cout<<"s2,c2 => "<<s2<<','<<c2<<std::endl;
+            dbgcout<<"s2,c2 => "<<s2<<','<<c2<<std::endl;
 
             // We have two formulae for t1:
             // t1_a = -(t2 + b) / f
@@ -474,35 +478,35 @@ namespace tmv {
             RT dt;
             do {
                 RT t2 = s2/c2;
-                //std::cout<<"current t2 = "<<t2<<std::endl;
+                dbgcout<<"current t2 = "<<t2<<std::endl;
                 dt = ( b - t2*(b*(t2+b)-(1-f)*(1+f)) ) / 
                     (b*(2*t2+b)-(1-f)*(1+f));
-                //std::cout<<"dt = "<<dt<<std::endl;
+                dbgcout<<"dt = "<<dt<<std::endl;
                 dt *= c2*c2;
                 RT ds = c2*dt;
                 RT dc = s2*dt;
-                //std::cout<<"ds,dc = "<<ds<<','<<dc<<std::endl;
+                dbgcout<<"ds,dc = "<<ds<<','<<dc<<std::endl;
                 s2 += ds;
                 c2 -= dc;
-                //std::cout<<"New s2,c2 = "<<s2<<','<<c2<<std::endl; 
+                dbgcout<<"New s2,c2 = "<<s2<<','<<c2<<std::endl; 
             } while (TMV_ABS(dt) > TMV_Epsilon<T>());
 
             // Make sure s2^2 + c2^2 is still = 1
-            //std::cout<<"s2^2+c2^2 - 1 = "<<s2*s2+c2*c2-RT(1)<<std::endl;
+            dbgcout<<"s2^2+c2^2 - 1 = "<<s2*s2+c2*c2-RT(1)<<std::endl;
             norm2 = TMV_SQRT(s2*s2 + c2*c2);
             s2 /= norm2;
             c2 /= norm2;
-            //std::cout<<"s2,c2 => "<<s2<<','<<c2<<std::endl;
+            dbgcout<<"s2,c2 => "<<s2<<','<<c2<<std::endl;
 
             s1 = s2*f;
             c1 = s2*b-c2;
-            //std::cout<<"s1 = "<<-s2<<" + "<<-c2*b<<std::endl;
-            //std::cout<<"s1,c1 = "<<s1<<','<<c1<<std::endl;
+            dbgcout<<"s1 = "<<-s2<<" + "<<-c2*b<<std::endl;
+            dbgcout<<"s1,c1 = "<<s1<<','<<c1<<std::endl;
             RT norm1 = TMV_SQRT(s1*s1 + c1*c1);
             if (c1 < RT(0)) norm1 = -norm1;
             s1 /= norm1;
             c1 /= norm1;
-            //std::cout<<"s1,c1  => "<<s1<<','<<c1<<std::endl;
+            dbgcout<<"s1,c1  => "<<s1<<','<<c1<<std::endl;
 
         }
 #ifdef XDEBUG
@@ -512,13 +516,13 @@ namespace tmv {
         Matrix<RT> S = g1 * B * g2;
         Matrix<T> A(U&&V ? U->colsize() : 0, U&&V ? V->rowsize() : 0);
         if (U && V) A = *U * B * *V;
-        std::cout<<"c1,s1 = "<<c1<<','<<s1<<std::endl;
-        std::cout<<"c2,s2 = "<<c2<<','<<s2<<std::endl;
-        std::cout<<"Initial B = "<<B<<endl;
-        std::cout<<"g1 = "<<g1<<std::endl;
-        std::cout<<"g2 = "<<g2<<std::endl;
-        std::cout<<"S = g1 B g2 = "<<S<<std::endl;
-        //std::cout<<"Initial UBV = "<<A<<endl;
+        dbgcout<<"c1,s1 = "<<c1<<','<<s1<<std::endl;
+        dbgcout<<"c2,s2 = "<<c2<<','<<s2<<std::endl;
+        dbgcout<<"Initial B = "<<B<<endl;
+        dbgcout<<"g1 = "<<g1<<std::endl;
+        dbgcout<<"g2 = "<<g2<<std::endl;
+        dbgcout<<"S = g1 B g2 = "<<S<<std::endl;
+        dbgcout<<"Initial UBV = "<<A<<endl;
 #endif
         if (c2*eps != RT(0)) {
             D(0) *= c1/c2;
@@ -549,10 +553,10 @@ namespace tmv {
             B.diag() = D;
             B.diag(1) = E;
             Matrix<T> A2 = *U * B * *V;
-            std::cout<<"Done: B = "<<B<<endl;
-            //std::cout<<"UBV = "<<A2<<endl;
-            std::cout<<"Done 22: Norm(A2-A) = "<<Norm(A2-A)<<endl;
-            std::cout<<"Norm(A) = "<<Norm(A)<<std::endl;
+            dbgcout<<"Done: B = "<<B<<endl;
+            dbgcout<<"UBV = "<<A2<<endl;
+            dbgcout<<"Done 22: Norm(A2-A) = "<<Norm(A2-A)<<endl;
+            dbgcout<<"Norm(A) = "<<Norm(A)<<std::endl;
             if (Norm(A2-A) > THRESH*Norm(A)) {
                 cerr<<"ReduceBidiagonal22\n";
                 cerr<<"B = "<<B<<endl;
@@ -577,9 +581,9 @@ namespace tmv {
         MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E, MVP<T> V)
     {
 #ifdef XDEBUG
-        std::cout<<"Start Reduce Bidiagonal QR:\n";
-        std::cout<<"D = "<<D<<endl;
-        std::cout<<"E = "<<E<<endl;
+        dbgcout<<"Start Reduce Bidiagonal QR:\n";
+        dbgcout<<"D = "<<D<<endl;
+        dbgcout<<"E = "<<E<<endl;
         Matrix<RT> B(D.size(),D.size(),RT(0));
         Vector<RT> D0 = D;
         Vector<RT> E0 = E;
@@ -590,7 +594,7 @@ namespace tmv {
         Matrix<T> A0(M,Nx);
         if (U && V) {
             A0 = (*U) * B * (*V);
-            //std::cout<<"A0 = "<<A0<<endl;
+            dbgcout<<"A0 = "<<A0<<endl;
         }
 #endif
         // Reduce the superdiagonal elements of Bidiagonal Matrix B 
@@ -656,32 +660,32 @@ namespace tmv {
 
         RT mu = BidiagonalTrailingEigenValue(D,E);
 #ifdef XDEBUG
-        std::cout<<"mu = "<<mu<<std::endl;
+        dbgcout<<"mu = "<<mu<<std::endl;
 #endif
         RT y = TMV_NORM(*Di) - mu;  // = T00 - mu
-        //std::cout<<"y = "<<y<<std::endl;
+        dbgcout<<"y = "<<y<<std::endl;
         RT x = TMV_CONJ(*Di)*(*Ei);  // = T10
-        //std::cout<<"x = "<<x<<std::endl;
+        dbgcout<<"x = "<<x<<std::endl;
         Givens<RT> G = GivensRotate(y,x);
-        //std::cout<<"Rotatedi y,x => "<<y<<','<<x<<std::endl;
+        dbgcout<<"Rotatedi y,x => "<<y<<','<<x<<std::endl;
         for(int i=1;i<N;++i) {
             G.mult(*Di,*Ei);
-            //std::cout<<"D,E -> "<<*Di<<','<<*Ei<<std::endl;
+            dbgcout<<"D,E -> "<<*Di<<','<<*Ei<<std::endl;
             if (V) G.conjMult(V->rowPair(i-1,i));
             TMVAssert(x==RT(0));
             G.mult(x,*(++Di)); // x = B(i,i-1)
-            //std::cout<<"x,D -> "<<x<<','<<*Di<<std::endl;
+            dbgcout<<"x,D -> "<<x<<','<<*Di<<std::endl;
             G = GivensRotate(*(Di-1),x);
-            //std::cout<<"Rotatedi D,x => "<<*(Di-1)<<','<<x<<std::endl;
+            dbgcout<<"Rotatedi D,x => "<<*(Di-1)<<','<<x<<std::endl;
             G.mult(*Ei,*Di);
-            //std::cout<<"E,D -> "<<*Ei<<','<<*Di<<std::endl;
+            dbgcout<<"E,D -> "<<*Ei<<','<<*Di<<std::endl;
             if (U) G.conjMult(U->colPair(i-1,i).transpose());
             if (i < N-1) {
                 TMVAssert(x==RT(0));
                 G.mult(x,*(++Ei)); // x = B(i-1,i+1)
-                //std::cout<<"x,E -> "<<i<<','<<*Ei<<std::endl;
+                dbgcout<<"x,E -> "<<i<<','<<*Ei<<std::endl;
                 G = GivensRotate(*(Ei-1),x);
-                //std::cout<<"Rotatedi E,x => "<<*(Ei-1)<<','<<x<<std::endl;
+                dbgcout<<"Rotatedi E,x => "<<*(Ei-1)<<','<<x<<std::endl;
             }
         }
 #ifdef XDEBUG
@@ -718,11 +722,11 @@ namespace tmv {
         MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E, MVP<T> V)
     {
 #ifdef XDEBUG
-        std::cout<<"Start Decompose from Bidiagonal QR:\n";
-        //if (U) std::cout<<"U = "<<*U<<endl;
-        //if (V) std::cout<<"V = "<<*V<<endl;
-        std::cout<<"D = "<<D<<endl;
-        std::cout<<"E = "<<E<<endl;
+        dbgcout<<"Start Decompose from Bidiagonal QR:\n";
+        //if (U) dbgcout<<"U = "<<*U<<endl;
+        //if (V) dbgcout<<"V = "<<*V<<endl;
+        dbgcout<<"D = "<<D<<endl;
+        dbgcout<<"E = "<<E<<endl;
         Matrix<RT> B(D.size(),D.size(),RT(0));
         B.diag() = D;
         B.diag(1) = E;
@@ -731,7 +735,7 @@ namespace tmv {
         Matrix<T> A0(M,Nx);
         if (U && V) {
             A0 = (*U) * B * (*V);
-            std::cout<<"A0 = "<<A0<<endl;
+            dbgcout<<"A0 = "<<A0<<endl;
         }
 #endif
 
@@ -780,17 +784,17 @@ namespace tmv {
 
                 bool newzeroD = false;
 #ifdef XDEBUG
-                std::cout<<"Before Chop: \n";
-                std::cout<<"D = "<<D.subVector(p,q+1)<<std::endl;
-                std::cout<<"E = "<<E.subVector(p,q)<<std::endl;
+                dbgcout<<"Before Chop: \n";
+                dbgcout<<"D = "<<D.subVector(p,q+1)<<std::endl;
+                dbgcout<<"E = "<<E.subVector(p,q)<<std::endl;
 #endif
                 BidiagonalChopSmallElements(
                     D.subVector(p,q+1),E.subVector(p,q),&newzeroD);
 #ifdef XDEBUG
-                std::cout<<"After Chop: \n";
-                std::cout<<"D = "<<D.subVector(p,q+1)<<std::endl;
-                std::cout<<"E = "<<E.subVector(p,q)<<std::endl;
-                std::cout<<"newzero in D? "<<newzeroD<<std::endl;
+                dbgcout<<"After Chop: \n";
+                dbgcout<<"D = "<<D.subVector(p,q+1)<<std::endl;
+                dbgcout<<"E = "<<E.subVector(p,q)<<std::endl;
+                dbgcout<<"newzero in D? "<<newzeroD<<std::endl;
 #endif
                 // Check that we haven't introduced new 0's in the D vector.
                 // If we have, we need to go back to the original calling 
@@ -818,13 +822,13 @@ namespace tmv {
 #ifdef XDEBUG
         if (U && V) {
             Matrix<T> AA = (*U) * DiagMatrixViewOf(D) * (*V);
-            std::cout<<"Done QR Norm(A0-AA) = "<<Norm(A0-AA)<<endl;
-            std::cout<<"Norm(UtU-1) = "<<Norm(U->adjoint()*(*U)-T(1))<<endl;
-            std::cout<<"Norm(VtV-1) = "<<Norm(V->adjoint()*(*V)-T(1))<<endl;
-            std::cout<<"Norm(VVt-1) = "<<Norm((*V)*V->adjoint()-T(1))<<endl;
-            //std::cout<<"U = "<<*U<<std::endl;
-            std::cout<<"D = "<<D<<std::endl;
-            //std::cout<<"V = "<<*V<<std::endl;
+            dbgcout<<"Done QR Norm(A0-AA) = "<<Norm(A0-AA)<<endl;
+            dbgcout<<"Norm(UtU-1) = "<<Norm(U->adjoint()*(*U)-T(1))<<endl;
+            dbgcout<<"Norm(VtV-1) = "<<Norm(V->adjoint()*(*V)-T(1))<<endl;
+            dbgcout<<"Norm(VVt-1) = "<<Norm((*V)*V->adjoint()-T(1))<<endl;
+            dbgcout<<"U = "<<*U<<std::endl;
+            dbgcout<<"D = "<<D<<std::endl;
+            dbgcout<<"V = "<<*V<<std::endl;
             if (Norm(A0-AA) > THRESH*Norm(A0)) {
                 cerr<<"SV_DecomposeFromBidiagonal QR: \n";
                 cerr<<"input B = "<<B<<endl;

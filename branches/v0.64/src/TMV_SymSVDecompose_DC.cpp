@@ -313,11 +313,12 @@ namespace tmv {
         bool fixedweight = true;
         if (threepoles) dbgcout<<"USE THREE POLES\n";
 
+        bool last = false;
         for(int iter = 0; iter < TMV_MAXITER; iter++) {
             dbgcout<<"Main iter = "<<iter<<", f = "<<f<<", eps*e = "<<eps*e<<endl;
             dbgcout<<"f("<<tau<<") = "<<f<<"  s = "<<s<<endl;
 
-            if (TMV_ABS(f) <= eps*e) break;
+            if (TMV_ABS(f) <= eps*e) last = true;
 
             T eta; // = the change to be added to s
             if (!threepoles) { // The normal case - only 2 poles used for approx.
@@ -635,6 +636,7 @@ namespace tmv {
                 fixedweight = !fixedweight;
 
             f = fnew;
+            if (last) break;
 #ifdef XDEBUG
             if (iter == TMV_MAXITER-1) {
                 std::cout<<"Warning - Unable to find solution in FindDCEigenValue\n";

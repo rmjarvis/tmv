@@ -237,7 +237,19 @@ namespace tmv {
 
     template <class T> 
     inline T TMV_ABS(std::complex<T> x)
-    { return std::abs(x); }
+    {
+        // This is the same as the usual std::abs algorithm.
+        // However, I have come across implementations that don't 
+        // protext against overflow, so I just duplicate it here.
+
+        T xr = x.real();
+        T xi = x.imag();
+        const T s = std::max(std::abs(xr),std::abs(xi));
+        if (s == T(0)) return s; // Check for s == 0
+        xr /= s;
+        xi /= s;
+        return s * std::sqrt(xr*xr + xi*xi);
+    }
 
     template <class T> 
     inline T TMV_ABS2(T x)
@@ -512,7 +524,7 @@ namespace tmv {
 #ifdef INST_INT
     inline int TMV_ABS(const std::complex<int>& z)
     { 
-        return int(floor(std::abs(
+        return int(floor(TMV_ABS(
                     std::complex<double>(std::real(z),std::imag(z))))); 
     }
 
