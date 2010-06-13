@@ -9694,7 +9694,7 @@ the composite objects now (again actually) derive from the normal \tt{GenVector}
 \tt{GenMatrix} classes.  This removes the "No implicit instantiation" item that had appeared
 in the list of limitations of the \tt{Small} classes.
 
-I had removed that inheritance in my attempt to get rid of the expensive virtual
+I had removed that inheritance for version 0.62 in my attempt to get rid of the expensive virtual
 tables from all small operations.  However, the vtable here is almost never expensive 
 (unlike the one that had been in \tt{SmallVector} and \tt{SmallMatrix}), and
 it allows for a greater freedom of expression with the \tt{Small} objects.
@@ -9705,19 +9705,20 @@ it allows for a greater freedom of expression with the \tt{Small} objects.
 \tt{TMV\_MINOR\_VERSION},
 and \tt{TMV\_VERSION\_AT\_LEAST(major,minor)} to help users customize
 their code depending on the version of TMV that is installed on a particular
-computer.  Also documented the \tt{TMV\_Version} function that had been there
-for a couple versions now, but wasn't yet documented.
+computer.  Also documented the \tt{TMV\_Version} function and the \tt{tmv-version}
+script, which have been around
+for a couple versions now, but weren't yet documented.
 
 \item Fixed a bug in BLAS versions of U*M and L*M when U or L is real and
 M is complex.
 
-\item Fixed a bug in m.det() when m is a SmallMatrix<T,1,1>.
+\item Fixed a bug in \tt{m.det()} when \tt{m} is a \tt{SmallMatrix<T,1,1>}.
 
-\item Fixed a bug in an (apparently) uncommon pathway of Rank2Update.
+\item Fixed a bug in an (apparently) uncommon pathway of \tt{Rank2Update}.
 I say uncommon since it never turned up until I expanded the scope of
 the test suite to include more combinations of matrix types.
 
-\item Researched my QRDowndate algorithm to see if it is in the literature already.
+\item Researched my \tt{QRDowndate} algorithm to see if it is in the literature already.
 The only similar algorithm I could find was in Bojanczyk and Steinhardt (1991), 
 a paper which seems to have been overlooked by the matrix algorithms community.
 It's not quite the same as mine in detail, but it is based on the same basic idea.

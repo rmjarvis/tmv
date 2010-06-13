@@ -789,8 +789,9 @@ namespace tmv
         for(int i=0;i<n;++i) --((lap_p.get())[i]);
 #endif
         ConvertIndexToPermute(n,lap_p.get(),P);
-        const double* bi = beta.cptr();
+        double* bi = beta.ptr();
         for(int i=0;i<n;++i,++bi) {
+            if (std::abs(*bi-1.) > 1.01) *bi = 0.;
             if (det) {
                 if (*bi != 0.) det = -det;
                 if (P[i] != i) det = -det;
@@ -857,8 +858,9 @@ namespace tmv
         for(int i=0;i<n;++i) --((lap_p.get())[i]);
 #endif
         ConvertIndexToPermute(n,lap_p.get(),P);
-        const std::complex<double>* bi = beta.cptr();
+        std::complex<double>* bi = beta.ptr();
         for(int i=0;i<n;++i,++bi) {
+            if (std::abs(*bi-1.) > 1.01) *bi = 0.;
             if (det!=0.) {
                 if (TMV_IMAG(*bi) != 0.) 
                     det *= -TMV_CONJ(*bi* *bi)/norm(*bi);
@@ -924,8 +926,9 @@ namespace tmv
         for(int i=0;i<n;++i) --((lap_p.get())[i]);
 #endif
         ConvertIndexToPermute(n,lap_p.get(),P);
-        const float* bi = beta.cptr();
+        float* bi = beta.ptr();
         for(int i=0;i<n;++i,++bi) {
+            if (std::abs(*bi-1.F) > 1.01F) *bi = 0.F;
             if (det) {
                 if (*bi != 0.) det = -det;
                 if (P[i] != i) det = -det;
@@ -992,8 +995,9 @@ namespace tmv
         for(int i=0;i<n;++i) --((lap_p.get())[i]);
 #endif
         ConvertIndexToPermute(n,lap_p.get(),P);
-        const std::complex<float>* bi = beta.cptr();
+        std::complex<float>* bi = beta.ptr();
         for(int i=0;i<n;++i,++bi) {
+            if (std::abs(*bi-1.F) > 1.01F) *bi = 0.F;
             if (det!=0.F) {
                 if (TMV_IMAG(*bi) != 0.) 
                     det *= -TMV_CONJ(*bi* *bi)/norm(*bi);

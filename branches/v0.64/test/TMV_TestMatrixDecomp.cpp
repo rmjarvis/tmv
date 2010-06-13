@@ -202,6 +202,10 @@ void TestMatrixDecomp()
             Assert(Norm(c-cQR) <= ceps*normc,"C QR"); 
             Assert(Norm(c-c.qrd().getQ()*c.qrd().getR()) <= ceps*normc,
                    "C QR - PackedQ"); 
+            if (showacc) {
+                std::cout<<"Norm(cQt*cQ-1) = "<<Norm(cQ.adjoint()*cQ-T(1))<<std::endl;
+                std::cout<<"cf "<<T(N)*ceps<<std::endl;
+            }
             Assert(Norm(cQ.adjoint()*cQ-T(1)) <= T(N)*ceps,"C QR - QtQ"); 
             Assert(Norm(cQ.adjoint()*c.qrd().getQ()-T(1)) <= T(N)*ceps,
                    "C QR - QtQ - PackedQ (1)"); 

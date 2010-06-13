@@ -32,7 +32,6 @@
 
 //#define XDEBUG
 
-
 #include "TMV_Blas.h"
 #include "TMV_QRDiv.h"
 #include "tmv/TMV_Matrix.h"
@@ -420,28 +419,30 @@ namespace tmv {
         } else {
 #ifdef XDEBUG
             std::cout<<"Start GetQFromQR: Q = "<<Q<<"beta = "<<beta<<std::endl;
-#endif
-#ifdef LAP
-#ifdef XDEBUG
             Matrix<T> Q0(Q);
             Matrix<T> Q2(Q);
             NonBlockGetQFromQR(Q2.view(),beta);
 #endif
+#ifdef LAP
             LapGetQFromQR(Q,beta);
-#ifdef XDEBUG
-            if (Norm(Q-Q2) > 0.001*Norm(Q)*Norm(beta)) {
-                cerr<<"LapGetQ: Q = "<<TMV_Text(Q)<<"  "<<Q0<<endl;
-                cerr<<"beta = "<<beta<<endl;
-                cerr<<"-> Q = "<<Q<<endl;
-                cerr<<"NonBlock Q = "<<Q2<<endl;
-                abort(); 
-            }
-#endif
 #else
             NonLapGetQFromQR(Q,beta);
 #endif
 #ifdef XDEBUG
             std::cout<<"Done GetQFromQR: Q = "<<Q<<std::endl;
+            std::cout<<"(QtQ-1).diag = "<<Matrix<T>(Q.adjoint()*Q-T(1)).diag()<<std::endl;
+            std::cout<<"(Q2tQ2-1).diag = "<<Matrix<T>(Q2.adjoint()*Q2-T(1)).diag()<<std::endl;
+            std::cout<<"Norm(QtQ-1) = "<<Norm(Q.adjoint()*Q-T(1))<<std::endl;
+            std::cout<<"Norm(Q2tQ2-1) = "<<Norm(Q2.adjoint()*Q2-T(1))<<std::endl;
+            if (Norm(Q-Q2) > 0.001*Norm(Q)*Norm(beta)) {
+                cerr<<"LapGetQ: Q = "<<TMV_Text(Q)<<"  "<<Q0<<endl;
+                cerr<<"beta = "<<beta<<endl;
+                cerr<<"-> Q = "<<Q<<endl;
+                cerr<<"NonBlock Q = "<<Q2<<endl;
+                cerr<<"diff = "<<tmv::Matrix<T>(Q-Q2).clip(1.e-6)<<endl;
+                cerr<<"Norm(diff) = "<<Norm(Q-Q2)<<endl;
+                abort(); 
+            }
 #endif
         }
     }

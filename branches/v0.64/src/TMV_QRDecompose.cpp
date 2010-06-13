@@ -297,8 +297,9 @@ namespace tmv {
     { NonLapQRDecompose(A,beta,det); }
 #ifdef INST_DOUBLE
     template <> 
-    void LapQRDecompose(const MatrixView<double>& A,
-              const VectorView<double>& beta, double& det)
+    void LapQRDecompose(
+        const MatrixView<double>& A,
+        const VectorView<double>& beta, double& det)
     {
         TMVAssert(A.colsize() >= A.rowsize());
         TMVAssert(A.rowsize() == beta.size());
@@ -358,14 +359,17 @@ namespace tmv {
             LAP_Results(int(work[0]),m,n,lwork,"dgeqrf");
 #endif
         }
-        const double* bi = beta.cptr();
-        if (det) for(int i=0;i<n;++i,++bi) 
-            if (*bi != 0.) det = -det;
+        double* bi = beta.ptr();
+        for(int i=0;i<n;++i,++bi)  {
+            if (std::abs(*bi-1.) > 1.01) *bi = 0.;
+            if (det && *bi != 0.) det = -det;
+        }
     }
     template <> 
     void LapQRDecompose(
         const MatrixView<std::complex<double> >& A,
-        const VectorView<std::complex<double> >& beta, std::complex<double>& det)
+        const VectorView<std::complex<double> >& beta,
+        std::complex<double>& det)
     {
         TMVAssert(A.colsize() >= A.rowsize());
         TMVAssert(A.rowsize() == beta.size());
@@ -426,20 +430,25 @@ namespace tmv {
 #endif
             beta.conjugateSelf();
         }
-        if (det!=0.) {
-            const std::complex<double>* bi = beta.cptr();
-            for(int i=0;i<n;++i,++bi)
-                if (TMV_IMAG(*bi) != 0.) 
-                    det *= -TMV_CONJ(*bi * *bi)/norm(*bi);
-                else if (TMV_REAL(*bi) != 0.)
-                    det = -det;
+        std::complex<double>* bi = beta.ptr();
+        for(int i=0;i<n;++i,++bi) {
+            // Sometimes (very rarely!) LAPACK comes back with an 
+            // impossible beta value with |beta - 1| > 1.  e.g. (2,-1) (?!?)
+            // This seems to only happen when beta should really be 0.  
+            // So just set it to 0 now.
+            if (std::abs(*bi-1.) > 1.01) *bi = 0.;
+            if (TMV_IMAG(*bi) != 0.) 
+                det *= -TMV_CONJ(*bi * *bi)/norm(*bi);
+            else if (TMV_REAL(*bi) != 0.)
+                det = -det;
         }
     }
 #endif
 #ifdef INST_FLOAT
     template <> 
-    void LapQRDecompose(const MatrixView<float>& A,
-                        const VectorView<float>& beta, float& det)
+    void LapQRDecompose(
+        const MatrixView<float>& A,
+        const VectorView<float>& beta, float& det)
     {
         TMVAssert(A.colsize() >= A.rowsize());
         TMVAssert(A.rowsize() == beta.size());
@@ -499,9 +508,11 @@ namespace tmv {
             LAP_Results(int(work[0]),m,n,lwork,"sgeqrf");
 #endif
         }
-        const float* bi = beta.cptr();
-        if (det) for(int i=0;i<n;++i,++bi) 
-            if (*bi != 0.) det = -det;
+        float* bi = beta.ptr();
+        for(int i=0;i<n;++i,++bi) {
+            if (std::abs(*bi-1.F) > 1.01F) *bi = 0.F;
+            if (*bi != 0.F) det = -det;
+        }
     }
     template <> 
     void LapQRDecompose(
@@ -567,13 +578,13 @@ namespace tmv {
 #endif
             beta.conjugateSelf();
         }
-        if (det!=0.F) {
-            const std::complex<float>* bi = beta.cptr();
-            for(int i=0;i<n;++i,++bi)
-                if (TMV_IMAG(*bi) != 0.) 
-                    det *= -TMV_CONJ(*bi * *bi)/norm(*bi);
-                else if (TMV_REAL(*bi) != 0.)
-                    det = -det;
+        std::complex<float>* bi = beta.ptr();
+        for(int i=0;i<n;++i,++bi) {
+            if (std::abs(*bi-1.F) > 1.01F) *bi = 0.F;
+            if (TMV_IMAG(*bi) != 0.F) 
+                det *= -TMV_CONJ(*bi * *bi)/norm(*bi);
+            else if (TMV_REAL(*bi) != 0.F)
+                det = -det;
         }
     }
 #endif
@@ -582,6 +593,9 @@ namespace tmv {
     void QR_Decompose(const MatrixView<T>& A, const VectorView<T>& beta, T& det)
     {
 #ifdef XDEBUG
+        std::cout<<"Start QR_Decompose\n";
+        std::cout<<"A = "<<TMV_Text(A)<<std::endl;
+        std::cout<<"beta = "<<TMV_Text(beta)<<std::endl;
         Matrix<T> A0(A);
 #endif
 
@@ -599,10 +613,13 @@ namespace tmv {
 #endif
         }
 #ifdef XDEBUG
+        std::cout<<"Done QR_Decompose:\n";
+        std::cout<<"beta = "<<beta<<std::endl;
         Matrix<T> R = A.upperTri();
         Matrix<T> Q(A);
         GetQFromQR(Q.view(),beta);
         Matrix<T> AA = Q*R;
+        std::cout<<"Norm(AA-A0) = "<<Norm(AA-A0)<<std::endl;
         if (Norm(AA-A0) > 0.0001*Norm(Q)*Norm(R)) {
             cerr<<"BlockQRDecompose: A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"-> "<<A<<endl;
