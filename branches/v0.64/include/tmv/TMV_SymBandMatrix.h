@@ -1502,8 +1502,8 @@ namespace tmv {
         inline const_band_type subBandMatrix(
             int i1, int i2, int j1, int j2) const
         {
-            const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1);
-            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1);
+            const int newnlo = TMV_MIN(this->nlo()+j1-i1,i2-i1);
+            const int newnhi = TMV_MIN(this->nlo()+i1-j1,j2-j1);
             return subBandMatrix(i1,i2,j1,j2,newnlo,newnhi);
         }
 
@@ -1540,8 +1540,7 @@ namespace tmv {
             int i1, int i2, int newnlo, int istep) const
         {
             TMVAssert(hasSubSymBandMatrix(i1,i2,newnlo,istep));
-            return base::subSymBandMatrix(i1-1,i2-1+istep,
-                                          newnlo,istep);
+            return base::subSymBandMatrix(i1-1,i2-1+istep,newnlo,istep);
         }
 
         inline const_band_type diagRange(int k1, int k2) const
@@ -2036,7 +2035,7 @@ namespace tmv {
             int i1, int i2, int j1, int j2) const
         {
             const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1-1);
-            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1-1);
+            const int newnhi = TMV_MIN(nlo()+i1-j1,j2-j1-1);
             return subBandMatrix(i1,i2,j1,j2,newnlo,newnhi);
         }
 
@@ -2612,8 +2611,8 @@ namespace tmv {
         inline band_type subBandMatrix(
             int i1, int i2, int j1, int j2) const
         {
-            const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1);
-            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1);
+            const int newnlo = TMV_MIN(this->nlo()+j1-i1,i2-i1);
+            const int newnhi = TMV_MIN(this->nlo()+i1-j1,j2-j1);
             return subBandMatrix(i1,i2,j1,j2,newnlo,newnhi);
         }
 
@@ -3441,7 +3440,7 @@ namespace tmv {
             int i1, int i2, int j1, int j2) const
         {
             const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1-(I==CStyle?1:0));
-            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1-(I==CStyle?1:0));
+            const int newnhi = TMV_MIN(nlo()+i1-j1,j2-j1-(I==CStyle?1:0));
             return subBandMatrix(i1,i2,j1,j2,newnlo,newnhi);
         }
 
@@ -3723,7 +3722,7 @@ namespace tmv {
         inline band_type subBandMatrix(int i1, int i2, int j1, int j2)
         {
             const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1-(I==CStyle?1:0));
-            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1-(I==CStyle?1:0));
+            const int newnhi = TMV_MIN(nlo()+i1-j1,j2-j1-(I==CStyle?1:0));
             return subBandMatrix(i1,i2,j1,j2,newnlo,newnhi);
         }
 
@@ -4932,7 +4931,7 @@ namespace tmv {
             int i1, int i2, int j1, int j2) const
         {
             const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1-(I==CStyle?1:0));
-            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1-(I==CStyle?1:0));
+            const int newnhi = TMV_MIN(nlo()+i1-j1,j2-j1-(I==CStyle?1:0));
             return subBandMatrix(i1,i2,j1,j2,newnlo,newnhi);
         }
 
@@ -5216,7 +5215,7 @@ namespace tmv {
         inline band_type subBandMatrix(int i1, int i2, int j1, int j2)
         {
             const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1-(I==CStyle?1:0));
-            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1-(I==CStyle?1:0));
+            const int newnhi = TMV_MIN(nlo()+i1-j1,j2-j1-(I==CStyle?1:0));
             return subBandMatrix(i1,i2,j1,j2,newnlo,newnhi);
         }
 
