@@ -283,7 +283,6 @@ namespace tmv {
         if (A.rowsize() > QR_BLOCKSIZE)
             BlockQRDecompose(A,beta,det);
         else {
-
             UpperTriMatrix<T,NonUnitDiag,ColMajor> Z(A.rowsize());
             RecursiveQRDecompose(A,Z.view(),det,false);
             beta = Z.diag().conjugate();

@@ -13,6 +13,12 @@ void TestMatrixDecomp()
 #if !(XTEST & 64)
         if (mattype >= 4) break;
 #endif
+#ifdef LAP
+        // Most LAPACK implementations actually do ok with the nearly
+        // over/underflowing matrices, but some do not, so as far as 
+        // this test suite is concerned, I just skip those tests for LAPACK.
+        if (mattype >= 5) break;
+#endif
         if (showstartdone) {
             std::cout<<"mattype = "<<mattype<<", stor = "<<
                 tmv::TMV_Text(stor)<<std::endl;
@@ -82,6 +88,10 @@ void TestMatrixDecomp()
             c.diag(0,N/5,2*N/5).setZero();
             m.diag(0,N/2+1,N) *= T(-1);
             c.diag(0,N/2+1,N) *= T(-1);
+            m.subMatrix(N-4,N,N-4,N).setAllTo(
+                -x/std::numeric_limits<T>::epsilon()/T(8));
+            c.subMatrix(N-4,N,N-4,N).setAllTo(
+                -x/std::numeric_limits<T>::epsilon()/T(8));
         }
 
         if (nearoverflow) {
@@ -126,8 +136,8 @@ void TestMatrixDecomp()
 
         // LU Decomposition
         if (m.isSquare()) do {
-#if (XTEST & 64) && defined(LAP)
-            if (mattype >= 4) break;
+#ifdef LAP
+            if (baddefect || nearunderflow || nearoverflow) break;
 #endif
             if (showstartdone) {
                 std::cout<<"LU\n";
@@ -178,7 +188,7 @@ void TestMatrixDecomp()
         } while (false);
 
         // QR Decomposition
-        {
+        do {
             // QR Decomposition always works.  It just can't be used for
             // solving equations if the matrix is singular.
             if (showstartdone) {
@@ -199,13 +209,19 @@ void TestMatrixDecomp()
             tmv::Matrix<std::complex<T>,stor> cQ = c.qrd().getQ();
             tmv::UpperTriMatrix<std::complex<T> > cR = c.qrd().getR();
             tmv::Matrix<std::complex<T> > cQR = cQ*cR;
+            if (showacc) {
+                std::cout<<"Norm(c-cQR) = "<<Norm(c-cQR)<<std::endl;
+                std::cout<<"cf "<<ceps*normc<<std::endl;
+                std::cout<<"Norm(c-cQR) (packed) = "<<
+                    Norm(c-c.qrd().getQ()*c.qrd().getR())<<std::endl;
+                std::cout<<"cf "<<ceps*normc<<std::endl;
+                std::cout<<"Norm(cQt*cQ-1) = "<<
+                    Norm(cQ.adjoint()*cQ-T(1))<<std::endl;
+                std::cout<<"cf "<<T(N)*ceps<<std::endl;
+            }
             Assert(Norm(c-cQR) <= ceps*normc,"C QR"); 
             Assert(Norm(c-c.qrd().getQ()*c.qrd().getR()) <= ceps*normc,
                    "C QR - PackedQ"); 
-            if (showacc) {
-                std::cout<<"Norm(cQt*cQ-1) = "<<Norm(cQ.adjoint()*cQ-T(1))<<std::endl;
-                std::cout<<"cf "<<T(N)*ceps<<std::endl;
-            }
             Assert(Norm(cQ.adjoint()*cQ-T(1)) <= T(N)*ceps,"C QR - QtQ"); 
             Assert(Norm(cQ.adjoint()*c.qrd().getQ()-T(1)) <= T(N)*ceps,
                    "C QR - QtQ - PackedQ (1)"); 
@@ -255,12 +271,12 @@ void TestMatrixDecomp()
             Assert(Norm(c-cQR) <= ceps*normc,"C QR7"); 
 #endif
             std::cout<<"."; std::cout.flush();
-        }
+        } while (false);
 
         // QRP Decomposition
         for (int istrict = 0; istrict <= 1; istrict++) {
-#if (XTEST & 64) && defined(LAP)
-            if (mattype >= 4) break;
+#ifdef LAP
+            if (baddefect || nearunderflow || nearoverflow) break;
 #endif
             if (showstartdone) {
                 std::cout<<"QRP\n";
@@ -387,7 +403,7 @@ void TestMatrixDecomp()
         }
 
         // SV Decomposition
-        {
+        do {
             if (showstartdone) {
                 std::cout<<"SV\n";
             }
@@ -535,7 +551,7 @@ void TestMatrixDecomp()
                        ceps*normc*normc,"C SV13 V"); 
 #endif
             std::cout<<"."; std::cout.flush();
-        }
+        } while (false);
     }
 }
 

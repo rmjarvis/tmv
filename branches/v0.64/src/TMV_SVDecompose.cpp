@@ -63,7 +63,11 @@ namespace tmv {
     static inline void DoSVDecomposeFromBidiagonal_NZ(
         MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E, MVP<T> V,
         bool UisI, bool VisI)
-    { SV_DecomposeFromBidiagonal_DC<T>(U,D,E,V,UisI,VisI); }
+    {
+        SV_DecomposeFromBidiagonal_DC<T>(U,D,E,V,UisI,VisI); 
+        //SV_DecomposeFromBidiagonal_QR<T>(U,D,E,V); 
+        //UisI = VisI; if (UisI != VisI) abort();
+    }
 
     template <class T> 
     void DoSVDecomposeFromBidiagonal(
@@ -193,7 +197,7 @@ namespace tmv {
         RT scale = TMV_MAX(D.maxAbs2Element(),E.maxAbs2Element());
         dbgcout<<"scale = "<<scale<<std::endl;
         dbgcout<<"1/scale = "<<RT(1)/scale<<std::endl;
-        if (scale * TMV_Epsilon<T>() == RT(0)) {
+        if (TMV_Underflow(scale)) {
             // Hopeless case.  Just zero out D,E and call it done.
             D.setZero();
             E.setZero();

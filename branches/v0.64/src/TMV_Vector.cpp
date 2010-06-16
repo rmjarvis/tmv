@@ -221,11 +221,10 @@ namespace tmv {
     static RT DoNorm2(const GenVector<T>& v)
     { 
         const RT eps = TMV_Epsilon<T>();
-        const RT halfeps = eps/RT(2);
 
         RT vmax = v.maxAbs2Element();
         if (vmax == RT(0)) return RT(0);
-        else if (vmax * vmax * halfeps == RT(0)) {
+        else if (TMV_Underflow(vmax * vmax)) {
             // Then we need to rescale, since underflow will cause 
             // rounding errors
             // Epsilon is a pure power of 2, so this scaling doesn't 

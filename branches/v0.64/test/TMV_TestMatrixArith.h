@@ -2479,13 +2479,11 @@ static void DoTestMM4a_Full(M1& a, const M2& b, std::string label)
             }
 #endif
             m0 = a0;
-            tmv::Matrix<T> m4 = m0;
+            m4 = m0;
             a *= -b;
             m4 = -mm;
             Assert(Norm(MAT(T,a)-m4) <= eps,label+" a *= -b");
             CopyBackM(a0,a);
-            RealType(T) x(5);
-            T z; SetZ(z);
             a *= x*b;
             m4 = x*mm;
             Assert(Norm(MAT(T,a)-m4) <= x*eps,label+" a *= x*b");

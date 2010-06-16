@@ -13,6 +13,9 @@ void TestHermBandDecomp()
 #if !(XTEST & 64)
         if (mattype % 6 >= 3) continue;
 #endif
+#ifdef LAP
+        if (mattype % 6 >= 4) continue;
+#endif
         if (showstartdone) {
             std::cout<<"HermBand: mattype = "<<mattype<<std::endl;
             std::cout<<"uplo, stor = "<<TMV_Text(uplo)<<
@@ -146,6 +149,10 @@ void TestHermBandDecomp()
             c.diag(0,N/5,2*N/5).setZero();
             m.diag(0,N/2+1,N) *= T(-1);
             c.diag(0,N/2+1,N) *= T(-1);
+            m.subSymBandMatrix(N-4,N).setAllTo(
+                -x/std::numeric_limits<T>::epsilon()/T(8));
+            c.subSymBandMatrix(N-4,N).setAllTo(
+                -x/std::numeric_limits<T>::epsilon()/T(8));
         }
 
         if (nearoverflow) {
@@ -186,7 +193,7 @@ void TestHermBandDecomp()
         if (showacc) std::cout<<"eps => "<<eps<<"  "<<ceps<<std::endl;
 
         // CH Decomposition
-        if (posdef) {
+        if (posdef) do {
             if (showstartdone) std::cout<<"CH"<<std::endl;
             tmv::BandMatrix<T> L(N,N,nlo,0);
             tmv::BandMatrix<T> LLt(N,N,nlo,nlo);
@@ -232,93 +239,94 @@ void TestHermBandDecomp()
             Assert(Norm(c-cLLt) <= ceps*normc,"HermBand C CH2");
 #endif
             std::cout<<"."; std::cout.flush();
-        }
+        } while (false);
 
         // LDL Decomposition
-        const bool doLDL = nlo == 1
+        if (nlo == 1) do {
 #ifdef NOTHROW
-             && posdef
+            if (!posdef) break;
 #endif
-             ;
-        if (doLDL) try {
-            if (showstartdone) std::cout<<"LDL"<<std::endl;
-            tmv::BandMatrix<T> L(N,N,1,0);
-            tmv::DiagMatrix<T> D(N);
-            tmv::BandMatrix<T> LDL(N,N,1,1);
-            if (posdef) {
-                L = m.chd().getL();
-                D = m.chd().getD();
-                LDL = L*D*L.adjoint();
-                Assert(Norm(m-LDL) <= eps*normm,"HermBand LDL");
-            }
+            try {
 
-            tmv::BandMatrix<std::complex<T> > cL(N,N,nlo,0);
-            tmv::DiagMatrix<std::complex<T> > cD(N);
-            tmv::BandMatrix<std::complex<T> > cLDL(N,N,nlo,nlo);
-            if (posdef) {
-                cL = c.chd().getL();
-                cD = c.chd().getD();
-                cLDL = cL*cD*cL.adjoint();
-                Assert(Norm(c-cLDL) <= ceps*normc,"HermBand C LDL");
-            }
+                if (showstartdone) std::cout<<"LDL"<<std::endl;
+                tmv::BandMatrix<T> L(N,N,1,0);
+                tmv::DiagMatrix<T> D(N);
+                tmv::BandMatrix<T> LDL(N,N,1,1);
+                if (posdef) {
+                    L = m.chd().getL();
+                    D = m.chd().getD();
+                    LDL = L*D*L.adjoint();
+                    Assert(Norm(m-LDL) <= eps*normm,"HermBand LDL");
+                }
+
+                tmv::BandMatrix<std::complex<T> > cL(N,N,nlo,0);
+                tmv::DiagMatrix<std::complex<T> > cD(N);
+                tmv::BandMatrix<std::complex<T> > cLDL(N,N,nlo,nlo);
+                if (posdef) {
+                    cL = c.chd().getL();
+                    cD = c.chd().getD();
+                    cLDL = cL*cD*cL.adjoint();
+                    Assert(Norm(c-cLDL) <= ceps*normc,"HermBand C LDL");
+                }
 
 #if (XTEST & 16)
-            tmv::HermBandMatrix<T,uplo,stor> m2 = m;
-            LDL_Decompose(m2.view());
-            (L = m2.lowerBand()).diag().setAllTo(T(1));
-            D = DiagMatrixViewOf(m2.diag());
-            LDL = L*D*L.adjoint();
-            Assert(Norm(m-LDL) <= eps*normm,"HermBand LDL2");
+                tmv::HermBandMatrix<T,uplo,stor> m2 = m;
+                LDL_Decompose(m2.view());
+                (L = m2.lowerBand()).diag().setAllTo(T(1));
+                D = DiagMatrixViewOf(m2.diag());
+                LDL = L*D*L.adjoint();
+                Assert(Norm(m-LDL) <= eps*normm,"HermBand LDL2");
 
-            // Alt calculation:
-            // (I + L) D (I + Lt)
-            // D + LD + DLt = LDLt
-            tmv::DiagMatrix<T> E(m2.diag(-1));
-            LDL.setZero();
-            LDL.diag(0,1,N) = (E*D.subDiagMatrix(0,N-1)*E).diag();
-            LDL.diag(-1) = (E*D.subDiagMatrix(0,N-1)).diag();
-            LDL += D;
-            LDL.diag(1) = LDL.diag(-1);
-            Assert(Norm(m-LDL) <= eps*normm,"HermBand LDL2 Alt");
+                // Alt calculation:
+                // (I + L) D (I + Lt)
+                // D + LD + DLt = LDLt
+                tmv::DiagMatrix<T> E(m2.diag(-1));
+                LDL.setZero();
+                LDL.diag(0,1,N) = (E*D.subDiagMatrix(0,N-1)*E).diag();
+                LDL.diag(-1) = (E*D.subDiagMatrix(0,N-1)).diag();
+                LDL += D;
+                LDL.diag(1) = LDL.diag(-1);
+                Assert(Norm(m-LDL) <= eps*normm,"HermBand LDL2 Alt");
 
-            tmv::HermBandMatrix<std::complex<T>,uplo,stor> c2 = c;
-            LDL_Decompose(c2.view());
-            (cL = c2.lowerBand()).diag().setAllTo(T(1));
-            cD = DiagMatrixViewOf(c2.diag());
-            cLDL = cL*cD*cL.adjoint();
-            Assert(Norm(c-cLDL) <= ceps*normc,"HermBand C LDL2");
-            Assert(Norm(cD.imagPart()) <= ceps*normc,
-                   "HermBand C LDL2 - D");
+                tmv::HermBandMatrix<std::complex<T>,uplo,stor> c2 = c;
+                LDL_Decompose(c2.view());
+                (cL = c2.lowerBand()).diag().setAllTo(T(1));
+                cD = DiagMatrixViewOf(c2.diag());
+                cLDL = cL*cD*cL.adjoint();
+                Assert(Norm(c-cLDL) <= ceps*normc,"HermBand C LDL2");
+                Assert(Norm(cD.imagPart()) <= ceps*normc,
+                       "HermBand C LDL2 - D");
 
-            // Alt calculation:
-            tmv::DiagMatrix<std::complex<T> > cE(c2.diag(-1));
-            cLDL.setZero();
-            cLDL.diag(0,1,N) =
-                (cE*cD.subDiagMatrix(0,N-1)*cE.conjugate()).diag();
-            cLDL.diag(-1) = (cE*cD.subDiagMatrix(0,N-1)).diag();
-            cLDL += cD;
-            cLDL.diag(1) = cLDL.diag(-1).conjugate();
-            Assert(Norm(c-cLDL) <= ceps*normc,"HermBand C LDL2 Alt");
+                // Alt calculation:
+                tmv::DiagMatrix<std::complex<T> > cE(c2.diag(-1));
+                cLDL.setZero();
+                cLDL.diag(0,1,N) =
+                    (cE*cD.subDiagMatrix(0,N-1)*cE.conjugate()).diag();
+                cLDL.diag(-1) = (cE*cD.subDiagMatrix(0,N-1)).diag();
+                cLDL += cD;
+                cLDL.diag(1) = cLDL.diag(-1).conjugate();
+                Assert(Norm(c-cLDL) <= ceps*normc,"HermBand C LDL2 Alt");
 
-            c2.conjugate() = c;
-            LDL_Decompose(c2.conjugate());
-            (cL = c2.conjugate().lowerBand()).diag().setAllTo(T(1));
-            cD = DiagMatrixViewOf(c2.conjugate().diag());
-            cLDL = cL*cD*cL.adjoint();
-            Assert(Norm(c-cLDL) <= ceps*normc,"HermBand C LDL3");
-            Assert(Norm(cD.imagPart()) <= ceps*normc,
-                   "HermBand C LDL2 - D");
+                c2.conjugate() = c;
+                LDL_Decompose(c2.conjugate());
+                (cL = c2.conjugate().lowerBand()).diag().setAllTo(T(1));
+                cD = DiagMatrixViewOf(c2.conjugate().diag());
+                cLDL = cL*cD*cL.adjoint();
+                Assert(Norm(c-cLDL) <= ceps*normc,"HermBand C LDL3");
+                Assert(Norm(cD.imagPart()) <= ceps*normc,
+                       "HermBand C LDL2 - D");
 #endif
-            std::cout<<"."; std::cout.flush();
-        } catch (tmv::NonPosDef) { 
-            // The Lapack version throws whenever mattype is not posdef, 
-            // but native algorithm succeeds when mattype is indefinite,
-            // or even singular.  
-            Assert(!posdef,"caught NonPosDef, but mattype == posdef");
-        }
+                std::cout<<"."; std::cout.flush();
+            } catch (tmv::NonPosDef) { 
+                // The Lapack version throws whenever mattype is not posdef, 
+                // but native algorithm succeeds when mattype is indefinite,
+                // or even singular.  
+                Assert(!posdef,"caught NonPosDef, but mattype == posdef");
+            }
+        } while (false);
 
         // SV Decomposition
-        {
+        do {
             if (showstartdone) std::cout<<"SV"<<std::endl;
             tmv::Matrix<T> U = m.svd().getU();
             tmv::DiagMatrix<T> S = m.svd().getS();
@@ -401,10 +409,10 @@ void TestHermBandDecomp()
                        ceps*normc*normc,"HermBand C SV8 U");
 #endif
             std::cout<<"."; std::cout.flush();
-        }
+        } while (false);
 
         // Eigen
-        {
+        do {
             if (showstartdone) std::cout<<"Eigen"<<std::endl;
             tmv::Matrix<T> V(N,N);
             tmv::Vector<T> L(N);
@@ -435,12 +443,14 @@ void TestHermBandDecomp()
             Assert(Norm(cL2-cL) <= ceps*normc,"HermBand C Eigen4");
 #endif
             std::cout<<"."; std::cout.flush();
-        }
+        } while (false);
 
         // Square Root
+        do {
 #ifdef NOTHROW
-        if (posdef) {
-#else
+            if (!posdef) break;
+#endif
+#ifndef NOTHROW
             try {
 #endif
                 if (showstartdone) std::cout<<"Square Root"<<std::endl;
@@ -483,23 +493,27 @@ void TestHermBandDecomp()
 #endif
                 Assert(posdef, "didn't throw NonPosDef, and mattype != pos def"); 
                 std::cout<<"."; std::cout.flush();
+            }
 #ifndef NOTHROW
-            } catch (tmv::NonPosDef) { 
+            catch (tmv::NonPosDef) { 
                 Assert(!posdef,"caught NonPosDef, but mattype == posdef"); 
             }
-#else
-        }
 #endif
+        } while (false);
 
     }
+
 }
 
 template <class T, tmv::UpLoType uplo, tmv::StorageType stor> 
 void TestSymBandDecomp()
 {
-    for (int mattype = 0; mattype <= 14; mattype++) {
+    for (int mattype = START; mattype <= 14; mattype++) {
 #if !(XTEST & 64)
         if (mattype % 6 >= 3) continue;
+#endif
+#ifdef LAP
+        if (mattype % 6 >= 4) continue;
 #endif
         if (showstartdone) {
             std::cout<<"SymBand: mattype = "<<mattype<<std::endl;
@@ -626,6 +640,10 @@ void TestSymBandDecomp()
             c.diag(0,N/5,2*N/5).setZero();
             m.diag(0,N/2+1,N) *= T(-1);
             c.diag(0,N/2+1,N) *= T(-1);
+            m.subSymBandMatrix(N-4,N).setAllTo(
+                -x/std::numeric_limits<T>::epsilon()/T(8));
+            c.subSymBandMatrix(N-4,N).setAllTo(
+                -x/std::numeric_limits<T>::epsilon()/T(8));
         }
 
         if (nearoverflow) {

@@ -518,6 +518,24 @@ namespace tmv {
     inline TMV_RealType(T) TMV_Epsilon()
     { return std::numeric_limits<typename Traits<T>::real_type>::epsilon(); }
 
+    template <class T>
+    inline bool TMV_Underflow(T x)
+    {
+        typedef typename Traits<T>::real_type RT;
+#if 1
+        return TMV_ABS2(x) < std::numeric_limits<RT>::min()*RT(2); 
+#else
+        const RT halfeps = TMV_Epsilon<T>() / RT(2);
+        return x * halfeps == RT(0); 
+        // This is too strict on some systems.
+        // Usually x remains representable all the way down to just above
+        // limits::min * limits::epsilon.
+        // However, on one system I tested on, it would sometimes 
+        // represent values less than min, and other times underflow to 0.
+        // So, I think the above test is more portable.
+#endif
+    }
+
     extern bool TMV_FALSE; 
     // = false (in TMV_Vector.cpp), but without the unreachable returns
 
@@ -539,6 +557,10 @@ namespace tmv {
     template <> 
     inline int TMV_LOG(int x) 
     { return int(floor(std::log(double(x)))); }
+
+    template <>
+    bool TMV_Underflow(int x)
+    { return x == 0; }
 #endif
 
     template <class T> 

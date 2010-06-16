@@ -195,33 +195,38 @@ namespace tmv {
         const int N = A.size();
         const RT alpha = (TMV_SQRT(RT(17))+1)/8;
 
-        // I use x*halfeps to check for underflow.  Normally x*eps should
-        // be sufficient.  But if x is complex, then 1/x can still overflow
-        // if x*eps != 0, but x*halfeps == 0.
-        const RT halfeps = TMV_Epsilon<RT>()/RT(2);
-
 #ifdef XTEST 
         TMVAssert(A.isHermOK());
+#endif
+#ifdef XDEBUG
+        //std::cout<<"Start NonBlockLDL_Decompose\n";
+        Matrix<T> A0(A);
 #endif
 
         VectorView<T> D = A.diag();
         T* Dj = D.ptr()+j1*D.step();
         for (int j=j1; j<N;) { // ++j or j+=2 done below
+            //std::cout<<j<<"  ";
             bool seq1 = true;
             if (j == N-1) {
+                //std::cout<<"j==N-1  ";
                 // No permutation
                 P[j] = j;
             } else {
                 RT ajj = herm ? TMV_ABS(TMV_REAL(*Dj)) : TMV_ABS(*Dj);
+                //std::cout<<ajj<<"  ";
                 int p; // p is relative to j index, not absolute.
                 RT apj = A.col(j,j,N).maxAbsElement(&p);
+                //std::cout<<apj<<"  ";
                 // Check for underflow:
-                if (apj * halfeps == RT(0)) {
-                    *Dj = apj = ajj = RT(0);
-                    A.col(j,j+1,N).setZero();
+                if (TMV_Underflow(apj)) {
+                    apj = ajj = RT(0);
+                    p = 0;
+                    A.col(j,j,N).setZero();
                 }
 
                 if (p == 0 || ajj >= alpha * apj) {
+                    //std::cout<<"No perm (1)  ";
                     // No permutation
                     P[j] = j;
                 } else {
@@ -234,14 +239,17 @@ namespace tmv {
                         apq = TMV_MAX(apq,apq2);
                     }
                     if (ajj*apq >= alpha * apj * apj) {
+                        //std::cout<<"No perm (2)  ";
                         // No permutation
                         P[j] = j;
                     } else if (app >= alpha * apq) {
+                        //std::cout<<"Perm (1)  ";
                         // Permute p diagonal into j spot
                         TMVAssert(p<int(A.size()));
                         A.swapRowsCols(j,p);
                         P[j] = p;
                     } else {
+                        //std::cout<<"Perm (2)  ";
                         // Permute pj element into j+1,j spot
                         // This also permutes pp element into j+1,j+1
                         seq1 = false;
@@ -257,6 +265,7 @@ namespace tmv {
 
             // Now the LDL solving:
             if (seq1) {
+                //std::cout<<"seq1  ";
                 if (herm) {
                     RT dj = TMV_REAL(*Dj);
                     if (signdet != T(0)) {
@@ -288,6 +297,7 @@ namespace tmv {
                 }
                 ++j; Dj += D.step();
             } else {
+                //std::cout<<"seq2  ";
                 // Invert E:  E^-1 = [ x z* ]
                 //                   [ z y  ]
 
@@ -384,9 +394,37 @@ namespace tmv {
                 }
                 j+=2; Dj += D.step(); // Already did one += D.step() above
             }
+            //std::cout<<std::endl;
         }
 #ifdef XTEST 
         TMVAssert(A.isHermOK());
+#endif
+#ifdef XDEBUG
+        if (j1 == 0) {
+            LowerTriMatrix<T,UnitDiag> L = A.lowerTri(UnitDiag);
+            Matrix<T> DD(A.size(),A.size(),T(0));
+            DD.diag() = A.diag();
+            DD.diag(-1) = xD;
+            DD.diag(1) = A.isherm() ? xD.conjugate() : xD;
+            Matrix<T> A2 = L*DD*(A.isherm() ? L.adjoint() : L.transpose());
+            A2.reversePermuteRows(P);
+            A2.reversePermuteCols(P);
+            std::cout<<"Done: D = "<<A.diag()<<std::endl;
+            std::cout<<"     xD = "<<xD<<std::endl;
+            std::cout<<"Norm(A2-A0) = "<<Norm(A2-A0)<<std::endl;
+            std::cout<<"Norm(A0) = "<<Norm(A0)<<std::endl;
+            std::cout<<"Norm(L) = "<<Norm(L)<<std::endl;
+            std::cout<<"Norm(DD) = "<<Norm(DD)<<std::endl;
+            if (Norm(A2-A0) > 1.e-11*(Norm(A0)+NormSq(L)*Norm(DD))) {
+                cerr<<"NonBlock LDL_Decompose\n";
+                cerr<<"A0 = "<<TMV_Text(A)<<"  "<<A0<<endl;
+                cerr<<"A -> "<<A<<endl;
+                cerr<<"L = "<<L<<endl;
+                cerr<<"D = "<<DD<<endl;
+                cerr<<"A2 = "<<A2<<endl;
+                abort();
+            }
+        }
 #endif
     }
 
@@ -408,16 +446,16 @@ namespace tmv {
 #ifdef XTEST
         TMVAssert(A.isHermOK());
 #endif
+#ifdef XDEBUG
+        std::cout<<"Start BlockLDL_Decompose\n";
+        Matrix<T> A0(A);
+#endif
 
         const RT alpha = (TMV_SQRT(RT(17))+1)/8;
-        const RT halfeps = TMV_Epsilon<RT>()/RT(2);
         const int N = A.size();
 
         VectorView<T> D = A.diag();
-        // Only make LD if we're going to use it:
-        Matrix<T,ColMajor> LD(
-            N < SYM_LDL_BLOCKSIZE ? 0 : N,
-            N < SYM_LDL_BLOCKSIZE ? 0 : SYM_LDL_BLOCKSIZE+1);
+        Matrix<T,ColMajor> LD(N,SYM_LDL_BLOCKSIZE+1);
         T* Dj = D.ptr();
         for (int j1=0; j1<N; ) {
             int j2 = TMV_MIN(j1+SYM_LDL_BLOCKSIZE,N);
@@ -426,6 +464,7 @@ namespace tmv {
                 int j;
                 T* LDjj = LD.ptr()+j1;  // = LD(j,jj)
                 for (j=j1; j<j2;) { // ++j or j+=2 done below
+                    //std::cout<<j<<"  ";
                     bool seq1 = true;
                     int jj = j-j1; // Col index in LD
 
@@ -434,23 +473,31 @@ namespace tmv {
                         (herm ? LD.row(j,0,jj).conjugate() : LD.row(j,0,jj));
 
                     if (j == N-1) {
+                        //std::cout<<"j==N-1  ";
                         // No permutation
                         P[j] = j;
                     } else {
-                        RT ajj = TMV_ABS(*LDjj);
-                        int p; // p is relative to j+1 index, not absolute.
-                        RT apj = LD.col(jj,j+1,N).maxAbsElement(&p);
+                        RT ajj = herm ?
+                            TMV_ABS(TMV_REAL(*LDjj)) :
+                            TMV_ABS(*LDjj);
+                        //std::cout<<ajj<<"  ";
+                        int p; // p is relative to j index, not absolute.
+                        RT apj = LD.col(jj,j,N).maxAbsElement(&p);
+                        //std::cout<<apj<<"  ";
                         // Check for underflow:
-                        if (apj * halfeps == RT(0)) {
-                            *LDjj = apj = ajj = RT(0);
-                            LD.col(jj,j+1,N).setZero();
+                        if (TMV_Underflow(apj)) {
+                            apj = ajj = RT(0);
+                            p = 0;
+                            LD.col(jj,j,N).setZero();
                         }
 
-                        if (ajj >= alpha * apj) {
+                        if (p == 0 || ajj >= alpha * apj) {
+                            //std::cout<<"No perm (1)  ";
                             // No permutation
                             P[j] = j;
                         } else {
-                            p+=j+1;
+                            p+=j;
+                            //std::cout<<"p = "<<p<<"  ";
 
                             LD.col(jj+1,j,p) = A.col(p,j,p);
                             LD.col(jj+1,p,N) = A.col(p,p,N);
@@ -460,16 +507,22 @@ namespace tmv {
                                  LD.row(p,0,jj));
 
                             const T* LDpj = LD.cptr() + p + (jj+1)*LD.stepj();
-                            RT app = TMV_ABS(*LDpj);
+                            RT app = herm ? 
+                                TMV_ABS(TMV_REAL(*LDpj)) :
+                                TMV_ABS(*LDpj);
+                            //std::cout<<app<<"  ";
                             RT apq = LD.col(jj+1,j,p).maxAbsElement();
                             if (p+1 < N) {
                                 RT apq2 = LD.col(jj+1,p+1,N).maxAbsElement();
                                 apq = TMV_MAX(apq,apq2);
                             }
+                            //std::cout<<apq<<"  ";
                             if (ajj*apq >= alpha * apj * apj) {
+                                //std::cout<<"No perm (2)  ";
                                 // No permutation
                                 P[j] = j;
                             } else if (app >= alpha * apq) {
+                                //std::cout<<"Perm (1)  ";
                                 // Permute p diagonal into j spot
                                 P[j] = p;
                                 // Move updated pivot column (in LD) to j column
@@ -491,6 +544,7 @@ namespace tmv {
                                 // Also need to do row swaps in LD
                                 Swap(LD.row(j,0,jj+1),LD.row(p,0,jj+1));
                             } else {
+                                //std::cout<<"Perm (2)  ";
                                 // Permute pj element into j+1,j spot
                                 // This also permutes pp element into j+1,j+1
                                 seq1 = false;
@@ -519,6 +573,7 @@ namespace tmv {
 
                     // Now the LDL solving:
                     if (seq1) {
+                        //std::cout<<"seq1  ";
                         // LD.col(j) now holds L.col(j)*D(j)
                         A.col(j,j,N) = LD.col(jj,j,N);
                         if (herm) {
@@ -555,6 +610,7 @@ namespace tmv {
                         Dj+=D.step();
                         LDjj += LD.stepj()+1;
                     } else {
+                        //std::cout<<"seq2  ";
                         // LD.cols(j,j+1) now hold L.cols(j,j+1) * E 
                         // Invert E:  E^-1 = [ x z* ]
                         //                   [ z y  ]
@@ -634,6 +690,7 @@ namespace tmv {
                         Dj+=D.step(); // One of these steps already done above
                         LDjj += LD.stepj()+1;
                     }
+                    //std::cout<<std::endl;
                 }
                 j2 = j; // in case last one was a j+=2
 
@@ -657,6 +714,65 @@ namespace tmv {
 #ifdef XTEST
         TMVAssert(A.isHermOK());
 #endif
+#ifdef XDEBUG
+        LowerTriMatrix<T,UnitDiag> L = A.lowerTri(UnitDiag);
+        Matrix<T> DD(A.size(),A.size(),T(0));
+        DD.diag() = A.diag();
+        DD.diag(-1) = xD;
+        DD.diag(1) = A.isherm() ? xD.conjugate() : xD;
+        Matrix<T> A2 = L*DD*(A.isherm() ? L.adjoint() : L.transpose());
+        A2.reversePermuteRows(P);
+        A2.reversePermuteCols(P);
+        std::cout<<"Done: D = "<<A.diag()<<std::endl;
+        std::cout<<"     xD = "<<xD<<std::endl;
+        std::cout<<"Norm(A2-A0) = "<<Norm(A2-A0)<<std::endl;
+        std::cout<<"Norm(A0) = "<<Norm(A0)<<std::endl;
+        std::cout<<"Norm(L) = "<<Norm(L)<<std::endl;
+        std::cout<<"Norm(DD) = "<<Norm(DD)<<std::endl;
+        if (Norm(A2-A0) > 1.e-11*(Norm(A0)+NormSq(L)*Norm(DD))) {
+            cerr<<"Block LDL_Decompose\n";
+            cerr<<"A0 = "<<TMV_Text(A)<<"  "<<A0<<endl;
+            cerr<<"A -> "<<A<<endl;
+            cerr<<"L = "<<L<<endl;
+            cerr<<"D = "<<DD<<endl;
+            cerr<<"A2 = "<<A2<<endl;
+            cerr<<"Compare to NonBlock version:\n";
+            auto_ptr<SymMatrix<T,Lower,ColMajor> > A3S(0);
+            auto_ptr<HermMatrix<T,Lower,ColMajor> > A3H(0);
+            auto_ptr<SymMatrixView<T> > A3(0);
+            if (A.isherm()) {
+                A3H.reset(new HermMatrix<T,Lower,ColMajor>(A0));
+                A3.reset(new SymMatrixView<T>(A3H->view()));
+            } else {
+                A3S.reset(new SymMatrix<T,Lower,ColMajor>(A0));
+                A3.reset(new SymMatrixView<T>(A3S->view()));
+            }
+            Vector<T> xD3(xD.size(),T(0));
+            auto_array<int> P3(new int[A.size()]);
+            RT logdet3(1);
+            T signdet3(1);
+            if (A.isherm()) 
+                NonBlockLDL_Decompose<true>(
+                    *A3,xD3.view(),P3.get(),logdet3,signdet3);
+            else
+                NonBlockLDL_Decompose<false>(
+                    *A3,xD3.view(),P3.get(),logdet3,signdet3);
+            cerr<<"A3 = "<<*A3<<endl;
+            cerr<<"A = "<<A<<endl;
+            cerr<<"Norm(diff) = "<<Norm(A-*A3)<<endl;
+            cerr<<"xD3 = "<<xD3<<endl;
+            cerr<<"xD = "<<xD<<endl;
+            cerr<<"Norm(diff) = "<<Norm(xD-xD3)<<endl;
+            cerr<<"P3 = ";
+            for(int i=0;i<int(A.size());i++) cerr<<P3[i]<<" ";
+            cerr<<"\nP  = ";
+            for(int i=0;i<int(A.size());i++) cerr<<P[i]<<" ";
+            cerr<<endl;
+            cerr<<"det3 = "<<logdet3<<"  "<<signdet3<<endl;
+            cerr<<"det = "<<logdet<<"  "<<signdet<<endl;
+            abort();
+        }
+#endif
     }
 
     template <bool herm, class T> 
@@ -671,7 +787,7 @@ namespace tmv {
         TMVAssert(A.ct()==NonConj);
         TMVAssert(A.uplo()==Lower);
 
-#if 0
+#if 1
         if (A.size() > SYM_LDL_BLOCKSIZE) 
             BlockLDL_Decompose<herm>(A,xD,P,logdet,signdet);
         else 
@@ -1204,7 +1320,11 @@ namespace tmv {
         Matrix<T> A2 = L*DD*(A.isherm() ? L.adjoint() : L.transpose());
         A2.reversePermuteRows(P);
         A2.reversePermuteCols(P);
-        if (Norm(A2-A0) > 0.0001*(Norm(A0)+NormSq(L)*Norm(DD))) {
+        std::cout<<"Norm(A2-A0) = "<<Norm(A2-A0)<<std::endl;
+        std::cout<<"Norm(A0) = "<<Norm(A0)<<std::endl;
+        std::cout<<"Norm(L) = "<<Norm(L)<<std::endl;
+        std::cout<<"Norm(DD) = "<<Norm(DD)<<std::endl;
+        if (Norm(A2-A0) > 1.e-11*(Norm(A0)+NormSq(L)*Norm(DD))) {
             cerr<<"LDL_Decompose\n";
             cerr<<"A0 = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"A -> "<<A<<endl;
@@ -1228,9 +1348,11 @@ namespace tmv {
             RT logdet3(1);
             T signdet3(1);
             if (A.isherm()) 
-                NonLapLDL_Decompose<true>(*A3,xD3.view(),P3.get(),logdet3,det3);
+                NonLapLDL_Decompose<true>(
+                    *A3,xD3.view(),P3.get(),logdet3,signdet3);
             else
-                NonLapLDL_Decompose<false>(*A3,xD3.view(),P3.get(),logdet3,det3);
+                NonLapLDL_Decompose<false>(
+                    *A3,xD3.view(),P3.get(),logdet3,signdet3);
             cerr<<"A3 = "<<*A3<<endl;
             cerr<<"A = "<<A<<endl;
             cerr<<"Norm(diff) = "<<Norm(A-*A3)<<endl;
@@ -1244,8 +1366,8 @@ namespace tmv {
             cerr<<endl;
             cerr<<"det3 = "<<logdet3<<"  "<<signdet3<<endl;
             cerr<<"det = "<<logdet<<"  "<<signdet<<endl;
-            abort();
 #endif
+            abort();
         }
 #endif
     }
@@ -1270,16 +1392,16 @@ namespace tmv {
         Matrix<T> A2 = L * D * (A.isherm() ? L.adjoint() : L.transpose());
         A2.reversePermuteRows(P);
         A2.reversePermuteCols(P);
-        //cout<<"LDL_Decompose: A0 = "<<TMV_Text(A)<<"  "<<A0<<std::endl;
-        //cout<<"A -> "<<A<<std::endl;
-        //cout<<"D = "<<TMV_Text(D)<<"  "<<D<<std::endl;
-        //cout<<"L = "<<L<<std::endl;
-        //cout<<"LDLt = "<<L*D*(A.isherm()?L.adjoint():L.transpose());
-        //cout<<"D.-1 = "<<TMV_Text(D.diag(-1))<<"  "<<D.diag(-1)<<std::endl;
-        //cout<<"D.0 = "<<D.diag()<<std::endl;
-        //cout<<"D.1 = "<<D.diag(1)<<std::endl;
-        //cout<<"PLDLtPt = "<<A2<<std::endl;
-        //cout<<"cf A0 = "<<A0<<std::endl;
+        cout<<"LDL_Decompose: A0 = "<<TMV_Text(A)<<"  "<<A0<<std::endl;
+        cout<<"A -> "<<A<<std::endl;
+        cout<<"D = "<<TMV_Text(D)<<"  "<<D<<std::endl;
+        cout<<"L = "<<L<<std::endl;
+        cout<<"LDLt = "<<L*D*(A.isherm()?L.adjoint():L.transpose());
+        cout<<"D.-1 = "<<TMV_Text(D.diag(-1))<<"  "<<D.diag(-1)<<std::endl;
+        cout<<"D.0 = "<<D.diag()<<std::endl;
+        cout<<"D.1 = "<<D.diag(1)<<std::endl;
+        cout<<"PLDLtPt = "<<A2<<std::endl;
+        cout<<"cf A0 = "<<A0<<std::endl;
         if (Norm(A2-A0) > 0.001*Norm(A0)) {
             cerr<<"LDL_Decompose: A0 = "<<TMV_Text(A)<<"  "<<A0<<std::endl;
             cerr<<"A -> "<<A<<std::endl;

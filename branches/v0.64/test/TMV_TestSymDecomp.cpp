@@ -17,6 +17,9 @@ void TestHermDecomp()
 #if !(XTEST & 64)
         if (mattype >= 3) break;
 #endif
+#ifdef LAP
+        if (mattype >= 4) break;
+#endif
         if (showstartdone) {
             std::cout<<"Herm: mattype = "<<mattype<<std::endl;
             std::cout<<"uplo, stor = "<<TMV_Text(uplo)<<
@@ -113,12 +116,16 @@ void TestHermDecomp()
                 m.col(i,0,i+1) /= T(i);
                 c.col(i,0,i+1) /= T(i);
             }
-            m(N/2,N/2) /= std::numeric_limits<T>::epsilon();
-            c(N/2,N/2) /= std::numeric_limits<T>::epsilon();
+            m(N/2,N/2) = x/std::numeric_limits<T>::epsilon();
+            c(N/2,N/2) = x/std::numeric_limits<T>::epsilon();
             m.diag(0,N/5,2*N/5).setZero();
             c.diag(0,N/5,2*N/5).setZero();
             m.diag(0,N/2+1,N) *= T(-1);
             c.diag(0,N/2+1,N) *= T(-1);
+            m.subSymMatrix(N-4,N).setAllTo(
+                -x/std::numeric_limits<T>::epsilon()/T(8));
+            c.subSymMatrix(N-4,N).setAllTo(
+                -x/std::numeric_limits<T>::epsilon()/T(8));
         }
 
         if (nearoverflow) {
@@ -202,8 +209,8 @@ void TestHermDecomp()
         // LDL Decomposition
         try {
             do {
-#if (XTEST & 64) && defined(LAP)
-                if (mattype >= 3) break;
+#ifdef LAP
+                if (baddefect || nearunderflow || nearoverflow) break;
 #endif
                 if (showstartdone) std::cout<<"LDL"<<std::endl;
                 tmv::LowerTriMatrix<T,tmv::UnitDiag> L = m.lud().getL();
@@ -416,6 +423,9 @@ void TestSymDecomp()
 #if !(XTEST & 64)
         if (mattype >= 3) break;
 #endif
+#ifdef LAP
+        if (mattype >= 4) break;
+#endif
         if (showstartdone) {
             std::cout<<"Sym: mattype = "<<mattype<<std::endl;
             std::cout<<"uplo, stor = "<<TMV_Text(uplo)<<
@@ -510,12 +520,16 @@ void TestSymDecomp()
                 m.col(i,0,i+1) /= T(i);
                 c.col(i,0,i+1) /= T(i);
             }
-            m(N/2,N/2) /= std::numeric_limits<T>::epsilon();
-            c(N/2,N/2) /= std::numeric_limits<T>::epsilon();
+            m(N/2,N/2) = x/std::numeric_limits<T>::epsilon();
+            c(N/2,N/2) = x/std::numeric_limits<T>::epsilon();
             m.diag(0,N/5,2*N/5).setZero();
             c.diag(0,N/5,2*N/5).setZero();
             m.diag(0,N/2+1,N) *= T(-1);
             c.diag(0,N/2+1,N) *= T(-1);
+            m.subSymMatrix(N-4,N).setAllTo(
+                -x/std::numeric_limits<T>::epsilon()/T(8));
+            c.subSymMatrix(N-4,N).setAllTo(
+                -x/std::numeric_limits<T>::epsilon()/T(8));
         }
 
         if (nearoverflow) {
@@ -553,14 +567,18 @@ void TestSymDecomp()
 
         // LDL Decomposition
         do {
-#if (XTEST & 64) && defined(LAP)
-            if (mattype >= 3) break;
+#ifdef LAP
+            if (baddefect || nearunderflow || nearoverflow) break;
 #endif
             if (showstartdone) std::cout<<"LDL"<<std::endl;
             tmv::LowerTriMatrix<T,tmv::UnitDiag> L = m.lud().getL();
             tmv::BandMatrix<T> D = m.lud().getD();
             tmv::Permutation P = m.lud().getP();
             tmv::Matrix<T> LDL = P*L*D*L.transpose()*P.transpose();
+            if (showacc) {
+                std::cout<<"Norm(m-LDL) = "<<Norm(m-LDL)<<std::endl;
+                std::cout<<"eps*Norm(m) = "<<eps*normm<<std::endl;
+            }
             Assert(Norm(m-LDL) <= eps*normm,"Sym LDL");
 
             tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag> cL = 
@@ -569,6 +587,10 @@ void TestSymDecomp()
             tmv::Permutation cP = c.lud().getP();
             tmv::Matrix<std::complex<T> > cLDL = 
                 cP*cL*cD*cL.transpose()*cP.transpose();
+            if (showacc) {
+                std::cout<<"Norm(c-cLDL) = "<<Norm(c-cLDL)<<std::endl;
+                std::cout<<"ceps*Norm(c) = "<<ceps*normc<<std::endl;
+            }
             Assert(Norm(c-cLDL) <= ceps*normc,"Sym C LDL");
 
 #if (XTEST & 16)
@@ -614,6 +636,10 @@ void TestSymDecomp()
             tmv::Matrix<T> U = m.svd().getU();
             tmv::DiagMatrix<T> S = m.svd().getS();
             tmv::Matrix<T> V = m.svd().getV();
+            if (showacc) {
+                std::cout<<"Norm(m-U*S*V) = "<<Norm(m-U*S*V)<<std::endl;
+                std::cout<<"eps*Norm(m) = "<<eps*normm<<std::endl;
+            }
             Assert(Norm(m-U*S*V) <= eps*normm,"Sym SV");
 
             tmv::Matrix<std::complex<T> > cU = c.symsvd().getU();
@@ -687,7 +713,9 @@ void TestPolar()
     if (showstartdone) std::cout<<"PolarDecomp "<<TMV_Text(stor)<<std::endl;
 
     for (int mattype = START; mattype <= 6; mattype++) {
-#if !(XTEST & 64)
+#if !(XTEST & 64) || defined(LAP)
+        // Some LAPACK packages don't manage the bad defect case here
+        // so skip that as well, not just over/underflow.
         if (mattype >= 4) break;
 #endif
         if (showstartdone) {
@@ -707,6 +735,9 @@ void TestPolar()
         if (mattype == 1) M = 211;
         else if (mattype == 2) M = 545;
         const bool singular = mattype >= 3;
+        const bool baddefect = mattype == 4;
+        const bool nearunderflow = mattype == 5;
+        const bool nearoverflow = mattype == 6;
 
         tmv::Matrix<T,stor> m(M,N);
         for(int i=0;i<M;++i) for(int j=0;j<N;++j) m(i,j) = T(2+4*i-5*j);
@@ -727,7 +758,7 @@ void TestPolar()
         if (!singular) c.diag() *= T(30);
         else { c.col(1).setZero(); c.row(7) = c.row(6); }
 
-        if (mattype == 4) {
+        if (baddefect) {
             for(int i=10;i<N;i+=10) {
                 m.colRange(i,N) *= T(1.e-10);
                 c.colRange(i,N) *= T(1.e-10);
@@ -736,7 +767,7 @@ void TestPolar()
             }
         }
 
-        if (mattype == 5) {
+        if (nearunderflow) {
             T x = std::numeric_limits<T>::min();
             m.setAllTo(x);
             c.setAllTo(std::complex<T>(x,2*x));
@@ -744,11 +775,19 @@ void TestPolar()
                 m.col(i) /= T(i);
                 c.col(i) /= T(i);
             }
-            m(N/2,N/2) /= std::numeric_limits<T>::epsilon();
-            c(N/2,N/2) /= std::numeric_limits<T>::epsilon();
+            m(N/2,N/2) = x/std::numeric_limits<T>::epsilon();
+            c(N/2,N/2) = x/std::numeric_limits<T>::epsilon();
+            m.diag(0,N/5,2*N/5).setZero();
+            c.diag(0,N/5,2*N/5).setZero();
+            m.diag(0,N/2+1,N) *= T(-1);
+            c.diag(0,N/2+1,N) *= T(-1);
+            m.subMatrix(N-4,N,N-4,N).setAllTo(
+                -x/std::numeric_limits<T>::epsilon()/T(8));
+            c.subMatrix(N-4,N,N-4,N).setAllTo(
+                -x/std::numeric_limits<T>::epsilon()/T(8));
         }
 
-        if (mattype == 6) {
+        if (nearoverflow) {
             T x = std::numeric_limits<T>::max();
             x /= N;
             m.setAllTo(x);
@@ -782,13 +821,16 @@ void TestPolar()
 
         // Matrix Polar Decomposition
         do {
-#if (XTEST & 64) && defined(LAP)
-            if (mattype >= 4) break;
-#endif
-            if (showstartdone) std::cout<<"Polar"<<std::endl;
+            if (showstartdone) std::cout<<"Matrix Polar"<<std::endl;
             tmv::HermMatrix<T,tmv::Lower,tmv::ColMajor> P(N);
             tmv::Matrix<T,stor> U = m;
             PolarDecompose(U.view(),P.view());
+            if (showacc) {
+                std::cout<<"Norm(m-UP) = "<<Norm(m-U*P)<<std::endl;
+                std::cout<<"eps*Norm(m) = "<<eps*normm<<std::endl;
+                std::cout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<std::endl;
+                std::cout<<"eps = "<<eps<<std::endl;
+            }
             Assert(Norm(m-U*P) <= eps*normm,"Polar");
             Assert(Norm(U.adjoint()*U-T(1)) <= eps,"Polar UtU");
 
@@ -846,9 +888,6 @@ void TestPolar()
 
         // BandMatrix Polar Decomposition
         do {
-#if (XTEST & 64) && defined(LAP)
-            if (mattype >= 4) break;
-#endif
             if (showstartdone) std::cout<<"Band Polar"<<std::endl;
             tmv::BandMatrixView<T> b(m.view(),5,11);
             tmv::BandMatrixView<std::complex<T> > cb(c.view(),5,11);

@@ -73,7 +73,7 @@ namespace tmv {
         //std::cout<<"x0,absx0 = "<<x0<<"  "<<absx0<<std::endl;
         if (absx0 > scale) scale = absx0;
         //std::cout<<"scale => "<<scale<<std::endl;
-        if (scale * TMV_Epsilon<T>() == RT(0)) {
+        if (TMV_Underflow(scale)) {
             // Then the situation is hopeless, and we should just zero out
             // the whole vector.
             //std::cout<<"scale is essentially 0\n";
@@ -123,10 +123,22 @@ namespace tmv {
         RT normv0 = TMV_NORM(v0);
         T beta = normv0 / (normsqx - y * x0);
         T invv0 = RT(1)/v0;
-        //std::cout<<"v0 = "<<v0<<", normv0 = "<<normv0<<", beta = "<<beta<<", invv0 = "<<invv0<<std::endl;
+        //std::cout<<"v0 = "<<v0<<", normv0 = "<<normv0;
+        //std::cout<<", beta = "<<beta<<", invv0 = "<<invv0<<std::endl;
 
-        x *= invv0*invscale;
-        //std::cout<<"x = "<<x<<std::endl;
+        // Sometimes this combination can underflow, so check.
+        T scaled_invv0 = invv0 * invscale;
+        //std::cout<<"scaled_invv0 = "<<scaled_invv0<<std::endl;
+        if ((TMV_REAL(invv0)!=RT(0) && TMV_Underflow(TMV_REAL(scaled_invv0))) ||
+            (TMV_IMAG(invv0)!=RT(0) && TMV_Underflow(TMV_IMAG(scaled_invv0)))) {
+            //std::cout<<"Two steps:\n";
+            x *= invscale;
+            //std::cout<<"x -> "<<x<<std::endl;
+            x *= invv0;
+        } else {
+            x *= scaled_invv0;
+        }
+        //std::cout<<"x => "<<x<<std::endl;
 
         x0 = y*scale;
         //std::cout<<"x0 = "<<x0<<std::endl;
@@ -155,9 +167,9 @@ namespace tmv {
             Norm(Hxx.subVector(1,Hxx.size())/scale) > 0.0001*TMV_ABS(x0/scale)) {
             cerr<<"Householder Reflect:\n";
             cerr<<"Input: x = "<<xx<<endl;
-            cerr<<"x0 = "<<x0<<endl;
             cerr<<"Norm(x) = "<<Norm(xx)<<endl;
             cerr<<"Output: v = "<<vv<<endl;
+            cerr<<"x0 = "<<x0<<endl;
             cerr<<"beta = "<<beta<<endl;
             cerr<<"H = "<<H<<endl;
             cerr<<"xx = "<<xx<<endl;

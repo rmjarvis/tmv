@@ -58,7 +58,7 @@ namespace tmv {
         TMVAssert(x!=Tx(0));
         TMVAssert(x!=Tx(1)); 
         TMVAssert(v.size()>0);
-        TMVAssert(v.step()>0);
+        TMVAssert(v.step()>=0);
         TMVAssert(v.ct() == NonConj);
 
         T* vptr = v.ptr();
@@ -84,8 +84,7 @@ namespace tmv {
 #endif
                 *vptr *= x;
             }
-        }
-        else
+        } else {
             for(int i=N;i>0;--i,vptr+=s) {
 #ifdef TMVFLDEBUG
                 TMVAssert(vptr >= v.first);
@@ -93,6 +92,7 @@ namespace tmv {
 #endif
                 *vptr *= x;
             }
+        }
     }
 
 #ifdef BLAS

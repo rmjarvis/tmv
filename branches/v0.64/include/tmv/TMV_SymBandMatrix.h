@@ -180,6 +180,7 @@
 //    subMatrix(int i1, int i2, int j1, int j2, int istep=1, int jstep=1)
 //    subBandMatrix(int i1, int i2, int j1, int j2, int nlo, int nhi, 
 //        int istep=1, int jstep=1)
+//    subBandMatrix(int i1, int i2, int j1, int j2)
 //    subVector(int i, int j, int istep, int jstep, int size)
 //        Just like for a regular band matrix except that the 
 //        sub-matrix/bandmatrix/vector must be completely contained within 
@@ -650,6 +651,14 @@ namespace tmv {
                     cptr()+i1*stepj()+j1*stepi(),
                     i2-i1,j2-j1,newnlo,newnhi,stepj(),stepi(),diagstep(),
                     TMV_TransOf(stor()),issym()?ct():TMV_ConjOf(T,ct()));
+        }
+
+        inline const_band_type subBandMatrix(
+            int i1, int i2, int j1, int j2) const
+        {
+            const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1-1);
+            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1-1);
+            return subBandMatrix(i1,i2,j1,j2,newnlo,newnhi);
         }
 
         inline const_band_type subBandMatrix(
@@ -1490,6 +1499,14 @@ namespace tmv {
                 i1-1,i2-1+istep,j1-1,j2-1+jstep,newnlo,newnhi,istep,jstep);
         }
 
+        inline const_band_type subBandMatrix(
+            int i1, int i2, int j1, int j2) const
+        {
+            const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1);
+            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1);
+            return subBandMatrix(i1,i2,j1,j2,newnlo,newnhi);
+        }
+
         inline const_vec_type subVector(
             int i, int j, int istep, int jstep, int n) const
         {
@@ -2013,6 +2030,14 @@ namespace tmv {
                     i2-i1,j2-j1,newnlo,newnhi,stepj(),stepi(),diagstep(),
                     TMV_TransOf(stor()), this->issym()?ct():TMV_ConjOf(T,ct()) 
                     TMV_FIRSTLAST);
+        }
+
+        inline band_type subBandMatrix(
+            int i1, int i2, int j1, int j2) const
+        {
+            const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1-1);
+            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1-1);
+            return subBandMatrix(i1,i2,j1,j2,newnlo,newnhi);
         }
 
         inline band_type subBandMatrix(
@@ -2582,6 +2607,14 @@ namespace tmv {
         {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,lo,hi,1,1));
             return c_type::subBandMatrix(i1-1,i2,j1-1,j2,lo,hi);
+        }
+
+        inline band_type subBandMatrix(
+            int i1, int i2, int j1, int j2) const
+        {
+            const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1);
+            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1);
+            return subBandMatrix(i1,i2,j1,j2,newnlo,newnhi);
         }
 
         inline band_type subBandMatrix(
@@ -3405,6 +3438,14 @@ namespace tmv {
         }
 
         inline const_band_type subBandMatrix(
+            int i1, int i2, int j1, int j2) const
+        {
+            const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1-(I==CStyle?1:0));
+            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1-(I==CStyle?1:0));
+            return subBandMatrix(i1,i2,j1,j2,newnlo,newnhi);
+        }
+
+        inline const_band_type subBandMatrix(
             int i1, int i2, int j1, int j2, int newnlo, int newnhi,
             int istep, int jstep) const
         {
@@ -3480,7 +3521,7 @@ namespace tmv {
         inline const_view_type subSymBandMatrix(int i1, int i2) const
         {
             return subSymBandMatrix(
-                i1,i2,TMV_MIN(nlo(),i2-i1-(I==CStyle?0:1))); 
+                i1,i2,TMV_MIN(nlo(),i2-i1-(I==CStyle?1:0))); 
         }
 
         inline const_view_type subSymBandMatrix(
@@ -3679,6 +3720,13 @@ namespace tmv {
                     TMV_TransOf(S),NonConj TMV_FIRSTLAST);
         }
 
+        inline band_type subBandMatrix(int i1, int i2, int j1, int j2)
+        {
+            const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1-(I==CStyle?1:0));
+            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1-(I==CStyle?1:0));
+            return subBandMatrix(i1,i2,j1,j2,newnlo,newnhi);
+        }
+
         inline band_type subBandMatrix(
             int i1, int i2, int j1, int j2, int newnlo, int newnhi,
             int istep, int jstep)
@@ -3754,7 +3802,7 @@ namespace tmv {
         inline view_type subSymBandMatrix(int i1, int i2)
         {
             return subSymBandMatrix(
-                i1,i2,TMV_MIN(nlo(),i2-i1-(I==CStyle?0:1))); 
+                i1,i2,TMV_MIN(nlo(),i2-i1-(I==CStyle?1:0))); 
         }
 
         inline view_type subSymBandMatrix(
@@ -4881,6 +4929,14 @@ namespace tmv {
         }
 
         inline const_band_type subBandMatrix(
+            int i1, int i2, int j1, int j2) const
+        {
+            const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1-(I==CStyle?1:0));
+            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1-(I==CStyle?1:0));
+            return subBandMatrix(i1,i2,j1,j2,newnlo,newnhi);
+        }
+
+        inline const_band_type subBandMatrix(
             int i1, int i2, int j1, int j2, int newnlo, int newnhi,
             int istep, int jstep) const
         {
@@ -4956,7 +5012,7 @@ namespace tmv {
         inline const_view_type subSymBandMatrix(int i1, int i2) const
         {
             return subSymBandMatrix(
-                i1,i2,TMV_MIN(nlo(),i2-i1-(I==CStyle?0:1))); 
+                i1,i2,TMV_MIN(nlo(),i2-i1-(I==CStyle?1:0))); 
         }
 
         inline const_view_type subSymBandMatrix(
@@ -5157,6 +5213,13 @@ namespace tmv {
                     TMV_TransOf(S),TMV_ConjOf(T,NonConj) TMV_FIRSTLAST);
         }
 
+        inline band_type subBandMatrix(int i1, int i2, int j1, int j2)
+        {
+            const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1-(I==CStyle?1:0));
+            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1-(I==CStyle?1:0));
+            return subBandMatrix(i1,i2,j1,j2,newnlo,newnhi);
+        }
+
         inline band_type subBandMatrix(
             int i1, int i2, int j1, int j2, int newnlo, int newnhi,
             int istep, int jstep)
@@ -5233,7 +5296,7 @@ namespace tmv {
         inline view_type subSymBandMatrix(int i1, int i2)
         {
             return subSymBandMatrix(
-                i1,i2,TMV_MIN(nlo(),i2-i1-(I==CStyle?0:1))); 
+                i1,i2,TMV_MIN(nlo(),i2-i1-(I==CStyle?1:0))); 
         }
 
         inline view_type subSymBandMatrix(

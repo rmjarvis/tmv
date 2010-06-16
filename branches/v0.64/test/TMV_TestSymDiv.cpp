@@ -329,14 +329,14 @@ void TestSymDiv(tmv::DivType dt, PosDefCode pdc)
 template <class T> 
 void TestAllSymDiv()
 {
-    TestSymDecomp<T,tmv::Upper,tmv::ColMajor>();
-    TestSymDecomp<T,tmv::Upper,tmv::RowMajor>();
-    TestSymDecomp<T,tmv::Lower,tmv::ColMajor>();
-    TestSymDecomp<T,tmv::Lower,tmv::RowMajor>();
     TestHermDecomp<T,tmv::Lower,tmv::ColMajor>();
     TestHermDecomp<T,tmv::Lower,tmv::RowMajor>();
     TestHermDecomp<T,tmv::Upper,tmv::ColMajor>();
     TestHermDecomp<T,tmv::Upper,tmv::RowMajor>();
+    TestSymDecomp<T,tmv::Upper,tmv::ColMajor>();
+    TestSymDecomp<T,tmv::Upper,tmv::RowMajor>();
+    TestSymDecomp<T,tmv::Lower,tmv::ColMajor>();
+    TestSymDecomp<T,tmv::Lower,tmv::RowMajor>();
     TestPolar<T,tmv::RowMajor>();
     TestPolar<T,tmv::ColMajor>();
     std::cout<<"SymMatrix<"<<tmv::TMV_Text(T())<<"> passed all ";

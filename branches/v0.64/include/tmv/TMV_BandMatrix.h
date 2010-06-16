@@ -212,6 +212,13 @@
 //        All members of the new subBandMatrix must be within the 
 //        original band.
 //
+//    subBandMatrix(int i1, int i2, int j1, int j2)
+//        This is normally equivalenet to 
+//        b.subBandMatrix(i1,i2,j1,j2,b.nlo(),b.nhi())
+//        However, it lowers the new nlo, nhi as necessary for small 
+//        i2-i1 or j2-j1 if the full band-width doesn't fit into the 
+//        new matrix size.
+//
 //    subMatrix(int i1, int i2, int j1, int j2, int istep=1, int jstep=1)
 //    subVector(int i1, int i2, int istep, int jstep, int size)
 //        Just like the regular Matrix version, but all entries in the 
@@ -606,6 +613,14 @@ namespace tmv {
                 cptr()+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1, newnlo, newnhi, stepi(), stepj(),
                 diagstep(),stor(),ct());
+        }
+
+        inline const_view_type subBandMatrix(
+            int i1, int i2, int j1, int j2) const
+        {
+            const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1-1);
+            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1-1);
+            return subBandMatrix(i1,i2,j1,j2,newnlo,newnhi);
         }
 
         inline const_view_type subBandMatrix(
@@ -1353,12 +1368,20 @@ namespace tmv {
         }
 
         inline const_view_type subBandMatrix(
+            int i1, int i2, int j1, int j2) const
+        {
+            const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1);
+            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1);
+            return subBandMatrix(i1,i2,j1,j2,newnlo,newnhi);
+        }
+
+        inline const_view_type subBandMatrix(
             int i1, int i2, int j1, int j2, int newnlo, int newnhi,
             int istep, int jstep) const
         {
             TMVAssert(hasSubBandMatrix(i1,i2,j1,j2,newnlo,newnhi,istep,jstep));
-            return base::subBandMatrix(i1-1,i2-1+istep,j1-1,j2-1+jstep,
-                                       newnlo,newnhi,istep,jstep);
+            return base::subBandMatrix(
+                i1-1,i2-1+istep,j1-1,j2-1+jstep,newnlo,newnhi,istep,jstep);
         }
 
         inline const_view_type rowRange(int i1, int i2) const
@@ -1935,6 +1958,14 @@ namespace tmv {
         }
 
         inline view_type subBandMatrix(
+            int i1, int i2, int j1, int j2) const
+        {
+            const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1-1);
+            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1-1);
+            return subBandMatrix(i1,i2,j1,j2,newnlo,newnhi);
+        }
+
+        inline view_type subBandMatrix(
             int i1, int i2, int j1, int j2, int newnlo, int newnhi,
             int istep, int jstep) const
         {
@@ -2441,6 +2472,14 @@ namespace tmv {
         {
             TMVAssert(hasSubBandMatrix(i1,i2,j1,j2,newnlo,newnhi,1,1));
             return c_type::subBandMatrix(i1-1,i2,j1-1,j2,newnlo,newnhi);
+        }
+
+        inline view_type subBandMatrix(
+            int i1, int i2, int j1, int j2) const
+        {
+            const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1);
+            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1);
+            return subBandMatrix(i1,i2,j1,j2,newnlo,newnhi);
         }
 
         inline view_type subBandMatrix(
@@ -3287,6 +3326,14 @@ namespace tmv {
         }
 
         inline const_view_type subBandMatrix(
+            int i1, int i2, int j1, int j2) const
+        {
+            const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1-(I==CStyle?1:0));
+            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1-(I==CStyle?1:0));
+            return subBandMatrix(i1,i2,j1,j2,newnlo,newnhi);
+        }
+
+        inline const_view_type subBandMatrix(
             int i1, int i2, int j1, int j2, int newnlo, int newnhi,
             int istep, int jstep) const
         {
@@ -3462,6 +3509,13 @@ namespace tmv {
                 itsm+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1, newnlo, newnhi, stepi(), stepj(),
                 diagstep(), S, NonConj TMV_FIRSTLAST);
+        }
+
+        inline view_type subBandMatrix(int i1, int i2, int j1, int j2)
+        {
+            const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1-(I==CStyle?1:0));
+            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1-(I==CStyle?1:0));
+            return subBandMatrix(i1,i2,j1,j2,newnlo,newnhi);
         }
 
         inline view_type subBandMatrix(
@@ -4258,8 +4312,8 @@ namespace tmv {
         TMVAssert(m2.nlo() >= m1.nlo());
         TMVAssert(m2.nhi() >= m1.nhi());
 
-        DoCopy1(m1,m2.subBandMatrix(0,m2.colsize(),0,m2.rowsize(),
-                                    m1.nlo(),m1.nhi()));
+        DoCopy1(m1,m2.subBandMatrix(
+                0,m2.colsize(),0,m2.rowsize(),m1.nlo(),m1.nhi()));
         if (m2.nhi() > m1.nhi())
             m2.diagRange(m1.nhi()+1,m2.nhi()+1).setZero();
         if (m2.nlo() > m1.nlo())

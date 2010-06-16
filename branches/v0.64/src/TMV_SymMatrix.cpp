@@ -606,11 +606,10 @@ namespace tmv {
     static RT NonLapNormF(const GenSymMatrix<T>& m)
     {
         const RT eps = TMV_Epsilon<T>();
-        const RT halfeps = eps/RT(2);
 
         RT mmax = m.maxAbs2Element();
         if (mmax == RT(0)) return RT(0);
-        else if (mmax * mmax * halfeps == RT(0)) {
+        else if (TMV_Underflow(mmax * mmax)) {
             // Then we need to rescale, since underflow has caused 
             // rounding errors.
             // Epsilon is a pure power of 2, so no rounding errors from 

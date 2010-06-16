@@ -116,7 +116,6 @@ namespace tmv {
         const int N = A.rowsize();
 
         typedef TMV_RealType(T) RT;
-        const RT halfeps = TMV_Epsilon<RT>()/RT(2);
 
         const int ds = A.diagstep();
         T* Ujj = A.ptr();
@@ -129,7 +128,7 @@ namespace tmv {
             int ip;
             T piv = A.col(j,j,endcol).maxAbsElement(&ip);
 
-            if (piv * halfeps == RT(0)) {
+            if (TMV_Underflow(piv)) {
                 ip = 0;
                 A.col(j,j,endcol).setZero();
             }
@@ -174,7 +173,6 @@ namespace tmv {
         const int N = A.rowsize();
 
         typedef TMV_RealType(T) RT;
-        const RT halfeps = TMV_Epsilon<RT>()/RT(2);
 
         T* Ujj = A.ptr(); // = U(j,j)
         T* Lj = Ujj+A.stepi();  // = L(j+1,j)
@@ -198,7 +196,7 @@ namespace tmv {
             TMVAssert(Lj >= A.first);
             TMVAssert(Lj < A.last);
 #endif
-            if (*Ujj * halfeps == T(0)) {
+            if (TMV_Underflow(*Ujj)) {
                 *Ujj = *Lj = T(0);
             } else {
                 *Lj /= *Ujj;

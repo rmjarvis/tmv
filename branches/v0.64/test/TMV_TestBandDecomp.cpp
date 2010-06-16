@@ -15,6 +15,13 @@ void TestBandDecomp()
 #if !(XTEST & 64)
         if (mattype >= 7) break;
 #endif
+#ifdef LAP
+        // Most LAPACK implementations actually do ok with the nearly
+        // over/underflowing matrices, but some do not, so as far as 
+        // this test suite is concerned, I just skip those tests for LAPACK.
+        if (mattype >= 8) break;
+#endif
+
         if (showstartdone) {
             std::cout<<"mattype = "<<mattype<<", stor = "<<
                 tmv::TMV_Text(stor)<<std::endl;
@@ -91,6 +98,10 @@ void TestBandDecomp()
             c.diag(0,N/5,2*N/5).setZero();
             m.diag(0,N/2+1,N) *= T(-1);
             c.diag(0,N/2+1,N) *= T(-1);
+            m.subBandMatrix(N-4,N,N-4,N).setAllTo(
+                -x/std::numeric_limits<T>::epsilon()/T(8));
+            c.subBandMatrix(N-4,N,N-4,N).setAllTo(
+                -x/std::numeric_limits<T>::epsilon()/T(8));
         }
 
         if (nearoverflow) {
@@ -134,8 +145,8 @@ void TestBandDecomp()
 
         // LU Decomposition
         if (m.isSquare()) do {
-#if (XTEST & 64) && defined(LAP)
-            if (mattype >= 7) break;
+#ifdef LAP
+            if (baddefect || nearunderflow || nearoverflow) break;
 #endif
             if (showstartdone) {
                 std::cout<<"LU\n";
@@ -202,7 +213,7 @@ void TestBandDecomp()
         } while (false);
 
         // QR Decomposition
-        {
+        do {
             if (showstartdone) {
                 std::cout<<"QR\n";
             }
@@ -226,6 +237,10 @@ void TestBandDecomp()
 
             tmv::BandMatrix<T,stor> R2(N,N,0,Rnhi);
             QR_Decompose(m,R2.view());
+            if (showacc) {
+                std::cout<<"Norm(R-R2) = "<<Norm(R-R2)<<std::endl;
+                std::cout<<"eps*Norm(m) = "<<eps*normm<<std::endl;
+            }
             Assert(Norm(R-R2) <= eps*normm,"Band QR3");
 
             QR_Decompose(c,cQ.view(),cR.view());
@@ -281,10 +296,10 @@ void TestBandDecomp()
                    "Band C QR15");
 #endif
             std::cout<<"."; std::cout.flush();
-        }
+        } while (false);
 
         // SV Decomposition
-        {
+        do {
             if (showstartdone) {
                 std::cout<<"SV\n";
             }
@@ -310,6 +325,20 @@ void TestBandDecomp()
             tmv::Matrix<std::complex<T> > cU = c.svd().getU();
             tmv::DiagMatrix<T> cS = c.svd().getS();
             tmv::Matrix<std::complex<T> > cV = c.svd().getV();
+            if (showacc) {
+                std::cout<<"cU = "<<cU<<std::endl;
+                std::cout<<"cV = "<<cV<<std::endl;
+                std::cout<<"cS = "<<cS<<std::endl;
+                std::cout<<"c-cUcScV = "<<c-cU*cS*cV<<std::endl;
+                std::cout<<"Norm(c-cUcScV) = "<<Norm(c-cU*cS*cV)<<
+                    "  cf "<<eps*normm<<std::endl;
+                std::cout<<"Norm(cUtcU-1) = "<<Norm(cU.adjoint()*cU-T(1))<<
+                    "  cf "<<eps<<std::endl;
+                std::cout<<"Norm(cVtcV-1) = "<<Norm(cV.adjoint()*cV-T(1))<<
+                    "  cf "<<eps<<std::endl;
+                std::cout<<"Norm(cVcVt-1) = "<<Norm(cV*cV.adjoint()-T(1))<<
+                    "  cf "<<eps<<std::endl;
+            }
             Assert(Norm(c-cU*cS*cV) <= ceps*normc,"C SV");
 
 #if (XTEST & 16)
@@ -419,7 +448,7 @@ void TestBandDecomp()
                        ceps*normc*normc,"C SV19 V");
 #endif
             std::cout<<"."; std::cout.flush();
-        }
+        } while (false);
     }
 }
 

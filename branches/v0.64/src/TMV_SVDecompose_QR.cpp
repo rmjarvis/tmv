@@ -329,8 +329,6 @@ namespace tmv {
         if (U) TMVAssert(U->rowsize() == 2);
         if (V) TMVAssert(V->colsize() == 2);
 
-        const RT eps = TMV_Epsilon<T>();
-
         RT d0 = D(0);
         RT d1 = D(1);
         RT e = E(0);

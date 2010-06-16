@@ -140,11 +140,6 @@ namespace tmv {
         TMVAssert(A.iscm());
         typedef TMV_RealType(T) RT;
 
-        // I use x*halfeps to check for underflow.  Normally x*eps should
-        // be sufficient.  But if x is complex, then 1/x can still overflow
-        // if x*eps != 0, but x*halfeps == 0.
-        const RT halfeps = TMV_Epsilon<RT>()/RT(2);
-
         const int N = A.rowsize();
         const int M = A.colsize();
         const int R = TMV_MIN(N,M);
@@ -157,23 +152,29 @@ namespace tmv {
         int* Pj = P;
 
         for (int j=0; j<R; ++j,Ujj+=Ads,++Pj) {
+            //std::cout<<"j = "<<j<<std::endl;
+            //std::cout<<"A.col(j) = "<<A.col(j)<<std::endl;
             if (j > 0) {
                 // Solve for U(0:j,j))
                 A.col(j,0,j) /= A.subMatrix(0,j,0,j).lowerTri(UnitDiag);
+                //std::cout<<"A.col(j,0,j) => "<<A.col(j,0,j)<<std::endl;
 
                 // Solve for v = L(j:M,j) U(j,j)
                 A.col(j,j,M) -= A.subMatrix(j,M,0,j) * A.col(j,0,j);
+                //std::cout<<"A.col(j,j+1,M) => "<<A.col(j,j+1,M)<<std::endl;
             }
 
             // Find the pivot element
             int ip;
             RT piv = A.col(j,j,M).maxAbsElement(&ip);
             // ip is relative to j index, not absolute.
+            //std::cout<<"piv = "<<piv<<std::endl;
             
             // Check for underflow:
-            if (piv * halfeps == RT(0)) {
+            if (TMV_Underflow(piv)) {
                 *Pj = j;
                 A.col(j,j,M).setZero();
+                //std::cout<<"col is zero\n";
                 continue;
             }
 
@@ -185,13 +186,17 @@ namespace tmv {
                 A.swapRows(ip,j);  // This does both Lkb and A'
                 *Pj = ip;
                 detp = -detp;
+                //std::cout<<"swapped rows\n";
             } else *Pj = j;
 
             // Solve for L(j+1:M,j)
             // If Ujj is 0, then all of the L's are 0.
             // ie. Ujj Lij = 0 for all i>j
             // Any value for Lij is valid, so leave them 0.
+            //std::cout<<"*Ujj = "<<*Ujj<<std::endl;
+            //std::cout<<"A.col(j,j+1,M) = "<<A.col(j,j+1,M)<<std::endl;
             if (*Ujj != T(0)) A.col(j,j+1,M) /= *Ujj;
+            //std::cout<<"A.col(j,j+1,M) => "<<A.col(j,j+1,M)<<std::endl;
         }
         if (N > M) {
             // Solve for U(0:M,M:N))
@@ -205,7 +210,7 @@ namespace tmv {
         Matrix<T> U = A.upperTri();
         Matrix<T> AA = L * U;
         AA.reversePermuteRows(P,0,R);
-        if (Norm(AA-A0) > 0.001*Norm(A0) && Norm(A0)*halfeps > RT(0)) {
+        if (Norm(AA-A0) > 0.001*Norm(A0) && TMV_Underflow(Norm(A0))) {
             cerr<<"Done NonBlock LU: \n";
             cerr<<"A0 = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"LU = "<<A<<endl;
@@ -231,7 +236,7 @@ namespace tmv {
         // to an Mx2 or Mx1 matrix.
 
 #ifdef XDEBUG
-        Matrix<T> A0 = A;
+        Matrix<T> A_0 = A;
         Matrix<T,ColMajor> A2 = A;
         std::vector<int> P2(A.colsize());
         int detp2=1;
@@ -239,7 +244,6 @@ namespace tmv {
 #endif
 
         typedef TMV_RealType(T) RT;
-        const RT halfeps = TMV_Epsilon<RT>()/RT(2);
 
         TMVAssert(A.ct()==NonConj);
         TMVAssert(A.iscm());
@@ -289,7 +293,7 @@ namespace tmv {
             RT piv = A0.maxAbsElement(&ip0);
 
             // Check for underflow:
-            if (piv * halfeps == RT(0)) {
+            if (TMV_Underflow(piv)) {
                 ip0 = 0;
                 piv = RT(0);
                 A0.setZero();
@@ -328,7 +332,7 @@ namespace tmv {
             }
 
             // Check for underflow:
-            if (piv * halfeps == RT(0)) {
+            if (TMV_Underflow(piv)) {
                 piv = RT(0);
                 ip1 = 1;
                 A1.subVector(1,M).setZero();
@@ -363,7 +367,7 @@ namespace tmv {
             RT piv = A0.maxAbsElement(P);
 
             // Check for underflow:
-            if (piv * halfeps == RT(0)) {
+            if (TMV_Underflow(piv)) {
                 piv = RT(0);
                 *P = 0;
                 A0.setZero();
@@ -384,16 +388,16 @@ namespace tmv {
         Matrix<T> U = A.upperTri();
         Matrix<T> AA = L * U;
         AA.reversePermuteRows(P,0,R);
-        if (Norm(AA-A0) > 0.001*Norm(A0) && Norm(A0)*halfeps > RT(0)) {
+        if (Norm(AA-A_0) > 0.001*Norm(A_0) && TMV_Underflow(Norm(A_0))) {
             cerr<<"Done Recursive LU: \n";
-            cerr<<"A0 = "<<A0<<endl;
+            cerr<<"A0 = "<<A_0<<endl;
             cerr<<"LU = "<<A<<endl;
             cerr<<"P = (";
             for(int i=0;i<R;i++) cerr<<P[i]<<" ";
             cerr<<")\n";
             cerr<<"A2 = "<<A2<<endl;
             cerr<<"Norm(A-A2) = "<<Norm(A-A2)<<endl;
-            cerr<<"Norm(AA-A0) = "<<Norm(AA-A0)<<endl;
+            cerr<<"Norm(AA-A0) = "<<Norm(AA-A_0)<<endl;
             cerr<<"correct P = (";
             for(int i=0;i<R;i++) cerr<<P2[i]<<" ";
             cerr<<")\n";
@@ -530,8 +534,7 @@ namespace tmv {
         A2.reversePermuteRows(P);
         std::cout<<"Norm(A0-A2) = "<<Norm(A0-A2)<<std::endl;
         typedef TMV_RealType(T) RT;
-        const RT halfeps = TMV_Epsilon<RT>()/RT(2);
-        if (Norm(A2-A0) > 0.001*Norm(A0) && Norm(A0)*halfeps > RT(0)) {
+        if (Norm(A2-A0) > 0.001*Norm(A0) && TMV_Underflow(Norm(A0))) {
             cerr<<"Done LU_Decompose: \n";
             cerr<<"A0 = "<<A0<<endl;
             cerr<<"LU = "<<A<<endl;

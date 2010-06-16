@@ -48,7 +48,7 @@
 #include "TMV_IsNaN.h"
 
 #ifdef XDEBUG
-#define THRESH 1.e-5
+#define THRESH 1.e-11
 #include "tmv/TMV_MatrixArith.h"
 #include "tmv/TMV_DiagMatrixArith.h"
 #include "tmv/TMV_SymMatrixArith.h"
@@ -862,7 +862,7 @@ namespace tmv {
         // Before running the normal algorithms, rescale D,E by the maximum
         // value to help avoid overflow and underflow.
         RT scale = TMV_MAX(D.maxAbs2Element(),E.maxAbs2Element());
-        if (scale * TMV_Epsilon<T>() == RT(0)) {
+        if (TMV_Underflow(scale)) {
             // Hopeless case.  Just zero out D,E and call it done.
             D.setZero();
             E.setZero();
@@ -1287,8 +1287,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void PolarDecompose(const MatrixView<T>& U,
-                        const SymMatrixView<T>& P)
+    void PolarDecompose(const MatrixView<T>& U, const SymMatrixView<T>& P)
     {
         // Decompose A = UP
         // A is input in the place of U.
@@ -1306,17 +1305,26 @@ namespace tmv {
         // P = Vt S V
 #ifdef XDEBUG
         Matrix<T> A0 = U;
+        std::cout<<"Start PolarDecompose:\n";
+        std::cout<<"U = "<<TMV_Text(U)<<std::endl;
+        std::cout<<"P = "<<TMV_Text(P)<<std::endl;
+        std::cout<<"A0 = "<<A0<<std::endl;
 #endif
         Matrix<T> V(U.rowsize(),U.rowsize());
         DiagMatrix<RT> S(U.rowsize());
         SV_Decompose(U.view(),S.view(),V.view(),true);
+        //std::cout<<"S = "<<S.diag()<<std::endl;
         RT thresh = TMV_Epsilon<T>()*S.size()*S(0);
         for(size_t i=0;i<S.size();i++) if (S(i) < thresh) S(i) = RT(0);
+        //std::cout<<"S => "<<S.diag()<<std::endl;
         U *= V;
         Matrix<T> VtS = V.adjoint() * S;
         SymMultMM<false>(T(1),VtS,V,P);
 #ifdef XDEBUG
         Matrix<T> A2 = U*P;
+        std::cout<<"Done PolarDecompose:\n";
+        std::cout<<"Norm(A0 - USV) = "<<Norm(A0-U*S*V)<<std::endl;
+        std::cout<<"Norm(A2-A0) = "<<Norm(A2-A0)<<std::endl;
         if (!(Norm(A2-A0) < THRESH*Norm(A0))) {
             cerr<<"PolarDecompose "<<TMV_Text(U)<<"  "<<A0<<endl;
             cerr<<"U = "<<U<<endl;
@@ -1331,8 +1339,9 @@ namespace tmv {
     }
 
     template <class T> 
-    void PolarDecompose(const GenBandMatrix<T>& A,
-                        const MatrixView<T>& U, const SymMatrixView<T>& P)
+    void PolarDecompose(
+        const GenBandMatrix<T>& A,
+        const MatrixView<T>& U, const SymMatrixView<T>& P)
     {
         Matrix<T> V(A.rowsize(),A.rowsize());
         DiagMatrix<RT> S(A.rowsize());
