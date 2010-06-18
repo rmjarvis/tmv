@@ -15,7 +15,7 @@ void TestHermDecomp()
 {
     for (int mattype = START; mattype <= 5; mattype++) {
 #if !(XTEST & 64)
-        if (mattype >= 3) break;
+        //if (mattype >= 3) break;
 #endif
 #ifdef LAP
         if (mattype >= 4) break;
@@ -421,7 +421,7 @@ void TestSymDecomp()
 {
     for (int mattype = START; mattype <= 5; mattype++) {
 #if !(XTEST & 64)
-        if (mattype >= 3) break;
+        //if (mattype >= 3) break;
 #endif
 #ifdef LAP
         if (mattype >= 4) break;
@@ -716,7 +716,7 @@ void TestPolar()
 #if !(XTEST & 64) || defined(LAP)
         // Some LAPACK packages don't manage the bad defect case here
         // so skip that as well, not just over/underflow.
-        if (mattype >= 4) break;
+        //if (mattype >= 4) break;
 #endif
         if (showstartdone) {
             std::cout<<"Polar: mattype = "<<mattype<<std::endl;

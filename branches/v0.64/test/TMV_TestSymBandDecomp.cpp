@@ -11,7 +11,7 @@ void TestHermBandDecomp()
 {
     for (int mattype = START; mattype <= 17; mattype++) {
 #if !(XTEST & 64)
-        if (mattype % 6 >= 3) continue;
+        //if (mattype % 6 >= 3) continue;
 #endif
 #ifdef LAP
         if (mattype % 6 >= 4) continue;
@@ -510,7 +510,7 @@ void TestSymBandDecomp()
 {
     for (int mattype = START; mattype <= 14; mattype++) {
 #if !(XTEST & 64)
-        if (mattype % 6 >= 3) continue;
+        //if (mattype % 6 >= 3) continue;
 #endif
 #ifdef LAP
         if (mattype % 6 >= 4) continue;

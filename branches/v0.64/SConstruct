@@ -132,7 +132,7 @@ Help(opts.GenerateHelpText(initial_env))
 
 # This helps us determine of openmp is available
 openmp_mingcc_vers = 4.1
-openmp_minicpc_vers = 9.0
+openmp_minicpc_vers = 10.0  # 9.0 is supposed to work but has bugs
 openmp_minpgcc_vers = 6.0
 
 

@@ -43,12 +43,53 @@ using std::endl;
 
 #ifdef XDEBUG
 #ifdef _OPENMP
-#undef _OPENMP
+
+#include <sstream>
+struct ThreadSafeWriter
+{
+    ThreadSafeWriter() {}
+    ~ThreadSafeWriter()
+    {
+#pragma omp critical
+        {
+            std::cout<<s.str();
+        }
+    }
+    template <class T>
+    ThreadSafeWriter& operator<<(const T& x)
+    { s << x; return *this; }
+
+    // The next bit is to get dbgcout<<std::endl; working.
+    // See: http://stackoverflow.com/questions/1134388/stdendl-is-of-unknown-type-when-overloading-operator
+
+    typedef std::basic_ostream<char, std::char_traits<char> > CoutType;
+    typedef CoutType& (*StandardEndLine)(CoutType&);
+    ThreadSafeWriter& operator<<(StandardEndLine)
+    {
+#pragma omp critical
+        {
+            std::cout<<s.str()<<std::endl;
+        }
+        s.clear();
+        s.str(std::string());
+        return *this;
+    }
+
+    std::stringstream s;
+};
+
+#include "omp.h"
+
+#define dbgcout ThreadSafeWriter()
+
+#else
+
+#define dbgcout std::cout
+//#define dbgcout if (false) std::cout
+
 #endif
 #include "tmv/TMV_DiagMatrixArith.h"
 #define THRESH 1.e-10
-#define dbgcout std::cout
-//#define dbgcout if (false) std::cout
 using std::cerr;
 #else
 #define dbgcout if (false) std::cout
@@ -109,7 +150,8 @@ namespace tmv {
         T s = D[k] + tau;
         dbgcout<<"Initial s = "<<s<<" = "<<D[k]<<" + "<<tau<<std::endl;
 
-        for(int j=0;j<N;j++) { diff[j] = (D[j]-D[k])-tau; }
+        for(int j=0;j<N;j++) diff[j] = D[j]-D[k];
+        for(int j=0;j<N;j++) diff[j] -= tau;
 
         // Let c = f(s) - z_k^2/(D_k-s) - z_k+1^2/(D_k+1-s)
         // i.e. c is f(s) without the two terms for the poles that
@@ -214,10 +256,16 @@ namespace tmv {
         dbgcout<<"Allowed bounds for tau = "<<
             lowerbound<<"  "<<upperbound<<endl;
         TMVAssert(tau >= lowerbound && tau <= upperbound);
+        dbgcout<<"k = "<<k<<", k1 = "<<k1<<std::endl;
 
         s = D[k1] + tau;
         dbgcout<<"First refinement: s = "<<s<<" = "<<D[k1]<<" + "<<tau<<std::endl;
-        for(int j=0;j<N;j++) diff[j] = (D[j]-D[k1])-tau; 
+        // We should be able to write diff[j] = (D[j]-D[k1)-tau,
+        // but some compilers do optimizations that lose accuracy 
+        // and can end up with diff = 0.
+        // So need to do this in two steps.
+        for(int j=0;j<N;j++) diff[j] = D[j]-D[k1];
+        for(int j=0;j<N;j++) diff[j] -= tau; 
 
         // Define f(s) = rho + psi(s) + z_k1^2/(D_k1^2-s^2) + phi(s)
         // psi(s) = Sum_k=1..k1-1 z_k^2/(D_k^2-s^2)
@@ -932,9 +980,9 @@ namespace tmv {
             dbgcout<<"D = "<<D<<endl;
             dbgcout<<"z = "<<z<<endl;
             if (U) {
-                dbgcout<<"M = "<<M<<endl;
-                dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
-                dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
+                //dbgcout<<"M = "<<M<<endl;
+                //dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                //dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
                 dbgcout<<"Norm(UMUt-A0) = "<<Norm(*U*M*U->adjoint()-A0)<<endl;
                 if (Norm(*U*M*U->adjoint()-A0) > THRESH*Norm(A0)) abort();
             }
@@ -970,9 +1018,9 @@ namespace tmv {
             dbgcout<<"DN = "<<D.subVector(0,N)<<endl;
             dbgcout<<"zN = "<<z.subVector(0,N)<<endl;
             if (U) {
-                dbgcout<<"M = "<<M<<endl;
-                dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
-                dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
+                //dbgcout<<"M = "<<M<<endl;
+                //dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                //dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
                 dbgcout<<"Norm(UMUt-A0) = "<<Norm(*U*M*U->adjoint()-A0)<<endl;
                 if (Norm(*U*M*U->adjoint()-A0) > THRESH*Norm(A0)) abort();
             }
@@ -991,9 +1039,9 @@ namespace tmv {
                 if (U) {
                     M.colRange(0,N).permuteCols(P.get());
                     M.rowRange(0,N).permuteRows(P.get());
-                    dbgcout<<"M = "<<M<<endl;
-                    dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
-                    dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
+                    //dbgcout<<"M = "<<M<<endl;
+                    //dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                    //dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
                     dbgcout<<"Norm(UMUt-A0) = "<<
                         Norm(*U*M*U->adjoint()-A0)<<endl;
                     if (Norm(*U*M*U->adjoint()-A0) > THRESH*Norm(A0)) abort();
@@ -1030,9 +1078,9 @@ namespace tmv {
                 dbgcout<<"DN = "<<D.subVector(0,N)<<endl;
                 dbgcout<<"zN = "<<z.subVector(0,N)<<endl;
                 if (U) {
-                    dbgcout<<"M = "<<M<<endl;
-                    dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
-                    dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
+                    //dbgcout<<"M = "<<M<<endl;
+                    //dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                    //dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
                     dbgcout<<"Norm(UMUt-A0) = "<<
                         Norm(*U*M*U->adjoint()-A0)<<endl;
                     if (Norm(*U*M*U->adjoint()-A0) > THRESH*Norm(A0)) abort();
@@ -1055,9 +1103,9 @@ namespace tmv {
                         M.colRange(i_firstswap,N).permuteCols(P.get());
                         M.rowRange(i_firstswap,N).permuteRows(P.get());
                     }
-                    dbgcout<<"M = "<<M<<endl;
-                    dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
-                    dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
+                    //dbgcout<<"M = "<<M<<endl;
+                    //dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                    //dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
                     dbgcout<<"Norm(UMUt-A0) = "<<Norm(*U*M*U->adjoint()-A0)<<endl;
                     if (Norm(*U*M*U->adjoint()-A0) > THRESH*Norm(A0)) abort();
                 }
@@ -1111,13 +1159,13 @@ namespace tmv {
                     }
                     U->colRange(0,N) *= W;
 #ifdef XDEBUG
-                    dbgcout<<"W => (X) "<<W<<endl;
+                    //dbgcout<<"W => (X) "<<W<<endl;
                     if (U) {
                         M.subMatrix(0,N,0,N) = 
                             W.adjoint() * M.subMatrix(0,N,0,N) * W;
-                        dbgcout<<"M = "<<M.subMatrix(0,N,0,N)<<endl;
-                        dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
-                        dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
+                        //dbgcout<<"M = "<<M.subMatrix(0,N,0,N)<<endl;
+                        //dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                        //dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
                         dbgcout<<"Norm(UMUt-A0) = "<<
                             Norm(*U*M*U->adjoint()-A0)<<endl;
                         if (Norm(*U*M*U->adjoint()-A0) > THRESH*Norm(A0)) abort();
@@ -1135,18 +1183,17 @@ namespace tmv {
 #ifdef XDEBUG
                 dbgcout<<"Done D = "<<D<<endl;
                 if (U) {
-                    dbgcout<<"M.diag = "<<M.diag()<<std::endl;
-                    dbgcout<<"S = "<<S<<std::endl;
-                    dbgcout<<"diff = "<<M.diag()-S<<std::endl;
-                    dbgcout<<"Norm(diff) = "<<Norm(M.diag()-S)<<std::endl;
-                    dbgcout<<"N = "<<N<<std::endl;
+                    //dbgcout<<"N = "<<N<<std::endl;
+                    //dbgcout<<"M.diag = "<<M.diag()<<std::endl;
+                    //dbgcout<<"S = "<<S<<std::endl;
+                    //dbgcout<<"diff = "<<M.diag(0,0,N)-S<<std::endl;
+                    //dbgcout<<"Norm(diff) = "<<Norm(M.diag(0,0,N)-S)<<std::endl;
                     M.subMatrix(0,N,0,N) = DiagMatrixViewOf(S);
-                    dbgcout<<"M = "<<M<<endl;
-                    dbgcout<<"U = "<<*U<<endl;
-                    dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
-                    //dbgcout<<"diff = ";
-                    //(*U*M*U->adjoint()-A0).write(std::cout,(*U*M*U->adjoint()-A0).maxAbsElement()*1.e-3);
-                    //dbgcout<<endl;
+                    //dbgcout<<"M = "<<M<<endl;
+                    //dbgcout<<"U = "<<*U<<endl;
+                    //dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                    //dbgcout<<"diff = "<<Matrix<T>(*U*M*U->adjoint()-A0).clip(
+                        //(*U*M*U->adjoint()-A0).maxAbsElement()*1.e-3)<<endl;
                     dbgcout<<"Norm(UMUt-A0) = "<<
                         Norm(*U*M*U->adjoint()-A0)<<endl;
                     if (Norm(*U*M*U->adjoint()-A0) > THRESH*Norm(A0)) abort();
@@ -1156,11 +1203,12 @@ namespace tmv {
                 D(0) += z(0)*z(0);
 #ifdef XDEBUG
                 if (U) {
+                    M.setZero();
                     M(0,0) = D(0);
-                    dbgcout<<"M = "<<M<<endl;
-                    dbgcout<<"U = "<<*U<<endl;
-                    dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
-                    dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
+                    //dbgcout<<"M = "<<M<<endl;
+                    //dbgcout<<"U = "<<*U<<endl;
+                    //dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                    //dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
                     dbgcout<<"Norm(UMUt-A0) = "<<
                         Norm(*U*M*U->adjoint()-A0)<<endl;
                     if (Norm(*U*M*U->adjoint()-A0) > THRESH*Norm(A0)) abort();
@@ -1170,9 +1218,9 @@ namespace tmv {
 #ifdef XDEBUG
             if (U) {
                 M = DiagMatrixViewOf(D);
-                dbgcout<<"M = "<<M<<endl;
-                dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
-                dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
+                //dbgcout<<"M = "<<M<<endl;
+                //dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;
+                //dbgcout<<"diff = "<<*U*M*U->adjoint()-A0<<endl;
                 dbgcout<<"Norm(UMUt-A0) = "<<Norm(*U*M*U->adjoint()-A0)<<endl;
                 if (Norm(*U*M*U->adjoint()-A0) > THRESH*Norm(A0)) abort();
             }

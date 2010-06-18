@@ -13,7 +13,7 @@ void TestBandDecomp()
 {
     for (int mattype = START; mattype <= 9; mattype++) {
 #if !(XTEST & 64)
-        if (mattype >= 7) break;
+        //if (mattype >= 7) break;
 #endif
 #ifdef LAP
         // Most LAPACK implementations actually do ok with the nearly

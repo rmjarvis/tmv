@@ -11,7 +11,7 @@ void TestMatrixDecomp()
 {
     for (int mattype = START; mattype <= 6; mattype++) {
 #if !(XTEST & 64)
-        if (mattype >= 4) break;
+        //if (mattype >= 4) break;
 #endif
 #ifdef LAP
         // Most LAPACK implementations actually do ok with the nearly

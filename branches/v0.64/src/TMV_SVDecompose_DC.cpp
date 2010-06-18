@@ -43,14 +43,56 @@ using std::endl;
 
 #ifdef XDEBUG
 #ifdef _OPENMP
-#undef _OPENMP
+
+#include <sstream>
+struct ThreadSafeWriter
+{
+    ThreadSafeWriter() {}
+    ~ThreadSafeWriter()
+    {
+#pragma omp critical
+        {
+            std::cout<<s.str();
+        }
+    }
+    template <class T>
+    ThreadSafeWriter& operator<<(const T& x)
+    { s << x; return *this; }
+
+    // The next bit is to get dbgcout<<std::endl; working.
+    // See: http://stackoverflow.com/questions/1134388/stdendl-is-of-unknown-type-when-overloading-operator
+
+    typedef std::basic_ostream<char, std::char_traits<char> > CoutType;
+    typedef CoutType& (*StandardEndLine)(CoutType&);
+    ThreadSafeWriter& operator<<(StandardEndLine)
+    {
+#pragma omp critical
+        {
+            std::cout<<s.str()<<std::endl;
+        }
+        s.clear();
+        s.str(std::string());
+        return *this;
+    }
+
+    std::stringstream s;
+};
+
+#include "omp.h"
+
+#define dbgcout ThreadSafeWriter()
+
+#else
+
+#define dbgcout std::cout
+//#define dbgcout if (false) std::cout
+
 #endif
+
 #include "tmv/TMV_DiagMatrix.h"
 #include "tmv/TMV_DiagMatrixArith.h"
 #define THRESH 1.e-5
 //#define TESTUV  // Should only use this for full USV decompositions
-#define dbgcout std::cout
-//#define dbgcout if (false) std::cout
 using std::cerr;
 #else
 #define dbgcout if (false) std::cout
@@ -128,7 +170,9 @@ namespace tmv {
         T s = D[k] + t;
         dbgcout<<"Initial s = "<<s<<" = "<<D[k]<<" + "<<t<<std::endl;
 
-        for(int j=0;j<N;j++) { sum[j] = D[j]+s; diff[j] = (D[j]-D[k])-t; }
+        for(int j=0;j<N;j++) sum[j] = D[j]+s; 
+        for(int j=0;j<N;j++) diff[j] = D[j]-D[k]; 
+        for(int j=0;j<N;j++) diff[j] -= t; 
 
         // Let c = f(s) - z_k^2/(D_k^2-s^2) - z_k+1^2/(D_k+1^2-s^2)
         // i.e. c is f(s) without the two terms for the poles that
@@ -236,7 +280,13 @@ namespace tmv {
 
         s = D[k1] + t;
         dbgcout<<"First refinement: s = "<<s<<" = "<<D[k1]<<" + "<<t<<std::endl;
-        for(int j=0;j<N;j++) { sum[j] = D[j]+s; diff[j] = (D[j]-D[k1])-t; }
+        // We should be able to write diff[j] = (D[j]-D[k1)-t,
+        // but some compilers do optimizations that lose accuracy 
+        // and can end up with diff = 0.
+        // So need to do this in two steps.
+        for(int j=0;j<N;j++) sum[j] = D[j]+s;
+        for(int j=0;j<N;j++) diff[j] = D[j]-D[k1];
+        for(int j=0;j<N;j++) diff[j] -= t; 
 
         // Define f(s) = rho + psi(s) + z_k1^2/(D_k1^2-s^2) + phi(s)
         // psi(s) = Sum_k=1..k1-1 z_k^2/(D_k^2-s^2)
@@ -338,12 +388,13 @@ namespace tmv {
             dt /= s + TMV_SQRT(s*s+dt);
             t += dt;
             s += dt;
+            for(int j=0;j<N;j++) sum[j] = D[j]+s;
             if (std::abs(s) < std::abs(dt)) {
-                for(int j=0;j<N;j++) { sum[j] = D[j]+s; diff[j] = D[j]-s; }
-            } else {
-                for(int j=0;j<N;j++) { sum[j] = D[j]+s; diff[j] -= dt; }
+                dbgcout<<"Need to redo the diff calculations\n";
+                for(int j=0;j<N;j++) diff[j] = D[j]-s; 
+            } else  {
+                for(int j=0;j<N;j++) diff[j] -= dt; 
             }
-
 
 #ifdef TMVDEBUG
             if (iter == TMV_MAXITER-1) {
@@ -659,13 +710,14 @@ namespace tmv {
             eta /= s + TMV_SQRT(s*s+eta);
             t += eta;
             s += eta;
+            for(int j=0;j<N;j++) sum[j] = D[j]+s;
             if (std::abs(s) < std::abs(eta)) {
                 // Then the iterative adjustment to diff isn't going to 
                 // maintain the accuracy we need.
                 dbgcout<<"Need to redo the diff calculations\n";
-                for(int j=0;j<N;j++) { sum[j] = D[j]+s; diff[j] = D[j]-s; }
+                for(int j=0;j<N;j++) diff[j] = D[j]-s; 
             } else {
-                for(int j=0;j<N;j++) { sum[j] = D[j]+s; diff[j] -= eta; }
+                for(int j=0;j<N;j++) diff[j] -= eta; 
             }
 
             if (last) break;

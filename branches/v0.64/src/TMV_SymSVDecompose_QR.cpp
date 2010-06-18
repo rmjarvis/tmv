@@ -150,7 +150,7 @@ namespace tmv {
         Matrix<T> A0(M,M);
         if (U) {
             A0 = *U * TT * U->adjoint();
-            std::cout<<"A0 = "<<A0<<std::endl;
+            //std::cout<<"A0 = "<<A0<<std::endl;
         }
 #endif
 
@@ -238,11 +238,11 @@ namespace tmv {
             TT.diag(-1) = TT.diag(1) = E;
             Matrix<T> A2 = *U * TT * U->adjoint();
             std::cout<<"Done Reduce Tridiagonal\n";
-            std::cout<<"U = "<<*U<<std::endl;
-            std::cout<<"TT = "<<TT<<std::endl;
-            std::cout<<"A2 = "<<A2<<std::endl;
-            std::cout<<"A0 = "<<A0<<std::endl;
-            std::cout<<"A2-A0 = "<<A2-A0<<std::endl;
+            //std::cout<<"U = "<<*U<<std::endl;
+            //std::cout<<"TT = "<<TT<<std::endl;
+            //std::cout<<"A2 = "<<A2<<std::endl;
+            //std::cout<<"A0 = "<<A0<<std::endl;
+            //std::cout<<"A2-A0 = "<<A2-A0<<std::endl;
             std::cout<<"Norm(A2-A0) = "<<Norm(A2-A0)<<std::endl;
             if (Norm(A2-A0) > THRESH*Norm(A0)) {
                 cerr<<"Reduce Tridiagonal:\n";
@@ -274,7 +274,7 @@ namespace tmv {
         Matrix<T> A0(M,M);
         if (U) {
             A0 = *U * TT * U->adjoint();
-            std::cout<<"A0 = "<<A0<<std::endl;
+            //std::cout<<"A0 = "<<A0<<std::endl;
         }
 #endif
         TMVAssert(D.size() == E.size()+1);

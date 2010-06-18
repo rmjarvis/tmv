@@ -836,6 +836,7 @@ namespace tmv {
         if (D.size() == 0) return;
 
 #ifdef XDEBUG
+        std::cout<<"Start EigenFromTridiag\n";
         Matrix<T> A0(D.size(),D.size());
         Vector<RT> D0(D);
         Vector<RT> E0(E);
@@ -1022,7 +1023,7 @@ namespace tmv {
 #ifdef XDEBUG
         Matrix<T> A0(U);
         A0.upperTri() = A0.lowerTri().adjoint();
-        std::cout<<"Start SymSV_Decompose\n";
+        std::cout<<"Start HermSV_Decompose\n";
         //std::cout<<"U = "<<U<<endl;
         //std::cout<<"A0 = "<<A0<<endl;
 #endif
@@ -1308,7 +1309,7 @@ namespace tmv {
         std::cout<<"Start PolarDecompose:\n";
         std::cout<<"U = "<<TMV_Text(U)<<std::endl;
         std::cout<<"P = "<<TMV_Text(P)<<std::endl;
-        std::cout<<"A0 = "<<A0<<std::endl;
+        //std::cout<<"A0 = "<<A0<<std::endl;
 #endif
         Matrix<T> V(U.rowsize(),U.rowsize());
         DiagMatrix<RT> S(U.rowsize());
