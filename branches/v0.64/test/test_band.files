@@ -14,4 +14,5 @@ TMV_TestBandDiv_C1.cpp
 TMV_TestBandDiv_C2.cpp 
 TMV_TestBandDiv_D1.cpp 
 TMV_TestBandDiv_D2.cpp 
+TMV_TestBandDecomp.cpp
 
