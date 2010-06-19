@@ -4349,17 +4349,26 @@ except that the entire
 subvector or submatrix must be completely within the band.
 
 \begin{tmvcode}
+b.subBandMatrix(int i1, int i2, int j1, int j2)
 b.subBandMatrix(int i1, int i2, int j1, int j2, int newnlo, int newnhi)
 b.subBandMatrix(int i1, int i2, int j1, int j2, int newnlo, int newnhi, 
       int istep, int jstep)
 \end{tmvcode}
 \index{BandMatrix!methods!subBandMatrix}
-This returns a \tt{BandMatrixView} of a subset of a \tt{BandMatrix}.
-The \tt{newnlo} and \tt{newnhi} parameters do not need to be different
-from the existing \tt{nlo} and \tt{nhi} if \tt{i1} = \tt{j1} 
-(i.e. the new main diagonal
-is part of the old main diagonal).  However, if you are moving the upper left
-corner off of the diagonal, you need to adjust \tt{nlo} and \tt{nhi} appropriately.
+This returns a \tt{BandMatrixView} that is a subset of a \tt{BandMatrix}.
+The first version returns the full band matrix that fits within the rows
+\tt{i1..i2} and the columns \tt{j1..j2}.  If \tt{i1 == j1} and the range is 
+relatively large, then the values of \tt{nlo} and \tt{nhi} for the new 
+submatrix will match the values of the original matrix \tt{b}.  However,
+if the new size is too small, then the number of bands may be 
+smaller if some off-diagonals would be outside of the range. 
+Likewise, if \tt{i1 != j1}, then \tt{nlo + nhi} will (typically) be preserved, but some 
+sub-diagonals may become super-diagonals or vice versa.
+
+If you want more control over the number of off-diagonals, then
+the next two versions allow you to specify them explicitly.  The final
+version also allows a non-unit step in each direction.
+
 For example, if \tt{b} is a $6 \times 6$ \tt{BandMatrix} with 2 sub-diagonals and 
 3 super-diagonals
 (like our example above), the 3 super-diagonals may be viewed as a \tt{BandMatrixView}
@@ -5623,6 +5632,7 @@ must be accessed in its two parts, one on each side of the diagonal.
 sb.subVector(int i, int j, int istep, int jstep, int size)
 sb.subMatrix(int i1, int i2, int j1, int j2)
 sb.subMatrix(int i1, int i2, int j1, int j2, int istep, int jstep)
+sb.subBandMatrix(int i1, int i2, int j1, int j2)
 sb.subBandMatrix(int i1, int i2, int j1, int j2, int newnlo, int newhi)
 sb.subBandMatrix(int i1, int i2, int j1, int j2, int newnlo, int newhi, 
       int istep, int jstep)
@@ -6665,6 +6675,8 @@ The original matrix \tt{A} is very simply
 \begin{tmvcode}
 A = L * L.adjoint();
 \end{tmvcode}
+
+If $A$ is found to be not positive definite, a \tt{NonPosDef} exception is thrown.
 
 \item Bunch-Kaufman Decomposition 
 \index{Bunch-Kaufman Decomposition}
@@ -8067,7 +8079,7 @@ you decide to use when installing TMV.  This is especially useful on systems whe
 system administrator installs the library, which is then used by many users.  
 
 You can have your makefiles read this file as described above.  Or if you are using SCons
-to build your software, you can similarly add the contents of the file into \tt{env[LIBS]}.
+to build your software, you can similarly add the contents of the file into \tt{env['LIBS']}.
 The \tt{examples} directory has a makefile that uses the above lines
 (using the local \tt{share} directory rather than the installed location).
 
@@ -8456,9 +8468,9 @@ Download CMake from \url{http://www.cmake.org/} if you do not already have it.
 
 \item
 In the TMV directory, type\\
-\texttt{cmake -i .}\\
+\texttt{cmake -i .} $\qquad$ (for interactive text-based configuration) \\
 or\\
-\texttt{ccmake .}\\
+\texttt{ccmake .} $\qquad \quad \,$ (for menu-based configuration) \\
 for Unix, or run \texttt{CMakeSetup.exe} in Windows.
 
 Answer the configuration questions and/or set the options listed.
@@ -8849,9 +8861,8 @@ large matrices with at least one dimension $N > 100$ or so.  (I'm not sure of th
 exact crossover point from working to non-working code.)
 
 I haven't surveyed which versions of XCode have this bug, but it seems to be in version
-3.2.2 at least.  I reported the bug to Apple (ID 8069848) fairly soon before this release, 
-so they have understandably not fixed it yet.  The best thing to do to see if your 
-XCode installation has this problem
+3.2.2 at least.  Apparently, this is a known bug (ID 7437011), but it hasn't been fixed yet.  
+The best thing to do to see if your XCode installation has this problem
 is to install the test suite and make sure that it runs without errors.  If it makes it 
 through without errors, then you don't have to worry about it.
 
@@ -9646,16 +9657,14 @@ in the code.  Some from overflow and underflow issues of course, but also some
 imprecision issues, and some just plain bugs that I hadn't uncovered before.  So 
 I think this version should be much more stable for a wider range of input matrices.
 
-There are also a couple of feature additions as well -- most notably the Permutation class.
+There are also a bunch of miscellaneous feature additions as well -- most notably the \tt{Permutation} class.
 
 \begin{itemize}
 
 \item Added a some very difficult matrices to the test suite, and found and fixed quite a few 
 bugs as a result involving underflow, overflow, and loss of precision.  It is worth noting that
 when compiled to use LAPACK, rather than the native TMV code, some of these tests
-(which are enabled with \tt{XTEST=64}) fail.  So if you find your program having problems with
-problematic input matrices, it might be worth compiling TMV with \tt{WITH\_LAPACK=false} to
-see if that helps.
+(which are enabled with \tt{XTEST=64}) fail.  Different LAPACK distributions fail different tests, some getting most of them right, and others failing quite a few tests.  So if you find your program having problems with particular input matrices, it might be worth compiling TMV with \tt{WITH\_LAPACK=false} to see if that helps.
 
 \item Fixed a bug that \tt{U(i,i)} was invalid if \tt{U} is non-const and is \tt{UnitDiag} even 
 if the resulting value is not used in a mutable context.  
@@ -9665,10 +9674,10 @@ However, if the user tries to modify the value through this reference type, then
 an error.  This was probably not causing anyone any problems, and the workarounds 
 weren't too onerous, but it seemed worth getting the syntax right.
 
-\item Added a new Permutation class to encapsulate permutation operations.  
+\item Added a new \tt{Permutation} class to encapsulate permutation operations.  
 This is basically a wrapper around the old functions
 like \tt{m.permuteRows(p)}.  Now you can write \tt{m = P * m} instead.  All of the routines
-which returned a permutation in an \tt{int* p} object now returns it as a Permutation object.
+which returned a permutation as an \tt{int* p} object now returns it as a \tt{Permutation} object.
 This includes \tt{Vector::sort}, \tt{LU\_Decompose}, \tt{QRP\_Decompose}, and 
 \tt{LDL\_Decompose}.  The old functions still work, but are now undocumented.
 
@@ -9682,6 +9691,9 @@ the old syntax.
 \item Added \tt{v.minAbs2Element()}, \tt{v.maxAbs2Element()} and \tt{m.maxAbs2Element()}.
 
 \item Added \tt{m.unitUpperTri()} and \tt{m.unitLowerTri()}.
+
+\item Added \tt{b.subBandMatrix(i1,i2,j1,j2)} (i.e. a version that calculates the correct 
+\tt{newnlo} and \tt{newnhi} automatically) to \tt{BandMatrix} and \tt{SymBandMatrix}.
 
 \item Made \tt{Swap(m1,m2)} and \tt{Swap(v1,v2)} efficient when the arguments are both
 complete matrices or vectors, rather than views, so they now take $O(1)$ time rather than

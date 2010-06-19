@@ -11,10 +11,7 @@ void TestHermBandDecomp()
 {
     for (int mattype = START; mattype <= 17; mattype++) {
 #if !(XTEST & 64)
-        //if (mattype % 6 >= 3) continue;
-#endif
-#ifdef LAP
-        if (mattype % 6 >= 4) continue;
+        if (mattype % 6 >= 3) continue;
 #endif
         if (showstartdone) {
             std::cout<<"HermBand: mattype = "<<mattype<<std::endl;
@@ -510,14 +507,12 @@ void TestSymBandDecomp()
 {
     for (int mattype = START; mattype <= 14; mattype++) {
 #if !(XTEST & 64)
-        //if (mattype % 6 >= 3) continue;
-#endif
-#ifdef LAP
-        if (mattype % 6 >= 4) continue;
+        if (mattype % 6 >= 3) continue;
 #endif
         if (showstartdone) {
             std::cout<<"SymBand: mattype = "<<mattype<<std::endl;
-            std::cout<<"uplo, stor = "<<TMV_Text(uplo)<<"  "<<TMV_Text(stor)<<std::endl;
+            std::cout<<"uplo, stor = "<<TMV_Text(uplo)<<"  "<<
+                TMV_Text(stor)<<std::endl;
         }
         // mattype = 0  is PosDef, nlo = 8
         // mattype = 1  is Indef, nlo = 8

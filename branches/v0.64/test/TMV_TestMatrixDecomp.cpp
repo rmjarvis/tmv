@@ -11,14 +11,9 @@ void TestMatrixDecomp()
 {
     for (int mattype = START; mattype <= 6; mattype++) {
 #if !(XTEST & 64)
-        //if (mattype >= 4) break;
+        if (mattype >= 4) break;
 #endif
-#ifdef LAP
-        // Most LAPACK implementations actually do ok with the nearly
-        // over/underflowing matrices, but some do not, so as far as 
-        // this test suite is concerned, I just skip those tests for LAPACK.
-        if (mattype >= 5) break;
-#endif
+
         if (showstartdone) {
             std::cout<<"mattype = "<<mattype<<", stor = "<<
                 tmv::TMV_Text(stor)<<std::endl;
@@ -136,9 +131,6 @@ void TestMatrixDecomp()
 
         // LU Decomposition
         if (m.isSquare()) do {
-#ifdef LAP
-            if (baddefect || nearunderflow || nearoverflow) break;
-#endif
             if (showstartdone) {
                 std::cout<<"LU\n";
             }
@@ -275,9 +267,6 @@ void TestMatrixDecomp()
 
         // QRP Decomposition
         for (int istrict = 0; istrict <= 1; istrict++) {
-#ifdef LAP
-            if (baddefect || nearunderflow || nearoverflow) break;
-#endif
             if (showstartdone) {
                 std::cout<<"QRP\n";
             }

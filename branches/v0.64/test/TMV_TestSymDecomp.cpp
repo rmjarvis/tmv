@@ -1,7 +1,6 @@
 
 #define START 0
 
-#include "../src/TMV_Blas.h"
 #include "TMV.h"
 #include "TMV_Sym.h"
 #include "TMV_Band.h"
@@ -15,10 +14,7 @@ void TestHermDecomp()
 {
     for (int mattype = START; mattype <= 5; mattype++) {
 #if !(XTEST & 64)
-        //if (mattype >= 3) break;
-#endif
-#ifdef LAP
-        if (mattype >= 4) break;
+        if (mattype >= 3) break;
 #endif
         if (showstartdone) {
             std::cout<<"Herm: mattype = "<<mattype<<std::endl;
@@ -209,9 +205,6 @@ void TestHermDecomp()
         // LDL Decomposition
         try {
             do {
-#ifdef LAP
-                if (baddefect || nearunderflow || nearoverflow) break;
-#endif
                 if (showstartdone) std::cout<<"LDL"<<std::endl;
                 tmv::LowerTriMatrix<T,tmv::UnitDiag> L = m.lud().getL();
                 tmv::BandMatrix<T> D = m.lud().getD();
@@ -421,10 +414,7 @@ void TestSymDecomp()
 {
     for (int mattype = START; mattype <= 5; mattype++) {
 #if !(XTEST & 64)
-        //if (mattype >= 3) break;
-#endif
-#ifdef LAP
-        if (mattype >= 4) break;
+        if (mattype >= 3) break;
 #endif
         if (showstartdone) {
             std::cout<<"Sym: mattype = "<<mattype<<std::endl;
@@ -567,9 +557,6 @@ void TestSymDecomp()
 
         // LDL Decomposition
         do {
-#ifdef LAP
-            if (baddefect || nearunderflow || nearoverflow) break;
-#endif
             if (showstartdone) std::cout<<"LDL"<<std::endl;
             tmv::LowerTriMatrix<T,tmv::UnitDiag> L = m.lud().getL();
             tmv::BandMatrix<T> D = m.lud().getD();
@@ -713,10 +700,8 @@ void TestPolar()
     if (showstartdone) std::cout<<"PolarDecomp "<<TMV_Text(stor)<<std::endl;
 
     for (int mattype = START; mattype <= 6; mattype++) {
-#if !(XTEST & 64) || defined(LAP)
-        // Some LAPACK packages don't manage the bad defect case here
-        // so skip that as well, not just over/underflow.
-        //if (mattype >= 4) break;
+#if !(XTEST & 64)
+        if (mattype >= 4) break;
 #endif
         if (showstartdone) {
             std::cout<<"Polar: mattype = "<<mattype<<std::endl;

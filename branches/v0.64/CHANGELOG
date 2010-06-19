@@ -73,6 +73,8 @@ New features:
 
 -- Added cView and fView methods.
 
+-- Added b.subBandMatrix(i1,i2,j1,j2).
+
 -- Made SmallMatrixComposite derive from MatrixComposite, which allows it
    to be automatically instantiated rather than just assigned to a 
    matrix object.  This used to be how it worked in v0.61 I think, and I 

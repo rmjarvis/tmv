@@ -1,7 +1,6 @@
 
 #define START 0
 
-#include "../src/TMV_Blas.h"
 #include "TMV.h"
 #include "TMV_Band.h"
 #include "TMV_Test.h"
@@ -13,13 +12,7 @@ void TestBandDecomp()
 {
     for (int mattype = START; mattype <= 9; mattype++) {
 #if !(XTEST & 64)
-        //if (mattype >= 7) break;
-#endif
-#ifdef LAP
-        // Most LAPACK implementations actually do ok with the nearly
-        // over/underflowing matrices, but some do not, so as far as 
-        // this test suite is concerned, I just skip those tests for LAPACK.
-        if (mattype >= 8) break;
+        if (mattype >= 7) break;
 #endif
 
         if (showstartdone) {
@@ -145,9 +138,6 @@ void TestBandDecomp()
 
         // LU Decomposition
         if (m.isSquare()) do {
-#ifdef LAP
-            if (baddefect || nearunderflow || nearoverflow) break;
-#endif
             if (showstartdone) {
                 std::cout<<"LU\n";
             }

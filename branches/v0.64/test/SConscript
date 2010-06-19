@@ -12,9 +12,7 @@ test_diag_files = ReadFileList('test_diag.files')
 test_tri_files = ReadFileList('test_tri.files')
 test_div_files = ReadFileList('test_div.files')
 test_band_files = ReadFileList('test_band.files')
-test_band_div_files = ReadFileList('test_band_div.files')
 test_sym_files = ReadFileList('test_sym.files')
-test_sym_div_files = ReadFileList('test_sym_div.files')
 test_symband_files = ReadFileList('test_symband.files')
 test_small_files = ReadFileList('test_small.files')
 test_small_sq_files = ReadFileList('test_small_sq.files')
@@ -54,7 +52,6 @@ if env['LAP']:
     env1b.Append(CPPDEFINES=['LAP'])
 
 env2 = env1.Clone(LIBS=sblibs+env['LIBS'])
-env2b = env1b.Clone(LIBS=sblibs+env['LIBS'])
 
 test_mix_files = ['TMV_TestMix.cpp']
 obj_mix = env1.Object(test_mix_files)
@@ -70,8 +67,8 @@ obj_basic = env1.Object(test_basic_files)
 obj_diag = env1.Object(test_diag_files)
 obj_tri = env1.Object(test_tri_files)
 obj_div = env1b.Object(test_div_files) # uses lapack, so env1b
-obj_band = env2.Object(test_band_files) + env2b.Object(test_band_div_files)
-obj_sym = env2.Object(test_sym_files) + env2b.Object(test_sym_div_files)
+obj_band = env2.Object(test_band_files)
+obj_sym = env2.Object(test_sym_files)
 obj_symband = env2.Object(test_symband_files)
 obj_small = env3.Object(test_small_files)
 obj_small_sq = env3.Object(test_small_sq_files)
