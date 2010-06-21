@@ -63,9 +63,9 @@ namespace tmv {
         TMVAssert(Qbeta.step() == 1);
 
 #ifdef XDEBUG
-        std::cout<<"Start Band QR_Decompose\n";
+        cout<<"Start Band QR_Decompose\n";
         cout<<"QRx = "<<TMV_Text(QRx)<<endl;
-        cout<<"= "<<QRx<<std::endl;
+        cout<<"= "<<QRx<<endl;
         cout<<"M N lo hi = "<<QRx.colsize()<<"  "<<QRx.rowsize()<<"  "<<QRx.nlo()<<"  "<<QRx.nhi()<<endl;
         Matrix<T> A0(QRx);
 #endif
@@ -89,18 +89,19 @@ namespace tmv {
             }
         }
 #ifdef XDEBUG
-        std::cout<<"Done Band QR_Decompose\n";
-        std::cout<<"QRx => "<<QRx<<std::endl;
-        std::cout<<"beta => "<<Qbeta<<std::endl;
+        cout<<"Done Band QR_Decompose\n";
+        cout<<"QRx => "<<QRx<<endl;
+        cout<<"beta => "<<Qbeta<<endl;
         Matrix<T> Q(M,N);
         Q = QRx;
         GetQFromBandQR(Q.view(),Qbeta,QRx.nlo());
-        std::cout<<"Q = "<<Q<<std::endl;
+        cout<<"Q = "<<Q<<endl;
         Matrix<T> R(QRx.diagRange(0,QRx.nhi()+1));
-        std::cout<<"R = "<<R<<std::endl;
+        cout<<"R = "<<R<<endl;
         Matrix<T> QR = Q*R;
-        std::cout<<"QR = "<<QR<<std::endl;
+        cout<<"QR = "<<QR<<endl;
         cout<<"Norm(QR-A0) = "<<Norm(QR-A0)<<endl;
+        cout<<"Norm(AtA-RtR) = "<<Norm(A0.adjoint()*A0-R.adjoint()*R)<<endl;
         if (Norm(QR-A0) > 0.00001*Norm(A0)) {
             cerr<<"QR_Decompose: \n";
             cerr<<"A = "<<TMV_Text(QRx)<<"  "<<A0<<endl;
@@ -143,6 +144,9 @@ namespace tmv {
             R = BandMatrixViewOf(Q,0,newnhi);
             GetQFromBandQR(Q,beta.view(),A.nlo());
         }
+#ifdef XDEBUG
+        cout<<"Norm(AtA-RtR) = "<<Norm(A.adjoint()*A-R.adjoint()*R)<<endl;
+#endif
     }
 
     template <class T> 
@@ -169,6 +173,9 @@ namespace tmv {
         BandMatrixViewOf(QR,A.nlo(),A.nhi()) = A.rowRange(0,QR.colsize());
         QR_Decompose(QR.view(),beta.view(),d);
         R = BandMatrixViewOf(QR,0,newnhi);
+#ifdef XDEBUG
+        cout<<"Norm(AtA-RtR) = "<<Norm(A.adjoint()*A-R.adjoint()*R)<<endl;
+#endif
     }
 
 #define InstFile "TMV_BandQRDecompose.inst"

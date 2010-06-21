@@ -62,7 +62,7 @@ namespace tmv {
             size_t s = this->size();        
             size_t lo = this->nlo();      
             size_t len = BandStorageLength(this->stor(),s,s,lo,0);
-            itsm1.reset(new T[len]);                          
+            itsm1.resize(len);
             itsm = this->isdm() ? itsm1.get() + lo*(s-1) : itsm1.get();
             this->assignTosB(SymBandMatrixView<T>(
                     itsm,s,lo,stepi(),stepj(),diagstep(),

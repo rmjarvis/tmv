@@ -904,7 +904,7 @@ namespace tmv {
             int noff = m.nlo();
             int lda = m.diagstep();
 #ifndef LAPNOWORK
-            auto_array<double> work(cc == '1' ? new double[N] : 0);
+            AlignedArray<double> work(c == '1' ? N : 0);
 #endif
             const double* mp = m.cptr();
             if (m.uplo()==Upper) mp -= m.nhi();
@@ -926,7 +926,7 @@ namespace tmv {
             int noff = m.nlo();
             int lda = m.diagstep();
 #ifndef LAPNOWORK
-            auto_array<double> work(cc == '1' ? new double[N] : 0);
+            AlignedArray<double> work(c == '1' ? N : 0);
 #endif
             const std::complex<double>* mp = m.cptr();
             if (m.uplo()==Upper) mp -= m.nhi();
@@ -955,7 +955,7 @@ namespace tmv {
             int noff = m.nlo();
             int lda = m.diagstep();
 #ifndef LAPNOWORK
-            auto_array<float> work(cc == '1' ? new float[N] : 0);
+            AlignedArray<float> work(c == '1' ? N : 0);
 #endif
             const float* mp = m.cptr();
             if (m.uplo()==Upper) mp -= m.nhi();
@@ -977,7 +977,7 @@ namespace tmv {
             int noff = m.nlo();
             int lda = m.diagstep();
 #ifndef LAPNOWORK
-            auto_array<float> work(cc == '1' ? new float[N] : 0);
+            AlignedArray<float> work(c == '1' ? N : 0);
 #endif
             const std::complex<float>* mp = m.cptr();
             if (m.uplo()==Upper) mp -= m.nhi();

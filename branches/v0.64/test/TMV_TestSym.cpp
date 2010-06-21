@@ -720,6 +720,15 @@ static void TestBasicSymMatrix_IO()
     tmv::SymMatrix<std::complex<T>,U,S> s1(N);
     tmv::HermMatrix<std::complex<T>,U,S> h1(N);
 
+    for (size_t i=0, k=1; i<N; ++i) for (size_t j=0; j<N; ++j, ++k) {
+        std::complex<T> value(T(k),T(2*k));
+        if (i==j) {
+            h1(i,j) = T(k); s1(i,j) = value;
+        } else {
+            h1(i,j) = s1(i,j) = value;
+        }
+    }
+
     std::ofstream fout("tmvtest_symmatrix_io.dat");
     if (!fout) {
 #ifdef NOTHROW

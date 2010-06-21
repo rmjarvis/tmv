@@ -54,7 +54,7 @@ namespace tmv {
 
         const bool istrans;
         const bool inplace;
-        auto_array<T> Aptr1;
+        AlignedArray<T> Aptr1;
         T* Aptr;
         BandMatrixView<T> LUx;
         Permutation P;
@@ -66,8 +66,7 @@ namespace tmv {
 #define NEWLO TMV_MIN(A.nlo(),A.nhi())
 #define NEWHI TMV_MIN(A.nlo()+A.nhi(),int(A.colsize())-1)
 #define APTR1 (inplace ? 0 : \
-               new T[BandStorageLength(ColMajor,A.colsize(),A.colsize(), \
-                                       NEWLO,NEWHI)])
+               BandStorageLength(ColMajor,A.colsize(),A.colsize(),NEWLO,NEWHI))
 #define APTR (inplace ? A.nonConst().ptr() : Aptr1.get())
 
 #define LUX (istrans ? \
@@ -154,8 +153,7 @@ namespace tmv {
 
 #define NEWLO TMV_MIN(A.nlo(),A.nhi())
 #define NEWHI TMV_MIN(A.nlo()+A.nhi(),int(A.colsize())-1)
-#define APTR1 \
-    new T[BandStorageLength(ColMajor,A.colsize(),A.colsize(),NEWLO,NEWHI)]
+#define APTR1 BandStorageLength(ColMajor,A.colsize(),A.colsize(),NEWLO,NEWHI)
 #define APTR Aptr1.get()
 
 #define LUX \
@@ -233,7 +231,7 @@ namespace tmv {
         if (!pimpl->donedet) {
             T s;
             pimpl->logdet = DiagMatrixViewOf(pimpl->LUx.diag()).logDet(&s);
-            pimpl->signdet = T(pimpl->P.det()) * s;
+            pimpl->signdet = TMV_RealType(T)(pimpl->P.det()) * s;
             pimpl->donedet = true;
         }         
         if (pimpl->signdet == T(0)) return T(0);
@@ -246,7 +244,7 @@ namespace tmv {
         if (!pimpl->donedet) {
             T s;
             pimpl->logdet = DiagMatrixViewOf(pimpl->LUx.diag()).logDet(&s);
-            pimpl->signdet = T(pimpl->P.det()) * s;
+            pimpl->signdet = TMV_RealType(T)(pimpl->P.det()) * s;
             pimpl->donedet = true;
         }
         if (sign) *sign = pimpl->signdet;

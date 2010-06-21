@@ -37,6 +37,7 @@
 #include "tmv/TMV_VectorArithFunc.h"
 #include "tmv/TMV_MatrixArithFunc.h"
 #include "tmv/TMV_TriMatrixArithFunc.h"
+#include "tmv/TMV_Array.h"
 
 #define CT std::complex<T>
 
@@ -153,8 +154,8 @@ namespace tmv {
     class SymMatrixComposite : public GenSymMatrix<T>
     {
     public :
-        inline SymMatrixComposite() : itsm(0) {}
-        inline SymMatrixComposite(const SymMatrixComposite<T>&) : itsm(0) {}
+        inline SymMatrixComposite() {}
+        inline SymMatrixComposite(const SymMatrixComposite<T>&) {}
         virtual inline ~SymMatrixComposite() {}
 
         // Definitions are in TMV_MultSV.cpp
@@ -167,7 +168,7 @@ namespace tmv {
         inline ConjType ct() const { return NonConj; }
 
     private :
-        mutable auto_array<T> itsm;
+        mutable AlignedArray<T> itsm;
 
         SymMatrixComposite<T>& operator=(const SymMatrixComposite<T>&);
     };

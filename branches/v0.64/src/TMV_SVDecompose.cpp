@@ -45,7 +45,7 @@
 #include <iostream>
 
 #ifdef XDEBUG
-#define THRESH 1.e-5
+#define THRESH 1.e-11
 #include "tmv/TMV_DiagMatrixArith.h"
 #define dbgcout std::cout 
 //#define dbgcout if(false) std::cout
@@ -228,7 +228,7 @@ namespace tmv {
 
         // Now A = U * S * V
         // Sort output singular values 
-        auto_array<int> sortp(new int[N]);
+        AlignedArray<int> sortp(N);
         D.sort(sortp.get(),Descend);
         if (U) U->permuteCols(sortp.get());
         if (V) V->permuteRows(sortp.get());
@@ -299,9 +299,9 @@ namespace tmv {
                 int ldv = V->stepj();
 #ifndef LAPNOWORK
                 int lwork = (3*n+4)*n;
-                auto_array<double> work(new double[lwork]);
+                AlignedArray<double> work(lwork);
                 lwork = 8*n;
-                auto_array<int> iwork(new int[lwork]);
+                AlignedArray<int> iwork(lwork);
 #endif
                 LAPNAME(dbdsdc) (
                     LAPCM LAPV(u),LAPV(c),LAPV(n),
@@ -316,9 +316,9 @@ namespace tmv {
                 int ldv = V->stepi();
 #ifndef LAPNOWORK
                 int lwork = (3*n+4)*n;
-                auto_array<double> work(new double[lwork]);
+                AlignedArray<double> work(lwork);
                 lwork = 8*n;
-                auto_array<int> iwork(new int[lwork]);
+                AlignedArray<int> iwork(lwork);
 #endif
                 LAPNAME(dbdsdc) (
                     LAPCM LAPV(u),LAPV(c),LAPV(n),
@@ -334,9 +334,9 @@ namespace tmv {
             int ldv = V1.stepj();
 #ifndef LAPNOWORK
             int lwork = (3*n+4)*n;
-            auto_array<double> work(new double[lwork]);
+            AlignedArray<double> work(lwork);
             lwork = 8*n;
-            auto_array<int> iwork(new int[lwork]);
+            AlignedArray<int> iwork(lwork);
 #endif
             LAPNAME(dbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
@@ -351,9 +351,9 @@ namespace tmv {
             char c = 'N';
 #ifndef LAPNOWORK
             int lwork = 4*n;
-            auto_array<double> work(new double[lwork]);
+            AlignedArray<double> work(lwork);
             lwork = 8*n;
-            auto_array<int> iwork(new int[lwork]);
+            AlignedArray<int> iwork(lwork);
 #endif
             LAPNAME(dbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
@@ -396,9 +396,9 @@ namespace tmv {
             int ldv = V1.stepj();
 #ifndef LAPNOWORK
             int lwork = (3*n+4)*n;
-            auto_array<double> work(new double[lwork]);
+            AlignedArray<double> work(lwork);
             lwork = 8*n;
-            auto_array<int> iwork(new int[lwork]);
+            AlignedArray<int> iwork(lwork);
 #endif
             LAPNAME(dbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
@@ -419,9 +419,9 @@ namespace tmv {
             char c = 'N';
 #ifndef LAPNOWORK
             int lwork = 4*n;
-            auto_array<double> work(new double[lwork]);
+            AlignedArray<double> work(lwork);
             lwork = 8*n;
-            auto_array<int> iwork(new int[lwork]);
+            AlignedArray<int> iwork(lwork);
 #endif
             LAPNAME(dbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
@@ -466,9 +466,9 @@ namespace tmv {
                 int ldv = V->stepj();
 #ifndef LAPNOWORK
                 int lwork = (3*n+4)*n;
-                auto_array<float> work(new float[lwork]);
+                AlignedArray<float> work(lwork);
                 lwork = 8*n;
-                auto_array<int> iwork(new int[lwork]);
+                AlignedArray<int> iwork(lwork);
 #endif
                 LAPNAME(sbdsdc) (
                     LAPCM LAPV(u),LAPV(c),LAPV(n),
@@ -483,9 +483,9 @@ namespace tmv {
                 int ldv = V->stepi();
 #ifndef LAPNOWORK
                 int lwork = (3*n+4)*n;
-                auto_array<float> work(new float[lwork]);
+                AlignedArray<float> work(lwork);
                 lwork = 8*n;
-                auto_array<int> iwork(new int[lwork]);
+                AlignedArray<int> iwork(lwork);
 #endif
                 LAPNAME(sbdsdc) (
                     LAPCM LAPV(u),LAPV(c),LAPV(n),
@@ -501,9 +501,9 @@ namespace tmv {
             int ldv = V1.stepj();
 #ifndef LAPNOWORK
             int lwork = (3*n+4)*n;
-            auto_array<float> work(new float[lwork]);
+            AlignedArray<float> work(lwork);
             lwork = 8*n;
-            auto_array<int> iwork(new int[lwork]);
+            AlignedArray<int> iwork(lwork);
 #endif
             LAPNAME(sbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
@@ -518,9 +518,9 @@ namespace tmv {
             char c = 'N';
 #ifndef LAPNOWORK
             int lwork = 4*n;
-            auto_array<float> work(new float[lwork]);
+            AlignedArray<float> work(lwork);
             lwork = 8*n;
-            auto_array<int> iwork(new int[lwork]);
+            AlignedArray<int> iwork(lwork);
 #endif
             LAPNAME(sbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
@@ -563,9 +563,9 @@ namespace tmv {
             int ldv = V1.stepj();
 #ifndef LAPNOWORK
             int lwork = (3*n+4)*n;
-            auto_array<float> work(new float[lwork]);
+            AlignedArray<float> work(lwork);
             lwork = 8*n;
-            auto_array<int> iwork(new int[lwork]);
+            AlignedArray<int> iwork(lwork);
 #endif
             LAPNAME(sbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
@@ -587,9 +587,9 @@ namespace tmv {
             char c = 'N';
 #ifndef LAPNOWORK
             int lwork = 4*n;
-            auto_array<float> work(new float[lwork]);
+            AlignedArray<float> work(lwork);
             lwork = 8*n;
-            auto_array<int> iwork(new int[lwork]);
+            AlignedArray<int> iwork(lwork);
 #endif
             LAPNAME(sbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),

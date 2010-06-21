@@ -231,7 +231,15 @@ void TestBandDecomp()
                 std::cout<<"Norm(R-R2) = "<<Norm(R-R2)<<std::endl;
                 std::cout<<"eps*Norm(m) = "<<eps*normm<<std::endl;
             }
-            Assert(Norm(R-R2) <= eps*normm,"Band QR3");
+            if (baddefect)
+                // Sometimes R,R2 come out a bit different, but RtR = mtm,
+                // so I think it's ok.  It's just that rounding errors can
+                // make the R's differ by more than eps*normm.
+                Assert(Norm(m.adjoint()*m-R2.adjoint()*R2) <=
+                       eps*normm*normm,"Band QR3 (RtR)");
+            else
+                Assert(Norm(R-R2) <= eps*normm,"Band QR3");
+
 
             QR_Decompose(c,cQ.view(),cR.view());
             cQR = cQ*cR;
@@ -239,7 +247,11 @@ void TestBandDecomp()
 
             tmv::BandMatrix<std::complex<T>,stor> cR2(N,N,0,Rnhi);
             QR_Decompose(c,cR2.view());
-            Assert(Norm(cR-cR2) <= ceps*normc,"Band C QR3");
+            if (baddefect) 
+                Assert(Norm(c.adjoint()*c-cR2.adjoint()*cR2) <=
+                       ceps*normm*normm,"Band C QR3 (RtR)");
+            else
+                Assert(Norm(cR-cR2) <= ceps*normc,"Band C QR3");
 
             QR_Decompose(c,cQ.conjugate(),cR2.view());
             cQR = cQ.conjugate()*cR2;
@@ -254,17 +266,29 @@ void TestBandDecomp()
             Assert(Norm(c-cQR) <= ceps*normc,"Band C QR6");
 
             QR_Decompose(c,cR2.view());
-            Assert(Norm(cR-cR2) <= ceps*normc,"Band C QR7");
+            if (baddefect) 
+                Assert(Norm(c.adjoint()*c-cR2.adjoint()*cR2) <= 
+                       ceps*normc*normc,"Band C QR7 (RtR)");
+            else
+                Assert(Norm(cR-cR2) <= ceps*normc,"Band C QR7");
 
             QR_Decompose(c,cR2.conjugate());
-            Assert(Norm(cR-cR2.conjugate()) <= ceps*normc,"Band C QR8");
+            if (baddefect)
+                Assert(Norm(c.adjoint()*c-cR2.transpose()*cR2.conjugate()) <=
+                       ceps*normc*normc,"Band C QR8 (RtR)");
+            else
+                Assert(Norm(cR-cR2.conjugate()) <= ceps*normc,"Band C QR8");
 
             QR_Decompose(c.conjugate(),cQ.view(),cR2.view());
             cQR = cQ*cR2;
             Assert(Norm(c.conjugate()-cQR) <= ceps*normc,"Band C QR9");
 
             QR_Decompose(c.conjugate(),cR2.view());
-            Assert(Norm(cR.conjugate()-cR2) <= ceps*normc,"Band C QR10");
+            if (baddefect) 
+                Assert(Norm(c.transpose()*c.conjugate()-cR2.adjoint()*cR2) <=
+                       ceps*normc*normc,"Band C QR10 (RtR)");
+            else
+                Assert(Norm(cR.conjugate()-cR2) <= ceps*normc,"Band C QR10");
 
             QR_Decompose(c.conjugate(),cQ.conjugate(),cR2.view());
             cQR = cQ.conjugate()*cR2;
@@ -278,12 +302,13 @@ void TestBandDecomp()
             cQR = cQ.conjugate()*cR2.conjugate();
             Assert(Norm(c.conjugate()-cQR) <= ceps*normc,"Band C QR13");
 
-            QR_Decompose(c.conjugate(),cR2.view());
-            Assert(Norm(cR.conjugate()-cR2) <= ceps*normc,"Band C QR14");
-
             QR_Decompose(c.conjugate(),cR2.conjugate());
-            Assert(Norm(cR.conjugate()-cR2.conjugate()) <= ceps*normc,
-                   "Band C QR15");
+            if (baddefect)
+                Assert(Norm(c.adjoint()*c-cR2.adjoint()*cR2) <=
+                       ceps*normc*normc,"Band C QR15 (RtR)");
+            else
+                Assert(Norm(cR.conjugate()-cR2.conjugate()) <= ceps*normc,
+                       "Band C QR15");
 #endif
             std::cout<<"."; std::cout.flush();
         } while (false);

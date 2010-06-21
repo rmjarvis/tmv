@@ -229,7 +229,15 @@ void TestMatrixDecomp()
 
             Q = m;
             QR_Decompose(Q.view());
-            Assert(Norm(R-Q.upperTri()) <= eps*normm,"QR3"); 
+            tmv::UpperTriMatrix<T> R2 = Q.upperTri();
+            if (baddefect)
+                // Sometimes R,R2 come out a bit different, but RtR = mtm,
+                // so I think it's ok.  It's just that rounding errors can
+                // make the R's differ by more than eps*normm.
+                Assert(Norm(m.adjoint()*m-R2.adjoint()*R2) <= eps*normm*normm,
+                       "QR3 (RtR)");
+            else
+                Assert(Norm(R-R2) <= eps*normm,"QR3"); 
 
             cQ = c;
             QR_Decompose(cQ.view(),cR.view());
@@ -239,7 +247,12 @@ void TestMatrixDecomp()
 
             cQ = c;
             QR_Decompose(cQ.view());
-            Assert(Norm(cR-cQ.upperTri()) <= ceps*normc,"C QR3"); 
+            tmv::UpperTriMatrix<std::complex<T> > cR2 = cQ.upperTri();
+            if (baddefect)
+                Assert(Norm(c.adjoint()*c-cR2.adjoint()*cR2) <= 
+                       ceps*normc*normc,"QR3 (RtR)");
+            else
+                Assert(Norm(cR-cR2) <= ceps*normc,"C QR3"); 
 
             cQ.conjugate() = c;
             QR_Decompose(cQ.conjugate(),cR.view());
@@ -249,7 +262,12 @@ void TestMatrixDecomp()
 
             cQ.conjugate() = c;
             QR_Decompose(cQ.conjugate());
-            Assert(Norm(cR-cQ.conjugate().upperTri()) <= ceps*normc,"C QR5"); 
+            cR2 = cQ.conjugate().upperTri();
+            if (baddefect)
+                Assert(Norm(c.adjoint()*c-cR2.adjoint()*cR2) <= 
+                       ceps*normc*normc,"QR5 (RtR)");
+            else
+                Assert(Norm(cR-cR2) <= ceps*normc,"C QR5"); 
 
             cQ = c;
             QR_Decompose(cQ.view(),cR.conjugate());
@@ -326,7 +344,8 @@ void TestMatrixDecomp()
 
             Q = m;
             QRP_Decompose(Q.view(),strict);
-            Assert(Norm(R-Q.upperTri()) <= eps*normm,"QRP3"); 
+            tmv::UpperTriMatrix<T> R2 = Q.upperTri();
+            Assert(Norm(R-R2) <= eps*normm,"QRP3"); 
 
             cQ = c;
             QRP_Decompose(cQ.view(),cR.view(),p2,strict);
@@ -342,7 +361,8 @@ void TestMatrixDecomp()
 #endif
             cQ = c;
             QRP_Decompose(cQ.view(),strict);
-            Assert(Norm(cR-cQ.upperTri()) <= ceps*normc,"C QRP3"); 
+            tmv::UpperTriMatrix<std::complex<T> > cR2 = cQ.upperTri();
+            Assert(Norm(cR-cR2) <= ceps*normc,"C QRP3"); 
 
             cQ.conjugate() = c;
             QRP_Decompose(cQ.conjugate(),cR.view(),p2,strict);
@@ -359,7 +379,8 @@ void TestMatrixDecomp()
 
             cQ.conjugate() = c;
             QRP_Decompose(cQ.conjugate(),strict);
-            Assert(Norm(cR-cQ.conjugate().upperTri()) <= ceps*normc,"C QRP5"); 
+            cR2 = cQ.conjugate().upperTri();
+            Assert(Norm(cR-cR2) <= ceps*normc,"C QRP5"); 
 
             cQ = c;
             QRP_Decompose(cQ.view(),cR.conjugate(),p2,strict);

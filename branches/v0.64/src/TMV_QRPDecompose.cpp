@@ -749,22 +749,22 @@ namespace tmv
         TMVAssert(beta.step()==1);
         int m = A.colsize();
         int n = A.rowsize();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         for(int i=0;i<n;++i) (lap_p.get())[i] = 0;
         int lda = A.stepj();
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = 3*n+1;
-        auto_array<double> work(new double[lwork]);
+        AlignedArray<double> work(lwork);
 #else
         int lwork = -1;
-        auto_array<double> work(new double[1]);
+        AlignedArray<double> work(1);
         LAPNAME(dgeqp3) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
             LAPP(lap_p.get()),LAPP(beta.ptr()) 
             LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(work[0]);
-        work.reset(new double[lwork]);
+        work.resize(lwork);
 #endif
 #endif
         LAPNAME(dgeqp3) (
@@ -813,23 +813,23 @@ namespace tmv
         TMVAssert(beta.step()==1);
         int m = A.colsize();
         int n = A.rowsize();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         for(int i=0;i<n;++i) (lap_p.get())[i] = 0;
         int lda = A.stepj();
 #ifndef LAPNOWORK
-        auto_array<double> rwork(new double[2*n]);
+        AlignedArray<double> rwork(2*n);
 #ifdef NOWORKQUERY
         int lwork = n+1;
-        auto_array<std::complex<double> > work(new std::complex<double>[lwork]);
+        AlignedArray<std::complex<double> > work(lwork);
 #else
         int lwork = -1;
-        auto_array<std::complex<double> > work(new std::complex<double>[1]);
+        AlignedArray<std::complex<double> > work(1);
         LAPNAME(zgeqp3) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
             LAPP(lap_p.get()),LAPP(beta.ptr()) 
             LAPWK(work.get()) LAPVWK(lwork) LAPWK(rwork.get()) LAPINFO);
         lwork = int(std::real(work[0]));
-        work.reset(new std::complex<double>[lwork]);
+        work.resize(lwork);
 #endif
 #endif
         LAPNAME(zgeqp3) (
@@ -886,22 +886,22 @@ namespace tmv
         TMVAssert(beta.step()==1);
         int m = A.colsize();
         int n = A.rowsize();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         for(int i=0;i<n;++i) (lap_p.get())[i] = 0;
         int lda = A.stepj();
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = 3*n+1;
-        auto_array<float> work(new float[lwork]);
+        AlignedArray<float> work(lwork);
 #else
         int lwork = -1;
-        auto_array<float> work(new float[1]);
+        AlignedArray<float> work(1);
         LAPNAME(sgeqp3) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
             LAPP(lap_p.get()),LAPP(beta.ptr()) 
             LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(work[0]);
-        work.reset(new float[lwork]);
+        work.resize(lwork);
 #endif
 #endif
         LAPNAME(sgeqp3) (
@@ -950,23 +950,23 @@ namespace tmv
         TMVAssert(beta.step()==1);
         int m = A.colsize();
         int n = A.rowsize();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         for(int i=0;i<n;++i) (lap_p.get())[i] = 0;
         int lda = A.stepj();
 #ifndef LAPNOWORK
-        auto_array<float> rwork(new float[2*n]);
+        AlignedArray<float> rwork(2*n);
 #ifdef NOWORKQUERY
         int lwork = n+1;
-        auto_array<std::complex<float> > work(new std::complex<float>[lwork]);
+        AlignedArray<std::complex<float> > work(lwork);
 #else
         int lwork = -1;
-        auto_array<std::complex<float> > work(new std::complex<float>[1]);
+        AlignedArray<std::complex<float> > work(1);
         LAPNAME(cgeqp3) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
             LAPP(lap_p.get()),LAPP(beta.ptr()) 
             LAPWK(work.get()) LAPVWK(lwork) LAPWK(rwork.get()) LAPINFO);
         lwork = int(std::real(work[0]));
-        work.reset(new std::complex<float>[lwork]);
+        work.resize(lwork);
 #endif
 #endif
         LAPNAME(cgeqp3) (
@@ -1030,7 +1030,7 @@ namespace tmv
 #ifdef LAP
         Matrix<T> A2(A);
         Vector<T> beta2(beta);
-        auto_array<int> P2(new int[beta.size()]);
+        AlignedArray<int> P2(beta.size());
         T det2=det;
         NonLapQRPDecompose(A2.view(),beta2.view(),P2.get(),det2,strict);
         std::cout<<"NonLap QRP = "<<A2<<std::endl;
@@ -1128,7 +1128,7 @@ namespace tmv
 
         Vector<T> beta(A.rowsize());
         T d(0);
-        auto_array<int> P(new int[A.rowsize()]);
+        AlignedArray<int> P(A.rowsize());
         if (A.isconj())
             QRP_Decompose(A.conjugate(),beta.view(),P.get(),d,strict);
         else

@@ -218,6 +218,7 @@ namespace tmv {
         }
         if (beta != T(0)) HouseholderLMult(v,beta,m.colRange(1,m.rowsize()));
 #ifdef XDEBUG
+        if (TMV_Underflow(m0.col(0).maxAbsElement())) return beta;
         Vector<T> vv(m.colsize());
         vv(0) = T(1);
         vv.subVector(1,vv.size()) = m.col(0,1,vv.size());
@@ -333,10 +334,6 @@ namespace tmv {
         const GenVector<T1>& v, T1 beta, const VectorView<T2>& m0,
         const MatrixView<T2>& mx)
     {
-        //std::cout<<"Start HouseholderLMult"<<std::endl;
-        //std::cout<<"v = "<<v<<std::endl;
-        //std::cout<<"m0 = "<<m0<<std::endl;
-        //std::cout<<"mx = "<<mx<<std::endl;
         // The input vector, v, is taken to be the vector for a  
         // Householder matrix, H.  This routine takes 
         // ( m0 ) <- H ( m0 ) = [ ( m0 ) - beta ( 1 ) ( 1 vt ) ( m0 ) ]
@@ -351,6 +348,11 @@ namespace tmv {
         Matrix<T2> mm(mx.colsize()+1,m0.size());
         mm.row(0) = m0;
         mm.rowRange(1,mm.colsize()) = mx;
+        std::cout<<"Start HouseholderLMult"<<std::endl;
+        std::cout<<"v = "<<v<<std::endl;
+        std::cout<<"beta = "<<beta<<std::endl;
+        std::cout<<"m0 = "<<m0<<std::endl;
+        std::cout<<"mx = "<<mx<<std::endl;
 #endif
 
         if (m0.size() == 0) return;
@@ -364,6 +366,8 @@ namespace tmv {
             mx -= v^temp;
         }
 #ifdef XDEBUG
+        std::cout<<"m0 => "<<m0<<std::endl;
+        std::cout<<"mx => "<<mx<<std::endl;
         Vector<T1> vv(v.size()+1);
         vv(0) = T1(1);
         vv.subVector(1,vv.size()) = v;

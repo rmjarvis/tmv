@@ -51,7 +51,7 @@ namespace tmv {
         HermBandCHDiv_Impl(const GenSymBandMatrix<T>& m, bool inplace);
 
         const bool inplace;
-        auto_array<T> Aptr1;
+        AlignedArray<T> Aptr1;
         T* Aptr;
         SymBandMatrixView<T> LLx;
         mutable bool zerodet;
@@ -60,8 +60,7 @@ namespace tmv {
     };
 
 #define APTR1 (inplace ? 0 : \
-               new T[BandStorageLength(ColMajor,A.size(),A.size(), \
-                                       A.nlo(),A.nlo())])
+               BandStorageLength(ColMajor,A.size(),A.size(),A.nlo(),A.nlo()))
 #define APTR (inplace ? A.nonConst().ptr() : Aptr1.get())
 #define LLX \
     (inplace ? (A.uplo()==Upper ? A.nonConst().adjoint() : A.nonConst()) : \

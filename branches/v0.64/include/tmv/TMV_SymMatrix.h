@@ -292,6 +292,7 @@
 #include "tmv/TMV_TriMatrix.h"
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_DiagMatrix.h"
+#include "tmv/TMV_Array.h"
 #include <vector>
 
 namespace tmv {
@@ -2327,7 +2328,7 @@ namespace tmv {
         // Constructors
         //
 
-#define NEW_SIZE(s) itslen((s)*(s)), itsm(new T[itslen]), itss(s)  \
+#define NEW_SIZE(s) itslen((s)*(s)), itsm(itslen), itss(s)  \
         TMV_DEFFIRSTLAST(itsm.get(),itsm.get()+itslen) 
 
         explicit inline SymMatrix(size_t _size) : NEW_SIZE(_size) 
@@ -3304,7 +3305,7 @@ namespace tmv {
     protected :
 
         const size_t itslen;
-        auto_array<T> itsm;
+        AlignedArray<T> itsm;
         const size_t itss;
 
 #ifdef TMVFLDEBUG
@@ -3317,9 +3318,7 @@ namespace tmv {
         friend void Swap(SymMatrix<T,U,S,I>& m1, SymMatrix<T,U,S,I2>& m2)
         {
             TMVAssert(m1.size() == m2.size());
-            T* temp = m1.itsm.release();
-            m1.itsm.reset(m2.itsm.release());
-            m2.itsm.reset(temp);
+            m1.itsm.swapWith(m2.itsm);
 #ifdef TMVFLDEBUG
             TMV_SWAP(m1._first,m2._first);
             TMV_SWAP(m1._last,m2._last);
@@ -3362,7 +3361,7 @@ namespace tmv {
         // Constructors
         //
 
-#define NEW_SIZE(s) itslen((s)*(s)), itsm(new T[itslen]), itss(s)  \
+#define NEW_SIZE(s) itslen((s)*(s)), itsm(itslen), itss(s)  \
         TMV_DEFFIRSTLAST(itsm.get(),itsm.get()+itslen)
 
         explicit inline HermMatrix(size_t _size) : NEW_SIZE(_size) 
@@ -4442,7 +4441,7 @@ namespace tmv {
     protected :
 
         const size_t itslen;
-        auto_array<T> itsm;
+        AlignedArray<T> itsm;
         const size_t itss;
 
 #ifdef TMVFLDEBUG
@@ -4455,9 +4454,7 @@ namespace tmv {
         friend void Swap(HermMatrix<T,U,S,I>& m1, HermMatrix<T,U,S,I2>& m2)
         {
             TMVAssert(m1.size() == m2.size());
-            T* temp = m1.itsm.release();
-            m1.itsm.reset(m2.itsm.release());
-            m2.itsm.reset(temp);
+            m1.itsm.swapWith(m2.itsm);
 #ifdef TMVFLDEBUG
             TMV_SWAP(m1._first,m2._first);
             TMV_SWAP(m1._last,m2._last);

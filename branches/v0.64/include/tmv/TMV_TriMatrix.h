@@ -262,6 +262,7 @@
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_DiagMatrix.h"
+#include "tmv/TMV_Array.h"
 #include <vector>
 
 namespace tmv {
@@ -3780,7 +3781,7 @@ namespace tmv {
         //
 
 #define NEW_SIZE(s) \
-        itslen((s)*(s)), itsm(new T[itslen]), itss(s) \
+        itslen((s)*(s)), itsm(itslen), itss(s) \
         TMV_DEFFIRSTLAST(itsm.get(),itsm.get()+itslen)
 
         explicit inline UpperTriMatrix(size_t _size) : NEW_SIZE(_size) 
@@ -3848,7 +3849,7 @@ namespace tmv {
         }
 
         inline UpperTriMatrix(const type& rhs) :
-            itslen(rhs.itslen), itsm(new T[itslen]), itss(rhs.itss)
+            itslen(rhs.itslen), itsm(itslen), itss(rhs.itss)
             TMV_DEFFIRSTLAST(itsm.get(),itsm.get()+itslen)
         {
 #ifdef XTEST_DEBUG
@@ -4589,7 +4590,7 @@ namespace tmv {
     protected :
 
         const size_t itslen;
-        auto_array<T> itsm;
+        AlignedArray<T> itsm;
         const size_t itss;
 
 #ifdef TMVFLDEBUG
@@ -4611,9 +4612,7 @@ namespace tmv {
             UpperTriMatrix<T,D,S,I>& m1, UpperTriMatrix<T,D,S,I2>& m2)
         {
             TMVAssert(m1.size() == m2.size());
-            T* temp = m1.itsm.release();
-            m1.itsm.reset(m2.itsm.release());
-            m2.itsm.reset(temp);
+            m1.itsm.swapWith(m2.itsm);
 #ifdef TMVFLDEBUG
             TMV_SWAP(m1._first,m2._first);
             TMV_SWAP(m1._last,m2._last);
@@ -4656,7 +4655,7 @@ namespace tmv {
         //
 
 #define NEW_SIZE(s) \
-        itslen((s)*(s)), itsm(new T[itslen]), itss(s) \
+        itslen((s)*(s)), itsm(itslen), itss(s) \
         TMV_DEFFIRSTLAST(itsm.get(),itsm.get()+itslen)
 
         explicit inline LowerTriMatrix(size_t _size) : NEW_SIZE(_size) 
@@ -4724,7 +4723,7 @@ namespace tmv {
         }
 
         inline LowerTriMatrix(const type& rhs) :
-            itslen(rhs.itslen), itsm(new T[itslen]), itss(rhs.itss)
+            itslen(rhs.itslen), itsm(itslen), itss(rhs.itss)
             TMV_DEFFIRSTLAST(itsm.get(),itsm.get()+itslen)
         {
 #ifdef XTEST_DEBUG
@@ -5471,7 +5470,7 @@ namespace tmv {
     protected :
 
         const size_t itslen;
-        auto_array<T> itsm;
+        AlignedArray<T> itsm;
         const size_t itss;
 
 #ifdef TMVFLDEBUG
@@ -5493,9 +5492,7 @@ namespace tmv {
             LowerTriMatrix<T,D,S,I>& m1, LowerTriMatrix<T,D,S,I2>& m2)
         {
             TMVAssert(m1.size() == m2.size());
-            T* temp = m1.itsm.release();
-            m1.itsm.reset(m2.itsm.release());
-            m2.itsm.reset(temp);
+            m1.itsm.swapWith(m2.itsm);
 #ifdef TMVFLDEBUG
             TMV_SWAP(m1._first,m2._first);
             TMV_SWAP(m1._last,m2._last);

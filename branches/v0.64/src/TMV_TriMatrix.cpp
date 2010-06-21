@@ -402,7 +402,7 @@ namespace tmv {
             else
                 for(int j=0;j<N;++j) 
                     sum += col(j,0,j+1).sumElements();
-        if (isunit()) sum += N;
+        if (isunit()) sum += RT(N);
         return sum;
     }
 
@@ -425,7 +425,7 @@ namespace tmv {
             else
                 for(int j=0;j<N;++j) 
                     sum += col(j,0,j+1).sumAbsElements();
-        if (isunit()) sum += N;
+        if (isunit()) sum += RT(N);
         return sum;
     }
 
@@ -449,8 +449,8 @@ namespace tmv {
                 for(int j=0;j<N;++j) 
                     sum += col(j,0,j+1).normSq(scale);
         if (isunit()) {
-            if (scale == RT(1)) sum += N;
-            else sum += N * scale * scale;
+            if (scale == RT(1)) sum += RT(N);
+            else sum += RT(N) * scale * scale;
         }
         return sum;
     }
@@ -610,7 +610,7 @@ namespace tmv {
         int N = M;
         int lda = m.iscm() ? m.stepj() : m.stepi();
 #ifndef LAPNOWORK
-        auto_array<double> work(cc == 'I' ? new double[M] : 0);
+        AlignedArray<double> work(c == 'I' ? M : 0);
 #endif
         double norm = LAPNAME(dlantr) (
             LAPCM LAPV(cc),
@@ -633,7 +633,7 @@ namespace tmv {
         int N = M;
         int lda = m.iscm() ? m.stepj() : m.stepi();
 #ifndef LAPNOWORK
-        auto_array<double> work(cc == 'I' ? new double[M] : 0);
+        AlignedArray<double> work(c == 'I' ? M : 0);
 #endif
         double norm = LAPNAME(zlantr) (
             LAPCM LAPV(cc),
@@ -658,7 +658,7 @@ namespace tmv {
         int N = M;
         int lda = m.iscm() ? m.stepj() : m.stepi();
 #ifndef LAPNOWORK
-        auto_array<float> work(cc == 'I' ? new float[M] : 0);
+        AlignedArray<float> work(c == 'I' ? M : 0);
 #endif
         float norm = LAPNAME(slantr) (
             LAPCM LAPV(cc),
@@ -681,7 +681,7 @@ namespace tmv {
         int N = M;
         int lda = m.iscm() ? m.stepj() : m.stepi();
 #ifndef LAPNOWORK
-        auto_array<float> work(cc == 'I' ? new float[M] : 0);
+        AlignedArray<float> work(c == 'I' ? M : 0);
 #endif
         float norm = LAPNAME(clantr) (
             LAPCM LAPV(cc),

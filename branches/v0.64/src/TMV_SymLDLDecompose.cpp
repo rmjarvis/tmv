@@ -748,7 +748,7 @@ namespace tmv {
                 A3.reset(new SymMatrixView<T>(A3S->view()));
             }
             Vector<T> xD3(xD.size(),T(0));
-            auto_array<int> P3(new int[A.size()]);
+            AlignedArray<int> P3(A.size());
             RT logdet3(1);
             T signdet3(1);
             if (A.isherm()) 
@@ -820,19 +820,19 @@ namespace tmv {
 
         int n = A.size();
         int lda = A.stepj();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
-        auto_array<double> work(new double[lwork]);
+        AlignedArray<double> work(lwork);
 #else
         int lwork = -1;
-        auto_array<double> work(new double[1]);
+        AlignedArray<double> work(1);
         LAPNAME(dsytrf) (
             LAPCM LAPCH_LO,LAPV(n),LAPP(A.ptr()),LAPV(lda),
             LAPP(lap_p.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
         lwork = int(work[0]);
-        work.reset(new double[lwork]);
+        work.resize(lwork);
 #endif
 #endif
         LAPNAME(dsytrf) (
@@ -911,20 +911,20 @@ namespace tmv {
         TMVAssert(A.iscm());
         int n = A.size();
         int lda = A.stepj();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         if (A.isherm()) {
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = n*LAP_BLOCKSIZE;
-            auto_array<std::complex<double> > work(new std::complex<double>[lwork]);
+            AlignedArray<std::complex<double> > work(lwork);
 #else
             int lwork = -1;
-            auto_array<std::complex<double> > work(new std::complex<double>[1]);
+            AlignedArray<std::complex<double> > work(1);
             LAPNAME(zhetrf) (
                 LAPCM LAPCH_LO,LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(lap_p.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
             lwork = int(std::real(work[0]));
-            work.reset(new std::complex<double>[lwork]);
+            work.resize(lwork);
 #endif
 #endif
             LAPNAME(zhetrf) (
@@ -939,15 +939,15 @@ namespace tmv {
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = n*LAP_BLOCKSIZE;
-            auto_array<std::complex<double> > work(new std::complex<double>[lwork]);
+            AlignedArray<std::complex<double> > work(lwork);
 #else
             int lwork = -1;
-            auto_array<std::complex<double> > work(new std::complex<double>[1]);
+            AlignedArray<std::complex<double> > work(1);
             LAPNAME(zsytrf) (
                 LAPCM LAPCH_LO,LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(lap_p.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
             lwork = int(std::real(work[0]));
-            work.reset(new std::complex<double>[lwork]);
+            work.resize(lwork);
 #endif
 #endif
             LAPNAME(zsytrf) (
@@ -1049,19 +1049,19 @@ namespace tmv {
 
         int n = A.size();
         int lda = A.stepj();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
-        auto_array<float> work(new float[lwork]);
+        AlignedArray<float> work(lwork);
 #else
         int lwork = -1;
-        auto_array<float> work(new float[1]);
+        AlignedArray<float> work(1);
         LAPNAME(ssytrf) (
             LAPCM LAPCH_LO,LAPV(n),LAPP(A.ptr()),LAPV(lda),
             LAPP(lap_p.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
         lwork = int(work[0]);
-        work.reset(new float[lwork]);
+        work.resize(lwork);
 #endif
 #endif
         LAPNAME(ssytrf) (
@@ -1140,20 +1140,20 @@ namespace tmv {
         TMVAssert(A.iscm());
         int n = A.size();
         int lda = A.stepj();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         if (A.isherm()) {
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = n*LAP_BLOCKSIZE;
-            auto_array<std::complex<float> > work(new std::complex<float>[lwork]);
+            AlignedArray<std::complex<float> > work(lwork);
 #else
             int lwork = -1;
-            auto_array<std::complex<float> > work(new std::complex<float>[1]);
+            AlignedArray<std::complex<float> > work(1);
             LAPNAME(chetrf) (
                 LAPCM LAPCH_LO,LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(lap_p.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
             lwork = int(std::real(work[0]));
-            work.reset(new std::complex<float>[lwork]);
+            work.resize(lwork);
 #endif
 #endif
             LAPNAME(chetrf) (
@@ -1168,15 +1168,15 @@ namespace tmv {
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = n*LAP_BLOCKSIZE;
-            auto_array<std::complex<float> > work(new std::complex<float>[lwork]);
+            AlignedArray<std::complex<float> > work(lwork);
 #else
             int lwork = -1;
-            auto_array<std::complex<float> > work(new std::complex<float>[1]);
+            AlignedArray<std::complex<float> > work(1);
             LAPNAME(csytrf) (
                 LAPCM LAPCH_LO,LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(lap_p.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
             lwork = int(std::real(work[0]));
-            work.reset(new std::complex<float>[lwork]);
+            work.resize(lwork);
 #endif
 #endif
             LAPNAME(csytrf) (
@@ -1344,7 +1344,7 @@ namespace tmv {
                 A3.reset(new SymMatrixView<T>(A3S->view()));
             }
             Vector<T> xD3(xD.size(),T(0));
-            auto_array<int> P3(new int[A.size()]);
+            AlignedArray<int> P3(A.size());
             RT logdet3(1);
             T signdet3(1);
             if (A.isherm()) 

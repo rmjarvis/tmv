@@ -231,7 +231,7 @@ namespace tmv {
         int kl = A.nlo();
         int ku = A.nhi()-kl;
         int lda = A.stepj()+1;
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         LAPNAME(dgbtrf) (
             LAPCM LAPV(n),LAPV(n),LAPV(kl),LAPV(ku),
             LAPP(A.ptr()-A.nhi()),LAPV(lda),LAPP(lap_p.get()) LAPINFO );
@@ -253,7 +253,7 @@ namespace tmv {
         int kl = A.nlo();
         int ku = A.nhi()-kl;
         int lda = A.stepj()+1;
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         LAPNAME(zgbtrf) (
             LAPCM LAPV(n),LAPV(n),LAPV(kl),LAPV(ku),
             LAPP(A.ptr()-A.nhi()),LAPV(lda),LAPP(lap_p.get()) LAPINFO );
@@ -277,7 +277,7 @@ namespace tmv {
         int kl = A.nlo();
         int ku = A.nhi()-kl;
         int lda = A.stepj()+1;
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         LAPNAME(sgbtrf) (
             LAPCM LAPV(n),LAPV(n),LAPV(kl),LAPV(ku),
             LAPP(A.ptr()-A.nhi()),LAPV(lda),LAPP(lap_p.get()) LAPINFO );
@@ -299,7 +299,7 @@ namespace tmv {
         int kl = A.nlo();
         int ku = A.nhi()-kl;
         int lda = A.stepj()+1;
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         LAPNAME(cgbtrf) (
             LAPCM LAPV(n),LAPV(n),LAPV(kl),LAPV(ku),
             LAPP(A.ptr()-A.nhi()),LAPV(lda),LAPP(lap_p.get()) LAPINFO );
@@ -327,7 +327,7 @@ namespace tmv {
         TMVAssert(A.nhi()==2);
         TMVAssert(A.ct()==NonConj);
         int n = A.colsize();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         LAPNAME(dgttrf) (
             LAPCM LAPV(n),LAPP(A.diag(-1).ptr()),LAPP(A.diag().ptr()),
             LAPP(A.diag(1).ptr()),LAPP(A.diag(2).ptr()),LAPP(lap_p.get()) LAPINFO );
@@ -348,7 +348,7 @@ namespace tmv {
         TMVAssert(A.nhi()==2);
         TMVAssert(A.ct()==NonConj);
         int n = A.colsize();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         LAPNAME(zgttrf) (
             LAPCM LAPV(n),LAPP(A.diag(-1).ptr()),LAPP(A.diag().ptr()), 
             LAPP(A.diag(1).ptr()),LAPP(A.diag(2).ptr()),LAPP(lap_p.get()) LAPINFO);
@@ -371,7 +371,7 @@ namespace tmv {
         TMVAssert(A.nhi()==2);
         TMVAssert(A.ct()==NonConj);
         int n = A.colsize();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         LAPNAME(sgttrf) (
             LAPCM LAPV(n),LAPP(A.diag(-1).ptr()),LAPP(A.diag().ptr()),
             LAPP(A.diag(1).ptr()),LAPP(A.diag(2).ptr()),LAPP(lap_p.get()) LAPINFO );
@@ -392,7 +392,7 @@ namespace tmv {
         TMVAssert(A.nhi()==2);
         TMVAssert(A.ct()==NonConj);
         int n = A.colsize();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         LAPNAME(cgttrf) (
             LAPCM LAPV(n),LAPP(A.diag(-1).ptr()),LAPP(A.diag().ptr()), 
             LAPP(A.diag(1).ptr()),LAPP(A.diag(2).ptr()),LAPP(lap_p.get()) LAPINFO);
@@ -478,7 +478,7 @@ namespace tmv {
             cerr<<endl;
 #ifdef LAP
             BandMatrix<T,ColMajor> A2 = A0;
-            auto_array<int> P2(new int[A.colsize()]);
+            AlignedArray<int> P2(A.colsize());
             int det2(0);
             NonLapBandLU_Decompose(A2.view(),P2.get(),det2);
             cerr<<"NonLap version = "<<A2<<endl;

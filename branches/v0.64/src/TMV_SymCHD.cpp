@@ -51,7 +51,7 @@ namespace tmv {
         HermCHDiv_Impl(const GenSymMatrix<T>& m, bool inplace);
 
         const bool inplace;
-        auto_array<T> Aptr1;
+        AlignedArray<T> Aptr1;
         T* Aptr;
         SymMatrixView<T> LLx;
         mutable bool zerodet;
@@ -59,7 +59,7 @@ namespace tmv {
         mutable bool donedet;
     };
 
-#define APTR1 (inplace ? 0 : new T[A.size()*A.size()])
+#define APTR1 (inplace ? 0 : (A.size()*A.size()))
 #define APTR (inplace ? A.nonConst().ptr() : Aptr1.get())
 #define LLX \
     (inplace ? (A.uplo()==Upper ? A.nonConst().adjoint() : A.nonConst()) : \

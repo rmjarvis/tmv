@@ -328,6 +328,7 @@
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_TriMatrix.h"
 #include "tmv/TMV_DiagMatrix.h"
+#include "tmv/TMV_Array.h"
 #include <vector>
 
 namespace tmv {
@@ -2634,7 +2635,7 @@ namespace tmv {
 
 #define NEW_SIZE(cs,rs,lo,hi) \
         linsize(BandStorageLength(S,cs,rs,lo,hi)), \
-        itsm1(new T[linsize]), itscs(cs), itsrs(rs), itsnlo(lo), itsnhi(hi), \
+        itsm1(linsize), itscs(cs), itsrs(rs), itsnlo(lo), itsnhi(hi), \
         itssi(S==RowMajor ? lo+hi : S==ColMajor ? 1 : \
               rs>= cs ? 1-int(cs) : -int(rs) ), \
         itssj(S==RowMajor ? 1 : S==ColMajor ? lo+hi : -itssi+1), \
@@ -2644,7 +2645,7 @@ namespace tmv {
 
 #define NEW_SIZE2(ls,cs,rs,lo,hi) \
         linsize(ls), \
-        itsm1(new T[linsize]), itscs(cs), itsrs(rs), itsnlo(lo), itsnhi(hi), \
+        itsm1(linsize), itscs(cs), itsrs(rs), itsnlo(lo), itsnhi(hi), \
         itssi(S==RowMajor ? lo+hi : S==ColMajor ? 1 : \
               rs>= cs ? 1-int(cs) : -int(rs) ), \
         itssj(S==RowMajor ? 1 : S==ColMajor ? lo+hi : -itssi+1), \
@@ -3862,7 +3863,7 @@ namespace tmv {
     protected :
 
         const size_t linsize;
-        auto_array<T> itsm1;
+        AlignedArray<T> itsm1;
         const size_t itscs;
         const size_t itsrs;
         const int itsnlo;
@@ -3895,9 +3896,7 @@ namespace tmv {
             TMVAssert(m1.rowsize() == m2.rowsize());
             TMVAssert(m1.nlo() == m2.nlo());
             TMVAssert(m1.nhi() == m2.nhi());
-            T* temp = m1.itsm1.release();
-            m1.itsm1.reset(m2.itsm1.release());
-            m2.itsm1.reset(temp);
+            m1.itsm1.swapWith(m2.itsm1);
             TMV_SWAP(m1.itsm,m2.itsm);
 #ifdef TMVFLDEBUG
             TMV_SWAP(m1._first,m2._first);

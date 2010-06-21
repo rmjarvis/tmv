@@ -181,7 +181,7 @@ namespace tmv {
         //
 
         Permutation(size_t n) :
-            itsn(n), itsmem(new int[n]), itsp(itsmem.get()),
+            itsn(n), itsmem(n), itsp(itsmem.get()),
             isinv(false), itsdet(1) 
         { for(int i=0;i<itsn;++i) itsmem[i] = i; }
 
@@ -202,7 +202,7 @@ namespace tmv {
         Permutation& operator=(const Permutation& rhs) 
         {
             TMVAssert(size() == rhs.size());
-            itsmem.reset();
+            itsmem.resize(0);
             itsp = rhs.itsp;
             isinv = rhs.isinv;
             itsdet = rhs.itsdet;
@@ -288,7 +288,7 @@ namespace tmv {
             // equal to its index.
             // Then apply the permutation and count how many are still in
             // the same position.
-            auto_array<int> temp(new int[itsn]);
+            AlignedArray<int> temp(itsn);
             makeIndex(temp.get());
             int t = 0;
             for(int k=0;k<itsn;++k) if (temp[k] == k) ++t;
@@ -356,8 +356,8 @@ namespace tmv {
             } else {
                 // If not the same storage, then this requires a bit of work
                 // to see if they effect the same permutation.
-                auto_array<int> temp1(new int[n]);
-                auto_array<int> temp2(new int[n]);
+                AlignedArray<int> temp1(n);
+                AlignedArray<int> temp2(n);
                 p1.makeIndex(temp1.get());
                 p2.makeIndex(temp2.get());
                 for(int i=0;i<n;++i) {
@@ -421,7 +421,7 @@ namespace tmv {
 
         inline void write(std::ostream& os) const
         {
-            auto_array<int> temp(new int[itsn]);
+            AlignedArray<int> temp(itsn);
             makeIndex(temp.get());
             os<<itsn<<"  "<<itsn<<std::endl;
             for(int i=0;i<itsn;++i) {
@@ -478,9 +478,7 @@ namespace tmv {
         friend inline void Swap(Permutation& p1, Permutation& p2)
         {
             TMVAssert(p1.size() == p2.size());
-            int* m1 = p1.itsmem.release();
-            p1.itsmem.reset(p2.itsmem.release());
-            p2.itsmem.reset(m1);
+            p1.itsmem.swapWith(p2.itsmem);
             TMV_SWAP(p1.itsp,p2.itsp);
             TMV_SWAP(p1.isinv,p2.isinv);
             TMV_SWAP(p1.itsdet,p2.itsdet);
@@ -570,10 +568,22 @@ namespace tmv {
             P.calcDet();
         }
 
+        template <class T, IndexStyle I>
+        friend inline void DoVectorSort(
+            const VectorView<T,I>& v, Permutation& P, ADType ad, CompType comp)
+        {
+            TMVAssert(P.size() == v.size());
+            P.allocateMem();
+            v.sort(P.getMem(),ad,comp);
+            P.calcDet();
+            P.isinv = false;
+        }
+
+
     protected:
 
         int itsn;
-        auto_array<int> itsmem;
+        AlignedArray<int> itsmem;
         const int* itsp;
         bool isinv;
         int itsdet; // det = 1 or -1
@@ -597,7 +607,7 @@ namespace tmv {
         inline void allocateMem()
         { 
             if (!itsmem.get()) {
-                itsmem.reset(new int[itsn]);
+                itsmem.resize(itsn);
                 itsp = itsmem.get();
             }
         }
@@ -605,7 +615,7 @@ namespace tmv {
         inline void saveToMem()
         { 
             if (!itsmem.get()) {
-                itsmem.reset(new int[itsn]);
+                itsmem.resize(itsn);
                 for(int i=0;i<itsn;++i) itsmem[i] = itsp[i];
                 itsp = itsmem.get();
             }
@@ -614,7 +624,7 @@ namespace tmv {
         inline void makeCopyOf(const Permutation& orig)
         { 
             itsn = orig.itsn;
-            itsmem.reset(new int[itsn]);
+            itsmem.resize(itsn);
             for(int i=0;i<itsn;++i) itsmem[i] = orig.itsp[i];
             itsp = itsmem.get();
             isinv = orig.isinv;
@@ -880,11 +890,7 @@ namespace tmv {
     inline const VectorView<T,I>& VectorView<T,I>::sort(
         Permutation& P, ADType ad, CompType comp) const
     {
-        TMVAssert(P.size() == this->size());
-        P.allocateMem();
-        sort(P.getMem(),ad,comp);
-        P.calcDet();
-        P.isinv = false;
+        DoVectorSort(*this,P,ad,comp);
         return *this;
     }
 

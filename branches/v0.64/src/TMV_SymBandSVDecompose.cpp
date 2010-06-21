@@ -289,7 +289,7 @@ namespace tmv {
         double* UU = U ? U->ptr() : 0;
 #ifndef LAPNOWORK
         int lwork = n;
-        auto_array<double> work(new double[lwork]);
+        AlignedArray<double> work(lwork);
 #endif
         LAPNAME(dsbtrd) (
             LAPCM LAPV(vect),LAPCH_LO,LAPV(n),LAPV(kl),
@@ -330,7 +330,7 @@ namespace tmv {
         std::complex<double>* UU = U ? U->ptr() : 0;
 #ifndef LAPNOWORK
         int lwork = n;
-        auto_array<std::complex<double> > work(new std::complex<double>[lwork]);
+        AlignedArray<std::complex<double> > work(lwork);
 #endif
         LAPNAME(zhbtrd) (
             LAPCM LAPV(vect),LAPCH_LO,LAPV(n),LAPV(kl),
@@ -370,7 +370,7 @@ namespace tmv {
         float* UU = U ? U->ptr() : 0;
 #ifndef LAPNOWORK
         int lwork = n;
-        auto_array<float> work(new float[lwork]);
+        AlignedArray<float> work(lwork);
 #endif
         LAPNAME(ssbtrd) (
             LAPCM LAPV(vect),LAPCH_LO,LAPV(n),LAPV(kl),
@@ -411,7 +411,7 @@ namespace tmv {
         std::complex<float>* UU = U ? U->ptr() : 0;
 #ifndef LAPNOWORK
         int lwork = n;
-        auto_array<std::complex<float> > work(new std::complex<float>[lwork]);
+        AlignedArray<std::complex<float> > work(lwork);
 #endif
         LAPNAME(chbtrd) (
             LAPCM LAPV(vect),LAPCH_LO,LAPV(n),LAPV(kl),
@@ -597,7 +597,7 @@ namespace tmv {
                 signdet *= s;
             }
             if (U || V) {
-                auto_array<int> sortp(new int[A.size()]);
+                AlignedArray<int> sortp(A.size());
                 SS.diag().sort(sortp.get(),Descend,AbsComp);
                 if (U) U->permuteCols(sortp.get());
                 if (V) V->permuteRows(sortp.get());
@@ -699,7 +699,7 @@ namespace tmv {
                 U.conjugateSelf();
             } else {
                 UnsortedEigen<T>(A,U,SS);
-                auto_array<int> sortp(new int[A.size()]);
+                AlignedArray<int> sortp(A.size());
                 SS.sort(sortp.get(),Ascend);
                 U.permuteCols(sortp.get());
             }

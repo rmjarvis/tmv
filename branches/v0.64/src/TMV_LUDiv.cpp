@@ -87,7 +87,7 @@ namespace tmv {
         int nrhs = m.rowsize();
         int lda = LUx.stepj();
         int ldb = m.stepj();
-        auto_array<int> ipiv(new int[n]);
+        AlignedArray<int> ipiv(n);
 #ifdef CLAP
         for(int i=0;i<n;++i) ipiv[i] = i;
 #else
@@ -114,7 +114,7 @@ namespace tmv {
         int nrhs = m.rowsize();
         int lda = LUx.stepj();
         int ldb = m.stepj();
-        auto_array<int> ipiv(new int[n]);
+        AlignedArray<int> ipiv(n);
 #ifdef CLAP
         for(int i=0;i<n;++i) ipiv[i] = i;
 #else
@@ -142,7 +142,7 @@ namespace tmv {
         int nrhs = m.rowsize();
         int lda = LUx.stepj();
         int ldb = m.stepj();
-        auto_array<int> ipiv(new int[n]);
+        AlignedArray<int> ipiv(n);
 #ifdef CLAP
         for(int i=0;i<n;++i) ipiv[i] = i;
 #else
@@ -169,7 +169,7 @@ namespace tmv {
         int nrhs = m.rowsize();
         int lda = LUx.stepj();
         int ldb = m.stepj();
-        auto_array<int> ipiv(new int[n]);
+        AlignedArray<int> ipiv(n);
 #ifdef CLAP
         for(int i=0;i<n;++i) ipiv[i] = i;
 #else
@@ -264,7 +264,7 @@ namespace tmv {
         int nrhs = m.colsize();
         int lda = LUx.stepj();
         int ldb = m.stepi();
-        auto_array<int> ipiv(new int[n]);
+        AlignedArray<int> ipiv(n);
 #ifdef CLAP
         for(int i=0;i<n;++i) ipiv[i] = i;
 #else
@@ -290,7 +290,7 @@ namespace tmv {
         int nrhs = m.colsize();
         int lda = LUx.stepj();
         int ldb = m.stepi();
-        auto_array<int> ipiv(new int[n]);
+        AlignedArray<int> ipiv(n);
 #ifdef CLAP
         for(int i=0;i<n;++i) ipiv[i] = i;
 #else
@@ -319,7 +319,7 @@ namespace tmv {
         int nrhs = m.colsize();
         int lda = LUx.stepj();
         int ldb = m.stepi();
-        auto_array<int> ipiv(new int[n]);
+        AlignedArray<int> ipiv(n);
 #ifdef CLAP
         for(int i=0;i<n;++i) ipiv[i] = i;
 #else
@@ -345,7 +345,7 @@ namespace tmv {
         int nrhs = m.colsize();
         int lda = LUx.stepj();
         int ldb = m.stepi();
-        auto_array<int> ipiv(new int[n]);
+        AlignedArray<int> ipiv(n);
 #ifdef CLAP
         for(int i=0;i<n;++i) ipiv[i] = i;
 #else

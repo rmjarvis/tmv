@@ -91,7 +91,7 @@ namespace tmv {
             int lo = this->nlo();
             int hi = this->nhi();
             size_t len = ls();
-            itsm1.reset(new T[len]);
+            itsm1.resize(len);
             int si = stepi();
             int sj = stepj();
             int ds = si + sj;

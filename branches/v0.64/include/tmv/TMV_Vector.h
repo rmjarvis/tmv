@@ -322,6 +322,7 @@
 #include "tmv/TMV_BaseVector.h"
 #include <vector>
 #include "tmv/TMV_ListInit.h"
+#include "tmv/TMV_Array.h"
 
 #ifdef TMVFLDEBUG
 #include "tmv/TMV_VIt.h"
@@ -1546,7 +1547,7 @@ namespace tmv {
         //
 
 #define NEW_SIZE(n) \
-        _v(new T[(n)]), _size(n) TMV_DEFFIRSTLAST(_v.get(),_v.get()+n)
+        _v(n), _size(n) TMV_DEFFIRSTLAST(_v.get(),_v.get()+n)
 
         explicit inline Vector(size_t n) : NEW_SIZE(n)
         {
@@ -2121,7 +2122,7 @@ namespace tmv {
 
     private:
 
-        auto_array<T> _v;
+        AlignedArray<T> _v;
         const size_t _size;
 
 #ifdef TMVFLDEBUG

@@ -50,7 +50,7 @@ namespace tmv {
 
         const bool istrans;
         const bool inplace;
-        auto_array<T> Aptr1;
+        AlignedArray<T> Aptr1;
         T* Aptr;
         MatrixView<T> LUx;
         Permutation P;
@@ -59,7 +59,7 @@ namespace tmv {
         mutable bool donedet;
     };
 
-#define APTR1 (inplace ? 0 : new T[A.colsize()*A.rowsize()])
+#define APTR1 (inplace ? 0 : (A.colsize()*A.rowsize()))
 #define APTR (inplace ? A.nonConst().ptr() : Aptr1.get())
 #define LUX (istrans ? \
              (inplace ? A.nonConst().transpose() : \
@@ -141,7 +141,7 @@ namespace tmv {
         if (!pimpl->donedet) {
             T s;
             pimpl->logdet = DiagMatrixViewOf(pimpl->LUx.diag()).logDet(&s);
-            pimpl->signdet = T(pimpl->P.det()) * s;
+            pimpl->signdet = TMV_RealType(T)(pimpl->P.det()) * s;
             pimpl->donedet = true;
         }         
         if (pimpl->signdet == T(0)) return T(0);
@@ -154,7 +154,7 @@ namespace tmv {
         if (!pimpl->donedet) {
             T s;
             pimpl->logdet = DiagMatrixViewOf(pimpl->LUx.diag()).logDet(&s);
-            pimpl->signdet = T(pimpl->P.det()) * s;
+            pimpl->signdet = TMV_RealType(T)(pimpl->P.det()) * s;
             pimpl->donedet = true;
         }
         if (sign) *sign = pimpl->signdet;

@@ -64,6 +64,7 @@
 
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_SmallVector.h"
+#include "tmv/TMV_Array.h"
 
 namespace tmv {
 
@@ -701,7 +702,7 @@ namespace tmv {
         inline type& conjugateSelf() 
         {
             if (isComplex(T())) {
-                RT* itsmi = reinterpret_cast<RT*>(itsm)+1;
+                RT* itsmi = reinterpret_cast<RT*>(ptr())+1;
                 for(int i=0;i<2*M*N;i+=2) itsmi[i] = -itsmi[i];
             }
             return *this;
@@ -1097,7 +1098,7 @@ namespace tmv {
 
     protected :
 
-        T itsm[M*N];
+        StackArray<T,M*N> itsm;
 
     }; // SmallMatrix
 

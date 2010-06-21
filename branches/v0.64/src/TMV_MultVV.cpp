@@ -61,7 +61,7 @@ namespace tmv {
     {
         if (!_v.get()) {
             size_t len = this->size();
-            _v.reset(new T[len]);
+            _v.resize(len);
             assignToV(
                 VectorView<T>(
                     _v.get(),len,1,NonConj

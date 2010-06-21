@@ -34,6 +34,7 @@
 #define TMV_TriMatrixArithFunc_H
 
 #include "tmv/TMV_BaseTriMatrix.h"
+#include "tmv/TMV_Array.h"
 
 #define CT std::complex<T>
 
@@ -179,9 +180,8 @@ namespace tmv {
     {
     public:
 
-        inline UpperTriMatrixComposite() : itsm(0) {}
-        inline UpperTriMatrixComposite(const UpperTriMatrixComposite<T>&) :
-            itsm(0) {}
+        inline UpperTriMatrixComposite() {}
+        inline UpperTriMatrixComposite(const UpperTriMatrixComposite<T>&) {}
         virtual inline ~UpperTriMatrixComposite() {}
         const T* cptr() const;
         int stepi() const;
@@ -189,7 +189,7 @@ namespace tmv {
         inline ConjType ct() const { return NonConj; }
 
     private:
-        mutable auto_array<T> itsm;
+        mutable AlignedArray<T> itsm;
     };
 
     template <class T> 
@@ -197,9 +197,8 @@ namespace tmv {
     {
     public:
 
-        inline LowerTriMatrixComposite() : itsm(0) {}
-        inline LowerTriMatrixComposite(const LowerTriMatrixComposite<T>&) :
-            itsm(0) {}
+        inline LowerTriMatrixComposite() {}
+        inline LowerTriMatrixComposite(const LowerTriMatrixComposite<T>&) {}
         virtual inline ~LowerTriMatrixComposite() {}
         const T* cptr() const;
         int stepi() const;
@@ -207,7 +206,7 @@ namespace tmv {
         inline ConjType ct() const { return NonConj; }
 
     private:
-        mutable auto_array<T> itsm;
+        mutable AlignedArray<T> itsm;
     };
 
     // Specialize allowed complex combinations:

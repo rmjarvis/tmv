@@ -430,7 +430,7 @@ namespace tmv {
         int m = A.colsize();
         int n = A.rowsize();
         int lda = A.stepj();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         LAPNAME(dgetrf) (LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
                          LAPP(lap_p.get()) LAPINFO);
         LAP_Results("dgetrf");
@@ -450,7 +450,7 @@ namespace tmv {
         int m = A.colsize();
         int n = A.rowsize();
         int lda = A.stepj();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         LAPNAME(zgetrf) (LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
                          LAPP(lap_p.get()) LAPINFO);
         LAP_Results("zgetrf");
@@ -476,7 +476,7 @@ namespace tmv {
         int m = A.colsize();
         int n = A.rowsize();
         int lda = A.stepj();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         LAPNAME(sgetrf) (LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
                          LAPP(lap_p.get()) LAPINFO);
         LAP_Results("sgetrf");
@@ -496,7 +496,7 @@ namespace tmv {
         int m = A.colsize();
         int n = A.rowsize();
         int lda = A.stepj();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         LAPNAME(cgetrf) (LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
                          LAPP(lap_p.get()) LAPINFO);
         LAP_Results("cgetrf");

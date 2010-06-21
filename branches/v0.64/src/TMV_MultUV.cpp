@@ -62,7 +62,7 @@ namespace tmv {
     const T* UpperTriMatrixComposite<T>::cptr() const
     {
         if (!itsm.get()) {
-            itsm.reset(new T[this->size()*this->size()]);
+            itsm.resize(this->size()*this->size());
             UpperTriMatrixViewOf(
                 itsm.get(),this->size(), this->stor(), this->dt()) = *this;
         }
@@ -81,7 +81,7 @@ namespace tmv {
     const T* LowerTriMatrixComposite<T>::cptr() const
     {
         if (!itsm.get()) {
-            itsm.reset(new T[this->size()*this->size()]);
+            itsm.resize(this->size()*this->size());
             LowerTriMatrixViewOf(
                 itsm.get(),this->size(), this->stor(), this->dt()) = *this;
         }

@@ -61,7 +61,7 @@ namespace tmv {
 
 #define NEW_SIZE(cs,rs) \
     linsize((cs)*(rs)), \
-    itsm(new T[linsize]), itscs(cs), itsrs(rs) \
+    itsm(linsize), itscs(cs), itsrs(rs) \
     TMV_DEFFIRSTLAST(itsm.get(),itsm.get()+ls())
 
     template <class T, StorageType S, IndexStyle I>
@@ -504,7 +504,7 @@ namespace tmv {
         int N = m.rowsize();
         int lda = m.stepj();
 #ifndef LAPNOWORK
-        auto_array<double> work(c == 'I' ? new double[M] : 0);
+        AlignedArray<double> work(c == 'I' ? M : 0);
 #endif
         double norm = LAPNAME(dlange) (
             LAPCM LAPV(cc),LAPV(M),LAPV(N),
@@ -520,7 +520,7 @@ namespace tmv {
         int N = m.rowsize();
         int lda = m.stepj();
 #ifndef LAPNOWORK
-        auto_array<double> work(c == 'I' ? new double[M] : 0);
+        AlignedArray<double> work(c == 'I' ? M : 0);
 #endif
         double norm = LAPNAME(zlange) (
             LAPCM LAPV(cc),LAPV(M),LAPV(N),
@@ -538,7 +538,7 @@ namespace tmv {
         int N = m.rowsize();
         int lda = m.stepj();
 #ifndef LAPNOWORK
-        auto_array<float> work(c == 'I' ? new float[M] : 0);
+        AlignedArray<float> work(c == 'I' ? M : 0);
 #endif
         double norm = LAPNAME(slange) (
             LAPCM LAPV(cc),LAPV(M),LAPV(N),
@@ -554,7 +554,7 @@ namespace tmv {
         int N = m.rowsize();
         int lda = m.stepj();
 #ifndef LAPNOWORK
-        auto_array<float> work(c == 'I' ? new float[M] : 0);
+        AlignedArray<float> work(c == 'I' ? M : 0);
 #endif
         double norm = LAPNAME(clange) (
             LAPCM LAPV(cc),LAPV(M),LAPV(N),

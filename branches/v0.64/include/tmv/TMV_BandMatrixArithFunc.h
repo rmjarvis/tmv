@@ -34,6 +34,7 @@
 #define TMV_BandMatrixArithFunc_H
 
 #include "tmv/TMV_BaseBandMatrix.h"
+#include "tmv/TMV_Array.h"
 
 #define CT std::complex<T>
 
@@ -100,9 +101,8 @@ namespace tmv {
     {
     public:
 
-        inline BandMatrixComposite() : itsm1(0), itsm(0) {}
-        inline BandMatrixComposite(const BandMatrixComposite<T>&) :
-            itsm1(0), itsm(0) {}
+        inline BandMatrixComposite() : itsm(0) {}
+        inline BandMatrixComposite(const BandMatrixComposite<T>&) : itsm(0) {}
         virtual inline ~BandMatrixComposite() {}
 
         // Definitions are in TMV_MultBV.cpp
@@ -120,7 +120,7 @@ namespace tmv {
 
     private:
 
-        mutable auto_array<T> itsm1;
+        mutable AlignedArray<T> itsm1;
         mutable T* itsm;
 
         BandMatrixComposite<T>& operator=(const BandMatrixComposite<T>&);

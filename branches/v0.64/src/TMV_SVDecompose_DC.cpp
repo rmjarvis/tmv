@@ -91,7 +91,7 @@ struct ThreadSafeWriter
 
 #include "tmv/TMV_DiagMatrix.h"
 #include "tmv/TMV_DiagMatrixArith.h"
-#define THRESH 1.e-5
+#define THRESH 1.e-11
 //#define TESTUV  // Should only use this for full USV decompositions
 using std::cerr;
 #else
@@ -584,12 +584,12 @@ namespace tmv {
                     // if they are the same sign, then that means that the 
                     // threepoles approximation is the same sign over the
                     // entire allowed bounds for eta.
-                    // The best solution then is to just go to eta2.
-                    // But instead we use bisection to be safe.
+                    // Since threepoles isn't a good approximation, use 
+                    // Newton instead.
                     dbgcout<<"h(0) = g = "<<h<<endl;
                     dbgcout<<"h(eta2) = h2 = "<<h2<<endl;
-                    dbgcout<<"Same sign, so use bisection\n";
-                    eta = eta2/2;
+                    dbgcout<<"Same sign, so use Newton\n";
+                    eta = (-f/df)/d2;
                 } else for(int iter3 = 0; iter3 < TMV_MAXITER; iter3++) {
                     dbgcout<<"iter3 = "<<iter3<<", eta = "<<eta<<
                         "  h = "<<h<<endl;
@@ -1213,7 +1213,7 @@ namespace tmv {
 
             if (N > 1) {
                 // Sort the inner matrix so z is in the first row, D are increasing
-                auto_array<int> P(new int[N]);
+                AlignedArray<int> P(N);
                 D.subVector(0,N).sort(P.get(),Ascend);
                 z.subVector(0,N).permute(P.get());
                 if (U) U->colRange(0,N).permuteCols(P.get());

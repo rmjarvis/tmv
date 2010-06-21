@@ -60,7 +60,7 @@ namespace tmv {
         if (!itsm.get()) {
             size_t s = this->size();
             size_t len = s*s;
-            itsm.reset(new T[len]);
+            itsm.resize(len);
             this->assignToS(SymMatrixView<T>(
                     itsm.get(),s,stepi(),stepj(),
                     Sym,uplo(),this->stor(),NonConj 
@@ -636,69 +636,65 @@ namespace tmv {
         } else if (y.step() == 0) {
             TMVAssert(y.size() <= 1);
             DoMultMV<add>(alpha,A,x,VectorView<T>(y.ptr(),y.size(),1,y.ct()));
-        } else {
-            if (A.iscm()&&A.stepj()>0) {
-                if (!y.isconj() /*&& y.step() > 0*/) { 
-                    if (!x.isconj() /*&& x.step() > 0*/)
-                        BlasMultMV(alpha,A,x,add?1:0,y);
-                    else {
-                        Vector<T> xx = alpha*x;
-                        BlasMultMV(T(1),A,xx,add?1:0,y);
-                    }
-                } else {
-                    Vector<T> yy(y.size());
-                    if (!x.isconj() /*&& x.step() > 0*/) {
-                        BlasMultMV(T(1),A,x,0,yy.view());
-                        if (add) y += alpha*yy;
-                        else y = alpha*yy;
-                    } else {
-                        Vector<T> xx = alpha*x;
-                        BlasMultMV(T(1),A,xx,0,yy.view());
-                        if (add) y += yy;
-                        else y = yy;
-                    }
+        } else if (A.iscm()&&A.stepj()>0) {
+            if (!y.isconj() && y.step() > 0) { 
+                if (!x.isconj() && x.step() > 0)
+                    BlasMultMV(alpha,A,x,add?1:0,y);
+                else {
+                    Vector<T> xx = alpha*x;
+                    BlasMultMV(T(1),A,xx,add?1:0,y);
                 }
             } else {
-                if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
-                    if (A.isherm()) {
-                        if (A.uplo() == Upper) {
-                            HermMatrix<Ta,Upper,ColMajor> A2 =
-                                TMV_REAL(alpha)*A;
-                            DoMultMV<add>(T(1),A2,x,y);
-                        } else {
-                            HermMatrix<Ta,Lower,ColMajor> A2 =
-                                TMV_REAL(alpha)*A;
-                            DoMultMV<add>(T(1),A2,x,y);
-                        }
-                    } else {
-                        if (A.uplo() == Upper) {
-                            SymMatrix<Ta,Upper,ColMajor> A2 =
-                                TMV_REAL(alpha)*A;
-                            DoMultMV<add>(T(1),A2,x,y);
-                        } else {
-                            SymMatrix<Ta,Lower,ColMajor> A2 =
-                                TMV_REAL(alpha)*A;
-                            DoMultMV<add>(T(1),A2,x,y);
-                        }
-                    }
+                Vector<T> yy(y.size());
+                if (!x.isconj() && x.step() > 0) {
+                    BlasMultMV(T(1),A,x,0,yy.view());
+                    if (add) y += alpha*yy;
+                    else y = alpha*yy;
                 } else {
-                    if (!A.issym()) {
-                        if (A.uplo() == Upper) {
-                            HermMatrix<Ta,Upper,ColMajor> A2 = A;
-                            DoMultMV<add>(alpha,A2,x,y);
-                        } else {
-                            HermMatrix<Ta,Lower,ColMajor> A2 = A;
-                            DoMultMV<add>(alpha,A2,x,y);
-                        }
-                    } else {
-                        if (A.uplo() == Upper) {
-                            SymMatrix<T,Upper,ColMajor> A2 = alpha*A;
-                            DoMultMV<add>(T(1),A2,x,y);
-                        } else {
-                            SymMatrix<T,Lower,ColMajor> A2 = alpha*A;
-                            DoMultMV<add>(T(1),A2,x,y);
-                        }
-                    }
+                    Vector<T> xx = alpha*x;
+                    BlasMultMV(T(1),A,xx,0,yy.view());
+                    if (add) y += yy;
+                    else y = yy;
+                }
+            }
+        } else if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
+            if (A.isherm()) {
+                if (A.uplo() == Upper) {
+                    HermMatrix<Ta,Upper,ColMajor> A2 =
+                        TMV_REAL(alpha)*A;
+                    DoMultMV<add>(T(1),A2,x,y);
+                } else {
+                    HermMatrix<Ta,Lower,ColMajor> A2 =
+                        TMV_REAL(alpha)*A;
+                    DoMultMV<add>(T(1),A2,x,y);
+                }
+            } else {
+                if (A.uplo() == Upper) {
+                    SymMatrix<Ta,Upper,ColMajor> A2 =
+                        TMV_REAL(alpha)*A;
+                    DoMultMV<add>(T(1),A2,x,y);
+                } else {
+                    SymMatrix<Ta,Lower,ColMajor> A2 =
+                        TMV_REAL(alpha)*A;
+                    DoMultMV<add>(T(1),A2,x,y);
+                }
+            }
+        } else {
+            if (!A.issym()) {
+                if (A.uplo() == Upper) {
+                    HermMatrix<Ta,Upper,ColMajor> A2 = A;
+                    DoMultMV<add>(alpha,A2,x,y);
+                } else {
+                    HermMatrix<Ta,Lower,ColMajor> A2 = A;
+                    DoMultMV<add>(alpha,A2,x,y);
+                }
+            } else {
+                if (A.uplo() == Upper) {
+                    SymMatrix<T,Upper,ColMajor> A2 = alpha*A;
+                    DoMultMV<add>(T(1),A2,x,y);
+                } else {
+                    SymMatrix<T,Lower,ColMajor> A2 = alpha*A;
+                    DoMultMV<add>(T(1),A2,x,y);
                 }
             }
         }

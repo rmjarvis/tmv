@@ -136,13 +136,13 @@ namespace tmv {
 #ifdef NOWORKQUERY
             int lwork = 1+(4+n)*n;
             int liwork = 3+5*n;
-            auto_array<double> work(new double[lwork]);
-            auto_array<int> iwork(new int[liwork]);
+            AlignedArray<double> work(lwork);
+            AlignedArray<int> iwork(liwork);
 #else
             int lwork = -1;
             int liwork = -1;
-            auto_array<double> work(new double[1]);
-            auto_array<int> iwork(new int[1]);
+            AlignedArray<double> work(1);
+            AlignedArray<int> iwork(1);
             LAPNAME(dstedc) (
                 LAPCM LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E.ptr()),LAPP(U1.ptr()),LAPV(ldu)
@@ -150,8 +150,8 @@ namespace tmv {
                 LAPINFO LAP1);
             lwork = int(work[0]);
             liwork = iwork[0];
-            work.reset(new double[lwork]);
-            iwork.reset(new int[liwork]);
+            work.resize(lwork);
+            iwork.resize(liwork);
 #endif
 #endif
             LAPNAME(dstedc) (
@@ -172,13 +172,13 @@ namespace tmv {
 #ifdef NOWORKQUERY
             int lwork = 1;
             int liwork = 1;
-            auto_array<double> work(new double[lwork]);
-            auto_array<int> iwork(new int[liwork]);
+            AlignedArray<double> work(lwork);
+            AlignedArray<int> iwork(liwork);
 #else
             int lwork = -1;
             int liwork = -1;
-            auto_array<double> work(new double[1]);
-            auto_array<int> iwork(new int[1]);
+            AlignedArray<double> work(1);
+            AlignedArray<int> iwork(1);
             LAPNAME(dstedc) (
                 LAPCM LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E.ptr()),0,LAPV(ldu)
@@ -186,8 +186,8 @@ namespace tmv {
                 LAPINFO LAP1);
             lwork = int(work[0]);
             liwork = iwork[0];
-            work.reset(new double[lwork]);
-            iwork.reset(new int[liwork]);
+            work.resize(lwork);
+            iwork.resize(liwork);
 #endif
 #endif
             LAPNAME(dstedc) (
@@ -222,13 +222,13 @@ namespace tmv {
 #ifdef NOWORKQUERY
             int lwork = 1+(4+n)*n;
             int liwork = 3+5*n;
-            auto_array<double> work(new double[lwork]);
-            auto_array<int> iwork(new int[liwork]);
+            AlignedArray<double> work(lwork);
+            AlignedArray<int> iwork(liwork);
 #else
             int lwork = -1;
             int liwork = -1;
-            auto_array<double> work(new double[1]);
-            auto_array<int> iwork(new int[1]);
+            AlignedArray<double> work(1);
+            AlignedArray<int> iwork(1);
             LAPNAME(dstedc) (
                 LAPCM LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E.ptr()),LAPP(U1.ptr()),LAPV(ldu)
@@ -236,8 +236,8 @@ namespace tmv {
                 LAPINFO LAP1);
             lwork = int(work[0]);
             liwork = iwork[0];
-            work.reset(new double[lwork]);
-            iwork.reset(new int[liwork]);
+            work.resize(lwork);
+            iwork.resize(liwork);
 #endif
 #endif
             LAPNAME(dstedc) (
@@ -258,13 +258,13 @@ namespace tmv {
 #ifdef NOWORKQUERY
             int lwork = 1;
             int liwork = 1;
-            auto_array<double> work(new double[lwork]);
-            auto_array<int> iwork(new int[liwork]);
+            AlignedArray<double> work(lwork);
+            AlignedArray<int> iwork(liwork);
 #else
             int lwork = -1;
             int liwork = -1;
-            auto_array<double> work(new double[1]);
-            auto_array<int> iwork(new int[1]);
+            AlignedArray<double> work(1);
+            AlignedArray<int> iwork(1);
             LAPNAME(dstedc) (
                 LAPCM LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E.ptr()),0,LAPV(ldu)
@@ -272,8 +272,8 @@ namespace tmv {
                 LAPINFO LAP1);
             lwork = int(work[0]);
             liwork = iwork[0];
-            work.reset(new double[lwork]);
-            iwork.reset(new int[liwork]);
+            work.resize(lwork);
+            iwork.resize(liwork);
 #endif
 #endif
             LAPNAME(dstedc) (
@@ -310,13 +310,13 @@ namespace tmv {
 #ifdef NOWORKQUERY
             int lwork = 1+(4+n)*n;
             int liwork = 3+5*n;
-            auto_array<float> work(new float[lwork]);
-            auto_array<int> iwork(new int[liwork]);
+            AlignedArray<float> work(lwork);
+            AlignedArray<int> iwork(liwork);
 #else
             int lwork = -1;
             int liwork = -1;
-            auto_array<float> work(new float[1]);
-            auto_array<int> iwork(new int[1]);
+            AlignedArray<float> work(1);
+            AlignedArray<int> iwork(1);
             LAPNAME(sstedc) (
                 LAPCM LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E.ptr()),LAPP(U1.ptr()),LAPV(ldu)
@@ -324,8 +324,8 @@ namespace tmv {
                 LAPINFO LAP1);
             lwork = int(work[0]);
             liwork = iwork[0];
-            work.reset(new float[lwork]);
-            iwork.reset(new int[liwork]);
+            work.resize(lwork);
+            iwork.resize(liwork);
 #endif
 #endif
             LAPNAME(sstedc) (
@@ -346,13 +346,13 @@ namespace tmv {
 #ifdef NOWORKQUERY
             int lwork = 1;
             int liwork = 1;
-            auto_array<float> work(new float[lwork]);
-            auto_array<int> iwork(new int[liwork]);
+            AlignedArray<float> work(lwork);
+            AlignedArray<int> iwork(liwork);
 #else
             int lwork = -1;
             int liwork = -1;
-            auto_array<float> work(new float[1]);
-            auto_array<int> iwork(new int[1]);
+            AlignedArray<float> work(1);
+            AlignedArray<int> iwork(1);
             LAPNAME(sstedc) (
                 LAPCM LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E.ptr()),0,LAPV(ldu)
@@ -360,8 +360,8 @@ namespace tmv {
                 LAPINFO LAP1);
             lwork = int(work[0]);
             liwork = iwork[0];
-            work.reset(new float[lwork]);
-            iwork.reset(new int[liwork]);
+            work.resize(lwork);
+            iwork.resize(liwork);
 #endif
 #endif
             LAPNAME(sstedc) (
@@ -396,13 +396,13 @@ namespace tmv {
 #ifdef NOWORKQUERY
             int lwork = 1+(4+n)*n;
             int liwork = 3+5*n;
-            auto_array<float> work(new float[lwork]);
-            auto_array<int> iwork(new int[liwork]);
+            AlignedArray<float> work(lwork);
+            AlignedArray<int> iwork(liwork);
 #else
             int lwork = -1;
             int liwork = -1;
-            auto_array<float> work(new float[1]);
-            auto_array<int> iwork(new int[1]);
+            AlignedArray<float> work(1);
+            AlignedArray<int> iwork(1);
             LAPNAME(sstedc) (
                 LAPCM LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E.ptr()),LAPP(U1.ptr()),LAPV(ldu)
@@ -410,8 +410,8 @@ namespace tmv {
                 LAPINFO LAP1);
             lwork = int(work[0]);
             liwork = iwork[0];
-            work.reset(new float[lwork]);
-            iwork.reset(new int[liwork]);
+            work.resize(lwork);
+            iwork.resize(liwork);
 #endif
 #endif
             LAPNAME(sstedc) (
@@ -432,13 +432,13 @@ namespace tmv {
 #ifdef NOWORKQUERY
             int lwork = 1;
             int liwork = 1;
-            auto_array<float> work(new float[lwork]);
-            auto_array<int> iwork(new int[liwork]);
+            AlignedArray<float> work(lwork);
+            AlignedArray<int> iwork(liwork);
 #else
             int lwork = -1;
             int liwork = -1;
-            auto_array<float> work(new float[1]);
-            auto_array<int> iwork(new int[1]);
+            AlignedArray<float> work(1);
+            AlignedArray<int> iwork(1);
             LAPNAME(sstedc) (
                 LAPCM LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E.ptr()),0,LAPV(ldu)
@@ -446,8 +446,8 @@ namespace tmv {
                 LAPINFO LAP1);
             lwork = int(work[0]);
             liwork = iwork[0];
-            work.reset(new float[lwork]);
-            iwork.reset(new int[liwork]);
+            work.resize(lwork);
+            iwork.resize(liwork);
 #endif
 #endif
             LAPNAME(sstedc) (
@@ -514,12 +514,12 @@ namespace tmv {
             Vector<double> Dout(n);
             Matrix<double,ColMajor> U1(n,n);
             int ldu = U1.stepj();
-            auto_array<int> isuppz(new int[2*n]);
+            AlignedArray<int> isuppz(2*n);
 #ifndef LAPNOWORK
             int lwork = 18*n;
-            auto_array<double> work(new double[lwork]);
+            AlignedArray<double> work(lwork);
             int liwork = 10*n;
-            auto_array<int> iwork(new int[liwork]);
+            AlignedArray<int> iwork(liwork);
 #endif
             LAPNAME(dstegr) (
                 LAPCM LAPV(c1),LAPV(c2),LAPV(n),
@@ -607,12 +607,12 @@ namespace tmv {
             Vector<double> Dout(n);
             Matrix<double,ColMajor> U1(n,n);
             int ldu = U1.stepj();
-            auto_array<int> isuppz(new int[2*n]);
+            AlignedArray<int> isuppz(2*n);
 #ifndef LAPNOWORK
             int lwork = 18*n;
-            auto_array<double> work(new double[lwork]);
+            AlignedArray<double> work(lwork);
             int liwork = 10*n;
-            auto_array<int> iwork(new int[liwork]);
+            AlignedArray<int> iwork(liwork);
 #endif
             LAPNAME(dstegr) (
                 LAPCM LAPV(c1),LAPV(c2),LAPV(n),
@@ -686,12 +686,12 @@ namespace tmv {
             Vector<float> Dout(n);
             Matrix<float,ColMajor> U1(n,n);
             int ldu = U1.stepj();
-            auto_array<int> isuppz(new int[2*n]);
+            AlignedArray<int> isuppz(2*n);
 #ifndef LAPNOWORK
             int lwork = 18*n;
-            auto_array<float> work(new float[lwork]);
+            AlignedArray<float> work(lwork);
             int liwork = 10*n;
-            auto_array<int> iwork(new int[liwork]);
+            AlignedArray<int> iwork(liwork);
 #endif
             LAPNAME(sstegr) (
                 LAPCM LAPV(c1),LAPV(c2),LAPV(n),
@@ -763,12 +763,12 @@ namespace tmv {
             Vector<float> Dout(n);
             Matrix<float,ColMajor> U1(n,n);
             int ldu = U1.stepj();
-            auto_array<int> isuppz(new int[2*n]);
+            AlignedArray<int> isuppz(2*n);
 #ifndef LAPNOWORK
             int lwork = 18*n;
-            auto_array<float> work(new float[lwork]);
+            AlignedArray<float> work(lwork);
             int liwork = 10*n;
-            auto_array<int> iwork(new int[liwork]);
+            AlignedArray<int> iwork(liwork);
 #endif
             LAPNAME(sstegr) (
                 LAPCM LAPV(c1),LAPV(c2),LAPV(n),
@@ -885,7 +885,7 @@ namespace tmv {
         // V = Ut relationship.  So just keep that in mind later when we use S.
 
         // Sort output singular values by absolute value:
-        auto_array<int> sortp(new int[D.size()]);
+        AlignedArray<int> sortp(D.size());
         D.sort(sortp.get(),Descend,AbsComp);
         if (U) U->permuteCols(sortp.get());
 
@@ -1029,7 +1029,7 @@ namespace tmv {
 #endif
 
         UnsortedHermEigen(U,SS.diag());
-        auto_array<int> sortp(new int[SS.size()]);
+        AlignedArray<int> sortp(SS.size());
         SS.diag().sort(sortp.get(),Descend,AbsComp);
         U.permuteCols(sortp.get());
 
@@ -1189,7 +1189,7 @@ namespace tmv {
         else {
             U.lowerTri() = A.lowerTri();
             UnsortedHermEigen(U,SS);
-            auto_array<int> sortp(new int[A.size()]);
+            AlignedArray<int> sortp(A.size());
             SS.sort(sortp.get(),Ascend);
             U.permuteCols(sortp.get());
         }

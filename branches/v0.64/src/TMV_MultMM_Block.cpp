@@ -33,7 +33,7 @@
 #include "TMV_Blas.h"
 #include "TMV_MultMM.h"
 #include "TMV_MultMM_Kernel.h"
-#include "TMV_Array.h"
+#include "tmv/TMV_Array.h"
 #include "tmv/TMV_MatrixArith.h"
 
 //#include <iostream>

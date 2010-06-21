@@ -69,20 +69,20 @@ namespace tmv {
 
         T* Di = D.ptr();
         T* Ei = E.ptr();
-        if (*Di * eps == T(0)) { *Di = T(0); }
+        if (TMV_Underflow(*Di)) { *Di = T(0); }
         ++Di;
         for(int k=E.size();k>0;--k,++Di,++Ei) {
 #ifdef TMVFLDEBUG
             TMVAssert(Di >= D.first);
             TMVAssert(Di < D.last);
 #endif
-            if (*Di * eps == T(0)) { *Di = T(0); }
+            if (TMV_Underflow(*Di)) { *Di = T(0); }
 #ifdef TMVFLDEBUG
             TMVAssert(Ei >= E.first);
             TMVAssert(Ei < E.last);
 #endif
             if ( TMV_ABS(*Ei) <= eps*(TMV_ABS(*Di)+TMV_ABS(*(Di-1))) ||
-                 *Ei * eps == T(0) ) {
+                 TMV_Underflow(*Ei) ) {
                 *Ei = T(0);
             }
         }

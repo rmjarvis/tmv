@@ -34,6 +34,7 @@
 #define TMV_VectorArithFunc_H
 
 #include "tmv/TMV_BaseVector.h"
+#include "tmv/TMV_Array.h"
 
 #define CT std::complex<T>
 
@@ -74,8 +75,8 @@ namespace tmv {
     {
     public:
 
-        inline VectorComposite() : _v(0) {}
-        inline VectorComposite(const VectorComposite<T>&) : _v(0) {}
+        inline VectorComposite() {}
+        inline VectorComposite(const VectorComposite<T>&) {}
         virtual inline ~VectorComposite() {}
 
         const T* cptr() const;
@@ -84,7 +85,7 @@ namespace tmv {
         inline bool isconj() const { return false; }
 
     private:
-        mutable auto_array<T> _v;
+        mutable AlignedArray<T> _v;
     };
 
     // Specialize allowed complex combinations:

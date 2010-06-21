@@ -35,6 +35,7 @@
 
 #include "tmv/TMV_BaseSymBandMatrix.h"
 #include "tmv/TMV_BandMatrixArithFunc.h"
+#include "tmv/TMV_Array.h"
 
 #define CT std::complex<T>
 
@@ -142,9 +143,9 @@ namespace tmv {
     class SymBandMatrixComposite : public GenSymBandMatrix<T>
     {
     public :
-        inline SymBandMatrixComposite() : itsm1(0), itsm(0) {}
+        inline SymBandMatrixComposite() : itsm(0) {}
         inline SymBandMatrixComposite(const SymBandMatrixComposite<T>&) :
-            itsm1(0), itsm(0) {}
+            itsm(0) {}
         virtual inline ~SymBandMatrixComposite() {}
 
         // Definitions are in TMV_MultsBV.cpp
@@ -158,7 +159,7 @@ namespace tmv {
         inline ConjType ct() const { return NonConj; }
 
     private:
-        mutable auto_array<T> itsm1;
+        mutable AlignedArray<T> itsm1;
         mutable T* itsm;
 
         SymBandMatrixComposite<T>& operator=(const SymBandMatrixComposite<T>&);

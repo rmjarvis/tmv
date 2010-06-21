@@ -41,7 +41,7 @@
 #include <iostream>
 
 #ifdef XDEBUG
-#define THRESH 1.e-5
+#define THRESH 1.e-11
 #include <iostream>
 #include "tmv/TMV_VectorArith.h"
 #include "tmv/TMV_MatrixArith.h"
@@ -83,7 +83,7 @@ namespace tmv {
         TMVAssert(Di >= D.first);
         TMVAssert(Di < D.last);
 #endif
-        if (TMV_NORM(*Di)*eps == T(0)) { 
+        if (TMV_Underflow(TMV_NORM(*Di))) { 
             *Di = T(0);
             if(zd) *zd = true; 
         }
@@ -93,7 +93,7 @@ namespace tmv {
             TMVAssert(Di >= D.first);
             TMVAssert(Di < D.last);
 #endif
-            if (TMV_NORM(*Di)*eps == RT(0)) {
+            if (TMV_Underflow(TMV_NORM(*Di))) {
                 *Di = T(0);
                 if(zd) *zd = true; 
             }
@@ -102,7 +102,7 @@ namespace tmv {
             TMVAssert(Ei < E.last);
 #endif
             if ( TMV_MAXABS(*Ei) <= eps*(TMV_MAXABS(*Di)+TMV_MAXABS(*(Di-1))) ||
-                 *Ei * eps == T(0) ) {
+                 TMV_Underflow(*Ei) ) {
                 *Ei = T(0);
             }
         }

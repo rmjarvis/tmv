@@ -881,7 +881,7 @@ namespace tmv {
             int ku = m.nhi();
             int lda = m.stepj()+1;
 #ifndef LAPNOWORK
-            auto_array<double> work(c == 'I' ? new double[n] : 0);
+            AlignedArray<double> work(c == 'I' ? n : 0);
 #endif
             norm = LAPNAME(dlangb) (
                 LAPCM LAPV(cc),LAPV(n),LAPV(kl),LAPV(ku),
@@ -907,7 +907,7 @@ namespace tmv {
             int ku = m.nhi();
             int lda = m.stepj()+1;
 #ifndef LAPNOWORK
-            auto_array<double> work(c == 'I' ? new double[n] : 0);
+            AlignedArray<double> work(c == 'I' ? n : 0);
 #endif
             norm = LAPNAME(zlangb) (
                 LAPCM LAPV(cc),LAPV(n),LAPV(kl),LAPV(ku),
@@ -935,7 +935,7 @@ namespace tmv {
             int ku = m.nhi();
             int lda = m.stepj()+1;
 #ifndef LAPNOWORK
-            auto_array<float> work(c == 'I' ? new float[n] : 0);
+            AlignedArray<float> work(c == 'I' ? n : 0);
 #endif
             norm = LAPNAME(slangb) (
                 LAPCM LAPV(cc),LAPV(n),LAPV(kl),LAPV(ku),
@@ -961,7 +961,7 @@ namespace tmv {
             int ku = m.nhi();
             int lda = m.stepj()+1;
 #ifndef LAPNOWORK
-            auto_array<float> work(c == 'I' ? new float[n] : 0);
+            AlignedArray<float> work(c == 'I' ? n : 0);
 #endif
             norm = LAPNAME(clangb) (
                 LAPCM LAPV(cc),LAPV(n),LAPV(kl),LAPV(ku),

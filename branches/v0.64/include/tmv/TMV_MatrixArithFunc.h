@@ -34,6 +34,7 @@
 #define TMV_MatrixArithFunc_H
 
 #include "tmv/TMV_BaseMatrix.h"
+#include "tmv/TMV_Array.h"
 
 #define CT std::complex<T>
 
@@ -85,8 +86,8 @@ namespace tmv {
     {
     public:
 
-        inline MatrixComposite() : itsm(0) {}
-        inline MatrixComposite(const MatrixComposite<T>&) : itsm(0) {}
+        inline MatrixComposite() {}
+        inline MatrixComposite(const MatrixComposite<T>&) {}
         virtual inline ~MatrixComposite() {}
         const T* cptr() const;
         int stepi() const;
@@ -96,7 +97,7 @@ namespace tmv {
         size_t ls() const;
 
     private:
-        mutable auto_array<T> itsm;
+        mutable AlignedArray<T> itsm;
     };
 
     // Specialize allowed complex combinations:

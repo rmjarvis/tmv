@@ -523,6 +523,7 @@
 #include "tmv/TMV_BaseTriMatrix.h"
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_Permutation.h"
+#include "tmv/TMV_Array.h"
 #include <vector>
 
 namespace tmv {
@@ -2644,7 +2645,7 @@ namespace tmv {
 
 #define NEW_SIZE(cs,rs) \
         linsize((cs)*(rs)), \
-        itsm(new T[linsize]), itscs(cs), itsrs(rs) \
+        itsm(linsize), itscs(cs), itsrs(rs) \
         TMV_DEFFIRSTLAST(itsm.get(),itsm.get()+linsize)
 
         inline Matrix(size_t _colsize, size_t _rowsize) :
@@ -3814,7 +3815,7 @@ namespace tmv {
     protected :
 
         const size_t linsize;
-        auto_array<T> itsm;
+        AlignedArray<T> itsm;
         const size_t itscs;
         const size_t itsrs;
 
@@ -3831,9 +3832,7 @@ namespace tmv {
         {
             TMVAssert(m1.colsize() == m2.colsize());
             TMVAssert(m1.rowsize() == m2.rowsize());
-            T* temp = m1.itsm.release();
-            m1.itsm.reset(m2.itsm.release());
-            m2.itsm.reset(temp);
+            m1.itsm.swapWith(m2.itsm);
 #ifdef TMVFLDEBUG
             TMV_SWAP(m1._first,m2._first);
             TMV_SWAP(m1._last,m2._last);

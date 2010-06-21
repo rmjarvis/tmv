@@ -56,7 +56,7 @@ namespace tmv {
 
         const bool istrans;
         const bool inplace;
-        auto_array<T> Aptr1;
+        AlignedArray<T> Aptr1;
         T* Aptr;
         MatrixView<T> QRx;
         Vector<T> beta;
@@ -67,7 +67,7 @@ namespace tmv {
         int N1;
     };
 
-#define APTR1 (inplace ? 0 : new T[A.colsize()*A.rowsize()])
+#define APTR1 (inplace ? 0 : (A.colsize()*A.rowsize()))
 #define APTR (inplace ? A.nonConst().ptr() : Aptr1.get())
 #define QRX (istrans ? \
              (inplace ? A.nonConst().transpose() : \

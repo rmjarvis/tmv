@@ -441,16 +441,16 @@ namespace tmv {
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = (m+n)*LAP_BLOCKSIZE;
-        auto_array<double> work(new double[lwork]);
+        AlignedArray<double> work(lwork);
 #else
         int lwork = -1;
-        auto_array<double> work(new double[1]);
+        AlignedArray<double> work(1);
         LAPNAME(dgebrd) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(ldu),
             LAPP(D.ptr()),LAPP(E.ptr()),LAPP(Ubeta.ptr()),LAPP(Vbeta2.ptr())
             LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(work[0]);
-        work.reset(new double[lwork]);
+        work.resize(lwork);
 #endif
 #endif
         LAPNAME(dgebrd) (
@@ -496,16 +496,16 @@ namespace tmv {
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = (m+n)*LAP_BLOCKSIZE;
-        auto_array<std::complex<double> > work(new std::complex<double>[lwork]);
+        AlignedArray<std::complex<double> > work(lwork);
 #else
         int lwork = -1;
-        auto_array<std::complex<double> > work(new std::complex<double>[1]);
+        AlignedArray<std::complex<double> > work(1);
         LAPNAME(zgebrd) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(ldu),
             LAPP(D.ptr()),LAPP(E.ptr()),LAPP(Ubeta.ptr()),LAPP(Vbeta2.ptr())
             LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(std::real(work[0]));
-        work.reset(new std::complex<double>[lwork]);
+        work.resize(lwork);
 #endif
 #endif
         LAPNAME(zgebrd) (
@@ -555,16 +555,16 @@ namespace tmv {
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = (m+n)*LAP_BLOCKSIZE;
-        auto_array<float> work(new float[lwork]);
+        AlignedArray<float> work(lwork);
 #else
         int lwork = -1;
-        auto_array<float> work(new float[1]);
+        AlignedArray<float> work(1);
         LAPNAME(sgebrd) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(ldu),
             LAPP(D.ptr()),LAPP(E.ptr()),LAPP(Ubeta.ptr()),LAPP(Vbeta2.ptr())
             LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(work[0]);
-        work.reset(new float[lwork]);
+        work.resize(lwork);
 #endif
 #endif
         LAPNAME(sgebrd) (
@@ -610,16 +610,16 @@ namespace tmv {
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = (m+n)*LAP_BLOCKSIZE;
-        auto_array<std::complex<float> > work(new std::complex<float>[lwork]);
+        AlignedArray<std::complex<float> > work(lwork);
 #else
         int lwork = -1;
-        auto_array<std::complex<float> > work(new std::complex<float>[1]);
+        AlignedArray<std::complex<float> > work(1);
         LAPNAME(cgebrd) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(ldu),
             LAPP(D.ptr()),LAPP(E.ptr()),LAPP(Ubeta.ptr()),LAPP(Vbeta2.ptr())
             LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(std::real(work[0]));
-        work.reset(new std::complex<float>[lwork]);
+        work.resize(lwork);
 #endif
 #endif
         LAPNAME(cgebrd) (

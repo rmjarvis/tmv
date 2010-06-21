@@ -81,7 +81,7 @@ namespace tmv {
 
         int n = minv.colsize();
         int lda = minv.stepj();
-        auto_array<int> ipiv(new int[n]);
+        AlignedArray<int> ipiv(n);
 #ifdef CLAP
         for(int i=0;i<n;++i) ipiv[i] = i;
 #else
@@ -90,14 +90,14 @@ namespace tmv {
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
-        auto_array<double> work(new double[lwork]);
+        AlignedArray<double> work(lwork);
 #else
         int lwork = -1;
-        auto_array<double> work(new double[1]);
+        AlignedArray<double> work(1);
         LAPNAME(dgetri) (LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
                          LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(work[0]);
-        work.reset(new double[lwork]);
+        work.resize(lwork);
 #endif
 #endif
         LAPNAME(dgetri) (LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
@@ -116,7 +116,7 @@ namespace tmv {
 
         int n = minv.colsize();
         int lda = minv.stepj();
-        auto_array<int> ipiv(new int[n]);
+        AlignedArray<int> ipiv(n);
 #ifdef CLAP
         for(int i=0;i<n;++i) ipiv[i] = i;
 #else
@@ -125,14 +125,14 @@ namespace tmv {
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
-        auto_array<std::complex<double> > work(new std::complex<double>[lwork]);
+        AlignedArray<std::complex<double> > work(lwork);
 #else
         int lwork = -1;
-        auto_array<std::complex<double> > work(new std::complex<double>[1]);
+        AlignedArray<std::complex<double> > work(1);
         LAPNAME(zgetri) (LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
                          LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(std::real(work[0]));
-        work.reset(new std::complex<double>[lwork]);
+        work.resize(lwork);
 #endif
 #endif
         LAPNAME(zgetri) (LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
@@ -153,7 +153,7 @@ namespace tmv {
 
         int n = minv.colsize();
         int lda = minv.stepj();
-        auto_array<int> ipiv(new int[n]);
+        AlignedArray<int> ipiv(n);
 #ifdef CLAP
         for(int i=0;i<n;++i) ipiv[i] = i;
 #else
@@ -162,14 +162,14 @@ namespace tmv {
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
-        auto_array<float> work(new float[lwork]);
+        AlignedArray<float> work(lwork);
 #else
         int lwork = -1;
-        auto_array<float> work(new float[1]);
+        AlignedArray<float> work(1);
         LAPNAME(sgetri) (LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
                          LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(work[0]);
-        work.reset(new float[lwork]);
+        work.resize(lwork);
 #endif
 #endif
         LAPNAME(sgetri) (LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
@@ -188,7 +188,7 @@ namespace tmv {
 
         int n = minv.colsize();
         int lda = minv.stepj();
-        auto_array<int> ipiv(new int[n]);
+        AlignedArray<int> ipiv(n);
 #ifdef CLAP
         for(int i=0;i<n;++i) ipiv[i] = i;
 #else
@@ -197,14 +197,14 @@ namespace tmv {
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
-        auto_array<std::complex<float> > work(new std::complex<float>[lwork]);
+        AlignedArray<std::complex<float> > work(lwork);
 #else
         int lwork = -1;
-        auto_array<std::complex<float> > work(new std::complex<float>[1]);
+        AlignedArray<std::complex<float> > work(1);
         LAPNAME(cgetri) (LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
                          LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(std::real(work[0]));
-        work.reset(new std::complex<float>[lwork]);
+        work.resize(lwork);
 #endif
 #endif
         LAPNAME(cgetri) (LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),

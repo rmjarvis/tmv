@@ -62,6 +62,7 @@
 
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_VIt.h"
+#include "tmv/TMV_Array.h"
 #include <sstream>
 #include <algorithm>
 
@@ -571,7 +572,7 @@ namespace tmv {
         inline type& conjugateSelf()
         { 
             if (isComplex(T())) {
-                RT* itsvi = reinterpret_cast<RT*>(itsv)+1;
+                RT* itsvi = reinterpret_cast<RT*>(ptr())+1;
                 for(int i=0;i<2*N;i+=2) itsvi[i] = -itsvi[i];
             }
             return *this; 
@@ -807,7 +808,7 @@ namespace tmv {
 
     protected :
 
-        T itsv[N];
+        StackArray<T,N> itsv;
 
     }; // SmallVector
 

@@ -51,7 +51,7 @@ namespace tmv {
 
         const bool istrans;
         const bool inplace;
-        auto_array<T> Aptr1;
+        AlignedArray<T> Aptr1;
         T* Aptr;
         MatrixView<T> U;
         DiagMatrix<RT> S;
@@ -61,7 +61,7 @@ namespace tmv {
         mutable int kmax;
     };
 
-#define APTR1 (inplace ? 0 : new T[A.colsize()*A.rowsize()])
+#define APTR1 (inplace ? 0 : (A.colsize()*A.rowsize()))
 #define APTR (inplace ? A.nonConst().ptr() : Aptr1.get())
 #define UX (istrans ? \
             (inplace ? A.nonConst().transpose() : \

@@ -30,7 +30,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 
-//#define XDEBUG
+#define XDEBUG
 
 
 #include "TMV_Blas.h"
@@ -62,7 +62,7 @@ namespace tmv {
     {
         if (!itsm.get()) {
             size_t len = this->colsize()*this->rowsize();
-            itsm.reset(new T[len]);
+            itsm.resize(len);
             MatrixView<T>(itsm.get(),this->colsize(),this->rowsize(),
                           stepi(),stepj(),this->stor(),NonConj,len 
                           TMV_FIRSTLAST1(itsm.get(),itsm.get()+len) ) = *this;
@@ -299,8 +299,8 @@ namespace tmv {
                 Norm(A0)*Norm(x0)+
                 (add?Norm(y0):TMV_RealType(T)(0))<<endl;
             cerr<<"Norm(y-y2) = "<<Norm(y-y2)<<endl;
-            cerr<<"normInf(y-y2) = "<<normInf(y-y2)<<endl;
-            cerr<<"norm1(y-y2) = "<<norm1(y-y2)<<endl;
+            cerr<<"NormInf(y-y2) = "<<NormInf(y-y2)<<endl;
+            cerr<<"Norm1(y-y2) = "<<Norm1(y-y2)<<endl;
             abort();
         }
 #endif
@@ -414,8 +414,8 @@ namespace tmv {
                 TMV_ABS(alpha)*Norm(A0)*Norm(x0)+
                 (add?Norm(y0):TMV_RealType(T)(0))<<endl;
             cerr<<"Norm(y-y2) = "<<Norm(y-y2)<<endl;
-            cerr<<"normInf(y-y2) = "<<normInf(y-y2)<<endl;
-            cerr<<"norm1(y-y2) = "<<norm1(y-y2)<<endl;
+            cerr<<"NormInf(y-y2) = "<<NormInf(y-y2)<<endl;
+            cerr<<"Norm1(y-y2) = "<<Norm1(y-y2)<<endl;
             abort();
         }
 #endif
@@ -831,6 +831,15 @@ namespace tmv {
         std::complex<float>* yp = y.ptr();
         if (ys < 0) yp += (y.size()-1)*ys;
         std::complex<float> xbeta(beta);
+        std::cout<<"Before cgemv:\n";
+        std::cout<<"m,n = "<<m<<','<<n<<std::endl;
+        std::cout<<"alpha,beta = "<<alpha<<','<<xbeta<<std::endl;
+        std::cout<<"A.cptr = "<<A.cptr()<<std::endl;
+        std::cout<<"xp = "<<xp<<std::endl;
+        std::cout<<"yp = "<<yp<<std::endl;
+        std::cout<<"lda,xs,ys = "<<lda<<','<<xs<<','<<ys<<std::endl;
+        std::cout<<"conj = "<<A.isconj()<<std::endl;
+        std::cout<<"cm = "<<A.iscm()<<std::endl;
         if (A.isconj() && A.iscm()) {
 #ifdef CBLAS
             TMV_SWAP(m,n);
@@ -869,6 +878,7 @@ namespace tmv {
                 BLASP(xp),BLASV(xs),BLASP(&xbeta),BLASP(yp),BLASV(ys)
                 BLAS1);
         }
+        std::cout<<"After cgemv:\n";
     }
     template <> void BlasMultMV(
         const std::complex<float> alpha,
@@ -1075,6 +1085,14 @@ namespace tmv {
         } else if (y.step() == 0) {
             TMVAssert(y.size() <= 1);
             DoMultMV<add>(alpha,A,x,VectorView<T>(y.ptr(),y.size(),1,y.ct()));
+        } else if (y.step() < 0) {
+            Vector<T> yy(y.size());
+            DoMultMV<false>(T(1),A,x,yy.view());
+            if (add) y += alpha*yy;
+            else y = alpha*yy;
+        } else if (x.step() < 0) {
+            Vector<T> xx = alpha*x;
+            DoMultMV<add>(T(1),A,xx,y);
         } else if ((A.isrm()&&A.stepi()>0) || (A.iscm()&&A.stepj()>0)) {
             if (!SameStorage(A,y)) {
                 if (!SameStorage(x,y) && !SameStorage(A,x))
@@ -1096,8 +1114,7 @@ namespace tmv {
                     else y = yy;
                 }
             }
-        }
-        else {
+        } else {
             if (TMV_IMAG(alpha) == T(0)) {
                 Matrix<Ta,RowMajor> A2 = TMV_REAL(alpha)*A;
                 DoMultMV<add>(T(1),A2,x,y);
@@ -1117,11 +1134,11 @@ namespace tmv {
         // y (+)= alpha * A * x
     { 
 #ifdef XDEBUG
-        cout<<"Start MultMV: alpha = "<<alpha<<endl;
-        cout<<"add = "<<add<<endl;
-        cout<<"A = "<<TMV_Text(A)<<"  "<<A<<endl;
-        cout<<"x = "<<TMV_Text(x)<<" step "<<x.step()<<"  "<<x<<endl;
-        cout<<"y = "<<TMV_Text(y)<<" step "<<y.step()<<"  "<<y<<endl;
+        //cout<<"Start MultMV: alpha = "<<alpha<<endl;
+        //cout<<"add = "<<add<<endl;
+        //cout<<"A = "<<TMV_Text(A)<<"  "<<A<<endl;
+        //cout<<"x = "<<TMV_Text(x)<<" step "<<x.step()<<"  "<<x<<endl;
+        //cout<<"y = "<<TMV_Text(y)<<" step "<<y.step()<<"  "<<y<<endl;
         Vector<Tx> x0 = x;
         Vector<T> y0 = y;
         Matrix<Ta> A0 = A;
@@ -1130,7 +1147,7 @@ namespace tmv {
             if (add) y2(i) += alpha * (A.row(i) * x0);
             else y2(i) = alpha * (A.row(i) * x0);
         }
-        cout<<"y2 = "<<y2<<endl;
+        //cout<<"y2 = "<<y2<<endl;
 #endif
         TMVAssert(A.rowsize() == x.size());
         TMVAssert(A.colsize() == y.size());
@@ -1147,7 +1164,7 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
-        cout<<"y => "<<y<<endl;
+        //cout<<"y => "<<y<<endl;
         if (Norm(y-y2) > 
             0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(x0)+
                    (add?Norm(y0):TMV_RealType(T)(0)))) {
@@ -1178,8 +1195,8 @@ namespace tmv {
                 TMV_ABS(alpha)*Norm(A0)*Norm(x0)+
                 (add?Norm(y0):TMV_RealType(T)(0))<<endl;
             cerr<<"Norm(y-y2) = "<<Norm(y-y2)<<endl;
-            cerr<<"normInf(y-y2) = "<<normInf(y-y2)<<endl;
-            cerr<<"norm1(y-y2) = "<<norm1(y-y2)<<endl;
+            cerr<<"NormInf(y-y2) = "<<NormInf(y-y2)<<endl;
+            cerr<<"Norm1(y-y2) = "<<Norm1(y-y2)<<endl;
             abort();
         }
 #endif

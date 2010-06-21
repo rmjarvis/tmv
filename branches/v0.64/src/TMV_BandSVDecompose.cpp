@@ -318,7 +318,7 @@ namespace tmv {
         int ku = A.nhi();
 #ifndef LAPNOWORK
         int lwork = 2*TMV_MAX(m,n);
-        auto_array<double> work(new double[lwork]);
+        AlignedArray<double> work(lwork);
 #endif
         // LAP version overwrites original BandMatrix with crap.
         // Hence, copy BandMatrix before running.
@@ -379,8 +379,8 @@ namespace tmv {
         int ku = A.nhi();
 #ifndef LAPNOWORK
         int lwork = TMV_MAX(m,n);
-        auto_array<std::complex<double> > work(new std::complex<double>[lwork]);
-        auto_array<double> rwork(new double[lwork]);
+        AlignedArray<std::complex<double> > work(lwork);
+        AlignedArray<double> rwork(lwork);
 #endif
         BandMatrix<std::complex<double>,ColMajor> A2 = A;
         int lda = A2.diagstep();
@@ -446,7 +446,7 @@ namespace tmv {
         int ku = A.nhi();
 #ifndef LAPNOWORK
         int lwork = 2*TMV_MAX(m,n);
-        auto_array<float> work(new float[lwork]);
+        AlignedArray<float> work(lwork);
 #endif
         BandMatrix<float,ColMajor> A2 = A;
         int lda = A2.diagstep();
@@ -505,8 +505,8 @@ namespace tmv {
         int ku = A.nhi();
 #ifndef LAPNOWORK
         int lwork = TMV_MAX(m,n);
-        auto_array<std::complex<float> > work(new std::complex<float>[lwork]);
-        auto_array<float> rwork(new float[lwork]);
+        AlignedArray<std::complex<float> > work(lwork);
+        AlignedArray<float> rwork(lwork);
 #endif
         BandMatrix<std::complex<float>,ColMajor> A2 = A;
         int lda = A2.diagstep();
@@ -690,7 +690,7 @@ namespace tmv {
                     }
                 }
             }
-            auto_array<int> sortp(new int[N]);
+            AlignedArray<int> sortp(N);
             S.diag().sort(sortp.get(),Descend);
             if (U) U->permuteCols(sortp.get());
             if (V) V->permuteRows(sortp.get());

@@ -308,6 +308,7 @@
 #include "tmv/TMV_BandMatrix.h"
 #include "tmv/TMV_SymMatrix.h"
 #include "tmv/TMV_DiagMatrix.h"
+#include "tmv/TMV_Array.h"
 #include <vector>
 
 namespace tmv {
@@ -2794,7 +2795,7 @@ namespace tmv {
 
 #define NEW_SIZE(s,lo) \
         linsize(BandStorageLength(S,s,s,lo,0)), \
-        itsm1(new T[linsize]), itss(s), itslo(lo), \
+        itsm1(linsize), itss(s), itslo(lo), \
         itssi(S==DiagMajor ? -int(s)+1 : S==RowMajor ? lo : 1), \
         itssj(S==DiagMajor ? int(s) : S==RowMajor ? 1 : lo), \
         itssd(S==DiagMajor ? 1 : lo+1), \
@@ -2803,7 +2804,7 @@ namespace tmv {
 
 #define NEW_SIZE2(ls,s,lo) \
         linsize(ls), \
-        itsm1(new T[linsize]), itss(s), itslo(lo), \
+        itsm1(linsize), itss(s), itslo(lo), \
         itssi(S==DiagMajor ? -int(s)+1 : S==RowMajor ? lo : 1), \
         itssj(S==DiagMajor ? int(s) : S==RowMajor ? 1 : lo), \
         itssd(S==DiagMajor ? 1 : lo+1), \
@@ -4116,7 +4117,7 @@ namespace tmv {
     protected :
 
         const size_t linsize;
-        auto_array<T> itsm1;
+        AlignedArray<T> itsm1;
         const size_t itss;
         const int itslo;
         const int itssi;
@@ -4140,9 +4141,7 @@ namespace tmv {
         {
             TMVAssert(m1.size() == m2.size());
             TMVAssert(m1.nlo() == m2.nlo());
-            T* temp = m1.itsm1.release();
-            m1.itsm1.reset(m2.itsm1.release());
-            m2.itsm1.reset(temp);
+            m1.itsm1.swapWith(m2.itsm1);
             TMV_SWAP(m1.itsm,m2.itsm);
 #ifdef TMVFLDEBUG
             TMV_SWAP(m1._first,m2._first);
@@ -4189,7 +4188,7 @@ namespace tmv {
 
 #define NEW_SIZE(s,lo) \
         linsize(BandStorageLength(S,s,s,lo,0)), \
-        itsm1(new T[linsize]), itss(s), itslo(lo), \
+        itsm1(linsize), itss(s), itslo(lo), \
         itssi(S==DiagMajor ? -int(s)+1 : S==RowMajor ? lo : 1), \
         itssj(S==DiagMajor ? int(s) : S==RowMajor ? 1 : lo), \
         itssd(S==DiagMajor ? 1 : lo+1), \
@@ -4198,7 +4197,7 @@ namespace tmv {
 
 #define NEW_SIZE2(ls,s,lo) \
         linsize(ls), \
-        itsm1(new T[linsize]), itss(s), itslo(lo), \
+        itsm1(linsize), itss(s), itslo(lo), \
         itssi(S==DiagMajor ? -int(s)+1 : S==RowMajor ? lo : 1), \
         itssj(S==DiagMajor ? int(s) : S==RowMajor ? 1 : lo), \
         itssd(S==DiagMajor ? 1 : lo+1), \
@@ -5602,7 +5601,7 @@ namespace tmv {
     protected :
 
         const size_t linsize;
-        auto_array<T> itsm1;
+        AlignedArray<T> itsm1;
         const size_t itss;
         const int itslo;
         const int itssi;
@@ -5626,9 +5625,7 @@ namespace tmv {
         {
             TMVAssert(m1.size() == m2.size());
             TMVAssert(m1.nlo() == m2.nlo());
-            T* temp = m1.itsm1.release();
-            m1.itsm1.reset(m2.itsm1.release());
-            m2.itsm1.reset(temp);
+            m1.itsm1.swapWith(m2.itsm1);
             TMV_SWAP(m1.itsm,m2.itsm);
 #ifdef TMVFLDEBUG
             TMV_SWAP(m1._first,m2._first);

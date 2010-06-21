@@ -108,6 +108,10 @@
 #include <string>
 #include <algorithm>
 
+#if defined(__SSE2__) || defined(__SSE__)
+#include "xmmintrin.h"
+#endif
+
 #ifdef TMVDEBUG
 #include <typeinfo>
 #include <iostream>
@@ -310,49 +314,104 @@ namespace tmv {
 
     template <class T1, class T2>
     struct Traits2
-    { typedef T1 type; };
+    { 
+        enum { sametype = false };
+        enum { samebase = false };
+        typedef T1 type; 
+    };
     template <class T1, class T2>
     struct Traits2<T1,std::complex<T2> >
-    { typedef std::complex<typename Traits2<T1,T2>::type> type; };
+    {
+        enum { sametype = false };
+        enum { samebase = false };
+        typedef std::complex<typename Traits2<T1,T2>::type> type;
+    };
     template <class T1, class T2>
     struct Traits2<std::complex<T1>,T2>
-    { typedef std::complex<typename Traits2<T1,T2>::type> type; };
+    { 
+        enum { sametype = false };
+        enum { samebase = false };
+        typedef std::complex<typename Traits2<T1,T2>::type> type; 
+    };
     template <class T1, class T2>
     struct Traits2<std::complex<T1>,std::complex<T2> >
-    { typedef std::complex<typename Traits2<T1,T2>::type> type; };
+    {
+        enum { sametype = false };
+        enum { samebase = false };
+        typedef std::complex<typename Traits2<T1,T2>::type> type; 
+    };
     template <class T>
     struct Traits2<T,T>
-    { typedef T type; };
+    {
+        enum { sametype = true };
+        enum { samebase = true };
+        typedef T type; 
+    };
     template <class T>
     struct Traits2<std::complex<T>,T>
-    { typedef std::complex<T> type; };
+    {
+        enum { sametype = false };
+        enum { samebase = true };
+        typedef std::complex<T> type;
+    };
     template <class T>
     struct Traits2<T,std::complex<T> >
-    { typedef std::complex<T> type; };
+    {
+        enum { sametype = false };
+        enum { samebase = true };
+        typedef std::complex<T> type;
+    };
     template <class T>
     struct Traits2<std::complex<T>,std::complex<T> >
-    { typedef std::complex<T> type; };
+    {
+        enum { sametype = true };
+        enum { samebase = true };
+        typedef std::complex<T> type;
+    };
     // Specialize the real pairs for which the second value is the type to
     // use for sums and products rather than the first.
     template <>
     struct Traits2<int,float>
-    { typedef float type; };
+    {
+        enum { sametype = false };
+        enum { samebase = false };
+        typedef float type; 
+    };
     template <>
     struct Traits2<int,double>
-    { typedef double type; };
+    {
+        enum { sametype = false };
+        enum { samebase = false };
+        typedef double type; 
+    };
     template <>
     struct Traits2<int,long double>
-    { typedef long double type; };
+    {
+        enum { sametype = false };
+        enum { samebase = false };
+        typedef long double type; 
+    };
     template <>
     struct Traits2<float,double>
-    { typedef double type; };
+    {
+        enum { sametype = false };
+        enum { samebase = false };
+        typedef double type; 
+    };
     template <>
     struct Traits2<float,long double>
-    { typedef long double type; };
+    {
+        enum { sametype = false };
+        enum { samebase = false };
+        typedef long double type;
+    };
     template <>
     struct Traits2<double,long double>
-    { typedef long double type; };
-
+    {
+        enum { sametype = false };
+        enum { samebase = false };
+        typedef long double type;
+    };
 
 
 #define TMV_RealType(T) typename tmv::Traits<T>::real_type
@@ -690,75 +749,6 @@ namespace tmv {
 #else
     using std::auto_ptr;
 #endif
-    // Identical, except delete[]
-    template <class X> 
-    class auto_array {
-
-    private:
-        X* ptr;
-        template <class Y> 
-        struct auto_array_ref {
-            Y* ptr;
-            explicit auto_array_ref(Y* p) : ptr(p) {}
-        };
-
-    public:
-        typedef X element_type;
-        explicit auto_array(X* p = 0) throw() : ptr(p) {}
-        auto_array(auto_array& a) throw() : ptr(a.release()) {}
-        auto_array(auto_array_ref<X> ref) throw() : ptr(ref.ptr) {}
-        template <class Y> 
-        auto_array(auto_array<Y>& a) throw() :
-            ptr(a.release()) {}
-
-        auto_array& operator=(auto_array& a) throw() 
-        {
-            reset(a.release());
-            return *this;
-        }
-        template <class Y> 
-        auto_array& operator=(auto_array<Y>& a) throw() 
-        {
-            reset(a.release());
-            return *this;
-        }
-        auto_array& operator=(auto_array_ref<X> ref) throw() 
-        {
-            if (ref.ptr != this->get())
-            { 
-                delete[] ptr;
-                ptr = ref.ptr;
-            }
-            return *this;
-        }
-
-        ~auto_array() throw() { delete[] ptr; }
-
-        template <class Y> 
-        operator auto_array_ref<Y>() throw()
-        { return auto_array_ref<Y>(this->release()); }
-        template <class Y> 
-        operator auto_array<Y>() throw()
-        { return auto_array<Y>(this->release()); }
-
-        X& operator[](const int i) const throw() { return *(ptr+i); }
-        X& operator*() const throw() { return *ptr; }
-        X* operator->() const throw() { return ptr; }
-        X* get() const throw() { return ptr; }
-        X* release() throw() 
-        {
-            X* tmp = ptr;
-            ptr = 0;
-            return tmp;
-        }
-        void reset(X* p = 0) throw() 
-        {
-            if (p != ptr) {
-                delete[] ptr;
-                ptr = p;
-            }
-        }
-    };
 
     //#define TMVFLDEBUG
 

@@ -340,7 +340,7 @@ namespace tmv {
         int nrhs = m.rowsize();
         int lda = LUx.stepj()+1;
         int ldm = m.stepj();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i] LAPPLUS1;
         LAPNAME(dgbtrs) (
             LAPCM LAPCH_NT,LAPV(n),LAPV(kl),LAPV(ku),LAPV(nrhs),
@@ -372,7 +372,7 @@ namespace tmv {
         int nrhs = m.rowsize();
         int lda = LUx.diagstep();
         int ldm = m.stepj();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i] LAPPLUS1;
         LAPNAME(zgbtrs) (
             LAPCM LAPCH_NT,LAPV(n),LAPV(kl),LAPV(ku),LAPV(nrhs),
@@ -399,7 +399,7 @@ namespace tmv {
         int n = LUx.colsize();
         int nrhs = m.rowsize();
         int ldm = m.stepj();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i] LAPPLUS1;
         LAPNAME(dgttrs) (
             LAPCM LAPCH_NT,LAPV(n),LAPV(nrhs),
@@ -429,7 +429,7 @@ namespace tmv {
         int n = LUx.colsize();
         int nrhs = m.rowsize();
         int ldm = m.stepj();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i] LAPPLUS1;
         LAPNAME(zgttrs) (
             LAPCM LAPCH_NT,LAPV(n),LAPV(nrhs),
@@ -460,7 +460,7 @@ namespace tmv {
         int nrhs = m.colsize();
         int lda = LUx.stepj()+1;
         int ldm = m.stepi();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i]+1;
         LAPNAME(dgbtrs) (
             LAPCM LAPCH_T,LAPV(n),LAPV(kl),LAPV(ku),LAPV(nrhs),
@@ -491,7 +491,7 @@ namespace tmv {
         int nrhs = m.colsize();
         int lda = LUx.stepj()+1;
         int ldm = m.stepi();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i]+1;
         LAPNAME(zgbtrs) (
             LAPCM LUx.isconj()?LAPCH_CT:LAPCH_T,
@@ -519,7 +519,7 @@ namespace tmv {
         int n = LUx.colsize();
         int nrhs = m.colsize();
         int ldm = m.stepi();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i]+1;
         LAPNAME(dgttrs) (
             LAPCM LAPCH_T,LAPV(n),LAPV(nrhs),
@@ -548,7 +548,7 @@ namespace tmv {
         int n = LUx.colsize();
         int nrhs = m.colsize();
         int ldm = m.stepi();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i]+1;
         LAPNAME(zgttrs) (
             LAPCM LUx.isconj()?LAPCH_CT:LAPCH_T, LAPV(n),LAPV(nrhs),
@@ -581,7 +581,7 @@ namespace tmv {
         int nrhs = m.rowsize();
         int lda = LUx.stepj()+1;
         int ldm = m.stepj();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i] LAPPLUS1;
         LAPNAME(sgbtrs) (
             LAPCM LAPCH_NT,LAPV(n),LAPV(kl),LAPV(ku),LAPV(nrhs),
@@ -613,7 +613,7 @@ namespace tmv {
         int nrhs = m.rowsize();
         int lda = LUx.stepj()+1;
         int ldm = m.stepj();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i] LAPPLUS1;
         LAPNAME(cgbtrs) (
             LAPCM LAPCH_NT,LAPV(n),LAPV(kl),LAPV(ku),LAPV(nrhs),
@@ -640,7 +640,7 @@ namespace tmv {
         int n = LUx.colsize();
         int nrhs = m.rowsize();
         int ldm = m.stepj();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i] LAPPLUS1;
         LAPNAME(sgttrs) (
             LAPCM LAPCH_NT,LAPV(n),LAPV(nrhs),
@@ -670,7 +670,7 @@ namespace tmv {
         int n = LUx.colsize();
         int nrhs = m.rowsize();
         int ldm = m.stepj();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i] LAPPLUS1;
         LAPNAME(cgttrs) (
             LAPCM LAPCH_NT,LAPV(n),LAPV(nrhs),
@@ -701,7 +701,7 @@ namespace tmv {
         int nrhs = m.colsize();
         int lda = LUx.stepj()+1;
         int ldm = m.stepi();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i]+1;
         LAPNAME(sgbtrs) (
             LAPCM LAPCH_T,LAPV(n),LAPV(kl),LAPV(ku),LAPV(nrhs),
@@ -732,7 +732,7 @@ namespace tmv {
         int nrhs = m.colsize();
         int lda = LUx.stepj()+1;
         int ldm = m.stepi();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i]+1;
         LAPNAME(cgbtrs) (
             LAPCM LUx.isconj()?LAPCH_CT:LAPCH_T,
@@ -760,7 +760,7 @@ namespace tmv {
         int n = LUx.colsize();
         int nrhs = m.colsize();
         int ldm = m.stepi();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i]+1;
         LAPNAME(sgttrs) (
             LAPCM LAPCH_T,LAPV(n),LAPV(nrhs),
@@ -789,7 +789,7 @@ namespace tmv {
         int n = LUx.colsize();
         int nrhs = m.colsize();
         int ldm = m.stepi();
-        auto_array<int> lap_p(new int[n]);
+        AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i]+1;
         LAPNAME(cgttrs) (
             LAPCM LUx.isconj()?LAPCH_CT:LAPCH_T,LAPV(n),LAPV(nrhs),

@@ -55,7 +55,7 @@ namespace tmv {
 
         const bool istrans;
         const bool inplace;
-        auto_array<T> Aptr1;
+        AlignedArray<T> Aptr1;
         T* Aptr;
         BandMatrixView<T> QRx;
         Vector<T> Qbeta;
@@ -67,9 +67,8 @@ namespace tmv {
 #define NEWLO (istrans ? A.nhi() : A.nlo())
 #define NEWHI TMV_MIN(A.nlo()+A.nhi(),int(istrans?A.colsize():A.rowsize())-1)
 #define APTR1 inplace ? 0 : \
-    new T[BandStorageLength(ColMajor, \
-                            istrans ? A.rowsize() : A.colsize(), \
-                            istrans ? A.colsize() : A.rowsize(), NEWLO, NEWHI)]
+    BandStorageLength(ColMajor, istrans ? A.rowsize() : A.colsize(), \
+                      istrans ? A.colsize() : A.rowsize(), NEWLO, NEWHI)
 #define APTR inplace ? A.nonConst().ptr() : Aptr1.get()
 #define QRX (istrans ? \
              (inplace ? A.nonConst().transpose() : \
