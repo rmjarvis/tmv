@@ -30,7 +30,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 
-#define XDEBUG
+//#define XDEBUG
 
 
 #include "TMV_Blas.h"
@@ -831,6 +831,7 @@ namespace tmv {
         std::complex<float>* yp = y.ptr();
         if (ys < 0) yp += (y.size()-1)*ys;
         std::complex<float> xbeta(beta);
+#if 0
         std::cout<<"Before cgemv:\n";
         std::cout<<"m,n = "<<m<<','<<n<<std::endl;
         std::cout<<"alpha,beta = "<<alpha<<','<<xbeta<<std::endl;
@@ -840,6 +841,7 @@ namespace tmv {
         std::cout<<"lda,xs,ys = "<<lda<<','<<xs<<','<<ys<<std::endl;
         std::cout<<"conj = "<<A.isconj()<<std::endl;
         std::cout<<"cm = "<<A.iscm()<<std::endl;
+#endif
         if (A.isconj() && A.iscm()) {
 #ifdef CBLAS
             TMV_SWAP(m,n);
@@ -878,7 +880,9 @@ namespace tmv {
                 BLASP(xp),BLASV(xs),BLASP(&xbeta),BLASP(yp),BLASV(ys)
                 BLAS1);
         }
+#if 0
         std::cout<<"After cgemv:\n";
+#endif
     }
     template <> void BlasMultMV(
         const std::complex<float> alpha,

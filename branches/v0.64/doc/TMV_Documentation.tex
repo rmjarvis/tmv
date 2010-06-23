@@ -87,7 +87,7 @@ keywordstyle=\color{Green},
 
 \title{Template Matrix/Vector Library for C++ \\ User Manual \\ Version \tmvversion}
 \author{Mike Jarvis}
-\date{June 1, 2010}
+\date{June 23, 2010}
 \maketitle
 
 \tableofcontents
@@ -870,7 +870,7 @@ v.cView()
 v.fView()
 \end{tmvcode}
 \index{Vector!methods!cView}
-\index{Vector!methods!vView}
+\index{Vector!methods!fView}
 Like \tt{view()} but forces the result to have C- or Fortran-style indexing respectively.
 
 \item
@@ -1809,7 +1809,7 @@ m.cView()
 m.fView()
 \end{tmvcode}
 \index{Matrix!methods!cView}
-\index{Matrix!methods!vView}
+\index{Matrix!methods!fView}
 Like \tt{view()} but forces the result to have C- or Fortran-style indexing respectively.
 
 \item
@@ -6423,11 +6423,11 @@ want, then \tt{doNorm2()} or \tt{doCondition()} will bypass the warning.
 \item The LAPACK function \tt{dstegr} (or \tt{sstegr}) had an error, and the function
 \tt{dstedc} (or \tt{sstedc}) was called instead.  The \tt{dstegr} calculation was wasted,
 although I don't think it is knowable a priori that this might happen.
-\index{LAPACK!dstegr warnings}
+\index{LAPACK!dstegr/sstegr issues}
 \item A LAPACK function requested more workspace than was provided.  This shouldn't happen
 anymore, since I switched to using the LAPACK workspace queries.  But the code to check
 for this is still there.
-\index{LAPACK!workspace warnings}
+\index{LAPACK!workspace issues}
 \end{itemize}
 
 The default way of handling these situations is to print a message to \tt{std::cout}.  This is often
@@ -7919,19 +7919,31 @@ cores, since TMV seems to have better parallelization of this algorithm
  (if \tt{WITH_OPENMP=true}) than many LAPACK libraries.
 \item \texttt{FORCE\_MKL=false} forces the use of the Intel Math Kernel library. 
 It requires the header file \texttt{"mkl.h"} to be found in your path. 
+\index{BLAS!MKL}
+\index{LAPACK!MKL}
 \item \texttt{FORCE\_ACML=false} forces the use of the AMD Core Math library.  
 It requires the header file \texttt{"acml.h"} to be found in your path.
+\index{BLAS!ACML}
+\index{LAPACK!ACML}
 \item \texttt{FORCE\_GOTO=false} forces the use of the GotoBlas library.  
+\index{BLAS!GotoBLAS}
 \item \texttt{FORCE\_ATLAS=false} forces the use of the ATLAS library (for BLAS).  
 It requires the header file \texttt{"cblas.h"} to be found in your path.
+\index{BLAS!ATLAS}
 \item \texttt{FORCE\_CBLAS=false} forces the use of a CBLAS library.
+\index{BLAS!CBLAS}
 \item \texttt{FORCE\_FBLAS=false} forces the use of a Fortran BLAS library.
+\index{BLAS!Fortran BLAS}
 \item \texttt{FORCE\_CLAPACK=false} forces the use of the CLAPACk library. 
 It requires the CLAPACK version of the header file \texttt{"clapack.h"} to be found in your path.
+\index{LAPACK!CLAPACK}
 \item \texttt{FORCE\_ATLAS\_LAPACK=false} forces the use of the LAPACK portion
 of the ATLAS Library.  
 It requires the ATLAS version of the header file \texttt{"clapack.h"} to be found in your path.
+\index{LAPACK!ATLAS}
+\index{BLAS!ATLAS}
 \item \texttt{FORCE\_FLAPACK=false} forces the use of a Fortran LAPACK library.
+\index{LAPACK!Fortran LAPACK}
 \item \texttt{LIBS=''} directly specifies the library flags to use for linking if the automatic methods aren't working for you.  Because of the way SCons works,
 these should omit the \texttt{-l} part of the flag, since SCons will add this to what is provided.
 For example, to specify an alternate name for the CLAPACK library, use 
@@ -7961,7 +7973,7 @@ named \tt{dstedc} (or \tt{sstedc}) will be used instead.
 \index{Singular Value Decomposition!LAPACK ?stegr}
 \index{Eigenvalues!LAPACK ?stegr}
 \index{Warnings!LAPACK ?stegr}
-\index{LAPACK!Problems with ?stegr}
+\index{LAPACK!dstegr/sstegr issues}
 \item
 \texttt{USE\_GEQP3=true} specifies whether to use the LAPACK algorithm called
 \tt{dgeqp3} (or its variants) for the strict QRP decomposition.  If it is false,
@@ -8311,9 +8323,11 @@ The next flags specify what BLAS and/or LAPACK libraries to use (if any):
 \texttt{-DATLAS} will set up the BLAS calls as defined by ATLAS.  And (if -DNOLAP
 is not specified), it will also call the several LAPACK routines
 provided by ATLAS.
+\index{BLAS!ATLAS}
 \item
 \texttt{-DCBLAS} will set up the BLAS calls using the notation provided by the 
 CBLAS interface to BLAS.  Many systems have a library like this installed as 
+\index{BLAS!CBLAS}
 \texttt{/usr/local/lib/libcblas.a}, or some similar location,
 so it is worth looking to see if you have this before
 trying to install something new.
@@ -8324,6 +8338,7 @@ Most BLAS installations also install the C interface, but if your
 BLAS does not have this (e.g. GotoBLAS), then this flag should work.  
 Since there is often no
 header file for a Fortran BLAS library, we include the file \texttt{fblas.h} in the TMV 
+\index{BLAS!Fortran BLAS}
 \texttt{include} directory that should work.
 \item
 \texttt{-DCLAPACK} will set up the LAPACK calls for the CLAPACK distribution.  I 
@@ -8337,17 +8352,24 @@ the ATLAS versions of its few LAPACK routines instead, the ATLAS
 installation instructions describe a way to get them into the CLAPACK library.
 Also, you should make sure the \texttt{-I} directories lists the directory with the CLAPACK
 version of clapack.h before the ATLAS version.
+\index{LAPACK!CLAPACK}
+\index{BLAS!ATLAS}
 \item
 \texttt{-DFLAPACK} will set up the LAPACK calls for a distribution that
 was designed to be called from Fortran programs rather than C.  Since such distributions
 do not provide a header file, we provide \texttt{flapack.h} in the TMV \texttt{include} directory.
+\index{LAPACK!Fortran LAPACK}
 \item
 \texttt{-DMKL} will call all the external BLAS and LAPACK routines as defined by the
 Intel Math Kernel Library.  You should specify the directory with \texttt{mkl.h} with a 
+\index{BLAS!MKL}
+\index{LAPACK!MKL}
 \texttt{-I} flag if it is not installed in your include path.
 \item
 \texttt{-DACML} will call all the external BLAS and LAPACK routines as defined by the 
 AMD Core Math Library.  You should specify the directory with \texttt{acml.h} with a 
+\index{BLAS!ACML}
+\index{LAPACK!ACML}
 \texttt{-I} flag if it is not installed in your include path.
 \end{itemize}
 The next set of compiler defines are not usually necessary.  But
@@ -8375,7 +8397,7 @@ named \tt{dstedc} (or \tt{sstedc}) will be used instead.
 \index{Singular Value Decomposition!LAPACK ?stegr}
 \index{Eigenvalues!LAPACK ?stegr}
 \index{Warnings!LAPACK ?stegr}
-\index{LAPACK!Problems with ?stegr}
+\index{LAPACK!dstegr/sstegr issues}
 
 I used to have problems with the \tt{stegr} algorithm producing incorrent
 results, but I figured out how to detect the problem and now
@@ -8395,6 +8417,7 @@ produce an $R$ matrix
 with strictly decreasing elements along the diagonal.  So if this is important
 for you, then you should use this flag.
 \item
+\index{LAPACK!workspace issues}
 \texttt{-DNOWORKQUERY} specifies that your LAPACK library does not support
 work size queries.  There are a few LAPACK routines that require workspace whose
 optimal size depends on details of the L1 cache size of your machine.  Normally,
@@ -8408,6 +8431,7 @@ So if you get errors similar to \\
 \texttt{TMV Error: info < 0 returned by LAPACK function dormqr}\\
 then this flag will compile without the workspace queries, instead just
 using a good guess for the optimal size.
+\index{BLAS!MKL}
 
 \item
 \texttt{-DNOMIX\_SMALL} will avoid all arithmetic that mixes \tt{SmallMatrix} and \tt{SmallVector} 
@@ -8828,14 +8852,15 @@ which will use the native TMV code for strict QRP decomposition for this
 rather than the LAPACK function (which is called \tt{?geqp3}).
 
 \item{\bf Info $<$ 0 errors:}
-\index{LAPACK!Problems with workspace queries}
+\index{LAPACK!workspace issues}
 If you get an error that looks something like:\\
 \texttt{TMV Error: info < 0 returned by LAPACK function dormqr}\\
 then this probably means that your LAPACK distribution does not support
 workspace size queries.  The solution is to use the flag \texttt{-DNOWORKQUERY}.
 
 \item {\bf Unable to link LAPACK on Mac:}
-\index{LAPACK!Problems linking LAPACK}
+\index{LAPACK!linking}
+\index{LAPACK!CLAPACK}
 I get a linking error on my Mac when combining the XCode LAPACK library
 (either libclapack.dylib or liblapack.dylib) with a non-XCode BLAS library.
 Specifically, it can't find the \texttt{?getri} functions.   Basically, the reason is that
@@ -8852,7 +8877,7 @@ library files, since they are in the /usr/lib directory, and \tt{-L} flags usual
 precedence over /usr/lib.
 
 \item {\bf Errors in \tt{Matrix<float>} calculations using BLAS on Mac}
-\index{LAPACK!Errors with float}
+\index{BLAS!Errors with float}
 I have found that some XCode BLAS libraries seem to have errors in the 
 calculations for large \tt{<float>} matrices.  I think it is an error in the \tt{sgemm}
 function.  Since very many of the other algorithms use this function, the error
@@ -8866,13 +8891,25 @@ The best thing to do to see if your XCode installation has this problem
 is to install the test suite and make sure that it runs without errors.  If it makes it 
 through without errors, then you don't have to worry about it.
 
-If you do get an error in the test suite, and you want to use \tt{<float>} matrices, then the only workaround I can suggest is to either compile without using BLAS or download and make a different BLAS library.
-For example ATLAS or GOTO BLAS are free to download and are both pretty fast.
+If you encounter this problem (which manifests as tmvtest1 failing in the <float> section),
+then I'm afraid the solution is to either forego using \tt{Matrix<float>}, switch to another
+BLAS library, or compile TMV without BLAS.
+
+\item {\bf Segmentation fault when using GotoBLAS2}
+\index{BLAS!Errors with float}
+\index{BLAS!GotoBLAS}
+The latest version of GotoBLAS2 at the time of this release (v1.13) has a bug that leads to segmentation
+faults in some \tt{cgermv} calls.  I've reported the bug to them, but haven't heard back from
+them yet.  (To be fair, my report was mere days before the release of this TMV version.)  I don't know exactly which versions of GotoBLAS have this bug, nor on which systems the bug manifests (since the error is undoubtedly in their specialized assembly code that varies from one system to another).  I encountered the bug on an Intel Core 2 Duo machine.
+
+If you encounter the same issue (which manifests in \tt{tmvtest1}), then I'm afraid the solution is to either forego using \tt{Matrix<float>}, switch to another BLAS library, or compile TMV without BLAS.
 
 \item {\bf Segmentation faults with \tt{SmallMatrix}:}
-\index{LAPACK!Problems with SmallMatrix}
+\index{BLAS!Problems with SmallMatrix}
 \index{SmallMatrix!mixing with regular Matrix, Vector}
 \index{SmallVector!mixing with regular Matrix, Vector}
+\index{BLAS!GotoBLAS}
+\index{BLAS!ATLAS}
 My version of the GotoBLAS library seems to have trouble with arithmetic statements that
 mix \tt{SmallMatrix} or \tt{SmallVector} with \tt{Matrix} or \tt{Vector}.  I think the
 problem stems from the fact that the \tt{Small} objects allocate their memory on the
