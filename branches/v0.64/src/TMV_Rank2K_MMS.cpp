@@ -700,9 +700,6 @@ namespace tmv {
     // if A is sym:  A (+)= alpha * (x ^ y + y ^ x)
     // if A is herm: A (+)= alpha * x ^ y* + conj(alpha) * y ^ x*
     {
-#ifdef XTEST
-        TMVAssert(!add || A.isHermOK());
-#endif
         TMVAssert(A.size() == x.colsize());
         TMVAssert(A.size() == y.colsize());
         TMVAssert(x.rowsize() == y.rowsize());
@@ -846,6 +843,7 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
+        TMVAssert(A.isHermOK());
         if (Norm(A-A2) > 0.001*(TMV_ABS(alpha)*Norm(x0)*Norm(y0)+
                                 (add?Norm(A0):TMV_RealType(T)(0)))) {
             cerr<<"Rank2KUpdate: alpha = "<<alpha<<endl;
@@ -863,9 +861,6 @@ namespace tmv {
             cerr<<"Norm(A-A2) = "<<Norm(A-A2)<<endl;
             abort();
         }
-#endif
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
 #endif
     }
 

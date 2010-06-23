@@ -691,9 +691,6 @@ namespace tmv {
         const VectorView<T>& y)
     // y (+)= alpha * A * x
     { 
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
-#endif
         TMVAssert(A.rowsize() == x.size());
         TMVAssert(A.colsize() == y.size());
 #ifdef XDEBUG

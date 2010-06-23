@@ -107,9 +107,6 @@ namespace tmv {
         const GenSymMatrix<T1>& LL, const GenVector<T1>& xD, const int* P, 
         const MatrixView<T>& m)
     {
-#ifdef XTEST
-        TMVAssert(LL.isHermOK());
-#endif
         // Solve P L D Lt Pt x = m:
         TMVAssert(LL.size() == m.colsize());
         TMVAssert(xD.size()+1 == m.colsize());
@@ -167,9 +164,6 @@ namespace tmv {
         const GenSymMatrix<T1>& LL, const GenVector<T1>& xD, const int* P, 
         const MatrixView<T>& m)
     {
-#ifdef XTEST
-        TMVAssert(LL.isHermOK());
-#endif
         // Solve x P L D Lt Pt = m:
         // P L Dt Lt Pt xt = mt
         TMVAssert(LL.size() == m.rowsize());

@@ -615,7 +615,7 @@ namespace tmv {
         if (V) TMVAssert(int(V->colsize()) == N);
         TMVAssert(D.step()==1);
         TMVAssert(E.step()==1);
-#ifdef XTEST
+#ifdef XDEBUG
         TMVAssert(D.minAbs2Element() > RT(0));
         TMVAssert(E.minAbs2Element() > RT(0));
 #endif
@@ -753,7 +753,7 @@ namespace tmv {
         TMVAssert(D.size() == E.size()+1);
         if (U) TMVAssert(U->rowsize() == D.size());
         if (V) TMVAssert(V->colsize() == D.size());
-#ifdef XTEST
+#ifdef XDEBUG
         TMVAssert(D.minAbs2Element() > RT(0));
         TMVAssert(E.minAbs2Element() > RT(0));
 #endif

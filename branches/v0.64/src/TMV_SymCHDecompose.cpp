@@ -138,7 +138,6 @@ namespace tmv {
         const int N = A.size();
 #ifdef XDEBUG
         Matrix<T> A0(A);
-#ifdef XTEST
         for(int i=1;i<=N;i++) {
             T d = Matrix<T>(A.subSymMatrix(0,i)).det();
             if (TMV_REAL(d) < 0) {
@@ -146,7 +145,6 @@ namespace tmv {
                 cout<<"det(0.."<<i<<") = "<<d<<endl;
             }
         }
-#endif
 #endif
 
         const VectorView<RT> Adiag = A.realPart().diag();
@@ -545,9 +543,6 @@ namespace tmv {
     template <class T> 
     void CH_Decompose(const SymMatrixView<T>& A)
     {
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
-#endif
         TMVAssert(isReal(T()) || A.isherm());
         TMVAssert(A.isrm() || A.iscm());
 
@@ -560,9 +555,6 @@ namespace tmv {
             NonLapCH_Decompose(A);
 #endif
         }
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
-#endif
     }
 
 #undef RT

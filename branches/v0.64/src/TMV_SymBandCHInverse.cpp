@@ -126,9 +126,6 @@ namespace tmv {
     void CH_Inverse(
         const GenSymBandMatrix<T>& LLx, const SymMatrixView<T1>& sinv) 
     {
-#ifdef XTEST
-        TMVAssert(LLx.isHermOK());
-#endif
         TMVAssert(LLx.size() == sinv.size());
 
 #ifdef XDEBUG
@@ -165,18 +162,13 @@ namespace tmv {
             abort();
         }
 #endif
-#ifdef XTEST
         TMVAssert(sinv.isHermOK());
-#endif
     }
 
     template <class T, class T1> 
     void LDL_Inverse(
         const GenSymBandMatrix<T>& LLx, const SymMatrixView<T1>& sinv) 
     {
-#ifdef XTEST
-        TMVAssert(LLx.isHermOK());
-#endif
         TMVAssert(LLx.size() == sinv.size());
         TMVAssert(LLx.nlo() == 1);
 
@@ -218,9 +210,7 @@ namespace tmv {
             abort();
         }
 #endif
-#ifdef XTEST
         TMVAssert(sinv.isHermOK());
-#endif
     }
 
 

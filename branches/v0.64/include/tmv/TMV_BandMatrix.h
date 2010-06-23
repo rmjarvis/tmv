@@ -1118,12 +1118,6 @@ namespace tmv {
 
 
 
-#ifdef XTEST
-#ifdef TMVDEBUG
-#define XTEST_DEBUG
-#endif
-#endif
-
     template <class T, IndexStyle I> 
     class ConstBandMatrixView : public GenBandMatrix<T>
     {
@@ -1163,11 +1157,9 @@ namespace tmv {
             TMVAssert(nhi() >= 0);
             TMVAssert(nlo() >= 0);
             TMVAssert(!(isdm() && linsize!=0));
-#ifdef XTEST_DEBUG
             TMVAssert(linsize==0 || linsize==1 || 
                       linsize==BandStorageLength(
                           itsstor,itscs,itsrs,itsnlo,itsnhi));
-#endif
         }
 
         // These two work slightly differently than the BandMatrixViewOf
@@ -1545,11 +1537,9 @@ namespace tmv {
             TMVAssert(nlo() >= 0);
             TMVAssert(!(isdm() && linsize != 0));
             TMVAssert(itsstor==DiagMajor ? linsize == 0 : true);
-#ifdef XTEST_DEBUG
             TMVAssert(linsize==0 || linsize==1 || 
                       linsize==BandStorageLength(
                           itsstor,itscs,itsrs,itsnlo,itsnhi));
-#endif
         }
 
         inline BandMatrixView(
@@ -1570,11 +1560,9 @@ namespace tmv {
             TMVAssert(nlo() >= 0);
             TMVAssert(!(isdm() && linsize != 0));
             TMVAssert(itsstor==DiagMajor ? linsize == 0 : true);
-#ifdef XTEST_DEBUG
             TMVAssert(linsize==0 || linsize==1 || 
                       linsize==BandStorageLength(
                           itsstor,itscs,itsrs,itsnlo,itsnhi));
-#endif
         }
 
         inline BandMatrixView(
@@ -2680,7 +2668,7 @@ namespace tmv {
         inline BandMatrix(size_t cs, size_t rs, int lo, int hi, const T* vv) :
             NEW_SIZE(cs,rs,lo,hi)
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
@@ -2695,7 +2683,7 @@ namespace tmv {
             size_t cs, size_t rs, int lo, int hi, const std::vector<T>& vv) :
             NEW_SIZE(cs,rs,lo,hi)
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
@@ -2710,7 +2698,7 @@ namespace tmv {
         inline BandMatrix(const BandMatrix<T,S,I>& m2) :
             NEW_SIZE2(m2.ls(),m2.itscs,m2.itsrs,m2.itsnlo,m2.itsnhi)
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
@@ -2721,7 +2709,7 @@ namespace tmv {
         inline BandMatrix(const BandMatrix<T,S,I2>& m2) :
             NEW_SIZE2(m2.ls(),m2.colsize(),m2.rowsize(),m2.nlo(),m2.nhi())
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
@@ -2731,7 +2719,7 @@ namespace tmv {
         inline BandMatrix(const GenBandMatrix<RT>& m2) :
             NEW_SIZE(m2.colsize(),m2.rowsize(),m2.nlo(),m2.nhi())
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
@@ -2741,7 +2729,7 @@ namespace tmv {
         inline BandMatrix(const GenBandMatrix<CT>& m2) :
             NEW_SIZE(m2.colsize(),m2.rowsize(),m2.nlo(),m2.nhi())
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(isComplex(T()));
@@ -2753,7 +2741,7 @@ namespace tmv {
         inline BandMatrix(const GenBandMatrix<T2>& m2) :
             NEW_SIZE(m2.colsize(),m2.rowsize(),m2.nlo(),m2.nhi())
         { 
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(isReal(T2()) || isComplex(T()));
@@ -2765,7 +2753,7 @@ namespace tmv {
         inline BandMatrix(const GenBandMatrix<T2>& m2, int lo, int hi) :
             NEW_SIZE(m2.colsize(),m2.rowsize(),lo,hi)
         { 
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(isReal(T2()) || isComplex(T()));
@@ -2787,7 +2775,7 @@ namespace tmv {
         inline BandMatrix(const GenMatrix<T>& m2, int lo, int hi) :
             NEW_SIZE(m2.colsize(),m2.rowsize(),lo,hi)
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
@@ -2801,7 +2789,7 @@ namespace tmv {
         inline BandMatrix(const GenUpperTriMatrix<T>& m2, int hi) :
             NEW_SIZE(m2.size(),m2.size(),0,hi)
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
@@ -2813,7 +2801,7 @@ namespace tmv {
         inline BandMatrix(const GenLowerTriMatrix<T>& m2, int lo) :
             NEW_SIZE(m2.size(),m2.size(),lo,0)
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
@@ -2825,7 +2813,7 @@ namespace tmv {
         inline BandMatrix(const AssignableToBandMatrix<RT>& m2) :
             NEW_SIZE(m2.colsize(),m2.rowsize(),m2.nlo(),m2.nhi())
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
@@ -2835,7 +2823,7 @@ namespace tmv {
         inline BandMatrix(const AssignableToBandMatrix<CT>& m2) :
             NEW_SIZE(m2.colsize(),m2.rowsize(),m2.nlo(),m2.nhi())
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(isComplex(T()));

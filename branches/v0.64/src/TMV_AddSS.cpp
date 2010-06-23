@@ -53,10 +53,6 @@ namespace tmv {
     void AddMM(
         const T alpha, const GenSymMatrix<Ta>& A, const MatrixView<T>& B)
     {
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
-#endif
-
 #ifdef XDEBUG
         Matrix<Ta> A0 = A;
         Matrix<T> B0 = B;
@@ -109,10 +105,6 @@ namespace tmv {
         const T alpha, const GenSymMatrix<Ta>& A,
         const T beta, const GenSymMatrix<Tb>& B, const MatrixView<T>& C)
     { 
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
-        TMVAssert(B.isHermOK());
-#endif
 #ifdef XDEBUG
         Matrix<Ta> A0 = A;
         Matrix<Tb> B0 = B;
@@ -167,9 +159,6 @@ namespace tmv {
         const T alpha, const GenSymMatrix<Ta>& A,
         const T beta, const GenMatrix<Tb>& B, const MatrixView<T>& C)
     { 
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
-#endif
 #ifdef XDEBUG
         Matrix<Ta> A0 = A;
         Matrix<Tb> B0 = B;

@@ -687,9 +687,6 @@ namespace tmv {
         const MatrixView<T>& C)
     // C (+)= alpha * A * B
     {
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
-#endif
         TMVAssert(A.size() == C.colsize());
         TMVAssert(A.size() == B.colsize());
         TMVAssert(B.rowsize() == C.rowsize());
@@ -807,10 +804,6 @@ namespace tmv {
         const GenSymMatrix<Tb>& B, const MatrixView<T>& C)
     // C (+)= alpha * A * B
     {
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
-        TMVAssert(B.isHermOK());
-#endif
         TMVAssert(A.size() == B.size());
         TMVAssert(A.size() == C.colsize());
         TMVAssert(A.size() == C.rowsize());

@@ -132,9 +132,6 @@ namespace tmv {
         const MatrixView<T>& C)
         // C (+)= alpha * A * B
     {
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
-#endif
         TMVAssert(A.size() == C.colsize());
         TMVAssert(A.size() == B.colsize());
         TMVAssert(B.rowsize() == C.rowsize());

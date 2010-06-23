@@ -1041,9 +1041,6 @@ namespace tmv {
             itssym(rhs.itssym), itsuplo(rhs.itsuplo), itsstor(rhs.itsstor),
             itsct(rhs.itsct) 
         {
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         inline ConstSymMatrixView(const base& rhs) :
@@ -1052,9 +1049,6 @@ namespace tmv {
             itssym(rhs.sym()), itsuplo(rhs.uplo()), itsstor(rhs.stor()),
             itsct(rhs.ct()) 
         {
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         inline ConstSymMatrixView(
@@ -1066,9 +1060,6 @@ namespace tmv {
         { 
             TMVAssert(_stor==RowMajor ? _sj == 1 : _stor==ColMajor ?
                       _si==1 : true);
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         virtual inline ~ConstSymMatrixView()
@@ -1322,12 +1313,7 @@ namespace tmv {
         inline SymMatrixView(const type& rhs) : 
             itsm(rhs.itsm), itss(rhs.itss), itssi(rhs.itssi), itssj(rhs.itssj),
             itssym(rhs.sym()), itsuplo(rhs.uplo()), itsstor(rhs.stor()),
-            itsct(rhs.ct()) TMV_DEFFIRSTLAST(rhs._first,rhs._last) 
-        {
-#ifdef XTEST
-            //TMVAssert(this->isHermOK());
-#endif
-        }
+            itsct(rhs.ct()) TMV_DEFFIRSTLAST(rhs._first,rhs._last) {}
 
         inline SymMatrixView(
             T* _m, size_t _s, int _si, int _sj, 
@@ -1340,9 +1326,6 @@ namespace tmv {
         {
             TMVAssert(_stor==RowMajor ? _sj==1 : _stor==ColMajor ?
                       _si==1 : true); 
-#ifdef XTEST
-            //TMVAssert(this->isHermOK());
-#endif
         }
 
         virtual inline ~SymMatrixView() 
@@ -1361,9 +1344,6 @@ namespace tmv {
             TMVAssert(size() == m2.size());
             TMVAssert(isReal(T()) || m2.sym() == sym());
             if (!isSameAs(m2)) upperTri() = m2.upperTri(); 
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this; 
         }
 
@@ -1372,9 +1352,6 @@ namespace tmv {
             TMVAssert(size() == m2.size());
             TMVAssert(isReal(T()) || m2.sym() == sym());
             if (!isSameAs(m2)) upperTri() = m2.upperTri(); 
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this; 
         }
 
@@ -1382,9 +1359,6 @@ namespace tmv {
         { 
             TMVAssert(size() == m2.size());
             m2.assignToS(*this);
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this; 
         }
 
@@ -1394,9 +1368,6 @@ namespace tmv {
             TMVAssert(size() == m2.size());
             TMVAssert(m2.sym() == sym());
             m2.assignToS(*this);
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this; 
         }
 
@@ -1407,9 +1378,6 @@ namespace tmv {
             TMVAssert(isComplex(T()) || isReal(T2()));
             TMVAssert(isReal(T2()) || m2.sym() == sym());
             if (!isSameAs(m2)) upperTri() = m2.upperTri(); 
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this; 
         }
 
@@ -1423,9 +1391,6 @@ namespace tmv {
         { 
             TMVAssert(size() == m2.size());
             m2.assignToS(view());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -1435,9 +1400,6 @@ namespace tmv {
             TMVAssert(size() == m2.size());
             TMVAssert(sym() == m2.sym());
             m2.assignToS(view());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -1446,9 +1408,6 @@ namespace tmv {
             TMVAssert(size() == m2.size());
             m2.assignToD(DiagMatrixViewOf(diag()));
             upperTri().offDiag().setZero();
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -1459,9 +1418,7 @@ namespace tmv {
             TMVAssert(issym());
             m2.assignToD(DiagMatrixViewOf(diag()));
             upperTri().offDiag().setZero();
-#ifdef XTEST
             TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -1474,9 +1431,6 @@ namespace tmv {
                     issym() ? opvv.getV2().view() : opvv.getV2().conjugate()));
             TMVAssert(issym() || TMV_IMAG(opvv.getX()) == RT(0));
             Rank1Update<false>(opvv.getX(),opvv.getV1(),*this);
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -1490,9 +1444,6 @@ namespace tmv {
                     issym() ? opvv.getV2().view() : opvv.getV2().conjugate()));
             TMVAssert(issym() || TMV_IMAG(opvv.getX()) == RT(0));
             Rank1Update<false>(opvv.getX(),opvv.getV1(),*this);
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -1505,9 +1456,6 @@ namespace tmv {
                                            pmm.getM2().adjoint()));
             TMVAssert(issym() || TMV_IMAG(pmm.getX()) == RT(0));
             RankKUpdate<false>(pmm.getX(),pmm.getM1(),*this);
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -1521,9 +1469,6 @@ namespace tmv {
                     issym() ? pmm.getM2().transpose() : pmm.getM2().adjoint()));
             TMVAssert(issym() || TMV_IMAG(pmm.getX()) == RT(0));
             RankKUpdate<false>(pmm.getX(),pmm.getM1(),*this);
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -1536,9 +1481,6 @@ namespace tmv {
                     issym() ? pmm.getM2().transpose() : pmm.getM2().adjoint()));
             TMVAssert(issym() || TMV_IMAG(pmm.getX()) == RT(0));
             RankKUpdate<false>(pmm.getX(),pmm.getM1(),*this);
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -1552,9 +1494,6 @@ namespace tmv {
                     issym() ? pmm.getM2().transpose() : pmm.getM2().adjoint()));
             TMVAssert(issym() || TMV_IMAG(pmm.getX()) == RT(0));
             RankKUpdate<false>(pmm.getX(),pmm.getM1(),*this);
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -1567,9 +1506,6 @@ namespace tmv {
                     issym() ? pmm.getM2().transpose() : pmm.getM2().adjoint()));
             TMVAssert(issym() || TMV_IMAG(pmm.getX()) == RT(0));
             RankKUpdate<false>(pmm.getX(),pmm.getM1(),*this);
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -1583,9 +1519,6 @@ namespace tmv {
                     issym() ? pmm.getM2().transpose() : pmm.getM2().adjoint()));
             TMVAssert(issym() || TMV_IMAG(pmm.getX()) == RT(0));
             RankKUpdate<false>(pmm.getX(),pmm.getM1(),*this);
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -2288,12 +2221,6 @@ namespace tmv {
 
     }; // FortranStyle SymMatrixView
 
-#ifdef XTEST
-#ifdef TMVDEBUG
-#define XTEST_DEBUG
-#endif
-#endif
-
     template <class T, UpLoType U, StorageType S, IndexStyle I> 
     class SymMatrix : public GenSymMatrix<T>
     {
@@ -2347,9 +2274,6 @@ namespace tmv {
 
         inline SymMatrix(size_t _size, const T* vv) : NEW_SIZE(_size)
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             std::copy(vv,vv+itslen,itsm.get());
         }
@@ -2357,9 +2281,6 @@ namespace tmv {
         inline SymMatrix(size_t _size, const std::vector<T>& vv) :
             NEW_SIZE(_size)
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(vv.size() == itslen);
             std::copy(vv.begin(),vv.end(),itsm.get());
@@ -2367,9 +2288,6 @@ namespace tmv {
 
         inline SymMatrix(const type& rhs) : NEW_SIZE(rhs.size())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             std::copy(rhs.cptr(),rhs.cptr()+itslen,itsm.get());
         }
@@ -2377,18 +2295,12 @@ namespace tmv {
         template <IndexStyle I2> 
         inline SymMatrix(const SymMatrix<T,U,S,I2>& rhs) : NEW_SIZE(rhs.size())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             std::copy(rhs.cptr(),rhs.cptr()+itslen,itsm.get());
         }
 
         inline SymMatrix(const GenSymMatrix<RT>& rhs) : NEW_SIZE(rhs.size())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             if (rhs.issym()) 
                 rhs.assignToS(view());
@@ -2402,9 +2314,6 @@ namespace tmv {
 
         inline SymMatrix(const GenSymMatrix<CT>& rhs) : NEW_SIZE(rhs.size())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(isComplex(T()));
             TMVAssert(S==RowMajor || S==ColMajor);
             if (rhs.issym()) 
@@ -2420,9 +2329,6 @@ namespace tmv {
         template <class T2> 
         inline SymMatrix(const GenSymMatrix<T2>& rhs) : NEW_SIZE(rhs.size())
         { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             if (U == Upper)
                 upperTri() = rhs.upperTri();
@@ -2434,9 +2340,6 @@ namespace tmv {
         inline explicit SymMatrix(const Matrix<T,S,I2>& rhs) :
             NEW_SIZE(rhs.rowsize())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(rhs.isSquare());
             std::copy(rhs.cptr(),rhs.cptr()+itslen,itsm.get());
@@ -2446,9 +2349,6 @@ namespace tmv {
         inline SymMatrix(const GenMatrix<T2>& rhs) :
             NEW_SIZE(rhs.rowsize())
         { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(rhs.isSquare());
             if (U == Upper)
@@ -2460,9 +2360,6 @@ namespace tmv {
         inline SymMatrix(const AssignableToSymMatrix<RT>& m2) :
             NEW_SIZE(m2.size())
         { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(m2.issym());
             m2.assignToS(view());
@@ -2471,9 +2368,6 @@ namespace tmv {
         inline SymMatrix(const AssignableToSymMatrix<CT>& m2) :
             NEW_SIZE(m2.size())
         { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(isComplex(T()));
             TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(m2.issym());
@@ -2501,9 +2395,6 @@ namespace tmv {
         inline SymMatrix(const OProdVV<T,T2,T2>& opvv) :
             NEW_SIZE(opvv.colsize())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(opvv.colsize() == opvv.rowsize());
             TMVAssert(opvv.getV1().isSameAs(opvv.getV2().view()));
             Rank1Update<false>(opvv.getX(),opvv.getV1(),view());
@@ -2513,9 +2404,6 @@ namespace tmv {
         inline SymMatrix(const ProdMM<T,T2,T2>& pmm) :
             NEW_SIZE(pmm.colsize())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(pmm.colsize() == pmm.rowsize());
             TMVAssert(pmm.getM1().isSameAs(pmm.getM2().transpose()));
             RankKUpdate<false>(pmm.getX(),pmm.getM1(),view());
@@ -2525,9 +2413,6 @@ namespace tmv {
         inline SymMatrix(const ProdUL<T,T2,T2>& pmm) :
             NEW_SIZE(pmm.colsize())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(pmm.colsize() == pmm.rowsize());
             TMVAssert(pmm.getM1().isSameAs(pmm.getM2().transpose()));
             RankKUpdate<false>(pmm.getX(),pmm.getM1(),view());
@@ -2537,9 +2422,6 @@ namespace tmv {
         inline SymMatrix(const ProdLU<T,T2,T2>& pmm) :
             NEW_SIZE(pmm.colsize())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(pmm.colsize() == pmm.rowsize());
             TMVAssert(pmm.getM1().isSameAs(pmm.getM2().transpose()));
             RankKUpdate<false>(pmm.getX(),pmm.getM1(),view());
@@ -3368,7 +3250,7 @@ namespace tmv {
         { 
             TMVAssert(S==RowMajor || S==ColMajor);
 #ifdef TMVDEBUG
-            setAllTo(RT(888));
+            setAllTo(T(888));
 #endif
         }
 
@@ -3380,9 +3262,6 @@ namespace tmv {
 
         HermMatrix(size_t _size, const T* vv) : NEW_SIZE(_size)
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             std::copy(vv,vv+itslen,itsm.get());
             TMVAssert(this->isHermOK());
@@ -3390,9 +3269,6 @@ namespace tmv {
 
         HermMatrix(size_t _size, const std::vector<T>& vv) : NEW_SIZE(_size)
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(vv.size() == itslen);
             std::copy(vv.begin(),vv.end(),itsm.get());
@@ -3401,48 +3277,27 @@ namespace tmv {
 
         HermMatrix(const type& rhs) : NEW_SIZE(rhs.size())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             std::copy(rhs.cptr(),rhs.cptr()+itslen,itsm.get());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         template <IndexStyle I2> 
         HermMatrix(const HermMatrix<T,U,S,I2>& rhs) : NEW_SIZE(rhs.size())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             std::copy(rhs.cptr(),rhs.cptr()+itslen,itsm.get());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         HermMatrix(const GenSymMatrix<RT>& rhs) : NEW_SIZE(rhs.size())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             if (rhs.isherm()) rhs.assignToS(view());
             else if (U == Upper) upperTri() = rhs.upperTri();
             else lowerTri() = rhs.lowerTri();
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         HermMatrix(const GenSymMatrix<CT>& rhs) : NEW_SIZE(rhs.size())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(isComplex(T()));
             TMVAssert(S==RowMajor || S==ColMajor);
             if (rhs.isherm())
@@ -3452,49 +3307,31 @@ namespace tmv {
                 else lowerTri() = rhs.lowerTri();
                 diag().imagPart().setZero();
             }
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         template <class T2> 
         inline HermMatrix(const GenSymMatrix<T2>& rhs) : NEW_SIZE(rhs.size())
         { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             if (U == Upper) upperTri() = rhs.upperTri();
             else lowerTri() = rhs.lowerTri();
             if (isComplex(T()) && isComplex(T2()) && rhs.issym()) 
                 diag().imagPart().setZero();
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         template <IndexStyle I2> 
         inline explicit HermMatrix(const Matrix<T,S,I2>& rhs) : 
             NEW_SIZE(rhs.rowsize())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(rhs.isSquare());
             std::copy(rhs.cptr(),rhs.cptr()+itslen,itsm.get());
             if (isComplex(T())) diag().imagPart().setZero();
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         template <class T2> 
         inline HermMatrix(const GenMatrix<T2>& rhs) : NEW_SIZE(rhs.rowsize())
         { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(rhs.isSquare());
             if (U == Upper)
@@ -3502,124 +3339,80 @@ namespace tmv {
             else
                 lowerTri() = rhs.lowerTri();
             if (isComplex(T()) && isComplex(T2())) diag().imagPart().setZero();
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         inline HermMatrix(const AssignableToSymMatrix<RT>& m2) :
             NEW_SIZE(m2.size())
         { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(m2.isherm());
             m2.assignToS(view());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         inline HermMatrix(const AssignableToSymMatrix<CT>& m2) :
             NEW_SIZE(m2.size())
         { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(isComplex(T()));
             TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(m2.isherm());
             m2.assignToS(view());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         inline explicit HermMatrix(const GenDiagMatrix<RT>& m2) :
             NEW_SIZE(m2.size())
         { 
             TMVAssert(S==RowMajor || S==ColMajor);
-            setZero();
             m2.assignToD(DiagMatrixViewOf(diag()));
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
+            upperTri().offDiag().setZero();
         }
 
         inline explicit HermMatrix(const GenDiagMatrix<CT>& m2) :
             NEW_SIZE(m2.size())
         { 
             TMVAssert(S==RowMajor || S==ColMajor);
-            setZero();
             m2.assignToD(DiagMatrixViewOf(diag().realPart()));
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
+            upperTri().offDiag().setZero();
+            if (isComplex(T())) diag().imagPart().setZero();
         }
 
         template <class T2> 
         inline HermMatrix(const OProdVV<T,T2,T2>& opvv) :
             NEW_SIZE(opvv.colsize())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(opvv.colsize() == opvv.rowsize());
             TMVAssert(opvv.getV1().isSameAs(opvv.getV2().conjugate()));
             TMVAssert(TMV_IMAG(opvv.getX()) == RT(0));
             Rank1Update<false>(opvv.getX(),opvv.getV1(),view());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         template <class T2> 
         inline HermMatrix(const ProdMM<T,T2,T2>& pmm) :
             NEW_SIZE(pmm.colsize())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(pmm.colsize() == pmm.rowsize());
             TMVAssert(pmm.getM1().isSameAs(pmm.getM2().adjoint()));
             TMVAssert(TMV_IMAG(pmm.getX()) == RT(0));
             RankKUpdate<false>(pmm.getX(),pmm.getM1(),view());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         template <class T2> 
         inline HermMatrix(const ProdUL<T,T2,T2>& pmm) :
             NEW_SIZE(pmm.colsize())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(pmm.colsize() == pmm.rowsize());
             TMVAssert(pmm.getM1().isSameAs(pmm.getM2().adjoint()));
             TMVAssert(TMV_IMAG(pmm.getX()) == RT(0));
             RankKUpdate<false>(pmm.getX(),pmm.getM1(),view());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         template <class T2> 
         inline HermMatrix(const ProdLU<T,T2,T2>& pmm) :
             NEW_SIZE(pmm.colsize())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(pmm.colsize() == pmm.rowsize());
             TMVAssert(pmm.getM1().isSameAs(pmm.getM2().adjoint()));
             TMVAssert(TMV_IMAG(pmm.getX()) == RT(0));
             RankKUpdate<false>(pmm.getX(),pmm.getM1(),view());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
 
@@ -3641,9 +3434,6 @@ namespace tmv {
             TMVAssert(m2.size() == size());
             if (&m2 != this) 
                 std::copy(m2.cptr(),m2.cptr()+itslen,itsm.get());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -3653,9 +3443,6 @@ namespace tmv {
             TMVAssert(m2.size() == size());
             if (&m2 != this) 
                 std::copy(m2.cptr(),m2.cptr()+itslen,itsm.get());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -3664,9 +3451,6 @@ namespace tmv {
             TMVAssert(m2.size() == size());
             TMVAssert(m2.isherm());
             m2.assignToS(view());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this; 
         }
 
@@ -3676,9 +3460,6 @@ namespace tmv {
             TMVAssert(m2.size() == size());
             TMVAssert(m2.isherm());
             m2.assignToS(view());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this; 
         }
 
@@ -3688,9 +3469,6 @@ namespace tmv {
             TMVAssert(m2.size() == size());
             TMVAssert(m2.isherm());
             upperTri() = m2.upperTri(); 
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this; 
         }
 
@@ -3706,9 +3484,6 @@ namespace tmv {
             TMVAssert(size() == m2.colsize());
             TMVAssert(m2.isherm());
             m2.assignToS(view());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -3719,9 +3494,6 @@ namespace tmv {
             TMVAssert(size() == m2.colsize());
             TMVAssert(m2.isherm());
             m2.assignToS(view());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -3729,14 +3501,17 @@ namespace tmv {
         { 
             TMVAssert(size() == m2.colsize());
             view() = m2;
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
         inline type& operator=(const GenDiagMatrix<CT>& m2) 
-        { TMVAssert(TMV_FALSE); return *this; }
+        { 
+            TMVAssert(isComplex(T()));
+            TMVAssert(size() == m2.colsize());
+            view() = m2;
+            TMVAssert(this->isHermOK());
+            return *this;
+        }
 
         template <class T2> 
         inline type& operator=(const OProdVV<T,T2,T2>& opvv)
@@ -3745,9 +3520,6 @@ namespace tmv {
             TMVAssert(size() == opvv.rowsize());
             TMVAssert(opvv.getV1().isSameAs(opvv.getV2().conjugate()));
             Rank1Update<false>(opvv.getX(),opvv.getV1(),view());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -3758,9 +3530,6 @@ namespace tmv {
             TMVAssert(size() == pmm.rowsize());
             TMVAssert(pmm.getM1().isSameAs(pmm.getM2().adjoint()));
             RankKUpdate<false>(pmm.getX(),pmm.getM1(),view());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -3771,9 +3540,6 @@ namespace tmv {
             TMVAssert(size() == pmm.rowsize());
             TMVAssert(pmm.getM1().isSameAs(pmm.getM2().adjoint()));
             RankKUpdate<false>(pmm.getX(),pmm.getM1(),view());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -3784,9 +3550,6 @@ namespace tmv {
             TMVAssert(size() == pmm.rowsize());
             TMVAssert(pmm.getM1().isSameAs(pmm.getM2().adjoint()));
             RankKUpdate<false>(pmm.getX(),pmm.getM1(),view());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -3999,7 +3762,7 @@ namespace tmv {
         { if (isComplex(T())) upperTri().conjugateSelf(); return *this; }
 
         inline type& transposeSelf() 
-        { if (isComplex(T())) upperTri().conjugateSelf(); return *this; }
+        { conjugateSelf(); }
 
         inline type& setToIdentity(const T& x=T(1)) 
         { 
@@ -4528,9 +4291,8 @@ namespace tmv {
         const GenMatrix<T>& m, UpLoType uplo)
     {
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef XTEST
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
-#endif
+        TMVAssert(isReal(T()) || 
+                  m.diag().imagPart().normInf() == TMV_RealType(T)(0));
         return ConstSymMatrixView<T>(
             m.cptr(),m.rowsize(),m.stepi(),m.stepj(),
             Herm,uplo,m.stor(),m.ct()); 
@@ -4541,9 +4303,8 @@ namespace tmv {
         const ConstMatrixView<T,I>& m, UpLoType uplo)
     { 
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef XTEST
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
-#endif
+        TMVAssert(isReal(T()) || 
+                  m.diag().imagPart().normInf() == TMV_RealType(T)(0));
         return ConstSymMatrixView<T,I>(
             m.cptr(),m.rowsize(),m.stepi(),m.stepj(),
             Herm,uplo,m.stor(),m.ct()); 
@@ -4554,9 +4315,8 @@ namespace tmv {
         const Matrix<T,S,I>& m, UpLoType uplo)
     {
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef XTEST
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
-#endif
+        TMVAssert(isReal(T()) || 
+                  m.diag().imagPart().normInf() == TMV_RealType(T)(0));
         return ConstSymMatrixView<T,I>(
             m.cptr(),m.rowsize(),m.stepi(),m.stepj(),
             Herm,uplo,m.stor(),m.ct()); 
@@ -4567,9 +4327,8 @@ namespace tmv {
         const MatrixView<T,I>& m, UpLoType uplo)
     { 
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef XTEST
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
-#endif
+        TMVAssert(isReal(T()) || 
+                  m.diag().imagPart().normInf() == TMV_RealType(T)(0));
         return SymMatrixView<T,I>(
             m.ptr(),m.rowsize(),m.stepi(),m.stepj(),
             Herm,uplo,m.stor(),m.ct() TMV_FIRSTLAST1(m._first,m._last)); 
@@ -4580,9 +4339,8 @@ namespace tmv {
         Matrix<T,S,I>& m, UpLoType uplo)
     {
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef XTEST
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
-#endif
+        TMVAssert(isReal(T()) || 
+                  m.diag().imagPart().normInf() == TMV_RealType(T)(0));
         return SymMatrixView<T,I>(
             m.ptr(),m.rowsize(),m.stepi(),m.stepj(),
             Herm,uplo,m.stor(),m.ct() TMV_FIRSTLAST1(m._first,m._last)); 

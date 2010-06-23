@@ -90,17 +90,11 @@ namespace tmv {
     SymLDLDiv<T>::SymLDLDiv(const GenSymMatrix<T>& A, bool inplace) :
         pimpl(new SymLDLDiv_Impl(A,inplace))
     {
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
-#endif
         if (inplace) TMVAssert(A == pimpl->LLx); 
         else pimpl->LLx = A;
 
         LDL_Decompose(pimpl->LLx,pimpl->xD.view(),pimpl->P,
                       pimpl->logdet,pimpl->signdet);
-#ifdef XTEST
-        TMVAssert(pimpl->LLx.isHermOK());
-#endif
     }
 
     template <class T>
@@ -144,15 +138,13 @@ namespace tmv {
         TMVAssert(isReal(T()) || issym() == sinv.issym());
         TMVAssert(isReal(T()) || isherm() == sinv.isherm());
         LDL_Inverse(pimpl->LLx,pimpl->xD,pimpl->P.getValues(),sinv); 
-#ifdef XTEST
-        TMVAssert(sinv.isHermOK());
-#endif
     }
 
     template <class T> template <class T1> 
     void SymLDLDiv<T>::doMakeInverse(const MatrixView<T1>& minv) const
     {
         if (pimpl->LLx.isherm()) {
+            if (isComplex(T1())) minv.diag().imagPart().setZero();
             doMakeInverse(HermMatrixViewOf(minv,Lower));
             if (minv.colsize() > 1)
                 minv.upperTri().offDiag() =
@@ -172,12 +164,11 @@ namespace tmv {
         TMVAssert(ata.rowsize() == pimpl->LLx.size());
 
         if (pimpl->LLx.isherm()) {
-            SymMatrixView<T> symata = HermMatrixViewOf(ata,Lower);
-            doMakeInverse(symata);
+            if (isComplex(T())) ata.diag().imagPart().setZero();
+            doMakeInverse(HermMatrixViewOf(ata,Lower));
             SymSquare<true>(ata);
         } else {
-            SymMatrixView<T> symata = SymMatrixViewOf(ata,Lower);
-            doMakeInverse(symata);
+            doMakeInverse(SymMatrixViewOf(ata,Lower));
             SymSquare<false>(ata);
         }
     }

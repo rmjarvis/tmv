@@ -195,9 +195,6 @@ namespace tmv {
         const int N = A.size();
         const RT alpha = (TMV_SQRT(RT(17))+1)/8;
 
-#ifdef XTEST 
-        TMVAssert(A.isHermOK());
-#endif
 #ifdef XDEBUG
         //std::cout<<"Start NonBlockLDL_Decompose\n";
         Matrix<T> A0(A);
@@ -325,7 +322,7 @@ namespace tmv {
                         logdet += TMV_LOG(absd);
                     }
                 }
-#ifdef XTEST
+#ifdef XDEBUG
                 RT normEinv = TMV_NORM(x) + TMV_NORM(y) + 2*TMV_NORM(z);
                 if (normEinv < 1.) normEinv = 1.;
                 RT normC = Norm(A.subMatrix(j+2,N,j,j+2));
@@ -387,7 +384,7 @@ namespace tmv {
                     }
                 }
                 if (herm && isComplex(T())) {
-#ifdef XTEST
+#ifdef XDEBUG
                     TMVAssert(normInf(A.diag().imagPart()) <= eps);
 #endif
                     A.diag().subVector(j+2,N).imagPart().setZero();
@@ -396,9 +393,7 @@ namespace tmv {
             }
             //std::cout<<std::endl;
         }
-#ifdef XTEST 
         TMVAssert(A.isHermOK());
-#endif
 #ifdef XDEBUG
         if (j1 == 0) {
             LowerTriMatrix<T,UnitDiag> L = A.lowerTri(UnitDiag);
@@ -443,9 +438,6 @@ namespace tmv {
         TMVAssert(A.ct()==NonConj);
         TMVAssert(A.uplo()==Lower);
 
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
-#endif
 #ifdef XDEBUG
         std::cout<<"Start BlockLDL_Decompose\n";
         Matrix<T> A0(A);
@@ -711,9 +703,7 @@ namespace tmv {
 
             j1 = j2;
         }
-#ifdef XTEST
         TMVAssert(A.isHermOK());
-#endif
 #ifdef XDEBUG
         LowerTriMatrix<T,UnitDiag> L = A.lowerTri(UnitDiag);
         Matrix<T> DD(A.size(),A.size(),T(0));
@@ -1277,10 +1267,6 @@ namespace tmv {
 #ifdef XDEBUG
         Matrix<T> A0(A);
 #endif
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
-#endif
-
         if (A.isconj()) 
             LDL_Decompose(A.conjugate(),xD.conjugate(),P,logdet,signdet);
         else if (A.uplo() == Upper) {
@@ -1308,9 +1294,7 @@ namespace tmv {
             if (signdet == T(0)) logdet = TMV_LOG(TMV_ABS(signdet));
         }
 
-#ifdef XTEST
         TMVAssert(A.isHermOK());
-#endif
 #ifdef XDEBUG
         LowerTriMatrix<T,UnitDiag> L = A.lowerTri(UnitDiag);
         Matrix<T> DD(A.size(),A.size(),T(0));

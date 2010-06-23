@@ -70,7 +70,7 @@ namespace tmv {
         TMVAssert(x.ct() == NonConj);
         TMVAssert(y.ct() == NonConj);
         TMVAssert(ha == !A.issym());
-#ifdef XTEST
+#ifdef XDEBUG
         TMV_RealType(T) normA = Norm(A);
         TMV_RealType(T) normx = Norm(x);
         TMV_RealType(T) normy = Norm(y);
@@ -154,7 +154,7 @@ namespace tmv {
         if (add) *A.ptr() += A00;
         else *A.ptr() = A00;
         if (ha && isComplex(T())) {
-#ifdef XTEST
+#ifdef XDEBUG
             TMVAssert(normInf(A.diag().imagPart()) <= eps);
 #endif
             A.diag().imagPart().setZero();
@@ -178,7 +178,7 @@ namespace tmv {
         TMVAssert(x.ct() == NonConj);
         TMVAssert(y.ct() == NonConj);
         TMVAssert(ha == !A.issym());
-#ifdef XTEST
+#ifdef XDEBUG
         TMV_RealType(T) normA = Norm(A);
         TMV_RealType(T) normx = Norm(x);
         TMV_RealType(T) normy = Norm(y);
@@ -242,7 +242,7 @@ namespace tmv {
             }
         }
         if (ha && isComplex(T())) {
-#ifdef XTEST
+#ifdef XDEBUG
             TMVAssert(normInf(A.diag().imagPart()) <= eps);
 #endif
             A.diag().imagPart().setZero();
@@ -690,9 +690,6 @@ namespace tmv {
     // if A is sym:  A (+)= alpha * (x ^ y + y ^ x)
     // if A is herm: A (+)= alpha * x ^ y* + conj(alpha) * y ^ x*
     {
-#ifdef XTEST
-        TMVAssert(!add || A.isHermOK());
-#endif
 #ifdef XDEBUG
         Vector<Tx> x0 = x;
         Vector<Ty> y0 = y;
@@ -789,6 +786,7 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
+        TMVAssert(A.isHermOK());
         //cout<<"Done Rank2Update: \n";
         //cout<<"Norm(A-A2) = "<<Norm(A-A2)<<endl;
         if (Norm(A-A2) > 0.001*(TMV_ABS(alpha)*Norm(x0)*Norm(y0)+Norm(A0))) {
@@ -801,9 +799,6 @@ namespace tmv {
             cerr<<"A2 = "<<A2<<endl;
             abort();
         }
-#endif
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
 #endif
     }
 

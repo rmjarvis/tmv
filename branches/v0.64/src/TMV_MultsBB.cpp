@@ -132,9 +132,6 @@ namespace tmv {
         const GenBandMatrix<Tb>& B, const BandMatrixView<T>& C)
         // C (+)= alpha * A * B
     {
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
-#endif
         TMVAssert(A.size() == C.colsize());
         TMVAssert(A.size() == B.colsize());
         TMVAssert(B.rowsize() == C.rowsize());
@@ -185,9 +182,6 @@ namespace tmv {
         const GenSymBandMatrix<Tb>& B, const BandMatrixView<T>& C)
         // C (+)= alpha * A * B
     {
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
-#endif
         TMVAssert(A.size() == C.colsize());
         TMVAssert(A.size() == B.colsize());
         TMVAssert(B.rowsize() == C.rowsize());

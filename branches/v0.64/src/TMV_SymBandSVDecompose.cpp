@@ -229,13 +229,9 @@ namespace tmv {
             if (isReal(Td())) D = U1->diag().realPart();
             else D = U1->diag();
             E = U1->diag(-1).realPart();
-#ifdef XTEST
             if (isComplex(T())) {
-                if (isReal(Td()))
-                    TMVAssert(normInf(U1->diag().imagPart()) == RT(0));
-                TMVAssert(normInf(U1->diag(-1).imagPart()) == RT(0));
+                TMVAssert(NormInf(U1->diag(-1).imagPart()) == RT(0));
             }
-#endif
 
             if (U) {
                 U->upperTri().setZero();
@@ -439,6 +435,12 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
+        cout<<"Start Tridiagonalize: \n";
+        cout<<"A = "<<TMV_Text(A)<<endl;
+        if (U) cout<<"U = "<<TMV_Text(*U)<<endl;
+        cout<<"D = "<<TMV_Text(D)<<endl;
+        cout<<"E = "<<TMV_Text(E)<<endl;
+        cout<<"signdet = "<<signdet<<endl;
         Matrix<T> A0 = A;
 #endif
 

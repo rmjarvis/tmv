@@ -119,14 +119,12 @@ namespace tmv {
         //cout<<"U reflect: A("<<N-1<<","<<N-1<<") = "<<A.cref(N-1,N-1)<<endl;
 
         // The bidiagonal of A is the bidiagonal we want, so copy it to D,E
-#ifdef XTEST
-        if (isComplex(T())) {
-            TMVAssert(normInf(A.diag().imagPart()) == RT(0));
-            TMVAssert(normInf(A.diag(1).imagPart()) == RT(0));
-        }
-#endif
         D = A.diag().realPart();
         E = A.diag(1).realPart();
+        if (isComplex(T())) {
+            TMVAssert(NormInf(A.diag().imagPart()) == RT(0));
+            TMVAssert(NormInf(A.diag(1).imagPart()) == RT(0));
+        }
         //cout<<"D = "<<D<<std::endl;
         //cout<<"E = "<<E<<std::endl;
 

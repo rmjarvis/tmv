@@ -80,9 +80,6 @@ namespace tmv {
     HermCHDiv<T>::HermCHDiv(const GenSymMatrix<T>& A, bool inplace) :
         pimpl(new HermCHDiv_Impl(A,inplace))
     {
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
-#endif
         TMVAssert(isReal(T()) || A.isherm());
         if (inplace) TMVAssert(A==pimpl->LLx); 
         else pimpl->LLx = A;

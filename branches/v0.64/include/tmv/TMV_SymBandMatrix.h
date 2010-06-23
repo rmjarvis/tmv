@@ -1302,23 +1302,13 @@ namespace tmv {
             itsm(rhs.itsm), itss(rhs.itss), itslo(rhs.itslo),
             itssi(rhs.itssi), itssj(rhs.itssj), itssd(rhs.itssd),
             itssym(rhs.itssym), itsuplo(rhs.itsuplo), itsstor(rhs.itsstor),
-            itsct(rhs.itsct) 
-        {
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
-        }
+            itsct(rhs.itsct) {}
 
         inline ConstSymBandMatrixView(const base& rhs) :
             itsm(rhs.cptr()), itss(rhs.size()), itslo(rhs.nlo()), 
             itssi(rhs.stepi()), itssj(rhs.stepj()), itssd(rhs.diagstep()),
             itssym(rhs.sym()), itsuplo(rhs.uplo()), itsstor(rhs.stor()),
-            itsct(rhs.ct())
-        {
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
-        }
+            itsct(rhs.ct()) {}
 
         inline ConstSymBandMatrixView(
             const T* _m, size_t _s, int _lo, int _si, int _sj, int _sd,
@@ -1330,9 +1320,6 @@ namespace tmv {
             TMVAssert(_stor==RowMajor ? _sj==1 : _stor==ColMajor ?
                       _si==1 : _stor==DiagMajor ? _sd==1 : true); 
             TMVAssert(size()==0 || nlo() < int(size())); 
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         virtual inline ~ConstSymBandMatrixView()
@@ -1674,12 +1661,7 @@ namespace tmv {
             itsm(rhs.itsm), itss(rhs.itss), itslo(rhs.itslo), 
             itssi(rhs.itssi), itssj(rhs.itssj), itssd(rhs.itssd),
             itssym(rhs.itssym), itsuplo(rhs.itsuplo), itsstor(rhs.itsstor),
-            itsct(rhs.itsct) TMV_DEFFIRSTLAST(rhs._first,rhs._last) 
-        {
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
-        }
+            itsct(rhs.itsct) TMV_DEFFIRSTLAST(rhs._first,rhs._last) {}
 
         inline SymBandMatrixView(
             T* _m, size_t _s, int _lo, int _si, int _sj, int _sd,
@@ -1693,9 +1675,6 @@ namespace tmv {
             TMVAssert(_stor==RowMajor ? _sj==1 : _stor==ColMajor ?
                       _si==1 : _stor==DiagMajor ? _sd==1 : true); 
             TMVAssert(size()==0 || nlo() < int(size())); 
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         virtual inline ~SymBandMatrixView()
@@ -1718,9 +1697,6 @@ namespace tmv {
                 upperBand() = m2.upperBand();
                 if (nlo() > m2.nlo()) diagRange(-nlo(),-m2.nlo()).setZero();
             }
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -1733,9 +1709,6 @@ namespace tmv {
                 upperBand() = m2.upperBand();
                 if (nlo() > m2.nlo()) diagRange(-nlo(),-m2.nlo()).setZero();
             }
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -1744,9 +1717,6 @@ namespace tmv {
             TMVAssert(size() == m2.size());
             TMVAssert(nlo() >= m2.nlo());
             if (!isSameAs(m2)) m2.assignTosB(*this); 
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this; 
         }
 
@@ -1757,9 +1727,6 @@ namespace tmv {
             TMVAssert(m2.sym() == sym());
             TMVAssert(nlo() >= m2.nlo());
             if (!isSameAs(m2)) m2.assignTosB(*this); 
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this; 
         }
 
@@ -1772,9 +1739,6 @@ namespace tmv {
             TMVAssert(nlo() >= m2.nlo());
             upperBand() = m2.upperBand();
             if (nlo() > m2.nlo()) diagRange(-nlo(),-m2.nlo()).setZero();
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this; 
         }
 
@@ -1789,9 +1753,6 @@ namespace tmv {
         {
             TMVAssert(size() == m2.size());
             m2.assignTosB(view());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -1802,9 +1763,6 @@ namespace tmv {
             TMVAssert(size() == m2.size());
             TMVAssert(m2.sym() == sym());
             m2.assignTosB(view());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -1813,22 +1771,16 @@ namespace tmv {
             TMVAssert(size() == m2.size());
             m2.assignToD(DiagMatrixViewOf(diag()));
             if (nlo() > 0) upperBandOff().setZero();
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
         inline const type& operator=(const GenDiagMatrix<CT>& m2) const
         {
             TMVAssert(isComplex(T()));
-            TMVAssert(issym());
             TMVAssert(size() == m2.size());
             m2.assignToD(DiagMatrixViewOf(diag()));
             if (nlo() > 0) upperBandOff().setZero();
-#ifdef XTEST
             TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -2753,12 +2705,6 @@ namespace tmv {
 
     }; // FortranStyle SymBandMatrixView
 
-#ifdef XTEST
-#ifdef TMVDEBUG
-#define XTEST_DEBUG
-#endif
-#endif
-
     template <class T, UpLoType U, StorageType S, IndexStyle I> 
     class SymBandMatrix : public GenSymBandMatrix<T>
     {
@@ -2827,9 +2773,6 @@ namespace tmv {
 
         inline SymBandMatrix(size_t s, int lo, const T* vv) : NEW_SIZE(s,lo)
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             std::copy(vv,vv+linsize,itsm1.get());
         }
@@ -2837,9 +2780,6 @@ namespace tmv {
         inline SymBandMatrix(size_t s, int lo, const std::vector<T>& vv) : 
             NEW_SIZE(s,lo)
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             TMVAssert(vv.size() == linsize);
             std::copy(vv.begin(),vv.end(),itsm1.get());
@@ -2848,9 +2788,6 @@ namespace tmv {
         inline SymBandMatrix(const type& rhs) : 
             NEW_SIZE2(rhs.linsize,rhs.size(),rhs.nlo())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             std::copy(rhs.start_mem(),rhs.start_mem()+linsize,itsm1.get());
         }
@@ -2859,9 +2796,6 @@ namespace tmv {
         inline SymBandMatrix(const SymBandMatrix<T,U2,S2,I2>& rhs) : 
             NEW_SIZE(rhs.size(),rhs.nlo())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             if ( (U==U2 && S==S2) ||
                  (S!=DiagMajor && (S2==RowMajor || S2==ColMajor) && 
@@ -2874,9 +2808,6 @@ namespace tmv {
         inline SymBandMatrix(const GenSymBandMatrix<RT>& rhs) :
             NEW_SIZE(rhs.size(),rhs.nlo())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             if (rhs.issym()) {
                 rhs.assignTosB(view());
@@ -2891,9 +2822,6 @@ namespace tmv {
         inline SymBandMatrix(const GenSymBandMatrix<CT>& rhs) :
             NEW_SIZE(rhs.size(),rhs.nlo())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(isComplex(T()));
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             if (rhs.issym()) {
@@ -2910,9 +2838,6 @@ namespace tmv {
         inline SymBandMatrix(const GenSymBandMatrix<T2>& rhs) :
             NEW_SIZE(rhs.size(),rhs.nlo())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             if (U==Upper) upperBand() = rhs.upperBand();
             else lowerBand() = rhs.lowerBand();
@@ -2922,9 +2847,6 @@ namespace tmv {
         inline SymBandMatrix(const GenSymBandMatrix<T2>& rhs, int newnlo) : 
             NEW_SIZE(rhs.size(),newnlo)
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             TMVAssert(newnlo <= rhs.nlo());
             if (U==Upper) upperBand() = rhs.upperBand().diagRange(0,newnlo+1);
@@ -2935,9 +2857,6 @@ namespace tmv {
         inline SymBandMatrix(const GenBandMatrix<T2>& rhs) :
             NEW_SIZE(rhs.rowsize(),U==Upper?rhs.nhi():rhs.nlo())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             TMVAssert(rhs.rowsize() == rhs.colsize());
             if (U==Upper) upperBand() = rhs.upperBand();
@@ -2948,9 +2867,6 @@ namespace tmv {
         inline SymBandMatrix(const GenMatrix<T2>& rhs, int newnlo) :
             NEW_SIZE(rhs.rowsize(),newnlo)
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             if (U==Upper) upperBand() = BandMatrixViewOf(rhs,0,nlo());
             else lowerBand() = BandMatrixViewOf(rhs,nlo(),0);
@@ -2960,9 +2876,6 @@ namespace tmv {
         inline SymBandMatrix(const GenBandMatrix<T2>& rhs, int newnlo) :
             NEW_SIZE(rhs.rowsize(),newnlo)
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             if (U==Upper) upperBand() = BandMatrixViewOf(rhs,0,nlo());
             else lowerBand() = BandMatrixViewOf(rhs,nlo(),0);
@@ -2972,9 +2885,6 @@ namespace tmv {
         inline SymBandMatrix(const GenSymMatrix<T2>& rhs, int newnlo) :
             NEW_SIZE(rhs.rowsize(),newnlo)
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             if (U==Upper) 
                 upperBand() = BandMatrixViewOf(rhs.upperTri(),nlo());
@@ -2994,9 +2904,6 @@ namespace tmv {
         inline SymBandMatrix(const AssignableToSymBandMatrix<RT>& m2) :
             NEW_SIZE(m2.size(),m2.nlo())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             TMVAssert(m2.issym());
             m2.assignTosB(view());
@@ -3005,9 +2912,6 @@ namespace tmv {
         inline SymBandMatrix(const AssignableToSymBandMatrix<CT>& m2) :
             NEW_SIZE(m2.size(),m2.nlo())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(isComplex(T()));
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             TMVAssert(m2.issym());
@@ -4209,6 +4113,8 @@ namespace tmv {
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
 #ifdef TMVDEBUG
             setAllTo(T(888));
+#else
+            if (isComplex(T())) diag().imagPart().setZero();
 #endif
         }
 
@@ -4221,9 +4127,6 @@ namespace tmv {
 
         inline HermBandMatrix(size_t s, int lo, const T* vv) : NEW_SIZE(s,lo)
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             std::copy(vv,vv+linsize,itsm1.get());
             TMVAssert(this->isHermOK());
@@ -4232,9 +4135,6 @@ namespace tmv {
         inline HermBandMatrix(size_t s, int lo, const std::vector<T>& vv) : 
             NEW_SIZE(s,lo)
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             TMVAssert(vv.size() == linsize);
             T* vi = itsm1.get();
@@ -4246,23 +4146,14 @@ namespace tmv {
         inline HermBandMatrix(const type& rhs) : 
             NEW_SIZE2(rhs.linsize,rhs.size(),rhs.nlo())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             std::copy(rhs.start_mem(),rhs.start_mem()+linsize,itsm1.get());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         template <UpLoType U2, StorageType S2, IndexStyle I2> 
         inline HermBandMatrix(const HermBandMatrix<T,U2,S2,I2>& rhs) : 
             NEW_SIZE(rhs.size(),rhs.nlo())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             if (U==U2 && S==S2)
                 std::copy(rhs.start_mem(),rhs.start_mem()+linsize,itsm1.get());
@@ -4273,17 +4164,11 @@ namespace tmv {
             }
             else if (U==Upper) upperBand() = rhs.upperBand();
             else lowerBand() = rhs.lowerBand();
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         inline HermBandMatrix(const GenSymBandMatrix<RT>& rhs) :
             NEW_SIZE(rhs.size(),rhs.nlo())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             if (rhs.isherm()) {
                 rhs.assignTosB(view());
@@ -4291,17 +4176,11 @@ namespace tmv {
                 if (U==Upper) upperBand() = rhs.upperBand();
                 else lowerBand() = rhs.lowerBand();
             }
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         inline HermBandMatrix(const GenSymBandMatrix<CT>& rhs) :
             NEW_SIZE(rhs.size(),rhs.nlo())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(isComplex(T()));
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             if (rhs.isherm()) {
@@ -4311,185 +4190,116 @@ namespace tmv {
                 else lowerBand() = rhs.lowerBand();
                 if (isComplex(T())) diag().imagPart().setZero();
             }
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         template <class T2> 
         inline HermBandMatrix(const GenSymBandMatrix<T2>& rhs) :
             NEW_SIZE(rhs.size(),rhs.nlo())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             if (U==Upper) 
                 upperBand() = rhs.upperBand();
             else 
                 lowerBand() = rhs.lowerBand();
             if (isComplex(T())) diag().imagPart().setZero();
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         template <class T2> 
         inline HermBandMatrix(const GenSymBandMatrix<T2>& rhs, int newnlo) : 
             NEW_SIZE(rhs.size(),newnlo)
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             TMVAssert(newnlo <= rhs.nlo());
             if (U==Upper) upperBand() = rhs.upperBand().diagRange(0,newnlo+1);
             else lowerBand() = rhs.lowerBand().diagRange(-newnlo,1);
             if (isComplex(T())) diag().imagPart().setZero();
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         template <class T2> 
         inline HermBandMatrix(const GenBandMatrix<T2>& rhs) :
             NEW_SIZE(rhs.rowsize(),rhs.nlo())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             if (U==Upper) upperBand() = rhs.upperBand();
             else lowerBand() = rhs.lowerBand();
             if (isComplex(T())) diag().imagPart().setZero();
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         template <class T2> 
         inline HermBandMatrix(const GenMatrix<T2>& rhs, int newnlo) :
             NEW_SIZE(rhs.rowsize(),newnlo)
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             if (U==Upper) upperBand() = BandMatrixViewOf(rhs,0,nlo());
             else lowerBand() = BandMatrixViewOf(rhs,nlo(),0);
             if (isComplex(T())) diag().imagPart().setZero();
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         template <class T2> 
         inline HermBandMatrix(const GenBandMatrix<T2>& rhs, int newnlo) :
             NEW_SIZE(rhs.rowsize(),newnlo)
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             if (U==Upper) upperBand() = BandMatrixViewOf(rhs,0,nlo());
             else lowerBand() = BandMatrixViewOf(rhs,nlo(),0);
             if (isComplex(T())) diag().imagPart().setZero();
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         template <class T2> 
         inline HermBandMatrix(const GenSymMatrix<T2>& rhs, int newnlo) :
             NEW_SIZE(rhs.rowsize(),newnlo)
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             if (U==Upper) 
                 upperBand() = BandMatrixViewOf(rhs.upperTri(),nlo());
             else 
                 lowerBand() = BandMatrixViewOf(rhs.lowerTri(),nlo());
             if (isComplex(T())) diag().imagPart().setZero();
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         template <class T2> 
         inline HermBandMatrix(const GenDiagMatrix<T2>& m2) :
             NEW_SIZE(m2.size(),0)
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
-            setZero();
             DiagMatrixViewOf(diag()) = m2;
+            if (nlo()>0) upperBandOff().setZero();
             if (isComplex(T())) diag().imagPart().setZero();
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         inline HermBandMatrix(const AssignableToSymBandMatrix<RT>& m2) :
             NEW_SIZE(m2.size(),m2.nlo())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             TMVAssert(m2.isherm());
             m2.assignTosB(view());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         inline HermBandMatrix(const AssignableToSymBandMatrix<CT>& m2) :
             NEW_SIZE(m2.size(),m2.nlo())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(isComplex(T()));
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             TMVAssert(m2.isherm());
             m2.assignTosB(view());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
         }
 
         inline HermBandMatrix(const GenDiagMatrix<RT>& m2) :
             NEW_SIZE(m2.size(),0)
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
-            setZero();
             m2.assignToD(DiagMatrixViewOf(diag()));
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
+            if (nlo()>0) upperBandOff().setZero();
         }
 
         inline HermBandMatrix(const GenDiagMatrix<CT>& m2) :
             NEW_SIZE(m2.size(),0)
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(isComplex(T()));
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
-            setZero();
             m2.assignToD(DiagMatrixViewOf(diag()));
-            diag().imagPart().setZero();
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
+            if (isComplex(T())) diag().imagPart().setZero();
+            if (nlo()>0) upperBandOff().setZero();
         }
 
 #undef NEW_SIZE
@@ -4510,7 +4320,8 @@ namespace tmv {
             TMVAssert(size() == m2.size());
             TMVAssert(nlo() >= m2.nlo());
             if (&m2 != this) {
-                if (nlo() > m2.nlo()) lowerBand().diagRange(-nlo(),-m2.nlo()).setZero();
+                if (nlo() > m2.nlo()) 
+                    lowerBand().diagRange(-nlo(),-m2.nlo()).setZero();
                 if (S==DiagMajor)
                     if (nlo() > m2.nlo())
                         std::copy(
@@ -4525,9 +4336,6 @@ namespace tmv {
                 else
                     lowerBand().diagRange(-m2.nlo(),1) = m2.lowerBand();
             }
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -4536,7 +4344,8 @@ namespace tmv {
         {
             TMVAssert(size() == m2.size());
             TMVAssert(nlo() >= m2.nlo());
-            if (nlo() > m2.nlo()) lowerBand().diagRange(-nlo(),-m2.nlo()).setZero();
+            if (nlo() > m2.nlo()) 
+                lowerBand().diagRange(-nlo(),-m2.nlo()).setZero();
             if (S==DiagMajor)
                 if (nlo() > m2.nlo())
                     std::copy(
@@ -4550,9 +4359,6 @@ namespace tmv {
                 std::copy(m2.cptr(),m2.cptr()+m2.mem_used(),itsm1.get());
             else
                 lowerBand().diagRange(-m2.nlo(),1) = m2.lowerBand();
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -4562,9 +4368,6 @@ namespace tmv {
             TMVAssert(nlo() >= m2.nlo());
             TMVAssert(m2.isherm());
             m2.assignTosB(view());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this; 
         }
 
@@ -4575,9 +4378,6 @@ namespace tmv {
             TMVAssert(nlo() >= m2.nlo());
             TMVAssert(m2.isherm());
             m2.assignTosB(view());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this; 
         }
 
@@ -4585,11 +4385,8 @@ namespace tmv {
         inline type& operator=(const GenSymBandMatrix<T2>& m2)
         {
             TMVAssert(size() == m2.size());
-            TMVAssert(isReal(T2()) || m2.isherm());
+            TMVAssert(m2.isherm());
             lowerBand() = m2.lowerBand();
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this; 
         }
 
@@ -4601,9 +4398,6 @@ namespace tmv {
             TMVAssert(size() == m2.size());
             TMVAssert(m2.isherm());
             m2.assignTosB(view());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -4613,9 +4407,6 @@ namespace tmv {
             TMVAssert(size() == m2.size());
             TMVAssert(m2.isherm());
             m2.assignTosB(view());
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
@@ -4623,14 +4414,16 @@ namespace tmv {
         {
             TMVAssert(size() == m2.size());
             view() = m2;
-#ifdef XTEST
-            TMVAssert(this->isHermOK());
-#endif
             return *this;
         }
 
         inline type& operator=(const GenDiagMatrix<CT>& m2) 
-        { TMVAssert(TMV_FALSE); return *this; }
+        { 
+            TMVAssert(size() == m2.size());
+            view() = m2;
+            TMVAssert(this->isHermOK());
+            return *this;
+        }
 
         //
         // Access
@@ -4844,10 +4637,13 @@ namespace tmv {
         { upperBand().clip(thresh); return *this; }
 
         inline type& conjugateSelf() 
-        { if (isComplex(T())) upperBandOff().conjugateSelf(); return *this; }
+        { 
+            if (isComplex(T()) && nlo()>0) upperBandOff().conjugateSelf();
+            return *this; 
+        }
 
         inline type& transposeSelf() 
-        { if (isComplex(T())) upperBandOff().conjugateSelf(); return *this; }
+        { return conjugateSelf(); }
 
         inline type& setToIdentity(const T& x=T(1)) 
         {
@@ -5721,8 +5517,9 @@ namespace tmv {
         const GenMatrix<T>& m, UpLoType uplo, int nlo)
     {
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
+#ifdef TMVDEBUG
+        TMVAssert(isReal(T()) || 
+                  m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return ConstSymBandMatrixView<T>(
             m.cptr(),m.colsize(),nlo,
@@ -5734,8 +5531,9 @@ namespace tmv {
         const ConstMatrixView<T,I>& m, UpLoType uplo, int nlo)
     {
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
+#ifdef TMVDEBUG
+        TMVAssert(isReal(T()) || 
+                  m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return ConstSymBandMatrixView<T,I>(
             m.cptr(),m.colsize(),nlo,
@@ -5747,8 +5545,9 @@ namespace tmv {
         const Matrix<T,S,I>& m, UpLoType uplo, int nlo)
     {
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
+#ifdef TMVDEBUG
+        TMVAssert(isReal(T()) || 
+                  m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return ConstSymBandMatrixView<T,I>(
             m.cptr(),m.colsize(),nlo,
@@ -5760,8 +5559,9 @@ namespace tmv {
         const MatrixView<T,I>& m, UpLoType uplo, int nlo)
     {
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
+#ifdef TMVDEBUG
+        TMVAssert(isReal(T()) || 
+                  m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return SymBandMatrixView<T,I>(
             m.ptr(),m.colsize(),nlo,
@@ -5774,8 +5574,9 @@ namespace tmv {
         Matrix<T,S,I>& m, UpLoType uplo, int nlo)
     {
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
+#ifdef TMVDEBUG
+        TMVAssert(isReal(T()) || 
+                  m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return SymBandMatrixView<T,I>(
             m.ptr(),m.colsize(),nlo,
@@ -5847,8 +5648,9 @@ namespace tmv {
     {
         if (nlo<0) nlo = (uplo==Upper?m.nhi():m.nlo());
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
+#ifdef TMVDEBUG
+        TMVAssert(isReal(T()) || 
+                  m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return ConstSymBandMatrixView<T>(
             m.cptr(),m.colsize(),nlo,
@@ -5861,8 +5663,9 @@ namespace tmv {
     {
         if (nlo<0) nlo = (uplo==Upper?m.nhi():m.nlo());
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
+#ifdef TMVDEBUG
+        TMVAssert(isReal(T()) || 
+                  m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return ConstSymBandMatrixView<T,I>(
             m.cptr(),m.colsize(),nlo,
@@ -5875,8 +5678,9 @@ namespace tmv {
     {
         if (nlo<0) nlo = (uplo==Upper?m.nhi():m.nlo());
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
+#ifdef TMVDEBUG
+        TMVAssert(isReal(T()) || 
+                  m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return ConstSymBandMatrixView<T,I>(
             m.cptr(),m.colsize(),nlo,
@@ -5889,8 +5693,9 @@ namespace tmv {
     {
         if (nlo<0) nlo = (uplo==Upper?m.nhi():m.nlo());
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
+#ifdef TMVDEBUG
+        TMVAssert(isReal(T()) || 
+                  m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return SymBandMatrixView<T,I>(
             m.ptr(),m.colsize(),nlo,
@@ -5904,8 +5709,9 @@ namespace tmv {
     {
         if (nlo<0) nlo = (uplo==Upper?m.nhi():m.nlo());
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef XTEST_DEBUG
-        TMVAssert(isReal(T()) || m.diag().imagPart().normInf() == TMV_RealType(T)(0));
+#ifdef TMVDEBUG
+        TMVAssert(isReal(T()) || 
+                  m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
         return SymBandMatrixView<T,I>(
             m.ptr(),m.colsize(),nlo,

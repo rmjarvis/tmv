@@ -96,11 +96,6 @@ namespace tmv {
     inline void DoInverseATA(
         const SmallMatrix<T,M,N,S,I>& m, SmallMatrix<T,N,N,S2,I2>& ata);
 
-#ifdef XTEST
-#ifdef TMVDEBUG
-#define XTEST_DEBUG
-#endif
-#endif
 
     // defaults S=ColMajor and I=CStyle are set in TMV_BaseMatrix.h
     template <class T, int M, int N, StorageType S, IndexStyle I> 
@@ -161,9 +156,6 @@ namespace tmv {
 
         inline SmallMatrix(const T* vv) 
         { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(M>0);
             TMVAssert(N>0);
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -172,9 +164,6 @@ namespace tmv {
 
         inline SmallMatrix(const std::vector<T>& vv) 
         { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(M>0);
             TMVAssert(N>0);
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -184,9 +173,6 @@ namespace tmv {
 
         explicit inline SmallMatrix(const std::vector<std::vector<T> >& vv) 
         { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(M>0);
             TMVAssert(N>0);
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -198,9 +184,6 @@ namespace tmv {
 
         inline SmallMatrix(const type& m2) 
         { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(M>0);
             TMVAssert(N>0);
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -210,9 +193,6 @@ namespace tmv {
         template <IndexStyle I2> 
         inline SmallMatrix(const SmallMatrix<T,M,N,S,I2>& m2) 
         { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(M>0);
             TMVAssert(N>0);
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -222,9 +202,6 @@ namespace tmv {
         template <class T2, StorageType S2, IndexStyle I2> 
         inline SmallMatrix(const SmallMatrix<T2,M,N,S2,I2>& m2) 
         { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(M>0);
             TMVAssert(N>0);
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -234,9 +211,6 @@ namespace tmv {
 
         inline SmallMatrix(const GenMatrix<T>& m2) 
         { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(M>0);
             TMVAssert(N>0);
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -248,9 +222,6 @@ namespace tmv {
         template <class T2> 
         inline SmallMatrix(const GenMatrix<T2>& m2) 
         { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(M>0);
             TMVAssert(N>0);
             TMVAssert(isComplex(T()) || isReal(T2()));
@@ -262,9 +233,6 @@ namespace tmv {
 
         inline SmallMatrix(const AssignableToMatrix<RT>& m2) 
         { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(M>0);
             TMVAssert(N>0);
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -275,9 +243,6 @@ namespace tmv {
 
         inline SmallMatrix(const AssignableToMatrix<CT>& m2) 
         { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(M>0);
             TMVAssert(N>0);
             TMVAssert(isComplex(T()));
@@ -289,9 +254,6 @@ namespace tmv {
 
         inline SmallMatrix(const SmallMatrixComposite<RT,M,N>& m2) 
         { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(M>0);
             TMVAssert(N>0);
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -300,9 +262,6 @@ namespace tmv {
 
         inline SmallMatrix(const SmallMatrixComposite<CT,M,N>& m2) 
         { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(M>0);
             TMVAssert(N>0);
             TMVAssert(S==RowMajor || S==ColMajor);

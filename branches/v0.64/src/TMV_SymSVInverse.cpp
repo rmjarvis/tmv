@@ -50,9 +50,6 @@ namespace tmv {
         Matrix<T,ColMajor> SinvUt = U.adjoint().rowRange(0,kmax) /
             SS.subDiagMatrix(0,kmax);
         SymMultMM<false>(T1(1),U.colRange(0,kmax),SinvUt,sinv);
-#ifdef XTEST
-        TMVAssert(sinv.isHermOK());
-#endif
     }
 
     template <class T, class T1> 

@@ -65,9 +65,6 @@ namespace tmv {
     HermSVDiv<T>::HermSVDiv(const GenSymMatrix<T>& A) :
         pimpl(new HermSVDiv_Impl(A))
     {
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
-#endif
         TMVAssert(A.isherm());
         pimpl->U.lowerTri() = A.lowerTri();
         HermSV_Decompose<T>(pimpl->U.view(),pimpl->S.view());
@@ -139,9 +136,6 @@ namespace tmv {
         TMVAssert(sinv.size() == pimpl->S.size());
         TMVAssert(sinv.isherm());
         HermSV_Inverse(pimpl->U,pimpl->S,pimpl->kmax,sinv);
-#ifdef XTEST
-        TMVAssert(sinv.isHermOK());
-#endif
     }
 
     template <class T> template <class T1>  

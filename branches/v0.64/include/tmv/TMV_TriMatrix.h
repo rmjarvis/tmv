@@ -3741,11 +3741,6 @@ namespace tmv {
 
     }; // FortranStyle LowerTriMatrixView
 
-#ifdef XTEST
-#ifdef TMVDEBUG
-#define XTEST_DEBUG
-#endif
-#endif
 
     template <class T, DiagType D, StorageType S, IndexStyle I> 
     class UpperTriMatrix : public GenUpperTriMatrix<T>
@@ -3800,7 +3795,7 @@ namespace tmv {
 
         inline UpperTriMatrix(size_t _size, const T* vv) : NEW_SIZE(_size)
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -3810,7 +3805,7 @@ namespace tmv {
         inline UpperTriMatrix(size_t _size, const std::vector<T>& vv) :
             NEW_SIZE(_size)
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -3822,7 +3817,7 @@ namespace tmv {
         inline UpperTriMatrix(const GenMatrix<T2>& rhs) :
             NEW_SIZE(rhs.rowsize())
         { 
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(isReal(T2()) || isComplex(T()));
@@ -3834,7 +3829,7 @@ namespace tmv {
         inline UpperTriMatrix(const GenUpperTriMatrix<T2>& rhs) :
             NEW_SIZE(rhs.size())
         { 
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(isReal(T2()) || isComplex(T()));
@@ -3852,7 +3847,7 @@ namespace tmv {
             itslen(rhs.itslen), itsm(itslen), itss(rhs.itss)
             TMV_DEFFIRSTLAST(itsm.get(),itsm.get()+itslen)
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -3863,7 +3858,7 @@ namespace tmv {
         inline UpperTriMatrix(const UpperTriMatrix<T,D2,S,I2>& rhs) :
             NEW_SIZE(rhs.size())
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -3875,7 +3870,7 @@ namespace tmv {
         inline UpperTriMatrix(const Matrix<T,S,I2>& rhs) :
             NEW_SIZE(rhs.rowsize())
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -3888,7 +3883,7 @@ namespace tmv {
         inline UpperTriMatrix(const GenMatrix<T>& rhs) :
             NEW_SIZE(rhs.rowsize())
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -3898,7 +3893,7 @@ namespace tmv {
         inline UpperTriMatrix(const GenUpperTriMatrix<RT>& rhs) :
             NEW_SIZE(rhs.size())
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -3911,7 +3906,7 @@ namespace tmv {
         inline UpperTriMatrix(const GenUpperTriMatrix<CT>& rhs) :
             NEW_SIZE(rhs.size())
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -3925,7 +3920,7 @@ namespace tmv {
         inline UpperTriMatrix(const AssignableToUpperTriMatrix<RT>& m2) :
             NEW_SIZE(m2.size())
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -3936,7 +3931,7 @@ namespace tmv {
         inline UpperTriMatrix(const AssignableToUpperTriMatrix<CT>& m2) :
             NEW_SIZE(m2.size())
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -4674,7 +4669,7 @@ namespace tmv {
 
         inline LowerTriMatrix(size_t _size, const T* vv) : NEW_SIZE(_size)
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -4684,7 +4679,7 @@ namespace tmv {
         inline LowerTriMatrix(size_t _size, const std::vector<T>& vv) :
             NEW_SIZE(_size)
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -4696,7 +4691,7 @@ namespace tmv {
         inline LowerTriMatrix(const GenMatrix<T2>& rhs) :
             NEW_SIZE(rhs.colsize())
         { 
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(isReal(T2()) || isComplex(T()));
@@ -4708,7 +4703,7 @@ namespace tmv {
         inline LowerTriMatrix(const GenLowerTriMatrix<T2>& rhs) :
             NEW_SIZE(rhs.size())
         { 
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(isReal(T2()) || isComplex(T()));
@@ -4726,7 +4721,7 @@ namespace tmv {
             itslen(rhs.itslen), itsm(itslen), itss(rhs.itss)
             TMV_DEFFIRSTLAST(itsm.get(),itsm.get()+itslen)
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -4737,7 +4732,7 @@ namespace tmv {
         inline LowerTriMatrix(const LowerTriMatrix<T,D2,S,I2>& rhs) :
             NEW_SIZE(rhs.size())
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -4749,7 +4744,7 @@ namespace tmv {
         inline LowerTriMatrix(const Matrix<T,S,I2>& rhs) :
             NEW_SIZE(rhs.rowsize())
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -4762,7 +4757,7 @@ namespace tmv {
         inline LowerTriMatrix(const GenMatrix<T>& rhs) :
             NEW_SIZE(rhs.rowsize())
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -4772,7 +4767,7 @@ namespace tmv {
         inline LowerTriMatrix(const GenLowerTriMatrix<RT>& rhs) :
             NEW_SIZE(rhs.size())
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -4785,7 +4780,7 @@ namespace tmv {
         inline LowerTriMatrix(const GenLowerTriMatrix<CT>& rhs) :
             NEW_SIZE(rhs.size())
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -4799,7 +4794,7 @@ namespace tmv {
         inline LowerTriMatrix(const AssignableToLowerTriMatrix<RT>& m2) :
             NEW_SIZE(m2.size())
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -4810,7 +4805,7 @@ namespace tmv {
         inline LowerTriMatrix(const AssignableToLowerTriMatrix<CT>& m2) :
             NEW_SIZE(m2.size())
         {
-#ifdef XTEST_DEBUG
+#ifdef TMVDEBUG
             setAllTo(T(888));
 #endif
             TMVAssert(S==RowMajor || S==ColMajor);

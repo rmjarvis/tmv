@@ -71,7 +71,7 @@ namespace tmv {
         TMVAssert(rm == A.isrm());
         TMVAssert(cx == x.isconj());
         TMVAssert(ha == A.isherm());
-#ifdef XTEST
+#ifdef XDEBUG
         TMV_RealType(T) normA = Norm(A);
         TMV_RealType(T) normx = Norm(x);
         TMV_RealType(T) eps = TMV_ABS(alpha)*normx*normx;
@@ -145,7 +145,7 @@ namespace tmv {
         else *A.ptr() = A00;
 
         if (ha && isComplex(T())) {
-#ifdef XTEST
+#ifdef XDEBUG
             TMVAssert(normInf(A.diag().imagPart()) <= eps);
 #endif
             A.diag().imagPart().setZero();
@@ -165,7 +165,7 @@ namespace tmv {
         TMVAssert(cx == x.isconj());
         TMVAssert(cm == A.iscm());
         TMVAssert(ha == A.isherm());
-#ifdef XTEST
+#ifdef XDEBUG
         TMV_RealType(T) normA = Norm(A);
         TMV_RealType(T) normx = Norm(x);
         TMV_RealType(T) eps = TMV_ABS(alpha)*normx*normx;
@@ -222,7 +222,7 @@ namespace tmv {
             }
         }
         if (ha && isComplex(T())) {
-#ifdef XTEST
+#ifdef XDEBUG
             TMVAssert(normInf(A.diag().imagPart()) <= eps);
 #endif
             A.diag().imagPart().setZero();
@@ -534,9 +534,6 @@ namespace tmv {
         cout<<"A = "<<TMV_Text(A)<<"  "<<A<<endl;
         cout<<"x = "<<TMV_Text(x)<<"  "<<x<<endl;
 #endif
-#ifdef XTEST
-        TMVAssert(!add || A.isHermOK());
-#endif
 
         TMVAssert(A.size() == x.size());
         TMVAssert(TMV_IMAG(alpha)==TMV_RealType(T)(0) || !A.isherm());
@@ -575,10 +572,8 @@ namespace tmv {
 #endif
         }
 
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
-#endif
 #ifdef XDEBUG
+        TMVAssert(A.isHermOK());
         cout<<"Done Rank1\n";
         if (Norm(A-A2) > 0.001*(TMV_ABS(alpha)*TMV_SQR(Norm(x0))+Norm(A0))) {
             cerr<<"Rank1Update: alpha = "<<alpha<<endl;

@@ -299,9 +299,6 @@ namespace tmv {
         const GenSymMatrix<T>& LLx, const GenVector<T>& xD, const int* P,
         const SymMatrixView<T1>& sinv)
     {
-#ifdef XTEST
-        TMVAssert(LLx.isHermOK());
-#endif
         TMVAssert(sinv.size() == LLx.size());
         TMVAssert(isReal(T()) || LLx.isherm() == sinv.isherm());
         TMVAssert(isReal(T()) || LLx.issym() == sinv.issym());
@@ -369,9 +366,7 @@ namespace tmv {
             abort();
         }
 #endif
-#ifdef XTEST
         TMVAssert(sinv.isHermOK());
-#endif
     }
 
 #define InstFile "TMV_SymLDLInverse.inst"

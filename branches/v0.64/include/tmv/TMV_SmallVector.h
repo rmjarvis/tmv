@@ -74,12 +74,6 @@ namespace tmv {
     template <class T1, class T2, int N, IndexStyle I1, IndexStyle I2> 
     inline void Copy(const SmallVector<T1,N,I1>& v1, SmallVector<T2,N,I2>& v2);
 
-#ifdef XTEST
-#ifdef TMVDEBUG
-#define XTEST_DEBUG
-#endif
-#endif
-
     template <class T, int N, IndexStyle I> 
     class SmallVector 
     {
@@ -125,27 +119,18 @@ namespace tmv {
 
         explicit inline SmallVector(const T* vv) 
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(N > 0);
             for(int i=0;i<N;++i) itsv[i] = vv[i];
         }
 
         explicit inline SmallVector(const std::vector<T>& vv) 
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(N > 0);
             for(int i=0;i<N;++i) itsv[i] = vv[i];
         }
 
         inline SmallVector(const type& v2) 
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(N > 0);
             for(int i=0;i<N;++i) itsv[i] = v2.cref(i);
         }
@@ -153,9 +138,6 @@ namespace tmv {
         template <IndexStyle I2> 
         inline SmallVector(const SmallVector<T,N,I2>& v2) 
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(N > 0);
             TMVAssert(v2.size() == N);
             for(int i=0;i<N;++i) itsv[i] = v2.cref(i);
@@ -164,9 +146,6 @@ namespace tmv {
         template <class T2, IndexStyle I2> 
         inline SmallVector(const SmallVector<T2,N,I2>& v2) 
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(N > 0);
             TMVAssert(v2.size() == N);
             Copy(v2,*this); 
@@ -175,9 +154,6 @@ namespace tmv {
         template <IndexStyle I2> 
         inline SmallVector(const Vector<T,I2>& v2) 
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(N > 0);
             TMVAssert(v2.size() == N);
             for(int i=0;i<N;++i) itsv[i] = v2.cref(i);
@@ -186,9 +162,6 @@ namespace tmv {
         template <class T2> 
         inline SmallVector(const GenVector<T2>& v2) 
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(N > 0);
             TMVAssert(isReal(T2()) || isComplex(T()));
             TMVAssert(v2.size() == N);
@@ -197,9 +170,6 @@ namespace tmv {
 
         inline SmallVector(const AssignableToVector<RT>& v2) 
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(N > 0);
             TMVAssert(v2.size() == N);
             view() = v2;
@@ -207,9 +177,6 @@ namespace tmv {
 
         inline SmallVector(const AssignableToVector<CT>& v2) 
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(N > 0);
             TMVAssert(isComplex(T()));
             TMVAssert(v2.size() == N);
@@ -218,18 +185,12 @@ namespace tmv {
 
         inline SmallVector(const SmallVectorComposite<RT,N>& v2) 
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(N > 0);
             v2.assignTov(*this);
         }
 
         inline SmallVector(const SmallVectorComposite<CT,N>& v2) 
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(isComplex(T()));
             TMVAssert(N > 0);
             v2.assignTov(*this);

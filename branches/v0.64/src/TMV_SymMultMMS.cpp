@@ -115,8 +115,7 @@ namespace tmv {
                     }
                 }
                 if (ha && isComplex(T())) {
-#ifdef XTEST
-                    TMVAssert(normInf(A.diag().imagPart()) < 
+#ifdef XDEBUG
                               A.size()*TMV_Epsilon<T>()*
                               (Norm(A)+Norm(x)*Norm(y)));
 #endif
@@ -289,9 +288,6 @@ namespace tmv {
         const SymMatrixView<T>& A)
     // A (+)= alpha * x * y
     {
-#ifdef XTEST
-        TMVAssert(!add || A.isHermOK());
-#endif
         TMVAssert(A.size() == x.colsize());
         TMVAssert(A.size() == y.rowsize());
         TMVAssert(x.rowsize() == y.colsize());
@@ -335,9 +331,7 @@ namespace tmv {
             abort();
         }
 #endif
-#ifdef XTEST
         TMVAssert(A.isHermOK());
-#endif
     }
 
 #define InstFile "TMV_SymMultMMS.inst"

@@ -1509,11 +1509,6 @@ namespace tmv {
 
     }; // FortranStyle VectorView
 
-#ifdef XTEST
-#ifdef TMVDEBUG
-#define XTEST_DEBUG
-#endif
-#endif
 
     template <class T, IndexStyle I> 
     class Vector : public GenVector<T>
@@ -1563,42 +1558,27 @@ namespace tmv {
 
         inline Vector(size_t n, const T* vv) : NEW_SIZE(n)
         { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             std::copy(vv,vv+n,_v.get());
         }
 
         inline explicit Vector(const std::vector<T>& vv) : NEW_SIZE(vv.size())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             std::copy(vv.begin(),vv.end(),_v.get());
         }
 
         inline Vector(const Vector<T,I>& rhs) : NEW_SIZE(rhs.size())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             std::copy(rhs.cptr(),rhs.cptr()+_size,_v.get());
         }
 
         template <IndexStyle I2> 
         inline Vector(const Vector<T,I2>& rhs) : NEW_SIZE(rhs.size())
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             std::copy(rhs.cptr(),rhs.cptr()+_size,_v.get());
         }
 
         inline Vector(const GenVector<RT>& rhs) : NEW_SIZE(rhs.size())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             if (isReal(T()) && rhs.step() == 1 && !rhs.isconj())
                 std::copy(rhs.cptr(),rhs.cptr()+_size,_v.get());
             else rhs.assignToV(view());
@@ -1606,9 +1586,6 @@ namespace tmv {
 
         inline Vector(const GenVector<CT>& rhs) : NEW_SIZE(rhs.size())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(isComplex(T()));
             if (rhs.step() == 1 && !rhs.isconj())
                 std::copy(rhs.cptr(),rhs.cptr()+_size,_v.get());
@@ -1618,26 +1595,17 @@ namespace tmv {
         template <class T2> 
         inline Vector(const GenVector<T2>& rhs) : NEW_SIZE(rhs.size())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(isReal(T2()) || isComplex(T()));
             Copy(rhs,view()); 
         }
 
         inline Vector(const AssignableToVector<RT>& v2) : NEW_SIZE(v2.size())
         { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             v2.assignToV(view()); 
         }
 
         inline Vector(const AssignableToVector<CT>& v2) : NEW_SIZE(v2.size())
         { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(isComplex(T()));
             v2.assignToV(view()); 
         }
@@ -1646,35 +1614,10 @@ namespace tmv {
         inline Vector(const SmallVector<T2,N,I2>& rhs) : 
             NEW_SIZE(rhs.size())
         {
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(isReal(T2()) || isComplex(T()));
             Copy(rhs.view(),view()); 
         }
 
-#if 0
-        template <int N> 
-        inline Vector(const SmallVectorComposite<RT,N>& v2) : 
-            NEW_SIZE(v2.size())
-        { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
-            v2.assignToV(view()); 
-        }
-
-        template <int N> 
-        inline Vector(const SmallVectorComposite<CT,N>& v2) :
-            NEW_SIZE(v2.size())
-        { 
-#ifdef XTEST_DEBUG
-            setAllTo(T(888));
-#endif
-            TMVAssert(isComplex(T()));
-            v2.assignToV(view()); 
-        }
-#endif
 
 #undef NEW_SIZE
 

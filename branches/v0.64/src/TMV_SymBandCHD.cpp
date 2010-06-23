@@ -86,9 +86,6 @@ namespace tmv {
         const GenSymBandMatrix<T>& A, bool inplace) :
         pimpl(new HermBandCHDiv_Impl(A,inplace))
     {
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
-#endif
         TMVAssert(isReal(T()) || A.isherm());
         if (inplace) TMVAssert(A==pimpl->LLx); 
         else pimpl->LLx = A;
@@ -115,9 +112,7 @@ namespace tmv {
             else throw NonPosDefHermBandMatrix2<T>(pimpl->LLx,A);
         }
 #endif
-#ifdef XTEST
         TMVAssert(pimpl->LLx.isHermOK());
-#endif
     }
 
     template <class T> 

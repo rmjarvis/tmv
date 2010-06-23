@@ -489,9 +489,6 @@ namespace tmv {
         const T alpha, const GenMatrix<Tx>& x, const SymMatrixView<T>& A)
     // A (+)= alpha * x * xT
     {
-#ifdef XTEST
-        TMVAssert(!add || A.isHermOK());
-#endif
 #ifdef XDEBUG
         Matrix<T> A0 = A;
         Matrix<Tx> x0 = x;
@@ -544,6 +541,7 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
+        TMVAssert(A.isHermOK());
         if (Norm(A-A2) > 0.001*(TMV_ABS(alpha)*TMV_SQR(Norm(x0))+
                                 add?Norm(A0):TMV_RealType(T)(0))) {
             cerr<<"RankKUpdate: alpha = "<<alpha<<endl;
@@ -554,9 +552,6 @@ namespace tmv {
             cerr<<"A2 = "<<A2<<endl;
             abort();
         }
-#endif
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
 #endif
     }
 

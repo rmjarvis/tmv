@@ -141,11 +141,6 @@ namespace tmv {
         // if we store (ZYtm)t for Hermitian or (ZYtm)T for symmetric.
         // This is what is stored in the Matrix ZYtmT.
 
-        Matrix<T> Ax2 = A;
-        SymMatrixView<T> A2 = A.isherm() ?
-            HermMatrixViewOf(Ax2,Lower) : SymMatrixViewOf(Ax2,Lower);
-        Vector<T> b2 = beta;
-
         T* bj = beta.ptr();
         for(int j1=0;j1<Nm1;) {
             int j2 = TMV_MIN(Nm1,j1+SYM_TRIDIAG_BLOCKSIZE);
@@ -173,10 +168,6 @@ namespace tmv {
                     TMVAssert(bj >= beta.first);
                     TMVAssert(bj < beta.last);
 #endif
-                    b2[j] = HouseholderReflect(A2.col(j,j+1,N),signdet);
-                    if (b2[j] != T(0)) 
-                        HouseholderLRMult(A2.col(j,j+2,N),b2[j],A2.subSymMatrix(j+1,N));
-
                     *bj = HouseholderReflect(u,signdet);
 
                     T* u0 = u.ptr();
@@ -320,6 +311,12 @@ namespace tmv {
         const VectorView<double>& D, const VectorView<double>& E, 
         std::complex<double>& )
     {
+        //std::cout<<"Start LapTridiagonalize:\n";
+        //std::cout<<"A = "<<TMV_Text(A)<<std::endl;
+        //std::cout<<"beta = "<<TMV_Text(beta)<<"  "<<beta.step()<<std::endl;
+        //std::cout<<"D = "<<TMV_Text(D)<<"  "<<D.step()<<std::endl;
+        //std::cout<<"E = "<<TMV_Text(E)<<"  "<<E.step()<<std::endl;
+
         TMVAssert(A.iscm());
         TMVAssert(A.uplo() == Lower);
         TMVAssert(A.isherm());
@@ -356,16 +353,19 @@ namespace tmv {
         work.resize(lwork);
 #endif
 #endif
+        //std::cout<<"Before zhetrd\n";
         LAPNAME(zhetrd) (
             LAPCM LAPCH_LO,LAPV(n),
             LAPP(A.ptr()),LAPV(ldu),LAPP(D.ptr()),LAPP(E.ptr()),
             LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
+        //std::cout<<"After zhetrd\n";
         if (!A.isconj()) beta.conjugateSelf();
 #ifdef LAPNOWORK
         LAP_Results("zhetrd");
 #else
         LAP_Results(int(TMV_REAL(work[0])),n,n,lwork,"zhetrd");
 #endif
+        //std::cout<<"Done LapTridiag\n";
     }
 #endif
 #ifdef INST_FLOAT
@@ -470,6 +470,14 @@ namespace tmv {
         const SymMatrixView<T>& A, const VectorView<T>& beta,
         const VectorView<Td>& D, const VectorView<RT>& E, T& signdet)
     {
+#ifdef XDEBUG
+        cout<<"Start Tridiagonalize: \n";
+        cout<<"A = "<<TMV_Text(A)<<endl;
+        cout<<"beta = "<<TMV_Text(beta)<<endl;
+        cout<<"D = "<<TMV_Text(D)<<endl;
+        cout<<"E = "<<TMV_Text(E)<<endl;
+        cout<<"signdet = "<<signdet<<endl;
+#endif
         TMVAssert(A.size() == D.size());
 #ifdef LAP
         TMVAssert(beta.size() == A.size());

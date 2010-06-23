@@ -599,9 +599,6 @@ namespace tmv {
     template <class T> 
     void LDL_Decompose(const SymBandMatrixView<T>& A)
     {
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
-#endif
         TMVAssert(A.nlo() == 1);
 
         if (A.uplo() == Upper) LDL_Decompose(A.adjoint());
@@ -624,17 +621,11 @@ namespace tmv {
                 else SymLDL_Decompose<false>(A);
             }
         }
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
-#endif
     }
 
     template <class T> 
     void CH_Decompose(const SymBandMatrixView<T>& A)
     {
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
-#endif
         TMVAssert(isReal(T()) || A.isherm());
         TMVAssert(A.iscm() || A.isrm());
 
@@ -647,9 +638,6 @@ namespace tmv {
             NonLapCH_Decompose(A);
 #endif
         }
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
-#endif
     }
 
 #define InstFile "TMV_SymBandCHDecompose.inst"

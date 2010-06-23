@@ -237,14 +237,12 @@ namespace tmv {
             // Now U stores Householder vectors for U in lower diagonal columns (HLi)
             // and Householder vectors for V in upper diagonal rows (HRi)
             // except for the bidiagonal which is the bidiagonal we want:
-#ifdef XTEST
-            if (isComplex(T())) {
-                TMVAssert(normInf(U1->diag().imagPart()) == RT(0));
-                TMVAssert(normInf(U1->diag(1).imagPart()) == RT(0));
-            }
-#endif
             D = U1->diag().realPart();
             E = U1->diag(1).realPart();
+            if (isComplex(T())) {
+                TMVAssert(NormInf(U1->diag().imagPart()) == RT(0));
+                TMVAssert(NormInf(U1->diag(1).imagPart()) == RT(0));
+            }
 
             if (V) {
                 V->setToIdentity();

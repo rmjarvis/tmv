@@ -126,9 +126,6 @@ namespace tmv {
     template <class T, class T1> 
     void CH_Inverse(const GenSymMatrix<T>& LLx, const SymMatrixView<T1>& sinv) 
     {
-#ifdef XTEST
-        TMVAssert(LLx.isHermOK());
-#endif
         TMVAssert(LLx.size() == sinv.size());
 
 #ifdef XDEBUG
@@ -171,9 +168,7 @@ namespace tmv {
             abort();
         }
 #endif
-#ifdef XTEST
         TMVAssert(sinv.isHermOK());
-#endif
     }
 
 #define InstFile "TMV_SymCHInverse.inst"

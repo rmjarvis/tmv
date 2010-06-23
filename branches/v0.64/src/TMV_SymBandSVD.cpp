@@ -68,9 +68,6 @@ namespace tmv {
     HermBandSVDiv<T>::HermBandSVDiv(const GenSymBandMatrix<T>& A) :
         pimpl(new HermBandSVDiv_Impl(A))
     {
-#ifdef XTEST
-        TMVAssert(A.isHermOK());
-#endif
         TMVAssert(A.isherm());
 
         SV_Decompose<T>(A, pimpl->U.view(), pimpl->S.view(), 0,
@@ -135,9 +132,6 @@ namespace tmv {
         TMVAssert(sinv.size() == pimpl->S.size());
         TMVAssert(sinv.isherm());
         HermSV_Inverse(pimpl->U,pimpl->S,pimpl->kmax,sinv);
-#ifdef XTEST
-        TMVAssert(sinv.isHermOK());
-#endif
     }
 
     template <class T> template <class T1>
