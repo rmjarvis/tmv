@@ -610,7 +610,7 @@ namespace tmv {
         int N = M;
         int lda = m.iscm() ? m.stepj() : m.stepi();
 #ifndef LAPNOWORK
-        AlignedArray<double> work(c == 'I' ? M : 0);
+        AlignedArray<double> work(cc == 'I' ? M : 0);
 #endif
         double norm = LAPNAME(dlantr) (
             LAPCM LAPV(cc),
@@ -633,7 +633,7 @@ namespace tmv {
         int N = M;
         int lda = m.iscm() ? m.stepj() : m.stepi();
 #ifndef LAPNOWORK
-        AlignedArray<double> work(c == 'I' ? M : 0);
+        AlignedArray<double> work(cc == 'I' ? M : 0);
 #endif
         double norm = LAPNAME(zlantr) (
             LAPCM LAPV(cc),
@@ -658,7 +658,7 @@ namespace tmv {
         int N = M;
         int lda = m.iscm() ? m.stepj() : m.stepi();
 #ifndef LAPNOWORK
-        AlignedArray<float> work(c == 'I' ? M : 0);
+        AlignedArray<float> work(cc == 'I' ? M : 0);
 #endif
         float norm = LAPNAME(slantr) (
             LAPCM LAPV(cc),
@@ -681,7 +681,7 @@ namespace tmv {
         int N = M;
         int lda = m.iscm() ? m.stepj() : m.stepi();
 #ifndef LAPNOWORK
-        AlignedArray<float> work(c == 'I' ? M : 0);
+        AlignedArray<float> work(cc == 'I' ? M : 0);
 #endif
         float norm = LAPNAME(clantr) (
             LAPCM LAPV(cc),
@@ -718,9 +718,9 @@ namespace tmv {
     RT GenUpperTriMatrix<T>::norm1() const
     {
 #ifdef XLAP
-        if ((isrm() && stepi()>0) || (iscm() && stepj()>0))
+        if ((isrm() && stepi()>0) || (iscm() && stepj()>0)) 
             return LapNorm('1',*this);
-        else
+        else 
 #endif
             return NonLapNorm1(*this);
     }
