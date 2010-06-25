@@ -41,7 +41,7 @@
 #include <iostream>
 
 #ifdef XDEBUG
-#define THRESH 1.e-11
+#define THRESH 1.e-6
 #include <iostream>
 #include "tmv/TMV_VectorArith.h"
 #include "tmv/TMV_MatrixArith.h"
@@ -104,6 +104,22 @@ namespace tmv {
             if ( TMV_MAXABS(*Ei) <= eps*(TMV_MAXABS(*Di)+TMV_MAXABS(*(Di-1))) ||
                  TMV_Underflow(*Ei) ) {
                 *Ei = T(0);
+            }
+
+            // This last one checks that when the product of a D*E underflows
+            // that at least one of the two values have been set to zero.
+            // Otherwise, set the smaller one to 0.
+            // e.g. if underflow happens at 1.e-310, and you have
+            // Di = 1.e-154, Ei = 1.e-157, then none of the above tests
+            // will trigger a zero.  But the product will underflow, leading
+            // to problems with Reduce not reducing.
+            if (TMV_Underflow(*Di * *Ei) && *Di!=T(0) && *Ei!=T(0)) {
+                if (TMV_MAXABS(*Ei) <= TMV_MAXABS(*Di) ) *Ei = T(0);
+                else *Di = T(0);
+            }
+            if (TMV_Underflow(*(Di-1) * *Ei) && *(Di-1)!=T(0) && *Ei!=T(0)) {
+                if (TMV_MAXABS(*Ei) <= TMV_MAXABS(*(Di-1)) ) *Ei = T(0);
+                else *(Di-1) = T(0);
             }
         }
     }
@@ -835,16 +851,18 @@ namespace tmv {
             dbgcout<<"Norm(VtV-1) = "<<Norm(V->adjoint()*(*V)-T(1))<<endl;
             dbgcout<<"Norm(VVt-1) = "<<Norm((*V)*V->adjoint()-T(1))<<endl;
             dbgcout<<"U = "<<*U<<std::endl;
-            dbgcout<<"D = "<<D<<std::endl;
+            dbgcout<<"S = "<<D<<std::endl;
             dbgcout<<"V = "<<*V<<std::endl;
             if (Norm(A0-AA) > THRESH*Norm(A0)) {
                 cerr<<"SV_DecomposeFromBidiagonal QR: \n";
-                cerr<<"input B = "<<B<<endl;
                 cerr<<"UBV = "<<A0<<endl;
                 cerr<<"USV = "<<AA<<endl;
-                cerr<<"U = "<<*U<<endl;
+                //cerr<<"U = "<<*U<<endl;
+                //cerr<<"V = "<<*V<<endl;
+                cerr<<"input B = "<<B<<endl;
                 cerr<<"S = "<<D<<endl;
-                cerr<<"V = "<<*V<<endl;
+                dbgcout<<"Norm(UBV-USV) = "<<Norm(A0-AA)<<endl;
+                dbgcout<<"cf "<<THRESH<<"*Norm(UBV) = "<<THRESH*Norm(A0)<<endl;
                 abort();
             }
         }
