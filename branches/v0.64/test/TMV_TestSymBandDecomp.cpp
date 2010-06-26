@@ -9,6 +9,7 @@
 template <class T, tmv::UpLoType uplo, tmv::StorageType stor> 
 void TestHermBandDecomp()
 {
+    typedef std::complex<T> CT;
     for (int mattype = START; mattype <= 17; mattype++) {
 #if !(XTEST & 64)
         if (mattype % 6 >= 3) continue;
@@ -44,6 +45,9 @@ void TestHermBandDecomp()
         const bool nearunderflow = mattype % 6 == 4;
         const bool nearoverflow = mattype % 6 == 5;
         const int nlo = mattype / 6 == 0 ? 8 : mattype / 6 == 1 ? 1 : 0;
+        const T Teps = std::numeric_limits<T>::epsilon();
+        const T Tmin = std::numeric_limits<T>::min();
+        const T Tmax = std::numeric_limits<T>::max();
         if (showstartdone) {
             std::cout<<"posdef = "<<posdef<<", singular = "<<singular<<
                 ", nlo = "<<nlo<<std::endl;
@@ -86,12 +90,12 @@ void TestHermBandDecomp()
         }
         //std::cout<<"m = "<<m<<std::endl;
 
-        tmv::HermBandMatrix<std::complex<T>,uplo,stor> c(N,nlo);
+        tmv::HermBandMatrix<CT,uplo,stor> c(N,nlo);
         //std::cout<<"c = "<<TMV_Text(c)<<std::endl;
         for(int i=0;i<N;++i) for(int j=0;j<N;++j) 
             if ((uplo == tmv::Upper && j>=i && j<=i+nlo) || 
                 (uplo == tmv::Lower && i>=j && i<=j+nlo)) 
-                c(i,j) = std::complex<T>(2.5+4*i-5*j,3-i);
+                c(i,j) = CT(2.5+4*i-5*j,3-i);
         c.diag().imagPart().setZero();
         c /= T(10*N);
         if (posdef) {
@@ -130,34 +134,32 @@ void TestHermBandDecomp()
         }
 
         if (nearunderflow) {
-            T x = std::numeric_limits<T>::min();
+            T x = Tmin;
             m.setAllTo(x);
             if (nlo > 0)
-                c.upperBandOff().setAllTo(std::complex<T>(x,2*x));
+                c.upperBandOff().setAllTo(CT(x,2*x));
             c.diag().setAllTo(x);
             for(int i=1;i<N;++i) {
                 int start = i-nlo; if (start < 0) start = 0;
                 m.col(i,start,i+1) /= T(i);
                 c.col(i,start,i+1) /= T(i);
             }
-            m(N/2,N/2) = x/std::numeric_limits<T>::epsilon();
-            c(N/2,N/2) = x/std::numeric_limits<T>::epsilon();
+            m(N/2,N/2) = x/Teps;
+            c(N/2,N/2) = x/Teps;
             m.diag(0,N/5,2*N/5).setZero();
             c.diag(0,N/5,2*N/5).setZero();
             m.diag(0,N/2+1,N) *= T(-1);
             c.diag(0,N/2+1,N) *= T(-1);
-            m.subSymBandMatrix(N-4,N).setAllTo(
-                -x/std::numeric_limits<T>::epsilon()/T(8));
-            c.subSymBandMatrix(N-4,N).setAllTo(
-                -x/std::numeric_limits<T>::epsilon()/T(8));
+            m.subSymBandMatrix(N-4,N).setAllTo(-x/Teps/T(8));
+            c.subSymBandMatrix(N-4,N).setAllTo(-x/Teps/T(8));
         }
 
         if (nearoverflow) {
-            T x = std::numeric_limits<T>::max();
+            T x = Tmax;
             x /= N;
             m.setAllTo(x);
             if (nlo > 0) 
-                c.upperBandOff().setAllTo(std::complex<T>(x,x/2));
+                c.upperBandOff().setAllTo(CT(x,x/2));
             c.diag().setAllTo(x);
             for(int i=1;i<N;++i) {
                 int start = i-nlo;  if (start < 0) start = 0;
@@ -204,8 +206,8 @@ void TestHermBandDecomp()
                 Assert(Norm(m-LLt) <= eps*normm,"HermBand CH");
             }
 
-            tmv::BandMatrix<std::complex<T> > cL(N,N,nlo,0);
-            tmv::BandMatrix<std::complex<T> > cLLt(N,N,nlo,nlo);
+            tmv::BandMatrix<CT> cL(N,N,nlo,0);
+            tmv::BandMatrix<CT> cLLt(N,N,nlo,nlo);
             if (nlo > 1) {
                 cL = c.chd().getL();
                 cLLt = cL*cL.adjoint();
@@ -223,7 +225,7 @@ void TestHermBandDecomp()
             LLt = L*L.adjoint();
             Assert(Norm(m-LLt) <= eps*normm,"HermBand CH2");
 
-            tmv::HermBandMatrix<std::complex<T>,uplo,stor> c2 = c;
+            tmv::HermBandMatrix<CT,uplo,stor> c2 = c;
             CH_Decompose(c2.view());
             cL = c2.lowerBand();
             cLLt = cL*cL.adjoint();
@@ -256,9 +258,9 @@ void TestHermBandDecomp()
                     Assert(Norm(m-LDL) <= eps*normm,"HermBand LDL");
                 }
 
-                tmv::BandMatrix<std::complex<T> > cL(N,N,nlo,0);
-                tmv::DiagMatrix<std::complex<T> > cD(N);
-                tmv::BandMatrix<std::complex<T> > cLDL(N,N,nlo,nlo);
+                tmv::BandMatrix<CT> cL(N,N,nlo,0);
+                tmv::DiagMatrix<CT> cD(N);
+                tmv::BandMatrix<CT> cLDL(N,N,nlo,nlo);
                 if (posdef) {
                     cL = c.chd().getL();
                     cD = c.chd().getD();
@@ -285,7 +287,7 @@ void TestHermBandDecomp()
                 LDL.diag(1) = LDL.diag(-1);
                 Assert(Norm(m-LDL) <= eps*normm,"HermBand LDL2 Alt");
 
-                tmv::HermBandMatrix<std::complex<T>,uplo,stor> c2 = c;
+                tmv::HermBandMatrix<CT,uplo,stor> c2 = c;
                 LDL_Decompose(c2.view());
                 (cL = c2.lowerBand()).diag().setAllTo(T(1));
                 cD = DiagMatrixViewOf(c2.diag());
@@ -295,7 +297,7 @@ void TestHermBandDecomp()
                        "HermBand C LDL2 - D");
 
                 // Alt calculation:
-                tmv::DiagMatrix<std::complex<T> > cE(c2.diag(-1));
+                tmv::DiagMatrix<CT> cE(c2.diag(-1));
                 cLDL.setZero();
                 cLDL.diag(0,1,N) =
                     (cE*cD.subDiagMatrix(0,N-1)*cE.conjugate()).diag();
@@ -334,9 +336,9 @@ void TestHermBandDecomp()
             }
             Assert(Norm(m-U*S*V) <= eps*normm,"HermBand SV");
 
-            tmv::Matrix<std::complex<T> > cU = c.svd().getU();
+            tmv::Matrix<CT> cU = c.svd().getU();
             tmv::DiagMatrix<T> cS = c.svd().getS();
-            tmv::Matrix<std::complex<T> > cV = c.svd().getV();
+            tmv::Matrix<CT> cV = c.svd().getV();
             if (showacc) {
                 std::cout<<"Norm(c-cU*cS*cV) = "<<Norm(c-cU*cS*cV)<<std::endl;
                 std::cout<<"ceps * normc = "<<ceps*normc<<std::endl;
@@ -348,6 +350,10 @@ void TestHermBandDecomp()
             Assert(Norm(c-cU*cS*cV) <= ceps*normc,"HermBand C SV");
 
 #if (XTEST & 16)
+            const T x = 
+                nearoverflow ? Tmax*Teps :
+                nearunderflow ? Tmin/Teps : T(1);
+
             tmv::Matrix<T> U2(N,N);
             tmv::DiagMatrix<T> S2(N);
             tmv::Matrix<T> V2(N,N);
@@ -362,18 +368,18 @@ void TestHermBandDecomp()
             Assert(Norm(S2-S) <= eps*normm,"HermBand SV3");
             SV_Decompose(m,U2.view(),S2.view());
             Assert(Norm(S2-S) <= eps*normm,"HermBand SV4 S");
-            if (!nearoverflow)
-                Assert(Norm(m*m.adjoint()-U2*S2*S2*U2.adjoint()) <= 
-                       eps*normm*normm,"HermBand SV4 U");
+            Assert(Norm((m/x)*tmv::Matrix<T>(m.adjoint()/x)-
+                        U2*tmv::DiagMatrix<T>(S2/x)*tmv::DiagMatrix<T>(S2/x)*U2.adjoint()) <= 
+                   eps*(normm/x)*(normm/x),"HermBand SV4 U");
             SV_Decompose(m,S2.view(),V2.view());
             Assert(Norm(S2-S) <= eps*normm,"HermBand SV5 S");
-            if (!nearoverflow)
-                Assert(Norm(m.adjoint()*m-V2.adjoint()*S2*S2*V2) <= 
-                       eps*normm*normm,"HermBand SV5 V");
+            Assert(Norm((m.adjoint()/x)*tmv::Matrix<T>(m/x)-
+                        V2.adjoint()*tmv::DiagMatrix<T>(S2/x)*tmv::DiagMatrix<T>(S2/x)*V2) <= 
+                   eps*(normm/x)*(normm/x),"HermBand SV5 V");
 
-            tmv::Matrix<std::complex<T> > cU2(N,N);
+            tmv::Matrix<CT> cU2(N,N);
             tmv::DiagMatrix<T> cS2(N);
-            tmv::Matrix<std::complex<T> > cV2(N,N);
+            tmv::Matrix<CT> cV2(N,N);
             SV_Decompose(c,cU2.view(),cS2.view(),cV2.view());
             Assert(Norm(c-cU2*cS2*cV2) <= ceps*normc,"HermBand C SV2");
 
@@ -381,29 +387,27 @@ void TestHermBandDecomp()
             Assert(Norm(cS2-cS) <= ceps*normc,"HermBand C SV3");
             SV_Decompose(c,cU2.view(),cS2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"HermBand C SV4 S");
-            if (!nearoverflow)
-                Assert(Norm(c*c.adjoint()-cU2*cS2*cS2*cU2.adjoint()) <= 
-                       ceps*normc*normc,"HermBand C SV4 U");
+            Assert(Norm(tmv::Matrix<CT>(c/x)*tmv::Matrix<CT>(c.adjoint()/x)-
+                        cU2*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.adjoint()) <= 
+                   ceps*(normc/x)*(normc/x),"HermBand C SV4 U");
             SV_Decompose(c,cS2.view(),cV2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"HermBand C SV5 S");
-            if (!nearoverflow)
-                Assert(Norm(c.adjoint()*c-cV2.adjoint()*cS2*cS2*cV2) <= 
-                       ceps*normc*normc,"Herm C SV5 V");
+            Assert(Norm(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x)-
+                        cV2.adjoint()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cV2) <= 
+                   ceps*(normc/x)*(normc/x),"Herm C SV5 V");
 
             SV_Decompose(c.conjugate(),cS2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"HermBand C SV6");
             SV_Decompose(c.conjugate(),cU2.view(),cS2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"HermBand C SV7 S");
-            if (!nearoverflow)
-                Assert(Norm(c.conjugate()*c.transpose()-
-                            cU2*cS2*cS2*cU2.adjoint()) <=
-                       ceps*normc*normc,"HermBand C SV7 U");
+            Assert(Norm(tmv::Matrix<CT>(c.conjugate()/x)*tmv::Matrix<CT>(c.transpose()/x)-
+                        cU2*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.adjoint()) <=
+                   ceps*(normc/x)*(normc/x),"HermBand C SV7 U");
             SV_Decompose(c.conjugate(),cU2.conjugate(),cS2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"HermBand C SV8 S");
-            if (!nearoverflow)
-                Assert(Norm(c.conjugate()*c.transpose()-
-                            cU2.conjugate()*cS2*cS2*cU2.transpose()) <=
-                       ceps*normc*normc,"HermBand C SV8 U");
+            Assert(Norm(tmv::Matrix<CT>(c.conjugate()/x)*tmv::Matrix<CT>(c.transpose()/x)-
+                        cU2.conjugate()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.transpose()) <=
+                   ceps*(normc/x)*(normc/x),"HermBand C SV8 U");
 #endif
             std::cout<<"."; std::cout.flush();
         } while (false);
@@ -417,7 +421,7 @@ void TestHermBandDecomp()
             Assert(Norm(m*V-V*DiagMatrixViewOf(L)) <= eps*normm,
                    "HermBand Eigen");
 
-            tmv::Matrix<std::complex<T> > cV(N,N);
+            tmv::Matrix<CT> cV(N,N);
             tmv::Vector<T> cL(N);
             Eigen(c,cV.view(),cL.view());
             Assert(Norm(c*cV-cV*DiagMatrixViewOf(cL)) <= ceps*normc,
@@ -455,7 +459,7 @@ void TestHermBandDecomp()
                 SquareRoot(m,S.view());
                 Assert(Norm(m-S*S) <= eps*normm,"HermBand Square Root");
 
-                tmv::HermMatrix<std::complex<T>,uplo,stor> cS(N);
+                tmv::HermMatrix<CT,uplo,stor> cS(N);
                 SquareRoot(c,cS.view());
                 Assert(Norm(c-cS*cS) <= eps*normc,"HermBand C Square Root");
 
@@ -499,12 +503,12 @@ void TestHermBandDecomp()
         } while (false);
 
     }
-
 }
 
 template <class T, tmv::UpLoType uplo, tmv::StorageType stor> 
 void TestSymBandDecomp()
 {
+    typedef std::complex<T> CT;
     for (int mattype = START; mattype <= 14; mattype++) {
 #if !(XTEST & 64)
         if (mattype % 6 >= 3) continue;
@@ -540,6 +544,9 @@ void TestSymBandDecomp()
         const bool nearunderflow = mattype % 6 == 4;
         const bool nearoverflow = mattype % 6 == 5;
         const int nlo = mattype / 6 == 0 ? 8 : mattype / 6 == 1 ? 1 : 0;
+        const T Teps = std::numeric_limits<T>::epsilon();
+        const T Tmin = std::numeric_limits<T>::min();
+        const T Tmax = std::numeric_limits<T>::max();
         if (showstartdone) {
             std::cout<<"posdef = "<<posdef<<", singular = "<<singular<<
                 ", nlo = "<<nlo<<std::endl;
@@ -579,11 +586,11 @@ void TestSymBandDecomp()
         }
         //std::cout<<"m = "<<m<<std::endl;
 
-        tmv::SymBandMatrix<std::complex<T>,uplo,stor> c(N,nlo);
+        tmv::SymBandMatrix<CT,uplo,stor> c(N,nlo);
         for(int i=0;i<N;++i) for(int j=0;j<N;++j) 
             if ((uplo == tmv::Upper && j>=i && j<=i+nlo) || 
                 (uplo == tmv::Lower && i>=j && i<=j+nlo)) 
-                c(i,j) = std::complex<T>(2+4*i-5*j,3-i);
+                c(i,j) = CT(2+4*i-5*j,3-i);
         c /= T(10*N);
         if (posdef) {
             c += T(10);
@@ -621,31 +628,29 @@ void TestSymBandDecomp()
         }
 
         if (nearunderflow) {
-            T x = std::numeric_limits<T>::min();
+            T x = Tmin;
             m.setAllTo(x);
-            c.upperBand().setAllTo(std::complex<T>(x,2*x));
+            c.upperBand().setAllTo(CT(x,2*x));
             for(int i=1;i<N;++i) {
                 int start = i-nlo; if (start < 0) start = 0;
                 m.col(i,start,i+1) /= T(i);
                 c.col(i,start,i+1) /= T(i);
             }
-            m(N/2,N/2) = x/std::numeric_limits<T>::epsilon();
-            c(N/2,N/2) = x/std::numeric_limits<T>::epsilon();
+            m(N/2,N/2) = x/Teps;
+            c(N/2,N/2) = x/Teps;
             m.diag(0,N/5,2*N/5).setZero();
             c.diag(0,N/5,2*N/5).setZero();
             m.diag(0,N/2+1,N) *= T(-1);
             c.diag(0,N/2+1,N) *= T(-1);
-            m.subSymBandMatrix(N-4,N).setAllTo(
-                -x/std::numeric_limits<T>::epsilon()/T(8));
-            c.subSymBandMatrix(N-4,N).setAllTo(
-                -x/std::numeric_limits<T>::epsilon()/T(8));
+            m.subSymBandMatrix(N-4,N).setAllTo(-x/Teps/T(8));
+            c.subSymBandMatrix(N-4,N).setAllTo(-x/Teps/T(8));
         }
 
         if (nearoverflow) {
-            T x = std::numeric_limits<T>::max();
+            T x = Tmax;
             x /= N;
             m.setAllTo(x);
-            c.upperBand().setAllTo(std::complex<T>(x,x/2));
+            c.upperBand().setAllTo(CT(x,x/2));
             for(int i=1;i<N;++i) {
                 int start = i-nlo;  if (start < 0) start = 0;
                 m.col(i,start,i+1) /= T(i);
@@ -707,11 +712,11 @@ void TestSymBandDecomp()
             Assert(Norm(m-LDL) <= eps*normm,"SymBand LDL2 Alt");
 #endif
 
-            tmv::BandMatrix<std::complex<T> > cL(N,N,nlo,0);
-            tmv::DiagMatrix<std::complex<T> > cD(N);
-            tmv::BandMatrix<std::complex<T> > cLDL(N,N,nlo,nlo);
+            tmv::BandMatrix<CT> cL(N,N,nlo,0);
+            tmv::DiagMatrix<CT> cD(N);
+            tmv::BandMatrix<CT> cLDL(N,N,nlo,nlo);
 
-            tmv::SymBandMatrix<std::complex<T>,uplo,stor> c2 = c;
+            tmv::SymBandMatrix<CT,uplo,stor> c2 = c;
             LDL_Decompose(c2.view());
             (cL = c2.lowerBand()).diag().setAllTo(T(1));
             cD = DiagMatrixViewOf(c2.diag());
@@ -720,7 +725,7 @@ void TestSymBandDecomp()
 
 #if (XTEST & 16)
             // Alt calculation:
-            tmv::DiagMatrix<std::complex<T> > cE(c2.diag(-1));
+            tmv::DiagMatrix<CT> cE(c2.diag(-1));
             cLDL.setZero();
             cLDL.diag(0,1,N) = (cE*cD.subDiagMatrix(0,N-1)*cE).diag();
             cLDL.diag(-1) = (cE*cD.subDiagMatrix(0,N-1)).diag();
@@ -748,12 +753,16 @@ void TestSymBandDecomp()
             tmv::Matrix<T> V = m.svd().getV();
             Assert(Norm(m-U*S*V) <= eps*normm,"SymBand SV");
 
-            tmv::Matrix<std::complex<T> > cU = c.symsvd().getU();
+            tmv::Matrix<CT> cU = c.symsvd().getU();
             tmv::DiagMatrix<T> cS = c.symsvd().getS();
-            tmv::Matrix<std::complex<T> > cV = c.symsvd().getV();
+            tmv::Matrix<CT> cV = c.symsvd().getV();
             Assert(Norm(c-cU*cS*cV) <= ceps*normc,"SymBand C SV");
 
 #if (XTEST & 16)
+            const T x = 
+                nearoverflow ? Tmax*Teps :
+                nearunderflow ? Tmin/Teps : T(1);
+
             tmv::Matrix<T> U2(N,N);
             tmv::DiagMatrix<T> S2(N);
             tmv::Matrix<T> V2(N,N);
@@ -764,18 +773,18 @@ void TestSymBandDecomp()
             Assert(Norm(S2-S) <= eps*normm,"SymBand SV3");
             SV_Decompose(m,U2.view(),S2.view());
             Assert(Norm(S2-S) <= eps*normm,"SymBand SV4 S");
-            if (!nearoverflow)
-                Assert(Norm(m*m.transpose()-U2*S2*S2*U2.transpose()) <=
-                       eps*normm*normm,"SymBand SV4 U");
+            Assert(Norm((m/x)*tmv::Matrix<T>(m.transpose()/x)-
+                        U2*tmv::DiagMatrix<T>(S2/x)*tmv::DiagMatrix<T>(S2/x)*U2.transpose()) <=
+                   eps*(normm/x)*(normm/x),"SymBand SV4 U");
             SV_Decompose(m,S2.view(),V2.view());
             Assert(Norm(S2-S) <= eps*normm,"SymBand SV5 S");
-            if (!nearoverflow)
-                Assert(Norm(m.adjoint()*m-V2.adjoint()*S2*S2*V2) <= 
-                       eps*normm*normm,"SymBand SV5 V");
+            Assert(Norm((m.adjoint()/x)*tmv::Matrix<T>(m/x)-
+                        V2.adjoint()*(S2/x)*tmv::DiagMatrix<T>(S2/x)*V2) <= 
+                   eps*(normm/x)*(normm/x),"SymBand SV5 V");
 
-            tmv::Matrix<std::complex<T> > cU2(N,N);
+            tmv::Matrix<CT> cU2(N,N);
             tmv::DiagMatrix<T> cS2(N);
-            tmv::Matrix<std::complex<T> > cV2(N,N);
+            tmv::Matrix<CT> cV2(N,N);
             SV_Decompose(c,cU2.view(),cS2.view(),cV2.view());
             Assert(Norm(c-cU2*cS2*cV2) <= ceps*normc,"SymBand C SV2");
 
@@ -783,29 +792,27 @@ void TestSymBandDecomp()
             Assert(Norm(cS2-cS) <= ceps*normc,"SymBand C SV3");
             SV_Decompose(c,cU2.view(),cS2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"SymBand C SV4 S");
-            if (!nearoverflow)
-                Assert(Norm(c*c.adjoint()-cU2*cS2*cS2*cU2.adjoint()) <=
-                       ceps*normc*normc,"SymBand C SV4 U");
+            Assert(Norm(tmv::Matrix<CT>(c/x)*tmv::Matrix<CT>(c.adjoint()/x)-
+                        cU2*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.adjoint()) <=
+                   ceps*(normc/x)*(normc/x),"SymBand C SV4 U");
             SV_Decompose(c,cS2.view(),cV2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"SymBand C SV5 S");
-            if (!nearoverflow)
-                Assert(Norm(c.adjoint()*c-cV2.adjoint()*cS2*cS2*cV2) <= 
-                       ceps*normc*normc,"SymBand C SV5 V");
+            Assert(Norm(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x)-
+                        cV2.adjoint()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cV2) <= 
+                   ceps*(normc/x)*(normc/x),"SymBand C SV5 V");
 
             SV_Decompose(c.conjugate(),cS2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"SymBand C SV6");
             SV_Decompose(c.conjugate(),cU2.view(),cS2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"SymBand C SV7 S");
-            if (!nearoverflow)
-                Assert(Norm(c.conjugate()*c.transpose()-
-                            cU2*cS2*cS2*cU2.adjoint()) <=
-                       ceps*normc*normc,"SymBand C SV7 U");
+            Assert(Norm(tmv::Matrix<CT>(c.conjugate()/x)*tmv::Matrix<CT>(c.transpose()/x)-
+                        cU2*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.adjoint()) <=
+                   ceps*(normc/x)*(normc/x),"SymBand C SV7 U");
             SV_Decompose(c.conjugate(),cU2.conjugate(),cS2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"SymBand C SV8 S");
-            if (!nearoverflow)
-                Assert(Norm(c.conjugate()*c.transpose()-
-                            cU2.conjugate()*cS2*cS2*cU2.transpose()) <=
-                       ceps*normc*normc,"SymBand C SV8 U");
+            Assert(Norm(tmv::Matrix<CT>(c.conjugate()/x)*tmv::Matrix<CT>(c.transpose()/x)-
+                        cU2.conjugate()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.transpose()) <=
+                   ceps*(normc/x)*(normc/x),"SymBand C SV8 U");
 #endif
             std::cout<<"."; std::cout.flush();
         }

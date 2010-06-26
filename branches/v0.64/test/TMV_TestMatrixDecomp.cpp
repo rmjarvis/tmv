@@ -9,6 +9,7 @@
 template <class T, tmv::StorageType stor> 
 void TestMatrixDecomp()
 {
+    typedef std::complex<T> CT;
     for (int mattype = START; mattype <= 6; mattype++) {
 #if !(XTEST & 64)
         if (mattype >= 4) break;
@@ -34,6 +35,9 @@ void TestMatrixDecomp()
         const bool baddefect = mattype == 4;
         const bool nearunderflow = mattype == 5;
         const bool nearoverflow = mattype == 6;
+        const T Teps = std::numeric_limits<T>::epsilon();
+        const T Tmin = std::numeric_limits<T>::min();
+        const T Tmax = std::numeric_limits<T>::max();
 
         tmv::Matrix<T,stor> m(M,N);
         for(int i=0;i<M;++i) for(int j=0;j<N;++j) m(i,j) = T(2+4*i-5*j);
@@ -47,9 +51,9 @@ void TestMatrixDecomp()
         if (singular) { m.col(1).setZero(); m.row(7) = m.row(6); }
         else m.diag() *= T(30*N);
 
-        tmv::Matrix<std::complex<T>,stor> c(M,N);
+        tmv::Matrix<CT,stor> c(M,N);
         for(int i=0;i<M;++i) for(int j=0;j<N;++j) 
-            c(i,j) = std::complex<T>(2+4*i-5*j,3-i);
+            c(i,j) = CT(2+4*i-5*j,3-i);
         if (!singular) c /= T(10*N);
         c(3,3) = 14;
         c(3,4) = -2;
@@ -70,30 +74,28 @@ void TestMatrixDecomp()
         }
 
         if (nearunderflow) {
-            T x = std::numeric_limits<T>::min();
+            T x = Tmin;
             m.setAllTo(x);
-            c.setAllTo(std::complex<T>(x,2*x));
+            c.setAllTo(CT(x,2*x));
             for(int i=1;i<N;++i) {
                 m.col(i) /= T(i);
                 c.col(i) /= T(i);
             }
-            m(N/2,N/2) = x/std::numeric_limits<T>::epsilon();
-            c(N/2,N/2) = x/std::numeric_limits<T>::epsilon();
+            m(N/2,N/2) = x/Teps;
+            c(N/2,N/2) = x/Teps;
             m.diag(0,N/5,2*N/5).setZero();
             c.diag(0,N/5,2*N/5).setZero();
             m.diag(0,N/2+1,N) *= T(-1);
             c.diag(0,N/2+1,N) *= T(-1);
-            m.subMatrix(N-4,N,N-4,N).setAllTo(
-                -x/std::numeric_limits<T>::epsilon()/T(8));
-            c.subMatrix(N-4,N,N-4,N).setAllTo(
-                -x/std::numeric_limits<T>::epsilon()/T(8));
+            m.subMatrix(N-4,N,N-4,N).setAllTo(-x/Teps/T(8));
+            c.subMatrix(N-4,N,N-4,N).setAllTo(-x/Teps/T(8));
         }
 
         if (nearoverflow) {
-            T x = std::numeric_limits<T>::max();
+            T x = Tmax;
             x /= N;
             m.setAllTo(x);
-            c.setAllTo(std::complex<T>(x,x/2));
+            c.setAllTo(CT(x,x/2));
             for(int i=1;i<N;++i) {
                 m.col(i) /= T(i);
                 c.col(i) /= T(i);
@@ -141,11 +143,11 @@ void TestMatrixDecomp()
             if (m.lud().isTrans()) PLU.transposeSelf();
             Assert(Norm(m-PLU) <= eps*normm,"LU"); 
 
-            tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag> cL =
+            tmv::LowerTriMatrix<CT,tmv::UnitDiag> cL =
                 c.lud().getL();
-            tmv::UpperTriMatrix<std::complex<T> > cU = c.lud().getU();
+            tmv::UpperTriMatrix<CT> cU = c.lud().getU();
             tmv::Permutation cP = c.lud().getP();
-            tmv::Matrix<std::complex<T> > cPLU = cP*cL*cU;
+            tmv::Matrix<CT> cPLU = cP*cL*cU;
             if (c.lud().isTrans()) cPLU.transposeSelf();
             Assert(Norm(c-cPLU) <= ceps*normc,"C LU"); 
 
@@ -160,7 +162,7 @@ void TestMatrixDecomp()
             PLU = P2*L*U;
             Assert(Norm(m-PLU) <= eps*normm,"LU2"); 
 
-            tmv::Matrix<std::complex<T>,stor> c2 = c;
+            tmv::Matrix<CT,stor> c2 = c;
             LU_Decompose(c2.view(),p2);
             tmv::Permutation cP2(N,p2,true);
             cL = c2.lowerTri(tmv::UnitDiag);
@@ -198,9 +200,9 @@ void TestMatrixDecomp()
             Assert(Norm(Q / m.qrd().getQ()-T(1)) <= T(N)*eps,
                    "QR - QtQ - PackedQ (2)"); 
 
-            tmv::Matrix<std::complex<T>,stor> cQ = c.qrd().getQ();
-            tmv::UpperTriMatrix<std::complex<T> > cR = c.qrd().getR();
-            tmv::Matrix<std::complex<T> > cQR = cQ*cR;
+            tmv::Matrix<CT,stor> cQ = c.qrd().getQ();
+            tmv::UpperTriMatrix<CT> cR = c.qrd().getR();
+            tmv::Matrix<CT> cQR = cQ*cR;
             if (showacc) {
                 std::cout<<"Norm(c-cQR) = "<<Norm(c-cQR)<<std::endl;
                 std::cout<<"cf "<<ceps*normc<<std::endl;
@@ -221,6 +223,10 @@ void TestMatrixDecomp()
                    "C QR - QtQ - PackedQ (2)"); 
 
 #if (XTEST & 16)
+            const T x = 
+                nearoverflow ? Tmax*Teps :
+                nearunderflow ? Tmin/Teps : T(1);
+
             Q = m;
             QR_Decompose(Q.view(),R.view());
             QR = Q*R;
@@ -230,14 +236,9 @@ void TestMatrixDecomp()
             Q = m;
             QR_Decompose(Q.view());
             tmv::UpperTriMatrix<T> R2 = Q.upperTri();
-            if (baddefect)
-                // Sometimes R,R2 come out a bit different, but RtR = mtm,
-                // so I think it's ok.  It's just that rounding errors can
-                // make the R's differ by more than eps*normm.
-                Assert(Norm(m.adjoint()*m-R2.adjoint()*R2) <= eps*normm*normm,
-                       "QR3 (RtR)");
-            else
-                Assert(Norm(R-R2) <= eps*normm,"QR3"); 
+            Assert(Norm(tmv::Matrix<T>(m.adjoint()/x)*tmv::Matrix<T>(m/x)-
+                        tmv::Matrix<T>(R2.adjoint()/x)*tmv::Matrix<T>(R2/x)) <= 
+                   eps*(normm/x)*(normm/x),"QR3 (RtR)");
 
             cQ = c;
             QR_Decompose(cQ.view(),cR.view());
@@ -247,12 +248,10 @@ void TestMatrixDecomp()
 
             cQ = c;
             QR_Decompose(cQ.view());
-            tmv::UpperTriMatrix<std::complex<T> > cR2 = cQ.upperTri();
-            if (baddefect)
-                Assert(Norm(c.adjoint()*c-cR2.adjoint()*cR2) <= 
-                       ceps*normc*normc,"QR3 (RtR)");
-            else
-                Assert(Norm(cR-cR2) <= ceps*normc,"C QR3"); 
+            tmv::UpperTriMatrix<CT> cR2 = cQ.upperTri();
+            Assert(Norm(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x)-
+                        tmv::Matrix<CT>(cR2.adjoint()/x)*tmv::Matrix<CT>(cR2/x)) <= 
+                   ceps*(normc/x)*(normc/x),"QR3 (RtR)");
 
             cQ.conjugate() = c;
             QR_Decompose(cQ.conjugate(),cR.view());
@@ -263,11 +262,9 @@ void TestMatrixDecomp()
             cQ.conjugate() = c;
             QR_Decompose(cQ.conjugate());
             cR2 = cQ.conjugate().upperTri();
-            if (baddefect)
-                Assert(Norm(c.adjoint()*c-cR2.adjoint()*cR2) <= 
-                       ceps*normc*normc,"QR5 (RtR)");
-            else
-                Assert(Norm(cR-cR2) <= ceps*normc,"C QR5"); 
+            Assert(Norm(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x)-
+                        tmv::Matrix<CT>(cR2.adjoint()/x)*tmv::Matrix<CT>(cR2/x)) <= 
+                   ceps*(normc/x)*(normc/x),"QR5 (RtR)");
 
             cQ = c;
             QR_Decompose(cQ.view(),cR.conjugate());
@@ -290,7 +287,7 @@ void TestMatrixDecomp()
             }
             bool strict = istrict == 1;
             tmv::QRPDiv<T>::StrictQRP = strict;
-            tmv::QRPDiv<std::complex<T> >::StrictQRP = strict;
+            tmv::QRPDiv<CT>::StrictQRP = strict;
             if (istrict == 1) { m.unsetDiv(); c.unsetDiv(); }
 
             tmv::Matrix<T,stor> Q = m.qrpd().getQ();
@@ -311,10 +308,10 @@ void TestMatrixDecomp()
             }
 #endif
 
-            tmv::Matrix<std::complex<T>,stor> cQ = c.qrpd().getQ();
-            tmv::UpperTriMatrix<std::complex<T> > cR = c.qrpd().getR();
+            tmv::Matrix<CT,stor> cQ = c.qrpd().getQ();
+            tmv::UpperTriMatrix<CT> cR = c.qrpd().getR();
             tmv::Permutation cP = c.qrpd().getP();
-            tmv::Matrix<std::complex<T> > cQRP = cQ*cR*cP;
+            tmv::Matrix<CT> cQRP = cQ*cR*cP;
             Assert(Norm(c-cQRP) <= ceps*normc,"C QRP"); 
             Assert(Norm(cQ.adjoint()*cQ-T(1)) <= T(N)*ceps,"C QRP - QtQ"); 
             Assert(Norm(cQ.adjoint()*c.qrpd().getQ()-T(1)) <= T(N)*ceps,
@@ -361,7 +358,7 @@ void TestMatrixDecomp()
 #endif
             cQ = c;
             QRP_Decompose(cQ.view(),strict);
-            tmv::UpperTriMatrix<std::complex<T> > cR2 = cQ.upperTri();
+            tmv::UpperTriMatrix<CT> cR2 = cQ.upperTri();
             Assert(Norm(cR-cR2) <= ceps*normc,"C QRP3"); 
 
             cQ.conjugate() = c;
@@ -439,9 +436,9 @@ void TestMatrixDecomp()
             Assert(Norm(V.transpose()*V-T(1)) <= eps,"SV - VtV"); 
             Assert(Norm(V*V.transpose()-T(1)) <= eps,"SV - VVt"); 
 
-            tmv::Matrix<std::complex<T> > cU = c.svd().getU();
+            tmv::Matrix<CT> cU = c.svd().getU();
             tmv::DiagMatrix<T> cS = c.svd().getS();
-            tmv::Matrix<std::complex<T> > cV = c.svd().getV();
+            tmv::Matrix<CT> cV = c.svd().getV();
             if (showacc) {
                 std::cout<<"Norm(c-USV) = "<<Norm(c-cU*cS*cV)<<
                     "  cf "<<ceps*normm<<std::endl;
@@ -458,6 +455,10 @@ void TestMatrixDecomp()
             Assert(Norm(cV*cV.adjoint()-T(1)) <= ceps,"C SV - VVt"); 
 
 #if (XTEST & 16)
+            const T x = 
+                nearoverflow ? Tmax*Teps :
+                nearunderflow ? Tmin/Teps : T(1);
+
             tmv::Matrix<T,stor> U2 = m;
             tmv::DiagMatrix<T> S2(N);
             tmv::Matrix<T> V2(N,N);
@@ -473,40 +474,40 @@ void TestMatrixDecomp()
             U2 = m;
             SV_Decompose(U2.view(),S2.view(),true);
             Assert(Norm(S2-S) <= eps*normm,"SV4 S"); 
-            if (!nearoverflow)
-                Assert(Norm(m*m.transpose()-U2*S2*S2*U2.transpose()) <=  
-                       eps*normm*normm,"SV4 U"); 
+            Assert(Norm(tmv::Matrix<T>(m/x)*tmv::Matrix<T>(m.transpose()/x)-
+                        U2*tmv::DiagMatrix<T>(S2/x)*tmv::DiagMatrix<T>(S2/x)*U2.transpose()) <=  
+                   eps*(normm/x)*(normm/x),"SV4 U"); 
             m2 = m;
             SV_Decompose(m2.view(),S2.view(),V2.view(),false);
             Assert(Norm(S2-S) <= eps*normm,"SV5 S"); 
-            if (!nearoverflow)
-                Assert(Norm(m.transpose()*m-V2.transpose()*S2*S2*V2) <= 
-                       eps*normm*normm,"SV5 V"); 
+            Assert(Norm(tmv::Matrix<T>(m.transpose()/x)*tmv::Matrix<T>(m/x)-
+                        V2.transpose()*tmv::DiagMatrix<T>(S2/x)*tmv::DiagMatrix<T>(S2/x)*V2) <= 
+                   eps*(normm/x)*(normm/x),"SV5 V"); 
 
-            tmv::Matrix<std::complex<T>,stor> cU2 = c;
+            tmv::Matrix<CT,stor> cU2 = c;
             tmv::DiagMatrix<T> cS2(N);
-            tmv::Matrix<std::complex<T> > cV2(N,N);
+            tmv::Matrix<CT> cV2(N,N);
             SV_Decompose(cU2.view(),cS2.view(),cV2.view(),true);
             Assert(Norm(c-cU2*cS2*cV2) <= ceps*normm,"C SV2"); 
             Assert(Norm(cU2.adjoint()*cU2-T(1)) <= ceps,"C SV2 - UtU"); 
             Assert(Norm(cV2.adjoint()*cV2-T(1)) <= ceps,"C SV2 - VtV"); 
             Assert(Norm(cV2*cV2.adjoint()-T(1)) <= ceps,"C SV2 - VVt"); 
 
-            tmv::Matrix<std::complex<T>,stor> c2 = c;
+            tmv::Matrix<CT,stor> c2 = c;
             SV_Decompose(c2.view(),cS2.view(),false);
             Assert(Norm(cS2-cS) <= ceps*normc,"C SV3"); 
             cU2 = c;
             SV_Decompose(cU2.view(),cS2.view(),true);
             Assert(Norm(cS2-cS) <= ceps*normc,"C SV4 S"); 
-            if (!nearoverflow)
-                Assert(Norm(c*c.adjoint()-cU2*cS2*cS2*cU2.adjoint()) <=  
-                       ceps*normc*normc,"C SV4 U"); 
+            Assert(Norm(tmv::Matrix<CT>(c/x)*tmv::Matrix<CT>(c.adjoint()/x)-
+                        cU2*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.adjoint()) <=  
+                   ceps*(normc/x)*(normc/x),"C SV4 U"); 
             c2 = c;
             SV_Decompose(c2.view(),cS2.view(),cV2.view(),false);
             Assert(Norm(cS2-cS) <= ceps*normc,"C SV5 S"); 
-            if (!nearoverflow)
-                Assert(Norm(c.adjoint()*c-cV2.adjoint()*cS2*cS2*cV2) <= 
-                       ceps*normc*normc,"C SV5 V"); 
+            Assert(Norm(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x)-
+                        cV2.adjoint()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cV2) <= 
+                   ceps*(normc/x)*(normc/x),"C SV5 V"); 
 
             cU2.conjugate() = c;
             SV_Decompose(cU2.conjugate(),cS2.view(),cV2.view(),true);
@@ -520,16 +521,15 @@ void TestMatrixDecomp()
             cU2.conjugate() = c;
             SV_Decompose(cU2.conjugate(),cS2.view(),true);
             Assert(Norm(cS2-cS) <= ceps*normc,"C SV8 S"); 
-            if (!nearoverflow)
-                Assert(Norm(c*c.adjoint()-
-                            cU2.conjugate()*cS2*cS2*cU2.transpose()) <=
-                       ceps*normc*normc,"C SV8 U"); 
+            Assert(Norm(tmv::Matrix<CT>(c/x)*tmv::Matrix<CT>(c.adjoint()/x)-
+                        cU2.conjugate()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.transpose()) <=
+                       ceps*(normc/x)*(normc/x),"C SV8 U"); 
             c2.conjugate() = c;
             SV_Decompose(c2.conjugate(),cS2.view(),cV2.view(),false);
             Assert(Norm(cS2-cS) <= ceps*normc,"C SV9 S"); 
-            if (!nearoverflow)
-                Assert(Norm(c.adjoint()*c-cV2.adjoint()*cS2*cS2*cV2) <= 
-                       ceps*normc*normc,"C SV9 V"); 
+            Assert(Norm(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x)-
+                        cV2.adjoint()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cV2) <= 
+                   ceps*(normc/x)*(normc/x),"C SV9 V"); 
 
             cU2 = c;
             SV_Decompose(cU2.view(),cS2.view(),cV2.conjugate(),true);
@@ -540,10 +540,9 @@ void TestMatrixDecomp()
             c2 = c;
             SV_Decompose(c2.view(),cS2.view(),cV2.conjugate(),false);
             Assert(Norm(cS2-cS) <= ceps*normc,"C SV11 S"); 
-            if (!nearoverflow)
-                Assert(Norm(c.adjoint()*c-
-                            cV2.transpose()*cS2*cS2*cV2.conjugate()) <=
-                       ceps*normc*normc,"C SV9 V"); 
+            Assert(Norm(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x)-
+                        cV2.transpose()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cV2.conjugate()) <=
+                       ceps*(normc/x)*(normc/x),"C SV9 V"); 
 
             cU2.conjugate() = c;
             SV_Decompose(cU2.conjugate(),cS2.view(),cV2.conjugate(),true);
@@ -555,10 +554,9 @@ void TestMatrixDecomp()
             c2.conjugate() = c;
             SV_Decompose(c2.conjugate(),cS2.view(),cV2.conjugate(),false);
             Assert(Norm(cS2-cS) <= ceps*normc,"C SV13 S"); 
-            if (!nearoverflow)
-                Assert(Norm(c.adjoint()*c-
-                            cV2.transpose()*cS2*cS2*cV2.conjugate()) <=
-                       ceps*normc*normc,"C SV13 V"); 
+            Assert(Norm(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x)-
+                        cV2.transpose()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cV2.conjugate()) <=
+                       ceps*(normc/x)*(normc/x),"C SV13 V"); 
 #endif
             std::cout<<"."; std::cout.flush();
         } while (false);

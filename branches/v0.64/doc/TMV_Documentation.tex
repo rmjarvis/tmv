@@ -6264,8 +6264,9 @@ Once the code is working, you can make the code slightly faster by
 compiling with -DNDEBUG.  I say slightly, since most of these checks 
 are pretty innocuous.  And most of the computing time is usually in the depths
 of the various algorithms, not in these $O(1)$ time checks of the dimensions and such.  
-There are a few checks which take $O(N)$ time, but these are only done
-if the code is compiled with the \tt{-DXTEST} flag.
+There are a few checks which take $O(N)$ time (e.g. making sure that the imaginary
+part of a complex Hermitian matrix is actually 0 as it must be when initializing from values
+that might not be 0's), but not many.
 
 The other kind of error checked for by the code is 
 where the data don't behave in the way
@@ -7985,10 +7986,8 @@ the native TMV code will be used instead.
 something similar).
 \item \texttt{NOMIX\_SMALL=false} specifies whether to avoid mixing Small and regular arithmetic.  
 (This is automatically selected if GotoBLAS is being used.)
-\item \texttt{CACHE\_LIB=true} specifies whether to cache the results of the library checks.  Scons
-usually detects correctly when something salient has changed to require a recompilation.  However,
-sometimes it doesn't, in which case setting this to false will force recompilation of everything each
-time you type scons.
+\item \texttt{CACHE\_LIB=true} specifies whether to cache the results of the library checks.  
+Scons is pretty good at only recompiling what needs to be recompiled based on what options or files you have changed.  However, it is not good at detecting when changed options might change the results of a BLAS or LAPACK library check.  So if you add new paths for it to search, or even more so, if you change the names or locations of libraries on your system, then you should set \tt{CACHE\_LIB=false} to force scons to redo the BLAS and LAPACK checks each time.
 \item \texttt{WITH\_UPS=false} specifies whether to install TMV information for ups into the \tt{PREFIX/ups} directory.
 \item \texttt{TEST\_DEPRECATED=false} specifies whether to use the old deprecated method
 names in the test suite.
@@ -8807,8 +8806,8 @@ any version of Sun's CC, I would love to hear about it (at \mygroup).
 \item {\bf Memory requirements:}
 The library is pretty big, so it can take quite a lot of memory to compile. 
 For most compilers, it seems that a minimum of around 512K is required.
-For compiling the test suite with the \texttt{-DXTEST} flag, more than 
-2GB of memory is recommended.
+For compiling the test suite with the \texttt{-DXTEST} flag (especially when combining
+multiple extra tests, e.g. XTEST=127), at least 2 - 4 GB of memory is recommended.
 
 \item {\bf Linker choking:}
 Some linkers (e.g. the one on my old Mac G5) have trouble with the size 
@@ -8876,7 +8875,7 @@ library.  If you do the latter, you will probably want to rename (or delete) the
 library files, since they are in the /usr/lib directory, and \tt{-L} flags usually can't take 
 precedence over /usr/lib.
 
-\item {\bf Errors in \tt{Matrix<float>} calculations using BLAS on Mac}
+\item {\bf Errors in \tt{Matrix<float>} calculations using BLAS on Mac:}
 \index{BLAS!Errors with float}
 I have found that some XCode BLAS libraries seem to have errors in the 
 calculations for large \tt{<float>} matrices.  I think it is an error in the \tt{sgemm}
@@ -8895,40 +8894,14 @@ If you encounter this problem (which manifests as tmvtest1 failing in the <float
 then I'm afraid the solution is to either forego using \tt{Matrix<float>}, switch to another
 BLAS library, or compile TMV without BLAS.
 
-\item {\bf Segmentation fault when using GotoBLAS2}
+\item {\bf Segmentation fault when using GotoBLAS2:}
 \index{BLAS!Errors with float}
 \index{BLAS!GotoBLAS}
 The latest version of GotoBLAS2 at the time of this release (v1.13) has a bug that leads to segmentation
-faults in some \tt{cgermv} calls.  I've reported the bug to them, but haven't heard back from
-them yet.  (To be fair, my report was mere days before the release of this TMV version.)  I don't know exactly which versions of GotoBLAS have this bug, nor on which systems the bug manifests (since the error is undoubtedly in their specialized assembly code that varies from one system to another).  I encountered the bug on an Intel Core 2 Duo machine.
+faults in some \tt{cgemv} calls.  I've reported the bug, but I haven't heard back from
+them yet.  (To be fair, my report was mere days before the release of this TMV version.)  I don't know exactly which versions of GotoBLAS have this bug, nor on which systems the bug manifests.  (Since the error is undoubtedly in their specialized assembly code, which varies from one system to another, it probably only shows up for particular systems.)  I encountered the bug on an Intel Core 2 Duo machine.
 
 If you encounter the same issue (which manifests in \tt{tmvtest1}), then I'm afraid the solution is to either forego using \tt{Matrix<float>}, switch to another BLAS library, or compile TMV without BLAS.
-
-\item {\bf Segmentation faults with \tt{SmallMatrix}:}
-\index{BLAS!Problems with SmallMatrix}
-\index{SmallMatrix!mixing with regular Matrix, Vector}
-\index{SmallVector!mixing with regular Matrix, Vector}
-\index{BLAS!GotoBLAS}
-\index{BLAS!ATLAS}
-My version of the GotoBLAS library seems to have trouble with arithmetic statements that
-mix \tt{SmallMatrix} or \tt{SmallVector} with \tt{Matrix} or \tt{Vector}.  I think the
-problem stems from the fact that the \tt{Small} objects allocate their memory on the
-stack, while the regular objects allocate their memory on the heap.  
-One of the ATLAS installations I tested also had similar trouble.
-
-If your BLAS distribution has problems running \texttt{tmvtest3} (which is the one
-that runs the tests of 
-\tt{SmallMatrix} and \tt{SmallVector}), then you should try
-compiling with the flag \texttt{-DNOMIX\_SMALL}
-to tell the code to skip the tests that mix \tt{Small} and regular objects.
-And of course, you will also want to remember to watch out for this in your own code 
-if you use \tt{SmallMatrix} and \tt{SmallVector}.
-The SCons installer automatically uses this flag when using GotoBLAS.
-
-If you want to test the mixed arithmetic specifically, you can use \texttt{scons testmix}
-to compile the test program \texttt{tmvtestmix}.  I am planning on having scons
-compile and run this program before compiling \texttt{tmvtest3} to see whether it needs
-the flag, but I haven't figured out how to do that yet.
 
 \item {\bf Overflow and underflow when using LAPACK:}
 \index{LAPACK!overflow/underflow problems}

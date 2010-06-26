@@ -548,33 +548,29 @@ int main()
 
 
 def CheckGOTO(context):
-    goto_source_file = """
+    fblas_source_file = """
 extern "C" {
-#include "cblas.h"
+#include "fblas.h"
 }
 int main()
 {
-  //char ta='N', tb='N';
-  //int M=1,N=1,K=1,lda=1,ldb=1,ldc=1;
-  //double alpha=1.,beta=1., *A=0, *B=0, *C=0;
-  //dgemm_(ta,tb,M,N,K,alpha,A,lda,B,ldb,beta,C,ldc,1,1);
+  char ta='N', tb='N';
   int M=1,N=1,K=1,lda=1,ldb=1,ldc=1;
   double alpha=1.,beta=1., *A=0, *B=0, *C=0;
-  cblas_dgemm(CblasRowMajor,CblasNoTrans,CblasNoTrans,
-      M,N,K,alpha,A,lda,B,ldb,beta,C,ldc);
+  dgemm_(ta,tb,M,N,K,alpha,A,lda,B,ldb,beta,C,ldc,1,1);
   return 0;
 }
 """
 
     context.Message('Checking for GotoBLAS... ')
 
-    if context.TryCompile(goto_source_file,'.cpp'):
+    if context.TryCompile(fblas_source_file,'.cpp'):
         result = (
-            CheckLibs(context,[],goto_source_file) or
-            CheckLibs(context,['goto2'],goto_source_file) or
-            CheckLibs(context,['goto2','pthread'],goto_source_file) or
-            CheckLibs(context,['goto'],goto_source_file) or
-            CheckLibs(context,['goto','pthread'],goto_source_file))
+            CheckLibs(context,[],fblas_source_file) or
+            CheckLibs(context,['goto2'],fblas_source_file) or
+            CheckLibs(context,['goto2','pthread'],fblas_source_file) or
+            CheckLibs(context,['goto'],fblas_source_file) or
+            CheckLibs(context,['goto','pthread'],fblas_source_file))
 
         context.Result(result)
 
@@ -653,7 +649,10 @@ int main()
     if context.TryCompile(cblas_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],cblas_source_file) or
-            CheckLibs(context,['cblas'],cblas_source_file) )
+            CheckLibs(context,['cblas'],cblas_source_file) or
+            CheckLibs(context,['cblas','blas'],cblas_source_file) or
+            CheckLibs(context,['cblas','blas','gfortran'],cblas_source_file) or
+            CheckLibs(context,['cblas','blas','pgftnrtl'],cblas_source_file) )
 
         context.Result(result)
 
@@ -917,7 +916,7 @@ def DoLibraryAndHeaderChecks(config):
         elif config.env['FORCE_GOTO']:
             config.CheckGOTO()
             print 'Using GOTO BLAS'
-            config.env.Append(CPPDEFINES=['CBLAS'])
+            config.env.Append(CPPDEFINES=['FBLAS'])
             #config.env['NOMIX_SMALL'] = 1
 
         elif config.env['FORCE_ATLAS']:
@@ -954,7 +953,7 @@ def DoLibraryAndHeaderChecks(config):
 
         elif config.CheckGOTO() :
             print 'Using GotoBLAS'
-            config.env.Append(CPPDEFINES=['CBLAS'])
+            config.env.Append(CPPDEFINES=['FBLAS'])
             #config.env['NOMIX_SMALL'] = 1
 
         elif config.CheckCBLAS() :

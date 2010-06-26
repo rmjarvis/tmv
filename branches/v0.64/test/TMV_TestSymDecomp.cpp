@@ -12,6 +12,7 @@
 template <class T, tmv::UpLoType uplo, tmv::StorageType stor> 
 void TestHermDecomp()
 {
+    typedef std::complex<T> CT;
     for (int mattype = START; mattype <= 5; mattype++) {
 #if !(XTEST & 64)
         if (mattype >= 3) break;
@@ -34,6 +35,9 @@ void TestHermDecomp()
         const bool baddefect = mattype == 3;
         const bool nearunderflow = mattype == 4;
         const bool nearoverflow = mattype == 5;
+        const T Teps = std::numeric_limits<T>::epsilon();
+        const T Tmin = std::numeric_limits<T>::min();
+        const T Tmax = std::numeric_limits<T>::max();
         if (showstartdone) {
             std::cout<<"posdef = "<<posdef<<
                 ", singular = "<<singular<<std::endl;
@@ -66,10 +70,10 @@ void TestHermDecomp()
             m.subSymMatrix(N/2,3*N/4,2) /= T(100);
         }
 
-        tmv::HermMatrix<std::complex<T>,uplo,stor> c(N);
+        tmv::HermMatrix<CT,uplo,stor> c(N);
         for(int i=0;i<N;++i) for(int j=0;j<N;++j) 
             if ((uplo == tmv::Upper && j>=i) || (uplo == tmv::Lower && i>=j)) 
-                c(i,j) = std::complex<T>(2+4*i-5*j,3-i);
+                c(i,j) = CT(2+4*i-5*j,3-i);
         c.diag().imagPart().setZero();
         if (posdef) {
             c /= T(10*N);
@@ -104,31 +108,29 @@ void TestHermDecomp()
         }
 
         if (nearunderflow) {
-            T x = std::numeric_limits<T>::min();
+            T x = Tmin;
             m.setAllTo(x);
-            c.upperTri().offDiag().setAllTo(std::complex<T>(x,2*x));
+            c.upperTri().offDiag().setAllTo(CT(x,2*x));
             c.diag().setAllTo(x);
             for(int i=1;i<N;++i) {
                 m.col(i,0,i+1) /= T(i);
                 c.col(i,0,i+1) /= T(i);
             }
-            m(N/2,N/2) = x/std::numeric_limits<T>::epsilon();
-            c(N/2,N/2) = x/std::numeric_limits<T>::epsilon();
+            m(N/2,N/2) = x/Teps;
+            c(N/2,N/2) = x/Teps;
             m.diag(0,N/5,2*N/5).setZero();
             c.diag(0,N/5,2*N/5).setZero();
             m.diag(0,N/2+1,N) *= T(-1);
             c.diag(0,N/2+1,N) *= T(-1);
-            m.subSymMatrix(N-4,N).setAllTo(
-                -x/std::numeric_limits<T>::epsilon()/T(8));
-            c.subSymMatrix(N-4,N).setAllTo(
-                -x/std::numeric_limits<T>::epsilon()/T(8));
+            m.subSymMatrix(N-4,N).setAllTo(-x/Teps/T(8));
+            c.subSymMatrix(N-4,N).setAllTo(-x/Teps/T(8));
         }
 
         if (nearoverflow) {
-            T x = std::numeric_limits<T>::max();
+            T x = Tmax;
             x /= N;
             m.setAllTo(x);
-            c.upperTri().offDiag().setAllTo(std::complex<T>(x,x/2));
+            c.upperTri().offDiag().setAllTo(CT(x,x/2));
             c.diag().setAllTo(x);
             for(int i=1;i<N;++i) {
                 m.col(i,0,i+1) /= T(i);
@@ -169,8 +171,8 @@ void TestHermDecomp()
                 tmv::Matrix<T> LLt = L*L.adjoint();
                 Assert(Norm(m-LLt) <= eps*normm,"Herm CH");
 
-                tmv::LowerTriMatrix<std::complex<T> > cL = c.chd().getL();
-                tmv::Matrix<std::complex<T> > cLLt = cL*cL.adjoint();
+                tmv::LowerTriMatrix<CT> cL = c.chd().getL();
+                tmv::Matrix<CT> cLLt = cL*cL.adjoint();
                 Assert(Norm(c-cLLt) <= ceps*normc,"Herm C CH");
 
 #if (XTEST & 16)
@@ -180,7 +182,7 @@ void TestHermDecomp()
                 LLt = L*L.adjoint();
                 Assert(Norm(m-LLt) <= eps*normm,"Herm CH2");
 
-                tmv::HermMatrix<std::complex<T>,uplo,stor> c2 = c;
+                tmv::HermMatrix<CT,uplo,stor> c2 = c;
                 CH_Decompose(c2.view());
                 cL = c2.lowerTri();
                 cLLt = cL*cL.adjoint();
@@ -212,10 +214,10 @@ void TestHermDecomp()
                 tmv::Matrix<T> LDL = P*L*D*L.adjoint()*P.transpose();
                 Assert(Norm(m-LDL) <= eps*normm,"Herm LDL");
 
-                tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag> cL = c.lud().getL();
-                tmv::BandMatrix<std::complex<T> > cD = c.lud().getD();
+                tmv::LowerTriMatrix<CT,tmv::UnitDiag> cL = c.lud().getL();
+                tmv::BandMatrix<CT> cD = c.lud().getD();
                 tmv::Permutation cP = c.lud().getP();
-                tmv::Matrix<std::complex<T> > cLDL = 
+                tmv::Matrix<CT> cLDL = 
                     cP*cL*cD*cL.adjoint()*cP.transpose();
                 Assert(Norm(c-cLDL) <= ceps*normc,"Herm C LDL");
 
@@ -228,8 +230,8 @@ void TestHermDecomp()
                 LDL = P2*L*D2*L.adjoint()*P2.transpose();
                 Assert(Norm(m-LDL) <= eps*normm,"Herm LDL2");
 
-                tmv::HermMatrix<std::complex<T>,uplo,stor> c2 = c;
-                tmv::HermBandMatrix<std::complex<T>,uplo,stor> cD2(N,1);
+                tmv::HermMatrix<CT,uplo,stor> c2 = c;
+                tmv::HermBandMatrix<CT,uplo,stor> cD2(N,1);
                 LDL_Decompose(c2.view(),cD2.view(),P2);
                 cL = c2.lowerTri(tmv::UnitDiag);
                 cLDL = P2*cL*cD2*cL.adjoint()*P2.transpose();
@@ -274,12 +276,16 @@ void TestHermDecomp()
             }
             Assert(Norm(m-U*S*V) <= eps*normm,"Herm SV");
 
-            tmv::Matrix<std::complex<T> > cU = c.svd().getU();
+            tmv::Matrix<CT> cU = c.svd().getU();
             tmv::DiagMatrix<T> cS = c.svd().getS();
-            tmv::Matrix<std::complex<T> > cV = c.svd().getV();
+            tmv::Matrix<CT> cV = c.svd().getV();
             Assert(Norm(c-cU*cS*cV) <= ceps*normc,"Herm C SV");
 
 #if (XTEST & 16)
+            const T x = 
+                nearoverflow ? Tmax*Teps :
+                nearunderflow ? Tmin/Teps : T(1);
+
             tmv::Matrix<T> U2(N,N);
             tmv::DiagMatrix<T> S2(N);
             tmv::Matrix<T> V2(N,N);
@@ -291,44 +297,43 @@ void TestHermDecomp()
             Assert(Norm(S2-S) <= eps*normm,"Herm SV3");
             SV_Decompose(m,U2.view(),S2.view());
             Assert(Norm(S2-S) <= eps*normm,"Herm SV4 S");
-            if (!nearoverflow)
-                Assert(Norm(m*m.transpose()-U2*S2*S2*U2.adjoint()) <= 
-                       eps*normm*normm,"Herm SV4 U");
+            Assert(Norm(tmv::Matrix<T>(m/x)*tmv::Matrix<T>(m.transpose()/x)-
+                        U2*tmv::DiagMatrix<T>(S2/x)*tmv::DiagMatrix<T>(S2/x)*U2.adjoint()) <= 
+                   eps*(normm/x)*(normm/x),"Herm SV4 U");
             SV_Decompose(m,S2.view(),V2.view());
             Assert(Norm(S2-S) <= eps*normm,"Herm SV5 S");
-            if (!nearoverflow)
-                Assert(Norm(m.adjoint()*m-V2.adjoint()*S2*S2*V2) <= 
-                       eps*normm*normm,"Herm SV5 V");
+            Assert(Norm(tmv::Matrix<T>(m.adjoint()/x)*tmv::Matrix<T>(m/x)-
+                        V2.adjoint()*tmv::DiagMatrix<T>(S2/x)*tmv::DiagMatrix<T>(S2/x)*V2) <= 
+                   eps*(normm/x)*(normm/x),"Herm SV5 V");
 
-            tmv::Matrix<std::complex<T> > cU2(N,N);
+            tmv::Matrix<CT> cU2(N,N);
             tmv::DiagMatrix<T> cS2(N);
-            tmv::Matrix<std::complex<T> > cV2(N,N);
+            tmv::Matrix<CT> cV2(N,N);
             SV_Decompose(c,cU2.view(),cS2.view(),cV2.view());
             Assert(Norm(c-cU2*cS2*cV2) <= ceps*normc,"Herm C SV2");
 
-            tmv::HermMatrix<std::complex<T>,uplo,stor> c2 = c;
+            tmv::HermMatrix<CT,uplo,stor> c2 = c;
             SV_Decompose(c2.view(),cS2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"Herm C SV3");
             SV_Decompose(c,cU2.view(),cS2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"Herm C SV4 S");
-            if (!nearoverflow)
-                Assert(Norm(c*c.adjoint()-cU2*cS2*cS2*cU2.adjoint()) <= 
-                       ceps*normc*normc,"Herm C SV4 U");
+            Assert(Norm(tmv::Matrix<CT>(c/x)*tmv::Matrix<CT>(c.adjoint()/x)-
+                        cU2*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.adjoint()) <= 
+                   ceps*(normc/x)*(normc/x),"Herm C SV4 U");
             SV_Decompose(c,cS2.view(),cV2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"Herm C SV5 S");
-            if (!nearoverflow)
-                Assert(Norm(c.adjoint()*c-cV2.adjoint()*cS2*cS2*cV2) <= 
-                       ceps*normc*normc,"Herm C SV5 V");
+            Assert(Norm(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x)-
+                        cV2.adjoint()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cV2) <= 
+                   ceps*(normc/x)*(normc/x),"Herm C SV5 V");
 
             c2 = c.conjugate();
             SV_Decompose(c2.conjugate(),cS2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"Herm C SV6");
             SV_Decompose(c,cU2.conjugate(),cS2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"Herm C SV4 S");
-            if (!nearoverflow)
-                Assert(Norm(c*c.adjoint()-
-                            cU2.conjugate()*cS2*cS2*cU2.transpose()) <=
-                       ceps*normc*normc, "Herm C SV4 U");
+            Assert(Norm(tmv::Matrix<CT>(c/x)*tmv::Matrix<CT>(c.adjoint()/x)-
+                        cU2.conjugate()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.transpose()) <=
+                   ceps*(normc/x)*(normc/x), "Herm C SV4 U");
 #endif
             std::cout<<"."; std::cout.flush();
         }
@@ -341,7 +346,7 @@ void TestHermDecomp()
             Eigen(m,V.view(),L.view());
             Assert(Norm(m*V-V*DiagMatrixViewOf(L)) <= eps*normm,"Herm Eigen");
 
-            tmv::Matrix<std::complex<T> > cV(N,N);
+            tmv::Matrix<CT> cV(N,N);
             tmv::Vector<T> cL(N);
             Eigen(c,cV.view(),cL.view());
             Assert(Norm(c*cV-cV*DiagMatrixViewOf(cL)) <= eps*normc,
@@ -354,7 +359,7 @@ void TestHermDecomp()
             Assert(Norm(L2-L) <= eps*normm,"Herm Eigen2");
 
             tmv::Vector<T> cL2(N);
-            tmv::HermMatrix<std::complex<T>,uplo,stor> c2 = c;
+            tmv::HermMatrix<CT,uplo,stor> c2 = c;
             Eigen(c2.view(),cL2.view());
             Assert(Norm(cL2-cL) <= eps*normc,"Herm C Eigen2");
 
@@ -388,7 +393,7 @@ void TestHermDecomp()
                 SquareRoot(S.view());
                 Assert(Norm(m-S*S) <= eps*normm,"Herm Square Root");
 
-                tmv::HermMatrix<std::complex<T>,uplo,stor> cS = c;
+                tmv::HermMatrix<CT,uplo,stor> cS = c;
                 SquareRoot(cS.view());
 
 #if (XTEST & 16)
@@ -412,6 +417,7 @@ void TestHermDecomp()
 template <class T, tmv::UpLoType uplo, tmv::StorageType stor> 
 void TestSymDecomp()
 {
+    typedef std::complex<T> CT;
     for (int mattype = START; mattype <= 5; mattype++) {
 #if !(XTEST & 64)
         if (mattype >= 3) break;
@@ -435,6 +441,9 @@ void TestSymDecomp()
         const bool nearoverflow = mattype == 5;
         // Note: posdef isn't really positive definite for complex matrices.
         const bool singular = mattype >= 2;
+        const T Teps = std::numeric_limits<T>::epsilon();
+        const T Tmin = std::numeric_limits<T>::min();
+        const T Tmax = std::numeric_limits<T>::max();
         if (showstartdone) {
             std::cout<<"posdef = "<<posdef<<
                 ", singular = "<<singular<<std::endl;
@@ -467,9 +476,9 @@ void TestSymDecomp()
             m.subSymMatrix(N/2,3*N/4,2) /= T(100);
         } 
 
-        tmv::SymMatrix<std::complex<T>,uplo,stor> c(N);
+        tmv::SymMatrix<CT,uplo,stor> c(N);
         for(int i=0;i<N;++i) for(int j=0;j<N;++j) 
-            c(i,j) = std::complex<T>(2+4*i-5*j,3-i);
+            c(i,j) = CT(2+4*i-5*j,3-i);
         if (posdef) {
             c /= T(10*N);
             c.diag().addToAll(T(1));
@@ -503,30 +512,28 @@ void TestSymDecomp()
         }
 
         if (nearunderflow) {
-            T x = std::numeric_limits<T>::min();
+            T x = Tmin;
             m.setAllTo(x);
-            c.upperTri().setAllTo(std::complex<T>(x,2*x));
+            c.upperTri().setAllTo(CT(x,2*x));
             for(int i=1;i<N;++i) {
                 m.col(i,0,i+1) /= T(i);
                 c.col(i,0,i+1) /= T(i);
             }
-            m(N/2,N/2) = x/std::numeric_limits<T>::epsilon();
-            c(N/2,N/2) = x/std::numeric_limits<T>::epsilon();
+            m(N/2,N/2) = x/Teps;
+            c(N/2,N/2) = x/Teps;
             m.diag(0,N/5,2*N/5).setZero();
             c.diag(0,N/5,2*N/5).setZero();
             m.diag(0,N/2+1,N) *= T(-1);
             c.diag(0,N/2+1,N) *= T(-1);
-            m.subSymMatrix(N-4,N).setAllTo(
-                -x/std::numeric_limits<T>::epsilon()/T(8));
-            c.subSymMatrix(N-4,N).setAllTo(
-                -x/std::numeric_limits<T>::epsilon()/T(8));
+            m.subSymMatrix(N-4,N).setAllTo(-x/Teps/T(8));
+            c.subSymMatrix(N-4,N).setAllTo(-x/Teps/T(8));
         }
 
         if (nearoverflow) {
-            T x = std::numeric_limits<T>::max();
+            T x = Tmax;
             x /= N;
             m.setAllTo(x);
-            c.upperTri().setAllTo(std::complex<T>(x,x/2));
+            c.upperTri().setAllTo(CT(x,x/2));
             for(int i=1;i<N;++i) {
                 m.col(i,0,i+1) /= T(i);
                 c.col(i,0,i+1) /= T(i);
@@ -568,11 +575,11 @@ void TestSymDecomp()
             }
             Assert(Norm(m-LDL) <= eps*normm,"Sym LDL");
 
-            tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag> cL = 
+            tmv::LowerTriMatrix<CT,tmv::UnitDiag> cL = 
                 c.lud().getL();
-            tmv::BandMatrix<std::complex<T> > cD = c.lud().getD();
+            tmv::BandMatrix<CT> cD = c.lud().getD();
             tmv::Permutation cP = c.lud().getP();
-            tmv::Matrix<std::complex<T> > cLDL = 
+            tmv::Matrix<CT> cLDL = 
                 cP*cL*cD*cL.transpose()*cP.transpose();
             if (showacc) {
                 std::cout<<"Norm(c-cLDL) = "<<Norm(c-cLDL)<<std::endl;
@@ -589,8 +596,8 @@ void TestSymDecomp()
             LDL = P2*L*D2*L.transpose()*P2.transpose();
             Assert(Norm(m-LDL) <= eps*normm,"Sym LDL2");
 
-            tmv::SymMatrix<std::complex<T>,uplo,stor> c2 = c;
-            tmv::SymBandMatrix<std::complex<T>,uplo,stor> cD2(N,1);
+            tmv::SymMatrix<CT,uplo,stor> c2 = c;
+            tmv::SymBandMatrix<CT,uplo,stor> cD2(N,1);
             LDL_Decompose(c2.view(),cD2.view(),P2);
             cL = c2.lowerTri(tmv::UnitDiag);
             cLDL = P2*cL*cD2*cL.transpose()*P2.transpose();
@@ -629,9 +636,9 @@ void TestSymDecomp()
             }
             Assert(Norm(m-U*S*V) <= eps*normm,"Sym SV");
 
-            tmv::Matrix<std::complex<T> > cU = c.symsvd().getU();
+            tmv::Matrix<CT> cU = c.symsvd().getU();
             tmv::DiagMatrix<T> cS = c.symsvd().getS();
-            tmv::Matrix<std::complex<T> > cV = c.symsvd().getV();
+            tmv::Matrix<CT> cV = c.symsvd().getV();
             if (showacc) {
                 std::cout<<"Norm(c-U*S*V) = "<<Norm(c-cU*cS*cV)<<std::endl;
                 std::cout<<"eps*Norm(c) = "<<eps*normc<<std::endl;
@@ -639,6 +646,10 @@ void TestSymDecomp()
             Assert(Norm(c-cU*cS*cV) <= ceps*normc,"Sym C SV");
 
 #if (XTEST & 16)
+            const T x = 
+                nearoverflow ? Tmax*Teps :
+                nearunderflow ? Tmin/Teps : T(1);
+
             tmv::Matrix<T> U2(N,N);
             tmv::DiagMatrix<T> S2(N);
             tmv::Matrix<T> V2(N,N);
@@ -650,44 +661,43 @@ void TestSymDecomp()
             Assert(Norm(S2-S) <= eps*normm,"Sym SV3");
             SV_Decompose(m,U2.view(),S2.view());
             Assert(Norm(S2-S) <= eps*normm,"Sym SV4 S");
-            if (!nearoverflow)
-                Assert(Norm(m*m.adjoint()-U2*S2*S2*U2.adjoint()) <=
-                       eps*normm*normm, "Sym SV4 U");
+            Assert(Norm(tmv::Matrix<T>(m/x)*tmv::Matrix<T>(m.adjoint()/x)-
+                        U2*tmv::DiagMatrix<T>(S2/x)*tmv::DiagMatrix<T>(S2/x)*U2.adjoint()) <=
+                   eps*(normm/x)*(normm/x), "Sym SV4 U");
             SV_Decompose(m,S2.view(),V2.view());
             Assert(Norm(S2-S) <= eps*normm,"Sym SV5 S");
-            if (!nearoverflow)
-                Assert(Norm(m.adjoint()*m-V2.adjoint()*S2*S2*V2) <=
-                       eps*normm*normm, "Sym SV5 V");
+            Assert(Norm(tmv::Matrix<T>(m.adjoint()/x)*tmv::Matrix<T>(m/x)-
+                        V2.adjoint()*tmv::DiagMatrix<T>(S2/x)*tmv::DiagMatrix<T>(S2/x)*V2) <=
+                   eps*(normm/x)*(normm/x), "Sym SV5 V");
 
-            tmv::Matrix<std::complex<T> > cU2(N,N);
+            tmv::Matrix<CT> cU2(N,N);
             tmv::DiagMatrix<T> cS2(N);
-            tmv::Matrix<std::complex<T> > cV2(N,N);
+            tmv::Matrix<CT> cV2(N,N);
             SV_Decompose(c,cU2.view(),cS2.view(),cV2.view());
             Assert(Norm(c-cU2*cS2*cV2) <= ceps*normc,"Sym C SV2");
 
-            tmv::SymMatrix<std::complex<T>,uplo,stor> c2 = c;
+            tmv::SymMatrix<CT,uplo,stor> c2 = c;
             SV_Decompose(c2.view(),cS2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"Sym C SV3");
             SV_Decompose(c,cU2.view(),cS2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"Sym C SV4 S");
-            if (!nearoverflow)
-                Assert(Norm(c*c.adjoint()-cU2*cS2*cS2*cU2.adjoint()) <= 
-                       ceps*normc*normc,"Sym C SV4 U");
+            Assert(Norm(tmv::Matrix<CT>(c/x)*tmv::Matrix<CT>(c.adjoint()/x)-
+                        cU2*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.adjoint()) <= 
+                   ceps*(normc/x)*(normc/x),"Sym C SV4 U");
             SV_Decompose(c,cS2.view(),cV2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"Sym C SV5 S");
-            if (!nearoverflow)
-                Assert(Norm(c.adjoint()*c-cV2.adjoint()*cS2*cS2*cV2) <= 
-                       ceps*normc*normc,"Sym C SV5 V");
+            Assert(Norm(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x)-
+                        cV2.adjoint()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cV2) <= 
+                   ceps*(normc/x)*(normc/x),"Sym C SV5 V");
 
             c2 = c.conjugate();
             SV_Decompose(c2.conjugate(),cS2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"Sym C SV6");
             SV_Decompose(c,cU2.conjugate(),cS2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"Sym C SV7 S");
-            if (!nearoverflow)
-                Assert(Norm(c*c.adjoint()-
-                            cU2.conjugate()*cS2*cS2*cU2.transpose()) <= 
-                       ceps*normc*normc,"Sym C SV7 U");
+            Assert(Norm(tmv::Matrix<CT>(c/x)*tmv::Matrix<CT>(c.adjoint()/x)-
+                        cU2.conjugate()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.transpose()) <= 
+                   ceps*(normc/x)*(normc/x),"Sym C SV7 U");
 #endif
             std::cout<<"."; std::cout.flush();
         }
@@ -697,6 +707,7 @@ void TestSymDecomp()
 template <class T, tmv::StorageType stor> 
 void TestPolar()
 {
+    typedef std::complex<T> CT;
     if (showstartdone) std::cout<<"PolarDecomp "<<TMV_Text(stor)<<std::endl;
 
     for (int mattype = START; mattype <= 6; mattype++) {
@@ -723,6 +734,9 @@ void TestPolar()
         const bool baddefect = mattype == 4;
         const bool nearunderflow = mattype == 5;
         const bool nearoverflow = mattype == 6;
+        const T Teps = std::numeric_limits<T>::epsilon();
+        const T Tmin = std::numeric_limits<T>::min();
+        const T Tmax = std::numeric_limits<T>::max();
 
         tmv::Matrix<T,stor> m(M,N);
         for(int i=0;i<M;++i) for(int j=0;j<N;++j) m(i,j) = T(2+4*i-5*j);
@@ -733,9 +747,9 @@ void TestPolar()
         if (!singular) m.diag() *= T(30);
         else { m.col(1).setZero(); m.row(7) = m.row(6); }
 
-        tmv::Matrix<std::complex<T>,stor> c(M,N);
+        tmv::Matrix<CT,stor> c(M,N);
         for(int i=0;i<M;++i) for(int j=0;j<N;++j) 
-            c(i,j) = std::complex<T>(2+4*i-5*j,3-i);
+            c(i,j) = CT(2+4*i-5*j,3-i);
         c(0,0) *= T(14);
         c(1,0) *= T(-2);
         c(2,0) *= T(7);
@@ -753,30 +767,28 @@ void TestPolar()
         }
 
         if (nearunderflow) {
-            T x = std::numeric_limits<T>::min();
+            T x = Tmin;
             m.setAllTo(x);
-            c.setAllTo(std::complex<T>(x,2*x));
+            c.setAllTo(CT(x,2*x));
             for(int i=1;i<N;++i) {
                 m.col(i) /= T(i);
                 c.col(i) /= T(i);
             }
-            m(N/2,N/2) = x/std::numeric_limits<T>::epsilon();
-            c(N/2,N/2) = x/std::numeric_limits<T>::epsilon();
+            m(N/2,N/2) = x/Teps;
+            c(N/2,N/2) = x/Teps;
             m.diag(0,N/5,2*N/5).setZero();
             c.diag(0,N/5,2*N/5).setZero();
             m.diag(0,N/2+1,N) *= T(-1);
             c.diag(0,N/2+1,N) *= T(-1);
-            m.subMatrix(N-4,N,N-4,N).setAllTo(
-                -x/std::numeric_limits<T>::epsilon()/T(8));
-            c.subMatrix(N-4,N,N-4,N).setAllTo(
-                -x/std::numeric_limits<T>::epsilon()/T(8));
+            m.subMatrix(N-4,N,N-4,N).setAllTo(-x/Teps/T(8));
+            c.subMatrix(N-4,N,N-4,N).setAllTo(-x/Teps/T(8));
         }
 
         if (nearoverflow) {
-            T x = std::numeric_limits<T>::max();
+            T x = Tmax;
             x /= N;
             m.setAllTo(x);
-            c.setAllTo(std::complex<T>(x,x/2));
+            c.setAllTo(CT(x,x/2));
             for(int i=1;i<N;++i) {
                 m.col(i) /= T(i);
                 c.col(i) /= T(i);
@@ -819,8 +831,8 @@ void TestPolar()
             Assert(Norm(m-U*P) <= eps*normm,"Polar");
             Assert(Norm(U.adjoint()*U-T(1)) <= eps,"Polar UtU");
 
-            tmv::HermMatrix<std::complex<T>,tmv::Lower,tmv::ColMajor> cP(N);
-            tmv::Matrix<std::complex<T>,stor> cU = c;
+            tmv::HermMatrix<CT,tmv::Lower,tmv::ColMajor> cP(N);
+            tmv::Matrix<CT,stor> cU = c;
             PolarDecompose(cU.view(),cP.view());
             Assert(Norm(c-cU*cP) <= ceps*normc,"C Polar");
             Assert(Norm(cU.adjoint()*cU-T(1)) <= ceps,"C Polar UtU");
@@ -875,7 +887,7 @@ void TestPolar()
         do {
             if (showstartdone) std::cout<<"Band Polar"<<std::endl;
             tmv::BandMatrixView<T> b(m.view(),5,11);
-            tmv::BandMatrixView<std::complex<T> > cb(c.view(),5,11);
+            tmv::BandMatrixView<CT> cb(c.view(),5,11);
             T normb = Norm(b);
             T normcb = Norm(cb);
 
@@ -889,12 +901,14 @@ void TestPolar()
             Assert(Norm(b-U*P) <= eps*normb,"Band Polar");
             Assert(Norm(U.adjoint()*U-T(1)) <= eps,"Band Polar UtU");
 
-            tmv::HermMatrix<std::complex<T>,tmv::Lower,tmv::ColMajor> cP(N);
-            tmv::Matrix<std::complex<T>,stor> cU(cb.colsize(),N);
+            tmv::HermMatrix<CT,tmv::Lower,tmv::ColMajor> cP(N);
+            tmv::Matrix<CT,stor> cU(cb.colsize(),N);
             PolarDecompose(cb,cU.view(),cP.view());
             if (showacc) {
-                std::cout<<"Norm(cb-UP) = "<<Norm(cb-cU*cP)<<"  "<<ceps*normcb<<std::endl;
-                std::cout<<"Norm(UtU-1) = "<<Norm(cU.adjoint()*cU-T(1))<<"  "<<ceps<<std::endl;
+                std::cout<<"Norm(cb-UP) = "<<Norm(cb-cU*cP)<<
+                    "  "<<ceps*normcb<<std::endl;
+                std::cout<<"Norm(UtU-1) = "<<Norm(cU.adjoint()*cU-T(1))<<
+                    "  "<<ceps<<std::endl;
             }
             Assert(Norm(cb-cU*cP) <= ceps*normcb,"C Band Polar");
             Assert(Norm(cU.adjoint()*cU-T(1)) <= ceps,"C Band Polar UtU");

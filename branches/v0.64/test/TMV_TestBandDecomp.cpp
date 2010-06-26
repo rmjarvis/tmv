@@ -10,6 +10,7 @@
 template <class T, tmv::StorageType stor> 
 void TestBandDecomp()
 {
+    typedef std::complex<T> CT;
     for (int mattype = START; mattype <= 9; mattype++) {
 #if !(XTEST & 64)
         if (mattype >= 7) break;
@@ -43,6 +44,9 @@ void TestBandDecomp()
         const bool baddefect = mattype == 7;
         const bool nearunderflow = mattype == 8;
         const bool nearoverflow = mattype == 9;
+        const T Teps = std::numeric_limits<T>::epsilon();
+        const T Tmin = std::numeric_limits<T>::min();
+        const T Tmax = std::numeric_limits<T>::max();
 
         tmv::BandMatrix<T,stor> m(M,N,nlo,nhi);
         for(int i=0;i<M;++i) for(int j=0;j<N;++j) 
@@ -55,9 +59,9 @@ void TestBandDecomp()
             m.diag() *= T(30);
         }
 
-        tmv::BandMatrix<std::complex<T>,stor> c(M,N,nlo,nhi);
+        tmv::BandMatrix<CT,stor> c(M,N,nlo,nhi);
         for(int i=0;i<M;++i) for(int j=0;j<N;++j) 
-            if (i<=j+nlo && j<=i+nhi) c(i,j) = std::complex<T>(2+4*i-5*j,3-i);
+            if (i<=j+nlo && j<=i+nhi) c(i,j) = CT(2+4*i-5*j,3-i);
         if (!singular) {
             c(0,0) = T(14);
             if (c.nlo() >= 1) c(1,0) = T(-2);
@@ -76,32 +80,30 @@ void TestBandDecomp()
         }
 
         if (nearunderflow) {
-            T x = std::numeric_limits<T>::min();
+            T x = Tmin;
             m.setAllTo(x);
-            c.setAllTo(std::complex<T>(x,2*x));
+            c.setAllTo(CT(x,2*x));
             for(int i=1;i<N;++i) {
                 int start = i-nhi;  if (start < 0) start = 0;
                 int end = i+nlo;  if (end > N) end = N;
                 m.col(i,start,end) /= T(i);
                 c.col(i,start,end) /= T(i);
             }
-            m(N/2,N/2) = x/std::numeric_limits<T>::epsilon();
-            c(N/2,N/2) = x/std::numeric_limits<T>::epsilon();
+            m(N/2,N/2) = x/Teps;
+            c(N/2,N/2) = x/Teps;
             m.diag(0,N/5,2*N/5).setZero();
             c.diag(0,N/5,2*N/5).setZero();
             m.diag(0,N/2+1,N) *= T(-1);
             c.diag(0,N/2+1,N) *= T(-1);
-            m.subBandMatrix(N-4,N,N-4,N).setAllTo(
-                -x/std::numeric_limits<T>::epsilon()/T(8));
-            c.subBandMatrix(N-4,N,N-4,N).setAllTo(
-                -x/std::numeric_limits<T>::epsilon()/T(8));
+            m.subBandMatrix(N-4,N,N-4,N).setAllTo(-x/Teps/T(8));
+            c.subBandMatrix(N-4,N,N-4,N).setAllTo(-x/Teps/T(8));
         }
 
         if (nearoverflow) {
-            T x = std::numeric_limits<T>::max();
+            T x = Tmax;
             x /= N;
             m.setAllTo(x);
-            c.setAllTo(std::complex<T>(x,x/2));
+            c.setAllTo(CT(x,x/2));
             for(int i=1;i<N;++i) {
                 int start = i-nhi;  if (start < 0) start = 0;
                 int end = i+nlo;  if (end > N) end = N;
@@ -148,11 +150,11 @@ void TestBandDecomp()
             if (m.lud().isTrans()) PLU.transposeSelf();
             Assert(Norm(m-PLU) <= eps*normm,"Band LU");
 
-            tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag> cL = 
+            tmv::LowerTriMatrix<CT,tmv::UnitDiag> cL = 
                 c.lud().getL();
-            tmv::UpperTriMatrix<std::complex<T> > cU = c.lud().getU();
+            tmv::UpperTriMatrix<CT> cU = c.lud().getU();
             tmv::Permutation cP = c.lud().getP();
-            tmv::Matrix<std::complex<T> > cPLU = cP*cL*cU;
+            tmv::Matrix<CT> cPLU = cP*cL*cU;
             if (c.lud().isTrans()) cPLU.transposeSelf();
             Assert(Norm(c-cPLU) <= ceps*normc,"Band C LU");
 
@@ -165,8 +167,8 @@ void TestBandDecomp()
             PLU = P2*L2*U2;
             Assert(Norm(m-PLU) <= eps*normm,"Band LU2");
 
-            tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag> cL2(M);
-            tmv::BandMatrix<std::complex<T>,stor> cU2(M,M,0,Rnhi);
+            tmv::LowerTriMatrix<CT,tmv::UnitDiag> cL2(M);
+            tmv::BandMatrix<CT,stor> cU2(M,M,0,Rnhi);
             LU_Decompose(c,cL2.view(),cU2.view(),P2);
             cPLU = P2*cL2*cU2;
             Assert(Norm(c-cPLU) <= ceps*normc,"Band C LU2");
@@ -213,13 +215,17 @@ void TestBandDecomp()
             if (m.qrd().isTrans()) QR.transposeSelf();
             Assert(Norm(m-QR) <= eps*normm,"Band QR");
 
-            tmv::Matrix<std::complex<T> > cQ = c.qrd().getQ();
-            tmv::BandMatrix<std::complex<T> > cR = c.qrd().getR();
-            tmv::Matrix<std::complex<T> > cQR = cQ*cR;
+            tmv::Matrix<CT> cQ = c.qrd().getQ();
+            tmv::BandMatrix<CT> cR = c.qrd().getR();
+            tmv::Matrix<CT> cQR = cQ*cR;
             if (c.qrd().isTrans()) cQR.transposeSelf();
             Assert(Norm(c-cQR) <= ceps*normc,"Band C QR");
 
 #if (XTEST & 16)
+            const T x = 
+                nearoverflow ? Tmax*Teps :
+                nearunderflow ? Tmin/Teps : T(1);
+
             const int Rnhi = std::min(N-1,nlo+nhi);
             QR_Decompose(m,Q.view(),R.view());
             QR = Q*R;
@@ -231,27 +237,19 @@ void TestBandDecomp()
                 std::cout<<"Norm(R-R2) = "<<Norm(R-R2)<<std::endl;
                 std::cout<<"eps*Norm(m) = "<<eps*normm<<std::endl;
             }
-            if (baddefect)
-                // Sometimes R,R2 come out a bit different, but RtR = mtm,
-                // so I think it's ok.  It's just that rounding errors can
-                // make the R's differ by more than eps*normm.
-                Assert(Norm(m.adjoint()*m-R2.adjoint()*R2) <=
-                       eps*normm*normm,"Band QR3 (RtR)");
-            else
-                Assert(Norm(R-R2) <= eps*normm,"Band QR3");
-
+            Assert(Norm(tmv::Matrix<T>(m.adjoint()/x)*tmv::Matrix<T>(m/x)-
+                        tmv::Matrix<T>(R2.adjoint()/x)*tmv::Matrix<T>(R2/x)) <=
+                   eps*(normm/x)*(normm/x),"Band QR3 (RtR)");
 
             QR_Decompose(c,cQ.view(),cR.view());
             cQR = cQ*cR;
             Assert(Norm(c-cQR) <= ceps*normc,"Band C QR2");
 
-            tmv::BandMatrix<std::complex<T>,stor> cR2(N,N,0,Rnhi);
+            tmv::BandMatrix<CT,stor> cR2(N,N,0,Rnhi);
             QR_Decompose(c,cR2.view());
-            if (baddefect) 
-                Assert(Norm(c.adjoint()*c-cR2.adjoint()*cR2) <=
-                       ceps*normm*normm,"Band C QR3 (RtR)");
-            else
-                Assert(Norm(cR-cR2) <= ceps*normc,"Band C QR3");
+            Assert(Norm(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x)-
+                        tmv::Matrix<CT>(cR2.adjoint()/x)*tmv::Matrix<CT>(cR2/x)) <=
+                   ceps*(normc/x)*(normc/x),"Band C QR3 (RtR)");
 
             QR_Decompose(c,cQ.conjugate(),cR2.view());
             cQR = cQ.conjugate()*cR2;
@@ -266,29 +264,23 @@ void TestBandDecomp()
             Assert(Norm(c-cQR) <= ceps*normc,"Band C QR6");
 
             QR_Decompose(c,cR2.view());
-            if (baddefect) 
-                Assert(Norm(c.adjoint()*c-cR2.adjoint()*cR2) <= 
-                       ceps*normc*normc,"Band C QR7 (RtR)");
-            else
-                Assert(Norm(cR-cR2) <= ceps*normc,"Band C QR7");
+            Assert(Norm(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x)-
+                        tmv::Matrix<CT>(cR2.adjoint()/x)*tmv::Matrix<CT>(cR2/x)) <= 
+                   ceps*(normc/x)*(normc/x),"Band C QR7 (RtR)");
 
             QR_Decompose(c,cR2.conjugate());
-            if (baddefect)
-                Assert(Norm(c.adjoint()*c-cR2.transpose()*cR2.conjugate()) <=
-                       ceps*normc*normc,"Band C QR8 (RtR)");
-            else
-                Assert(Norm(cR-cR2.conjugate()) <= ceps*normc,"Band C QR8");
+            Assert(Norm(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x)-
+                        tmv::Matrix<CT>(cR2.transpose()/x)*tmv::Matrix<CT>(cR2.conjugate()/x)) <=
+                   ceps*(normc/x)*(normc/x),"Band C QR8 (RtR)");
 
             QR_Decompose(c.conjugate(),cQ.view(),cR2.view());
             cQR = cQ*cR2;
             Assert(Norm(c.conjugate()-cQR) <= ceps*normc,"Band C QR9");
 
             QR_Decompose(c.conjugate(),cR2.view());
-            if (baddefect) 
-                Assert(Norm(c.transpose()*c.conjugate()-cR2.adjoint()*cR2) <=
-                       ceps*normc*normc,"Band C QR10 (RtR)");
-            else
-                Assert(Norm(cR.conjugate()-cR2) <= ceps*normc,"Band C QR10");
+            Assert(Norm(tmv::Matrix<CT>(c.transpose()/x)*tmv::Matrix<CT>(c.conjugate()/x)-
+                        tmv::Matrix<CT>(cR2.adjoint()/x)*tmv::Matrix<CT>(cR2/x)) <=
+                   ceps*(normc/x)*(normc/x),"Band C QR10 (RtR)");
 
             QR_Decompose(c.conjugate(),cQ.conjugate(),cR2.view());
             cQR = cQ.conjugate()*cR2;
@@ -303,12 +295,9 @@ void TestBandDecomp()
             Assert(Norm(c.conjugate()-cQR) <= ceps*normc,"Band C QR13");
 
             QR_Decompose(c.conjugate(),cR2.conjugate());
-            if (baddefect)
-                Assert(Norm(c.adjoint()*c-cR2.adjoint()*cR2) <=
-                       ceps*normc*normc,"Band C QR15 (RtR)");
-            else
-                Assert(Norm(cR.conjugate()-cR2.conjugate()) <= ceps*normc,
-                       "Band C QR15");
+            Assert(Norm(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x)-
+                        tmv::Matrix<CT>(cR2.adjoint()/x)*tmv::Matrix<CT>(cR2/x)) <=
+                   ceps*(normc/x)*(normc/x),"Band C QR15 (RtR)");
 #endif
             std::cout<<"."; std::cout.flush();
         } while (false);
@@ -337,9 +326,9 @@ void TestBandDecomp()
             }
             Assert(Norm(m-U*S*V) <= eps*normm,"SV");
 
-            tmv::Matrix<std::complex<T> > cU = c.svd().getU();
+            tmv::Matrix<CT> cU = c.svd().getU();
             tmv::DiagMatrix<T> cS = c.svd().getS();
-            tmv::Matrix<std::complex<T> > cV = c.svd().getV();
+            tmv::Matrix<CT> cV = c.svd().getV();
             if (showacc) {
                 std::cout<<"cU = "<<cU<<std::endl;
                 std::cout<<"cV = "<<cV<<std::endl;
@@ -357,6 +346,10 @@ void TestBandDecomp()
             Assert(Norm(c-cU*cS*cV) <= ceps*normc,"C SV");
 
 #if (XTEST & 16)
+            const T x = 
+                nearoverflow ? Tmax*Teps :
+                nearunderflow ? Tmin/Teps : T(1);
+
             tmv::Matrix<T> U2(M,N);
             tmv::DiagMatrix<T> S2(N);
             tmv::Matrix<T> V2(N,N);
@@ -374,18 +367,18 @@ void TestBandDecomp()
             Assert(Norm(S2-S) <= eps*normm,"SV3");
             SV_Decompose(m,U2.view(),S2.view());
             Assert(Norm(S2-S) <= eps*normm,"SV4 S");
-            if (!nearoverflow)
-                Assert(Norm(m*m.transpose()-U2*S2*S2*U2.transpose()) <= 
-                       eps*normm*normm,"SV3 U");
+            Assert(Norm(tmv::Matrix<T>(m/x)*tmv::Matrix<T>(m.transpose()/x)-
+                        U2*tmv::DiagMatrix<T>(S2/x)*tmv::DiagMatrix<T>(S2/x)*U2.transpose()) <= 
+                   eps*(normm/x)*(normm/x),"SV3 U");
             SV_Decompose(m,S2.view(),V2.view());
             Assert(Norm(S2-S) <= eps*normm,"SV5 S");
-            if (!nearoverflow)
-                Assert(Norm(m.transpose()*m-V2.transpose()*S2*S2*V2) <= 
-                       eps*normm*normm,"SV5 V");
+            Assert(Norm(tmv::Matrix<T>(m.transpose()/x)*tmv::Matrix<T>(m/x)-
+                        V2.transpose()*tmv::DiagMatrix<T>(S2/x)*tmv::DiagMatrix<T>(S2/x)*V2) <= 
+                   eps*(normm/x)*(normm/x),"SV5 V");
 
-            tmv::Matrix<std::complex<T> > cU2(M,N);
+            tmv::Matrix<CT> cU2(M,N);
             tmv::DiagMatrix<T> cS2(N);
-            tmv::Matrix<std::complex<T> > cV2(N,N);
+            tmv::Matrix<CT> cV2(N,N);
             SV_Decompose(c,cU2.view(),cS2.view(),cV2.view());
             Assert(Norm(c-cU2*cS2*cV2) <= eps*normc,"C SV2");
 
@@ -393,14 +386,14 @@ void TestBandDecomp()
             Assert(Norm(cS2-cS) <= ceps*normc,"C SV3");
             SV_Decompose(c,cU2.view(),cS2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"C SV4 S");
-            if (!nearoverflow)
-                Assert(Norm(c*c.adjoint()-cU2*cS2*cS2*cU2.adjoint()) <= 
-                       ceps*normc*normc,"C SV4 U");
+            Assert(Norm(tmv::Matrix<CT>(c/x)*tmv::Matrix<CT>(c.adjoint()/x)-
+                        cU2*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.adjoint()) <= 
+                   ceps*(normc/x)*(normc/x),"C SV4 U");
             SV_Decompose(c,cS2.view(),cV2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"C SV5 S");
-            if (!nearoverflow)
-                Assert(Norm(c.adjoint()*c-cV2.adjoint()*cS2*cS2*cV2) <= 
-                       ceps*normc*normc,"C SV5 V");
+            Assert(Norm(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x)-
+                        cV2.adjoint()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cV2) <= 
+                   ceps*(normc/x)*(normc/x),"C SV5 V");
 
             SV_Decompose(c,cU2.conjugate(),cS2.view(),cV2.view());
             Assert(Norm(c-cU2.conjugate()*cS2*cV2) <= eps*normc,"C SV6");
@@ -412,14 +405,14 @@ void TestBandDecomp()
 
             SV_Decompose(c,cU2.view(),cS2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"C SV9 S");
-            if (!nearoverflow)
-                Assert(Norm(c*c.adjoint()-cU2*cS2*cS2*cU2.adjoint()) <= 
-                       ceps*normc*normc,"C SV9 U");
+            Assert(Norm(tmv::Matrix<CT>(c/x)*tmv::Matrix<CT>(c.adjoint()/x)-
+                        cU2*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.adjoint()) <= 
+                   ceps*(normc/x)*(normc/x),"C SV9 U");
             SV_Decompose(c,cS2.view(),cV2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"C SV10 S");
-            if (!nearoverflow)
-                Assert(Norm(c.adjoint()*c-cV2.adjoint()*cS2*cS2*cV2) <= 
-                       ceps*normc*normc,"C SV10 V");
+            Assert(Norm(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x)-
+                        cV2.adjoint()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cV2) <= 
+                   ceps*(normc/x)*(normc/x),"C SV10 V");
 
             SV_Decompose(c.conjugate(),cU2.view(),cS2.view(),cV2.view());
             Assert(Norm(c.conjugate()-cU2*cS2*cV2) <= eps*normc,"C SV11");
@@ -427,16 +420,14 @@ void TestBandDecomp()
             Assert(Norm(cS2-cS) <= ceps*normc,"C SV12");
             SV_Decompose(c.conjugate(),cU2.view(),cS2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"C SV13 S");
-            if (!nearoverflow)
-                Assert(Norm(c.conjugate()*c.transpose()-
-                            cU2*cS2*cS2*cU2.adjoint()) <=
-                       ceps*normc*normc,"C SV13 U");
+            Assert(Norm(tmv::Matrix<CT>(c.conjugate()/x)*tmv::Matrix<CT>(c.transpose()/x)-
+                        cU2*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.adjoint()) <=
+                   ceps*(normc/x)*(normc/x),"C SV13 U");
             SV_Decompose(c.conjugate(),cS2.view(),cV2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"C SV14 S");
-            if (!nearoverflow)
-                Assert(Norm(c.transpose()*c.conjugate()-
-                            cV2.adjoint()*cS2*cS2*cV2) <=
-                       ceps*normc*normc,"C SV14 V");
+            Assert(Norm(tmv::Matrix<CT>(c.transpose()/x)*tmv::Matrix<CT>(c.conjugate()/x)-
+                        cV2.adjoint()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cV2) <=
+                   ceps*(normc/x)*(normc/x),"C SV14 V");
 
             SV_Decompose(c.conjugate(),cU2.conjugate(),cS2.view(),cV2.view());
             Assert(Norm(c.conjugate()-cU2.conjugate()*cS2*cV2) <= eps*normc,
@@ -451,16 +442,14 @@ void TestBandDecomp()
 
             SV_Decompose(c.conjugate(),cU2.conjugate(),cS2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"C SV18 S");
-            if (!nearoverflow)
-                Assert(Norm(c.conjugate()*c.transpose()-
-                            cU2.conjugate()*cS2*cS2*cU2.transpose()) <=
-                       ceps*normc*normc,"C SV18 U");
+            Assert(Norm(tmv::Matrix<CT>(c.conjugate()/x)*tmv::Matrix<CT>(c.transpose()/x)-
+                        cU2.conjugate()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.transpose()) <=
+                   ceps*(normc/x)*(normc/x),"C SV18 U");
             SV_Decompose(c.conjugate(),cS2.view(),cV2.conjugate());
             Assert(Norm(cS2-cS) <= ceps*normc,"C SV19 S");
-            if (!nearoverflow)
-                Assert(Norm(c.transpose()*c.conjugate()-
-                            cV2.transpose()*cS2*cS2*cV2.conjugate()) <=
-                       ceps*normc*normc,"C SV19 V");
+            Assert(Norm(tmv::Matrix<CT>(c.transpose()/x)*tmv::Matrix<CT>(c.conjugate()/x)-
+                        cV2.transpose()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cV2.conjugate()) <=
+                   ceps*(normc/x)*(normc/x),"C SV19 V");
 #endif
             std::cout<<"."; std::cout.flush();
         } while (false);
