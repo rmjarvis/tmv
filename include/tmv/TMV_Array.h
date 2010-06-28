@@ -46,6 +46,8 @@
 
 const int TMV_MaxStack = 1024; // bytes
 
+//#include <iostream>
+
 namespace tmv
 {
     // There doesn't seem to be any portable C++ function that guarantees
@@ -62,59 +64,56 @@ namespace tmv
     {
         T* p;
 
-        AlignedMemory() : p(0) {}
+        AlignedMemory() : p(0) 
+        { 
+            //std::cout<<this<<" constructor: p = "<<p<<std::endl; 
+        }
         inline void allocate(const size_t n) 
-        { p = new T[n]; }
+        { 
+            p = new T[n]; 
+            //std::cout<<this<<" allocate: n = "<<n<<"  p = "<<p<<std::endl; 
+        }
         inline void deallocate()
-        { if (p) delete [] p; p=0; }
+        { 
+            if (p) delete [] p; p=0; 
+            //std::cout<<this<<" deallocate: p = "<<p<<std::endl; 
+        }
         inline void swapWith(AlignedMemory<T>& rhs)
-        { T* temp = p; p = rhs.p; rhs.p = temp; }
+        { 
+            T* temp = p; p = rhs.p; rhs.p = temp; 
+            //std::cout<<this<<","<<&rhs<<" swap: p = "<<p<<","<<rhs.p<<std::endl; 
+        }
         inline T* get() { return p; }
         inline const T* get() const { return p; }
     };
 
     // Now specialize float and double if SSE commands are enabled
-    // Thie solution is adapted from the web page:
-    // http://stackoverflow.com/questions/227897/
-    //   solve-the-memory-alignment-in-c-interview-question-that-stumped-me
-    // See that page for more discussion of this kind of problem.
 #ifdef __SSE__
     template <>
     struct AlignedMemory<float>
     {
         float* p;
 
-#if 0
-        AlignedMemory() : mem(0), p(0) {}
-        float* mem;
-        inline void allocate(const size_t n) 
-        { 
-            mem = new float[n+3];
-            //p = mem + ((4 - (size_t(mem) & 3)) & 3);
-            p = mem + ((4 - (((size_t)(mem) & 0xf)>>2)) & 3);
-            TMVAssert( ((size_t)(p) & 0xf) == 0);
-            TMVAssert(p <= mem + 3);
-            TMVAssert(p >= mem);
-        }
-        inline void deallocate()
-        { if (mem) delete [] mem; p=0; mem=0; }
-        inline void swapWith(AlignedMemory<float>& rhs)
+        AlignedMemory() : p(0)
         {
-            float* temp = p; p = rhs.p; rhs.p = temp; 
-            temp = mem; mem = rhs.mem; rhs.mem = temp; 
+            //std::cout<<this<<" F constructor: p = "<<p<<std::endl; 
         }
-#else
-        AlignedMemory() : p(0) {}
         inline void allocate(const size_t n) 
         { 
             p = reinterpret_cast<float*>(new __m128[(n+3)>>2]);
             TMVAssert( ((size_t)(p) & 0xf) == 0);
+            //std::cout<<this<<" F allocate: n = "<<n<<"  p = "<<p<<std::endl; 
         }
         inline void deallocate()
-        { if (p) delete [] reinterpret_cast<__m128*>(p); p=0; }
+        {
+            if (p) delete [] reinterpret_cast<__m128*>(p); p=0; 
+            //std::cout<<this<<" F deallocate: p = "<<p<<std::endl; 
+        }
         inline void swapWith(AlignedMemory<float>& rhs)
-        { float* temp = p; p = rhs.p; rhs.p = temp; }
-#endif
+        {
+            float* temp = p; p = rhs.p; rhs.p = temp; 
+            //std::cout<<this<<","<<&rhs<<" F swap: p = "<<p<<","<<rhs.p<<std::endl; 
+        }
         inline float* get() { return p; }
         inline const float* get() const { return p; }
     };
@@ -125,37 +124,26 @@ namespace tmv
     {
         double* p;
 
-#if 0
-        double* mem;
-        AlignedMemory() : mem(0), p(0) {}
-        inline void allocate(const size_t n)
+        AlignedMemory() : p(0) 
         {
-            mem = new double[n+1]; 
-            //p = mem + (size_t(mem) & 1);
-            p = mem + (((size_t)(mem) & 0xf)>>3);
-            TMVAssert( ((size_t)(p) & 0xf) == 0);
-            TMVAssert(p <= mem + 1);
-            TMVAssert(p >= mem);
+            //std::cout<<this<<" D constructor: p = "<<p<<std::endl; 
         }
-        inline void deallocate()
-        { if (mem) delete [] mem; p=0; mem=0; }
-        inline void swapWith(AlignedMemory<double>& rhs)
-        {
-            double* temp = p; p = rhs.p; rhs.p = temp; 
-            temp = mem; mem = rhs.mem; rhs.mem = temp; 
-        }
-#else
-        AlignedMemory() : p(0) {}
         inline void allocate(const size_t n) 
         { 
             p = reinterpret_cast<double*>(new __m128d[(n+1)>>1]);
             TMVAssert( ((size_t)(p) & 0xf) == 0);
+            //std::cout<<this<<" D allocate: n = "<<n<<"  p = "<<p<<std::endl; 
         }
         inline void deallocate()
-        { if (p) delete [] reinterpret_cast<__m128d*>(p); p=0; }
+        {
+            if (p) delete [] reinterpret_cast<__m128d*>(p); p=0; 
+            //std::cout<<this<<" D deallocate: p = "<<p<<std::endl; 
+        }
         inline void swapWith(AlignedMemory<double>& rhs)
-        { double* temp = p; p = rhs.p; rhs.p = temp; }
-#endif
+        {
+            double* temp = p; p = rhs.p; rhs.p = temp; 
+            //std::cout<<this<<","<<&rhs<<" D swap: p = "<<p<<","<<rhs.p<<std::endl; 
+        }
         inline double* get() { return p; }
         inline const double* get() const { return p; }
     };
@@ -168,9 +156,20 @@ namespace tmv
     {
     public :
 
-        inline AlignedArray() {}
-        inline AlignedArray(const size_t n) { p.allocate(n); }
-        inline ~AlignedArray() { p.deallocate(); }
+        inline AlignedArray() 
+        {
+            //std::cout<<"Default constructor: "<<&p<<std::endl;
+        }
+        inline AlignedArray(const size_t n) 
+        {
+            p.allocate(n); 
+            //std::cout<<"Sized constructor: n = "<<n<<"  "<<&p<<std::endl;
+        }
+        inline ~AlignedArray() 
+        { 
+            p.deallocate(); 
+            //std::cout<<"Destructor: "<<&p<<std::endl;
+        }
 
         inline T& operator*() { return *get(); }
         inline T* operator->() { return get(); }
@@ -200,9 +199,20 @@ namespace tmv
     public :
         typedef std::complex<RT> T;
 
-        inline AlignedArray() {}
-        inline AlignedArray(const size_t n) { p.allocate(n<<1); }
-        inline ~AlignedArray() { p.deallocate(); }
+        inline AlignedArray()
+        {
+            //std::cout<<"Default complex constructor: "<<&p<<std::endl;
+        }
+        inline AlignedArray(const size_t n) 
+        { 
+            p.allocate(n<<1); 
+            //std::cout<<"Sized complex constructor: n = "<<n<<"  "<<&p<<std::endl;
+        }
+        inline ~AlignedArray() 
+        {
+            p.deallocate(); 
+            //std::cout<<"Destructor: "<<&p<<std::endl;
+        }
 
         inline T& operator*() { return *get(); }
         inline T* operator->() { return get(); }

@@ -36,23 +36,25 @@ int main() try {
 #ifdef TEST_DOUBLE
     TestVector<double>();
     TestMatrix<double>();
+    TestPermutation<double>();
 #endif // DOUBLE
-
-    TestPermutation();
 
 #ifdef TEST_FLOAT
     TestVector<float>();
     TestMatrix<float>();
+    TestPermutation<float>();
 #endif // FLOAT
 
 #ifdef TEST_LONGDOUBLE
     TestVector<long double>();
     TestMatrix<long double>();
+    TestPermutation<long double>();
 #endif // LONGDOUBLE
 
 #ifdef TEST_INT
     TestVector<int>();
     TestMatrix<int>();
+    TestPermutation<int>();
 #endif  // INT
 
 #endif

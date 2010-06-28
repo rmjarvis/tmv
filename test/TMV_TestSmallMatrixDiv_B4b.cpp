@@ -1,7 +1,8 @@
 
+#include "TMV.h"
+#include "TMV_Small.h"
 #include "TMV_Test.h"
 #include "TMV_Test3.h"
-#include "TMV.h"
 #define NOLDIVEQ
 #include "TMV_TestMatrixDivArith.h"
 
@@ -37,12 +38,8 @@ static void TestSmallNonSquareDiv_B4b()
     c7.col(3) *= std::complex<T>(-1,3);
     c7.row(4).addToAll(std::complex<T>(1,9));
 
-    tmv::SmallMatrix<T,N,7,stor> a5x;
-    tmv::SmallMatrix<std::complex<T>,N,7,stor> c5x;
-
-    TestMatrixDivArith3b<T>(tmv::QR,a5x,c5x,a2,a5,a7,c2,c5,c7,
-                            "NonSquare/NonSquare"); 
-#if XTEST & 32
+    TestMatrixDivArith3b<T>(tmv::QR,a2,a5,a7,c2,c5,c7,"NonSquare/NonSquare"); 
+#if (XTEST & 32)
     tmv::SmallMatrix<T,N,6,stor,tmv::FortranStyle> a2f = a2;
     tmv::SmallMatrix<std::complex<T>,N,6,stor,tmv::FortranStyle> c2f = c2;
     tmv::SmallMatrix<T,N,7,stor,tmv::FortranStyle> a5f = a5;
@@ -50,15 +47,9 @@ static void TestSmallNonSquareDiv_B4b()
     tmv::SmallMatrix<T,6,7,stor,tmv::FortranStyle> a7f = a7;
     tmv::SmallMatrix<std::complex<T>,6,7,stor,tmv::FortranStyle> c7f = c7;
 
-
-    TestMatrixDivArith3b<T>(tmv::QR,a5x,c5x,a2,a5,a7,c2,c5,c7,
-                            "NonSquare/NonSquare"); 
-    TestMatrixDivArith3b<T>(tmv::QR,a5x,c5x,a2f,a5,a7,c2f,c5,c7,
-                            "NonSquare/NonSquare"); 
-    TestMatrixDivArith3b<T>(tmv::QR,a5x,c5x,a2f,a5f,a7,c2f,c5f,c7,
-                            "NonSquare/NonSquare"); 
-    TestMatrixDivArith3b<T>(tmv::QR,a5x,c5x,a2f,a5f,a7f,c2f,c5f,c7f,
-                            "NonSquare/NonSquare"); 
+    TestMatrixDivArith3b<T>(tmv::QR,a2f,a5,a7,c2f,c5,c7,"NonSquare/NonSquare"); 
+    TestMatrixDivArith3b<T>(tmv::QR,a2f,a5f,a7,c2f,c5f,c7,"NonSquare/NonSquare"); 
+    TestMatrixDivArith3b<T>(tmv::QR,a2f,a5f,a7f,c2f,c5f,c7f,"NonSquare/NonSquare"); 
 #endif
 }
 
@@ -67,7 +58,7 @@ void TestSmallMatrixDiv_B4b()
 {
     TestSmallNonSquareDiv_B4b<T,tmv::ColMajor,2>();
     TestSmallNonSquareDiv_B4b<T,tmv::ColMajor,5>();
-#if XTEST & 2
+#if (XTEST & 2)
     TestSmallNonSquareDiv_B4b<T,tmv::ColMajor,1>();
     TestSmallNonSquareDiv_B4b<T,tmv::ColMajor,3>();
     TestSmallNonSquareDiv_B4b<T,tmv::ColMajor,4>();

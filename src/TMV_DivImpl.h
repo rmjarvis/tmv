@@ -43,22 +43,20 @@ namespace tmv {
     public :
 
         DivImpl(const BaseMatrix<T>& _m) : 
-            m(_m), itsdiv(0), itsdt(_m.IsSquare() ? LU : QR),
+            m(_m), div(0), dt(m.isSquare() ? LU : QR),
             inplace(false), cache(false) {}
-        ~DivImpl() { if (itsdiv) delete itsdiv; itsdiv=0; }
+        ~DivImpl() { if (div) delete div; div=0; }
 
         const BaseMatrix<T>& m;
-        const Divider<T>* itsdiv;
-        DivType itsdt;
+        const Divider<T>* div;
+        DivType dt;
         bool inplace;
         bool cache;
 
     private :
 
-        DivImpl(const DivImpl&)
-        { TMVAssert(FALSE); }
-        DivImpl& operator=(const DivImpl&)
-        { TMVAssert(FALSE); return *this; }
+        DivImpl(const DivImpl&);
+        DivImpl& operator=(const DivImpl&);
     };
 
 }

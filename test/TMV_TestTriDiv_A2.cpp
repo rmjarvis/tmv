@@ -36,19 +36,10 @@ template <class T> void TestTriDiv_A2()
     tmv::LowerTriMatrixView<std::complex<T> > ca1t = ca1.transpose();
     tmv::LowerTriMatrixView<std::complex<T> > ca2t = ca2.transpose();
 
-    tmv::UpperTriMatrix<T,tmv::NonUnitDiag> a1x(m);
-    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag> ca1x(cm);
-    tmv::UpperTriMatrix<T,tmv::UnitDiag> a2x(m);
-    tmv::UpperTriMatrix<std::complex<T>,tmv::UnitDiag> ca2x(cm);
-    tmv::LowerTriMatrix<T,tmv::NonUnitDiag> b1x(m);
-    tmv::LowerTriMatrix<std::complex<T>,tmv::NonUnitDiag> cb1x(cm);
-    tmv::LowerTriMatrix<T,tmv::UnitDiag> b2x(m);
-    tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag> cb2x(cm);
-
-    TestMatrixDivArith1<T>(tmv::LU,b2x,cb2x,a1v,a2t,ca1v,ca2t,"L/U");
-    TestMatrixDivArith1<T>(tmv::LU,a2x,ca2x,a1t,a2v,ca1t,ca2v,"U/L");
-    TestMatrixDivArith1<T>(tmv::LU,b1x,cb1x,a2v,a1t,ca2v,ca1t,"L/U");
-    TestMatrixDivArith1<T>(tmv::LU,a1x,ca1x,a2t,a1v,ca2t,ca1v,"U/L");
+    TestMatrixDivArith1<T>(tmv::LU,a1v,a2t,ca1v,ca2t,"L/U");
+    TestMatrixDivArith1<T>(tmv::LU,a1t,a2v,ca1t,ca2v,"U/L");
+    TestMatrixDivArith1<T>(tmv::LU,a2v,a1t,ca2v,ca1t,"L/U");
+    TestMatrixDivArith1<T>(tmv::LU,a2t,a1v,ca2t,ca1v,"U/L");
 
 #if (XTEST & 2)
     tmv::UpperTriMatrix<T,tmv::NonUnitDiag> a1b(m);
@@ -65,10 +56,10 @@ template <class T> void TestTriDiv_A2()
     tmv::LowerTriMatrixView<std::complex<T> > ca1bt = ca1b.transpose();
     tmv::LowerTriMatrixView<std::complex<T> > ca2bt = ca2b.transpose();
 
-    TestMatrixDivArith1<T>(tmv::LU,b1x,cb1x,a1v,a1bt,ca1v,ca1bt,"L/U");
-    TestMatrixDivArith1<T>(tmv::LU,a1x,ca1x,a1t,a1bv,ca1t,ca1bv,"U/L");
-    TestMatrixDivArith1<T>(tmv::LU,b2x,cb2x,a2v,a2bt,ca2v,ca2bt,"L/U");
-    TestMatrixDivArith1<T>(tmv::LU,a2x,ca2x,a2t,a2bv,ca2t,ca2bv,"U/L");
+    TestMatrixDivArith1<T>(tmv::LU,a1v,a1bt,ca1v,ca1bt,"L/U");
+    TestMatrixDivArith1<T>(tmv::LU,a1t,a1bv,ca1t,ca1bv,"U/L");
+    TestMatrixDivArith1<T>(tmv::LU,a2v,a2bt,ca2v,ca2bt,"L/U");
+    TestMatrixDivArith1<T>(tmv::LU,a2t,a2bv,ca2t,ca2bv,"U/L");
 #endif
 }
 

@@ -1,52 +1,89 @@
 
 #define CT std::complex<T>
 
-#define Def1(RT,T)\
-  template void InstTransposeSelf(MatrixView<T> m); \
-  template void InstPermuteRows(MatrixView<T> m,  \
-      const int*const p, const int i1, const int i2); \
-  template void InstReversePermuteRows(MatrixView<T> m,  \
-      const int*const p, const int i1, const int i2); \
-  template T InstSumElements(const ConstMatrixView<T>& m); \
-  template RT InstSumAbsElements(const ConstMatrixView<T>& m); \
-  template RT InstSumAbs2Elements(const ConstMatrixView<T>& m); \
-  template RT InstNormSq(const ConstMatrixView<T>& m);  \
-  template RT InstNormSq(const ConstMatrixView<T>& m, const RT scale);  \
-  template RT InstMaxAbsElement(const ConstMatrixView<T>& m);  \
-  template RT InstNormF(const ConstMatrixView<T>& m);  \
-  template RT InstNorm1(const ConstMatrixView<T>& m);  \
-  template RT InstNormInf(const ConstMatrixView<T>& m);  \
+#define Def1(RT,T,Ref)\
+  template bool GenMatrix<T >::hasSubMatrix( \
+      int i1, int i2, int j1, int j2, int istep, int jstep) const; \
+  template bool GenMatrix<T >::hasSubVector( \
+      int i, int j, int istep, int jstep, int s) const; \
+  template bool ConstMatrixView<T,FortranStyle>::hasSubMatrix( \
+      int i1, int i2, int j1, int j2, int istep, int jstep) const; \
+  template bool ConstMatrixView<T,FortranStyle>::hasSubVector( \
+      int i, int j, int istep, int jstep, int s) const; \
+  template std::istream& operator>>(std::istream& fin, \
+      const MatrixView<T >& m);  \
+  template RT GenMatrix<T >::normSq(const RT scale) const; \
+  template RT GenMatrix<T >::normF() const; \
+  template RT GenMatrix<T >::norm1() const; \
+  template RT GenMatrix<T >::maxAbsElement() const; \
+  template RT GenMatrix<T >::maxAbs2Element() const; \
+  template QuotXM<T,T > GenMatrix<T >::QInverse() const; \
+  template auto_ptr<BaseMatrix<T > > GenMatrix<T >::newCopy() const; \
+  template auto_ptr<BaseMatrix<T > > GenMatrix<T >::newView() const; \
+  template auto_ptr<BaseMatrix<T > > GenMatrix<T >::newTranspose() const; \
+  template auto_ptr<BaseMatrix<T > > GenMatrix<T >::newConjugate() const; \
+  template auto_ptr<BaseMatrix<T > > GenMatrix<T >::newAdjoint() const; \
+  template auto_ptr<BaseMatrix<T > > GenMatrix<T >::newInverse() const; \
+  template void GenMatrix<T >::write(std::ostream& os) const; \
+  template void GenMatrix<T >::write(std::ostream& os, RT minnz) const; \
+  template void MatrixView<T >::read(std::istream& os) const; \
+  template T GenMatrix<T >::cref(int i, int j) const; \
+  template void GenMatrix<T >::newDivider() const; \
+  template void Swap(const MatrixView<T >& m1, const MatrixView<T >& m2); \
+  template void DoCopySameType(const GenMatrix<T >& m1, \
+      const MatrixView<T >& m2);  \
+  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::clip( \
+      RT thresh) const; \
+  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::setZero() const; \
+  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::setAllTo( \
+      const T& x) const; \
+  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::transposeSelf() const; \
+  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::conjugateSelf() const; \
+  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::setToIdentity( \
+      const T& x) const; \
+  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::permuteRows( \
+      const int* p, int i1, int i2) const; \
+  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::reversePermuteRows( \
+      const int* p, int i1, int i2) const; \
+  template Ref MatrixView<T,CStyle>::ref(int i, int j) const; \
 
-Def1(T,T)
-#ifdef TMV_INST_COMPLEX
-Def1(T,CT)
-#endif
-
-
-#define Def2(RT,T,C) \
-  template void InstCopy(const ConstMatrixView<T,UNKNOWN,UNKNOWN,C>& m1, \
-      MatrixView<T> m2); \
-  template void InstSwap(MatrixView<T,UNKNOWN,UNKNOWN,C> m1, \
-      MatrixView<T> m2); \
-  template void InstWrite(std::ostream& os, \
-      const ConstMatrixView<T,UNKNOWN,UNKNOWN,C>& m1); \
-  template void InstWrite(std::ostream& os, \
-      const ConstMatrixView<T,UNKNOWN,UNKNOWN,C>& m1, const RT thresh); \
-  template void InstRead(std::istream& is, \
-      MatrixView<T,UNKNOWN,UNKNOWN,C> m1); \
-
-Def2(T,T,false)
-#ifdef TMV_INST_COMPLEX
-Def2(T,CT,false)
-Def2(T,CT,true)
-#endif
-
-
-#ifdef TMV_INST_MIX
-template void InstCopy(const ConstMatrixView<T>& m1, MatrixView<CT> m2); 
+Def1(T,T,T&)
+#ifdef INST_COMPLEX
+Def1(T,CT,VarConjRef<CT >)
 #endif
 
 #undef Def1
+
+#define Def2(T,S,I) \
+  template Matrix<T,S,I>::Matrix(const std::vector<std::vector<T > >& vv); \
+  template std::istream& operator>>(std::istream& fin, \
+      auto_ptr<Matrix<T,S,I> >& m); \
+
+Def2(T,RowMajor,CStyle)
+Def2(T,RowMajor,FortranStyle)
+Def2(T,ColMajor,CStyle)
+Def2(T,ColMajor,FortranStyle)
+#ifdef INST_COMPLEX
+Def2(CT,RowMajor,CStyle)
+Def2(CT,RowMajor,FortranStyle)
+Def2(CT,ColMajor,CStyle)
+Def2(CT,ColMajor,FortranStyle)
+#endif
+
 #undef Def2
+
+#define Def3(T1,T2)\
+  template bool operator==(const GenMatrix<T1 >& m1, \
+      const GenMatrix<T2 >& m2); \
+
+Def3(T,T)
+#ifdef INST_COMPLEX
+Def3(T,CT)
+Def3(CT,T)
+Def3(CT,CT)
+#endif
+
+#undef Def3
+
 #undef CT
 

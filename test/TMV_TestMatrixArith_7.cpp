@@ -36,14 +36,6 @@ template <class T> void TestMatrixArith_7()
     ca2x -= a2x;
     ca2x *= CT(1,-2);
 
-    tmv::Matrix<T> a3x(12,16);
-    for(int i=0;i<12;++i) for(int j=0;j<16;++j) a3x(i,j) = T(1-2*i+3*j);
-    tmv::MatrixView<T> a3 = a3x.subMatrix(0,12,0,16,3,4);
-    a3.diag().addToAll(30);
-    tmv::Matrix<CT> ca3x = a3x*CT(1,-2);
-    tmv::MatrixView<CT> ca3 = ca3x.subMatrix(0,12,0,16,3,4);
-    ca3.diag().addToAll(CT(-22,15));
-
     tmv::MatrixView<T> a1 = a1x.view();
     tmv::MatrixView<CT> ca1 = ca1x.view();
     tmv::MatrixView<T> a2 = a2x.view();
@@ -82,6 +74,14 @@ template <class T> void TestMatrixArith_7()
     TestMatrixArith7<T>(a2,ca2,v1v,cv1v,v2s,cv2s,"Square 7");
     TestMatrixArith7<T>(a2,ca2,v1s,cv1s,v2s,cv2s,"Square 8");
 #if (XTEST & 1)
+    tmv::Matrix<T> a3x(12,16);
+    for(int i=0;i<12;++i) for(int j=0;j<16;++j) a3x(i,j) = T(1-2*i+3*j);
+    tmv::MatrixView<T> a3 = a3x.subMatrix(0,12,0,16,3,4);
+    a3.diag().addToAll(30);
+    tmv::Matrix<CT> ca3x = a3x*CT(1,-2);
+    tmv::MatrixView<CT> ca3 = ca3x.subMatrix(0,12,0,16,3,4);
+    ca3.diag().addToAll(CT(-22,15));
+
     TestMatrixArith7<T>(a3,ca3,v1v,cv1v,v2v,cv2v,"Square 9");
     TestMatrixArith7<T>(a3,ca3,v1s,cv1s,v2v,cv2v,"Square 10");
     TestMatrixArith7<T>(a3,ca3,v1v,cv1v,v2s,cv2s,"Square 11");

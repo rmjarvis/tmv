@@ -42,8 +42,8 @@
 				AdditionalOptions="/bigobj"
 				Optimization="0"
 				InlineFunctionExpansion="0"
-				AdditionalIncludeDirectories="&quot;C:\Documents and Settings\Loser\My Documents\tmv0.62\include&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;NOBLAS"
+				AdditionalIncludeDirectories="include"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -121,8 +121,8 @@
 				FavorSizeOrSpeed="0"
 				EnableFiberSafeOptimizations="true"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="&quot;C:\Documents and Settings\Loser\My Documents\tmv0.62\include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;NOBLAS;XTEST"
+				AdditionalIncludeDirectories="include"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;XTEST=127"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="1"
@@ -141,11 +141,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalOptions="/ltcg"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				LinkTimeCodeGeneration="0"
 				TargetMachine="1"
 			/>
 			<Tool

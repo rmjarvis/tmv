@@ -13,7 +13,7 @@ import sys
 # there are some other optional ones
 src_dir = 'src'
 #subdirs=['test','examples','doc']
-subdirs=['test','examples']
+subdirs=['test','examples','bin','share']
 
 # Configurations will be saved here so command line options don't
 # have to be sent more than once
@@ -38,11 +38,8 @@ opts = Variables(config_file)
 opts.Add('CXX','Name of c++ compiler')
 opts.Add('FLAGS','Compile flags to send to the compiler','')
 opts.Add(PathVariable('PREFIX',
-        'prefix for installation','', PathVariable.PathAccept))
+            'prefix for installation','', PathVariable.PathAccept))
 
-opts.Add(EnumVariable('OPT',
-        'Set the optimization level for TMV library', '2',
-        allowed_values=('0','1','2','3')))
 opts.Add(BoolVariable('WITH_OPENMP',
         'Look for openmp and use if found.', True))
 opts.Add(BoolVariable('INST_FLOAT',
@@ -53,77 +50,81 @@ opts.Add(BoolVariable('INST_LONGDOUBLE',
         'Instantiate <long double> templates in compiled library', False))
 opts.Add(BoolVariable('INST_INT',
         'Instantiate <int> templates in compiled library', False))
-opts.Add(BoolVariable('INST_COMPLEX',
-        'Instantiate complex<T> templates in compiled library', True))
-opts.Add(BoolVariable('INST_MIX',
-        'Instantiate functions that mix real with complex', False))
 
-opts.Add(EnumVariable('TEST_OPT',
-        'Set the optimization level for TMV test suite', '0',
-        allowed_values=('0','1','2','3')))
-opts.Add(BoolVariable('TEST_FLOAT',
-        'Instantiate <float> in the test suite', True))
-opts.Add(BoolVariable('TEST_DOUBLE',
-        'Instantiate <double> in the test suite', True))
-opts.Add(BoolVariable('TEST_LONGDOUBLE',
-        'Instantiate <long double> in the test suite', False))
-opts.Add(BoolVariable('TEST_INT',
-        'Instantiate <int> in the test suite', True))
+#opts.Add(BoolVariable('TEST_FLOAT',
+#        'Instantiate <float> in the test suite', True))
+#opts.Add(BoolVariable('TEST_DOUBLE',
+#        'Instantiate <double> in the test suite', True))
+#opts.Add(BoolVariable('TEST_LONGDOUBLE',
+#        'Instantiate <long double> in the test suite', False))
+#opts.Add(BoolVariable('TEST_INT',
+#        'Instantiate <int> in the test suite', True))
 
-opts.Add(PathVariable('EXTRA_PATH',
-        'Extra paths for executables (separated by : if more than 1)',
-        '',PathVariable.PathAccept))
-opts.Add(PathVariable('EXTRA_LIB_PATH',
-        'Extra paths for linking (separated by : if more than 1)',
-        '',PathVariable.PathAccept))
-opts.Add(PathVariable('EXTRA_INCLUDE_PATH',
-        'Extra paths for header files (separated by : if more than 1)',
-        '',PathVariable.PathAccept))
-opts.Add(BoolVariable('IMPORT_PATHS',
-        'Import PATH, C_INCLUDE_PATH and LIBRARY_PATH/LD_LIBRARY_PATH environment variables',
-        False))
+
 opts.Add(BoolVariable('IMPORT_ENV',
-        'Import full environment from calling shell', False))
+            'Import full environment from calling shell', False))
+opts.Add(PathVariable('EXTRA_PATH',
+            'Extra paths for executables (separated by : if more than 1)',
+            '',PathVariable.PathAccept))
+opts.Add(PathVariable('EXTRA_LIB_PATH',
+            'Extra paths for linking (separated by : if more than 1)',
+            '',PathVariable.PathAccept))
+opts.Add(PathVariable('EXTRA_INCLUDE_PATH',
+            'Extra paths for header files (separated by : if more than 1)',
+            '',PathVariable.PathAccept))
+opts.Add(BoolVariable('IMPORT_PATHS',
+            'Import PATH, C_INCLUDE_PATH and LIBRARY_PATH/LD_LIBRARY_PATH environment variables',
+            False))
 
 opts.Add(BoolVariable('WITH_BLAS',
-        'Look for blas libraries and link if found.', True))
+            'Look for blas libraries and link if found.', True))
 opts.Add(BoolVariable('WITH_LAPACK',
-        'Look for lapack libraries and link if found.', True))
+            'Look for lapack libraries and link if found.', True))
 opts.Add(BoolVariable('FORCE_MKL',
-        'Force scons to use MKL for BLAS and/or LAPACK', False))
+            'Force scons to use MKL for BLAS and/or LAPACK', False))
 opts.Add(BoolVariable('FORCE_ACML',
-        'Force scons to use ACML for BLAS and/or LAPACK', False))
+            'Force scons to use ACML for BLAS and/or LAPACK', False))
 opts.Add(BoolVariable('FORCE_GOTO',
-        'Force scons to use GOTO BLAS', False))
+            'Force scons to use GOTO BLAS', False))
 opts.Add(BoolVariable('FORCE_ATLAS',
-        'Force scons to use ATLAS for BLAS', False))
+            'Force scons to use ATLAS for BLAS', False))
 opts.Add(BoolVariable('FORCE_CBLAS',
-        'Force scons to use CBLAS', False))
+            'Force scons to use CBLAS', False))
 opts.Add(BoolVariable('FORCE_FBLAS',
-        'Force scons to use Fortran BLAS', False))
+            'Force scons to use Fortran BLAS', False))
 opts.Add(BoolVariable('FORCE_CLAPACK',
-        'Force scons to use CLAPACK', False))
+            'Force scons to use CLAPACK', False))
 opts.Add(BoolVariable('FORCE_ATLAS_LAPACK',
-        'Force scons to use ATLAS subset of LAPACK', False))
+            'Force scons to use ATLAS subset of LAPACK', False))
 opts.Add(BoolVariable('FORCE_FLAPACK',
-        'Force scons to use Fortran LAPACK', False))
+            'Force scons to use Fortran LAPACK', False))
+opts.Add(BoolVariable('USE_STEGR',
+            'Use the LAPACK function ?stegr for finding eigenvectors', True))
+opts.Add(BoolVariable('USE_GEQP3',
+            'Use the LAPACK function ?qeqp3 for finding strict QRP decomposition', True))
 opts.Add('LIBS','Libraries to send to the linker','')
 
 opts.Add(BoolVariable('DEBUG',
         'Turn on debugging statements in compilied library',False))
 opts.Add(BoolVariable('STATIC','Use static linkage', False))
+opts.Add(BoolVariable('WITH_SSE',
+            'Only necessary for icpc compilations: Use SSE commands', True))
 opts.Add('XTEST',
-        'Do extra tests in the test suite (1=non-unit step, 2=extra sizes/shapes, 4=mix real/complex,  8=degenerate,  16=extra arithmetic, 32=FortranStyle) ', '0')
+        'Do extra tests in the test suite (1=non-unit step, 2=extra sizes/shapes, 4=mix real/complex,  8=degenerate,  16=extra arithmetic, 32=FortranStyle, 64=extreme matrices) ', 0)
 opts.Add(BoolVariable('MEM_TEST',
-        'Test for memory leaks', False))
+            'Test for memory leaks', False))
 opts.Add(BoolVariable('SMALL_TESTS',
-        'Make the small test programs: tmvtest1a, tmvtest1b, etc.', False))
+            'Make the small test programs: tmvtest1a, tmvtest1b, etc.', False))
 opts.Add(BoolVariable('WARN',
-        'Add warning compiler flags, like -Wall', False))
-opts.Add(BoolVariable('PROFILE',
-        'Add profiling compiler flags -pg', False))
+            'Add warning compiler flags, like -Wall', False))
 opts.Add(BoolVariable('NOMIX_SMALL',
-        'Do not test the mixed Small and regular arithmetic', False))
+            'Do not test the mixed Small and regular arithmetic', False))
+opts.Add(BoolVariable('CACHE_LIB',
+            'Cache the results of the library checks',True))
+opts.Add(BoolVariable('WITH_UPS',
+            'Install the ups directory under PREFIX/ups',False))
+opts.Add(BoolVariable('TEST_DEPRECATED',
+            'Test the deprecated method names',False))
 
 opts.Update(initial_env)
 opts.Save(config_file,initial_env)
@@ -131,38 +132,70 @@ Help(opts.GenerateHelpText(initial_env))
 
 # This helps us determine of openmp is available
 openmp_mingcc_vers = 4.1
-openmp_minicpc_vers = 9.0
+openmp_minicpc_vers = 10.0  # 9.0 is supposed to work but has bugs
 openmp_minpgcc_vers = 6.0
+
+
+# used only in /bin right now
+def RunInstall(env, targets, subdir):
+    install_dir = os.path.join(env['INSTALL_PREFIX'], subdir)
+    env.Alias(target='install',
+              source=env.Install(dir=install_dir, source=targets))
+
+def RunUninstall(env, targets, subdir):
+    # There is no env.Uninstall method, we must build our own
+    install_dir = os.path.join(env['INSTALL_PREFIX'], subdir)
+    deltarget = Delete("$TARGET")
+
+    # delete from $prefix/bin/
+    files = []
+    for t in targets:
+        ifile = os.path.join(install_dir, os.path.basename(str(t))) 
+        files.append(ifile)
+
+    for f in files:
+        env.Alias('uninstall', env.Command(f, None, deltarget))
+
 
 
 def BasicCCFlags(env):
     """
     """
+
+    compiler = env['CXXTYPE']
+    version = env['CXXVERSION_NUMERICAL']
+
+    # First parse the LIBS options if present
+    if env['LIBS'] == '':
+        env.Replace(LIBS=[])
+    else:
+        libs = env['LIBS'].split(' ')
+        env.Replace(LIBS=libs)
+    if compiler == 'g++':
+        if version >= 4.4:
+            # Workaround for a bug in the g++ v4.4 exception handling
+            env.AppendUnique(LIBS='pthread')
+
     if env['FLAGS'] == '':
-        compiler = env['CXXTYPE']
-        version = env['CXXVERSION_NUMERICAL']
-    
         if compiler == 'g++':
-            env.Replace(CCFLAGS=['-g','-O2'])
-            env['TEST_FLAGS'] = ['-g','-O']
+            env.Replace(CCFLAGS=['-O2'])
+            env['TEST_FLAGS'] = []
             if version <= 4.2:
                 env.Append(CCFLAGS=['-fno-strict-aliasing'])
-            if env['PROFILE']:
-                env.Append(CCFLAGS=['-pg'])
-                env['TEST_FLAGS'] += ['-pg']
             if env['WARN']:
                 env.Append(CCFLAGS=['-ansi','-pedantic-errors','-Wall','-Werror'])
-                env['TEST_FLAGS'] += ['-ansi','-pedantic-errors','-Wall','-Werror']
+                env['TEST_FLAGS'] = ['-ansi','-pedantic-errors','-Wall','-Werror']
+            if env['TEST_DEPRECATED']:
+                env['TEST_FLAGS'] += ['-Wno-deprecated-declarations']
     
         elif compiler == 'icpc':
-            env.Replace(CCFLAGS=['-g','-O3'])
-            env['TEST_FLAGS'] = ['-g']
+            env.Replace(CCFLAGS=['-O2'])
+            if env['WITH_SSE']:
+                env.Append(CCFLAGS=['-msse2'])
+            env['TEST_FLAGS'] = []
             if version >= 10:
                 env.Append(CCFLAGS=['-vec-report0'])
                 env['TEST_FLAGS'] += ['-vec-report0']
-            if env['PROFILE']:
-                env.Append(CCFLAGS=['-pg'])
-                env['TEST_FLAGS'] += ['-pg']
             if env['WARN']:
                 env.Append(CCFLAGS=['-Wall','-Werror','-wd279,383,810,981'])
                 env['TEST_FLAGS'] += ['-Wall','-Werror','-wd279,383,810,981']
@@ -175,20 +208,13 @@ def BasicCCFlags(env):
                 if version >= 11:
                     env.Append(CCFLAGS=['-wd2259'])
                     env['TEST_FLAGS'] += ['-wd2259']
-            else :
-                env.Append(CCFLAGS=['-w'])
-                env['TEST_FLAGS'] += ['-w']
 
         elif compiler == 'pgCC':
-            env.Replace(CCFLAGS=['g','-O2','-fast','-Mcache_align'])
-            env['TEST_FLAGS'] = ['g','-O0']
-            if env['PROFILE']:
-                # Not sure if this is right...
-                env.Append(CCFLAGS=['-pg'])
-                env['TEST_FLAGS'] += ['-pg']
+            env.Replace(CCFLAGS=['-O2','-fast','-Mcache_align'])
+            env['TEST_FLAGS'] = ['-O0']
 
         elif compiler == 'cl':
-            env.Replace(CCFLAGS=['/EHsc','/nologo','/O2','/Oi'])
+            env.Replace(CCFLAGS=['/EHsc','/nologo','/O2','/Oi',])
             env['TEST_FLAGS'] = ['/EHsc','/nologo']
             if env['WARN']:
                 env.Append(CCFLAGS=['/W2','/WX'])
@@ -204,13 +230,6 @@ def BasicCCFlags(env):
         cxx_flags = env['FLAGS'].split(' ')
         env.Replace(CCFLAGS=cxx_flags)
         env['TEST_FLAGS'] = cxx_flags
-
-    # Also parse the LIBS options if present
-    if env['LIBS'] == '':
-        env.Replace(LIBS=[])
-    else:
-        libs = env['LIBS'].split(' ')
-        env.Replace(LIBS=libs)
 
 
 def AddOpenMPFlag(env):
@@ -229,6 +248,7 @@ def AddOpenMPFlag(env):
     if compiler == 'g++':
         if version < openmp_mingcc_vers: 
             print 'No OpenMP support for g++ versions before ',openmp_mingcc_vers
+            env['WITH_OPENMP'] = False
             return
         flag = ['-fopenmp']
         ldflag = ['-fopenmp']
@@ -236,6 +256,7 @@ def AddOpenMPFlag(env):
     elif compiler == 'icpc':
         if version < openmp_minicpc_vers:
             print 'No OpenMP support for icpc versions before ',openmp_minicpc_vers
+            env['WITH_OPENMP'] = False
             return
         flag = ['-openmp']
         ldflag = ['-openmp']
@@ -243,6 +264,7 @@ def AddOpenMPFlag(env):
     elif compiler == 'pgCC':
         if version < openmp_minpgcc_vers:
             print 'No OpenMP support for pgCC versions before ',openmp_minpgcc_vers
+            env['WITH_OPENMP'] = False
             return
         flag = ['-mp','--exceptions']
         ldflag = ['-mp']
@@ -258,7 +280,7 @@ def AddOpenMPFlag(env):
     print 'Using OpenMP'
     env['OMP_FLAGS'] = flag 
     env.Append(LINKFLAGS=ldflag)
-    env.Append(LIBS=xlib)
+    env.AppendUnique(LIBS=xlib)
 
 def GetCompilerVersion(env):
     """
@@ -356,12 +378,13 @@ def AddExtraPaths(env):
     # directory even when we are in a sub-directory (src,test,etc.)
     bin_paths = []
     cpp_paths = ['#include']
-    lib_paths = ['#lib']
+    lib_paths1 = ['#lib']
+    lib_paths2 = []
 
     # Paths specified in EXTRA_*
     bin_paths += env['EXTRA_PATH'].split(':')
-    lib_paths += env['EXTRA_LIB_PATH'].split(':')
     cpp_paths += env['EXTRA_INCLUDE_PATH'].split(':')
+    lib_paths2 += env['EXTRA_LIB_PATH'].split(':')
 
     # Paths found in environment paths
     if env['IMPORT_PATHS'] and os.environ.has_key('PATH'):
@@ -377,12 +400,12 @@ def AddExtraPaths(env):
     if env['IMPORT_PATHS'] and os.environ.has_key('LIBRARY_PATH'):
         paths=os.environ['LIBRARY_PATH']
         paths=paths.split(os.pathsep)
-        AddPath(lib_paths, paths)
+        AddPath(lib_paths2, paths)
 
     if env['IMPORT_PATHS'] and os.environ.has_key('LD_LIBRARY_PATH'):
         paths=os.environ['LD_LIBRARY_PATH']
         paths=paths.split(os.pathsep)
-        AddPath(lib_paths, paths)
+        AddPath(lib_paths2, paths)
 
     # PREFIX directory
     # If none given, then don't add them to the -L and -I directories.
@@ -391,8 +414,8 @@ def AddExtraPaths(env):
         env['INSTALL_PREFIX'] = default_prefix
     else:
         AddPath(bin_paths, os.path.join(env['PREFIX'], 'bin'))
-        AddPath(lib_paths, os.path.join(env['PREFIX'], 'lib'))
         AddPath(cpp_paths, os.path.join(env['PREFIX'], 'include'))
+        AddPath(lib_paths1, os.path.join(env['PREFIX'], 'lib'))
         env['INSTALL_PREFIX'] = env['PREFIX']
     
 
@@ -404,8 +427,10 @@ def AddExtraPaths(env):
     #env.Append(LIBPATH= lib_paths)
     #env.Append(CPPPATH= cpp_paths)
     env.PrependENVPath('PATH', bin_paths)
-    env.Prepend(LIBPATH= lib_paths)
     env.Prepend(CPPPATH= cpp_paths)
+    env.Prepend(LIBPATH= lib_paths1)
+    env.Prepend(LIBPATH= lib_paths2)
+    env['LIBPATH2'] = lib_paths2    # used for the tmv-link file
 
 def ReadFileList(fname):
     """
@@ -503,9 +528,8 @@ int main()
     if context.TryCompile(acml_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],acml_source_file) or
-            CheckLibs(context,['acml'],acml_source_file) or
             CheckLibs(context,['acml','pgftnrtl'],acml_source_file) or
-            CheckLibs(context,['acml','gfortran'],acml_source_file) )
+            CheckLibs(context,['acml'],acml_source_file) )
 
         context.Result(result)
 
@@ -524,9 +548,9 @@ int main()
 
 
 def CheckGOTO(context):
-    goto_source_file = """
+    fblas_source_file = """
 extern "C" {
-#include "util/fblas.h"
+#include "fblas.h"
 }
 int main()
 {
@@ -540,10 +564,13 @@ int main()
 
     context.Message('Checking for GotoBLAS... ')
 
-    if context.TryCompile(goto_source_file,'.cpp'):
+    if context.TryCompile(fblas_source_file,'.cpp'):
         result = (
-            CheckLibs(context,[],goto_source_file) or
-            CheckLibs(context,['goto'],goto_source_file))
+            CheckLibs(context,[],fblas_source_file) or
+            CheckLibs(context,['goto2'],fblas_source_file) or
+            CheckLibs(context,['goto2','pthread'],fblas_source_file) or
+            CheckLibs(context,['goto'],fblas_source_file) or
+            CheckLibs(context,['goto','pthread'],fblas_source_file))
 
         context.Result(result)
 
@@ -622,7 +649,10 @@ int main()
     if context.TryCompile(cblas_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],cblas_source_file) or
-            CheckLibs(context,['cblas'],cblas_source_file) )
+            CheckLibs(context,['cblas'],cblas_source_file) or
+            CheckLibs(context,['cblas','blas'],cblas_source_file) or
+            CheckLibs(context,['cblas','blas','gfortran'],cblas_source_file) or
+            CheckLibs(context,['cblas','blas','pgftnrtl'],cblas_source_file) )
 
         context.Result(result)
 
@@ -644,7 +674,7 @@ int main()
 def CheckFBLAS(context):
     fblas_source_file = """
 extern "C" {
-#include "util/fblas.h"
+#include "fblas.h"
 }
 int main()
 {
@@ -656,14 +686,14 @@ int main()
 }
 """
 
-    context.Message('Checking for Fotran BLAS... ')
+    context.Message('Checking for Fortran BLAS... ')
 
     if context.TryCompile(fblas_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],fblas_source_file) or
             CheckLibs(context,['blas'],fblas_source_file) or
-            CheckLibs(context,['blas','pgftnrtl'],fblas_source_file) or
-            CheckLibs(context,['blas','gfortran'],fblas_source_file) )
+            CheckLibs(context,['blas','gfortran'],fblas_source_file) or
+            CheckLibs(context,['blas','pgftnrtl'],fblas_source_file) )
 
         context.Result(result)
 
@@ -700,8 +730,7 @@ int main()
 
     result = (context.TryCompile(mkl_lap_source_file,'.cpp') and
         (CheckLibs(context,[],mkl_lap_source_file) or
-         CheckLibs(context,['mkl_lapack'],mkl_lap_source_file) or
-         CheckLibs(context,['mkl_lapack','guide'],mkl_lap_source_file)))
+         CheckLibs(context,['mkl_lapack'],mkl_lap_source_file)))
 
     context.Result(result)
     return result
@@ -800,7 +829,7 @@ int main()
 def CheckFLAPACK(context):
     flapack_source_file = """
 extern "C" {
-#include "util/flapack.h"
+#include "flapack.h"
 }
 int main()
 {
@@ -818,8 +847,8 @@ int main()
         result = (
             CheckLibs(context,[],flapack_source_file) or
             CheckLibs(context,['lapack'],flapack_source_file) or
-            CheckLibs(context,['lapack','pgftnrtl'],flapack_source_file) or
-            CheckLibs(context,['lapack','gfortran'],flapack_source_file) )
+            CheckLibs(context,['lapack','gfortran'],flapack_source_file) or
+            CheckLibs(context,['lapack','pgftnrtl'],flapack_source_file) )
 
         context.Result(result)
 
@@ -888,7 +917,7 @@ def DoLibraryAndHeaderChecks(config):
             config.CheckGOTO()
             print 'Using GOTO BLAS'
             config.env.Append(CPPDEFINES=['FBLAS'])
-            config.env['NOMIX_SMALL'] = 1
+            #config.env['NOMIX_SMALL'] = 1
 
         elif config.env['FORCE_ATLAS']:
             config.CheckATLAS()
@@ -925,7 +954,7 @@ def DoLibraryAndHeaderChecks(config):
         elif config.CheckGOTO() :
             print 'Using GotoBLAS'
             config.env.Append(CPPDEFINES=['FBLAS'])
-            config.env['NOMIX_SMALL'] = 1
+            #config.env['NOMIX_SMALL'] = 1
 
         elif config.CheckCBLAS() :
             print 'Using CBLAS'
@@ -1006,29 +1035,28 @@ def DoConfig(env):
     # Some extra flags depending on the options:
     if env['WITH_OPENMP']:
         AddOpenMPFlag(env)
-    env.Append(CPPDEFINES=['TMV_OPT=' + env['OPT']])
     if not env['DEBUG']:
         print 'Debugging turned off'
-        env.Append(CPPDEFINES=['NDEBUG'])
+        env.Append(CPPDEFINES='NDEBUG')
     if env['MEM_TEST']:
-        env.Append(CPPDEFINES=['TMV_MEM_TEST'])
+        env.Append(CPPDEFINES=['MEMTEST'])
     if env['STATIC'] :
         if env['CXXTYPE'] == 'pgCC':
             env.Append(LINKFLAGS=['-Bstatic'])
         else:
             env.Append(LINKFLAGS=['-static'])
+    env['TEST_FLOAT'] = env['INST_FLOAT']
+    env['TEST_DOUBLE'] = env['INST_DOUBLE']
+    env['TEST_LONGDOUBLE'] = env['INST_LONGDOUBLE']
+    env['TEST_INT'] = env['INST_INT']
     if not env['INST_FLOAT']:
-        env.Append(CPPDEFINES=['TMV_NO_INST_FLOAT'])
+        env.Append(CPPDEFINES=['NO_INST_FLOAT'])
     if not env['INST_DOUBLE']:
-        env.Append(CPPDEFINES=['TMV_NO_INST_DOUBLE'])
+        env.Append(CPPDEFINES=['NO_INST_DOUBLE'])
     if env['INST_LONGDOUBLE']:
-        env.Append(CPPDEFINES=['TMV_INST_LONGDOUBLE'])
+        env.Append(CPPDEFINES=['INST_LONGDOUBLE'])
     if env['INST_INT']:
-        env.Append(CPPDEFINES=['TMV_INST_INT'])
-    if not env['INST_COMPLEX']:
-        env.Append(CPPDEFINES=['TMV_NO_INST_COMPLEX'])
-    if env['INST_MIX']:
-        env.Append(CPPDEFINES=['TMV_INST_MIX'])
+        env.Append(CPPDEFINES=['INST_INT'])
     if not env['TEST_FLOAT']:
         env.Append(CPPDEFINES=['NO_TEST_FLOAT'])
     if not env['TEST_DOUBLE']:
@@ -1038,12 +1066,14 @@ def DoConfig(env):
     if env['TEST_INT']:
         env.Append(CPPDEFINES=['TEST_INT'])
 
+
     import SCons.SConf
 
     # Figure out what BLAS and/or LAPACK libraries are on the system
     # MJ: I have had bad luck with scons figuring out when the cache
     #     is invalid.  This just forces a check every time.
-    SCons.SConf.SetCacheMode('force')
+    if not env['CACHE_LIB']:
+        SCons.SConf.SetCacheMode('force')
     config = env.Configure(custom_tests = {
         'CheckMKL' : CheckMKL ,
         'CheckACML' : CheckACML ,
@@ -1059,7 +1089,8 @@ def DoConfig(env):
     env = config.Finish()
     # MJ: Turn the cache back on now, since we want it for the
     #     main compilation steps.
-    SCons.SConf.SetCacheMode('auto')
+    if not env['CACHE_LIB']:
+        SCons.SConf.SetCacheMode('auto')
 
 
 #
@@ -1085,6 +1116,11 @@ if not GetOption('help'):
  
     # subdirectory SConscript files can use this function
     env['__readfunc'] = ReadFileList
+    env['_InstallProgram'] = RunInstall
+    env['_UninstallProgram'] = RunUninstall
+
+    if env['WITH_UPS']:
+        subdirs += ['ups']
 
     # subdirectores to process.  We process src by default
     script_files = [os.path.join(src_dir,'SConscript')]
@@ -1093,5 +1129,3 @@ if not GetOption('help'):
             script_files.append(os.path.join(d,'SConscript'))
 
     SConscript(script_files, exports=['env'])
-
-

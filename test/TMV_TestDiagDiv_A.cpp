@@ -21,23 +21,20 @@ void TestDiagDiv_A()
     tmv::Matrix<T> r(N,0,T(1));
     tmv::Matrix<std::complex<T> > cr(N,0,std::complex<T>(1));
 
-    tmv::DiagMatrix<T> bx(N);
-    tmv::DiagMatrix<std::complex<T> > cbx(N);
-
     tmv::DiagMatrixView<T> av = a.view();
     tmv::DiagMatrixView<T> bv = b.view();
     tmv::DiagMatrixView<std::complex<T> > cav = ca.view();
     tmv::DiagMatrixView<std::complex<T> > cbv = cb.view();
 
-    TestMatrixDivArith2<T>(tmv::LU,bx,cbx,av,bv,cav,cbv,"Diag/Diag");
+    TestMatrixDivArith2<T>(tmv::LU,av,bv,cav,cbv,"Diag/Diag");
 }
 
-#ifdef TMV_INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestDiagDiv_A<double>();
 #endif
-#ifdef TMV_INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestDiagDiv_A<float>();
 #endif
-#ifdef TMV_INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestDiagDiv_A<long double>();
 #endif

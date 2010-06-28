@@ -22,7 +22,8 @@ bool symoprod = false;
 bool dontthrow = false;
 std::string lastsuccess = "";
 
-int main() try {
+int main() try 
+{
     std::ofstream log("tmvtest3a.log");
     tmv::WriteWarningsTo(&log);
 
@@ -53,7 +54,7 @@ int main() try {
     TestAllSmallMatrix<int>();
 #endif 
 
-#endif 
+#endif
 
     return 0;
 }
@@ -69,14 +70,13 @@ catch (std::exception& e) {
     std::cerr<<e.what()<<std::endl;
     std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
     return 1;
-}
-catch (...) {
+} catch (...) {
     std::cerr<<"Unknown exception thrown\n";
     std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
     return 1;
 }
 #else
-catch (int) {}
+catch (double) {}
 #endif
 
 
@@ -96,12 +96,14 @@ void DoAssert(bool x, std::string s)
     } else { 
         if (showtests) std::cout<<"  Failed"<<std::endl;
         if (dontthrow) std::cout<<"Failed test: "<<s<<std::endl;  
-        else
+        else {
 #ifdef NOTHROW
-        { std::cerr<<"Error in test: "<<s<<std::endl; exit(1); }
+            std::cerr<<"Error in test: "<<s<<std::endl; 
+            exit(1); 
 #else
-        throw tmv::Error("Error in test: ",s);  
+            throw tmv::Error("Error in test: ",s);  
 #endif
+        }
     } 
 }
 

@@ -1,29 +1,31 @@
 
-#include "TMV_Test.h"
-#include "TMV_Test3.h"
-#include "TMV.h"
+#include "tmv/TMV_SmallVector.h"
+#include "tmv/TMV_SmallVectorArith.h"
 #include <fstream>
 #include <cstdio>
+#include "TMV_Test.h"
+#include "TMV_Test3.h"
+#include "TMV_TestVectorArith.h"
 
-template <class T> static void TestSmallVectorReal()
+#define N 100
+#define NN 20
+
+template <class T> 
+static void TestSmallVectorReal()
 {
-    const int N = 100;
-
     tmv::SmallVector<T,N> v;
 
     for (int i=0; i<N; ++i) v(i) = T(i);
 
     for (int i=0; i<N; ++i) Assert(v(i) == T(i),"Setting SmallVector");
 
-    if (N % 2 == 0) {
-        tmv::SmallVectorView<T,N/2,2> v1 = v.subVector(0,N,2);
-        for (int i=0; i<N/2; ++i) Assert(v1(i) == T(2*i), "SmallVector stride=2");
+    tmv::VectorView<T> v1 = v.subVector(0,N,2);
+    for (int i=0; i<N/2; ++i) Assert(v1(i) == T(2*i), "SmallVector stride=2");
 
-        for (int i=0; i<N/2; ++i) v1[i] = T(i+1234);
-        for (int i=0; i<N/2; ++i) Assert(v[2*i] == T(i+1234),
-                                         "setting SmallVector with stride = 2");
-        for (int i=0; i<N; ++i) v(i) = T(i);
-    }
+    for (int i=0; i<N/2; ++i) v1[i] = T(i+1234);
+    for (int i=0; i<N/2; ++i) Assert(v[2*i] == T(i+1234),
+                                     "setting SmallVector with stride = 2");
+    for (int i=0; i<N; ++i) v(i) = T(i);
 
     v.swap(2,5);
     Assert(v(2) == T(5) && v(5) == T(2),"Swapping elements of SmallVector");
@@ -42,21 +44,21 @@ template <class T> static void TestSmallVectorReal()
     v(15) = T(-20*N);
     int imax,imin;
     Assert(v.maxAbsElement(&imax) == T(20*N),
-           "maxAbsElement of SmallVector did not return correct value");
+           "MaxAbsElement of SmallVector did not return correct value");
     Assert(imax == 15,
-           "maxAbsElement of SmallVector did not return correct index");
+           "MaxAbsElement of SmallVector did not return correct index");
     Assert(v.minAbsElement(&imin) == T(1)/T(4),
-           "minAbsElement of SmallVector did not return correct value");
+           "MinAbsElement of SmallVector did not return correct value");
     Assert(imin == 42,
-           "minAbsElement of SmallVector did not return correct index");
+           "MinAbsElement of SmallVector did not return correct index");
     Assert(v.maxElement(&imax) == T(10*N),
-           "maxElement of SmallVector did not return correct value");
+           "MaxElement of SmallVector did not return correct value");
     Assert(imax == 23,
-           "maxElement of SmallVector did not return correct index");
+           "MaxElement of SmallVector did not return correct index");
     Assert(v.minElement(&imin) == T(-20*N),
-           "minElement of SmallVector did not return correct value");
+           "MinElement of SmallVector did not return correct value");
     Assert(imin == 15,
-           "minElement of SmallVector did not return correct index");
+           "MinElement of SmallVector did not return correct index");
 
     tmv::SmallVector<T,N> a;
     tmv::SmallVector<T,N> b;
@@ -68,23 +70,22 @@ template <class T> static void TestSmallVectorReal()
     Assert(a == b,"Testing Equality of SmallVectors");
 
     b(4) = 0;
-    Assert(a != b,"Testing Inequality of SmallVectors");
+    Assert(a != b,"SmallVector = SmallVector copied address, not values");
 
     tmv::SmallVector<T,N,tmv::FortranStyle> af;
     for (int i=1; i<=N; ++i) af(i) = T(3+i-1);
-    for (int i=1; i<=N; ++i) 
-        Assert(af(i) == a(i-1), "FortranStyle SmallVector access");
+    for (int i=1; i<=N; ++i) Assert(af(i) == a(i-1),
+                                    "FortranStyle SmallVector access");
     Assert(a == af,"FortransStyle SmallVector = CStyle SmallVector");
 
     for (int i=0; i<N; ++i) b(i) = T(5+2*i);
 
     v = a+b;
-    for (int i=0; i<N; ++i) 
-        Assert(v(i) == T(8+3*i),"Adding SmallVectors");
+    for (int i=0; i<N; ++i) Assert(v(i) == T(8+3*i),"Adding SmallVectors");
 
     v = a-b;
-    for (int i=0; i<N; ++i) 
-        Assert(v(i) == T(-2-i),"Subtracting SmallVectors");
+    tmv::Vector<T> vv = a-b;
+    for (int i=0; i<N; ++i) Assert(v(i) == T(-2-i),"Subtracting SmallVectors");
 
     a(0) = 1;
     b(0) = 1024;
@@ -112,77 +113,63 @@ template <class T> static void TestSmallVectorReal()
     for(int i=0;i<N;++i) a(i) = T(i+10);
     for(int i=0;i<N;++i) b(i) = T(-3*i+191);
 
-    T prod = 0, normsum = 0, normdiff = 0;
-    for(int i=0;i<N;++i) {
-        prod += a[i] * b[i];
-        normsum += (a[i]+b[i])*(a[i]+b[i]);
-        normdiff += (a[i]-b[i])*(a[i]-b[i]);
-    }
-    normsum = tmv::TMV_SQRT(normsum);
-    normdiff = tmv::TMV_SQRT(normdiff);
+    T prod = 2900;
+    T normsum = tmv::TMV_SQRT(T(1373700));
+    T normdiff = tmv::TMV_SQRT(T(1362100));
     Assert(std::abs(a*b - prod) <= EPS*Norm(a)*Norm(b),"Inner Product");
     tmv::SmallVector<T,N> temp;
-    Assert(std::abs(Norm(temp=a+b) - normsum) <= 
-           EPS*std::abs(Norm1(a)+Norm1(b)),"SmallVector Sum");
-    Assert(std::abs(Norm(temp=a-b) - normdiff) <= 
-           EPS*std::abs(Norm1(a)+Norm1(b)),"SmallVector Diff");
+    Assert(std::abs(Norm(temp=a+b) - normsum) <= EPS*std::abs(Norm1(a)+Norm1(b)),"SmallVector Sum");
+    Assert(std::abs(Norm(temp=a-b) - normdiff) <= EPS*std::abs(Norm1(a)+Norm1(b)),"SmallVector Diff");
 
-    tmv::SmallVector<T,20> w;
-    w << 3.3,1.2,5.4,-1.2,4.3,-9.4,0,-2,4,-11.5,
-      -12,14,33,1,-9.3,-3.9,4.9,10,-31,1.e-33;
+    tmv::SmallVector<T,NN> w;
+    w <<
+        3.3,1.2,5.4,-1.2,4.3,-9.4,0,-2,4,-11.5,
+        -12,14,33,1,-9.3,-3.9,4.9,10,-31,1.e-33;
 
-    tmv::SmallVector<T,20> origw = w;
-    int perm[20];
+    tmv::SmallVector<T,NN> origw = w;
+    int perm[NN];
 
     if (showacc)
         std::cout<<"unsorted w = "<<w<<std::endl;
-    tmv::Permutation P = w.sort(perm);
-    for(int i=1;i<20;++i) {
+    w.sort(perm);
+    for(int i=1;i<NN;++i) {
         Assert(w(i-1) <= w(i),"Sort real SmallVector");
     }
     if (showacc)
         std::cout<<"sorted w = "<<w<<std::endl;
 
     w.sort(0);
-    w = P.inverse() * w;
-    //w.reversePermute(perm);
+    w.reversePermute(perm);
     if (showacc)
         std::cout<<"Reverse permuted w = "<<w<<std::endl;
     Assert(w==origw,"Reverse permute sorted SmallVector = orig");
     w.sort(0);
-    origw = P * origw;
-    //origw.permute(perm);
+    origw.permute(perm);
     if (showacc)
         std::cout<<"Sort permuted w = "<<origw<<std::endl;
     Assert(w==origw,"Permute SmallVector = sorted SmallVector");
-
 }
 
-template <class T> static void TestSmallVectorComplex()
+template <class T> 
+static void TestSmallVectorComplex()
 {
-    const int N = 100;
-
     tmv::SmallVector<std::complex<T>,N> v;
     for (int i=0; i<N; ++i) v(i) = std::complex<T>(T(i),T(i+1234));
 
     for (int i=0; i<N; ++i) 
-        Assert(v(i).real() == T(i), "CSmallVector set");
+        Assert(real(v(i)) == T(i),"CSmallVector set");
     for (int i=0; i<N; ++i) 
-        Assert(v(i).imag() == T(i+1234), "CSmallVector set");
+        Assert(imag(v(i)) == T(i+1234),"CSmallVector set");
 
-    if (N % 2 == 0) {
-        tmv::SmallVectorView<std::complex<T>,N/2,2> v1 = v.subVector(0,N,2);
-        for (int i=0; i<N/2; ++i) 
-            Assert(v1(i)==std::complex<T>(T(2*i),T(2*i+1234)),
-                   "CSmallVector stride=2");
+    tmv::VectorView<std::complex<T> > v1 = v.subVector(0,N,2);
+    for (int i=0; i<N/2; ++i) Assert(v1(i)==std::complex<T>(T(2*i),T(2*i+1234)),
+                                     "CSmallVector stride=2");
 
-        for (int i=0; i<N/2; ++i) v1[i] = std::complex<T>(T(i),T(i+9876));
-        for (int i=0; i<N/2; ++i) 
-            Assert(v[2*i]==std::complex<T>(T(i),T(i+9876)),
-                   "setting CSmallVector with stride = 2");
+    for (int i=0; i<N/2; ++i) v1[i] = std::complex<T>(T(i),T(i+9876));
+    for (int i=0; i<N/2; ++i) Assert(v[2*i]==std::complex<T>(T(i),T(i+9876)),
+                                     "setting CSmallVector with stride = 2");
 
-        for (int i=0; i<N; ++i) v(i) = std::complex<T>(T(i),T(i+1234));
-    }
+    for (int i=0; i<N; ++i) v(i) = std::complex<T>(T(i),T(i+1234));
 
     v.swap(2,5);
     Assert(v[2] == std::complex<T>(5,5+1234),"Swap in CSmallVector");
@@ -196,8 +183,8 @@ template <class T> static void TestSmallVectorComplex()
                "Conjugate CSmallVector");
     Assert(v2 == v.conjugate(),"Conjugate == CSmallVector");
 
-    Assert(std::abs((v*v2).imag()) <= EPS,"CSmallVector * CSmallVector");
-    T norm1 = tmv::TMV_SQRT((v*v2).real());
+    Assert(std::abs(imag(v*v2)) <= EPS,"CSmallVector * CSmallVector");
+    T norm1 = tmv::TMV_SQRT(real(v*v2));
     T norm2 = Norm(v);
     if (showacc) {
         std::cout<<"v = "<<v<<std::endl;
@@ -221,58 +208,113 @@ template <class T> static void TestSmallVectorComplex()
     ca *= std::complex<T>(3,4);
     tmv::SmallVector<std::complex<T>,N> cb = b*std::complex<T>(3,4);
 
-    std::complex<T> prod = 0;
-    T normsum = 0, normdiff = 0;
-    for(int i=0;i<N;++i) {
-        prod += ca[i] * cb[i];
-        normsum += std::norm(ca[i]+cb[i]);
-        normdiff += std::norm(ca[i]-cb[i]);
+    tmv::SmallVector<std::complex<T>,N> v3;
+    for (int i=0; i<N; ++i) v3(i) = std::complex<T>(i+10,2*i);
+    v3(23) = std::complex<T>(40*N,9*N);
+    v3(42) = std::complex<T>(0.15,-0.20);
+    v3(15) = std::complex<T>(-32*N,24*N);
+    int imax,imin;
+    if (showacc) {
+        std::cout<<"v = "<<v3<<std::endl;
+        std::cout<<"v.MaxAbs = "<<v3.maxAbsElement(&imax)<<std::endl;
+        std::cout<<"imax = "<<imax<<std::endl;
+        std::cout<<"v.MinAbs = "<<v3.minAbsElement(&imin)<<std::endl;
+        std::cout<<"imin = "<<imin<<std::endl;
     }
-    normsum = tmv::TMV_SQRT(normsum);
-    normdiff = tmv::TMV_SQRT(normdiff);
-    Assert(std::abs(ca*cb - prod) <= EPS*Norm(ca)*Norm(cb),"CInner Product");
-    Assert(std::abs(Norm(temp=ca+cb) - normsum) <= 
-           EPS*std::abs(Norm(ca)+Norm(cb)),"CSmallVector Sum");
-    Assert(std::abs(Norm(temp=ca-cb) - normdiff) <= 
-           EPS*std::abs(Norm(ca)+Norm(cb)),"CSmallVector Diff");
+    Assert(std::abs(v3.maxAbsElement(&imax) - T(41*N)) < tmv::TMV_Epsilon<T>(),
+           "MaxAbsElement of Vector did not return correct value");
+    Assert(imax == 23,
+           "MaxAbsElement of Vector did not return correct index");
+    Assert(std::abs(v3.minAbsElement(&imin) - T(0.25)) < tmv::TMV_Epsilon<T>(),
+           "MinAbsElement of Vector did not return correct value");
+    Assert(imin == 42,
+           "MinAbsElement of Vector did not return correct index");
+    Assert(std::abs(v3.maxAbs2Element(&imax) - T(56*N)) < tmv::TMV_Epsilon<T>(),
+           "MaxAbs2Element of Vector did not return correct value");
+    Assert(imax == 15,
+           "MaxAbs2Element of Vector did not return correct index");
+    Assert(std::abs(v3.minAbs2Element(&imin) - T(0.35)) < tmv::TMV_Epsilon<T>(),
+           "MinAbs2Element of Vector did not return correct value");
+    Assert(imin == 42,
+           "MinAbs2Element of Vector did not return correct index");
+ 
+    std::complex<T> prod = T(29)*std::complex<T>(-28,96)*T(25);
+    T normsum = tmv::TMV_SQRT(T(1373700)*T(25));
+    T normdiff = tmv::TMV_SQRT(T(1362100)*T(25));
+    Assert(tmv::TMV_ABS(ca*cb - prod) <= EPS*Norm(ca)*Norm(cb),"CInner Product");
+    Assert(std::abs(Norm(temp=ca+cb) - normsum) <= EPS*std::abs(Norm(ca)+Norm(cb)),"CSmallVector Sum");
+    Assert(std::abs(Norm(temp=ca-cb) - normdiff) <= EPS*std::abs(Norm(ca)+Norm(cb)),"CSmallVector Diff");
 
-    tmv::SmallVector<std::complex<T>,20> w;
-    w << 3.3,1.2,5.4,-1.2,4.3,-9.4,0,-2,4,-11.5,
-      -12,14,33,1,-9.3,-3.9,4.9,10,-31,1.e-33;
-    tmv::SmallVector<T,20> iw;
-    iw << 1.4,9.8,-0.2,-8.6,3.0,-4.4,3,9,-1.9,-11.4,
-       11.1,-140,-23,11,5.2,-3.8,4.9,99,-71,-0.5;
+    tmv::SmallVector<std::complex<T>,NN> w;
+    w <<
+        3.3,1.2,5.4,-1.2,4.3,-9.4,0,-2,4,-11.5,
+        -12,14,33,1,-9.3,-3.9,4.9,10,-31,1.e-33;
+    tmv::SmallVector<T,NN> iw;
+    iw <<
+        1.4,9.8,-0.2,-8.6,3.0,-4.4,3,9,-1.9,-11.4,
+        11.1,-140,-23,11,5.2,-3.8,4.9,99,-71,-0.5;
     w.imagPart() = iw;
 
-    tmv::SmallVector<std::complex<T>,20> origw = w;
-    int perm[20];
+    tmv::SmallVector<std::complex<T>,NN> origw = w;
+    int perm[NN];
 
     if (showacc)
         std::cout<<"unsorted w = "<<w<<std::endl;
-    tmv::Permutation P = w.sort(perm);
-    for(int i=1;i<20;++i) {
-        Assert(w(i-1).real() <= w(i).real(),"Sort complex SmallVector");
+    w.sort(perm);
+    for(int i=1;i<NN;++i) {
+        Assert(real(w(i-1)) <= real(w(i)),"Sort complex SmallVector");
     }
     if (showacc)
         std::cout<<"sorted w = "<<w<<std::endl;
 
-    //w.sort(0);
-    w = P.inverse() * w;
-    //w.reversePermute(perm);
+    w.reversePermute(perm);
     Assert(w==origw,"Reverse permute sorted SmallVector = orig");
     w.sort(0);
-    origw = P * origw;
-    //origw.permute(perm);
+    origw.permute(perm);
     Assert(w==origw,"Permute SmallVector = sorted SmallVector");
 }
 
-template <class T> static void TestSmallVectorIO()
+template <class T> 
+static void TestSmallVectorArith()
 {
-    const int N = 100;
+    tmv::SmallVector<T,NN> a;
+    for(int i=0;i<NN;++i) a(i) = T(i+10);
+    tmv::SmallVector<T,NN> b;
+    for(int i=0;i<NN;++i) b(i) = T(-3*i+2);
 
-    tmv::SmallVector<T,N> v;
-    tmv::SmallVector<std::complex<T>,N> cv;
-    for (int i=0; i<N; ++i) {
+    tmv::SmallVector<std::complex<T>,NN> ca = a*std::complex<T>(2,-1);;
+    tmv::SmallVector<std::complex<T>,NN> cb = b*std::complex<T>(-5,1);
+
+    TestVectorArith1<T>(a,ca,"SmallVector C");
+    TestVectorArith2<T>(a,ca,b,cb,"SmallVector CC");
+
+    tmv::SmallVector<T,NN,tmv::FortranStyle> af = a;
+    tmv::SmallVector<T,NN,tmv::FortranStyle> bf = b;
+    tmv::SmallVector<std::complex<T>,NN,tmv::FortranStyle> caf = ca;
+    tmv::SmallVector<std::complex<T>,NN,tmv::FortranStyle> cbf = cb;
+
+    TestVectorArith1<T>(af,caf,"SmallVector F");
+    TestVectorArith2<T>(af,caf,bf,cbf,"SmallVector FF");
+    TestVectorArith2<T>(a,ca,bf,cbf,"SmallVector CF");
+    TestVectorArith2<T>(af,caf,b,cb,"SmallVector FC");
+
+#ifndef NOMIX_SMALL
+    tmv::VectorView<T> av = a.view();
+    tmv::VectorView<std::complex<T> > cav = ca.view();
+    tmv::VectorView<T> bv = b.view();
+    tmv::VectorView<std::complex<T> > cbv = cb.view();
+
+    TestVectorArith2<T>(av,cav,b,cb,"SmallVector/Vector");
+    TestVectorArith2<T>(a,ca,bv,cbv,"Vector/SmallVector");
+#endif
+}
+
+template <class T> 
+static void TestSmallVectorIO()
+{
+    tmv::SmallVector<T,NN> v;
+    tmv::SmallVector<std::complex<T>,NN> cv;
+    for (int i=0; i<NN; ++i) {
         v(i) = T(i+34);
         cv(i) = std::complex<T>(T(i),T(N-i));
     }
@@ -280,7 +322,7 @@ template <class T> static void TestSmallVectorIO()
     std::ofstream fout("tmvtest_smallvector_io.dat");
     if (!fout) {
 #ifdef NOTHROW
-        std::cerr<<"Couldn't open tmvtest_smallvector_io.dat for output\n";
+        std::cerr<<"Couldn't open tmvtest_smallvector_io.dat for output\n"; 
         exit(1); 
 #else
         throw std::runtime_error(
@@ -290,12 +332,12 @@ template <class T> static void TestSmallVectorIO()
     fout << v << std::endl << cv << std::endl;
     fout.close();
 
-    tmv::SmallVector<T,N> xv1;
-    tmv::SmallVector<std::complex<T>,N> xcv1;
+    tmv::SmallVector<T,NN> xv1;
+    tmv::SmallVector<std::complex<T>,NN> xcv1;
     std::ifstream fin("tmvtest_smallvector_io.dat");
     if (!fin) {
 #ifdef NOTHROW
-        std::cerr<<"Couldn't open tmvtest_smallvector_io.dat for input\n";
+        std::cerr<<"Couldn't open tmvtest_smallvector_io.dat for input\n"; 
         exit(1); 
 #else
         throw std::runtime_error(
@@ -312,7 +354,7 @@ template <class T> static void TestSmallVectorIO()
     fin.open("tmvtest_smallvector_io.dat");
     if (!fin) {
 #ifdef NOTHROW
-        std::cerr<<"Couldn't open tmvtest_smallvector_io.dat for input\n";
+        std::cerr<<"Couldn't open tmvtest_smallvector_io.dat for input\n"; 
         exit(1); 
 #else
         throw std::runtime_error(
@@ -327,24 +369,17 @@ template <class T> static void TestSmallVectorIO()
     std::remove("tmvtest_smallvector_io.dat");
 }
 
-template <class T> void TestAllSmallVector()
+template <class T> 
+void TestAllSmallVector()
 {
-#if 1
     TestSmallVectorReal<T>();
     TestSmallVectorComplex<T>();
+    if (tmv::TMV_Epsilon<T>() > T(0)) {
+        TestSmallVectorArith<T>();
+    }
     TestSmallVectorIO<T>();
-    std::cout<<"SmallVector<"<<tmv::TMV_Text(T())<<"> passed all basic tests\n";
-#endif
 
-#if 1
-    TestSmallVectorArith_1a<T>();
-    TestSmallVectorArith_1b<T>();
-    TestSmallVectorArith_2a<T>();
-    TestSmallVectorArith_2b<T>();
-    TestSmallVectorArith_2c<T>();
-    TestSmallVectorArith_2d<T>();
-    std::cout<<"SmallVector<"<<tmv::TMV_Text(T())<<"> passed all arithmetic tests\n";
-#endif
+    std::cout<<"SmallVector<"<<tmv::TMV_Text(T())<<"> passed all tests\n";
 }
 
 #ifdef TEST_DOUBLE

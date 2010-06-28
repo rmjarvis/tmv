@@ -10,7 +10,7 @@ template <class T> void TestDiagMatrix()
     const int N = 10;
 
     tmv::DiagMatrix<T> a(N);
-    tmv::DiagMatrixF<T> af(N);
+    tmv::DiagMatrix<T,tmv::FortranStyle> af(N);
     Assert(a.colsize() == size_t(N) && a.rowsize() == size_t(N),
            "Creating DiagMatrix(N)");
     Assert(af.colsize() == size_t(N) && af.rowsize() == size_t(N),
@@ -22,8 +22,8 @@ template <class T> void TestDiagMatrix()
     }
     tmv::ConstDiagMatrixView<T> acv = a.view();
     tmv::DiagMatrixView<T> av = a.view();
-    tmv::ConstDiagMatrixViewF<T> afcv = af.view();
-    tmv::DiagMatrixViewF<T> afv = af.view();
+    tmv::ConstDiagMatrixView<T,tmv::FortranStyle> afcv = af.view();
+    tmv::DiagMatrixView<T,tmv::FortranStyle> afv = af.view();
 
     for (int i=0, k=0; i<N; ++i) for (int j=0; j<N; ++j, ++k)
         if (i == j) {
@@ -85,13 +85,15 @@ template <class T> void TestDiagMatrix()
             Assert(a(i,j) == m(i,j),"DiagMatrix -> Matrix");
     Assert(a == tmv::DiagMatrix<T>(m),"Matrix -> DiagMatrix");
 
-    tmv::DiagMatrix<T> ainv = a;
-    ainv.invertSelf();
-    tmv::DiagMatrix<T> ainv2 = a.inverse();
-    for(int i=0;i<N;++i)
-        Assert(std::abs(a(i)*ainv(i) - T(1)) < 1.e-6,"DiagMatrix invertSelf");
-    for(int i=0;i<N;++i)
-        Assert(std::abs(a(i)*ainv2(i) - T(1)) < 1.e-6,"DiagMatrix inverse()");
+    if (!(std::numeric_limits<T>::is_integer)) {
+        tmv::DiagMatrix<T> ainv = a;
+        ainv.invertSelf();
+        tmv::DiagMatrix<T> ainv2 = a.inverse();
+        for(int i=0;i<N;++i)
+            Assert(std::abs(a(i)*ainv(i) - T(1)) < 1.e-6,"DiagMatrix invertSelf");
+        for(int i=0;i<N;++i)
+            Assert(std::abs(a(i)*ainv2(i) - T(1)) < 1.e-6,"DiagMatrix inverse()");
+    }
 
     tmv::DiagMatrix<std::complex<T> > ca = a*std::complex<T>(1,2);
     tmv::DiagMatrix<std::complex<T> > cb = b*std::complex<T>(-5,-1);

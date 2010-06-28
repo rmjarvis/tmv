@@ -35,6 +35,7 @@ int main() try {
 
 #ifdef TEST_DOUBLE
     TestVector<double>();
+    TestPermutation<double>();
     TestMatrix<double>();
     TestDiagMatrix<double>();
     TestDiagDiv<double>();
@@ -43,10 +44,9 @@ int main() try {
     TestMatrixDiv<double>();
 #endif // DOUBLE
 
-    TestPermutation();
-
 #ifdef TEST_FLOAT
     TestVector<float>();
+    TestPermutation<float>();
     TestMatrix<float>();
     TestDiagMatrix<float>();
     TestDiagDiv<float>();
@@ -57,6 +57,7 @@ int main() try {
 
 #ifdef TEST_INT
     TestVector<int>();
+    TestPermutation<int>();
     TestMatrix<int>();
     TestDiagMatrix<int>();
     TestTriMatrix<int>();
@@ -64,6 +65,7 @@ int main() try {
 
 #ifdef TEST_LONGDOUBLE
     TestVector<long double>();
+    TestPermutation<long double>();
     TestMatrix<long double>();
     TestDiagMatrix<long double>();
     TestDiagDiv<long double>();

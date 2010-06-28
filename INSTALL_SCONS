@@ -34,13 +34,23 @@ This file give the instructions for installing TMV using the program SCons.
              in the compiled library code.  
        PREFIX=/usr/local specifies where to install the library when running 
              scons install (see below).
-       WITH_FLOAT=true specifies whether to instantiate the <float> templates.
-       WITH_DOUBLE=true specifies whether to instantiate the <double> 
+       INST_FLOAT=true specifies whether to instantiate the <float> templates.
+       INST_DOUBLE=true specifies whether to instantiate the <double> 
              templates.
-       WITH_LONGDOUBLE=false specifies whether to instantiate the <long double> 
+       INST_LONGDOUBLE=false specifies whether to instantiate the <long double> 
              templates.
-       WITH_INT=false specifies whether to instantiate the <int> templates.
+       INST_INT=false specifies whether to instantiate the <int> templates.
+       WITH_OPENMP=true specifies whether to use OpenMP to parallelize some 
+             parts of the code.
    
+       IMPORT_ENV=false specifies whether to import the entire environment 
+             from the calling shell.  The default is to start with a clean 
+	     environment to be less susceptible to a particular user having an 
+	     unusual set up.  But sometimes sysadmins set things up in 
+	     non-standard ways and use the environment variables to make 
+	     everything work.  If this is the case, then IMPORT_ENV should do 
+	     the trick.  It imports the environment, but doe not add any
+             -I or -L flags when compiling.
        EXTRA_PATH='' specifies directories in which to search for executables 
              (notably the compiler, although you can also just give the full 
 	     path in the CXX parameter) in addition to the standard locations 
@@ -60,21 +70,11 @@ This file give the instructions for installing TMV using the program SCons.
        IMPORT_PATHS=false specifies whether to import extra path directories 
              from the environment variables: PATH, C_INCLUDE_PATH, 
 	     LD_LIBRARY_PATH and LIBRARY_PATH.  
-       IMPORT_ENV=false specifies whether to import the entire environment 
-             from the calling shell.  The default is to start with a clean 
-	     environment to be less susceptible to a particular user having an 
-	     unusual set up.  But sometimes sysadmins set things up in 
-	     non-standard ways and use the environment variables to make 
-	     everything work.  If this is the case, then IMPORT_ENV should do 
-	     the trick.  It imports the environment, but doe not add any
-             -I or -L flags when compiling.
    
        WITH_BLAS=true specifies whether to look for and try to use a BLAS 
              library.
        WITH_LAPACK=true specifies whether to look for and try to use a 
              LAPACK library.
-       WITH_OPENMP=false specifies whether to use OpenMP to parallelize some 
-             parts of the code.
    
        FORCE_MKL=false forces the use of the Intel Math Kernel library.  
        FORCE_ACML=false forces the use of the AMD Core Math library.  
@@ -86,6 +86,8 @@ This file give the instructions for installing TMV using the program SCons.
        FORCE_ATLAS_LAPACK=false forces the use of the LAPACK portion
              of the ATLAS Library.  
        FORCE_FLAPACK=false forces the use of a Fortran LAPACK library.
+       LIBS='' directly specifies the library flags to use for linking if
+             the automatic methods aren't working for you.
    
    
 3. (optional) Type

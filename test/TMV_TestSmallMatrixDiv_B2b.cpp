@@ -1,7 +1,8 @@
 
+#include "TMV.h"
+#include "TMV_Small.h"
 #include "TMV_Test.h"
 #include "TMV_Test3.h"
-#include "TMV.h"
 #define NOLDIVEQ
 #include "TMV_TestMatrixDivArith.h"
 
@@ -28,12 +29,8 @@ static void TestSmallNonSquareDiv_B2b()
         a3b * std::complex<T>(-4,8);
     tmv::SmallMatrix<std::complex<T>,N,6,stor> c4;
 
-    tmv::SmallMatrix<T,6,6,stor> a3x = a3b;
-    tmv::SmallMatrix<std::complex<T>,6,6,stor> c3x = c3b;
-
-    TestMatrixDivArith3b<T>(tmv::QR,a3x,c3x,a1,a3b,a4,c1,c3b,c4,
-                            "Square/NonSquare"); 
-#if XTEST & 32
+    TestMatrixDivArith3b<T>(tmv::QR,a1,a3b,a4,c1,c3b,c4,"Square/NonSquare"); 
+#if (XTEST & 32)
     tmv::SmallMatrix<T,6,N,stor,tmv::FortranStyle> a1f = a1;
     tmv::SmallMatrix<std::complex<T>,6,N,stor,tmv::FortranStyle> c1f = c1;
 
@@ -42,12 +39,9 @@ static void TestSmallNonSquareDiv_B2b()
     tmv::SmallMatrix<T,N,6,stor,tmv::FortranStyle> a4f = a4;
     tmv::SmallMatrix<std::complex<T>,N,6,stor,tmv::FortranStyle> c4f = c4;
 
-    TestMatrixDivArith3b<T>(tmv::QR,a3x,c3x,a1f,a3b,a4,c1f,c3b,c4,
-                            "Square/NonSquare"); 
-    TestMatrixDivArith3b<T>(tmv::QR,a3x,c3x,a1f,a3fb,a4,c1f,c3fb,c4,
-                            "Square/NonSquare"); 
-    TestMatrixDivArith3b<T>(tmv::QR,a3x,c3x,a1f,a3fb,a4f,c1f,c3fb,c4f,
-                            "Square/NonSquare"); 
+    TestMatrixDivArith3b<T>(tmv::QR,a1f,a3b,a4,c1f,c3b,c4,"Square/NonSquare"); 
+    TestMatrixDivArith3b<T>(tmv::QR,a1f,a3fb,a4,c1f,c3fb,c4,"Square/NonSquare"); 
+    TestMatrixDivArith3b<T>(tmv::QR,a1f,a3fb,a4f,c1f,c3fb,c4f,"Square/NonSquare"); 
 #endif
 }
 
@@ -56,7 +50,7 @@ void TestSmallMatrixDiv_B2b()
 {
     TestSmallNonSquareDiv_B2b<T,tmv::ColMajor,2>();
     TestSmallNonSquareDiv_B2b<T,tmv::ColMajor,5>();
-#if XTEST & 2
+#if (XTEST & 2)
     TestSmallNonSquareDiv_B2b<T,tmv::ColMajor,1>();
     TestSmallNonSquareDiv_B2b<T,tmv::ColMajor,3>();
     TestSmallNonSquareDiv_B2b<T,tmv::ColMajor,4>();

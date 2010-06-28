@@ -1,17 +1,111 @@
 
 #define CT std::complex<T>
 
-#define Def1(RT,T,C) \
-  template void InstWrite(std::ostream& os, \
-      const ConstDiagMatrixView<T,UNKNOWN,C>& m); \
-  template void InstWrite(std::ostream& os, \
-      const ConstDiagMatrixView<T,UNKNOWN,C>& m, RT thresh); \
+#define Def1(T,RT,CT) \
+  template T GenDiagMatrix<T >::det() const; \
+  template RT GenDiagMatrix<T >::logDet(T* sign) const; \
+  template const DiagMatrixView<T,CStyle>& \
+      DiagMatrixView<T,CStyle>::invertSelf() const; \
+  template void GenDiagMatrix<T >::doMakeInverseATA( \
+      const DiagMatrixView<T >& ) const; \
+  template void GenDiagMatrix<T >::doMakeInverseATA(const MatrixView<T >& ) const; \
+  template QuotXD<T,T > GenDiagMatrix<T >::QInverse() const; \
+  template void GenDiagMatrix<T >::write(std::ostream& os) const; \
+  template void GenDiagMatrix<T >::write(std::ostream& os, RT thresh) const; \
+  template std::istream& operator>>(std::istream& fin,  \
+      const DiagMatrixView<T >& m);  \
+  template auto_ptr<BaseMatrix<T > > GenDiagMatrix<T >::newCopy() const; \
+  template auto_ptr<BaseMatrix<T > > GenDiagMatrix<T >::newView() const; \
+  template auto_ptr<BaseMatrix<T > > GenDiagMatrix<T >::newTranspose() const; \
+  template auto_ptr<BaseMatrix<T > > GenDiagMatrix<T >::newConjugate() const; \
+  template auto_ptr<BaseMatrix<T > > GenDiagMatrix<T >::newAdjoint() const; \
+  template auto_ptr<BaseMatrix<T > > GenDiagMatrix<T >::newInverse() const; \
 
-Def1(T,T,false)
-#ifdef TMV_INST_COMPLEX
-Def1(T,CT,false)
-Def1(T,CT,true)
+Def1(T,T,CT)
+#ifdef INST_COMPLEX
+Def1(CT,T,CT)
 #endif
 
-#undef Def1
+#define Def2(T,I) \
+  template std::istream& operator>>(std::istream& fin, \
+      auto_ptr<DiagMatrix<T,I> >& m); \
+
+Def2(T,CStyle)
+Def2(T,FortranStyle)
+#ifdef INST_COMPLEX
+Def2(CT,CStyle)
+Def2(CT,FortranStyle)
+#endif
+
+#undef Def2
+
+#define Def3(T,T1) \
+  template void GenDiagMatrix<T >::doLDivEq(const VectorView<T1 >& ) const;\
+  template void GenDiagMatrix<T >::doLDivEq(const MatrixView<T1 >& ) const;\
+  template void GenDiagMatrix<T >::doMakeInverse( \
+      const DiagMatrixView<T1 >& m) const;\
+  template void GenDiagMatrix<T >::doMakeInverse(const MatrixView<T1 >& m) const;\
+
+Def3(T,T)
+#ifdef INST_COMPLEX
+Def3(T,CT)
+Def3(CT,CT)
+#endif
+
+#undef Def3
+
+#define Def3(T,T1) \
+  template <> template <> void GenDiagMatrix<T >::doLDivEq(\
+      const VectorView<T1 >& ) const\
+  { TMVAssert(TMV_FALSE); } \
+  template <> template <> void GenDiagMatrix<T >::doLDivEq(\
+      const MatrixView<T1 >& ) const\
+  { TMVAssert(TMV_FALSE); } \
+  template <> template <> void GenDiagMatrix<T >::doMakeInverse( \
+      const DiagMatrixView<T1 >& ) const\
+  { TMVAssert(TMV_FALSE); } \
+  template <> template <> void GenDiagMatrix<T >::doMakeInverse( \
+      const MatrixView<T1 >& ) const\
+  { TMVAssert(TMV_FALSE); } \
+
+#ifdef INST_COMPLEX
+Def3(CT,T)
+#endif
+
+#undef Def3
+
+#define Def4(T,T1,T0) \
+  template void GenDiagMatrix<T >::doLDiv( \
+      const GenVector<T1 >& , const VectorView<T0 >& ) const;\
+  template void GenDiagMatrix<T >::doLDiv( \
+      const GenMatrix<T1 >& , const MatrixView<T0 >& ) const;\
+
+Def4(T,T,T)
+#ifdef INST_COMPLEX
+Def4(T,T,CT)
+Def4(T,CT,CT)
+Def4(CT,T,CT)
+Def4(CT,CT,CT)
+#endif
+
+#undef Def4
+
+#define Def4(T,T1,T0) \
+  template <> template <> void GenDiagMatrix<T >::doLDiv( \
+      const GenVector<T1 >& , const VectorView<T0 >& ) const\
+      { TMVAssert(TMV_FALSE); } \
+  template <> template <> void GenDiagMatrix<T >::doLDiv( \
+      const GenMatrix<T1 >& , const MatrixView<T0 >& ) const\
+      { TMVAssert(TMV_FALSE); } \
+
+#ifdef INST_COMPLEX
+Def4(CT,CT,T)
+Def4(T,CT,T)
+Def4(CT,T,T)
+#endif
+
+#undef Def4
+
 #undef CT
+
+

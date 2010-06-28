@@ -1,16 +1,26 @@
+#include "TMV.h"
+#include "TMV_Small.h"
 #include "TMV_Test.h"
 #include "TMV_Test3.h"
-#include "TMV.h"
 #include <fstream>
 
-template <class T> void TestAllSmallMatrixA()
+template <class T> 
+void TestAllSmallMatrixA()
 {
-    TestSmallMatrixArith_1<T>();
-    TestSmallMatrixArith_2<T>();
-    TestSmallMatrixArith_3<T>();
-    TestSmallMatrixArith_7<T>();
+    TestSmallMatrixArith_A1<T>();
+    TestSmallMatrixArith_A2a<T>();
+    TestSmallMatrixArith_A2b<T>();
+    TestSmallMatrixArith_A3a<T>();
+    TestSmallMatrixArith_A3b<T>();
+    TestSmallMatrixArith_A4a<T>();
+    TestSmallMatrixArith_A4b<T>();
+    TestSmallMatrixArith_A5a<T>();
+    TestSmallMatrixArith_A5b<T>();
+    TestSmallMatrixArith_A6a<T>();
+    TestSmallMatrixArith_A6b<T>();
+    TestSmallMatrixArith_A7<T>();
     std::cout<<"SmallMatrix<"<<tmv::TMV_Text(T())<<
-        "> Arithmetic passed all MV tests\n";
+        "> Square Arithmetic passed all tests\n";
 }
 
 #ifdef TEST_DOUBLE

@@ -1,5 +1,3 @@
 TMV_MultMM.cpp 
-TMV_MultMM_CCC.cpp 
-TMV_MultMM_CRC.cpp 
-TMV_MultMM_RCC.cpp 
-TMV_MultMM_RRC.cpp 
+TMV_MultMM_OpenMP.cpp 
+TMV_SVDecompose_DC.cpp 

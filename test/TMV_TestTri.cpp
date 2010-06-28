@@ -23,8 +23,8 @@ static void TestBasicUpperTriMatrix_1()
         }
     }
 
-    tmv::UpperTriMatrixView<T,D> uv = u.view();
-    tmv::ConstUpperTriMatrixView<T,D> ucv = u.view();
+    tmv::UpperTriMatrixView<T> uv = u.view();
+    tmv::ConstUpperTriMatrixView<T> ucv = u.view();
 
     const tmv::UpperTriMatrix<T,D,S>& ux = u;
 
@@ -106,8 +106,8 @@ static void TestBasicUpperTriMatrix_1()
         }
     }
 
-    tmv::UpperTriMatrixViewF<T,D> ufv = uf.view();
-    tmv::ConstUpperTriMatrixViewF<T,D> ufcv = uf.view();
+    tmv::UpperTriMatrixView<T,tmv::FortranStyle> ufv = uf.view();
+    tmv::ConstUpperTriMatrixView<T,tmv::FortranStyle> ufcv = uf.view();
 
     const tmv::UpperTriMatrix<T,D,S,tmv::FortranStyle>& ufx = uf;
 
@@ -199,8 +199,8 @@ static void TestBasicLowerTriMatrix_1()
         }
     }
 
-    tmv::LowerTriMatrixView<T,D> lv = l.view();
-    tmv::ConstLowerTriMatrixView<T,D> lcv = l.view();
+    tmv::LowerTriMatrixView<T> lv = l.view();
+    tmv::ConstLowerTriMatrixView<T> lcv = l.view();
 
     const tmv::LowerTriMatrix<T,D,S>& lx = l;
 
@@ -283,8 +283,8 @@ static void TestBasicLowerTriMatrix_1()
         }
     }
 
-    tmv::LowerTriMatrixViewF<T,D> lfv = lf.view();
-    tmv::ConstLowerTriMatrixViewF<T,D> lfcv = lf.view();
+    tmv::LowerTriMatrixView<T,tmv::FortranStyle> lfv = lf.view();
+    tmv::ConstLowerTriMatrixView<T,tmv::FortranStyle> lfcv = lf.view();
 
     const tmv::LowerTriMatrix<T,D,S,tmv::FortranStyle>& lfx = lf;
 
@@ -426,7 +426,7 @@ static void TestBasicTriMatrix_2()
             }
         }
         if (D == tmv::UnitDiag) {
-            const tmv::ConstUpperTriMatrixView<T,tmv::UnitDiag> q3 = (
+            const tmv::ConstUpperTriMatrixView<T> q3 = (
                 tmv::UnitUpperTriMatrixViewOf(qar,3,S));
             for(int i=0;i<3;i++) for(int j=0;j<3;j++) if (j>=i) {
                 if (i == j)
@@ -435,7 +435,7 @@ static void TestBasicTriMatrix_2()
                     Assert(q3(i,j) == T(2*i-j),"Create UnitUpperTriMatrixView of T*");
             }
         } else {
-            const tmv::ConstUpperTriMatrixView<T,tmv::NonUnitDiag> q3 = (
+            const tmv::ConstUpperTriMatrixView<T> q3 = (
                 tmv::UpperTriMatrixViewOf(qar,3,S));
             for(int i=0;i<3;i++) for(int j=0;j<3;j++) if (j>=i) {
                 Assert(q3(i,j) == T(2*i-j),"Create UpperTriMatrixView of T*");
@@ -455,7 +455,7 @@ static void TestBasicTriMatrix_2()
             }
         }
         if (D == tmv::UnitDiag) {
-            const tmv::ConstLowerTriMatrixView<T,tmv::UnitDiag> q3 = (
+            const tmv::ConstLowerTriMatrixView<T> q3 = (
                 tmv::UnitLowerTriMatrixViewOf(qar,3,S));
             for(int i=0;i<3;i++) for(int j=0;j<3;j++) if (i>=j) {
                 if (i == j)
@@ -464,7 +464,7 @@ static void TestBasicTriMatrix_2()
                     Assert(q3(i,j) == T(2*i-j),"Create UnitLowerTriMatrixView of T*");
             }
         } else {
-            const tmv::ConstLowerTriMatrixView<T,tmv::NonUnitDiag> q3 = (
+            const tmv::ConstLowerTriMatrixView<T> q3 = (
                 tmv::LowerTriMatrixViewOf(qar,3,S));
             for(int i=0;i<3;i++) for(int j=0;j<3;j++) if (i>=j) {
                 Assert(q3(i,j) == T(2*i-j),"Create LowerTriMatrixView of T*");
@@ -684,8 +684,8 @@ static void TestBasicTriMatrix_IO()
         fin >> xum1 >> xlm1;
         fin >> xu4 >> xl4;
         fin.close();
-        Assert(u == xu2,"NonUnitDiag UpperTriMatrix Compact I/O check #4");
-        Assert(l == xl2,"NonUnitDiag LowerTriMatrix Compact I/O check #4");
+        Assert(u == xu4,"NonUnitDiag UpperTriMatrix Compact I/O check #4");
+        Assert(l == xl4,"NonUnitDiag LowerTriMatrix Compact I/O check #4");
     } else {
         fin.open("tmvtest_trimatrix_io.dat");
         if (!fin) 
@@ -701,14 +701,13 @@ static void TestBasicTriMatrix_IO()
             tmv::UpperTriMatrix<std::complex<T>,tmv::UnitDiag,tmv::RowMajor> xu4(N);
             fin >> xu4;
             Assert(false,"Throw ReadError for UnitDiag read");
-        } catch (tmv::ReadError) {
+        } catch (tmv::ReadError&) {
             Assert(true,"Catch ReadError for UnitDiag read");
         }
         try {
             tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag,tmv::RowMajor> xl4(N);
             fin >> xl4;
-            Assert(false,"Throw ReadError for UnitDiag read");
-        } catch (tmv::ReadError) {
+        } catch (tmv::ReadError&) {
             Assert(true,"Catch ReadError for UnitDiag read");
         }
 #endif

@@ -179,6 +179,3 @@ template void TestDiagDiv<float>();
 #ifdef TEST_LONGDOUBLE
 template void TestDiagDiv<long double>();
 #endif
-#ifdef TEST_INT
-template void TestDiagDiv<int>();
-#endif

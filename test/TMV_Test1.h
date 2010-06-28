@@ -4,7 +4,7 @@
 
 template <class T> void TestVector();
 template <class T> void TestMatrix();
-void TestPermutation();
+template <class T> void TestPermutation();
 template <class T> void TestMatrixArith_1();
 template <class T> void TestMatrixArith_2();
 template <class T> void TestMatrixArith_3();

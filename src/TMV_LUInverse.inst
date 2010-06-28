@@ -1,24 +1,27 @@
-
 #define CT std::complex<T>
 
-#define Def1(T1)\
-  template void InstLU_Inverse(MatrixView<T1> lu, const int* P);
+#define DefInv(T,T1) \
+template void LU_Inverse(const GenMatrix<T >& LUx, const int* P, \
+    const MatrixView<T1 >& minv); \
 
-#define Def2(T1,T2,C1)\
-  template void InstLU_InverseATA( \
-      const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const int* P, \
-      const bool trans, MatrixView<T2> m2); \
-
-Def1(T)
-Def2(T,T,false)
-#ifdef TMV_INST_COMPLEX
-Def1(CT)
-#ifdef TMV_INST_MIX
-Def2(T,CT,false)
-#endif
-Def2(CT,CT,false)
-Def2(CT,CT,true)
+DefInv(T,T)
+#ifdef INST_COMPLEX
+DefInv(T,CT)
+DefInv(CT,CT)
 #endif
 
-#undef Def1
+#undef DefInv
+
+#define DefInv(T,T1) \
+template <> void LU_Inverse(const GenMatrix<T >& , const int* , \
+    const MatrixView<T1 >& ) \
+    { TMVAssert(TMV_FALSE); } \
+
+#ifdef INST_COMPLEX
+DefInv(CT,T)
+#endif
+
+#undef DefInv
+
 #undef CT
+

@@ -20,7 +20,7 @@ template <class T> static void TestVectorReal()
 
     for (int i=0; i<N; ++i) Assert(v(i) == T(i),"Setting Vector");
 
-    tmv::VectorView<T,2> v2 = v.subVector(0,N,2);
+    tmv::VectorView<T> v2 = v.subVector(0,N,2);
     for (int i=0; i<N/2; ++i) Assert(v2(i) == T(2*i),
                                      "Reading Vector with stride = 2");
 
@@ -78,6 +78,14 @@ template <class T> static void TestVectorReal()
            "MinElement of Vector did not return correct value");
     Assert(imin == 15,
            "MinElement of Vector did not return correct index");
+    Assert(v.maxAbs2Element(&imax) == T(20*N),
+           "MaxAbs2Element of Vector did not return correct value");
+    Assert(imax == 15,
+           "MaxAbs2Element of Vector did not return correct index");
+    Assert(v.minAbs2Element(&imin) == T(0.25),
+           "MinAbs2Element of Vector did not return correct value");
+    Assert(imin == 42,
+           "MinAbs2Element of Vector did not return correct index");
 
     tmv::Vector<T> a(N);
     tmv::Vector<T> b(N);
@@ -91,12 +99,12 @@ template <class T> static void TestVectorReal()
     b(4) = T(0);
     Assert(a != b,"Vector = Vector copied address, not values");
 
-    tmv::VectorF<T> af(N);
+    tmv::Vector<T,tmv::FortranStyle> af(N);
     for (int i=1; i<=N; ++i) af(i) = T(3+i-1);
     for (int i=1; i<=N; ++i) Assert(af(i) == a(i-1),"FortranStyle Vector access");
-    tmv::ConstVectorViewF<T> afcv = af.view();
+    tmv::ConstVectorView<T,tmv::FortranStyle> afcv = af.view();
     for (int i=1; i<=N; ++i) Assert(afcv(i) == a(i-1),"FortranStyle Vector CV access");
-    tmv::VectorViewF<T> afv = af.view();
+    tmv::VectorView<T,tmv::FortranStyle> afv = af.view();
     for (int i=1; i<=N; ++i) Assert(afv(i) == a(i-1),"FortranStyle Vector V access");
     Assert(a == af,"FortransStyle Vector = CStyle Vector");
     tmv::ConstVectorView<T> afcv_c = afcv;
@@ -165,39 +173,32 @@ template <class T> static void TestVectorReal()
 
     tmv::Vector<T> origw = w;
     tmv::Vector<T> w2 = w;
-    int perm[NN];
-    if (showacc)
-        std::cout<<"unsorted w = "<<w<<std::endl;
+    tmv::Permutation P(NN);
+    if (showacc) std::cout<<"unsorted w = "<<w<<std::endl;
 
-    tmv::Permutation P = w.sort(perm);
-    if (showacc)
-        std::cout<<"sorted w = "<<w<<std::endl;
+    w.sort(P);
+    if (showacc) std::cout<<"sorted w = "<<w<<std::endl;
     for(int i=1;i<NN;++i) {
         Assert(w(i-1) <= w(i),"Sort real Vector");
     }
     w2 = P * w2;
-    //w2.permute(perm);
     Assert(w2 == w,"Sort real Vector -- perm");
     w = origw;
     w.sort();
     Assert(w2 == w,"Sort real Vector -- without perm");
     w = P.inverse() * w;
-    //w.reversePermute(perm);
-    if (showacc)
-        std::cout<<"reverse permute sorted Vector = "<<w<<std::endl;
+    if (showacc) std::cout<<"reverse permute sorted Vector = "<<w<<std::endl;
     Assert(w == origw,"Reverse permute sorted Vector = orig");
     w2 = origw;
 
-    tmv::Permutation P2 = w.sort(perm,tmv::Ascend,tmv::AbsComp);
-    if (showacc)
-        std::cout<<"sorted w abs = "<<w<<std::endl;
+    w.sort(P,tmv::Ascend,tmv::AbsComp);
+    if (showacc) std::cout<<"sorted w abs = "<<w<<std::endl;
     for(int i=1;i<NN;++i) {
-        Assert(tmv::TMV_ABS(w(i-1)) <= tmv::TMV_ABS(w(i)),"Sort real Vector abs");
+        Assert(tmv::TMV_ABS(w(i-1)) <= tmv::TMV_ABS(w(i)),
+               "Sort real Vector abs");
     }
-    w2 = P2 * w2;
-    //w2.permute(perm);
-    if (showacc)
-        std::cout<<"permuted w2 = "<<w<<std::endl;
+    w2 = P * w2;
+    if (showacc) std::cout<<"permuted w2 = "<<w<<std::endl;
     Assert(w2 == w,"Sort real Vector abs -- perm");
     w = origw;
     w.sort(tmv::Ascend,tmv::AbsComp);
@@ -206,28 +207,25 @@ template <class T> static void TestVectorReal()
     Assert(w2 == w,"Sort real Vector abs -- without perm");
     w = w2 = origw;
 
-    tmv::Permutation P3 = w.sort(perm,tmv::Descend);
-    if (showacc)
-        std::cout<<"sorted w desc = "<<w<<std::endl;
+    w.sort(P,tmv::Descend);
+    if (showacc) std::cout<<"sorted w desc = "<<w<<std::endl;
     for(int i=1;i<NN;++i) {
         Assert(w(i-1) >= w(i),"Sort real Vector desc");
     }
-    w2 = P3 * w2;
-    //w2.permute(perm);
+    w2 = P * w2;
     Assert(w2 == w,"Sort real Vector desc -- perm");
     w = origw;
     w.sort(tmv::Descend);
     Assert(w2 == w,"Sort real Vector desc -- without perm");
     w = w2 = origw;
 
-    tmv::Permutation P4 = w.sort(perm,tmv::Descend,tmv::AbsComp);
-    if (showacc)
-        std::cout<<"sorted w desc abs = "<<w<<std::endl;
+    w.sort(P,tmv::Descend,tmv::AbsComp);
+    if (showacc) std::cout<<"sorted w desc abs = "<<w<<std::endl;
     for(int i=1;i<NN;++i) {
-        Assert(tmv::TMV_ABS(w(i-1)) >= tmv::TMV_ABS(w(i)),"Sort real Vector desc abs");
+        Assert(tmv::TMV_ABS(w(i-1)) >= tmv::TMV_ABS(w(i)),
+               "Sort real Vector desc abs");
     }
-    w2 = P4 * w2;
-    //w2.permute(perm);
+    w2 = P * w2;
     Assert(w2 == w,"Sort real Vector desc abs -- perm");
     w = origw;
     w.sort(tmv::Descend,tmv::AbsComp);
@@ -249,18 +247,20 @@ template <class T> static void TestVectorComplex()
     tmv::Vector<std::complex<T> > v(N);
     for (int i=0; i<N; ++i) v(i) = std::complex<T>(T(i),T(i+1234));
 
-    for (int i=0; i<N; ++i) Assert(v(i).real() == T(i),
-                                   "CVector set");
-    for (int i=0; i<N; ++i) Assert(v(i).imag() == T(i+1234),
-                                   "CVector set");
+    for (int i=0; i<N; ++i) 
+        Assert(v(i).real() == T(i), "CVector set");
+    for (int i=0; i<N; ++i) 
+        Assert(v(i).imag() == T(i+1234), "CVector set");
 
-    tmv::VectorView<std::complex<T>,2> v1(v.subVector(0,N,2));
-    for (int i=0; i<N/2; ++i) Assert(v1(i) == std::complex<T>(T(2*i),T(2*i+1234)),
-                                     "CVector stride=2");
+    tmv::VectorView<std::complex<T> > v1(v.subVector(0,N,2));
+    for (int i=0; i<N/2; ++i) 
+        Assert(v1(i) == std::complex<T>(T(2*i),T(2*i+1234)),
+               "CVector stride=2");
 
     for (int i=0; i<N/2; ++i) v1[i] = std::complex<T>(T(i),T(i+1234));
-    for (int i=0; i<N/2; ++i) Assert(v[2*i] == std::complex<T>(T(i),T(i+1234)),
-                                     "setting CVector with stride = 2");
+    for (int i=0; i<N/2; ++i) 
+        Assert(v[2*i] == std::complex<T>(T(i),T(i+1234)),
+               "setting CVector with stride = 2");
 
     for (int i=0; i<N; ++i) v(i) = std::complex<T>(T(i),T(i+1234));
 
@@ -275,6 +275,36 @@ template <class T> static void TestVectorComplex()
         Assert(v2(i) == std::complex<T>(T(i),T(-i-1234)), "Conjugate CVector");
     Assert(v2 == v.conjugate(),"Conjugate == CVector");
 
+    tmv::Vector<std::complex<T> > v3(N);
+    for (int i=0; i<N; ++i) v3(i) = std::complex<T>(i+10,2*i);
+    v3(23) = std::complex<T>(40*N,9*N);
+    v3(42) = std::complex<T>(0.15,-0.20);
+    v3(15) = std::complex<T>(-32*N,24*N);
+    int imax,imin;
+    if (showacc) {
+        std::cout<<"v = "<<v3<<std::endl;
+        std::cout<<"v.MaxAbs = "<<v3.maxAbsElement(&imax)<<std::endl;
+        std::cout<<"imax = "<<imax<<std::endl;
+        std::cout<<"v.MinAbs = "<<v3.minAbsElement(&imin)<<std::endl;
+        std::cout<<"imin = "<<imin<<std::endl;
+    }
+    Assert(std::abs(v3.maxAbsElement(&imax) - T(41*N)) < tmv::TMV_Epsilon<T>(),
+           "MaxAbsElement of Vector did not return correct value");
+    Assert(imax == 23,
+           "MaxAbsElement of Vector did not return correct index");
+    Assert(std::abs(v3.minAbsElement(&imin) - T(0.25)) < tmv::TMV_Epsilon<T>(),
+           "MinAbsElement of Vector did not return correct value");
+    Assert(imin == 42,
+           "MinAbsElement of Vector did not return correct index");
+    Assert(std::abs(v3.maxAbs2Element(&imax) - T(56*N)) < tmv::TMV_Epsilon<T>(),
+           "MaxAbs2Element of Vector did not return correct value");
+    Assert(imax == 15,
+           "MaxAbs2Element of Vector did not return correct index");
+    Assert(std::abs(v3.minAbs2Element(&imin) - T(0.35)) < tmv::TMV_Epsilon<T>(),
+           "MinAbs2Element of Vector did not return correct value");
+    Assert(imin == 42,
+           "MinAbs2Element of Vector did not return correct index");
+ 
     if (tmv::TMV_Epsilon<T>() == T(0)) return;
 
     std::complex<T> prod_act(0);
@@ -283,6 +313,8 @@ template <class T> static void TestVectorComplex()
     Assert(tmv::TMV_ABS(prod-prod_act) < EPS*tmv::TMV_ABS(prod_act),
            "CVector * CVector");
     prod = v*v.conjugate();
+    prod_act = T(0);
+    for (int i=0; i<N; ++i) prod_act += v[i] * std::conj(v[i]);
     Assert(tmv::TMV_ABS(prod.imag()) < EPS,"prod is real");
     Assert(tmv::TMV_ABS(prod-prod_act) < EPS*tmv::TMV_ABS(prod_act),
            "CVector * conj(CVector)");
@@ -306,7 +338,8 @@ template <class T> static void TestVectorComplex()
         std::cout<<"sumact = "<<sum_act<<std::endl;
         std::cout<<"diff = "<<tmv::TMV_ABS(sumel-sum_act)<<std::endl;
     }
-    Assert(tmv::TMV_ABS(sumel-sum_act) < EPS*tmv::TMV_ABS(sum_act),"CVector SumElements");
+    Assert(tmv::TMV_ABS(sumel-sum_act) < EPS*tmv::TMV_ABS(sum_act),
+           "CVector SumElements");
 
     T sumabs_act(0);
     for (int i=0; i<N; ++i) sumabs_act += tmv::TMV_ABS(v[i]);
@@ -340,8 +373,10 @@ template <class T> static void TestVectorComplex()
         std::cout<<"eps = "<<EPS*Norm(ca)*Norm(cb)<<std::endl;
     }
     Assert(tmv::TMV_ABS(ca*cb - prod) < EPS*Norm(ca)*Norm(cb),"CInner Product");
-    Assert(tmv::TMV_ABS(Norm(ca+cb) - normsum) < EPS*tmv::TMV_ABS(Norm(ca)+Norm(cb)),"CVector Sum");
-    Assert(tmv::TMV_ABS(Norm(ca-cb) - normdiff) < EPS*tmv::TMV_ABS(Norm(ca)+Norm(cb)),"CVector Diff");
+    Assert(tmv::TMV_ABS(Norm(ca+cb) - normsum) < 
+           EPS*tmv::TMV_ABS(Norm(ca)+Norm(cb)),"CVector Sum");
+    Assert(tmv::TMV_ABS(Norm(ca-cb) - normdiff) < 
+           EPS*tmv::TMV_ABS(Norm(ca)+Norm(cb)),"CVector Diff");
 
     const int NN=20;
     tmv::Vector<std::complex<T> > w(NN);
@@ -355,121 +390,105 @@ template <class T> static void TestVectorComplex()
 
     tmv::Vector<std::complex<T> > origw = w;
     tmv::Vector<std::complex<T> > w2 = w;
-    int perm[NN];
-    if (showacc)
-        std::cout<<"unsorted w = "<<w<<std::endl;
+    tmv::Permutation P(NN);
+    if (showacc) std::cout<<"unsorted w = "<<w<<std::endl;
 
-    tmv::Permutation P = w.sort(perm);
-    if (showacc)
-        std::cout<<"sorted w = "<<w<<std::endl;
+    w.sort(P);
+    if (showacc) std::cout<<"sorted w = "<<w<<std::endl;
     for(int i=1;i<NN;++i) {
         Assert(real(w(i-1)) <= real(w(i)),"Sort complex Vector");
     }
     w2 = P * w2;
-    //w2.permute(perm);
     Assert(w2 == w,"Sort complex Vector -- perm");
     w = origw;
     w.sort();
     Assert(w2 == w,"Sort complex Vector -- without perm");
     w = P.inverse() * w;
-    //w.reversePermute(perm);
-    if (showacc)
-        std::cout<<"reverse permute sorted Vector = "<<w<<std::endl;
+    if (showacc) std::cout<<"reverse permute sorted Vector = "<<w<<std::endl;
     Assert(w == origw,"Reverse permute sorted Vector = orig");
     w2 = origw;
 
-    tmv::Permutation P2 = w.sort(perm,tmv::Ascend,tmv::AbsComp);
-    if (showacc)
-        std::cout<<"sorted w abs = "<<w<<std::endl;
+    w.sort(P,tmv::Ascend,tmv::AbsComp);
+    if (showacc) std::cout<<"sorted w abs = "<<w<<std::endl;
     for(int i=1;i<NN;++i) {
-        Assert(tmv::TMV_ABS(w(i-1)) <= tmv::TMV_ABS(w(i)),"Sort complex Vector abs");
+        Assert(tmv::TMV_ABS(w(i-1)) <= tmv::TMV_ABS(w(i)),
+               "Sort complex Vector abs");
     }
-    w2 = P2 * w2;
-    //w2.permute(perm);
+    w2 = P * w2;
     Assert(w2 == w,"Sort complex Vector abs -- perm");
     w = origw;
     w.sort(tmv::Ascend,tmv::AbsComp);
     Assert(w2 == w,"Sort complex Vector abs -- without perm");
     w = w2 = origw;
 
-    tmv::Permutation P3 = w.sort(perm,tmv::Ascend,tmv::ArgComp);
-    if (showacc)
-        std::cout<<"sorted w arg = "<<w<<std::endl;
+    w.sort(P,tmv::Ascend,tmv::ArgComp);
+    if (showacc) std::cout<<"sorted w arg = "<<w<<std::endl;
     for(int i=1;i<NN;++i) {
-        Assert(tmv::TMV_ARG(w(i-1)) <= tmv::TMV_ARG(w(i)),"Sort complex Vector arg");
+        Assert(tmv::TMV_ARG(w(i-1)) <= tmv::TMV_ARG(w(i)),
+               "Sort complex Vector arg");
     }
-    w2 = P3 * w2;
-    //w2.permute(perm);
+    w2 = P * w2;
     Assert(w2 == w,"Sort complex Vector arg -- perm");
     w = origw;
     w.sort(tmv::Ascend,tmv::ArgComp);
     Assert(w2 == w,"Sort complex Vector arg -- without perm");
     w = w2 = origw;
 
-    tmv::Permutation P4 = w.sort(perm,tmv::Ascend,tmv::ImagComp);
-    if (showacc)
-        std::cout<<"sorted w imag = "<<w<<std::endl;
+    w.sort(P,tmv::Ascend,tmv::ImagComp);
+    if (showacc) std::cout<<"sorted w imag = "<<w<<std::endl;
     for(int i=1;i<NN;++i) {
         Assert(imag(w(i-1)) <= imag(w(i)),"Sort complex Vector imag");
     }
-    w2 = P4 * w2;
-    //w2.permute(perm);
+    w2 = P * w2;
     Assert(w2 == w,"Sort complex Vector imag -- perm");
     w = origw;
     w.sort(tmv::Ascend,tmv::ImagComp);
     Assert(w2 == w,"Sort complex Vector imag -- without perm");
     w = w2 = origw;
 
-    tmv::Permutation P5 = w.sort(perm,tmv::Descend);
-    if (showacc)
-        std::cout<<"sorted w desc = "<<w<<std::endl;
+    w.sort(P,tmv::Descend);
+    if (showacc) std::cout<<"sorted w desc = "<<w<<std::endl;
     for(int i=1;i<NN;++i) {
         Assert(real(w(i-1)) >= real(w(i)),"Sort complex Vector desc");
     }
-    w2 = P5 * w2;
-    //w2.permute(perm);
+    w2 = P * w2;
     Assert(w2 == w,"Sort complex Vector desc -- perm");
     w = origw;
     w.sort(tmv::Descend);
     Assert(w2 == w,"Sort complex Vector desc -- without perm");
     w = w2 = origw;
 
-    tmv::Permutation P6 = w.sort(perm,tmv::Descend,tmv::AbsComp);
-    if (showacc)
-        std::cout<<"sorted w desc abs = "<<w<<std::endl;
+    w.sort(P,tmv::Descend,tmv::AbsComp);
+    if (showacc) std::cout<<"sorted w desc abs = "<<w<<std::endl;
     for(int i=1;i<NN;++i) {
         Assert(tmv::TMV_ABS(w(i-1)) >= tmv::TMV_ABS(w(i)),"Sort complex Vector desc abs");
     }
-    w2 = P6 * w2;
-    //w2.permute(perm);
+    w2 = P * w2;
     Assert(w2 == w,"Sort complex Vector desc abs -- perm");
     w = origw;
     w.sort(tmv::Descend,tmv::AbsComp);
     Assert(w2 == w,"Sort complex Vector desc abs -- without perm");
     w = w2 = origw;
 
-    tmv::Permutation P7 = w.sort(perm,tmv::Descend,tmv::ArgComp);
-    if (showacc)
-        std::cout<<"sorted w desc arg = "<<w<<std::endl;
+    w.sort(P,tmv::Descend,tmv::ArgComp);
+    if (showacc) std::cout<<"sorted w desc arg = "<<w<<std::endl;
     for(int i=1;i<NN;++i) {
         Assert(tmv::TMV_ARG(w(i-1)) >= tmv::TMV_ARG(w(i)),"Sort complex Vector desc arg");
     }
-    w2 = P7 * w2;
-    //w2.permute(perm);
+    w2 = P * w2;
     Assert(w2 == w,"Sort complex Vector desc arg -- perm");
     w = origw;
     w.sort(tmv::Descend,tmv::ArgComp);
     Assert(w2 == w,"Sort complex Vector desc arg -- without perm");
     w = w2 = origw;
 
-    tmv::Permutation P8 = w.sort(perm,tmv::Descend,tmv::ImagComp);
+    w.sort(P,tmv::Descend,tmv::ImagComp);
     if (showacc)
         std::cout<<"sorted w desc imag = "<<w<<std::endl;
     for(int i=1;i<NN;++i) {
         Assert(imag(w(i-1)) >= imag(w(i)),"Sort complex Vector desc imag");
     }
-    w2 = P8 * w2;
-    //w2.permute(perm);
+    w2 = P * w2;
     Assert(w2 == w,"Sort complex Vector desc imag -- perm");
     w = origw;
     w.sort(tmv::Descend,tmv::ImagComp);
@@ -485,8 +504,8 @@ template <class T> static void TestVectorArith()
 {
     typedef tmv::VectorView<T> V;
     typedef tmv::VectorView<std::complex<T> > CV;
-    typedef tmv::VectorViewF<T> VF;
-    typedef tmv::VectorViewF<std::complex<T> > CVF;
+    typedef tmv::VectorView<T,tmv::FortranStyle> VF;
+    typedef tmv::VectorView<std::complex<T>,tmv::FortranStyle> CVF;
 
     if (showstartdone) {
         std::cout<<"Start Test Vector Arith"<<std::endl;
