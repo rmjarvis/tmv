@@ -1,4 +1,4 @@
-#Instructions for building TMV in Microsoft Visual C++
+#summary Instructions for building TMV in Microsoft Visual C++
 
 = Installing using Microsoft Visual C++ =
 
