@@ -1,4 +1,4 @@
-#Instructions for downloading and installing the TMV library
+#summary Instructions for downloading and installing the TMV library
 
 = Obtaining the source code =
 
