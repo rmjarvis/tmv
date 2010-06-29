@@ -2,46 +2,41 @@
 
 = Installing using CMake =
 
-CMake is another automated build tool.  I am not very well versed in it, but a user of the 
-TMV library, Andy Molloy, sent me the \texttt{CMakeLists.txt} files that he used to compile TMV,
-so I am distributing them for anyone else who wants
-to use them.  It is an easy way to build a basic TMV library, but I am not sure how hard it is
-to get it working with BLAS or LAPACK libraries\footnote{
-I was about to start learning more about it when a colleague, Erin Sheldon, introduced me to
-SCons, which I like a lot, so I haven't been motivated to go back to CMake and really flesh
-it out like I did with the SCons installation script.}.
-The basic usage is as follows:
-
-\begin{enumerate}
-\item Download and unpack the tarball as described above (\S\ref{Install_Obtain}).
-
-\item
-Download CMake from \url{http://www.cmake.org/} if you do not already have it.
-
-\item
-In the TMV directory, type\\
-\texttt{cmake -i .} $\qquad$ (for interactive text-based configuration) \\
-or\\
-\texttt{ccmake .} $\qquad \quad \,$ (for menu-based configuration) \\
-for Unix, or run \texttt{CMakeSetup.exe} in Windows.
-
-Answer the configuration questions and/or set the options listed.
-
-\item
-Type:\\
-\texttt{make tmv}\\
-\texttt{make tmv\_symband}\\
-to make the libraries.
-
-\item
-(Optional) Type:\\
-\texttt{make tmvtest1}\\
-\texttt{make tmvtest2}\\
-\texttt{make tmvtest3}\\
-to make the test suites.
-
-\end{enumerate}
+CMake is another automated build tool.  I am not very well versed in it, but a user of the TMV library, Andy Molloy, sent me the \texttt{CMakeLists.txt} files that he used to compile TMV, so I am distributing them for anyone else who wants to use them.  It is an easy way to build a basic TMV library, but I am not sure how hard it is to get it working with BLAS or LAPACK libraries.  (I was about to start learning more about it when a colleague, Erin Sheldon, introduced me to SCons, which I like a lot, so I haven't been motivated to go back to CMake and really flesh it out like I did with the SCons installation script.) 
 
 I haven't incorporated most of the options that I added to the SCons installation above.
 But I think all of that is possible with CMake, so if someone who is an expert in CMake wants
 to do this and send me the CMake files for it, I'll include them in future releases.
+
+The basic usage is as follows:
+
+1. Download CMake from [http://www.cmake.org/] if you do not already have it.
+
+2. Configure CMake for you system. For Unix (or Linux, etc.) systems, there are two options.  For interactive text-based configuration, type (in the TMV directory): 
+{{{
+cmake -i .
+}}}
+or for menu-based configuration, type:
+{{{
+ccmake .
+}}}
+
+In Windows, you should instead run the program:
+{{{
+CMakeSetup.exe
+}}}
+
+Answer the configuration questions and/or set the options listed.
+
+3. Build the TMV library:  Type:
+{{{
+make tmv
+make tmv\_symband
+}}}
+
+4. (Optional) Build the test suite:  Type:
+{{{
+make tmvtest1
+make tmvtest2
+make tmvtest3
+}}}
