@@ -2,7 +2,7 @@
 
 = Obtaining the source code =
 
-1. Go to Downloads tab for a link to a tarball with all of the source code (or on the right hand side of the Project Home under "Featured Downloads").
+1. Go to Downloads tab for a link to a tarball with all of the source code (or simply [http://code.google.com/p/tmv-cpp/downloads/detail?name=tmv0.64.tar.gz click here]).
 
 2. Copy it to the directory where you want to put the TMV library.
 
