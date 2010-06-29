@@ -11,11 +11,10 @@ to specify them by hand.
 
 If you have trouble installing with SCons, you can try the 
 [Make_Installation Makefile installation] instead.  And please let me know about 
-the problem you are having either at [tmv-discuss@googlegroups.com] or [http://code.google.com/p/tmv-cpp/issues].
+the problem you are having either at [http://groups.google.com/group/tmv-discuss TMV Discuss] or [http://code.google.com/p/tmv-cpp/issues Issues].
 
 === 1. Make sure you have SCons installed on your system.  ===
-It is available for free from [http://www.scons.org/].  (It is a
-very quick installation if you have Python installed.)
+It is available for free from [http://www.scons.org/].  (It is a very quick installation if you have Python installed.)
 
 === 2. Build library ===
 Type 
