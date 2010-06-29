@@ -9,7 +9,7 @@
 3. Unpack the tarball: 
 {{{
 gunzip tmv0.64.tar.gz
-tar xf tmv\tmvversion .tar
+tar xf tmv0.64.tar
 }}}
 
 This will make a directory called `tmv0.64` with the subdirectories:
