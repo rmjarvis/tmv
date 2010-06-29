@@ -2,14 +2,14 @@
 
 = Obtaining the source code =
 
-  * Go to Downloads tab for a link to a tarball with all of the source code (or on the right hand side of the Project Home under "Featured Downloads").
+1. Go to Downloads tab for a link to a tarball with all of the source code (or on the right hand side of the Project Home under "Featured Downloads").
 
-  * Copy it to the directory where you want to put the TMV library.
+2. Copy it to the directory where you want to put the TMV library.
 
-  * Unpack the tarball: 
+3. Unpack the tarball: 
 {{{
-    gunzip tmv0.64.tar.gz
-    tar xf tmv\tmvversion .tar
+gunzip tmv0.64.tar.gz
+tar xf tmv\tmvversion .tar
 }}}
 
 This will make a directory called `tmv0.64` with the subdirectories:
