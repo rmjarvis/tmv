@@ -1,4 +1,4 @@
-#summary Overview of notable features of TMV
+#summary Overview of some of the more notable features of TMV
 
 == Key features of TMV==
 
