@@ -6,11 +6,12 @@
 
 2. Copy it to the directory where you want to put the TMV library.
 
-3. Unpack the tarball: 
+3. Unpack the tarball.  On linux machines, the commands are:
 {{{
 gunzip tmv0.64.tar.gz
 tar xf tmv0.64.tar
 }}}
+On Windows, you can use a utility like [http://www.izarc.org/ IZArc], or something similar.
 
 This will make a directory called `tmv0.64` with the subdirectories:
 `doc`, `examples`, `include`, `lib`, `src` and `test`
