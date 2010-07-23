@@ -1,0 +1,161 @@
+Note: More complete installation information is contained in 
+doc/TMV_Documentation.pdf,
+
+First, see INSTALL for instructions on downloading and unpacking the 
+tarball if you have not already done so.
+
+This file give the instructions for installing TMV using the program make.
+
+
+1. Edit Makefile:
+
+   There are 5 things at the start of the makefile that will 
+   possibly need to be changed.  The defaults are:
+
+   CC= g++
+   INCLUDE= -Iinclude
+   CFLAGS= $(INCLUDE) -O -DNOBLAS -DNDEBUG
+   BLASLIBS= 
+   PREFIX=/usr/local
+
+   CC should be set to whatever C++ compiler you want to use.
+   The code has been tested with:
+       g++ versions 3.4.6, 4.0.2, 4.1.2, 4.2.2, 4.3.1, and 4.3.2
+       icc versions 9.0, 9.1, 10.1, and 11.0
+       pgCC version 6.1
+       Microsoft Visual C++ Express 2008 Edition
+   It should work with any ansi-compliant compiler, these 
+   are all that I have access to at the moment, and therefore, all that
+   I have been able to test.
+
+   For CFLAGS, there are a number of -D defines that you may want to use in 
+   addition to any optimization parameters like -fast, -O, etc.
+   A comprehensive list is provided in the pdf documentation.
+
+   In particular, there are flags to control which types to instantiate 
+   for the compiled functions.  The default is to instantiate functions
+   for double and float (and their corresponding complex varieties).
+
+     -DNO_INST_FLOAT -- Don't instantiate float or complex<float>
+     -DNO_INST_DOUBLE -- Don't instantiate double or complex<double>
+     -DNO_INST_COMPLEX -- Don't instantiate any complex types
+     -DINST_INT -- Instantiate int and complex<int>
+     -DINST_LONGDOUBLE -- Instantiate long double and complex<long double>
+
+   Also, there are some flags to specify some popular BLAS/LAPACK options:
+
+     -DCBLAS -- Use a CBlas Library
+     -DFBLAS -- Use a Fortran Blas Library
+     -DATLAS -- Use the ATLAS Blas Library
+     -DMKL -- Use Intel's Math Kernel Library for BLAS/LAPACK
+     -DACML -- Use the AMD Core Math Library for BLAS/LAPACK
+     -DCLAPACK -- Use the CLAPACK Library
+     -DFLAPACK -- Use a Fortran LAPACK Library
+     -DNOBLAS -- Do not use any external BLAS library
+     -DNOLAP -- Do not use any external LAPACK library
+
+   INCLUDE should include the locations of any BLAS or LAPACK .h files
+   that you are using.  e.g.:
+   
+     INCLUDE= -Iinclude -I/usr/local/atlas/include
+
+   BLASLIBS should include the linking options for any BLAS or LAPACK
+   libraries that you need to link to.  e.g.:
+   
+     BLASLIBS= -L/usr/local/atlas/lib -lcblas -latlas
+
+   There are examples in the Makefile itself for a variety of systems
+   which can help you determine what is appropriate for your machine.
+   Also, see doc/TMV_Documentation.pdf for more details and 
+   known issues for some compilers.
+
+   Finally, PREFIX gives the location where you want to install the 
+   TMV library and include files when you type make install.
+
+
+2. (advanced) Edit include/TMV_Inst.h and include/TMV_Blas.h files:
+
+   As mentioned above, the default setup is to instantiate everything
+   for floats and doubles.  In addition, int and long double may be 
+   specified with the above flags.  But if you wan to instantiate 
+   the TMV code for some other type, such as a user-defined type,
+   then you will need to add that type to the file TMV_Inst.h.
+   See that file for how to do this.
+
+   Also, every BLAS and LAPACK package seems to use slightly different
+   syntaxes.  Especially for their complex operations.  The above
+   flags set things up for some popular packages, but if you have a 
+   different one than these, you may need to edit TMV_Blas.h to
+   set things up appropriately for your package.  See that file
+   for how to do this.
+
+
+3. Make the libraries:
+
+   make libs
+
+   This will make the files lib/libtmv.a and lib/libtmv_symband.a.
+
+
+4. (optional) Make the test and example programs:
+
+   make test
+
+   will make the programs bin/tmvtest1, bin/tmvtest2, and bin/tmvtest3.
+
+   They should each compile successfully, and when you run them, they 
+   should output a bunch of lines reading:
+     [Something] passed all tests.
+ 
+   make examples
+
+   will make the programs bin/vector, bin/matrix, bin/bandmatrix, 
+   bin/symmatrix and bin/division.
+
+   The code for these programs and the corresponding output should give
+   you a quick guide to using the TMV library.
+
+
+5. (optional) Install the library and header files:
+
+   make install
+
+   will copy all the header files necessary for compiling your own program
+   into the directory $(PREFIX)/include and copy the library files
+   into the directory $(PREFIX)/lib.  
+
+   The default value of PREFIX is /usr/local, but this can be changed
+   as described above.  
+
+
+6. Compile your own program:
+
+   Each .cpp file that uses the TMV library will need to have
+
+   #include "TMV.h"
+
+   at the top.  Furthermore, if you are using some of the special matrix
+   varieties, you will need to include their .h files as well:
+
+   #include "TMV_Band.h"
+   #include "TMV_Sym.h"
+   #include "TMV_SymBand.h"
+
+   Also, you will need to compile with -I[tmvdir]/include,
+   and also link with 
+
+   -L[tmvdir]/lib -ltmv -lm.
+
+   where [tmvdir] is either the directory where you installed the libraries
+   or this directory if you did not.  Of course, if you installed the 
+   libraries to a directory in your path, then you do not need the 
+   -I and -L flags.
+
+   If you use and banded or symmetric/hermitian matrices, then you will
+   need to link with 
+
+   -L[tmvdir]/lib -ltmv_symband -ltmv -lm
+
+   And remember to link with whatever BLAS and/or LAPACK libraries
+   that you specified for TMV to use.
+

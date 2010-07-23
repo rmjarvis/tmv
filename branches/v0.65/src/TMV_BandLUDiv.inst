@@ -1,0 +1,48 @@
+
+#define CT std::complex<T>
+
+#define DefDivEq(T,T1)\
+template void LU_PackedPL_Unpack(const GenBandMatrix<T1 >& A, \
+    const int* p, const LowerTriMatrixView<T >& m); \
+template void LU_PackedPL_LDivEq(const GenBandMatrix<T1 >& A, \
+    const int* p, const MatrixView<T >& m); \
+template void LU_PackedPL_RDivEq(const GenBandMatrix<T1 >& A, \
+    const int* p, const MatrixView<T >& m); \
+template void LU_LDivEq(const GenBandMatrix<T1 >& A, \
+    const int* p, const MatrixView<T >& m); \
+template void LU_RDivEq(const GenBandMatrix<T1 >& A, \
+    const int* p, const MatrixView<T >& m); \
+
+DefDivEq(T,T)
+#ifdef INST_COMPLEX
+DefDivEq(CT,T)
+DefDivEq(CT,CT)
+#endif
+
+#undef DefDivEq
+
+#define DefDivEq(T,T1)\
+template <> void LU_PackedPL_Unpack(const GenBandMatrix<T1 >& , \
+    const int* , const LowerTriMatrixView<T >& ) \
+    { TMVAssert(TMV_FALSE); }\
+template <> void LU_PackedPL_LDivEq(const GenBandMatrix<T1 >& , \
+    const int* , const MatrixView<T >& ) \
+    { TMVAssert(TMV_FALSE); }\
+template <> void LU_PackedPL_RDivEq(const GenBandMatrix<T1 >& , \
+    const int* , const MatrixView<T >& ) \
+    { TMVAssert(TMV_FALSE); }\
+template <> void LU_LDivEq(const GenBandMatrix<T1 >& , \
+    const int* , const MatrixView<T >& ) \
+    { TMVAssert(TMV_FALSE); }\
+template <> void LU_RDivEq(const GenBandMatrix<T1 >& , \
+    const int* , const MatrixView<T >& ) \
+    { TMVAssert(TMV_FALSE); }\
+
+#ifdef INST_COMPLEX
+DefDivEq(T,CT)
+#endif
+
+#undef DefDivEq
+
+#undef CT
+

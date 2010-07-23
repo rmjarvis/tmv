@@ -1,0 +1,114 @@
+
+#define CT std::complex<T>
+
+#define Def1(T,RT,CCT) \
+  template T GenUpperTriMatrix<T >::cref(int i, int j) const; \
+  template T GenLowerTriMatrix<T >::cref(int i, int j) const; \
+  template TriRef<T,true> UpperTriMatrixView<T,CStyle>::ref(int i, int j) const; \
+  template TriRef<T,true> LowerTriMatrixView<T,CStyle>::ref(int i, int j) const; \
+  template bool GenUpperTriMatrix<T >::hasSubMatrix( \
+      int i1, int i2, int j1, int j2, int istep, int jstep) const; \
+  template bool GenUpperTriMatrix<T >::hasSubVector( \
+      int i, int j, int istep, int jstep, int size) const; \
+  template bool GenUpperTriMatrix<T >::hasSubTriMatrix( \
+      int i1, int i2, int istep) const; \
+  template bool ConstUpperTriMatrixView<T,FortranStyle>::hasSubMatrix( \
+      int i1, int i2, int j1, int j2, int istep, int jstep) const; \
+  template bool ConstUpperTriMatrixView<T,FortranStyle>::hasSubVector( \
+      int i, int j, int istep, int jstep, int size) const; \
+  template bool ConstUpperTriMatrixView<T,FortranStyle>::hasSubTriMatrix( \
+      int i1, int i2, int istep) const; \
+  template RT GenUpperTriMatrix<T >::normF() const; \
+  template RT GenUpperTriMatrix<T >::normSq(const RT scale) const; \
+  template RT GenUpperTriMatrix<T >::norm1() const; \
+  template RT GenUpperTriMatrix<T >::doNorm2() const; \
+  template RT GenUpperTriMatrix<T >::doCondition() const; \
+  template RT GenUpperTriMatrix<T >::normInf() const; \
+  template RT GenUpperTriMatrix<T >::maxAbsElement() const; \
+  template RT GenUpperTriMatrix<T >::maxAbs2Element() const; \
+  template auto_ptr<BaseMatrix<T > > GenUpperTriMatrix<T >::newCopy() const; \
+  template auto_ptr<BaseMatrix<T > > GenUpperTriMatrix<T >::newView() const; \
+  template auto_ptr<BaseMatrix<T > > GenUpperTriMatrix<T >::newTranspose() const; \
+  template auto_ptr<BaseMatrix<T > > GenUpperTriMatrix<T >::newConjugate() const; \
+  template auto_ptr<BaseMatrix<T > > GenUpperTriMatrix<T >::newAdjoint() const; \
+  template auto_ptr<BaseMatrix<T > > GenUpperTriMatrix<T >::newInverse() const; \
+  template auto_ptr<BaseMatrix<T > > GenLowerTriMatrix<T >::newCopy() const; \
+  template auto_ptr<BaseMatrix<T > > GenLowerTriMatrix<T >::newView() const; \
+  template auto_ptr<BaseMatrix<T > > GenLowerTriMatrix<T >::newTranspose() const; \
+  template auto_ptr<BaseMatrix<T > > GenLowerTriMatrix<T >::newConjugate() const; \
+  template auto_ptr<BaseMatrix<T > > GenLowerTriMatrix<T >::newAdjoint() const; \
+  template auto_ptr<BaseMatrix<T > > GenLowerTriMatrix<T >::newInverse() const; \
+  template void GenUpperTriMatrix<T >::write(std::ostream& os) const; \
+  template void GenUpperTriMatrix<T >::write(std::ostream& os, RT t) const; \
+  template void GenUpperTriMatrix<T >::writeCompact(std::ostream& os) const; \
+  template void GenUpperTriMatrix<T >::writeCompact(std::ostream& os, \
+      RT t) const; \
+  template void GenLowerTriMatrix<T >::write(std::ostream& os) const; \
+  template void GenLowerTriMatrix<T >::write(std::ostream& os, RT t) const; \
+  template void GenLowerTriMatrix<T >::writeCompact(std::ostream& os) const; \
+  template void GenLowerTriMatrix<T >::writeCompact(std::ostream& os, \
+      RT t) const; \
+  template const UpperTriMatrixView<T,CStyle>& \
+      UpperTriMatrixView<T,CStyle>::setZero() const; \
+  template const UpperTriMatrixView<T,CStyle>& \
+      UpperTriMatrixView<T,CStyle>::setAllTo(const T& x) const; \
+  template const UpperTriMatrixView<T,CStyle>& \
+      UpperTriMatrixView<T,CStyle>::clip(RT t) const; \
+  template const UpperTriMatrixView<T,CStyle>& \
+      UpperTriMatrixView<T,CStyle>::conjugateSelf() const; \
+  template const UpperTriMatrixView<T,CStyle>& \
+      UpperTriMatrixView<T,CStyle>::setToIdentity(const T& x) const; \
+  template void UpperTriMatrixView<T,CStyle>::read(std::istream& is) const; \
+  template void LowerTriMatrixView<T,CStyle>::read(std::istream& is) const; \
+  template std::istream& operator>>(std::istream& fin, \
+      const UpperTriMatrixView<T >& m); \
+  template std::istream& operator>>(std::istream& fin, \
+      const LowerTriMatrixView<T >& m); \
+  template void Swap(const UpperTriMatrixView<T >& m1, \
+      const UpperTriMatrixView<T >& m2); \
+
+Def1(T,T,CT)
+#ifdef INST_COMPLEX
+Def1(CT,T,CT)
+#endif
+
+#undef Def1
+
+#define Def2(T1,T2) \
+  template bool operator==(const GenUpperTriMatrix<T1 >& m1, \
+      const GenUpperTriMatrix<T2 >& m2); \
+
+Def2(T,T)
+#ifdef INST_COMPLEX
+Def2(T,CT)
+Def2(CT,T)
+Def2(CT,CT)
+#endif
+
+#undef Def2
+
+#define Def3(T,D,S) \
+  template std::istream& operator>>(std::istream& is, \
+      auto_ptr<UpperTriMatrix<T,D,S> >& m); \
+  template std::istream& operator>>(std::istream& is, \
+      auto_ptr<LowerTriMatrix<T,D,S> >& m); \
+  template std::istream& operator>>(std::istream& is, \
+      auto_ptr<UpperTriMatrix<T,D,S,FortranStyle> >& m); \
+  template std::istream& operator>>(std::istream& is,  \
+      auto_ptr<LowerTriMatrix<T,D,S,FortranStyle> >& m); \
+
+Def3(T,UnitDiag,RowMajor)
+Def3(T,UnitDiag,ColMajor)
+Def3(T,NonUnitDiag,RowMajor)
+Def3(T,NonUnitDiag,ColMajor)
+#ifdef INST_COMPLEX
+Def3(CT,UnitDiag,RowMajor)
+Def3(CT,UnitDiag,ColMajor)
+Def3(CT,NonUnitDiag,RowMajor)
+Def3(CT,NonUnitDiag,ColMajor)
+#endif
+
+#undef Def3
+
+#undef CT
+
