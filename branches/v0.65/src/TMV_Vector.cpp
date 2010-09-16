@@ -933,6 +933,7 @@ namespace tmv {
     }
 
 #ifdef INST_INT
+    template <>
     const VectorView<std::complex<int>,CStyle>& 
     VectorView<std::complex<int>,CStyle>::clip(int thresh) const
     { TMVAssert(TMV_FALSE); return *this; }
