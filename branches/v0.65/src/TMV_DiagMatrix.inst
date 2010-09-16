@@ -1,14 +1,7 @@
 
 #define CT std::complex<T>
 
-#define Def1(T,RT,CT) \
-  template T GenDiagMatrix<T >::det() const; \
-  template RT GenDiagMatrix<T >::logDet(T* sign) const; \
-  template const DiagMatrixView<T,CStyle>& \
-      DiagMatrixView<T,CStyle>::invertSelf() const; \
-  template void GenDiagMatrix<T >::doMakeInverseATA( \
-      const DiagMatrixView<T >& ) const; \
-  template void GenDiagMatrix<T >::doMakeInverseATA(const MatrixView<T >& ) const; \
+#define Def1(RT,T) \
   template QuotXD<T,T > GenDiagMatrix<T >::QInverse() const; \
   template void GenDiagMatrix<T >::write(std::ostream& os) const; \
   template void GenDiagMatrix<T >::write(std::ostream& os, RT thresh) const; \
@@ -19,11 +12,31 @@
   template auto_ptr<BaseMatrix<T > > GenDiagMatrix<T >::newTranspose() const; \
   template auto_ptr<BaseMatrix<T > > GenDiagMatrix<T >::newConjugate() const; \
   template auto_ptr<BaseMatrix<T > > GenDiagMatrix<T >::newAdjoint() const; \
+
+Def1(T,T)
+#ifdef INST_COMPLEX
+Def1(T,CT)
+#endif
+
+#undef Def1
+
+#ifndef TISINT
+#define Def1b(RT,T) \
+  template T GenDiagMatrix<T >::det() const; \
+  template RT GenDiagMatrix<T >::logDet(T* sign) const; \
+  template const DiagMatrixView<T,CStyle>& \
+      DiagMatrixView<T,CStyle>::invertSelf() const; \
+  template void GenDiagMatrix<T >::doMakeInverseATA( \
+      const DiagMatrixView<T >& ) const; \
+  template void GenDiagMatrix<T >::doMakeInverseATA(const MatrixView<T >& ) const; \
   template auto_ptr<BaseMatrix<T > > GenDiagMatrix<T >::newInverse() const; \
 
-Def1(T,T,CT)
+Def1b(T,T)
 #ifdef INST_COMPLEX
-Def1(CT,T,CT)
+Def1b(T,CT)
+#endif
+
+#undef Def1b
 #endif
 
 #define Def2(T,I) \

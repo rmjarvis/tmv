@@ -263,6 +263,10 @@ namespace tmv {
     template <class T> size_t LUDiv<T>::rowsize() const
     { return pimpl->LUx.rowsize(); }
 
+#ifdef INST_INT
+#undef INST_INT
+#endif
+
 #define InstFile "TMV_LUD.inst"
 #include "TMV_Inst.h"
 #undef InstFile

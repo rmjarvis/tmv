@@ -10,7 +10,7 @@ template <class T> void TestTriMatrixArith_A4a()
 
     tmv::Matrix<T,tmv::RowMajor> a1x(4,4);
     for(int i=0;i<4;++i) for(int j=0;j<4;++j) {
-        a1x(i,j) = T(2+4*i-5*j);
+        a1x(i,j) = T(3+4*i-6*j);
     }
     a1x(0,0) = 14; 
     a1x(1,0) = -2; 
@@ -26,7 +26,7 @@ template <class T> void TestTriMatrixArith_A4a()
 
     tmv::Matrix<T,tmv::ColMajor> a2x = a1x.transpose();
     a2x.row(1) *= T(3);
-    a2x.col(2) -= tmv::Vector<T>(4,4.);
+    a2x.col(2) -= tmv::Vector<T>(4,4);
     tmv::Matrix<CT,tmv::ColMajor> ca2x = ca1x;
     ca2x -= a2x;
     ca2x *= CT(1,-2);

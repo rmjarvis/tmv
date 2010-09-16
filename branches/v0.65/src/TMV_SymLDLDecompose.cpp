@@ -76,7 +76,7 @@ namespace tmv {
         const SymMatrixView<T>& A, const VectorView<T>& xD, 
         int* P, RT& logdet, T& signdet, int j1=0)
     {
-        // Bunch-Kauffman algorithm for LDL Decomposition of a symmetric matrix.
+        // Bunch-Kaufman algorithm for LDL Decomposition of a symmetric matrix.
         //
         // We want to decompose the matrix (input as A) into P * L * D * Lt * Pt,
         // where P is a permutation, L is a lower triangle matrix with 1's for 
@@ -165,7 +165,7 @@ namespace tmv {
         // O(n^2) comparisons, which needs to be done O(n) times, so these become 
         // a significant fraction of the computation time.
         //
-        // Bunch and Kauffman modified the algorithm slightly to require only
+        // Bunch and Kaufman modified the algorithm slightly to require only
         // O(n) comparisons for each step.  The values to calculate are:
         // a00 = |A(0,0)|
         // ap0 = |A(p,0)| = max_i |A(i,0)| 
@@ -1398,6 +1398,10 @@ namespace tmv {
         }
 #endif
     }
+
+#ifdef INST_INT
+#undef INST_INT
+#endif
 
 #define InstFile "TMV_SymLDLDecompose.inst"
 #include "TMV_Inst.h"

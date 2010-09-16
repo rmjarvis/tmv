@@ -351,6 +351,10 @@ namespace tmv {
     size_t BandLUDiv<T>::rowsize() const
     { return pimpl->LUx.rowsize(); }
 
+#ifdef INST_INT
+#undef INST_INT
+#endif
+
 #define InstFile "TMV_BandLUD.inst"
 #include "TMV_Inst.h"
 #undef InstFile

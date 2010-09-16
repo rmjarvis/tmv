@@ -117,6 +117,42 @@ namespace tmv {
         return logdet;
     }
 
+#ifdef INST_INT
+    template <>
+    int GenDiagMatrix<int>::det() const
+    {
+        const int* di = diag().cptr();
+        const int ds = diag().step();
+        int det(1);
+        if (ds == 1) {
+            for(int i=size();i>0;--i,++di) det *= *di;
+        } else {
+            for(int i=size();i>0;--i,di+=ds) det *= *di;
+        }
+        return det;
+    }
+    template <>
+    std::complex<int> GenDiagMatrix<std::complex<int> >::det() const
+    {
+        const std::complex<int>* di = diag().cptr();
+        const int ds = diag().step();
+        std::complex<int> det(1);
+        if (ds == 1) {
+            for(int i=size();i>0;--i,++di) det *= *di;
+        } else {
+            for(int i=size();i>0;--i,di+=ds) det *= *di;
+        }
+        return diag().isconj() ? TMV_CONJ(det) : det;
+    }
+
+    template <>
+    int GenDiagMatrix<int>::logDet(int* ) const
+    { TMVAssert(TMV_FALSE); return 0; }
+    template <>
+    int GenDiagMatrix<std::complex<int> >::logDet(std::complex<int>* ) const
+    { TMVAssert(TMV_FALSE); return 0; }
+#endif
+
     template <class T>
     auto_ptr<BaseMatrix<T> > GenDiagMatrix<T>::newCopy() const
     {
@@ -229,6 +265,16 @@ namespace tmv {
         return *this;
     }
 
+#ifdef INST_INT
+    template <>
+    const DiagMatrixView<int,CStyle>& 
+        DiagMatrixView<int,CStyle>::invertSelf() const
+    { TMVAssert(TMV_FALSE); return *this; }
+    template <>
+    const DiagMatrixView<std::complex<int>,CStyle>& 
+        DiagMatrixView<std::complex<int>,CStyle>::invertSelf() const
+    { TMVAssert(TMV_FALSE); return *this; }
+#endif
 
     template <class T> template <class T1> 
     void GenDiagMatrix<T>::doMakeInverse(const MatrixView<T1>& minv) const
@@ -242,9 +288,29 @@ namespace tmv {
         }
     }
 
+#ifdef INST_INT
+    template <> template <class T1>
+    void GenDiagMatrix<int>::doMakeInverse(const MatrixView<T1>& ) const
+    { TMVAssert(TMV_FALSE); }
+    template <> template <class T1>
+    void GenDiagMatrix<std::complex<int> >::doMakeInverse(
+        const MatrixView<T1>& ) const
+    { TMVAssert(TMV_FALSE); }
+#endif
+
     template <class T> template <class T1> 
     void GenDiagMatrix<T>::doMakeInverse(const DiagMatrixView<T1>& minv) const
     { (minv = *this).invertSelf(); }
+
+#ifdef INST_INT
+    template <> template <class T1>
+    void GenDiagMatrix<int>::doMakeInverse(const DiagMatrixView<T1>& ) const
+    { TMVAssert(TMV_FALSE); }
+    template <> template <class T1>
+    void GenDiagMatrix<std::complex<int> >::doMakeInverse(
+        const DiagMatrixView<T1>& ) const
+    { TMVAssert(TMV_FALSE); }
+#endif
 
     template <class T>
     void GenDiagMatrix<T>::doMakeInverseATA(const DiagMatrixView<T>& ata) const
@@ -271,12 +337,33 @@ namespace tmv {
         }
     }
 
+#ifdef INST_INT
+    template <> 
+    void GenDiagMatrix<int>::doMakeInverseATA(
+        const DiagMatrixView<int>& ) const
+    { TMVAssert(TMV_FALSE); }
+    template <> 
+    void GenDiagMatrix<std::complex<int> >::doMakeInverseATA(
+        const DiagMatrixView<std::complex<int> >& ) const
+    { TMVAssert(TMV_FALSE); }
+#endif
+
     template <class T>
     void GenDiagMatrix<T>::doMakeInverseATA(const MatrixView<T>& ata) const
     {
         ata.setZero();
         makeInverseATA(DiagMatrixViewOf(ata.diag()));
     }
+
+#ifdef INST_INT
+    template <> 
+    void GenDiagMatrix<int>::doMakeInverseATA(const MatrixView<int>& ) const
+    { TMVAssert(TMV_FALSE); }
+    template <> 
+    void GenDiagMatrix<std::complex<int> >::doMakeInverseATA(
+        const MatrixView<std::complex<int> >& ) const
+    { TMVAssert(TMV_FALSE); }
+#endif
 
     template <class T>
     QuotXD<T,T> GenDiagMatrix<T>::QInverse() const
@@ -377,6 +464,16 @@ namespace tmv {
 #endif
     }
 
+#ifdef INST_INT
+    template <> template <class T1>
+    void GenDiagMatrix<int>::doLDivEq(const VectorView<T1>& ) const
+    { TMVAssert(TMV_FALSE); }
+    template <> template <class T1>
+    void GenDiagMatrix<std::complex<int> >::doLDivEq(
+        const VectorView<T1>& ) const
+    { TMVAssert(TMV_FALSE); }
+#endif
+
     template <class T> template <class T1, class T0> 
     void GenDiagMatrix<T>::doLDiv(
         const GenVector<T1>& v1, const VectorView<T0>& v0) const
@@ -390,6 +487,17 @@ namespace tmv {
             doLDivEq(v0=v1);
         }
     }
+
+#ifdef INST_INT
+    template <> template <class T1, class T0>
+    void GenDiagMatrix<int>::doLDiv(
+        const GenVector<T1>& , const VectorView<T0>& ) const
+    { TMVAssert(TMV_FALSE); }
+    template <> template <class T1, class T0>
+    void GenDiagMatrix<std::complex<int> >::doLDiv(
+        const GenVector<T1>& , const VectorView<T0>& ) const
+    { TMVAssert(TMV_FALSE); }
+#endif
 
     template <bool rm, bool cd, class T, class Td> 
     static void RowDiagLDivEq(
@@ -538,6 +646,16 @@ namespace tmv {
 #endif
     }
 
+#ifdef INST_INT
+    template <> template <class T1>
+    void GenDiagMatrix<int>::doLDivEq(const MatrixView<T1>& ) const
+    { TMVAssert(TMV_FALSE); }
+    template <> template <class T1>
+    void GenDiagMatrix<std::complex<int> >::doLDivEq(
+        const MatrixView<T1>& ) const
+    { TMVAssert(TMV_FALSE); }
+#endif
+
     template <class T> template <class T1, class T0> 
     void GenDiagMatrix<T>::doLDiv(
         const GenMatrix<T1>& m1, const MatrixView<T0>& m0) const
@@ -552,6 +670,17 @@ namespace tmv {
             doLDivEq(m0=m1);
         }
     }
+
+#ifdef INST_INT
+    template <> template <class T1, class T0>
+    void GenDiagMatrix<int>::doLDiv(
+        const GenMatrix<T1>& , const MatrixView<T0>& ) const
+    { TMVAssert(TMV_FALSE); }
+    template <> template <class T1, class T0>
+    void GenDiagMatrix<std::complex<int> >::doLDiv(
+        const GenMatrix<T1>& , const MatrixView<T0>& ) const
+    { TMVAssert(TMV_FALSE); }
+#endif
 
 #undef CT
 
@@ -705,8 +834,8 @@ namespace tmv {
             m->diag().read(is);
 #ifndef NOTHROW
         } catch (VectorReadError<T>& ve) {
-            throw DiagMatrixReadError<T>(ve.i,*m,ve.exp,ve.got,ve.s,
-                                         ve.is,ve.iseof,ve.isbad);
+            throw DiagMatrixReadError<T>(
+                ve.i,*m,ve.exp,ve.got,ve.s,ve.is,ve.iseof,ve.isbad);
         }
 #endif
         return is;

@@ -41,6 +41,7 @@
 #include "tmv/TMV_SymBandMatrixArith.h"
 #include "tmv/TMV_SymMatrix.h"
 #include "tmv/TMV_BandMatrix.h"
+#include "TMV_IntegerDet.h"
 #include <iostream>
 #include <string>
 #include "portable_platform.h"
@@ -67,7 +68,8 @@ namespace tmv {
     }
 
     template <class T, IndexStyle I> 
-    TMV_RefType(T) SymBandMatrixView<T,I>::ref(int i, int j) const
+    typename SymBandMatrixView<T,I>::reference SymBandMatrixView<T,I>::ref(
+        int i, int j) const
     {
         if ((uplo() == Upper && i<=j) || (uplo() == Lower && i>=j)) {
             T* mi = ptr() + int(i)*stepi() + int(j)*stepj();
@@ -165,7 +167,18 @@ namespace tmv {
             return ret;
         }
     }
-
+#ifdef INST_INT
+    template <>
+    auto_ptr<BaseMatrix<int> > GenSymBandMatrix<int>::newInverse() const
+    { TMVAssert(TMV_FALSE); return auto_ptr<BaseMatrix<int> >(); }
+    template <>
+    auto_ptr<BaseMatrix<std::complex<int> > > 
+    GenSymBandMatrix<std::complex<int> >::newInverse() const
+    { 
+        TMVAssert(TMV_FALSE); 
+        return auto_ptr<BaseMatrix<std::complex<int> > >(); 
+    }
+#endif
 
     template <class T> 
     void GenSymBandMatrix<T>::newDivider() const
@@ -188,6 +201,68 @@ namespace tmv {
           default : TMVAssert(TMV_FALSE); 
         }
     }
+
+#ifdef INST_INT
+    template <>
+    void GenSymBandMatrix<int>::newDivider() const
+    { TMVAssert(TMV_FALSE); }
+    template <>
+    void GenSymBandMatrix<std::complex<int> >::newDivider() const
+    { TMVAssert(TMV_FALSE); }
+#endif
+
+    template <class T>
+    bool GenSymBandMatrix<T>::divIsLUDiv() const
+    { return static_cast<bool>(dynamic_cast<const BandLUDiv<T>*>(getDiv())); }
+
+    template <class T>
+    bool GenSymBandMatrix<T>::divIsCHDiv() const
+    {
+        return static_cast<bool>(
+            dynamic_cast<const HermBandCHDiv<T>*>(getDiv())); 
+    }
+
+    template <class T>
+    bool GenSymBandMatrix<T>::divIsHermSVDiv() const
+    {
+        return static_cast<bool>(
+            dynamic_cast<const HermBandSVDiv<T>*>(getDiv())); 
+    }
+
+    template <class T>
+    bool GenSymBandMatrix<T>::divIsSymSVDiv() const
+    { 
+        return static_cast<bool>(
+            dynamic_cast<const SymBandSVDiv<T>*>(getDiv())); 
+    }
+
+#ifdef INST_INT
+    template <>
+    bool GenSymBandMatrix<int>::divIsLUDiv() const
+    { return false; }
+    template <>
+    bool GenSymBandMatrix<int>::divIsCHDiv() const
+    { return false; }
+    template <>
+    bool GenSymBandMatrix<int>::divIsHermSVDiv() const
+    { return false; }
+    template <>
+    bool GenSymBandMatrix<int>::divIsSymSVDiv() const
+    { return false; }
+
+    template <>
+    bool GenSymBandMatrix<std::complex<int> >::divIsLUDiv() const
+    { return false; }
+    template <>
+    bool GenSymBandMatrix<std::complex<int> >::divIsCHDiv() const
+    { return false; }
+    template <>
+    bool GenSymBandMatrix<std::complex<int> >::divIsHermSVDiv() const
+    { return false; }
+    template <>
+    bool GenSymBandMatrix<std::complex<int> >::divIsSymSVDiv() const
+    { return false; }
+#endif
 
     template <class T> 
     QuotXsB<T,T> GenSymBandMatrix<T>::QInverse() const
@@ -774,6 +849,32 @@ namespace tmv {
     // Norms
     //
 
+    template <class T>
+    T GenSymBandMatrix<T>::det() const
+    { return DivHelper<T>::det(); }
+
+    template <class T>
+    RT GenSymBandMatrix<T>::logDet(T* sign) const
+    { return DivHelper<T>::logDet(sign); }
+
+#ifdef INST_INT
+    template <>
+    int GenSymBandMatrix<int>::det() const
+    { return IntegerDet(*this); }
+
+    template <>
+    std::complex<int> GenSymBandMatrix<std::complex<int> >::det() const
+    { return IntegerDet(*this); }
+
+    template <>
+    int GenSymBandMatrix<int>::logDet(int* ) const
+    { TMVAssert(TMV_FALSE); return 0; }
+
+    template <>
+    int GenSymBandMatrix<std::complex<int> >::logDet(std::complex<int>* ) const
+    { TMVAssert(TMV_FALSE); return 0; }
+#endif
+
     template <class T> 
     T GenSymBandMatrix<T>::sumElements() const
     {
@@ -791,13 +892,35 @@ namespace tmv {
     }
 
     template <class T> 
-    RT GenSymBandMatrix<T>::sumAbsElements() const
+    static RT DoSumAbsElements(const GenSymBandMatrix<T>& m)
     {
-        RT sum = diag().sumAbsElements();
-        if (size() > 1 && nlo() > 0) 
-            sum += RT(2) * upperBandOff().sumAbsElements();
+        RT sum = m.diag().sumAbsElements();
+        if (m.size() > 1 && m.nlo() > 0) 
+            sum += RT(2) * m.upperBandOff().sumAbsElements();
         return sum;
     }
+
+    template <class T> 
+    static RT DoSumAbs2Elements(const GenSymBandMatrix<T>& m)
+    {
+        RT sum = m.diag().sumAbs2Elements();
+        if (m.size() > 1 && m.nlo() > 0) 
+            sum += RT(2) * m.upperBandOff().sumAbs2Elements();
+        return sum;
+    }
+
+#ifdef INST_INT
+    static int DoSumAbsElements(const GenSymBandMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+#endif
+
+    template <class T> 
+    RT GenSymBandMatrix<T>::sumAbsElements() const
+    { return DoSumAbsElements(*this); }
+
+    template <class T> 
+    RT GenSymBandMatrix<T>::sumAbs2Elements() const
+    { return DoSumAbs2Elements(*this); }
 
     template <class T> 
     RT GenSymBandMatrix<T>::normSq(const RT scale) const
@@ -831,13 +954,6 @@ namespace tmv {
             return m.diag().normInf();
         }
     } 
-
-#ifdef INST_INT
-    static int NonLapNormF(const GenSymBandMatrix<int>& m)
-    { return TMV_SQRT(m.normSq()); }
-    static int NonLapNormF(const GenSymBandMatrix<std::complex<int> >& m)
-    { return TMV_SQRT(m.normSq()); }
-#endif
 
     template <class T> 
     static RT NonLapNormF(const GenSymBandMatrix<T>& m)
@@ -996,6 +1112,17 @@ namespace tmv {
 #endif
 #endif // XLAP
 
+#ifdef INST_INT
+    static int NonLapNormF(const GenSymBandMatrix<int>& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int NonLapNormF(const GenSymBandMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int NonLapNorm1(const GenSymBandMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int NonLapMaxAbsElement(const GenSymBandMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+#endif
+
     template <class T> 
     RT GenSymBandMatrix<T>::maxAbsElement() const
     {
@@ -1039,24 +1166,40 @@ namespace tmv {
     }
 
     template <class T> 
-    RT GenSymBandMatrix<T>::doNorm2() const
+    static RT DoNorm2(const GenSymBandMatrix<T>& m)
     {
-        if (this->colsize() < this->rowsize()) return transpose().doNorm2();
-        if (size() == 0) return RT(0);
-        DiagMatrix<RT> S(this->size());
-        SV_Decompose(*this,S.view());
+        if (m.size() == 0) return RT(0);
+        DiagMatrix<RT> S(m.size());
+        SV_Decompose(m,S.view());
         return std::abs(S(0));
     }
 
     template <class T> 
-    RT GenSymBandMatrix<T>::doCondition() const
+    static RT DoCondition(const GenSymBandMatrix<T>& m)
     {
-        if (this->colsize() < this->rowsize()) return transpose().doNorm2();
-        if (size() == 0) return RT(1);
-        DiagMatrix<RT> S(this->size());
-        SV_Decompose(*this,S.view());
+        if (m.size() == 0) return RT(1);
+        DiagMatrix<RT> S(m.size());
+        SV_Decompose(m,S.view());
         return std::abs(S(0)/S(S.size()-1));
     }
+
+#ifdef INST_INT
+    static int DoNorm2(const GenSymBandMatrix<int>& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int DoCondition(const GenSymBandMatrix<int>& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int DoNorm2(const GenSymBandMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int DoCondition(const GenSymBandMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+#endif
+
+    template <class T> 
+    RT GenSymBandMatrix<T>::doNorm2() const
+    { return tmv::DoNorm2(*this); }
+    template <class T> 
+    RT GenSymBandMatrix<T>::doCondition() const
+    { return tmv::DoCondition(*this); }
 
     template <class T> 
     SymBandMatrix<T,Upper,DiagMajor> SymTriDiagMatrix(

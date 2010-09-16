@@ -137,9 +137,9 @@
 
 namespace tmv {
 
-    inline std::string TMV_Version() { return "0.64"; }
+    inline std::string TMV_Version() { return "0.65"; }
 #define TMV_MAJOR_VERSION 0
-#define TMV_MINOR_VERSION 64
+#define TMV_MINOR_VERSION 65
 #define TMV_VERSION_AT_LEAST(major,minor) \
     ( (major > TMV_MAJOR_VERSION) || \
       (major == TMV_MAJOR_VERSION && minor >= TMV_MINOR_VERSION) )
@@ -176,7 +176,11 @@ namespace tmv {
     template <class M1, class M2> 
     inline bool SameStorage(
         const M1& m1, const M2& m2)
-    { return m1.realPart().cptr() == m2.realPart().cptr(); }
+    {
+        return 
+            static_cast<const void*>(m1.realPart().cptr()) == 
+            static_cast<const void*>(m2.realPart().cptr()); 
+    }
 #endif
 
     template <class T> 
@@ -289,6 +293,7 @@ namespace tmv {
         enum { isreal = true };
         enum { iscomplex = false };
         enum { isinteger = std::numeric_limits<T>::is_integer };
+        enum { twoifcomplex = 1 };
 
         typedef T real_type;
         typedef std::complex<T> complex_type;
@@ -300,6 +305,7 @@ namespace tmv {
         enum { isreal = false };
         enum { iscomplex = true };
         enum { isinteger = Traits<T>::isinteger };
+        enum { twoifcomplex = 2 };
 
         typedef T real_type;
         typedef std::complex<T> complex_type;
@@ -581,64 +587,44 @@ namespace tmv {
     inline bool TMV_Underflow(T x)
     {
         typedef typename Traits<T>::real_type RT;
-#if 1
-        return TMV_ABS2(x) < std::numeric_limits<RT>::min()*RT(2); 
-#else
-        const RT halfeps = TMV_Epsilon<T>() / RT(2);
-        return x * halfeps == RT(0); 
-        // This is too strict on some systems.
-        // Usually x remains representable all the way down to just above
-        // limits::min * limits::epsilon.
-        // However, on one system I tested on, it would sometimes 
-        // represent values less than min, and other times underflow to 0.
-        // So, I think the above test is more portable.
-#endif
+        return TMV_ABS2(x) < 
+            std::numeric_limits<RT>::min() * RT(tmv::Traits<T>::twoifcomplex); 
     }
 
     extern bool TMV_FALSE; 
     // = false (in TMV_Vector.cpp), but without the unreachable returns
 
-#ifdef INST_INT
-    inline int TMV_ABS(const std::complex<int>& z)
-    { 
-        return int(floor(TMV_ABS(
-                    std::complex<double>(std::real(z),std::imag(z))))); 
-    }
+    inline int TMV_ABS(const std::complex<int>& )
+    { TMVAssert(TMV_FALSE); return 0; }
 
-    template <> 
-    inline int TMV_SQRT(int x) 
-    { return int(floor(std::sqrt(double(x)))); }
+    inline int TMV_ARG(const std::complex<int>& )
+    { TMVAssert(TMV_FALSE); return 0; }
 
-    template <> 
-    inline int TMV_EXP(int x) 
-    { return int(floor(std::exp(double(x)))); }
+    inline int TMV_SQRT(int ) 
+    { TMVAssert(TMV_FALSE); return 0; }
 
-    template <> 
-    inline int TMV_LOG(int x) 
-    { return int(floor(std::log(double(x)))); }
+    inline int TMV_EXP(int ) 
+    { TMVAssert(TMV_FALSE); return 0; }
 
-    template <>
-    bool TMV_Underflow(int x)
-    { return x == 0; }
-#endif
+    inline int TMV_LOG(int ) 
+    { TMVAssert(TMV_FALSE); return 0; }
+
+    inline bool TMV_Underflow(int )
+    { return false; }
 
     template <class T> 
     inline std::string TMV_Text(const T&)
     { return std::string("Unknown (") + typeid(T).name() + ")"; }
 
-    template <> 
     inline std::string TMV_Text(const double&)
     { return "double"; }
 
-    template <> 
     inline std::string TMV_Text(const float&)
     { return "float"; }
 
-    template <> 
     inline std::string TMV_Text(const int&)
     { return "int"; }
 
-    template <> 
     inline std::string TMV_Text(const long double&)
     { return "long double"; }
 

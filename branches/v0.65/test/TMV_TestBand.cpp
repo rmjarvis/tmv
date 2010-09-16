@@ -102,6 +102,31 @@ static void TestBasicBandMatrix_1()
     Assert(a1 == a1v,"BandMatrix == BandMatrixView");
     Assert(a1 == a1fcv,"BandMatrix == FortranStyle ConstBandMatrixView");
     Assert(a1 == a1fv,"BandMatrix == FortranStyle BandMatrixView");
+
+    a1.resize(3,3,1,1);
+    Assert(a1.colsize() == 3 && a1.rowsize() == 3,
+           "BandMatrix a1.resize(3,3,1,1) sizes");
+    Assert(a1.nlo() == 1 && a1.nhi() == 1,
+           "BandMatrix a1.resize(3,3,1,1) nlo,nhi");
+    for (int i=0, k=0; i<3; ++i) for (int j=0; j<3; ++j, ++k) 
+        if ( j <= i + 1 && i <= j + 1) 
+            a1(i,j) = T(k);
+    for (int i=0, k=0; i<3; ++i) for (int j=0; j<3; ++j, ++k) 
+        if ( j <= i + 1 && i <= j + 1) 
+            Assert(a1(i,j) == k,"Read/Write resized BandMatrix");
+
+    a1.resize(2*N,3*N,5,3);
+    Assert(a1.colsize() == 2*N && a1.rowsize() == 3*N,
+           "BandMatrix a1.resize(2*N,3*N,5,3) sizes");
+    Assert(a1.nlo() == 5 && a1.nhi() == 3,
+           "BandMatrix a1.resize(2*N,3*N,5,3) nlo,nhi");
+    for (int i=0, k=0; i<2*N; ++i) for (int j=0; j<3*N; ++j, ++k) 
+        if ( j <= i + 3 && i <= j + 5) 
+            a1(i,j) = T(k);
+    for (int i=0, k=0; i<2*N; ++i) for (int j=0; j<3*N; ++j, ++k) 
+        if ( j <= i + 3 && i <= j + 5) 
+            Assert(a1(i,j) == k,"Read/Write resized BandMatrix");
+
 }
 
 template <class T, tmv::StorageType S> 
@@ -270,23 +295,21 @@ void TestBandMatrix()
 
     std::cout<<"BandMatrix<"<<tmv::TMV_Text(T())<<"> passed all basic tests\n";
 
-    if (tmv::TMV_Epsilon<T>() > T(0)) {
-        TestBandMatrixArith_A<T>();
-        std::cout<<"BandMatrix<"<<tmv::TMV_Text(T())<<
-            "> (Band/Band) Arithmetic passed all tests\n";
-        TestBandMatrixArith_B1<T>();
-        TestBandMatrixArith_B2<T>();
-        std::cout<<"BandMatrix<"<<tmv::TMV_Text(T())<<
-            "> (Matrix/Band) Arithmetic passed all tests\n";
-        TestBandMatrixArith_C1<T>();
-        TestBandMatrixArith_C2<T>();
-        std::cout<<"BandMatrix<"<<tmv::TMV_Text(T())<<
-            "> (Diag/Band) Arithmetic passed all tests\n";
-        TestBandMatrixArith_D1<T>();
-        TestBandMatrixArith_D2<T>();
-        std::cout<<"BandMatrix<"<<tmv::TMV_Text(T())<<
-            "> (Tri/Band) Arithmetic passed all tests\n";
-    }
+    TestBandMatrixArith_A<T>();
+    std::cout<<"BandMatrix<"<<tmv::TMV_Text(T())<<
+        "> (Band/Band) Arithmetic passed all tests\n";
+    TestBandMatrixArith_B1<T>();
+    TestBandMatrixArith_B2<T>();
+    std::cout<<"BandMatrix<"<<tmv::TMV_Text(T())<<
+        "> (Matrix/Band) Arithmetic passed all tests\n";
+    TestBandMatrixArith_C1<T>();
+    TestBandMatrixArith_C2<T>();
+    std::cout<<"BandMatrix<"<<tmv::TMV_Text(T())<<
+        "> (Diag/Band) Arithmetic passed all tests\n";
+    TestBandMatrixArith_D1<T>();
+    TestBandMatrixArith_D2<T>();
+    std::cout<<"BandMatrix<"<<tmv::TMV_Text(T())<<
+        "> (Tri/Band) Arithmetic passed all tests\n";
 }
 
 #ifdef TEST_DOUBLE

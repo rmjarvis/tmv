@@ -697,6 +697,10 @@ namespace tmv {
             QR_Decompose(A,beta.view(),d);
     }
 
+#ifdef INST_INT
+#undef INST_INT
+#endif
+
 #define InstFile "TMV_QRDecompose.inst"
 #include "TMV_Inst.h"
 #undef InstFile

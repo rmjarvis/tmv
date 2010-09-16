@@ -22,7 +22,8 @@ bool symoprod = false;
 bool dontthrow = false;
 std::string lastsuccess = "";
 
-int main() try {
+int main() try 
+{
     std::ofstream log("tmvtest1v.log");
     tmv::WriteWarningsTo(&log);
 

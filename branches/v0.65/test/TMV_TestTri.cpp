@@ -1,6 +1,3 @@
-#define XDEBUG_PRODMM
-#define PRINTALGO_UL
-
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
 #include "TMV.h"
@@ -181,6 +178,23 @@ static void TestBasicUpperTriMatrix_1()
         }
     }
 #endif
+
+    u.resize(2);
+    Assert(u.colsize() == 2 && u.rowsize() == 2,"u.resize(2)");
+    for (int i=0, k=0; i<2; ++i) for (int j=0; j<2; ++j, ++k) 
+        if (i < j || (D==tmv::NonUnitDiag && i==j)) u(i,j) = T(k);
+    for (int i=0, k=0; i<2; ++i) for (int j=0; j<2; ++j, ++k) 
+        if (i < j || (D==tmv::NonUnitDiag && i==j)) 
+            Assert(u(i,j) == k,"Read/Write resized UpperTriMatrix");
+
+    u.resize(2*N);
+    Assert(u.colsize() == 2*N && u.rowsize() == 2*N,"m.resize(2*N)");
+    for (int i=0, k=0; i<2*N; ++i) for (int j=0; j<2*N; ++j, ++k) 
+        if (i < j || (D==tmv::NonUnitDiag && i==j)) u(i,j) = T(k);
+    for (int i=0, k=0; i<2*N; ++i) for (int j=0; j<2*N; ++j, ++k) 
+        if (i < j || (D==tmv::NonUnitDiag && i==j)) 
+            Assert(u(i,j) == k,"Read/Write resized UpperTriMatrix");
+
 }
 
 template <class T, tmv::DiagType D, tmv::StorageType S> 
@@ -358,6 +372,23 @@ static void TestBasicLowerTriMatrix_1()
         }
     }
 #endif
+
+    l.resize(2);
+    Assert(l.colsize() == 2 && l.rowsize() == 2,"l.resize(2)");
+    for (int i=0, k=0; i<2; ++i) for (int j=0; j<2; ++j, ++k) 
+        if (j < i || (D==tmv::NonUnitDiag && i==j)) l(i,j) = T(k);
+    for (int i=0, k=0; i<2; ++i) for (int j=0; j<2; ++j, ++k) 
+        if (j < i || (D==tmv::NonUnitDiag && i==j)) 
+            Assert(l(i,j) == k,"Read/Write resized UpperTriMatrix");
+
+    l.resize(2*N);
+    Assert(l.colsize() == 2*N && l.rowsize() == 2*N,"m.resize(2*N)");
+    for (int i=0, k=0; i<2*N; ++i) for (int j=0; j<2*N; ++j, ++k) 
+        if (j < i || (D==tmv::NonUnitDiag && i==j)) l(i,j) = T(k);
+    for (int i=0, k=0; i<2*N; ++i) for (int j=0; j<2*N; ++j, ++k) 
+        if (j < i || (D==tmv::NonUnitDiag && i==j)) 
+            Assert(l(i,j) == k,"Read/Write resized UpperTriMatrix");
+
 }
 
 template <class T, tmv::DiagType D, tmv::StorageType S> 
@@ -707,6 +738,7 @@ static void TestBasicTriMatrix_IO()
         try {
             tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag,tmv::RowMajor> xl4(N);
             fin >> xl4;
+            Assert(false,"Throw ReadError for UnitDiag read");
         } catch (tmv::ReadError&) {
             Assert(true,"Catch ReadError for UnitDiag read");
         }
@@ -738,45 +770,43 @@ template <class T> void TestTriMatrix()
     std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<"> passed all basic tests\n";
 #endif
 
-    if (tmv::TMV_Epsilon<T>() > T(0)) {
 #if 1
-        TestAllAliasMultUL<T>();
-        std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<"> passed all aliased multiplication tests\n";
+    TestAllAliasMultUL<T>();
+    std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<"> passed all aliased multiplication tests\n";
 #endif
 
 #if 1
-        TestTriMatrixArith_A1a<T>();
-        TestTriMatrixArith_A1b<T>();
-        TestTriMatrixArith_A2<T>();
-        TestTriMatrixArith_A3<T>();
-        TestTriMatrixArith_A4a<T>();
-        TestTriMatrixArith_A4b<T>();
-        TestTriMatrixArith_A5a<T>();
-        TestTriMatrixArith_A5b<T>();
-        TestTriMatrixArith_A6a<T>();
-        TestTriMatrixArith_A6b<T>();
-        TestTriMatrixArith_A6c<T>();
-        std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<"> (Tri/Tri) Arithmetic passed all tests\n";
+    TestTriMatrixArith_A1a<T>();
+    TestTriMatrixArith_A1b<T>();
+    TestTriMatrixArith_A2<T>();
+    TestTriMatrixArith_A3<T>();
+    TestTriMatrixArith_A4a<T>();
+    TestTriMatrixArith_A4b<T>();
+    TestTriMatrixArith_A5a<T>();
+    TestTriMatrixArith_A5b<T>();
+    TestTriMatrixArith_A6a<T>();
+    TestTriMatrixArith_A6b<T>();
+    TestTriMatrixArith_A6c<T>();
+    std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<"> (Tri/Tri) Arithmetic passed all tests\n";
 #endif
 #if 1
-        TestTriMatrixArith_B4a<T>();
-        TestTriMatrixArith_B4b<T>();
-        TestTriMatrixArith_B5a<T>();
-        TestTriMatrixArith_B5b<T>();
-        TestTriMatrixArith_B6a<T>();
-        TestTriMatrixArith_B6b<T>();
-        std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<"> (Matrix/Tri) Arithmetic passed all tests\n";
+    TestTriMatrixArith_B4a<T>();
+    TestTriMatrixArith_B4b<T>();
+    TestTriMatrixArith_B5a<T>();
+    TestTriMatrixArith_B5b<T>();
+    TestTriMatrixArith_B6a<T>();
+    TestTriMatrixArith_B6b<T>();
+    std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<"> (Matrix/Tri) Arithmetic passed all tests\n";
 #endif
 #if 1
-        TestTriMatrixArith_C4a<T>();
-        TestTriMatrixArith_C4b<T>();
-        TestTriMatrixArith_C5a<T>();
-        TestTriMatrixArith_C5b<T>();
-        TestTriMatrixArith_C6a<T>();
-        TestTriMatrixArith_C6b<T>();
-        std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<"> (Diag/Tri) Arithmetic passed all tests\n";
+    TestTriMatrixArith_C4a<T>();
+    TestTriMatrixArith_C4b<T>();
+    TestTriMatrixArith_C5a<T>();
+    TestTriMatrixArith_C5b<T>();
+    TestTriMatrixArith_C6a<T>();
+    TestTriMatrixArith_C6b<T>();
+    std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<"> (Diag/Tri) Arithmetic passed all tests\n";
 #endif
-    }
 }
 
 #ifdef TEST_DOUBLE

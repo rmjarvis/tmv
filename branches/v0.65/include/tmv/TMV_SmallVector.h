@@ -388,6 +388,13 @@ namespace tmv {
             return sum;
         }
 
+        inline RT sumAbs2Elements() const
+        {
+            RT sum(0);
+            for(int i=0;i<N;++i) sum += TMV_ABS2(itsv[i]);
+            return sum;
+        }
+
         inline T minElement(int* iminout=0) const
         {
             T min = N>0 ? itsv[0] : T(0);
@@ -633,7 +640,7 @@ namespace tmv {
                 int* p, OldADType ad=ASCEND, OldCompType comp=REAL_COMP))
         { return sort(p,ADType(ad),CompType(comp)); }
         TMV_DEPRECATED(type& Sort(
-                OldADType ad=ASCEND, OldCompType comp=REAL_COMP))
+                ADType ad=ASCEND, CompType comp=REAL_COMP))
         { return sort(ADType(ad),CompType(comp)); }
 
 
@@ -839,6 +846,10 @@ namespace tmv {
     template <class T, int N, IndexStyle I> 
     inline TMV_RealType(T) SumAbsElements(const SmallVector<T,N,I>& v)
     { return v.sumAbsElements(); }
+
+    template <class T, int N, IndexStyle I> 
+    inline TMV_RealType(T) SumAbs2Elements(const SmallVector<T,N,I>& v)
+    { return v.sumAbs2Elements(); }
 
     template <class T, int N, IndexStyle I> 
     inline T MinElement(const SmallVector<T,N,I>& v)

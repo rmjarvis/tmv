@@ -104,7 +104,7 @@ namespace tmv {
     }
 
     template <class T, IndexStyle I> 
-    TMV_RefType(T) VectorView<T,I>::ref(int i) const
+    typename VectorView<T,I>::reference VectorView<T,I>::ref(int i) const
     {
         T* vi = ptr() + int(i)*step();
         return TMV_REF(vi,ct());
@@ -211,10 +211,10 @@ namespace tmv {
     }
 
 #ifdef INST_INT
-    static int DoNorm2(const GenVector<int>& v)
-    { return TMV_SQRT(v.normSq()); }
-    static int DoNorm2(const GenVector<std::complex<int> >& v)
-    { return TMV_SQRT(v.normSq()); }
+    static int DoNorm2(const GenVector<int>& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int DoNorm2(const GenVector<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
 #endif
 
     template <class T> 
@@ -338,6 +338,7 @@ namespace tmv {
         }
         return sum;
     }
+
 #ifdef BLAS
 #ifndef BLASNORETURN
 #ifdef INST_DOUBLE
@@ -388,6 +389,29 @@ namespace tmv {
 #endif // BLAS
 
     template <class T> 
+    static T DoSumAbs2Elements(const GenVector<T>& v)
+    { return DoSumAbsElements(v); }
+
+    template <class T> 
+    static T DoSumAbs2Elements(const GenVector<std::complex<T> >& v)
+    {
+        TMVAssert(v.step() > 0);
+        if (v.step() == 1) return DoSumAbsElements(v.flatten());
+        else {
+            const int s = v.step();
+            T sum(0);
+            const std::complex<T>* p = v.cptr();
+            for(int i=v.size();i>0;--i,p+=s) sum += TMV_ABS2(*p);
+            return sum;
+        }
+    }
+
+#ifdef INST_INT
+    static int DoSumAbsElements(const GenVector<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+#endif
+
+    template <class T> 
     RT GenVector<T>::sumAbsElements() const
     {
         if (size() == 0) return RT(0);
@@ -397,6 +421,18 @@ namespace tmv {
         // rather than the correct value.  Weird.
         // The non-blas version works correctly, but just do it here anyway.
         else return size() * TMV_ABS(*cptr());
+    }
+
+    template <class T> 
+    RT GenVector<T>::sumAbs2Elements() const
+    {
+        if (size() == 0) return RT(0);
+        else if (step() > 0) return DoSumAbs2Elements(*this); 
+        else if (step() < 0) return DoSumAbs2Elements(reverse()); 
+        // If s == 0, the BLAS standard is to return 0 for the sum,
+        // rather than the correct value.  Weird.
+        // The non-blas version works correctly, but just do it here anyway.
+        else return size() * TMV_ABS2(*cptr());
     }
 
     //
@@ -527,6 +563,7 @@ namespace tmv {
         }
         return min;
     }
+
     template <class T> 
     static RT FindMaxAbs2Element(const GenVector<T>& v, int& imax)
     {
@@ -703,6 +740,15 @@ namespace tmv {
 #endif // BLASAMIN
 #endif // FLOAT
 #endif // BLAS
+
+#ifdef INST_INT
+    static int FindMinAbsElement(
+        const GenVector<std::complex<int> >& , int& imax)
+    { TMVAssert(TMV_FALSE); imax=0; return 0; }
+    static int FindMaxAbsElement(
+        const GenVector<std::complex<int> >& , int& imin)
+    { TMVAssert(TMV_FALSE); imin=0; return 0; }
+#endif
 
     template <class T> 
     T GenVector<T>::minElement(int* iminout) const
@@ -886,9 +932,14 @@ namespace tmv {
         return *this; 
     }
 
+#ifdef INST_INT
+    const VectorView<std::complex<int>,CStyle>& 
+    VectorView<std::complex<int>,CStyle>::clip(int thresh) const
+    { TMVAssert(TMV_FALSE); return *this; }
+#endif
+
     template <class T, IndexStyle I> 
-    Vector<T,I>& Vector<T,I>::clip(
-        RT thresh)
+    Vector<T,I>& Vector<T,I>::clip(RT thresh)
     { view().clip(thresh); return *this; }
 
     template <class T, IndexStyle I> 
@@ -1291,6 +1342,13 @@ namespace tmv {
     const VectorView<T,I>& VectorView<T,I>::sort(
         int* p, ADType ad, CompType comp) const
     {
+        if (tmv::Traits<T>::iscomplex) {
+            if (std::numer_limits<T>::is_integer) {
+                TMVAssert(comp != AbsComp && comp != ArgComp);
+            }
+        } else {
+            TMVAssert(comp != ImagComp && comp != ArgComp);
+        }
         if (p) {
             std::vector<VTIndex<T> > newindex(size());
             const int N = size();
@@ -1303,7 +1361,7 @@ namespace tmv {
             ConvertIndexToPermute(size(),newindex,p);
             permute(p);
         } else {
-            // Swap ad necessary accroding the the conj status of the vector:
+            // Swap ad as necessary according the the conj status of the vector:
             if (this->isconj() && (comp==ImagComp || comp==ArgComp)) {
                 if (ad == Ascend) ad = Descend;
                 else ad = Ascend;

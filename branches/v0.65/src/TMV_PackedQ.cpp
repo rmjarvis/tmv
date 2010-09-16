@@ -1194,6 +1194,10 @@ namespace tmv {
         Q_RDivEq(Q,beta,x);
     }
 
+#ifdef INST_INT
+#undef INST_INT
+#endif
+
 #define InstFile "TMV_PackedQ.inst"
 #include "TMV_Inst.h"
 #undef InstFile

@@ -1,7 +1,6 @@
 
 #define START 0
 
-#include "../src/TMV_Blas.h"
 #include "TMV.h"
 #include "TMV_Test.h"
 #include "TMV_Test1.h"
@@ -11,7 +10,7 @@ void TestMatrixDecomp()
 {
     typedef std::complex<T> CT;
     for (int mattype = START; mattype <= 6; mattype++) {
-#if !(XTEST & 64)
+#if !(XTEST & 64) || defined(LAP)
         if (mattype >= 4) break;
 #endif
 
@@ -141,6 +140,10 @@ void TestMatrixDecomp()
             tmv::Permutation P = m.lud().getP();
             tmv::Matrix<T> PLU = P*L*U;
             if (m.lud().isTrans()) PLU.transposeSelf();
+	    if (showacc) {
+                std::cout<<"Norm(m-PLU) = "<<Norm(m-PLU)<<std::endl;
+                std::cout<<"cf "<<eps*normm<<std::endl;
+	    }
             Assert(Norm(m-PLU) <= eps*normm,"LU"); 
 
             tmv::LowerTriMatrix<CT,tmv::UnitDiag> cL =
@@ -149,6 +152,10 @@ void TestMatrixDecomp()
             tmv::Permutation cP = c.lud().getP();
             tmv::Matrix<CT> cPLU = cP*cL*cU;
             if (c.lud().isTrans()) cPLU.transposeSelf();
+	    if (showacc) {
+                std::cout<<"Norm(c-cPLU) = "<<Norm(c-cPLU)<<std::endl;
+                std::cout<<"cf "<<ceps*normc<<std::endl;
+	    }
             Assert(Norm(c-cPLU) <= ceps*normc,"C LU"); 
 
 #if (XTEST & 16)
@@ -251,7 +258,7 @@ void TestMatrixDecomp()
             tmv::UpperTriMatrix<CT> cR2 = cQ.upperTri();
             Assert(Norm(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x)-
                         tmv::Matrix<CT>(cR2.adjoint()/x)*tmv::Matrix<CT>(cR2/x)) <= 
-                   ceps*(normc/x)*(normc/x),"QR3 (RtR)");
+                   ceps*(normc/x)*(normc/x),"C QR3 (RtR)");
 
             cQ.conjugate() = c;
             QR_Decompose(cQ.conjugate(),cR.view());
@@ -264,7 +271,7 @@ void TestMatrixDecomp()
             cR2 = cQ.conjugate().upperTri();
             Assert(Norm(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x)-
                         tmv::Matrix<CT>(cR2.adjoint()/x)*tmv::Matrix<CT>(cR2/x)) <= 
-                   ceps*(normc/x)*(normc/x),"QR5 (RtR)");
+                   ceps*(normc/x)*(normc/x),"C QR5 (RtR)");
 
             cQ = c;
             QR_Decompose(cQ.view(),cR.conjugate());
@@ -574,8 +581,4 @@ template void TestMatrixDecomp<float,tmv::ColMajor>();
 #ifdef TEST_LONGDOUBLE
 template void TestMatrixDecomp<long double,tmv::RowMajor>();
 template void TestMatrixDecomp<long double,tmv::ColMajor>();
-#endif
-#ifdef TEST_INT
-template void TestMatrixDecomp<int,tmv::RowMajor>();
-template void TestMatrixDecomp<int,tmv::ColMajor>();
 #endif

@@ -141,8 +141,8 @@
 //    sort(Permutation& P, AD, COMP)
 //        Sorts the vector, returning the swaps required in P.
 //        If you do not care about P, you may omit the P parameter.
-//        AD = ASCEND or DESCEND (ASCEND=default)
-//        COMP = REAL_COMP, ABS_COMP, IMAG_COMP, or ARG_COMP (REAL_COMP=default)
+//        AD = Ascend or Descend (Ascend=default)
+//        COMP = RealComp, AbsComp, ImagComp, or ArgComp (RealComp=default)
 //
 // VectorViews:
 //
@@ -229,7 +229,11 @@
 //        Returns the sum of all elements in the Vector
 //
 //    v.sumAbsElements() or SumAbsElements(v)
-//        Returns the sum of absolute values of  elements in the Vector
+//        Returns the sum of absolute values of elements in the Vector
+//
+//    v.sumAbs2Elements() or SumAbs2Elements(v)
+//        Returns the sum of absolute values of elements in the Vector
+//        using |real(v(i))| + |imag(v(i))| for complex vectors.
 //
 //    v.maxElement() or MaxElement(v)
 //    v.maxElement(int* imax = 0)
@@ -538,6 +542,8 @@ namespace tmv {
 
         RT sumAbsElements() const;
 
+        RT sumAbs2Elements() const;
+
         T minElement(int* iminout=0) const;
 
         T maxElement(int* imaxout=0) const;
@@ -844,6 +850,7 @@ namespace tmv {
 
         virtual inline ~VectorView() 
         {
+            TMV_SETFIRSTLAST(0,0);
 #ifdef TMVDEBUG
             const_cast<T*&>(_v) = 0;
 #endif
@@ -914,27 +921,6 @@ namespace tmv {
             Copy(v2.view(),*this);
             return *this; 
         }
-
-#if 0
-        template <int N> 
-        inline const type& operator=(
-            const SmallVectorComposite<RT,N>& v2) const
-        {
-            TMVAssert(size() == N);
-            v2.assignToV(*this);
-            return *this; 
-        }
-
-        template <int N> 
-        inline const type& operator=(
-            const SmallVectorComposite<CT,N>& v2) const
-        {
-            TMVAssert(size() == N);
-            TMVAssert(isComplex(T()));
-            v2.assignToV(*this);
-            return *this; 
-        }
-#endif
 
         //
         // Access Functions
@@ -1057,7 +1043,7 @@ namespace tmv {
                 int* p, OldADType ad=ASCEND, OldCompType comp=REAL_COMP) const)
         { return sort(p,ADType(ad),CompType(comp)); }
         TMV_DEPRECATED(const type& Sort(
-                OldADType ad=ASCEND, OldCompType comp=REAL_COMP) const)
+                ADType ad=ASCEND, CompType comp=REAL_COMP) const)
         { return sort(ADType(ad),CompType(comp)); }
 
         //
@@ -1272,16 +1258,6 @@ namespace tmv {
         inline const type& operator=(const SmallVector<T2,N,I2>& v2) const
         { c_type::operator=(v2); return *this; }
 
-#if 0
-        template <int N> 
-        inline const type& operator=(const SmallVectorComposite<RT,N>& v2) const
-        { c_type::operator=(v2); return *this; }
-
-        template <int N> 
-        inline const type& operator=(const SmallVectorComposite<CT,N>& v2) const
-        { c_type::operator=(v2); return *this; }
-#endif
-
 
         //
         // Access Functions
@@ -1404,10 +1380,10 @@ namespace tmv {
         TMV_DEPRECATED(const type& ReverseSelf() const)
         { return reverseSelf(); }
         TMV_DEPRECATED(const type& Sort(
-                int* p, OldADType ad=ASCEND, OldCompType comp=REAL_COMP) const)
+                int* p, ADType ad=ASCEND, CompType comp=REAL_COMP) const)
         { return sort(p,ADType(ad),CompType(comp)); }
         TMV_DEPRECATED(const type& Sort(
-                OldADType ad=ASCEND, OldCompType comp=REAL_COMP) const)
+                ADType ad=ASCEND, CompType comp=REAL_COMP) const)
         { return sort(ADType(ad),CompType(comp)); }
 
 
@@ -1623,6 +1599,7 @@ namespace tmv {
 
         virtual inline ~Vector() 
         {
+            TMV_SETFIRSTLAST(0,0);
 #ifdef TMVDEBUG
             setAllTo(T(999));
 #endif
@@ -1695,25 +1672,6 @@ namespace tmv {
             view() = v2.view(); 
             return *this; 
         }
-
-#if 0
-        template <int N> 
-        inline type& operator=(const SmallVectorComposite<RT,N>& v2)
-        { 
-            TMVAssert(N == size());
-            v2.assignToV(view()); 
-            return *this; 
-        }
-
-        template <int N> 
-        inline type& operator=(const SmallVectorComposite<CT,N>& v2)
-        { 
-            TMVAssert(N == size());
-            TMVAssert(isComplex(T()));
-            v2.assignToV(view()); 
-            return *this; 
-        }
-#endif
 
 
         //
@@ -1868,10 +1826,10 @@ namespace tmv {
         TMV_DEPRECATED(type& ReverseSelf())
         { return reverseSelf(); }
         TMV_DEPRECATED(type& Sort(
-                int* p, OldADType ad=ASCEND, OldCompType comp=REAL_COMP))
+                int* p, ADType ad=ASCEND, CompType comp=REAL_COMP))
         { return sort(p,ADType(ad),CompType(comp)); }
         TMV_DEPRECATED(type& Sort(
-                OldADType ad=ASCEND, OldCompType comp=REAL_COMP))
+                ADType ad=ASCEND, CompType comp=REAL_COMP))
         { return sort(ADType(ad),CompType(comp)); }
 
 
@@ -2063,10 +2021,23 @@ namespace tmv {
         inline T& ref(int i)
         { return _v.get()[i]; }
 
+        inline void resize(int n)
+        {
+            _v.resize(n);
+            _size = n;
+#ifdef TMVFLDEBUG
+            _first = _v.get();
+            _last = _first + n;
+#endif
+#ifdef TMVDEBUG
+            setAllTo(T(888));
+#endif
+        }
+
     private:
 
         AlignedArray<T> _v;
-        const size_t _size;
+        size_t _size;
 
 #ifdef TMVFLDEBUG
     public:
@@ -2267,6 +2238,10 @@ namespace tmv {
     template <class T> 
     inline TMV_RealType(T) SumAbsElements(const GenVector<T>& v)
     { return v.sumAbsElements(); }
+
+    template <class T> 
+    inline TMV_RealType(T) SumAbs2Elements(const GenVector<T>& v)
+    { return v.sumAbs2Elements(); }
 
     template <class T> 
     inline T MinElement(const GenVector<T>& v)

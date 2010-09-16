@@ -64,6 +64,10 @@ namespace tmv {
         SymMultMM<false>(T1(1),V.adjoint().colRange(0,kmax),SinvUt,sinv);
     }
 
+#ifdef INST_INT
+#undef INST_INT
+#endif
+
 #define InstFile "TMV_SymSVInverse.inst"
 #include "TMV_Inst.h"
 #undef InstFile

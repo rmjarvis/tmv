@@ -7,12 +7,14 @@
   template void BlockMultMM<false>(const T alpha,const GenMatrix<Ta >& A, \
       const GenMatrix<Tb >& B, const MatrixView<T >& C); \
 
+#ifndef INST_SKIP_BLAS
 DefMM(T,T,T)
 #ifdef INST_COMPLEX
 DefMM(CT,T,T)
 DefMM(CT,T,CT)
 DefMM(CT,CT,T)
 DefMM(CT,CT,CT)
+#endif
 #endif
 
 #undef DefMM

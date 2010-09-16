@@ -22,7 +22,8 @@ bool symoprod = false;
 bool dontthrow = false;
 std::string lastsuccess = "";
 
-int main() try {
+int main() try 
+{
     std::ofstream log("tmvtest1d.log");
     tmv::WriteWarningsTo(&log);
 
@@ -35,14 +36,21 @@ int main() try {
 
 #ifdef TEST_DOUBLE
     TestMatrixDiv<double>();
+    TestMatrixDet<double>();
 #endif // DOUBLE
 
 #ifdef TEST_FLOAT
     TestMatrixDiv<float>();
+    TestMatrixDet<float>();
 #endif // FLOAT
+
+#ifdef TEST_INT
+    TestMatrixDet<int>();
+#endif // INT
 
 #ifdef TEST_LONGDOUBLE
     TestMatrixDiv<long double>();
+    TestMatrixDet<long double>();
 #endif // LONGDOUBLE
 
 #endif

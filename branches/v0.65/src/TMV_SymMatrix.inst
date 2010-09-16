@@ -1,7 +1,7 @@
 
 #define CT std::complex<T>
 
-#define Def1(T,RT,CCT,Ref) \
+#define Def1(RT,T,Ref) \
   template bool GenSymMatrix<T >::hasSubMatrix( \
       int i1, int i2, int j1, int j2, int is, int js) const; \
   template bool GenSymMatrix<T >::hasSubVector( \
@@ -14,6 +14,9 @@
       int i, int j, int is, int js, int s) const; \
   template bool ConstSymMatrixView<T,FortranStyle>::hasSubSymMatrix( \
       int i1, int i2, int is) const; \
+  template T GenSymMatrix<T >::sumElements() const; \
+  template RT GenSymMatrix<T >::sumAbsElements() const; \
+  template RT GenSymMatrix<T >::sumAbs2Elements() const; \
   template RT GenSymMatrix<T >::normF() const; \
   template RT GenSymMatrix<T >::normSq(const RT scale) const; \
   template RT GenSymMatrix<T >::norm1() const; \
@@ -25,13 +28,11 @@
   template auto_ptr<BaseMatrix<T > > GenSymMatrix<T >::newTranspose() const; \
   template auto_ptr<BaseMatrix<T > > GenSymMatrix<T >::newConjugate() const; \
   template auto_ptr<BaseMatrix<T > > GenSymMatrix<T >::newAdjoint() const; \
-  template auto_ptr<BaseMatrix<T > > GenSymMatrix<T >::newInverse() const; \
   template void GenSymMatrix<T >::write(std::ostream& os) const; \
   template void GenSymMatrix<T >::write(std::ostream& os, RT t) const; \
   template void GenSymMatrix<T >::writeCompact(std::ostream& os) const; \
   template void GenSymMatrix<T >::writeCompact(std::ostream& os, RT t) const; \
   template T GenSymMatrix<T >::cref(int i, int j) const; \
-  template void GenSymMatrix<T >::newDivider() const; \
   template const SymMatrixView<T,CStyle>&  \
       SymMatrixView<T,CStyle>::swapRowsCols(int i1, int i2) const;\
   template const SymMatrixView<T,CStyle>&  \
@@ -53,12 +54,31 @@
   template SymMatrixView<T > HermMatrixViewOf( \
       T* m, size_t s, UpLoType uplo, StorageType stor); \
 
-Def1(T,T,CT,T&)
+Def1(T,T,T&)
 #ifdef INST_COMPLEX
-Def1(CT,T,CT,VarConjRef<CT >)
+Def1(T,CT,VarConjRef<CT >)
 #endif
 
 #undef Def1
+
+#ifndef TISINT
+#define Def1b(RT,T) \
+  template T GenSymMatrix<T >::det() const; \
+  template RT GenSymMatrix<T >::logDet(T* sign) const; \
+  template void GenSymMatrix<T >::newDivider() const; \
+  template auto_ptr<BaseMatrix<T > > GenSymMatrix<T >::newInverse() const; \
+  template bool GenSymMatrix<T >::divIsLUDiv() const; \
+  template bool GenSymMatrix<T >::divIsCHDiv() const; \
+  template bool GenSymMatrix<T >::divIsHermSVDiv() const; \
+  template bool GenSymMatrix<T >::divIsSymSVDiv() const; \
+
+Def1b(T,T)
+#ifdef INST_COMPLEX
+Def1b(T,CT)
+#endif
+
+#undef Def1b
+#endif
 
 #define Def2(T1,T2) \
   template void GenSymMatrix<T1 >::doMakeInverse( \

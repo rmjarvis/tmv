@@ -12,13 +12,12 @@ template <class T>
 void TestSymBandMatrixArith_B2()
 {
 #if (XTEST & 2)
-    const int N = 10;
-
     std::vector<tmv::SymBandMatrixView<T> > sb;
     std::vector<tmv::SymBandMatrixView<std::complex<T> > > csb;
     std::vector<tmv::BaseMatrix<T>*> B;
     std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
     MakeSymBandList(sb,csb,B,CB,InDef);
+    const int N = sb[0].size();
 
     tmv::Matrix<T> a1(N,N);
     for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) a1(i,j) = T(3+i-5*j);

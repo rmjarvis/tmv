@@ -1,5 +1,7 @@
 Note: More complete installation information is contained in 
-doc/TMV_Documentation.pdf,
+doc/TMV_Documentation.pdf.  If the instructions there differ from these, 
+then it is probably true that the pdf is correct, rather than this file.
+
 
 First, see INSTALL for instructions on downloading and unpacking the 
 tarball if you have not already done so.
@@ -42,6 +44,8 @@ This file give the instructions for installing TMV using the program SCons.
        INST_INT=false specifies whether to instantiate the <int> templates.
        WITH_OPENMP=true specifies whether to use OpenMP to parallelize some 
              parts of the code.
+       SHARED=false specifies whether to make the library files shared as 
+             opposed to static libraries.
    
        IMPORT_ENV=false specifies whether to import the entire environment 
              from the calling shell.  The default is to start with a clean 

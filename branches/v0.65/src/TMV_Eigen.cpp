@@ -428,6 +428,10 @@ namespace tmv {
     // Schur_From_Hessenberg: QR method
     //
 
+#ifdef INST_INT
+#undef INST_INT
+#endif
+
 #define InstFile "TMV_Eigen.inst"
 #include "TMV_Inst.h"
 #undef InstFile

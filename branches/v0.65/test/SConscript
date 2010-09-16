@@ -11,9 +11,13 @@ test_basic_files = ReadFileList('test_basic.files')
 test_diag_files = ReadFileList('test_diag.files')
 test_tri_files = ReadFileList('test_tri.files')
 test_div_files = ReadFileList('test_div.files')
+test_div_lap_files = ReadFileList('test_div_lap.files')
 test_band_files = ReadFileList('test_band.files')
+test_band_lap_files = ReadFileList('test_band_lap.files')
 test_sym_files = ReadFileList('test_sym.files')
+test_sym_lap_files = ReadFileList('test_sym_lap.files')
 test_symband_files = ReadFileList('test_symband.files')
+test_symband_lap_files = ReadFileList('test_symband_lap.files')
 test_small_files = ReadFileList('test_small.files')
 test_small_sq_files = ReadFileList('test_small_sq.files')
 test_small_nonsq_files = ReadFileList('test_small_nonsq.files')
@@ -27,17 +31,10 @@ if env['MEM_TEST']:
     env1.Append(CPPDEFINES=['TMV_MEM_TEST'])
 if env['XTEST'] > 0:
     env1.Append(CPPDEFINES=['XTEST=' + env['XTEST']])
-if not env['INST_FLOAT']:
-    env1.Append(CPPDEFINES=['NO_INST_FLOAT'])
-if not env['INST_DOUBLE']:
-    env1.Append(CPPDEFINES=['NO_INST_DOUBLE'])
-if env['INST_LONGDOUBLE']:
-    env1.Append(CPPDEFINES=['INST_LONGDOUBLE'])
-if env['INST_INT']:
-    env1.Append(CPPDEFINES=['INST_INT'])
-if not env['TEST_FLOAT']:
+
+if not env['TEST_FLOAT'] or not env['INST_FLOAT']:
     env1.Append(CPPDEFINES=['NO_TEST_FLOAT'])
-if not env['TEST_DOUBLE']:
+if not env['TEST_DOUBLE'] or not env['INST_DOUBLE']:
     env1.Append(CPPDEFINES=['NO_TEST_DOUBLE'])
 if env['TEST_LONGDOUBLE']:
     env1.Append(CPPDEFINES=['TEST_LONGDOUBLE'])
@@ -53,6 +50,10 @@ if env['LAP']:
 
 env2 = env1.Clone(LIBS=sblibs+env['LIBS'])
 
+env2b = env2.Clone()
+if env['LAP']:
+    env2b.Append(CPPDEFINES=['LAP'])
+
 test_mix_files = ['TMV_TestMix.cpp']
 obj_mix = env1.Object(test_mix_files)
 progmix = env1.Program('tmvtestmix', obj_mix)
@@ -66,10 +67,14 @@ if env['NOMIX_SMALL']:
 obj_basic = env1.Object(test_basic_files)
 obj_diag = env1.Object(test_diag_files)
 obj_tri = env1.Object(test_tri_files)
-obj_div = env1b.Object(test_div_files) # uses lapack, so env1b
-obj_band = env2.Object(test_band_files)
-obj_sym = env2.Object(test_sym_files)
-obj_symband = env2.Object(test_symband_files)
+obj_div = [ env1.Object(test_div_files) ,
+    env1b.Object(test_div_lap_files) ]
+obj_band = [ env2.Object(test_band_files),
+    env2b.Object(test_band_lap_files) ]
+obj_sym = [ env2.Object(test_sym_files),
+    env2b.Object(test_sym_lap_files) ]
+obj_symband = [ env2.Object(test_symband_files),
+    env2b.Object(test_symband_lap_files) ]
 obj_small = env3.Object(test_small_files)
 obj_small_sq = env3.Object(test_small_sq_files)
 obj_small_nonsq = env3.Object(test_small_nonsq_files)

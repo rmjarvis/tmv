@@ -238,7 +238,8 @@ namespace tmv {
             // If isinv = true, these two options become:
             // 1) P(i,j) = e_j.reversePermute(p,0,j+1)(i)
             // 2) P(i,j) = e_i.permute(p,0,j+1)(j)
-            // which is equivalent to just swapping the i,j values.
+            // which is equivalent to just swapping the i,j values
+            // (and using the other algorithm).
             //
             // The two options use the same number of permutations.
             // However, with the forward permutation, it is easy 
@@ -310,7 +311,7 @@ namespace tmv {
         inline int normSq() const
         { return itsn; }
 
-        inline int normSq(const int scale) const
+        inline double normSq(const double scale) const
         { return itsn * scale * scale; }
 
         inline double normF() const
@@ -577,6 +578,14 @@ namespace tmv {
             v.sort(P.getMem(),ad,comp);
             P.calcDet();
             P.isinv = false;
+        }
+
+        inline void resize(size_t n)
+        {
+            itsn = n;
+            allocateMem();
+            isinv = false;
+            itsdet = 1;
         }
 
 

@@ -18,13 +18,12 @@ inline bool CanAddEq(
 template <class T> 
 void TestSymMatrixArith_C1()
 {
-    const int N = 10;
-
     std::vector<tmv::SymMatrixView<T> > s;
     std::vector<tmv::SymMatrixView<std::complex<T> > > cs;
     std::vector<tmv::BaseMatrix<T>*> B;
     std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
     MakeSymList(s,cs,B,CB,InDef);
+    const int N = s[0].size();
 
     tmv::Matrix<T> a1(N,N);
     for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) a1(i,j) = T(3+i-5*j);

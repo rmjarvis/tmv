@@ -292,6 +292,10 @@ namespace tmv {
     size_t HermBandCHDiv<T>::rowsize() const
     { return pimpl->LLx.size(); }
 
+#ifdef INST_INT
+#undef INST_INT
+#endif
+
 #define InstFile "TMV_SymBandCHD.inst"
 #include "TMV_Inst.h"
 #undef InstFile

@@ -12,6 +12,9 @@
       int i, int j, int istep, int jstep, int s) const; \
   template std::istream& operator>>(std::istream& fin, \
       const MatrixView<T >& m);  \
+  template T GenMatrix<T >::sumElements() const; \
+  template RT GenMatrix<T >::sumAbsElements() const; \
+  template RT GenMatrix<T >::sumAbs2Elements() const; \
   template RT GenMatrix<T >::normSq(const RT scale) const; \
   template RT GenMatrix<T >::normF() const; \
   template RT GenMatrix<T >::norm1() const; \
@@ -23,12 +26,10 @@
   template auto_ptr<BaseMatrix<T > > GenMatrix<T >::newTranspose() const; \
   template auto_ptr<BaseMatrix<T > > GenMatrix<T >::newConjugate() const; \
   template auto_ptr<BaseMatrix<T > > GenMatrix<T >::newAdjoint() const; \
-  template auto_ptr<BaseMatrix<T > > GenMatrix<T >::newInverse() const; \
   template void GenMatrix<T >::write(std::ostream& os) const; \
   template void GenMatrix<T >::write(std::ostream& os, RT minnz) const; \
   template void MatrixView<T >::read(std::istream& os) const; \
   template T GenMatrix<T >::cref(int i, int j) const; \
-  template void GenMatrix<T >::newDivider() const; \
   template void Swap(const MatrixView<T >& m1, const MatrixView<T >& m2); \
   template void DoCopySameType(const GenMatrix<T >& m1, \
       const MatrixView<T >& m2);  \
@@ -36,6 +37,8 @@
       RT thresh) const; \
   template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::setZero() const; \
   template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::setAllTo( \
+      const T& x) const; \
+  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::addToAll( \
       const T& x) const; \
   template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::transposeSelf() const; \
   template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::conjugateSelf() const; \
@@ -53,6 +56,26 @@ Def1(T,CT,VarConjRef<CT >)
 #endif
 
 #undef Def1
+
+#ifndef TISINT
+#define Def1b(RT,T) \
+  template T GenMatrix<T >::det() const; \
+  template RT GenMatrix<T >::logDet(T* sign) const; \
+  template bool GenMatrix<T >::isSingular() const; \
+  template auto_ptr<BaseMatrix<T > > GenMatrix<T >::newInverse() const; \
+  template void GenMatrix<T >::newDivider() const; \
+  template bool GenMatrix<T >::divIsLUDiv() const; \
+  template bool GenMatrix<T >::divIsQRDiv() const; \
+  template bool GenMatrix<T >::divIsQRPDiv() const; \
+  template bool GenMatrix<T >::divIsSVDiv() const; \
+
+Def1b(T,T)
+#ifdef INST_COMPLEX
+Def1b(T,CT)
+#endif
+
+#undef Def1b
+#endif
 
 #define Def2(T,S,I) \
   template Matrix<T,S,I>::Matrix(const std::vector<std::vector<T > >& vv); \

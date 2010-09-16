@@ -40,9 +40,9 @@
 \usepackage{times}
 %\renewcommand{\tt}[1]{{\texttt {#1}}}
 %\renewcommand{\tt}[1]{\rm #1}
-\newcommand{\tmvversion}{0.64}
+\newcommand{\tmvversion}{0.65}
 \newcommand{\tmvmajorversion}{0}
-\newcommand{\tmvminorversion}{64}
+\newcommand{\tmvminorversion}{65}
 \newcommand{\tttmvversion}{\texttt \tmvversion}
 \newcommand{\mygroupx}{tmv-discuss@googlegroups.com}
 \newcommand{\mygroup}{\href{mailto:\mygroupx}{\texttt \mygroupx}}
@@ -90,7 +90,7 @@ keywordstyle=\color{Green},
 
 \title{Template Matrix/Vector Library for C++ \\ User Manual \\ Version \tmvversion}
 \author{Mike Jarvis}
-\date{June 27, 2010}
+\date{September 16, 2010}
 \maketitle
 
 \tableofcontents
@@ -441,9 +441,18 @@ divide by a \tt{Matrix<int>}, for example, the required calculations are impossi
 for \tt{int}'s,
 so the result will not be correct.  But since the possibility of multiplication of 
 integer matrices seemed desirable, we do allow them to be used.  
-\emph{Caveat programor}.  If debugging is turned on (or more accurately, not
-turned off via the compile flag -DNDEBUG), then trying to do anything that requires
-\tt{sqrt} or \tt{epsilon} for \tt{int}s will result in a runtime error.
+\emph{Caveat programor}.  If debugging is turned on with \tt{DEBUG=true}, 
+then trying to do anything that requires
+\tt{sqrt} or \tt{epsilon} for \tt{int}s will result in a runtime error.  Specifically a 
+\tt{FailedAssert} exception will be thrown.
+\index{Matrix!integer types}
+
+The one somewhat complicated algorithm that is available for integer types is
+the determinant, since the determinant of an integer matrix is always an integer.
+The algorithm to do this is a so-called integer-preserving algorithm from Bareiss (1968)
+that only uses division when it is known that the result will not require a fractional part.
+I've extended his algorithm to \tt{complex<int>} as well, so those are also accurate.
+\index{Matrix!Determinant!integer types}
 
 \subsection {Notations used in this document}
 
@@ -594,6 +603,11 @@ so the whitespace doesn't confuse the parser.  e.g. \texttt{scons FLAGS='-O3 -g'
 \index{Installation!OpenMP}
 \index{OpenMP}
 \item \texttt{WITH\_OPENMP=true} specifies whether to use OpenMP to parallelize some parts of the code.
+\item \texttt{SHARED=false} specifies whether to make the library files shared as opposed to static libraries.  Making the libraries shared (e.g. \texttt{libtmv.so}, \texttt{libtmv.dylib}, etc. depending on your system) allows the compiled programs that use TMV to be quite a bit smaller typically.  However, since shared libraries often require a bit more care in terms of having your paths set up properly, the default is to create static libraries.
+\item \texttt{TEST\_FLOAT=true} specifies whether to include the \tt{<float>} tests in the test suite.
+\item \texttt{TEST\_DOUBLE=true} specifies whether to include the \tt{<double>} tests in the test suite.
+\item \texttt{TEST\_LONGDOUBLE=false} specifies whether to include the \tt{<long double>} tests in the test suite.
+\item \texttt{TEST\_INT=false} specifies whether to include the \tt{<int>} tests in the test suite.
 \end{itemize}
 The next flags set up the paths that SCons will use to try to find your BLAS and LAPACK libraries.
 \begin{itemize}
@@ -683,19 +697,18 @@ whitespace and enclosed in quotes.
 \end{itemize}
 Finally, some miscellaneous options that you are less likely to need:
 \begin{itemize}
-\item \texttt{STATIC=false} specifies whether to use static linkage.  Some systems have trouble with
+\item \texttt{STATIC=false} specifies whether to use static linkage for the test program.  Some systems have trouble with
 dynamic linkage of libraries.  This usually indicates that something is installed incorrectly, but
 it can be easier to just use static linkage when you compile as a workaround.  This flag does this
-for the test suite executables.
+for the test suite executables.  \footnote{Note: combining \texttt{STATIC=true} with \texttt{SHARED=true} does not work.}
 \item \texttt{WITH\_SSE=true} specifies whether to use the \texttt{-msse2} flag with \texttt{icpc} compilations. 
 It seems like most machines that have \texttt{icpc} are able to use SSE commands.  However, 
 I couldn't figure out a compiler flag that would turn on SSE {\em if and only if} the machine
 supports it.  So the default is to use the flag \texttt{-msse2}, but you can disable it by setting 
-\texttt{WITH\_SSE=false} if your machine doesn't have SSE support.
+\texttt{WITH\_SSE=false} if your machine doesn't have SSE support.  In fact, I don't even know if this option is ever necessary, since \texttt{icpc} might be smart enough to ignore this flag if your machine doesn't support SSE instructions.
 \item \texttt{XTEST=0} specifies whether to include extra tests in the test suite.  \texttt{XTEST}
 is treated as a bit set, with each non-zero bit turning on particular tests.  Type ``\tt{scons -h}'' for 
 more information.
-
 \item \texttt{MEM\_TEST=false} specifies whether to include extra memory tests in the library and test suite.
 \item \texttt{USE\_STEGR=true} specifies whether to use the LAPACK algorithm called
 \tt{dstegr} (or \tt{sstegr} for \tt{<float>}) for symmetric
@@ -1546,6 +1559,7 @@ into the element type of the \tt{Vector} will work.
 Also, \tt{v} can be re-initialized with this method at any time, so it is not limited to 
 initialization at construction.  And finally, \tt{v} can be a \tt{VectorView}, not just a \tt{Vector}.
 
+
 \subsection{Access}
 \index{Vector!Access methods}
 \label{Vector_Access}
@@ -1618,6 +1632,44 @@ so you should declare them as \tt{typename tmv::VectorView<T>::iterator},
 etc. instead.
 
 \end{itemize}
+
+\subsection{Resizing}
+\index{Vector!Resizing}
+\label{Vector_Resize}
+
+It is possible to change the size of a vector after it has been created using the method \tt{resize}:
+
+\begin{tmvcode}
+v.resize(size_t newsize);
+\end{tmvcode}
+\index{Vector!Methods!resize}
+
+This reallocates memory for the new size with {\u uninitialized} values.  
+(Or if not compiling with -DNDEBUG, the values are in fact set to 888.)
+
+There are no correlates to the other constructors, so after a resize, the 
+values should be set directly in some fashion.
+
+Note that there is no automatic resizing if assigning a result that is a different size. 
+For example, the code:
+\begin{tmvcode}
+tmv::Vector<double> v(10);
+tmv::Vector<double> w(20);
+// w = ...
+v = 5. * w;
+\end{tmvcode}
+will throw a \tt{tmv::FailedAssert} exception (c.f. \S\ref{FailedAssert}) (Or if compiled with 
+-DNDEBUG to skip TMV's asserts, then it will probably produce a segmentation fault.),
+rather than resizing \tt{v} to a size of 20.  
+
+The reason for this is that such code is more often the result of a bug, rather than intent.
+So if this code is what you intend, you should write the following:
+\begin{tmvcode}
+v.resize(20);
+v = 5. * w;
+\end{tmvcode}
+
+Also, only actual \tt{Vector}s can be resized, not the views that we will discuss in the next section.
 
 \subsection{Views}
 \index{Vector!VectorView}
@@ -1778,6 +1830,12 @@ Functions that do not modify the \tt{Vector} are defined in
 Functions that modify the \tt{Vector} are only defined for 
 \tt{Vector} and \tt{VectorView}.
 
+Some functions are invalid if T is \tt{int} or \tt{complex<int>} because they require 
+a \tt{sqrt}.  If called, these functions typically return \tt{0} if there is a return value.
+And if the library is compiled with debugging on (\tt{DEBUG=true} in the scons installation),
+then they will throw a \tt{FailedAssert} exception.  The descriptions for such functions
+will mention if they are invalid for integer types.
+
 \subsubsection{Non-modifying functions}
 
 Each of the following functions can be written in two ways, either as a method or a function.
@@ -1789,8 +1847,7 @@ double normv = Norm(v);
 are equivalent.  In either case, \tt{v} can be any \tt{GenVector}.
 Also, several of the functions below have multiple equivalent names.  For example,
 \tt{norm1} and \tt{sumAbsElements} are equivalent, so you can use whichever one is
-clearer to you in your situation.
-And just to remind you, \tt{RT} refers to the 
+clearer to you in your situation.  And just to remind you, \tt{RT} refers to the 
 real type associated with \tt{T}.  So if \tt{T} is either \tt{double} or \tt{complex<double>},
 \tt{RT} would be \tt{double}.
 
@@ -1807,7 +1864,9 @@ RT SumAbsElements(v)
 \index{Vector!Functions of!Norm1}
 \index{Vector!Methods!sumAbsElements}
 \index{Vector!Functions of!SumAbsElements}
-The 1-norm of \tt{v}: $||v||_1 = \sum_i |v(i)|$.
+The 1-norm of \tt{v}: $||v||_1 = \sum_i |v(i)|$.  
+
+Invalid for \tt{T = complex<int>}.
 
 \item
 \begin{tmvcode}
@@ -1822,7 +1881,9 @@ RT Norm(v)
 \index{Vector!Functions of!Norm2}
 The 2-norm of \tt{v}: $||v||_2 = (\sum_i |v(i)|^2)^{1/2}$.
 This is the most common meaning for the norm of a vector, so we
-define the \tt{norm} function to be the same as \tt{norm2}.
+define the \tt{norm} function to be the same as \tt{norm2}.  
+
+Invalid for \tt{T = int} or \tt{complex<int>}.
 
 \item
 \begin{tmvcode}
@@ -1847,7 +1908,30 @@ RT MaxAbsElement(v)
 \index{Vector!Functions of!NormInf}
 \index{Vector!Methods!maxAbsElement}
 \index{Vector!Functions of!MaxAbsElement}
-The infinity-norm of \tt{v}: $||v||_\infty = \max_i |v(i)|$.
+The infinity-norm of \tt{v}: $||v||_\infty = \max_i |v(i)|$.  
+
+Invalid for \tt{T = complex<int>}.
+
+\item
+\begin{tmvcode}
+T v.sumElements() const
+T SumElements(v)
+\end{tmvcode}
+\index{Vector!Methods!sumElements}
+\index{Vector!Functions of!SumElements}
+The sum of the elements of \tt{v} $= \sum_i v(i)$.
+
+\item
+\begin{tmvcode}
+RT v.sumAbs2Elements() const
+RT SumAbs2Elements(v)
+\end{tmvcode}
+\index{Vector!Methods!sumAbs2Elements}
+\index{Vector!Functions of!SumAbs2Elements}
+The sum of the ``\tt{Abs2}'' values of the elements of \tt{v}: $\sum_i |real(v(i))| + |imag(v(i))|$.
+This is faster than the version using real absolute values for
+complex vectors and is often just as useful, depending on your purpose.  Also this version
+is valid for \tt{T = complex<int>}, while the normal version is not.
 
 \item
 \begin{tmvcode}
@@ -1872,37 +1956,35 @@ RT v.maxAbsElement(int* i=0) const
 RT MaxAbsElement(v)
 RT v.minAbsElement(int* i=0) const
 RT MinAbsElement(v)
-RT v.maxAbs2Element(int* i=0) const
-RT MaxAbs2Element(v)
-RT v.minAbs2Element(int* i=0) const
-RT MinAbs2Element(v)
 \end{tmvcode}
 \index{Vector!Methods!maxAbsElement}
 \index{Vector!Functions of!MaxAbsElement}
 \index{Vector!Methods!minAbsElement}
 \index{Vector!Functions of!MinAbsElement}
+The maximum/minimum element by absolute value.  $max_i |v(i)|$ or $min_i |v(i)|$.
+The \tt{i} argument is available in the method versions of these function, and it is optional.
+If it is present (and not 0), then \tt{*i} is set to the 
+index of the max/min element returned.  
+
+Invalid for \tt{T = complex<int>}.
+
+\item
+\begin{tmvcode}
+RT v.maxAbs2Element(int* i=0) const
+RT MaxAbs2Element(v)
+RT v.minAbs2Element(int* i=0) const
+RT MinAbs2Element(v)
+\end{tmvcode}
 \index{Vector!Methods!maxAbs2Element}
 \index{Vector!Functions of!MaxAbs2Element}
 \index{Vector!Methods!minAbs2Element}
 \index{Vector!Functions of!MinAbs2Element}
-The maximum/minimum element by absolute value.  
-The \tt{i} argument is available in the method versions of these function, and it is optional.
-If it is present (and not 0), then \tt{*i} is set to the 
-index of the max/min element returned.
-
-For real vectors, the last four cases with \tt{Abs2} instead of \tt{Abs} are identical, but 
-for complex vectors, they use $|real(v(i))| + |imag(v(i))|$ instead.  This is faster than doing
+The same as the above functions, but using
+$|real(v(i))| + |imag(v(i))|$ instead of the normal absolute value if \tt{T} is complex.  
+This is faster than doing
 the normal absolute value, and for many purposes (such as finding a suitably large value
-with which to scale a vector), it is just as useful.
-
-\item
-\begin{tmvcode}
-T v.sumElements() const
-T SumElements(v)
-\end{tmvcode}
-\index{Vector!Methods!sumElements}
-\index{Vector!Functions of!SumElements}
-The sum of the elements of \tt{v} $= \sum_i v(i)$.
+with which to scale a vector), it is just as useful.  Also these functions are
+valid for \tt{T = complex<int>}, while the normal versions are not.
 
 \end{itemize}
 
@@ -1947,19 +2029,21 @@ Set each element to the value \tt{x}.
 
 \item
 \begin{tmvcode}
+v.addToAll(T x)
+\end{tmvcode}
+\index{Vector!Methods!addToAll}
+Add the value \tt{x} to each element.
+
+\item
+\begin{tmvcode}
 v.clip(RT thresh)
 \end{tmvcode}
 \index{Vector!Methods!clip}
 Set each element whose absolute value is less than \tt{thresh} equal to 0.
 Note that \tt{thresh} should be a real value even for complex valued
-\tt{Vector}s.
+\tt{Vector}s.  
 
-\item
-\begin{tmvcode}
-v.addToAll(T x)
-\end{tmvcode}
-\index{Vector!Methods!addToAll}
-Add the value \tt{x} to each element.
+Invalid for \tt{T = complex<int>}.
 
 \item 
 \begin{tmvcode}
@@ -2018,10 +2102,10 @@ operations.  See \S\ref{Permutation}
 
 \item
 \begin{tmvcode}
-v.sort(Permutation& p, tmv::ADType ad=tmv::ASCEND, 
-      tmv::COMPType comp=tmv::REAL_COMP)
-v.sort(tmv::ADType ad=tmv::ASCEND, 
-      tmv::COMPType comp=tmv::REAL_COMP)
+v.sort(Permutation& p, tmv::ADType ad=tmv::Ascend, 
+      tmv::CompType comp=tmv::RealComp)
+v.sort(tmv::ADType ad=tmv::Ascend, 
+      tmv::CompType comp=tmv::RealComp)
 \end{tmvcode}
 \index{Vector!Methods!sort}
 \index{Permutation!Vector sort}
@@ -2030,17 +2114,19 @@ If you do not care about the permutation, the second form is slightly more effic
 
 The next parameter, \tt{ad}, determines whether the sorted \tt{Vector} 
 will have its elements in ascending or descending order.  The possible values
-are \tt{ASCEND} and \tt{DESCEND}.  The default if omitted is to sort
+are \tt{Ascend} and \tt{Descend}.  The default if omitted is to sort
 in ascending order.
 
 The final parameter, \tt{comp}, determines what component of the
 elements to use for the sorting.  This is especially relevant if T is complex, 
 since complex values are not intrinsically sortable.
 The possible values are
-\tt{REAL\_COMP}, \tt{ABS\_COMP},
-\tt{IMAG\_COMP}, and \tt{ARG\_COMP}.
+\tt{RealComp}, \tt{AbsComp},
+\tt{ImagComp}, and \tt{ArgComp}.
 Only the first two make sense for non-complex vectors.  The default if
-omitted is to sort the real values of the elements.
+omitted is to sort the real values of the elements.  
+
+\tt{AbsComp} and \tt{ArgComp} are invalid for \tt{T = complex<int>}.
 
 \item
 \begin{tmvcode}
@@ -2660,6 +2746,43 @@ would be obtained by: \tt{m.subVector(n-1,0,-1,1,n)} for C-style or
 
 \end{itemize}
 
+\subsection{Resizing}
+\index{Matrix!Resizing}
+\label{Matrix_Resize}
+
+It is possible to change the size of a matrix after it has been created using the method \tt{resize}:
+
+\begin{tmvcode}
+m.resize(size_t new_nrows, size_t new_ncols);
+\end{tmvcode}
+\index{Matrix!Methods!resize}
+
+This reallocates memory for the new size with {\u uninitialized} values.  
+(Or if not compiling with -DNDEBUG, the values are in fact set to 888.)
+
+There are no correlates to the other constructors, so after a resize, the 
+values should be set directly in some fashion.
+
+Note that there is no automatic resizing if assigning a result that is a different size. 
+For example, the code:
+\begin{tmvcode}
+tmv::Matrix<double> m(10,10);
+tmv::Matrix<double> q(20,15);
+// q = ...
+m = q.transpose();
+\end{tmvcode}
+will throw a \tt{tmv::FailedAssert} exception (c.f. \S\ref{FailedAssert}) (Or if compiled with 
+-DNDEBUG to skip TMV's asserts, then it will probably produce a segmentation fault.),
+rather than resizing \tt{m} to a size of 15 $\times$ 20.  
+
+The reason for this is that such code is more often the result of a bug, rather than intent.
+So if this code is what you intend, you should write the following:
+\begin{tmvcode}
+m.resize(15,20);
+m = q.transpose()
+\end{tmvcode}
+
+Also, only actual \tt{Matrix}es can be resized, not the views that we will discuss in the next section.
 
 \subsection{Views}
 \index{Matrix!MatrixView}
@@ -2860,6 +2983,12 @@ Functions that do not modify the \tt{Matrix} are defined in
 Functions that modify the \tt{Matrix} are only defined for 
 \tt{Matrix} and \tt{MatrixView}.
 
+Some functions are invalid if T is \tt{int} or \tt{complex<int>} because they require 
+a \tt{sqrt}, \tt{log} or division.  If called, these functions typically return \tt{0} if there is a return value.
+And if the library is compiled with debugging on (\tt{DEBUG=true} in the scons installation),
+then they will throw a \tt{FailedAssert} exception.  The descriptions for such functions
+will mention if they are invalid for integer types.
+
 \subsubsection{Non-modifying functions}
 
 Each of the following functions can be written in two ways,
@@ -2881,7 +3010,9 @@ RT Norm1(m)
 \index{Matrix!Methods!norm1}
 \index{Matrix!Functions of!Norm1}
 The 1-norm of \tt{m}: 
-$||m||_1 = \max_j (\sum_i |m(i,j)|)$.
+$||m||_1 = \max_j (\sum_i |m(i,j)|)$.  
+
+Invalid for \tt{T = complex<int>}.
 
 \item
 \begin{tmvcode}
@@ -2893,7 +3024,7 @@ RT m.doNorm2() const
 \index{Matrix!Methods!doNorm2}
 \index{Matrix!Functions of!Norm2}
 The 2-norm of \tt{m}: $||m||_2 =$ the largest singular value of $m$, which
-is also the square root of the largest eigenvalue of $(m^\dagger m)$.
+is also the square root of the largest eigenvalue of $(m^\dagger m)$.  
 
 This function can be fairly expensive if you have not
 already performed an SV decomposition of \tt{m}, so the first two versions
@@ -2909,6 +3040,8 @@ In fact, if you are not going to need the decomposition for anything else,
 then \tt{m.doNorm2()} will be faster than \tt{m.svd(), m.norm2()}, because the 
 former will not bother to accumulate the singular vectors.
 
+Invalid for \tt{T = int} or \tt{complex<int>}.
+
 \item
 \begin{tmvcode}
 RT m.normInf() const
@@ -2917,7 +3050,9 @@ RT NormInf(m)
 \index{Matrix!Methods!normInf}
 \index{Matrix!Functions of!NormInf}
 The infinity-norm of \tt{m}: 
-$||m||_\infty = \max_i (\sum_j |m(i,j)|)$.
+$||m||_\infty = \max_i (\sum_j |m(i,j)|)$.  
+
+Invalid for \tt{T = complex<int>}.
 
 \item
 \begin{tmvcode}
@@ -2931,10 +3066,12 @@ RT Norm(m)
 \index{Matrix!Methods!normF}
 \index{Matrix!Functions of!NormF}
 The Frobenius norm of \tt{m}: 
-$||m||_F = (\sum_{i,j} |m(i,j)|^2)^{1/2}$.
+$||m||_F = (\sum_{i,j} |m(i,j)|^2)^{1/2}$.  
 
 This is the most common meaning for the norm of a matrix, so we
 define the \tt{norm} function to be the same as \tt{normF}.
+
+Invalid for \tt{T = int} or \tt{complex<int>}.
 
 \item
 \begin{tmvcode}
@@ -2958,7 +3095,9 @@ RT MaxAbsElement(m)
 \index{Matrix!Methods!maxAbsElement}
 \index{Matrix!Functions of!MaxAbsElement}
 The element of \tt{m} with the maximum absolute value: 
-$||m||_\Delta = \max_{i,j} |m(i,j)|$.
+$||m||_\Delta = \max_{i,j} |m(i,j)|$.  
+
+Invalid for \tt{T = complex<int>}.
 
 \item
 \begin{tmvcode}
@@ -2997,6 +3136,17 @@ RT SumAbsElements(m)
 \index{Matrix!Functions of!SumAbsElements}
 The sum of the absolute values of all elements of \tt{m}: $\sum_{i,j} |m(i,j)|$.
 
+Invalid for \tt{T = complex<int>}.
+
+\item
+\begin{tmvcode}
+RT m.sumAbs2Elements() const
+RT SumAbs2Elements(m)
+\end{tmvcode}
+\index{Matrix!Methods!sumAbs2Elements}
+\index{Matrix!Functions of!SumAbs2Elements}
+The sum of the ``\tt{Abs2}'' values of all elements of \tt{m}: $\sum_{i,j} |real(m(i,j))| + |imag(m(i,j))|$.
+
 \item
 \begin{tmvcode}
 T m.det() const
@@ -3018,7 +3168,9 @@ RT LogDet(m)
 \index{Matrix!Functions of!LogDet}
 The log of the absolute value of the determinant of \tt{m}.  If the optional argument \tt{sign} is 
 provided (possible in the method version only), then on output \tt{*sign} records the sign of the determinant.  See \ref{Matrix_Division_Determinants} 
-for more details.
+for more details.  
+
+Invalid for \tt{T = int} or \tt{complex<int>}.
 
 \item
 \begin{tmvcode}
@@ -3048,6 +3200,8 @@ And as with \tt{norm2}, you can bypass the warning by calling \tt{doCondition()}
 which will do the necessary SV decomposition without any warnings.  
 Also, see \S\ref{Warnings} for how to change the warning behavior of TMV.
 
+Invalid for \tt{T = int} or \tt{complex<int>}.
+
 \item
 \begin{tmvcode}
 tmv::Matrix<T> minv = m.inverse()
@@ -3057,7 +3211,7 @@ void m.makeInverse(Matrix<T>& minv)
 \index{Matrix!Methods!inverse}
 \index{Matrix!Methods!makeInverse}
 \index{Matrix!Functions of!Inverse}
-Set \tt{minv} to the inverse of \tt{m}.  
+Set \tt{minv} to the inverse of \tt{m}.    
 
 If \tt{m} is not square, then \tt{minv} is set to the pseudo-inverse, or an approximate
 pseudo-inverse.  If \tt{m} is singular, then an error may result, or the pseudo-inverse
@@ -3071,12 +3225,14 @@ This is because \tt{m.inverse()} actually returns an object whose type is derive
 \tt{MatrixComposite}.  The calculation of the inverse is then delayed 
 until there is a place to store the result.
 
+Invalid for \tt{T = int} or \tt{complex<int>}.
+
 \item
 \begin{tmvcode}
 void m.makeInverseATA(Matrix<T>& cov) const
 \end{tmvcode}
 \index{Matrix!Methods!makeInverseATA}
-Set \tt{cov} to be $(m^\dagger m)^{-1}$.
+Set \tt{cov} to be $(m^\dagger m)^{-1}$.  
 
 If \tt{m} has more rows than columns, then using it to solve a system of equations
 really amounts to finding the least-square solution, since there is (typically) no
@@ -3091,6 +3247,8 @@ Thus this function is provided, which sets the
 argument \tt{cov} to the equivalent of \tt{Inverse(m.adjoint()*m)}, 
 but generally does so much more efficiently than doing this explicitly, 
 and also probably more accurately.
+
+Invalid for \tt{T = int} or \tt{complex<int>}.
 
 \end{itemize}
 
@@ -3119,12 +3277,21 @@ Set all elements to the value \tt{x}.
 
 \item
 \begin{tmvcode}
+m.addToAll(T x)
+\end{tmvcode}
+\index{Matrix!Methods!addToAll}
+Adds the value \tt{x} to all elements of \tt{m}.
+
+\item
+\begin{tmvcode}
 m.clip(RT thresh)
 \end{tmvcode}
 \index{Matrix!Methods!clip}
 Set each element whose absolute value is less than \tt{thresh} equal to 0.
 Note that \tt{thresh} should be a real value even for complex valued
-\tt{Matrix}es.
+\tt{Matrix}es.  
+
+Invalid for \tt{T = complex<int>}.
 
 \item
 \begin{tmvcode}
@@ -3356,6 +3523,18 @@ where $A$ is a matrix and $x$ and $b$ are vectors.  $A$ and $b$ are known,
 and one wants to solve for $x$.  Sometimes there are
 multiple systems to be solved using the same coefficients, in which case
 $x$ and $b$ become matrices as well.
+
+Note -- essentially all of the functions and operations in this section are invalid for
+integer-typed matrices.  If $A$ and $b$ have integer values, it is not necessarily
+true that $x$ will too.  So if you want to do this kind of operation on \tt{int} matrices,
+you should first copy them to either \tt{float} or \tt{double} before doing any division
+operation.  
+
+The exception to this is determinants.  The determinant of a matrix with integer values
+is necessarily an integer too.  So TMV uses a special algorithm that does not involve
+division to calculate the determinant of \tt{int} and \tt{complex<int>} matrices\footnote{
+Well, actually there are division operations, but only when they are guaranteed to 
+result in exact integer results without rounding.  So it is safe to perform on integer values.}.
 
 \subsubsection{Operators}
 \label{Matrix_Division_Operators}
@@ -3701,6 +3880,28 @@ calculations.  Since log is a monotonic function, the maximum likelihood is coin
 with the maximum of its logarithm.  And, since likelihoods in matrix formulation
 often involve a determinant,
 the \tt{logDet()} function is exactly what is needed to calculate the log likelihood.
+
+Finally, if \tt{m}'s type is either \tt{int} or \tt{complex<int>} (or some other integer type),
+then the determinant returned by \tt{m.det()} is calculated a bit differently.  In general, division is not accurate
+for integer types, so we can't use the normal decomposition algorithms for the determinant,
+since they all use division (and sometimes \tt{sqrt}) as part of the calculation.  
+
+But the determinant of an integer matrix
+is always an integer, so we provide the ability to calculate accurate results in this case 
+using a so-called integer-preserving algorithm by Bareiss (1968).  He claims that this
+algorithm keeps the intermediate values as small as possible to help avoid overflow.
+In addition to using this algorithm, we also store the intermediate values as \tt{long double},
+which has the same number of digits in its mantissa as a 64 bit integer.  And if the intermediate
+values need to exceed this, the values will be rounded somewhat, but in most cases the 
+final answer will still be accurate to the nearest integer, which is what is returned.
+
+Obviously, if your system uses 32 bit integers, then any answer that is not representable in
+32 bits will be inaccurate.  In this case, the returned answer is either \tt{numeric_limits<int>::max()}
+(if the correct answer is positive) or \tt{numeric_limits<int>::min()} (if the correct answer is
+negative).  Depending on your application, you may want to include checks for these return values
+in your code.
+
+\index{Matrix!Determinant!integer types}
 
 \subsubsection{Accessing the decompositions}
 \index{Matrix!Decompositions}
@@ -4215,7 +4416,7 @@ with \tt{Small} objects in an arithmetic statement, which will be done inline
 in some cases.
 
 \item
-\textbf{Division method is fixed}
+\textbf{Cannot change division algorithm}
 \index{SmallMatrix!Arithmetic!division}
 
 A \tt{SmallMatrix} does not have the various division control methods 
@@ -4228,6 +4429,9 @@ the library will not save the decomposition between statements.
 \index{QR Decomposition!SmallMatrix}
 \index{SmallMatrix!LU decomposition}
 \index{SmallMatrix!QR decomposition}
+
+There are also some specializations for particular sizes like $2 \times 2$ and $3 \times 3$
+matrices.
 
 \end{enumerate}
 
@@ -4339,6 +4543,11 @@ Make a \tt{DiagMatrixView} whose diagonal consists of the actual memory elements
 \label{DiagMatrix_Access}
 
 \begin{tmvcode}
+d.resize(size_t newsize)
+\end{tmvcode}
+\index{DiagMatrix!Methods!resize}
+
+\begin{tmvcode}
 d.nrows() = d.ncols() = d.colsize() = d.rowsize() = d.size()
 d(i,j)
 d(i) = d(i,i)
@@ -4409,6 +4618,7 @@ RT d.normSq(RT scale)
 T d.trace() = Trace(d)
 T d.sumElements() = SumElements(d)
 RT d.sumAbsElements() = SumAbsElements(d)
+RT d.sumAbs2Elements() = SumAbs2Elements(d)
 T d.det() = Det(d)
 RT d.logDet(T* sign=0) = LogDet(d)
 bool d.isSingular()
@@ -4427,6 +4637,7 @@ d.makeInverseATA(DiagMatrix<T>& cov)
 \index{DiagMatrix!Functions of!Trace}
 \index{DiagMatrix!Functions of!SumElements}
 \index{DiagMatrix!Functions of!SumAbsElements}
+\index{DiagMatrix!Functions of!SumAbs2Elements}
 \index{DiagMatrix!Functions of!Det}
 \index{DiagMatrix!Functions of!LogDet}
 \index{DiagMatrix!Functions of!Inverse}
@@ -4437,6 +4648,7 @@ d.makeInverseATA(DiagMatrix<T>& cov)
 \index{DiagMatrix!Methods!trace}
 \index{DiagMatrix!Methods!sumElements}
 \index{DiagMatrix!Methods!sumAbsElements}
+\index{DiagMatrix!Methods!sumAbs2Elements}
 \index{DiagMatrix!Methods!det}
 \index{DiagMatrix!Methods!logDet}
 \index{DiagMatrix!Methods!isSingular}
@@ -4453,6 +4665,7 @@ available with the operator version: \tt{dinv = d.inverse()}.
 \begin{tmvcode}
 d.setZero()
 d.setAllTo(T x)
+d.addToAll(T x)
 d.clip(RT thresh)
 d.setToIdentity(T x = 1)
 d.conjugateSelf()
@@ -4462,14 +4675,16 @@ Swap(d1,d2)
 \end{tmvcode}
 \index{DiagMatrix!Methods!setZero}
 \index{DiagMatrix!Methods!setAllTo}
+\index{DiagMatrix!Methods!addToAll}
 \index{DiagMatrix!Methods!clip}
 \index{DiagMatrix!Methods!setToIdentity}
 \index{DiagMatrix!Methods!conjugateSelf}
 \index{DiagMatrix!Methods!transposeSelf}
 \index{DiagMatrix!Methods!invertSelf}
 \index{DiagMatrix!Functions of!Swap}
-\tt{invertSelf} is new for \tt{DiagMatrix} and calculates $d^{-1}$ in place.  
-It is equivalent to \tt{d = d.inverse()}.
+There is one new method here for \tt{DiagMatrix}: The method \tt{invertSelf}  calculates $d^{-1}$ in place.  
+It is equivalent to \tt{d = d.inverse()} and, like the other division operations, is invalid for \tt{T = int} or \tt{complex<int>}.
+\vspace{12pt}
 
 \subsection{Arithmetic}
 \index{DiagMatrix!Arithmetic}
@@ -4695,6 +4910,11 @@ elements must be in memory, even though they are never used.
 \label{TriMatrix_Access}
 
 \begin{tmvcode}
+U.resize(size_t newsize)
+\end{tmvcode}
+\index{UpperTriMatrix!Methods!resize}
+
+\begin{tmvcode}
 U.nrows() = U.ncols() = U.colsize() = U.rowsize() = U.size()
 U(i,j)
 U.row(int i, int j1, int j2)
@@ -4799,6 +5019,7 @@ RT U.maxAbs2Element() = MaxAbs2Element(U)
 T U.trace() = Trace(U)
 T U.sumElements() = SumElements(U)
 RT U.sumAbsElements() = SumAbsElements(U)
+RT U.sumAbs2Elements() = SumAbs2Elements(U)
 T U.det() = Det(U)
 RT U.logDet(T* sign=0) = LogDet(U)
 bool U.isSingular()
@@ -4826,6 +5047,7 @@ U.makeInverseATA(Matrix<T>& cov)
 \index{UpperTriMatrix!Functions of!Trace}
 \index{UpperTriMatrix!Functions of!SumElements}
 \index{UpperTriMatrix!Functions of!SumAbsElements}
+\index{UpperTriMatrix!Functions of!SumAbs2Elements}
 \index{UpperTriMatrix!Functions of!Det}
 \index{UpperTriMatrix!Functions of!LogDet}
 \index{UpperTriMatrix!Functions of!Inverse}
@@ -4835,6 +5057,7 @@ U.makeInverseATA(Matrix<T>& cov)
 \index{UpperTriMatrix!Methods!trace}
 \index{UpperTriMatrix!Methods!sumElements}
 \index{UpperTriMatrix!Methods!sumAbsElements}
+\index{UpperTriMatrix!Methods!sumAbs2Elements}
 \index{UpperTriMatrix!Methods!det}
 \index{UpperTriMatrix!Methods!logDet}
 \index{UpperTriMatrix!Methods!isSingular}
@@ -4853,6 +5076,7 @@ hold for \tt{LowerTriMatrix} as well.
 \begin{tmvcode}
 U.setZero()
 U.setAllTo(T x)
+U.addToAll(T x)
 U.clip(RT thresh)
 U.setToIdentity(T x = 1)
 U.conjugateSelf()
@@ -4861,13 +5085,14 @@ Swap(U1,U2)
 \end{tmvcode}
 \index{UpperTriMatrix!Methods!setZero}
 \index{UpperTriMatrix!Methods!setAllTo}
+\index{UpperTriMatrix!Methods!addToAll}
 \index{UpperTriMatrix!Methods!clip}
 \index{UpperTriMatrix!Methods!setToIdentity}
 \index{UpperTriMatrix!Methods!conjugateSelf}
 \index{UpperTriMatrix!Methods!invertSelf}
 \index{UpperTriMatrix!Functions of!Swap}
 Like for \tt{DiagMatrix}, \tt{invertSelf} calculates $U^{-1}$ in place.  
-It is equivalent to \tt{U = U.inverse()}.
+It is equivalent to \tt{U = U.inverse()} and, like the other division operations, is invalid for \tt{T = int} or \tt{complex<int>}.
 \vspace{12pt}
 
 \subsection{Arithmetic}
@@ -5257,6 +5482,11 @@ Make a \tt{BandMatrixView} of the actual memory elements, \tt{vv}.
 \label{BandMatrix_Access}
 
 \begin{tmvcode}
+b.resize(size_t new_nrows, size_t new_ncols, int new_nlo, int new_nhi)
+\end{tmvcode}
+\index{BandMatrix!Methods!resize}
+
+\begin{tmvcode}
 b.nrows() = b.colsize()
 b.ncols() = b.rowsize()
 b(i,j)
@@ -5397,6 +5627,7 @@ RT b.maxAbs2Element() = MaxAbs2Element(b)
 T b.trace() = Trace(b)
 T b.sumElements() = SumElements(b)
 RT b.sumAbsElements() = SumAbsElements(b)
+RT b.sumAbs2Elements() = SumAbs2Elements(b)
 T b.det() = Det(b)
 RT b.logDet(T* sign=0) = LogDet(b)
 bool b.isSingular()
@@ -5423,6 +5654,7 @@ b.makeInverseATA(Matrix<T>& cov)
 \index{BandMatrix!Functions of!Trace}
 \index{BandMatrix!Functions of!SumElements}
 \index{BandMatrix!Functions of!SumAbsElements}
+\index{BandMatrix!Functions of!SumAbs2Elements}
 \index{BandMatrix!Functions of!Det}
 \index{BandMatrix!Functions of!LogDet}
 \index{BandMatrix!Functions of!Inverse}
@@ -5432,6 +5664,7 @@ b.makeInverseATA(Matrix<T>& cov)
 \index{BandMatrix!Methods!trace}
 \index{BandMatrix!Methods!sumElements}
 \index{BandMatrix!Methods!sumAbsElements}
+\index{BandMatrix!Methods!sumAbs2Elements}
 \index{BandMatrix!Methods!det}
 \index{BandMatrix!Methods!logDet}
 \index{BandMatrix!Methods!isSingular}
@@ -5446,6 +5679,7 @@ must be a regular \tt{Matrix}.
 \begin{tmvcode}
 b.setZero()
 b.setAllTo(T x)
+b.addToAll(T x)
 b.clip(RT thresh)
 b.setToIdentity(T x = 1)
 b.conjugateSelf()
@@ -5454,6 +5688,7 @@ Swap(b1,b2)
 \end{tmvcode}
 \index{BandMatrix!Methods!setZero}
 \index{BandMatrix!Methods!setAllTo}
+\index{BandMatrix!Methods!addToAll}
 \index{BandMatrix!Methods!clip}
 \index{BandMatrix!Methods!setToIdentity}
 \index{BandMatrix!Methods!conjugateSelf}
@@ -5618,6 +5853,12 @@ b.divideInPlace()
 \index{BandMatrix!Methods!divideInPlace}
 work the same as for regular \tt{Matrix}es.
 (See \ref{Matrix_Division_Efficiency}.)
+
+And the function \tt{b.det()} (or \tt{b.logDet()}) calculates the determinant
+using whichever decomposition is currently set with \tt{b.divideUsing(dt)},
+unless \tt{b}'s data type is an integer type, in which case Bareiss's algorithm 
+is used.
+\index{BandMatrix!Determinant}
 
 \subsection{Input/Output}
 \index{BandMatrix!Input/output}
@@ -5833,6 +6074,11 @@ of the values are actually used,
 \label{SymMatrix_Access}
 
 \begin{tmvcode}
+s.resize(size_t new_size)
+\end{tmvcode}
+\index{SymMatrix!Methods!resize}
+
+\begin{tmvcode}
 s.nrows() = s.ncols() = s.colsize() = s.rowsize() = s.size()
 s(i,j)
 s.row(int i, int j1, int j2)
@@ -5938,6 +6184,7 @@ RT s.maxAbs2Element() = MaxAbs2Element(s)
 T s.trace() = Trace(s)
 T s.sumElements() = SumElements(s)
 RT s.sumAbsElements() = SumAbsElements(s)
+RT s.sumAbs2Elements() = SumAbs2Elements(s)
 T s.det() = Det(s)
 RT s.logDet(T* sign=0) = LogDet(s)
 bool s.isSingular()
@@ -5965,6 +6212,7 @@ s.makeInverseATA(Matrix<T>& cov)
 \index{SymMatrix!Functions of!Trace}
 \index{SymMatrix!Functions of!SumElements}
 \index{SymMatrix!Functions of!SumAbsElements}
+\index{SymMatrix!Functions of!SumAbs2Elements}
 \index{SymMatrix!Functions of!Det}
 \index{SymMatrix!Functions of!LogDet}
 \index{SymMatrix!Functions of!Inverse}
@@ -5974,6 +6222,7 @@ s.makeInverseATA(Matrix<T>& cov)
 \index{SymMatrix!Methods!trace}
 \index{SymMatrix!Methods!sumElements}
 \index{SymMatrix!Methods!sumAbsElements}
+\index{SymMatrix!Methods!sumAbs2Elements}
 \index{SymMatrix!Methods!det}
 \index{SymMatrix!Methods!logDet}
 \index{SymMatrix!Methods!isSingular}
@@ -5991,6 +6240,7 @@ of \tt{s.makeInverse(minv)} for both argument types.
 \begin{tmvcode}
 s.setZero()
 s.setAllTo(T x)
+s.addToAll(T x)
 s.clip(RT thresh)
 s.setToIdentity(T x = 1)
 s.conjugateSelf()
@@ -5999,13 +6249,14 @@ Swap(s1,s2)
 \end{tmvcode}
 \index{SymMatrix!Methods!setZero}
 \index{SymMatrix!Methods!setAllTo}
+\index{SymMatrix!Methods!addToAll}
 \index{SymMatrix!Methods!clip}
 \index{SymMatrix!Methods!setToIdentity}
 \index{SymMatrix!Methods!conjugateSelf}
 \index{SymMatrix!Methods!transposeSelf}
 \index{SymMatrix!Functions of!Swap}
-\tt{transposeSelf} does nothing to a \tt{SymMatrix} and is equivalent to
-\tt{conjugateSelf} for a \tt{HermMatrix}.
+The method \tt{transposeSelf()} does nothing to a \tt{SymMatrix} and is equivalent to
+\tt{conjugateSelf()} for a \tt{HermMatrix}.
 \begin{tmvcode}
 s.swapRowsCols(int i1, int i2)
 s.permuteRowsCols(const int* p)
@@ -6299,6 +6550,12 @@ s.divideInPlace()
 work the same as for regular \tt{Matrix}es.
 (See \ref{Matrix_Division_Efficiency}.)
 
+And the function \tt{s.det()} (or \tt{s.logDet()}) calculates the determinant
+using whichever decomposition is currently set with \tt{s.divideUsing(dt)},
+unless \tt{s}'s data type is an integer type, in which case Bareiss's algorithm 
+is used.
+\index{SymMatrix!Determinant}
+
 \subsection{Input/Output}
 \index{SymMatrix!Input/output}
 \label{SymMatrix_IO}
@@ -6546,6 +6803,11 @@ Make a \tt{SymBandMatrixView} of the actual memory elements, \tt{vv}.
 \label{SymBandMatrix_Access}
 
 \begin{tmvcode}
+sb.resize(size_t new_size, int new_nlo)
+\end{tmvcode}
+\index{SymBandMatrix!Methods!resize}
+
+\begin{tmvcode}
 sb.nrows() = sb.ncols() = sb.colsize() = sb.rowsize() = sb.size()
 sb.nlo() = sb.nhi()
 sb(i,j)
@@ -6662,6 +6924,7 @@ RT sb.maxAbs2Element() = MaxAbs2Element(sb)
 T sb.trace() = Trace(sb)
 T sb.sumElements() = SumElements(sb)
 RT sb.sumAbsElements() = SumAbsElements(sb)
+RT sb.sumAbs2Elements() = SumAbs2Elements(sb)
 T sb.det() = Det(sb)
 RT sb.logDet(T* sign=0) = LogDet(sb)
 sinv = sb.inverse() = Inverse(sb)
@@ -6689,6 +6952,7 @@ sb.makeInverseATA(Matrix<T>& cov)
 \index{SymBandMatrix!Functions of!Trace}
 \index{SymBandMatrix!Functions of!SumElements}
 \index{SymBandMatrix!Functions of!SumAbsElements}
+\index{SymBandMatrix!Functions of!SumAbs2Elements}
 \index{SymBandMatrix!Functions of!Det}
 \index{SymBandMatrix!Functions of!LogDet}
 \index{SymBandMatrix!Functions of!Inverse}
@@ -6698,6 +6962,7 @@ sb.makeInverseATA(Matrix<T>& cov)
 \index{SymBandMatrix!Methods!trace}
 \index{SymBandMatrix!Methods!sumElements}
 \index{SymBandMatrix!Methods!sumAbsElements}
+\index{SymBandMatrix!Methods!sumAbs2Elements}
 \index{SymBandMatrix!Methods!det}
 \index{SymBandMatrix!Methods!logDet}
 \index{SymBandMatrix!Methods!isSingular}
@@ -6713,6 +6978,7 @@ So \tt{sb.inverse()} may be assigned to either a \tt{Matrix} or a \tt{SymMatrix}
 \begin{tmvcode}
 sb.setZero()
 sb.setAllTo(T x)
+sb.addToAll(T x)
 sb.clip(RT thresh)
 sb.setToIdentity(T x = 1)
 sb.conjugateSelf()
@@ -6721,6 +6987,7 @@ Swap(sb1,sb2)
 \end{tmvcode}
 \index{SymBandMatrix!Methods!setZero}
 \index{SymBandMatrix!Methods!setAllTo}
+\index{SymBandMatrix!Methods!addToAll}
 \index{SymBandMatrix!Methods!clip}
 \index{SymBandMatrix!Methods!setToIdentity}
 \index{SymBandMatrix!Methods!conjugateSelf}
@@ -6900,6 +7167,12 @@ sb.divideInPlace()
 work the same as for regular \tt{Matrix}es.
 (See \ref{Matrix_Division_Efficiency}.)
 
+And the function \tt{sb.det()} (or \tt{sb.logDet()}) calculates the determinant
+using whichever decomposition is currently set with \tt{sb.divideUsing(dt)},
+unless \tt{sb}'s data type is an integer type, in which case Bareiss's algorithm 
+is used.
+\index{SymBandMatrix!Determinant}
+
 \subsection{Input/Output}
 \index{SymBandMatrix!Input/output}
 \label{SymBandMatrix_IO}
@@ -7002,6 +7275,11 @@ from the input values.  And if \tt{isinv} is omitted, it is taken to be \tt{fals
 \label{Permutation_Access}
 
 \begin{tmvcode}
+p.resize(size_t new_size)
+\end{tmvcode}
+\index{Permutation!Methods!resize}
+
+\begin{tmvcode}
 p.nrows() = p.ncols() = p.colsize() = p.rowsize() = p.size()
 p(i,j)
 \end{tmvcode}
@@ -7045,22 +7323,23 @@ trivial values like 1 or n.  But we provide them all for consistency with the
 functions that other matrices provide.
 
 \begin{tmvcode}
-int p.norm1() = Norm1(p)
-int p.norm2() = Norm2(p) = p.doNorm2()
-int p.normInf() = NormInf(p)
-int p.maxAbsElement() = MaxAbsElement(p)
-int p.maxAbs2Element() = MaxAbs2Element(p)
-double p.normF() = NormF(p) = p.norm() = Norm(p)
-int p.normSq() = NormSq(p)
-int p.normSq(RT scale)
+int p.norm1() = Norm1(p) = 1
+int p.norm2() = Norm2(p) = p.doNorm2() = 1
+int p.normInf() = NormInf(p) = 1
+int p.maxAbsElement() = MaxAbsElement(p) = 1
+int p.maxAbs2Element() = MaxAbs2Element(p) = 1
+double p.normF() = NormF(p) = p.norm() = Norm(p) = sqrt(n)
+int p.normSq() = NormSq(p) = n
+double p.normSq(double scale) = n*scale^2
 int p.trace() = Trace(p)
-int p.sumElements() = SumElements(p)
-int p.sumAbsElements() = SumAbsElements(p)
+int p.sumElements() = SumElements(p) = n
+int p.sumAbsElements() = SumAbsElements(p) = n
+int p.sumAbs2Elements() = SumAbs2Elements(p) = n
 int p.det() = Det(p)
 int p.logDet(int* sign=0) = LogDet(p)
-bool p.isSingular()
-int p.condition()
-int p.doCondition()
+bool p.isSingular() = false
+int p.condition() = 1
+int p.doCondition() = 1
 pinv = p.inverse() = Inverse(p)
 p.makeInverse(Matrix<T>& minv)
 p.makeInverseATA(Matrix<T>& cov)
@@ -7082,6 +7361,7 @@ p.makeInverseATA(Matrix<T>& cov)
 \index{Permutation!Functions of!Trace}
 \index{Permutation!Functions of!SumElements}
 \index{Permutation!Functions of!SumAbsElements}
+\index{Permutation!Functions of!SumAbs2Elements}
 \index{Permutation!Functions of!Det}
 \index{Permutation!Functions of!LogDet}
 \index{Permutation!Functions of!Inverse}
@@ -7091,6 +7371,7 @@ p.makeInverseATA(Matrix<T>& cov)
 \index{Permutation!Methods!trace}
 \index{Permutation!Methods!sumElements}
 \index{Permutation!Methods!sumAbsElements}
+\index{Permutation!Methods!sumAbs2Elements}
 \index{Permutation!Methods!det}
 \index{Permutation!Methods!logDet}
 \index{Permutation!Methods!isSingular}
@@ -7193,9 +7474,6 @@ Trying to multiply a \tt{Matrix} by a \tt{Vector} where the number of columns
 in the \tt{Matrix} doesn't match the size of the \tt{Vector}.
 \item
 Viewing a \tt{Matrix} as a \tt{HermMatrix} when the diagonal isn't real.
-\item
-Calling \tt{m.lud()}, \tt{m.qrd()}, etc. for a \tt{Matrix} that does not have that 
-decomposition set (and saved).
 \end{itemize}
 
 I check for all of these (and similar) errors using assert statements.
@@ -7251,7 +7529,7 @@ If you want to be more specific, there are a number of classes that derive from
 \index{Exceptions!FailedAssert}
 \label{FailedAssert}
 
-\tt{tmv::FailedAssert} indicates that one of the assert statements failed.
+The \tt{tmv::FailedAssert} exception indicates that one of the assert statements failed.
 Since these are coding errors,
 if you catch this one, you'll probably just want to print out the error and abort
 the program so you can fix the bug.  In addition to printing the text of the
@@ -7268,19 +7546,19 @@ rather than your own code, please post a bug report at \myissues.
 \index{Exceptions!Singular}
 \label{Singular}
 
-\tt{tmv::Singular} indicates that you tried to invert or divide by a matrix
+The \tt{tmv::Singular} exception indicates that you tried to invert or divide by a matrix
 that is (numerically) singular.  This may be useful to catch specifically,
 since you may want to do something different when you encounter a singular
 matrix.  Note however, that this only detects \underline{exactly} singular
 matrices.  If a matrix is numerically close to singular, but no actual 
-zeros are found, then no error will be thrown, and your results will just be 
+zeros are found, then no error will be thrown.  Your results will just be 
 unreliable.
 
 \subsection{ReadError}
 \index{Exceptions!ReadError}
 \label{ReadError}
 
-\tt{tmv::ReadError} indicates that there was some problem reading in a matrix or 
+The \tt{tmv::ReadError} exception indicates that there was some problem reading in a matrix or 
 vector from an \tt{istream} input.  If you catch this by reference and write it,
 it will give you a fairly specific description of what the problem was as well as
 writing the part of the matrix or vector that was read in successfully.
@@ -7290,11 +7568,11 @@ writing the part of the matrix or vector that was read in successfully.
 \index{Cholesky Decomposition!NonPosDef exception}
 \label{NonPosDef}
 
-\tt{tmv::NonPosDef} indicates that you tried to do some operation that requires
+The \tt{tmv::NonPosDef} exception indicates that you tried to do some operation that requires
 a matrix to be positive definite, and it turned out not to be positive definite.
 The most common example would be performing a Cholesky decomposition on a 
 hermitian matrix.  I suspect that this is the 
-most useful exception to catch specifically, as opposed to just via \tt{tmv::Error} base class.
+most useful exception to catch specifically, as opposed to just via the \tt{tmv::Error} base class.
 
 For example, the fastest algorithm for determining whether a matrix is 
 (at least numerically) positive definite is to try the Cholesky decomposition
@@ -7327,7 +7605,7 @@ x = b/m;
 \end{tmvcode}
 Note, however, that the speed difference between the two algorithms is only about
 20\% or so for typical matrices.  So if a significant fraction of your matrices are 
-not positive definite, you are probably better off always using the LU algorithm.  
+not positive definite, you are probably better off always using the Bunch-Kaufman (\tt{LU}) algorithm.  
 Code like that given above would probably be most useful when all of your 
 matrices \underline{should} be positive definite in exact arithmetic, but you 
 want to guard against one failing the Cholesky decomposition due to round-off
@@ -7526,6 +7804,8 @@ void Eigen(const GenSymBandMatrix<T>& A, const VectorView<RT>& lambda);
 Note that the first one uses the input matrix \tt{A} as workspace and destroys the 
 input matrix in the process.
 
+None of these functions are valid for \tt{T = int} or \tt{complex<int>}.
+
 \subsection{Matrix decompositions}
 \label{Decompositions}
 
@@ -7566,6 +7846,8 @@ class yet to make it easy to use these permutations.  But the
 code snippets which show how to recreate the input matrices from
 the decompositions should be sufficient to describe how to use the 
 permutations as given.
+
+None of the decompositions are valid for \tt{T = int} or \tt{complex<int>}.
 
 \begin{itemize}
 
@@ -9224,12 +9506,17 @@ any out-of-memory throws and use a less memory-intesive algorithm
 when necessary.
 
 \item
-\textbf{Permutations}
+\textbf{Integer determinants for special matrices}
 
-I should make it easier to use the permutations that are output from 
-sort(), as well as from LU and QRP decompositions.   I'd like to write
-\tt{m *= P}, rather than \tt{m.permuteCols(p)}.  This just needs to be a wrapper
-class for the functions that already exist, so it shouldn't be too hard to write.
+The determinant of \tt{<int>} matrices is only written for a regular \tt{Matrix},
+and of course for the trivial \tt{DiagMatrix} and \tt{TriMatrix} types.  But
+for \tt{BandMatrix}, \tt{SymMatrix}, and \tt{SymBandMatrix}, I just copy to a regular
+\tt{Matrix} and then calculate the determinant of that.  I can speed up the 
+calculation for these special matrix types by taking advantage of their special
+structure, even using the same Bareiss algorithm as I currently use.
+\index{BandMatrix!Determinant!integer values}
+\index{SymMatrix!Determinant!integer values}
+\index{SymBandMatrix!Determinant!integer values}
 
 \end{enumerate}
 
@@ -9785,6 +10072,48 @@ The only similar algorithm I could find was in Bojanczyk and Steinhardt (1991),
 a paper which seems to have been overlooked by the matrix algorithms community.
 It's not quite the same as mine in detail, but it is based on the same basic idea.
 I added this reference to the discussion in the documentation about my algorithm.
+
+\end{itemize}
+
+\item[Version 0.65]
+This update primarily fixed some problems for integer matrices.  In addition to some compiler
+errors for some combinations of scons parameters, I also added the ability to calculate the 
+determinant of integer matrices.  It had been documented (albeit somewhat poorly) that 
+this would not work for integer matrices.  However, user Ronny Bergmann convinced me that
+it would make sense to include the ability for integer matrices to produce accurate determinants.
+
+There are also a few miscellaneous feature additions as well.
+
+\begin{itemize}
+
+\item Made \tt{m.det()} produce accurate results is \tt{m} is a \tt{Matrix<int>} or 
+\tt{Matrix<complex<int> >}.  Or in general if the underlying type is an integer type.
+
+The algorithm in this case is not the usual one (LU decomposition, then compute the 
+product of the diagonal of U), since this algorithm uses division which obviously leads 
+to errors if the elements are integers.  We could just use \tt{double} or \tt{long double} for
+the intermediate storage and convert back to the nearest integer at the end, but it has
+been shown by Bareiss (1968) that a different algorithm is better at avoiding intermediate
+values with significant rounding errors.  So we use that algorithm with \tt{long double} 
+intermediates, which seems to be effective at producing accurate answers over the 
+full range of values expressible as a 32 bit integer, and most of the range of a 64 bit 
+integer.
+
+\item Fixed some compiling errors with \tt{INST_INT=true}.
+
+\item Skip compiling functions that are invalid for integer values, like the various decompositions 
+and such.  The methods that normally use these functions will produce a \tt{FailedAssert}
+exception if the library is compiled with \tt{DEBUG=true}.  And if not, then these methods 
+will typically either not do anything, or return 0, as appropriate.
+
+\item Added the \tt{resize} methods to resize an existing vector or matrix at the request of user Zhaoming Ma.  I had thought that there was a speed benefit to having the sizes be \tt{const} variables, so the compiler could make optimization about the sizes of some loops and such.  However, it seems that (at least for the several compilers I tried), there is really no advantage to having the sizes be \tt{const}.  So given that, I might as well allow the sizes to be modifiable by the user.
+
+\item Added \tt{m.sumAbs2Elements()}, which works for \tt{complex<int>} matrices.
+
+\item Added \tt{m.addToAll(x)}.
+
+\item Added the ability to compile TMV as a shared library, rather than a static library using the \tt{SHARED=true} option in scons.  
+
 
 \end{itemize}
 

@@ -407,27 +407,64 @@ namespace tmv {
     }
 
     template <class T>
-    RT GenUpperTriMatrix<T>::sumAbsElements() const
+    static RT DoSumAbsElements(const GenUpperTriMatrix<T>& m)
     {
-        const int N = size();
+        const int N = m.size();
         RT sum(0);
-        if (isrm()) 
-            if (isunit())
+        if (m.isrm()) 
+            if (m.isunit())
                 for(int i=0;i<N;++i) 
-                    sum += row(i,i+1,N).sumAbsElements();
+                    sum += m.row(i,i+1,N).sumAbsElements();
             else
                 for(int i=0;i<N;++i) 
-                    sum += row(i,i,N).sumAbsElements();
+                    sum += m.row(i,i,N).sumAbsElements();
         else
-            if (isunit())
+            if (m.isunit())
                 for(int j=0;j<N;++j) 
-                    sum += col(j,0,j).sumAbsElements();
+                    sum += m.col(j,0,j).sumAbsElements();
             else
                 for(int j=0;j<N;++j) 
-                    sum += col(j,0,j+1).sumAbsElements();
-        if (isunit()) sum += RT(N);
+                    sum += m.col(j,0,j+1).sumAbsElements();
+        if (m.isunit()) sum += RT(N);
         return sum;
     }
+
+    template <class T>
+    static RT DoSumAbs2Elements(const GenUpperTriMatrix<T>& m)
+    {
+        const int N = m.size();
+        RT sum(0);
+        if (m.isrm()) 
+            if (m.isunit())
+                for(int i=0;i<N;++i) 
+                    sum += m.row(i,i+1,N).sumAbs2Elements();
+            else
+                for(int i=0;i<N;++i) 
+                    sum += m.row(i,i,N).sumAbs2Elements();
+        else
+            if (m.isunit())
+                for(int j=0;j<N;++j) 
+                    sum += m.col(j,0,j).sumAbs2Elements();
+            else
+                for(int j=0;j<N;++j) 
+                    sum += m.col(j,0,j+1).sumAbs2Elements();
+        if (m.isunit()) sum += RT(N);
+        return sum;
+    }
+
+#ifdef INST_INT
+    template <class T>
+    static RT DoSumAbsElements(const GenMatrix<std::complex<T> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+#endif
+
+    template <class T>
+    RT GenUpperTriMatrix<T>::sumAbsElements() const
+    { return DoSumAbsElements(*this); }
+
+    template <class T>
+    RT GenUpperTriMatrix<T>::sumAbs2Elements() const
+    { return DoSumAbs2Elements(*this); }
 
     template <class T>
     RT GenUpperTriMatrix<T>::normSq(const RT scale) const
@@ -454,13 +491,6 @@ namespace tmv {
         }
         return sum;
     }
-
-#ifdef INST_INT
-    static int NonLapNormF(const GenUpperTriMatrix<int>& m)
-    { return TMV_SQRT(m.normSq()); }
-    static int NonLapNormF(const GenUpperTriMatrix<std::complex<int> >& m)
-    { return TMV_SQRT(m.normSq()); }
-#endif
 
     template <class T> 
     static RT NonLapNormF(const GenUpperTriMatrix<T>& m)
@@ -693,6 +723,19 @@ namespace tmv {
 #endif
 #endif // XLAP
 
+#ifdef INST_INT
+    static int NonLapNormF(const GenUpperTriMatrix<int>& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int NonLapNormF(const GenUpperTriMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int NonLapNorm1(const GenUpperTriMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int NonLapNormInf(const GenUpperTriMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int NonLapMaxAbsElement(const GenUpperTriMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+#endif
+
     template <class T>
     RT GenUpperTriMatrix<T>::maxAbsElement() const
     {
@@ -746,12 +789,30 @@ namespace tmv {
     }
 
     template <class T>
-    RT GenUpperTriMatrix<T>::doNorm2() const
-    { return Matrix<T>(*this).doNorm2(); }
+    static RT DoNorm2(const GenUpperTriMatrix<T>& m)
+    { return Matrix<T>(m).doNorm2(); }
 
     template <class T>
+    static RT DoCondition(const GenUpperTriMatrix<T>& m)
+    { return Matrix<T>(m).doCondition(); }
+
+#ifdef INST_INT
+    static int DoNorm2(const GenUpperTriMatrix<int>& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int DoCondition(const GenUpperTriMatrix<int>& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int DoNorm2(const GenUpperTriMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int DoCondition(const GenUpperTriMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+#endif
+
+    template <class T>
+    RT GenUpperTriMatrix<T>::doNorm2() const
+    { return tmv::DoNorm2(*this); }
+    template <class T>
     RT GenUpperTriMatrix<T>::doCondition() const
-    { return Matrix<T>(*this).doCondition(); }
+    { return tmv::DoCondition(*this); }
 
     template <class T>
     T GenUpperTriMatrix<T>::det() const
@@ -853,6 +914,18 @@ namespace tmv {
             }
         }
     }
+#ifdef INST_INT
+    template <>
+    auto_ptr<BaseMatrix<int> > GenUpperTriMatrix<int>::newInverse() const
+    { TMVAssert(TMV_FALSE); return auto_ptr<BaseMatrix<int> >(); }
+    template <>
+    auto_ptr<BaseMatrix<std::complex<int> > > 
+    GenUpperTriMatrix<std::complex<int> >::newInverse() const
+    { 
+        TMVAssert(TMV_FALSE); 
+        return auto_ptr<BaseMatrix<std::complex<int> > >(); 
+    }
+#endif
 
     template <class T> 
     auto_ptr<BaseMatrix<T> > GenLowerTriMatrix<T>::newCopy() const
@@ -936,7 +1009,18 @@ namespace tmv {
             }
         }
     }
-
+#ifdef INST_INT
+    template <>
+    auto_ptr<BaseMatrix<int> > GenLowerTriMatrix<int>::newInverse() const
+    { TMVAssert(TMV_FALSE); return auto_ptr<BaseMatrix<int> >(); }
+    template <>
+    auto_ptr<BaseMatrix<std::complex<int> > > 
+    GenLowerTriMatrix<std::complex<int> >::newInverse() const
+    { 
+        TMVAssert(TMV_FALSE); 
+        return auto_ptr<BaseMatrix<std::complex<int> > >(); 
+    }
+#endif
 
     //
     // Modifying Functions
@@ -961,7 +1045,8 @@ namespace tmv {
     } 
 
     template <class T, IndexStyle I> 
-    const UpperTriMatrixView<T,I>& UpperTriMatrixView<T,I>::setAllTo(const T& x) const
+    const UpperTriMatrixView<T,I>& UpperTriMatrixView<T,I>::setAllTo(
+        const T& x) const
     {
         const int N = size();
 
@@ -975,6 +1060,20 @@ namespace tmv {
                 for(int j=0;j<N;++j) col(j,0,j).setAllTo(x); 
             else
                 for(int j=0;j<N;++j) col(j,0,j+1).setAllTo(x); 
+        return *this; 
+    }
+
+    template <class T, IndexStyle I> 
+    const UpperTriMatrixView<T,I>& UpperTriMatrixView<T,I>::addToAll(
+        const T& x) const
+    {
+        TMVAssert(!isunit());
+        const int N = size();
+
+        if (isrm())
+            for(int i=0;i<N;++i) row(i,i,N).addToAll(x); 
+        else 
+            for(int j=0;j<N;++j) col(j,0,j+1).addToAll(x); 
         return *this; 
     }
 
@@ -1236,7 +1335,8 @@ namespace tmv {
             ReadError("UpperTriMatrix."),
             i(_i), j(_j), m(new UpperTriMatrix<T>(_m)),
             exp(0), got(0), unitgot(_u), s(_m.size()),
-            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+            is(_is), iseof(_is.eof()), isbad(_is.bad()) 
+        {}
         UpperTriMatrixReadError(
             const GenUpperTriMatrix<T>& _m,
             std::istream& _is, size_t _s
@@ -1744,8 +1844,7 @@ namespace tmv {
     }
 
     template <class T>
-    std::istream& operator>>(
-        std::istream& is, const LowerTriMatrixView<T>& m)
+    std::istream& operator>>(std::istream& is, const LowerTriMatrixView<T>& m)
     {
         char ul;
         is >> ul;

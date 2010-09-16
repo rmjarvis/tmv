@@ -86,13 +86,12 @@ template <class T>
 void TestBandMatrixArith_D2()
 {
 #if (XTEST & 2)
-    const int N = 10;
-
     std::vector<tmv::BandMatrixView<T> > b;
     std::vector<tmv::BandMatrixView<std::complex<T> > > cb;
     std::vector<tmv::BaseMatrix<T>*> B;
     std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
     MakeBandList(b,cb,B,CB);
+    const int N = b[0].rowsize();
 
     tmv::Matrix<T> a1(N,N);
     for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) a1(i,j) = T(3+i-5*j);

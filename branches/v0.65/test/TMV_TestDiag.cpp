@@ -98,6 +98,18 @@ template <class T> void TestDiagMatrix()
     tmv::DiagMatrix<std::complex<T> > ca = a*std::complex<T>(1,2);
     tmv::DiagMatrix<std::complex<T> > cb = b*std::complex<T>(-5,-1);
 
+    a.resize(2);
+    Assert(a.size() == 2,"DiagMatrix a.resize(2)");
+    for (int i=0; i<2; ++i) a(i,i) = T(i);
+    for (int i=0; i<2; ++i) 
+        Assert(a(i,i) == i,"Read/Write resized DiagMatrix");
+
+    a.resize(2*N);
+    Assert(a.size() == 2*N,"DiagMatrix a.resize(2*N)");
+    for (int i=0; i<2*N; ++i) a(i,i) = T(i);
+    for (int i=0; i<2*N; ++i) 
+        Assert(a(i,i) == i,"Read/Write resized DiagMatrix");
+
     // Test I/O
 
     std::ofstream fout("tmvtest_diagmatrix_io.dat");

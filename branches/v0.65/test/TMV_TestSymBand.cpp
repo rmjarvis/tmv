@@ -9,7 +9,7 @@
 template <class T, tmv::UpLoType U, tmv::StorageType S>
 static void TestBasicSymBandMatrix_1()
 {
-    const size_t N = 10;
+    const int N = 10;
     const int noff = 3;
 
     tmv::SymBandMatrix<std::complex<T>,U,S> s1(N,noff);
@@ -17,20 +17,18 @@ static void TestBasicSymBandMatrix_1()
     tmv::SymBandMatrix<std::complex<T>,U,S,tmv::FortranStyle> s1f(N,noff);
     tmv::SymBandMatrix<std::complex<T>,U,S,tmv::FortranStyle> s2f(N,noff);
 
-    Assert(s1.colsize() == N && s1.rowsize() == N,"Creating SymMatrix(N)");
+    Assert(int(s1.colsize()) == N && int(s1.rowsize()) == N,"Creating SymMatrix(N)");
     Assert(s1.nlo() == noff && s1.nhi() == noff,"Creating SymMatrix(N)");
-    Assert(s1f.colsize() == N && s1f.rowsize() == N,"Creating SymMatrix(N)F");
+    Assert(int(s1f.colsize()) == N && int(s1f.rowsize()) == N,"Creating SymMatrix(N)F");
     Assert(s1f.nlo() == noff && s1f.nhi() == noff,"Creating SymMatrix(N)F");
 
-    for (size_t i=0, k=1; i<N; ++i) for (size_t j=0; j<N; ++j, ++k) {
+    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         std::complex<T> value(T(k),T(2*k));
         if (i <= j && j <= i + noff) {
-            if (showtests) std::cout<<"1: i,j = "<<i<<','<<j<<std::endl;
             s1(i,j) = value; 
             s1f(i+1,j+1) = value; 
         }
         if (j <= i && i <= j + noff) {
-            if (showtests) std::cout<<"2: i,j = "<<i<<','<<j<<std::endl;
             s2(i,j) = value; 
             s2f(i+1,j+1) = value; 
         }
@@ -51,12 +49,11 @@ static void TestBasicSymBandMatrix_1()
     const tmv::SymBandMatrix<std::complex<T>,U,S,tmv::FortranStyle>& s1fx = s1f;
     const tmv::SymBandMatrix<std::complex<T>,U,S,tmv::FortranStyle>& s2fx = s2f;
 
-    for (size_t i=0, k=1; i<N; ++i) for (size_t j=0; j<N; ++j, ++k) {
+    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         if ( j <= i + noff && i <= j + noff) {
             std::complex<T> value(T(k),T(2*k));
-            if (showtests) std::cout<<"i,j = "<<i<<','<<j<<std::endl;
             if (i<=j) {
-                size_t j2 = i+noff+1;  if (j2>=N) j2 = N;
+                int j2 = i+noff+1;  if (j2>=N) j2 = N;
                 Assert(s1(i,j) == value,"Read/Write SymBandMatrix");
                 Assert(s1x(i,j) == value,"Access const SymBandMatrix");
                 Assert(s1v(i,j) == value,"Access SymBandMatrix V");
@@ -176,7 +173,7 @@ static void TestBasicSymBandMatrix_1()
                        "SymBandMatrixF.diag2 V");
             }
             if (j<=i) {
-                size_t j1 = 0;  if (int(i)>noff) j1 = i-noff;
+                int j1 = 0;  if (int(i)>noff) j1 = i-noff;
                 Assert(s2(j,i) == value,"Read/Write SymBandMatrix");
                 Assert(s2x(j,i) == value,"Access const SymBandMatrix");
                 Assert(s2v(j,i) == value,"Access SymBandMatrix V");
@@ -314,12 +311,79 @@ static void TestBasicSymBandMatrix_1()
     Assert(s2 == s2v,"SymBandMatrix == SymBandMatrixView");
     Assert(s2 == s2fcv,"SymBandMatrix == FortranStyle ConstSymBandMatrixView");
     Assert(s2 == s2fv,"SymBandMatrix == FortranStyle SymBandMatrixView");
+
+    s1.resize(3,1);
+    Assert(s1.colsize() == 3 && s1.rowsize() == 3,
+           "SymBandMatrix s1.resize(3,1) sizes");
+    Assert(s1.colsize() == 3 && s1.rowsize() == 3,
+           "SymBandMatrix s1.resize(3,1) sizes");
+    s2.resize(3,1);
+    Assert(s2.nlo() == 1 && s2.nhi() == 1,
+           "SymBandMatrix s2.resize(3,1) nlo,nhi");
+    Assert(s2.nlo() == 1 && s2.nhi() == 1,
+           "SymBandMatrix s2.resize(3,1) nlo,nhi");
+    s2.resize(3,1);
+    Assert(s2.colsize() == 3 && s2.rowsize() == 3,
+           "SymBandMatrix s2.resize(3,1) sizes");
+    Assert(s2.nlo() == 1 && s2.nhi() == 1,
+           "SymBandMatrix s2.resize(3,1) nlo,nhi");
+    for (int i=0, k=0; i<3; ++i) for (int j=0; j<3; ++j, ++k) {
+        std::complex<T> value(T(k),T(2*k));
+        if (i <= j && j <= i + 1) s1(i,j) = value; 
+        if (j <= i && i <= j + 1) s2(i,j) = value; 
+    }
+    for (int i=0, k=0; i<3; ++i) for (int j=0; j<3; ++j, ++k) {
+        if ( j <= i + 1 && i <= j + 1) {
+            std::complex<T> value(T(k),T(2*k));
+            if (i<=j) {
+                Assert(s1(i,j) == value,"Read/Write resized SymBandMatrix");
+                Assert(s1(j,i) == value,
+                       "Read/Write resized SymBandMatrix opp tri");
+            }
+            if (j<=i) {
+                Assert(s2(i,j) == value,"Read/Write resized SymBandMatrix");
+                Assert(s2(j,i) == value,
+                       "Read/Write resized SymBandMatrix opp tri");
+            }
+        }
+    }
+
+    s1.resize(2*N,5);
+    Assert(int(s1.colsize()) == 2*N && int(s1.rowsize()) == 2*N,
+           "SymBandMatrix s1.resize(2*N,5) sizes");
+    Assert(s1.nlo() == 5 && s1.nhi() == 5,
+           "SymBandMatrix s1.resize(2*N,5) nlo,nhi");
+    s2.resize(2*N,5);
+    Assert(int(s2.colsize()) == 2*N && int(s2.rowsize()) == 2*N,
+           "SymBandMatrix s2.resize(2*N,5) sizes");
+    Assert(s2.nlo() == 5 && s2.nhi() == 5,
+           "SymBandMatrix s2.resize(2*N,5) nlo,nhi");
+    for (int i=0, k=0; i<2*N; ++i) for (int j=0; j<2*N; ++j, ++k) {
+        std::complex<T> value(T(k),T(2*k));
+        if (i <= j && j <= i + 5) s1(i,j) = value; 
+        if (j <= i && i <= j + 5) s2(i,j) = value; 
+    }
+    for (int i=0, k=0; i<2*N; ++i) for (int j=0; j<2*N; ++j, ++k) {
+        if ( j <= i + 5 && i <= j + 5) {
+            std::complex<T> value(T(k),T(2*k));
+            if (i<=j) {
+                Assert(s1(i,j) == value,"Read/Write resized SymBandMatrix");
+                Assert(s1(j,i) == value,
+                       "Read/Write resized SymBandMatrix opp tri");
+            }
+            if (j<=i) {
+                Assert(s2(i,j) == value,"Read/Write resized SymBandMatrix");
+                Assert(s2(j,i) == value,
+                       "Read/Write resized SymBandMatrix opp tri");
+            }
+        }
+    }
 }
 
 template <class T, tmv::UpLoType U, tmv::StorageType S>
 static void TestBasicHermBandMatrix_1()
 {
-    const size_t N = 10;
+    const int N = 10;
     const int noff = 3;
 
     tmv::HermBandMatrix<std::complex<T>,U,S> h1(N,noff);
@@ -327,21 +391,21 @@ static void TestBasicHermBandMatrix_1()
     tmv::HermBandMatrix<std::complex<T>,U,S,tmv::FortranStyle> h1f(N,noff);
     tmv::HermBandMatrix<std::complex<T>,U,S,tmv::FortranStyle> h2f(N,noff);
 
-    Assert(h1.colsize() == N && h1.rowsize() == N,"Creating HermMatrix(N)");
+    Assert(int(h1.colsize()) == N && int(h1.rowsize()) == N,
+           "Creating HermMatrix(N)");
     Assert(h1.nlo() == noff && h1.nhi() == noff,"Creating HermMatrix(N)");
-    Assert(h1f.colsize() == N && h1f.rowsize() == N,"Creating HermMatrix(N)F");
+    Assert(int(h1f.colsize()) == N && int(h1f.rowsize()) == N,
+           "Creating HermMatrix(N)F");
     Assert(h1f.nlo() == noff && h1f.nhi() == noff,"Creating HermMatrix(N)F");
 
-    for (size_t i=0, k=1; i<N; ++i) for (size_t j=0; j<N; ++j, ++k) {
+    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         std::complex<T> value(T(k),T(2*k));
         std::complex<T> hvalue = i==j ? std::complex<T>(T(k),0) : value;
         if (i <= j && j <= i + noff) {
-            if (showtests) std::cout<<"1: i,j = "<<i<<','<<j<<std::endl;
             h1(i,j) = hvalue; 
             h1f(i+1,j+1) = hvalue;
         }
         if (j <= i && i <= j + noff) {
-            if (showtests) std::cout<<"2: i,j = "<<i<<','<<j<<std::endl;
             h2(i,j) = hvalue; 
             h2f(i+1,j+1) = hvalue; 
         }
@@ -362,13 +426,12 @@ static void TestBasicHermBandMatrix_1()
     const tmv::HermBandMatrix<std::complex<T>,U,S,tmv::FortranStyle>& h1fx = h1f;
     const tmv::HermBandMatrix<std::complex<T>,U,S,tmv::FortranStyle>& h2fx = h2f;
 
-    for (size_t i=0, k=1; i<N; ++i) for (size_t j=0; j<N; ++j, ++k) {
+    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         if ( j <= i + noff && i <= j + noff) {
             std::complex<T> value(T(k),T(2*k));
             std::complex<T> hvalue = i==j ? std::complex<T>(T(k),0) : value;
-            if (showtests) std::cout<<"i,j = "<<i<<','<<j<<std::endl;
             if (i<=j) {
-                size_t j2 = i+noff+1;  if (j2>=N) j2 = N;
+                int j2 = i+noff+1;  if (j2>=N) j2 = N;
                 Assert(h1(i,j) == hvalue,"Read/Write HermBandMatrix");
                 Assert(h1x(i,j) == hvalue,"Access const HermBandMatrix");
                 Assert(h1v(i,j) == hvalue,"Access HermBandMatrix V");
@@ -514,7 +577,7 @@ static void TestBasicHermBandMatrix_1()
                        "HermBandMatrixF.diag2 V");
             }
             if (j<=i) {
-                size_t j1 = 0;  if (int(i)>noff) j1 = i-noff;
+                int j1 = 0;  if (int(i)>noff) j1 = i-noff;
                 Assert(h2(j,i) == conj(hvalue),"Read/Write HermBandMatrix");
                 Assert(h2x(j,i) == conj(hvalue),"Access const HermBandMatrix");
                 Assert(h2v(j,i) == conj(hvalue),"Access HermBandMatrix V");
@@ -680,24 +743,88 @@ static void TestBasicHermBandMatrix_1()
     Assert(h2 == h2v,"HermBandMatrix == SymBandMatrixView");
     Assert(h2 == h2fcv,"HermBandMatrix == FortranStyle ConstSymBandMatrixView");
     Assert(h2 == h2fv,"HermBandMatrix == FortranStyle SymBandMatrixView");
+
+    h1.resize(3,1);
+    Assert(h1.colsize() == 3 && h1.rowsize() == 3,
+           "HermBandMatrix h1.resize(3,1) sizes");
+    Assert(h1.nlo() == 1 && h1.nhi() == 1,
+           "HermBandMatrix h1.resize(3,1) nlo,nhi");
+    h2.resize(3,1);
+    Assert(h2.colsize() == 3 && h2.rowsize() == 3,
+           "HermBandMatrix h2.resize(3,1) sizes");
+    Assert(h2.nlo() == 1 && h2.nhi() == 1,
+           "HermBandMatrix h2.resize(3,1) nlo,nhi");
+    for (int i=0, k=0; i<3; ++i) for (int j=0; j<3; ++j, ++k) {
+        std::complex<T> value(T(k),T(2*k));
+        std::complex<T> hvalue = i==j ? std::complex<T>(T(k),0) : value;
+        if (i <= j && j <= i + 1) h1(i,j) = hvalue; 
+        if (j <= i && i <= j + 1) h2(i,j) = hvalue; 
+    }
+    for (int i=0, k=0; i<3; ++i) for (int j=0; j<3; ++j, ++k) {
+        if ( j <= i + 1 && i <= j + 1) {
+            std::complex<T> value(T(k),T(2*k));
+            std::complex<T> hvalue = i==j ? std::complex<T>(T(k),0) : value;
+            if (i<=j) {
+                Assert(h1(i,j) == hvalue,"Read/Write resized HermBandMatrix");
+                Assert(h1(j,i) == std::conj(hvalue),
+                       "Read/Write resized HermBandMatrix opp tri");
+            }
+            if (j<=i) {
+                Assert(h2(i,j) == hvalue,"Read/Write resized HermBandMatrix");
+                Assert(h2(j,i) == std::conj(hvalue),
+                       "Read/Write resized HermBandMatrix opp tri");
+            }
+        }
+    }
+
+    h1.resize(2*N,5);
+    Assert(int(h1.colsize()) == 2*N && int(h1.rowsize()) == 2*N,
+           "HermBandMatrix h1.resize(2*N,5) sizes");
+    Assert(h1.nlo() == 5 && h1.nhi() == 5,
+           "HermBandMatrix h1.resize(2*N,5) nlo,nhi");
+    h2.resize(2*N,5);
+    Assert(int(h2.colsize()) == 2*N && int(h2.rowsize()) == 2*N,
+           "HermBandMatrix h2.resize(2*N,5) sizes");
+    Assert(h2.nlo() == 5 && h2.nhi() == 5,
+           "HermBandMatrix h2.resize(2*N,5) nlo,nhi");
+    for (int i=0, k=0; i<2*N; ++i) for (int j=0; j<2*N; ++j, ++k) {
+        std::complex<T> value(T(k),T(2*k));
+        std::complex<T> hvalue = i==j ? std::complex<T>(T(k),0) : value;
+        if (i <= j && j <= i + 5) h1(i,j) = hvalue; 
+        if (j <= i && i <= j + 5) h2(i,j) = hvalue; 
+    }
+    for (int i=0, k=0; i<2*N; ++i) for (int j=0; j<2*N; ++j, ++k) {
+        if ( j <= i + 5 && i <= j + 5) {
+            std::complex<T> value(T(k),T(2*k));
+            std::complex<T> hvalue = i==j ? std::complex<T>(T(k),0) : value;
+            if (i<=j) {
+                Assert(h1(i,j) == hvalue,"Read/Write resized HermBandMatrix");
+                Assert(h1(j,i) == std::conj(hvalue),
+                       "Read/Write resized HermBandMatrix opp tri");
+            }
+            if (j<=i) {
+                Assert(h2(i,j) == hvalue,"Read/Write resized HermBandMatrix");
+                Assert(h2(j,i) == std::conj(hvalue),
+                       "Read/Write resized HermBandMatrix opp tri");
+            }
+        }
+    }
 }
 
 template <class T, tmv::UpLoType U, tmv::StorageType S>
 static void TestBasicSymBandMatrix_2()
 {
-    const size_t N = 10;
+    const int N = 10;
     const int noff = 3;
 
     tmv::SymBandMatrix<std::complex<T>,U,S> s1(N,noff);
     tmv::SymBandMatrix<std::complex<T>,U,S> s2(N,noff);
-    for (size_t i=0, k=1; i<N; ++i) for (size_t j=0; j<N; ++j, ++k) {
+    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         std::complex<T> value(T(k),T(2*k));
         if (i <= j && j <= i + noff) {
-            if (showtests) std::cout<<"1: i,j = "<<i<<','<<j<<std::endl;
             s1(i,j) = value; 
         }
         if (j <= i && i <= j + noff) {
-            if (showtests) std::cout<<"2: i,j = "<<i<<','<<j<<std::endl;
             s2(i,j) = value; 
         }
     }
@@ -708,13 +835,13 @@ static void TestBasicSymBandMatrix_2()
             T(-1), T(0), T(1), T(2), T(888),
             T(-2), T(-1), T(0) };
         qv.resize(13);
-        for(size_t i=0;i<qv.size();i++) qv[i] = qvar[i];
+        for(int i=0;i<13;i++) qv[i] = qvar[i];
     } else if (S == tmv::DiagMajor && U == tmv::Lower) {
         const T qvar[] = {                T(-2), T(-1), T(0), 
             T(888), T(-1), T(0),  T(1),  T(2), 
             T(0),   T(1),  T(2),  T(3),  T(4) };
         qv.resize(13);
-        for(size_t i=0;i<qv.size();i++) qv[i] = qvar[i];
+        for(int i=0;i<13;i++) qv[i] = qvar[i];
     } else if ((S == tmv::RowMajor) == (U == tmv::Upper)) {
         const T qvar[] = { T(0), T(-1), T(-2),
             T(1),  T(0),  T(-1),
@@ -722,7 +849,7 @@ static void TestBasicSymBandMatrix_2()
             T(3),  T(2),  T(888),
             T(4) };
         qv.resize(13);
-        for(size_t i=0;i<qv.size();i++) qv[i] = qvar[i];
+        for(int i=0;i<13;i++) qv[i] = qvar[i];
     } else {
         const T qvar[] = { T(0), 
             T(888),  T(-1), T(1),
@@ -730,10 +857,10 @@ static void TestBasicSymBandMatrix_2()
             T(-1), T(1), T(3),
             T(0), T(2), T(4) };
         qv.resize(13);
-        for(size_t i=0;i<qv.size();i++) qv[i] = qvar[i];
+        for(int i=0;i<13;i++) qv[i] = qvar[i];
     }
     T qar[13];
-    for(size_t i=0;i<qv.size();i++) qar[i] = qv[i];
+    for(int i=0;i<13;i++) qar[i] = qv[i];
 
     tmv::SymBandMatrix<T,U,S> q1(5,2,qar);
     tmv::SymBandMatrix<T,U,S> q2(5,2,qv);
@@ -748,7 +875,7 @@ static void TestBasicSymBandMatrix_2()
     tmv::SymBandMatrix<std::complex<T>,U,S> s3(N,noff);
     s3 = s1+s2;
 
-    for (size_t i=0; i<N; ++i) for (size_t j=0; j<N; ++j) {
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
         if ( j <= i + noff && i <= j + noff) {
             Assert(s3(i,j) == s1(i,j)+s2(i,j),"Add SymBandMatrices1");
             Assert(s3(j,i) == s1(i,j)+s2(i,j),"Add SymBandMatrices2");
@@ -761,7 +888,7 @@ static void TestBasicSymBandMatrix_2()
 
     s3 = s1-s2;
 
-    for (size_t i=0; i<N; ++i) for (size_t j=0; j<N; ++j) {
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
         if ( j <= i + noff && i <= j + noff) {
             Assert(s3(i,j) == s1(i,j)-s2(i,j),"Subtract SymBandMatrices1");
             Assert(s3(j,i) == s1(i,j)-s2(i,j),"Subtract SymBandMatrices2");
@@ -771,7 +898,7 @@ static void TestBasicSymBandMatrix_2()
     tmv::BandMatrix<std::complex<T> > bm1 = s1;
     Assert(bm1.nlo() == s1.nlo(),"SymBandMatrix -> BandMatrix (nlo)");
     Assert(bm1.nhi() == s1.nhi(),"SymBandMatrix -> BandMatrix (nhi)");
-    for (size_t i=0; i<N; ++i) for (size_t j=0; j<N; ++j) {
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
         if ( j <= i + noff && i <= j + noff) {
             Assert(s1(i,j) == bm1(i,j),"SymBandMatrix -> BandMatrix");
         }
@@ -780,7 +907,7 @@ static void TestBasicSymBandMatrix_2()
     Assert(s1 == bm1_sb,"BandMatrix -> SymBandMatrix");
 
     tmv::Matrix<std::complex<T> > m1 = s1;
-    for (size_t i=0; i<N; ++i) for (size_t j=0; j<N; ++j) {
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
         if ( j <= i + noff && i <= j + noff) {
             Assert(s1(i,j) == m1(i,j),"SymBandMatrix -> Matrix");
         } else {
@@ -791,7 +918,7 @@ static void TestBasicSymBandMatrix_2()
     Assert(s1 == m1_sb,"Matrix -> SymBandMatrix");
 
     tmv::SymMatrix<std::complex<T> > sm1 = s1;
-    for (size_t i=0; i<N; ++i) for (size_t j=0; j<N; ++j) {
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
         if ( j <= i + noff && i <= j + noff) {
             Assert(s1(i,j) == sm1(i,j),"SymBandMatrix -> SymMatrix");
         } else {
@@ -835,20 +962,18 @@ static void TestBasicSymBandMatrix_2()
 template <class T, tmv::UpLoType U, tmv::StorageType S>
 static void TestBasicHermBandMatrix_2()
 {
-    const size_t N = 10;
+    const int N = 10;
     const int noff = 3;
 
     tmv::HermBandMatrix<std::complex<T>,U,S> h1(N,noff);
     tmv::HermBandMatrix<std::complex<T>,U,S> h2(N,noff);
-    for (size_t i=0, k=1; i<N; ++i) for (size_t j=0; j<N; ++j, ++k) {
+    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         std::complex<T> value(T(k),T(2*k));
         std::complex<T> hvalue = i==j ? std::complex<T>(T(k),0) : value;
         if (i <= j && j <= i + noff) {
-            if (showtests) std::cout<<"1: i,j = "<<i<<','<<j<<std::endl;
             h1(i,j) = hvalue; 
         }
         if (j <= i && i <= j + noff) {
-            if (showtests) std::cout<<"2: i,j = "<<i<<','<<j<<std::endl;
             h2(i,j) = hvalue; 
         }
     }
@@ -859,13 +984,13 @@ static void TestBasicHermBandMatrix_2()
             T(-1), T(0), T(1), T(2), T(888),
             T(-2), T(-1), T(0) };
         qv.resize(13);
-        for(size_t i=0;i<qv.size();i++) qv[i] = qvar[i];
+        for(int i=0;i<13;i++) qv[i] = qvar[i];
     } else if (S == tmv::DiagMajor && U == tmv::Lower) {
         const T qvar[] = {                T(-2), T(-1), T(0), 
             T(888), T(-1), T(0),  T(1),  T(2), 
             T(0),   T(1),  T(2),  T(3),  T(4) };
         qv.resize(13);
-        for(size_t i=0;i<qv.size();i++) qv[i] = qvar[i];
+        for(int i=0;i<13;i++) qv[i] = qvar[i];
     } else if ((S == tmv::RowMajor) == (U == tmv::Upper)) {
         const T qvar[] = { T(0), T(-1), T(-2),
             T(1),  T(0),  T(-1),
@@ -873,7 +998,7 @@ static void TestBasicHermBandMatrix_2()
             T(3),  T(2),  T(888),
             T(4) };
         qv.resize(13);
-        for(size_t i=0;i<qv.size();i++) qv[i] = qvar[i];
+        for(int i=0;i<13;i++) qv[i] = qvar[i];
     } else {
         const T qvar[] = { T(0), 
             T(888),  T(-1), T(1),
@@ -881,10 +1006,10 @@ static void TestBasicHermBandMatrix_2()
             T(-1), T(1), T(3),
             T(0), T(2), T(4) };
         qv.resize(13);
-        for(size_t i=0;i<qv.size();i++) qv[i] = qvar[i];
+        for(int i=0;i<13;i++) qv[i] = qvar[i];
     }
     T qar[13];
-    for(size_t i=0;i<qv.size();i++) qar[i] = qv[i];
+    for(int i=0;i<13;i++) qar[i] = qv[i];
 
     tmv::HermBandMatrix<T,U,S> q4(5,2,qar);
     tmv::HermBandMatrix<T,U,S> q5(5,2,qv);
@@ -899,7 +1024,7 @@ static void TestBasicHermBandMatrix_2()
     tmv::HermBandMatrix<std::complex<T>,U,S> h3(N,noff);
     h3 = h1+h2;
 
-    for (size_t i=0; i<N; ++i) for (size_t j=0; j<N; ++j) {
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
         if ( j <= i + noff && i <= j + noff) {
             Assert(h3(i,j) == h1(i,j)+h2(i,j),"Add HermBandMatrices1");
             Assert(h3(j,i) == conj(h1(i,j)+h2(i,j)),"Add HermBandMatrices2");
@@ -912,7 +1037,7 @@ static void TestBasicHermBandMatrix_2()
 
     h3 = h1-h2;
 
-    for (size_t i=0; i<N; ++i) for (size_t j=0; j<N; ++j) {
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
         if ( j <= i + noff && i <= j + noff) {
             Assert(h3(i,j) == h1(i,j)-h2(i,j),"Subtract HermBandMatrices1");
             Assert(h3(j,i) == conj(h1(i,j)-h2(i,j)),
@@ -923,7 +1048,7 @@ static void TestBasicHermBandMatrix_2()
     tmv::BandMatrix<std::complex<T> > bn1 = h1;
     Assert(bn1.nlo() == h1.nlo(),"SymBandMatrix -> BandMatrix (nlo)");
     Assert(bn1.nhi() == h1.nhi(),"SymBandMatrix -> BandMatrix (nhi)");
-    for (size_t i=0; i<N; ++i) for (size_t j=0; j<N; ++j) {
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
         if ( j <= i + noff && i <= j + noff) {
             Assert(h1(i,j) == bn1(i,j),"HermBandMatrix -> BandMatrix");
         }
@@ -932,7 +1057,7 @@ static void TestBasicHermBandMatrix_2()
     Assert(h1 == bn1_hb,"BandMatrix -> HermBandMatrix");
 
     tmv::Matrix<std::complex<T> > n1 = h1;
-    for (size_t i=0; i<N; ++i) for (size_t j=0; j<N; ++j) {
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
         if ( j <= i + noff && i <= j + noff) {
             Assert(h1(i,j) == n1(i,j),"HermBandMatrix -> Matrix");
         } else {
@@ -943,7 +1068,7 @@ static void TestBasicHermBandMatrix_2()
     Assert(h1 == n1_hb,"Matrix -> HermBandMatrix");
 
     tmv::HermMatrix<std::complex<T> > hn1 = h1;
-    for (size_t i=0; i<N; ++i) for (size_t j=0; j<N; ++j) {
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
         if ( j <= i + noff && i <= j + noff) {
             Assert(h1(i,j) == hn1(i,j),"HermBandMatrix -> HermMatrix");
         } else {
@@ -985,23 +1110,21 @@ static void TestBasicHermBandMatrix_2()
 template <class T, tmv::UpLoType U, tmv::StorageType S>
 static void TestBasicSymBandMatrix_IO()
 {
-    const size_t N = 10;
+    const int N = 10;
     const int noff = 3;
 
     tmv::SymBandMatrix<std::complex<T>,U,S> s1(N,noff);
     tmv::SymBandMatrix<std::complex<T>,U,S> s2(N,noff);
     tmv::HermBandMatrix<std::complex<T>,U,S> h1(N,noff);
     tmv::HermBandMatrix<std::complex<T>,U,S> h2(N,noff);
-    for (size_t i=0, k=1; i<N; ++i) for (size_t j=0; j<N; ++j, ++k) {
+    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         std::complex<T> value(T(k),T(2*k));
         std::complex<T> hvalue = i==j ? std::complex<T>(T(k),0) : value;
         if (i <= j && j <= i + noff) {
-            if (showtests) std::cout<<"1: i,j = "<<i<<','<<j<<std::endl;
             s1(i,j) = value; 
             h1(i,j) = hvalue; 
         }
         if (j <= i && i <= j + noff) {
-            if (showtests) std::cout<<"2: i,j = "<<i<<','<<j<<std::endl;
             s2(i,j) = value; 
             h2(i,j) = hvalue; 
         }
@@ -1140,31 +1263,29 @@ void TestSymBandMatrix()
     std::cout<<"SymBandMatrix<"<<tmv::TMV_Text(T())<<
         "> passed all basic tests\n";
 
-    if (tmv::TMV_Epsilon<T>() > T(0)) {
-        TestSymBandMatrixArith_A<T>();
-        std::cout<<"SymBandMatrix<"<<tmv::TMV_Text(T())<<
-            "> (SymBand/SymBand) Arithmetic passed all tests\n";
-        TestSymBandMatrixArith_B1<T>();
-        TestSymBandMatrixArith_B2<T>();
-        std::cout<<"SymBandMatrix<"<<tmv::TMV_Text(T())<<
-            "> (Matrix/SymBand) Arithmetic passed all tests\n";
-        TestSymBandMatrixArith_C1<T>();
-        TestSymBandMatrixArith_C2<T>();
-        std::cout<<"SymBandMatrix<"<<tmv::TMV_Text(T())<<
-            "> (Diag/SymBand) Arithmetic passed all tests\n";
-        TestSymBandMatrixArith_D1<T>();
-        TestSymBandMatrixArith_D2<T>();
-        std::cout<<"SymBandMatrix<"<<tmv::TMV_Text(T())<<
-            "> (Tri/SymBand) Arithmetic passed all tests\n";
-        TestSymBandMatrixArith_E1<T>();
-        TestSymBandMatrixArith_E2<T>();
-        std::cout<<"SymBandMatrix<"<<tmv::TMV_Text(T())<<
-            "> (Band/SymBand) Arithmetic passed all tests\n";
-        TestSymBandMatrixArith_F1<T>();
-        TestSymBandMatrixArith_F2<T>();
-        std::cout<<"SymBandMatrix<"<<tmv::TMV_Text(T())<<
-            "> (Sym/SymBand) Arithmetic passed all tests\n";
-    }
+    TestSymBandMatrixArith_A<T>();
+    std::cout<<"SymBandMatrix<"<<tmv::TMV_Text(T())<<
+        "> (SymBand/SymBand) Arithmetic passed all tests\n";
+    TestSymBandMatrixArith_B1<T>();
+    TestSymBandMatrixArith_B2<T>();
+    std::cout<<"SymBandMatrix<"<<tmv::TMV_Text(T())<<
+        "> (Matrix/SymBand) Arithmetic passed all tests\n";
+    TestSymBandMatrixArith_C1<T>();
+    TestSymBandMatrixArith_C2<T>();
+    std::cout<<"SymBandMatrix<"<<tmv::TMV_Text(T())<<
+        "> (Diag/SymBand) Arithmetic passed all tests\n";
+    TestSymBandMatrixArith_D1<T>();
+    TestSymBandMatrixArith_D2<T>();
+    std::cout<<"SymBandMatrix<"<<tmv::TMV_Text(T())<<
+        "> (Tri/SymBand) Arithmetic passed all tests\n";
+    TestSymBandMatrixArith_E1<T>();
+    TestSymBandMatrixArith_E2<T>();
+    std::cout<<"SymBandMatrix<"<<tmv::TMV_Text(T())<<
+        "> (Band/SymBand) Arithmetic passed all tests\n";
+    TestSymBandMatrixArith_F1<T>();
+    TestSymBandMatrixArith_F2<T>();
+    std::cout<<"SymBandMatrix<"<<tmv::TMV_Text(T())<<
+        "> (Sym/SymBand) Arithmetic passed all tests\n";
 }
 
 #ifdef TEST_DOUBLE

@@ -1243,6 +1243,7 @@ namespace tmv {
     { generic_multmm_M_N_K(M,N,K,K,A0,B0,C0); }
 
 
+#ifndef BLAS
 #ifdef INST_FLOAT
     //
     // float
@@ -3371,6 +3372,7 @@ namespace tmv {
 
 #endif
 
+#endif
 #endif
 
 #ifdef INST_INT

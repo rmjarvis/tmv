@@ -248,6 +248,10 @@ namespace tmv {
     bool SymLDLDiv<T>::issym() const
     { return pimpl->LLx.issym(); }
 
+#ifdef INST_INT
+#undef INST_INT
+#endif
+
 #define InstFile "TMV_SymLDLD.inst"
 #include "TMV_Inst.h"
 #undef InstFile

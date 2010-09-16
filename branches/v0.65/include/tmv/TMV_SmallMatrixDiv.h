@@ -32,6 +32,8 @@
 #ifndef SmallMatrixDiv_H
 #define SmallMatrixDiv_H
 
+#include "tmv/TMV_SimpleMatrix.h"
+
 namespace tmv {
 
     //
@@ -314,11 +316,30 @@ namespace tmv {
     // Determinant
     //
 
-    template <class T, int M, int N, StorageType S> 
+    template <int algo, class T, int M, int N, StorageType S> 
     struct SMDet;
 
+    template <class T, StorageType S> 
+    struct SMDet<1,T,1,1,S> // algo for 1x1 matrix
+    { static inline T det(const T* m) { return *m; } };
+
+    template <class T, StorageType S> 
+    struct SMDet<2,T,2,2,S> // algo for 2x2 matrix
+    { static inline T det(const T* m) { return (m[0]*m[3] - m[1]*m[2]); } };
+
+    template <class T, StorageType S> 
+    struct SMDet<3,T,3,3,S> // algo for 3x3 matrix
+    {
+        static T det(const T* m) {
+            return (
+                m[0] * (m[4]*m[8] - m[5]*m[7]) 
+                -m[1] * (m[3]*m[8] - m[5]*m[6])
+                +m[2] * (m[3]*m[7] - m[4]*m[6])); 
+        }
+    };
+
     template <class T, int N, StorageType S> 
-    struct SMDet<T,N,N,S>
+    struct SMDet<10,T,N,N,S> // algo for normal calculation using LU
     {
         static T det(const T* m)
         {
@@ -333,28 +354,88 @@ namespace tmv {
         }
     };
 
-    template <class T, StorageType S> 
-    struct SMDet<T,1,1,S>
-    { static inline T det(const T* m) { return *m; } };
-
-    template <class T, StorageType S> 
-    struct SMDet<T,2,2,S>
-    { static inline T det(const T* m) { return (m[0]*m[3] - m[1]*m[2]); } };
-
-    template <class T, StorageType S> 
-    struct SMDet<T,3,3,S>
+    template <class T, int N, StorageType S> 
+    struct SMDet<20,T,N,N,S> // algo for integers without fractions
     {
-        static T det(const T* m) {
-            return (
-                m[0] * (m[4]*m[8] - m[5]*m[7]) 
-                -m[1] * (m[3]*m[8] - m[5]*m[6])
-                +m[2] * (m[3]*m[7] - m[4]*m[6])); 
+        template <class TT>
+        struct Helper
+        {
+            typedef long double longdouble_type;
+            static TT convert(longdouble_type x)
+            { return x < 0. ? -TT(floor(-x+0.5)) : TT(floor(x+0.5)); }
+            static bool isUnity(longdouble_type x)
+            { return TMV_ABS2(TMV_ABS2(x)-1.) < 0.1; }
+            static bool isZero(longdouble_type x)
+            { return TMV_ABS2(x) < 0.1; }
+        };
+        template <class TT>
+        struct Helper<std::complex<TT> >
+        {
+            typedef std::complex<TT> CT;
+            typedef std::complex<long double> longdouble_type;
+            static CT convert(longdouble_type x)
+            {
+                return CT(Helper<TT>::convert(x.real()),
+                          Helper<TT>::convert(x.imag()));
+            }
+            static bool isUnity(longdouble_type x)
+            { return TMV_ABS2(TMV_ABS2(x)-1.) < 0.1; }
+            static bool isZero(longdouble_type x)
+            { return TMV_ABS2(x) < 0.1; }
+        };
+
+        static T det(const T* m)
+        {
+            typedef typename Helper<T>::longdouble_type DT;
+            SimpleMatrix<DT,ColMajor> A(N,N);
+            // A = m;
+            DoCopy<N,N,S,ColMajor>(m,A.ptr());
+            // This is the 1x1 Bareiss algorithm
+            T det = 1;
+            for (int k=0; k<N-1; ++k) {
+                int imin = k, jmin = k;
+                while (imin < N && Helper<T>::isZero(A.cref(imin,jmin))) ++imin;
+                if (imin == N) return T(0);
+                for (int j=k; j<N; ++j) {
+                    if (Helper<T>::isUnity(A.cref(imin,jmin))) break;
+                    for (int i=k; i<N; ++i) {
+                        if (TMV_ABS2(A.cref(i,j))<TMV_ABS2(A.cref(imin,jmin)) &&
+                            !Helper<T>::isZero(A.cref(i,j))) {
+                            imin = i; jmin = j;
+                            if (Helper<T>::isUnity(A.cref(i,j))) break;
+                        }
+                    }
+                }
+
+                if (Helper<T>::isZero(A.cref(imin,jmin))) return T(0);
+
+                if (imin != k) { A.swapRows(imin,k); det *= -1; }
+                if (jmin != k) { A.swapCols(jmin,k); det *= -1; }
+
+                for (int j=k+1; j<N; ++j) for(int i=k+1; i<N; ++i)
+                    A.ref(i,j) = 
+                        A.cref(k,k)*A.cref(i,j) - A.cref(i,k)*A.cref(k,j);
+                if (k > 0) {
+                    for (int j=k+1; j<N; ++j) for(int i=k+1; i<N; ++i)
+                        A.ref(i,j) /= A.cref(k-1,k-1);
+                }
+            }
+            det *= Helper<T>::convert(A.cref(N-1,N-1));
+            return det;
         }
     };
 
     template <class T, int M, int N, StorageType S, IndexStyle I> 
     inline T DoDet(const SmallMatrix<T,M,N,S,I>& m)
-    { return SMDet<T,M,N,S>::det(m.cptr()); }
+    {
+        enum { algo = (
+                N == 1 ? 1 :
+                N == 2 ? 2 :
+                N == 3 ? 3 :
+                Traits<T>::isinteger ? 20 :
+                10 ) };
+        return SMDet<algo,T,M,N,S>::det(m.cptr()); 
+    }
 
     //
     // Matrix Inverse
@@ -491,7 +572,7 @@ namespace tmv {
     {
         SMInv(const T* m, T2* minv)
         {
-            T det = SMDet<T,2,2,S>::det(m);
+            T det = SMDet<2,T,2,2,S>::det(m);
             if (det == T(0)) 
 #ifdef NOTHROW
             { std::cerr<<"Singular SmallMatrix found\n"; exit(1); }
@@ -519,7 +600,7 @@ namespace tmv {
     {
         SMInv(const T* m, T2* minv)
         {
-            T det = SMDet<T,3,3,S>::det(m);
+            T det = SMDet<3,T,3,3,S>::det(m);
             if (det == T(0)) 
 #ifdef NOTHROW
             { std::cerr<<"Singular SmallMatrix found\n"; exit(1); }

@@ -282,6 +282,10 @@ namespace tmv {
         //cout<<"Done PseudoDiag_LMultEq: xD = "<<xD<<endl;
     }
 
+#ifdef INST_INT
+#undef INST_INT
+#endif
+
 #define InstFile "TMV_SymLDLPseudo.inst"
 #include "TMV_Inst.h"
 #undef InstFile

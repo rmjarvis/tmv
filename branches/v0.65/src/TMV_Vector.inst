@@ -9,6 +9,7 @@
   template RT GenVector<T >::norm2() const; \
   template T GenVector<T >::sumElements() const; \
   template RT GenVector<T >::sumAbsElements() const; \
+  template RT GenVector<T >::sumAbs2Elements() const; \
   template T GenVector<T >::minElement(int* iminout) const; \
   template T GenVector<T >::maxElement(int* imaxout) const; \
   template RT GenVector<T >::minAbsElement(int* iminout) const; \

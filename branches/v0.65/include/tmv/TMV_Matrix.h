@@ -161,6 +161,9 @@
 //    Matrix& setAllTo(T x)
 //        Sets all elements to x
 //
+//    Matrix& addToAll(T x)
+//        Adds x to all elements
+//
 //    Matrix& clip(RT thresh)
 //        Set to 0 all elements whose abolute value is < thresh
 //
@@ -327,6 +330,11 @@
 //    m.sumAbsElements()
 //        Returns the sum of the absolute values of the elements of a Matrix.
 //        = sum_ij |a_ij|
+//
+//    SumAbs2Elements(m)
+//    m.sumAbs2Elements()
+//        Returns the sum of the absolute values of the elements of a Matrix.
+//        = sum_ij |real(a_ij)| + |imag(a_ij)|
 //
 //    Norm(m) or NormF(m)
 //    m.norm() or m.normF()
@@ -757,24 +765,28 @@ namespace tmv {
 
         inline const_uppertri_type unitUpperTri() const
         {
+            TMVAssert(rowsize() <= colsize());
             return const_uppertri_type(
                 cptr(),rowsize(),stepi(),stepj(),UnitDiag,stor(),ct() );
         }
 
         inline const_uppertri_type upperTri(DiagType dt=NonUnitDiag) const
         {
+            TMVAssert(rowsize() <= colsize());
             return const_uppertri_type(
                 cptr(),rowsize(),stepi(),stepj(),dt,stor(),ct() );
         }
 
         inline const_lowertri_type unitLowerTri() const
         {
+            TMVAssert(colsize() <= rowsize());
             return const_lowertri_type(
                 cptr(),colsize(),stepi(),stepj(),UnitDiag,stor(),ct() );
         }
 
         inline const_lowertri_type lowerTri(DiagType dt=NonUnitDiag) const
         {
+            TMVAssert(colsize() <= rowsize());
             return const_lowertri_type(
                 cptr(),colsize(),stepi(),stepj(),dt,stor(),ct() );
         }
@@ -950,11 +962,9 @@ namespace tmv {
         // Functions of Matrix
         //
 
-        inline T det() const
-        { return DivHelper<T>::det(); }
+        T det() const;
 
-        inline RT logDet(T* sign=0) const
-        { return DivHelper<T>::logDet(sign); }
+        RT logDet(T* sign=0) const;
 
         inline T trace() const
         { return diag().sumElements(); }
@@ -962,6 +972,8 @@ namespace tmv {
         T sumElements() const;
 
         RT sumAbsElements() const;
+
+        RT sumAbs2Elements() const;
 
         inline RT norm() const 
         { return normF(); }
@@ -984,8 +996,7 @@ namespace tmv {
         // = max_i,j (|real(a_ij)|+|imag(a_ij)|)
         RT maxAbs2Element() const;
 
-        inline bool isSingular() const
-        { return DivHelper<T>::isSingular(); }
+        bool isSingular() const;
 
         RT doNorm2() const;
         inline RT norm2() const
@@ -1075,8 +1086,8 @@ namespace tmv {
             divideUsing(LU);
             setDiv();
             TMVAssert(getDiv());
-            TMVAssert(dynamic_cast<const LUDiv<T>*>(getDiv()));
-            return *dynamic_cast<const LUDiv<T>*>(getDiv());
+            TMVAssert(divIsLUDiv());
+            return static_cast<const LUDiv<T>&>(*getDiv());
         }
 
         inline const QRDiv<T>& qrd() const
@@ -1084,8 +1095,8 @@ namespace tmv {
             divideUsing(QR);
             setDiv();
             TMVAssert(getDiv());
-            TMVAssert(dynamic_cast<const QRDiv<T>*>(getDiv()));
-            return *dynamic_cast<const QRDiv<T>*>(getDiv());
+            TMVAssert(divIsQRDiv());
+            return static_cast<const QRDiv<T>&>(*getDiv());
         }
 
         inline const QRPDiv<T>& qrpd() const
@@ -1093,8 +1104,8 @@ namespace tmv {
             divideUsing(QRP);
             setDiv();
             TMVAssert(getDiv());
-            TMVAssert(dynamic_cast<const QRPDiv<T>*>(getDiv()));
-            return *dynamic_cast<const QRPDiv<T>*>(getDiv());
+            TMVAssert(divIsQRPDiv());
+            return static_cast<const QRPDiv<T>&>(*getDiv());
         }
 
         inline const SVDiv<T>& svd() const
@@ -1102,8 +1113,8 @@ namespace tmv {
             divideUsing(SV);
             setDiv();
             TMVAssert(getDiv());
-            TMVAssert(dynamic_cast<const SVDiv<T>*>(getDiv()));
-            return *dynamic_cast<const SVDiv<T>*>(getDiv());
+            TMVAssert(divIsSVDiv());
+            return static_cast<const SVDiv<T>&>(*getDiv());
         }
 
         template <class T1> 
@@ -1193,6 +1204,11 @@ namespace tmv {
     private :
 
         type& operator=(const type&);
+
+        bool divIsLUDiv() const;
+        bool divIsQRDiv() const;
+        bool divIsQRPDiv() const;
+        bool divIsSVDiv() const;
 
     }; // GenMatrix
 
@@ -1573,6 +1589,7 @@ namespace tmv {
 
         virtual inline ~MatrixView() 
         {
+            TMV_SETFIRSTLAST(0,0);
 #ifdef TMVDEBUG
             const_cast<T*&>(itsm) = 0;
 #endif
@@ -1663,27 +1680,6 @@ namespace tmv {
             Copy(m2.view(),*this);
             return *this; 
         }
-
-#if 0
-        template <int M, int N> 
-        inline const type& operator=(
-            const SmallMatrixComposite<RT,M,N>& m2) const
-        { 
-            TMVAssert(colsize() == M && rowsize() == N);
-            m2.assignToM(*this);
-            return *this; 
-        }
-
-        template <int M, int N> 
-        inline const type& operator=(
-            const SmallMatrixComposite<CT,M,N>& m2) const
-        { 
-            TMVAssert(colsize() == M && rowsize() == N);
-            TMVAssert(isComplex(T()));
-            m2.assignToM(*this);
-            return *this; 
-        }
-#endif
 
         typedef ListAssigner<T,VIter<T> > MyListAssigner;
         inline MyListAssigner operator<<(const T& x)
@@ -1802,6 +1798,8 @@ namespace tmv {
         const type& setZero() const;
 
         const type& setAllTo(const T& x) const;
+
+        const type& addToAll(const T& x) const;
 
         const type& clip(RT thresh) const;
 
@@ -1945,6 +1943,7 @@ namespace tmv {
 
         inline uppertri_type unitUpperTri() const
         {
+            TMVAssert(rowsize() <= colsize());
             return uppertri_type(
                 ptr(),rowsize(),stepi(),stepj(),UnitDiag,stor(),ct() 
                 TMV_FIRSTLAST);
@@ -1952,12 +1951,14 @@ namespace tmv {
 
         inline uppertri_type upperTri(DiagType dt=NonUnitDiag) const
         {
+            TMVAssert(rowsize() <= colsize());
             return uppertri_type(
                 ptr(),rowsize(),stepi(),stepj(), dt,stor(),ct() TMV_FIRSTLAST);
         }
 
         inline lowertri_type unitLowerTri() const
         {
+            TMVAssert(colsize() <= rowsize());
             return lowertri_type(
                 ptr(),colsize(),stepi(),stepj(),UnitDiag,stor(),ct() 
                 TMV_FIRSTLAST);
@@ -1965,6 +1966,7 @@ namespace tmv {
 
         inline lowertri_type lowerTri(DiagType dt=NonUnitDiag) const
         {
+            TMVAssert(colsize() <= rowsize());
             return lowertri_type(
                 ptr(),colsize(),stepi(),stepj(), dt,stor(),ct() TMV_FIRSTLAST);
         }
@@ -2275,18 +2277,6 @@ namespace tmv {
         inline const type& operator=(const SmallMatrix<T2,M,N,S2,I2>& m2) const
         { c_type::operator=(m2); return *this; }
 
-#if 0
-        template <int M, int N>
-        inline const type& operator=(
-            const SmallMatrixComposite<RT,M,N>& m2) const
-        { c_type::operator=(m2); return *this; }
-
-        template <int M, int N>
-        inline const type& operator=(
-            const SmallMatrixComposite<CT,M,N>& m2) const
-        { c_type::operator=(m2); return *this; }
-#endif
-
         typedef ListAssigner<T,VIter<T> > MyListAssigner;
         inline MyListAssigner operator<<(const T& x)
         { return c_type::operator<<(x); }
@@ -2358,6 +2348,9 @@ namespace tmv {
 
         inline const type& setAllTo(const T& x) const
         { c_type::setAllTo(x); return *this; }
+
+        inline const type& addToAll(const T& x) const
+        { c_type::addToAll(x); return *this; }
 
         inline const type& clip(RT thresh) const
         { c_type::clip(thresh); return *this; }
@@ -2867,25 +2860,6 @@ namespace tmv {
             return *this; 
         }
 
-#if 0
-        template <int M, int N> 
-        inline type& operator=(const SmallMatrixComposite<RT,M,N>& m2)
-        { 
-            TMVAssert(M == colsize() && N == rowsize());
-            m2.assignToM(view());
-            return *this; 
-        }
-
-        template <int M, int N> 
-        inline type& operator=(const SmallMatrixComposite<CT,M,N>& m2)
-        { 
-            TMVAssert(M == colsize() && N == rowsize());
-            TMVAssert(isComplex(T()));
-            m2.assignToM(view());
-            return *this; 
-        }
-#endif
-
         typedef ListAssigner<T,VIt<T,Unit,NonConj> > MyListAssigner;
         inline MyListAssigner operator<<(const T& x)
         { 
@@ -3128,6 +3102,9 @@ namespace tmv {
         inline type& setAllTo(const T& x) 
         { linearView().setAllTo(x); return *this; }
 
+        inline type& addToAll(const T& x) 
+        { linearView().addToAll(x); return *this; }
+
         inline type& clip(RT thresh)
         { linearView().clip(thresh); return *this; }
 
@@ -3289,6 +3266,7 @@ namespace tmv {
 
         inline const_uppertri_type unitUpperTri() const
         {
+            TMVAssert(rowsize() <= colsize());
             return const_uppertri_type(
                 cptr(),rowsize(), stepi(),stepj(),UnitDiag,stor(),ct() 
                 TMV_FIRSTLAST);
@@ -3296,6 +3274,7 @@ namespace tmv {
 
         inline const_uppertri_type upperTri(DiagType dt=NonUnitDiag) const
         {
+            TMVAssert(rowsize() <= colsize());
             return const_uppertri_type(
                 cptr(),rowsize(), stepi(),stepj(),dt,stor(),ct() 
                 TMV_FIRSTLAST);
@@ -3303,6 +3282,7 @@ namespace tmv {
 
         inline const_lowertri_type unitLowerTri() const
         {
+            TMVAssert(colsize() <= rowsize());
             return const_lowertri_type(
                 cptr(),colsize(), stepi(),stepj(),UnitDiag,stor(),ct() 
                 TMV_FIRSTLAST);
@@ -3310,6 +3290,7 @@ namespace tmv {
 
         inline const_lowertri_type lowerTri(DiagType dt=NonUnitDiag) const
         {
+            TMVAssert(colsize() <= rowsize());
             return const_lowertri_type(
                 cptr(),colsize(), stepi(),stepj(),dt,stor(),ct() 
                 TMV_FIRSTLAST);
@@ -3471,6 +3452,7 @@ namespace tmv {
 
         inline uppertri_type unitUpperTri()
         {
+            TMVAssert(rowsize() <= colsize());
             return uppertri_type(
                 ptr(),rowsize(), stepi(),stepj(),UnitDiag,stor(),ct() 
                 TMV_FIRSTLAST);
@@ -3478,6 +3460,7 @@ namespace tmv {
 
         inline uppertri_type upperTri(DiagType dt=NonUnitDiag)
         {
+            TMVAssert(rowsize() <= colsize());
             return uppertri_type(
                 ptr(),rowsize(), stepi(),stepj(),dt,stor(),ct() 
                 TMV_FIRSTLAST);
@@ -3485,6 +3468,7 @@ namespace tmv {
 
         inline lowertri_type unitLowerTri()
         { 
+            TMVAssert(colsize() <= rowsize());
             return lowertri_type(
                 ptr(),colsize(), stepi(),stepj(),UnitDiag,stor(),ct() 
                 TMV_FIRSTLAST);
@@ -3492,6 +3476,7 @@ namespace tmv {
 
         inline lowertri_type lowerTri(DiagType dt=NonUnitDiag)
         { 
+            TMVAssert(colsize() <= rowsize());
             return lowertri_type(
                 ptr(),colsize(), stepi(),stepj(),dt,stor(),ct() 
                 TMV_FIRSTLAST);
@@ -3767,10 +3752,8 @@ namespace tmv {
         virtual inline size_t rowsize() const { return itsrs; }
         virtual inline const T* cptr() const { return itsm.get(); }
         inline T* ptr() { return itsm.get(); }
-        virtual inline int stepi() const 
-        { return S == RowMajor ? itsrs : 1; }
-        virtual inline int stepj() const 
-        { return S == RowMajor ? 1 : itscs; }
+        virtual inline int stepi() const { return S == RowMajor ? itsrs : 1; }
+        virtual inline int stepj() const { return S == RowMajor ? 1 : itscs; }
         inline bool isrm() const { return S==RowMajor; }
         inline bool iscm() const { return S==ColMajor; }
         inline bool isconj() const { return false; }
@@ -3785,12 +3768,27 @@ namespace tmv {
         inline T& ref(int i, int j)
         { return itsm.get()[S==RowMajor ? i*stepi()+j : i+j*stepj()]; }
 
+        inline void resize(size_t cs, size_t rs)
+        {
+            linsize = cs*rs;
+            itsm.resize(linsize);
+            itscs = cs;
+            itsrs = rs;
+#ifdef TMVFLDEBUG
+            _first = itsm.get();
+            _last = _first + linsize;
+#endif
+#ifdef TMVDEBUG
+            setAllTo(T(888));
+#endif
+        }
+
     protected :
 
-        const size_t linsize;
+        size_t linsize;
         AlignedArray<T> itsm;
-        const size_t itscs;
-        const size_t itsrs;
+        size_t itscs;
+        size_t itsrs;
 
 #ifdef TMVFLDEBUG
     public:

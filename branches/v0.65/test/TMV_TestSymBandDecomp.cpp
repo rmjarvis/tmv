@@ -11,7 +11,7 @@ void TestHermBandDecomp()
 {
     typedef std::complex<T> CT;
     for (int mattype = START; mattype <= 17; mattype++) {
-#if !(XTEST & 64)
+#if !(XTEST & 64) || defined(LAP)
         if (mattype % 6 >= 3) continue;
 #endif
         if (showstartdone) {
@@ -510,7 +510,7 @@ void TestSymBandDecomp()
 {
     typedef std::complex<T> CT;
     for (int mattype = START; mattype <= 14; mattype++) {
-#if !(XTEST & 64)
+#if !(XTEST & 64) || defined(LAP)
         if (mattype % 6 >= 3) continue;
 #endif
         if (showstartdone) {

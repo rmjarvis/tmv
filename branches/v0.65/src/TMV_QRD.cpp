@@ -250,6 +250,10 @@ namespace tmv {
     size_t QRDiv<T>::rowsize() const
     { return pimpl->istrans ? pimpl->QRx.colsize() : pimpl->QRx.rowsize(); }
 
+#ifdef INST_INT
+#undef INST_INT
+#endif
+
 #define InstFile "TMV_QRD.inst"
 #include "TMV_Inst.h"
 #undef InstFile

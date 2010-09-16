@@ -58,6 +58,10 @@ namespace tmv {
         Q_RDivEq(QRx,beta,minv);
     }
 
+#ifdef INST_INT
+#undef INST_INT
+#endif
+
 #define InstFile "TMV_BandQRInverse.inst"
 #include "TMV_Inst.h"
 #undef InstFile

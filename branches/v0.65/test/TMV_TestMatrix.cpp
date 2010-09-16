@@ -116,6 +116,21 @@ template <class T, tmv::StorageType S> static void TestBasicMatrix_1()
     Assert(m == mv,"Matrix == MatrixView");
     Assert(m == mfcv,"Matrix == FortranStyle ConstMatrixView");
     Assert(m == mfv,"Matrix == FortranStyle MatrixView");
+
+    m.resize(2,3);
+    Assert(m.colsize() == 2 && m.rowsize() == 3,"m.resize(2,3)");
+    for (int i=0, k=0; i<2; ++i) for (int j=0; j<3; ++j, ++k) 
+        m(i,j) = T(k);
+    for (int i=0, k=0; i<2; ++i) for (int j=0; j<3; ++j, ++k) 
+        Assert(m(i,j) == k,"Read/Write resized Matrix");
+
+    m.resize(2*M,3*N);
+    Assert(m.colsize() == 2*M && m.rowsize() == 3*N,"m.resize(2*M,3*N)");
+    for (int i=0, k=0; i<2*M; ++i) for (int j=0; j<3*N; ++j, ++k) 
+        m(i,j) = T(k);
+    for (int i=0, k=0; i<2*M; ++i) for (int j=0; j<3*N; ++j, ++k) 
+        Assert(m(i,j) == k,"Read/Write resized Matrix");
+
 }
 
 template <class T, tmv::StorageType S> static void TestBasicMatrix_2()

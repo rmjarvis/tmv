@@ -118,6 +118,7 @@ namespace tmv {
         static int RoundUp(int x) { return x; }
     };
 
+#ifndef BLAS
 #ifdef INST_DOUBLE
 #ifdef __SSE2__
     template <>
@@ -166,6 +167,7 @@ namespace tmv {
         static int RoundUp(int x) 
         { return (x == 0 ? 0 : (((x-1)>>2)+1)<<2); }
     };
+#endif
 #endif
 #endif
 

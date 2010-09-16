@@ -1,5 +1,7 @@
 Note: More complete installation information is contained in 
-doc/TMV_Documentation.pdf,
+doc/TMV_Documentation.pdf.  If the instructions there differ from these, 
+then it is probably true that the pdf is correct, rather than this file.
+
 
 First, see INSTALL for instructions on downloading and unpacking the 
 tarball if you have not already done so.

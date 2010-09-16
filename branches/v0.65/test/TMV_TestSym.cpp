@@ -9,16 +9,17 @@
 template <class T, tmv::UpLoType U, tmv::StorageType S> 
 static void TestBasicSymMatrix_1()
 {
-    const size_t N = 6;
+    const int N = 6;
 
     tmv::SymMatrix<std::complex<T>,U,S> s1(N);
     tmv::SymMatrix<std::complex<T>,U,S> s2(N);
     tmv::SymMatrix<std::complex<T>,U,S,tmv::FortranStyle> s1f(N);
     tmv::SymMatrix<std::complex<T>,U,S,tmv::FortranStyle> s2f(N);
 
-    Assert(s1.colsize() == N && s1.rowsize() == N,"Creating SymMatrix(N)");
+    Assert(int(s1.colsize()) == N && int(s1.rowsize()) == N,
+           "Creating SymMatrix(N)");
 
-    for (size_t i=0, k=1; i<N; ++i) for (size_t j=0; j<N; ++j, ++k) {
+    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         std::complex<T> value(T(k),T(2*k));
         if (i<=j) {
             s1(i,j) = value; 
@@ -45,7 +46,7 @@ static void TestBasicSymMatrix_1()
     const tmv::SymMatrix<std::complex<T>,U,S,tmv::FortranStyle>& s1fx = s1f;
     const tmv::SymMatrix<std::complex<T>,U,S,tmv::FortranStyle>& s2fx = s2f;
 
-    for (size_t i=0, k=1; i<N; ++i) for (size_t j=0; j<N; ++j, ++k) {
+    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         std::complex<T> value(T(k),T(2*k));
         if (showtests) std::cout<<"i,j = "<<i<<','<<j<<std::endl;
         if (i<=j) {
@@ -248,21 +249,74 @@ static void TestBasicSymMatrix_1()
     Assert(s2 == s2v,"SymMatrix == SymMatrixView");
     Assert(s2 == s2fcv,"SymMatrix == FortranStyle ConstSymMatrixView");
     Assert(s2 == s2fv,"SymMatrix == FortranStyle SymMatrixView");
+
+    s1.resize(3);
+    Assert(s1.colsize() == 3 && s1.rowsize() == 3,
+           "SymMatrix s1.resize(3)");
+    s2.resize(3);
+    Assert(s2.colsize() == 3 && s2.rowsize() == 3,
+           "SymMatrix s2.resize(3)");
+    for (int i=0, k=0; i<3; ++i) for (int j=0; j<3; ++j, ++k) {
+        std::complex<T> value(T(k),T(2*k));
+        std::complex<T> hvalue = i==j ? std::complex<T>(T(k),0) : value;
+        if (i <= j) s1(i,j) = hvalue; 
+        if (j <= i) s2(i,j) = hvalue; 
+    }
+    for (int i=0, k=0; i<3; ++i) for (int j=0; j<3; ++j, ++k) {
+        std::complex<T> value(T(k),T(2*k));
+        std::complex<T> hvalue = i==j ? std::complex<T>(T(k),0) : value;
+        if (i<=j) {
+            Assert(s1(i,j) == hvalue,"Read/Write resized SymMatrix");
+            Assert(s1(j,i) == hvalue,
+                   "Read/Write resized SymMatrix opp tri");
+        }
+        if (j<=i) {
+            Assert(s2(j,i) == hvalue,"Read/Write resized SymMatrix");
+            Assert(s2(i,j) == hvalue,
+                   "Read/Write resized SymMatrix opp tri");
+        }
+    }
+
+    s1.resize(2*N);
+    Assert(int(s1.colsize()) == 2*N && int(s1.rowsize()) == 2*N,
+           "SymMatrix s1.resize(2*N) sizes");
+    s2.resize(2*N);
+    Assert(int(s2.colsize()) == 2*N && int(s2.rowsize()) == 2*N,
+           "SymMatrix s2.resize(2*N) sizes");
+    for (int i=0, k=0; i<2*N; ++i) for (int j=0; j<2*N; ++j, ++k) {
+        std::complex<T> value(T(k),T(2*k));
+        if (i <= j) s1(i,j) = value; 
+        if (j <= i) s2(i,j) = value; 
+    }
+    for (int i=0, k=0; i<2*N; ++i) for (int j=0; j<2*N; ++j, ++k) {
+        std::complex<T> value(T(k),T(2*k));
+        if (i<=j) {
+            Assert(s1(i,j) == value,"Read/Write resized SymMatrix");
+            Assert(s1(j,i) == value,
+                   "Read/Write resized SymMatrix opp tri");
+        }
+        if (j<=i) {
+            Assert(s2(j,i) == value,"Read/Write resized SymMatrix");
+            Assert(s2(i,j) == value,
+                   "Read/Write resized SymMatrix opp tri");
+        }
+    }
 }
 
 template <class T, tmv::UpLoType U, tmv::StorageType S> 
 static void TestBasicHermMatrix_1()
 {
-    const size_t N = 6;
+    const int N = 6;
 
     tmv::HermMatrix<std::complex<T>,U,S> h1(N);
     tmv::HermMatrix<std::complex<T>,U,S> h2(N);
     tmv::HermMatrix<std::complex<T>,U,S,tmv::FortranStyle> h1f(N);
     tmv::HermMatrix<std::complex<T>,U,S,tmv::FortranStyle> h2f(N);
 
-    Assert(h1.colsize() == N && h1.rowsize() == N,"Creating HermMatrix(N)");
+    Assert(int(h1.colsize()) == N && int(h1.rowsize()) == N,
+           "Creating HermMatrix(N)");
 
-    for (size_t i=0, k=1; i<N; ++i) for (size_t j=0; j<N; ++j, ++k) {
+    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         std::complex<T> value(T(k),T(2*k));
         std::complex<T> hvalue = i==j ? std::complex<T>(T(k),0) : value;
         if (i<=j) {
@@ -290,7 +344,7 @@ static void TestBasicHermMatrix_1()
     const tmv::HermMatrix<std::complex<T>,U,S,tmv::FortranStyle>& h1fx = h1f;
     const tmv::HermMatrix<std::complex<T>,U,S,tmv::FortranStyle>& h2fx = h2f;
 
-    for (size_t i=0, k=1; i<N; ++i) for (size_t j=0; j<N; ++j, ++k) {
+    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         std::complex<T> value(T(k),T(2*k));
         std::complex<T> hvalue = i==j ? std::complex<T>(T(k),0) : value;
         if (showtests) std::cout<<"i,j = "<<i<<','<<j<<std::endl;
@@ -521,17 +575,71 @@ static void TestBasicHermMatrix_1()
     Assert(h2 == h2v,"HermMatrix == SymMatrixView");
     Assert(h2 == h2fcv,"HermMatrix == FortranStyle ConstSymMatrixView");
     Assert(h2 == h2fv,"HermMatrix == FortranStyle SymMatrixView");
+
+    h1.resize(3);
+    Assert(h1.colsize() == 3 && h1.rowsize() == 3,
+           "HermBandMatrix h1.resize(3)");
+    h2.resize(3);
+    Assert(h2.colsize() == 3 && h2.rowsize() == 3,
+           "HermBandMatrix h2.resize(3)");
+    for (int i=0, k=0; i<3; ++i) for (int j=0; j<3; ++j, ++k) {
+        std::complex<T> value(T(k),T(2*k));
+        std::complex<T> hvalue = i==j ? std::complex<T>(T(k),0) : value;
+        if (i <= j) h1(i,j) = hvalue; 
+        if (j <= i) h2(i,j) = hvalue; 
+    }
+    for (int i=0, k=0; i<3; ++i) for (int j=0; j<3; ++j, ++k) {
+        std::complex<T> value(T(k),T(2*k));
+        std::complex<T> hvalue = i==j ? std::complex<T>(T(k),0) : value;
+        if (i<=j) {
+            Assert(h1(i,j) == hvalue,"Read/Write resized HermMatrix");
+            Assert(h1(j,i) == std::conj(hvalue),
+                   "Read/Write resized HermMatrix opp tri");
+        }
+        if (j<=i) {
+            Assert(h2(i,j) == hvalue,"Read/Write resized HermMatrix");
+            Assert(h2(j,i) == std::conj(hvalue),
+                   "Read/Write resized HermMatrix opp tri");
+        }
+    }
+
+    h1.resize(2*N);
+    Assert(int(h1.colsize()) == 2*N && int(h1.rowsize()) == 2*N,
+           "HermMatrix h1.resize(2*N) sizes");
+    h2.resize(2*N);
+    Assert(int(h2.colsize()) == 2*N && int(h2.rowsize()) == 2*N,
+           "HermMatrix h2.resize(2*N) sizes");
+    for (int i=0, k=0; i<2*N; ++i) for (int j=0; j<2*N; ++j, ++k) {
+        std::complex<T> value(T(k),T(2*k));
+        std::complex<T> hvalue = i==j ? std::complex<T>(T(k),0) : value;
+        if (i <= j) h1(i,j) = hvalue; 
+        if (j <= i) h2(i,j) = hvalue; 
+    }
+    for (int i=0, k=0; i<2*N; ++i) for (int j=0; j<2*N; ++j, ++k) {
+        std::complex<T> value(T(k),T(2*k));
+        std::complex<T> hvalue = i==j ? std::complex<T>(T(k),0) : value;
+        if (i<=j) {
+            Assert(h1(i,j) == hvalue,"Read/Write resized HermMatrix");
+            Assert(h1(j,i) == std::conj(hvalue),
+                   "Read/Write resized HermMatrix opp tri");
+        }
+        if (j<=i) {
+            Assert(h2(i,j) == hvalue,"Read/Write resized HermMatrix");
+            Assert(h2(j,i) == std::conj(hvalue),
+                   "Read/Write resized HermMatrix opp tri");
+        }
+    }
 }
 
 template <class T, tmv::UpLoType U, tmv::StorageType S> 
 static void TestBasicSymMatrix_2()
 {
-    const size_t N = 6;
+    const int N = 6;
 
     tmv::SymMatrix<std::complex<T>,U,S> s1(N);
     tmv::SymMatrix<std::complex<T>,U,S> s2(N);
 
-    for (size_t i=0, k=1; i<N; ++i) for (size_t j=0; j<N; ++j, ++k) {
+    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         std::complex<T> value(T(k),T(2*k));
         if (i<=j) {
             s1(i,j) = value; 
@@ -571,21 +679,21 @@ static void TestBasicSymMatrix_2()
     tmv::SymMatrix<std::complex<T>,U,S> s3(N);
     s3 = s1+s2;
 
-    for (size_t i=0; i<N; ++i) for (size_t j=0; j<N; ++j) {
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
         Assert(s3(i,j) == s1(i,j)+s2(i,j),"Add SymMatrices1");
         Assert(s3(j,i) == s1(i,j)+s2(i,j),"Add SymMatrices2");
     }
 
     s3 = s1-s2;
 
-    for (size_t i=0; i<N; ++i) for (size_t j=0; j<N; ++j) 
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) 
         if (i<=j) {
             Assert(s3(i,j) == s1(i,j)-s2(i,j),"Subtract SymMatrices1");
             Assert(s3(j,i) == s1(i,j)-s2(i,j),"Subtract SymMatrices2");
         }
 
     tmv::Matrix<std::complex<T> > m1 = s1;
-    for (size_t i=0; i<N; ++i) for (size_t j=0; j<N; ++j) {
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
         Assert(s1(i,j) == m1(i,j),"SymMatrix -> Matrix");
     }
     tmv::SymMatrix<std::complex<T>,U,S> sm1(m1);
@@ -621,12 +729,12 @@ static void TestBasicSymMatrix_2()
 template <class T, tmv::UpLoType U, tmv::StorageType S> 
 static void TestBasicHermMatrix_2()
 {
-    const size_t N = 6;
+    const int N = 6;
 
     tmv::HermMatrix<std::complex<T>,U,S> h1(N);
     tmv::HermMatrix<std::complex<T>,U,S> h2(N);
 
-    for (size_t i=0, k=1; i<N; ++i) for (size_t j=0; j<N; ++j, ++k) {
+    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         std::complex<T> value(T(k),T(2*k));
         std::complex<T> hvalue = i==j ? std::complex<T>(T(k),0) : value;
         if (i<=j) {
@@ -667,21 +775,21 @@ static void TestBasicHermMatrix_2()
     tmv::HermMatrix<std::complex<T>,U,S> h3(N);
     h3 = h1+h2;
 
-    for (size_t i=0; i<N; ++i) for (size_t j=0; j<N; ++j) {
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
         Assert(h3(i,j) == h1(i,j)+h2(i,j),"Add HermMatrices1");
         Assert(h3(j,i) == conj(h1(i,j)+h2(i,j)),"Add HermMatrices2");
     }
 
     h3 = h1-h2;
 
-    for (size_t i=0; i<N; ++i) for (size_t j=0; j<N; ++j) 
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) 
         if (i<=j) {
             Assert(h3(i,j) == h1(i,j)-h2(i,j),"Subtract HermMatrices1");
             Assert(h3(j,i) == conj(h1(i,j)-h2(i,j)),"Subtract HermMatrices2");
         }
 
     tmv::Matrix<std::complex<T> > n1 = h1;
-    for (size_t i=0; i<N; ++i) for (size_t j=0; j<N; ++j) {
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
         Assert(h1(i,j) == n1(i,j),"HermMatrix -> Matrix");
     }
     tmv::HermMatrix<std::complex<T>,U,S> hn1(n1);
@@ -715,12 +823,12 @@ static void TestBasicHermMatrix_2()
 template <class T, tmv::UpLoType U, tmv::StorageType S> 
 static void TestBasicSymMatrix_IO()
 {
-    const size_t N = 6;
+    const int N = 6;
 
     tmv::SymMatrix<std::complex<T>,U,S> s1(N);
     tmv::HermMatrix<std::complex<T>,U,S> h1(N);
 
-    for (size_t i=0, k=1; i<N; ++i) for (size_t j=0; j<N; ++j, ++k) {
+    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         std::complex<T> value(T(k),T(2*k));
         if (i==j) {
             h1(i,j) = T(k); s1(i,j) = value;
@@ -870,27 +978,25 @@ template <class T> void TestSymMatrix()
 
     std::cout<<"SymMatrix<"<<tmv::TMV_Text(T())<<"> passed all basic tests\n";
 
-    if (tmv::TMV_Epsilon<T>() > T(0)) {
-        TestSymMatrixArith_A<T>();
-        std::cout<<"SymMatrix<"<<tmv::TMV_Text(T())<<
-            "> (Sym/Sym) Arithmetic passed all tests\n";
-        TestSymMatrixArith_B1<T>();
-        TestSymMatrixArith_B2<T>();
-        std::cout<<"SymMatrix<"<<tmv::TMV_Text(T())<<
-            "> (Matrix/Sym) Arithmetic passed all tests\n";
-        TestSymMatrixArith_C1<T>();
-        TestSymMatrixArith_C2<T>();
-        std::cout<<"SymMatrix<"<<tmv::TMV_Text(T())<<
-            "> (Diag/Sym) Arithmetic passed all tests\n";
-        TestSymMatrixArith_D1<T>();
-        TestSymMatrixArith_D2<T>();
-        std::cout<<"SymMatrix<"<<tmv::TMV_Text(T())<<
-            "> (Tri/Sym) Arithmetic passed all tests\n";
-        TestSymMatrixArith_E1<T>();
-        TestSymMatrixArith_E2<T>();
-        std::cout<<"SymMatrix<"<<tmv::TMV_Text(T())<<
-            "> (Band/Sym) Arithmetic passed all tests\n";
-    }
+    TestSymMatrixArith_A<T>();
+    std::cout<<"SymMatrix<"<<tmv::TMV_Text(T())<<
+        "> (Sym/Sym) Arithmetic passed all tests\n";
+    TestSymMatrixArith_B1<T>();
+    TestSymMatrixArith_B2<T>();
+    std::cout<<"SymMatrix<"<<tmv::TMV_Text(T())<<
+        "> (Matrix/Sym) Arithmetic passed all tests\n";
+    TestSymMatrixArith_C1<T>();
+    TestSymMatrixArith_C2<T>();
+    std::cout<<"SymMatrix<"<<tmv::TMV_Text(T())<<
+        "> (Diag/Sym) Arithmetic passed all tests\n";
+    TestSymMatrixArith_D1<T>();
+    TestSymMatrixArith_D2<T>();
+    std::cout<<"SymMatrix<"<<tmv::TMV_Text(T())<<
+        "> (Tri/Sym) Arithmetic passed all tests\n";
+    TestSymMatrixArith_E1<T>();
+    TestSymMatrixArith_E2<T>();
+    std::cout<<"SymMatrix<"<<tmv::TMV_Text(T())<<
+        "> (Band/Sym) Arithmetic passed all tests\n";
 }
 
 #ifdef TEST_DOUBLE

@@ -559,6 +559,10 @@ namespace tmv {
 
 #undef RT
 
+#ifdef INST_INT
+#undef INST_INT
+#endif
+
 #define InstFile "TMV_SymCHDecompose.inst"
 #include "TMV_Inst.h"
 #undef InstFile

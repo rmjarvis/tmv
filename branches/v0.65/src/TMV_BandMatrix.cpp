@@ -39,6 +39,7 @@
 #include "tmv/TMV_VIt.h"
 #include "tmv/TMV_BandMatrixArith.h"
 #include "tmv/TMV_DiagMatrix.h"
+#include "TMV_IntegerDet.h"
 #include <iostream>
 #include "portable_platform.h"
 
@@ -59,7 +60,8 @@ namespace tmv {
     }
 
     template <class T, IndexStyle I> 
-    TMV_RefType(T) BandMatrixView<T,I>::ref(int i, int j) const
+    typename BandMatrixView<T,I>::reference BandMatrixView<T,I>::ref(
+        int i, int j) const
     {
         T* mi = ptr()+int(i)*stepi()+int(j)*stepj();
         return TMV_REF(mi,ct());
@@ -80,6 +82,49 @@ namespace tmv {
           default : TMVAssert(TMV_FALSE);
         }
     }
+
+#ifdef INST_INT
+    template <>
+    void GenBandMatrix<int>::newDivider() const
+    { TMVAssert(TMV_FALSE); }
+    template <>
+    void GenBandMatrix<std::complex<int> >::newDivider() const
+    { TMVAssert(TMV_FALSE); }
+#endif
+
+    template <class T>
+    bool GenBandMatrix<T>::divIsLUDiv() const
+    { return static_cast<bool>(dynamic_cast<const BandLUDiv<T>*>(getDiv())); }
+
+    template <class T>
+    bool GenBandMatrix<T>::divIsQRDiv() const
+    { return static_cast<bool>(dynamic_cast<const BandQRDiv<T>*>(getDiv())); }
+
+    template <class T>
+    bool GenBandMatrix<T>::divIsSVDiv() const
+    { return static_cast<bool>(dynamic_cast<const BandSVDiv<T>*>(getDiv())); }
+
+#ifdef INST_INT
+    template <>
+    bool GenBandMatrix<int>::divIsLUDiv() const
+    { return false; }
+    template <>
+    bool GenBandMatrix<int>::divIsQRDiv() const
+    { return false; }
+    template <>
+    bool GenBandMatrix<int>::divIsSVDiv() const
+    { return false; }
+
+    template <>
+    bool GenBandMatrix<std::complex<int> >::divIsLUDiv() const
+    { return false; }
+    template <>
+    bool GenBandMatrix<std::complex<int> >::divIsQRDiv() const
+    { return false; }
+    template <>
+    bool GenBandMatrix<std::complex<int> >::divIsSVDiv() const
+    { return false; }
+#endif
 
     size_t BandStorageLength(
         StorageType s, size_t cs, size_t rs, int lo, int hi)
@@ -600,6 +645,18 @@ namespace tmv {
         auto_ptr<BaseMatrix<T> > ret(ret1);
         return ret;
     }
+#ifdef INST_INT
+    template <>
+    auto_ptr<BaseMatrix<int> > GenBandMatrix<int>::newInverse() const
+    { TMVAssert(TMV_FALSE); return auto_ptr<BaseMatrix<int> >(); }
+    template <>
+    auto_ptr<BaseMatrix<std::complex<int> > > 
+    GenBandMatrix<std::complex<int> >::newInverse() const
+    { 
+        TMVAssert(TMV_FALSE); 
+        return auto_ptr<BaseMatrix<std::complex<int> > >(); 
+    }
+#endif
 
     template <class T> QuotXB<T,T> GenBandMatrix<T>::QInverse() const
     { return QuotXB<T,T>(T(1),*this); }
@@ -608,6 +665,32 @@ namespace tmv {
     // Norms
     //
     
+    template <class T>
+    T GenBandMatrix<T>::det() const
+    { return DivHelper<T>::det(); }
+
+    template <class T>
+    RT GenBandMatrix<T>::logDet(T* sign) const
+    { return DivHelper<T>::logDet(sign); }
+
+#ifdef INST_INT
+    template <>
+    int GenBandMatrix<int>::det() const
+    { return IntegerDet(*this); }
+
+    template <>
+    std::complex<int> GenBandMatrix<std::complex<int> >::det() const
+    { return IntegerDet(*this); }
+
+    template <>
+    int GenBandMatrix<int>::logDet(int* ) const
+    { TMVAssert(TMV_FALSE); return 0; }
+
+    template <>
+    int GenBandMatrix<std::complex<int> >::logDet(std::complex<int>* ) const
+    { TMVAssert(TMV_FALSE); return 0; }
+#endif
+
     template <class T>
     T GenBandMatrix<T>::sumElements() const
     {
@@ -643,38 +726,87 @@ namespace tmv {
     }
 
     template <class T>
-    RT GenBandMatrix<T>::sumAbsElements() const
+    static RT DoSumAbsElements(const GenBandMatrix<T>& m)
     {
-        const int M = colsize();
-        const int N = rowsize();
+        const int M = m.colsize();
+        const int N = m.rowsize();
         RT sum = 0;
         if (M > 0 && N > 0) {
-            if (isrm()) {
+            if (m.isrm()) {
                 int j1=0;
-                int j2=nhi()+1;
-                int k=nlo();
+                int j2=m.nhi()+1;
+                int k=m.nlo();
                 for(int i=0;i<M;++i) {
-                    sum += row(i,j1,j2).sumAbsElements();
+                    sum += m.row(i,j1,j2).sumAbsElements();
                     if (k>0) --k; else ++j1;
                     if (j2<N) ++j2;
                     else if (j1==N) break;
                 }
-            } else if (iscm()) {
+            } else if (m.iscm()) {
                 int i1=0;
-                int i2=nlo()+1;
-                int k=nhi();
+                int i2=m.nlo()+1;
+                int k=m.nhi();
                 for(int j=0;j<N;++j) {
-                    sum += col(j,i1,i2).sumAbsElements();
+                    sum += m.col(j,i1,i2).sumAbsElements();
                     if (k>0) --k; else ++i1;
                     if (i2<M) ++i2;
                     else if (i1==M) break;
                 }
             } else {
-                for(int i=-nlo();i<=nhi();++i) sum += diag(i).sumAbsElements();
+                for(int i=-m.nlo();i<=m.nhi();++i) 
+                    sum += m.diag(i).sumAbsElements();
             }
         }
         return sum;
     }
+
+    template <class T>
+    static RT DoSumAbs2Elements(const GenBandMatrix<T>& m)
+    {
+        const int M = m.colsize();
+        const int N = m.rowsize();
+        RT sum = 0;
+        if (M > 0 && N > 0) {
+            if (m.isrm()) {
+                int j1=0;
+                int j2=m.nhi()+1;
+                int k=m.nlo();
+                for(int i=0;i<M;++i) {
+                    sum += m.row(i,j1,j2).sumAbs2Elements();
+                    if (k>0) --k; else ++j1;
+                    if (j2<N) ++j2;
+                    else if (j1==N) break;
+                }
+            } else if (m.iscm()) {
+                int i1=0;
+                int i2=m.nlo()+1;
+                int k=m.nhi();
+                for(int j=0;j<N;++j) {
+                    sum += m.col(j,i1,i2).sumAbs2Elements();
+                    if (k>0) --k; else ++i1;
+                    if (i2<M) ++i2;
+                    else if (i1==M) break;
+                }
+            } else {
+                for(int i=-m.nlo();i<=m.nhi();++i) 
+                    sum += m.diag(i).sumAbs2Elements();
+            }
+        }
+        return sum;
+    }
+
+#ifdef INST_INT
+    static int DoSumAbsElements(const GenBandMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+#endif
+
+    template <class T>
+    RT GenBandMatrix<T>::sumAbsElements() const
+    { return DoSumAbsElements(*this); }
+ 
+    template <class T>
+    RT GenBandMatrix<T>::sumAbs2Elements() const
+    { return DoSumAbs2Elements(*this); }
  
     template <class T> 
     RT GenBandMatrix<T>::normSq(RT scale) const
@@ -809,13 +941,6 @@ namespace tmv {
         }
         return max;
     }
-
-#ifdef INST_INT
-    static int NonLapNormF(const GenBandMatrix<int>& m)
-    { return TMV_SQRT(m.normSq()); }
-    static int NonLapNormF(const GenBandMatrix<std::complex<int> >& m)
-    { return TMV_SQRT(m.normSq()); }
-#endif
 
     template <class T> 
     static RT NonLapNormF(const GenBandMatrix<T>& m)
@@ -977,6 +1102,17 @@ namespace tmv {
 #endif
 #endif // XLAP
 
+#ifdef INST_INT
+    static int NonLapNormF(const GenBandMatrix<int>& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int NonLapNormF(const GenBandMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int NonLapNorm1(const GenBandMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int NonLapMaxAbsElement(const GenBandMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+#endif
+
     template <class T> 
     RT GenBandMatrix<T>::maxAbsElement() const
     {
@@ -1028,24 +1164,43 @@ namespace tmv {
     }
 
     template <class T> 
-    RT GenBandMatrix<T>::doNorm2() const
+    static RT DoNorm2(const GenBandMatrix<T>& m)
     {
-        if (this->colsize() < this->rowsize()) return transpose().doNorm2();
-        if (this->rowsize() == 0) return RT(0);
-        DiagMatrix<RT> S(this->rowsize());
-        SV_Decompose(*this,S.view());
+        if (m.colsize() < m.rowsize()) return DoNorm2(m.transpose());
+        if (m.rowsize() == 0) return RT(0);
+        DiagMatrix<RT> S(m.rowsize());
+        SV_Decompose(m,S.view());
         return S(0);
     }
 
     template <class T> 
-    RT GenBandMatrix<T>::doCondition() const
+    static RT DoCondition(const GenBandMatrix<T>& m)
     {
-        if (this->colsize() < this->rowsize()) return transpose().doNorm2();
-        if (this->rowsize() == 0) return RT(1);
-        DiagMatrix<RT> S(this->rowsize());
-        SV_Decompose(*this,S.view());
+        if (m.colsize() < m.rowsize()) return DoCondition(m.transpose());
+        if (m.rowsize() == 0) return RT(1);
+        DiagMatrix<RT> S(m.rowsize());
+        SV_Decompose(m,S.view());
         return S(0)/S(S.size()-1);
     }
+
+#ifdef INST_INT
+    static int DoNorm2(const GenBandMatrix<int>& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int DoCondition(const GenBandMatrix<int>& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int DoNorm2(const GenBandMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int DoCondition(const GenBandMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+#endif
+
+    template <class T> 
+    RT GenBandMatrix<T>::doNorm2() const
+    { return tmv::DoNorm2(*this); }
+
+    template <class T> 
+    RT GenBandMatrix<T>::doCondition() const
+    { return tmv::DoCondition(*this); }
 
     //
     // Modifying Functions
@@ -1153,6 +1308,42 @@ namespace tmv {
                     }
                 } else {
                     for(int i=-nlo();i<=nhi();++i) diag(i).setAllTo(x);
+                }
+            }
+        }
+        return *this;
+    }
+
+    template <class T, IndexStyle I> 
+    const BandMatrixView<T,I>& BandMatrixView<T,I>::addToAll(const T& x) const
+    {
+        if (this->canLinearize()) linearView().addToAll(x);
+        else {
+            const int M = colsize();
+            const int N = rowsize();
+            if (M > 0 && N > 0) {
+                if (isrm()) {
+                    int j1=0;
+                    int j2=nhi()+1;
+                    int k=nlo();
+                    for(int i=0;i<M;++i) {
+                        row(i,j1,j2).addToAll(x);
+                        if (k>0) --k; else ++j1;
+                        if (j2<N) ++j2;
+                        else if (j1==N) break;
+                    }
+                } else if (iscm()) {
+                    int i1=0;
+                    int i2=nlo()+1;
+                    int k=nhi();
+                    for(int j=0;j<N;++j) {
+                        col(j,i1,i2).addToAll(x);
+                        if (k>0) --k; else ++i1;
+                        if (i2<M) ++i2;
+                        else if (i1==M) break;
+                    }
+                } else {
+                    for(int i=-nlo();i<=nhi();++i) diag(i).addToAll(x);
                 }
             }
         }
@@ -1383,17 +1574,64 @@ namespace tmv {
     template <class T1, class T2> 
     bool operator==(const GenBandMatrix<T1>& m1, const GenBandMatrix<T2>& m2)
     {
+        //std::cout<<"Start op== Band/Band\n";
+        //std::cout<<"m1 = "<<m1<<std::endl;
+        //std::cout<<"m2 = "<<m2<<std::endl;
         if (m1.colsize() != m2.colsize()) return false;
         else if (m1.rowsize() != m2.rowsize()) return false;
-        else if (m1.nlo() != m2.nlo()) return false;
-        else if (m1.nhi() != m2.nhi()) return false;
         else if (m1.isSameAs(m2)) return true;
         else {
-            for(int i=-m1.nlo();i<=m1.nhi();++i) 
+            //std::cout<<"No trivial return\n";
+            int lo = TMV_MIN(m1.nlo(),m2.nlo());
+            int hi = TMV_MIN(m1.nhi(),m2.nhi());
+            for(int i=-lo;i<=hi;++i) 
                 if (m1.diag(i) != m2.diag(i)) return false;
+            //std::cout<<"All common diags are ==, return true\n";
+            for(int i=-m1.nlo();i<-lo;++i)
+                if (m1.diag(i).maxAbs2Element() != T1(0)) return false;
+            //std::cout<<"m1 extra subdiagonals are all 0 (if any)\n";
+            for(int i=-m2.nlo();i<-lo;++i)
+                if (m2.diag(i).maxAbs2Element() != T2(0)) return false;
+            //std::cout<<"m2 extra subdiagonals are all 0 (if any)\n";
+            for(int i=hi+1;i<=m1.nhi();++i)
+                if (m1.diag(i).maxAbs2Element() != T1(0)) return false;
+            //std::cout<<"m1 extra superdiagonals are all 0 (if any)\n";
+            for(int i=hi+1;i<=m2.nhi();++i)
+                if (m2.diag(i).maxAbs2Element() != T2(0)) return false;
+            //std::cout<<"m2 extra superdiagonals are all 0 (if any)\n";
             return true;
         }
     }
+
+    template <class T1, class T2> 
+    bool operator==(const GenBandMatrix<T1>& m1, const GenMatrix<T2>& m2)
+    {
+        //std::cout<<"Start op== Band/Matrix\n";
+        //std::cout<<"m1 = "<<m1<<std::endl;
+        //std::cout<<"m2 = "<<m2<<std::endl;
+        if (m1.colsize() != m2.colsize()) return false;
+        else if (m1.rowsize() != m2.rowsize()) return false;
+        else {
+            //std::cout<<"No trivial return\n";
+            ConstBandMatrixView<T2> m2b = 
+                BandMatrixViewOf(m2,m2.colsize()-1,m2.rowsize()-1);
+            //std::cout<<"m2b = "<<m2b<<std::endl;
+            if ( m1.diagRange(-m1.nlo(),m1.nhi()+1) !=
+                 m2b.diagRange(-m1.nlo(),m1.nhi()+1)) 
+                return false;
+            //std::cout<<"central regions are ==\n";
+            if ( m1.nhi()+1 < int(m1.rowsize()) &&
+                 m2b.diagRange(m1.nhi()+1,m1.rowsize()).maxAbs2Element() != T2(0)) 
+                return false;
+            //std::cout<<"upper right region of m2 is 0\n";
+            if ( m1.nlo()+1 < int(m1.colsize()) &&
+                 m2b.diagRange(-int(m1.colsize())+1,-m1.nlo()).maxAbs2Element() != T2(0)) 
+                return false;
+            //std::cout<<"lower left region of m2 is 0\n";
+            return true;
+        }
+    }
+
 
     //
     // I/O

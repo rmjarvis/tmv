@@ -194,6 +194,7 @@
 //
 //    BandMatrix& setZero()
 //    BandMatrix& setAllTo(T x)
+//    BandMatrix& addToAll(T x)
 //    BandMatrix<T>& transposeSelf() 
 //        Must be square, and have nhi=nlo for this function
 //    BandMatrix& conjugateSelf()
@@ -264,6 +265,7 @@
 //    m.norm() or m.normF() or Norm(m) or NormF(m)
 //    m.sumElements() or SumElements(m)
 //    m.sumAbsElements() or SumAbsElements(m)
+//    m.sumAbs2Elements() or SumAbs2Elements(m)
 //    m.normSq() or NormSq(m)
 //    m.norm1() or Norm1(m)
 //    m.norm2() or Norm2(m)
@@ -830,7 +832,17 @@ namespace tmv {
             TMVAssert(ls() != 1 || (rowsize() == 1 && colsize() == 1));
             // (To assure that next assert has no effect.)
             TMVAssert(canLinearize());
-
+#ifdef TMV_USE_VALGRIND
+            std::vector<bool> ok(ls(),false);
+            for (size_t i=0;i<colsize();++i) for (size_t j=0;j<rowsize();++j) 
+                if (okij(i,j)) {
+                    int k = i*stepi() + j*stepj();
+                    ok[k] = true;
+                }
+            for (size_t k=0;k<ls();++k) if (!ok[k]) {
+                const_cast<T*>(cptr())[k] = T(-777);
+            }
+#endif
             return const_vec_type(cptr(),ls(),1,ct());
         }
 
@@ -862,11 +874,9 @@ namespace tmv {
         // Functions of Matrix
         //
 
-        inline T det() const
-        { return DivHelper<T>::det(); }
+        T det() const;
 
-        inline RT logDet(T* sign=0) const
-        { return DivHelper<T>::logDet(sign); }
+        RT logDet(T* sign=0) const;
 
         inline T trace() const
         { return diag().sumElements(); }
@@ -874,6 +884,8 @@ namespace tmv {
         T sumElements() const;
 
         RT sumAbsElements() const;
+
+        RT sumAbs2Elements() const;
 
         inline RT norm() const
         { return normF(); }
@@ -975,8 +987,8 @@ namespace tmv {
             divideUsing(LU);
             setDiv();
             TMVAssert(getDiv());
-            TMVAssert(dynamic_cast<const BandLUDiv<T>*>(getDiv()));
-            return *dynamic_cast<const BandLUDiv<T>*>(getDiv());
+            TMVAssert(divIsLUDiv());
+            return static_cast<const BandLUDiv<T>&>(*getDiv());
         }
 
         inline const BandQRDiv<T>& qrd() const
@@ -984,8 +996,8 @@ namespace tmv {
             divideUsing(QR);
             setDiv();
             TMVAssert(getDiv());
-            TMVAssert(dynamic_cast<const BandQRDiv<T>*>(getDiv()));
-            return *dynamic_cast<const BandQRDiv<T>*>(getDiv());
+            TMVAssert(divIsQRDiv());
+            return static_cast<const BandQRDiv<T>&>(*getDiv());
         }
 
         inline const BandSVDiv<T>& svd() const
@@ -993,8 +1005,8 @@ namespace tmv {
             divideUsing(SV);
             setDiv();
             TMVAssert(getDiv());
-            TMVAssert(dynamic_cast<const BandSVDiv<T>*>(getDiv()));
-            return *dynamic_cast<const BandSVDiv<T>*>(getDiv());
+            TMVAssert(divIsSVDiv());
+            return static_cast<const BandSVDiv<T>&>(*getDiv());
         }
 
         template <class T1> 
@@ -1093,6 +1105,10 @@ namespace tmv {
     private :
 
         type& operator=(const type&);
+
+        bool divIsLUDiv() const;
+        bool divIsQRDiv() const;
+        bool divIsSVDiv() const;
 
     }; // GenBandMatrix
 
@@ -1488,10 +1504,11 @@ namespace tmv {
         using c_type::nlo;
         using c_type::nhi;
 
+        using base::cref;
+
     protected :
 
         using base::okij;
-        using base::cref;
 
     private :
 
@@ -1867,6 +1884,8 @@ namespace tmv {
 
         const type& setAllTo(const T& x) const;
 
+        const type& addToAll(const T& x) const;
+
         const type& clip(RT thresh) const;
 
         void doTransposeSelf() const;
@@ -2120,6 +2139,27 @@ namespace tmv {
             // (To assure that next assert has no effect.)
             TMVAssert(canLinearize());
 
+#ifdef TMV_USE_VALGRIND
+            // Valgrind will complain about using a BandMatrix linearView
+            // since there are some values that are not initialized.
+            // These are ok to be not initialized, since they are also 
+            // never used for anything, so this ifdef will assign -777
+            // to each of these values to make sure valgrind doesn't give
+            // a conditional jump error when they are accessed.
+            // I didn't try to make this at all efficient, since it's not
+            // ever used in production versions of the code.
+            // e.g. there should be a guard like if (isSetupForValgrind) {...}
+            // but I haven't bothered to do that.
+            std::vector<bool> ok(ls(),false);
+            for (size_t i=0;i<colsize();++i) for (size_t j=0;j<rowsize();++j) 
+                if (okij(i,j)) {
+                    int k = i*stepi() + j*stepj();
+                    ok[k] = true;
+                }
+            for (size_t k=0;k<ls();++k) if (!ok[k]) {
+                ptr()[k] = T(-777);
+            }
+#endif
             return vec_type(ptr(),ls(),1,ct() TMV_FIRSTLAST );
         }
 
@@ -2384,6 +2424,9 @@ namespace tmv {
 
         inline const type& setAllTo(const T& x) const
         { c_type::setAllTo(x); return *this; }
+
+        inline const type& addToAll(const T& x) const
+        { c_type::addToAll(x); return *this; }
 
         inline const type& clip(RT thresh) const
         { c_type::clip(thresh); return *this; }
@@ -2903,6 +2946,7 @@ namespace tmv {
 #ifdef TMVDEBUG
             setAllTo(T(999));
 #endif
+            itsm = 0;
         }
 
 
@@ -3232,6 +3276,9 @@ namespace tmv {
 
         inline type& setAllTo(const T& x) 
         { linearView().setAllTo(x); return *this; }
+
+        inline type& addToAll(const T& x) 
+        { linearView().addToAll(x); return *this; }
 
         inline type& clip(RT thresh) 
         { linearView().clip(thresh); return *this; }
@@ -3767,7 +3814,20 @@ namespace tmv {
         }
 
         inline const_c_vec_type constLinearView() const
-        { return const_c_vec_type(itsm1.get(),linsize,1,NonConj); }
+        {
+#ifdef TMV_USE_VALGRIND
+            std::vector<bool> ok(linsize,false);
+            for (size_t i=0;i<colsize();++i) for (size_t j=0;j<rowsize();++j) 
+                if (okij(i,j)) {
+                    int k = i*stepi() + j*stepj() + int(cptr()-itsm1.get());
+                    ok[k] = true;
+                }
+            for (size_t k=0;k<linsize;++k) if (!ok[k]) {
+                const_cast<T*>(itsm1.get())[k] = T(-777);
+            }
+#endif
+            return const_c_vec_type(itsm1.get(),linsize,1,NonConj); 
+        }
 
         inline view_type view() 
         { 
@@ -3802,7 +3862,20 @@ namespace tmv {
         }
 
         inline vec_type linearView()
-        { return vec_type(itsm1.get(),linsize,1,NonConj TMV_FIRSTLAST ); }
+        {
+#ifdef TMV_USE_VALGRIND
+            std::vector<bool> ok(linsize,false);
+            for (size_t i=0;i<colsize();++i) for (size_t j=0;j<rowsize();++j) 
+                if (okij(i,j)) {
+                    int k = i*stepi() + j*stepj() + int(cptr()-itsm1.get());
+                    ok[k] = true;
+                }
+            for (size_t k=0;k<linsize;++k) if (!ok[k]) {
+                itsm1.get()[k] = T(-777);
+            }
+#endif
+            return vec_type(itsm1.get(),linsize,1,NonConj TMV_FIRSTLAST ); 
+        }
 
         TMV_DEPRECATED(const_view_type View() const)
         { return view(); }
@@ -3848,29 +3921,59 @@ namespace tmv {
         inline bool canLinearize() const
         { return true; }
 
-    protected :
-
-        const size_t linsize;
-        AlignedArray<T> itsm1;
-        const size_t itscs;
-        const size_t itsrs;
-        const int itsnlo;
-        const int itsnhi;
-        const int itssi;
-        const int itssj;
-        const int itsds;
-        T*const itsm;
-
         inline T cref(int i, int j) const
         { return itsm[i*itssi + j*itssj]; }
 
         inline T& ref(int i, int j)
         { return itsm[i*itssi + j*itssj]; }
 
+        inline void resize(size_t cs, size_t rs, int lo, int hi)
+        {
+            linsize = BandStorageLength(S,cs,rs,lo,hi);
+            itsm1.resize(linsize);
+            itscs = cs;
+            itsrs = rs;
+            itsnlo = lo;
+            itsnhi = hi;
+            itssi = 
+                S==RowMajor ? lo+hi : 
+                S==ColMajor ? 1 : 
+                rs>= cs ? 1-int(cs) : -int(rs);
+            itssj = 
+                S==RowMajor ? 1 :
+                S==ColMajor ? lo+hi :
+                -itssi+1;
+            itsds = 
+                S==RowMajor ? itssi+1 :
+                S==ColMajor ? itssj+1 :
+                1;
+            itsm = S==DiagMajor ? itsm1.get()-lo*itssi : itsm1.get();
+#ifdef TMVFLDEBUG
+            _first = itsm.get();
+            _last = _first + linsize;
+#endif
+#ifdef TMVDEBUG
+            setAllTo(T(888));
+#endif
+        }
+
+    protected :
+
+        size_t linsize;
+        AlignedArray<T> itsm1;
+        size_t itscs;
+        size_t itsrs;
+        int itsnlo;
+        int itsnhi;
+        int itssi;
+        int itssj;
+        int itsds;
+        T* itsm;
+
 #ifdef TMVFLDEBUG
     public:
-        const T* _first;
-        const T* _last;
+        T* _first;
+        T* _last;
     protected:
 #endif
 
@@ -4412,6 +4515,26 @@ namespace tmv {
     template <class T1, class T2> 
     inline bool operator!=(
         const GenBandMatrix<T1>& m1, const GenBandMatrix<T2>& m2)
+    { return !(m1 == m2); }
+
+
+    template <class T1, class T2> 
+    bool operator==(
+        const GenBandMatrix<T1>& m1, const GenMatrix<T2>& m2);
+
+    template <class T1, class T2> 
+    inline bool operator==(
+        const GenMatrix<T1>& m1, const GenBandMatrix<T2>& m2)
+    { return m2 == m1; }
+
+    template <class T1, class T2> 
+    inline bool operator!=(
+        const GenBandMatrix<T1>& m1, const GenMatrix<T2>& m2)
+    { return !(m1 == m2); }
+
+    template <class T1, class T2> 
+    inline bool operator!=(
+        const GenMatrix<T1>& m1, const GenBandMatrix<T2>& m2)
     { return !(m1 == m2); }
 
 

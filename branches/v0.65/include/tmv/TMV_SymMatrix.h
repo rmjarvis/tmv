@@ -142,7 +142,8 @@
 //
 //    setZero()
 //    setAllTo(T x) 
-//        For HermMatrix, x must be real.
+//    addToAll(T x) 
+//        For HermMatrix, x must be real in both setAllTo and addToAll.
 //    clip(RT thresh)
 //    conjugateSelf()
 //    transposeSelf()
@@ -203,6 +204,7 @@
 //    m.trace() or Trace(m)
 //    m.sumElements() or SumElements(m)
 //    m.sumAbsElements() or SumAbsElements(m)
+//    m.sumAbs2Elements() or SumAbs2Elements(m)
 //    m.norm() or m.normF() or Norm(m) or NormF(m)
 //    m.normSq() or NormSq(m)
 //    m.norm1() or Norm1(m)
@@ -519,7 +521,7 @@ namespace tmv {
             int i1, int i2, int j1, int j2) const
         {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,1,1));
-            if ((i2-1<=j1 && uplo()==Upper) || (j2-1<=i1 && uplo()==Lower))
+            if ( (uplo()==Upper && i2-j1<=1) || (uplo()==Lower && j2-i1<=1) )
                 return const_rec_type(
                     cptr()+i1*stepi()+j1*stepj(),
                     i2-i1,j2-j1,stepi(),stepj(),stor(),ct());
@@ -537,8 +539,8 @@ namespace tmv {
                 iscm() ? (istep == 1 ? ColMajor : NoMajor) :
                 isrm() ? (jstep == 1 ? RowMajor : NoMajor) : NoMajor;
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
-            if ((i2-istep<=j1 && uplo()==Upper) || 
-                (j2-jstep<=i1 && uplo()==Lower))
+            if ( (uplo()==Upper && i2-j1<=istep) || 
+                 (uplo()==Lower && j2-i1<=istep) )
                 return const_rec_type(
                     cptr()+i1*stepi()+j1*stepj(),
                     (i2-i1)/istep,(j2-j1)/jstep,istep*stepi(),jstep*stepj(),
@@ -716,11 +718,9 @@ namespace tmv {
         // Functions of Matrix
         //
 
-        inline T det() const 
-        { return DivHelper<T>::det(); }
+        T det() const ;
 
-        inline RT logDet(T* sign=0) const
-        { return DivHelper<T>::logDet(sign); }
+        RT logDet(T* sign=0) const;
 
         inline T trace() const
         { return diag().sumElements(); }
@@ -728,6 +728,8 @@ namespace tmv {
         T sumElements() const;
 
         RT sumAbsElements() const;
+
+        RT sumAbs2Elements() const;
 
         inline RT norm() const 
         { return normF(); }
@@ -862,8 +864,8 @@ namespace tmv {
             divideUsing(LU);
             setDiv();
             TMVAssert(this->getDiv());
-            TMVAssert(dynamic_cast<const SymLDLDiv<T>*>(this->getDiv()));
-            return *dynamic_cast<const SymLDLDiv<T>*>(this->getDiv());
+            TMVAssert(divIsLUDiv());
+            return static_cast<const SymLDLDiv<T>&>(*this->getDiv());
         }
 
         inline const HermCHDiv<T>& chd() const
@@ -872,8 +874,8 @@ namespace tmv {
             divideUsing(CH);
             setDiv();
             TMVAssert(this->getDiv());
-            TMVAssert(dynamic_cast<const HermCHDiv<T>*>(this->getDiv()));
-            return *dynamic_cast<const HermCHDiv<T>*>(this->getDiv());
+            TMVAssert(divIsCHDiv());
+            return static_cast<const HermCHDiv<T>&>(*this->getDiv());
         }
 
         inline const HermSVDiv<T>& svd() const
@@ -882,8 +884,8 @@ namespace tmv {
             divideUsing(SV);
             setDiv();
             TMVAssert(this->getDiv());
-            TMVAssert(dynamic_cast<const HermSVDiv<T>*>(this->getDiv()));
-            return *dynamic_cast<const HermSVDiv<T>*>(this->getDiv());
+            TMVAssert(divIsHermSVDiv());
+            return static_cast<const HermSVDiv<T>&>(*this->getDiv());
         }
 
         inline const SymSVDiv<T>& symsvd() const
@@ -893,8 +895,8 @@ namespace tmv {
             divideUsing(SV);
             setDiv();
             TMVAssert(this->getDiv());
-            TMVAssert(dynamic_cast<const SymSVDiv<T>*>(this->getDiv()));
-            return *dynamic_cast<const SymSVDiv<T>*>(this->getDiv());
+            TMVAssert(divIsSymSVDiv());
+            return static_cast<const SymSVDiv<T>&>(*this->getDiv());
         }
 
         template <class T1> 
@@ -994,6 +996,11 @@ namespace tmv {
     private :
 
         type& operator=(const type&);
+
+        bool divIsLUDiv() const;
+        bool divIsCHDiv() const;
+        bool divIsHermSVDiv() const;
+        bool divIsSymSVDiv() const;
 
     }; // GenSymMatrix
 
@@ -1330,8 +1337,9 @@ namespace tmv {
 
         virtual inline ~SymMatrixView() 
         {
+            TMV_SETFIRSTLAST(0,0);
 #ifdef TMVDEBUG
-            const_cast<T*&>(itsm) = 0;
+            const_cast<const T*&>(itsm) = 0;
 #endif
         }
 
@@ -1628,6 +1636,12 @@ namespace tmv {
             upperTri().setAllTo(x); return *this; 
         }
 
+        inline const type& addToAll(const T& x) const
+        { 
+            TMVAssert(TMV_IMAG(x)==RT(0) || this->issym());
+            upperTri().addToAll(x); return *this; 
+        }
+
         inline const type& clip(RT thresh) const
         { upperTri().clip(thresh); return *this; }
 
@@ -1688,7 +1702,8 @@ namespace tmv {
         inline rec_type subMatrix(int i1, int i2, int j1, int j2) const
         {
             TMVAssert(base::hasSubMatrix(i1,i2,j1,j2,1,1));
-            if ((i2-j1<=1 && uplo()==Upper) || (j2-i1<=1 && uplo()==Lower))
+            if ( (uplo()==Upper && i2-j1<=1) || 
+                 (uplo()==Lower && j2-i1<=1) )
                 return rec_type(
                     ptr()+i1*stepi()+j1*stepj(),
                     i2-i1,j2-j1,stepi(),stepj(),stor(),ct() TMV_FIRSTLAST);
@@ -1706,8 +1721,8 @@ namespace tmv {
                 this->iscm() ? (istep == 1 ? ColMajor : NoMajor) :
                 this->isrm() ? (jstep == 1 ? RowMajor : NoMajor) : NoMajor;
             TMVAssert(base::hasSubMatrix(i1,i2,j1,j2,istep,jstep));
-            if ((i2-istep<=j1 && uplo()==Upper) || 
-                (j2-jstep<=i1 && uplo()==Lower))
+            if ( (uplo()==Upper && i2-j1<=istep) || 
+                 (uplo()==Lower && j2-i1<=istep) )
                 return rec_type(
                     ptr()+i1*stepi()+j1*stepj(),
                     (i2-i1)/istep,(j2-j1)/jstep,istep*stepi(),jstep*stepj(),
@@ -2047,6 +2062,9 @@ namespace tmv {
 
         inline const type& setAllTo(const T& x) const
         { c_type::setAllTo(x); return *this; }
+
+        inline const type& addToAll(const T& x) const
+        { c_type::addToAll(x); return *this; }
 
         inline const type& clip(RT thresh) const
         { c_type::clip(thresh); return *this; }
@@ -2431,6 +2449,7 @@ namespace tmv {
 
         virtual inline ~SymMatrix() 
         {
+            TMV_SETFIRSTLAST(0,0);
 #ifdef TMVDEBUG
             setAllTo(T(999));
 #endif
@@ -2746,6 +2765,9 @@ namespace tmv {
         inline type& setAllTo(const T& x) 
         { upperTri().setAllTo(x); return *this; }
 
+        inline type& addToAll(const T& x) 
+        { upperTri().addToAll(x); return *this; }
+
         inline type& clip(RT thresh) 
         { upperTri().clip(thresh); return *this; }
 
@@ -2807,7 +2829,7 @@ namespace tmv {
         {
             TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,1,1));
             if (I==FortranStyle) { --i1; --j1; }
-            if ((U==Upper && i2-1<=j1) || (U==Lower && j2-1<=i1))
+            if ( (U==Upper && i2-j1<=1) || (U==Lower && j2-i1<=1) )
                 return const_rec_type(
                     itsm.get()+i1*stepi()+j1*stepj(),
                     i2-i1,j2-j1,stepi(),stepj(),S,NonConj);
@@ -2825,7 +2847,7 @@ namespace tmv {
             const StorageType newstor = S==RowMajor ?
                 jstep == 1 ? RowMajor : NoMajor :
                 istep == 1 ? ColMajor : NoMajor;
-            if ((U==Upper && i2-istep<=j1) || (U==Lower && j2-jstep<=i1))
+            if ( (U==Upper && i2-j1<=istep) || (U==Lower && j2-i1<=jstep) )
                 return const_rec_type(
                     itsm.get()+i1*stepi()+j1*stepj(),
                     (i2-i1)/istep,(j2-j1)/jstep,istep*stepi(),jstep*stepj(),
@@ -2942,7 +2964,7 @@ namespace tmv {
         {
             TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,1,1));
             if (I==FortranStyle) { --i1; --j1; }
-            if ((U==Upper && i2-1<=j1) || (U==Lower && j2-1<=i1))
+            if ( (U==Upper && i2-j1<=1) || (U==Lower && j2-i1<=1) )
                 return rec_type(
                     itsm.get()+i1*stepi()+j1*stepj(),
                     i2-i1,j2-j1,stepi(),stepj(),S,NonConj TMV_FIRSTLAST);
@@ -2961,7 +2983,7 @@ namespace tmv {
                 istep == 1 ? ColMajor : NoMajor;
             TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,istep,jstep));
             if (I==FortranStyle) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
-            if ((U==Upper && i2-istep<=j1) || (U==Lower && j2-jstep<=i1))
+            if ( (U==Upper && i2-j1<=istep) || (U==Lower && j2-i1<=jstep) )
                 return rec_type(
                     itsm.get()+i1*stepi()+j1*stepj(),
                     (i2-i1)/istep,(j2-j1)/jstep,istep*stepi(),jstep*stepj(),
@@ -3184,11 +3206,25 @@ namespace tmv {
                 else return itsm.get()[i*itss + j];
         }
 
+        inline void resize(size_t s)
+        {
+            itslen = s*s;
+            itsm.resize(itslen);
+            itss = s;
+#ifdef TMVFLDEBUG
+            _first = itsm.get();
+            _last = _first+itslen;
+#endif
+#ifdef TMVDEBUG
+            setAllTo(T(888));
+#endif
+        }
+
     protected :
 
-        const size_t itslen;
+        size_t itslen;
         AlignedArray<T> itsm;
-        const size_t itss;
+        size_t itss;
 
 #ifdef TMVFLDEBUG
     public:
@@ -3420,6 +3456,7 @@ namespace tmv {
 
         virtual inline ~HermMatrix() 
         {
+            TMV_SETFIRSTLAST(0,0);
 #ifdef TMVDEBUG
             setAllTo(T(999));
 #endif
@@ -3755,6 +3792,13 @@ namespace tmv {
             return *this; 
         }
 
+        inline type& addToAll(const T& x) 
+        { 
+            TMVAssert(TMV_IMAG(x) == RT(0));
+            upperTri().addToAll(x); 
+            return *this; 
+        }
+
         inline type& clip(RT thresh) 
         { upperTri().clip(thresh); return *this; }
 
@@ -3821,7 +3865,7 @@ namespace tmv {
         {
             TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,1,1));
             if (I==FortranStyle) { --i1; --j1; }
-            if ((U==Upper && i2-1<=j1) || (U==Lower && j2-1<=i1))
+            if ((U==Upper && i2-j1<=1) || (U==Lower && j2-i1<=1))
                 return const_rec_type(
                     itsm.get()+i1*stepi()+j1*stepj(),
                     i2-i1,j2-j1,stepi(),stepj(),S,NonConj);
@@ -3839,7 +3883,7 @@ namespace tmv {
                 istep == 1 ? ColMajor : NoMajor;
             TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,istep,jstep));
             if (I==FortranStyle) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
-            if ((U==Upper && i2-istep<=j1) || (U==Lower && j2-jstep<=i1))
+            if ((U==Upper && i2-j1<=istep) || (U==Lower && j2-i1<=jstep))
                 return const_rec_type(
                     itsm.get()+i1*stepi()+j1*stepj(),
                     (i2-i1)/istep,(j2-j1)/jstep,istep*stepi(),jstep*stepj(),
@@ -3955,7 +3999,7 @@ namespace tmv {
         {
             TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,1,1));
             if (I==FortranStyle) { --i1; --j1; }
-            if ((U==Upper && i2-1<=j1) || (U==Lower && j2-1<=i1))
+            if ((U==Upper && i2-j1<=1) || (U==Lower && j2-i1<=1))
                 return rec_type(
                     itsm.get()+i1*stepi()+j1*stepj(),
                     i2-i1,j2-j1,stepi(),stepj(),S,NonConj TMV_FIRSTLAST);
@@ -3974,7 +4018,7 @@ namespace tmv {
                 istep == 1 ? ColMajor : NoMajor;
             TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,istep,jstep));
             if (I==FortranStyle) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
-            if ((U==Upper && i2-istep<=j1) || (U==Lower && j2-jstep<=i1))
+            if ((U==Upper && i2-j1<=istep) || (U==Lower && j2-i1<=jstep))
                 return rec_type(
                     itsm.get()+i1*stepi()+j1*stepj(),
                     (i2-i1)/istep,(j2-j1)/jstep,istep*stepi(),jstep*stepj(),
@@ -4201,16 +4245,30 @@ namespace tmv {
                     return TMV_CONJ(itsm.get()[i*itss + j]);
         }
 
+        inline void resize(size_t s)
+        {
+            itslen = s*s;
+            itsm.resize(itslen);
+            itss = s;
+#ifdef TMVFLDEBUG
+            _first = itsm.get();
+            _last = _first+itslen;
+#endif
+#ifdef TMVDEBUG
+            setAllTo(T(888));
+#endif
+        }
+
     protected :
 
-        const size_t itslen;
+        size_t itslen;
         AlignedArray<T> itsm;
-        const size_t itss;
+        size_t itss;
 
 #ifdef TMVFLDEBUG
     public:
-        const T*const _first;
-        const T*const _last;
+        const T* _first;
+        const T* _last;
 #endif
 
         template <IndexStyle I2>
@@ -4477,9 +4535,35 @@ namespace tmv {
     inline bool operator==(
         const GenSymMatrix<T1>& m1, const GenSymMatrix<T2>& m2)
     { return m1.upperTri() == m2.upperTri(); }
+
     template <class T1, class T2> 
     inline bool operator!=(
         const GenSymMatrix<T1>& m1, const GenSymMatrix<T2>& m2)
+    { return !(m1 == m2); }
+
+
+    template <class T1, class T2> 
+    inline bool operator==(
+        const GenSymMatrix<T1>& m1, const GenMatrix<T2>& m2)
+    {
+        return 
+            m1.upperTri() == m2.upperTri() &&
+            m1.lowerTri() == m2.lowerTri();
+    }
+
+    template <class T1, class T2> 
+    inline bool operator==(
+        const GenMatrix<T1>& m1, const GenSymMatrix<T2>& m2)
+    { return m2 == m1; }
+
+    template <class T1, class T2> 
+    inline bool operator!=(
+        const GenSymMatrix<T1>& m1, const GenMatrix<T2>& m2)
+    { return !(m1 == m2); }
+
+    template <class T1, class T2> 
+    inline bool operator!=(
+        const GenMatrix<T1>& m1, const GenSymMatrix<T2>& m2)
     { return !(m1 == m2); }
 
 

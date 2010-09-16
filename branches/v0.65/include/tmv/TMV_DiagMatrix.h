@@ -86,6 +86,7 @@
 //
 //    DiagMatrix& setZero()
 //    DiagMatrix& setAllTo(T x)
+//    DiagMatrix& addToAll(T x)
 //    DiagMatrix<T>& transposeSelf() 
 //        (Does nothing.)
 //    DiagMatrix& conjugateSelf()
@@ -119,6 +120,7 @@
 //    m.trace() or Trace(m)
 //    m.sumElements() or SumElements(m)
 //    m.sumAbsElements() or SumAbsElements(m)
+//    m.sumAbs2Elements() or SumAbs2Elements(m)
 //    m.norm() or m.normF() or Norm(m) or NormF(m)
 //    m.normSq() or NormSq(m)
 //    m.norm1() or Norm1(m)
@@ -370,6 +372,9 @@ namespace tmv {
 
         inline RT sumAbsElements() const
         { return diag().sumAbsElements(); }
+
+        inline RT sumAbs2Elements() const
+        { return diag().sumAbs2Elements(); }
 
         inline RT norm() const 
         { return normF(); }
@@ -900,6 +905,9 @@ namespace tmv {
         inline const type& setAllTo(const T& x) const
         { diag().setAllTo(x); return *this; }
 
+        inline const type& addToAll(const T& x) const
+        { diag().addToAll(x); return *this; }
+
         inline const type& clip(RT thresh) const
         { diag().clip(thresh); return *this; }
 
@@ -1091,6 +1099,9 @@ namespace tmv {
 
         inline const type& setAllTo(const T& x) const
         { diag().setAllTo(x); return *this; }
+
+        inline const type& addToAll(const T& x) const
+        { diag().addToAll(x); return *this; }
 
         inline const type& clip(RT thresh) const
         { diag().clip(thresh); return *this; }
@@ -1386,6 +1397,9 @@ namespace tmv {
         inline type& setAllTo(const T& x) 
         { itsdiag.setAllTo(x); return *this; }
 
+        inline type& addToAll(const T& x) 
+        { itsdiag.addToAll(x); return *this; }
+
         inline type& clip(RT thresh)
         { diag().clip(thresh); return *this; }
 
@@ -1529,6 +1543,9 @@ namespace tmv {
         { return adjoint(); }
 
         using base::size;
+
+        inline void resize(size_t s)
+        { itsdiag.resize(s); }
 
     protected :
 
@@ -1681,6 +1698,30 @@ namespace tmv {
         const GenDiagMatrix<T1>& m1, const GenDiagMatrix<T2>& m2)
     { return !(m1 == m2); }
 
+    template <class T1, class T2> 
+    inline bool operator==(
+        const GenDiagMatrix<T1>& m1, const GenMatrix<T2>& m2)
+    {
+        return 
+            m1.diag() == m2.diag() && 
+            m2.upperTri().offDiag().maxAbs2Element() == T2(0) &&
+            m2.lowerTri().offDiag().maxAbs2Element() == T2(0);
+    }
+
+    template <class T1, class T2> 
+    inline bool operator==(
+        const GenMatrix<T1>& m1, const GenDiagMatrix<T2>& m2)
+    { return m2 == m1; }
+
+    template <class T1, class T2> 
+    inline bool operator!=(
+        const GenDiagMatrix<T1>& m1, const GenMatrix<T2>& m2)
+    { return !(m1 == m2); }
+
+    template <class T1, class T2> 
+    inline bool operator!=(
+        const GenMatrix<T1>& m1, const GenDiagMatrix<T2>& m2)
+    { return !(m1 == m2); }
 
     //
     // I/O

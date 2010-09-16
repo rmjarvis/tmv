@@ -91,11 +91,10 @@ namespace tmv {
                     T yoverx = y/x;
                     RT n = TMV_NORM(yoverx);
                     RT sqrtfactor = TMV_SQRT(RT(1)+n);
-                    RT invsqrtfactor = RT(1)/sqrtfactor;
-                    T s = TMV_CONJ(yoverx)*invsqrtfactor;
+                    RT c = RT(1)/sqrtfactor;
+                    T s = TMV_CONJ(yoverx)*c;
                     x += x*(n/(RT(1)+sqrtfactor));
                     y = RT(0);
-                    RT c = RT(1)/sqrtfactor;
                     //std::cout<<"x>y: return "<<c<<','<<s<<std::endl;
                     return Givens<T>(c,s);
                 }
@@ -412,6 +411,10 @@ namespace tmv {
     }
 
 #undef RT
+
+#ifdef INST_INT
+#undef INST_INT
+#endif
 
 #define InstFile "TMV_Givens.inst"
 #include "TMV_Inst.h"

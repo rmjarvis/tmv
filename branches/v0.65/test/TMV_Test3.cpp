@@ -42,6 +42,7 @@ int main() try
     TestAllSmallMatrixDiv<double>();
     TestAllSmallMatrixDivA<double>();
     TestAllSmallMatrixDivB<double>();
+    TestSmallMatrixDet<double>();
 #endif
 
 #ifdef TEST_FLOAT
@@ -52,6 +53,7 @@ int main() try
     TestAllSmallMatrixDiv<float>();
     TestAllSmallMatrixDivA<float>();
     TestAllSmallMatrixDivB<float>();
+    TestSmallMatrixDet<float>();
 #endif
 
 #ifdef TEST_LONGDOUBLE
@@ -62,11 +64,15 @@ int main() try
     TestAllSmallMatrixDiv<long double>();
     TestAllSmallMatrixDivA<long double>();
     TestAllSmallMatrixDivB<long double>();
+    TestSmallMatrixDet<long double>();
 #endif 
 
 #ifdef TEST_INT
     TestAllSmallVector<int>();
     TestAllSmallMatrix<int>();
+    TestAllSmallMatrixA<int>();
+    TestAllSmallMatrixB<int>();
+    TestSmallMatrixDet<int>();
 #endif 
 
 #endif 

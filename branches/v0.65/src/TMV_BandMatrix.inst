@@ -1,7 +1,7 @@
 
 #define CT std::complex<T>
 
-#define Def1(RT,CCT,T,Ref) \
+#define Def1(RT,T,Ref) \
   template bool GenBandMatrix<T >::hasSubMatrix( \
       int i1, int i2, int j1, int j2, int is, int js) const; \
   template bool GenBandMatrix<T >::hasSubVector( \
@@ -14,6 +14,9 @@
       int i, int j, int is, int js, int s) const; \
   template bool ConstBandMatrixView<T,FortranStyle>::hasSubBandMatrix( \
       int i1, int i2, int j1, int j2, int lo, int hi, int is, int js) const; \
+  template T GenBandMatrix<T >::sumElements() const; \
+  template RT GenBandMatrix<T >::sumAbsElements() const; \
+  template RT GenBandMatrix<T >::sumAbs2Elements() const; \
   template RT GenBandMatrix<T >::normF() const; \
   template RT GenBandMatrix<T >::normSq(const RT scale) const; \
   template RT GenBandMatrix<T >::norm1() const; \
@@ -27,17 +30,17 @@
   template auto_ptr<BaseMatrix<T > > GenBandMatrix<T >::newTranspose() const; \
   template auto_ptr<BaseMatrix<T > > GenBandMatrix<T >::newConjugate() const; \
   template auto_ptr<BaseMatrix<T > > GenBandMatrix<T >::newAdjoint() const; \
-  template auto_ptr<BaseMatrix<T > > GenBandMatrix<T >::newInverse() const; \
   template void GenBandMatrix<T >::write(std::ostream& os) const; \
   template void GenBandMatrix<T >::write(std::ostream& os, RT t) const; \
   template void GenBandMatrix<T >::writeCompact(std::ostream& os) const; \
   template void GenBandMatrix<T >::writeCompact(std::ostream& os, RT t) const;\
   template T GenBandMatrix<T >::cref(int i, int j) const; \
-  template void GenBandMatrix<T >::newDivider() const; \
   template const BandMatrixView<T,CStyle>&  \
       BandMatrixView<T,CStyle>::clip(RT thresh) const; \
   template const BandMatrixView<T,CStyle>&  \
       BandMatrixView<T,CStyle>::setAllTo(const T& x) const; \
+  template const BandMatrixView<T,CStyle>&  \
+      BandMatrixView<T,CStyle>::addToAll(const T& x) const; \
   template const BandMatrixView<T,CStyle>&  \
       BandMatrixView<T,CStyle>::setZero() const; \
   template const BandMatrixView<T,CStyle>&  \
@@ -69,16 +72,36 @@
   template bool BandMatrixView<T >::canLinearize() const; \
   template void BandMatrixView<T >::read(std::istream& fin) const; \
 
-Def1(T,CT,T,T&)
+Def1(T,T,T&)
 #ifdef INST_COMPLEX
-Def1(T,CT,CT,VarConjRef<CT >)
+Def1(T,CT,VarConjRef<CT >)
 #endif
 
 #undef Def1
 
+#ifndef TISINT
+#define Def1b(RT,T) \
+  template T GenBandMatrix<T >::det() const; \
+  template RT GenBandMatrix<T >::logDet(T* sign) const; \
+  template void GenBandMatrix<T >::newDivider() const; \
+  template auto_ptr<BaseMatrix<T > > GenBandMatrix<T >::newInverse() const; \
+  template bool GenBandMatrix<T >::divIsLUDiv() const; \
+  template bool GenBandMatrix<T >::divIsQRDiv() const; \
+  template bool GenBandMatrix<T >::divIsSVDiv() const; \
+
+Def1b(T,T)
+#ifdef INST_COMPLEX
+Def1b(T,CT)
+#endif
+
+#undef Def1b
+#endif
+
 #define Def2(T1,T2)\
   template bool operator==(const GenBandMatrix<T1 >& m1, \
       const GenBandMatrix<T2 >& m2); \
+  template bool operator==(const GenBandMatrix<T1 >& m1, \
+      const GenMatrix<T2 >& m2); \
 
 Def2(T,T)
 #ifdef INST_COMPLEX

@@ -90,7 +90,7 @@ namespace tmv {
     static void SimpleLDLt_CombineInverse(const SymMatrixView<T>& sinv)
     {
         // This is basically the same algorithm as the LDLt_CombineInverse
-        // in TMV_SymLDLInverse.cpp for the Bunch-Kauffman inverse.
+        // in TMV_SymLDLInverse.cpp for the Bunch-Kaufman inverse.
         // The difference, and why this is the "simple" version, is that
         // D really is a regular DiagMatrix - not the screwy block diagonal
         // version that we had to deal with there.
@@ -213,6 +213,10 @@ namespace tmv {
         TMVAssert(sinv.isHermOK());
     }
 
+
+#ifdef INST_INT
+#undef INST_INT
+#endif
 
 #define InstFile "TMV_SymBandCHInverse.inst"
 #include "TMV_Inst.h"

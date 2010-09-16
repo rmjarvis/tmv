@@ -46,7 +46,7 @@
 
 const int TMV_MaxStack = 1024; // bytes
 
-//#include <iostream>
+#include <complex>
 
 namespace tmv
 {
@@ -55,99 +55,129 @@ namespace tmv
     // SSE functions.
     // Sometimes posix_memalign or memalign does this job.
     // But it doesn't seem to be standard, since some systems don't have it.
-    // So we make this simple class that simply loads a bit more memory than
-    // necessary and then finds the starting point that is 16 byte aligned.
+    // Other systems have _mm_malloc (ICPC) or _aligned_malloc (WIN).
+    // So probably I should have ifdefs that check to see if one of these
+    // is available and use that instead.
+    //
+    // But for now we have this simple class that simply loads a bit more 
+    // memory than necessary and then finds the starting point that is 
+    // 16 byte aligned.
 
     // First the regular non-SSE version, where we don't need aligment.
     template <class T>
-    struct AlignedMemory
+    class AlignedMemory
     {
-        T* p;
-
+    public:
         AlignedMemory() : p(0) 
         { 
-            //std::cout<<this<<" constructor: p = "<<p<<std::endl; 
+            //std::cout<<this<<" X constructor: p = "<<p<<std::endl; 
         }
         inline void allocate(const size_t n) 
         { 
             p = new T[n]; 
-            //std::cout<<this<<" allocate: n = "<<n<<"  p = "<<p<<std::endl; 
+            //std::cout<<this<<" X allocate: n = "<<n<<"  p = "<<p<<std::endl; 
         }
         inline void deallocate()
         { 
             if (p) delete [] p; p=0; 
-            //std::cout<<this<<" deallocate: p = "<<p<<std::endl; 
+            //std::cout<<this<<" X deallocate: p = "<<p<<std::endl; 
         }
         inline void swapWith(AlignedMemory<T>& rhs)
-        { 
-            T* temp = p; p = rhs.p; rhs.p = temp; 
-            //std::cout<<this<<","<<&rhs<<" swap: p = "<<p<<","<<rhs.p<<std::endl; 
-        }
+        { T* temp = p; p = rhs.p; rhs.p = temp; }
         inline T* get() { return p; }
         inline const T* get() const { return p; }
+    private:
+        T* p;
     };
 
-    // Now specialize float and double if SSE commands are enabled
-#ifdef __SSE__
+    // Now specialize float and double
+    // We do this regardless of whether __SSE__ or __SSE2__ is defined,
+    // since these might be allocated in a unit that doesn't defined them
+    // and then have get() called in a unit that does.  This leads to problems!
+    // So we always make the float and double allocations aligned at
+    // 16 byte boundaries.
     template <>
-    struct AlignedMemory<float>
+    class AlignedMemory<float>
     {
-        float* p;
-
+    public:
         AlignedMemory() : p(0)
         {
-            //std::cout<<this<<" F constructor: p = "<<p<<std::endl; 
+            //std::cout<<this<<" F constructor: p = "<<(void*)p<<std::endl; 
         }
         inline void allocate(const size_t n) 
         { 
-            p = reinterpret_cast<float*>(new __m128[(n+3)>>2]);
-            TMVAssert( ((size_t)(p) & 0xf) == 0);
-            //std::cout<<this<<" F allocate: n = "<<n<<"  p = "<<p<<std::endl; 
+            p = new char[(n<<2)+15];
+            //std::cout<<this<<" F allocate: p = "<<(void*)p<<std::endl;
+            TMVAssert((void*)(p+(n<<2)+15) >= (void*)(get()+n));
         }
         inline void deallocate()
         {
-            if (p) delete [] reinterpret_cast<__m128*>(p); p=0; 
-            //std::cout<<this<<" F deallocate: p = "<<p<<std::endl; 
+            //std::cout<<this<<" F deallocate: p = "<<(void*)p<<", p = "<<((size_t)p)<<std::endl; 
+            if (p) delete [] p; p=0;
         }
         inline void swapWith(AlignedMemory<float>& rhs)
+        { char* temp = p; p = rhs.p; rhs.p = temp; }
+        inline float* get() 
         {
-            float* temp = p; p = rhs.p; rhs.p = temp; 
-            //std::cout<<this<<","<<&rhs<<" F swap: p = "<<p<<","<<rhs.p<<std::endl; 
+            //std::cout<<this<<" F get: p = "<<(void*)p<<std::endl;
+            float* pf = reinterpret_cast<float*>(
+                p + ((0x10-((size_t)(p) & 0xf)) & ~0x10));
+            //std::cout<<this<<" pf = "<<(void*)pf<<std::endl;
+            TMVAssert( ((size_t)(pf) & 0xf) == 0);
+            return pf;
         }
-        inline float* get() { return p; }
-        inline const float* get() const { return p; }
-    };
-#endif
-#ifdef __SSE2__
-    template <>
-    struct AlignedMemory<double>
-    {
-        double* p;
-
-        AlignedMemory() : p(0) 
+        inline const float* get() const 
         {
-            //std::cout<<this<<" D constructor: p = "<<p<<std::endl; 
+            const float* pf = reinterpret_cast<const float*>(
+                p + ((0x10-((size_t)(p) & 0xf)) & ~0x10));
+            TMVAssert( ((size_t)(pf) & 0xf) == 0);
+            return pf;
+        }
+    private:
+        char* p;
+    };
+    template <>
+    class AlignedMemory<double>
+    {
+    public:
+        AlignedMemory() : p(0)
+        {
+            //std::cout<<this<<" D constructor: p = "<<(void*)p<<std::endl; 
         }
         inline void allocate(const size_t n) 
         { 
-            p = reinterpret_cast<double*>(new __m128d[(n+1)>>1]);
-            TMVAssert( ((size_t)(p) & 0xf) == 0);
-            //std::cout<<this<<" D allocate: n = "<<n<<"  p = "<<p<<std::endl; 
+            p = new char[(n<<3)+15];
+            //std::cout<<this<<" D allocate: p = "<<(void*)p<<std::endl;
+            TMVAssert((void*)(p+(n<<3)+15) >= (void*)(get()+n));
         }
         inline void deallocate()
         {
-            if (p) delete [] reinterpret_cast<__m128d*>(p); p=0; 
-            //std::cout<<this<<" D deallocate: p = "<<p<<std::endl; 
+            //std::cout<<this<<" D deallocate: p = "<<(void*)p<<std::endl; 
+            if (p) delete [] p; p=0;
         }
         inline void swapWith(AlignedMemory<double>& rhs)
+        { char* temp = p; p = rhs.p; rhs.p = temp; }
+        inline double* get() 
         {
-            double* temp = p; p = rhs.p; rhs.p = temp; 
-            //std::cout<<this<<","<<&rhs<<" D swap: p = "<<p<<","<<rhs.p<<std::endl; 
+            //std::cout<<this<<" D get: p = "<<(void*)p<<std::endl;
+            double* pd = reinterpret_cast<double*>(
+                p + ((0x10-((size_t)(p) & 0xf)) & ~0x10));
+            //std::cout<<"pd = "<<(void*)pd<<std::endl;
+            TMVAssert( ((size_t)(pd) & 0xf) == 0);
+            return pd;
         }
-        inline double* get() { return p; }
-        inline const double* get() const { return p; }
+        inline const double* get() const 
+        {
+            const double* pd = reinterpret_cast<const double*>(
+                p + ((0x10-((size_t)(p) & 0xf)) & ~0x10));
+            TMVAssert( ((size_t)(pd) & 0xf) == 0);
+            return pd;
+        }
+
+    private :
+        char* p;
+
     };
-#endif
 
     // Now the actual class that makes AlignedMemory work like a normal 
     // pointer.
@@ -158,17 +188,17 @@ namespace tmv
 
         inline AlignedArray() 
         {
-            //std::cout<<"Default constructor: "<<&p<<std::endl;
+            //std::cout<<"AA Default constructor: "<<&p<<std::endl;
         }
         inline AlignedArray(const size_t n) 
         {
+            //std::cout<<"AA Sized constructor: n = "<<n<<"  "<<&p<<std::endl;
             p.allocate(n); 
-            //std::cout<<"Sized constructor: n = "<<n<<"  "<<&p<<std::endl;
         }
         inline ~AlignedArray() 
         { 
+            //std::cout<<"AA Destructor: "<<&p<<std::endl;
             p.deallocate(); 
-            //std::cout<<"Destructor: "<<&p<<std::endl;
         }
 
         inline T& operator*() { return *get(); }
@@ -201,17 +231,17 @@ namespace tmv
 
         inline AlignedArray()
         {
-            //std::cout<<"Default complex constructor: "<<&p<<std::endl;
+            //std::cout<<"CAA Default constructor: "<<&p<<std::endl;
         }
         inline AlignedArray(const size_t n) 
         { 
+            //std::cout<<"CAA Sized constructor: n = "<<n<<"  "<<&p<<std::endl;
             p.allocate(n<<1); 
-            //std::cout<<"Sized complex constructor: n = "<<n<<"  "<<&p<<std::endl;
         }
         inline ~AlignedArray() 
         {
+            //std::cout<<"CAA Destructor: "<<&p<<std::endl;
             p.deallocate(); 
-            //std::cout<<"Destructor: "<<&p<<std::endl;
         }
 
         inline T& operator*() { return *get(); }
@@ -238,62 +268,84 @@ namespace tmv
     };
 
 
-    // This is a helper class that has bigN as a template parameter
+
+    // The rest of this file implements memory that is allocated on 
+    // the stack rather than on the heap.  Here things are a bit easier,
+    // since this will always align __m128 objects on 16 byte boundaries.
+    // So the way to get float or double aligned is simply to union
+    // the array with one of these.
+    
+    // Another wrinkle though is that we don't actually want to use the
+    // stack for very large arrays, since it will crash.  And very small
+    // arrays don't need the alignement.
+    // So here is a helper class that has bigN as a template parameter
     // to decide whether to use the stack or not.
-    // smallN is for N < 4 or N < 2 where the SSE alignment isn't necessary,
-    // to make sure we don't gratuitously use extra memory when we have
-    // a lot of SmallVector<float,2>'s or something like that.
+    // And smallN is for N < 4 or N < 2 where the SSE alignment isn't 
+    // necessary, to make sure we don't gratuitously use extra memory when 
+    // we have a lot of SmallVector<float,2>'s or something like that.
     template <class T, int N, bool bigN, bool smallN> 
     class StackArray2;
 
     template <class T, int N>
-    struct StackArray2<T,N,false,false>
+    class StackArray2<T,N,false,false>
     { 
-        T p[N]; 
+    public:
         inline T* get() { return p; }
         inline const T* get() const { return p; }
+    private:
+        T p[N]; 
     };
 
 #ifdef __SSE__
     template <int N>
-    struct StackArray2<float,N,false,false>
+    class StackArray2<float,N,false,false>
     {
-        union { float xf[N]; __m128 xm; } xp;
+    public:
         inline float* get() { return xp.xf; }
         inline const float* get() const { return xp.xf; }
+    private:
+        union { float xf[N]; __m128 xm; } xp;
     };
     template <int N>
-    struct StackArray2<float,N,false,true>
+    class StackArray2<float,N,false,true>
     {
-        float p[N];
+    public:
         inline float* get() { return p; }
         inline const float* get() const { return p; }
+    private:
+        float p[N];
     };
 #endif
 #ifdef __SSE2__
     template <int N>
-    struct StackArray2<double,N,false,false>
+    class StackArray2<double,N,false,false>
     { 
-        union { double xd[N]; __m128d xm; } xp;
+    public:
         inline double* get() { return xp.xd; }
         inline const double* get() const { return xp.xd; }
+    private:
+        union { double xd[N]; __m128d xm; } xp;
     };
     template <int N>
-    struct StackArray2<double,N,false,true>
+    class StackArray2<double,N,false,true>
     {
-        double p[N];
+    public:
         inline double* get() { return p; }
         inline const double* get() const { return p; }
+    private:
+        double p[N];
     };
 #endif
 
     template <class T, int N>
-    struct StackArray2<T,N,true,false>
+    class StackArray2<T,N,true,false>
     {
-        AlignedArray<T> p;
+    public:
         inline StackArray2() : p(N) {}
         inline T* get() { return p.get(); }
         inline const T* get() const { return p.get(); }
+    private:
+        AlignedArray<T> p;
     };
 
     // Now the real class that we use: StackArray<T,N>

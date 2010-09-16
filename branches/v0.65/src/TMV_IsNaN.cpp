@@ -84,6 +84,10 @@ namespace tmv {
     bool isNaN(T x)
     { return DoIsNaN(x); }
 
+#ifdef INST_INT
+#undef INST_INT
+#endif
+
 #define InstFile "TMV_IsNaN.inst"
 #include "TMV_Inst.h"
 #undef InstFile

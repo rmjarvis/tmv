@@ -126,6 +126,7 @@
 //
 //    setZero()
 //    setAllTo(T x)
+//    addToAll(T x)
 //    conjugateSelf()
 //    setToIdentity(x = 1)
 //    void Swap(TriMatrix& m1, TriMatrix& m2)
@@ -193,6 +194,7 @@
 //    m.trace() or Trace(m)
 //    m.sumElements() or SumElements(m)
 //    m.sumAbsElements() or SumAbsElements(m)
+//    m.sumAbs2Elements() or SumAbs2Elements(m)
 //    m.norm() or m.normF() or Norm(m) or NormF(m)
 //    m.normSq() or NormSq(m)
 //    m.norm1() or Norm1(m)
@@ -867,6 +869,8 @@ namespace tmv {
 
         RT sumAbsElements() const;
 
+        RT sumAbs2Elements() const;
+
         RT norm() const
         { return normF(); }
 
@@ -1115,6 +1119,8 @@ namespace tmv {
             return isComplex(T()) && ct()==Conj;
         }
 
+        virtual T cref(int i, int j) const;
+
     protected :
 
         inline bool okij(int i, int j) const
@@ -1123,7 +1129,6 @@ namespace tmv {
             TMVAssert(j>=0 && j < int(size()));
             if (isunit()) return i<j; else return i<=j;
         }
-        virtual T cref(int i, int j) const;
 
     private :
 
@@ -1498,6 +1503,9 @@ namespace tmv {
         inline RT sumAbsElements() const
         { return transpose().sumAbsElements(); }
 
+        inline RT sumAbs2Elements() const
+        { return transpose().sumAbs2Elements(); }
+
         inline RT norm() const 
         { return transpose().normF(); }
 
@@ -1750,6 +1758,8 @@ namespace tmv {
             return isComplex(T()) && ct()==Conj;
         }
 
+        virtual T cref(int i, int j) const;
+
     protected :
 
         inline bool okij(int i, int j) const
@@ -1758,8 +1768,6 @@ namespace tmv {
             TMVAssert(j>=0 && j < int(size()));
             if (isunit()) return i>j; else return i>=j;
         }
-
-        virtual T cref(int i, int j) const;
 
     private :
 
@@ -1827,7 +1835,7 @@ namespace tmv {
                       _si==1 : true);
         }
 
-        virtual inline ~ConstUpperTriMatrixView() 
+        virtual inline ~ConstUpperTriMatrixView()
         {
 #ifdef TMVDEBUG
             const_cast<const T*&>(itsm) = 0;
@@ -2096,10 +2104,11 @@ namespace tmv {
         using c_type::size;
         using base::isunit;
 
+        using c_type::cref;
+
     protected :
 
         using base::okij;
-        using c_type::cref;
 
     private :
 
@@ -2290,10 +2299,11 @@ namespace tmv {
         using c_type::size;
         using base::isunit;
 
+        using c_type::cref;
+
     protected :
 
         using base::okij;
-        using c_type::cref;
 
     private :
 
@@ -2345,6 +2355,7 @@ namespace tmv {
 
         virtual inline ~UpperTriMatrixView() 
         {
+            TMV_SETFIRSTLAST(0,0);
 #ifdef TMVDEBUG
             const_cast<T*&>(itsm) = 0;
 #endif
@@ -2495,6 +2506,8 @@ namespace tmv {
         const type& setZero() const;
 
         const type& setAllTo(const T& x) const;
+
+        const type& addToAll(const T& x) const;
 
         const type& clip(RT thresh) const;
 
@@ -2785,8 +2798,9 @@ namespace tmv {
                       _si==1 : true);
         }
 
-        virtual inline ~LowerTriMatrixView() 
+        virtual inline ~LowerTriMatrixView()
         {
+            TMV_SETFIRSTLAST(0,0);
 #ifdef TMVDEBUG
             const_cast<T*&>(itsm) = 0;
 #endif
@@ -2938,6 +2952,9 @@ namespace tmv {
 
         inline const type& setAllTo(const T& x) const
         { transpose().setAllTo(x); return *this; }
+
+        inline const type& addToAll(const T& x) const
+        { transpose().addToAll(x); return *this; }
 
         inline const type& clip(RT thresh) const
         { transpose().clip(thresh); return *this; }
@@ -3324,6 +3341,9 @@ namespace tmv {
         inline const type& setAllTo(const T& x) const
         { c_type::setAllTo(x); return *this; }
 
+        inline const type& addToAll(const T& x) const
+        { c_type::addToAll(x); return *this; }
+
         inline const type& clip(RT thresh) const
         { c_type::clip(thresh); return *this; }
 
@@ -3599,6 +3619,9 @@ namespace tmv {
         inline const type& setAllTo(const T& x) const
         { c_type::setAllTo(x); return *this; }
 
+        inline const type& addToAll(const T& x) const
+        { c_type::addToAll(x); return *this; }
+
         inline const type& clip(RT thresh) const
         { c_type::clip(thresh); return *this; }
 
@@ -3837,8 +3860,7 @@ namespace tmv {
             if (isunit() && !rhs.isunit()) {
                 if (rhs.size() > 0)
                     Copy(rhs.offDiag(),offDiag());
-            }
-            else {
+            } else {
                 Copy(rhs,view());
             }
         }
@@ -3899,8 +3921,8 @@ namespace tmv {
             TMVAssert(S==RowMajor || S==ColMajor);
             if (isunit() && !rhs.isunit()) {
                 if (rhs.size() > 0) offDiag() = rhs.offDiag();
-            }
-            else rhs.assignToU(view());
+            } else 
+                rhs.assignToU(view());
         }
 
         inline UpperTriMatrix(const GenUpperTriMatrix<CT>& rhs) :
@@ -3913,8 +3935,8 @@ namespace tmv {
             TMVAssert(isComplex(T()));
             if (isunit() && !rhs.isunit()) {
                 if (rhs.size() > 0) offDiag() = rhs.offDiag();
-            }
-            else rhs.assignToU(view());
+            } else 
+                rhs.assignToU(view());
         }
 
         inline UpperTriMatrix(const AssignableToUpperTriMatrix<RT>& m2) :
@@ -3944,6 +3966,7 @@ namespace tmv {
 
         virtual inline ~UpperTriMatrix()
         {
+            TMV_SETFIRSTLAST(0,0);
 #ifdef TMVDEBUG
             setAllTo(T(999));
 #endif
@@ -4179,6 +4202,13 @@ namespace tmv {
 
         inline type& setAllTo(const T& x) 
         { VectorViewOf(itsm.get(),itslen).setAllTo(x); return *this; }
+
+        inline type& addToAll(const T& x) 
+        { 
+            TMVAssert(!isunit());
+            VectorViewOf(itsm.get(),itslen).addToAll(x);
+            return *this; 
+        }
 
         inline type& clip(RT thresh)
         { VectorViewOf(itsm.get(),itslen).clip(thresh); return *this; }
@@ -4582,11 +4612,25 @@ namespace tmv {
         inline T cref(int i, int j) const 
         { return itsm.get()[S==RowMajor ? i*itss + j : j*itss + i]; }
 
+        inline void resize(size_t s)
+        {
+            itslen = s*s;
+            itsm.resize(itslen);
+            itss = s;
+#ifdef TMVFLDEBUG
+            _first = itsm.get();
+            _last = _first+itslen;
+#endif
+#ifdef TMVDEBUG
+            setAllTo(T(888));
+#endif
+        }
+
     protected :
 
-        const size_t itslen;
+        size_t itslen;
         AlignedArray<T> itsm;
-        const size_t itss;
+        size_t itss;
 
 #ifdef TMVFLDEBUG
     public :
@@ -4711,8 +4755,7 @@ namespace tmv {
             if (isunit() && !rhs.isunit()) {
                 if (rhs.size() > 0) 
                     Copy(rhs.offDiag().transpose(),offDiag().transpose());
-            }
-            else {
+            } else {
                 Copy(rhs.transpose(),transpose());
             }
         }
@@ -4773,8 +4816,8 @@ namespace tmv {
             TMVAssert(S==RowMajor || S==ColMajor);
             if (isunit() && !rhs.isunit()) {
                 if (rhs.size() > 0) offDiag() = rhs.offDiag();
-            }
-            else rhs.assignToL(view());
+            } else 
+                rhs.assignToL(view());
         }
 
         inline LowerTriMatrix(const GenLowerTriMatrix<CT>& rhs) :
@@ -4787,8 +4830,8 @@ namespace tmv {
             TMVAssert(isComplex(T()));
             if (isunit() && !rhs.isunit()) {
                 if (rhs.size() > 0) offDiag() = rhs.offDiag();
-            }
-            else rhs.assignToL(view());
+            } else 
+                rhs.assignToL(view());
         }
 
         inline LowerTriMatrix(const AssignableToLowerTriMatrix<RT>& m2) :
@@ -4818,6 +4861,7 @@ namespace tmv {
 
         virtual inline ~LowerTriMatrix() 
         {
+            TMV_SETFIRSTLAST(0,0);
 #ifdef TMVDEBUG
             setAllTo(T(999));
 #endif
@@ -5053,6 +5097,13 @@ namespace tmv {
 
         inline type& setAllTo(const T& x) 
         { VectorViewOf(itsm.get(),itslen).setAllTo(x); return *this; }
+
+        inline type& addToAll(const T& x) 
+        {
+            TMVAssert(!isunit());
+            VectorViewOf(itsm.get(),itslen).addToAll(x);
+            return *this; 
+        }
 
         inline type& clip(RT thresh)
         { VectorViewOf(itsm.get(),itslen).clip(thresh); return *this; }
@@ -5462,11 +5513,25 @@ namespace tmv {
         inline T cref(int i, int j) const 
         { return itsm.get()[S==RowMajor ? i*itss + j : j*itss + i]; }
 
+        inline void resize(size_t s)
+        {
+            itslen = s*s;
+            itsm.resize(itslen);
+            itss = s;
+#ifdef TMVFLDEBUG
+            _first = itsm.get();
+            _last = _first+itslen;
+#endif
+#ifdef TMVDEBUG
+            setAllTo(T(888));
+#endif
+        }
+
     protected :
 
-        const size_t itslen;
+        size_t itslen;
         AlignedArray<T> itsm;
-        const size_t itss;
+        size_t itss;
 
 #ifdef TMVFLDEBUG
     public:
@@ -5838,17 +5903,69 @@ namespace tmv {
     template <class T1, class T2> 
     bool operator==(
         const GenUpperTriMatrix<T1>& m1, const GenUpperTriMatrix<T2>& m2);
+
     template <class T1, class T2> 
     inline bool operator==(
         const GenLowerTriMatrix<T1>& m1, const GenLowerTriMatrix<T2>& m2)
     { return m1.transpose() == m2.transpose(); }
+
     template <class T1, class T2> 
     inline bool operator!=(
         const GenUpperTriMatrix<T1>& m1, const GenUpperTriMatrix<T2>& m2)
     { return !(m1 == m2); }
+
     template <class T1, class T2> 
     inline bool operator!=(
         const GenLowerTriMatrix<T1>& m1, const GenLowerTriMatrix<T2>& m2)
+    { return !(m1 == m2); }
+
+
+    template <class T1, class T2> 
+    inline bool operator==(
+        const GenUpperTriMatrix<T1>& m1, const GenMatrix<T2>& m2)
+    {
+        return 
+            m1 == m2.upperTri() &&
+            m2.lowerTri().offDiag().maxAbs2Element() == T2(0);
+    }
+
+    template <class T1, class T2> 
+    inline bool operator==(
+        const GenLowerTriMatrix<T1>& m1, const GenMatrix<T2>& m2)
+    {
+        return 
+            m1 == m2.lowerTri() &&
+            m2.upperTri().offDiag().maxAbs2Element() == T2(0);
+    }
+
+    template <class T1, class T2> 
+    inline bool operator==(
+        const GenMatrix<T1>& m1, const GenUpperTriMatrix<T2>& m2)
+    { return m2 == m1; }
+
+    template <class T1, class T2> 
+    inline bool operator==(
+        const GenMatrix<T1>& m1, const GenLowerTriMatrix<T2>& m2)
+    { return m2 == m1; }
+
+    template <class T1, class T2> 
+    inline bool operator!=(
+        const GenUpperTriMatrix<T1>& m1, const GenMatrix<T2>& m2)
+    { return !(m1 == m2); }
+
+    template <class T1, class T2> 
+    inline bool operator!=(
+        const GenMatrix<T1>& m1, const GenUpperTriMatrix<T2>& m2)
+    { return !(m1 == m2); }
+
+    template <class T1, class T2> 
+    inline bool operator!=(
+        const GenLowerTriMatrix<T1>& m1, const GenMatrix<T2>& m2)
+    { return !(m1 == m2); }
+
+    template <class T1, class T2> 
+    inline bool operator!=(
+        const GenMatrix<T1>& m1, const GenLowerTriMatrix<T2>& m2)
     { return !(m1 == m2); }
 
 

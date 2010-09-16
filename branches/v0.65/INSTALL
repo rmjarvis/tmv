@@ -1,5 +1,7 @@
 Note: More complete installation information is contained in 
-doc/TMV_Documentation.pdf,
+doc/TMV_Documentation.pdf.  If the instructions there differ from these, 
+then it is probably true that the pdf is correct, rather than this file.
+
 
 First, obtain the tarball from either:
 http://code.google.com/p/tmv-cpp/ or 
@@ -7,10 +9,10 @@ http://sourceforge.net/projects/tmv-cpp/.
 
 Unpack the tarball with:
 
-gunzip tmv0.64.tar.gz
-tar xf tmv0.64.tar
+gunzip tmv0.65.tar.gz
+tar xf tmv0.65.tar
 
-This will make a directory called tmv0.64 with subdirectories:
+This will make a directory called tmv0.65 with subdirectories:
   doc
   examples
   include

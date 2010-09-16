@@ -12,7 +12,7 @@ void TestBandDecomp()
 {
     typedef std::complex<T> CT;
     for (int mattype = START; mattype <= 9; mattype++) {
-#if !(XTEST & 64)
+#if !(XTEST & 64) || defined(LAP)
         if (mattype >= 7) break;
 #endif
 

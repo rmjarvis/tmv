@@ -51,9 +51,11 @@
 #endif
 
 #ifdef INST_INT
+#define TISINT
 #define T int
 #include InstFile
 #undef T
+#undef TISINT
 #endif
 
 #ifdef INST_LONGDOUBLE

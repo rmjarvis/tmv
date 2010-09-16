@@ -14,7 +14,7 @@ void TestHermDecomp()
 {
     typedef std::complex<T> CT;
     for (int mattype = START; mattype <= 5; mattype++) {
-#if !(XTEST & 64)
+#if !(XTEST & 64) || defined(LAP)
         if (mattype >= 3) break;
 #endif
         if (showstartdone) {
@@ -419,7 +419,7 @@ void TestSymDecomp()
 {
     typedef std::complex<T> CT;
     for (int mattype = START; mattype <= 5; mattype++) {
-#if !(XTEST & 64)
+#if !(XTEST & 64) || defined(LAP)
         if (mattype >= 3) break;
 #endif
         if (showstartdone) {
@@ -711,7 +711,7 @@ void TestPolar()
     if (showstartdone) std::cout<<"PolarDecomp "<<TMV_Text(stor)<<std::endl;
 
     for (int mattype = START; mattype <= 6; mattype++) {
-#if !(XTEST & 64)
+#if !(XTEST & 64) || defined(LAP)
         if (mattype >= 4) break;
 #endif
         if (showstartdone) {

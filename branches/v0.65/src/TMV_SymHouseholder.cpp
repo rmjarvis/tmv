@@ -91,6 +91,10 @@ namespace tmv {
         }
     }
 
+#ifdef INST_INT
+#undef INST_INT
+#endif
+
 #define InstFile "TMV_SymHouseholder.inst"
 #include "TMV_Inst.h"
 #undef InstFile

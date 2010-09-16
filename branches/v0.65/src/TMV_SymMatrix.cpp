@@ -43,6 +43,7 @@
 #include "tmv/TMV_VIt.h"
 #include "tmv/TMV_SymMatrixArith.h"
 #include "tmv/TMV_DiagMatrix.h"
+#include "TMV_IntegerDet.h"
 #include <iostream>
 #include "portable_platform.h"
 
@@ -73,7 +74,8 @@ namespace tmv {
     }
 
     template <class T, IndexStyle I> 
-    TMV_RefType(T) SymMatrixView<T,I>::ref(int i, int j) const
+    typename SymMatrixView<T,I>::reference SymMatrixView<T,I>::ref(
+        int i, int j) const
     {
         if ((uplo() == Upper && i<=j) || (uplo() == Lower && i>=j)) {
             T* mi = ptr() + int(i)*stepi() + int(j)*stepj();
@@ -158,6 +160,18 @@ namespace tmv {
             return ret;
         }
     }
+#ifdef INST_INT
+    template <>
+    auto_ptr<BaseMatrix<int> > GenSymMatrix<int>::newInverse() const
+    { TMVAssert(TMV_FALSE); return auto_ptr<BaseMatrix<int> >(); }
+    template <>
+    auto_ptr<BaseMatrix<std::complex<int> > > 
+    GenSymMatrix<std::complex<int> >::newInverse() const
+    { 
+        TMVAssert(TMV_FALSE); 
+        return auto_ptr<BaseMatrix<std::complex<int> > >(); 
+    }
+#endif
 
     template <class T> 
     void GenSymMatrix<T>::newDivider() const
@@ -183,6 +197,15 @@ namespace tmv {
         }
     }
 
+#ifdef INST_INT
+    template <>
+    void GenSymMatrix<int>::newDivider() const
+    { TMVAssert(TMV_FALSE); }
+    template <>
+    void GenSymMatrix<std::complex<int> >::newDivider() const
+    { TMVAssert(TMV_FALSE); }
+#endif
+
     template <class T> 
     QuotXS<T,T> GenSymMatrix<T>::QInverse() const
     { return QuotXS<T,T>(T(1),*this); }
@@ -199,6 +222,59 @@ namespace tmv {
         TMVAssert(sdiv);
         sdiv->makeInverse(sinv);
     }
+
+    template <class T>
+    bool GenSymMatrix<T>::divIsLUDiv() const
+    { return static_cast<bool>(dynamic_cast<const SymLDLDiv<T>*>(getDiv())); }
+
+    template <class T>
+    bool GenSymMatrix<T>::divIsCHDiv() const
+    {
+        return static_cast<bool>(
+            dynamic_cast<const HermCHDiv<T>*>(getDiv())); 
+    }
+
+    template <class T>
+    bool GenSymMatrix<T>::divIsHermSVDiv() const
+    {
+        return static_cast<bool>(
+            dynamic_cast<const HermSVDiv<T>*>(getDiv())); 
+    }
+
+    template <class T>
+    bool GenSymMatrix<T>::divIsSymSVDiv() const
+    { 
+        return static_cast<bool>(
+            dynamic_cast<const SymSVDiv<T>*>(getDiv())); 
+    }
+
+#ifdef INST_INT
+    template <>
+    bool GenSymMatrix<int>::divIsLUDiv() const
+    { return false; }
+    template <>
+    bool GenSymMatrix<int>::divIsCHDiv() const
+    { return false; }
+    template <>
+    bool GenSymMatrix<int>::divIsHermSVDiv() const
+    { return false; }
+    template <>
+    bool GenSymMatrix<int>::divIsSymSVDiv() const
+    { return false; }
+
+    template <>
+    bool GenSymMatrix<std::complex<int> >::divIsLUDiv() const
+    { return false; }
+    template <>
+    bool GenSymMatrix<std::complex<int> >::divIsCHDiv() const
+    { return false; }
+    template <>
+    bool GenSymMatrix<std::complex<int> >::divIsHermSVDiv() const
+    { return false; }
+    template <>
+    bool GenSymMatrix<std::complex<int> >::divIsSymSVDiv() const
+    { return false; }
+#endif
 
     //
     // OK? (SubMatrix, etc.)
@@ -551,6 +627,32 @@ namespace tmv {
     // Norms
     //
 
+    template <class T>
+    T GenSymMatrix<T>::det() const
+    { return DivHelper<T>::det(); }
+
+    template <class T>
+    RT GenSymMatrix<T>::logDet(T* sign) const
+    { return DivHelper<T>::logDet(sign); }
+
+#ifdef INST_INT
+    template <>
+    int GenSymMatrix<int>::det() const
+    { return IntegerDet(*this); }
+
+    template <>
+    std::complex<int> GenSymMatrix<std::complex<int> >::det() const
+    { return IntegerDet(*this); }
+
+    template <>
+    int GenSymMatrix<int>::logDet(int* ) const
+    { TMVAssert(TMV_FALSE); return 0; }
+
+    template <>
+    int GenSymMatrix<std::complex<int> >::logDet(std::complex<int>* ) const
+    { TMVAssert(TMV_FALSE); return 0; }
+#endif
+
     template <class T> 
     T GenSymMatrix<T>::sumElements() const
     {
@@ -568,12 +670,35 @@ namespace tmv {
     }
 
     template <class T> 
-    RT GenSymMatrix<T>::sumAbsElements() const
+    static RT DoSumAbsElements(const GenSymMatrix<T>& m)
     {
-        RT sum = diag().sumAbsElements();
-        if (size() > 1) sum += RT(2) * upperTri().offDiag().sumAbsElements();
+        RT sum = m.diag().sumAbsElements();
+        if (m.size() > 1) 
+            sum += RT(2) * m.upperTri().offDiag().sumAbsElements();
         return sum;
     }
+
+    template <class T> 
+    static RT DoSumAbs2Elements(const GenSymMatrix<T>& m)
+    {
+        RT sum = m.diag().sumAbs2Elements();
+        if (m.size() > 1) 
+            sum += RT(2) * m.upperTri().offDiag().sumAbs2Elements();
+        return sum;
+    }
+
+#ifdef INST_INT
+    static int DoSumAbsElements(const GenSymMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+#endif
+
+    template <class T> 
+    RT GenSymMatrix<T>::sumAbsElements() const
+    { return DoSumAbsElements(*this); }
+
+    template <class T> 
+    RT GenSymMatrix<T>::sumAbs2Elements() const
+    { return DoSumAbs2Elements(*this); }
 
     template <class T> 
     RT GenSymMatrix<T>::normSq(const RT scale) const
@@ -594,13 +719,6 @@ namespace tmv {
         }
         return max;
     } 
-
-#ifdef INST_INT
-    static int NonLapNormF(const GenSymMatrix<int>& m)
-    { return TMV_SQRT(m.normSq()); }
-    static int NonLapNormF(const GenSymMatrix<std::complex<int> >& m)
-    { return TMV_SQRT(m.normSq()); }
-#endif
 
     template <class T> 
     static RT NonLapNormF(const GenSymMatrix<T>& m)
@@ -735,6 +853,17 @@ namespace tmv {
 #endif
 #endif // XLAP
 
+#ifdef INST_INT
+    static int NonLapNormF(const GenSymMatrix<int>& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int NonLapNormF(const GenSymMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int NonLapNorm1(const GenSymMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int NonLapMaxAbsElement(const GenSymMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+#endif
+
     template <class T> 
     RT GenSymMatrix<T>::maxAbsElement() const
     {
@@ -778,36 +907,52 @@ namespace tmv {
     }
 
     template <class T> 
-    RT GenSymMatrix<T>::doNorm2() const
+    static RT DoNorm2(const GenSymMatrix<T>& m)
     {
-        if (this->colsize() < this->rowsize()) return transpose().doNorm2();
-        if (size() == 0) return RT(0);
-        DiagMatrix<RT> S(this->size());
-        if (this->isherm()) {
-            HermMatrix<T> m = *this;
-            SV_Decompose(m.view(),S.view());
+        if (m.size() == 0) return RT(0);
+        DiagMatrix<RT> S(m.size());
+        if (m.isherm()) {
+            HermMatrix<T> m2(m);
+            SV_Decompose(m2.view(),S.view());
         } else {
-            SymMatrix<T> m = *this;
-            SV_Decompose(m.view(),S.view());
+            SymMatrix<T> m2(m);
+            SV_Decompose(m2.view(),S.view());
         }
         return S(0);
     }
 
     template <class T> 
-    RT GenSymMatrix<T>::doCondition() const
+    static RT DoCondition(const GenSymMatrix<T>& m)
     {
-        if (this->colsize() < this->rowsize()) return transpose().doCondition();
-        if (size() == 0) return RT(1);
-        DiagMatrix<RT> S(this->size());
-        if (this->isherm()) {
-            HermMatrix<T> m = *this;
-            SV_Decompose(m.view(),S.view());
+        if (m.size() == 0) return RT(1);
+        DiagMatrix<RT> S(m.size());
+        if (m.isherm()) {
+            HermMatrix<T> m2(m);
+            SV_Decompose(m2.view(),S.view());
         } else {
-            SymMatrix<T> m = *this;
-            SV_Decompose(m.view(),S.view());
+            SymMatrix<T> m2(m);
+            SV_Decompose(m2.view(),S.view());
         }
         return std::abs(S(0)/S(S.size()-1));
     }
+
+#ifdef INST_INT
+    static int DoNorm2(const GenSymMatrix<int>& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int DoCondition(const GenSymMatrix<int>& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int DoNorm2(const GenSymMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int DoCondition(const GenSymMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+#endif
+
+    template <class T> 
+    RT GenSymMatrix<T>::doNorm2() const
+    { return tmv::DoNorm2(*this); }
+    template <class T> 
+    RT GenSymMatrix<T>::doCondition() const
+    { return tmv::DoCondition(*this); }
 
     template <class T> 
     ConstSymMatrixView<T> SymMatrixViewOf(

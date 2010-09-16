@@ -114,17 +114,20 @@ static void TestSmallVectorReal()
     for(int i=0;i<N;++i) b(i) = T(-3*i+191);
 
     T prod = 2900;
-    T normsum = tmv::TMV_SQRT(T(1373700));
-    T normdiff = tmv::TMV_SQRT(T(1362100));
-    Assert(std::abs(a*b - prod) <= EPS*Norm(a)*Norm(b),"Inner Product");
+    T normsqsum = 1373700;
+    T normsqdiff = 1362100;
+    T eps = EPS;
+    if (!std::numeric_limits<T>::is_integer) eps *= Norm(a) * Norm(b);
+    Assert(Equal2(a*b,prod,eps),"Inner Product");
     tmv::SmallVector<T,N> temp;
-    Assert(std::abs(Norm(temp=a+b) - normsum) <= EPS*std::abs(Norm1(a)+Norm1(b)),"SmallVector Sum");
-    Assert(std::abs(Norm(temp=a-b) - normdiff) <= EPS*std::abs(Norm1(a)+Norm1(b)),"SmallVector Diff");
+    T eps2 = EPS * tmv::TMV_ABS2(Norm1(a)+Norm1(b));
+    Assert(Equal2(NormSq(temp=a+b),normsqsum,eps2),"SmallVector Sum");
+    Assert(Equal2(NormSq(temp=a-b),normsqdiff,eps2),"SmallVector Diff");
 
     tmv::SmallVector<T,NN> w;
     w <<
-        3.3,1.2,5.4,-1.2,4.3,-9.4,0,-2,4,-11.5,
-        -12,14,33,1,-9.3,-3.9,4.9,10,-31,1.e-33;
+        33,12,54,-12,43,-94,0,-20,40,-115,
+        -120,140,330,10,-93,-39,49,100,-310,1;
 
     tmv::SmallVector<T,NN> origw = w;
     int perm[NN];
@@ -162,12 +165,14 @@ static void TestSmallVectorComplex()
         Assert(imag(v(i)) == T(i+1234),"CSmallVector set");
 
     tmv::VectorView<std::complex<T> > v1 = v.subVector(0,N,2);
-    for (int i=0; i<N/2; ++i) Assert(v1(i)==std::complex<T>(T(2*i),T(2*i+1234)),
-                                     "CSmallVector stride=2");
+    for (int i=0; i<N/2; ++i) 
+        Assert(v1(i)==std::complex<T>(T(2*i),T(2*i+1234)),
+               "CSmallVector stride=2");
 
     for (int i=0; i<N/2; ++i) v1[i] = std::complex<T>(T(i),T(i+9876));
-    for (int i=0; i<N/2; ++i) Assert(v[2*i]==std::complex<T>(T(i),T(i+9876)),
-                                     "setting CSmallVector with stride = 2");
+    for (int i=0; i<N/2; ++i) 
+        Assert(v[2*i]==std::complex<T>(T(i),T(i+9876)),
+               "setting CSmallVector with stride = 2");
 
     for (int i=0; i<N; ++i) v(i) = std::complex<T>(T(i),T(i+1234));
 
@@ -183,35 +188,10 @@ static void TestSmallVectorComplex()
                "Conjugate CSmallVector");
     Assert(v2 == v.conjugate(),"Conjugate == CSmallVector");
 
-    Assert(std::abs(imag(v*v2)) <= EPS,"CSmallVector * CSmallVector");
-    T norm1 = tmv::TMV_SQRT(real(v*v2));
-    T norm2 = Norm(v);
-    if (showacc) {
-        std::cout<<"v = "<<v<<std::endl;
-        std::cout<<"v2 = "<<v2<<std::endl;
-        std::cout<<"v*v2 = "<<v*v2<<std::endl;
-        std::cout<<"norm1 = "<<norm1<<std::endl;
-        std::cout<<"norm2 = "<<norm2<<std::endl;
-    }
-    Assert(std::abs(norm1 - norm2) <= EPS*norm1,"Norm CSmallVector");
-
-    Assert(v2 == v.conjugateSelf(),"ConjugateSelf CSmallVector");
-
-    tmv::SmallVector<T,N> a;
-    for(int i=0;i<N;++i) a(i) = T(i+10);
-    tmv::SmallVector<T,N> b;
-    for(int i=0;i<N;++i) b(i) = T(-3*i+191);
-
-    tmv::SmallVector<std::complex<T>,N> ca = a;
-    tmv::SmallVector<std::complex<T>,N> temp;
-    Assert(Norm(temp=ca-a) <= EPS*Norm(a),"Copy real V -> complex V");
-    ca *= std::complex<T>(3,4);
-    tmv::SmallVector<std::complex<T>,N> cb = b*std::complex<T>(3,4);
-
     tmv::SmallVector<std::complex<T>,N> v3;
     for (int i=0; i<N; ++i) v3(i) = std::complex<T>(i+10,2*i);
     v3(23) = std::complex<T>(40*N,9*N);
-    v3(42) = std::complex<T>(0.15,-0.20);
+    v3(42) = std::complex<T>(0,1);
     v3(15) = std::complex<T>(-32*N,24*N);
     int imax,imin;
     if (showacc) {
@@ -221,38 +201,115 @@ static void TestSmallVectorComplex()
         std::cout<<"v.MinAbs = "<<v3.minAbsElement(&imin)<<std::endl;
         std::cout<<"imin = "<<imin<<std::endl;
     }
-    Assert(std::abs(v3.maxAbsElement(&imax) - T(41*N)) < tmv::TMV_Epsilon<T>(),
-           "MaxAbsElement of Vector did not return correct value");
-    Assert(imax == 23,
-           "MaxAbsElement of Vector did not return correct index");
-    Assert(std::abs(v3.minAbsElement(&imin) - T(0.25)) < tmv::TMV_Epsilon<T>(),
-           "MinAbsElement of Vector did not return correct value");
-    Assert(imin == 42,
-           "MinAbsElement of Vector did not return correct index");
-    Assert(std::abs(v3.maxAbs2Element(&imax) - T(56*N)) < tmv::TMV_Epsilon<T>(),
+    if (!std::numeric_limits<T>::is_integer) {
+        Assert(Equal2(v3.maxAbsElement(&imax),T(41*N),EPS),
+               "MaxAbsElement of Vector did not return correct value");
+        Assert(imax == 23,
+               "MaxAbsElement of Vector did not return correct index");
+        Assert(Equal2(v3.minAbsElement(&imin),T(1),EPS),
+               "MinAbsElement of Vector did not return correct value");
+        Assert(imin == 42,
+               "MinAbsElement of Vector did not return correct index");
+    }
+    Assert(Equal2(v3.maxAbs2Element(&imax),T(56*N),EPS),
            "MaxAbs2Element of Vector did not return correct value");
     Assert(imax == 15,
            "MaxAbs2Element of Vector did not return correct index");
-    Assert(std::abs(v3.minAbs2Element(&imin) - T(0.35)) < tmv::TMV_Epsilon<T>(),
+    Assert(Equal2(v3.minAbs2Element(&imin),T(1),EPS),
            "MinAbs2Element of Vector did not return correct value");
     Assert(imin == 42,
            "MinAbs2Element of Vector did not return correct index");
- 
-    std::complex<T> prod = T(29)*std::complex<T>(-28,96)*T(25);
-    T normsum = tmv::TMV_SQRT(T(1373700)*T(25));
-    T normdiff = tmv::TMV_SQRT(T(1362100)*T(25));
-    Assert(tmv::TMV_ABS(ca*cb - prod) <= EPS*Norm(ca)*Norm(cb),"CInner Product");
-    Assert(std::abs(Norm(temp=ca+cb) - normsum) <= EPS*std::abs(Norm(ca)+Norm(cb)),"CSmallVector Sum");
-    Assert(std::abs(Norm(temp=ca-cb) - normdiff) <= EPS*std::abs(Norm(ca)+Norm(cb)),"CSmallVector Diff");
+
+    std::complex<T> prod_act(0);
+    for (int i=0; i<N; ++i) prod_act += v[i] * v2[i];
+    std::complex<T> prod = v*v2;
+    Assert(Equal2(prod,prod_act,EPS*tmv::TMV_ABS2(prod_act)),
+           "CVector * CVector");
+    prod = v*v.conjugate();
+    prod_act = T(0);
+    for (int i=0; i<N; ++i) prod_act += v[i] * std::conj(v[i]);
+    Assert(Equal2(prod.imag(),T(0),EPS),"prod is real");
+    Assert(Equal2(prod,prod_act,EPS*tmv::TMV_ABS2(prod_act)),
+           "CVector * conj(CVector)");
+
+    if (!std::numeric_limits<T>::is_integer) {
+        T norm1 = tmv::TMV_SQRT(prod.real());
+        T norm2 = Norm(v);
+        if (showacc) {
+            std::cout<<"v = "<<v<<std::endl;
+            std::cout<<"v2 = "<<v2<<std::endl;
+            std::cout<<"v*v2 = "<<v*v2<<std::endl;
+            std::cout<<"norm1 = "<<norm1<<std::endl;
+            std::cout<<"norm2 = "<<norm2<<std::endl;
+        }
+        Assert(Equal2(norm1,norm2,EPS*norm1),"Norm CVector");
+    }
+
+
+    std::complex<T> sum_act(0);
+    for (int i=0; i<N; ++i) sum_act += v[i];
+    std::complex<T> sumel = v.sumElements();
+    if (showacc) {
+        std::cout<<"sumel = "<<sumel<<std::endl;
+        std::cout<<"sumact = "<<sum_act<<std::endl;
+        std::cout<<"diff = "<<tmv::TMV_ABS(sumel-sum_act)<<std::endl;
+    }
+    Assert(Equal2(sumel,sum_act,EPS*tmv::TMV_ABS2(sum_act)),
+           "CVector SumElements");
+
+    if (!std::numeric_limits<T>::is_integer) {
+        T sumabs_act(0);
+        for (int i=0; i<N; ++i) sumabs_act += tmv::TMV_ABS(v[i]);
+        T sumabsel = v.sumAbsElements();
+        Assert(Equal2(sumabsel,sumabs_act,EPS*tmv::TMV_ABS2(sumabs_act)),
+               "CVector SumAbsElements");
+    }
+    T sumabs2_act(0);
+    for (int i=0; i<N; ++i) sumabs2_act += tmv::TMV_ABS2(v[i]);
+    T sumabs2el = v.sumAbs2Elements();
+    Assert(Equal2(sumabs2el,sumabs2_act,EPS*tmv::TMV_ABS2(sumabs2_act)),
+           "CVector SumAbs2Elements");
+
+    v.conjugateSelf();
+    Assert(v == v2,"ConjugateSelf CVector");
+    v = v.conjugate();
+    Assert(v == v2.conjugate(),"v = v.conjugate() CVector");
+
+    tmv::SmallVector<T,N> a;
+    for(int i=0;i<N;++i) a(i) = T(i+10);
+    tmv::SmallVector<T,N> b;
+    for(int i=0;i<N;++i) b(i) = T(-3*i+191);
+
+    tmv::SmallVector<std::complex<T>,N> ca = a;
+    Assert(Equal(ca,a,EPS),"Copy real V -> complex V");
+
+    ca *= std::complex<T>(3,4);
+    tmv::SmallVector<std::complex<T>,N> cb = b*std::complex<T>(3,4);
+    prod = T(29)*T(25)*std::complex<T>(-28,96);
+    T normsqsum = 34342500;
+    T normsqdiff = 34052500;
+    if (showacc) {
+        std::cout<<"ca*cb = "<<ca*cb<<std::endl;
+        std::cout<<"expected prod = "<<prod<<std::endl;
+        std::cout<<"abs(diff) = "<<tmv::TMV_ABS(ca*cb-prod)<<std::endl;
+        std::cout<<"eps = "<<EPS*Norm(ca)*Norm(cb)<<std::endl;
+    }
+    T eps = EPS;
+    if (!std::numeric_limits<T>::is_integer) eps *= Norm(ca) * Norm(cb);
+    Assert(Equal2(ca*cb,prod,eps),"CInner Product");
+    T eps2 = EPS;
+    if (!std::numeric_limits<T>::is_integer) eps2 *= Norm1(ca) * Norm1(cb);
+    Assert(Equal2(NormSq(ca+cb),normsqsum,eps2),"CVector Sum");
+    Assert(Equal2(NormSq(ca-cb),normsqdiff,eps2),"CVector Diff");
 
     tmv::SmallVector<std::complex<T>,NN> w;
     w <<
-        3.3,1.2,5.4,-1.2,4.3,-9.4,0,-2,4,-11.5,
-        -12,14,33,1,-9.3,-3.9,4.9,10,-31,1.e-33;
+        33,12,54,-12,43,-94,0,-20,40,-115,
+        -120,140,330,10,-93,-39,49,100,-310,1;
     tmv::SmallVector<T,NN> iw;
     iw <<
-        1.4,9.8,-0.2,-8.6,3.0,-4.4,3,9,-1.9,-11.4,
-        11.1,-140,-23,11,5.2,-3.8,4.9,99,-71,-0.5;
+        14,98,-2,-86,30,-44,30,90,-19,-114,
+        111,-1400,-230,110,52,-38,49,990,-710,-5;
     w.imagPart() = iw;
 
     tmv::SmallVector<std::complex<T>,NN> origw = w;

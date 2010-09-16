@@ -176,6 +176,10 @@ namespace tmv {
         Q_RDivEq(QRx,beta,m);
     }
 
+#ifdef INST_INT
+#undef INST_INT
+#endif
+
 #define InstFile "TMV_QRDiv.inst"
 #include "TMV_Inst.h"
 #undef InstFile

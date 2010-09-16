@@ -39,6 +39,8 @@ opts.Add('CXX','Name of c++ compiler')
 opts.Add('FLAGS','Compile flags to send to the compiler','')
 opts.Add(PathVariable('PREFIX',
             'prefix for installation','', PathVariable.PathAccept))
+opts.Add(BoolVariable('SHARED',
+            'Build a shared library',False))
 
 opts.Add(BoolVariable('WITH_OPENMP',
         'Look for openmp and use if found.', True))
@@ -51,15 +53,14 @@ opts.Add(BoolVariable('INST_LONGDOUBLE',
 opts.Add(BoolVariable('INST_INT',
         'Instantiate <int> templates in compiled library', False))
 
-#opts.Add(BoolVariable('TEST_FLOAT',
-#        'Instantiate <float> in the test suite', True))
-#opts.Add(BoolVariable('TEST_DOUBLE',
-#        'Instantiate <double> in the test suite', True))
-#opts.Add(BoolVariable('TEST_LONGDOUBLE',
-#        'Instantiate <long double> in the test suite', False))
-#opts.Add(BoolVariable('TEST_INT',
-#        'Instantiate <int> in the test suite', True))
-
+opts.Add(BoolVariable('TEST_FLOAT',
+        'Instantiate <float> in the test suite', True))
+opts.Add(BoolVariable('TEST_DOUBLE',
+        'Instantiate <double> in the test suite', True))
+opts.Add(BoolVariable('TEST_LONGDOUBLE',
+        'Instantiate <long double> in the test suite', False))
+opts.Add(BoolVariable('TEST_INT',
+        'Instantiate <int> in the test suite', False))
 
 opts.Add(BoolVariable('IMPORT_ENV',
             'Import full environment from calling shell', False))
@@ -106,7 +107,8 @@ opts.Add('LIBS','Libraries to send to the linker','')
 
 opts.Add(BoolVariable('DEBUG',
         'Turn on debugging statements in compilied library',False))
-opts.Add(BoolVariable('STATIC','Use static linkage', False))
+opts.Add(BoolVariable('STATIC',
+            'Use static linkage', False))
 opts.Add(BoolVariable('WITH_SSE',
             'Only necessary for icpc compilations: Use SSE commands', True))
 opts.Add('XTEST',
@@ -125,6 +127,7 @@ opts.Add(BoolVariable('WITH_UPS',
             'Install the ups directory under PREFIX/ups',False))
 opts.Add(BoolVariable('TEST_DEPRECATED',
             'Test the deprecated method names',False))
+
 
 opts.Update(initial_env)
 opts.Save(config_file,initial_env)
@@ -179,15 +182,15 @@ def BasicCCFlags(env):
     if env['FLAGS'] == '':
         if compiler == 'g++':
             env.Replace(CCFLAGS=['-O2'])
+            #if version <= 4.2:
+            env.Append(CCFLAGS=['-fno-strict-aliasing'])
             env['TEST_FLAGS'] = []
-            if version <= 4.2:
-                env.Append(CCFLAGS=['-fno-strict-aliasing'])
             if env['WARN']:
-                env.Append(CCFLAGS=['-ansi','-pedantic-errors','-Wall','-Werror'])
-                env['TEST_FLAGS'] = ['-ansi','-pedantic-errors','-Wall','-Werror']
+                env.Append(CCFLAGS=['-g3','-ansi','-pedantic-errors','-Wall','-Werror'])
+                env['TEST_FLAGS'] = ['-g3','-ansi','-pedantic-errors','-Wall','-Werror']
             if env['TEST_DEPRECATED']:
                 env['TEST_FLAGS'] += ['-Wno-deprecated-declarations']
-    
+
         elif compiler == 'icpc':
             env.Replace(CCFLAGS=['-O2'])
             if env['WITH_SSE']:
@@ -197,8 +200,8 @@ def BasicCCFlags(env):
                 env.Append(CCFLAGS=['-vec-report0'])
                 env['TEST_FLAGS'] += ['-vec-report0']
             if env['WARN']:
-                env.Append(CCFLAGS=['-Wall','-Werror','-wd279,383,810,981'])
-                env['TEST_FLAGS'] += ['-Wall','-Werror','-wd279,383,810,981']
+                env.Append(CCFLAGS=['-g','-Wall','-Werror','-wd279,383,810,981'])
+                env['TEST_FLAGS'] += ['-g','-Wall','-Werror','-wd279,383,810,981']
                 if version >= 9:
                     env.Append(CCFLAGS=['-wd1572'])
                     env['TEST_FLAGS'] += ['-wd1572']
@@ -1045,27 +1048,6 @@ def DoConfig(env):
             env.Append(LINKFLAGS=['-Bstatic'])
         else:
             env.Append(LINKFLAGS=['-static'])
-    env['TEST_FLOAT'] = env['INST_FLOAT']
-    env['TEST_DOUBLE'] = env['INST_DOUBLE']
-    env['TEST_LONGDOUBLE'] = env['INST_LONGDOUBLE']
-    env['TEST_INT'] = env['INST_INT']
-    if not env['INST_FLOAT']:
-        env.Append(CPPDEFINES=['NO_INST_FLOAT'])
-    if not env['INST_DOUBLE']:
-        env.Append(CPPDEFINES=['NO_INST_DOUBLE'])
-    if env['INST_LONGDOUBLE']:
-        env.Append(CPPDEFINES=['INST_LONGDOUBLE'])
-    if env['INST_INT']:
-        env.Append(CPPDEFINES=['INST_INT'])
-    if not env['TEST_FLOAT']:
-        env.Append(CPPDEFINES=['NO_TEST_FLOAT'])
-    if not env['TEST_DOUBLE']:
-        env.Append(CPPDEFINES=['NO_TEST_DOUBLE'])
-    if env['TEST_LONGDOUBLE']:
-        env.Append(CPPDEFINES=['TEST_LONGDOUBLE'])
-    if env['TEST_INT']:
-        env.Append(CPPDEFINES=['TEST_INT'])
-
 
     import SCons.SConf
 
@@ -1129,3 +1111,4 @@ if not GetOption('help'):
             script_files.append(os.path.join(d,'SConscript'))
 
     SConscript(script_files, exports=['env'])
+

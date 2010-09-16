@@ -27,7 +27,7 @@ template <class T> void TestMatrixArith_2()
 
     tmv::Matrix<T,tmv::ColMajor> a2x = a1x.transpose();
     a2x.row(1) *= T(3);
-    a2x.col(2) -= tmv::Vector<T>(4,4.);
+    a2x.col(2) -= tmv::Vector<T>(4,4);
     tmv::Matrix<CT,tmv::ColMajor> ca2x = ca1x;
     ca2x -= a2x;
     ca2x *= CT(1,-2);

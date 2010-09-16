@@ -455,6 +455,13 @@ namespace tmv {
             return sum;
         }
 
+        inline RT sumAbs2Elements() const
+        {
+            RT sum(0);
+            for(int i=0;i<M*N; ++i) sum += TMV_ABS2(itsm[i]);
+            return sum;
+        }
+
         inline RT norm() const 
         { return normF(); }
 
@@ -647,6 +654,12 @@ namespace tmv {
         inline type& setAllTo(const T& x) 
         {
             for(int i=0; i<M*N; ++i) itsm[i] = x;
+            return *this;
+        }
+
+        inline type& addToAll(const T& x) 
+        {
+            for(int i=0; i<M*N; ++i) itsm[i] += x;
             return *this;
         }
 
@@ -1254,6 +1267,27 @@ namespace tmv {
         const SmallMatrix<T1,M,N,S1,I1>& m1, 
         const SmallMatrix<T2,M,N,S2,I2>& m2)
     { return !(m1 == m2); }
+
+    template <class T1, class T2, int M, int N, StorageType S, IndexStyle I> 
+    inline bool operator==(
+        const GenMatrix<T1>& m1, const SmallMatrix<T2,M,N,S,I>& m2)
+    { return m1 == m2.view(); }
+
+    template <class T1, class T2, int M, int N, StorageType S, IndexStyle I> 
+    inline bool operator==(
+        const SmallMatrix<T1,M,N,S,I>& m1, const GenMatrix<T2>& m2)
+    { return m1.view() == m2; }
+
+    template <class T1, class T2, int M, int N, StorageType S, IndexStyle I> 
+    inline bool operator!=(
+        const GenMatrix<T1>& m1, const SmallMatrix<T2,M,N,S,I>& m2)
+    { return m1 != m2.view(); }
+
+    template <class T1, class T2, int M, int N, StorageType S, IndexStyle I> 
+    inline bool operator!=(
+        const SmallMatrix<T1,M,N,S,I>& m1, const GenMatrix<T2>& m2)
+    { return m1.view() != m2; }
+
 
 
     //

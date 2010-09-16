@@ -47,6 +47,7 @@ template <class T> void TestSmallMatrixArith_B7();
 template <class T> void TestAllSmallMatrixDiv();
 template <class T> void TestAllSmallMatrixDivA();
 template <class T> void TestAllSmallMatrixDivB();
+template <class T> void TestSmallMatrixDet();
 template <class T> void TestSmallMatrixDiv_A1a();
 template <class T> void TestSmallMatrixDiv_A1b();
 template <class T> void TestSmallMatrixDiv_A1c();

@@ -93,6 +93,10 @@ namespace tmv {
         TriLDivEq(LL.upperBand(),m.adjoint(),UnitDiag);
     }
 
+#ifdef INST_INT
+#undef INST_INT
+#endif
+
 #define InstFile "TMV_SymBandCHDiv.inst"
 #include "TMV_Inst.h"
 #undef InstFile

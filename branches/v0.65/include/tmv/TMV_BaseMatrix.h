@@ -120,6 +120,7 @@ namespace tmv {
         virtual T trace() const = 0;
         virtual T sumElements() const = 0;
         virtual RT sumAbsElements() const = 0;
+        virtual RT sumAbs2Elements() const = 0;
 
         virtual RT norm() const  = 0;
         virtual RT normSq(const RT scale = RT(1)) const = 0;
@@ -486,6 +487,10 @@ namespace tmv {
     template <class T> 
     inline TMV_RealType(T) SumAbsElements(const BaseMatrix<T>& m)
     { return m.sumAbsElements(); }
+
+    template <class T> 
+    inline TMV_RealType(T) SumAbs2Elements(const BaseMatrix<T>& m)
+    { return m.sumAbs2Elements(); }
 
     template <class T> 
     inline TMV_RealType(T) Norm(const BaseMatrix<T>& m)

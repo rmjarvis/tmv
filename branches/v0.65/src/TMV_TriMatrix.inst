@@ -1,7 +1,7 @@
 
 #define CT std::complex<T>
 
-#define Def1(T,RT,CCT) \
+#define Def1(T,RT) \
   template T GenUpperTriMatrix<T >::cref(int i, int j) const; \
   template T GenLowerTriMatrix<T >::cref(int i, int j) const; \
   template TriRef<T,true> UpperTriMatrixView<T,CStyle>::ref(int i, int j) const; \
@@ -18,6 +18,9 @@
       int i, int j, int istep, int jstep, int size) const; \
   template bool ConstUpperTriMatrixView<T,FortranStyle>::hasSubTriMatrix( \
       int i1, int i2, int istep) const; \
+  template T GenUpperTriMatrix<T >::sumElements() const; \
+  template RT GenUpperTriMatrix<T >::sumAbsElements() const; \
+  template RT GenUpperTriMatrix<T >::sumAbs2Elements() const; \
   template RT GenUpperTriMatrix<T >::normF() const; \
   template RT GenUpperTriMatrix<T >::normSq(const RT scale) const; \
   template RT GenUpperTriMatrix<T >::norm1() const; \
@@ -31,13 +34,11 @@
   template auto_ptr<BaseMatrix<T > > GenUpperTriMatrix<T >::newTranspose() const; \
   template auto_ptr<BaseMatrix<T > > GenUpperTriMatrix<T >::newConjugate() const; \
   template auto_ptr<BaseMatrix<T > > GenUpperTriMatrix<T >::newAdjoint() const; \
-  template auto_ptr<BaseMatrix<T > > GenUpperTriMatrix<T >::newInverse() const; \
   template auto_ptr<BaseMatrix<T > > GenLowerTriMatrix<T >::newCopy() const; \
   template auto_ptr<BaseMatrix<T > > GenLowerTriMatrix<T >::newView() const; \
   template auto_ptr<BaseMatrix<T > > GenLowerTriMatrix<T >::newTranspose() const; \
   template auto_ptr<BaseMatrix<T > > GenLowerTriMatrix<T >::newConjugate() const; \
   template auto_ptr<BaseMatrix<T > > GenLowerTriMatrix<T >::newAdjoint() const; \
-  template auto_ptr<BaseMatrix<T > > GenLowerTriMatrix<T >::newInverse() const; \
   template void GenUpperTriMatrix<T >::write(std::ostream& os) const; \
   template void GenUpperTriMatrix<T >::write(std::ostream& os, RT t) const; \
   template void GenUpperTriMatrix<T >::writeCompact(std::ostream& os) const; \
@@ -53,6 +54,8 @@
   template const UpperTriMatrixView<T,CStyle>& \
       UpperTriMatrixView<T,CStyle>::setAllTo(const T& x) const; \
   template const UpperTriMatrixView<T,CStyle>& \
+      UpperTriMatrixView<T,CStyle>::addToAll(const T& x) const; \
+  template const UpperTriMatrixView<T,CStyle>& \
       UpperTriMatrixView<T,CStyle>::clip(RT t) const; \
   template const UpperTriMatrixView<T,CStyle>& \
       UpperTriMatrixView<T,CStyle>::conjugateSelf() const; \
@@ -67,12 +70,25 @@
   template void Swap(const UpperTriMatrixView<T >& m1, \
       const UpperTriMatrixView<T >& m2); \
 
-Def1(T,T,CT)
+Def1(T,T)
 #ifdef INST_COMPLEX
-Def1(CT,T,CT)
+Def1(CT,T)
 #endif
 
 #undef Def1
+
+#ifndef TISINT
+#define Def1b(T,RT) \
+  template auto_ptr<BaseMatrix<T > > GenUpperTriMatrix<T >::newInverse() const; \
+  template auto_ptr<BaseMatrix<T > > GenLowerTriMatrix<T >::newInverse() const; \
+
+Def1b(T,T)
+#ifdef INST_COMPLEX
+Def1b(CT,T)
+#endif
+
+#undef Def1b
+#endif
 
 #define Def2(T1,T2) \
   template bool operator==(const GenUpperTriMatrix<T1 >& m1, \

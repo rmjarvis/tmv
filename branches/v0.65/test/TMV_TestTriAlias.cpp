@@ -8,90 +8,98 @@ static void TestAliasMultUL2(
     const M& m, const Ma& ma, const Mb& mb,
     M1& m1, const M1a& m1a, const M1b& m1b, std::string label)
 {
+    if (showstartdone) {
+        std::cout<<"Start AliasMultUL2\n";
+        std::cout<<"m = "<<m<<std::endl;
+        std::cout<<"ma = "<<ma<<std::endl;
+        std::cout<<"mb = "<<mb<<std::endl;
+    }
+
     typedef typename M::value_type T;
     tmv::Matrix<T> m2(4,4);
 
-    const typename M::real_type eps = EPS * Norm(m);
+    typename M::real_type eps = EPS;
+    if (!std::numeric_limits<T>::is_integer) eps *= Norm(m);
 
     m1 = m;
     m1 = m1a * m1b;
     m2 = ma * mb;
-    Assert(Norm(m1-m2) < eps,label+" m=a*b");
+    Assert(Equal(m1,m2,eps),label+" m=a*b");
 
     m1 = m;
     m1 += m1a * m1b;
     m2 = m + ma * mb;
-    Assert(Norm(m1-m2) < eps,label+" m+=a*b");
+    Assert(Equal(m1,m2,eps),label+" m+=a*b");
 
     m1 = m;
     m1 = T(10) * m1a * m1b;
     m2 = T(10) * ma * mb;
-    Assert(Norm(m1-m2) < eps,label+" m=10*a*b");
+    Assert(Equal(m1,m2,eps),label+" m=10*a*b");
 
     m1 = m;
     m1 += T(10) * m1a * m1b;
     m2 = m + T(10) * ma * mb;
-    Assert(Norm(m1-m2) < eps,label+" m+=10*a*b");
+    Assert(Equal(m1,m2,eps),label+" m+=10*a*b");
 
     m1 = m;
     m1 = m1a * m1b.transpose();
     m2 = ma * mb.transpose();
-    Assert(Norm(m1-m2) < eps,label+" m=a*bT");
+    Assert(Equal(m1,m2,eps),label+" m=a*bT");
 
     m1 = m;
     m1 += m1a * m1b.transpose();
     m2 = m + ma * mb.transpose();
-    Assert(Norm(m1-m2) < eps,label+" m+=a*bT");
+    Assert(Equal(m1,m2,eps),label+" m+=a*bT");
 
     m1 = m;
     m1 = T(10) * m1a * m1b.transpose();
     m2 = T(10) * ma * mb.transpose();
-    Assert(Norm(m1-m2) < eps,label+" m=10*a*bT");
+    Assert(Equal(m1,m2,eps),label+" m=10*a*bT");
 
     m1 = m;
     m1 += T(10) * m1a * m1b.transpose();
     m2 = m + T(10) * ma * mb.transpose();
-    Assert(Norm(m1-m2) < eps,label+" m+=10*a*bT");
+    Assert(Equal(m1,m2,eps),label+" m+=10*a*bT");
 
     m1 = m;
     m1 = m1a.transpose() * m1b;
     m2 = ma.transpose() * mb;
-    Assert(Norm(m1-m2) < eps,label+" m=aT*b");
+    Assert(Equal(m1,m2,eps),label+" m=aT*b");
 
     m1 = m;
     m1 += m1a.transpose() * m1b;
     m2 = m + ma.transpose() * mb;
-    Assert(Norm(m1-m2) < eps,label+" m+=aT*b");
+    Assert(Equal(m1,m2,eps),label+" m+=aT*b");
 
     m1 = m;
     m1 = T(10) * m1a.transpose() * m1b;
     m2 = T(10) * ma.transpose() * mb;
-    Assert(Norm(m1-m2) < eps,label+" m=10*aT*b");
+    Assert(Equal(m1,m2,eps),label+" m=10*aT*b");
 
     m1 = m;
     m1 += T(10) * m1a.transpose() * m1b;
     m2 = m + T(10) * ma.transpose() * mb;
-    Assert(Norm(m1-m2) < eps,label+" m+=10*aT*b");
+    Assert(Equal(m1,m2,eps),label+" m+=10*aT*b");
 
     m1 = m;
     m1 = m1a.transpose() * m1b.transpose();
     m2 = ma.transpose() * mb.transpose();
-    Assert(Norm(m1-m2) < eps,label+" m=aT*bT");
+    Assert(Equal(m1,m2,eps),label+" m=aT*bT");
 
     m1 = m;
     m1 += m1a.transpose() * m1b.transpose();
     m2 = m + ma.transpose() * mb.transpose();
-    Assert(Norm(m1-m2) < eps,label+" m+=aT*bT");
+    Assert(Equal(m1,m2,eps),label+" m+=aT*bT");
 
     m1 = m;
     m1 = T(10) * m1a.transpose() * m1b.transpose();
     m2 = T(10) * ma.transpose() * mb.transpose();
-    Assert(Norm(m1-m2) < eps,label+" m=10*aT*bT");
+    Assert(Equal(m1,m2,eps),label+" m=10*aT*bT");
 
     m1 = m;
     m1 += T(10) * m1a.transpose() * m1b.transpose();
     m2 = m + T(10) * ma.transpose() * mb.transpose();
-    Assert(Norm(m1-m2) < eps,label+" m+=10*aT*bT");
+    Assert(Equal(m1,m2,eps),label+" m+=10*aT*bT");
 }
 
 template <class M, class M1>

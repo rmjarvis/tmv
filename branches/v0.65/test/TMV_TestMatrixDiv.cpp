@@ -267,7 +267,7 @@ static void TestSquareDiv(tmv::DivType dt)
     tmv::Matrix<T,stor> a1 = m;
     tmv::Matrix<T,stor> a2 = m.transpose();
     a2.row(1) *= T(3);
-    a2.col(2) -= tmv::Vector<T>(4,4.);
+    a2.col(2) -= tmv::Vector<T>(4,4);
 
     tmv::Matrix<std::complex<T>,stor> c1 = a1 * std::complex<T>(1,2);
     tmv::Matrix<std::complex<T>,stor> c2 = a2 * std::complex<T>(-3,4);

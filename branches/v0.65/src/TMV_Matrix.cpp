@@ -42,6 +42,7 @@
 #include "tmv/TMV_SVD.h"
 #include "tmv/TMV_MatrixArith.h"
 #include "tmv/TMV_VIt.h"
+#include "TMV_IntegerDet.h"
 #include <iostream>
 #include "portable_platform.h"
 
@@ -115,7 +116,7 @@ namespace tmv {
     }
 
     template <class T, IndexStyle I>
-    TMV_RefType(T) MatrixView<T,I>::ref(int i, int j) const
+    typename MatrixView<T,I>::reference MatrixView<T,I>::ref(int i, int j) const
     {
         T* mi = ptr() + int(i)*itssi + int(j)*stepj();
         return TMV_REF(mi,ct());
@@ -140,6 +141,68 @@ namespace tmv {
           default : TMVAssert(TMV_FALSE);
         }
     }
+
+#ifdef INST_INT
+    template <>
+    void GenMatrix<int>::newDivider() const
+    { TMVAssert(TMV_FALSE); }
+    template <>
+    void GenMatrix<std::complex<int> >::newDivider() const
+    { TMVAssert(TMV_FALSE); }
+#endif
+
+    // Note: These need to be in the .cpp file, not the .h file for
+    // dynamic libraries.  Apparently the typeinfo used for dynamic_cast
+    // doesn't get shread correctly by different modules, so the 
+    // dynamic_cast fails when called in one module for an object that 
+    // was created in a different module.
+    //
+    // So putting these functions here puts the dynamic cast in the shared
+    // library, which is also where it is created (by newDivider above).
+    template <class T>
+    bool GenMatrix<T>::divIsLUDiv() const
+    { return static_cast<bool>(dynamic_cast<const LUDiv<T>*>(getDiv())); }
+
+    template <class T>
+    bool GenMatrix<T>::divIsQRDiv() const
+    { return static_cast<bool>(dynamic_cast<const QRDiv<T>*>(getDiv())); }
+
+    template <class T>
+    bool GenMatrix<T>::divIsQRPDiv() const
+    { return static_cast<bool>(dynamic_cast<const QRPDiv<T>*>(getDiv())); }
+
+    template <class T>
+    bool GenMatrix<T>::divIsSVDiv() const
+    { return static_cast<bool>(dynamic_cast<const SVDiv<T>*>(getDiv())); }
+
+
+#ifdef INST_INT
+    template <>
+    bool GenMatrix<int>::divIsLUDiv() const
+    { return false; }
+    template <>
+    bool GenMatrix<int>::divIsQRDiv() const
+    { return false; }
+    template <>
+    bool GenMatrix<int>::divIsQRPDiv() const
+    { return false; }
+    template <>
+    bool GenMatrix<int>::divIsSVDiv() const
+    { return false; }
+
+    template <>
+    bool GenMatrix<std::complex<int> >::divIsLUDiv() const
+    { return false; }
+    template <>
+    bool GenMatrix<std::complex<int> >::divIsQRDiv() const
+    { return false; }
+    template <>
+    bool GenMatrix<std::complex<int> >::divIsQRPDiv() const
+    { return false; }
+    template <>
+    bool GenMatrix<std::complex<int> >::divIsSVDiv() const
+    { return false; }
+#endif
 
     //
     // OK? (SubMatrix, SubVector)
@@ -325,8 +388,45 @@ namespace tmv {
 
 
     //
-    // Norms
+    // Norms, det, etc.
     //
+
+    template <class T>
+    T GenMatrix<T>::det() const
+    { return DivHelper<T>::det(); }
+
+    template <class T>
+    RT GenMatrix<T>::logDet(T* sign) const
+    { return DivHelper<T>::logDet(sign); }
+
+    inline bool isSingular() const
+    { return DivHelper<T>::isSingular(); }
+
+#ifdef INST_INT
+    template <>
+    int GenMatrix<int>::det() const
+    { return IntegerDet(*this); }
+
+    template <>
+    std::complex<int> GenMatrix<std::complex<int> >::det() const
+    { return IntegerDet(*this); }
+
+    template <>
+    int GenMatrix<int>::logDet(int* ) const
+    { TMVAssert(TMV_FALSE); return 0; }
+
+    template <>
+    int GenMatrix<std::complex<int> >::logDet(std::complex<int>* ) const
+    { TMVAssert(TMV_FALSE); return 0; }
+
+    template <>
+    bool GenMatrix<int>::isSingular() const
+    { return det() == 0; }
+
+    template <>
+    bool GenMatrix<std::complex<int> >::isSingular() const
+    { return det() == 0; }
+#endif
 
     template <class T>
     T GenMatrix<T>::sumElements() const
@@ -346,21 +446,51 @@ namespace tmv {
     }
 
     template <class T>
-    RT GenMatrix<T>::sumAbsElements() const
+    static RT DoSumAbsElements(const GenMatrix<T>& m)
     {
-        if (canLinearize()) return constLinearView().sumAbsElements();
+        if (m.canLinearize()) return m.constLinearView().sumAbsElements();
         else {
             RT sum(0);
-            if (iscm()) {
-                const int N = rowsize();
-                for(int j=0;j<N;++j) sum += col(j).sumAbsElements();
+            if (m.iscm()) {
+                const int N = m.rowsize();
+                for(int j=0;j<N;++j) sum += m.col(j).sumAbsElements();
             } else {
-                const int M = colsize();
-                for(int i=0;i<M;++i) sum += row(i).sumAbsElements();
+                const int M = m.colsize();
+                for(int i=0;i<M;++i) sum += m.row(i).sumAbsElements();
             }
             return sum;
         }
     }
+
+    template <class T>
+    static RT DoSumAbs2Elements(const GenMatrix<T>& m)
+    {
+        if (m.canLinearize()) return m.constLinearView().sumAbs2Elements();
+        else {
+            RT sum(0);
+            if (m.iscm()) {
+                const int N = m.rowsize();
+                for(int j=0;j<N;++j) sum += m.col(j).sumAbs2Elements();
+            } else {
+                const int M = m.colsize();
+                for(int i=0;i<M;++i) sum += m.row(i).sumAbs2Elements();
+            }
+            return sum;
+        }
+    }
+
+#ifdef INST_INT
+    static int DoSumAbsElements(const GenMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+#endif
+
+    template <class T>
+    RT GenMatrix<T>::sumAbsElements() const
+    { return DoSumAbsElements(*this); }
+
+    template <class T>
+    RT GenMatrix<T>::sumAbs2Elements() const
+    { return DoSumAbs2Elements(*this); }
 
     template <class T>
     RT GenMatrix<T>::normSq(const RT scale) const
@@ -437,21 +567,20 @@ namespace tmv {
         return max;
     }
 
-#ifdef INST_INT
-    static int NonLapNormF(const GenMatrix<int>& m)
-    { return TMV_SQRT(m.normSq()); }
-    static int NonLapNormF(const GenMatrix<std::complex<int> >& m)
-    { return TMV_SQRT(m.normSq()); }
-#endif
-
     template <class T>
     static RT NonLapNormF(const GenMatrix<T>& m)
     {
+        //std::cout<<"NonLapNorm "<<std::endl;
+        //std::cout<<"m = "<<m<<std::endl;
         const RT eps = TMV_Epsilon<T>();
 
         RT mmax = m.maxAbs2Element();
-        if (mmax == RT(0)) return RT(0);
-        else if (TMV_Underflow(mmax * mmax)) {
+        RT norm;
+        if (mmax == RT(0)) {
+            // Then norm is also 0
+            norm = RT(0);
+            //std::cout<<"case 0: norm = "<<norm<<std::endl;
+        } else if (TMV_Underflow(mmax * mmax)) {
             // Then we need to rescale, since underflow has caused 
             // rounding errors.
             // Epsilon is a pure power of 2, so no rounding errors from 
@@ -461,20 +590,25 @@ namespace tmv {
             mmax *= scale;
             const RT eps2 = eps*eps;
             while (mmax < eps2) { scale *= inveps; mmax *= inveps; }
-            return TMV_SQRT(m.normSq(scale))/scale;
+            norm = TMV_SQRT(m.normSq(scale))/scale;
+            //std::cout<<"case 1: norm = "<<norm<<std::endl;
         } else if (RT(1) / mmax == RT(0)) {
             // Then mmax is already inf, so no hope of making it more accurate.
-            return mmax;
+            norm = mmax;
+            //std::cout<<"case 2: norm = "<<norm<<std::endl;
         } else if (RT(1) / (mmax*mmax) == RT(0)) {
             // Then we have overflow, so we need to rescale:
             const RT inveps = RT(1)/eps;
             RT scale = eps;
             mmax *= scale;
             while (mmax > inveps) { scale *= eps; mmax *= eps; }
-            return TMV_SQRT(m.normSq(scale))/scale;
+            norm = TMV_SQRT(m.normSq(scale))/scale;
+            //std::cout<<"case 3: norm = "<<norm<<std::endl;
         }  else {
-            return TMV_SQRT(m.normSq());
+            norm = TMV_SQRT(m.normSq());
+            //std::cout<<"case 4: norm = "<<norm<<std::endl;
         }
+        return norm;
     }
 
     template <class T>
@@ -564,6 +698,17 @@ namespace tmv {
 #endif
 #endif // XLAP
 
+#ifdef INST_INT
+    static int NonLapNormF(const GenMatrix<int>& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int NonLapNormF(const GenMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int NonLapNorm1(const GenMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int NonLapMaxAbsElement(const GenMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+#endif
+
     template <class T>
     RT GenMatrix<T>::maxAbsElement() const
     {
@@ -607,26 +752,45 @@ namespace tmv {
     }
 
     template <class T>
-    RT GenMatrix<T>::doNorm2() const
+    static RT DoNorm2(const GenMatrix<T>& m)
     {
-        if (this->colsize() < this->rowsize()) return transpose().doNorm2();
-        if (this->rowsize() == 0) return RT(0);
-        Matrix<T> m = *this;
-        DiagMatrix<RT> S(this->rowsize());
-        SV_Decompose(m.view(),S.view(),false);
+        if (m.colsize() < m.rowsize()) return DoNorm2(m.transpose());
+        if (m.rowsize() == 0) return RT(0);
+        Matrix<T> m2(m);
+        DiagMatrix<RT> S(m.rowsize());
+        SV_Decompose(m2.view(),S.view(),false);
         return S(0);
     }
 
     template <class T>
-    RT GenMatrix<T>::doCondition() const
+    static RT DoCondition(const GenMatrix<T>& m) 
     {
-        if (this->colsize() < this->rowsize()) return transpose().doNorm2();
-        if (this->rowsize() == 0) return RT(1);
-        Matrix<T> m = *this;
-        DiagMatrix<RT> S(this->rowsize());
-        SV_Decompose(m.view(),S.view(),false);
+        if (m.colsize() < m.rowsize()) return DoCondition(m.transpose());
+        if (m.rowsize() == 0) return RT(1);
+        Matrix<T> m2(m);
+        DiagMatrix<RT> S(m.rowsize());
+        SV_Decompose(m2.view(),S.view(),false);
         return S(0)/S(S.size()-1);
     }
+
+#ifdef INST_INT
+    static int DoNorm2(const GenMatrix<int>& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int DoCondition(const GenMatrix<int>& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int DoNorm2(const GenMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+    static int DoCondition(const GenMatrix<std::complex<int> >& )
+    { TMVAssert(TMV_FALSE); return 0; }
+#endif
+
+    template <class T>
+    RT GenMatrix<T>::doNorm2() const
+    { return tmv::DoNorm2(*this); }
+
+    template <class T>
+    RT GenMatrix<T>::doCondition() const
+    { return tmv::DoCondition(*this); }
 
     template <class T>
     QuotXM<T,T> GenMatrix<T>::QInverse() const
@@ -679,6 +843,18 @@ namespace tmv {
         auto_ptr<BaseMatrix<T> > ret(ret1);
         return ret;
     }
+#ifdef INST_INT
+    template <>
+    auto_ptr<BaseMatrix<int> > GenMatrix<int>::newInverse() const
+    { TMVAssert(TMV_FALSE); return auto_ptr<BaseMatrix<int> >(); }
+    template <>
+    auto_ptr<BaseMatrix<std::complex<int> > > 
+    GenMatrix<std::complex<int> >::newInverse() const
+    { 
+        TMVAssert(TMV_FALSE); 
+        return auto_ptr<BaseMatrix<std::complex<int> > >(); 
+    }
+#endif
 
     //
     // Modifying Functions
@@ -732,6 +908,23 @@ namespace tmv {
             } else  {
                 const int N = rowsize();
                 for(int j=0;j<N;++j) col(j).setAllTo(x); 
+            }
+        }
+        return *this; 
+    }
+
+    template <class T, IndexStyle I> 
+    const MatrixView<T,I>& MatrixView<T,I>::addToAll(const T& x) const
+    {
+        TMVAssert(I==CStyle);
+        if (this->canLinearize()) linearView().addToAll(x);
+        else {
+            if (this->isrm()) {
+                const int M = colsize();
+                for(int i=0;i<M;++i) row(i).addToAll(x); 
+            } else  {
+                const int N = rowsize();
+                for(int j=0;j<N;++j) col(j).addToAll(x); 
             }
         }
         return *this; 
