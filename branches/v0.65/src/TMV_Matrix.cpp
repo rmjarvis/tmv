@@ -399,7 +399,8 @@ namespace tmv {
     RT GenMatrix<T>::logDet(T* sign) const
     { return DivHelper<T>::logDet(sign); }
 
-    inline bool isSingular() const
+    template <class T>
+    inline bool GenMatrix<T>::isSingular() const
     { return DivHelper<T>::isSingular(); }
 
 #ifdef INST_INT

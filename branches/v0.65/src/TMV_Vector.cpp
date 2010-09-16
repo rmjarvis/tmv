@@ -1343,7 +1343,7 @@ namespace tmv {
         int* p, ADType ad, CompType comp) const
     {
         if (tmv::Traits<T>::iscomplex) {
-            if (std::numer_limits<T>::is_integer) {
+            if (std::numeric_limits<T>::is_integer) {
                 TMVAssert(comp != AbsComp && comp != ArgComp);
             }
         } else {
