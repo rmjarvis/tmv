@@ -121,7 +121,7 @@
 				EnableFiberSafeOptimizations="true"
 				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;XTEST=127"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;XTEST=127;TEST_INT"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="1"

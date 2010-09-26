@@ -602,6 +602,19 @@ namespace tmv {
                     issym()?ct():TMV_ConjOf(T,ct()));
         }
 
+        inline const_uppertri_type unitUpperTri() const
+        {
+            if (uplo() == Upper)
+                return const_uppertri_type(
+                    cptr(),size(),
+                    stepi(),stepj(),UnitDiag,stor(),ct());
+            else
+                return const_uppertri_type(
+                    cptr(),size(),
+                    stepj(),stepi(),UnitDiag,TMV_TransOf(stor()),
+                    issym()?ct():TMV_ConjOf(T,ct()));
+        }
+
         inline const_lowertri_type lowerTri(DiagType dt = NonUnitDiag) const
         {
             if (uplo() == Lower)
@@ -612,6 +625,19 @@ namespace tmv {
                 return const_lowertri_type(
                     cptr(),size(),
                     stepj(),stepi(),dt,TMV_TransOf(stor()),
+                    issym()?ct():TMV_ConjOf(T,ct()));
+        }
+
+        inline const_lowertri_type unitLowerTri() const
+        {
+            if (uplo() == Lower)
+                return const_lowertri_type(
+                    cptr(),size(),
+                    stepi(),stepj(),UnitDiag,stor(),ct());
+            else
+                return const_lowertri_type(
+                    cptr(),size(),
+                    stepj(),stepi(),UnitDiag,TMV_TransOf(stor()),
                     issym()?ct():TMV_ConjOf(T,ct()));
         }
 
@@ -1222,8 +1248,14 @@ namespace tmv {
         inline const_uppertri_type upperTri(DiagType dt = NonUnitDiag) const
         { return base::upperTri(dt); }
 
+        inline const_uppertri_type unitUpperTri() const
+        { return base::unitUpperTri(); }
+
         inline const_lowertri_type lowerTri(DiagType dt = NonUnitDiag) const
         { return base::lowerTri(dt); }
+
+        inline const_lowertri_type unitLowerTri() const
+        { return base::unitLowerTri(); }
 
         inline const_realpart_type realPart() const
         { return base::realPart(); }
@@ -1778,6 +1810,19 @@ namespace tmv {
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
+        inline uppertri_type unitUpperTri() const
+        {
+            if (uplo() == Upper)
+                return uppertri_type(
+                    ptr(),size(),
+                    stepi(),stepj(),UnitDiag,stor(),ct() TMV_FIRSTLAST);
+            else
+                return uppertri_type(
+                    ptr(),size(),
+                    stepj(),stepi(),UnitDiag,TMV_TransOf(stor()),
+                    this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
+        }
+
         inline lowertri_type lowerTri(DiagType dt = NonUnitDiag) const
         {
             if (uplo() == Lower)
@@ -1788,6 +1833,19 @@ namespace tmv {
                 return lowertri_type(
                     ptr(),size(),
                     stepj(),stepi(),dt,TMV_TransOf(stor()),
+                    this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
+        }
+
+        inline lowertri_type unitLowerTri() const
+        {
+            if (uplo() == Lower)
+                return lowertri_type(
+                    ptr(),size(),
+                    stepi(),stepj(),UnitDiag,stor(),ct() TMV_FIRSTLAST);
+            else
+                return lowertri_type(
+                    ptr(),size(),
+                    stepj(),stepi(),UnitDiag,TMV_TransOf(stor()),
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
@@ -2186,8 +2244,14 @@ namespace tmv {
         inline uppertri_type upperTri(DiagType dt = NonUnitDiag) const
         { return c_type::upperTri(dt); }
 
+        inline uppertri_type unitUpperTri() const
+        { return c_type::unitUpperTri(); }
+
         inline lowertri_type lowerTri(DiagType dt = NonUnitDiag) const
         { return c_type::lowerTri(dt); }
+
+        inline lowertri_type unitLowerTri() const
+        { return c_type::unitLowerTri(); }
 
         inline realpart_type realPart() const
         { return c_type::realPart(); }
@@ -2904,6 +2968,17 @@ namespace tmv {
                     stepj(),stepi(),dt,TMV_TransOf(S),NonConj);
         }
 
+        inline const_uppertri_type unitUpperTri() const
+        {
+            return U==Upper ? 
+                const_uppertri_type(
+                    itsm.get(),size(),
+                    stepi(),stepj(),UnitDiag,S,NonConj) :
+                const_uppertri_type(
+                    itsm.get(),size(),
+                    stepj(),stepi(),UnitDiag,TMV_TransOf(S),NonConj);
+        }
+
         inline const_lowertri_type lowerTri(DiagType dt = NonUnitDiag) const
         {
             return U==Lower ? 
@@ -2913,6 +2988,17 @@ namespace tmv {
                 const_lowertri_type(
                     itsm.get(),size(),
                     stepj(),stepi(),dt,TMV_TransOf(S),NonConj);
+        }
+
+        inline const_lowertri_type unitLowerTri() const
+        {
+            return U==Lower ? 
+                const_lowertri_type(
+                    itsm.get(),size(),
+                    stepi(),stepj(),UnitDiag,S,NonConj) :
+                const_lowertri_type(
+                    itsm.get(),size(),
+                    stepj(),stepi(),UnitDiag,TMV_TransOf(S),NonConj);
         }
 
         inline const_realpart_type realPart() const
@@ -3040,6 +3126,17 @@ namespace tmv {
                     stepj(),stepi(),dt,TMV_TransOf(S),NonConj TMV_FIRSTLAST);
         }
 
+        inline uppertri_type unitUpperTri()
+        {
+            return U==Upper ? 
+                uppertri_type(
+                    itsm.get(),size(),
+                    stepi(),stepj(),UnitDiag,S,NonConj TMV_FIRSTLAST) :
+                uppertri_type(
+                    itsm.get(),size(),
+                    stepj(),stepi(),UnitDiag,TMV_TransOf(S),NonConj TMV_FIRSTLAST);
+        }
+
         inline lowertri_type lowerTri(DiagType dt = NonUnitDiag)
         {
             return U==Lower ? 
@@ -3049,6 +3146,17 @@ namespace tmv {
                 lowertri_type(
                     itsm.get(),size(),
                     stepj(),stepi(),dt,TMV_TransOf(S),NonConj TMV_FIRSTLAST);
+        }
+
+        inline lowertri_type unitLowerTri()
+        {
+            return U==Lower ? 
+                lowertri_type(
+                    itsm.get(),size(),
+                    stepi(),stepj(),UnitDiag,S,NonConj TMV_FIRSTLAST) :
+                lowertri_type(
+                    itsm.get(),size(),
+                    stepj(),stepi(),UnitDiag,TMV_TransOf(S),NonConj TMV_FIRSTLAST);
         }
 
         inline realpart_type realPart()
@@ -3939,6 +4047,17 @@ namespace tmv {
                     dt,TMV_TransOf(S),TMV_ConjOf(T,NonConj));
         }
 
+        inline const_uppertri_type unitUpperTri() const
+        {
+            return U==Upper ? 
+                const_uppertri_type(
+                    itsm.get(),size(),stepi(),stepj(),
+                    UnitDiag,S,NonConj) :
+                const_uppertri_type(
+                    itsm.get(),size(),stepj(),stepi(),
+                    UnitDiag,TMV_TransOf(S),TMV_ConjOf(T,NonConj));
+        }
+
         inline const_lowertri_type lowerTri(DiagType dt = NonUnitDiag) const
         {
             return U==Lower ? 
@@ -3948,6 +4067,17 @@ namespace tmv {
                 const_lowertri_type(
                     itsm.get(),size(),stepj(),stepi(),
                     dt,TMV_TransOf(S),TMV_ConjOf(T,NonConj));
+        }
+
+        inline const_lowertri_type unitLowerTri() const
+        {
+            return U==Lower ? 
+                const_lowertri_type(
+                    itsm.get(),size(),stepi(),stepj(),
+                    UnitDiag,S,NonConj) :
+                const_lowertri_type(
+                    itsm.get(),size(),stepj(),stepi(),
+                    UnitDiag,TMV_TransOf(S),TMV_ConjOf(T,NonConj));
         }
 
         inline const_realpart_type realPart() const
@@ -4075,6 +4205,17 @@ namespace tmv {
                     dt,TMV_TransOf(S),TMV_ConjOf(T,NonConj) TMV_FIRSTLAST);
         }
 
+        inline uppertri_type unitUpperTri()
+        {
+            return U==Upper ? 
+                uppertri_type(
+                    itsm.get(),size(),stepi(),stepj(),
+                    UnitDiag,S,NonConj TMV_FIRSTLAST) :
+                uppertri_type(
+                    itsm.get(),size(),stepj(),stepi(),
+                    UnitDiag,TMV_TransOf(S),TMV_ConjOf(T,NonConj) TMV_FIRSTLAST);
+        }
+
         inline lowertri_type lowerTri(DiagType dt = NonUnitDiag)
         {
             return U==Lower ? 
@@ -4084,6 +4225,17 @@ namespace tmv {
                 lowertri_type(
                     itsm.get(),size(),stepj(),stepi(),
                     dt,TMV_TransOf(S),TMV_ConjOf(T,NonConj) TMV_FIRSTLAST);
+        }
+
+        inline lowertri_type unitLowerTri()
+        {
+            return U==Lower ? 
+                lowertri_type(
+                    itsm.get(),size(),stepi(),stepj(),
+                    UnitDiag,S,NonConj TMV_FIRSTLAST) :
+                lowertri_type(
+                    itsm.get(),size(),stepj(),stepi(),
+                    UnitDiag,TMV_TransOf(S),TMV_ConjOf(T,NonConj) TMV_FIRSTLAST);
         }
 
         inline realpart_type realPart()

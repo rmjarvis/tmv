@@ -301,7 +301,12 @@ namespace tmv {
 #else
 
 #define BLAS
-#define BLASZDROT
+// It has zdrot, csrot, but there is a bug where they sometimes return
+// wrong answers.  I filed a ticket (#1106), but they replied that the 
+// bug is actually in gfortran.  They suggest a workaround of using the
+// netlib zdrot directly, but it is easier to just disable zdrot for ACML
+// until the underlying problem has been fixed.
+//#define BLASZDROT
 
 /* Works with either of these sets of defines: */
 #define BLASZDOTRETURN

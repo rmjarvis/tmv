@@ -21,8 +21,6 @@
   template T GenVector<T >::cref(int i) const; \
   template Ref VectorView<T >::ref(int i) const; \
   template const VectorView<T,CStyle>& VectorView<T,CStyle>::setZero() const; \
-  template const VectorView<T,CStyle>& VectorView<T,CStyle>::clip( \
-      RT thresh) const; \
   template const VectorView<T,CStyle>& VectorView<T,CStyle>::setAllTo( \
       const T& x) const; \
   template const VectorView<T,CStyle>& VectorView<T,CStyle>::addToAll( \
@@ -51,6 +49,19 @@ Def1(T,CT,VarConjRef<CT >)
 #endif
 
 #undef Def1
+
+#define Def1a(RT,T) \
+  template const VectorView<T,CStyle>& VectorView<T,CStyle>::clip( \
+      RT thresh) const; \
+      
+Def1a(T,T)
+#ifndef TISINT
+#ifdef INST_COMPLEX
+Def1a(T,CT)
+#endif
+#endif
+
+#undef Def1a
 
 #ifndef NOTHROW
   template void VectorReadError<T>::write(std::ostream& os) const throw();

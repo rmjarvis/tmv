@@ -50,31 +50,38 @@ using std::endl;
 namespace tmv {
 
     template <bool herm, class T> 
-    void SymInvert_2x2(
-        T& a, T& b, T& c, T* dd)
+    void SymInvert_2x2(T& a, T& b, T& c, T* dd)
     {
+        typedef typename Traits<T>::real_type RT;
+        // Rescale to help avoid underflow/overflow:
+        RT max = TMV_MAX(TMV_ABS2(a),TMV_MAX(TMV_ABS2(b),TMV_ABS2(c)));
+        a /= max;
+        b /= max;
+        c /= max;
+
         // Invert matrix [ a  c* ] -->  1/(ab-|c|^2) [ b -c* ]
         //               [ c  b  ]                   [ -c a  ]
         if (herm) {
-            TMV_RealType(T) d = TMV_REAL(a)*TMV_REAL(b) - TMV_NORM(c);
+            RT d = TMV_REAL(a)*TMV_REAL(b) - TMV_NORM(c);
             TMV_SWAP(a,b);
-            a/=d;
-            b/=d;
+            d *= max;
+            a /= d; 
+            b /= d;
             c = -c/d;
-            if (dd) *dd = d;
+            if (dd) *dd = d*max;
         } else {
             T d = a*b - c*c;
             TMV_SWAP(a,b);
-            a/=d;
-            b/=d;
+            d *= max;
+            a /= d;
+            b /= d;
             c = -c/d;
-            if (dd) *dd = d;
+            if (dd) *dd = d*max;
         }
     }
 
     template <class T, class T1ab, class T1c> 
-    static void LMultEq_2x2(
-        T1ab a, T1ab b, T1c c, T1c cc, T& x, T& y)
+    static void LMultEq_2x2(T1ab a, T1ab b, T1c c, T1c cc, T& x, T& y)
     {
         // Solve [ x ] <- [ a  cc ] [ x ]
         //       [ y ]    [ c  b  ] [ y ]
@@ -121,8 +128,7 @@ namespace tmv {
     }
 
     template <bool herm, class T, class T1> 
-    static void SymLMultEq_2x2(
-        T1 a, T1 b, T1 c, const MatrixView<T>& m)
+    static void SymLMultEq_2x2(T1 a, T1 b, T1 c, const MatrixView<T>& m)
     {
         //cout<<"SymLMultEq_2x2: m = "<<TMV_Text(m)<<"  "<<m<<endl;
         TMVAssert(m.colsize() == 2);
@@ -141,8 +147,7 @@ namespace tmv {
     }
 
     template <bool herm, class T, class T1> 
-    static void SymRMultEq_2x2(
-        T1 a, T1 b, T1 c, const MatrixView<T>& m)
+    static void SymRMultEq_2x2(T1 a, T1 b, T1 c, const MatrixView<T>& m)
     {
         TMVAssert(m.rowsize() == 2);
         if (herm)

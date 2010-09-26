@@ -1,6 +1,6 @@
 CC= g++
 INCLUDE= -Iinclude
-CFLAGS= $(INCLUDE) -O2 -DNOBLAS
+CFLAGS= $(INCLUDE) -O -DNOBLAS -DNDEBUG
 TESTCFLAGS= $(INCLUDE)
 BLASLIBS= 
 PREFIX=/usr/local
@@ -31,6 +31,7 @@ PREFIX=/usr/local
 # when typing make install.
 # The header files will be copied to $(PREFIX)/include.
 # The library files will be copied to $(PREFIX)/lib.
+# Note: PREFIX=. is invalid.
 #
 # The default (also the first example below) should work for all systems 
 # if you don't want to work too hard at getting it to compile.

@@ -30,7 +30,7 @@ int main() try
     //showtests=true;
     //showacc=true;
     //showdiv=true;
-    //showstartdone = true;
+    //showstartdone=true;
 
 #if 1
 

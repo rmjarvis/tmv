@@ -814,24 +814,6 @@ namespace tmv {
     RT GenUpperTriMatrix<T>::doCondition() const
     { return tmv::DoCondition(*this); }
 
-    template <class T>
-    T GenUpperTriMatrix<T>::det() const
-    {
-        if (isunit()) return T(1);
-        else return DiagMatrixViewOf(this->diag()).det(); 
-    }
-
-    template <class T>
-    RT GenUpperTriMatrix<T>::logDet(T* sign) const
-    {
-        if (isunit()) {
-            if (sign) *sign = T(1);
-            return RT(0);
-        } else {
-            return DiagMatrixViewOf(this->diag()).logDet(sign); 
-        }
-    }
-
     template <class T> 
     auto_ptr<BaseMatrix<T> > GenUpperTriMatrix<T>::newCopy() const
     {

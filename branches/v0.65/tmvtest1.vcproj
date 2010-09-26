@@ -121,7 +121,7 @@
 				EnableFiberSafeOptimizations="true"
 				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;XTEST=127"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;XTEST=127;TEST_INT=true"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="1"
@@ -306,6 +306,10 @@
 			</File>
 			<File
 				RelativePath=".\test\TMV_TestMatrixDecomp.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\TMV_TestMatrixDet.cpp"
 				>
 			</File>
 			<File
