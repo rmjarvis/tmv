@@ -144,6 +144,12 @@ header_install_dir_sub = os.path.join(env['INSTALL_PREFIX'], header_dir_sub)
 
 lib_targets = [lib,sblib]
 
+lib_file = '#' + lib[0].path
+sblib_file = '#' + sblib[0].path
+
+# Save this info for share/SConscript
+env['LIB_FILE_NAMES'] = [lib_file,sblib_file]
+
 if 'install' in COMMAND_LINE_TARGETS: 
 
     if env['SHARED']:

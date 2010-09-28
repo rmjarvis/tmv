@@ -1,10 +1,6 @@
 #ifndef TMV_TEST_H
 #define TMV_TEST_H
 
-#ifdef NDEBUG
-#undef NDEBUG
-#endif
-
 #ifndef XTEST
 #define XTEST 0
 #endif

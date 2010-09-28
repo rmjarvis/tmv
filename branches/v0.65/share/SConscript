@@ -23,7 +23,7 @@ if env['PREFIX'] != '':
 #print "LIBPATH1= " , env1['LIBPATH']
 #print "INSTALL_PREFIX= " , env['INSTALL_PREFIX']
 
-lib_files = ['#lib/libtmv.a', '#lib/libtmv_symband.a']
+lib_files = env['LIB_FILE_NAMES']
 cmd1 = 'rm -f $LINKFILE; '
 cmd1 += 'echo $_LIBDIRFLAGS $_LIBFLAGS $LINKFLAGS > $TARGET '
 env1.Command(link_file,lib_files,cmd1)

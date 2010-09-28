@@ -273,11 +273,21 @@ def AddOpenMPFlag(env):
         ldflag = ['-mp']
         xlib = ['pthread']
     elif compiler == 'cl':
-        flag = ['/openmp']
-        ldflag = ['/openmp']
-        xlib = []
+        #flag = ['/openmp']
+        #ldflag = ['/openmp']
+        #xlib = []
+        # The Express edition, which is the one I have, doesn't come with
+        # the file omp.h, which we need.  So I am unable to test TMV's
+        # OpenMP with cl.  
+        # I believe the Professional edition has full OpenMP support,
+        # so if you have that, the above lines might work for you.
+        # Just uncomment those, and commend the below three lines.
+        print 'No OpenMP support for cl'
+        env['WITH_OPENMP'] = False
+        return
     else:
-        print 'Warning: No OpenMP support for compiler ',compiler
+        print 'No OpenMP support for compiler ',compiler
+        return
 
     #print 'Adding openmp support:',flag
     print 'Using OpenMP'
@@ -1040,7 +1050,7 @@ def DoConfig(env):
         AddOpenMPFlag(env)
     if not env['DEBUG']:
         print 'Debugging turned off'
-        env.Append(CPPDEFINES='NDEBUG')
+        env.Append(CPPDEFINES=['NDEBUG'])
     if env['MEM_TEST']:
         env.Append(CPPDEFINES=['MEMTEST'])
     if env['STATIC'] :

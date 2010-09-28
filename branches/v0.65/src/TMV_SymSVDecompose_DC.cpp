@@ -78,7 +78,7 @@ struct ThreadSafeWriter
     std::stringstream s;
 };
 
-#include "omp.h"
+#include <omp.h>
 
 #define dbgcout ThreadSafeWriter()
 

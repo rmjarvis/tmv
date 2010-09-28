@@ -40,7 +40,7 @@
 #include "TMV_MultMM.h"
 
 #ifdef _OPENMP
-#include "omp.h"
+#include <omp.h>
 #endif
 
 #ifdef XDEBUG

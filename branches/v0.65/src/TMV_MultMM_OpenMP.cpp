@@ -34,7 +34,7 @@
 
 #include "TMV_Blas.h"
 #include "TMV_MultMM.h"
-#include "omp.h"
+#include <omp.h>
 
 namespace tmv {
 
