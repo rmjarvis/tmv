@@ -640,7 +640,7 @@ namespace tmv {
                 int* p, OldADType ad=ASCEND, OldCompType comp=REAL_COMP))
         { return sort(p,ADType(ad),CompType(comp)); }
         TMV_DEPRECATED(type& Sort(
-                ADType ad=ASCEND, CompType comp=REAL_COMP))
+                OldADType ad=ASCEND, OldCompType comp=REAL_COMP))
         { return sort(ADType(ad),CompType(comp)); }
 
 

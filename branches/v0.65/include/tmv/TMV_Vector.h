@@ -1043,7 +1043,7 @@ namespace tmv {
                 int* p, OldADType ad=ASCEND, OldCompType comp=REAL_COMP) const)
         { return sort(p,ADType(ad),CompType(comp)); }
         TMV_DEPRECATED(const type& Sort(
-                ADType ad=ASCEND, CompType comp=REAL_COMP) const)
+                OldADType ad=ASCEND, OldCompType comp=REAL_COMP) const)
         { return sort(ADType(ad),CompType(comp)); }
 
         //
@@ -1380,10 +1380,10 @@ namespace tmv {
         TMV_DEPRECATED(const type& ReverseSelf() const)
         { return reverseSelf(); }
         TMV_DEPRECATED(const type& Sort(
-                int* p, ADType ad=ASCEND, CompType comp=REAL_COMP) const)
+                int* p, OldADType ad=ASCEND, OldCompType comp=REAL_COMP) const)
         { return sort(p,ADType(ad),CompType(comp)); }
         TMV_DEPRECATED(const type& Sort(
-                ADType ad=ASCEND, CompType comp=REAL_COMP) const)
+                OldADType ad=ASCEND, OldCompType comp=REAL_COMP) const)
         { return sort(ADType(ad),CompType(comp)); }
 
 
@@ -1826,10 +1826,10 @@ namespace tmv {
         TMV_DEPRECATED(type& ReverseSelf())
         { return reverseSelf(); }
         TMV_DEPRECATED(type& Sort(
-                int* p, ADType ad=ASCEND, CompType comp=REAL_COMP))
+                int* p, OldADType ad=ASCEND, OldCompType comp=REAL_COMP))
         { return sort(p,ADType(ad),CompType(comp)); }
         TMV_DEPRECATED(type& Sort(
-                ADType ad=ASCEND, CompType comp=REAL_COMP))
+                OldADType ad=ASCEND, OldCompType comp=REAL_COMP))
         { return sort(ADType(ad),CompType(comp)); }
 
 

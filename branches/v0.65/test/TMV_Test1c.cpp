@@ -29,9 +29,8 @@ int main() try
 
     //showacc=true;
     //showdiv=true;
-    showtests=true;
-    showstartdone=true;
-    XXDEBUG9 = true;
+    //showtests=true;
+    //showstartdone=true;
 
 #if 1
 

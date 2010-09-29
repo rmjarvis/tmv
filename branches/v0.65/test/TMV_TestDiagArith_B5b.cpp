@@ -55,12 +55,12 @@ template <class T> void TestDiagMatrixArith_B5b()
 
     tmv::MatrixView<T> qv = q.view();
     tmv::MatrixView<std::complex<T> > cqv = cq.view();
-    tmv::MatrixView<T> rv = r.view();
-    tmv::MatrixView<std::complex<T> > crv = cr.view();
 
     TestMatrixArith5<T>(pv,cpv,av,cav, "SquareM/Diag");
     TestMatrixArith5<T>(qv,cqv,av,cav, "NonSquareM/Diag");
 #if (XTEST & 8)
+    tmv::MatrixView<T> rv = r.view();
+    tmv::MatrixView<std::complex<T> > crv = cr.view();
     TestMatrixArith5<T>(rv,crv,av,cav, "DegenM/Diag");
 #endif
 #endif

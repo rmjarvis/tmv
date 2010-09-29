@@ -444,7 +444,7 @@ namespace tmv {
     private:
 
         template <class T2>
-        void check(T2 x) const
+        void check(T2 TMV_DEBUGPARAM(x)) const
         {
             TMVAssert(
                 (!isunit || x == T2(1)) &&
