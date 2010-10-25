@@ -91,7 +91,7 @@ struct ThreadSafeWriter
 
 #include "tmv/TMV_DiagMatrix.h"
 #include "tmv/TMV_DiagMatrixArith.h"
-#define THRESH 1.e-11
+#define THRESH 1.e-5
 //#define TESTUV  // Should only use this for full USV decompositions
 using std::cerr;
 #else
@@ -389,7 +389,7 @@ namespace tmv {
             t += dt;
             s += dt;
             for(int j=0;j<N;j++) sum[j] = D[j]+s;
-            if (std::abs(s) < std::abs(dt)) {
+            if (TMV_ABS(s) < TMV_ABS(dt)) {
                 dbgcout<<"Need to redo the diff calculations\n";
                 for(int j=0;j<N;j++) diff[j] = D[j]-s; 
             } else  {
@@ -711,7 +711,7 @@ namespace tmv {
             t += eta;
             s += eta;
             for(int j=0;j<N;j++) sum[j] = D[j]+s;
-            if (std::abs(s) < std::abs(eta)) {
+            if (TMV_ABS(s) < TMV_ABS(eta)) {
                 // Then the iterative adjustment to diff isn't going to 
                 // maintain the accuracy we need.
                 dbgcout<<"Need to redo the diff calculations\n";

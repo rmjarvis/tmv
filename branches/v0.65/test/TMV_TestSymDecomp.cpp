@@ -205,8 +205,11 @@ void TestHermDecomp()
 #endif
 
         // LDL Decomposition
-        try {
-            do {
+#ifdef NOTHROW
+        if (!singular) {
+#else
+            try  {
+#endif
                 if (showstartdone) std::cout<<"LDL"<<std::endl;
                 tmv::LowerTriMatrix<T,tmv::UnitDiag> L = m.lud().getL();
                 tmv::BandMatrix<T> D = m.lud().getD();
@@ -256,13 +259,15 @@ void TestHermDecomp()
                 Assert(Norm(c-cLDL) <= ceps*normc,"Herm C LDL5");
 #endif
                 std::cout<<"."; std::cout.flush();
-            } while (false);
-        } catch (tmv::NonPosDef) {
-            // The Lapack version throws whenever mattype is not posdef, 
-            // but native algorithm succeeds when mattype is indefinite,
-            // or even singular.  
-            Assert(!posdef,"caught NonPosDef but mattype == posdef");
+#ifndef NOTHROW
+            } catch (tmv::Singular) {
+                // The Lapack version throws when matrix is exactly singular,
+                // but native algorithm succeeds for all matrices.
+                Assert(singular,"caught Singular but mattype != singular");
+            }
+#else
         }
+#endif
 
         // SV Decomposition
         {
@@ -563,66 +568,77 @@ void TestSymDecomp()
         if (showacc) std::cout<<"eps => "<<eps<<"  "<<ceps<<std::endl;
 
         // LDL Decomposition
-        do {
-            if (showstartdone) std::cout<<"LDL"<<std::endl;
-            tmv::LowerTriMatrix<T,tmv::UnitDiag> L = m.lud().getL();
-            tmv::BandMatrix<T> D = m.lud().getD();
-            tmv::Permutation P = m.lud().getP();
-            tmv::Matrix<T> LDL = P*L*D*L.transpose()*P.transpose();
-            if (showacc) {
-                std::cout<<"Norm(m-LDL) = "<<Norm(m-LDL)<<std::endl;
-                std::cout<<"eps*Norm(m) = "<<eps*normm<<std::endl;
-            }
-            Assert(Norm(m-LDL) <= eps*normm,"Sym LDL");
+#ifdef NOTHROW
+        if (!singular) {
+#else
+            try  {
+#endif
+                if (showstartdone) std::cout<<"LDL"<<std::endl;
+                tmv::LowerTriMatrix<T,tmv::UnitDiag> L = m.lud().getL();
+                tmv::BandMatrix<T> D = m.lud().getD();
+                tmv::Permutation P = m.lud().getP();
+                tmv::Matrix<T> LDL = P*L*D*L.transpose()*P.transpose();
+                if (showacc) {
+                    std::cout<<"Norm(m-LDL) = "<<Norm(m-LDL)<<std::endl;
+                    std::cout<<"eps*Norm(m) = "<<eps*normm<<std::endl;
+                }
+                Assert(Norm(m-LDL) <= eps*normm,"Sym LDL");
 
-            tmv::LowerTriMatrix<CT,tmv::UnitDiag> cL = 
-                c.lud().getL();
-            tmv::BandMatrix<CT> cD = c.lud().getD();
-            tmv::Permutation cP = c.lud().getP();
-            tmv::Matrix<CT> cLDL = 
-                cP*cL*cD*cL.transpose()*cP.transpose();
-            if (showacc) {
-                std::cout<<"Norm(c-cLDL) = "<<Norm(c-cLDL)<<std::endl;
-                std::cout<<"ceps*Norm(c) = "<<ceps*normc<<std::endl;
-            }
-            Assert(Norm(c-cLDL) <= ceps*normc,"Sym C LDL");
+                tmv::LowerTriMatrix<CT,tmv::UnitDiag> cL = c.lud().getL();
+                tmv::BandMatrix<CT> cD = c.lud().getD();
+                tmv::Permutation cP = c.lud().getP();
+                tmv::Matrix<CT> cLDL = 
+                    cP*cL*cD*cL.transpose()*cP.transpose();
+                if (showacc) {
+                    std::cout<<"Norm(c-cLDL) = "<<Norm(c-cLDL)<<std::endl;
+                    std::cout<<"ceps*Norm(c) = "<<ceps*normc<<std::endl;
+                }
+                Assert(Norm(c-cLDL) <= ceps*normc,"Sym C LDL");
 
 #if (XTEST & 16)
-            tmv::SymMatrix<T,uplo,stor> m2 = m;
-            tmv::SymBandMatrix<T,uplo,stor> D2(N,1);
-            tmv::Permutation P2(N);
-            LDL_Decompose(m2.view(),D2.view(),P2);
-            L = m2.lowerTri(tmv::UnitDiag);
-            LDL = P2*L*D2*L.transpose()*P2.transpose();
-            Assert(Norm(m-LDL) <= eps*normm,"Sym LDL2");
+                tmv::SymMatrix<T,uplo,stor> m2 = m;
+                tmv::SymBandMatrix<T,uplo,stor> D2(N,1);
+                tmv::Permutation P2(N);
+                LDL_Decompose(m2.view(),D2.view(),P2);
+                L = m2.lowerTri(tmv::UnitDiag);
+                LDL = P2*L*D2*L.transpose()*P2.transpose();
+                Assert(Norm(m-LDL) <= eps*normm,"Sym LDL2");
 
-            tmv::SymMatrix<CT,uplo,stor> c2 = c;
-            tmv::SymBandMatrix<CT,uplo,stor> cD2(N,1);
-            LDL_Decompose(c2.view(),cD2.view(),P2);
-            cL = c2.lowerTri(tmv::UnitDiag);
-            cLDL = P2*cL*cD2*cL.transpose()*P2.transpose();
-            Assert(Norm(c-cLDL) <= ceps*normc,"Sym C LDL2");
+                tmv::SymMatrix<CT,uplo,stor> c2 = c;
+                tmv::SymBandMatrix<CT,uplo,stor> cD2(N,1);
+                LDL_Decompose(c2.view(),cD2.view(),P2);
+                cL = c2.lowerTri(tmv::UnitDiag);
+                cLDL = P2*cL*cD2*cL.transpose()*P2.transpose();
+                Assert(Norm(c-cLDL) <= ceps*normc,"Sym C LDL2");
 
-            c2.conjugate() = c;
-            LDL_Decompose(c2.conjugate(),cD2.view(),P2);
-            cL = c2.conjugate().lowerTri(tmv::UnitDiag);
-            cLDL = P2*cL*cD2*cL.transpose()*P2.transpose();
-            Assert(Norm(c-cLDL) <= ceps*normc,"Sym C LDL3");
+                c2.conjugate() = c;
+                LDL_Decompose(c2.conjugate(),cD2.view(),P2);
+                cL = c2.conjugate().lowerTri(tmv::UnitDiag);
+                cLDL = P2*cL*cD2*cL.transpose()*P2.transpose();
+                Assert(Norm(c-cLDL) <= ceps*normc,"Sym C LDL3");
 
-            c2= c;
-            LDL_Decompose(c2.view(),cD2.conjugate(),P2);
-            cL = c2.lowerTri(tmv::UnitDiag);
-            cLDL = P2*cL*cD2.conjugate()*cL.transpose()*P2.transpose();
-            Assert(Norm(c-cLDL) <= ceps*normc,"Sym C LDL4");
+                c2= c;
+                LDL_Decompose(c2.view(),cD2.conjugate(),P2);
+                cL = c2.lowerTri(tmv::UnitDiag);
+                cLDL = P2*cL*cD2.conjugate()*cL.transpose()*P2.transpose();
+                Assert(Norm(c-cLDL) <= ceps*normc,"Sym C LDL4");
 
-            c2.conjugate() = c;
-            LDL_Decompose(c2.conjugate(),cD2.conjugate(),P2);
-            cL = c2.conjugate().lowerTri(tmv::UnitDiag);
-            cLDL = P2*cL*cD2.conjugate()*cL.transpose()*P2.transpose();
-            Assert(Norm(c-cLDL) <= ceps*normc,"Sym C LDL5");
+                c2.conjugate() = c;
+                LDL_Decompose(c2.conjugate(),cD2.conjugate(),P2);
+                cL = c2.conjugate().lowerTri(tmv::UnitDiag);
+                cLDL = P2*cL*cD2.conjugate()*cL.transpose()*P2.transpose();
+                Assert(Norm(c-cLDL) <= ceps*normc,"Sym C LDL5");
 #endif
-            std::cout<<"."; std::cout.flush();
-        } while (false);
+                std::cout<<"."; std::cout.flush();
+#ifndef NOTHROW
+            } catch (tmv::Singular) {
+                // The Lapack version throws when matrix is exactly singular,
+                // but native algorithm succeeds for all matrices.
+                Assert(singular,"caught Singular but mattype != singular");
+            }
+#else
+        }
+#endif
 
         // SV Decomposition
         {

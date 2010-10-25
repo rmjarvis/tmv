@@ -31,6 +31,7 @@
 
 
 
+#include "TMV_Blas.h"
 #include "tmv/TMV_QRD.h"
 #include "TMV_QRDiv.h"
 #include "tmv/TMV_Matrix.h"
@@ -42,6 +43,8 @@
 #include <ostream>
 
 namespace tmv {
+
+#define RT TMV_RealType(T)
 
     template <class T> 
     struct QRDiv<T>::QRDiv_Impl
@@ -55,12 +58,13 @@ namespace tmv {
         T* Aptr;
         MatrixView<T> QRx;
         Vector<T> beta;
-        mutable TMV_RealType(T) logdet;
+        mutable RT logdet;
         mutable T signdet;
         mutable bool donedet;
     };
 
-#define APTR1 (inplace ? 0 : (A.colsize()*A.rowsize()))
+#define APTR1_SIZE (A.colsize()*A.rowsize())
+#define APTR1 (inplace ? 0 : APTR1_SIZE)
 #define APTR (inplace ? A.nonConst().ptr() : Aptr1.get())
 #define QRX (istrans ? \
              (inplace ? A.nonConst().transpose() : \
@@ -73,7 +77,14 @@ namespace tmv {
         istrans(A.colsize()<A.rowsize()),
         inplace(_inplace && (A.iscm() || A.isrm())), 
         Aptr1(APTR1), Aptr(APTR), QRx(QRX), 
-        beta(QRx.rowsize()), logdet(0), signdet(1), donedet(false) {}
+        beta(QRx.rowsize()), logdet(0), signdet(1), donedet(false) 
+    {
+#ifdef LAP
+        // Otherwise I get "Conditional jump or move" errors in valgrind, 
+        // although they don't seem to cause any problems somehow.
+        if (!inplace) VectorViewOf(Aptr,APTR1_SIZE).setZero();
+#endif
+    }
 
 #undef QRX
 #undef APTR
@@ -82,7 +93,6 @@ namespace tmv {
     QRDiv<T>::QRDiv(const GenMatrix<T>& A, bool inplace) :
         pimpl(new QRDiv_Impl(A,inplace))
     {
-        //std::cout<<"Start QRDiv Constructor"<<std::endl;
         if (pimpl->istrans) {
             if (inplace) TMVAssert(A.transpose() == pimpl->QRx);
             else pimpl->QRx = A.transpose();
@@ -91,9 +101,7 @@ namespace tmv {
             if (inplace) TMVAssert(A == pimpl->QRx); 
             else pimpl->QRx = A;
         }
-        //std::cout<<"Before QR_Decompose"<<std::endl;
         QR_Decompose(pimpl->QRx,pimpl->beta.view(),pimpl->signdet);
-        //std::cout<<"End QRDiv Constructor"<<std::endl;
     }
 
     template <class T> QRDiv<T>::~QRDiv() {}
@@ -160,7 +168,7 @@ namespace tmv {
     }                  
 
     template <class T> 
-    TMV_RealType(T) QRDiv<T>::logDet(T* sign) const
+    RT QRDiv<T>::logDet(T* sign) const
     {
         if (!pimpl->donedet) {
             T s;
@@ -174,12 +182,10 @@ namespace tmv {
     template <class T> template <class T1> 
     void QRDiv<T>::doMakeInverse(const MatrixView<T1>& minv) const
     {
-        //std::cout<<"Start QRDiv doMakeInverse"<<std::endl;
         if (pimpl->istrans)
             QR_Inverse(pimpl->QRx,pimpl->beta,minv.transpose()); 
         else
             QR_Inverse(pimpl->QRx,pimpl->beta,minv); 
-        //std::cout<<"End QRDiv doMakeInverse"<<std::endl;
     }
 
     template <class T> 
@@ -229,8 +235,7 @@ namespace tmv {
             *fout << "R = "<<getR()<<std::endl;
         }
         Matrix<T> qr = getQ()*getR();
-        TMV_RealType(T) nm = 
-            Norm(qr-(pimpl->istrans ? mm.transpose() : mm.view()));
+        RT nm = Norm(qr-(pimpl->istrans ? mm.transpose() : mm.view()));
         nm /= Norm(getQ())*Norm(getR());
         if (printmat) {
             *fout << "QR = "<<qr<<std::endl;
@@ -239,7 +244,7 @@ namespace tmv {
             *fout << "Norm(M-QR)/Norm(QR) = "<<nm<<"  ";
             *fout << pimpl->QRx.rowsize()*TMV_Epsilon<T>()<<std::endl;
         }
-        return nm < mm.doCondition()*mm.colsize()*TMV_Epsilon<T>();
+        return nm < mm.doCondition()*RT(mm.colsize())*TMV_Epsilon<T>();
     }
 
     template <class T> 

@@ -67,6 +67,8 @@ namespace tmv {
         // and underflow problems if done naively.  The simplest (although
         // probably not the most efficient) solution is to scale all the 
         // intermediate values by the maximum abs value in the vector.
+        //std::cout<<"Start HouseholderReflect"<<std::endl;
+        //std::cout<<"x = "<<x<<std::endl;
         RT scale = x.maxAbs2Element();
         //std::cout<<"scale = "<<scale<<std::endl;
         RT absx0 = TMV_ABS(x0);
@@ -153,6 +155,7 @@ namespace tmv {
             else 
                 det *= -TMV_CONJ(beta*beta)/TMV_NORM(beta);
         }
+        //std::cout<<"det = "<<det<<std::endl;
 #ifdef XDEBUG
         Vector<T> vv(xx.size());
         vv(0) = T(1);

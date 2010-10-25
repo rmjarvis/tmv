@@ -41,7 +41,7 @@
 #include <iostream>
 
 #ifdef XDEBUG
-#define THRESH 1.e-6
+#define THRESH 1.e-5
 #include <iostream>
 #include "tmv/TMV_VectorArith.h"
 #include "tmv/TMV_MatrixArith.h"
@@ -364,7 +364,7 @@ namespace tmv {
         // So in this case, just do the calculation for what E(0) should
         // be and let ChopSmallElements figure out whether it is small 
         // enough to go the rest of the way to 0.
-        bool exact = (std::abs(e) < 1.e-3);
+        bool exact = (TMV_ABS(e) < 1.e-3);
 
         RT d = ((d1-d0)*(d1+d0)+e*e)/RT(2);
         RT absd = TMV_ABS(d);

@@ -726,6 +726,8 @@ namespace tmv {
             cerr<<"L = "<<L<<endl;
             cerr<<"D = "<<DD<<endl;
             cerr<<"A2 = "<<A2<<endl;
+            cerr<<"diff = "<<Matrix<T>(A0-A2).clip(1.e-3*A0.maxAbsElement())<<endl;
+            cerr<<"Norm(diff) = "<<Norm(A0-A2)<<endl;
             cerr<<"Compare to NonBlock version:\n";
             auto_ptr<SymMatrix<T,Lower,ColMajor> > A3S(0);
             auto_ptr<HermMatrix<T,Lower,ColMajor> > A3H(0);
@@ -749,7 +751,11 @@ namespace tmv {
                     *A3,xD3.view(),P3.get(),logdet3,signdet3);
             cerr<<"A3 = "<<*A3<<endl;
             cerr<<"A = "<<A<<endl;
+            cerr<<"diff = "<<Matrix<T>(A-*A3).clip(1.e-3*A.maxAbsElement())<<endl;
             cerr<<"Norm(diff) = "<<Norm(A-*A3)<<endl;
+            cerr<<"D3 = "<<A3->diag()<<endl;
+            cerr<<"D = "<<A.diag()<<endl;
+            cerr<<"Norm(diff) = "<<Norm(A.diag()-A3->diag())<<endl;
             cerr<<"xD3 = "<<xD3<<endl;
             cerr<<"xD = "<<xD<<endl;
             cerr<<"Norm(diff) = "<<Norm(xD-xD3)<<endl;
@@ -833,6 +839,12 @@ namespace tmv {
 #else
         LAP_Results(int(work[0]),n,n,lwork,"dsytrf");
 #endif
+        // Supposedly, sytrf is supposed to successfully complete the
+        // decomposition if it encounters a singularity.  But in my 
+        // experience that isn't always true.  So throw a Singular 
+        // exception when it reports info > 0.
+        if (Lap_info > 0) throw Singular("SymMatrix in LAPACK routine dsytrf");
+            
         int* pi = lap_p.get();
         double* Aii = A.ptr();
         const int Astep = A.stepj()+1;
@@ -913,7 +925,7 @@ namespace tmv {
             LAPNAME(zhetrf) (
                 LAPCM LAPCH_LO,LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(lap_p.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
-            lwork = int(std::real(work[0]));
+            lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
 #endif
 #endif
@@ -923,8 +935,10 @@ namespace tmv {
 #ifdef LAPNOWORK
             LAP_Results("zhetrf");
 #else
-            LAP_Results(int(std::real(work[0])),n,n,lwork,"zhetrf");
+            LAP_Results(int(TMV_REAL(work[0])),n,n,lwork,"zhetrf");
 #endif
+            if (Lap_info > 0) 
+                throw Singular("SymMatrix in LAPACK routine zhetrf");
         } else {
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
@@ -936,7 +950,7 @@ namespace tmv {
             LAPNAME(zsytrf) (
                 LAPCM LAPCH_LO,LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(lap_p.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
-            lwork = int(std::real(work[0]));
+            lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
 #endif
 #endif
@@ -946,9 +960,12 @@ namespace tmv {
 #ifdef LAPNOWORK
             LAP_Results("zsytrf");
 #else
-            LAP_Results(int(std::real(work[0])),n,n,lwork,"zsytrf");
+            LAP_Results(int(TMV_REAL(work[0])),n,n,lwork,"zsytrf");
 #endif
+            if (Lap_info > 0) 
+                throw Singular("SymMatrix in LAPACK routine zsytrf");
         }
+
         int* pi = lap_p.get();
         std::complex<double>* Aii = A.ptr();
         const int Astep = A.stepj()+1;
@@ -961,10 +978,10 @@ namespace tmv {
                     if (signdet != 0.) {
                         if (*Aii == 0.) signdet = 0.;
                         else if (A.isherm()) {
-                            if (std::real(*Aii) < 0.) signdet = -signdet;
-                            logdet += TMV_LOG(std::abs(std::real(*Aii)));
+                            if (TMV_REAL(*Aii) < 0.) signdet = -signdet;
+                            logdet += TMV_LOG(TMV_ABS(TMV_REAL(*Aii)));
                         } else {
-                            double ad = std::abs(*Aii);
+                            double ad = TMV_ABS(*Aii);
                             signdet *= *Aii/ad;
                             logdet += TMV_LOG(ad);
                         }
@@ -984,14 +1001,14 @@ namespace tmv {
                     xD[i] = b;
                     if (signdet != 0.) {
                         if (A.isherm()) {
-                            double a = std::real(*Aii);
+                            double a = TMV_REAL(*Aii);
                             Aii += Astep;
-                            double c = std::real(*Aii);
+                            double c = TMV_REAL(*Aii);
                             double d = a*c-TMV_NORM(b);
                             if (d == 0.) signdet = 0.;
                             else {
                                 if (d < 0.) signdet = -signdet;
-                                logdet += TMV_LOG(std::abs(d));
+                                logdet += TMV_LOG(TMV_ABS(d));
                             }
                         } else {
                             std::complex<double> a = *Aii;
@@ -1000,7 +1017,7 @@ namespace tmv {
                             std::complex<double> d = a*c-b*b;
                             if (d == 0.) signdet = 0.;
                             else {
-                                double ad = std::abs(d);
+                                double ad = TMV_ABS(d);
                                 signdet *= d/ad;
                                 logdet += TMV_LOG(ad);
                             }
@@ -1012,10 +1029,10 @@ namespace tmv {
                 if (signdet != 0.) {
                     if (*Aii == 0.) signdet = 0.;
                     else if (A.isherm()) {
-                        if (std::real(*Aii) < 0.) signdet = -signdet;
-                        logdet += TMV_LOG(std::abs(std::real(*Aii)));
+                        if (TMV_REAL(*Aii) < 0.) signdet = -signdet;
+                        logdet += TMV_LOG(TMV_ABS(TMV_REAL(*Aii)));
                     } else {
-                        double ad = std::abs(*Aii);
+                        double ad = TMV_ABS(*Aii);
                         signdet *= *Aii/ad;
                         logdet += TMV_LOG(ad);
                     }
@@ -1062,6 +1079,7 @@ namespace tmv {
 #else
         LAP_Results(int(work[0]),n,n,lwork,"ssytrf");
 #endif
+        if (Lap_info > 0) throw Singular("SymMatrix in LAPACK routine ssytrf");
         int* pi = lap_p.get();
         float* Aii = A.ptr();
         const int Astep = A.stepj()+1;
@@ -1075,7 +1093,7 @@ namespace tmv {
                         if (*Aii == 0.F) signdet = 0.F;
                         else {
                             if (*Aii < 0.F) signdet = -signdet;
-                            logdet += TMV_LOG(std::abs(*Aii));
+                            logdet += TMV_LOG(TMV_ABS(*Aii));
                         }
                     }
                 } else {
@@ -1100,7 +1118,7 @@ namespace tmv {
                         if (d == 0.F) signdet = 0.F;
                         else {
                             if (d < 0.F) signdet = -signdet;
-                            logdet += TMV_LOG(std::abs(d));
+                            logdet += TMV_LOG(TMV_ABS(d));
                         }
                     }
                     ++i; ++pi; // extra ++ for 2x2 case
@@ -1110,7 +1128,7 @@ namespace tmv {
                     if (*Aii == 0.F) signdet = 0.F;
                     else {
                         if (*Aii < 0.F) signdet = -signdet;
-                        logdet += TMV_LOG(std::abs(*Aii));
+                        logdet += TMV_LOG(TMV_ABS(*Aii));
                     }
                 }
                 P[i] = i;
@@ -1142,7 +1160,7 @@ namespace tmv {
             LAPNAME(chetrf) (
                 LAPCM LAPCH_LO,LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(lap_p.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
-            lwork = int(std::real(work[0]));
+            lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
 #endif
 #endif
@@ -1152,8 +1170,10 @@ namespace tmv {
 #ifdef LAPNOWORK
             LAP_Results("chetrf");
 #else
-            LAP_Results(int(std::real(work[0])),n,n,lwork,"chetrf");
+            LAP_Results(int(TMV_REAL(work[0])),n,n,lwork,"chetrf");
 #endif
+            if (Lap_info > 0) 
+                throw Singular("SymMatrix in LAPACK routine chetrf");
         } else {
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
@@ -1165,7 +1185,7 @@ namespace tmv {
             LAPNAME(csytrf) (
                 LAPCM LAPCH_LO,LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(lap_p.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
-            lwork = int(std::real(work[0]));
+            lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
 #endif
 #endif
@@ -1175,8 +1195,10 @@ namespace tmv {
 #ifdef LAPNOWORK
             LAP_Results("csytrf");
 #else
-            LAP_Results(int(std::real(work[0])),n,n,lwork,"csytrf");
+            LAP_Results(int(TMV_REAL(work[0])),n,n,lwork,"csytrf");
 #endif
+            if (Lap_info > 0) 
+                throw Singular("SymMatrix in LAPACK routine csytrf");
         }
         int* pi = lap_p.get();
         std::complex<float>* Aii = A.ptr();
@@ -1190,10 +1212,10 @@ namespace tmv {
                     if (signdet != 0.F) {
                         if (*Aii == 0.F) signdet = 0.F;
                         else if (A.isherm()) {
-                            if (std::real(*Aii) < 0.F) signdet = -signdet;
-                            logdet += TMV_LOG(std::abs(std::real(*Aii)));
+                            if (TMV_REAL(*Aii) < 0.F) signdet = -signdet;
+                            logdet += TMV_LOG(TMV_ABS(TMV_REAL(*Aii)));
                         } else {
-                            float ad = std::abs(*Aii);
+                            float ad = TMV_ABS(*Aii);
                             signdet *= *Aii/ad;
                             logdet += TMV_LOG(ad);
                         }
@@ -1213,14 +1235,14 @@ namespace tmv {
                     xD[i] = b;
                     if (signdet != 0.F) {
                         if (A.isherm()) {
-                            float a = std::real(*Aii);
+                            float a = TMV_REAL(*Aii);
                             Aii += Astep;
-                            float c = std::real(*Aii);
+                            float c = TMV_REAL(*Aii);
                             float d = a*c-TMV_NORM(b);
                             if (d == 0.F) signdet = 0.F;
                             else {
                                 if (d < 0.F) signdet = -signdet;
-                                logdet += TMV_LOG(std::abs(d));
+                                logdet += TMV_LOG(TMV_ABS(d));
                             }
                         } else {
                             std::complex<float> a = *Aii;
@@ -1229,7 +1251,7 @@ namespace tmv {
                             std::complex<float> d = a*c-b*b;
                             if (d == 0.F) signdet = 0.F;
                             else {
-                                float ad = std::abs(d);
+                                float ad = TMV_ABS(d);
                                 signdet *= d/ad;
                                 logdet += TMV_LOG(ad);
                             }
@@ -1241,10 +1263,10 @@ namespace tmv {
                 if (signdet != 0.F) {
                     if (*Aii == 0.F) signdet = 0.F;
                     else if (A.isherm()) {
-                        if (std::real(*Aii) < 0.F) signdet = -signdet;
-                        logdet += TMV_LOG(std::abs(std::real(*Aii)));
+                        if (TMV_REAL(*Aii) < 0.F) signdet = -signdet;
+                        logdet += TMV_LOG(TMV_ABS(TMV_REAL(*Aii)));
                     } else {
-                        float ad = std::abs(*Aii);
+                        float ad = TMV_ABS(*Aii);
                         signdet *= *Aii/ad;
                         logdet += TMV_LOG(ad);
                     }
@@ -1315,6 +1337,8 @@ namespace tmv {
             cerr<<"L = "<<L<<endl;
             cerr<<"D = "<<DD<<endl;
             cerr<<"A2 = "<<A2<<endl;
+            cerr<<"diff = "<<Matrix<T>(A0-A2).clip(1.e-3*A0.maxAbsElement())<<endl;
+            cerr<<"Norm(diff) = "<<Norm(A0-A2)<<endl;
 #ifdef LAP
             cerr<<"Compare to NonLap version:\n";
             auto_ptr<SymMatrix<T,Lower,ColMajor> > A3S(0);
@@ -1340,6 +1364,9 @@ namespace tmv {
             cerr<<"A3 = "<<*A3<<endl;
             cerr<<"A = "<<A<<endl;
             cerr<<"Norm(diff) = "<<Norm(A-*A3)<<endl;
+            cerr<<"D3 = "<<A3->diag()<<endl;
+            cerr<<"D = "<<A.diag()<<endl;
+            cerr<<"Norm(diff) = "<<Norm(A.diag()-A3->diag())<<endl;
             cerr<<"xD3 = "<<xD3<<endl;
             cerr<<"xD = "<<xD<<endl;
             cerr<<"Norm(diff) = "<<Norm(xD-xD3)<<endl;

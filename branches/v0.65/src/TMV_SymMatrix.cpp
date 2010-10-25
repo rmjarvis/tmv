@@ -933,7 +933,7 @@ namespace tmv {
             SymMatrix<T> m2(m);
             SV_Decompose(m2.view(),S.view());
         }
-        return std::abs(S(0)/S(S.size()-1));
+        return TMV_ABS(S(0)/S(S.size()-1));
     }
 
 #ifdef INST_INT

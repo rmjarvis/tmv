@@ -4,7 +4,6 @@
 #include "TMV.h"
 
 #define NO_COMPLEX_ARITH
-//#define NODIV
 #define NOASSIGN
 
 #include "TMV_TestMatrixArith.h"
@@ -13,6 +12,8 @@
 template <class T>
 void TestPermutation()
 {
+    T eps = EPS;
+
     int pp1[10] = { 0,1,2,3,4,5,6,7,8,9 }; // identity
     int pp2[10] = { 9,8,7,6,5,5,6,7,8,9 }; // reversal
     int pp3[10] = { 5,3,5,9,4,5,9,8,9,9 }; // "random"
@@ -47,12 +48,10 @@ void TestPermutation()
     // Test construction
     //
 
-    if (!(std::numeric_limits<T>::is_integer)) {
-        Assert(p1.det() == m1.det(),"Identity permutation determinant");
-        Assert(p2.det() == m2.det(),"Reversal permutation determinant");
-        Assert(p3.det() == m3.det(),"Random permutation determinant");
-        Assert(p3i.det() == m3.det(),"Inverse permutation determinant");
-    }
+    Assert(p1.det() == m1.det(),"Identity permutation determinant");
+    Assert(p2.det() == m2.det(),"Reversal permutation determinant");
+    Assert(p3.det() == m3.det(),"Random permutation determinant");
+    Assert(p3i.det() == m3.det(),"Inverse permutation determinant");
 
     for(int i=0;i<10;++i) for(int j=0;j<10;++j) {
         Assert(p1.cref(i,j) == m1.cref(i,j),"Identity permutation cref");
@@ -126,50 +125,43 @@ void TestPermutation()
     v = v0 * m3.transpose();
     Assert(v == v3l,"Random permutation from right -- transpose matrix");
 
-    if (!(std::numeric_limits<T>::is_integer)) {
-        v = v0 / p1;
-        Assert(v == v1,"Identity permutation left division");
-        v = v0 % p1;
-        Assert(v == v1,"Identity permutation right division");
-        v = v0 / p2;
-        Assert(v == v2,"Reversal permutation left division");
-        v = v0 % p2;
-        Assert(v == v2,"Reversal permutation right division");
-        v = v0 / p3;
-        Assert(v == v3r,"Random permutation left division");
-        v = v0 % p3;
-        Assert(v == v3l,"Random permutation right division");
-        v = v0 / p3i;
-        Assert(v == v3r,"Inverse permutation left division");
-        v = v0 % p3i;
-        Assert(v == v3l,"Inverse permutation right division");
-    }
+    v = v0 / p1;
+    Assert(v == v1,"Identity permutation left division");
+    v = v0 % p1;
+    Assert(v == v1,"Identity permutation right division");
+    v = v0 / p2;
+    Assert(v == v2,"Reversal permutation left division");
+    v = v0 % p2;
+    Assert(v == v2,"Reversal permutation right division");
+    v = v0 / p3;
+    Assert(v == v3r,"Random permutation left division");
+    v = v0 % p3;
+    Assert(v == v3l,"Random permutation right division");
+    v = v0 / p3i;
+    Assert(v == v3r,"Inverse permutation left division");
+    v = v0 % p3i;
+    Assert(v == v3l,"Inverse permutation right division");
 
     v = v0;
     v *= p3;
     Assert(v == v3r,"Random permutation *=");
-    if (!(std::numeric_limits<T>::is_integer)) {
-        v %= p3;
-        Assert(v == v0,"Random permutation %=");
-        v /= p3;
-        Assert(v == v3r,"Random permutation /=");
-    }
+    v %= p3;
+    Assert(v == v0,"Random permutation %=");
+    v /= p3;
+    Assert(v == v3r,"Random permutation /=");
 
     v = v0;
     v *= p3i;
     Assert(v == v3r,"Inverse permutation *=");
-    if (!(std::numeric_limits<T>::is_integer)) {
-        v %= p3i;
-        Assert(v == v0,"Inverse permutation %=");
-        v /= p3i;
-        Assert(v == v3r,"Inverse permutation /=");
-    }
+    v %= p3i;
+    Assert(v == v0,"Inverse permutation %=");
+    v /= p3i;
+    Assert(v == v3r,"Inverse permutation /=");
 
     //
     // Test arithmetic with a Matrix
     //
 
-    T eps = EPS;
     tmv::Matrix<T> m0(10,10);
     for(int i=0;i<10;++i) for(int j=0;j<10;++j) 
         m0(i,j) = T(2)+T(3)*i-T(5)*j;
@@ -211,6 +203,8 @@ void TestPermutation()
     m = m0 * p3i.transpose();
     Assert(Equal(m,(m0*m3.transpose()),eps),"Inverse permutation m*pt");
 
+    // The permutation division works for integers, but the comparison
+    // to the regular matrix fails.
     if (!(std::numeric_limits<T>::is_integer)) {
         m = m0 / p1;
         Assert(Equal(m,(m0/m1),eps),"Identity permutation m/p");
@@ -255,6 +249,85 @@ void TestPermutation()
         Assert(Equal(m,(m0/m3),eps),"Inverse permutation m/=p");
     }
 
+    // Repeat for complex matrices:
+    cm = p1 * cm0;
+    Assert(Equal(cm,(m1*cm0),eps),"Identity permutation p*cm");
+    cm = p2 * cm0;
+    Assert(Equal(cm,(m2*cm0),eps),"Reversal permutation p*cm");
+    cm = p3 * cm0;
+    Assert(Equal(cm,(m3*cm0),eps),"Random permutation p*cm");
+    cm = p3i * cm0;
+    Assert(Equal(cm,(m3*cm0),eps),"Inverse permutation p*cm");
+    cm = cm0 * p1;
+    Assert(Equal(cm,(cm0*m1),eps),"Identity permutation cm*p");
+    cm = cm0 * p2;
+    Assert(Equal(cm,(cm0*m2),eps),"Reversal permutation cm*p");
+    cm = cm0 * p3;
+    Assert(Equal(cm,(cm0*m3),eps),"Random permutation cm*p");
+    cm = cm0 * p3i;
+    Assert(Equal(cm,(cm0*m3),eps),"Inverse permutation cm*p");
+
+    cm = p1.transpose() * cm0;
+    Assert(Equal(cm,(m1.transpose()*cm0),eps),"Identity permutation pt*cm");
+    cm = p2.transpose() * cm0;
+    Assert(Equal(cm,(m2.transpose()*cm0),eps),"Reversal permutation pt*cm");
+    cm = p3.transpose() * cm0;
+    Assert(Equal(cm,(m3.transpose()*cm0),eps),"Random permutation pt*cm");
+    cm = p3i.transpose() * cm0;
+    Assert(Equal(cm,(m3.transpose()*cm0),eps),"Inverse permutation pt*cm");
+    cm = cm0 * p1.transpose();
+    Assert(Equal(cm,(cm0*m1.transpose()),eps),"Identity permutation cm*pt");
+    cm = cm0 * p2.transpose();
+    Assert(Equal(cm,(cm0*m2.transpose()),eps),"Reversal permutation cm*pt");
+    cm = cm0 * p3.transpose();
+    Assert(Equal(cm,(cm0*m3.transpose()),eps),"Random permutation cm*pt");
+    cm = cm0 * p3i.transpose();
+    Assert(Equal(cm,(cm0*m3.transpose()),eps),"Inverse permutation cm*pt");
+
+    if (!(std::numeric_limits<T>::is_integer)) {
+        cm = cm0 / p1;
+        Assert(Equal(cm,(cm0/m1),eps),"Identity permutation cm/p");
+        cm = cm0 / p2;
+        Assert(Equal(cm,(cm0/m2),eps),"Reversal permutation cm/p");
+        cm = cm0 / p3;
+        Assert(Equal(cm,(cm0/m3),eps),"Random permutation cm/p");
+        cm = cm0 / p3i;
+        Assert(Equal(cm,(cm0/m3),eps),"Inverse permutation cm/p");
+
+        cm = cm0 % p1;
+        Assert(Equal(cm,(cm0%m1),eps),"Identity permutation cm%p");
+        cm = cm0 % p2;
+        Assert(Equal(cm,(cm0%m2),eps),"Reversal permutation cm%p");
+        cm = cm0 % p3;
+        Assert(Equal(cm,(cm0%m3),eps),"Random permutation cm%p");
+        cm = cm0 % p3i;
+        Assert(Equal(cm,(cm0%m3),eps),"Inverse permutation cm%p");
+    }
+
+    cm = cm0;
+    cm *= p3;
+    Assert(Equal(cm,(cm0*m3),eps),"Random permutation cm*=p");
+    if (!(std::numeric_limits<T>::is_integer)) {
+        cm = cm0;
+        cm %= p3;
+        Assert(Equal(cm,(cm0%m3),eps),"Random permutation cm%=p");
+        cm = cm0;
+        cm /= p3;
+        Assert(Equal(cm,(cm0/m3),eps),"Random permutation cm/=p");
+    }
+
+    cm = cm0;
+    cm *= p3i;
+    Assert(Equal(cm,(cm0*m3),eps),"Inverse permutation cm*=p");
+    if (!(std::numeric_limits<T>::is_integer)) {
+        cm = cm0;
+        cm %= p3i;
+        Assert(Equal(cm,(cm0%m3),eps),"Inverse permutation cm%=p");
+        cm = cm0;
+        cm /= p3i;
+        Assert(Equal(cm,(cm0/m3),eps),"Inverse permutation cm/=p");
+    }
+
     // 
     // Test various functions of a Permutation
     //
@@ -292,8 +365,8 @@ void TestPermutation()
     Assert(Equal2(MaxAbsElement(p3),MaxAbsElement(m3),eps),
            "Permutation MaxAbsElement");
     Assert(Equal2(Trace(p3),Trace(m3),eps),"Permutation Trace");
+    Assert(Equal2(Det(p3),Det(m3),eps),"Permutation Det");
     if (!(std::numeric_limits<T>::is_integer)) {
-        Assert(Equal2(Det(p3),Det(m3),eps),"Permutation Det");
         Assert(Equal2(LogDet(p3),LogDet(m3),eps),"Permutation LogDet");
     }
 
@@ -342,7 +415,7 @@ void TestPermutation()
     Assert(p3 == *xp2,"Permutation Compact I/O check #2");
 
     std::remove("tmvtest_permutation_io.dat");
- 
+
 #if 0
     //
     // Test other arithmetic
@@ -363,7 +436,7 @@ void TestPermutation()
     //
     // Test resize
     //
-    
+
     tmv::Permutation q3(2);
     tmv::Permutation q3i(2);
 

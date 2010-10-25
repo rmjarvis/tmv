@@ -222,7 +222,7 @@ namespace tmv {
                 LAPCM LAPV(n),LAPV(m),LAPV(n),
                 LAPP(Q.ptr()),LAPV(ldq),LAPP(beta.cptr())
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
-            lwork = int(std::real(work[0]));
+            lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
 #endif
 #endif
@@ -233,7 +233,7 @@ namespace tmv {
 #ifdef LAPNOWORK
             LAP_Results("zunglq");
 #else
-            LAP_Results(int(std::real(work[0])),m,n,lwork,"zunglq");
+            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"zunglq");
 #endif
         } else {
             int ldq = Q.stepj();
@@ -249,7 +249,7 @@ namespace tmv {
                 LAPCM LAPV(m),LAPV(n),LAPV(n),
                 LAPP(Q.ptr()),LAPV(ldq),LAPP(conjbeta.cptr())
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
-            lwork = int(std::real(work[0]));
+            lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
 #endif
 #endif
@@ -260,7 +260,7 @@ namespace tmv {
 #ifdef LAPNOWORK
             LAP_Results("zungqr");
 #else
-            LAP_Results(int(std::real(work[0])),m,n,lwork,"zungqr");
+            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"zungqr");
 #endif
         }
     }
@@ -352,7 +352,7 @@ namespace tmv {
                 LAPCM LAPV(n),LAPV(m),LAPV(n),
                 LAPP(Q.ptr()),LAPV(ldq),LAPP(beta.cptr())
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
-            lwork = int(std::real(work[0]));
+            lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
 #endif
 #endif
@@ -363,7 +363,7 @@ namespace tmv {
 #ifdef LAPNOWORK
             LAP_Results("cunglq");
 #else
-            LAP_Results(int(std::real(work[0])),m,n,lwork,"cunglq");
+            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"cunglq");
 #endif
         } else {
             int ldq = Q.stepj();
@@ -379,7 +379,7 @@ namespace tmv {
                 LAPCM LAPV(m),LAPV(n),LAPV(n),
                 LAPP(Q.ptr()),LAPV(ldq),LAPP(conjbeta.cptr())
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
-            lwork = int(std::real(work[0]));
+            lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
 #endif
 #endif
@@ -390,7 +390,7 @@ namespace tmv {
 #ifdef LAPNOWORK
             LAP_Results("cungqr");
 #else
-            LAP_Results(int(std::real(work[0])),m,n,lwork,"cungqr");
+            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"cungqr");
 #endif
         }
     }

@@ -1,5 +1,3 @@
-//#define XTEST_QUOTVM
-//#define XTEST_QUOTMM
 
 #include "TMV_Test.h"
 #include "TMV_Test1.h"

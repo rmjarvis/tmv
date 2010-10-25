@@ -44,6 +44,8 @@
 
 namespace tmv {
 
+#define RT TMV_RealType(T)
+
     template <class T> 
     struct HermBandCHDiv<T>::HermBandCHDiv_Impl
     {
@@ -55,7 +57,7 @@ namespace tmv {
         T* Aptr;
         SymBandMatrixView<T> LLx;
         mutable bool zerodet;
-        mutable TMV_RealType(T) logdet;
+        mutable RT logdet;
         mutable bool donedet;
     };
 
@@ -97,7 +99,7 @@ namespace tmv {
             else if (A.nlo() == 1)
                 LDL_Decompose(pimpl->LLx);
             else {
-                if (A.realPart().diag().minElement() <= TMV_RealType(T)(0)) {
+                if (A.realPart().diag().minElement() <= RT(0)) {
 #ifdef NOTHROW
                     std::cerr<<"Non Posdef HermBandMatrix found\n";
                     exit(1); 
@@ -178,7 +180,7 @@ namespace tmv {
         if (!pimpl->donedet) {
             T s;
             pimpl->logdet = DiagMatrixViewOf(pimpl->LLx.diag()).logDet(&s);
-            if (pimpl->LLx.nlo() > 1) { pimpl->logdet *= TMV_RealType(T)(2); }
+            if (pimpl->LLx.nlo() > 1) { pimpl->logdet *= RT(2); }
             pimpl->zerodet = s == T(0);
             pimpl->donedet = true;
         }         
@@ -187,12 +189,12 @@ namespace tmv {
     }                  
 
     template <class T> 
-    TMV_RealType(T) HermBandCHDiv<T>::logDet(T* sign) const
+    RT HermBandCHDiv<T>::logDet(T* sign) const
     {
         if (!pimpl->donedet) {
             T s;
             pimpl->logdet = DiagMatrixViewOf(pimpl->LLx.diag()).logDet(&s);
-            if (pimpl->LLx.nlo() > 1) { pimpl->logdet *= TMV_RealType(T)(2); }
+            if (pimpl->LLx.nlo() > 1) { pimpl->logdet *= RT(2); }
             pimpl->zerodet = s == T(0);
             pimpl->donedet = true;
         }
@@ -274,14 +276,14 @@ namespace tmv {
             *fout << "D = "<<getD()<<std::endl;
         }
         BandMatrix<T> lu = getL()*getD()*getL().adjoint();
-        TMV_RealType(T) nm = Norm(lu-mm);
+        RT nm = Norm(lu-mm);
         nm /= TMV_SQR(Norm(getL())) * Norm(getD());
         if (fout) {
             *fout << "LDLt = "<<lu<<std::endl;
             *fout << "M-LDLt = "<<(mm-lu)<<std::endl;
             *fout << "Norm(M-LDLt)/Norm(LDLt) = "<<nm<<std::endl;
         }
-        return nm < mm.doCondition()*mm.colsize()*TMV_Epsilon<T>();
+        return nm < mm.doCondition()*RT(mm.colsize())*TMV_Epsilon<T>();
     }
 
     template <class T> 

@@ -229,7 +229,7 @@ namespace tmv {
     static void RecursiveLUDecompose(
         const MatrixView<T>& A, int* P, int& detp)
     {
-        //cout<<"Start recursive LU: A = "<<A<<endl;
+        //std::cout<<"Start recursive LU: A = "<<A<<std::endl;
         // The recursive LU algorithm is similar to the block algorithm, except 
         // that the block is roughly half the size of the whole matrix.
         // We keep dividing the matrix in half (column-wise) until we get down
@@ -285,12 +285,15 @@ namespace tmv {
         } else if (LU_BLOCKSIZE2 > 2 && R > 2) {
             NonBlockLUDecompose(A,P,detp);
         } else if (R == 2) {
+            //std::cout<<"R == 2\n";
             // Same as NonBlock version, but with R==2 hard coded
             VectorView<T> A0 = A.col(0);
             VectorView<T> A1 = A.col(1);
 
             int ip0,ip1;
+            //std::cout<<"A0 = "<<A0<<std::endl;
             RT piv = A0.maxAbsElement(&ip0);
+            //std::cout<<"ip0 => "<<ip0<<std::endl;
 
             // Check for underflow:
             if (TMV_Underflow(piv)) {
@@ -327,7 +330,9 @@ namespace tmv {
                     if (absAi1 > piv) { piv = absAi1; ip1=i; }
                 }
             } else {
+                //std::cout<<"A1 = "<<A1.subVector(1,M)<<std::endl;
                 piv = A1.subVector(1,M).maxAbsElement(&ip1); 
+                //std::cout<<"ip1 => "<<ip1<<std::endl;
                 ++ip1;
             }
 

@@ -350,7 +350,7 @@ namespace tmv {
             dbgcout<<"bounds -> "<<lowerbound<<"  "<<upperbound<<std::endl;
 
             s += dt;
-            if (std::abs(s) < std::abs(dt))
+            if (TMV_ABS(s) < TMV_ABS(dt))
                 for(int j=0;j<N;j++) diff[j] = D[j]-s;
             else
                 for(int j=0;j<N;j++) diff[j] -= dt;
@@ -633,7 +633,7 @@ namespace tmv {
             tau += eta;
             TMVAssert(tau >= lowerbound && tau <= upperbound);
             s += eta;
-            if (std::abs(s) < std::abs(eta))
+            if (TMV_ABS(s) < TMV_ABS(eta))
                 for(int j=0;j<N;j++) diff[j] = D[j]-s;
             else
                 for(int j=0;j<N;j++) diff[j] -= eta;

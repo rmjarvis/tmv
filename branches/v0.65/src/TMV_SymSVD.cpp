@@ -121,7 +121,7 @@ namespace tmv {
     }                  
 
     template <class T>
-    TMV_RealType(T) HermSVDiv<T>::logDet(T* sign) const
+    RT HermSVDiv<T>::logDet(T* sign) const
     {
         if (!pimpl->donedet) {
             pimpl->logdet = pimpl->S.logDet(&pimpl->signdet);
@@ -259,7 +259,7 @@ namespace tmv {
             *fout << "Norm(M-USV)/Norm(USV) = "<<nm;
             *fout <<"  "<<cond<<" * "<<TMV_Epsilon<T>()<<std::endl;
         }
-        return nm < cond*mm.colsize()*TMV_Epsilon<T>();
+        return nm < cond*RT(mm.colsize())*TMV_Epsilon<T>();
     }
 
     template <class T>
@@ -462,7 +462,7 @@ namespace tmv {
             *fout << "Norm(M-USV)/Norm(USV) = "<<nm;
             *fout <<"  "<<cond<<" * "<<TMV_Epsilon<T>()<<std::endl;
         }
-        return nm < cond*mm.colsize()*TMV_Epsilon<T>();
+        return nm < cond*RT(mm.colsize())*TMV_Epsilon<T>();
     }
 
     template <class T>

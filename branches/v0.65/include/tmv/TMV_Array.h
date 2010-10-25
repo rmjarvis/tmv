@@ -63,6 +63,15 @@ namespace tmv
     // memory than necessary and then finds the starting point that is 
     // 16 byte aligned.
 
+    // Also, the TMV_END_PADDING option is implemented here.  If it is 
+    // defined, then we write 0's to the end of the full 16 byte word.
+    // This is mostly useful when running valgrind with a BLAS library
+    // that isn't careful about reading past the end of the allocated
+    // memory.  GotoBLAS for example.
+    // So if end padding is enabled, we make sure to allocate enough memory
+    // to finish the block of 16 bytes.  And we write 0's to the values
+    // that aren't part of the requested memory.
+    
     // First the regular non-SSE version, where we don't need aligment.
     template <class T>
     class AlignedMemory
@@ -74,7 +83,13 @@ namespace tmv
         }
         inline void allocate(const size_t n) 
         { 
+#ifdef TMV_END_PADDING
+            const size_t nn = n + 16/sizeof(T);
+            p = new T[nn];
+            for(size_t i=n;i<nn;++i) p[i] = T(0);
+#else
             p = new T[n]; 
+#endif
             //std::cout<<this<<" X allocate: n = "<<n<<"  p = "<<p<<std::endl; 
         }
         inline void deallocate()
@@ -106,7 +121,14 @@ namespace tmv
         }
         inline void allocate(const size_t n) 
         { 
+#ifdef TMV_END_PADDING
+            const size_t nn = (n<<2)+15 + 16;
+            p = new char[nn];
+            float* pf = get();
+            for(size_t i=n;i<(nn>>2);++i) pf[i] = 0.F;
+#else
             p = new char[(n<<2)+15];
+#endif
             //std::cout<<this<<" F allocate: p = "<<(void*)p<<std::endl;
             TMVAssert((void*)(p+(n<<2)+15) >= (void*)(get()+n));
         }
@@ -146,7 +168,14 @@ namespace tmv
         }
         inline void allocate(const size_t n) 
         { 
+#ifdef TMV_END_PADDING
+            const size_t nn = (n<<3)+15 + 16;
+            p = new char[nn];
+            double* pd = get();
+            for(size_t i=n;i<(nn>>3);++i) pd[i] = 0.;
+#else
             p = new char[(n<<3)+15];
+#endif
             //std::cout<<this<<" D allocate: p = "<<(void*)p<<std::endl;
             TMVAssert((void*)(p+(n<<3)+15) >= (void*)(get()+n));
         }
@@ -290,10 +319,18 @@ namespace tmv
     class StackArray2<T,N,false,false>
     { 
     public:
+#ifdef TMV_END_PADDING
+        inline StackArray2() { for(int i=N;i<NN;++i) p[i] = T(0); }
+#endif
         inline T* get() { return p; }
         inline const T* get() const { return p; }
     private:
+#ifdef TMV_END_PADDING
+        enum { NN = N + (16/sizeof(T)) };
+        T p[NN];
+#else
         T p[N]; 
+#endif
     };
 
 #ifdef __SSE__
@@ -301,19 +338,33 @@ namespace tmv
     class StackArray2<float,N,false,false>
     {
     public:
+#ifdef TMV_END_PADDING
+        inline StackArray2() { for(int i=N;i<N+4;++i) xp.xf[i] = 0.F; }
+#endif
         inline float* get() { return xp.xf; }
         inline const float* get() const { return xp.xf; }
     private:
+#ifdef TMV_END_PADDING
+        union { float xf[N+4]; __m128 xm; } xp;
+#else
         union { float xf[N]; __m128 xm; } xp;
+#endif
     };
     template <int N>
     class StackArray2<float,N,false,true>
     {
     public:
+#ifdef TMV_END_PADDING
+        inline StackArray2() { for(int i=N;i<N+4;++i) p[i] = 0.F; }
+#endif
         inline float* get() { return p; }
         inline const float* get() const { return p; }
     private:
+#ifdef TMV_END_PADDING
+        float p[N+4];
+#else
         float p[N];
+#endif
     };
 #endif
 #ifdef __SSE2__
@@ -321,19 +372,33 @@ namespace tmv
     class StackArray2<double,N,false,false>
     { 
     public:
+#ifdef TMV_END_PADDING
+        inline StackArray2() { for(int i=N;i<N+2;++i) xp.xd[i] = 0.; }
+#endif
         inline double* get() { return xp.xd; }
         inline const double* get() const { return xp.xd; }
     private:
+#ifdef TMV_END_PADDING
+        union { double xd[N+2]; __m128d xm; } xp;
+#else
         union { double xd[N]; __m128d xm; } xp;
+#endif
     };
     template <int N>
     class StackArray2<double,N,false,true>
     {
     public:
+#ifdef TMV_END_PADDING
+        inline StackArray2() { for(int i=N;i<N+2;++i) p[i] = 0.; }
+#endif
         inline double* get() { return p; }
         inline const double* get() const { return p; }
     private:
+#ifdef TMV_END_PADDING
+        double p[N+2];
+#else
         double p[N];
+#endif
     };
 #endif
 

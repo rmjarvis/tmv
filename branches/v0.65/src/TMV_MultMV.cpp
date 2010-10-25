@@ -833,6 +833,9 @@ namespace tmv {
         std::complex<float> xbeta(beta);
 #if 0
         std::cout<<"Before cgemv:\n";
+        std::cout<<"A = "<<A<<std::endl;
+        std::cout<<"x = "<<x<<std::endl;
+        if (beta == 1) std::cout<<"y = "<<y<<std::endl;
         std::cout<<"m,n = "<<m<<','<<n<<std::endl;
         std::cout<<"alpha,beta = "<<alpha<<','<<xbeta<<std::endl;
         std::cout<<"A.cptr = "<<A.cptr()<<std::endl;
@@ -882,6 +885,7 @@ namespace tmv {
         }
 #if 0
         std::cout<<"After cgemv:\n";
+        std::cout<<"y -> "<<y<<std::endl;
 #endif
     }
     template <> void BlasMultMV(
@@ -1142,7 +1146,8 @@ namespace tmv {
         //cout<<"add = "<<add<<endl;
         //cout<<"A = "<<TMV_Text(A)<<"  "<<A<<endl;
         //cout<<"x = "<<TMV_Text(x)<<" step "<<x.step()<<"  "<<x<<endl;
-        //cout<<"y = "<<TMV_Text(y)<<" step "<<y.step()<<"  "<<y<<endl;
+        //cout<<"y = "<<TMV_Text(y)<<" step "<<y.step()<<endl;
+        //if (add) cout<<"y = "<<y<<endl;
         Vector<Tx> x0 = x;
         Vector<T> y0 = y;
         Matrix<Ta> A0 = A;

@@ -45,6 +45,8 @@
 
 namespace tmv {
 
+#define RT TMV_RealType(T)
+
     template <class T> 
     bool QRPDiv<T>::StrictQRP = false;
 
@@ -61,7 +63,7 @@ namespace tmv {
         MatrixView<T> QRx;
         Vector<T> beta;
         Permutation P;
-        mutable TMV_RealType(T) logdet;
+        mutable RT logdet;
         mutable T signdet;
         mutable bool donedet;
         int N1;
@@ -181,7 +183,7 @@ namespace tmv {
     }                  
 
     template <class T> 
-    TMV_RealType(T) QRPDiv<T>::logDet(T* sign) const
+    RT QRPDiv<T>::logDet(T* sign) const
     {
         if (!pimpl->donedet) {
             T s;
@@ -270,8 +272,7 @@ namespace tmv {
             *fout<<std::endl;
         }
         Matrix<T> qr = getQ()*getR()*getP();
-        TMV_RealType(T) nm = 
-            Norm(qr-(pimpl->istrans ? mm.transpose() : mm.view()));
+        RT nm = Norm(qr-(pimpl->istrans ? mm.transpose() : mm.view()));
         nm /= Norm(getQ())*Norm(getR());
         if (printmat) {
             *fout << "QRP = "<<qr<<std::endl;
@@ -280,7 +281,7 @@ namespace tmv {
             *fout << "Norm(M-QR)/Norm(QR) = "<<nm<<"  ";
             *fout <<pimpl->QRx.rowsize()*TMV_Epsilon<T>()<<std::endl;
         }
-        return nm < mm.doCondition()*TMV_Epsilon<T>();
+        return nm < mm.doCondition()*RT(mm.colsize())*TMV_Epsilon<T>();
     }
 
     template <class T> 

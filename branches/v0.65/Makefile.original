@@ -61,7 +61,7 @@ PREFIX=/usr/local
 
 #CC= icpc
 #INCLUDE= -Iinclude -I/usr/local/include
-#CFLAGS= $(INCLUDE) -O3 -DNDEBUG -DMKL -DINST_LONGDOUBLE
+#CFLAGS= $(INCLUDE) -msse2 -O3 -DNDEBUG -DMKL -DINST_LONGDOUBLE
 #BLASLIBS= -lmkl_lapack -lmkl_ia32 -lguide 
 
 

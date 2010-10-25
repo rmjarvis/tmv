@@ -3,19 +3,17 @@
 
 #include "TMV_Test.h"
 
-#define RealType(T) typename tmv::Traits<T>::real_type
-#define ComplexType(T) typename tmv::Traits<T>::complex_type
-
 template <class T, class V> 
 inline void TestV(const V& a, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start V "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
     }
 
     tmv::Vector<T> v = a;
-    RealType(T) eps = EPS*v.size();
+    RT eps = EPS*v.size();
 
     if (XXDEBUG1) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" = "<<a<<std::endl;
@@ -32,16 +30,13 @@ inline void TestV(const V& a, std::string label)
 
     Assert(Equal(a,v,eps),label+" a != v");
 
-    if (!std::numeric_limits<RealType(T)>::is_integer) {
+    if (!(std::numeric_limits<RT>::is_integer)) {
         Assert(Equal2(Norm2(a),Norm2(v),eps*Norm2(v)),label+" Norm2");
     }
-
-    if (!std::numeric_limits<RealType(T)>::is_integer && 
-        tmv::Traits<T>::iscomplex) {
+    if (!(std::numeric_limits<RT>::is_integer && tmv::Traits<T>::iscomplex)) {
         Assert(Equal2(Norm1(a),Norm1(v),eps*Norm1(v)),label+" Norm1");
         Assert(Equal2(NormInf(a),NormInf(v),eps*NormInf(v)),label+" NormInf");
     }
-
     Assert(Equal2(NormSq(a),NormSq(v),eps*NormSq(v)),label+" NormSq");
 
     if (showstartdone) {
@@ -52,6 +47,7 @@ inline void TestV(const V& a, std::string label)
 template <class T, class V, class T2> 
 inline void TestVX(const V& a, T2 x, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start VX "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -59,8 +55,9 @@ inline void TestVX(const V& a, T2 x, std::string label)
     }
 
     tmv::Vector<T> v = a;
-    RealType(T) eps = EPS*v.size();
-    if (!std::numeric_limits<RealType(T)>::is_integer) eps *= Norm(v);
+    RT eps = EPS*v.size();
+    if (!(std::numeric_limits<RT>::is_integer)) 
+        eps *= Norm(v) * tmv::TMV_ABS2(x);
 
     if (XXDEBUG2) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" = "<<a<<std::endl;
@@ -70,13 +67,15 @@ inline void TestVX(const V& a, T2 x, std::string label)
         std::cout<<"x*a = "<<(x*a)<<std::endl;
         std::cout<<"x*v = "<<(x*v)<<std::endl;
         std::cout<<"Norm(diff) = "<<Norm((x*a)-(x*v))<<std::endl;
-        std::cout<<"eps*norm = "<<eps*Norm(v)*tmv::TMV_ABS(x)<<std::endl;
+        std::cout<<"eps*norm = "<<eps<<std::endl;
     }
     Assert(Equal(a,v,eps),label+" a != v");
 
-    Assert(Equal((x*a),(x*v),eps*tmv::TMV_ABS2(x)),label+" x*a");
-    Assert(Equal((a*x),(x*v),eps*tmv::TMV_ABS2(x)),label+" a*x");
-    Assert(Equal((a/x),(v/x),eps*tmv::TMV_ABS2(x)),label+" a/x");
+    Assert(Equal((x*a),(x*v),eps),label+" x*a");
+    Assert(Equal((a*x),(x*v),eps),label+" a*x");
+    if (!(std::numeric_limits<RT>::is_integer)) {
+        Assert(Equal((a/x),(v/x),eps),label+" a/x");
+    }
 
     if (showstartdone) {
         std::cout<<"Done VX "<<std::endl;
@@ -86,6 +85,7 @@ inline void TestVX(const V& a, T2 x, std::string label)
 template <class T, class V, class T2> 
 inline void TestVX2(V& a, T2 x, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start VX2 "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -93,10 +93,12 @@ inline void TestVX2(V& a, T2 x, std::string label)
     }
 
     tmv::Vector<T> v = a;
-    RealType(T) eps = EPS*v.size();
-    if (!std::numeric_limits<RealType(T)>::is_integer) eps *= Norm(v);
+    RT eps = EPS*v.size();
+    if (!(std::numeric_limits<RT>::is_integer)) 
+        eps *= Norm(v) * tmv::TMV_ABS2(x);
 
     Assert(Equal(a,v,eps),label+" a != v");
+
     typename V::copy_type a0 = a;
 
     if (XXDEBUG3) {
@@ -112,30 +114,34 @@ inline void TestVX2(V& a, T2 x, std::string label)
 
     a *= x;
     v = tmv::Vector<T>(v*x);
-    Assert(Equal(a,v,eps*tmv::TMV_ABS2(x)),label+" a *= x");
-    Assert(Equal((a*=x),(v*=x),eps*tmv::TMV_ABS2(x)),label+" a *= x (2)");
+    Assert(Equal(a,v,eps),label+" a *= x");
+    Assert(Equal((a*=x),(v*=x),eps),label+" a *= x (2)");
     a = v = a0;
 
-    a /= x;
-    v = tmv::Vector<T>(v/x);
-    Assert(Equal(a,v,eps*tmv::TMV_ABS2(x)),label+" a /= x");
-    a = v = a0;
+    if (!(std::numeric_limits<RT>::is_integer)) {
+        a /= x;
+        v = tmv::Vector<T>(v/x);
+        Assert(Equal(a,v,eps),label+" a /= x");
+        a = v = a0;
+    }
 
 #ifdef ALIASOK
     a = a*x;
     v = tmv::Vector<T>(v*x);
-    Assert(Equal(a,v,eps*tmv::TMV_ABS2(x)),label+" a = a*x");
+    Assert(Equal(a,v,eps),label+" a = a*x");
     a = v = a0;
 
     a = x*a;
     v = tmv::Vector<T>(v*x);
-    Assert(Equal(a,v,eps*tmv::TMV_ABS2(x)),label+" a = x*a");
+    Assert(Equal(a,v,eps),label+" a = x*a");
     a = v = a0;
 
-    a = a/x;
-    v = tmv::Vector<T>(v/x);
-    Assert(Equal(a,v,eps*tmv::TMV_ABS2(x)),label+" a = a/x");
-    a = a0;
+    if (!(std::numeric_limits<RT>::is_integer)) {
+        a = a/x;
+        v = tmv::Vector<T>(v/x);
+        Assert(Equal(a,v,eps),label+" a = a/x");
+        a = a0;
+    }
 #endif
 
     if (showstartdone) {
@@ -146,6 +152,7 @@ inline void TestVX2(V& a, T2 x, std::string label)
 template <class T, class T2, class V1, class V2> 
 inline void TestVV(const V1& a, const V2& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start VV "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -154,9 +161,11 @@ inline void TestVV(const V1& a, const V2& b, std::string label)
 
     tmv::Vector<T> v1 = a;
     tmv::Vector<T2> v2 = b;
-    RealType(T) eps = EPS;
-    RealType(T) eps2 = EPS;
-    if (!std::numeric_limits<RealType(T)>::is_integer) {
+    RT eps = EPS;
+    RT eps2 = EPS;
+    Assert(Equal(a,v1,eps),label+" a != v1");
+    Assert(Equal(b,v2,eps),label+" b != v2");
+    if (!(std::numeric_limits<RT>::is_integer)) {
         eps *= Norm(v1) + Norm(v2);
         eps2 *= Norm(v1) * Norm(v2);
     }
@@ -185,8 +194,8 @@ inline void TestVV(const V1& a, const V2& b, std::string label)
     Assert(Equal2((a*v2),(v1*v2),eps2),label+" a*v");
     Assert(Equal2((v1*b),(v1*v2),eps2),label+" v*b");
 
-    RealType(T) x(5);
-    ComplexType(T) z(3,4);
+    RT x(5);
+    std::complex<RT> z(3,4);
     if (XXDEBUG4) {
         std::cout<<"a-x*b = "<<(a-x*b)<<std::endl;
         std::cout<<"v1-x*v2 = "<<(v1-x*v2)<<std::endl;
@@ -239,6 +248,7 @@ inline void TestVV(const V1& a, const V2& b, std::string label)
 template <class T, class T2, class V1, class V2> 
 inline void TestVV2(V1& a, const V2& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start VV2 "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -247,16 +257,14 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
 
     tmv::Vector<T> v1 = a;
     tmv::Vector<T2> v2 = b;
-    RealType(T) eps = EPS;
-    if (!std::numeric_limits<RealType(T)>::is_integer) {
+    RT eps = EPS;
+    if (!std::numeric_limits<RT>::is_integer) {
         eps *= Norm(v1) + Norm(v2);
     }
     Assert(Equal(a,v1,eps),label+" a != v1");
     Assert(Equal(b,v2,eps),label+" b != v2");
 
     tmv::Vector<T> v4 = v1;
-
-#if 1
     tmv::Vector<T> v3 = v1;
     if (XXDEBUG5) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" = "<<a<<std::endl;
@@ -317,7 +325,6 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
     v4 = v2-v1;
     Assert(Equal(a,v4,eps),label+" a = v-a");
     a = v4 = v1;
-#endif
 #endif
 
     if (XXDEBUG5) {

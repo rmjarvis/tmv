@@ -898,8 +898,8 @@ namespace tmv {
         { return subSymBandMatrix(i1,i2,newnlo,istep); }
         TMV_DEPRECATED(const_band_type Diags(int k1, int k2) const)
         { return diagRange(k1,k2); }
-        TMV_DEPRECATED(const_view_type SymDiags(int k1, int k2) const)
-        { return symDiagRange(k1,k2); }
+        TMV_DEPRECATED(const_view_type SymDiags(int newnlo) const)
+        { return symDiagRange(newnlo); }
         TMV_DEPRECATED(const_band_type UpperBand() const)
         { return upperBand(); }
         TMV_DEPRECATED(const_band_type LowerBand() const)
@@ -1608,8 +1608,8 @@ namespace tmv {
         { return subSymBandMatrix(i1,i2,newnlo,istep); }
         TMV_DEPRECATED(const_band_type Diags(int k1, int k2) const)
         { return diagRange(k1,k2); }
-        TMV_DEPRECATED(const_view_type SymDiags(int k1, int k2) const)
-        { return symDiagRange(k1,k2); }
+        TMV_DEPRECATED(const_view_type SymDiags(int newnlo) const)
+        { return symDiagRange(newnlo); }
         TMV_DEPRECATED(const_band_type UpperBand() const)
         { return upperBand(); }
         TMV_DEPRECATED(const_band_type LowerBand() const)
@@ -2287,8 +2287,8 @@ namespace tmv {
         { return subSymBandMatrix(i1,i2,newnlo,istep); }
         TMV_DEPRECATED(band_type Diags(int k1, int k2) const)
         { return diagRange(k1,k2); }
-        TMV_DEPRECATED(view_type SymDiags(int k1, int k2) const)
-        { return symDiagRange(k1,k2); }
+        TMV_DEPRECATED(view_type SymDiags(int newnlo) const)
+        { return symDiagRange(newnlo); }
         TMV_DEPRECATED(band_type UpperBand() const)
         { return upperBand(); }
         TMV_DEPRECATED(band_type LowerBand() const)
@@ -2696,8 +2696,8 @@ namespace tmv {
         { return subSymBandMatrix(i1,i2,newnlo,istep); }
         TMV_DEPRECATED(band_type Diags(int k1, int k2) const)
         { return diagRange(k1,k2); }
-        TMV_DEPRECATED(view_type SymDiags(int k1, int k2) const)
-        { return symDiagRange(k1,k2); }
+        TMV_DEPRECATED(view_type SymDiags(int newnlo) const)
+        { return symDiagRange(newnlo); }
         TMV_DEPRECATED(band_type UpperBand() const)
         { return upperBand(); }
         TMV_DEPRECATED(band_type LowerBand() const)
@@ -3925,8 +3925,8 @@ namespace tmv {
         { return subSymBandMatrix(i1,i2,newnlo,istep); }
         TMV_DEPRECATED(const_band_type Diags(int k1, int k2) const)
         { return diagRange(k1,k2); }
-        TMV_DEPRECATED(const_view_type SymDiags(int k1, int k2) const)
-        { return symDiagRange(k1,k2); }
+        TMV_DEPRECATED(const_view_type SymDiags(int newnlo) const)
+        { return symDiagRange(newnlo); }
         TMV_DEPRECATED(const_band_type UpperBand() const)
         { return upperBand(); }
         TMV_DEPRECATED(const_band_type LowerBand() const)
@@ -3980,8 +3980,8 @@ namespace tmv {
         { return subSymBandMatrix(i1,i2,newnlo,istep); }
         TMV_DEPRECATED(band_type Diags(int k1, int k2))
         { return diagRange(k1,k2); }
-        TMV_DEPRECATED(view_type SymDiags(int k1, int k2))
-        { return symDiagRange(k1,k2); }
+        TMV_DEPRECATED(view_type SymDiags(int newnlo))
+        { return symDiagRange(newnlo); }
         TMV_DEPRECATED(band_type UpperBand())
         { return upperBand(); }
         TMV_DEPRECATED(band_type LowerBand())
@@ -5333,8 +5333,8 @@ namespace tmv {
         { return subSymBandMatrix(i1,i2,newnlo,istep); }
         TMV_DEPRECATED(const_band_type Diags(int k1, int k2) const)
         { return diagRange(k1,k2); }
-        TMV_DEPRECATED(const_view_type SymDiags(int k1, int k2) const)
-        { return symDiagRange(k1,k2); }
+        TMV_DEPRECATED(const_view_type SymDiags(int newnlo) const)
+        { return symDiagRange(newnlo); }
         TMV_DEPRECATED(const_band_type UpperBand() const)
         { return upperBand(); }
         TMV_DEPRECATED(const_band_type LowerBand() const)
@@ -5386,8 +5386,8 @@ namespace tmv {
         { return subSymBandMatrix(i1,i2,newnlo,istep); }
         TMV_DEPRECATED(band_type Diags(int k1, int k2))
         { return diagRange(k1,k2); }
-        TMV_DEPRECATED(view_type SymDiags(int k1, int k2))
-        { return symDiagRange(k1,k2); }
+        TMV_DEPRECATED(view_type SymDiags(int newnlo))
+        { return symDiagRange(newnlo); }
         TMV_DEPRECATED(band_type UpperBand())
         { return upperBand(); }
         TMV_DEPRECATED(band_type LowerBand())
@@ -6090,7 +6090,6 @@ namespace tmv {
     inline bool operator!=(
         const GenSymBandMatrix<T1>& m1, const GenSymBandMatrix<T2>& m2)
     { return !(m1 == m2); }
-
 
     template <class T1, class T2> 
     inline bool operator==(

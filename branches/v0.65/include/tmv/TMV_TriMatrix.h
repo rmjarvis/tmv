@@ -5919,7 +5919,6 @@ namespace tmv {
         const GenLowerTriMatrix<T1>& m1, const GenLowerTriMatrix<T2>& m2)
     { return !(m1 == m2); }
 
-
     template <class T1, class T2> 
     inline bool operator==(
         const GenUpperTriMatrix<T1>& m1, const GenMatrix<T2>& m2)

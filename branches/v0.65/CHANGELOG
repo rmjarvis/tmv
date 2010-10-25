@@ -4,7 +4,25 @@ versions to 0.64.)
 
 Bug fixes:
 
--- Fixed some compiling errors when using INST_INT=true.
+-- Fixed a bug in the allocation code in TMV_Array.h for icpc compilations.
+   icpc has a "feature" that it only turns on SSE commands if you explicitly
+   specify the compile flag -msse or -msse2.  (g++ always turns them on
+   when the architecture supports them.)  The file TMV_Array.h has different
+   behavior depending on whether SSE is enabled or not.  
+   
+   Anyway, we do turn these on in our SCons installation for TMV.  
+   However, if a user code does not use these flags then that leads to a 
+   mismatch in the TMV_Array.h behavior for the user code and the TMV 
+   library, which could sometimes cause segmentation faults.  
+   
+   We fixed this by always using the SSE alignment even if SSE is not
+   enabled.  This is probably a good idea anyway, since some BLAS libraries
+   are probably faster with the aligned memory allocation too, so it
+   seems worth it to always align on 16 byte boundaries even if TMV 
+   does explicitly know that it will be useful.
+   
+-- Fixed some compilation problems when compiling with INST_INT=true.
+   There were some linking errors that have now been fixed.
 
 -- In SConstruct file, now always use -fno-strict-aliasing for g++.  (It was
    just for version <= 4.2.)  I found a bug in g++ 4.5 that was fixed by
@@ -13,6 +31,13 @@ Bug fixes:
    use the -fno-strict-aliasing flag and be safe.
 
 New features:
+
+-- Made integer determinants calculate correctly, since the previous code
+   used division, which produced wrong answers for integers. Probably 
+   anyone who tried to do this would consider this a bug fix, but
+   it was (somewhat poorly) documented that this wouldn't work.
+   The code now uses Bareiss's algorithm for these matrices, instead
+   of LU decomposition, which is what floating point matrices use.
 
 -- Skip compilation of functions for <int> that it will never use.
    Also specialized some methods for <int> and complex<int> to make sure
@@ -31,9 +56,6 @@ New features:
    work with integer matrices. But with the new changes, I can run a larger
    fraction of the test suite on <int> and <complex<int> > matrices.
    
--- Added code to correctly calculate determinants of <int> and <complex<int> >
-   matrices.  And added a section in the test suite to test them.
-
 -- Added m.sumAbs2Elements()
 
 -- Added m.addToAll(x)

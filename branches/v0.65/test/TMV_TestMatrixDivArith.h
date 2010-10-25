@@ -186,6 +186,12 @@ static void DoTestRDivVM1a(
         RealType(T) x(5);
         ComplexType(T) z(3,4);
         Assert(Equal(VEC2(T,Tb,x*a%b),x*frac,x*eps),label+" x*a%b");
+        if (XXDEBUG2) {
+            std::cout<<"z*a%b = "<<VEC(ComplexType(T),z*a%b)<<std::endl;
+            std::cout<<"z*v%m = "<<z*frac<<std::endl;
+            std::cout<<"Norm(diff) = "<<Norm(VEC(ComplexType(T),z*a%b)-z*frac)<<std::endl;
+            std::cout<<"x*eps = "<<x*eps<<std::endl;
+        }
         Assert(Equal(VEC(ComplexType(T),z*a%b),z*frac,x*eps),label+" z*a%b");
 #if (XTEST & 16)
         Assert(Equal(VEC2(T,Tb,a*b.inverse()),frac,eps),label+" a*b^-1");
@@ -541,7 +547,7 @@ static void DoTestLDivVM3a(
         std::cout<<"Start LDiv VM3a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     tmv::Vector<Ta> v1 = a;
@@ -557,7 +563,7 @@ static void DoTestLDivVM3a(
     if (XXDEBUG3) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a.step()<<"  "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c.step()<<"  "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c.step()<<std::endl;
     }
 
     if (CanLDivVM(a,b,c)) {
@@ -600,7 +606,7 @@ static void DoTestRDivVM3a(
         std::cout<<"Start RDiv VM3a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     tmv::Vector<Ta> v1 = a;
@@ -616,7 +622,7 @@ static void DoTestRDivVM3a(
     if (XXDEBUG4) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a.step()<<"  "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c.step()<<"  "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c.step()<<std::endl;
     }
 
     if (CanRDivVM(a,b,c)) {
@@ -659,7 +665,7 @@ static void DoTestLDivVM3RR(
         std::cout<<"Start LDiv VM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -681,7 +687,7 @@ static void DoTestLDivVM3RC(
         std::cout<<"Start LDiv VM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -708,7 +714,7 @@ static void DoTestLDivVM3CR(
         std::cout<<"Start LDiv VM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -734,7 +740,7 @@ static void DoTestLDivVM3CC(
         std::cout<<"Start LDiv VM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -763,7 +769,7 @@ static void DoTestRDivVM3RR(
         std::cout<<"Start RDiv VM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -785,7 +791,7 @@ static void DoTestRDivVM3RC(
         std::cout<<"Start RDiv VM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -812,7 +818,7 @@ static void DoTestRDivVM3CR(
         std::cout<<"Start RDiv VM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -838,7 +844,7 @@ static void DoTestRDivVM3CC(
         std::cout<<"Start RDiv VM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -1198,7 +1204,7 @@ static void DoTestLDivMM3a(
         std::cout<<"Start LDiv MM3a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     tmv::Matrix<Ta> v1 = a;
@@ -1214,7 +1220,7 @@ static void DoTestLDivMM3a(
     if (XXDEBUG7) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     if (CanLDiv(a,b,c)) {
@@ -1257,7 +1263,7 @@ static void DoTestRDivMM3a(
         std::cout<<"Start RDiv MM3a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     tmv::Matrix<Ta> v1 = a;
@@ -1273,7 +1279,7 @@ static void DoTestRDivMM3a(
     if (XXDEBUG8) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     if (CanRDiv(a,b,c)) {
@@ -1321,7 +1327,7 @@ static void DoTestLDivMM3RR(
         std::cout<<"Start LDiv MM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -1337,7 +1343,7 @@ static void DoTestLDivMM3RC(
         std::cout<<"Start LDiv MM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -1359,7 +1365,7 @@ static void DoTestLDivMM3CR(
         std::cout<<"Start LDiv MM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -1380,7 +1386,7 @@ static void DoTestLDivMM3CC(
         std::cout<<"Start LDiv MM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -1404,7 +1410,7 @@ static void DoTestRDivMM3RR(
         std::cout<<"Start RDiv MM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -1420,7 +1426,7 @@ static void DoTestRDivMM3RC(
         std::cout<<"Start RDiv MM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -1442,7 +1448,7 @@ static void DoTestRDivMM3CR(
         std::cout<<"Start RDiv MM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -1463,7 +1469,7 @@ static void DoTestRDivMM3CC(
         std::cout<<"Start RDiv MM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -1782,10 +1788,10 @@ static void TestMatrixDivArith3b(
         std::cout<<"Start Test Div 3b: "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
         std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
-        std::cout<<"cc = "<<tmv::TMV_Text(cc)<<"  "<<cc<<std::endl;
+        std::cout<<"cc = "<<tmv::TMV_Text(cc)<<std::endl;
     }
 
     DoTestLDivMM1R<T,T>(dt,b,a,label+" R,R");
@@ -1821,10 +1827,10 @@ static void TestMatrixDivArith3c(
         std::cout<<"Start Test Div 3c: "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
         std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
-        std::cout<<"cc = "<<tmv::TMV_Text(cc)<<"  "<<cc<<std::endl;
+        std::cout<<"cc = "<<tmv::TMV_Text(cc)<<std::endl;
     }
 
     DoTestRDivMM1R<T,T>(dt,b,a,label+" R,R");
@@ -1860,10 +1866,10 @@ static void TestMatrixDivArith3d(
         std::cout<<"Start Test Div 3d: "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"v = "<<tmv::TMV_Text(v)<<"  "<<v<<std::endl;
-        std::cout<<"x = "<<tmv::TMV_Text(x)<<"  "<<x<<std::endl;
+        std::cout<<"x = "<<tmv::TMV_Text(x)<<std::endl;
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
         std::cout<<"cv = "<<tmv::TMV_Text(cv)<<"  "<<cv<<std::endl;
-        std::cout<<"cx = "<<tmv::TMV_Text(cx)<<"  "<<cx<<std::endl;
+        std::cout<<"cx = "<<tmv::TMV_Text(cx)<<std::endl;
     }
 
     DoTestLDivVM1R<T,T>(dt,v,a,label+" R,R");
@@ -1899,10 +1905,10 @@ static void TestMatrixDivArith3e(
         std::cout<<"Start Test Div 3e: "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"w = "<<tmv::TMV_Text(w)<<"  "<<w<<std::endl;
-        std::cout<<"y = "<<tmv::TMV_Text(y)<<"  "<<y<<std::endl;
+        std::cout<<"y = "<<tmv::TMV_Text(y)<<std::endl;
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
         std::cout<<"cw = "<<tmv::TMV_Text(cw)<<"  "<<cw<<std::endl;
-        std::cout<<"cy = "<<tmv::TMV_Text(cy)<<"  "<<cy<<std::endl;
+        std::cout<<"cy = "<<tmv::TMV_Text(cy)<<std::endl;
     }
 
     DoTestRDivVM1R<T,T>(dt,w,a,label+" R,R");

@@ -67,7 +67,7 @@ Def3(CT,CT)
 
 #undef Def3
 
-#define Def3(T,T1) \
+#define Def3a(T,T1) \
   template <> template <> void GenDiagMatrix<T >::doLDivEq(\
       const VectorView<T1 >& ) const\
   { TMVAssert(TMV_FALSE); } \
@@ -82,10 +82,10 @@ Def3(CT,CT)
   { TMVAssert(TMV_FALSE); } \
 
 #ifdef INST_COMPLEX
-Def3(CT,T)
+Def3a(CT,T)
 #endif
 
-#undef Def3
+#undef Def3a
 
 #define Def4(T,T1,T0) \
   template void GenDiagMatrix<T >::doLDiv( \
@@ -103,7 +103,7 @@ Def4(CT,CT,CT)
 
 #undef Def4
 
-#define Def4(T,T1,T0) \
+#define Def4a(T,T1,T0) \
   template <> template <> void GenDiagMatrix<T >::doLDiv( \
       const GenVector<T1 >& , const VectorView<T0 >& ) const\
       { TMVAssert(TMV_FALSE); } \
@@ -112,12 +112,12 @@ Def4(CT,CT,CT)
       { TMVAssert(TMV_FALSE); } \
 
 #ifdef INST_COMPLEX
-Def4(CT,CT,T)
-Def4(T,CT,T)
-Def4(CT,T,T)
+Def4a(CT,CT,T)
+Def4a(T,CT,T)
+Def4a(CT,T,T)
 #endif
 
-#undef Def4
+#undef Def4a
 
 #undef CT
 

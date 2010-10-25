@@ -300,7 +300,7 @@ namespace tmv {
             *fout << "Norm(M-USV)/Norm(USV) = "<<nm;
             *fout <<"  "<<cond<<" * "<<TMV_Epsilon<T>()<<std::endl;
         }
-        return nm < cond*TMV_Epsilon<T>();
+        return nm < cond*RT(mm.colsize())*TMV_Epsilon<T>();
     }
 
     template <class T> 

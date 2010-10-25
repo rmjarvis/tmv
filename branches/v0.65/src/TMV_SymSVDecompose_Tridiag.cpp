@@ -349,7 +349,7 @@ namespace tmv {
             LAPCM LAPCH_LO,LAPV(n),
             LAPP(A.ptr()),LAPV(ldu),LAPP(D.ptr()),LAPP(E.ptr()),
             LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
-        lwork = int(std::real(work[0]));
+        lwork = int(TMV_REAL(work[0]));
         work.resize(lwork);
 #endif
 #endif
@@ -447,7 +447,7 @@ namespace tmv {
             LAPCM LAPCH_LO,LAPV(n),
             LAPP(A.ptr()),LAPV(ldu),LAPP(D.ptr()),LAPP(E.ptr()),
             LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
-        lwork = int(std::real(work[0]));
+        lwork = int(TMV_REAL(work[0]));
         work.resize(lwork);
 #endif
 #endif

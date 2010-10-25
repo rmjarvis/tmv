@@ -1,4 +1,3 @@
-#define CT std::complex<T>
 #define XXD // Turn this off to reduce the compiled code size.
 
 // Preprocessor options:
@@ -79,9 +78,6 @@ template <class M0, class M1>
 inline void CopyBackM(const M0& m0, M1& m1)
 { m1 = m0; }
 
-#define RealType(T) typename tmv::Traits<T>::real_type
-#define ComplexType(T) typename tmv::Traits<T>::complex_type
-
 #define ProductType(T1,T2) typename tmv::Traits2<T1,T2>::type
 
 #ifdef NOMIX
@@ -109,13 +105,14 @@ inline void CopyBackM(const M0& m0, M1& m1)
 template <class T, class MM> 
 static void DoTestMa_Basic(const MM& a, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start Ma "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
     }
 
     tmv::Matrix<T> m = a;
-    RealType(T) eps = EPS * (a.colsize() + a.rowsize());
+    RT eps = EPS * RT(m.colsize()+m.rowsize());
 
 #ifdef XXD
     if (XXDEBUG1) {
@@ -128,9 +125,11 @@ static void DoTestMa_Basic(const MM& a, std::string label)
             std::cout<<"Trace(a) = "<<Trace(a)<<"  "<<Trace(m)<<std::endl;
 #ifndef NODIV
             std::cout<<"Det(a) = "<<Det(a)<<"  "<<Det(m)<<std::endl;
-            std::cout<<"diff = "<<tmv::TMV_ABS2(Det(a)-Det(m))<<"  "<<eps*Norm(m)*Norm(m.inverse())*tmv::TMV_ABS2(Det(m))<<std::endl;
+            std::cout<<"diff = "<<tmv::TMV_ABS2(Det(a)-Det(m))<<"  "<<
+                eps*Norm(m)*Norm(m.inverse())*tmv::TMV_ABS2(Det(m))<<std::endl;
             std::cout<<"LogDet(a) = "<<LogDet(a)<<"  "<<LogDet(m)<<std::endl;
-            std::cout<<"diff = "<<tmv::TMV_ABS2(LogDet(a)-LogDet(m))<<"  "<<eps*Norm(m)*Norm(m.inverse())<<std::endl;
+            std::cout<<"diff = "<<tmv::TMV_ABS2(LogDet(a)-LogDet(m))<<"  "<<
+                eps*Norm(m)*Norm(m.inverse())<<std::endl;
 #endif
         }
 #endif
@@ -143,7 +142,8 @@ static void DoTestMa_Basic(const MM& a, std::string label)
         std::cout<<"NormInf(a) = "<<NormInf(a)<<"  "<<NormInf(m)<<std::endl;
         std::cout<<"abs(diff) = "<<tmv::TMV_ABS2(NormInf(a)-NormInf(m))<<std::endl;
         std::cout<<"eps*norminf = "<<eps*NormInf(m)<<std::endl;
-        std::cout<<"MaxAbsElement(a) = "<<MaxAbsElement(a)<<"  "<<MaxAbsElement(m)<<std::endl;
+        std::cout<<"MaxAbsElement(a) = "<<MaxAbsElement(a)<<"  "<<
+            MaxAbsElement(m)<<std::endl;
     }
 #endif
 
@@ -155,16 +155,16 @@ static void DoTestMa_Basic(const MM& a, std::string label)
 #ifndef NODIV
         T d = Det(m);
         if (tmv::TMV_ABS2(d) > 0.5) {
-            RealType(T) eps1 = eps;
-            if (!std::numeric_limits<RealType(T)>::is_integer) 
+            RT eps1 = eps;
+            if (!std::numeric_limits<RT>::is_integer) 
                 eps1 *= Norm(m) * Norm(m.inverse());
             Assert(Equal2(Det(a),d,eps1*tmv::TMV_ABS2(d)),label+" Det");
-            if (!std::numeric_limits<RealType(T)>::is_integer) {
+            if (!std::numeric_limits<RT>::is_integer) {
                 Assert(Equal2(LogDet(a),LogDet(m),eps1),label+" LogDet");
             }
         } else if (tmv::TMV_ABS2(d) != 0.0) {
-            RealType(T) eps1 = eps;
-            if (!std::numeric_limits<RealType(T)>::is_integer) 
+            RT eps1 = eps;
+            if (!std::numeric_limits<RT>::is_integer) 
                 eps1 *= Norm(m) * Norm(m.inverse());
             Assert(Equal2(Det(a),d,eps1*(1+tmv::TMV_ABS2(d))),label+" Det");
         } else {
@@ -174,12 +174,12 @@ static void DoTestMa_Basic(const MM& a, std::string label)
     }
 #endif
 
-    if (!std::numeric_limits<RealType(T)>::is_integer) {
+    if (!std::numeric_limits<RT>::is_integer) {
         Assert(Equal2(NormF(a),NormF(m),eps*NormF(m)),label+" NormF");
         Assert(Equal2(Norm(a),Norm(m),eps*Norm(m)),label+" Norm");
     }
     Assert(Equal2(NormSq(a),NormSq(m),eps*NormSq(m)),label+" NormSq");
-    if (!std::numeric_limits<RealType(T)>::is_integer && 
+    if (!std::numeric_limits<RT>::is_integer && 
         tmv::Traits<T>::iscomplex) {
         Assert(Equal2(Norm1(a),Norm1(m),eps*Norm1(m)),label+" Norm1");
         Assert(Equal2(NormInf(a),NormInf(m),eps*NormInf(m)),label+" NormInf");
@@ -190,7 +190,7 @@ static void DoTestMa_Basic(const MM& a, std::string label)
            label+" MaxAbs2Element");
 #ifndef NODIV
 #ifndef NOSV
-    if (donorm2 && !std::numeric_limits<RealType(T)>::is_integer) {
+    if (donorm2 && !std::numeric_limits<RT>::is_integer) {
 #ifdef XXD
         if (XXDEBUG1) {
             std::cout<<"Norm2(a) = "<<a.doNorm2()<<"  "<<m.doNorm2()<<std::endl;
@@ -200,7 +200,8 @@ static void DoTestMa_Basic(const MM& a, std::string label)
 #endif
         Assert(Equal2(a.doNorm2(),m.doNorm2(),eps*m.doCondition()*m.doNorm2()),
                label+" DoNorm2");
-        Assert(Equal2(Norm2(a),Norm2(m),eps*m.condition()*m.doNorm2()),label+" Norm2");
+        Assert(Equal2(Norm2(a),Norm2(m),eps*m.condition()*m.doNorm2()),
+               label+" Norm2");
     }
 #endif
 #endif
@@ -216,7 +217,7 @@ static void DoTestMa_Basic(const MM& a, std::string label)
         std::cout<<"Norm(at-mt) = "<<Norm(MAT(T,Adjoint(a))-Adjoint(m))<<std::endl;
     }
 #endif
-    if (!std::numeric_limits<RealType(T)>::is_integer) eps *= Norm(m);
+    if (!std::numeric_limits<RT>::is_integer) eps *= Norm(m);
     Assert(Equal(MAT(T,Transpose(a)),Transpose(m),eps),label+" Transpose");
     Assert(Equal(MAT(T,Conjugate(a)),Conjugate(m),eps),label+" Conjugate");
     Assert(Equal(MAT(T,Adjoint(a)),Adjoint(m),eps),label+" Adjoint");
@@ -227,8 +228,7 @@ static void DoTestMa_Basic(const MM& a, std::string label)
 template <class T, class MM> 
 static void DoTestMa_Full(const MM& a, std::string label)
 {
-    typedef RealType(T) RT;
-
+    typedef typename tmv::Traits<T>::real_type RT;
     DoTestMa_Basic<T>(a,label);
 
 #if (XTEST & 2)
@@ -252,7 +252,7 @@ static void DoTestMa_Full(const MM& a, std::string label)
         std::cout<<"a.sumAbs2Elements() = "<<a.sumAbs2Elements()<<"  "<<SumAbs2Elements(m)<<std::endl;
     }
 #endif
-    if (!std::numeric_limits<RealType(T)>::is_integer) {
+    if (!(std::numeric_limits<RT>::is_integer)) {
         Assert(Equal2(a.normF(),NormF(m),eps*NormF(m)),label+" NormF");
         Assert(Equal2(a.norm(),Norm(m),eps*Norm(m)),label+" Norm");
     }
@@ -262,8 +262,7 @@ static void DoTestMa_Full(const MM& a, std::string label)
     Assert(Equal2(a.normSq(),NormSq(m),eps*NormSq(m)),label+" NormSq");
     Assert(Equal2(a.normSq(1000),NormSq(m*RT(1000)),eps*1000000*NormSq(m)),
            label+" NormSq,scale");
-    if (!std::numeric_limits<RealType(T)>::is_integer && 
-        tmv::Traits<T>::iscomplex) {
+    if (!std::numeric_limits<RT>::is_integer && tmv::Traits<T>::iscomplex) {
         Assert(Equal2(a.sumAbsElements(),SumAbsElements(m),
                       eps*SumAbsElements(m)),
                label+" SumAbsElements");
@@ -281,7 +280,7 @@ static void DoTestMa_Full(const MM& a, std::string label)
            label+" MaxAbs2Element");
 #ifndef NODIV
 #ifndef NOSV
-    if (donorm2 && !std::numeric_limits<RealType(T)>::is_integer) {
+    if (donorm2 && !std::numeric_limits<RT>::is_integer) {
         Assert(Equal2(a.norm2(),m.doNorm2(),eps*m.condition()*m.doNorm2()),
                label+" Norm2");
     }
@@ -311,6 +310,7 @@ static void DoTestMC(const MM& a, std::string label)
 template <class T, class MM, class T2> 
 static void DoTestMX1a_Basic(const MM& a, T2 x, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start MX1a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -319,8 +319,8 @@ static void DoTestMX1a_Basic(const MM& a, T2 x, std::string label)
 
     tmv::Matrix<T> m = a;
 
-    RealType(T) eps = EPS * (a.colsize() + a.rowsize());
-    if (!std::numeric_limits<RealType(T)>::is_integer) eps *= Norm(m);
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    if (!std::numeric_limits<RT>::is_integer) eps *= Norm(m);
 
 #ifndef NONSQUARE
     if (CanAddX(a,x)) {
@@ -353,13 +353,14 @@ static void DoTestMX1a_Basic(const MM& a, T2 x, std::string label)
 template <class T, class MM, class T2> 
 static void DoTestMX1a_Full(const MM& a, T2 x, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     DoTestMX1a_Basic<T>(a,x,label);
 
 #if (XTEST & 2)
     tmv::Matrix<T> m = a;
 
-    RealType(T) eps = EPS * (a.colsize() + a.rowsize());
-    if (!std::numeric_limits<RealType(T)>::is_integer) eps *= Norm(m);
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    if (!std::numeric_limits<RT>::is_integer) eps *= Norm(m);
 
 #ifndef NONSQUARE
     if (CanAddX(a,x)) {
@@ -370,7 +371,7 @@ static void DoTestMX1a_Full(const MM& a, T2 x, std::string label)
 #endif
     if (CanMultX(a,x)) {
         Assert(Equal(MAT2(T,T2,a*x),(x*m),eps*tmv::TMV_ABS2(x)),label+" a*x");
-        if (!std::numeric_limits<RealType(T)>::is_integer) {
+        if (!std::numeric_limits<RT>::is_integer) {
             Assert(Equal(MAT2(T,T2,a/x),(m/x),eps/tmv::TMV_ABS2(x)),label+" a/x");
         }
     }
@@ -394,6 +395,7 @@ static void DoTestMX1C(const MM& a, T2 x, std::string label)
 template <class T, class MM, class T2> 
 static void DoTestMX2a_Basic(MM& a, T2 x, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start MX2a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -408,8 +410,8 @@ static void DoTestMX2a_Basic(MM& a, T2 x, std::string label)
     tmv::Matrix<T> m1 = a;
     tmv::Matrix<T> temp = a;
 
-    RealType(T) eps = EPS * (a.colsize() + a.rowsize());
-    if (!std::numeric_limits<RealType(T)>::is_integer) eps *= Norm(m1);
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    if (!std::numeric_limits<RT>::is_integer) eps *= Norm(m1);
 
     Assert(Equal(MAT(T,a),m1,eps),label+" a = m1");
 
@@ -469,14 +471,15 @@ static void DoTestMX2a_Basic(MM& a, T2 x, std::string label)
 template <class T, class MM, class T2> 
 static void DoTestMX2a_Full(MM& a, T2 x, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     DoTestMX2a_Basic<T>(a,x,label);
 
 #if (XTEST & 2)
     tmv::Matrix<T> m1 = a;
     tmv::Matrix<T> temp = a;
 
-    RealType(T) eps = EPS * (a.colsize() + a.rowsize());
-    if (!std::numeric_limits<RealType(T)>::is_integer) eps *= Norm(m1);
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    if (!std::numeric_limits<RT>::is_integer) eps *= Norm(m1);
 
     Assert(Equal(MAT(T,a),m1,eps),label+" a = m1");
 
@@ -524,7 +527,7 @@ static void DoTestMX2a_Full(MM& a, T2 x, std::string label)
         Assert(Equal(MAT(T,a),m2,eps*tmv::TMV_ABS2(x)),label+" a *= -x");
         Assert(Equal(MAT(T,a*=-x),(m2*=-x),eps*tmv::TMV_ABS2(x*x)),label+" a *= -x");
         CopyBackM(a0,a);
-        if (!std::numeric_limits<RealType(T)>::is_integer) {
+        if (!std::numeric_limits<RT>::is_integer) {
             a /= x;
             m2 = m1/x;
             Assert(Equal(MAT(T,a),m2,eps*tmv::TMV_ABS2(x)),label+" a /= x");
@@ -568,6 +571,8 @@ static void DoTestMX2C(MM& a, T2 x, std::string label)
 template <class Ta, class T, class MM, class V> 
 static void DoTestMV1a_Basic(const MM& a, const V& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<T>::complex_type CT;
     if (showstartdone) {
         std::cout<<"Start MV1a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -583,9 +588,9 @@ static void DoTestMV1a_Basic(const MM& a, const V& b, std::string label)
     tmv::Matrix<Ta> m = a;
     tmv::Vector<T> v = b;
 
-    RealType(T) eps = EPS * 
+    RT eps = EPS * 
         (a.colsize() + a.rowsize()) * (a.colsize() + a.rowsize());
-    if (!std::numeric_limits<RealType(T)>::is_integer) 
+    if (!std::numeric_limits<RT>::is_integer) 
         eps *= Norm(m) * Norm(v);
 
     if (CanMultMV(a,b)) {
@@ -600,8 +605,8 @@ static void DoTestMV1a_Basic(const MM& a, const V& b, std::string label)
         }
 #endif
         Assert(Equal(VEC2(T,Ta,a*b),(m*v),eps),label+" a*b");
-        RealType(T) x(5);
-        ComplexType(T) z(3,4);
+        RT x(5);
+        CT z(3,4);
 #ifdef XXD
         if (XXDEBUG4) {
             std::cout<<"x*a*b = "<<(x*a*b)<<std::endl;
@@ -621,7 +626,7 @@ static void DoTestMV1a_Basic(const MM& a, const V& b, std::string label)
             std::cout<<"x*eps = "<<x*eps<<std::endl;
         }
 #endif
-        Assert(Equal(VEC(ComplexType(T),z*a*b),(z*m*v),x*eps),label+" z*a*b");
+        Assert(Equal(VEC(CT,z*a*b),(z*m*v),x*eps),label+" z*a*b");
     }
     if (showstartdone) std::cout<<"Done MV1a"<<std::endl;
 }
@@ -629,28 +634,27 @@ static void DoTestMV1a_Basic(const MM& a, const V& b, std::string label)
 template <class Ta, class T, class MM, class V> 
 static void DoTestMV1a_Full(const MM& a, const V& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<T>::complex_type CT;
     DoTestMV1a_Basic<Ta,T>(a,b,label);
 
 #if (XTEST & 2)
     tmv::Matrix<Ta> m = a;
     tmv::Vector<T> v = b;
 
-    RealType(T) eps = EPS * (a.colsize() + a.rowsize());
-    if (!std::numeric_limits<RealType(T)>::is_integer) 
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    if (!std::numeric_limits<RT>::is_integer) 
         eps *= Norm(m) * Norm(v);
 
     if (CanMultMV(a,b)) {
-        RealType(T) x(5);
-        ComplexType(T) z(3,4);
+        RT x(5);
+        std::complex<RT> z(3,4);
         Assert(Equal(VEC2(T,Ta,(x*a)*b),(x*m*v),x*eps),label+" (x*a)*b");
         Assert(Equal(VEC2(T,Ta,x*(a*b)),(x*m*v),x*eps),label+" x*(a*b)");
         Assert(Equal(VEC2(T,Ta,a*(x*b)),(x*m*v),x*eps),label+" a*(x*b)");
-        Assert(Equal(VEC(ComplexType(T),(z*a)*b),(z*m*v),x*eps),
-               label+" (z*a)*b");
-        Assert(Equal(VEC(ComplexType(T),z*(a*b)),(z*m*v),x*eps),
-               label+" z*(a*b)");
-        Assert(Equal(VEC(ComplexType(T),a*(z*b)),(z*m*v),x*eps),
-               label+" a*(z*b)");
+        Assert(Equal(VEC(CT,(z*a)*b),(z*m*v),x*eps),label+" (z*a)*b");
+        Assert(Equal(VEC(CT,z*(a*b)),(z*m*v),x*eps),label+" z*(a*b)");
+        Assert(Equal(VEC(CT,a*(z*b)),(z*m*v),x*eps),label+" a*(z*b)");
     }
     if (showstartdone) std::cout<<"Done MV1a_Full"<<std::endl;
 #endif
@@ -659,6 +663,8 @@ static void DoTestMV1a_Full(const MM& a, const V& b, std::string label)
 template <class Ta, class T, class MM, class V> 
 static void DoTestVM1a_Basic(const MM& a, const V& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<T>::complex_type CT;
     if (showstartdone) {
         std::cout<<"Start VM1a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -674,13 +680,13 @@ static void DoTestVM1a_Basic(const MM& a, const V& b, std::string label)
     tmv::Matrix<Ta> m = a;
     tmv::Vector<T> v = b;
 
-    RealType(T) eps = EPS * (a.colsize() + a.rowsize());
-    if (!std::numeric_limits<RealType(T)>::is_integer) 
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    if (!std::numeric_limits<RT>::is_integer) 
         eps *= Norm(m) * Norm(v);
 
     if (CanMultVM(b,a)) {
-        RealType(T) x(5);
-        ComplexType(T) z(3,4);
+        RT x(5);
+        CT z(3,4);
 #ifdef XXD
         if (XXDEBUG4) {
             std::cout<<"CanMult("<<tmv::TMV_Text(v)<<","<<tmv::TMV_Text(m)<<")\n";
@@ -690,14 +696,14 @@ static void DoTestVM1a_Basic(const MM& a, const V& b, std::string label)
             std::cout<<"z*b*a = "<<(z*b*a)<<std::endl;
             std::cout<<"b*a Norm(diff) = "<<Norm(VEC2(T,Ta,b*a)-(v*m))<<std::endl;
             std::cout<<"x*b*a Norm(diff) = "<<Norm(VEC2(T,Ta,x*b*a)-(x*v*m))<<std::endl;
-            std::cout<<"z*b*a Norm(diff) = "<<Norm(VEC(ComplexType(T),z*b*a)-(z*v*m))<<std::endl;
+            std::cout<<"z*b*a Norm(diff) = "<<Norm(VEC(CT,z*b*a)-(z*v*m))<<std::endl;
             std::cout<<"eps = "<<eps<<std::endl;
             std::cout<<"x*eps = "<<x*eps<<std::endl;
         }
 #endif
         Assert(Equal(VEC2(T,Ta,b*a),(v*m),eps),label+" b*a");
         Assert(Equal(VEC2(T,Ta,x*b*a),(x*v*m),x*eps),label+" x*b*a");
-        Assert(Equal(VEC(ComplexType(T),z*b*a),(z*v*m),x*eps),label+" z*b*a");
+        Assert(Equal(VEC(CT,z*b*a),(z*v*m),x*eps),label+" z*b*a");
     }
     if (showstartdone) std::cout<<"Done VM1a"<<std::endl;
 }
@@ -705,25 +711,27 @@ static void DoTestVM1a_Basic(const MM& a, const V& b, std::string label)
 template <class Ta, class T, class MM, class V> 
 static void DoTestVM1a_Full(const MM& a, const V& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<T>::complex_type CT;
     DoTestVM1a_Basic<Ta,T>(a,b,label);
 
 #if (XTEST & 2)
     tmv::Matrix<Ta> m = a;
     tmv::Vector<T> v = b;
 
-    RealType(T) eps = EPS * (a.colsize() + a.rowsize());
-    if (!std::numeric_limits<RealType(T)>::is_integer) 
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    if (!std::numeric_limits<RT>::is_integer) 
         eps *= Norm(m) * Norm(v);
 
     if (CanMultVM(b,a)) {
-        RealType(T) x(5);
-        ComplexType(T) z(3,4);
+        RT x(5);
+        CT z(3,4);
         Assert(Equal(VEC2(T,Ta,(x*b)*a),(x*v*m),x*eps),label+" (x*b)*a");
         Assert(Equal(VEC2(T,Ta,x*(b*a)),(x*v*m),x*eps),label+" x*(b*a)");
         Assert(Equal(VEC2(T,Ta,b*(x*a)),(x*v*m),x*eps),label+" b*(x*a)");
-        Assert(Equal(VEC(ComplexType(T),(z*b)*a),(z*v*m),x*eps),label+" (z*b)*a");
-        Assert(Equal(VEC(ComplexType(T),z*(b*a)),(z*v*m),x*eps),label+" z*(b*a)");
-        Assert(Equal(VEC(ComplexType(T),b*(z*a)),(z*v*m),x*eps),label+" b*(z*a)");
+        Assert(Equal(VEC(CT,(z*b)*a),(z*v*m),x*eps),label+" (z*b)*a");
+        Assert(Equal(VEC(CT,z*(b*a)),(z*v*m),x*eps),label+" z*(b*a)");
+        Assert(Equal(VEC(CT,b*(z*a)),(z*v*m),x*eps),label+" b*(z*a)");
     }
     if (showstartdone) std::cout<<"Done VM1a_Full"<<std::endl;
 #endif
@@ -933,6 +941,7 @@ static inline void SetZ(std::complex<T>& z) { z = std::complex<T>(3,4); }
 template <class Ta, class T, class MM, class V> 
 static void DoTestMV2a_Basic(const MM& a, V& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start MV2a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -948,9 +957,9 @@ static void DoTestMV2a_Basic(const MM& a, V& b, std::string label)
     tmv::Matrix<Ta> m = a;
     tmv::Vector<T> v = b;
 
-    RealType(T) eps = EPS * (a.colsize() + a.rowsize());
-    RealType(T) eps2 = eps;
-    if (!std::numeric_limits<RealType(T)>::is_integer) {
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    RT eps2 = eps;
+    if (!std::numeric_limits<RT>::is_integer) {
         eps *= Norm(m) * Norm(v);
         eps2 *= Norm(m*v) + Norm(m)*Norm(v);
     }
@@ -985,7 +994,7 @@ static void DoTestMV2a_Basic(const MM& a, V& b, std::string label)
 #endif
         Assert(Equal(c,(c0+prod),eps2),label+" c+=a*b");
         c = c0;
-        RealType(T) x(5);
+        RT x(5);
         T z; SetZ(z);
         c = x*a*b;
 #ifdef XXD
@@ -1030,7 +1039,7 @@ static void DoTestMV2a_Basic(const MM& a, V& b, std::string label)
         b -= a*b;
         Assert(Equal(VEC(T,b),(v-prod),eps2),label+" b-=a*b");
         b = v;
-        RealType(T) x(5);
+        RT x(5);
         T z; SetZ(z);
         b = x*a*b;
         Assert(Equal(VEC(T,b),x*prod,x*eps),label+" b=x*a*b");
@@ -1046,15 +1055,16 @@ static void DoTestMV2a_Basic(const MM& a, V& b, std::string label)
 template <class Ta, class T, class MM, class V> 
 static void DoTestMV2a_Full(const MM& a, V& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     DoTestMV2a_Basic<Ta,T>(a,b,label);
 
 #if (XTEST & 2)
     tmv::Matrix<Ta> m = a;
     tmv::Vector<T> v = b;
 
-    RealType(T) eps = EPS * (a.colsize() + a.rowsize());
-    RealType(T) eps2 = eps;
-    if (!std::numeric_limits<RealType(T)>::is_integer) {
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    RT eps2 = eps;
+    if (!std::numeric_limits<RT>::is_integer) {
         eps *= Norm(m) * Norm(v);
         eps2 *= Norm(m*v) + Norm(m)*Norm(v);
     }
@@ -1064,7 +1074,7 @@ static void DoTestMV2a_Full(const MM& a, V& b, std::string label)
         tmv::Vector<T> c = prod;
         tmv::Vector<T> c0 = c;
         c0 /= T(2);
-        RealType(T) x(5);
+        RT x(5);
         T z; SetZ(z);
         c = c0;
         c += x*a*b;
@@ -1112,7 +1122,7 @@ static void DoTestMV2a_Full(const MM& a, V& b, std::string label)
 #ifdef ALIASOK
     if (CanMultMV(a,b,b)) {
         tmv::Vector<T> prod = m*v;
-        RealType(T) x(5);
+        RT x(5);
         T z; SetZ(z);
         b = v;
         b += x*a*b;
@@ -1163,6 +1173,7 @@ static void DoTestMV2a_Full(const MM& a, V& b, std::string label)
 template <class Ta, class T, class MM, class V> 
 static void DoTestVM2a_Basic(const MM& a, V& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start VM2a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -1178,9 +1189,9 @@ static void DoTestVM2a_Basic(const MM& a, V& b, std::string label)
     tmv::Matrix<Ta> m = a;
     tmv::Vector<T> v = b;
 
-    RealType(T) eps = EPS * (a.colsize() + a.rowsize());
-    RealType(T) eps2 = eps;
-    if (!std::numeric_limits<RealType(T)>::is_integer) {
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    RT eps2 = eps;
+    if (!std::numeric_limits<RT>::is_integer) {
         eps *= Norm(m) * Norm(v);
         eps2 *= Norm(v*m) + Norm(m)*Norm(v);
     }
@@ -1205,7 +1216,7 @@ static void DoTestVM2a_Basic(const MM& a, V& b, std::string label)
         c += b*a;
         Assert(Equal(c,(c0+prod),eps2),label+" c+=b*a");
         c = c0;
-        RealType(T) x(5);
+        RT x(5);
         T z; SetZ(z);
         c = x*b*a;
         Assert(Equal(c,x*prod,x*eps),label+" c=x*b*a");
@@ -1250,15 +1261,16 @@ static void DoTestVM2a_Basic(const MM& a, V& b, std::string label)
 template <class Ta, class T, class MM, class V> 
 static void DoTestVM2a_Full(const MM& a, V& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     DoTestVM2a_Basic<Ta,T>(a,b,label);
 
 #if (XTEST & 2)
     tmv::Matrix<Ta> m = a;
     tmv::Vector<T> v = b;
 
-    RealType(T) eps = EPS * (a.colsize() + a.rowsize());
-    RealType(T) eps2 = eps;
-    if (!std::numeric_limits<RealType(T)>::is_integer) {
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    RT eps2 = eps;
+    if (!std::numeric_limits<RT>::is_integer) {
         eps *= Norm(m) * Norm(v);
         eps2 *= Norm(v*m) + Norm(m)*Norm(v);
     }
@@ -1268,7 +1280,7 @@ static void DoTestVM2a_Full(const MM& a, V& b, std::string label)
         tmv::Vector<T> c = prod;
         tmv::Vector<T> c0 = c;
         c0 /= T(2);
-        RealType(T) x(5);
+        RT x(5);
         T z; SetZ(z);
         c = c0;
         c += -b*a;
@@ -1316,7 +1328,7 @@ static void DoTestVM2a_Full(const MM& a, V& b, std::string label)
     if (CanMultVM(b,a,b)) {
         tmv::Vector<T> prod = v*m;
         b = v;
-        RealType(T) x(5);
+        RT x(5);
         T z; SetZ(z);
         b *= x*a;
         Assert(Equal(VEC(T,b),x*prod,x*eps),label+" b*=(x*a)");
@@ -1512,6 +1524,7 @@ template <class Ta, class Tb, class T, class MM, class V1, class V2>
 static void DoTestMV3a_Basic(
     const MM& a, const V1& b, V2& c, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start MV3a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -1524,9 +1537,9 @@ static void DoTestMV3a_Basic(
     tmv::Vector<Tb> v1 = b;
     tmv::Vector<T> v2 = c;
 
-    RealType(T) eps = EPS * (a.colsize() + a.rowsize());
-    RealType(T) eps2 = eps;
-    if (!std::numeric_limits<RealType(T)>::is_integer) {
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    RT eps2 = eps;
+    if (!std::numeric_limits<RT>::is_integer) {
         eps *= Norm(m) * Norm(v1);
         eps2 *= Norm(m*v1) + Norm(m)*Norm(v1);
     }
@@ -1550,7 +1563,7 @@ static void DoTestMV3a_Basic(
         v2 = c0 + m*v1;
         Assert(Equal(VEC(T,c),v2,eps2),label+" c+=a*b");
         CopyBackV(c0,c);
-        RealType(T) x(5);
+        RT x(5);
         T z; SetZ(z);
         c = x*a*b;
         v2 = x*m*v1;
@@ -1585,6 +1598,7 @@ static void DoTestMV3a_Basic(
 template <class Ta, class Tb, class T, class MM, class V1, class V2> 
 static void DoTestMV3a_Full(const MM& a, const V1& b, V2& c, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     DoTestMV3a_Basic<Ta,Tb,T>(a,b,c,label);
 
 #if (XTEST & 2)
@@ -1593,16 +1607,16 @@ static void DoTestMV3a_Full(const MM& a, const V1& b, V2& c, std::string label)
     tmv::Vector<Tb> v1 = b;
     tmv::Vector<T> v2 = c;
 
-    RealType(T) eps = EPS * (a.colsize() + a.rowsize());
-    RealType(T) eps2 = eps;
-    if (!std::numeric_limits<RealType(T)>::is_integer) {
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    RT eps2 = eps;
+    if (!std::numeric_limits<RT>::is_integer) {
         eps *= Norm(m) * Norm(v1);
         eps2 *= Norm(m*v1) + Norm(m)*Norm(v1);
     }
 
     if (CanMultMV(a,b,c)) {
         typename V2::copy_type c0 = c;
-        RealType(T) x(5);
+        RT x(5);
         T z; SetZ(z);
         c += x*a*b;
         v2 = c0 + x*m*v1;
@@ -1711,6 +1725,7 @@ template <class Ta, class Tb, class T, class MM, class V1, class V2>
 static void DoTestVM3a_Basic(
     const MM& a, const V1& b, V2& c, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start VM3a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -1723,9 +1738,9 @@ static void DoTestVM3a_Basic(
     tmv::Vector<Tb> v1 = b;
     tmv::Vector<T> v2 = c;
 
-    RealType(T) eps = EPS * (a.colsize() + a.rowsize());
-    RealType(T) eps2 = eps;
-    if (!std::numeric_limits<RealType(T)>::is_integer) {
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    RT eps2 = eps;
+    if (!std::numeric_limits<RT>::is_integer) {
         eps *= Norm(m) * Norm(v1);
         eps2 *= Norm(v1*m) + Norm(m)*Norm(v1);
     }
@@ -1749,7 +1764,7 @@ static void DoTestVM3a_Basic(
         v2 = c0 + v1*m;
         Assert(Equal(VEC(T,c),v2,eps2),label+" c+=b*a");
         CopyBackV(c0,c);
-        RealType(T) x(5);
+        RT x(5);
         T z; SetZ(z);
         c = x*b*a;
         v2 = x*v1*m;
@@ -1784,6 +1799,8 @@ static void DoTestVM3a_Basic(
 template <class Ta, class Tb, class T, class MM, class V1, class V2> 
 static void DoTestVM3a_Full(const MM& a, const V1& b, V2& c, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<T>::complex_type CT;
     DoTestVM3a_Basic<Ta,Tb,T>(a,b,c,label);
 
 #if (XTEST & 2)
@@ -1792,17 +1809,17 @@ static void DoTestVM3a_Full(const MM& a, const V1& b, V2& c, std::string label)
     tmv::Vector<Tb> v1 = b;
     tmv::Vector<T> v2 = c;
 
-    RealType(T) eps = EPS * (a.colsize() + a.rowsize());
-    RealType(T) eps2 = eps;
-    if (!std::numeric_limits<RealType(T)>::is_integer) {
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    RT eps2 = eps;
+    if (!std::numeric_limits<RT>::is_integer) {
         eps *= Norm(m) * Norm(v1);
         eps2 *= Norm(v1*m) + Norm(m)*Norm(v1);
     }
 
     if (CanMultVM(b,a,c)) {
         typename V2::copy_type c0 = c;
-        RealType(T) x(5);
-        ComplexType(T) z(3,4);
+        RT x(5);
+        CT z(3,4);
         c += x*b*a;
         v2 = c0 + x*v1*m;
         Assert(Equal(VEC(T,c),v2,x*eps2),label+" c+=x*b*a");
@@ -1963,6 +1980,8 @@ static void DoTestVM3C(const MM& a, const V1& b, V2& c, std::string label)
 template <class T, class Tb, class Tsum, class M1, class M2> 
 static void DoTestMM1a_Basic(const M1& a, const M2& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<T>::complex_type CT;
     if (showstartdone) {
         std::cout<<"Start MM1a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -1979,8 +1998,8 @@ static void DoTestMM1a_Basic(const M1& a, const M2& b, std::string label)
         tmv::Matrix<T> m1 = a;
         tmv::Matrix<Tb> m2 = b;
 
-        RealType(T) eps = EPS * (a.colsize() + a.rowsize());
-        if (!std::numeric_limits<RealType(T)>::is_integer) 
+        RT eps = EPS * (a.colsize() + a.rowsize());
+        if (!std::numeric_limits<RT>::is_integer) 
             eps *= Norm(m1) * Norm(m2);
 
         {
@@ -2001,12 +2020,12 @@ static void DoTestMM1a_Basic(const M1& a, const M2& b, std::string label)
         }
 
         {
-            RealType(T) x(5);
-            ComplexType(T) z(3,4);
-            tmv::Matrix<ComplexType(T)> sum = m1+z*m2;
-            tmv::Matrix<ComplexType(T)> diff = m1-z*m2;
-            Assert(Equal(MAT(ComplexType(T),a+z*b),sum,x*eps),label+" a+z*b");
-            Assert(Equal(MAT(ComplexType(T),a-z*b),diff,x*eps),label+" a-z*b");
+            RT x(5);
+            CT z(3,4);
+            tmv::Matrix<CT> sum = m1+z*m2;
+            tmv::Matrix<CT> diff = m1-z*m2;
+            Assert(Equal(MAT(CT,a+z*b),sum,x*eps),label+" a+z*b");
+            Assert(Equal(MAT(CT,a-z*b),diff,x*eps),label+" a-z*b");
         }
     }
     if (showstartdone) std::cout<<"Done MM1a"<<std::endl;
@@ -2015,6 +2034,8 @@ static void DoTestMM1a_Basic(const M1& a, const M2& b, std::string label)
 template <class T, class Tb, class Tsum, class M1, class M2> 
 static void DoTestMM1a_Full(const M1& a, const M2& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<T>::complex_type CT;
     DoTestMM1a_Basic<T,Tb,Tsum>(a,b,label);
 
 #if (XTEST & 2)
@@ -2022,15 +2043,15 @@ static void DoTestMM1a_Full(const M1& a, const M2& b, std::string label)
         tmv::Matrix<T> m1 = a;
         tmv::Matrix<Tb> m2 = b;
 
-        RealType(T) eps = EPS * (a.colsize() + a.rowsize());
-        if (!std::numeric_limits<RealType(T)>::is_integer) 
+        RT eps = EPS * (a.colsize() + a.rowsize());
+        if (!std::numeric_limits<RT>::is_integer) 
             eps *= Norm(m1) * Norm(m2);
 
         {
             tmv::Matrix<Tsum> sum = m1+m2;
             tmv::Matrix<Tsum> diff = m1-m2;
 
-            RealType(T) x(5);
+            RT x(5);
             sum = m1+x*m2;
             diff = m1-x*m2;
             Assert(Equal(MAT2(T,Tb,a-x*b),diff,x*eps),label+" a-x*b");
@@ -2046,26 +2067,26 @@ static void DoTestMM1a_Full(const M1& a, const M2& b, std::string label)
         }
 
         {
-            RealType(T) x(5);
-            ComplexType(T) z(3,4);
-            tmv::Matrix<ComplexType(T)> sum = m1+z*m2;
-            tmv::Matrix<ComplexType(T)> diff = m1-z*m2;
+            RT x(5);
+            CT z(3,4);
+            tmv::Matrix<CT> sum = m1+z*m2;
+            tmv::Matrix<CT> diff = m1-z*m2;
             sum = x*m1+z*m2;
             diff = x*m1-z*m2;
-            Assert(Equal(MAT(ComplexType(T),x*a-z*b),diff,x*eps),label+" x*a-z*b");
-            Assert(Equal(MAT(ComplexType(T),x*a+z*b),sum,x*eps),label+" x*a+z*b");
+            Assert(Equal(MAT(CT,x*a-z*b),diff,x*eps),label+" x*a-z*b");
+            Assert(Equal(MAT(CT,x*a+z*b),sum,x*eps),label+" x*a+z*b");
             sum = z*m1+m2;
             diff = z*m1-m2;
-            Assert(Equal(MAT(ComplexType(T),z*a-b),diff,x*eps),label+" z*a-b");
-            Assert(Equal(MAT(ComplexType(T),z*a+b),sum,x*eps),label+" z*a+b");
+            Assert(Equal(MAT(CT,z*a-b),diff,x*eps),label+" z*a-b");
+            Assert(Equal(MAT(CT,z*a+b),sum,x*eps),label+" z*a+b");
             sum = z*m1+x*m2;
             diff = z*m1-x*m2;
-            Assert(Equal(MAT(ComplexType(T),z*a-x*b),diff,x*eps),label+" z*a-x*b");
-            Assert(Equal(MAT(ComplexType(T),z*a+x*b),sum,x*eps),label+" z*a+x*b");
+            Assert(Equal(MAT(CT,z*a-x*b),diff,x*eps),label+" z*a-x*b");
+            Assert(Equal(MAT(CT,z*a+x*b),sum,x*eps),label+" z*a+x*b");
             sum = z*m1+z*m2;
             diff = z*m1-z*m2;
-            Assert(Equal(MAT(ComplexType(T),z*a-z*b),diff,x*eps),label+" z*a-z*b");
-            Assert(Equal(MAT(ComplexType(T),z*a+z*b),sum,x*eps),label+" z*a+bz*");
+            Assert(Equal(MAT(CT,z*a-z*b),diff,x*eps),label+" z*a-z*b");
+            Assert(Equal(MAT(CT,z*a+z*b),sum,x*eps),label+" z*a+bz*");
         }
     }
     if (showstartdone) std::cout<<"Done MM1a"<<std::endl;
@@ -2085,6 +2106,7 @@ static void DoTestMM1RR(const M1& a, const M2& b, std::string label)
 template <class T, class M1, class M2> 
 static void DoTestMM1RC(const M1& a, const M2& b, std::string label)
 {
+    typedef std::complex<T> CT;
     DoTestMM1a_Basic<T,CT,CT>(a,b,label);
 
 #if (XTEST & 2)
@@ -2097,6 +2119,7 @@ static void DoTestMM1RC(const M1& a, const M2& b, std::string label)
 template <class T, class M1, class M2> 
 static void DoTestMM1CR(const M1& a, const M2& b, std::string label)
 {
+    typedef std::complex<T> CT;
     DoTestMM1a_Basic<CT,T,CT>(a,b,label);
 
 #if (XTEST & 2)
@@ -2109,6 +2132,7 @@ static void DoTestMM1CR(const M1& a, const M2& b, std::string label)
 template <class T, class M1, class M2> 
 static void DoTestMM1CC(const M1& a, const M2& b, std::string label)
 {
+    typedef std::complex<T> CT;
     DoTestMM1a_Full<CT,CT,CT>(a,b,label);
 
 #if (XTEST & 2)
@@ -2125,6 +2149,7 @@ static void DoTestMM1CC(const M1& a, const M2& b, std::string label)
 template <class T, class Tb, class M1, class M2> 
 static void DoTestMM2a_Basic(M1& a, const M2& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start MM2a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
@@ -2147,8 +2172,8 @@ static void DoTestMM2a_Basic(M1& a, const M2& b, std::string label)
 #endif
 #ifndef NOADDEQ
 
-    RealType(T) eps = EPS * (a.colsize() + a.rowsize());
-    if (!std::numeric_limits<RealType(T)>::is_integer) 
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    if (!std::numeric_limits<RT>::is_integer) 
         eps *= Norm(m1) * Norm(m2);
 
 #ifdef XXD
@@ -2204,6 +2229,7 @@ static void DoTestMM2a_Basic(M1& a, const M2& b, std::string label)
 template <class T, class Tb, class M1, class M2> 
 static void DoTestMM2a_Full(M1& a, const M2& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     DoTestMM2a_Basic<T,Tb>(a,b,label);
 
 #if (XTEST & 2)
@@ -2211,8 +2237,8 @@ static void DoTestMM2a_Full(M1& a, const M2& b, std::string label)
     const tmv::Matrix<T> m1 = a;
     const tmv::Matrix<Tb> m2 = b;
 
-    RealType(T) eps = EPS * (a.colsize() + a.rowsize());
-    if (!std::numeric_limits<RealType(T)>::is_integer) 
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    if (!std::numeric_limits<RT>::is_integer) 
         eps *= Norm(m1) * Norm(m2);
 
     if (CanAddEq(a,b)) {
@@ -2269,6 +2295,7 @@ static void DoTestMM2RR(M1& a, const M2& b, std::string label)
 template <class T, class M1, class M2> 
 static void DoTestMM2RC(M1& a, const M2& b, std::string label)
 {
+    typedef std::complex<T> CT;
     DoTestMM2a_Basic<T,CT>(a,b,label);
 #if (XTEST & 2)
     DoTestMM2a_Basic<T,CT>(a,Conjugate(b),label+" ConjB");
@@ -2278,6 +2305,7 @@ static void DoTestMM2RC(M1& a, const M2& b, std::string label)
 template <class T, class M1, class M2> 
 static void DoTestMM2CR(M1& a, const M2& b, std::string label)
 {
+    typedef std::complex<T> CT;
     typename M1::conjugate_type ac = a.conjugate();
     DoTestMM2a_Basic<CT,T>(a,b,label);
     DoTestMM2a_Basic<CT,T>(ac,b,label+" ConjA");
@@ -2286,6 +2314,7 @@ static void DoTestMM2CR(M1& a, const M2& b, std::string label)
 template <class T, class M1, class M2> 
 static void DoTestMM2CC(M1& a, const M2& b, std::string label)
 {
+    typedef std::complex<T> CT;
     typename M1::conjugate_type ac = a.conjugate();
     DoTestMM2a_Full<CT,CT>(a,b,label);
     DoTestMM2a_Basic<CT,CT>(ac,b,label+" ConjA");
@@ -2299,6 +2328,7 @@ static void DoTestMM2CC(M1& a, const M2& b, std::string label)
 template <class T, class Tb, class M1, class M2> 
 static void DoTestMM3a_Basic(const M1& a, const M2& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start MM3a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -2317,8 +2347,8 @@ static void DoTestMM3a_Basic(const M1& a, const M2& b, std::string label)
         tmv::Matrix<Tb> m2 = b;
         tmv::Matrix<ProductType(T,Tb)> mm = m1*m2;
 
-        RealType(T) eps = EPS * (a.colsize() + a.rowsize());
-        if (!std::numeric_limits<RealType(T)>::is_integer) 
+        RT eps = EPS * (a.colsize() + a.rowsize());
+        if (!std::numeric_limits<RT>::is_integer) 
             eps *= Norm(m1) * Norm(m2);
 
 #ifdef XXD
@@ -2363,6 +2393,7 @@ static void DoTestMM3RR(const M1& a, const M2& b, std::string label)
 template <class T, class M1, class M2> 
 static void DoTestMM3RC(const M1& a, const M2& b, std::string label)
 {
+    typedef std::complex<T> CT;
     DoTestMM3a_Basic<T,CT>(a,b,label);
 
 #if (XTEST & 2)
@@ -2375,6 +2406,7 @@ static void DoTestMM3RC(const M1& a, const M2& b, std::string label)
 template <class T, class M1, class M2> 
 static void DoTestMM3CR(const M1& a, const M2& b, std::string label)
 {
+    typedef std::complex<T> CT;
     DoTestMM3a_Basic<CT,T>(a,b,label);
 
 #if (XTEST & 2)
@@ -2387,6 +2419,7 @@ static void DoTestMM3CR(const M1& a, const M2& b, std::string label)
 template <class T, class M1, class M2> 
 static void DoTestMM3CC(const M1& a, const M2& b, std::string label)
 {
+    typedef std::complex<T> CT;
     DoTestMM3a_Full<CT,CT>(a,b,label);
 
 #if (XTEST & 2)
@@ -2403,6 +2436,7 @@ static void DoTestMM3CC(const M1& a, const M2& b, std::string label)
 template <class T, class Tb, class M1, class M2> 
 static void DoTestMM4a_Basic(M1& a, const M2& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start MM4a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -2425,9 +2459,9 @@ static void DoTestMM4a_Basic(M1& a, const M2& b, std::string label)
         }
 #endif
 
-        RealType(T) eps = EPS * (a.colsize() + a.rowsize());
-        RealType(T) eps2 = eps;
-        if (!std::numeric_limits<RealType(T)>::is_integer) {
+        RT eps = EPS * (a.colsize() + a.rowsize());
+        RT eps2 = eps;
+        if (!std::numeric_limits<RT>::is_integer) {
             eps *= Norm(m1) * Norm(m2);
             eps2 *= Norm(m1*m2) + Norm(m1) * Norm(m2);
         }
@@ -2446,7 +2480,7 @@ static void DoTestMM4a_Basic(M1& a, const M2& b, std::string label)
             std::cout<<"Norm(diff) = "<<Norm(m3 - mm)<<std::endl;
         }
 #endif
-        RealType(T) x(5);
+        RT x(5);
         T z; SetZ(z);
         m3 = a*b;
         m4 = mm;
@@ -2507,6 +2541,7 @@ static void DoTestMM4a_Basic(M1& a, const M2& b, std::string label)
 template <class T, class Tb, class M1, class M2> 
 static void DoTestMM4a_Full(M1& a, const M2& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     DoTestMM4a_Basic<T,Tb>(a,b,label);
 
 #if (XTEST & 2)
@@ -2514,9 +2549,9 @@ static void DoTestMM4a_Full(M1& a, const M2& b, std::string label)
         const tmv::Matrix<T> m1 = a;
         const tmv::Matrix<Tb> m2 = b;
 
-        RealType(T) eps = EPS * (a.colsize() + a.rowsize() + b.rowsize());
-        RealType(T) eps2 = eps;
-        if (!std::numeric_limits<RealType(T)>::is_integer) {
+        RT eps = EPS * (a.colsize() + a.rowsize() + b.rowsize());
+        RT eps2 = eps;
+        if (!std::numeric_limits<RT>::is_integer) {
             eps *= Norm(m1) * Norm(m2);
             eps2 *= Norm(m1*m2) + Norm(m1) * Norm(m2);
         }
@@ -2526,7 +2561,7 @@ static void DoTestMM4a_Full(M1& a, const M2& b, std::string label)
         tmv::Matrix<ProductType(T,Tb)> m4 = mm;
         tmv::Matrix<ProductType(T,Tb)> m0 = mm;
         m0 /= T(2);
-        RealType(T) x(5);
+        RT x(5);
         T z; SetZ(z);
         m3 = m0;
         m3 += x*a*b;
@@ -2666,6 +2701,7 @@ static void DoTestMM4RR(M1& a, const M2& b, std::string label)
 template <class T, class M1, class M2> 
 static void DoTestMM4RC(M1& a, const M2& b, std::string label)
 {
+    typedef std::complex<T> CT;
     DoTestMM4a_Basic<T,CT>(a,b,label);
 #if (XTEST & 2)
     DoTestMM4a_Basic<T,CT>(a,Conjugate(b),label+" ConjB");
@@ -2675,6 +2711,7 @@ static void DoTestMM4RC(M1& a, const M2& b, std::string label)
 template <class T, class M1, class M2> 
 static void DoTestMM4CR(M1& a, const M2& b, std::string label)
 {
+    typedef std::complex<T> CT;
     typename M1::conjugate_type ac = a.conjugate();
     DoTestMM4a_Basic<CT,T>(a,b,label);
     DoTestMM4a_Basic<CT,T>(ac,b,label+" ConjA");
@@ -2683,6 +2720,7 @@ static void DoTestMM4CR(M1& a, const M2& b, std::string label)
 template <class T, class M1, class M2> 
 static void DoTestMM4CC(M1& a, const M2& b, std::string label)
 {
+    typedef std::complex<T> CT;
     typename M1::conjugate_type ac = a.conjugate();
     DoTestMM4a_Full<CT,CT>(a,b,label);
     DoTestMM4a_Basic<CT,CT>(ac,b,label+" ConjA");
@@ -2697,6 +2735,7 @@ template <class Ta, class Tb, class T, class M1, class M2, class M3>
 static void DoTestMM5a_Basic(
     const M1& a, const M2& b, M3& c, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start MM5a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -2708,9 +2747,9 @@ static void DoTestMM5a_Basic(
     tmv::Matrix<Tb> m2 = b;
     tmv::Matrix<T> m3 = c;
 
-    RealType(T) eps = EPS * (a.colsize() + a.rowsize() + b.rowsize());
-    RealType(T) eps2 = eps;
-    if (!std::numeric_limits<RealType(T)>::is_integer) {
+    RT eps = EPS * (a.colsize() + a.rowsize() + b.rowsize());
+    RT eps2 = eps;
+    if (!std::numeric_limits<RT>::is_integer) {
         eps *= Norm(m) * Norm(m2);
         eps2 *= Norm(m*m2) + Norm(m) * Norm(m2);
     }
@@ -2747,7 +2786,7 @@ static void DoTestMM5a_Basic(
 #endif
         Assert(Equal(MAT(T,c),m3,eps2),label+" c+=a*b");
         CopyBackM(c0,c);
-        RealType(T) x(5);
+        RT x(5);
         T z; SetZ(z);
         c = x*a*b;
         m3 = x*mm;
@@ -2774,6 +2813,7 @@ static void DoTestMM5a_Basic(
 template <class Ta, class Tb, class T, class M1, class M2, class M3> 
 static void DoTestMM5a_Full(const M1& a, const M2& b, M3& c, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     DoTestMM5a_Basic<Ta,Tb,T>(a,b,c,label);
 
 #ifndef BASIC_MULTMM_ONLY
@@ -2782,9 +2822,9 @@ static void DoTestMM5a_Full(const M1& a, const M2& b, M3& c, std::string label)
     tmv::Matrix<Tb> m2 = b;
     tmv::Matrix<T> m3 = c;
 
-    RealType(T) eps = EPS * (a.colsize() + a.rowsize() + b.rowsize());
-    RealType(T) eps2 = eps;
-    if (!std::numeric_limits<RealType(T)>::is_integer) {
+    RT eps = EPS * (a.colsize() + a.rowsize() + b.rowsize());
+    RT eps2 = eps;
+    if (!std::numeric_limits<RT>::is_integer) {
         eps *= Norm(m) * Norm(m2);
         eps2 *= Norm(m*m2) + Norm(m) * Norm(m2);
     }
@@ -2792,7 +2832,7 @@ static void DoTestMM5a_Full(const M1& a, const M2& b, M3& c, std::string label)
     if (CanMultMM(a,b,c)) {
         typename M3::copy_type c0 = c;
         tmv::Matrix<T> mm = m*m2;
-        RealType(T) x(5);
+        RT x(5);
         T z; SetZ(z);
         c += x*a*b;
         m3 = c0 + x*mm;
@@ -2875,6 +2915,7 @@ template <class T, class M, class V1, class V2>
 static void DoTestOProda_Basic(
     M& a, const V1& v1, const V2& v2, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start OProd"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -2891,9 +2932,9 @@ static void DoTestOProda_Basic(
 
     tmv::Matrix<T> vv = tmv::Vector<T>(v1)^tmv::Vector<T>(v2);
 
-    RealType(T) eps = EPS * (a.colsize() + a.rowsize());
-    RealType(T) eps2 = eps;
-    if (!std::numeric_limits<RealType(T)>::is_integer) {
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    RT eps2 = eps;
+    if (!std::numeric_limits<RT>::is_integer) {
         eps *= Norm(v1) * Norm(v2);
         eps2 *= Norm(vv) + Norm(v1) * Norm(v2);
     }
@@ -2915,7 +2956,7 @@ static void DoTestOProda_Basic(
     a -= v1^v2;
     Assert(Equal(MAT(T,a),(a0-vv),eps2),label+" a -= v1^v2");
     CopyBackM(a0,a);
-    RealType(T) x(5);
+    RT x(5);
     T z; SetZ(z);
     a = x * (v1^v2);
     Assert(Equal(MAT(T,a),x*vv,x*eps),label+" a = x * (v1^v2)");
@@ -2945,20 +2986,21 @@ template <class T, class M, class V1, class V2>
 static void DoTestOProda_Full(
     M& a, const V1& v1, const V2& v2, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     DoTestOProda_Basic<T>(a,v1,v2,label);
 
 #if (XTEST & 2)
     tmv::Matrix<T> vv = tmv::Vector<T>(v1)^tmv::Vector<T>(v2);
     typename M::copy_type a0 = vv;
 
-    RealType(T) eps = EPS * (a.colsize() + a.rowsize());
-    RealType(T) eps2 = eps;
-    if (!std::numeric_limits<RealType(T)>::is_integer) {
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    RT eps2 = eps;
+    if (!std::numeric_limits<RT>::is_integer) {
         eps *= Norm(v1) * Norm(v2);
         eps2 *= Norm(vv) + Norm(v1) * Norm(v2);
     }
 
-    RealType(T) x(5);
+    RT x(5);
     T z; SetZ(z);
     a = (x * v1)^v2;
     Assert(Equal(MAT(T,a),x*vv,x*eps),label+" a = (x*v1) ^ v2)");
@@ -3088,6 +3130,7 @@ static void DoTestOProdC(M& a, const V1& v1, const V2& v2, std::string label)
 template <class T, class M, class CM> 
 static void TestMatrixArith1(M& a, CM& ca, std::string label)
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith1 "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -3148,6 +3191,7 @@ static void TestMatrixArith2a(
     const M& a, const CM& ca, V1& b, CV1& cb, 
     V2& c, CV2& cc, std::string label)
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith2a "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -3184,6 +3228,7 @@ static void TestMatrixArith2b(
     const M& a, const CM& ca, V1& b, CV1& cb, 
     V2& c, CV2& cc, std::string label)
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith2b "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -3219,6 +3264,7 @@ static void TestMatrixArith2b(
 template <class T, class M, class CM> 
 static void TestMatrixArith2(M& a, CM& ca, std::string label)
 {
+    typedef std::complex<T> CT;
     tmv::Vector<T> v(a.rowsize());
     for(int i=0;i<int(a.rowsize());i++) v(i) = T(i+3);
     tmv::Vector<CT> cv = CT(4,5) * v;
@@ -3252,6 +3298,7 @@ static void TestMatrixArith3a(
     const M& a, const CM& ca, V1& b, CV1& cb,
     V2& c, CV2& cc, std::string label)
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith3a "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -3280,6 +3327,7 @@ static void TestMatrixArith3b(
     const M& a, const CM& ca, V1& b, CV1& cb,
     V2& c, CV2& cc, std::string label)
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith3b "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -3306,6 +3354,7 @@ static void TestMatrixArith3b(
 template <class T, class M, class CM> 
 static void TestMatrixArith3(M& a, CM& ca, std::string label)
 {
+    typedef std::complex<T> CT;
     tmv::Vector<T> vx(a.rowsize());
     for(int i=0;i<int(a.rowsize());i++) vx(i) = T(i+3);
     tmv::Vector<CT> cvx = CT(4,5) * vx;
@@ -3380,6 +3429,7 @@ template <class T, class M1, class CM1, class M2, class CM2>
 static void TestMatrixArith5(
     M1& a, CM1& ca, const M2& b, const CM2& cb, std::string label)
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith5 "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -3414,6 +3464,7 @@ static void TestMatrixArith6(
     const M1& a, const CM1& ca,
     const M2& b, const CM2& cb, M3& c, CM3& cc, std::string label)
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith6 "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -3442,6 +3493,7 @@ static void TestMatrixArith6x(
     const M1& a, const CM1& ca,
     const M2& b, const CM2& cb, std::string label)
 {
+    typedef std::complex<T> CT;
     if (CanMultMM(a,b)) {
         tmv::Matrix<T,tmv::ColMajor> c1(a*b);
         tmv::Matrix<CT,tmv::ColMajor> cc1(ca*cb);
@@ -3469,6 +3521,7 @@ static void TestMatrixArith7(
     M& a, CM& ca, const V1& v1, const CV1& cv1,
     const V2& v2, const CV2& cv2, std::string label)
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith6 "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -3495,4 +3548,3 @@ static void TestMatrixArith7(
 }
 
 #undef ProductType
-#undef CT

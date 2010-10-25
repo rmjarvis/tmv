@@ -45,6 +45,8 @@
 
 namespace tmv {
 
+#define RT TMV_RealType(T)
+
     template <class T> 
     struct BandLUDiv<T>::BandLUDiv_Impl
     {
@@ -58,7 +60,7 @@ namespace tmv {
         T* Aptr;
         BandMatrixView<T> LUx;
         Permutation P;
-        mutable TMV_RealType(T) logdet;
+        mutable RT logdet;
         mutable T signdet;
         mutable bool donedet;
     };
@@ -231,7 +233,7 @@ namespace tmv {
         if (!pimpl->donedet) {
             T s;
             pimpl->logdet = DiagMatrixViewOf(pimpl->LUx.diag()).logDet(&s);
-            pimpl->signdet = TMV_RealType(T)(pimpl->P.det()) * s;
+            pimpl->signdet = RT(pimpl->P.det()) * s;
             pimpl->donedet = true;
         }         
         if (pimpl->signdet == T(0)) return T(0);
@@ -239,12 +241,12 @@ namespace tmv {
     }
 
     template <class T> 
-    TMV_RealType(T) BandLUDiv<T>::logDet(T* sign) const
+    RT BandLUDiv<T>::logDet(T* sign) const
     {
         if (!pimpl->donedet) {
             T s;
             pimpl->logdet = DiagMatrixViewOf(pimpl->LUx.diag()).logDet(&s);
-            pimpl->signdet = TMV_RealType(T)(pimpl->P.det()) * s;
+            pimpl->signdet = RT(pimpl->P.det()) * s;
             pimpl->donedet = true;
         }
         if (sign) *sign = pimpl->signdet;
@@ -333,14 +335,13 @@ namespace tmv {
             *fout << "U = "<<getU()<<std::endl;
         }
         Matrix<T> lu = getP() * getL() * getU();
-        TMV_RealType(T) nm = Norm(
-            lu-(pimpl->istrans ? mm.transpose() : mm.view()));
+        RT nm = Norm(lu-(pimpl->istrans ? mm.transpose() : mm.view()));
         nm /= Norm(getL())*Norm(getU());
         if (fout) {
             *fout << "PLU = "<<lu<<std::endl;
             *fout << "Norm(M-PLU)/Norm(PLU) = "<<nm<<std::endl;
         }
-        return nm < mm.doCondition()*mm.colsize()*TMV_Epsilon<T>();
+        return nm < mm.doCondition()*RT(mm.colsize())*TMV_Epsilon<T>();
     }
 
     template <class T> 

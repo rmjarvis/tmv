@@ -47,6 +47,8 @@
 
 namespace tmv {
 
+#define RT TMV_RealType(T)
+
     template <class T>
     struct SymLDLDiv<T>::SymLDLDiv_Impl
     {
@@ -59,7 +61,7 @@ namespace tmv {
         SymMatrixView<T> LLx;
         Vector<T> xD;
         Permutation P;
-        mutable TMV_RealType(T) logdet;
+        mutable RT logdet;
         mutable T signdet;
     };
 
@@ -126,7 +128,7 @@ namespace tmv {
     }
 
     template <class T>
-    TMV_RealType(T) SymLDLDiv<T>::logDet(T* sign) const 
+    RT SymLDLDiv<T>::logDet(T* sign) const 
     { 
         if (sign) *sign = pimpl->signdet;
         return pimpl->logdet;
@@ -223,13 +225,13 @@ namespace tmv {
         Matrix<T> lu = getP()*getL()*getD()*
             (pimpl->LLx.isherm()?getL().adjoint():getL().transpose())*
             getP().transpose();
-        TMV_RealType(T) nm = Norm(lu-mm);
+        RT nm = Norm(lu-mm);
         nm /= TMV_SQR(Norm(getL()))*Norm(getD());
         if (fout) {
             *fout << "LDLt = "<<lu<<std::endl;
             *fout << "Norm(M-LDLt)/Norm(LDLt) = "<<nm<<std::endl;
         }
-        return nm < mm.doCondition()*mm.colsize()*TMV_Epsilon<T>();
+        return nm < mm.doCondition()*RT(mm.colsize())*TMV_Epsilon<T>();
     }
 
     template <class T>

@@ -2112,6 +2112,11 @@ v.sort(tmv::ADType ad=tmv::Ascend,
 Sorts the vector \tt{v}, optionally returning the corresponding permutation in \tt{p}.
 If you do not care about the permutation, the second form is slightly more efficient.
 
+The returned permutation is such that if you have stored the initial vector as
+\tt{v\_i}, then you can reproduce the sort operation with: \tt{v = p * v\_i}.
+More commonly, the permutation is used to effect the same permutation on a 
+different vector or matrix.
+
 The next parameter, \tt{ad}, determines whether the sorted \tt{Vector} 
 will have its elements in ascending or descending order.  The possible values
 are \tt{Ascend} and \tt{Descend}.  The default if omitted is to sort
@@ -7936,6 +7941,14 @@ A = P * L * D * (A.isherm() ? L.adjoint() : L.transpose())
         P.transpose();
 \end{tmvcode}
 
+Note: If you are using LAPACK, rather than the native TMV code, then this routine throws a
+\tt{tmv::Singular} exception if the matrix is found to be exactly singular.  The LAPACK
+documentation says that the decomposition is supposed to finish successfully, but I have
+not found that to always be true.  So if LAPACK reports that it has found a singular matrix, TMV
+will throw an exception.  The native code will always successfully decompose the matrix.
+\index{Exceptions!Singular}
+\index{LAPACK!Exceptions from LDL\_Decompose}
+
 \item Tridiagonal LDL$^\dagger$ Decomposition 
 \index{Tridiagonal LDL Decomposition}
 
@@ -7951,10 +7964,10 @@ It turns out
 that the Bunch-Kaufman algorithm on banded matrices tends to expand the band structure
 without limit because of the pivoting involved, so it is not practical.
 However, with tridiagonal matrices, it is often possible to perform the 
-decomposition without pivoting.  Thus, this one does not have any growth of the band structure,
+decomposition without pivoting.  There is then no growth of the band structure,
 but it is not as stable for singular or nearly singular matrices.
 If an exact zero is found on the diagonal along the way
-tmv::NonPosDef is thrown.\footnote{
+\tt{tmv::NonPosDef} is thrown.\footnote{
 Note, however, that if $A$ is complex, symmetric - i.e. not hermitian -
 then this doesn't actually mean that $A$ is not positive definite (since such a 
 quality is only defined for hermitian matrices).  Furthermore, 
@@ -7966,7 +7979,7 @@ successfully decomposes.  It throws for hermitian matrices whenever they are
 not positive definite, whereas the native code succeeds for many indefinite matrices.
 }
 \index{Exceptions!NonPosDef}
-\index{LAPACK!NonPosDef exceptions from LDL\_Decompose}
+\index{LAPACK!Exceptions from LDL\_Decompose}
 
 \begin{tmvcode}
 void LDL_Decompose(const SymBandMatrixView<T>& A);

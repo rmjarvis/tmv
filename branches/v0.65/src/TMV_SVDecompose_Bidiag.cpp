@@ -184,6 +184,7 @@ namespace tmv {
         const int N = A.rowsize();
 
 #ifdef XDEBUG
+        //cout<<"Start BlockBidiag: A = "<<A<<endl;
         Matrix<T> A0(A);
 #endif
 
@@ -210,18 +211,25 @@ namespace tmv {
         for(int j1=0;j1<N-1;) {
             int j2 = TMV_MIN(N-1,j1+BIDIAG_BLOCKSIZE);
             for(int j=j1,jj=0;j<j2;++j,++jj,++Uj,++Vj,Dj+=Ds,++Ej) { // jj = j-j1
+                //cout<<"j = "<<j<<endl;
 
                 // Update current column:
                 // A(j:M,j) -= Y(j:M,0:j) ZYtm(0:j,j) + mXtW(j:M,0:j) X(0:j,j)
                 //
                 VectorView<T> u = A.col(j,j,M);
+                //cout<<"u = "<<u<<endl;
                 MatrixView<T> Y0 = A.subMatrix(j,M,j1,j);
                 MatrixView<T> ZYtm0 = ZYtm.subMatrix(0,jj,j,N);
                 MatrixView<T> mXtW0 = mXtW.subMatrix(j,M,0,jj);
                 MatrixView<T> X0 = A.subMatrix(j1,j,j,N);
                 if (jj > 0) {
+                    //cout<<"Y0 = "<<Y0<<endl;
+                    //cout<<"ZYtm0 = "<<ZYtm0<<endl;
                     u -= Y0 * ZYtm0.col(0);
+                    //cout<<"mXtW0 = "<<mXtW0<<endl;
+                    //cout<<"X0 = "<<X0<<endl;
                     u -= mXtW0 * X0.col(0);
+                    //cout<<"u => "<<u<<endl;
                 }
 
                 // Do the Householder reflection for U
@@ -230,6 +238,7 @@ namespace tmv {
                 // if it's actually 1 rather than dealing with it implicitly.)
                 //
                 T bu = HouseholderReflect(u,signdet);
+                //cout<<"bu = "<<bu<<endl;
 #ifdef TMVFLDEBUG
                 TMVAssert(Uj >= Ubeta.first);
                 TMVAssert(Uj < Ubeta.last);
@@ -272,23 +281,42 @@ namespace tmv {
                 VectorView<T> ut = u.conjugate();
                 MatrixView<T> ZYtm0a = ZYtm0.colRange(1,ZYtm0.rowsize());
                 MatrixView<T> X0a = X0.colRange(1,X0.rowsize());
+                //cout<<"ut = "<<ut<<endl;
                 ZYtmj = ut * A.subMatrix(j,M,j+1,N);
-                ZYtmj -= (temp = ut*Y0) * ZYtm0a;
-                ZYtmj -= (temp = ut*mXtW0) * X0a;
+                //cout<<"ZYtmj = "<<ZYtmj<<endl;
+                if (jj > 0) {
+                    //cout<<"Y0 = "<<Y0<<endl;
+                    //cout<<"ZYtm0a = "<<ZYtm0a<<endl;
+                    ZYtmj -= (temp = ut*Y0) * ZYtm0a;
+                    //cout<<"ZYtmj => "<<ZYtmj<<endl;
+                    //cout<<"X0a = "<<X0a<<endl;
+                    //cout<<"mXtW0 = "<<mXtW0<<endl;
+                    ZYtmj -= (temp = ut*mXtW0) * X0a;
+                    //cout<<"ZYtmj => "<<ZYtmj<<endl;
+                }
+                //cout<<"bu = "<<bu<<endl;
                 ZYtmj *= bu;
+                //cout<<"ZYtmj => "<<ZYtmj<<endl;
 
                 // Update the current row:
                 // A(j,j+1:N) -= Y(j,0:j+1) ZYtm(0:j+1,j+1:N) + mXtW(j,0:j) X(0:j:j+1,N)
                 //
                 MatrixView<T> Y1 = A.subMatrix(j,M,j1,j+1);
+                //cout<<"Y1 = "<<Y1<<endl;
                 MatrixView<T> ZYtm1 = ZYtm.subMatrix(0,jj+1,j+1,N);
+                //cout<<"ZYtm1 = "<<ZYtm1<<endl;
                 VectorView<T> v = A.row(j,j+1,N);
+                //cout<<"v = "<<v<<endl;
                 v -= Y1.row(0) * ZYtm1;
-                v -= mXtW0.row(0) * X0a;
+                if (jj > 0) {
+                    v -= mXtW0.row(0) * X0a;
+                }
+                //cout<<"v => "<<v<<endl;
 
                 // Do the Householder reflection for V
                 //
                 T bv = HouseholderReflect(v,signdet);
+                //cout<<"bv = "<<bv<<endl;
 #ifdef TMVFLDEBUG
                 TMVAssert(Vj >= Vbeta.first);
                 TMVAssert(Vj < Vbeta.last);
@@ -319,10 +347,23 @@ namespace tmv {
                 VectorView<T> vt = v.conjugate();
                 MatrixView<T> Y1a = Y1.rowRange(1,Y1.colsize());
                 MatrixView<T> mXtW0a = mXtW0.rowRange(1,mXtW0.colsize());
+                //cout<<"vt = "<<vt<<endl;
                 mXtWj = A.subMatrix(j+1,M,j+1,N)*vt;
+                //cout<<"mXtWj => "<<mXtWj<<endl;
+                //cout<<"ZYtm1 = "<<ZYtm1<<endl;
+                //temp1 = ZYtm1*vt;
+                //cout<<"temp1 = "<<temp1<<endl;
+                //cout<<"Y1a = "<<Y1a<<endl;
+                //mXtWj -= Y1a * temp1;
                 mXtWj -= Y1a * (temp1 = ZYtm1*vt);
+                //cout<<"mXtWj => "<<mXtWj<<endl;
+                //cout<<"mXtW0a = "<<mXtW0a<<endl;
+                //cout<<"X0a = "<<X0a<<endl;
                 mXtWj -= mXtW0a * (temp2 = X0a*vt);
+                //cout<<"mXtWj => "<<mXtWj<<endl;
+                //cout<<"bv = "<<bv<<endl;
                 mXtWj *= bv;
+                //cout<<"mXtWj => "<<mXtWj<<endl;
             }
 
             // Update the rest of the matrix:
@@ -340,10 +381,13 @@ namespace tmv {
         TMVAssert(Dj >= D.first);
         TMVAssert(Dj < D.last);
 #endif
+        //cout<<"Last one: u = "<<A.col(N-1,N-1,M)<<endl;
         *Uj = HouseholderReflect(A.col(N-1,N-1,M),signdet);
+        //cout<<"*Uj = "<<*Uj<<endl;
         const T Aend = *(A.cptr()+(N-1)*(A.stepi()+A.stepj()));
         TMVAssert(TMV_IMAG(Aend) == RT(0));
         *Dj = TMV_REAL(Aend);
+        //cout<<"*Dj = "<<*Dj<<endl;
 
 #ifdef XDEBUG
         Matrix<T> U(A);
@@ -502,7 +546,7 @@ namespace tmv {
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(ldu),
             LAPP(D.ptr()),LAPP(E.ptr()),LAPP(Ubeta.ptr()),LAPP(Vbeta2.ptr())
             LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
-        lwork = int(std::real(work[0]));
+        lwork = int(TMV_REAL(work[0]));
         work.resize(lwork);
 #endif
 #endif
@@ -515,7 +559,7 @@ namespace tmv {
 #ifdef LAPNOWORK
         LAP_Results("zgebrd");
 #else
-        LAP_Results(int(std::real(work[0])),m,n,lwork,"zgebrd");
+        LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"zgebrd");
 #endif
         if (signdet!=0.) {
             const std::complex<double>* Ubi = Ubeta.cptr();
@@ -612,11 +656,12 @@ namespace tmv {
 #else
         int lwork = -1;
         AlignedArray<std::complex<float> > work(1);
+        work[0] = 0.F;
         LAPNAME(cgebrd) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(ldu),
             LAPP(D.ptr()),LAPP(E.ptr()),LAPP(Ubeta.ptr()),LAPP(Vbeta2.ptr())
             LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
-        lwork = int(std::real(work[0]));
+        lwork = int(TMV_REAL(work[0]));
         work.resize(lwork);
 #endif
 #endif
@@ -629,7 +674,7 @@ namespace tmv {
 #ifdef LAPNOWORK
         LAP_Results("cgebrd");
 #else
-        LAP_Results(int(std::real(work[0])),m,n,lwork,"cgebrd");
+        LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"cgebrd");
 #endif
         if (signdet!=0.F) {
             const std::complex<float>* Ubi = Ubeta.cptr();
@@ -652,6 +697,8 @@ namespace tmv {
         const VectorView<RT>& E, T& signdet)
     {
 #ifdef XDEBUG
+        //std::cout<<"Start Bidiagonalize:\n";
+        //std::cout<<"A = "<<A<<std::endl;
         Matrix<T> A0(A);
 #endif
         TMVAssert(A.colsize() >= A.rowsize());
@@ -676,6 +723,13 @@ namespace tmv {
                 NonLapBidiagonalize(A,Ubeta,Vbeta,D,E,signdet);
         }
 #ifdef XDEBUG
+        //std::cout<<"Done Bidiagonalize: \n";
+        //std::cout<<"A = "<<A<<std::endl;
+        //std::cout<<"Ubeta = "<<Ubeta<<std::endl;
+        //std::cout<<"Vbeta = "<<Vbeta<<std::endl;
+        //std::cout<<"D = "<<D<<std::endl;
+        //std::cout<<"E = "<<E<<std::endl;
+        //std::cout<<"signdet = "<<signdet<<std::endl;
         int N = D.size();
         Matrix<T> U(A);
         GetQFromQR(U.view(),Ubeta);

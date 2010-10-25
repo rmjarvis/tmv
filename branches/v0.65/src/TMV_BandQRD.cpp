@@ -47,6 +47,8 @@
 
 namespace tmv {
 
+#define RT TMV_RealType(T)
+
     template <class T> 
     struct BandQRDiv<T>::BandQRDiv_Impl
     {
@@ -59,7 +61,7 @@ namespace tmv {
         T* Aptr;
         BandMatrixView<T> QRx;
         Vector<T> Qbeta;
-        mutable TMV_RealType(T) logdet;
+        mutable RT logdet;
         mutable T signdet;
         mutable bool donedet;
     };
@@ -183,7 +185,7 @@ namespace tmv {
     }                  
 
     template <class T> 
-    TMV_RealType(T) BandQRDiv<T>::logDet(T* sign) const
+    RT BandQRDiv<T>::logDet(T* sign) const
     {
         if (!pimpl->donedet) {
             T s;
@@ -285,14 +287,13 @@ namespace tmv {
             *fout << "R = "<<getR()<<std::endl;
         }
         Matrix<T> qr = Q*getR();
-        TMV_RealType(T) nm = 
-            Norm(qr-(pimpl->istrans ? mm.transpose() : mm.view()));
+        RT nm = Norm(qr-(pimpl->istrans ? mm.transpose() : mm.view()));
         nm /= Norm(Q)*Norm(getR());
         if (fout) {
             *fout << "QR = "<<qr<<std::endl;
             *fout << "Norm(M-QR)/Norm(QR) = "<<nm<<std::endl;
         }
-        return nm < mm.doCondition()*mm.colsize()*TMV_Epsilon<T>();
+        return nm < mm.doCondition()*RT(mm.colsize())*TMV_Epsilon<T>();
     }
 
     template <class T> 

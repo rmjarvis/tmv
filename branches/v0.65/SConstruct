@@ -598,6 +598,10 @@ int main()
             print 'Error: FORCE_GOTO, but failed compile test'
             Exit(1)
 
+    if result:
+        context.env.Append(CPPDEFINES=['TMV_END_PADDING'])
+        context.env['END_PADDING'] = True
+
     return result
 
 
@@ -901,6 +905,8 @@ def DoLibraryAndHeaderChecks(config):
 
     if not (config.env.has_key('LIBS')) :
       config.env['LIBS'] = []
+
+    config.env['END_PADDING'] = False # Overwrite this below if we need it.
 
     if config.env['WITH_BLAS']:
         foundblas = 1  # Set to 0 at end if not found

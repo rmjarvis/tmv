@@ -791,7 +791,7 @@ namespace tmv
         ConvertIndexToPermute(n,lap_p.get(),P);
         double* bi = beta.ptr();
         for(int i=0;i<n;++i,++bi) {
-            if (std::abs(*bi-1.) > 1.01) *bi = 0.;
+            if (TMV_ABS(*bi-1.) > 1.01) *bi = 0.;
             if (det) {
                 if (*bi != 0.) det = -det;
                 if (P[i] != i) det = -det;
@@ -828,7 +828,7 @@ namespace tmv
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
             LAPP(lap_p.get()),LAPP(beta.ptr()) 
             LAPWK(work.get()) LAPVWK(lwork) LAPWK(rwork.get()) LAPINFO);
-        lwork = int(std::real(work[0]));
+        lwork = int(TMV_REAL(work[0]));
         work.resize(lwork);
 #endif
 #endif
@@ -839,7 +839,7 @@ namespace tmv
 #ifdef LAPNOWORK
         LAP_Results("zgeqp3");
 #else
-        LAP_Results(int(std::real(work[0])),m,n,lwork,"zgeqp3");
+        LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"zgeqp3");
 #endif
         beta.conjugateSelf();
         double thresh = TMV_Epsilon<double>()*A.normF();
@@ -860,7 +860,7 @@ namespace tmv
         ConvertIndexToPermute(n,lap_p.get(),P);
         std::complex<double>* bi = beta.ptr();
         for(int i=0;i<n;++i,++bi) {
-            if (std::abs(*bi-1.) > 1.01) *bi = 0.;
+            if (TMV_ABS(*bi-1.) > 1.01) *bi = 0.;
             if (det!=0.) {
                 if (TMV_IMAG(*bi) != 0.) 
                     det *= -TMV_CONJ(*bi* *bi)/norm(*bi);
@@ -928,7 +928,7 @@ namespace tmv
         ConvertIndexToPermute(n,lap_p.get(),P);
         float* bi = beta.ptr();
         for(int i=0;i<n;++i,++bi) {
-            if (std::abs(*bi-1.F) > 1.01F) *bi = 0.F;
+            if (TMV_ABS(*bi-1.F) > 1.01F) *bi = 0.F;
             if (det) {
                 if (*bi != 0.) det = -det;
                 if (P[i] != i) det = -det;
@@ -965,7 +965,7 @@ namespace tmv
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
             LAPP(lap_p.get()),LAPP(beta.ptr()) 
             LAPWK(work.get()) LAPVWK(lwork) LAPWK(rwork.get()) LAPINFO);
-        lwork = int(std::real(work[0]));
+        lwork = int(TMV_REAL(work[0]));
         work.resize(lwork);
 #endif
 #endif
@@ -976,7 +976,7 @@ namespace tmv
 #ifdef LAPNOWORK
         LAP_Results("cgeqp3");
 #else
-        LAP_Results(int(std::real(work[0])),m,n,lwork,"cgeqp3");
+        LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"cgeqp3");
 #endif
         float thresh = TMV_Epsilon<float>()*A.normF();
         const std::complex<float>* Aii = A.diag().cptr();
@@ -997,7 +997,7 @@ namespace tmv
         ConvertIndexToPermute(n,lap_p.get(),P);
         std::complex<float>* bi = beta.ptr();
         for(int i=0;i<n;++i,++bi) {
-            if (std::abs(*bi-1.F) > 1.01F) *bi = 0.F;
+            if (TMV_ABS(*bi-1.F) > 1.01F) *bi = 0.F;
             if (det!=0.F) {
                 if (TMV_IMAG(*bi) != 0.) 
                     det *= -TMV_CONJ(*bi* *bi)/norm(*bi);

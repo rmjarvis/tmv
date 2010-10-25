@@ -528,22 +528,22 @@ namespace tmv {
                 LAPP(&neigen),LAPP(Dout.ptr()),LAPP(U1.ptr()),LAPV(ldu),
                 LAPP(isuppz.get()) LAPWK(work.get()) LAPVWK(lwork) 
                 LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1 LAP1);
-            // MJ: The dstegr algorithm has a bug wherein it sometimes fails
-            //     to finish, in which case the output values are incorrect.
-            //     It informs that this has happened via the info variable.
-            //     Specifically, it sets info = 2 in this case.
-            //     We test for all info > 0 just to be sure.
-            //     When this happens, we call dstedc instead.
+            // The dstegr algorithm has a bug wherein it sometimes fails
+            // to finish, in which case the output values are incorrect.
+            // It informs that this has happened via the info variable.
+            // Specifically, it sets info = 2 in this case.
+            // We test for all info > 0 just to be sure.
+            // When this happens, we call dstedc instead.
             //
-            //     Also, sometimes, the U matrix comes back with a column
-            //     of all zeros.  No error is indicated by Lap_info in 
-            //     these (rare) cases, so I'm not sure what is going on,
-            //     but I check for it here too.
+            // Also, sometimes, the U matrix comes back with a column
+            // of all zeros.  No error is indicated by Lap_info in 
+            // these (rare) cases, so I'm not sure what is going on,
+            // but I check for it here too.
             //
-            //     In addition to the above problem, the dstegr routine 
-            //     seems to not be very careful about nan issues.  
-            //     So we also check for nan's in U1, and call dstedc if 
-            //     there are any.
+            // In addition to the above problem, the dstegr routine 
+            // seems to not be very careful about nan issues.  
+            // So we also check for nan's in U1, and call dstedc if 
+            // there are any.
             double nantest = U1.linearView().sumElements();
             int badcol = -1;
             for(int j=0;j<n;++j) {

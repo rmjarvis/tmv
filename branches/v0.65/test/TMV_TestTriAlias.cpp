@@ -16,10 +16,12 @@ static void TestAliasMultUL2(
     }
 
     typedef typename M::value_type T;
-    tmv::Matrix<T> m2(4,4);
+    typedef typename M::real_type RT;
+    const int N = m.colsize();
+    tmv::Matrix<T> m2(N,N);
 
-    typename M::real_type eps = EPS;
-    if (!std::numeric_limits<T>::is_integer) eps *= Norm(m);
+    RT eps = EPS * RT(N);
+    if (!std::numeric_limits<RT>::is_integer) eps *= Norm(m);
 
     m1 = m;
     m1 = m1a * m1b;

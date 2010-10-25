@@ -201,6 +201,7 @@ static void TestSmallVectorComplex()
         std::cout<<"v.MinAbs = "<<v3.minAbsElement(&imin)<<std::endl;
         std::cout<<"imin = "<<imin<<std::endl;
     }
+
     if (!std::numeric_limits<T>::is_integer) {
         Assert(Equal2(v3.maxAbsElement(&imax),T(41*N),EPS),
                "MaxAbsElement of Vector did not return correct value");
@@ -212,13 +213,13 @@ static void TestSmallVectorComplex()
                "MinAbsElement of Vector did not return correct index");
     }
     Assert(Equal2(v3.maxAbs2Element(&imax),T(56*N),EPS),
-           "MaxAbs2Element of Vector did not return correct value");
+           "MaxAbs2Element of complex Vector did not return correct value");
     Assert(imax == 15,
-           "MaxAbs2Element of Vector did not return correct index");
+           "MaxAbs2Element of complex Vector did not return correct index");
     Assert(Equal2(v3.minAbs2Element(&imin),T(1),EPS),
-           "MinAbs2Element of Vector did not return correct value");
+           "MinAbs2Element of complex Vector did not return correct value");
     Assert(imin == 42,
-           "MinAbs2Element of Vector did not return correct index");
+           "MinAbs2Element of complex Vector did not return correct index");
 
     std::complex<T> prod_act(0);
     for (int i=0; i<N; ++i) prod_act += v[i] * v2[i];

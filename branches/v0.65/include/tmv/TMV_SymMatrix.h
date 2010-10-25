@@ -4693,7 +4693,6 @@ namespace tmv {
         const GenSymMatrix<T1>& m1, const GenSymMatrix<T2>& m2)
     { return !(m1 == m2); }
 
-
     template <class T1, class T2> 
     inline bool operator==(
         const GenSymMatrix<T1>& m1, const GenMatrix<T2>& m2)

@@ -45,7 +45,7 @@
 #include <iostream>
 
 #ifdef XDEBUG
-#define THRESH 1.e-11
+#define THRESH 1.e-5
 #include "tmv/TMV_DiagMatrixArith.h"
 #define dbgcout std::cout 
 //#define dbgcout if(false) std::cout

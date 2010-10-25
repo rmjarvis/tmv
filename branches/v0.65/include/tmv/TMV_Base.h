@@ -174,8 +174,7 @@ namespace tmv {
     { return false; }
 #else
     template <class M1, class M2> 
-    inline bool SameStorage(
-        const M1& m1, const M2& m2)
+    inline bool SameStorage(const M1& m1, const M2& m2)
     {
         return 
             static_cast<const void*>(m1.realPart().cptr()) == 

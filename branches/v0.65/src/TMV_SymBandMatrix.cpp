@@ -1171,7 +1171,7 @@ namespace tmv {
         if (m.size() == 0) return RT(0);
         DiagMatrix<RT> S(m.size());
         SV_Decompose(m,S.view());
-        return std::abs(S(0));
+        return TMV_ABS(S(0));
     }
 
     template <class T> 
@@ -1180,7 +1180,7 @@ namespace tmv {
         if (m.size() == 0) return RT(1);
         DiagMatrix<RT> S(m.size());
         SV_Decompose(m,S.view());
-        return std::abs(S(0)/S(S.size()-1));
+        return TMV_ABS(S(0)/S(S.size()-1));
     }
 
 #ifdef INST_INT

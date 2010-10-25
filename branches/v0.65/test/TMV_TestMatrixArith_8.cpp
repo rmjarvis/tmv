@@ -145,8 +145,7 @@ template <class T> void TestMatrixArith_8()
                 eps *= (T(1)+Norm(ac)*Norm(bc));
 
             c1 = ac * bc;
-            if (showacc)
-            {
+            if (showacc) {
                 std::cout<<"a = "<<ar<<std::endl;
                 std::cout<<"b = "<<br<<std::endl;
                 std::cout<<"c (CC) = "<<c1<<std::endl;

@@ -4376,9 +4376,11 @@ namespace tmv {
         if (m2.colsize() > 0 && m2.rowsize() > 0) {
             if (SameStorage(m1,m2)) {
                 if (m2.isSameAs(m1)) {} // Do Nothing
-                else if (m2.nlo() == m2.nhi() &&  m2.transpose().isSameAs(m1)) 
+                else if (m2.nlo() == m2.nhi() &&  
+                         m2.transpose().isSameAs(m1)) 
                     m2.transposeSelf();
-                else if (m1.isconj() != m2.isconj() && m2.conjugate().isSameAs(m1)) 
+                else if (m1.isconj() != m2.isconj() && 
+                         m2.conjugate().isSameAs(m1)) 
                     m2.conjugateSelf();
                 else if (m1.isrm()) 
                     DoCopy1(BandMatrix<T1,RowMajor>(m1),m2);
@@ -4516,7 +4518,6 @@ namespace tmv {
     inline bool operator!=(
         const GenBandMatrix<T1>& m1, const GenBandMatrix<T2>& m2)
     { return !(m1 == m2); }
-
 
     template <class T1, class T2> 
     bool operator==(

@@ -261,7 +261,7 @@ namespace tmv {
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            lwork = int(std::real(work[0]));
+            lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
 #endif
 #endif
@@ -297,7 +297,7 @@ namespace tmv {
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(conjbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            lwork = int(std::real(work[0]));
+            lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
 #endif
 #endif
@@ -424,7 +424,7 @@ namespace tmv {
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            lwork = int(std::real(work[0]));
+            lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
 #endif
 #endif
@@ -460,7 +460,7 @@ namespace tmv {
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(conjbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            lwork = int(std::real(work[0]));
+            lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
 #endif
 #endif
@@ -494,6 +494,7 @@ namespace tmv {
         TMVAssert(beta.ct() == NonConj);
 
 #ifdef XDEBUG
+        std::cout<<"Start Q_LDivEq: \n";
         Matrix<T1> QQ(Q.colsize(),Q.colsize(),0.);
         QQ.setToIdentity();
         QQ.colRange(0,Q.rowsize()) = Q;
@@ -505,7 +506,6 @@ namespace tmv {
         GetQFromQR(Qx.view(),bx);
         Matrix<T> m0 = m;
         Matrix<T> m2 = QQ.adjoint() * m;
-        std::cout<<"Start Q_LDivEq: \n";
         std::cout<<"Q = "<<TMV_Text(Q)<<std::endl;
         std::cout<<"beta = "<<TMV_Text(beta)<<std::endl;
         std::cout<<"m = "<<TMV_Text(m)<<std::endl;
@@ -755,7 +755,7 @@ namespace tmv {
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            lwork = int(std::real(work[0]));
+            lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
 #endif
 #endif
@@ -791,7 +791,7 @@ namespace tmv {
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(conjbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            lwork = int(std::real(work[0]));
+            lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
 #endif
 #endif
@@ -919,7 +919,7 @@ namespace tmv {
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            lwork = int(std::real(work[0]));
+            lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
 #endif
 #endif
@@ -955,7 +955,7 @@ namespace tmv {
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(conjbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            lwork = int(std::real(work[0]));
+            lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
 #endif
 #endif
@@ -989,6 +989,7 @@ namespace tmv {
         TMVAssert(beta.ct() == NonConj);
 
 #ifdef XDEBUG
+        std::cout<<"Start Q_RDivEq: \n";
         Matrix<T1> QQ(Q.colsize(),Q.colsize(),0.);
         QQ.setToIdentity();
         QQ.colRange(0,Q.rowsize()) = Q;
@@ -997,7 +998,6 @@ namespace tmv {
         GetQFromQR(QQ.view(),bb);
         Matrix<T> m0 = m;
         Matrix<T> m2 = m * QQ.adjoint();
-        std::cout<<"Start Q_RDivEq: \n";
         std::cout<<"Q = "<<TMV_Text(Q)<<std::endl;
         std::cout<<"beta = "<<TMV_Text(beta)<<std::endl;
         std::cout<<"m = "<<TMV_Text(m)<<std::endl;

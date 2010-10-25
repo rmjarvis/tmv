@@ -131,7 +131,7 @@ namespace tmv {
         AlignedArray<std::complex<double> > work(1);
         LAPNAME(zgetri) (LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
                          LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
-        lwork = int(std::real(work[0]));
+        lwork = int(TMV_REAL(work[0]));
         work.resize(lwork);
 #endif
 #endif
@@ -140,7 +140,7 @@ namespace tmv {
 #ifdef LAPNOWORK
         LAP_Results("zgetri");
 #else
-        LAP_Results(int(std::real(work[0])),n,n,lwork,"zgetri");
+        LAP_Results(int(TMV_REAL(work[0])),n,n,lwork,"zgetri");
 #endif
     }
 #endif
@@ -203,7 +203,7 @@ namespace tmv {
         AlignedArray<std::complex<float> > work(1);
         LAPNAME(cgetri) (LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
                          LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
-        lwork = int(std::real(work[0]));
+        lwork = int(TMV_REAL(work[0]));
         work.resize(lwork);
 #endif
 #endif
@@ -212,7 +212,7 @@ namespace tmv {
 #ifdef LAPNOWORK
         LAP_Results("cgetri");
 #else
-        LAP_Results(int(std::real(work[0])),n,n,lwork,"cgetri");
+        LAP_Results(int(TMV_REAL(work[0])),n,n,lwork,"cgetri");
 #endif
     }
 #endif // FLOAT

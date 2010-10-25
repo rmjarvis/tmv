@@ -360,7 +360,7 @@ namespace tmv {
         }
         double* bi = beta.ptr();
         for(int i=0;i<n;++i,++bi)  {
-            if (std::abs(*bi-1.) > 1.01) *bi = 0.;
+            if (TMV_ABS(*bi-1.) > 1.01) *bi = 0.;
             if (det && *bi != 0.) det = -det;
         }
     }
@@ -391,7 +391,7 @@ namespace tmv {
             LAPNAME(zgelqf) (
                 LAPCM LAPV(n),LAPV(m),LAPP(A.ptr()),LAPV(lda),
                 LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
-            lwork = int(std::real(work[0]));
+            lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
 #endif
 #endif
@@ -415,7 +415,7 @@ namespace tmv {
             LAPNAME(zgeqrf) (
                 LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
-            lwork = int(std::real(work[0]));
+            lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
 #endif
 #endif
@@ -435,7 +435,7 @@ namespace tmv {
             // impossible beta value with |beta - 1| > 1.  e.g. (2,-1) (?!?)
             // This seems to only happen when beta should really be 0.  
             // So just set it to 0 now.
-            if (std::abs(*bi-1.) > 1.01) *bi = 0.;
+            if (TMV_ABS(*bi-1.) > 1.01) *bi = 0.;
             if (TMV_IMAG(*bi) != 0.) 
                 det *= -TMV_CONJ(*bi * *bi)/norm(*bi);
             else if (TMV_REAL(*bi) != 0.)
@@ -509,7 +509,7 @@ namespace tmv {
         }
         float* bi = beta.ptr();
         for(int i=0;i<n;++i,++bi) {
-            if (std::abs(*bi-1.F) > 1.01F) *bi = 0.F;
+            if (TMV_ABS(*bi-1.F) > 1.01F) *bi = 0.F;
             if (*bi != 0.F) det = -det;
         }
     }
@@ -539,7 +539,7 @@ namespace tmv {
             LAPNAME(cgelqf) (
                 LAPCM LAPV(n),LAPV(m),LAPP(A.ptr()),LAPV(lda),
                 LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
-            lwork = int(std::real(work[0]));
+            lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
 #endif
 #endif
@@ -563,7 +563,7 @@ namespace tmv {
             LAPNAME(cgeqrf) (
                 LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
-            lwork = int(std::real(work[0]));
+            lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
 #endif
 #endif
@@ -579,7 +579,7 @@ namespace tmv {
         }
         std::complex<float>* bi = beta.ptr();
         for(int i=0;i<n;++i,++bi) {
-            if (std::abs(*bi-1.F) > 1.01F) *bi = 0.F;
+            if (TMV_ABS(*bi-1.F) > 1.01F) *bi = 0.F;
             if (TMV_IMAG(*bi) != 0.F) 
                 det *= -TMV_CONJ(*bi * *bi)/norm(*bi);
             else if (TMV_REAL(*bi) != 0.F)
