@@ -462,7 +462,7 @@ def ReadFileList(fname):
 
 def CheckLibs(context,try_libs,source_file):
     init_libs = context.env['LIBS']
-    context.env.Prepend(LIBS=try_libs)
+    context.env.PrependUnique(LIBS=try_libs)
     result = context.TryLink(source_file,'.cpp')
     if not result :
         context.env.Replace(LIBS=init_libs)
@@ -626,6 +626,7 @@ int main()
     if context.TryCompile(atlas_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],atlas_source_file) or
+            CheckLibs(context,['ptcblas','atlas','pthread'],atlas_source_file) or
             CheckLibs(context,['cblas','atlas'],atlas_source_file))
 
         context.Result(result)
