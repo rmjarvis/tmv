@@ -817,14 +817,16 @@ int main()
     if context.TryCompile(clapack_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],clapack_source_file) or
-            CheckLibs(context,['clapack','cblaswr','f2c'],clapack_source_file) or
             CheckLibs(context,['lapack','cblaswr','f2c'],clapack_source_file) or
-            CheckLibs(context,['clapack','fblaswr','f2c'],clapack_source_file) or
             CheckLibs(context,['lapack','fblaswr','f2c'],clapack_source_file) or
-            CheckLibs(context,['clapack','f2c'],clapack_source_file) or
+            CheckLibs(context,['clapack','cblaswr','f2c'],clapack_source_file) or
+            CheckLibs(context,['clapack','fblaswr','f2c'],clapack_source_file) or
             CheckLibs(context,['lapack','f2c'],clapack_source_file) or
-            CheckLibs(context,['clapack'],clapack_source_file) or
-            CheckLibs(context,['lapack'],clapack_source_file) )
+            CheckLibs(context,['clapack','f2c'],clapack_source_file) or
+            CheckLibs(context,['lapack','F77'],clapack_source_file) or
+            CheckLibs(context,['clapack','F77'],clapack_source_file) or
+            CheckLibs(context,['lapack'],clapack_source_file) or
+            CheckLibs(context,['clapack'],clapack_source_file) )
 
         context.Result(result)
 
@@ -1060,6 +1062,10 @@ def DoConfig(env):
         env.Append(CPPDEFINES=['NDEBUG'])
     if env['MEM_TEST']:
         env.Append(CPPDEFINES=['MEMTEST'])
+    if '-m32' in env['CCFLAGS']:
+        env.Append(LINKFLAGS=['-m32'])
+    if '-m64' in env['CCFLAGS']:
+        env.Append(LINKFLAGS=['-m64'])
     if env['STATIC'] :
         if env['CXXTYPE'] == 'pgCC':
             env.Append(LINKFLAGS=['-Bstatic'])

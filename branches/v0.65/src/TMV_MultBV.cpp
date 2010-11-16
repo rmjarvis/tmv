@@ -1731,7 +1731,7 @@ namespace tmv {
             if ( !((A.isrm() && A.stepi()>0) || (A.iscm() && A.stepj()>0)) ) {
                 BandMatrix<Ta,ColMajor> AA = A;
                 BlasMultEqMV(AA,x);
-            } else if (SameStorage(A,x)) {
+            } else if (SameStorage(A,x) || x.step() != 1) {
                 Vector<T> xx = x;
                 BlasMultEqMV(A,xx.view());
                 x = xx;

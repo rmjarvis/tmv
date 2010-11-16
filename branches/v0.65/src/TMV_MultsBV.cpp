@@ -616,8 +616,8 @@ namespace tmv {
             cout<<"y = "<<TMV_Text(y)<<" step "<<y.step()<<"  "<<y<<endl;
 #endif
             if (A.iscm()&&(A.nlo()==0 || A.stepj()>0)) {
-                if (!y.isconj() /*&& y.step() > 0*/) { 
-                    if (!x.isconj() /*&& x.step() > 0*/)
+                if (!y.isconj() && y.step() != 1) { 
+                    if (!x.isconj() && x.step() != 1)
                         BlasMultMV(alpha,A,x,add?1:0,y);
                     else {
                         Vector<T> xx = alpha*x;
@@ -625,7 +625,7 @@ namespace tmv {
                     }
                 } else {
                     Vector<T> yy(y.size());
-                    if (!x.isconj() /*&& x.step() > 0*/) {
+                    if (!x.isconj() && x.step() != 1) {
                         BlasMultMV(T(1),A,x,0,yy.view());
                         if (add) y += alpha*yy;
                         else y = alpha*yy;

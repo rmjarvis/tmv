@@ -44,10 +44,18 @@ void DoAssert(bool x, std::string s);
 
 template <class M1, class M2, class T>
 inline bool Equal(const M1& a, const M2& b, T eps)
-{ return Norm(a-b) <= eps; }
+{ 
+    T normdiff = Norm(a-b);
+    if (showtests) std::cout<<"  "<<normdiff<<" <=? "<<eps<<"  ";
+    return normdiff <= eps; 
+}
 template <class X1, class X2, class T>
 inline bool Equal2(const X1& a, const X2& b, T eps)
-{ return tmv::TMV_ABS2(a-b) <= eps; }
+{
+    T absdiff = tmv::TMV_ABS2(a-b);
+    if (showtests) std::cout<<"  "<<absdiff<<" <=? "<<eps<<"  ";
+    return absdiff <= eps;
+}
 
 template <class M1, class M2>
 inline bool Equal(const M1& a, const M2& b, int )

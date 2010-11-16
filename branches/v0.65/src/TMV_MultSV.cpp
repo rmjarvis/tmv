@@ -637,8 +637,8 @@ namespace tmv {
             TMVAssert(y.size() <= 1);
             DoMultMV<add>(alpha,A,x,VectorView<T>(y.ptr(),y.size(),1,y.ct()));
         } else if (A.iscm()&&A.stepj()>0) {
-            if (!y.isconj() && y.step() > 0) { 
-                if (!x.isconj() && x.step() > 0)
+            if (!y.isconj() && y.step() != 1) { 
+                if (!x.isconj() && x.step() != 1)
                     BlasMultMV(alpha,A,x,add?1:0,y);
                 else {
                     Vector<T> xx = alpha*x;
@@ -646,7 +646,7 @@ namespace tmv {
                 }
             } else {
                 Vector<T> yy(y.size());
-                if (!x.isconj() && x.step() > 0) {
+                if (!x.isconj() && x.step() != 1) {
                     BlasMultMV(T(1),A,x,0,yy.view());
                     if (add) y += alpha*yy;
                     else y = alpha*yy;

@@ -280,7 +280,7 @@ namespace tmv {
             cerr<<endl<<"x = "<<TMV_Text(x)<<" step "<<x.step();
             if (x.size() < 30) cerr<<"  "<<x0;
             cerr<<endl<<"y = "<<TMV_Text(y)<<" step "<<y.step();
-            if (y.size() < 30) cerr<<"  "<<y0;
+            if (add && y.size() < 30) cerr<<"  "<<y0;
             cerr<<endl<<"Aptr = "<<A.cptr();
             cerr<<", xptr = "<<x.cptr()<<", yptr = "<<y.cptr()<<endl;
             if (y.size() < 200) {
@@ -294,7 +294,7 @@ namespace tmv {
             }
             cerr<<"Norm(A0) = "<<Norm(A0)<<endl;
             cerr<<"Norm(x0) = "<<Norm(x0)<<endl;
-            cerr<<"Norm(y0) = "<<Norm(y0)<<endl;
+            if (add) cerr<<"Norm(y0) = "<<Norm(y0)<<endl;
             cerr<<"|A0|*|x0|+?|y0| = "<<
                 Norm(A0)*Norm(x0)+
                 (add?Norm(y0):TMV_RealType(T)(0))<<endl;
@@ -395,7 +395,7 @@ namespace tmv {
             cerr<<endl<<"x = "<<TMV_Text(x)<<" step "<<x.step();
             if (x.size() < 30) cerr<<"  "<<x0;
             cerr<<endl<<"y = "<<TMV_Text(y)<<" step "<<y.step();
-            if (y.size() < 30) cerr<<"  "<<y0;
+            if (add && y.size() < 30) cerr<<"  "<<y0;
             cerr<<endl<<"Aptr = "<<A.cptr();
             cerr<<", xptr = "<<x.cptr()<<", yptr = "<<y.cptr()<<endl;
             if (y.size() < 200) {
@@ -409,7 +409,7 @@ namespace tmv {
             }
             cerr<<"Norm(A0) = "<<Norm(A0)<<endl;
             cerr<<"Norm(x0) = "<<Norm(x0)<<endl;
-            cerr<<"Norm(y0) = "<<Norm(y0)<<endl;
+            if (add) cerr<<"Norm(y0) = "<<Norm(y0)<<endl;
             cerr<<"|alpha|*|A0|*|x0|+?|y0| = "<<
                 TMV_ABS(alpha)*Norm(A0)*Norm(x0)+
                 (add?Norm(y0):TMV_RealType(T)(0))<<endl;
@@ -836,6 +836,7 @@ namespace tmv {
         std::cout<<"A = "<<A<<std::endl;
         std::cout<<"x = "<<x<<std::endl;
         if (beta == 1) std::cout<<"y = "<<y<<std::endl;
+        else { y.setZero(); std::cout<<"zeroed y = "<<y<<std::endl; }
         std::cout<<"m,n = "<<m<<','<<n<<std::endl;
         std::cout<<"alpha,beta = "<<alpha<<','<<xbeta<<std::endl;
         std::cout<<"A.cptr = "<<A.cptr()<<std::endl;
@@ -884,7 +885,7 @@ namespace tmv {
                 BLAS1);
         }
 #if 0
-        std::cout<<"After cgemv:\n";
+        std::cout<<"After cgemv:"<<std::endl;
         std::cout<<"y -> "<<y<<std::endl;
 #endif
     }
@@ -1093,12 +1094,28 @@ namespace tmv {
         } else if (y.step() == 0) {
             TMVAssert(y.size() <= 1);
             DoMultMV<add>(alpha,A,x,VectorView<T>(y.ptr(),y.size(),1,y.ct()));
+#if 1
+        } else if (y.step() != 1) {
+            // Most BLAS implementations do fine with the y.step() < 0.
+            // And in fact, they _should_ do ok even if the step is negative.
+            // However, some implementations seem to propagate nan's from
+            // the temporary memory they create to do the unit-1 calculation.
+            // So to make sure they don't have to make a temporary, I just
+            // do it here for them.
+#else
         } else if (y.step() < 0) {
+#endif
             Vector<T> yy(y.size());
             DoMultMV<false>(T(1),A,x,yy.view());
             if (add) y += alpha*yy;
             else y = alpha*yy;
+#if 1
+        } else if (x.step() != 1) {
+            // I don't think the non-unit step is a problem, but just to be
+            // sure...
+#else
         } else if (x.step() < 0) {
+#endif
             Vector<T> xx = alpha*x;
             DoMultMV<add>(T(1),A,xx,y);
         } else if ((A.isrm()&&A.stepi()>0) || (A.iscm()&&A.stepj()>0)) {
@@ -1142,12 +1159,13 @@ namespace tmv {
         // y (+)= alpha * A * x
     { 
 #ifdef XDEBUG
-        //cout<<"Start MultMV: alpha = "<<alpha<<endl;
-        //cout<<"add = "<<add<<endl;
-        //cout<<"A = "<<TMV_Text(A)<<"  "<<A<<endl;
-        //cout<<"x = "<<TMV_Text(x)<<" step "<<x.step()<<"  "<<x<<endl;
-        //cout<<"y = "<<TMV_Text(y)<<" step "<<y.step()<<endl;
-        //if (add) cout<<"y = "<<y<<endl;
+        cout<<"Start MultMV: alpha = "<<alpha<<endl;
+        cout<<"add = "<<add<<endl;
+        cout<<"A = "<<TMV_Text(A)<<"  "<<A<<endl;
+        cout<<"x = "<<TMV_Text(x)<<" step "<<x.step()<<"  "<<x<<endl;
+        cout<<"y = "<<TMV_Text(y)<<" step "<<y.step()<<endl;
+        if (add) cout<<"y = "<<y<<endl;
+        cout<<"ptrs = "<<A.cptr()<<"  "<<x.cptr()<<"  "<<y.cptr()<<std::endl;
         Vector<Tx> x0 = x;
         Vector<T> y0 = y;
         Matrix<Ta> A0 = A;
@@ -1156,7 +1174,7 @@ namespace tmv {
             if (add) y2(i) += alpha * (A.row(i) * x0);
             else y2(i) = alpha * (A.row(i) * x0);
         }
-        //cout<<"y2 = "<<y2<<endl;
+        cout<<"y2 = "<<y2<<endl;
 #endif
         TMVAssert(A.rowsize() == x.size());
         TMVAssert(A.colsize() == y.size());
@@ -1173,7 +1191,7 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
-        //cout<<"y => "<<y<<endl;
+        cout<<"y => "<<y<<endl;
         if (Norm(y-y2) > 
             0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(x0)+
                    (add?Norm(y0):TMV_RealType(T)(0)))) {
@@ -1185,7 +1203,7 @@ namespace tmv {
             cerr<<endl<<"x = "<<TMV_Text(x)<<" step "<<x.step();
             if (x.size() < 30) cerr<<"  "<<x0;
             cerr<<endl<<"y = "<<TMV_Text(y)<<" step "<<y.step();
-            if (y.size() < 30) cerr<<"  "<<y0;
+            if (add && y.size() < 30) cerr<<"  "<<y0;
             cerr<<endl<<"Aptr = "<<A.cptr();
             cerr<<", xptr = "<<x.cptr()<<", yptr = "<<y.cptr()<<endl;
             if (y.size() < 200) {
@@ -1199,7 +1217,7 @@ namespace tmv {
             }
             cerr<<"Norm(A0) = "<<Norm(A0)<<endl;
             cerr<<"Norm(x0) = "<<Norm(x0)<<endl;
-            cerr<<"Norm(y0) = "<<Norm(y0)<<endl;
+            if (add) cerr<<"Norm(y0) = "<<Norm(y0)<<endl;
             cerr<<"|alpha|*|A0|*|x0|+?|y0| = "<<
                 TMV_ABS(alpha)*Norm(A0)*Norm(x0)+
                 (add?Norm(y0):TMV_RealType(T)(0))<<endl;

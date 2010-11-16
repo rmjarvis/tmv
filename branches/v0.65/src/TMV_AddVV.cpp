@@ -350,8 +350,10 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
+        std::cout<<"v2 => "<<v2<<std::endl;
         Vector<T> diff(v2.size());
         for(int i=0;i<int(v2.size());i++) diff(i) = vx(i) - v2(i);
+        std::cout<<"diff => "<<diff<<std::endl;
         if (Norm(diff) > 0.001*TMV_ABS(x)*(Norm(v1)+Norm(v0))) {
             cerr<<"AddVV: x = "<<x<<endl;
             cerr<<"v1 = "<<TMV_Text(v1)<<"  step "<<v1.step()<<"  "<<v1<<endl;
@@ -378,7 +380,7 @@ namespace tmv {
         cout<<"Start AddVV: x1 = "<<x1<<", x2 = "<<x2<<endl;
         cout<<"v1 = "<<TMV_Text(v1)<<"  "<<v1<<endl;
         cout<<"v2 = "<<TMV_Text(v2)<<"  "<<v2<<endl;
-        cout<<"v3 = "<<TMV_Text(v3)<<"  "<<v3<<endl;
+        cout<<"v3 = "<<TMV_Text(v3)<<endl;
         Vector<T> v10 = v1;
         Vector<T> v20 = v2;
         Vector<T> vx = v2;
@@ -406,8 +408,10 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
+        std::cout<<"v3 => "<<v3<<std::endl;
         Vector<T> diff(v3.size());
         for(int i=0;i<int(v3.size());i++) diff(i) = vx(i) - v3(i);
+        std::cout<<"diff = "<<diff<<std::endl;
         if (Norm(diff) > 0.001*(
                 x1==T(0)?TMV_RealType(T)(0):(TMV_ABS(x1)*Norm(v10)) +
                 x2==T(0)?TMV_RealType(T)(0):(TMV_ABS(x2)*Norm(v20)) )) {
