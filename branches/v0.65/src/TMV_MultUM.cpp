@@ -181,7 +181,7 @@ namespace tmv {
             NonBlasMultEqMM(alpha,A11,B1);
         }
 #ifdef XDEBUG
-        if (Norm(B-B2) > 0.001*(Norm(A0)*Norm(BB0))) {
+        if (!(Norm(B-B2) <= 0.001*(Norm(A0)*Norm(BB0)))) {
             cerr<<"NonBlas MultEqMM alpha = "<<alpha<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"B = "<<TMV_Text(B)<<"  "<<BB0<<endl;
@@ -709,7 +709,7 @@ namespace tmv {
 
 #ifdef XDEBUG
         cout<<"Norm(B-B2) = "<<Norm(B-B2)<<endl;
-        if (Norm(B-B2) > 0.001*(Norm(A0)*Norm(B0))) {
+        if (!(Norm(B-B2) <= 0.001*(Norm(A0)*Norm(B0)))) {
             cerr<<"MultEqMM alpha = "<<alpha<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"B = "<<TMV_Text(B)<<"  "<<B0<<endl;
@@ -762,7 +762,7 @@ namespace tmv {
 
 #ifdef XDEBUG
         cout<<"Norm(B-B2) = "<<Norm(B-B2)<<endl;
-        if (Norm(B-B2) > 0.001*(Norm(A0)*Norm(B0))) {
+        if (!(Norm(B-B2) <= 0.001*(Norm(A0)*Norm(B0)))) {
             cerr<<"MultEqMM alpha = "<<alpha<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"B = "<<TMV_Text(B)<<"  "<<B0<<endl;
@@ -915,7 +915,7 @@ namespace tmv {
         }
 #ifdef XDEBUG
         cout<<"Norm(C-C2) = "<<Norm(C-C2)<<endl;
-        if (Norm(C-C2) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(BB0))) {
+        if (!(Norm(C-C2) <= 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(BB0)))) {
             cerr<<"AddMultMM alpha = "<<alpha<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"B = "<<TMV_Text(B)<<"  "<<BB0<<endl;
@@ -1058,7 +1058,7 @@ namespace tmv {
         }
 #ifdef XDEBUG
         cout<<"Norm(C-C2) = "<<Norm(C-C2)<<endl;
-        if (Norm(C-C2) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(BB0))) {
+        if (!(Norm(C-C2) <= 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(BB0)))) {
             cerr<<"AddMultMM alpha = "<<alpha<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"B = "<<TMV_Text(B)<<"  "<<BB0<<endl;
@@ -1157,8 +1157,9 @@ namespace tmv {
         }
 #ifdef XDEBUG
         cout<<"Norm(C-C2) = "<<Norm(C-C2)<<endl;
-        if (Norm(C-C2) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
-                                (add?Norm(C0):TMV_RealType(T)(0)))) {
+        if (!(Norm(C-C2) <= 
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
+                     (add?Norm(C0):TMV_RealType(T)(0))))) {
             cerr<<"MultMM alpha = "<<alpha<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A<<endl;
             cerr<<"B = "<<TMV_Text(B)<<"  "<<B<<endl;
@@ -1256,9 +1257,9 @@ namespace tmv {
         }
 #ifdef XDEBUG
         cout<<"Norm(C-C2) = "<<Norm(C-C2)<<endl;
-        if (Norm(C-C2) > 0.001*(
-                TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
-                (add?Norm(C0):TMV_RealType(T)(0)))) {
+        if (!(Norm(C-C2) <= 
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
+                     (add?Norm(C0):TMV_RealType(T)(0))))) {
             cerr<<"MultMM alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;

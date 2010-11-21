@@ -98,7 +98,7 @@ namespace tmv {
         Matrix<T> Q(A);
         GetQFromQR(Q.view(),beta);
         Matrix<T> AA = Q*R;
-        if (Norm(AA-A0) > 0.0001*Norm(Q)*Norm(R)) {
+        if (!(Norm(AA-A0) < 0.0001*Norm(Q)*Norm(R))) {
             cerr<<"NonBlockQRDecompose: A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"-> "<<A<<endl;
             cerr<<"beta = "<<beta<<endl;
@@ -194,7 +194,7 @@ namespace tmv {
         Matrix<T> Q(A);
         GetQFromQR(Q.view(),Z.diag().conjugate());
         Matrix<T> AA = Q*R;
-        if (Norm(AA-A0) > 0.0001*Norm(Q)*Norm(R)) {
+        if (!(Norm(AA-A0) < 0.0001*Norm(Q)*Norm(R))) {
             cerr<<"RecursiveQRDecompose: A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"-> "<<A<<endl;
             cerr<<"Z = "<<Z<<endl;
@@ -251,7 +251,7 @@ namespace tmv {
         Matrix<T> Q(A);
         GetQFromQR(Q.view(),beta);
         Matrix<T> AA = Q*R;
-        if (Norm(AA-A0) > 0.0001*Norm(Q)*Norm(R)) {
+        if (!(Norm(AA-A0) < 0.0001*Norm(Q)*Norm(R))) {
             cerr<<"BlockQRDecompose: A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"-> "<<A<<endl;
             cerr<<"beta = "<<beta<<endl;
@@ -309,20 +309,24 @@ namespace tmv {
         TMVAssert(beta.step()==1);
         int m = A.colsize();
         int n = A.rowsize();
+        beta.setZero();
         if (A.isrm()) {
             int lda = A.stepi();
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = 2*n*LAP_BLOCKSIZE;
             AlignedArray<double> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #else
             int lwork = -1;
             AlignedArray<double> work(1);
+            work.get()[0] = 0.;
             LAPNAME(dgelqf) (
                 LAPCM LAPV(n),LAPV(m),LAPP(A.ptr()),LAPV(lda),
                 LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
             lwork = int(work[0]);
             work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
             LAPNAME(dgelqf) (
@@ -339,14 +343,17 @@ namespace tmv {
 #ifdef NOWORKQUERY
             int lwork = 2*n*LAP_BLOCKSIZE;
             AlignedArray<double> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #else
             int lwork = -1;
             AlignedArray<double> work(1);
+            work.get()[0] = 0.;
             LAPNAME(dgeqrf) (
                 LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
             lwork = int(work[0]);
             work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
             LAPNAME(dgeqrf) (
@@ -379,20 +386,24 @@ namespace tmv {
         TMVAssert(beta.step()==1);
         int m = A.colsize();
         int n = A.rowsize();
+        beta.setZero();
         if (A.isrm()) {
             int lda = A.stepi();
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = 2*n*LAP_BLOCKSIZE;
             AlignedArray<std::complex<double> > work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #else
             int lwork = -1;
             AlignedArray<std::complex<double> > work(1);
+            work.get()[0] = 0.;
             LAPNAME(zgelqf) (
                 LAPCM LAPV(n),LAPV(m),LAPP(A.ptr()),LAPV(lda),
                 LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
             lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
             LAPNAME(zgelqf) (
@@ -409,14 +420,17 @@ namespace tmv {
 #ifdef NOWORKQUERY
             int lwork = 2*n*LAP_BLOCKSIZE;
             AlignedArray<std::complex<double> > work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #else
             int lwork = -1;
             AlignedArray<std::complex<double> > work(1);
+            work.get()[0] = 0.;
             LAPNAME(zgeqrf) (
                 LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
             lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
             LAPNAME(zgeqrf) (
@@ -458,20 +472,24 @@ namespace tmv {
         TMVAssert(beta.step()==1);
         int m = A.colsize();
         int n = A.rowsize();
+        beta.setZero();
         if (A.isrm()) {
             int lda = A.stepi();
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = 2*n*LAP_BLOCKSIZE;
             AlignedArray<float> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #else
             int lwork = -1;
             AlignedArray<float> work(1);
+            work.get()[0] = 0.F;
             LAPNAME(sgelqf) (
                 LAPCM LAPV(n),LAPV(m),LAPP(A.ptr()),LAPV(lda),
                 LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
             lwork = int(work[0]);
             work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
             LAPNAME(sgelqf) (
@@ -488,14 +506,17 @@ namespace tmv {
 #ifdef NOWORKQUERY
             int lwork = 2*n*LAP_BLOCKSIZE;
             AlignedArray<float> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #else
             int lwork = -1;
             AlignedArray<float> work(1);
+            work.get()[0] = 0.F;
             LAPNAME(sgeqrf) (
                 LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
             lwork = int(work[0]);
             work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
             LAPNAME(sgeqrf) (
@@ -527,20 +548,24 @@ namespace tmv {
         TMVAssert(beta.step()==1);
         int m = A.colsize();
         int n = A.rowsize();
+        beta.setZero();
         if (A.isrm()) {
             int lda = A.stepi();
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = 2*n*LAP_BLOCKSIZE;
             AlignedArray<std::complex<float> > work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #else
             int lwork = -1;
             AlignedArray<std::complex<float> > work(1);
+            work.get()[0] = 0.F;
             LAPNAME(cgelqf) (
                 LAPCM LAPV(n),LAPV(m),LAPP(A.ptr()),LAPV(lda),
                 LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
             lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
             LAPNAME(cgelqf) (
@@ -557,14 +582,17 @@ namespace tmv {
 #ifdef NOWORKQUERY
             int lwork = 2*n*LAP_BLOCKSIZE;
             AlignedArray<std::complex<float> > work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #else
             int lwork = -1;
             AlignedArray<std::complex<float> > work(1);
+            work.get()[0] = 0.F;
             LAPNAME(cgeqrf) (
                 LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
             lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
             LAPNAME(cgeqrf) (
@@ -588,13 +616,16 @@ namespace tmv {
     }
 #endif
 #endif
+
     template <class T> 
     void QR_Decompose(const MatrixView<T>& A, const VectorView<T>& beta, T& det)
     {
 #ifdef XDEBUG
         std::cout<<"Start QR_Decompose\n";
         std::cout<<"A = "<<TMV_Text(A)<<std::endl;
+        std::cout<<"Norm(A) = "<<Norm(A)<<std::endl;
         std::cout<<"beta = "<<TMV_Text(beta)<<std::endl;
+        std::cout<<"Norm(beta) = "<<Norm(beta)<<std::endl;
         Matrix<T> A0(A);
 #endif
 
@@ -613,14 +644,16 @@ namespace tmv {
         }
 #ifdef XDEBUG
         std::cout<<"Done QR_Decompose:\n";
+        std::cout<<"Norm(A) = "<<Norm(A)<<std::endl;
         std::cout<<"beta = "<<beta<<std::endl;
+        std::cout<<"Norm(beta) = "<<Norm(beta)<<std::endl;
         Matrix<T> R = A.upperTri();
         Matrix<T> Q(A);
         GetQFromQR(Q.view(),beta);
         Matrix<T> AA = Q*R;
         std::cout<<"Norm(AA-A0) = "<<Norm(AA-A0)<<std::endl;
-        if (Norm(AA-A0) > 0.0001*Norm(Q)*Norm(R)) {
-            cerr<<"BlockQRDecompose: A = "<<TMV_Text(A)<<"  "<<A0<<endl;
+        if (!(Norm(AA-A0) <= 0.0001*Norm(Q)*Norm(R))) {
+            cerr<<"QRDecompose: A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"-> "<<A<<endl;
             cerr<<"beta = "<<beta<<endl;
             cerr<<"Q*R = "<<Q*R<<endl;

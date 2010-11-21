@@ -182,7 +182,7 @@ namespace tmv {
         BandMatrix<T> L = A.lowerBand();
         BandMatrix<T> A2 = L * L.adjoint();
         TMV_RealType(T) normll = TMV_SQR(Norm(L));
-        if (Norm(A2-A0) > 0.001*normll) {
+        if (!(Norm(A2-A0) < 0.001*normll)) {
             cerr<<"CH_Decompose: A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"Done: A = "<<A<<endl;
             cerr<<"L = "<<L<<endl;
@@ -293,7 +293,7 @@ namespace tmv {
         //cout<<"D = "<<D<<endl;
         //cout<<"A2 = "<<A2<<endl;
         //cout<<"cf A0 = "<<A0<<endl;
-        if (Norm(A2-A0) > 0.001*normldl) {
+        if (!(Norm(A2-A0) < 0.001*normldl)) {
             cerr<<"LDL_Decompose: A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"Done: A = "<<A<<endl;
             cerr<<"L = "<<L<<endl;
@@ -372,7 +372,7 @@ namespace tmv {
         //cout<<"D = "<<D<<endl;
         //cout<<"A2 = "<<A2<<endl;
         //cout<<"cf. A0 = "<<A0<<endl;
-        if (Norm(A2-A0) > 0.001*normldl) {
+        if (!(Norm(A2-A0) < 0.001*normldl)) {
             cerr<<"SymLDLDecomp: A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"Done: A = "<<A<<endl;
             cerr<<"L = "<<L<<endl;

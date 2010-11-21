@@ -229,8 +229,9 @@ namespace tmv {
             }
         }
 #ifdef XDEBUG
-        if (Norm(C2-C) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
-                                (add?Norm(C0):TMV_RealType(T)(0)))) {
+        if (!(Norm(C2-C) <=
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
+                     (add?Norm(C0):TMV_RealType(T)(0))))) {
             cerr<<"ColMultMM: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
@@ -319,8 +320,9 @@ namespace tmv {
             DoMultMM<add>(alpha,A11,B11,C11);
         }
 #ifdef XDEBUG
-        if (Norm(C2-C) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
-                                (add?Norm(C0):TMV_RealType(T)(0)))) {
+        if (!(Norm(C2-C) <=
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
+                     (add?Norm(C0):TMV_RealType(T)(0))))) {
             cerr<<"DoMultMM: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
@@ -367,8 +369,9 @@ namespace tmv {
             DoMultMM<add>(alpha,A,B,C);
 
 #ifdef XDEBUG
-        if (Norm(C2-C) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
-                                (add?Norm(C0):TMV_RealType(T)(0)))) {
+        if (!(Norm(C2-C) <=
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
+                     (add?Norm(C0):TMV_RealType(T)(0))))) {
             cerr<<"MultMM: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
@@ -569,8 +572,9 @@ namespace tmv {
             }
         }
 #ifdef XDEBUG
-        if (Norm(C2-C) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
-                                (add?Norm(C0):TMV_RealType(T)(0)))) {
+        if (!(Norm(C2-C) <=
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
+                     (add?Norm(C0):TMV_RealType(T)(0))))) {
             cerr<<"MultMM: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
@@ -660,8 +664,9 @@ namespace tmv {
             DoMultMM<add>(alpha,A00,B00,C00);
         }
 #ifdef XDEBUG
-        if (Norm(C2-C) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
-                                (add?Norm(C0):TMV_RealType(T)(0)))) {
+        if (!(Norm(C2-C) <= 
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
+                     (add?Norm(C0):TMV_RealType(T)(0))))) {
             cerr<<"MultMM: alpha= "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
@@ -708,8 +713,9 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
-        if (Norm(C2-C) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
-                                (add?Norm(C0):TMV_RealType(T)(0)))) {
+        if (!(Norm(C2-C) <= 
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
+                     (add?Norm(C0):TMV_RealType(T)(0))))) {
             cerr<<"MultMM: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;

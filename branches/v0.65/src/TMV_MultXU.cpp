@@ -138,7 +138,7 @@ namespace tmv {
         }
 #ifdef XDEBUG
         //cout<<"Done MultXM: A = "<<A<<endl;
-        if (Norm(Matrix<T>(A)-A2) > 0.001*TMV_ABS(alpha)*Norm(A)) {
+        if (!(Norm(Matrix<T>(A)-A2) <= 0.001*TMV_ABS(alpha)*Norm(A))) {
             cerr<<"MultXM: alpha = "<<alpha<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"-> A = "<<A<<endl;

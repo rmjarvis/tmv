@@ -30,6 +30,19 @@ Bug fixes:
    optimizations are probably worth much for TMV, I decided to just always
    use the -fno-strict-aliasing flag and be safe.
 
+-- Fixed a bug in the BLAS calls of things like gemv, gemm, etc that have a 
+   "beta" parameter.  BLAS reinterprets a statement like y = A * x as
+   y = beta * y + alpha * A * x with alpha = 1, beta = 0.  The problem
+   comes when y is uninitialized data (which it often is in this kind of 
+   situation) and that uninitialized data happens to have a nan in it.
+   Then some BLAS distributions are true to the beta * y formulation which
+   involves a 0 * nan = nan.  So the output preserves the nan, rather than
+   overwriting with the desired answer. 
+   
+   The solution is basically to always zero out the y value directly
+   before calling gemv (or any of several others), rather than counting
+   on the BLAS implementation to do it.  So that is what TMV does now.
+
 New features:
 
 -- Made integer determinants calculate correctly, since the previous code

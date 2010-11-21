@@ -107,8 +107,9 @@ namespace tmv {
             else AddElementProd(alpha,A.diag(),x,y);
         }
 #ifdef XDEBUG
-        if (Norm(y-y2) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(x0)+
-                                (add?Norm(y0):TMV_RealType(T)(0)))) {
+        if (!(Norm(y-y2) <=
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(x0)+
+                     (add?Norm(y0):TMV_RealType(T)(0))))) {
             cerr<<"MultMV: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<TMV_Text(A)<<" step "<<A.diag().step()<<"  "<<A0<<endl;

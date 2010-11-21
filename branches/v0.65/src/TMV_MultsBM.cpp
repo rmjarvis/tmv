@@ -167,8 +167,9 @@ namespace tmv {
 
 #ifdef XDEBUG
         //cout<<"Done: C = "<<C<<endl;
-        if (Norm(C-C2) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
-                                (add?Norm(C0):TMV_RealType(T)(0)))) {
+        if (!(Norm(C-C2) <= 
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
+                     (add?Norm(C0):TMV_RealType(T)(0))))) {
             cerr<<"MultMM: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;

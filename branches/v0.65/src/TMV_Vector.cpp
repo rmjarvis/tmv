@@ -293,9 +293,19 @@ namespace tmv {
     template <class T> 
     RT GenVector<T>::norm2() const
     { 
+#if 0
+        std::cout<<"Norm2 of "<<*this<<std::endl;
+        RT ret = 
+            (size() == 0) ? RT(0) :
+            (step() < 0) ? DoNorm2(reverse()) :
+            DoNorm2(*this);
+        std::cout<<"ret = "<<ret<<std::endl;
+        return ret;
+#else
         if (size() == 0) return RT(0);
         else if (step() < 0) return DoNorm2(reverse());
         else  return DoNorm2(*this);
+#endif
     }
 
     //

@@ -270,8 +270,9 @@ namespace tmv {
 
 #ifdef XDEBUG
         //cout<<"y => "<<y<<endl;
-        if (Norm(y-y2) > 0.001*(Norm(A0)*Norm(x0)+
-                                (add?Norm(y0):TMV_RealType(T)(0)))) {
+        if (!(Norm(y-y2) <=
+              0.001*(Norm(A0)*Norm(x0)+
+                     (add?Norm(y0):TMV_RealType(T)(0))))) {
             cerr<<"MultMV: \n";
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<TMV_Text(A);
@@ -385,8 +386,9 @@ namespace tmv {
         } 
 #ifdef XDEBUG
         //cout<<"y => "<<y<<endl;
-        if (Norm(y-y2) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(x0)+
-                                (add?Norm(y0):TMV_RealType(T)(0)))) {
+        if (!(Norm(y-y2) <=
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(x0)+
+                     (add?Norm(y0):TMV_RealType(T)(0))))) {
             cerr<<"MultMV: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<TMV_Text(A);
@@ -453,7 +455,15 @@ namespace tmv {
         if (xs < 0) xp += (x.size()-1)*xs;
         double* yp = y.ptr();
         if (ys < 0) yp += (y.size()-1)*ys;
-        double xbeta(beta);
+        // Some BLAS implementations seem to have trouble if the 
+        // input y has a nan in it.
+        // They propagate the nan into the  output.
+        // I guess they strictly interpret y = beta*y + alpha*m*x,
+        // so if beta = 0, then beta*nan = nan.
+        // Anyway, to fix this problem, we always use beta=1, and just
+        // zero out y before calling the blas function if beta is 0.
+        if (beta == 0) y.setZero();
+        double xbeta(1);
 
 #if 0
         std::cout<<"Before dgemv"<<std::endl;
@@ -526,7 +536,8 @@ namespace tmv {
         if (xs < 0) xp += (x.size()-1)*xs;
         std::complex<double>* yp = y.ptr();
         if (ys < 0) yp += (y.size()-1)*ys;
-        std::complex<double> xbeta(beta);
+        if (beta == 0) y.setZero();
+        std::complex<double> xbeta(1);
 #if 0
         std::cout<<"Before zgemv"<<std::endl;
         std::cout<<"A = "<<A<<std::endl;
@@ -613,7 +624,8 @@ namespace tmv {
                     if (xs < 0) xp += (x.size()-1)*xs;
                     double* yp = (double*) y.ptr();
                     double xalpha(1);
-                    double xbeta(0);
+                    y.setZero();
+                    double xbeta(1);
                     BLASNAME(dgemv) (
                         BLASCM BLASCH_NT,
                         BLASV(m),BLASV(n),BLASV(xalpha),
@@ -680,7 +692,8 @@ namespace tmv {
             double* yp = (double*) y.ptr();
             if (ys < 0) yp += (y.size()-1)*ys;
             double xalpha(1);
-            double xbeta(beta);
+            y.setZero();
+            double xbeta(1);
             BLASNAME(dgemv) (
                 BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
                 BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
@@ -704,7 +717,7 @@ namespace tmv {
             double* yp = (double*) y.ptr();
             if (ys < 0) yp += (y.size()-1)*ys;
             double xalpha(TMV_REAL(alpha));
-            double xbeta(beta);
+            double xbeta(1);
             BLASNAME(dgemv) (
                 BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
                 BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
@@ -746,18 +759,15 @@ namespace tmv {
         double ar(TMV_REAL(alpha));
         double ai(TMV_IMAG(alpha));
         double xbeta(beta);
-        if (ar == 0.) {
-            if (beta == 0) y.realPart().setZero();
-        } else  {
+        if (beta == 0) y.setZero();
+        if (ar != 0.) {
             BLASNAME(dgemv) (
                 BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
                 BLASV(m),BLASV(n),BLASV(ar),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp),BLASV(ys) BLAS1);
         }
-        if (ai == 0.) {
-            if (beta == 0) y.imagPart().setZero();
-        } else {
+        if (ai != 0.) {
             BLASNAME(dgemv) (
                 BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
                 BLASV(m),BLASV(n),BLASV(ai),BLASP(A.cptr()),BLASV(lda),
@@ -790,7 +800,8 @@ namespace tmv {
         if (xs < 0) xp += (x.size()-1)*xs;
         float* yp = y.ptr();
         if (ys < 0) yp += (y.size()-1)*ys;
-        float xbeta(beta);
+        if (beta == 0) y.setZero();
+        float xbeta(1);
 
         BLASNAME(sgemv) (
             BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
@@ -830,7 +841,8 @@ namespace tmv {
         if (xs < 0) xp += (x.size()-1)*xs;
         std::complex<float>* yp = y.ptr();
         if (ys < 0) yp += (y.size()-1)*ys;
-        std::complex<float> xbeta(beta);
+        if (beta == 0) y.setZero();
+        std::complex<float> xbeta(1);
 #if 0
         std::cout<<"Before cgemv:\n";
         std::cout<<"A = "<<A<<std::endl;
@@ -920,7 +932,8 @@ namespace tmv {
                     if (xs < 0) xp += (x.size()-1)*xs;
                     float* yp = (float*) y.ptr();
                     float xalpha(1);
-                    float xbeta(0);
+                    y.setZero();
+                    float xbeta(1);
                     BLASNAME(sgemv) (
                         BLASCM BLASCH_NT,
                         BLASV(m),BLASV(n),BLASV(xalpha),
@@ -985,7 +998,8 @@ namespace tmv {
             float* yp = (float*) y.ptr();
             if (ys < 0) yp += (y.size()-1)*ys;
             float xalpha(1);
-            float xbeta(beta);
+            y.setZero();
+            float xbeta(1);
             BLASNAME(sgemv) (
                 BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
                 BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
@@ -1009,7 +1023,7 @@ namespace tmv {
             float* yp = (float*) y.ptr();
             if (ys < 0) yp += (y.size()-1)*ys;
             float xalpha(TMV_REAL(alpha));
-            float xbeta(beta);
+            float xbeta(1);
             BLASNAME(sgemv) (
                 BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
                 BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
@@ -1050,19 +1064,16 @@ namespace tmv {
         if (ys < 0) yp += (y.size()-1)*ys;
         float ar(TMV_REAL(alpha));
         float ai(TMV_IMAG(alpha));
-        float xbeta(beta);
-        if (ar == 0.F) {
-            if (beta == 0) y.realPart().setZero();
-        } else  {
+        if (beta == 0) y.setZero();
+        float xbeta(1);
+        if (ar != 0.F) {
             BLASNAME(sgemv) (
                 BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
                 BLASV(m),BLASV(n),BLASV(ar),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp),BLASV(ys) BLAS1);
         }
-        if (ai == 0.F) {
-            if (beta == 0) y.imagPart().setZero();
-        } else {
+        if (ai != 0.F) {
             BLASNAME(sgemv) (
                 BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
                 BLASV(m),BLASV(n),BLASV(ai),BLASP(A.cptr()),BLASV(lda),
@@ -1120,9 +1131,9 @@ namespace tmv {
             DoMultMV<add>(T(1),A,xx,y);
         } else if ((A.isrm()&&A.stepi()>0) || (A.iscm()&&A.stepj()>0)) {
             if (!SameStorage(A,y)) {
-                if (!SameStorage(x,y) && !SameStorage(A,x))
+                if (!SameStorage(x,y) && !SameStorage(A,x)) {
                     BlasMultMV(alpha,A,x,add?1:0,y);
-                else {
+                } else {
                     Vector<T> xx = alpha*x;
                     BlasMultMV(T(1),A,xx,add?1:0,y);
                 }
@@ -1164,7 +1175,8 @@ namespace tmv {
         cout<<"A = "<<TMV_Text(A)<<"  "<<A<<endl;
         cout<<"x = "<<TMV_Text(x)<<" step "<<x.step()<<"  "<<x<<endl;
         cout<<"y = "<<TMV_Text(y)<<" step "<<y.step()<<endl;
-        if (add) cout<<"y = "<<y<<endl;
+        //if (add) cout<<"y = "<<y<<endl;
+        cout<<"y = "<<y<<endl;
         cout<<"ptrs = "<<A.cptr()<<"  "<<x.cptr()<<"  "<<y.cptr()<<std::endl;
         Vector<Tx> x0 = x;
         Vector<T> y0 = y;
@@ -1192,9 +1204,9 @@ namespace tmv {
 
 #ifdef XDEBUG
         cout<<"y => "<<y<<endl;
-        if (Norm(y-y2) > 
-            0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(x0)+
-                   (add?Norm(y0):TMV_RealType(T)(0)))) {
+        if (!(Norm(y-y2) <= 
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(x0)+
+                     (add?Norm(y0):TMV_RealType(T)(0))))) {
             cerr<<"MultMV: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<TMV_Text(A);

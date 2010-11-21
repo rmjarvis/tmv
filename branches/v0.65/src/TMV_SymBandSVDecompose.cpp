@@ -283,9 +283,12 @@ namespace tmv {
         int ldu = U ? U->stepj() : 1;
         char vect = U ? 'V' : 'N';
         double* UU = U ? U->ptr() : 0;
+        D.setZero();
+        E.setZero();
 #ifndef LAPNOWORK
         int lwork = n;
         AlignedArray<double> work(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #endif
         LAPNAME(dsbtrd) (
             LAPCM LAPV(vect),LAPCH_LO,LAPV(n),LAPV(kl),
@@ -324,9 +327,12 @@ namespace tmv {
         int ldu = U ? U->stepj() : 1;
         char vect = U ? 'V' : 'N';
         std::complex<double>* UU = U ? U->ptr() : 0;
+        D.setZero();
+        E.setZero();
 #ifndef LAPNOWORK
         int lwork = n;
         AlignedArray<std::complex<double> > work(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #endif
         LAPNAME(zhbtrd) (
             LAPCM LAPV(vect),LAPCH_LO,LAPV(n),LAPV(kl),
@@ -364,9 +370,12 @@ namespace tmv {
         int ldu = U ? U->stepj() : 1;
         char vect = U ? 'V' : 'N';
         float* UU = U ? U->ptr() : 0;
+        D.setZero();
+        E.setZero();
 #ifndef LAPNOWORK
         int lwork = n;
         AlignedArray<float> work(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #endif
         LAPNAME(ssbtrd) (
             LAPCM LAPV(vect),LAPCH_LO,LAPV(n),LAPV(kl),
@@ -405,9 +414,12 @@ namespace tmv {
         int ldu = U ? U->stepj() : 1;
         char vect = U ? 'V' : 'N';
         std::complex<float>* UU = U ? U->ptr() : 0;
+        D.setZero();
+        E.setZero();
 #ifndef LAPNOWORK
         int lwork = n;
         AlignedArray<std::complex<float> > work(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #endif
         LAPNAME(chbtrd) (
             LAPCM LAPV(vect),LAPCH_LO,LAPV(n),LAPV(kl),
@@ -481,7 +493,7 @@ namespace tmv {
             std::cout<<"After Tridiag: Norm(A2-A0) = "<<Norm(A2-A0)<<std::endl;
             std::cout<<"Norm(UtU-1) = "<<Norm(U->adjoint()*(*U)-T(1))<<std::endl;
             std::cout<<"Norm(UUt-1) = "<<Norm((*U)*U->adjoint()-T(1))<<std::endl;
-            if (Norm(A2-A0) > 0.001*Norm(A0)) {
+            if (!(Norm(A2-A0) < 0.001*Norm(A0))) {
                 cerr<<"Tridiagonalize: \n";
                 cerr<<"A0 = "<<TMV_Text(A)<<"  "<<A0<<endl;
                 cerr<<"Done: U = "<<*U<<endl;
@@ -546,7 +558,7 @@ namespace tmv {
             std::cout<<"After UnsortedEigen: Norm(A2-A0) = "<<Norm(A2-A0)<<std::endl;
             std::cout<<"Norm(UtU-1) = "<<Norm(U->adjoint()*(*U)-T(1))<<std::endl;
             std::cout<<"Norm(UUt-1) = "<<Norm((*U)*U->adjoint()-T(1))<<std::endl;
-            if (Norm(A0-A2) > 0.0001 * Norm(*U) * Norm(SS) * Norm(*U)) {
+            if (!(Norm(A0-A2) < 0.0001 * Norm(*U) * Norm(SS) * Norm(*U))) {
                 cerr<<"Unsorted Eigen:\n";
                 //cerr<<"A = "<<A0<<endl;
                 //cerr<<"U = "<<*U<<endl;
@@ -666,7 +678,7 @@ namespace tmv {
 #ifdef XDEBUG
         if (U&&V) {
             Matrix<T> A2 = (*U) * SS * (*V);
-            if (Norm(A0-A2) > 0.0001 * Norm(*U) * Norm(SS) * Norm(*V)) {
+            if (!(Norm(A0-A2) < 0.0001 * Norm(*U) * Norm(SS) * Norm(*V))) {
                 cerr<<"SV_Decompose:\n";
                 cerr<<"A = "<<A0<<endl;
                 cerr<<"U = "<<U<<endl;

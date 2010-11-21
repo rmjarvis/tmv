@@ -67,7 +67,7 @@ namespace tmv {
             }
         }
 #ifdef XDEBUG
-        if (Norm(A2-A) > 0.001*TMV_ABS(alpha)*Norm(A0)) {
+        if (!(Norm(A2-A) <= 0.001*TMV_ABS(alpha)*Norm(A0))) {
             cerr<<"MultXM: alpha = "<<alpha;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"A2 = "<<A2<<endl;

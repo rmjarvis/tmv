@@ -639,7 +639,9 @@ namespace tmv {
         int N = m.rowsize();
         int lda = m.stepj();
 #ifndef LAPNOWORK
-        AlignedArray<double> work(c == 'I' ? M : 0);
+        int lwork = c=='I' ? M : 0;
+        AlignedArray<double> work(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #endif
         double norm = LAPNAME(dlange) (
             LAPCM LAPV(cc),LAPV(M),LAPV(N),
@@ -655,7 +657,9 @@ namespace tmv {
         int N = m.rowsize();
         int lda = m.stepj();
 #ifndef LAPNOWORK
-        AlignedArray<double> work(c == 'I' ? M : 0);
+        int lwork = c=='I' ? M : 0;
+        AlignedArray<double> work(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #endif
         double norm = LAPNAME(zlange) (
             LAPCM LAPV(cc),LAPV(M),LAPV(N),
@@ -673,7 +677,9 @@ namespace tmv {
         int N = m.rowsize();
         int lda = m.stepj();
 #ifndef LAPNOWORK
-        AlignedArray<float> work(c == 'I' ? M : 0);
+        int lwork = c=='I' ? M : 0;
+        AlignedArray<float> work(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #endif
         double norm = LAPNAME(slange) (
             LAPCM LAPV(cc),LAPV(M),LAPV(N),
@@ -689,7 +695,9 @@ namespace tmv {
         int N = m.rowsize();
         int lda = m.stepj();
 #ifndef LAPNOWORK
-        AlignedArray<float> work(c == 'I' ? M : 0);
+        int lwork = c=='I' ? M : 0;
+        AlignedArray<float> work(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #endif
         double norm = LAPNAME(clange) (
             LAPCM LAPV(cc),LAPV(M),LAPV(N),

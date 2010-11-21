@@ -302,8 +302,8 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
-        if (TMV_ABS(resx-res) >
-            0.001*TMV_MAX(TMV_RealType(T)(1),Norm(v1)*Norm(v2))) {
+        if (!(TMV_ABS(resx-res) <=
+              0.001*TMV_MAX(TMV_RealType(T)(1),Norm(v1)*Norm(v2)))) {
             cerr<<"MultVV: \n";
             cerr<<"v1 = "<<TMV_Text(v1)<<"  step "<<v1.step()<<"  "<<v1<<endl;
             cerr<<"v2 = "<<TMV_Text(v2)<<"  step "<<v2.step()<<"  "<<v2<<endl;

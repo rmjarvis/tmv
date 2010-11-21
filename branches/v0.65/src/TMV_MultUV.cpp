@@ -825,7 +825,7 @@ namespace tmv {
         }
 #ifdef XDEBUG
         //cout<<"-> x = "<<x<<endl<<"x2 = "<<x2<<endl;
-        if (Norm(x-x2) > 0.001*(Norm(A0)*Norm(x0))) {
+        if (!(Norm(x-x2) <= 0.001*(Norm(A0)*Norm(x0)))) {
             cerr<<"MultEqMV: \n";
             cerr<<"A = "<<A.cptr()<<"  "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"x = "<<x.cptr()<<"  "<<TMV_Text(x)<<" step "<<x.step()<<"  "<<x0<<endl;
@@ -869,7 +869,7 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
-        if (Norm(x-x2) > 0.001*(Norm(A0)*Norm(x0))) {
+        if (!(Norm(x-x2) <= 0.001*(Norm(A0)*Norm(x0)))) {
             cerr<<"MultEqMV: \n";
             cerr<<"A = "<<A.cptr()<<"  "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"x = "<<x.cptr()<<"  "<<TMV_Text(x)<<" step "<<x.step()<<"  "<<x0<<endl;
@@ -911,8 +911,9 @@ namespace tmv {
             }
         } 
 #ifdef XDEBUG
-        if (Norm(y-y2) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(x0)+
-                                (add?Norm(y0):TMV_RealType(T)(0)))) {
+        if (!(Norm(y-y2) <=
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(x0)+
+                     (add?Norm(y0):TMV_RealType(T)(0))))) {
             cerr<<"MultMV: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
@@ -957,8 +958,9 @@ namespace tmv {
             }
         }
 #ifdef XDEBUG
-        if (Norm(y-y2) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(x0)+
-                                (add?Norm(y0):TMV_RealType(T)(0)))) {
+        if (!(Norm(y-y2) <= 
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(x0)+
+                     (add?Norm(y0):TMV_RealType(T)(0))))) {
             cerr<<"MultMV: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<A.cptr()<<"  "<<TMV_Text(A)<<"  "<<A0<<endl;

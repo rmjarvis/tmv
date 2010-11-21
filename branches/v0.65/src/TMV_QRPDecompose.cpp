@@ -87,6 +87,8 @@ namespace tmv
         cout<<"Start NonBlock QRPD with strict = "<<strict<<endl;
         cout<<"A = "<<TMV_Text(A)<<"  "<<A<<endl;
         cout<<"beta = "<<TMV_Text(beta)<<"  "<<beta<<endl;
+        cout<<"Norm(A) = "<<Norm(A)<<std::endl;
+        cout<<"Norm(beta) = "<<Norm(beta)<<std::endl;
 #endif
         // Decompose A into A = Q R P
         // where Q is unitary, R is upper triangular, and P is a permutation
@@ -109,16 +111,16 @@ namespace tmv
         // When considering column j, these are actually just the norm
         // of each column from j:M, not 0:M.
         RT scale = RT(1) / A.maxAbs2Element(); // for more stable normSq
-        //std::cout<<"scale = "<<scale<<std::endl;
-        //std::cout<<"maxAbs = "<<A.maxAbsElement()<<std::endl;
-        //std::cout<<"maxAbs2 = "<<A.maxAbs2Element()<<std::endl;
+        //cout<<"scale = "<<scale<<std::endl;
+        //cout<<"maxAbs = "<<A.maxAbsElement()<<std::endl;
+        //cout<<"maxAbs2 = "<<A.maxAbs2Element()<<std::endl;
         Vector<RT> colnormsq(N);
         for(int j=0;j<N;++j) colnormsq(j) = A.col(j).normSq(scale);
-        //std::cout<<"colnormsq = "<<colnormsq<<std::endl;
+        //cout<<"colnormsq = "<<colnormsq<<std::endl;
         RT anormsq = colnormsq.sumElements();
         RT thresh = RT(N) * TMV_SQR(TMV_Epsilon<T>()) * anormsq;
-        //std::cout<<"anormsq = "<<anormsq<<std::endl;
-        //std::cout<<"thresh = "<<thresh<<std::endl;
+        //cout<<"anormsq = "<<anormsq<<std::endl;
+        //cout<<"thresh = "<<thresh<<std::endl;
         // Set to 0 any diag element whose norm is < epsilon * |A|
         RT recalcthresh(0);
         // recalcthresh is the threshold for recalculating the norm to account 
@@ -128,31 +130,31 @@ namespace tmv
 
         T* bj = beta.ptr();
         for(int j=0;j<N;++j,++bj) {
-            //std::cout<<"j = "<<j<<std::endl;
-            //std::cout<<"colnormsq = "<<colnormsq<<std::endl;
-            //std::cout<<"recalcthresh = "<<recalcthresh<<std::endl;
+            //cout<<"j = "<<j<<std::endl;
+            //cout<<"colnormsq = "<<colnormsq<<std::endl;
+            //cout<<"recalcthresh = "<<recalcthresh<<std::endl;
             if (strict || j==0 || colnormsq(j) < recalcthresh) {
                 // Find the column with the largest norm
                 int jpiv;
                 RT maxnormsq = colnormsq.subVector(j,N).maxElement(&jpiv);
-                //std::cout<<"jpiv = "<<jpiv<<std::endl;
+                //cout<<"jpiv = "<<jpiv<<std::endl;
                 if (j==0) recalcthresh = 4*sqrteps * maxnormsq;
-                //std::cout<<"maxnormsq = "<<maxnormsq<<std::endl;
-                //std::cout<<"recalcthresh = "<<recalcthresh<<std::endl;
+                //cout<<"maxnormsq = "<<maxnormsq<<std::endl;
+                //cout<<"recalcthresh = "<<recalcthresh<<std::endl;
                 // Note: jpiv is relative to the subVector(j,N)
 
                 // If the largest colnormsq is lower than the recalulation 
                 // threshold, then recalc all colnormsq's, and redetermine max.
                 if (maxnormsq < recalcthresh) {
-                    //std::cout<<"do recalc\n";
+                    //cout<<"do recalc\n";
                     for(int k=j;k<N;++k) 
                         colnormsq(k) = A.col(k,j,M).normSq(scale);
-                    //std::cout<<"colnormsq => "<<colnormsq<<std::endl;
+                    //cout<<"colnormsq => "<<colnormsq<<std::endl;
                     maxnormsq = colnormsq.subVector(j,N).maxElement(&jpiv);
                     recalcthresh = 4*sqrteps* maxnormsq;
                     if (recalcthresh < thresh) recalcthresh = thresh;
-                    //std::cout<<"maxnormsq => "<<maxnormsq<<std::endl;
-                    //std::cout<<"recalcthresh => "<<recalcthresh<<std::endl;
+                    //cout<<"maxnormsq => "<<maxnormsq<<std::endl;
+                    //cout<<"recalcthresh => "<<recalcthresh<<std::endl;
                 }
 
                 // If maxnormsq = 0 (technically < thresh to account for
@@ -160,7 +162,7 @@ namespace tmv
                 // Householder matrices are identities (indicated by 0's 
                 // in the Q part of the matrix).
                 if (maxnormsq < thresh) {
-                    //std::cout<<"maxnormsq < thresh\n";
+                    //cout<<"maxnormsq < thresh\n";
                     A.subMatrix(j,M,j,N).setZero();
                     // Already essentially zero - make it exact
                     beta.subVector(j,N).setZero();
@@ -168,7 +170,7 @@ namespace tmv
                     for(;j<N;j++) P[j] = j;
                     break;
                 } else {
-                    //std::cout<<"apply jpiv = "<<jpiv<<std::endl;
+                    //cout<<"apply jpiv = "<<jpiv<<std::endl;
                     // Swap the column with the largest norm into the current 
                     // column
                     if (jpiv != 0) {
@@ -191,9 +193,9 @@ namespace tmv
             TMVAssert(bj < beta.last);
 #endif
 
-            //std::cout<<"Before HouseholderReflect: A.col(j) = "<<A.col(j,j,M)<<std::endl;
+            //cout<<"Before HouseholderReflect: A.col(j) = "<<A.col(j,j,M)<<std::endl;
             *bj = HouseholderReflect(A.subMatrix(j,M,j,N),det);
-            //std::cout<<"bj = "<<*bj<<std::endl;
+            //cout<<"bj = "<<*bj<<std::endl;
 
             // And update the norms for use with the next column
             const T* Ajk = A.row(j,j+1,N).cptr();
@@ -204,6 +206,8 @@ namespace tmv
 #ifdef XDEBUG
         cout<<"Done NonBlock QRPDecompose"<<std::endl;
         cout<<"A -> "<<A<<std::endl;
+        cout<<"Norm(A) = "<<Norm(A)<<std::endl;
+        cout<<"Norm(beta) = "<<Norm(beta)<<std::endl;
         Matrix<T> Q(A);
         GetQFromQR(Q.view(),beta);
         cout<<"Q = "<<Q<<std::endl;
@@ -213,7 +217,7 @@ namespace tmv
         AA.reversePermuteCols(P);
         cout<<"QRP = "<<AA<<std::endl;
         cout<<"Norm(AA-A0) = "<<Norm(AA-A0)<<std::endl;
-        if (Norm(AA-A0) > 0.001*Norm(A0)) {
+        if (!(Norm(AA-A0) < 0.001*Norm(A0))) {
             cerr<<"NonBlockQRPDecompose: A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"-> "<<A<<endl;
             cerr<<"beta = "<<beta<<endl;
@@ -248,7 +252,9 @@ namespace tmv
 
 #ifdef XDEBUG
         Matrix<T> A0(A);
-        cerr<<"Start StrictBlockQRPDecompose: "<<std::endl;
+        cout<<"Start StrictBlockQRPDecompose: "<<std::endl;
+        cout<<"Norm(A) = "<<Norm(A)<<std::endl;
+        cout<<"Norm(beta) = "<<Norm(beta)<<std::endl;
 #endif
 
         const int M = A.colsize();
@@ -257,9 +263,9 @@ namespace tmv
         const RT sqrteps = TMV_SQRT(TMV_Epsilon<T>());
 
         RT scale = RT(1) / A.maxAbs2Element(); // for more stable normSq
-        //std::cout<<"scale = "<<scale<<std::endl;
-        //std::cout<<"maxAbs = "<<A.maxAbsElement()<<std::endl;
-        //std::cout<<"maxAbs2 = "<<A.maxAbs2Element()<<std::endl;
+        //cout<<"scale = "<<scale<<std::endl;
+        //cout<<"maxAbs = "<<A.maxAbsElement()<<std::endl;
+        //cout<<"maxAbs2 = "<<A.maxAbs2Element()<<std::endl;
         Vector<RT> colnormsq(N);
         for(int j=0;j<N;++j) colnormsq(j) = A.col(j).normSq(scale);
         RT anormsq = colnormsq.sumElements();
@@ -387,7 +393,10 @@ namespace tmv
         GetQFromQR(Q.view(),beta);
         Matrix<T> AA = Q*A.upperTri();
         AA.reversePermuteCols(P);
-        if (Norm(AA-A0) > 0.001*Norm(A0)) {
+        cout<<"Done StrictBlockQRPDecompose\n";
+        cout<<"Norm(A) = "<<Norm(A)<<std::endl;
+        cout<<"Norm(beta) = "<<Norm(beta)<<std::endl;
+        if (!(Norm(AA-A0) < 0.001*Norm(A0))) {
             cerr<<"StrictBlockQRPDecompose: A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"-> "<<A<<endl;
             cerr<<"beta = "<<beta<<endl;
@@ -443,9 +452,9 @@ namespace tmv
         for(int k=0;k<N;k++) index2(k) = double(k);
         for(int k=0;k<j1;k++) index2.swap(k,P[k]);
         if (Norm(index-index2) > 0.01) {
-            cerr<<"index = "<<index<<endl;
-            cerr<<"index2 = "<<index2<<endl;
-            cerr<<"Norm(diff) = "<<Norm(index-index2)<<endl;
+            cout<<"index = "<<index<<endl;
+            cout<<"index2 = "<<index2<<endl;
+            cout<<"Norm(diff) = "<<Norm(index-index2)<<endl;
             abort();
         }
     }
@@ -473,7 +482,9 @@ namespace tmv
 
 #ifdef XDEBUG
         Matrix<T> A0(A);
-        cerr<<"Start LooseBlockQRPDecompose: "<<std::endl;
+        cout<<"Start LooseBlockQRPDecompose: "<<std::endl;
+        cout<<"Norm(A) = "<<Norm(A)<<std::endl;
+        cout<<"Norm(beta) = "<<Norm(beta)<<std::endl;
 #endif
 
         const int M = A.colsize();
@@ -482,16 +493,17 @@ namespace tmv
         const RT sqrteps = TMV_SQRT(TMV_Epsilon<T>());
 
         RT scale = RT(1) / A.maxAbs2Element(); // for more stable normSq
-        //std::cout<<"scale = "<<scale<<std::endl;
-        //std::cout<<"maxAbs = "<<A.maxAbsElement()<<std::endl;
-        //std::cout<<"maxAbs2 = "<<A.maxAbs2Element()<<std::endl;
+        //cout<<"scale = "<<scale<<std::endl;
+        //cout<<"maxAbs = "<<A.maxAbsElement()<<std::endl;
+        //cout<<"maxAbs2 = "<<A.maxAbs2Element()<<std::endl;
         Vector<RT> colnormsq(N);
         for(int j=0;j<N;++j) colnormsq(j) = A.col(j).normSq(scale);
-        //std::cout<<"colnormsq = "<<colnormsq<<std::endl;
+        //cout<<"colnormsq = "<<colnormsq<<std::endl;
         RT anormsq = colnormsq.sumElements();
         RT thresh = RT(N) * TMV_SQR(TMV_Epsilon<T>()) * anormsq;
-        //std::cout<<"anormsq = "<<anormsq<<std::endl;
-        //std::cout<<"thresh = "<<thresh<<std::endl;
+        //cout<<"anormsq = "<<anormsq<<std::endl;
+        //cout<<"thresh = "<<thresh<<std::endl;
+        //cout<<"Norm(A) = "<<Norm(A)<<std::endl;
 
 #ifdef XDEBUG
         Vector<double> index(N);
@@ -508,12 +520,13 @@ namespace tmv
 
             int jpiv0;
             RT maxnormsq = colnormsq.subVector(j1,N).maxElement(&jpiv0);
-            //std::cout<<"j1 = "<<j1<<", j3 = "<<j3<<", jpiv = "<<jpiv0<<std::endl;
-            //std::cout<<"colnormsq = "<<colnormsq<<std::endl;
-            //std::cout<<"maxnormsq = "<<maxnormsq<<std::endl;
+            //cout<<"j1 = "<<j1<<", j3 = "<<j3<<", jpiv = "<<jpiv0<<std::endl;
+            //cout<<"colnormsq = "<<colnormsq<<std::endl;
+            //cout<<"maxnormsq = "<<maxnormsq<<std::endl;
+            //cout<<"Norm(A) = "<<Norm(A)<<std::endl;
 
             if (maxnormsq < thresh) {
-                //std::cout<<"OK, zero the rest and we're done.\n";
+                //cout<<"OK, zero the rest and we're done.\n";
                 // Zero the rest out and we are done.
                 A.subMatrix(j1,M,j1,N).setZero();
                 beta.subVector(j1,N).setZero();
@@ -523,7 +536,7 @@ namespace tmv
 
             // Move max column to the front:
             if (jpiv0 != 0) {
-                //std::cout<<"pivot\n";
+                //cout<<"pivot\n";
                 jpiv0 += j1;
                 TMVAssert(jpiv0 < int(A.rowsize()));
                 A.swapCols(j1,jpiv0);
@@ -548,7 +561,8 @@ namespace tmv
             // Work on this one block at a time:
             while (j1 < j3) {
                 int j2 = TMV_MIN(j3,j1+QRP_BLOCKSIZE);
-                //std::cout<<"j1,j2,j3 = "<<j1<<','<<j2<<','<<j3<<std::endl;
+                //cout<<"j1,j2,j3 = "<<j1<<','<<j2<<','<<j3<<std::endl;
+                //cout<<"Norm(A) = "<<Norm(A)<<std::endl;
                 TMVAssert(j1 - j2 < 0);
                 moveLowColsToEnd(colnormsq,recalcthresh,j1x,j2,j3,A,P);
 #ifdef XDEBUG
@@ -561,12 +575,25 @@ namespace tmv
 
                 T* bj = beta.ptr()+j1*beta.step();
                 for(int j=j1; j<j2; ++j, ++bj) {
+                    //cout<<"j = "<<j<<std::endl;
+                    //cout<<"Norm(A) = "<<Norm(A)<<std::endl;
 
                     if (colnormsq(j) < recalcthresh) {
+                        ////cout<<"swap this column out\n";
 #ifdef XDEBUG
                         checkIndex(index,P,origj2);
 #endif
                         --j2;
+#ifdef TMV_INITIALIZE_NAN
+                        // Need this to avoid gratuitously populating
+                        // uninitialized memory with nan's.
+                        // Sometimes LAPACK or BLAS functions will allocate
+                        // memory internally, and screw up if they get
+                        // memory with nan's.  The INITIALIZE_NAN stuff
+                        // is only designed to check that the TMV code
+                        // is able to handle such values.
+                        Z.col(j2-j1,0,j2-j1+1).setZero();
+#endif
                         if (j==j2) break;
                         A.swapCols(j,j2);
                         colnormsq.swap(j,j2);
@@ -594,6 +621,7 @@ namespace tmv
                         checkIndex(index,P,origj2);
 #endif
                     }
+                    //cout<<"Norm(A) = "<<Norm(A)<<std::endl;
 
                     // Find Householder matrix for this column
                     // This multiplies through to the end of the original block.
@@ -604,11 +632,13 @@ namespace tmv
                     TMVAssert(bj < beta.last);
 #endif
                     *bj = HouseholderReflect(A.subMatrix(j,M,j,origj2),det);
+                    //cout<<"After reflect Norm(A) = "<<Norm(A)<<std::endl;
 
                     // Update Z:
                     BlockHouseholderAugment(
                         A.subMatrix(j1,M,j1,j+1),
                         Z.subTriMatrix(0,j-j1+1),TMV_CONJ(*bj));
+                    //cout<<"After Householder Augment Norm(A) = "<<Norm(A)<<std::endl;
 
                     // Update the colnormsq values within this block
                     // (No need to go all the way to origj2, since the 
@@ -624,9 +654,17 @@ namespace tmv
 
                     // Do the Block Householder update of the rest of the 
                     // matrix:
+                    //cout<<"Before BlockLDiv Norm(A) = "<<Norm(A)<<std::endl;
+                    //cout<<"j1,j2 = "<<j1<<" "<<j2<<std::endl;
+                    //cout<<"origj2 = "<<origj2<<std::endl;
+                    //cout<<"Z = "<<Z.subTriMatrix(0,j2-j1)<<std::endl;
+                    //cout<<"Norm(Z) = "<<Norm(Z.subTriMatrix(0,j2-j1))<<std::endl;
+                    //cout<<"Norm(A1) = "<<Norm(A.subMatrix(j1,M,j1,j2))<<std::endl;
+                    //cout<<"Norm(A2) = "<<Norm(A.subMatrix(j1,M,origj2,N))<<std::endl;
                     BlockHouseholderLDiv(
                         A.subMatrix(j1,M,j1,j2),
                         Z.subTriMatrix(0,j2-j1),A.subMatrix(j1,M,origj2,N));
+                    //cout<<"After BlockLDiv Norm(A) = "<<Norm(A)<<std::endl;
 
                     // Update the colnormsq values for the rest of the matrix:
                     if (M-j2 > j2-j1)
@@ -655,16 +693,17 @@ namespace tmv
                     checkIndex(index,P,j2);
 #endif
                 }
+                //cout<<"Done block: Norm(A) = "<<Norm(A)<<std::endl;
 
                 j1 = j1x = j2;
             }
 
             if (j3 < N) {
-                //std::cout<<"recalculate colnorms\n";
+                //cout<<"recalculate colnorms\n";
                 // Then need to recalculate some of the colnorms:
                 for(int k=j3;k<N;++k) 
                     colnormsq(k) = A.col(k,j3,M).normSq(scale);
-                //std::cout<<"colnormsq = "<<colnormsq<<std::endl;
+                //cout<<"colnormsq = "<<colnormsq<<std::endl;
             }
         }
 
@@ -673,12 +712,15 @@ namespace tmv
         }
 
 #ifdef XDEBUG
+        cout<<"Done LooseBlockQRPDecompose\n";
+        cout<<"Norm(A) = "<<Norm(A)<<std::endl;
+        cout<<"Norm(beta) = "<<Norm(beta)<<std::endl;
         checkIndex(index,P,N);
         Matrix<T> Q = A;
         GetQFromQR(Q.view(),beta);
         Matrix<T> AA = Q*A.upperTri();
         AA.reversePermuteCols(P);
-        if (Norm(AA-A0) > 0.001*TMV_MAX(RT(1),Norm(A0))) {
+        if (!(Norm(AA-A0) < 0.001*TMV_MAX(RT(1),Norm(A0)))) {
             cerr<<"LooseBlockQRPDecompose: "<<std::endl;
             cerr<<"A = "<<TMV_Text(A)<<endl;
             if (N < 100) {
@@ -751,20 +793,24 @@ namespace tmv
         int n = A.rowsize();
         AlignedArray<int> lap_p(n);
         for(int i=0;i<n;++i) (lap_p.get())[i] = 0;
+        beta.setZero();
         int lda = A.stepj();
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = 3*n+1;
         AlignedArray<double> work(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #else
         int lwork = -1;
         AlignedArray<double> work(1);
+        work.get()[0] = 0.;
         LAPNAME(dgeqp3) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
             LAPP(lap_p.get()),LAPP(beta.ptr()) 
             LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(work[0]);
         work.resize(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
         LAPNAME(dgeqp3) (
@@ -815,21 +861,26 @@ namespace tmv
         int n = A.rowsize();
         AlignedArray<int> lap_p(n);
         for(int i=0;i<n;++i) (lap_p.get())[i] = 0;
+        beta.setZero();
         int lda = A.stepj();
 #ifndef LAPNOWORK
         AlignedArray<double> rwork(2*n);
+        VectorViewOf(rwork.get(),2*n).setZero();
 #ifdef NOWORKQUERY
         int lwork = n+1;
         AlignedArray<std::complex<double> > work(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #else
         int lwork = -1;
         AlignedArray<std::complex<double> > work(1);
+        work.get()[0] = 0.;
         LAPNAME(zgeqp3) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
             LAPP(lap_p.get()),LAPP(beta.ptr()) 
             LAPWK(work.get()) LAPVWK(lwork) LAPWK(rwork.get()) LAPINFO);
         lwork = int(TMV_REAL(work[0]));
         work.resize(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
         LAPNAME(zgeqp3) (
@@ -888,20 +939,24 @@ namespace tmv
         int n = A.rowsize();
         AlignedArray<int> lap_p(n);
         for(int i=0;i<n;++i) (lap_p.get())[i] = 0;
+        beta.setZero();
         int lda = A.stepj();
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = 3*n+1;
         AlignedArray<float> work(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #else
         int lwork = -1;
         AlignedArray<float> work(1);
+        work.get()[0] = 0.;
         LAPNAME(sgeqp3) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
             LAPP(lap_p.get()),LAPP(beta.ptr()) 
             LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(work[0]);
         work.resize(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
         LAPNAME(sgeqp3) (
@@ -952,21 +1007,26 @@ namespace tmv
         int n = A.rowsize();
         AlignedArray<int> lap_p(n);
         for(int i=0;i<n;++i) (lap_p.get())[i] = 0;
+        beta.setZero();
         int lda = A.stepj();
 #ifndef LAPNOWORK
         AlignedArray<float> rwork(2*n);
+        VectorViewOf(rwork.get(),2*n).setZero();
 #ifdef NOWORKQUERY
         int lwork = n+1;
         AlignedArray<std::complex<float> > work(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #else
         int lwork = -1;
         AlignedArray<std::complex<float> > work(1);
+        work.get()[0] = 0.;
         LAPNAME(cgeqp3) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
             LAPP(lap_p.get()),LAPP(beta.ptr()) 
             LAPWK(work.get()) LAPVWK(lwork) LAPWK(rwork.get()) LAPINFO);
         lwork = int(TMV_REAL(work[0]));
         work.resize(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
         LAPNAME(cgeqp3) (
@@ -1024,16 +1084,18 @@ namespace tmv
 
 #ifdef XDEBUG
         Matrix<T> A0(A);
-        std::cout<<"Start QRPDecompose:"<<std::endl;
-        std::cout<<"A = "<<A0<<std::endl;
-        std::cout<<"strict = "<<strict<<std::endl;
+        cout<<"Start QRPDecompose:"<<std::endl;
+        cout<<"A = "<<A0<<std::endl;
+        cout<<"strict = "<<strict<<std::endl;
+        cout<<"Norm(A) = "<<Norm(A)<<std::endl;
+        cout<<"Norm(beta) = "<<Norm(beta)<<std::endl;
 #ifdef LAP
         Matrix<T> A2(A);
         Vector<T> beta2(beta);
         AlignedArray<int> P2(beta.size());
         T det2=det;
         NonLapQRPDecompose(A2.view(),beta2.view(),P2.get(),det2,strict);
-        std::cout<<"NonLap QRP = "<<A2<<std::endl;
+        cout<<"NonLap QRP = "<<A2<<std::endl;
 #endif
 #endif
 
@@ -1049,17 +1111,20 @@ namespace tmv
 #endif
         }
 #ifdef XDEBUG
+        cout<<"Done QRPDecompose\n";
+        cout<<"Norm(A) = "<<Norm(A)<<std::endl;
+        cout<<"Norm(beta) = "<<Norm(beta)<<std::endl;
         Matrix<T> Q(A);
-        std::cout<<"Q = "<<Q<<std::endl;
+        cout<<"Q = "<<Q<<std::endl;
         GetQFromQR(Q.view(),beta);
-        std::cout<<"Q => "<<Q<<std::endl;
+        cout<<"Q => "<<Q<<std::endl;
         Matrix<T> R = A.upperTri();
-        std::cout<<"R = "<<R<<std::endl;
+        cout<<"R = "<<R<<std::endl;
         Matrix<T> AA = Q*R;
-        std::cout<<"AA = "<<AA<<std::endl;
+        cout<<"AA = "<<AA<<std::endl;
         AA.reversePermuteCols(P);
-        std::cout<<"Norm(AA -A0) = "<<Norm(AA-A0)<<std::endl;
-        if (Norm(AA-A0) > 0.001*Norm(A0)) {
+        cout<<"Norm(AA -A0) = "<<Norm(AA-A0)<<std::endl;
+        if (!(Norm(AA-A0) < 0.001*Norm(A0))) {
             cerr<<"QRPDecompose: A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"-> "<<A<<endl;
             cerr<<"beta = "<<beta<<endl;

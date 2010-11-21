@@ -1479,14 +1479,14 @@ namespace tmv {
             dbgcout<<"Norm(UtU-1) = "<<Norm(U->adjoint()*(*U)-T(1))<<endl;
             dbgcout<<"Norm(VVt-1) = "<<Norm((*V)*V->adjoint()-T(1))<<endl;
             dbgcout<<"THRESH * normA0 = "<<THRESH<<" * "<<normA0<<" = "<<THRESH*normA0<<std::endl;
-            if (Norm(A2-A0) > THRESH*normA0 
+            if (!(Norm(A2-A0) < THRESH*normA0) 
 #ifdef TESTUV
                 || ( V->colsize()>=V->rowsize() && 
-                     Norm(V->adjoint()*(*V)-T(1)) > THRESH*normA0 )
+                     !(Norm(V->adjoint()*(*V)-T(1)) < THRESH*normA0) )
                 || ( V->rowsize()>=V->colsize() && 
-                     Norm((*V)*V->adjoint()-T(1)) > THRESH*normA0 )
+                     !(Norm((*V)*V->adjoint()-T(1)) < THRESH*normA0) )
                 || ( U->colsize()>=U->rowsize() && 
-                     Norm(U->adjoint()*(*U)-T(1)) > THRESH*normA0 ) 
+                     !(Norm(U->adjoint()*(*U)-T(1)) < THRESH*normA0) ) 
 #endif
             ) {
                 cerr<<"SV_Decompose_DC: \n";

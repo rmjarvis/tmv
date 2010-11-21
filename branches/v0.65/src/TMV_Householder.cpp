@@ -165,9 +165,9 @@ namespace tmv {
         // H * xx = (Norm(xx),0,0.0...)
         // x0 = Norm(xx)
         Vector<T> Hxx = H * xx;
-        if (TMV_ABS(TMV_ABS(Hxx(0)/scale)-TMV_ABS(x0/scale)) > 0.0001*TMV_ABS(x0/scale) ||
-            TMV_ABS(Norm(xx/scale)-TMV_ABS(x0/scale)) > 0.0001*TMV_ABS(x0/scale) ||
-            Norm(Hxx.subVector(1,Hxx.size())/scale) > 0.0001*TMV_ABS(x0/scale)) {
+        if (!(TMV_ABS(TMV_ABS(Hxx(0)/scale)-TMV_ABS(x0/scale)) <=0.0001*TMV_ABS(x0/scale)) ||
+            !(TMV_ABS(Norm(xx/scale)-TMV_ABS(x0/scale)) <=0.0001*TMV_ABS(x0/scale)) ||
+            !(Norm(Hxx.subVector(1,Hxx.size())/scale) <=0.0001*TMV_ABS(x0/scale))) {
             cerr<<"Householder Reflect:\n";
             cerr<<"Input: x = "<<xx<<endl;
             cerr<<"Norm(x) = "<<Norm(xx)<<endl;
@@ -229,7 +229,7 @@ namespace tmv {
         Matrix<T> Hm = H * m0;
         Matrix<T> Hm2 = m;
         Hm2.col(0,1,vv.size()).setZero();
-        if (Norm(Hm-Hm2) > 0.001*Norm(m0)) {
+        if (!(Norm(Hm-Hm2) <=0.001*Norm(m0))) {
             cerr<<"Householder Reflect\n";
             cerr<<"Input: m0 = "<<m0<<endl;
             cerr<<"Output: vv = "<<vv<<endl;
@@ -379,7 +379,7 @@ namespace tmv {
         Matrix<T2> Hm2(mx.colsize()+1,m0.size());
         Hm2.row(0) = m0;
         Hm2.rowRange(1,Hm2.colsize()) = mx;
-        if (Norm(Hm-Hm2) > 0.001*Norm(Hm)) {
+        if (!(Norm(Hm-Hm2) <=0.001*Norm(Hm))) {
             cerr<<"HouseholderLMult\n";
             cerr<<"Input: m = "<<mm<<endl;
             cerr<<"vv = "<<vv<<endl;
@@ -543,7 +543,7 @@ namespace tmv {
         Matrix<T> YY(Y);
         YY.upperTri().setToIdentity();
         Matrix<T> HH = T(1) - YY * Z * YY.adjoint();
-        if (Norm(HH-H2) > 0.001*Norm(H2)) {
+        if (!(Norm(HH-H2) <=0.001*Norm(H2))) {
             cerr<<"BlockHouseholderAugment\n";
             cerr<<"Input: Y = "<<Y0<<endl;
             cerr<<"beta = "<<beta<<endl;
@@ -697,7 +697,7 @@ namespace tmv {
         Matrix<T> Y2(Y);
         Y2.upperTri().setToIdentity();
         Matrix<T> Hnet = T(1) - Y2*Z*Y2.adjoint();
-        if (Norm(Htot-Hnet) > 0.001*Norm(Htot)) {
+        if (!(Norm(Htot-Hnet) <=0.001*Norm(Htot))) {
             cerr<<"BlockHouseholderMakeZ\n";
             cerr<<"Input: Y = "<<Y0<<endl;
             cerr<<"beta = "<<beta<<endl;
@@ -753,7 +753,7 @@ namespace tmv {
             m.rowRange(N,M) -= Y.rowRange(N,M) * ZYtm;
         }
 #ifdef XDEBUG
-        if (Norm(Hm-m) > 0.001*Norm(m0)*Norm(H)) {
+        if (!(Norm(Hm-m) <=0.001*Norm(m0)*Norm(H))) {
             cerr<<"BlockHouseholderLMult\n";
             cerr<<"Input: Y = "<<Y0<<endl;
             cerr<<"Z = "<<Z0<<endl;
@@ -805,7 +805,7 @@ namespace tmv {
             m.rowRange(N,M) -= Y.rowRange(N,M) * ZtYtm;
         }
 #ifdef XDEBUG
-        if (Norm(Hm-m) > 0.001*Norm(m0)*Norm(Hinv)) {
+        if (!(Norm(Hm-m) <=0.001*Norm(m0)*Norm(Hinv))) {
             cerr<<"BlockHouseholderLDiv\n";
             cerr<<"Input: Y = "<<Y0<<endl;
             cerr<<"Z = "<<Z0<<endl;

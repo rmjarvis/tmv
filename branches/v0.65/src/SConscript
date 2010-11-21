@@ -41,6 +41,8 @@ if env['MEM_TEST']:
     print 'Using mmgr.cpp'
     lib_files += ['mmgr.cpp']
 
+if (int(env['XTEST']) & 64):
+    env1.Append(CPPDEFINES=['TMV_INITIALIZE_NAN'])
 if not env['INST_FLOAT']:
     env1.Append(CPPDEFINES=['NO_INST_FLOAT'])
 if not env['INST_DOUBLE']:

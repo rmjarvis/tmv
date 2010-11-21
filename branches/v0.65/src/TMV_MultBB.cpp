@@ -565,8 +565,9 @@ namespace tmv {
         //cout<<"Done: C = "<<TMV_Text(C)<<"  "<<C.nlo()<<','<<C.nhi()<<"  "<<C<<endl;
         //cout<<"C2-C = "<<(C2-C)<<endl;
         //cout<<"Norm(C2-C) = "<<Norm(C2-C)<<endl;
-        if (Norm(C2-C) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
-                                (add?Norm(C0):TMV_RealType(T)(0)))) {
+        if (!(Norm(C2-C) <= 
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
+                     (add?Norm(C0):TMV_RealType(T)(0))))) {
             cerr<<"MultMM alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A.nlo()<<','<<A.nhi()<<"  "<<A<<endl;

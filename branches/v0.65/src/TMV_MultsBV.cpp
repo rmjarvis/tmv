@@ -176,9 +176,10 @@ namespace tmv {
     }
 #ifdef INST_DOUBLE
     template <> 
-    void BlasMultMV(const double alpha,
-              const GenSymBandMatrix<double>& A, const GenVector<double>& x,
-              const int beta, const VectorView<double>& y)
+    void BlasMultMV(
+        const double alpha,
+        const GenSymBandMatrix<double>& A, const GenVector<double>& x,
+        const int beta, const VectorView<double>& y)
     {
         TMVAssert(A.rowsize() == x.size());
         TMVAssert(A.colsize() == y.size());
@@ -199,7 +200,8 @@ namespace tmv {
         if (xs < 0) xp += (n-1)*xs;
         double* yp = y.ptr();
         if (ys < 0) yp += (n-1)*ys;
-        double xbeta(beta);
+        if (beta == 0) y.setZero();
+        double xbeta(1);
         const double* Aptr = A.cptr();
         if (A.uplo() == Upper) Aptr -= A.nlo();
         BLASNAME(dsbmv) (
@@ -235,7 +237,8 @@ namespace tmv {
             if (xs < 0) xp += (n-1)*xs;
             std::complex<double>* yp = y.ptr();
             if (ys < 0) yp += (n-1)*ys;
-            std::complex<double> xbeta(beta);
+            if (beta == 0) y.setZero();
+            std::complex<double> xbeta(1);
             const std::complex<double>* Aptr = A.cptr();
             if (A.uplo() == Upper) Aptr -= A.nlo();
             BLASNAME(zhbmv) (
@@ -283,7 +286,8 @@ namespace tmv {
             double* yp = (double*) y.ptr();
             if (ys < 0) yp += (n-1)*ys;
             double xalpha(1);
-            double xbeta(beta);
+            y.setZero();
+            double xbeta(1);
             const double* Aptr = A.cptr();
             if (A.uplo() == Upper) Aptr -= A.nlo();
             BLASNAME(dsbmv) (
@@ -309,7 +313,7 @@ namespace tmv {
             double* yp = (double*) y.ptr();
             if (ys < 0) yp += (n-1)*ys;
             double xalpha(TMV_REAL(alpha));
-            double xbeta(beta);
+            double xbeta(1);
             const double* Aptr = A.cptr();
             if (A.uplo() == Upper) Aptr -= A.nlo();
             BLASNAME(dsbmv) (
@@ -355,32 +359,32 @@ namespace tmv {
         if (ys < 0) yp += (n-1)*ys;
         double ar(TMV_REAL(alpha));
         double ai(TMV_IMAG(alpha));
-        double xbeta(beta);
+        if (beta == 0) y.setZero();
+        double xbeta(1);
         const double* Aptr = A.cptr();
         if (A.uplo() == Upper) Aptr -= A.nlo();
-        if (ar == 0.) {
-            if (beta == 0) y.realPart().setZero();
-        } else
+        if (ar != 0.) {
             BLASNAME(dsbmv) (
                 BLASCM A.uplo() == Upper?BLASCH_UP:BLASCH_LO, 
                 BLASV(n),BLASV(k),BLASV(ar),BLASP(Aptr),BLASV(lda),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp),BLASV(ys) BLAS1);
-        if (ai == 0.) {
-            if (beta == 0) y.imagPart().setZero();
-        } else 
+        }
+        if (ai != 0.) {
             BLASNAME(dsbmv) (
                 BLASCM A.uplo() == Upper?BLASCH_UP:BLASCH_LO, 
                 BLASV(n),BLASV(k),BLASV(ai),BLASP(Aptr),BLASV(lda),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp+1),BLASV(ys) BLAS1);
+        }
     }
 #endif
 #ifdef INST_FLOAT
     template <> 
-    void BlasMultMV(const float alpha,
-                    const GenSymBandMatrix<float>& A, const GenVector<float>& x,
-                    const int beta, const VectorView<float>& y)
+    void BlasMultMV(
+        const float alpha,
+        const GenSymBandMatrix<float>& A, const GenVector<float>& x,
+        const int beta, const VectorView<float>& y)
     {
         TMVAssert(A.rowsize() == x.size());
         TMVAssert(A.colsize() == y.size());
@@ -401,7 +405,8 @@ namespace tmv {
         if (xs < 0) xp += (n-1)*xs;
         float* yp = y.ptr();
         if (ys < 0) yp += (n-1)*ys;
-        float xbeta(beta);
+        if (beta == 0) y.setZero();
+        float xbeta(1);
         const float* Aptr = A.cptr();
         if (A.uplo() == Upper) Aptr -= A.nlo();
         BLASNAME(ssbmv) (
@@ -437,7 +442,8 @@ namespace tmv {
             if (xs < 0) xp += (n-1)*xs;
             std::complex<float>* yp = y.ptr();
             if (ys < 0) yp += (n-1)*ys;
-            std::complex<float> xbeta(beta);
+            if (beta == 0) y.setZero();
+            std::complex<float> xbeta(1);
             const std::complex<float>* Aptr = A.cptr();
             if (A.uplo() == Upper) Aptr -= A.nlo();
             BLASNAME(chbmv) (
@@ -485,7 +491,8 @@ namespace tmv {
             float* yp = (float*) y.ptr();
             if (ys < 0) yp += (n-1)*ys;
             float xalpha(1);
-            float xbeta(beta);
+            y.setZero();
+            float xbeta(1);
             const float* Aptr = A.cptr();
             if (A.uplo() == Upper) Aptr -= A.nlo();
             BLASNAME(ssbmv) (
@@ -511,7 +518,7 @@ namespace tmv {
             float* yp = (float*) y.ptr();
             if (ys < 0) yp += (n-1)*ys;
             float xalpha(TMV_REAL(alpha));
-            float xbeta(beta);
+            float xbeta(1);
             const float* Aptr = A.cptr();
             if (A.uplo() == Upper) Aptr -= A.nlo();
             BLASNAME(ssbmv) (
@@ -557,25 +564,24 @@ namespace tmv {
         if (ys < 0) yp += (n-1)*ys;
         float ar(TMV_REAL(alpha));
         float ai(TMV_IMAG(alpha));
-        float xbeta(beta);
+        if (beta == 0) y.setZero();
+        float xbeta(1);
         const float* Aptr = A.cptr();
         if (A.uplo() == Upper) Aptr -= A.nlo();
-        if (ar == 0.F) {
-            if (beta == 0) y.realPart().setZero();
-        } else
+        if (ar != 0.F) {
             BLASNAME(ssbmv) (
                 BLASCM A.uplo() == Upper?BLASCH_UP:BLASCH_LO, 
                 BLASV(n),BLASV(k),BLASV(ar),BLASP(Aptr),BLASV(lda),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp),BLASV(ys) BLAS1);
-        if (ai == 0.F) {
-            if (beta == 0) y.imagPart().setZero();
-        } else 
+        }
+        if (ai != 0.F) {
             BLASNAME(ssbmv) (
                 BLASCM A.uplo() == Upper?BLASCH_UP:BLASCH_LO, 
                 BLASV(n),BLASV(k),BLASV(ai),BLASP(Aptr),BLASV(lda),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp+1),BLASV(ys) BLAS1);
+        }
     }
 #endif
 #endif // BLAS
@@ -617,9 +623,9 @@ namespace tmv {
 #endif
             if (A.iscm()&&(A.nlo()==0 || A.stepj()>0)) {
                 if (!y.isconj() && y.step() != 1) { 
-                    if (!x.isconj() && x.step() != 1)
+                    if (!x.isconj() && x.step() != 1) {
                         BlasMultMV(alpha,A,x,add?1:0,y);
-                    else {
+                    } else {
                         Vector<T> xx = alpha*x;
                         BlasMultMV(T(1),A,xx,add?1:0,y);
                     }
@@ -720,8 +726,9 @@ namespace tmv {
 #ifdef XDEBUG
         cout<<"--> y = "<<y<<endl;
         cout<<"y2 = "<<y2<<endl;
-        if (Norm(y-y2) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(x0)+
-                                (add?Norm(y0):TMV_RealType(T)(0)))) {
+        if (!(Norm(y-y2) <= 
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(x0)+
+                     (add?Norm(y0):TMV_RealType(T)(0))))) {
             cerr<<"MultMV: alpha = "<<alpha<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"x = "<<TMV_Text(x)<<" step "<<x.step()<<"  "<<x0<<endl;

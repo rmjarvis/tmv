@@ -581,7 +581,7 @@ namespace tmv {
             //dbgcout<<"A2-A = "<<Matrix<T>(A2-A).clip(0.1*MaxAbsElement(A2))<<endl;
             dbgcout<<"Done 22: Norm(A2-A) = "<<Norm(A2-A)<<endl;
             dbgcout<<"Norm(A) = "<<Norm(A)<<std::endl;
-            if (Norm(A2-A) > THRESH*Norm(A)) {
+            if (!(Norm(A2-A) < THRESH*Norm(A))) {
                 cerr<<"ReduceBidiagonal22\n";
                 cerr<<"B = "<<B<<endl;
                 cerr<<"A = "<<A<<endl;
@@ -717,7 +717,7 @@ namespace tmv {
             B.diag() = D;
             B.diag(1) = E;
             Matrix<T> AA = (*U) * B * (*V);
-            if (Norm(A0-AA) > THRESH*Norm(A0)) {
+            if (!(Norm(A0-AA) < THRESH*Norm(A0))) {
                 cerr<<"ReduceBidiagonal: \n";
                 cerr<<"input D = "<<D0<<endl;
                 cerr<<"input E = "<<E0<<endl;
@@ -853,7 +853,7 @@ namespace tmv {
             dbgcout<<"U = "<<*U<<std::endl;
             dbgcout<<"S = "<<D<<std::endl;
             dbgcout<<"V = "<<*V<<std::endl;
-            if (Norm(A0-AA) > THRESH*Norm(A0)) {
+            if (!(Norm(A0-AA) < THRESH*Norm(A0))) {
                 cerr<<"SV_DecomposeFromBidiagonal QR: \n";
                 cerr<<"UBV = "<<A0<<endl;
                 cerr<<"USV = "<<AA<<endl;

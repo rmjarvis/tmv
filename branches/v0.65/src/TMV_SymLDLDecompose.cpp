@@ -410,7 +410,7 @@ namespace tmv {
             std::cout<<"Norm(A0) = "<<Norm(A0)<<std::endl;
             std::cout<<"Norm(L) = "<<Norm(L)<<std::endl;
             std::cout<<"Norm(DD) = "<<Norm(DD)<<std::endl;
-            if (Norm(A2-A0) > 1.e-11*(Norm(A0)+NormSq(L)*Norm(DD))) {
+            if (!(Norm(A2-A0) < 1.e-11*(Norm(A0)+NormSq(L)*Norm(DD)))) {
                 cerr<<"NonBlock LDL_Decompose\n";
                 cerr<<"A0 = "<<TMV_Text(A)<<"  "<<A0<<endl;
                 cerr<<"A -> "<<A<<endl;
@@ -719,7 +719,7 @@ namespace tmv {
         std::cout<<"Norm(A0) = "<<Norm(A0)<<std::endl;
         std::cout<<"Norm(L) = "<<Norm(L)<<std::endl;
         std::cout<<"Norm(DD) = "<<Norm(DD)<<std::endl;
-        if (Norm(A2-A0) > 1.e-11*(Norm(A0)+NormSq(L)*Norm(DD))) {
+        if (!(Norm(A2-A0) < 1.e-11*(Norm(A0)+NormSq(L)*Norm(DD)))) {
             cerr<<"Block LDL_Decompose\n";
             cerr<<"A0 = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"A -> "<<A<<endl;
@@ -821,14 +821,17 @@ namespace tmv {
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
         AlignedArray<double> work(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #else
         int lwork = -1;
         AlignedArray<double> work(1);
+        work.get()[0] = 0.;
         LAPNAME(dsytrf) (
             LAPCM LAPCH_LO,LAPV(n),LAPP(A.ptr()),LAPV(lda),
             LAPP(lap_p.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
         lwork = int(work[0]);
         work.resize(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
         LAPNAME(dsytrf) (
@@ -919,14 +922,17 @@ namespace tmv {
 #ifdef NOWORKQUERY
             int lwork = n*LAP_BLOCKSIZE;
             AlignedArray<std::complex<double> > work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #else
             int lwork = -1;
             AlignedArray<std::complex<double> > work(1);
+            work.get()[0] = 0.;
             LAPNAME(zhetrf) (
                 LAPCM LAPCH_LO,LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(lap_p.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
             lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
             LAPNAME(zhetrf) (
@@ -944,14 +950,17 @@ namespace tmv {
 #ifdef NOWORKQUERY
             int lwork = n*LAP_BLOCKSIZE;
             AlignedArray<std::complex<double> > work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #else
             int lwork = -1;
             AlignedArray<std::complex<double> > work(1);
+            work.get()[0] = 0.;
             LAPNAME(zsytrf) (
                 LAPCM LAPCH_LO,LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(lap_p.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
             lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
             LAPNAME(zsytrf) (
@@ -1061,14 +1070,17 @@ namespace tmv {
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
         AlignedArray<float> work(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #else
         int lwork = -1;
         AlignedArray<float> work(1);
+        work.get()[0] = 0.F;
         LAPNAME(ssytrf) (
             LAPCM LAPCH_LO,LAPV(n),LAPP(A.ptr()),LAPV(lda),
             LAPP(lap_p.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
         lwork = int(work[0]);
         work.resize(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
         LAPNAME(ssytrf) (
@@ -1154,14 +1166,17 @@ namespace tmv {
 #ifdef NOWORKQUERY
             int lwork = n*LAP_BLOCKSIZE;
             AlignedArray<std::complex<float> > work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #else
             int lwork = -1;
             AlignedArray<std::complex<float> > work(1);
+            work.get()[0] = 0.F;
             LAPNAME(chetrf) (
                 LAPCM LAPCH_LO,LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(lap_p.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
             lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
             LAPNAME(chetrf) (
@@ -1179,14 +1194,17 @@ namespace tmv {
 #ifdef NOWORKQUERY
             int lwork = n*LAP_BLOCKSIZE;
             AlignedArray<std::complex<float> > work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #else
             int lwork = -1;
             AlignedArray<std::complex<float> > work(1);
+            work.get()[0] = 0.F;
             LAPNAME(csytrf) (
                 LAPCM LAPCH_LO,LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(lap_p.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
             lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
             LAPNAME(csytrf) (
@@ -1330,7 +1348,7 @@ namespace tmv {
         std::cout<<"Norm(A0) = "<<Norm(A0)<<std::endl;
         std::cout<<"Norm(L) = "<<Norm(L)<<std::endl;
         std::cout<<"Norm(DD) = "<<Norm(DD)<<std::endl;
-        if (Norm(A2-A0) > 1.e-11*(Norm(A0)+NormSq(L)*Norm(DD))) {
+        if (!(Norm(A2-A0) < 1.e-11*(Norm(A0)+NormSq(L)*Norm(DD)))) {
             cerr<<"LDL_Decompose\n";
             cerr<<"A0 = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"A -> "<<A<<endl;
@@ -1413,7 +1431,7 @@ namespace tmv {
         cout<<"D.1 = "<<D.diag(1)<<std::endl;
         cout<<"PLDLtPt = "<<A2<<std::endl;
         cout<<"cf A0 = "<<A0<<std::endl;
-        if (Norm(A2-A0) > 0.001*Norm(A0)) {
+        if (!(Norm(A2-A0) < 0.001*Norm(A0))) {
             cerr<<"LDL_Decompose: A0 = "<<TMV_Text(A)<<"  "<<A0<<std::endl;
             cerr<<"A -> "<<A<<std::endl;
             cerr<<"L = "<<L<<std::endl;

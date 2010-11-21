@@ -48,7 +48,7 @@
 #include "TMV_IsNaN.h"
 
 #ifdef XDEBUG
-#define THRESH 1.e-11
+#define THRESH 1.e-5
 #include "tmv/TMV_MatrixArith.h"
 #include "tmv/TMV_DiagMatrixArith.h"
 #include "tmv/TMV_SymMatrixArith.h"
@@ -137,11 +137,13 @@ namespace tmv {
             int lwork = 1+(4+n)*n;
             int liwork = 3+5*n;
             AlignedArray<double> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             AlignedArray<int> iwork(liwork);
 #else
             int lwork = -1;
             int liwork = -1;
             AlignedArray<double> work(1);
+            work.get()[0] = 0.;
             AlignedArray<int> iwork(1);
             LAPNAME(dstedc) (
                 LAPCM LAPV(c),LAPV(n),
@@ -151,6 +153,7 @@ namespace tmv {
             lwork = int(work[0]);
             liwork = iwork[0];
             work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             iwork.resize(liwork);
 #endif
 #endif
@@ -173,11 +176,13 @@ namespace tmv {
             int lwork = 1;
             int liwork = 1;
             AlignedArray<double> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             AlignedArray<int> iwork(liwork);
 #else
             int lwork = -1;
             int liwork = -1;
             AlignedArray<double> work(1);
+            work.get()[0] = 0.;
             AlignedArray<int> iwork(1);
             LAPNAME(dstedc) (
                 LAPCM LAPV(c),LAPV(n),
@@ -187,6 +192,7 @@ namespace tmv {
             lwork = int(work[0]);
             liwork = iwork[0];
             work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             iwork.resize(liwork);
 #endif
 #endif
@@ -223,11 +229,13 @@ namespace tmv {
             int lwork = 1+(4+n)*n;
             int liwork = 3+5*n;
             AlignedArray<double> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             AlignedArray<int> iwork(liwork);
 #else
             int lwork = -1;
             int liwork = -1;
             AlignedArray<double> work(1);
+            work.get()[0] = 0.;
             AlignedArray<int> iwork(1);
             LAPNAME(dstedc) (
                 LAPCM LAPV(c),LAPV(n),
@@ -237,6 +245,7 @@ namespace tmv {
             lwork = int(work[0]);
             liwork = iwork[0];
             work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             iwork.resize(liwork);
 #endif
 #endif
@@ -259,11 +268,13 @@ namespace tmv {
             int lwork = 1;
             int liwork = 1;
             AlignedArray<double> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             AlignedArray<int> iwork(liwork);
 #else
             int lwork = -1;
             int liwork = -1;
             AlignedArray<double> work(1);
+            work.get()[0] = 0.;
             AlignedArray<int> iwork(1);
             LAPNAME(dstedc) (
                 LAPCM LAPV(c),LAPV(n),
@@ -273,6 +284,7 @@ namespace tmv {
             lwork = int(work[0]);
             liwork = iwork[0];
             work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             iwork.resize(liwork);
 #endif
 #endif
@@ -311,11 +323,13 @@ namespace tmv {
             int lwork = 1+(4+n)*n;
             int liwork = 3+5*n;
             AlignedArray<float> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             AlignedArray<int> iwork(liwork);
 #else
             int lwork = -1;
             int liwork = -1;
             AlignedArray<float> work(1);
+            work.get()[0] = 0.F;
             AlignedArray<int> iwork(1);
             LAPNAME(sstedc) (
                 LAPCM LAPV(c),LAPV(n),
@@ -325,6 +339,7 @@ namespace tmv {
             lwork = int(work[0]);
             liwork = iwork[0];
             work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             iwork.resize(liwork);
 #endif
 #endif
@@ -347,11 +362,13 @@ namespace tmv {
             int lwork = 1;
             int liwork = 1;
             AlignedArray<float> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             AlignedArray<int> iwork(liwork);
 #else
             int lwork = -1;
             int liwork = -1;
             AlignedArray<float> work(1);
+            work.get()[0] = 0.F;
             AlignedArray<int> iwork(1);
             LAPNAME(sstedc) (
                 LAPCM LAPV(c),LAPV(n),
@@ -361,6 +378,7 @@ namespace tmv {
             lwork = int(work[0]);
             liwork = iwork[0];
             work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             iwork.resize(liwork);
 #endif
 #endif
@@ -397,11 +415,13 @@ namespace tmv {
             int lwork = 1+(4+n)*n;
             int liwork = 3+5*n;
             AlignedArray<float> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             AlignedArray<int> iwork(liwork);
 #else
             int lwork = -1;
             int liwork = -1;
             AlignedArray<float> work(1);
+            work.get()[0] = 0.F;
             AlignedArray<int> iwork(1);
             LAPNAME(sstedc) (
                 LAPCM LAPV(c),LAPV(n),
@@ -411,6 +431,7 @@ namespace tmv {
             lwork = int(work[0]);
             liwork = iwork[0];
             work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             iwork.resize(liwork);
 #endif
 #endif
@@ -433,11 +454,13 @@ namespace tmv {
             int lwork = 1;
             int liwork = 1;
             AlignedArray<float> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             AlignedArray<int> iwork(liwork);
 #else
             int lwork = -1;
             int liwork = -1;
             AlignedArray<float> work(1);
+            work.get()[0] = 0.F;
             AlignedArray<int> iwork(1);
             LAPNAME(sstedc) (
                 LAPCM LAPV(c),LAPV(n),
@@ -447,6 +470,7 @@ namespace tmv {
             lwork = int(work[0]);
             liwork = iwork[0];
             work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             iwork.resize(liwork);
 #endif
 #endif
@@ -518,6 +542,7 @@ namespace tmv {
 #ifndef LAPNOWORK
             int lwork = 18*n;
             AlignedArray<double> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             int liwork = 10*n;
             AlignedArray<int> iwork(liwork);
 #endif
@@ -611,6 +636,7 @@ namespace tmv {
 #ifndef LAPNOWORK
             int lwork = 18*n;
             AlignedArray<double> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             int liwork = 10*n;
             AlignedArray<int> iwork(liwork);
 #endif
@@ -690,6 +716,7 @@ namespace tmv {
 #ifndef LAPNOWORK
             int lwork = 18*n;
             AlignedArray<float> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             int liwork = 10*n;
             AlignedArray<int> iwork(liwork);
 #endif
@@ -767,6 +794,7 @@ namespace tmv {
 #ifndef LAPNOWORK
             int lwork = 18*n;
             AlignedArray<float> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             int liwork = 10*n;
             AlignedArray<int> iwork(liwork);
 #endif
@@ -969,17 +997,32 @@ namespace tmv {
         U.col(0).makeBasis(0);
         U.row(0,1,N).setZero();
         GetQFromQR(U.subMatrix(1,N,1,N),Ubeta.subVector(0,N-1));
+#ifdef XDEBUG
+        Matrix<T> TT = A0;
+        TT.setToIdentity();
+        TT.diag() = SS;
+        TT.diag(1) = E.conjugate();
+        TT.diag(-1) = E;
+        cout<<"A0 = "<<A0<<std::endl;
+        cout<<"UTU = "<<U*TT*U.adjoint()<<std::endl;
+        cout<<"Norm(A0-UTU) = "<<Norm(A0-U*TT*U.adjoint())<<std::endl;
+#endif
 
         EigenFromTridiagonal<T>(U,SS,E.view());
 
 #ifdef XDEBUG
         Matrix<T> A2 = U * DiagMatrixViewOf(SS) * U.adjoint();
+        cout<<"Norm(A0-USU) = "<<Norm(A0-A2)<<std::endl;
         if (!(Norm(A0-A2) < THRESH * Norm(U) * Norm(SS) * Norm(U))) {
             cerr<<"UnsortedHermEigen:\n";
             cerr<<"A = "<<A0<<endl;
             cerr<<"U = "<<U<<endl;
             cerr<<"S = "<<SS<<endl;
             cerr<<"USUt = "<<A2<<endl;
+            cerr<<"Norm(A-USUt) = "<<Norm(A0-A2)<<std::endl;
+            cerr<<"cf "<<THRESH<<
+                " * "<<Norm(U)<<" * "<<Norm(SS)<<" * "<<Norm(U)<<
+                " = "<<THRESH*Norm(U)*Norm(SS)*Norm(U)<<std::endl;
             abort();
         }
 #endif
@@ -1359,7 +1402,7 @@ namespace tmv {
         //std::cout<<"UP = "<<A2<<endl;
         std::cout<<"Norm(A2-A0) = "<<Norm(A2-A)<<endl;
         std::cout<<"Norm(A0) = "<<Norm(A)<<endl;
-        if (Norm(A2-A) > THRESH*Norm(A)) {
+        if (!(Norm(A2-A) < THRESH*Norm(A))) {
             cerr<<"Band PolarDecompose "<<TMV_Text(A)<<"  "<<A<<endl;
             cerr<<"U = "<<U<<endl;
             cerr<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<endl;

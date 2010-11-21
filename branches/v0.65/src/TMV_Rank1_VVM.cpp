@@ -639,7 +639,7 @@ namespace tmv {
     void Rank1Update(
         const T alpha, const GenVector<Tx>& x,
         const GenVector<Ty>& y, const MatrixView<T>& A)
-        // A (+)= beta + alpha * x * yT
+        // A (+)= alpha * x * yT
     {
 #ifdef XDEBUG
         //cout<<"Rank1Update: alpha = "<<alpha<<endl;

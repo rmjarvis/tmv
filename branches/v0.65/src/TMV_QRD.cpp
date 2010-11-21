@@ -240,11 +240,14 @@ namespace tmv {
         if (printmat) {
             *fout << "QR = "<<qr<<std::endl;
         }
+        RT kappa = mm.doCondition();
         if (fout) {
-            *fout << "Norm(M-QR)/Norm(QR) = "<<nm<<"  ";
-            *fout << pimpl->QRx.rowsize()*TMV_Epsilon<T>()<<std::endl;
+            *fout << "Norm(M-QR)/Norm(QR) = "<<nm<<" <? ";
+            *fout << kappa<<" * "<<RT(mm.colsize())<<" * "<<TMV_Epsilon<T>();
+            *fout <<" = "<<kappa*RT(mm.colsize())*TMV_Epsilon<T>()<<std::endl;
+
         }
-        return nm < mm.doCondition()*RT(mm.colsize())*TMV_Epsilon<T>();
+        return nm < kappa*RT(mm.colsize())*TMV_Epsilon<T>();
     }
 
     template <class T> 

@@ -181,16 +181,13 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     static inline void LapTriDiagMultMM(
         const GenBandMatrix<Ta>& A, const GenMatrix<Tb>& B, 
-        const int beta, const MatrixView<T>& C)
-    {
-        if (beta == 1) NonLapTriDiagMultMM<true>(A,B,C); 
-        else NonLapTriDiagMultMM<false>(A,B,C); 
-    }
+        const MatrixView<T>& C)
+    { NonLapTriDiagMultMM<true>(A,B,C); }
 #ifdef INST_DOUBLE
     template <> 
     void LapTriDiagMultMM(
         const GenBandMatrix<double>& A, const GenMatrix<double>& B,
-        const int beta, const MatrixView<double>& C)
+        const MatrixView<double>& C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -212,19 +209,19 @@ namespace tmv {
         int nrhs = B.rowsize();
         double a(1);
         int ldB = B.stepj();
-        double xbeta(beta);
+        double beta(1);
         int ldC = C.stepj();
         LAPNAME(dlagtm) (
             LAPCM LAPCH_T,LAPV(n),LAPV(nrhs),
-                         LAPV(a),LAPP(A.cptr()+A.stepj()),
-                         LAPP(A.cptr()),LAPP(A.cptr()+A.stepi()),
-                         LAPP(B.cptr()),LAPV(ldB),LAPV(xbeta),LAPP(C.ptr()),LAPV(ldC) LAP1);
+            LAPV(a),LAPP(A.cptr()+A.stepj()),
+            LAPP(A.cptr()),LAPP(A.cptr()+A.stepi()),
+            LAPP(B.cptr()),LAPV(ldB),LAPV(beta),LAPP(C.ptr()),LAPV(ldC) LAP1);
     }
     template <> 
     void LapTriDiagMultMM(
         const GenBandMatrix<std::complex<double> >& A, 
         const GenMatrix<std::complex<double> >& B,
-        const int beta, const MatrixView<std::complex<double> >& C)
+        const MatrixView<std::complex<double> >& C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -245,20 +242,20 @@ namespace tmv {
         int nrhs = B.rowsize();
         double a(1);
         int ldB = B.stepj();
-        double xbeta(beta);
+        double beta(1);
         int ldC = C.stepj();
         LAPNAME(zlagtm) (
             LAPCM B.isconj()?LAPCH_CT:LAPCH_T,LAPV(n),LAPV(nrhs),
-                         LAPV(a),LAPP(A.cptr()+A.stepj()),
-                         LAPP(A.cptr()),LAPP(A.cptr()+A.stepi()),
-                         LAPP(B.cptr()),LAPV(ldB),LAPV(xbeta),LAPP(C.ptr()),LAPV(ldC) LAP1);
+            LAPV(a),LAPP(A.cptr()+A.stepj()),
+            LAPP(A.cptr()),LAPP(A.cptr()+A.stepi()),
+            LAPP(B.cptr()),LAPV(ldB),LAPV(beta),LAPP(C.ptr()),LAPV(ldC) LAP1);
     }
 #endif
 #ifdef INST_FLOAT
     template <> 
     void LapTriDiagMultMM(
         const GenBandMatrix<float>& A, const GenMatrix<float>& B,
-        const int beta, const MatrixView<float>& C)
+        const MatrixView<float>& C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -280,19 +277,19 @@ namespace tmv {
         int nrhs = B.rowsize();
         float a(1);
         int ldB = B.stepj();
-        float xbeta(beta);
+        float beta(1);
         int ldC = C.stepj();
         LAPNAME(slagtm) (
             LAPCM LAPCH_T,LAPV(n),LAPV(nrhs),
-                         LAPV(a),LAPP(A.cptr()+A.stepj()),
-                         LAPP(A.cptr()),LAPP(A.cptr()+A.stepi()),
-                         LAPP(B.cptr()),LAPV(ldB),LAPV(xbeta),LAPP(C.ptr()),LAPV(ldC) LAP1);
+            LAPV(a),LAPP(A.cptr()+A.stepj()),
+            LAPP(A.cptr()),LAPP(A.cptr()+A.stepi()),
+            LAPP(B.cptr()),LAPV(ldB),LAPV(beta),LAPP(C.ptr()),LAPV(ldC) LAP1);
     }
     template <> 
     void LapTriDiagMultMM(
         const GenBandMatrix<std::complex<float> >& A, 
         const GenMatrix<std::complex<float> >& B,
-        const int beta, const MatrixView<std::complex<float> >& C)
+        const MatrixView<std::complex<float> >& C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -313,13 +310,13 @@ namespace tmv {
         int nrhs = B.rowsize();
         float a(1);
         int ldB = B.stepj();
-        float xbeta(beta);
+        float beta(1);
         int ldC = C.stepj();
         LAPNAME(clagtm) (
             LAPCM B.isconj()?LAPCH_CT:LAPCH_T,LAPV(n),LAPV(nrhs),
-                         LAPV(a),LAPP(A.cptr()+A.stepj()),
-                         LAPP(A.cptr()),LAPP(A.cptr()+A.stepi()),
-                         LAPP(B.cptr()),LAPV(ldB),LAPV(xbeta),LAPP(C.ptr()),LAPV(ldC) LAP1);
+            LAPV(a),LAPP(A.cptr()+A.stepj()),
+            LAPP(A.cptr()),LAPP(A.cptr()+A.stepi()),
+            LAPP(B.cptr()),LAPV(ldB),LAPV(beta),LAPP(C.ptr()),LAPV(ldC) LAP1);
     }
 #endif // FLOAT
 #endif // ELAP
@@ -330,9 +327,10 @@ namespace tmv {
         const MatrixView<T>& C)
     {
 #ifdef ELAP
-        if (A.isSquare() && B.iscm() && C.iscm() && B.isconj() == C.isconj())
-            LapTriDiagMultMM(A,B,add?1:0,C);
-        else
+        if (A.isSquare() && B.iscm() && C.iscm() && B.isconj() == C.isconj()) {
+            if (!add) C.setZero();
+            LapTriDiagMultMM(A,B,C);
+        } else
 #endif
             NonLapTriDiagMultMM<add>(A,B,C);
     }
@@ -401,8 +399,9 @@ namespace tmv {
         else ColMultMM<add>(alpha,A,B,C);
 #ifdef XDEBUG
         //cout<<"C -> "<<C<<endl;
-        if (Norm(C2-C) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
-                                (add?Norm(C0):TMV_RealType(T)(0)))) {
+        if (!(Norm(C2-C) <= 
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
+                     (add?Norm(C0):TMV_RealType(T)(0))))) {
             cerr<<"DoMultMM: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A.cptr()<<"  "<<A0<<endl;
@@ -464,9 +463,9 @@ namespace tmv {
 
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(const T alpha,
-              const GenBandMatrix<Ta>& A, const GenMatrix<Tb>& B,
-              const MatrixView<T>& C)
-        // C (+)= alpha * A * B
+                const GenBandMatrix<Ta>& A, const GenMatrix<Tb>& B,
+                const MatrixView<T>& C)
+    // C (+)= alpha * A * B
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -515,8 +514,9 @@ namespace tmv {
         }
 #ifdef XDEBUG
         //cout<<"C -> "<<C<<endl;
-        if (Norm(C2-C) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
-                                (add?Norm(C0):TMV_RealType(T)(0)))) {
+        if (!(Norm(C2-C) <= 
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
+                     (add?Norm(C0):TMV_RealType(T)(0))))) {
             cerr<<"MultMM: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A.cptr()<<"  "<<A0<<endl;

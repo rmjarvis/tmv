@@ -5462,6 +5462,8 @@ namespace tmv {
 #endif
 #ifdef TMVDEBUG
             setAllTo(T(888));
+#else
+            if (isComplex(T())) diag().imagPart().setZero();
 #endif
         }
 

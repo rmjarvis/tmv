@@ -493,21 +493,21 @@ int main()
     if context.TryCompile(mkl_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],mkl_source_file) or
-            CheckLibs(context,['mkl'],mkl_source_file) or
-            CheckLibs(context,['mkl','pthread'],mkl_source_file) or
             CheckLibs(context,['mkl','guide','pthread'],mkl_source_file) or
-            CheckLibs(context,['mkl_ia32','guide','pthread'],
-                        mkl_source_file) or
-            CheckLibs(context,['mkl_ia32','mkl_core','mkl_sequential'],
-                        mkl_source_file) or
-            CheckLibs(context,['mkl_intel_lp64','mkl_core',threadlib,
-                        'guide','pthread'],mkl_source_file) or
-            CheckLibs(context,['mkl_intel_lp64','mkl_core','mkl_sequential'],
+            CheckLibs(context,['mkl_em64t','guide','pthread'],
                         mkl_source_file) or
             CheckLibs(context,['mkl_ipf','guide','pthread'],
                         mkl_source_file) or
-            CheckLibs(context,['mkl_em64t','guide','pthread'],
-                        mkl_source_file) )
+            CheckLibs(context,['mkl_ia32','guide','pthread'],
+                        mkl_source_file) or
+            CheckLibs(context,['mkl_intel_lp64','mkl_core',threadlib,
+                        'guide','pthread'],mkl_source_file) or
+            CheckLibs(context,['mkl_ia32','mkl_core','mkl_sequential'],
+                        mkl_source_file) or
+            CheckLibs(context,['mkl_intel_lp64','mkl_core','mkl_sequential'],
+                        mkl_source_file) or
+            CheckLibs(context,['mkl','pthread'],mkl_source_file) or
+            CheckLibs(context,['mkl'],mkl_source_file) )
 
         context.Result(result)
 
@@ -580,10 +580,10 @@ int main()
     if context.TryCompile(fblas_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],fblas_source_file) or
-            CheckLibs(context,['goto2'],fblas_source_file) or
             CheckLibs(context,['goto2','pthread'],fblas_source_file) or
-            CheckLibs(context,['goto'],fblas_source_file) or
-            CheckLibs(context,['goto','pthread'],fblas_source_file))
+            CheckLibs(context,['goto2'],fblas_source_file) or
+            CheckLibs(context,['goto','pthread'],fblas_source_file) or
+            CheckLibs(context,['goto'],fblas_source_file))
 
         context.Result(result)
 
@@ -667,10 +667,11 @@ int main()
     if context.TryCompile(cblas_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],cblas_source_file) or
-            CheckLibs(context,['cblas'],cblas_source_file) or
-            CheckLibs(context,['cblas','blas'],cblas_source_file) or
-            CheckLibs(context,['cblas','blas','gfortran'],cblas_source_file) or
-            CheckLibs(context,['cblas','blas','pgftnrtl'],cblas_source_file) )
+            CheckLibs(context,['cblas','gfortran'],cblas_source_file) or
+            CheckLibs(context,['cblas','pgftnrtl'],cblas_source_file) or
+            CheckLibs(context,['blas','gfortran'],cblas_source_file) or
+            CheckLibs(context,['blas','pgftnrtl'],cblas_source_file) or
+            CheckLibs(context,['cblas'],cblas_source_file) )
 
         context.Result(result)
 
@@ -709,9 +710,9 @@ int main()
     if context.TryCompile(fblas_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],fblas_source_file) or
-            CheckLibs(context,['blas'],fblas_source_file) or
             CheckLibs(context,['blas','gfortran'],fblas_source_file) or
-            CheckLibs(context,['blas','pgftnrtl'],fblas_source_file) )
+            CheckLibs(context,['blas','pgftnrtl'],fblas_source_file) or
+            CheckLibs(context,['blas'],fblas_source_file) )
 
         context.Result(result)
 
@@ -866,9 +867,17 @@ int main()
     if context.TryCompile(flapack_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],flapack_source_file) or
-            CheckLibs(context,['lapack'],flapack_source_file) or
             CheckLibs(context,['lapack','gfortran'],flapack_source_file) or
-            CheckLibs(context,['lapack','pgftnrtl'],flapack_source_file) )
+            CheckLibs(context,['lapack','pgftnrtl'],flapack_source_file) or
+            CheckLibs(context,['lapack','cblaswr','f2c'],flapack_source_file) or
+            CheckLibs(context,['lapack','fblaswr','f2c'],flapack_source_file) or
+            CheckLibs(context,['clapack','cblaswr','f2c'],flapack_source_file) or
+            CheckLibs(context,['clapack','fblaswr','f2c'],flapack_source_file) or
+            CheckLibs(context,['lapack','f2c'],flapack_source_file) or
+            CheckLibs(context,['clapack','f2c'],flapack_source_file) or
+            CheckLibs(context,['lapack','F77'],flapack_source_file) or
+            CheckLibs(context,['clapack','F77'],flapack_source_file) or
+            CheckLibs(context,['lapack'],flapack_source_file) )
 
         context.Result(result)
 
@@ -915,47 +924,47 @@ def DoLibraryAndHeaderChecks(config):
         foundblas = 1  # Set to 0 at end if not found
         # Do FORCE options first:
         if config.env['FORCE_MKL']:
-            if config.CheckMKL():
-                if (config.env['WITH_LAPACK'] and config.CheckMKL_LAP()) :
-                    print 'Using MKL LAPACK'
-                    foundlap = 1
-                print 'Using MKL BLAS'
-                config.env.Append(CPPDEFINES=['MKL'])
-                if compiler == 'icpc' and version <= 9.0:
-                    env.Append(CPPDEFINES=['NOWORKQUERY'])
+            config.CheckMKL()
+            config.env.Append(CPPDEFINES=['MKL'])
+            print 'Using MKL BLAS'
+            if (config.env['WITH_LAPACK'] and config.CheckMKL_LAP()) :
+                foundlap = 1
+                print 'Using MKL LAPACK'
+            if compiler == 'icpc' and version <= 9.0:
+                # This is a proxy for the MKL versions that don't do
+                # work queries.  A better solution would be to do a 
+                # check for whether work queries work correctly.
+                env.Append(CPPDEFINES=['NOWORKQUERY'])
 
         elif config.env['FORCE_ACML']:
-            if config.CheckACML():
-                if config.env['WITH_LAPACK']:
-                    print 'Using ACML LAPACK'
-                    foundlap = 1
-                print 'Using ACML BLAS'
-                config.env.Append(CPPDEFINES=['ACML'])
-            else:
-                print 'Forced MKL, but failed to find or compile with acml.h'
-                Exit(1)
+            config.CheckACML()
+            config.env.Append(CPPDEFINES=['ACML'])
+            print 'Using ACML BLAS'
+            if config.env['WITH_LAPACK']:
+                foundlap = 1
+                print 'Using ACML LAPACK'
  
         elif config.env['FORCE_GOTO']:
             config.CheckGOTO()
-            print 'Using GOTO BLAS'
             config.env.Append(CPPDEFINES=['FBLAS'])
             #config.env['NOMIX_SMALL'] = 1
+            print 'Using GOTO BLAS'
 
         elif config.env['FORCE_ATLAS']:
             config.CheckATLAS()
-            print 'Using ATLAS BLAS'
             config.env.Append(CPPDEFINES=['ATLAS'])
             foundatlasblas = 1
+            print 'Using ATLAS BLAS'
 
         elif config.env['FORCE_CBLAS']:
             config.CheckCBLAS()
-            print 'Using CBLAS'
             config.env.Append(CPPDEFINES=['CBLAS'])
+            print 'Using CBLAS'
 
         elif config.env['FORCE_FBLAS']:
             config.CheckFBLAS()
-            print 'Using FBLAS'
             config.env.Append(CPPDEFINES=['FBLAS'])
+            print 'Using FBLAS'
 
         # If no BLAS is forced, then look for MKL, ACML before more generic
         # (and probably less optimized) BLAS library.
@@ -963,72 +972,68 @@ def DoLibraryAndHeaderChecks(config):
             if (config.env['WITH_LAPACK'] and config.CheckMKL_LAP()) :
                 print 'Using MKL LAPACK'
                 foundlap = 1
-            print 'Using MKL BLAS'
             config.env.Append(CPPDEFINES=['MKL'])
+            print 'Using MKL BLAS'
  
         elif config.CheckACML() :
             if config.env['WITH_LAPACK']:
                 print 'Using ACML LAPACK'
                 foundlap = 1
-            print 'Using ACML BLAS'
             config.env.Append(CPPDEFINES=['ACML'])
+            print 'Using ACML BLAS'
 
         elif config.CheckGOTO() :
-            print 'Using GotoBLAS'
             config.env.Append(CPPDEFINES=['FBLAS'])
             #config.env['NOMIX_SMALL'] = 1
+            print 'Using GotoBLAS'
 
         elif config.CheckCBLAS() :
-            print 'Using CBLAS'
             config.env.Append(CPPDEFINES=['CBLAS'])
+            print 'Using CBLAS'
 
         elif config.CheckATLAS() :
-            print 'Using ATLAS'
             foundatlasblas = 1
             config.env.Append(CPPDEFINES=['ATLAS'])
+            print 'Using ATLAS'
 
         elif config.CheckFBLAS() :
-            print 'Using Fortran BLAS'
             config.env.Append(CPPDEFINES=['FBLAS'])
+            print 'Using Fortran BLAS'
 
         else:
-            print 'No BLAS libraries found'
             foundblas = 0
+            print 'No BLAS libraries found'
 
     if foundblas and not foundlap and config.env['WITH_LAPACK']:
         foundlap = 1   # Set back to 0 at end if not found.
-        if config.env['FORCE_CLAPACK']:
-            if config.CheckCLAPACK():
-                print 'Using CLAPACK'
-                config.env.Append(CPPDEFINES=['CLAPACK'])
-            else:
-                print 'Forced CLAPACK, but failed to find or compile with clapack.h'
-                Exit(1)
-
-        elif config.env['FORCE_FLAPACK']:
+        if config.env['FORCE_FLAPACK']:
             config.CheckFLAPACK()
-            print 'Using FLAPACK'
-            foundlap = 1
             config.env.Append(CPPDEFINES=['FLAPACK'])
+            print 'Using FLAPACK'
+
+        elif config.env['FORCE_CLAPACK']:
+            config.CheckCLAPACK()
+            config.env.Append(CPPDEFINES=['CLAPACK'])
+            print 'Using CLAPACK'
 
         elif foundatlasblas and config.env['FORCE_ATLAS_LAPACK']:
             config.CheckATLAS_LAP()
             print 'Using ATLAS LAPACK'
 
-        elif config.CheckCLAPACK() :
-            config.env.Append(CPPDEFINES=['CLAPACK'])
-            print 'Using CLAPACK'
-
         elif config.CheckFLAPACK() :
             config.env.Append(CPPDEFINES=['FLAPACK'])
             print 'Using Fortran LAPACK'
+
+        elif config.CheckCLAPACK() :
+            config.env.Append(CPPDEFINES=['CLAPACK'])
+            print 'Using CLAPACK'
 
         elif foundatlasblas and config.CheckATLAS_LAP():
             print 'Using ATLAS LAPACK'
 
         else :
-            print 'No LAPACK libraries found'
             foundlap = 0
+            print 'No LAPACK libraries found'
 
     config.env['LAP'] = 0
     if foundlap:

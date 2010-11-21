@@ -455,8 +455,8 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
-        if (Norm(y2-y) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(x0)+
-                                (add?Norm(y0):TMV_RealType(T)(0)))) {
+        if (!(Norm(y2-y) <= 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(x0)+
+                                (add?Norm(y0):TMV_RealType(T)(0))))) {
             cerr<<"NonBlas MultMV: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A.cptr()<<"  "<<A0<<endl;
@@ -507,7 +507,8 @@ namespace tmv {
         if (xs < 0) xp += (x.size()-1)*xs;
         double* yp = y.ptr();
         if (ys < 0) yp += (y.size()-1)*ys;
-        double xbeta(beta);
+        if (beta == 0) y.setZero();
+        double xbeta(1);
         BLASNAME(dgbmv) (
             BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
             BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
@@ -552,10 +553,11 @@ namespace tmv {
         if (xs < 0) xp += (x.size()-1)*xs;
         std::complex<double>* yp = y.ptr();
         if (ys < 0) yp += (y.size()-1)*ys;
+        if (beta == 0) y.setZero();
+        std::complex<double> xbeta(1);
 
         if (A.isconj() && A.iscm()) {
 #ifdef CBLAS
-            std::complex<double> xbeta(beta);
             TMV_SWAP(m,n);
             TMV_SWAP(lo,hi);
             BLASNAME(zgbmv) (
@@ -565,7 +567,6 @@ namespace tmv {
                 BLASP(yp),BLASV(ys) BLAS1); 
 #else
             std::complex<double> ca = TMV_CONJ(alpha);
-            std::complex<double> xbeta(beta);
             if (x.isconj()) {
                 y.conjugateSelf();
                 BLASNAME(zgbmv) (
@@ -589,7 +590,6 @@ namespace tmv {
             }
 #endif
         } else {
-            std::complex<double> xbeta(beta);
             BLASNAME(zgbmv) (
                 BLASCM A.iscm()?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
@@ -635,7 +635,8 @@ namespace tmv {
             double* yp = (double*) y.ptr();
             if (ys < 0) yp += (y.size()-1)*ys;
             double xalpha(1);
-            double xbeta(beta);
+            y.setZero();
+            double xbeta(1);
             BLASNAME(dgbmv) (
                 BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
@@ -711,25 +712,24 @@ namespace tmv {
         if (ys < 0) yp += (y.size()-1)*ys;
         double ar(TMV_REAL(alpha));
         double ai(TMV_IMAG(alpha));
-        double xbeta(beta);
-        if (ar == 0.) {
-            if (beta == 0) y.realPart().setZero();
-        } else
+        if (beta == 0) y.setZero();
+        double xbeta(1);
+        if (ar != 0.) {
             BLASNAME(dgbmv) (
                 BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASV(ar),BLASP(A.cptr()-hi),BLASV(ds),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp),BLASV(ys) BLAS1); 
-        if (ai == 0.) {
-            if (beta == 0) y.imagPart().setZero();
-        } else
+        }
+        if (ai != 0.) {
             BLASNAME(dgbmv) (
                 BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASV(ai),BLASP(A.cptr()-hi),BLASV(ds),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp+1),BLASV(ys) BLAS1); 
+        }
     }
 #endif
 #ifdef INST_FLOAT
@@ -760,7 +760,8 @@ namespace tmv {
         if (xs < 0) xp += (x.size()-1)*xs;
         float* yp = y.ptr();
         if (ys < 0) yp += (y.size()-1)*ys;
-        float xbeta(beta);
+        if (beta == 0) y.setZero();
+        float xbeta(1);
         BLASNAME(sgbmv) (
             BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
             BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
@@ -805,10 +806,11 @@ namespace tmv {
         if (xs < 0) xp += (x.size()-1)*xs;
         std::complex<float>* yp = y.ptr();
         if (ys < 0) yp += (y.size()-1)*ys;
+        if (beta == 0) y.setZero();
+        std::complex<float> xbeta(1);
 
         if (A.isconj() && A.iscm()) {
 #ifdef CBLAS
-            std::complex<float> xbeta(beta);
             TMV_SWAP(m,n);
             TMV_SWAP(lo,hi);
             BLASNAME(cgbmv) (
@@ -818,7 +820,6 @@ namespace tmv {
                 BLASP(yp),BLASV(ys) BLAS1); 
 #else
             std::complex<float> ca = TMV_CONJ(alpha);
-            std::complex<float> xbeta(beta);
             if (x.isconj()) {
                 y.conjugateSelf();
                 BLASNAME(cgbmv) (
@@ -842,7 +843,6 @@ namespace tmv {
             }
 #endif
         } else {
-            std::complex<float> xbeta(beta);
             BLASNAME(cgbmv) (
                 BLASCM A.iscm()?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
@@ -888,7 +888,8 @@ namespace tmv {
             float* yp = (float*) y.ptr();
             if (ys < 0) yp += (y.size()-1)*ys;
             float xalpha(1);
-            float xbeta(beta);
+            y.setZero();
+            float xbeta(1);
             BLASNAME(sgbmv) (
                 BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
@@ -916,7 +917,7 @@ namespace tmv {
             float* yp = (float*) y.ptr();
             if (ys < 0) yp += (y.size()-1)*ys;
             float xalpha(TMV_REAL(alpha));
-            float xbeta(beta);
+            float xbeta(1);
             BLASNAME(sgbmv) (
                 BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
@@ -964,25 +965,24 @@ namespace tmv {
         if (ys < 0) yp += (y.size()-1)*ys;
         float ar(TMV_REAL(alpha));
         float ai(TMV_IMAG(alpha));
-        float xbeta(beta);
-        if (ar == 0.F) {
-            if (beta == 0) y.realPart().setZero();
-        } else
+        if (beta == 0) y.setZero();
+        float xbeta(1);
+        if (ar != 0.F) {
             BLASNAME(sgbmv) (
                 BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASV(ar),BLASP(A.cptr()-hi),BLASV(ds),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp),BLASV(ys) BLAS1); 
-        if (ai == 0.F) {
-            if (beta == 0) y.imagPart().setZero();
-        } else
+        }
+        if (ai != 0.F) {
             BLASNAME(sgbmv) (
                 BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASV(ai),BLASP(A.cptr()-hi),BLASV(ds),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp+1),BLASV(ys) BLAS1); 
+        }
     }
 #endif
 
@@ -1058,14 +1058,14 @@ namespace tmv {
                     alpha,A,x,VectorView<T>(y.ptr(),y.size(),1,y.ct()));
             } else if ((A.isrm()&&A.stepi()>0) || (A.iscm()&&A.stepj()>0)) {
                 if (!SameStorage(A,y)) {
-                    if (!SameStorage(x,y) && !SameStorage(A,x))
+                    if (!SameStorage(x,y) && !SameStorage(A,x)) {
                         BlasMultMV(alpha,A,x,add?1:0,y);
-                    else {
+                    } else {
                         Vector<T> xx = alpha*x;
                         BlasMultMV(T(1),A,xx,add?1:0,y);
                     }
                 } else {
-                    Vector<T> yy(y.size());
+                    Vector<T> yy(y.size(),T(0));
                     if (!SameStorage(A,x)) {
                         BlasMultMV(T(1),A,x,0,yy.view());
                         if (add) y += alpha*yy;
@@ -1714,7 +1714,7 @@ namespace tmv {
         const GenBandMatrix<Ta>& A, const VectorView<T>& x)
     {
 #ifdef XDEBUG
-        //cout<<"Start MultEqMV\n";
+        cout<<"Start MultEqMV\n";
         Vector<T> x0 = x;
         Matrix<Ta> A0 = A;
         Vector<T> x2 = A0 * x0;
@@ -1745,8 +1745,8 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
-        //cout<<"Done MultEqMV\n";
-        if (Norm(x-x2) > 0.001*(Norm(A0)*Norm(x0))) {
+        cout<<"Done MultEqMV\n";
+        if (!(Norm(x-x2) <= 0.001*(Norm(A0)*Norm(x0)))) {
             cerr<<"MultEqMV: \n";
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"x = "<<TMV_Text(x)<<" step "<<x.step()<<"  "<<x0<<endl;
@@ -1767,11 +1767,11 @@ namespace tmv {
         TMVAssert(A.rowsize() == x.size());
         TMVAssert(A.colsize() == y.size());
 #ifdef XDEBUG
-        //cout<<"Start Band: MultMV\n";
-        //cout<<"A = "<<TMV_Text(A)<<"  "<<A.cptr()<<"  "<<A<<endl;
-        //cout<<"x = "<<TMV_Text(x)<<"  "<<x.cptr()<<"  step "<<x.step()<<"  "<<x<<endl;
-        //cout<<"y = "<<TMV_Text(y)<<"  "<<y.cptr()<<"  step "<<y.step()<<"  "<<y<<endl;
-        //cout<<"alpha = "<<alpha<<", add = "<<add<<endl;
+        cout<<"Start Band: MultMV\n";
+        cout<<"A = "<<TMV_Text(A)<<"  "<<A.cptr()<<"  "<<A<<endl;
+        cout<<"x = "<<TMV_Text(x)<<"  "<<x.cptr()<<"  step "<<x.step()<<"  "<<x<<endl;
+        cout<<"y = "<<TMV_Text(y)<<"  "<<y.cptr()<<"  step "<<y.step()<<"  "<<y<<endl;
+        cout<<"alpha = "<<alpha<<", add = "<<add<<endl;
         Vector<T> y0 = y;
         Vector<Tx> x0 = x;
         Matrix<Ta> A0 = A;
@@ -1813,9 +1813,9 @@ namespace tmv {
             }
         }
 #ifdef XDEBUG
-        //cout<<"->y = "<<y<<endl;
-        if (Norm(y2-y) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(x0)+
-                                (add?Norm(y0):TMV_RealType(T)(0)))) {
+        cout<<"->y = "<<y<<endl;
+        if (!(Norm(y2-y) <= 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(x0)+
+                                (add?Norm(y0):TMV_RealType(T)(0))))) {
             cerr<<"MultMV: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A.cptr()<<"  "<<A0<<endl;

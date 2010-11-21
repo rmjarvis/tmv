@@ -102,7 +102,7 @@ namespace tmv {
         cout<<"QR = "<<QR<<endl;
         cout<<"Norm(QR-A0) = "<<Norm(QR-A0)<<endl;
         cout<<"Norm(AtA-RtR) = "<<Norm(A0.adjoint()*A0-R.adjoint()*R)<<endl;
-        if (Norm(QR-A0) > 0.00001*Norm(A0)) {
+        if (!(Norm(QR-A0) < 0.00001*Norm(A0))) {
             cerr<<"QR_Decompose: \n";
             cerr<<"A = "<<TMV_Text(QRx)<<"  "<<A0<<endl;
             cerr<<"QRx = "<<QRx<<endl;

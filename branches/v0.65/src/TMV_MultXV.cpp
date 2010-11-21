@@ -196,7 +196,7 @@ namespace tmv {
 #ifdef XDEBUG
         Vector<T> diff(v.size());
         for(int i=0;i<int(v.size());i++) diff(i) = vx(i) - v(i);
-        if (Norm(diff) > 0.001*TMV_MAX(TMV_RealType(T)(1),Norm(v))) {
+        if (!(Norm(diff) <= 0.001*TMV_MAX(TMV_RealType(T)(1),Norm(v)))) {
             cerr<<"MultXV: x = "<<x<<endl;
             cerr<<"v = "<<TMV_Text(v)<<"  step "<<v.step()<<"  "<<v0<<endl;
             cerr<<"-> "<<v<<endl;
@@ -316,7 +316,7 @@ namespace tmv {
 #ifdef XDEBUG
         Vector<T> diff(v2.size());
         for(int i=0;i<int(v2.size());i++) diff(i) = vx(i) - v2(i);
-        if (Norm(diff) > 0.001*TMV_MAX(TMV_RealType(T)(1),Norm(v2))) {
+        if (!(Norm(diff) <= 0.001*TMV_MAX(TMV_RealType(T)(1),Norm(v2)))) {
             cerr<<"CopyMultXV: x = "<<x<<endl;
             cerr<<"v2 = "<<TMV_Text(v2)<<"  step "<<v2.step()<<endl;
             cerr<<"v1 = "<<TMV_Text(v1)<<"  step "<<v1.step()<<endl;
@@ -528,7 +528,8 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
-        if (Norm(zx-z) > 0.001*(TMV_ABS(alpha)*(Norm(x)+Norm(y))+Norm(z0))) {
+        if (!(Norm(zx-z) <= 
+              0.001*(TMV_ABS(alpha)*(Norm(x)+Norm(y))+Norm(z0)))) {
             cerr<<"AddElProd: alpha = "<<alpha<<endl;
             cerr<<"x = "<<TMV_Text(x)<<"  step "<<x.step()<<"  "<<x<<endl;
             cerr<<"y = "<<TMV_Text(y)<<"  step "<<y.step()<<"  "<<y<<endl;
@@ -669,7 +670,7 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
-        if (Norm(yx-y) > 0.001*(TMV_ABS(alpha)*Norm(x)+Norm(y0))) {
+        if (!(Norm(yx-y) <= 0.001*(TMV_ABS(alpha)*Norm(x)+Norm(y0)))) {
             cerr<<"AddElProd: alpha = "<<alpha<<endl;
             cerr<<"x = "<<TMV_Text(x)<<"  step "<<x.step()<<"  "<<x<<endl;
             cerr<<"y = "<<TMV_Text(y)<<"  step "<<y.step()<<"  "<<y0<<endl;

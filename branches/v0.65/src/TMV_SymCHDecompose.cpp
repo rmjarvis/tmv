@@ -224,7 +224,7 @@ namespace tmv {
 #ifdef XDEBUG
         RT norml = Norm(A.lowerTri());
         Matrix<T> A2 = A.lowerTri()*A.lowerTri().adjoint();
-        if (Norm(A2-A0) > 0.001*TMV_SQR(norml)) {
+        if (!(Norm(A2-A0) < 0.001*TMV_SQR(norml))) {
             cerr<<"CHDecomp: A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"Done: A = "<<A<<endl;
             cerr<<"L = "<<A.lowerTri()<<endl;
@@ -299,7 +299,7 @@ namespace tmv {
 #ifdef XDEBUG
         ConstLowerTriMatrixView<T> L = A.lowerTri();
         Matrix<T> AA = L * L.adjoint();
-        if (Norm(AA-A0) > 0.001*Norm(A0)) {
+        if (!(Norm(AA-A0) < 0.001*Norm(A0))) {
             cerr<<"Done Block CH: \n";
             cerr<<"A (block) = "<<A<<endl;
             cerr<<"A (nonblock) = "<<A2<<endl;
@@ -409,7 +409,7 @@ namespace tmv {
 #ifdef XDEBUG
         ConstLowerTriMatrixView<T> L = A.lowerTri();
         Matrix<T> AA = L * L.adjoint();
-        if (Norm(AA-A0) > 0.001*Norm(A0)) {
+        if (!(Norm(AA-A0) < 0.001*Norm(A0))) {
             cerr<<"Done Recursive CH: \n";
             cerr<<"A (block) = "<<A<<endl;
             cerr<<"A (nonblock) = "<<A2<<endl;

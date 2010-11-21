@@ -241,7 +241,7 @@ namespace tmv {
 #ifdef XDEBUG
         if (U && V) {
             Matrix<T> AA = (*U) * DiagMatrixViewOf(D) * (*V);
-            if (Norm(A0-AA) > THRESH*Norm(A0)) {
+            if (!(Norm(A0-AA) < THRESH*Norm(A0))) {
                 cerr<<"SV_DecomposeFromBidiagonal: \n";
                 cerr<<"input B = "<<B<<endl;
                 cerr<<"U => "<<*U<<endl;
@@ -286,13 +286,21 @@ namespace tmv {
             TMVAssert(V->ct()==NonConj);
             if (U && setUV) TMVAssert(U->stor() == V->stor());
         }
+
         char u = 'U';
         int n = D.size();
         Vector<double> E1(n);
         E1.subVector(0,n-1) = E;
+        E1[n-1] = 0.;
         if (setUV) {
             char c = 'I';
             TMVAssert(U && V);
+            //std::cout<<"setUV\n";
+            //std::cout<<"U = "<<*U<<std::endl;
+            //std::cout<<"V = "<<*V<<std::endl;
+            //std::cout<<"D = "<<D<<std::endl;
+            //std::cout<<"E = "<<E<<std::endl;
+            //std::cout<<"E1 = "<<E1<<std::endl;
             if (U->iscm()) {
                 TMVAssert(V->iscm());
                 int ldu = U->stepj();
@@ -300,6 +308,7 @@ namespace tmv {
 #ifndef LAPNOWORK
                 int lwork = (3*n+4)*n;
                 AlignedArray<double> work(lwork);
+                VectorViewOf(work.get(),lwork).setZero();
                 lwork = 8*n;
                 AlignedArray<int> iwork(lwork);
 #endif
@@ -317,6 +326,7 @@ namespace tmv {
 #ifndef LAPNOWORK
                 int lwork = (3*n+4)*n;
                 AlignedArray<double> work(lwork);
+                VectorViewOf(work.get(),lwork).setZero();
                 lwork = 8*n;
                 AlignedArray<int> iwork(lwork);
 #endif
@@ -328,13 +338,22 @@ namespace tmv {
             }
         } else if (U || V) {
             char c = 'I';
-            Matrix<double,ColMajor> U1(n,n);
-            Matrix<double,ColMajor> V1(n,n);
+            Matrix<double,ColMajor> U1(n,n,0.);
+            Matrix<double,ColMajor> V1(n,n,0.);
             int ldu = U1.stepj();
             int ldv = V1.stepj();
+            //std::cout<<"U || V\n";
+            //if (U) std::cout<<"U = "<<*U<<std::endl;
+            //std::cout<<"U1 = "<<U1<<std::endl;
+            //if (V) std::cout<<"V = "<<*V<<std::endl;
+            //std::cout<<"V1 = "<<V1<<std::endl;
+            //std::cout<<"D = "<<D<<std::endl;
+            //std::cout<<"E = "<<E<<std::endl;
+            //std::cout<<"E1 = "<<E1<<std::endl;
 #ifndef LAPNOWORK
             int lwork = (3*n+4)*n;
             AlignedArray<double> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             lwork = 8*n;
             AlignedArray<int> iwork(lwork);
 #endif
@@ -346,12 +365,17 @@ namespace tmv {
             if (U) *U = *U*U1;
             if (V) *V = V1*(*V);
         } else {
+            //std::cout<<"!(U || V)\n";
+            //std::cout<<"D = "<<D<<std::endl;
+            //std::cout<<"E = "<<E<<std::endl;
+            //std::cout<<"E1 = "<<E1<<std::endl;
             int ldu = n;
             int ldv = n;
             char c = 'N';
 #ifndef LAPNOWORK
             int lwork = 4*n;
             AlignedArray<double> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             lwork = 8*n;
             AlignedArray<int> iwork(lwork);
 #endif
@@ -363,6 +387,9 @@ namespace tmv {
         }
         LAP_Results("dbdsdc");
         E = E1.subVector(0,n-1);
+        //std::cout<<"Done: D => "<<D<<std::endl;
+        //std::cout<<"E1 => "<<E1<<std::endl;
+        //std::cout<<"E => "<<E<<std::endl;
     }
     template <> 
     void LapSVDecomposeFromBidiagonal(
@@ -388,15 +415,25 @@ namespace tmv {
         int n = D.size();
         Vector<double> E1(n);
         E1.subVector(0,n-1) = E;
+        E1[n-1] = 0.;
         if (U || V) {
             char c = 'I';
-            Matrix<double,ColMajor> U1(n,n);
-            Matrix<double,ColMajor> V1(n,n);
+            Matrix<double,ColMajor> U1(n,n,0.);
+            Matrix<double,ColMajor> V1(n,n,0.);
             int ldu = U1.stepj();
             int ldv = V1.stepj();
+            //std::cout<<"U || V\n";
+            //if (U) std::cout<<"U = "<<*U<<std::endl;
+            //std::cout<<"U1 = "<<U1<<std::endl;
+            //if (V) std::cout<<"V = "<<*V<<std::endl;
+            //std::cout<<"V1 = "<<V1<<std::endl;
+            //std::cout<<"D = "<<D<<std::endl;
+            //std::cout<<"E = "<<E<<std::endl;
+            //std::cout<<"E1 = "<<E1<<std::endl;
 #ifndef LAPNOWORK
             int lwork = (3*n+4)*n;
             AlignedArray<double> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             lwork = 8*n;
             AlignedArray<int> iwork(lwork);
 #endif
@@ -417,9 +454,14 @@ namespace tmv {
             int ldu = n;
             int ldv = n;
             char c = 'N';
+            //std::cout<<"!(U || V)\n";
+            //std::cout<<"D = "<<D<<std::endl;
+            //std::cout<<"E = "<<E<<std::endl;
+            //std::cout<<"E1 = "<<E1<<std::endl;
 #ifndef LAPNOWORK
             int lwork = 4*n;
             AlignedArray<double> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             lwork = 8*n;
             AlignedArray<int> iwork(lwork);
 #endif
@@ -431,6 +473,9 @@ namespace tmv {
         }
         LAP_Results("dbdsdc");
         E = E1.subVector(0,n-1);
+        //std::cout<<"Done: D => "<<D<<std::endl;
+        //std::cout<<"E1 => "<<E1<<std::endl;
+        //std::cout<<"E => "<<E<<std::endl;
     }
 #endif
 #ifdef INST_FLOAT
@@ -453,10 +498,12 @@ namespace tmv {
             TMVAssert(V->ct()==NonConj);
             if (U && setUV) TMVAssert(U->stor() == V->stor());
         }
+
         char u = 'U';
         int n = D.size();
         Vector<float> E1(n);
         E1.subVector(0,n-1) = E;
+        E1[n-1] = 0.;
         if (setUV) {
             char c = 'I';
             TMVAssert(U && V);
@@ -467,6 +514,7 @@ namespace tmv {
 #ifndef LAPNOWORK
                 int lwork = (3*n+4)*n;
                 AlignedArray<float> work(lwork);
+                VectorViewOf(work.get(),lwork).setZero();
                 lwork = 8*n;
                 AlignedArray<int> iwork(lwork);
 #endif
@@ -484,6 +532,7 @@ namespace tmv {
 #ifndef LAPNOWORK
                 int lwork = (3*n+4)*n;
                 AlignedArray<float> work(lwork);
+                VectorViewOf(work.get(),lwork).setZero();
                 lwork = 8*n;
                 AlignedArray<int> iwork(lwork);
 #endif
@@ -495,13 +544,14 @@ namespace tmv {
             }
         } else if (U || V) {
             char c = 'I';
-            Matrix<float,ColMajor> U1(n,n);
-            Matrix<float,ColMajor> V1(n,n);
+            Matrix<float,ColMajor> U1(n,n,0.F);
+            Matrix<float,ColMajor> V1(n,n,0.F);
             int ldu = U1.stepj();
             int ldv = V1.stepj();
 #ifndef LAPNOWORK
             int lwork = (3*n+4)*n;
             AlignedArray<float> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             lwork = 8*n;
             AlignedArray<int> iwork(lwork);
 #endif
@@ -519,6 +569,7 @@ namespace tmv {
 #ifndef LAPNOWORK
             int lwork = 4*n;
             AlignedArray<float> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             lwork = 8*n;
             AlignedArray<int> iwork(lwork);
 #endif
@@ -555,15 +606,17 @@ namespace tmv {
         int n = D.size();
         Vector<float> E1(n);
         E1.subVector(0,n-1) = E;
+        E1[n-1] = 0.;
         if (U || V) {
             char c = 'I';
-            Matrix<float,ColMajor> U1(n,n);
-            Matrix<float,ColMajor> V1(n,n);
+            Matrix<float,ColMajor> U1(n,n,0.F);
+            Matrix<float,ColMajor> V1(n,n,0.F);
             int ldu = U1.stepj();
             int ldv = V1.stepj();
 #ifndef LAPNOWORK
             int lwork = (3*n+4)*n;
             AlignedArray<float> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             lwork = 8*n;
             AlignedArray<int> iwork(lwork);
 #endif
@@ -588,6 +641,7 @@ namespace tmv {
 #ifndef LAPNOWORK
             int lwork = 4*n;
             AlignedArray<float> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
             lwork = 8*n;
             AlignedArray<int> iwork(lwork);
 #endif
@@ -661,7 +715,7 @@ namespace tmv {
             dbgcout<<"A0-AA = "<<Matrix<T>(A0-AA).clip(1.e-3)<<std::endl;
             dbgcout<<"SVDecomposeFromBidiag: Norm(A0-AA) = "<<Norm(A0-AA)<<std::endl;
             dbgcout<<"cf "<<THRESH*Norm(A0)<<std::endl;
-            if (Norm(A0-AA) > THRESH*Norm(A0)) {
+            if (!(Norm(A0-AA) < THRESH*Norm(A0))) {
                 cerr<<"SV_DecomposeFromBidiagonal: \n";
                 cerr<<"input B = "<<B<<endl;
                 cerr<<"UBV = "<<A0<<endl;
@@ -791,28 +845,36 @@ namespace tmv {
                 V->rowRange(1,N) = U.rowRange(0,N-1);
                 V->col(0,1,N).setZero();
                 GetQFromQR(V->subMatrix(1,N,1,N).transpose(),Vbeta);
+                dbgcout<<"V => "<<U<<std::endl;
+                dbgcout<<"Norm(VtV-1) = "<<Norm(V->adjoint()*(*V)-T(1))<<std::endl;
+                dbgcout<<"Norm(VVt-1) = "<<Norm((*V)*V->adjoint()-T(1))<<std::endl;
             }
             if (StoreU) {
                 GetQFromQR(U,Ubeta);
+                dbgcout<<"U => "<<U<<std::endl;
+                dbgcout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<std::endl;
             }
-            dbgcout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<std::endl;
 
             if (StoreU) SV_DecomposeFromBidiagonal<T>(U,S.diag(),E.view(),V);
             else SV_DecomposeFromBidiagonal<T>(0,S.diag(),E.view(),V);
-            dbgcout<<"After DecomposeFromBidiag: Norm(UtU-1) = "<<
-                Norm(U.adjoint()*U-T(1))<<std::endl;
+            if (StoreU) {
+                dbgcout<<"After DecomposeFromBidiag: Norm(UtU-1) = "<<
+                    Norm(U.adjoint()*U-T(1))<<std::endl;
+            }
 
         }
 #ifdef XDEBUG
+        dbgcout<<"Done SVDecompose\n";
+        dbgcout<<"S = "<<S.diag()<<std::endl;
         if (StoreU && V && S.size()>0) {
             Matrix<T> A2 = U * S * (*V);
             dbgcout<<"SVDecompose: Norm(A0-A2) = "<<Norm(A0-A2)<<std::endl;
             dbgcout<<"cf "<<THRESH*Norm(U)*Norm(S)*Norm(*V)<<std::endl;
-            if (Norm(A0-A2) > THRESH * Norm(U) * Norm(S) * Norm(*V)) {
+            if (!(Norm(A0-A2) < THRESH * Norm(U) * Norm(S) * Norm(*V))) {
                 cerr<<"SV_Decompose:\n";
                 cerr<<"A = "<<A0<<endl;
                 cerr<<"U = "<<U<<endl;
-                cerr<<"S = "<<S<<endl;
+                cerr<<"S = "<<S.diag()<<endl;
                 cerr<<"V = "<<*V<<endl;
                 cerr<<"USV = "<<A2<<endl;
                 abort();

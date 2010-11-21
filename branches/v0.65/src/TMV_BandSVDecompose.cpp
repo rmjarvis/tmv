@@ -317,10 +317,15 @@ namespace tmv {
 #ifndef LAPNOWORK
         int lwork = 2*TMV_MAX(m,n);
         AlignedArray<double> work(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #endif
         // LAP version overwrites original BandMatrix with crap.
         // Hence, copy BandMatrix before running.
         BandMatrix<double,ColMajor> A2 = A;
+        if (U) U->setZero();
+        if (V) V->setZero();
+        D.setZero();
+        E.setZero();
         int lda = A2.diagstep();
         int ldu = U ? U->stepj() : 1;
         int ldv = V ? V->stepj() : 1;
@@ -379,8 +384,14 @@ namespace tmv {
         int lwork = TMV_MAX(m,n);
         AlignedArray<std::complex<double> > work(lwork);
         AlignedArray<double> rwork(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
+        VectorViewOf(rwork.get(),lwork).setZero();
 #endif
         BandMatrix<std::complex<double>,ColMajor> A2 = A;
+        if (U) U->setZero();
+        if (V) V->setZero();
+        D.setZero();
+        E.setZero();
         int lda = A2.diagstep();
         int ldu = U ? U->stepj() : 1;
         int ldv = V ? V->stepj() : 1;
@@ -445,8 +456,13 @@ namespace tmv {
 #ifndef LAPNOWORK
         int lwork = 2*TMV_MAX(m,n);
         AlignedArray<float> work(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #endif
         BandMatrix<float,ColMajor> A2 = A;
+        if (U) U->setZero();
+        if (V) V->setZero();
+        D.setZero();
+        E.setZero();
         int lda = A2.diagstep();
         int ldu = U ? U->stepj() : 1;
         int ldv = V ? V->stepj() : 1;
@@ -505,8 +521,14 @@ namespace tmv {
         int lwork = TMV_MAX(m,n);
         AlignedArray<std::complex<float> > work(lwork);
         AlignedArray<float> rwork(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
+        VectorViewOf(rwork.get(),lwork).setZero();
 #endif
         BandMatrix<std::complex<float>,ColMajor> A2 = A;
+        if (U) U->setZero();
+        if (V) V->setZero();
+        D.setZero();
+        E.setZero();
         int lda = A2.diagstep();
         int ldu = U ? U->stepj() : 1;
         int ldv = V ? V->stepj() : 1;
@@ -589,7 +611,7 @@ namespace tmv {
             Matrix<T> UBV = *U*UpperBiDiagMatrix(D,E)*(*V);
             std::cout<<"UBV = "<<UBV<<std::endl;
             std::cout<<"Norm(UBV-A0) = "<<Norm(UBV-A0)<<std::endl;
-            if (Norm(UBV-A0) > 0.001*Norm(A0)) {
+            if (!(Norm(UBV-A0) < 0.001*Norm(A0))) {
                 cerr<<"Bidiagonalize:\n";
                 cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
                 cerr<<"-> D = "<<D<<endl;

@@ -2655,9 +2655,6 @@ namespace tmv {
         inline Matrix(size_t _colsize,size_t _rowsize, const T* vv) :
             NEW_SIZE(_colsize,_rowsize)
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             std::copy(vv,vv+linsize,itsm.get());
         }
@@ -2666,9 +2663,6 @@ namespace tmv {
             size_t _colsize, size_t _rowsize, const std::vector<T>& vv) : 
             NEW_SIZE(_colsize,_rowsize)
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(vv.size() == linsize);
             std::copy(vv.begin(),vv.end(),itsm.get());
@@ -2678,9 +2672,6 @@ namespace tmv {
 
         inline Matrix(const type& rhs) : NEW_SIZE(rhs.colsize(),rhs.rowsize())
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             std::copy(rhs.cptr(),rhs.cptr()+linsize,itsm.get());
         }
@@ -2689,9 +2680,6 @@ namespace tmv {
         inline Matrix(const Matrix<T,S,I2>& rhs) :
             NEW_SIZE(rhs.colsize(),rhs.rowsize())
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             std::copy(rhs.cptr(),rhs.cptr()+linsize,itsm.get());
         }
@@ -2699,9 +2687,6 @@ namespace tmv {
         inline Matrix(const GenMatrix<RT>& rhs) :
             NEW_SIZE(rhs.colsize(),rhs.rowsize())
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             rhs.assignToM(view());
         }
@@ -2709,9 +2694,6 @@ namespace tmv {
         inline Matrix(const GenMatrix<CT>& rhs) :
             NEW_SIZE(rhs.colsize(),rhs.rowsize())
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(isComplex(T()));
             rhs.assignToM(view());
@@ -2721,9 +2703,6 @@ namespace tmv {
         inline Matrix(const GenMatrix<T2>& rhs) :
             NEW_SIZE(rhs.colsize(),rhs.rowsize()) 
         { 
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(isComplex(T()) || isReal(T2()));
             TMVAssert(S==RowMajor || S==ColMajor);
             Copy(rhs,view()); 
@@ -2732,9 +2711,6 @@ namespace tmv {
         inline Matrix(const AssignableToMatrix<RT>& m2) :
             NEW_SIZE(m2.colsize(),m2.rowsize())
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             m2.assignToM(view());
         }
@@ -2742,9 +2718,6 @@ namespace tmv {
         inline Matrix(const AssignableToMatrix<CT>& m2) :
             NEW_SIZE(m2.colsize(),m2.rowsize())
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(isComplex(T()));
             m2.assignToM(view());
@@ -2753,9 +2726,6 @@ namespace tmv {
         inline Matrix(const Permutation& m2) :
             NEW_SIZE(m2.colsize(),m2.rowsize())
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             m2.assignToM(view());
         }
@@ -2764,9 +2734,6 @@ namespace tmv {
         inline Matrix(const SmallMatrix<T2,M,N,S2,I2>& rhs) :
             NEW_SIZE(rhs.colsize(),rhs.rowsize()) 
         { 
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(isComplex(T()) || isReal(T2()));
             TMVAssert(S==RowMajor || S==ColMajor);
             Copy(rhs.view(),view()); 

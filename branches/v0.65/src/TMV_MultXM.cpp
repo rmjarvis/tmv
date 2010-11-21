@@ -122,7 +122,7 @@ namespace tmv {
         for(size_t i=0;i<A.colsize();i++)
             for(size_t j=0;j<A.rowsize();j++)
                 diff(i,j) = A(i,j) - A2(i,j);
-        if (Norm(diff) > 0.001*TMV_ABS(alpha)*Norm(A)) {
+        if (!Norm(diff) <= 0.001*TMV_ABS(alpha)*Norm(A))) {
             cerr<<"MultXM: alpha = "<<alpha<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"-> A = "<<A<<endl;

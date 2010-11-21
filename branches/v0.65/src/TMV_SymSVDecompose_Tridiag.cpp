@@ -32,7 +32,6 @@
 
 //#define XDEBUG
 
-
 #include "TMV_Blas.h"
 #include "TMV_SymSVDiv.h"
 #include "TMV_Householder.h"
@@ -50,9 +49,6 @@ using std::cout;
 using std::cerr;
 using std::endl;
 #endif
-//#ifdef LAP 
-//#undef LAP
-//#endif
 
 #ifdef TMV_BLOCKSIZE
 #define SYM_TRIDIAG_BLOCKSIZE TMV_BLOCKSIZE
@@ -279,19 +275,25 @@ namespace tmv {
 
         int n = A.size();
         int ldu = A.stepj();
+        beta.setZero();
+        D.setZero();
+        E.setZero();
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
         AlignedArray<double> work(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #else
         int lwork = -1;
         AlignedArray<double> work(1);
+        work.get()[0] = 0.;
         LAPNAME(dsytrd) (
             LAPCM LAPCH_LO,LAPV(n),
             LAPP(A.ptr()),LAPV(ldu),LAPP(D.ptr()),LAPP(E.ptr()),
             LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
         lwork = int(work[0]);
         work.resize(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
         LAPNAME(dsytrd) (
@@ -338,19 +340,25 @@ namespace tmv {
 
         int n = A.size();
         int ldu = A.stepj();
+        beta.setZero();
+        D.setZero();
+        E.setZero();
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
         AlignedArray<std::complex<double> > work(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #else
         int lwork = -1;
         AlignedArray<std::complex<double> > work(1);
+        work.get()[0] = 0.;
         LAPNAME(zhetrd) (
             LAPCM LAPCH_LO,LAPV(n),
             LAPP(A.ptr()),LAPV(ldu),LAPP(D.ptr()),LAPP(E.ptr()),
             LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
         lwork = int(TMV_REAL(work[0]));
         work.resize(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
         //std::cout<<"Before zhetrd\n";
@@ -389,19 +397,25 @@ namespace tmv {
 
         int n = A.size();
         int ldu = A.stepj();
+        beta.setZero();
+        D.setZero();
+        E.setZero();
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
         AlignedArray<float> work(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #else
         int lwork = -1;
         AlignedArray<float> work(1);
+        work.get()[0] = 0.F;
         LAPNAME(ssytrd) (
             LAPCM LAPCH_LO,LAPV(n),
             LAPP(A.ptr()),LAPV(ldu),LAPP(D.ptr()),LAPP(E.ptr()),
             LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
         lwork = int(work[0]);
         work.resize(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
         LAPNAME(ssytrd) (
@@ -436,25 +450,42 @@ namespace tmv {
 
         int n = A.size();
         int ldu = A.stepj();
+        beta.setZero();
+        D.setZero();
+        E.setZero();
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
         AlignedArray<std::complex<float> > work(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #else
         int lwork = -1;
         AlignedArray<std::complex<float> > work(1);
+        work.get()[0] = 0.F;
         LAPNAME(chetrd) (
             LAPCM LAPCH_LO,LAPV(n),
             LAPP(A.ptr()),LAPV(ldu),LAPP(D.ptr()),LAPP(E.ptr()),
             LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
         lwork = int(TMV_REAL(work[0]));
         work.resize(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
+        std::cout<<"Start LapTridiagonalize:\n";
+        std::cout<<"A = "<<TMV_Text(A)<<std::endl;
+        std::cout<<"beta = "<<TMV_Text(beta)<<"  "<<beta<<std::endl;
+        std::cout<<"D = "<<TMV_Text(D)<<"  "<<D<<std::endl;
+        std::cout<<"E = "<<TMV_Text(E)<<"  "<<E<<std::endl;
+        std::cout<<"n = "<<n<<std::endl;
+        std::cout<<"ldu = "<<ldu<<std::endl;
+        std::cout<<"lwork = "<<lwork<<std::endl;
+        std::cout<<"work = "<<VectorViewOf(work.get(),lwork)<<std::endl;
+        std::cout<<"Before chetrd"<<std::endl;
         LAPNAME(chetrd) (
             LAPCM LAPCH_LO,LAPV(n),
             LAPP(A.ptr()),LAPV(ldu),LAPP(D.ptr()),LAPP(E.ptr()),
             LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
+        std::cout<<"After chetrd"<<std::endl;
         if (!A.isconj()) beta.conjugateSelf();
 #ifdef LAPNOWORK
         LAP_Results("chetrd");
@@ -522,7 +553,7 @@ namespace tmv {
                 // GetQFromQR function can handle.  I should really write a 
                 // version that can handle that, so I can call LAPACK in
                 // that case as well.
-                if (A.iscm() && (A.isherm())) {
+                if (A.iscm() && A.isherm()) {
                     TMVAssert(isReal(Td()));
                     if (D.step() != 1) {
                         Vector<Td> Dx(D.size());
@@ -539,43 +570,44 @@ namespace tmv {
                     } else {
                         LapTridiagonalize(A,beta,D,E,d);
                     }
-                }
-                else 
+                } else {
                     NonLapTridiagonalize(A,beta.subVector(0,A.size()-1),D,E,d);
+                }
 #else // LAP
                 NonLapTridiagonalize(A,beta,D,E,d);
 #endif
 
 #ifdef XDEBUG
                 const int N = A.size();
-                Matrix<T> AA(N,N,T(0));
-                for(int j=N-1;j>0;--j) AA.col(j,j,N) = A.col(j-1,j,N);
-                AA(0,0) = T(1);
-                GetQFromQR(AA.subMatrix(1,N,1,N),beta.subVector(0,N-1));
+                Matrix<T> UU(N,N,T(0));
+                for(int j=N-1;j>0;--j) UU.col(j,j,N) = A.col(j-1,j,N);
+                UU(0,0) = T(1);
+                GetQFromQR(UU.subMatrix(1,N,1,N),beta.subVector(0,N-1));
                 Matrix<T> TT(N,N,T(0));
                 TT.diag() = D; TT.diag(1) = TT.diag(-1) = E;
-                Matrix<T> A3 = AA*TT*(A.isherm() ? AA.adjoint() : AA.transpose());
-                if (Norm(A3-A0) > 0.001*Norm(A0)) {
+                Matrix<T> A3 = UU*TT*(A.isherm() ? UU.adjoint() : UU.transpose());
+                if (!(Norm(A3-A0) < 0.001*Norm(A0))) {
                     cerr<<"Tridiagonalize: \n";
                     cerr<<"A0 = "<<TMV_Text(A)<<endl;
-                    //cerr<<"  "<<A0<<endl;
-                    //cerr<<"Done: A = "<<A<<endl;
-                    //cerr<<"beta = "<<beta<<endl;
-                    //cerr<<"UU = "<<AA<<endl;
+                    cerr<<"  "<<A0<<endl;
+                    cerr<<"Done: A = "<<A<<endl;
+                    cerr<<"beta = "<<beta<<endl;
+                    cerr<<"UU = "<<UU<<endl;
                     cerr<<"D = "<<D<<endl;
                     cerr<<"E = "<<E<<endl;
-                    //cerr<<"TT = "<<TT<<endl;
-                    //cerr<<"UU * TT * UUt = "<<A3<<endl;
+                    cerr<<"TT = "<<TT<<endl;
+                    cerr<<"UU * TT * UUt = "<<A3<<endl;
+                    cerr<<"Norm(diff) = "<<Norm(A0-A3)<<std::endl;
                     cerr<<"NonBlock versions:\n";
-                    //if (A.isherm())
-                    //cerr<<"A2 = "<<HermMatrixViewOf(A2,Lower)<<endl;
-                    //else
-                    //cerr<<"A2 = "<<SymMatrixViewOf(A2,Lower)<<endl;
-                    //cerr<<"cf. A = "<<A<<endl;
-                    //cerr<<"A2 - A = "<<A2-A<<endl;
+                    if (A.isherm())
+                        cerr<<"A2 = "<<HermMatrixViewOf(A2,Lower)<<endl;
+                    else
+                        cerr<<"A2 = "<<SymMatrixViewOf(A2,Lower)<<endl;
+                    cerr<<"cf. A = "<<A<<endl;
+                    cerr<<"A2 - A = "<<A2-A<<endl;
                     cerr<<"Norm(A2-A) = "<<Norm(A2-A)<<endl;
-                    //cerr<<"beta2 = "<<b2<<endl;
-                    //cerr<<"beta = "<<beta<<endl;
+                    cerr<<"beta2 = "<<b2<<endl;
+                    cerr<<"beta = "<<beta<<endl;
                     cerr<<"Norm(beta2-beta) = "<<
                         Norm(b2-beta.subVector(0,b2.size()))<<endl;
                     cerr<<"D2 = "<<D2<<endl;

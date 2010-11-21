@@ -144,7 +144,8 @@ namespace tmv {
         int lda = A.isrm()?A.stepi():A.stepj();
         int ldb = B.isrm()?B.stepi():B.stepj();
         int ldc = C.stepj();
-        double xbeta(beta);
+        if (beta == 0) C.setZero();
+        double xbeta(1);
         BLASNAME(dgemm) (
             BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
             B.iscm()?BLASCH_NT:BLASCH_T,
@@ -184,7 +185,8 @@ namespace tmv {
             int lda = A.isrm()?A.stepi():A.stepj();
             int ldb = B.isrm()?B.stepi():B.stepj();
             int ldc = C.stepj();
-            std::complex<double> xbeta(beta);
+            if (beta == 0) C.setZero();
+            std::complex<double> xbeta(1);
             BLASNAME(zgemm) (
                 BLASCM A.iscm()?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
                 B.iscm()?BLASCH_NT:B.isconj()?BLASCH_CT:BLASCH_T,
@@ -221,7 +223,8 @@ namespace tmv {
             int ldc = 2*C.stepj();
             if (beta == 0) {
                 double xalpha(1);
-                double xbeta(0);
+                C.setZero();
+                double xbeta(1);
                 BLASNAME(dgemm) (
                     BLASCM BLASCH_NT, B.iscm()?BLASCH_NT:BLASCH_T,
                     BLASV(m),BLASV(n),BLASV(k),BLASV(xalpha),
@@ -233,7 +236,7 @@ namespace tmv {
                 C *= alpha;
             } else {
                 double xalpha(TMV_REAL(alpha));
-                double xbeta(beta);
+                double xbeta(1);
                 BLASNAME(dgemm) (
                     BLASCM BLASCH_NT, B.iscm()?BLASCH_NT:BLASCH_T,
                     BLASV(m),BLASV(n),BLASV(k),BLASV(xalpha),
@@ -365,7 +368,8 @@ namespace tmv {
         int lda = A.isrm()?A.stepi():A.stepj();
         int ldb = B.isrm()?B.stepi():B.stepj();
         int ldc = C.stepj();
-        float xbeta(beta);
+        if (beta == 0) C.setZero();
+        float xbeta(1);
         //std::cout<<"Before sgemm"<<std::endl;
         //std::cout<<"A = "<<TMV_Text(A)<<std::endl;
         //std::cout<<"B = "<<TMV_Text(B)<<std::endl;
@@ -415,7 +419,8 @@ namespace tmv {
             int lda = A.isrm()?A.stepi():A.stepj();
             int ldb = B.isrm()?B.stepi():B.stepj();
             int ldc = C.stepj();
-            std::complex<float> xbeta(beta);
+            if (beta == 0) C.setZero();
+            std::complex<float> xbeta(1);
             //std::cout<<"Before cgemm"<<std::endl;
             BLASNAME(cgemm) (
                 BLASCM A.iscm()?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
@@ -452,19 +457,10 @@ namespace tmv {
             int lda = 2*A.stepj();
             int ldb = B.isrm()?B.stepi():B.stepj();
             int ldc = 2*C.stepj();
-            if (TMV_IMAG(alpha)==0.F) {
-                float xalpha(TMV_REAL(alpha));
-                float xbeta(beta);
-                BLASNAME(sgemm) (
-                    BLASCM BLASCH_NT, B.iscm()?BLASCH_NT:BLASCH_T,
-                    BLASV(m),BLASV(n),BLASV(k),BLASV(xalpha),
-                    BLASP((const float*)(A.cptr())),BLASV(lda),
-                    BLASP(B.cptr()),BLASV(ldb),
-                    BLASV(xbeta),BLASP((float*)(C.ptr())),BLASV(ldc) 
-                    BLAS1 BLAS1);
-            } else { // beta == 0
+            if (beta == 0) {
                 float xalpha(1);
-                float xbeta(0);
+                C.setZero();
+                float xbeta(1);
                 BLASNAME(sgemm) (
                     BLASCM BLASCH_NT, B.iscm()?BLASCH_NT:BLASCH_T,
                     BLASV(m),BLASV(n),BLASV(k),BLASV(xalpha),
@@ -473,7 +469,17 @@ namespace tmv {
                     BLASV(xbeta),BLASP((float*)(C.ptr())),BLASV(ldc) 
                     BLAS1 BLAS1);
                 C *= alpha;
-            } 
+            } else {
+                float xalpha(TMV_REAL(alpha));
+                float xbeta(1);
+                BLASNAME(sgemm) (
+                    BLASCM BLASCH_NT, B.iscm()?BLASCH_NT:BLASCH_T,
+                    BLASV(m),BLASV(n),BLASV(k),BLASV(xalpha),
+                    BLASP((const float*)(A.cptr())),BLASV(lda),
+                    BLASP(B.cptr()),BLASV(ldb),
+                    BLASV(xbeta),BLASP((float*)(C.ptr())),BLASV(ldc) 
+                    BLAS1 BLAS1);
+            }
         } else {
             if (TMV_IMAG(alpha) == 0.F) {
                 Matrix<float,ColMajor> A1 = A.realPart();
@@ -710,8 +716,9 @@ namespace tmv {
         cout<<"Norm(A0) = "<<Norm(A0)<<std::endl;
         cout<<"Norm(B0) = "<<Norm(B0)<<std::endl;
         cout<<"Norm(C0) = "<<Norm(C0)<<std::endl;
-        if (Norm(C2-C) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
-                                (add?Norm(C0):TMV_RealType(T)(0)))) {
+        if (!(Norm(C2-C) <= 
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
+                     (add?Norm(C0):TMV_RealType(T)(0))))) {
             cerr<<"MultMM: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;

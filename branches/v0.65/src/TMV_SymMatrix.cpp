@@ -782,7 +782,9 @@ namespace tmv {
         int N = m.size();
         int lda = m.iscm() ? m.stepj() : m.stepi();
 #ifndef LAPNOWORK
-        AlignedArray<double> work(c == '1' ? N : 0);
+        int lwork = c=='1' ? N : 0;
+        AlignedArray<double> work(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #endif
         double norm = LAPNAME(dlansy) (
             LAPCM LAPV(cc),
@@ -798,7 +800,9 @@ namespace tmv {
         int N = m.size();
         int lda = m.iscm() ? m.stepj() : m.stepi();
 #ifndef LAPNOWORK
-        AlignedArray<double> work(c == '1' ? N : 0);
+        int lwork = c=='1' ? N : 0;
+        AlignedArray<double> work(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #endif
         double norm = m.isherm() ?
             LAPNAME(zlanhe) (
@@ -821,7 +825,9 @@ namespace tmv {
         int N = m.size();
         int lda = m.iscm() ? m.stepj() : m.stepi();
 #ifndef LAPNOWORK
-        AlignedArray<float> work(c == '1' ? N : 0);
+        int lwork = c=='1' ? N : 0;
+        AlignedArray<float> work(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #endif
         float norm = LAPNAME(slansy) (
             LAPCM LAPV(cc),
@@ -837,7 +843,9 @@ namespace tmv {
         int N = m.size();
         int lda = m.iscm() ? m.stepj() : m.stepi();
 #ifndef LAPNOWORK
-        AlignedArray<float> work(c == '1' ? N : 0);
+        int lwork = c=='1' ? N : 0;
+        AlignedArray<float> work(lwork);
+        VectorViewOf(work.get(),lwork).setZero();
 #endif
         float norm = m.isherm() ?
             LAPNAME(clanhe) (

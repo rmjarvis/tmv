@@ -242,7 +242,8 @@ namespace tmv {
         int lda = A.stepj();
         int ldb = B.iscm()?B.stepj():B.stepi();
         int ldc = C.iscm()?C.stepj():C.stepi();
-        double xbeta(beta);
+        if (beta == 0) C.setZero();
+        double xbeta(1);
         BLASNAME(dsymm) (
             BLASCM C.isrm()?BLASCH_R:BLASCH_L,
             A.uplo() == Upper ? BLASCH_UP : BLASCH_LO,
@@ -278,7 +279,8 @@ namespace tmv {
         int lda = A.stepj();
         int ldb = B.iscm()?B.stepj():B.stepi();
         int ldc = C.iscm()?C.stepj():C.stepi();
-        std::complex<double> xbeta(beta);
+        if (beta == 0) C.setZero();
+        std::complex<double> xbeta(1);
         if (A.issym())
             BLASNAME(zsymm) (
                 BLASCM C.isrm()?BLASCH_R:BLASCH_L,
@@ -320,7 +322,8 @@ namespace tmv {
         int lda = A.stepj();
         int ldb = B.iscm()?B.stepj():B.stepi();
         int ldc = C.iscm()?C.stepj():C.stepi();
-        float xbeta(beta);
+        if (beta == 0) C.setZero();
+        float xbeta(1);
         BLASNAME(ssymm) (
             BLASCM C.isrm()?BLASCH_R:BLASCH_L,
             A.uplo() == Upper ? BLASCH_UP : BLASCH_LO,
@@ -356,7 +359,8 @@ namespace tmv {
         int lda = A.stepj();
         int ldb = B.iscm()?B.stepj():B.stepi();
         int ldc = C.iscm()?C.stepj():C.stepi();
-        std::complex<float> xbeta(beta);
+        if (beta == 0) C.setZero();
+        std::complex<float> xbeta(1);
         if (A.issym())
             BLASNAME(csymm) (
                 BLASCM C.isrm()?BLASCH_R:BLASCH_L,
@@ -718,8 +722,9 @@ namespace tmv {
 
 #ifdef XDEBUG
         //cout<<"Done: C = "<<C<<endl;
-        if (Norm(C-C2) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
-                                (add?Norm(C0):TMV_RealType(T)(0)))) {
+        if (!(Norm(C-C2) <= 
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
+                     (add?Norm(C0):TMV_RealType(T)(0))))) {
             cerr<<"MultMM: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
@@ -827,8 +832,9 @@ namespace tmv {
 
 #ifdef XDEBUG
         //cout<<"done: C = "<<C<<endl;
-        if (Norm(C-C2) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
-                                (add?Norm(C0):TMV_RealType(T)(0)))) {
+        if (!(Norm(C-C2) <= 
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
+                     (add?Norm(C0):TMV_RealType(T)(0))))) {
             cerr<<"MultMM: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;

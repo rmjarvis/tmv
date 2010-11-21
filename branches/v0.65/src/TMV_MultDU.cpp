@@ -127,7 +127,8 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
-        if (Norm(Matrix<T>(B)-B2) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0))) {
+        if (!(Norm(Matrix<T>(B)-B2) <= 
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)))) {
             cerr<<"MultEqMM: alpha = "<<alpha<<endl;
             cerr<<"A = "<<TMV_Text(A)<<" step "<<A.diag().step()<<"  "<<A0<<endl;
             cerr<<"B = "<<TMV_Text(B)<<"  "<<B0<<endl;
@@ -246,8 +247,8 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
-        if (Norm(Matrix<T>(C)-C2) > 0.001*(
-                TMV_ABS(alpha)*Norm(A0)*Norm(B0)+Norm(C0))) {
+        if (!(Norm(Matrix<T>(C)-C2) <= 
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+Norm(C0)))) {
             cerr<<"AddMultMM: alpha = "<<alpha<<endl;
             cerr<<"A = "<<TMV_Text(A)<<" step "<<A.diag().step()<<
                 "  "<<A0<<endl;
@@ -305,8 +306,9 @@ namespace tmv {
             }
         }
 #ifdef XDEBUG
-        if (Norm(Matrix<T>(C)-C2) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
-                                           add?Norm(C0):TMV_RealType(T)(0))) {
+        if (!(Norm(Matrix<T>(C)-C2) <= 
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
+                     add?Norm(C0):TMV_RealType(T)(0)))) {
             cerr<<"MultMM: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<TMV_Text(A)<<" step "<<A.diag().step()<<
@@ -398,7 +400,8 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
-        if (Norm(Matrix<T>(B)-B2) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0))) {
+        if (1(Norm(Matrix<T>(B)-B2) <= 
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)))) {
             cerr<<"MultEqMM: alpha = "<<alpha<<endl;
             cerr<<"A = "<<TMV_Text(A)<<" step "<<A.diag().step()<<"  "<<A0<<endl;
             cerr<<"B = "<<TMV_Text(B)<<"  "<<B0<<endl;
@@ -517,8 +520,8 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
-        if (Norm(Matrix<T>(C)-C2) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
-                                           + Norm(C0))) {
+        if (!(Norm(Matrix<T>(C)-C2) <=
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+Norm(C0)))) {
             cerr<<"AddMultMM: alpha = "<<alpha<<endl;
             cerr<<"A = "<<TMV_Text(A)<<" step "<<A.diag().step()<<
                 "  "<<A0<<endl;
@@ -576,8 +579,9 @@ namespace tmv {
             }
         }
 #ifdef XDEBUG
-        if (Norm(Matrix<T>(C)-C2) > 0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
-                                           add?Norm(C0):TMV_RealType(T)(0))) {
+        if (!(Norm(Matrix<T>(C)-C2) <= 
+              0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
+                     add?Norm(C0):TMV_RealType(T)(0)))) {
             cerr<<"MultMM: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"A = "<<TMV_Text(A)<<" step "<<A.diag().step()<<"  "<<A0<<endl;

@@ -244,7 +244,7 @@ namespace tmv {
             //std::cout<<"A0 = "<<A0<<std::endl;
             //std::cout<<"A2-A0 = "<<A2-A0<<std::endl;
             std::cout<<"Norm(A2-A0) = "<<Norm(A2-A0)<<std::endl;
-            if (Norm(A2-A0) > THRESH*Norm(A0)) {
+            if (!(Norm(A2-A0) < THRESH*Norm(A0))) {
                 cerr<<"Reduce Tridiagonal:\n";
                 cerr<<"A0 = "<<A0<<endl;
                 cerr<<"A2 = "<<A2<<endl;
@@ -316,7 +316,7 @@ namespace tmv {
             Matrix<T> A2 = *U * TT * U->adjoint();
             std::cout<<"Done QR: Norm(A2-A0) = "<<Norm(A2-A0)<<std::endl;
             std::cout<<"cf. Norm(A0) = "<<Norm(A0)<<std::endl;
-            if (Norm(A2-A0) > THRESH*Norm(A0)) {
+            if (!(Norm(A2-A0) < THRESH*Norm(A0))) {
                 cerr<<"Decompose from Tridiagonal QR:\n";
                 cerr<<"A0 = "<<A0<<endl;
                 cerr<<"A2 = "<<A2<<endl;

@@ -1020,7 +1020,9 @@ namespace tmv {
             int noff = m.nlo();
             int lda = m.diagstep();
 #ifndef LAPNOWORK
-            AlignedArray<double> work(c == '1' ? N : 0);
+            int lwork = c=='1' ? N : 0;
+            AlignedArray<double> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #endif
             const double* mp = m.cptr();
             if (m.uplo()==Upper) mp -= m.nhi();
@@ -1042,7 +1044,9 @@ namespace tmv {
             int noff = m.nlo();
             int lda = m.diagstep();
 #ifndef LAPNOWORK
-            AlignedArray<double> work(c == '1' ? N : 0);
+            int lwork = c=='1' ? N : 0;
+            AlignedArray<double> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #endif
             const std::complex<double>* mp = m.cptr();
             if (m.uplo()==Upper) mp -= m.nhi();
@@ -1071,7 +1075,9 @@ namespace tmv {
             int noff = m.nlo();
             int lda = m.diagstep();
 #ifndef LAPNOWORK
-            AlignedArray<float> work(c == '1' ? N : 0);
+            int lwork = c=='1' ? N : 0;
+            AlignedArray<float> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #endif
             const float* mp = m.cptr();
             if (m.uplo()==Upper) mp -= m.nhi();
@@ -1093,7 +1099,9 @@ namespace tmv {
             int noff = m.nlo();
             int lda = m.diagstep();
 #ifndef LAPNOWORK
-            AlignedArray<float> work(c == '1' ? N : 0);
+            int lwork = c=='1' ? N : 0;
+            AlignedArray<float> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
 #endif
             const std::complex<float>* mp = m.cptr();
             if (m.uplo()==Upper) mp -= m.nhi();

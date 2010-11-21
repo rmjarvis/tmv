@@ -58,6 +58,11 @@ namespace tmv {
         // Solve Q R P x = m
         // where Q and R are stored in QRx, and beta are the beta
 
+        //std::cout<<"Start QR_LDiv"<<std::endl;
+        //std::cout<<"Norm(QRx) = "<<Norm(QRx)<<std::endl;
+        //std::cout<<"Norm(beta) = "<<Norm(beta)<<std::endl;
+        //std::cout<<"Norm(m) = "<<Norm(m)<<std::endl;
+
         // First Solve Q y = m
         if (QRx.isSquare()) {
             x = m;
@@ -81,11 +86,15 @@ namespace tmv {
 
         // Now solve R z = y
         x.rowRange(N1,x.colsize()).setZero();
+        //std::cout<<"1 Norm(x) = "<<Norm(x)<<std::endl;
+
         //x.rowRange(0,N1) /= QRx.upperTri().subTriMatrix(0,N1);
         QRx.upperTri().subTriMatrix(0,N1).LDivEq(x.rowRange(0,N1));
+        //std::cout<<"2 Norm(x) = "<<Norm(x)<<std::endl;
 
         // Finally P x = z
         if (P) x.reversePermuteRows(P);
+        //std::cout<<"3 Norm(x) = "<<Norm(x)<<std::endl;
     }
 
     //
@@ -108,7 +117,7 @@ namespace tmv {
         Q_LDivEq(QRx,beta,m);
         m.rowRange(N1,m.colsize()).setZero();
         //m.rowRange(0,N1) /= QRx.upperTri().subTriMatrix(0,N1);
-        QRx.upperTri().subTriMatrix(0,N1).LDivEq(m.rowRange(0,N1));;
+        QRx.upperTri().subTriMatrix(0,N1).LDivEq(m.rowRange(0,N1));
         if (P) m.reversePermuteRows(P);
     }
 
@@ -132,6 +141,10 @@ namespace tmv {
 
         // Solve x Q R P = m
         // where Q and R are stored in QRx, and beta are the beta
+        //std::cout<<"Start QR_RDiv"<<std::endl;
+        //std::cout<<"Norm(QRx) = "<<Norm(QRx)<<std::endl;
+        //std::cout<<"Norm(beta) = "<<Norm(beta)<<std::endl;
+        //std::cout<<"Norm(m) = "<<Norm(m)<<std::endl;
 
         // First solve y P = m
         x.colRange(0,m.rowsize()) = m;
@@ -139,8 +152,11 @@ namespace tmv {
 
         // Next solve z R = y by forward substitution
         x.colRange(N1,x.rowsize()).setZero();
+        //std::cout<<"1 Norm(x) = "<<Norm(x)<<std::endl;
+
         //x.colRange(0,N1) %= QRx.upperTri().subTriMatrix(0,N1);
-        QRx.upperTri().subTriMatrix(0,N1).RDivEq(x.colRange(0,N1));;
+        QRx.upperTri().subTriMatrix(0,N1).RDivEq(x.colRange(0,N1));
+        //std::cout<<"2 Norm(x) = "<<Norm(x)<<std::endl;
 
         // Finally solve x Q = z
         // Q = Q1 [ I ]
@@ -149,6 +165,7 @@ namespace tmv {
         // We've already dealt with the first part by zeroing out the 
         // right columns of x.
         Q_RDivEq(QRx,beta,x);
+        //std::cout<<"3 Norm(x) = "<<Norm(x)<<std::endl;
     }
 
     //

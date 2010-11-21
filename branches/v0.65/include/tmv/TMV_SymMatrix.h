@@ -3395,6 +3395,8 @@ namespace tmv {
             TMVAssert(S==RowMajor || S==ColMajor);
 #ifdef TMVDEBUG
             setAllTo(T(888));
+#else
+            if (isComplex(T())) diag().imagPart().setZero();
 #endif
         }
 
@@ -4408,6 +4410,8 @@ namespace tmv {
 #endif
 #ifdef TMVDEBUG
             setAllTo(T(888));
+#else
+            if (isComplex(T())) diag().imagPart().setZero();
 #endif
         }
 

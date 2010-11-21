@@ -210,7 +210,7 @@ namespace tmv {
         Matrix<T> U = A.upperTri();
         Matrix<T> AA = L * U;
         AA.reversePermuteRows(P,0,R);
-        if (Norm(AA-A0) > 0.001*Norm(A0) && TMV_Underflow(Norm(A0))) {
+        if (!(Norm(AA-A0) < 0.001*Norm(A0)) && !TMV_Underflow(Norm(A0))) {
             cerr<<"Done NonBlock LU: \n";
             cerr<<"A0 = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"LU = "<<A<<endl;
@@ -393,7 +393,7 @@ namespace tmv {
         Matrix<T> U = A.upperTri();
         Matrix<T> AA = L * U;
         AA.reversePermuteRows(P,0,R);
-        if (Norm(AA-A_0) > 0.001*Norm(A_0) && TMV_Underflow(Norm(A_0))) {
+        if (!(Norm(AA-A_0) < 0.001*Norm(A_0)) && !TMV_Underflow(Norm(A_0))) {
             cerr<<"Done Recursive LU: \n";
             cerr<<"A0 = "<<A_0<<endl;
             cerr<<"LU = "<<A<<endl;
@@ -539,7 +539,7 @@ namespace tmv {
         A2.reversePermuteRows(P);
         std::cout<<"Norm(A0-A2) = "<<Norm(A0-A2)<<std::endl;
         typedef TMV_RealType(T) RT;
-        if (Norm(A2-A0) > 0.001*Norm(A0) && TMV_Underflow(Norm(A0))) {
+        if (!(Norm(A2-A0) < 0.001*Norm(A0)) && !TMV_Underflow(Norm(A0))) {
             cerr<<"Done LU_Decompose: \n";
             cerr<<"A0 = "<<A0<<endl;
             cerr<<"LU = "<<A<<endl;

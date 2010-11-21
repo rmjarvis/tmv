@@ -208,6 +208,35 @@ namespace tmv
 
     };
 
+#ifdef TMV_INITIALIZE_NAN
+    // This option is to stress test the code to make sure it works
+    // ok if uninitialized data happens to have a nan in it.
+    // Naive BLAS calls can fail when there are nan's, since it recasts
+    // the equation y = A*x as y = beta*y + alpha*A*x with alpha=1 and
+    // beta=0.  So if y initially has nan's, then the beta*y
+    // part has 0*nan => nan, which is then added to whatever 
+    // alpha*A*x has, so stays nan on output.
+    // TMV should be accounting for this kind of thing correctly, and 
+    // this section here helps test for it.
+    template <class T>
+    struct TMV_Nan 
+    {
+        static inline T get() 
+        { 
+            static T zero(0);
+            static T nan = 
+                std::numeric_limits<T>::is_integer ? zero : zero/zero;
+            return nan; 
+        }
+    };
+    template <class T>
+    struct TMV_Nan<std::complex<T> >
+    {
+        static inline std::complex<T> get()
+        { return std::complex<T>(TMV_Nan<T>::get(),TMV_Nan<T>::get()); }
+    };
+#endif
+
     // Now the actual class that makes AlignedMemory work like a normal 
     // pointer.
     template <class T>
@@ -223,6 +252,10 @@ namespace tmv
         {
             //std::cout<<"AA Sized constructor: n = "<<n<<"  "<<&p<<std::endl;
             p.allocate(n); 
+#ifdef TMV_INITIALIZE_NAN
+            for(size_t i=0;i<n;++i)
+                get()[i] = TMV_Nan<T>::get();
+#endif
         }
         inline ~AlignedArray() 
         { 
@@ -239,7 +272,15 @@ namespace tmv
         inline operator const T*() const { return get(); }
 
         inline void swapWith(AlignedArray<T>& rhs) { p.swapWith(rhs.p); }
-        inline void resize(const size_t n) { p.deallocate(); p.allocate(n); }
+        inline void resize(const size_t n) 
+        { 
+            p.deallocate(); 
+            p.allocate(n); 
+#ifdef TMV_INITIALIZE_NAN
+            for(size_t i=0;i<n;++i)
+                get()[i] = TMV_Nan<T>::get();
+#endif
+        }
 
         inline T* get() { return p.get(); }
         inline const T* get() const  { return p.get(); }
@@ -266,6 +307,10 @@ namespace tmv
         { 
             //std::cout<<"CAA Sized constructor: n = "<<n<<"  "<<&p<<std::endl;
             p.allocate(n<<1); 
+#ifdef TMV_INITIALIZE_NAN
+            for(size_t i=0;i<n;++i)
+                get()[i] = TMV_Nan<std::complex<RT> >::get();
+#endif
         }
         inline ~AlignedArray() 
         {
@@ -282,7 +327,15 @@ namespace tmv
         inline operator const T*() const { return get(); }
 
         inline void swapWith(AlignedArray<T>& rhs) { p.swapWith(rhs.p); }
-        inline void resize(const size_t n) { p.deallocate(); p.allocate(n<<1); }
+        inline void resize(const size_t n) 
+        { 
+            p.deallocate();
+            p.allocate(n<<1); 
+#ifdef TMV_INITIALIZE_NAN
+            for(size_t i=0;i<n;++i)
+                get()[i] = TMV_Nan<std::complex<RT> >::get();
+#endif
+        }
 
         inline T* get() { return reinterpret_cast<T*>(p.get()); }
         inline const T* get() const 
@@ -303,7 +356,7 @@ namespace tmv
     // since this will always align __m128 objects on 16 byte boundaries.
     // So the way to get float or double aligned is simply to union
     // the array with one of these.
-    
+
     // Another wrinkle though is that we don't actually want to use the
     // stack for very large arrays, since it will crash.  And very small
     // arrays don't need the alignement.
@@ -418,7 +471,13 @@ namespace tmv
     class StackArray
     {
     public :
-        inline StackArray() {}
+        inline StackArray()
+        {
+#ifdef TMV_INITIALIZE_NAN
+            for(int i=0;i<N;++i)
+                get()[i] = TMV_Nan<T>::get();
+#endif
+        }
         inline ~StackArray() {}
 
         inline T& operator*() { return *get(); }
@@ -455,7 +514,13 @@ namespace tmv
     public :
         typedef std::complex<RT> T;
 
-        inline StackArray() {}
+        inline StackArray() 
+        {
+#ifdef TMV_INITIALIZE_NAN
+            for(int i=0;i<N;++i)
+                get()[i] = TMV_Nan<std::complex<RT> >::get();
+#endif
+        }
         inline ~StackArray() {}
 
         inline T& operator*() { return *get(); }

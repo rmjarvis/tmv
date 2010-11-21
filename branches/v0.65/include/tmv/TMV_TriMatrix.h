@@ -3818,9 +3818,6 @@ namespace tmv {
 
         inline UpperTriMatrix(size_t _size, const T* vv) : NEW_SIZE(_size)
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             std::copy(vv,vv+itslen,itsm.get());
         }
@@ -3828,9 +3825,6 @@ namespace tmv {
         inline UpperTriMatrix(size_t _size, const std::vector<T>& vv) :
             NEW_SIZE(_size)
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(vv.size() == itslen);
             std::copy(vv.begin(),vv.end(),itsm.get());
@@ -3840,9 +3834,6 @@ namespace tmv {
         inline UpperTriMatrix(const GenMatrix<T2>& rhs) :
             NEW_SIZE(rhs.rowsize())
         { 
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(isReal(T2()) || isComplex(T()));
             TMVAssert(S==RowMajor || S==ColMajor); 
             Copy(rhs.upperTri(D),view()); 
@@ -3852,9 +3843,6 @@ namespace tmv {
         inline UpperTriMatrix(const GenUpperTriMatrix<T2>& rhs) :
             NEW_SIZE(rhs.size())
         { 
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(isReal(T2()) || isComplex(T()));
             TMVAssert(S==RowMajor || S==ColMajor); 
             if (isunit() && !rhs.isunit()) {
@@ -3869,9 +3857,6 @@ namespace tmv {
             itslen(rhs.itslen), itsm(itslen), itss(rhs.itss)
             TMV_DEFFIRSTLAST(itsm.get(),itsm.get()+itslen)
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             std::copy(rhs.cptr(),rhs.cptr()+itslen,itsm.get());
         }
@@ -3880,9 +3865,6 @@ namespace tmv {
         inline UpperTriMatrix(const UpperTriMatrix<T,D2,S,I2>& rhs) :
             NEW_SIZE(rhs.size())
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             std::copy(rhs.cptr(),rhs.cptr()+itslen,itsm.get());
             if (D==NonUnitDiag && D2==UnitDiag) diag().setAllTo(T(1));
@@ -3892,9 +3874,6 @@ namespace tmv {
         inline UpperTriMatrix(const Matrix<T,S,I2>& rhs) :
             NEW_SIZE(rhs.rowsize())
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             if (rhs.isSquare())
                 std::copy(rhs.cptr(),rhs.cptr()+itslen,itsm.get());
@@ -3905,9 +3884,6 @@ namespace tmv {
         inline UpperTriMatrix(const GenMatrix<T>& rhs) :
             NEW_SIZE(rhs.rowsize())
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             Copy(rhs.upperTri(D),view());
         }
@@ -3915,9 +3891,6 @@ namespace tmv {
         inline UpperTriMatrix(const GenUpperTriMatrix<RT>& rhs) :
             NEW_SIZE(rhs.size())
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             if (isunit() && !rhs.isunit()) {
                 if (rhs.size() > 0) offDiag() = rhs.offDiag();
@@ -3928,9 +3901,6 @@ namespace tmv {
         inline UpperTriMatrix(const GenUpperTriMatrix<CT>& rhs) :
             NEW_SIZE(rhs.size())
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(isComplex(T()));
             if (isunit() && !rhs.isunit()) {
@@ -3942,9 +3912,6 @@ namespace tmv {
         inline UpperTriMatrix(const AssignableToUpperTriMatrix<RT>& m2) :
             NEW_SIZE(m2.size())
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(!(m2.dt()==NonUnitDiag && D==UnitDiag));
             m2.assignToU(view());
@@ -3953,9 +3920,6 @@ namespace tmv {
         inline UpperTriMatrix(const AssignableToUpperTriMatrix<CT>& m2) :
             NEW_SIZE(m2.size())
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(isComplex(T()));
             TMVAssert(!(m2.dt()==NonUnitDiag && D==UnitDiag));
@@ -4713,9 +4677,6 @@ namespace tmv {
 
         inline LowerTriMatrix(size_t _size, const T* vv) : NEW_SIZE(_size)
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             std::copy(vv,vv+itslen,itsm.get());
         }
@@ -4723,9 +4684,6 @@ namespace tmv {
         inline LowerTriMatrix(size_t _size, const std::vector<T>& vv) :
             NEW_SIZE(_size)
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(vv.size() == itslen);
             std::copy(vv.begin(),vv.end(),itsm.get());
@@ -4735,9 +4693,6 @@ namespace tmv {
         inline LowerTriMatrix(const GenMatrix<T2>& rhs) :
             NEW_SIZE(rhs.colsize())
         { 
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(isReal(T2()) || isComplex(T()));
             TMVAssert(S==RowMajor || S==ColMajor); 
             Copy(rhs.lowerTri(D).transpose(),transpose()); 
@@ -4747,9 +4702,6 @@ namespace tmv {
         inline LowerTriMatrix(const GenLowerTriMatrix<T2>& rhs) :
             NEW_SIZE(rhs.size())
         { 
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(isReal(T2()) || isComplex(T()));
             TMVAssert(S==RowMajor || S==ColMajor); 
             if (isunit() && !rhs.isunit()) {
@@ -4764,9 +4716,6 @@ namespace tmv {
             itslen(rhs.itslen), itsm(itslen), itss(rhs.itss)
             TMV_DEFFIRSTLAST(itsm.get(),itsm.get()+itslen)
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             std::copy(rhs.cptr(),rhs.cptr()+itslen,itsm.get());
         }
@@ -4775,9 +4724,6 @@ namespace tmv {
         inline LowerTriMatrix(const LowerTriMatrix<T,D2,S,I2>& rhs) :
             NEW_SIZE(rhs.size())
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             std::copy(rhs.cptr(),rhs.cptr()+itslen,itsm.get());
             if (D==NonUnitDiag && D2==UnitDiag) diag().setAllTo(T(1));
@@ -4787,9 +4733,6 @@ namespace tmv {
         inline LowerTriMatrix(const Matrix<T,S,I2>& rhs) :
             NEW_SIZE(rhs.rowsize())
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             if (rhs.isSquare())
                 std::copy(rhs.cptr(),rhs.cptr()+itslen,itsm.get());
@@ -4800,9 +4743,6 @@ namespace tmv {
         inline LowerTriMatrix(const GenMatrix<T>& rhs) :
             NEW_SIZE(rhs.rowsize())
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             Copy(rhs.lowerTri(D).transpose(),transpose());
         }
@@ -4810,9 +4750,6 @@ namespace tmv {
         inline LowerTriMatrix(const GenLowerTriMatrix<RT>& rhs) :
             NEW_SIZE(rhs.size())
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             if (isunit() && !rhs.isunit()) {
                 if (rhs.size() > 0) offDiag() = rhs.offDiag();
@@ -4823,9 +4760,6 @@ namespace tmv {
         inline LowerTriMatrix(const GenLowerTriMatrix<CT>& rhs) :
             NEW_SIZE(rhs.size())
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(isComplex(T()));
             if (isunit() && !rhs.isunit()) {
@@ -4837,9 +4771,6 @@ namespace tmv {
         inline LowerTriMatrix(const AssignableToLowerTriMatrix<RT>& m2) :
             NEW_SIZE(m2.size())
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(!(m2.dt()==NonUnitDiag && D==UnitDiag));
             m2.assignToL(view());
@@ -4848,9 +4779,6 @@ namespace tmv {
         inline LowerTriMatrix(const AssignableToLowerTriMatrix<CT>& m2) :
             NEW_SIZE(m2.size())
         {
-#ifdef TMVDEBUG
-            setAllTo(T(888));
-#endif
             TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(!(m2.dt()==NonUnitDiag && D==UnitDiag));
             TMVAssert(isComplex(T()));

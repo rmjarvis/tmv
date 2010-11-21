@@ -1238,8 +1238,8 @@ namespace tmv {
         Vector<RT> D2 = D_QR;
         D2.sort(Descend,AbsComp);
         if (U) dbgcout<<"Norm(A2-A0) = "<<Norm(A2-A0)<<endl;
-        if (Norm(D1-D2) > THRESH*Norm(T0) ||
-            (U && Norm(A2-A0) > THRESH*Norm(A0)) ) {
+        if (!(Norm(D1-D2) < THRESH*Norm(T0)) ||
+            (U && !(Norm(A2-A0) < THRESH*Norm(A0))) ) {
             cerr<<"Eigen_DC: \n";
             cerr<<"input D = "<<D0<<endl;
             cerr<<"input E = "<<E0<<endl;

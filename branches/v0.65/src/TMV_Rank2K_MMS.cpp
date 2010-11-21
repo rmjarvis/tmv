@@ -362,17 +362,14 @@ namespace tmv {
     template <class T, class Tx, class Ty> 
     static inline void BlasRank2KUpdate(
         const T alpha, const GenMatrix<Tx>& x, const GenMatrix<Ty>& y,
-        const int beta, const SymMatrixView<T>& A)
-    {
-        if (beta == 1) NonBlasRank2KUpdate<true>(alpha,x,y,A); 
-        else NonBlasRank2KUpdate<false>(alpha,x,y,A); 
-    }
+        const SymMatrixView<T>& A)
+    { NonBlasRank2KUpdate<true>(alpha,x,y,A); }
 #ifdef INST_DOUBLE
     template <> 
     void BlasRank2KUpdate(
         const double alpha, const GenMatrix<double>& x,
         const GenMatrix<double>& y, 
-        const int beta, const SymMatrixView<double>& A)
+        const SymMatrixView<double>& A)
     {
         TMVAssert(A.size() == x.colsize());
         TMVAssert(A.size() == y.colsize());
@@ -392,20 +389,20 @@ namespace tmv {
         int k=x.rowsize();
         int ldx=x.isrm()?x.stepi():x.stepj();
         int ldy=y.isrm()?y.stepi():y.stepj();
-        double xbeta(beta);
+        double beta(1);
         int lda=A.stepj();
         BLASNAME(dsyr2k) (
             BLASCM A.uplo()==Upper?BLASCH_UP:BLASCH_LO, 
             x.isrm()?BLASCH_T:BLASCH_NT,BLASV(n),BLASV(k),BLASV(alpha),
             BLASP(x.cptr()),BLASV(ldx),BLASP(y.cptr()),BLASV(ldy),
-            BLASV(xbeta),BLASP(A.ptr()),BLASV(lda) BLAS1 BLAS1);
+            BLASV(beta),BLASP(A.ptr()),BLASV(lda) BLAS1 BLAS1);
     }
     template <> 
     void BlasRank2KUpdate(
         const std::complex<double> alpha,
         const GenMatrix<std::complex<double> >& x, 
         const GenMatrix<std::complex<double> >& y,
-        const int beta, const SymMatrixView<std::complex<double> >& A)
+        const SymMatrixView<std::complex<double> >& A)
     {
         TMVAssert(A.size() == x.colsize());
         TMVAssert(A.size() == y.colsize());
@@ -428,20 +425,20 @@ namespace tmv {
         int ldy=y.isrm()?y.stepi():y.stepj();
         int lda=A.stepj();
         if (A.isherm()) {
-            double xbeta(beta);
+            double beta(1);
             BLASNAME(zher2k) (
                 BLASCM A.uplo()==Upper?BLASCH_UP:BLASCH_LO, 
                 x.isrm()?BLASCH_CT:BLASCH_NT,BLASV(n),BLASV(k),BLASP(&alpha),
                 BLASP(x.cptr()),BLASV(ldx),BLASP(y.cptr()),BLASV(ldy),
-                BLASV(xbeta),BLASP(A.ptr()),BLASV(lda) BLAS1 BLAS1);
+                BLASV(beta),BLASP(A.ptr()),BLASV(lda) BLAS1 BLAS1);
         }
         else {
-            std::complex<double> xbeta(beta);
+            std::complex<double> beta(1);
             BLASNAME(zsyr2k) (
                 BLASCM A.uplo()==Upper?BLASCH_UP:BLASCH_LO, 
                 x.isrm()?BLASCH_T:BLASCH_NT,BLASV(n),BLASV(k),BLASP(&alpha),
                 BLASP(x.cptr()),BLASV(ldx),BLASP(y.cptr()),BLASV(ldy),
-                BLASP(&xbeta),BLASP(A.ptr()),BLASV(lda) BLAS1 BLAS1);
+                BLASP(&beta),BLASP(A.ptr()),BLASV(lda) BLAS1 BLAS1);
         }
     }
     template <> 
@@ -449,7 +446,7 @@ namespace tmv {
         const std::complex<double> alpha, 
         const GenMatrix<std::complex<double> >& x,
         const GenMatrix<double>& y, 
-        const int beta, const SymMatrixView<std::complex<double> >& A)
+        const SymMatrixView<std::complex<double> >& A)
     {
         TMVAssert(A.size() == x.colsize());
         TMVAssert(A.size() == y.colsize());
@@ -466,19 +463,18 @@ namespace tmv {
         TMVAssert(x.stor() == y.stor());
 
         Matrix<double,ColMajor> x1 = x.realPart();
-        SymMatrix<double,Lower,ColMajor> A1(A.size());
-        BlasRank2KUpdate(1.,x1,y,0,A1.view());
-        if (beta == 0) A = alpha*A1;
-        else A += alpha*A1;
+        SymMatrix<double,Lower,ColMajor> A1(A.size(),0.);
+        BlasRank2KUpdate(1.,x1,y,A1.view());
+        A += alpha*A1;
         x1 = x.imagPart();
-        BlasRank2KUpdate(1.,x1,y,0,A1.view());
+        BlasRank2KUpdate(1.,x1,y,A1.view());
         A += std::complex<double>(0,1)*alpha*A1;
     }
     template <> 
     void BlasRank2KUpdate(
         const std::complex<double> alpha, const GenMatrix<double>& x,
         const GenMatrix<std::complex<double> >& y, 
-        const int beta, const SymMatrixView<std::complex<double> >& A)
+        const SymMatrixView<std::complex<double> >& A)
     {
         TMVAssert(A.size() == x.colsize());
         TMVAssert(A.size() == y.colsize());
@@ -495,19 +491,18 @@ namespace tmv {
         TMVAssert(x.stor() == y.stor());
 
         Matrix<double,RowMajor> y1 = y.realPart();
-        SymMatrix<double,Lower,ColMajor> A1(A.size());
-        BlasRank2KUpdate(1.,x,y1,0,A1.view());
-        if (beta == 0) A = alpha*A1;
-        else A += alpha*A1;
+        SymMatrix<double,Lower,ColMajor> A1(A.size(),0.);
+        BlasRank2KUpdate(1.,x,y1,A1.view());
+        A += alpha*A1;
         y1 = y.imagPart();
-        BlasRank2KUpdate(1.,x,y1,0,A1.view());
+        BlasRank2KUpdate(1.,x,y1,A1.view());
         A += std::complex<double>(0,1)*alpha*A1;
     }
     template <> 
     void BlasRank2KUpdate(
         const std::complex<double> alpha, const GenMatrix<double>& x,
         const GenMatrix<double>& y, 
-        const int beta, const SymMatrixView<std::complex<double> >& A)
+        const SymMatrixView<std::complex<double> >& A)
     {
         TMVAssert(A.size() == x.colsize());
         TMVAssert(A.size() == y.colsize());
@@ -524,9 +519,8 @@ namespace tmv {
         TMVAssert(x.stor() == y.stor());
 
         SymMatrix<double,Lower,ColMajor> A1(A.size(),0.);
-        BlasRank2KUpdate(1.,x,y,beta,A1.view());
-        if (beta == 0) A = alpha*A1;
-        else A += alpha*A1;
+        BlasRank2KUpdate(1.,x,y,A1.view());
+        A += alpha*A1;
     }
 #endif
 #ifdef INST_FLOAT
@@ -534,7 +528,7 @@ namespace tmv {
     void BlasRank2KUpdate(
         const float alpha, const GenMatrix<float>& x,
         const GenMatrix<float>& y, 
-        const int beta, const SymMatrixView<float>& A)
+        const SymMatrixView<float>& A)
     {
         TMVAssert(A.size() == x.colsize());
         TMVAssert(A.size() == y.colsize());
@@ -554,20 +548,20 @@ namespace tmv {
         int k=x.rowsize();
         int ldx=x.isrm()?x.stepi():x.stepj();
         int ldy=y.isrm()?y.stepi():y.stepj();
-        float xbeta(beta);
+        float beta(1);
         int lda=A.stepj();
         BLASNAME(ssyr2k) (
             BLASCM A.uplo()==Upper?BLASCH_UP:BLASCH_LO, 
             x.isrm()?BLASCH_T:BLASCH_NT,BLASV(n),BLASV(k),BLASV(alpha),
             BLASP(x.cptr()),BLASV(ldx),BLASP(y.cptr()),BLASV(ldy),
-            BLASV(xbeta),BLASP(A.ptr()),BLASV(lda) BLAS1 BLAS1);
+            BLASV(beta),BLASP(A.ptr()),BLASV(lda) BLAS1 BLAS1);
     }
     template <> 
     void BlasRank2KUpdate(
         const std::complex<float> alpha,
         const GenMatrix<std::complex<float> >& x, 
         const GenMatrix<std::complex<float> >& y,
-        const int beta, const SymMatrixView<std::complex<float> >& A)
+        const SymMatrixView<std::complex<float> >& A)
     {
         TMVAssert(A.size() == x.colsize());
         TMVAssert(A.size() == y.colsize());
@@ -590,20 +584,20 @@ namespace tmv {
         int ldy=y.isrm()?y.stepi():y.stepj();
         int lda=A.stepj();
         if (A.isherm()) {
-            float xbeta(beta);
+            float beta(1);
             BLASNAME(cher2k) (
                 BLASCM A.uplo()==Upper?BLASCH_UP:BLASCH_LO, 
                 x.isrm()?BLASCH_CT:BLASCH_NT,BLASV(n),BLASV(k),BLASP(&alpha),
                 BLASP(x.cptr()),BLASV(ldx),BLASP(y.cptr()),BLASV(ldy),
-                BLASV(xbeta),BLASP(A.ptr()),BLASV(lda) BLAS1 BLAS1);
+                BLASV(beta),BLASP(A.ptr()),BLASV(lda) BLAS1 BLAS1);
         }
         else {
-            std::complex<float> xbeta(beta);
+            std::complex<float> beta(1);
             BLASNAME(csyr2k) (
                 BLASCM A.uplo()==Upper?BLASCH_UP:BLASCH_LO, 
                 x.isrm()?BLASCH_T:BLASCH_NT,BLASV(n),BLASV(k),BLASP(&alpha),
                 BLASP(x.cptr()),BLASV(ldx),BLASP(y.cptr()),BLASV(ldy),
-                BLASP(&xbeta),BLASP(A.ptr()),BLASV(lda) BLAS1 BLAS1);
+                BLASP(&beta),BLASP(A.ptr()),BLASV(lda) BLAS1 BLAS1);
         }
     }
     template <> 
@@ -611,7 +605,7 @@ namespace tmv {
         const std::complex<float> alpha, 
         const GenMatrix<std::complex<float> >& x,
         const GenMatrix<float>& y, 
-        const int beta, const SymMatrixView<std::complex<float> >& A)
+        const SymMatrixView<std::complex<float> >& A)
     {
         TMVAssert(A.size() == x.colsize());
         TMVAssert(A.size() == y.colsize());
@@ -628,19 +622,18 @@ namespace tmv {
         TMVAssert(x.stor() == y.stor());
 
         Matrix<float,ColMajor> x1 = x.realPart();
-        SymMatrix<float,Lower,ColMajor> A1(A.size());
-        BlasRank2KUpdate(1.F,x1,y,0,A1.view());
-        if (beta == 0) A = alpha*A1;
-        else A += alpha*A1;
+        SymMatrix<float,Lower,ColMajor> A1(A.size(),0.F);
+        BlasRank2KUpdate(1.F,x1,y,A1.view());
+        A += alpha*A1;
         x1 = x.imagPart();
-        BlasRank2KUpdate(1.F,x1,y,0,A1.view());
+        BlasRank2KUpdate(1.F,x1,y,A1.view());
         A += std::complex<float>(0,1)*alpha*A1;
     }
     template <> 
     void BlasRank2KUpdate(
         const std::complex<float> alpha, const GenMatrix<float>& x,
         const GenMatrix<std::complex<float> >& y, 
-        const int beta, const SymMatrixView<std::complex<float> >& A)
+        const SymMatrixView<std::complex<float> >& A)
     {
         TMVAssert(A.size() == x.colsize());
         TMVAssert(A.size() == y.colsize());
@@ -657,19 +650,18 @@ namespace tmv {
         TMVAssert(x.stor() == y.stor());
 
         Matrix<float,RowMajor> y1 = y.realPart();
-        SymMatrix<float,Lower,ColMajor> A1(A.size());
-        BlasRank2KUpdate(1.F,x,y1,0,A1.view());
-        if (beta == 0) A = alpha*A1;
-        else A += alpha*A1;
+        SymMatrix<float,Lower,ColMajor> A1(A.size(),0.F);
+        BlasRank2KUpdate(1.F,x,y1,A1.view());
+        A += alpha*A1;
         y1 = y.imagPart();
-        BlasRank2KUpdate(1.F,x,y1,0,A1.view());
+        BlasRank2KUpdate(1.F,x,y1,A1.view());
         A += std::complex<float>(0,1)*alpha*A1;
     }
     template <> 
     void BlasRank2KUpdate(
         const std::complex<float> alpha, const GenMatrix<float>& x,
         const GenMatrix<float>& y, 
-        const int beta, const SymMatrixView<std::complex<float> >& A)
+        const SymMatrixView<std::complex<float> >& A)
     {
         TMVAssert(A.size() == x.colsize());
         TMVAssert(A.size() == y.colsize());
@@ -686,9 +678,8 @@ namespace tmv {
         TMVAssert(x.stor() == y.stor());
 
         SymMatrix<float,Lower,ColMajor> A1(A.size(),0.F);
-        BlasRank2KUpdate(1.F,x,y,beta,A1.view());
-        if (beta == 0) A = alpha*A1;
-        else A += alpha*A1;
+        BlasRank2KUpdate(1.F,x,y,A1.view());
+        A += alpha*A1;
     }
 #endif
 #endif // BLAS
@@ -732,6 +723,7 @@ namespace tmv {
                 Rank2KUpdate<add>(
                     TMV_CONJ(alpha),x.conjugate(),y.conjugate(),A.conjugate());
             else if (A.iscm() && A.stepj()>0) {
+                if (!add) A.setZero();
                 if (!((x.isrm() && x.stepi()>0) || (x.iscm() && x.stepj()>0)) ||
                     (!A.issym() && x.iscm() == x.isconj()) ||
                     (!A.isherm() && x.isconj()) || SameStorage(x,A)) {
@@ -741,11 +733,11 @@ namespace tmv {
                         if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
                             Matrix<Tx,ColMajor> xx = TMV_REAL(alpha)*x;
                             Matrix<Ty,ColMajor> yy = y;
-                            BlasRank2KUpdate(T(1),xx,yy,add?1:0,A);
+                            BlasRank2KUpdate(T(1),xx,yy,A);
                         } else {
                             Matrix<T,ColMajor> xx = alpha*x;
                             Matrix<Ty,ColMajor> yy = y;
-                            BlasRank2KUpdate(T(1),xx,yy,add?1:0,A);
+                            BlasRank2KUpdate(T(1),xx,yy,A);
                         }
                     } else {
                         if (y.iscm()) {
@@ -755,14 +747,14 @@ namespace tmv {
                                 BlasRank2KUpdate(
                                     T(1),
                                     (y.isconj() ? xx.conjugate() : xx.view()),
-                                    y,add?1:0,A);
+                                    y,A);
                             } else {
                                 Matrix<T,ColMajor> xx = alpha*
                                     (y.isconj() ? x.conjugate() : x.view());
                                 BlasRank2KUpdate(
                                     T(1),
                                     (y.isconj() ? xx.conjugate() : xx.view()),
-                                    y,add?1:0,A);
+                                    y,A);
                             }
                         } else {
                             if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
@@ -771,14 +763,14 @@ namespace tmv {
                                 BlasRank2KUpdate(
                                     T(1),
                                     (y.isconj() ? xx.conjugate() : xx.view()),
-                                    y,add?1:0,A);
+                                    y,A);
                             } else {
                                 Matrix<T,RowMajor> xx = alpha*
                                     (y.isconj() ? x.conjugate() : x.view());
                                 BlasRank2KUpdate(
                                     T(1),
                                     (y.isconj() ? xx.conjugate() : xx.view()),
-                                    y,add?1:0,A);
+                                    y,A);
                             }
                         }
                     }
@@ -794,14 +786,14 @@ namespace tmv {
                                 BlasRank2KUpdate(
                                     T(1),x,
                                     (x.isconj() ? yy.conjugate() : yy.view()),
-                                    add?1:0,A);
+                                    A);
                             } else {
                                 Matrix<T,ColMajor> yy = alpha*
                                     (x.isconj() ? y.conjugate() : y.view());
                                 BlasRank2KUpdate(
                                     T(1),x,
                                     (x.isconj() ? yy.conjugate() : yy.view()),
-                                    add?1:0,A);
+                                    A);
                             }
                         } else {
                             if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
@@ -810,18 +802,18 @@ namespace tmv {
                                 BlasRank2KUpdate(
                                     T(1),x,
                                     (x.isconj() ? yy.conjugate() : yy.view()),
-                                    add?1:0,A);
+                                    A);
                             } else {
                                 Matrix<T,RowMajor> yy = alpha*
                                     (x.isconj() ? y.conjugate() : y.view());
                                 BlasRank2KUpdate(
                                     T(1),x,
                                     (x.isconj() ? yy.conjugate() : yy.view()),
-                                    add?1:0,A);
+                                    A);
                             }
                         }
                     } else {
-                        BlasRank2KUpdate(alpha,x,y,add?1:0,A);
+                        BlasRank2KUpdate(alpha,x,y,A);
                     }
                 }
             } else {
