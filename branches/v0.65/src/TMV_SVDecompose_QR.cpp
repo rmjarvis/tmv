@@ -83,7 +83,7 @@ namespace tmv {
         TMVAssert(Di >= D.first);
         TMVAssert(Di < D.last);
 #endif
-        if (TMV_Underflow(TMV_NORM(*Di))) { 
+        if (TMV_Underflow(TMV_NORM(*Di))) {
             *Di = T(0);
             if(zd) *zd = true; 
         }
@@ -101,8 +101,10 @@ namespace tmv {
             TMVAssert(Ei >= E.first);
             TMVAssert(Ei < E.last);
 #endif
-            if ( TMV_MAXABS(*Ei) <= eps*(TMV_MAXABS(*Di)+TMV_MAXABS(*(Di-1))) ||
-                 TMV_Underflow(*Ei) ) {
+            // Do it as !(|e| > eps (|d1| + |d2|)) to nan's will get set to 
+            // zero too and not iterate forever.
+            if ( !(TMV_MAXABS(*Ei) > eps*(TMV_MAXABS(*Di)+TMV_MAXABS(*(Di-1))))
+                 || TMV_Underflow(*Ei) ) {
                 *Ei = T(0);
             }
 
@@ -364,7 +366,10 @@ namespace tmv {
         // So in this case, just do the calculation for what E(0) should
         // be and let ChopSmallElements figure out whether it is small 
         // enough to go the rest of the way to 0.
-        bool exact = (TMV_ABS(e) < 1.e-3);
+        //bool exact = (TMV_ABS(e) < 1.e-3);
+        // Do it this way, so nan will also trigger an exact answer,
+        // which will set e to zero on exit.
+        bool exact = !(TMV_ABS(e) > 1.e-3);
 
         RT d = ((d1-d0)*(d1+d0)+e*e)/RT(2);
         RT absd = TMV_ABS(d);

@@ -136,7 +136,7 @@ namespace tmv {
         // http://www.netlib.org/lapack/lawnspdf/lawn89.pdf
         //
         const T eps = TMV_Epsilon<T>();
-        const int TMV_MAXITER = 20;
+        const int TMV_MAXITER = 100;
 
         dbgcout<<"k = "<<k<<endl;
         if (k<N-1) {
@@ -346,7 +346,9 @@ namespace tmv {
             dbgcout<<"df = "<<df<<endl;
 
             if (k == N-1) break;
-            if (TMV_ABS(f) <= eps*e) break; 
+            //if (TMV_ABS(f) <= eps*e) break; 
+            // Do it this way instead so nan will break out too.
+            if (!(TMV_ABS(f) > eps*e)) break; 
             if (TMV_ABS(f) <= RT(1.e3)*TMV_ABS(f1) && f*f1 < T(0)) break;
 
             // If we get to here, then the initial guess was not very good.  
@@ -422,7 +424,7 @@ namespace tmv {
 
             T eta; // = the change to be added to s
 
-            if (TMV_ABS(f) <= eps*e) {
+            if (!(TMV_ABS(f) > eps*e)) {
                 last = true;
                 eta = T(0); // This will trigger a Newton step below.
             } else if (!threepoles) {

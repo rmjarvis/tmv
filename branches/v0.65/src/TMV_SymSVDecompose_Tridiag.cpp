@@ -471,21 +471,21 @@ namespace tmv {
         VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
-        std::cout<<"Start LapTridiagonalize:\n";
-        std::cout<<"A = "<<TMV_Text(A)<<std::endl;
-        std::cout<<"beta = "<<TMV_Text(beta)<<"  "<<beta<<std::endl;
-        std::cout<<"D = "<<TMV_Text(D)<<"  "<<D<<std::endl;
-        std::cout<<"E = "<<TMV_Text(E)<<"  "<<E<<std::endl;
-        std::cout<<"n = "<<n<<std::endl;
-        std::cout<<"ldu = "<<ldu<<std::endl;
-        std::cout<<"lwork = "<<lwork<<std::endl;
-        std::cout<<"work = "<<VectorViewOf(work.get(),lwork)<<std::endl;
-        std::cout<<"Before chetrd"<<std::endl;
+        //std::cout<<"Start LapTridiagonalize:\n";
+        //std::cout<<"A = "<<TMV_Text(A)<<std::endl;
+        //std::cout<<"beta = "<<TMV_Text(beta)<<"  "<<beta<<std::endl;
+        //std::cout<<"D = "<<TMV_Text(D)<<"  "<<D<<std::endl;
+        //std::cout<<"E = "<<TMV_Text(E)<<"  "<<E<<std::endl;
+        //std::cout<<"n = "<<n<<std::endl;
+        //std::cout<<"ldu = "<<ldu<<std::endl;
+        //std::cout<<"lwork = "<<lwork<<std::endl;
+        //std::cout<<"work = "<<VectorViewOf(work.get(),lwork)<<std::endl;
+        //std::cout<<"Before chetrd"<<std::endl;
         LAPNAME(chetrd) (
             LAPCM LAPCH_LO,LAPV(n),
             LAPP(A.ptr()),LAPV(ldu),LAPP(D.ptr()),LAPP(E.ptr()),
             LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
-        std::cout<<"After chetrd"<<std::endl;
+        //std::cout<<"After chetrd"<<std::endl;
         if (!A.isconj()) beta.conjugateSelf();
 #ifdef LAPNOWORK
         LAP_Results("chetrd");

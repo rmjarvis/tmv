@@ -99,7 +99,7 @@ namespace tmv {
                 // So we need to find a p where all E(i) with p<=i<q are 
                 // non-zero.
                 int p = q-1;
-                while (p>0 && E(p-1) != T(0)) --p;
+                while (p>0 && !(E(p-1) == T(0))) --p;
                 // Now Zero out the last column:
                 if (V) BidiagonalZeroLastCol<T>(
                     D.subVector(p,q),E.subVector(p,q),V->rowRange(p,q+1));
@@ -110,7 +110,7 @@ namespace tmv {
             } else {
                 // Find first p before q with either E(p) = 0 or D(p) = 0
                 int p=q-1;
-                while (p>0 && E(p-1)!=T(0) && D(p)!=T(0)) --p; 
+                while (p>0 && !(E(p-1)==T(0)) && !(D(p)==T(0))) --p; 
                 dbgcout<<"p = "<<p<<std::endl;
                 if (D(p) == T(0)) {
                     dbgcout<<"D(p) == 0, so do ZeroFirstRow\n";
