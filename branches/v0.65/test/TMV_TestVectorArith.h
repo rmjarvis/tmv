@@ -379,8 +379,7 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
 }
 
 template <class T, class V, class CV> 
-inline void TestVectorArith1(
-    V& a, CV& ca, std::string label)
+inline void TestVectorArith1(V& a, CV& ca, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start VectorArith1 "<<label<<std::endl;

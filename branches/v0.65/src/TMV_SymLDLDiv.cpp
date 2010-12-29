@@ -140,7 +140,7 @@ namespace tmv {
         //cout<<"xD = "<<xD<<endl;
 #ifdef XDEBUG
         Matrix<T> mm = LDL*m;
-        if (Norm(mm-m0) > 0.001*Norm(LDL)*Norm(m0)) {
+        if (!(Norm(mm-m0) > 0.001*Norm(LDL)*Norm(m0))) {
             cerr<<"LDL_LDivEq: m = "<<TMV_Text(m)<<"  "<<m0<<endl;
             cerr<<"L = "<<L<<endl;
             cerr<<"D = "<<LL.diag()<<endl;

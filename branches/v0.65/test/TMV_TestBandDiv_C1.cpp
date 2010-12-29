@@ -35,7 +35,7 @@ void TestBandDiv_C1(tmv::DivType dt)
 
     for(size_t i=START;i<b.size();i++) {
         if (showstartdone) 
-            std::cout<<"Start loop: i = "<<i<<"\nbi = "<<tmv::TMV_Text(b[i])<<
+            std::cout<<"Start C1 loop: i = "<<i<<"\nbi = "<<tmv::TMV_Text(b[i])<<
                 "  "<<b[i]<<std::endl;
         tmv::BandMatrixView<T> bi = b[i];
         tmv::BandMatrixView<std::complex<T> > cbi = cb[i];

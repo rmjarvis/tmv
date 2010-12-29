@@ -128,7 +128,7 @@ namespace tmv {
 #ifdef XDEBUG
         TMV_RealType(T) kappa = Norm(PL0)*Norm(PL0.inverse());
         TMV_RealType(T) normdiff = Norm(m2-m);
-        if (normdiff > 0.0001*kappa*Norm(m2)) {
+        if (!(normdiff <= 0.0001*kappa*Norm(m2))) {
             cerr<<"LU_PackedPL_LDivEq\n";
             cerr<<"LUx = "<<LUx<<endl;
             cerr<<"PL = "<<PL0<<endl;
@@ -174,7 +174,7 @@ namespace tmv {
 #ifdef XDEBUG
         TMV_RealType(T) kappa = Norm(PLU)*Norm(PLU.inverse());
         TMV_RealType(T) normdiff = Norm(m2-m);
-        if (normdiff > 0.0001*kappa*Norm(m2)) {
+        if (!(normdiff <= 0.0001*kappa*Norm(m2))) {
             cerr<<"LU_PackedPL_LDivEq\n";
             cerr<<"LUx = "<<LUx<<endl;
             cerr<<"L = "<<L0<<endl;
@@ -234,7 +234,7 @@ namespace tmv {
 #ifdef XDEBUG
         TMV_RealType(T) kappa = Norm(PL0)*Norm(PL0.inverse());
         TMV_RealType(T) normdiff = Norm(m2-m);
-        if (normdiff > 0.0001*kappa*Norm(m2)) {
+        if (!(normdiff <= 0.0001*kappa*Norm(m2))) {
             cerr<<"LU_PackedPL_RDivEq\n";
             cerr<<"LUx = "<<LUx<<endl;
             cerr<<"PL = "<<PL0<<endl;
@@ -281,7 +281,7 @@ namespace tmv {
 #ifdef XDEBUG
         TMV_RealType(T) kappa = Norm(PLU)*Norm(PLU.inverse());
         TMV_RealType(T) normdiff = Norm(m2-m);
-        if (normdiff > 0.0001*kappa*Norm(m2)) {
+        if (!(normdiff <= 0.0001*kappa*Norm(m2))) {
             cerr<<"LU_PackedPL_RDivEq\n";
             cerr<<"LUx = "<<LUx<<endl;
             cerr<<"L = "<<L0<<endl;

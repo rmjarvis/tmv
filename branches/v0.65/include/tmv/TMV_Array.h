@@ -246,20 +246,23 @@ namespace tmv
 
         inline AlignedArray() 
         {
-            //std::cout<<"AA Default constructor: "<<&p<<std::endl;
+#ifdef TMV_INITIALIZE_NAN
+            _n = 0;
+#endif
         }
         inline AlignedArray(const size_t n) 
         {
-            //std::cout<<"AA Sized constructor: n = "<<n<<"  "<<&p<<std::endl;
             p.allocate(n); 
 #ifdef TMV_INITIALIZE_NAN
-            for(size_t i=0;i<n;++i)
-                get()[i] = TMV_Nan<T>::get();
+            _n = n;
+            for(size_t i=0;i<_n;++i) get()[i] = TMV_Nan<T>::get();
 #endif
         }
         inline ~AlignedArray() 
         { 
-            //std::cout<<"AA Destructor: "<<&p<<std::endl;
+#ifdef TMV_INITIALIZE_NAN
+            for(size_t i=0;i<_n;++i) get()[i] = T(-999);
+#endif
             p.deallocate(); 
         }
 
@@ -271,14 +274,23 @@ namespace tmv
         inline const T* operator->() const { return get(); }
         inline operator const T*() const { return get(); }
 
-        inline void swapWith(AlignedArray<T>& rhs) { p.swapWith(rhs.p); }
+        inline void swapWith(AlignedArray<T>& rhs) 
+        {
+#ifdef TMV_INITIALIZE_NAN
+            TMV_SWAP(_n,rhs._n);
+#endif
+            p.swapWith(rhs.p); 
+        }
         inline void resize(const size_t n) 
         { 
+#ifdef TMV_INITIALIZE_NAN
+            for(size_t i=0;i<_n;++i) get()[i] = T(-999);
+#endif
             p.deallocate(); 
             p.allocate(n); 
 #ifdef TMV_INITIALIZE_NAN
-            for(size_t i=0;i<n;++i)
-                get()[i] = TMV_Nan<T>::get();
+            _n = n;
+            for(size_t i=0;i<_n;++i) get()[i] = TMV_Nan<T>::get();
 #endif
         }
 
@@ -288,6 +300,9 @@ namespace tmv
     private :
 
         AlignedMemory<T> p;
+#ifdef TMV_INITIALIZE_NAN
+        size_t _n;
+#endif
 
         inline AlignedArray& operator=(AlignedArray& p2);
         inline AlignedArray(const AlignedArray& p2);
@@ -301,20 +316,24 @@ namespace tmv
 
         inline AlignedArray()
         {
-            //std::cout<<"CAA Default constructor: "<<&p<<std::endl;
+#ifdef TMV_INITIALIZE_NAN
+            _n = 0;
+#endif
         }
         inline AlignedArray(const size_t n) 
         { 
-            //std::cout<<"CAA Sized constructor: n = "<<n<<"  "<<&p<<std::endl;
             p.allocate(n<<1); 
 #ifdef TMV_INITIALIZE_NAN
-            for(size_t i=0;i<n;++i)
+            _n = n;
+            for(size_t i=0;i<_n;++i) 
                 get()[i] = TMV_Nan<std::complex<RT> >::get();
 #endif
         }
         inline ~AlignedArray() 
         {
-            //std::cout<<"CAA Destructor: "<<&p<<std::endl;
+#ifdef TMV_INITIALIZE_NAN
+            for(size_t i=0;i<_n;++i) get()[i] = std::complex<RT>(-999,-888);
+#endif
             p.deallocate(); 
         }
 
@@ -326,13 +345,23 @@ namespace tmv
         inline const T* operator->() const { return get(); }
         inline operator const T*() const { return get(); }
 
-        inline void swapWith(AlignedArray<T>& rhs) { p.swapWith(rhs.p); }
+        inline void swapWith(AlignedArray<T>& rhs) 
+        { 
+#ifdef TMV_INITIALIZE_NAN
+            TMV_SWAP(_n,rhs._n);
+#endif
+            p.swapWith(rhs.p); 
+        }
         inline void resize(const size_t n) 
         { 
+#ifdef TMV_INITIALIZE_NAN
+            for(size_t i=0;i<_n;++i) get()[i] = std::complex<RT>(-999,-888);
+#endif
             p.deallocate();
             p.allocate(n<<1); 
 #ifdef TMV_INITIALIZE_NAN
-            for(size_t i=0;i<n;++i)
+            _n = n;
+            for(size_t i=0;i<_n;++i) 
                 get()[i] = TMV_Nan<std::complex<RT> >::get();
 #endif
         }
@@ -344,6 +373,9 @@ namespace tmv
     private :
 
         AlignedMemory<RT> p;
+#ifdef TMV_INITIALIZE_NAN
+        size_t _n;
+#endif
 
         inline AlignedArray& operator=(AlignedArray& p2);
         inline AlignedArray(const AlignedArray& p2);
@@ -474,11 +506,15 @@ namespace tmv
         inline StackArray()
         {
 #ifdef TMV_INITIALIZE_NAN
-            for(int i=0;i<N;++i)
-                get()[i] = TMV_Nan<T>::get();
+            for(int i=0;i<N;++i) get()[i] = TMV_Nan<T>::get();
 #endif
         }
-        inline ~StackArray() {}
+        inline ~StackArray() 
+        {
+#ifdef TMV_INITIALIZE_NAN
+            for(int i=0;i<N;++i) get()[i] = T(-999);
+#endif
+        }
 
         inline T& operator*() { return *get(); }
         inline T* operator->() { return get(); }
@@ -517,11 +553,15 @@ namespace tmv
         inline StackArray() 
         {
 #ifdef TMV_INITIALIZE_NAN
-            for(int i=0;i<N;++i)
-                get()[i] = TMV_Nan<std::complex<RT> >::get();
+            for(int i=0;i<N;++i) get()[i] = TMV_Nan<std::complex<RT> >::get();
 #endif
         }
-        inline ~StackArray() {}
+        inline ~StackArray() 
+        {
+#ifdef TMV_INITIALIZE_NAN
+            for(int i=0;i<N;++i) get()[i] = std::complex<RT>(-999,-888);
+#endif
+        }
 
         inline T& operator*() { return *get(); }
         inline T* operator->() { return get(); }

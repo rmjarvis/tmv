@@ -42,6 +42,7 @@
 #include "tmv/TMV_MatrixArith.h"
 #include "tmv/TMV_BandMatrixArith.h"
 #include <iostream>
+using std::cout;
 using std::cerr;
 using std::endl;
 #endif
@@ -113,6 +114,11 @@ namespace tmv {
         TMVAssert(x.rowsize() == m.rowsize());
 
 #ifdef XDEBUG
+        cout<<"Start QR_LDiv\n";
+        cout<<"QRx = "<<QRx<<endl;
+        cout<<"Qbeta = "<<Qbeta<<endl;
+        cout<<"m = "<<m<<endl;
+        cout<<"x = "<<x<<endl;
         Matrix<T1> QR2 = QRx;
         GetQFromBandQR(QR2.view(),Qbeta,QRx.nlo());
         QR2 *= QRx.diagRange(0,QRx.nhi()+1);
@@ -141,7 +147,9 @@ namespace tmv {
         TriLDivEq(QRx.subBandMatrix(0,N,0,N,0,QRx.nhi()),x,NonUnitDiag);
 
 #ifdef XDEBUG
-        if (Norm(x2-x) > 0.001*Norm(x)) {
+        cout<<"x => "<<x<<endl;
+        cout<<"Norm(x2-x) = "<<Norm(x2-x)<<endl;
+        if (!(Norm(x2-x) <= 0.001*Norm(x))) {
             cerr<<"QR_LDiv: \n";
             cerr<<"m = "<<TMV_Text(m)<<"  "<<m<<endl;
             cerr<<"x = "<<TMV_Text(x)<<endl;
@@ -169,6 +177,10 @@ namespace tmv {
         TMVAssert(m.colsize() == QRx.colsize());
 
 #ifdef XDEBUG
+        cout<<"Start QR_LDivEq\n";
+        cout<<"QRx = "<<QRx<<endl;
+        cout<<"Qbeta = "<<Qbeta<<endl;
+        cout<<"m = "<<m<<endl;
         Matrix<T2> m0(m);
         Matrix<T1> QR2 = QRx;
         GetQFromBandQR(QR2.view(),Qbeta,QRx.nlo());
@@ -182,7 +194,9 @@ namespace tmv {
         TriLDivEq(QRx.subBandMatrix(0,N,0,N,0,QRx.nhi()),m,NonUnitDiag);
 
 #ifdef XDEBUG
-        if (Norm(m2-m) > 0.001*Norm(m)) {
+        cout<<"m => "<<m<<endl;
+        cout<<"Norm(m2-m) = "<<Norm(m2-m)<<endl;
+        if (!(Norm(m2-m) <= 0.001*Norm(m))) {
             cerr<<"QR_LDivEq: \n";
             cerr<<"m = "<<TMV_Text(m)<<"  "<<m0<<endl;
             cerr<<"-> m = "<<m<<endl;
@@ -211,6 +225,11 @@ namespace tmv {
         TMVAssert(x.colsize() == m.colsize());
 
 #ifdef XDEBUG
+        cout<<"Start QR_RDiv\n";
+        cout<<"QRx = "<<QRx<<endl;
+        cout<<"Qbeta = "<<Qbeta<<endl;
+        cout<<"m = "<<m<<endl;
+        cout<<"x = "<<x<<endl;
         Matrix<T1> QR2 = QRx;
         GetQFromBandQR(QR2.view(),Qbeta,QRx.nlo());
         QR2 *= QRx.diagRange(0,QRx.nhi()+1);
@@ -228,7 +247,9 @@ namespace tmv {
         Q_RDivEq(QRx,Qbeta,x);
 
 #ifdef XDEBUG
-        if (Norm(x2-x) > 0.001*Norm(x)) {
+        cout<<"x => "<<x<<endl;
+        cout<<"Norm(x2-x) = "<<Norm(x2-x)<<endl;
+        if (!(Norm(x2-x) <= 0.001*Norm(x))) {
             cerr<<"QR_RDiv: \n";
             cerr<<"m = "<<TMV_Text(m)<<"  "<<m<<endl;
             cerr<<"x = "<<TMV_Text(x)<<endl;
@@ -256,6 +277,10 @@ namespace tmv {
         TMVAssert(m.rowsize() == QRx.colsize());
 
 #ifdef XDEBUG
+        cout<<"Start QR_RDivEq\n";
+        cout<<"QRx = "<<QRx<<endl;
+        cout<<"Qbeta = "<<Qbeta<<endl;
+        cout<<"m = "<<m<<endl;
         Matrix<T2> m0(m);
         Matrix<T1> QR2 = QRx;
         GetQFromBandQR(QR2.view(),Qbeta,QRx.nlo());
@@ -272,7 +297,9 @@ namespace tmv {
         Q_RDivEq(QRx,Qbeta,m);
 
 #ifdef XDEBUG
-        if (Norm(m2-m) > 0.001*Norm(m)) {
+        cout<<"m => "<<m<<endl;
+        cout<<"Norm(m2-m) = "<<Norm(m2-m)<<endl;
+        if (!(Norm(m2-m) <= 0.001*Norm(m))) {
             cerr<<"QR_RDivEq: \n";
             cerr<<"m = "<<TMV_Text(m)<<"  "<<m0<<endl;
             cerr<<"-> m = "<<m<<endl;

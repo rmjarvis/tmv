@@ -177,6 +177,8 @@ def BasicCCFlags(env):
     if compiler == 'g++':
         if version >= 4.4:
             # Workaround for a bug in the g++ v4.4 exception handling
+            # I don't think 4.5 actually needs it, but keep >= for now
+            # just to be safe.
             env.AppendUnique(LIBS='pthread')
 
     if env['FLAGS'] == '':
@@ -598,9 +600,9 @@ int main()
             print 'Error: FORCE_GOTO, but failed compile test'
             Exit(1)
 
-    if result:
-        context.env.Append(CPPDEFINES=['TMV_END_PADDING'])
-        context.env['END_PADDING'] = True
+    #if result:
+        #context.env.Append(CPPDEFINES=['TMV_END_PADDING'])
+        #context.env['END_PADDING'] = True
 
     return result
 
@@ -969,18 +971,18 @@ def DoLibraryAndHeaderChecks(config):
         # If no BLAS is forced, then look for MKL, ACML before more generic
         # (and probably less optimized) BLAS library.
         elif config.CheckMKL() :
-            if (config.env['WITH_LAPACK'] and config.CheckMKL_LAP()) :
-                print 'Using MKL LAPACK'
-                foundlap = 1
             config.env.Append(CPPDEFINES=['MKL'])
             print 'Using MKL BLAS'
+            if (config.env['WITH_LAPACK'] and config.CheckMKL_LAP()) :
+                foundlap = 1
+                print 'Using MKL LAPACK'
  
         elif config.CheckACML() :
-            if config.env['WITH_LAPACK']:
-                print 'Using ACML LAPACK'
-                foundlap = 1
             config.env.Append(CPPDEFINES=['ACML'])
             print 'Using ACML BLAS'
+            if config.env['WITH_LAPACK']:
+                foundlap = 1
+                print 'Using ACML LAPACK'
 
         elif config.CheckGOTO() :
             config.env.Append(CPPDEFINES=['FBLAS'])

@@ -32,7 +32,6 @@
 
 //#define XDEBUG
 
-
 #include "TMV_Householder.h"
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_Matrix.h"
@@ -389,7 +388,6 @@ namespace tmv {
             abort();
         }
 #endif
-        //std::cout<<"mx => "<<mx<<std::endl;
     }
 
     template <class T1, class T2> 

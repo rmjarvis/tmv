@@ -2939,9 +2939,8 @@ namespace tmv {
             NEW_SIZE(m2.size(),0)
         {
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
-            setZero();
             m2.assignToD(DiagMatrixViewOf(diag()));
-            if (nlo() > 0) upperBandOff().setZero();
+            if (nlo()>0) upperBandOff().setZero();
         }
 
         inline SymBandMatrix(const GenDiagMatrix<CT>& m2) :
@@ -2949,8 +2948,8 @@ namespace tmv {
         {
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             TMVAssert(isComplex(T()));
-            setZero();
             m2.assignToD(DiagMatrixViewOf(diag()));
+            if (nlo()>0) upperBandOff().setZero();
         }
 
 #undef NEW_SIZE
@@ -4366,19 +4365,21 @@ namespace tmv {
             if (&m2 != this) {
                 if (nlo() > m2.nlo()) 
                     lowerBand().diagRange(-nlo(),-m2.nlo()).setZero();
-                if (S==DiagMajor)
-                    if (nlo() > m2.nlo())
+                if (S==DiagMajor) {
+                    if (nlo() > m2.nlo()) {
                         std::copy(
                             m2.start_mem(),m2.start_mem()+m2.mem_used(),
                             itsm+m2.nlo()*stepi());
-                    else
+                    } else {
                         std::copy(
                             m2.start_mem(),m2.start_mem()+m2.mem_used(),
                             itsm1.get());
-                else if (nlo()==m2.nlo())
+                    }
+                } else if (nlo()==m2.nlo()) {
                     std::copy(m2.cptr(),m2.cptr()+m2.mem_used(),itsm1.get());
-                else
+                } else {
                     lowerBand().diagRange(-m2.nlo(),1) = m2.lowerBand();
+                }
             }
             return *this;
         }

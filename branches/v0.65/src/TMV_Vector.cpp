@@ -909,7 +909,7 @@ namespace tmv {
     const VectorView<T,I>& VectorView<T,I>::setZero() const
     {
         if (step() == 1) std::fill_n(ptr(),size(),T(0));
-        else setAllTo(0);
+        else setAllTo(T(0));
         return *this;
     }
 

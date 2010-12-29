@@ -3269,8 +3269,8 @@ static void TestMatrixArith2(M& a, CM& ca, std::string label)
     for(int i=0;i<int(a.rowsize());i++) v(i) = T(i+3);
     tmv::Vector<CT> cv = CT(4,5) * v;
 
-    tmv::Vector<T> v5(5*a.rowsize());
-    tmv::Vector<CT> cv5(5*a.rowsize());
+    tmv::Vector<T> v5(5*a.rowsize(),T(0));
+    tmv::Vector<CT> cv5(5*a.rowsize(),CT(0));
     tmv::VectorView<T> vs = v5.cSubVector(0,5*a.rowsize(),5);
     tmv::VectorView<CT> cvs = cv5.cSubVector(0,5*a.rowsize(),5);
     vs = v;
@@ -3280,8 +3280,8 @@ static void TestMatrixArith2(M& a, CM& ca, std::string label)
     for(int i=0;i<int(a.colsize());i++) w(i) = T(2*i-6);
     tmv::Vector<CT> cw = CT(-1,2) * w;
 
-    tmv::Vector<T> w5(5*a.colsize());
-    tmv::Vector<CT> cw5(5*a.colsize());
+    tmv::Vector<T> w5(5*a.colsize(),T(0));
+    tmv::Vector<CT> cw5(5*a.colsize(),CT(0));
     tmv::VectorView<T> ws = w5.cSubVector(0,5*a.colsize(),5);
     tmv::VectorView<CT> cws = cw5.cSubVector(0,5*a.colsize(),5);
     ws = w;
@@ -3361,8 +3361,8 @@ static void TestMatrixArith3(M& a, CM& ca, std::string label)
     tmv::VectorView<T> v = vx.view();
     tmv::VectorView<CT> cv = cvx.view();
 
-    tmv::Vector<T> v5(5*a.rowsize());
-    tmv::Vector<CT> cv5(5*a.rowsize());
+    tmv::Vector<T> v5(5*a.rowsize(),T(0));
+    tmv::Vector<CT> cv5(5*a.rowsize(),CT(0));
     tmv::VectorView<T> vs = v5.cSubVector(0,5*a.rowsize(),5);
     tmv::VectorView<CT> cvs = cv5.cSubVector(0,5*a.rowsize(),5);
     vs = v;
@@ -3374,8 +3374,8 @@ static void TestMatrixArith3(M& a, CM& ca, std::string label)
     tmv::VectorView<T> w = wx.view();
     tmv::VectorView<CT> cw = cwx.view();
 
-    tmv::Vector<T> w5(5*a.colsize());
-    tmv::Vector<CT> cw5(5*a.colsize());
+    tmv::Vector<T> w5(5*a.colsize(),T(0));
+    tmv::Vector<CT> cw5(5*a.colsize(),CT(0));
     tmv::VectorView<T> ws = w5.cSubVector(0,5*a.colsize(),5);
     tmv::VectorView<CT> cws = cw5.cSubVector(0,5*a.colsize(),5);
     ws = w;
@@ -3505,8 +3505,8 @@ static void TestMatrixArith6x(
 #endif
 
 #if (XTEST & 1)
-        tmv::Matrix<T> c3x(4*c1.colsize(),5*c1.rowsize());
-        tmv::Matrix<CT> cc3x(4*c1.colsize(),5*c1.rowsize());
+        tmv::Matrix<T> c3x(4*c1.colsize(),5*c1.rowsize(),T(0));
+        tmv::Matrix<CT> cc3x(4*c1.colsize(),5*c1.rowsize(),CT(0));
         tmv::MatrixView<T> c3 = c3x.cSubMatrix(0,c3x.colsize(),0,c3x.rowsize(),4,5);
         tmv::MatrixView<CT> cc3 = cc3x.cSubMatrix(0,c3x.colsize(),0,c3x.rowsize(),4,5);
         c3 = c1;

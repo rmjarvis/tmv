@@ -32,7 +32,6 @@
 
 //#define XDEBUG
 
-
 #include "TMV_Blas.h"
 #include "tmv/TMV_MatrixArithFunc.h"
 #include "TMV_MultMV.h"
@@ -802,12 +801,29 @@ namespace tmv {
         if (ys < 0) yp += (y.size()-1)*ys;
         if (beta == 0) y.setZero();
         float xbeta(1);
+#if 0
+        std::cout<<"Before sgemv:\n";
+        std::cout<<"A = "<<A<<std::endl;
+        std::cout<<"x = "<<x<<std::endl;
+        std::cout<<"y = "<<y<<std::endl;
+        std::cout<<"m,n = "<<m<<','<<n<<std::endl;
+        std::cout<<"alpha,beta = "<<alpha<<','<<xbeta<<std::endl;
+        std::cout<<"A.cptr = "<<A.cptr()<<std::endl;
+        std::cout<<"xp = "<<xp<<std::endl;
+        std::cout<<"yp = "<<yp<<std::endl;
+        std::cout<<"lda,xs,ys = "<<lda<<','<<xs<<','<<ys<<std::endl;
+        std::cout<<"cm = "<<A.iscm()<<std::endl;
+#endif
 
         BLASNAME(sgemv) (
             BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
             BLASV(m),BLASV(n),BLASV(alpha),BLASP(A.cptr()),BLASV(lda),
             BLASP(xp),BLASV(xs),BLASV(xbeta),BLASP(yp),BLASV(ys)
             BLAS1);
+#if 0
+        std::cout<<"After sgemv:"<<std::endl;
+        std::cout<<"y -> "<<y<<std::endl;
+#endif
     }
     template <> void BlasMultMV(
         const std::complex<float> alpha,
@@ -847,8 +863,7 @@ namespace tmv {
         std::cout<<"Before cgemv:\n";
         std::cout<<"A = "<<A<<std::endl;
         std::cout<<"x = "<<x<<std::endl;
-        if (beta == 1) std::cout<<"y = "<<y<<std::endl;
-        else { y.setZero(); std::cout<<"zeroed y = "<<y<<std::endl; }
+        std::cout<<"y = "<<y<<std::endl;
         std::cout<<"m,n = "<<m<<','<<n<<std::endl;
         std::cout<<"alpha,beta = "<<alpha<<','<<xbeta<<std::endl;
         std::cout<<"A.cptr = "<<A.cptr()<<std::endl;
@@ -1084,10 +1099,20 @@ namespace tmv {
 #endif
 #endif // BLAS
 
-    template <bool add, class T, class Ta, class Tx> static void DoMultMV(
+    template <bool add, class T, class Ta, class Tx> 
+    static void DoMultMV(
         const T alpha, const GenMatrix<Ta>& A,
         const GenVector<Tx>& x, const VectorView<T>& y)
     {
+#ifdef XDEBUG
+        std::cout<<"Start DoMultMV\n";
+        std::cout<<"alpha = "<<alpha<<std::endl;
+        std::cout<<"add = "<<add<<std::endl;
+        std::cout<<"A = "<<A<<std::endl;
+        std::cout<<"x = "<<x<<std::endl;
+        std::cout<<"y = "<<y<<std::endl;
+#endif
+
         TMVAssert(A.rowsize() == x.size());
         TMVAssert(A.colsize() == y.size());
         TMVAssert(alpha != T(0));
@@ -1161,6 +1186,9 @@ namespace tmv {
         }
 #else
         NonBlasMultMV<add>(alpha,A,x,y);
+#endif
+#ifdef XDEBUG
+        std::cout<<"y => "<<y<<std::endl;
 #endif
     }
 

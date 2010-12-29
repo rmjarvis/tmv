@@ -215,7 +215,7 @@ namespace tmv {
         //cout<<"m-> "<<m<<endl;
         Matrix<T> mm = LU*m;
         //cout<<"mm = "<<mm<<endl;
-        if (Norm(mm-m0) > 0.001*Norm(L)*Norm(U)*Norm(m0)) {
+        if (!(Norm(mm-m0) <= 0.001*Norm(L)*Norm(U)*Norm(m0))) {
             cerr<<"LU_LDivEq: m = "<<TMV_Text(m)<<"  "<<m0<<endl;
             cerr<<"L = "<<L<<endl;
             cerr<<"U = "<<U<<endl;
@@ -392,7 +392,7 @@ namespace tmv {
         //cout<<"m-> "<<m<<endl;
         Matrix<T> mm = m*LU;
         //cout<<"mm = "<<mm<<endl;
-        if (Norm(mm-m0) > 0.001*Norm(L)*Norm(U)*Norm(m0)) {
+        if (!(Norm(mm-m0) <= 0.001*Norm(L)*Norm(U)*Norm(m0))) {
             cerr<<"LU_RDivEq: m = "<<TMV_Text(m)<<"  "<<m0<<endl;
             cerr<<"L = "<<L<<endl;
             cerr<<"U = "<<U<<endl;

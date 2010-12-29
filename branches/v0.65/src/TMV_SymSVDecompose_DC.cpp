@@ -123,7 +123,7 @@ namespace tmv {
         // http://www.netlib.org/lapack/lawnspdf/lawn89.pdf
         //
         const T eps = TMV_Epsilon<T>();
-        const int TMV_MAXITER = 20;
+        const int TMV_MAXITER = 100;
 
         dbgcout<<"k = "<<k<<endl;
         if (k<N-1) {

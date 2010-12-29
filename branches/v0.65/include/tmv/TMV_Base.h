@@ -95,7 +95,7 @@
 #ifndef TMV_Base_H
 #define TMV_Base_H
 
-#ifndef NDEBUG
+#if (!defined(NDEBUG) && !defined(TMVNDEBUG))
 #define TMVDEBUG
 #endif
 

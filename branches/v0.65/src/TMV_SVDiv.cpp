@@ -79,8 +79,8 @@ namespace tmv {
 #ifdef XDEBUG
         // Note: this test only works for square matrices
         Matrix<Tx> mm = A*x;
-        if (U.isSquare() && kmax==int(SS.size()) && Norm(m0-mm) >
-            0.001 * Norm(A)*Norm(m0)) {
+        if (U.isSquare() && kmax==int(SS.size()) && 
+            !(Norm(m0-mm) <= 0.001 * Norm(A)*Norm(m0))) {
             cerr<<"SV_LDiv\n";
             cerr<<"U = "<<U<<endl;
             cerr<<"S = "<<SS.diag()<<endl;
@@ -124,8 +124,8 @@ namespace tmv {
 #ifdef XDEBUG
         // Note: this test only works for square matrices
         Matrix<Tx> mm = x*A;
-        if (U.isSquare() && kmax==int(SS.size()) && Norm(m0-mm) >
-            0.001 * Norm(A)*Norm(m0)) {
+        if (U.isSquare() && kmax==int(SS.size()) && 
+            !(Norm(m0-mm) > 0.001 * Norm(A)*Norm(m0))) {
             cerr<<"SV_RDiv\n";
             cerr<<"U = "<<U<<endl;
             cerr<<"S = "<<SS.diag()<<endl;

@@ -29,7 +29,6 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #include "TMV_QRDiv.h"
 #include "tmv/TMV_QRD.h"
 #include "tmv/TMV_Matrix.h"

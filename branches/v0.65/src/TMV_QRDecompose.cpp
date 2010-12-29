@@ -47,6 +47,7 @@
 #include "tmv/TMV_MatrixArith.h"
 #include <iostream>
 using std::cerr;
+using std::cout;
 using std::endl;
 #endif
 
@@ -67,6 +68,9 @@ namespace tmv {
         const MatrixView<T>& A, const VectorView<T>& beta, T& det)
     {
 #ifdef XDEBUG
+        cout<<"Start NonBlockQRDecompose\n";
+        cout<<"Norm(A) = "<<Norm(A)<<endl;
+        cout<<"Norm(beta) = "<<Norm(A)<<endl;
         Matrix<T> A0(A);
 #endif
 
@@ -98,6 +102,10 @@ namespace tmv {
         Matrix<T> Q(A);
         GetQFromQR(Q.view(),beta);
         Matrix<T> AA = Q*R;
+        cout<<"Done NonBlockQRDecompose\n";
+        cout<<"Norm(A) = "<<Norm(A)<<endl;
+        cout<<"Norm(beta) = "<<Norm(A)<<endl;
+        cout<<"Norm(AA-A0) = "<<Norm(AA-A0)<<endl;
         if (!(Norm(AA-A0) < 0.0001*Norm(Q)*Norm(R))) {
             cerr<<"NonBlockQRDecompose: A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"-> "<<A<<endl;
@@ -117,6 +125,9 @@ namespace tmv {
         bool makeZ)
     {
 #ifdef XDEBUG
+        cout<<"Start RecursiveQRDecompose\n";
+        cout<<"Norm(A) = "<<Norm(A)<<endl;
+        cout<<"Norm(beta) = "<<Norm(A)<<endl;
         Matrix<T> A0(A);
 #endif
         TMVAssert(A.colsize() >= A.rowsize());
@@ -139,46 +150,59 @@ namespace tmv {
 
         if (N==1) {
             T b = HouseholderReflect(A.col(0),det);
-#ifdef TMVFLDEBUG
-            TMVAssert(Z.ptr() >= Z.first);
-            TMVAssert(Z.ptr() < Z.last);
-#endif
             *Z.ptr() = TMV_CONJ(b);
         } else if (N==2) {
             T* Z00 = Z.ptr();
             T* Z01 = Z00 + Z.stepj();
             T* Z11 = Z01 + 1;
+            //cout<<"Z = "<<*Z00<<"  "<<*Z01<<"  "<<*Z11<<endl;
 
             T b0 = HouseholderReflect(A,det);
-#ifdef TMVFLDEBUG
-            TMVAssert(Z00 >= Z.first);
-            TMVAssert(Z00 < Z.last);
-            TMVAssert(Z01 >= Z.first);
-            TMVAssert(Z01 < Z.last);
-            TMVAssert(Z11 >= Z.first);
-            TMVAssert(Z11 < Z.last);
-#endif
+            //cout<<"b0 = "<<b0<<endl;
+            //cout<<"A -> "<<A<<endl;
             *Z00 = TMV_CONJ(b0);
+            //cout<<"A.col(1,1,M) = "<<A.col(1,1,M)<<endl;
             T b1 = HouseholderReflect(A.col(1,1,M),det);
+            //cout<<"b1 = "<<b1<<endl;
             *Z11 = TMV_CONJ(b1);
+            //cout<<"Z => "<<*Z00<<"  "<<*Z01<<"  "<<*Z11<<endl;
 
             if (makeZ) {
                 const T* A10 = A.cptr()+A.stepi();
                 T temp = A.col(0,2,M).conjugate()*A.col(1,2,M);
                 temp += TMV_CONJ(*A10);
                 *Z01 = -TMV_CONJ(b0*b1)*temp;
+                //cout<<"temp = "<<temp<<endl;
+                //cout<<"Z => "<<*Z00<<"  "<<*Z01<<"  "<<*Z11<<endl;
             }
+#ifdef TMV_INITIALIZE_NAN
+            else {
+                *Z01 = T(0);
+                //cout<<"Z => "<<*Z00<<"  "<<*Z01<<"  "<<*Z11<<endl;
+            }
+#endif
         } else {
+            //cout<<"N = "<<N<<endl;
             int j1 = (N+1)/2;
+            //cout<<"j1 = "<<j1<<endl;
             MatrixView<T> A1 = A.colRange(0,j1);
             UpperTriMatrixView<T> Z1 = Z.subTriMatrix(0,j1);
+            //cout<<"Z1 = "<<Z1<<endl;
             RecursiveQRDecompose(A1,Z1,det,true);
+            //cout<<"Z1 => "<<Z1<<endl;
+            //cout<<"A1 => "<<A1<<endl;
 
             BlockHouseholderLDiv(A1,Z1,A.colRange(j1,N));
+            //cout<<"Z1 => "<<Z1<<endl;
+            //cout<<"A1 => "<<A1<<endl;
+            //cout<<"A(j1:N) = "<<A.colRange(j1,N)<<endl;
 
             MatrixView<T> A2 = A.subMatrix(j1,M,j1,N);
             UpperTriMatrixView<T> Z2 = Z.subTriMatrix(j1,N);
+            //cout<<"Z2 = "<<Z2<<endl;
             RecursiveQRDecompose(A2,Z2,det,makeZ);
+            //cout<<"Z2 => "<<Z2<<endl;
+            //cout<<"A2 => "<<A2<<endl;
 
             if (makeZ) {
                 MatrixView<T> Z3 = Z.subMatrix(0,j1,j1,N);
@@ -187,13 +211,26 @@ namespace tmv {
                 Z3 += A1.rowRange(N,M).adjoint() * A.subMatrix(N,M,j1,N);
                 Z3 = -Z1*Z3;
                 Z3 *= Z2;
+                //cout<<"Z => "<<Z<<endl;
             }
+#ifdef TMV_INITIALIZE_NAN
+            else {
+                MatrixView<T> Z3 = Z.subMatrix(0,j1,j1,N);
+                Z3.setZero();
+                //cout<<"Z => "<<Z<<endl;
+            }
+#endif
         }
 #ifdef XDEBUG
         Matrix<T> R = A.upperTri();
         Matrix<T> Q(A);
         GetQFromQR(Q.view(),Z.diag().conjugate());
         Matrix<T> AA = Q*R;
+        cout<<"Done RecursiveQRDecompose\n";
+        cout<<"Norm(A) = "<<Norm(A)<<endl;
+        cout<<"Norm(beta) = "<<Norm(A)<<endl;
+        cout<<"Norm(AA-A0) = "<<Norm(AA-A0)<<endl;
+        cout<<"Norm(Z) = "<<Norm(Z)<<endl;
         if (!(Norm(AA-A0) < 0.0001*Norm(Q)*Norm(R))) {
             cerr<<"RecursiveQRDecompose: A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"-> "<<A<<endl;
@@ -227,6 +264,9 @@ namespace tmv {
         TMVAssert(beta.step()==1);
 
 #ifdef XDEBUG
+        cout<<"Start BlockQRDecompose\n";
+        cout<<"Norm(A) = "<<Norm(A)<<endl;
+        cout<<"Norm(beta) = "<<Norm(A)<<endl;
         Matrix<T> A0(A);
 #endif
         const int M = A.colsize();
@@ -251,6 +291,11 @@ namespace tmv {
         Matrix<T> Q(A);
         GetQFromQR(Q.view(),beta);
         Matrix<T> AA = Q*R;
+        cout<<"Done BlockQRDecompose\n";
+        cout<<"Norm(A) = "<<Norm(A)<<endl;
+        cout<<"Norm(beta) = "<<Norm(A)<<endl;
+        cout<<"Norm(AA-A0) = "<<Norm(AA-A0)<<endl;
+        cout<<"Norm(BaseZ) = "<<Norm(BaseZ)<<endl;
         if (!(Norm(AA-A0) < 0.0001*Norm(Q)*Norm(R))) {
             cerr<<"BlockQRDecompose: A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"-> "<<A<<endl;
@@ -621,11 +666,11 @@ namespace tmv {
     void QR_Decompose(const MatrixView<T>& A, const VectorView<T>& beta, T& det)
     {
 #ifdef XDEBUG
-        std::cout<<"Start QR_Decompose\n";
-        std::cout<<"A = "<<TMV_Text(A)<<std::endl;
-        std::cout<<"Norm(A) = "<<Norm(A)<<std::endl;
-        std::cout<<"beta = "<<TMV_Text(beta)<<std::endl;
-        std::cout<<"Norm(beta) = "<<Norm(beta)<<std::endl;
+        cout<<"Start QR_Decompose\n";
+        cout<<"A = "<<TMV_Text(A)<<endl;
+        cout<<"Norm(A) = "<<Norm(A)<<endl;
+        cout<<"beta = "<<TMV_Text(beta)<<endl;
+        cout<<"Norm(beta) = "<<Norm(beta)<<endl;
         Matrix<T> A0(A);
 #endif
 
@@ -643,15 +688,15 @@ namespace tmv {
 #endif
         }
 #ifdef XDEBUG
-        std::cout<<"Done QR_Decompose:\n";
-        std::cout<<"Norm(A) = "<<Norm(A)<<std::endl;
-        std::cout<<"beta = "<<beta<<std::endl;
-        std::cout<<"Norm(beta) = "<<Norm(beta)<<std::endl;
+        cout<<"Done QR_Decompose:\n";
+        cout<<"Norm(A) = "<<Norm(A)<<endl;
+        cout<<"beta = "<<beta<<endl;
+        cout<<"Norm(beta) = "<<Norm(beta)<<endl;
         Matrix<T> R = A.upperTri();
         Matrix<T> Q(A);
         GetQFromQR(Q.view(),beta);
         Matrix<T> AA = Q*R;
-        std::cout<<"Norm(AA-A0) = "<<Norm(AA-A0)<<std::endl;
+        cout<<"Norm(AA-A0) = "<<Norm(AA-A0)<<endl;
         if (!(Norm(AA-A0) <= 0.0001*Norm(Q)*Norm(R))) {
             cerr<<"QRDecompose: A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"-> "<<A<<endl;

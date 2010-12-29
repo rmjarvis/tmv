@@ -57,7 +57,7 @@ void TestBandDiv_D2(tmv::DivType dt)
 
     for(size_t i=START;i<b.size();i++) {
         if (showstartdone) {
-            std::cout<<"Start loop: i = "<<i<<"\n";
+            std::cout<<"Start D2 loop: i = "<<i<<"\n";
             std::cout<<"bi = "<<tmv::TMV_Text(b[i])<<"  "<<b[i]<<std::endl;
             std::cout<<"u = "<<tmv::TMV_Text(u)<<"  "<<u<<std::endl;
             std::cout<<"l = "<<tmv::TMV_Text(l)<<"  "<<l<<std::endl;

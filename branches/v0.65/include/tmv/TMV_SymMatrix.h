@@ -3561,7 +3561,6 @@ namespace tmv {
             RankKUpdate<false>(pmm.getX(),pmm.getM1(),view());
         }
 
-
 #undef NEW_SIZE
 
         virtual inline ~HermMatrix() 

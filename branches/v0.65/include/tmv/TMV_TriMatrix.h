@@ -4780,8 +4780,8 @@ namespace tmv {
             NEW_SIZE(m2.size())
         {
             TMVAssert(S==RowMajor || S==ColMajor);
-            TMVAssert(!(m2.dt()==NonUnitDiag && D==UnitDiag));
             TMVAssert(isComplex(T()));
+            TMVAssert(!(m2.dt()==NonUnitDiag && D==UnitDiag));
             m2.assignToL(view());
         }
 
@@ -4800,7 +4800,7 @@ namespace tmv {
         // Op=
         //
 
-        inline type& operator=(const LowerTriMatrix<T,D,S,I>& m2)
+        inline type& operator=(const type& m2)
         { 
             TMVAssert(size() == m2.size());
             if (&m2 != this)

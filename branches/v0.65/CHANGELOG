@@ -43,6 +43,11 @@ Bug fixes:
    before calling gemv (or any of several others), rather than counting
    on the BLAS implementation to do it.  So that is what TMV does now.
 
+-- Increased the maximum number of iterations within the divide-and-conquer
+   SVD algorithm from 20 to 100, since I found a case that required 27 
+   iterations to converge.
+   
+
 New features:
 
 -- Made integer determinants calculate correctly, since the previous code
@@ -81,3 +86,8 @@ New features:
 
 -- Added ability to make the libraries shared libraries, rather than static
    with the SHARED=true scons option.
+
+-- Added ability to turn off TMV debug statements with TMVNDEBUG.
+   Defining NDEBUG also still turns off TMV debugging, but this allows 
+   the user to turn off just the TMV debug statements without turning off 
+   the debug statements in their own code.
