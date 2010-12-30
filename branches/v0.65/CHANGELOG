@@ -46,6 +46,11 @@ Bug fixes:
 -- Increased the maximum number of iterations within the divide-and-conquer
    SVD algorithm from 20 to 100, since I found a case that required 27 
    iterations to converge.
+
+-- Fixed some places where nan's in the input data can lead to infinite loops.
+
+-- Also fixed a place in the SV Decomposition which could rarely go into
+   an infinite loop.
    
 
 New features:

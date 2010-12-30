@@ -504,20 +504,18 @@ namespace tmv {
             // So c' = c - s c^2 dt
             //    s' = s + c^3 dt
             RT dt;
-            do {
-                RT t2 = s2/c2;
-                dbgcout<<"current t2 = "<<t2<<std::endl;
-                dt = ( b - t2*(b*(t2+b)-(1-f)*(1+f)) ) / 
-                    (b*(2*t2+b)-(1-f)*(1+f));
-                dbgcout<<"dt = "<<dt<<std::endl;
-                dt *= c2*c2;
-                RT ds = c2*dt;
-                RT dc = s2*dt;
-                dbgcout<<"ds,dc = "<<ds<<','<<dc<<std::endl;
-                s2 += ds;
-                c2 -= dc;
-                dbgcout<<"New s2,c2 = "<<s2<<','<<c2<<std::endl; 
-            } while (TMV_ABS(dt) > TMV_Epsilon<T>());
+            RT t2 = s2/c2;
+            dbgcout<<"current t2 = "<<t2<<std::endl;
+            dt = ( b - t2*(b*(t2+b)-(1-f)*(1+f)) ) / 
+                (b*(2*t2+b)-(1-f)*(1+f));
+            dbgcout<<"dt = "<<dt<<std::endl;
+            dt *= c2*c2;
+            RT ds = c2*dt;
+            RT dc = s2*dt;
+            dbgcout<<"ds,dc = "<<ds<<','<<dc<<std::endl;
+            s2 += ds;
+            c2 -= dc;
+            dbgcout<<"New s2,c2 = "<<s2<<','<<c2<<std::endl; 
 
             // Make sure s2^2 + c2^2 is still = 1
             dbgcout<<"s2^2+c2^2 - 1 = "<<s2*s2+c2*c2-RT(1)<<std::endl;
@@ -688,9 +686,7 @@ namespace tmv {
         RT* Ei = E.ptr();
 
         RT mu = BidiagonalTrailingEigenValue(D,E);
-#ifdef XDEBUG
         dbgcout<<"mu = "<<mu<<std::endl;
-#endif
         RT y = TMV_NORM(*Di) - mu;  // = T00 - mu
         dbgcout<<"y = "<<y<<std::endl;
         RT x = TMV_CONJ(*Di)*(*Ei);  // = T10
@@ -741,6 +737,7 @@ namespace tmv {
             cerr<<"input E = "<<E0<<endl;
             cerr<<"output D = "<<D<<endl;
             cerr<<"output E = "<<E<<endl;
+            cerr<<"mu = "<<mu<<endl;
             abort();
         }
 #endif
