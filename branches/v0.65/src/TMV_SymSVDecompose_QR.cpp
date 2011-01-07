@@ -81,7 +81,7 @@ namespace tmv {
             TMVAssert(Ei >= E.first);
             TMVAssert(Ei < E.last);
 #endif
-            if ( TMV_ABS(*Ei) <= eps*(TMV_ABS(*Di)+TMV_ABS(*(Di-1))) ||
+            if ( !(TMV_ABS(*Ei) > eps*(TMV_ABS(*Di)+TMV_ABS(*(Di-1)))) ||
                  TMV_Underflow(*Ei) ) {
                 *Ei = T(0);
             }
