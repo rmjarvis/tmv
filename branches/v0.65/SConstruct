@@ -584,8 +584,12 @@ int main()
             CheckLibs(context,[],fblas_source_file) or
             CheckLibs(context,['goto2','pthread'],fblas_source_file) or
             CheckLibs(context,['goto2'],fblas_source_file) or
+            CheckLibs(context,['goto2','gfortran','pthread'],fblas_source_file) or
+            CheckLibs(context,['goto2','gfortran'],fblas_source_file) or
             CheckLibs(context,['goto','pthread'],fblas_source_file) or
-            CheckLibs(context,['goto'],fblas_source_file))
+            CheckLibs(context,['goto'],fblas_source_file) or
+            CheckLibs(context,['goto','gfortran','pthread'],fblas_source_file) or
+            CheckLibs(context,['goto','gfortran'],fblas_source_file))
 
         context.Result(result)
 
