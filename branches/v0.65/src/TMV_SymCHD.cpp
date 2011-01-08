@@ -197,7 +197,10 @@ namespace tmv {
 
     template <class T>
     bool HermCHDiv<T>::isSingular() const 
-    { return det() == T(0); }
+    {
+        return pimpl->LLx.diag().minAbs2Element() <=
+            TMV_Epsilon<T>() * pimpl->LLx.diag().maxAbs2Element(); 
+    }
 
     template <class T> 
     const ConstLowerTriMatrixView<T> HermCHDiv<T>::getL() const 

@@ -177,7 +177,11 @@ namespace tmv {
 
     template <class T>
     bool SymLDLDiv<T>::isSingular() const 
-    { return pimpl->signdet == T(0); }
+    {
+        return pimpl->signdet == T(0) ||
+            ( pimpl->LLx.diag().minAbs2Element() <=
+              TMV_Epsilon<T>() * pimpl->LLx.diag().maxAbs2Element() ); 
+    }
 
     template <class T>
     const ConstLowerTriMatrixView<T> SymLDLDiv<T>::getL() const

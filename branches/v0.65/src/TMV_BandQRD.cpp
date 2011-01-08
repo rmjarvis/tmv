@@ -224,7 +224,10 @@ namespace tmv {
 
     template <class T> 
     bool BandQRDiv<T>::isSingular() const
-    { return det() == T(0); }
+    {
+        return pimpl->QRx.diag().minAbs2Element() <=
+            TMV_Epsilon<T>() * pimpl->QRx.diag().maxAbs2Element(); 
+    }
 
     template <class T> 
     bool BandQRDiv<T>::isTrans() const

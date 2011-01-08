@@ -211,7 +211,10 @@ namespace tmv {
 
     template <class T> 
     bool LUDiv<T>::isSingular() const 
-    { return det() == T(0); }
+    {
+        return pimpl->LUx.diag().minAbs2Element() <=
+            TMV_Epsilon<T>() * pimpl->LUx.diag().maxAbs2Element(); 
+    }
 
     template <class T> 
     bool LUDiv<T>::isTrans() const 
