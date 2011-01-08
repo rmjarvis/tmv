@@ -80,7 +80,7 @@ opts.Add(BoolVariable('IMPORT_PATHS',
 opts.Add(BoolVariable('WITH_BLAS',
             'Look for blas libraries and link if found.', True))
 opts.Add(BoolVariable('WITH_LAPACK',
-            'Look for lapack libraries and link if found.', True))
+            'Look for lapack libraries and link if found.', False))
 opts.Add(BoolVariable('FORCE_MKL',
             'Force scons to use MKL for BLAS and/or LAPACK', False))
 opts.Add(BoolVariable('FORCE_ACML',

@@ -96,3 +96,10 @@ New features:
    Defining NDEBUG also still turns off TMV debugging, but this allows 
    the user to turn off just the TMV debug statements without turning off 
    the debug statements in their own code.
+
+-- Made the default configuration for scons to be WITH_LAPACK=false.
+   Too many LAPACK installations are not thread safe.  And since I 
+   personally use a lot of openmp code in my programs, I occasionally
+   get random segmentation faults when I use TMV with LAPACK.  
+   And since the native TMV code is almost universally as fast as LAPACK,
+   and _is_ thread safe, I finally decided to just make that the default.

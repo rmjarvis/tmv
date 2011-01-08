@@ -346,6 +346,12 @@ implemented the new RRR
 spending a significant time calculating eigenvectors, it may be worth having it call the
 LAPACK routines.
 
+Also, it is worth noting that many LAPACK libraries are not thread safe.
+So if your main program uses multiple threads, and you aren't sure whether
+your LAPACK library is thread safe, you might want to compile TMV without 
+LAPACK to avoid intermittent mysterious segmentation faults from the
+LAPACK library.  All the native TMV code is thread safe.
+
 \begin{comment}
 \item
 \textbf{Comments}
@@ -662,6 +668,11 @@ in TMV is \#\ref{Bugs_RRR} on my To-do list (\S\ref{Bugs}).
 if you use a machine with multiple 
 cores, since TMV seems to have better parallelization of this algorithm
  (if \tt{WITH_OPENMP=true}) than many LAPACK libraries.
+Also, it is worth noting that many LAPACK libraries are not thread safe.
+So if your main program uses multiple threads, and you aren't sure whether
+your LAPACK library is thread safe, you might want to compile TMV without 
+LAPACK to avoid intermittent mysterious segmentation faults from the
+LAPACK library.  All the native TMV code is thread safe.
 \item \texttt{FORCE\_MKL=false} forces the use of the Intel Math Kernel library. 
 It requires the header file \texttt{"mkl.h"} to be found in your path. 
 \index{BLAS!MKL}
@@ -754,9 +765,6 @@ Checking for ACML... no
 Checking for GotoBLAS... no
 Checking for CBLAS... yes
 Using CBLAS
-Checking for CLAPACK... no
-Checking for Fortran LAPACK... yes
-Using Fortran LAPACK
 scons: done reading SConscript files.
 scons: Building targets ...
 \end{verbatim}
@@ -9282,6 +9290,7 @@ should fix the problem.
 There are a number of possible errors that are related to particular BLAS or LAPACK
 distributions, or combinations thereof:
 \begin{itemize}
+
 \item{\bf Strict QRP decomposition fails:}
 \index{LAPACK!Problems with QRP decomposition}
 Some versions of the LAPACK function \tt{dgeqp3} do not produce the correct
@@ -9361,6 +9370,14 @@ library (e.g. by using \tt{WITH_LAPACK=false} in the SCons installation method).
 This does not generally result in slower code, since the native TMV code is almost always
 as fast (usually using the same algorithm) as the LAPACK distribution, but has better
 guards against overflow and underflow.
+
+\item {\bf Segmentation fault or other errors when using LAPACK in multi-threaded program:}
+\index{LAPACK!Problems in multi-threaded programs}
+I have found that many LAPACK libraries (especially older installations) 
+are not thread-safe.  So you might get segmentation faults or other strange
+non-repeatable errors at random times when using LAPACK within a multi-threaded
+program.  The solution is to compile TMV without LAPACK (e.g. by using
+\tt{WITH_LAPACK=false} in the SCons installation method).  
 
 \end{itemize}
 
@@ -10191,6 +10208,15 @@ in scons using the \tt{SHARED=true} option.
 \item Added \tt{TEST\_FLOAT}, \tt{TEST\_DOUBLE}, etc. to the list of scons options.  
   This allows one to only testing one type at a time without recompiling the libraries.
 
+\item Fixed some places where nan's in the input values could lead to
+infinite loops in certain algorithms. 
+
+\item Made the default configuration for scons to be WITH\_LAPACK=false.
+   Too many LAPACK installations are not thread safe.  And since I 
+   personally use a lot of openmp code in my programs, I occasionally
+   get random segmentation faults when I use TMV with LAPACK.  
+   And since the native TMV code is almost universally as fast as LAPACK
+   and is thread safe, I finally decided to just make that the default.
 
 
 \end{itemize}
