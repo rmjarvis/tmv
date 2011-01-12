@@ -397,98 +397,130 @@ namespace tmv
     // And smallN is for N < 4 or N < 2 where the SSE alignment isn't 
     // necessary, to make sure we don't gratuitously use extra memory when 
     // we have a lot of SmallVector<float,2>'s or something like that.
-    template <class T, int N, bool bigN, bool smallN> 
+    template <class T, int N, bool bigN, bool smallN>
     class StackArray2;
 
     template <class T, int N>
     class StackArray2<T,N,false,false>
-    { 
+    // !bigN, !smallN
+    {
     public:
 #ifdef TMV_END_PADDING
-        inline StackArray2() { for(int i=N;i<NN;++i) p[i] = T(0); }
+        inline StackArray2() { for(int i=N;i<NN;++i) get()[i] = T(0); }
 #endif
         inline T* get() { return p; }
         inline const T* get() const { return p; }
     private:
 #ifdef TMV_END_PADDING
         enum { NN = N + (16/sizeof(T)) };
-        T p[NN];
-#else
-        T p[N]; 
+#else 
+        enum { NN = N };
 #endif
+#ifdef __GNUC__
+        T p[NN] __attribute__ ((aligned (16)));
+#else
+        T p[NN]; 
+#endif
+    };
+    template <class T, int N>
+    class StackArray2<T,N,false,true>
+    // smallN 
+    {
+    public:
+#ifdef TMV_END_PADDING
+        inline StackArray2() { for(int i=N;i<NN;++i) get()[i] = T(0); }
+#endif
+        inline T* get() { return p; }
+        inline const T* get() const { return p; }
+    private:
+#ifdef TMV_END_PADDING
+        enum { NN = N + 4 };
+#else 
+        enum { NN = N };
+#endif
+        T p[NN];
     };
 
 #ifdef __SSE__
     template <int N>
     class StackArray2<float,N,false,false>
+    // !bigN, !smallN 
     {
     public:
 #ifdef TMV_END_PADDING
-        inline StackArray2() { for(int i=N;i<N+4;++i) xp.xf[i] = 0.F; }
+        inline StackArray2() { for(int i=N;i<NN;++i) get()[i] = 0.F; }
 #endif
-        inline float* get() { return xp.xf; }
-        inline const float* get() const { return xp.xf; }
+        inline float* get() { return xp.p; }
+        inline const float* get() const { return xp.p; }
     private:
 #ifdef TMV_END_PADDING
-        union { float xf[N+4]; __m128 xm; } xp;
-#else
-        union { float xf[N]; __m128 xm; } xp;
+        enum { NN = N + 4 };
+#else 
+        enum { NN = N };
 #endif
+        union { float p[NN]; __m128 x; } xp;
     };
     template <int N>
     class StackArray2<float,N,false,true>
+    // smallN 
     {
     public:
 #ifdef TMV_END_PADDING
-        inline StackArray2() { for(int i=N;i<N+4;++i) p[i] = 0.F; }
+        inline StackArray2() { for(int i=N;i<NN;++i) get()[i] = 0.F; }
 #endif
         inline float* get() { return p; }
         inline const float* get() const { return p; }
     private:
 #ifdef TMV_END_PADDING
-        float p[N+4];
-#else
-        float p[N];
+        enum { NN = N + 4 };
+#else 
+        enum { NN = N };
 #endif
+        float p[NN];
     };
 #endif
 #ifdef __SSE2__
     template <int N>
     class StackArray2<double,N,false,false>
-    { 
-    public:
-#ifdef TMV_END_PADDING
-        inline StackArray2() { for(int i=N;i<N+2;++i) xp.xd[i] = 0.; }
-#endif
-        inline double* get() { return xp.xd; }
-        inline const double* get() const { return xp.xd; }
-    private:
-#ifdef TMV_END_PADDING
-        union { double xd[N+2]; __m128d xm; } xp;
-#else
-        union { double xd[N]; __m128d xm; } xp;
-#endif
-    };
-    template <int N>
-    class StackArray2<double,N,false,true>
+    // !bigN, !smallN 
     {
     public:
 #ifdef TMV_END_PADDING
-        inline StackArray2() { for(int i=N;i<N+2;++i) p[i] = 0.; }
+        inline StackArray2() { for(int i=N;i<NN;++i) get()[i] = 0.; }
+#endif
+        inline double* get() { return xp.p; }
+        inline const double* get() const { return xp.p; }
+    private:
+#ifdef TMV_END_PADDING
+        enum { NN = N + 2 };
+#else 
+        enum { NN = N };
+#endif
+        union { double p[NN]; __m128d x; } xp;
+    };
+    template <int N>
+    class StackArray2<double,N,false,true>
+    // smallN 
+    {
+    public:
+#ifdef TMV_END_PADDING
+        inline StackArray2() { for(int i=N;i<NN;++i) get()[i] = 0.; }
 #endif
         inline double* get() { return p; }
         inline const double* get() const { return p; }
     private:
 #ifdef TMV_END_PADDING
-        double p[N+2];
-#else
-        double p[N];
+        enum { NN = N + 2 };
+#else 
+        enum { NN = N };
 #endif
+        double p[NN];
     };
 #endif
 
     template <class T, int N>
     class StackArray2<T,N,true,false>
+    // bigN
     {
     public:
         inline StackArray2() : p(N) {}
@@ -587,7 +619,7 @@ namespace tmv
 #endif
                 false ) };
 
-        StackArray2<T,(N<<1),bigN,smallN> p;
+        StackArray2<RT,(N<<1),bigN,smallN> p;
 
         inline StackArray& operator=(StackArray& p2);
         inline StackArray(const StackArray& p2);

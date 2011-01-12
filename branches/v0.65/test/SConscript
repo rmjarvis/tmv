@@ -20,7 +20,7 @@ test_symband_files = ReadFileList('test_symband.files')
 test_symband_lap_files = ReadFileList('test_symband_lap.files')
 test_small_files = ReadFileList('test_small.files')
 test_small_sq_files = ReadFileList('test_small_sq.files')
-test_small_nonsq_files = ReadFileList('test_small_nonsq.filesx')
+test_small_nonsq_files = ReadFileList('test_small_nonsq.files')
 test_small_sq_div_files = ReadFileList('test_small_sq_div.files')
 test_small_nonsq_div_files = ReadFileList('test_small_nonsq_div.files')
 

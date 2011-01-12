@@ -1423,8 +1423,7 @@ namespace tmv {
 
         if (step1 == 1 && step2 == 1) {
             std::copy(v1ptr,v1ptr+v2.size(),v2ptr);
-        }
-        else {
+        } else {
             for(int i=v2.size();i>0;--i,v1ptr+=step1,v2ptr+=step2) {
 #ifdef TMVFLDEBUG
                 TMVAssert(v2ptr >= v2.first);

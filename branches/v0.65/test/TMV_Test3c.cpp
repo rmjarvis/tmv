@@ -29,11 +29,10 @@ int main() try
 
     //showacc=true;
     //showdiv=true;
-    showtests=true;
-    showstartdone=true;
-    TestSmallMatrixArith_B3a<int>();
+    //showtests=true;
+    //showstartdone=true;
 
-#if 0
+#if 1
 
 #ifdef TEST_DOUBLE
     TestAllSmallMatrixB<double>();
