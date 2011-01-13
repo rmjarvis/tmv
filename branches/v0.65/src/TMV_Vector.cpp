@@ -650,6 +650,10 @@ namespace tmv {
 #ifndef CBLAS
         --imax;
 #endif
+        // If the input vector has nan's (especially all nan's), then
+        // the output imax might not be in the allowed bounds.
+        // So make sure to reset it to 0, so we don't get a segfault.
+        if (imax < 0 || imax >= int(v.size())) imax = 0;
         TMVAssert(imax < int(v.size()));
         return TMV_ABS(v[imax]);
     }
@@ -664,6 +668,7 @@ namespace tmv {
 #ifndef CBLAS
         --imax;
 #endif
+        if (imax < 0 || imax >= int(v.size())) imax = 0;
         TMVAssert(imax < int(v.size()));
         return TMV_ABS2(v[imax]);
     }
@@ -676,6 +681,7 @@ namespace tmv {
 #ifndef CBLAS
         --imin;
 #endif
+        if (imin < 0 || imin >= int(v.size())) imin = 0;
         TMVAssert(imin < int(v.size()));
         return TMV_ABS(v[imin]);
     }
@@ -690,6 +696,7 @@ namespace tmv {
 #ifndef CBLAS
         --imin;
 #endif
+        if (imin < 0 || imin >= int(v.size())) imin = 0;
         TMVAssert(imin < int(v.size()));
         return TMV_ABS2(v[imin]);
     }
@@ -698,12 +705,15 @@ namespace tmv {
 #ifdef INST_FLOAT
     static float FindMaxAbsElement(const GenVector<float>& v, int& imax)
     {
+        //std::cout<<"v = "<<v<<std::endl;
         int n=v.size();
         int s=v.step();
         imax = BLASNAME(isamax) (BLASV(n),BLASP(v.cptr()),BLASV(s));
 #ifndef CBLAS
         --imax;
 #endif
+        //std::cout<<"imax = "<<imax<<std::endl;
+        if (imax < 0 || imax >= int(v.size())) imax = 0;
         TMVAssert(imax < int(v.size()));
         return TMV_ABS(v[imax]);
     }
@@ -718,6 +728,7 @@ namespace tmv {
 #ifndef CBLAS
         --imax;
 #endif
+        if (imax < 0 || imax >= int(v.size())) imax = 0;
         TMVAssert(imax < int(v.size()));
         return TMV_ABS2(v[imax]);
     }
@@ -730,6 +741,7 @@ namespace tmv {
 #ifndef CBLAS
         --imin;
 #endif
+        if (imin < 0 || imin >= int(v.size())) imin = 0;
         TMVAssert(imin < int(v.size()));
         return TMV_ABS(v[imin]);
     }
@@ -744,6 +756,7 @@ namespace tmv {
 #ifndef CBLAS
         --imin;
 #endif
+        if (imin < 0 || imin >= int(v.size())) imin = 0;
         TMVAssert(imin < int(v.size()));
         return TMV_ABS2(v[imin]);
     }

@@ -118,7 +118,7 @@ namespace tmv {
         cout<<"QRx = "<<QRx<<endl;
         cout<<"Qbeta = "<<Qbeta<<endl;
         cout<<"m = "<<m<<endl;
-        cout<<"x = "<<x<<endl;
+        //cout<<"x = "<<x<<endl;
         Matrix<T1> QR2 = QRx;
         GetQFromBandQR(QR2.view(),Qbeta,QRx.nlo());
         QR2 *= QRx.diagRange(0,QRx.nhi()+1);
@@ -229,7 +229,7 @@ namespace tmv {
         cout<<"QRx = "<<QRx<<endl;
         cout<<"Qbeta = "<<Qbeta<<endl;
         cout<<"m = "<<m<<endl;
-        cout<<"x = "<<x<<endl;
+        //cout<<"x = "<<x<<endl;
         Matrix<T1> QR2 = QRx;
         GetQFromBandQR(QR2.view(),Qbeta,QRx.nlo());
         QR2 *= QRx.diagRange(0,QRx.nhi()+1);

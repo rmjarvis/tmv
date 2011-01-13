@@ -218,7 +218,11 @@ namespace tmv {
         } else {
             beta = HouseholderReflect(*m.ptr(),v,det);
         }
+        //std::cout<<"Before LMult: m = "<<m<<std::endl;
+        //std::cout<<"v = "<<v<<std::endl;
+        //std::cout<<"beta = "<<beta<<std::endl;
         if (beta != T(0)) HouseholderLMult(v,beta,m.colRange(1,m.rowsize()));
+        //std::cout<<"m => "<<m<<std::endl;
 #ifdef XDEBUG
         if (TMV_Underflow(m0.col(0).maxAbsElement())) return beta;
         Vector<T> vv(m.colsize());

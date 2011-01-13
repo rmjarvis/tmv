@@ -126,6 +126,7 @@ namespace tmv {
     {
 #ifdef XDEBUG
         cout<<"Start RecursiveQRDecompose\n";
+        cout<<"A = "<<A<<endl;
         cout<<"Norm(A) = "<<Norm(A)<<endl;
         cout<<"Norm(beta) = "<<Norm(A)<<endl;
         Matrix<T> A0(A);

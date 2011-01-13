@@ -41,7 +41,7 @@
 #include <iostream>
 
 #ifdef XDEBUG
-#define THRESH 1.e-5
+#define THRESH 1.e-15
 #include <iostream>
 #include "tmv/TMV_VectorArith.h"
 #include "tmv/TMV_MatrixArith.h"
@@ -481,6 +481,7 @@ namespace tmv {
             // However, we can improve the accuracy by combining the 
             // above two equations to get an equation for t2 in terms of
             // the existing estimate of t2. 
+            exact = false;  // And don't assume answer is exact.
             
             // t1 = -(t2 + b) / f
             // t2 = -t1 f - b

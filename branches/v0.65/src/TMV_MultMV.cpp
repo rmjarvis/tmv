@@ -1110,7 +1110,7 @@ namespace tmv {
         std::cout<<"add = "<<add<<std::endl;
         std::cout<<"A = "<<A<<std::endl;
         std::cout<<"x = "<<x<<std::endl;
-        std::cout<<"y = "<<y<<std::endl;
+        if (add) std::cout<<"y = "<<y<<std::endl;
 #endif
 
         TMVAssert(A.rowsize() == x.size());
@@ -1203,8 +1203,7 @@ namespace tmv {
         cout<<"A = "<<TMV_Text(A)<<"  "<<A<<endl;
         cout<<"x = "<<TMV_Text(x)<<" step "<<x.step()<<"  "<<x<<endl;
         cout<<"y = "<<TMV_Text(y)<<" step "<<y.step()<<endl;
-        //if (add) cout<<"y = "<<y<<endl;
-        cout<<"y = "<<y<<endl;
+        if (add) cout<<"y = "<<y<<endl;
         cout<<"ptrs = "<<A.cptr()<<"  "<<x.cptr()<<"  "<<y.cptr()<<std::endl;
         Vector<Tx> x0 = x;
         Vector<T> y0 = y;
