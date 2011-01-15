@@ -383,8 +383,8 @@ def AddExtraPaths(env):
 
         local lib and include paths
         paths in EXTRA_*PATH parameters
-        paths from the user's environment
         paths in PREFIX directory
+        paths from the user's environment
 
     Only paths that actually exists are kept.
     """
@@ -401,6 +401,17 @@ def AddExtraPaths(env):
     cpp_paths += env['EXTRA_INCLUDE_PATH'].split(':')
     lib_paths2 += env['EXTRA_LIB_PATH'].split(':')
 
+    # PREFIX directory
+    # If none given, then don't add them to the -L and -I directories.
+    # But still use the default /usr/local for installation
+    if env['PREFIX'] == '':
+        env['INSTALL_PREFIX'] = default_prefix
+    else:
+        AddPath(bin_paths, os.path.join(env['PREFIX'], 'bin'))
+        AddPath(cpp_paths, os.path.join(env['PREFIX'], 'include'))
+        AddPath(lib_paths1, os.path.join(env['PREFIX'], 'lib'))
+        env['INSTALL_PREFIX'] = env['PREFIX']
+    
     # Paths found in environment paths
     if env['IMPORT_PATHS'] and os.environ.has_key('PATH'):
         paths=os.environ['PATH']
@@ -422,29 +433,15 @@ def AddExtraPaths(env):
         paths=paths.split(os.pathsep)
         AddPath(lib_paths2, paths)
 
-    # PREFIX directory
-    # If none given, then don't add them to the -L and -I directories.
-    # But still use the default /usr/local for installation
-    if env['PREFIX'] == '':
-        env['INSTALL_PREFIX'] = default_prefix
-    else:
-        AddPath(bin_paths, os.path.join(env['PREFIX'], 'bin'))
-        AddPath(cpp_paths, os.path.join(env['PREFIX'], 'include'))
-        AddPath(lib_paths1, os.path.join(env['PREFIX'], 'lib'))
-        env['INSTALL_PREFIX'] = env['PREFIX']
-    
 
     #print 'bin paths = ',bin_paths
     #print 'cpp paths = ',cpp_paths
     #print 'lib paths = ',lib_paths
 
-    #env.AppendENVPath('PATH', bin_paths)
-    #env.Append(LIBPATH= lib_paths)
-    #env.Append(CPPPATH= cpp_paths)
     env.PrependENVPath('PATH', bin_paths)
     env.Prepend(CPPPATH= cpp_paths)
-    env.Prepend(LIBPATH= lib_paths1)
     env.Prepend(LIBPATH= lib_paths2)
+    env.Prepend(LIBPATH= lib_paths1)
     env['LIBPATH2'] = lib_paths2    # used for the tmv-link file
 
 def ReadFileList(fname):
