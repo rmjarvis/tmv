@@ -38,7 +38,7 @@ static void TestSmallSquareDiv()
         std::cout<<"b = "<<b<<std::endl;
         std::cout<<"x = b/m = "<<x<<std::endl;
         std::cout<<"b2 = "<<b2<<std::endl;
-        std::cout<<"Norm(b-b2) = "<<Norm(vtemp=b-b2)<<std::endl;
+        std::cout<<"Norm(b-b2) = "<<Norm(b-b2)<<std::endl;
         std::cout<<"eps*Norm(b) = "<<eps*Norm(b)<<std::endl;
     }
     Assert(Norm(vtemp=b2-b) < eps*Norm(b),"Square b/m");
@@ -172,14 +172,14 @@ static void TestSmallNonSquareDiv()
     if (N > 3) m(3,0) = T(-10);
     if (N > 2) m(2,2) = T(30);
 
-    tmv::SmallVector<T,N> x;
+    tmv::SmallVector<T,N> x(T(7));
     x(0) = T(2);
     if (N  > 1) x(1) = T(-10);
     if (N  > 2) x(2) = T(5);
     if (N  > 3) x(3) = T(-5);
 
     if (showstartdone) {
-        std::cout<<"Start TestSmallSquareDiv\n";
+        std::cout<<"Start TestSmallNonSquareDiv\n";
         std::cout<<"m = "<<TMV_Text(m)<<" "<<m<<std::endl;
     }
 
@@ -189,6 +189,13 @@ static void TestSmallNonSquareDiv()
     tmv::SmallVector<T,6> b = m * x;
     tmv::SmallVector<T,N> x2 = b/m;
     tmv::SmallVector<T,N> vntemp;
+    if (showacc) {
+        std::cout<<"x = "<<x<<std::endl;
+        std::cout<<"b = m*x "<<b<<std::endl;
+        std::cout<<"x2 = b/m "<<x2<<std::endl;
+        std::cout<<"Norm(diff) = "<<Norm(vntemp=x2-x)<<std::endl;
+        std::cout<<"eps*Norm(x) = "<<eps<<" * "<<Norm(x)<<std::endl;
+    }
     Assert(Norm(vntemp=x2-x) < eps*Norm(x),"NonSquare exact b/m");
 
     tmv::SmallVector<T,6> b2 = x%m;
@@ -224,7 +231,7 @@ static void TestSmallNonSquareDiv()
     if (N > 1) c.col(1) *= std::complex<T>(-1,3);
     c.row(3) += tmv::SmallVector<std::complex<T>,N>(std::complex<T>(1,9));
 
-    tmv::SmallVector<std::complex<T>,N> y;
+    tmv::SmallVector<std::complex<T>,N> y(std::complex<T>(7,3));
     y(0) = std::complex<T>(2,9);
     if (N > 1) y(1) = std::complex<T>(-10,4);
     if (N > 2) y(2) = std::complex<T>(5,-1);
