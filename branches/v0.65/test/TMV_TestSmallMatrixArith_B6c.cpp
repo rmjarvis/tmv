@@ -43,8 +43,8 @@ static void DoTestSmallMatrixArith_B6c()
     ca5.col(3) *= std::complex<T>(-1,3);
     ca5.row(0).addToAll(std::complex<T>(1,9));
 
-    tmv::SmallMatrix<T,7,7,tmv::RowMajor> a7;
-    tmv::SmallMatrix<std::complex<T>,7,7,tmv::RowMajor> ca7;
+    tmv::SmallMatrix<T,7,7,tmv::RowMajor> a7(T(7));
+    tmv::SmallMatrix<std::complex<T>,7,7,tmv::RowMajor> ca7(std::complex<T>(5,7));
 
     if (showstartdone) {
         std::cout<<"B6c\n";
