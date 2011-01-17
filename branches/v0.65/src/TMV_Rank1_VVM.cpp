@@ -664,104 +664,106 @@ namespace tmv {
         if (A.colsize() > 0 && A.rowsize() > 0) {
             if (alpha == T(0)) {
                 if (!add) A.setZero();
-            } else {
-                if (A.isconj()) 
-                    Rank1Update<add>(
-                        TMV_CONJ(alpha),x.conjugate(),y.conjugate(),
-                        A.conjugate());
-                else if (A.isrm())
-                    Rank1Update<add>(alpha,y,x,A.transpose());
+            } else if (A.isconj()) 
+                Rank1Update<add>(
+                    TMV_CONJ(alpha),x.conjugate(),y.conjugate(),
+                    A.conjugate());
+            else if (A.isrm()) 
+                Rank1Update<add>(alpha,y,x,A.transpose());
 #ifdef BLAS
-                else if (!((A.iscm() && A.stepj()>0))) {
-                    Matrix<T,ColMajor> A2(A);
-                    Rank1Update<add>(alpha,x,y,A2.view());
-                    A = A2;
+            else if (!((A.iscm() && A.stepj()>0))) {
+                Matrix<T,ColMajor> A2(A);
+                Rank1Update<add>(alpha,x,y,A2.view());
+                A = A2;
+            } else if (x.step() != 1 || SameStorage(x,A)) {
+                // Most BLAS implementations do fine with the x.step() != 1.
+                // However, some implementations seem to propagate nan's from
+                // the temporary memory they create to do the unit-1 
+                // calculation.
+                // So to make sure they don't have to make a temporary, I just
+                // do it here for them.
+                if (y.step() != 1 || SameStorage(y,A)) {
+                    if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
+                        if (x.size() <= y.size()) {
+                            Vector<Tx> xx = TMV_REAL(alpha)*x;
+                            Vector<Ty> yy = y;
+                            if (!add) A.setZero();
+                            BlasRank1Update(T(1),xx,yy,A);
+                        } else {
+                            Vector<Tx> xx = x;
+                            Vector<Ty> yy = TMV_REAL(alpha)*y;
+                            if (!add) A.setZero();
+                            BlasRank1Update(T(1),xx,yy,A);
+                        }
+                    } else {
+                        if (x.size() <= y.size()) {
+                            Vector<T> xx = alpha*x;
+                            Vector<Ty> yy = y;
+                            if (!add) A.setZero();
+                            BlasRank1Update(T(1),xx,yy,A);
+                        } else {
+                            Vector<Tx> xx = x;
+                            Vector<T> yy = alpha*y;
+                            if (!add) A.setZero();
+                            BlasRank1Update(T(1),xx,yy,A);
+                        }
+                    }
                 } else {
-                    if (SameStorage(x,A)) {
-                        if (SameStorage(y,A)) {
-                            if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
-                                if (x.size() <= y.size()) {
-                                    Vector<Tx> xx = TMV_REAL(alpha)*x;
-                                    Vector<Ty> yy = y;
-                                    if (!add) A.setZero();
-                                    BlasRank1Update(T(1),xx,yy,A);
-                                } else {
-                                    Vector<Tx> xx = x;
-                                    Vector<Ty> yy = TMV_REAL(alpha)*y;
-                                    if (!add) A.setZero();
-                                    BlasRank1Update(T(1),xx,yy,A);
-                                }
+                    if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
+                        Vector<Tx> xx = TMV_REAL(alpha)*x;
+                        if (!add) A.setZero();
+                        BlasRank1Update(T(1),xx,y,A);
+                    } else {
+                        Vector<T> xx = alpha*x;
+                        if (!add) A.setZero();
+                        BlasRank1Update(T(1),xx,y,A);
+                    }
+                }
+            } else {
+                if (y.step() != 1 || SameStorage(A,y)) {
+                    if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
+                        Vector<Ty> yy = TMV_REAL(alpha)*y;
+                        if (!add) A.setZero();
+                        BlasRank1Update(T(1),x,yy,A);
+                    } else {
+                        Vector<T> yy = alpha*y;
+                        if (!add) A.setZero();
+                        BlasRank1Update(T(1),x,yy,A);
+                    }
+                } else {
+                    if (!add) A.setZero();
+                    if (x.isconj() && y.isconj()) {
+                        if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
+                            if (x.size() <= y.size()) {
+                                Vector<Tx> xx = TMV_REAL(alpha)*x;
+                                BlasRank1Update(T(1),xx,y,A);
                             } else {
-                                if (x.size() <= y.size()) {
-                                    Vector<T> xx = alpha*x;
-                                    Vector<Ty> yy = y;
-                                    if (!add) A.setZero();
-                                    BlasRank1Update(T(1),xx,yy,A);
-                                } else {
-                                    Vector<Tx> xx = x;
-                                    Vector<T> yy = alpha*y;
-                                    if (!add) A.setZero();
-                                    BlasRank1Update(T(1),xx,yy,A);
-                                }
+                                Vector<Ty> yy = TMV_REAL(alpha)*y;
+                                BlasRank1Update(T(1),x,yy,A);
                             }
                         } else {
-                            if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
-                                Vector<Tx> xx = TMV_REAL(alpha)*x;
-                                if (!add) A.setZero();
+                            if (x.size() <= y.size()) {
+                                Vector<T> xx = alpha*x;
                                 BlasRank1Update(T(1),xx,y,A);
                             } else {
-                                Vector<T> xx = alpha*x;
-                                if (!add) A.setZero();
-                                BlasRank1Update(T(1),xx,y,A);
+                                Vector<T> yy = alpha*y;
+                                BlasRank1Update(T(1),x,yy,A);
                             }
                         }
                     } else {
-                        if (SameStorage(A,y)) {
-                            if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
-                                Vector<Ty> yy = TMV_REAL(alpha)*y;
-                                if (!add) A.setZero();
-                                BlasRank1Update(T(1),x,yy,A);
-                            } else {
-                                Vector<T> yy = alpha*y;
-                                if (!add) A.setZero();
-                                BlasRank1Update(T(1),x,yy,A);
-                            }
-                        } else {
-                            if (!add) A.setZero();
-                            if (x.isconj() && y.isconj()) {
-                                if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
-                                    if (x.size() <= y.size()) {
-                                        Vector<Tx> xx = TMV_REAL(alpha)*x;
-                                        BlasRank1Update(T(1),xx,y,A);
-                                    } else {
-                                        Vector<Ty> yy = TMV_REAL(alpha)*y;
-                                        BlasRank1Update(T(1),x,yy,A);
-                                    }
-                                } else {
-                                    if (x.size() <= y.size()) {
-                                        Vector<T> xx = alpha*x;
-                                        BlasRank1Update(T(1),xx,y,A);
-                                    } else {
-                                        Vector<T> yy = alpha*y;
-                                        BlasRank1Update(T(1),x,yy,A);
-                                    }
-                                }
-                            } else {
-                                BlasRank1Update(alpha,x,y,A);
-                            }
-                        }
+                        BlasRank1Update(alpha,x,y,A);
                     }
                 }
-#else
-                else NonBlasRank1Update<add>(alpha,x,y,A);
-#endif
             }
+#else
+            else NonBlasRank1Update<add>(alpha,x,y,A);
+#endif
         }
 
 #ifdef XDEBUG
         //cout<<"Done Rank1Update: A->"<<A<<endl;
-        if (Norm(A-A2) > 0.001*(TMV_ABS(alpha)*Norm(x0)*Norm(y0)+
-                                (add?Norm(A0):TMV_RealType(T)(0)))) {
+        if (!(Norm(A-A2) < 0.001*(TMV_ABS(alpha)*Norm(x0)*Norm(y0)+
+                                  (add?Norm(A0):TMV_RealType(T)(0))))) {
             cerr<<"Rank1Update: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"x = "<<TMV_Text(x)<<"  step = "<<x.step()<<"  "<<x0<<endl;

@@ -836,8 +836,8 @@ namespace tmv {
 
 #ifdef XDEBUG
         TMVAssert(A.isHermOK());
-        if (Norm(A-A2) > 0.001*(TMV_ABS(alpha)*Norm(x0)*Norm(y0)+
-                                (add?Norm(A0):TMV_RealType(T)(0)))) {
+        if (!(Norm(A-A2) < 0.001*(TMV_ABS(alpha)*Norm(x0)*Norm(y0)+
+                                  (add?Norm(A0):TMV_RealType(T)(0))))) {
             cerr<<"Rank2KUpdate: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"x = "<<TMV_Text(x)<<endl;

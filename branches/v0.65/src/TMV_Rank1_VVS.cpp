@@ -539,14 +539,20 @@ namespace tmv {
         TMVAssert(TMV_IMAG(alpha)==TMV_RealType(T)(0) || !A.isherm());
         if (alpha != T(0) && A.size() > 0) {
 #ifdef BLAS
-            if (A.isrm())
+            if (A.isrm()) {
                 return Rank1Update<add>(
                     alpha,x,A.issym()?A.transpose():A.adjoint());
-            else if (A.isconj()) 
+            } else if (A.isconj())  {
                 return Rank1Update<add>(
                     TMV_CONJ(alpha),x.conjugate(),A.conjugate());
-            else if (A.iscm() && A.stepj()>0) {
-                if (x.isconj() || SameStorage(x,A)) {
+            } else if (A.iscm() && A.stepj()>0) {
+                // Most BLAS implementations do fine with the x.step() != 1.
+                // However, some implementations seem to propagate nan's from
+                // the temporary memory they create to do the unit-1 
+                // calculation.
+                // So to make sure they don't have to make a temporary, I just
+                // do it here for them.
+                if (x.step() != 1 || x.isconj() || SameStorage(x,A)) {
                     Vector<Tx> xx = x;
                     if (!add) A.setZero();
                     BlasRank1Update(alpha,xx,A);
@@ -575,7 +581,8 @@ namespace tmv {
 #ifdef XDEBUG
         TMVAssert(A.isHermOK());
         cout<<"Done Rank1\n";
-        if (Norm(A-A2) > 0.001*(TMV_ABS(alpha)*TMV_SQR(Norm(x0))+Norm(A0))) {
+        cout<<"Norm(A-A2) = "<<Norm(A-A2)<<std::endl;
+        if (!(Norm(A-A2) < 0.001*(TMV_ABS(alpha)*TMV_SQR(Norm(x0))+Norm(A0)))) {
             cerr<<"Rank1Update: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"x = "<<TMV_Text(x)<<"  step = "<<x.step()<<"  "<<x<<endl;

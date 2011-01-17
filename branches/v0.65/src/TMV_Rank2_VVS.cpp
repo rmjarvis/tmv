@@ -715,8 +715,8 @@ namespace tmv {
         TMVAssert(A.size() == x.size());
         TMVAssert(A.size() == y.size());
         if (alpha != T(0) && A.size() > 0) {
-            if (A.isconj()) 
-                Rank2Update<add>(
+        if (A.isconj()) 
+            Rank2Update<add>(
                     TMV_CONJ(alpha),x.conjugate(),y.conjugate(),A.conjugate());
             else if (A.isrm())
                 if (A.isherm()) Rank2Update<add>(alpha,x,y,A.adjoint());
@@ -739,8 +739,8 @@ namespace tmv {
                 }
             } else {
 #ifdef BLAS
-                if (x.isconj() || x.step()<0 || SameStorage(x,A)) {
-                    if (y.isconj() || y.step()<0 || SameStorage(y,A)) {
+                if (x.isconj() || x.step()!=1 || SameStorage(x,A)) {
+                    if (y.isconj() || y.step()!=1 || SameStorage(y,A)) {
                         if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
                             Vector<Tx> xx = TMV_REAL(alpha)*x;
                             Vector<Ty> yy = y;
@@ -764,7 +764,7 @@ namespace tmv {
                         }
                     }
                 } else {
-                    if (y.isconj() || y.step()<0 || SameStorage(y,A)) {
+                    if (y.isconj() || y.step()!=1 || SameStorage(y,A)) {
                         if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
                             Vector<Ty> yy = TMV_REAL(alpha)*y;
                             if (!add) A.setZero();
@@ -789,7 +789,7 @@ namespace tmv {
         TMVAssert(A.isHermOK());
         //cout<<"Done Rank2Update: \n";
         //cout<<"Norm(A-A2) = "<<Norm(A-A2)<<endl;
-        if (Norm(A-A2) > 0.001*(TMV_ABS(alpha)*Norm(x0)*Norm(y0)+Norm(A0))) {
+        if (!(Norm(A-A2) < 0.001*(TMV_ABS(alpha)*Norm(x0)*Norm(y0)+Norm(A0)))) {
             cerr<<"Rank2Update: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"x = "<<TMV_Text(x)<<"  step = "<<x.step()<<"  "<<x0<<endl;
