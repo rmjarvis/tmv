@@ -5,7 +5,7 @@
 #include "TMV.h"
 #include "TMV_Band.h"
 #include "TMV_Test.h"
-#include "TMV_Test2.h"
+#include "TMV_Test_2.h"
 #include "TMV_TestBandArith.h"
 
 template <class T1, class T2> 
@@ -34,9 +34,7 @@ void TestBandMatrixArith_A()
 {
     std::vector<tmv::BandMatrixView<T> > b;
     std::vector<tmv::BandMatrixView<std::complex<T> > > cb;
-    std::vector<tmv::BaseMatrix<T>*> B;
-    std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
-    MakeBandList(b,cb,B,CB);
+    MakeBandList(b,cb);
 
     for(size_t i=START1;i<b.size();i++) {
         if (showstartdone) {
@@ -59,8 +57,6 @@ void TestBandMatrixArith_A()
             TestMatrixArith6x<T>(bi,cbi,b[j],cb[j],"Band/Band");
         }
     }
-    for(size_t i=0;i<B.size();i++) delete B[i];
-    for(size_t i=0;i<CB.size();i++) delete CB[i];
 }
 
 #ifdef TEST_DOUBLE

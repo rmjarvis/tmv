@@ -25,11 +25,13 @@ DefGiv2(T,CT,CT)
 #undef DefGiv1
 #undef DefGiv2
 
+#if 0
 #ifdef INST_COMPLEX
 template void GivensMult(T c, CT s, ConjRef<CT > x, ConjRef<CT > y); 
 template void GivensMult(T c, T s, ConjRef<CT > x, ConjRef<CT > y); 
 template void GivensMult(T c, CT s, VarConjRef<CT > x, VarConjRef<CT > y); 
 template void GivensMult(T c, T s, VarConjRef<CT > x, VarConjRef<CT > y); 
+#endif
 #endif
 
 #undef CT

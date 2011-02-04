@@ -76,8 +76,9 @@ namespace tmv {
 
     // C (+)= alpha * A * B
     template <class T, class Ta> 
-    void MultEqMM(const T alpha,
-                  const GenDiagMatrix<Ta>& A, const MatrixView<T>& B);
+    void MultEqMM(
+        const T alpha,
+        const GenDiagMatrix<Ta>& A, const MatrixView<T>& B);
 
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(

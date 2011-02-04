@@ -15,18 +15,4 @@ DefDivEq(CT,CT)
 
 #undef DefDivEq
 
-#define DefDivEq(T,T1)\
-  template <> void LU_LDivEq(const GenMatrix<T1 >& ,\
-      const int* , const MatrixView<T >& )\
-      { TMVAssert(TMV_FALSE); }\
-  template <> void LU_RDivEq(const GenMatrix<T1 >& ,\
-      const int* , const MatrixView<T >& )\
-      { TMVAssert(TMV_FALSE); }\
-
-#ifdef INST_COMPLEX
-DefDivEq(T,CT)
-#endif
-
-#undef DefDivEq
-
 #undef CT

@@ -1,5 +1,5 @@
 #include "TMV_Test.h"
-#include "TMV_Test1.h"
+#include "TMV_Test_1.h"
 #include "TMV.h"
 
 #include "TMV_TestMatrixArith.h"

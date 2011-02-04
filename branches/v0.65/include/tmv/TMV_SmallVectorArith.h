@@ -45,20 +45,20 @@ namespace tmv {
     template <class T, int N> 
     class SmallVectorComposite : public VectorComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
 
         inline SmallVectorComposite() {}
         inline SmallVectorComposite(const SmallVectorComposite<T,N>&) {}
         virtual inline ~SmallVectorComposite() {}
 
         inline size_t size() const { return N; }
-        virtual void assignTov(SmallVector<RT,N,CStyle>& v) const = 0;
+        virtual void assignTov(SmallVector<real_type,N,CStyle>& v) const = 0;
         virtual void assignTov(SmallVector<TMV_ComplexType(T),N,CStyle>& v) const = 0;
-        virtual void assignTov(SmallVector<RT,N,FortranStyle>& v) const = 0;
+        virtual void assignTov(SmallVector<real_type,N,FortranStyle>& v) const = 0;
         virtual void assignTov(SmallVector<TMV_ComplexType(T),N,FortranStyle>& v) const = 0;
-        virtual void assignToV(const VectorView<RT>& v) const = 0;
+        virtual void assignToV(const VectorView<real_type>& v) const = 0;
         virtual void assignToV(const VectorView<TMV_ComplexType(T)>& v) const = 0;
     };
 
@@ -70,21 +70,22 @@ namespace tmv {
     template <class T, class T1, int N, IndexStyle I> 
     class ProdXv : public SmallVectorComposite<T,N> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline ProdXv(T _x, const SmallVector<T1,N,I>& _v) : x(_x), v(_v) {}
         inline T getX() const { return x; }
         inline const SmallVector<T1,N,I>& getV() const { return v; }
-        inline void assignTov(SmallVector<RT,N,CStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,N,CStyle>& v0) const
         { TMVAssert(isReal(T())); MultXV<N>(x,v.cptr(),v0.ptr()); }
-        inline void assignTov(SmallVector<xCT,N,CStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,N,CStyle>& v0) const
         { MultXV<N>(x,v.cptr(),v0.ptr()); }
-        inline void assignTov(SmallVector<RT,N,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,N,FortranStyle>& v0) const
         { TMVAssert(isReal(T())); MultXV<N>(x,v.cptr(),v0.ptr()); }
-        inline void assignTov(SmallVector<xCT,N,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,N,FortranStyle>& v0) const
         { MultXV<N>(x,v.cptr(),v0.ptr()); }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         { 
             TMVAssert(isReal(T()));
             if (v0.step() == 1) 
@@ -92,7 +93,7 @@ namespace tmv {
             else
                 MultXV(x,v.view(),v0); 
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         { 
             if (v0.step() == 1) {
                 MultXV<N>(x,v.cptr(),v0.ptr());
@@ -154,9 +155,10 @@ namespace tmv {
     template <class T, class T1, class T2, int N, IndexStyle I1, IndexStyle I2> 
     class Sumvv_1_1 : public SmallVectorComposite<T,N> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline Sumvv_1_1(
             T TMV_DEBUGPARAM(_x1), const SmallVector<T1,N,I1>& _v1, 
             T TMV_DEBUGPARAM(_x2), const SmallVector<T2,N,I2>& _v2
@@ -165,15 +167,15 @@ namespace tmv {
         { TMVAssert(_x1 == T(1) && _x2 == T(1)); }
         inline const SmallVector<T1,N,I1>& getV1() const { return v1; }
         inline const SmallVector<T2,N,I2>& getV2() const { return v2; }
-        inline void assignTov(SmallVector<RT,N,CStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,N,CStyle>& v0) const
         { TMVAssert(isReal(T())); AddVV_1_1<N>(v1.cptr(),v2.cptr(),v0.ptr()); }
-        inline void assignTov(SmallVector<xCT,N,CStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,N,CStyle>& v0) const
         { AddVV_1_1<N>(v1.cptr(),v2.cptr(),v0.ptr()); }
-        inline void assignTov(SmallVector<RT,N,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,N,FortranStyle>& v0) const
         { TMVAssert(isReal(T())); AddVV_1_1<N>(v1.cptr(),v2.cptr(),v0.ptr()); }
-        inline void assignTov(SmallVector<xCT,N,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,N,FortranStyle>& v0) const
         { AddVV_1_1<N>(v1.cptr(),v2.cptr(),v0.ptr()); }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         {
             TMVAssert(isReal(T()));
             if (v0.step() == 1)
@@ -181,7 +183,7 @@ namespace tmv {
             else
                 AddVV(T(1),v1.view(),T(1),v2.view(),v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         {
             if (v0.step() == 1) {
                 AddVV_1_1<N>(v1.cptr(),v2.cptr(),v0.ptr());
@@ -198,9 +200,10 @@ namespace tmv {
     template <class T, class T1, class T2, int N, IndexStyle I1, IndexStyle I2> 
     class Sumvv_1_m1 : public SmallVectorComposite<T,N> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline Sumvv_1_m1(
             T TMV_DEBUGPARAM(_x1), const SmallVector<T1,N,I1>& _v1, 
             T TMV_DEBUGPARAM(_x2), const SmallVector<T2,N,I2>& _v2
@@ -209,15 +212,15 @@ namespace tmv {
         { TMVAssert(_x1 == T(1) && _x2 == T(-1)); }
         inline const SmallVector<T1,N,I1>& getV1() const { return v1; }
         inline const SmallVector<T2,N,I2>& getV2() const { return v2; }
-        inline void assignTov(SmallVector<RT,N,CStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,N,CStyle>& v0) const
         { TMVAssert(isReal(T())); AddVV_1_m1<N>(v1.cptr(),v2.cptr(),v0.ptr()); }
-        inline void assignTov(SmallVector<xCT,N,CStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,N,CStyle>& v0) const
         { AddVV_1_m1<N>(v1.cptr(),v2.cptr(),v0.ptr()); }
-        inline void assignTov(SmallVector<RT,N,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,N,FortranStyle>& v0) const
         { TMVAssert(isReal(T())); AddVV_1_m1<N>(v1.cptr(),v2.cptr(),v0.ptr()); }
-        inline void assignTov(SmallVector<xCT,N,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,N,FortranStyle>& v0) const
         { AddVV_1_m1<N>(v1.cptr(),v2.cptr(),v0.ptr()); }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         { 
             TMVAssert(isReal(T()));
             if (v0.step() == 1)
@@ -225,7 +228,7 @@ namespace tmv {
             else
                 AddVV(T(1),v1.view(),T(-1),v2.view(),v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         { 
             if (v0.step() == 1) {
                 AddVV_1_m1<N>(v1.cptr(),v2.cptr(),v0.ptr());
@@ -242,9 +245,10 @@ namespace tmv {
     template <class T, class T1, class T2, int N, IndexStyle I1, IndexStyle I2> 
     class Sumvv_1_x : public SmallVectorComposite<T,N> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline Sumvv_1_x(
             T TMV_DEBUGPARAM(_x1), const SmallVector<T1,N,I1>& _v1, 
             T _x2, const SmallVector<T2,N,I2>& _v2
@@ -254,15 +258,15 @@ namespace tmv {
         inline const SmallVector<T1,N,I1>& getV1() const { return v1; }
         inline T getX2() const { return x2; }
         inline const SmallVector<T2,N,I2>& getV2() const { return v2; }
-        inline void assignTov(SmallVector<RT,N,CStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,N,CStyle>& v0) const
         { TMVAssert(isReal(T())); AddVV_1_x<N>(v1.cptr(),x2,v2.cptr(),v0.ptr()); }
-        inline void assignTov(SmallVector<xCT,N,CStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,N,CStyle>& v0) const
         { AddVV_1_x<N>(v1.cptr(),x2,v2.cptr(),v0.ptr()); }
-        inline void assignTov(SmallVector<RT,N,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,N,FortranStyle>& v0) const
         { TMVAssert(isReal(T())); AddVV_1_x<N>(v1.cptr(),x2,v2.cptr(),v0.ptr()); }
-        inline void assignTov(SmallVector<xCT,N,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,N,FortranStyle>& v0) const
         { AddVV_1_x<N>(v1.cptr(),x2,v2.cptr(),v0.ptr()); }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         { 
             TMVAssert(isReal(T()));
             if (v0.step() == 1)
@@ -270,7 +274,7 @@ namespace tmv {
             else
                 AddVV(T(1),v1.view(),x2,v2.view(),v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         {
             if (v0.step() == 1) {
                 AddVV_1_x<N>(v1.cptr(),x2,v2.cptr(),v0.ptr());
@@ -288,9 +292,10 @@ namespace tmv {
     template <class T, class T1, class T2, int N, IndexStyle I1, IndexStyle I2> 
     class Sumvv_x_1 : public SmallVectorComposite<T,N> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline Sumvv_x_1(
             T _x1, const SmallVector<T1,N,I1>& _v1, 
             T TMV_DEBUGPARAM(_x2), const SmallVector<T2,N,I2>& _v2
@@ -300,15 +305,15 @@ namespace tmv {
         inline T getX1() const { return x1; }
         inline const SmallVector<T1,N,I1>& getV1() const { return v1; }
         inline const SmallVector<T2,N,I2>& getV2() const { return v2; }
-        inline void assignTov(SmallVector<RT,N,CStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,N,CStyle>& v0) const
         { TMVAssert(isReal(T())); AddVV_x_1<N>(x1,v1.cptr(),v2.cptr(),v0.ptr()); }
-        inline void assignTov(SmallVector<xCT,N,CStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,N,CStyle>& v0) const
         { AddVV_x_1<N>(x1,v1.cptr(),v2.cptr(),v0.ptr()); }
-        inline void assignTov(SmallVector<RT,N,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,N,FortranStyle>& v0) const
         { TMVAssert(isReal(T())); AddVV_x_1<N>(x1,v1.cptr(),v2.cptr(),v0.ptr()); }
-        inline void assignTov(SmallVector<xCT,N,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,N,FortranStyle>& v0) const
         { AddVV_x_1<N>(x1,v1.cptr(),v2.cptr(),v0.ptr()); }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         { 
             TMVAssert(isReal(T()));
             if (v0.step() == 1)
@@ -316,7 +321,7 @@ namespace tmv {
             else
                 AddVV(x1,v1.view(),T(1),v2.view(),v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         { 
             if (v0.step() == 1) {
                 AddVV_x_1<N>(x1,v1.cptr(),v2.cptr(),v0.ptr());
@@ -334,9 +339,10 @@ namespace tmv {
     template <class T, class T1, class T2, int N, IndexStyle I1, IndexStyle I2> 
     class Sumvv_x_m1 : public SmallVectorComposite<T,N> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline Sumvv_x_m1(
             T _x1, const SmallVector<T1,N,I1>& _v1, 
             T TMV_DEBUGPARAM(_x2), const SmallVector<T2,N,I2>& _v2
@@ -347,28 +353,28 @@ namespace tmv {
         inline const SmallVector<T1,N,I1>& getV1() const { return v1; }
         inline const SmallVector<T2,N,I2>& getV2() const { return v2; }
         inline void assignTov(
-            SmallVector<RT,N,CStyle>& v0) const
+            SmallVector<real_type,N,CStyle>& v0) const
         { 
             TMVAssert(isReal(T()));
             AddVV_x_m1<N>(x1,v1.cptr(),v2.cptr(),v0.ptr());
         }
         inline void assignTov(
-            SmallVector<xCT,N,CStyle>& v0) const
+            SmallVector<complex_type,N,CStyle>& v0) const
         { 
             AddVV_x_m1<N>(x1,v1.cptr(),v2.cptr(),v0.ptr());
         }
         inline void assignTov(
-            SmallVector<RT,N,FortranStyle>& v0) const
+            SmallVector<real_type,N,FortranStyle>& v0) const
         { 
             TMVAssert(isReal(T()));
             AddVV_x_m1<N>(x1,v1.cptr(),v2.cptr(),v0.ptr());
         }
         inline void assignTov(
-            SmallVector<xCT,N,FortranStyle>& v0) const
+            SmallVector<complex_type,N,FortranStyle>& v0) const
         {
             AddVV_x_m1<N>(x1,v1.cptr(),v2.cptr(),v0.ptr());
         }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         {
             TMVAssert(isReal(T()));
             if (v0.step() == 1)
@@ -376,7 +382,7 @@ namespace tmv {
             else
                 AddVV(x1,v1.view(),T(-1),v2.view(),v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         {
             if (v0.step() == 1) {
                 AddVV_x_m1<N>(x1,v1.cptr(),v2.cptr(),v0.ptr());
@@ -394,9 +400,10 @@ namespace tmv {
     template <class T, class T1, class T2, int N, IndexStyle I1, IndexStyle I2> 
     class Sumvv : public SmallVectorComposite<T,N> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline Sumvv(
             T _x1, const SmallVector<T1,N,I1>& _v1, 
             T _x2, const SmallVector<T2,N,I2>& _v2
@@ -407,28 +414,28 @@ namespace tmv {
         inline T getX2() const { return x2; }
         inline const SmallVector<T2,N,I2>& getV2() const { return v2; }
         inline void assignTov(
-            SmallVector<RT,N,CStyle>& v0) const
+            SmallVector<real_type,N,CStyle>& v0) const
         { 
             TMVAssert(isReal(T()));
             AddVV<N>(x1,v1.cptr(),x2,v2.cptr(),v0.ptr());
         }
         inline void assignTov(
-            SmallVector<xCT,N,CStyle>& v0) const
+            SmallVector<complex_type,N,CStyle>& v0) const
         {
             AddVV<N>(x1,v1.cptr(),x2,v2.cptr(),v0.ptr());
         }
         inline void assignTov(
-            SmallVector<RT,N,FortranStyle>& v0) const
+            SmallVector<real_type,N,FortranStyle>& v0) const
         {
             TMVAssert(isReal(T()));
             AddVV<N>(x1,v1.cptr(),x2,v2.cptr(),v0.ptr());
         }
         inline void assignTov(
-            SmallVector<xCT,N,FortranStyle>& v0) const
+            SmallVector<complex_type,N,FortranStyle>& v0) const
         {
             AddVV<N>(x1,v1.cptr(),x2,v2.cptr(),v0.ptr());
         }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         {
             TMVAssert(isReal(T()));
             if (v0.step() == 1)
@@ -436,7 +443,7 @@ namespace tmv {
             else
                 AddVV(x1,v1.view(),x2,v2.view(),v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         {
             if (v0.step() == 1) {
                 AddVV<N>(x1,v1.cptr(),x2,v2.cptr(),v0.ptr());
@@ -455,9 +462,10 @@ namespace tmv {
     template <class T, class T1, class T2, int N, IndexStyle I> 
     class SumVv : public VectorComposite<T> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline SumVv(
             T _x1, const GenVector<T1>& _v1, 
             T _x2, const SmallVector<T2,N,I>& _v2
@@ -468,7 +476,7 @@ namespace tmv {
         inline const GenVector<T1>& getV1() const { return v1; }
         inline T getX2() const { return x2; }
         inline const SmallVector<T2,N,I>& getV2() const { return v2; }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         { 
             TMVAssert(isReal(T()));
             if (v1.step() == 1 && v0.step() == 1 && !SameStorage(v0,v1)) {
@@ -489,7 +497,7 @@ namespace tmv {
             }
             else AddVV(x1,v1,x2,v2.view(),v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         { 
             if (v1.step() == 1 && v0.step() == 1 && !v1.isconj() &&
                 !SameStorage(v0,v1)) {
@@ -521,9 +529,10 @@ namespace tmv {
     template <class T, class T1, class T2, int N, IndexStyle I> 
     class SumvV : public VectorComposite<T> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline SumvV(
             T _x1, const SmallVector<T1,N,I>& _v1, 
             T _x2, const GenVector<T2>& _v2
@@ -534,7 +543,7 @@ namespace tmv {
         inline const SmallVector<T1,N,I>& getV1() const { return v1; }
         inline T getX2() const { return x2; }
         inline const GenVector<T2>& getV2() const { return v2; }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         { 
             TMVAssert(isReal(T()));
             if (v2.step() == 1 && v0.step() == 1 && !SameStorage(v0,v2)) {
@@ -555,7 +564,7 @@ namespace tmv {
             }
             else AddVV(x1,v1.view(),x2,v2,v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         { 
             if (v2.step() == 1 && v0.step() == 1 && !v2.isconj() &&
                 !SameStorage(v0,v2) ) {

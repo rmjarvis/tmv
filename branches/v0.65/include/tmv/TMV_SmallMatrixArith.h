@@ -46,9 +46,9 @@ namespace tmv {
     template <class T, int M, int N> 
     class SmallMatrixComposite : public MatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
 
         inline SmallMatrixComposite() {}
         inline SmallMatrixComposite(const SmallMatrixComposite<T,M,N>&) {}
@@ -58,23 +58,23 @@ namespace tmv {
         size_t rowsize() const { return N; }
 
         virtual void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,CStyle>& m) const = 0;
+            SmallMatrix<real_type,M,N,ColMajor,CStyle>& m) const = 0;
         virtual void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,CStyle>& m) const = 0;
+            SmallMatrix<real_type,M,N,RowMajor,CStyle>& m) const = 0;
         virtual void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,CStyle>& m) const = 0;
+            SmallMatrix<complex_type,M,N,ColMajor,CStyle>& m) const = 0;
         virtual void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,CStyle>& m) const = 0;
+            SmallMatrix<complex_type,M,N,RowMajor,CStyle>& m) const = 0;
         virtual void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,FortranStyle>& m) const = 0;
+            SmallMatrix<real_type,M,N,ColMajor,FortranStyle>& m) const = 0;
         virtual void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,FortranStyle>& m) const = 0;
+            SmallMatrix<real_type,M,N,RowMajor,FortranStyle>& m) const = 0;
         virtual void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,FortranStyle>& m) const = 0;
+            SmallMatrix<complex_type,M,N,ColMajor,FortranStyle>& m) const = 0;
         virtual void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,FortranStyle>& m) const = 0;
-        virtual void assignToM(const MatrixView<RT>& m) const = 0;
-        virtual void assignToM(const MatrixView<xCT>& m) const = 0;
+            SmallMatrix<complex_type,M,N,RowMajor,FortranStyle>& m) const = 0;
+        virtual void assignToM(const MatrixView<real_type>& m) const = 0;
+        virtual void assignToM(const MatrixView<complex_type>& m) const = 0;
     };
 
 
@@ -85,67 +85,68 @@ namespace tmv {
     template <class T, class T1, int M, int N, StorageType S, IndexStyle I> 
     class ProdXm : public SmallMatrixComposite<T,M,N> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline ProdXm(const T _x, const SmallMatrix<T1,M,N,S,I>& _m) :
             x(_x), m(_m) {}
         inline T getX() const { return x; }
         inline const SmallMatrix<T1,M,N,S,I>& getM() const { return m; }
         inline StorageType stor() const { return S; }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,CStyle>& m0) const
         { 
             TMVAssert(isReal(T()));
             m0=m;
             MultXV<M*N>(x,m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,CStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0=m;
             MultXV<M*N>(x,m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,CStyle>& m0) const
         {
             m0=m;
             MultXV<M*N>(x,m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,CStyle>& m0) const
         {
             m0=m;
             MultXV<M*N>(x,m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,FortranStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0=m;
             MultXV<M*N>(x,m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,FortranStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0=m;
             MultXV<M*N>(x,m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,FortranStyle>& m0) const
         {
             m0=m;
             MultXV<M*N>(x,m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,FortranStyle>& m0) const
         {
             m0=m;
             MultXV<M*N>(x,m0.ptr());
         }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             if (m0.stepi() == 1 && m0.stepj() == M && !SameStorage(m0,m)) {
@@ -159,7 +160,7 @@ namespace tmv {
                 MultXM(x,m0=m);
             }
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         {
             if (m0.stepi() == 1 && m0.stepj() == M && !SameStorage(m0,m)) {
                 DoCopy<M,N,S,ColMajor>(m.cptr(),m0.ptr());
@@ -229,9 +230,10 @@ namespace tmv {
     template <class T, class T1, int N, StorageType S, IndexStyle I> 
     class SummX_1 : public SmallMatrixComposite<T,N,N>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline SummX_1(
             T TMV_DEBUGPARAM(_x1), const SmallMatrix<T1,N,N,S,I>& _m, T _x2
         ) :
@@ -242,56 +244,56 @@ namespace tmv {
         inline T getX2() const { return x2; }
         inline StorageType stor() const { return S; }
         inline void assignTom(
-            SmallMatrix<RT,N,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<real_type,N,N,RowMajor,CStyle>& m0) const
         { TMVAssert(isReal(T())); (m0=m) += TMV_REAL(x2); }
         inline void assignTom(
-            SmallMatrix<RT,N,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<real_type,N,N,ColMajor,CStyle>& m0) const
         { TMVAssert(isReal(T())); (m0=m) += TMV_REAL(x2); }
         inline void assignTom(
-            SmallMatrix<xCT,N,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,N,N,RowMajor,CStyle>& m0) const
         { (m0=m) += x2; }
         inline void assignTom(
-            SmallMatrix<xCT,N,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,N,N,ColMajor,CStyle>& m0) const
         { (m0=m) += x2; }
         inline void assignTom(
-            SmallMatrix<RT,N,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,N,N,RowMajor,FortranStyle>& m0) const
         { TMVAssert(isReal(T())); (m0=m) += TMV_REAL(x2); }
         inline void assignTom(
-            SmallMatrix<RT,N,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,N,N,ColMajor,FortranStyle>& m0) const
         { TMVAssert(isReal(T())); (m0=m) += TMV_REAL(x2); }
         inline void assignTom(
-            SmallMatrix<xCT,N,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,N,N,RowMajor,FortranStyle>& m0) const
         { (m0=m) += x2; }
         inline void assignTom(
-            SmallMatrix<xCT,N,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,N,N,ColMajor,FortranStyle>& m0) const
         { (m0=m) += x2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             if (m0.stepi() == 1 && m0.stepj() == N && !SameStorage(m0,m)) {
                 DoCopy<N,N,S,ColMajor>(m.cptr(),m0.ptr());
-                RT* m0p = m0.ptr();
+                real_type* m0p = m0.ptr();
                 for(int i=0;i<N;i++) m0p[(N+1)*i] += TMV_REAL(x2);
             } else if (m0.stepj() == 1 && m0.stepi() == N && 
                        !SameStorage(m0,m)) {
                 DoCopy<N,N,S,RowMajor>(m.cptr(),m0.ptr());
-                RT* m0p = m0.ptr();
+                real_type* m0p = m0.ptr();
                 for(int i=0;i<N;i++) m0p[(N+1)*i] += TMV_REAL(x2);
             } else {
                 (m0=m) += TMV_REAL(x2); 
             }
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         {
             if (m0.stepi() == 1 && m0.stepj() == N && !SameStorage(m0,m)) {
                 DoCopy<N,N,S,ColMajor>(m.cptr(),m0.ptr());
-                xCT* m0p = m0.ptr();
+                complex_type* m0p = m0.ptr();
                 for(int i=0;i<N;i++) m0p[(N+1)*i] += x2;
                 if (m0.isconj()) m0.conjugateSelf();
             } else if (m0.stepj() == 1 && m0.stepi() == N && 
                        !SameStorage(m0,m)) {
                 DoCopy<N,N,S,RowMajor>(m.cptr(),m0.ptr());
-                xCT* m0p = m0.ptr();
+                complex_type* m0p = m0.ptr();
                 for(int i=0;i<N;i++) m0p[(N+1)*i] += x2;
                 if (m0.isconj()) m0.conjugateSelf();
             } else {
@@ -306,10 +308,10 @@ namespace tmv {
     template <class T, class T1, int N, StorageType S, IndexStyle I> 
     class SummX : public SmallMatrixComposite<T,N,N>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
-        // x1*m + x2
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline SummX(T _x1, const SmallMatrix<T1,N,N,S,I>& _m, T _x2) :
             x1(_x1), m(_m), x2(_x2) {}
         inline T getX1() const { return x1; }
@@ -318,59 +320,59 @@ namespace tmv {
         inline T getX2() const { return x2; }
         inline StorageType stor() const { return S; }
         inline void assignTom(
-            SmallMatrix<RT,N,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<real_type,N,N,RowMajor,CStyle>& m0) const
         { TMVAssert(isReal(T())); (m0=x1*m) += TMV_REAL(x2); }
         inline void assignTom(
-            SmallMatrix<RT,N,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<real_type,N,N,ColMajor,CStyle>& m0) const
         { TMVAssert(isReal(T())); (m0=x1*m) += TMV_REAL(x2); }
         inline void assignTom(
-            SmallMatrix<xCT,N,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,N,N,RowMajor,CStyle>& m0) const
         { (m0=x1*m) += x2; }
         inline void assignTom(
-            SmallMatrix<xCT,N,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,N,N,ColMajor,CStyle>& m0) const
         { (m0=x1*m) += x2; }
         inline void assignTom(
-            SmallMatrix<RT,N,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,N,N,RowMajor,FortranStyle>& m0) const
         { TMVAssert(isReal(T())); (m0=x1*m) += TMV_REAL(x2); }
         inline void assignTom(
-            SmallMatrix<RT,N,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,N,N,ColMajor,FortranStyle>& m0) const
         { TMVAssert(isReal(T())); (m0=x1*m) += TMV_REAL(x2); }
         inline void assignTom(
-            SmallMatrix<xCT,N,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,N,N,RowMajor,FortranStyle>& m0) const
         { (m0=x1*m) += x2; }
         inline void assignTom(
-            SmallMatrix<xCT,N,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,N,N,ColMajor,FortranStyle>& m0) const
         { (m0=x1*m) += x2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             if (m0.stepi() == 1 && m0.stepj() == N && !SameStorage(m0,m)) {
                 DoCopy<N,N,S,ColMajor>(m.cptr(),m0.ptr());
-                RT* m0p = m0.ptr();
+                real_type* m0p = m0.ptr();
                 MultXV<N*N>(x1,m0p);
                 for(int i=0;i<N;i++) m0p[(N+1)*i] += TMV_REAL(x2);
             } else if (m0.stepj() == 1 && m0.stepi() == N && 
                        !SameStorage(m0,m)) {
                 DoCopy<N,N,S,RowMajor>(m.cptr(),m0.ptr());
-                RT* m0p = m0.ptr();
+                real_type* m0p = m0.ptr();
                 MultXV<N*N>(x1,m0p);
                 for(int i=0;i<N;i++) m0p[(N+1)*i] += TMV_REAL(x2);
             } else {
                 (m0=x1*m) += TMV_REAL(x2); 
             }
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         {
             if (m0.stepi() == 1 && m0.stepj() == N && !SameStorage(m0,m)) {
                 DoCopy<N,N,S,ColMajor>(m.cptr(),m0.ptr());
-                xCT* m0p = m0.ptr();
+                complex_type* m0p = m0.ptr();
                 MultXV<N*N>(x1,m0p);
                 for(int i=0;i<N;i++) m0p[(N+1)*i] += x2;
                 if (m0.isconj()) m0.conjugateSelf();
             } else if (m0.stepj() == 1 && m0.stepi() == N && 
                        !SameStorage(m0,m)) {
                 DoCopy<N,N,S,RowMajor>(m.cptr(),m0.ptr());
-                xCT* m0p = m0.ptr();
+                complex_type* m0p = m0.ptr();
                 MultXV<N*N>(x1,m0p);
                 for(int i=0;i<N;i++) m0p[(N+1)*i] += x2;
                 if (m0.isconj()) m0.conjugateSelf();
@@ -438,9 +440,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, IndexStyle I1, IndexStyle I2>
     class OProdvv_1 : public SmallMatrixComposite<T,M,N>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline OProdvv_1(
             const T TMV_DEBUGPARAM(_x), const SmallVector<T1,M,I1>& _v1,
             const SmallVector<T2,N,I2>& _v2
@@ -451,42 +454,42 @@ namespace tmv {
         inline const SmallVector<T1,M,I1>& getV1() const { return v1; }
         inline const SmallVector<T2,N,I2>& getV2() const { return v2; }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,CStyle>& m0) const
         { 
             TMVAssert(isReal(T()));
             Rank1Update_1<M,N,RowMajor>(v1.cptr(),v2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,CStyle>& m0) const
         { 
             TMVAssert(isReal(T()));
             Rank1Update_1<M,N,ColMajor>(v1.cptr(),v2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,CStyle>& m0) const
         { Rank1Update_1<M,N,RowMajor>(v1.cptr(),v2.cptr(),m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,CStyle>& m0) const
         { Rank1Update_1<M,N,ColMajor>(v1.cptr(),v2.cptr(),m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,FortranStyle>& m0) const
         { 
             TMVAssert(isReal(T()));
             Rank1Update_1<M,N,RowMajor>(v1.cptr(),v2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,FortranStyle>& m0) const
         { 
             TMVAssert(isReal(T()));
             Rank1Update_1<M,N,ColMajor>(v1.cptr(),v2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,FortranStyle>& m0) const
         { Rank1Update_1<M,N,RowMajor>(v1.cptr(),v2.cptr(),m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,FortranStyle>& m0) const
         { Rank1Update_1<M,N,ColMajor>(v1.cptr(),v2.cptr(),m0.ptr()); }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             if (m0.stepi() == 1 && m0.stepj() == M) {
@@ -497,7 +500,7 @@ namespace tmv {
                 Rank1Update<false>(T(1),v1.view(),v2.view(),m0.view()); 
             }
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         {
             if (m0.stepi() == 1 && m0.stepj() == M && !m0.isconj()) {
                 Rank1Update_1<M,N,ColMajor>(v1.cptr(),v2.cptr(),m0.ptr());
@@ -515,9 +518,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, IndexStyle I1, IndexStyle I2>
     class OProdvv : public SmallMatrixComposite<T,M,N>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline OProdvv(
             const T _x, const SmallVector<T1,M,I1>& _v1,
             const SmallVector<T2,N,I2>& _v2
@@ -528,42 +532,42 @@ namespace tmv {
         inline const SmallVector<T1,M,I1>& getV1() const { return v1; }
         inline const SmallVector<T2,N,I2>& getV2() const { return v2; }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,CStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             Rank1Update<M,N,RowMajor>(x,v1.cptr(),v2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,CStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             Rank1Update<M,N,ColMajor>(x,v1.cptr(),v2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,CStyle>& m0) const
         { Rank1Update<M,N,RowMajor>(x,v1.cptr(),v2.cptr(),m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,CStyle>& m0) const
         { Rank1Update<M,N,ColMajor>(x,v1.cptr(),v2.cptr(),m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,FortranStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             Rank1Update<M,N,RowMajor>(x,v1.cptr(),v2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,FortranStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             Rank1Update<M,N,ColMajor>(x,v1.cptr(),v2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,FortranStyle>& m0) const
         { Rank1Update<M,N,RowMajor>(x,v1.cptr(),v2.cptr(),m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,FortranStyle>& m0) const
         { Rank1Update<M,N,ColMajor>(x,v1.cptr(),v2.cptr(),m0.ptr()); }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             if (m0.stepi() == 1 && m0.stepj() == M) {
@@ -574,7 +578,7 @@ namespace tmv {
                 Rank1Update<false>(x,v1.view(),v2.view(),m0.view()); 
             }
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         { 
             if (m0.stepi() == 1 && m0.stepj() == M && !m0.isconj()) {
                 Rank1Update<M,N,ColMajor>(x,v1.cptr(),v2.cptr(),m0.ptr());
@@ -593,9 +597,10 @@ namespace tmv {
     template <class T, class T1, class T2, int N, IndexStyle I>
     class OProdVv : public MatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline OProdVv(
             const T _x, const GenVector<T1>& _v1,
             const SmallVector<T2,N,I>& _v2
@@ -607,12 +612,12 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenVector<T1>& getV1() const { return v1; }
         inline const SmallVector<T2,N,I>& getV2() const { return v2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             Rank1Update<false>(x,v1,v2.view(),m0.view()); 
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         { Rank1Update<false>(x,v1,v2.view(),m0.view()); }
     private:
         T x;
@@ -623,9 +628,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, IndexStyle I>
     class OProdvV : public MatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline OProdvV(
             const T _x, const SmallVector<T1,M,I>& _v1,
             const GenVector<T2>& _v2
@@ -637,12 +643,12 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const SmallVector<T1,M,I>& getV1() const { return v1; }
         inline const GenVector<T2>& getV2() const { return v2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             Rank1Update<false>(x,v1.view(),v2,m0.view()); 
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         { Rank1Update<false>(x,v1.view(),v2,m0.view()); }
     private:
         T x;
@@ -920,9 +926,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, StorageType S1, StorageType S2, IndexStyle I1, IndexStyle I2> 
     class Summm_1_1 : public SmallMatrixComposite<T,M,N> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline Summm_1_1(
             const T TMV_DEBUGPARAM(_x1), const SmallMatrix<T1,M,N,S1,I1>& _m1, 
             const T TMV_DEBUGPARAM(_x2), const SmallMatrix<T2,M,N,S2,I2>& _m2
@@ -935,58 +942,58 @@ namespace tmv {
         inline const SmallMatrix<T2,M,N,S2,I2>& getM2() const 
         { return m2; }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,CStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0 = m1;
             AddMM_1<M,N,S2,RowMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,CStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0 = m1;
             AddMM_1<M,N,S2,ColMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,CStyle>& m0) const
         { 
             m0 = m1;
             AddMM_1<M,N,S2,RowMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,CStyle>& m0) const
         { 
             m0 = m1;
             AddMM_1<M,N,S2,ColMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,FortranStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0 = m1;
             AddMM_1<M,N,S2,RowMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,FortranStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0 = m1;
             AddMM_1<M,N,S2,ColMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,FortranStyle>& m0) const
         { 
             m0 = m1;
             AddMM_1<M,N,S2,RowMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,FortranStyle>& m0) const
         { 
             m0 = m1;
             AddMM_1<M,N,S2,ColMajor>(m2.cptr(),m0.ptr());
         }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             if (m0.stepi() == 1 && m0.stepj() == M && 
@@ -1001,7 +1008,7 @@ namespace tmv {
                 AddMM(T(1),m1.view(),T(1),m2.view(),m0); 
             }
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         {
             if (m0.stepi() == 1 && m0.stepj() == M && 
                 !SameStorage(m0,m1) && !SameStorage(m0,m2)) {
@@ -1025,9 +1032,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, StorageType S1, StorageType S2, IndexStyle I1, IndexStyle I2> 
     class Summm_1_m1 : public SmallMatrixComposite<T,M,N> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline Summm_1_m1(
             const T TMV_DEBUGPARAM(_x1), const SmallMatrix<T1,M,N,S1,I1>& _m1, 
             const T TMV_DEBUGPARAM(_x2), const SmallMatrix<T2,M,N,S2,I2>& _m2
@@ -1038,58 +1046,58 @@ namespace tmv {
         inline const SmallMatrix<T1,M,N,S1,I1>& getM1() const { return m1; }
         inline const SmallMatrix<T2,M,N,S2,I2>& getM2() const { return m2; }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,CStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0 = m1;
             AddMM_m1<M,N,S2,RowMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,CStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0 = m1;
             AddMM_m1<M,N,S2,ColMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,CStyle>& m0) const
         { 
             m0 = m1;
             AddMM_m1<M,N,S2,RowMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,CStyle>& m0) const
         { 
             m0 = m1;
             AddMM_m1<M,N,S2,ColMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,FortranStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0 = m1;
             AddMM_m1<M,N,S2,RowMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,FortranStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0 = m1;
             AddMM_m1<M,N,S2,ColMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,FortranStyle>& m0) const
         { 
             m0 = m1;
             AddMM_m1<M,N,S2,RowMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,FortranStyle>& m0) const
         { 
             m0 = m1;
             AddMM_m1<M,N,S2,ColMajor>(m2.cptr(),m0.ptr());
         }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             if (m0.stepi() == 1 && m0.stepj() == M && 
@@ -1104,7 +1112,7 @@ namespace tmv {
                 AddMM(T(1),m1.view(),T(-1),m2.view(),m0); 
             }
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         {
             if (m0.stepi() == 1 && m0.stepj() == M && 
                 !SameStorage(m0,m1) && !SameStorage(m0,m2)) {
@@ -1128,9 +1136,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, StorageType S1, StorageType S2, IndexStyle I1, IndexStyle I2> 
     class Summm_1_x : public SmallMatrixComposite<T,M,N> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline Summm_1_x(
             const T TMV_DEBUGPARAM(_x1), const SmallMatrix<T1,M,N,S1,I1>& _m1, 
             const T _x2, const SmallMatrix<T2,M,N,S2,I2>& _m2
@@ -1142,58 +1151,58 @@ namespace tmv {
         inline T getX2() const { return x2; }
         inline const SmallMatrix<T2,M,N,S2,I2>& getM2() const { return m2; }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,CStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0 = x2*m2;
             AddMM_1<M,N,S1,RowMajor>(m1.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,CStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0 = x2*m2;
             AddMM_1<M,N,S1,ColMajor>(m1.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,CStyle>& m0) const
         { 
             m0 = x2*m2;
             AddMM_1<M,N,S1,RowMajor>(m1.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,CStyle>& m0) const
         { 
             m0 = x2*m2;
             AddMM_1<M,N,S1,ColMajor>(m1.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,FortranStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0 = x2*m2;
             AddMM_1<M,N,S1,RowMajor>(m1.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,FortranStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0 = x2*m2;
             AddMM_1<M,N,S1,ColMajor>(m1.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,FortranStyle>& m0) const
         { 
             m0 = x2*m2;
             AddMM_1<M,N,S1,RowMajor>(m1.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,FortranStyle>& m0) const
         { 
             m0 = x2*m2;
             AddMM_1<M,N,S1,ColMajor>(m1.cptr(),m0.ptr());
         }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             if (m0.stepi() == 1 && m0.stepj() == M && 
@@ -1210,7 +1219,7 @@ namespace tmv {
                 AddMM(T(1),m1.view(),x2,m2.view(),m0); 
             }
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         {
             if (m0.stepi() == 1 && m0.stepj() == M && 
                 !SameStorage(m0,m1) && !SameStorage(m0,m2)) {
@@ -1237,9 +1246,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, StorageType S1, StorageType S2, IndexStyle I1, IndexStyle I2> 
     class Summm_x_1 : public SmallMatrixComposite<T,M,N> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline Summm_x_1(
             const T _x1, const SmallMatrix<T1,M,N,S1,I1>& _m1, 
             const T TMV_DEBUGPARAM(_x2), const SmallMatrix<T2,M,N,S2,I2>& _m2
@@ -1251,58 +1261,58 @@ namespace tmv {
         inline const SmallMatrix<T1,M,N,S1,I1>& getM1() const { return m1; }
         inline const SmallMatrix<T2,M,N,S2,I2>& getM2() const { return m2; }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,CStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0 = x1*m1;
             AddMM_1<M,N,S2,RowMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,CStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0 = x1*m1;
             AddMM_1<M,N,S2,ColMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,CStyle>& m0) const
         { 
             m0 = x1*m1;
             AddMM_1<M,N,S2,RowMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,CStyle>& m0) const
         { 
             m0 = x1*m1;
             AddMM_1<M,N,S2,ColMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,FortranStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0 = x1*m1;
             AddMM_1<M,N,S2,RowMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,FortranStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0 = x1*m1;
             AddMM_1<M,N,S2,ColMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,FortranStyle>& m0) const
         { 
             m0 = x1*m1;
             AddMM_1<M,N,S2,RowMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,FortranStyle>& m0) const
         { 
             m0 = x1*m1;
             AddMM_1<M,N,S2,ColMajor>(m2.cptr(),m0.ptr());
         }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             if (m0.stepi() == 1 && m0.stepj() == M && 
@@ -1319,7 +1329,7 @@ namespace tmv {
                 AddMM(x1,m1.view(),T(1),m2.view(),m0); 
             }
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         {
             if (m0.stepi() == 1 && m0.stepj() == M && 
                 !SameStorage(m0,m1) && !SameStorage(m0,m2)) {
@@ -1346,9 +1356,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, StorageType S1, StorageType S2, IndexStyle I1, IndexStyle I2> 
     class Summm_x_m1 : public SmallMatrixComposite<T,M,N> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline Summm_x_m1(
             const T _x1, const SmallMatrix<T1,M,N,S1,I1>& _m1, 
             const T TMV_DEBUGPARAM(_x2), const SmallMatrix<T2,M,N,S2,I2>& _m2
@@ -1360,58 +1371,58 @@ namespace tmv {
         inline const SmallMatrix<T1,M,N,S1,I1>& getM1() const { return m1; }
         inline const SmallMatrix<T2,M,N,S2,I2>& getM2() const { return m2; }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,CStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0 = x1*m1;
             AddMM_m1<M,N,S2,RowMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,CStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0 = x1*m1;
             AddMM_m1<M,N,S2,ColMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,CStyle>& m0) const
         { 
             m0 = x1*m1;
             AddMM_m1<M,N,S2,RowMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,CStyle>& m0) const
         { 
             m0 = x1*m1;
             AddMM_m1<M,N,S2,ColMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,FortranStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0 = x1*m1;
             AddMM_m1<M,N,S2,RowMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,FortranStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0 = x1*m1;
             AddMM_m1<M,N,S2,ColMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,FortranStyle>& m0) const
         { 
             m0 = x1*m1;
             AddMM_m1<M,N,S2,RowMajor>(m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,FortranStyle>& m0) const
         { 
             m0 = x1*m1;
             AddMM_m1<M,N,S2,ColMajor>(m2.cptr(),m0.ptr());
         }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             if (m0.stepi() == 1 && m0.stepj() == M && 
@@ -1428,7 +1439,7 @@ namespace tmv {
                 AddMM(x1,m1.view(),T(1),m2.view(),m0); 
             }
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         {
             if (m0.stepi() == 1 && m0.stepj() == M && 
                 !SameStorage(m0,m1) && !SameStorage(m0,m2)) {
@@ -1455,9 +1466,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, StorageType S1, StorageType S2, IndexStyle I1, IndexStyle I2> 
     class Summm : public SmallMatrixComposite<T,M,N> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline Summm(
             const T _x1, const SmallMatrix<T1,M,N,S1,I1>& _m1, 
             const T _x2, const SmallMatrix<T2,M,N,S2,I2>& _m2
@@ -1469,58 +1481,58 @@ namespace tmv {
         inline T getX2() const { return x2; }
         inline const SmallMatrix<T2,M,N,S2,I2>& getM2() const { return m2; }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,CStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0 = x1*m1;
             AddMM<M,N,S2,RowMajor>(x2,m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,CStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0 = x1*m1;
             AddMM<M,N,S2,ColMajor>(x2,m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,CStyle>& m0) const
         { 
             m0 = x1*m1;
             AddMM<M,N,S2,RowMajor>(x2,m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,CStyle>& m0) const
         { 
             m0 = x1*m1;
             AddMM<M,N,S2,ColMajor>(x2,m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,FortranStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0 = x1*m1;
             AddMM<M,N,S2,RowMajor>(x2,m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,FortranStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             m0 = x1*m1;
             AddMM<M,N,S2,ColMajor>(x2,m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,FortranStyle>& m0) const
         { 
             m0 = x1*m1;
             AddMM<M,N,S2,RowMajor>(x2,m2.cptr(),m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,FortranStyle>& m0) const
         { 
             m0 = x1*m1;
             AddMM<M,N,S2,ColMajor>(x2,m2.cptr(),m0.ptr());
         }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             if (m0.stepi() == 1 && m0.stepj() == M && 
@@ -1537,7 +1549,7 @@ namespace tmv {
                 AddMM(x1,m1.view(),x2,m2.view(),m0); 
             }
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         {
             if (m0.stepi() == 1 && m0.stepj() == M && 
                 !SameStorage(m0,m1) && !SameStorage(m0,m2)) {
@@ -1565,9 +1577,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, StorageType S1, IndexStyle I1> 
     class SummM : public MatrixComposite<T> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline SummM(
             const T _x1, const SmallMatrix<T1,M,N,S1,I1>& _m1, 
             const T _x2, const GenMatrix<T2>& _m2
@@ -1580,7 +1593,7 @@ namespace tmv {
         inline const SmallMatrix<T1,M,N,S1,I1>& getM1() const { return m1; }
         inline T getX2() const { return x2; }
         inline const GenMatrix<T2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             if (m2.stepi() == 1 && m2.stepj() == M && 
@@ -1625,7 +1638,7 @@ namespace tmv {
                 AddMM(x1,m1.view(),x2,m2.view(),m0); 
             }
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         {
             if (m2.stepi() == 1 && m2.stepj() == M &&
                 !SameStorage(m0,m1) && !SameStorage(m0,m2)) {
@@ -1687,9 +1700,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, StorageType S2, IndexStyle I2> 
     class SumMm : public MatrixComposite<T> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline SumMm(
             const T _x1, const GenMatrix<T1>& _m1, 
             const T _x2, const SmallMatrix<T2,M,N,S2,I2>& _m2
@@ -1702,7 +1716,7 @@ namespace tmv {
         inline const GenMatrix<T1>& getM1() const { return m1; }
         inline T getX2() const { return x2; }
         inline const SmallMatrix<T2,M,N,S2,I2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             if (m1.stepi() == 1 && m1.stepj() == M && 
@@ -1747,7 +1761,7 @@ namespace tmv {
                 AddMM(x1,m1.view(),x2,m2.view(),m0); 
             }
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         {
             if (m1.stepi() == 1 && m1.stepj() == M && 
                 !SameStorage(m0,m1) && !SameStorage(m0,m2)) {
@@ -2078,9 +2092,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, int K, StorageType S1, StorageType S2, IndexStyle I1, IndexStyle I2> 
     class Prodmm_1 : public SmallMatrixComposite<T,M,N>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline Prodmm_1(
             const T TMV_DEBUGPARAM(_x), const SmallMatrix<T1,M,K,S1,I1>& _m1, 
             const SmallMatrix<T2,K,N,S2,I2>& _m2
@@ -2092,42 +2107,42 @@ namespace tmv {
         inline const SmallMatrix<T1,M,K,S1,I1>& getM1() const { return m1; }
         inline const SmallMatrix<T2,K,N,S2,I2>& getM2() const { return m2; }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,CStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             MultMM_1<M,N,K,S1,S2,RowMajor>(m1.cptr(), m2.cptr(), m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,CStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             MultMM_1<M,N,K,S1,S2,ColMajor>(m1.cptr(), m2.cptr(), m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,CStyle>& m0) const
         { MultMM_1<M,N,K,S1,S2,RowMajor>(m1.cptr(), m2.cptr(), m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,CStyle>& m0) const
         { MultMM_1<M,N,K,S1,S2,ColMajor>(m1.cptr(), m2.cptr(), m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,FortranStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             MultMM_1<M,N,K,S1,S2,RowMajor>(m1.cptr(), m2.cptr(), m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,FortranStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             MultMM_1<M,N,K,S1,S2,ColMajor>(m1.cptr(), m2.cptr(), m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,FortranStyle>& m0) const
         { MultMM_1<M,N,K,S1,S2,RowMajor>(m1.cptr(), m2.cptr(), m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,FortranStyle>& m0) const
         { MultMM_1<M,N,K,S1,S2,ColMajor>(m1.cptr(), m2.cptr(), m0.ptr()); }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             if (m0.stepi() == 1 && m0.stepj() == M && 
@@ -2140,7 +2155,7 @@ namespace tmv {
                 MultMM<false>(T(1), m1.view(), m2.view(), m0); 
             }
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         {
             if (m0.stepi() == 1 && m0.stepj() == M && 
                 !SameStorage(m0,m1) && !SameStorage(m0,m2)) {
@@ -2162,9 +2177,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, int K, StorageType S1, StorageType S2, IndexStyle I1, IndexStyle I2> 
     class Prodmm : public SmallMatrixComposite<T,M,N>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline Prodmm(
             const T _x, const SmallMatrix<T1,M,K,S1,I1>& _m1, 
             const SmallMatrix<T2,K,N,S2,I2>& _m2
@@ -2176,42 +2192,42 @@ namespace tmv {
         inline const SmallMatrix<T1,M,K,S1,I1>& getM1() const { return m1; }
         inline const SmallMatrix<T2,K,N,S2,I2>& getM2() const { return m2; }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,CStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             MultMM<M,N,K,S1,S2,RowMajor>(x,m1.cptr(), m2.cptr(), m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,CStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             MultMM<M,N,K,S1,S2,ColMajor>(x,m1.cptr(), m2.cptr(), m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,CStyle>& m0) const
         { MultMM<M,N,K,S1,S2,RowMajor>(x,m1.cptr(), m2.cptr(), m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,CStyle>& m0) const
         { MultMM<M,N,K,S1,S2,ColMajor>(x,m1.cptr(), m2.cptr(), m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,FortranStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             MultMM<M,N,K,S1,S2,RowMajor>(x,m1.cptr(), m2.cptr(), m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,FortranStyle>& m0) const
         {
             TMVAssert(isReal(T()));
             MultMM<M,N,K,S1,S2,ColMajor>(x,m1.cptr(), m2.cptr(), m0.ptr());
         }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,FortranStyle>& m0) const
         { MultMM<M,N,K,S1,S2,RowMajor>(x,m1.cptr(), m2.cptr(), m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,FortranStyle>& m0) const
         { MultMM<M,N,K,S1,S2,ColMajor>(x,m1.cptr(), m2.cptr(), m0.ptr()); }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             if (m0.stepi() == 1 && m0.stepj() == M && 
@@ -2224,7 +2240,7 @@ namespace tmv {
                 MultMM<false>(x, m1.view(), m2.view(), m0); 
             }
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         {
             if (m0.stepi() == 1 && m0.stepj() == M && 
                 !SameStorage(m0,m1) && !SameStorage(m0,m2)) {
@@ -2247,9 +2263,10 @@ namespace tmv {
     template <class T, class T1, class T2, int K, int N, StorageType S2, IndexStyle I2> 
     class ProdMm : public MatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline ProdMm(
             const T _x, const GenMatrix<T1>& _m1, 
             const SmallMatrix<T2,K,N,S2,I2>& _m2
@@ -2263,9 +2280,9 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenMatrix<T1>& getM1() const { return m1; }
         inline const SmallMatrix<T2,K,N,S2,I2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         { TMVAssert(isReal(T())); MultMM<false>(x, m1, m2.view(), m0); }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         { MultMM<false>(x, m1, m2.view(), m0); }
     private:
         const T x;
@@ -2276,9 +2293,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int K, StorageType S1, IndexStyle I1> 
     class ProdmM : public MatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline ProdmM(
             const T _x, const SmallMatrix<T1,M,K,S1,I1>& _m1, 
             const GenMatrix<T2>& _m2
@@ -2292,9 +2310,9 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const SmallMatrix<T1,M,K,S1,I1>& getM1() const { return m1; }
         inline const GenMatrix<T2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         { TMVAssert(isReal(T())); MultMM<false>(x, m1.view(), m2, m0); }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         { MultMM<false>(x, m1.view(), m2, m0); }
     private:
         const T x;
@@ -2678,9 +2696,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, StorageType S, IndexStyle I1, IndexStyle I2> 
     class Prodmv_1 : public SmallVectorComposite<T,M>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline Prodmv_1(
             const T TMV_DEBUGPARAM(_x), const SmallMatrix<T1,M,N,S,I1>& _m,
             const SmallVector<T2,N,I2>& _v
@@ -2689,25 +2708,25 @@ namespace tmv {
         { TMVAssert(_x == T(1)); }
         inline const SmallMatrix<T1,M,N,S,I1>& getM() const { return m; }
         inline const SmallVector<T2,N,I2>& getV() const { return v; }
-        inline void assignTov(SmallVector<RT,M,CStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,M,CStyle>& v0) const
         {
             TMVAssert(isReal(T()));
             MultMV_1<M,N,S>(m.cptr(),v.cptr(),v0.ptr());
         }
-        inline void assignTov(SmallVector<xCT,M,CStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,M,CStyle>& v0) const
         {
             MultMV_1<M,N,S>(m.cptr(),v.cptr(),v0.ptr());
         }
-        inline void assignTov(SmallVector<RT,M,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,M,FortranStyle>& v0) const
         {
             TMVAssert(isReal(T()));
             MultMV_1<M,N,S>(m.cptr(),v.cptr(),v0.ptr());
         }
-        inline void assignTov(SmallVector<xCT,M,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,M,FortranStyle>& v0) const
         { 
             MultMV_1<M,N,S>(m.cptr(),v.cptr(),v0.ptr());
         }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         {
             TMVAssert(isReal(T()));
             if (v0.step() == 1) 
@@ -2715,7 +2734,7 @@ namespace tmv {
             else
                 MultMV<false>(T(1),m.view(),v.view(),v0); 
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         { 
             if (v0.step() == 1) {
                 MultMV_1<M,N,S>(m.cptr(),v.cptr(),v0.ptr());
@@ -2732,9 +2751,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, StorageType S, IndexStyle I1, IndexStyle I2> 
     class Prodmv : public SmallVectorComposite<T,M>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline Prodmv(
             const T _x, const SmallMatrix<T1,M,N,S,I1>& _m,
             const SmallVector<T2,N,I2>& _v
@@ -2743,21 +2763,21 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const SmallMatrix<T1,M,N,S,I1>& getM() const { return m; }
         inline const SmallVector<T2,N,I2>& getV() const { return v; }
-        inline void assignTov(SmallVector<RT,M,CStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,M,CStyle>& v0) const
         {
             TMVAssert(isReal(T()));
             MultMV<M,N,S>(x,m.cptr(),v.cptr(),v0.ptr());
         }
-        inline void assignTov(SmallVector<xCT,M,CStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,M,CStyle>& v0) const
         { MultMV<M,N,S>(x,m.cptr(),v.cptr(),v0.ptr()); }
-        inline void assignTov(SmallVector<RT,M,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,M,FortranStyle>& v0) const
         {
             TMVAssert(isReal(T()));
             MultMV<M,N,S>(x,m.cptr(),v.cptr(),v0.ptr());
         }
-        inline void assignTov(SmallVector<xCT,M,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,M,FortranStyle>& v0) const
         { MultMV<M,N,S>(x,m.cptr(),v.cptr(),v0.ptr()); }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         { 
             TMVAssert(isReal(T()));
             if (v0.step() == 1) 
@@ -2765,7 +2785,7 @@ namespace tmv {
             else
                 MultMV<false>(x,m.view(),v.view(),v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         { 
             if (v0.step() == 1) {
                 MultMV<M,N,S>(x,m.cptr(),v.cptr(),v0.ptr());
@@ -2783,9 +2803,10 @@ namespace tmv {
     template <class T, class T1, class T2, int N, IndexStyle I> 
     class ProdMv : public VectorComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline ProdMv(
             const T _x, const GenMatrix<T1>& _m,
             const SmallVector<T2,N,I>& _v
@@ -2796,12 +2817,12 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenMatrix<T1>& getM() const { return m; }
         inline const SmallVector<T2,N,I>& getV() const { return v; }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         { 
             TMVAssert(isReal(T()));
             MultMV<false>(x,m,v.view(),v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         { MultMV<false>(x,m,v.view(),v0); }
     private:
         const T x;
@@ -2812,9 +2833,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, StorageType S, IndexStyle I> 
     class ProdmV : public VectorComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline ProdmV(
             const T _x, const SmallMatrix<T1,M,N,S,I>& _m,
             const GenVector<T2>& _v
@@ -2825,7 +2847,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const SmallMatrix<T1,M,N,S,I>& getM() const { return m; }
         inline const GenVector<T2>& getV() const { return v; }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         { 
             TMVAssert(isReal(T()));
             if (v.step() == 1 && v0.step() == 1 && !SameStorage(v0,v)) 
@@ -2836,7 +2858,7 @@ namespace tmv {
             else
                 MultMV<false>(x,m.view(),v,v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         {
             if (v.step() == 1 && v0.step() == 1 && !SameStorage(v0,v) && 
                 !v.isconj()) {
@@ -2859,9 +2881,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, StorageType S, IndexStyle I1, IndexStyle I2> 
     class Prodvm_1 : public SmallVectorComposite<T,N>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline Prodvm_1(
             const T TMV_DEBUGPARAM(_x), const SmallVector<T1,M,I1>& _v,
             const SmallMatrix<T2,M,N,S,I2>& _m
@@ -2870,21 +2893,21 @@ namespace tmv {
         { TMVAssert(_x == T(1)); }
         inline const SmallVector<T1,M,I1>& getV() const { return v; }
         inline const SmallMatrix<T2,M,N,S,I2>& getM() const { return m; }
-        inline void assignTov(SmallVector<RT,N,CStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,N,CStyle>& v0) const
         {
             TMVAssert(isReal(T()));
             MultVM_1<M,N,S>(v.cptr(),m.cptr(),v0.ptr());
         }
-        inline void assignTov(SmallVector<xCT,N,CStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,N,CStyle>& v0) const
         { MultVM_1<M,N,S>(v.cptr(),m.cptr(),v0.ptr()); }
-        inline void assignTov(SmallVector<RT,N,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,N,FortranStyle>& v0) const
         {
             TMVAssert(isReal(T()));
             MultVM_1<M,N,S>(v.cptr(),m.cptr(),v0.ptr());
         }
-        inline void assignTov(SmallVector<xCT,N,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,N,FortranStyle>& v0) const
         { MultVM_1<M,N,S>(v.cptr(),m.cptr(),v0.ptr()); }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         { 
             TMVAssert(isReal(T()));
             if (v0.step() == 1) 
@@ -2892,7 +2915,7 @@ namespace tmv {
             else
                 MultMV<false>(T(1),m.transpose(),v.view(),v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         {
             if (v0.step() == 1) {
                 MultVM_1<M,N,S>(v.cptr(),m.cptr(),v0.ptr());
@@ -2909,9 +2932,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, StorageType S, IndexStyle I1, IndexStyle I2> 
     class Prodvm : public SmallVectorComposite<T,N>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline Prodvm(
             const T _x, const SmallVector<T1,M,I1>& _v,
             const SmallMatrix<T2,M,N,S,I2>& _m
@@ -2920,21 +2944,21 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const SmallVector<T1,M,I1>& getV() const { return v; }
         inline const SmallMatrix<T2,M,N,S,I2>& getM() const { return m; }
-        inline void assignTov(SmallVector<RT,N,CStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,N,CStyle>& v0) const
         { 
             TMVAssert(isReal(T()));
             MultVM<M,N,S>(x,v.cptr(),m.cptr(),v0.ptr());
         }
-        inline void assignTov(SmallVector<xCT,N,CStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,N,CStyle>& v0) const
         { MultVM<M,N,S>(x,v.cptr(),m.cptr(),v0.ptr()); }
-        inline void assignTov(SmallVector<RT,N,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,N,FortranStyle>& v0) const
         {
             TMVAssert(isReal(T()));
             MultVM<M,N,S>(x,v.cptr(),m.cptr(),v0.ptr());
         }
-        inline void assignTov(SmallVector<xCT,N,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,N,FortranStyle>& v0) const
         { MultVM<M,N,S>(x,v.cptr(),m.cptr(),v0.ptr()); }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         {
             TMVAssert(isReal(T()));
             if (v0.step() == 1) 
@@ -2942,7 +2966,7 @@ namespace tmv {
             else
                 MultMV<false>(x,m.transpose(),v.view(),v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         {
             if (v0.step() == 1) {
                 MultVM<M,N,S>(x,v.cptr(),m.cptr(),v0.ptr());
@@ -2960,9 +2984,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, StorageType S, IndexStyle I> 
     class ProdVm : public VectorComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline ProdVm(
             const T _x, const GenVector<T1>& _v,
             const SmallMatrix<T2,M,N,S,I>& _m
@@ -2973,7 +2998,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenVector<T1>& getV() const { return v; }
         inline const SmallMatrix<T2,M,N,S,I>& getM() const { return m; }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         { 
             TMVAssert(isReal(T()));
             if (v0.step() == 1 && v.step() == 1 && !SameStorage(v0,v)) 
@@ -2984,7 +3009,7 @@ namespace tmv {
             else
                 MultMV<false>(x,m.transpose(),v,v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         {
             if (v0.step() == 1 && v.step() == 1 && !SameStorage(v0,v) &&
                 !v.isconj()) {
@@ -3006,9 +3031,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, IndexStyle I> 
     class ProdvM : public VectorComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline ProdvM(
             const T _x, const SmallVector<T1,M,I>& _v,
             const GenMatrix<T2>& _m
@@ -3019,12 +3045,12 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const SmallVector<T1,M,I>& getV() const { return v; }
         inline const GenMatrix<T2>& getM() const { return m; }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         {
             TMVAssert(isReal(T()));
             MultMV<false>(x,m.transpose(),v.view(),v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         { MultMV<false>(x,m.transpose(),v.view(),v0); }
     private:
         const T x;
@@ -3684,9 +3710,10 @@ namespace tmv {
     template <class T, class Tm, int M, int N, StorageType S, IndexStyle I> 
     class QuotXm_1 : public SmallMatrixComposite<T,N,M> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline QuotXm_1(
             const T TMV_DEBUGPARAM(_x), 
             const SmallMatrix<Tm,M,N,S,I>& _m
@@ -3696,32 +3723,32 @@ namespace tmv {
         inline StorageType stor() const { return ColMajor; }
         inline const SmallMatrix<Tm,M,N,S,I>& getM() const { return m; }
         inline void assignTom(
-            SmallMatrix<RT,N,M,RowMajor,CStyle>& m0) const
+            SmallMatrix<real_type,N,M,RowMajor,CStyle>& m0) const
         { TMVAssert(isReal(T())); DoInverse(m,m0); }
         inline void assignTom(
-            SmallMatrix<RT,N,M,ColMajor,CStyle>& m0) const
+            SmallMatrix<real_type,N,M,ColMajor,CStyle>& m0) const
         { TMVAssert(isReal(T())); DoInverse(m,m0); }
         inline void assignTom(
-            SmallMatrix<xCT,N,M,RowMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,N,M,RowMajor,CStyle>& m0) const
         { DoInverse(m,m0); }
         inline void assignTom(
-            SmallMatrix<xCT,N,M,ColMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,N,M,ColMajor,CStyle>& m0) const
         { DoInverse(m,m0); }
         inline void assignTom(
-            SmallMatrix<RT,N,M,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,N,M,RowMajor,FortranStyle>& m0) const
         { TMVAssert(isReal(T())); DoInverse(m,m0); }
         inline void assignTom(
-            SmallMatrix<RT,N,M,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,N,M,ColMajor,FortranStyle>& m0) const
         { TMVAssert(isReal(T())); DoInverse(m,m0); }
         inline void assignTom(
-            SmallMatrix<xCT,N,M,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,N,M,RowMajor,FortranStyle>& m0) const
         { DoInverse(m,m0); }
         inline void assignTom(
-            SmallMatrix<xCT,N,M,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,N,M,ColMajor,FortranStyle>& m0) const
         { DoInverse(m,m0); }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         { TMVAssert(isReal(T())); m.view().makeInverse(m0); }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         { m.view().makeInverse(m0); }
     private:
         const SmallMatrix<Tm,M,N,S,I>& m;
@@ -3730,41 +3757,42 @@ namespace tmv {
     template <class T, class Tm, int M, int N, StorageType S, IndexStyle I> 
     class QuotXm : public SmallMatrixComposite<T,N,M> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline QuotXm(const T _x, const SmallMatrix<Tm,M,N,S,I>& _m) : 
             x(_x), m(_m) {}
         inline StorageType stor() const { return S; }
         inline T getX() const { return x; }
         inline const SmallMatrix<Tm,M,N,S,I>& getM() const { return m; }
         inline void assignTom(
-            SmallMatrix<RT,N,M,RowMajor,CStyle>& m0) const
+            SmallMatrix<real_type,N,M,RowMajor,CStyle>& m0) const
         { TMVAssert(isReal(T())); DoInverse(m,m0); MultXV<M*N>(x,m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<RT,N,M,ColMajor,CStyle>& m0) const
+            SmallMatrix<real_type,N,M,ColMajor,CStyle>& m0) const
         { TMVAssert(isReal(T())); DoInverse(m,m0); MultXV<M*N>(x,m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<xCT,N,M,RowMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,N,M,RowMajor,CStyle>& m0) const
         { DoInverse(m,m0); MultXV<M*N>(x,m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<xCT,N,M,ColMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,N,M,ColMajor,CStyle>& m0) const
         { DoInverse(m,m0); MultXV<M*N>(x,m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<RT,N,M,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,N,M,RowMajor,FortranStyle>& m0) const
         { TMVAssert(isReal(T())); DoInverse(m,m0); MultXV<M*N>(x,m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<RT,N,M,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,N,M,ColMajor,FortranStyle>& m0) const
         { TMVAssert(isReal(T())); DoInverse(m,m0); MultXV<M*N>(x,m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<xCT,N,M,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,N,M,RowMajor,FortranStyle>& m0) const
         { DoInverse(m,m0); MultXV<M*N>(x,m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<xCT,N,M,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,N,M,ColMajor,FortranStyle>& m0) const
         { DoInverse(m,m0); MultXV<M*N>(x,m0.ptr()); }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         { TMVAssert(isReal(T())); m.view().makeInverse(m0); MultXM(x,m0); }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         { m.view().makeInverse(m0); MultXM(x,m0); }
     private:
         const T x;
@@ -3793,9 +3821,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, StorageType S, IndexStyle I1, IndexStyle I2> 
     class Quotvm_1 : public SmallVectorComposite<T,N>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline Quotvm_1(
             const T TMV_DEBUGPARAM(_x), const SmallVector<T1,M,I1>& _v,
             const SmallMatrix<T2,M,N,S,I2>& _m
@@ -3804,21 +3833,21 @@ namespace tmv {
         { TMVAssert(_x == T(1)); }
         inline const SmallVector<T1,M,I1>& getV() const { return v; }
         inline const SmallMatrix<T2,M,N,S,I2>& getM() const { return m; }
-        inline void assignTov(SmallVector<RT,N,CStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,N,CStyle>& v0) const
         { TMVAssert(isReal(T())); DoLDiv(m,v,v0); }
-        inline void assignTov(SmallVector<xCT,N,CStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,N,CStyle>& v0) const
         { DoLDiv(m,v,v0); }
-        inline void assignTov(SmallVector<RT,N,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,N,FortranStyle>& v0) const
         { TMVAssert(isReal(T())); DoLDiv(m,v,v0); }
-        inline void assignTov(SmallVector<xCT,N,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,N,FortranStyle>& v0) const
         { DoLDiv(m,v,v0); }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         { 
             TMVAssert(v0.size() == N);
             TMVAssert(isReal(T())); 
             m.view().LDiv(v.view(),v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         { 
             TMVAssert(v0.size() == N);
             m.view().LDiv(v.view(),v0);
@@ -3831,9 +3860,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, StorageType S, IndexStyle I1, IndexStyle I2> 
     class Quotvm : public SmallVectorComposite<T,N>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline Quotvm(
             const T _x, const SmallVector<T1,M,I1>& _v,
             const SmallMatrix<T2,M,N,S,I2>& _m
@@ -3842,22 +3872,22 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const SmallVector<T1,M,I1>& getV() const { return v; }
         inline const SmallMatrix<T2,M,N,S,I2>& getM() const { return m; }
-        inline void assignTov(SmallVector<RT,N,CStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,N,CStyle>& v0) const
         { TMVAssert(isReal(T())); DoLDiv(m,v,v0); MultXV<N>(x,v0.ptr()); }
-        inline void assignTov(SmallVector<xCT,N,CStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,N,CStyle>& v0) const
         { DoLDiv(m,v,v0); MultXV<N>(x,v0.ptr()); }
-        inline void assignTov(SmallVector<RT,N,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,N,FortranStyle>& v0) const
         { TMVAssert(isReal(T())); DoLDiv(m,v,v0); MultXV<N>(x,v0.ptr()); }
-        inline void assignTov(SmallVector<xCT,N,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,N,FortranStyle>& v0) const
         { DoLDiv(m,v,v0); MultXV<N>(x,v0.ptr()); }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         { 
             TMVAssert(v0.size() == N);
             TMVAssert(isReal(T())); 
             m.view().LDiv(v.view(),v0);
             MultXV(x,v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         { 
             TMVAssert(v0.size() == N);
             m.view().LDiv(v.view(),v0);
@@ -3872,9 +3902,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, StorageType S, IndexStyle I> 
     class QuotVm_1 : public VectorComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline QuotVm_1(
             const T TMV_DEBUGPARAM(_x), const GenVector<T1>& _v,
             const SmallMatrix<T2,M,N,S,I>& _m
@@ -3884,14 +3915,14 @@ namespace tmv {
         inline size_t size() const { return N; }
         inline const GenVector<T1>& getV() const { return v; }
         inline const SmallMatrix<T2,M,N,S,I>& getM() const { return m; }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         { 
             TMVAssert(v0.size() == size());
             TMVAssert(isReal(T())); 
             m.view().LDiv(v,v0);
             MultXV(T(1),v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         { 
             TMVAssert(v0.size() == size());
             m.view().LDiv(v,v0);
@@ -3905,9 +3936,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, StorageType S, IndexStyle I> 
     class QuotVm : public VectorComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline QuotVm(
             const T _x, const GenVector<T1>& _v,
             const SmallMatrix<T2,M,N,S,I>& _m
@@ -3918,14 +3950,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenVector<T1>& getV() const { return v; }
         inline const SmallMatrix<T2,M,N,S,I>& getM() const { return m; }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         { 
             TMVAssert(v0.size() == size());
             TMVAssert(isReal(T())); 
             m.view().LDiv(v,v0);
             MultXV(x,v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         { 
             TMVAssert(v0.size() == size());
             m.view().LDiv(v,v0);
@@ -3940,9 +3972,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, IndexStyle I> 
     class QuotvM : public VectorComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline QuotvM(
             const T _x, const SmallVector<T1,M,I>& _v,
             const GenMatrix<T2>& _m
@@ -3953,14 +3986,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const SmallVector<T1,M,I>& getV() const { return v; }
         inline const GenMatrix<T2>& getM() const { return m; }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         { 
             TMVAssert(v0.size() == size());
             TMVAssert(isReal(T())); 
             m.LDiv(v.view(),v0);
             MultXV(x,v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         { 
             TMVAssert(v0.size() == size());
             m.LDiv(v.view(),v0);
@@ -3975,9 +4008,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, StorageType S, IndexStyle I1, IndexStyle I2> 
     class RQuotvm_1 : public SmallVectorComposite<T,M>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline RQuotvm_1(
             const T TMV_DEBUGPARAM(_x), const SmallVector<T1,N,I1>& _v,
             const SmallMatrix<T2,M,N,S,I2>& _m
@@ -3986,21 +4020,21 @@ namespace tmv {
         { TMVAssert(_x == T(1)); }
         inline const SmallVector<T1,N,I1>& getV() const { return v; }
         inline const SmallMatrix<T2,M,N,S,I2>& getM() const { return m; }
-        inline void assignTov(SmallVector<RT,M,CStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,M,CStyle>& v0) const
         { TMVAssert(isReal(T())); DoRDiv(m,v,v0); }
-        inline void assignTov(SmallVector<xCT,M,CStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,M,CStyle>& v0) const
         { DoRDiv(m,v,v0); }
-        inline void assignTov(SmallVector<RT,M,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,M,FortranStyle>& v0) const
         { TMVAssert(isReal(T())); DoRDiv(m,v,v0); }
-        inline void assignTov(SmallVector<xCT,M,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,M,FortranStyle>& v0) const
         { DoRDiv(m,v,v0); }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         { 
             TMVAssert(v0.size() == M);
             TMVAssert(isReal(T())); 
             m.view().RDiv(v.view(),v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         { 
             TMVAssert(v0.size() == M);
             m.view().RDiv(v.view(),v0);
@@ -4013,9 +4047,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, StorageType S, IndexStyle I1, IndexStyle I2> 
     class RQuotvm : public SmallVectorComposite<T,M>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline RQuotvm(
             const T _x, const SmallVector<T1,N,I1>& _v,
             const SmallMatrix<T2,M,N,S,I2>& _m
@@ -4024,22 +4059,22 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const SmallVector<T1,N,I1>& getV() const { return v; }
         inline const SmallMatrix<T2,M,N,S,I2>& getM() const { return m; }
-        inline void assignTov(SmallVector<RT,M,CStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,M,CStyle>& v0) const
         { TMVAssert(isReal(T())); DoRDiv(m,v,v0); MultXV<M>(x,v0.ptr()); }
-        inline void assignTov(SmallVector<xCT,M,CStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,M,CStyle>& v0) const
         { DoRDiv(m,v,v0); MultXV<M>(x,v0.ptr()); }
-        inline void assignTov(SmallVector<RT,M,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<real_type,M,FortranStyle>& v0) const
         { TMVAssert(isReal(T())); DoRDiv(m,v,v0); MultXV<M>(x,v0.ptr()); }
-        inline void assignTov(SmallVector<xCT,M,FortranStyle>& v0) const
+        inline void assignTov(SmallVector<complex_type,M,FortranStyle>& v0) const
         { DoRDiv(m,v,v0); MultXV<M>(x,v0.ptr()); }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         { 
             TMVAssert(v0.size() == M);
             TMVAssert(isReal(T())); 
             m.view().RDiv(v.view(),v0);
             MultXV(x,v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         { 
             TMVAssert(v0.size() == M);
             m.view().RDiv(v.view(),v0);
@@ -4054,9 +4089,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, StorageType S, IndexStyle I> 
     class RQuotVm_1 : public VectorComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline RQuotVm_1(
             const T TMV_DEBUGPARAM(_x), const GenVector<T1>& _v,
             const SmallMatrix<T2,M,N,S,I>& _m
@@ -4066,14 +4102,14 @@ namespace tmv {
         inline size_t size() const { return M; }
         inline const GenVector<T1>& getV() const { return v; }
         inline const SmallMatrix<T2,M,N,S,I>& getM() const { return m; }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         { 
             TMVAssert(v0.size() == size());
             TMVAssert(isReal(T())); 
             m.view().RDiv(v,v0);
             MultXV(T(1),v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         { 
             TMVAssert(v0.size() == size());
             m.view().RDiv(v,v0);
@@ -4087,9 +4123,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, StorageType S, IndexStyle I> 
     class RQuotVm : public VectorComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline RQuotVm(
             const T _x, const GenVector<T1>& _v,
             const SmallMatrix<T2,M,N,S,I>& _m
@@ -4100,14 +4137,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenVector<T1>& getV() const { return v; }
         inline const SmallMatrix<T2,M,N,S,I>& getM() const { return m; }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         { 
             TMVAssert(v0.size() == size());
             TMVAssert(isReal(T())); 
             m.view().RDiv(v,v0);
             MultXV(x,v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         { 
             TMVAssert(v0.size() == size());
             m.view().RDiv(v,v0);
@@ -4122,9 +4159,10 @@ namespace tmv {
     template <class T, class T1, class T2, int N, IndexStyle I> 
     class RQuotvM : public VectorComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline RQuotvM(
             const T _x, const SmallVector<T1,N,I>& _v,
             const GenMatrix<T2>& _m
@@ -4135,14 +4173,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const SmallVector<T1,N,I>& getV() const { return v; }
         inline const GenMatrix<T2>& getM() const { return m; }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         { 
             TMVAssert(v0.size() == size());
             TMVAssert(isReal(T())); 
             m.RDiv(v.view(),v0);
             MultXV(x,v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         { 
             TMVAssert(v0.size() == size());
             m.RDiv(v.view(),v0);
@@ -4478,9 +4516,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, int K, StorageType S1, StorageType S2, IndexStyle I1, IndexStyle I2> 
     class Quotmm_1 : public SmallMatrixComposite<T,M,N>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline Quotmm_1(
             const T TMV_DEBUGPARAM(_x), const SmallMatrix<T1,K,N,S1,I1>& _m1,
             const SmallMatrix<T2,K,M,S2,I2>& _m2
@@ -4491,36 +4530,36 @@ namespace tmv {
         inline const SmallMatrix<T1,K,N,S1,I1>& getM1() const { return m1; }
         inline const SmallMatrix<T2,K,M,S2,I2>& getM2() const { return m2; }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,CStyle>& m0) const
         { TMVAssert(isReal(T())); DoLDiv(m2,m1,m0); }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,CStyle>& m0) const
         { TMVAssert(isReal(T())); DoLDiv(m2,m1,m0); }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,CStyle>& m0) const
         { DoLDiv(m2,m1,m0); }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,CStyle>& m0) const
         { DoLDiv(m2,m1,m0); }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,FortranStyle>& m0) const
         { TMVAssert(isReal(T())); DoLDiv(m2,m1,m0); }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,FortranStyle>& m0) const
         { TMVAssert(isReal(T())); DoLDiv(m2,m1,m0); }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,FortranStyle>& m0) const
         { DoLDiv(m2,m1,m0); }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,FortranStyle>& m0) const
         { DoLDiv(m2,m1,m0); }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         { 
             TMVAssert(m0.colsize() == M && m0.rowsize() == N);
             TMVAssert(isReal(T())); 
             m2.view().LDiv(m1.view(),m0);
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         { 
             TMVAssert(m0.colsize() == M && m0.rowsize() == N);
             m2.view().LDiv(m1.view(),m0);
@@ -4533,9 +4572,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, int K,StorageType S1, StorageType S2, IndexStyle I1, IndexStyle I2> 
     class Quotmm : public SmallMatrixComposite<T,M,N>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline Quotmm(
             const T _x, const SmallMatrix<T1,K,N,S1,I1>& _m1,
             const SmallMatrix<T2,K,M,S2,I2>& _m2
@@ -4546,37 +4586,37 @@ namespace tmv {
         inline const SmallMatrix<T1,K,N,S1,I1>& getM1() const { return m1; }
         inline const SmallMatrix<T2,K,M,S2,I2>& getM2() const { return m2; }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,CStyle>& m0) const
         { TMVAssert(isReal(T())); DoLDiv(m2,m1,m0); MultXV<M*N>(x,m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,CStyle>& m0) const
         { TMVAssert(isReal(T())); DoLDiv(m2,m1,m0); MultXV<M*N>(x,m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,CStyle>& m0) const
         { DoLDiv(m2,m1,m0); MultXV<M*N>(x,m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,CStyle>& m0) const
         { DoLDiv(m2,m1,m0); MultXV<M*N>(x,m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,FortranStyle>& m0) const
         { TMVAssert(isReal(T())); DoLDiv(m2,m1,m0); MultXV<M*N>(x,m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,FortranStyle>& m0) const
         { TMVAssert(isReal(T())); DoLDiv(m2,m1,m0); MultXV<M*N>(x,m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,FortranStyle>& m0) const
         { DoLDiv(m2,m1,m0); MultXV<M*N>(x,m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,FortranStyle>& m0) const
         { DoLDiv(m2,m1,m0); MultXV<M*N>(x,m0.ptr()); }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         { 
             TMVAssert(m0.colsize() == M && m0.rowsize() == N);
             TMVAssert(isReal(T())); 
             m2.view().LDiv(m1.view(),m0);
             MultXM(x,m0);
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         { 
             TMVAssert(m0.colsize() == M && m0.rowsize() == N);
             m2.view().LDiv(m1.view(),m0);
@@ -4591,9 +4631,10 @@ namespace tmv {
     template <class T, class T1, class T2, int K, int M, StorageType S2, IndexStyle I2> 
     class QuotMm_1 : public MatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline QuotMm_1(
             const T TMV_DEBUGPARAM(_x), const GenMatrix<T1>& _m1,
             const SmallMatrix<T2,K,M,S2,I2>& _m2
@@ -4605,13 +4646,13 @@ namespace tmv {
         inline StorageType stor() const { return S2; }
         inline const GenMatrix<T1>& getM1() const { return m1; }
         inline const SmallMatrix<T2,K,M,S2,I2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         { 
             TMVAssert(m0.colsize() == M && m0.rowsize() == rowsize());
             TMVAssert(isReal(T())); 
             m2.view().LDiv(m1,m0);
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         { 
             TMVAssert(m0.colsize() == M && m0.rowsize() == rowsize());
             m2.view().LDiv(m1,m0);
@@ -4624,9 +4665,10 @@ namespace tmv {
     template <class T, class T1, class T2, int K, int M, StorageType S2, IndexStyle I2> 
     class QuotMm : public MatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline QuotMm(
             const T _x, const GenMatrix<T1>& _m1,
             const SmallMatrix<T2,K,M,S2,I2>& _m2
@@ -4639,14 +4681,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenMatrix<T1>& getM1() const { return m1; }
         inline const SmallMatrix<T2,K,M,S2,I2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         { 
             TMVAssert(m0.colsize() == M && m0.rowsize() == rowsize());
             TMVAssert(isReal(T())); 
             m2.view().LDiv(m1,m0);
             MultXM(x,m0);
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         { 
             TMVAssert(m0.colsize() == M && m0.rowsize() == rowsize());
             m2.view().LDiv(m1,m0);
@@ -4661,9 +4703,10 @@ namespace tmv {
     template <class T, class T1, class T2, int K, int N, StorageType S1, IndexStyle I1> 
     class QuotmM : public MatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline QuotmM(
             const T _x, const SmallMatrix<T1,K,N,S1,I1>& _m1,
             const GenMatrix<T2>& _m2
@@ -4675,14 +4718,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const SmallMatrix<T1,K,N,S1,I1>& getM1() const { return m1; }
         inline const GenMatrix<T2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         { 
             TMVAssert(m0.colsize() == colsize() && m0.rowsize() == N);
             TMVAssert(isReal(T())); 
             m2.LDiv(m1.view(),m0);
             MultXM(x,m0);
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         { 
             TMVAssert(m0.colsize() == colsize() && m0.rowsize() == N);
             m2.LDiv(m1.view(),m0);
@@ -4697,9 +4740,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, int K, StorageType S1, StorageType S2, IndexStyle I1, IndexStyle I2> 
     class RQuotmm_1 : public SmallMatrixComposite<T,M,N>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline RQuotmm_1(
             const T TMV_DEBUGPARAM(_x), const SmallMatrix<T1,M,K,S1,I1>& _m1,
             const SmallMatrix<T2,N,K,S2,I2>& _m2
@@ -4710,36 +4754,36 @@ namespace tmv {
         inline const SmallMatrix<T1,M,K,S1,I1>& getM1() const { return m1; }
         inline const SmallMatrix<T2,N,K,S2,I2>& getM2() const { return m2; }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,CStyle>& m0) const
         { TMVAssert(isReal(T())); DoRDiv(m2,m1,m0); }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,CStyle>& m0) const
         { TMVAssert(isReal(T())); DoRDiv(m2,m1,m0); }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,CStyle>& m0) const
         { DoRDiv(m2,m1,m0); }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,CStyle>& m0) const
         { DoRDiv(m2,m1,m0); }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,FortranStyle>& m0) const
         { TMVAssert(isReal(T())); DoRDiv(m2,m1,m0); }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,FortranStyle>& m0) const
         { TMVAssert(isReal(T())); DoRDiv(m2,m1,m0); }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,FortranStyle>& m0) const
         { DoRDiv(m2,m1,m0); }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,FortranStyle>& m0) const
         { DoRDiv(m2,m1,m0); }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         { 
             TMVAssert(m0.colsize() == M && m0.rowsize() == N);
             TMVAssert(isReal(T())); 
             m2.view().RDiv(m1.view(),m0);
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         { 
             TMVAssert(m0.colsize() == M && m0.rowsize() == N);
             m2.view().RDiv(m1.view(),m0);
@@ -4752,9 +4796,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int N, int K, StorageType S1, StorageType S2, IndexStyle I1, IndexStyle I2> 
     class RQuotmm : public SmallMatrixComposite<T,M,N>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline RQuotmm(
             const T _x, const SmallMatrix<T1,M,K,S1,I1>& _m1,
             const SmallMatrix<T2,N,K,S2,I2>& _m2
@@ -4764,37 +4809,37 @@ namespace tmv {
         inline const SmallMatrix<T1,M,K,S1,I1>& getM1() const { return m1; }
         inline const SmallMatrix<T2,N,K,S2,I2>& getM2() const { return m2; }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,CStyle>& m0) const
         { TMVAssert(isReal(T())); DoRDiv(m2,m1,m0); MultXV<M*N>(x,m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,CStyle>& m0) const
         { TMVAssert(isReal(T())); DoRDiv(m2,m1,m0); MultXV<M*N>(x,m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,CStyle>& m0) const
         { DoRDiv(m2,m1,m0); MultXV<M*N>(x,m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,CStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,CStyle>& m0) const
         { DoRDiv(m2,m1,m0); MultXV<M*N>(x,m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<RT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,ColMajor,FortranStyle>& m0) const
         { TMVAssert(isReal(T())); DoRDiv(m2,m1,m0); MultXV<M*N>(x,m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<RT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<real_type,M,N,RowMajor,FortranStyle>& m0) const
         { TMVAssert(isReal(T())); DoRDiv(m2,m1,m0); MultXV<M*N>(x,m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,ColMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,ColMajor,FortranStyle>& m0) const
         { DoRDiv(m2,m1,m0); MultXV<M*N>(x,m0.ptr()); }
         inline void assignTom(
-            SmallMatrix<xCT,M,N,RowMajor,FortranStyle>& m0) const
+            SmallMatrix<complex_type,M,N,RowMajor,FortranStyle>& m0) const
         { DoRDiv(m2,m1,m0); MultXV<M*N>(x,m0.ptr()); }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         { 
             TMVAssert(m0.colsize() == M && m0.rowsize() == N);
             TMVAssert(isReal(T())); 
             m2.view().RDiv(m1.view(),m0);
             MultXM(x,m0);
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         { 
             TMVAssert(m0.colsize() == M && m0.rowsize() == N);
             m2.view().RDiv(m1.view(),m0);
@@ -4809,9 +4854,10 @@ namespace tmv {
     template <class T, class T1, class T2, int N, int K, StorageType S2, IndexStyle I2> 
     class RQuotMm_1 : public MatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline RQuotMm_1(
             const T TMV_DEBUGPARAM(_x), const GenMatrix<T1>& _m1,
             const SmallMatrix<T2,N,K,S2,I2>& _m2
@@ -4823,13 +4869,13 @@ namespace tmv {
         inline StorageType stor() const { return S2; }
         inline const GenMatrix<T1>& getM1() const { return m1; }
         inline const SmallMatrix<T2,N,K,S2,I2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         { 
             TMVAssert(m0.colsize() == colsize() && m0.rowsize() == N);
             TMVAssert(isReal(T())); 
             m2.view().RDiv(m1,m0);
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         { 
             TMVAssert(m0.colsize() == colsize() && m0.rowsize() == N);
             m2.view().RDiv(m1,m0);
@@ -4842,9 +4888,10 @@ namespace tmv {
     template <class T, class T1, class T2, int N, int K, StorageType S2, IndexStyle I2> 
     class RQuotMm : public MatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline RQuotMm(
             const T _x, const GenMatrix<T1>& _m1,
             const SmallMatrix<T2,N,K,S2,I2>& _m2
@@ -4857,14 +4904,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenMatrix<T1>& getM1() const { return m1; }
         inline const SmallMatrix<T2,N,K,S2,I2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         { 
             TMVAssert(m0.colsize() == colsize() && m0.rowsize() == N);
             TMVAssert(isReal(T())); 
             m2.view().RDiv(m1,m0);
             MultXM(x,m0);
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         { 
             TMVAssert(m0.colsize() == colsize() && m0.rowsize() == N);
             m2.view().RDiv(m1,m0);
@@ -4879,9 +4926,10 @@ namespace tmv {
     template <class T, class T1, class T2, int M, int K, StorageType S1, IndexStyle I1> 
     class RQuotmM : public MatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline RQuotmM(
             const T _x, const SmallMatrix<T1,M,K,S1,I1>& _m1,
             const GenMatrix<T2>& _m2
@@ -4894,14 +4942,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const SmallMatrix<T1,M,K,S1,I1>& getM1() const { return m1; }
         inline const GenMatrix<T2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         { 
             TMVAssert(m0.colsize() == M && m0.rowsize() == rowsize());
             TMVAssert(isReal(T())); 
             m2.RDiv(m1.view(),m0);
             MultXM(x,m0);
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         { 
             TMVAssert(m0.colsize() == M && m0.rowsize() == rowsize());
             m2.RDiv(m1.view(),m0);

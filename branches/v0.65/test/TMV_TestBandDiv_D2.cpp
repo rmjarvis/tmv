@@ -4,7 +4,7 @@
 #include "TMV.h"
 #include "TMV_Band.h"
 #include "TMV_Test.h"
-#include "TMV_Test2.h"
+#include "TMV_Test_2.h"
 #include "TMV_TestBandArith.h"
 
 template <class T1, class T2> 
@@ -36,9 +36,7 @@ void TestBandDiv_D2(tmv::DivType dt)
 
     std::vector<tmv::BandMatrixView<T> > b;
     std::vector<tmv::BandMatrixView<std::complex<T> > > cb;
-    std::vector<tmv::BaseMatrix<T>*> B;
-    std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
-    MakeBandList(b,cb,B,CB);
+    MakeBandList(b,cb);
 
     tmv::Matrix<T> a1(N,N);
     for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) a1(i,j) = T(1-3*i+j);
@@ -69,8 +67,6 @@ void TestBandDiv_D2(tmv::DivType dt)
         TestMatrixDivArith1<T>(dt,uv,bi,cuv,cbi,"Band/UpperTriMatrix");
         TestMatrixDivArith1<T>(dt,lv,bi,clv,cbi,"Band/LowerTriMatrix");
     }
-    for(size_t i=0;i<B.size();++i) delete B[i];
-    for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
 #ifdef TEST_DOUBLE

@@ -4,7 +4,7 @@
 #include "TMV.h"
 #include "TMV_Sym.h"
 #include "TMV_Test.h"
-#include "TMV_Test2.h"
+#include "TMV_Test_2.h"
 #include "TMV_TestSymArith.h"
 
 #include "TMV_TestMatrixDivArith.h"
@@ -16,9 +16,7 @@ void TestSymDiv_B1(tmv::DivType dt, PosDefCode pdc)
 
     std::vector<tmv::SymMatrixView<T> > s;
     std::vector<tmv::SymMatrixView<std::complex<T> > > cs;
-    std::vector<tmv::BaseMatrix<T>*> B;
-    std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
-    MakeSymList(s,cs,B,CB,pdc);
+    MakeSymList(s,cs,pdc);
 
     tmv::Matrix<T> a1(N,N);
     for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) a1(i,j) = T(1-3*i+j);
@@ -68,8 +66,6 @@ void TestSymDiv_B1(tmv::DivType dt, PosDefCode pdc)
         TestMatrixDivArith1<T>(dt,si,a6v,csi,ca6v,"DegenerateMatrix/Sym");
 #endif
     }
-    for(size_t i=0;i<B.size();++i) delete B[i];
-    for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
 #ifdef TEST_DOUBLE

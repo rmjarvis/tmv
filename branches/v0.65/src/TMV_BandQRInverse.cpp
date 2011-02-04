@@ -42,8 +42,8 @@ namespace tmv {
 
     template <class T, class T1> 
     void QR_Inverse(
-        const GenBandMatrix<T>& QRx, const GenVector<T>& beta,
-        const MatrixView<T1>& minv)
+        const GenBandMatrix<T1>& QRx, const GenVector<T1>& beta,
+        const MatrixView<T>& minv)
     {
         // minv = R^-1 Qt
         TMVAssert(minv.colsize() == QRx.rowsize());
@@ -52,7 +52,7 @@ namespace tmv {
         const int N = QRx.rowsize();
 
         minv.setZero();
-        UpperTriMatrixView<T1> R = minv.colRange(0,N).upperTri();
+        UpperTriMatrixView<T> R = minv.colRange(0,N).upperTri();
         R = QRx.diagRange(0,QRx.nhi()+1);
         TriInverse(R,QRx.nhi());
         Q_RDivEq(QRx,beta,minv);

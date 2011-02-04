@@ -124,7 +124,7 @@ namespace tmv {
 
     template <class T, class T1> 
     void CH_Inverse(
-        const GenSymBandMatrix<T>& LLx, const SymMatrixView<T1>& sinv) 
+        const GenSymBandMatrix<T1>& LLx, const SymMatrixView<T>& sinv) 
     {
         TMVAssert(LLx.size() == sinv.size());
 
@@ -150,7 +150,7 @@ namespace tmv {
 
 #ifdef XDEBUG
         //cout<<"Done CH_Inverse\n";
-        Matrix<T1> eye = A * sinv;
+        Matrix<T> eye = A * sinv;
         TMV_RealType(T) kappa = Norm(A) * Norm(sinv);
         if (Norm(eye-T(1)) > 0.0001*kappa*sinv.size()) {
             cerr<<"A = "<<A<<endl;
@@ -167,7 +167,7 @@ namespace tmv {
 
     template <class T, class T1> 
     void LDL_Inverse(
-        const GenSymBandMatrix<T>& LLx, const SymMatrixView<T1>& sinv) 
+        const GenSymBandMatrix<T1>& LLx, const SymMatrixView<T>& sinv) 
     {
         TMVAssert(LLx.size() == sinv.size());
         TMVAssert(LLx.nlo() == 1);
@@ -198,7 +198,7 @@ namespace tmv {
 
 #ifdef XDEBUG
         //cout<<"Done LDL_Inverse\n";
-        Matrix<T1> eye = A * sinv;
+        Matrix<T> eye = A * sinv;
         TMV_RealType(T) kappa = Norm(A) * Norm(sinv);
         if (Norm(eye-T(1)) > 0.0001*kappa*sinv.size()) {
             cerr<<"A = "<<A<<endl;

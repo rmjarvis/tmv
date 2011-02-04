@@ -8,16 +8,73 @@ inline void CopyBackM(
     else m = HermMatrixViewOf(m0,m.uplo());
 }
 
+#define MakeSymList(s,cs,pdc) \
+    std::vector<tmv::SymMatrix<T,tmv::Upper,tmv::RowMajor> > S1; \
+    std::vector<tmv::SymMatrix<T,tmv::Upper,tmv::ColMajor> > S2; \
+    std::vector<tmv::SymMatrix<T,tmv::Lower,tmv::RowMajor> > S3; \
+    std::vector<tmv::SymMatrix<T,tmv::Lower,tmv::ColMajor> > S4; \
+    std::vector<tmv::HermMatrix<T,tmv::Upper,tmv::RowMajor> > S5; \
+    std::vector<tmv::HermMatrix<T,tmv::Upper,tmv::ColMajor> > S6; \
+    std::vector<tmv::HermMatrix<T,tmv::Lower,tmv::RowMajor> > S7; \
+    std::vector<tmv::HermMatrix<T,tmv::Lower,tmv::ColMajor> > S8; \
+    std::vector<tmv::Matrix<T> > S9; \
+    std::vector<tmv::SymMatrix<std::complex<T>,tmv::Upper,tmv::RowMajor> > CS1; \
+    std::vector<tmv::SymMatrix<std::complex<T>,tmv::Upper,tmv::ColMajor> > CS2; \
+    std::vector<tmv::SymMatrix<std::complex<T>,tmv::Lower,tmv::RowMajor> > CS3; \
+    std::vector<tmv::SymMatrix<std::complex<T>,tmv::Lower,tmv::ColMajor> > CS4; \
+    std::vector<tmv::HermMatrix<std::complex<T>,tmv::Upper,tmv::RowMajor> > CS5; \
+    std::vector<tmv::HermMatrix<std::complex<T>,tmv::Upper,tmv::ColMajor> > CS6; \
+    std::vector<tmv::HermMatrix<std::complex<T>,tmv::Lower,tmv::RowMajor> > CS7; \
+    std::vector<tmv::HermMatrix<std::complex<T>,tmv::Lower,tmv::ColMajor> > CS8; \
+    std::vector<tmv::Matrix<std::complex<T> > > CS9; \
+    DoMakeSymList(s,cs,pdc,S1,S2,S3,S4,S5,S6,S7,S8,S9, \
+                  CS1,CS2,CS3,CS4,CS5,CS6,CS7,CS8,CS9);
+
 template <class T> 
-inline void MakeSymList(
+inline void DoMakeSymList(
     std::vector<tmv::SymMatrixView<T> >& s,
     std::vector<tmv::SymMatrixView<std::complex<T> > >& cs,
-    std::vector<tmv::BaseMatrix<T>*>& B,
-    std::vector<tmv::BaseMatrix<std::complex<T> >*>& CB,
-    PosDefCode pdc)
+    PosDefCode pdc,
+    std::vector<tmv::SymMatrix<T,tmv::Upper,tmv::RowMajor> >& SUR,
+    std::vector<tmv::SymMatrix<T,tmv::Upper,tmv::ColMajor> >& SUC,
+    std::vector<tmv::SymMatrix<T,tmv::Lower,tmv::RowMajor> >& SLR,
+    std::vector<tmv::SymMatrix<T,tmv::Lower,tmv::ColMajor> >& SLC,
+    std::vector<tmv::HermMatrix<T,tmv::Upper,tmv::RowMajor> >& HUR,
+    std::vector<tmv::HermMatrix<T,tmv::Upper,tmv::ColMajor> >& HUC,
+    std::vector<tmv::HermMatrix<T,tmv::Lower,tmv::RowMajor> >& HLR,
+    std::vector<tmv::HermMatrix<T,tmv::Lower,tmv::ColMajor> >& HLC,
+    std::vector<tmv::Matrix<T> >& M,
+    std::vector<tmv::SymMatrix<std::complex<T>,tmv::Upper,tmv::RowMajor> >& CSUR,
+    std::vector<tmv::SymMatrix<std::complex<T>,tmv::Upper,tmv::ColMajor> >& CSUC,
+    std::vector<tmv::SymMatrix<std::complex<T>,tmv::Lower,tmv::RowMajor> >& CSLR,
+    std::vector<tmv::SymMatrix<std::complex<T>,tmv::Lower,tmv::ColMajor> >& CSLC,
+    std::vector<tmv::HermMatrix<std::complex<T>,tmv::Upper,tmv::RowMajor> >& CHUR,
+    std::vector<tmv::HermMatrix<std::complex<T>,tmv::Upper,tmv::ColMajor> >& CHUC,
+    std::vector<tmv::HermMatrix<std::complex<T>,tmv::Lower,tmv::RowMajor> >& CHLR,
+    std::vector<tmv::HermMatrix<std::complex<T>,tmv::Lower,tmv::ColMajor> >& CHLC,
+    std::vector<tmv::Matrix<std::complex<T> > >& CM)
 {
     const int N = std::numeric_limits<T>::is_integer ? 6 : 10;
-
+    const int RESERVE = 20;
+    SUR.reserve(RESERVE);
+    SUC.reserve(RESERVE);
+    SLR.reserve(RESERVE);
+    SLC.reserve(RESERVE);
+    HUR.reserve(RESERVE);
+    HUC.reserve(RESERVE);
+    HLR.reserve(RESERVE);
+    HLC.reserve(RESERVE);
+    M.reserve(RESERVE);
+    CSUR.reserve(RESERVE);
+    CSUC.reserve(RESERVE);
+    CSLR.reserve(RESERVE);
+    CSLC.reserve(RESERVE);
+    CHUR.reserve(RESERVE);
+    CHUC.reserve(RESERVE);
+    CHLR.reserve(RESERVE);
+    CHLC.reserve(RESERVE);
+    CM.reserve(RESERVE);
+ 
     tmv::Matrix<T> a1(N,N);
     tmv::Matrix<std::complex<T> > ca1(N,N);
     tmv::Matrix<T> a2(2*N,2*N);
@@ -118,87 +175,73 @@ inline void MakeSymList(
         }
     }
 
-    tmv::SymMatrix<T,tmv::Upper,tmv::RowMajor>* SUR = new
-        tmv::SymMatrix<T,tmv::Upper,tmv::RowMajor>(a1);
-    tmv::HermMatrix<T,tmv::Upper,tmv::RowMajor>* HUR = new
-        tmv::HermMatrix<T,tmv::Upper,tmv::RowMajor>(a1);
-    tmv::SymMatrix<std::complex<T>,tmv::Upper,tmv::RowMajor>* CSUR = new
-        tmv::SymMatrix<std::complex<T>,tmv::Upper,tmv::RowMajor>(ca1);
-    tmv::HermMatrix<std::complex<T>,tmv::Upper,tmv::RowMajor>* CHUR = new
-        tmv::HermMatrix<std::complex<T>,tmv::Upper,tmv::RowMajor>(ca1);
-    s.push_back(SUR->view());
-    s.push_back(HUR->view());
-    cs.push_back(CSUR->view());
-    cs.push_back(CHUR->view());
-    B.push_back(SUR);
-    B.push_back(HUR);
-    CB.push_back(CSUR);
-    CB.push_back(CHUR);
+    SUR.push_back(tmv::SymMatrix<T,tmv::Upper,tmv::RowMajor>(a1));
+    HUR.push_back(tmv::HermMatrix<T,tmv::Upper,tmv::RowMajor>(a1));
+    CSUR.push_back(tmv::SymMatrix<std::complex<T>,tmv::Upper,tmv::RowMajor>(ca1));
+    CHUR.push_back(tmv::HermMatrix<std::complex<T>,tmv::Upper,tmv::RowMajor>(ca1));
+    s.push_back(SUR.back().view());
+    s.push_back(HUR.back().view());
+    cs.push_back(CSUR.back().view());
+    cs.push_back(CHUR.back().view());
 
-    tmv::SymMatrix<T,tmv::Upper,tmv::ColMajor>* SUC = new
-        tmv::SymMatrix<T,tmv::Upper,tmv::ColMajor>(a1);
-    tmv::HermMatrix<T,tmv::Upper,tmv::ColMajor>* HUC = new
-        tmv::HermMatrix<T,tmv::Upper,tmv::ColMajor>(a1);
-    tmv::SymMatrix<std::complex<T>,tmv::Upper,tmv::ColMajor>* CSUC = new
-        tmv::SymMatrix<std::complex<T>,tmv::Upper,tmv::ColMajor>(ca1);
-    tmv::HermMatrix<std::complex<T>,tmv::Upper,tmv::ColMajor>* CHUC = new
-        tmv::HermMatrix<std::complex<T>,tmv::Upper,tmv::ColMajor>(ca1);
-    s.push_back(SUC->view());
-    s.push_back(HUC->view());
-    cs.push_back(CSUC->view());
-    cs.push_back(CHUC->view());
-    B.push_back(SUC);
-    B.push_back(HUC);
-    CB.push_back(CSUC);
-    CB.push_back(CHUC);
+    SUC.push_back(tmv::SymMatrix<T,tmv::Upper,tmv::ColMajor>(a1));
+    HUC.push_back(tmv::HermMatrix<T,tmv::Upper,tmv::ColMajor>(a1));
+    CSUC.push_back(tmv::SymMatrix<std::complex<T>,tmv::Upper,tmv::ColMajor>(ca1));
+    CHUC.push_back(tmv::HermMatrix<std::complex<T>,tmv::Upper,tmv::ColMajor>(ca1));
+    s.push_back(SUC.back().view());
+    s.push_back(HUC.back().view());
+    cs.push_back(CSUC.back().view());
+    cs.push_back(CHUC.back().view());
 
 #if (XTEST & 2)
-    tmv::SymMatrix<T,tmv::Lower,tmv::RowMajor>* SLR = new
-        tmv::SymMatrix<T,tmv::Lower,tmv::RowMajor>(a1);
-    tmv::HermMatrix<T,tmv::Lower,tmv::RowMajor>* HLR = new
-        tmv::HermMatrix<T,tmv::Lower,tmv::RowMajor>(a1);
-    tmv::SymMatrix<std::complex<T>,tmv::Lower,tmv::RowMajor>* CSLR = new
-        tmv::SymMatrix<std::complex<T>,tmv::Lower,tmv::RowMajor>(ca1);
-    tmv::HermMatrix<std::complex<T>,tmv::Lower,tmv::RowMajor>* CHLR = new
-        tmv::HermMatrix<std::complex<T>,tmv::Lower,tmv::RowMajor>(ca1);
-    s.push_back(SLR->view());
-    s.push_back(HLR->view());
-    cs.push_back(CSLR->view());
-    cs.push_back(CHLR->view());
-    B.push_back(SLR);
-    B.push_back(HLR);
-    CB.push_back(CSLR);
-    CB.push_back(CHLR);
-    tmv::SymMatrix<T,tmv::Lower,tmv::ColMajor>* SLC = new
-        tmv::SymMatrix<T,tmv::Lower,tmv::ColMajor>(a1);
-    tmv::HermMatrix<T,tmv::Lower,tmv::ColMajor>* HLC = new
-        tmv::HermMatrix<T,tmv::Lower,tmv::ColMajor>(a1);
-    tmv::SymMatrix<std::complex<T>,tmv::Lower,tmv::ColMajor>* CSLC = new
-        tmv::SymMatrix<std::complex<T>,tmv::Lower,tmv::ColMajor>(ca1);
-    tmv::HermMatrix<std::complex<T>,tmv::Lower,tmv::ColMajor>* CHLC = new
-        tmv::HermMatrix<std::complex<T>,tmv::Lower,tmv::ColMajor>(ca1);
-    s.push_back(SLC->view());
-    s.push_back(HLC->view());
-    cs.push_back(CSLC->view());
-    cs.push_back(CHLC->view());
-    B.push_back(SLC);
-    B.push_back(HLC);
-    CB.push_back(CSLC);
-    CB.push_back(CHLC);
-    tmv::Matrix<T>* a2a = new tmv::Matrix<T>(a2);
-    tmv::Matrix<T>* a2b = new tmv::Matrix<T>(a2);
-    tmv::Matrix<std::complex<T> >* ca2a = new tmv::Matrix<std::complex<T> >(ca2);
-    tmv::Matrix<std::complex<T> >* ca2b = new tmv::Matrix<std::complex<T> >(ca2);
-    ca2b->diag().imagPart().setZero();
-    s.push_back(SymMatrixViewOf(*a2a,tmv::Upper).subSymMatrix(0,2*N,2));
-    s.push_back(HermMatrixViewOf(*a2b,tmv::Upper).subSymMatrix(0,2*N,2));
-    cs.push_back(SymMatrixViewOf(*ca2a,tmv::Upper).subSymMatrix(0,2*N,2));
-    cs.push_back(HermMatrixViewOf(*ca2b,tmv::Upper).subSymMatrix(0,2*N,2));
-    B.push_back(a2a);
-    B.push_back(a2b);
-    CB.push_back(ca2a);
-    CB.push_back(ca2b);
+    SLR.push_back(tmv::SymMatrix<T,tmv::Lower,tmv::RowMajor>(a1));
+    HLR.push_back(tmv::HermMatrix<T,tmv::Lower,tmv::RowMajor>(a1));
+    CSLR.push_back(tmv::SymMatrix<std::complex<T>,tmv::Lower,tmv::RowMajor>(ca1));
+    CHLR.push_back(tmv::HermMatrix<std::complex<T>,tmv::Lower,tmv::RowMajor>(ca1));
+    s.push_back(SLR.back().view());
+    s.push_back(HLR.back().view());
+    cs.push_back(CSLR.back().view());
+    cs.push_back(CHLR.back().view());
+
+    SLC.push_back(tmv::SymMatrix<T,tmv::Lower,tmv::ColMajor>(a1));
+    HLC.push_back(tmv::HermMatrix<T,tmv::Lower,tmv::ColMajor>(a1));
+    CSLC.push_back(tmv::SymMatrix<std::complex<T>,tmv::Lower,tmv::ColMajor>(ca1));
+    CHLC.push_back(tmv::HermMatrix<std::complex<T>,tmv::Lower,tmv::ColMajor>(ca1));
+    s.push_back(SLC.back().view());
+    s.push_back(HLC.back().view());
+    cs.push_back(CSLC.back().view());
+    cs.push_back(CHLC.back().view());
+
+    M.push_back(tmv::Matrix<T>(a2));
+    CM.push_back(tmv::Matrix<std::complex<T> >(ca2));
+    s.push_back(SymMatrixViewOf(M.back(),tmv::Upper).subSymMatrix(0,2*N,2));
+    cs.push_back(SymMatrixViewOf(CM.back(),tmv::Upper).subSymMatrix(0,2*N,2));
+
+    M.push_back(tmv::Matrix<T>(a2));
+    CM.push_back(tmv::Matrix<std::complex<T> >(ca2));
+    CM.back().diag().imagPart().setZero();
+    s.push_back(HermMatrixViewOf(M.back(),tmv::Upper).subSymMatrix(0,2*N,2));
+    cs.push_back(HermMatrixViewOf(CM.back(),tmv::Upper).subSymMatrix(0,2*N,2));
 #endif
+
+    TMVAssert(SUR.size() <= RESERVE);
+    TMVAssert(SUC.size() <= RESERVE);
+    TMVAssert(SLR.size() <= RESERVE);
+    TMVAssert(SLC.size() <= RESERVE);
+    TMVAssert(HUR.size() <= RESERVE);
+    TMVAssert(HUC.size() <= RESERVE);
+    TMVAssert(HLR.size() <= RESERVE);
+    TMVAssert(HLC.size() <= RESERVE);
+    TMVAssert(M.size() <= RESERVE);
+    TMVAssert(CSUR.size() <= RESERVE);
+    TMVAssert(CSUC.size() <= RESERVE);
+    TMVAssert(CSLR.size() <= RESERVE);
+    TMVAssert(CSLC.size() <= RESERVE);
+    TMVAssert(CHUR.size() <= RESERVE);
+    TMVAssert(CHUC.size() <= RESERVE);
+    TMVAssert(CHLR.size() <= RESERVE);
+    TMVAssert(CHLC.size() <= RESERVE);
+    TMVAssert(CM.size() <= RESERVE);
 }
 
 

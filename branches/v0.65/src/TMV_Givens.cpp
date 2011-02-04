@@ -143,6 +143,7 @@ namespace tmv {
         y = c*y-TMV_CONJ(s)*x;
         x = xx;
     }
+#if 0
     template <class T, class Tx> 
     void GivensMult(RT c, T s, ConjRef<Tx> x, ConjRef<Tx> y)
     {
@@ -157,6 +158,7 @@ namespace tmv {
         y = c*y-TMV_CONJ(s)*x;
         x = xx;
     }
+#endif
 
     //
     // GivensMult vectors
@@ -214,8 +216,7 @@ namespace tmv {
 
 #ifdef BLAS
 #ifdef INST_DOUBLE
-    template <> 
-    void DoGivensMult(
+    static void DoGivensMult(
         double c, double s,
         const VectorView<double>& v1, const VectorView<double>& v2)
     { 
@@ -234,8 +235,7 @@ namespace tmv {
             BLASP(v2p),BLASV(s2),BLASV(c),BLASV(s)); 
     }
 #ifdef BLASZDROT
-    template <> 
-    void DoGivensMult(
+    static void DoGivensMult(
         double c, double s,
         const VectorView<std::complex<double> >& v1,
         const VectorView<std::complex<double> >& v2)
@@ -256,8 +256,7 @@ namespace tmv {
     }
 #endif
 #ifdef ELAP
-    template <> 
-    void DoGivensMult(
+    static void DoGivensMult(
         double c, std::complex<double> s,
         const VectorView<std::complex<double> >& v1,
         const VectorView<std::complex<double> >& v2)
@@ -278,8 +277,7 @@ namespace tmv {
 #endif // ELAP
 #endif // DOUBLE
 #ifdef INST_FLOAT
-    template <> 
-    void DoGivensMult(
+    static void DoGivensMult(
         float c, float s,
         const VectorView<float>& v1, const VectorView<float>& v2)
     { 
@@ -298,8 +296,7 @@ namespace tmv {
             BLASP(v2p),BLASV(s2),BLASV(c),BLASV(s)); 
     }
 #ifdef BLASZDROT
-    template <> 
-    void DoGivensMult(
+    static void DoGivensMult(
         float c, float s,
         const VectorView<std::complex<float> >& v1,
         const VectorView<std::complex<float> >& v2)
@@ -320,8 +317,7 @@ namespace tmv {
     }
 #endif
 #ifdef ELAP
-    template <> 
-    void DoGivensMult(
+    static void DoGivensMult(
         float c, std::complex<float> s,
         const VectorView<std::complex<float> >& v1,
         const VectorView<std::complex<float> >& v2)

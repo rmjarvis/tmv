@@ -37,6 +37,7 @@
 namespace tmv {
 
 #define RT TMV_RealType(T)
+#define RT1 TMV_RealType(T1)
 
     template <class T, class Td> 
     void Tridiagonalize(
@@ -64,12 +65,12 @@ namespace tmv {
 
     template <class T, class T1> 
     void HermSV_Inverse(
-        const GenMatrix<T>& U, const GenDiagMatrix<RT>& S, int kmax,
-        const SymMatrixView<T1>& sinv);
+        const GenMatrix<T1>& U, const GenDiagMatrix<RT1>& S, int kmax,
+        const SymMatrixView<T>& sinv);
     template <class T, class T1> 
     void SymSV_Inverse(
-        const GenMatrix<T>& U, const GenDiagMatrix<RT>& S,
-        const GenMatrix<T>& V, int kmax, const SymMatrixView<T1>& sinv);
+        const GenMatrix<T1>& U, const GenDiagMatrix<RT1>& S,
+        const GenMatrix<T1>& V, int kmax, const SymMatrixView<T>& sinv);
 
     template <class T> 
     void HermTridiagonalChopSmallElements(
@@ -94,6 +95,22 @@ namespace tmv {
 
 #undef RT
 
+    // Specialize disallowed complex combinations:
+#define CT std::complex<T>
+
+    template <class T>
+    void HermSV_Inverse(
+        const GenMatrix<CT>& U, const GenDiagMatrix<T>& S, int kmax,
+        const SymMatrixView<T>& sinv)
+    { TMVAssert(TMV_FALSE); }
+    template <class T>
+    void SymSV_Inverse(
+        const GenMatrix<CT>& U, const GenDiagMatrix<T>& S,
+        const GenMatrix<CT>& V, int kmax, const SymMatrixView<T>& sinv)
+    { TMVAssert(TMV_FALSE); }
+
+#undef CT
+ 
 }
 
 #endif

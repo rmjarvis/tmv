@@ -44,9 +44,10 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class SumDsB : public SymBandMatrixComposite<T> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline SumDsB(
             T _x1, const GenDiagMatrix<T1>& _m1, 
             T _x2, const GenSymBandMatrix<T2>& _m2
@@ -64,7 +65,7 @@ namespace tmv {
         inline const GenDiagMatrix<T1>& getM1() const { return m1; }
         inline T getX2() const { return x2; }
         inline const GenSymBandMatrix<T2>& getM2() const { return m2; }
-        inline void assignToB(const BandMatrixView<RT>& m0) const
+        inline void assignToB(const BandMatrixView<real_type>& m0) const
         { 
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
@@ -78,7 +79,7 @@ namespace tmv {
             else if (m0.nlo() > 0) 
                 m0.diagRange(-m0.nlo(),0).setZero();
         }
-        inline void assignToB(const BandMatrixView<xCT>& m0) const
+        inline void assignToB(const BandMatrixView<complex_type>& m0) const
         { 
             TMVAssert(m0.size() == size());
             TMVAssert(m0.nhi() >= nlo());
@@ -91,7 +92,7 @@ namespace tmv {
             else if (m0.nlo() > 0) 
                 m0.diagRange(-m0.nlo(),0).setZero();
         }
-        inline void assignTosB(const SymBandMatrixView<RT>& m0) const
+        inline void assignTosB(const SymBandMatrixView<real_type>& m0) const
         { 
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
@@ -100,7 +101,7 @@ namespace tmv {
                 x1,BandMatrixViewOf(m1),x2,m2.upperBand(),
                   m0.diagRange(0,m0.nhi()+1));
         }
-        inline void assignTosB(const SymBandMatrixView<xCT>& m0) const
+        inline void assignTosB(const SymBandMatrixView<complex_type>& m0) const
         { 
             TMVAssert(m0.size() == size());
             TMVAssert(m0.nlo() >= nlo());
@@ -296,9 +297,10 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class ProdDsB : public BandMatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline ProdDsB(
             T _x, const GenDiagMatrix<T1>& _m1,
             const GenSymBandMatrix<T2>& _m2
@@ -313,7 +315,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenDiagMatrix<T1>& getM1() const { return m1; }
         inline const GenSymBandMatrix<T2>& getM2() const { return m2; }
-        inline void assignToB(const BandMatrixView<RT>& m0) const
+        inline void assignToB(const BandMatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
@@ -329,7 +331,7 @@ namespace tmv {
                 MultMM<false>(T(1),BandMatrixViewOf(m1),m0,m0);
             }
         }
-        inline void assignToB(const BandMatrixView<xCT>& m0) const
+        inline void assignToB(const BandMatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -353,9 +355,10 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class ProdsBD : public BandMatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline ProdsBD(
             T _x, const GenSymBandMatrix<T1>& _m1,
             const GenDiagMatrix<T2>& _m2
@@ -370,7 +373,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenSymBandMatrix<T1>& getM1() const { return m1; }
         inline const GenDiagMatrix<T2>& getM2() const { return m2; }
-        inline void assignToB(const BandMatrixView<RT>& m0) const
+        inline void assignToB(const BandMatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
@@ -386,7 +389,7 @@ namespace tmv {
                 MultMM<false>(T(1),m0,BandMatrixViewOf(m2),m0);
             }
         }
-        inline void assignToB(const BandMatrixView<xCT>& m0) const
+        inline void assignToB(const BandMatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -480,9 +483,10 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class QuotsBD : public BandMatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline QuotsBD(
             const T _x, const GenSymBandMatrix<T1>& _m1,
             const GenDiagMatrix<T2>& _m2
@@ -497,7 +501,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenSymBandMatrix<T1>& getM1() const { return m1; }
         inline const GenDiagMatrix<T2>& getM2() const { return m2; }
-        inline void assignToB(const BandMatrixView<RT>& m0) const
+        inline void assignToB(const BandMatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == m1.size());
@@ -507,7 +511,7 @@ namespace tmv {
             MultMM<false>(
                 T(1),BandMatrixViewOf(DiagMatrix<T2>(m2.inverse())),m0,m0);
         }
-        inline void assignToB(const BandMatrixView<xCT>& m0) const
+        inline void assignToB(const BandMatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.size() == m1.size());
             TMVAssert(m0.nlo() >= nlo());
@@ -525,9 +529,10 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class RQuotsBD : public BandMatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline RQuotsBD(
             const T _x, const GenSymBandMatrix<T1>& _m1,
             const GenDiagMatrix<T2>& _m2
@@ -542,7 +547,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenSymBandMatrix<T1>& getM1() const { return m1; }
         inline const GenDiagMatrix<T2>& getM2() const { return m2; }
-        inline void assignToB(const BandMatrixView<RT>& m0) const
+        inline void assignToB(const BandMatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == m1.size());
@@ -552,7 +557,7 @@ namespace tmv {
             MultMM<false>(
                 T(1),m0,BandMatrixViewOf(DiagMatrix<T2>(m2.inverse())),m0);
         }
-        inline void assignToB(const BandMatrixView<xCT>& m0) const
+        inline void assignToB(const BandMatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.size() == m1.size());
             TMVAssert(m0.nlo() >= nlo());

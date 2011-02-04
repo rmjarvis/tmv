@@ -12,15 +12,6 @@ DefInv(CT,CT)
 
 #undef DefInv
 
-#define DefInv(T,T1) \
-template <> void LU_Inverse(const GenBandMatrix<T1 >& , const int* , \
-    const MatrixView<T >& ) \
-    { TMVAssert(TMV_FALSE); } \
-
-#ifdef INST_COMPLEX
-DefInv(T,CT)
-#endif
-
 #undef DefInv
 #define DefInv(T) \
 template void TriInverse(const UpperTriMatrixView<T >& minv, int nhi); \

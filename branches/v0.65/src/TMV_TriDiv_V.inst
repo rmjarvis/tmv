@@ -1,7 +1,7 @@
 
 #define CT std::complex<T>
 
-#define DefDivEq(T1,T)\
+#define DefDivEq(T,T1)\
 template void TriLDivEq(const GenUpperTriMatrix<T1 >& A, \
     const VectorView<T >& v); \
 template void TriLDivEq(const GenLowerTriMatrix<T1 >& A, \
@@ -9,22 +9,8 @@ template void TriLDivEq(const GenLowerTriMatrix<T1 >& A, \
 
 DefDivEq(T,T)
 #ifdef INST_COMPLEX
-DefDivEq(T,CT)
+DefDivEq(CT,T)
 DefDivEq(CT,CT)
-#endif
-
-#undef DefDivEq
-
-#define DefDivEq(T,T1)\
-  template <> void TriLDivEq(const GenUpperTriMatrix<T1 >& ,\
-      const VectorView<T >& )\
-      { TMVAssert(TMV_FALSE); }\
-  template <> void TriLDivEq(const GenLowerTriMatrix<T1 >& ,\
-      const VectorView<T >& )\
-      { TMVAssert(TMV_FALSE); }\
-
-#ifdef INST_COMPLEX
-DefDivEq(T,CT)
 #endif
 
 #undef DefDivEq

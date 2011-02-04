@@ -112,52 +112,6 @@ Def2(CT,CT)
 
 #undef Def2
 
-#define Def3(T,I)\
-  template ConstBandMatrixView<T,I> BandMatrixViewOf( \
-      const ConstDiagMatrixView<T,I>& m); \
-  template ConstBandMatrixView<T,I> BandMatrixViewOf( \
-      const DiagMatrix<T,I>& m); \
-  template BandMatrixView<T,I> BandMatrixViewOf( \
-      const DiagMatrixView<T,I>& m); \
-  template BandMatrixView<T,I> BandMatrixViewOf( \
-      DiagMatrix<T,I>& m); \
-  template ConstBandMatrixView<T,I> BandMatrixViewOf( \
-      const ConstUpperTriMatrixView<T,I>& m, int nhi); \
-  template BandMatrixView<T,I> BandMatrixViewOf( \
-      const UpperTriMatrixView<T,I>& m, int nhi); \
-  template ConstBandMatrixView<T,I> BandMatrixViewOf( \
-      const ConstLowerTriMatrixView<T,I>& m, int nlo); \
-  template BandMatrixView<T,I> BandMatrixViewOf( \
-      const LowerTriMatrixView<T,I>& m, int nlo); \
-
-Def3(T,CStyle)
-Def3(T,FortranStyle)
-#ifdef INST_COMPLEX
-Def3(CT,CStyle)
-Def3(CT,FortranStyle)
-#endif
-
-#define Def4(T,S,I)\
-  template ConstBandMatrixView<T,I> BandMatrixViewOf( \
-	const UpperTriMatrix<T,NonUnitDiag,S,I>& m, int nhi); \
-  template ConstBandMatrixView<T,I> BandMatrixViewOf( \
-	const LowerTriMatrix<T,NonUnitDiag,S,I>& m, int nlo); \
-  template BandMatrixView<T,I> BandMatrixViewOf( \
-	UpperTriMatrix<T,NonUnitDiag,S,I>& m, int nhi); \
-  template BandMatrixView<T,I> BandMatrixViewOf( \
-	LowerTriMatrix<T,NonUnitDiag,S,I>& m, int nlo); \
-
-Def4(T,RowMajor,CStyle)
-Def4(T,ColMajor,CStyle)
-Def4(T,RowMajor,FortranStyle)
-Def4(T,ColMajor,FortranStyle)
-#ifdef INST_COMPLEX
-Def4(CT,RowMajor,CStyle)
-Def4(CT,ColMajor,CStyle)
-Def4(CT,RowMajor,FortranStyle)
-Def4(CT,ColMajor,FortranStyle)
-#endif
-
 #define Def5(T,S,I)\
   template std::istream& operator>>(std::istream& fin, \
       auto_ptr<BandMatrix<T,S,I> >& m); \

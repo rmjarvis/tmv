@@ -19,23 +19,5 @@ DefDiv(CT,T,CT,CT)
 
 #undef DefDiv
 
-#define DefDiv(T,RT1,T1,T2)\
-template <> void SV_LDiv(const GenMatrix<T1 >& ,\
-    const GenDiagMatrix<RT1 >& , const GenMatrix<T1 >& , const int , \
-    const GenMatrix<T2 >& , const MatrixView<T >& ) \
-    { TMVAssert(TMV_FALSE); } \
-template <> void SV_RDiv(const GenMatrix<T1 >& ,\
-    const GenDiagMatrix<RT1 >& , const GenMatrix<T1 >& , const int , \
-    const GenMatrix<T2 >& , const MatrixView<T >& ) \
-    { TMVAssert(TMV_FALSE); } \
-
-#ifdef INST_COMPLEX
-DefDiv(T,T,CT,CT)
-DefDiv(T,T,CT,T)
-DefDiv(T,T,T,CT)
-#endif
-
-#undef DefDiv
-
 #undef CT
 

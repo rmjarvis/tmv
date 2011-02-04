@@ -3,7 +3,7 @@
 #include "TMV.h"
 #include "TMV_Band.h"
 #include "TMV_Test.h"
-#include "TMV_Test2.h"
+#include "TMV_Test_2.h"
 #include "TMV_TestBandArith.h"
 
 #define NOADDEQ
@@ -44,9 +44,8 @@ void TestBandMatrixArith_C2()
 #if (XTEST & 2)
     std::vector<tmv::BandMatrixView<T> > b;
     std::vector<tmv::BandMatrixView<std::complex<T> > > cb;
-    std::vector<tmv::BaseMatrix<T>*> B;
-    std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
-    MakeBandList(b,cb,B,CB);
+    MakeBandList(b,cb);
+
     const int N = b[0].rowsize();
 
     tmv::Matrix<T> a1(N,N);
@@ -72,8 +71,6 @@ void TestBandMatrixArith_C2()
         TestMatrixArith5<T>(d1v,cd1v,bi,cbi,"Diag/Band");
         TestMatrixArith6x<T>(d1v,cd1v,bi,cbi,"Diag/Band");
     }
-    for(size_t i=0;i<B.size();i++) delete B[i];
-    for(size_t i=0;i<CB.size();i++) delete CB[i];
 #endif
 }
 

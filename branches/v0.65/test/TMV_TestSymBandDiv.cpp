@@ -4,7 +4,7 @@
 #include "TMV.h"
 #include "TMV_SymBand.h"
 #include "TMV_Test.h"
-#include "TMV_Test2.h"
+#include "TMV_Test_2.h"
 #include "TMV_TestSymBandArith.h"
 
 template <class T> 
@@ -70,9 +70,7 @@ void TestSymBandDiv(tmv::DivType dt, PosDefCode pdc)
 
     std::vector<tmv::SymBandMatrixView<T> > sb;
     std::vector<tmv::SymBandMatrixView<std::complex<T> > > csb;
-    std::vector<tmv::BaseMatrix<T>*> B;
-    std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
-    MakeSymBandList(sb,csb,B,CB,pdc);
+    MakeSymBandList(sb,csb,pdc);
 
     size_t ntot = sb.size();
 
@@ -281,8 +279,6 @@ void TestSymBandDiv(tmv::DivType dt, PosDefCode pdc)
         if (dt != tmv::CH) TestSymBandDiv_E2<T>(dt,pdc);
         TestSymBandDiv_F2<T>(dt,pdc);
     }
-    for(size_t i=0;i<B.size();++i) delete B[i];
-    for(size_t i=0;i<CB.size();++i) delete CB[i];
 
     std::cout<<PDLabel(pdc)<<" SymBandMatrix<"<<tmv::TMV_Text(T())<<
         "> Division using ";

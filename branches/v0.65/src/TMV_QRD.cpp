@@ -178,7 +178,8 @@ namespace tmv {
         }
         if (sign) *sign = pimpl->signdet;
         return pimpl->logdet;  
-    }                  
+    }
+
     template <class T> template <class T1> 
     void QRDiv<T>::doMakeInverse(const MatrixView<T1>& minv) const
     {

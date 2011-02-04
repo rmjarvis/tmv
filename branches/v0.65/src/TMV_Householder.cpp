@@ -250,6 +250,7 @@ namespace tmv {
         return beta;
     }
 
+#if 0
     template <class T> 
     T HouseholderReflect(ConjRef<T> x0, const VectorView<T>& x, T& det)
     {
@@ -267,6 +268,7 @@ namespace tmv {
         if (x0.isconj()) x0r = TMV_CONJ(x0r);
         return HouseholderReflect(x0r,x,det);
     }
+#endif
 
     template <class T> 
     T HouseholderReflect(const VectorView<T>& x, T& det)
@@ -320,6 +322,7 @@ namespace tmv {
         return true;
     }
 
+#if 0
     template <class T> 
     bool HouseholderUnReflect(ConjRef<T> x0, const VectorView<T>& x, T& beta)
     {
@@ -334,6 +337,7 @@ namespace tmv {
         TMVAssert(TMV_IMAG(x0.getRef()) == RT(0));
         return HouseholderUnReflect(x0.getRef(),x,beta);
     }
+#endif
 
     template <class T1, class T2> 
     void HouseholderLMult(
@@ -423,9 +427,9 @@ namespace tmv {
         }
     }
 
+#if 0
     template <class T> 
-    static void HouseholderUnpack(
-        ConjRef<T> v0, const VectorView<T>& v, T beta)
+    void HouseholderUnpack(ConjRef<T> v0, const VectorView<T>& v, T beta)
     {
         T vv = v0;
         HouseholderUnpack(vv,v,beta);
@@ -433,8 +437,7 @@ namespace tmv {
     }
 
     template <class T> 
-    static void HouseholderUnpack(
-        VarConjRef<T> v0, const VectorView<T>& v, T beta)
+    void HouseholderUnpack(VarConjRef<T> v0, const VectorView<T>& v, T beta)
     {
         if (v0.isconj()) {
             T vv = v0;
@@ -444,6 +447,7 @@ namespace tmv {
             HouseholderUnpack(v0.getRef(),v,beta);
         }
     }
+#endif
 
 
     template <class T> 

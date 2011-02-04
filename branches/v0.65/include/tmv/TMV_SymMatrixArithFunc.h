@@ -174,9 +174,9 @@ namespace tmv {
     };
 
     template <class T> 
-    class SymMatrixComposite<std::complex<T> > :
-        public MatrixComposite<std::complex<T> >,
-        virtual public AssignableToSymMatrix<std::complex<T> >
+    class SymMatrixComposite<CT> :
+        public MatrixComposite<CT>,
+        virtual public AssignableToSymMatrix<CT>
     {
     public :
 
@@ -184,9 +184,9 @@ namespace tmv {
         inline size_t rowsize() const { return this->size(); }
 
         inline void assignToM(const MatrixView<TMV_RealType(T)>& m0) const
-        { MatrixComposite<std::complex<T> >::assignToM(m0); }
+        { MatrixComposite<CT>::assignToM(m0); }
         inline void assignToM(const MatrixView<TMV_ComplexType(T)>& m0) const
-        { MatrixComposite<std::complex<T> >::assignToM(m0); }
+        { MatrixComposite<CT>::assignToM(m0); }
     };
 
     // Specialize allowed complex combinations:

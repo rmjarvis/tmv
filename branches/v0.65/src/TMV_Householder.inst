@@ -25,6 +25,7 @@ DefHR(CT)
 
 // These are only for CT:
 #ifdef INST_COMPLEX
+#if 0
 template CT HouseholderReflect(ConjRef<CT > x0, const VectorView<CT >& x,
     CT& det); 
 template CT HouseholderReflect(VarConjRef<CT > x0, const VectorView<CT >& x,
@@ -37,6 +38,7 @@ template bool HouseholderUnReflect(ConjRef<CT > y, const VectorView<CT >& x,
     CT& det);
 template bool HouseholderUnReflect(VarConjRef<CT > y, const VectorView<CT >& x,
     CT& det);
+#endif
 #endif
 
 #define DefMult(T,T1)\

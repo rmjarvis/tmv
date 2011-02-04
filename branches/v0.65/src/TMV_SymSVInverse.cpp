@@ -43,25 +43,25 @@ namespace tmv {
 
     template <class T, class T1> 
     void HermSV_Inverse(
-        const GenMatrix<T>& U, const GenDiagMatrix<TMV_RealType(T)>& SS,
-        int kmax, const SymMatrixView<T1>& sinv)
+        const GenMatrix<T1>& U, const GenDiagMatrix<TMV_RealType(T1)>& SS,
+        int kmax, const SymMatrixView<T>& sinv)
     {
         TMVAssert(sinv.isherm());
         Matrix<T,ColMajor> SinvUt = U.adjoint().rowRange(0,kmax) /
             SS.subDiagMatrix(0,kmax);
-        SymMultMM<false>(T1(1),U.colRange(0,kmax),SinvUt,sinv);
+        SymMultMM<false>(T(1),U.colRange(0,kmax),SinvUt,sinv);
     }
 
     template <class T, class T1> 
     void SymSV_Inverse(
-        const GenMatrix<T>& U, const GenDiagMatrix<TMV_RealType(T)>& SS, 
-        const GenMatrix<T>& V, int kmax, const SymMatrixView<T1>& sinv)
+        const GenMatrix<T1>& U, const GenDiagMatrix<TMV_RealType(T1)>& SS, 
+        const GenMatrix<T1>& V, int kmax, const SymMatrixView<T>& sinv)
     {
         // A = U S V
         // A^-1 = Vt S^-1 Ut
         Matrix<T,ColMajor> SinvUt = U.adjoint().rowRange(0,kmax) /
             SS.subDiagMatrix(0,kmax);
-        SymMultMM<false>(T1(1),V.adjoint().colRange(0,kmax),SinvUt,sinv);
+        SymMultMM<false>(T(1),V.adjoint().colRange(0,kmax),SinvUt,sinv);
     }
 
 #ifdef INST_INT

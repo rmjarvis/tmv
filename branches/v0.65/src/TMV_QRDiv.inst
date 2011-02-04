@@ -34,39 +34,5 @@ DefDiv(CT,CT,CT)
 
 #undef DefDiv
 
-#define DefDivEq(T,T1)\
-template <> void QR_LDivEq(const GenMatrix<T1 >& ,\
-    const GenVector<T1 >& , const int* , \
-    const MatrixView<T >& , int )\
-    { TMVAssert(TMV_FALSE); }\
-template <> void QR_RDivEq(const GenMatrix<T1 >& ,\
-    const GenVector<T1 >& , const int* , \
-    const MatrixView<T >& , int )\
-    { TMVAssert(TMV_FALSE); }\
-
-#ifdef INST_COMPLEX
-DefDivEq(T,CT)
-#endif
-
-#undef DefDivEq
-
-#define DefDiv(T,T1,T2)\
-template <> void QR_LDiv(const GenMatrix<T1 >& ,\
-    const GenVector<T1 >& , const int* , \
-    const GenMatrix<T2 >& , const MatrixView<T >& , int )\
-    { TMVAssert(TMV_FALSE); }\
-template <> void QR_RDiv(const GenMatrix<T1 >& ,\
-    const GenVector<T1 >& , const int* , \
-    const GenMatrix<T2 >& , const MatrixView<T >& , int )\
-    { TMVAssert(TMV_FALSE); }\
-
-#ifdef INST_COMPLEX
-DefDiv(T,T,CT)
-DefDiv(T,CT,T)
-DefDiv(T,CT,CT)
-#endif
-
-#undef DefDiv
-
 #undef CT
 

@@ -232,7 +232,7 @@ namespace tmv {
 
     template <class T, class T1> 
     void LU_Inverse(
-        const GenMatrix<T>& LUx, const int* P, const MatrixView<T1>& minv)
+        const GenMatrix<T1>& LUx, const int* P, const MatrixView<T>& minv)
     {
         //std::cout<<"Start LU_Inverse"<<std::endl;
         //std::cout<<"LUx = "<<LUx<<std::endl;

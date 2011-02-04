@@ -53,10 +53,10 @@ namespace tmv {
     // Packed BandQ - LDivEq/RDivEq
     //
 
-    template <class T1, class T2> 
+    template <class T, class T1> 
     void Q_LDivEq(
         const GenBandMatrix<T1>& Q, const GenVector<T1>& Qbeta,
-        const MatrixView<T2>& m)
+        const MatrixView<T>& m)
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Q.rowsize() == Qbeta.size());
@@ -74,10 +74,10 @@ namespace tmv {
         }
     }
 
-    template <class T1, class T2> 
+    template <class T, class T1> 
     void Q_RDivEq(
         const GenBandMatrix<T1>& Q, const GenVector<T1>& Qbeta,
-        const MatrixView<T2>& m)
+        const MatrixView<T>& m)
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Qbeta.size() == Q.rowsize());
@@ -102,10 +102,10 @@ namespace tmv {
     // LDiv
     //
 
-    template <class T1, class T2, class T3> 
+    template <class T, class T1, class T2> 
     void QR_LDiv(
         const GenBandMatrix<T1>& QRx, const GenVector<T1>& Qbeta,
-        const GenMatrix<T2>& m, const MatrixView<T3>& x)
+        const GenMatrix<T2>& m, const MatrixView<T>& x)
     {
         TMVAssert(QRx.colsize() >= QRx.rowsize());
         TMVAssert(Qbeta.size() == QRx.rowsize());
@@ -123,7 +123,7 @@ namespace tmv {
         GetQFromBandQR(QR2.view(),Qbeta,QRx.nlo());
         QR2 *= QRx.diagRange(0,QRx.nhi()+1);
         QR2.divideUsing(QR);
-        Matrix<T3> x2 = m / QR2;
+        Matrix<T> x2 = m / QR2;
 #endif
         const int N = QRx.rowsize();
 
@@ -132,11 +132,11 @@ namespace tmv {
             Q_LDivEq(QRx,Qbeta,x);
         } else if (QRx.nlo() > 0) {
             if (m.isrm()) {
-                Matrix<T3,RowMajor> m1 = m;
+                Matrix<T,RowMajor> m1 = m;
                 Q_LDivEq(QRx,Qbeta,m1.view());
                 x = m1.rowRange(0,N);
             } else {
-                Matrix<T3,ColMajor> m1 = m;
+                Matrix<T,ColMajor> m1 = m;
                 Q_LDivEq(QRx,Qbeta,m1.view());
                 x = m1.rowRange(0,N);
             }
@@ -167,10 +167,10 @@ namespace tmv {
     // LDivEq
     //
 
-    template <class T1, class T2> 
+    template <class T, class T1> 
     void QR_LDivEq(
         const GenBandMatrix<T1>& QRx, const GenVector<T1>& Qbeta, 
-        const MatrixView<T2>& m)
+        const MatrixView<T>& m)
     {
         TMVAssert(QRx.colsize() == QRx.rowsize());
         TMVAssert(Qbeta.size() == QRx.rowsize());
@@ -181,12 +181,12 @@ namespace tmv {
         cout<<"QRx = "<<QRx<<endl;
         cout<<"Qbeta = "<<Qbeta<<endl;
         cout<<"m = "<<m<<endl;
-        Matrix<T2> m0(m);
+        Matrix<T> m0(m);
         Matrix<T1> QR2 = QRx;
         GetQFromBandQR(QR2.view(),Qbeta,QRx.nlo());
         QR2 *= QRx.diagRange(0,QRx.nhi()+1);
         QR2.divideUsing(QR);
-        Matrix<T2> m2 = m / QR2;
+        Matrix<T> m2 = m / QR2;
 #endif
         const int N = QRx.rowsize();
 
@@ -213,10 +213,10 @@ namespace tmv {
     // RDiv
     //
 
-    template <class T1, class T2, class T3> 
+    template <class T, class T1, class T2> 
     void QR_RDiv(
         const GenBandMatrix<T1>& QRx, const GenVector<T1>& Qbeta, 
-        const GenMatrix<T2>& m, const MatrixView<T3>& x)
+        const GenMatrix<T2>& m, const MatrixView<T>& x)
     {
         TMVAssert(QRx.colsize() >= QRx.rowsize());
         TMVAssert(Qbeta.size() == QRx.rowsize());
@@ -234,7 +234,7 @@ namespace tmv {
         GetQFromBandQR(QR2.view(),Qbeta,QRx.nlo());
         QR2 *= QRx.diagRange(0,QRx.nhi()+1);
         QR2.divideUsing(QR);
-        Matrix<T3> x2 = m % QR2;
+        Matrix<T> x2 = m % QR2;
 #endif
         const int M = QRx.colsize();
         const int N = QRx.rowsize();
@@ -267,10 +267,10 @@ namespace tmv {
     // RDivEq
     //
 
-    template <class T1, class T2> 
+    template <class T, class T1> 
     void QR_RDivEq(
         const GenBandMatrix<T1>& QRx, const GenVector<T1>& Qbeta, 
-        const MatrixView<T2>& m)
+        const MatrixView<T>& m)
     {
         TMVAssert(QRx.colsize() == QRx.rowsize());
         TMVAssert(Qbeta.size() == QRx.rowsize());
@@ -281,12 +281,12 @@ namespace tmv {
         cout<<"QRx = "<<QRx<<endl;
         cout<<"Qbeta = "<<Qbeta<<endl;
         cout<<"m = "<<m<<endl;
-        Matrix<T2> m0(m);
+        Matrix<T> m0(m);
         Matrix<T1> QR2 = QRx;
         GetQFromBandQR(QR2.view(),Qbeta,QRx.nlo());
         QR2 *= QRx.diagRange(0,QRx.nhi()+1);
         QR2.divideUsing(QR);
-        Matrix<T2> m2 = m % QR2;
+        Matrix<T> m2 = m % QR2;
 #endif
 
         const int N = QRx.rowsize();

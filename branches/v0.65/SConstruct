@@ -137,6 +137,7 @@ Help(opts.GenerateHelpText(initial_env))
 openmp_mingcc_vers = 4.1
 openmp_minicpc_vers = 9.1  # 9.0 is supposed to work but has bugs
 openmp_minpgcc_vers = 6.0
+openmp_mincc_vers = 5.0  # I don't actually know what this should be.
 
 
 # used only in /bin right now
@@ -218,6 +219,13 @@ def BasicCCFlags(env):
             env.Replace(CCFLAGS=['-O2','-fast','-Mcache_align'])
             env['TEST_FLAGS'] = ['-O0']
 
+        elif compiler == 'CC':
+            env.Replace(CCFLAGS=['-O2','-fast','-instances=semiexplicit'])
+            env['TEST_FLAGS'] = ['-instances=semiexplicit']
+            if env['WARN']:
+                env.Append(CCFLAGS=['-g','+w'])
+                env['TEST_FLAGS'] += ['-g','+w']
+
         elif compiler == 'cl':
             env.Replace(CCFLAGS=['/EHsc','/nologo','/O2','/Oi',])
             env['TEST_FLAGS'] = ['/EHsc','/nologo']
@@ -245,6 +253,7 @@ def AddOpenMPFlag(env):
     g++ uses -fopemnp
     icpc uses -openmp
     pgCC uses -mp
+    CC uses -xopenmp
     
     Other compilers?
     """
@@ -273,6 +282,14 @@ def AddOpenMPFlag(env):
             return
         flag = ['-mp','--exceptions']
         ldflag = ['-mp']
+        xlib = ['pthread']
+    elif compiler == 'CC':
+        if version < openmp_mincc_vers:
+            print 'No OpenMP support for CC versions before ',openmp_mincc_vers
+            env['WITH_OPENMP'] = False
+            return
+        flag = ['-xopenmp']
+        ldflag = ['-xopenmp']
         xlib = ['pthread']
     elif compiler == 'cl':
         #flag = ['/openmp']
@@ -317,22 +334,21 @@ def GetCompilerVersion(env):
         compilertype = 'g++'
         versionflag = '--version'
         linenum=0
+    elif 'CC' in compiler :
+        compilertype = 'CC'
+        versionflag = '-V'
+        linenum=0
     elif 'cl' in compiler :
         compilertype = 'cl'
         versionflag = ''
         linenum=0
-        # With cl, the version seems to be printed in the first line,
-        # but the lines read out with popen below seem to skip the
-        # first two lines.  So the code below ends up with version = 0.
-        # It doesn't really matter though, since we don't use the cl 
-        # version for anything. 
     else :
         compilertype = 'unknown'
         version = 0
         vnum = 0
 
     if compilertype != 'unknown':
-        cmd = compiler + ' ' + versionflag
+        cmd = compiler + ' ' + versionflag + ' 2>&1'
         lines = os.popen(cmd).readlines()
         line = lines[linenum]
     

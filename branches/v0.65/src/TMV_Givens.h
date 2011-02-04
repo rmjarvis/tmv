@@ -143,17 +143,13 @@ namespace tmv {
     template <class Tg, class T> 
     void GivensMult(TMV_RealType(Tg) c, Tg s, T& x, T& y);
     template <class Tg, class T> 
-    void GivensMult(TMV_RealType(Tg) c, Tg s, T& x, ConjRef<T> y);
+    inline void GivensMult(
+        TMV_RealType(Tg) c, Tg s, ConjRef<T> x, ConjRef<T> y)
+    { GivensMult(c,TMV_CONJ(s),x.getRef(),y.getRef()); }
     template <class Tg, class T> 
-    void GivensMult(TMV_RealType(Tg) c, Tg s, ConjRef<T> x, T& y);
-    template <class Tg, class T> 
-    void GivensMult(TMV_RealType(Tg) c, Tg s, ConjRef<T> x, ConjRef<T> y);
-    template <class Tg, class T> 
-    void GivensMult(TMV_RealType(Tg) c, Tg s, T& x, VarConjRef<T> y);
-    template <class Tg, class T> 
-    void GivensMult(TMV_RealType(Tg) c, Tg s, VarConjRef<T> x, T& y);
-    template <class Tg, class T> 
-    void GivensMult(TMV_RealType(Tg) c, Tg s, VarConjRef<T> x, VarConjRef<T> y);
+    inline void GivensMult(
+        TMV_RealType(Tg) c, Tg s, VarConjRef<T> x, VarConjRef<T> y)
+    { GivensMult(c,TMV_CONJ(s),x.getRef(),y.getRef()); }
 
     template <class Tg, class T> 
     void GivensMult(

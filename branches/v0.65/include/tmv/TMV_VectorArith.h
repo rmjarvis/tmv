@@ -70,20 +70,21 @@ namespace tmv {
     template <class T, class Tv> 
     class ProdXV : public VectorComposite<T> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline ProdXV(T _x, const GenVector<Tv>& _v) : x(_x), v(_v) {}
         inline size_t size() const { return v.size(); }
         inline T getX() const { return x; }
         inline const GenVector<Tv>& getV() const { return v; }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(v0.size() == size());
             MultXV(x,v,v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         {
             TMVAssert(v0.size() == size());
             MultXV(x,v,v0);
@@ -138,9 +139,10 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class SumVV : public VectorComposite<T> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline SumVV(
             T _x1, const GenVector<T1>& _v1, 
             T _x2, const GenVector<T2>& _v2
@@ -152,13 +154,13 @@ namespace tmv {
         inline const GenVector<T1>& getV1() const { return v1; }
         inline T getX2() const { return x2; }
         inline const GenVector<T2>& getV2() const { return v2; }
-        inline void assignToV(const VectorView<RT>& v0) const
+        inline void assignToV(const VectorView<real_type>& v0) const
         {
             TMVAssert(v0.size() == v1.size());
             TMVAssert(isReal(T()));
             AddVV(x1,v1,x2,v2,v0);
         }
-        inline void assignToV(const VectorView<xCT>& v0) const
+        inline void assignToV(const VectorView<complex_type>& v0) const
         {
             TMVAssert(v0.size() == v1.size());
             AddVV(x1,v1,x2,v2,v0);

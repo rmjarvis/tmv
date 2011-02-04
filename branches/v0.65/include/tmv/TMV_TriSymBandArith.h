@@ -46,9 +46,10 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class SumUsB : public MatrixComposite<T> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline SumUsB(
             T _x1, const GenUpperTriMatrix<T1>& _m1, 
             T _x2, const GenSymBandMatrix<T2>& _m2
@@ -62,7 +63,7 @@ namespace tmv {
         inline const GenUpperTriMatrix<T1>& getM1() const { return m1; }
         inline T getX2() const { return x2; }
         inline const GenSymBandMatrix<T2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         { 
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
@@ -76,7 +77,7 @@ namespace tmv {
                 AddMM(x2,m2,m0);
             }
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         { 
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -99,9 +100,10 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class SumLsB : public MatrixComposite<T> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline SumLsB(
             T _x1, const GenLowerTriMatrix<T1>& _m1, 
             T _x2, const GenSymBandMatrix<T2>& _m2
@@ -115,7 +117,7 @@ namespace tmv {
         inline const GenLowerTriMatrix<T1>& getM1() const { return m1; }
         inline T getX2() const { return x2; }
         inline const GenSymBandMatrix<T2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         { 
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
@@ -129,7 +131,7 @@ namespace tmv {
                 AddMM(x2,m2,m0);
             }
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         { 
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -179,9 +181,10 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class ProdUsB : public MatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline ProdUsB(
             T _x, const GenUpperTriMatrix<T1>& _m1,
             const GenSymBandMatrix<T2>& _m2
@@ -195,7 +198,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenUpperTriMatrix<T1>& getM1() const { return m1; }
         inline const GenSymBandMatrix<T2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
@@ -209,7 +212,7 @@ namespace tmv {
                 MultMM<false>(T(1),m1,m0,m0);
             }
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -231,9 +234,10 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class ProdsBU : public MatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline ProdsBU(
             T _x, const GenSymBandMatrix<T1>& _m1,
             const GenUpperTriMatrix<T2>& _m2
@@ -247,7 +251,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenSymBandMatrix<T1>& getM1() const { return m1; }
         inline const GenUpperTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
@@ -261,7 +265,7 @@ namespace tmv {
                 MultMM<false>(T(1),m0,m2,m0);
             }
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -283,9 +287,10 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class ProdLsB : public MatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline ProdLsB(
             T _x, const GenLowerTriMatrix<T1>& _m1,
             const GenSymBandMatrix<T2>& _m2
@@ -299,7 +304,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenLowerTriMatrix<T1>& getM1() const { return m1; }
         inline const GenSymBandMatrix<T2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
@@ -313,7 +318,7 @@ namespace tmv {
                 MultMM<false>(T(1),m1,m0,m0);
             }
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -335,9 +340,10 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class ProdsBL : public MatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline ProdsBL(
             T _x, const GenSymBandMatrix<T1>& _m1,
             const GenLowerTriMatrix<T2>& _m2
@@ -351,7 +357,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenSymBandMatrix<T1>& getM1() const { return m1; }
         inline const GenLowerTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
@@ -365,7 +371,7 @@ namespace tmv {
                 MultMM<false>(T(1),m0,m2,m0);
             }
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -435,9 +441,10 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class QuotsBU : public MatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline QuotsBU(
             const T _x, const GenSymBandMatrix<T1>& _m1,
             const GenUpperTriMatrix<T2>& _m2
@@ -451,7 +458,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenSymBandMatrix<T1>& getM1() const { return m1; }
         inline const GenUpperTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
@@ -459,7 +466,7 @@ namespace tmv {
             MultXM(x,m0=m1);
             m2.LDivEq(m0);
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -475,9 +482,10 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class RQuotsBU : public MatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline RQuotsBU(
             const T _x, const GenSymBandMatrix<T1>& _m1,
             const GenUpperTriMatrix<T2>& _m2
@@ -491,7 +499,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenSymBandMatrix<T1>& getM1() const { return m1; }
         inline const GenUpperTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
@@ -499,7 +507,7 @@ namespace tmv {
             MultXM(x,m0=m1);
             m2.RDivEq(m0);
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -515,9 +523,10 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class QuotsBL : public MatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline QuotsBL(
             const T _x, const GenSymBandMatrix<T1>& _m1,
             const GenLowerTriMatrix<T2>& _m2
@@ -531,7 +540,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenSymBandMatrix<T1>& getM1() const { return m1; }
         inline const GenLowerTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
@@ -539,7 +548,7 @@ namespace tmv {
             MultXM(x,m0=m1);
             m2.LDivEq(m0);
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -555,9 +564,10 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class RQuotsBL : public MatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline RQuotsBL(
             const T _x, const GenSymBandMatrix<T1>& _m1,
             const GenLowerTriMatrix<T2>& _m2
@@ -571,7 +581,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenSymBandMatrix<T1>& getM1() const { return m1; }
         inline const GenLowerTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
@@ -579,7 +589,7 @@ namespace tmv {
             MultXM(x,m0=m1);
             m2.RDivEq(m0);
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());

@@ -119,11 +119,29 @@ namespace tmv {
     // in x, except for the first element, which is 1.
     // Beta is the return value.  y is returned as x0.
 
+#if 0
     template <class T> 
     T HouseholderReflect(ConjRef<T> x0, const VectorView<T>& x, T& det);
-
     template <class T> 
     T HouseholderReflect(VarConjRef<T> x0, const VectorView<T>& x, T& det);
+#else
+    template <class T> 
+    inline T HouseholderReflect(ConjRef<T> x0, const VectorView<T>& x, T& det)
+    {
+        x0.getRef() = TMV_CONJ(x0.getRef());
+        return HouseholderReflect(x0.getRef(),x,det);
+        // x0r ends up real, so we don't need to care about the conjugation
+        // of the output value.
+    }
+
+    template <class T> 
+    inline T HouseholderReflect(
+        VarConjRef<T> x0, const VectorView<T>& x, T& det)
+    {
+        if (x0.isconj()) x0.getRef() = TMV_CONJ(x0.getRef());
+        return HouseholderReflect(x0.getRef(),x,det);
+    }
+#endif
 
     template <class T> 
     T HouseholderReflect(const VectorView<T>& x, T& det);
@@ -148,13 +166,29 @@ namespace tmv {
     // The rest of the vector is transformed into the Householder vector.
     // This is used for downdating QR decompositions.
     // The return value is true if successful, false if |y| < |x|.
+#if 0
     template <class T> 
     bool HouseholderUnReflect(ConjRef<T> y, const VectorView<T>& x, T& beta);
+    template <class T> 
+    bool HouseholderUnReflect(VarConjRef<T> y, const VectorView<T>& x, T& beta);
+#else
+    template <class T> 
+    inline bool HouseholderUnReflect(
+        ConjRef<T> x0, const VectorView<T>& x, T& beta)
+    {
+        TMVAssert(TMV_IMAG(x0.getRef()) == RT(0));
+        return HouseholderUnReflect(x0.getRef(),x,beta);
+    }
 
     template <class T> 
-    bool HouseholderUnReflect(
-        VarConjRef<T> y, const VectorView<T>& x, T& beta);
-
+    inline bool HouseholderUnReflect(
+        VarConjRef<T> x0, const VectorView<T>& x, T& beta)
+    {
+        TMVAssert(TMV_IMAG(x0.getRef()) == RT(0));
+        return HouseholderUnReflect(x0.getRef(),x,beta);
+    }
+#endif
+    
     template <class T1, class T2> 
     void HouseholderLMult(
         const GenVector<T1>& v, T1 beta,
@@ -177,11 +211,34 @@ namespace tmv {
     // matrix, H. 
     // (v0,v) is set to Ht times e0.
 
+#if 0
     template <class T> 
     void HouseholderUnpack(ConjRef<T> v0, const VectorView<T>& v, T beta);
-
     template <class T> 
     void HouseholderUnpack(VarConjRef<T> v0, const VectorView<T>& v, T beta);
+#else
+    template <class T> 
+    inline void HouseholderUnpack(
+        ConjRef<T> v0, const VectorView<T>& v, T beta)
+    {
+        T vv = v0;
+        HouseholderUnpack(vv,v,beta);
+        v0 = vv;
+    }
+
+    template <class T> 
+    inline void HouseholderUnpack(
+        VarConjRef<T> v0, const VectorView<T>& v, T beta)
+    {
+        if (v0.isconj()) {
+            T vv = v0;
+            HouseholderUnpack(vv,v,beta);
+            v0 = vv;
+        } else {
+            HouseholderUnpack(v0.getRef(),v,beta);
+        }
+    }
+#endif
 
     template <class T> 
     void HouseholderUnpack(const MatrixView<T>& m, T beta);

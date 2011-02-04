@@ -3,7 +3,7 @@
 #include "TMV.h"
 #include "TMV_Sym.h"
 #include "TMV_Test.h"
-#include "TMV_Test2.h"
+#include "TMV_Test_2.h"
 #include "TMV_TestSymArith.h"
 #include "TMV_TestMatrixArith.h"
 
@@ -13,9 +13,8 @@ void TestSymMatrixArith_B2()
 #if (XTEST & 2)
     std::vector<tmv::SymMatrixView<T> > s;
     std::vector<tmv::SymMatrixView<std::complex<T> > > cs;
-    std::vector<tmv::BaseMatrix<T>*> B;
-    std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
-    MakeSymList(s,cs,B,CB,InDef);
+    MakeSymList(s,cs,InDef);
+
     const int N = s[0].size();
 
     tmv::Matrix<T> a1(N,N);
@@ -72,8 +71,6 @@ void TestSymMatrixArith_B2()
         TestMatrixArith5<T>(a4v,ca4v,si,csi,"DegenerateM/Sym");
         TestMatrixArith6x<T>(a4v,ca4v,si,csi,"DegenerateM/Sym");
     }
-    for(size_t i=0;i<B.size();++i) delete B[i];
-    for(size_t i=0;i<CB.size();++i) delete CB[i];
 #endif
 }
 

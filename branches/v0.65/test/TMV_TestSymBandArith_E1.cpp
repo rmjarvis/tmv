@@ -4,7 +4,7 @@
 #include "TMV.h"
 #include "TMV_SymBand.h"
 #include "TMV_Test.h"
-#include "TMV_Test2.h"
+#include "TMV_Test_2.h"
 #include "TMV_TestSymBandArith.h"
 #include "TMV_TestBandArith.h"
 
@@ -18,13 +18,11 @@ void TestSymBandMatrixArith_E1()
 {
     std::vector<tmv::SymBandMatrixView<T> > sb;
     std::vector<tmv::SymBandMatrixView<std::complex<T> > > csb;
-    std::vector<tmv::BaseMatrix<T>*> B;
-    std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
-    MakeSymBandList(sb,csb,B,CB,InDef);
+    MakeSymBandList(sb,csb,InDef);
 
     std::vector<tmv::BandMatrixView<T> > b;
     std::vector<tmv::BandMatrixView<std::complex<T> > > cb;
-    MakeBandList(b,cb,B,CB);
+    MakeBandList(b,cb);
 
     for(size_t i=STARTI;i<sb.size();i++) {
         if (showstartdone) {
@@ -48,8 +46,6 @@ void TestSymBandMatrixArith_E1()
             TestMatrixArith6x<T>(si,csi,bj,cbj,"SymBand/Band");
         }
     }
-    for(size_t i=0;i<B.size();++i) delete B[i];
-    for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
 #ifdef TEST_DOUBLE

@@ -5,7 +5,7 @@
 #include "TMV.h"
 #include "TMV_SymBand.h"
 #include "TMV_Test.h"
-#include "TMV_Test2.h"
+#include "TMV_Test_2.h"
 #include "TMV_TestSymBandArith.h"
 
 template <class T1, class T2> 
@@ -38,9 +38,37 @@ void TestSymBandMatrixArith_A()
 {
     std::vector<tmv::SymBandMatrixView<T> > sb;
     std::vector<tmv::SymBandMatrixView<std::complex<T> > > csb;
-    std::vector<tmv::BaseMatrix<T>*> B;
-    std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
-    MakeSymBandList(sb,csb,B,CB,InDef);
+    //MakeSymBandList(sb,csb,InDef);
+    std::vector<tmv::SymBandMatrix<T,tmv::Upper,tmv::RowMajor> > sB1; 
+    std::vector<tmv::SymBandMatrix<T,tmv::Upper,tmv::ColMajor> > sB2; 
+    std::vector<tmv::SymBandMatrix<T,tmv::Upper,tmv::DiagMajor> > sB3; 
+    std::vector<tmv::SymBandMatrix<T,tmv::Lower,tmv::RowMajor> > sB4; 
+    std::vector<tmv::SymBandMatrix<T,tmv::Lower,tmv::ColMajor> > sB5; 
+    std::vector<tmv::SymBandMatrix<T,tmv::Lower,tmv::DiagMajor> > sB6; 
+    std::vector<tmv::HermBandMatrix<T,tmv::Upper,tmv::RowMajor> > sB7; 
+    std::vector<tmv::HermBandMatrix<T,tmv::Upper,tmv::ColMajor> > sB8; 
+    std::vector<tmv::HermBandMatrix<T,tmv::Upper,tmv::DiagMajor> > sB9; 
+    std::vector<tmv::HermBandMatrix<T,tmv::Lower,tmv::RowMajor> > sB10; 
+    std::vector<tmv::HermBandMatrix<T,tmv::Lower,tmv::ColMajor> > sB11; 
+    std::vector<tmv::HermBandMatrix<T,tmv::Lower,tmv::DiagMajor> > sB12; 
+    std::vector<tmv::Matrix<T> > sB13; 
+    std::vector<tmv::SymBandMatrix<std::complex<T>,tmv::Upper,tmv::RowMajor> > CsB1; 
+    std::vector<tmv::SymBandMatrix<std::complex<T>,tmv::Upper,tmv::ColMajor> > CsB2; 
+    std::vector<tmv::SymBandMatrix<std::complex<T>,tmv::Upper,tmv::DiagMajor> > CsB3; 
+    std::vector<tmv::SymBandMatrix<std::complex<T>,tmv::Lower,tmv::RowMajor> > CsB4; 
+    std::vector<tmv::SymBandMatrix<std::complex<T>,tmv::Lower,tmv::ColMajor> > CsB5; 
+    std::vector<tmv::SymBandMatrix<std::complex<T>,tmv::Lower,tmv::DiagMajor> > CsB6; 
+    std::vector<tmv::HermBandMatrix<std::complex<T>,tmv::Upper,tmv::RowMajor> > CsB7; 
+    std::vector<tmv::HermBandMatrix<std::complex<T>,tmv::Upper,tmv::ColMajor> > CsB8; 
+    std::vector<tmv::HermBandMatrix<std::complex<T>,tmv::Upper,tmv::DiagMajor> > CsB9; 
+    std::vector<tmv::HermBandMatrix<std::complex<T>,tmv::Lower,tmv::RowMajor> > CsB10; 
+    std::vector<tmv::HermBandMatrix<std::complex<T>,tmv::Lower,tmv::ColMajor> > CsB11; 
+    std::vector<tmv::HermBandMatrix<std::complex<T>,tmv::Lower,tmv::DiagMajor> > CsB12; 
+    std::vector<tmv::Matrix<std::complex<T> > > CsB13; 
+    DoMakeSymBandList( 
+        sb,csb,InDef,sB1,sB2,sB3,sB4,sB5,sB6,sB7,sB8,sB9,sB10,sB11,sB12,sB13,
+        CsB1,CsB2,CsB3,CsB4,CsB5,CsB6,CsB7,CsB8,CsB9,CsB10,CsB11,CsB12,CsB13);
+
 
     for(size_t i=START1;i<sb.size();i++) {
         if (showstartdone) {
@@ -64,8 +92,6 @@ void TestSymBandMatrixArith_A()
             TestMatrixArith6x<T>(si,csi,sb[j],csb[j],"SymBand/SymBand");
         }
     }
-    for(size_t i=0;i<B.size();++i) delete B[i];
-    for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
 #ifdef TEST_DOUBLE

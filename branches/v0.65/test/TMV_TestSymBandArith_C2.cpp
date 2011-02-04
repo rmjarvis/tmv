@@ -3,7 +3,7 @@
 #include "TMV.h"
 #include "TMV_SymBand.h"
 #include "TMV_Test.h"
-#include "TMV_Test2.h"
+#include "TMV_Test_2.h"
 #include "TMV_TestSymBandArith.h"
 
 template <class T1, class T2> 
@@ -40,9 +40,8 @@ void TestSymBandMatrixArith_C2()
 #if (XTEST & 2)
     std::vector<tmv::SymBandMatrixView<T> > sb;
     std::vector<tmv::SymBandMatrixView<std::complex<T> > > csb;
-    std::vector<tmv::BaseMatrix<T>*> B;
-    std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
-    MakeSymBandList(sb,csb,B,CB,InDef);
+    MakeSymBandList(sb,csb,InDef);
+
     const int N = sb[0].size();
 
     tmv::Matrix<T> a1(N,N);
@@ -69,8 +68,6 @@ void TestSymBandMatrixArith_C2()
         TestMatrixArith5<T>(d1v,cd1v,si,csi,"Diag/SymBand");
         TestMatrixArith6x<T>(d1v,cd1v,si,csi,"Diag/SymBand");
     }
-    for(size_t i=0;i<B.size();++i) delete B[i];
-    for(size_t i=0;i<CB.size();++i) delete CB[i];
 #endif
 }
 

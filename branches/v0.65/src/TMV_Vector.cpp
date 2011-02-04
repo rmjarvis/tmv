@@ -29,14 +29,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "TMV_Blas.h"
-#include <iostream>
-#include <algorithm>
-#include <limits>
-#include <iostream>
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_VIt.h"
 #include "TMV_ConvertIndex.h"
 #include "portable_platform.h"
+#include <iostream>
+#include <algorithm>
+#include <limits>
+#include <iostream>
+#include <sstream>
 
 #ifndef NOTHROW
 #include "TMV_VectorRE.h"

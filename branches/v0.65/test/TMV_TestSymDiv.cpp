@@ -4,7 +4,7 @@
 #include "TMV.h"
 #include "TMV_Sym.h"
 #include "TMV_Test.h"
-#include "TMV_Test2.h"
+#include "TMV_Test_2.h"
 #include "TMV_TestSymArith.h"
 
 template <class T> 
@@ -82,9 +82,7 @@ void TestSymDiv(tmv::DivType dt, PosDefCode pdc)
 
     std::vector<tmv::SymMatrixView<T> > s;
     std::vector<tmv::SymMatrixView<std::complex<T> > > cs;
-    std::vector<tmv::BaseMatrix<T>*> B;
-    std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
-    MakeSymList(s,cs,B,CB,pdc);
+    MakeSymList(s,cs,pdc);
 
     tmv::Vector<T> v1(N);
     tmv::Vector<T> v2(N-1);
@@ -318,8 +316,6 @@ void TestSymDiv(tmv::DivType dt, PosDefCode pdc)
         if (dt == tmv::LU) TestSymDiv_D2<T>(dt,pdc);
         if (dt != tmv::CH) TestSymDiv_E2<T>(dt,pdc);
     }
-    for(size_t i=0;i<B.size();++i) delete B[i];
-    for(size_t i=0;i<CB.size();++i) delete CB[i];
 
     std::cout<<PDLabel(pdc)<<" SymMatrix<"<<tmv::TMV_Text(T())<<
         "> Division using ";

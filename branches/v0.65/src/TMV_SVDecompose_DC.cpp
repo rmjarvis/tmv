@@ -802,7 +802,7 @@ namespace tmv {
     }
 
     template <class T> 
-    static void FindDCSingularValues(
+    void FindDCSingularValues(
         Vector<T>& S, T rho, const GenVector<T>& D, const GenVector<T>& z, 
         Matrix<T,ColMajor>& diffmat)
     {
@@ -853,7 +853,7 @@ namespace tmv {
     }
 
     template <class T> 
-    static void FindDCSingularValues(
+    void FindDCSingularValues(
         Vector<T>& S, T rho, const GenVector<T>& D, const GenVector<T>& z)
     {  
         dbgcout<<"Start FindDCSV (No diffmat): "<<std::endl;

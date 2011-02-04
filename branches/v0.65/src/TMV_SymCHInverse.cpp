@@ -124,7 +124,7 @@ namespace tmv {
 #endif // LAP
 
     template <class T, class T1> 
-    void CH_Inverse(const GenSymMatrix<T>& LLx, const SymMatrixView<T1>& sinv) 
+    void CH_Inverse(const GenSymMatrix<T1>& LLx, const SymMatrixView<T>& sinv) 
     {
         TMVAssert(LLx.size() == sinv.size());
 
@@ -156,14 +156,14 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
-        Matrix<T1> eye = A * sinv;
+        Matrix<T> eye = A * sinv;
         TMV_RealType(T) kappa = Norm(A) * Norm(sinv);
-        if (Norm(eye-T1(1)) > 0.0001*kappa*sinv.size()) {
+        if (Norm(eye-T(1)) > 0.0001*kappa*sinv.size()) {
             cerr<<"A = "<<A<<endl;
             cerr<<"sinv = "<<sinv<<endl;
             cerr<<"A*sinv = "<<A*sinv<<endl;
             cerr<<"sinv*A = "<<sinv*A<<endl;
-            cerr<<"Norm(A*sinv-1) = "<<Norm(A*sinv-T1(1))<<endl;
+            cerr<<"Norm(A*sinv-1) = "<<Norm(A*sinv-T(1))<<endl;
             cerr<<"kappa = "<<kappa<<endl;
             abort();
         }

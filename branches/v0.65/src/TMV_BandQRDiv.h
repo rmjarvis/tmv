@@ -43,38 +43,102 @@ namespace tmv {
     void GetQFromBandQR(
         const MatrixView<T>& QRx, const GenVector<T>& Qbeta, int nlo);
 
-    template <class T1, class T2> 
+    template <class T, class T1> 
     void QR_LDivEq(
         const GenBandMatrix<T1>& QRx, const GenVector<T1>& Qbeta,
-        const MatrixView<T2>& m);
-    template <class T1, class T2> 
+        const MatrixView<T>& m);
+    template <class T, class T1> 
     void QR_RDivEq(
         const GenBandMatrix<T1>& QRx, const GenVector<T1>& Qbeta,
-        const MatrixView<T2>& m);
+        const MatrixView<T>& m);
 
-    template <class T1, class T2, class T3> 
+    template <class T, class T1, class T2> 
     void QR_LDiv(
         const GenBandMatrix<T1>& QR, const GenVector<T1>& Qbeta,
-        const GenMatrix<T2>& m, const MatrixView<T3>& x);
-    template <class T1, class T2, class T3> 
+        const GenMatrix<T2>& m, const MatrixView<T>& x);
+    template <class T, class T1, class T2> 
     void QR_RDiv(
         const GenBandMatrix<T1>& QR, const GenVector<T1>& Qbeta,
-        const GenMatrix<T2>& m, const MatrixView<T3>& x);
+        const GenMatrix<T2>& m, const MatrixView<T>& x);
 
-    template <class T1, class T2> 
+    template <class T, class T1> 
     void Q_LDivEq(
         const GenBandMatrix<T1>& Q, const GenVector<T1>& Qbeta,
-        const MatrixView<T2>& m);
-    template <class T1, class T2> 
+        const MatrixView<T>& m);
+    template <class T, class T1> 
     void Q_RDivEq(
         const GenBandMatrix<T1>& Q, const GenVector<T1>& Qbeta,
-        const MatrixView<T2>& m);
+        const MatrixView<T>& m);
 
-    template <class T1, class T2> 
+    template <class T, class T1> 
     void QR_Inverse(
         const GenBandMatrix<T1>& QRx, const GenVector<T1>& Qbeta,
-        const MatrixView<T2>& m);
+        const MatrixView<T>& m);
 
+
+    // Specialize disallowed complex combinations:
+#define CT std::complex<T>
+
+    template <class T>
+    inline void QR_LDivEq(
+        const GenBandMatrix<CT>& QRx, const GenVector<CT>& Qbeta,
+        const MatrixView<T>& m)
+    { TMVAssert(TMV_FALSE); }
+    template <class T>
+    inline void QR_RDivEq(
+        const GenBandMatrix<CT>& QRx, const GenVector<CT>& Qbeta,
+        const MatrixView<T>& m)
+    { TMVAssert(TMV_FALSE); }
+
+    template <class T>
+    inline void QR_LDiv(
+        const GenBandMatrix<CT>& QR, const GenVector<CT>& Qbeta,
+        const GenMatrix<CT>& m, const MatrixView<T>& x)
+    { TMVAssert(TMV_FALSE); }
+    template <class T>
+    inline void QR_LDiv(
+        const GenBandMatrix<CT>& QR, const GenVector<CT>& Qbeta,
+        const GenMatrix<T>& m, const MatrixView<T>& x)
+    { TMVAssert(TMV_FALSE); }
+    template <class T>
+    inline void QR_LDiv(
+        const GenBandMatrix<T>& QR, const GenVector<T>& Qbeta,
+        const GenMatrix<CT>& m, const MatrixView<T>& x)
+    { TMVAssert(TMV_FALSE); }
+    template <class T>
+    inline void QR_RDiv(
+        const GenBandMatrix<CT>& QR, const GenVector<CT>& Qbeta,
+        const GenMatrix<CT>& m, const MatrixView<T>& x)
+    { TMVAssert(TMV_FALSE); }
+    template <class T>
+    inline void QR_RDiv(
+        const GenBandMatrix<CT>& QR, const GenVector<CT>& Qbeta,
+        const GenMatrix<T>& m, const MatrixView<T>& x)
+    { TMVAssert(TMV_FALSE); }
+    template <class T>
+    inline void QR_RDiv(
+        const GenBandMatrix<T>& QR, const GenVector<T>& Qbeta,
+        const GenMatrix<CT>& m, const MatrixView<T>& x)
+    { TMVAssert(TMV_FALSE); }
+
+    template <class T>
+    inline void Q_LDivEq(
+        const GenBandMatrix<CT>& Q, const GenVector<CT>& Qbeta,
+        const MatrixView<T>& m)
+    { TMVAssert(TMV_FALSE); }
+    template <class T>
+    inline void Q_RDivEq(
+        const GenBandMatrix<CT>& Q, const GenVector<CT>& Qbeta,
+        const MatrixView<T>& m)
+    { TMVAssert(TMV_FALSE); }
+
+    template <class T>
+    inline void QR_Inverse(
+        const GenBandMatrix<CT>& QRx, const GenVector<CT>& Qbeta,
+        const MatrixView<T>& m)
+    { TMVAssert(TMV_FALSE); }
+
+#undef CT
 }
 
 #endif

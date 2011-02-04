@@ -3,7 +3,7 @@
 #include "TMV.h"
 #include "TMV_Sym.h"
 #include "TMV_Test.h"
-#include "TMV_Test2.h"
+#include "TMV_Test_2.h"
 #include "TMV_TestSymArith.h"
 
 template <class T1, class T2> 
@@ -20,9 +20,8 @@ void TestSymMatrixArith_C1()
 {
     std::vector<tmv::SymMatrixView<T> > s;
     std::vector<tmv::SymMatrixView<std::complex<T> > > cs;
-    std::vector<tmv::BaseMatrix<T>*> B;
-    std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
-    MakeSymList(s,cs,B,CB,InDef);
+    MakeSymList(s,cs,InDef);
+
     const int N = s[0].size();
 
     tmv::Matrix<T> a1(N,N);
@@ -49,8 +48,6 @@ void TestSymMatrixArith_C1()
         TestMatrixArith5<T>(si,csi,d1v,cd1v,"Sym/Diag");
         TestMatrixArith6x<T>(si,csi,d1v,cd1v,"Sym/Diag");
     }
-    for(size_t i=0;i<B.size();++i) delete B[i];
-    for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
 #ifdef TEST_DOUBLE

@@ -602,145 +602,150 @@ namespace tmv {
         const int s;
     };
 
-    template <class T> class ConjRef
+    template <class T> 
+    class ConjRef; // Undefined unless T is complex<T>
+    
+    template <class T> 
+    class ConjRef<std::complex<T> >
     {
-        typedef TMV_RealType(T) RT;
     public:
 
-        explicit ConjRef(T& _val) : val(_val) {}
-        ConjRef(const ConjRef<T>& rhs) : val(rhs.val) {}
+        typedef std::complex<T> CT;
+
+        explicit ConjRef(CT& _val) : val(_val) {}
+        ConjRef(const ConjRef<CT>& rhs) : val(rhs.val) {}
         ~ConjRef() {}
 
-        inline operator T() const { return std::conj(val); }
-        inline T& getRef() { return val; }
-        inline T conj() const { return val; }
-        inline RT real() const { return val.real(); }
-        inline RT imag() const { return -val.imag(); }
-        inline T operator-() const { return -std::conj(val); }
+        inline operator CT() const { return std::conj(val); }
+        inline CT& getRef() { return val; }
+        inline CT conj() const { return val; }
+        inline T real() const { return val.real(); }
+        inline T imag() const { return -val.imag(); }
+        inline CT operator-() const { return -std::conj(val); }
 
-        inline ConjRef<T>& operator=(const ConjRef<T>& rhs)
+        inline ConjRef<CT>& operator=(const ConjRef<CT>& rhs)
         { val = rhs.val; return *this; }
-        inline ConjRef<T>& operator=(T rhs)
+        inline ConjRef<CT>& operator=(CT rhs)
         { val = std::conj(rhs); return *this; }
-        inline ConjRef<T>& operator=(RT rhs)
+        inline ConjRef<CT>& operator=(T rhs)
         { val = rhs; return *this; }
 
-        inline ConjRef<T>& operator+=(const ConjRef<T>& x2)
+        inline ConjRef<CT>& operator+=(const ConjRef<CT>& x2)
         { val += x2.val; return *this; }
-        inline ConjRef<T>& operator+=(T x2)
+        inline ConjRef<CT>& operator+=(CT x2)
         { val += std::conj(x2); return *this; }
-        inline ConjRef<T>& operator+=(RT x2)
+        inline ConjRef<CT>& operator+=(T x2)
         { val += x2; return *this; }
-        inline T operator+(const ConjRef<T>& x2)
+        inline CT operator+(const ConjRef<CT>& x2)
         { return std::conj(val+x2.val); }
-        inline friend T operator+(const ConjRef<T>& x1, T x2)
+        inline friend CT operator+(const ConjRef<CT>& x1, CT x2)
         { return std::conj(x1.val)+x2; }
-        inline friend T operator+(ConjRef<T>& x1, RT x2)
+        inline friend CT operator+(ConjRef<CT>& x1, T x2)
         { return std::conj(x1.val)+x2; }
-        inline friend T operator+(T x1, const ConjRef<T>& x2)
+        inline friend CT operator+(CT x1, const ConjRef<CT>& x2)
         { return x1+std::conj(x2.val); }
-        inline friend T operator+(RT x1, const ConjRef<T>& x2)
+        inline friend CT operator+(T x1, const ConjRef<CT>& x2)
         { return x1+std::conj(x2.val); }
-        inline friend T& operator+=(T& x1, const ConjRef<T>& x2)
-        { return x1+=std::conj(x2.val); }
+        //inline friend CT& operator+=(CT& x1, const ConjRef<CT>& x2)
+        //{ return x1+=std::conj(x2.val); }
 
-        inline ConjRef<T>& operator-=(const ConjRef<T>& x2) 
+        inline ConjRef<CT>& operator-=(const ConjRef<CT>& x2) 
         { val -= x2.val; return *this; }
-        inline ConjRef<T>& operator-=(T x2) 
+        inline ConjRef<CT>& operator-=(CT x2) 
         { val -= std::conj(x2); return *this; }
-        inline ConjRef<T>& operator-=(RT x2) 
+        inline ConjRef<CT>& operator-=(T x2) 
         { val -= x2; return *this; }
-        inline T operator-(const ConjRef<T>& x2)
+        inline CT operator-(const ConjRef<CT>& x2)
         { return std::conj(val-x2.val); }
-        inline friend T operator-(const ConjRef<T>& x1, T x2)
+        inline friend CT operator-(const ConjRef<CT>& x1, CT x2)
         { return std::conj(x1.val)-x2; }
-        inline friend T operator-(const ConjRef<T>& x1, RT x2)
+        inline friend CT operator-(const ConjRef<CT>& x1, T x2)
         { return std::conj(x1.val)-x2; }
-        inline friend T operator-(T x1, const ConjRef<T>& x2)
+        inline friend CT operator-(CT x1, const ConjRef<CT>& x2)
         { return x1-std::conj(x2.val); }
-        inline friend T operator-(RT x1, const ConjRef<T>& x2)
+        inline friend CT operator-(T x1, const ConjRef<CT>& x2)
         { return x1-std::conj(x2.val); }
-        inline friend T& operator-=(T& x1, const ConjRef<T>& x2)
-        { return x1-=std::conj(x2.val); }
+        //inline friend CT& operator-=(CT& x1, const ConjRef<CT>& x2)
+        //{ return x1-=std::conj(x2.val); }
 
-        inline ConjRef<T>& operator*=(const ConjRef<T>& x2) 
+        inline ConjRef<CT>& operator*=(const ConjRef<CT>& x2) 
         { val *= x2.val; return *this; }
-        inline ConjRef<T>& operator*=(T x2) 
+        inline ConjRef<CT>& operator*=(CT x2) 
         { val *= std::conj(x2); return *this; }
-        inline ConjRef<T>& operator*=(RT x2) 
+        inline ConjRef<CT>& operator*=(T x2) 
         { val *= x2; return *this; }
-        inline T operator*(const ConjRef<T> x2)
+        inline CT operator*(const ConjRef<CT> x2)
         { return std::conj(val*x2.val); }
-        inline friend T operator*(const ConjRef<T>& x1, T x2)
+        inline friend CT operator*(const ConjRef<CT>& x1, CT x2)
         { return std::conj(x1.val)*x2; }
-        inline friend T operator*(const ConjRef<T>& x1, RT x2)
+        inline friend CT operator*(const ConjRef<CT>& x1, T x2)
         { return std::conj(x1.val)*x2; }
-        inline friend T operator*(T x1, const ConjRef<T>& x2)
+        inline friend CT operator*(CT x1, const ConjRef<CT>& x2)
         { return x1*std::conj(x2.val); }
-        inline friend T operator*(RT x1, const ConjRef<T>& x2)
+        inline friend CT operator*(T x1, const ConjRef<CT>& x2)
         { return x1*std::conj(x2.val); }
-        inline friend T& operator*=(T& x1, const ConjRef<T>& x2)
-        { return x1*=std::conj(x2.val); }
+        //inline friend CT& operator*=(CT& x1, const ConjRef<CT>& x2)
+        //{ return x1*=std::conj(x2.val); }
 
-        inline ConjRef<T>& operator/=(const ConjRef<T>& x2) 
+        inline ConjRef<CT>& operator/=(const ConjRef<CT>& x2) 
         { val /= x2.val; return *this; }
-        inline ConjRef<T>& operator/=(T x2) 
+        inline ConjRef<CT>& operator/=(CT x2) 
         { val /= std::conj(x2); return *this; }
-        inline ConjRef<T>& operator/=(RT x2) 
+        inline ConjRef<CT>& operator/=(T x2) 
         { val /= x2; return *this; }
-        inline T operator/(const ConjRef<T>& x2)
+        inline CT operator/(const ConjRef<CT>& x2)
         { return std::conj(val/x2.val); }
-        inline friend T operator/(const ConjRef<T>& x1, T x2)
+        inline friend CT operator/(const ConjRef<CT>& x1, CT x2)
         { return std::conj(x1.val)/x2; }
-        inline friend T operator/(const ConjRef<T>& x1, RT x2)
+        inline friend CT operator/(const ConjRef<CT>& x1, T x2)
         { return std::conj(x1.val)/x2; }
-        inline friend T operator/(T x1, const ConjRef<T>& x2)
+        inline friend CT operator/(CT x1, const ConjRef<CT>& x2)
         { return x1/std::conj(x2.val); }
-        inline friend T operator/(RT x1, const ConjRef<T>& x2)
+        inline friend CT operator/(T x1, const ConjRef<CT>& x2)
         { return x1/std::conj(x2.val); }
-        inline friend T& operator/=(T& x1, const ConjRef<T>& x2)
-        { return x1/=std::conj(x2.val); }
+        //inline friend CT& operator/=(CT& x1, const ConjRef<CT>& x2)
+        //{ return x1/=std::conj(x2.val); }
 
-        inline bool operator==(const ConjRef<T>& x2) const
+        inline bool operator==(const ConjRef<CT>& x2) const
         { return val == x2.val; }
-        inline bool operator==(T x2) const 
+        inline bool operator==(CT x2) const 
         { return std::conj(val) == x2; }
-        inline bool operator==(RT x2) const 
+        inline bool operator==(T x2) const 
         { return std::real(val) == x2 && std::imag(val) == T(0); }
-        inline friend bool operator==(T x1, const ConjRef<T>& x2)
+        inline friend bool operator==(CT x1, const ConjRef<CT>& x2)
         { return x2==x1; }
-        inline friend bool operator==(RT x1, const ConjRef<T>& x2)
+        inline friend bool operator==(T x1, const ConjRef<CT>& x2)
         { return x2==x1; }
-        inline bool operator!=(const ConjRef<T>& x2) const
+        inline bool operator!=(const ConjRef<CT>& x2) const
+        { return !(operator==(x2)); }
+        inline bool operator!=(CT x2) const 
         { return !(operator==(x2)); }
         inline bool operator!=(T x2) const 
         { return !(operator==(x2)); }
-        inline bool operator!=(RT x2) const 
-        { return !(operator==(x2)); }
-        inline friend bool operator!=(T x1, const ConjRef<T>& x2)
+        inline friend bool operator!=(CT x1, const ConjRef<CT>& x2)
         { return !(x2==x1); }
-        inline friend bool operator!=(RT x1, const ConjRef<T>& x2)
+        inline friend bool operator!=(T x1, const ConjRef<CT>& x2)
         { return !(x2==x1); }
 
-        inline void swapWith(T& x2)
+        inline void swapWith(CT& x2)
         { 
             TMVAssert(&val != &x2);
-            T temp = x2; x2 = std::conj(val); val = std::conj(temp); 
+            CT temp = x2; x2 = std::conj(val); val = std::conj(temp); 
         }
-        inline void swapWith(ConjRef<T> x2)
+        inline void swapWith(ConjRef<CT> x2)
         { 
             TMVAssert(&val != &x2);
-            T temp = x2.val; x2.val = val; val = temp; 
+            CT temp = x2.val; x2.val = val; val = temp; 
         }
 
-        inline friend std::ostream& operator<<(std::ostream& os, ConjRef<T> x)
+        inline friend std::ostream& operator<<(std::ostream& os, ConjRef<CT> x)
         { os << std::conj(x.val); return os; }
-        inline friend std::istream& operator>>(std::istream& is, ConjRef<T> x)
+        inline friend std::istream& operator>>(std::istream& is, ConjRef<CT> x)
         { is >> x.val; x.val = std::conj(x.val); return is; }
 
     private:
 
-        T& val;
+        CT& val;
     };
 
     template <class T> inline T TMV_CONJ(const ConjRef<T>& x) 
@@ -1199,160 +1204,165 @@ namespace tmv {
         const int s;
     };
 
-    template <class T> class VarConjRef
+    template <class T> 
+    class VarConjRef; // Undefined unless T is complex<T>
+
+    template <class T> 
+    class VarConjRef<std::complex<T> >
     {
-        typedef TMV_RealType(T) RT;
     public:
 
-        VarConjRef(T& _val, ConjType _c) : val(_val), c(_c) {}
-        VarConjRef(const VarConjRef<T>& rhs) : val(rhs.val), c(rhs.c) {}
+        typedef std::complex<T> CT;
+
+        VarConjRef(CT& _val, ConjType _c) : val(_val), c(_c) {}
+        VarConjRef(const VarConjRef<CT>& rhs) : val(rhs.val), c(rhs.c) {}
         ~VarConjRef() {}
 
         inline bool isconj() const { return c == Conj; }
-        inline operator T() const { return c==Conj?std::conj(val):val; }
-        inline T& getRef() { return val; }
-        inline T conj() const { return c==Conj?val:std::conj(val); }
-        inline RT real() const { return val.real(); }
-        inline RT imag() const 
+        inline operator CT() const { return c==Conj?std::conj(val):val; }
+        inline CT& getRef() { return val; }
+        inline CT conj() const { return c==Conj?val:std::conj(val); }
+        inline T real() const { return val.real(); }
+        inline T imag() const 
         { return c==Conj? -val.imag() : val.imag(); }
-        inline T operator-() const { return -T(*this); }
+        inline CT operator-() const { return -CT(*this); }
 
-        VarConjRef<T>& operator=(const VarConjRef<T>& rhs)
+        VarConjRef<CT>& operator=(const VarConjRef<CT>& rhs)
         { val = c==rhs.c ? rhs.val : std::conj(rhs.val); return *this; }
-        inline VarConjRef<T>& operator=(T rhs)
+        inline VarConjRef<CT>& operator=(CT rhs)
         { val = c==Conj ? std::conj(rhs) : rhs; return *this; }
-        inline VarConjRef<T>& operator=(RT rhs) 
+        inline VarConjRef<CT>& operator=(T rhs) 
         { val = rhs; return *this; }
 
-        inline VarConjRef<T>& operator+=(const VarConjRef<T>& x2)
+        inline VarConjRef<CT>& operator+=(const VarConjRef<CT>& x2)
         { val += c==x2.c ? x2.val : std::conj(x2.val); return *this; }
-        inline VarConjRef<T>& operator+=(T x2) 
+        inline VarConjRef<CT>& operator+=(CT x2) 
         { val += c==Conj ? std::conj(x2) : x2; return *this; }
-        inline VarConjRef<T>& operator+=(RT x2)
+        inline VarConjRef<CT>& operator+=(T x2)
         { val += x2; return *this; }
-        inline T operator+(const VarConjRef<T>& x2)
-        { return T(*this)+T(x2); }
-        inline friend T operator+(const VarConjRef<T>& x1, T x2)
-        { return T(x1)+x2; }
-        inline friend T operator+(const VarConjRef<T>& x1, RT x2)
-        { return T(x1)+x2; }
-        inline friend T operator+(T x1, const VarConjRef<T>& x2)
-        { return x1+T(x2); }
-        inline friend T operator+(RT x1, const VarConjRef<T>& x2)
-        { return x1+T(x2); }
-        inline friend T& operator+=(T& x1, const VarConjRef<T>& x2)
-        { return x1 += (x2.c==Conj ? std::conj(x2.val) : x2.val); }
+        inline CT operator+(const VarConjRef<CT>& x2)
+        { return CT(*this)+CT(x2); }
+        inline friend CT operator+(const VarConjRef<CT>& x1, CT x2)
+        { return CT(x1)+x2; }
+        inline friend CT operator+(const VarConjRef<CT>& x1, T x2)
+        { return CT(x1)+x2; }
+        inline friend CT operator+(CT x1, const VarConjRef<CT>& x2)
+        { return x1+CT(x2); }
+        inline friend CT operator+(T x1, const VarConjRef<CT>& x2)
+        { return x1+CT(x2); }
+        //inline friend CT& operator+=(CT& x1, const VarConjRef<CT>& x2)
+        //{ return x1 += (x2.c==Conj ? std::conj(x2.val) : x2.val); }
 
-        inline VarConjRef<T>& operator-=(const VarConjRef<T>& x2) 
+        inline VarConjRef<CT>& operator-=(const VarConjRef<CT>& x2) 
         { val -= c==x2.c ? x2.val : std::conj(x2.val); return *this; }
-        inline VarConjRef<T>& operator-=(T x2) 
+        inline VarConjRef<CT>& operator-=(CT x2) 
         { val -= c==Conj ? std::conj(x2) : x2; return *this; }
-        inline VarConjRef<T>& operator-=(RT x2) 
+        inline VarConjRef<CT>& operator-=(T x2) 
         { val -= x2; return *this; }
-        inline T operator-(const VarConjRef<T>& x2)
-        { return T(*this)-T(x2); }
-        inline friend T operator-(const VarConjRef<T>& x1, T x2)
-        { return T(x1)-x2; }
-        inline friend T operator-(const VarConjRef<T>& x1, RT x2)
-        { return T(x1)-x2; }
-        inline friend T operator-(T x1, const VarConjRef<T>& x2)
-        { return x1-T(x2); }
-        inline friend T operator-(RT x1, const VarConjRef<T>& x2)
-        { return x1-T(x2); }
-        inline friend T& operator-=(T& x1, const VarConjRef<T>& x2)
-        { return x1 -= (x2.c==Conj ? std::conj(x2.val) : x2.val); }
+        inline CT operator-(const VarConjRef<CT>& x2)
+        { return CT(*this)-CT(x2); }
+        inline friend CT operator-(const VarConjRef<CT>& x1, CT x2)
+        { return CT(x1)-x2; }
+        inline friend CT operator-(const VarConjRef<CT>& x1, T x2)
+        { return CT(x1)-x2; }
+        inline friend CT operator-(CT x1, const VarConjRef<CT>& x2)
+        { return x1-CT(x2); }
+        inline friend CT operator-(T x1, const VarConjRef<CT>& x2)
+        { return x1-CT(x2); }
+        //inline friend CT& operator-=(CT& x1, const VarConjRef<CT>& x2)
+        //{ return x1 -= (x2.c==Conj ? std::conj(x2.val) : x2.val); }
 
-        inline VarConjRef<T>& operator*=(const VarConjRef<T>& x2) 
+        inline VarConjRef<CT>& operator*=(const VarConjRef<CT>& x2) 
         { val *= c==x2.c ? x2.val : std::conj(x2.val); return *this; }
-        inline VarConjRef<T>& operator*=(T x2) 
+        inline VarConjRef<CT>& operator*=(CT x2) 
         { val *= c==Conj ? std::conj(x2) : x2; return *this; }
-        inline VarConjRef<T>& operator*=(RT x2) 
+        inline VarConjRef<CT>& operator*=(T x2) 
         { val *= x2; return *this; }
-        inline T operator*(const VarConjRef<T> x2)
-        { return T(*this)*T(x2); }
-        inline friend T operator*(const VarConjRef<T>& x1, T x2)
-        { return T(x1)*x2; }
-        inline friend T operator*(const VarConjRef<T>& x1, RT x2)
-        { return T(x1)*x2; }
-        inline friend T operator*(T x1, const VarConjRef<T>& x2)
-        { return x1*T(x2); }
-        inline friend T operator*(RT x1, const VarConjRef<T>& x2)
-        { return x1*T(x2); }
-        inline friend T& operator*=(T& x1, const VarConjRef<T>& x2)
-        { return x1 *= (x2.c==Conj ? std::conj(x2.val) : x2.val); }
+        inline CT operator*(const VarConjRef<CT> x2)
+        { return CT(*this)*CT(x2); }
+        inline friend CT operator*(const VarConjRef<T>& x1, CT x2)
+        { return CT(x1)*x2; }
+        inline friend CT operator*(const VarConjRef<CT>& x1, T x2)
+        { return CT(x1)*x2; }
+        inline friend CT operator*(CT x1, const VarConjRef<CT>& x2)
+        { return x1*CT(x2); }
+        inline friend CT operator*(T x1, const VarConjRef<CT>& x2)
+        { return x1*CT(x2); }
+        //inline friend CT& operator*=(CT& x1, const VarConjRef<CT>& x2)
+        //{ return x1 *= (x2.c==Conj ? std::conj(x2.val) : x2.val); }
 
-        inline VarConjRef<T>& operator/=(const VarConjRef<T>& x2) 
+        inline VarConjRef<CT>& operator/=(const VarConjRef<CT>& x2) 
         { val /= c==x2.c ? x2.val : std::conj(x2.val); return *this; }
-        inline VarConjRef<T>& operator/=(T x2) 
+        inline VarConjRef<CT>& operator/=(CT x2) 
         { val /= c==Conj ? std::conj(x2) : x2; return *this; }
-        inline VarConjRef<T>& operator/=(RT x2) 
+        inline VarConjRef<CT>& operator/=(T x2) 
         { val /= x2; return *this; }
-        inline T operator/(const VarConjRef<T>& x2)
-        { return T(*this)/T(x2); }
-        inline friend T operator/(const VarConjRef<T>& x1, T x2)
-        { return T(x1)/x2; }
-        inline friend T operator/(const VarConjRef<T>& x1, RT x2)
-        { return T(x1)/x2; }
-        inline friend T operator/(T x1, const VarConjRef<T>& x2)
-        { return x1/T(x2); }
-        inline friend T operator/(RT x1, const VarConjRef<T>& x2)
-        { return x1/T(x2); }
-        inline friend T& operator/=(T& x1, const VarConjRef<T>& x2)
-        { return x1 /= (x2.c==Conj ? std::conj(x2.val) : x2.val); }
+        inline CT operator/(const VarConjRef<CT>& x2)
+        { return CT(*this)/CT(x2); }
+        inline friend CT operator/(const VarConjRef<CT>& x1, CT x2)
+        { return CT(x1)/x2; }
+        inline friend CT operator/(const VarConjRef<CT>& x1, T x2)
+        { return CT(x1)/x2; }
+        inline friend CT operator/(CT x1, const VarConjRef<CT>& x2)
+        { return x1/CT(x2); }
+        inline friend CT operator/(T x1, const VarConjRef<CT>& x2)
+        { return x1/CT(x2); }
+        //inline friend CT& operator/=(CT& x1, const VarConjRef<CT>& x2)
+        //{ return x1 /= (x2.c==Conj ? std::conj(x2.val) : x2.val); }
 
-        inline bool operator==(const VarConjRef<T>& x2) const
+        inline bool operator==(const VarConjRef<CT>& x2) const
         { return val == (c==x2.c ? x2.val : std::conj(x2.val)); }
-        inline bool operator==(T x2) const 
+        inline bool operator==(CT x2) const 
         { return val == (c==Conj ? std::conj(x2) : x2); }
-        inline bool operator==(RT x2) const 
-        { return std::real(val) == x2 && std::imag(val) == T(0); }
-        inline friend bool operator==(T x1, const VarConjRef<T>& x2)
+        inline bool operator==(T x2) const 
+        { return std::real(val) == x2 && std::imag(val) == CT(0); }
+        inline friend bool operator==(CT x1, const VarConjRef<CT>& x2)
         { return x2==x1; }
-        inline friend bool operator==(RT x1, const VarConjRef<T>& x2)
+        inline friend bool operator==(T x1, const VarConjRef<CT>& x2)
         { return x2==x1; }
-        inline bool operator!=(const VarConjRef<T>& x2) const
+        inline bool operator!=(const VarConjRef<CT>& x2) const
+        { return !(operator==(x2)); }
+        inline bool operator!=(CT x2) const 
         { return !(operator==(x2)); }
         inline bool operator!=(T x2) const 
         { return !(operator==(x2)); }
-        inline bool operator!=(RT x2) const 
-        { return !(operator==(x2)); }
-        inline friend bool operator!=(T x1, const VarConjRef<T>& x2)
+        inline friend bool operator!=(CT x1, const VarConjRef<CT>& x2)
         { return !(x2==x1); }
-        inline friend bool operator!=(RT x1, const VarConjRef<T>& x2)
+        inline friend bool operator!=(T x1, const VarConjRef<CT>& x2)
         { return !(x2==x1); }
 
-        inline void swapWith(T& x2)
+        inline void swapWith(CT& x2)
         { 
             if (&val == &x2) {
                 TMVAssert(c != Conj);
             } else {
-                T temp = x2; x2 = T(*this); *this = temp;
+                CT temp = x2; x2 = CT(*this); *this = temp;
             }
         }
-        inline void swapWith(VarConjRef<T> x2)
+        inline void swapWith(VarConjRef<CT> x2)
         { 
             if (&val == &x2.val) {
                 TMVAssert(c == x2.c);
             } else {
                 if (c==x2.c) {
-                    T temp = x2.val; x2.val = val; val = temp;
+                    CT temp = x2.val; x2.val = val; val = temp;
                 }
                 else {
-                    T temp = x2; x2 = T(*this); *this = temp;
+                    CT temp = x2; x2 = CT(*this); *this = temp;
                 }
             }
         }
 
         inline friend std::ostream& operator<<(
-            std::ostream& os, VarConjRef<T> x)
+            std::ostream& os, VarConjRef<CT> x)
         { os << (x.c==Conj ? std::conj(x.val) : x.val); return os; }
         inline friend std::istream& operator>>(
-            std::istream& is, VarConjRef<T> x)
+            std::istream& is, VarConjRef<CT> x)
         { is >> x.val; if(x.c==Conj) x.val = std::conj(x.val); return is; }
 
     private:
 
-        T& val;
+        CT& val;
         ConjType c;
     };
 
@@ -1391,14 +1401,17 @@ namespace std {
     { return x.real(); }
     template <class T> inline TMV_RealType(T) imag(const tmv::VarConjRef<T>& x) 
     { return x.imag(); }
-    template <class T> inline void swap(tmv::VarConjRef<std::complex<T> > x1,
-              tmv::VarConjRef<std::complex<T> > x2)
+    template <class T> 
+    inline void swap(
+        tmv::VarConjRef<std::complex<T> > x1,
+        tmv::VarConjRef<std::complex<T> > x2)
     { return x1.swapWith(x2); }
-    template <class T> inline void swap(std::complex<T>& x1,
-              tmv::VarConjRef<std::complex<T> > x2)
+    template <class T> 
+    inline void swap(
+        std::complex<T>& x1, tmv::VarConjRef<std::complex<T> > x2)
     { return x2.swapWith(x1); }
-    template <class T> inline void swap(tmv::VarConjRef<std::complex<T> > x1,
-              std::complex<T>& x2)
+    template <class T> 
+    inline void swap(tmv::VarConjRef<std::complex<T> > x1, std::complex<T>& x2)
     { return x1.swapWith(x2); }
 }
 

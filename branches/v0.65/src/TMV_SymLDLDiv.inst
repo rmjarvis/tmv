@@ -1,34 +1,18 @@
 
 #define CT std::complex<T>
 
-#define DefDivEq(RT1,T1,T2)\
+#define DefDivEq(T,T1)\
   template void LDL_LDivEq(const GenSymMatrix<T1 >& L,  \
       const GenVector<T1 >& xD, const int* P, \
-      const MatrixView<T2 >& m); \
+      const MatrixView<T >& m); \
   template void LDL_RDivEq(const GenSymMatrix<T1 >& L,  \
       const GenVector<T1 >& xD, const int* P, \
-      const MatrixView<T2 >& m); \
+      const MatrixView<T >& m); \
 
-DefDivEq(T,T,T)
+DefDivEq(T,T)
 #ifdef INST_COMPLEX
-DefDivEq(T,T,CT)
-DefDivEq(T,CT,CT)
-#endif
-
-#undef DefDivEq
-
-#define DefDivEq(RT1,T1,T2)\
-  template <> void LDL_LDivEq(const GenSymMatrix<T1 >& ,  \
-      const GenVector<T1 >& , const int* , \
-      const MatrixView<T2 >& )\
-      { TMVAssert(TMV_FALSE); }\
-  template <> void LDL_RDivEq(const GenSymMatrix<T1 >& ,  \
-      const GenVector<T1 >& , const int* , \
-      const MatrixView<T2 >& )\
-      { TMVAssert(TMV_FALSE); }\
-
-#ifdef INST_COMPLEX
-DefDivEq(T,CT,T)
+DefDivEq(CT,T)
+DefDivEq(CT,CT)
 #endif
 
 #undef DefDivEq

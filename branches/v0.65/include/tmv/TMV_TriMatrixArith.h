@@ -105,9 +105,10 @@ namespace tmv {
     template <class T, class Tm> 
     class ProdXU : public UpperTriMatrixComposite<T> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline ProdXU(const T _x, const GenUpperTriMatrix<Tm>& _m) :
             x(_x), m(_m) {}
         inline size_t size() const { return m.size(); }
@@ -116,7 +117,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenUpperTriMatrix<Tm>& getM() const { return m; }
         inline void assignToU(
-            const UpperTriMatrixView<RT>& m0) const
+            const UpperTriMatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
@@ -124,7 +125,7 @@ namespace tmv {
             MultXM(x,m0=m);
         }
         inline void assignToU(
-            const UpperTriMatrixView<xCT>& m0) const
+            const UpperTriMatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit() || m0.dt() == dt());
@@ -222,9 +223,10 @@ namespace tmv {
     template <class T, class Tm> 
     class SumUX : public UpperTriMatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline SumUX(T _x1, const GenUpperTriMatrix<Tm>& _m, T _x2) :
             x1(_x1), m(_m), x2(_x2) {}
         inline size_t size() const { return m.size(); }
@@ -234,7 +236,7 @@ namespace tmv {
         inline const GenUpperTriMatrix<Tm>& getM() const { return m; }
         inline T getX2() const { return x2; }
         inline void assignToU(
-            const UpperTriMatrixView<RT>& m0) const
+            const UpperTriMatrixView<real_type>& m0) const
         { 
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
@@ -243,12 +245,12 @@ namespace tmv {
             m0.diag().addToAll(TMV_REAL(x2));
         }
         inline void assignToU(
-            const UpperTriMatrixView<xCT>& m0) const
+            const UpperTriMatrixView<complex_type>& m0) const
         { 
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit());
             MultXM(x1,m0=m);
-            m0.diag().addToAll(xCT(x2));
+            m0.diag().addToAll(complex_type(x2));
         }
     private:
         const T x1;
@@ -345,9 +347,10 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class SumUU : public UpperTriMatrixComposite<T> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline SumUU(T _x1, const GenUpperTriMatrix<T1>& _m1, 
                      T _x2, const GenUpperTriMatrix<T2>& _m2) :
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
@@ -359,14 +362,14 @@ namespace tmv {
         inline const GenUpperTriMatrix<T1>& getM1() const { return m1; }
         inline T getX2() const { return x2; }
         inline const GenUpperTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToU(const UpperTriMatrixView<RT>& m0) const
+        inline void assignToU(const UpperTriMatrixView<real_type>& m0) const
         { 
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit() || m0.dt() == dt());
             AddMM(x1,m1,x2,m2,m0);
         }
-        inline void assignToU(const UpperTriMatrixView<xCT>& m0) const
+        inline void assignToU(const UpperTriMatrixView<complex_type>& m0) const
         { 
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit() || m0.dt() == dt());
@@ -478,11 +481,13 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class ProdUU : public UpperTriMatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
-        inline ProdUU(T _x, const GenUpperTriMatrix<T1>& _m1,
-                      const GenUpperTriMatrix<T2>& _m2) :
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
+        inline ProdUU(
+            T _x, const GenUpperTriMatrix<T1>& _m1,
+            const GenUpperTriMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline size_t size() const { return m1.size(); }
@@ -492,14 +497,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenUpperTriMatrix<T1>& getM1() const { return m1; }
         inline const GenUpperTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToU(const UpperTriMatrixView<RT>& m0) const
+        inline void assignToU(const UpperTriMatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit() || m0.dt() == dt());
             MultMM<false>(x,m1,m2,m0);
         }
-        inline void assignToU(const UpperTriMatrixView<xCT>& m0) const
+        inline void assignToU(const UpperTriMatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit() || m0.dt() == dt());
@@ -592,9 +597,10 @@ namespace tmv {
     template <class T, class Tm> 
     class QuotXU : public UpperTriMatrixComposite<T> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline QuotXU(const T _x, const GenUpperTriMatrix<Tm>& _m) :
             x(_x), m(_m)  {}
         inline size_t size() const { return m.size(); }
@@ -603,7 +609,7 @@ namespace tmv {
         { return x==T(1) ? m.dt() : NonUnitDiag; }
         inline T getX() const { return x; }
         inline const GenUpperTriMatrix<Tm>& getM() const { return m; }
-        inline void assignToU(const UpperTriMatrixView<RT>& m0) const
+        inline void assignToU(const UpperTriMatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
@@ -611,7 +617,7 @@ namespace tmv {
             (m0 = m).Inverse(m0);
             MultXM(x,m0);
         }
-        inline void assignToU(const UpperTriMatrixView<xCT>& m0) const
+        inline void assignToU(const UpperTriMatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit() || m0.dt() == dt());
@@ -639,11 +645,13 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class QuotUU : public UpperTriMatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
-        inline QuotUU(const T _x, const GenUpperTriMatrix<T1>& _m1,
-                      const GenUpperTriMatrix<T2>& _m2) :
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
+        inline QuotUU(
+            const T _x, const GenUpperTriMatrix<T1>& _m1,
+            const GenUpperTriMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.size() == m2.size() ); }
         inline size_t size() const { return m1.size(); }
@@ -653,7 +661,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenUpperTriMatrix<T1>& getM1() const { return m1; }
         inline const GenUpperTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToU(const UpperTriMatrixView<RT>& m0) const
+        inline void assignToU(const UpperTriMatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
@@ -661,7 +669,7 @@ namespace tmv {
             m2.LDiv(m1,m0);
             MultXM(x,m0);
         }
-        inline void assignToU(const UpperTriMatrixView<xCT>& m0) const
+        inline void assignToU(const UpperTriMatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit() || (m0.dt() == dt() && x==T(1)));
@@ -677,11 +685,13 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class RQuotUU : public UpperTriMatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
-        inline RQuotUU(const T _x, const GenUpperTriMatrix<T1>& _m1,
-                       const GenUpperTriMatrix<T2>& _m2) :
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
+        inline RQuotUU(
+            const T _x, const GenUpperTriMatrix<T1>& _m1,
+            const GenUpperTriMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.size() == m2.size() ); }
         inline size_t size() const { return m1.size(); }
@@ -691,7 +701,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenUpperTriMatrix<T1>& getM1() const { return m1; }
         inline const GenUpperTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToU(const UpperTriMatrixView<RT>& m0) const
+        inline void assignToU(const UpperTriMatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
@@ -699,7 +709,7 @@ namespace tmv {
             m2.RDiv(m1,m0);
             MultXM(x,m0);
         }
-        inline void assignToU(const UpperTriMatrixView<xCT>& m0) const
+        inline void assignToU(const UpperTriMatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit() || (m0.dt() == dt() && x==T(1)));
@@ -876,9 +886,10 @@ namespace tmv {
     template <class T, class Tm> 
     class ProdXL : public LowerTriMatrixComposite<T> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline ProdXL(const T _x, const GenLowerTriMatrix<Tm>& _m) :
             x(_x), m(_m) {}
         inline size_t size() const { return m.size(); }
@@ -886,14 +897,14 @@ namespace tmv {
         inline DiagType dt() const { return NonUnitDiag; }
         inline T getX() const { return x; }
         inline const GenLowerTriMatrix<Tm>& getM() const { return m; }
-        inline void assignToL(const LowerTriMatrixView<RT>& m0) const
+        inline void assignToL(const LowerTriMatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit() || m0.dt() == dt());
             MultXM(x,m0=m);
         }
-        inline void assignToL(const LowerTriMatrixView<xCT>& m0) const
+        inline void assignToL(const LowerTriMatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit() || m0.dt() == dt());
@@ -992,9 +1003,10 @@ namespace tmv {
     template <class T, class Tm> 
     class SumLX : public LowerTriMatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline SumLX(T _x1, const GenLowerTriMatrix<Tm>& _m, T _x2) :
             x1(_x1), m(_m), x2(_x2) {}
         inline size_t size() const { return m.size(); }
@@ -1003,7 +1015,7 @@ namespace tmv {
         inline T getX1() const { return x1; }
         inline const GenLowerTriMatrix<Tm>& getM() const { return m; }
         inline T getX2() const { return x2; }
-        inline void assignToL(const LowerTriMatrixView<RT>& m0) const
+        inline void assignToL(const LowerTriMatrixView<real_type>& m0) const
         { 
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
@@ -1011,12 +1023,12 @@ namespace tmv {
             MultXM(x1,m0=m);
             m0.diag().addToAll(TMV_REAL(x2));
         }
-        inline void assignToL(const LowerTriMatrixView<xCT>& m0) const
+        inline void assignToL(const LowerTriMatrixView<complex_type>& m0) const
         { 
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit());
             MultXM(x1,m0=m);
-            m0.diag().addToAll(xCT(x2));
+            m0.diag().addToAll(complex_type(x2));
         }
     private:
         const T x1;
@@ -1114,11 +1126,13 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class SumLL : public LowerTriMatrixComposite<T> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
-        inline SumLL(T _x1, const GenLowerTriMatrix<T1>& _m1, 
-                     T _x2, const GenLowerTriMatrix<T2>& _m2) :
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
+        inline SumLL(
+            T _x1, const GenLowerTriMatrix<T1>& _m1, 
+            T _x2, const GenLowerTriMatrix<T2>& _m2) :
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline size_t size() const { return m2.size(); }
@@ -1128,14 +1142,14 @@ namespace tmv {
         inline const GenLowerTriMatrix<T1>& getM1() const { return m1; }
         inline T getX2() const { return x2; }
         inline const GenLowerTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToL(const LowerTriMatrixView<RT>& m0) const
+        inline void assignToL(const LowerTriMatrixView<real_type>& m0) const
         { 
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit() || m0.dt() == dt());
             AddMM(x1,m1,x2,m2,m0);
         }
-        inline void assignToL(const LowerTriMatrixView<xCT>& m0) const
+        inline void assignToL(const LowerTriMatrixView<complex_type>& m0) const
         { 
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit() || m0.dt() == dt());
@@ -1248,11 +1262,13 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class ProdLL : public LowerTriMatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
-        inline ProdLL(T _x, const GenLowerTriMatrix<T1>& _m1,
-                      const GenLowerTriMatrix<T2>& _m2) :
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
+        inline ProdLL(
+            T _x, const GenLowerTriMatrix<T1>& _m1,
+            const GenLowerTriMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m2.size() == m2.size()); }
         inline size_t size() const { return m1.size(); }
@@ -1262,14 +1278,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenLowerTriMatrix<T1>& getM1() const { return m1; }
         inline const GenLowerTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToL(const LowerTriMatrixView<RT>& m0) const
+        inline void assignToL(const LowerTriMatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit() || m0.dt() == dt());
             MultMM<false>(x,m1,m2,m0);
         }
-        inline void assignToL(const LowerTriMatrixView<xCT>& m0) const
+        inline void assignToL(const LowerTriMatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit() || m0.dt() == dt());
@@ -1361,9 +1377,10 @@ namespace tmv {
     template <class T, class Tm> 
     class QuotXL : public LowerTriMatrixComposite<T> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline QuotXL(const T _x, const GenLowerTriMatrix<Tm>& _m) :
             x(_x), m(_m)  {}
         inline size_t size() const { return m.size(); }
@@ -1371,7 +1388,7 @@ namespace tmv {
         inline DiagType dt() const { return x==T(1) ? m.dt() : NonUnitDiag; }
         inline T getX() const { return x; }
         inline const GenLowerTriMatrix<Tm>& getM() const { return m; }
-        inline void assignToL(const LowerTriMatrixView<RT>& m0) const
+        inline void assignToL(const LowerTriMatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
@@ -1379,7 +1396,7 @@ namespace tmv {
             (m0=m).Inverse(m0);
             MultXM(x,m0);
         }
-        inline void assignToL(const LowerTriMatrixView<xCT>& m0) const
+        inline void assignToL(const LowerTriMatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit() || m0.dt() == dt());
@@ -1407,11 +1424,13 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class QuotLL : public LowerTriMatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
-        inline QuotLL(const T _x, const GenLowerTriMatrix<T1>& _m1,
-                      const GenLowerTriMatrix<T2>& _m2) :
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
+        inline QuotLL(
+            const T _x, const GenLowerTriMatrix<T1>& _m1,
+            const GenLowerTriMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.size() == m2.size() ); }
         inline size_t size() const { return m1.size(); }
@@ -1421,7 +1440,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenLowerTriMatrix<T1>& getM1() const { return m1; }
         inline const GenLowerTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToL(const LowerTriMatrixView<RT>& m0) const
+        inline void assignToL(const LowerTriMatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
@@ -1429,7 +1448,7 @@ namespace tmv {
             m2.LDiv(m1,m0);
             MultXM(x,m0);
         }
-        inline void assignToL(const LowerTriMatrixView<xCT>& m0) const
+        inline void assignToL(const LowerTriMatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit() || (m0.dt() == dt() && x==T(1)));
@@ -1445,11 +1464,13 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class RQuotLL : public LowerTriMatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
-        inline RQuotLL(const T _x, const GenLowerTriMatrix<T1>& _m1,
-                       const GenLowerTriMatrix<T2>& _m2) :
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
+        inline RQuotLL(
+            const T _x, const GenLowerTriMatrix<T1>& _m1,
+            const GenLowerTriMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.size() == m2.size() ); }
         inline size_t size() const { return m1.size(); }
@@ -1459,7 +1480,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenLowerTriMatrix<T1>& getM1() const { return m1; }
         inline const GenLowerTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToL(const LowerTriMatrixView<RT>& m0) const
+        inline void assignToL(const LowerTriMatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
@@ -1467,7 +1488,7 @@ namespace tmv {
             m2.RDiv(m1,m0);
             MultXM(x,m0);
         }
-        inline void assignToL(const LowerTriMatrixView<xCT>& m0) const
+        inline void assignToL(const LowerTriMatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit() || (m0.dt() == dt() && x==T(1)));
@@ -1592,11 +1613,13 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class SumUL : public MatrixComposite<T> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
-        inline SumUL(T _x1, const GenUpperTriMatrix<T1>& _m1, 
-                     T _x2, const GenLowerTriMatrix<T2>& _m2) :
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
+        inline SumUL(
+            T _x1, const GenUpperTriMatrix<T1>& _m1, 
+            T _x2, const GenLowerTriMatrix<T2>& _m2) :
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         {  TMVAssert(m1.size() == m2.size()); }
         inline size_t colsize() const { return m1.size(); }
@@ -1606,14 +1629,14 @@ namespace tmv {
         inline const GenUpperTriMatrix<T1>& getM1() const { return m1; }
         inline T getX2() const { return x2; }
         inline const GenLowerTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         { 
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
             AddMM(x2,m2,x1,m1,m0);
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         { 
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -1642,11 +1665,13 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class ProdUL : public MatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
-        inline ProdUL(T _x, const GenUpperTriMatrix<T1>& _m1,
-                      const GenLowerTriMatrix<T2>& _m2) :
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
+        inline ProdUL(
+            T _x, const GenUpperTriMatrix<T1>& _m1,
+            const GenLowerTriMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.size() == m2.size()); }
         inline size_t colsize() const { return m1.size(); }
@@ -1655,14 +1680,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenUpperTriMatrix<T1>& getM1() const { return m1; }
         inline const GenLowerTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
             MultMM<false>(x,m1,m2,m0);
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -1747,11 +1772,13 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class ProdLU : public MatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
-        inline ProdLU(T _x, const GenLowerTriMatrix<T1>& _m1,
-                      const GenUpperTriMatrix<T2>& _m2) :
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
+        inline ProdLU(
+            T _x, const GenLowerTriMatrix<T1>& _m1,
+            const GenUpperTriMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.size() == m2.size()); }
         inline size_t colsize() const { return m1.size(); }
@@ -1760,14 +1787,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenLowerTriMatrix<T1>& getM1() const { return m1; }
         inline const GenUpperTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<RT>& m0) const
+        inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
             MultMM<false>(x,m1,m2,m0);
         }
-        inline void assignToM(const MatrixView<xCT>& m0) const
+        inline void assignToM(const MatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());

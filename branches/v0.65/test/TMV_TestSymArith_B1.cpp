@@ -3,7 +3,7 @@
 #include "TMV.h"
 #include "TMV_Sym.h"
 #include "TMV_Test.h"
-#include "TMV_Test2.h"
+#include "TMV_Test_2.h"
 #include "TMV_TestSymArith.h"
 
 #define NOADDEQ
@@ -18,9 +18,8 @@ void TestSymMatrixArith_B1()
 
     std::vector<tmv::SymMatrixView<T> > s;
     std::vector<tmv::SymMatrixView<std::complex<T> > > cs;
-    std::vector<tmv::BaseMatrix<T>*> B;
-    std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
-    MakeSymList(s,cs,B,CB,InDef);
+    MakeSymList(s,cs,InDef);
+
     const int N = s[0].size();
 
     tmv::Matrix<T> a1(N,N);
@@ -100,8 +99,6 @@ void TestSymMatrixArith_B1()
             TestMatrixArith7<T>(si,csi,vs,cvs,vs,cvs,"Sym");
 #endif
     }
-    for(size_t i=0;i<B.size();++i) delete B[i];
-    for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
 #ifdef TEST_DOUBLE

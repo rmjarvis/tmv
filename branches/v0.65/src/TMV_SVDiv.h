@@ -52,23 +52,27 @@ namespace tmv {
     };
 
     template <class T> 
-    void SV_Decompose(const MatrixView<T>& U, const DiagMatrixView<RT>& S, 
-                      MVP<T> V, RT& logdet, T& signdet, bool StoreU=false);
+    void SV_Decompose(
+        const MatrixView<T>& U, const DiagMatrixView<RT>& S, 
+        MVP<T> V, RT& logdet, T& signdet, bool StoreU=false);
 
     template <class T, class Tm, class Tx> 
-    void SV_LDiv(const GenMatrix<T>& U, const GenDiagMatrix<RT>& S,
-                 const GenMatrix<T>& V, int kmax,
-                 const GenMatrix<Tm>& m, const MatrixView<Tx>& x);
+    void SV_LDiv(
+        const GenMatrix<T>& U, const GenDiagMatrix<RT>& S,
+        const GenMatrix<T>& V, int kmax,
+        const GenMatrix<Tm>& m, const MatrixView<Tx>& x);
     template <class T, class Tm, class Tx> 
-    void SV_RDiv(const GenMatrix<T>& U, const GenDiagMatrix<RT>& S,
-                 const GenMatrix<T>& V, int kmax,
-                 const GenMatrix<Tm>& m, const MatrixView<Tx>& x);
+    void SV_RDiv(
+        const GenMatrix<T>& U, const GenDiagMatrix<RT>& S,
+        const GenMatrix<T>& V, int kmax,
+        const GenMatrix<Tm>& m, const MatrixView<Tx>& x);
 
 
     template <class T> 
-    void Bidiagonalize(const MatrixView<T>& A, const VectorView<T>& Ubeta,
-                       const VectorView<T>& Vbeta, const VectorView<RT>& D,
-                       const VectorView<RT>& E, T& signdet);
+    void Bidiagonalize(
+        const MatrixView<T>& A, const VectorView<T>& Ubeta,
+        const VectorView<T>& Vbeta, const VectorView<RT>& D,
+        const VectorView<RT>& E, T& signdet);
 
     template <class T> 
     void BidiagonalChopSmallElements(
@@ -111,6 +115,48 @@ namespace tmv {
         Vector<T>& S, const T rho, const GenVector<T>& D, const GenVector<T>& z);
 
 #undef RT
+
+    // Specialize disallowed complex combinations:
+#define CT std::complex<T>
+
+    template <class T>
+    inline void SV_LDiv(
+        const GenMatrix<CT>& U, const GenDiagMatrix<T>& S,
+        const GenMatrix<CT>& V, int kmax,
+        const GenMatrix<CT>& m, const MatrixView<T>& x)
+    { TMVAssert(TMV_FALSE); }
+    template <class T>
+    inline void SV_LDiv(
+        const GenMatrix<CT>& U, const GenDiagMatrix<T>& S,
+        const GenMatrix<CT>& V, int kmax,
+        const GenMatrix<T>& m, const MatrixView<T>& x)
+    { TMVAssert(TMV_FALSE); }
+    template <class T>
+    inline void SV_LDiv(
+        const GenMatrix<T>& U, const GenDiagMatrix<T>& S,
+        const GenMatrix<T>& V, int kmax,
+        const GenMatrix<CT>& m, const MatrixView<T>& x)
+    { TMVAssert(TMV_FALSE); }
+    template <class T>
+    inline void SV_RDiv(
+        const GenMatrix<CT>& U, const GenDiagMatrix<T>& S,
+        const GenMatrix<CT>& V, int kmax,
+        const GenMatrix<CT>& m, const MatrixView<T>& x)
+    { TMVAssert(TMV_FALSE); }
+    template <class T>
+    inline void SV_RDiv(
+        const GenMatrix<CT>& U, const GenDiagMatrix<T>& S,
+        const GenMatrix<CT>& V, int kmax,
+        const GenMatrix<T>& m, const MatrixView<T>& x)
+    { TMVAssert(TMV_FALSE); }
+    template <class T>
+    inline void SV_RDiv(
+        const GenMatrix<T>& U, const GenDiagMatrix<T>& S,
+        const GenMatrix<T>& V, int kmax,
+        const GenMatrix<CT>& m, const MatrixView<T>& x)
+    { TMVAssert(TMV_FALSE); }
+
+#undef CT
 
 } // namespace mv
 

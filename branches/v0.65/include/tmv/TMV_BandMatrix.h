@@ -4116,8 +4116,7 @@ namespace tmv {
     }
 
     template <class T> 
-    inline ConstBandMatrixView<T> BandMatrixViewOf(
-        const GenDiagMatrix<T>& m)
+    inline ConstBandMatrixView<T> BandMatrixViewOf(const GenDiagMatrix<T>& m)
     { 
         return ConstBandMatrixView<T>(
             m.diag().cptr(),m.size(),m.size(),0,0,
@@ -4136,8 +4135,7 @@ namespace tmv {
     }
 
     template <class T, IndexStyle I> 
-    inline ConstBandMatrixView<T,I> BandMatrixViewOf(
-        const DiagMatrix<T,I>& m)
+    inline ConstBandMatrixView<T,I> BandMatrixViewOf(const DiagMatrix<T,I>& m)
     {
         return ConstBandMatrixView<T,I>(
             m.diag().cptr(),m.size(),m.size(),0,0,
@@ -4146,8 +4144,7 @@ namespace tmv {
     }
 
     template <class T, IndexStyle I> 
-    inline BandMatrixView<T,I> BandMatrixViewOf(
-        const DiagMatrixView<T,I>& m)
+    inline BandMatrixView<T,I> BandMatrixViewOf(const DiagMatrixView<T,I>& m)
     {
         return BandMatrixView<T,I>(
             m.diag().ptr(),m.size(),m.size(),0,0,
@@ -4157,8 +4154,7 @@ namespace tmv {
     }
 
     template <class T, IndexStyle I> 
-    inline BandMatrixView<T,I> BandMatrixViewOf(
-        DiagMatrix<T,I>& m)
+    inline BandMatrixView<T,I> BandMatrixViewOf(DiagMatrix<T,I>& m)
     {
         return BandMatrixView<T,I>(
             m.diag().ptr(),m.size(),m.size(),0,0,

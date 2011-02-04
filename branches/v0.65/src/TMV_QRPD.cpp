@@ -32,7 +32,6 @@
 
 
 #include "tmv/TMV_QRPD.h"
-#include "TMV_QRPDiv.h"
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_TriMatrix.h"
 #include "tmv/TMV_TriMatrixArith.h"

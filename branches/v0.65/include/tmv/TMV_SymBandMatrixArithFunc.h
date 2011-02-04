@@ -167,48 +167,49 @@ namespace tmv {
 
 
     template <class T> 
-    class SymBandMatrixComposite<std::complex<T> > :
-        public BandMatrixComposite<std::complex<T> >,
-        virtual public AssignableToSymBandMatrix<std::complex<T> >
+    class SymBandMatrixComposite<CT> :
+        public BandMatrixComposite<CT>,
+        virtual public AssignableToSymBandMatrix<CT>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public :
         // Need to respecify that size() is pure virtual here, 
         // since GenBandMatrix defines size for compaibility
         // with AssignableToDiagMatrix, etc.
         virtual size_t size() const = 0;
 
+        using AssignableToSymMatrix<CT>::sym;
+        using AssignableToBandMatrix<CT>::nlo;
+        inline int nhi() const { return nlo(); }
         inline size_t colsize() const { return size(); }
         inline size_t rowsize() const { return size(); }
-        inline int nhi() const { return this->nlo(); }
-        inline void assignToS(const SymMatrixView<RT>& m0) const
+
+        inline void assignToS(const SymMatrixView<T>& m0) const
         {
             TMVAssert(m0.size() == size());
-            TMVAssert(m0.sym() == this->sym());
-            this->assignTosB(SymBandMatrixViewOf(m0,this->nlo()));
-            if (int(m0.size()) > this->nlo()+1)
+            TMVAssert(m0.sym() == sym());
+            this->assignTosB(SymBandMatrixViewOf(m0,nlo()));
+            if (int(m0.size()) > nlo()+1)
                 BandMatrixViewOf(m0.upperTri()).diagRange(
-                    this->nlo()+1,m0.size()).setZero();
+                    nlo()+1,m0.size()).setZero();
         }
         inline void assignToS(const SymMatrixView<CT>& m0) const
         {
             TMVAssert(m0.size() == size());
-            TMVAssert(m0.sym() == this->sym());
-            this->assignTosB(SymBandMatrixViewOf(m0,this->nlo()));
-            if (int(m0.size()) > this->nlo()+1)
+            TMVAssert(m0.sym() == sym());
+            this->assignTosB(SymBandMatrixViewOf(m0,nlo()));
+            if (int(m0.size()) > nlo()+1)
                 BandMatrixViewOf(m0.upperTri()).diagRange(
-                    this->nlo()+1,m0.size()).setZero();
+                    nlo()+1,m0.size()).setZero();
         }
 
-        inline void assignToM(const MatrixView<TMV_RealType(T)>& m0) const
-        { BandMatrixComposite<std::complex<T> >::assignToM(m0); }
-        inline void assignToM(const MatrixView<TMV_ComplexType(T)>& m0) const
-        { BandMatrixComposite<std::complex<T> >::assignToM(m0); }
-        inline void assignToB(const BandMatrixView<TMV_RealType(T)>& m0) const
-        { BandMatrixComposite<std::complex<T> >::assignToB(m0); }
-        inline void assignToB(const BandMatrixView<TMV_ComplexType(T)>& m0) const
-        { BandMatrixComposite<std::complex<T> >::assignToB(m0); }
+        inline void assignToM(const MatrixView<T>& m0) const
+        { BandMatrixComposite<CT>::assignToM(m0); }
+        inline void assignToM(const MatrixView<CT>& m0) const
+        { BandMatrixComposite<CT>::assignToM(m0); }
+        inline void assignToB(const BandMatrixView<T>& m0) const
+        { BandMatrixComposite<CT>::assignToB(m0); }
+        inline void assignToB(const BandMatrixView<CT>& m0) const
+        { BandMatrixComposite<CT>::assignToB(m0); }
     };
 
     // Specialize allowed complex combinations:

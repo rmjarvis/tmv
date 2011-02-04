@@ -59,6 +59,39 @@ namespace tmv {
         const GenVector<T1>& D, const GenVector<T1>& xD, 
         const MatrixView<T>& m);
 
+
+    // Specialize disallowed complex combinations:
+#define CT std::complex<T>
+
+    template <class T>
+    inline void LDL_LDivEq(
+        const GenSymMatrix<CT>& L, const GenVector<CT>& xD,
+        const int* P, const MatrixView<T>& m)
+    { TMVAssert(TMV_FALSE); }
+    template <class T>
+    inline void LDL_RDivEq(
+        const GenSymMatrix<CT>& L, const GenVector<CT>& xD,
+        const int* P, const MatrixView<T>& m)
+    { TMVAssert(TMV_FALSE); }
+    template <class T>
+    inline void LDL_Inverse(
+        const GenSymMatrix<CT>& L, const GenVector<CT>& xD,
+        const int* P, const SymMatrixView<T>& sinv)
+    { TMVAssert(TMV_FALSE); }
+
+    template <bool herm, class T>
+    inline void PseudoDiag_LDivEq(
+        const GenVector<CT>& D, const GenVector<CT>& xD, 
+        const MatrixView<T>& m)
+    { TMVAssert(TMV_FALSE); }
+    template <bool herm, class T>
+    inline void PseudoDiag_LMultEq(
+        const GenVector<CT>& D, const GenVector<CT>& xD, 
+        const MatrixView<T>& m)
+    { TMVAssert(TMV_FALSE); }
+
+#undef CT
+
 }
 
 #endif

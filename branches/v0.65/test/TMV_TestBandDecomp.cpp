@@ -4,7 +4,7 @@
 #include "TMV.h"
 #include "TMV_Band.h"
 #include "TMV_Test.h"
-#include "TMV_Test2.h"
+#include "TMV_Test_2.h"
 #include "TMV_TestBandArith.h"
 
 template <class T, tmv::StorageType stor> 

@@ -78,20 +78,21 @@ namespace tmv {
     template <class T, class T2> 
     class ProdXD : public DiagMatrixComposite<T> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline ProdXD(T _x, const GenDiagMatrix<T2>& _m) : x(_x), m(_m) {}
         inline size_t size() const { return m.size(); }
         inline T getX() const { return x; }
         inline const GenDiagMatrix<T2>& getM() const { return m; }
-        inline void assignToD(const DiagMatrixView<RT>& m0) const
+        inline void assignToD(const DiagMatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             MultXV(x,m.diag(),m0.diag());
         }
-        inline void assignToD(const DiagMatrixView<xCT>& m0) const
+        inline void assignToD(const DiagMatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.size() == size());
             MultXV(x,m.diag(),m0.diag());
@@ -155,27 +156,28 @@ namespace tmv {
     template <class T, class T2> 
     class SumDX : public DiagMatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline SumDX(T _x1, const GenDiagMatrix<T2>& _m, T _x2) :
             x1(_x1), m(_m), x2(_x2) {}
         inline size_t size() const { return m.size(); }
         inline T getX1() const { return x1; }
         inline const GenDiagMatrix<T2>& getM() const { return m; }
         inline T getX2() const { return x2; }
-        inline void assignToD(const DiagMatrixView<RT>& m0) const
+        inline void assignToD(const DiagMatrixView<real_type>& m0) const
         { 
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             MultXV(x1,m.diag(),m0.diag());
             m0.diag().addToAll(TMV_REAL(x2));
         }
-        inline void assignToD(const DiagMatrixView<xCT>& m0) const
+        inline void assignToD(const DiagMatrixView<complex_type>& m0) const
         { 
             TMVAssert(m0.size() == size());
             MultXV(x1,m.diag(),m0.diag());
-            m0.diag().addToAll(xCT(x2));
+            m0.diag().addToAll(complex_type(x2));
         }
     private:
         const T x1;
@@ -239,9 +241,10 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class SumDD : public DiagMatrixComposite<T> 
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline SumDD(
             T _x1, const GenDiagMatrix<T1>& _m1, 
             T _x2, const GenDiagMatrix<T2>& _m2
@@ -252,13 +255,13 @@ namespace tmv {
         inline const GenDiagMatrix<T1>& getM1() const { return m1; }
         inline T getX2() const { return x2; }
         inline const GenDiagMatrix<T2>& getM2() const { return m2; }
-        inline void assignToD(const DiagMatrixView<RT>& m0) const
+        inline void assignToD(const DiagMatrixView<real_type>& m0) const
         { 
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             AddVV(x1,m1.diag(),x2,m2.diag(),m0.diag());
         }
-        inline void assignToD(const DiagMatrixView<xCT>& m0) const
+        inline void assignToD(const DiagMatrixView<complex_type>& m0) const
         { 
             TMVAssert(m0.size() == size());
             AddVV(x1,m1.diag(),x2,m2.diag(),m0.diag());
@@ -362,9 +365,10 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class ProdDD : public DiagMatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline ProdDD(
             T _x, const GenDiagMatrix<T1>& _m1,
             const GenDiagMatrix<T2>& _m2
@@ -374,13 +378,13 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenDiagMatrix<T1>& getM1() const { return m1; }
         inline const GenDiagMatrix<T2>& getM2() const { return m2; }
-        inline void assignToD(const DiagMatrixView<RT>& m0) const
+        inline void assignToD(const DiagMatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             MultMM<false>(x,m1,m2,m0);
         }
-        inline void assignToD(const DiagMatrixView<xCT>& m0) const
+        inline void assignToD(const DiagMatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.size() == size());
             MultMM<false>(x,m1,m2,m0);
@@ -487,22 +491,23 @@ namespace tmv {
     template <class T, class Tm> 
     class QuotXD : public DiagMatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline QuotXD(T _x, const GenDiagMatrix<Tm>& _m) :
             x(_x), m(_m) {}
         inline size_t size() const { return m.size(); }
         inline T getX() const { return x; }
         inline const GenDiagMatrix<Tm>& getM() const { return m; }
-        inline void assignToD(const DiagMatrixView<RT>& m0) const
+        inline void assignToD(const DiagMatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             (m0=m).Inverse(m0);
             if (x != T(1)) MultXV(x,m0.diag());
         }
-        inline void assignToD(const DiagMatrixView<xCT>& m0) const
+        inline void assignToD(const DiagMatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.size() == size());
             (m0=m).Inverse(m0);
@@ -529,9 +534,10 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class QuotDD : public DiagMatrixComposite<T>
     {
-        typedef TMV_RealType(T) RT;
-        typedef TMV_ComplexType(T) xCT;
     public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
         inline QuotDD(
             const T _x, const GenDiagMatrix<T1>& _m1,
             const GenDiagMatrix<T2>& _m2
@@ -541,14 +547,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenDiagMatrix<T1>& getM1() const { return m1; }
         inline const GenDiagMatrix<T2>& getM2() const { return m2; }
-        inline void assignToD(const DiagMatrixView<RT>& m0) const
+        inline void assignToD(const DiagMatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             m2.div(m1,m0);
             if (x != T(1)) MultXV(x,m0.diag());
         }
-        inline void assignToD(const DiagMatrixView<xCT>& m0) const
+        inline void assignToD(const DiagMatrixView<complex_type>& m0) const
         {
             TMVAssert(m0.size() == size());
             m2.div(m1,m0);

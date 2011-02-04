@@ -5,7 +5,7 @@
 #include "TMV.h"
 #include "TMV_Sym.h"
 #include "TMV_Test.h"
-#include "TMV_Test2.h"
+#include "TMV_Test_2.h"
 #include "TMV_TestSymArith.h"
 
 template <class T> 
@@ -33,10 +33,8 @@ void TestSymMatrixArith_A()
 {
     std::vector<tmv::SymMatrixView<T> > s;
     std::vector<tmv::SymMatrixView<std::complex<T> > > cs;
-    std::vector<tmv::BaseMatrix<T>*> B;
-    std::vector<tmv::BaseMatrix<std::complex<T> >*> CB;
-    MakeSymList(s,cs,B,CB,InDef);
-
+    MakeSymList(s,cs,InDef);
+ 
     for(size_t i=START1;i<s.size();i++) {
         if (showstartdone) {
             std::cout<<"Start loop i = "<<i<<std::endl;
@@ -59,8 +57,6 @@ void TestSymMatrixArith_A()
             TestMatrixArith6x<T>(si,csi,s[j],cs[j],"Sym/Sym");
         }
     }
-    for(size_t i=0;i<B.size();++i) delete B[i];
-    for(size_t i=0;i<CB.size();++i) delete CB[i];
 }
 
 #ifdef TEST_DOUBLE

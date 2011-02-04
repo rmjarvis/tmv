@@ -2,26 +2,14 @@
 #define CT std::complex<T>
 
 #define DefInv(T,T1) \
-template void LDL_Inverse(const GenSymMatrix<T >& L, \
-  const GenVector<T >& xD, const int* P,  \
-  const SymMatrixView<T1 >& sinv); \
+template void LDL_Inverse(const GenSymMatrix<T1 >& L, \
+  const GenVector<T1 >& xD, const int* P,  \
+  const SymMatrixView<T >& sinv); \
 
 DefInv(T,T)
 #ifdef INST_COMPLEX
-DefInv(T,CT)
-DefInv(CT,CT)
-#endif
-
-#undef DefInv
-
-#define DefInv(T,T1) \
-template <> void LDL_Inverse(const GenSymMatrix<T >& , \
-  const GenVector<T >& , const int* ,  \
-  const SymMatrixView<T1 >& )\
-  { TMVAssert(TMV_FALSE); }\
-
-#ifdef INST_COMPLEX
 DefInv(CT,T)
+DefInv(CT,CT)
 #endif
 
 #undef DefInv

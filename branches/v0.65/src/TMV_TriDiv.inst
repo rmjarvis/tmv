@@ -1,19 +1,19 @@
 
 #define CT std::complex<T>
 
-#define Def1(RT,T) \
+#define Def1(T) \
   template QuotXU<T,T > GenUpperTriMatrix<T >::QInverse() const; \
   template QuotXL<T,T > GenLowerTriMatrix<T >::QInverse() const; \
 
-Def1(T,T)
+Def1(T)
 #ifdef INST_COMPLEX
-Def1(T,CT)
+Def1(CT)
 #endif
 
 #undef Def1
 
 #ifndef TISINT
-#define Def1b(RT,T) \
+#define Def1b(T) \
   template T GenUpperTriMatrix<T >::det() const; \
   template T GenLowerTriMatrix<T >::det() const; \
   template const UpperTriMatrixView<T,CStyle>& \
@@ -23,9 +23,9 @@ Def1(T,CT)
   template void GenLowerTriMatrix<T >::doMakeInverseATA( \
       const MatrixView<T >& ) const; \
 
-Def1b(T,T)
+Def1b(T)
 #ifdef INST_COMPLEX
-Def1b(T,CT)
+Def1b(CT)
 #endif
 
 #undef Def1b

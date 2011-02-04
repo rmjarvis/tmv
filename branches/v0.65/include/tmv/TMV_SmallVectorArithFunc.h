@@ -50,7 +50,6 @@ namespace tmv {
     struct OKTypeHelper2<CT,T,T> { enum { ok=false }; };
     template <class T>
     struct OKTypeHelper2<CT,CT,T> { enum { ok=false }; };
-#undef CT
 
 #define OKTypes(T1,T2) (OKTypeHelper<T1,T2>::ok)
 #define OKTypes2(T1,T2,T3) (OKTypeHelper2<T1,T2,T3>::ok)
@@ -190,7 +189,6 @@ namespace tmv {
         else
             for(int i=0;i<N;++i) v3.ref(i) += alpha * v1.cref(i) * v2.cref(i);
     }
-#define CT std::complex<T>
     template <class T, class T1, int N, IndexStyle I1, IndexStyle I2> 
     inline void elementProd(
         const CT , const SmallVector<T1,N,I1>& , const SmallVector<T,N,I2>& )
