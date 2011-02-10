@@ -176,7 +176,7 @@ namespace tmv {
     inline bool HouseholderUnReflect(
         ConjRef<T> x0, const VectorView<T>& x, T& beta)
     {
-        TMVAssert(TMV_IMAG(x0.getRef()) == RT(0));
+        TMVAssert(TMV_IMAG(x0.getRef()) == TMV_RealType(T)(0));
         return HouseholderUnReflect(x0.getRef(),x,beta);
     }
 
@@ -184,7 +184,7 @@ namespace tmv {
     inline bool HouseholderUnReflect(
         VarConjRef<T> x0, const VectorView<T>& x, T& beta)
     {
-        TMVAssert(TMV_IMAG(x0.getRef()) == RT(0));
+        TMVAssert(TMV_IMAG(x0.getRef()) == TMV_RealType(T)(0));
         return HouseholderUnReflect(x0.getRef(),x,beta);
     }
 #endif

@@ -485,7 +485,7 @@ namespace tmv {
     std::cerr<<"Failed Assert: "<<#x<<" on line "<<__LINE__<<" in file "<<__FILE__<<std::endl; exit(1); } } while (false)
 #else
 #define TMVAssert(x) do { if(!(x)) { \
-    throw FailedAssert(#x,__LINE__,__FILE__); } } while(false)
+    throw tmv::FailedAssert(#x,__LINE__,__FILE__); } } while(false)
 #endif
 #endif
 #ifdef NOTHROW
@@ -493,7 +493,7 @@ namespace tmv {
     std::cerr<<"Failed Assert: "<<#x<<" on line "<<__LINE__<<" in file "<<__FILE__<<std::endl; exit(1); } } while (false)
 #else
 #define TMVAssert2(x) do { if(!(x)) { \
-    throw FailedAssert(#x,__LINE__,__FILE__); } } while(false)
+    throw tmv::FailedAssert(#x,__LINE__,__FILE__); } } while(false)
 #endif
 
 #ifdef __GNUC__

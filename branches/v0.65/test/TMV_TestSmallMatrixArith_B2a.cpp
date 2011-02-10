@@ -48,7 +48,7 @@ static void DoTestSmallMatrixArith_B2a()
     tmv::SmallVector<std::complex<T>,7> cv2 = ca3.col(0);
 
     if (showstartdone) {
-        std::cout<<"B2a\n";
+        std::cout<<"B2a"<<std::endl;
     }
     TestMatrixArith2a<T>(a3,ca3,v1,cv1,v2,cv2,"NonSquare");
     TestMatrixArith2a<T>(a5,ca5,v2,cv2,v1,cv1,"NonSquare");

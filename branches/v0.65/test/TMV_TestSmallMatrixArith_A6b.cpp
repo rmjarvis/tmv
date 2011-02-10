@@ -36,7 +36,7 @@ static void DoTestSmallMatrixArith_A6b()
     tmv::SmallMatrix<std::complex<T>,N,N,tmv::RowMajor> ca1b = ca1;
 
     if (showstartdone) {
-        std::cout<<"A6b\n";
+        std::cout<<"A6b"<<std::endl;
     }
     TestMatrixArith6<T>(a2,ca2,a1,ca1,a1b,ca1b,"Square");
 #if (XTEST & 2)

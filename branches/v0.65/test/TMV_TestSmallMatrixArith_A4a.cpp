@@ -33,7 +33,7 @@ static void DoTestSmallMatrixArith_A4a()
     ca2 *= std::complex<T>(1,-2);
 
     if (showstartdone) {
-        std::cout<<"A4a\n";
+        std::cout<<"A4a"<<std::endl;
     }
     TestMatrixArith4<T>(a1,ca1,a2,ca2,"Square");
 

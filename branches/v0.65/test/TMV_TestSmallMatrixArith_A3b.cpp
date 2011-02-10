@@ -38,7 +38,7 @@ static void DoTestSmallMatrixArith_A3b()
     tmv::SmallVector<std::complex<T>,N> cv2 = ca1.col(0);
 
     if (showstartdone) {
-        std::cout<<"A3\n";
+        std::cout<<"A3b"<<std::endl;
     }
     TestMatrixArith3a<T>(a2,ca2,v1,cv1,v2,cv2,"Square");
     TestMatrixArith3b<T>(a2,ca2,v1,cv1,v2,cv2,"Square");

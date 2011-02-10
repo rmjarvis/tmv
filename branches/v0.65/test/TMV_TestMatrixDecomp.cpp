@@ -133,7 +133,7 @@ void TestMatrixDecomp()
         // LU Decomposition
         if (m.isSquare()) do {
             if (showstartdone) {
-                std::cout<<"LU\n";
+                std::cout<<"LU"<<std::endl;
             }
             tmv::LowerTriMatrix<T,tmv::UnitDiag> L = m.lud().getL();
             tmv::UpperTriMatrix<T> U = m.lud().getU();
@@ -193,7 +193,7 @@ void TestMatrixDecomp()
             // QR Decomposition always works.  It just can't be used for
             // solving equations if the matrix is singular.
             if (showstartdone) {
-                std::cout<<"QR\n";
+                std::cout<<"QR"<<std::endl;
             }
             tmv::Matrix<T,stor> Q = m.qrd().getQ();
             tmv::UpperTriMatrix<T> R = m.qrd().getR();
@@ -304,7 +304,7 @@ void TestMatrixDecomp()
         // QRP Decomposition
         for (int istrict = 0; istrict <= 1; istrict++) {
             if (showstartdone) {
-                std::cout<<"QRP\n";
+                std::cout<<"QRP"<<std::endl;
             }
             bool strict = istrict == 1;
             tmv::QRPDiv<T>::StrictQRP = strict;
@@ -433,7 +433,7 @@ void TestMatrixDecomp()
         // SV Decomposition
         do {
             if (showstartdone) {
-                std::cout<<"SV\n";
+                std::cout<<"SV"<<std::endl;
             }
             tmv::Matrix<T> U = m.svd().getU();
             tmv::DiagMatrix<T> S = m.svd().getS();

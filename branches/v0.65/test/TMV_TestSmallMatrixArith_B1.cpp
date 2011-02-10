@@ -44,7 +44,7 @@ static void DoTestSmallMatrixArith_B1()
     ca5.row(0).addToAll(std::complex<T>(1,9));
 
     if (showstartdone) {
-        std::cout<<"B1\n";
+        std::cout<<"B1"<<std::endl;
     }
     TestMatrixArith1<T>(a3,ca3,"NonSquare");
     TestMatrixArith1<T>(a5,ca5,"NonSquare");

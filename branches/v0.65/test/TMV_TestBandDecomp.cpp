@@ -141,7 +141,7 @@ void TestBandDecomp()
         // LU Decomposition
         if (m.isSquare()) do {
             if (showstartdone) {
-                std::cout<<"LU\n";
+                std::cout<<"LU"<<std::endl;
             }
             tmv::LowerTriMatrix<T,tmv::UnitDiag> L = m.lud().getL();
             tmv::UpperTriMatrix<T> U = m.lud().getU();
@@ -207,7 +207,7 @@ void TestBandDecomp()
         // QR Decomposition
         do {
             if (showstartdone) {
-                std::cout<<"QR\n";
+                std::cout<<"QR"<<std::endl;
             }
             tmv::Matrix<T> Q = m.qrd().getQ();
             tmv::BandMatrix<T> R = m.qrd().getR();
@@ -305,7 +305,7 @@ void TestBandDecomp()
         // SV Decomposition
         do {
             if (showstartdone) {
-                std::cout<<"SV\n";
+                std::cout<<"SV"<<std::endl;
             }
             tmv::Matrix<T> U = m.svd().getU();
             tmv::DiagMatrix<T> S = m.svd().getS();
