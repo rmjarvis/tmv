@@ -121,39 +121,39 @@ namespace tmv {
 
     template <class T>
     inline void SV_LDiv(
-        const GenMatrix<CT>& U, const GenDiagMatrix<T>& S,
-        const GenMatrix<CT>& V, int kmax,
-        const GenMatrix<CT>& m, const MatrixView<T>& x)
+        const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
+        const GenMatrix<CT>& , int ,
+        const GenMatrix<CT>& , const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void SV_LDiv(
-        const GenMatrix<CT>& U, const GenDiagMatrix<T>& S,
-        const GenMatrix<CT>& V, int kmax,
-        const GenMatrix<T>& m, const MatrixView<T>& x)
+        const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
+        const GenMatrix<CT>& , int ,
+        const GenMatrix<T>& , const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void SV_LDiv(
-        const GenMatrix<T>& U, const GenDiagMatrix<T>& S,
-        const GenMatrix<T>& V, int kmax,
-        const GenMatrix<CT>& m, const MatrixView<T>& x)
+        const GenMatrix<T>& , const GenDiagMatrix<T>& ,
+        const GenMatrix<T>& , int ,
+        const GenMatrix<CT>& , const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void SV_RDiv(
-        const GenMatrix<CT>& U, const GenDiagMatrix<T>& S,
-        const GenMatrix<CT>& V, int kmax,
-        const GenMatrix<CT>& m, const MatrixView<T>& x)
+        const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
+        const GenMatrix<CT>& , int ,
+        const GenMatrix<CT>& , const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void SV_RDiv(
-        const GenMatrix<CT>& U, const GenDiagMatrix<T>& S,
-        const GenMatrix<CT>& V, int kmax,
-        const GenMatrix<T>& m, const MatrixView<T>& x)
+        const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
+        const GenMatrix<CT>& , int ,
+        const GenMatrix<T>& , const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void SV_RDiv(
-        const GenMatrix<T>& U, const GenDiagMatrix<T>& S,
-        const GenMatrix<T>& V, int kmax,
-        const GenMatrix<CT>& m, const MatrixView<T>& x)
+        const GenMatrix<T>& , const GenDiagMatrix<T>& ,
+        const GenMatrix<T>& , int ,
+        const GenMatrix<CT>& , const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
 
 #undef CT

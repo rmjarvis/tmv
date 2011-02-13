@@ -141,27 +141,27 @@ namespace tmv {
 #define CT std::complex<T>
 
     template <class T>
-    inline void CH_LDivEq(const GenSymBandMatrix<CT>& L, const MatrixView<T>& m)
+    inline void CH_LDivEq(const GenSymBandMatrix<CT>& , const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
     template <class T>
-    inline void CH_RDivEq(const GenSymBandMatrix<CT>& L, const MatrixView<T>& m)
+    inline void CH_RDivEq(const GenSymBandMatrix<CT>& , const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void CH_Inverse(
-        const GenSymBandMatrix<CT>& LLx, const SymMatrixView<T>& sinv)
+        const GenSymBandMatrix<CT>& , const SymMatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
 
     template <class T>
     inline void LDL_LDivEq(
-        const GenSymBandMatrix<CT>& L, const MatrixView<T>& m)
+        const GenSymBandMatrix<CT>& , const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void LDL_RDivEq(
-        const GenSymBandMatrix<CT>& L, const MatrixView<T>& m)
+        const GenSymBandMatrix<CT>& , const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void LDL_Inverse(
-        const GenSymBandMatrix<CT>& LLx, const SymMatrixView<T>& sinv)
+        const GenSymBandMatrix<CT>& , const SymMatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
 
 #undef CT

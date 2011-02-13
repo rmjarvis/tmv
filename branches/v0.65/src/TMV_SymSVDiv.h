@@ -99,14 +99,14 @@ namespace tmv {
 #define CT std::complex<T>
 
     template <class T>
-    void HermSV_Inverse(
-        const GenMatrix<CT>& U, const GenDiagMatrix<T>& S, int kmax,
-        const SymMatrixView<T>& sinv)
+    inline void HermSV_Inverse(
+        const GenMatrix<CT>& , const GenDiagMatrix<T>& , int ,
+        const SymMatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
     template <class T>
-    void SymSV_Inverse(
-        const GenMatrix<CT>& U, const GenDiagMatrix<T>& S,
-        const GenMatrix<CT>& V, int kmax, const SymMatrixView<T>& sinv)
+    inline void SymSV_Inverse(
+        const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
+        const GenMatrix<CT>& , int , const SymMatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
 
 #undef CT

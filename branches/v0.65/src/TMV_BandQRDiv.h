@@ -81,61 +81,61 @@ namespace tmv {
 
     template <class T>
     inline void QR_LDivEq(
-        const GenBandMatrix<CT>& QRx, const GenVector<CT>& Qbeta,
-        const MatrixView<T>& m)
+        const GenBandMatrix<CT>& , const GenVector<CT>& ,
+        const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void QR_RDivEq(
-        const GenBandMatrix<CT>& QRx, const GenVector<CT>& Qbeta,
-        const MatrixView<T>& m)
+        const GenBandMatrix<CT>& , const GenVector<CT>& ,
+        const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
 
     template <class T>
     inline void QR_LDiv(
-        const GenBandMatrix<CT>& QR, const GenVector<CT>& Qbeta,
-        const GenMatrix<CT>& m, const MatrixView<T>& x)
+        const GenBandMatrix<CT>& , const GenVector<CT>& ,
+        const GenMatrix<CT>& , const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void QR_LDiv(
-        const GenBandMatrix<CT>& QR, const GenVector<CT>& Qbeta,
-        const GenMatrix<T>& m, const MatrixView<T>& x)
+        const GenBandMatrix<CT>& , const GenVector<CT>& ,
+        const GenMatrix<T>& , const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void QR_LDiv(
-        const GenBandMatrix<T>& QR, const GenVector<T>& Qbeta,
-        const GenMatrix<CT>& m, const MatrixView<T>& x)
+        const GenBandMatrix<T>& , const GenVector<T>& ,
+        const GenMatrix<CT>& , const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void QR_RDiv(
-        const GenBandMatrix<CT>& QR, const GenVector<CT>& Qbeta,
-        const GenMatrix<CT>& m, const MatrixView<T>& x)
+        const GenBandMatrix<CT>& , const GenVector<CT>& ,
+        const GenMatrix<CT>& , const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void QR_RDiv(
-        const GenBandMatrix<CT>& QR, const GenVector<CT>& Qbeta,
-        const GenMatrix<T>& m, const MatrixView<T>& x)
+        const GenBandMatrix<CT>& , const GenVector<CT>& ,
+        const GenMatrix<T>& , const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void QR_RDiv(
-        const GenBandMatrix<T>& QR, const GenVector<T>& Qbeta,
-        const GenMatrix<CT>& m, const MatrixView<T>& x)
+        const GenBandMatrix<T>& , const GenVector<T>& ,
+        const GenMatrix<CT>& , const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
 
     template <class T>
     inline void Q_LDivEq(
-        const GenBandMatrix<CT>& Q, const GenVector<CT>& Qbeta,
-        const MatrixView<T>& m)
+        const GenBandMatrix<CT>& , const GenVector<CT>& ,
+        const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void Q_RDivEq(
-        const GenBandMatrix<CT>& Q, const GenVector<CT>& Qbeta,
-        const MatrixView<T>& m)
+        const GenBandMatrix<CT>& , const GenVector<CT>& ,
+        const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
 
     template <class T>
     inline void QR_Inverse(
-        const GenBandMatrix<CT>& QRx, const GenVector<CT>& Qbeta,
-        const MatrixView<T>& m)
+        const GenBandMatrix<CT>& , const GenVector<CT>& ,
+        const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
 
 #undef CT
