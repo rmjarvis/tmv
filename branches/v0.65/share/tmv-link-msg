@@ -32,6 +32,9 @@ echo
 echo "TMVLINK := \$(shell cat $INSTALLED_FILENAME)"
 echo "LIBS = \$(TMVLINK) [... other libs ...]"
 echo
+echo "In a SConstruct file, you can do something like the following: "
+echo
+echo "env.MergeFlags(open('$INSTALLED_FILENAME').read())"
 echo
 
 

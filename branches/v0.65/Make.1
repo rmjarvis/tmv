@@ -158,10 +158,10 @@ division: $(EXDIR)/division
 
 
 testclean:
-	- $(RM) $(TESTDIR)/*.o $(TESTDIR)/.*.P $(TESTDIR)/tmv* tmv*.dat
+	- $(RM) $(TESTDIR)/*.o $(TESTDIR)/*.os $(TESTDIR)/.*.P $(TESTDIR)/tmv* tmv*.dat
  
 clean:
-	- $(RM) $(SRCDIR)/*.o $(SRCDIR)/.*.P $(EXDIR)/*.o $(EXDIR)/.*.P 
+	- $(RM) $(SRCDIR)/*.o $(SRCDIR)/*.os $(SRCDIR)/.*.P $(EXDIR)/*.o $(EXDIR)/.*.P 
 
 $(LIBDIR)/$(LIBFILE): $(LIB_O)
 	$(AR) $(ARFLAGS) $@ $?

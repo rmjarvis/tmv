@@ -92,10 +92,10 @@ namespace tmv {
         TMVAssert(m.colsize() == rowsize());
         TMVAssert(m.colsize() == colsize());
         if (pimpl->istrans) 
-            SV_RDiv(
-                pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,
+            CallSV_RDiv(
+                T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,
                 m.transpose(),m.transpose());
-        else SV_LDiv(pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,m);
+        else CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,m);
     }
 
     template <class T> template <class T1> 
@@ -104,10 +104,10 @@ namespace tmv {
         TMVAssert(m.rowsize() == rowsize());
         TMVAssert(m.rowsize() == colsize());
         if (pimpl->istrans) 
-            SV_LDiv(
-                pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,
+            CallSV_LDiv(
+                T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,
                 m.transpose(),m.transpose());
-        else SV_RDiv(pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,m);
+        else CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,m);
     }
 
     template <class T> template <class T1, class T2> 
@@ -118,10 +118,10 @@ namespace tmv {
         TMVAssert(m.colsize() == colsize());
         TMVAssert(x.colsize() == rowsize());
         if (pimpl->istrans) 
-            SV_RDiv(
-                pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,
+            CallSV_RDiv(
+                T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,
                 m.transpose(),x.transpose());
-        else SV_LDiv(pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,x);
+        else CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,x);
     }
 
     template <class T> template <class T1, class T2> 
@@ -132,10 +132,10 @@ namespace tmv {
         TMVAssert(m.rowsize() == rowsize());
         TMVAssert(x.rowsize() == colsize());
         if (pimpl->istrans) 
-            SV_LDiv(
-                pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,
+            CallSV_LDiv(
+                T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,
                 m.transpose(),x.transpose());
-        else SV_RDiv(pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,x);
+        else CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,x);
     }
 
     template <class T> 

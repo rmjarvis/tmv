@@ -55,13 +55,13 @@ PREFIX=/usr/local
 
 #
 # For Intel C Compiler with Intel Math Kernel Library compiling code
-# for float, double _and_ long double matrices and vectors:
+# for float, double, int, and long double matrices and vectors:
 # (Default is just float and double.)
 #
 
 #CC= icpc
 #INCLUDE= -Iinclude -I/usr/local/include
-#CFLAGS= $(INCLUDE) -msse2 -O3 -DNDEBUG -DMKL -DINST_LONGDOUBLE
+#CFLAGS= $(INCLUDE) -msse2 -O3 -DNDEBUG -DMKL -DINST_INT -DINST_LONGDOUBLE -DTEST_INT -DTEST_LONGDOUBLE
 #BLASLIBS= -lmkl_lapack -lmkl_ia32 -lguide 
 
 

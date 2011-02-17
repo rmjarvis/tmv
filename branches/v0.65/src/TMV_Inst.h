@@ -51,7 +51,8 @@
 #endif
 
 #ifdef INST_INT
-#define TISINT
+// Define TISINT for any integer type.  e.g. long, short, etc.
+#define TISINT 
 #define T int
 #include InstFile
 #undef T

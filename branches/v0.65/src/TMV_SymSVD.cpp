@@ -79,14 +79,14 @@ namespace tmv {
     void HermSVDiv<T>::doLDivEq(const MatrixView<T1>& m) const
     {
         TMVAssert(m.colsize() == colsize());
-        SV_LDiv(pimpl->U,pimpl->S,pimpl->U.adjoint(),pimpl->kmax,m,m);
+        CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->U.adjoint(),pimpl->kmax,m,m);
     }
 
     template <class T> template <class T1> 
     void HermSVDiv<T>::doRDivEq(const MatrixView<T1>& m) const
     {
         TMVAssert(m.rowsize() == rowsize());
-        SV_RDiv(pimpl->U,pimpl->S,pimpl->U.adjoint(),pimpl->kmax,m,m);
+        CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->U.adjoint(),pimpl->kmax,m,m);
     }
 
     template <class T> template <class T1, class T2> 
@@ -96,7 +96,7 @@ namespace tmv {
         TMVAssert(m.rowsize() == x.rowsize());
         TMVAssert(m.colsize() == colsize());
         TMVAssert(x.colsize() == rowsize());
-        SV_LDiv(pimpl->U,pimpl->S,pimpl->U.adjoint(),pimpl->kmax,m,x);
+        CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->U.adjoint(),pimpl->kmax,m,x);
     }
 
     template <class T> template <class T1, class T2> 
@@ -106,7 +106,7 @@ namespace tmv {
         TMVAssert(m.colsize() == x.colsize());
         TMVAssert(m.rowsize() == rowsize());
         TMVAssert(x.rowsize() == colsize());
-        SV_RDiv(pimpl->U,pimpl->S,pimpl->U.adjoint(),pimpl->kmax,m,x);
+        CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->U.adjoint(),pimpl->kmax,m,x);
     }
 
     template <class T>
@@ -135,15 +135,15 @@ namespace tmv {
     {
         TMVAssert(sinv.size() == pimpl->S.size());
         TMVAssert(sinv.isherm());
-        HermSV_Inverse(pimpl->U,pimpl->S,pimpl->kmax,sinv);
+        CallHermSV_Inverse(T(),pimpl->U,pimpl->S,pimpl->kmax,sinv);
     }
 
     template <class T> template <class T1>  
     void HermSVDiv<T>::doMakeInverse(const MatrixView<T1>& minv) const
     { 
         // A^-1 = U S^-1 Ut
-        HermSV_Inverse(pimpl->U,pimpl->S,pimpl->kmax,
-                       HermMatrixViewOf(minv,Upper));
+        CallHermSV_Inverse(
+            T(),pimpl->U,pimpl->S,pimpl->kmax,HermMatrixViewOf(minv,Upper));
         if (pimpl->S.size() > 1)
             minv.lowerTri().offDiag() = minv.upperTri().offDiag().adjoint();
     }
@@ -293,8 +293,9 @@ namespace tmv {
     {
         TMVAssert(isComplex(T()));
         pimpl->U.lowerTri() = A.lowerTri();
-        SymSV_Decompose<T>(pimpl->U.view(),pimpl->S.view(),
-                           pimpl->V.view(),pimpl->logdet,pimpl->signdet);
+        SymSV_Decompose<T>(
+            pimpl->U.view(),pimpl->S.view(),
+            pimpl->V.view(),pimpl->logdet,pimpl->signdet);
 
         thresh(TMV_Epsilon<T>());
     }
@@ -306,14 +307,14 @@ namespace tmv {
     void SymSVDiv<T>::doLDivEq(const MatrixView<T1>& m) const
     {
         TMVAssert(m.colsize() == pimpl->U.colsize());
-        SV_LDiv(pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,m);
+        CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,m);
     }
 
     template <class T> template <class T1> 
     void SymSVDiv<T>::doRDivEq(const MatrixView<T1>& m) const
     {
         TMVAssert(m.rowsize() == pimpl->U.rowsize());
-        SV_RDiv(pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,m);
+        CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,m);
     }
 
     template <class T> template <class T1, class T2> 
@@ -323,7 +324,7 @@ namespace tmv {
         TMVAssert(m.rowsize() == x.rowsize());
         TMVAssert(m.colsize() == colsize());
         TMVAssert(x.colsize() == rowsize());
-        SV_LDiv(pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,x);
+        CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,x);
     }
 
     template <class T> template <class T1, class T2> 
@@ -333,7 +334,7 @@ namespace tmv {
         TMVAssert(m.colsize() == x.colsize());
         TMVAssert(m.rowsize() == rowsize());
         TMVAssert(x.rowsize() == colsize());
-        SV_RDiv(pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,x);
+        CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,x);
     }
 
     template <class T>
@@ -355,14 +356,15 @@ namespace tmv {
     {
         TMVAssert(sinv.size() == pimpl->S.size());
         TMVAssert(sinv.issym());
-        SymSV_Inverse(pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,sinv);
+        CallSymSV_Inverse(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,sinv);
     }
 
     template <class T> template <class T1>  
     void SymSVDiv<T>::doMakeInverse(const MatrixView<T1>& minv) const
     { 
-        SymSV_Inverse(pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,
-                      SymMatrixViewOf(minv,Upper));
+        CallSymSV_Inverse(
+            T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,
+            SymMatrixViewOf(minv,Upper));
         if (pimpl->S.size() > 1)
             minv.lowerTri().offDiag() = minv.upperTri().offDiag().transpose();
     }

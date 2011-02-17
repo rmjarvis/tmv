@@ -114,44 +114,79 @@ namespace tmv {
     void FindDCSingularValues(
         Vector<T>& S, const T rho, const GenVector<T>& D, const GenVector<T>& z);
 
+
+#define CTx std::complex<Tx>
+
+    // Some compilers (specifically MS Visual C++ at least) need this
+    // dummy variable in the front to be able to resolve the overloads
+    // between the allowed versions and the below disallowed versions.
+    template <class T, class Tm, class Tx>
+    inline void CallSV_LDiv(
+        Tx , const GenMatrix<T>& U, const GenDiagMatrix<RT>& S,
+        const GenMatrix<T>& V, int kmax,
+        const GenMatrix<Tm>& m, const MatrixView<Tx>& x)
+    { SV_LDiv(U,S,V,kmax,m,x); }
+
+    template <class T, class Tm, class Tx>
+    inline void CallSV_LDiv(
+        Tx , const GenMatrix<T>& U, const GenDiagMatrix<RT>& S,
+        const GenMatrix<T>& V, int kmax,
+        const GenMatrix<Tm>& m, const MatrixView<CTx>& x)
+    { SV_LDiv(U,S,V,kmax,m,x); }
+   
+    template <class T, class Tm, class Tx>
+    inline void CallSV_RDiv(
+        Tx , const GenMatrix<T>& U, const GenDiagMatrix<RT>& S,
+        const GenMatrix<T>& V, int kmax,
+        const GenMatrix<Tm>& m, const MatrixView<Tx>& x)
+    { SV_RDiv(U,S,V,kmax,m,x); }
+   
+    template <class T, class Tm, class Tx>
+    inline void CallSV_RDiv(
+        Tx , const GenMatrix<T>& U, const GenDiagMatrix<RT>& S,
+        const GenMatrix<T>& V, int kmax,
+        const GenMatrix<Tm>& m, const MatrixView<CTx>& x)
+    { SV_RDiv(U,S,V,kmax,m,x); }
+   
+#undef CTx
 #undef RT
 
     // Specialize disallowed complex combinations:
 #define CT std::complex<T>
 
     template <class T>
-    inline void SV_LDiv(
-        const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
+    inline void CallSV_LDiv(
+        CT , const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
         const GenMatrix<CT>& , int ,
         const GenMatrix<CT>& , const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
     template <class T>
-    inline void SV_LDiv(
-        const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
+    inline void CallSV_LDiv(
+        CT , const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
         const GenMatrix<CT>& , int ,
         const GenMatrix<T>& , const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
     template <class T>
-    inline void SV_LDiv(
-        const GenMatrix<T>& , const GenDiagMatrix<T>& ,
+    inline void CallSV_LDiv(
+        CT , const GenMatrix<T>& , const GenDiagMatrix<T>& ,
         const GenMatrix<T>& , int ,
         const GenMatrix<CT>& , const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
     template <class T>
-    inline void SV_RDiv(
-        const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
+    inline void CallSV_RDiv(
+        CT , const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
         const GenMatrix<CT>& , int ,
         const GenMatrix<CT>& , const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
     template <class T>
-    inline void SV_RDiv(
-        const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
+    inline void CallSV_RDiv(
+        CT , const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
         const GenMatrix<CT>& , int ,
         const GenMatrix<T>& , const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
     template <class T>
-    inline void SV_RDiv(
-        const GenMatrix<T>& , const GenDiagMatrix<T>& ,
+    inline void CallSV_RDiv(
+        CT , const GenMatrix<T>& , const GenDiagMatrix<T>& ,
         const GenMatrix<T>& , int ,
         const GenMatrix<CT>& , const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }

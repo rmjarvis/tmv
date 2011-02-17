@@ -65,8 +65,8 @@ namespace tmv {
 
     template <class T, class T1> 
     void HermSV_Inverse(
-        const GenMatrix<T1>& U, const GenDiagMatrix<RT1>& S, int kmax,
-        const SymMatrixView<T>& sinv);
+        const GenMatrix<T1>& U, const GenDiagMatrix<RT1>& S, 
+        int kmax, const SymMatrixView<T>& sinv);
     template <class T, class T1> 
     void SymSV_Inverse(
         const GenMatrix<T1>& U, const GenDiagMatrix<RT1>& S,
@@ -95,17 +95,43 @@ namespace tmv {
 
 #undef RT
 
-    // Specialize disallowed complex combinations:
 #define CT std::complex<T>
 
+    // Again, Microsoft Visual C++ needs this extra parameter to 
+    // get the resolution of the overload right.
+    template <class T, class T1> 
+    inline void CallHermSV_Inverse(
+        T , const GenMatrix<T1>& U, const GenDiagMatrix<RT1>& S,
+        int kmax, const SymMatrixView<T>& sinv)
+    { HermSV_Inverse(U,S,kmax,sinv); }
+
+    template <class T, class T1> 
+    inline void CallHermSV_Inverse(
+        T , const GenMatrix<T1>& U, const GenDiagMatrix<RT1>& S, 
+        int kmax, const SymMatrixView<CT>& sinv)
+    { HermSV_Inverse(U,S,kmax,sinv); }
+
+    template <class T, class T1> 
+    inline void CallSymSV_Inverse(
+        T , const GenMatrix<T1>& U, const GenDiagMatrix<RT1>& S,
+        const GenMatrix<T1>& V, int kmax, const SymMatrixView<T>& sinv)
+    { SymSV_Inverse(U,S,V,kmax,sinv); }
+
+    template <class T, class T1> 
+    inline void CallSymSV_Inverse(
+        T , const GenMatrix<T1>& U, const GenDiagMatrix<RT1>& S,
+        const GenMatrix<T1>& V, int kmax, const SymMatrixView<CT>& sinv)
+    { SymSV_Inverse(U,S,V,kmax,sinv); }
+
+    // Specialize disallowed complex combinations:
     template <class T>
-    inline void HermSV_Inverse(
-        const GenMatrix<CT>& , const GenDiagMatrix<T>& , int ,
-        const SymMatrixView<T>& )
+    inline void CallHermSV_Inverse(
+        CT , const GenMatrix<CT>& , const GenDiagMatrix<T>& , 
+        int , const SymMatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
     template <class T>
-    inline void SymSV_Inverse(
-        const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
+    inline void CallSymSV_Inverse(
+        CT , const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
         const GenMatrix<CT>& , int , const SymMatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
 
