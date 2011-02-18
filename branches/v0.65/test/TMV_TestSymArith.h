@@ -224,24 +224,24 @@ inline void DoMakeSymList(
     cs.push_back(HermMatrixViewOf(CM.back(),tmv::Upper).subSymMatrix(0,2*N,2));
 #endif
 
-    TMVAssert(SUR.size() <= RESERVE);
-    TMVAssert(SUC.size() <= RESERVE);
-    TMVAssert(SLR.size() <= RESERVE);
-    TMVAssert(SLC.size() <= RESERVE);
-    TMVAssert(HUR.size() <= RESERVE);
-    TMVAssert(HUC.size() <= RESERVE);
-    TMVAssert(HLR.size() <= RESERVE);
-    TMVAssert(HLC.size() <= RESERVE);
-    TMVAssert(M.size() <= RESERVE);
-    TMVAssert(CSUR.size() <= RESERVE);
-    TMVAssert(CSUC.size() <= RESERVE);
-    TMVAssert(CSLR.size() <= RESERVE);
-    TMVAssert(CSLC.size() <= RESERVE);
-    TMVAssert(CHUR.size() <= RESERVE);
-    TMVAssert(CHUC.size() <= RESERVE);
-    TMVAssert(CHLR.size() <= RESERVE);
-    TMVAssert(CHLC.size() <= RESERVE);
-    TMVAssert(CM.size() <= RESERVE);
+    TMVAssert(int(SUR.size()) <= RESERVE);
+    TMVAssert(int(SUC.size()) <= RESERVE);
+    TMVAssert(int(SLR.size()) <= RESERVE);
+    TMVAssert(int(SLC.size()) <= RESERVE);
+    TMVAssert(int(HUR.size()) <= RESERVE);
+    TMVAssert(int(HUC.size()) <= RESERVE);
+    TMVAssert(int(HLR.size()) <= RESERVE);
+    TMVAssert(int(HLC.size()) <= RESERVE);
+    TMVAssert(int(M.size()) <= RESERVE);
+    TMVAssert(int(CSUR.size()) <= RESERVE);
+    TMVAssert(int(CSUC.size()) <= RESERVE);
+    TMVAssert(int(CSLR.size()) <= RESERVE);
+    TMVAssert(int(CSLC.size()) <= RESERVE);
+    TMVAssert(int(CHUR.size()) <= RESERVE);
+    TMVAssert(int(CHUC.size()) <= RESERVE);
+    TMVAssert(int(CHLR.size()) <= RESERVE);
+    TMVAssert(int(CHLC.size()) <= RESERVE);
+    TMVAssert(int(CM.size()) <= RESERVE);
 }
 
 

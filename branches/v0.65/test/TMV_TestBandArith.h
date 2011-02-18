@@ -178,12 +178,12 @@ inline void DoMakeBandList(
 
     // Make sure we didn't exceed the reserve amount.  Otherwise the 
     // views in b and cb are invalid.
-    TMVAssert(BR.size() <= RESERVE);
-    TMVAssert(BC.size() <= RESERVE);
-    TMVAssert(BD.size() <= RESERVE);
-    TMVAssert(M.size() <= RESERVE);
-    TMVAssert(CBR.size() <= RESERVE);
-    TMVAssert(CBC.size() <= RESERVE);
-    TMVAssert(CBD.size() <= RESERVE);
-    TMVAssert(CM.size() <= RESERVE);
+    TMVAssert(int(BR.size()) <= RESERVE);
+    TMVAssert(int(BC.size()) <= RESERVE);
+    TMVAssert(int(BD.size()) <= RESERVE);
+    TMVAssert(int(M.size()) <= RESERVE);
+    TMVAssert(int(CBR.size()) <= RESERVE);
+    TMVAssert(int(CBC.size()) <= RESERVE);
+    TMVAssert(int(CBD.size()) <= RESERVE);
+    TMVAssert(int(CM.size()) <= RESERVE);
 }

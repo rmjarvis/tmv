@@ -1,0 +1,1308 @@
+% !TEX root = TMV_Documentation.tex
+
+\section{Advanced Usage}
+
+\subsection{Eigenvalues and eigenvectors}
+\index{Eigenvalues}
+\label{Eigenvalues}
+
+The eigenvalues of a matrix are important quantities in many matrix applications.
+A number, $\lambda$, is an eigenvalue of a square matrix, $A$, if for some
+non-zero vector $v$,
+\begin{equation*}
+A v = \lambda v
+\end{equation*}
+in which case $v$ is the called an eigenvector corresponding to the eigenvalue $\lambda$.
+Since any arbitrary multiple of $v$ also satisfies this equation, it is common practice
+to scale the eigenvectors so that $||v||_2 = 1$.
+If $v_1$ and $v_2$ are eigenvectors whose eigenvalues are 
+$\lambda_1 \neq \lambda_2$, then $v_1$ and $v_2$ are linearly independent.
+
+The above equation implies that 
+\begin{align*}
+A v - \lambda v &= 0 \\
+(A - \lambda I) v &= 0 \\
+\det(A-\lambda I) &= 0 \quad (\text{or} ~~ v = 0)
+\end{align*}
+If $A$ is an $N \times N$ matrix, then the last expression is called the characteristic
+equation of $A$ and the left hand side is a polynomial of degree $N$.
+Thus, it has potentially $N$ solutions.  
+Note that, even for real matrices, the solution may yield complex eigenvalues, in which
+case, the corresponding eigenvectors will also be complex.
+
+If there are solutions to the characteristic equation which are multiple roots, then these
+eigenvalues are said to have a multiplicity greater than $1$.  These eigenvalues 
+may have multiple corresponding eigenvectors.  That is, different values of $v$ 
+(which are not just a multiple of each other) may satisfy the equation $A v = \lambda v$.
+
+The number of independent eigenvectors
+corresponding to an eigenvalue with multiplicity $> 1$ may be less than that multiplicity\footnote{
+The multiplicity of the eigenvalue is generally referred to as its algebraic multiplicity.
+The number of corresponding eigenvectors is referred to as its geometric multiplicity.
+So $1 \leq \text{geometric multiplicity} \leq \text{algebraic multiplicity}$.}.  Such eigenvalues
+are called ``defective'', and any matrix with defective eigenvalues is likewise
+called defective.
+
+If $0$ is an eigenvalue, then the matrix $A$ is singular.
+And conversely, singular matrices necessarily have $0$ as one of their eigenvalues.
+
+If we define $\Lambda$ to be a diagonal matrix with the values of $\lambda$ along
+the diagonal, then we have (for non-defective matrices)
+\begin{equation*}
+A V = V \Lambda
+\end{equation*}
+where the columns of $V$ are the eigenvectors.  If $A$ is defective, we can construct
+a $V$ that satisfies this equation too, but some of the columns will have to be all zeros.
+There will be one such column for each missing eigenvector, and the other columns will
+be the eigenvectors.
+
+If $A$ is not defective, then all of the columns of $V$ are linearly independent, which
+implies that $V$ is not singular (i.e. $V$ is ``invertible'').  Then,
+\begin{align*}
+A &= V \Lambda V^{-1}\\
+\Lambda &= V^{-1} A V
+\end{align*}
+This is known as ``diagonalizing'' the matrix $A$.  The determinant and trace are preserved by this procedure, which implies two more properties of eigenvalues:
+\begin{align*}
+\det(A) &= \prod_{k=1}^{N} \lambda_k\\
+\text{tr}(A) &= \sum_{k=1}^{N} \lambda_k
+\end{align*}
+
+If $A$ is a ``normal'' matrix -- which means that $A$ commutes with its adjoint,
+$AA^\dagger = A^\dagger A$ -- then the 
+matrix $V$ is unitary, and $A$ cannot be defective.  
+The most common example of a normal matrix is a hermitian matrix
+(where $A^\dagger = A$), which has
+the additional property that all of the eigenvalues are real\footnote{
+Other examples of normal matrices are unitary matrices ($A^\dagger A = AA^\dagger = I$)
+and skew-hermitian matrices ($A^\dagger = -A$).  However, normal matrices do
+not have to be one of these special types.}.
+
+So far, the TMV library can only find the eigenvalues and eigenvectors 
+of hermitian matrices.  The routines to do so are 
+\begin{tmvcode}
+void Eigen(const GenSymMatrix<T>& A,
+      const MatrixView<T>& V, const VectorView<RT>& lambda);
+
+void Eigen(const GenSymBandMatrix<T>& A,
+      const MatrixView<T>& V, const VectorView<RT>& lambda);
+\end{tmvcode}
+\index{SymMatrix!Eigenvalues and eigenvectors}
+\index{SymBandMatrix!Eigenvalues and eigenvectors}
+\index{Eigenvalues!SymMatrix}
+\index{Eigenvalues!SymBandMatrix}
+where \tt{V.col(i)} is the eigenvector corresponding to each eigenvalue \tt{lambda(i)}.
+The original matrix \tt{A} can be obtained from
+\begin{tmvcode}
+A = V * DiagMatrixViewOf(lambda) * V.adjoint();
+\end{tmvcode}
+
+There are also routines which only find the eigenvalues, which are faster, since they
+do not perform the calculations to determine the eigenvectors:
+\begin{tmvcode}
+void Eigen(const SymMatrixView<T>& A, const VectorView<RT>& lambda);
+
+void Eigen(const GenSymBandMatrix<T>& A, const VectorView<RT>& lambda);
+\end{tmvcode}
+\index{SymMatrix!Eigenvalues and eigenvectors}
+\index{SymBandMatrix!Eigenvalues and eigenvectors}
+Note that the first one uses the input matrix \tt{A} as workspace and destroys the 
+input matrix in the process.
+
+None of these functions are valid for \tt{T = int} or \tt{complex<int>}.
+
+\subsection{Matrix decompositions}
+\label{Decompositions}
+
+While many matrix decompositions are primarily useful for performing matrix division
+(or least-squares pseudo-division), one sometimes wants to perform the decompositions for 
+their own sake.  It is possible to get at the underlying decomposition with the various
+divider accessor routines like \tt{m.lud()}, \tt{m.qrd()}, etc.  However, this is somewhat
+roundabout, and at times inefficient.  So we provide direct ways to perform all of
+the various matrix decompositions that are implemented by the TMV code.
+
+In the routines below, the matrix being decomposed is input as \tt{A}, and we
+list the routines for all of the 
+allowed types for \tt{A} for each kind of decomposition.  If \tt{A} is listed as a ``\tt{Gen}''
+type, such as \tt{GenBandMatrix<T>}, then that means the input matrix is not 
+changed by the decomposition routine.  
+If \tt{A} is listed as a ``\tt{View}'' type,
+such as \tt{BandMatrixView<T>}, then that means the input matrix is 
+changed.  
+
+In some cases where \tt{A} is a \tt{View} type, one of the decomposition components is 
+returned in the location of 
+\tt{A}, or some part of it, overwriting the input matrix.  
+In these cases, there will be a line indicating this
+after the function (e.g. \tt{L = A.lowerTri()}).
+In other cases, the input matrix is just used as workspace, and it is junk
+on output, (in which case, there is no such line following the function).
+
+Sometimes, only certain parts of a decomposition are wanted.  For example,
+you might want to know the singular values of a matrix, but not care about
+the $U$ and $V$ matrices.  For cases such as this, there are versions
+of the decomposition routines which omit certain output parameters.
+These routines are generally faster than the versions which include all
+output parameters, since they can omit some of the calculations.
+
+Finally, a word about the permutations.  In TMV, permutations are
+defined as a series of row or column swaps.  I haven't made a \tt{Permutation}
+class yet to make it easy to use these permutations.  But the 
+code snippets which show how to recreate the input matrices from
+the decompositions should be sufficient to describe how to use the 
+permutations as given.
+
+None of the decompositions are valid for \tt{T = int} or \tt{complex<int>}.
+
+\begin{itemize}
+
+\item LU Decomposition 
+\index{LU Decomposition}
+
+(\tt{Matrix}, \tt{BandMatrix})
+
+$A \rightarrow P L U$ where $L$ is lower triangular, 
+$U$ is upper triangular, and $P$ is a permutation.
+
+\begin{tmvcode}
+void LU_Decompose(const MatrixView<T>& A, Permutation& P);
+L = A.unitLowerTri();
+U = A.upperTri();
+
+void LU_Decompose(const GenBandMatrix<T>& A, 
+      const LowerTriMatrixView<T>& L, 
+      const BandMatrixView<T>& U, Permutation& P);
+\end{tmvcode}
+\index{LU Decomposition!Matrix}
+\index{LU Decomposition!BandMatrix}
+\index{Matrix!LU decomposition}
+\index{BandMatrix!LU decomposition}
+In the second case, \tt{U} must have \tt{U.nhi() = A.nlo()+A.nhi()},
+and \tt{L} should be \tt{UnitDiag}.
+In both cases, \tt{P} must have \tt{A.ncols()} elements of memory allocated.
+
+The original matrix \tt{A} can be obtained from:
+\begin{tmvcode}
+A = P * L * U;
+\end{tmvcode}
+
+\item Cholesky Decomposition 
+\index{Cholesky Decomposition}
+
+(\tt{HermMatrix}, \tt{HermBandMatrix})
+
+$A \rightarrow L L^\dagger$, where $L$ is lower triangular,
+and $A$ is hermitian.
+
+\begin{tmvcode}
+void CH_Decompose(const SymMatrixView<T>& A);
+L = A.lowerTri();
+
+void CH_Decompose(const SymBandMatrixView<T>& A);
+L = A.lowerBand();
+\end{tmvcode}
+\index{Cholesky Decomposition!SymMatrix}
+\index{Cholesky Decomposition!SymBandMatrix}
+\index{SymMatrix!Cholesky decomposition}
+\index{SymBandMatrix!Cholesky decomposition}
+
+The original matrix \tt{A} is very simply
+\begin{tmvcode}
+A = L * L.adjoint();
+\end{tmvcode}
+
+If $A$ is found to be not positive definite, a \tt{NonPosDef} exception is thrown.
+
+\item Bunch-Kaufman Decomposition 
+\index{Bunch-Kaufman Decomposition}
+
+(\tt{HermMatrix}, \tt{SymMatrix})
+
+If $A$ is hermitian, $A \rightarrow P L D L^\dagger P^T$,
+and if $A$ is symmetric, $A \rightarrow P L D L^T P^T$, where $P$ is a permutation,
+$L$ is lower triangular, and $D$ is hermitian or symmetric tridiagonal (respectively).  
+In fact, $D$ is even more special than that: it is block diagonal with $1 \times 1$
+and $2 \times 2$ blocks,
+which means that there are no two consecutive
+non-zero elements along the off-diagonal.
+
+\begin{tmvcode}
+void LDL_Decompose(const SymMatrixView<T>& A, 
+      const SymBandMatrixView<T>& D, Permutation& P);
+L = A.unitLowerTri();
+\end{tmvcode}
+\index{Bunch-Kaufman Decomposition!SymMatrix}
+\index{SymMatrix!Bunch-Kaufman decomposition}
+\tt{P} must have \tt{A.size()} elements of memory allocated.
+
+The original matrix \tt{A} can be obtained from:
+\begin{tmvcode}
+A = P * L * D * (A.isherm() ? L.adjoint() : L.transpose())
+        P.transpose();
+\end{tmvcode}
+
+Note: If you are using LAPACK, rather than the native TMV code, then the 
+\tt{LDL_Decompose} routine throws a
+\tt{tmv::Singular} exception if the matrix is found to be exactly singular.  The LAPACK
+documentation says that the decomposition is supposed to finish successfully, but I have
+not found that to always be true.  So if LAPACK reports that it has found a singular matrix, TMV
+will throw an exception.  The native code will always successfully decompose the matrix.
+\index{Exceptions!Singular}
+\index{LAPACK!Exceptions from LDL\_Decompose}
+
+\item Tridiagonal LDL$^\dagger$ Decomposition 
+\index{Tridiagonal LDL Decomposition}
+
+(\tt{HermBandMatrix}, \tt{SymBandMatrix} with \tt{nlo = 1})
+
+This decomposition for symmetric or hermitian tri-diagonal matrices is 
+similar to the Bunch-Kaufman decomposition: 
+$A \rightarrow L D L^\dagger$
+or $A \rightarrow L D L^T$ where this time $D$ is a regular diagonal matrix and $L$ is
+a lower band matrix with a single subdiagonal and all 1's on the diagonal.
+
+It turns out
+that the Bunch-Kaufman algorithm on banded matrices tends to expand the band structure
+without limit because of the pivoting involved, so it is not practical.
+However, with tridiagonal matrices, it is often possible to perform the 
+decomposition without pivoting.  There is then no growth of the band structure,
+but it is not as stable for singular or nearly singular matrices.
+If an exact zero is found on the diagonal along the way
+\tt{tmv::NonPosDef} is thrown.\footnote{
+Note, however, that if $A$ is complex, symmetric - i.e. not hermitian -
+then this doesn't actually mean that $A$ is not positive definite (since such a 
+quality is only defined for hermitian matrices).  Furthermore, 
+hermitian matrices that are not positive definite will probably be decomposed successfully
+without throwing, resulting in D having negative values.
+
+Also, the LAPACK implementation throws an exception for matrices that the native code
+successfully decomposes.  It throws for hermitian matrices whenever they are 
+not positive definite, whereas the native code succeeds for many indefinite matrices.
+}
+\index{Exceptions!NonPosDef}
+\index{LAPACK!Exceptions from LDL\_Decompose}
+
+\begin{tmvcode}
+void LDL_Decompose(const SymBandMatrixView<T>& A);
+L = A.lowerBand();
+L.diag().setAllTo(T(1));
+D = DiagMatrixViewOf(A.diag());
+\end{tmvcode}
+\index{Tridiagonal LDL Decomposition!SymBandMatrix}
+\index{SymBandMatrix!Tri-diagonal LDL decomposition}
+
+The original matrix \tt{A} can be obtained from:
+\begin{tmvcode}
+A = L * D * (A.isherm() ? L.adjoint() : L.transpose());
+\end{tmvcode}
+
+\item QR Decomposition 
+\index{QR Decomposition}
+
+(\tt{Matrix}, \tt{BandMatrix})
+
+$A \rightarrow Q R$, where $Q$ is column-unitary 
+(i.e. $Q^\dagger Q = I$), $R$ is upper triangular, and $A$ is either square or 
+has more rows than columns.
+
+\begin{tmvcode}
+void QR_Decompose(const MatrixView<T>& A, 
+      const UpperTriMatrixView<T>& R);
+Q = A;
+
+void QR_Decompose(const GenBandMatrix<T>& A, 
+      const MatrixView<T>& Q, const BandMatrixView<T>& R);
+\end{tmvcode}
+\index{QR Decomposition!Matrix}
+\index{Matrix!QR decomposition}
+\index{QR Decomposition!BandMatrix}
+\index{BandMatrix!QR decomposition}
+In the second case, \tt{R} must have \tt{R.nhi()} $>=$ \tt{A.nlo()+A.nhi()}.
+
+If you only need $R$, the following versions are faster, since they do 
+not fully calculate $Q$.
+\begin{tmvcode}
+void QR_Decompose(const MatrixView<T>& A);
+R = A.upperTri();
+
+void QR_Decompose(const GenBandMatrix<T>& A, 
+      const BandMatrixView<T>& R);
+\end{tmvcode}
+
+\item QRP Decomposition 
+\index{QRP Decomposition}
+
+(\tt{Matrix})
+
+$A \rightarrow Q R P$, where $Q$ is column-unitary 
+(i.e. $Q^\dagger Q = I$), $R$ is upper triangular, $P$ is a permutation, 
+and $A$ is either square or has more rows than columns.
+
+\begin{tmvcode}
+void QRP_Decompose(const MatrixView<T>& A, 
+      const UpperTriMatrixView<T>& R, Permutation& P, 
+      bool strict=false);
+Q = A;
+\end{tmvcode}
+\index{QRP Decomposition!Matrix}
+\index{Matrix!QRP decomposition}
+\tt{P} must have \tt{A.ncols()} elements of memory allocated.
+
+As discussed in \S\ref{Matrix_Division_Decompositions}, 
+there are two slightly different algorithms for doing a QRP decomposition.  
+If \tt{strict = true}, then the diagonal elements
+of $R$ be strictly decreasing (in absolute value) from upper-left to lower-right\footnote{
+\index{QRP Decomposition!LAPACK ?geqp3}
+\index{LAPACK!Problems with QRP decomposition}
+If you are using a LAPACK library, you might find that the output $R$ diagonal
+is not always strictly decreasing, although it will usually be close.  If strictly monotonic
+diagonal elements are important for you, you can use the native TMV algorithm instead
+by compiling with the flag \texttt{-DNOGEQP3}.}.
+
+If \tt{strict} is false however (the default), then the diagonal elements of $R$ will not
+be strictly decreasing.  Rather, there will be no diagonal element
+of $R$ below and to the right of one which is more than a factor of $\epsilon^{1/4}$ 
+smaller in absolute value, where 
+$\epsilon$ is the machine precision.  This restriction
+is almost always sufficient to make the decomposition useful for singular or nearly
+singular matrices, and it is much faster than the strict algorithm.
+
+The original matrix \tt{A} is obtained from:
+\begin{tmvcode}
+A = Q * R * P;
+\end{tmvcode}
+
+If you only need $R$, the following versions is faster, since it does
+not fully calculate $Q$.
+\begin{tmvcode}
+void QRP_Decompose(const MatrixView<T>& A, bool strict=false);
+R = A.upperTri();
+\end{tmvcode}
+
+\item Singular Value Decomposition 
+\index{Singular Value Decomposition}
+
+(\tt{Matrix}, \tt{SymMatrix}, \tt{HermMatrix}, \tt{BandMatrix}, \tt{SymBandMatrix}, \tt{HermBandMatrix})
+
+$A \rightarrow U S V$,
+where $U$ is column-unitary (i.e. $U^\dagger U = I$),
+$S$ is real diagonal, $V$ is square unitary, and $A$ is either square or 
+has more rows than columns.\footnote{
+The singular value decomposition is more commonly written as 
+$A \rightarrow U S V^T$.
+As far as I can tell, this seems to be a holdover from the days of 
+Fortran programming.  In Fortran, matrices are stored in column-major format.
+Considering that the rows of what we call $V$ are the 
+singular vectors, also known as principal components, of $A$,
+it made more sense for 
+Fortran programmers to use the transpose of $V$ which has the principal 
+components in the columns.
+This complication is unnecessary in TMV.  If you want the principal components
+stored contiguously, just make $V$ row-major.  On the other hand, decomposition
+with column-major storage of $V$
+is usually a bit faster, so you need to make a choice appropriate for your 
+particular program.}
+
+\begin{tmvcode}
+void SV_Decompose(const MatrixView<T>& A, 
+      const DiagMatrixView<RT>& S, const MatrixView<T>& V);
+U = A;
+
+void SV_Decompose(const GenSymMatrix<T>& A, 
+      const MatrixView<T>& U, const DiagMatrixView<RT>& S, 
+      const MatrixView<T>& V);
+
+void SV_Decompose(const GenBandMatrix<T>& A,
+      const MatrixView<T>& U, const DiagMatrixView<RT>& S,
+      const MatrixView<T>& V);
+
+void SV_Decompose(const GenSymBandMatrix<T>& A,
+      const MatrixView<T>& U, const DiagMatrixView<RT>& S, 
+      const MatrixView<T>& V);
+\end{tmvcode}
+\index{Singular Value Decomposition!Matrix}
+\index{Singular Value Decomposition!BandMatrix}
+\index{Singular Value Decomposition!SymMatrix}
+\index{Singular Value Decomposition!SymBandMatrix}
+\index{Matrix!Singular value decomposition}
+\index{BandMatrix!Singular value decomposition}
+\index{SymMatrix!Singular value decomposition}
+\index{SymBandMatrix!Singular value decomposition}
+
+The input $A$ matrix must not have more columns than rows.  If you want
+to calculate the SVD of such a matrix, you should decompose $A^T$ instead:
+\begin{tmvcode}
+tmv::Matrix<double> A(nrows,ncols); // ncols > nrows
+[ A = ... ]
+tmv::Matrix<double> V = A;
+tmv::DiagMatrix<double> S(nrows);
+tmv::Matrix<double> U(nrows,nrows);
+SV_Decompose(V.transpose(),S.view(),U.transpose());
+// Now A = U * S * V
+\end{tmvcode}
+
+If you only need $S$, or $S$ and $V$, or $S$ and $U$, the following 
+versions are faster, since they do
+not fully calculate the omitted matrices.  
+\begin{tmvcode}
+void SV_Decompose(const MatrixView<T>& A, 
+      const DiagMatrixView<RT>& S, const MatrixView<T>& V, false);
+// U != A
+
+void SV_Decompose(const MatrixView<T>& A, 
+      const DiagMatrixView<RT>& S, bool StoreU);
+if (StoreU) U = A;
+
+void SV_Decompose(const SymMatrixView<T>& A, 
+      const DiagMatrixView<RT>& S);
+      
+void SV_Decompose(const GenSymMatrix<T>& A,
+      const DiagMatrixView<RT>& S, const MatrixView<T>& V);
+      
+void SV_Decompose(const GenSymMatrix<T>& A,
+      const MatrixView<T>& U, const DiagMatrixView<RT>& S);
+      
+void SV_Decompose(const GenBandMatrix<T>& A, 
+      const DiagMatrixView<RT>& S);
+
+void SV_Decompose(const GenBandMatrix<T>& A,
+      const DiagMatrixView<RT>& S, const MatrixView<T>& V);
+      
+void SV_Decompose(const GenBandMatrix<T>& A,
+      const MatrixView<T>& U, const DiagMatrixView<RT>& S);
+      
+void SV_Decompose(const GenSymBandMatrix<T>& A, 
+      const DiagMatrixView<RT>& S);
+      
+void SV_Decompose(const GenSymBandMatrix<T>& A,
+      const DiagMatrixView<RT>& S, const MatrixView<T>& V);
+
+void SV_Decompose(const GenSymBandMatrix<T>& A,
+      const MatrixView<T>& U, const DiagMatrixView<RT>& S);
+\end{tmvcode}
+
+\item Polar Decomposition 
+\index{Polar Decomposition}
+
+(\tt{Matrix}, \tt{BandMatrix})
+
+$A \rightarrow U P$ where $U$ is unitary and $P$ is positive definite hermitian.
+
+This is similar to polar form of a complex number: $z = r e^{i \theta}$.
+In the matrix version, $P$ acts as $r$, being in some sense the ``magnitude'' 
+of the matrix.  And $U$ acts as $e^{i \theta}$, being a generalized rotation.
+
+\begin{tmvcode}
+void Polar_Decompose(const MatrixView<T>& A, 
+      const SymMatrixView<T>& P);
+U = A;
+
+void Polar_Decompose(const GenBandMatrix<T>& A,
+      const MatrixView<T>& U, const SymMatrixView<T>& P);
+\end{tmvcode}
+\index{Polar Decomposition!Matrix}
+\index{Polar Decomposition!BandMatrix}
+\index{Matrix!Polar decomposition}
+\index{BandMatrix!Polar decomposition}
+
+\item Matrix Square Root 
+
+(\tt{HermMatrix, HermBandMatrix})
+
+$A \rightarrow S S$, where $A$ and $S$ are each positive definite hermitian matrices.
+
+\begin{tmvcode}
+void SquareRoot(const SymMatrixView<T>& A);
+S = A;
+
+void SquareRoot(const GenSymBandMatrix<T>& A, 
+      const SymMatrixView<T>& S);
+\end{tmvcode}
+\index{SymMatrix!Square root}
+\index{SymBandMatrix!Square root}
+\index{Square Root!SymMatrix}
+\index{Square Root!SymBandMatrix}
+
+If $A$ is found to be not positive definite, a \tt{NonPosDef} exception is thrown.
+\index{Exceptions!NonPosDef}
+
+\end{itemize}
+
+\subsection{Update a QR decomposition}
+\index{QR Decomposition!Update}
+\label{QRUpdate}
+
+One reason that it can be useful to create and deal with the QR decomposition directly,
+rather than 
+just relying on the division routines is the possibility
+of updating or ``downdating'' the resulting $R$ matrix.  
+
+If you are doing a 
+least-square fit to a large number of linear equations, you can write the system as
+a matrix equation: 
+$A x = b$, where $A$ is a matrix with more rows than columns, and you are seeking,
+not an exact solution for $x$, but rather the value of $x$ which minimizes
+$||b-Ax||_2$.  See \S\ref{Matrix_Division_Leastsquare} for a more in-depth discussion of this topic.
+
+It may be the case that you
+have more rows (i.e. constraints) than would allow the entire matrix to fit in memory.  
+In this case it may be tempting to use the so-called normal equation instead: 
+\begin{align*}
+A^\dagger A x &= A^\dagger b \\
+x & = (A^\dagger A)^{-1} A^\dagger b
+\end{align*}
+This equation theoretically gives the same 
+solution as using the QR decomposition on the original design matrix.
+However, it can be shown that the condition of $A^\dagger A$ is the 
+\underline{square} of the condition of $A$.  Since larger condition values
+lead to larger numerical instabilities and round-off problems, a mildly
+ill-conditioned matrix is made much worse by this procedure.
+
+When all of $A$ fits in memory, the better solution is to use the QR decomposition, $A = QR$,
+to calculate $x$.
+\begin{align*}
+Q R x &= b \\
+x &= R^{-1} Q^\dagger b
+\end{align*}
+In fact, this is the usual behind-the-scenes procedure when you write \tt{x = b/A} in TMV.
+But if $A$ is too large to fit in memory, then so is $Q$.
+
+A compromise solution, which is not quite as good as doing the full QR decomposition,
+but is better than using the normal equation, is to just calculate the $R$ of the
+QR decomposition, and not $Q$.  Then:
+\begin{align*}
+A^\dagger A x &= A^\dagger b \\
+R^\dagger Q^\dagger Q R x = R^\dagger R x &= A^\dagger b \\
+x &= R^{-1} (R^\dagger)^{-1} A^\dagger b
+\end{align*}
+
+Calculating $R$ directly from $A$ is numerically much more stable than 
+calculating it through, say, a Cholesky decomposition of $A^\dagger A$.
+So this method produces a more accurate answer for $x$ than the normal equation does.
+
+But how can $R$ be calculated if we cannot fit all of $A$ into memory at once?
+
+First, we point out a characteristic of unitary matrices that the product 
+of two or more of them is also unitary.  
+This implies that if we can calculate
+something like: $A = Q_0 Q_1 Q_2 ... Q_n R$, then this is the $R$ that we want.
+
+So, consider breaking $A$ into a submatrix, $A_0$, which can fit into memory, 
+plus the remainder, $A_1$, which may or may not.
+\begin{equation*}
+A = \left(\begin{array}{c}A_0 \\A_1\end{array}\right)
+\end{equation*}
+First perform a QR decomposition of $A_0 = Q_0 R_0$.  Then we have:
+\begin{align*}
+A &= \left(\begin{array}{c}Q_0 R_0 \\ A_1 \end{array}\right) \\
+&= \left(\begin{array}{cc}Q_0 & 0 \\ 0 & 1\end{array}\right) 
+      \left(\begin{array}{c}R_0 \\ A_1 \end{array}\right) \\
+&\equiv Q_0^\prime A_1^\prime
+\end{align*}
+
+Assuming that $A_0$ has more rows than columns, 
+then $A_1^\prime$ has fewer rows than
+the original matrix $A$.  So we can iterate this process until the 
+resulting matrix can fit in memory, and we can perform the final QR update
+to get the final value of $R$.
+
+For the numerical reasons mentioned above, 
+the fewer such iterations you do, the better.  So you should try to include as many
+rows of the matrix $A$ as possible in each step, given the amount of memory
+available.
+
+The solution equation, written above, also needs the quantity $A^\dagger b$, which
+can be accumulated in the same blocks:
+\begin{equation*}
+A^\dagger b = A_0^\dagger b_0 + A_1^\dagger b_1 + ....
+\end{equation*}
+This, combined with the calculation of $R$, allows us to determine $x$ using the above formula.
+
+The TMV library includes a command which does the update step of the above procedure
+directly, which is slightly more efficient than explicitly forming the $A_k^\prime$ matrices.
+The commands is
+\begin{tmvcode}
+void QR_Update(const UpperTriMatrixView<T>& R, const MatrixView<T>& X)
+\end{tmvcode}
+which updates the value of $R$ such that $R_{\rm out}^\dagger R_{\rm out} =
+R_{\rm in}^\dagger R_{\rm in} + X^\dagger X$.
+(The input matrix \tt{X} is destroyed in the process.)  This is equivalent to the QR
+definition of the update described above.
+
+So the entire process might be coded using TMV as:
+\begin{tmvcode}
+int n_full = nrows_for_full_A_matrix;
+int n_mem = nrows_that_fit_in_memory;
+assert(n_mem <= n_full);
+assert(n_mem > ncols);
+
+tmv::Matrix<double> A(n_mem,ncols); 
+tmv::Vector<double> b(n_mem);
+
+// Import_Ab sets A to the first n_mem rows of the full matrix, 
+// and also sets b to the same components of the full rhs vector.
+// Maybe it reads from a file, or performs a calculation, etc.
+Import_Ab(0,n_mem,A,b);
+
+// x will be the solution to A_full x = b_full when we are done
+// But for now, it is accumulating A_full.transpose() * b_full.
+tmv::Vector<double> x = A.transpose() * b;
+
+// Do the initial QR Decomposition:
+QR_Decompose(A.view());
+tmv::UpperTriMatrix<double> R = A.upperTri();
+
+// Iterate until we have done all the rows
+for(int n1=n_mem, n2=n1+n_mem; n2<n_full; n1=n2, n2+=n_mem) {
+    if (n2 > n_full) n2 = n_full;
+
+    // Import the next bit:
+    Import_Ab(n1,n2,A,b);
+
+    // (Usually, A1==A, b1==b, but not the last time through the loop.)
+    tmv::MatrixView<double> A1 = A.rowRange(0,n2-n1);
+    tmv::VectorView<double> b1 = b.subVector(0,n2-n1);
+
+    // Update, x, R:
+    x += A1.transpose() * b1;
+    QR_Update(R.view(),A1);
+}
+
+// Finish the solution:
+x /= R.transpose();
+x /= R;
+\end{tmvcode}
+
+\subsection{Downdate a QR decomposition}
+\index{QR Decomposition!Downdate}
+\label{QRDowndate}
+
+When performing a least-square fit of some data to a model,
+it is common to do some kind of outlier rejection to remove data that
+seem not to be applicable to the model - things like spurious measurements
+and such.
+For this, we basically want the opposite of a QR update - instead we want to 
+find the QR decomposition that results from
+removing a few rows from $A$.  This is called a QR ``downdate'', and is performed
+using the subroutine:
+\begin{tmvcode}
+void QR_Downdate(const UpperTriMatrixView<T>& R, const GenMatrix<T>& X)
+\end{tmvcode}
+where \tt{X} represents the rows from the original matrix to remove from the 
+QR decomposition.
+
+It is possible for the downdate to fail (and throw an exception) 
+if the matrix $X$ does not represent rows
+of the matrix that was originally used to create $R$.
+Furthermore,
+with round-off errors, the error may still result with actual rows from the 
+original $A$
+if $R$ gets too close to singular.  In this case, \tt{QR\_Downdate} throws
+a \tt{NonPosDef} exception.  This might seem like a strange choice, but the 
+logic is that $R^\dagger R$ is the Cholesky decomposition of $A^\dagger A$,
+and \tt{QR\_Downdate(R,X)} basically updates $R$ to be the Cholesky decomposition
+of $A^\dagger A - X^\dagger X$.  The procedure fails (and throws) when this latter 
+matrix is found not to be positive definite.
+\index{QR Decomposition!Downdate!NonPosDef exception}
+\index{Exceptions!NonPosDef}
+
+It is worth pointing out that the algorithm used in TMV is a new one developed by
+Mike Jarvis.  Most of the texts and online resources that discuss the 
+QR downdate algorithm only explain how to do one row at a time, using a 
+modification of the QR update using Givens rotations.  
+If you are doing many rows, it is common that roundoff errors in such a 
+procedure accumulate sufficiently for the routine to fail.  The TMV algorithm
+instead downdates all of the rows together using a modification of the 
+Householder reflection algorithm for updates.  This algorithm seems to be
+much more stable than ones that use Givens rotations.  
+
+The only references to a similar algorithm that I could find in the literature is 
+described in the paper,
+"Stability Analysis of a Householder-based Algorithm for Downdating the Cholesky Factorization", Bojanczyk and Steinhardt, 1991, Siam J. Sci. Stat. Comput. 12, 6, 
+1255\footnote{
+It seems that this paper has become a bit forgotten.  A recent paper,
+``Efficient Algorithms for Block Downdating of Least Squares Solutions'', Yanev and Kontoghiorghes, 2004, Applied Numerical Mathematics, 49, 3, evaluates
+five algorithms for doing the downdate.  However, all
+of them are block versions of the Given matrix approach.  They do not consider 
+any algorithms that use Householder matrices to do the downdate, and do not reference
+the above paper by Bojanczyk and Steinhardt.  In addition, none of the papers that
+do cite the Bojanczyk and Steinhardt paper seem to be about the general problem 
+of QR (or Cholesky) downdating.
+}.
+This paper describes a similar algorithm to compute the downdated $R$ matrix
+using Householder matrices.  However, the details of the computation are somewhat
+different from the TMV algorithm.  Also, they only consider real matrices, and they 
+do not include the block-householder techniques in their description to employ more
+so-called ``level-3'' matrix operations.
+
+Therefore, I will describe the TMV downdate algorithm here.  I think it is clearer to 
+begin by describing the update algorithm in \S\ref{QRUpdate_Algorithm}, since it 
+is quite similar to the algorithm we use for downdating, but is a bit easier to 
+understand.  Then the downdate algorithm
+is described in \S\ref{QRDowndate_Algorithm}.
+
+\subsubsection{The update algorithm}
+\index{QR Decomposition!Update!algorithm}
+\label{QRUpdate_Algorithm}
+
+First lets look at the Householder algorithm for QR update:
+
+Given the initial decomposition $A_0 = Q_0 R_0$, we want to find $R$ such that
+\begin{align*}
+A_1 = \left(\begin{array}{c}A_0 \\ X \end{array}\right) &= Q_1 R_1 \\
+\left(\begin{array}{c}Q_0 R_0 \\ X \end{array}\right) &= Q_1 R_1 \\
+\left(\begin{array}{cc}Q_0 & 0 \\ 0 & 1 \end{array}\right) 
+\left(\begin{array}{c}R_0 \\ X \end{array}\right) &= Q_1 R_1 
+\end{align*}
+So if we perform a QR decomposition: 
+\begin{equation*}
+S \equiv \left(\begin{array}{c}R_0 \\ X \end{array}\right) = Q_S R_S
+\end{equation*}
+Then this is the $R$ we want: $R_1 = R_S$, and 
+\begin{equation*}
+Q_1 = \left(\begin{array}{cc}Q_0 & 0 \\ 0 & 1 \end{array}\right)  Q_S
+\end{equation*}
+
+For the following discussion, let $N$ be the number of rows (and columns) in $R_0$,
+and $M$ be the number of rows in $X$.
+
+To perform the decomposition, we multiply $S$ by a series of Householder reflections
+on the left to zero out each column of $X$ one at a time.  Householder reflections 
+are unitary, so their product in the reverse order is $Q_S$:
+\begin{align*}
+\left(\begin{array}{c}R_1 \\ 0 \end{array}\right) &=
+  H_N H_{N-1} ... H_2 H_1 
+  \left(\begin{array}{c}R_0 \\ A_1 \end{array}\right)  \\
+Q_S &= H_1^\dagger H_2^\dagger ... H_{N-1}^\dagger H_N^\dagger 
+\end{align*}
+
+Householder reflections are defined as $H = I - \beta (x - y e_1)  (x - y e_1)^\dagger$
+where $x$ is a (column) vector, $y$ is a scalar with $|y| = ||x||_2$, $e_1$ is the
+basis vector whose only non-zero element is the first: $e_1(1) = 1$, and
+$\beta = (||x||_2^2 - y^* x(1))^{-1}$.
+They have the useful properties that $H x = y e_1$ and they are unitary:
+$H^\dagger H = H H^\dagger = I$.
+Furthermore, if $\beta$ is real, they are also hermitian: $H = H^\dagger$.
+
+$H_1$ is defined for the vector 
+$x = (R_0(1,1), 0, 0, ... , 0, 0, X(1,1), X(2,1), ... , X(M,1) )$ 
+where the stretch of $0$'s includes a total of $(N-1)$ $0$'s. This value of 
+$x$ completely determines the Householder matrix $H_1$ up to an arbitrary sign
+on either $y$ or $\beta$ (or in general an arbitrary factor $e^{i \theta}$) which is 
+chosen to minimize rounding errors.  The optimal choice is to choose
+$y = -||x||_2\:x(1)/|x(1)|$, which makes $\beta$ real.  
+However, the LAPACK choice is $y = -||x||_2 \:sign(real(x(1))$, which means
+$\beta$ is complex, and $H$ is not Hermitian\footnote{
+This choice complicates a lot of the calling routines which use
+Householder matrices, since you need to keep track of conjugation of the 
+$\beta$ values.  Since TMV is designed to be able to call LAPACK
+when possible, it is forced to follow the same convention.
+
+In fact, it could be argued that the LAPACK convention is even ``wrong'' in the sense that
+their Householder matrices are not actually ``reflections''.  A reflection is a 
+unitary matrix whose determinant is $-1$.  The determinant of a Householder 
+matrix as defined here is $-\beta^2/|\beta|^2$ which is $-1$ for real $\beta$, 
+but not for complex $\beta$.  But we are stuck with their choice, so we allow $\beta$
+to be complex in this discussion.
+}.
+\index{LAPACK!Householder matrices}
+
+The product $H_1 S$ ``reflects'' the first column
+of $X$ into the first diagonal element of $R_0$.  Because of all the $0$'s, 
+most of $R_0$ is unaffected -- only the first row of $R_0$ and the rest of $X$
+are changed.
+The subsequent Householder reflections are defined similarly, each zeroing out
+a column of $X$, and modifying the corresponding row of $R_0$ and the 
+remaining elements of $X$.
+
+At the end of this procedure, the matrix $R_0$ will be changed into the 
+matrix $R_1$.  If desired, $Q_S$ (and then $Q_1$) 
+may also be calculated in the process, but the 
+TMV implementation of the QR update does not calculate $Q_1$.
+If there is a demand for such a routine, it would not be hard to add it, 
+but I think most applications of the update do not use the $Q$ matrix explicitly.
+
+\subsubsection{The downdate algorithm}
+\index{QR Decomposition!Downdate!algorithm}
+\label{QRDowndate_Algorithm}
+
+Given the initial decomposition
+\begin{equation*}
+A_1 = \left(\begin{array}{c}A_0 \\ X \end{array}\right) = Q_1 R_1 
+\end{equation*}
+we want to find $R_0$ such that $A_0 = Q_0 R_0$.
+
+The TMV algorithm to do this essentially performs the same steps as in the update
+algorithm above,
+but instead removes the effect of each $H$ from $R_1$.
+This is easy to
+do if we can determine what each $H$ is, since $H^{-1} = H^\dagger$, so we just
+apply $H^\dagger$ to update each row of $R_1$.  The $X$ update takes
+the regular $H$ matrix, since we need to replicate the steps that we would do
+for an update to keep finding the correct values for the remaining columns of $X$.
+
+All of the values in the vector $x$ needed to define $H_1$ are given, except for the first,
+$R_0(0,0)$.  But this is easy to calculate, since
+\begin{equation*}
+|R_1(0,0)|^2 = |R_0(0,0)|^2 + ||X(1:M,0)||_2^2
+\end{equation*}
+This determines the $x$ vector, which in turn defines $H_1$
+(modulo an arbitrary sign, which again is chosen to minimize rounding errors).
+Thus, we can calculate $H_1$ and apply it as described above.  Each subsequent Householder
+matrix is created and applied similarly for each column of $X$.  When we have finished
+this process, we are left with $R_0$ in the place of $R_1$.
+
+If at any point in the process, we find the calculated $|R_0(k,k)|^2 < 0$, then 
+the algorithm fails.  In the TMV implementation, a \tt{NonPosDef} exception is thrown.
+
+In practice, for both of these algorithms, we actually use a blocked implementation for updating
+the $R$ and $X$ matrices.  We accumulate the effect of the Householder matrices until 
+there are sufficiently many (e.g. 64), at which point we update the appropriate rows of the $R$
+matrix and the rest of $X$.  Implementing this correctly is mostly a matter of keeping track
+of which elements have been updated yet, making sure that whenever an element is used,
+it is already updated, while delaying as much of the calculation as possible in order 
+to make maximum
+use of the so-called ``level-3'' matrix functions, which are the most efficient on modern computers.
+We also make the additional improvement of using a recursive algorithm within each block,
+which gains some additional level-3 operations, for a bit more efficiency.
+
+\subsection{Other SymMatrix operations}
+\index{SymMatrix!Arithmetic!rank-2 Update}
+\index{SymMatrix!Arithmetic!rank-2k Update}
+\index{SymMatrix!Arithmetic!product of two regular matrices}
+\label{SymMatrix_Ops}
+
+There are three more arithmetic routines that we provide for \tt{SymMatrix},
+which do not have
+any corresponding shorthand with the usual arithmetic operators.
+
+The first two are:
+\begin{tmvcode}
+tmv::Rank2Update<bool add>(T x, const GenVector<T1>& v1, 
+      const GenVector<T2>& v2, const SymMatrixView<T>& s)
+tmv::Rank2KUpdate<bool add>(T x, const GenMatrix<T1>& m1, 
+      const GenMatrix<T2>& m2, const SymMatrixView<T>& s)
+\end{tmvcode}
+They are similar to the \tt{Rank1Update} and \tt{RankKUpdate} routines,
+which are implemented in TMV with the expressions 
+\tt{s += x * v \^\ v} and \tt{s += x * m * m.transpose()}.
+
+A rank-2 update calculates
+\begin{tmvcode}
+s (+=) x * ((v1 ^ v2) + (v2 ^ v1))
+s (+=) x * (v1 ^ v2.conjugate()) + conj(x) * (v2 ^ v1.conjugate())
+\end{tmvcode}
+for a symmetric or hermitian \tt{s} respectively,
+where ``(+=)'' means ``+='' if \tt{add} is \tt{true} and ``='' 
+if \tt{add} is \tt{false}.
+Likewise, a rank-2k update calculates:
+\begin{tmvcode}
+s (+=) x * (m1 * m2.transpose() + m2 * m1.transpose())
+s (+=) x * m1 * m2.adjoint() + conj(x) * m2 * m1.adjoint()
+\end{tmvcode}
+for a symmetric or hermitian \tt{s} respectively.
+
+We don't have an arithmetic operator 
+shorthand for these, because, as you can see, the operator
+overloading required would be quite complicated.  
+And since they are pretty rare, I decided to just let the programmer 
+call the routines explicitly.
+
+The other routine is:
+\begin{tmvcode}
+tmv::SymMultMM<bool add>(T x, const GenMatrix<T>& m1, 
+      const GenMatrix<T>& m2, const SymMatrixView<T>& s)
+\end{tmvcode}
+This calculates the usual generalized matrix product:
+\tt{s (+=) x * m1 * m2}, but it basically
+asserts that the product \tt{m1 * m2} is symmetric (or hermitian as appropriate).
+
+Since a matrix product is not in general symmetric, I decided not to allow 
+this operation with just the usual operators to prevent the user from doing 
+this accidentally.  However, there are times when the 
+programmer can know that the product should be (at least numerically close to)
+symmetric and that this calculation is ok.  Therefore it is provided as a subroutine.
+
+\subsection{Element-by-element product}
+\index{Vector!Arithmetic!element by element product}
+\index{Matrix!Arithmetic!element by element product}
+\index{DiagMatrix!Arithmetic!element by element product}
+\index{UpperTriMatrix!Arithmetic!element by element product}
+\index{BandMatrix!Arithmetic!element by element product}
+\index{SymMatrix!Arithmetic!element by element product}
+\index{SymBandMatrix!Arithmetic!element by element product}
+\label{ElementProd}
+
+The two usual kinds of multiplication for vectors are the inner product and 
+the outer product, which result in a scalar and a matrix respectively.
+However there is also a third kind of multiplication that is sometimes needed where
+each element in a vector is multiplied by the
+corresponding element in another vector: $v(i) = v(i) \cdot w(i)$.
+
+There are two functions that should provide all of this kind of functionality
+for you:
+\begin{tmvcode}
+ElementProd(T x, const GenVector<T1>& v1, const VectorView<T>& v2);
+AddElementProd(T x, const GenVector<T1>& v1, const GenVector<T2>& v2,
+      const VectorView<T>& v3)
+\end{tmvcode}
+The first performs $v_2(i) = x \cdot v_1(i) \cdot v_2(i)$, and the second performs
+$v_3(i) = v_3(i) + x \cdot v_1(i) \cdot v_2(i)$ for $i = 0 ... (N-1)$ (where $N$ is the 
+size of the vectors).
+
+There is no operator overloading for \tt{Vector}s that would be equivalent to 
+these expressions.
+But they are actually equivalent to the following:
+\begin{tmvcode}
+v2 *= x * DiagMatrixViewOf(v1);
+v3 += x * DiagMatrixViewOf(v1) * v2;
+\end{tmvcode}
+respectively.  In fact, these statements inline to the above function calls
+automatically.  Depending on you preference and the meanings of your vectors,
+these statements may or may not be clearer as to what you are doing.
+
+There are also corresponding functions for \tt{Matrix} and for each of the special
+matrix types:
+\begin{tmvcode}
+ElementProd(T x, const GenMatrix<T1>& m1, const MatrixView<T>& m2);
+AddElementProd(T x, const GenMatrix<T1>& m1, const GenMatrix<T2>& m2,
+      const MatrixView<T>& m3);
+\end{tmvcode}
+Likewise for the other special matrix classes.  The first performs 
+$m_2(i,j) = x \cdot m_1(i,j) \cdot m_2(i,j)$, and the second performs
+$m_3(i,j) = m_3(i,j) + x \cdot m_1(i,j) \cdot m_2(i,j)$ for every $i,j$ in the matrix.
+
+These don't have any \tt{DiagMatrixViewOf} version, since the corresponding 
+concept would require a four-dimensional tensor, and the TMV library
+just deals with one- and two-dimensional objects.
+
+The matrices all have to be the same size and shape, but can have any 
+(i.e. not necessarily the same) storage method.  Of course, the routines are fastest
+if all the matrices use the same storage.
+
+\subsection{BaseMatrix views}
+\index{BaseMatrix!Views of}
+\index{BaseMatrix!Copy of}
+\index{BaseMatrix!Inverse of}
+\label{BaseMatrixViews}
+
+If you are dealing with objects that are only known to be \tt{BaseMatrix}es
+(i.e. they could be a \tt{Matrix} or a \tt{DiagMatrix} or a \tt{SymMatrix}, etc.),
+then methods like \tt{m.transpose()}, \tt{m.view()}, and such
+can't know what kind of object to return.
+So these methods can't be defined for a \tt{BaseMatrix}.  
+
+Instead, we have the following virtual methods, 
+which are available to a \tt{BaseMatrix}
+object and are defined in each specific kind of matrix to return a pointer
+to the right kind of object:
+\begin{tmvcode}
+std::auto_ptr<tmv::BaseMatrix<T> > m.newCopy()
+std::auto_ptr<tmv::BaseMatrix<T> > m.newView()
+std::auto_ptr<tmv::BaseMatrix<T> > m.newTranspose()
+std::auto_ptr<tmv::BaseMatrix<T> > m.newConjugate()
+std::auto_ptr<tmv::BaseMatrix<T> > m.newAdjoint()
+std::auto_ptr<tmv::BaseMatrix<T> > m.newInverse()
+\end{tmvcode}
+\tt{newCopy} and \tt{newInverse} create new storage to store a copy of the 
+matrix or its inverse, respectively.  The other four just return views of the current 
+matrix.
+
+\subsection{Iterators}
+\index{Vector!Iterators}
+\label{Iterators}
+
+We mentioned that the iterators through a \tt{Vector} are:
+\begin{tmvcode}
+typename tmv::Vector<T>::iterator
+typename tmv::Vector<T>::const_iterator
+typename tmv::Vector<T>::reverse_iterator
+typename tmv::Vector<T>::const_reverse_iterator
+\end{tmvcode}
+just like for standard library containers.  The specific types to which these
+typedefs refer are:
+\begin{tmvcode}
+tmv::VIt<T,tmv::Unit,tmv::NonConj>
+tmv::CVIt<T,tmv::Unit,tmv::NonConj>
+tmv::VIt<T,tmv::Step,tmv::NonConj>
+tmv::CVIt<T,tmv::Step,tmv::NonConj>
+\end{tmvcode}
+respectively.
+
+\tt{VIt} is a mutable-iterator, and \tt{CVIt} is a const-iterator.  \tt{Unit} 
+indicates that the step size is 1, while \tt{Step} allows for any step size
+between successive elements (and is therefore slower).  For the reverse
+iterators, the step size is -1.
+
+This can be worth knowing if you are going to be optimizing code that uses
+iterators of \tt{VectorView}s.
+This is because their iterators are instead:
+\begin{tmvcode}
+tmv::VIter<T>
+tmv::CVIter<T>
+\end{tmvcode}
+which always check the step size (rather than assuming unit steps) and always
+keep track of a possible conjugation.
+
+If you know that you are dealing with a view that is not conjugated, you can 
+convert your iterator into one of the above \tt{VIt} or \tt{CVIt} types, which will be 
+faster, since they won't check the conjugation bit each time. 
+
+Likewise, if you
+know that it {\em is} conjugated, then you can use \tt{tmv::Conj} for the 
+third template parameter above.  This indicates that the vector view really
+refers to the conjugates of the values stored in the actual memory locations.
+
+Also, if you know that your view has unit steps between elements, converting to 
+an iterator with \tt{tmv::Unit} will iterate faster.  It is often faster to check
+the step size once at the beginning of the routine and convert to a unit-step
+iterator if possible.
+
+All of these conversions can be done with a simple cast or constructor, such as:
+\begin{tmvcode}
+if (v.step() == 1) {
+    for(VIt<float,Unit,NonConj> it = v.begin(); it != v.end(); ++it)
+        (*it) = sqrt(*it);
+} else {
+    for(VIt<float,Step,NonConj> it = v.begin(); it != v.end(); ++it)
+        (*it) = sqrt(*it);
+}
+\end{tmvcode}
+
+Regular \tt{Vector}s are always \tt{Unit} and \tt{NonConj}, so those iterators
+are already fast without using the specific \tt{VIt} names. 
+That is, you can just use \tt{Vector<T>::iterator} rather than \tt{VIt<T,Unit,NonConj>}
+without any drop in performance.
+
+\subsection{Direct memory access}
+\index{Vector!Direct access to memory}
+\index{SmallVector!Direct access to memory}
+\index{Matrix!Direct access to memory}
+\index{DiagMatrix!Direct access to memory}
+\index{UpperTriMatrix!Direct access to memory}
+\index{BandMatrix!Direct access to memory}
+\index{SymMatrix!Direct access to memory}
+\index{SymBandMatrix!Direct access to memory}
+\label{DirectAccess}
+
+We provide methods for accessing the memory of a matrix or vector directly.
+This is especially useful for meshing the TMV objects with other libraries
+(such as BLAS or LAPACK).  But it can also be useful for writing some
+optimized code for a particular function.  
+
+The pointer to the start of the memory for a vector can be obtained by:
+\begin{tmvcode}
+T* v.ptr()
+const T* v.cptr() const
+\end{tmvcode}
+\index{Vector!Methods!ptr}
+\index{Vector!Methods!cptr}
+
+Using the direct memory access
+requires that you know the spacing of the elements in memory and
+(for views) whether the view is conjugated or not.  So we also provide:
+\begin{tmvcode}
+int v.step() const
+bool v.isconj() const
+\end{tmvcode}
+\index{Vector!Methods!step}
+\index{Vector!Methods!isconj}
+
+For matrices, the corresponding routines return the upper-left element
+of the matrix.  Note that for some matrices, (e.g. \tt{BandMatrix<T,DiagMatrix>}) 
+this is not necessarily the first element in memory.  We also need to know the 
+step size in both directions:
+\begin{tmvcode}
+T* m.ptr()
+const T* m.cptr() const
+int m.stepi() const
+int m.stepj() const
+bool m.isconj() const
+bool m.isrm() const
+bool m.iscm() const
+\end{tmvcode}
+\index{Matrix!Methods!ptr}
+\index{Matrix!Methods!cptr}
+\index{Matrix!Methods!stepi}
+\index{Matrix!Methods!stepj}
+\index{Matrix!Methods!isconj}
+\index{Matrix!Methods!isrm}
+\index{Matrix!Methods!iscm}
+\index{DiagMatrix!Methods!ptr}
+\index{DiagMatrix!Methods!cptr}
+\index{DiagMatrix!Methods!isconj}
+\index{UpperTriMatrix!Methods!ptr}
+\index{UpperTriMatrix!Methods!cptr}
+\index{UpperTriMatrix!Methods!stepi}
+\index{UpperTriMatrix!Methods!stepj}
+\index{UpperTriMatrix!Methods!isconj}
+\index{UpperTriMatrix!Methods!isrm}
+\index{UpperTriMatrix!Methods!iscm}
+\index{BandMatrix!Methods!ptr}
+\index{BandMatrix!Methods!cptr}
+\index{BandMatrix!Methods!stepi}
+\index{BandMatrix!Methods!stepj}
+\index{BandMatrix!Methods!isconj}
+\index{BandMatrix!Methods!isrm}
+\index{BandMatrix!Methods!iscm}
+\index{SymMatrix!Methods!ptr}
+\index{SymMatrix!Methods!cptr}
+\index{SymMatrix!Methods!stepi}
+\index{SymMatrix!Methods!stepj}
+\index{SymMatrix!Methods!isconj}
+\index{SymMatrix!Methods!isrm}
+\index{SymMatrix!Methods!iscm}
+\index{SymBandMatrix!Methods!ptr}
+\index{SymBandMatrix!Methods!cptr}
+\index{SymBandMatrix!Methods!stepi}
+\index{SymBandMatrix!Methods!stepj}
+\index{SymBandMatrix!Methods!isconj}
+\index{SymBandMatrix!Methods!isrm}
+\index{SymBandMatrix!Methods!iscm}
+The step in the ``down'' direction along a column is \tt{stepi}, and the step to 
+the ``right'' along a row is \tt{stepj}.
+The last two check if a matrix is \tt{RowMajor} or \tt{ColMajor} respectively.
+
+For band matrices, there are also:
+\begin{tmvcode}
+int m.diagstep() const
+bool m.isdm() const
+\end{tmvcode}
+\index{BandMatrix!Methods!diagstep}
+\index{BandMatrix!Methods!isdm}
+\index{SymBandMatrix!Methods!diagstep}
+\index{SymBandMatrix!Methods!isdm}
+which return the step along the diagonal and whether the matrix is \tt{DiagMajor}.
+
+For symmetric/hermitian matrices, there are some more methods:
+\begin{tmvcode}
+bool m.isherm()
+bool m.issym()
+bool m.isupper()
+\end{tmvcode}
+\index{SymMatrix!Methods!isherm}
+\index{SymMatrix!Methods!issym}
+\index{SymMatrix!Methods!isupper}
+\index{SymBandMatrix!Methods!isherm}
+\index{SymBandMatrix!Methods!issym}
+\index{SymBandMatrix!Methods!isupper}
+The first two both return \tt{true} for real symmetric matrices, but 
+differentiate between hermitian and symmetric varieties for complex types.
+The last one tells you whether the actual elements to be accessed are stored
+in the upper triangle half of the matrix (true) or the lower (false).
+
+\subsection{``Linear'' views}
+\label{LinearViews}
+
+Our matrices generally store the data contiguously in memory with all of the 
+methods like \tt{row} and \tt{col} returning the appropriate slice through the
+data.  Occasionally, though, it can be useful to treat the whole matrix
+as a single vector of elements.  We use this internally for implementing routines
+like \tt{setAllTo} and matrix addition, among others.  These are faster than
+accessing the data in ways that use the actual matrix structure.
+
+This kind of access may be useful for some users of the library, 
+so the following methods are available:
+\begin{tmvcode}
+tmv::VectorView<T> m.linearView()
+tmv::ConstVectorView<T> m.constLinearView()
+bool m.canLinearize()
+\end{tmvcode}
+\index{Matrix!View as a contiguous Vector}
+\index{Matrix!Methods!linearView}
+\index{Matrix!Methods!constLinearView}
+\index{Matrix!Methods!canLinearize}
+These return a view to the elements of a \tt{Matrix} as a single vector.  
+It is always allowed for an actual \tt{Matrix}.  For a \tt{MatrixView} 
+(or \tt{ConstMatrixView}), it is only allowed if all of the elements in the 
+view are in one contiguous block of memory.  The helper function 
+\tt{m.canLinearize()} returns whether or not the first two methods will work.
+
+The same methods are also defined for \tt{BandMatrix} (and corresponding views).
+In this case, there are a few elements in memory that are not necessarily
+defined, since they lie outside of the actual band structure, so some care
+should be used depending on the application of the returned vector views.  
+(For example, one cannot compute things like the
+minimum or maximum element this way, since the undefined elements may
+have very large or small values which would corrupt this calculation.)
+
+The triangular and symmetric matrices have too much memory that is not
+actually used by the matrix for these to be very useful, so we do not provide them.
+When we eventually implement the packed storage varieties, these methods will
+be provided for those.
+
+Along the same lines is another method for a \tt{Vector}:
+\begin{tmvcode}
+tmv::VectorView<RT> v.flatten()
+\end{tmvcode}
+\index{Vector!Methods!flatten}
+This returns a real view to the real and imaginary elements of a complex \tt{Vector}. 
+The initial \tt{Vector} is required to have unit step.  The returned view has twice the 
+length of \tt{v} and also has unit step.
+
+This probably isn't very useful for most users either, but it is useful internally,
+since it allows code such as:
+\begin{tmvcode}
+tmv::Vector<complex<double> > v(500);
+[...]
+v *= 2.3;
+\end{tmvcode}
+to call the BLAS routine \tt{dscal} with \tt{x=2.3}, rather than \tt{zscal}
+with \tt{x=complex<double>(2.3,0.0)}, which would be slower.
+
+\subsection{Getting the Version of TMV}
+\index{Version of TMV}
+
+At times it can be useful to be able to access what version of TMV is installed on a 
+particular machine, either to log the information as part of the meta-data about a
+run of a program, or even to modify the code depending on which features of TMV
+are available.  To address this, we provide three ways to access this information.
+
+First, there is a function you can call from within your program:
+\begin{tmvcode}
+std::string TMV_Version();
+\end{tmvcode}
+\index{TMV\_Version}
+For this release, this function returns the string ``\tttmvversion''.  This is useful for inserting
+into a log file or anywhere else that you want to record the version somewhere.
+
+Second we also provide three C preprocessor definitions:
+\begin{tmvcode}
+TMV_MAJOR_VERSION
+TMV_MINOR_VERSION
+TMV_VERSION_AT_LEAST(major,minor)
+\end{tmvcode}
+\index{TMV\_MAJOR\_VERSION}
+\index{TMV\_MINOR\_VERSION}
+\index{TMV\_VERSION\_AT\_LEAST}
+\index{Conditional compilation}
+The first two are defined to be \tmvmajorversion\ and \tmvminorversion\ for this release.
+The third can be used with an \tt{#if} directive to change what code you want to compile
+according the the version of TMV that is installed.
+For example, in version 0.64 we added the \tt{m.unitUpperTri()} feature.  So you could
+write\footnote{
+Well, technically, this wouldn't wouldn't be very useful, 
+since the \tt{TMV_VERSION_AT_LEAST} macro
+wasn't introduced until version 0.64 either...}:
+\begin{tmvcode}
+#if TMV_VERSION_AT_LEAST(0,64)
+U = m.unitUpperTri();
+#else
+U = m.upperTri(tmv::UnitDiag);
+#endif
+\end{tmvcode}
+
+And finally, we also include a bash script called \tt{tmv-version} that will output
+the version number, so you can run this
+directly from the command line.  For this release, this script produces the output:\\ \\
+\texttt{\$ tmv-version} \\
+\tttmvversion \\
+\texttt{\$}\\ \\
+This can be useful as part of a larger script if you want to log the TMV version from that
+rather than from within a C++ program.  
+
+Hopefully these three methods will satisfy any potential manner in which you might want 
+to access the version of TMV that is on your system.  If there is something I missed, and 
+none of these work for you, please
+let me know, and I'll probably be happy to provide another mechanism in future releases.
+

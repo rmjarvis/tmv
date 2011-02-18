@@ -2,7 +2,67 @@ Changes from version 0.64 to 0.65:
 (See the History section in the full documentation for changes from previous
 versions to 0.64.)
 
+New features:
+
+-- Made integer determinants calculate correctly.  The previous code
+   used division, which produced wrong answers for integers. Probably 
+   anyone who tried to do this would consider this a bug fix, but
+   it was (somewhat poorly) documented that this wouldn't work.
+   The code now uses Bareiss's algorithm for these matrices, instead
+   of LU decomposition, which is what floating point matrices use.
+
+-- Added m.sumAbs2Elements()
+
+-- Added m.addToAll(x)
+
+-- Added m.resize(nrows,ncols) and v.resize(n) (and similar for other Matrix
+   types).
+
+-- Added ability to make the libraries shared libraries, rather than static
+   with the SHARED=true scons option.
+
+-- Added ability to turn off TMV debug statements with TMVNDEBUG.
+   Defining NDEBUG also still turns off TMV debugging, but this allows 
+   the user to turn off just the TMV debug statements without turning off 
+   the debug statements in their own code.
+
+-- Skip compilation of functions for <int> that it will never use.
+   Also specialized some methods for <int> and complex<int> to make sure
+   they don't call those routines.  If compiled with DEBUG=true, the
+   compiled code hits a TMVAssert(false).  
+   
+   Perhaps I should change this to throw an exception rather than use 
+   Assert, so it doesn't get turned off by the (default) DEBUG=false.
+   Something like InvalidCallError or something like that.
+   I'd have to add that to the tmv::Error heirarchy.
+   But in 0.70 these will all become static_assert failures, which is a
+   better way to do it, so it's probably not worth it.
+
+-- Updated the test suite to work better with <int> tests.  Many tests
+   had been disabled for int, since the way I tested things didn't really
+   work with integer matrices. But with the new changes, I can run a larger
+   fraction of the test suite on <int> and <complex<int> > matrices.
+
+-- Added TEST_FLOAT, TEST_DOUBLE, etc. to scons options.  This allows
+   for only testing one type at a time without recompiling the libraries.
+
+-- Made the default configuration for scons to be WITH_LAPACK=false.
+   Too many LAPACK installations are not thread safe.  And since I 
+   personally use a lot of openmp code in my programs, I occasionally
+   get random segmentation faults when I use TMV with LAPACK.  
+   Since the native TMV code is almost universally as fast as LAPACK,
+   and _is_ thread safe, I finally decided to just make that the default.
+
+-- Made the code mostly compatible with the Sun CC compiler.  However,
+   there seems to be a bug with the compiler so that it doesn't compile
+   the full test suite.  Only tests 1, 3a, 3d, and 3e compiled successfully.
+   The others died with an internal compiler error.  I couldn't figure out 
+   a workaround to make them work.
+
 Bug fixes:
+
+-- Fixed some compilation problems when compiling with INST_INT=true.
+   There were some linking errors that have now been fixed.
 
 -- Fixed a bug in the allocation code in TMV_Array.h for icpc compilations.
    icpc has a "feature" that it only turns on SSE commands if you explicitly
@@ -21,14 +81,18 @@ Bug fixes:
    seems worth it to always align on 16 byte boundaries even if TMV 
    does explicitly know that it will be useful.
    
--- Fixed some compilation problems when compiling with INST_INT=true.
-   There were some linking errors that have now been fixed.
+-- Fixed a bug in StackArray (used for SmallVector and SmallMatrix) where 
+   complex allocations weren't getting properly aligned on 16 bytes boundaries.
+   
+-- Increased the maximum number of iterations within the divide-and-conquer
+   SVD algorithm from 20 to 100, since I found a case that required 27 
+   iterations to converge.
 
--- In SConstruct file, now always use -fno-strict-aliasing for g++.  (It was
-   just for version <= 4.2.)  I found a bug in g++ 4.5 that was fixed by
-   turning off strict aliasing.  Since I don't think the strict aliasing
-   optimizations are probably worth much for TMV, I decided to just always
-   use the -fno-strict-aliasing flag and be safe.
+-- Fixed some places where nan's in the input data could lead to infinite 
+   loops in certain algorithms.
+
+-- Fixed a place in the SV Decomposition which could (rarely) go into
+   an infinite loop.
 
 -- Fixed a bug in the BLAS calls of things like gemv, gemm, etc that have a 
    "beta" parameter.  BLAS reinterprets a statement like y = A * x as
@@ -37,69 +101,21 @@ Bug fixes:
    situation) and that uninitialized data happens to have a nan in it.
    Then some BLAS distributions are true to the beta * y formulation which
    involves a 0 * nan = nan.  So the output preserves the nan, rather than
-   overwriting with the desired answer. 
+   overwriting with the desired answer.  
+
+   From my reading of the BLAS standard, this is a bug in these BLAS 
+   distributions. (They are supposed to zero out the input data if beta == 0.) 
+   But since some distributions have this bug, the TMV code needs to 
+   work around it.
    
    The solution is basically to always zero out the y value directly
    before calling gemv (or any of several others), rather than counting
    on the BLAS implementation to do it.  So that is what TMV does now.
 
--- Increased the maximum number of iterations within the divide-and-conquer
-   SVD algorithm from 20 to 100, since I found a case that required 27 
-   iterations to converge.
+-- In SConstruct file, now always use -fno-strict-aliasing for g++.  (It was
+   just for version <= 4.2.)  I found a bug in g++ 4.5 that was fixed by
+   turning off strict aliasing.  Since I don't think the strict aliasing
+   optimizations are probably worth much for TMV, I decided to just always
+   use the -fno-strict-aliasing flag and be safe.
 
--- Fixed some places where nan's in the input data can lead to infinite loops.
 
--- Also fixed a place in the SV Decomposition which could rarely go into
-   an infinite loop.
-   
-
-New features:
-
--- Made integer determinants calculate correctly, since the previous code
-   used division, which produced wrong answers for integers. Probably 
-   anyone who tried to do this would consider this a bug fix, but
-   it was (somewhat poorly) documented that this wouldn't work.
-   The code now uses Bareiss's algorithm for these matrices, instead
-   of LU decomposition, which is what floating point matrices use.
-
--- Skip compilation of functions for <int> that it will never use.
-   Also specialized some methods for <int> and complex<int> to make sure
-   they don't call those routines.  If compiled with DEBUG=true, the
-   compiled code hits a TMVAssert(false).  
-   
-   Perhaps I should change this to throw an exception rather than use 
-   Assert, so it doesn't get turned off by the (default) DEBUG=false.
-   Something like InvalidCallError or something like that.
-   I'd have to add that to the tmv::Error heirarchy.
-   But in 0.70 these will all become static_assert failures, which is a
-   better way to do it, so it's probably not worth it.
-
--- Updated the test suite to work better with <int> tests.  Many tests
-   had been disabled for int, since the way I tested things didn't really
-   work with integer matrices. But with the new changes, I can run a larger
-   fraction of the test suite on <int> and <complex<int> > matrices.
-   
--- Added m.sumAbs2Elements()
-
--- Added m.addToAll(x)
-
--- Added m.resize(nrows,ncols) and v.resize(n) (and similar for other Matrix
-   types).
-
--- Added TEST_FLOAT, TEST_DOUBLE, etc. to scons options.  This allows
-   for only testing one type at a time without recompiling the libraries.
-
--- Added ability to make the libraries shared libraries, rather than static
-   with the SHARED=true scons option.
-
--- Added ability to turn off TMV debug statements with TMVNDEBUG.
-   Defining NDEBUG also still turns off TMV debugging, but this allows 
-   the user to turn off just the TMV debug statements without turning off 
-   the debug statements in their own code.
-
--- Made the default configuration for scons to be WITH_LAPACK=false.
-   Too many LAPACK installations are not thread safe.  And since I 
-   personally use a lot of openmp code in my programs, I occasionally
-   get random segmentation faults when I use TMV with LAPACK.  
-   And since the native TMV code is almost universally as fast as LAPACK,
-   and _is_ thread safe, I finally decided to just make that the default.
