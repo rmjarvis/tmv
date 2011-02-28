@@ -1,7 +1,8 @@
 
-#include "TMV_Test.h"
-#include "TMV_Test3.h"
 #include "TMV.h"
+#include "TMV_Small.h"
+#include "TMV_Test.h"
+#include "TMV_Test_3.h"
 #define NORDIVEQ
 #include "TMV_TestMatrixDivArith.h"
 
@@ -37,12 +38,8 @@ static void TestSmallNonSquareDiv_B5a()
     c6.col(1) *= std::complex<T>(2,1);
     c6.row(5).addToAll(std::complex<T>(-7,2));
 
-    tmv::SmallMatrix<T,7,N,stor> a4x;
-    tmv::SmallMatrix<std::complex<T>,7,N,stor> c4x;
-
-    TestMatrixDivArith3c<T>(tmv::QR,a4x,c4x,a1,a4,a6,c1,c4,c6,
-                            "NonSquare/NonSquare"); 
-#if XTEST & 32
+    TestMatrixDivArith3c<T>(tmv::QR,a1,a4,a6,c1,c4,c6,"NonSquare/NonSquare"); 
+#if (XTEST & 32)
     tmv::SmallMatrix<T,6,N,stor,tmv::FortranStyle> a1f = a1;
     tmv::SmallMatrix<std::complex<T>,6,N,stor,tmv::FortranStyle> c1f = c1;
     tmv::SmallMatrix<T,7,N,stor,tmv::FortranStyle> a4f = a4;
@@ -50,12 +47,9 @@ static void TestSmallNonSquareDiv_B5a()
     tmv::SmallMatrix<T,7,6,stor,tmv::FortranStyle> a6f = a6;
     tmv::SmallMatrix<std::complex<T>,7,6,stor,tmv::FortranStyle> c6f = c6;
 
-    TestMatrixDivArith3c<T>(tmv::QR,a4x,c4x,a1f,a4,a6,c1f,c4,c6,
-                            "NonSquare/NonSquare"); 
-    TestMatrixDivArith3c<T>(tmv::QR,a4x,c4x,a1f,a4f,a6,c1f,c4f,c6,
-                            "NonSquare/NonSquare"); 
-    TestMatrixDivArith3c<T>(tmv::QR,a4x,c4x,a1f,a4f,a6f,c1f,c4f,c6f,
-                            "NonSquare/NonSquare"); 
+    TestMatrixDivArith3c<T>(tmv::QR,a1f,a4,a6,c1f,c4,c6,"NonSquare/NonSquare"); 
+    TestMatrixDivArith3c<T>(tmv::QR,a1f,a4f,a6,c1f,c4f,c6,"NonSquare/NonSquare"); 
+    TestMatrixDivArith3c<T>(tmv::QR,a1f,a4f,a6f,c1f,c4f,c6f,"NonSquare/NonSquare"); 
 
 #endif
 }
@@ -65,7 +59,7 @@ void TestSmallMatrixDiv_B5a()
 {
     TestSmallNonSquareDiv_B5a<T,tmv::ColMajor,2>();
     TestSmallNonSquareDiv_B5a<T,tmv::ColMajor,5>();
-#if XTEST & 2
+#if (XTEST & 2)
     TestSmallNonSquareDiv_B5a<T,tmv::ColMajor,1>();
     TestSmallNonSquareDiv_B5a<T,tmv::ColMajor,3>();
     TestSmallNonSquareDiv_B5a<T,tmv::ColMajor,4>();

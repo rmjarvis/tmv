@@ -1,7 +1,8 @@
 
-#include "TMV_Test.h"
-#include "TMV_Test3.h"
 #include "TMV.h"
+#include "TMV_Small.h"
+#include "TMV_Test.h"
+#include "TMV_Test_3.h"
 #define NOLDIVEQ
 #define NORDIVEQ
 #include "TMV_TestMatrixDivArith.h"
@@ -28,7 +29,7 @@ static void TestSmallNonSquareDiv_B1c()
     tmv::SmallVector<std::complex<T>,6> y = c1.col(0);
 
     TestMatrixDivArith3e<T>(tmv::QR,a1,b,x,c1,e,y,"V/NonSquare"); 
-#if XTEST & 32
+#if (XTEST & 32)
     tmv::SmallMatrix<T,6,N,stor,tmv::FortranStyle> a1f = a1;
     tmv::SmallMatrix<std::complex<T>,6,N,stor,tmv::FortranStyle> c1f = c1;
 
@@ -48,7 +49,7 @@ void TestSmallMatrixDiv_B1c()
 {
     TestSmallNonSquareDiv_B1c<T,tmv::ColMajor,2>();
     TestSmallNonSquareDiv_B1c<T,tmv::ColMajor,5>();
-#if XTEST & 2
+#if (XTEST & 2)
     TestSmallNonSquareDiv_B1c<T,tmv::ColMajor,1>();
     TestSmallNonSquareDiv_B1c<T,tmv::ColMajor,3>();
     TestSmallNonSquareDiv_B1c<T,tmv::ColMajor,4>();

@@ -1,7 +1,7 @@
 
 #include <fstream>
 #include "TMV_Test.h"
-#include "TMV_Test2.h"
+#include "TMV_Test_2.h"
 
 bool XXDEBUG1 = false;
 bool XXDEBUG2 = false;
@@ -22,14 +22,15 @@ bool symoprod = true;
 bool dontthrow = false;
 std::string lastsuccess = "";
 
-int main() try {
+int main() try 
+{
     std::ofstream log("tmvtest2.log");
     tmv::WriteWarningsTo(&log);
 
     //showtests=true;
     //showacc=true;
     //showdiv=true;
-    //showstartdone = true;
+    //showstartdone=true;
 
 #if 1
 
@@ -37,27 +38,27 @@ int main() try {
     TestBandMatrix<double>();
     TestSymMatrix<double>();
     TestSymBandMatrix<double>();
-    TestBandDiv<double>();
-    TestSymDiv<double>();
-    TestSymBandDiv<double>();
+    TestAllBandDiv<double>();
+    TestAllSymDiv<double>();
+    TestAllSymBandDiv<double>();
 #endif
 
 #ifdef TEST_FLOAT
     TestBandMatrix<float>();
     TestSymMatrix<float>();
     TestSymBandMatrix<float>();
-    TestBandDiv<float>();
-    TestSymDiv<float>();
-    TestSymBandDiv<float>();
+    TestAllBandDiv<float>();
+    TestAllSymDiv<float>();
+    TestAllSymBandDiv<float>();
 #endif
 
 #ifdef TEST_LONGDOUBLE
     TestBandMatrix<long double>();
     TestSymMatrix<long double>();
     TestSymBandMatrix<long double>();
-    TestBandDiv<long double>();
-    TestSymDiv<long double>();
-    TestSymBandDiv<long double>();
+    TestAllBandDiv<long double>();
+    TestAllSymDiv<long double>();
+    TestAllSymBandDiv<long double>();
 #endif 
 
 #ifdef TEST_INT
@@ -66,7 +67,7 @@ int main() try {
     TestSymBandMatrix<int>();
 #endif 
 
-#endif 
+#endif
 
     return 0;
 }
@@ -82,8 +83,7 @@ catch (std::exception& e) {
     std::cerr<<e.what()<<std::endl;
     std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
     return 1;
-}
-catch (...) {
+} catch (...) {
     std::cerr<<"Unknown exception thrown\n";
     std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
     return 1;
@@ -108,12 +108,14 @@ void DoAssert(bool x, std::string s)
     } else { 
         if (showtests) std::cout<<"  Failed"<<std::endl;
         if (dontthrow) std::cout<<"Failed test: "<<s<<std::endl;  
-        else
+        else {
 #ifdef NOTHROW
-        { std::cerr<<"Error in test: "<<s<<std::endl; exit(1); }
+            std::cerr<<"Error in test: "<<s<<std::endl; 
+            exit(1); 
 #else
-        throw tmv::Error("Error in test: ",s);  
+            throw tmv::Error("Error in test: ",s);  
 #endif
+        }
     } 
 }
 

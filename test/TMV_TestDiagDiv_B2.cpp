@@ -1,7 +1,7 @@
 
 #include "TMV.h"
 #include "TMV_Test.h"
-#include "TMV_Test1.h"
+#include "TMV_Test_1.h"
 #include "TMV_TestMatrixDivArith.h"
 
 template <class T> 
@@ -40,33 +40,24 @@ void TestDiagDiv_B2()
     tmv::MatrixView<std::complex<T> > cqv = cq.view();
     tmv::DiagMatrixView<std::complex<T> > cav = ca.view();
 
-    tmv::Matrix<T> px(N,N);
-    tmv::DiagMatrix<T> bx(N);
-    tmv::Matrix<T> qx(2*N,N);
-    tmv::Matrix<std::complex<T> > cpx(N,N);
-    tmv::DiagMatrix<std::complex<T> > cbx(N);
-    tmv::Matrix<std::complex<T> > cqx(2*N,N);
-
-    TestMatrixDivArith1<T>(tmv::LU,px,cpx,av,pv,cav,cpv,"SquareM/Diag");
-    TestMatrixDivArith1<T>(tmv::LU,qx,cqx,av,qv,cav,cqv,"NonSqaureM/Diag");
+    TestMatrixDivArith1<T>(tmv::LU,av,pv,cav,cpv,"SquareM/Diag");
+    TestMatrixDivArith1<T>(tmv::LU,av,qv,cav,cqv,"NonSqaureM/Diag");
 #if (XTEST & 8)
     tmv::Matrix<T> r(N,0,T(1));
     tmv::Matrix<std::complex<T> > cr(N,0,std::complex<T>(1));
     tmv::MatrixView<T> rv = r.view();
     tmv::MatrixView<std::complex<T> > crv = cr.view();
-    tmv::Matrix<T> rx(N,0);
-    tmv::Matrix<std::complex<T> > crx(N,0);
 
-    TestMatrixDivArith1<T>(tmv::LU,rx,crx,av,rv,cav,crv,"DegenM/Diag");
+    TestMatrixDivArith1<T>(tmv::LU,av,rv,cav,crv,"DegenM/Diag");
 #endif
 }
 
-#ifdef TMV_INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestDiagDiv_B2<double>();
 #endif
-#ifdef TMV_INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestDiagDiv_B2<float>();
 #endif
-#ifdef TMV_INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestDiagDiv_B2<long double>();
 #endif

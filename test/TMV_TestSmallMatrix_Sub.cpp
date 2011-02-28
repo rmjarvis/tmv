@@ -1,6 +1,7 @@
-#include "TMV_Test.h"
-#include "TMV_Test3.h"
 #include "TMV.h"
+#include "TMV_Small.h"
+#include "TMV_Test.h"
+#include "TMV_Test_3.h"
 #include <fstream>
 
 template <class T, size_t M, size_t N, tmv::StorageType S> 
@@ -21,27 +22,27 @@ static void DoTestSmallMatrix_Sub()
 #define Si (S==tmv::RowMajor ? int(N) : 1)
 #define Sj (S==tmv::RowMajor ? 1 : int(M))
 
-    Assert(m.subMatrix(2,5,1,4) == m.subMatrix(2,5,1,4,1,1),"subMatrix");
+    Assert(m.subMatrix(2,5,1,4) == m.subMatrix(2,5,1,4,1,1),"SubMatrix");
     Assert(m.subVector(2,5,4,2,3) == m.subMatrix(2,14,5,11,4,2).diag(),
-           "subVector");
+           "SubVector");
 
-    Assert(mf.subMatrix(3,5,2,4) == mf.subMatrix(3,5,2,4,1,1),"subMatrixFF");
+    Assert(mf.subMatrix(3,5,2,4) == mf.subMatrix(3,5,2,4,1,1),"SubMatrixFF");
     Assert(mf.subVector(3,6,4,2,3) == mf.subMatrix(3,11,6,10,4,2).diag(),
-           "subVectorFF");
+           "SubVectorFF");
 
-    Assert(m.subMatrix(2,5,1,4) == mf.subMatrix(3,5,2,4),"subMatrixF");
-    Assert(m.subMatrix(2,8,1,10,2,3) == mf.subMatrix(3,7,2,8,2,3),"subMatrixF");
+    Assert(m.subMatrix(2,5,1,4) == mf.subMatrix(3,5,2,4),"SubMatrixF");
+    Assert(m.subMatrix(2,8,1,10,2,3) == mf.subMatrix(3,7,2,8,2,3),"SubMatrixF");
 
     Assert(m.subVector(2,5,4,2,3) == m.subMatrix(2,14,5,11,4,2).diag(),
-           "subVector");
+           "SubVector");
 
     Assert(mf.subVector(3,6,4,2,3) == mf.subMatrix(3,11,6,10,4,2).diag(),
-           "subVectorFF");
+           "SubVectorFF");
 
-    Assert(m.subVector(2,5,4,2,3) == mf.subVector(3,6,4,2,3),"subVectorF");
-    Assert(m.subVector(8,1,-1,2,4) == mf.subVector(9,2,-1,2,4),"subVector2F");
+    Assert(m.subVector(2,5,4,2,3) == mf.subVector(3,6,4,2,3),"SubVectorF");
+    Assert(m.subVector(8,1,-1,2,4) == mf.subVector(9,2,-1,2,4),"SubVector2F");
     Assert(m.subVector(12,8,-4,-2,2) == mf.subVector(13,9,-4,-2,2),
-           "subVector3F");
+           "SubVector3F");
 
     Assert(m.colPair(2,5) == m.subMatrix(0,M,2,8,1,3),"colPair");
     Assert(m.colPair(7,2) == m.subMatrix(0,M,7,-3,1,-5),"colPair");
@@ -76,7 +77,8 @@ static void DoTestSmallMatrix_Sub()
 #undef Sj
 }
 
-template <class T> void TestSmallMatrix_Sub()
+template <class T> 
+void TestSmallMatrix_Sub()
 {
     DoTestSmallMatrix_Sub<T,15,10,tmv::RowMajor>();
     DoTestSmallMatrix_Sub<T,15,10,tmv::ColMajor>();

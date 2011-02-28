@@ -1,7 +1,8 @@
 
-#include "TMV_Test.h"
-#include "TMV_Test3.h"
 #include "TMV.h"
+#include "TMV_Small.h"
+#include "TMV_Test.h"
+#include "TMV_Test_3.h"
 #include "TMV_TestMatrixDivArith.h"
 
 template <class T, tmv::StorageType stor, int N> 
@@ -24,7 +25,7 @@ static void TestSmallSquareDiv_A1a()
     c1.diag().addToAll(std::complex<T>(3,1));
 
     TestMatrixDivArith3a<T>(tmv::LU,a1,c1,"Square"); 
-#if XTEST & 32
+#if (XTEST & 2)
     tmv::SmallMatrix<T,N,N,stor,tmv::FortranStyle> a1f = a1;
     tmv::SmallMatrix<std::complex<T>,N,N,stor,tmv::FortranStyle> c1f = c1;
 
@@ -37,7 +38,7 @@ void TestSmallMatrixDiv_A1a()
 {
     TestSmallSquareDiv_A1a<T,tmv::ColMajor,2>();
     TestSmallSquareDiv_A1a<T,tmv::ColMajor,5>();
-#if XTEST & 2
+#if (XTEST & 2)
     TestSmallSquareDiv_A1a<T,tmv::ColMajor,1>();
     TestSmallSquareDiv_A1a<T,tmv::ColMajor,3>();
     TestSmallSquareDiv_A1a<T,tmv::ColMajor,4>();

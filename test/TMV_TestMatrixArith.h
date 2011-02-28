@@ -1,4 +1,3 @@
-#define CT std::complex<T>
 #define XXD // Turn this off to reduce the compiled code size.
 
 // Preprocessor options:
@@ -16,88 +15,68 @@
 // BASIC_MULTMM_ONLY Skip all matrix multiplication other than simple c=a*b.
 // NO_COMPLEX_ARITH  Skip all complex tests.
 
-
-using tmv::BaseMatrix;
-using tmv::BaseVector;
-using tmv::BaseMatrix_Calc;
-using tmv::BaseVector_Calc;
-using tmv::BaseMatrix_Mutable;
-using tmv::BaseVector_Mutable;
-
-template <class M1, class M2>
-static inline bool CanAdd(
-    const BaseMatrix<M1>& a, const BaseMatrix<M2>& b)
+template <class M1, class M2> 
+inline bool CanAdd(const M1& a, const M2& b)
 { return a.colsize() == b.colsize() && a.rowsize() == b.rowsize(); }
 
-template <class M1, class M2>
-static inline bool CanAddEq(
-    const BaseMatrix_Mutable<M1>& a, const BaseMatrix<M2>& b)
-{ return CanAdd(a.mat(),b); }
+template <class M1, class M2> 
+inline bool CanAddEq(const M1& a, const M2& b)
+{ return CanAdd(a,b); }
 
-template <class M, class T2>
-static inline bool CanAddX(
-    const BaseMatrix<M>& a, const T2 x)
+template <class M, class T2> 
+inline bool CanAddX(const M& a, const T2)
 { return a.isSquare(); }
 
-template <class M, class T2>
-static inline bool CanAddEqX(
-    const BaseMatrix_Mutable<M>& a, const T2 x)
-{ return CanAddX(a.mat(),x); }
+template <class M, class T2> 
+inline bool CanAddEqX(const M& a, const T2 x)
+{ return CanAddX(a,x); }
 
-template <class M, class T2>
-static inline bool CanMultX(
-    const BaseMatrix<M>& a, const T2 x)
+template <class M, class T2> 
+inline bool CanMultX(const M&, const T2)
 { return true; }
 
-template <class M, class T2>
-static inline bool CanMultEqX(
-    const BaseMatrix_Mutable<M>& a, const T2 x)
-{ return CanMultX(a.mat(),x); }
+template <class M, class T2> 
+inline bool CanMultEqX(const M& a, const T2 x)
+{ return CanMultX(a,x); }
 
-template <class M1, class M2>
-static inline bool CanMultMM(
-    const BaseMatrix<M1>& a, const BaseMatrix<M2>& b)
+template <class M1, class M2> 
+inline bool CanMultMM(const M1& a, const M2& b)
 { return a.rowsize() == b.colsize(); }
 
-template <class M1, class V2>
-static inline bool CanMultMV(
-    const BaseMatrix<M1>& a, const BaseVector<V2>& b)
-{ return a.rowsize() == b.size(); }
+template <class M, class V> 
+inline bool CanMultMV(const M& m, const V& v)
+{ return m.rowsize() == v.size(); }
 
-template <class V1, class M2>
-static inline bool CanMultVM(
-    const BaseVector<V1>& a, const BaseMatrix<M2>& b)
-{ return a.size() == b.colsize(); }
+template <class M, class V> 
+inline bool CanMultVM(const V& v, const M& m)
+{ return m.colsize() == v.size(); }
 
-template <class M1, class M2, class M3>
-static inline bool CanMultMM(
-    const BaseMatrix<M1>& a, const BaseMatrix<M2>& b,
-    const BaseMatrix<M3>& c)
+template <class M1, class M2, class M3> 
+inline bool CanMultMM(const M1& a, const M2& b, const M3& c)
 {
-    return (CanMultMM(a,b) && c.colsize() == a.colsize() && 
-            c.rowsize() == b.rowsize());
+    return CanMultMM(a,b) && c.colsize() == a.colsize() &&
+        c.rowsize() == b.rowsize();
 }
 
-template <class M1, class V2, class V3>
-static inline bool CanMultMV(
-    const BaseMatrix<M1>& a, const BaseVector<V2>& b,
-    const BaseVector<V3>& c)
+template <class M1, class V2, class V3> 
+inline bool CanMultMV(const M1& a, const V2& b, const V3& c)
 { return CanMultMV(a,b) && c.size() == a.colsize(); }
 
-template <class V1, class M2, class V3>
-static inline bool CanMultVM(
-    const BaseVector<V1>& a, const BaseMatrix<M2>& b,
-    const BaseVector<V3>& c)
+template <class V1, class M2, class V3> 
+inline bool CanMultVM(const V1& a, const M2& b, const V3& c)
 { return CanMultVM(a,b) && c.size() == b.rowsize(); }
 
-template <class M1, class M2, class M3>
-static inline bool CanMultXMM(
-    const BaseMatrix<M1>& a, const BaseMatrix<M2>& b,
-    const BaseMatrix<M3>& c)
+template <class M1, class M2, class M3> 
+inline bool CanMultXMM(const M1& a, const M2& b, const M3& c)
 { return CanMultMM(a,b,c); }
 
-#define RealType(T) typename tmv::Traits<T>::real_type
-#define ComplexType(T) typename tmv::Traits<T>::complex_type
+template <class V0, class V1>
+inline void CopyBackV(const V0& v0, V1& v1)
+{ v1 = v0; }
+
+template <class M0, class M1>
+inline void CopyBackM(const M0& m0, M1& m1)
+{ m1 = m0; }
 
 #define ProductType(T1,T2) typename tmv::Traits2<T1,T2>::type
 
@@ -126,13 +105,14 @@ static inline bool CanMultXMM(
 template <class T, class MM> 
 static void DoTestMa_Basic(const MM& a, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start Ma "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
     }
 
     tmv::Matrix<T> m = a;
-    double eps = EPS * (m.colsize()+m.rowsize());
+    RT eps = EPS * RT(m.colsize()+m.rowsize());
 
 #ifdef XXD
     if (XXDEBUG1) {
@@ -145,65 +125,83 @@ static void DoTestMa_Basic(const MM& a, std::string label)
             std::cout<<"Trace(a) = "<<Trace(a)<<"  "<<Trace(m)<<std::endl;
 #ifndef NODIV
             std::cout<<"Det(a) = "<<Det(a)<<"  "<<Det(m)<<std::endl;
-            std::cout<<"diff = "<<tmv::TMV_ABS(Det(a)-Det(m))<<"  "<<eps*Norm(m)*Norm(m.inverse())*tmv::TMV_ABS(Det(m))<<std::endl;
+            std::cout<<"diff = "<<tmv::TMV_ABS2(Det(a)-Det(m))<<"  "<<
+                eps*Norm(m)*Norm(m.inverse())*tmv::TMV_ABS2(Det(m))<<std::endl;
             std::cout<<"LogDet(a) = "<<LogDet(a)<<"  "<<LogDet(m)<<std::endl;
-            std::cout<<"diff = "<<tmv::TMV_ABS(LogDet(a)-LogDet(m))<<"  "<<eps*Norm(m)*Norm(m.inverse())<<std::endl;
+            std::cout<<"diff = "<<tmv::TMV_ABS2(LogDet(a)-LogDet(m))<<"  "<<
+                eps*Norm(m)*Norm(m.inverse())<<std::endl;
 #endif
         }
 #endif
         std::cout<<"NormF(a) = "<<NormF(a)<<"  "<<NormF(m)<<std::endl;
         std::cout<<"Norm(a) = "<<Norm(a)<<"  "<<Norm(m)<<std::endl;
         std::cout<<"NormSq(a) = "<<NormSq(a)<<"  "<<NormSq(m)<<std::endl;
-        std::cout<<"abs(diff) = "<<tmv::TMV_ABS(NormSq(a)-NormSq(m))<<std::endl;
+        std::cout<<"abs(diff) = "<<tmv::TMV_ABS2(NormSq(a)-NormSq(m))<<std::endl;
         std::cout<<"eps*normsq = "<<eps*NormSq(m)<<std::endl;
         std::cout<<"Norm1(a) = "<<Norm1(a)<<"  "<<Norm1(m)<<std::endl;
-        std::cout<<"Norm1(m) = "<<Norm1(m)<<std::endl;
         std::cout<<"NormInf(a) = "<<NormInf(a)<<"  "<<NormInf(m)<<std::endl;
-        std::cout<<"abs(diff) = "<<tmv::TMV_ABS(NormInf(a)-NormInf(m))<<std::endl;
+        std::cout<<"abs(diff) = "<<tmv::TMV_ABS2(NormInf(a)-NormInf(m))<<std::endl;
         std::cout<<"eps*norminf = "<<eps*NormInf(m)<<std::endl;
+        std::cout<<"MaxAbsElement(a) = "<<MaxAbsElement(a)<<"  "<<
+            MaxAbsElement(m)<<std::endl;
     }
 #endif
 
-    Assert(Norm(MAT(T,a)-m) <= eps,label+" a != m");
+    Assert(Equal(MAT(T,a),m,eps),label+" a != m");
 #ifndef NONSQUARE
     if (m.isSquare()) {
-        Assert(tmv::TMV_ABS(Trace(a)-Trace(m)) <= eps*tmv::TMV_ABS(Trace(m)),label+" Trace");
+        Assert(Equal2(Trace(a),Trace(m),eps*tmv::TMV_ABS2(Trace(m))),
+               label+" Trace");
 #ifndef NODIV
         T d = Det(m);
-        if (tmv::TMV_ABS(d) > 0.5) {
-            double eps1 = eps * Norm(m) * Norm(m.inverse());
-            Assert(tmv::TMV_ABS(Det(a)-d) <= eps1*tmv::TMV_ABS(d),label+" Det");
-            Assert(tmv::TMV_ABS(LogDet(a)-LogDet(m)) <= eps1,label+" LogDet");
-        } else if (tmv::TMV_ABS(d) != 0.0) {
-            double eps1 = eps * Norm(m) * Norm(m.inverse());
-            Assert(tmv::TMV_ABS(Det(a)-d) <= eps1*(1.+tmv::TMV_ABS(d)),label+" Det");
+        if (tmv::TMV_ABS2(d) > 0.5) {
+            RT eps1 = eps;
+            if (!std::numeric_limits<RT>::is_integer) 
+                eps1 *= Norm(m) * Norm(m.inverse());
+            Assert(Equal2(Det(a),d,eps1*tmv::TMV_ABS2(d)),label+" Det");
+            if (!std::numeric_limits<RT>::is_integer) {
+                Assert(Equal2(LogDet(a),LogDet(m),eps1),label+" LogDet");
+            }
+        } else if (tmv::TMV_ABS2(d) != 0.0) {
+            RT eps1 = eps;
+            if (!std::numeric_limits<RT>::is_integer) 
+                eps1 *= Norm(m) * Norm(m.inverse());
+            Assert(Equal2(Det(a),d,eps1*(1+tmv::TMV_ABS2(d))),label+" Det");
         } else {
-            Assert(tmv::TMV_ABS(Det(a)) <= eps,label+" Det");
+            Assert(Equal2(Det(a),d,eps),label+" Det");
         }
 #endif
     }
 #endif
 
-    if (tmv::TMV_Epsilon<T>()  != T(0)) {
-        Assert(tmv::TMV_ABS(NormF(a)-NormF(m)) <= eps*NormF(m),label+" NormF");
-        Assert(tmv::TMV_ABS(Norm(a)-Norm(m)) <= eps*Norm(m),label+" Norm");
+    if (!std::numeric_limits<RT>::is_integer) {
+        Assert(Equal2(NormF(a),NormF(m),eps*NormF(m)),label+" NormF");
+        Assert(Equal2(Norm(a),Norm(m),eps*Norm(m)),label+" Norm");
     }
-    Assert(tmv::TMV_ABS(NormSq(a)-NormSq(m)) <= eps*NormSq(m),label+" NormSq");
-    Assert(tmv::TMV_ABS(Norm1(a)-Norm1(m)) <= eps*Norm1(m),label+" Norm1");
-    Assert(tmv::TMV_ABS(NormInf(a)-NormInf(m)) <= eps*NormInf(m),label+" NormInf");
+    Assert(Equal2(NormSq(a),NormSq(m),eps*NormSq(m)),label+" NormSq");
+    if (!std::numeric_limits<RT>::is_integer && 
+        tmv::Traits<T>::iscomplex) {
+        Assert(Equal2(Norm1(a),Norm1(m),eps*Norm1(m)),label+" Norm1");
+        Assert(Equal2(NormInf(a),NormInf(m),eps*NormInf(m)),label+" NormInf");
+        Assert(Equal2(MaxAbsElement(a),MaxAbsElement(m),eps*MaxAbsElement(m)),
+               label+" MaxAbsElement");
+    }
+    Assert(Equal2(MaxAbs2Element(a),MaxAbs2Element(m),eps*MaxAbs2Element(m)),
+           label+" MaxAbs2Element");
 #ifndef NODIV
 #ifndef NOSV
-    if (donorm2) {
+    if (donorm2 && !std::numeric_limits<RT>::is_integer) {
 #ifdef XXD
         if (XXDEBUG1) {
             std::cout<<"Norm2(a) = "<<a.doNorm2()<<"  "<<m.doNorm2()<<std::endl;
-            std::cout<<"abs(diff) = "<<tmv::TMV_ABS(a.doNorm2()-m.doNorm2())<<std::endl;
+            std::cout<<"abs(diff) = "<<tmv::TMV_ABS2(a.doNorm2()-m.doNorm2())<<std::endl;
             std::cout<<"eps*kappa = "<<eps*m.doCondition()<<std::endl;
         }
 #endif
-        Assert(tmv::TMV_ABS(a.doNorm2()-m.doNorm2()) <= eps*m.doCondition()*m.doNorm2(),
+        Assert(Equal2(a.doNorm2(),m.doNorm2(),eps*m.doCondition()*m.doNorm2()),
                label+" DoNorm2");
-        Assert(tmv::TMV_ABS(Norm2(a)-Norm2(m)) <= eps*m.condition()*m.doNorm2(),label+" Norm2");
+        Assert(Equal2(Norm2(a),Norm2(m),eps*m.condition()*m.doNorm2()),
+               label+" Norm2");
     }
 #endif
 #endif
@@ -219,9 +217,10 @@ static void DoTestMa_Basic(const MM& a, std::string label)
         std::cout<<"Norm(at-mt) = "<<Norm(MAT(T,Adjoint(a))-Adjoint(m))<<std::endl;
     }
 #endif
-    Assert(Norm(MAT(T,Transpose(a))-Transpose(m)) <= eps*Norm(m),label+" Transpose");
-    Assert(Norm(MAT(T,Conjugate(a))-Conjugate(m)) <= eps*Norm(m),label+" Conjugate");
-    Assert(Norm(MAT(T,Adjoint(a))-Adjoint(m)) <= eps*Norm(m),label+" Adjoint");
+    if (!std::numeric_limits<RT>::is_integer) eps *= Norm(m);
+    Assert(Equal(MAT(T,Transpose(a)),Transpose(m),eps),label+" Transpose");
+    Assert(Equal(MAT(T,Conjugate(a)),Conjugate(m),eps),label+" Conjugate");
+    Assert(Equal(MAT(T,Adjoint(a)),Adjoint(m),eps),label+" Adjoint");
 
     if (showstartdone) std::cout<<"Done Ma"<<std::endl;
 }
@@ -229,11 +228,13 @@ static void DoTestMa_Basic(const MM& a, std::string label)
 template <class T, class MM> 
 static void DoTestMa_Full(const MM& a, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     DoTestMa_Basic<T>(a,label);
 
 #if (XTEST & 2)
+
     tmv::Matrix<T> m = a;
-    double eps = EPS * (m.colsize()+m.rowsize());
+    RT eps = EPS * (a.colsize() + a.rowsize());
 
 #ifdef XXD
     if (XXDEBUG1) {
@@ -242,25 +243,45 @@ static void DoTestMa_Full(const MM& a, std::string label)
         std::cout<<"a.normF() = "<<a.normF()<<"  "<<NormF(m)<<std::endl;
         std::cout<<"a.norm() = "<<a.norm()<<"  "<<Norm(m)<<std::endl;
         std::cout<<"a.normSq() = "<<a.normSq()<<"  "<<NormSq(m)<<std::endl;
-        std::cout<<"a.normSq(1.e-3) = "<<a.normSq(1.e-3)<<"  "<<NormSq(m*T(1.e-3))<<std::endl;
-        std::cout<<"abs(diff) = "<<tmv::TMV_ABS(a.normSq(1.e-3)-NormSq(m*T(1.e-3)))<<std::endl;
+        std::cout<<"a.normSq(1.e-3) = "<<a.normSq(RT(1.e-3))<<"  "<<NormSq(m*RT(1.e-3))<<std::endl;
+        std::cout<<"abs(diff) = "<<tmv::TMV_ABS2(a.normSq(RT(1.e-3))-NormSq(m*RT(1.e-3)))<<std::endl;
         std::cout<<"eps*1.e-6*normsq = "<<eps*1.e-6*NormSq(m)<<std::endl;
         std::cout<<"a.norm1() = "<<a.norm1()<<"  "<<Norm1(m)<<std::endl;
         std::cout<<"a.normInf() = "<<a.normInf()<<"  "<<NormInf(m)<<std::endl;
+        std::cout<<"a.sumAbsElements() = "<<a.sumAbsElements()<<"  "<<SumAbsElements(m)<<std::endl;
+        std::cout<<"a.sumAbs2Elements() = "<<a.sumAbs2Elements()<<"  "<<SumAbs2Elements(m)<<std::endl;
     }
 #endif
-    if (tmv::TMV_Epsilon<T>()  != T(0)) {
-        Assert(tmv::TMV_ABS(a.normF()-NormF(m)) <= eps*NormF(m),label+" NormF");
-        Assert(tmv::TMV_ABS(a.norm()-Norm(m)) <= eps*Norm(m),label+" Norm");
+    if (!(std::numeric_limits<RT>::is_integer)) {
+        Assert(Equal2(a.normF(),NormF(m),eps*NormF(m)),label+" NormF");
+        Assert(Equal2(a.norm(),Norm(m),eps*Norm(m)),label+" Norm");
     }
-    Assert(tmv::TMV_ABS(a.normSq()-NormSq(m)) <= eps*NormSq(m),label+" NormSq");
-    Assert(tmv::TMV_ABS(a.normSq(1.e-3)-NormSq(m*T(1.e-3))) <= eps*1.e-6*NormSq(m),label+" NormSq,scale");
-    Assert(tmv::TMV_ABS(a.norm1()-Norm1(m)) <= eps*Norm1(m),label+" Norm1");
-    Assert(tmv::TMV_ABS(a.normInf()-NormInf(m)) <= eps*NormInf(m),label+" NormInf");
+    Assert(Equal2(a.sumElements(),SumElements(m),
+                  eps*tmv::TMV_ABS2(SumElements(m))),
+           label+" SumElements");
+    Assert(Equal2(a.normSq(),NormSq(m),eps*NormSq(m)),label+" NormSq");
+    Assert(Equal2(a.normSq(1000),NormSq(m*RT(1000)),eps*1000000*NormSq(m)),
+           label+" NormSq,scale");
+    if (!std::numeric_limits<RT>::is_integer && tmv::Traits<T>::iscomplex) {
+        Assert(Equal2(a.sumAbsElements(),SumAbsElements(m),
+                      eps*SumAbsElements(m)),
+               label+" SumAbsElements");
+        Assert(Equal2(a.normSq(RT(1.e-3)),NormSq(m*RT(1.e-3)),
+                      eps*RT(1.e-6)*NormSq(m)),
+               label+" NormSq,scale");
+        Assert(Equal2(a.norm1(),Norm1(m),eps*Norm1(m)),label+" Norm1");
+        Assert(Equal2(a.normInf(),NormInf(m),eps*NormInf(m)),label+" NormInf");
+        Assert(Equal2(a.maxAbsElement(),MaxAbsElement(m),eps*MaxAbsElement(m)),
+               label+" MaxAbsElement");
+    }
+    Assert(Equal2(a.sumAbs2Elements(),SumAbs2Elements(m),eps*SumAbs2Elements(m)),
+           label+" SumAbs2Elements");
+    Assert(Equal2(a.maxAbs2Element(),MaxAbs2Element(m),eps*MaxAbs2Element(m)),
+           label+" MaxAbs2Element");
 #ifndef NODIV
 #ifndef NOSV
-    if (donorm2) {
-        Assert(tmv::TMV_ABS(a.norm2()-m.doNorm2()) <= eps*m.condition()*m.doNorm2(),
+    if (donorm2 && !std::numeric_limits<RT>::is_integer) {
+        Assert(Equal2(a.norm2(),m.doNorm2(),eps*m.condition()*m.doNorm2()),
                label+" Norm2");
     }
 #endif
@@ -289,6 +310,7 @@ static void DoTestMC(const MM& a, std::string label)
 template <class T, class MM, class T2> 
 static void DoTestMX1a_Basic(const MM& a, T2 x, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start MX1a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -297,7 +319,9 @@ static void DoTestMX1a_Basic(const MM& a, T2 x, std::string label)
 
     tmv::Matrix<T> m = a;
 
-    double eps = EPS * (m.colsize()+m.rowsize())*Norm(m);
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    if (!std::numeric_limits<RT>::is_integer) eps *= Norm(m);
+
 #ifndef NONSQUARE
     if (CanAddX(a,x)) {
 #ifdef XXD
@@ -311,8 +335,8 @@ static void DoTestMX1a_Basic(const MM& a, T2 x, std::string label)
             std::cout<<"Norm((x-a)-(x-m)) = "<<Norm(MAT2(T,T2,x-a)-(x-m))<<std::endl;
         }
 #endif
-        Assert(Norm(MAT(T,a)-m) <= eps,label+" a != m1");
-        Assert(Norm(MAT2(T,T2,x-a)-(x-m)) <= eps,label+" x-a");
+        Assert(Equal(MAT(T,a),m,eps),label+" a != m1");
+        Assert(Equal(MAT2(T,T2,x-a),(x-m),eps),label+" x-a");
     }
 #endif
     if (CanMultX(a,x)) {
@@ -321,7 +345,7 @@ static void DoTestMX1a_Basic(const MM& a, T2 x, std::string label)
             std::cout<<"CanMultX("<<tmv::TMV_Text(a)<<","<<tmv::TMV_Text(x)<<")\n";
         }
 #endif
-        Assert(Norm(MAT2(T,T2,x*a)-(x*m)) <= eps*tmv::TMV_ABS(x),label+" x*a");
+        Assert(Equal(MAT2(T,T2,x*a),(x*m),eps*tmv::TMV_ABS2(x)),label+" x*a");
     }
     if (showstartdone) std::cout<<"Done MX1a"<<std::endl;
 }
@@ -329,23 +353,26 @@ static void DoTestMX1a_Basic(const MM& a, T2 x, std::string label)
 template <class T, class MM, class T2> 
 static void DoTestMX1a_Full(const MM& a, T2 x, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     DoTestMX1a_Basic<T>(a,x,label);
 
 #if (XTEST & 2)
     tmv::Matrix<T> m = a;
 
-    double eps = EPS * (m.colsize()+m.rowsize())*Norm(m);
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    if (!std::numeric_limits<RT>::is_integer) eps *= Norm(m);
+
 #ifndef NONSQUARE
     if (CanAddX(a,x)) {
-        Assert(Norm(MAT2(T,T2,a-x)-(m-x)) <= eps,label+" a-x");
-        Assert(Norm(MAT2(T,T2,x+a)-(x+m)) <= eps,label+" x+a");
-        Assert(Norm(MAT2(T,T2,a+x)-(m+x)) <= eps,label+" a+x");
+        Assert(Equal(MAT2(T,T2,a-x),(m-x),eps),label+" a-x");
+        Assert(Equal(MAT2(T,T2,x+a),(x+m),eps),label+" x+a");
+        Assert(Equal(MAT2(T,T2,a+x),(m+x),eps),label+" a+x");
     }
 #endif
     if (CanMultX(a,x)) {
-        Assert(Norm(MAT2(T,T2,a*x)-(x*m)) <= eps*tmv::TMV_ABS(x),label+" a*x");
-        if (tmv::TMV_Epsilon<T>()  != T(0)) {
-            Assert(Norm(MAT2(T,T2,a/x)-(m/x)) <= eps/tmv::TMV_ABS(x),label+" a/x");
+        Assert(Equal(MAT2(T,T2,a*x),(x*m),eps*tmv::TMV_ABS2(x)),label+" a*x");
+        if (!std::numeric_limits<RT>::is_integer) {
+            Assert(Equal(MAT2(T,T2,a/x),(m/x),eps/tmv::TMV_ABS2(x)),label+" a/x");
         }
     }
     if (showstartdone) std::cout<<"Done MX1a_Full"<<std::endl;
@@ -368,6 +395,7 @@ static void DoTestMX1C(const MM& a, T2 x, std::string label)
 template <class T, class MM, class T2> 
 static void DoTestMX2a_Basic(MM& a, T2 x, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start MX2a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -379,15 +407,18 @@ static void DoTestMX2a_Basic(MM& a, T2 x, std::string label)
     }
 #endif
 
-    typename MM::copy_type a0 = a.mat();
     tmv::Matrix<T> m1 = a;
     tmv::Matrix<T> temp = a;
-    Assert(Norm(MAT(T,a)-m1) <= EPS * (a.colsize()+a.rowsize())*Norm(m1),label+" a = m1");
+
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    if (!std::numeric_limits<RT>::is_integer) eps *= Norm(m1);
+
+    Assert(Equal(MAT(T,a),m1,eps),label+" a = m1");
 
 #ifndef NOADDEQX
 #ifndef NONSQUARE
     if (CanAddEqX(a,x)) {
-        double eps = EPS * (a.colsize()+a.rowsize()) * Norm(m1);
+        typename MM::copy_type a0(a);
 #ifdef XXD
         if (XXDEBUG3) {
             std::cout<<"CanAddEqX("<<tmv::TMV_Text(a)<<","<<tmv::TMV_Text(x)<<")\n";
@@ -396,19 +427,19 @@ static void DoTestMX2a_Basic(MM& a, T2 x, std::string label)
         tmv::Matrix<T> m2 = m1;
         a += x;
         m2 = m1+x;
-        Assert(Norm(MAT(T,a)-m2) <= eps,label+" a += x");
-        Assert(Norm(MAT(T,a+=x)-(m2+=x)) <= eps,label+" a += x (2)");
-        a = a0;
+        Assert(Equal(MAT(T,a),m2,eps),label+" a += x");
+        Assert(Equal(MAT(T,a+=x),(m2+=x),eps),label+" a += x (2)");
+        CopyBackM(a0,a);
         a = a+x; 
         m2 = m1+x;
-        Assert(Norm(MAT(T,a)-m2) <= eps,label+" a = a+x");
-        a = a0;
+        Assert(Equal(MAT(T,a),m2,eps),label+" a = a+x");
+        CopyBackM(a0,a);
     }
 #endif
 #endif
 #ifndef NOMULTEQX
     if (CanMultEqX(a,x)) {
-        double eps = EPS * (a.colsize()+a.rowsize()) * Norm(m1);
+        typename MM::copy_type a0(a);
 #ifdef XXD
         if (XXDEBUG3) {
             std::cout<<"CanMultEqX("<<tmv::TMV_Text(a)<<","<<tmv::TMV_Text(x)<<")\n";
@@ -421,16 +452,16 @@ static void DoTestMX2a_Basic(MM& a, T2 x, std::string label)
         if (XXDEBUG3) {
             std::cout<<"a *= x = "<<a<<std::endl;
             std::cout<<"m2 = "<<m2<<std::endl;
-            std::cout<<"Norm(diff) = "<<Norm(MAT(T,a)-m2)<<"  <=? "<<eps*tmv::TMV_ABS(x)<<std::endl;
+            std::cout<<"Norm(diff) = "<<Norm(MAT(T,a)-m2)<<"  <=? "<<eps*tmv::TMV_ABS2(x)<<std::endl;
         }
 #endif
-        Assert(Norm(MAT(T,a)-m2) <= eps*tmv::TMV_ABS(x),label+" a *= x");
-        Assert(Norm(MAT(T,a*=x)-(m2*=x)) <= eps*tmv::TMV_ABS(x*x),label+" a *= x");
-        a = a0;
+        Assert(Equal(MAT(T,a),m2,eps*tmv::TMV_ABS2(x)),label+" a *= x");
+        Assert(Equal(MAT(T,a*=x),(m2*=x),eps*tmv::TMV_ABS2(x*x)),label+" a *= x");
+        CopyBackM(a0,a);
         a = a*x;
         m2 = m1*x;
-        Assert(Norm(MAT(T,a)-m2) <= eps*tmv::TMV_ABS(x),label+" a = a*x");
-        a = a0;
+        Assert(Equal(MAT(T,a),m2,eps*tmv::TMV_ABS2(x)),label+" a = a*x");
+        CopyBackM(a0,a);
     }
 #endif
 
@@ -440,78 +471,82 @@ static void DoTestMX2a_Basic(MM& a, T2 x, std::string label)
 template <class T, class MM, class T2> 
 static void DoTestMX2a_Full(MM& a, T2 x, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     DoTestMX2a_Basic<T>(a,x,label);
 
 #if (XTEST & 2)
-    typename MM::copy_type a0 = a.mat();
     tmv::Matrix<T> m1 = a;
     tmv::Matrix<T> temp = a;
-    Assert(Norm(MAT(T,a)-m1) <= EPS * (a.colsize()+a.rowsize())*Norm(m1),label+" a = m1");
+
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    if (!std::numeric_limits<RT>::is_integer) eps *= Norm(m1);
+
+    Assert(Equal(MAT(T,a),m1,eps),label+" a = m1");
 
 #ifndef NOADDEQX
 #ifndef NONSQUARE
     if (CanAddEqX(a,x)) {
-        double eps = EPS * (a.colsize()+a.rowsize()) * Norm(m1);
+        typename MM::copy_type a0(a);
         tmv::Matrix<T> m2 = m1;
         a += -x;
         m2 = m1-x;
-        Assert(Norm(MAT(T,a)-m2) <= eps,label+" a += x");
-        Assert(Norm(MAT(T,a+=-x)-(m2+=-x)) <= eps,label+" a += -x (2)");
-        a = a0;
+        Assert(Equal(MAT(T,a),m2,eps),label+" a += x");
+        Assert(Equal(MAT(T,a+=-x),(m2+=-x),eps),label+" a += -x (2)");
+        CopyBackM(a0,a);
         a -= x;
         m2 = m1-x;
-        Assert(Norm(MAT(T,a)-m2) <= eps,label+" a -= x");
-        Assert(Norm(MAT(T,a-=x)-(m2-=x)) <= eps,label+" a -= x (2)");
-        a = a0;
+        Assert(Equal(MAT(T,a),m2,eps),label+" a -= x");
+        Assert(Equal(MAT(T,a-=x),(m2-=x),eps),label+" a -= x (2)");
+        CopyBackM(a0,a);
         a -= -x;
         m2 = m1+x;
-        Assert(Norm(MAT(T,a)-m2) <= eps,label+" a -= x");
-        Assert(Norm(MAT(T,a-=-x)-(m2-=-x)) <= eps,label+" a -= -x (2)");
-        a = a0;
+        Assert(Equal(MAT(T,a),m2,eps),label+" a -= x");
+        Assert(Equal(MAT(T,a-=-x),(m2-=-x),eps),label+" a -= -x (2)");
+        CopyBackM(a0,a);
         a = a-x;
         m2 = m1-x;
-        Assert(Norm(MAT(T,a)-m2) <= eps,label+" a = a-x");
-        a = a0;
+        Assert(Equal(MAT(T,a),m2,eps),label+" a = a-x");
+        CopyBackM(a0,a);
         a = x+a;
         m2 = x+m1;
-        Assert(Norm(MAT(T,a)-m2) <= eps,label+" a = x+a");
-        a = a0;
+        Assert(Equal(MAT(T,a),m2,eps),label+" a = x+a");
+        CopyBackM(a0,a);
         a = x-a; 
         m2 = x-m1;
-        Assert(Norm(MAT(T,a)-m2) <= eps,label+" a = x-a");
-        a = a0;
+        Assert(Equal(MAT(T,a),m2,eps),label+" a = x-a");
+        CopyBackM(a0,a);
     }
 #endif
 #endif
 #ifndef NOMULTEQX
     if (CanMultEqX(a,x)) {
-        double eps = EPS * (a.colsize()+a.rowsize()) * Norm(m1);
+        typename MM::copy_type a0(a);
         tmv::Matrix<T> m2 = m1;
         a *= -x;
         m2 = -m1*x;
-        Assert(Norm(MAT(T,a)-m2) <= eps*tmv::TMV_ABS(x),label+" a *= -x");
-        Assert(Norm(MAT(T,a*=-x)-(m2*=-x)) <= eps*tmv::TMV_ABS(x*x),label+" a *= -x");
-        a = a0;
-        if (tmv::TMV_Epsilon<T>() != T(0)) {
+        Assert(Equal(MAT(T,a),m2,eps*tmv::TMV_ABS2(x)),label+" a *= -x");
+        Assert(Equal(MAT(T,a*=-x),(m2*=-x),eps*tmv::TMV_ABS2(x*x)),label+" a *= -x");
+        CopyBackM(a0,a);
+        if (!std::numeric_limits<RT>::is_integer) {
             a /= x;
             m2 = m1/x;
-            Assert(Norm(MAT(T,a)-m2) <= eps*tmv::TMV_ABS(x),label+" a /= x");
-            Assert(Norm(MAT(T,a/=x)-(m2/=x)) <= eps,label+" a /= x");
-            a = a0;
+            Assert(Equal(MAT(T,a),m2,eps*tmv::TMV_ABS2(x)),label+" a /= x");
+            Assert(Equal(MAT(T,a/=x),(m2/=x),eps),label+" a /= x");
+            CopyBackM(a0,a);
             a /= -x;
             m2 = -m1/x;
-            Assert(Norm(MAT(T,a)-m2) <= eps*tmv::TMV_ABS(x),label+" a /= -x");
-            Assert(Norm(MAT(T,a/=-x)-(m2/=-x)) <= eps,label+" a /= -x");
-            a = a0;
+            Assert(Equal(MAT(T,a),m2,eps*tmv::TMV_ABS2(x)),label+" a /= -x");
+            Assert(Equal(MAT(T,a/=-x),(m2/=-x),eps),label+" a /= -x");
+            CopyBackM(a0,a);
             a = a/x;
             m2 = m1/x;
-            Assert(Norm(MAT(T,a)-m2) <= eps,label+" a = a/x");
-            a = a0;
+            Assert(Equal(MAT(T,a),m2,eps),label+" a = a/x");
+            CopyBackM(a0,a);
         }
         a = x*a; 
         m2 = x*m1;
-        Assert(Norm(MAT(T,a)-m2) <= eps*tmv::TMV_ABS(x),label+" a = x*a");
-        a = a0;
+        Assert(Equal(MAT(T,a),m2,eps*tmv::TMV_ABS2(x)),label+" a = x*a");
+        CopyBackM(a0,a);
     }
 #endif
 
@@ -536,6 +571,8 @@ static void DoTestMX2C(MM& a, T2 x, std::string label)
 template <class Ta, class T, class MM, class V> 
 static void DoTestMV1a_Basic(const MM& a, const V& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<T>::complex_type CT;
     if (showstartdone) {
         std::cout<<"Start MV1a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -550,7 +587,12 @@ static void DoTestMV1a_Basic(const MM& a, const V& b, std::string label)
 
     tmv::Matrix<Ta> m = a;
     tmv::Vector<T> v = b;
-    double eps = EPS * (a.colsize()+a.rowsize()) * double(m.colsize() + m.rowsize()) * Norm(m) * Norm(v);
+
+    RT eps = EPS * 
+        (a.colsize() + a.rowsize()) * (a.colsize() + a.rowsize());
+    if (!std::numeric_limits<RT>::is_integer) 
+        eps *= Norm(m) * Norm(v);
+
     if (CanMultMV(a,b)) {
 #ifdef XXD
         if (XXDEBUG4) {
@@ -562,9 +604,9 @@ static void DoTestMV1a_Basic(const MM& a, const V& b, std::string label)
             std::cout<<"eps = "<<eps<<std::endl;
         }
 #endif
-        Assert(Norm(VEC2(T,Ta,a*b)-(m*v)) <= eps,label+" a*b");
-        RealType(T) x(5);
-        ComplexType(T) z(3,4);
+        Assert(Equal(VEC2(T,Ta,a*b),(m*v),eps),label+" a*b");
+        RT x(5);
+        CT z(3,4);
 #ifdef XXD
         if (XXDEBUG4) {
             std::cout<<"x*a*b = "<<(x*a*b)<<std::endl;
@@ -574,7 +616,7 @@ static void DoTestMV1a_Basic(const MM& a, const V& b, std::string label)
             std::cout<<"x*eps = "<<x*eps<<std::endl;
         }
 #endif
-        Assert(Norm(VEC2(T,Ta,x*a*b)-(x*m*v)) <= x*eps,label+" x*a*b");
+        Assert(Equal(VEC2(T,Ta,x*a*b),(x*m*v),x*eps),label+" x*a*b");
 #ifdef XXD
         if (XXDEBUG4) {
             std::cout<<"z*a*b = "<<(z*a*b)<<std::endl;
@@ -584,7 +626,7 @@ static void DoTestMV1a_Basic(const MM& a, const V& b, std::string label)
             std::cout<<"x*eps = "<<x*eps<<std::endl;
         }
 #endif
-        Assert(Norm(VEC(ComplexType(T),z*a*b)-(z*m*v)) <= x*eps,label+" z*a*b");
+        Assert(Equal(VEC(CT,z*a*b),(z*m*v),x*eps),label+" z*a*b");
     }
     if (showstartdone) std::cout<<"Done MV1a"<<std::endl;
 }
@@ -592,21 +634,27 @@ static void DoTestMV1a_Basic(const MM& a, const V& b, std::string label)
 template <class Ta, class T, class MM, class V> 
 static void DoTestMV1a_Full(const MM& a, const V& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<T>::complex_type CT;
     DoTestMV1a_Basic<Ta,T>(a,b,label);
 
 #if (XTEST & 2)
     tmv::Matrix<Ta> m = a;
     tmv::Vector<T> v = b;
-    double eps = EPS * (a.colsize()+a.rowsize()) * Norm(m) * Norm(v);
+
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    if (!std::numeric_limits<RT>::is_integer) 
+        eps *= Norm(m) * Norm(v);
+
     if (CanMultMV(a,b)) {
-        RealType(T) x(5);
-        ComplexType(T) z(3,4);
-        Assert(Norm(VEC2(T,Ta,(x*a)*b)-(x*m*v)) <= x*eps,label+" (x*a)*b");
-        Assert(Norm(VEC2(T,Ta,x*(a*b))-(x*m*v)) <= x*eps,label+" x*(a*b)");
-        Assert(Norm(VEC2(T,Ta,a*(x*b))-(x*m*v)) <= x*eps,label+" a*(x*b)");
-        Assert(Norm(VEC(ComplexType(T),(z*a)*b)-(z*m*v)) <= x*eps,label+" (z*a)*b");
-        Assert(Norm(VEC(ComplexType(T),z*(a*b))-(z*m*v)) <= x*eps,label+" z*(a*b)");
-        Assert(Norm(VEC(ComplexType(T),a*(z*b))-(z*m*v)) <= x*eps,label+" a*(z*b)");
+        RT x(5);
+        std::complex<RT> z(3,4);
+        Assert(Equal(VEC2(T,Ta,(x*a)*b),(x*m*v),x*eps),label+" (x*a)*b");
+        Assert(Equal(VEC2(T,Ta,x*(a*b)),(x*m*v),x*eps),label+" x*(a*b)");
+        Assert(Equal(VEC2(T,Ta,a*(x*b)),(x*m*v),x*eps),label+" a*(x*b)");
+        Assert(Equal(VEC(CT,(z*a)*b),(z*m*v),x*eps),label+" (z*a)*b");
+        Assert(Equal(VEC(CT,z*(a*b)),(z*m*v),x*eps),label+" z*(a*b)");
+        Assert(Equal(VEC(CT,a*(z*b)),(z*m*v),x*eps),label+" a*(z*b)");
     }
     if (showstartdone) std::cout<<"Done MV1a_Full"<<std::endl;
 #endif
@@ -615,6 +663,8 @@ static void DoTestMV1a_Full(const MM& a, const V& b, std::string label)
 template <class Ta, class T, class MM, class V> 
 static void DoTestVM1a_Basic(const MM& a, const V& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<T>::complex_type CT;
     if (showstartdone) {
         std::cout<<"Start VM1a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -629,10 +679,14 @@ static void DoTestVM1a_Basic(const MM& a, const V& b, std::string label)
 
     tmv::Matrix<Ta> m = a;
     tmv::Vector<T> v = b;
-    double eps = EPS * (a.colsize()+a.rowsize()) * Norm(m) * Norm(v);
-    if (CanMultVM(v,m)) {
-        RealType(T) x(5);
-        ComplexType(T) z(3,4);
+
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    if (!std::numeric_limits<RT>::is_integer) 
+        eps *= Norm(m) * Norm(v);
+
+    if (CanMultVM(b,a)) {
+        RT x(5);
+        CT z(3,4);
 #ifdef XXD
         if (XXDEBUG4) {
             std::cout<<"CanMult("<<tmv::TMV_Text(v)<<","<<tmv::TMV_Text(m)<<")\n";
@@ -642,14 +696,14 @@ static void DoTestVM1a_Basic(const MM& a, const V& b, std::string label)
             std::cout<<"z*b*a = "<<(z*b*a)<<std::endl;
             std::cout<<"b*a Norm(diff) = "<<Norm(VEC2(T,Ta,b*a)-(v*m))<<std::endl;
             std::cout<<"x*b*a Norm(diff) = "<<Norm(VEC2(T,Ta,x*b*a)-(x*v*m))<<std::endl;
-            std::cout<<"z*b*a Norm(diff) = "<<Norm(VEC(ComplexType(T),z*b*a)-(z*v*m))<<std::endl;
+            std::cout<<"z*b*a Norm(diff) = "<<Norm(VEC(CT,z*b*a)-(z*v*m))<<std::endl;
             std::cout<<"eps = "<<eps<<std::endl;
             std::cout<<"x*eps = "<<x*eps<<std::endl;
         }
 #endif
-        Assert(Norm(VEC2(T,Ta,b*a)-(v*m)) <= eps,label+" b*a");
-        Assert(Norm(VEC2(T,Ta,x*b*a)-(x*v*m)) <= x*eps,label+" x*b*a");
-        Assert(Norm(VEC(ComplexType(T),z*b*a)-(z*v*m)) <= x*eps,label+" z*b*a");
+        Assert(Equal(VEC2(T,Ta,b*a),(v*m),eps),label+" b*a");
+        Assert(Equal(VEC2(T,Ta,x*b*a),(x*v*m),x*eps),label+" x*b*a");
+        Assert(Equal(VEC(CT,z*b*a),(z*v*m),x*eps),label+" z*b*a");
     }
     if (showstartdone) std::cout<<"Done VM1a"<<std::endl;
 }
@@ -657,21 +711,27 @@ static void DoTestVM1a_Basic(const MM& a, const V& b, std::string label)
 template <class Ta, class T, class MM, class V> 
 static void DoTestVM1a_Full(const MM& a, const V& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<T>::complex_type CT;
     DoTestVM1a_Basic<Ta,T>(a,b,label);
 
 #if (XTEST & 2)
     tmv::Matrix<Ta> m = a;
     tmv::Vector<T> v = b;
-    double eps = EPS * (a.colsize()+a.rowsize()) * Norm(m) * Norm(v);
-    if (CanMultVM(v,m)) {
-        RealType(T) x(5);
-        ComplexType(T) z(3,4);
-        Assert(Norm(VEC2(T,Ta,(x*b)*a)-(x*v*m)) <= x*eps,label+" (x*b)*a");
-        Assert(Norm(VEC2(T,Ta,x*(b*a))-(x*v*m)) <= x*eps,label+" x*(b*a)");
-        Assert(Norm(VEC2(T,Ta,b*(x*a))-(x*v*m)) <= x*eps,label+" b*(x*a)");
-        Assert(Norm(VEC(ComplexType(T),(z*b)*a)-(z*v*m)) <= x*eps,label+" (z*b)*a");
-        Assert(Norm(VEC(ComplexType(T),z*(b*a))-(z*v*m)) <= x*eps,label+" z*(b*a)");
-        Assert(Norm(VEC(ComplexType(T),b*(z*a))-(z*v*m)) <= x*eps,label+" b*(z*a)");
+
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    if (!std::numeric_limits<RT>::is_integer) 
+        eps *= Norm(m) * Norm(v);
+
+    if (CanMultVM(b,a)) {
+        RT x(5);
+        CT z(3,4);
+        Assert(Equal(VEC2(T,Ta,(x*b)*a),(x*v*m),x*eps),label+" (x*b)*a");
+        Assert(Equal(VEC2(T,Ta,x*(b*a)),(x*v*m),x*eps),label+" x*(b*a)");
+        Assert(Equal(VEC2(T,Ta,b*(x*a)),(x*v*m),x*eps),label+" b*(x*a)");
+        Assert(Equal(VEC(CT,(z*b)*a),(z*v*m),x*eps),label+" (z*b)*a");
+        Assert(Equal(VEC(CT,z*(b*a)),(z*v*m),x*eps),label+" z*(b*a)");
+        Assert(Equal(VEC(CT,b*(z*a)),(z*v*m),x*eps),label+" b*(z*a)");
     }
     if (showstartdone) std::cout<<"Done VM1a_Full"<<std::endl;
 #endif
@@ -689,34 +749,34 @@ static void DoTestMV1R(const MM& a, V& b, std::string label)
     b.setZero();
     DoTestMV1a_Basic<Ta,T>(a,b,label);
 
-    b = b0;
+    CopyBackV(b0,b);
     b.cSubVector(0,b.size()/2).setZero();
     DoTestMV1a_Basic<Ta,T>(a,b,label);
 
-    b = b0;
+    CopyBackV(b0,b);
     b.cSubVector(b.size()/2,b.size()).setZero();
     DoTestMV1a_Basic<Ta,T>(a,b,label);
 
-    b = b0;
+    CopyBackV(b0,b);
     b.cSubVector(0,b.size()/4).setZero();
     b.cSubVector(3*b.size()/4,b.size()).setZero();
     DoTestMV1a_Basic<Ta,T>(a,b,label);
 
     if (b.size() > 1) {
-        b = b0;
+        CopyBackV(b0,b);
         b.cSubVector(0,1).setZero();
         DoTestMV1a_Basic<Ta,T>(a,b,label);
 
-        b = b0;
+        CopyBackV(b0,b);
         b.cSubVector(b.size()-1,b.size()).setZero();
         DoTestMV1a_Basic<Ta,T>(a,b,label);
 
-        b = b0;
+        CopyBackV(b0,b);
         b.cSubVector(0,1).setZero();
         b.cSubVector(b.size()-1,b.size()).setZero();
         DoTestMV1a_Basic<Ta,T>(a,b,label);
     }
-    b = b0;
+    CopyBackV(b0,b);
 #endif
 }
 
@@ -727,39 +787,39 @@ static void DoTestVM1R(const MM& a, V& b, std::string label)
     DoTestVM1a_Basic<Ta,T>(a,b.reverse(),label);
 
 #if (XTEST & 8)
-    typename V::copy_type b0 = b.vec();
+    typename V::copy_type b0 = b;
 
     b.setZero();
     DoTestVM1a_Basic<Ta,T>(a,b,label);
 
-    b = b0;
+    CopyBackV(b0,b);
     b.cSubVector(0,b.size()/2).setZero();
     DoTestVM1a_Basic<Ta,T>(a,b,label);
 
-    b = b0;
+    CopyBackV(b0,b);
     b.cSubVector(b.size()/2,b.size()).setZero();
     DoTestVM1a_Basic<Ta,T>(a,b,label);
 
-    b = b0;
+    CopyBackV(b0,b);
     b.cSubVector(0,b.size()/4).setZero();
     b.cSubVector(3*b.size()/4,b.size()).setZero();
     DoTestVM1a_Basic<Ta,T>(a,b,label);
 
     if (b.size() > 1) {
-        b = b0;
+        CopyBackV(b0,b);
         b.cSubVector(0,1).setZero();
         DoTestVM1a_Basic<Ta,T>(a,b,label);
 
-        b = b0;
+        CopyBackV(b0,b);
         b.cSubVector(b.size()-1,b.size()).setZero();
         DoTestVM1a_Basic<Ta,T>(a,b,label);
 
-        b = b0;
+        CopyBackV(b0,b);
         b.cSubVector(0,1).setZero();
         b.cSubVector(b.size()-1,b.size()).setZero();
         DoTestVM1a_Basic<Ta,T>(a,b,label);
     }
-    b = b0;
+    CopyBackV(b0,b);
 #endif
 }
 
@@ -775,46 +835,46 @@ static void DoTestMV1C(const MM& a, V& b, std::string label)
 #endif
 
 #if (XTEST & 8)
-    typename V::copy_type b0 = b.vec();
+    typename V::copy_type b0 = b;
 
     b.setZero();
     DoTestMV1a_Basic<Ta,T>(a,b,label);
     DoTestMV1a_Basic<Ta,T>(Conjugate(a),b,label+" Conj");
 
-    b = b0;
+    CopyBackV(b0,b);
     b.cSubVector(0,b.size()/2).setZero();
     DoTestMV1a_Basic<Ta,T>(a,b,label);
     DoTestMV1a_Basic<Ta,T>(Conjugate(a),b,label+" Conj");
 
-    b = b0;
+    CopyBackV(b0,b);
     b.cSubVector(b.size()/2,b.size()).setZero();
     DoTestMV1a_Basic<Ta,T>(a,b,label);
     DoTestMV1a_Basic<Ta,T>(Conjugate(a),b,label+" Conj");
 
-    b = b0;
+    CopyBackV(b0,b);
     b.cSubVector(0,b.size()/4).setZero();
     b.cSubVector(3*b.size()/4,b.size()).setZero();
     DoTestMV1a_Basic<Ta,T>(a,b,label);
     DoTestMV1a_Basic<Ta,T>(Conjugate(a),b,label+" Conj");
 
     if (b.size() > 1) {
-        b = b0;
+        CopyBackV(b0,b);
         b.cSubVector(0,1).setZero();
         DoTestMV1a_Basic<Ta,T>(a,b,label);
         DoTestMV1a_Basic<Ta,T>(Conjugate(a),b, label+" Conj");
 
-        b = b0;
+        CopyBackV(b0,b);
         b.cSubVector(b.size()-1,b.size()).setZero();
         DoTestMV1a_Basic<Ta,T>(a,b,label);
         DoTestMV1a_Basic<Ta,T>(Conjugate(a),b, label+" Conj");
 
-        b = b0;
+        CopyBackV(b0,b);
         b.cSubVector(0,1).setZero();
         b.cSubVector(b.size()-1,b.size()).setZero();
         DoTestMV1a_Basic<Ta,T>(a,b,label);
         DoTestMV1a_Basic<Ta,T>(Conjugate(a),b, label+" Conj");
     }
-    b = b0;
+    CopyBackV(b0,b);
 #endif
 }
 
@@ -830,46 +890,46 @@ static void DoTestVM1C(const MM& a, V& b, std::string label)
 #endif
 
 #if (XTEST & 8)
-    typename V::copy_type b0 = b.vec();
+    typename V::copy_type b0 = b;
 
     b.setZero();
     DoTestVM1a_Basic<Ta,T>(a,b,label);
     DoTestVM1a_Basic<Ta,T>(Conjugate(a),b,label+" Conj");
 
-    b = b0;
+    CopyBackV(b0,b);
     b.cSubVector(0,b.size()/2).setZero();
     DoTestVM1a_Basic<Ta,T>(a,b,label);
     DoTestVM1a_Basic<Ta,T>(Conjugate(a),b,label+" Conj");
 
-    b = b0;
+    CopyBackV(b0,b);
     b.cSubVector(b.size()/2,b.size()).setZero();
     DoTestVM1a_Basic<Ta,T>(a,b,label);
     DoTestVM1a_Basic<Ta,T>(Conjugate(a),b,label+" Conj");
 
-    b = b0;
+    CopyBackV(b0,b);
     b.cSubVector(0,b.size()/4).setZero();
     b.cSubVector(3*b.size()/4,b.size()).setZero();
     DoTestVM1a_Basic<Ta,T>(a,b,label);
     DoTestVM1a_Basic<Ta,T>(Conjugate(a),b,label+" Conj");
 
     if (b.size() > 1) {
-        b = b0;
+        CopyBackV(b0,b);
         b.cSubVector(0,1).setZero();
         DoTestVM1a_Basic<Ta,T>(a,b,label);
         DoTestVM1a_Basic<Ta,T>(Conjugate(a),b, label+" Conj");
 
-        b = b0;
+        CopyBackV(b0,b);
         b.cSubVector(b.size()-1,b.size()).setZero();
         DoTestVM1a_Basic<Ta,T>(a,b,label);
         DoTestVM1a_Basic<Ta,T>(Conjugate(a),b, label+" Conj");
 
-        b = b0;
+        CopyBackV(b0,b);
         b.cSubVector(0,1).setZero();
         b.cSubVector(b.size()-1,b.size()).setZero();
         DoTestVM1a_Basic<Ta,T>(a,b,label);
         DoTestVM1a_Basic<Ta,T>(Conjugate(a),b, label+" Conj");
     }
-    b = b0;
+    CopyBackV(b0,b);
 #endif
 }
 
@@ -881,6 +941,7 @@ static inline void SetZ(std::complex<T>& z) { z = std::complex<T>(3,4); }
 template <class Ta, class T, class MM, class V> 
 static void DoTestMV2a_Basic(const MM& a, V& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start MV2a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -889,15 +950,19 @@ static void DoTestMV2a_Basic(const MM& a, V& b, std::string label)
 #ifdef XXD
     if (XXDEBUG5) {
         std::cout<<"a = "<<a<<std::endl;
-        std::cout<<"b = "<<b.vec()<<std::endl;
+        std::cout<<"b = "<<b<<std::endl;
     }
 #endif
 
     tmv::Matrix<Ta> m = a;
     tmv::Vector<T> v = b;
 
-    double eps = EPS * (a.colsize()+a.rowsize()) * Norm(v) * Norm(m);
-    double eps2 = EPS * (a.colsize()+a.rowsize()) * Norm(v) * (1.+Norm(m));
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    RT eps2 = eps;
+    if (!std::numeric_limits<RT>::is_integer) {
+        eps *= Norm(m) * Norm(v);
+        eps2 *= Norm(m*v) + Norm(m)*Norm(v);
+    }
 
     if (CanMultMV(a,b)) {
         tmv::Vector<T> prod = m*v;
@@ -918,7 +983,7 @@ static void DoTestMV2a_Basic(const MM& a, V& b, std::string label)
             std::cout<<"Norm(c-prod) = "<<Norm(c-prod)<<std::endl;
         }
 #endif
-        Assert(Norm(c-prod) <= eps,label+" c=a*b");
+        Assert(Equal(c,prod,eps),label+" c=a*b");
         c = c0;
         c += a*b;
 #ifdef XXD
@@ -927,9 +992,9 @@ static void DoTestMV2a_Basic(const MM& a, V& b, std::string label)
             std::cout<<"Norm(c-(c0+prod)) = "<<Norm(c-(c0+prod))<<std::endl;
         }
 #endif
-        Assert(Norm(c-(c0+prod)) <= eps2,label+" c+=a*b");
+        Assert(Equal(c,(c0+prod),eps2),label+" c+=a*b");
         c = c0;
-        RealType(T) x(5);
+        RT x(5);
         T z; SetZ(z);
         c = x*a*b;
 #ifdef XXD
@@ -940,7 +1005,7 @@ static void DoTestMV2a_Basic(const MM& a, V& b, std::string label)
             std::cout<<"x*eps = "<<x*eps<<std::endl;
         }
 #endif
-        Assert(Norm(c-x*prod) <= x*eps,label+" c=x*a*b");
+        Assert(Equal(c,x*prod,x*eps),label+" c=x*a*b");
         c = z*a*b;
 #ifdef XXD
         if (XXDEBUG5) {
@@ -949,7 +1014,7 @@ static void DoTestMV2a_Basic(const MM& a, V& b, std::string label)
             std::cout<<"Norm(c-z*prod) = "<<Norm(c-z*prod)<<std::endl;
         }
 #endif
-        Assert(Norm(c-z*prod) <= x*eps,label+" c=z*a*b");
+        Assert(Equal(c,z*prod,x*eps),label+" c=z*a*b");
         c = c0;
     }
 
@@ -966,21 +1031,21 @@ static void DoTestMV2a_Basic(const MM& a, V& b, std::string label)
             std::cout<<"eps = "<<eps<<std::endl;
         }
 #endif
-        Assert(Norm(VEC(T,b)-prod) <= eps,label+" b=a*b");
+        Assert(Equal(VEC(T,b),prod,eps),label+" b=a*b");
         b = v;
         b += a*b;
-        Assert(Norm(VEC(T,b)-(v+prod)) <= eps2,label+" b+=a*b");
+        Assert(Equal(VEC(T,b),(v+prod),eps2),label+" b+=a*b");
         b = v;
         b -= a*b;
-        Assert(Norm(VEC(T,b)-(v-prod)) <= eps2,label+" b-=a*b");
+        Assert(Equal(VEC(T,b),(v-prod),eps2),label+" b-=a*b");
         b = v;
-        RealType(T) x(5);
+        RT x(5);
         T z; SetZ(z);
         b = x*a*b;
-        Assert(Norm(VEC(T,b)-x*prod) <= x*eps,label+" b=x*a*b");
+        Assert(Equal(VEC(T,b),x*prod,x*eps),label+" b=x*a*b");
         b = v;
         b = z*a*b;
-        Assert(Norm(VEC(T,b)-z*prod) <= x*eps,label+" b=z*a*b");
+        Assert(Equal(VEC(T,b),z*prod,x*eps),label+" b=z*a*b");
         b = v;
     }
 #endif // ALIAS
@@ -990,109 +1055,114 @@ static void DoTestMV2a_Basic(const MM& a, V& b, std::string label)
 template <class Ta, class T, class MM, class V> 
 static void DoTestMV2a_Full(const MM& a, V& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     DoTestMV2a_Basic<Ta,T>(a,b,label);
 
 #if (XTEST & 2)
     tmv::Matrix<Ta> m = a;
     tmv::Vector<T> v = b;
 
-    double eps = EPS * (a.colsize()+a.rowsize()) * Norm(v) * Norm(m);
-    double eps2 = EPS * (a.colsize()+a.rowsize()) * Norm(v) * (1.+Norm(m));
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    RT eps2 = eps;
+    if (!std::numeric_limits<RT>::is_integer) {
+        eps *= Norm(m) * Norm(v);
+        eps2 *= Norm(m*v) + Norm(m)*Norm(v);
+    }
 
     if (CanMultMV(a,b)) {
         tmv::Vector<T> prod = m*v;
         tmv::Vector<T> c = prod;
         tmv::Vector<T> c0 = c;
         c0 /= T(2);
-        RealType(T) x(5);
+        RT x(5);
         T z; SetZ(z);
         c = c0;
         c += x*a*b;
-        Assert(Norm(c-(c0+x*prod)) <= x*eps2,label+" c+=x*a*b");
+        Assert(Equal(c,(c0+x*prod),x*eps2),label+" c+=x*a*b");
         c = c0;
         c += z*a*b;
-        Assert(Norm(c-(c0+z*prod)) <= x*eps2,label+" c+=z*a*b");
+        Assert(Equal(c,(c0+z*prod),x*eps2),label+" c+=z*a*b");
         c = c0;
         c = -a*b;
-        Assert(Norm(c-(-prod)) <= eps,label+" c=-a*b");
+        Assert(Equal(c,(-prod),eps),label+" c=-a*b");
         c = -x*a*b;
-        Assert(Norm(c-(-x*prod)) <= x*eps,label+" c=-x*a*b");
+        Assert(Equal(c,(-x*prod),x*eps),label+" c=-x*a*b");
         c = -z*a*b;
-        Assert(Norm(c-(-z*prod)) <= x*eps,label+" c=-z*a*b");
+        Assert(Equal(c,(-z*prod),x*eps),label+" c=-z*a*b");
         c = c0;
         c += -a*b;
-        Assert(Norm(c-(c0-prod)) <= eps2,label+" c+=-a*b");
+        Assert(Equal(c,(c0-prod),eps2),label+" c+=-a*b");
         c = c0;
         c -= a*b;
-        Assert(Norm(c-(c0-prod)) <= eps2,label+" c-=a*b");
+        Assert(Equal(c,(c0-prod),eps2),label+" c-=a*b");
         c = c0;
         c -= -a*b;
-        Assert(Norm(c-(c0+prod)) <= eps2,label+" c-=-a*b");
+        Assert(Equal(c,(c0+prod),eps2),label+" c-=-a*b");
         c = c0;
         c += -x*a*b;
-        Assert(Norm(c-(c0-x*prod)) <= x*eps2,label+" c+=-x*a*b");
+        Assert(Equal(c,(c0-x*prod),x*eps2),label+" c+=-x*a*b");
         c = c0;
         c -= x*a*b;
-        Assert(Norm(c-(c0-x*prod)) <= x*eps2,label+" c-=x*a*b");
+        Assert(Equal(c,(c0-x*prod),x*eps2),label+" c-=x*a*b");
         c = c0;
         c -= -x*a*b;
-        Assert(Norm(c-(c0+x*prod)) <= x*eps2,label+" c-=-x*a*b");
+        Assert(Equal(c,(c0+x*prod),x*eps2),label+" c-=-x*a*b");
         c = c0;
         c += -z*a*b;
-        Assert(Norm(c-(c0-z*prod)) <= x*eps2,label+" c+=-z*a*b");
+        Assert(Equal(c,(c0-z*prod),x*eps2),label+" c+=-z*a*b");
         c = c0;
         c -= z*a*b;
-        Assert(Norm(c-(c0-z*prod)) <= x*eps2,label+" c-=z*a*b");
+        Assert(Equal(c,(c0-z*prod),x*eps2),label+" c-=z*a*b");
         c = c0;
         c -= -z*a*b;
-        Assert(Norm(c-(c0+z*prod)) <= x*eps2,label+" c-=-z*a*b");
+        Assert(Equal(c,(c0+z*prod),x*eps2),label+" c-=-z*a*b");
         c = c0;
     }
 
 #ifdef ALIASOK
     if (CanMultMV(a,b,b)) {
         tmv::Vector<T> prod = m*v;
-        RealType(T) x(5);
+        RT x(5);
         T z; SetZ(z);
         b = v;
         b += x*a*b;
-        Assert(Norm(VEC(T,b)-(v+x*prod)) <= x*eps2,label+" b+=x*a*b");
+        Assert(Equal(VEC(T,b),(v+x*prod),x*eps2),label+" b+=x*a*b");
         b = v;
         b += z*a*b;
-        Assert(Norm(VEC(T,b)-(v+z*prod)) <= x*eps2,label+" b+=z*a*b");
+        Assert(Equal(VEC(T,b),(v+z*prod),x*eps2),label+" b+=z*a*b");
         b = v;
         b = -a*b;
-        Assert(Norm(VEC(T,b)-(-prod)) <= eps,label+" b=-a*b");
+        Assert(Equal(VEC(T,b),(-prod),eps),label+" b=-a*b");
         b = v;
         b = -x*a*b;
-        Assert(Norm(VEC(T,b)-(-x*prod)) <= x*eps,label+" b=-x*a*b");
+        Assert(Equal(VEC(T,b),(-x*prod),x*eps),label+" b=-x*a*b");
         b = v;
         b = -z*a*b;
-        Assert(Norm(VEC(T,b)-(-z*prod)) <= x*eps,label+" b=-z*a*b");
+        Assert(Equal(VEC(T,b),(-z*prod),x*eps),label+" b=-z*a*b");
         b = v;
         b += -a*b;
-        Assert(Norm(VEC(T,b)-(v-prod)) <= eps2,label+" b+=-a*b");
+        Assert(Equal(VEC(T,b),(v-prod),eps2),label+" b+=-a*b");
         b = v;
         b -= -a*b;
-        Assert(Norm(VEC(T,b)-(v+prod)) <= eps2,label+" b-=-a*b");
+        Assert(Equal(VEC(T,b),(v+prod),eps2),label+" b-=-a*b");
         b = v;
         b += -x*a*b;
-        Assert(Norm(VEC(T,b)-(v-x*prod)) <= x*eps2,label+" b+=-x*a*b");
+        Assert(Equal(VEC(T,b),(v-x*prod),x*eps2),label+" b+=-x*a*b");
         b = v;
         b -= x*a*b;
-        Assert(Norm(VEC(T,b)-(v-x*prod)) <= x*eps2,label+" b-=x*a*b");
+        Assert(Equal(VEC(T,b),(v-x*prod),x*eps2),label+" b-=x*a*b");
         b = v;
         b -= -x*a*b;
-        Assert(Norm(VEC(T,b)-(v+x*prod)) <= x*eps2,label+" b-=-x*a*b");
+        Assert(Equal(VEC(T,b),(v+x*prod),x*eps2),label+" b-=-x*a*b");
         b = v;
         b += -z*a*b;
-        Assert(Norm(VEC(T,b)-(v-z*prod)) <= x*eps2,label+" b+=-z*a*b");
+        Assert(Equal(VEC(T,b),(v-z*prod),x*eps2),label+" b+=-z*a*b");
         b = v;
         b -= z*a*b;
-        Assert(Norm(VEC(T,b)-(v-z*prod)) <= x*eps2,label+" b-=z*a*b");
+        Assert(Equal(VEC(T,b),(v-z*prod),x*eps2),label+" b-=z*a*b");
         b = v;
         b -= -z*a*b;
-        Assert(Norm(VEC(T,b)-(v+z*prod)) <= x*eps2,label+" b-=-z*a*b");
+        Assert(Equal(VEC(T,b),(v+z*prod),x*eps2),label+" b-=-z*a*b");
         b = v;
     }
 #endif // ALIAS
@@ -1103,6 +1173,7 @@ static void DoTestMV2a_Full(const MM& a, V& b, std::string label)
 template <class Ta, class T, class MM, class V> 
 static void DoTestVM2a_Basic(const MM& a, V& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start VM2a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -1111,15 +1182,19 @@ static void DoTestVM2a_Basic(const MM& a, V& b, std::string label)
 #ifdef XXD
     if (XXDEBUG5) {
         std::cout<<"a = "<<a<<std::endl;
-        std::cout<<"b = "<<b.vec()<<std::endl;
+        std::cout<<"b = "<<b<<std::endl;
     }
 #endif
 
     tmv::Matrix<Ta> m = a;
     tmv::Vector<T> v = b;
 
-    double eps = EPS * (a.colsize()+a.rowsize()) * Norm(v) * Norm(m);
-    double eps2 = EPS * (a.colsize()+a.rowsize()) * Norm(v) * (1.+Norm(m));
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    RT eps2 = eps;
+    if (!std::numeric_limits<RT>::is_integer) {
+        eps *= Norm(m) * Norm(v);
+        eps2 *= Norm(v*m) + Norm(m)*Norm(v);
+    }
 
     if (CanMultVM(b,a)) {
         tmv::Vector<T> prod = v*m;
@@ -1136,17 +1211,17 @@ static void DoTestVM2a_Basic(const MM& a, V& b, std::string label)
         }
 #endif
         c = b*a;
-        Assert(Norm(c-prod) <= eps,label+" c=b*a");
+        Assert(Equal(c,prod,eps),label+" c=b*a");
         c = c0;
         c += b*a;
-        Assert(Norm(c-(c0+prod)) <= eps2,label+" c+=b*a");
+        Assert(Equal(c,(c0+prod),eps2),label+" c+=b*a");
         c = c0;
-        RealType(T) x(5);
+        RT x(5);
         T z; SetZ(z);
         c = x*b*a;
-        Assert(Norm(c-x*prod) <= x*eps,label+" c=x*b*a");
+        Assert(Equal(c,x*prod,x*eps),label+" c=x*b*a");
         c = z*b*a;
-        Assert(Norm(c-z*prod) <= x*eps,label+" c=z*b*a");
+        Assert(Equal(c,z*prod,x*eps),label+" c=z*b*a");
         c = c0;
     }
 
@@ -1161,7 +1236,7 @@ static void DoTestVM2a_Basic(const MM& a, V& b, std::string label)
         }
 #endif
         b *= a;
-        Assert(Norm(VEC(T,b)-prod) <= eps,label+" b*=a");
+        Assert(Equal(VEC(T,b),prod,eps),label+" b*=a");
         b = v;
 #ifdef ALIASOK
         b = b*a;
@@ -1173,10 +1248,10 @@ static void DoTestVM2a_Basic(const MM& a, V& b, std::string label)
             std::cout<<"eps = "<<eps<<std::endl;
         }
 #endif
-        Assert(Norm(VEC(T,b)-prod) <= eps,label+" b=b*a");
+        Assert(Equal(VEC(T,b),prod,eps),label+" b=b*a");
         b = v;
         b += b*a;
-        Assert(Norm(VEC(T,b)-(v+prod)) <= eps2,label+" b+=b*a");
+        Assert(Equal(VEC(T,b),(v+prod),eps2),label+" b+=b*a");
         b = v;
 #endif
     }
@@ -1186,127 +1261,132 @@ static void DoTestVM2a_Basic(const MM& a, V& b, std::string label)
 template <class Ta, class T, class MM, class V> 
 static void DoTestVM2a_Full(const MM& a, V& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     DoTestVM2a_Basic<Ta,T>(a,b,label);
 
 #if (XTEST & 2)
     tmv::Matrix<Ta> m = a;
     tmv::Vector<T> v = b;
 
-    double eps = EPS * (a.colsize()+a.rowsize()) * Norm(v) * Norm(m);
-    double eps2 = EPS * (a.colsize()+a.rowsize()) * Norm(v) * (1.+Norm(m));
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    RT eps2 = eps;
+    if (!std::numeric_limits<RT>::is_integer) {
+        eps *= Norm(m) * Norm(v);
+        eps2 *= Norm(v*m) + Norm(m)*Norm(v);
+    }
 
     if (CanMultVM(b,a)) {
         tmv::Vector<T> prod = v*m;
         tmv::Vector<T> c = prod;
         tmv::Vector<T> c0 = c;
         c0 /= T(2);
-        RealType(T) x(5);
+        RT x(5);
         T z; SetZ(z);
         c = c0;
         c += -b*a;
-        Assert(Norm(c-(c0-prod)) <= eps2,label+" c+=-b*a");
+        Assert(Equal(c,(c0-prod),eps2),label+" c+=-b*a");
         c = c0;
         c += x*b*a;
-        Assert(Norm(c-(c0+x*prod)) <= x*eps2,label+" c+=x*b*a");
+        Assert(Equal(c,(c0+x*prod),x*eps2),label+" c+=x*b*a");
         c = c0;
         c += z*b*a;
-        Assert(Norm(c-(c0+z*prod)) <= x*eps2,label+" c+=z*b*a");
+        Assert(Equal(c,(c0+z*prod),x*eps2),label+" c+=z*b*a");
         c = c0;
         c = -b*a;
-        Assert(Norm(c-(-prod)) <= eps,label+" c=-b*a");
+        Assert(Equal(c,(-prod),eps),label+" c=-b*a");
         c = -x*b*a;
-        Assert(Norm(c-(-x*prod)) <= x*eps,label+" c=-x*b*a");
+        Assert(Equal(c,(-x*prod),x*eps),label+" c=-x*b*a");
         c = -z*b*a;
-        Assert(Norm(c-(-z*prod)) <= x*eps,label+" c=-z*b*a");
+        Assert(Equal(c,(-z*prod),x*eps),label+" c=-z*b*a");
         c = c0;
         c -= b*a;
-        Assert(Norm(c-(c0-prod)) <= eps2,label+" c-=b*a");
+        Assert(Equal(c,(c0-prod),eps2),label+" c-=b*a");
         c = c0;
         c -= -b*a;
-        Assert(Norm(c-(c0+prod)) <= eps2,label+" c-=-b*a");
+        Assert(Equal(c,(c0+prod),eps2),label+" c-=-b*a");
         c = c0;
         c += -x*b*a;
-        Assert(Norm(c-(c0-x*prod)) <= x*eps2,label+" c+=-x*b*a");
+        Assert(Equal(c,(c0-x*prod),x*eps2),label+" c+=-x*b*a");
         c = c0;
         c -= x*b*a;
-        Assert(Norm(c-(c0-x*prod)) <= x*eps2,label+" c-=x*b*a");
+        Assert(Equal(c,(c0-x*prod),x*eps2),label+" c-=x*b*a");
         c = c0;
         c -= -x*b*a;
-        Assert(Norm(c-(c0+x*prod)) <= x*eps2,label+" c-=-x*b*a");
+        Assert(Equal(c,(c0+x*prod),x*eps2),label+" c-=-x*b*a");
         c = c0;
         c += -z*b*a;
-        Assert(Norm(c-(c0-z*prod)) <= x*eps2,label+" c+=-z*b*a");
+        Assert(Equal(c,(c0-z*prod),x*eps2),label+" c+=-z*b*a");
         c = c0;
         c -= z*b*a;
-        Assert(Norm(c-(c0-z*prod)) <= x*eps2,label+" c-=z*b*a");
+        Assert(Equal(c,(c0-z*prod),x*eps2),label+" c-=z*b*a");
         c = c0;
         c -= -z*b*a;
-        Assert(Norm(c-(c0+z*prod)) <= x*eps2,label+" c-=-z*b*a");
+        Assert(Equal(c,(c0+z*prod),x*eps2),label+" c-=-z*b*a");
         c = c0;
     }
 
     if (CanMultVM(b,a,b)) {
         tmv::Vector<T> prod = v*m;
         b = v;
-        RealType(T) x(5);
+        RT x(5);
         T z; SetZ(z);
         b *= x*a;
-        Assert(Norm(VEC(T,b)-x*prod) <= x*eps,label+" b*=(x*a)");
+        Assert(Equal(VEC(T,b),x*prod,x*eps),label+" b*=(x*a)");
         b = v;
         b *= z*a;
-        Assert(Norm(VEC(T,b)-z*prod) <= x*eps,label+" b*=(z*a)");
+        Assert(Equal(VEC(T,b),z*prod,x*eps),label+" b*=(z*a)");
         b = v;
         b *= -a;
-        Assert(Norm(VEC(T,b)-(-prod)) <= eps,label+" b*=-a");
+        Assert(Equal(VEC(T,b),(-prod),eps),label+" b*=-a");
         b = v;
 #ifdef ALIASOK
         b = x*b*a;
-        Assert(Norm(VEC(T,b)-x*prod) <= x*eps,label+" b=x*b*a");
+        Assert(Equal(VEC(T,b),x*prod,x*eps),label+" b=x*b*a");
         b = v;
         b = z*b*a;
-        Assert(Norm(VEC(T,b)-z*prod) <= x*eps,label+" b=z*b*a");
+        Assert(Equal(VEC(T,b),z*prod,x*eps),label+" b=z*b*a");
         b = v;
         b += x*b*a;
-        Assert(Norm(VEC(T,b)-(v+x*prod)) <= x*eps2,label+" b+=x*b*a");
+        Assert(Equal(VEC(T,b),(v+x*prod),x*eps2),label+" b+=x*b*a");
         b = v;
         b += z*b*a;
-        Assert(Norm(VEC(T,b)-(v+z*prod)) <= x*eps2,label+" b+=z*b*a");
+        Assert(Equal(VEC(T,b),(v+z*prod),x*eps2),label+" b+=z*b*a");
         b = v;
         b = -b*a;
-        Assert(Norm(VEC(T,b)-(-prod)) <= eps,label+" b=-b*a");
+        Assert(Equal(VEC(T,b),(-prod),eps),label+" b=-b*a");
         b = v;
         b = -x*b*a;
-        Assert(Norm(VEC(T,b)-(-x*prod)) <= x*eps,label+" b=-x*b*a");
+        Assert(Equal(VEC(T,b),(-x*prod),x*eps),label+" b=-x*b*a");
         b = v;
         b = -z*b*a;
-        Assert(Norm(VEC(T,b)-(-z*prod)) <= x*eps,label+" b=-z*b*a");
+        Assert(Equal(VEC(T,b),(-z*prod),x*eps),label+" b=-z*b*a");
         b = v;
         b += -b*a;
-        Assert(Norm(VEC(T,b)-(v-prod)) <= eps2,label+" b+=-b*a");
+        Assert(Equal(VEC(T,b),(v-prod),eps2),label+" b+=-b*a");
         b = v;
         b -= b*a;
-        Assert(Norm(VEC(T,b)-(v-prod)) <= eps2,label+" b-=b*a");
+        Assert(Equal(VEC(T,b),(v-prod),eps2),label+" b-=b*a");
         b = v;
         b -= -b*a;
-        Assert(Norm(VEC(T,b)-(v+prod)) <= eps2,label+" b-=-b*a");
+        Assert(Equal(VEC(T,b),(v+prod),eps2),label+" b-=-b*a");
         b = v;
         b += -x*b*a;
-        Assert(Norm(VEC(T,b)-(v-x*prod)) <= x*eps2,label+" b+=-x*b*a");
+        Assert(Equal(VEC(T,b),(v-x*prod),x*eps2),label+" b+=-x*b*a");
         b = v;
         b -= x*b*a;
-        Assert(Norm(VEC(T,b)-(v-x*prod)) <= x*eps2,label+" b-=x*b*a");
+        Assert(Equal(VEC(T,b),(v-x*prod),x*eps2),label+" b-=x*b*a");
         b = v;
         b -= -x*b*a;
-        Assert(Norm(VEC(T,b)-(v+x*prod)) <= x*eps2,label+" b-=-x*b*a");
+        Assert(Equal(VEC(T,b),(v+x*prod),x*eps2),label+" b-=-x*b*a");
         b = v;
         b += -z*b*a;
-        Assert(Norm(VEC(T,b)-(v-z*prod)) <= x*eps2,label+" b+=-z*b*a");
+        Assert(Equal(VEC(T,b),(v-z*prod),x*eps2),label+" b+=-z*b*a");
         b = v;
         b -= z*b*a;
-        Assert(Norm(VEC(T,b)-(v-z*prod)) <= x*eps2,label+" b-=z*b*a");
+        Assert(Equal(VEC(T,b),(v-z*prod),x*eps2),label+" b-=z*b*a");
         b = v;
         b -= -z*b*a;
-        Assert(Norm(VEC(T,b)-(v+z*prod)) <= x*eps2,label+" b-=-z*b*a");
+        Assert(Equal(VEC(T,b),(v+z*prod),x*eps2),label+" b-=-z*b*a");
         b = v;
 #endif
     }
@@ -1325,20 +1405,20 @@ static void DoTestMV2R(const MM& a, V& b, std::string label)
     typename V::copy_type b0 = b;
     b.setZero();
     DoTestMV2a_Basic<Ta,T>(a,b,label+" 1");
-    b = b0;
+    CopyBackV(b0,b);
 
     b.cSubVector(0,b.size()/2).setZero();
     DoTestMV2a_Basic<Ta,T>(a,b,label+" 2");
-    b = b0;
+    CopyBackV(b0,b);
 
     b.cSubVector(b.size()/2,b.size()).setZero();
     DoTestMV2a_Basic<Ta,T>(a,b,label+" 3");
-    b = b0;
+    CopyBackV(b0,b);
 
     b.cSubVector(0,b.size()/4).setZero();
     b.cSubVector(3*b.size()/4,b.size()).setZero();
     DoTestMV2a_Basic<Ta,T>(a,b,label+" 4");
-    b = b0;
+    CopyBackV(b0,b);
 #endif
 }
 
@@ -1347,26 +1427,26 @@ static void DoTestVM2R(const MM& a, V& b, std::string label)
 {
     typename V::reverse_type br = b.reverse();
     DoTestVM2a_Basic<Ta,T>(a,b,label);
-    DoTestMV2a_Basic<Ta,T>(a,br,label+" Rev");
+    DoTestVM2a_Basic<Ta,T>(a,br,label+" Rev");
 
 #if (XTEST & 8)
     typename V::copy_type b0 = b;
     b.setZero();
     DoTestVM2a_Basic<Ta,T>(a,b,label+" 1");
-    b = b0;
+    CopyBackV(b0,b);
 
     b.cSubVector(0,b.size()/2).setZero();
     DoTestVM2a_Basic<Ta,T>(a,b,label+" 2");
-    b = b0;
+    CopyBackV(b0,b);
 
     b.cSubVector(b.size()/2,b.size()).setZero();
     DoTestVM2a_Basic<Ta,T>(a,b,label+" 3");
-    b = b0;
+    CopyBackV(b0,b);
 
     b.cSubVector(0,b.size()/4).setZero();
     b.cSubVector(3*b.size()/4,b.size()).setZero();
     DoTestVM2a_Basic<Ta,T>(a,b,label+" 4");
-    b = b0;
+    CopyBackV(b0,b);
 #endif
 }
 
@@ -1385,23 +1465,23 @@ static void DoTestMV2C(const MM& a, V& b, std::string label)
     b.setZero();
     DoTestMV2a_Basic<Ta,T>(a,b,label+" 1");
     DoTestMV2a_Basic<Ta,T>(Conjugate(a),b,label+" Conj1");
-    b = b0;
+    CopyBackV(b0,b);
 
     b.cSubVector(0,b.size()/2).setZero();
     DoTestMV2a_Basic<Ta,T>(a,b,label+" 2");
     DoTestMV2a_Basic<Ta,T>(Conjugate(a),b,label+" Conj2");
-    b = b0;
+    CopyBackV(b0,b);
 
     b.cSubVector(b.size()/2,b.size()).setZero();
     DoTestMV2a_Basic<Ta,T>(a,b,label+" 3");
     DoTestMV2a_Basic<Ta,T>(Conjugate(a),b,label+" Conj3");
-    b = b0;
+    CopyBackV(b0,b);
 
     b.cSubVector(0,b.size()/4).setZero();
     b.cSubVector(3*b.size()/4,b.size()).setZero();
     DoTestMV2a_Basic<Ta,T>(a,b,label+" 4");
     DoTestMV2a_Basic<Ta,T>(Conjugate(a),b,label+" Conj4");
-    b = b0;
+    CopyBackV(b0,b);
 #endif
 }
 
@@ -1420,23 +1500,23 @@ static void DoTestVM2C(const MM& a, V& b, std::string label)
     b.setZero();
     DoTestVM2a_Basic<Ta,T>(a,b,label+" 1");
     DoTestVM2a_Basic<Ta,T>(Conjugate(a),b,label+" Conj1");
-    b = b0;
+    CopyBackV(b0,b);
 
     b.cSubVector(0,b.size()/2).setZero();
     DoTestVM2a_Basic<Ta,T>(a,b,label+" 2");
     DoTestVM2a_Basic<Ta,T>(Conjugate(a),b,label+" Conj2");
-    b = b0;
+    CopyBackV(b0,b);
 
     b.cSubVector(b.size()/2,b.size()).setZero();
     DoTestVM2a_Basic<Ta,T>(a,b,label+" 3");
     DoTestVM2a_Basic<Ta,T>(Conjugate(a),b,label+" Conj3");
-    b = b0;
+    CopyBackV(b0,b);
 
     b.cSubVector(0,b.size()/4).setZero();
     b.cSubVector(3*b.size()/4,b.size()).setZero();
     DoTestVM2a_Basic<Ta,T>(a,b,label+" 4");
     DoTestVM2a_Basic<Ta,T>(Conjugate(a),b,label+" Conj4");
-    b = b0;
+    CopyBackV(b0,b);
 #endif
 }
 
@@ -1444,6 +1524,7 @@ template <class Ta, class Tb, class T, class MM, class V1, class V2>
 static void DoTestMV3a_Basic(
     const MM& a, const V1& b, V2& c, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start MV3a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -1453,58 +1534,62 @@ static void DoTestMV3a_Basic(
 
     tmv::Matrix<Ta> m = a;
     tmv::Matrix<Ta> mt = Transpose(a);
-    tmv::Vector<T> c0 = c;
     tmv::Vector<Tb> v1 = b;
     tmv::Vector<T> v2 = c;
 
-    double eps = EPS * (a.colsize()+a.rowsize()) * Norm(b) * Norm(a);
-    double eps2 = EPS * (a.colsize()+a.rowsize()) * (Norm(c0) + Norm(b) * Norm(a));
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    RT eps2 = eps;
+    if (!std::numeric_limits<RT>::is_integer) {
+        eps *= Norm(m) * Norm(v1);
+        eps2 *= Norm(m*v1) + Norm(m)*Norm(v1);
+    }
 
 #ifdef XXD
     if (XXDEBUG6) {
         std::cout<<"a = "<<TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"b = "<<TMV_Text(b)<<"  "<<b.step()<<"  "<<b<<std::endl;
-        std::cout<<"c = "<<TMV_Text(c)<<"  "<<c.step()<<"  "<<c.vec()<<std::endl;
+        std::cout<<"c = "<<TMV_Text(c)<<"  "<<c.step()<<"  "<<c<<std::endl;
         std::cout<<"a*b = "<<m*v1<<std::endl;
     }
 #endif
 
     if (CanMultMV(a,b,c)) {
+        typename V2::copy_type c0 = c;
         c = a*b;
         v2 = m*v1;
-        Assert(Norm(VEC(T,c)-v2) <= eps,label+" c=a*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,eps),label+" c=a*b");
+        CopyBackV(c0,c);
         c += a*b;
         v2 = c0 + m*v1;
-        Assert(Norm(VEC(T,c)-v2) <= eps2,label+" c+=a*b");
-        c = c0;
-        RealType(T) x(5);
+        Assert(Equal(VEC(T,c),v2,eps2),label+" c+=a*b");
+        CopyBackV(c0,c);
+        RT x(5);
         T z; SetZ(z);
         c = x*a*b;
         v2 = x*m*v1;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps,label+" c=x*a*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps),label+" c=x*a*b");
+        CopyBackV(c0,c);
         c = z*a*b;
         v2 = z*m*v1;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps,label+" c=z*a*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps),label+" c=z*a*b");
+        CopyBackV(c0,c);
 
         c = b*Transpose(a);
         v2 = v1*mt;
-        Assert(Norm(VEC(T,c)-v2) <= eps,label+" c=b*at");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,eps),label+" c=b*at");
+        CopyBackV(c0,c);
         c += b*Transpose(a);
         v2 = c0 + v1*mt;
-        Assert(Norm(VEC(T,c)-v2) <= eps2,label+" c+=b*at");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,eps2),label+" c+=b*at");
+        CopyBackV(c0,c);
         c = x*b*Transpose(a);
         v2 = x*v1*mt;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps,label+" c=x*b*at");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps),label+" c=x*b*at");
+        CopyBackV(c0,c);
         c = z*b*Transpose(a);
         v2 = z*v1*mt;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps,label+" c=z*b*at");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps),label+" c=z*b*at");
+        CopyBackV(c0,c);
     }
 
     if (showstartdone) std::cout<<"Done MV3a"<<std::endl;
@@ -1513,119 +1598,123 @@ static void DoTestMV3a_Basic(
 template <class Ta, class Tb, class T, class MM, class V1, class V2> 
 static void DoTestMV3a_Full(const MM& a, const V1& b, V2& c, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     DoTestMV3a_Basic<Ta,Tb,T>(a,b,c,label);
 
 #if (XTEST & 2)
     tmv::Matrix<Ta> m = a;
     tmv::Matrix<Ta> mt = Transpose(a);
-    tmv::Vector<T> c0 = c;
     tmv::Vector<Tb> v1 = b;
     tmv::Vector<T> v2 = c;
 
-    double eps = EPS * (a.colsize()+a.rowsize()) * Norm(b) * Norm(a);
-    double eps2 = EPS * (a.colsize()+a.rowsize()) * (Norm(c0) + Norm(b) * Norm(a));
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    RT eps2 = eps;
+    if (!std::numeric_limits<RT>::is_integer) {
+        eps *= Norm(m) * Norm(v1);
+        eps2 *= Norm(m*v1) + Norm(m)*Norm(v1);
+    }
 
     if (CanMultMV(a,b,c)) {
-        RealType(T) x(5);
+        typename V2::copy_type c0 = c;
+        RT x(5);
         T z; SetZ(z);
-        c = c0;
         c += x*a*b;
         v2 = c0 + x*m*v1;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c+=x*a*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c+=x*a*b");
+        CopyBackV(c0,c);
         c += z*a*b;
         v2 = c0 + z*m*v1;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c+=z*a*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c+=z*a*b");
+        CopyBackV(c0,c);
         c = -a*b;
         v2 = -m*v1;
-        Assert(Norm(VEC(T,c)-v2) <= eps,label+" c=-a*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,eps),label+" c=-a*b");
+        CopyBackV(c0,c);
         c += -a*b;
         v2 = c0 - m*v1;
-        Assert(Norm(VEC(T,c)-v2) <= eps2,label+" c+=-a*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,eps2),label+" c+=-a*b");
+        CopyBackV(c0,c);
         c -= a*b;
         v2 = c0 - m*v1;
-        Assert(Norm(VEC(T,c)-v2) <= eps2,label+" c-=a*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,eps2),label+" c-=a*b");
+        CopyBackV(c0,c);
         c -= -a*b;
         v2 = c0 + m*v1;
-        Assert(Norm(VEC(T,c)-v2) <= eps2,label+" c-=-a*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,eps2),label+" c-=-a*b");
+        CopyBackV(c0,c);
         c += -x*a*b;
         v2 = c0 - x*m*v1;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c+=-x*a*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c+=-x*a*b");
+        CopyBackV(c0,c);
         c -= x*a*b;
         v2 = c0 - x*m*v1;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c-=x*a*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c-=x*a*b");
+        CopyBackV(c0,c);
         c -= -x*a*b;
         v2 = c0 + x*m*v1;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c-=-x*a*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c-=-x*a*b");
+        CopyBackV(c0,c);
         c += -z*a*b;
         v2 = c0 - z*m*v1;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c+=-z*a*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c+=-z*a*b");
+        CopyBackV(c0,c);
         c -= z*a*b;
         v2 = c0 - z*m*v1;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c-=z*a*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c-=z*a*b");
+        CopyBackV(c0,c);
         c -= -z*a*b;
         v2 = c0 + z*m*v1;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c-=-z*a*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c-=-z*a*b");
+        CopyBackV(c0,c);
 
         c += x*b*Transpose(a);
         v2 = c0 + x*v1*mt;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c+=x*b*at");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c+=x*b*at");
+        CopyBackV(c0,c);
         c += z*b*Transpose(a);
         v2 = c0 + z*v1*mt;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c+=z*b*at");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c+=z*b*at");
+        CopyBackV(c0,c);
         c = -b*Transpose(a);
         v2 = -v1*mt;
-        Assert(Norm(VEC(T,c)-v2) <= eps,label+" c=-b*at");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,eps),label+" c=-b*at");
+        CopyBackV(c0,c);
         c += -b*Transpose(a);
         v2 = c0 - v1*mt;
-        Assert(Norm(VEC(T,c)-v2) <= eps2,label+" c+=-b*at");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,eps2),label+" c+=-b*at");
+        CopyBackV(c0,c);
         c -= b*Transpose(a);
         v2 = c0 - v1*mt;
-        Assert(Norm(VEC(T,c)-v2) <= eps2,label+" c-=b*at");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,eps2),label+" c-=b*at");
+        CopyBackV(c0,c);
         c -= -b*Transpose(a);
         v2 = c0 + v1*mt;
-        Assert(Norm(VEC(T,c)-v2) <= eps2,label+" c-=-b*at");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,eps2),label+" c-=-b*at");
+        CopyBackV(c0,c);
         c += -x*b*Transpose(a);
         v2 = c0 - x*v1*mt;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c+=-x*b*at");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c+=-x*b*at");
+        CopyBackV(c0,c);
         c -= x*b*Transpose(a);
         v2 = c0 - x*v1*mt;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c-=x*b*at");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c-=x*b*at");
+        CopyBackV(c0,c);
         c -= -x*b*Transpose(a);
         v2 = c0 + x*v1*mt;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c-=-x*b*at");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c-=-x*b*at");
+        CopyBackV(c0,c);
         c += -z*b*Transpose(a);
         v2 = c0 - z*v1*mt;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c+=-z*b*at");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c+=-z*b*at");
+        CopyBackV(c0,c);
         c -= z*b*Transpose(a);
         v2 = c0 - z*v1*mt;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c-=z*b*at");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c-=z*b*at");
+        CopyBackV(c0,c);
         c -= -z*b*Transpose(a);
         v2 = c0 + z*v1*mt;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c-=-z*b*at");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c-=-z*b*at");
+        CopyBackV(c0,c);
     }
 
     if (showstartdone) std::cout<<"Done MV3a_Full"<<std::endl;
@@ -1636,6 +1725,7 @@ template <class Ta, class Tb, class T, class MM, class V1, class V2>
 static void DoTestVM3a_Basic(
     const MM& a, const V1& b, V2& c, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start VM3a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -1645,12 +1735,15 @@ static void DoTestVM3a_Basic(
 
     tmv::Matrix<Ta> m = a;
     tmv::Matrix<Ta> mt = Transpose(a);
-    tmv::Vector<T> c0 = c;
     tmv::Vector<Tb> v1 = b;
     tmv::Vector<T> v2 = c;
 
-    double eps = EPS * (a.colsize()+a.rowsize()) * Norm(b) * Norm(a);
-    double eps2 = EPS * (a.colsize()+a.rowsize()) * (Norm(c0) + Norm(b) * Norm(a));
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    RT eps2 = eps;
+    if (!std::numeric_limits<RT>::is_integer) {
+        eps *= Norm(m) * Norm(v1);
+        eps2 *= Norm(v1*m) + Norm(m)*Norm(v1);
+    }
 
 #ifdef XXD
     if (XXDEBUG6) {
@@ -1662,41 +1755,42 @@ static void DoTestVM3a_Basic(
 #endif
 
     if (CanMultVM(b,a,c)) {
+        typename V2::copy_type c0 = c;
         c = b*a;
         v2 = v1*m;
-        Assert(Norm(VEC(T,c)-v2) <= eps,label+" c=b*a");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,eps),label+" c=b*a");
+        CopyBackV(c0,c);
         c += b*a;
         v2 = c0 + v1*m;
-        Assert(Norm(VEC(T,c)-v2) <= eps2,label+" c+=b*a");
-        c = c0;
-        RealType(T) x(5);
+        Assert(Equal(VEC(T,c),v2,eps2),label+" c+=b*a");
+        CopyBackV(c0,c);
+        RT x(5);
         T z; SetZ(z);
         c = x*b*a;
         v2 = x*v1*m;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps,label+" c=x*b*a");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps),label+" c=x*b*a");
+        CopyBackV(c0,c);
         c = z*b*a;
         v2 = z*v1*m;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps,label+" c=z*b*a");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps),label+" c=z*b*a");
+        CopyBackV(c0,c);
 
         c = Transpose(a)*b;
         v2 = mt*v1;
-        Assert(Norm(VEC(T,c)-v2) <= eps,label+" c=at*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,eps),label+" c=at*b");
+        CopyBackV(c0,c);
         c += Transpose(a)*b;
         v2 = c0 + mt*v1;
-        Assert(Norm(VEC(T,c)-v2) <= eps2,label+" c+=at*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,eps2),label+" c+=at*b");
+        CopyBackV(c0,c);
         c = x*Transpose(a)*b;
         v2 = x*mt*v1;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps,label+" c=x*at*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps),label+" c=x*at*b");
+        CopyBackV(c0,c);
         c = z*Transpose(a)*b;
         v2 = z*mt*v1;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps,label+" c=z*at*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps),label+" c=z*at*b");
+        CopyBackV(c0,c);
     }
 
     if (showstartdone) std::cout<<"Done VM3a"<<std::endl;
@@ -1705,119 +1799,124 @@ static void DoTestVM3a_Basic(
 template <class Ta, class Tb, class T, class MM, class V1, class V2> 
 static void DoTestVM3a_Full(const MM& a, const V1& b, V2& c, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<T>::complex_type CT;
     DoTestVM3a_Basic<Ta,Tb,T>(a,b,c,label);
 
 #if (XTEST & 2)
     tmv::Matrix<Ta> m = a;
     tmv::Matrix<Ta> mt = Transpose(a);
-    tmv::Vector<T> c0 = c;
     tmv::Vector<Tb> v1 = b;
     tmv::Vector<T> v2 = c;
 
-    double eps = EPS * (a.colsize()+a.rowsize()) * Norm(b) * Norm(a);
-    double eps2 = EPS * (a.colsize()+a.rowsize()) * (Norm(c0) + Norm(b) * Norm(a));
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    RT eps2 = eps;
+    if (!std::numeric_limits<RT>::is_integer) {
+        eps *= Norm(m) * Norm(v1);
+        eps2 *= Norm(v1*m) + Norm(m)*Norm(v1);
+    }
 
     if (CanMultVM(b,a,c)) {
-        RealType(T) x(5);
-        ComplexType(T) z(3,4);
-        c = c0;
+        typename V2::copy_type c0 = c;
+        RT x(5);
+        CT z(3,4);
         c += x*b*a;
         v2 = c0 + x*v1*m;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c+=x*b*a");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c+=x*b*a");
+        CopyBackV(c0,c);
         c += z*b*a;
         v2 = c0 + z*v1*m;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c+=z*b*a");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c+=z*b*a");
+        CopyBackV(c0,c);
         c = -b*a;
         v2 = -v1*m;
-        Assert(Norm(VEC(T,c)-v2) <= eps,label+" c=-b*a");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,eps),label+" c=-b*a");
+        CopyBackV(c0,c);
         c += -b*a;
         v2 = c0 - v1*m;
-        Assert(Norm(VEC(T,c)-v2) <= eps2,label+" c+=-b*a");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,eps2),label+" c+=-b*a");
+        CopyBackV(c0,c);
         c -= b*a;
         v2 = c0 - v1*m;
-        Assert(Norm(VEC(T,c)-v2) <= eps2,label+" c-=b*a");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,eps2),label+" c-=b*a");
+        CopyBackV(c0,c);
         c -= -b*a;
         v2 = c0 + v1*m;
-        Assert(Norm(VEC(T,c)-v2) <= eps2,label+" c-=-b*a");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,eps2),label+" c-=-b*a");
+        CopyBackV(c0,c);
         c += -x*b*a;
         v2 = c0 - x*v1*m;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c+=-x*b*a");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c+=-x*b*a");
+        CopyBackV(c0,c);
         c -= x*b*a;
         v2 = c0 - x*v1*m;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c-=x*b*a");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c-=x*b*a");
+        CopyBackV(c0,c);
         c -= -x*b*a;
         v2 = c0 + x*v1*m;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c-=-x*b*a");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c-=-x*b*a");
+        CopyBackV(c0,c);
         c += -z*b*a;
         v2 = c0 - z*v1*m;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c+=-z*b*a");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c+=-z*b*a");
+        CopyBackV(c0,c);
         c -= z*b*a;
         v2 = c0 - z*v1*m;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c-=z*b*a");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c-=z*b*a");
+        CopyBackV(c0,c);
         c -= -z*b*a;
         v2 = c0 + z*v1*m;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c-=-z*b*a");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c-=-z*b*a");
+        CopyBackV(c0,c);
 
         c += x*Transpose(a)*b;
         v2 = c0 + x*mt*v1;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c+=x*at*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c+=x*at*b");
+        CopyBackV(c0,c);
         c += z*Transpose(a)*b;
         v2 = c0 + z*mt*v1;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c+=z*at*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c+=z*at*b");
+        CopyBackV(c0,c);
         c = -Transpose(a)*b;
         v2 = -mt*v1;
-        Assert(Norm(VEC(T,c)-v2) <= eps,label+" c=-at*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,eps),label+" c=-at*b");
+        CopyBackV(c0,c);
         c += -Transpose(a)*b;
         v2 = c0 - mt*v1;
-        Assert(Norm(VEC(T,c)-v2) <= eps2,label+" c+=-at*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,eps2),label+" c+=-at*b");
+        CopyBackV(c0,c);
         c -= Transpose(a)*b;
         v2 = c0 - mt*v1;
-        Assert(Norm(VEC(T,c)-v2) <= eps2,label+" c-=at*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,eps2),label+" c-=at*b");
+        CopyBackV(c0,c);
         c -= -Transpose(a)*b;
         v2 = c0 + mt*v1;
-        Assert(Norm(VEC(T,c)-v2) <= eps2,label+" c-=-at*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,eps2),label+" c-=-at*b");
+        CopyBackV(c0,c);
         c += -x*Transpose(a)*b;
         v2 = c0 - x*mt*v1;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c+=-x*at*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c+=-x*at*b");
+        CopyBackV(c0,c);
         c -= x*Transpose(a)*b;
         v2 = c0 - x*mt*v1;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c-=x*at*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c-=x*at*b");
+        CopyBackV(c0,c);
         c -= -x*Transpose(a)*b;
         v2 = c0 + x*mt*v1;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c-=-x*at*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c-=-x*at*b");
+        CopyBackV(c0,c);
         c += -z*Transpose(a)*b;
         v2 = c0 - z*mt*v1;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c+=-z*at*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c+=-z*at*b");
+        CopyBackV(c0,c);
         c -= z*Transpose(a)*b;
         v2 = c0 - z*mt*v1;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c-=z*at*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c-=z*at*b");
+        CopyBackV(c0,c);
         c -= -z*Transpose(a)*b;
         v2 = c0 + z*mt*v1;
-        Assert(Norm(VEC(T,c)-v2) <= x*eps2,label+" c-=-z*at*b");
-        c = c0;
+        Assert(Equal(VEC(T,c),v2,x*eps2),label+" c-=-z*at*b");
+        CopyBackV(c0,c);
     }
 
     if (showstartdone) std::cout<<"Done VM3a"<<std::endl;
@@ -1881,6 +1980,8 @@ static void DoTestVM3C(const MM& a, const V1& b, V2& c, std::string label)
 template <class T, class Tb, class Tsum, class M1, class M2> 
 static void DoTestMM1a_Basic(const M1& a, const M2& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<T>::complex_type CT;
     if (showstartdone) {
         std::cout<<"Start MM1a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -1896,7 +1997,11 @@ static void DoTestMM1a_Basic(const M1& a, const M2& b, std::string label)
     if (CanAdd(a,b)) {
         tmv::Matrix<T> m1 = a;
         tmv::Matrix<Tb> m2 = b;
-        double eps = EPS * (a.colsize()+a.rowsize())*(Norm(m1)+Norm(m2));
+
+        RT eps = EPS * (a.colsize() + a.rowsize());
+        if (!std::numeric_limits<RT>::is_integer) 
+            eps *= Norm(m1) * Norm(m2);
+
         {
             tmv::Matrix<Tsum> sum = m1+m2;
             tmv::Matrix<Tsum> diff = m1-m2;
@@ -1910,17 +2015,17 @@ static void DoTestMM1a_Basic(const M1& a, const M2& b, std::string label)
                 std::cout<<"a+b = "<<(a+b)<<std::endl;
             }
 #endif
-            Assert(Norm(MAT2(T,Tb,a-b)-diff) <= eps,label+" a-b");
-            Assert(Norm(MAT2(T,Tb,a+b)-sum) <= eps,label+" a+b");
+            Assert(Equal(MAT2(T,Tb,a-b),diff,eps),label+" a-b");
+            Assert(Equal(MAT2(T,Tb,a+b),sum,eps),label+" a+b");
         }
 
         {
-            RealType(T) x(5);
-            ComplexType(T) z(3,4);
-            tmv::Matrix<ComplexType(T)> sum = m1+z*m2;
-            tmv::Matrix<ComplexType(T)> diff = m1-z*m2;
-            Assert(Norm(MAT(ComplexType(T),a+z*b)-sum) <= x*eps,label+" a+z*b");
-            Assert(Norm(MAT(ComplexType(T),a-z*b)-diff) <= x*eps,label+" a-z*b");
+            RT x(5);
+            CT z(3,4);
+            tmv::Matrix<CT> sum = m1+z*m2;
+            tmv::Matrix<CT> diff = m1-z*m2;
+            Assert(Equal(MAT(CT,a+z*b),sum,x*eps),label+" a+z*b");
+            Assert(Equal(MAT(CT,a-z*b),diff,x*eps),label+" a-z*b");
         }
     }
     if (showstartdone) std::cout<<"Done MM1a"<<std::endl;
@@ -1929,53 +2034,59 @@ static void DoTestMM1a_Basic(const M1& a, const M2& b, std::string label)
 template <class T, class Tb, class Tsum, class M1, class M2> 
 static void DoTestMM1a_Full(const M1& a, const M2& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<T>::complex_type CT;
     DoTestMM1a_Basic<T,Tb,Tsum>(a,b,label);
 
 #if (XTEST & 2)
     if (CanAdd(a,b)) {
         tmv::Matrix<T> m1 = a;
         tmv::Matrix<Tb> m2 = b;
-        double eps = EPS * (a.colsize()+a.rowsize())*(Norm(m1)+Norm(m2));
+
+        RT eps = EPS * (a.colsize() + a.rowsize());
+        if (!std::numeric_limits<RT>::is_integer) 
+            eps *= Norm(m1) * Norm(m2);
+
         {
             tmv::Matrix<Tsum> sum = m1+m2;
             tmv::Matrix<Tsum> diff = m1-m2;
 
-            RealType(T) x(5);
+            RT x(5);
             sum = m1+x*m2;
             diff = m1-x*m2;
-            Assert(Norm(MAT2(T,Tb,a-x*b)-diff) <= x*eps,label+" a-x*b");
-            Assert(Norm(MAT2(T,Tb,a+x*b)-sum) <= x*eps,label+" a+x*b");
+            Assert(Equal(MAT2(T,Tb,a-x*b),diff,x*eps),label+" a-x*b");
+            Assert(Equal(MAT2(T,Tb,a+x*b),sum,x*eps),label+" a+x*b");
             sum = x*m1+m2;
             diff = x*m1-m2;
-            Assert(Norm(MAT2(T,Tb,x*a-b)-diff) <= x*eps,label+" x*a-b");
-            Assert(Norm(MAT2(T,Tb,x*a+b)-sum) <= x*eps,label+" x*a+b");
+            Assert(Equal(MAT2(T,Tb,x*a-b),diff,x*eps),label+" x*a-b");
+            Assert(Equal(MAT2(T,Tb,x*a+b),sum,x*eps),label+" x*a+b");
             sum = x*m1+x*m2;
             diff = x*m1-x*m2;
-            Assert(Norm(MAT2(T,Tb,x*a-x*b)-diff) <= x*eps,label+" x*a-x*b");
-            Assert(Norm(MAT2(T,Tb,x*a+x*b)-sum) <= x*eps,label+" x*a+x*b");
+            Assert(Equal(MAT2(T,Tb,x*a-x*b),diff,x*eps),label+" x*a-x*b");
+            Assert(Equal(MAT2(T,Tb,x*a+x*b),sum,x*eps),label+" x*a+x*b");
         }
 
         {
-            RealType(T) x(5);
-            ComplexType(T) z(3,4);
-            tmv::Matrix<ComplexType(T)> sum = m1+z*m2;
-            tmv::Matrix<ComplexType(T)> diff = m1-z*m2;
+            RT x(5);
+            CT z(3,4);
+            tmv::Matrix<CT> sum = m1+z*m2;
+            tmv::Matrix<CT> diff = m1-z*m2;
             sum = x*m1+z*m2;
             diff = x*m1-z*m2;
-            Assert(Norm(MAT(ComplexType(T),x*a-z*b)-diff) <= x*eps,label+" x*a-z*b");
-            Assert(Norm(MAT(ComplexType(T),x*a+z*b)-sum) <= x*eps,label+" x*a+z*b");
+            Assert(Equal(MAT(CT,x*a-z*b),diff,x*eps),label+" x*a-z*b");
+            Assert(Equal(MAT(CT,x*a+z*b),sum,x*eps),label+" x*a+z*b");
             sum = z*m1+m2;
             diff = z*m1-m2;
-            Assert(Norm(MAT(ComplexType(T),z*a-b)-diff) <= x*eps,label+" z*a-b");
-            Assert(Norm(MAT(ComplexType(T),z*a+b)-sum) <= x*eps,label+" z*a+b");
+            Assert(Equal(MAT(CT,z*a-b),diff,x*eps),label+" z*a-b");
+            Assert(Equal(MAT(CT,z*a+b),sum,x*eps),label+" z*a+b");
             sum = z*m1+x*m2;
             diff = z*m1-x*m2;
-            Assert(Norm(MAT(ComplexType(T),z*a-x*b)-diff) <= x*eps,label+" z*a-x*b");
-            Assert(Norm(MAT(ComplexType(T),z*a+x*b)-sum) <= x*eps,label+" z*a+x*b");
+            Assert(Equal(MAT(CT,z*a-x*b),diff,x*eps),label+" z*a-x*b");
+            Assert(Equal(MAT(CT,z*a+x*b),sum,x*eps),label+" z*a+x*b");
             sum = z*m1+z*m2;
             diff = z*m1-z*m2;
-            Assert(Norm(MAT(ComplexType(T),z*a-z*b)-diff) <= x*eps,label+" z*a-z*b");
-            Assert(Norm(MAT(ComplexType(T),z*a+z*b)-sum) <= x*eps,label+" z*a+bz*");
+            Assert(Equal(MAT(CT,z*a-z*b),diff,x*eps),label+" z*a-z*b");
+            Assert(Equal(MAT(CT,z*a+z*b),sum,x*eps),label+" z*a+bz*");
         }
     }
     if (showstartdone) std::cout<<"Done MM1a"<<std::endl;
@@ -1995,6 +2106,7 @@ static void DoTestMM1RR(const M1& a, const M2& b, std::string label)
 template <class T, class M1, class M2> 
 static void DoTestMM1RC(const M1& a, const M2& b, std::string label)
 {
+    typedef std::complex<T> CT;
     DoTestMM1a_Basic<T,CT,CT>(a,b,label);
 
 #if (XTEST & 2)
@@ -2007,6 +2119,7 @@ static void DoTestMM1RC(const M1& a, const M2& b, std::string label)
 template <class T, class M1, class M2> 
 static void DoTestMM1CR(const M1& a, const M2& b, std::string label)
 {
+    typedef std::complex<T> CT;
     DoTestMM1a_Basic<CT,T,CT>(a,b,label);
 
 #if (XTEST & 2)
@@ -2019,6 +2132,7 @@ static void DoTestMM1CR(const M1& a, const M2& b, std::string label)
 template <class T, class M1, class M2> 
 static void DoTestMM1CC(const M1& a, const M2& b, std::string label)
 {
+    typedef std::complex<T> CT;
     DoTestMM1a_Full<CT,CT,CT>(a,b,label);
 
 #if (XTEST & 2)
@@ -2035,19 +2149,19 @@ static void DoTestMM1CC(const M1& a, const M2& b, std::string label)
 template <class T, class Tb, class M1, class M2> 
 static void DoTestMM2a_Basic(M1& a, const M2& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start MM2a"<<label<<std::endl;
-        std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a.mat()<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
     }
 
 #ifdef XXD
     if (XXDEBUG8) {
-        std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a.mat()<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
     }
 #endif
-    typename M1::copy_type a0 = a;
     const tmv::Matrix<T> m1 = a;
     const tmv::Matrix<Tb> m2 = b;
 #ifdef XXD
@@ -2057,7 +2171,11 @@ static void DoTestMM2a_Basic(M1& a, const M2& b, std::string label)
     }
 #endif
 #ifndef NOADDEQ
-    double eps = EPS * (a.colsize()+a.rowsize())*(Norm(m1)+Norm(m2));
+
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    if (!std::numeric_limits<RT>::is_integer) 
+        eps *= Norm(m1) * Norm(m2);
+
 #ifdef XXD
     if (XXDEBUG8) {
         std::cout<<"eps = "<<eps<<std::endl;
@@ -2065,12 +2183,13 @@ static void DoTestMM2a_Basic(M1& a, const M2& b, std::string label)
 #endif
 
     if (CanAddEq(a,b)) {
+        typename M1::copy_type a0 = a;
 #ifdef XXD
         if (XXDEBUG8) {
             std::cout<<"CanAddEq("<<tmv::TMV_Text(a)<<","<<tmv::TMV_Text(b)<<")\n";
         }
 #endif
-        tmv::Matrix<T> m4 = a = a0;
+        tmv::Matrix<T> m4 = a;
         a += b;
         m4 = m1+m2;
 #ifdef XXD
@@ -2083,8 +2202,8 @@ static void DoTestMM2a_Basic(M1& a, const M2& b, std::string label)
             std::cout<<"cf. eps = "<<eps<<std::endl;
         }
 #endif
-        Assert(Norm(MAT(T,a)-m4) <= eps,label+" a += b");
-        a = a0;
+        Assert(Equal(MAT(T,a),m4,eps),label+" a += b");
+        CopyBackM(a0,a);
 #ifdef ALIASOK
         a = a+b;
         m4 = m1+m2;
@@ -2098,8 +2217,8 @@ static void DoTestMM2a_Basic(M1& a, const M2& b, std::string label)
             std::cout<<"Norm(diff) = "<<Norm(MAT(T,a)-m4)<<std::endl;
             std::cout<<"cf. eps = "<<eps<<std::endl;
         }
-        Assert(Norm(MAT(T,a)-m4) <= eps,label+" a = a+b");
-        a = a0;
+        Assert(Equal(MAT(T,a),m4,eps),label+" a = a+b");
+        CopyBackM(a0,a);
 #endif
     }
 #endif // NOADDEQ
@@ -2110,43 +2229,55 @@ static void DoTestMM2a_Basic(M1& a, const M2& b, std::string label)
 template <class T, class Tb, class M1, class M2> 
 static void DoTestMM2a_Full(M1& a, const M2& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     DoTestMM2a_Basic<T,Tb>(a,b,label);
 
 #if (XTEST & 2)
 #ifndef NOADDEQ
-    typename M1::copy_type a0 = a;
     const tmv::Matrix<T> m1 = a;
     const tmv::Matrix<Tb> m2 = b;
-    double eps = EPS * (a.colsize()+a.rowsize())*(Norm(m1)+Norm(m2));
+
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    if (!std::numeric_limits<RT>::is_integer) 
+        eps *= Norm(m1) * Norm(m2);
 
     if (CanAddEq(a,b)) {
-        tmv::Matrix<T> m4 = a = a0;
-        a = a0;
+        typename M1::copy_type a0 = a;
+        tmv::Matrix<T> m4 = a;
         a += -b;
         m4 = m1-m2;
-        Assert(Norm(MAT(T,a)-m4) <= eps,label+" a += -b");
-        a = a0;
+        Assert(Equal(MAT(T,a),m4,eps),label+" a += -b");
+        CopyBackM(a0,a);
         a -= b;
         m4 = m1-m2;
-        Assert(Norm(MAT(T,a)-m4) <= eps,label+" a -= b");
-        a = a0;
+        Assert(Equal(MAT(T,a),m4,eps),label+" a -= b");
+        CopyBackM(a0,a);
         a -= -b;
         m4 = m1+m2;
-        Assert(Norm(MAT(T,a)-m4) <= eps,label+" a -= -b");
-        a = a0;
+        Assert(Equal(MAT(T,a),m4,eps),label+" a -= -b");
+        CopyBackM(a0,a);
 #ifdef ALIASOK
         a = a-b;
         m4 = m1-m2;
-        Assert(Norm(MAT(T,a)-m4) <= eps,label+" a = a-b");
-        a = a0;
+        Assert(Equal(MAT(T,a),m4,eps),label+" a = a-b");
+        CopyBackM(a0,a);
         a = b+a; 
         m4 = m2+m1;
-        Assert(Norm(MAT(T,a)-m4) <= eps,label+" a = b+a");
-        a = a0;
+        Assert(Equal(MAT(T,a),m4,eps),label+" a = b+a");
+        CopyBackM(a0,a);
+        if (XXDEBUG8) {
+            std::cout<<"a = "<<a<<std::endl;
+            std::cout<<"b = "<<b<<std::endl;
+        }
         a = b-a;
         m4 = m2-m1;
-        Assert(Norm(MAT(T,a)-m4) <= eps,label+" a = b-a");
-        a = a0;
+        if (XXDEBUG8) {
+            std::cout<<"a = b-a = "<<a<<std::endl;
+            std::cout<<"m4 = m2-m1 = "<<m4<<std::endl;
+            std::cout<<"Norm(diff) = "<<Norm(MAT(T,a)-m4)<<std::endl;
+        }
+        Assert(Equal(MAT(T,a),m4,eps),label+" a = b-a");
+        CopyBackM(a0,a);
 #endif
     }
 #endif // NOADDEQ
@@ -2164,6 +2295,7 @@ static void DoTestMM2RR(M1& a, const M2& b, std::string label)
 template <class T, class M1, class M2> 
 static void DoTestMM2RC(M1& a, const M2& b, std::string label)
 {
+    typedef std::complex<T> CT;
     DoTestMM2a_Basic<T,CT>(a,b,label);
 #if (XTEST & 2)
     DoTestMM2a_Basic<T,CT>(a,Conjugate(b),label+" ConjB");
@@ -2173,6 +2305,7 @@ static void DoTestMM2RC(M1& a, const M2& b, std::string label)
 template <class T, class M1, class M2> 
 static void DoTestMM2CR(M1& a, const M2& b, std::string label)
 {
+    typedef std::complex<T> CT;
     typename M1::conjugate_type ac = a.conjugate();
     DoTestMM2a_Basic<CT,T>(a,b,label);
     DoTestMM2a_Basic<CT,T>(ac,b,label+" ConjA");
@@ -2181,6 +2314,7 @@ static void DoTestMM2CR(M1& a, const M2& b, std::string label)
 template <class T, class M1, class M2> 
 static void DoTestMM2CC(M1& a, const M2& b, std::string label)
 {
+    typedef std::complex<T> CT;
     typename M1::conjugate_type ac = a.conjugate();
     DoTestMM2a_Full<CT,CT>(a,b,label);
     DoTestMM2a_Basic<CT,CT>(ac,b,label+" ConjA");
@@ -2194,6 +2328,7 @@ static void DoTestMM2CC(M1& a, const M2& b, std::string label)
 template <class T, class Tb, class M1, class M2> 
 static void DoTestMM3a_Basic(const M1& a, const M2& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start MM3a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -2211,7 +2346,11 @@ static void DoTestMM3a_Basic(const M1& a, const M2& b, std::string label)
         tmv::Matrix<T> m1 = a;
         tmv::Matrix<Tb> m2 = b;
         tmv::Matrix<ProductType(T,Tb)> mm = m1*m2;
-        double eps = EPS * (a.colsize()+a.rowsize())*Norm(m1)*Norm(m2);
+
+        RT eps = EPS * (a.colsize() + a.rowsize());
+        if (!std::numeric_limits<RT>::is_integer) 
+            eps *= Norm(m1) * Norm(m2);
+
 #ifdef XXD
         if (XXDEBUG7) {
             std::cout<<"CanMult("<<tmv::TMV_Text(a)<<","<<tmv::TMV_Text(b)<<")\n";
@@ -2221,9 +2360,9 @@ static void DoTestMM3a_Basic(const M1& a, const M2& b, std::string label)
             std::cout<<"a*b = "<<(a*b)<<std::endl;
         }
 #endif
-        Assert(Norm(MAT2(T,Tb,m1*b)-mm) <= eps,label+" m*b");
-        Assert(Norm(MAT2(T,Tb,a*m2)-mm) <= eps,label+" a*m");
-        Assert(Norm(MAT2(T,Tb,a*b)-mm) <= eps,label+" a*b");
+        Assert(Equal(MAT2(T,Tb,m1*b),mm,eps),label+" m*b");
+        Assert(Equal(MAT2(T,Tb,a*m2),mm,eps),label+" a*m");
+        Assert(Equal(MAT2(T,Tb,a*b),mm,eps),label+" a*b");
     }
 
     if (showstartdone) std::cout<<"Done MM3a"<<std::endl;
@@ -2254,6 +2393,7 @@ static void DoTestMM3RR(const M1& a, const M2& b, std::string label)
 template <class T, class M1, class M2> 
 static void DoTestMM3RC(const M1& a, const M2& b, std::string label)
 {
+    typedef std::complex<T> CT;
     DoTestMM3a_Basic<T,CT>(a,b,label);
 
 #if (XTEST & 2)
@@ -2266,6 +2406,7 @@ static void DoTestMM3RC(const M1& a, const M2& b, std::string label)
 template <class T, class M1, class M2> 
 static void DoTestMM3CR(const M1& a, const M2& b, std::string label)
 {
+    typedef std::complex<T> CT;
     DoTestMM3a_Basic<CT,T>(a,b,label);
 
 #if (XTEST & 2)
@@ -2278,6 +2419,7 @@ static void DoTestMM3CR(const M1& a, const M2& b, std::string label)
 template <class T, class M1, class M2> 
 static void DoTestMM3CC(const M1& a, const M2& b, std::string label)
 {
+    typedef std::complex<T> CT;
     DoTestMM3a_Full<CT,CT>(a,b,label);
 
 #if (XTEST & 2)
@@ -2294,6 +2436,7 @@ static void DoTestMM3CC(const M1& a, const M2& b, std::string label)
 template <class T, class Tb, class M1, class M2> 
 static void DoTestMM4a_Basic(M1& a, const M2& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start MM4a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -2307,7 +2450,6 @@ static void DoTestMM4a_Basic(M1& a, const M2& b, std::string label)
             std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
         }
 #endif
-        typename M1::copy_type a0 = a;
         const tmv::Matrix<T> m1 = a;
         const tmv::Matrix<Tb> m2 = b;
 #ifdef XXD
@@ -2317,14 +2459,18 @@ static void DoTestMM4a_Basic(M1& a, const M2& b, std::string label)
         }
 #endif
 
-        double eps = EPS * (a.colsize()+a.rowsize()+b.rowsize())*Norm(m1)*Norm(m2);
-        double eps2 = EPS * (a.colsize()+a.rowsize()+b.rowsize())*Norm(m1)*(1.+Norm(m2));
+        RT eps = EPS * (a.colsize() + a.rowsize());
+        RT eps2 = eps;
+        if (!std::numeric_limits<RT>::is_integer) {
+            eps *= Norm(m1) * Norm(m2);
+            eps2 *= Norm(m1*m2) + Norm(m1) * Norm(m2);
+        }
 
         tmv::Matrix<ProductType(T,Tb)> mm = m1*m2;
         tmv::Matrix<ProductType(T,Tb)> m3 = mm;
         tmv::Matrix<ProductType(T,Tb)> m4 = mm;
         tmv::Matrix<ProductType(T,Tb)> m0 = mm;
-        m0 /= 2;
+        m0 /= T(2);
 #ifdef XXD
         if (XXDEBUG8) {
             std::cout<<"CanMult("<<tmv::TMV_Text(a)<<","<<tmv::TMV_Text(b)<<"\n";
@@ -2334,11 +2480,11 @@ static void DoTestMM4a_Basic(M1& a, const M2& b, std::string label)
             std::cout<<"Norm(diff) = "<<Norm(m3 - mm)<<std::endl;
         }
 #endif
-        RealType(T) x(5);
+        RT x(5);
         T z; SetZ(z);
         m3 = a*b;
         m4 = mm;
-        Assert(Norm(m3-m4) <= eps,label+" m = a*b");
+        Assert(Equal(m3,m4,eps),label+" m = a*b");
         m3 = m0;
         m3 += a*b;
         m4 = m0 + mm;
@@ -2349,26 +2495,26 @@ static void DoTestMM4a_Basic(M1& a, const M2& b, std::string label)
             std::cout<<"Norm(diff) = "<<Norm(m3 - m4)<<std::endl;
         }
 #endif
-        Assert(Norm(m3-m4) <= eps2,label+" m += a*b");
+        Assert(Equal(m3,m4,eps2),label+" m += a*b");
         m3 = m0;
         m3 = x*a*b;
         m4 = x*mm;
-        Assert(Norm(m3-m4) <= x*eps2,label+" m = x*a*b");
+        Assert(Equal(m3,m4,x*eps2),label+" m = x*a*b");
         m3 = m0;
         m3 = z*a*b;
         m4 = z*mm;
-        Assert(Norm(m3-m4) <= x*eps2,label+" m = z*a*b");
+        Assert(Equal(m3,m4,x*eps2),label+" m = z*a*b");
         m3 = m0;
 
 #ifndef NOMULTEQ
         if (CanMultMM(a,b,a)) {
+            typename M1::copy_type a0 = a;
 #ifdef XXD
             if (XXDEBUG8) {
                 std::cout<<"CanMult("<<tmv::TMV_Text(a)<<","<<tmv::TMV_Text(b)
                     <<","<<tmv::TMV_Text(a)<<")\n";
             }
 #endif
-            tmv::Matrix<T> m4 = mm;
             a *= b;
             m4 = mm;
 #ifdef XXD
@@ -2377,15 +2523,13 @@ static void DoTestMM4a_Basic(M1& a, const M2& b, std::string label)
                 std::cout<<"m4 = "<<m4<<std::endl;
             }
 #endif
-            Assert(Norm(MAT(T,a)-m4) <= eps,label+" a *= b");
-#ifndef BASIC_MULTMM_ONLY
-            a = a0;
+            Assert(Equal(MAT(T,a),m4,eps),label+" a *= b");
+            CopyBackM(a0,a);
 #ifdef ALIASOK
             a = a*b;
             m4 = mm;
-            Assert(Norm(MAT(T,a)-m4) <= eps,label+" a = a*b");
-            a = a0;
-#endif
+            Assert(Equal(MAT(T,a),m4,eps),label+" a = a*b");
+            CopyBackM(a0,a);
 #endif
         }
 #endif // NOMULTEQ
@@ -2397,85 +2541,90 @@ static void DoTestMM4a_Basic(M1& a, const M2& b, std::string label)
 template <class T, class Tb, class M1, class M2> 
 static void DoTestMM4a_Full(M1& a, const M2& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     DoTestMM4a_Basic<T,Tb>(a,b,label);
 
 #if (XTEST & 2)
     if (CanMultMM(a,b)) {
-        typename M1::copy_type a0 = a;
         const tmv::Matrix<T> m1 = a;
         const tmv::Matrix<Tb> m2 = b;
 
-        double eps = EPS * (a.colsize()+a.rowsize()+b.rowsize())*Norm(m1)*Norm(m2);
-        double eps2 = EPS * (a.colsize()+a.rowsize()+b.rowsize())*Norm(m1)*(1.+Norm(m2));
+        RT eps = EPS * (a.colsize() + a.rowsize() + b.rowsize());
+        RT eps2 = eps;
+        if (!std::numeric_limits<RT>::is_integer) {
+            eps *= Norm(m1) * Norm(m2);
+            eps2 *= Norm(m1*m2) + Norm(m1) * Norm(m2);
+        }
 
         tmv::Matrix<ProductType(T,Tb)> mm = m1*m2;
         tmv::Matrix<ProductType(T,Tb)> m3 = mm;
         tmv::Matrix<ProductType(T,Tb)> m4 = mm;
         tmv::Matrix<ProductType(T,Tb)> m0 = mm;
-        m0 /= 2;
-        RealType(T) x(5);
+        m0 /= T(2);
+        RT x(5);
         T z; SetZ(z);
         m3 = m0;
         m3 += x*a*b;
         m4 = m0 + x*mm;
-        Assert(Norm(m3-m4) <= x*eps2,label+" m += x*a*b");
+        Assert(Equal(m3,m4,x*eps2),label+" m += x*a*b");
         m3 = m0;
         m3 += z*a*b;
         m4 = m0 + z*mm;
-        Assert(Norm(m3-m4) <= x*eps2,label+" m += z*a*b");
+        Assert(Equal(m3,m4,x*eps2),label+" m += z*a*b");
         m3 = m0;
         m3 = -a*b;
         m4 = -mm;
-        Assert(Norm(m3-m4) <= eps,label+" m = -a*b");
+        Assert(Equal(m3,m4,eps),label+" m = -a*b");
         m3 = m0;
         m3 += -a*b;
         m4 = m0 - mm;
-        Assert(Norm(m3-m4) <= eps2,label+" m += -a*b");
+        Assert(Equal(m3,m4,eps2),label+" m += -a*b");
         m3 = m0;
         m3 -= a*b;
         m4 = m0 - mm;
-        Assert(Norm(m3-m4) <= eps2,label+" m -= a*b");
+        Assert(Equal(m3,m4,eps2),label+" m -= a*b");
         m3 = m0;
         m3 -= -a*b;
         m4 = m0 + mm;
-        Assert(Norm(m3-m4) <= eps2,label+" m -= -a*b");
+        Assert(Equal(m3,m4,eps2),label+" m -= -a*b");
         m3 = m0;
         m3 = -x*a*b;
         m4 = -x*mm;
-        Assert(Norm(m3-m4) <= x*eps2,label+" m = -x*a*b");
+        Assert(Equal(m3,m4,x*eps2),label+" m = -x*a*b");
         m3 = m0;
         m3 += -x*a*b;
         m4 = m0 - x*mm;
-        Assert(Norm(m3-m4) <= x*eps2,label+" m += -x*a*b");
+        Assert(Equal(m3,m4,x*eps2),label+" m += -x*a*b");
         m3 = m0;
         m3 -= x*a*b;
         m4 = m0 - x*mm;
-        Assert(Norm(m3-m4) <= x*eps2,label+" m -= x*a*b");
+        Assert(Equal(m3,m4,x*eps2),label+" m -= x*a*b");
         m3 = m0;
         m3 -= -x*a*b;
         m4 = m0 + x*mm;
-        Assert(Norm(m3-m4) <= x*eps2,label+" m -= -x*a*b");
+        Assert(Equal(m3,m4,x*eps2),label+" m -= -x*a*b");
         m3 = m0;
         m3 = -z*a*b;
         m4 = -z*mm;
-        Assert(Norm(m3-m4) <= x*eps2,label+" m = -z*a*b");
+        Assert(Equal(m3,m4,x*eps2),label+" m = -z*a*b");
         m3 = m0;
         m3 += -z*a*b;
         m4 = m0 - z*mm;
-        Assert(Norm(m3-m4) <= x*eps2,label+" m += -z*a*b");
+        Assert(Equal(m3,m4,x*eps2),label+" m += -z*a*b");
         m3 = m0;
         m3 -= z*a*b;
         m4 = m0 - z*mm;
-        Assert(Norm(m3-m4) <= x*eps2,label+" m -= z*a*b");
+        Assert(Equal(m3,m4,x*eps2),label+" m -= z*a*b");
         m3 = m0;
         m3 -= -z*a*b;
         m4 = m0 + z*mm;
-        Assert(Norm(m3-m4) <= x*eps2,label+" m -= -z*a*b");
+        Assert(Equal(m3,m4,x*eps2),label+" m -= -z*a*b");
         m3 = m0;
 
 #ifndef BASIC_MULTMM_ONLY
 #ifndef NOMULTEQ
         if (CanMultXMM(a,b,a)) {
+            typename M1::copy_type a0 = a;
 #ifdef XXD
             if (XXDEBUG8) {
                 std::cout<<"CanMultXM("<<tmv::TMV_Text(a)<<","<<tmv::TMV_Text(b)
@@ -2483,58 +2632,56 @@ static void DoTestMM4a_Full(M1& a, const M2& b, std::string label)
             }
 #endif
             m0 = a0;
-            tmv::Matrix<T> m4 = m0;
+            m4 = m0;
             a *= -b;
             m4 = -mm;
-            Assert(Norm(MAT(T,a)-m4) <= eps,label+" a *= -b");
-            a = a0;
-            RealType(T) x(5);
-            T z; SetZ(z);
+            Assert(Equal(MAT(T,a),m4,eps),label+" a *= -b");
+            CopyBackM(a0,a);
             a *= x*b;
             m4 = x*mm;
-            Assert(Norm(MAT(T,a)-m4) <= x*eps,label+" a *= x*b");
-            a = a0;
+            Assert(Equal(MAT(T,a),m4,x*eps),label+" a *= x*b");
+            CopyBackM(a0,a);
             a *= z*b;
             m4 = z*mm;
-            Assert(Norm(MAT(T,a)-m4) <= x*eps,label+" a *= z*b");
-            a = a0;
+            Assert(Equal(MAT(T,a),m4,x*eps),label+" a *= z*b");
+            CopyBackM(a0,a);
             a *= -x*b;
             m4 = -x*mm;
-            Assert(Norm(MAT(T,a)-m4) <= x*eps,label+" a *= -x*b");
-            a = a0;
+            Assert(Equal(MAT(T,a),m4,x*eps),label+" a *= -x*b");
+            CopyBackM(a0,a);
             a *= -z*b;
             m4 = -z*mm;
-            Assert(Norm(MAT(T,a)-m4) <= x*eps,label+" a *= -z*b");
-            a = a0;
+            Assert(Equal(MAT(T,a),m4,x*eps),label+" a *= -z*b");
+            CopyBackM(a0,a);
 #ifdef ALIASOK
             a = -a*b;
             m4 = -mm;
-            Assert(Norm(MAT(T,a)-m4) <= eps,label+" a = -a*b");
-            a = a0;
+            Assert(Equal(MAT(T,a),m4,eps),label+" a = -a*b");
+            CopyBackM(a0,a);
             a += a*b;
             m4 = m0 + mm;
-            Assert(Norm(MAT(T,a)-m4) <= eps2,label+" a += a*b");
-            a = a0;
+            Assert(Equal(MAT(T,a),m4,eps2),label+" a += a*b");
+            CopyBackM(a0,a);
             a += x*a*b;
             m4 = m0 + x*mm;
-            Assert(Norm(MAT(T,a)-m4) <= x*eps2,label+" a += x*a*b");
-            a = a0;
+            Assert(Equal(MAT(T,a),m4,x*eps2),label+" a += x*a*b");
+            CopyBackM(a0,a);
             a += z*a*b;
             m4 = m0 + z*mm;
-            Assert(Norm(MAT(T,a)-m4) <= x*eps2,label+" a += z*a*b");
-            a = a0;
+            Assert(Equal(MAT(T,a),m4,x*eps2),label+" a += z*a*b");
+            CopyBackM(a0,a);
             a -= a*b;
             m4 = m0 - mm;
-            Assert(Norm(MAT(T,a)-m4) <= eps2,label+" a -= a*b");
-            a = a0;
+            Assert(Equal(MAT(T,a),m4,eps2),label+" a -= a*b");
+            CopyBackM(a0,a);
             a -= x*a*b;
             m4 = m0 - x*mm;
-            Assert(Norm(MAT(T,a)-m4) <= x*eps2,label+" a -= x*a*b");
-            a = a0;
+            Assert(Equal(MAT(T,a),m4,x*eps2),label+" a -= x*a*b");
+            CopyBackM(a0,a);
             a -= z*a*b;
             m4 = m0 - z*mm;
-            Assert(Norm(MAT(T,a)-m4) <= x*eps2,label+" a -= z*a*b");
-            a = a0;
+            Assert(Equal(MAT(T,a),m4,x*eps2),label+" a -= z*a*b");
+            CopyBackM(a0,a);
 #endif
         }
 #endif // NOMULTEQ
@@ -2554,6 +2701,7 @@ static void DoTestMM4RR(M1& a, const M2& b, std::string label)
 template <class T, class M1, class M2> 
 static void DoTestMM4RC(M1& a, const M2& b, std::string label)
 {
+    typedef std::complex<T> CT;
     DoTestMM4a_Basic<T,CT>(a,b,label);
 #if (XTEST & 2)
     DoTestMM4a_Basic<T,CT>(a,Conjugate(b),label+" ConjB");
@@ -2563,6 +2711,7 @@ static void DoTestMM4RC(M1& a, const M2& b, std::string label)
 template <class T, class M1, class M2> 
 static void DoTestMM4CR(M1& a, const M2& b, std::string label)
 {
+    typedef std::complex<T> CT;
     typename M1::conjugate_type ac = a.conjugate();
     DoTestMM4a_Basic<CT,T>(a,b,label);
     DoTestMM4a_Basic<CT,T>(ac,b,label+" ConjA");
@@ -2571,6 +2720,7 @@ static void DoTestMM4CR(M1& a, const M2& b, std::string label)
 template <class T, class M1, class M2> 
 static void DoTestMM4CC(M1& a, const M2& b, std::string label)
 {
+    typedef std::complex<T> CT;
     typename M1::conjugate_type ac = a.conjugate();
     DoTestMM4a_Full<CT,CT>(a,b,label);
     DoTestMM4a_Basic<CT,CT>(ac,b,label+" ConjA");
@@ -2585,6 +2735,7 @@ template <class Ta, class Tb, class T, class M1, class M2, class M3>
 static void DoTestMM5a_Basic(
     const M1& a, const M2& b, M3& c, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start MM5a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -2592,12 +2743,16 @@ static void DoTestMM5a_Basic(
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
-    typename M3::copy_type c0 = c;
     tmv::Matrix<Ta> m = a;
     tmv::Matrix<Tb> m2 = b;
     tmv::Matrix<T> m3 = c;
 
-    double eps = EPS * (a.colsize()+a.rowsize()+b.rowsize()) * Norm(b) * Norm(a);
+    RT eps = EPS * (a.colsize() + a.rowsize() + b.rowsize());
+    RT eps2 = eps;
+    if (!std::numeric_limits<RT>::is_integer) {
+        eps *= Norm(m) * Norm(m2);
+        eps2 *= Norm(m*m2) + Norm(m) * Norm(m2);
+    }
 
 #ifdef XXD
     if (XXDEBUG9) {
@@ -2608,6 +2763,7 @@ static void DoTestMM5a_Basic(
 #endif
 
     if (CanMultMM(a,b,c)) {
+        typename M3::copy_type c0 = c;
         tmv::Matrix<T> mm = m*m2;
         c = a*b;
         m3 = mm;
@@ -2617,9 +2773,9 @@ static void DoTestMM5a_Basic(
             std::cout<<"m*m2 = "<<m3<<std::endl;
         }
 #endif
-        Assert(Norm(MAT(T,c)-m3) <= eps,label+" c=a*b");
+        Assert(Equal(MAT(T,c),m3,eps),label+" c=a*b");
+        CopyBackM(c0,c);
 #ifndef BASIC_MULTMM_ONLY
-        c = c0;
         c += a*b;
         m3 = c0 + mm;
 #ifdef XXD
@@ -2628,15 +2784,14 @@ static void DoTestMM5a_Basic(
             std::cout<<"c0 + m*m2 = "<<m3<<std::endl;
         }
 #endif
-        double eps2 = EPS * (a.colsize()+a.rowsize()+b.rowsize()) * (Norm(c0) + Norm(b) * Norm(a));
-        Assert(Norm(MAT(T,c)-m3) <= eps2,label+" c+=a*b");
-        c = c0;
-        RealType(T) x(5);
+        Assert(Equal(MAT(T,c),m3,eps2),label+" c+=a*b");
+        CopyBackM(c0,c);
+        RT x(5);
         T z; SetZ(z);
         c = x*a*b;
         m3 = x*mm;
-        Assert(Norm(MAT(T,c)-m3) <= x*eps,label+" c=x*a*b");
-        c = c0;
+        Assert(Equal(MAT(T,c),m3,x*eps),label+" c=x*a*b");
+        CopyBackM(c0,c);
         c = z*a*b;
         m3 = z*mm;
 #ifdef XXD
@@ -2647,8 +2802,8 @@ static void DoTestMM5a_Basic(
             std::cout<<"Norm(c-m3) = "<<Norm(c-m3)<<std::endl;
         }
 #endif
-        Assert(Norm(MAT(T,c)-m3) <= x*eps,label+" c=z*a*b");
-        c = c0;
+        Assert(Equal(MAT(T,c),m3,x*eps),label+" c=z*a*b");
+        CopyBackM(c0,c);
 #endif
     }
 
@@ -2658,70 +2813,75 @@ static void DoTestMM5a_Basic(
 template <class Ta, class Tb, class T, class M1, class M2, class M3> 
 static void DoTestMM5a_Full(const M1& a, const M2& b, M3& c, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     DoTestMM5a_Basic<Ta,Tb,T>(a,b,c,label);
 
 #ifndef BASIC_MULTMM_ONLY
 #if (XTEST & 2)
-    typename M3::copy_type c0 = c;
     tmv::Matrix<Ta> m = a;
     tmv::Matrix<Tb> m2 = b;
     tmv::Matrix<T> m3 = c;
 
-    double eps = EPS * (a.colsize()+a.rowsize()+b.rowsize()) * Norm(b) * Norm(a);
-    double eps2 = EPS * (a.colsize()+a.rowsize()+b.rowsize()) * (Norm(c0) + Norm(b) * Norm(a));
+    RT eps = EPS * (a.colsize() + a.rowsize() + b.rowsize());
+    RT eps2 = eps;
+    if (!std::numeric_limits<RT>::is_integer) {
+        eps *= Norm(m) * Norm(m2);
+        eps2 *= Norm(m*m2) + Norm(m) * Norm(m2);
+    }
 
     if (CanMultMM(a,b,c)) {
+        typename M3::copy_type c0 = c;
         tmv::Matrix<T> mm = m*m2;
-        RealType(T) x(5);
+        RT x(5);
         T z; SetZ(z);
         c += x*a*b;
         m3 = c0 + x*mm;
-        Assert(Norm(MAT(T,c)-m3) <= x*eps2,label+" c+=x*a*b");
-        c = c0;
+        Assert(Equal(MAT(T,c),m3,x*eps2),label+" c+=x*a*b");
+        CopyBackM(c0,c);
         c += z*a*b;
         m3 = c0 + z*mm;
-        Assert(Norm(MAT(T,c)-m3) <= x*eps2,label+" c+=z*a*b");
-        c = c0;
+        Assert(Equal(MAT(T,c),m3,x*eps2),label+" c+=z*a*b");
+        CopyBackM(c0,c);
         c = -a*b;
         m3 = -mm;
-        Assert(Norm(MAT(T,c)-m3) <= eps,label+" c=-a*b");
-        c = c0;
+        Assert(Equal(MAT(T,c),m3,eps),label+" c=-a*b");
+        CopyBackM(c0,c);
         c += -a*b;
         m3 = c0 - mm;
-        Assert(Norm(MAT(T,c)-m3) <= eps2,label+" c+=-a*b");
-        c = c0;
+        Assert(Equal(MAT(T,c),m3,eps2),label+" c+=-a*b");
+        CopyBackM(c0,c);
         c -= a*b;
         m3 = c0 - mm;
-        Assert(Norm(MAT(T,c)-m3) <= eps2,label+" c-=a*b");
-        c = c0;
+        Assert(Equal(MAT(T,c),m3,eps2),label+" c-=a*b");
+        CopyBackM(c0,c);
         c -= -a*b;
         m3 = c0 + mm;
-        Assert(Norm(MAT(T,c)-m3) <= eps2,label+" c-=-a*b");
-        c = c0;
+        Assert(Equal(MAT(T,c),m3,eps2),label+" c-=-a*b");
+        CopyBackM(c0,c);
         c += -x*a*b;
         m3 = c0 - x*mm;
-        Assert(Norm(MAT(T,c)-m3) <= x*eps2,label+" c+=-x*a*b");
-        c = c0;
+        Assert(Equal(MAT(T,c),m3,x*eps2),label+" c+=-x*a*b");
+        CopyBackM(c0,c);
         c -= x*a*b;
         m3 = c0 - x*mm;
-        Assert(Norm(MAT(T,c)-m3) <= x*eps2,label+" c-=x*a*b");
-        c = c0;
+        Assert(Equal(MAT(T,c),m3,x*eps2),label+" c-=x*a*b");
+        CopyBackM(c0,c);
         c -= -x*a*b;
         m3 = c0 + x*mm;
-        Assert(Norm(MAT(T,c)-m3) <= x*eps2,label+" c-=-x*a*b");
-        c = c0;
+        Assert(Equal(MAT(T,c),m3,x*eps2),label+" c-=-x*a*b");
+        CopyBackM(c0,c);
         c += -z*a*b;
         m3 = c0 - z*mm;
-        Assert(Norm(MAT(T,c)-m3) <= x*eps2,label+" c+=-z*a*b");
-        c = c0;
+        Assert(Equal(MAT(T,c),m3,x*eps2),label+" c+=-z*a*b");
+        CopyBackM(c0,c);
         c -= z*a*b;
         m3 = c0 - z*mm;
-        Assert(Norm(MAT(T,c)-m3) <= x*eps2,label+" c-=z*a*b");
-        c = c0;
+        Assert(Equal(MAT(T,c),m3,x*eps2),label+" c-=z*a*b");
+        CopyBackM(c0,c);
         c -= -z*a*b;
         m3 = c0 + z*mm;
-        Assert(Norm(MAT(T,c)-m3) <= x*eps2,label+" c-=-z*a*b");
-        c = c0;
+        Assert(Equal(MAT(T,c),m3,x*eps2),label+" c-=-z*a*b");
+        CopyBackM(c0,c);
     }
 
     if (showstartdone) std::cout<<"Done MM5a_Full"<<std::endl;
@@ -2738,10 +2898,10 @@ static void DoTestMM5R(const M1& a, const M2& b, M3& c, std::string label)
 template <class Ta, class Tb, class T, class M1, class M2, class M3> 
 static void DoTestMM5C(const M1& a, const M2& b, M3& c, std::string label)
 {
-    typename M3::conjugate_type cc = c.conjugate();
     DoTestMM5a_Full<Ta,Tb,T>(a,b,c,label);
     DoTestMM5a_Basic<Ta,Tb,T>(Conjugate(a),b,c,label+" ConjA");
 #if (XTEST & 2)
+    typename M3::conjugate_type cc = c.conjugate();
     DoTestMM5a_Basic<Ta,Tb,T>(a,Conjugate(b),c,label+" ConjB");
     DoTestMM5a_Basic<Ta,Tb,T>(Conjugate(a),Conjugate(b),c,label+" ConjAB");
     DoTestMM5a_Basic<Ta,Tb,T>(a,b,cc,label+" ConjC");
@@ -2755,6 +2915,7 @@ template <class T, class M, class V1, class V2>
 static void DoTestOProda_Basic(
     M& a, const V1& v1, const V2& v2, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Start OProd"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -2769,10 +2930,14 @@ static void DoTestOProda_Basic(
     }
 #endif
 
-    typename M::copy_type a0 = a;
     tmv::Matrix<T> vv = tmv::Vector<T>(v1)^tmv::Vector<T>(v2);
 
-    double eps = EPS * (a.colsize()+a.rowsize())*(Norm(a0)+Norm(v1)*Norm(v2));
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    RT eps2 = eps;
+    if (!std::numeric_limits<RT>::is_integer) {
+        eps *= Norm(v1) * Norm(v2);
+        eps2 *= Norm(vv) + Norm(v1) * Norm(v2);
+    }
 
     a = v1^v2;
 #ifdef XXD
@@ -2783,19 +2948,19 @@ static void DoTestOProda_Basic(
             <<"  cf "<<eps<<std::endl;
     }
 #endif
-    Assert(Norm(MAT(T,a)-vv) <= eps,label+" a = v1^v2");
-    a = a0;
+    Assert(Equal(MAT(T,a),vv,eps),label+" a = v1^v2");
+    typename M::copy_type a0 = a;
     a += v1^v2;
-    Assert(Norm(MAT(T,a)-(a0+vv)) <= eps,label+" a += v1^v2");
-    a = a0;
+    Assert(Equal(MAT(T,a),(a0+vv),eps2),label+" a += v1^v2");
+    CopyBackM(a0,a);
     a -= v1^v2;
-    Assert(Norm(MAT(T,a)-(a0-vv)) <= eps,label+" a -= v1^v2");
-    a = a0;
-    RealType(T) x(5);
+    Assert(Equal(MAT(T,a),(a0-vv),eps2),label+" a -= v1^v2");
+    CopyBackM(a0,a);
+    RT x(5);
     T z; SetZ(z);
     a = x * (v1^v2);
-    Assert(Norm(MAT(T,a)-x*vv) <= x*eps,label+" a = x * (v1^v2)");
-    a = a0;
+    Assert(Equal(MAT(T,a),x*vv,x*eps),label+" a = x * (v1^v2)");
+    CopyBackM(a0,a);
 #ifdef SYMOPROD
     if (a.issym()) {
 #endif
@@ -2808,8 +2973,8 @@ static void DoTestOProda_Basic(
                 <<"  cf "<<x*eps<<std::endl;
         }
 #endif
-        Assert(Norm(MAT(T,a)-z*vv) <= x*eps,label+" a = z * (v1^v2)");
-        a = a0;
+        Assert(Equal(MAT(T,a),z*vv,x*eps),label+" a = z * (v1^v2)");
+        CopyBackM(a0,a);
 #ifdef SYMOPROD
     }
 #endif
@@ -2821,104 +2986,110 @@ template <class T, class M, class V1, class V2>
 static void DoTestOProda_Full(
     M& a, const V1& v1, const V2& v2, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
     DoTestOProda_Basic<T>(a,v1,v2,label);
 
 #if (XTEST & 2)
-    typename M::copy_type a0 = a;
     tmv::Matrix<T> vv = tmv::Vector<T>(v1)^tmv::Vector<T>(v2);
+    typename M::copy_type a0 = vv;
 
-    double eps = EPS * (a.colsize()+a.rowsize())*(Norm(a0)+Norm(v1)*Norm(v2));
+    RT eps = EPS * (a.colsize() + a.rowsize());
+    RT eps2 = eps;
+    if (!std::numeric_limits<RT>::is_integer) {
+        eps *= Norm(v1) * Norm(v2);
+        eps2 *= Norm(vv) + Norm(v1) * Norm(v2);
+    }
 
-    RealType(T) x(5);
+    RT x(5);
     T z; SetZ(z);
     a = (x * v1)^v2;
-    Assert(Norm(MAT(T,a)-x*vv) <= x*eps,label+" a = (x*v1) ^ v2)");
-    a = a0;
+    Assert(Equal(MAT(T,a),x*vv,x*eps),label+" a = (x*v1) ^ v2)");
+    CopyBackM(a0,a);
     a = v1 ^ (x * v2);
-    Assert(Norm(MAT(T,a)-x*vv) <= x*eps,label+" a = v1 ^ (x*v2)");
-    a = a0;
+    Assert(Equal(MAT(T,a),x*vv,x*eps),label+" a = v1 ^ (x*v2)");
+    CopyBackM(a0,a);
     a += x * (v1^v2);
-    Assert(Norm(MAT(T,a)-(a0+x*vv)) <= x*eps,label+" a += x * (v1^v2)");
-    a = a0;
+    Assert(Equal(MAT(T,a),(a0+x*vv),x*eps2),label+" a += x * (v1^v2)");
+    CopyBackM(a0,a);
     a += (x * v1)^v2;
-    Assert(Norm(MAT(T,a)-(a0+x*vv)) <= x*eps,label+" a += (x*v1) ^ v2)");
-    a = a0;
+    Assert(Equal(MAT(T,a),(a0+x*vv),x*eps2),label+" a += (x*v1) ^ v2)");
+    CopyBackM(a0,a);
     a += v1 ^ (x * v2);
-    Assert(Norm(MAT(T,a)-(a0+x*vv)) <= x*eps,label+" a += v1 ^ (x*v2)");
-    a = a0;
+    Assert(Equal(MAT(T,a),(a0+x*vv),x*eps2),label+" a += v1 ^ (x*v2)");
+    CopyBackM(a0,a);
     a -= x * (v1^v2);
-    Assert(Norm(MAT(T,a)-(a0-x*vv)) <= x*eps,label+" a -= x * (v1^v2)");
-    a = a0;
+    Assert(Equal(MAT(T,a),(a0-x*vv),x*eps2),label+" a -= x * (v1^v2)");
+    CopyBackM(a0,a);
     a -= (x * v1)^v2;
-    Assert(Norm(MAT(T,a)-(a0-x*vv)) <= x*eps,label+" a -= (x*v1) ^ v2)");
-    a = a0;
+    Assert(Equal(MAT(T,a),(a0-x*vv),x*eps2),label+" a -= (x*v1) ^ v2)");
+    CopyBackM(a0,a);
     a -= v1 ^ (x * v2);
-    Assert(Norm(MAT(T,a)-(a0-x*vv)) <= x*eps,label+" a -= v1 ^ (x*v2)");
-    a = a0;
+    Assert(Equal(MAT(T,a),(a0-x*vv),x*eps2),label+" a -= v1 ^ (x*v2)");
+    CopyBackM(a0,a);
 
 #ifdef SYMOPROD
     if (a.issym()) {
 #endif
         a = (z * v1)^v2;
-        Assert(Norm(MAT(T,a)-z*vv) <= x*eps,label+" a = (z*v1) ^ v2)");
-        a = a0;
+        Assert(Equal(MAT(T,a),z*vv,x*eps),label+" a = (z*v1) ^ v2)");
+        CopyBackM(a0,a);
         a = v1 ^ (z * v2);
-        Assert(Norm(MAT(T,a)-z*vv) <= x*eps,label+" a = v1 ^ (z*v2)");
-        a = a0;
+        Assert(Equal(MAT(T,a),z*vv,x*eps),label+" a = v1 ^ (z*v2)");
+        CopyBackM(a0,a);
         a += z * (v1^v2);
-        Assert(Norm(MAT(T,a)-(a0+z*vv)) <= x*eps,label+" a += z * (v1^v2)");
-        a = a0;
+        Assert(Equal(MAT(T,a),(a0+z*vv),x*eps2),label+" a += z * (v1^v2)");
+        CopyBackM(a0,a);
         a += (z * v1)^v2;
-        Assert(Norm(MAT(T,a)-(a0+z*vv)) <= x*eps,label+" a += (z*v1) ^ v2)");
-        a = a0;
+        Assert(Equal(MAT(T,a),(a0+z*vv),x*eps2),label+" a += (z*v1) ^ v2)");
+        CopyBackM(a0,a);
         a += v1 ^ (z * v2);
-        Assert(Norm(MAT(T,a)-(a0+z*vv)) <= x*eps,label+" a += v1 ^ (z*v2)");
-        a = a0;
+        Assert(Equal(MAT(T,a),(a0+z*vv),x*eps2),label+" a += v1 ^ (z*v2)");
+        CopyBackM(a0,a);
         a -= z * (v1^v2);
-        Assert(Norm(MAT(T,a)-(a0-z*vv)) <= x*eps,label+" a -= z * (v1^v2)");
-        a = a0;
+        Assert(Equal(MAT(T,a),(a0-z*vv),x*eps2),label+" a -= z * (v1^v2)");
+        CopyBackM(a0,a);
         a -= (z * v1)^v2;
-        Assert(Norm(MAT(T,a)-(a0-z*vv)) <= x*eps,label+" a -= (z*v1) ^ v2)");
-        a = a0;
+        Assert(Equal(MAT(T,a),(a0-z*vv),x*eps2),label+" a -= (z*v1) ^ v2)");
+        CopyBackM(a0,a);
         a -= v1 ^ (z * v2);
-        Assert(Norm(MAT(T,a)-(a0-z*vv)) <= x*eps,label+" a -= v1 ^ (z*v2)");
-        a = a0;
+        Assert(Equal(MAT(T,a),(a0-z*vv),x*eps2),label+" a -= v1 ^ (z*v2)");
+        CopyBackM(a0,a);
         a = (x * v1)^(x * v2);
-        Assert(Norm(MAT(T,a)-x*x*vv) <= x*x*eps,label+" a = (x*v1) ^ (x*v2))");
-        a = a0;
+        Assert(Equal(MAT(T,a),x*x*vv,x*x*eps),label+" a = (x*v1) ^ (x*v2))");
+        CopyBackM(a0,a);
         a += (x * v1)^(x * v2);
-        Assert(Norm(MAT(T,a)-(a0+x*x*vv)) <= x*x*eps,label+" a += (x*v1) ^ (x*v2)");
-        a = a0;
+        Assert(Equal(MAT(T,a),(a0+x*x*vv),x*x*eps2),label+" a += (x*v1) ^ (x*v2)");
+        CopyBackM(a0,a);
         a -= (x * v1)^(x * v2);
-        Assert(Norm(MAT(T,a)-(a0-x*x*vv)) <= x*x*eps,label+" a -= (x*v1) ^ (x*v2)");
-        a = a0;
+        Assert(Equal(MAT(T,a),(a0-x*x*vv),x*x*eps2),label+" a -= (x*v1) ^ (x*v2)");
+        CopyBackM(a0,a);
         a = (x * v1)^(z * v2);
-        Assert(Norm(MAT(T,a)-x*z*vv) <= x*x*eps,label+" a = (x*v1) ^ (z*v2))");
-        a = a0;
+        Assert(Equal(MAT(T,a),x*z*vv,x*x*eps),label+" a = (x*v1) ^ (z*v2))");
+        CopyBackM(a0,a);
         a += (x * v1)^(z * v2);
-        Assert(Norm(MAT(T,a)-(a0+x*z*vv)) <= x*x*eps,label+" a += (x*v1) ^ (z*v2)");
-        a = a0;
+        Assert(Equal(MAT(T,a),(a0+x*z*vv),x*x*eps2),label+" a += (x*v1) ^ (z*v2)");
+        CopyBackM(a0,a);
         a -= (x * v1)^(z * v2);
-        Assert(Norm(MAT(T,a)-(a0-x*z*vv)) <= x*x*eps,label+" a -= (x*v1) ^ (z*v2)");
-        a = a0;
+        Assert(Equal(MAT(T,a),(a0-x*z*vv),x*x*eps2),label+" a -= (x*v1) ^ (z*v2)");
+        CopyBackM(a0,a);
         a = (z * v1)^(x * v2);
-        Assert(Norm(MAT(T,a)-z*x*vv) <= x*x*eps,label+" a = (z*v1) ^ (x*v2))");
-        a = a0;
+        Assert(Equal(MAT(T,a),z*x*vv,x*x*eps),label+" a = (z*v1) ^ (x*v2))");
+        CopyBackM(a0,a);
         a += (z * v1)^(x * v2);
-        Assert(Norm(MAT(T,a)-(a0+z*x*vv)) <= x*x*eps,label+" a += (z*v1) ^ (x*v2)");
-        a = a0;
+        Assert(Equal(MAT(T,a),(a0+z*x*vv),x*x*eps2),label+" a += (z*v1) ^ (x*v2)");
+        CopyBackM(a0,a);
         a -= (z * v1)^(x * v2);
-        Assert(Norm(MAT(T,a)-(a0-z*x*vv)) <= x*x*eps,label+" a -= (z*v1) ^ (x*v2)");
-        a = a0;
+        Assert(Equal(MAT(T,a),(a0-z*x*vv),x*x*eps2),label+" a -= (z*v1) ^ (x*v2)");
+        CopyBackM(a0,a);
         a = (z * v1)^(z * v2);
-        Assert(Norm(MAT(T,a)-z*z*vv) <= x*x*eps,label+" a = (z*v1) ^ (z*v2))");
-        a = a0;
+        Assert(Equal(MAT(T,a),z*z*vv,x*x*eps),label+" a = (z*v1) ^ (z*v2))");
+        CopyBackM(a0,a);
         a += (z * v1)^(z * v2);
-        Assert(Norm(MAT(T,a)-(a0+z*z*vv)) <= x*x*eps,label+" a += (z*v1) ^ (z*v2)");
-        a = a0;
+        Assert(Equal(MAT(T,a),(a0+z*z*vv),x*x*eps2),label+" a += (z*v1) ^ (z*v2)");
+        CopyBackM(a0,a);
         a -= (z * v1)^(z * v2);
-        Assert(Norm(MAT(T,a)-(a0-z*z*vv)) <= x*x*eps,label+" a -= (z*v1) ^ (z*v2)");
-        a = a0;
+        Assert(Equal(MAT(T,a),(a0-z*z*vv),x*x*eps2),label+" a -= (z*v1) ^ (z*v2)");
+        CopyBackM(a0,a);
 #ifdef SYMOPROD
     }
 #endif
@@ -2959,29 +3130,30 @@ static void DoTestOProdC(M& a, const V1& v1, const V2& v2, std::string label)
 template <class T, class M, class CM> 
 static void TestMatrixArith1(M& a, CM& ca, std::string label)
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith1 "<<label<<std::endl;
-        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
-        std::cout<<"ca = "<<tmv::TMV_Text(ca)<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
+        std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
     }
 
     CT z(9,-2);
     T x = 12;
 
 #if 1
-    DoTestMR<T>(a.mat(),label+" R");
+    DoTestMR<T>(a,label+" R");
 #ifndef NO_COMPLEX_ARITH
-    DoTestMC<CT>(ca.mat(),label+" C");
+    DoTestMC<CT>(ca,label+" C");
 #endif
 #endif
 
 #if 1
-    DoTestMX1R<T>(a.mat(),x,label+" R,R");
+    DoTestMX1R<T>(a,x,label+" R,R");
 #ifndef NO_COMPLEX_ARITH
-    DoTestMX1C<CT>(ca.mat(),z,label+" C,C");
+    DoTestMX1C<CT>(ca,z,label+" C,C");
 #if (XTEST & 4)
-    DoTestMX1R<T>(a.mat(),z,label+" R,C");
-    DoTestMX1C<CT>(ca.mat(),x,label+" C,R");
+    DoTestMX1R<T>(a,z,label+" R,C");
+    DoTestMX1C<CT>(ca,x,label+" C,R");
 #endif
 #endif
 #endif
@@ -2989,22 +3161,22 @@ static void TestMatrixArith1(M& a, CM& ca, std::string label)
 #ifndef NOASSIGN
 
 #if 1
-    DoTestMX2R<T>(a.mat(),x,label+" R,R");
+    DoTestMX2R<T>(a,x,label+" R,R");
 #ifndef NO_COMPLEX_ARITH
-    DoTestMX2C<CT>(ca.mat(),z,label+" C,C");
+    DoTestMX2C<CT>(ca,z,label+" C,C");
 #if (XTEST & 4)
-    DoTestMX2C<CT>(ca.mat(),x,label+" C,R");
+    DoTestMX2C<CT>(ca,x,label+" C,R");
 #endif
 #endif
 #endif
 
 #if 1
 #ifdef ALIASOK
-    DoTestMM2RR<T>(a,a.mat(),label+" self_arith");
-    DoTestMM4RR<T>(a,a.mat(),label+" self_arith");
+    DoTestMM2RR<T>(a,a,label+" self_arith");
+    DoTestMM4RR<T>(a,a,label+" self_arith");
 #ifndef NO_COMPLEX_ARITH
-    DoTestMM2CC<T>(ca,ca.mat(),label+" self_arith");
-    DoTestMM4CC<T>(ca,ca.mat(),label+" self_arith");
+    DoTestMM2CC<T>(ca,ca,label+" self_arith");
+    DoTestMM4CC<T>(ca,ca,label+" self_arith");
 #endif
 #endif
 #endif
@@ -3019,14 +3191,15 @@ static void TestMatrixArith2a(
     const M& a, const CM& ca, V1& b, CV1& cb, 
     V2& c, CV2& cc, std::string label)
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith2a "<<label<<std::endl;
-        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
-        std::cout<<"ca = "<<tmv::TMV_Text(ca)<<std::endl;
-        std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
-        std::cout<<"cb = "<<tmv::TMV_Text(cb)<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
-        std::cout<<"cc = "<<tmv::TMV_Text(cc)<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
+        std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
+        std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c<<std::endl;
+        std::cout<<"cc = "<<tmv::TMV_Text(cc)<<"  "<<cc<<std::endl;
     }
     DoTestMV1R<T,T>(a,b,label+" R,R");
 #ifndef NO_COMPLEX_ARITH
@@ -3055,14 +3228,15 @@ static void TestMatrixArith2b(
     const M& a, const CM& ca, V1& b, CV1& cb, 
     V2& c, CV2& cc, std::string label)
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith2b "<<label<<std::endl;
-        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
-        std::cout<<"ca = "<<tmv::TMV_Text(ca)<<std::endl;
-        std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
-        std::cout<<"cb = "<<tmv::TMV_Text(cb)<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
-        std::cout<<"cc = "<<tmv::TMV_Text(cc)<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
+        std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
+        std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c<<std::endl;
+        std::cout<<"cc = "<<tmv::TMV_Text(cc)<<"  "<<cc<<std::endl;
     }
 
     DoTestVM1R<T,T>(a,c,label+" R,R");
@@ -3090,23 +3264,24 @@ static void TestMatrixArith2b(
 template <class T, class M, class CM> 
 static void TestMatrixArith2(M& a, CM& ca, std::string label)
 {
+    typedef std::complex<T> CT;
     tmv::Vector<T> v(a.rowsize());
-    for(size_t i=0;i<a.rowsize();i++) v(i) = T(i+3);
+    for(int i=0;i<int(a.rowsize());i++) v(i) = T(i+3);
     tmv::Vector<CT> cv = CT(4,5) * v;
 
-    tmv::Vector<T> v5(5*a.rowsize());
-    tmv::Vector<CT> cv5(5*a.rowsize());
+    tmv::Vector<T> v5(5*a.rowsize(),T(0));
+    tmv::Vector<CT> cv5(5*a.rowsize(),CT(0));
     tmv::VectorView<T> vs = v5.cSubVector(0,5*a.rowsize(),5);
     tmv::VectorView<CT> cvs = cv5.cSubVector(0,5*a.rowsize(),5);
     vs = v;
     cvs = cv;
 
     tmv::Vector<T> w(a.colsize());
-    for(size_t i=0;i<a.colsize();i++) w(i) = T(2*i-6);
+    for(int i=0;i<int(a.colsize());i++) w(i) = T(2*i-6);
     tmv::Vector<CT> cw = CT(-1,2) * w;
 
-    tmv::Vector<T> w5(5*a.colsize());
-    tmv::Vector<CT> cw5(5*a.colsize());
+    tmv::Vector<T> w5(5*a.colsize(),T(0));
+    tmv::Vector<CT> cw5(5*a.colsize(),CT(0));
     tmv::VectorView<T> ws = w5.cSubVector(0,5*a.colsize(),5);
     tmv::VectorView<CT> cws = cw5.cSubVector(0,5*a.colsize(),5);
     ws = w;
@@ -3123,14 +3298,15 @@ static void TestMatrixArith3a(
     const M& a, const CM& ca, V1& b, CV1& cb,
     V2& c, CV2& cc, std::string label)
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
-        std::cout<<"Start TestMatrixArith3 "<<label<<std::endl;
-        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
-        std::cout<<"ca = "<<tmv::TMV_Text(ca)<<std::endl;
-        std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
-        std::cout<<"cb = "<<tmv::TMV_Text(cb)<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
-        std::cout<<"cc = "<<tmv::TMV_Text(cc)<<std::endl;
+        std::cout<<"Start TestMatrixArith3a "<<label<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
+        std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
+        std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c<<std::endl;
+        std::cout<<"cc = "<<tmv::TMV_Text(cc)<<"  "<<cc<<std::endl;
     }
 
     DoTestMV3R<T,T,T>(a,b,c,label+" R,R,R");
@@ -3151,14 +3327,15 @@ static void TestMatrixArith3b(
     const M& a, const CM& ca, V1& b, CV1& cb,
     V2& c, CV2& cc, std::string label)
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
-        std::cout<<"Start TestMatrixArith3 "<<label<<std::endl;
-        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
-        std::cout<<"ca = "<<tmv::TMV_Text(ca)<<std::endl;
-        std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
-        std::cout<<"cb = "<<tmv::TMV_Text(cb)<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
-        std::cout<<"cc = "<<tmv::TMV_Text(cc)<<std::endl;
+        std::cout<<"Start TestMatrixArith3b "<<label<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
+        std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
+        std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c<<std::endl;
+        std::cout<<"cc = "<<tmv::TMV_Text(cc)<<"  "<<cc<<std::endl;
     }
 
     DoTestVM3R<T,T,T>(a,c,b,label+" R,R,R");
@@ -3177,27 +3354,28 @@ static void TestMatrixArith3b(
 template <class T, class M, class CM> 
 static void TestMatrixArith3(M& a, CM& ca, std::string label)
 {
+    typedef std::complex<T> CT;
     tmv::Vector<T> vx(a.rowsize());
-    for(size_t i=0;i<a.rowsize();i++) vx(i) = T(i+3);
+    for(int i=0;i<int(a.rowsize());i++) vx(i) = T(i+3);
     tmv::Vector<CT> cvx = CT(4,5) * vx;
     tmv::VectorView<T> v = vx.view();
     tmv::VectorView<CT> cv = cvx.view();
 
-    tmv::Vector<T> v5(5*a.rowsize());
-    tmv::Vector<CT> cv5(5*a.rowsize());
+    tmv::Vector<T> v5(5*a.rowsize(),T(0));
+    tmv::Vector<CT> cv5(5*a.rowsize(),CT(0));
     tmv::VectorView<T> vs = v5.cSubVector(0,5*a.rowsize(),5);
     tmv::VectorView<CT> cvs = cv5.cSubVector(0,5*a.rowsize(),5);
     vs = v;
     cvs = cv;
 
     tmv::Vector<T> wx(a.colsize());
-    for(size_t i=0;i<a.colsize();i++) wx(i) = T(2*i-6);
+    for(int i=0;i<int(a.colsize());i++) wx(i) = T(2*i-6);
     tmv::Vector<CT> cwx = CT(-1,2) * wx;
     tmv::VectorView<T> w = wx.view();
     tmv::VectorView<CT> cw = cwx.view();
 
-    tmv::Vector<T> w5(5*a.colsize());
-    tmv::Vector<CT> cw5(5*a.colsize());
+    tmv::Vector<T> w5(5*a.colsize(),T(0));
+    tmv::Vector<CT> cw5(5*a.colsize(),CT(0));
     tmv::VectorView<T> ws = w5.cSubVector(0,5*a.colsize(),5);
     tmv::VectorView<CT> cws = cw5.cSubVector(0,5*a.colsize(),5);
     ws = w;
@@ -3220,10 +3398,10 @@ static void TestMatrixArith4(
 {
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith4 "<<label<<std::endl;
-        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
-        std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
-        std::cout<<"ca = "<<tmv::TMV_Text(ca)<<std::endl;
-        std::cout<<"cb = "<<tmv::TMV_Text(cb)<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
+        std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
+        std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
     }
 
     DoTestMM1RR<T>(a,b,label+" R,R");
@@ -3251,12 +3429,13 @@ template <class T, class M1, class CM1, class M2, class CM2>
 static void TestMatrixArith5(
     M1& a, CM1& ca, const M2& b, const CM2& cb, std::string label)
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith5 "<<label<<std::endl;
-        std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a.mat()<<std::endl;
-        std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"ca = "<<tmv::TMV_Text(ca)<<" "<<ca.mat()<<std::endl;
-        std::cout<<"cb = "<<tmv::TMV_Text(cb)<<" "<<cb<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
+        std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
+        std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
     }
 
     DoTestMM3RR<T>(a,b,label+" R,R");
@@ -3285,14 +3464,15 @@ static void TestMatrixArith6(
     const M1& a, const CM1& ca,
     const M2& b, const CM2& cb, M3& c, CM3& cc, std::string label)
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith6 "<<label<<std::endl;
-        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
-        std::cout<<"ca = "<<tmv::TMV_Text(ca)<<std::endl;
-        std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
-        std::cout<<"cb = "<<tmv::TMV_Text(cb)<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
-        std::cout<<"cc = "<<tmv::TMV_Text(cc)<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
+        std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
+        std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c<<std::endl;
+        std::cout<<"cc = "<<tmv::TMV_Text(cc)<<"  "<<cc<<std::endl;
     }
 
     DoTestMM5R<T,T,T>(a,b,c,label+" R,R,R");
@@ -3313,6 +3493,7 @@ static void TestMatrixArith6x(
     const M1& a, const CM1& ca,
     const M2& b, const CM2& cb, std::string label)
 {
+    typedef std::complex<T> CT;
     if (CanMultMM(a,b)) {
         tmv::Matrix<T,tmv::ColMajor> c1(a*b);
         tmv::Matrix<CT,tmv::ColMajor> cc1(ca*cb);
@@ -3324,8 +3505,8 @@ static void TestMatrixArith6x(
 #endif
 
 #if (XTEST & 1)
-        tmv::Matrix<T> c3x(4*c1.colsize(),5*c1.rowsize());
-        tmv::Matrix<CT> cc3x(4*c1.colsize(),5*c1.rowsize());
+        tmv::Matrix<T> c3x(4*c1.colsize(),5*c1.rowsize(),T(0));
+        tmv::Matrix<CT> cc3x(4*c1.colsize(),5*c1.rowsize(),CT(0));
         tmv::MatrixView<T> c3 = c3x.cSubMatrix(0,c3x.colsize(),0,c3x.rowsize(),4,5);
         tmv::MatrixView<CT> cc3 = cc3x.cSubMatrix(0,c3x.colsize(),0,c3x.rowsize(),4,5);
         c3 = c1;
@@ -3340,14 +3521,15 @@ static void TestMatrixArith7(
     M& a, CM& ca, const V1& v1, const CV1& cv1,
     const V2& v2, const CV2& cv2, std::string label)
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
-        std::cout<<"Start TestMatrixArith7 "<<label<<std::endl;
-        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
-        std::cout<<"ca = "<<tmv::TMV_Text(ca)<<std::endl;
-        std::cout<<"v1 = "<<tmv::TMV_Text(v1)<<std::endl;
-        std::cout<<"cv1 = "<<tmv::TMV_Text(cv1)<<std::endl;
-        std::cout<<"v2 = "<<tmv::TMV_Text(v2)<<std::endl;
-        std::cout<<"cv2 = "<<tmv::TMV_Text(cv2)<<std::endl;
+        std::cout<<"Start TestMatrixArith6 "<<label<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
+        std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
+        std::cout<<"v1 = "<<tmv::TMV_Text(v1)<<"  "<<v1<<std::endl;
+        std::cout<<"cv1 = "<<tmv::TMV_Text(cv1)<<"  "<<cv1<<std::endl;
+        std::cout<<"v2 = "<<tmv::TMV_Text(v2)<<"  "<<v2<<std::endl;
+        std::cout<<"cv2 = "<<tmv::TMV_Text(cv2)<<"  "<<cv2<<std::endl;
     }
 
     DoTestOProdR<T>(a,v1,v2,label+" R,R,R");
@@ -3366,4 +3548,3 @@ static void TestMatrixArith7(
 }
 
 #undef ProductType
-#undef CT

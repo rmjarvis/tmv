@@ -1,7 +1,8 @@
 
-#include "TMV_Test.h"
-#include "TMV_Test3.h"
 #include "TMV.h"
+#include "TMV_Small.h"
+#include "TMV_Test.h"
+#include "TMV_Test_3.h"
 #define NORDIVEQ
 #include "TMV_TestMatrixDivArith.h"
 
@@ -37,12 +38,8 @@ static void TestSmallNonSquareDiv_B5b()
     c6.col(1) *= std::complex<T>(2,1);
     c6.row(5).addToAll(std::complex<T>(-7,2));
 
-    tmv::SmallMatrix<T,7,6,stor> a6x;
-    tmv::SmallMatrix<std::complex<T>,7,6,stor> c6x;
-
-    TestMatrixDivArith3c<T>(tmv::QR,a6x,c6x,a2,a6,a4,c2,c6,c4,
-                            "NonSquare/NonSquare"); 
-#if XTEST & 32
+    TestMatrixDivArith3c<T>(tmv::QR,a2,a6,a4,c2,c6,c4,"NonSquare/NonSquare"); 
+#if (XTEST & 32)
     tmv::SmallMatrix<T,N,6,stor,tmv::FortranStyle> a2f = a2;
     tmv::SmallMatrix<std::complex<T>,N,6,stor,tmv::FortranStyle> c2f = c2;
     tmv::SmallMatrix<T,7,N,stor,tmv::FortranStyle> a4f = a4;
@@ -50,13 +47,9 @@ static void TestSmallNonSquareDiv_B5b()
     tmv::SmallMatrix<T,7,6,stor,tmv::FortranStyle> a6f = a6;
     tmv::SmallMatrix<std::complex<T>,7,6,stor,tmv::FortranStyle> c6f = c6;
 
-
-    TestMatrixDivArith3c<T>(tmv::QR,a6x,c6x,a2f,a6,a4,c2f,c6,c4,
-                            "NonSquare/NonSquare"); 
-    TestMatrixDivArith3c<T>(tmv::QR,a6x,c6x,a2f,a6f,a4,c2f,c6f,c4,
-                            "NonSquare/NonSquare"); 
-    TestMatrixDivArith3c<T>(tmv::QR,a6x,c6x,a2f,a6f,a4f,c2f,c6f,c4f,
-                            "NonSquare/NonSquare"); 
+    TestMatrixDivArith3c<T>(tmv::QR,a2f,a6,a4,c2f,c6,c4,"NonSquare/NonSquare"); 
+    TestMatrixDivArith3c<T>(tmv::QR,a2f,a6f,a4,c2f,c6f,c4,"NonSquare/NonSquare"); 
+    TestMatrixDivArith3c<T>(tmv::QR,a2f,a6f,a4f,c2f,c6f,c4f,"NonSquare/NonSquare"); 
 
 #endif
 }
@@ -66,7 +59,7 @@ void TestSmallMatrixDiv_B5b()
 {
     TestSmallNonSquareDiv_B5b<T,tmv::ColMajor,2>();
     TestSmallNonSquareDiv_B5b<T,tmv::ColMajor,5>();
-#if XTEST & 2
+#if (XTEST & 2)
     TestSmallNonSquareDiv_B5b<T,tmv::ColMajor,1>();
     TestSmallNonSquareDiv_B5b<T,tmv::ColMajor,3>();
     TestSmallNonSquareDiv_B5b<T,tmv::ColMajor,4>();

@@ -1,72 +1,22 @@
 
 #define CT std::complex<T>
 
-#ifndef TMV_INST_SKIP_BLAS
-#ifdef TMV_MM_USE_RECURSIVE_BLOCK
+#define DefMM(T,Ta,Tb)\
+  template void BlockMultMM<true>(const T alpha,const GenMatrix<Ta >& A, \
+      const GenMatrix<Tb >& B, const MatrixView<T >& C); \
+  template void BlockMultMM<false>(const T alpha,const GenMatrix<Ta >& A, \
+      const GenMatrix<Tb >& B, const MatrixView<T >& C); \
 
-#define DefMM(T1, C1, T2, C2, T3) \
-  template void InstMultMM_RecursiveBlock( \
-      const T3 x, \
-      const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1, \
-      const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, \
-      MatrixView<T3> m3); \
-  template void InstAddMultMM_RecursiveBlock( \
-      const T3 x, \
-      const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1, \
-      const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, \
-      MatrixView<T3> m3); \
-
-DefMM(T,false,T,false,T)
-#ifdef TMV_INST_COMPLEX
-#ifdef TMV_INST_MIX
-DefMM(T,false,T,false,CT)
-DefMM(T,false,CT,false,CT)
-DefMM(T,false,CT,true,CT)
-DefMM(CT,false,T,false,CT)
-DefMM(CT,true,T,false,CT)
+#ifndef INST_SKIP_BLAS
+DefMM(T,T,T)
+#ifdef INST_COMPLEX
+DefMM(CT,T,T)
+DefMM(CT,T,CT)
+DefMM(CT,CT,T)
+DefMM(CT,CT,CT)
 #endif
-DefMM(CT,false,CT,false,CT)
-DefMM(CT,false,CT,true,CT)
-DefMM(CT,true,CT,false,CT)
-DefMM(CT,true,CT,true,CT)
 #endif
 
 #undef DefMM
-
-#endif
-
-#if TMV_OPT > 0
-
-#define DefMM(T1, C1, T2, C2, T3) \
-  template void InstMultMM_Block( \
-      const T3 x, \
-      const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1, \
-      const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, \
-      MatrixView<T3> m3); \
-  template void InstAddMultMM_Block( \
-      const T3 x, \
-      const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1, \
-      const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, \
-      MatrixView<T3> m3); \
-
-DefMM(T,false,T,false,T)
-#ifdef TMV_INST_COMPLEX
-#ifdef TMV_INST_MIX
-DefMM(T,false,T,false,CT)
-DefMM(T,false,CT,false,CT)
-DefMM(T,false,CT,true,CT)
-DefMM(CT,false,T,false,CT)
-DefMM(CT,true,T,false,CT)
-#endif
-DefMM(CT,false,CT,false,CT)
-DefMM(CT,false,CT,true,CT)
-DefMM(CT,true,CT,false,CT)
-DefMM(CT,true,CT,true,CT)
-#endif
-
-#undef DefMM
-
-#endif
-#endif
 
 #undef CT

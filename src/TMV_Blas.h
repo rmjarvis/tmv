@@ -57,7 +57,7 @@
 //   BLASPTR -- Pass all arguments to Blas calls by pointer, not reference.
 //   BLASSTRLEN -- Last argument of Blas calls need the length of char array.
 //   BLASZDROT -- Include extra routines, zdrot and csrot
-//   BLASIDAMIN -- Include extra routines idamin, isamin, izamin, icamin
+//   BLASIDAMIN -- Include extra routines idamin, isamin
 //
 //   LAP -- Use LAPack calls (see below for more specific subsets here)
 //   CLAP -- LAPack calls should use clapack_* calling convention.
@@ -196,7 +196,7 @@ extern "C" {
 
 #define BLAS
 extern "C" {
-#include "util/fblas.h"
+#include "fblas.h"
 }
 #define BLAS_
 #define BLASSTRLEN
@@ -226,8 +226,8 @@ namespace tmv {
 
 }
 
-#define BLASP(x) FBLAS_ConvertP(x)
-#define BLASCValue(x) FBLAS_ConvertToComplex(x)
+#define BLASP(x) tmv::FBLAS_ConvertP(x)
+#define BLASCValue(x) tmv::FBLAS_ConvertToComplex(x)
 
 #endif
 
@@ -279,7 +279,7 @@ namespace tmv {
     { return MKL_ConvertP(const_cast<std::complex<float>*>(ptr)); }
 }
 
-#define LAPP(x) MKL_ConvertP(x)
+#define LAPP(x) tmv::MKL_ConvertP(x)
 
 #endif // !CLAPACK
 #endif // !FLAPACK
@@ -301,7 +301,12 @@ namespace tmv {
 #else
 
 #define BLAS
-#define BLASZDROT
+// It has zdrot, csrot, but there is a bug where they sometimes return
+// wrong answers.  I filed a ticket (#1106), but they replied that the 
+// bug is actually in gfortran.  They suggest a workaround of using the
+// netlib zdrot directly, but it is easier to just disable zdrot for ACML
+// until the underlying problem has been fixed.
+//#define BLASZDROT
 
 /* Works with either of these sets of defines: */
 #define BLASZDOTRETURN
@@ -339,8 +344,8 @@ namespace tmv {
 
 }
 
-#define BLASP(x) ACML_ConvertP(x)
-#define BLASCValue(x) ACML_ConvertToComplex(x)
+#define BLASP(x) tmv::ACML_ConvertP(x)
+#define BLASCValue(x) tmv::ACML_ConvertToComplex(x)
 
 #ifndef NOLAP
 #ifndef CLAPACK
@@ -357,7 +362,7 @@ namespace tmv {
 #define LAPSTRLEN
 */
 
-#define LAPP(x) ACML_ConvertP(x)
+#define LAPP(x) tmv::ACML_ConvertP(x)
 
 #endif // !CLAPACK
 #endif // !FLAPACK
@@ -447,7 +452,7 @@ namespace tmv {
 
 }
 
-#define LAPP(x) CLAPACK_ConvertP(x)
+#define LAPP(x) tmv::CLAPACK_ConvertP(x)
 
 #endif // LAP
 
@@ -472,7 +477,7 @@ namespace tmv {
 #define LAP_
 
 extern "C" {
-#include "util/flapack.h"
+#include "flapack.h"
 }
 
 namespace tmv {
@@ -498,8 +503,8 @@ namespace tmv {
 
 }
 
-#define LAPP(x) FLAPACK_ConvertP(x)
-#define LAPCValue(x) FLAPACK_ConvertToComplex(x)
+#define LAPP(x) tmv::FLAPACK_ConvertP(x)
+#define LAPCValue(x) tmv::FLAPACK_ConvertToComplex(x)
 
 #endif // LAP
 #endif // BLAS
@@ -521,14 +526,14 @@ namespace tmv {
 #endif // ELAP
 
 namespace tmv {
-    // This are defined in TMV_Vector.cpp
+    // These are defined in TMV_Vector.cpp
     extern int Lap_info; 
-    const char Blas_ch_N = 'N';
-    const char Blas_ch_C = 'C';
-    const char Blas_ch_T = 'T';
-    const char Blas_ch_L = 'L';
-    const char Blas_ch_R = 'R';
-    const char Blas_ch_U = 'U';
+    extern char Blas_ch_N;
+    extern char Blas_ch_C;
+    extern char Blas_ch_T;
+    extern char Blas_ch_L;
+    extern char Blas_ch_R;
+    extern char Blas_ch_U;
 }
 
 #ifdef BLAS
@@ -566,15 +571,15 @@ namespace tmv {
 #define BLASCH_UP CblasUpper
 #else
 #define BLASCM
-#define BLASCH_NT BLASV(Blas_ch_N)
-#define BLASCH_CT BLASV(Blas_ch_C)
-#define BLASCH_T BLASV(Blas_ch_T)
-#define BLASCH_L BLASV(Blas_ch_L)
-#define BLASCH_R BLASV(Blas_ch_R)
-#define BLASCH_U BLASV(Blas_ch_U)
-#define BLASCH_NU BLASV(Blas_ch_N)
-#define BLASCH_LO BLASV(Blas_ch_L)
-#define BLASCH_UP BLASV(Blas_ch_U)
+#define BLASCH_NT BLASV(tmv::Blas_ch_N)
+#define BLASCH_CT BLASV(tmv::Blas_ch_C)
+#define BLASCH_T BLASV(tmv::Blas_ch_T)
+#define BLASCH_L BLASV(tmv::Blas_ch_L)
+#define BLASCH_R BLASV(tmv::Blas_ch_R)
+#define BLASCH_U BLASV(tmv::Blas_ch_U)
+#define BLASCH_NU BLASV(tmv::Blas_ch_N)
+#define BLASCH_LO BLASV(tmv::Blas_ch_L)
+#define BLASCH_UP BLASV(tmv::Blas_ch_U)
 #endif
 
 #ifdef BLASSTRLEN
@@ -659,15 +664,15 @@ namespace tmv {
 #define LAPCH_UP CblasUpper
 #else
 #define LAPCM
-#define LAPCH_NT LAPV(Blas_ch_N)
-#define LAPCH_CT LAPV(Blas_ch_C)
-#define LAPCH_T LAPV(Blas_ch_T)
-#define LAPCH_L LAPV(Blas_ch_L)
-#define LAPCH_R LAPV(Blas_ch_R)
-#define LAPCH_U LAPV(Blas_ch_U)
-#define LAPCH_NU LAPV(Blas_ch_N)
-#define LAPCH_LO LAPV(Blas_ch_L)
-#define LAPCH_UP LAPV(Blas_ch_U)
+#define LAPCH_NT LAPV(tmv::Blas_ch_N)
+#define LAPCH_CT LAPV(tmv::Blas_ch_C)
+#define LAPCH_T LAPV(tmv::Blas_ch_T)
+#define LAPCH_L LAPV(tmv::Blas_ch_L)
+#define LAPCH_R LAPV(tmv::Blas_ch_R)
+#define LAPCH_U LAPV(tmv::Blas_ch_U)
+#define LAPCH_NU LAPV(tmv::Blas_ch_N)
+#define LAPCH_LO LAPV(tmv::Blas_ch_L)
+#define LAPCH_UP LAPV(tmv::Blas_ch_U)
 #endif
 
 #ifdef LAPSTRLEN
@@ -711,8 +716,9 @@ namespace tmv {
 
     // Defined in Vector.cpp
     void LAP_Results(const char* fn);
-    void LAP_Results(const int lwork_opt, const int m, const int n,
-                     const int lwork, const char* fn);
+    void LAP_Results(
+        const int lwork_opt, const int m, const int n,
+        const int lwork, const char* fn);
 
 }
 

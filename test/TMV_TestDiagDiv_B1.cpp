@@ -1,7 +1,7 @@
 
 #include "TMV.h"
 #include "TMV_Test.h"
-#include "TMV_Test1.h"
+#include "TMV_Test_1.h"
 #define NOLDIVEQ
 #define NORDIVEQ
 #include "TMV_TestMatrixDivArith.h"
@@ -31,20 +31,15 @@ void TestDiagDiv_B1()
     tmv::MatrixView<std::complex<T> > cpv = cp.view();
     tmv::DiagMatrixView<std::complex<T> > cbv = cb.view();
 
-    tmv::Matrix<T> px(N,N);
-    tmv::DiagMatrix<T> bx(N);
-    tmv::Matrix<std::complex<T> > cpx(N,N);
-    tmv::DiagMatrix<std::complex<T> > cbx(N);
-
-    TestMatrixDivArith1<T>(tmv::LU,bx,cbx,pv,bv,cpv,cbv,"Diag/SquareM");
+    TestMatrixDivArith1<T>(tmv::LU,pv,bv,cpv,cbv,"Diag/SquareM");
 }
 
-#ifdef TMV_INST_DOUBLE
+#ifdef TEST_DOUBLE
 template void TestDiagDiv_B1<double>();
 #endif
-#ifdef TMV_INST_FLOAT
+#ifdef TEST_FLOAT
 template void TestDiagDiv_B1<float>();
 #endif
-#ifdef TMV_INST_LONGDOUBLE
+#ifdef TEST_LONGDOUBLE
 template void TestDiagDiv_B1<long double>();
 #endif

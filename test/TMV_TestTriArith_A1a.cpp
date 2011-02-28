@@ -1,9 +1,6 @@
 #include "TMV_Test.h"
-#include "TMV_Test1.h"
+#include "TMV_Test_1.h"
 #include "TMV.h"
-
-// MJ: Remove once norm2, etc. are defined.
-#define NODIV
 
 #define NOSV
 #include "TMV_TestMatrixArith.h"
@@ -14,7 +11,7 @@ template <class T> void TestTriMatrixArith_A1a()
 
     tmv::Matrix<T,tmv::RowMajor> a1x(4,4);
     for(int i=0;i<4;++i) for(int j=0;j<4;++j) {
-        a1x(i,j) = T(2+4*i-5*j);
+        a1x(i,j) = T(3+4*i-6*j);
     }
     a1x(0,0) = 14; 
     a1x(1,0) = -2; 
@@ -30,27 +27,28 @@ template <class T> void TestTriMatrixArith_A1a()
 
     tmv::Matrix<T,tmv::ColMajor> a2x = a1x.transpose();
     a2x.row(1) *= T(3);
-    a2x.col(2) -= tmv::Vector<T>(4,4.);
+    a2x.col(2) -= tmv::Vector<T>(4,4);
     tmv::Matrix<CT,tmv::ColMajor> ca2x = ca1x;
     ca2x -= a2x;
     ca2x *= CT(1,-2);
 
+    tmv::UpperTriMatrixView<T> u1 = a1x.upperTri();
+    tmv::UpperTriMatrixView<CT> cu1 = ca1x.upperTri();
+    tmv::UpperTriMatrixView<T> u2 = a2x.upperTri();
+    tmv::UpperTriMatrixView<CT> cu2 = ca2x.upperTri();
+
+    TestMatrixArith1<T>(u1,cu1,"UpperTri 1");
+    TestMatrixArith1<T>(u2,cu2,"UpperTri 2");
+
+#if (XTEST & 1)
     tmv::Matrix<T> a3x(12,16);
     for(int i=0;i<12;++i) for(int j=0;j<16;++j) a3x(i,j) = T(1-2*i+3*j);
     a3x.diag().addToAll(30);
     tmv::Matrix<CT> ca3x = a3x*CT(1,-2);
     ca3x.diag().addToAll(CT(-22,15));
 
-    tmv::UpperTriMatrixView<T> u1 = a1x.upperTri();
-    tmv::UpperTriMatrixView<CT> cu1 = ca1x.upperTri();
-    tmv::UpperTriMatrixView<T> u2 = a2x.upperTri();
-    tmv::UpperTriMatrixView<CT> cu2 = ca2x.upperTri();
     tmv::UpperTriMatrixView<T> u3 = a3x.subMatrix(0,12,0,16,3,4).upperTri();
     tmv::UpperTriMatrixView<CT> cu3 = ca3x.subMatrix(0,12,0,16,3,4).upperTri();
-
-    TestMatrixArith1<T>(u1,cu1,"UpperTri 1");
-    TestMatrixArith1<T>(u2,cu2,"UpperTri 2");
-#if (XTEST & 1)
     TestMatrixArith1<T>(u3,cu3,"UpperTri 3");
 #endif
 
@@ -59,12 +57,12 @@ template <class T> void TestTriMatrixArith_A1a()
     tmv::LowerTriMatrixView<CT> cl1 = ca1x.lowerTri();
     tmv::LowerTriMatrixView<T> l2 = a2x.lowerTri();
     tmv::LowerTriMatrixView<CT> cl2 = ca2x.lowerTri();
-    tmv::LowerTriMatrixView<T> l3 = a3x.subMatrix(0,12,0,16,3,4).lowerTri();
-    tmv::LowerTriMatrixView<CT> cl3 = ca3x.subMatrix(0,12,0,16,3,4).lowerTri();
 
     TestMatrixArith1<T>(l1,cl1,"LowerTri 1");
     TestMatrixArith1<T>(l2,cl2,"LowerTri 2");
 #if (XTEST & 1)
+    tmv::LowerTriMatrixView<T> l3 = a3x.subMatrix(0,12,0,16,3,4).lowerTri();
+    tmv::LowerTriMatrixView<CT> cl3 = ca3x.subMatrix(0,12,0,16,3,4).lowerTri();
     TestMatrixArith1<T>(l3,cl3,"LowerTri 3");
 #endif
 #endif

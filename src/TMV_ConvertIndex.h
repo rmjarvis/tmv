@@ -38,27 +38,27 @@
 namespace tmv {
 
     template <class VI> 
-    inline void ConvertIndexToPermute(int n, const VI& newindex, int* P)
+    inline void ConvertIndexToPermute(int n, const VI& newIndex, int* P)
     {
-        // newindex[i]=j means value at original j location needs to go to i.
-        std::vector<int> currindex(n);
-        std::vector<int> origindex(n);
+        // newIndex[i]=j means value at original j location needs to go to i.
+        std::vector<int> currIndex(n);
+        std::vector<int> origIndex(n);
         for(int i=0;i<n;++i) {
-            currindex[i] = i;
-            origindex[i] = i;
+            currIndex[i] = i;
+            origIndex[i] = i;
         } 
-        // currindex[i]=j means value at original i location is currently at j.
-        // origindex[j]=i means value at original i location is currently at j.
+        // currIndex[i]=j means value at original i location is currently at j.
+        // origIndex[j]=i means value at original i location is currently at j.
         for(int i=0;i<n;++i) {
-            int ip = currindex[newindex[i]];
+            int ip = currIndex[newIndex[i]];
             P[i] = ip;
             if (i != ip) { 
-                int origi = origindex[i];
-                int origip = origindex[ip];
-                currindex[origi] = ip;
-                currindex[origip] = i;
-                origindex[i] = origip;
-                origindex[ip] = origi;
+                int origi = origIndex[i];
+                int origip = origIndex[ip];
+                currIndex[origi] = ip;
+                currIndex[origip] = i;
+                origIndex[i] = origip;
+                origIndex[ip] = origi;
             } 
         } 
     }   

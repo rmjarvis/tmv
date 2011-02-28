@@ -1,0 +1,19 @@
+# vim: set filetype=python :
+
+import os
+Import('env')
+
+install_subdir = 'bin'
+
+vfile=env.File('tmv-version')
+targets = [vfile]
+
+if 'install' in COMMAND_LINE_TARGETS:
+    RunInstall = env['_InstallProgram']
+    RunInstall(env, targets, install_subdir)
+
+if 'uninstall' in COMMAND_LINE_TARGETS:
+    RunUninstall = env['_UninstallProgram']
+    RunUninstall(env, targets, install_subdir)
+
+

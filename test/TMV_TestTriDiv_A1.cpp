@@ -1,5 +1,5 @@
 #include "TMV_Test.h"
-#include "TMV_Test1.h"
+#include "TMV_Test_1.h"
 #include "TMV.h"
 
 template <class T1, class T2> inline bool CanLDivEq(
@@ -50,19 +50,10 @@ template <class T> void TestTriDiv_A1()
     tmv::LowerTriMatrixView<std::complex<T> > ca1t = ca1.transpose();
     tmv::LowerTriMatrixView<std::complex<T> > ca2t = ca2.transpose();
 
-    tmv::UpperTriMatrix<T,tmv::NonUnitDiag> a1x(m);
-    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag> ca1x(cm);
-    tmv::UpperTriMatrix<T,tmv::UnitDiag> a2x(m);
-    tmv::UpperTriMatrix<std::complex<T>,tmv::UnitDiag> ca2x(cm);
-    tmv::LowerTriMatrix<T,tmv::NonUnitDiag> b1x(m);
-    tmv::LowerTriMatrix<std::complex<T>,tmv::NonUnitDiag> cb1x(cm);
-    tmv::LowerTriMatrix<T,tmv::UnitDiag> b2x(m);
-    tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag> cb2x(cm);
-
-    TestMatrixDivArith2<T>(tmv::LU,a2x,ca2x,a1v,a2v,ca1v,ca2v,"U/U 1");
-    TestMatrixDivArith2<T>(tmv::LU,b2x,cb2x,a1t,a2t,ca1t,ca2t,"L/L 1");
-    TestMatrixDivArith2<T>(tmv::LU,a1x,ca1x,a2v,a1v,ca2v,ca1v,"U/U 2");
-    TestMatrixDivArith2<T>(tmv::LU,b1x,cb1x,a2t,a1t,ca2t,ca1t,"L/L 2");
+    TestMatrixDivArith2<T>(tmv::LU,a1v,a2v,ca1v,ca2v,"U/U 1");
+    TestMatrixDivArith2<T>(tmv::LU,a1t,a2t,ca1t,ca2t,"L/L 1");
+    TestMatrixDivArith2<T>(tmv::LU,a2v,a1v,ca2v,ca1v,"U/U 2");
+    TestMatrixDivArith2<T>(tmv::LU,a2t,a1t,ca2t,ca1t,"L/L 2");
 
 #if (XTEST & 2)
     tmv::UpperTriMatrix<T,tmv::NonUnitDiag> a1b(m);
@@ -79,10 +70,10 @@ template <class T> void TestTriDiv_A1()
     tmv::LowerTriMatrixView<std::complex<T> > ca1bt = ca1b.transpose();
     tmv::LowerTriMatrixView<std::complex<T> > ca2bt = ca2b.transpose();
 
-    TestMatrixDivArith1<T>(tmv::LU,a1x,ca1x,a1v,a1bv,ca1v,ca1bv,"U/U 3");
-    TestMatrixDivArith1<T>(tmv::LU,b1x,cb1x,a1t,a1bt,ca1t,ca1bt,"L/L 3");
-    TestMatrixDivArith1<T>(tmv::LU,a2x,ca2x,a2v,a2bv,ca2v,ca2bv,"U/U 4");
-    TestMatrixDivArith1<T>(tmv::LU,b2x,cb2x,a2t,a2bt,ca2t,ca2bt,"L/L 4");
+    TestMatrixDivArith1<T>(tmv::LU,a1v,a1bv,ca1v,ca1bv,"U/U 3");
+    TestMatrixDivArith1<T>(tmv::LU,a1t,a1bt,ca1t,ca1bt,"L/L 3");
+    TestMatrixDivArith1<T>(tmv::LU,a2v,a2bv,ca2v,ca2bv,"U/U 4");
+    TestMatrixDivArith1<T>(tmv::LU,a2t,a2bt,ca2t,ca2bt,"L/L 4");
 #endif
 }
 

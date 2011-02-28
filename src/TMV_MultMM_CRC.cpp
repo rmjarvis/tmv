@@ -29,83 +29,125 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "TMV_Blas.h"
-#include "tmv/TMV_MultMM.h"
-#include "tmv/TMV_Matrix.h"
-#include "tmv/TMV_ProdXM.h"
-#include "tmv/TMV_SumMM.h"
 
-#ifdef BLAS
-#include "TMV_MultMM_Blas.h"
-#endif
+//#include <iostream>
+
+#include "TMV_Blas.h" // Sets BLAS if appropriate
+#include "TMV_MultMM.h"
+#include "tmv/TMV_Matrix.h"
+#include "tmv/TMV_MatrixArith.h"
 
 namespace tmv {
 
-    template <bool add, class T1, bool C1, class T2, bool C2, class T3>
-    static void DoMultMM(
-        const T3 x,
-        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1,
-        const ConstMatrixView<T2,UNKNOWN,1,C2>& m2, MatrixView<T3,1> m3)
+    template <bool ca, class T, class Ta, class Tb> 
+    static void ColMult(int M, const Tb b00, const Ta* A, T* C)
     {
-        typedef typename Traits<T3>::real_type RT;
-        if (x == RT(0))
-            Maybe<!add>::zero(m3); 
-        else if (x == RT(1))
-            InlineMultMM<add>(Scaling<1,RT>(),m1,m2,m3);
-        else if (x == RT(-1))
-            InlineMultMM<add>(Scaling<-1,RT>(),m1,m2,m3);
-        else if (TMV_IMAG(x) == RT(0))
-            InlineMultMM<add>(Scaling<0,RT>(TMV_REAL(x)),m1,m2,m3);
-        else
-            InlineMultMM<add>(Scaling<0,T3>(x),m1,m2,m3);
-    }
-
-#ifdef BLAS
-#ifdef TMV_INST_DOUBLE
-    template <bool add>
-    static void DoMultMM(
-        const double x,
-        const ConstMatrixView<double,1>& m1,
-        const ConstMatrixView<double,UNKNOWN,1>& m2, MatrixView<double,1> m3)
-    { BlasMultMM(x,m1,m2,add?1:0,m3); }
-    template <bool add, class T1, bool C1, class T2, bool C2>
-    static void DoMultMM(
-        const std::complex<double> x,
-        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1,
-        const ConstMatrixView<T2,UNKNOWN,1,C2>& m2,
-        MatrixView<std::complex<double>,1> m3)
-    { BlasMultMM(x,m1,m2,add?1:0,m3); }
-#endif // TMV_INST_DOUBLE
-#ifdef TMV_INST_FLOAT
-    template <bool add>
-    static void DoMultMM(
-        const float x,
-        const ConstMatrixView<float,1>& m1,
-        const ConstMatrixView<float,UNKNOWN,1>& m2, MatrixView<float,1> m3)
-    { BlasMultMM(x,m1,m2,add?1:0,m3); }
-    template <bool add, class T1, bool C1, class T2, bool C2>
-    static void DoMultMM(
-        const std::complex<float> x,
-        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1,
-        const ConstMatrixView<T2,UNKNOWN,1,C2>& m2,
-        MatrixView<std::complex<float>,1> m3)
-    { BlasMultMM(x,m1,m2,add?1:0,m3); }
-#endif // TMV_INST_FLOAT
-#endif // BLAS
-
-
-    template <bool add, class T1, bool C1, class T2, bool C2, class T3>
-    void DoInstMultMM(
-        const T3 x,
-        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1,
-        const ConstMatrixView<T2,UNKNOWN,1,C2>& m2, MatrixView<T3,1> m3)
-    {
-        if (m3.colsize() > 0 && m3.rowsize() > 0) {
-            if (m1.rowsize() == 0) Maybe<!add>::zero(m3);
-            else DoMultMM<add>(x,m1,m2,m3); 
+        for(int i=M/8;i;--i) {
+            C[0] += (ca ? TMV_CONJ(A[0]) : A[0]) * b00;
+            C[1] += (ca ? TMV_CONJ(A[1]) : A[1]) * b00;
+            C[2] += (ca ? TMV_CONJ(A[2]) : A[2]) * b00;
+            C[3] += (ca ? TMV_CONJ(A[3]) : A[3]) * b00;
+            C[4] += (ca ? TMV_CONJ(A[4]) : A[4]) * b00;
+            C[5] += (ca ? TMV_CONJ(A[5]) : A[5]) * b00;
+            C[6] += (ca ? TMV_CONJ(A[6]) : A[6]) * b00;
+            C[7] += (ca ? TMV_CONJ(A[7]) : A[7]) * b00;
+            A += 8; C += 8;
+        }
+        M %= 8;
+        if (M) {
+            if (M >= 4) {
+                C[0] += (ca ? TMV_CONJ(A[0]) : A[0]) * b00;
+                C[1] += (ca ? TMV_CONJ(A[1]) : A[1]) * b00;
+                C[2] += (ca ? TMV_CONJ(A[2]) : A[2]) * b00;
+                C[3] += (ca ? TMV_CONJ(A[3]) : A[3]) * b00;
+                M -= 4; A += 4; C += 4;
+            }
+            if (M >= 2) {
+                C[0] += (ca ? TMV_CONJ(A[0]) : A[0]) * b00;
+                C[1] += (ca ? TMV_CONJ(A[1]) : A[1]) * b00;
+                M -= 2; A += 2; C += 2;
+            }
+            if (M) {
+                C[0] += (ca ? TMV_CONJ(A[0]) : A[0]) * b00;
+            }
         }
     }
 
+    template <bool ca, bool cb, class T, class Ta, class Tb> 
+    static void RecursiveCRCMultMM(
+        const int M, const int N, const int K,
+        const Ta* A, const Tb* B, T* C,
+        const int Ask, const int Bsk, const int Csj)
+    {
+        if (K > N) {
+            int K1 = K/2;
+            RecursiveCRCMultMM<ca,cb>(M,N,K1,A,B,C,Ask,Bsk,Csj);
+            RecursiveCRCMultMM<ca,cb>(M,N,K-K1,A+K1*Ask,B+K1*Bsk,C,Ask,Bsk,Csj);
+        } else if (N > 1) {
+            int N1 = N/2;
+            RecursiveCRCMultMM<ca,cb>(M,N1,K,A,B,C,Ask,Bsk,Csj);
+            RecursiveCRCMultMM<ca,cb>(M,N-N1,K,A,B+N1,C+N1*Csj,Ask,Bsk,Csj);
+        } else {
+            ColMult<ca>(M,(cb ? TMV_CONJ(B[0]) : B[0]),A,C);
+        }
+    }
+
+    template <bool add, bool ca, bool cb, class T, class Ta, class Tb> 
+    static void DoCRCMultMM(
+        const T alpha, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
+        const MatrixView<T>& C)
+    {
+        TMVAssert(A.colsize() == C.colsize());
+        TMVAssert(A.rowsize() == B.colsize());
+        TMVAssert(B.rowsize() == C.rowsize());
+        TMVAssert(C.colsize() > 0);
+        TMVAssert(C.rowsize() > 0);
+        TMVAssert(A.rowsize() > 0);
+        TMVAssert(alpha != T(0));
+        TMVAssert(ca == A.isconj());
+        TMVAssert(cb == B.isconj());
+        TMVAssert(C.ct()==NonConj);
+        TMVAssert(A.iscm());
+        TMVAssert(B.isrm());
+        TMVAssert(C.iscm());
+
+        const int M = C.colsize();
+        const int N = C.rowsize();
+        const int K = A.rowsize();
+        const int Ask = A.stepj();
+        const int Bsk = B.stepi();
+
+        const Ta* Ap = A.cptr();
+        const Tb* Bp = B.cptr();
+
+        Matrix<T,ColMajor> Ctemp(M,N,T(0));
+        T* Ct = Ctemp.ptr();
+        const int Ctsj = Ctemp.stepj();
+        RecursiveCRCMultMM<ca,cb>(M,N,K,Ap,Bp,Ct, Ask,Bsk,Ctsj);
+        if (alpha != T(1)) Ctemp *= alpha;
+        if (add) C += Ctemp;
+        else C = Ctemp;
+    }
+
+    template <bool add, class T, class Ta, class Tb> void CRCMultMM(
+        const T alpha, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
+        const MatrixView<T>& C)
+    {
+        if (A.isconj())
+            if (B.isconj())
+                DoCRCMultMM<add,true,true>(alpha,A,B,C);
+            else
+                DoCRCMultMM<add,true,false>(alpha,A,B,C);
+        else
+            if (B.isconj())
+                DoCRCMultMM<add,false,true>(alpha,A,B,C);
+            else
+                DoCRCMultMM<add,false,false>(alpha,A,B,C);
+    }
+
+#ifdef BLAS
+#define INST_SKIP_BLAS
+#endif
 
 #define InstFile "TMV_MultMM_CRC.inst"
 #include "TMV_Inst.h"

@@ -1,7 +1,7 @@
 
 #include <fstream>
 #include "TMV_Test.h"
-#include "TMV_Test1.h"
+#include "TMV_Test_1.h"
 
 bool XXDEBUG1 = false;
 bool XXDEBUG2 = false;
@@ -22,7 +22,8 @@ bool symoprod = true;
 bool dontthrow = false;
 std::string lastsuccess = "";
 
-int main() try {
+int main() try 
+{
     std::ofstream log("tmvtest1.log");
     tmv::WriteWarningsTo(&log);
 
@@ -35,41 +36,47 @@ int main() try {
 
 #ifdef TEST_DOUBLE
     TestVector<double>();
+    TestPermutation<double>();
     TestMatrix<double>();
     TestDiagMatrix<double>();
     TestDiagDiv<double>();
     TestTriMatrix<double>();
     TestTriDiv<double>();
     TestMatrixDiv<double>();
+    TestMatrixDet<double>();
 #endif // DOUBLE
-
-    TestPermutation();
 
 #ifdef TEST_FLOAT
     TestVector<float>();
+    TestPermutation<float>();
     TestMatrix<float>();
     TestDiagMatrix<float>();
     TestDiagDiv<float>();
     TestTriMatrix<float>();
     TestTriDiv<float>();
     TestMatrixDiv<float>();
+    TestMatrixDet<float>();
 #endif // FLOAT
 
 #ifdef TEST_INT
     TestVector<int>();
+    TestPermutation<int>();
     TestMatrix<int>();
     TestDiagMatrix<int>();
     TestTriMatrix<int>();
+    TestMatrixDet<int>();
 #endif  // INT
 
 #ifdef TEST_LONGDOUBLE
     TestVector<long double>();
+    TestPermutation<long double>();
     TestMatrix<long double>();
     TestDiagMatrix<long double>();
     TestDiagDiv<long double>();
     TestTriMatrix<long double>();
     TestTriDiv<long double>();
     TestMatrixDiv<long double>();
+    TestMatrixDet<long double>();
 #endif // LONGDOUBLE
 
 #endif

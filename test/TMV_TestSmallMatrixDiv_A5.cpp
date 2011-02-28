@@ -1,7 +1,8 @@
 
-#include "TMV_Test.h"
-#include "TMV_Test3.h"
 #include "TMV.h"
+#include "TMV_Small.h"
+#include "TMV_Test.h"
+#include "TMV_Test_3.h"
 #include "TMV_TestMatrixDivArith.h"
 
 template <class T, tmv::StorageType stor, int N> 
@@ -32,13 +33,11 @@ static void TestSmallSquareDiv_A5()
     tmv::SmallMatrix<std::complex<T>,7,N,stor> c4 = c3.adjoint();
     c4.subMatrix(1,1+N,0,N) -= c1;
 
-    tmv::SmallMatrix<T,7,N,stor> a4x;
     tmv::SmallMatrix<T,7,N,stor> a4b;
-    tmv::SmallMatrix<std::complex<T>,7,N,stor> c4x;
     tmv::SmallMatrix<std::complex<T>,7,N,stor> c4b;
 
-    TestMatrixDivArith3c<T>(tmv::LU,a4x,c4x,a1,a4,a4b,c1,c4,c4b,"NonSquare/Square");
-#if XTEST & 32
+    TestMatrixDivArith3c<T>(tmv::LU,a1,a4,a4b,c1,c4,c4b,"NonSquare/Square");
+#if (XTEST & 32)
     tmv::SmallMatrix<T,N,N,stor,tmv::FortranStyle> a1f = a1;
     tmv::SmallMatrix<std::complex<T>,N,N,stor,tmv::FortranStyle> c1f = c1;
 
@@ -47,9 +46,9 @@ static void TestSmallSquareDiv_A5()
     tmv::SmallMatrix<T,7,N,stor,tmv::FortranStyle> a4fb = a4;
     tmv::SmallMatrix<std::complex<T>,7,N,stor,tmv::FortranStyle> c4fb = c4;
 
-    TestMatrixDivArith3c<T>(tmv::LU,a4x,c4x,a1f,a4,a4b,c1f,c4,c4b,"NonSquare/Square");
-    TestMatrixDivArith3c<T>(tmv::LU,a4x,c4x,a1f,a4f,a4b,c1f,c4f,c4b,"NonSquare/Square");
-    TestMatrixDivArith3c<T>(tmv::LU,a4x,c4x,a1f,a4f,a4fb,c1f,c4f,c4fb,"NonSquare/Square");
+    TestMatrixDivArith3c<T>(tmv::LU,a1f,a4,a4b,c1f,c4,c4b,"NonSquare/Square");
+    TestMatrixDivArith3c<T>(tmv::LU,a1f,a4f,a4b,c1f,c4f,c4b,"NonSquare/Square");
+    TestMatrixDivArith3c<T>(tmv::LU,a1f,a4f,a4fb,c1f,c4f,c4fb,"NonSquare/Square");
 #endif
 }
 
@@ -58,7 +57,7 @@ void TestSmallMatrixDiv_A5()
 {
     TestSmallSquareDiv_A5<T,tmv::ColMajor,2>();
     TestSmallSquareDiv_A5<T,tmv::ColMajor,5>();
-#if XTEST & 2
+#if (XTEST & 2)
     TestSmallSquareDiv_A5<T,tmv::ColMajor,1>();
     TestSmallSquareDiv_A5<T,tmv::ColMajor,3>();
     TestSmallSquareDiv_A5<T,tmv::ColMajor,4>();

@@ -8,47 +8,127 @@ ReadFileList=env['__readfunc']
 
 # Source lists
 basic = ReadFileList('basic.files')
+basic_noint = ReadFileList('basic_noint.files')
 basic_omp = ReadFileList('basic_omp.files')
+basic_omp_noint = ReadFileList('basic_omp_noint.files')
+basic_geqp3 = ReadFileList('basic_geqp3.files')
 diag = ReadFileList('diag.files')
 tri = ReadFileList('tri.files')
-tri_omp = ReadFileList('tri_omp.files')
-div = ReadFileList('divx.files')
-div_omp = ReadFileList('div_omp.files')
+tri_noint = ReadFileList('tri_noint.files')
 
 band = ReadFileList('band.files')
+band_noint = ReadFileList('band_noint.files')
 sym = ReadFileList('sym.files')
-sym_omp = ReadFileList('sym_omp.files')
+sym_noint = ReadFileList('sym_noint.files')
+sym_omp_noint = ReadFileList('sym_omp_noint.files')
+sym_stegr = ReadFileList('sym_stegr.files')
 symband = ReadFileList('symband.files')
+symband_noint = ReadFileList('symband_noint.files')
 
-lib_files= basic + diag + tri + div
-lib_omp_files= basic_omp + tri_omp #+ div_omp
+lib_files= basic + diag + tri
+lib_noint_files= basic_noint + tri_noint
+lib_omp_files= basic_omp
+lib_omp_noint_files= basic_omp_noint
+lib_geqp3_files= basic_geqp3
 sblib_files= band + sym + symband
-sblib_omp_files= sym_omp
+sblib_noint_files= band_noint + sym_noint + symband_noint
+sblib_omp_noint_files= sym_omp_noint
+sblib_stegr_files= sym_stegr
 
 env1 = env.Clone()
 
 if env['MEM_TEST']:
-  print 'Using mmgr.cpp'
-  lib_files += ['mmgr.cpp']
+    print 'Using mmgr.cpp'
+    lib_files += ['mmgr.cpp']
+
+if (int(env['XTEST']) & 64):
+    env1.Append(CPPDEFINES=['TMV_INITIALIZE_NAN'])
+if not env['INST_FLOAT']:
+    env1.Append(CPPDEFINES=['NO_INST_FLOAT'])
+if not env['INST_DOUBLE']:
+    env1.Append(CPPDEFINES=['NO_INST_DOUBLE'])
+if env['INST_LONGDOUBLE'] or env['TEST_LONGDOUBLE']:
+    env1.Append(CPPDEFINES=['INST_LONGDOUBLE'])
 
 env2 = env1.Clone()
+
+if env['INST_INT'] or env['TEST_INT']:
+    env1.Append(CPPDEFINES=['INST_INT'])
+
+env3 = env1.Clone()
+env4 = env2.Clone()
 if env['WITH_OPENMP'] :
-  env2.Append(CCFLAGS=env['OMP_FLAGS'])
+    env3.Append(CCFLAGS=env['OMP_FLAGS'])
+    env4.Append(CCFLAGS=env['OMP_FLAGS'])
 
-obj_lib = env1.Object(lib_files)
-obj_sblib = env1.Object(sblib_files)
-obj_omp_lib = env2.Object(lib_omp_files)
-obj_omp_sblib = env2.Object(sblib_omp_files)
+env5 = env2.Clone()
+if env['LAP'] :
+    if not env['USE_GEQP3']:
+        env5.Append(CPPDEFINES=['NOGEQP3'])
 
-lib = env1.Library('#lib/tmv',obj_lib+obj_omp_lib)
-#lib = env1.Library('#lib/tmv',obj_lib)
-sblib = env1.Library('#lib/tmv_symband',obj_sblib+obj_omp_sblib)
+env6 = env2.Clone()
+if env['LAP'] :
+    if not env['USE_STEGR']:
+        env6.Append(CPPDEFINES=['NOSTEGR'])
+
+if env['SHARED']:
+
+    obj_lib = env1.SharedObject(lib_files)
+    obj_noint_lib = env2.SharedObject(lib_noint_files)
+    obj_omp_lib = env3.SharedObject(lib_omp_files)
+    obj_omp_noint_lib = env4.SharedObject(lib_omp_noint_files)
+    obj_geqp3_lib = env5.SharedObject(lib_geqp3_files)
+
+
+    lib = env1.SharedLibrary('#lib/tmv',
+                             obj_lib + obj_noint_lib +
+                             obj_omp_lib + obj_omp_noint_lib +
+                             obj_geqp3_lib)
+
+    obj_sblib = env1.SharedObject(sblib_files)
+    obj_noint_sblib = env2.SharedObject(sblib_noint_files)
+    obj_omp_noint_sblib = env4.SharedObject(sblib_omp_noint_files)
+    obj_stegr_sblib = env6.SharedObject(sblib_stegr_files)
+
+    env7 = env1.Clone()
+    env7.Prepend(LIBS=['tmv'])
+    #sblib = env1.SharedLibrary('#lib/tmv_symband',
+    #                           lib + 
+    #                           obj_sblib + obj_noint_sblib +
+    #                           obj_omp_noint_sblib + obj_stegr_sblib)
+    sblib = env7.SharedLibrary('#lib/tmv_symband',
+                               #obj_lib + obj_noint_lib +
+                               #obj_omp_lib + obj_omp_noint_lib +
+                               #obj_geqp3_lib +
+                               obj_sblib + obj_noint_sblib +
+                               obj_omp_noint_sblib + obj_stegr_sblib)
+
+else:
+    obj_lib = env1.StaticObject(lib_files)
+    obj_noint_lib = env2.StaticObject(lib_noint_files)
+    obj_omp_lib = env3.StaticObject(lib_omp_files)
+    obj_omp_noint_lib = env4.StaticObject(lib_omp_noint_files)
+    obj_geqp3_lib = env5.StaticObject(lib_geqp3_files)
+
+    obj_sblib = env1.StaticObject(sblib_files)
+    obj_noint_sblib = env2.StaticObject(sblib_noint_files)
+    obj_omp_noint_sblib = env4.StaticObject(sblib_omp_noint_files)
+    obj_stegr_sblib = env6.StaticObject(sblib_stegr_files)
+
+
+    lib = env1.StaticLibrary('#lib/tmv',
+                             obj_lib + obj_noint_lib +
+                             obj_omp_lib + obj_omp_noint_lib +
+                             obj_geqp3_lib)
+    sblib = env1.StaticLibrary('#lib/tmv_symband',
+                               obj_sblib + obj_noint_sblib +
+                               obj_omp_noint_sblib + obj_stegr_sblib)
+
 
 env.Alias(target='lib', source=lib)
 env.Alias(target='sblib', source=sblib)
 
-#Default(['lib','sblib'])
-Default(['lib'])
+Default(['lib','sblib'])
 
 #
 # install/uninstall
@@ -66,11 +146,24 @@ header_install_dir_sub = os.path.join(env['INSTALL_PREFIX'], header_dir_sub)
 
 lib_targets = [lib,sblib]
 
+lib_file = '#' + lib[0].path
+sblib_file = '#' + sblib[0].path
+
+# Save this info for share/SConscript
+env['LIB_FILE_NAMES'] = [lib_file,sblib_file]
+
 if 'install' in COMMAND_LINE_TARGETS: 
 
+    if env['SHARED']:
+        installed_lib = env1.Install(dir=lib_install_dir, source=lib)
+        env.Depends(sblib,installed_lib)
+        installed_sblib = env1.Install(dir=lib_install_dir, source=sblib)
+        env.Alias(target='install', source=[installed_lib,installed_sblib])
 
-    env.Alias(target='install', 
-              source=env1.Install(dir=lib_install_dir, source=lib_targets))
+    else :
+        env.Alias(target='install', 
+	    source=env1.Install(dir=lib_install_dir, source=lib_targets))
+
 
     hglob = os.path.join('#'+header_dir,'*.h')
     env.Alias(target='install', 

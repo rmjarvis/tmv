@@ -1,6 +1,6 @@
 
 #include "TMV_Test.h"
-#include "TMV_Test1.h"
+#include "TMV_Test_1.h"
 #include "TMV.h"
 #include <fstream>
 #include <cstdio>
@@ -178,7 +178,4 @@ template void TestDiagDiv<float>();
 #endif
 #ifdef TEST_LONGDOUBLE
 template void TestDiagDiv<long double>();
-#endif
-#ifdef TEST_INT
-template void TestDiagDiv<int>();
 #endif

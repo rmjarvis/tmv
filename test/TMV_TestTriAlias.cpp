@@ -1,153 +1,163 @@
 
 #include "TMV_Test.h"
-#include "TMV_Test1.h"
+#include "TMV_Test_1.h"
 #include "TMV.h"
 
 template <class M, class Ma, class Mb, class M1, class M1a, class M1b>
-void TestAliasMultUL2(
+static void TestAliasMultUL2(
     const M& m, const Ma& ma, const Mb& mb,
     M1& m1, const M1a& m1a, const M1b& m1b, std::string label)
 {
-    typedef typename M::value_type T;
-    tmv::Matrix<T> m2(4,4);
+    if (showstartdone) {
+        std::cout<<"Start AliasMultUL2\n";
+        std::cout<<"m = "<<m<<std::endl;
+        std::cout<<"ma = "<<ma<<std::endl;
+        std::cout<<"mb = "<<mb<<std::endl;
+    }
 
-    const typename M::real_type eps = EPS * Norm(m);
+    typedef typename M::value_type T;
+    typedef typename M::real_type RT;
+    const int N = m.colsize();
+    tmv::Matrix<T> m2(N,N);
+
+    RT eps = EPS * RT(N);
+    if (!std::numeric_limits<RT>::is_integer) eps *= Norm(m);
 
     m1 = m;
     m1 = m1a * m1b;
     m2 = ma * mb;
-    Assert(Norm(m1-m2) < eps,label+" m=a*b");
+    Assert(Equal(m1,m2,eps),label+" m=a*b");
 
     m1 = m;
     m1 += m1a * m1b;
     m2 = m + ma * mb;
-    Assert(Norm(m1-m2) < eps,label+" m+=a*b");
+    Assert(Equal(m1,m2,eps),label+" m+=a*b");
 
     m1 = m;
-    m1 = 10 * m1a * m1b;
-    m2 = 10 * ma * mb;
-    Assert(Norm(m1-m2) < eps,label+" m=10*a*b");
+    m1 = T(10) * m1a * m1b;
+    m2 = T(10) * ma * mb;
+    Assert(Equal(m1,m2,eps),label+" m=10*a*b");
 
     m1 = m;
-    m1 += 10 * m1a * m1b;
-    m2 = m + 10 * ma * mb;
-    Assert(Norm(m1-m2) < eps,label+" m+=10*a*b");
+    m1 += T(10) * m1a * m1b;
+    m2 = m + T(10) * ma * mb;
+    Assert(Equal(m1,m2,eps),label+" m+=10*a*b");
 
     m1 = m;
     m1 = m1a * m1b.transpose();
     m2 = ma * mb.transpose();
-    Assert(Norm(m1-m2) < eps,label+" m=a*bT");
+    Assert(Equal(m1,m2,eps),label+" m=a*bT");
 
     m1 = m;
     m1 += m1a * m1b.transpose();
     m2 = m + ma * mb.transpose();
-    Assert(Norm(m1-m2) < eps,label+" m+=a*bT");
+    Assert(Equal(m1,m2,eps),label+" m+=a*bT");
 
     m1 = m;
-    m1 = 10 * m1a * m1b.transpose();
-    m2 = 10 * ma * mb.transpose();
-    Assert(Norm(m1-m2) < eps,label+" m=10*a*bT");
+    m1 = T(10) * m1a * m1b.transpose();
+    m2 = T(10) * ma * mb.transpose();
+    Assert(Equal(m1,m2,eps),label+" m=10*a*bT");
 
     m1 = m;
-    m1 += 10 * m1a * m1b.transpose();
-    m2 = m + 10 * ma * mb.transpose();
-    Assert(Norm(m1-m2) < eps,label+" m+=10*a*bT");
+    m1 += T(10) * m1a * m1b.transpose();
+    m2 = m + T(10) * ma * mb.transpose();
+    Assert(Equal(m1,m2,eps),label+" m+=10*a*bT");
 
     m1 = m;
     m1 = m1a.transpose() * m1b;
     m2 = ma.transpose() * mb;
-    Assert(Norm(m1-m2) < eps,label+" m=aT*b");
+    Assert(Equal(m1,m2,eps),label+" m=aT*b");
 
     m1 = m;
     m1 += m1a.transpose() * m1b;
     m2 = m + ma.transpose() * mb;
-    Assert(Norm(m1-m2) < eps,label+" m+=aT*b");
+    Assert(Equal(m1,m2,eps),label+" m+=aT*b");
 
     m1 = m;
-    m1 = 10 * m1a.transpose() * m1b;
-    m2 = 10 * ma.transpose() * mb;
-    Assert(Norm(m1-m2) < eps,label+" m=10*aT*b");
+    m1 = T(10) * m1a.transpose() * m1b;
+    m2 = T(10) * ma.transpose() * mb;
+    Assert(Equal(m1,m2,eps),label+" m=10*aT*b");
 
     m1 = m;
-    m1 += 10 * m1a.transpose() * m1b;
-    m2 = m + 10 * ma.transpose() * mb;
-    Assert(Norm(m1-m2) < eps,label+" m+=10*aT*b");
+    m1 += T(10) * m1a.transpose() * m1b;
+    m2 = m + T(10) * ma.transpose() * mb;
+    Assert(Equal(m1,m2,eps),label+" m+=10*aT*b");
 
     m1 = m;
     m1 = m1a.transpose() * m1b.transpose();
     m2 = ma.transpose() * mb.transpose();
-    Assert(Norm(m1-m2) < eps,label+" m=aT*bT");
+    Assert(Equal(m1,m2,eps),label+" m=aT*bT");
 
     m1 = m;
     m1 += m1a.transpose() * m1b.transpose();
     m2 = m + ma.transpose() * mb.transpose();
-    Assert(Norm(m1-m2) < eps,label+" m+=aT*bT");
+    Assert(Equal(m1,m2,eps),label+" m+=aT*bT");
 
     m1 = m;
-    m1 = 10 * m1a.transpose() * m1b.transpose();
-    m2 = 10 * ma.transpose() * mb.transpose();
-    Assert(Norm(m1-m2) < eps,label+" m=10*aT*bT");
+    m1 = T(10) * m1a.transpose() * m1b.transpose();
+    m2 = T(10) * ma.transpose() * mb.transpose();
+    Assert(Equal(m1,m2,eps),label+" m=10*aT*bT");
 
     m1 = m;
-    m1 += 10 * m1a.transpose() * m1b.transpose();
-    m2 = m + 10 * ma.transpose() * mb.transpose();
-    Assert(Norm(m1-m2) < eps,label+" m+=10*aT*bT");
+    m1 += T(10) * m1a.transpose() * m1b.transpose();
+    m2 = m + T(10) * ma.transpose() * mb.transpose();
+    Assert(Equal(m1,m2,eps),label+" m+=10*aT*bT");
 }
 
 template <class M, class M1>
-void TestAliasMultUL1(const M& m, M1& m1, std::string label)
+static void TestAliasMultUL1(const M& m, M1& m1, std::string label)
 {
     TestAliasMultUL2(m,m.upperTri(),m.upperTri(),
                      m1,m1.upperTri(),m1.upperTri(),
-                     " upperTri,upperTri");
+                     label+" upperTri,upperTri");
     TestAliasMultUL2(m,m.upperTri(),m.lowerTri(),
                      m1,m1.upperTri(),m1.lowerTri(),
-                     " upperTri,lowerTri");
+                     label+" upperTri,lowerTri");
     TestAliasMultUL2(m,m.lowerTri(),m.upperTri(),
                      m1,m1.lowerTri(),m1.upperTri(),
-                     " lowerTri,upperTri");
+                     label+" lowerTri,upperTri");
     TestAliasMultUL2(m,m.lowerTri(),m.lowerTri(),
                      m1,m1.lowerTri(),m1.lowerTri(),
-                     " lowerTri,lowerTri");
+                     label+" lowerTri,lowerTri");
 
     TestAliasMultUL2(m,m.unitUpperTri(),m.upperTri(),
                      m1,m1.unitUpperTri(),m1.upperTri(),
-                     " unitUpperTri,upperTri");
+                     label+" unitUpperTri,upperTri");
     TestAliasMultUL2(m,m.unitUpperTri(),m.lowerTri(),
                      m1,m1.unitUpperTri(),m1.lowerTri(),
-                     " unitUpperTri,lowerTri");
+                     label+" unitUpperTri,lowerTri");
     TestAliasMultUL2(m,m.unitLowerTri(),m.upperTri(),
                      m1,m1.unitLowerTri(),m1.upperTri(),
-                     " unitLowerTri,upperTri");
+                     label+" unitLowerTri,upperTri");
     TestAliasMultUL2(m,m.unitLowerTri(),m.lowerTri(),
                      m1,m1.unitLowerTri(),m1.lowerTri(),
-                     " unitLowerTri,lowerTri");
+                     label+" unitLowerTri,lowerTri");
 
     TestAliasMultUL2(m,m.upperTri(),m.unitUpperTri(),
                      m1,m1.upperTri(),m1.unitUpperTri(),
-                     " upperTri,unitUpperTri");
+                     label+" upperTri,unitUpperTri");
     TestAliasMultUL2(m,m.upperTri(),m.unitLowerTri(),
                      m1,m1.upperTri(),m1.unitLowerTri(),
-                     " upperTri,unitLowerTri");
+                     label+" upperTri,unitLowerTri");
     TestAliasMultUL2(m,m.lowerTri(),m.unitUpperTri(),
                      m1,m1.lowerTri(),m1.unitUpperTri(),
-                     " lowerTri,unitUpperTri");
+                     label+" lowerTri,unitUpperTri");
     TestAliasMultUL2(m,m.lowerTri(),m.unitLowerTri(),
                      m1,m1.lowerTri(),m1.unitLowerTri(),
-                     " lowerTri,unitLowerTri");
+                     label+" lowerTri,unitLowerTri");
 
     TestAliasMultUL2(m,m.unitUpperTri(),m.unitUpperTri(),
                      m1,m1.unitUpperTri(),m1.unitUpperTri(),
-                     " unitUpperTri,unitUpperTri");
+                     label+" unitUpperTri,unitUpperTri");
     TestAliasMultUL2(m,m.unitUpperTri(),m.unitLowerTri(),
                      m1,m1.unitUpperTri(),m1.unitLowerTri(),
-                     " unitUpperTri,unitLowerTri");
+                     label+" unitUpperTri,unitLowerTri");
     TestAliasMultUL2(m,m.unitLowerTri(),m.unitUpperTri(),
                      m1,m1.unitLowerTri(),m1.unitUpperTri(),
-                     " unitLowerTri,unitUpperTri");
+                     label+" unitLowerTri,unitUpperTri");
     TestAliasMultUL2(m,m.unitLowerTri(),m.unitLowerTri(),
                      m1,m1.unitLowerTri(),m1.unitLowerTri(),
-                     " unitLowerTri,unitLowerTri");
+                     label+" unitLowerTri,unitLowerTri");
 }
 
 template <class T>

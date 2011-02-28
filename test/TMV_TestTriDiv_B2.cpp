@@ -1,5 +1,5 @@
 #include "TMV_Test.h"
-#include "TMV_Test1.h"
+#include "TMV_Test_1.h"
 #include "TMV.h"
 
 #define NOLDIVEQ
@@ -36,13 +36,8 @@ template <class T> void TestTriDiv_B2()
     cmv.divideUsing(tmv::LU);
     cmv.saveDiv();
 
-    tmv::UpperTriMatrix<T,tmv::NonUnitDiag> a1x(m);
-    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag> ca1x(cm);
-    tmv::LowerTriMatrix<T,tmv::NonUnitDiag> b1x(m);
-    tmv::LowerTriMatrix<std::complex<T>,tmv::NonUnitDiag> cb1x(cm);
-
-    TestMatrixDivArith1<T>(tmv::LU,a1x,ca1x,mv,a1v,cmv,ca1v,"U/M");
-    TestMatrixDivArith1<T>(tmv::LU,b1x,cb1x,mv,a1t,cmv,ca1t,"L/M");
+    TestMatrixDivArith1<T>(tmv::LU,mv,a1v,cmv,ca1v,"U/M");
+    TestMatrixDivArith1<T>(tmv::LU,mv,a1t,cmv,ca1t,"L/M");
 
 #if (XTEST & 2)
     tmv::UpperTriMatrix<T,tmv::UnitDiag> a2(m);
@@ -60,17 +55,12 @@ template <class T> void TestTriDiv_B2()
     cmt.divideUsing(tmv::LU);
     cmt.saveDiv();
 
-    tmv::UpperTriMatrix<T,tmv::UnitDiag> a2x(m);
-    tmv::UpperTriMatrix<std::complex<T>,tmv::UnitDiag> ca2x(cm);
-    tmv::LowerTriMatrix<T,tmv::UnitDiag> b2x(m);
-    tmv::LowerTriMatrix<std::complex<T>,tmv::UnitDiag> cb2x(cm);
-
-    TestMatrixDivArith1<T>(tmv::LU,a2x,ca2x,mv,a2v,cmv,ca2v,"U/M");
-    TestMatrixDivArith1<T>(tmv::LU,b2x,cb2x,mv,a2t,cmv,ca2t,"L/M");
-    TestMatrixDivArith1<T>(tmv::LU,a1x,ca1x,mt,a1v,cmt,ca1v,"U/M");
-    TestMatrixDivArith1<T>(tmv::LU,b1x,cb1x,mt,a1t,cmt,ca1t,"L/M");
-    TestMatrixDivArith1<T>(tmv::LU,a2x,ca2x,mt,a2v,cmt,ca2v,"U/M");
-    TestMatrixDivArith1<T>(tmv::LU,b2x,cb2x,mt,a2t,cmt,ca2t,"L/M");
+    TestMatrixDivArith1<T>(tmv::LU,mv,a2v,cmv,ca2v,"U/M");
+    TestMatrixDivArith1<T>(tmv::LU,mv,a2t,cmv,ca2t,"L/M");
+    TestMatrixDivArith1<T>(tmv::LU,mt,a1v,cmt,ca1v,"U/M");
+    TestMatrixDivArith1<T>(tmv::LU,mt,a1t,cmt,ca1t,"L/M");
+    TestMatrixDivArith1<T>(tmv::LU,mt,a2v,cmt,ca2v,"U/M");
+    TestMatrixDivArith1<T>(tmv::LU,mt,a2t,cmt,ca2t,"L/M");
 #endif
 }
 
