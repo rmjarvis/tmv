@@ -7,7 +7,6 @@
 template <class T, int N> 
 static void DoTestSmallMatrixArith_B3a()
 {
-    std::cout<<"Start B3a "<<std::endl;
     tmv::SmallMatrix<T,N,N,tmv::RowMajor> a1;
     for(int i=0;i<N;++i) for(int j=0;j<N;++j) {
         a1(i,j) = T(3+4*i-5*j);
@@ -17,20 +16,14 @@ static void DoTestSmallMatrixArith_B3a()
     if (N > 2) a1(2,0) = 7;
     if (N > 3) a1(3,0) = -10;
     if (N > 2) a1(2,2) = 30;
-    std::cout<<"a1 = "<<a1<<std::endl;
 
     tmv::SmallMatrix<std::complex<T>,N,N,tmv::RowMajor> ca1 = 
         std::complex<T>(3,2)*a1;
-    std::cout<<"ca1 = "<<ca1<<std::endl;
     if (N > 3) ca1(2,3) += std::complex<T>(2,4);
-    std::cout<<"ca1 => "<<ca1<<std::endl;
     if (N > 1) ca1(1,0) *= std::complex<T>(1,3);
-    std::cout<<"ca1 => "<<ca1<<std::endl;
     if (N > 1) ca1.col(1) *= std::complex<T>(-1,4);
-    std::cout<<"ca1 => "<<ca1<<std::endl;
     if (N > 3) ca1.row(3) += 
         tmv::SmallVector<std::complex<T>,N>(std::complex<T>(2,9));
-    std::cout<<"ca1 => "<<ca1<<std::endl;
 
     tmv::SmallMatrix<T,7,N,tmv::RowMajor> a3;
     for(int i=0;i<7;++i) for(int j=0;j<N;++j) a3(i,j) = T(1-3*i+2*j);
@@ -40,17 +33,11 @@ static void DoTestSmallMatrixArith_B3a()
     ca3.subMatrix(2,N+2,0,N) += ca1;
     if (N > 1) ca3.col(1) *= std::complex<T>(2,1);
     ca3.row(6).addToAll(std::complex<T>(-7,2));
-    std::cout<<"a3 = "<<a3<<std::endl;
-    std::cout<<"ca3 = "<<ca3<<std::endl;
 
     tmv::SmallVector<T,N> v1 = a1.row(0);
     tmv::SmallVector<std::complex<T>,N> cv1 = ca1.row(0);
     tmv::SmallVector<T,7> v2 = a3.col(0);
     tmv::SmallVector<std::complex<T>,7> cv2 = ca3.col(0);
-    std::cout<<"v1 = "<<v1<<std::endl;
-    std::cout<<"cv1 = "<<cv1<<std::endl;
-    std::cout<<"v2 = "<<v2<<std::endl;
-    std::cout<<"cv2 = "<<cv2<<std::endl;
 
 #if 0
     if (showstartdone) {

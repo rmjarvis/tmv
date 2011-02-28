@@ -27,10 +27,10 @@ int main() try
     std::ofstream log("tmvtest3c.log");
     tmv::WriteWarningsTo(&log);
 
-    showacc=true;
-    showdiv=true;
-    showtests=true;
-    showstartdone=true;
+    //showacc=true;
+    //showdiv=true;
+    //showtests=true;
+    //showstartdone=true;
 
 #if 1
 

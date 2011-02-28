@@ -51,9 +51,7 @@ static void DoTestSmallMatrixArith_B2b()
         std::cout<<"B2b"<<std::endl;
     }
     TestMatrixArith2b<T>(a3,ca3,v1,cv1,v2,cv2,"NonSquare");
-    std::cout<<"After 1"<<std::endl;
     TestMatrixArith2b<T>(a5,ca5,v2,cv2,v1,cv1,"NonSquare");
-    std::cout<<"After 2"<<std::endl;
 
 #if (XTEST & 2)
     tmv::SmallMatrix<T,7,N,tmv::ColMajor> a4 = a3;
@@ -61,9 +59,7 @@ static void DoTestSmallMatrixArith_B2b()
     tmv::SmallMatrix<T,N,7,tmv::ColMajor> a6 = a5;
     tmv::SmallMatrix<std::complex<T>,N,7,tmv::ColMajor> ca6 = ca5;
     TestMatrixArith2b<T>(a4,ca4,v1,cv1,v2,cv2,"NonSquare");
-    std::cout<<"After 3"<<std::endl;
     TestMatrixArith2b<T>(a6,ca6,v2,cv2,v1,cv1,"NonSquare");
-    std::cout<<"After 4"<<std::endl;
 #endif
 
 #if (XTEST & 32)
@@ -82,21 +78,13 @@ static void DoTestSmallMatrixArith_B2b()
     tmv::SmallVector<std::complex<T>,7,tmv::FortranStyle> cv2f = cv2;
 
     TestMatrixArith2b<T>(a3f,ca3f,v1,cv1,v2,cv2,"NonSquare");
-    std::cout<<"After 5"<<std::endl;
     TestMatrixArith2b<T>(a4f,ca4f,v1,cv1,v2,cv2,"NonSquare");
-    std::cout<<"After 6"<<std::endl;
     TestMatrixArith2b<T>(a5f,ca5f,v2,cv2,v1,cv1,"NonSquare");
-    std::cout<<"After 7"<<std::endl;
     TestMatrixArith2b<T>(a6f,ca6f,v2,cv2,v1,cv1,"NonSquare");
-    std::cout<<"After 8"<<std::endl;
     TestMatrixArith2b<T>(a3f,ca3f,v1f,cv1f,v2,cv2,"NonSquare");
-    std::cout<<"After 9"<<std::endl;
     TestMatrixArith2b<T>(a3f,ca3f,v1f,cv1f,v2f,cv2f,"NonSquare");
-    std::cout<<"After 10"<<std::endl;
     TestMatrixArith2b<T>(a5f,ca5f,v2f,cv2f,v1,cv1,"NonSquare");
-    std::cout<<"After 11"<<std::endl;
     TestMatrixArith2b<T>(a5f,ca5f,v2f,cv2f,v1f,cv1f,"NonSquare");
-    std::cout<<"After 12"<<std::endl;
 #endif
 }
 
