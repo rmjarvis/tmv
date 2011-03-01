@@ -9,7 +9,7 @@ New features:
    anyone who tried to do this would consider this a bug fix, but
    it was (somewhat poorly) documented that this wouldn't work.
    The code now uses Bareiss's algorithm for these matrices, instead
-   of LU decomposition, which is what floating point matrices use.
+   of the LU decomposition that floating point matrices use.
 
 -- Added m.sumAbs2Elements()
 

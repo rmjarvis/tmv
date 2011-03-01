@@ -27,7 +27,7 @@ found that I didn't deem significant enough to mention here.
 \item Made \tt{m.det()} produce accurate results if \tt{m} is a \tt{Matrix<int>} or 
 \tt{Matrix<complex<int> >}.  Or in general if the underlying type is an integer type.
 
-The algorithm in this case is not the usual one (decomposing the matrix into $LU$ and
+The algorithm in this case is not the usual one (decompose the matrix into $LU$ and
 then compute the product of the diagonal elements of $U$), since this algorithm uses division which obviously leads to errors if the elements are integers.  
 We could just use \tt{double} or \tt{long double} for
 the intermediate storage and convert back to the nearest integer at the end, but it has
@@ -54,7 +54,7 @@ using the \tt{SHARED=true} option with the scons installation method.
 \item Added the ability to turn off TMV debug statements with \tt{-DTMVNDEBUG}.
 Defining \tt{NDEBUG} will still work to turn off TMV debugging statements as well, but this
 allows the user to turn off just the TMV debug statements without turning off the debug
-statements in their own code (e.g. using the normal \tt{assert} command).
+statements in their own code (e.g.\ using the normal \tt{assert} command).
 
 \item Skip compiling functions that are invalid for integer values, like the various decompositions 
 and such.  The methods that normally use these functions will produce a \tt{FailedAssert}
@@ -74,7 +74,7 @@ But with the new changes, I can run a larger fraction of the test suite on \tt{<
 
 \item Made the default configuration for scons to be WITH\_LAPACK=false.
    Too many LAPACK installations are not thread safe.  And since I 
-   personally use a lot of openMP code in my programs, I occasionally
+   personally use a lot of OpenMP code in my programs, I occasionally
    get random segmentation faults when I use TMV with LAPACK.  
    And since the native TMV code is almost universally as fast as LAPACK
    and is thread safe, I finally decided to just make that the default.
