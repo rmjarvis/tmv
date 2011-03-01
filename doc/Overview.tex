@@ -222,10 +222,9 @@ although this is not generally recommended if
 BLAS is available on your machine, and speed is important for your 
 application.  This is especially true if you have a highly optimized BLAS
 distribution for your machine like MKL or ACML.  However, 
-the native code is usually fairly competitive\footnote{Typically within a factor of 2 in speed,
-and often within tens of percent.} with generic BLAS implementations like
-ATLAS or GotoBLAS.
-
+the native code is usually within a factor of 2 or so of even these BLAS implementations,
+so if you don't care much about optimizing the speed of your code, it's not so bad to 
+use the native TMV code.
 \item
 \textbf{LAPACK}
 
@@ -246,9 +245,9 @@ to leave the LAPACK calls turned off.
 The only real exception to this statement
 is the eigenvector calculation for a hermitian matrix.  I have not yet 
 implemented the new RRR
-(Relatively Robust Representation) algorithm by Dhillon.  So if the code is
-spending a significant time calculating eigenvectors, it may be worth having it call the
-LAPACK routines.
+(Relatively Robust Representation) algorithm by Dhillon.  So if your program is
+spending a significant amount of time calculating eigenvectors of large symmetric matrices,
+it may be worth having TMV call the LAPACK routines.
 
 Also, it is worth noting that many LAPACK libraries are not thread safe.
 So if your main program uses multiple threads, and you aren't sure whether
