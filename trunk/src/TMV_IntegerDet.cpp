@@ -29,70 +29,20 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-//
-//
-// This file defines the StackArray class used by SmallVector and SmallMatrix.
-// It basically emulates a normal C array on the stack:
-// T p[N];
-// However, it uses the heap when N is large.
+//#define PRINTALGO_Det
 
-#ifndef StackArray_H
-#define StackArray_H
+#include "tmv/TMV_IntegerDet.h"
 
-const int TMV_MaxStack = 1024;
+namespace tmv {
 
-namespace tmv
-{
-    template <class T, int N, bool bigN> 
-    struct StackArray2;
-
-    template <class T, int N>
-    struct StackArray2<T,N,false>
-    {
-        T p[N];
-        inline StackArray2() {}
-        inline ~StackArray2() {}
-    };
-
-    template <class T, int N>
-    struct StackArray2<T,N,true>
-    {
-        T*const p;
-        inline StackArray2() : p(new T[N]) {}
-        inline ~StackArray2() { delete [] p; }
-    };
-
-    // I'm not sure if it's legal to declare: "T p[0]", so specialize N=0:
     template <class T>
-    struct StackArray2<T,0,false>
-    {
-        T*const p;
-        inline StackArray2() : p(0) {}
-        inline ~StackArray2() {}
-    };
+    T InstIntegerDet(const ConstMatrixView<T>& m)
+    { return InlineIntegerDet(m); }
 
-    template <class T, int N>
-    class StackArray
-    {
-    public :
-        inline StackArray() {}
-        inline ~StackArray() {}
-
-        inline T& operator*() { return *(p.p); }
-        inline T* operator->() { return (p.p); }
-        inline operator T*() { return (p.p); }
-
-        inline const T& operator*() const { return *(p.p); }
-        inline const T* operator->() const { return (p.p); }
-        inline operator const T*() const { return (p.p); }
-
-    private :
-        StackArray2<T,N,(N>TMV_MaxStack)> p;
-
-        inline StackArray& operator=(StackArray& p2);
-        inline StackArray(const StackArray& p2);
-    };
+#define InstFile "TMV_IntegerDet.inst"
+#include "TMV_Inst.h"
+#undef InstFile
 
 } // namespace tmv
 
-#endif
+

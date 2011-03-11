@@ -6,6 +6,4 @@ TMV_TestSmallSquareDiv_d.cpp
 TMV_TestSmallSquareDiv_e.cpp
 TMV_TestSmallSquareDiv_f.cpp
 TMV_TestSmallSquareDiv_g.cpp
-TMV_TestSmallSquareDiv_h.cpp
-TMV_TestSmallSquareDiv_i.cpp
-TMV_TestSmallSquareDiv_j.cpp
+TMV_TestSmallMatrixDet.cpp
