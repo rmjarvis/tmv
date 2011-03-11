@@ -1,0 +1,235 @@
+% !TEX root = TMV_Documentation.tex
+
+\section{Errors and Exceptions}
+\index{Exceptions}
+\label{Exceptions}
+
+There are two kinds of errors that the TMV library looks for.  The first are 
+coding errors.  Some examples are:
+\begin{itemize}
+\item
+Trying to access elements outside the range of a \tt{Vector} or \tt{Matrix}.
+\item
+Trying to add to \tt{Vector}s or \tt{Matrix}es that are different sizes.
+\item
+Trying to multiply a \tt{Matrix} by a \tt{Vector} where the number of columns 
+in the \tt{Matrix} doesn't match the size of the \tt{Vector}.
+\item
+Viewing a \tt{Matrix} as a \tt{HermMatrix} when the diagonal isn't real.
+\end{itemize}
+
+I check for all of these (and similar) errors using assert statements.
+If these asserts fail, it should mean that
+the programmer made a mistake in the code.  (Unless I've made a 
+mistake in the TMV code, of course.)
+
+Once the code is working, you can make the code slightly faster by 
+compiling with either \tt{-DNDEBUG} or \tt{-DTMVNDEBUG}.  I say slightly, since most of these checks 
+are pretty innocuous.  And most of the computing time is usually in the depths
+of the various algorithms, not in these $O(1)$ time checks of the dimensions and such.  
+There are a few checks which take $O(N)$ time (e.g. making sure that the imaginary
+part of a complex Hermitian matrix is actually 0 as it must be when initializing from values
+that might not be 0's), but not many.
+
+The other kind of error checked for by the code is 
+where the data don't behave in the way
+the programmer expected.  Here is a (complete) list of these errors:
+\begin{itemize}
+\item
+A singular matrix is encountered in a division routine that cannot handle it.
+\item
+An input file has the wrong format.
+\item
+A Cholesky decomposition is attempted for a
+hermitian matrix that isn't positive definite.
+\end{itemize}
+
+These errors are always checked for even if \tt{-DNDEBUG} or \tt{-DTMVNDEBUG} is used.
+That's because they are not problems in the code per se, but rather
+are problems with the data or files used by the code.  So they could
+still happen even after the code has been thoroughly tested.
+
+All errors in the TMV library are indicated by throwing an object of type
+\tt{tmv::Error}.  If you decide to catch it, you can determine what went
+wrong by printing it:
+\begin{tmvcode}
+catch (tmv::Error& e) {
+  std::cerr << e << std::endl;
+}
+\end{tmvcode}
+If you catch the error by value (i.e. without the \tt{\&}), it will print out
+a single line description.  If you catch it by reference (as above), it may 
+print out more information about the problem.
+
+Also, \tt{tmv::Error} derives from \tt{std::exception} and overrides the \tt{what()}
+method, so any program that catches these will catch \tt{tmv::Error} as well.
+
+If you want to be more specific, there are a number of classes that derive from
+\tt{Error}:
+
+\subsection{FailedAssert}
+\index{Exceptions!FailedAssert}
+\label{FailedAssert}
+
+The \tt{tmv::FailedAssert} exception indicates that one of the assert statements failed.
+Since these are coding errors,
+if you catch this one, you'll probably just want to print out the error and abort
+the program so you can fix the bug.  In addition to printing the text of the
+assert statement that failed (if you catch by reference), it will also indicate
+the file and line number as normal assert macros do.  Unfortunately, it gives the 
+line number in the TMV code, rather than in your own code, but hopefully seeing
+which function in TMV found the problem will help you figure out which line
+in your own code was incorrect.
+
+If you believe that the assert failed due to a bug in the TMV code
+rather than your own code, please post a bug report at \myissues.
+
+\subsection{Singular}
+\index{Exceptions!Singular}
+\label{Singular}
+
+The \tt{tmv::Singular} exception indicates that you tried to invert or divide by a matrix
+that is (numerically) singular.  This may be useful to catch specifically,
+since you may want to do something different when you encounter a singular
+matrix.  Note however, that this only detects \underline{exactly} singular
+matrices.  If a matrix is numerically close to singular, but no actual 
+zeros are found, then no error will be thrown.  Your results will just be 
+unreliable.
+
+\subsection{ReadError}
+\index{Exceptions!ReadError}
+\label{ReadError}
+
+The \tt{tmv::ReadError} exception indicates that there was some problem reading in a matrix or 
+vector from an \tt{istream} input.  If you catch this by reference and write it,
+it will give you a fairly specific description of what the problem was as well as
+writing the part of the matrix or vector that was read in successfully.
+
+\subsection{NonPosDef}
+\index{Exceptions!NonPosDef}
+\index{Cholesky Decomposition!NonPosDef exception}
+\label{NonPosDef}
+
+The \tt{tmv::NonPosDef} exception indicates that you tried to do some operation that requires
+a matrix to be positive definite, and it turned out not to be positive definite.
+The most common example would be performing a Cholesky decomposition on a 
+hermitian matrix.  I suspect that this is the 
+most useful exception to catch specifically, as opposed to just via the \tt{tmv::Error} base class.
+
+For example, the fastest algorithm for determining whether a matrix is 
+(at least numerically) positive definite is to try the Cholesky decomposition
+and catch this exception.  To wit:
+\begin{tmvcode}
+bool IsPosDef(const tmv::GenSymMatrix<T>& m)
+{
+    assert(m.isherm());
+    try {
+        m.view().chd();
+    } catch (tmv::NonPosDef) {
+        return false;
+    }
+    return true;
+}
+\end{tmvcode}
+Or you might want to use Cholesky for division when possible and Bunch-Kaufman otherwise:
+\begin{tmvcode}
+try {
+    m.divideUsing(tmv::CH);
+    m.setDiv();
+} catch (tmv::NonPosDef) {
+    m.divideUsing(tmv::LU);
+    m.setDiv();
+}
+x = b/m;
+\end{tmvcode}
+Note, however, that the speed difference between the two algorithms is only about
+20\% or so for typical matrices.  So if a significant fraction of your matrices are 
+not positive definite, you are probably better off always using the Bunch-Kaufman (\tt{tmv::LU}) algorithm.  
+Code like that given above would probably be most useful when all of your 
+matrices \underline{should} be positive definite in exact arithmetic, but you 
+want to guard against one failing the Cholesky decomposition due to round-off
+errors.
+
+\index{QR Decomposition!Downdate!NonPosDef exception}
+It is also worth mentioning that the routine \tt{QR\_Downdate} described in \S\ref{QRDowndate}
+below will also throw the exception \tt{NonPosDef} when it fails.
+
+\subsection{Warnings}
+\index{Warnings}
+\label{Warnings}
+
+There are also a few things that are not really errors, but where the user might be doing
+something wrong, or where something unexpected happened, but TMV was able to handle it.
+Here is a complete list of these situations:
+\begin{itemize}
+\item The function \tt{makeInverseATA()} was called for a matrix with more columns than rows.
+The result in this case is really $(AA^\dagger)^{-1}$ instead of $(A^\dagger A)^{-1}$.
+\index{Warnings!makeInverseATA}
+\index{Matrix!Methods!makeInverseATA}
+\index{BandMatrix!Methods!makeInverseATA}
+\index{SymMatrix!Methods!makeInverseATA}
+\index{SymBandMatrix!Methods!makeInverseATA}
+\item The function \tt{norm2()} or \tt{condition()} was called without the SV decomposition
+being previously calculated (or saved) for the matrix.  This is often inefficient, but if it is really what you
+want, then \tt{doNorm2()} or \tt{doCondition()} will bypass the warning.
+\index{Matrix!Methods!norm2}
+\index{UpperTriMatrix!Methods!norm2}
+\index{BandMatrix!Methods!norm2}
+\index{SymMatrix!Methods!norm2}
+\index{SymBandMatrix!Methods!norm2}
+\index{Matrix!Methods!condition}
+\index{UpperTriMatrix!Methods!condition}
+\index{BandMatrix!Methods!condition}
+\index{SymMatrix!Methods!condition}
+\index{SymBandMatrix!Methods!condition}
+\index{Warnings!norm2 and condition}
+\item The LAPACK function \tt{dstegr} (or \tt{sstegr}) had an error, and the function
+\tt{dstedc} (or \tt{sstedc}) was called instead.  The \tt{dstegr} calculation was wasted,
+although I don't think it is knowable a priori that this might happen.
+\index{LAPACK!dstegr/sstegr issues}
+\index{Warnings!LAPACK ?stegr}
+\item A LAPACK function requested more workspace than was provided.  This shouldn't happen
+anymore, since I switched to using the LAPACK workspace queries.  But the code to check
+for this is still there.
+\index{LAPACK!Workspace issues}
+\index{Warnings!LAPACK workspace}
+\end{itemize}
+
+The default way of handling these situations is to print a message to \tt{std::cout}.  This is often
+appropriate, since it is probably something the programmer wants to know about.
+The first two items, in fact, are probably coding errors.
+
+However, this behavior is clearly not always acceptable.  So we provide a function to 
+turn off the warnings:
+\begin{tmvcode}
+void tmv::NoWarnings();
+\end{tmvcode}
+\index{Warnings!Turn off}
+\index{NoWarnings}
+
+If you want to keep the warnings active, but don't like them being written to \tt{std::cout}, then 
+you can use:
+\begin{tmvcode}
+std::ostream* tmv::WriteWarningsTo(std::ostream* newos)
+\end{tmvcode}
+\index{Warnings!Redirect to a file}
+\index{WriteWarningsTo}
+This lets you redirect the warnings to some other \tt{ostream}.  It could be some log file
+that you look at later.  Or it could even be a \tt{stringstream} so you can examine the text
+of the warnings within your code and take appropriate action.
+
+The function \tt{WriteWarningsTo} returns a pointer to the old warning stream
+in case you only want to change the warning output stream temporarily.
+Also if you give \tt{WriteWarningsTo} a null pointer, rather than an actual \tt{ostream},
+then this will turn off the warnings.  In fact the above \tt{NoWarnings} function is 
+equivalent to \tt{(void) WriteWarningsTo(0)}.  These two features in combination
+let you turn off the warnings temporarily.  For example:
+\begin{tmvcode}
+tmv::Matrix<double> m(5,20);
+// m = ....
+tmv::Matrix<double> inv_mmt(5,5);
+std::ostream* tempos = tmv::WriteWarningsTo(0);
+m.makeInverseATA(int_mmt); // actually calculates (m*mt)^-1
+tmv::WriteWarnignsTo(tempos);
+\end{tmvcode}
+
