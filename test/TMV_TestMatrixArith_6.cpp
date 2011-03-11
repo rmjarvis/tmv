@@ -1,6 +1,6 @@
 
 #include "TMV_Test.h"
-#include "TMV_Test1.h"
+#include "TMV_Test_1.h"
 #include "TMV.h"
 #include <fstream>
 
@@ -30,18 +30,10 @@ template <class T> void TestMatrixArith_6()
 
     tmv::Matrix<T,tmv::ColMajor> a2x = a1x.transpose();
     a2x.row(1) *= T(3);
-    a2x.col(2) -= tmv::Vector<T>(4,4.);
+    a2x.col(2) -= tmv::Vector<T>(4,4);
     tmv::Matrix<CT,tmv::ColMajor> ca2x = ca1x;
     ca2x -= a2x;
     ca2x *= CT(1,-2);
-
-    tmv::Matrix<T> a3x(12,16);
-    for(int i=0;i<12;++i) for(int j=0;j<16;++j) a3x(i,j) = T(1-2*i+3*j);
-    tmv::MatrixView<T> a3 = a3x.subMatrix(0,12,0,16,3,4);
-    a3.diag().addToAll(30);
-    tmv::Matrix<CT> ca3x = a3x*CT(1,-2);
-    tmv::MatrixView<CT> ca3 = ca3x.subMatrix(0,12,0,16,3,4);
-    ca3.diag().addToAll(CT(-22,15));
 
     tmv::MatrixView<T> a1 = a1x.view();
     tmv::MatrixView<CT> ca1 = ca1x.view();
@@ -51,6 +43,14 @@ template <class T> void TestMatrixArith_6()
     TestMatrixArith6x<T>(a1,ca1,a2,ca2,"Square 1");
     TestMatrixArith6x<T>(a2,ca2,a1,ca1,"Square 2");
 #if (XTEST & 1)
+    tmv::Matrix<T> a3x(12,16);
+    for(int i=0;i<12;++i) for(int j=0;j<16;++j) a3x(i,j) = T(1-2*i+3*j);
+    tmv::MatrixView<T> a3 = a3x.subMatrix(0,12,0,16,3,4);
+    a3.diag().addToAll(30);
+    tmv::Matrix<CT> ca3x = a3x*CT(1,-2);
+    tmv::MatrixView<CT> ca3 = ca3x.subMatrix(0,12,0,16,3,4);
+    ca3.diag().addToAll(CT(-22,15));
+
     TestMatrixArith6x<T>(a3,ca3,a1,ca1,"Square 3");
     TestMatrixArith6x<T>(a1,ca1,a3,ca3,"Square 4");
 #if (XTEST & 2)

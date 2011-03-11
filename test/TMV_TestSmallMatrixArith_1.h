@@ -1,6 +1,6 @@
 
 #include "TMV_Test.h"
-#include "TMV_Test3.h"
+#include "TMV_Test_3.h"
 
 #include "TMV.h"
 #include <fstream>
@@ -17,6 +17,7 @@ template <class T> void TestSmallMatrixArith_1c();
 template <class T> void TestSmallMatrixArith_1d();
 template <class T> void TestSmallMatrixArith_1e();
 template <class T> void TestSmallMatrixArith_1f();
+template <class T> void TestSmallMatrixArith_1g();
 
 template <class T, int M, int N> void TestSmallMatrixArith_1(std::string label)
 {

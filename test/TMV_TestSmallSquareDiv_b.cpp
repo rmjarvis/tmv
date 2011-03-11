@@ -1,9 +1,11 @@
+
 #include "TMV_TestSmallSquareDiv.h"
 
 template <class T> 
 void TestSmallSquareDiv_b()
 {
-    TestSmallSquareDiv<T,tmv::RowMajor,3>();
+    TestSmallSquareDiv<T,tmv::RowMajor,2>();
+    TestSmallSquareDiv<T,tmv::ColMajor,2>();
 }
 
 #ifdef TEST_DOUBLE

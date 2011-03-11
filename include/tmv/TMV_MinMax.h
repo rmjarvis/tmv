@@ -34,34 +34,77 @@
 
 namespace tmv {
 
+    // Defined in TMV_Vector.cpp
+    template <class T>
+    T InstMaxElement(const ConstVectorView<T>& v, int* imax);
+
+    template <class T>
+    typename ConstVectorView<T>::float_type InstMaxAbsElement(
+        const ConstVectorView<T>& v, int* imax); 
+
+    template <class T>
+    typename Traits<T>::real_type InstMaxAbs2Element(
+        const ConstVectorView<T>& v, int* imax);
+
+    template <class T>
+    T InstMinElement(const ConstVectorView<T>& v, int* imin);
+
+    template <class T>
+    typename ConstVectorView<T>::float_type InstMinAbsElement(
+        const ConstVectorView<T>& v, int* imin);
+
+    template <class T>
+    typename Traits<T>::real_type InstMinAbs2Element(
+        const ConstVectorView<T>& v, int* imin);
+
+ 
+
     // 
-    // MaxElement
+    // I combine all of the above into a single Helper class
+    // that has the component and min/max as template arguments,
+    // since the underlying algorithms are basically the same.
     //
 
     template <int algo, CompType comp, bool max, class V>
     struct MinMaxElement_Helper;
 
+    // algo 0: size == 0
+    template <CompType comp, bool max, class V>
+    struct MinMaxElement_Helper<0,comp,max,V>
+    {
+        typedef typename Component<comp,typename V::value_type>::ret_type ret;
+        static ret call(const V& , int* ibest)
+        {
+            if (ibest) *ibest = -1;
+            return ret(0);
+        }
+    };
+
     // algo 1: simple for loop
     template <CompType comp, bool max, class V>
     struct MinMaxElement_Helper<1,comp,max,V>
     {
-        typedef typename V::value_type VT;
-        typedef typename V::real_type RT;
-        typedef typename V::const_iterator IT;
-
-        static inline RT call(const V& v, int*const ibest)
+        typedef typename Component<comp,typename V::value_type>::ret_type ret;
+        static ret call(const V& v, int* ibest)
         {
-            VT value;
-            RT best;
-            int n = v.size();
+            typedef typename V::value_type VT;
+            typedef typename V::const_iterator IT;
+            typedef typename TypeSelect<comp==AbsComp ,
+                    typename V::zfloat_type , typename V::value_type >::type ZT;
+            ZT value;
+            ret best;
+            int n = V::_size == UNKNOWN ? v.size() : V::_size;
+            if (n == 0) 
+                return MinMaxElement_Helper<0,comp,max,V>::call(v,ibest);
             IT it = v.begin();
             best = Component<comp,VT>::f(*it);
             IT bestit = it;
 
             if (n) do {
-                value = *it++;
-                Component<comp,VT>::applyf(value);
+                value = Traits<ZT>::convert(*it++);
+                Component<comp,ZT>::applyf(value);
 
+#if 1
                 // It turns out that doing the comparison this way makes 
                 // a huge difference in speed.
                 // The reason is basically that the processor anticipates
@@ -70,13 +113,12 @@ namespace tmv {
                 // So you always want to test for the most likely choice
                 // first.  In this case, it is more likely that value
                 // is not the new best.
-#if 1
-                if (Maybe<max>::less(TMV_REAL(value),best)) continue;
-                else { best = TMV_REAL(value); bestit = it-1; }
+                if (Maybe<max>::less(TMV_REAL(value),TMV_REAL(best))) continue;
+                else { best = Component<comp,ZT>::get(value); bestit = it-1; }
 #else
                 // This is the slower but more intuitive way:
-                if (Maybe<max>::less(best,TMV_REAL(value)))
-                { best = TMV_REAL(value); bestit = it-1; }
+                if (Maybe<max>::less(TMV_REAL(best),TMV_REAL(value)))
+                { best = Component<comp,ZT>::get(value); bestit = it-1; }
 #endif
 
             } while (--n);
@@ -89,16 +131,19 @@ namespace tmv {
     template <CompType comp, bool max, class V>
     struct MinMaxElement_Helper<2,comp,max,V>
     {
-        typedef typename V::value_type VT;
-        typedef typename V::real_type RT;
-        typedef typename V::const_iterator IT;
-
-        static inline RT call(const V& v, int*const ibest)
+        typedef typename Component<comp,typename V::value_type>::ret_type ret;
+        static ret call(const V& v, int* ibest)
         {
-            RT best;
-            VT value, value1;
+            typedef typename V::value_type VT;
+            typedef typename V::const_iterator IT;
+            typedef typename TypeSelect<comp==AbsComp ,
+                    typename V::zfloat_type , typename V::value_type >::type ZT;
+            ret best;
+            ZT value, value1;
             IT it = v.begin();
-            const int n = v.size();
+            int n = V::_size == UNKNOWN ? v.size() : V::_size;
+            if (n == 0) 
+                return MinMaxElement_Helper<0,comp,max,V>::call(v,ibest);
             best = Component<comp,VT>::f(*it);
             IT bestit = it;
 
@@ -106,26 +151,26 @@ namespace tmv {
             const int nb = n-1-(n_2<<1);
 
             if (nb) {
-                value = it[1];
+                value = Traits<ZT>::convert(it[1]);
                 it += 2;
-                Component<comp,VT>::applyf(value);
-                if (Maybe<max>::less(best,TMV_REAL(value))) 
-                { best = TMV_REAL(value); ++bestit; }
+                Component<comp,ZT>::applyf(value);
+                if (Maybe<max>::less(TMV_REAL(best),TMV_REAL(value))) 
+                { best = Component<comp,ZT>::get(value); ++bestit; }
             }
             else ++it;
 
             if (n_2) do {
-                value = it[0];
-                value1 = it[1];
+                value = Traits<ZT>::convert(it[0]);
+                value1 = Traits<ZT>::convert(it[1]);
                 it += 2;
-                Component<comp,VT>::applyf(value);
-                Component<comp,VT>::applyf(value1);
+                Component<comp,ZT>::applyf(value);
+                Component<comp,ZT>::applyf(value1);
 
-                if (Maybe<max>::less(TMV_REAL(value),best) &&
-                    Maybe<max>::less(TMV_REAL(value1),best)) continue;
+                if (Maybe<max>::less(TMV_REAL(value),TMV_REAL(best)) &&
+                    Maybe<max>::less(TMV_REAL(value1),TMV_REAL(best))) continue;
                 else if (Maybe<max>::less(TMV_REAL(value1),TMV_REAL(value)))
-                { best = TMV_REAL(value); bestit = it-2; }
-                else { best = TMV_REAL(value1); bestit = it-1; }
+                { best = Component<comp,ZT>::get(value); bestit = it-2; }
+                else { best = Component<comp,ZT>::get(value1); bestit = it-1; }
             } while (--n_2);
             if (ibest) *ibest = bestit - v.begin();
             return best;
@@ -136,16 +181,19 @@ namespace tmv {
     template <CompType comp, bool max, class V>
     struct MinMaxElement_Helper<3,comp,max,V>
     {
-        typedef typename V::value_type VT;
-        typedef typename V::real_type RT;
-        typedef typename V::const_iterator IT;
-
-        static inline RT call(const V& v, int*const ibest)
+        typedef typename Component<comp,typename V::value_type>::ret_type ret;
+        static ret call(const V& v, int* ibest)
         {
-            RT best;
-            VT value, value1, value2;
+            typedef typename V::value_type VT;
+            typedef typename V::const_iterator IT;
+            typedef typename TypeSelect<comp==AbsComp ,
+                    typename V::zfloat_type , typename V::value_type >::type ZT;
+            ret best;
+            ZT value, value1, value2;
             IT it = v.begin();
-            const int n = v.size();
+            int n = V::_size == UNKNOWN ? v.size() : V::_size;
+            if (n == 0) 
+                return MinMaxElement_Helper<0,comp,max,V>::call(v,ibest);
             const IT end = it + n;
             best = Component<comp,VT>::f(*it);
             IT bestit = it;
@@ -153,15 +201,15 @@ namespace tmv {
             int n_3 = n/3;
 
             if (n % 3 != 1) {
-                value = it[1];
-                Component<comp,VT>::applyf(value);
-                if (Maybe<max>::less(best,TMV_REAL(value))) 
-                { best = TMV_REAL(value); ++bestit; }
+                value = Traits<ZT>::convert(it[1]);
+                Component<comp,ZT>::applyf(value);
+                if (Maybe<max>::less(TMV_REAL(best),TMV_REAL(value))) 
+                { best = Component<comp,ZT>::get(value); ++bestit; }
                 if (n % 3 == 0) {
-                    value = it[2];
-                    Component<comp,VT>::applyf(value);
-                    if (Maybe<max>::less(best,TMV_REAL(value))) 
-                    { best = TMV_REAL(value); bestit = it + 2; }
+                    value = Traits<ZT>::convert(it[2]);
+                    Component<comp,ZT>::applyf(value);
+                    if (Maybe<max>::less(TMV_REAL(best),TMV_REAL(value))) 
+                    { best = Component<comp,ZT>::get(value); bestit = it + 2; }
                     it += 3;
                 }
                 else it += 2;
@@ -169,24 +217,24 @@ namespace tmv {
             else ++it;
 
             if (n_3) do {
-                value = it[0];
-                value1 = it[1];
-                value2 = it[2];
+                value = Traits<ZT>::convert(it[0]);
+                value1 = Traits<ZT>::convert(it[1]);
+                value2 = Traits<ZT>::convert(it[2]);
                 it += 3;
-                Component<comp,VT>::applyf(value);
-                Component<comp,VT>::applyf(value1);
-                Component<comp,VT>::applyf(value2);
+                Component<comp,ZT>::applyf(value);
+                Component<comp,ZT>::applyf(value1);
+                Component<comp,ZT>::applyf(value2);
 
-                if (Maybe<max>::less(TMV_REAL(value),best) &&
-                    Maybe<max>::less(TMV_REAL(value1),best) &&
-                    Maybe<max>::less(TMV_REAL(value2),best)) continue;
+                if (Maybe<max>::less(TMV_REAL(value),TMV_REAL(best)) &&
+                    Maybe<max>::less(TMV_REAL(value1),TMV_REAL(best)) &&
+                    Maybe<max>::less(TMV_REAL(value2),TMV_REAL(best))) continue;
                 else if (
                     Maybe<max>::less(TMV_REAL(value1),TMV_REAL(value)) &&
                     Maybe<max>::less(TMV_REAL(value2),TMV_REAL(value)))
-                { best = TMV_REAL(value); bestit = it-3; }
+                { best = Component<comp,ZT>::get(value); bestit = it-3; }
                 else if (Maybe<max>::less(TMV_REAL(value2),TMV_REAL(value1)))
-                { best = TMV_REAL(value1); bestit = it-2; }
-                else { best = TMV_REAL(value2); bestit = it-1; }
+                { best = Component<comp,ZT>::get(value1); bestit = it-2; }
+                else { best = Component<comp,ZT>::get(value2); bestit = it-1; }
             } while (--n_3);
             if (ibest) *ibest = bestit - v.begin();
             return best;
@@ -197,35 +245,38 @@ namespace tmv {
     template <CompType comp, bool max, class V>
     struct MinMaxElement_Helper<4,comp,max,V>
     {
-        typedef typename V::value_type VT;
-        typedef typename V::real_type RT;
-        typedef typename V::const_iterator IT;
-
-        static inline RT call(const V& v, int*const ibest)
+        typedef typename Component<comp,typename V::value_type>::ret_type ret;
+        static ret call(const V& v, int* ibest)
         {
-            RT best;
-            VT value, value1, value2, value3;
+            typedef typename V::value_type VT;
+            typedef typename V::const_iterator IT;
+            typedef typename TypeSelect<comp==AbsComp ,
+                    typename V::zfloat_type , typename V::value_type >::type ZT;
+            ret best;
+            ZT value, value1, value2, value3;
             IT it = v.begin();
-            const int n = v.size();
+            int n = V::_size == UNKNOWN ? v.size() : V::_size;
+            if (n == 0) 
+                return MinMaxElement_Helper<0,comp,max,V>::call(v,ibest);
             int n_4 = ((n-1)>>2);
             best = Component<comp,VT>::f(*it);
             IT bestit = it;
 
             if (n % 4 != 1) {
-                value = it[1];
-                Component<comp,VT>::applyf(value);
-                if (Maybe<max>::less(best,TMV_REAL(value))) 
-                { best = TMV_REAL(value); ++bestit; }
+                value = Traits<ZT>::convert(it[1]);
+                Component<comp,ZT>::applyf(value);
+                if (Maybe<max>::less(TMV_REAL(best),TMV_REAL(value))) 
+                { best = Component<comp,ZT>::get(value); ++bestit; }
                 if (n % 4 != 2) {
-                    value = it[2];
-                    Component<comp,VT>::applyf(value);
-                    if (Maybe<max>::less(best,TMV_REAL(value))) 
-                    { best = TMV_REAL(value); bestit = it + 2; }
+                    value = Traits<ZT>::convert(it[2]);
+                    Component<comp,ZT>::applyf(value);
+                    if (Maybe<max>::less(TMV_REAL(best),TMV_REAL(value))) 
+                    { best = Component<comp,ZT>::get(value); bestit = it + 2; }
                     if (n % 4 == 0) {
-                        value = it[3];
-                        Component<comp,VT>::applyf(value);
-                        if (Maybe<max>::less(best,TMV_REAL(value))) 
-                        { best = TMV_REAL(value); bestit = it + 3; }
+                        value = Traits<ZT>::convert(it[3]);
+                        Component<comp,ZT>::applyf(value);
+                        if (Maybe<max>::less(TMV_REAL(best),TMV_REAL(value))) 
+                        { best = Component<comp,ZT>::get(value); bestit = it + 3; }
                         it += 4;
                     }
                     else it += 3;
@@ -235,32 +286,32 @@ namespace tmv {
             else ++it;
 
             if (n_4) do {
-                value = it[0];
-                value1 = it[1];
-                value2 = it[2];
-                value3 = it[3];
-                Component<comp,VT>::applyf(value);
-                Component<comp,VT>::applyf(value1);
-                Component<comp,VT>::applyf(value2);
-                Component<comp,VT>::applyf(value3);
+                value = Traits<ZT>::convert(it[0]);
+                value1 = Traits<ZT>::convert(it[1]);
+                value2 = Traits<ZT>::convert(it[2]);
+                value3 = Traits<ZT>::convert(it[3]);
+                Component<comp,ZT>::applyf(value);
+                Component<comp,ZT>::applyf(value1);
+                Component<comp,ZT>::applyf(value2);
+                Component<comp,ZT>::applyf(value3);
                 it += 4;
 
-                if (Maybe<max>::less(TMV_REAL(value),best) &&
-                    Maybe<max>::less(TMV_REAL(value1),best) &&
-                    Maybe<max>::less(TMV_REAL(value2),best) &&
-                    Maybe<max>::less(TMV_REAL(value3),best)) continue;
+                if (Maybe<max>::less(TMV_REAL(value),TMV_REAL(best)) &&
+                    Maybe<max>::less(TMV_REAL(value1),TMV_REAL(best)) &&
+                    Maybe<max>::less(TMV_REAL(value2),TMV_REAL(best)) &&
+                    Maybe<max>::less(TMV_REAL(value3),TMV_REAL(best))) continue;
                 else if (
                     Maybe<max>::less(TMV_REAL(value1),TMV_REAL(value)) &&
                     Maybe<max>::less(TMV_REAL(value2),TMV_REAL(value)) &&
                     Maybe<max>::less(TMV_REAL(value3),TMV_REAL(value)))
-                { best = TMV_REAL(value); bestit = it-4; }
+                { best = Component<comp,ZT>::get(value); bestit = it-4; }
                 else if (
                     Maybe<max>::less(TMV_REAL(value2),TMV_REAL(value1)) &&
                     Maybe<max>::less(TMV_REAL(value3),TMV_REAL(value1)))
-                { best = TMV_REAL(value1); bestit = it-3; }
+                { best = Component<comp,ZT>::get(value1); bestit = it-3; }
                 else if (Maybe<max>::less(TMV_REAL(value3),TMV_REAL(value2)))
-                { best = TMV_REAL(value2); bestit = it-2; }
-                else { best = TMV_REAL(value3); bestit = it-1; }
+                { best = Component<comp,ZT>::get(value2); bestit = it-2; }
+                else { best = Component<comp,ZT>::get(value3); bestit = it-1; }
             } while (--n_4);
             if (ibest) *ibest = bestit - v.begin();
             return best;
@@ -272,35 +323,38 @@ namespace tmv {
     template <CompType comp, bool max, class V>
     struct MinMaxElement_Helper<5,comp,max,V>
     {
-        typedef typename V::value_type VT;
-        typedef typename V::real_type RT;
-        typedef typename V::const_iterator IT;
-
-        static inline RT call(const V& v, int*const ibest)
+        typedef typename Component<comp,typename V::value_type>::ret_type ret;
+        static ret call(const V& v, int* ibest)
         {
-            RT best;
-            VT value, value1;
+            typedef typename V::value_type VT;
+            typedef typename V::const_iterator IT;
+            typedef typename TypeSelect<comp==AbsComp ,
+                    typename V::zfloat_type , typename V::value_type >::type ZT;
+            ret best;
+            ZT value, value1;
             IT it = v.begin();
-            const int n = v.size();
+            int n = V::_size == UNKNOWN ? v.size() : V::_size;
+            if (n == 0) 
+                return MinMaxElement_Helper<0,comp,max,V>::call(v,ibest);
             int n_4 = ((n-1)>>2);
             best = Component<comp,VT>::f(*it);
             IT bestit = it;
 
             if (n % 4 != 1) {
-                value = it[1];
-                Component<comp,VT>::applyf(value);
-                if (Maybe<max>::less(best,TMV_REAL(value))) 
-                { best = TMV_REAL(value); ++bestit; }
+                value = Traits<ZT>::convert(it[1]);
+                Component<comp,ZT>::applyf(value);
+                if (Maybe<max>::less(TMV_REAL(best),TMV_REAL(value))) 
+                { best = Component<comp,ZT>::get(value); ++bestit; }
                 if (n % 4 != 2) {
-                    value = it[2];
-                    Component<comp,VT>::applyf(value);
-                    if (Maybe<max>::less(best,TMV_REAL(value))) 
-                    { best = TMV_REAL(value); bestit = it + 2; }
+                    value = Traits<ZT>::convert(it[2]);
+                    Component<comp,ZT>::applyf(value);
+                    if (Maybe<max>::less(TMV_REAL(best),TMV_REAL(value))) 
+                    { best = Component<comp,ZT>::get(value); bestit = it + 2; }
                     if (n % 4 == 0) {
-                        value = it[3];
-                        Component<comp,VT>::applyf(value);
-                        if (Maybe<max>::less(best,TMV_REAL(value))) 
-                        { best = TMV_REAL(value); bestit = it + 3; }
+                        value = Traits<ZT>::convert(it[3]);
+                        Component<comp,ZT>::applyf(value);
+                        if (Maybe<max>::less(TMV_REAL(best),TMV_REAL(value))) 
+                        { best = Component<comp,ZT>::get(value); bestit = it + 3; }
                         it += 4;
                     }
                     else it += 3;
@@ -310,28 +364,28 @@ namespace tmv {
             else ++it;
 
             if (n_4) do {
-                value = it[0];
-                value1 = it[1];
-                Component<comp,VT>::applyf(value);
-                Component<comp,VT>::applyf(value1);
+                value = Traits<ZT>::convert(it[0]);
+                value1 = Traits<ZT>::convert(it[1]);
+                Component<comp,ZT>::applyf(value);
+                Component<comp,ZT>::applyf(value1);
 
-                if (Maybe<max>::less(TMV_REAL(value),best) &&
-                    Maybe<max>::less(TMV_REAL(value1),best)) goto L1;
+                if (Maybe<max>::less(TMV_REAL(value),TMV_REAL(best)) &&
+                    Maybe<max>::less(TMV_REAL(value1),TMV_REAL(best))) goto L1;
                 else if (Maybe<max>::less(TMV_REAL(value1),TMV_REAL(value)))
-                { best = TMV_REAL(value); bestit = it; }
-                else { best = TMV_REAL(value1); bestit = it+1; }
+                { best = Component<comp,ZT>::get(value); bestit = it; }
+                else { best = Component<comp,ZT>::get(value1); bestit = it+1; }
 
 L1:
-                value = it[2];
-                value1 = it[3];
-                Component<comp,VT>::applyf(value);
-                Component<comp,VT>::applyf(value1);
+                value = Traits<ZT>::convert(it[2]);
+                value1 = Traits<ZT>::convert(it[3]);
+                Component<comp,ZT>::applyf(value);
+                Component<comp,ZT>::applyf(value1);
 
-                if (Maybe<max>::less(TMV_REAL(value),best) &&
-                    Maybe<max>::less(TMV_REAL(value1),best)) goto L2;
+                if (Maybe<max>::less(TMV_REAL(value),TMV_REAL(best)) &&
+                    Maybe<max>::less(TMV_REAL(value1),TMV_REAL(best))) goto L2;
                 else if (Maybe<max>::less(TMV_REAL(value1),TMV_REAL(value)))
-                { best = TMV_REAL(value); bestit = it+2; }
-                else { best = TMV_REAL(value1); bestit = it+3; }
+                { best = Component<comp,ZT>::get(value); bestit = it+2; }
+                else { best = Component<comp,ZT>::get(value1); bestit = it+3; }
 L2:
                 it += 4;
             } while (--n_4);
@@ -344,14 +398,14 @@ L2:
     template <CompType comp, bool max, class V>
     struct MinMaxElement_Helper<6,comp,max,V>
     {
+        typedef typename Component<comp,typename V::value_type>::ret_type ret;
         typedef typename V::value_type VT;
-        typedef typename V::real_type RT;
         typedef typename V::const_iterator IT;
 
         template <int n, int x>
         struct Helper1
         {
-            static inline IT unroll1(const IT& v0)
+            static IT unroll1(const IT& v0)
             {
                 const IT temp1 = Helper1<n-1,x>::unroll1(v0);
                 const IT temp2 = v0 + n-1;
@@ -359,35 +413,37 @@ L2:
                     Component<comp,VT>::f(*temp1),
                     Component<comp,VT>::f(*temp2)) ? temp2 : temp1;
             }
-            static inline RT unroll2(const V& v)
+            static ret unroll2(const V& v)
             {
-                const RT temp1 = Helper1<n-1,x>::unroll2(v);
-                const RT temp2 = Component<comp,VT>::f(v.cref(n-1));
-                return Maybe<max>::less(temp1,temp2) ? temp2 : temp1;
+                const ret temp1 = Helper1<n-1,x>::unroll2(v);
+                const ret temp2 = Component<comp,VT>::f(v.cref(n-1));
+                return Maybe<max>::less(TMV_REAL(temp1),TMV_REAL(temp2)) ?
+                    temp2 : temp1;
             }
-            static inline IT unroll3(const IT& v0, RT& best)
+            static IT unroll3(const IT& v0, ret& best)
             {
                 const IT temp1 = Helper1<n-1,x>::unroll3(v0,best);
                 const IT temp2 = v0 + n-1;
-                const RT f2 = Component<comp,VT>::f(*temp2);
-                if (Maybe<max>::less(f2,best)) return temp1;
+                const ret f2 = Component<comp,VT>::f(*temp2);
+                if (Maybe<max>::less(TMV_REAL(f2),TMV_REAL(best))) 
+                    return temp1;
                 else { best = f2; return temp2; }
             }
         };
         template <int x>
         struct Helper1<1,x>
         {
-            static inline IT unroll1(const IT& v0)
+            static IT unroll1(const IT& v0)
             { return v0; }
-            static inline RT unroll2(const V& v)
+            static ret unroll2(const V& v)
             { return Component<comp,VT>::f(v.cref(0)); }
-            static inline IT unroll3(const IT& v0, RT& best)
+            static IT unroll3(const IT& v0, ret& best)
             { best = Component<comp,VT>::f(*v0); return v0; }
         };
         template <int x>
         struct Helper1<0,x>; // not defined so give a compile error
 
-        static inline RT call(const V& v, int*const ibest)
+        static ret call(const V& v, int* ibest)
         {
             if (ibest) {
                 IT bestit = Helper1<V::_size,1>::unroll1(v.begin());
@@ -404,33 +460,33 @@ L2:
     struct MinMaxElement_Helper<7,comp,max,V>
 #if 1
     {
+        typedef typename Component<comp,typename V::value_type>::ret_type ret;
         typedef typename V::value_type VT;
-        typedef typename V::real_type RT;
         typedef typename V::const_iterator IT;
 
         template <int n, int x>
         struct Helper1
         {
-            static inline void unroll(RT& best, IT& bestit, const IT& v0)
+            static void unroll(ret& best, IT& bestit, const IT& v0)
             {
                 Helper1<n-1,x>::unroll(best,bestit,v0);
-                const RT temp = Component<comp,VT>::f(v0[n-1]);
-                if (Maybe<max>::less(temp,best)) return;
+                const ret temp = Component<comp,VT>::f(v0[n-1]);
+                if (Maybe<max>::less(TMV_REAL(temp),TMV_REAL(best))) return;
                 else { best = temp; bestit = v0+n-1; }
             }
         };
 
         template <int x>
         struct Helper1<1,x>
-        { static inline void unroll(RT& best, IT& bestit, const IT& v0) {} };
+        { static void unroll(ret& best, IT& bestit, const IT& v0) {} };
 
         template <int x>
         struct Helper1<0,x>; 
 
-        static inline RT call(const V& v, int*const ibest)
+        static ret call(const V& v, int* ibest)
         {
             IT it = v.begin();
-            RT best = Component<comp,VT>::f(*it);
+            ret best = Component<comp,VT>::f(*it);
             IT bestit = it;
             Helper1<V::_size,1>::unroll(best,bestit,it);
             if (ibest) *ibest = bestit - v.begin();
@@ -439,17 +495,17 @@ L2:
     };
 #else
     {
+        typedef typename Component<comp,typename V::value_type>::ret_type ret;
         typedef typename V::value_type VT;
-        typedef typename V::real_type RT;
 
         template <int n, int x>
         struct Helper1
         {
-            static inline RT unroll(const V& v, int& ibest)
+            static ret unroll(const V& v, int& ibest)
             {
-                const RT temp1 = Helper1<n-1,x>::unroll(v,ibest);
-                const RT temp2 = Component<comp,VT>::f(v.cref(n-1));
-                if (Maybe<max>::less(temp2,temp1)) return temp1;
+                const ret temp1 = Helper1<n-1,x>::unroll(v,ibest);
+                const ret temp2 = Component<comp,VT>::f(v.cref(n-1));
+                if (Maybe<max>::less(TMV_REAL(temp2),TMV_REAL(temp1))) return temp1;
                 else { ibest = n-1; return temp2; }
             }
         };
@@ -457,14 +513,14 @@ L2:
         template <int x>
         struct Helper1<1,x>
         {
-            static inline RT unroll(const V& v, int& ibest)
+            static ret unroll(const V& v, int& ibest)
             { ibest = 0; return Component<comp,VT>::f(v.cref(0)); }
         };
 
         template <int x>
         struct Helper1<0,x>; 
 
-        static inline RT call(const V& v, int*const ibest)
+        static ret call(const V& v, int* ibest)
         { return Helper1<V::_size,1>::unroll(v,*ibest); }
     };
 #endif
@@ -475,27 +531,29 @@ L2:
     template <class V>
     struct MinMaxElement_Helper<8,AbsComp,true,V>
     {
-        typedef typename V::value_type VT;
-        typedef typename V::real_type RT;
-        typedef typename V::const_iterator IT;
-
-        static inline RT call(const V& v, int*const ibest)
+        typedef typename V::float_type ret;
+        static ret call(const V& v, int* ibest)
         {
-            VT value;
-            RT best;
-            int n = v.size();
+            typedef typename V::value_type VT;
+            typedef typename V::const_iterator IT;
+            typedef typename V::zfloat_type ZT;
+            ZT value;
+            ret best;
+            int n = V::_size == UNKNOWN ? v.size() : V::_size;
+            if (n == 0) 
+                return MinMaxElement_Helper<0,AbsComp,true,V>::call(v,ibest);
             IT it = v.begin();
             best = TMV_ABS(*it);
             IT bestit = it;
 
             if (n) do {
-                value = *it++;
+                value = Traits<ZT>::convert(*it++);
                 // Only if sum of abs(real) + abs(imag) > best
                 // should we even both doing the complex abs()
                 if (TMV_ABS(real(value)) + TMV_ABS(imag(value)) < best) 
                     continue;
                 else { 
-                    Component<AbsComp,VT>::applyf(value);
+                    Component<AbsComp,ZT>::applyf(value);
                     if (TMV_REAL(value) < best) continue;
                     else { best = TMV_REAL(value); bestit = it-1; }
                 }
@@ -508,27 +566,29 @@ L2:
     template <class V>
     struct MinMaxElement_Helper<8,AbsComp,false,V>
     {
-        typedef typename V::value_type VT;
-        typedef typename V::real_type RT;
-        typedef typename V::const_iterator IT;
-
-        static inline RT call(const V& v, int*const ibest)
+        typedef typename V::float_type ret;
+        static ret call(const V& v, int* ibest)
         {
-            VT value;
-            RT best;
-            int n = v.size();
+            typedef typename V::value_type VT;
+            typedef typename V::const_iterator IT;
+            typedef typename V::zfloat_type ZT;
+            ZT value;
+            ret best;
+            int n = V::_size == UNKNOWN ? v.size() : V::_size;
+            if (n == 0) 
+                return MinMaxElement_Helper<0,AbsComp,false,V>::call(v,ibest);
             IT it = v.begin();
             best = TMV_ABS(*it);
             IT bestit = it;
 
             if (n) do {
-                value = *it++;
+                value = Traits<ZT>::convert(*it++);
                 // Only if both abs(real) and abs(imag) < best
                 // should we even both doing the complex abs()
-                if (TMV_ABS(real(value)) > best && TMV_ABS(imag(value)) > best) 
+                if (TMV_ABS(real(value)) >= best && TMV_ABS(imag(value)) >= best) 
                     continue;
                 else { 
-                    Component<AbsComp,VT>::applyf(value);
+                    Component<AbsComp,ZT>::applyf(value);
                     if (TMV_REAL(value) > best) continue;
                     else { best = TMV_REAL(value); bestit = it-1; }
                 }
@@ -542,11 +602,8 @@ L2:
     template <CompType comp, bool max, class V>
     struct MinMaxElement_Helper<12,comp,max,V>
     {
-        typedef typename V::value_type VT;
-        typedef typename V::real_type RT;
-        typedef typename V::const_iterator IT;
-
-        static inline RT call(const V& v, int*const ibest)
+        typedef typename Component<comp,typename V::value_type>::ret_type ret;
+        static ret call(const V& v, int* ibest)
         {
 #if TMV_OPT >= 2
             if (!ibest && v.size() < 250) 
@@ -561,8 +618,8 @@ L2:
     template <CompType comp, bool max, class V>
     struct MinMaxElement_Helper<13,comp,max,V>
     {
-        typedef typename V::real_type RT;
-        static inline RT call(const V& v, int*const ibest)
+        typedef typename Component<comp,typename V::value_type>::ret_type ret;
+        static ret call(const V& v, int* ibest)
         {
 #if TMV_OPT >= 2
             if (!ibest && v.size() < 250) 
@@ -577,8 +634,8 @@ L2:
     template <CompType comp, bool max, class V>
     struct MinMaxElement_Helper<14,comp,max,V>
     {
-        typedef typename V::real_type RT;
-        static inline RT call(const V& v, int*const ibest)
+        typedef typename Component<comp,typename V::value_type>::ret_type ret;
+        static ret call(const V& v, int* ibest)
         {
 #if TMV_OPT >= 2
             if (!ibest && v.size() < 250) 
@@ -593,8 +650,8 @@ L2:
     template <CompType comp, bool max, class V>
     struct MinMaxElement_Helper<15,comp,max,V>
     {
-        typedef typename V::real_type RT;
-        static inline RT call(const V& v, int*const ibest)
+        typedef typename Component<comp,typename V::value_type>::ret_type ret;
+        static ret call(const V& v, int* ibest)
         {
 #if TMV_OPT >= 2
             if (!ibest && v.size() < 250) 
@@ -605,484 +662,457 @@ L2:
         }
     };
 
+    // algo -3: Determine which algorithm to use
     template <class V>
-    inline typename V::value_type InlineMaxElement(
-        const BaseVector_Calc<V>& v, int*const imax)
+    struct MinMaxElement_Helper<-3,ValueComp,true,V>
     {
+        typedef typename V::value_type ret;
+        static ret call(const V& v, int* ibest)
+        {
 #if TMV_OPT >= 2
-        const int algo1 = 
-            V::_size != UNKNOWN ? (
-                V::_size <= 160 ? 6 :
-                (V::_step == 1 && V::_size > 250) ? (
-                    ( V::iscomplex ? 2 : 5 ) ) :
-                1 ) :
-            V::_step == 1 ? ( V::iscomplex ? 2 : 14 ) :
-            1;
+            const int algo1 = 
+                V::_size == 0 ? 0 :
+                V::_size != UNKNOWN ? (
+                    V::_size <= 160 ? 6 :
+                    (V::_step == 1 && V::_size > 250) ? (
+                        ( V::iscomplex ? 2 : 5 ) ) :
+                    1 ) :
+                V::_step == 1 ? ( V::iscomplex ? 12 : 14 ) :
+                1;
 #endif
-        const int algo2 = 
+            const int algo2 = 
 #if TMV_OPT >= 1
-            V::_size != UNKNOWN ? (
-                V::_size <= 12 ? 6 :
-                V::_size <= 40 ? 7 :
-                (V::_step == 1 && V::_size > 250) ? (
-                    ( V::iscomplex ? 1 : 5 ) ) :
-                1 ) :
-            V::_step == 1 ? ( V::iscomplex ? 1 : 14 ) :
+                V::_size == 0 ? 0 :
+                V::_size != UNKNOWN ? (
+                    V::_size <= 12 ? 6 :
+                    V::_size <= 40 ? 7 :
+                    (V::_step == 1 && V::_size > 250) ? (
+                        ( V::iscomplex ? 1 : 5 ) ) :
+                    1 ) :
+                V::_step == 1 ? ( V::iscomplex ? 1 : 14 ) :
 #endif
-            1;
+                1;
 #ifdef PRINTALGO
-        std::cout<<"InlineMaxElement: algo = "<<algo1<<" "<<algo2<<std::endl;
+            std::cout<<"InlineMaxElement: algo = "<<algo1<<" "<<algo2<<std::endl;
 #endif
 
 #if TMV_OPT >= 2
-        if (!imax) 
-            return MinMaxElement_Helper<algo1,RealComp,true,V>::call(
-                v.vec(),imax);
-        else 
+            if (!ibest) 
+                return MinMaxElement_Helper<algo1,ValueComp,true,V>::call(
+                    v.vec(),ibest);
+            else 
 #endif
-            return MinMaxElement_Helper<algo2,RealComp,true,V>::call(
-                v.vec(),imax);
-    }
-
-    // Defined in TMV_Vector.cpp
-    template <class T>
-    T InstMaxElement(const ConstVectorView<T>& v, int*const imax);
-
-    template <bool conj, bool inst, class V>
-    struct CallMaxElementv // conj = true
-    {
-        static inline typename V::value_type call(const V& v, int*const imax)
-        { 
-            typedef typename V::const_conjugate_type Vc;
-            return TMV_CONJ(CallMaxElementv<false,inst,Vc>::call(
-                    v.conjugate(),imax));
+                return MinMaxElement_Helper<algo2,ValueComp,true,V>::call(
+                    v.vec(),ibest);
         }
     };
     template <class V>
-    struct CallMaxElementv<false,false,V> // inst = false
+    struct MinMaxElement_Helper<-3,AbsComp,true,V>
     {
-        static inline typename V::value_type call(const V& v, int*const imax)
-        { return InlineMaxElement(v,imax); }
-    };
-    template <class V>
-    struct CallMaxElementv<false,true,V> // inst = true
-    {
-        static inline typename V::value_type call(const V& v, int*const imax)
-        { return InstMaxElement(v.xView(),imax); }
-    };
-
-    template <class V>
-    inline typename V::value_type MaxElement(
-        const BaseVector_Calc<V>& v, int*const imax)
-    {
-        TMVAssert(v.size() > 0);
-        typedef typename V::value_type T;
-        const bool inst = 
-            V::unknownsizes &&
-            Traits<T>::isinst;
-        return CallMaxElementv<V::_conj,inst,V>::call(v.vec(),imax);
-    }
-
-
-    // 
-    // MaxAbsElement
-    //
-
-    template <class V>
-    inline typename V::real_type InlineMaxAbsElement(
-        const BaseVector_Calc<V>& v, int*const imax)
-    {
+        typedef typename V::float_type ret;
+        static ret call(const V& v, int* ibest)
+        {
 #if TMV_OPT >= 2
-        const int algo1 = 
-            V::_size != UNKNOWN ? (
-                V::iscomplex ? (
-                    ( V::_size <= 16 ? 6 : V::_step == 1 ? 8 : 1 ) ) :
-                V::_size <= 160 ? 6 :
-                (V::_step == 1 && V::_size > 250) ?  5 : 1 ) :
-            V::_step == 1 ? ( V::iscomplex ? 8 : 15 ) :
-            1;
+            const int algo1 = 
+                V::_size == 0 ? 0 :
+                V::_size != UNKNOWN ? (
+                    V::iscomplex ? (
+                        ( V::_size <= 16 ? 6 : V::_step == 1 ? 8 : 1 ) ) :
+                    V::_size <= 160 ? 6 :
+                    (V::_step == 1 && V::_size > 250) ?  5 : 1 ) :
+                V::_step == 1 ? ( V::iscomplex ? 8 : 15 ) :
+                1;
 #endif
-        const int algo2 = 
+            const int algo2 = 
 #if TMV_OPT >= 1
-            V::_size != UNKNOWN ? (
-                V::iscomplex ? (
-                    ( V::_step == 1 ? 8 : 1 ) ) :
-                V::_size <= 12 ? 6 :
-                V::_size <= 40 ? 7 :
-                (V::_step == 1 && V::_size > 250) ? 5 : 1 ) :
-            V::_step == 1 ? ( V::iscomplex ? 8 : 15 ) :
+                V::_size == 0 ? 0 :
+                V::_size != UNKNOWN ? (
+                    V::iscomplex ? (
+                        ( V::_step == 1 ? 8 : 1 ) ) :
+                    V::_size <= 12 ? 6 :
+                    V::_size <= 40 ? 7 :
+                    (V::_step == 1 && V::_size > 250) ? 5 : 1 ) :
+                V::_step == 1 ? ( V::iscomplex ? 8 : 15 ) :
 #endif
-            1;
+                1;
 #ifdef PRINTALGO
-        std::cout<<"InlineMaxAbsElement: algo = "<<algo1<<
-            " "<<algo2<<std::endl;
+            std::cout<<"InlineMaxAbsElement: algo = "<<algo1<<
+                " "<<algo2<<std::endl;
 #endif
 
 #if TMV_OPT >= 2
-        if (!imax) 
-            return MinMaxElement_Helper<algo1,AbsComp,true,V>::call(
-                v.vec(),imax);
-        else 
+            if (!ibest) 
+                return MinMaxElement_Helper<algo1,AbsComp,true,V>::call(
+                    v.vec(),ibest);
+            else 
 #endif
-            return MinMaxElement_Helper<algo2,AbsComp,true,V>::call(
-                v.vec(),imax);
-    }
-
-    // Defined in TMV_Vector.cpp
-    template <class T>
-    typename Traits<T>::real_type InstMaxAbsElement(
-        const ConstVectorView<T>& v, int*const imax); 
-
-    template <bool inst, class V>
-    struct CallMaxAbsElementv // inst = false
-    {
-        static inline typename V::real_type call(const V& v, int*const imax)
-        { return InlineMaxAbsElement(v,imax); }
-    };
-    template <class V>
-    struct CallMaxAbsElementv<true,V>
-    {
-        static inline typename V::real_type call(const V& v, int*const imax)
-        { return InstMaxAbsElement(v.xView(),imax); }
-    };
-
-    template <class V>
-    inline typename V::real_type MaxAbsElement(
-        const BaseVector_Calc<V>& v, int*const imax)
-    {
-        TMVAssert(v.size() > 0);
-        typedef typename V::value_type T;
-        typedef typename V::const_nonconj_type Vn;
-        const bool inst = 
-            V::unknownsizes &&
-            Traits<T>::isinst;
-        return CallMaxAbsElementv<inst,Vn>::call(v.nonConj(),imax);
-    }
-
-
-    //
-    // MaxAbs2Element
-    //
-
-    template <class V>
-    inline typename V::real_type InlineMaxAbs2Element(
-        const BaseVector_Calc<V>& v, int*const imax)
-    {
-#if TMV_OPT >= 2
-        const int algo1 = 
-            V::_size != UNKNOWN ? (
-                V::_size <= 160 ? 6 :
-                (V::_step == 1 && V::_size > 250) ? (
-                    ( V::iscomplex ? 2 : 5 ) ) :
-                1 ) :
-            V::_step == 1 ? ( V::iscomplex ? 2 : 15 ) :
-            1;
-#endif
-        const int algo2 = 
-#if TMV_OPT >= 1
-            V::_size != UNKNOWN ? (
-                V::_size <= 12 ? 6 :
-                V::_size <= 40 ? 7 :
-                (V::_step == 1 && V::_size > 250) ? (
-                    ( V::iscomplex ? 1 : 5 ) ) :
-                1 ) :
-            V::_step == 1 ? ( V::iscomplex ? 1 : 15 ) :
-#endif
-            1;
-#ifdef PRINTALGO
-        std::cout<<"InlineMaxAbs2Element: algo = "<<algo1<<
-            " "<<algo2<<std::endl;
-#endif
-
-#if TMV_OPT >= 2
-        if (!imax) 
-            return MinMaxElement_Helper<algo1,Abs2Comp,true,V>::call(
-                v.vec(),imax);
-        else 
-#endif
-            return MinMaxElement_Helper<algo2,Abs2Comp,true,V>::call(
-                v.vec(),imax);
-    }
-
-    // Defined in TMV_Vector.cpp
-    template <class T>
-    typename Traits<T>::real_type InstMaxAbs2Element(
-        const ConstVectorView<T>& v, int*const imax);
-
-    template <class T>
-    inline typename Traits<T>::real_type InstMaxAbs2Element(
-        const ConstVectorView<T,UNKNOWN,true>& v, int*const imax)
-    { return InstMaxAbs2Element(v.conjugate(),imax); }
-
-    template <bool inst, class V>
-    struct CallMaxAbs2Elementv // inst = false
-    {
-        static inline typename V::real_type call(const V& v, int*const imax)
-        { return InlineMaxAbs2Element(v,imax); }
-    };
-    template <class V>
-    struct CallMaxAbs2Elementv<true,V>
-    {
-        static inline typename V::real_type call(const V& v, int*const imax)
-        { return InstMaxAbs2Element(v.xView(),imax); }
-    };
-
-    template <class V>
-    inline typename V::real_type MaxAbs2Element(
-        const BaseVector_Calc<V>& v, int*const imax)
-    {
-        TMVAssert(v.size() > 0);
-        typedef typename V::value_type T;
-        typedef typename V::const_nonconj_type Vn;
-        const bool inst = 
-            V::unknownsizes &&
-            Traits<T>::isinst;
-        return CallMaxAbs2Elementv<inst,Vn>::call(v.nonConj(),imax);
-    }
-
-
-    // 
-    // MinElement
-    //
-
-    template <class V>
-    inline typename V::value_type InlineMinElement(
-        const BaseVector_Calc<V>& v, int*const imin)
-    {
-#if TMV_OPT >= 2
-        const int algo1 = 
-            V::_size != UNKNOWN ? (
-                V::_size <= 160 ? 6 :
-                (V::_step == 1 && V::_size > 250) ? (
-                    ( V::iscomplex ? 2 : 5 ) ) :
-                1 ) :
-            V::_step == 1 ? ( V::iscomplex ? 2 : 14 ) :
-            1;
-#endif
-        const int algo2 = 
-#if TMV_OPT >= 1
-            V::_size != UNKNOWN ? (
-                V::_size <= 12 ? 6 :
-                V::_size <= 40 ? 7 :
-                (V::_step == 1 && V::_size > 250) ? (
-                    ( V::iscomplex ? 1 : 5 ) ) :
-                1 ) :
-            V::_step == 1 ? ( V::iscomplex ? 1 : 14 ) :
-#endif
-            1;
-#ifdef PRINTALGO
-        std::cout<<"InlineMinElement: algo = "<<algo1<<" "<<algo2<<std::endl;
-#endif
-
-#if TMV_OPT >= 2
-        if (!imin) 
-            return MinMaxElement_Helper<algo1,RealComp,false,V>::call(
-                v.vec(),imin);
-        else 
-#endif
-            return MinMaxElement_Helper<algo2,RealComp,false,V>::call(
-                v.vec(),imin);
-    }
-
-    // Defined in TMV_Vector.cpp
-    template <class T>
-    T InstMinElement(const ConstVectorView<T>& v, int*const imin);
-
-    template <bool conj, bool inst, class V>
-    struct CallMinElementv // conj = true
-    {
-        static inline typename V::value_type call(const V& v, int*const imin)
-        { 
-            typedef typename V::const_conjugate_type Vc;
-            return TMV_CONJ(CallMinElementv<false,inst,Vc>::call(
-                    v.conjugate(),imin));
+                return MinMaxElement_Helper<algo2,AbsComp,true,V>::call(
+                    v.vec(),ibest);
         }
     };
     template <class V>
-    struct CallMinElementv<false,false,V> // inst = false
+    struct MinMaxElement_Helper<-3,Abs2Comp,true,V>
     {
-        static inline typename V::value_type call(const V& v, int*const imin)
-        { return InlineMinElement(v,imin); }
-    };
-    template <class V>
-    struct CallMinElementv<false,true,V> // inst = true
-    {
-        static inline typename V::value_type call(const V& v, int*const imin)
-        { return InstMinElement(v.xView(),imin); }
-    };
-
-    template <class V>
-    inline typename V::value_type MinElement(
-        const BaseVector_Calc<V>& v, int*const imin)
-    {
-        TMVAssert(v.size() > 0);
-        typedef typename V::value_type T;
-        const bool inst = 
-            V::unknownsizes &&
-            Traits<T>::isinst;
-        return CallMinElementv<V::_conj,inst,V>::call(v.vec(),imin);
-    }
-
-
-    // 
-    // MinAbsElement
-    //
-
-    template <class V>
-    inline typename V::real_type InlineMinAbsElement(
-        const BaseVector_Calc<V>& v, int*const imin)
-    {
+        typedef typename V::real_type ret;
+        static ret call(const V& v, int* ibest)
+        {
 #if TMV_OPT >= 2
-        const int algo1 = 
-            V::_size != UNKNOWN ? (
-                V::iscomplex ? (
-                    ( V::_size <= 40 ? 6 : V::_step == 1 ? 8 : 1 ) ) :
-                V::_size <= 160 ? 6 :
-                (V::_step == 1 && V::_size > 250) ?  5 : 1 ) :
-            V::_step == 1 ? ( V::iscomplex ? 8 : 15 ) :
-            1;
+            const int algo1 = 
+                V::_size == 0 ? 0 :
+                V::_size != UNKNOWN ? (
+                    V::_size <= 160 ? 6 :
+                    (V::_step == 1 && V::_size > 250) ? (
+                        ( V::iscomplex ? 2 : 5 ) ) :
+                    1 ) :
+                V::_step == 1 ? ( V::iscomplex ? 12 : 15 ) :
+                1;
 #endif
-        const int algo2 = 
+            const int algo2 = 
 #if TMV_OPT >= 1
-            V::_size != UNKNOWN ? (
-                V::iscomplex ? (
-                    ( V::_step == 1 ? ( V::_size <= 20 ? 2 : 8 ) : 1 ) ) :
-                V::_size <= 12 ? 6 :
-                V::_size <= 40 ? 7 :
-                (V::_step == 1 && V::_size > 250) ? 5 : 1 ) :
-            V::_step == 1 ? ( V::iscomplex ? 8 : 15 ) :
+                V::_size == 0 ? 0 :
+                V::_size != UNKNOWN ? (
+                    V::_size <= 12 ? 6 :
+                    V::_size <= 40 ? 7 :
+                    (V::_step == 1 && V::_size > 250) ? (
+                        ( V::iscomplex ? 1 : 5 ) ) :
+                    1 ) :
+                V::_step == 1 ? ( V::iscomplex ? 1 : 15 ) :
 #endif
-            1;
+                1;
 #ifdef PRINTALGO
-        std::cout<<"InlineMinAbsElement: algo = "<<algo1<<
-            " "<<algo2<<std::endl;
+            std::cout<<"InlineMaxAbs2Element: algo = "<<algo1<<
+                " "<<algo2<<std::endl;
 #endif
 
 #if TMV_OPT >= 2
-        if (!imin) 
-            return MinMaxElement_Helper<algo1,AbsComp,false,V>::call(
-                v.vec(),imin);
-        else 
+            if (!ibest) 
+                return MinMaxElement_Helper<algo1,Abs2Comp,true,V>::call(
+                    v.vec(),ibest);
+            else 
 #endif
-            return MinMaxElement_Helper<algo2,AbsComp,false,V>::call(
-                v.vec(),imin);
-    }
-
-    // Defined in TMV_Vector.cpp
-    template <class T>
-    typename Traits<T>::real_type InstMinAbsElement(
-        const ConstVectorView<T>& v, int*const imin);
-
-    template <class T>
-    inline typename Traits<T>::real_type InstMinAbsElement(
-        const ConstVectorView<T,UNKNOWN,true>& v, int*const imin)
-    { return InstMinAbsElement(v.conjugate(),imin); }
-
-    template <bool inst, class V>
-    struct CallMinAbsElementv // inst = false
-    {
-        static inline typename V::real_type call(const V& v, int*const imin)
-        { return InlineMinAbsElement(v,imin); }
+                return MinMaxElement_Helper<algo2,Abs2Comp,true,V>::call(
+                    v.vec(),ibest);
+        }
     };
     template <class V>
-    struct CallMinAbsElementv<true,V>
+    struct MinMaxElement_Helper<-3,ValueComp,false,V>
     {
-        static inline typename V::real_type call(const V& v, int*const imin)
-        { return InstMinAbsElement(v.xView(),imin); }
-    };
-
-    template <class V>
-    inline typename V::real_type MinAbsElement(
-        const BaseVector_Calc<V>& v, int*const imin)
-    {
-        TMVAssert(v.size() > 0);
-        typedef typename V::value_type T;
-        typedef typename V::const_nonconj_type Vn;
-        const bool inst = 
-            V::unknownsizes &&
-            Traits<T>::isinst;
-        return CallMinAbsElementv<inst,Vn>::call(v.nonConj(),imin);
-    }
-
-    // 
-    // MinAbs2Element
-    //
-
-    template <class V>
-    inline typename V::real_type InlineMinAbs2Element(
-        const BaseVector_Calc<V>& v, int*const imin)
-    {
+        typedef typename V::value_type ret;
+        static ret call(const V& v, int* ibest)
+        {
 #if TMV_OPT >= 2
-        const int algo1 = 
-            V::_size != UNKNOWN ? (
-                V::_size <= 160 ? 6 :
-                (V::_step == 1 && V::_size > 250) ? (
-                    ( V::iscomplex ? 2 : 5 ) ) :
-                1 ) :
-            V::_step == 1 ? ( V::iscomplex ? 2 : 15 ) :
-            1;
+            const int algo1 = 
+                V::_size == 0 ? 0 :
+                V::_size != UNKNOWN ? (
+                    V::_size <= 160 ? 6 :
+                    (V::_step == 1 && V::_size > 250) ? (
+                        ( V::iscomplex ? 2 : 5 ) ) :
+                    1 ) :
+                V::_step == 1 ? ( V::iscomplex ? 12 : 14 ) :
+                1;
 #endif
-        const int algo2 = 
+            const int algo2 = 
 #if TMV_OPT >= 1
-            V::_size != UNKNOWN ? (
-                V::_size <= 12 ? 6 :
-                V::_size <= 40 ? 7 :
-                (V::_step == 1 && V::_size > 250) ? (
-                    ( V::iscomplex ? 1 : 5 ) ) :
-                1 ) :
-            V::_step == 1 ? ( V::iscomplex ? 1 : 15 ) :
+                V::_size == 0 ? 0 :
+                V::_size != UNKNOWN ? (
+                    V::_size <= 12 ? 6 :
+                    V::_size <= 40 ? 7 :
+                    (V::_step == 1 && V::_size > 250) ? (
+                        ( V::iscomplex ? 1 : 5 ) ) :
+                    1 ) :
+                V::_step == 1 ? ( V::iscomplex ? 1 : 14 ) :
 #endif
-            1;
+                1;
 #ifdef PRINTALGO
-        std::cout<<"InlineMinAbs2Element: algo = "<<algo1<<
-            " "<<algo2<<std::endl;
+            std::cout<<"InlineMinElement: algo = "<<algo1<<" "<<algo2<<std::endl;
 #endif
 
 #if TMV_OPT >= 2
-        if (!imin) 
-            return MinMaxElement_Helper<algo1,Abs2Comp,false,V>::call(
-                v.vec(),imin);
-        else 
+            if (!ibest) 
+                return MinMaxElement_Helper<algo1,ValueComp,false,V>::call(
+                    v.vec(),ibest);
+            else 
 #endif
-            return MinMaxElement_Helper<algo2,Abs2Comp,false,V>::call(
-                v.vec(),imin);
-    }
-
-    // Defined in TMV_Vector.cpp
-    template <class T>
-    typename Traits<T>::real_type InstMinAbs2Element(
-        const ConstVectorView<T>& v, int*const imin);
-
-    template <class T>
-    inline typename Traits<T>::real_type InstMinAbs2Element(
-        const ConstVectorView<T,UNKNOWN,true>& v, int*const imin)
-    { return InstMinAbs2Element(v.conjugate(),imin); }
-
-    template <bool inst, class V>
-    struct CallMinAbs2Elementv // inst = false
-    {
-        static inline typename V::real_type call(const V& v, int*const imin)
-        { return InlineMinAbs2Element(v,imin); }
+                return MinMaxElement_Helper<algo2,ValueComp,false,V>::call(
+                    v.vec(),ibest);
+        }
     };
     template <class V>
-    struct CallMinAbs2Elementv<true,V>
+    struct MinMaxElement_Helper<-3,AbsComp,false,V>
     {
-        static inline typename V::real_type call(const V& v, int*const imin)
-        { return InstMinAbs2Element(v.xView(),imin); }
+        typedef typename V::float_type ret;
+        static ret call(const V& v, int* ibest)
+        
+        {
+#if TMV_OPT >= 2
+            const int algo1 = 
+                V::_size == 0 ? 0 :
+                V::_size != UNKNOWN ? (
+                    V::iscomplex ? (
+                        ( V::_size <= 40 ? 6 : V::_step == 1 ? 8 : 1 ) ) :
+                    V::_size <= 160 ? 6 :
+                    (V::_step == 1 && V::_size > 250) ?  5 : 1 ) :
+                V::_step == 1 ? ( V::iscomplex ? 8 : 15 ) :
+                1;
+#endif
+            const int algo2 = 
+#if TMV_OPT >= 1
+                V::_size == 0 ? 0 :
+                V::_size != UNKNOWN ? (
+                    V::iscomplex ? (
+                        ( V::_step == 1 ? ( V::_size <= 20 ? 2 : 8 ) : 1 ) ) :
+                    V::_size <= 12 ? 6 :
+                    V::_size <= 40 ? 7 :
+                    (V::_step == 1 && V::_size > 250) ? 5 : 1 ) :
+                V::_step == 1 ? ( V::iscomplex ? 8 : 15 ) :
+#endif
+                1;
+#ifdef PRINTALGO
+            std::cout<<"InlineMinAbsElement: algo = "<<algo1<<
+                " "<<algo2<<std::endl;
+#endif
+
+#if TMV_OPT >= 2
+            if (!ibest) 
+                return MinMaxElement_Helper<algo1,AbsComp,false,V>::call(
+                    v.vec(),ibest);
+            else 
+#endif
+                return MinMaxElement_Helper<algo2,AbsComp,false,V>::call(
+                    v.vec(),ibest);
+        }
+    };
+    template <class V>
+    struct MinMaxElement_Helper<-3,Abs2Comp,false,V>
+    {
+        typedef typename V::real_type ret;
+        static ret call(const V& v, int* ibest)
+        {
+#if TMV_OPT >= 2
+            const int algo1 = 
+                V::_size == 0 ? 0 :
+                V::_size != UNKNOWN ? (
+                    V::_size <= 160 ? 6 :
+                    (V::_step == 1 && V::_size > 250) ? (
+                        ( V::iscomplex ? 2 : 5 ) ) :
+                    1 ) :
+                V::_step == 1 ? ( V::iscomplex ? 12 : 15 ) :
+                1;
+#endif
+            const int algo2 = 
+#if TMV_OPT >= 1
+                V::_size == 0 ? 0 :
+                V::_size != UNKNOWN ? (
+                    V::_size <= 12 ? 6 :
+                    V::_size <= 40 ? 7 :
+                    (V::_step == 1 && V::_size > 250) ? (
+                        ( V::iscomplex ? 1 : 5 ) ) :
+                    1 ) :
+                V::_step == 1 ? ( V::iscomplex ? 1 : 15 ) :
+#endif
+                1;
+#ifdef PRINTALGO
+            std::cout<<"InlineMinAbs2Element: algo = "<<algo1<<
+                " "<<algo2<<std::endl;
+#endif
+
+#if TMV_OPT >= 2
+            if (!ibest) 
+                return MinMaxElement_Helper<algo1,Abs2Comp,false,V>::call(
+                    v.vec(),ibest);
+            else 
+#endif
+                return MinMaxElement_Helper<algo2,Abs2Comp,false,V>::call(
+                    v.vec(),ibest);
+        }
+    };
+
+
+    // algo 97: Conjugate
+    template <bool max, class V>
+    struct MinMaxElement_Helper<97,ValueComp,max,V>
+    {
+        typedef typename V::value_type ret;
+        static ret call(const V& v, int* ibest)
+        {
+            typedef typename V::const_conjugate_type Vc;
+            Vc vc = v.conjugate();
+            return TMV_CONJ(
+                MinMaxElement_Helper<-1,ValueComp,max,Vc>::call(vc));
+        }
+    };
+ 
+    // algo 98: Call inst
+    template <class V>
+    struct MinMaxElement_Helper<98,ValueComp,true,V>
+    {
+        typedef typename V::value_type ret;
+        static ret call(const V& v, int* ibest)
+        { return InstMaxElement(v.xView(),ibest); }
+    };
+    template <class V>
+    struct MinMaxElement_Helper<98,AbsComp,true,V>
+    {
+        typedef typename V::float_type ret;
+        static ret call(const V& v, int* ibest)
+        { return InstMaxAbsElement(v.xView(),ibest); }
+    };
+    template <class V>
+    struct MinMaxElement_Helper<98,Abs2Comp,true,V>
+    {
+        typedef typename V::real_type ret;
+        static ret call(const V& v, int* ibest)
+        { return InstMaxAbs2Element(v.xView(),ibest); }
+    };
+    template <class V>
+    struct MinMaxElement_Helper<98,ValueComp,false,V>
+    {
+        typedef typename V::value_type ret;
+        static ret call(const V& v, int* ibest)
+        { return InstMinElement(v.xView(),ibest); }
+    };
+    template <class V>
+    struct MinMaxElement_Helper<98,AbsComp,false,V>
+    {
+        typedef typename V::float_type ret;
+        static ret call(const V& v, int* ibest)
+        { return InstMinAbsElement(v.xView(),ibest); }
+    };
+    template <class V>
+    struct MinMaxElement_Helper<98,Abs2Comp,false,V>
+    {
+        typedef typename V::real_type ret;
+        static ret call(const V& v, int* ibest)
+        { return InstMinAbs2Element(v.xView(),ibest); }
+    };
+ 
+    // algo -1: Check for inst
+    template <CompType comp, bool max, class V>
+    struct MinMaxElement_Helper<-1,comp,max,V>
+    {
+        typedef typename Component<comp,typename V::value_type>::ret_type ret;
+        static ret call(const V& v, int* ibest)
+        {
+            typedef typename V::value_type T;
+            const bool inst = 
+                (V::_size == UNKNOWN || V::_size > 16) &&
+                Traits<T>::isinst;
+            const int algo =
+                V::_conj ? 97 :
+                inst ? 98 :
+                -3;
+            return MinMaxElement_Helper<algo,comp,max,V>::call(v,ibest);
+        }
     };
 
     template <class V>
-    inline typename V::real_type MinAbs2Element(
-        const BaseVector_Calc<V>& v, int*const imin)
+    static typename V::value_type DoMaxElement(
+        const BaseVector_Calc<V>& v, int* imax)
     {
-        TMVAssert(v.size() > 0);
-        typedef typename V::value_type T;
-        typedef typename V::const_nonconj_type Vn;
-        const bool inst = 
-            V::unknownsizes &&
-            Traits<T>::isinst;
-        return CallMinAbs2Elementv<inst,Vn>::call(v.nonConj(),imin);
+        typedef typename V::const_cview_type Vv;
+        Vv vv = v.cView();
+        return MinMaxElement_Helper<-1,ValueComp,true,Vv>::call(vv,imax);
     }
+
+    template <class V>
+    static typename V::float_type DoMaxAbsElement(
+        const BaseVector_Calc<V>& v, int* imax)
+    {
+        typedef typename V::const_cview_type::const_nonconj_type Vv;
+        Vv vv = v.cView().nonConj();
+        return MinMaxElement_Helper<-1,AbsComp,true,Vv>::call(vv,imax);
+    }
+
+    template <class V>
+    static typename V::real_type DoMaxAbs2Element(
+        const BaseVector_Calc<V>& v, int* imax)
+    {
+        typedef typename V::const_cview_type::const_nonconj_type Vv;
+        Vv vv = v.cView().nonConj();
+        return MinMaxElement_Helper<-1,Abs2Comp,true,Vv>::call(vv,imax);
+    }
+
+    template <class V>
+    static typename V::value_type DoMinElement(
+        const BaseVector_Calc<V>& v, int* imin)
+    {
+        typedef typename V::const_cview_type Vv;
+        Vv vv = v.cView();
+        return MinMaxElement_Helper<-1,ValueComp,false,Vv>::call(vv,imin);
+    }
+
+    template <class V>
+    static typename V::float_type DoMinAbsElement(
+        const BaseVector_Calc<V>& v, int* imin)
+    {
+        typedef typename V::const_cview_type::const_nonconj_type Vv;
+        Vv vv = v.cView().nonConj();
+        return MinMaxElement_Helper<-1,AbsComp,false,Vv>::call(vv,imin);
+    }
+
+    template <class V>
+    static typename V::real_type DoMinAbs2Element(
+        const BaseVector_Calc<V>& v, int* imin)
+    {
+        typedef typename V::const_cview_type::const_nonconj_type Vv;
+        Vv vv = v.cView().nonConj();
+        return MinMaxElement_Helper<-1,Abs2Comp,false,Vv>::call(vv,imin);
+    }
+
+    template <class V>
+    static typename V::value_type InlineMaxElement(
+        const BaseVector_Calc<V>& v, int* imax)
+    {
+        typedef typename V::const_cview_type Vv;
+        Vv vv = v.cView();
+        return MinMaxElement_Helper<-3,ValueComp,true,Vv>::call(vv,imax);
+    }
+
+    template <class V>
+    static typename V::float_type InlineMaxAbsElement(
+        const BaseVector_Calc<V>& v, int* imax)
+    {
+        typedef typename V::const_cview_type::const_nonconj_type Vv;
+        Vv vv = v.cView().nonConj();
+        return MinMaxElement_Helper<-3,AbsComp,true,Vv>::call(vv,imax);
+    }
+
+    template <class V>
+    static typename V::real_type InlineMaxAbs2Element(
+        const BaseVector_Calc<V>& v, int* imax)
+    {
+        typedef typename V::const_cview_type::const_nonconj_type Vv;
+        Vv vv = v.cView().nonConj();
+        return MinMaxElement_Helper<-3,Abs2Comp,true,Vv>::call(vv,imax);
+    }
+
+    template <class V>
+    static typename V::value_type InlineMinElement(
+        const BaseVector_Calc<V>& v, int* imin)
+    {
+        typedef typename V::const_cview_type Vv;
+        Vv vv = v.cView();
+        return MinMaxElement_Helper<-3,ValueComp,false,Vv>::call(vv,imin);
+    }
+
+    template <class V>
+    static typename V::float_type InlineMinAbsElement(
+        const BaseVector_Calc<V>& v, int* imin)
+    {
+        typedef typename V::const_cview_type::const_nonconj_type Vv;
+        Vv vv = v.cView().nonConj();
+        return MinMaxElement_Helper<-3,AbsComp,false,Vv>::call(vv,imin);
+    }
+
+    template <class V>
+    static typename V::real_type InlineMinAbs2Element(
+        const BaseVector_Calc<V>& v, int* imin)
+    {
+        typedef typename V::const_cview_type::const_nonconj_type Vv;
+        Vv vv = v.cView().nonConj();
+        return MinMaxElement_Helper<-3,Abs2Comp,false,Vv>::call(vv,imin);
+    }
+
 
 } // namespace tmv
 

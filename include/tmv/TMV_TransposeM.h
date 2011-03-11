@@ -39,9 +39,9 @@ namespace tmv {
 
     // Defined below:
     template <class M1>
-    inline void TransposeSelf(BaseMatrix_Rec_Mutable<M1>& m);
+    static void TransposeSelf(BaseMatrix_Rec_Mutable<M1>& m);
     template <class M1>
-    inline void InlineTransposeSelf(BaseMatrix_Rec_Mutable<M1>& m);
+    static void InlineTransposeSelf(BaseMatrix_Rec_Mutable<M1>& m);
 
     // Defined in TMV_Matrix.cpp
     template <class T>
@@ -51,16 +51,16 @@ namespace tmv {
     // TransposeSelf
     //
 
-    template <int algo, int size, class M1>
+    template <int algo, int s, class M1>
     struct TransposeSelf_Helper;
 
     // algo 1: Simple for loop
-    template <int size, class M1>
-    struct TransposeSelf_Helper<1,size,M1>
+    template <int s, class M1>
+    struct TransposeSelf_Helper<1,s,M1>
     {
-        static inline void call(M1& m)
+        static void call(M1& m)
         {
-            const int n = (size == UNKNOWN ? int(m.colsize()) : size);
+            const int n = (s == UNKNOWN ? int(m.colsize()) : s);
             for(int i=1;i<n;++i) {
                 typename M1::row_sub_type v1 = m.get_row(i,0,i);
                 typename M1::col_sub_type v2 = m.get_col(i,0,i);
@@ -70,12 +70,12 @@ namespace tmv {
     };
 
     // algo 2: The same thing, but with iterators.
-    template <int size, class M1>
-    struct TransposeSelf_Helper<2,size,M1>
+    template <int s, class M1>
+    struct TransposeSelf_Helper<2,s,M1>
     {
-        static inline void call(M1& m)
+        static void call(M1& m)
         {
-            const int n = size == UNKNOWN ? int(m.colsize()) : size;
+            const int n = s == UNKNOWN ? int(m.colsize()) : s;
             if (n <= 1) return;
             typedef typename M1::row_type Mr;
             typedef typename M1::col_type Mc;
@@ -95,12 +95,12 @@ namespace tmv {
 
     // algo 3: The other way to do the loop.  
     // This way seems to be a little bit slower.
-    template <int size, class M1>
-    struct TransposeSelf_Helper<3,size,M1>
+    template <int s, class M1>
+    struct TransposeSelf_Helper<3,s,M1>
     {
-        static inline void call(M1& m)
+        static void call(M1& m)
         {
-            int n = size == UNKNOWN ? int(m.colsize()) : size;
+            int n = s == UNKNOWN ? int(m.colsize()) : s;
             if (n <= 1) return;
             typedef typename M1::row_type Mr;
             typedef typename M1::col_type Mc;
@@ -118,13 +118,13 @@ namespace tmv {
     };
 
     // algo 5: Fully unroll
-    template <int size, class M1>
-    struct TransposeSelf_Helper<5,size,M1>
+    template <int s, class M1>
+    struct TransposeSelf_Helper<5,s,M1>
     {
         template <int I, int M, int J, int N>
         struct Unroller
         {
-            static inline void unroll(M1& m)
+            static void unroll(M1& m)
             {
                 Unroller<I,M/2,0,I>::unroll(m);
                 Unroller<I+M/2,M-M/2,0,I+M/2>::unroll(m);
@@ -133,7 +133,7 @@ namespace tmv {
         template <int I, int J, int N>
         struct Unroller<I,1,J,N>
         {
-            static inline void unroll(M1& m)
+            static void unroll(M1& m)
             {
                 Unroller<I,1,J,N/2>::unroll(m);
                 Unroller<I,1,J+N/2,N-N/2>::unroll(m);
@@ -141,99 +141,99 @@ namespace tmv {
         };
         template <int I, int J, int N>
         struct Unroller<I,0,J,N>
-        { static inline void unroll(M1& ) {} };
+        { static void unroll(M1& ) {} };
         template <int I, int J>
         struct Unroller<I,1,J,1>
         {
-            static inline void unroll(M1& m)
+            static void unroll(M1& m)
             { TMV_SWAP(m.ref(I,J) , m.ref(J,I) ); }
         };
         template <int I>
         struct Unroller<I,1,I,1>
-        { static inline void unroll(M1& m) {} };
+        { static void unroll(M1& m) {} };
         template <int I, int J>
         struct Unroller<I,1,J,0>
-        { static inline void unroll(M1& ) {} };
+        { static void unroll(M1& ) {} };
 
-        static inline void call(M1& m)
-        { Unroller<0,size,0,size>::unroll(m); }
+        static void call(M1& m)
+        { Unroller<0,s,0,s>::unroll(m); }
     };
 
     // algo -3: Determine which algorithm to use
-    template <int size, class M1>
-    struct TransposeSelf_Helper<-3,size,M1>
+    template <int s, class M1>
+    struct TransposeSelf_Helper<-3,s,M1>
     {
-        static inline void call(M1& m)
+        static void call(M1& m)
         {
             TMVStaticAssert(!M1::_conj);
             const int algo = 
 #if TMV_OPT >= 1
-                ( size != UNKNOWN && size < 8 ) ? 5 :
+                ( s != UNKNOWN && s < 8 ) ? 5 :
 #endif
                 2;
-            TransposeSelf_Helper<algo,size,M1>::call(m);
+            TransposeSelf_Helper<algo,s,M1>::call(m);
         }
     };
 
     // algo 97: Conjugate
-    template <int size, class M1>
-    struct TransposeSelf_Helper<97,size,M1>
+    template <int s, class M1>
+    struct TransposeSelf_Helper<97,s,M1>
     {
-        static inline void call(M1& m)
+        static void call(M1& m)
         {
             typedef typename M1::conjugate_type Mc;
             Mc mc = m.conjugate();
-            TransposeSelf_Helper<-1,size,Mc>::call(mc);
+            TransposeSelf_Helper<-1,s,Mc>::call(mc);
         }
     };
 
     // algo 98: Call inst
-    template <int size, class M1>
-    struct TransposeSelf_Helper<98,size,M1>
+    template <int s, class M1>
+    struct TransposeSelf_Helper<98,s,M1>
     {
-        static inline void call(M1& m)
+        static void call(M1& m)
         { InstTransposeSelf(m.xView()); }
     };
 
     // algo -1: Check for inst
-    template <int size, class M1>
-    struct TransposeSelf_Helper<-1,size,M1>
+    template <int s, class M1>
+    struct TransposeSelf_Helper<-1,s,M1>
     {
-        static inline void call(M1& m)
+        static void call(M1& m)
         {
             typedef typename M1::value_type T;
             const bool inst = 
-                M1::unknownsizes &&
+                (s == UNKNOWN || s > 16) &&
                 Traits<T>::isinst;
             const bool conj = M1::_conj;
             const int algo = 
                 conj ? 97 :
                 inst ? 98 :
                 -3;
-            TransposeSelf_Helper<algo,size,M1>::call(m);
+            TransposeSelf_Helper<algo,s,M1>::call(m);
         }
     };
 
     template <class M1>
-    inline void TransposeSelf(BaseMatrix_Rec_Mutable<M1>& m)
+    static void TransposeSelf(BaseMatrix_Rec_Mutable<M1>& m)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
         TMVAssert(m.colsize() == m.rowsize());
-        const int size = Sizes<M1::_colsize,M1::_rowsize>::size;
+        const int s = Sizes<M1::_colsize,M1::_rowsize>::size;
         typedef typename M1::cview_type M1v;
         M1v m1v = m.cView();
-        TransposeSelf_Helper<-1,size,M1v>::call(m1v);
+        TransposeSelf_Helper<-1,s,M1v>::call(m1v);
     }
 
     template <class M1>
-    inline void InlineTransposeSelf(BaseMatrix_Rec_Mutable<M1>& m)
+    static void InlineTransposeSelf(BaseMatrix_Rec_Mutable<M1>& m)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
         TMVAssert(m.colsize() == m.rowsize());
-        const int size = Sizes<M1::_colsize,M1::_rowsize>::size;
+        const int s = Sizes<M1::_colsize,M1::_rowsize>::size;
         typedef typename M1::cview_type M1v;
         M1v m1v = m.cView();
-        TransposeSelf_Helper<-3,size,M1v>::call(m1v);
+        TransposeSelf_Helper<-3,s,M1v>::call(m1v);
     }
 
 } // namespace tmv

@@ -42,7 +42,7 @@ namespace tmv {
     //
 
     template <class M>
-    inline void InlineWriteCompact(
+    static void InlineWriteCompact(
         std::ostream& os, const BaseMatrix_Tri<M>& m)
     {
         typedef typename M::value_type T;
@@ -87,32 +87,31 @@ namespace tmv {
     template <class M>
     struct CallWriteU<false,M> // inst = false
     {
-        static inline void call(std::ostream& os, const M& m)
+        static void call(std::ostream& os, const M& m)
         { InlineWriteCompact(os,m); }
     };
     template <class M>
     struct CallWriteU<true,M> // inst = true
     {
-        static inline void call(std::ostream& os, const M& m)
+        static void call(std::ostream& os, const M& m)
         { InstWriteCompact(os,m.calc().xdView()); }
     };
 
     template <class M>
-    inline void WriteCompact(std::ostream& os, const BaseMatrix_Tri<M>& m)
+    static void WriteCompact(std::ostream& os, const BaseMatrix_Tri<M>& m)
     {
         typedef typename M::value_type T;
         const bool inst = 
-            M::unknownsizes &&
-            (M::_rowmajor || M::_colmajor) &&
+            (M::_size == UNKNOWN || M::_size > 16) &&
             Traits<T>::isinst;
         CallWriteU<inst,M>::call(os,m.mat());
     }
 
     // With thresh:
     template <class M>
-    inline void InlineWriteCompact(
+    static void InlineWriteCompact(
         std::ostream& os,
-        const BaseMatrix_Tri<M>& m, typename M::real_type thresh) 
+        const BaseMatrix_Tri<M>& m, typename M::float_type thresh) 
     {
         typedef typename M::value_type T;
         const int len = m.size();
@@ -126,7 +125,7 @@ namespace tmv {
                 for(int j=0;j<i;++j) {
                     T temp = m.cref(i,j);
                     os << " " << 
-                        Value((TMV_ABS(temp) < thresh ? T(0) : temp)) << " ";
+                        Value((TMV_ABS2(temp) < thresh ? T(0) : temp)) << " ";
                 }
             }
             if (unit)
@@ -137,7 +136,7 @@ namespace tmv {
                 for(int j=i+1;j<len;++j) {
                     T temp = m.cref(i,j);
                     os << " " << 
-                        Value((TMV_ABS(temp) < thresh ? T(0) : temp)) << " ";
+                        Value((TMV_ABS2(temp) < thresh ? T(0) : temp)) << " ";
                 }
             }
             os << " )\n";
@@ -149,12 +148,12 @@ namespace tmv {
     void InstWriteCompact(
         std::ostream& os,
         const ConstUpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>& m,
-        typename Traits<T>::real_type thresh);
+        typename ConstUpperTriMatrixView<T>::float_type thresh);
     template <class T, bool C>
     void InstWriteCompact(
         std::ostream& os,
         const ConstLowerTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>& m,
-        typename Traits<T>::real_type thresh);
+        typename ConstLowerTriMatrixView<T>::float_type thresh);
 
     template <bool inst, class M>
     struct CallWriteUThresh;
@@ -162,26 +161,26 @@ namespace tmv {
     template <class M>
     struct CallWriteUThresh<false,M> // inst = false
     {
-        static inline void call(std::ostream& os, const M& m, 
-                                typename M::real_type thresh) 
+        static void call(
+            std::ostream& os, const M& m, typename M::float_type thresh) 
         { InlineWriteCompact(os,m,thresh); }
     };
     template <class M>
     struct CallWriteUThresh<true,M> // inst = true
     {
-        static inline void call(std::ostream& os, const M& m, 
-                                typename M::real_type thresh) 
+        static void call(
+            std::ostream& os, const M& m, typename M::float_type thresh) 
         { InstWriteCompact(os,m.calc().xdView(),thresh); }
     };
 
     template <class M>
-    inline void WriteCompact(std::ostream& os, const BaseMatrix_Tri<M>& m,
-                             typename M::real_type thresh) 
+    static void WriteCompact(
+        std::ostream& os, const BaseMatrix_Tri<M>& m,
+        typename M::float_type thresh) 
     {
         typedef typename M::value_type T;
         const bool inst = 
-            M::unknownsizes &&
-            (M::_rowmajor || M::_colmajor) &&
+            (M::_size == UNKNOWN || M::_size > 16) &&
             Traits<T>::isinst;
         CallWriteUThresh<inst,M>::call(os,m.mat(),thresh);
     }
@@ -206,17 +205,19 @@ namespace tmv {
         size_t s;
         bool is, iseof, isbad;
 
-        inline TriMatrixReadError(std::istream& _is) throw() :
+        TriMatrixReadError(std::istream& _is) throw() :
             ReadError("TriMatrix"),
             i(0), j(0), m(0), exp(0), got(0), unitgot(T(1)), s(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        inline TriMatrixReadError(int _i, int _j, const BaseMatrix_Tri<M>& _m, 
-                                  std::istream& _is) throw() :
+        TriMatrixReadError(
+            int _i, int _j, const BaseMatrix_Tri<M>& _m, 
+            std::istream& _is
+        ) throw() :
             ReadError("TriMatrix"),
             i(_i), j(_j), m(new copy_type(_m)), exp(0), got(0), 
             unitgot(T(1)), s(_m.size()),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        inline TriMatrixReadError(
+        TriMatrixReadError(
             int _i, int _j, const BaseMatrix_Tri<M>& _m,
             std::istream& _is, char _e, char _g
         ) throw() :
@@ -224,31 +225,34 @@ namespace tmv {
             i(_i), j(_j), m(new copy_type(_m)), exp(_e), got(_g),
             unitgot(T(1)), s(_m.size()),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        inline TriMatrixReadError(
+        TriMatrixReadError(
             std::istream& _is, char _e, char _g
         ) throw() :
             ReadError("TriMatrix"),
             i(0), j(0), m(0), exp(_e), got(_g), unitgot(T(1)), s(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        inline TriMatrixReadError(int _i, int _j, const BaseMatrix_Tri<M>& _m,
-                                  std::istream& _is, T _u) throw() :
+        TriMatrixReadError(
+            int _i, int _j, const BaseMatrix_Tri<M>& _m,
+            std::istream& _is, T _u
+        ) throw() :
             ReadError("TriMatrix"),
             i(_i), j(_j), m(new copy_type(_m)), exp(0), got(0),
             unitgot(_u), s(_m.size()),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        inline TriMatrixReadError(const BaseMatrix_Tri<M>& _m,
-                                  std::istream& _is, size_t _s) :
+        TriMatrixReadError(
+            const BaseMatrix_Tri<M>& _m, std::istream& _is, size_t _s
+        ) throw():
             ReadError("TriMatrix"),
             i(0), m(new copy_type(_m)), exp(0), got(0), unitgot(T(1)), s(_s),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        inline TriMatrixReadError(const TriMatrixReadError<M>& rhs) :
+        TriMatrixReadError(const TriMatrixReadError<M>& rhs) throw() :
             ReadError("TriMatrix"),
             i(rhs.i), j(rhs.j), m(rhs.m), exp(rhs.exp), got(rhs.got), 
             unitgot(T(1)), s(rhs.s),
             is(rhs.is), iseof(rhs.iseof), isbad(rhs.isbad) {}
-        inline ~TriMatrixReadError() throw() {}
+        ~TriMatrixReadError() throw() {}
 
-        inline void Write(std::ostream& os) const throw()
+        void Write(std::ostream& os) const throw()
         {
             os<<"TMV Read Error: Reading istream input for ";
             if (M::_upper) os<<"UpperTriMatrix\n";
@@ -292,7 +296,7 @@ namespace tmv {
 #endif
 
     template <class M>
-    inline void InlineRead(std::istream& is, BaseMatrix_Tri_Mutable<M>& m)
+    static void InlineRead(std::istream& is, BaseMatrix_Tri_Mutable<M>& m)
     {
         char paren;
         typedef typename M::value_type T;
@@ -379,23 +383,22 @@ namespace tmv {
     template <class M>
     struct CallReadU<false,M> // inst = false
     {
-        static inline void call(std::istream& is, M& m)
+        static void call(std::istream& is, M& m)
         { InlineRead(is,m); }
     };
     template <class M>
     struct CallReadU<true,M>
     {
-        static inline void call(std::istream& is, M& m)
+        static void call(std::istream& is, M& m)
         { InstRead(is,m.xdView()); }
     };
 
     template <class M>
-    inline void Read(std::istream& is, BaseMatrix_Tri_Mutable<M>& m)
+    static void Read(std::istream& is, BaseMatrix_Tri_Mutable<M>& m)
     {
         typedef typename M::value_type T;
         const bool inst = 
-            M::unknownsizes &&
-            (M::_rowmajor || M::_colmajor) &&
+            (M::_size == UNKNOWN || M::_size > 16) &&
             Traits<T>::isinst;
         CallReadU<inst,M>::call(is,m.mat());
     }
@@ -407,7 +410,7 @@ namespace tmv {
     //
 
     template <class M>
-    inline std::istream& operator>>(
+    static std::istream& operator>>(
         std::istream& is, BaseMatrix_Tri_Mutable<M>& m)
     {
         char ul;
@@ -453,7 +456,7 @@ namespace tmv {
     }
 
     template <class T, DiagType D, StorageType S, IndexStyle I>
-    inline std::istream& operator>>(
+    static std::istream& operator>>(
         std::istream& is, auto_ptr<UpperTriMatrix<T,D,S,I> >& m)
     {
         typedef UpperTriMatrix<T,D,S,I> M;
@@ -491,7 +494,7 @@ namespace tmv {
     }
 
     template <class T, DiagType D, StorageType S, IndexStyle I>
-    inline std::istream& operator>>(
+    static std::istream& operator>>(
         std::istream& is, auto_ptr<LowerTriMatrix<T,D,S,I> >& m)
     {
         typedef LowerTriMatrix<T,D,S,I> M;

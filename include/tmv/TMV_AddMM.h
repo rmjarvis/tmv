@@ -52,7 +52,7 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddMM_Helper<0,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& , const M1& , 
             const Scaling<ix2,T2>& , const M2& , M3& )
         {}
@@ -63,7 +63,7 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddMM_Helper<1,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -142,14 +142,14 @@ namespace tmv {
         template <int I, int M, int J>
         struct Unroller<I,M,J,0>
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3) {}
         };
         template <int I, int J>
         struct Unroller<I,1,J,1>
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
             { m3.ref(I,J) = x1 * m1.cref(I,J) + x2 * m2.cref(I,J); }
@@ -157,11 +157,11 @@ namespace tmv {
         template <int I, int J>
         struct Unroller<I,0,J,1>
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3) {}
         };
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         { Unroller<0,cs,0,rs>::unroll(x1,m1,x2,m2,m3); }
@@ -230,14 +230,14 @@ namespace tmv {
         template <int I, int J, int N>
         struct Unroller<I,0,J,N>
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3) {}
         };
         template <int I, int J>
         struct Unroller<I,1,J,1>
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
             { m3.ref(I,J) = x1 * m1.cref(I,J) + x2 * m2.cref(I,J); }
@@ -245,11 +245,11 @@ namespace tmv {
         template <int I, int J>
         struct Unroller<I,1,J,0>
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3) {}
         };
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         { Unroller<0,cs,0,rs>::unroll(x1,m1,x2,m2,m3); }
@@ -290,7 +290,7 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddMM_Helper<-4,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -333,7 +333,7 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddMM_Helper<-3,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -357,12 +357,12 @@ namespace tmv {
         }
     };
 
-    // algo 96: Conjugate
+    // algo 97: Conjugate
     template <int cs, int rs, int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    struct AddMM_Helper<96,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
+    struct AddMM_Helper<97,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -377,12 +377,12 @@ namespace tmv {
         }
     };
 
-    // algo 97: Call inst
+    // algo 98: Call inst
     template <int cs, int rs, int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    struct AddMM_Helper<97,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
+    struct AddMM_Helper<98,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -396,7 +396,7 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddMM_Helper<-2,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -404,9 +404,8 @@ namespace tmv {
             typedef typename M2::value_type TM2;
             typedef typename M3::value_type TM3;
             const bool inst =
-                M1::unknownsizes &&
-                M2::unknownsizes &&
-                M3::unknownsizes &&
+                (cs == UNKNOWN || cs > 16) &&
+                (rs == UNKNOWN || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<TM1,TM2>::samebase &&
                 Traits2<TM1,TM3>::samebase &&
@@ -417,15 +416,15 @@ namespace tmv {
                 Traits<TM3>::isinst;
             const bool conj = M3::_conj;
             const int algo = 
-                conj ? 96 :
-                inst ? 97 :
+                conj ? 97 :
+                inst ? 98 :
                 -3;
             AddMM_Helper<algo,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>::call(
                 x1,m1,x2,m2,m3);
         }
     };
 
-    // algo 98: Check for aliases when calling Inst functions
+    // algo 980: Check for aliases when calling Inst functions
     // We don't have a separate Inst function for this.  We just
     // split the operation into two parts: 
     // m3 = x1*m1; 
@@ -435,9 +434,9 @@ namespace tmv {
     // normal ones, so we need to put some alias checking here.
     template <int cs, int rs, int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    struct AddMM_Helper<98,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
+    struct AddMM_Helper<980,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -470,7 +469,7 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddMM_Helper<99,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -505,7 +504,7 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddMM_Helper<-1,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -520,9 +519,8 @@ namespace tmv {
             typedef typename M2::value_type TM2;
             typedef typename M3::value_type TM3;
             const bool inst =
-                M1::unknownsizes &&
-                M2::unknownsizes &&
-                M3::unknownsizes &&
+                (cs == UNKNOWN || cs > 16) &&
+                (rs == UNKNOWN || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<TM1,TM2>::samebase &&
                 Traits2<TM1,TM3>::samebase &&
@@ -533,7 +531,7 @@ namespace tmv {
                 Traits<TM3>::isinst;
             const int algo = 
                 // We do a different alias check for the Inst calls.
-                inst ? 98 :
+                inst ? 980 :
                 checkalias ? 99 : 
                 -2;
             AddMM_Helper<algo,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>::call(
@@ -543,7 +541,7 @@ namespace tmv {
 
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void AddMM(
+    static void AddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Rec<M1>& m1, 
         const Scaling<ix2,T2>& x2, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -574,7 +572,7 @@ namespace tmv {
 
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void NoAliasAddMM(
+    static void NoAliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Rec<M1>& m1, 
         const Scaling<ix2,T2>& x2, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -605,7 +603,7 @@ namespace tmv {
 
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void InlineAddMM(
+    static void InlineAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Rec<M1>& m1, 
         const Scaling<ix2,T2>& x2, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -636,7 +634,7 @@ namespace tmv {
 
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void AliasAddMM(
+    static void AliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Rec<M1>& m1, 
         const Scaling<ix2,T2>& x2, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -659,9 +657,8 @@ namespace tmv {
         typedef typename M2::value_type TM2;
         typedef typename M3::value_type TM3;
         const bool inst =
-            M1::unknownsizes &&
-            M2::unknownsizes &&
-            M3::unknownsizes &&
+            (cs == UNKNOWN || cs > 16) &&
+            (rs == UNKNOWN || rs > 16) &&
 #ifdef TMV_INST_MIX
             Traits2<TM1,TM2>::samebase &&
             Traits2<TM1,TM3>::samebase &&
@@ -676,7 +673,7 @@ namespace tmv {
         M1v m1v = m1.cView();
         M2v m2v = m2.cView();
         M3v m3v = m3.cView();
-        AddMM_Helper<inst?98:99,cs,rs,ix1,T1,M1v,ix2,T2,M2v,M3v>::call(
+        AddMM_Helper<inst?980:99,cs,rs,ix1,T1,M1v,ix2,T2,M2v,M3v>::call(
             x1,m1v,x2,m2v,m3v);
     }
 

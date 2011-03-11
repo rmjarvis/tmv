@@ -1,4 +1,5 @@
 #define CT std::complex<T>
+#define FT Traits<T>::float_type
 
 #define Def1(T,C) \
   template void InstCopy(const ConstVectorView<T,UNKNOWN,C>& v1, \
@@ -11,7 +12,6 @@ Def1(CT,false)
 Def1(CT,true)
 #endif
 
-#undef Def1
 
 #ifdef TMV_INST_MIX
 template void InstCopy(const ConstVectorView<T >& v1, VectorView<CT > v2); 
@@ -20,26 +20,14 @@ template void InstCopy(const ConstVectorView<T >& v1, VectorView<CT > v2);
 #define Def2(RT,T) \
   template void InstReverseSelf(VectorView<T > v); \
   template T InstSumElements(const ConstVectorView<T >& v); \
-  template T InstMaxElement(const ConstVectorView<T >& v, int*const imax); \
-  template T InstMinElement(const ConstVectorView<T >& v, int*const imin); \
-  template RT InstSumAbsElements(const ConstVectorView<T >& v); \
-  template RT InstMaxAbsElement(const ConstVectorView<T >& v, int*const imax); \
-  template RT InstMinAbsElement(const ConstVectorView<T >& v, int*const imax); \
+  template T InstMaxElement(const ConstVectorView<T >& v, int* imax); \
+  template T InstMinElement(const ConstVectorView<T >& v, int* imin); \
   template RT InstSumAbs2Elements(const ConstVectorView<T >& v); \
-  template RT InstMaxAbs2Element(const ConstVectorView<T >& v, int*const imax); \
-  template RT InstMinAbs2Element(const ConstVectorView<T >& v, int*const imax); \
+  template RT InstMaxAbs2Element(const ConstVectorView<T >& v, int* imax); \
+  template RT InstMinAbs2Element(const ConstVectorView<T >& v, int* imax); \
   template RT InstNormSq(const ConstVectorView<T >& v);  \
-  template RT InstNormSq(const ConstVectorView<T >& v, const RT scale);  \
-  template RT InstNorm2(const ConstVectorView<T >& v); \
   template void InstSort(VectorView<T > v, ADType ad, CompType comp); \
   template void InstSort(VectorView<T > v, int* P, ADType ad, CompType comp); \
-  template void InstWrite(std::ostream& os, const ConstVectorView<T >& v); \
-  template void InstWrite( \
-      std::ostream& os, const ConstVectorView<T,UNKNOWN,true>& v); \
-  template void InstWrite( \
-      std::ostream& os, const ConstVectorView<T >& v, RT thresh); \
-  template void InstWrite(std::ostream& os, \
-      const ConstVectorView<T,UNKNOWN,true>& v, RT thresh); \
   template void InstRead(std::istream& is, VectorView<T > v); \
   template void InstRead( \
       std::istream& is, VectorView<T,UNKNOWN,true> v); \
@@ -49,11 +37,38 @@ Def2(T,T)
 Def2(T,CT)
 #endif
 
-#undef Def2
+#define Def3(RT,T) \
+  template RT InstSumAbsElements(const ConstVectorView<T >& v); \
+  template RT InstMaxAbsElement(const ConstVectorView<T >& v, int* imax); \
+  template RT InstMinAbsElement(const ConstVectorView<T >& v, int* imax); \
+  template RT InstNorm2(const ConstVectorView<T >& v); \
+  template RT InstNormSq(const ConstVectorView<T >& v, const RT scale);  \
+
+Def3(FT,T)
+#ifdef TMV_INST_COMPLEX
+Def3(FT,CT)
+#endif
+
+#define Def4(RT,T,C) \
+  template void InstWrite( \
+      std::ostream& os, const ConstVectorView<T,UNKNOWN,C>& v); \
+  template void InstWrite(std::ostream& os, \
+      const ConstVectorView<T,UNKNOWN,C>& v, RT thresh); \
+
+Def4(FT,T,false)
+#ifdef TMV_INST_COMPLEX
+Def4(FT,CT,false)
+Def4(FT,CT,true)
+#endif
+
 
 #ifdef TMV_INST_COMPLEX
   template void InstConjugateSelf(VectorView<CT > v); 
 #endif
   
+#undef Def1
+#undef Def2
+#undef Def3
+#undef Def4
 #undef CT
 

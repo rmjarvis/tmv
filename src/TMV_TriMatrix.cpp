@@ -39,6 +39,7 @@
 #include "tmv/TMV_CopyU.h"
 #include "tmv/TMV_SwapU.h"
 #include "tmv/TMV_NormU.h"
+#include "tmv/TMV_Norm.h"
 
 namespace tmv {
 
@@ -133,7 +134,7 @@ namespace tmv {
     }
 
     template <class T>
-    static typename Traits<T>::real_type DoInstSumAbsElements(
+    static typename ConstUpperTriMatrixView<T>::float_type DoInstSumAbsElements(
         const ConstUpperTriMatrixView<T>& m)
     {
         if (m.isrm()) return InlineSumAbsElements(m.rmView());
@@ -160,9 +161,9 @@ namespace tmv {
     }
 
     template <class T>
-    static typename Traits<T>::real_type DoInstNormSq(
+    static typename ConstUpperTriMatrixView<T>::float_type DoInstNormSq(
         const ConstUpperTriMatrixView<T>& m,
-        const typename Traits<T>::real_type scale)
+        const typename ConstUpperTriMatrixView<T>::float_type scale)
     {
         if (m.isrm()) return InlineNormSq(m.rmView());
         else if (m.iscm()) return InlineNormSq(m.cmView());
@@ -170,7 +171,7 @@ namespace tmv {
     }
 
     template <class T>
-    static typename Traits<T>::real_type DoInstNormF(
+    static typename ConstUpperTriMatrixView<T>::float_type DoInstNormF(
         const ConstUpperTriMatrixView<T>& m)
     {
         if (m.isrm()) return InlineNormF(m.rmView());
@@ -179,7 +180,7 @@ namespace tmv {
     }
 
     template <class T>
-    static typename Traits<T>::real_type DoInstMaxAbsElement(
+    static typename ConstUpperTriMatrixView<T>::float_type DoInstMaxAbsElement(
         const ConstUpperTriMatrixView<T>& m)
     {
         if (m.isrm()) return InlineMaxAbsElement(m.rmView());
@@ -188,7 +189,16 @@ namespace tmv {
     }
 
     template <class T>
-    static typename Traits<T>::real_type DoInstNorm1(
+    static typename Traits<T>::real_type DoInstMaxAbs2Element(
+        const ConstUpperTriMatrixView<T>& m)
+    {
+        if (m.isrm()) return InlineMaxAbs2Element(m.rmView());
+        else if (m.iscm()) return InlineMaxAbs2Element(m.cmView());
+        else return InlineMaxAbs2Element(m);
+    }
+
+    template <class T>
+    static typename ConstUpperTriMatrixView<T>::float_type DoInstNorm1(
         const ConstUpperTriMatrixView<T>& m)
     {
         if (m.isrm()) return InlineNorm1(m.rmView());
@@ -197,12 +207,12 @@ namespace tmv {
     }
 
     template <class T>
-    static typename Traits<T>::real_type DoInstNormInf(
-        const ConstUpperTriMatrixView<T>& m)
+    static typename ConstLowerTriMatrixView<T>::float_type DoInstNorm1(
+        const ConstLowerTriMatrixView<T>& m)
     {
-        if (m.isrm()) return InlineNormInf(m.rmView());
-        else if (m.iscm()) return InlineNormInf(m.cmView());
-        else return InlineNormInf(m);
+        if (m.isrm()) return InlineNorm1(m.rmView());
+        else if (m.iscm()) return InlineNorm1(m.cmView());
+        else return InlineNorm1(m);
     }
 
 #ifdef XLAP
@@ -275,10 +285,16 @@ namespace tmv {
         return norm;
     }
 
+    static double DoInstMaxAbs2Element(const ConstUpperTriMatrixView<double>& m)
+    { return DoInstMaxAbsElement(m); }
+    static double DoInstMaxAbs2Element(
+        const ConstUpperTriMatrixView<std::complex<double> >& m)
+    { return InlineMaxAbs2Element(m); }
+
     static double DoInstNorm1(const ConstUpperTriMatrixView<double>& m)
     { 
         if (!m.iscm() && !m.isrm()) return DoInstNorm1(m.copy());
-        char c = m.isrm() ? 'I' : '1';
+        char c = m.iscm() ? '1' : 'I';
         int N = m.size();
         int M = N;
         int lda = m.iscm() ? m.stepj() : m.stepi();
@@ -297,45 +313,7 @@ namespace tmv {
         const ConstUpperTriMatrixView<std::complex<double> >& m)
     {
         if (!m.iscm() && !m.isrm()) return DoInstNorm1(m.copy());
-        char c = m.isrm() ? 'I' : '1';
-        int N = m.size();
-        int M = N;
-        int lda = m.iscm() ? m.stepj() : m.stepi();
-        TMVAssert(lda >= m);
-#ifndef LAPNOWORK
-        auto_array<double> work(c == 'I' ? new double[M] : 0);
-#endif
-        double norm = LAPNAME(zlantr) (
-            LAPCM LAPV(c),
-            m.iscm() ? LAPCH_UP : LAPCH_LO , m.isunit() ? LAPCH_U : LAPCH_NU,
-            LAPV(M),LAPV(N), LAPP(m.cptr()),LAPV(lda) LAPWK(work.get())
-            LAP1 LAP1 LAP1);
-        return norm;
-    }
-
-    static double DoInstNormInf(const ConstUpperTriMatrixView<double>& m)
-    { 
-        if (!m.iscm() && !m.isrm()) return DoInstNormInf(m.copy());
-        char c = m.isrm() ? '1' : 'I';
-        int N = m.size();
-        int M = N;
-        int lda = m.iscm() ? m.stepj() : m.stepi();
-        TMVAssert(lda >= m);
-#ifndef LAPNOWORK
-        auto_array<double> work(c == 'I' ? new double[M] : 0);
-#endif
-        double norm = LAPNAME(dlantr) (
-            LAPCM LAPV(c),
-            m.iscm() ? LAPCH_UP : LAPCH_LO , m.isunit() ? LAPCH_U : LAPCH_NU,
-            LAPV(M),LAPV(N), LAPP(m.cptr()),LAPV(lda) LAPWK(work.get())
-            LAP1 LAP1 LAP1);
-        return norm;
-    }
-    static double DoInstNormInf(
-        const ConstUpperTriMatrixView<std::complex<double> >& m)
-    {
-        if (!m.iscm() && !m.isrm()) return DoInstNormInf(m.copy());
-        char c = m.isrm() ? '1' : 'I';
+        char c = m.iscm() ? '1' : 'I';
         int N = m.size();
         int M = N;
         int lda = m.iscm() ? m.stepj() : m.stepi();
@@ -420,10 +398,16 @@ namespace tmv {
         return norm;
     }
 
+    static float DoInstMaxAbs2Element(const ConstUpperTriMatrixView<float>& m)
+    {  return DoInstMaxAbsElement(m); }
+    static float DoInstMaxAbs2Element(
+        const ConstUpperTriMatrixView<std::complex<float> >& m)
+    { return InlineMaxAbs2Element(m); } 
+
     static float DoInstNorm1(const ConstUpperTriMatrixView<float>& m)
     { 
         if (!m.iscm() && !m.isrm()) return DoInstNorm1(m.copy());
-        char c = m.isrm() ? 'I' : '1';
+        char c = m.iscm() ? 'I' : '1';
         int N = m.size();
         int M = N;
         int lda = m.iscm() ? m.stepj() : m.stepi();
@@ -442,45 +426,7 @@ namespace tmv {
         const ConstUpperTriMatrixView<std::complex<float> >& m)
     {
         if (!m.iscm() && !m.isrm()) return DoInstNorm1(m.copy());
-        char c = m.isrm() ? 'I' : '1';
-        int N = m.size();
-        int M = N;
-        int lda = m.iscm() ? m.stepj() : m.stepi();
-        TMVAssert(lda >= m);
-#ifndef LAPNOWORK
-        auto_array<float> work(c == 'I' ? new float[M] : 0);
-#endif
-        float norm = LAPNAME(clantr) (
-            LAPCM LAPV(c),
-            m.iscm() ? LAPCH_UP : LAPCH_LO , m.isunit() ? LAPCH_U : LAPCH_NU,
-            LAPV(M),LAPV(N), LAPP(m.cptr()),LAPV(lda) LAPWK(work.get())
-            LAP1 LAP1 LAP1);
-        return norm;
-    }
-
-    static float DoInstNormInf(const ConstUpperTriMatrixView<float>& m)
-    { 
-        if (!m.iscm() && !m.isrm()) return DoInstNormInf(m.copy());
-        char c = m.isrm() ? '1' : 'I';
-        int N = m.size();
-        int M = N;
-        int lda = m.iscm() ? m.stepj() : m.stepi();
-        TMVAssert(lda >= m);
-#ifndef LAPNOWORK
-        auto_array<float> work(c == 'I' ? new float[M] : 0);
-#endif
-        float norm = LAPNAME(slantr) (
-            LAPCM LAPV(c),
-            m.iscm() ? LAPCH_UP : LAPCH_LO , m.isunit() ? LAPCH_U : LAPCH_NU,
-            LAPV(M),LAPV(N), LAPP(m.cptr()),LAPV(lda) LAPWK(work.get())
-            LAP1 LAP1 LAP1);
-        return norm;
-    }
-    static float DoInstNormInf(
-        const ConstUpperTriMatrixView<std::complex<float> >& m)
-    {
-        if (!m.iscm() && !m.isrm()) return DoInstNormInf(m.copy());
-        char c = m.isrm() ? '1' : 'I';
+        char c = m.iscm() ? 'I' : '1';
         int N = m.size();
         int M = N;
         int lda = m.iscm() ? m.stepj() : m.stepi();
@@ -503,7 +449,7 @@ namespace tmv {
     { return DoInstSumElements(m); }
 
     template <class T>
-    typename Traits<T>::real_type InstSumAbsElements(
+    typename ConstUpperTriMatrixView<T>::float_type InstSumAbsElements(
         const ConstUpperTriMatrixView<T>& m)
     { return DoInstSumAbsElements(m); }
 
@@ -518,30 +464,35 @@ namespace tmv {
     { return DoInstNormSq(m); }
 
     template <class T>
-    typename Traits<T>::real_type InstNormSq(
+    typename ConstUpperTriMatrixView<T>::float_type InstNormSq(
         const ConstUpperTriMatrixView<T>& m,
-        const typename Traits<T>::real_type scale)
+        const typename ConstUpperTriMatrixView<T>::float_type scale)
     { return DoInstNormSq(m,scale); }
 
     template <class T>
-    typename Traits<T>::real_type InstNormF(
+    typename ConstUpperTriMatrixView<T>::float_type InstNormF(
         const ConstUpperTriMatrixView<T>& m)
     { return DoInstNormF(m); }
 
     template <class T>
-    typename Traits<T>::real_type InstMaxAbsElement(
+    typename ConstUpperTriMatrixView<T>::float_type InstMaxAbsElement(
         const ConstUpperTriMatrixView<T>& m)
     { return DoInstMaxAbsElement(m); }
 
     template <class T>
-    typename Traits<T>::real_type InstNorm1(
+    typename Traits<T>::real_type InstMaxAbs2Element(
+        const ConstUpperTriMatrixView<T>& m)
+    { return DoInstMaxAbs2Element(m); }
+
+    template <class T>
+    typename ConstUpperTriMatrixView<T>::float_type InstNorm1(
         const ConstUpperTriMatrixView<T>& m)
     { return DoInstNorm1(m); }
 
     template <class T>
-    typename Traits<T>::real_type InstNormInf(
-        const ConstUpperTriMatrixView<T>& m)
-    { return DoInstNormInf(m); }
+    typename ConstLowerTriMatrixView<T>::float_type InstNorm1(
+        const ConstLowerTriMatrixView<T>& m)
+    { return DoInstNorm1(m); }
 
 #if 0
     template <class T> 
@@ -585,7 +536,7 @@ namespace tmv {
     void InstWriteCompact(
         std::ostream& os,
         const ConstUpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>& m, 
-        typename Traits<T>::real_type thresh)
+        typename ConstUpperTriMatrixView<T>::float_type thresh)
     {
         if (m.isrm()) InlineWriteCompact(os,m.rmView(),thresh);
         else if (m.iscm()) InlineWriteCompact(os,m.cmView(),thresh);
@@ -596,7 +547,7 @@ namespace tmv {
     void InstWriteCompact(
         std::ostream& os,
         const ConstLowerTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>& m, 
-        typename Traits<T>::real_type thresh)
+        typename ConstLowerTriMatrixView<T>::float_type thresh)
     {
         if (m.isrm()) InlineWriteCompact(os,m.rmView(),thresh);
         else if (m.iscm()) InlineWriteCompact(os,m.cmView(),thresh);

@@ -48,26 +48,26 @@ namespace tmv {
 
     // Defined below:
     template <int ix, class T, class M1, class M2>
-    inline void MakeInverse(
+    static void MakeInverse(
         const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
         BaseMatrix_Mutable<M2>& m2);
     template <int ix, class T, class M1, class M2>
-    inline void NoAliasMakeInverse(
+    static void NoAliasMakeInverse(
         const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
         BaseMatrix_Mutable<M2>& m2);
     template <int ix, class T, class M1, class M2>
-    inline void AliasMakeInverse(
+    static void AliasMakeInverse(
         const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
         BaseMatrix_Mutable<M2>& m2);
 
     template <class M1, class M2>
-    inline void MakeInverseATA(
+    static void MakeInverseATA(
         const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2);
     template <class M1, class M2>
-    inline void NoAliasMakeInverseATA(
+    static void NoAliasMakeInverseATA(
         const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2);
     template <class M1, class M2>
-    inline void AliasMakeInverseATA(
+    static void AliasMakeInverseATA(
         const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2);
 
     //
@@ -92,7 +92,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<0,cs,rs,ix,T,M1,M2>
     {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {}
     };
 
@@ -100,7 +100,7 @@ namespace tmv {
     template <int ix, class T, class M1, class M2>
     struct InvertM_Helper<1,1,1,ix,T,M1,M2>
     {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -118,7 +118,7 @@ namespace tmv {
     template <int ix, class T, class M1, class M2>
     struct InvertM_Helper<2,2,2,ix,T,M1,M2>
     {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         { 
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -149,7 +149,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<11,cs,rs,ix,T,M1,M2>
     {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         { 
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -157,6 +157,7 @@ namespace tmv {
             std::cout<<"InvM algo 11: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
             std::cout<<"m1.divIsSet = "<<m1.divIsSet()<<std::endl;
+            std::cout<<"m1.getDivType = "<<TMV_Text(m1.getDivType())<<std::endl;
 #endif
             if (m1.divIsSet() || m1.getDivType() != tmv::LU) {
                 m1.setDiv();
@@ -166,12 +167,7 @@ namespace tmv {
             } else {
                 // Special case: if LU and not set already,
                 // do the LU decomposition on m2 instead of m1.
-                Copy(m1,m2);
-                AlignedArray<int> P(m1.rowsize());
-                int detp=0;
-                LU_Decompose(m2,P,detp);
-                LU_Inverse(m2,P);
-                Scale(x,m2);
+                InvertM_Helper<12,cs,rs,ix,T,M1,M2>::call(x,m1,m2);
             }
         }
     };
@@ -180,7 +176,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<12,cs,rs,ix,T,M1,M2>
     {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         { 
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -188,39 +184,11 @@ namespace tmv {
             std::cout<<"InvM algo 12: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
-#if 1
             // This way is slightly faster than going through m1.lud()
             // since it skips the temporary LU matrix.
             Copy(m1,m2);
-            StackArray<int,rs> P;
-            int detp=0;
-            LU_Decompose(m2,P,detp);
-            LU_Inverse(m2,P);
-#else
-            m1.lud().makeInverse(m2);
-#endif
-            Scale(x,m2);
-        }
-    };
-    template <int cs, int ix, class T, class M1, class M2>
-    struct InvertM_Helper<12,cs,UNKNOWN,ix,T,M1,M2>
-    {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
-        { 
-#ifdef PRINTALGO_InvM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
-            std::cout<<"InvM algo 12: M,N,cs,rs = "<<M<<','<<N<<','<<
-                cs<<','<<UNKNOWN<<std::endl;
-#endif
-            // Normally algo 12 will only be called for SmallMatrices
-            // which will have a known value for rs.
-            // But it is possible to get here, so we need to have a 
-            // version that doesn't use StackArray.
-            Copy(m1,m2);
-            AlignedArray<int> P(m1.rowsize());
-            int detp=0;
-            LU_Decompose(m2,P,detp);
+            Permutation P(m1.rowsize());
+            LU_Decompose(m2,P);
             LU_Inverse(m2,P);
             Scale(x,m2);
         }
@@ -230,7 +198,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<13,cs,rs,ix,T,M1,M2>
     {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         { 
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -247,7 +215,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<14,cs,rs,ix,T,M1,M2>
     {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         { 
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -266,7 +234,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<21,cs,rs,ix,T,M1,M2>
     {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -291,7 +259,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<22,cs,rs,ix,T,M1,M2>
     {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -327,7 +295,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<23,cs,rs,ix,T,M1,M2>
     {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -351,7 +319,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<24,cs,rs,ix,T,M1,M2>
     {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -375,7 +343,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<25,cs,rs,ix,T,M1,M2>
     {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -401,7 +369,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<31,cs,rs,ix,T,M1,M2>
     {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -426,7 +394,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<32,cs,rs,ix,T,M1,M2>
     {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -453,7 +421,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<33,cs,rs,ix,T,M1,M2>
     {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -476,7 +444,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<34,cs,rs,ix,T,M1,M2>
     {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -499,7 +467,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<41,cs,rs,ix,T,M1,M2>
     {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -524,7 +492,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<42,cs,rs,ix,T,M1,M2>
     {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -551,7 +519,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<43,cs,rs,ix,T,M1,M2>
     {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -574,7 +542,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<44,cs,rs,ix,T,M1,M2>
     {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -598,7 +566,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<-2,cs,rs,ix,T,M1,M2>
     {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             const bool up1 = ShapeTraits<M1::_shape>::upper;
             const bool lo1 = ShapeTraits<M1::_shape>::lower;
@@ -637,7 +605,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<99,cs,rs,ix,T,M1,M2>
     {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             const bool up1 = ShapeTraits<M1::_shape>::upper;
             const bool lo1 = ShapeTraits<M1::_shape>::lower;
@@ -676,11 +644,11 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<-1,cs,rs,ix,T,M1,M2>
     {
-        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             const bool checkalias = 
-                M1::unknownsizes &&
-                M2::unknownsizes;
+                M1::_colsize == UNKNOWN && M1::_rowsize == UNKNOWN &&
+                M2::_colsize == UNKNOWN && M2::_rowsize == UNKNOWN;
             const int algo = 
                 cs == 0 || rs == 0 ? 0 :
                 cs == 1 && rs == 1 ? 1 :
@@ -691,10 +659,14 @@ namespace tmv {
     };
 
     template <int algo, int ix, class T, class M1, class M2>
-    inline void DoMakeInverse(
+    static void DoMakeInverse(
         const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
         BaseMatrix_Mutable<M2>& m2)
     {
+        typedef typename M1::real_type RT1;
+        typedef typename M2::real_type RT2;
+        TMVStaticAssert(!Traits<RT1>::isinteger);
+        TMVStaticAssert(!Traits<RT2>::isinteger);
         TMVStaticAssert((Sizes<M1::_colsize,M2::_rowsize>::same));
         TMVStaticAssert((Sizes<M1::_rowsize,M2::_colsize>::same));
         TMVAssert(m1.colsize() == m2.rowsize());
@@ -709,19 +681,19 @@ namespace tmv {
     }
 
     template <int ix, class T, class M1, class M2>
-    inline void MakeInverse(
+    static void MakeInverse(
         const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
         BaseMatrix_Mutable<M2>& m2)
     { DoMakeInverse<-1>(x,m1,m2); }
 
     template <int ix, class T, class M1, class M2>
-    inline void NoAliasMakeInverse(
+    static void NoAliasMakeInverse(
         const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
         BaseMatrix_Mutable<M2>& m2)
     { DoMakeInverse<-2>(x,m1,m2); }
 
     template <int ix, class T, class M1, class M2>
-    inline void AliasMakeInverse(
+    static void AliasMakeInverse(
         const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
         BaseMatrix_Mutable<M2>& m2)
     { DoMakeInverse<99>(x,m1,m2); }
@@ -750,7 +722,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<0,cs,rs,M1,M2>
     {
-        static inline void call(const M1& , M2& )
+        static void call(const M1& , M2& )
         {}
     };
 
@@ -758,7 +730,7 @@ namespace tmv {
     template <class M1, class M2>
     struct InverseATA_Helper<1,1,1,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -778,7 +750,7 @@ namespace tmv {
     template <int cs, class M1, class M2>
     struct InverseATA_Helper<2,cs,2,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         { 
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -798,7 +770,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<11,cs,rs,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         { 
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -816,7 +788,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<12,cs,rs,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         { 
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -833,7 +805,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<13,cs,rs,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -850,7 +822,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<14,cs,rs,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -869,7 +841,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<21,cs,rs,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -895,7 +867,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<22,cs,rs,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -923,7 +895,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<23,cs,rs,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -948,7 +920,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<24,cs,rs,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -973,7 +945,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<25,cs,rs,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -1000,7 +972,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<31,cs,rs,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -1025,7 +997,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<32,cs,rs,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -1050,7 +1022,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<41,cs,rs,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -1075,7 +1047,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<42,cs,rs,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
@@ -1100,7 +1072,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<-2,cs,rs,M1,M2> 
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         {
             const bool up1 = ShapeTraits<M1::_shape>::upper;
             const bool lo1 = ShapeTraits<M1::_shape>::lower;
@@ -1137,7 +1109,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<99,cs,rs,M1,M2> 
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         {
             const bool up1 = ShapeTraits<M1::_shape>::upper;
             const bool lo1 = ShapeTraits<M1::_shape>::lower;
@@ -1174,7 +1146,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<-1,cs,rs,M1,M2> 
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         {
             const bool checkalias = 
                 M1::_colsize == UNKNOWN && M1::_rowsize == UNKNOWN &&
@@ -1189,9 +1161,13 @@ namespace tmv {
     };
 
     template <int algo, class M1, class M2>
-    inline void DoMakeInverseATA(
+    static  void DoMakeInverseATA(
         const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2)
     {
+        typedef typename M1::real_type RT1;
+        typedef typename M2::real_type RT2;
+        TMVStaticAssert(!Traits<RT1>::isinteger);
+        TMVStaticAssert(!Traits<RT2>::isinteger);
         TMVStaticAssert((Sizes<M1::_colsize,M2::_rowsize>::same));
         TMVStaticAssert((Sizes<M1::_rowsize,M2::_colsize>::same));
         TMVAssert(m1.colsize() == m2.rowsize());
@@ -1206,17 +1182,17 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    inline void MakeInverseATA(
+    static  void MakeInverseATA(
         const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2)
     { DoMakeInverseATA<-1>(m1,m2); }
 
     template <class M1, class M2>
-    inline void NoAliasMakeInverseATA(
+    static  void NoAliasMakeInverseATA(
         const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2)
     { DoMakeInverseATA<-2>(m1,m2); }
 
     template <class M1, class M2>
-    inline void AliasMakeInverseATA(
+    static  void AliasMakeInverseATA(
         const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2)
     { DoMakeInverseATA<99>(m1,m2); }
 

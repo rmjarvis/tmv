@@ -1,6 +1,6 @@
 
 #include "TMV_Test.h"
-#include "TMV_Test3.h"
+#include "TMV_Test_3.h"
 
 #include "TMV.h"
 #include <fstream>
@@ -82,6 +82,7 @@ void TestSmallMatrixArith_6(std::string label)
     tmv::SmallMatrixView<CT,N,K,1,N> ca2c = ca2cx.view();
 
     TestMatrixArith6x<T>(a1c,ca1c,a2c,ca2c,label+" CM/CM");
+#if 0
 #if (XTEST & 2)
     TestMatrixArith6x<T>(a1r,ca1r,a2r,ca2r,label+" RM/RM");
     TestMatrixArith6x<T>(a1r,ca1r,a2c,ca2c,label+" RM/CM");
@@ -126,5 +127,6 @@ void TestSmallMatrixArith_6(std::string label)
     TestMatrixArith6<T>(a1r,ca1r,a2r,ca2r,a3r,ca3r,label+" RM/RM/RM");
     TestMatrixArith6<T>(a1r,ca1r,a2c,ca2c,a3r,ca3r,label+" RM/CM/RM");
     TestMatrixArith6<T>(a1c,ca1c,a2r,ca2r,a3r,ca3r,label+" CM/RM/RM");
+#endif
 #endif
 }

@@ -1,16 +1,35 @@
 
 #include "TMV_Test.h"
-#include "TMV_Test1.h"
+#include "TMV_Test_1.h"
 #include "TMV.h"
 #include <fstream>
 #include <cstdio>
+
+// Break this part out, since we need to skip it for integers
+template <class T> void TestDiagMatrixInvert()
+{
+    const int N = 10;
+    tmv::DiagMatrix<T> a(N);
+    for (int i=0; i<N; ++i) a(i,i) = T(3+5*i);
+
+    tmv::DiagMatrix<T> ainv = a;
+    ainv.invertSelf();
+    tmv::DiagMatrix<T> ainv2 = a.inverse();
+    for(int i=0;i<N;++i)
+        Assert(std::abs(a(i)*ainv(i) - T(1)) < 1.e-6,"DiagMatrix invertSelf");
+    for(int i=0;i<N;++i)
+        Assert(std::abs(a(i)*ainv2(i) - T(1)) < 1.e-6,"DiagMatrix inverse()");
+}
+
+template <> void TestDiagMatrixInvert<int>()
+{}
 
 template <class T> void TestDiagMatrix()
 {
     const int N = 10;
 
     tmv::DiagMatrix<T> a(N);
-    tmv::DiagMatrixF<T> af(N);
+    tmv::DiagMatrix<T,tmv::FortranStyle> af(N);
     Assert(a.colsize() == size_t(N) && a.rowsize() == size_t(N),
            "Creating DiagMatrix(N)");
     Assert(af.colsize() == size_t(N) && af.rowsize() == size_t(N),
@@ -85,16 +104,21 @@ template <class T> void TestDiagMatrix()
             Assert(a(i,j) == m(i,j),"DiagMatrix -> Matrix");
     Assert(a == tmv::DiagMatrix<T>(m),"Matrix -> DiagMatrix");
 
-    tmv::DiagMatrix<T> ainv = a;
-    ainv.invertSelf();
-    tmv::DiagMatrix<T> ainv2 = a.inverse();
-    for(int i=0;i<N;++i)
-        Assert(std::abs(a(i)*ainv(i) - T(1)) < 1.e-6,"DiagMatrix invertSelf");
-    for(int i=0;i<N;++i)
-        Assert(std::abs(a(i)*ainv2(i) - T(1)) < 1.e-6,"DiagMatrix inverse()");
 
     tmv::DiagMatrix<std::complex<T> > ca = a*std::complex<T>(1,2);
     tmv::DiagMatrix<std::complex<T> > cb = b*std::complex<T>(-5,-1);
+
+    a.resize(2);
+    Assert(a.size() == 2,"DiagMatrix a.resize(2)");
+    for (int i=0; i<2; ++i) a(i,i) = T(i);
+    for (int i=0; i<2; ++i) 
+        Assert(a(i,i) == i,"Read/Write resized DiagMatrix");
+
+    a.resize(2*N);
+    Assert(a.size() == 2*N,"DiagMatrix a.resize(2*N)");
+    for (int i=0; i<2*N; ++i) a(i,i) = T(i);
+    for (int i=0; i<2*N; ++i) 
+        Assert(a(i,i) == i,"Read/Write resized DiagMatrix");
 
     // Test I/O
 
@@ -150,7 +174,8 @@ template <class T> void TestDiagMatrix()
     std::remove("tmvtest_diagmatrix_io.dat");
 #endif
 
-#if 1
+    TestDiagMatrixInvert<T>();
+
     TestDiagMatrixArith_A1<T>();
     TestDiagMatrixArith_A2<T>();
     TestDiagMatrixArith_A3<T>();
@@ -163,10 +188,10 @@ template <class T> void TestDiagMatrix()
     TestDiagMatrixArith_B5b<T>();
     TestDiagMatrixArith_B6a<T>();
     TestDiagMatrixArith_B6b<T>();
-#endif
 
     std::cout<<"DiagMatrix<"<<tmv::TMV_Text(T())<<"> passed all tests\n";
 }
+
 
 #ifdef TEST_DOUBLE
 template void TestDiagMatrix<double>();

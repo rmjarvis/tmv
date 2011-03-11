@@ -1,27 +1,23 @@
 
 #define CT std::complex<T>
 
-#define DefXU1(T1,D1,C1,T2) \
+#define Def1(T1,C1,T2) \
   template void InstMultXM(const T2 x, \
-      const ConstUpperTriMatrixView<T1,D1,UNKNOWN,UNKNOWN,C1>& m1, \
+      const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1, \
       UpperTriMatrixView<T2,NonUnitDiag> m2); \
   template void InstAddMultXM(const T2 x, \
-      const ConstUpperTriMatrixView<T1,D1,UNKNOWN,UNKNOWN,C1>& m1, \
+      const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1, \
       UpperTriMatrixView<T2,NonUnitDiag> m2); \
 
-#define DefXU(T1,C1,T2) \
-  DefXU1(T1,UnknownDiag,C1,T2)
-
-DefXU(T,false,T)
+Def1(T,false,T)
 #ifdef TMV_INST_COMPLEX
 #ifdef TMV_INST_MIX
-DefXU(T,false,CT)
+Def1(T,false,CT)
 #endif
-DefXU(CT,false,CT)
-DefXU(CT,true,CT)
+Def1(CT,false,CT)
+Def1(CT,true,CT)
 #endif
 
-#undef DefXU1
-#undef DefXU
+#undef Def1
 #undef CT
 

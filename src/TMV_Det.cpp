@@ -29,6 +29,7 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
+//#define PRINTALGO_Det
 
 #include "tmv/TMV_Det.h"
 #include "tmv/TMV_Vector.h"
@@ -51,8 +52,9 @@ namespace tmv {
     }
 
     template <class T>
-    typename Traits<T>::real_type InstLogProdElements(
-        const ConstVectorView<T>& v, T* sign)
+    typename ConstVectorView<T>::float_type InstLogProdElements(
+        const ConstVectorView<T>& v,
+        typename ConstVectorView<T>::zfloat_type* sign)
     {
         if (v.step() == 1) {
             ConstVectorView<T,1> vunit = v.unitView();

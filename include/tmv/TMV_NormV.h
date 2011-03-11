@@ -37,48 +37,84 @@
 
 namespace tmv {
 
-    // TODO: Convert to new algo numbering scheme
     // TODO: Write SSE algo's.
+    // The real version of SumAbsElements is one routine where the 
+    // BLAS function (dasum) on my computer is significantly 
+    // (~30%) faster than TMV.
+    // I haven't figured out any way to make the function faster though.
+    // Maybe the SSE algos will be the difference.
     
     // 
     // SumElements
+    // SumAbsElements
+    // SumAbs2Elements
+    // NormSq
     //
 
-    template <int algo, int size, CompType comp, int ix, class V>
+    // Defined in TMV_Vector.cpp
+    template <class T>
+    T InstSumElements(const ConstVectorView<T>& v); 
+    template <class T>
+    typename ConstVectorView<T>::float_type InstSumAbsElements(
+        const ConstVectorView<T>& v);
+    template <class T>
+    typename Traits<T>::real_type InstSumAbs2Elements(
+        const ConstVectorView<T>& v);
+    template <class T>
+    typename Traits<T>::real_type InstNormSq(const ConstVectorView<T>& v); 
+    template <class T>
+    typename ConstVectorView<T>::float_type InstNormSq(
+        const ConstVectorView<T>& v, 
+        typename ConstVectorView<T>::float_type scale); 
+
+    // UNROLL is the maximum nops to unroll.
+#if TMV_OPT >= 3
+#define TMV_NORMV_UNROLL 200 
+#elif TMV_OPT >= 2
+#define TMV_NORMV_UNROLL 25
+#elif TMV_OPT >= 1
+#define TMV_NORMV_UNROLL 9
+#else
+#define TMV_NORMV_UNROLL 0
+#endif
+
+    template <int algo, int s, CompType comp, int ix, class ret, class V>
     struct SumElementsV_Helper;
 
     // algo 1: simple for loop
-    template <int size, CompType comp, int ix, class V>
-    struct SumElementsV_Helper<1,size,comp,ix,V> 
+    template <int s, CompType comp, int ix, class ret, class V>
+    struct SumElementsV_Helper<1,s,comp,ix,ret,V> 
     {
-        typedef typename V::value_type VT;
-        typedef typename V::real_type RT;
-        typedef typename Maybe<comp!=ValueComp>::
-            template RealType<VT>::type ret;
-
-        static inline ret call(const V& v, const Scaling<ix,RT>& x)
+        typedef typename Traits<ret>::real_type RT;
+        static ret call(const V& v, const Scaling<ix,RT>& x)
         {
-            const int n = size == UNKNOWN ? int(v.size()) : size;
+            typedef typename V::value_type VT;
+            typedef typename TypeSelect<
+                V::isreal || Traits<ret>::iscomplex , ret ,
+                std::complex<ret> >::type BT;
+            const int n = s == UNKNOWN ? int(v.size()) : s;
             ret sum(0);
-            for(int i=0;i<n;++i) sum += Component<comp,VT>::f(x * v.cref(i));
+            for(int i=0;i<n;++i) 
+                sum += Component<comp,BT>::f(
+                    x * Traits<BT>::convert(v.cref(i)));
             return sum;
         }
     };
 
     // algo 2: 2 at a time
-    template <int size, CompType comp, int ix, class V>
-    struct SumElementsV_Helper<2,size,comp,ix,V> 
+    template <int s, CompType comp, int ix, class ret, class V>
+    struct SumElementsV_Helper<2,s,comp,ix,ret,V> 
     {
-        typedef typename V::value_type VT;
-        typedef typename V::real_type RT;
-        typedef typename Maybe<comp!=ValueComp>::
-            template RealType<VT>::type ret;
-
-        static inline ret call(const V& v, const Scaling<ix,RT>& x)
+        typedef typename Traits<ret>::real_type RT;
+        static ret call(const V& v, const Scaling<ix,RT>& x)
         {
-            const int n = size == UNKNOWN ? int(v.size()) : size;
+            typedef typename V::value_type VT;
+            typedef typename TypeSelect<
+                V::isreal || Traits<ret>::iscomplex , ret ,
+                std::complex<ret> >::type BT;
+            const int n = s == UNKNOWN ? int(v.size()) : s;
             ret sum0(0), sum1(0);
-            VT v0, v1;
+            BT v0, v1;
             typedef typename V::const_iterator IT;
             IT it = v.begin();
             int n_2 = (n>>1);
@@ -86,37 +122,38 @@ namespace tmv {
 
             if (n_2) {
                 do {
-                    v0 = x * *it; v1 = x*it[1]; it += 2;
-                    Component<comp,VT>::applyf(v0);
-                    Component<comp,VT>::applyf(v1);
-                    sum0 += Component<comp,VT>::get(v0);
-                    sum1 += Component<comp,VT>::get(v1);
+                    v0 = x * Traits<BT>::convert(it[0]); 
+                    v1 = x * Traits<BT>::convert(it[1]); it += 2;
+                    Component<comp,BT>::applyf(v0);
+                    Component<comp,BT>::applyf(v1);
+                    sum0 += Component<comp,BT>::get(v0);
+                    sum1 += Component<comp,BT>::get(v1);
                 } while (--n_2);
                 sum0 += sum1;
             }
             if (nb) {
-                v0 = x * *it;
-                Component<comp,VT>::applyf(v0);
-                sum0 += Component<comp,VT>::get(v0);
+                v0 = x * Traits<BT>::convert(it[0]); 
+                Component<comp,BT>::applyf(v0);
+                sum0 += Component<comp,BT>::get(v0);
             }
             return sum0;
         }
     };
 
     // algo 3: 4 at a time
-    template <int size, CompType comp, int ix, class V>
-    struct SumElementsV_Helper<3,size,comp,ix,V> 
+    template <int s, CompType comp, int ix, class ret, class V>
+    struct SumElementsV_Helper<3,s,comp,ix,ret,V> 
     {
-        typedef typename V::value_type VT;
-        typedef typename V::real_type RT;
-        typedef typename Maybe<comp!=ValueComp>::
-            template RealType<VT>::type ret;
-
-        static inline ret call(const V& v, const Scaling<ix,RT>& x)
+        typedef typename Traits<ret>::real_type RT;
+        static ret call(const V& v, const Scaling<ix,RT>& x)
         {
-            const int n = size == UNKNOWN ? int(v.size()) : size;
+            typedef typename V::value_type VT;
+            typedef typename TypeSelect<
+                V::isreal || Traits<ret>::iscomplex , ret ,
+                std::complex<ret> >::type BT;
+            const int n = s == UNKNOWN ? int(v.size()) : s;
             ret sum0(0), sum1(0);
-            VT v0, v1;
+            BT v0, v1;
             typedef typename V::const_iterator IT;
             IT it = v.begin();
 
@@ -125,43 +162,45 @@ namespace tmv {
 
             if (n_4) {
                 do {
-                    v0 = x*it[0]; v1 = x*it[1];
-                    Component<comp,VT>::applyf(v0);
-                    Component<comp,VT>::applyf(v1);
-                    sum0 += Component<comp,VT>::get(v0);
-                    sum1 += Component<comp,VT>::get(v1);
+                    v0 = x * Traits<BT>::convert(it[0]); 
+                    v1 = x * Traits<BT>::convert(it[1]); 
+                    Component<comp,BT>::applyf(v0);
+                    Component<comp,BT>::applyf(v1);
+                    sum0 += Component<comp,BT>::get(v0);
+                    sum1 += Component<comp,BT>::get(v1);
 
-                    v0 = x*it[2]; v1 = x*it[3]; it += 4;
-                    Component<comp,VT>::applyf(v0);
-                    Component<comp,VT>::applyf(v1);
-                    sum0 += Component<comp,VT>::get(v0);
-                    sum1 += Component<comp,VT>::get(v1);
+                    v0 = x * Traits<BT>::convert(it[2]); 
+                    v1 = x * Traits<BT>::convert(it[3]); it += 4;
+                    Component<comp,BT>::applyf(v0);
+                    Component<comp,BT>::applyf(v1);
+                    sum0 += Component<comp,BT>::get(v0);
+                    sum1 += Component<comp,BT>::get(v1);
                 } while (--n_4);
                 sum0 += sum1;
             }
             if (nb) do {
-                v0 = x*(*it++);
-                Component<comp,VT>::applyf(v0);
-                sum0 += Component<comp,VT>::get(v0);
+                v0 = x * Traits<BT>::convert(*it++); 
+                Component<comp,BT>::applyf(v0);
+                sum0 += Component<comp,BT>::get(v0);
             } while (--nb);
             return sum0;
         }
     };
 
     // algo 4: 8 at a time
-    template <int size, CompType comp, int ix, class V>
-    struct SumElementsV_Helper<4,size,comp,ix,V> 
+    template <int s, CompType comp, int ix, class ret, class V>
+    struct SumElementsV_Helper<4,s,comp,ix,ret,V> 
     {
-        typedef typename V::value_type VT;
-        typedef typename V::real_type RT;
-        typedef typename Maybe<comp!=ValueComp>::
-            template RealType<VT>::type ret;
-
-        static inline ret call(const V& v, const Scaling<ix,RT>& x)
+        typedef typename Traits<ret>::real_type RT;
+        static ret call(const V& v, const Scaling<ix,RT>& x)
         {
-            const int n = size == UNKNOWN ? int(v.size()) : size;
+            typedef typename V::value_type VT;
+            typedef typename TypeSelect<
+                V::isreal || Traits<ret>::iscomplex , ret ,
+                std::complex<ret> >::type BT;
+            const int n = s == UNKNOWN ? int(v.size()) : s;
             ret sum0(0), sum1(0);
-            VT v0, v1;
+            BT v0, v1;
             typedef typename V::const_iterator IT;
             IT it = v.begin();
 
@@ -170,54 +209,58 @@ namespace tmv {
 
             if (n_8) {
                 do {
-                    v0 = x*it[0]; v1 = x*it[1];
-                    Component<comp,VT>::applyf(v0);
-                    Component<comp,VT>::applyf(v1);
-                    sum0 += Component<comp,VT>::get(v0);
-                    sum1 += Component<comp,VT>::get(v1);
+                    v0 = x * Traits<BT>::convert(it[0]); 
+                    v1 = x * Traits<BT>::convert(it[1]); 
+                    Component<comp,BT>::applyf(v0);
+                    Component<comp,BT>::applyf(v1);
+                    sum0 += Component<comp,BT>::get(v0);
+                    sum1 += Component<comp,BT>::get(v1);
 
-                    v0 = x*it[2]; v1 = x*it[3];
-                    Component<comp,VT>::applyf(v0);
-                    Component<comp,VT>::applyf(v1);
-                    sum0 += Component<comp,VT>::get(v0);
-                    sum1 += Component<comp,VT>::get(v1);
+                    v0 = x * Traits<BT>::convert(it[2]); 
+                    v1 = x * Traits<BT>::convert(it[3]);
+                    Component<comp,BT>::applyf(v0);
+                    Component<comp,BT>::applyf(v1);
+                    sum0 += Component<comp,BT>::get(v0);
+                    sum1 += Component<comp,BT>::get(v1);
 
-                    v0 = x*it[4]; v1 = x*it[5];
-                    Component<comp,VT>::applyf(v0);
-                    Component<comp,VT>::applyf(v1);
-                    sum0 += Component<comp,VT>::get(v0);
-                    sum1 += Component<comp,VT>::get(v1);
+                    v0 = x * Traits<BT>::convert(it[4]); 
+                    v1 = x * Traits<BT>::convert(it[5]); 
+                    Component<comp,BT>::applyf(v0);
+                    Component<comp,BT>::applyf(v1);
+                    sum0 += Component<comp,BT>::get(v0);
+                    sum1 += Component<comp,BT>::get(v1);
 
-                    v0 = x*it[6]; v1 = x*it[7]; it += 8;
-                    Component<comp,VT>::applyf(v0);
-                    Component<comp,VT>::applyf(v1);
-                    sum0 += Component<comp,VT>::get(v0);
-                    sum1 += Component<comp,VT>::get(v1);
+                    v0 = x * Traits<BT>::convert(it[6]); 
+                    v1 = x * Traits<BT>::convert(it[7]); it += 8;
+                    Component<comp,BT>::applyf(v0);
+                    Component<comp,BT>::applyf(v1);
+                    sum0 += Component<comp,BT>::get(v0);
+                    sum1 += Component<comp,BT>::get(v1);
                 } while (--n_8);
                 sum0 += sum1;
             }
             if (nb) do {
-                v0 = x*(*it++);
-                Component<comp,VT>::applyf(v0);
-                sum0 += Component<comp,VT>::get(v0);
+                v0 = x * Traits<BT>::convert(*it++); 
+                Component<comp,BT>::applyf(v0);
+                sum0 += Component<comp,BT>::get(v0);
             } while (--nb);
             return sum0;
         }
     };
 
     // algo 5: fully unroll
-    template <int size, CompType comp, int ix, class V>
-    struct SumElementsV_Helper<5,size,comp,ix,V> // known size, unroll
+    template <int s, CompType comp, int ix, class ret, class V>
+    struct SumElementsV_Helper<5,s,comp,ix,ret,V> 
     {
+        typedef typename Traits<ret>::real_type RT;
         typedef typename V::value_type VT;
-        typedef typename V::real_type RT;
-        typedef typename Maybe<comp!=ValueComp>::
-            template RealType<VT>::type ret;
-
+        typedef typename TypeSelect<
+            V::isreal || Traits<ret>::iscomplex , ret ,
+            std::complex<ret> >::type BT;
         template <int I, int N>
         struct Unroller
         {
-            static inline ret unroll(const V& v, const Scaling<ix,RT>& x)
+            static ret unroll(const V& v, const Scaling<ix,RT>& x)
             {
                 return (
                     Unroller<I,N/2>::unroll(v,x) +
@@ -227,493 +270,219 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static inline ret unroll(const V& v, const Scaling<ix,RT>& x)
-            { return Component<comp,VT>::f(x * v.cref(I)); }
+            static ret unroll(const V& v, const Scaling<ix,RT>& x)
+            { 
+                return Component<comp,BT>::f(
+                    x * Traits<BT>::convert(v.cref(I)));
+            }
         };
         template <int I>
         struct Unroller<I,0>
         { 
-            static inline ret unroll(const V& v, const Scaling<ix,RT>& x)
+            static ret unroll(const V& v, const Scaling<ix,RT>& x)
             { return ret(0); }
         };
-        static inline ret call(const V& v, const Scaling<ix,RT>& x)
-        { return Unroller<0,size>::unroll(v,x); }
+        static ret call(const V& v, const Scaling<ix,RT>& x)
+        { return Unroller<0,s>::unroll(v,x); }
     };
 
-    // algo 7: complex with unit step, convert to real
-    // (This only makes sense for comp = NORM and ABS2.)
-    template <int size, CompType comp, int ix, class V>
-    struct SumElementsV_Helper<7,size,comp,ix,V> 
+    // algo -3: Determine which algorithm to use
+    template <int s, CompType comp, int ix, class ret, class V>
+    struct SumElementsV_Helper<-3,s,comp,ix,ret,V> 
     {
+        typedef typename Traits<ret>::real_type RT;
         typedef typename V::value_type VT;
-        typedef typename V::real_type RT;
-        typedef typename Maybe<comp!=ValueComp>::
-            template RealType<VT>::type ret;
-
-        static inline ret call(const V& v, const Scaling<ix,RT>& x)
+        static ret call(const V& v, const Scaling<ix,RT>& x)
         {
-            typedef typename V::const_flatten_type Vf;
-            Vf vf = v.flatten();
-            const int size2 = IntTraits<size>::twoS;
-            const int algo2 = 
+            typedef typename V::real_type RT;
 #if TMV_OPT >= 1
-                (size2 != UNKNOWN && size2 <= 64) ? 5 :
-                sizeof(RT) == 8 ? 3 :
-                sizeof(RT) == 4 ? 4 :
-#endif
-                1;
-            return SumElementsV_Helper<algo2,size2,comp,ix,Vf>::call(vf,x);
-        }
-    };
-
-    // algo -1: Determine which algorithm to use
-    template <int size, CompType comp, int ix, class V>
-    struct SumElementsV_Helper<-1,size,comp,ix,V> 
-    {
-        typedef typename V::value_type VT;
-        typedef typename V::real_type RT;
-        typedef typename Maybe<comp!=ValueComp>::
-            template RealType<VT>::type ret;
-
-        static inline ret call(const V& v, const Scaling<ix,RT>& x)
-        {
-#if TMV_OPT >= 1
-            const int maxunroll = 
-                comp == ValueComp ? 80 :
-                comp == AbsComp ? 64 :
-                comp == Abs2Comp ? 64 :
-                comp == NormComp ? 64 : 
-                /* no other options currently */ 0;
+            const int maxunroll = 80;
             const int algo = 
-                ( ( comp == Abs2Comp || comp == NormComp ) && 
-                  ( V::iscomplex && V::_step == 1) ) ? 7 :
-                ( V::_size != UNKNOWN && V::_size <= int(maxunroll) ) ? 5 :
+                ( s != UNKNOWN && s <= int(maxunroll) ) ? 5 :
                 (sizeof(RT) == 8 && V::_step == 1) ? (V::iscomplex ? 2 : 3) :
                 (sizeof(RT) == 4 && V::_step == 1) ? (V::iscomplex ? 3 : 4) :
                 1;
 #else 
             const int algo = 1;
 #endif
-            return SumElementsV_Helper<algo,size,comp,ix,V>::call(v,x);
+            return SumElementsV_Helper<algo,s,comp,ix,ret,V>::call(v,x);
         }
     };
 
-    template <class V>
-    inline typename V::value_type InlineSumElements(
-        const BaseVector_Calc<V>& v)
+    // algo 97: Conjugate
+    template <int s, CompType comp, int ix, class ret, class V>
+    struct SumElementsV_Helper<97,s,comp,ix,ret,V> 
     {
-        typedef typename V::value_type VT;
-        typedef typename V::real_type RT;
-        typedef typename V::const_cview_type Vv;
-        Vv vv = v.cView();
-        return SumElementsV_Helper<-1,V::_size,ValueComp,1,Vv>::call(
-            vv,Scaling<1,RT>());
-    }
-
-    // Defined in TMV_Vector.cpp
-    template <class T>
-    T InstSumElements(const ConstVectorView<T>& v); 
-
-    template <bool conj, bool inst, class V>
-    struct CallSumElementsv // inst = false
-    {
-        static inline typename V::value_type call(const V& v)
-        {
+        typedef typename Traits<ret>::real_type RT;
+        static ret call(const V& v, const Scaling<ix,RT>& x)
+        { 
             typedef typename V::const_conjugate_type Vc;
+            Vc vc = v.conjugate();
             return TMV_CONJ(
-                CallSumElementsv<false,inst,Vc>::call(v.conjugate()));
+                SumElementsV_Helper<-1,s,comp,ix,ret,Vc>::call(vc,x));
         }
     };
-    template <class V>
-    struct CallSumElementsv<false,false,V>
+
+    // algo 98: Call inst
+    template <int s, int ix, class ret, class V>
+    struct SumElementsV_Helper<98,s,ValueComp,ix,ret,V> 
     {
-        static inline typename V::value_type call(const V& v)
-        { return InlineSumElements(v); }
-    };
-    template <class V>
-    struct CallSumElementsv<false,true,V>
-    {
-        static inline typename V::value_type call(const V& v)
+        typedef typename Traits<ret>::real_type RT;
+        static ret call(const V& v, const Scaling<ix,RT>& x)
         { return InstSumElements(v.xView()); }
     };
-
-    template <class V>
-    inline typename V::value_type SumElements(const BaseVector_Calc<V>& v)
+    template <int s, int ix, class ret, class V>
+    struct SumElementsV_Helper<98,s,AbsComp,ix,ret,V> 
     {
-        typedef typename V::value_type T;
-        const bool inst = 
-            V::unknownsizes &&
-            Traits<T>::isinst;
-        return CallSumElementsv<V::_conj,inst,V>::call(v.vec());
-    }
-
-
-    // 
-    // SumAbsElements
-    //
-
-    // TODO: This (the real version) is one routine where the 
-    // BLAS function (dasum) on my computer is significantly 
-    // (~30%) faster than TMV.
-    // I haven't figured out any way to make the above functions faster though.
-    template <class V>
-    inline typename V::real_type InlineSumAbsElements(
-        const BaseVector_Calc<V>& v)
-    {
-        typedef typename V::value_type VT;
-        typedef typename V::real_type RT;
-        typedef typename V::const_cview_type Vv;
-        Vv vv = v.cView();
-        return SumElementsV_Helper<-1,V::_size,AbsComp,1,Vv>::call(
-            vv,Scaling<1,RT>());
-    }
-
-    // Defined in TMV_Vector.cpp
-    template <class T>
-    typename Traits<T>::real_type InstSumAbsElements(
-        const ConstVectorView<T>& v);
-
-    template <bool inst, class V>
-    struct CallSumAbsElementsv // inst = false
-    {
-        static inline typename V::real_type call(const V& v)
-        { return InlineSumAbsElements(v); }
-    };
-    template <class V>
-    struct CallSumAbsElementsv<true,V>
-    {
-        static inline typename V::real_type call(const V& v)
+        typedef typename Traits<ret>::real_type RT;
+        static ret call(const V& v, const Scaling<ix,RT>& x)
         { return InstSumAbsElements(v.xView()); }
     };
-
-    template <class V>
-    inline typename V::real_type SumAbsElements(const BaseVector_Calc<V>& v)
+    template <int s, int ix, class ret, class V>
+    struct SumElementsV_Helper<98,s,Abs2Comp,ix,ret,V> 
     {
-        typedef typename V::value_type T;
-        typedef typename V::const_nonconj_type Vn;
-        const bool inst = 
-            V::unknownsizes &&
-            Traits<T>::isinst;
-        return CallSumAbsElementsv<inst,Vn>::call(v.nonConj());
-    }
+        typedef typename Traits<ret>::real_type RT;
+        static ret call(const V& v, const Scaling<ix,RT>& x)
+        { return InstSumAbs2Elements(v.xView()); }
+    };
+    template <int s, class ret, class V>
+    struct SumElementsV_Helper<98,s,NormComp,1,ret,V> 
+    {
+        typedef typename Traits<ret>::real_type RT;
+        static ret call(const V& v, const Scaling<1,RT>& x)
+        { return InstNormSq(v.xView()); }
+    };
+    template <int s, class ret, class V>
+    struct SumElementsV_Helper<98,s,NormComp,0,ret,V> 
+    {
+        typedef typename Traits<ret>::real_type RT;
+        static ret call(const V& v, const Scaling<0,RT>& x)
+        { return InstNormSq(v.xView(),x); }
+    };
 
-
-    // 
-    // SumAbs2Elements
-    //
+    // algo -1: Check for inst
+    template <int s, CompType comp, int ix, class ret, class V>
+    struct SumElementsV_Helper<-1,s,comp,ix,ret,V> 
+    {
+        typedef typename Traits<ret>::real_type RT;
+        static ret call(const V& v, const Scaling<ix,RT>& x)
+        {
+            const bool inst = 
+                (s == UNKNOWN || s > 16) &&
+                Traits<ret>::isinst;
+            const int algo = 
+                V::_conj ? 97 :
+                inst ? 98 :
+                -3;
+            return SumElementsV_Helper<algo,s,comp,ix,ret,V>::call(v,x);
+        }
+    };
 
     template <class V>
-    inline typename V::real_type InlineSumAbs2Elements(
+    static typename V::value_type InlineSumElements(
         const BaseVector_Calc<V>& v)
     {
         typedef typename V::value_type VT;
         typedef typename V::real_type RT;
         typedef typename V::const_cview_type Vv;
         Vv vv = v.cView();
-        return SumElementsV_Helper<-1,V::_size,Abs2Comp,1,Vv>::call(
+        return SumElementsV_Helper<-3,V::_size,ValueComp,1,VT,Vv>::call(
             vv,Scaling<1,RT>());
     }
 
-    // Defined in TMV_Vector.cpp
-    template <class T>
-    typename Traits<T>::real_type InstSumAbs2Elements(
-        const ConstVectorView<T>& v);
-
-    template <bool inst, class V>
-    struct CallSumAbs2Elementsv // inst = false
-    {
-        static inline typename V::real_type call(const V& v)
-        { return InlineSumAbs2Elements(v); }
-    };
     template <class V>
-    struct CallSumAbs2Elementsv<true,V>
-    {
-        static inline typename V::real_type call(const V& v)
-        { return InstSumAbs2Elements(v.xView()); }
-    };
-
-    template <class V>
-    inline typename V::real_type SumAbs2Elements(const BaseVector_Calc<V>& v)
-    {
-        typedef typename V::value_type T;
-        typedef typename V::const_nonconj_type Vn;
-        const bool inst = 
-            V::unknownsizes &&
-            Traits<T>::isinst;
-        return CallSumAbs2Elementsv<inst,Vn>::call(v.nonConj());
-    }
-
-
-    // 
-    // NormSq
-    //
-
-    template <class V>
-    inline typename V::real_type InlineNormSq(const BaseVector_Calc<V>& v)
+    static typename V::value_type DoSumElements(const BaseVector_Calc<V>& v)
     {
         typedef typename V::value_type VT;
         typedef typename V::real_type RT;
         typedef typename V::const_cview_type Vv;
         Vv vv = v.cView();
-        return SumElementsV_Helper<-1,V::_size,NormComp,1,Vv>::call(
+        return SumElementsV_Helper<-1,V::_size,ValueComp,1,VT,Vv>::call(
             vv,Scaling<1,RT>());
     }
 
-    // Defined in TMV_Vector.cpp
-    template <class T>
-    typename Traits<T>::real_type InstNormSq(const ConstVectorView<T>& v); 
-
-    template <bool inst, class V>
-    struct CallNormSqv // inst = false
-    {
-        static inline typename V::real_type call(const V& v)
-        { return InlineNormSq(v); }
-    };
     template <class V>
-    struct CallNormSqv<true,V>
+    static typename V::float_type InlineSumAbsElements(
+        const BaseVector_Calc<V>& v)
     {
-        static inline typename V::real_type call(const V& v)
-        { return InstNormSq(v.xView()); }
-    };
-
-    template <class V>
-    inline typename V::real_type NormSq(const BaseVector_Calc<V>& v)
-    {
-        typedef typename V::value_type T;
-        typedef typename V::const_nonconj_type Vn;
-        const bool inst = 
-            V::unknownsizes &&
-            Traits<T>::isinst;
-        return CallNormSqv<inst,Vn>::call(v.nonConj());
+        typedef typename V::float_type RT;
+        typedef typename V::const_cview_type::const_nonconj_type Vv;
+        Vv vv = v.cView().nonConj();
+        return SumElementsV_Helper<-3,V::_size,AbsComp,1,RT,Vv>::call(
+            vv,Scaling<1,RT>());
     }
 
-
-    // 
-    // NormSq with scaling
-    //
+    template <class V>
+    static typename V::float_type DoSumAbsElements(const BaseVector_Calc<V>& v)
+    {
+        typedef typename V::float_type RT;
+        typedef typename V::const_cview_type::const_nonconj_type Vv;
+        Vv vv = v.cView().nonConj();
+        return SumElementsV_Helper<-1,V::_size,AbsComp,1,RT,Vv>::call(
+            vv,Scaling<1,RT>());
+    }
 
     template <class V>
-    inline typename V::real_type InlineNormSq(
-        const BaseVector_Calc<V>& v, typename V::real_type scale)
+    static typename V::real_type InlineSumAbs2Elements(
+        const BaseVector_Calc<V>& v)
     {
-        typedef typename V::value_type VT;
         typedef typename V::real_type RT;
-        typedef typename V::const_cview_type Vv;
-        Vv vv = v.cView();
-        return SumElementsV_Helper<-1,V::_size,NormComp,0,Vv>::call(
+        typedef typename V::const_cview_type::const_nonconj_type Vv;
+        Vv vv = v.cView().nonConj();
+        return SumElementsV_Helper<-3,V::_size,Abs2Comp,1,RT,Vv>::call(
+            vv,Scaling<1,RT>());
+    }
+
+    template <class V>
+    static typename V::real_type DoSumAbs2Elements(const BaseVector_Calc<V>& v)
+    {
+        typedef typename V::real_type RT;
+        typedef typename V::const_cview_type::const_nonconj_type Vv;
+        Vv vv = v.cView().nonConj();
+        return SumElementsV_Helper<-1,V::_size,Abs2Comp,1,RT,Vv>::call(
+            vv,Scaling<1,RT>());
+    }
+
+    template <class V>
+    static typename V::real_type InlineNormSq(const BaseVector_Calc<V>& v)
+    {
+        typedef typename V::real_type RT;
+        typedef typename V::const_cview_type::const_nonconj_type Vv;
+        Vv vv = v.cView().nonConj();
+        return SumElementsV_Helper<-3,V::_size,NormComp,1,RT,Vv>::call(
+            vv,Scaling<1,RT>());
+    }
+
+    template <class V>
+    static typename V::real_type DoNormSq(const BaseVector_Calc<V>& v)
+    {
+        typedef typename V::real_type RT;
+        typedef typename V::const_cview_type::const_nonconj_type Vv;
+        Vv vv = v.cView().nonConj();
+        return SumElementsV_Helper<-1,V::_size,NormComp,1,RT,Vv>::call(
+            vv,Scaling<1,RT>());
+    }
+
+    template <class V>
+    static typename V::float_type InlineNormSq(
+        const BaseVector_Calc<V>& v, typename V::float_type scale)
+    {
+        typedef typename V::float_type RT;
+        typedef typename V::const_cview_type::const_nonconj_type Vv;
+        Vv vv = v.cView().nonConj();
+        return SumElementsV_Helper<-3,V::_size,NormComp,0,RT,Vv>::call(
             vv,Scaling<0,RT>(scale));
     }
 
-    // Defined in TMV_Vector.cpp
-    template <class T>
-    typename Traits<T>::real_type InstNormSq(
-        const ConstVectorView<T>& v, typename Traits<T>::real_type scale); 
-
-    template <bool inst, class V>
-    struct CallNormSq_scalev // inst = false
-    {
-        static inline typename V::real_type call(
-            const V& v, const typename V::real_type scale)
-        { return InlineNormSq(v,scale); }
-    };
     template <class V>
-    struct CallNormSq_scalev<true,V>
+    static typename V::float_type DoNormSq(
+        const BaseVector_Calc<V>& v, const typename V::float_type scale)
     {
-        static inline typename V::real_type call(
-            const V& v, const typename V::real_type scale)
-        { return InstNormSq(v.xView(),scale); }
-    };
-
-    template <class V>
-    inline typename V::real_type NormSq(
-        const BaseVector_Calc<V>& v, const typename V::real_type scale)
-    {
-        typedef typename V::value_type T;
-        typedef typename V::const_nonconj_type Vn;
-        const bool inst = 
-            V::unknownsizes &&
-            Traits<T>::isinst;
-        return CallNormSq_scalev<inst,Vn>::call(v.nonConj(),scale);
-    }
-
-
-    //
-    // Norm2
-    //
-
-    // This helper struct works for either Vector or Matrix "V"
-    template <int algo, class V> 
-    struct Norm_Helper;
-
-    // algo 1: simple: sqrt(NormSq(v))
-    template <class V> 
-    struct Norm_Helper<1,V>
-    {
-        typedef typename V::real_type RT;
-        static inline RT call(const V& v)
-        { return TMV_SQRT(InlineNormSq(v)); }
-    };
-
-    // algo 2: Robust algorithm with checks for overflow and underflow.
-    // This one always calls MaxAbsElement and then NormSq.
-    // This is inefficient if there are no problems.
-    // Since no problems is the usual case, I switched to the below
-    // version (algo 3) that calls NormSq first and then redoes it if there
-    // are problems.
-    template <class V> 
-    struct Norm_Helper<2,V>
-    {
-        typedef typename V::real_type RT;
-        static RT call(const V& v)
-        {
-            const RT eps = TMV_Epsilon<RT>();
-
-            // Start with the maximum |v(i)|.  It will tell us how (and if)
-            // we need to use a scaling for NormSq().
-            RT vmax = v.maxAbsElement();
-
-            // If vmax = 0, then norm2 = 0:
-            if (vmax == RT(0)) return RT(0);
-
-            // If vmax^2 * eps = 0, but vmax != 0, then a naive NormSq()
-            // will produce underflow rounding errors.  Find a better scaling.
-            // eps is a pure power of 2, so no rounding errors from
-            // rescaling by a power of eps.
-            else if (vmax * vmax * eps == RT(0)) {
-                const RT inveps = RT(1)/eps;
-                RT scale = inveps;
-                vmax *= scale;
-                RT eps2 = eps*eps;
-                while (vmax < eps2) { scale *= inveps; vmax *= inveps; }
-                return TMV_SQRT(v.normSq(scale))/scale;
-            }
-
-            // If 1/vmax == 0, then vmax is already inf, so no hope of
-            // making it more accurate.  (And need to check, since otherwise
-            // the next section would cause an infinite loop.)
-            else if (RT(1)/vmax == RT(0)) {
-                return vmax;
-            }
-
-            // If 1/(vmax^2) == 0, then a naive NormSq() will produce 
-            // overflow.  Find a better scaling.
-            else if (RT(1)/(vmax*vmax) == RT(0)) {
-                RT scale = eps;
-                vmax *= scale;
-                while (vmax > RT(1)) { scale *= eps; vmax *= eps; }
-                return TMV_SQRT(v.normSq(scale))/scale;
-            }
-
-            // No problems with overflow or underflow.
-            else return TMV_SQRT(v.normSq());
-        }
-    };
-
-    // algo 3: Robust algorithm with checks for overflow and underflow.
-    // This version is slower if there is a problem, but since
-    // there usually isn't a problem, it is generally faster.
-    template <class V> 
-    struct Norm_Helper<3,V>
-    {
-        typedef typename V::real_type RT;
-        static RT call(const V& v)
-        {
-            const RT eps = TMV_Epsilon<RT>();
-            const RT vnormsq = v.normSq();
-
-            if (vnormsq * eps == RT(0)) {
-                // Possible underflow errors:
-
-                // If vmax = 0, then norm2 = 0:
-                RT vmax = v.maxAbsElement();
-                if (vmax == RT(0)) return RT(0);
-
-                // If vmax^2 * eps = 0, but vmax != 0, then vnormsq has
-                // underflow rounding errors.  Find a better scaling.
-                // eps is a pure power of 2, so no rounding errors from
-                // rescaling by a power of eps.
-                else if (vmax * vmax * eps == RT(0)) {
-                    const RT inveps = RT(1)/eps;
-                    RT scale = inveps;
-                    vmax *= scale;
-                    RT eps2 = eps*eps;
-                    while (vmax < eps2) { scale *= inveps; vmax *= inveps; }
-                    return TMV_SQRT(v.normSq(scale))/scale;
-                }
-
-                else return TMV_SQRT(vnormsq);
-            }
-
-            else if (RT(1)/vnormsq == RT(0)) {
-                // Possible overflow errors:
-
-                // If 1/vmax == 0, then vmax is already inf, so no hope of
-                // making it more accurate.  (And need to check, since 
-                // otherwise the next section would cause an infinite loop.)
-                RT vmax = v.maxAbsElement();
-                if (RT(1)/vmax == RT(0)) {
-                    return vmax;
-                }
-
-                // If 1/(vmax^2) == 0, then vnormsq has overflow errors. 
-                // Find a better scaling.
-                else if (RT(1)/(vmax*vmax) == RT(0)) {
-                    RT scale = eps;
-                    vmax *= scale;
-                    while (vmax > RT(1)) { scale *= eps; vmax *= eps; }
-                    return TMV_SQRT(v.normSq(scale))/scale;
-                }
-
-                else return TMV_SQRT(vnormsq);
-            }
-
-            // No problems with overflow or underflow.
-            else return TMV_SQRT(vnormsq);
-        }
-    };
-
-    template <class V>
-    inline typename V::real_type InlineNorm2(const BaseVector_Calc<V>& v)
-    {
-        typedef typename V::const_cview_type Vv;
-        Vv vv = v.cView();
-#if TMV_OPT == 0
-        return Norm_Helper<1,Vv>::call(vv);
-#else
-        typedef typename V::real_type RT;
-        const bool isint = std::numeric_limits<RT>::is_integer;
-        const int algo = isint ? 1 : 3;
-        if (v.size() == 0) return RT(0);
-        else return Norm_Helper<algo,Vv>::call(vv);
-#endif
-    }
-
-    // Defined in TMV_Vector.cpp
-    template <class T>
-    typename Traits<T>::real_type InstNorm2(const ConstVectorView<T>& v);
-
-    template <bool inst, class V>
-    struct CallNorm2v // inst = false
-    {
-        static inline typename V::real_type call(const V& v)
-        { return InlineNorm2(v); }
-    };
-    template <class V>
-    struct CallNorm2v<true,V>
-    {
-        static inline typename V::real_type call(const V& v)
-        { return InstNorm2(v.xView()); }
-    };
-
-    template <class V>
-    inline typename V::real_type Norm2(const BaseVector_Calc<V>& v)
-    {
-        typedef typename V::value_type T;
-        typedef typename V::const_nonconj_type Vn;
-        const bool inst = 
-            V::unknownsizes &&
-            Traits<T>::isinst;
-        return CallNorm2v<inst,Vn>::call(v.nonConj());
+        typedef typename V::float_type RT;
+        typedef typename V::const_cview_type::const_nonconj_type Vv;
+        Vv vv = v.cView().nonConj();
+        return SumElementsV_Helper<-1,V::_size,NormComp,0,RT,Vv>::call(
+            vv,Scaling<0,RT>(scale));
     }
 
 } // namespace tmv

@@ -49,7 +49,7 @@
 // (mine is 8 MB), so we set a maximum size of 1KB for each SmallVector.
 // (For double, this means up to N=128 will be allocated on the stack.)
 // Any bigger than that, and the performance drop from using the
-// heap is pretty irrelevant.  (See TMV_StackArray.h to change this.)
+// heap is pretty irrelevant.  (See TMV_Array.h to change this.)
 // 
 // One drawback of using a SmallVector is that it does not do any
 // alias checking in the aritmetic statements.  So a statement like
@@ -155,15 +155,6 @@ namespace tmv {
         typedef VIt<T,-1,false> reverse_iterator;
     };
 
-
-    //#ifdef XTEST
-#ifdef TMV_DEBUG
-#ifndef XTEST_DEBUG
-#define XTEST_DEBUG
-#endif
-#endif
-    //#endif
-
     template <class T, int N, IndexStyle I> 
     class SmallVector : public BaseVector_Mutable<SmallVector<T,N,I> >
     {
@@ -188,7 +179,7 @@ namespace tmv {
         // Constructors
         //
 
-        inline SmallVector()
+        SmallVector()
         {
             TMVStaticAssert(N >= 0);
 #ifdef TMV_DEBUG
@@ -196,52 +187,40 @@ namespace tmv {
 #endif
         }
 
-        explicit inline SmallVector(T x) 
+        explicit SmallVector(T x) 
         {
             TMVStaticAssert(N >= 0);
             this->setAllTo(x); 
         }
 
-        explicit inline SmallVector(const T* v) 
+        explicit SmallVector(const T* v) 
         {
             TMVStaticAssert(N >= 0);
-#ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
-#endif
             ConstSmallVectorView<T,N>(v).newAssignTo(*this);
         }
 
-        explicit inline SmallVector(const std::vector<T>& v2) 
+        explicit SmallVector(const std::vector<T>& v2) 
         {
             TMVStaticAssert(N >= 0);
             TMVAssert(v2.size() == N);
-#ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
-#endif
             ConstSmallVectorView<T,N>(&v2[0]).newAssignTo(*this);
         }
 
-        inline SmallVector(const type& v2) 
+        SmallVector(const type& v2) 
         {
             TMVStaticAssert(N >= 0);
-#ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
-#endif
             v2.newAssignTo(*this);
         }
 
         template <class V2>
-        inline SmallVector(const BaseVector<V2>& v2) 
+        SmallVector(const BaseVector<V2>& v2) 
         {
             TMVStaticAssert(N >= 0);
             TMVAssert(v2.size() == N);
-#ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
-#endif
             v2.newAssignTo(*this);
         }
 
-        inline ~SmallVector()
+        ~SmallVector()
         {
 #ifdef TMV_DEBUG
             this->setAllTo(T(999));
@@ -252,14 +231,14 @@ namespace tmv {
         // Op =
         //
 
-        inline type& operator=(const type& v2)
+        type& operator=(const type& v2)
         { 
             if (&v2 != this) base_mut::operator=(v2); 
             return *this; 
         }
 
         template <class V2>
-        inline type& operator=(const BaseVector<V2>& v2) 
+        type& operator=(const BaseVector<V2>& v2) 
         { base_mut::operator=(v2); return *this; }
 
 
@@ -267,14 +246,15 @@ namespace tmv {
         // Auxilliary Functions
         //
 
-        inline const T* cptr() const { return itsv; }
-        inline T* ptr() { return itsv; }
-        inline T cref(int i) const  { return itsv[i]; }
-        inline T& ref(int i) { return itsv[i]; }
+        const T* cptr() const { return itsv; }
+        T* ptr() { return itsv; }
+        T cref(int i) const  { return itsv[i]; }
+        T& ref(int i) { return itsv[i]; }
 
-        inline size_t size() const { return N; }
-        inline int step() const { return 1; }
-        inline bool isconj() const { return false; }
+        size_t size() const { return N; }
+        int nElements() const { return N; }
+        int step() const { return 1; }
+        bool isconj() const { return false; }
 
 
     protected :
@@ -291,19 +271,19 @@ namespace tmv {
         typedef SmallVectorF<T,N> type;
         typedef SmallVector<T,N,FortranStyle> vtype;
 
-        inline SmallVectorF() : type() {}
-        explicit inline SmallVectorF(T x) : type(x) {}
-        explicit inline SmallVectorF(const T* v2)  : type(v2) {}
-        explicit inline SmallVectorF(const std::vector<T>& v2)  : type(v2) {}
-        inline SmallVectorF(const type& v2)  : type(v2) {}
+        SmallVectorF() : type() {}
+        explicit SmallVectorF(T x) : type(x) {}
+        explicit SmallVectorF(const T* v2)  : type(v2) {}
+        explicit SmallVectorF(const std::vector<T>& v2)  : type(v2) {}
+        SmallVectorF(const type& v2)  : type(v2) {}
         template <class V2>
-        inline SmallVectorF(const BaseVector<V2>& v2)  : type(v2) {}
-        inline ~SmallVectorF() {}
+        SmallVectorF(const BaseVector<V2>& v2)  : type(v2) {}
+        ~SmallVectorF() {}
 
         template <class V2>
-        inline type& operator=(const BaseVector<V2>& v2) 
+        type& operator=(const BaseVector<V2>& v2) 
         { vtype::operator=(v2); return *this; }
-        inline type& operator=(const type& v2)
+        type& operator=(const type& v2)
         { vtype::operator=(v2); return *this; }
     }; // SmallVectorF
 
@@ -383,48 +363,48 @@ namespace tmv {
         // Constructors
         //
 
-        inline ConstSmallVectorView(const T* v, size_t n, int s) : 
+        ConstSmallVectorView(const T* v, size_t n, int s) : 
             itsv(v), itssize(n), itsstep(s) {}
 
-        inline ConstSmallVectorView(const T* v, size_t n) : 
+        ConstSmallVectorView(const T* v, size_t n) : 
             itsv(v), itssize(n), itsstep(S) 
         { TMVStaticAssert(S != UNKNOWN); }
 
-        inline ConstSmallVectorView(const T* v) :
+        ConstSmallVectorView(const T* v) :
             itsv(v), itssize(N), itsstep(S) 
         { TMVStaticAssert(N != UNKNOWN); TMVStaticAssert(S != UNKNOWN); }
 
-        inline ConstSmallVectorView(const type& v2) : 
+        ConstSmallVectorView(const type& v2) : 
             itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) {}
 
-        inline ConstSmallVectorView(const SmallVectorView<T,N,S,C,I>& v2) : 
-            itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) {}
-
-        template <int S2, IndexStyle I2>
-        inline ConstSmallVectorView(const ConstVectorView<T,S2,C,I2>& v2) :
+        ConstSmallVectorView(const SmallVectorView<T,N,S,C,I>& v2) : 
             itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) {}
 
         template <int S2, IndexStyle I2>
-        inline ConstSmallVectorView(const VectorView<T,S2,C,I2>& v2) :
+        ConstSmallVectorView(const ConstVectorView<T,S2,C,I2>& v2) :
+            itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) {}
+
+        template <int S2, IndexStyle I2>
+        ConstSmallVectorView(const VectorView<T,S2,C,I2>& v2) :
             itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) {}
 
         template <int N2, int S2, IndexStyle I2>
-        inline ConstSmallVectorView(
+        ConstSmallVectorView(
             const ConstSmallVectorView<T,N2,S2,C,I2>& v2) :
             itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) {}
 
         template <int N2, int S2, IndexStyle I2>
-        inline ConstSmallVectorView(const SmallVectorView<T,N2,S2,C,I2>& v2) :
+        ConstSmallVectorView(const SmallVectorView<T,N2,S2,C,I2>& v2) :
             itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) {}
 
-        inline ~ConstSmallVectorView() {
+        ~ConstSmallVectorView() {
 #ifdef TMV_DEBUG
             itsv = 0; 
 #endif
         }
 
     private :
-        inline void operator=(const type& v2);
+        void operator=(const type& v2);
     public :
 
 
@@ -432,20 +412,17 @@ namespace tmv {
         // Auxilliary Functions
         //
 
-        inline const T* cptr() const { return itsv; }
-        inline T cref(int i) const  { return DoConj<C>(itsv[i*step()]); }
+        const T* cptr() const { return itsv; }
+        T cref(int i) const  { return DoConj<C>(itsv[i*step()]); }
 
-        inline size_t size() const { return itssize; }
-        inline int step() const { return itsstep; }
-        inline bool isconj() const { return C; }
+        size_t size() const { return itssize; }
+        int nElements() const { return itssize; }
+        int step() const { return itsstep; }
+        bool isconj() const { return C; }
 
     protected :
 
-#ifdef TMV_DEBUG
         const T* itsv;
-#else
-        const T*const itsv;
-#endif
         const CheckedInt<N> itssize;
         const CheckedInt<S> itsstep;
 
@@ -460,30 +437,30 @@ namespace tmv {
         typedef ConstSmallVectorViewF<T,N,S,C> type;
         typedef ConstSmallVectorView<T,N,S,C,FortranStyle> vtype;
 
-        inline ConstSmallVectorViewF(const T* v, size_t n, int s) :
+        ConstSmallVectorViewF(const T* v, size_t n, int s) :
             vtype(v,n,s) {}
-        inline ConstSmallVectorViewF(const T* v, size_t n) : vtype(v,n) {}
-        inline ConstSmallVectorViewF(const T* v) : vtype(v) {}
-        inline ConstSmallVectorViewF(const type& v2) : vtype(v2) {}
-        inline ConstSmallVectorViewF(
+        ConstSmallVectorViewF(const T* v, size_t n) : vtype(v,n) {}
+        ConstSmallVectorViewF(const T* v) : vtype(v) {}
+        ConstSmallVectorViewF(const type& v2) : vtype(v2) {}
+        ConstSmallVectorViewF(
             const SmallVectorView<T,N,S,C,FortranStyle>& v2) : vtype(v2) {}
         template <int S2, IndexStyle I2>
-        inline ConstSmallVectorViewF(const ConstVectorView<T,S2,C,I2>& v2) :
+        ConstSmallVectorViewF(const ConstVectorView<T,S2,C,I2>& v2) :
             vtype(v2) {}
         template <int S2, IndexStyle I2>
-        inline ConstSmallVectorViewF(const VectorView<T,S2,C,I2>& v2) :
+        ConstSmallVectorViewF(const VectorView<T,S2,C,I2>& v2) :
             vtype(v2) {}
         template <int N2, int S2, IndexStyle I2>
-        inline ConstSmallVectorViewF(
+        ConstSmallVectorViewF(
             const ConstSmallVectorView<T,N2,S2,C,I2>& v2) :
             vtype(v2) {}
         template <int N2, int S2, IndexStyle I2>
-        inline ConstSmallVectorViewF(const SmallVectorView<T,N2,S2,C,I2>& v2) :
+        ConstSmallVectorViewF(const SmallVectorView<T,N2,S2,C,I2>& v2) :
             vtype(v2) {}
-        inline ~ConstSmallVectorViewF() {}
+        ~ConstSmallVectorViewF() {}
 
     private :
-        inline void operator=(const type& v2);
+        void operator=(const type& v2);
     }; // ConstSmallVectorView
 
 
@@ -580,28 +557,28 @@ namespace tmv {
         // Constructors
         //
 
-        inline SmallVectorView(T* v, size_t n, int s) :
+        SmallVectorView(T* v, size_t n, int s) :
             itsv(v), itssize(n), itsstep(s) {}
 
-        inline SmallVectorView(T* v, size_t n) :
+        SmallVectorView(T* v, size_t n) :
             itsv(v), itssize(n), itsstep(S) 
         { TMVAssert(S != UNKNOWN); }
 
-        inline SmallVectorView(T* v) : itsv(v), itssize(N), itsstep(S) 
+        SmallVectorView(T* v) : itsv(v), itssize(N), itsstep(S) 
         { TMVAssert(N != UNKNOWN);  TMVAssert(S != UNKNOWN); }
 
-        inline SmallVectorView(const type& v2) : 
+        SmallVectorView(const type& v2) : 
             itsv(v2.itsv), itssize(v2.size()), itsstep(v2.step()) {}
 
         template <IndexStyle I2>
-        inline SmallVectorView(SmallVectorView<T,N,S,C,I2> v2) :
+        SmallVectorView(SmallVectorView<T,N,S,C,I2> v2) :
             itsv(v2.ptr()), itssize(v2.size()), itsstep(v2.step()) {}
 
         template <int S2, IndexStyle I2>
-        inline SmallVectorView(VectorView<T,S2,C,I2> v2) :
+        SmallVectorView(VectorView<T,S2,C,I2> v2) :
             itsv(v2.ptr()), itssize(v2.size()), itsstep(v2.step()) {}
 
-        inline ~SmallVectorView() {
+        ~SmallVectorView() {
 #ifdef TMV_DEBUG
             itsv = 0; 
 #endif
@@ -613,32 +590,29 @@ namespace tmv {
         //
 
         template <class V2>
-        inline type& operator=(const BaseVector<V2>& v2) 
+        type& operator=(const BaseVector<V2>& v2) 
         { base_mut::operator=(v2); return *this; }
 
-        inline type& operator=(const type& v2)
+        type& operator=(const type& v2)
         { base_mut::operator=(v2); return *this; }
 
         //
         // Auxilliary Functions
         //
 
-        inline const T* cptr() const { return itsv; }
-        inline T cref(int i) const  { return DoConj<C>(itsv[i*step()]); }
-        inline T* ptr() { return itsv; }
-        inline reference ref(int i) { return reference(itsv[i*step()]); }
+        const T* cptr() const { return itsv; }
+        T cref(int i) const  { return DoConj<C>(itsv[i*step()]); }
+        T* ptr() { return itsv; }
+        reference ref(int i) { return reference(itsv[i*step()]); }
 
-        inline size_t size() const { return itssize; }
-        inline int step() const { return itsstep; }
-        inline bool isconj() const { return C; }
+        size_t size() const { return itssize; }
+        int nElements() const { return itssize; }
+        int step() const { return itsstep; }
+        bool isconj() const { return C; }
 
     protected :
 
-#ifdef TMV_DEBUG
         T* itsv;
-#else
-        T*const itsv;
-#endif
         const CheckedInt<N> itssize;
         const CheckedInt<S> itsstep;
 
@@ -651,20 +625,20 @@ namespace tmv {
         typedef SmallVectorViewF<T,N,S,C> type;
         typedef SmallVectorView<T,N,S,C,FortranStyle> vtype;
 
-        inline SmallVectorViewF(T* v, size_t n, int s) : vtype(v,n,s) {}
-        inline SmallVectorViewF(T* v, size_t n) : vtype(v,n) {}
-        inline SmallVectorViewF(T* v) : vtype(v) {}
-        inline SmallVectorViewF(const type& v2) : vtype(v2) {}
+        SmallVectorViewF(T* v, size_t n, int s) : vtype(v,n,s) {}
+        SmallVectorViewF(T* v, size_t n) : vtype(v,n) {}
+        SmallVectorViewF(T* v) : vtype(v) {}
+        SmallVectorViewF(const type& v2) : vtype(v2) {}
         template <IndexStyle I2>
-        inline SmallVectorViewF(SmallVectorView<T,N,S,C,I2> v2) : vtype(v2) {}
+        SmallVectorViewF(SmallVectorView<T,N,S,C,I2> v2) : vtype(v2) {}
         template <int S2, IndexStyle I2>
-        inline SmallVectorViewF(VectorView<T,S2,C,I2> v2) : vtype(v2) {}
-        inline ~SmallVectorViewF() {}
+        SmallVectorViewF(VectorView<T,S2,C,I2> v2) : vtype(v2) {}
+        ~SmallVectorViewF() {}
 
         template <class V2>
-        inline type& operator=(const BaseVector<V2>& v2) 
+        type& operator=(const BaseVector<V2>& v2) 
         { vtype::operator=(v2); return *this; }
-        inline type& operator=(const type& v2)
+        type& operator=(const type& v2)
         { vtype::operator=(v2); return *this; }
 
     }; // SmallVectorViewF
@@ -675,33 +649,46 @@ namespace tmv {
     //
 
     template <class V, class T, int N, int S, bool C, IndexStyle I>
-    inline void Swap(BaseVector_Mutable<V>& v1, SmallVectorView<T,N,S,C,I> v2)
+    static void Swap(BaseVector_Mutable<V>& v1, SmallVectorView<T,N,S,C,I> v2)
     { DoSwap(v1,v2); }
     template <class V, class T, int N, int S, bool C, IndexStyle I>
-    inline void Swap(SmallVectorView<T,N,S,C,I> v1, BaseVector_Mutable<V>& v2)
+    static void Swap(SmallVectorView<T,N,S,C,I> v1, BaseVector_Mutable<V>& v2)
     { DoSwap(v1,v2); }
     template <class T, int N, int S1, bool C1, IndexStyle I1, 
               int S2, bool C2, IndexStyle I2>
-    inline void Swap(
+    static void Swap(
         SmallVectorView<T,N,S1,C1,I1> v1, SmallVectorView<T,N,S2,C2,I2> v2)
     { DoSwap(v1,v2); }
     template <class T, int N, int S1, bool C1, IndexStyle I1, 
               int S2, bool C2, IndexStyle I2>
-    inline void Swap(
+    static void Swap(
         VectorView<T,S1,C1,I1> v1, SmallVectorView<T,N,S2,C2,I2> v2)
     { DoSwap(v1,v2); }
     template <class T, int N, int S1, bool C1, IndexStyle I1, 
               int S2, bool C2, IndexStyle I2>
-    inline void Swap(
+    static void Swap(
         SmallVectorView<T,N,S1,C1,I1> v1, VectorView<T,S2,C2,I2> v2)
     { DoSwap(v1,v2); }
+
+
+    //
+    // Conjugate
+    //
+    
+    template <class T, int N, IndexStyle I>
+    static SmallVectorView<T,N,1,true,I> Conjugate(SmallVector<T,N,I>& v)
+    { return v.conjugate(); }
+    template <class T, int N, int S, bool C, IndexStyle I>
+    static SmallVectorView<T,N,S,!C,I> Conjugate(SmallVectorView<T,N,S,C,I> v)
+    { return v.conjugate(); }
+
 
     //
     // TMV_Text functions
     //
 
     template <class T, int N, IndexStyle I> 
-    inline std::string TMV_Text(const SmallVector<T,N,I>& )
+    static std::string TMV_Text(const SmallVector<T,N,I>& )
     {
         std::ostringstream s;
         s << "SmallVector<"<<TMV_Text(T())<<","<<N<<","<<TMV_Text(I)<<">";
@@ -709,7 +696,7 @@ namespace tmv {
     }
 
     template <class T, int N, int S, bool C, IndexStyle I>
-    inline std::string TMV_Text(const SmallVectorView<T,N,S,C,I>& v)
+    static std::string TMV_Text(const SmallVectorView<T,N,S,C,I>& v)
     {
         std::ostringstream s;
         s << "SmallVectorView<"<<TMV_Text(T());
@@ -722,7 +709,7 @@ namespace tmv {
     }
 
     template <class T, int N, int S, bool C, IndexStyle I>
-    inline std::string TMV_Text(const ConstSmallVectorView<T,N,S,C,I>& v)
+    static std::string TMV_Text(const ConstSmallVectorView<T,N,S,C,I>& v)
     {
         std::ostringstream s;
         s << "ConstSmallVectorView<"<<TMV_Text(T());

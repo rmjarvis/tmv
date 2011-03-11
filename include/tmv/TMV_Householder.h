@@ -269,13 +269,13 @@ namespace tmv {
         //
         
         // beta
-        inline RT getBeta() const { return beta; }
+        RT getBeta() const { return beta; }
 
         // u except for the first element (which is 1)
-        inline const V& getU() const { return u; }
+        const V& getU() const { return u; }
 
         // determinant
-        inline RT det() const 
+        RT det() const 
         { return beta == RT(0) ? RT(1) : RT(-1); }
 
 
@@ -286,11 +286,11 @@ namespace tmv {
         // This first one allows the first row and the rest in different
         // places:
         template <class M0, class Mx> 
-        inline void multEq(M0& m0, Mx& mx) const;
+        void multEq(M0& m0, Mx& mx) const;
 
         // Here m0 and mx are a single matrix:
         template <class M>
-        inline void multEq(M& m) const
+        void multEq(M& m) const
         {
             typename M::row_type m0 = m.row(0);
             typename M::rowrange_type mx = m.rowRange(1,m.colsize());
@@ -301,20 +301,20 @@ namespace tmv {
         // vector during the calculation.  The temporary isn't very
         // much, but still worth having the separate function.
         template <class M1, class M2>
-        inline void mult(const M1& m1, M2& m2) const;
+        void mult(const M1& m1, M2& m2) const;
 
         // Repeat for vectors:
         template <class Vx> 
-        inline void multEqV(typename Vx::reference v0, Vx& vx) const;
+        void multEqV(typename Vx::reference v0, Vx& vx) const;
         template <class V2>
-        inline void multEqV(V2& v) const
+        void multEqV(V2& v) const
         {
             typename Vx::reference v0 = v.ref(0);
             typename Vx::subvector_type vx = v.rowRange(1,v.size());
             multEqV(v0,vx);
         }
         template <class V1, class V2>
-        inline void multV(const V1& v1, V2& v2) const;
+        void multV(const V1& v1, V2& v2) const;
 
  
         
@@ -326,11 +326,11 @@ namespace tmv {
         // with the v0 location into H*e0.
         // Note: after doing this function, the Householder matrix
         // shouldn't be used further, since it isn't correct.
-        inline void unPack(T& v0);
+        void unPack(T& v0);
 
         // In case v0 is some other reference type
         template <class RefT>
-        inline void unPack(RefT v0)
+        void unPack(RefT v0)
         { T temp = v0; unPack(temp); v0 = temp; }
 
 
@@ -340,9 +340,9 @@ namespace tmv {
         //  calculate.)
         //
 
-        inline size_t colsize() const { return u.size()+1; }
-        inline size_t rowsize() const { return u.size()+1; }
-        inline T cref(size_t i, size_t j) const 
+        size_t colsize() const { return u.size()+1; }
+        size_t rowsize() const { return u.size()+1; }
+        T cref(size_t i, size_t j) const 
         {
             // H = [ I - beta ( 1 ) ( 1 ut ) ]
             //     [          ( u )          ]
@@ -356,11 +356,11 @@ namespace tmv {
                   -beta*u.cref(i-1)*TMV_CONJ(u.cref(j-1)) );
         }
 
-        inline RT trace() const
+        RT trace() const
         { return RT(colsize()) - beta*(RT(1)+u.NormSq()); }
 
         template <class M2>
-        inline void assignTo(BaseMatrix_Rec_Mutable<M2>& m2) const
+        void assignTo(BaseMatrix_Rec_Mutable<M2>& m2) const
         {
             const int N = u.size()+1;
             m2.mat().ref(0,0) = RT(1)-beta;
@@ -371,19 +371,19 @@ namespace tmv {
         }
 
         template <class M2>
-        inline void newAssignTo(BaseMatrix_Rec_Mutable<M2>& m2) const
+        void newAssignTo(BaseMatrix_Rec_Mutable<M2>& m2) const
         {
             // TODO use NoAlias versions:
             assignTo(m2);
         }
 
-        inline const_conjugate_type conjugate() const
+        const_conjugate_type conjugate() const
         { return const_conjugate_type(u,beta); }
-        inline const_transpose_type transpose() const
+        const_transpose_type transpose() const
         { return const_transpose_type(u,beta); }
-        inline const_adjoint_type conjugate() const
+        const_adjoint_type conjugate() const
         { return *this; }
-        inline const_inverse_type inverse() const
+        const_inverse_type inverse() const
         { return *this; }
 
     private :
@@ -407,59 +407,70 @@ namespace tmv {
         // The vector v of the Householder matrix is stored in v,
         // except for the first element.
         // Beta is the return value.
+        
+        // Since this routine involves squares of elements, we risk overflow
+        // and underflow problems if done naively.  The simplest (although
+        // probably not the most efficient) solution is to scale all the 
+        // intermediate values by the maximum abs value in the vector.
+
+        RT scale = x.maxAbs2Element();
+        RT absx0 = TMV_Abs(x0);
+        if (absx0 > scale) scale = absx0;
+
+        if (TMV_Underflow(scale)) {
+            // Then the situation is hopeless, and we should just zero out
+            // the whole vector.
+            u.setZero();
+            x0 = T(0);
+            beta = RT(0);
+            return;
+        }
 
         // Determine normx = |x|
-        RT normsqx = NormSq(u);
+        RT invscale = RT(1)/scale;
+        RT normsqx = u.normSq(invscale);
 
         // if all of x other than first element are 0, H is identity
-        if (normsqx == RT(0)) {
+        if (normsqx == RT(0) && TMV_IMAG(x0) == RT(0)) {
             // Set them all to x explicitly in case underflow led to the 0.
             u.setZero();
+            x0 = T(0);
             beta = RT(0);
             return;
         }
 
         // Finish calculating normx in usual case
-        RT normsqx0 = TMV_NORM(x0);
+        absx0 *= invscale;
+        x0 *= invscale;
+        RT normsqx0 = absx0*absx0;
         normsqx += normsqx0;
         RT normx = TMV_SQRT(normsqx);
 
-        if (normsqx * TMV_Epsilon<T>() == RT(0)) {
-            // Then we need to rescale, since underflow will cause 
-            // rounding errors
-            const RT eps = TMV_Epsilon<T>();
-            // Epsilon is a pure power of 2, so no rounding errors from 
-            // rescaling.
-            u /= eps;
-            x0 /= eps;
-            doReflection(x0);
-            x0 *= eps;
-        } else if (RT(1)/normsqx == RT(0)) {
-            // Then we have overflow, so we need to rescale:
-            const RT eps = TMV_Epsilon<T>();
-            RT scale = eps; normx *= eps;
-            while (normx > RT(1)) { scale *= eps; normx *= eps; }
-            u *= scale;
-            x0 *= scale;
-            doReflection(x0);
-            x0 /= scale;
+        // y = -|x| (x0/|x0|) 
+        RT absx0 = TMV_ABS(x0);
+        T y = absx0 == RT(0) ? normx : -normx*x0/absx0;
+
+        // beta = 1 / (|x|^2 + |x||x0|)
+        // H = I - beta v vt
+        // with u = x - y e0 in first column
+        // Renormalize beta,u so that u(0) = 1
+        T u0 = x0-y;
+        RT normu0 = TMV_NORM(u0);
+        beta = normu0 / (normsqx + normx * absx0);
+
+        T invu0 = RT(1)/u0;
+        // Sometimes this combination can underflow, so check.
+        T scaled_invu0 = invu0 * invscale;
+        if ((TMV_REAL(invv0)!=RT(0) && TMV_Underflow(TMV_REAL(scaled_invv0))) ||
+            (TMV_IMAG(invv0)!=RT(0) && TMV_Underflow(TMV_IMAG(scaled_invv0)))) {
+            u *= invscale;
+            u *= invu0;
         } else {
-            // The usual case with no rescaling required:
-
-            // y = -|x| (x0/|x0|) 
-            RT absx0 = TMV_ABS(x0);
-            T y = absx0 == RT(0) ? normx : -normx*x0/absx0;
-
-            // beta = 1 / (|x|^2 + |x||x0|)
-            // H = I - beta v vt
-            // with u = x - y e0 in first column
-            // Renormalize beta,u so that u(0) = 1
-            T u0 = x0-y;
-            RT normu0 = TMV_NORM(u0);
-            beta = normu0 / (normsqx + normx * absx0);
-            u /= u0;
-            x0 = y;
+            u *= scaled_invu0;
         }
+                        
+        x0 = y*scale;
+
 #ifdef XDEBUG_HOUSE
         Vector<T> uu(xx.size());
         uu(0) = T(1);
@@ -759,7 +770,7 @@ namespace tmv {
     //
 
     template <bool add, int ix, class T, class V1, class V2, class V3>
-    inline void MultMV(
+    static void MultMV(
         const Scaling<ix,T>& x, const Householder<V1>& m1, 
         const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
@@ -771,44 +782,44 @@ namespace tmv {
         }
     }
     template <bool add, int ix, class T, class V1, class V2, class V3>
-    inline void NoAliasMultMV(
+    static void NoAliasMultMV(
         const Scaling<ix,T>& x, const Householder<V1>& m1, 
         const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
     { MultMV<add>(x,m1,v2,v3); }
     template <bool add, int ix, class T, class V1, class V2, class V3>
-    inline void AliasMultMV(
+    static void AliasMultMV(
         const Scaling<ix,T>& x, const Householder<V1>& m1, 
         const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
     { MultMV<add>(x,m1,v2,v3); }
 
     template <bool add, int ix, class T, class V1, class V2, class V3>
-    inline void MultVM(
+    static void MultVM(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1, 
         const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
     { MultMV<add>(x,m2.transpose(),v1,v3); }
     template <bool add, int ix, class T, class V1, class V2, class V3>
-    inline void NoAliasMultVM(
+    static void NoAliasMultVM(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1, 
         const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
     { NoAliasMultMV<add>(x,m2.transpose(),v1,v3); }
     template <bool add, int ix, class T, class V1, class V2, class V3>
-    inline void AliasMultVM(
+    static void AliasMultVM(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1, 
         const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
     { AliasMultMV<add>(x,m2.transpose(),v1,v3); }
  
     template <int ix, class T, class V1, class V2>
-    inline void MultEqVM(
+    static void MultEqVM(
         BaseVector_Mutable<V1>& v1, const Scaling<ix,T>& x,
         const Householder<V2>& m2)
     { m2.transpose().multEqV(v1); Scale(x,v1); }
     template <int ix, class T, class V1, class V2>
-    inline void NoAliasMultEqVM(
+    static void NoAliasMultEqVM(
         BaseVector_Mutable<V1>& v1, const Scaling<ix,T>& x,
         const Householder<V2>& m2)
     { MultEqVM(v1,x,m2); }
     template <int ix, class T, class V1, class V2>
-    inline void AliasMultEqVM(
+    static void AliasMultEqVM(
         BaseVector_Mutable<V1>& v1, const Scaling<ix,T>& x,
         const Householder<V2>& m2)
     { MultEqVM(v1,x,m2); }
@@ -819,31 +830,31 @@ namespace tmv {
     //
 
     template <int ix, class T, class V1, class V2, class V3>
-    inline void LDiv(
+    static void LDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
     { m2.multV(v1,v3); Scale(x,v3); }
     template <int ix, class T, class V1, class V2, class V3>
-    inline void NoAliasLDiv(
+    static void NoAliasLDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
     { LDiv(x,v1,m2,v3); }
     template <int ix, class T, class V1, class V2, class V3>
-    inline void AliasLDiv(
+    static void AliasLDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
     { LDiv(x,v1,m2,v3); }
 
     template <class V1, class V2>
-    inline void LDivEq(
+    static void LDivEq(
         BaseVector_Mutable<V1>& v1, const Householder<V2>& m2)
     { m2.multEqV(v1); }
     template <class V1, class V2>
-    inline void NoAliasLDivEq(
+    static void NoAliasLDivEq(
         BaseVector_Mutable<V1>& v1, const Householder<V2>& m2)
     { LDivEq(v1,m2); }
     template <class V1, class V2>
-    inline void AliasLDivEq(
+    static void AliasLDivEq(
         BaseVector_Mutable<V1>& v1, const Householder<V2>& m2)
     { LDivEq(v1,m2); }
 
@@ -854,31 +865,31 @@ namespace tmv {
     //
 
     template <int ix, class T, class V1, class V3>
-    inline void RDiv(
+    static void RDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
     { m2.transpose().multV(v1,v3); Scale(x,v3); }
     template <int ix, class T, class V1, class V3>
-    inline void NoAliasRDiv(
+    static void NoAliasRDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
     { RDiv(x,v1,m2,v3); }
     template <int ix, class T, class V1, class V3>
-    inline void AliasRDiv(
+    static void AliasRDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
     { RDiv(x,v1,m2,v3); }
 
     template <class V1, class V2>
-    inline void RDivEq(
+    static void RDivEq(
         BaseVector_Mutable<V1>& v1, const Householder<V2>& m2)
     { m2.transpose().multEqV(v1); }
     template <class V1, class V2>
-    inline void NoAliasRDivEq(
+    static void NoAliasRDivEq(
         BaseVector_Mutable<V1>& v1, const Householder<V2>& m2)
     { RDivEq(v1,m2); }
     template <class V1, class V2>
-    inline void AliasRDivEq(
+    static void AliasRDivEq(
         BaseVector_Mutable<V1>& v1, const Householder<V2>& m2)
     { RDivEq(v1,m2); }
 
@@ -890,7 +901,7 @@ namespace tmv {
     //
 
     template <bool add, int ix, class T, class V1, class M2, class M3>
-    inline void MultMM(
+    static void MultMM(
         const Scaling<ix,T>& x, const Householder<V1>& m1, 
         const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     {
@@ -902,44 +913,44 @@ namespace tmv {
         }
     }
     template <bool add, int ix, class T, class V1, class M2, class M3>
-    inline void NoAliasMultMM(
+    static void NoAliasMultMM(
         const Scaling<ix,T>& x, const Householder<V1>& m1, 
         const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     { MultMM<add>(x,m1,m2,m3); }
     template <bool add, int ix, class T, class V1, class M2, class M3>
-    inline void AliasMultMM(
+    static void AliasMultMM(
         const Scaling<ix,T>& x, const Householder<V1>& m1, 
         const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     { MultMM<add>(x,m1,m2,m3); }
 
     template <bool add, int ix, class T, class M1, class V2, class M3>
-    inline void MultVM(
+    static void MultVM(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
         const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
     { MultMM<add>(x,m2.transpose(),m1,m3); }
     template <bool add, int ix, class T, class M1, class V2, class M3>
-    inline void NoAliasMultVM(
+    static void NoAliasMultVM(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
         const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
     { NoAliasMultMM<add>(x,m2.transpose(),m1,m3); }
     template <bool add, int ix, class T, class M1, class V2, class M3>
-    inline void AliasMultVM(
+    static void AliasMultVM(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
         const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
     { AliasMultMM<add>(x,m2.transpose(),m1,m3); }
  
     template <int ix, class T, class M1, class V2>
-    inline void MultEqMM(
+    static void MultEqMM(
         BaseMatrix_Mutable<M1>& m1, const Scaling<ix,T>& x,
         const Householder<V2>& m2)
     { m2.transpose().multEq(m1); Scale(x,m1); }
     template <int ix, class T, class M1, class V2>
-    inline void NoAliasMultEqMM(
+    static void NoAliasMultEqMM(
         BaseMatrix_Mutable<M1>& m1, const Scaling<ix,T>& x,
         const Householder<V2>& m2)
     { MultEqMM(m1,x,m2); }
     template <int ix, class T, class M1, class V2>
-    inline void AliasMultEqMM(
+    static void AliasMultEqMM(
         BaseMatrix_Mutable<M1>& m1, const Scaling<ix,T>& x,
         const Householder<V2>& m2)
     { MultEqMM(m1,x,m2); }
@@ -949,31 +960,31 @@ namespace tmv {
     //
 
     template <int ix, class T, class M1, class V2, class M3>
-    inline void LDiv(
+    static void LDiv(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
         const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
     { m2.mult(m1,m3); Scale(x,m3); }
     template <int ix, class T, class M1, class V2, class M3>
-    inline void NoAliasLDiv(
+    static void NoAliasLDiv(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
         const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
     { LDiv(x,m1,m2,m3); }
     template <int ix, class T, class M1, class V2, class M3>
-    inline void AliasLDiv(
+    static void AliasLDiv(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
         const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
     { LDiv(x,m1,m2,m3); }
 
     template <class M1, class V2>
-    inline void LDivEq(
+    static void LDivEq(
         BaseMatrix_Mutable<M1>& m1, const Householder<V2>& m2)
     { m2.multEq(m1); }
     template <class M1, class V2>
-    inline void NoAliasLDivEq(
+    static void NoAliasLDivEq(
         BaseMatrix_Mutable<M1>& m1, const Householder<V2>& m2)
     { LDivEq(m1,m2); }
     template <class M1, class V2>
-    inline void AliasLDivEq(
+    static void AliasLDivEq(
         BaseMatrix_Mutable<M1>& m1, const Householder<V2>& m2)
     { LDivEq(m1,m2); }
 
@@ -982,31 +993,31 @@ namespace tmv {
     //
 
     template <int ix, class T, class M1, class V2, class M3>
-    inline void RDiv(
+    static void RDiv(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
         const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
     { m2.transpose().mult(m1,m3); Scale(x,m3); }
     template <int ix, class T, class M1, class V2, class M3>
-    inline void NoAliasRDiv(
+    static void NoAliasRDiv(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
         const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
     { RDiv(x,m1,m2,m3); }
     template <int ix, class T, class M1, class V2, class M3>
-    inline void AliasRDiv(
+    static void AliasRDiv(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
         const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
     { RDiv(x,m1,m2,m3); }
 
     template <class M1, class V2>
-    inline void RDivEq(
+    static void RDivEq(
         BaseMatrix_Mutable<M1>& m1, const Householder<V2>& m2)
     { m2.transpose().multEq(m1); }
     template <class M1, class V2>
-    inline void NoAliasRDivEq(
+    static void NoAliasRDivEq(
         BaseMatrix_Mutable<M1>& m1, const Householder<V2>& m2)
     { RDivEq(m1,m2); }
     template <class M1, class V2>
-    inline void AliasRDivEq(
+    static void AliasRDivEq(
         BaseMatrix_Mutable<M1>& m1, const Householder<V2>& m2)
     { RDivEq(m1,m2); }
 

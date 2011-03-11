@@ -1,7 +1,7 @@
 
 #include <fstream>
 #include "TMV_Test.h"
-#include "TMV_Test1.h"
+#include "TMV_Test_1.h"
 
 bool XXDEBUG1 = false;
 bool XXDEBUG2 = false;
@@ -36,40 +36,46 @@ int main() try {
 #ifdef TEST_DOUBLE
     TestVector<double>();
     TestMatrix<double>();
+    TestPermutation<double>();
     TestDiagMatrix<double>();
     TestDiagDiv<double>();
     TestTriMatrix<double>();
     TestTriDiv<double>();
     TestMatrixDiv<double>();
+    TestMatrixDet<double>();
 #endif // DOUBLE
-
-    TestPermutation();
 
 #ifdef TEST_FLOAT
     TestVector<float>();
     TestMatrix<float>();
+    TestPermutation<float>();
     TestDiagMatrix<float>();
     TestDiagDiv<float>();
     TestTriMatrix<float>();
     TestTriDiv<float>();
     TestMatrixDiv<float>();
+    TestMatrixDet<float>();
 #endif // FLOAT
 
 #ifdef TEST_INT
     TestVector<int>();
     TestMatrix<int>();
+    TestPermutation<int>();
     TestDiagMatrix<int>();
     TestTriMatrix<int>();
+    TestMatrixDet<int>();
 #endif  // INT
 
 #ifdef TEST_LONGDOUBLE
     TestVector<long double>();
     TestMatrix<long double>();
+    TestPermutation<long double>();
     TestDiagMatrix<long double>();
     TestDiagDiv<long double>();
     TestTriMatrix<long double>();
     TestTriDiv<long double>();
     TestMatrixDiv<long double>();
+    TestMatrixDet<long double>();
 #endif // LONGDOUBLE
 
 #endif

@@ -1,86 +1,93 @@
-#define CT std::complex<T>
 
-template <class SM1, class SM2> inline bool CanLDiv(
-    const SM1& a, const SM2& b)
+template <class M1, class M2> 
+inline bool CanLDiv(
+    const tmv::BaseMatrix<M1>& a, const tmv::BaseMatrix<M2>& b)
 { return a.colsize() == b.colsize(); }
 
-template <class SM1, class SM2, class SM3> inline bool CanLDiv(
-    const SM1& a, const SM2& b, const SM3& c)
+template <class M1, class M2, class M3> 
+inline bool CanLDiv(
+    const tmv::BaseMatrix<M1>& a, const tmv::BaseMatrix<M2>& b,
+    const tmv::BaseMatrix_Mutable<M3>& c)
 { 
     return a.colsize() == b.colsize() && a.rowsize() == c.colsize() 
         && b.rowsize() == c.rowsize(); 
 }
 
-template <class SM1, class SM2> inline bool CanLDivEq(
-    const SM1& a, const SM2& b)
-{ return CanLDiv(a,b) && b.isSquare(); }
+template <class M1, class M2> 
+inline bool CanLDivEq(
+    const tmv::BaseMatrix_Mutable<M1>& a, const tmv::BaseMatrix<M2>& b)
+{ return CanLDiv(a.mat(),b) && b.isSquare(); }
 
-template <class V1, class SM2> inline bool CanLDivVM(
-    const V1& a, const SM2& b)
+template <class V1, class M2> 
+inline bool CanLDiv(
+    const tmv::BaseVector<V1>& a, const tmv::BaseMatrix<M2>& b)
 { return a.size() == b.colsize(); }
 
-template <class V1, class SM2, class V3> inline bool CanLDivVM(
-    const V1& a, const SM2& b, const V3& c)
+template <class V1, class M2, class V3> 
+inline bool CanLDiv(
+    const tmv::BaseVector<V1>& a, const tmv::BaseMatrix<M2>& b,
+    const tmv::BaseVector_Mutable<V3>& c)
 { return a.size() == b.colsize() && c.size() == b.rowsize(); }
 
-template <class V1, class SM2> inline bool CanLDivEqVM(
-    const V1& a, const SM2& b)
-{ return CanLDivVM(a,b) && b.isSquare(); }
+template <class V1, class M2> 
+inline bool CanLDivEq(
+    const tmv::BaseVector_Mutable<V1>& a, const tmv::BaseMatrix<M2>& b)
+{ return CanLDiv(a.vec(),b) && b.isSquare(); }
 
-template <class SM1, class SM2> inline bool CanRDiv(
-    const SM1& a, const SM2& b)
+template <class M1, class M2> 
+inline bool CanRDiv(
+    const tmv::BaseMatrix<M1>& a, const tmv::BaseMatrix<M2>& b)
 { return a.rowsize() == b.rowsize(); }
 
-template <class SM1, class SM2, class SM3> inline bool CanRDiv(
-    const SM1& a, const SM2& b, const SM3& c)
+template <class M1, class M2, class M3> 
+inline bool CanRDiv(
+    const tmv::BaseMatrix<M1>& a, const tmv::BaseMatrix<M2>& b,
+    const tmv::BaseMatrix_Mutable<M3>& c)
 { 
     return a.rowsize() == b.rowsize() && a.colsize() == c.colsize() 
         && b.colsize() == c.rowsize(); 
 }
 
-template <class SM1, class SM2> inline bool CanRDivEq(
-    const SM1& a, const SM2& b)
-{ return CanRDiv(a,b) && b.isSquare(); }
+template <class M1, class M2> 
+inline bool CanRDivEq(
+    const tmv::BaseMatrix_Mutable<M1>& a, const tmv::BaseMatrix<M2>& b)
+{ return CanRDiv(a.mat(),b) && b.isSquare(); }
 
-template <class V1, class SM2> inline bool CanRDivVM(
-    const V1& a, const SM2& b)
+template <class V1, class M2> 
+inline bool CanRDiv(
+    const tmv::BaseVector<V1>& a, const tmv::BaseMatrix<M2>& b)
 { return a.size() == b.rowsize(); }
 
-template <class V1, class SM2, class V3> inline bool CanRDivVM(
-    const V1& a, const SM2& b, const V3& c)
+template <class V1, class M2, class V3> 
+inline bool CanRDiv(
+    const tmv::BaseVector<V1>& a, const tmv::BaseMatrix<M2>& b, 
+    const tmv::BaseVector_Mutable<V3>& c)
 { return a.size() == b.rowsize() && c.size() == b.colsize(); }
 
-template <class V1, class SM2> inline bool CanRDivEqVM(
-    const V1& a, const SM2& b)
-{ return CanRDivVM(a,b) && b.isSquare(); }
+template <class V1, class M2> 
+inline bool CanRDivEq(
+    const tmv::BaseVector_Mutable<V1>& a, const tmv::BaseMatrix<M2>& b)
+{ return CanRDiv(a.vec(),b) && b.isSquare(); }
 
-template <class T1, class T2> struct ProdType
-{ typedef T1 Tprod; };
+template <class V0, class V1> 
+inline void CopyBackV(
+    const tmv::BaseVector<V0>& v0, tmv::BaseVector_Mutable<V1>& v1)
+{ v1 = v0; }
 
-template <class T> struct ProdType<T,std::complex<T> >
-{ typedef std::complex<T> Tprod; };
+template <class M0, class M1> 
+inline void CopyBackM(
+    const tmv::BaseMatrix<M0>& m0, tmv::BaseMatrix_Mutable<M1>& m1)
+{ m1 = m0; }
 
-#define RealType(T) typename tmv::Traits<T>::real_type
-#define ComplexType(T) typename tmv::Traits<T>::complex_type
-
-#define ProductType(T1,T2) typename ProdType<T1,T2>::Tprod
-
-#ifdef NOMIX
-#define VEC(T,v) (tmv::Vector<T>(v))
-#define VEC2(T1,T2,v) (tmv::Vector<ProductType(T1,T2)>(v))
-#define MAT(T,m) (tmv::Matrix<T>(m))
-#define MAT2(T1,T2,m) (tmv::Matrix<ProductType(T1,T2)>(m))
-#else
-#define VEC(T,v) (v)
-#define VEC2(T1,T2,v) (v)
-#define MAT(T,m) (m)
-#define MAT2(T1,T2,m) (m)
-#endif
+#define ProductType(T1,T2) typename tmv::Traits2<T1,T2>::type
 
 template <class T, class Tb, class V, class MM> 
 static void DoTestLDivVM1a(
     tmv::DivType dt, const V& a, const MM& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<T>::complex_type CT;
+    typedef typename tmv::Traits<RT>::float_type FT;
     if (showstartdone) std::cout<<"Start LDiv VM1a: "<<label<<std::endl;
 
     tmv::Vector<T> v = a;
@@ -88,11 +95,14 @@ static void DoTestLDivVM1a(
     m.divideUsing(dt==tmv::CH?tmv::LU:dt);
     m.saveDiv();
 
-    double eps = EPS*Norm(m)*Norm(tmv::Matrix<Tb>(m.inverse()))*v.size();
+    FT eps = EPS * a.size();
+    if (!std::numeric_limits<T>::is_integer) 
+        eps *= Norm(b)*Norm(tmv::Matrix<Tb>(b.inverse()));
 
-    if (CanLDivVM(a,b)) {
+    if (CanLDiv(a,b)) {
         tmv::Vector<ProductType(T,Tb)> frac = v/m;
         eps *= Norm(frac);
+#ifdef XXD
         if (XXDEBUG1) {
             std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
             std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
@@ -100,45 +110,52 @@ static void DoTestLDivVM1a(
             std::cout<<"m = "<<tmv::TMV_Text(m)<<"  "<<m<<std::endl;
             std::cout<<"a/b = "<<a/b<<std::endl;
             std::cout<<"v/m = "<<frac<<std::endl;
-            std::cout<<"Norm(diff) = "<<Norm(VEC2(T,Tb,a/b)-frac)<<std::endl;
+            std::cout<<"Norm(diff) = "<<Norm(a/b-frac)<<std::endl;
             std::cout<<"eps = "<<eps<<std::endl;
         }
-        Assert(Norm(VEC2(T,Tb,a/b)-frac) <= eps,label+" a/b");
-        RealType(T) x(5);
-        ComplexType(T) z(3,4);
-        Assert(Norm(VEC2(T,Tb,x*a/b)-x*frac) <= x*eps,label+" x*a/b");
+#endif
+        Assert(Equal(a/b,frac,eps),label+" a/b");
+        RT x(5);
+        CT z(3,4);
+#ifdef XXD
         if (XXDEBUG1) {
-            std::cout<<"z*a/b = "<<VEC(ComplexType(T),z*a/b)<<std::endl;
-            std::cout<<"z*frac = "<<z*frac<<std::endl;
-            std::cout<<"Norm(diff) = "<<Norm(VEC(ComplexType(T),z*a/b)-z*frac)
+            std::cout<<"x*a/b = "<<x*a/b<<std::endl;
+            std::cout<<"x*frac = "<<x*frac<<std::endl;
+            std::cout<<"Norm(diff) = "<<Norm(x*a/b-z*frac)
                 <<" x*eps = "<<x*eps<<std::endl;
         }
-        Assert(Norm(VEC(ComplexType(T),z*a/b)-z*frac) <= x*eps,label+" z*a/b");
+#endif
+        Assert(Equal(x*a/b,x*frac,x*eps),label+" x*a/b");
+#ifdef XXD
+        if (XXDEBUG1) {
+            std::cout<<"z*a/b = "<<z*a/b<<std::endl;
+            std::cout<<"z*frac = "<<z*frac<<std::endl;
+            std::cout<<"Norm(diff) = "<<Norm(z*a/b-z*frac)
+                <<" x*eps = "<<x*eps<<std::endl;
+        }
+#endif
+        Assert(Equal(z*a/b,z*frac,x*eps),label+" z*a/b");
 #if (XTEST & 16)
-        Assert(Norm(VEC2(T,Tb,b.inverse()*a)-frac) <= eps,label+" b^-1*a");
+        Assert(Equal(b.inverse()*a,frac,eps),label+" b^-1*a");
 #ifndef NOMIX
-        Assert(Norm(VEC2(T,Tb,a/m)-frac) <= eps,label+" a/m");
-        Assert(Norm(VEC2(T,Tb,m.inverse()*a)-frac) <= eps,label+" m^-1*a");
-        Assert(Norm(VEC2(T,Tb,v/b)-frac) <= eps,label+" v/b");
-        Assert(Norm(VEC2(T,Tb,b.inverse()*v)-frac) <= eps,label+" b^-1*v");
+        Assert(Equal(a/m,frac,eps),label+" a/m");
+        Assert(Equal(m.inverse()*a,frac,eps),label+" m^-1*a");
+        Assert(Equal(v/b,frac,eps),label+" v/b");
+        Assert(Equal(b.inverse()*v,frac,eps),label+" b^-1*v");
 #endif
 
-        Assert(Norm(VEC2(T,Tb,(x*a)/b)-x*frac) <= x*eps,label+" (x*a)/b");
-        Assert(Norm(VEC2(T,Tb,x*(a/b))-x*frac) <= x*eps,label+" x*(a/b)");
-        Assert(Norm(VEC2(T,Tb,a/(x*b))-frac/x) <= eps/x,label+" a/(x*b)");
+        Assert(Equal((x*a)/b,x*frac,x*eps),label+" (x*a)/b");
+        Assert(Equal(x*(a/b),x*frac,x*eps),label+" x*(a/b)");
+        Assert(Equal(a/(x*b),frac/x,eps/x),label+" a/(x*b)");
 
-        Assert(Norm(VEC(ComplexType(T),(z*a)/b)-z*frac) <= x*eps,label+" (z*a)/b");
-        Assert(Norm(VEC(ComplexType(T),z*(a/b))-z*frac) <= x*eps,label+" z*(a/b)");
-        Assert(Norm(VEC(ComplexType(T),a/(z*b))-frac/z) <= eps/x,label+" a/(z*b)");
+        Assert(Equal((z*a)/b,z*frac,x*eps),label+" (z*a)/b");
+        Assert(Equal(z*(a/b),z*frac,x*eps),label+" z*(a/b)");
+        Assert(Equal(a/(z*b),frac/z,eps/x),label+" a/(z*b)");
 
-        Assert(Norm(VEC2(T,Tb,(x*a)/(x*b))-frac) <= eps,
-               label+" (x*a)/(x*b)");
-        Assert(Norm(VEC(ComplexType(T),(z*a)/(x*b))-(z/x)*frac) <= eps,
-               label+" (z*a)/(x*b)");
-        Assert(Norm(VEC(ComplexType(T),(x*a)/(z*b))-(x/z)*frac) <= eps,
-               label+" (x*a)/(z*b)");
-        Assert(Norm(VEC(ComplexType(T),(z*a)/(z*b))-frac) <= eps,
-               label+" (z*a)/(z*b)");
+        Assert(Equal(x*a)/(x*b),frac,eps),label+" (x*a)/(x*b)");
+        Assert(Equal((z*a)/(x*b),(z/x)*frac,eps), label+" (z*a)/(x*b)");
+        Assert(Equal((x*a)/(z*b),(x/z)*frac,eps), label+" (x*a)/(z*b)");
+        Assert(Equal((z*a)/(z*b),frac,eps), label+" (z*a)/(z*b)");
 #endif
     }
 
@@ -149,6 +166,9 @@ template <class T, class Tb, class V, class MM>
 static void DoTestRDivVM1a(
     tmv::DivType dt, const V& a, const MM& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<T>::complex_type CT;
+    typedef typename tmv::Traits<RT>::float_type FT;
     if (showstartdone) std::cout<<"Start RDiv VM1a: "<<label<<std::endl;
 
     tmv::Vector<T> v = a;
@@ -156,11 +176,14 @@ static void DoTestRDivVM1a(
     m.divideUsing(dt==tmv::CH?tmv::LU:dt);
     m.saveDiv();
 
-    double eps = EPS*Norm(m)*Norm(tmv::Matrix<Tb>(m.inverse()))*v.size();
+    FT eps = EPS * a.size();
+    if (!std::numeric_limits<T>::is_integer) 
+        eps *= Norm(b)*Norm(tmv::Matrix<Tb>(b.inverse()));
 
-    if (CanRDivVM(a,b)) {
+    if (CanRDiv(a,b)) {
         tmv::Vector<ProductType(T,Tb)> frac = v%m;
         eps *= Norm(frac);
+#ifdef XXD
         if (XXDEBUG2) {
             std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
             std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
@@ -168,39 +191,44 @@ static void DoTestRDivVM1a(
             std::cout<<"m = "<<tmv::TMV_Text(m)<<"  "<<m<<std::endl;
             std::cout<<"a%b = "<<a%b<<std::endl;
             std::cout<<"v%m = "<<frac<<std::endl;
-            std::cout<<"Norm(diff) = "<<Norm(VEC2(T,Tb,a%b)-frac)<<std::endl;
+            std::cout<<"Norm(diff) = "<<Norm(a%b-frac)<<std::endl;
             std::cout<<"eps = "<<eps<<std::endl;
         }
-        Assert(Norm(VEC2(T,Tb,a%b)-frac) <= eps,label+" a%b");
-        RealType(T) x(5);
-        ComplexType(T) z(3,4);
-        Assert(Norm(VEC2(T,Tb,x*a%b)-x*frac) <= x*eps,label+" x*a%b");
-        Assert(Norm(VEC(ComplexType(T),z*a%b)-z*frac) <= x*eps,label+" z*a%b");
+#endif
+        Assert(Equal(a%b,frac,eps),label+" a%b");
+        RT x(5);
+        CT z(3,4);
+        Assert(Equal(x*a%b,x*frac,x*eps),label+" x*a%b");
+#ifdef XXD
+        if (XXDEBUG2) {
+            std::cout<<"z*a%b = "<<z*a%b<<std::endl;
+            std::cout<<"z*v%m = "<<z*frac<<std::endl;
+            std::cout<<"Norm(diff) = "<<Norm(z*a%b-z*frac)<<std::endl;
+            std::cout<<"x*eps = "<<x*eps<<std::endl;
+        }
+#endif
+        Assert(Equal(z*a%b,z*frac,x*eps),label+" z*a%b");
 #if (XTEST & 16)
-        Assert(Norm(VEC2(T,Tb,a*b.inverse())-frac) <= eps,label+" a*b^-1");
+        Assert(Equal(a*b.inverse(),frac,eps),label+" a*b^-1");
 #ifndef NOMIX
-        Assert(Norm(VEC2(T,Tb,a%m)-frac) <= eps,label+" a%m");
-        Assert(Norm(VEC2(T,Tb,a*m.inverse())-frac) <= eps,label+" a*m^-1");
-        Assert(Norm(VEC2(T,Tb,v%b)-frac) <= eps,label+" v%b");
-        Assert(Norm(VEC2(T,Tb,v*b.inverse())-frac) <= eps,label+" v*b^-1");
+        Assert(Equal(a%m,frac,eps),label+" a%m");
+        Assert(Equal(a*m.inverse(),frac,eps),label+" a*m^-1");
+        Assert(Equal(v%b,frac,eps),label+" v%b");
+        Assert(Equal(v*b.inverse(),frac,eps),label+" v*b^-1");
 #endif
 
-        Assert(Norm(VEC2(T,Tb,(x*a)%b)-x*frac) <= x*eps,label+" (x*a)%b");
-        Assert(Norm(VEC2(T,Tb,x*(a%b))-x*frac) <= x*eps,label+" x*(a%b)");
-        Assert(Norm(VEC2(T,Tb,a%(x*b))-frac/x) <= eps/x,label+" a%(x*b)");
+        Assert(Equal((x*a)%b,x*frac,x*eps),label+" (x*a)%b");
+        Assert(Equal(x*(a%b),x*frac,x*eps),label+" x*(a%b)");
+        Assert(Equal(a%(x*b),frac/x,eps/x),label+" a%(x*b)");
 
-        Assert(Norm(VEC(ComplexType(T),(z*a)%b)-z*frac) <= x*eps,label+" (z*a)%b");
-        Assert(Norm(VEC(ComplexType(T),z*(a%b))-z*frac) <= x*eps,label+" z*(a%b)");
-        Assert(Norm(VEC(ComplexType(T),a%(z*b))-frac/z) <= eps/x,label+" a%(z*b)");
+        Assert(Equal((z*a)%b,z*frac,x*eps),label+" (z*a)%b");
+        Assert(Equal(z*(a%b),z*frac,x*eps),label+" z*(a%b)");
+        Assert(Equal(a%(z*b),frac/z,eps/x),label+" a%(z*b)");
 
-        Assert(Norm(VEC2(T,Tb,(x*a)%(x*b))-frac) <= eps,
-               label+" (x*a)%(x*b)");
-        Assert(Norm(VEC(ComplexType(T),(z*a)%(x*b))-(z/x)*frac) <= eps,
-               label+" (z*a)%(x*b)");
-        Assert(Norm(VEC(ComplexType(T),(x*a)%(z*b))-(x/z)*frac) <= eps,
-               label+" (x*a)%(z*b)");
-        Assert(Norm(VEC(ComplexType(T),(z*a)%(z*b))-frac) <= eps,
-               label+" (z*a)%(z*b)");
+        Assert(Equal((x*a)%(x*b),frac,eps), label+" (x*a)%(x*b)");
+        Assert(Equal((z*a)%(x*b),(z/x)*frac,eps), label+" (z*a)%(x*b)");
+        Assert(Equal((x*a)%(z*b),(x/z)*frac,eps), label+" (x*a)%(z*b)");
+        Assert(Equal((z*a)%(z*b),frac,eps), label+" (z*a)%(z*b)");
 #endif
     }
 
@@ -263,44 +291,60 @@ template <class T, class Tb, class V, class MM>
 static void DoTestLDivVM2a(
     tmv::DivType dt, V& a, const MM& b, std::string label)
 {
-    if (showstartdone) std::cout<<"Start LDiv VM2b: "<<label<<std::endl;
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<RT>::float_type FT;
+    if (showstartdone) std::cout<<"Start LDiv VM2a: "<<label<<std::endl;
 
     tmv::Vector<T> v = a;
     tmv::Matrix<Tb> m = b;
     m.divideUsing(dt==tmv::CH?tmv::LU:dt);
     m.saveDiv();
 
-    double eps = EPS*Norm(m)*Norm(tmv::Matrix<Tb>(m.inverse()))*v.size();
+    FT eps = EPS * a.size();
+    if (!std::numeric_limits<T>::is_integer) 
+        eps *= Norm(b)*Norm(tmv::Matrix<Tb>(b.inverse()));
 
-    if (CanLDivEqVM(a,b)) {
-        tmv::Vector<T> a0 = v;
+    if (CanLDivEq(a,b)) {
+        typename V::copy_type a0 = a;
         tmv::Vector<T> frac = v/m;
         eps *= Norm(frac);
         a /= b;
-        Assert(Norm(VEC(T,a)-frac) <= eps,label+" a/=b");
-        a = a0;
+#ifdef XXD
+        if (XXDEBUG2) {
+            std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
+            std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
+            std::cout<<"v = "<<tmv::TMV_Text(v)<<"  "<<v<<std::endl;
+            std::cout<<"m = "<<tmv::TMV_Text(m)<<"  "<<m<<std::endl;
+            std::cout<<"a/b = "<<a/b<<std::endl;
+            std::cout<<"v/m = "<<frac<<std::endl;
+            std::cout<<"a /= b = "<<a<<std::endl;
+            std::cout<<"eps = "<<eps<<std::endl;
+        }
+#endif
+        Assert(Equal(a,frac,eps),label+" a/=b");
+        CopyBackV(a0,a);
 #ifdef ALIASOK
         a = a / b;
-        Assert(Norm(VEC(T,a)-frac) <= eps,label+" a=a/b");
-        a = a0;
+        Assert(Equal(a,frac,eps),label+" a=a/b");
+        CopyBackV(a0,a);
         a = b.inverse() * a;
-        Assert(Norm(VEC(T,a)-frac) <= eps,label+" a=b^-1*a");
-        a = a0;
+        Assert(Equal(a,frac,eps),label+" a=b^-1*a");
+        CopyBackV(a0,a);
 #if (XTEST & 16)
-        RealType(T) x(5);
+        RT x(5);
         T z;  SetZ(z);
         a = x * a / b;
-        Assert(Norm(VEC(T,a)-x*frac) <= x*eps,label+" a=x*a/b");
-        a = a0;
+        Assert(Equal(a,x*frac,x*eps),label+" a=x*a/b");
+        CopyBackV(a0,a);
         a = x * b.inverse() * a;
-        Assert(Norm(VEC(T,a)-x*frac) <= x*eps,label+" a=x*b^-1*a");
-        a = a0;
+        Assert(Equal(a,x*frac,x*eps),label+" a=x*b^-1*a");
+        CopyBackV(a0,a);
         a = z * a / b;
-        Assert(Norm(VEC(T,a)-z*frac) <= x*eps,label+" a=z*a/b");
-        a = a0;
+        Assert(Equal(a,z*frac,x*eps),label+" a=z*a/b");
+        CopyBackV(a0,a);
         a = z * b.inverse() * a;
-        Assert(Norm(VEC(T,a)-z*frac) <= x*eps,label+" a=z*b^-1*a");
-        a = a0;
+        Assert(Equal(a,z*frac,x*eps),label+" a=z*b^-1*a");
+        CopyBackV(a0,a);
 #endif
 #endif
     }
@@ -318,24 +362,24 @@ static void DoTestLDivVM2R(
 #endif
 
 #if (XTEST & 16)
-    tmv::Vector<T> a0 = a;
+    typename V::copy_type a0 = a;
     a.setZero();
     DoTestLDivVM2a<T,Tb>(dt,a,b,label+" 1");
-    a = a0;
+    CopyBackV(a0,a);
 
 #ifndef NOVIEWS
-    a.subVector(0,a.size()/2).setZero();
+    a.cSubVector(0,a.size()/2).setZero();
     DoTestLDivVM2a<T,Tb>(dt,a,b,label+" 2");
-    a = a0;
+    CopyBackV(a0,a);
 
-    a.subVector(a.size()/2,a.size()).setZero();
+    a.cSubVector(a.size()/2,a.size()).setZero();
     DoTestLDivVM2a<T,Tb>(dt,a,b,label+" 3");
-    a = a0;
+    CopyBackV(a0,a);
 
-    a.subVector(0,a.size()/4).setZero();
-    a.subVector(3*a.size()/4,a.size()).setZero();
+    a.cSubVector(0,a.size()/4).setZero();
+    a.cSubVector(3*a.size()/4,a.size()).setZero();
     DoTestLDivVM2a<T,Tb>(dt,a,b,label+" 4");
-    a = a0;
+    CopyBackV(a0,a);
 #endif
 #endif
 }
@@ -353,24 +397,24 @@ static void DoTestLDivVM2C(
 #endif
 
 #if (XTEST & 16)
-    tmv::Vector<T> a0 = a;
+    typename V::copy_type a0 = a;
     a.setZero();
     DoTestLDivVM2a<T,Tb>(dt,a,b,label+" 1");
-    a = a0;
+    CopyBackV(a0,a);
 
 #ifndef NOVIEWS
-    a.subVector(0,a.size()/2).setZero();
+    a.cSubVector(0,a.size()/2).setZero();
     DoTestLDivVM2a<T,Tb>(dt,a,b,label+" 2");
-    a = a0;
+    CopyBackV(a0,a);
 
-    a.subVector(a.size()/2,a.size()).setZero();
+    a.cSubVector(a.size()/2,a.size()).setZero();
     DoTestLDivVM2a<T,Tb>(dt,a,b,label+" 3");
-    a = a0;
+    CopyBackV(a0,a);
 
-    a.subVector(0,a.size()/4).setZero();
-    a.subVector(3*a.size()/4,a.size()).setZero();
+    a.cSubVector(0,a.size()/4).setZero();
+    a.cSubVector(3*a.size()/4,a.size()).setZero();
     DoTestLDivVM2a<T,Tb>(dt,a,b,label+" 4");
-    a = a0;
+    CopyBackV(a0,a);
 #endif
 #endif
 }
@@ -381,6 +425,8 @@ template <class T, class Tb, class V, class MM>
 static void DoTestRDivVM2a(
     tmv::DivType dt, V& a, const MM& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<RT>::float_type FT;
     if (showstartdone) std::cout<<"Start RDiv VM2a: "<<label<<std::endl;
 
     tmv::Vector<T> v = a;
@@ -388,51 +434,59 @@ static void DoTestRDivVM2a(
     m.divideUsing(dt==tmv::CH?tmv::LU:dt);
     m.saveDiv();
 
-    double eps = EPS*Norm(m)*Norm(tmv::Matrix<Tb>(m.inverse()))*v.size();
+    FT eps = EPS * a.size();
+    if (!std::numeric_limits<T>::is_integer) 
+        eps *= Norm(b)*Norm(tmv::Matrix<Tb>(b.inverse()));
 
-    if (CanRDivEqVM(a,b)) {
-        tmv::Vector<T> a0 = a;
+    if (CanRDivEq(a,b)) {
+        typename V::copy_type a0 = a;
         tmv::Vector<T> frac = v%m;
         eps *= Norm(frac);
+#ifdef XXD
         if (XXDEBUG2) {
             std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a.step()<<"  "<<a<<std::endl;
             std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
             std::cout<<"a % b = "<<frac<<std::endl;
         }
+#endif
         a %= b;
+#ifdef XXD
         if (XXDEBUG2) {
             std::cout<<"a %= b = "<<a<<std::endl;
         }
-        Assert(Norm(VEC(T,a)-frac) <= eps,label+" a%=b");
-        a = a0;
+#endif
+        Assert(Equal(a,frac,eps),label+" a%=b");
+        CopyBackV(a0,a);
         a *= b.inverse();
+#ifdef XXD
         if (XXDEBUG2) {
             std::cout<<"a *= b.inv = "<<a<<std::endl;
         }
-        Assert(Norm(VEC(T,a)-frac) <= eps,label+" a*=b^-1");
-        a = a0;
+#endif
+        Assert(Equal(a,frac,eps),label+" a*=b^-1");
+        CopyBackV(a0,a);
 #ifdef ALIASOK
         a = a % b;
-        Assert(Norm(VEC(T,a)-frac) <= eps,label+" a=a%b");
-        a = a0;
+        Assert(Equal(a,frac,eps),label+" a=a%b");
+        CopyBackV(a0,a);
         a = a * b.inverse();
-        Assert(Norm(VEC(T,a)-frac) <= eps,label+" a=a*b^-1");
-        a = a0;
+        Assert(Equal(a,frac,eps),label+" a=a*b^-1");
+        CopyBackV(a0,a);
 #if (XTEST & 16)
-        RealType(T) x(5);
+        RT x(5);
         T z;  SetZ(z);
         a = x * a % b;
-        Assert(Norm(VEC(T,a)-x*frac) <= x*eps,label+" a=x*a%b");
-        a = a0;
+        Assert(Equal(a,x*frac,x*eps),label+" a=x*a%b");
+        CopyBackV(a0,a);
         a = x * a * b.inverse();
-        Assert(Norm(VEC(T,a)-x*frac) <= x*eps,label+" a=x*a*b^-1");
-        a = a0;
+        Assert(Equal(a,x*frac,x*eps),label+" a=x*a*b^-1");
+        CopyBackV(a0,a);
         a = z * a % b;
-        Assert(Norm(VEC(T,a)-z*frac) <= x*eps,label+" a=z*a%b");
-        a = a0;
+        Assert(Equal(a,z*frac,x*eps),label+" a=z*a%b");
+        CopyBackV(a0,a);
         a = z * a * b.inverse();
-        Assert(Norm(VEC(T,a)-z*frac) <= x*eps,label+" a=z*a*b^-1");
-        a = a0;
+        Assert(Equal(a,z*frac,x*eps),label+" a=z*a*b^-1");
+        CopyBackV(a0,a);
 #endif
 #endif
     }
@@ -450,24 +504,24 @@ static void DoTestRDivVM2R(
 #endif
 
 #if (XTEST & 16)
-    tmv::Vector<T> a0 = a;
+    typename V::copy_type a0 = a;
     a.setZero();
     DoTestRDivVM2a<T,Tb>(dt,a,b,label+" 1");
-    a = a0;
+    CopyBackV(a0,a);
 
 #ifndef NOVIEWS
-    a.subVector(0,a.size()/2).setZero();
+    a.cSubVector(0,a.size()/2).setZero();
     DoTestRDivVM2a<T,Tb>(dt,a,b,label+" 2");
-    a = a0;
+    CopyBackV(a0,a);
 
-    a.subVector(a.size()/2,a.size()).setZero();
+    a.cSubVector(a.size()/2,a.size()).setZero();
     DoTestRDivVM2a<T,Tb>(dt,a,b,label+" 3");
-    a = a0;
+    CopyBackV(a0,a);
 
-    a.subVector(0,a.size()/4).setZero();
-    a.subVector(3*a.size()/4,a.size()).setZero();
+    a.cSubVector(0,a.size()/4).setZero();
+    a.cSubVector(3*a.size()/4,a.size()).setZero();
     DoTestRDivVM2a<T,Tb>(dt,a,b,label+" 4");
-    a = a0;
+    CopyBackV(a0,a);
 #endif
 #endif
 }
@@ -485,24 +539,24 @@ static void DoTestRDivVM2C(
 #endif
 
 #if (XTEST & 16)
-    tmv::Vector<T> a0 = a;
+    typename V::copy_type a0 = a;
     a.setZero();
     DoTestRDivVM2a<T,Tb>(dt,a,b,label+" 1");
-    a = a0;
+    CopyBackV(a0,a);
 
 #ifndef NOVIEWS
-    a.subVector(0,a.size()/2).setZero();
+    a.cSubVector(0,a.size()/2).setZero();
     DoTestRDivVM2a<T,Tb>(dt,a,b,label+" 2");
-    a = a0;
+    CopyBackV(a0,a);
 
-    a.subVector(a.size()/2,a.size()).setZero();
+    a.cSubVector(a.size()/2,a.size()).setZero();
     DoTestRDivVM2a<T,Tb>(dt,a,b,label+" 3");
-    a = a0;
+    CopyBackV(a0,a);
 
-    a.subVector(0,a.size()/4).setZero();
-    a.subVector(3*a.size()/4,a.size()).setZero();
+    a.cSubVector(0,a.size()/4).setZero();
+    a.cSubVector(3*a.size()/4,a.size()).setZero();
     DoTestRDivVM2a<T,Tb>(dt,a,b,label+" 4");
-    a = a0;
+    CopyBackV(a0,a);
 #endif
 #endif
 }
@@ -512,11 +566,13 @@ template <class Ta, class Tb, class T, class V1, class MM, class V2>
 static void DoTestLDivVM3a(
     tmv::DivType dt, const V1& a, const MM& b, V2& c, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<RT>::float_type FT;
     if (showstartdone) {
         std::cout<<"Start LDiv VM3a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     tmv::Vector<Ta> v1 = a;
@@ -525,40 +581,46 @@ static void DoTestLDivVM3a(
     m.divideUsing(dt==tmv::CH?tmv::LU:dt);
     m.saveDiv();
 
-    double eps = EPS*Norm(m)*Norm(tmv::Matrix<Tb>(m.inverse()))*v1.size();
+    FT eps = EPS * a.size();
+    if (!std::numeric_limits<T>::is_integer) 
+        eps *= Norm(b)*Norm(tmv::Matrix<Tb>(b.inverse()));
 
+#ifdef XXD
     if (XXDEBUG3) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a.step()<<"  "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c.step()<<"  "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c.step()<<std::endl;
     }
+#endif
 
-    if (CanLDivVM(a,b,c)) {
+    if (CanLDiv(a,b,c)) {
         v2 = v1/m;
         eps *= Norm(v2);
         c = a/b;
+#ifdef XXD
         if (XXDEBUG3) {
             std::cout<<"v/m = "<<v2<<std::endl;
             std::cout<<"a/b = "<<c<<std::endl;
         }
-        Assert(Norm(VEC(T,c)-v2) <= eps,label+" c=a/b");
+#endif
+        Assert(Equal(c,v2,eps),label+" c=a/b");
 #if (XTEST & 16)
         c = -a/b;
-        Assert(Norm(VEC(T,c)-(-v2)) <= eps,label+" c=-a/b");
-        RealType(T) x(5);
+        Assert(Equal(c,(-v2),eps),label+" c=-a/b");
+        RT x(5);
         T z; SetZ(z);
         c = x*a/b;
-        Assert(Norm(VEC(T,c)-(x*v2)) <= x*eps,label+" c=x*a/b");
+        Assert(Equal(c,(x*v2),x*eps),label+" c=x*a/b");
         c = a/b*x;
-        Assert(Norm(VEC(T,c)-(x*v2)) <= x*eps,label+" c=a/b*x");
+        Assert(Equal(c,(x*v2),x*eps),label+" c=a/b*x");
         c = (x*a)/b;
-        Assert(Norm(VEC(T,c)-(x*v2)) <= x*eps,label+" c=(x*a)/b");
+        Assert(Equal(c,(x*v2),x*eps),label+" c=(x*a)/b");
         c = z*a/b;
-        Assert(Norm(VEC(T,c)-(z*v2)) <= x*eps,label+" c=z*a/b");
+        Assert(Equal(c,(z*v2),x*eps),label+" c=z*a/b");
         c = a/b*z;
-        Assert(Norm(VEC(T,c)-(z*v2)) <= x*eps,label+" c=a/b*z");
+        Assert(Equal(c,(z*v2),x*eps),label+" c=a/b*z");
         c = (z*a)/b;
-        Assert(Norm(VEC(T,c)-(z*v2)) <= x*eps,label+" c=(z*a)/b");
+        Assert(Equal(c,(z*v2),x*eps),label+" c=(z*a)/b");
 #endif
     }
 
@@ -569,11 +631,13 @@ template <class Ta, class Tb, class T, class V1, class MM, class V2>
 static void DoTestRDivVM3a(
     tmv::DivType dt, const V1& a, const MM& b, V2& c, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<RT>::float_type FT;
     if (showstartdone) {
         std::cout<<"Start RDiv VM3a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     tmv::Vector<Ta> v1 = a;
@@ -582,40 +646,46 @@ static void DoTestRDivVM3a(
     m.divideUsing(dt==tmv::CH?tmv::LU:dt);
     m.saveDiv();
 
-    double eps = EPS*Norm(m)*Norm(tmv::Matrix<Tb>(m.inverse()))*v1.size();
+    FT eps = EPS * a.size();
+    if (!std::numeric_limits<T>::is_integer) 
+        eps *= Norm(b)*Norm(tmv::Matrix<Tb>(b.inverse()));
 
+#ifdef XXD
     if (XXDEBUG4) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a.step()<<"  "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c.step()<<"  "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c.step()<<std::endl;
     }
+#endif
 
-    if (CanRDivVM(a,b,c)) {
+    if (CanRDiv(a,b,c)) {
         v2 = v1%m;
         eps *= Norm(v2);
         c = a%b;
+#ifdef XXD
         if (XXDEBUG4) {
             std::cout<<"v%m = "<<v2<<std::endl;
             std::cout<<"a%b = "<<c<<std::endl;
         }
-        Assert(Norm(VEC(T,c)-v2) <= eps,label+" c=a%b");
+#endif
+        Assert(Equal(c,v2,eps),label+" c=a%b");
 #if (XTEST & 16)
         c = -a%b;
-        Assert(Norm(VEC(T,c)-(-v2)) <= eps,label+" c=-a%b");
-        RealType(T) x(5);
+        Assert(Equal(c,(-v2),eps),label+" c=-a%b");
+        RT x(5);
         T z; SetZ(z);
         c = x*a%b;
-        Assert(Norm(VEC(T,c)-(x*v2)) <= x*eps,label+" c=x*a%b");
+        Assert(Equal(c,(x*v2),x*eps),label+" c=x*a%b");
         c = a%b*x;
-        Assert(Norm(VEC(T,c)-(x*v2)) <= x*eps,label+" c=x*a%b");
+        Assert(Equal(c,(x*v2),x*eps),label+" c=x*a%b");
         c = (x*a)%b;
-        Assert(Norm(VEC(T,c)-(x*v2)) <= x*eps,label+" c=(x*a)%b");
+        Assert(Equal(c,(x*v2),x*eps),label+" c=(x*a)%b");
         c = z*a%b;
-        Assert(Norm(VEC(T,c)-(z*v2)) <= x*eps,label+" c=z*a%b");
+        Assert(Equal(c,(z*v2),x*eps),label+" c=z*a%b");
         c = a%b*z;
-        Assert(Norm(VEC(T,c)-(z*v2)) <= x*eps,label+" c=a%b*z");
+        Assert(Equal(c,(z*v2),x*eps),label+" c=a%b*z");
         c = (z*a)%b;
-        Assert(Norm(VEC(T,c)-(z*v2)) <= x*eps,label+" c=(z*a)%b");
+        Assert(Equal(c,(z*v2),x*eps),label+" c=(z*a)%b");
 #endif
     }
 
@@ -630,7 +700,7 @@ static void DoTestLDivVM3RR(
         std::cout<<"Start LDiv VM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -652,7 +722,7 @@ static void DoTestLDivVM3RC(
         std::cout<<"Start LDiv VM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -679,7 +749,7 @@ static void DoTestLDivVM3CR(
         std::cout<<"Start LDiv VM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -705,7 +775,7 @@ static void DoTestLDivVM3CC(
         std::cout<<"Start LDiv VM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -734,7 +804,7 @@ static void DoTestRDivVM3RR(
         std::cout<<"Start RDiv VM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -756,7 +826,7 @@ static void DoTestRDivVM3RC(
         std::cout<<"Start RDiv VM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -783,7 +853,7 @@ static void DoTestRDivVM3CR(
         std::cout<<"Start RDiv VM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -809,7 +879,7 @@ static void DoTestRDivVM3CC(
         std::cout<<"Start RDiv VM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -834,6 +904,9 @@ template <class T, class Tb, class M1, class M2>
 static void DoTestLDivMM1a(
     tmv::DivType dt, const M1& a, const M2& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<T>::complex_type CT;
+    typedef typename tmv::Traits<RT>::float_type FT;
     if (showstartdone) {
         std::cout<<"Start LDiv MM1b: "<<label<<std::endl;
     }
@@ -843,11 +916,14 @@ static void DoTestLDivMM1a(
     m2.divideUsing(dt==tmv::CH?tmv::LU:dt);
     m2.saveDiv();
 
-    double eps = EPS*Norm(m2)*Norm(tmv::Matrix<Tb>(m2.inverse()))*m1.colsize();
+    FT eps = EPS * a.colsize();
+    if (!std::numeric_limits<T>::is_integer) 
+        eps *= Norm(b)*Norm(tmv::Matrix<Tb>(b.inverse()));
 
     if (CanLDiv(a,b)) {
         tmv::Matrix<ProductType(T,Tb)> frac = m1/m2;
         eps *= Norm(frac);
+#ifdef XXD
         if (XXDEBUG5) {
             std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
             std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
@@ -855,44 +931,44 @@ static void DoTestLDivMM1a(
             std::cout<<"m = "<<tmv::TMV_Text(m2)<<"  "<<m2<<std::endl;
             std::cout<<"a/b = "<<a/b<<std::endl;
             std::cout<<"m1/m2 = "<<frac<<std::endl;
-            std::cout<<"Norm(diff) = "<<Norm(MAT2(T,Tb,a/b)-frac)<<std::endl;
+            std::cout<<"Norm(diff) = "<<Norm(a/b-frac)<<std::endl;
             std::cout<<"eps = "<<eps<<std::endl;
         }
-        Assert(Norm(MAT2(T,Tb,a/b)-frac) <= eps,label+" a/b");
-        RealType(T) x(5);
-        ComplexType(T) z(3,4);
-        Assert(Norm(MAT2(T,Tb,x*a/b)-x*frac) <= x*eps,label+" x*a/b");
+#endif
+        Assert(Equal(a/b,frac,eps),label+" a/b");
+        RT x(5);
+        CT z(3,4);
+        Assert(Equal(x*a/b,x*frac,x*eps),label+" x*a/b");
+#ifdef XXD
         if (XXDEBUG5) {
-            std::cout<<"z*a/b = "<<VEC(ComplexType(T),z*a/b)<<std::endl;
+            std::cout<<"z*a/b = "<<z*a/b<<std::endl;
             std::cout<<"z*frac = "<<z*frac<<std::endl;
-            std::cout<<"Norm(diff) = "<<Norm(VEC(ComplexType(T),z*a/b)-z*frac)
+            std::cout<<"Norm(diff) = "<<Norm(z*a/b-z*frac)
                 <<" x*eps = "<<x*eps<<std::endl;
         }
-        Assert(Norm(MAT(ComplexType(T),z*a/b)-z*frac) <= x*eps,label+" z*a/b");
+#endif
+        Assert(Equal(z*a/b,z*frac,x*eps),label+" z*a/b");
 #if (XTEST & 16)
-        Assert(Norm(MAT2(T,Tb,b.inverse()*a)-frac) <= eps,label+" b^-1*a");
+        Assert(Equal(b.inverse()*a,frac,eps),label+" b^-1*a");
 #ifndef NOMIX
-        Assert(Norm(MAT2(T,Tb,a/m2)-frac) <= eps,label+" a/m2");
-        Assert(Norm(MAT2(T,Tb,m2.inverse()*a)-frac) <= eps,label+" m2^-1*a");
-        Assert(Norm(MAT2(T,Tb,m1/b)-frac) <= eps,label+" m1/b");
-        Assert(Norm(MAT2(T,Tb,b.inverse()*m1)-frac) <= eps,label+" b^-1*m1");
+        Assert(Equal(a/m2,frac,eps),label+" a/m2");
+        Assert(Equal(m2.inverse()*a)frac,eps),label+" m2^-1*a");
+        Assert(Equal(m1/b,frac,eps),label+" m1/b");
+        Assert(Equal(b.inverse()*m1,frac,eps),label+" b^-1*m1");
 #endif
 
-        Assert(Norm(MAT2(T,Tb,(x*a)/b)-x*frac) <= x*eps,label+" (x*a)/b");
-        Assert(Norm(MAT2(T,Tb,x*(a/b))-x*frac) <= x*eps,label+" x*(a/b)");
-        Assert(Norm(MAT2(T,Tb,a/(x*b))-frac/x) <= eps/x,label+" a/(x*b)");
+        Assert(Equal((x*a)/b,x*frac,x*eps),label+" (x*a)/b");
+        Assert(Equal(x*(a/b),x*frac,x*eps),label+" x*(a/b)");
+        Assert(Equal(a/(x*b),frac/x,eps/x),label+" a/(x*b)");
 
-        Assert(Norm(MAT(ComplexType(T),(z*a)/b)-z*frac) <= x*eps,label+" (z*a)/b");
-        Assert(Norm(MAT(ComplexType(T),z*(a/b))-z*frac) <= x*eps,label+" z*(a/b)");
-        Assert(Norm(MAT(ComplexType(T),a/(z*b))-frac/z) <= eps/x,label+" a/(z*b)");
+        Assert(Equal((z*a)/b,z*frac,x*eps),label+" (z*a)/b");
+        Assert(Equal(z*(a/b),z*frac,x*eps),label+" z*(a/b)");
+        Assert(Equal(a/(z*b),frac/z,eps/x),label+" a/(z*b)");
 
-        Assert(Norm(MAT2(T,Tb,(x*a)/(x*b))-frac) <= eps,label+" (x*a)/(x*b)");
-        Assert(Norm(MAT(ComplexType(T),(z*a)/(x*b))-(z/x)*frac) <= eps,
-               label+" (z*a)/(x*b)");
-        Assert(Norm(MAT(ComplexType(T),(x*a)/(z*b))-(x/z)*frac) <= eps,
-               label+" (x*a)/(z*b)");
-        Assert(Norm(MAT(ComplexType(T),(z*a)/(z*b))-frac) <= eps,
-               label+" (z*a)/(z*b)");
+        Assert(Equal((x*a)/(x*b),frac,eps),label+" (x*a)/(x*b)");
+        Assert(Equal((z*a)/(x*b),(z/x)*frac,eps), label+" (z*a)/(x*b)");
+        Assert(Equal((x*a)/(z*b),(x/z)*frac,eps), label+" (x*a)/(z*b)");
+        Assert(Equal((z*a)/(z*b),frac,eps), label+" (z*a)/(z*b)");
 #endif
     }
 
@@ -903,6 +979,9 @@ template <class T, class Tb, class M1, class M2>
 static void DoTestRDivMM1a(
     tmv::DivType dt, const M1& a, const M2& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<T>::complex_type CT;
+    typedef typename tmv::Traits<RT>::float_type FT;
     if (showstartdone) std::cout<<"Start RDiv MM1b: "<<label<<std::endl;
 
     tmv::Matrix<T> m1 = a;
@@ -910,11 +989,14 @@ static void DoTestRDivMM1a(
     m2.divideUsing(dt==tmv::CH?tmv::LU:dt);
     m2.saveDiv();
 
-    double eps = EPS*Norm(m2)*Norm(tmv::Matrix<Tb>(m2.inverse()))*m1.colsize();
+    FT eps = EPS * a.colsize();
+    if (!std::numeric_limits<T>::is_integer) 
+        eps *= Norm(b)*Norm(tmv::Matrix<Tb>(b.inverse()));
 
     if (CanRDiv(a,b)) {
         tmv::Matrix<ProductType(T,Tb)> frac = m1%m2;
         eps *= Norm(frac);
+#ifdef XXD
         if (XXDEBUG6) {
             std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
             std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
@@ -922,38 +1004,36 @@ static void DoTestRDivMM1a(
             std::cout<<"m2 = "<<tmv::TMV_Text(m2)<<"  "<<m2<<std::endl;
             std::cout<<"a%b = "<<a%b<<std::endl;
             std::cout<<"m1%m2 = "<<frac<<std::endl;
-            std::cout<<"Norm(diff) = "<<Norm(MAT2(T,Tb,a%b)-frac)<<std::endl;
+            std::cout<<"Norm(diff) = "<<Norm(a%b-frac)<<std::endl;
             std::cout<<"eps = "<<eps<<std::endl;
         }
-        Assert(Norm(MAT2(T,Tb,a%b)-frac) <= eps,label+" a%b");
-        RealType(T) x(5);
-        ComplexType(T) z(3,4);
-        Assert(Norm(MAT2(T,Tb,x*a%b)-x*frac) <= x*eps,label+" x*a%b");
-        Assert(Norm(MAT(ComplexType(T),z*a%b)-z*frac) <= x*eps,label+" z*a%b");
+#endif
+        Assert(Equal(a%b,frac,eps),label+" a%b");
+        RT x(5);
+        CT z(3,4);
+        Assert(Equal(x*a%b,x*frac,x*eps),label+" x*a%b");
+        Assert(Equal(z*a%b,z*frac,x*eps),label+" z*a%b");
 #if (XTEST & 16)
-        Assert(Norm(MAT2(T,Tb,a*b.inverse())-frac) <= eps,label+" a*b^-1");
+        Assert(Equal(a*b.inverse(),frac,eps),label+" a*b^-1");
 #ifndef NOMIX
-        Assert(Norm(MAT2(T,Tb,a%m2)-frac) <= eps,label+" a%m2");
-        Assert(Norm(MAT2(T,Tb,a*m2.inverse())-frac) <= eps,label+" a*m2^-1");
-        Assert(Norm(MAT2(T,Tb,m1%b)-frac) <= eps,label+" m1%b");
-        Assert(Norm(MAT2(T,Tb,m1*b.inverse())-frac) <= eps,label+" m1*b^-1");
+        Assert(Equal(a%m2,frac,eps),label+" a%m2");
+        Assert(Equal(a*m2.inverse(),frac,eps),label+" a*m2^-1");
+        Assert(Equal(m1%b,frac,eps),label+" m1%b");
+        Assert(Equal(m1*b.inverse(),frac,eps),label+" m1*b^-1");
 #endif
 
-        Assert(Norm(MAT2(T,Tb,(x*a)%b)-x*frac) <= x*eps,label+" (x*a)%b");
-        Assert(Norm(MAT2(T,Tb,x*(a%b))-x*frac) <= x*eps,label+" x*(a%b)");
-        Assert(Norm(MAT2(T,Tb,a%(x*b))-frac/x) <= eps/x,label+" a%(x*b)");
+        Assert(Equal((x*a)%b,x*frac,x*eps),label+" (x*a)%b");
+        Assert(Equal(x*(a%b),x*frac,x*eps),label+" x*(a%b)");
+        Assert(Equal(a%(x*b),frac/x,eps/x),label+" a%(x*b)");
 
-        Assert(Norm(MAT(ComplexType(T),(z*a)%b)-z*frac) <= x*eps,label+" (z*a)%b");
-        Assert(Norm(MAT(ComplexType(T),z*(a%b))-z*frac) <= x*eps,label+" z*(a%b)");
-        Assert(Norm(MAT(ComplexType(T),a%(z*b))-frac/z) <= eps/x,label+" a%(z*b)");
+        Assert(Equal((z*a)%b,z*frac,x*eps),label+" (z*a)%b");
+        Assert(Equal(z*(a%b),z*frac,x*eps),label+" z*(a%b)");
+        Assert(Equal(a%(z*b),frac/z,eps/x),label+" a%(z*b)");
 
-        Assert(Norm(MAT2(T,Tb,(x*a)%(x*b))-frac) <= eps,label+" (x*a)%(x*b)");
-        Assert(Norm(MAT(ComplexType(T),(z*a)%(x*b))-(z/x)*frac) <= eps,
-               label+" (z*a)%(x*b)");
-        Assert(Norm(MAT(ComplexType(T),(x*a)%(z*b))-(x/z)*frac) <= eps,
-               label+" (x*a)%(z*b)");
-        Assert(Norm(MAT(ComplexType(T),(z*a)%(z*b))-frac) <= eps,
-               label+" (z*a)%(z*b)");
+        Assert(Equal((x*a)%(x*b),frac,eps),label+" (x*a)%(x*b)");
+        Assert(Equal((z*a)%(x*b),(z/x)*frac,eps), label+" (z*a)%(x*b)");
+        Assert(Equal((x*a)%(z*b),(x/z)*frac,eps), label+" (x*a)%(z*b)");
+        Assert(Equal((z*a)%(z*b),frac,eps), label+" (z*a)%(z*b)");
 #endif
     }
 
@@ -997,13 +1077,14 @@ static void DoTestRDivMM1C(
 }
 
 #ifndef NOLDIVEQ
-template <class T, class Tb, class M0, class M1, class M2> 
+template <class T, class Tb, class M1, class M2> 
 static void DoTestLDivMM2a(
-    tmv::DivType dt, M0& a0, M1& a, const M2& b, std::string label)
+    tmv::DivType dt, M1& a, const M2& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<RT>::float_type FT;
     if (showstartdone) {
         std::cout<<"Start LDiv MM2b: "<<label<<std::endl;
-        std::cout<<"a0 = "<<a0<<std::endl;
         std::cout<<"a = "<<a<<std::endl;
         std::cout<<"b = "<<b<<std::endl;
     }
@@ -1013,70 +1094,85 @@ static void DoTestLDivMM2a(
     m.divideUsing(dt==tmv::CH?tmv::LU:dt);
     m.saveDiv();
 
-    double eps = EPS*Norm(m)*Norm(tmv::Matrix<Tb>(m.inverse()))*v.colsize();
+    FT eps = EPS * a.colsize();
+    if (!std::numeric_limits<T>::is_integer) 
+        eps *= Norm(b)*Norm(tmv::Matrix<Tb>(b.inverse()));
 
     if (CanLDivEq(a,b)) {
-        a0 = a;
+        typename M1::copy_type a0 = a;
         tmv::Matrix<T> frac = v/m;
         eps *= Norm(frac);
         a /= b;
-        Assert(Norm(MAT(T,a)-frac) <= eps,label+" a/=b");
-        a = a0;
+#ifdef XXD
+        if (XXDEBUG6) {
+            std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
+            std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
+            std::cout<<"m1 = "<<tmv::TMV_Text(v)<<"  "<<v<<std::endl;
+            std::cout<<"m2 = "<<tmv::TMV_Text(m)<<"  "<<m<<std::endl;
+            std::cout<<"a/b = "<<a/b<<std::endl;
+            std::cout<<"m1/m2 = "<<frac<<std::endl;
+            std::cout<<"a /= b = "<<a<<std::endl;
+            std::cout<<"eps = "<<eps<<std::endl;
+        }
+#endif
+        Assert(Equal(a,frac,eps),label+" a/=b");
+        CopyBackM(a0,a);
 #ifdef ALIASOK
         a = a / b;
-        Assert(Norm(MAT(T,a)-frac) <= eps,label+" a=a/b");
-        a = a0;
+        Assert(Equal(a,frac,eps),label+" a=a/b");
+        CopyBackM(a0,a);
         a = b.inverse() * a;
-        Assert(Norm(MAT(T,a)-frac) <= eps,label+" a=b^-1*a");
-        a = a0;
+        Assert(Equal(a,frac,eps),label+" a=b^-1*a");
+        CopyBackM(a0,a);
 #if (XTEST & 16)
-        RealType(T) x(5);
+        RT x(5);
         T z;  SetZ(z);
         a = x * a / b;
-        Assert(Norm(MAT(T,a)-x*frac) <= x*eps,label+" a=x*a/b");
-        a = a0;
+        Assert(Equal(a,x*frac,x*eps),label+" a=x*a/b");
+        CopyBackM(a0,a);
         a = x * b.inverse() * a;
-        Assert(Norm(MAT(T,a)-x*frac) <= x*eps,label+" a=x*b^-1*a");
-        a = a0;
+        Assert(Equal(a,x*frac,x*eps),label+" a=x*b^-1*a");
+        CopyBackM(a0,a);
         a = z * a / b;
-        Assert(Norm(MAT(T,a)-z*frac) <= x*eps,label+" a=z*a/b");
-        a = a0;
+        Assert(Equal(a,z*frac,x*eps),label+" a=z*a/b");
+        CopyBackM(a0,a);
         a = z * b.inverse() * a;
-        Assert(Norm(MAT(T,a)-z*frac) <= x*eps,label+" a=z*b^-1*a");
-        a = a0;
+        Assert(Equal(a,z*frac,x*eps),label+" a=z*b^-1*a");
+        CopyBackM(a0,a);
 #endif
 #endif
     }
     if (showstartdone) std::cout<<"Done LDiv MM2a"<<std::endl;
 }
 
-template <class T, class Tb, class M0, class M1, class M2> 
+template <class T, class Tb, class M1, class M2> 
 static void DoTestLDivMM2R(
-    tmv::DivType dt, M0& a0, M1& a, const M2& b, std::string label)
+    tmv::DivType dt, M1& a, const M2& b, std::string label)
 {
-    DoTestLDivMM2a<T,Tb>(dt,a0,a,b,label);
+    DoTestLDivMM2a<T,Tb>(dt,a,b,label);
 }
 
-template <class T, class Tb, class M0, class M1, class M2> 
+template <class T, class Tb, class M1, class M2> 
 static void DoTestLDivMM2C(
-    tmv::DivType dt, M0& a0, M1& a, const M2& b, std::string label)
+    tmv::DivType dt, M1& a, const M2& b, std::string label)
 {
-    DoTestLDivMM2a<T,Tb>(dt,a0,a,b,label);
+    DoTestLDivMM2a<T,Tb>(dt,a,b,label);
 #ifndef NOVIEWS
     typename M1::conjugate_type ac = a.conjugate();
-    DoTestLDivMM2a<T,Tb>(dt,a0,ac,b,label+" ConjA");
+    DoTestLDivMM2a<T,Tb>(dt,ac,b,label+" ConjA");
 #endif
 }
 #endif
 
 #ifndef NORDIVEQ
-template <class T, class Tb, class M0, class M1, class M2> 
+template <class T, class Tb, class M1, class M2> 
 static void DoTestRDivMM2a(
-    tmv::DivType dt, M0& a0, M1& a, const M2& b, std::string label)
+    tmv::DivType dt, M1& a, const M2& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<RT>::float_type FT;
     if (showstartdone) {
         std::cout<<"Start RDiv MM2a: "<<label<<std::endl;
-        std::cout<<"a0 = "<<a0<<std::endl;
         std::cout<<"a = "<<a<<std::endl;
         std::cout<<"b = "<<b<<std::endl;
     }
@@ -1086,61 +1182,63 @@ static void DoTestRDivMM2a(
     m.divideUsing(dt==tmv::CH?tmv::LU:dt);
     m.saveDiv();
 
-    double eps = EPS*Norm(m)*Norm(tmv::Matrix<Tb>(m.inverse()));
+    FT eps = EPS;
+    if (!std::numeric_limits<T>::is_integer) 
+        eps *= Norm(b)*Norm(tmv::Matrix<Tb>(b.inverse()));
 
     if (CanRDivEq(a,b)) {
-        a0 = a;
+        typename M1::copy_type a0 = a;
         tmv::Matrix<T> frac = v%m;
         eps *= Norm(frac);
         a %= b;
-        Assert(Norm(MAT(T,a)-frac) <= eps,label+" a%=b");
-        a = a0;
+        Assert(Equal(a,frac,eps),label+" a%=b");
+        CopyBackM(a0,a);
         a *= b.inverse();
-        Assert(Norm(MAT(T,a)-frac) <= eps,label+" a*=b^-1");
-        a = a0;
+        Assert(Equal(a,frac,eps),label+" a*=b^-1");
+        CopyBackM(a0,a);
 #ifdef ALIASOK
         a = a % b;
-        Assert(Norm(MAT(T,a)-frac) <= eps,label+" a=a%b");
-        a = a0;
+        Assert(Equal(a,frac,eps),label+" a=a%b");
+        CopyBackM(a0,a);
         a = a * b.inverse();
-        Assert(Norm(MAT(T,a)-frac) <= eps,label+" a=a*b^-1");
-        a = a0;
+        Assert(Equal(a,frac,eps),label+" a=a*b^-1");
+        CopyBackM(a0,a);
 #if (XTEST & 16)
-        RealType(T) x(5);
+        RT x(5);
         T z;  SetZ(z);
         a = x * a % b;
-        Assert(Norm(MAT(T,a)-x*frac) <= x*eps,label+" a=x*a%b");
-        a = a0;
+        Assert(Equal(a,x*frac,x*eps),label+" a=x*a%b");
+        CopyBackM(a0,a);
         a = x * a * b.inverse();
-        Assert(Norm(MAT(T,a)-x*frac) <= x*eps,label+" a=x*a*b^-1");
-        a = a0;
+        Assert(Equal(a,x*frac,x*eps),label+" a=x*a*b^-1");
+        CopyBackM(a0,a);
         a = z * a % b;
-        Assert(Norm(MAT(T,a)-z*frac) <= x*eps,label+" a=z*a%b");
-        a = a0;
+        Assert(Equal(a,z*frac,x*eps),label+" a=z*a%b");
+        CopyBackM(a0,a);
         a = z * a * b.inverse();
-        Assert(Norm(MAT(T,a)-z*frac) <= x*eps,label+" a=z*a*b^-1");
-        a = a0;
+        Assert(Equal(a,z*frac,x*eps),label+" a=z*a*b^-1");
+        CopyBackM(a0,a);
 #endif
 #endif
     }
     if (showstartdone) std::cout<<"Done RDiv MM2a"<<std::endl;
 }
 
-template <class T, class Tb, class M0, class M1, class M2> 
+template <class T, class Tb, class M1, class M2> 
 static void DoTestRDivMM2R(
-    tmv::DivType dt, M0& a0, M1& a, const M2& b, std::string label)
+    tmv::DivType dt, M1& a, const M2& b, std::string label)
 {
-    DoTestRDivMM2a<T,Tb>(dt,a0,a,b,label);
+    DoTestRDivMM2a<T,Tb>(dt,a,b,label);
 }
 
-template <class T, class Tb, class M0, class M1, class M2> 
+template <class T, class Tb, class M1, class M2> 
 static void DoTestRDivMM2C(
-    tmv::DivType dt, M0& a0, M1& a, const M2& b, std::string label)
+    tmv::DivType dt, M1& a, const M2& b, std::string label)
 {
-    DoTestRDivMM2a<T,Tb>(dt,a0,a,b,label);
+    DoTestRDivMM2a<T,Tb>(dt,a,b,label);
 #ifndef NOVIEWS
     typename M1::conjugate_type ac = a.conjugate();
-    DoTestRDivMM2a<T,Tb>(dt,a0,ac,b,label+" ConjA");
+    DoTestRDivMM2a<T,Tb>(dt,ac,b,label+" ConjA");
 #endif
 }
 #endif
@@ -1149,11 +1247,13 @@ template <class Ta, class Tb, class T, class M1, class M2, class M3>
 static void DoTestLDivMM3a(
     tmv::DivType dt, const M1& a, const M2& b, M3& c, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<RT>::float_type FT;
     if (showstartdone) {
         std::cout<<"Start LDiv MM3a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     tmv::Matrix<Ta> v1 = a;
@@ -1162,40 +1262,46 @@ static void DoTestLDivMM3a(
     m.divideUsing(dt==tmv::CH?tmv::LU:dt);
     m.saveDiv();
 
-    double eps = EPS*Norm(m)*Norm(tmv::Matrix<Tb>(m.inverse()))*v1.colsize();
+    FT eps = EPS * a.colsize();
+    if (!std::numeric_limits<T>::is_integer) 
+        eps *= Norm(b)*Norm(tmv::Matrix<Tb>(b.inverse()));
 
+#ifdef XXD
     if (XXDEBUG7) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     if (CanLDiv(a,b,c)) {
         v2 = v1/m;
         eps *= Norm(v2);
         c = a/b;
+#ifdef XXD
         if (XXDEBUG7) {
             std::cout<<"v/m = "<<v2<<std::endl;
             std::cout<<"a/b = "<<c<<std::endl;
         }
-        Assert(Norm(MAT(T,c)-v2) <= eps,label+" c=a/b");
+#endif
+        Assert(Equal(c,v2,eps),label+" c=a/b");
 #if (XTEST & 16)
         c = -a/b;
-        Assert(Norm(MAT(T,c)-(-v2)) <= eps,label+" c=-a/b");
-        RealType(T) x(5);
+        Assert(Equal(c,(-v2),eps),label+" c=-a/b");
+        RT x(5);
         T z; SetZ(z);
         c = x*a/b;
-        Assert(Norm(MAT(T,c)-(x*v2)) <= x*eps,label+" c=x*a/b");
+        Assert(Equal(c,(x*v2),x*eps),label+" c=x*a/b");
         c = a/b*x;
-        Assert(Norm(MAT(T,c)-(x*v2)) <= x*eps,label+" c=a/b*x");
+        Assert(Equal(c,(x*v2),x*eps),label+" c=a/b*x");
         c = (x*a)/b;
-        Assert(Norm(MAT(T,c)-(x*v2)) <= x*eps,label+" c=(x*a)/b");
+        Assert(Equal(c,(x*v2),x*eps),label+" c=(x*a)/b");
         c = z*a/b;
-        Assert(Norm(MAT(T,c)-(z*v2)) <= x*eps,label+" c=z*a/b");
+        Assert(Equal(c,(z*v2),x*eps),label+" c=z*a/b");
         c = a/b*z;
-        Assert(Norm(MAT(T,c)-(z*v2)) <= x*eps,label+" c=a/b*z");
+        Assert(Equal(c,(z*v2),x*eps),label+" c=a/b*z");
         c = (z*a)/b;
-        Assert(Norm(MAT(T,c)-(z*v2)) <= x*eps,label+" c=(z*a)/b");
+        Assert(Equal(c,(z*v2),x*eps),label+" c=(z*a)/b");
 #endif
     }
 
@@ -1206,11 +1312,13 @@ template <class Ta, class Tb, class T, class M1, class M2, class M3>
 static void DoTestRDivMM3a(
     tmv::DivType dt, const M1& a, const M2& b, M3& c, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<RT>::float_type FT;
     if (showstartdone) {
         std::cout<<"Start RDiv MM3a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     tmv::Matrix<Ta> v1 = a;
@@ -1219,45 +1327,51 @@ static void DoTestRDivMM3a(
     m.divideUsing(dt==tmv::CH?tmv::LU:dt);
     m.saveDiv();
 
-    double eps = EPS*Norm(m)*Norm(tmv::Matrix<Tb>(m.inverse()));
+    FT eps = EPS;
+    if (!std::numeric_limits<T>::is_integer) 
+        eps *= Norm(b)*Norm(tmv::Matrix<Tb>(b.inverse()));
 
+#ifdef XXD
     if (XXDEBUG8) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     if (CanRDiv(a,b,c)) {
         v2 = v1%m;
         eps *= Norm(v2);
         c = a%b;
+#ifdef XXD
         if (XXDEBUG8) {
             std::cout<<"v%m = "<<v2<<std::endl;
             std::cout<<"a%b = "<<c<<std::endl;
             std::cout<<"c-v2 = "<<c-v2<<std::endl;
-            std::cout<<"Norm(c-v2) = "<<Norm(MAT(T,c)-v2)<<std::endl;
+            std::cout<<"Norm(c-v2) = "<<Norm(c-v2)<<std::endl;
             std::cout<<"eps = "<<EPS<<" * "<<Norm(m)<<" * "<<
                 Norm(tmv::Matrix<Tb>(m.inverse()))<<" * "<<
                 v1.colsize()<<" = "<<eps<<std::endl;
         }
-        Assert(Norm(MAT(T,c)-v2) <= eps,label+" c=a%b");
+#endif
+        Assert(Equal(c,v2,eps),label+" c=a%b");
 #if (XTEST & 16)
         c = -a%b;
-        Assert(Norm(MAT(T,c)-(-v2)) <= eps,label+" c=-a%b");
-        RealType(T) x(5);
+        Assert(Equal(c,(-v2),eps),label+" c=-a%b");
+        RT x(5);
         T z; SetZ(z);
         c = x*a%b;
-        Assert(Norm(MAT(T,c)-(x*v2)) <= x*eps,label+" c=x*a%b");
+        Assert(Equal(c,(x*v2),x*eps),label+" c=x*a%b");
         c = a%b*x;
-        Assert(Norm(MAT(T,c)-(x*v2)) <= x*eps,label+" c=x*a%b");
+        Assert(Equal(c,(x*v2),x*eps),label+" c=x*a%b");
         c = (x*a)%b;
-        Assert(Norm(MAT(T,c)-(x*v2)) <= x*eps,label+" c=(x*a)%b");
+        Assert(Equal(c,(x*v2),x*eps),label+" c=(x*a)%b");
         c = z*a%b;
-        Assert(Norm(MAT(T,c)-(z*v2)) <= x*eps,label+" c=z*a%b");
+        Assert(Equal(c,(z*v2),x*eps),label+" c=z*a%b");
         c = a%b*z;
-        Assert(Norm(MAT(T,c)-(z*v2)) <= x*eps,label+" c=a%b*z");
+        Assert(Equal(c,(z*v2),x*eps),label+" c=a%b*z");
         c = (z*a)%b;
-        Assert(Norm(MAT(T,c)-(z*v2)) <= x*eps,label+" c=(z*a)%b");
+        Assert(Equal(c,(z*v2),x*eps),label+" c=(z*a)%b");
 #endif
     }
 
@@ -1272,7 +1386,7 @@ static void DoTestLDivMM3RR(
         std::cout<<"Start LDiv MM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -1288,7 +1402,7 @@ static void DoTestLDivMM3RC(
         std::cout<<"Start LDiv MM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -1310,7 +1424,7 @@ static void DoTestLDivMM3CR(
         std::cout<<"Start LDiv MM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -1331,7 +1445,7 @@ static void DoTestLDivMM3CC(
         std::cout<<"Start LDiv MM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -1355,7 +1469,7 @@ static void DoTestRDivMM3RR(
         std::cout<<"Start RDiv MM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -1371,7 +1485,7 @@ static void DoTestRDivMM3RC(
         std::cout<<"Start RDiv MM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -1393,7 +1507,7 @@ static void DoTestRDivMM3CR(
         std::cout<<"Start RDiv MM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -1414,7 +1528,7 @@ static void DoTestRDivMM3CC(
         std::cout<<"Start RDiv MM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<" "<<c<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
 
     DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
@@ -1434,21 +1548,27 @@ template <class T, class MM>
 static void DoTestDivMX(
     tmv::DivType dt, const MM& a, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<T>::complex_type CT;
+    typedef typename tmv::Traits<RT>::float_type FT;
     if (showstartdone) std::cout<<"Start Div MX: "<<label<<std::endl;
 
     tmv::Matrix<T> m = a;
     m.divideUsing(dt==tmv::CH?tmv::LU:dt);
     m.saveDiv();
 
-    double eps = EPS*Norm(m)*Norm(m.inverse())*std::max(m.colsize(),m.rowsize());
+    FT eps = EPS * std::max(a.colsize(),a.rowsize());
+    if (!std::numeric_limits<T>::is_integer) 
+        eps *= Norm(a)*Norm(a.inverse());
 
-    RealType(T) x(5);
-    ComplexType(T) z(3,4);
+    RT x(5);
+    CT z(3,4);
     tmv::Matrix<T> xfrac = x/m;
-    tmv::Matrix<ComplexType(T)> zfrac = z/m;
-    double normfrac = Norm(xfrac);
-    double normm = Norm(m);
+    tmv::Matrix<CT> zfrac = z/m;
+    FT normfrac = Norm(xfrac);
+    FT normm = Norm(m);
 
+#ifdef XXD
     if (XXDEBUG9) {
         std::cout<<"eps = "<<eps<<std::endl;
         std::cout<<"x = "<<x<<std::endl;
@@ -1458,35 +1578,35 @@ static void DoTestDivMX(
         std::cout<<"x/m = "<<xfrac<<std::endl;
         std::cout<<"a*(x/a) = "<<tmv::Matrix<T>(a*(x/a))<<std::endl;
         std::cout<<"m*(x/m) = "<<m*xfrac<<std::endl;
-        std::cout<<"Norm(diff) = "<<Norm(MAT(T,x/a)-xfrac)<<std::endl;
+        std::cout<<"Norm(diff) = "<<Norm(x/a-xfrac)<<std::endl;
         std::cout<<"eps*Norm(diff) = "<<eps*normfrac<<std::endl;
     }
-    Assert(Norm(MAT(T,x/a)-xfrac) <= x*eps*normfrac,label+" x/a");
-    Assert(Norm(MAT(ComplexType(T),z/a)-zfrac) <= x*eps*normfrac,label+" z/a");
+#endif
+    Assert(Equal(x/a,xfrac,x*eps*normfrac),label+" x/a");
+    Assert(Equal(z/a,zfrac,x*eps*normfrac),label+" z/a");
 #if (XTEST & 16)
-    Assert(Norm(MAT(T,a.inverse()*x)-xfrac) <= x*eps*normfrac,
-           label+" a^-1*x");
-    Assert(Norm(MAT(ComplexType(T),a.inverse()*z)-zfrac) <= x*eps*normfrac,
-           label+" a^-1*z");
+    Assert(Equal(a.inverse()*x,xfrac,x*eps*normfrac), label+" a^-1*x");
+    Assert(Equal(a.inverse()*z,zfrac,x*eps*normfrac), label+" a^-1*z");
 #endif
 
+#ifdef XXD
     if (XXDEBUG9) {
         std::cout<<"x%a = "<<x%a<<std::endl;
         std::cout<<"x%m = "<<xfrac<<std::endl;
         std::cout<<"x%a*a = "<<tmv::Matrix<T>((x%a)*a)<<std::endl;
         std::cout<<"x%m*m = "<<xfrac*m<<std::endl;
-        std::cout<<"Norm(diff) = "<<Norm(MAT(T,x%a)-xfrac)<<std::endl;
+        std::cout<<"Norm(diff) = "<<Norm(x%a-xfrac)<<std::endl;
     }
-    Assert(Norm(MAT(T,x%a)-xfrac) <= x*eps*normfrac,label+" x%a");
+#endif
+    Assert(Equal(x%a,xfrac,x*eps*normfrac),label+" x%a");
 #if (XTEST & 16)
-    Assert(Norm(MAT(T,x*a.inverse())-xfrac) <= x*eps*normfrac,
-           label+" x*a^-1");
-    Assert(Norm(MAT(ComplexType(T),z%a)-zfrac) <= x*eps*normfrac,label+" z%a");
-    Assert(Norm(MAT(ComplexType(T),z*a.inverse())-zfrac) <= x*eps*normfrac,
-           label+" z*a^-1");
+    Assert(Equal(x*a.inverse(),xfrac,x*eps*normfrac), label+" x*a^-1");
+    Assert(Equal(z%a,zfrac,x*eps*normfrac),label+" z%a");
+    Assert(Equal(z*a.inverse(),zfrac,x*eps*normfrac), label+" z*a^-1");
 #endif
 
     tmv::Matrix<T> temp = a.inverse();
+#ifdef XXD
     if (XXDEBUG9) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"1/a = "<<temp<<std::endl;
@@ -1500,26 +1620,27 @@ static void DoTestDivMX(
         std::cout<<Norm(tmv::Matrix<T>(temp*a)-Adjoint(tmv::Matrix<T>(temp*a)))<<
             "  "<<eps<<std::endl;
     }
-    Assert(Norm(tmv::Matrix<T>(a*temp)*a-MAT(T,a)) <= eps*normm,label+" a*(1/a)*a");
-    Assert(Norm(tmv::Matrix<T>(temp*a)-Adjoint(tmv::Matrix<T>(temp*a))) <= eps,
+#endif
+    Assert(Equal(tmv::Matrix<T>(a*temp)*a,a,eps*normm),
+           label+" a*(1/a)*a");
+    Assert(Equal(tmv::Matrix<T>(temp*a),Adjoint(tmv::Matrix<T>(temp*a)),eps),
            label+" (1/a)*a-((1/a)*a)T");
 
     if (showstartdone) std::cout<<"Done MX"<<std::endl;
 }
 
-template <class T, class SM0, class CSM0, class SM1, class SM2, class CSM1, class CSM2> 
+template <class T, class M1, class M2, class CM1, class CM2> 
 static void TestMatrixDivArith1(
-    tmv::DivType dt, SM0& b0, CSM0& cb0, const SM1& a, SM2& b,
-    const CSM1& ca, CSM2& cb, std::string label)
+    tmv::DivType dt, const M1& a, M2& b,
+    const CM1& ca, CM2& cb, std::string label)
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
         std::cout<<"Start Test Div 1: "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
         std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
-        std::cout<<"b0 = "<<tmv::TMV_Text(b0)<<"  "<<b0<<std::endl;
-        std::cout<<"cb0 = "<<tmv::TMV_Text(cb0)<<"  "<<cb0<<std::endl;
     }
 
     tmv::Matrix<CT> cc(a.rowsize(),b.rowsize());
@@ -1538,19 +1659,19 @@ static void TestMatrixDivArith1(
     DoTestRDivMM1C<CT,CT>(dt,cb,ca,label+" C,C");
 
 #ifndef NOLDIVEQ
-    DoTestLDivMM2R<T,T>(dt,b0,b,a,label+" R,R");
+    DoTestLDivMM2R<T,T>(dt,b,a,label+" R,R");
 #if (XTEST & 4)
-    DoTestLDivMM2C<CT,T>(dt,cb0,cb,a,label+" C,R");
+    DoTestLDivMM2C<CT,T>(dt,cb,a,label+" C,R");
 #endif
-    DoTestLDivMM2C<CT,CT>(dt,cb0,cb,ca,label+" C,C");
+    DoTestLDivMM2C<CT,CT>(dt,cb,ca,label+" C,C");
 #endif
 
 #ifndef NORDIVEQ
-    DoTestRDivMM2R<T,T>(dt,b0,b,a,label+" R,R");
+    DoTestRDivMM2R<T,T>(dt,b,a,label+" R,R");
 #if (XTEST & 4)
-    DoTestRDivMM2C<CT,T>(dt,cb0,cb,a,label+" C,R");
+    DoTestRDivMM2C<CT,T>(dt,cb,a,label+" C,R");
 #endif
-    DoTestRDivMM2C<CT,CT>(dt,cb0,cb,ca,label+" C,C");
+    DoTestRDivMM2C<CT,CT>(dt,cb,ca,label+" C,C");
 #endif
 
     DoTestLDivMM3RR<T,T,T>(dt,b,a,c,label+" R,R,R");
@@ -1567,19 +1688,18 @@ static void TestMatrixDivArith1(
     DoTestRDivMM3CC<CT,CT,CT>(dt,cb,ca,cd,label+" C,C,C");
 }
 
-template <class T, class SM0, class CSM0, class SM1, class SM2, class CSM1, class CSM2> 
+template <class T, class M1, class M2, class CM1, class CM2> 
 static void TestMatrixDivArith2(
-    tmv::DivType dt, SM0& b0, CSM0& cb0,
-    const SM1& a, SM2& b, const CSM1& ca, CSM2& cb, std::string label)
+    tmv::DivType dt, const M1& a, M2& b, const CM1& ca, CM2& cb,
+    std::string label)
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
         std::cout<<"Start Test Div 2: "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
         std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
-        std::cout<<"b0 = "<<tmv::TMV_Text(b0)<<"  "<<b0<<std::endl;
-        std::cout<<"cb0 = "<<tmv::TMV_Text(cb0)<<"  "<<cb0<<std::endl;
     }
 
     DoTestDivMX<T>(dt,a,label+" R");
@@ -1682,19 +1802,19 @@ static void TestMatrixDivArith2(
     DoTestRDivMM1C<CT,CT>(dt,cb,ca,label+" C,C");
 
 #ifndef NOLDIVEQ
-    DoTestLDivMM2R<T,T>(dt,b0,b,a,label+" R,R");
+    DoTestLDivMM2R<T,T>(dt,b,a,label+" R,R");
 #if (XTEST & 4)
-    DoTestLDivMM2C<CT,T>(dt,cb0,cb,a,label+" C,R");
+    DoTestLDivMM2C<CT,T>(dt,cb,a,label+" C,R");
 #endif
-    DoTestLDivMM2C<CT,CT>(dt,cb0,cb,ca,label+" C,C");
+    DoTestLDivMM2C<CT,CT>(dt,cb,ca,label+" C,C");
 #endif
 
 #ifndef NORDIVEQ
-    DoTestRDivMM2R<T,T>(dt,b0,b,a,label+" R,R");
+    DoTestRDivMM2R<T,T>(dt,b,a,label+" R,R");
 #if (XTEST & 4)
-    DoTestRDivMM2C<CT,T>(dt,cb0,cb,a,label+" C,R");
+    DoTestRDivMM2C<CT,T>(dt,cb,a,label+" C,R");
 #endif
-    DoTestRDivMM2C<CT,CT>(dt,cb0,cb,ca,label+" C,C");
+    DoTestRDivMM2C<CT,CT>(dt,cb,ca,label+" C,C");
 #endif
 
     DoTestLDivMM3RR<T,T,T>(dt,b,a,cV,label+" R,R,R");
@@ -1711,10 +1831,11 @@ static void TestMatrixDivArith2(
     DoTestRDivMM3CC<CT,CT,CT>(dt,cb,ca,cdv,label+" C,C,C");
 }
 
-template <class T, class SM1, class CSM1> 
+template <class T, class M1, class CM1> 
 static void TestMatrixDivArith3a(
-    tmv::DivType dt, const SM1& a, const CSM1& ca, std::string label)
+    tmv::DivType dt, const M1& a, const CM1& ca, std::string label)
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
         std::cout<<"Start Test Div 3a: "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -1725,11 +1846,12 @@ static void TestMatrixDivArith3a(
     DoTestDivMX<CT>(dt,ca,label+" C");
 }
 
-template <class T, class SM0, class CSM0, class SM1, class SM2, class SM3, class CSM1, class CSM2, class CSM3> 
+template <class T, class M1, class M2, class M3, class CM1, class CM2, class CM3> 
 static void TestMatrixDivArith3b(
-    tmv::DivType dt, SM0& b0, CSM0& cb0, const SM1& a, SM2& b, SM3& c, 
-    const CSM1& ca, CSM2& cb, CSM3& cc, std::string label)
+    tmv::DivType dt, const M1& a, M2& b, M3& c, 
+    const CM1& ca, CM2& cb, CM3& cc, std::string label)
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
         std::cout<<"Start Test Div 3b: "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -1738,8 +1860,6 @@ static void TestMatrixDivArith3b(
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
         std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
         std::cout<<"cc = "<<tmv::TMV_Text(cc)<<"  "<<cc<<std::endl;
-        std::cout<<"b0 = "<<tmv::TMV_Text(b0)<<"  "<<b0<<std::endl;
-        std::cout<<"cb0 = "<<tmv::TMV_Text(cb0)<<"  "<<cb0<<std::endl;
     }
 
     DoTestLDivMM1R<T,T>(dt,b,a,label+" R,R");
@@ -1750,11 +1870,11 @@ static void TestMatrixDivArith3b(
     DoTestLDivMM1C<CT,CT>(dt,cb,ca,label+" C,C");
 
 #ifndef NOLDIVEQ
-    DoTestLDivMM2R<T,T>(dt,b0,b,a,label+" R,R");
+    DoTestLDivMM2R<T,T>(dt,b,a,label+" R,R");
 #if (XTEST & 4)
-    DoTestLDivMM2C<CT,T>(dt,cb0,cb,a,label+" C,R");
+    DoTestLDivMM2C<CT,T>(dt,cb,a,label+" C,R");
 #endif
-    DoTestLDivMM2C<CT,CT>(dt,cb0,cb,ca,label+" C,C");
+    DoTestLDivMM2C<CT,CT>(dt,cb,ca,label+" C,C");
 #endif
 
     DoTestLDivMM3RR<T,T,T>(dt,b,a,c,label+" R,R,R");
@@ -1766,11 +1886,12 @@ static void TestMatrixDivArith3b(
     DoTestLDivMM3CC<CT,CT,CT>(dt,cb,ca,cc,label+" C,C,C");
 }
 
-template <class T, class SM0, class CSM0, class SM1, class SM2, class SM3, class CSM1, class CSM2, class CSM3> 
+template <class T, class M1, class M2, class M3, class CM1, class CM2, class CM3> 
 static void TestMatrixDivArith3c(
-    tmv::DivType dt, SM0& b0, CSM0& cb0, const SM1& a, SM2& b, SM3& c, 
-    const CSM1& ca, CSM2& cb, CSM3& cc, std::string label)
+    tmv::DivType dt, const M1& a, M2& b, M3& c, 
+    const CM1& ca, CM2& cb, CM3& cc, std::string label)
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
         std::cout<<"Start Test Div 3c: "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -1779,8 +1900,6 @@ static void TestMatrixDivArith3c(
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
         std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
         std::cout<<"cc = "<<tmv::TMV_Text(cc)<<"  "<<cc<<std::endl;
-        std::cout<<"b0 = "<<tmv::TMV_Text(b0)<<"  "<<b0<<std::endl;
-        std::cout<<"cb0 = "<<tmv::TMV_Text(cb0)<<"  "<<cb0<<std::endl;
     }
 
     DoTestRDivMM1R<T,T>(dt,b,a,label+" R,R");
@@ -1791,11 +1910,11 @@ static void TestMatrixDivArith3c(
     DoTestRDivMM1C<CT,CT>(dt,cb,ca,label+" C,C");
 
 #ifndef NORDIVEQ
-    DoTestRDivMM2R<T,T>(dt,b0,b,a,label+" R,R");
+    DoTestRDivMM2R<T,T>(dt,b,a,label+" R,R");
 #if (XTEST & 4)
-    DoTestRDivMM2C<CT,T>(dt,cb0,cb,a,label+" C,R");
+    DoTestRDivMM2C<CT,T>(dt,cb,a,label+" C,R");
 #endif
-    DoTestRDivMM2C<CT,CT>(dt,cb0,cb,ca,label+" C,C");
+    DoTestRDivMM2C<CT,CT>(dt,cb,ca,label+" C,C");
 #endif
 
     DoTestRDivMM3RR<T,T,T>(dt,b,a,c,label+" R,R,R");
@@ -1807,11 +1926,12 @@ static void TestMatrixDivArith3c(
     DoTestRDivMM3CC<CT,CT,CT>(dt,cb,ca,cc,label+" C,C,C");
 }
 
-template <class T, class SM1, class V1, class V2, class CSM1, class CV1, class CV2> 
+template <class T, class M1, class V1, class V2, class CM1, class CV1, class CV2> 
 static void TestMatrixDivArith3d(
-    tmv::DivType dt, const SM1& a, const V1& v, V2& x,
-    const CSM1& ca, const CV1& cv, CV2& cx, std::string label)
+    tmv::DivType dt, const M1& a, const V1& v, V2& x,
+    const CM1& ca, const CV1& cv, CV2& cx, std::string label)
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
         std::cout<<"Start Test Div 3d: "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -1846,11 +1966,12 @@ static void TestMatrixDivArith3d(
     DoTestLDivVM3CC<CT,CT,CT>(dt,cv,ca,cx,label+" C,C,C");
 }
 
-template <class T, class SM1, class V1, class V2, class CSM1, class CV1, class CV2> 
+template <class T, class M1, class V1, class V2, class CM1, class CV1, class CV2> 
 static void TestMatrixDivArith3e(
-    tmv::DivType dt, const SM1& a, const V1& w, V2& y,
-    const CSM1& ca, const CV1& cw, CV2& cy, std::string label)
+    tmv::DivType dt, const M1& a, const V1& w, V2& y,
+    const CM1& ca, const CV1& cw, CV2& cy, std::string label)
 {
+    typedef std::complex<T> CT;
     if (showstartdone) {
         std::cout<<"Start Test Div 3e: "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;

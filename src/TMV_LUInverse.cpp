@@ -50,7 +50,7 @@
 namespace tmv {
 
     template <class T1>
-    static void NonLapLUInverse(MatrixView<T1> m1, const int* P)
+    static void NonLapLUInverse(MatrixView<T1> m1, const Permutation& P)
     {
         if (m1.iscm()) {
             MatrixView<T1,1> m1cm = m1.cmView();
@@ -64,20 +64,21 @@ namespace tmv {
 #ifdef ALAP
     // ALAP, not LAP, since ATLAS has these routines
     template <class T1> 
-    static inline void LapLUInverse(MatrixView<T1,1> m1, const int* P)
+    static inline void LapLUInverse(MatrixView<T1,1> m1, const Permutation& P)
     { NonLapLUInverse(m1,P); }
 #ifdef INST_DOUBLE
     template <>
-    static void LapLUInverse(MatrixView<double,1> m1, const int* P)
+    static void LapLUInverse(MatrixView<double,1> m1, const Permutation& P)
     {
+        TMVAssert(P.isInverse());
         int n = m1.colsize();
         int lda = m1.stepj();
 #ifdef CLAP
-        const int* ipiv = P;
+        const int* ipiv = P.getValues();
 #else
         auto_array<int> ipiv1(new int[n]);
         const int* ipiv = ipiv1.get();
-        for(int i=0;i<n;++i) ipiv1[i] = P[i]+1;
+        for(int i=0;i<n;++i) ipiv1[i] = P.getValues()[i]+1;
 #endif
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
@@ -104,16 +105,17 @@ namespace tmv {
     }
     template <>
     static void LapLUInverse(
-        MatrixView<std::complex<double>,1> m1, const int* P)
+        MatrixView<std::complex<double>,1> m1, const Permutation& P)
     {
+        TMVAssert(P.isInverse());
         int n = m1.colsize();
         int lda = m1.stepj();
 #ifdef CLAP
-        const int* ipiv = P;
+        const int* ipiv = P.getValues();
 #else
         auto_array<int> ipiv1(new int[n]);
         const int* ipiv = ipiv1.get();
-        for(int i=0;i<n;++i) ipiv1[i] = P[i]+1;
+        for(int i=0;i<n;++i) ipiv1[i] = P.getValues()[i]+1;
 #endif
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
@@ -141,16 +143,17 @@ namespace tmv {
 #endif
 #ifdef INST_FLOAT
     template <>
-    static void LapLUInverse(MatrixView<float,1> m1, const int* P)
+    static void LapLUInverse(MatrixView<float,1> m1, const Permutation& P)
     {
+        TMVAssert(P.isInverse());
         int n = m1.colsize();
         int lda = m1.stepj();
 #ifdef CLAP
-        const int* ipiv = P;
+        const int* ipiv = P.getValues();
 #else
         auto_array<int> ipiv1(new int[n]);
         const int* ipiv = ipiv1.get();
-        for(int i=0;i<n;++i) ipiv1[i] = P[i]+1;
+        for(int i=0;i<n;++i) ipiv1[i] = P.getValues()[i]+1;
 #endif
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
@@ -177,16 +180,17 @@ namespace tmv {
     }
     template <>
     static void LapLUInverse(
-        MatrixView<std::complex<float>,1> m1, const int* P)
+        MatrixView<std::complex<float>,1> m1, const Permutation& P)
     {
+        TMVAssert(P.isInverse());
         int n = m1.colsize();
         int lda = m1.stepj();
 #ifdef CLAP
-        const int* ipiv = P;
+        const int* ipiv = P.getValues();
 #else
         auto_array<int> ipiv1(new int[n]);
         const int* ipiv = ipiv1.get();
-        for(int i=0;i<n;++i) ipiv1[i] = P[i]+1;
+        for(int i=0;i<n;++i) ipiv1[i] = P.getValues()[i]+1;
 #endif
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
@@ -215,7 +219,7 @@ namespace tmv {
 #endif // ALAP
 
     template <class T1>
-    void InstLU_Inverse(MatrixView<T1> m1, const int* P)
+    void InstLU_Inverse(MatrixView<T1> m1, const Permutation& P)
     {
 #ifdef ALAP
         if (m1.iscm() && m1.stepj() > 0) {
@@ -238,7 +242,7 @@ namespace tmv {
 
     template <class T1, class T2, bool C1>
     void InstLU_InverseATA(
-        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const int* P,
+        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P,
         const bool trans, MatrixView<T2> m2)
     {
         if (m2.iscm()) {

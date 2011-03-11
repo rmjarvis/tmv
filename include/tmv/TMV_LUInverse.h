@@ -37,7 +37,7 @@
 #include "TMV_BaseMatrix_Tri.h"
 #include "TMV_MultUL.h"
 #include "TMV_InvertU.h"
-#include "TMV_PermuteM.h"
+#include "TMV_Permutation.h"
 
 #ifdef PRINTALGO_LU
 #include <iostream>
@@ -50,27 +50,27 @@ namespace tmv {
     // Defined below:
     template <class M1> 
     void LU_Inverse(
-        BaseMatrix_Rec_Mutable<M1>& m1, const int* P);
+        BaseMatrix_Rec_Mutable<M1>& m1, const Permutation& P);
     template <class M1>
     void InlineLU_Inverse(
-        BaseMatrix_Rec_Mutable<M1>& m1, const int* P);
+        BaseMatrix_Rec_Mutable<M1>& m1, const Permutation& P);
 
     template <class M1, class M2> 
     void LU_InverseATA(
-        const BaseMatrix_Rec<M1>& m1, const int* P,
+        const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         const bool trans, BaseMatrix_Rec_Mutable<M2>& m2);
     template <class M1, class M2> 
     void InlineLU_InverseATA(
-        const BaseMatrix_Rec<M1>& m1, const int* P,
+        const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         const bool trans, BaseMatrix_Rec_Mutable<M2>& m2);
 
     // Defined in TMV_LUInverse.cpp
     template <class T1>
-    void InstLU_Inverse(MatrixView<T1> m1, const int* P);
+    void InstLU_Inverse(MatrixView<T1> m1, const Permutation& P);
 
     template <class T1, class T2, bool C1> 
     void InstLU_InverseATA(
-        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const int* P, 
+        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P, 
         const bool trans, MatrixView<T2> m2);
 
 
@@ -80,13 +80,13 @@ namespace tmv {
     // algo 0: Trivial, nothing to do (M == 0 or N == 0)
     template <int cs, int rs, class M1>
     struct LU_Inverse_Helper<0,cs,rs,M1>
-    { static inline void call(M1& , const int* ) {} };
+    { static void call(M1& , const Permutation& ) {} };
 
     // algo 11: Normal case
     template <int cs, int rs, class M1>
     struct LU_Inverse_Helper<11,cs,rs,M1>
     {
-        static void call(M1& m1, const int* P)
+        static void call(M1& m1, const Permutation& P)
         {
 #ifdef PRINTALGO_LU
             std::cout<<"LUInverse algo 11: cs,rs = "<<cs<<','<<rs<<std::endl;
@@ -99,7 +99,7 @@ namespace tmv {
             L.invertSelf();
             const Scaling<1,typename M1::real_type> one;
             NoAliasMultMM<false>(one,U,L,m1);
-            m1.reversePermuteCols(P);
+            P.inverse().applyOnRight(m1);
         }
     };
 
@@ -107,7 +107,7 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct LU_Inverse_Helper<-3,cs,rs,M1>
     {
-        static inline void call(M1& m1, const int* P)
+        static void call(M1& m1, const Permutation& P)
         {
             const int algo = 
                 cs == 0 || rs == 0 ? 0 : 
@@ -125,11 +125,11 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct LU_Inverse_Helper<97,cs,rs,M1>
     {
-        static inline void call(M1& m1, const int* P)
+        static void call(M1& m1, const Permutation& P)
         { 
             typedef typename M1::conjugate_type M1c;
             M1c m1c = m1.conjugate();
-            LU_Inverse_Helper<-2,cs,rs,M1c>::call(m1c,P);
+            LU_Inverse_Helper<-1,cs,rs,M1c>::call(m1c,P);
         }
     };
 
@@ -137,19 +137,20 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct LU_Inverse_Helper<98,cs,rs,M1>
     {
-        static inline void call(M1& m1, const int* P)
+        static void call(M1& m1, const Permutation& P)
         { InstLU_Inverse(m1.xView(),P); }
     };
 
-    // algo -2: Check for inst
+    // algo -1: Check for inst
     template <int cs, int rs, class M1>
-    struct LU_Inverse_Helper<-2,cs,rs,M1>
+    struct LU_Inverse_Helper<-1,cs,rs,M1>
     {
-        static inline void call(M1& m1, const int* P)
+        static void call(M1& m1, const Permutation& P)
         {
             typedef typename M1::value_type T2;
             const bool inst = 
-                M1::unknownsizes &&
+                (cs == UNKNOWN || cs > 16) &&
+                (rs == UNKNOWN || rs > 16) &&
                 Traits<T2>::isinst;
             const int algo = 
                 cs == 0 || rs == 0 ? 0 : 
@@ -160,17 +161,9 @@ namespace tmv {
         }
     };
 
-    // algo -1: Check for aliases? No.
-    template <int cs, int rs, class M1>
-    struct LU_Inverse_Helper<-1,cs,rs,M1>
-    {
-        static inline void call(M1& m1, const int* P)
-        { LU_Inverse_Helper<-2,cs,rs,M1>::call(m1,P); }
-    };
-
     template <class M1> 
-    inline void InlineLU_Inverse(
-        BaseMatrix_Rec_Mutable<M1>& m1, const int* P)
+    static void InlineLU_Inverse(
+        BaseMatrix_Rec_Mutable<M1>& m1, const Permutation& P)
     {
         const int cs = M1::_colsize;
         const int rs = M1::_rowsize;
@@ -180,14 +173,14 @@ namespace tmv {
     }
 
     template <class M1> 
-    inline void LU_Inverse(
-        BaseMatrix_Rec_Mutable<M1>& m1, const int* P)
+    static void LU_Inverse(
+        BaseMatrix_Rec_Mutable<M1>& m1, const Permutation& P)
     {
         const int cs = M1::_colsize;
         const int rs = M1::_rowsize;
         typedef typename M1::cview_type M1v;
         M1v m1v = m1.cView();
-        LU_Inverse_Helper<-2,cs,rs,M1v>::call(m1v,P);
+        LU_Inverse_Helper<-1,cs,rs,M1v>::call(m1v,P);
     }
 
     template <int algo, int cs, int rs, class M1, class M2>
@@ -197,13 +190,13 @@ namespace tmv {
     // Also used for invalid real/complex combination from the virtual calls.
     template <int cs, int rs, class M1, class M2>
     struct LU_InverseATA_Helper<0,cs,rs,M1,M2>
-    { static inline void call(const M1& , const int* , const bool, M2& ) {} };
+    { static void call(const M1& , const Permutation& , const bool, M2& ) {} };
 
     // algo 11: Normal case
     template <int cs, int rs, class M1, class M2>
     struct LU_InverseATA_Helper<11,cs,rs,M1,M2>
     {
-        static void call(const M1& m1, const int* P, const bool trans, M2& m2)
+        static void call(const M1& m1, const Permutation& P, const bool trans, M2& m2)
         {
 #ifdef PRINTALGO_LU
             std::cout<<"LUInverseATA algo 11: cs,rs = "<<cs<<','<<rs<<std::endl;
@@ -248,11 +241,11 @@ namespace tmv {
 #ifdef PRINTALGO_LU
                 std::cout<<"m2 => "<<m2<<std::endl;
 #endif
-                m2.reversePermuteCols(P);
+                P.inverse().applyOnRight(m2);
 #ifdef PRINTALGO_LU
                 std::cout<<"m2 => "<<m2<<std::endl;
 #endif
-                m2.reversePermuteRows(P);
+                P.applyOnLeft(m2);
 #ifdef PRINTALGO_LU
                 std::cout<<"m2 => "<<m2<<std::endl;
 #endif
@@ -285,8 +278,8 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LU_InverseATA_Helper<-3,cs,rs,M1,M2>
     {
-        static inline void call(
-            const M1& m1, const int* P, const bool trans, M2& m2)
+        static void call(
+            const M1& m1, const Permutation& P, const bool trans, M2& m2)
         {
             const bool invalid =
                 M1::iscomplex && M2::isreal;
@@ -306,14 +299,14 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LU_InverseATA_Helper<97,cs,rs,M1,M2>
     {
-        static inline void call(
-            const M1& m1, const int* P, const bool trans, M2& m2)
+        static void call(
+            const M1& m1, const Permutation& P, const bool trans, M2& m2)
         { 
             typedef typename M1::const_conjugate_type M1c;
             typedef typename M2::conjugate_type M2c;
             M1c m1c = m1.conjugate();
             M2c m2c = m2.conjugate();
-            LU_InverseATA_Helper<-2,cs,rs,M1c,M2c>::call(m1c,P,trans,m2c);
+            LU_InverseATA_Helper<-1,cs,rs,M1c,M2c>::call(m1c,P,trans,m2c);
         }
     };
 
@@ -321,26 +314,26 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LU_InverseATA_Helper<98,cs,rs,M1,M2>
     {
-        static inline void call(
-            const M1& m1, const int* P, const bool trans, M2& m2)
+        static void call(
+            const M1& m1, const Permutation& P, const bool trans, M2& m2)
         { 
             TMVAssert(m1.iscm());
             InstLU_InverseATA(m1.xView().cmView(),P,trans,m2.xView()); 
         }
     };
 
-    // algo -2: Check for inst
+    // algo -1: Check for inst
     template <int cs, int rs, class M1, class M2>
-    struct LU_InverseATA_Helper<-2,cs,rs,M1,M2>
+    struct LU_InverseATA_Helper<-1,cs,rs,M1,M2>
     {
-        static inline void call(
-            const M1& m1, const int* P, const bool trans, M2& m2)
+        static void call(
+            const M1& m1, const Permutation& P, const bool trans, M2& m2)
         {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                M1::unknownsizes &&
-                M2::unknownsizes &&
+                (cs == UNKNOWN || cs > 16) &&
+                (rs == UNKNOWN || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
@@ -358,18 +351,9 @@ namespace tmv {
         }
     };
 
-    // algo -1: Check for aliases? No.
-    template <int cs, int rs, class M1, class M2>
-    struct LU_InverseATA_Helper<-1,cs,rs,M1,M2>
-    {
-        static inline void call(
-            const M1& m1, const int* P, const bool trans, M2& m2)
-        { LU_InverseATA_Helper<-2,cs,rs,M1,M2>::call(m1,P,trans,m2); }
-    };
-
     template <class M1, class M2> 
-    inline void InlineLU_InverseATA(
-        const BaseMatrix_Rec<M1>& m1, const int* P,
+    static void InlineLU_InverseATA(
+        const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         const bool trans, BaseMatrix_Rec_Mutable<M2>& m2)
     {
         const int cs = M2::_colsize;
@@ -382,8 +366,8 @@ namespace tmv {
     }
 
     template <class M1, class M2> 
-    inline void LU_InverseATA(
-        const BaseMatrix_Rec<M1>& m1, const int* P,
+    static void LU_InverseATA(
+        const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         const bool trans, BaseMatrix_Rec_Mutable<M2>& m2)
     {
         const int cs = M2::_colsize;
@@ -392,7 +376,7 @@ namespace tmv {
         typedef typename M2::cview_type M2v;
         M1v m1v = m1.cView();
         M2v m2v = m2.cView();
-        LU_InverseATA_Helper<-2,cs,rs,M1v,M2v>::call(m1v,P,trans,m2v);
+        LU_InverseATA_Helper<-1,cs,rs,M1v,M2v>::call(m1v,P,trans,m2v);
     }
 
 } // namespace tmv

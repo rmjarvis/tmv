@@ -9,6 +9,7 @@ template <class T> void TestSmallMatrixArith_1()
     TestSmallMatrixArith_1d<T>();
     TestSmallMatrixArith_1e<T>();
     TestSmallMatrixArith_1f<T>();
+    TestSmallMatrixArith_1g<T>();
     std::cout<<"SmallMatrix<"<<tmv::TMV_Text(T())<<"> Arithmetic passed all tests\n";
 }
 

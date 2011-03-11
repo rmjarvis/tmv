@@ -1,13 +1,24 @@
 
 
 #include "TMV_Test.h"
-#include "TMV_Test3.h"
+#include "TMV_Test_3.h"
 #include "TMV.h"
 #include "TMV_TestMatrixDivArith.h"
+
+template <class T> void TestSmallSquareDiv_a();
+template <class T> void TestSmallSquareDiv_b();
+template <class T> void TestSmallSquareDiv_c();
+template <class T> void TestSmallSquareDiv_a();
+template <class T> void TestSmallSquareDiv_d();
+template <class T> void TestSmallSquareDiv_e();
+template <class T> void TestSmallSquareDiv_f();
+template <class T> void TestSmallSquareDiv_g();
 
 template <class T, tmv::StorageType stor, int N> 
 static void TestSmallSquareDiv_Basic()
 {
+    typedef typename tmv::Traits<T>::float_type FT;
+
     tmv::SmallMatrix<T,N,N,stor> m;
 
     for(int i=0;i<N;++i) for(int j=0;j<N;++j) m(i,j) = T(2+4*i-5*j);
@@ -31,7 +42,7 @@ static void TestSmallSquareDiv_Basic()
 
     tmv::SmallMatrix<T,N,N> minv = m.inverse();
     T kappa = Norm(m) * Norm(minv);
-    T eps = EPS * kappa;
+    FT eps = EPS * kappa;
 
     tmv::SmallVector<T,N> x = b/m;
     tmv::SmallVector<T,N> b2 = m*x;
@@ -79,9 +90,9 @@ static void TestSmallSquareDiv_Basic()
     Assert(Norm(mata-mtm.inverse()) < eps*kappa*Norm(mata),"Square inverseATA");
 
     T mdet = Det(tmv::Matrix<T>(m));
-    if (T(1)/mdet != T(0)) {
+    if (T(1)/tmv::TMV_ABS(mdet) > T(0)) {
         // If det is inf, then skip these tests
-        // (Happens for the larger sized matrices we test on.
+        // (Happens for the larger sized matrices we test on.)
         if (showacc) {
             std::cout<<"Det(m) = "<<Det(m)<<std::endl;
             std::cout<<"mdet = "<<mdet<<std::endl;
@@ -106,12 +117,12 @@ static void TestSmallSquareDiv_Basic()
         tmv::SmallVector<std::complex<T>,N>(std::complex<T>(1,9));
 
     tmv::SmallMatrix<std::complex<T>,N,N> cinv = c.inverse();
-    T ckappa = Norm(c)*Norm(cinv);
-    T ceps = EPS * ckappa;
+    FT ckappa = Norm(c)*Norm(cinv);
+    FT ceps = EPS * ckappa;
 
     std::complex<T> cdet = Det(tmv::Matrix<std::complex<T> >(c));
-    if (T(1)/cdet != T(0)) {
-        // If det is inf, then skip these tests
+    if (T(1)/tmv::TMV_ABS(cdet) > T(0)) {
+        // If det is inf or (nan,nan) then skip these tests
         if (showacc) {
             std::cout<<"cdet = "<<cdet<<std::endl;
             std::cout<<"Det(c) = "<<Det(c)<<std::endl;
@@ -187,8 +198,8 @@ static void TestSmallSquareDiv_Arith()
 
     tmv::SmallVector<T,N> b = m.row(0);
     tmv::SmallVector<std::complex<T>,N> e = c.row(0);
-    tmv::SmallVector<T,N> x;
-    tmv::SmallVector<std::complex<T>,N> y;
+    tmv::SmallVector<T,N> x = m.col(0);
+    tmv::SmallVector<std::complex<T>,N> y = c.col(0);
 
     tmv::SmallMatrix<T,N,N,tmv::ColMajor> a2a = m.transpose();
     tmv::SmallMatrix<std::complex<T>,N,N,tmv::ColMajor> c2a = a2a * std::complex<T>(-3,4);
@@ -197,10 +208,8 @@ static void TestSmallSquareDiv_Arith()
     tmv::SmallMatrix<T,N,N,tmv::RowMajor> a2b = a2a;
     tmv::SmallMatrix<std::complex<T>,N,N,tmv::RowMajor> c2b = c2a;
 
-    tmv::SmallMatrix<T,N,N,stor> a0;
-    tmv::SmallMatrix<std::complex<T>,N,N,stor> c0;
-    tmv::SmallMatrix<T,N,N,stor> a3;
-    tmv::SmallMatrix<std::complex<T>,N,N,stor> c3;
+    tmv::SmallMatrix<T,N,N,stor> a3 = a1;
+    tmv::SmallMatrix<std::complex<T>,N,N,stor> c3 = c1;
 
     tmv::SmallMatrix<T,N,3*N,stor> a4;
     for(int i=0;i<N;++i) for(int j=0;j<3*N;++j) a4(i,j) = T(1-3*i+2*j);
@@ -213,25 +222,21 @@ static void TestSmallSquareDiv_Arith()
     tmv::SmallMatrix<std::complex<T>,3*N,N,stor> c5 = c4.adjoint();
     c5.subMatrix(1,1+N,0,N) -= c1;
 
-    tmv::SmallMatrix<T,N,3*N,stor> a4x;
-    tmv::SmallMatrix<T,N,3*N,stor> a4b;
-    tmv::SmallMatrix<std::complex<T>,N,3*N,stor> c4x;
-    tmv::SmallMatrix<std::complex<T>,N,3*N,stor> c4b;
+    tmv::SmallMatrix<T,N,3*N,stor> a4b = a4;
+    tmv::SmallMatrix<std::complex<T>,N,3*N,stor> c4b = c4;
 
-    tmv::SmallMatrix<T,3*N,N,stor> a5x;
-    tmv::SmallMatrix<T,3*N,N,stor> a5b;
-    tmv::SmallMatrix<std::complex<T>,3*N,N,stor> c5x;
-    tmv::SmallMatrix<std::complex<T>,3*N,N,stor> c5b;
+    tmv::SmallMatrix<T,3*N,N,stor> a5b = a5;
+    tmv::SmallMatrix<std::complex<T>,3*N,N,stor> c5b = c5;
 
     TestMatrixDivArith3a<T>(tmv::LU,a1,c1,"Square"); 
     TestMatrixDivArith3d<T>(tmv::LU,a1,b,x,c1,e,y,"V/Square"); 
     TestMatrixDivArith3e<T>(tmv::LU,a1,b,x,c1,e,y,"V/Square"); 
-    TestMatrixDivArith3b<T>(tmv::LU,a0,c0,a1,a2a,a3,c1,c2a,c3,"Square/Square"); 
-    TestMatrixDivArith3b<T>(tmv::LU,a0,c0,a1,a2b,a3,c1,c2b,c3,"Square/Square"); 
-    TestMatrixDivArith3c<T>(tmv::LU,a0,c0,a1,a2a,a3,c1,c2a,c3,"Square/Square"); 
-    TestMatrixDivArith3c<T>(tmv::LU,a0,c0,a1,a2b,a3,c1,c2b,c3,"Square/Square"); 
-    TestMatrixDivArith3b<T>(tmv::LU,a4x,c4x,a1,a4,a4b,c1,c4,c4b,"NonSquare/Square");
-    TestMatrixDivArith3c<T>(tmv::LU,a5x,c5x,a1,a5,a5b,c1,c5,c5b,"NonSquare/Square");
+    TestMatrixDivArith3b<T>(tmv::LU,a1,a2a,a3,c1,c2a,c3,"Square/Square"); 
+    TestMatrixDivArith3b<T>(tmv::LU,a1,a2b,a3,c1,c2b,c3,"Square/Square"); 
+    TestMatrixDivArith3c<T>(tmv::LU,a1,a2a,a3,c1,c2a,c3,"Square/Square"); 
+    TestMatrixDivArith3c<T>(tmv::LU,a1,a2b,a3,c1,c2b,c3,"Square/Square"); 
+    TestMatrixDivArith3b<T>(tmv::LU,a1,a4,a4b,c1,c4,c4b,"NonSquare/Square");
+    TestMatrixDivArith3c<T>(tmv::LU,a1,a5,a5b,c1,c5,c5b,"NonSquare/Square");
 
 #if XTEST & 32
     tmv::SmallMatrix<T,N,N,stor,tmv::FortranStyle> a1f = a1;
@@ -269,27 +274,27 @@ static void TestSmallSquareDiv_Arith()
     TestMatrixDivArith3e<T>(tmv::LU,a1f,bf,x,c1f,ef,y,"V/Square"); 
     TestMatrixDivArith3e<T>(tmv::LU,a1f,bf,xf,c1f,ef,yf,"V/Square"); 
 
-    TestMatrixDivArith3b<T>(tmv::LU,a0,c0,a1f,a2a,a3,c1f,c2a,c3,"Square/Square"); 
-    TestMatrixDivArith3b<T>(tmv::LU,a0,c0,a1f,a2fa,a3,c1f,c2fa,c3,"Square/Square"); 
-    TestMatrixDivArith3b<T>(tmv::LU,a0,c0,a1f,a2fa,a3f,c1f,c2fa,c3f,"Square/Square"); 
-    TestMatrixDivArith3b<T>(tmv::LU,a0,c0,a1f,a2b,a3,c1f,c2b,c3,"Square/Square"); 
-    TestMatrixDivArith3b<T>(tmv::LU,a0,c0,a1f,a2fb,a3,c1f,c2fb,c3,"Square/Square"); 
-    TestMatrixDivArith3b<T>(tmv::LU,a0,c0,a1f,a2fb,a3f,c1f,c2fb,c3f,"Square/Square"); 
+    TestMatrixDivArith3b<T>(tmv::LU,a1f,a2a,a3,c1f,c2a,c3,"Square/Square"); 
+    TestMatrixDivArith3b<T>(tmv::LU,a1f,a2fa,a3,c1f,c2fa,c3,"Square/Square"); 
+    TestMatrixDivArith3b<T>(tmv::LU,a1f,a2fa,a3f,c1f,c2fa,c3f,"Square/Square"); 
+    TestMatrixDivArith3b<T>(tmv::LU,a1f,a2b,a3,c1f,c2b,c3,"Square/Square"); 
+    TestMatrixDivArith3b<T>(tmv::LU,a1f,a2fb,a3,c1f,c2fb,c3,"Square/Square"); 
+    TestMatrixDivArith3b<T>(tmv::LU,a1f,a2fb,a3f,c1f,c2fb,c3f,"Square/Square"); 
 
-    TestMatrixDivArith3c<T>(tmv::LU,a0,c0,a1f,a2a,a3,c1f,c2a,c3,"Square/Square"); 
-    TestMatrixDivArith3c<T>(tmv::LU,a0,c0,a1f,a2fa,a3,c1f,c2fa,c3,"Square/Square"); 
-    TestMatrixDivArith3c<T>(tmv::LU,a0,c0,a1f,a2fa,a3f,c1f,c2fa,c3f,"Square/Square"); 
-    TestMatrixDivArith3c<T>(tmv::LU,a0,c0,a1f,a2b,a3,c1f,c2b,c3,"Square/Square"); 
-    TestMatrixDivArith3c<T>(tmv::LU,a0,c0,a1f,a2fb,a3,c1f,c2fb,c3,"Square/Square"); 
-    TestMatrixDivArith3c<T>(tmv::LU,a0,c0,a1f,a2fb,a3f,c1f,c2fb,c3f,"Square/Square"); 
+    TestMatrixDivArith3c<T>(tmv::LU,a1f,a2a,a3,c1f,c2a,c3,"Square/Square"); 
+    TestMatrixDivArith3c<T>(tmv::LU,a1f,a2fa,a3,c1f,c2fa,c3,"Square/Square"); 
+    TestMatrixDivArith3c<T>(tmv::LU,a1f,a2fa,a3f,c1f,c2fa,c3f,"Square/Square"); 
+    TestMatrixDivArith3c<T>(tmv::LU,a1f,a2b,a3,c1f,c2b,c3,"Square/Square"); 
+    TestMatrixDivArith3c<T>(tmv::LU,a1f,a2fb,a3,c1f,c2fb,c3,"Square/Square"); 
+    TestMatrixDivArith3c<T>(tmv::LU,a1f,a2fb,a3f,c1f,c2fb,c3f,"Square/Square"); 
 
-    TestMatrixDivArith3b<T>(tmv::LU,a4x,c4x,a1f,a4,a4b,c1f,c4,c4b,"NonSquare/Square");
-    TestMatrixDivArith3b<T>(tmv::LU,a4x,c4x,a1f,a4f,a4b,c1f,c4f,c4b,"NonSquare/Square");
-    TestMatrixDivArith3b<T>(tmv::LU,a4x,c4x,a1f,a4f,a4fb,c1f,c4f,c4fb,"NonSquare/Square");
+    TestMatrixDivArith3b<T>(tmv::LU,a1f,a4,a4b,c1f,c4,c4b,"NonSquare/Square");
+    TestMatrixDivArith3b<T>(tmv::LU,a1f,a4f,a4b,c1f,c4f,c4b,"NonSquare/Square");
+    TestMatrixDivArith3b<T>(tmv::LU,a1f,a4f,a4fb,c1f,c4f,c4fb,"NonSquare/Square");
 
-    TestMatrixDivArith3c<T>(tmv::LU,a5x,c5x,a1f,a5,a5b,c1f,c5,c5b,"NonSquare/Square");
-    TestMatrixDivArith3c<T>(tmv::LU,a5x,c5x,a1f,a5f,a5b,c1f,c5f,c5b,"NonSquare/Square");
-    TestMatrixDivArith3c<T>(tmv::LU,a5x,c5x,a1f,a5f,a5fb,c1f,c5f,c5fb,"NonSquare/Square");
+    TestMatrixDivArith3c<T>(tmv::LU,a1f,a5,a5b,c1f,c5,c5b,"NonSquare/Square");
+    TestMatrixDivArith3c<T>(tmv::LU,a1f,a5f,a5b,c1f,c5f,c5b,"NonSquare/Square");
+    TestMatrixDivArith3c<T>(tmv::LU,a1f,a5f,a5fb,c1f,c5f,c5fb,"NonSquare/Square");
 #endif
 }
 

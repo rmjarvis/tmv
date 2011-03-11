@@ -29,7 +29,7 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-#define PRINTALGO_UV
+//#define PRINTALGO_UV
 
 #include "TMV_Blas.h"
 #include "tmv/TMV_MultUV.h"
@@ -54,7 +54,7 @@ namespace tmv {
     template <class M1, class T2>
     static void NonBlasMultEq(const M1& m1, VectorView<T2> v2)
     {
-        TMVAssert(m2.iscm() || m2.isrm());
+        TMVAssert(m1.iscm() || m1.isrm());
         if (v2.step() == 1) {
             const Scaling<1,typename Traits<T2>::real_type> one;
             VectorView<T2,1> v2u = v2.unitView();

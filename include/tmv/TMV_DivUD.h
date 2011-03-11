@@ -40,7 +40,7 @@ namespace tmv {
 
     // m3 = x * m2^-1 * m1  (or m3 = x * m1 / m2)
     template <int algo, int ix, class T, class M1, class M2, class M3>
-    inline void DoLDivUD(
+    static void DoLDivUD(
         const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
     {
         TMVStaticAssert((Sizes<M3::_colsize,M1::_colsize>::same));
@@ -76,28 +76,28 @@ namespace tmv {
     }
 
     template <int ix, class T, class M1, class M2, class M3>
-    inline void LDiv(
+    static void LDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Tri_Mutable<M3>& m3)
     { DoLDivUD<-1>(x,m1,m2,m3); }
 
     template <int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasLDiv(
+    static void NoAliasLDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Tri_Mutable<M3>& m3)
     { DoLDivUD<-2>(x,m1,m2,m3); }
 
     template <int ix, class T, class M1, class M2, class M3>
-    inline void AliasLDiv(
+    static void AliasLDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Tri_Mutable<M3>& m3)
     { DoLDivUD<99>(x,m1,m2,m3); }
 
     template <int ix, class T, class M1, class M2, class M3>
-    inline void LDiv(
+    static void LDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -112,7 +112,7 @@ namespace tmv {
     }
 
     template <int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasLDiv(
+    static void NoAliasLDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -127,7 +127,7 @@ namespace tmv {
     }
 
     template <int ix, class T, class M1, class M2, class M3>
-    inline void AliasLDiv(
+    static void AliasLDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -143,19 +143,19 @@ namespace tmv {
 
 
     template <class M1, int ix, class T, class M2>
-    inline void LDivEq(
+    static void LDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { DoLDivUD<-1>(x,m1.mat(),m2.mat(),m1.mat()); }
 
     template <class M1, int ix, class T, class M2>
-    inline void NoAliasLDivEq(
+    static void NoAliasLDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { DoLDivUD<-2>(x,m1.mat(),m2.mat(),m1.mat()); }
 
     template <class M1, int ix, class T, class M2>
-    inline void AliasLDivEq(
+    static void AliasLDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { DoLDivUD<99>(x,m1.mat(),m2.mat(),m1.mat()); }
@@ -164,7 +164,7 @@ namespace tmv {
 
     // m3 = x * m1 * m2^-1 (or m3 = x * m1 % m2)
     template <int algo, int ix, class T, class M1, class M2, class M3>
-    inline void DoRDivUD(
+    static void DoRDivUD(
         const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
     {
         TMVStaticAssert((Sizes<M3::_colsize,M1::_colsize>::same));
@@ -200,28 +200,28 @@ namespace tmv {
     }
 
     template <int ix, class T, class M1, class M2, class M3>
-    inline void RDiv(
+    static void RDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Tri_Mutable<M3>& m3)
     { DoRDivUD<-1>(x,m1,m2,m3); }
 
     template <int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasRDiv(
+    static void NoAliasRDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Tri_Mutable<M3>& m3)
     { DoRDivUD<-2>(x,m1,m2,m3); }
 
     template <int ix, class T, class M1, class M2, class M3>
-    inline void AliasRDiv(
+    static void AliasRDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Tri_Mutable<M3>& m3)
     { DoRDivUD<99>(x,m1,m2,m3); }
 
     template <int ix, class T, class M1, class M2, class M3>
-    inline void RDiv(
+    static void RDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -236,7 +236,7 @@ namespace tmv {
     }
 
     template <int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasRDiv(
+    static void NoAliasRDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -251,7 +251,7 @@ namespace tmv {
     }
 
     template <int ix, class T, class M1, class M2, class M3>
-    inline void AliasRDiv(
+    static void AliasRDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -267,19 +267,19 @@ namespace tmv {
 
 
     template <class M1, int ix, class T, class M2>
-    inline void RDivEq(
+    static void RDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { DoRDivUD<-1>(x,m1.mat(),m2.mat(),m1.mat()); }
 
     template <class M1, int ix, class T, class M2>
-    inline void NoAliasRDivEq(
+    static void NoAliasRDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { DoRDivUD<-2>(x,m1.mat(),m2.mat(),m1.mat()); }
 
     template <class M1, int ix, class T, class M2>
-    inline void AliasRDivEq(
+    static void AliasRDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { DoRDivUD<99>(x,m1.mat(),m2.mat(),m1.mat()); }

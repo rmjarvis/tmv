@@ -29,7 +29,7 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-//#define PRINTALGO_DIVU
+//#define PRINTALGO_DivU
 //#define PRINTALGO_UM
 
 #include "TMV_Blas.h"

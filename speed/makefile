@@ -1,6 +1,7 @@
 #EIGEN= -I/home/mjarvis/eigen-2.0.0
 #EIGEN= -I/Users/Mike/Astro/eigen-2.0.12
-EIGEN= -I../eigen
+#EIGEN= -I../eigen
+EIGEN= -I/sw/include/eigen2
 #EIGEN= -I/Users/Mike/Astro/eigen-default
 
 #INCLUDE= -I../include $(EIGEN)

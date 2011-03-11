@@ -89,8 +89,8 @@ namespace tmv {
         enum { _size = Traits<type>::_size };
         enum { _fort = Traits<type>::_fort };
         enum { _calc = Traits<type>::_calc };
-        enum { _real = Traits<T>::_real }; 
-        enum { _complex = Traits<T>::_complex }; 
+        enum { isreal = Traits<T>::isreal }; 
+        enum { iscomplex = Traits<T>::iscomplex }; 
 
         typedef typename Traits<T>::real_type real_type;
         typedef typename Traits<T>::complex_type complex_type;
@@ -99,18 +99,19 @@ namespace tmv {
         // Constructors
         //
 
-        inline BasisVector(size_t n, int i, const T x) : 
+        BasisVector(size_t n, int i, const T x=T(1)) : 
             itssize(n), itsindex(I==FortranStyle?i-1:i), itsval(x) {}
-        inline ~BasisVector() {}
+        ~BasisVector() {}
 
         //
         // Auxilliary Functions
         //
 
-        inline T cref(int i) const  { return i==itsindex ? itsval : T(0); }
-        inline size_t size() const { return itssize; }
+        T cref(int i) const  { return i==itsindex ? itsval : T(0); }
+        size_t size() const { return itssize; }
+        int nElements() const { return 1; }
         template <class V2>
-        inline void assignTo(BaseVector_Mutable<V2>& v2) const
+        void assignTo(BaseVector_Mutable<V2>& v2) const
         { 
             TMVAssert(v2.size() == itssize);
             v2.setZero();
@@ -131,7 +132,7 @@ namespace tmv {
     //
 
     template <class T, IndexStyle I> 
-    inline std::string TMV_Text(const BasisVector<T,I>& )
+    static std::string TMV_Text(const BasisVector<T,I>& )
     { 
         std::ostringstream s;
         s << "BasisVector<"<<TMV_Text(T())<<","<<TMV_Text(I)<<">";

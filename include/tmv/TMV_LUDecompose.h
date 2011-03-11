@@ -40,6 +40,7 @@
 #include "TMV_DivVU.h"
 #include "TMV_DivMU.h"
 #include "TMV_SwapV.h"
+#include "TMV_Permutation.h"
 #include "TMV_PermuteM.h"
 
 #include <iostream>
@@ -80,7 +81,7 @@ namespace tmv {
     // algo 0: Trivial, nothing to do (M == 0 or 1, or N == 0)
     template <int cs, int rs, class M>
     struct LUDecompose_Helper<0,cs,rs,M>
-    { static inline void call(M& A, int* P, int& detp) {} };
+    { static void call(M& A, int* P, int& detp) {} };
 
     // algo 1: N == 1
     template <int cs, class M1>
@@ -99,7 +100,11 @@ namespace tmv {
 
             typename M1::col_type A0 = A.get_col(0);
             RT piv = A0.maxAbsElement(P);
-            if (piv != RT(0)) {
+
+            if (TMV_Underflow(piv)) {
+                *P = 0;
+                A0.setZero();
+            } else {
                 if (*P != 0) {
                     A0.swap(*P,0);
                     detp = -detp;
@@ -132,9 +137,14 @@ namespace tmv {
             typename M1::col_type::iterator it1 = A1.begin();
 
             int ip0,ip1;
-            //RT piv = A0.maxAbsElement(&ip0);
             RT piv = InlineMaxAbsElement(A0,&ip0);
-            if (piv != RT(0)) {
+
+            if (TMV_Underflow(piv)) {
+                A0.setZero();
+                ip0 = 0;
+                piv = InlineMaxAbsElement(A1.cSubVector(1,M),&ip1);
+                ip1++;
+            } else {
                 if (ip0 != 0) {
                     A0.swap(ip0,0);
                     A1.swap(ip0,0);
@@ -153,23 +163,25 @@ namespace tmv {
                     RT absAi1 = TMV_ABS(*it1);
                     if (absAi1 > piv) { piv = absAi1; ip1=i; }
                 }
+            }
+
+            if (TMV_Underflow(piv)) {
+                A1.cSubVector(1,M).setZero();
+                ip1 = 1;
             } else {
-                //piv = A1.cSubVector(1,M).maxAbsElement(&ip1); 
-                piv = InlineMaxAbsElement(A1.cSubVector(1,M),&ip1);
-                ip1++;
+                if (M > 2) {
+                    if (ip1 != 1) {
+                        A1.swap(ip1,1);
+                        A0.swap(ip1,1);
+                        detp = -detp;
+                    } 
+
+                    //A1.cSubVector(2,M) /= A1.cref(1);
+                    typename M1::col_sub_type A1b = A1.cSubVector(2,M);
+                    InlineScale(Scaling<0,T>(RT(1)/A1.cref(1)),A1b);
+                }
             }
 
-            if (piv != RT(0) && M>2) {
-                if (ip1 != 1) {
-                    A1.swap(ip1,1);
-                    A0.swap(ip1,1);
-                    detp = -detp;
-                } 
-
-                //A1.cSubVector(2,M) /= A1.cref(1);
-                typename M1::col_sub_type A1b = A1.cSubVector(2,M);
-                InlineScale(Scaling<0,T>(RT(1)/A1.cref(1)),A1b);
-            }
             P[0] = ip0;
             P[1] = ip1;
         }
@@ -195,7 +207,11 @@ namespace tmv {
 
             int ip0;
             RT piv = InlineMaxAbsElement(A0,&ip0);
-            if (piv != RT(0)) {
+
+            if (TMV_Underflow(piv)) {
+                A0.setZero();
+                ip0 = 0;
+            } else {
                 if (ip0 != 0) {
                     A0.swap(ip0,0);
                     A1.swap(ip0,0);
@@ -207,6 +223,7 @@ namespace tmv {
                 A0.ref(1) /= A0.cref(0);
                 A1.ref(1) -= A0.cref(1) * A1.cref(0);
             }
+
             P[0] = ip0;
             P[1] = 1;
 
@@ -298,6 +315,7 @@ namespace tmv {
             // 
             typedef typename M1::value_type T;
             typedef typename M1::real_type RT;
+
             const int N = rs==UNKNOWN ? int(A.rowsize()) : rs;
             const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
             const int R = TMV_MIN(N,M);
@@ -333,8 +351,15 @@ namespace tmv {
 
                 // Find the pivot element
                 int ip;
-                InlineMaxAbsElement(Ajb,&ip);
+                RT piv = InlineMaxAbsElement(Ajb,&ip);
                 // ip is relative to j index, not absolute.
+
+                // Check for underflow:
+                if (TMV_Underflow(piv)) {
+                    P[j] = j;
+                    Ajb.setZero();
+                    continue;
+                }
 
                 // Swap the pivot row with j if necessary
                 if (ip != 0) {
@@ -406,6 +431,7 @@ namespace tmv {
             //
 
             typedef typename M1::real_type RT;
+
             const int N = rs==UNKNOWN ? int(A.rowsize()) : rs;
             const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
             const int Nx = TMV_LU_BLOCKSIZE;
@@ -501,7 +527,7 @@ namespace tmv {
             // We keep dividing the matrix in half (column-wise) until we 
             // get down to an Mx2 or Mx1 matrix.
             typedef typename M1::real_type RT;
-            //typedef typename M1::value_type T;
+
             const int N = rs==UNKNOWN ? int(A.rowsize()) : rs;
             const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
             const int R = TMV_MIN(N,M);
@@ -645,7 +671,7 @@ namespace tmv {
             typedef typename M::value_type T;
             typedef typename MCopyHelper<T,Rec,cs,rs,false,false>::type Mcm;
             Mcm mcm = m;
-            LUDecompose_Helper<-2,cs,rs,Mcm>::call(mcm,P,detp);
+            LUDecompose_Helper<-1,cs,rs,Mcm>::call(mcm,P,detp);
             NoAliasCopy(mcm,m);
         }
     };
@@ -654,7 +680,7 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct LUDecompose_Helper<-4,cs,rs,M1>
     {
-        static inline void call(M1& m, int* P, int& detp)
+        static void call(M1& m, int* P, int& detp)
         {
 #if 0
             const int algo = 27;
@@ -672,8 +698,15 @@ namespace tmv {
             std::cout<<"cs = "<<cs<<"  rs = "<<rs<<std::endl;
             std::cout<<"sizes = "<<m.colsize()<<"  "<<m.rowsize()<<std::endl;
             std::cout<<"algo = "<<algo<<std::endl;
+            //std::cout<<"m = "<<m<<std::endl;
+            //std::cout<<"detp = "<<detp<<std::endl;
 #endif
             LUDecompose_Helper<algo,cs,rs,M1>::call(m,P,detp);
+#ifdef PRINTALGO_LU
+            //std::cout<<"m => "<<m<<std::endl;
+            //std::cout<<"P => "<<ConstVectorView<int>(P,m.rowsize(),1)<<std::endl;
+            //std::cout<<"detp -> "<<detp<<std::endl;
+#endif
         }
     };
 
@@ -681,7 +714,7 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct LUDecompose_Helper<-3,cs,rs,M1>
     {
-        static inline void call(M1& m, int* P, int& detp)
+        static void call(M1& m, int* P, int& detp)
         {
             const int algo = (
                 ( cs != UNKNOWN && rs != UNKNOWN &&
@@ -702,11 +735,11 @@ namespace tmv {
     template <int cs, int rs, class M>
     struct LUDecompose_Helper<97,cs,rs,M>
     {
-        static inline void call(M& m, int* P, int& detp)
+        static void call(M& m, int* P, int& detp)
         {
             typedef typename M::conjugate_type Mc;
             Mc mc = m.conjugate();
-            LUDecompose_Helper<-2,cs,rs,Mc>::call(mc,P,detp);
+            LUDecompose_Helper<-1,cs,rs,Mc>::call(mc,P,detp);
         }
     };
 
@@ -714,19 +747,20 @@ namespace tmv {
     template <int cs, int rs, class M>
     struct LUDecompose_Helper<98,cs,rs,M>
     {
-        static inline void call(M& m, int* P, int& detp)
+        static void call(M& m, int* P, int& detp)
         { InstLU_Decompose(m.xView().cmView(),P,detp); }
     };
 
-    // algo -2: Check for inst
+    // algo -1: Check for inst
     template <int cs, int rs, class M>
-    struct LUDecompose_Helper<-2,cs,rs,M>
+    struct LUDecompose_Helper<-1,cs,rs,M>
     {
-        static inline void call(M& m, int* P, int& detp)
+        static void call(M& m, int* P, int& detp)
         {
             typedef typename M::value_type T;
             const bool inst = 
-                M::unknownsizes &&
+                (cs == UNKNOWN || cs > 16) &&
+                (rs == UNKNOWN || rs > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 cs == 0 || rs == 0 || cs == 1 ? 0 :
@@ -737,16 +771,8 @@ namespace tmv {
         }
     };
 
-    // algo -1: Check for aliases? No.
-    template <int cs, int rs, class M>
-    struct LUDecompose_Helper<-1,cs,rs,M>
-    {
-        static inline void call(M& m, int* P, int& detp)
-        { LUDecompose_Helper<-2,cs,rs,M>::call(m,P,detp); }
-    };
-
     template <class M> 
-    inline void InlineLU_Decompose(
+    static void InlineLU_Decompose(
         BaseMatrix_Rec_Mutable<M>& m, int* P, int& detp)
     {
         const int cs = M::_colsize;
@@ -757,48 +783,40 @@ namespace tmv {
     }
 
     template <class M> 
-    inline void LU_Decompose(
+    static void LU_Decompose(
         BaseMatrix_Rec_Mutable<M>& m, int* P, int& detp)
     {
         const int cs = M::_colsize;
         const int rs = M::_rowsize;
         typedef typename M::cview_type Mv;
         Mv mv = m.cView();
-        LUDecompose_Helper<-2,cs,rs,Mv>::call(mv,P,detp);
+        LUDecompose_Helper<-1,cs,rs,Mv>::call(mv,P,detp);
     }
 
-    template <class M> 
-    inline void LU_Decompose(BaseMatrix_Rec_Mutable<M>& m, int* P)
-    { int d(0); LU_Decompose(m,P,d); }
-
+    // This function is a friend of Permutation class.
+    template <class M>
+    static void LU_Decompose(BaseMatrix_Rec_Mutable<M>& m, Permutation& P)
+    {
+        TMVAssert(P.size() == m.colsize());
+        P.allocateMem();
+        LU_Decompose(m,P.getMem(),P.itsdet=1);
+        P.isinv = true;
+    }
 
     // Allow views as an argument by value (for convenience)
     template <class T, int Si, int Sj, bool C, IndexStyle I>
-    inline void LU_Decompose(MatrixView<T,Si,Sj,C,I> m, int* P, int& detp)
-    { 
-        typedef MatrixView<T,Si,Sj,C,I> M;
-        LU_Decompose(static_cast<BaseMatrix_Rec_Mutable<M>&>(m),P,detp); 
-    }
-    template <class T, int Si, int Sj, bool C, IndexStyle I>
-    inline void LU_Decompose(MatrixView<T,Si,Sj,C,I> m, int* P)
+    static void LU_Decompose(MatrixView<T,Si,Sj,C,I> m, Permutation& P)
     { 
         typedef MatrixView<T,Si,Sj,C,I> M;
         LU_Decompose(static_cast<BaseMatrix_Rec_Mutable<M>&>(m),P); 
     }
     template <class T, int M, int N, int Si, int Sj, bool C, IndexStyle I>
-    inline void LU_Decompose(
-        SmallMatrixView<T,M,N,Si,Sj,C,I> m, int* P, int& detp)
-    { 
-        typedef SmallMatrixView<T,M,N,Si,Sj,C,I> MM;
-        LU_Decompose(static_cast<BaseMatrix_Rec_Mutable<MM>&>(m),P,detp); 
-    }
-    template <class T, int M, int N, int Si, int Sj, bool C, IndexStyle I>
-    inline void LU_Decompose(SmallMatrixView<T,M,N,Si,Sj,C,I> m, int* P)
+    static void LU_Decompose(
+        SmallMatrixView<T,M,N,Si,Sj,C,I> m, Permutation& P)
     { 
         typedef SmallMatrixView<T,M,N,Si,Sj,C,I> MM;
         LU_Decompose(static_cast<BaseMatrix_Rec_Mutable<MM>&>(m),P); 
     }
-
 
 #undef TMV_Q2
 #undef TMV_LU_BLOCKSIZE

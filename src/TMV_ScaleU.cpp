@@ -31,33 +31,35 @@
 
 #include "tmv/TMV_ScaleU.h"
 #include "tmv/TMV_TriMatrix.h"
-//#include "tmv/TMV_ProdXM.h"
 
 namespace tmv {
 
     template <class T, class M>
     static void DoScale(const T x, M& m)
     {
-        if (x == T(-1))
+        if (x == T(-1)) {
             InlineScale(Scaling<-1,T>(x),m); 
-        else if (x == T(0))
+        } else if (x == T(0)) {
             m.setZero();
-        else if (x != T(1))
+        } else if (x != T(1)) {
             InlineScale(Scaling<0,T>(x),m); 
+        }
     }
 
     template <class T, class M>
     static void DoScale(const std::complex<T> x, M& m)
     { 
         if (imag(x) == T(0)) {
-            if (real(x) == T(-1))
+            if (real(x) == T(-1)) {
                 InlineScale(Scaling<-1,T>(real(x)),m); 
-            else if (real(x) == T(0))
+            } else if (real(x) == T(0)) {
                 m.setZero();
-            else if (real(x) != T(1))
+            } else if (real(x) != T(1)) {
                 InlineScale(Scaling<0,T>(real(x)),m); 
-        } else 
+            }
+        } else  {
             InlineScale(Scaling<0,std::complex<T> >(x),m);
+        }
     }
 
     template <class T>

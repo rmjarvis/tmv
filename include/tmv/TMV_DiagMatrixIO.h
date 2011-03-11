@@ -45,7 +45,7 @@ namespace tmv {
     //
 
     template <class M>
-    inline void InlineWrite(std::ostream& os, const BaseMatrix_Diag<M>& m)
+    static void InlineWrite(std::ostream& os, const BaseMatrix_Diag<M>& m)
     {
         typedef typename M::value_type T;
         const int n = m.size();
@@ -68,7 +68,7 @@ namespace tmv {
 
     // With thresh:
     template <class M>
-    inline void InlineWrite(
+    static void InlineWrite(
         std::ostream& os, const BaseMatrix_Diag<M>& m,
         typename M::real_type thresh) 
     {
@@ -80,7 +80,7 @@ namespace tmv {
             for(int j=0;j<i;++j) 
                 os << " " << Value(T(0)) << " ";
             T temp = m.cref(i);
-            os << " " << Value((TMV_ABS(temp) < thresh ? T(0) : temp)) << " ";
+            os << " " << Value((TMV_ABS2(temp) < thresh ? T(0) : temp)) << " ";
             for(int j=i+1;j<n;++j) 
                 os << " " << Value(T(0)) << " ";
             os << " )\n";
@@ -109,35 +109,35 @@ namespace tmv {
         size_t s;
         bool is, iseof, isbad;
 
-        inline DiagMatrixReadError(std::istream& _is) throw() :
+        DiagMatrixReadError(std::istream& _is) throw() :
             ReadError("DiagMatrix"),
             i(0), m(0), exp(0), got(0), s(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        inline DiagMatrixReadError(
+        DiagMatrixReadError(
             int _i, const BaseMatrix_Diag<M>& _m, char _e, char _g, size_t _s,
             bool _is, bool _iseof, bool _isbad
         ) throw() :
             ReadError("DiagMatrix"),
             i(_i), m(new copy_type(_m)), exp(_e), got(_g), s(_s),
             is(_is), iseof(_iseof), isbad(_isbad) {}
-        inline DiagMatrixReadError(
+        DiagMatrixReadError(
             const BaseMatrix_Diag<M>& _m, std::istream& _is, size_t _s
         ) throw() :
             ReadError("DiagMatrix"),
             i(0), m(new copy_type(_m)), exp(0), got(0), s(_s),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        inline DiagMatrixReadError(
+        DiagMatrixReadError(
             std::istream& _is, char _e, char _g
         ) throw() :
             ReadError("DiagMatrix"),
             i(0), m(0), exp(_e), got(_g), s(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        inline DiagMatrixReadError(const DiagMatrixReadError<M>& rhs) :
+        DiagMatrixReadError(const DiagMatrixReadError<M>& rhs) :
             ReadError("DiagMatrix"),
             i(rhs.i), m(rhs.m), exp(rhs.exp), got(rhs.got), s(rhs.s),
             is(rhs.is), iseof(rhs.iseof), isbad(rhs.isbad) {}
 
-        inline ~DiagMatrixReadError() throw() {}
+        ~DiagMatrixReadError() throw() {}
 
         virtual void Write(std::ostream& os) const throw()
         {

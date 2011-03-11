@@ -1,7 +1,7 @@
 
 #include <fstream>
 #include "TMV_Test.h"
-#include "TMV_Test2.h"
+#include "TMV_Test_2.h"
 
 bool XXDEBUG1 = false;
 bool XXDEBUG2 = false;

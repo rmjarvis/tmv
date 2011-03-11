@@ -1,7 +1,7 @@
 
 #include <fstream>
 #include "TMV_Test.h"
-#include "TMV_Test3.h"
+#include "TMV_Test_3.h"
 
 bool XXDEBUG1 = false;
 bool XXDEBUG2 = false;
@@ -41,12 +41,12 @@ int main() try {
     TestAllSmallMatrixB<float>();
 #endif
 
-#ifdef TEST_LONGDOUBLE
-    TestAllSmallMatrixB<long double>();
-#endif 
-
 #ifdef TEST_INT
     TestAllSmallMatrixB<int>();
+#endif 
+
+#ifdef TEST_LONGDOUBLE
+    TestAllSmallMatrixB<long double>();
 #endif 
 
 #endif 

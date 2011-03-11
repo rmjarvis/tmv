@@ -47,10 +47,10 @@ EX4= BandMatrix.cpp
 EX5= SymMatrix.cpp
 EX6= NewMatrix.cpp
 
-LIBFILE= $(LIBDIR)/libtmv.a
-LIBS= -L$(LIBDIR) -ltmv $(BLASLIBS) -lm
-SBLIBFILE= $(LIBDIR)/libtmv_symband.a
-SBLIBS= -L$(LIBDIR) -ltmv_symband -ltmv $(BLASLIBS) -lm
+LIBFILE= libtmv.a
+SBLIBFILE= libtmv_symband.a
+LIBS= -L$(LIBDIR) -ltmv $(BLASLIBS)
+SBLIBS= -L$(LIBDIR) -ltmv_symband -ltmv $(BLASLIBS)
 
 LIB_O := $(patsubst %.cpp,$(SRCDIR)/%.o,$(LIB))
 SBLIB_O := $(patsubst %.cpp,$(SRCDIR)/%.o,$(SBLIB))
@@ -108,9 +108,9 @@ examples: vector matrix bandmatrix symmatrix division newmatrix
 
 all: libs tests examples
 
-lib: $(LIBFILE)
+lib: $(LIBDIR)/$(LIBFILE)
 
-sblib: $(SBLIBFILE)
+sblib: $(LIBDIR)/$(SBLIBFILE)
 
 test1: $(TESTDIR)/tmvtest1
 
@@ -154,26 +154,45 @@ division: $(EXDIR)/division
 
 
 testclean:
-	- $(RM) $(TESTDIR)/*.o $(TESTDIR)/.*.P $(TESTDIR)/tmv* tmv*.dat
+	- $(RM) $(TESTDIR)/*.o $(TESTDIR)/*.os $(TESTDIR)/.*.P $(TESTDIR)/tmv* tmv*.dat
  
 clean:
-	- $(RM) $(SRCDIR)/*.o $(SRCDIR)/.*.P $(EXDIR)/*.o $(EXDIR)/.*.P 
+	- $(RM) $(SRCDIR)/*.o $(SRCDIR)/*.os $(SRCDIR)/.*.P $(EXDIR)/*.o $(EXDIR)/.*.P 
 
-$(LIBFILE): $(LIB_O)
+$(LIBDIR)/$(LIBFILE): $(LIB_O)
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
 
-$(SBLIBFILE): $(SBLIB_O)
+$(LIBDIR)/$(SBLIBFILE): $(SBLIB_O)
 	$(AR) $(ARFLAGS) $@ $?
 	$(RANLIB) $@
 
-install: $(LIBFILE) $(SBLIBFILE)
-	$(CP) -r include/*.h tmv $(PREFIX)/include
-	$(CP) lib/lib*.a $(PREFIX)/lib
+install: $(PREFIX)/share/$(LINKFILE)
+        share/tmv-link-msg share/tmv-link $(PREFIX)/share/$(LINKFILE)
+
+$(PREFIX)/share/$(LINKFILE): $(PREFIX)/lib/$(LIBFILE) $(PREFIX)/lib/$(SBLIBFILE)
+	- $(MKDIR) $(PREFIX)/include
+	- $(MKDIR) $(PREFIX)/bin
+	- $(MKDIR) $(PREFIX)/share
+	$(CP) -r include/*.h include/tmv $(PREFIX)/include
+	$(CP) bin/tmv-version $(PREFIX)/bin
+	echo -L$(PREFIX)/lib -ltmv $(BLASLIBS) > share/$(LINKFILE)
+	$(CP) share/$(LINKFILE) $(PREFIX)/share
+
+$(PREFIX)/lib/$(LIBFILE): $(LIBDIR)/$(LIBFILE)
+	- $(MKDIR) $(PREFIX)/lib
+	$(CP) $(LIBDIR)/$(LIBFILE) $(PREFIX)/lib
+
+$(PREFIX)/lib/$(SBLIBFILE): $(LIBDIR)/$(SBLIBFILE)
+	- $(MKDIR) $(PREFIX)/lib
+	$(CP) $(LIBDIR)/$(SBLIBFILE) $(PREFIX)/lib
 
 uninstall:
 	- $(RM) -r $(PREFIX)/include/TMV_*.h $(PREFIX)/include/tmv
-	- $(CP) $(PREFIX)/lib/libtmv*.a
+	- $(RM) $(PREFIX)/lib/libtmv*.a
+	- $(RM) $(PREFIX)/bin/tmv-version
+	- $(RM) $(PREFIX)/share/$(LINKFILE)
+
 
 LIB_ALL= $(LIB) $(SBLIB) 
 TEST_ALL= $(TEST1) $(TEST2) $(TEST3) 
@@ -183,12 +202,6 @@ TEST_P := $(patsubst %.cpp,$(TESTDIR)/.%.P,$(TEST_ALL))
 EX_P := $(patsubst %.cpp,$(EXDIR)/.%.P,$(EX_ALL)) 
 ALL_P= $(LIB_P) $(TEST_P) $(EX_P)
 ALL_O= $(LIB_O) $(SBLIB_O) $(TEST1_O) $(TEST2_O) $(TEST3_O) $(EX1_O) $(EX2_O) $(EX3_O) $(EX4_O) $(EX5_O) $(EX6_O)
-
-# Add in the SRCDIR to the includes for the .inst files
-CFLAGS2= -I$(SRCDIR) $(CFLAGS)
-INCLUDE2= -I$(SRCDIR) $(INCLUDE)
-CFLAGS3= -I$(SRCDIR) -I$(TESTDIR) $(CFLAGS)
-INCLUDE3= -I$(SRCDIR) -I$(TESTDIR) $(INCLUDE)
 
 # See http://make.paulandlesley.org/autodep.html for an explanation of 
 # the following lines
@@ -227,63 +240,63 @@ $(TESTDIR)/%.o : $(TESTDIR)/%.cpp
 	      -e '/^$$/ d' -e 's/$$/ :/' < $*.d >> $(TESTDIR)/.$*.P; \
 	  $(RM) $*.d
 
-$(TESTDIR)/tmvtest1: $(TEST1_O) $(LIBFILE)
+$(TESTDIR)/tmvtest1: $(TEST1_O) $(LIBDIR)/$(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST1_O) $(LIBS)
 
-$(TESTDIR)/tmvtest1a: $(TEST1a_O) $(LIBFILE)
+$(TESTDIR)/tmvtest1a: $(TEST1a_O) $(LIBDIR)/$(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST1a_O) $(LIBS)
 
-$(TESTDIR)/tmvtest1b: $(TEST1b_O) $(LIBFILE)
+$(TESTDIR)/tmvtest1b: $(TEST1b_O) $(LIBDIR)/$(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST1b_O) $(LIBS)
 
-$(TESTDIR)/tmvtest1c: $(TEST1c_O) $(LIBFILE)
+$(TESTDIR)/tmvtest1c: $(TEST1c_O) $(LIBDIR)/$(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST1c_O) $(LIBS)
 
-$(TESTDIR)/tmvtest2: $(TEST2_O) $(SBLIBFILE) $(LIBFILE)
+$(TESTDIR)/tmvtest2: $(TEST2_O) $(LIBDIR)/$(SBLIBFILE) $(LIBDIR)/$(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST2_O) $(SBLIBS)
 
-$(TESTDIR)/tmvtest2a: $(TEST2a_O) $(SBLIBFILE) $(LIBFILE)
+$(TESTDIR)/tmvtest2a: $(TEST2a_O) $(LIBDIR)/$(SBLIBFILE) $(LIBDIR)/$(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST2a_O) $(SBLIBS)
 
-$(TESTDIR)/tmvtest2b: $(TEST2b_O) $(SBLIBFILE) $(LIBFILE)
+$(TESTDIR)/tmvtest2b: $(TEST2b_O) $(LIBDIR)/$(SBLIBFILE) $(LIBDIR)/$(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST2b_O) $(SBLIBS)
 
-$(TESTDIR)/tmvtest2c: $(TEST2c_O) $(SBLIBFILE) $(LIBFILE)
+$(TESTDIR)/tmvtest2c: $(TEST2c_O) $(LIBDIR)/$(SBLIBFILE) $(LIBDIR)/$(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST2c_O) $(SBLIBS)
 
-$(TESTDIR)/tmvtest3: $(TEST3_O) $(LIBFILE)
+$(TESTDIR)/tmvtest3: $(TEST3_O) $(LIBDIR)/$(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST3_O) $(LIBS)
 
-$(TESTDIR)/tmvtest3a: $(TEST3a_O) $(LIBFILE)
+$(TESTDIR)/tmvtest3a: $(TEST3a_O) $(LIBDIR)/$(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST3a_O) $(LIBS)
 
-$(TESTDIR)/tmvtest3b: $(TEST3b_O) $(LIBFILE)
+$(TESTDIR)/tmvtest3b: $(TEST3b_O) $(LIBDIR)/$(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST3b_O) $(LIBS)
 
-$(TESTDIR)/tmvtest3c: $(TEST3c_O) $(LIBFILE)
+$(TESTDIR)/tmvtest3c: $(TEST3c_O) $(LIBDIR)/$(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST3c_O) $(LIBS)
 
-$(TESTDIR)/tmvtest3d: $(TEST3d_O) $(LIBFILE)
+$(TESTDIR)/tmvtest3d: $(TEST3d_O) $(LIBDIR)/$(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST3d_O) $(LIBS)
 
-$(TESTDIR)/tmvtest3e: $(TEST3e_O) $(LIBFILE)
+$(TESTDIR)/tmvtest3e: $(TEST3e_O) $(LIBDIR)/$(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(TEST3e_O) $(LIBS)
 
-$(EXDIR)/vector: $(EX1_O) $(LIBFILE)
+$(EXDIR)/vector: $(EX1_O) $(LIBDIR)/$(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(EX1_O) $(LIBS)
 
-$(EXDIR)/matrix: $(EX2_O) $(LIBFILE)
+$(EXDIR)/matrix: $(EX2_O) $(LIBDIR)/$(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(EX2_O) $(LIBS)
 
-$(EXDIR)/division: $(EX3_O) $(LIBFILE)
+$(EXDIR)/division: $(EX3_O) $(LIBDIR)/$(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(EX3_O) $(LIBS)
 
-$(EXDIR)/bandmatrix: $(EX4_O) $(SBLIBFILE) $(LIBFILE)
+$(EXDIR)/bandmatrix: $(EX4_O) $(LIBDIR)/$(SBLIBFILE) $(LIBDIR)/$(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(EX4_O) $(SBLIBS)
 
-$(EXDIR)/symmatrix: $(EX5_O) $(SBLIBFILE) $(LIBFILE)
+$(EXDIR)/symmatrix: $(EX5_O) $(LIBDIR)/$(SBLIBFILE) $(LIBDIR)/$(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(EX5_O) $(SBLIBS)
 
-$(EXDIR)/newmatrix: $(EX6_O) $(LIBFILE)
+$(EXDIR)/newmatrix: $(EX6_O) $(LIBDIR)/$(LIBFILE)
 	$(CC) $(CFLAGS) -o $@ $(EX6_O) $(LIBS)
 

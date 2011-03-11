@@ -39,9 +39,9 @@ namespace tmv {
 
     // Defined below:
     template <class V>
-    inline void ReverseSelf(BaseVector_Mutable<V>& v);
+    static void ReverseSelf(BaseVector_Mutable<V>& v);
     template <class V>
-    inline void InlineReverseSelf(BaseVector_Mutable<V>& v);
+    static void InlineReverseSelf(BaseVector_Mutable<V>& v);
 
     // Defined in TMV_Vector.cpp
     template <class T>
@@ -58,7 +58,7 @@ namespace tmv {
     template <int size, class V>
     struct ReverseV_Helper<1,size,V>
     {
-        static inline void call(V& v)
+        static void call(V& v)
         { 
             const int n = size == UNKNOWN ? int(v.size()) : size;
             const int no2 = n/2;
@@ -71,7 +71,7 @@ namespace tmv {
     template <int size, class V>
     struct ReverseV_Helper<2,size,V> 
     {
-        static inline void call(V& v)
+        static void call(V& v)
         {
             typedef typename V::value_type T;
             typedef typename V::subvector_type V1;
@@ -100,7 +100,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static inline void unroll(V& v)
+            static void unroll(V& v)
             {
                 Unroller<I,N-1>::unroll(v);
                 v.cSwap(N-1,size-N);
@@ -108,8 +108,8 @@ namespace tmv {
         };
         template <int I>
         struct Unroller<I,0>
-        { static inline void unroll(V& v) {} };
-        static inline void call(V& v)
+        { static void unroll(V& v) {} };
+        static void call(V& v)
         { Unroller<0,size/2>::unroll(v); }
     };
 
@@ -117,7 +117,7 @@ namespace tmv {
     template <int size, class V>
     struct ReverseV_Helper<-3,size,V> 
     {
-        static inline void call(V& v)
+        static void call(V& v)
         {
             const int algo = 
 #if TMV_OPT >= 1
@@ -133,7 +133,7 @@ namespace tmv {
     template <int size, class V>
     struct ReverseV_Helper<97,size,V> 
     {
-        static inline void call(V& v)
+        static void call(V& v)
         {
             typedef typename V::conjugate_type Vc;
             Vc vc = v.conjugate();
@@ -145,7 +145,7 @@ namespace tmv {
     template <int size, class V>
     struct ReverseV_Helper<98,size,V> 
     {
-        static inline void call(V& v)
+        static void call(V& v)
         { InstReverseSelf(v.xView()); }
     };
 
@@ -153,7 +153,7 @@ namespace tmv {
     template <int size, class V>
     struct ReverseV_Helper<-1,size,V> 
     {
-        static inline void call(V& v)
+        static void call(V& v)
         {
             typedef typename V::value_type T;
             const bool inst =
@@ -168,7 +168,7 @@ namespace tmv {
     };
 
     template <class V>
-    inline void ReverseSelf(BaseVector_Mutable<V>& v)
+    static void ReverseSelf(BaseVector_Mutable<V>& v)
     {
         const int size = V::_size;
         typedef typename V::cview_type Vv;
@@ -177,7 +177,7 @@ namespace tmv {
     }
 
     template <class V>
-    inline void InlineReverseSelf(BaseVector_Mutable<V>& v)
+    static void InlineReverseSelf(BaseVector_Mutable<V>& v)
     {
         const int size = V::_size;
         typedef typename V::cview_type Vv;

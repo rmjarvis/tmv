@@ -1,10 +1,9 @@
 
-#define NONSQUARE
 #include "TMV_TestSmallMatrixArith_2.h"
 
 template <class T> void TestSmallMatrixArith_2d()
 {
-    TestSmallMatrixArith_2<T,3,6>("3 6");
+    TestSmallMatrixArith_2<T,4,4>("4 4");
 }
 
 #ifdef TEST_DOUBLE

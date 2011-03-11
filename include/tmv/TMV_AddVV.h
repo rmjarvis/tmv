@@ -80,7 +80,7 @@ namespace tmv {
         typedef typename V2f::const_nonconj_type::const_iterator IT2f;
         typedef typename V3f::iterator IT3f;
         enum { size2 = size == UNKNOWN ? UNKNOWN : (size<<1) };
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
@@ -127,8 +127,9 @@ namespace tmv {
             const bool c1 = V1::_conj;
             const bool c2 = V2::_conj;
             for(;n;--n) 
-                *it3++ = ZProd<false,c1>::prod(x1 , *it1++) + 
-                    ZProd<false,c2>::prod(x2 , *it2++); 
+                *it3++ = ZSum::sum(
+                    ZProd<false,c1>::prod(x1 , *it1++), 
+                    ZProd<false,c2>::prod(x2 , *it2++)); 
         }
     };  
 
@@ -140,7 +141,7 @@ namespace tmv {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         typedef typename V3::iterator IT3;
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
@@ -157,16 +158,18 @@ namespace tmv {
             const bool c2 = V2::_conj;
 
             if (n_2) do {
-                it3[0] = ZProd<false,c1>::prod(x1 , it1[0]) +
-                    ZProd<false,c2>::prod(x2 , it2[0]);
-                it3[1] = (
-                    ZProd<false,c1>::prod(x1 , it1[1]) +
+                it3[0] = ZSum::sum(
+                    ZProd<false,c1>::prod(x1 , it1[0]),
+                    ZProd<false,c2>::prod(x2 , it2[0]));
+                it3[1] = ZSum::sum(
+                    ZProd<false,c1>::prod(x1 , it1[1]),
                     ZProd<false,c2>::prod(x2 , it2[1]));
                 it1 += 2; it2 += 2; it3 += 2;
             } while (--n_2);
             if (nb) {
-                *it3 = ZProd<false,c1>::prod(x1 , *it1) +
-                    ZProd<false,c2>::prod(x2 , *it2); 
+                *it3 = ZSum::sum(
+                    ZProd<false,c1>::prod(x1 , *it1),
+                    ZProd<false,c2>::prod(x2 , *it2)); 
             }
         }
     };
@@ -179,7 +182,7 @@ namespace tmv {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         typedef typename V3::iterator IT3;
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
@@ -196,19 +199,24 @@ namespace tmv {
             const bool c2 = V2::_conj;
 
             if (n_4) do {
-                it3[0] = ZProd<false,c1>::prod(x1 , it1[0]) +
-                    ZProd<false,c2>::prod(x2 , it2[0]);
-                it3[1] = ZProd<false,c1>::prod(x1 , it1[1]) +
-                    ZProd<false,c2>::prod(x2 , it2[1]);
-                it3[2] = ZProd<false,c1>::prod(x1 , it1[2]) +
-                    ZProd<false,c2>::prod(x2 , it2[2]);
-                it3[3] = ZProd<false,c1>::prod(x1 , it1[3]) +
-                    ZProd<false,c2>::prod(x2 , it2[3]);
+                it3[0] = ZSum::sum(
+                    ZProd<false,c1>::prod(x1 , it1[0]),
+                    ZProd<false,c2>::prod(x2 , it2[0]));
+                it3[1] = ZSum::sum(
+                    ZProd<false,c1>::prod(x1 , it1[1]),
+                    ZProd<false,c2>::prod(x2 , it2[1]));
+                it3[2] = ZSum::sum(
+                    ZProd<false,c1>::prod(x1 , it1[2]),
+                    ZProd<false,c2>::prod(x2 , it2[2]));
+                it3[3] = ZSum::sum(
+                    ZProd<false,c1>::prod(x1 , it1[3]),
+                    ZProd<false,c2>::prod(x2 , it2[3]));
                 it1 += 4; it2 += 4; it3 += 4;
             } while (--n_4);
             if (nb) do {
-                *it3++ = ZProd<false,c1>::prod(x1 , *it1++) +
-                    ZProd<false,c2>::prod(x2 , *it2++); 
+                *it3++ = ZSum::sum(
+                    ZProd<false,c1>::prod(x1 , *it1++),
+                    ZProd<false,c2>::prod(x2 , *it2++)); 
             } while (--nb);
         }
     };
@@ -221,7 +229,7 @@ namespace tmv {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         typedef typename V3::iterator IT3;
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
@@ -238,27 +246,36 @@ namespace tmv {
             const bool c2 = V2::_conj;
 
             if (n_8) do {
-                it3[0] = ZProd<false,c1>::prod(x1 , it1[0]) +
-                    ZProd<false,c2>::prod(x2 , it2[0]);
-                it3[1] = ZProd<false,c1>::prod(x1 , it1[1]) +
-                    ZProd<false,c2>::prod(x2 , it2[1]);
-                it3[2] = ZProd<false,c1>::prod(x1 , it1[2]) +
-                    ZProd<false,c2>::prod(x2 , it2[2]);
-                it3[3] = ZProd<false,c1>::prod(x1 , it1[3]) +
-                    ZProd<false,c2>::prod(x2 , it2[3]);
-                it3[4] = ZProd<false,c1>::prod(x1 , it1[4]) +
-                    ZProd<false,c2>::prod(x2 , it2[4]);
-                it3[5] = ZProd<false,c1>::prod(x1 , it1[5]) +
-                    ZProd<false,c2>::prod(x2 , it2[5]);
-                it3[6] = ZProd<false,c1>::prod(x1 , it1[6]) +
-                    ZProd<false,c2>::prod(x2 , it2[6]);
-                it3[7] = ZProd<false,c1>::prod(x1 , it1[7]) +
-                    ZProd<false,c2>::prod(x2 , it2[7]);
+                it3[0] = ZSum::sum(
+                    ZProd<false,c1>::prod(x1 , it1[0]),
+                    ZProd<false,c2>::prod(x2 , it2[0]));
+                it3[1] = ZSum::sum(
+                    ZProd<false,c1>::prod(x1 , it1[1]),
+                    ZProd<false,c2>::prod(x2 , it2[1]));
+                it3[2] = ZSum::sum(
+                    ZProd<false,c1>::prod(x1 , it1[2]),
+                    ZProd<false,c2>::prod(x2 , it2[2]));
+                it3[3] = ZSum::sum(
+                    ZProd<false,c1>::prod(x1 , it1[3]),
+                    ZProd<false,c2>::prod(x2 , it2[3]));
+                it3[4] = ZSum::sum(
+                    ZProd<false,c1>::prod(x1 , it1[4]),
+                    ZProd<false,c2>::prod(x2 , it2[4]));
+                it3[5] = ZSum::sum(
+                    ZProd<false,c1>::prod(x1 , it1[5]),
+                    ZProd<false,c2>::prod(x2 , it2[5]));
+                it3[6] = ZSum::sum(
+                    ZProd<false,c1>::prod(x1 , it1[6]),
+                    ZProd<false,c2>::prod(x2 , it2[6]));
+                it3[7] = ZSum::sum(
+                    ZProd<false,c1>::prod(x1 , it1[7]),
+                    ZProd<false,c2>::prod(x2 , it2[7]));
                 it1 += 8; it2 += 8; it3 += 8;
             } while (--n_8);
             if (nb) do {
-                *it3++ = ZProd<false,c1>::prod(x1 , *it1++) +
-                    ZProd<false,c2>::prod(x2 , *it2++); 
+                *it3++ = ZSum::sum(
+                    ZProd<false,c1>::prod(x1 , *it1++),
+                    ZProd<false,c2>::prod(x2 , *it2++)); 
             } while (--nb);
         }
     };
@@ -271,7 +288,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix1,T1>& x1, const V1& v1,
                 const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
             {
@@ -282,22 +299,23 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix1,T1>& x1, const V1& v1,
                 const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
             {
-                v3.ref(I) = ZProd<false,false>::prod(x1 , v1.cref(I)) +
-                    ZProd<false,false>::prod(x2 , v2.cref(I)); 
+                v3.ref(I) = ZSum::sum(
+                    ZProd<false,false>::prod(x1 , v1.cref(I)),
+                    ZProd<false,false>::prod(x2 , v2.cref(I))); 
             }
         };
         template <int I>
         struct Unroller<I,0>
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix1,T1>& x1, const V1& v1,
                 const Scaling<ix2,T2>& x2, const V2& v2, V3& v3) {}
         };
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         { Unroller<0,size>::unroll(x1,v1,x2,v2,v3); }
@@ -329,7 +347,7 @@ namespace tmv {
                 (sizeof(RT) == 4 && allunit && allreal) ? 13 :
 #endif
                 11 ) };
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
@@ -340,7 +358,7 @@ namespace tmv {
             AddVV_Helper<algo1,size,ix1,T1,V1,ix2,T2,V2,V3>::call(
                 x1,v1,x2,v2,v3);
         }
-        static inline void call2(
+        static void call2(
             const int n, const Scaling<ix1,T1>& x1, const IT1& it1,
             const Scaling<ix2,T2>& x2, const IT2& it2, const IT3& it3)
         {
@@ -355,7 +373,7 @@ namespace tmv {
               int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<-3,size,ix1,T1,V1,ix2,T2,V2,V3> 
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
@@ -364,12 +382,12 @@ namespace tmv {
         }
     };
 
-    // algo 96: Conjugate
+    // algo 97: Conjugate
     template <int s, int ix1, class T1, class V1,
               int ix2, class T2, class V2, class V3>
-    struct AddVV_Helper<96,s,ix1,T1,V1,ix2,T2,V2,V3>
+    struct AddVV_Helper<97,s,ix1,T1,V1,ix2,T2,V2,V3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const V1& v1, 
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
@@ -384,12 +402,12 @@ namespace tmv {
         }
     };
 
-    // algo 97: Call inst
+    // algo 98: Call inst
     template <int s, int ix1, class T1, class V1,
               int ix2, class T2, class V2, class V3>
-    struct AddVV_Helper<97,s,ix1,T1,V1,ix2,T2,V2,V3>
+    struct AddVV_Helper<98,s,ix1,T1,V1,ix2,T2,V2,V3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const V1& v1, 
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
@@ -402,7 +420,7 @@ namespace tmv {
               int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<-2,s,ix1,T1,V1,ix2,T2,V2,V3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const V1& v1, 
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
@@ -410,9 +428,7 @@ namespace tmv {
             typedef typename V2::value_type TV2;
             typedef typename V3::value_type TV3;
             const bool inst =
-                V1::unknownsizes &&
-                V2::unknownsizes &&
-                V3::unknownsizes &&
+                (s == UNKNOWN || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<TV1,TV2>::samebase &&
                 Traits2<TV1,TV3>::samebase &&
@@ -423,14 +439,14 @@ namespace tmv {
                 Traits<TV3>::isinst;
             const bool conj = V3::_conj;
             const int algo = 
-                conj ? 96 :
-                inst ? 97 :
+                conj ? 97 :
+                inst ? 98 :
                 -4;
             AddVV_Helper<algo,s,ix1,T1,V1,ix2,T2,V2,V3>::call(x1,v1,x2,v2,v3);
         }
     };
 
-    // algo 98: Check for aliases when calling Inst functions
+    // algo 980: Check for aliases when calling Inst functions
     // We don't have a separate Inst function for this.  We just
     // split the operation into two parts: 
     // v3 = x1*v1; 
@@ -440,9 +456,9 @@ namespace tmv {
     // normal ones, so we need to put some alias checking here.
     template <int s, int ix1, class T1, class V1,
               int ix2, class T2, class V2, class V3>
-    struct AddVV_Helper<98,s,ix1,T1,V1,ix2,T2,V2,V3>
+    struct AddVV_Helper<980,s,ix1,T1,V1,ix2,T2,V2,V3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const V1& v1, 
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
@@ -475,7 +491,7 @@ namespace tmv {
               int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<99,s,ix1,T1,V1,ix2,T2,V2,V3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const V1& v1, 
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
@@ -510,7 +526,7 @@ namespace tmv {
               int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<-1,s,ix1,T1,V1,ix2,T2,V2,V3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const V1& v1, 
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
@@ -518,9 +534,7 @@ namespace tmv {
             typedef typename V2::value_type TV2;
             typedef typename V3::value_type TV3;
             const bool inst =
-                V1::unknownsizes &&
-                V2::unknownsizes &&
-                V3::unknownsizes &&
+                (s == UNKNOWN || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<TV1,TV2>::samebase &&
                 Traits2<TV1,TV3>::samebase &&
@@ -535,7 +549,7 @@ namespace tmv {
                 V3::_size == UNKNOWN;
             const int algo = 
                 // We do a different check alias with the Inst calls.
-                inst ? 98 : 
+                inst ? 980 : 
                 checkalias ? 99 : 
                 -2;
             AddVV_Helper<algo,s,ix1,T1,V1,ix2,T2,V2,V3>::call(x1,v1,x2,v2,v3);
@@ -544,7 +558,7 @@ namespace tmv {
 
     template <int ix1, class T1, class V1,
               int ix2, class T2, class V2, class V3>
-    inline void AddVV(
+    static void AddVV(
         const Scaling<ix1,T1>& x1, const BaseVector_Calc<V1>& v1,
         const Scaling<ix2,T2>& x2, const BaseVector_Calc<V2>& v2,
         BaseVector_Mutable<V3>& v3)
@@ -568,7 +582,7 @@ namespace tmv {
 
     template <int ix1, class T1, class V1,
               int ix2, class T2, class V2, class V3>
-    inline void NoAliasAddVV(
+    static void NoAliasAddVV(
         const Scaling<ix1,T1>& x1, const BaseVector_Calc<V1>& v1,
         const Scaling<ix2,T2>& x2, const BaseVector_Calc<V2>& v2,
         BaseVector_Mutable<V3>& v3)
@@ -592,7 +606,7 @@ namespace tmv {
 
     template <int ix1, class T1, class V1,
               int ix2, class T2, class V2, class V3>
-    inline void InlineAddVV(
+    static void InlineAddVV(
         const Scaling<ix1,T1>& x1, const BaseVector_Calc<V1>& v1,
         const Scaling<ix2,T2>& x2, const BaseVector_Calc<V2>& v2,
         BaseVector_Mutable<V3>& v3)
@@ -616,7 +630,7 @@ namespace tmv {
 
     template <int ix1, class T1, class V1,
               int ix2, class T2, class V2, class V3>
-    inline void AliasAddVV(
+    static void AliasAddVV(
         const Scaling<ix1,T1>& x1, const BaseVector_Calc<V1>& v1,
         const Scaling<ix2,T2>& x2, const BaseVector_Calc<V2>& v2,
         BaseVector_Mutable<V3>& v3)
@@ -626,15 +640,13 @@ namespace tmv {
         TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v1.size() == v3.size());
-        const int size =
+        const int s =
             Sizes<Sizes<V1::_size,V2::_size>::size,V3::_size>::size;
         typedef typename V1::value_type TV1;
         typedef typename V2::value_type TV2;
         typedef typename V3::value_type TV3;
         const bool inst =
-            V1::unknownsizes &&
-            V2::unknownsizes &&
-            V3::unknownsizes &&
+            (s == UNKNOWN || s > 16) &&
 #ifdef TMV_INST_MIX
             Traits2<TV1,TV2>::samebase &&
             Traits2<TV1,TV3>::samebase &&
@@ -649,7 +661,7 @@ namespace tmv {
         V1v v1v = v1.cView();
         V2v v2v = v2.cView();
         V3v v3v = v3.cView();
-        AddVV_Helper<inst?98:99,size,ix1,T1,V1v,ix2,T2,V2v,V3v>::call(
+        AddVV_Helper<inst?980:99,s,ix1,T1,V1v,ix2,T2,V2v,V3v>::call(
             x1,v1v,x2,v2v,v3v);
     }
 

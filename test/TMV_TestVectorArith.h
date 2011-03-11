@@ -3,19 +3,18 @@
 
 #include "TMV_Test.h"
 
-#define RealType(T) typename tmv::Traits<T>::real_type
-#define ComplexType(T) typename tmv::Traits<T>::complex_type
-
 template <class T, class V> 
 inline void TestV(const V& a, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<RT>::float_type FT;
     if (showstartdone) {
         std::cout<<"Start V "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
     }
 
     tmv::Vector<T> v = a;
-    RealType(T) eps = EPS*v.size();
+    FT eps = EPS*v.size();
 
     if (XXDEBUG1) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" = "<<a<<std::endl;
@@ -30,16 +29,12 @@ inline void TestV(const V& a, std::string label)
         std::cout<<"eps*normsq = "<<eps*NormSq(v)<<std::endl;
     }
 
-    Assert(Norm(a-v) <= eps*Norm(v),label+" a != v");
+    Assert(Equal(a,v,eps),label+" a != v");
 
-    Assert(tmv::TMV_ABS(Norm1(a)-Norm1(v)) <= eps*tmv::TMV_ABS(Norm1(v)),
-           label+" Norm1");
-    Assert(tmv::TMV_ABS(Norm2(a)-Norm2(v)) <= eps*tmv::TMV_ABS(Norm2(v)),
-           label+" Norm2");
-    Assert(tmv::TMV_ABS(NormInf(a)-NormInf(v)) <= eps*tmv::TMV_ABS(NormInf(v)),
-           label+" NormInf");
-    Assert(tmv::TMV_ABS(NormSq(a)-NormSq(v)) <= eps*tmv::TMV_ABS(NormSq(v)),
-           label+" NormSq");
+    Assert(Equal2(Norm2(a),Norm2(v),eps*Norm2(v)),label+" Norm2");
+    Assert(Equal2(Norm1(a),Norm1(v),eps*Norm1(v)),label+" Norm1");
+    Assert(Equal2(NormInf(a),NormInf(v),eps*NormInf(v)),label+" NormInf");
+    Assert(Equal2(NormSq(a),NormSq(v),eps*NormSq(v)),label+" NormSq");
 
     if (showstartdone) {
         std::cout<<"Done V "<<std::endl;
@@ -49,6 +44,8 @@ inline void TestV(const V& a, std::string label)
 template <class T, class V, class T2> 
 inline void TestVX(const V& a, T2 x, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<RT>::float_type FT;
     if (showstartdone) {
         std::cout<<"Start VX "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -56,7 +53,9 @@ inline void TestVX(const V& a, T2 x, std::string label)
     }
 
     tmv::Vector<T> v = a;
-    RealType(T) eps = EPS*v.size();
+    FT eps = EPS*v.size();
+    if (!(std::numeric_limits<RT>::is_integer)) 
+        eps *= Norm(v) * tmv::TMV_ABS(x);
 
     if (XXDEBUG2) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" = "<<a<<std::endl;
@@ -66,13 +65,15 @@ inline void TestVX(const V& a, T2 x, std::string label)
         std::cout<<"x*a = "<<(x*a)<<std::endl;
         std::cout<<"x*v = "<<(x*v)<<std::endl;
         std::cout<<"Norm(diff) = "<<Norm((x*a)-(x*v))<<std::endl;
-        std::cout<<"eps*norm = "<<eps*Norm(v)*tmv::TMV_ABS(x)<<std::endl;
+        std::cout<<"eps = "<<eps<<std::endl;
     }
-    Assert(Norm(a-v) <= eps*Norm(v),label+" a != v");
+    Assert(Equal(a,v,eps),label+" a != v");
 
-    Assert(Norm((x*a)-(x*v)) <= eps*Norm(v)*tmv::TMV_ABS(x),label+" x*a");
-    Assert(Norm((a*x)-(x*v)) <= eps*Norm(v)*tmv::TMV_ABS(x),label+" a*x");
-    Assert(Norm((a/x)-(v/x)) <= eps*Norm(v)*tmv::TMV_ABS(x),label+" a/x");
+    Assert(Equal((x*a),(x*v),eps),label+" x*a");
+    Assert(Equal((a*x),(x*v),eps),label+" a*x");
+    if (!(std::numeric_limits<RT>::is_integer)) {
+        Assert(Equal((a/x),(v/x),eps),label+" a/x");
+    }
 
     if (showstartdone) {
         std::cout<<"Done VX "<<std::endl;
@@ -82,6 +83,8 @@ inline void TestVX(const V& a, T2 x, std::string label)
 template <class T, class V, class T2> 
 inline void TestVX2(V& a, T2 x, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<RT>::float_type FT;
     if (showstartdone) {
         std::cout<<"Start VX2 "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -89,9 +92,12 @@ inline void TestVX2(V& a, T2 x, std::string label)
     }
 
     tmv::Vector<T> v = a;
-    RealType(T) eps = EPS*v.size();
-    Assert(Norm(a-v) <= eps*Norm(v),label+" a != v");
-    double normv = tmv::TMV_ABS(x)*Norm(v);
+    FT eps = EPS*v.size();
+    if (!(std::numeric_limits<RT>::is_integer)) 
+        eps *= Norm(v) * tmv::TMV_ABS2(x);
+
+    Assert(Equal(a,v,eps),label+" a != v");
+
     typename V::copy_type a0 = a;
 
     if (XXDEBUG3) {
@@ -101,36 +107,40 @@ inline void TestVX2(V& a, T2 x, std::string label)
         std::cout<<"a*=x = "<<(a*=x)<<std::endl;
         std::cout<<"x*v = "<<(x*v)<<std::endl;
         std::cout<<"Norm(diff) = "<<Norm(a-(x*v))<<std::endl;
-        std::cout<<"eps*norm = "<<eps*normv<<std::endl;
+        std::cout<<"eps = "<<eps<<std::endl;
         a = a0;
     }
 
     a *= x;
     v = tmv::Vector<T>(v*x);
-    Assert(Norm(a-v) <= eps*normv,label+" a *= x");
-    Assert(Norm((a*=x)-(v*=x)) <= eps*normv,label+" a *= x (2)");
+    Assert(Equal(a,v,eps),label+" a *= x");
+    Assert(Equal((a*=x),(v*=x),eps),label+" a *= x (2)");
     a = v = a0;
 
-    a /= x;
-    v = tmv::Vector<T>(v/x);
-    Assert(Norm(a-v) <= eps*normv,label+" a /= x");
-    a = v = a0;
+    if (!(std::numeric_limits<RT>::is_integer)) {
+        a /= x;
+        v = tmv::Vector<T>(v/x);
+        Assert(Equal(a,v,eps),label+" a /= x");
+        a = v = a0;
+    }
 
 #ifdef ALIASOK
     a = a*x;
     v = tmv::Vector<T>(v*x);
-    Assert(Norm(a-v) <= eps*normv,label+" a = a*x");
+    Assert(Equal(a,v,eps),label+" a = a*x");
     a = v = a0;
 
     a = x*a;
     v = tmv::Vector<T>(v*x);
-    Assert(Norm(a-v) <= eps*normv,label+" a = x*a");
+    Assert(Equal(a,v,eps),label+" a = x*a");
     a = v = a0;
 
-    a = a/x;
-    v = tmv::Vector<T>(v/x);
-    Assert(Norm(a-v) <= eps*normv,label+" a = a/x");
-    a = a0;
+    if (!(std::numeric_limits<RT>::is_integer)) {
+        a = a/x;
+        v = tmv::Vector<T>(v/x);
+        Assert(Equal(a,v,eps),label+" a = a/x");
+        a = a0;
+    }
 #endif
 
     if (showstartdone) {
@@ -141,6 +151,8 @@ inline void TestVX2(V& a, T2 x, std::string label)
 template <class T, class T2, class V1, class V2> 
 inline void TestVV(const V1& a, const V2& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<RT>::float_type FT;
     if (showstartdone) {
         std::cout<<"Start VV "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -149,10 +161,17 @@ inline void TestVV(const V1& a, const V2& b, std::string label)
 
     tmv::Vector<T> v1 = a;
     tmv::Vector<T2> v2 = b;
-    RealType(T) eps = EPS * (Norm(v1) + Norm(v2));
-    RealType(T) eps2 = EPS * Norm(v1) * Norm(v2);
-    Assert(Norm(a-v1) <= EPS*Norm(v1),label+" a != v1");
-    Assert(Norm(b-v2) <= EPS*Norm(v2),label+" b != v2");
+    FT eps = EPS;
+    FT eps2 = EPS;
+    Assert(Equal(a,v1,eps),label+" a != v1");
+    Assert(Equal(b,v2,eps),label+" b != v2");
+    if (!(std::numeric_limits<RT>::is_integer)) {
+        eps *= Norm(v1) + Norm(v2);
+        eps2 *= Norm(v1) * Norm(v2);
+    }
+
+    Assert(Equal(a,v1,eps),label+" a != v1");
+    Assert(Equal(b,v2,eps),label+" b != v2");
 
     if (XXDEBUG4) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" = "<<a<<std::endl;
@@ -165,65 +184,61 @@ inline void TestVV(const V1& a, const V2& b, std::string label)
         std::cout<<"eps = "<<eps<<std::endl;
     }
 
-    Assert(Norm((a+b)-(v1+v2)) <= eps,label+" a+b");
-    Assert(Norm((a-b)-(v1-v2)) <= eps,label+" a-b");
-    Assert(tmv::TMV_ABS((a*b)-(v1*v2)) <= eps2,label+" a*b");
-    Assert(Norm((a+v2)-(v1+v2)) <= eps,label+" a+v");
-    Assert(Norm((v1+b)-(v1+v2)) <= eps,label+" v+b");
-    Assert(Norm((a-v2)-(v1-v2)) <= eps,label+" a-v");
-    Assert(Norm((v1-b)-(v1-v2)) <= eps,label+" v-b");
-    Assert(tmv::TMV_ABS((a*v2)-(v1*v2)) <= eps2,label+" a*v");
-    Assert(tmv::TMV_ABS((v1*b)-(v1*v2)) <= eps2,label+" v*b");
+    Assert(Equal((a+b),(v1+v2),eps),label+" a+b");
+    Assert(Equal((a-b),(v1-v2),eps),label+" a-b");
+    Assert(Equal2((a*b),(v1*v2),eps2),label+" a*b");
+    Assert(Equal((a+v2),(v1+v2),eps),label+" a+v");
+    Assert(Equal((v1+b),(v1+v2),eps),label+" v+b");
+    Assert(Equal((a-v2),(v1-v2),eps),label+" a-v");
+    Assert(Equal((v1-b),(v1-v2),eps),label+" v-b");
+    Assert(Equal2((a*v2),(v1*v2),eps2),label+" a*v");
+    Assert(Equal2((v1*b),(v1*v2),eps2),label+" v*b");
 
-    RealType(T) x(5);
-    ComplexType(T) z(3,4);
+    RT x(5);
+    std::complex<RT> z(3,4);
     if (XXDEBUG4) {
         std::cout<<"a-x*b = "<<(a-x*b)<<std::endl;
         std::cout<<"v1-x*v2 = "<<(v1-x*v2)<<std::endl;
         std::cout<<"Norm(diff) = "<<Norm((a-x*b)-(v1-x*v2))<<std::endl;
         std::cout<<"eps*x = "<<x*eps<<std::endl;
     }
-    Assert(Norm((a-x*b)-(v1-x*v2)) <= x*eps,label+" a-x*b");
-    Assert(Norm((a+x*b)-(v1+x*v2)) <= x*eps,label+" a+x*b");
-    Assert(Norm((x*a-b)-(x*v1-v2)) <= x*eps,label+" x*a-b");
-    Assert(Norm((x*a+b)-(x*v1+v2)) <= x*eps,label+" x*a+b");
-    Assert(Norm((x*a-x*b)-(x*v1-x*v2)) <= x*eps,label+" x*a-x*b");
-    Assert(Norm((x*a+x*b)-(x*v1+x*v2)) <= x*eps,label+" x*a+x*b");
+    Assert(Equal((a-x*b),(v1-x*v2),x*eps),label+" a-x*b");
+    Assert(Equal((a+x*b),(v1+x*v2),x*eps),label+" a+x*b");
+    Assert(Equal((x*a-b),(x*v1-v2),x*eps),label+" x*a-b");
+    Assert(Equal((x*a+b),(x*v1+v2),x*eps),label+" x*a+b");
+    Assert(Equal((x*a-x*b),(x*v1-x*v2),x*eps),label+" x*a-x*b");
+    Assert(Equal((x*a+x*b),(x*v1+x*v2),x*eps),label+" x*a+x*b");
 
-    Assert(Norm((a-z*b)-(v1-z*v2)) <= x*eps,label+" a-z*b");
-    Assert(Norm((a+z*b)-(v1+z*v2)) <= x*eps,label+" a+z*b");
+    Assert(Equal((a-z*b),(v1-z*v2),x*eps),label+" a-z*b");
+    Assert(Equal((a+z*b),(v1+z*v2),x*eps),label+" a+z*b");
     if (XXDEBUG4) {
         std::cout<<"z*a-b = "<<(z*a-b)<<std::endl;
         std::cout<<"z*v1-v2 = "<<(z*v1-v2)<<std::endl;
         std::cout<<"Norm(diff) = "<<Norm((z*a-b)-(z*v1-v2))<<std::endl;
         std::cout<<"eps*x = "<<x*eps<<std::endl;
     }
-    Assert(Norm((z*a-b)-(z*v1-v2)) <= x*eps,label+" z*a-b");
-    Assert(Norm((z*a+b)-(z*v1+v2)) <= x*eps,label+" z*a+b");
-    Assert(Norm((z*a-z*b)-(z*v1-z*v2)) <= x*eps,label+" z*a-z*b");
-    Assert(Norm((z*a+z*b)-(z*v1+z*v2)) <= x*eps,label+" z*a+z*b");
+    Assert(Equal((z*a-b),(z*v1-v2),x*eps),label+" z*a-b");
+    Assert(Equal((z*a+b),(z*v1+v2),x*eps),label+" z*a+b");
+    Assert(Equal((z*a-z*b),(z*v1-z*v2),x*eps),label+" z*a-z*b");
+    Assert(Equal((z*a+z*b),(z*v1+z*v2),x*eps),label+" z*a+z*b");
 
-    Assert(Norm((z*a-x*b)-(z*v1-x*v2)) <= x*eps,label+" z*a-x*b");
-    Assert(Norm((z*a+x*b)-(z*v1+x*v2)) <= x*eps,label+" z*a+x*b");
-    Assert(Norm((x*a-z*b)-(x*v1-z*v2)) <= x*eps,label+" x*a-z*b");
-    Assert(Norm((x*a+z*b)-(x*v1+z*v2)) <= x*eps,label+" x*a+z*b");
+    Assert(Equal((z*a-x*b),(z*v1-x*v2),x*eps),label+" z*a-x*b");
+    Assert(Equal((z*a+x*b),(z*v1+x*v2),x*eps),label+" z*a+x*b");
+    Assert(Equal((x*a-z*b),(x*v1-z*v2),x*eps),label+" x*a-z*b");
+    Assert(Equal((x*a+z*b),(x*v1+z*v2),x*eps),label+" x*a+z*b");
 
-    Assert(tmv::TMV_ABS(((x*a)*b)-(x*v1*v2)) <= x*eps2,label+" (x*a)*b");
-    Assert(tmv::TMV_ABS((a*(x*b))-(x*v1*v2)) <= x*eps2,label+" a*(x*b)");
-    Assert(tmv::TMV_ABS((x*(a*b))-(x*v1*v2)) <= x*eps2,label+" x*(a*b)");
+    Assert(Equal2(((x*a)*b),(x*v1*v2),x*eps2),label+" (x*a)*b");
+    Assert(Equal2((a*(x*b)),(x*v1*v2),x*eps2),label+" a*(x*b)");
+    Assert(Equal2((x*(a*b)),(x*v1*v2),x*eps2),label+" x*(a*b)");
 
-    Assert(tmv::TMV_ABS(((z*a)*b)-(z*v1*v2)) <= x*eps2,label+" (z*a)*b");
-    Assert(tmv::TMV_ABS((a*(z*b))-(z*v1*v2)) <= x*eps2,label+" a*(z*b)");
-    Assert(tmv::TMV_ABS((z*(a*b))-(z*v1*v2)) <= x*eps2,label+" z*(a*b)");
+    Assert(Equal2(((z*a)*b),(z*v1*v2),x*eps2),label+" (z*a)*b");
+    Assert(Equal2((a*(z*b)),(z*v1*v2),x*eps2),label+" a*(z*b)");
+    Assert(Equal2((z*(a*b)),(z*v1*v2),x*eps2),label+" z*(a*b)");
 
-    Assert(tmv::TMV_ABS(((x*a)*(x*b))-(x*x*v1*v2)) <= x*x*eps2,
-           label+" (x*a)*(x*b)");
-    Assert(tmv::TMV_ABS(((z*a)*(x*b))-(z*x*v1*v2)) <= x*x*eps2,
-           label+" (z*a)*(x*b)");
-    Assert(tmv::TMV_ABS(((x*a)*(z*b))-(x*z*v1*v2)) <= x*x*eps2,
-           label+" (x*a)*(z*b)");
-    Assert(tmv::TMV_ABS(((z*a)*(z*b))-(z*z*v1*v2)) <= x*x*eps2,
-           label+" (z*a)*(z*b)");
+    Assert(Equal2(((x*a)*(x*b)),(x*x*v1*v2),x*x*eps2),label+" (x*a)*(x*b)");
+    Assert(Equal2(((z*a)*(x*b)),(z*x*v1*v2),x*x*eps2),label+" (z*a)*(x*b)");
+    Assert(Equal2(((x*a)*(z*b)),(x*z*v1*v2),x*x*eps2),label+" (x*a)*(z*b)");
+    Assert(Equal2(((z*a)*(z*b)),(z*z*v1*v2),x*x*eps2),label+" (z*a)*(z*b)");
 
     if (showstartdone) {
         std::cout<<"Done VV "<<std::endl;
@@ -233,6 +248,8 @@ inline void TestVV(const V1& a, const V2& b, std::string label)
 template <class T, class T2, class V1, class V2> 
 inline void TestVV2(V1& a, const V2& b, std::string label)
 {
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<RT>::float_type FT;
     if (showstartdone) {
         std::cout<<"Start VV2 "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -241,15 +258,14 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
 
     tmv::Vector<T> v1 = a;
     tmv::Vector<T2> v2 = b;
-    Assert(Norm(a-v1) <= EPS*Norm(v1),label+" a != v1");
-    Assert(Norm(b-v2) <= EPS*Norm(v2),label+" b != v2");
-
-    double normv = Norm(v1)+Norm(v2);
-    RealType(T) eps = EPS*normv;
+    FT eps = EPS;
+    if (!std::numeric_limits<RT>::is_integer) 
+        eps *= Norm(v1) + Norm(v2);
+    
+    Assert(Equal(a,v1,eps),label+" a != v1");
+    Assert(Equal(b,v2,eps),label+" b != v2");
 
     tmv::Vector<T> v4 = v1;
-
-#if 1
     tmv::Vector<T> v3 = v1;
     if (XXDEBUG5) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" = "<<a<<std::endl;
@@ -263,54 +279,53 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
 
     v3 += b;
     v4 = v1+v2;
-    Assert(Norm(v3-v4) <= eps,label+" v += b");
+    Assert(Equal(v3,v4,eps),label+" v += b");
     v3 = v4 = v1;
     v3 -= b;
     v4 = v1-v2;
-    Assert(Norm(v3-v4) <= eps,label+" v -= b");
+    Assert(Equal(v3,v4,eps),label+" v -= b");
     v3 = v4 = v1;
     v3 = v3+b;
     v4 = v1+v2;
-    Assert(Norm(v3-v4) <= eps,label+" v = v+b");
+    Assert(Equal(v3,v4,eps),label+" v = v+b");
     v3 = v4 = v1;
     v3 = v3-b;
     v4 = v1-v2;
-    Assert(Norm(v3-v4) <= eps,label+" v = v-b");
+    Assert(Equal(v3,v4,eps),label+" v = v-b");
     v3 = v4 = v1;
     v3 = b+v3;
     v4 = v1+v2;
-    Assert(Norm(v3-v4) <= eps,label+" v = b+v");
+    Assert(Equal(v3,v4,eps),label+" v = b+v");
     v3 = v4 = v1;
     v3 = b-v3;
     v4 = v2-v1;
-    Assert(Norm(v3-v4) <= eps,label+" v = b-v");
+    Assert(Equal(v3,v4,eps),label+" v = b-v");
     v3 = v4 = v1;
     a += v2;
     v4 = v1+v2;
-    Assert(Norm(a-v4) <= eps,label+" a += v");
+    Assert(Equal(a,v4,eps),label+" a += v");
     a = v4 = v1;
     a -= v2;
     v4 = v1-v2;
-    Assert(Norm(a-v4) <= eps,label+" a -= v");
+    Assert(Equal(a,v4,eps),label+" a -= v");
     a = v4 = v1;
 #ifdef ALIASOK
     a = a+v2;
     v4 = v1+v2;
-    Assert(Norm(a-v4) <= eps,label+" a = a+v");
+    Assert(Equal(a,v4,eps),label+" a = a+v");
     a = v4 = v1;
     a = a-v2;
     v4 = v1-v2;
-    Assert(Norm(a-v4) <= eps,label+" a = a-v");
+    Assert(Equal(a,v4,eps),label+" a = a-v");
     a = v4 = v1;
     a = v2+a;
     v4 = v1+v2;
-    Assert(Norm(a-v4) <= eps,label+" a = v+a");
+    Assert(Equal(a,v4,eps),label+" a = v+a");
     a = v4 = v1;
     a = v2-a;
     v4 = v2-v1;
-    Assert(Norm(a-v4) <= eps,label+" a = v-a");
+    Assert(Equal(a,v4,eps),label+" a = v-a");
     a = v4 = v1;
-#endif
 #endif
 
     if (XXDEBUG5) {
@@ -326,36 +341,36 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
 
     a += b;
     v4 = v1+v2;
-    Assert(Norm(a-v4) <= eps,label+" a += b");
+    Assert(Equal(a,v4,eps),label+" a += b");
     a = v4 = v1;
     a -= b;
     v4 = v1-v2;
-    Assert(Norm(a-v4) <= eps,label+" a -= b");
+    Assert(Equal(a,v4,eps),label+" a -= b");
     a = v4 = v1;
     a += -b;
     v4 = v1-v2;
-    Assert(Norm(a-v4) <= eps,label+" a += -b");
+    Assert(Equal(a,v4,eps),label+" a += -b");
     a = v4 = v1;
     a -= -b;
     v4 = v1+v2;
-    Assert(Norm(a-v4) <= eps,label+" a -= -b");
+    Assert(Equal(a,v4,eps),label+" a -= -b");
     a = v4 = v1;
 #ifdef ALIASOK
     a = a+b;
     v4 = v1+v2;
-    Assert(Norm(a-v4) <= eps,label+" a = a+b");
+    Assert(Equal(a,v4,eps),label+" a = a+b");
     a = v4 = v1;
     a = a-b;
     v4 = v1-v2;
-    Assert(Norm(a-v4) <= eps,label+" a = a-b");
+    Assert(Equal(a,v4,eps),label+" a = a-b");
     a = v4 = v1;
     a = b+a;
     v4 = v1+v2;
-    Assert(Norm(a-v4) <= eps,label+" a = b+a");
+    Assert(Equal(a,v4,eps),label+" a = b+a");
     a = v4 = v1;
     a = b-a;
     v4 = v2-v1;
-    Assert(Norm(a-v4) <= eps,label+" a = b-a");
+    Assert(Equal(a,v4,eps),label+" a = b-a");
     a = v4 = v1;
 #endif
 
@@ -365,8 +380,7 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
 }
 
 template <class T, class V, class CV> 
-inline void TestVectorArith1(
-    V& a, CV& ca, std::string label)
+inline void TestVectorArith1(V& a, CV& ca, std::string label)
 {
     if (showstartdone) {
         std::cout<<"Start VectorArith1 "<<label<<std::endl;
@@ -378,7 +392,7 @@ inline void TestVectorArith1(
     TestV<std::complex<T> >(ca,label+" C");
 
     T x = 12;
-    std::complex<T> z(9.-2);
+    std::complex<T> z(9,-2);
 
     TestVX<T>(a,x,label+" R,R");
     TestVX2<T>(a,x,label+" R,R");

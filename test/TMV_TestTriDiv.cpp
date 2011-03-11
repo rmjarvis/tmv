@@ -1,13 +1,15 @@
 
 #include "TMV_Test.h"
-#include "TMV_Test1.h"
+#include "TMV_Test_1.h"
 #include "TMV.h"
 #include <fstream>
 #include <cstdio>
 
 template <class T, class M, class CM> 
-void TestBasicTriDiv()
+static void TestBasicTriDiv()
 {
+    typedef typename tmv::Traits<T>::float_type FT;
+
     tmv::Matrix<T,tmv::ColMajor> a(10,10);
 
     for(int i=0;i<10;++i) for(int j=0;j<10;++j) 
@@ -21,7 +23,7 @@ void TestBasicTriDiv()
     M minv = m;
     minv.invertSelf();
 
-    T eps = EPS * Norm(m) * Norm(minv);
+    FT eps = EPS * Norm(m) * Norm(minv);
 
     M id1 = m*minv;
     M id2 = minv*m;
@@ -156,7 +158,7 @@ void TestBasicTriDiv()
         std::cout<<"m.invata = "<<mata<<std::endl;
         std::cout<<"minv*minvt = "<<mata1<<std::endl;
         std::cout<<"Norm(diff) = "<<Norm(mata-mata1)<<std::endl;
-        std::cout<<"ata*mata = "<<(a.adjoint()*a).calc() * mata<<std::endl;
+        std::cout<<"ata*mata = "<<(a.adjoint()*a) * mata<<std::endl;
     }
     Assert(Norm(mata-mata1) < eps*Norm(mata1),"Tri inverseATA");
 
@@ -174,10 +176,10 @@ void TestBasicTriDiv()
     Assert(std::abs(m.logDet(&signdet)-std::log(det1)) < eps,"Tri logDet");
     Assert(std::abs(signdet-1.) < eps,"Tri logDet - sign");
 
-    tmv::Matrix<std::complex<double> > ca = a * std::complex<T>(1,2);
+    tmv::Matrix<std::complex<T> > ca = a * std::complex<T>(1,2);
     CM c(ca);
 
-    T ceps = EPS * Norm(c) * Norm(c.inverse());
+    FT ceps = EPS * Norm(c) * Norm(c.inverse());
 
     std::complex<T> cdet1(1);
     for(int i=0;i<10;++i) cdet1 *= c(i,i);
@@ -213,7 +215,7 @@ void TestBasicTriDiv()
         std::cout<<"c.invata = "<<cata<<std::endl;
         std::cout<<"cinv*cinvt = "<<cata1<<std::endl;
         std::cout<<"Norm(diff) = "<<Norm(cata-cata1)<<std::endl;
-        std::cout<<"ctc*cata = "<<(c.adjoint()*c).calc() * cata<<std::endl;
+        std::cout<<"ctc*cata = "<<(c.adjoint()*c) * cata<<std::endl;
     }
     Assert(Norm(cata-cata1) < ceps*Norm(cata1),"Tri CinverseATA");
 
@@ -352,14 +354,13 @@ void TestTriDiv()
         tmv::LowerTriMatrix<CT,tmv::UnitDiag,tmv::RowMajor> >();
 #endif
 
-#if 0
     TestTriDiv_A1<T>();
     TestTriDiv_A2<T>();
     TestTriDiv_B1<T>();
     TestTriDiv_B2<T>();
     TestTriDiv_C1<T>();
     TestTriDiv_C2<T>();
-#endif
+
     std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<
         "> Division passed all tests\n";
 }
@@ -372,7 +373,4 @@ template void TestTriDiv<float>();
 #endif
 #ifdef TEST_LONGDOUBLE
 template void TestTriDiv<long double>();
-#endif
-#ifdef TEST_INT
-template void TestTriDiv<int>();
 #endif

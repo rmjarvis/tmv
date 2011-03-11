@@ -1,23 +1,21 @@
 
 #include "TMV_Test.h"
-#include "TMV_Test1.h"
+#include "TMV_Test_1.h"
 #include "TMV.h"
 #include <fstream>
 
-#define NODIV
-#define NOSV
 #include "TMV_TestMatrixArith.h"
 
 template <class T> void TestDiagMatrixArith_A5()
 {
-    const int N = 10;
+    const int N = 6;
 
     tmv::DiagMatrix<T> a(N);
     tmv::DiagMatrix<T> b(N);
     for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) 
         if (i == j) {
-            a(i,j) = T(3+i+5*j);
-            b(i,j) = T(5+2*i+4*j);
+            a(i,j) = T(-7+2*i);
+            b(i,j) = T(-5+3*i);
         }
 
     tmv::DiagMatrix<std::complex<T> > ca = a*std::complex<T>(1,2);

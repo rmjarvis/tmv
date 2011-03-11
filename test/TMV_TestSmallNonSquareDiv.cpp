@@ -1,11 +1,12 @@
 
 #include "TMV_Test.h"
-#include "TMV_Test3.h"
+#include "TMV_Test_3.h"
 
 #if 0
 template <class T, tmv::StorageType stor, int N> 
 static void TestSmallNonSquareDiv()
 {
+    typedef typename tmv::Traits<T>::float_type FT;
     tmv::SmallMatrix<T,6,N,stor> m;
     for(int i=0;i<6;++i) for(int j=0;j<N;++j) m(i,j) = T(2+4*i-5*j);
     m.diag() *= T(11);
@@ -115,9 +116,8 @@ static void TestSmallNonSquareDiv()
 template <class T> 
 void TestAllSmallMatrixDiv()
 {
-    //TestSmallSquareDiv_a<T>();
+    TestSmallSquareDiv_a<T>();
     TestSmallSquareDiv_b<T>();
-#if 0
     TestSmallSquareDiv_c<T>();
     TestSmallSquareDiv_d<T>();
     TestSmallSquareDiv_e<T>();
@@ -126,7 +126,6 @@ void TestAllSmallMatrixDiv()
     TestSmallSquareDiv_h<T>();
     TestSmallSquareDiv_i<T>();
     TestSmallSquareDiv_j<T>();
-#endif
 
     std::cout<<"Square SmallMatrix<"<<tmv::TMV_Text(T())<<"> Division ";
     std::cout<<"passed all tests\n";

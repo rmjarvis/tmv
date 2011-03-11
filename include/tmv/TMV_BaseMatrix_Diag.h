@@ -56,17 +56,17 @@ namespace tmv {
 
     // Defined in InvertD.h
     template <int ix, class T, class M1, class M2>
-    inline void Invert(
+    static void Invert(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Mutable<M2>& m2);
     template <int ix, class T, class M1, class M2>
-    inline void Invert(
+    static void Invert(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Diag_Mutable<M2>& m2);
 
     // Defined in ElemMultVV.h
     template <bool add, int ix, class T, class V1, class V2, class V3>
-    inline void NoAliasElemMultVV(
+    static void NoAliasElemMultVV(
         const Scaling<ix,T>& x1, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3);
 
@@ -85,7 +85,8 @@ namespace tmv {
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Diag_Mutable<M2>& m2);
 
     template <class M>
-    class BaseMatrix_Diag : public BaseMatrix_Calc<M>
+    class BaseMatrix_Diag : 
+        public BaseMatrix_Calc<M>
     {
     public:
         enum { _colsize = Traits<M>::_size };
@@ -131,6 +132,8 @@ namespace tmv {
 
         // Derived values:
         typedef typename Traits<value_type>::real_type real_type;
+        typedef typename Traits<real_type>::float_type float_type;
+        typedef typename Traits<value_type>::float_type zfloat_type;
         typedef typename Traits<value_type>::complex_type complex_type;
 
 
@@ -138,9 +141,9 @@ namespace tmv {
         // Constructor
         //
 
-        inline BaseMatrix_Diag() {}
-        inline BaseMatrix_Diag(const BaseMatrix_Diag<M>&) {}
-        inline ~BaseMatrix_Diag() {}
+        BaseMatrix_Diag() {}
+        BaseMatrix_Diag(const BaseMatrix_Diag<M>&) {}
+        ~BaseMatrix_Diag() {}
 
     private:
         void operator=(const BaseMatrix_Diag<M>&);
@@ -151,7 +154,7 @@ namespace tmv {
         // Access 
         //
 
-        inline value_type operator()(int i, int j) const
+        value_type operator()(int i, int j) const
         {
             CheckRowIndex<_fort>(i,size());
             CheckColIndex<_fort>(j,size());
@@ -159,13 +162,13 @@ namespace tmv {
             return cref(i);
         }
 
-        inline value_type operator()(int i) const
+        value_type operator()(int i) const
         {
             CheckIndex<_fort>(i,size());
             return cref(i);
         }
 
-        inline const_diag_type diag() const
+        const_diag_type diag() const
         { return const_diag_type(cptr(),size(),step()); }
 
 
@@ -173,35 +176,41 @@ namespace tmv {
         // Functions
         //
 
-        inline value_type sumElements() const
+        value_type sumElements() const
         { return diag().sumElements(); }
 
-        inline real_type sumAbsElements() const
+        float_type sumAbsElements() const
         { return diag().sumAbsElements(); }
 
-        inline real_type maxAbsElement() const
+        real_type sumAbs2Elements() const
+        { return diag().sumAbs2Elements(); }
+
+        float_type maxAbsElement() const
         { return diag().maxAbsElement(); }
 
-        inline real_type normSq() const
+        real_type maxAbs2Element() const
+        { return diag().maxAbs2Element(); }
+
+        real_type normSq() const
         { return diag().normSq(); }
 
-        inline real_type normSq(const real_type scale) const
+        float_type normSq(const float_type scale) const
         { return diag().normSq(scale); }
 
-        inline real_type normF() const 
+        float_type normF() const 
         { return diag().norm2(); }
 
-        inline real_type norm() const
+        float_type norm() const
         { return normF(); }
 
-        inline real_type norm1() const
+        float_type norm1() const
         { return diag().maxAbsElement(); }
 
-        inline real_type normInf() const
+        float_type normInf() const
         { return diag().maxAbsElement(); }
 
         template <class ret_type, class F>
-        inline ret_type sumElements(const F& f) const
+        ret_type sumElements(const F& f) const
         { return diag().sumElements(f); }
 
 
@@ -210,10 +219,10 @@ namespace tmv {
         // Division Functions
         //
 
-        inline real_type norm2() const
+        float_type norm2() const
         { return diag().maxAbsElement(); }
 
-        inline real_type condition() const
+        float_type condition() const
         { return diag().maxAbsElement() / diag().minAbsElement(); }
 
 
@@ -222,13 +231,13 @@ namespace tmv {
         //
 
         // These versions always uses CStyle
-        inline const_subdiagmatrix_type cSubDiagMatrix(int i1, int i2) const
+        const_subdiagmatrix_type cSubDiagMatrix(int i1, int i2) const
         {
             return const_subdiagmatrix_type(
                 cptr()+i1*step(), i2-i1, step());
         }
 
-        inline const_subdiagmatrix_step_type cSubDiagMatrix(
+        const_subdiagmatrix_step_type cSubDiagMatrix(
             int i1, int i2, int istep) const
         {
             return const_subdiagmatrix_step_type(
@@ -238,13 +247,13 @@ namespace tmv {
 
         // These check the indices according the the indexing style being
         // used, and then calls the above CStyle versions.
-        inline const_subdiagmatrix_type subDiagMatrix(int i1, int i2) const
+        const_subdiagmatrix_type subDiagMatrix(int i1, int i2) const
         {
             CheckRange<_fort>(i1,i2,size());
             return cSubDiagMatrix(i1,i2);
         }
 
-        inline const_subdiagmatrix_step_type subDiagMatrix(
+        const_subdiagmatrix_step_type subDiagMatrix(
             int i1, int i2, int istep) const
         {
             CheckRange<_fort>(i1,i2,istep,size());
@@ -256,43 +265,43 @@ namespace tmv {
         // Views
         //
 
-        inline const_view_type view() const
+        const_view_type view() const
         { return const_view_type(cptr(),size(),step()); }
 
-        inline const_cview_type cView() const
+        const_cview_type cView() const
         { return view(); }
 
-        inline const_fview_type fView() const
+        const_fview_type fView() const
         { return view(); }
 
-        inline const_xview_type xView() const
+        const_xview_type xView() const
         { return view(); }
 
-        inline const_cmview_type cmView() const
+        const_cmview_type cmView() const
         {
             TMVAssert(step()==1 && "Called cmView on DiagMatrix with step!=1");
             return view(); 
         }
 
-        inline const_rmview_type rmView() const
+        const_rmview_type rmView() const
         {
             TMVAssert(step()==1 && "Called rmView on DiagMatrix with step!=1");
             return view(); 
         }
 
-        inline const_view_type constView() const
+        const_view_type constView() const
         { return view(); }
 
-        inline const_transpose_type transpose() const
+        const_transpose_type transpose() const
         { return view(); }
 
-        inline const_conjugate_type conjugate() const
+        const_conjugate_type conjugate() const
         { return const_conjugate_type(cptr(),size(),step()); }
 
-        inline const_adjoint_type adjoint() const
+        const_adjoint_type adjoint() const
         { return conjugate(); }
 
-        inline const_realpart_type realPart() const
+        const_realpart_type realPart() const
         {
             const bool isreal = Traits<value_type>::isreal;
             return const_realpart_type(
@@ -300,7 +309,7 @@ namespace tmv {
                 isreal ? step() : 2*step());
         }
 
-        inline const_imagpart_type imagPart() const
+        const_imagpart_type imagPart() const
         {
             const bool isreal = Traits<value_type>::isreal;
             TMVStaticAssert(Traits<value_type>::iscomplex);
@@ -309,10 +318,10 @@ namespace tmv {
                 isreal ? step() : 2*step());
         }
 
-        inline const_nonconj_type nonConj() const
+        const_nonconj_type nonConj() const
         { return const_nonconj_type(cptr(),size(),step()); }
 
-        inline nonconst_type nonConst() const
+        nonconst_type nonConst() const
         { return nonconst_type(const_cast<value_type*>(cptr()),size(),step()); }
 
 
@@ -320,9 +329,9 @@ namespace tmv {
         // I/O
         //
 
-        inline void writeCompact(std::ostream& os) const
+        void writeCompact(std::ostream& os) const
         { os << "D " << diag() << std::endl; }
-        inline void writeCompact(std::ostream& os, real_type thresh) const
+        void writeCompact(std::ostream& os, float_type thresh) const
         { os << "D "; diag().write(os,thresh); os << std::endl; }
 
 
@@ -331,44 +340,44 @@ namespace tmv {
         //
 
         template <class M2>
-        inline void assignTo(BaseMatrix_Mutable<M2>& m2) const
+        void assignTo(BaseMatrix_Mutable<M2>& m2) const
         { 
             TMVStaticAssert((ShapeTraits2<_shape,M2::_shape>::assignable));
             tmv::Copy(mat(),m2.mat()); 
         }
 
         template <class M2>
-        inline void newAssignTo(BaseMatrix_Mutable<M2>& m2) const
+        void newAssignTo(BaseMatrix_Mutable<M2>& m2) const
         { 
             TMVStaticAssert((ShapeTraits2<_shape,M2::_shape>::assignable));
             tmv::NoAliasCopy(mat(),m2.mat()); 
         }
 
-        inline const type& mat() const
+        const type& mat() const
         { return *static_cast<const type*>(this); }
 
-        inline bool isconj() const { return _conj; }
+        bool isconj() const { return _conj; }
 
         // Note that these last functions need to be defined in a more derived
         // class than this, or an infinite loop will result.
         // Also, cref, get_row and get_col from BaseMatrix.
 
-        inline size_t colsize() const { return mat().size(); }
-        inline size_t rowsize() const { return mat().size(); }
-        inline size_t size() const { return mat().size(); }
-        inline int step() const { return mat().step(); }
+        size_t colsize() const { return mat().size(); }
+        size_t rowsize() const { return mat().size(); }
+        size_t size() const { return mat().size(); }
+        int step() const { return mat().step(); }
 
-        inline const value_type* cptr() const { return mat().cptr(); }
-        inline value_type cref(int i, int j) const 
+        const value_type* cptr() const { return mat().cptr(); }
+        value_type cref(int i, int j) const 
         { return (i!=j ? value_type(0) : cref(i)); }
-        inline value_type cref(int i) const 
+        value_type cref(int i) const 
         { return mat().cref(i); }
 
     };
 
     // Specify ExactSameStorage for diagonal matrices:
     template <class M1, class M2>
-    inline bool ExactSameStorage(
+    bool ExactSameStorage(
         const BaseMatrix_Diag<M1>& m1, const BaseMatrix_Diag<M2>& m2)
     {
         typedef typename M1::value_type T1;
@@ -377,8 +386,9 @@ namespace tmv {
     }
 
     template <class M>
-    class BaseMatrix_Diag_Mutable : public BaseMatrix_Diag<M>,
-                                    public BaseMatrix_Mutable<M>
+    class BaseMatrix_Diag_Mutable : 
+        public BaseMatrix_Diag<M>,
+        public BaseMatrix_Mutable<M>
     {
     public:
         enum { _colsize = Traits<M>::_size };
@@ -396,8 +406,6 @@ namespace tmv {
         typedef BaseMatrix_Diag<M> base_diag;
 
         typedef typename Traits<M>::value_type value_type;
-        typedef typename Traits<M>::real_type real_type;
-        typedef typename Traits<M>::complex_type complex_type;
 
         typedef typename Traits<M>::calc_type calc_type;
         typedef typename Traits<M>::eval_type eval_type;
@@ -443,42 +451,47 @@ namespace tmv {
 
         typedef typename Traits<M>::reference reference;
 
+        // Derived values:
+        typedef typename Traits<value_type>::real_type real_type;
+        typedef typename Traits<real_type>::float_type float_type;
+        typedef typename Traits<value_type>::float_type zfloat_type;
+        typedef typename Traits<value_type>::complex_type complex_type;
 
         //
         // Constructor
         //
 
-        inline BaseMatrix_Diag_Mutable() {}
-        inline BaseMatrix_Diag_Mutable(const BaseMatrix_Diag_Mutable<M>&) {}
-        inline ~BaseMatrix_Diag_Mutable() {}
+        BaseMatrix_Diag_Mutable() {}
+        BaseMatrix_Diag_Mutable(const BaseMatrix_Diag_Mutable<M>&) {}
+        ~BaseMatrix_Diag_Mutable() {}
 
 
         //
         // Access 
         //
 
-        inline reference operator()(int i, int j)
+        reference operator()(int i, int j)
         {
             TMVAssert(i == j);
             CheckIndex<_fort>(i,size());
             return ref(i);
         }
 
-        inline reference operator()(int i)
+        reference operator()(int i)
         {
             CheckIndex<_fort>(i,size());
             return ref(i);
         }
 
-        inline diag_type diag() 
+        diag_type diag() 
         { return diag_type(ptr(),size(),step()); }
 
 
         // We need to repeat the const versions so the non-const ones
         // don't clobber them.
-        inline value_type operator()(int i, int j) const
+        value_type operator()(int i, int j) const
         { return base_diag::operator()(i,j); }
-        inline const_diag_type diag() const
+        const_diag_type diag() const
         { return base_diag::diag(); }
 
 
@@ -486,7 +499,7 @@ namespace tmv {
         // Op =
         //
 
-        inline type& operator=(BaseMatrix_Diag_Mutable<M>& m2) 
+        type& operator=(BaseMatrix_Diag_Mutable<M>& m2) 
         {
             TMVAssert(colsize() == m2.colsize());
             TMVAssert(rowsize() == m2.rowsize());
@@ -495,7 +508,7 @@ namespace tmv {
         }
 
         template <class M2>
-        inline type& operator=(const BaseMatrix<M2>& m2) 
+        type& operator=(const BaseMatrix<M2>& m2) 
         {
             TMVStaticAssert((Sizes<_colsize,M2::_colsize>::same));
             TMVStaticAssert((Sizes<_rowsize,M2::_rowsize>::same));
@@ -505,7 +518,7 @@ namespace tmv {
             return mat(); 
         }
 
-        inline type& operator=(const value_type x)
+        type& operator=(const value_type x)
         {
             TMVStaticAssert((Sizes<_rowsize,_colsize>::same));
             TMVAssert(colsize() == rowsize());
@@ -518,39 +531,39 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline type& setZero() 
+        type& setZero() 
         { return setAllTo(value_type(0)); }
 
-        inline type& setAllTo(value_type x) 
+        type& setAllTo(value_type x) 
         { diag().setAllTo(x); return mat(); }
 
-        inline type& addToAll(value_type x) 
+        type& addToAll(value_type x) 
         { diag().addToAll(x); return mat(); }
 
-        inline type& clip(real_type thresh) 
+        type& clip(float_type thresh) 
         { diag().clip(thresh); return mat(); }
 
         template <class F>
-        inline type& applyToAll(const F& f)
+        type& applyToAll(const F& f)
         { diag().applyToAll(f); return mat(); }
 
-        inline type& conjugateSelf() 
+        type& conjugateSelf() 
         { diag().conjugateSelf(); return mat(); }
 
-        inline type& transposeSelf() 
+        type& transposeSelf() 
         { return mat(); }
 
-        inline type& invertSelf() 
+        type& invertSelf() 
         {
             const int n=size();
             for(int i=0;i<n;++i) ref(i) = real_type(1)/cref(i);
             return mat(); 
         }
 
-        inline type& setToIdentity(const value_type x=value_type(1))
+        type& setToIdentity(const value_type x=value_type(1))
         { diag().setAllTo(x); return mat(); }
 
-        inline type& swap(int i1, int i2) 
+        type& swap(int i1, int i2) 
         {
             CheckIndex<_fort>(i1,size());
             CheckIndex<_fort>(i2,size());
@@ -558,24 +571,24 @@ namespace tmv {
             return mat();
         }
 
-        inline type& cPermute(const int*const p, int i1, int i2) 
+        type& cPermute(const int* p, int i1, int i2) 
         { diag().permute(p,i1,i2); return mat(); }
-        inline type& permute(const int*const p, int i1, int i2) 
+        type& permute(const int* p, int i1, int i2) 
         {
             CheckRange<_fort>(i1,i2,size());
             return cPermute(p,i1,i2);
         }
-        inline type& permute(const int*const p) 
+        type& permute(const int* p) 
         { cPermute(p,0,size()); return mat(); }
 
-        inline type& cReversePermute(const int*const p, int i1, int i2) 
+        type& cReversePermute(const int* p, int i1, int i2) 
         { diag().reversePermute(p,i1,i2); }
-        inline type& reversePermute(const int*const p, int i1, int i2) 
+        type& reversePermute(const int* p, int i1, int i2) 
         {
             CheckRange<_fort>(i1,i2,size());
             return cReversePermute(p,i1,i2);
         }
-        inline type& reversePermute(const int*const p) 
+        type& reversePermute(const int* p) 
         { cReversePermute(p,0,size()); return mat(); }
 
 
@@ -584,10 +597,10 @@ namespace tmv {
         //
 
         // These versions always uses CStyle
-        inline subdiagmatrix_type cSubDiagMatrix(int i1, int i2) 
+        subdiagmatrix_type cSubDiagMatrix(int i1, int i2) 
         { return subdiagmatrix_type(ptr()+i1*step(), i2-i1, step()); }
 
-        inline subdiagmatrix_step_type cSubDiagMatrix(
+        subdiagmatrix_step_type cSubDiagMatrix(
             int i1, int i2, int istep) 
         {
             return subdiagmatrix_step_type(
@@ -596,13 +609,13 @@ namespace tmv {
 
         // These check the indices according the the indexing style being
         // used, and then calls the above CStyle versions.
-        inline subdiagmatrix_type subDiagMatrix(int i1, int i2) 
+        subdiagmatrix_type subDiagMatrix(int i1, int i2) 
         {
             CheckRange<_fort>(i1,i2,size());
             return cSubDiagMatrix(i1,i2);
         }
 
-        inline subdiagmatrix_step_type subMatrix(
+        subdiagmatrix_step_type subMatrix(
             int i1, int i2, int istep) 
         {
             CheckRange<_fort>(i1,i2,istep,size());
@@ -611,15 +624,15 @@ namespace tmv {
 
 
         // Repeat the const versions:
-        inline const_subdiagmatrix_type cSubDiagMatrix(int i1, int i2) const
+        const_subdiagmatrix_type cSubDiagMatrix(int i1, int i2) const
         { return base_diag::cSubDiagMatrix(i1,i2); }
-        inline const_subdiagmatrix_step_type cSubDiagMatrix(
+        const_subdiagmatrix_step_type cSubDiagMatrix(
             int i1, int i2, int istep) const
         { return base_diag::cSubDiagMatrix(i1,i2,istep); }
 
-        inline const_subdiagmatrix_type subDiagMatrix(int i1, int i2) const
+        const_subdiagmatrix_type subDiagMatrix(int i1, int i2) const
         { return base_diag::subDiagMatrix(i1,i2); }
-        inline const_subdiagmatrix_step_type subDiagMatrix(
+        const_subdiagmatrix_step_type subDiagMatrix(
             int i1, int i2, int istep) const
         { return base_diag::subDiagMatrix(i1,i2,istep); }
 
@@ -628,40 +641,40 @@ namespace tmv {
         // Views
         //
 
-        inline view_type view() 
+        view_type view() 
         { return view_type(ptr(),size(),step()); }
 
-        inline cview_type cView() 
+        cview_type cView() 
         { return view(); }
 
-        inline fview_type fView() 
+        fview_type fView() 
         { return view(); }
 
-        inline xview_type xView() 
+        xview_type xView() 
         { return view(); }
 
-        inline cmview_type cmView() 
+        cmview_type cmView() 
         {
             TMVAssert(step()==1 && "Called cmView on DiagMatrix with step!=1");
             return view(); 
         }
 
-        inline rmview_type rmView() 
+        rmview_type rmView() 
         {
             TMVAssert(step()==1 && "Called rmView on DiagMatrix with step!=1");
             return view(); 
         }
 
-        inline transpose_type transpose() 
+        transpose_type transpose() 
         { return view(); }
 
-        inline conjugate_type conjugate() 
+        conjugate_type conjugate() 
         { return conjugate_type(ptr(),size(),step()); }
 
-        inline adjoint_type adjoint() 
+        adjoint_type adjoint() 
         { return conjugate(); }
 
-        inline realpart_type realPart() 
+        realpart_type realPart() 
         {
             const bool isreal = Traits<value_type>::isreal;
             return realpart_type(
@@ -669,7 +682,7 @@ namespace tmv {
                 isreal ? step() : 2*step());
         }
 
-        inline imagpart_type imagPart() 
+        imagpart_type imagPart() 
         {
             const bool isreal = Traits<value_type>::isreal;
             TMVStaticAssert(Traits<value_type>::iscomplex);
@@ -678,50 +691,50 @@ namespace tmv {
                 isreal ? step() : 2*step());
         }
 
-        inline nonconj_type nonConj()
+        nonconj_type nonConj()
         { return nonconj_type(ptr(),size(),step()); }
 
 
         // Repeat the const versions:
-        inline const_view_type view() const
+        const_view_type view() const
         { return base_diag::view(); }
-        inline const_cview_type cView() const
+        const_cview_type cView() const
         { return base_diag::cView(); }
-        inline const_fview_type fView() const
+        const_fview_type fView() const
         { return base_diag::fView(); }
-        inline const_xview_type xView() const
+        const_xview_type xView() const
         { return base_diag::xView(); }
-        inline const_cmview_type cmView() const
+        const_cmview_type cmView() const
         { return base_diag::cmView(); }
-        inline const_rmview_type rmView() const
+        const_rmview_type rmView() const
         { return base_diag::rmView(); }
-        inline const_transpose_type transpose() const
+        const_transpose_type transpose() const
         { return base_diag::transpose(); }
-        inline const_conjugate_type conjugate() const
+        const_conjugate_type conjugate() const
         { return base_diag::conjugate(); }
-        inline const_adjoint_type adjoint() const
+        const_adjoint_type adjoint() const
         { return base_diag::adjoint(); }
-        inline const_realpart_type realPart() const
+        const_realpart_type realPart() const
         { return base_diag::realPart(); }
-        inline const_imagpart_type imagPart() const
+        const_imagpart_type imagPart() const
         { return base_diag::imagPart(); }
-        inline const_nonconj_type nonConj() const
+        const_nonconj_type nonConj() const
         { return base_diag::nonConj(); }
 
         //
         // I/O
         //
 
-        inline void read(std::istream& is)
+        void read(std::istream& is)
         { tmv::Read(is,mat()); }
 
         //
         // Auxilliary routines
         //
 
-        inline const type& mat() const
+        const type& mat() const
         { return *static_cast<const type*>(this); }
-        inline type& mat()
+        type& mat()
         { return *static_cast<type*>(this); }
 
 
@@ -729,14 +742,14 @@ namespace tmv {
         // class than this, or an infinite loop will result when compiling.
         // Also, cref and cptr from above.
 
-        inline size_t colsize() const { return mat().size(); }
-        inline size_t rowsize() const { return mat().size(); }
-        inline size_t size() const { return mat().size(); }
-        inline int step() const { return mat().step(); }
+        size_t colsize() const { return mat().size(); }
+        size_t rowsize() const { return mat().size(); }
+        size_t size() const { return mat().size(); }
+        int step() const { return mat().step(); }
 
-        inline value_type* ptr() { return mat().ptr(); }
-        inline reference ref(int i) { return mat().ref(i); }
-        inline value_type cref(int i) { return mat().cref(i); }
+        value_type* ptr() { return mat().ptr(); }
+        reference ref(int i) { return mat().ref(i); }
+        value_type cref(int i) { return mat().cref(i); }
 
     }; // BaseMatrix_Diag_Mutable
 
@@ -747,8 +760,6 @@ namespace tmv {
     template <class M>
     static typename M::value_type DoTrace(const BaseMatrix_Diag<M>& m)
     { return m.diag().sumElements(); }
-
-
 
 
     template <class T, IndexStyle I=CStyle>
@@ -783,7 +794,7 @@ namespace tmv {
     //
 
     template <class M1, class M2> 
-    inline void Copy(
+    static void Copy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Diag_Mutable<M2>& m2)
     { 
         typename M1::const_diag_type m1d = m1.diag();
@@ -792,7 +803,7 @@ namespace tmv {
     }
 
     template <class M1, class M2> 
-    inline void NoAliasCopy(
+    static void NoAliasCopy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Diag_Mutable<M2>& m2)
     { 
         typename M1::const_diag_type m1d = m1.diag();
@@ -831,7 +842,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    inline void AliasCopy(
+    static void AliasCopy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
     { Copy(m1,m2); }
 
@@ -841,30 +852,9 @@ namespace tmv {
     //
 
     template <class M1, class M2> 
-    inline void Swap(
+    static void Swap(
         BaseMatrix_Diag_Mutable<M1>& m1, BaseMatrix_Diag_Mutable<M2>& m2)
     { Swap(m1.diag(),m2.diag()); }
-
-
-    //
-    // Matrix ==, != Matrix
-    //
-
-    template <class M1, class M2>
-    inline bool operator==(
-        const BaseMatrix_Diag<M1>& m1, const BaseMatrix_Diag<M2>& m2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
-        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m2.colsize());
-        TMVAssert(m1.rowsize() == m2.rowsize());
-        return m1.diag() == m2.diag();
-    }
-
-    template <class M1, class M2>
-    inline bool operator!=(
-        const BaseMatrix_Diag<M1>& m1, const BaseMatrix_Diag<M2>& m2)
-    { return !(m1 == m2); }
 
 
     //

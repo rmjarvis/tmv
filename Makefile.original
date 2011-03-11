@@ -96,14 +96,18 @@ CP= cp
 AR= ar
 ARFLAGS= -cr
 RANLIB= ranlib
+MKDIR= mkdir -p
 # RM, CP, AR, ARFLAGS, RANLIB are all pretty standard, but change them if 
 # necessary.
 LIBDIR= lib
 SRCDIR= src
 TESTDIR= test
 EXDIR= examples
+LINKFILE= tmv-link
 # LIBDIR indicates where to put the compiled libraries.
 # SRCDIR, TESTDIR and EXDIR indicate where the various source files are.
+# LINKFILE is the name of the file in the share directory that stores the 
+# required linkage flags to compile programs that use the TMV library.
 
 # Make.1 has all the real meat of the makefile.
 include Make.1

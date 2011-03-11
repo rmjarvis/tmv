@@ -35,6 +35,7 @@
 namespace tmv {
 
     enum Shape {
+        Vec,
         Rec, SquareRec, Diag, UpperTri, LowerTri, UnitUpperTri, UnitLowerTri,
         Band, SquareBand, UpperBand, LowerBand, UnitUpperBand, UnitLowerBand,
         RealSym, Sym, Herm, RealSymBand, SymBand, HermBand };
@@ -43,8 +44,24 @@ namespace tmv {
     struct ShapeTraits;
 
     template <> 
+    struct ShapeTraits<Vec>
+    {
+        enum { vector = true };
+        enum { square = false };
+        enum { sym = false };
+        enum { herm = false };
+        enum { upper = false };
+        enum { lower = false };
+        enum { band = false };
+        enum { unit = false };
+        enum { inverse_shape = Vec };
+        enum { nonunit_shape = Vec };
+    };
+
+    template <> 
     struct ShapeTraits<Rec>
     {
+        enum { vector = false };
         enum { square = false };
         enum { sym = false };
         enum { herm = false };
@@ -59,6 +76,7 @@ namespace tmv {
     template <> 
     struct ShapeTraits<SquareRec>
     {
+        enum { vector = false };
         enum { square = true };
         enum { sym = false };
         enum { herm = false };
@@ -73,6 +91,7 @@ namespace tmv {
     template <> 
     struct ShapeTraits<Diag>
     {
+        enum { vector = false };
         enum { square = true };
         enum { sym = false };
         enum { herm = false };
@@ -87,6 +106,7 @@ namespace tmv {
     template <> 
     struct ShapeTraits<UpperTri>
     {
+        enum { vector = false };
         enum { square = true };
         enum { sym = false };
         enum { herm = false };
@@ -101,6 +121,7 @@ namespace tmv {
     template <> 
     struct ShapeTraits<LowerTri>
     {
+        enum { vector = false };
         enum { square = true };
         enum { sym = false };
         enum { herm = false };
@@ -115,6 +136,7 @@ namespace tmv {
     template <> 
     struct ShapeTraits<UnitUpperTri>
     {
+        enum { vector = false };
         enum { square = true };
         enum { sym = false };
         enum { herm = false };
@@ -129,6 +151,7 @@ namespace tmv {
     template <> 
     struct ShapeTraits<UnitLowerTri>
     {
+        enum { vector = false };
         enum { square = true };
         enum { sym = false };
         enum { herm = false };
@@ -143,6 +166,7 @@ namespace tmv {
     template <> 
     struct ShapeTraits<Band>
     {
+        enum { vector = false };
         enum { square = false };
         enum { sym = false };
         enum { herm = false };
@@ -157,6 +181,7 @@ namespace tmv {
     template <> 
     struct ShapeTraits<SquareBand>
     {
+        enum { vector = false };
         enum { square = true };
         enum { sym = false };
         enum { herm = false };
@@ -171,6 +196,7 @@ namespace tmv {
     template <> 
     struct ShapeTraits<UpperBand>
     {
+        enum { vector = false };
         enum { square = true };
         enum { sym = false };
         enum { herm = false };
@@ -185,6 +211,7 @@ namespace tmv {
     template <> 
     struct ShapeTraits<LowerBand>
     {
+        enum { vector = false };
         enum { square = true };
         enum { sym = false };
         enum { herm = false };
@@ -199,6 +226,7 @@ namespace tmv {
     template <> 
     struct ShapeTraits<UnitUpperBand>
     {
+        enum { vector = false };
         enum { square = true };
         enum { sym = false };
         enum { herm = false };
@@ -213,6 +241,7 @@ namespace tmv {
     template <> 
     struct ShapeTraits<UnitLowerBand>
     {
+        enum { vector = false };
         enum { square = true };
         enum { sym = false };
         enum { herm = false };
@@ -227,6 +256,7 @@ namespace tmv {
     template <> 
     struct ShapeTraits<RealSym>
     {
+        enum { vector = false };
         enum { square = true };
         enum { sym = true };
         enum { herm = true };
@@ -241,6 +271,7 @@ namespace tmv {
     template <> 
     struct ShapeTraits<Sym>
     {
+        enum { vector = false };
         enum { square = true };
         enum { sym = true };
         enum { herm = false };
@@ -255,6 +286,7 @@ namespace tmv {
     template <> 
     struct ShapeTraits<Herm>
     {
+        enum { vector = false };
         enum { square = true };
         enum { sym = false };
         enum { herm = true };
@@ -269,6 +301,7 @@ namespace tmv {
     template <> 
     struct ShapeTraits<RealSymBand>
     {
+        enum { vector = false };
         enum { square = true };
         enum { sym = true };
         enum { herm = true };
@@ -283,6 +316,7 @@ namespace tmv {
     template <> 
     struct ShapeTraits<SymBand>
     {
+        enum { vector = false };
         enum { square = true };
         enum { sym = true };
         enum { herm = false };
@@ -297,6 +331,7 @@ namespace tmv {
     template <> 
     struct ShapeTraits<HermBand>
     {
+        enum { vector = false };
         enum { square = true };
         enum { sym = false };
         enum { herm = true };
