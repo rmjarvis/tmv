@@ -47,48 +47,48 @@ namespace tmv {
 
     // Defined below:
     template <bool add, int ix, class T, class M1, class V2, class V3>
-    inline void MultMV(
+    static void MultMV(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseVector_Calc<V2>& v2, 
         BaseVector_Mutable<V3>& v3);
     template <bool add, int ix, class T, class M1, class V2, class V3>
-    inline void NoAliasMultMV(
+    static void NoAliasMultMV(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseVector_Calc<V2>& v2, 
         BaseVector_Mutable<V3>& v3);
     template <bool add, int ix, class T, class M1, class V2, class V3>
-    inline void InlineMultMV(
+    static void InlineMultMV(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseVector_Calc<V2>& v2, 
         BaseVector_Mutable<V3>& v3);
     template <bool add, int ix, class T, class M1, class V2, class V3>
-    inline void AliasMultMV(
+    static void AliasMultMV(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseVector_Calc<V2>& v2, 
         BaseVector_Mutable<V3>& v3);
 
     template <bool add, int ix, class T, class V1, class M2, class V3>
-    inline void MultVM(
+    static void MultVM(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Tri<M2>& m2, BaseVector_Mutable<V3>& v3);
     template <bool add, int ix, class T, class V1, class M2, class V3>
-    inline void NoAliasMultVM(
+    static void NoAliasMultVM(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Tri<M2>& m2, BaseVector_Mutable<V3>& v3);
     template <bool add, int ix, class T, class V1, class M2, class V3>
-    inline void AliasMultVM(
+    static void AliasMultVM(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Tri<M2>& m2, BaseVector_Mutable<V3>& v3);
     template <class V1, int ix, class T, class M2>
-    inline void MultEqVM(
+    static void MultEqVM(
         BaseVector_Mutable<V1>& v1,
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M2>& m2);
     template <class V1, int ix, class T, class M2>
-    inline void NoAliasMultEqVM(
+    static void NoAliasMultEqVM(
         BaseVector_Mutable<V1>& v1,
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M2>& m2);
     template <class V1, int ix, class T, class M2>
-    inline void AliasMultEqVM(
+    static void AliasMultEqVM(
         BaseVector_Mutable<V1>& v1,
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M2>& m2);
 
@@ -304,7 +304,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
             {
                 Unroller<I,N/2>::unroll(x,m1,v2,v3);
@@ -314,7 +314,7 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
             {
                 typedef typename M1::const_row_sub_type M1r;
@@ -330,10 +330,10 @@ namespace tmv {
         template <int I>
         struct Unroller<I,0>
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix,T>& , const M1& , const V2& , V3& ) {}
         };
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_UV
@@ -485,7 +485,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
             {
                 Unroller<I+N/2,N-N/2>::unroll(x,m1,v2,v3);
@@ -495,7 +495,7 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
             {
                 typedef typename M1::const_row_sub_type M1r;
@@ -511,11 +511,11 @@ namespace tmv {
         template <int I>
         struct Unroller<I,0>
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix,T>& , const M1& , const V2& , V3& ) {}
         };
 
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_UV
@@ -529,7 +529,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<43,s,add,ix,T,M1,V2,V3> 
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_UV
@@ -552,7 +552,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<53,s,add,ix,T,M1,V2,V3> 
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_UV
@@ -575,7 +575,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<81,s,add,ix,T,M1,V2,V3> 
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_UV
@@ -590,7 +590,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<85,s,add,ix,T,M1,V2,V3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_UV
@@ -607,7 +607,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<-4,s,add,ix,T,M1,V2,V3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
             TMVStaticAssert(!V3::_conj);
@@ -640,7 +640,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<-3,s,add,ix,T,M1,V2,V3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
             TMVStaticAssert(!V3::_conj);
@@ -725,7 +725,7 @@ namespace tmv {
               int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<97,s,add,ix,T,M1,V2,V3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         { 
             typedef typename M1::const_conjugate_type M1c;
@@ -746,7 +746,8 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            typename V3::value_type xx(x);
+            typedef typename V3::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
             InstMultMV(xx,m1.xdView(),v2.xView(),v3.xView());
         }
     };
@@ -756,7 +757,8 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            typename V3::value_type xx(x);
+            typedef typename V3::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
             InstAddMultMV(xx,m1.xdView(),v2.xView(),v3.xView());
         }
     };
@@ -766,16 +768,14 @@ namespace tmv {
               int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<-2,s,add,ix,T,M1,V2,V3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
             typedef typename M1::value_type T1;
             typedef typename V2::value_type T2;
             typedef typename V3::value_type T3;
             const bool inst = 
-                M1::unknownsizes &&
-                V2::unknownsizes &&
-                V3::unknownsizes &&
+                (s == UNKNOWN || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -798,7 +798,7 @@ namespace tmv {
     template <int s, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<99,s,true,ix,T,M1,V2,V3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
             if ( !SameStorage(m1,v3) &&
@@ -821,7 +821,7 @@ namespace tmv {
     template <int s, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<99,s,false,ix,T,M1,V2,V3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
             if ( !SameStorage(m1,v3) &&
@@ -845,7 +845,7 @@ namespace tmv {
               int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<-1,s,add,ix,T,M1,V2,V3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
             const bool checkalias =
@@ -862,7 +862,7 @@ namespace tmv {
     };
 
     template <int algo, bool add, int ix, class T, class M1, class V2, class V3>
-    inline void DoMultUV(
+    static void DoMultUV(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseVector_Calc<V2>& v2, 
         BaseVector_Mutable<V3>& v3)
@@ -884,35 +884,35 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class M1, class V2, class V3>
-    inline void MultMV(
+    static void MultMV(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseVector_Calc<V2>& v2, 
         BaseVector_Mutable<V3>& v3)
     { DoMultUV<-1,add>(x,m1,v2,v3); }
 
     template <bool add, int ix, class T, class M1, class V2, class V3>
-    inline void NoAliasMultMV(
+    static void NoAliasMultMV(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseVector_Calc<V2>& v2, 
         BaseVector_Mutable<V3>& v3)
     { DoMultUV<-2,add>(x,m1,v2,v3); }
 
     template <bool add, int ix, class T, class M1, class V2, class V3>
-    inline void InlineMultMV(
+    static void InlineMultMV(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseVector_Calc<V2>& v2, 
         BaseVector_Mutable<V3>& v3)
     { DoMultUV<-3,add>(x,m1,v2,v3); }
 
     template <bool add, int ix, class T, class M1, class V2, class V3>
-    inline void AliasMultMV(
+    static void AliasMultMV(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Tri<M1>& m1, const BaseVector_Calc<V2>& v2, 
         BaseVector_Mutable<V3>& v3)
     { DoMultUV<99,add>(x,m1,v2,v3); }
 
     template <bool add, int ix, class T, class V1, class M2, class V3>
-    inline void MultVM(
+    static void MultVM(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Tri<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
@@ -924,7 +924,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class V1, class M2, class V3>
-    inline void NoAliasMultVM(
+    static void NoAliasMultVM(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Tri<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
@@ -936,7 +936,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class V1, class M2, class V3>
-    inline void AliasMultVM(
+    static void AliasMultVM(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Tri<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
@@ -948,19 +948,19 @@ namespace tmv {
     }
 
     template <class V1, int ix, class T, class M2>
-    inline void MultEqVM(
+    static void MultEqVM(
         BaseVector_Mutable<V1>& v1,
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M2>& m2)
     { MultVM<false>(x,v1.vec(),m2.mat(),v1.vec()); }
 
     template <class V1, int ix, class T, class M2>
-    inline void NoAliasMultEqVM(
+    static void NoAliasMultEqVM(
         BaseVector_Mutable<V1>& v1,
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M2>& m2)
     { NoAliasMultVM<false>(x,v1.vec(),m2.mat(),v1.vec()); }
 
     template <class V1, int ix, class T, class M2>
-    inline void AliasMultEqVM(
+    static void AliasMultEqVM(
         BaseVector_Mutable<V1>& v1,
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M2>& m2)
     { AliasMultVM<false>(x,v1.vec(),m2.mat(),v1.vec()); }

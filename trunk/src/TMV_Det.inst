@@ -1,9 +1,10 @@
 
 #define CT std::complex<T>
+#define FT Traits<T>::float_type
+#define ZFT std::complex<Traits<T>::float_type>
 
 #define Def1(RT,T)\
     template T InstProdElements(const ConstVectorView<T>& v); \
-    template RT InstLogProdElements(const ConstVectorView<T>& v, T* sign); \
     template bool InstHasZeroElement(const ConstVectorView<T>& v); \
 
 Def1(T,T)
@@ -11,5 +12,15 @@ Def1(T,T)
 Def1(T,CT)
 #endif
 
+#define Def2(RT,T)\
+    template RT InstLogProdElements(const ConstVectorView<T>& v, T* sign); \
+
+Def2(FT,FT)
+#ifdef TMV_INST_COMPLEX
+Def2(FT,ZFT)
+#endif
+
+
 #undef Def1
+#undef Def2
 #undef CT

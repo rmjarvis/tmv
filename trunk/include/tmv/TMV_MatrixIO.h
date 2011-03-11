@@ -42,7 +42,7 @@ namespace tmv {
     //
 
     template <class M>
-    inline void InlineWrite(std::ostream& os, const BaseMatrix_Calc<M>& m)
+    static void InlineWrite(std::ostream& os, const BaseMatrix_Calc<M>& m)
     {
         const int nrows = m.nrows();
         const int ncols = m.ncols();
@@ -67,33 +67,33 @@ namespace tmv {
     template <class M>
     struct CallWriteM<false,M> // inst = false
     {
-        static inline void call(std::ostream& os, const M& m)
+        static void call(std::ostream& os, const M& m)
         { InlineWrite(os,m); }
     };
     template <class M>
     struct CallWriteM<true,M>
     {
-        static inline void call(std::ostream& os, const M& m)
+        static void call(std::ostream& os, const M& m)
         { InstWrite(os,m.calc().xView()); }
     };
 
     template <class M>
-    inline void Write(std::ostream& os, const BaseMatrix_Calc<M>& m)
+    static void Write(std::ostream& os, const BaseMatrix_Calc<M>& m)
     {
         typedef typename M::value_type T;
         const int inst = 
-            M::unknownsizes &&
+            (M::_colsize == UNKNOWN || M::_colsize > 16) &&
+            (M::_rowsize == UNKNOWN || M::_rowsize > 16) &&
             Shape(M::_shape) == Rec &&
-            (M::_rowmajor || M::_colmajor) &&
             Traits<T>::isinst;
         CallWriteM<inst,M>::call(os,m.mat());
     }
 
     // With thresh:
     template <class M>
-    inline void InlineWrite(
+    static void InlineWrite(
         std::ostream& os, const BaseMatrix_Calc<M>& m,
-        typename M::real_type thresh) 
+        typename M::float_type thresh) 
     {
         typedef typename M::value_type T;
         const int nrows = m.nrows();
@@ -103,7 +103,7 @@ namespace tmv {
             os << "( ";
             for(int j=0;j<ncols;++j) {
                 T temp = m.cref(i,j);
-                os << " " << Value((TMV_ABS(temp) < thresh ? T(0) : temp)) 
+                os << " " << Value((TMV_ABS2(temp) < thresh ? T(0) : temp)) 
                     << " ";
             }
             os << " )\n";
@@ -114,7 +114,7 @@ namespace tmv {
     template <class T, bool C>
     void InstWrite(
         std::ostream& os, const ConstMatrixView<T,UNKNOWN,UNKNOWN,C>& m,
-        typename Traits<T>::real_type thresh);
+        typename ConstMatrixView<T>::float_type thresh);
 
     template <bool inst, class M>
     struct CallWriteMThresh;
@@ -122,28 +122,28 @@ namespace tmv {
     template <class M>
     struct CallWriteMThresh<false,M> // inst = false
     {
-        static inline void call(
-            std::ostream& os, const M& m, typename M::real_type thresh) 
+        static void call(
+            std::ostream& os, const M& m, typename M::float_type thresh) 
         { InlineWrite(os,m,thresh); }
     };
     template <class M>
     struct CallWriteMThresh<true,M>
     {
-        static inline void call(
-            std::ostream& os, const M& m, typename M::real_type thresh) 
+        static void call(
+            std::ostream& os, const M& m, typename M::float_type thresh) 
         { InstWrite(os,m.calc().xView(),thresh); }
     };
 
     template <class M>
-    inline void Write(
+    static void Write(
         std::ostream& os,
-        const BaseMatrix_Calc<M>& m, typename M::real_type thresh) 
+        const BaseMatrix_Calc<M>& m, typename M::float_type thresh) 
     {
         typedef typename M::value_type T;
         const int inst = 
-            M::unknownsizes &&
+            (M::_colsize == UNKNOWN || M::_colsize > 16) &&
+            (M::_rowsize == UNKNOWN || M::_rowsize > 16) &&
             Shape(M::_shape) == Rec &&
-            (M::_rowmajor || M::_colmajor) &&
             Traits<T>::isinst;
         CallWriteMThresh<inst,M>::call(os,m.mat(),thresh);
     }
@@ -165,35 +165,35 @@ namespace tmv {
         size_t cs,rs;
         bool is, iseof, isbad;
 
-        inline MatrixReadError(std::istream& _is) throw() :
+        MatrixReadError(std::istream& _is) throw() :
             ReadError("Matrix"),
             i(0), j(0), m(0), exp(0), got(0), cs(0), rs(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        inline MatrixReadError(int _i, int _j, const BaseMatrix<M>& _m, 
+        MatrixReadError(int _i, int _j, const BaseMatrix<M>& _m, 
                                std::istream& _is) throw() :
             ReadError("Matrix"),
             i(_i), j(_j), m(new copy_type(_m)), exp(0), got(0), 
             cs(_m.colsize()), rs(_m.rowsize()),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        inline MatrixReadError(int _i, int _j, const BaseMatrix<M>& _m,
+        MatrixReadError(int _i, int _j, const BaseMatrix<M>& _m,
                                std::istream& _is, char _e, char _g) throw() :
             ReadError("Matrix"),
             i(_i), j(_j), m(new copy_type(_m)), exp(_e), got(_g),
             cs(_m.colsize()), rs(_m.rowsize()),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        inline MatrixReadError(const BaseMatrix<M>& _m,
+        MatrixReadError(const BaseMatrix<M>& _m,
                                std::istream& _is, size_t _cs, size_t _rs) :
             ReadError("Matrix"),
             i(0), m(new copy_type(_m)), exp(0), got(0), cs(_cs), rs(_rs),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        inline MatrixReadError(const MatrixReadError<M>& rhs) :
+        MatrixReadError(const MatrixReadError<M>& rhs) :
             ReadError("Matrix"),
             i(rhs.i), j(rhs.j), m(rhs.m), exp(rhs.exp), got(rhs.got), 
             cs(rhs.cs), rs(rhs.rs),
             is(rhs.is), iseof(rhs.iseof), isbad(rhs.isbad) {}
-        inline ~MatrixReadError() throw() {}
+        ~MatrixReadError() throw() {}
 
-        inline void Write(std::ostream& os) const throw()
+        void Write(std::ostream& os) const throw()
         {
             os<<"TMV Read Error: Reading istream input for Matrix\n";
             if (exp != got) {
@@ -236,7 +236,7 @@ namespace tmv {
 #endif
 
     template <class M>
-    inline void InlineRead(std::istream& is, BaseMatrix_Rec_Mutable<M>& m)
+    static void InlineRead(std::istream& is, BaseMatrix_Rec_Mutable<M>& m)
     {
         char paren;
         typename M::value_type temp;
@@ -286,23 +286,23 @@ namespace tmv {
     template <class M>
     struct CallReadM<false,M> // inst = false
     {
-        static inline void call(std::istream& is, M& m)
+        static void call(std::istream& is, M& m)
         { InlineRead(is,m); }
     };
     template <class M>
     struct CallReadM<true,M>
     {
-        static inline void call(std::istream& is, M& m)
+        static void call(std::istream& is, M& m)
         { InstRead(is,m.xView()); }
     };
 
     template <class M>
-    inline void Read(std::istream& is, BaseMatrix_Rec_Mutable<M>& m)
+    static void Read(std::istream& is, BaseMatrix_Rec_Mutable<M>& m)
     {
         typedef typename M::value_type T;
         const int inst = 
-            M::unknownsizes &&
-            (M::_rowmajor || M::_colmajor) &&
+            (M::_colsize == UNKNOWN || M::_colsize > 16) &&
+            (M::_rowsize == UNKNOWN || M::_rowsize > 16) &&
             Traits<T>::isinst;
         CallReadM<inst,M>::call(is,m.mat());
     }
@@ -315,12 +315,12 @@ namespace tmv {
     //
 
     template <class M>
-    inline std::ostream& operator<<(
+    static std::ostream& operator<<(
         std::ostream& os, const BaseMatrix<M>& m)
     { Write(os,m.calc()); return os; }
 
     template <class M>
-    inline std::istream& operator>>(
+    static std::istream& operator>>(
         std::istream& is, BaseMatrix_Rec_Mutable<M>& m)
     {
         size_t cs,rs;
@@ -346,7 +346,7 @@ namespace tmv {
     }
 
     template <class T, StorageType S, IndexStyle I>
-    inline std::istream& operator>>(
+    static std::istream& operator>>(
         std::istream& is, auto_ptr<Matrix<T,S,I> >& m)
     {
         size_t cs,rs;

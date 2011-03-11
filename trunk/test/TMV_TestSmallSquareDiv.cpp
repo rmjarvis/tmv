@@ -1,6 +1,6 @@
 
 #include "TMV_Test.h"
-#include "TMV_Test3.h"
+#include "TMV_Test_3.h"
 
 template <class T> 
 void TestAllSmallSquareDiv()
@@ -12,9 +12,6 @@ void TestAllSmallSquareDiv()
     TestSmallSquareDiv_e<T>();
     TestSmallSquareDiv_f<T>();
     TestSmallSquareDiv_g<T>();
-    TestSmallSquareDiv_h<T>();
-    TestSmallSquareDiv_i<T>();
-    TestSmallSquareDiv_j<T>();
 
     std::cout<<"Square SmallMatrix<"<<tmv::TMV_Text(T())<<"> Division ";
     std::cout<<"passed all tests\n";

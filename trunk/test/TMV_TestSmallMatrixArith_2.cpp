@@ -9,6 +9,7 @@ template <class T> void TestSmallMatrixArith_2()
     TestSmallMatrixArith_2d<T>();
     TestSmallMatrixArith_2e<T>();
     TestSmallMatrixArith_2f<T>();
+    TestSmallMatrixArith_2g<T>();
 }
 
 #ifdef TEST_DOUBLE

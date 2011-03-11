@@ -39,16 +39,16 @@ namespace tmv {
 
     // Defined below:
     template <class M1, class M2>
-    inline void Copy(
+    static void Copy(
         const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
     template <class M1, class M2>
-    inline void NoAliasCopy(
+    static void NoAliasCopy(
         const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
     template <class M1, class M2>
-    inline void InlineCopy(
+    static void InlineCopy(
         const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
     template <class M1, class M2>
-    inline void AliasCopy(
+    static void AliasCopy(
         const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
 
     // Defined in TMV_Matrix.cpp
@@ -66,13 +66,13 @@ namespace tmv {
     // algo 0: size = 0, nothing to do
     template <int cs, int rs, class M1, class M2>
     struct CopyM_Helper<0,cs,rs,M1,M2>
-    { static inline void call(const M1& , M2& ) {} };
+    { static void call(const M1& , M2& ) {} };
 
     // algo 1: Linearize to vector version
     template <int cs, int rs, class M1, class M2>
     struct CopyM_Helper<1,cs,rs,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         {
             typedef typename M1::const_linearview_type M1l;
             typedef typename M2::linearview_type M2l;
@@ -87,7 +87,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct CopyM_Helper<11,cs,rs,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         {
             const int M = cs == UNKNOWN ? int(m2.colsize()) : cs;
             int N = rs == UNKNOWN ? int(m2.rowsize()) : rs;
@@ -114,7 +114,7 @@ namespace tmv {
         template <int I, int M, int J, int N>
         struct Unroller
         {
-            static inline void unroll(const M1& m1, M2& m2)
+            static void unroll(const M1& m1, M2& m2)
             {
                 Unroller<I,M,J,N/2>::unroll(m1,m2);
                 Unroller<I,M,J+N/2,N-N/2>::unroll(m1,m2);
@@ -123,7 +123,7 @@ namespace tmv {
         template <int I, int M, int J>
         struct Unroller<I,M,J,1>
         {
-            static inline void unroll(const M1& m1, M2& m2)
+            static void unroll(const M1& m1, M2& m2)
             {
                 Unroller<I,M/2,J,1>::unroll(m1,m2);
                 Unroller<I+M/2,M-M/2,J,1>::unroll(m1,m2);
@@ -131,18 +131,18 @@ namespace tmv {
         };
         template <int I, int M, int J>
         struct Unroller<I,M,J,0>
-        { static inline void unroll(const M1& , M2& ) {} };
+        { static void unroll(const M1& , M2& ) {} };
         template <int I, int J>
         struct Unroller<I,1,J,1>
         {
-            static inline void unroll(const M1& m1, M2& m2)
+            static void unroll(const M1& m1, M2& m2)
             { m2.ref(I,J) = m1.cref(I,J); }
         };
         template <int I, int J>
         struct Unroller<I,0,J,1>
-        { static inline void unroll(const M1& , M2& ) {} };
+        { static void unroll(const M1& , M2& ) {} };
 
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         { Unroller<0,cs,0,rs>::unroll(m1,m2); }
     };
 
@@ -150,7 +150,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct CopyM_Helper<21,cs,rs,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         {
             int M = cs == UNKNOWN ? int(m2.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m2.rowsize()) : rs;
@@ -177,7 +177,7 @@ namespace tmv {
         template <int I, int M, int J, int N>
         struct Unroller
         {
-            static inline void unroll(const M1& m1, M2& m2)
+            static void unroll(const M1& m1, M2& m2)
             {
                 Unroller<I,M/2,J,N>::unroll(m1,m2);
                 Unroller<I+M/2,M-M/2,J,N>::unroll(m1,m2);
@@ -186,7 +186,7 @@ namespace tmv {
         template <int I, int J, int N>
         struct Unroller<I,1,J,N>
         {
-            static inline void unroll(const M1& m1, M2& m2)
+            static void unroll(const M1& m1, M2& m2)
             {
                 Unroller<I,1,J,N/2>::unroll(m1,m2);
                 Unroller<I,1,J+N/2,N-N/2>::unroll(m1,m2);
@@ -194,18 +194,18 @@ namespace tmv {
         };
         template <int I, int J, int N>
         struct Unroller<I,0,J,N>
-        { static inline void unroll(const M1& , M2& ) {} };
+        { static void unroll(const M1& , M2& ) {} };
         template <int I, int J>
         struct Unroller<I,1,J,1>
         {
-            static inline void unroll(const M1& m1, M2& m2)
+            static void unroll(const M1& m1, M2& m2)
             { m2.ref(I,J) = m1.cref(I,J); }
         };
         template <int I, int J>
         struct Unroller<I,1,J,0>
-        { static inline void unroll(const M1& , M2& ) {} };
+        { static void unroll(const M1& , M2& ) {} };
 
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         { Unroller<0,cs,0,rs>::unroll(m1,m2); }
     };
 
@@ -213,7 +213,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct CopyM_Helper<31,cs,rs,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         {
             if (m1.canLinearize() && m2.canLinearize() &&
                 m1.stepi() == m2.stepi() && m1.stepj() == m2.stepj()) 
@@ -231,7 +231,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct CopyM_Helper<-4,cs,rs,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         {
             typedef typename M2::value_type T2;
             const bool allrm = M1::_rowmajor && M2::_rowmajor;
@@ -260,7 +260,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct CopyM_Helper<-3,cs,rs,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         { 
             const int algo = 
 #if TMV_OPT >= 2
@@ -275,7 +275,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct CopyM_Helper<97,cs,rs,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         {
             typedef typename M1::const_conjugate_type M1c;
             typedef typename M2::conjugate_type M2c;
@@ -289,7 +289,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct CopyM_Helper<98,cs,rs,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         { InstCopy(m1.xView(),m2.xView()); }
     };
 
@@ -297,22 +297,22 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct CopyM_Helper<-2,cs,rs,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                M1::unknownsizes &&
-                M2::unknownsizes &&
+                (cs == UNKNOWN || cs > 16) &&
+                (rs == UNKNOWN || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
                 Traits2<T1,T2>::sametype &&
 #endif
                 Traits<T1>::isinst;
-            const bool conj = M2::_conj;
             const int algo = 
-                inst ? (conj ? 97 : 98) :
+                M2::_conj ? 97 :
+                inst ? 98 :
                 -3;
             CopyM_Helper<algo,cs,rs,M1,M2>::call(m1,m2);
         }
@@ -322,7 +322,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct CopyM_Helper<99,cs,rs,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         {
             if (!SameStorage(m1,m2)) {
                 // No aliasing
@@ -347,7 +347,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct CopyM_Helper<-1,cs,rs,M1,M2>
     {
-        static inline void call(const M1& m1, M2& m2)
+        static void call(const M1& m1, M2& m2)
         {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
@@ -364,7 +364,7 @@ namespace tmv {
     };
 
     template <class M1, class M2>
-    inline void Copy(
+    static void Copy(
         const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
@@ -381,7 +381,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    inline void NoAliasCopy(
+    static void NoAliasCopy(
         const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
@@ -398,7 +398,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    inline void InlineCopy(
+    static void InlineCopy(
         const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
@@ -415,7 +415,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    inline void AliasCopy(
+    static void AliasCopy(
         const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));

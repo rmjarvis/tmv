@@ -1,12 +1,15 @@
 
 #include "TMV_Test.h"
-#include "TMV_Test3.h"
+#include "TMV_Test_3.h"
 #include "TMV.h"
 #include <fstream>
 #include <cstdio>
 
-template <class T> static void TestSmallVectorReal()
+template <class T> 
+static void TestSmallVectorReal()
 {
+    typedef typename tmv::Traits<T>::float_type FT;
+
     const int N = 100;
 
     tmv::SmallVector<T,N> v;
@@ -112,7 +115,8 @@ template <class T> static void TestSmallVectorReal()
     for(int i=0;i<N;++i) a(i) = T(i+10);
     for(int i=0;i<N;++i) b(i) = T(-3*i+191);
 
-    T prod = 0, normsum = 0, normdiff = 0;
+    T prod = 0;
+    FT normsum = 0, normdiff = 0;
     for(int i=0;i<N;++i) {
         prod += a[i] * b[i];
         normsum += (a[i]+b[i])*(a[i]+b[i]);
@@ -120,46 +124,46 @@ template <class T> static void TestSmallVectorReal()
     }
     normsum = tmv::TMV_SQRT(normsum);
     normdiff = tmv::TMV_SQRT(normdiff);
-    Assert(std::abs(a*b - prod) <= EPS*Norm(a)*Norm(b),"Inner Product");
-    tmv::SmallVector<T,N> temp;
-    Assert(std::abs(Norm(temp=a+b) - normsum) <= 
-           EPS*std::abs(Norm1(a)+Norm1(b)),"SmallVector Sum");
-    Assert(std::abs(Norm(temp=a-b) - normdiff) <= 
-           EPS*std::abs(Norm1(a)+Norm1(b)),"SmallVector Diff");
+    Assert(Equal2(a*b , prod, EPS*Norm(a)*Norm(b)),"Inner Product");
+    Assert(Equal2(Norm(a+b) , normsum, EPS*(Norm1(a)+Norm1(b))),
+           "SmallVector Sum");
+    Assert(Equal2(Norm(a-b) , normdiff, EPS*(Norm1(a)+Norm1(b))),
+           "SmallVector Diff");
 
     tmv::SmallVector<T,20> w;
     w << 3.3,1.2,5.4,-1.2,4.3,-9.4,0,-2,4,-11.5,
       -12,14,33,1,-9.3,-3.9,4.9,10,-31,1.e-33;
 
     tmv::SmallVector<T,20> origw = w;
-    int perm[20];
+    tmv::Permutation P(20);
 
     if (showacc)
         std::cout<<"unsorted w = "<<w<<std::endl;
-    tmv::Permutation P = w.sort(perm);
+    w.sort(P);
     for(int i=1;i<20;++i) {
         Assert(w(i-1) <= w(i),"Sort real SmallVector");
     }
     if (showacc)
         std::cout<<"sorted w = "<<w<<std::endl;
 
-    w.sort(0);
-    w = P.inverse() * w;
-    //w.reversePermute(perm);
+    w.sort();
+    P.inverse().applyOnLeft(w);
     if (showacc)
         std::cout<<"Reverse permuted w = "<<w<<std::endl;
     Assert(w==origw,"Reverse permute sorted SmallVector = orig");
-    w.sort(0);
-    origw = P * origw;
-    //origw.permute(perm);
+    w.sort();
+    P.applyOnLeft(origw);
     if (showacc)
         std::cout<<"Sort permuted w = "<<origw<<std::endl;
     Assert(w==origw,"Permute SmallVector = sorted SmallVector");
 
 }
 
-template <class T> static void TestSmallVectorComplex()
+template <class T> 
+static void TestSmallVectorComplex()
 {
+    typedef typename tmv::Traits<T>::float_type FT;
+
     const int N = 100;
 
     tmv::SmallVector<std::complex<T>,N> v;
@@ -196,9 +200,9 @@ template <class T> static void TestSmallVectorComplex()
                "Conjugate CSmallVector");
     Assert(v2 == v.conjugate(),"Conjugate == CSmallVector");
 
-    Assert(std::abs((v*v2).imag()) <= EPS,"CSmallVector * CSmallVector");
-    T norm1 = tmv::TMV_SQRT((v*v2).real());
-    T norm2 = Norm(v);
+    Assert(tmv::TMV_ABS((v*v2).imag()) <= EPS,"CSmallVector * CSmallVector");
+    FT norm1 = tmv::TMV_SQRT((v*v2).real());
+    FT norm2 = Norm(v);
     if (showacc) {
         std::cout<<"v = "<<v<<std::endl;
         std::cout<<"v2 = "<<v2<<std::endl;
@@ -206,7 +210,7 @@ template <class T> static void TestSmallVectorComplex()
         std::cout<<"norm1 = "<<norm1<<std::endl;
         std::cout<<"norm2 = "<<norm2<<std::endl;
     }
-    Assert(std::abs(norm1 - norm2) <= EPS*norm1,"Norm CSmallVector");
+    Assert(tmv::TMV_ABS(norm1 - norm2) <= EPS*norm1,"Norm CSmallVector");
 
     Assert(v2 == v.conjugateSelf(),"ConjugateSelf CSmallVector");
 
@@ -216,13 +220,12 @@ template <class T> static void TestSmallVectorComplex()
     for(int i=0;i<N;++i) b(i) = T(-3*i+191);
 
     tmv::SmallVector<std::complex<T>,N> ca = a;
-    tmv::SmallVector<std::complex<T>,N> temp;
-    Assert(Norm(temp=ca-a) <= EPS*Norm(a),"Copy real V -> complex V");
+    Assert(Equal(ca,a,EPS*Norm(a)),"Copy real V -> complex V");
     ca *= std::complex<T>(3,4);
     tmv::SmallVector<std::complex<T>,N> cb = b*std::complex<T>(3,4);
 
     std::complex<T> prod = 0;
-    T normsum = 0, normdiff = 0;
+    FT normsum = 0, normdiff = 0;
     for(int i=0;i<N;++i) {
         prod += ca[i] * cb[i];
         normsum += std::norm(ca[i]+cb[i]);
@@ -230,11 +233,11 @@ template <class T> static void TestSmallVectorComplex()
     }
     normsum = tmv::TMV_SQRT(normsum);
     normdiff = tmv::TMV_SQRT(normdiff);
-    Assert(std::abs(ca*cb - prod) <= EPS*Norm(ca)*Norm(cb),"CInner Product");
-    Assert(std::abs(Norm(temp=ca+cb) - normsum) <= 
-           EPS*std::abs(Norm(ca)+Norm(cb)),"CSmallVector Sum");
-    Assert(std::abs(Norm(temp=ca-cb) - normdiff) <= 
-           EPS*std::abs(Norm(ca)+Norm(cb)),"CSmallVector Diff");
+    Assert(Equal2(ca*cb , prod, EPS*Norm(ca)*Norm(cb)),"CInner Product");
+    Assert(Equal2(Norm(ca+cb) , normsum, EPS*(Norm(ca)+Norm(cb))),
+           "CSmallVector Sum");
+    Assert(Equal2(Norm(ca-cb) , normdiff, EPS*(Norm(ca)+Norm(cb))),
+           "CSmallVector Diff");
 
     tmv::SmallVector<std::complex<T>,20> w;
     w << 3.3,1.2,5.4,-1.2,4.3,-9.4,0,-2,4,-11.5,
@@ -245,28 +248,26 @@ template <class T> static void TestSmallVectorComplex()
     w.imagPart() = iw;
 
     tmv::SmallVector<std::complex<T>,20> origw = w;
-    int perm[20];
+    tmv::Permutation P(20);
 
     if (showacc)
         std::cout<<"unsorted w = "<<w<<std::endl;
-    tmv::Permutation P = w.sort(perm);
+    w.sort(P);
     for(int i=1;i<20;++i) {
         Assert(w(i-1).real() <= w(i).real(),"Sort complex SmallVector");
     }
     if (showacc)
         std::cout<<"sorted w = "<<w<<std::endl;
 
-    //w.sort(0);
-    w = P.inverse() * w;
-    //w.reversePermute(perm);
+    P.inverse().applyOnLeft(w);
     Assert(w==origw,"Reverse permute sorted SmallVector = orig");
-    w.sort(0);
-    origw = P * origw;
-    //origw.permute(perm);
+    w.sort();
+    P.applyOnLeft(origw);
     Assert(w==origw,"Permute SmallVector = sorted SmallVector");
 }
 
-template <class T> static void TestSmallVectorIO()
+template <class T> 
+static void TestSmallVectorIO()
 {
     const int N = 100;
 
@@ -327,7 +328,8 @@ template <class T> static void TestSmallVectorIO()
     std::remove("tmvtest_smallvector_io.dat");
 }
 
-template <class T> void TestAllSmallVector()
+template <class T> 
+void TestAllSmallVector()
 {
 #if 1
     TestSmallVectorReal<T>();

@@ -104,6 +104,10 @@
 //            StorageType stor)
 //    ConstMatrixView MatrixViewOf(const T* m, size_t colsize, size_t rowsize,
 //            StorageType stor)
+//    MatrixView MatrixViewOf(T* m, size_t colsize, size_t rowsize,
+//            int stepi, int stepj)
+//    ConstMatrixView MatrixViewOf(const T* m, size_t colsize, size_t rowsize,
+//            int stepi, int stepj)
 //        Returns a MatrixView of the elements in m, using the actual
 //        elements m for the storage.  This is essentially the same as the 
 //        constructor with (const T*m), except that the data isn't duplicated.
@@ -225,19 +229,21 @@
 //    real_type sumAbsElements() const    or SumAbsElements(m) 
 //        Returns the sum of absolute values of elements in the matrix.
 //
+//    real_type sumAbs2Elements() const    or SumAbs2Elements(m) 
+//        Returns the sum of absolute values of the real and imaginary
+//        components of the elements in the matrix.
+//        i.e. realPart().sumAbsElements() + imagPart().sumAbsElements()
+//
 //    value_type maxElement() const    or MaxElement(m) 
 //        Returns the maximum value of any element in the matrix.
 //        As "max" doesn't make sense for complex values, for these
 //        we use just the real components.
 //
-//    value_type minElement() const    or MinElement(m) 
-//        Returns the minimum value of any element in the matrix.
-//
 //    real_type maxAbsElement() const    or MaxAbsElement(m) 
 //        The same as MaxElement, except absolute values are used.
 //
-//    real_type minAbsElement() const    or MinAbsElement(m) 
-//        The same as MinElement, except absolute values are used.
+//    real_type maxAbs2Element() const    or MaxAbsElement(m) 
+//        The same as MaxElement, except abs(m.real()) + abs(m.imag()) is used.
 //
 //    void m.makeInverse(minv) const
 //        Sets minv to the inverse of m if it exists.
@@ -624,8 +630,11 @@ namespace tmv {
     // DivType values: divideUsing, setDiv, saveDiv, etc.
     // SmallMatrix varieties don't have it, so we put it all here, and let
     // Matrix, ConstMatrixView and MatrixView inherit from this.
+    template <class M, bool hasdivider>
+    class MatrixDivHelper;
+
     template <class M>
-    class MatrixDivHelper 
+    class MatrixDivHelper<M,true>
     {
     public:
 
@@ -638,27 +647,27 @@ namespace tmv {
 
         // Constructor starts with a default of LU or QR depending on 
         // whether matrix is square.
-        inline MatrixDivHelper(bool isSquare) : 
+        MatrixDivHelper(bool isSquare) : 
             divtype(isSquare ? tmv::LU : tmv::QR) {}
 
-        inline ~MatrixDivHelper() {}
+        ~MatrixDivHelper() {}
 
-        inline void divideInPlace() const
+        void divideInPlace() const
         { divtype |= tmv::DivInPlaceFlag; saveDiv(); }
 
-        inline bool divIsInPlace() const 
+        bool divIsInPlace() const 
         { return divtype & tmv::DivInPlaceFlag; }
 
-        inline void saveDiv() const
+        void saveDiv() const
         { divtype |= tmv::SaveDivFlag; }
 
-        inline void unsaveDiv() const
+        void unsaveDiv() const
         { divtype &= ~tmv::SaveDivFlag; }
 
-        inline bool divIsSaved() const 
+        bool divIsSaved() const 
         { return divtype & tmv::SaveDivFlag; }
 
-        inline void divideUsing(DivType dt) const
+        void divideUsing(DivType dt) const
         {
             TMVAssert(dt == tmv::LU || dt == tmv::QR || 
                       dt == tmv::QRP || dt == tmv::SV);
@@ -669,18 +678,19 @@ namespace tmv {
             }
         }
 
-        inline DivType getDivType() const 
+        DivType getDivType() const 
         { return divtype & tmv::DivTypeFlags; }
 
-        inline void setDiv() const
+        void setDiv() const
         {
+            TMVStaticAssert(!Traits<typename M::real_type>::isinteger);
             if (!divIsSet()) {
                 DivType dt = getDivType();
                 TMVAssert(dt == tmv::LU /*|| dt == tmv::QR || 
                           dt == tmv::QRP || dt == tmv::SV*/);
                 switch (dt) {
                   case tmv::LU : 
-                       divider.reset(new LUD<M>(mat2(),divIsInPlace()));
+                       divider.reset(makeLUD(mat2(),divIsInPlace()));
                        break;
                   default :
                        // The above assert should have already failed.
@@ -690,22 +700,22 @@ namespace tmv {
             }
         }
 
-        inline void unsetDiv() const
+        void unsetDiv() const
         { divider.reset(); }
 
-        inline bool divIsSet() const
+        bool divIsSet() const
         { return getDiv(); }
 
-        inline void resetDiv() const
+        void resetDiv() const
         { unsetDiv(); setDiv(); }
 
-        inline void doneDiv() const
+        void doneDiv() const
         { if (!divIsSaved()) unsetDiv(); }
 
-        inline getdiv_type getDiv() const
+        getdiv_type getDiv() const
         { return divider.get(); }
 
-        inline lud_type lud() const
+        lud_type lud() const
         {
             divideUsing(LU);
             setDiv();
@@ -713,7 +723,7 @@ namespace tmv {
             return static_cast<lud_type>(*getDiv());
         }
 
-        inline qrd_type qrd() const
+        qrd_type qrd() const
         {
             divideUsing(QR);
             setDiv();
@@ -721,7 +731,7 @@ namespace tmv {
             return static_cast<qrd_type>(*getDiv());
         }
 
-        inline qrpd_type qrpd() const
+        qrpd_type qrpd() const
         {
             divideUsing(QRP);
             setDiv();
@@ -729,7 +739,7 @@ namespace tmv {
             return static_cast<qrpd_type>(*getDiv());
         }
 
-        inline svd_type svd() const
+        svd_type svd() const
         {
             divideUsing(SV);
             setDiv();
@@ -739,14 +749,14 @@ namespace tmv {
 
         // use name mat2 rather than mat to avoid ambiguating mat() from
         // BaseMatrix when inheriting from both BaseMatrix and MatrixDivHelper.
-        inline const M& mat2() const
+        const M& mat2() const
         { return *static_cast<const M*>(this); }
 
-        inline bool checkDecomp(std::ostream* fout=0) const
+        bool checkDecomp(std::ostream* fout=0) const
         { return getDiv()->checkDecomp(mat2(),fout); }
 
         template <class M2>
-        inline bool checkDecomp(
+        bool checkDecomp(
             const BaseMatrix_Rec<M2>& m, std::ostream* fout=0) const
         { return getDiv()->checkDecomp(m,fout); }
 
@@ -756,6 +766,37 @@ namespace tmv {
         mutable DivType divtype;
 
     }; // MatrixDivHelper
+
+    template <class M>
+    class MatrixDivHelper<M,false>
+    {
+    public:
+
+        MatrixDivHelper(bool ) {}
+        ~MatrixDivHelper() {}
+        void divideInPlace() const {}
+        bool divIsInPlace() const { return false; }
+        void saveDiv() const {}
+        void unsaveDiv() const {}
+        bool divIsSaved() const { return false; }
+        void divideUsing(DivType dt) const {}
+        DivType getDivType() const { return XXX; }
+        void setDiv() const {}
+        void unsetDiv() const {}
+        bool divIsSet() const { return false; }
+        void resetDiv() const {}
+        void doneDiv() const {}
+        void* getDiv() const{ return 0; }
+        LUD<M> lud() const { return LUD<M>(); }
+        void qrd() const {}
+        void qrpd() const {}
+        void svd() const {}
+        bool checkDecomp(std::ostream* =0) const { return false; }
+
+        template <class M2>
+        bool checkDecomp(const BaseMatrix_Rec<M2>& , std::ostream* =0) const 
+        { return false; }
+    };
 
     template <class T, StorageType S, IndexStyle I>
     struct Traits<Matrix<T,S,I> >
@@ -773,16 +814,6 @@ namespace tmv {
         typedef type copy_type;
 
         typedef QuotXM<1,real_type,type> inverse_type;
-        typedef const LUD<type>& lud_type;
-#if 1
-        typedef InvalidType qrd_type;
-        typedef InvalidType qrpd_type;
-        typedef InvalidType svd_type;
-#else
-        typedef const QRD<type>& qrd_type;
-        typedef const QRPD<type>& qrpd_type;
-        typedef const SVD<type>& svd_type;
-#endif
 
         enum { _colsize = UNKNOWN };
         enum { _rowsize = UNKNOWN };
@@ -800,7 +831,19 @@ namespace tmv {
         enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
         enum { notC = iscomplex };
-        enum { _hasdivider = true };
+
+        enum { _hasdivider = Traits<real_type>::isinst && !Traits<real_type>::isinteger };
+        typedef typename TypeSelect<_hasdivider ,
+                const LUD<type>& , LUD<type> >::type lud_type;
+#if 1
+        typedef InvalidType qrd_type;
+        typedef InvalidType qrpd_type;
+        typedef InvalidType svd_type;
+#else
+        typedef const QRD<type>& qrd_type;
+        typedef const QRPD<type>& qrpd_type;
+        typedef const SVD<type>& svd_type;
+#endif
 
         typedef ConstVectorView<T,_stepi,false,I> const_col_type;
         typedef ConstVectorView<T,_stepi,false,I> const_col_sub_type;
@@ -895,22 +938,17 @@ namespace tmv {
         typedef MatrixView<T,_stepi,_stepj,false,I> nonconj_type;
     };
 
-#ifdef XTEST
-#ifdef TMV_DEBUG
-#define XTEST_DEBUG
-#endif
-#endif
-
     template <class T, StorageType S, IndexStyle I>
     class Matrix : 
         public BaseMatrix_Rec_Mutable<Matrix<T,S,I> >,
-        public MatrixDivHelper<Matrix<T,S,I> >
+        public MatrixDivHelper<Matrix<T,S,I> , Traits<Matrix<T,S,I> >::_hasdivider >
     {
     public:
 
         typedef Matrix<T,S,I> type;
         typedef BaseMatrix_Rec_Mutable<type> base_mut;
         typedef BaseMatrix_Rec_Mutable<type> base_div;
+        typedef MatrixDivHelper<type,Traits<type>::_hasdivider> divhelper;
 
         enum { _colsize = Traits<type>::_colsize };
         enum { _rowsize = Traits<type>::_rowsize };
@@ -931,18 +969,15 @@ namespace tmv {
         // Constructors
         //
 
-        inline Matrix() : 
-            MatrixDivHelper<type>(true),
+        Matrix() : 
+            divhelper(true),
             itscs(0), itsrs(0), linsize(0), itsm(0)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
-#ifdef TMV_DEBUG
-            this->setAllTo(T(888));
-#endif
         }
 
-        inline Matrix(size_t cs, size_t rs) :
-            MatrixDivHelper<type>(cs==rs),
+        Matrix(size_t cs, size_t rs) :
+            divhelper(cs==rs),
             itscs(cs), itsrs(rs), linsize(cs*rs), itsm(linsize)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
@@ -951,47 +986,38 @@ namespace tmv {
 #endif
         }
 
-        inline Matrix(size_t cs, size_t rs, T x) :
-            MatrixDivHelper<type>(cs==rs),
+        Matrix(size_t cs, size_t rs, T x) :
+            divhelper(cs==rs),
             itscs(cs), itsrs(rs), linsize(cs*rs), itsm(linsize)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             this->setAllTo(x);
         }
 
-        inline Matrix(size_t cs, size_t rs, const T* vv) :
-            MatrixDivHelper<type>(cs==rs),
+        Matrix(size_t cs, size_t rs, const T* vv) :
+            divhelper(cs==rs),
             itscs(cs), itsrs(rs), linsize(cs*rs), itsm(linsize)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
-#ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
-#endif
             typename type::linearview_type lv = this->linearView();
             ConstVectorView<T,1>(vv,linsize).newAssignTo(lv);
         }
 
-        inline Matrix(size_t cs, size_t rs, const std::vector<T>& vv) : 
-            MatrixDivHelper<type>(cs==rs),
+        Matrix(size_t cs, size_t rs, const std::vector<T>& vv) : 
+            divhelper(cs==rs),
             itscs(cs), itsrs(rs), linsize(cs*rs), itsm(linsize)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVAssert(vv.size() == linsize);
-#ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
-#endif
             typename type::linearview_type lv = this->linearView();
             ConstVectorView<T,1>(&vv[0],linsize).newAssignTo(lv);
         }
 
-        inline Matrix(const std::vector<std::vector<T> >& vv) :
-            MatrixDivHelper<type>(false),
+        Matrix(const std::vector<std::vector<T> >& vv) :
+            divhelper(false),
             itscs(vv.size()), itsrs(0), linsize(0), itsm(0)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
-#ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
-#endif
             if (itscs > 0) {
                 resize(itscs,vv[0].size());
                 for(size_t i=0;i<itscs;++i) {
@@ -1002,46 +1028,37 @@ namespace tmv {
             }
         }
 
-        inline Matrix(const type& m2) :
-            MatrixDivHelper<type>(m2.isSquare()),
+        Matrix(const type& m2) :
+            divhelper(m2.isSquare()),
             itscs(m2.itscs), itsrs(m2.itsrs),
             linsize(m2.linsize), itsm(linsize)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
-#ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
-#endif
             m2.newAssignTo(*this);
         }
 
         template <class M2>
-        inline Matrix(const BaseMatrix<M2>& m2) :
-            MatrixDivHelper<type>(m2.isSquare()),
+        Matrix(const BaseMatrix<M2>& m2) :
+            divhelper(m2.isSquare()),
             itscs(m2.colsize()), itsrs(m2.rowsize()),
             linsize(itscs * itsrs), itsm(linsize)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert((ShapeTraits2<M2::_shape,_shape>::assignable));
-#ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
-#endif
             m2.newAssignTo(*this);
         }
 
         template <class M2>
-        inline Matrix(const BaseMatrix_Rec<M2>& m2) :
-            MatrixDivHelper<type>(m2.isSquare()),
+        Matrix(const BaseMatrix_Rec<M2>& m2) :
+            divhelper(m2.isSquare()),
             itscs(m2.colsize()), itsrs(m2.rowsize()),
             linsize(m2.ls()), itsm(linsize)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
-#ifdef XTEST_DEBUG
-            this->setAllTo(T(888));
-#endif
             m2.newAssignTo(*this);
         }
 
-        inline ~Matrix() 
+        ~Matrix() 
         {
 #ifdef TMV_DEBUG
             this->setAllTo(T(999));
@@ -1052,20 +1069,20 @@ namespace tmv {
         // Op=
         //
 
-        inline type& operator=(const type& m2)
+        type& operator=(const type& m2)
         {
             if (&m2 != this) base_mut::operator=(m2);
             return *this; 
         }
 
         template <class M2>
-        inline type& operator=(const BaseMatrix<M2>& m2)
+        type& operator=(const BaseMatrix<M2>& m2)
         {
             base_mut::operator=(m2);
             return *this; 
         }
 
-        inline type& operator=(T x)
+        type& operator=(T x)
         {
             base_mut::operator=(x);
             return *this; 
@@ -1076,16 +1093,16 @@ namespace tmv {
         // Auxilliary Functions
         //
 
-        inline const T* cptr() const { return itsm; }
-        inline T* ptr() { return itsm; }
+        const T* cptr() const { return itsm; }
+        T* ptr() { return itsm; }
 
-        inline T cref(int i, int j) const
+        T cref(int i, int j) const
         { return itsm[S==RowMajor ? i*stepi()+j : i+j*stepj()]; }
 
-        inline T& ref(int i, int j)
+        T& ref(int i, int j)
         { return itsm[S==RowMajor ? i*stepi()+j : i+j*stepj()]; }
 
-        inline void swapWith(type& m2)
+        void swapWith(type& m2)
         {
             TMVAssert(m2.colsize() == colsize());
             TMVAssert(m2.rowsize() == rowsize());
@@ -1093,25 +1110,29 @@ namespace tmv {
             itsm.swapWith(m2.itsm);
         }
         
-        inline void resize(const size_t cs, const size_t rs)
+        void resize(const size_t cs, const size_t rs)
         {
             itscs = cs;
             itsrs = rs;
-            if (cs == rs) MatrixDivHelper<type>::divideUsing(tmv::LU);
-            else MatrixDivHelper<type>::divideUsing(tmv::QR);
+            if (cs == rs) divhelper::divideUsing(tmv::LU);
+            else divhelper::divideUsing(tmv::QR);
             linsize = cs*rs;
             itsm.resize(linsize);
+#ifdef TMV_DEBUG
+            this->setAllTo(T(888));
+#endif
         }
 
-        inline size_t ls() const { return linsize; }
-        inline size_t colsize() const { return itscs; }
-        inline size_t rowsize() const { return itsrs; }
-        inline int stepi() const { return S == RowMajor ? itsrs : 1; }
-        inline int stepj() const { return S == RowMajor ? 1 : itscs; }
-        inline bool isconj() const { return false; }
-        inline bool isrm() const { return S == RowMajor; }
-        inline bool iscm() const { return S == ColMajor; }
-        inline StorageType stor() const { return S; }
+        size_t ls() const { return linsize; }
+        size_t colsize() const { return itscs; }
+        size_t rowsize() const { return itsrs; }
+        int nElements() const { return itscs*itsrs; }
+        int stepi() const { return S == RowMajor ? itsrs : 1; }
+        int stepj() const { return S == RowMajor ? 1 : itscs; }
+        bool isconj() const { return false; }
+        bool isrm() const { return S == RowMajor; }
+        bool iscm() const { return S == ColMajor; }
+        StorageType stor() const { return S; }
 
     private:
 
@@ -1129,23 +1150,23 @@ namespace tmv {
         typedef MatrixF<T,S> type;
         typedef Matrix<T,S,FortranStyle> mtype;
 
-        inline MatrixF(size_t cs, size_t rs) : mtype(cs,rs) {}
-        inline MatrixF(size_t cs, size_t rs, T x) : mtype(cs,rs,x) {}
-        inline MatrixF(size_t cs, size_t rs, const T* vv) : mtype(cs,rs,vv) {}
-        inline MatrixF(size_t cs, size_t rs, const std::vector<T>& vv) : 
+        MatrixF(size_t cs, size_t rs) : mtype(cs,rs) {}
+        MatrixF(size_t cs, size_t rs, T x) : mtype(cs,rs,x) {}
+        MatrixF(size_t cs, size_t rs, const T* vv) : mtype(cs,rs,vv) {}
+        MatrixF(size_t cs, size_t rs, const std::vector<T>& vv) : 
             mtype(cs,rs,vv) {}
-        inline MatrixF(const std::vector<std::vector<T> >& vv) : mtype(vv) {}
-        inline MatrixF(const type& m2) : mtype(m2) {}
+        MatrixF(const std::vector<std::vector<T> >& vv) : mtype(vv) {}
+        MatrixF(const type& m2) : mtype(m2) {}
         template <class M2>
-        inline MatrixF(const BaseMatrix<M2>& m2) : mtype(m2) {}
-        inline ~MatrixF() {}
+        MatrixF(const BaseMatrix<M2>& m2) : mtype(m2) {}
+        ~MatrixF() {}
 
-        inline type& operator=(const type& m2)
+        type& operator=(const type& m2)
         { mtype::operator=(m2); return *this; }
         template <class M2>
-        inline type& operator=(const BaseMatrix<M2>& m2)
+        type& operator=(const BaseMatrix<M2>& m2)
         { mtype::operator=(m2); return *this; }
-        inline type& operator=(T x)
+        type& operator=(T x)
         { mtype::operator=(x); return *this; }
 
     }; // MatrixF
@@ -1166,16 +1187,6 @@ namespace tmv {
         typedef Matrix<T,Sj==1?RowMajor:ColMajor,I> copy_type;
 
         typedef QuotXM<1,real_type,type> inverse_type;
-        typedef const LUD<type>& lud_type;
-#if 1
-        typedef InvalidType qrd_type;
-        typedef InvalidType qrpd_type;
-        typedef InvalidType svd_type;
-#else
-        typedef const QRD<type>& qrd_type;
-        typedef const QRPD<type>& qrpd_type;
-        typedef const SVD<type>& svd_type;
-#endif
 
         enum { _colsize = UNKNOWN };
         enum { _rowsize = UNKNOWN };
@@ -1193,7 +1204,19 @@ namespace tmv {
         enum { twoSi = isreal ? Si : IntTraits<Si>::twoS };
         enum { twoSj = isreal ? Sj : IntTraits<Sj>::twoS };
         enum { notC = !C && iscomplex };
-        enum { _hasdivider = true };
+
+        enum { _hasdivider = Traits<real_type>::isinst && !Traits<real_type>::isinteger };
+        typedef typename TypeSelect<_hasdivider ,
+                const LUD<type>& , LUD<type> >::type lud_type;
+#if 1
+        typedef InvalidType qrd_type;
+        typedef InvalidType qrpd_type;
+        typedef InvalidType svd_type;
+#else
+        typedef const QRD<type>& qrd_type;
+        typedef const QRPD<type>& qrpd_type;
+        typedef const SVD<type>& svd_type;
+#endif
 
         typedef ConstVectorView<T,_stepi,C,I> const_col_type;
         typedef ConstVectorView<T,_stepi,C,I> const_col_sub_type;
@@ -1246,10 +1269,11 @@ namespace tmv {
     template <class T, int Si, int Sj, bool C, IndexStyle I>
     class ConstMatrixView : 
         public BaseMatrix_Rec<ConstMatrixView<T,Si,Sj,C,I> >,
-        public MatrixDivHelper<ConstMatrixView<T,Si,Sj,C,I> >
+        public MatrixDivHelper<ConstMatrixView<T,Si,Sj,C,I>,Traits<ConstMatrixView<T,Si,Sj,C,I> >::_hasdivider >
     {
     public:
         typedef ConstMatrixView<T,Si,Sj,C,I> type;
+        typedef MatrixDivHelper<type,Traits<type>::_hasdivider> divhelper;
 
         enum { _colsize = Traits<type>::_colsize };
         enum { _rowsize = Traits<type>::_rowsize };
@@ -1269,101 +1293,98 @@ namespace tmv {
         // Constructors
         //
 
-        inline ConstMatrixView(
+        ConstMatrixView(
             const T* m, size_t cs, size_t rs, int si, int sj) :
-            MatrixDivHelper<type>(cs==rs),
+            divhelper(cs==rs),
             itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(sj) 
         {}
 
-        inline ConstMatrixView(const T* m, size_t cs, size_t rs, int si) :
-            MatrixDivHelper<type>(cs==rs),
+        ConstMatrixView(const T* m, size_t cs, size_t rs, int si) :
+            divhelper(cs==rs),
             itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(Sj) 
         { TMVStaticAssert(Sj != UNKNOWN); }
 
-        inline ConstMatrixView(const T* m, size_t cs, size_t rs) :
-            MatrixDivHelper<type>(cs==rs),
+        ConstMatrixView(const T* m, size_t cs, size_t rs) :
+            divhelper(cs==rs),
             itsm(m), itscs(cs), itsrs(rs), itssi(Si), itssj(Sj)
         { TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); }
 
-        inline ConstMatrixView(const type& m2) :
-            MatrixDivHelper<type>(m2.isSquare()),
+        ConstMatrixView(const type& m2) :
+            divhelper(m2.isSquare()),
             itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
             itssi(m2.stepi()), itssj(m2.stepj()) 
         {}
 
-        inline ConstMatrixView(const MatrixView<T,Si,Sj,C,I>& m2) :
-            MatrixDivHelper<type>(m2.isSquare()),
-            itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
-            itssi(m2.stepi()), itssj(m2.stepj()) 
-        {}
-
-        template <int Si2, int Sj2, IndexStyle I2>
-        inline ConstMatrixView(const ConstMatrixView<T,Si2,Sj2,C,I2>& m2) :
-            MatrixDivHelper<type>(m2.isSquare()),
+        ConstMatrixView(const MatrixView<T,Si,Sj,C,I>& m2) :
+            divhelper(m2.isSquare()),
             itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
             itssi(m2.stepi()), itssj(m2.stepj()) 
         {}
 
         template <int Si2, int Sj2, IndexStyle I2>
-        inline ConstMatrixView(const MatrixView<T,Si2,Sj2,C,I2>& m2) :
-            MatrixDivHelper<type>(m2.isSquare()),
+        ConstMatrixView(const ConstMatrixView<T,Si2,Sj2,C,I2>& m2) :
+            divhelper(m2.isSquare()),
+            itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
+            itssi(m2.stepi()), itssj(m2.stepj()) 
+        {}
+
+        template <int Si2, int Sj2, IndexStyle I2>
+        ConstMatrixView(const MatrixView<T,Si2,Sj2,C,I2>& m2) :
+            divhelper(m2.isSquare()),
             itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
             itssi(m2.stepi()), itssj(m2.stepj()) 
         {}
 
         template <int M2, int N2, int Si2, int Sj2, IndexStyle I2>
-        inline ConstMatrixView(
+        ConstMatrixView(
             const ConstSmallMatrixView<T,M2,N2,Si2,Sj2,C,I2>& m2) :
-            MatrixDivHelper<type>(m2.isSquare()),
+            divhelper(m2.isSquare()),
             itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
             itssi(m2.stepi()), itssj(m2.stepj()) 
         {}
 
         template <int M2, int N2, int Si2, int Sj2, IndexStyle I2>
-        inline ConstMatrixView(
+        ConstMatrixView(
             const SmallMatrixView<T,M2,N2,Si2,Sj2,C,I2>& m2) :
-            MatrixDivHelper<type>(m2.isSquare()),
+            divhelper(m2.isSquare()),
             itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
             itssi(m2.stepi()), itssj(m2.stepj()) 
         {}
 
-        inline ~ConstMatrixView() { 
+        ~ConstMatrixView() { 
 #ifdef TMV_DEBUG
             itsm = 0; 
 #endif
         }
 
     private :
-        inline void operator=(const type& m2);
+        void operator=(const type& m2);
     public :
 
         //
         // Auxilliary Functions
         //
 
-        inline const T* cptr() const { return itsm; }
+        const T* cptr() const { return itsm; }
 
-        inline T cref(int i, int j) const
+        T cref(int i, int j) const
         { return DoConj<C>(itsm[i*stepi()+j*stepj()]); }
 
-        inline size_t ls() const { return itscs*itsrs; }
-        inline size_t colsize() const { return itscs; }
-        inline size_t rowsize() const { return itsrs; }
-        inline int stepi() const { return itssi; }
-        inline int stepj() const { return itssj; }
-        inline bool isconj() const { return C; }
-        inline bool isrm() const 
+        size_t ls() const { return itscs*itsrs; }
+        size_t colsize() const { return itscs; }
+        size_t rowsize() const { return itsrs; }
+        int nElements() const { return itscs*itsrs; }
+        int stepi() const { return itssi; }
+        int stepj() const { return itssj; }
+        bool isconj() const { return C; }
+        bool isrm() const 
         { return _rowmajor || (!_colmajor &&  stepj() == 1); }
-        inline bool iscm() const 
+        bool iscm() const 
         { return _colmajor || (!_rowmajor &&  stepi() == 1); }
 
     private :
 
-#ifdef TMV_DEBUG
         const T* itsm;
-#else
-        const T*const itsm;
-#endif
         const size_t itscs;
         const size_t itsrs;
         const CheckedInt<Si> itssi;
@@ -1379,38 +1400,38 @@ namespace tmv {
         typedef ConstMatrixViewF<T,Si,Sj,C> type;
         typedef ConstMatrixView<T,Si,Sj,C,FortranStyle> mtype;
 
-        inline ConstMatrixViewF(
+        ConstMatrixViewF(
             const T* m, size_t cs, size_t rs, int si, int sj) :
             mtype(m,cs,rs,si,sj) 
         {}
-        inline ConstMatrixViewF(const T* m, size_t cs, size_t rs, int si) :
+        ConstMatrixViewF(const T* m, size_t cs, size_t rs, int si) :
             mtype(m,cs,rs,si) 
         {}
-        inline ConstMatrixViewF(const T* m, size_t cs, size_t rs) : 
+        ConstMatrixViewF(const T* m, size_t cs, size_t rs) : 
             mtype(m,cs,rs) 
         {}
-        inline ConstMatrixViewF(const type& m2) : mtype(m2) {}
+        ConstMatrixViewF(const type& m2) : mtype(m2) {}
         template <int Si2, int Sj2, IndexStyle I2>
-        inline ConstMatrixViewF(const ConstMatrixView<T,Si2,Sj2,C,I2>& m2) :
+        ConstMatrixViewF(const ConstMatrixView<T,Si2,Sj2,C,I2>& m2) :
             mtype(m2) 
         {}
         template <int Si2, int Sj2, IndexStyle I2>
-        inline ConstMatrixViewF(const MatrixView<T,Si2,Sj2,C,I2>& m2) :
+        ConstMatrixViewF(const MatrixView<T,Si2,Sj2,C,I2>& m2) :
             mtype(m2) 
         {}
         template <int M2, int N2, int Si2, int Sj2, IndexStyle I2>
-        inline ConstMatrixViewF(
+        ConstMatrixViewF(
             const ConstSmallMatrixView<T,M2,N2,Si2,Sj2,C,I2>& m2) : mtype(m2) 
         {}
         template <int M2, int N2, int Si2, int Sj2, IndexStyle I2>
-        inline ConstMatrixViewF(
+        ConstMatrixViewF(
             const SmallMatrixView<T,M2,N2,Si2,Sj2,C,I2>& m2) : mtype(m2) 
         {}
-        inline ~ConstMatrixViewF() 
+        ~ConstMatrixViewF() 
         {}
 
     private :
-        inline void operator=(const type& m2);
+        void operator=(const type& m2);
 
     }; // ConstMatrixViewF
 
@@ -1430,16 +1451,6 @@ namespace tmv {
         typedef Matrix<T,Sj==1?RowMajor:ColMajor,I> copy_type;
 
         typedef QuotXM<1,real_type,type> inverse_type;
-        typedef const LUD<type>& lud_type;
-#if 1
-        typedef InvalidType qrd_type;
-        typedef InvalidType qrpd_type;
-        typedef InvalidType svd_type;
-#else
-        typedef const QRD<type>& qrd_type;
-        typedef const QRPD<type>& qrpd_type;
-        typedef const SVD<type>& svd_type;
-#endif
 
         enum { _colsize = UNKNOWN };
         enum { _rowsize = UNKNOWN };
@@ -1457,7 +1468,19 @@ namespace tmv {
         enum { twoSi = isreal ? Si : IntTraits<Si>::twoS };
         enum { twoSj = isreal ? Sj : IntTraits<Sj>::twoS };
         enum { notC = !C && iscomplex };
-        enum { _hasdivider = true };
+
+        enum { _hasdivider = Traits<real_type>::isinst && !Traits<real_type>::isinteger };
+        typedef typename TypeSelect<_hasdivider ,
+                const LUD<type>& , LUD<type> >::type lud_type;
+#if 1
+        typedef InvalidType qrd_type;
+        typedef InvalidType qrpd_type;
+        typedef InvalidType svd_type;
+#else
+        typedef const QRD<type>& qrd_type;
+        typedef const QRPD<type>& qrpd_type;
+        typedef const SVD<type>& svd_type;
+#endif
 
         typedef ConstVectorView<T,_stepi,C,I> const_col_type;
         typedef ConstVectorView<T,_stepi,C,I> const_col_sub_type;
@@ -1553,13 +1576,14 @@ namespace tmv {
     template <class T, int Si, int Sj, bool C, IndexStyle I>
     class MatrixView : 
         public BaseMatrix_Rec_Mutable<MatrixView<T,Si,Sj,C,I> >,
-        public MatrixDivHelper<MatrixView<T,Si,Sj,C,I> >
+        public MatrixDivHelper<MatrixView<T,Si,Sj,C,I>,Traits<MatrixView<T,Si,Sj,C,I> >::_hasdivider >
     {
     public:
 
         typedef MatrixView<T,Si,Sj,C,I> type;
         typedef BaseMatrix_Rec_Mutable<type> base_mut;
         typedef typename base_mut::reference reference;
+        typedef MatrixDivHelper<type,Traits<type>::_hasdivider> divhelper;
 
         enum { _colsize = Traits<type>::_colsize };
         enum { _rowsize = Traits<type>::_rowsize };
@@ -1579,38 +1603,38 @@ namespace tmv {
         // Constructors
         //
 
-        inline MatrixView(T* m, size_t cs, size_t rs, int si, int sj) :
-            MatrixDivHelper<type>(cs==rs),
+        MatrixView(T* m, size_t cs, size_t rs, int si, int sj) :
+            divhelper(cs==rs),
             itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(sj) {}
 
-        inline MatrixView(T* m, size_t cs, size_t rs, int si) :
-            MatrixDivHelper<type>(cs==rs),
+        MatrixView(T* m, size_t cs, size_t rs, int si) :
+            divhelper(cs==rs),
             itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(Sj) 
         { TMVStaticAssert(Sj != UNKNOWN); }
 
-        inline MatrixView(T* m, size_t cs, size_t rs) :
-            MatrixDivHelper<type>(cs==rs),
+        MatrixView(T* m, size_t cs, size_t rs) :
+            divhelper(cs==rs),
             itsm(m), itscs(cs), itsrs(rs), itssi(Si), itssj(Sj)
         { TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); }
 
-        inline MatrixView(const type& m2) :
-            MatrixDivHelper<type>(m2.isSquare()),
+        MatrixView(const type& m2) :
+            divhelper(m2.isSquare()),
             itsm(m2.itsm), itscs(m2.colsize()), itsrs(m2.rowsize()),
             itssi(m2.stepi()), itssj(m2.stepj()) {}
 
         template <int Si2, int Sj2, IndexStyle I2>
-        inline MatrixView(MatrixView<T,Si2,Sj2,C,I2> m2) :
-            MatrixDivHelper<type>(m2.isSquare()),
+        MatrixView(MatrixView<T,Si2,Sj2,C,I2> m2) :
+            divhelper(m2.isSquare()),
             itsm(m2.ptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
             itssi(m2.stepi()), itssj(m2.stepj()) {}
 
         template <int M2, int N2, int Si2, int Sj2, IndexStyle I2>
-        inline MatrixView(SmallMatrixView<T,M2,N2,Si2,Sj2,C,I2> m2) :
-            MatrixDivHelper<type>(m2.isSquare()),
+        MatrixView(SmallMatrixView<T,M2,N2,Si2,Sj2,C,I2> m2) :
+            divhelper(m2.isSquare()),
             itsm(m2.ptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
             itssi(m2.stepi()), itssj(m2.stepj()) {}
 
-        inline ~MatrixView() { 
+        ~MatrixView() { 
 #ifdef TMV_DEBUG
             itsm = 0; 
 #endif
@@ -1622,19 +1646,19 @@ namespace tmv {
         //
 
         template <class M2>
-        inline type& operator=(const BaseMatrix<M2>& m2)
+        type& operator=(const BaseMatrix<M2>& m2)
         {
             base_mut::operator=(m2); 
             return *this;
         }
 
-        inline type& operator=(const type& m2)
+        type& operator=(const type& m2)
         {
             base_mut::operator=(m2); 
             return *this;
         }
 
-        inline type& operator=(const T x)
+        type& operator=(const T x)
         {
             base_mut::operator=(x); 
             return *this;
@@ -1645,33 +1669,30 @@ namespace tmv {
         // Auxilliary Functions
         //
 
-        inline const T* cptr() const { return itsm; }
-        inline T* ptr() { return itsm; }
+        const T* cptr() const { return itsm; }
+        T* ptr() { return itsm; }
 
-        inline T cref(int i, int j) const
+        T cref(int i, int j) const
         { return DoConj<C>(itsm[i*stepi()+j*stepj()]); }
 
-        inline reference ref(int i, int j) 
+        reference ref(int i, int j) 
         { return reference(itsm[i*stepi()+j*stepj()]); }
 
-        inline size_t ls() const { return itscs*itsrs; }
-        inline size_t colsize() const { return itscs; }
-        inline size_t rowsize() const { return itsrs; }
-        inline int stepi() const { return itssi; }
-        inline int stepj() const { return itssj; }
-        inline bool isconj() const { return C; }
-        inline bool isrm() const 
+        size_t ls() const { return itscs*itsrs; }
+        size_t colsize() const { return itscs; }
+        size_t rowsize() const { return itsrs; }
+        int nElements() const { return itscs*itsrs; }
+        int stepi() const { return itssi; }
+        int stepj() const { return itssj; }
+        bool isconj() const { return C; }
+        bool isrm() const 
         { return _rowmajor || (!_colmajor &&  stepj() == 1); }
-        inline bool iscm() const 
+        bool iscm() const 
         { return _colmajor || (!_rowmajor &&  stepi() == 1); }
 
     private :
 
-#ifdef TMV_DEBUG
         T* itsm;
-#else
-        T*const itsm;
-#endif
         const size_t itscs;
         const size_t itsrs;
         const CheckedInt<Si> itssi;
@@ -1687,32 +1708,32 @@ namespace tmv {
         typedef MatrixViewF<T,Si,Sj,C> type;
         typedef MatrixView<T,Si,Sj,C,FortranStyle> mtype;
 
-        inline MatrixViewF(T* m, size_t cs, size_t rs, int si, int sj) :
+        MatrixViewF(T* m, size_t cs, size_t rs, int si, int sj) :
             mtype(m,cs,rs,si,sj) 
         {}
-        inline MatrixViewF(T* m, size_t cs, size_t rs, int si) :
+        MatrixViewF(T* m, size_t cs, size_t rs, int si) :
             mtype(m,cs,rs,si) 
         {}
-        inline MatrixViewF(T* m, size_t cs, size_t rs) : mtype(m,cs,rs) 
+        MatrixViewF(T* m, size_t cs, size_t rs) : mtype(m,cs,rs) 
         {}
-        inline MatrixViewF(const type& m2) : mtype(m2) 
+        MatrixViewF(const type& m2) : mtype(m2) 
         {}
         template <int Si2, int Sj2, IndexStyle I2>
-        inline MatrixViewF(MatrixView<T,Si2,Sj2,C,I2> m2) : mtype(m2) 
+        MatrixViewF(MatrixView<T,Si2,Sj2,C,I2> m2) : mtype(m2) 
         {}
         template <int M2, int N2, int Si2, int Sj2, IndexStyle I2>
-        inline MatrixViewF(SmallMatrixView<T,M2,N2,Si2,Sj2,C,I2> m2) :
+        MatrixViewF(SmallMatrixView<T,M2,N2,Si2,Sj2,C,I2> m2) :
             mtype(m2) 
         {}
-        inline ~MatrixViewF() 
+        ~MatrixViewF() 
         {}
 
         template <class M2>
-        inline type& operator=(const BaseMatrix<M2>& m2)
+        type& operator=(const BaseMatrix<M2>& m2)
         { mtype::operator=(m2); return *this; }
-        inline type& operator=(const type& m2)
+        type& operator=(const type& m2)
         { mtype::operator=(m2); return *this; }
-        inline type& operator=(const T x)
+        type& operator=(const T x)
         { mtype::operator=(x); return *this; }
 
     }; // MatrixViewF
@@ -1729,7 +1750,7 @@ namespace tmv {
 
     // MatrixView of raw memory:
     template <class T> 
-    inline MatrixView<T> MatrixViewOf(
+    static MatrixView<T> MatrixViewOf(
         T* m, size_t colsize, size_t rowsize, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -1740,7 +1761,7 @@ namespace tmv {
     }
 
     template <class T> 
-    inline ConstMatrixView<T> MatrixViewOf(
+    static ConstMatrixView<T> MatrixViewOf(
         const T* m, size_t colsize, size_t rowsize, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -1751,12 +1772,12 @@ namespace tmv {
     }
 
     template <class T> 
-    inline MatrixView<T> MatrixViewOf(
+    static MatrixView<T> MatrixViewOf(
         T* m, size_t colsize, size_t rowsize, int stepi, int stepj)
     { return MatrixView<T>(m,colsize,rowsize,stepi,stepj); }
 
     template <class T> 
-    inline ConstMatrixView<T> MatrixViewOf(
+    static ConstMatrixView<T> MatrixViewOf(
         const T* m, size_t colsize, size_t rowsize, int stepi, int stepj)
     { return ConstMatrixView<T>(m,colsize,rowsize,stepi,stepj); }
 
@@ -1766,19 +1787,47 @@ namespace tmv {
     //
 
     template <class T, StorageType S, IndexStyle I>
-    inline void Swap(Matrix<T,S,I>& m1, Matrix<T,S,I>& m2)
+    static void Swap(Matrix<T,S,I>& m1, Matrix<T,S,I>& m2)
     { m1.swapWith(m2); }
     template <class M, class T, int Si, int Sj, bool C, IndexStyle I>
-    inline void Swap(BaseMatrix_Rec_Mutable<M>& m1, MatrixView<T,Si,Sj,C,I> m2)
+    static void Swap(BaseMatrix_Rec_Mutable<M>& m1, MatrixView<T,Si,Sj,C,I> m2)
     { DoSwap(m1,m2); }
     template <class M, class T, int Si, int Sj, bool C, IndexStyle I>
-    inline void Swap(MatrixView<T,Si,Sj,C,I> m1, BaseMatrix_Rec_Mutable<M>& m2)
+    static void Swap(MatrixView<T,Si,Sj,C,I> m1, BaseMatrix_Rec_Mutable<M>& m2)
     { DoSwap(m1,m2); }
-    template <class T, int Si1, int Sj1, bool C1, IndexStyle I1,
-              int Si2, int Sj2, bool C2, IndexStyle I2>
-    inline void Swap(
+    template <class T, int Si1, int Sj1, bool C1, IndexStyle I1, int Si2, int Sj2, bool C2, IndexStyle I2>
+    static void Swap(
         MatrixView<T,Si1,Sj1,C1,I1> m1, MatrixView<T,Si2,Sj2,C2,I2> m2)
     { DoSwap(m1,m2); }
+
+
+    //
+    // Conjugate, Transpose, Adjoint
+    //
+
+    template <class T, StorageType S, IndexStyle I>
+    static typename Matrix<T,S,I>::conjugate_type Conjugate(Matrix<T,S,I>& m)
+    { return m.conjugate(); }
+    template <class T, int Si, int Sj, bool C, IndexStyle I>
+    static typename MatrixView<T,Si,Sj,C,I>::conjugate_type Conjugate(
+        MatrixView<T,Si,Sj,C,I>& m)
+    { return m.conjugate(); }
+
+    template <class T, StorageType S, IndexStyle I>
+    static typename Matrix<T,S,I>::transpose_type Transpose(Matrix<T,S,I>& m)
+    { return m.transpose(); }
+    template <class T, int Si, int Sj, bool C, IndexStyle I>
+    static typename MatrixView<T,Si,Sj,C,I>::transpose_type Transpose(
+        MatrixView<T,Si,Sj,C,I>& m)
+    { return m.transpose(); }
+
+    template <class T, StorageType S, IndexStyle I>
+    static typename Matrix<T,S,I>::adjoint_type Adjoint(Matrix<T,S,I>& m)
+    { return m.adjoint(); }
+    template <class T, int Si, int Sj, bool C, IndexStyle I>
+    static typename MatrixView<T,Si,Sj,C,I>::adjoint_type Adjoint(
+        MatrixView<T,Si,Sj,C,I>& m)
+    { return m.adjoint(); }
 
 
     //
@@ -1786,7 +1835,7 @@ namespace tmv {
     //
 
     template <class T, StorageType S, IndexStyle I>
-    inline std::string TMV_Text(const Matrix<T,S,I>& )
+    static std::string TMV_Text(const Matrix<T,S,I>& )
     {
         std::ostringstream s;
         s << "Matrix<"<<TMV_Text(T())<<","<<TMV_Text(S)<<","<<TMV_Text(I)<<">";
@@ -1794,7 +1843,7 @@ namespace tmv {
     }
 
     template <class T, int Si, int Sj, bool C, IndexStyle I>
-    inline std::string TMV_Text(const ConstMatrixView<T,Si,Sj,C,I>& m)
+    static std::string TMV_Text(const ConstMatrixView<T,Si,Sj,C,I>& m)
     {
         std::ostringstream s;
         s << "ConstMatrixView<"<<TMV_Text(T());
@@ -1807,7 +1856,7 @@ namespace tmv {
     }
 
     template <class T, int Si, int Sj, bool C, IndexStyle I>
-    inline std::string TMV_Text(const MatrixView<T,Si,Sj,C,I>& m)
+    static std::string TMV_Text(const MatrixView<T,Si,Sj,C,I>& m)
     {
         std::ostringstream s;
         s << "MatrixView<"<<TMV_Text(T());

@@ -61,13 +61,13 @@ namespace tmv {
 
     // Defined below:
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void MultMM_Winograd(
+    static void MultMM_Winograd(
         const Scaling<ix,T>& x,
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2,
         BaseMatrix_Rec_Mutable<M3>& m3);
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void InlineMultMM_Winograd(
+    static void InlineMultMM_Winograd(
         const Scaling<ix,T>& x,
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2,
         BaseMatrix_Rec_Mutable<M3>& m3);
@@ -85,7 +85,7 @@ namespace tmv {
     template <bool add, int ix, class T, class M1, class M2, class M3> 
     struct MultMM_Winograd_Helper<0,add,ix,T,M1,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         {
             const int xx = UNKNOWN;
@@ -346,20 +346,22 @@ namespace tmv {
     template <int ix, class T, class M1, class M2, class M3> 
     struct MultMM_Winograd_Helper<98,false,ix,T,M1,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         {
-            typename M3::value_type xx(x);
+            typedef typename M3::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
             InstMultMM_Winograd(xx,m1.xView(),m2.xView(),m3.xView());
         }
     };
     template <int ix, class T, class M1, class M2, class M3> 
     struct MultMM_Winograd_Helper<98,true,ix,T,M1,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         {
-            typename M3::value_type xx(x);
+            typedef typename M3::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
             InstAddMultMM_Winograd(xx,m1.xView(),m2.xView(),m3.xView());
         }
     };
@@ -368,7 +370,7 @@ namespace tmv {
     template <bool add, int ix, class T, class M1, class M2, class M3> 
     struct MultMM_Winograd_Helper<-1,add,ix,T,M1,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         {
             TMVStaticAssert(!M3::_conj);
@@ -376,9 +378,6 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
             const bool inst =
-                M1::unknownsizes &&
-                M2::unknownsizes &&
-                M3::unknownsizes &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -395,7 +394,7 @@ namespace tmv {
     };
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void MultMM_Winograd(
+    static void MultMM_Winograd(
         const Scaling<ix,T>& x,
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2,
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -413,7 +412,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void InlineMultMM_Winograd(
+    static void InlineMultMM_Winograd(
         const Scaling<ix,T>& x,
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2,
         BaseMatrix_Rec_Mutable<M3>& m3)

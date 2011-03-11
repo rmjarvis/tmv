@@ -74,6 +74,8 @@
 #include "TMV_NormU.h"
 #include "TMV_MultUL.h"
 #include "TMV_Permutation.h"
+#include "TMV_MultPM.h"
+#include "TMV_MultPV.h"
 
 #include "TMV_LUDiv.h"
 #include "TMV_LUDecompose.h"
@@ -91,6 +93,8 @@ namespace tmv {
         typedef typename M::value_type T;
         typedef typename M::real_type RT;
         typedef typename M::complex_type CT;
+        typedef typename M::float_type FT;
+        typedef typename M::zfloat_type ZFT;
 
         // This next bit finds the storage type to use for the lu matrix
         // regardless of what kind of matrix M is.  e.g. this should
@@ -136,32 +140,32 @@ namespace tmv {
         void solveTransposeInPlace(BaseVector_Mutable<V2>& v2) const;
 
         // These are the virtual functions from the Divider base class.
-        inline void doSolveInPlace(MatrixView<RT> m2) const 
+        void doSolveInPlace(MatrixView<RT> m2) const 
         { solveInPlace(m2);  }
-        inline void doSolveInPlace(MatrixView<CT> m2) const 
+        void doSolveInPlace(MatrixView<CT> m2) const 
         { solveInPlace(m2);  }
-        inline void doSolveInPlace(
+        void doSolveInPlace(
             MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
         { solveInPlace(m2);  }
-        inline void doSolveInPlace(VectorView<RT> v2) const 
+        void doSolveInPlace(VectorView<RT> v2) const 
         { solveInPlace(v2);  }
-        inline void doSolveInPlace(VectorView<CT> v2) const 
+        void doSolveInPlace(VectorView<CT> v2) const 
         { solveInPlace(v2);  }
-        inline void doSolveInPlace(VectorView<CT,UNKNOWN,true> v2) const 
+        void doSolveInPlace(VectorView<CT,UNKNOWN,true> v2) const 
         { solveInPlace(v2);  }
 
-        inline void doSolveTransposeInPlace(MatrixView<RT> m2) const 
+        void doSolveTransposeInPlace(MatrixView<RT> m2) const 
         { solveTransposeInPlace(m2); } 
-        inline void doSolveTransposeInPlace(MatrixView<CT> m2) const 
+        void doSolveTransposeInPlace(MatrixView<CT> m2) const 
         { solveTransposeInPlace(m2); } 
-        inline void doSolveTransposeInPlace(
+        void doSolveTransposeInPlace(
             MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
         { solveTransposeInPlace(m2); } 
-        inline void doSolveTransposeInPlace(VectorView<RT> v2) const 
+        void doSolveTransposeInPlace(VectorView<RT> v2) const 
         { solveTransposeInPlace(v2); } 
-        inline void doSolveTransposeInPlace(VectorView<CT> v2) const 
+        void doSolveTransposeInPlace(VectorView<CT> v2) const 
         { solveTransposeInPlace(v2); } 
-        inline void doSolveTransposeInPlace(
+        void doSolveTransposeInPlace(
             VectorView<CT,UNKNOWN,true> v2) const 
         { solveTransposeInPlace(v2); } 
 
@@ -172,122 +176,122 @@ namespace tmv {
         // 
         
         template <class M1, class M2> 
-        inline void solve(
+        void solve(
             const BaseMatrix<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2) const
         { solveInPlace(m2=m1); }
         template <class V1, class V2> 
-        inline void solve(
+        void solve(
             const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2) const
         { solveInPlace(v2=v1); }
 
         template <class M1, class M2> 
-        inline void solveTranspose(
+        void solveTranspose(
             const BaseMatrix<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2) const
         { solveTransposeInPlace(m2=m1); }
         template <class V1, class V2> 
-        inline void solveTranspose(
+        void solveTranspose(
             const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2) const
         { solveTransposeInPlace(v2=v1); }
 
         // These are the virtual functions from the Divider base class.
-        inline void doSolve(
+        void doSolve(
             const ConstMatrixView<RT>& m1, MatrixView<RT> m2) const 
         { solve(m1,m2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstMatrixView<RT>& m1, MatrixView<CT> m2) const 
         { solve(m1,m2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstMatrixView<RT>& m1, 
             MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
         { solve(m1,m2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstMatrixView<CT>& m1, MatrixView<CT> m2) const 
         { solve(m1,m2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstMatrixView<CT>& m1, 
             MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
         { solve(m1,m2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstMatrixView<CT,UNKNOWN,UNKNOWN,true>& m1, 
             MatrixView<CT> m2) const 
         { solve(m1,m2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstMatrixView<CT,UNKNOWN,UNKNOWN,true>& m1, 
             MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
         { solve(m1,m2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstVectorView<RT>& v1, VectorView<RT> v2) const 
         { solve(v1,v2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstVectorView<RT>& v1, VectorView<CT> v2) const 
         { solve(v1,v2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstVectorView<RT>& v1, 
             VectorView<CT,UNKNOWN,true> v2) const 
         { solve(v1,v2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstVectorView<CT>& v1, VectorView<CT> v2) const 
         { solve(v1,v2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstVectorView<CT>& v1, 
             VectorView<CT,UNKNOWN,true> v2) const 
         { solve(v1,v2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstVectorView<CT,UNKNOWN,true>& v1, 
             VectorView<CT> v2) const 
         { solve(v1,v2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstVectorView<CT,UNKNOWN,true>& v1, 
             VectorView<CT,UNKNOWN,true> v2) const 
         { solve(v1,v2); } 
 
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstMatrixView<RT>& m1, MatrixView<RT> m2) const 
         { solveTranspose(m1,m2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstMatrixView<RT>& m1, MatrixView<CT> m2) const 
         { solveTranspose(m1,m2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstMatrixView<RT>& m1, 
             MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
         { solveTranspose(m1,m2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstMatrixView<CT>& m1, MatrixView<CT> m2) const 
         { solveTranspose(m1,m2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstMatrixView<CT>& m1, 
             MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
         { solveTranspose(m1,m2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstMatrixView<CT,UNKNOWN,UNKNOWN,true>& m1, 
             MatrixView<CT> m2) const 
         { solveTranspose(m1,m2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstMatrixView<CT,UNKNOWN,UNKNOWN,true>& m1, 
             MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
         { solveTranspose(m1,m2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstVectorView<RT>& v1, VectorView<RT> v2) const 
         { solveTranspose(v1,v2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstVectorView<RT>& v1, VectorView<CT> v2) const 
         { solveTranspose(v1,v2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstVectorView<RT>& v1, 
             VectorView<CT,UNKNOWN,true> v2) const 
         { solveTranspose(v1,v2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstVectorView<CT>& v1, VectorView<CT> v2) const 
         { solveTranspose(v1,v2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstVectorView<CT>& v1, 
             VectorView<CT,UNKNOWN,true> v2) const 
         { solveTranspose(v1,v2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstVectorView<CT,UNKNOWN,true>& v1, 
             VectorView<CT> v2) const 
         { solveTranspose(v1,v2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstVectorView<CT,UNKNOWN,true>& v1, 
             VectorView<CT,UNKNOWN,true> v2) const 
         { solveTranspose(v1,v2); }
@@ -298,7 +302,7 @@ namespace tmv {
         //
         
         T det() const;
-        RT logDet(T* sign) const;
+        FT logDet(ZFT* sign) const;
         bool isSingular() const;
 
         
@@ -309,11 +313,11 @@ namespace tmv {
         template <class M2> 
         void makeInverse(BaseMatrix_Rec_Mutable<M2>& minv) const;
 
-        inline void doMakeInverse(MatrixView<RT> minv) const 
+        void doMakeInverse(MatrixView<RT> minv) const 
         { makeInverse(minv); } 
-        inline void doMakeInverse(MatrixView<CT> minv) const 
+        void doMakeInverse(MatrixView<CT> minv) const 
         { makeInverse(minv); } 
-        inline void doMakeInverse(
+        void doMakeInverse(
             MatrixView<CT,UNKNOWN,UNKNOWN,true> minv) const 
         { makeInverse(minv); } 
 
@@ -325,11 +329,11 @@ namespace tmv {
         template <class M2>
         void makeInverseATA(BaseMatrix_Rec_Mutable<M2>& ata) const;
 
-        inline void doMakeInverseATA(MatrixView<RT> ata) const
+        void doMakeInverseATA(MatrixView<RT> ata) const
         { makeInverseATA(ata); }
-        inline void doMakeInverseATA(MatrixView<CT> ata) const
+        void doMakeInverseATA(MatrixView<CT> ata) const
         { makeInverseATA(ata); }
-        inline void doMakeInverseATA(
+        void doMakeInverseATA(
             MatrixView<CT,UNKNOWN,UNKNOWN,true> ata) const
         { makeInverseATA(ata); }
 
@@ -355,10 +359,10 @@ namespace tmv {
         bool checkDecomp(
             const BaseMatrix<M2>& m2, std::ostream* fout) const;
 
-        inline bool doCheckDecomp(
+        bool doCheckDecomp(
             const ConstMatrixView<T>& m2, std::ostream* fout) const
         { return checkDecomp(m2,fout); }
-        inline bool doCheckDecomp(
+        bool doCheckDecomp(
             const ConstMatrixView<T,UNKNOWN,UNKNOWN,true>& m2,
             std::ostream* fout) const
         { return checkDecomp(Maybe<Traits<T>::isreal>::conjugate(m2),fout); }
@@ -389,7 +393,7 @@ namespace tmv {
         static void copy(const M1& m1, M2& m2)
         { NoAliasCopy(m1,m2); }
         template <class M1, class M2>
-        static void makeInverse(const M1& LUx, const int* P, M2& m2)
+        static void makeInverse(const M1& LUx, const Permutation& P, M2& m2)
         {
             // This one might be same storage if LUx was done in place.
             // e.g. { A.divideInPlace(); A = A.inverse(); }
@@ -398,7 +402,7 @@ namespace tmv {
             LU_Inverse(m2,P);
         }
         template <class M1, class M2>
-        static void solveInPlace(const M1& LUx, const int* P, M2& m2)
+        static void solveInPlace(const M1& LUx, const Permutation& P, M2& m2)
         { LU_SolveInPlace(LUx,P,m2); }
         template <class M1>
         static typename M1::const_view_type view(const M1& m)
@@ -414,14 +418,14 @@ namespace tmv {
         static void copy(const M1& m1, M2& m2)
         { NoAliasCopy(m1.transpose(),m2); }
         template <class M1, class M2>
-        static void makeInverse(const M1& LUx, const int* P, M2& m2)
+        static void makeInverse(const M1& LUx, const Permutation& P, M2& m2)
         {
             typename M2::transpose_type m2t = m2.transpose();
             Copy(LUx,m2t);
             LU_Inverse(m2t,P);
         }
         template <class M1, class M2>
-        static void solveInPlace(const M1& LUx, const int* P, M2& m2)
+        static void solveInPlace(const M1& LUx, const Permutation& P, M2& m2)
         { LU_SolveTransposeInPlace(LUx,P,m2); }
         template <class M1>
         static typename M1::const_transpose_type view(const M1& m)
@@ -436,9 +440,9 @@ namespace tmv {
         template <class M1, class M2>
         static void copy(const M1& , M2& ) {}
         template <class M1, class M2>
-        static void makeInverse(const M1& , const int* , M2& ) {}
+        static void makeInverse(const M1& , const Permutation& , M2& ) {}
         template <class M1, class M2>
-        static void solveInPlace(const M1& , const int* , M2& ) {}
+        static void solveInPlace(const M1& , const Permutation& , M2& ) {}
         template <class M1>
         static void view(const M1& ) {}
     };
@@ -450,8 +454,8 @@ namespace tmv {
         enum { size = M::_colsize };
         typedef typename LUD<M>::lu_type::view_type lux_type;
 
-        LUD_Impl(const M& A, bool ) : LUx( SmallLUx.view() ), detp(1) 
-        { 
+        LUD_Impl(const M& A, bool ) : LUx( SmallLUx.view() ), P(A.rowsize())
+        {
             TMVStaticAssert(M::_colsize == int(M::_rowsize));
             TMVStaticAssert(M::_colsize != UNKNOWN);
             TMVStaticAssert(M::_colsize == int(LUD<M>::lu_type::_colsize));
@@ -461,8 +465,7 @@ namespace tmv {
 
         typename LUD<M>::lu_type SmallLUx;
         lux_type LUx;
-        StackArray<int,size> P;
-        int detp;
+        Permutation P;
     };
     
     template <class M> 
@@ -490,7 +493,7 @@ namespace tmv {
                   int(A.rowsize()) ) // stepj
             ),
             // allocate memory for the permutation
-            P(A.rowsize()), detp(1) 
+            P(A.rowsize())
             {
                 if (!inplace) {
                     LUHelper<true,istrans>::copy(A,LUx);
@@ -502,8 +505,7 @@ namespace tmv {
         const bool inplace;
         AlignedArray<typename M::value_type> Aptr;
         lux_type LUx;
-        AlignedArray<int> P;
-        int detp;
+        Permutation P;
     };
 
     template <class M> 
@@ -512,7 +514,7 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same));
         TMVAssert(A.isSquare());
-        LU_Decompose(pimpl->LUx,pimpl->P,pimpl->detp);
+        LU_Decompose(pimpl->LUx,pimpl->P);
     }
 
     template <class M> 
@@ -563,13 +565,13 @@ namespace tmv {
 
     template <class M> 
     typename M::value_type LUD<M>::det() const
-    { return typename M::real_type(pimpl->detp) * getU().det(); }                  
+    { return typename M::real_type(getP().det()) * getU().det(); }
 
     template <class M> 
-    typename M::real_type LUD<M>::logDet(typename M::value_type* sign) const
+    typename M::float_type LUD<M>::logDet(typename M::zfloat_type* sign) const
     {
-        typename M::real_type ret = getU().logDet(sign);
-        if (sign) *sign *= typename M::real_type(pimpl->detp);
+        typename M::float_type ret = getU().logDet(sign);
+        if (sign) *sign *= getP().det();
         return ret;
     }                  
 
@@ -613,7 +615,7 @@ namespace tmv {
 
     template <class M> 
     typename LUD<M>::getp_type LUD<M>::getP() const 
-    { return Permutation(rowsize(),pimpl->P,true,pimpl->detp); }
+    { return pimpl->P; }
 
     template <class M> 
     typename M::real_type LUD<M>::condition(RT normInf) const 
@@ -646,7 +648,8 @@ namespace tmv {
         if (printmat) {
             *fout << "LU = "<<lu<<std::endl;
         }
-        lu = getP() * lu;
+        //lu = getP() * lu;
+        getP().applyOnLeft(lu);
         if (printmat) {
             *fout << "PLU = "<<lu<<std::endl;
         }
@@ -661,11 +664,18 @@ namespace tmv {
         return nm < kappa*RT(mm.colsize())*TMV_Epsilon<T>();
     }
 
-    template <class M> size_t LUD<M>::colsize() const
+    template <class M> 
+    size_t LUD<M>::colsize() const
     { return pimpl->LUx.colsize(); }
 
-    template <class M> size_t LUD<M>::rowsize() const
+    template <class M> 
+    size_t LUD<M>::rowsize() const
     { return pimpl->LUx.rowsize(); }
+
+    template <class M>
+    const Divider<typename Traits<M>::value_type>* makeLUD(
+        const M& m, bool divinplace)
+    { return new LUD<M>(m,divinplace); }
 
 } // namespace tmv
 

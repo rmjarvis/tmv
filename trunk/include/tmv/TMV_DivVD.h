@@ -41,54 +41,49 @@ namespace tmv {
 
     // Defined below:
     template <int ix, class T, class V1, class M2, class V3>
-    inline void LDiv(
+    static void LDiv(
         const Scaling<ix,T>& x,
         const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3);
     template <int ix, class T, class V1, class M2, class V3>
-    inline void NoAliasLDiv(
+    static void NoAliasLDiv(
         const Scaling<ix,T>& x,
         const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3);
     template <int ix, class T, class V1, class M2, class V3>
-    inline void InlineLDiv(
+    static void InlineLDiv(
         const Scaling<ix,T>& x,
         const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3);
     template <int ix, class T, class V1, class M2, class V3>
-    inline void AliasLDiv(
+    static void AliasLDiv(
         const Scaling<ix,T>& x,
         const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3);
 
     template <int ix, class T, class V1, class V2, class V3>
-    inline void ElemDivVV(
+    static void ElemDivVV(
         const Scaling<ix,T>& x,
         const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3);
     template <int ix, class T, class V1, class V2, class V3>
-    inline void NoAliasElemDivVV(
+    static void NoAliasElemDivVV(
         const Scaling<ix,T>& x,
         const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3);
     template <int ix, class T, class V1, class V2, class V3>
-    inline void InlineElemDivVV(
+    static void InlineElemDivVV(
         const Scaling<ix,T>& x,
         const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3);
     template <int ix, class T, class V1, class V2, class V3>
-    inline void AliasElemDivVV(
+    static void AliasElemDivVV(
         const Scaling<ix,T>& x,
         const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3);
 
 
     // Defined in TMV_DivVD.cpp
-    template <class T1, bool C1, class T2, bool C2, class T3>
-    void InstLDiv(
-        const T3 x,
-        const ConstVectorView<T1,UNKNOWN,C1>& v1,
-        const ConstDiagMatrixView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3);
     template <class T1, bool C1, class T2, bool C2, class T3>
     void InstElemDivVV(
         const T3 x,
@@ -100,10 +95,10 @@ namespace tmv {
     // v3(i) = x * v1(i) / v2(i)
     //
 
-    template <int algo, int size, int ix, class T, class V1, class V2, class V3>
+    template <int algo, int s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper;
 
-    // algo 0: size == 0, nothing to do
+    // algo 0: s == 0, nothing to do
     template <int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<0,0,ix,T,V1,V2,V3> 
     {
@@ -115,8 +110,8 @@ namespace tmv {
     };
 
     // algo 11: simple for loop
-    template <int size, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<11,size,ix,T,V1,V2,V3> 
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<11,s,ix,T,V1,V2,V3> 
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -124,15 +119,15 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = size == UNKNOWN ? int(v3.size()) : size;
+            const int n = s == UNKNOWN ? int(v3.size()) : s;
             call2(n,x,v1.nonConj().begin(),v2.nonConj().begin(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
             const bool c1 = V1::_conj;
             const bool c2 = V2::_conj;
-#ifdef PRINTALGO_DIVVD
-            std::cout<<"ElemDivVV algo 11: N,s = "<<n<<','<<size<<std::endl;
+#ifdef PRINTALGO_DivD
+            std::cout<<"ElemDivVV algo 11: N,s = "<<n<<','<<s<<std::endl;
             std::cout<<"c1,c2 = "<<c1<<','<<c2<<std::endl;
 #endif
             if (n) do {
@@ -144,8 +139,8 @@ namespace tmv {
 
 #ifdef __SSE__
     // algo 21: single precision SSE: all real
-    template <int size, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<21,size,ix,T,V1,V2,V3> 
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<21,s,ix,T,V1,V2,V3> 
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -153,30 +148,30 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = size == UNKNOWN ? int(v2.size()) : size;
+            const int n = s == UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.nonConj().begin(),v2.nonConj().begin(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
-#ifdef PRINTALGO_DIVVD
-            std::cout<<"ElemDivVV algo 21: N,s = "<<n<<','<<size<<std::endl;
+#ifdef PRINTALGO_DivD
+            std::cout<<"ElemDivVV algo 21: N,s = "<<n<<','<<s<<std::endl;
 #endif
             const bool unit1 = V1::_step == 1;
             const bool unit2 = V2::_step == 1;
             const bool unit3 = V2::_step == 1;
 
             if (unit3) {
-                while (n && (((unsigned int)(C.get()) & 0xf) != 0) ) {
+                while (n && !TMV_Aligned(C.get()) ) {
                     *C++ = x * *A++ / *B++;
                     --n;
                 }
             } else if (unit1) {
-                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
+                while (n && !TMV_Aligned(A.get()) ) {
                     *C++ = x * *A++ / *B++;
                     --n;
                 }
             } else if (unit2) {
-                while (n && (((unsigned int)(B.get()) & 0xf) != 0) ) {
+                while (n && !TMV_Aligned(B.get()) ) {
                     *C++ = x * *A++ / *B++;
                     --n;
                 }
@@ -220,8 +215,8 @@ namespace tmv {
     };
 
     // algo 22: single precision SSE: x real v1 real v2 complex
-    template <int size, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<22,size,ix,T,V1,V2,V3> 
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<22,s,ix,T,V1,V2,V3> 
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -229,19 +224,19 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = size == UNKNOWN ? int(v2.size()) : size;
+            const int n = s == UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.nonConj().begin(),v2.nonConj().begin(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
-#ifdef PRINTALGO_DIVVD
-            std::cout<<"ElemDivVV algo 22: N,s = "<<n<<','<<size<<std::endl;
+#ifdef PRINTALGO_DivD
+            std::cout<<"ElemDivVV algo 22: N,s = "<<n<<','<<s<<std::endl;
 #endif
             const bool unit1 = V1::_step == 1;
             const bool unit2 = V2::_step == 1;
 
             if (unit1) {
-                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
+                while (n && !TMV_Aligned(A.get()) ) {
                     *B++ = x / *A++;
                     --n;
                 }
@@ -280,8 +275,8 @@ namespace tmv {
     };
 
     // algo 23: single precision SSE: x real v1 complex v2 complex
-    template <int size, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<23,size,ix,T,V1,V2,V3> 
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<23,s,ix,T,V1,V2,V3> 
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -289,25 +284,25 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = size == UNKNOWN ? int(v2.size()) : size;
+            const int n = s == UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.nonConj().begin(),v2.nonConj().begin(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
-#ifdef PRINTALGO_DIVVD
-            std::cout<<"ElemDivVV algo 23: N,s = "<<n<<','<<size<<std::endl;
+#ifdef PRINTALGO_DivD
+            std::cout<<"ElemDivVV algo 23: N,s = "<<n<<','<<s<<std::endl;
 #endif
             const bool unit1 = V1::_step == 1;
             const bool unit2 = V2::_step == 1;
             const bool c1 = V1::_conj;
 
             if (unit2) {
-                while (n && (((unsigned int)(B.get()) & 0xf) != 0) ) {
+                while (n && !TMV_Aligned(B.get()) ) {
                     *B++ = ZProd<false,c1>::quot(x , *A++);
                     --n;
                 }
             } else if (unit1) {
-                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
+                while (n && !TMV_Aligned(A.get()) ) {
                     *B++ = ZProd<false,c1>::quot(x , *A++);
                     --n;
                 }
@@ -343,8 +338,8 @@ namespace tmv {
     };
 
     // algo 24: single precision SSE: x complex v1 real v2 complex
-    template <int size, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<24,size,ix,T,V1,V2,V3> 
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<24,s,ix,T,V1,V2,V3> 
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -352,13 +347,13 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = size == UNKNOWN ? int(v2.size()) : size;
+            const int n = s == UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.nonConj().begin(),v2.nonConj().begin(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
-#ifdef PRINTALGO_DIVVD
-            std::cout<<"ElemDivVV algo 24: N,s = "<<n<<','<<size<<std::endl;
+#ifdef PRINTALGO_DivD
+            std::cout<<"ElemDivVV algo 24: N,s = "<<n<<','<<s<<std::endl;
 #endif
             TMVStaticAssert(ix == 0);
             TMVStaticAssert((Traits2<T,std::complex<float> >::sametype));
@@ -366,7 +361,7 @@ namespace tmv {
             const bool unit2 = V2::_step == 1;
 
             if (unit1) {
-                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
+                while (n && !TMV_Aligned(A.get()) ) {
                     *B++ = x / *A++;
                     --n;
                 }
@@ -408,8 +403,8 @@ namespace tmv {
     };
 
     // algo 25: single precision SSE: all complex
-    template <int size, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<25,size,ix,T,V1,V2,V3> 
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<25,s,ix,T,V1,V2,V3> 
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -417,13 +412,13 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = size == UNKNOWN ? int(v2.size()) : size;
+            const int n = s == UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.nonConj().begin(),v2.nonConj().begin(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
-#ifdef PRINTALGO_DIVVD
-            std::cout<<"ElemDivVV algo 25: N,s = "<<n<<','<<size<<std::endl;
+#ifdef PRINTALGO_DivD
+            std::cout<<"ElemDivVV algo 25: N,s = "<<n<<','<<s<<std::endl;
 #endif
             TMVStaticAssert(ix == 0);
             TMVStaticAssert((Traits2<T,std::complex<float> >::sametype));
@@ -432,12 +427,12 @@ namespace tmv {
             const bool c1 = V1::_conj;
 
             if (unit2) {
-                while (n && (((unsigned int)(B.get()) & 0xf) != 0) ) {
+                while (n && !TMV_Aligned(B.get()) ) {
                     *B++ = ZProd<false,c1>::quot(x , *A++);
                     --n;
                 }
             } else if (unit1) {
-                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
+                while (n && !TMV_Aligned(A.get()) ) {
                     *B++ = ZProd<false,c1>::quot(x , *A++);
                     --n;
                 }
@@ -487,8 +482,8 @@ namespace tmv {
 
 #ifdef __SSE2__
     // algo 31: double precision SSE2: all real
-    template <int size, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<31,size,ix,T,V1,V2,V3> 
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<31,s,ix,T,V1,V2,V3> 
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -496,24 +491,24 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = size == UNKNOWN ? int(v2.size()) : size;
+            const int n = s == UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.nonConj().begin(),v2.nonConj().begin(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
-#ifdef PRINTALGO_DIVVD
-            std::cout<<"ElemDivVV algo 31: N,s = "<<n<<','<<size<<std::endl;
+#ifdef PRINTALGO_DivD
+            std::cout<<"ElemDivVV algo 31: N,s = "<<n<<','<<s<<std::endl;
 #endif
             const bool unit1 = V1::_step == 1;
             const bool unit2 = V2::_step == 1;
 
             if (unit2) {
-                while (n && (((unsigned int)(B.get()) & 0xf) != 0) ) {
+                while (n && !TMV_Aligned(B.get()) ) {
                     *B++ = x / *A++;
                     --n;
                 }
             } else if (unit1) {
-                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
+                while (n && !TMV_Aligned(A.get()) ) {
                     *B++ = x / *A++;
                     --n;
                 }
@@ -542,8 +537,8 @@ namespace tmv {
     };
 
     // algo 32: double precision SSE2: x real v1 real v2 complex
-    template <int size, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<32,size,ix,T,V1,V2,V3> 
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<32,s,ix,T,V1,V2,V3> 
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -551,18 +546,18 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = size == UNKNOWN ? int(v2.size()) : size;
+            const int n = s == UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.nonConj().begin(),v2.nonConj().begin(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
-#ifdef PRINTALGO_DIVVD
-            std::cout<<"ElemDivVV algo 32: N,s = "<<n<<','<<size<<std::endl;
+#ifdef PRINTALGO_DivD
+            std::cout<<"ElemDivVV algo 32: N,s = "<<n<<','<<s<<std::endl;
 #endif
             const bool unit1 = V1::_step == 1;
 
             if (unit1) {
-                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
+                while (n && !TMV_Aligned(A.get()) ) {
                     *B++ = x / *A++;
                     --n;
                 }
@@ -595,8 +590,8 @@ namespace tmv {
     };
 
     // algo 33: double precision SSE2: x real v1 complex v2 complex
-    template <int size, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<33,size,ix,T,V1,V2,V3> 
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<33,s,ix,T,V1,V2,V3> 
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -604,13 +599,13 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = size == UNKNOWN ? int(v2.size()) : size;
+            const int n = s == UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.nonConj().begin(),v2.nonConj().begin(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
-#ifdef PRINTALGO_DIVVD
-            std::cout<<"ElemDivVV algo 33: N,s = "<<n<<','<<size<<std::endl;
+#ifdef PRINTALGO_DivD
+            std::cout<<"ElemDivVV algo 33: N,s = "<<n<<','<<s<<std::endl;
 #endif
             const bool c1 = V1::_conj;
             if (n) {
@@ -619,8 +614,7 @@ namespace tmv {
                 __m128d xconj = _mm_set_pd(mone, double(x));
                 __m128d xA,xB;
                 __m128d xAc, xnorm, x1, x2; // temp values
-                if (((unsigned int)(A.get()) & 0xf) == 0 &&
-                    ((unsigned int)(B.get()) & 0xf) == 0 ) {
+                if ( TMV_Aligned(A.get()) && TMV_Aligned(B.get()) ) {
                     do {
                         Maybe<true>::sse_load(xA,A.get()); ++A;
                         xAc = _mm_mul_pd(xconj,xA); // x*conj(xA)
@@ -646,8 +640,8 @@ namespace tmv {
     };
 
     // algo 34: double precision SSE2: x complex v1 real v2 complex
-    template <int size, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<34,size,ix,T,V1,V2,V3> 
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<34,s,ix,T,V1,V2,V3> 
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -655,20 +649,20 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = size == UNKNOWN ? int(v2.size()) : size;
+            const int n = s == UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.nonConj().begin(),v2.nonConj().begin(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
-#ifdef PRINTALGO_DIVVD
-            std::cout<<"ElemDivVV algo 34: N,s = "<<n<<','<<size<<std::endl;
+#ifdef PRINTALGO_DivD
+            std::cout<<"ElemDivVV algo 34: N,s = "<<n<<','<<s<<std::endl;
 #endif
             TMVStaticAssert(ix == 0);
             TMVStaticAssert((Traits2<T,std::complex<double> >::sametype));
             const bool unit1 = V1::_step == 1;
 
             if (unit1) {
-                while (n && (((unsigned int)(A.get()) & 0xf) != 0) ) {
+                while (n && !TMV_Aligned(A.get()) ) {
                     *B++ = x / *A++;
                     --n;
                 }
@@ -702,8 +696,8 @@ namespace tmv {
     };
 
     // algo 35: double precision SSE2: all complex
-    template <int size, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<35,size,ix,T,V1,V2,V3> 
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<35,s,ix,T,V1,V2,V3> 
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -711,13 +705,13 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = size == UNKNOWN ? int(v2.size()) : size;
+            const int n = s == UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.nonConj().begin(),v2.nonConj().begin(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
-#ifdef PRINTALGO_DIVVD
-            std::cout<<"ElemDivVV algo 35: N,s = "<<n<<','<<size<<std::endl;
+#ifdef PRINTALGO_DivD
+            std::cout<<"ElemDivVV algo 35: N,s = "<<n<<','<<s<<std::endl;
 #endif
             TMVStaticAssert(ix == 0);
             TMVStaticAssert((Traits2<T,std::complex<double> >::sametype));
@@ -751,9 +745,9 @@ namespace tmv {
     };
 #endif
 
-    // algo -4: No branches or copies
-    template <int size, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<-4,size,ix,T,V1,V2,V3> 
+    // algo -3: Determine which algorithm to use
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<-3,s,ix,T,V1,V2,V3> 
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -765,34 +759,25 @@ namespace tmv {
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
             TMVStaticAssert(!V3::_conj);
-#ifdef PRINTALGO_DIVVD
-            std::cout<<"Inline ElemDivVV: s = "<<size<<std::endl;
+#ifdef PRINTALGO_DivD
+            std::cout<<"Inline ElemDivVV: s = "<<s<<std::endl;
             std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
             std::cout<<"v1 = "<<TMV_Text(v1)<<std::endl;
             std::cout<<"v2 = "<<TMV_Text(v2)<<std::endl;
             std::cout<<"v3 = "<<TMV_Text(v3)<<std::endl;
 #endif
-            ElemDivVV_Helper<algo,size,ix,T,V1,V2,V3>::call(x,v1,v2,v3); 
+            ElemDivVV_Helper<algo,s,ix,T,V1,V2,V3>::call(x,v1,v2,v3); 
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
             TMVStaticAssert(!V3::_conj);
-            ElemDivVV_Helper<algo,size,ix,T,V1,V2,V3>::call2(n,x,A,B,C);
+            ElemDivVV_Helper<algo,s,ix,T,V1,V2,V3>::call2(n,x,A,B,C);
         }
     };
 
-    // algo -3: Determine which algorithm to use
-    template <int size, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<-3,size,ix,T,V1,V2,V3> 
-    {
-        static void call(
-            const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
-        { ElemDivVV_Helper<-4,size,ix,T,V1,V2,V3>::call(x,v1,v2,v3); }
-    };
-
     // algo 97: Conjugate
-    template <int size, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<97,size,ix,T,V1,V2,V3> 
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<97,s,ix,T,V1,V2,V3> 
     {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
@@ -803,26 +788,27 @@ namespace tmv {
             V1c v1c = v1.conjugate();
             V2c v2c = v2.conjugate();
             V3c v3c = v3.conjugate();
-            ElemDivVV_Helper<-2,size,ix,T,V1c,V2c,V3c>::call(
+            ElemDivVV_Helper<-2,s,ix,T,V1c,V2c,V3c>::call(
                 TMV_CONJ(x),v1c,v2c,v3c);
         }
     };
 
     // algo 98: Call inst
-    template <int size, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<98,size,ix,T,V1,V2,V3> 
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<98,s,ix,T,V1,V2,V3> 
     {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         { 
-            typename V3::value_type xx(x);
+            typedef typename V3::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
             InstElemDivVV(xx,v1.xView(),v2.xView(),v3.xView()); 
         }
     };
 
     // algo -2: Check for inst
-    template <int size, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<-2,size,ix,T,V1,V2,V3> 
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<-2,s,ix,T,V1,V2,V3> 
     {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
@@ -831,9 +817,7 @@ namespace tmv {
             typedef typename V2::value_type T2;
             typedef typename V3::value_type T3;
             const bool inst =
-                V1::unknownsizes &&
-                V2::unknownsizes &&
-                V3::unknownsizes &&
+                (s == UNKNOWN || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -845,14 +829,14 @@ namespace tmv {
             const int algo =
                 V3::_conj ? 97 : 
                 inst ? 98 : 
-                -4;
-            ElemDivVV_Helper<algo,size,ix,T,V1,V2,V3>::call(x,v1,v2,v3); 
+                -3;
+            ElemDivVV_Helper<algo,s,ix,T,V1,V2,V3>::call(x,v1,v2,v3); 
         }
     };
 
     // algo 99: Check for aliases
-    template <int size, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<99,size,ix,T,V1,V2,V3> 
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<99,s,ix,T,V1,V2,V3> 
     {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
@@ -870,7 +854,7 @@ namespace tmv {
             if (noclobber1) {
                 if (noclobber2) {
                     // No aliasing (or no clobering)
-                    ElemDivVV_Helper<-2,size,ix,T,V1,V2,V3>::call(x,v1,v2,v3); 
+                    ElemDivVV_Helper<-2,s,ix,T,V1,V2,V3>::call(x,v1,v2,v3); 
                 } else { 
                     // Need a temporary for v2
                     NoAliasElemDivVV(x,v1,v2.copy(),v3);
@@ -890,8 +874,8 @@ namespace tmv {
     };
 
     // algo -1: Check for aliases?
-    template <int size, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<-1,size,ix,T,V1,V2,V3> 
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<-1,s,ix,T,V1,V2,V3> 
     {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
@@ -900,19 +884,19 @@ namespace tmv {
                 VStepHelper<V1,V3>::noclobber &&
                 VStepHelper<V2,V3>::noclobber;
             const bool checkalias =
-                V1::_size == UNKNOWN &&
-                V2::_size == UNKNOWN &&
+                V1::_size == UNKNOWN && 
+                V2::_size == UNKNOWN && 
                 V3::_size == UNKNOWN &&
                 !noclobber;
             const int algo =
                 checkalias ? 99 : 
                 -2;
-            ElemDivVV_Helper<algo,size,ix,T,V1,V2,V3>::call(x,v1,v2,v3); 
+            ElemDivVV_Helper<algo,s,ix,T,V1,V2,V3>::call(x,v1,v2,v3); 
         }
     };
 
     template <int ix, class T, class V1, class V2, class V3>
-    inline void ElemDivVV(
+    static void ElemDivVV(
         const Scaling<ix,T>& x,
         const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
@@ -922,18 +906,18 @@ namespace tmv {
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v1.size() == v3.size());
         const int s12 = Sizes<V1::_size,V2::_size>::size;
-        const int size = Sizes<s12,V3::_size>::size;
+        const int s = Sizes<s12,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2d;
         typedef typename V3::cview_type V3v;
         V1v v1v = v1.cView();
         V2d v2v = v2.cView();
         V3v v3v = v3.cView();
-        ElemDivVV_Helper<-1,size,ix,T,V1v,V2d,V3v>::call(x,v1v,v2v,v3v);
+        ElemDivVV_Helper<-1,s,ix,T,V1v,V2d,V3v>::call(x,v1v,v2v,v3v);
     }
 
     template <int ix, class T, class V1, class V2, class V3>
-    inline void NoAliasElemDivVV(
+    static void NoAliasElemDivVV(
         const Scaling<ix,T>& x,
         const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
@@ -943,18 +927,18 @@ namespace tmv {
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v1.size() == v3.size());
         const int s12 = Sizes<V1::_size,V2::_size>::size;
-        const int size = Sizes<s12,V3::_size>::size;
+        const int s = Sizes<s12,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2d;
         typedef typename V3::cview_type V3v;
         V1v v1v = v1.cView();
         V2d v2v = v2.cView();
         V3v v3v = v3.cView();
-        ElemDivVV_Helper<-2,size,ix,T,V1v,V2d,V3v>::call(x,v1v,v2v,v3v);
+        ElemDivVV_Helper<-2,s,ix,T,V1v,V2d,V3v>::call(x,v1v,v2v,v3v);
     }
 
     template <int ix, class T, class V1, class V2, class V3>
-    inline void InlineElemDivVV(
+    static void InlineElemDivVV(
         const Scaling<ix,T>& x,
         const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
@@ -964,18 +948,18 @@ namespace tmv {
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v1.size() == v3.size());
         const int s12 = Sizes<V1::_size,V2::_size>::size;
-        const int size = Sizes<s12,V3::_size>::size;
+        const int s = Sizes<s12,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2d;
         typedef typename V3::cview_type V3v;
         V1v v1v = v1.cView();
         V2d v2v = v2.cView();
         V3v v3v = v3.cView();
-        ElemDivVV_Helper<-4,size,ix,T,V1v,V2d,V3v>::call(x,v1v,v2v,v3v);
+        ElemDivVV_Helper<-3,s,ix,T,V1v,V2d,V3v>::call(x,v1v,v2v,v3v);
     }
 
     template <int ix, class T, class V1, class V2, class V3>
-    inline void AliasElemDivVV(
+    static void AliasElemDivVV(
         const Scaling<ix,T>& x,
         const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
@@ -985,19 +969,19 @@ namespace tmv {
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v1.size() == v3.size());
         const int s12 = Sizes<V1::_size,V2::_size>::size;
-        const int size = Sizes<s12,V3::_size>::size;
+        const int s = Sizes<s12,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2d;
         typedef typename V3::cview_type V3v;
         V1v v1v = v1.cView();
         V2d v2v = v2.cView();
         V3v v3v = v3.cView();
-        ElemDivVV_Helper<99,size,ix,T,V1v,V2d,V3v>::call(x,v1v,v2v,v3v);
+        ElemDivVV_Helper<99,s,ix,T,V1v,V2d,V3v>::call(x,v1v,v2v,v3v);
     }
 
     // TODO: Check for singular DiagMatrix
     template <int ix, class T, class V1, class M2, class V3>
-    inline void LDiv(
+    static void LDiv(
         const Scaling<ix,T>& x,
         const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
@@ -1007,18 +991,18 @@ namespace tmv {
         TMVAssert(v1.size() == m2.size());
         TMVAssert(v1.size() == v3.size());
         const int s12 = Sizes<V1::_size,M2::_size>::size;
-        const int size = Sizes<s12,V3::_size>::size;
+        const int s = Sizes<s12,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::const_diag_type::const_cview_type M2d;
         typedef typename V3::cview_type V3v;
         V1v v1v = v1.cView();
         M2d m2d = m2.diag().cView();
         V3v v3v = v3.cView();
-        ElemDivVV_Helper<-1,size,ix,T,V1v,M2d,V3v>::call(x,v1v,m2d,v3v);
+        ElemDivVV_Helper<-1,s,ix,T,V1v,M2d,V3v>::call(x,v1v,m2d,v3v);
     }
 
     template <int ix, class T, class V1, class M2, class V3>
-    inline void NoAliasLDiv(
+    static void NoAliasLDiv(
         const Scaling<ix,T>& x,
         const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
@@ -1028,18 +1012,18 @@ namespace tmv {
         TMVAssert(v1.size() == m2.size());
         TMVAssert(v1.size() == v3.size());
         const int s12 = Sizes<V1::_size,M2::_size>::size;
-        const int size = Sizes<s12,V3::_size>::size;
+        const int s = Sizes<s12,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::const_diag_type::const_cview_type M2d;
         typedef typename V3::cview_type V3v;
         V1v v1v = v1.cView();
         M2d m2d = m2.diag().cView();
         V3v v3v = v3.cView();
-        ElemDivVV_Helper<-2,size,ix,T,V1v,M2d,V3v>::call(x,v1v,m2d,v3v);
+        ElemDivVV_Helper<-2,s,ix,T,V1v,M2d,V3v>::call(x,v1v,m2d,v3v);
     }
 
     template <int ix, class T, class V1, class M2, class V3>
-    inline void InlineLDiv(
+    static void InlineLDiv(
         const Scaling<ix,T>& x,
         const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
@@ -1049,18 +1033,18 @@ namespace tmv {
         TMVAssert(v1.size() == m2.size());
         TMVAssert(v1.size() == v3.size());
         const int s12 = Sizes<V1::_size,M2::_size>::size;
-        const int size = Sizes<s12,V3::_size>::size;
+        const int s = Sizes<s12,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::const_diag_type::const_cview_type M2d;
         typedef typename V3::cview_type V3v;
         V1v v1v = v1.cView();
         M2d m2d = m2.diag().cView();
         V3v v3v = v3.cView();
-        ElemDivVV_Helper<-4,size,ix,T,V1v,M2d,V3v>::call(x,v1v,m2d,v3v);
+        ElemDivVV_Helper<-3,s,ix,T,V1v,M2d,V3v>::call(x,v1v,m2d,v3v);
     }
 
     template <int ix, class T, class V1, class M2, class V3>
-    inline void AliasLDiv(
+    static void AliasLDiv(
         const Scaling<ix,T>& x,
         const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
@@ -1070,14 +1054,14 @@ namespace tmv {
         TMVAssert(v1.size() == m2.size());
         TMVAssert(v1.size() == v3.size());
         const int s12 = Sizes<V1::_size,M2::_size>::size;
-        const int size = Sizes<s12,V3::_size>::size;
+        const int s = Sizes<s12,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::const_diag_type::const_cview_type M2d;
         typedef typename V3::cview_type V3v;
         V1v v1v = v1.cView();
         M2d m2d = m2.diag().cView();
         V3v v3v = v3.cView();
-        ElemDivVV_Helper<99,size,ix,T,V1v,M2d,V3v>::call(x,v1v,m2d,v3v);
+        ElemDivVV_Helper<99,s,ix,T,V1v,M2d,V3v>::call(x,v1v,m2d,v3v);
     }
 
     //
@@ -1085,15 +1069,15 @@ namespace tmv {
     //
 
     template <class V1, class M2>
-    inline void LDivEq(
+    static void LDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Diag<M2>& m2)
     { LDiv(Scaling<1,typename V1::real_type>(),v1.vec(),m2,v1); }
     template <class V1, class M2>
-    inline void NoAliasLDivEq(
+    static void NoAliasLDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Diag<M2>& m2)
     { NoAliasLDiv(Scaling<1,typename V1::real_type>(),v1.vec(),m2,v1); }
     template <class V1, class M2>
-    inline void AliasLDivEq(
+    static void AliasLDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Diag<M2>& m2)
     { AliasLDiv(Scaling<1,typename V1::real_type>(),v1.vec(),m2,v1); }
 
@@ -1102,19 +1086,19 @@ namespace tmv {
     //
 
     template <int ix, class T, class V1, class M2, class V3>
-    inline void RDiv(
+    static void RDiv(
         const Scaling<ix,T>& x,
         const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
     { LDiv(x,v1,m2,v3); }
     template <int ix, class T, class V1, class M2, class V3>
-    inline void NoAliasRDiv(
+    static void NoAliasRDiv(
         const Scaling<ix,T>& x,
         const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
     { NoAliasLDiv(x,v1,m2,v3); }
     template <int ix, class T, class V1, class M2, class V3>
-    inline void AliasRDiv(
+    static void AliasRDiv(
         const Scaling<ix,T>& x,
         const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
@@ -1125,15 +1109,15 @@ namespace tmv {
     //
 
     template <class V1, class M2>
-    inline void RDivEq(
+    static void RDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Diag<M2>& m2)
     { LDivEq(v1,m2); }
     template <class V1, class M2>
-    inline void NoAliasRDivEq(
+    static void NoAliasRDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Diag<M2>& m2)
     { NoAliasLDivEq(v1,m2); }
     template <class V1, class M2>
-    inline void AliasRDivEq(
+    static void AliasRDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Diag<M2>& m2)
     { AliasLDivEq(v1,m2); }
 
@@ -1142,7 +1126,7 @@ namespace tmv {
     //
     
     template <int ix, class T, class M1, class M2, class M3>
-    inline void LDiv(
+    static void LDiv(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Diag_Mutable<M3>& m3)
@@ -1151,7 +1135,7 @@ namespace tmv {
         LDiv(x,m1.diag(),m2,m3d); 
     }
     template <int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasLDiv(
+    static void NoAliasLDiv(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Diag_Mutable<M3>& m3)
@@ -1160,7 +1144,7 @@ namespace tmv {
         NoAliasLDiv(x,m1.diag(),m2,m3d); 
     }
     template <int ix, class T, class M1, class M2, class M3>
-    inline void AliasLDiv(
+    static void AliasLDiv(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Diag_Mutable<M3>& m3)
@@ -1170,7 +1154,7 @@ namespace tmv {
     }
 
     template <int ix, class T, class M1, class M2, class M3>
-    inline void LDiv(
+    static void LDiv(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
@@ -1181,7 +1165,7 @@ namespace tmv {
         m3.lowerTri().offDiag().setZero();
     }
     template <int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasLDiv(
+    static void NoAliasLDiv(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
@@ -1191,7 +1175,7 @@ namespace tmv {
         NoAliasLDiv(x,m1.diag(),m2,m3d); 
     }
     template <int ix, class T, class M1, class M2, class M3>
-    inline void AliasLDiv(
+    static void AliasLDiv(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
@@ -1203,7 +1187,7 @@ namespace tmv {
     }
 
     template <int ix, class T, class M1, class M2, class M3>
-    inline void LDiv(
+    static void LDiv(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
@@ -1213,7 +1197,7 @@ namespace tmv {
         m3.offDiag().setZero();
     }
     template <int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasLDiv(
+    static void NoAliasLDiv(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
@@ -1223,7 +1207,7 @@ namespace tmv {
         NoAliasLDiv(x,m1.diag(),m2,m3d); 
     }
     template <int ix, class T, class M1, class M2, class M3>
-    inline void AliasLDiv(
+    static void AliasLDiv(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
@@ -1239,21 +1223,21 @@ namespace tmv {
     //
 
     template <class M1, class M2>
-    inline void LDivEq(
+    static void LDivEq(
         BaseMatrix_Diag_Mutable<M1>& m1, const BaseMatrix_Diag<M2>& m2)
     {
         typename M1::diag_type m1d = m1.mat().diag();
         LDivEq(m1d,m2); 
     }
     template <class M1, class M2>
-    inline void NoAliasLDivEq(
+    static void NoAliasLDivEq(
         BaseMatrix_Diag_Mutable<M1>& m1, const BaseMatrix_Diag<M2>& m2)
     {
         typename M1::diag_type m1d = m1.mat().diag();
         NoAliasLDivEq(m1d,m2); 
     }
     template <class M1, class M2>
-    inline void AliasLDivEq(
+    static void AliasLDivEq(
         BaseMatrix_Diag_Mutable<M1>& m1, const BaseMatrix_Diag<M2>& m2)
     {
         typename M1::diag_type m1d = m1.mat().diag();
@@ -1265,57 +1249,57 @@ namespace tmv {
     //
 
     template <int ix, class T, class M1, class M2, class M3>
-    inline void RDiv(
+    static void RDiv(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Diag_Mutable<M3>& m3)
     { LDiv(x,m1,m2,m3.mat()); }
     template <int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasRDiv(
+    static void NoAliasRDiv(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Diag_Mutable<M3>& m3)
     { NoAliasLDiv(x,m1,m2,m3.mat()); }
     template <int ix, class T, class M1, class M2, class M3>
-    inline void AliasRDiv(
+    static void AliasRDiv(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Diag_Mutable<M3>& m3)
     { AliasLDiv(x,m1,m2,m3.mat()); }
 
     template <int ix, class T, class M1, class M2, class M3>
-    inline void RDiv(
+    static void RDiv(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     { LDiv(x,m1,m2,m3.mat()); }
     template <int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasRDiv(
+    static void NoAliasRDiv(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     { NoAliasLDiv(x,m1,m2,m3.mat()); }
     template <int ix, class T, class M1, class M2, class M3>
-    inline void AliasRDiv(
+    static void AliasRDiv(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     { AliasLDiv(x,m1,m2,m3.mat()); }
 
     template <int ix, class T, class M1, class M2, class M3>
-    inline void RDiv(
+    static void RDiv(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
     { LDiv(x,m1,m2,m3.mat()); }
     template <int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasRDiv(
+    static void NoAliasRDiv(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
     { NoAliasLDiv(x,m1,m2,m3.mat()); }
     template <int ix, class T, class M1, class M2, class M3>
-    inline void AliasRDiv(
+    static void AliasRDiv(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
@@ -1326,15 +1310,15 @@ namespace tmv {
     //
 
     template <class M1, class M2>
-    inline void RDivEq(
+    static void RDivEq(
         BaseMatrix_Diag_Mutable<M1>& m1, const BaseMatrix_Diag<M2>& m2)
     { LDivEq(m1,m2); }
     template <class M1, class M2>
-    inline void NoAliasRDivEq(
+    static void NoAliasRDivEq(
         BaseMatrix_Diag_Mutable<M1>& m1, const BaseMatrix_Diag<M2>& m2)
     { NoAliasLDivEq(m1,m2); }
     template <class M1, class M2>
-    inline void AliasRDivEq(
+    static void AliasRDivEq(
         BaseMatrix_Diag_Mutable<M1>& m1, const BaseMatrix_Diag<M2>& m2)
     { AliasLDivEq(m1,m2); }
 

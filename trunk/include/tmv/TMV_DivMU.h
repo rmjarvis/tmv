@@ -42,15 +42,16 @@
 #include "TMV_Rank1VVM.h"
 #include "TMV_SmallTriMatrix.h"
 #include "TMV_InvertU.h"
+#include "TMV_MultXD.h"
 
 #ifdef _OPENMP
 #include "omp.h"
-#ifdef PRINTALGO_DIVU_OMP
+#ifdef PRINTALGO_DivU_OMP
 #include <fstream>
 #endif
 #endif
 
-#ifdef PRINTALGO_DIVU
+#ifdef PRINTALGO_DivU
 #include <iostream>
 #endif
 
@@ -80,16 +81,16 @@ namespace tmv {
 
     // Defined below:
     template <class M1, class M2>
-    inline void LDivEq(
+    static void LDivEq(
         BaseMatrix_Rec_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2);
     template <class M1, class M2>
-    inline void NoAliasLDivEq(
+    static void NoAliasLDivEq(
         BaseMatrix_Rec_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2);
     template <class M1, class M2>
-    inline void InlineLDivEq(
+    static void InlineLDivEq(
         BaseMatrix_Rec_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2);
     template <class M1, class M2>
-    inline void AliasLDivEq(
+    static void AliasLDivEq(
         BaseMatrix_Rec_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2);
 
     // Defined in TMV_DivMU.cpp
@@ -122,7 +123,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_DIVU
+#ifdef PRINTALGO_DivU
             const int N = rs==UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"LDivEqMU algo 1: M,N,cs,rs = "<<1<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -131,13 +132,13 @@ namespace tmv {
             typedef typename M1::row_type M1r;
             typedef typename M2::real_type RT;
             typedef typename M2::value_type T2;
-            typedef typename Maybe<u2>::template SelectType<RT,T2>::type XT2;
+            typedef typename TypeSelect<u2,RT,T2>::type XT2;
             const int ix2 = u2 ? 1 : 0;
 
             M1r m1r = m1.get_row(0);
             const Scaling<ix2,XT2> inv00(
                 Maybe<!u2>::invprod( m2.cref(0,0) , RT(1) ));
-            ScaleV_Helper<-2,rs,ix2,XT2,M1r>::call(inv00, m1r);
+            ScaleV_Helper<-1,rs,ix2,XT2,M1r>::call(inv00, m1r);
         }
     };
 
@@ -147,7 +148,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_DIVU
+#ifdef PRINTALGO_DivU
             const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
             std::cout<<"LDivEqMU algo 2: M,N,cs,rs = "<<M<<','<<1<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -165,7 +166,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_DIVU
+#ifdef PRINTALGO_DivU
             const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
             std::cout<<"LDivEqMU algo 202: M,N,cs,rs = "<<M<<','<<1<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -183,7 +184,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_DIVU
+#ifdef PRINTALGO_DivU
             const int N = rs==UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"LDivEqMU algo 401: M,N,cs,rs = "<<1<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -192,7 +193,7 @@ namespace tmv {
             typedef typename M1::row_type M1r;
             typedef typename M2::real_type RT;
             typedef typename M2::value_type T2;
-            typedef typename Maybe<u2>::template SelectType<RT,T2>::type XT2;
+            typedef typename TypeSelect<u2,RT,T2>::type XT2;
             const int ix2 = u2 ? 1 : 0;
 
             M1r m1r = m1.get_row(0);
@@ -208,7 +209,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_DIVU
+#ifdef PRINTALGO_DivU
             const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
             std::cout<<"LDivEqMU algo 402: M,N,cs,rs = "<<M<<','<<1<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -227,7 +228,7 @@ namespace tmv {
         static void call(M1& m1, const M2& m2)
         {
             const int N = rs==UNKNOWN ? int(m1.rowsize()) : rs;
-#ifdef PRINTALGO_DIVU
+#ifdef PRINTALGO_DivU
             const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
             std::cout<<"LDivEqMU algo 11: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -248,7 +249,7 @@ namespace tmv {
         static void call(M1& m1, const M2& m2)
         {
             const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
-#ifdef PRINTALGO_DIVU
+#ifdef PRINTALGO_DivU
             const int N = rs==UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"LDivEqMU algo 12: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -256,7 +257,7 @@ namespace tmv {
             const bool u2 = M2::_unit;
             typedef typename M2::real_type RT;
             typedef typename M2::value_type T2;
-            typedef typename Maybe<u2>::template SelectType<RT,T2>::type XT2;
+            typedef typename TypeSelect<u2,RT,T2>::type XT2;
             typedef typename M2::const_row_sub_type M2r;
             typedef typename M1::row_type M1r;
             typedef typename M1::rowrange_type::const_transpose_type M1rrt;
@@ -286,7 +287,7 @@ namespace tmv {
         static void call(M1& m1, const M2& m2)
         {
             const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
-#ifdef PRINTALGO_DIVU
+#ifdef PRINTALGO_DivU
             const int N = rs==UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"LDivEqMU algo 13: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -294,7 +295,7 @@ namespace tmv {
             const bool u2 = M2::_unit;
             typedef typename M2::real_type RT;
             typedef typename M2::value_type T2;
-            typedef typename Maybe<u2>::template SelectType<RT,T2>::type XT2;
+            typedef typename TypeSelect<u2,RT,T2>::type XT2;
             typedef typename M1::row_type M1r;
             typedef typename M1::rowrange_type M1rr;
             typedef typename M1::const_row_type M1rc;
@@ -324,16 +325,18 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_DIVU
+#ifdef PRINTALGO_DivU
+            const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
             const int N = rs==UNKNOWN ? int(m1.rowsize()) : rs;
-            std::cout<<"LDivEqMU algo 16: M,N,cs,rs = "<<2<<','<<N<<
-                ','<<2<<','<<rs<<std::endl;
+            std::cout<<"LDivEqMU algo 16: M,N,cs,rs = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<std::endl;
 #endif
             typedef typename M2::real_type RT;
             typedef typename M2::value_type T2;
             const DiagType D2 = M2::_unit ? UnitDiag : NonUnitDiag;
-            SmallUpperTriMatrix<T2,cs,D2> m2inv = m2;
-            m2inv.invertSelf();
+            typedef SmallUpperTriMatrix<T2,cs,D2> Uinv;
+            Uinv m2inv = m2;
+            InvertU_Helper<-3,cs,Uinv>::call(m2inv);
             const Scaling<1,RT> one;
             NoAliasMultMM<false>(one,m2inv,m1,m1);
         }
@@ -344,7 +347,7 @@ namespace tmv {
         static void call(M1& m1, const M2& m2)
         {
             const int M = m1.colsize();
-#ifdef PRINTALGO_DIVU
+#ifdef PRINTALGO_DivU
             const int N = rs==UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"LDivEqMU algo 16: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<UNKNOWN<<','<<rs<<std::endl;
@@ -401,7 +404,7 @@ namespace tmv {
         static void call(M1& m1, const M2& m2)
         {
             const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
-#ifdef PRINTALGO_DIVU
+#ifdef PRINTALGO_DivU
             const int N = rs==UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"LDivEqMU algo 17: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -479,7 +482,7 @@ namespace tmv {
         static void call(M1& m1, const M2& m2)
         {
             const int N = rs==UNKNOWN ? int(m1.rowsize()) : rs;
-#ifdef PRINTALGO_DIVU
+#ifdef PRINTALGO_DivU
             const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
             std::cout<<"LDivEqMU algo 21: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -500,7 +503,7 @@ namespace tmv {
         static void call(M1& m1, const M2& m2)
         {
             const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
-#ifdef PRINTALGO_DIVU
+#ifdef PRINTALGO_DivU
             const int N = rs==UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"LDivEqMU algo 22: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -508,7 +511,7 @@ namespace tmv {
             const bool u2 = M2::_unit;
             typedef typename M2::real_type RT;
             typedef typename M2::value_type T2;
-            typedef typename Maybe<u2>::template SelectType<RT,T2>::type XT2;
+            typedef typename TypeSelect<u2,RT,T2>::type XT2;
             typedef typename M2::const_row_sub_type M2r;
             typedef typename M1::rowrange_type::const_transpose_type M1rrt;
             typedef typename M1::row_type M1r;
@@ -538,7 +541,7 @@ namespace tmv {
         static void call(M1& m1, const M2& m2)
         {
             const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
-#ifdef PRINTALGO_DIVU
+#ifdef PRINTALGO_DivU
             const int N = rs==UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"LDivEqMU algo 23: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -546,7 +549,7 @@ namespace tmv {
             const bool u2 = M2::_unit;
             typedef typename M2::real_type RT;
             typedef typename M2::value_type T2;
-            typedef typename Maybe<u2>::template SelectType<RT,T2>::type XT2;
+            typedef typename TypeSelect<u2,RT,T2>::type XT2;
             typedef typename M1::row_type M1r;
             typedef typename M1::const_row_type M1rc;
             typedef typename M1::rowrange_type M1rr;
@@ -576,25 +579,20 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_DIVU
+#ifdef PRINTALGO_DivU
+            const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
             const int N = rs==UNKNOWN ? int(m1.rowsize()) : rs;
-            std::cout<<"LDivEqMU algo 26: M,N,cs,rs = "<<cs<<','<<N<<
+            std::cout<<"LDivEqMU algo 26: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
             typedef typename M2::real_type RT;
             typedef typename M2::value_type T2;
             const DiagType D2 = M2::_unit ? UnitDiag : NonUnitDiag;
-            SmallLowerTriMatrix<T2,cs,D2> m2inv = m2;
-            m2inv.invertSelf();
+            typedef SmallLowerTriMatrix<T2,cs,D2> Linv;
+            Linv m2inv = m2;
+            InvertU_Helper<-3,cs,Linv>::call(m2inv);
             const Scaling<1,RT> one;
-#ifdef PRINTALGO_DIVU
-            std::cout<<"m2inv = "<<m2inv<<std::endl;
-            std::cout<<"m1 = "<<m1<<std::endl;
-#endif
             NoAliasMultMM<false>(one,m2inv,m1,m1);
-#ifdef PRINTALGO_DIVU
-            std::cout<<"m1 => "<<m1<<std::endl;
-#endif
         }
     };
     template <int rs, class M1, class M2>
@@ -603,7 +601,7 @@ namespace tmv {
         static void call(M1& m1, const M2& m2)
         {
             const int M = m1.colsize();
-#ifdef PRINTALGO_DIVU
+#ifdef PRINTALGO_DivU
             const int N = rs==UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"LDivEqMU algo 26: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<UNKNOWN<<','<<rs<<std::endl;
@@ -660,7 +658,7 @@ namespace tmv {
         static void call(M1& m1, const M2& m2)
         {
             const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
-#ifdef PRINTALGO_DIVU
+#ifdef PRINTALGO_DivU
             const int N = rs==UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"LDivEqMU algo 27: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -740,7 +738,7 @@ namespace tmv {
         {
             const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
             const int N = rs==UNKNOWN ? int(m1.rowsize()) : rs;
-#ifdef PRINTALGO_DIVU
+#ifdef PRINTALGO_DivU
             std::cout<<"LDivEqMU algo 31: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -793,7 +791,7 @@ namespace tmv {
         static void call(M1& m1, const M2& m2)
         {
             const int N = rs==UNKNOWN ? int(m1.rowsize()) : rs;
-#ifdef PRINTALGO_DIVU
+#ifdef PRINTALGO_DivU
             const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
             std::cout<<"LDivEqMU algo 36: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -801,7 +799,7 @@ namespace tmv {
             const bool upper2 = M2::_upper;
             const int algo2 = upper2 ? 17 : 27;
             bool bad_alloc = false;
-#ifdef PRINTALGO_DIVU_OMP
+#ifdef PRINTALGO_DivU_OMP
             std::ofstream fout("omp.out");
 #endif
 #pragma omp parallel
@@ -809,14 +807,14 @@ namespace tmv {
                 try {
                     int num_threads = omp_get_num_threads();
                     int mythread = omp_get_thread_num();
-#ifdef PRINTALGO_DIVU_OMP
+#ifdef PRINTALGO_DivU_OMP
 #pragma omp critical
                     {
                         fout<<"thread "<<mythread<<"/"<<num_threads<<std::endl;
                     }
 #endif
                     if (num_threads == 1) {
-#ifdef PRINTALGO_DIVU_OMP
+#ifdef PRINTALGO_DivU_OMP
 #pragma omp critical
                         {
                             fout<<"thread "<<mythread<<"/"<<num_threads;
@@ -830,7 +828,7 @@ namespace tmv {
                         int j1 = mythread * Nx;
                         int j2 = (mythread+1) * Nx;
                         if (j2 > N || mythread == num_threads-1) j2 = N;
-#ifdef PRINTALGO_DIVU_OMP
+#ifdef PRINTALGO_DivU_OMP
 #pragma omp critical
                         {
                             fout<<"thread "<<mythread<<"/"<<num_threads;
@@ -843,7 +841,7 @@ namespace tmv {
                             typedef typename M1::colrange_type M1c;
                             const int rsx = UNKNOWN; 
                             M1c m1c = m1.cColRange(j1,j2);
-#ifdef PRINTALGO_DIVU_OMP
+#ifdef PRINTALGO_DivU_OMP
 #pragma omp critical
                             {
                                 fout<<"thread "<<mythread<<"/"<<num_threads;
@@ -852,7 +850,7 @@ namespace tmv {
                             }
 #endif
                             LDivEqMU_Helper<algo2,cs,rsx,M1c,M2>::call(m1c,m2);
-#ifdef PRINTALGO_DIVU_OMP
+#ifdef PRINTALGO_DivU_OMP
 #pragma omp critical
                             {
                                 fout<<"thread "<<mythread<<"/"<<num_threads;
@@ -882,7 +880,7 @@ namespace tmv {
 #ifdef TMV_DIVMU_OPT_SMALL
             TMVStaticAssert(cs == UNKNOWN);
             const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
-#ifdef PRINTALGO_DIVU
+#ifdef PRINTALGO_DivU
             const int N = rs==UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"LDivEqMU algo 38: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -947,7 +945,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_MV_MM
+#ifdef PRINTALGO_DivU
             const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"LDivEqMU algo 81: M,N,cs,rs = "<<M<<','<<N<<
@@ -963,7 +961,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_DIVU
+#ifdef PRINTALGO_DivU
             const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
             const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"LDivEqMU algo 84: M,N,cs,rs = "<<M<<','<<N<<
@@ -1072,7 +1070,7 @@ namespace tmv {
                     27 );
 #endif
 #endif
-#ifdef PRINTALGO_DIVU
+#ifdef PRINTALGO_DivU
             const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
             const int N = rs==UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"InlineLDivEqMU: \n";
@@ -1085,7 +1083,7 @@ namespace tmv {
             //std::cout<<"m2 = "<<m2<<std::endl;
 #endif
             LDivEqMU_Helper<algo,cs,rs,M1,M2>::call(m1,m2);
-#ifdef PRINTALGO_DIVU
+#ifdef PRINTALGO_DivU
             //std::cout<<"m1 => "<<m1<<std::endl;
 #endif
         }
@@ -1122,8 +1120,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                M1::unknownsizes &&
-                M2::unknownsizes &&
+                (cs == UNKNOWN || cs > 16) &&
+                (rs == UNKNOWN || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
@@ -1180,7 +1178,7 @@ namespace tmv {
     };
 
     template <int algo, class M1, class M2>
-    inline void DoLDivEq(
+    static void DoLDivEq(
         BaseMatrix_Rec_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2)
     {
         TMVStaticAssert((Sizes<M2::_size,M1::_colsize>::same));
@@ -1203,19 +1201,19 @@ namespace tmv {
         LDivEqMU_Helper<algo,cs,rs,M1v,M2v>::call(m1v,m2v);
     }
     template <class M1, class M2>
-    inline void LDivEq(
+    static void LDivEq(
         BaseMatrix_Rec_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2)
     { DoLDivEq<-1>(m1,m2); }
     template <class M1, class M2>
-    inline void NoAliasLDivEq(
+    static void NoAliasLDivEq(
         BaseMatrix_Rec_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2)
     { DoLDivEq<-2>(m1,m2); }
     template <class M1, class M2>
-    inline void InlineLDivEq(
+    static void InlineLDivEq(
         BaseMatrix_Rec_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2)
     { DoLDivEq<-3>(m1,m2); }
     template <class M1, class M2>
-    inline void AliasLDivEq(
+    static void AliasLDivEq(
         BaseMatrix_Rec_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2)
     { DoLDivEq<99>(m1,m2); }
 
@@ -1245,13 +1243,13 @@ namespace tmv {
         template <bool unknowndiag, class M3c>
         struct copyBack
         { // unknowndiag = false
-            static inline void call(const M3c& m3c, M3& m3)
+            static void call(const M3c& m3c, M3& m3)
             { NoAliasCopy(m3c,m3); }
         };
         template <class M3c>
         struct copyBack<true,M3c>
         {
-            static inline void call(const M3c& m3c, M3& m3)
+            static void call(const M3c& m3c, M3& m3)
             {
                 if (m3.isunit()) {
                     typedef typename M3c::const_unitdiag_type M3cu;
@@ -1309,9 +1307,9 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const bool checkalias =
-                M1::unknownsizes &&
-                M2::unknownsizes &&
-                M3::unknownsizes;
+                M1::_colsize == UNKNOWN && M1::_rowsize == UNKNOWN &&
+                M2::_size == UNKNOWN &&
+                M3::_colsize == UNKNOWN && M3::_rowsize == UNKNOWN;
             const int algo =
                 checkalias ? 99 :
                 -2;
@@ -1320,7 +1318,7 @@ namespace tmv {
     };
 
     template <int algo, int ix, class T, class M1, class M2, class M3>
-    inline void DoLDiv(
+    static void DoLDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Calc<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Mutable<M3>& m3)
@@ -1340,19 +1338,19 @@ namespace tmv {
         LDivMU_Helper<algo,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
     }
     template <int ix, class T, class M1, class M2, class M3>
-    inline void LDiv(
+    static void LDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Calc<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Mutable<M3>& m3)
     { DoLDiv<-1>(x,m1,m2,m3); }
     template <int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasLDiv(
+    static void NoAliasLDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Calc<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Mutable<M3>& m3)
     { DoLDiv<-2>(x,m1,m2,m3); }
     template <int ix, class T, class M1, class M2, class M3>
-    inline void AliasLDiv(
+    static void AliasLDiv(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Calc<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Mutable<M3>& m3)
@@ -1363,21 +1361,21 @@ namespace tmv {
     //
 
     template <class M1, class M2>
-    inline void RDivEq(
+    static void RDivEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2)
     { 
         typename M1::transpose_type m1t = m1.transpose();
         LDivEq(m1t,m2.transpose()); 
     }
     template <class M1, class M2>
-    inline void NoAliasRDivEq(
+    static void NoAliasRDivEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2)
     { 
         typename M1::transpose_type m1t = m1.transpose();
         NoAliasLDivEq(m1t,m2.transpose()); 
     }
     template <class M1, class M2>
-    inline void AliasRDivEq(
+    static void AliasRDivEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2)
     {
         typename M1::transpose_type m1t = m1.transpose();
@@ -1389,7 +1387,7 @@ namespace tmv {
     //
 
     template <int ix, class T, class M1, class M2, class M3>
-    inline void RDiv(
+    static void RDiv(
         const Scaling<ix,T>& x,
         const BaseMatrix_Calc<M1>& m1,
         const BaseMatrix_Tri<M2>& m2, BaseMatrix_Mutable<M3>& m3)
@@ -1398,7 +1396,7 @@ namespace tmv {
         LDiv(x,m1.transpose(),m2.transpose(),m3t); 
     }
     template <int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasRDiv(
+    static void NoAliasRDiv(
         const Scaling<ix,T>& x,
         const BaseMatrix_Calc<M1>& m1,
         const BaseMatrix_Tri<M2>& m2, BaseMatrix_Mutable<M3>& m3)
@@ -1407,7 +1405,7 @@ namespace tmv {
         NoAliasLDiv(x,m1.transpose(),m2.transpose(),m3t); 
     }
     template <int ix, class T, class M1, class M2, class M3>
-    inline void AliasRDiv(
+    static void AliasRDiv(
         const Scaling<ix,T>& x,
         const BaseMatrix_Calc<M1>& m1,
         const BaseMatrix_Tri<M2>& m2, BaseMatrix_Mutable<M3>& m3)

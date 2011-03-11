@@ -5,6 +5,7 @@
 //#define PRINTALGO_UL
 //#define PRINTALGO_XV
 //#define PRINTALGO_MM
+//#define PRINTALGO_Det
 
 //#define XDEBUG_PRODMM
 //#define XDEBUG_QUOTMM
@@ -17,11 +18,11 @@
 // How big do you want the matrices to be?
 // (The matrix being inverted is NxN.  
 //  K is the other dimension of the matrix being solved.)
-const int N = 206;
-const int K = 109;
+const int N = 693;
+const int K = 197;
 
 // Define the type to use:
-//#define TISFLOAT
+#define TISFLOAT
 //#define TISCOMPLEX
 
 // Define the parts of the matrices to use
@@ -41,6 +42,10 @@ const int K = 109;
 #define DOLAP
 #define DOEIGEN
 #define DOEIGENSMALL
+
+// For large N, this can be useful to keep the condition of the matrix
+// not too large.
+#define SMALL_OFFDIAG
 
 // Define which batches of functions you want to test:
 #define DO_C
@@ -107,8 +112,8 @@ const long long nloops1 = 1;
 const long long nloops2 = 1;
 #else
 const long long nloops2 = (
-    (((long long)(sizeof(T)))*(N*N+N*K)/1000 > targetmem ? 1 :
-     targetmem*1000 / (((long long)(sizeof(T)))*(N*N+N*K))));
+    (((long long)(sizeof(T)))*(2*N*N+4*N*K)/1000 > targetmem ? 1 :
+     targetmem*1000 / (((long long)(sizeof(T)))*(2*N*N+4*N*K))));
 const long long nloops1 = (
     (nloops2*N*N*(N+K)*XFOUR/1000000 > targetnmegaflops ? 1 :
      targetnmegaflops*1000000 / (nloops2*N*N*(N+K)) / XFOUR ));
@@ -503,11 +508,13 @@ static void LU_C(
     for(int k=0;k<nloops2;++k) {
         P1[k].resize(N);
     }
+    std::vector<T> d1(nloops2);
 
 #ifdef ERRORCHECK
     std::vector<tmv::Matrix<T> > A0 = A1;
     std::vector<tmv::Matrix<T> > C0 = C1;
     std::vector<tmv::Matrix<T> > E0 = E1;
+    std::vector<T> d0(nloops2);
 #endif
 
 #ifdef DOSMALL
@@ -517,6 +524,7 @@ static void LU_C(
     std::vector<tmv::SmallMatrix<T,N,K> > D2(nloops2);
     std::vector<tmv::SmallMatrix<T,K,N> > E2(nloops2);
     std::vector<tmv::SmallMatrix<T,K,N> > F2(nloops2);
+    std::vector<T> d2(nloops2);
 #ifdef TMV_V063
     std::vector<tmv::SmallMatrix<T,N,N> > LU2(nloops2);
     std::vector<std::vector<int> > P2(nloops2);
@@ -539,6 +547,7 @@ static void LU_C(
     std::vector<tmv::Matrix<T> > D3 = D1;
     std::vector<tmv::Matrix<T> > E3 = E1;
     std::vector<tmv::Matrix<T> > F3 = F1;
+    std::vector<T> d3(nloops2);
     std::vector<tmv::Matrix<T> > LU3 = A1;
     std::vector<std::vector<int> > P3(nloops2);
     for(int k=0;k<nloops2;++k) {
@@ -553,6 +562,7 @@ static void LU_C(
     std::vector<EIGENM,ALLOC(EIGENM) > D4(nloops2,EIGENM(N,K));
     std::vector<EIGENM,ALLOC(EIGENM) > E4(nloops2,EIGENM(K,N));
     std::vector<EIGENM,ALLOC(EIGENM) > F4(nloops2,EIGENM(K,N));
+    std::vector<T> d4(nloops2);
 #if EIGEN_VERSION_AT_LEAST(2,91,0)
     std::vector<Eigen::PartialPivLU<EIGENM>*,ALLOC(Eigen::PartialPivLU<EIGENM>*) > LU4(nloops2);
 #else
@@ -572,6 +582,7 @@ static void LU_C(
     std::vector<EIGENSMD,ALLOC(EIGENSMD) > D5;
     std::vector<EIGENSME,ALLOC(EIGENSME) > E5;
     std::vector<EIGENSMF,ALLOC(EIGENSMF) > F5;
+    std::vector<T> d5(nloops2x);
 #if EIGEN_VERSION_AT_LEAST(2,91,0)
     std::vector<Eigen::PartialPivLU<EIGENSMA>*,ALLOC(Eigen::PartialPivLU<EIGENSMA>*) > LU5;
 #else
@@ -669,8 +680,8 @@ static void LU_C(
 #else
                 //A0[k] = LU1[k].unitLowerTri() * LU1[k].upperTri();
                 //A0[k].reversePermuteRows(&P1[k][0]);
-                A0[k] = A1[k].lud().getL() * A1[k].lud().getU();
-                A0[k].reversePermuteRows(A1[k].lud().getP());
+                A0[k] = A1[k].lud().getP() * 
+                    A1[k].lud().getL() * A1[k].lud().getU();
 #endif
                 e1_reg += NormSq(A0[k]-A1[k]);
             }
@@ -705,8 +716,7 @@ static void LU_C(
                 A0[k] = LU2[k].lowerTri(tmv::UnitDiag) * LU2[k].upperTri();
                 A0[k].reversePermuteRows(&P2[k][0]);
 #else
-                A0[k] = LU2[k]->getL() * LU2[k]->getU();
-                A0[k].reversePermuteRows(LU2[k]->getP());
+                A0[k] = LU2[k]->getP() * LU2[k]->getL() * LU2[k]->getU();
 #endif
                 e1_small += NormSq(A2[k]-A0[k]);
             }
@@ -1223,7 +1233,7 @@ static void LU_C(
 #if PART1 == 1
                 B3[k] = LU3[k];
                 int lwork = 10*N*LAP_BLOCKSIZE;
-                std::vector<double> work(lwork);
+                std::vector<RT> work(lwork);
                 LAPNAME(getri) (
                     LAPCM N,LP(B3[k].ptr()),N,&P3[k][0],
                     LP(&work[0]),lwork,&lapinfo);
@@ -1319,7 +1329,155 @@ static void LU_C(
 #endif
 #endif
 #endif
+
+#if 1 // d = A.det() (no decomp)
+#ifdef ERRORCHECK
+        for (int k=0; k<nloops2; ++k) {
+            // I just use the TMV calculation for the error check.
+            // So if there is an error there, it only turns up in comparison
+            // with the other 4 answers.
+            d0[k] = MPART1(A1[k]).det();
+        }
+        if (n==0) std::cout<<"det = "<<d0[0]<<std::endl;
 #endif
+        ClearCache();
+
+#ifdef DOREG
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+            d1[k] = MPART1(A1[k]).det();
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t11_reg += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e11_reg = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                e11_reg += tmv::TMV_NORM(d0[k]-d1[k]);
+            }
+            e11_reg = sqrt(e11_reg/nloops2);
+            e11_reg /= tmv::TMV_ABS(d0[0]);
+        }
+#endif
+#endif
+
+#ifdef DOSMALL
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+#if (PART1 == 1)
+            d2[k] = LU2[k]->det();
+#else
+            d2[k] = MPART1(A2[k]).det();
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t11_small += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e11_small = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                e11_small += tmv::TMV_NORM(d0[k]-d2[k]);
+            }
+            e11_small = sqrt(e11_small/nloops2);
+            e11_small /= tmv::TMV_ABS(d0[0]);
+        }
+#endif
+#endif
+
+#ifdef DOLAP
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+            d3[k] = T(1);
+#if PART1 == 1
+            for(int i=0;i<N;++i) d3[k] *= LU3[k](i,i);
+            for(int i=0;i<N;++i) if (P3[k][i] != i+1) d3[k] = -d3[k];
+#elif PART1 >= 2 && PART1 <= 5
+            for(int i=0;i<N;++i) d3[k] *= A3[k](i,i);
+#endif
+        }
+        if (n==0) std::cout<<"LAP det = "<<d3[0]<<std::endl;
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t11_blas += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e11_blas = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                e11_blas += tmv::TMV_NORM(d0[k]-d3[k]);
+            }
+            e11_blas = sqrt(e11_blas/nloops2);
+            e11_blas /= tmv::TMV_ABS(d0[0]);
+        }
+#endif
+#endif
+
+#ifdef DOEIGEN
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+#if PART1 == 1
+            d4[k] = LU4[k]->determinant();
+#elif PART1 >= 2 && PART1 <= 5
+            d4[k] = A4[k].determinant();
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t11_eigen += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e11_eigen = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                e11_eigen += tmv::TMV_NORM(d0[k]-d4[k]);
+            }
+            e11_eigen = sqrt(e11_eigen/nloops2);
+            e11_eigen /= tmv::TMV_ABS(d0[0]);
+        }
+#endif
+#endif
+
+#ifdef DOEIGENSMALL
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2x; ++k) {
+#if PART1 == 1
+            d5[k] = LU5[k]->determinant();
+#elif PART1 >= 2 && PART1 <= 5
+            d5[k] = A5[k].determinant();
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t11_smalleigen += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0 && nloops2x) {
+            e11_smalleigen = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                e11_smalleigen += tmv::TMV_NORM(d0[k]-d5[k]);
+            }
+            e11_smalleigen = sqrt(e11_smalleigen/nloops2);
+            e11_smalleigen /= tmv::TMV_ABS(d0[0]);
+        }
+#endif
+#endif
+#endif
+
+#endif // PART == 1 -- separate decomposition and use
 
 #if 1 // D /= A
         ClearCache();
@@ -1697,7 +1855,7 @@ static void LU_C(
                 LAPNAME(getrf) (
                     LAPCM N,N,LP(B3[k].ptr()),N,&P3[k][0],&lapinfo);
                 int lwork = N*LAP_BLOCKSIZE;
-                std::vector<double> work(lwork);
+                std::vector<RT> work(lwork);
                 LAPNAME(getri) (
                     LAPCM N,LP(B3[k].ptr()),N,&P3[k][0],
                     LP(&work[0]),lwork,&lapinfo);
@@ -1863,7 +2021,7 @@ static void LU_C(
                 LAPNAME(getrf) (
                     LAPCM N,N,LP(B3[k].ptr()),N,&P3[k][0],&lapinfo);
                 int lwork = N*LAP_BLOCKSIZE;
-                std::vector<double> work(lwork);
+                std::vector<RT> work(lwork);
                 LAPNAME(getri) (
                     LAPCM N,LP(B3[k].ptr()),N,&P3[k][0],
                     LP(&work[0]),lwork,&lapinfo);
@@ -2279,7 +2437,145 @@ static void LU_C(
 #endif
 #endif
 #endif
+
+#if 1 // d = A.det()
+#ifdef ERRORCHECK
+        for (int k=0; k<nloops2; ++k) {
+            // I just use the TMV calculation for the error check.
+            // So if there is an error there, it only turns up in comparison
+            // with the other 4 answers.
+            d0[k] = MPART1(A1[k]).det();
+        }
+#endif
+        ClearCache();
+
+#ifdef DOREG
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+            d1[k] = MPART1(A1[k]).det();
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t12_reg += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e12_reg = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                e12_reg += tmv::TMV_NORM(d0[k]-d1[k]);
+            }
+            e12_reg = sqrt(e12_reg/nloops2);
+            e12_reg /= tmv::TMV_ABS(d0[0]);
+        }
+#endif
+#endif
+
+#ifdef DOSMALL
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+            d2[k] = MPART1(A2[k]).det();
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t12_small += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e12_small = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                e12_small += tmv::TMV_NORM(d0[k]-d2[k]);
+            }
+            e12_small = sqrt(e12_small/nloops2);
+            e12_small /= tmv::TMV_ABS(d0[0]);
+        }
+#endif
+#endif
+
+#ifdef DOLAP
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+            d3[k] = T(1);
+#if PART1 == 1
+            LU3[k] = A3[k];
+            LAPNAME(getrf) (
+                LAPCM N,N,LP(LU3[k].ptr()),N,&P3[k][0],&lapinfo);
+            for(int i=0;i<N;++i) d3[k] *= LU3[k](i,i);
+            for(int i=0;i<N;++i) if (P3[k][i] != i+1) d3[k] = -d3[k];
+#elif PART1 >= 2 && PART1 <= 5
+            for(int i=0;i<N;++i) d3[k] *= A3[k](i,i);
+#endif
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t12_blas += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e12_blas = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                e12_blas += tmv::TMV_NORM(d0[k]-d3[k]);
+            }
+            e12_blas = sqrt(e12_blas/nloops2);
+            e12_blas /= tmv::TMV_ABS(d0[0]);
+        }
+#endif
+#endif
+
+#ifdef DOEIGEN
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2; ++k) {
+            d4[k] = A4[k].determinant();
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t12_eigen += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0) {
+            e12_eigen = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                e12_eigen += tmv::TMV_NORM(d0[k]-d4[k]);
+            }
+            e12_eigen = sqrt(e12_eigen/nloops2);
+            e12_eigen /= tmv::TMV_ABS(d0[0]);
+        }
+#endif
+#endif
+
+#ifdef DOEIGENSMALL
+        gettimeofday(&tp,0);
+        ta = tp.tv_sec + tp.tv_usec/1.e6;
+
+        for (int k=0; k<nloops2x; ++k) {
+            d5[k] = A5[k].determinant();
+        }
+
+        gettimeofday(&tp,0);
+        tb = tp.tv_sec + tp.tv_usec/1.e6;
+        t12_smalleigen += tb-ta;
+#ifdef ERRORCHECK
+        if (n == 0 && nloops2x) {
+            e12_smalleigen = 0.;
+            for (int k=0; k<nloops2; ++k) {
+                e12_smalleigen += tmv::TMV_NORM(d0[k]-d5[k]);
+            }
+            e12_smalleigen = sqrt(e12_smalleigen/nloops2);
+            e12_smalleigen /= tmv::TMV_ABS(d0[0]);
+        }
+#endif
+#endif
+#endif
+        std::cout<<"."; std::cout.flush();
     }
+    std::cout<<"\n";
 
 #if PART1 == 1
     std::cout<<"A -> PLU               "<<t1_reg<<"  "<<t1_small<<"  "<<t1_blas;
@@ -2291,6 +2587,8 @@ static void LU_C(
     std::cout<<"  "<<t3_eigen<<"  "<<t3_smalleigen<<std::endl;
     std::cout<<"B = A.inverse()        "<<t4_reg<<"  "<<t4_small<<"  "<<t4_blas;
     std::cout<<"  "<<t4_eigen<<"  "<<t4_smalleigen<<std::endl;
+    std::cout<<"d = A.det()            "<<t11_reg<<"  "<<t11_small<<"  "<<t11_blas;
+    std::cout<<"  "<<t11_eigen<<"  "<<t11_smalleigen<<std::endl;
     std::cout<<"Including decomposition:\n";
 #endif
     std::cout<<"D /= A                 "<<t5_reg<<"  "<<t5_small<<"  "<<t5_blas;
@@ -2305,6 +2603,8 @@ static void LU_C(
     std::cout<<"  "<<t9_eigen<<"  "<<t9_smalleigen<<std::endl;
     std::cout<<"F = E % A              "<<t10_reg<<"  "<<t10_small<<"  "<<t10_blas;
     std::cout<<"  "<<t10_eigen<<"  "<<t10_smalleigen<<std::endl;
+    std::cout<<"d = A.det()            "<<t12_reg<<"  "<<t12_small<<"  "<<t12_blas;
+    std::cout<<"  "<<t12_eigen<<"  "<<t12_smalleigen<<std::endl;
 
 #ifdef ERRORCHECK
     std::cout<<"errors:\n";
@@ -2317,6 +2617,8 @@ static void LU_C(
     std::cout<<"  "<<e3_eigen<<"  "<<e3_smalleigen<<std::endl;
     std::cout<<"B = A.inverse() ND     "<<e4_reg<<"  "<<e4_small<<"  "<<e4_blas;
     std::cout<<"  "<<e4_eigen<<"  "<<e4_smalleigen<<std::endl;
+    std::cout<<"d = A.det() ND         "<<e11_reg<<"  "<<e11_small<<"  "<<e11_blas;
+    std::cout<<"  "<<e11_eigen<<"  "<<e11_smalleigen<<std::endl;
 #endif
     std::cout<<"D /= A                 "<<e5_reg<<"  "<<e5_small<<"  "<<e5_blas;
     std::cout<<"  "<<e5_eigen<<"  "<<e5_smalleigen<<std::endl;
@@ -2330,6 +2632,8 @@ static void LU_C(
     std::cout<<"  "<<e9_eigen<<"  "<<e9_smalleigen<<std::endl;
     std::cout<<"F = E % A              "<<e10_reg<<"  "<<e10_small<<"  "<<e10_blas;
     std::cout<<"  "<<e10_eigen<<"  "<<e10_smalleigen<<std::endl;
+    std::cout<<"d = A.det()            "<<e12_reg<<"  "<<e12_small<<"  "<<e12_blas;
+    std::cout<<"  "<<e12_eigen<<"  "<<e12_smalleigen<<std::endl;
     std::cout<<"\n\n";
 #endif
 #ifdef DOSMALL
@@ -2368,7 +2672,7 @@ static void LU_R(
 #else
 #define RAND1 ( T(rand()) / RT(RAND_MAX) )
 #endif
-#define RAND  ( RAND1 * RT(1000) + RAND1 - RT(500) )
+#define RAND  ( RAND1 * RT(1000) + RAND1 - RT(500) ) / RT(1000)
 #endif
 
 
@@ -2398,8 +2702,10 @@ int main() try
 #endif
         }
 #ifdef SMALL_OFFDIAG
+        A[k].diag().addToAll(1.);
         A[k].upperTri().offDiag() /= 10000.;
         A[k].lowerTri().offDiag() /= 10000.;
+        B[k].diag().addToAll(1.);
         B[k].upperTri().offDiag() /= 10000.;
         B[k].lowerTri().offDiag() /= 10000.;
 #endif

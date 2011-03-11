@@ -36,6 +36,8 @@
 #include <algorithm>
 #include <vector>
 
+#include "TMV_BaseVector.h";
+
 namespace tmv {
 
     //
@@ -45,8 +47,7 @@ namespace tmv {
     template <ADType ad, CompType comp, class T> 
     struct Compare
     {
-        typedef typename Traits<T>::real_type RT;
-        inline bool operator()(const T& x, const T& y) const
+        bool operator()(const T& x, const T& y) const
         {
             return Maybe<ad==Ascend>::less(
                 Component<comp,T>::f(x),Component<comp,T>::f(y)); 
@@ -63,7 +64,7 @@ namespace tmv {
     // under particular situations.  So if the std::sort() works on your
     // system, it is recommended.
     template <class IT, class COMP>
-    inline void Sort3(IT x1, IT x2, IT x3, const COMP& comp)
+    static void Sort3(IT x1, IT x2, IT x3, const COMP& comp)
     {
         if (comp(*x3,*x1)) {
             if (comp(*x1,*x2)) { // x3 < x1 < x2
@@ -91,7 +92,7 @@ namespace tmv {
     }
 
     template <class IT, class COMP>
-    inline void DoSort(IT begin, IT end, const COMP& comp)
+    static void DoSort(IT begin, IT end, const COMP& comp)
     {
         iterator_traits<IT>::difference_type n = end-begin;
         TMVAssert(N >= 0);
@@ -123,106 +124,29 @@ namespace tmv {
     }
 
     template <class IT>
-    inline void DoSort(const IT& begin, const IT& end)
+    static void DoSort(const IT& begin, const IT& end)
     { DoSort(begin,end,std::less<iterator_traits<IT>::value_type>()); }
 #else
     // Otherwise, just use the standard library sort routine.
     template <class IT, class COMP>
-    inline void DoSort(IT begin, IT end, const COMP& comp)
+    static void DoSort(IT begin, IT end, const COMP& comp)
     { std::sort(begin,end,comp); }
 
     // Overload the case of RealComp with real values, since then
     // we can call the sort without a comp object
     template <class IT, class T>
-    inline void DoSort(IT begin, IT end,
+    static void DoSort(IT begin, IT end,
                        const Compare<Ascend,RealComp,T>& comp)
     { std::sort(begin,end); }
     template <class IT, class T>
-    inline void DoSort(IT begin, IT end,
+    static void DoSort(IT begin, IT end,
                        const Compare<Ascend,RealComp,std::complex<T> >& comp)
     { std::sort(begin,end,comp); }
 
     template <class IT>
-    inline void DoSort(const IT& begin, const IT& end)
+    static void DoSort(const IT& begin, const IT& end)
     { std::sort(begin,end); }
 #endif
-
-    //
-    // Sort without returning permutation
-    //
-
-    // TODO: I should probably change the syntax to have ad and comp be 
-    // template parameters.
-    template <class V>
-    inline void InlineSort(BaseVector_Mutable<V>& v, ADType ad, CompType comp)
-    {
-        typedef typename V::value_type T;
-        if (ad == Ascend) {
-            if (comp == RealComp) 
-                return DoSort(v.ptr(),v.ptr()+v.size(),Compare<Ascend,RealComp,T>());
-            else if (comp == AbsComp) 
-                return DoSort(v.ptr(),v.ptr()+v.size(),Compare<Ascend,AbsComp,T>());
-            else if (comp == ImagComp) 
-                return DoSort(v.ptr(),v.ptr()+v.size(),Compare<Ascend,ImagComp,T>());
-            else 
-                return DoSort(v.ptr(),v.ptr()+v.size(),Compare<Ascend,ArgComp,T>());
-        } else {
-            if (comp == RealComp) 
-                return DoSort(v.ptr(),v.ptr()+v.size(),Compare<Descend,RealComp,T>());
-            else if (comp == AbsComp) 
-                return DoSort(v.ptr(),v.ptr()+v.size(),Compare<Descend,AbsComp,T>());
-            else if (comp == ImagComp) 
-                return DoSort(v.ptr(),v.ptr()+v.size(),Compare<Descend,ImagComp,T>());
-            else 
-                return DoSort(v.ptr(),v.ptr()+v.size(),Compare<Descend,ArgComp,T>());
-        }
-    }
-
-    // Defined in TMV_Vector.cpp
-    template <class T>
-    void InstSort(VectorView<T> v, ADType ad, CompType comp);
-
-    template <bool vconj, bool inst, class V>
-    struct CallSort // vconj = true
-    {
-        static inline void call(V& v, ADType ad, CompType comp)
-        {
-            // Swap ad if necessary according to the conj status of the vector:
-            if (V::_conj && (comp==ImagComp || comp==ArgComp)) {
-                if (ad == Ascend) ad = Descend;
-                else ad = Ascend;
-            }
-            CallSort<false,inst,V>::call(v.conjugate(),ad,comp); 
-        }
-    };
-    template <class V>
-    struct CallSort<false,false,V> // inst = false
-    {
-        static inline void call(V& v, ADType ad, CompType comp)
-        { InlineSort(v,ad,comp); }
-    };
-    template <class V>
-    struct CallSort<false,true,V> // inst = true
-    {
-        static inline void call(V& v, ADType ad, CompType comp)
-        { InstSort(v.xView(),ad,comp); }
-    };
-
-    template <class V>
-    inline void Sort(BaseVector_Mutable<V>& v, ADType ad, CompType comp)
-    {
-        typedef typename V::value_type T;
-        const bool inst = 
-            V::unknownsizes &&
-            Traits<T>::isinst;
-        CallSort<V::_conj,inst,V>::call(v.vec(),ad,comp);
-    }
-
-
-
-    //
-    // Sort with returning permutation
-    //
 
     // A helper class to keep track of indexes in the sort.
     // We sort the "value" according to which component of the actual
@@ -234,19 +158,20 @@ namespace tmv {
     private :
 
         typedef typename Traits<T>::real_type RT;
+        typedef typename Traits<RT>::float_type FT;
 
-        RT itsvalue;
+        FT itsvalue;
         int itsi;
 
     public :
 
-        VTIndex() : itsvalue(RT(0)), itsi(0) {}
+        VTIndex() : itsvalue(FT(0)), itsi(0) {}
 
         VTIndex(T val, int i) : itsvalue(0), itsi(i)
         { itsvalue = Maybe<ad==Descend>::neg(Component<comp,T>::f(val)); }
 
         int getI() const { return itsi; }
-        RT getVal() const { return itsvalue; }
+        FT getVal() const { return itsvalue; }
         bool operator<(const VTIndex& rhs) const
         { return itsvalue < rhs.itsvalue; }
         operator int() const { return itsi; }
@@ -258,7 +183,7 @@ namespace tmv {
     // Ouput P is in swap form, meaning that permutation is series of
     // Swap(i,P[i])
     template <class VI> 
-    inline void ConvertIndexToPermute(int n, const VI& newindex, int*const P)
+    static void ConvertIndexToPermute(int n, const VI& newindex, int* P)
     {
         // newindex[i]=j means value at original j location needs to go to i.
         std::vector<int> currindex(n);
@@ -284,8 +209,7 @@ namespace tmv {
     }
 
     template <ADType ad, CompType comp, class V>
-    inline void InlineSort1(
-        BaseVector_Mutable<V>& v, int*const P)
+    static void CallSort(V& v, int* P)
     {
         typedef typename V::value_type T;
         const int n = v.size();
@@ -296,66 +220,158 @@ namespace tmv {
         v.permute(P);
     }
 
-    template <class V>
-    inline void InlineSort(
-        BaseVector_Mutable<V>& v, int*const P, ADType ad, CompType comp)
+    template <ADType ad, CompType comp, class V>
+    static void CallSort(V& v)
     {
-        if (ad == Ascend) {
-            if (comp == RealComp) InlineSort1<Ascend,RealComp>(v,P);
-            else if (comp == AbsComp) InlineSort1<Ascend,AbsComp>(v,P);
-            else if (comp == ImagComp) InlineSort1<Ascend,ImagComp>(v,P);
-            else InlineSort1<Ascend,ArgComp>(v,P);
-        } else {
-            if (comp == RealComp) InlineSort1<Descend,RealComp>(v,P);
-            else if (comp == AbsComp) InlineSort1<Descend,AbsComp>(v,P);
-            else if (comp == ImagComp) InlineSort1<Descend,ImagComp>(v,P);
-            else InlineSort1<Descend,ArgComp>(v,P);
-        }
+        typedef typename V::value_type T;
+        DoSort(v.ptr(),v.ptr()+v.size(),Compare<ad,comp,T>()); 
     }
 
     // Defined in TMV_Vector.cpp
     template <class T>
-    void InstSort(VectorView<T> v, int*const P, ADType ad, CompType comp);
+    void InstSort(VectorView<T> v, ADType ad, CompType comp);
+    template <class T>
+    void InstSort(VectorView<T> v, int* P, ADType ad, CompType comp);
 
-    template <bool vconj, bool inst, class V>
-    struct CallSortP // vconj = true
+    template <int algo, class V>
+    struct Sort_Helper;
+
+    // algo 1: Normal case.  Call DoSort with the right Compare object.
+    template <class V>
+    struct Sort_Helper<1,V>
     {
-        static inline void call(V& v, int*const P, ADType ad, CompType comp)
+        static void call(V& v, int* P, ADType ad, CompType comp)
         {
-            // Swap ad if necessary according to the conj status of the vector:
-            if (V::_conj && (comp==ImagComp || comp==ArgComp)) {
+            if (ad == Ascend) {
+                if (comp == RealComp) CallSort<Ascend,RealComp>(v,P);
+                else if (comp == AbsComp) CallSort<Ascend,AbsComp>(v,P);
+                else if (comp == ImagComp) CallSort<Ascend,ImagComp>(v,P);
+                else CallSort<Ascend,ArgComp>(v,P);
+            } else {
+                if (comp == RealComp) CallSort<Descend,RealComp>(v,P);
+                else if (comp == AbsComp) CallSort<Descend,AbsComp>(v,P);
+                else if (comp == ImagComp) CallSort<Descend,ImagComp>(v,P);
+                else CallSort<Descend,ArgComp>(v,P);
+            }
+        }
+        static void call(V& v, ADType ad, CompType comp)
+        {
+            if (ad == Ascend) {
+                if (comp == RealComp) CallSort<Ascend,RealComp>(v);
+                else if (comp == AbsComp) CallSort<Ascend,AbsComp>(v);
+                else if (comp == ImagComp) CallSort<Ascend,ImagComp>(v);
+                else CallSort<Ascend,ArgComp>(v);
+            } else {
+                if (comp == RealComp) CallSort<Descend,RealComp>(v);
+                else if (comp == AbsComp) CallSort<Descend,AbsComp>(v);
+                else if (comp == ImagComp) CallSort<Descend,ImagComp>(v);
+                else CallSort<Descend,ArgComp>(v);
+            }
+        }
+    };
+
+    // algo 97: Conjugate
+    template <class V>
+    struct Sort_Helper<97,V>
+    {
+        static void call(V& v, int* P, ADType ad, CompType comp)
+        {
+            // Swap ad if necessary 
+            if (comp==ImagComp || comp==ArgComp) {
                 if (ad == Ascend) ad = Descend;
                 else ad = Ascend;
             }
-            typename V::conjugate_type vc = v.conjugate();
-            CallSortP<false,inst,V>::call(vc,ad,comp); 
+            typedef typename V::conjugate_type Vc;
+            Vc vc = v.conjugate();
+            Sort_Helper<-1,Vc>::call(vc,P,ad,comp); 
+        }
+        static void call(V& v, ADType ad, CompType comp)
+        {
+            // Swap ad if necessary 
+            if (comp==ImagComp || comp==ArgComp) {
+                if (ad == Ascend) ad = Descend;
+                else ad = Ascend;
+            }
+            typedef typename V::conjugate_type Vc;
+            Vc vc = v.conjugate();
+            Sort_Helper<-1,Vc>::call(vc,ad,comp); 
         }
     };
+
+    // algo 98: Call inst
     template <class V>
-    struct CallSortP<false,false,V> // inst = false
+    struct Sort_Helper<98,V>
     {
-        static inline void call(V& v, int*const P, ADType ad, CompType comp)
-        { InlineSort(v,P,ad,comp); }
-    };
-    template <class V>
-    struct CallSortP<false,true,V> // inst = true
-    {
-        static inline void call(V& v, int*const P, ADType ad, CompType comp)
+        static void call(V& v, int* P, ADType ad, CompType comp)
         { InstSort(v.xView(),P,ad,comp); }
+        static void call(V& v, ADType ad, CompType comp)
+        { InstSort(v.xView(),ad,comp); }
+    };
+
+    // algo -1: Check for inst
+    template <class V>
+    struct Sort_Helper<-1,V>
+    {
+        static void call(V& v, int* P, ADType ad, CompType comp)
+        {
+            typedef typename V::value_type T;
+            const bool inst = 
+                (V::_size == UNKNOWN || V::_size > 16) &&
+                Traits<T>::isinst;
+            const int algo = 
+                V::_conj ? 97 :
+                inst ? 98 :
+                1;
+            Sort_Helper<algo,V>::call(v,P,ad,comp);
+        }
+        static void call(V& v, ADType ad, CompType comp)
+        {
+            typedef typename V::value_type T;
+            const bool inst = 
+                (V::_size == UNKNOWN || V::_size > 16) &&
+                Traits<T>::isinst;
+            const int algo = 
+                V::_conj ? 97 :
+                inst ? 98 :
+                1;
+            Sort_Helper<algo,V>::call(v,ad,comp);
+        }
     };
 
     template <class V>
-    inline void Sort(BaseVector_Mutable<V>& v,
-                     int*const P, ADType ad, CompType comp)
+    static void InlineSort(
+        BaseVector_Mutable<V>& v, int* P, ADType ad, CompType comp)
     {
-        if (P == 0) Sort(v,ad,comp);
-        else {
-            typedef typename V::value_type T;
-            const bool inst = 
-                V::unknownsizes &&
-                Traits<T>::isinst;
-            CallSortP<V::_conj,inst,V>::call(v.vec(),P,ad,comp);
-        }
+        typedef typename V::cview_type Vv;
+        Vv vv = v.cView();
+        if (P == 0) Sort_Helper<1,Vv>::call(vv,ad,comp);
+        else Sort_Helper<1,Vv>::call(vv,P,ad,comp);
+    }
+
+    template <class V>
+    static void Sort(
+        BaseVector_Mutable<V>& v, int* P, ADType ad, CompType comp)
+    {
+        typedef typename V::cview_type Vv;
+        Vv vv = v.cView();
+        if (P == 0) Sort_Helper<-1,Vv>::call(vv,ad,comp);
+        else Sort_Helper<-1,Vv>::call(vv,P,ad,comp);
+    }
+
+    template <class V>
+    static void InlineSort(BaseVector_Mutable<V>& v, ADType ad, CompType comp)
+    {
+        typedef typename V::cview_type Vv;
+        Vv vv = v.cView();
+        Sort_Helper<1,Vv>::call(vv,ad,comp);
+    }
+
+    template <class V>
+    static void Sort(BaseVector_Mutable<V>& v, ADType ad, CompType comp)
+    {
+        typedef typename V::cview_type Vv;
+        Vv vv = v.cView();
+        Sort_Helper<-1,Vv>::call(vv,ad,comp);
     }
 
 } // namespace tmv

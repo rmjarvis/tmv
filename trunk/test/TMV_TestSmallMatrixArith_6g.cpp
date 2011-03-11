@@ -4,8 +4,9 @@
 
 template <class T> void TestSmallMatrixArith_6g()
 {
-#if (XTEST & 2)
     TestSmallMatrixArith_6<T,9,3,1>("9 3 1");
+#if (XTEST & 2)
+    TestSmallMatrixArith_6<T,3,9,1>("3 9 1");
 #endif
 }
 

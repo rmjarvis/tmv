@@ -17,6 +17,7 @@ int main() try
     //! (  888  888  888  )
     //! (  888  888  888  )
     //! (  888  888  888  )
+    //! 
 
     // Initialize with direct element access:
     for(size_t i=0;i<m1.nrows();i++) 
@@ -29,6 +30,7 @@ int main() try
     //! (  12  9  6  )
     //! (  14  11  8  )
     //! (  16  13  10  )
+    //! 
 
     // Create with all 2's.
     tmv::Matrix<double> m2(4,3,2.); 
@@ -39,6 +41,7 @@ int main() try
     //! (  2  2  2  )
     //! (  2  2  2  )
     //! (  2  2  2  )
+    //! 
 
     // Create from given elements in a C array;
     double mm[12] = {1,2,3,4, 5,6,7,8, 9,10,11,12};
@@ -50,6 +53,7 @@ int main() try
     //! (  2  6  10  )
     //! (  3  7  11  )
     //! (  4  8  12  )
+    //! 
 
     tmv::Matrix<double,tmv::RowMajor> m4(4,3,mm);
     std::cout<<"m4 (RowMajor) = \n"<<m4<<std::endl;
@@ -59,6 +63,7 @@ int main() try
     //! (  4  5  6  )
     //! (  7  8  9  )
     //! (  10  11  12  )
+    //! 
 
     // Initialize with << notation.
     // Note that this is more intuitive with RowMajor Storage
@@ -73,6 +78,7 @@ int main() try
     //! (  -5  8  2  )
     //! (  1  -7  4  )
     //! (  -3  1  0  )
+    //! 
 
     m4 <<
         2, -4,  1,
@@ -86,6 +92,7 @@ int main() try
     //! (  -5  8  2  )
     //! (  1  -7  4  )
     //! (  -3  1  0  )
+    //! 
 
     // Create from STL vector of vectors
     std::vector<std::vector<double> > mm2(3,std::vector<double>(3));
@@ -99,6 +106,7 @@ int main() try
     //! (  0  1  2  )
     //! (  2  0  -2  )
     //! (  4  -1  -6  )
+    //! 
 
 
     // Norms, etc. 
@@ -146,18 +154,21 @@ int main() try
     //! 2  2
     //! (  14  11  )
     //! (  16  13  )
+    //! 
     std::cout<<"m1.subMatrix(0,4,1,3,2,1) = \n"<<
         m1.subMatrix(0,4,1,3,2,1)<<std::endl;
     //! m1.subMatrix(0,4,1,3,2,1) = 
     //! 2  2
     //! (  7  4  )
     //! (  11  8  )
+    //! 
     std::cout<<"m1.transpose() = \n"<<m1.transpose()<<std::endl;
     //! m1.transpose() = 
     //! 3  4
     //! (  10  12  14  16  )
     //! (  7  9  11  13  )
     //! (  4  6  8  10  )
+    //! 
     std::cout<<"m1.colRange(1,3) = \n"<<m1.colRange(1,3)<<std::endl;
     //! m1.colRange(1,3) = 
     //! 4  2
@@ -165,11 +176,13 @@ int main() try
     //! (  9  6  )
     //! (  11  8  )
     //! (  13  10  )
+    //! 
     std::cout<<"m1.rowPair(3,0) = \n"<<m1.rowPair(3,0)<<std::endl;
     //! m1.rowPair(3,0) = 
     //! 2  3
     //! (  16  13  10  )
     //! (  10  7  4  )
+    //! 
     // Can use the views within expressions
     m1.rowRange(0,3) += m5.transpose();
     std::cout<<"m1.rowRange(0,3) += m5.transpose() => m1 = \n"<<m1<<std::endl;
@@ -179,6 +192,7 @@ int main() try
     //! (  13  9  5  )
     //! (  16  9  2  )
     //! (  16  13  10  )
+    //! 
     m1.row(0) *= 2.;
     std::cout<<"m1.row(0) *= 2 => m1 = \n"<<m1<<std::endl;
     //! m1.row(0) *= 2 => m1 = 
@@ -187,6 +201,7 @@ int main() try
     //! (  13  9  5  )
     //! (  16  9  2  )
     //! (  16  13  10  )
+    //! 
 
 
     // Fortran Indexing:
@@ -199,6 +214,7 @@ int main() try
     //! (  13  9  5  )
     //! (  16  9  2  )
     //! (  16  13  10  )
+    //! 
     std::cout<<"fm1(1,1) = "<<fm1(1,1)<<std::endl;
     //! fm1(1,1) = 20
     std::cout<<"fm1(4,3) = "<<fm1(4,3)<<std::endl;
@@ -212,12 +228,14 @@ int main() try
     //! 2  2
     //! (  13  9  )
     //! (  16  9  )
+    //! 
     std::cout<<"fm1.subMatrix(1,3,2,3,2,1) = \n"<<
         fm1.subMatrix(1,3,2,3,2,1)<<std::endl;
     //! fm1.subMatrix(1,3,2,3,2,1) = 
     //! 2  2
     //! (  18  16  )
     //! (  9  2  )
+    //! 
     std::cout<<"fm1.colRange(1,2) = \n"<<fm1.colRange(1,2)<<std::endl;
     //! fm1.colRange(1,2) = 
     //! 4  2
@@ -225,11 +243,13 @@ int main() try
     //! (  13  9  )
     //! (  16  9  )
     //! (  16  13  )
+    //! 
     std::cout<<"fm1.rowPair(4,1) = \n"<<fm1.rowPair(4,1)<<std::endl;
     //! fm1.rowPair(4,1) = 
     //! 2  3
     //! (  16  13  10  )
     //! (  20  18  16  )
+    //! 
 
 
     // Matrix arithmetic:
@@ -242,6 +262,7 @@ int main() try
     //! (  8  17  7  )
     //! (  17  2  6  )
     //! (  13  14  10  )
+    //! 
     // Works correctly even if matrices are stored in different order:
     tmv::Matrix<double> m3pm4 = m3 + m4; 
     std::cout<<"m3 + m4 = \n"<<m3pm4<<std::endl;
@@ -251,6 +272,7 @@ int main() try
     //! (  -10  16  4  )
     //! (  2  -14  8  )
     //! (  -6  2  0  )
+    //! 
 
     m1 *= 2.;  
     std::cout<<"m1 *= 2 = \n"<<m1<<std::endl;
@@ -260,6 +282,7 @@ int main() try
     //! (  26  18  10  )
     //! (  32  18  4  )
     //! (  32  26  20  )
+    //! 
 
     m1 += m4; 
     std::cout<<"m1 += m4 = \n"<<m1<<std::endl;
@@ -269,6 +292,7 @@ int main() try
     //! (  21  26  12  )
     //! (  33  11  8  )
     //! (  29  27  20  )
+    //! 
 
     // Vector outer product
     tmv::Vector<double> v1 = m4.col(0);
@@ -285,6 +309,7 @@ int main() try
     //! (  25  -40  -10  )
     //! (  -5  8  2  )
     //! (  15  -24  -6  )
+    //! 
     std::cout<<"ColVectorViewOf(v1)*RowVectorViewOf(v2) = \n"<<
         ColVectorViewOf(v1)*RowVectorViewOf(v2)<<std::endl;
     //! ColVectorViewOf(v1)*RowVectorViewOf(v2) = 
@@ -293,6 +318,7 @@ int main() try
     //! (  25  -40  -10  )
     //! (  -5  8  2  )
     //! (  15  -24  -6  )
+    //! 
 
     // Matrix * Vector product
     std::cout<<"m1 * v2 = "<<m1*v2<<std::endl;
@@ -309,6 +335,7 @@ int main() try
     //! (  100  9  -82  )
     //! (  54  25  -4  )
     //! (  134  9  -116  )
+    //! 
     std::cout<<"m1.row(0) * m5.col(2) = "<<m1.row(0)*m5.col(2)<<std::endl;
     //! m1.row(0) * m5.col(2) = -178
     std::cout<<"(m1 * m5)(0,2) = "<<m1m5(0,2)<<std::endl;
@@ -322,6 +349,7 @@ int main() try
     //! (  82  102  46  )
     //! (  130  42  30  )
     //! (  114  106  78  )
+    //! 
     m1 += 3.*m1-m2;
     std::cout<<"m1 += 3*m1-m2 = \n"<<m1<<std::endl;
     //! m1 += 3*m1-m2 = 
@@ -330,12 +358,14 @@ int main() try
     //! (  82  102  46  )
     //! (  130  42  30  )
     //! (  114  106  78  )
+    //! 
     std::cout<<"m5 * m5 = \n"<<m5*m5<<std::endl;
     //! m5 * m5 = 
     //! 3  3
     //! (  10  -2  -14  )
     //! (  -8  4  16  )
     //! (  -26  10  46  )
+    //! 
     m5 *= m5;
     std::cout<<"m5 *= m5 = \n"<<m5<<std::endl;
     //! m5 *= m5 = 
@@ -343,6 +373,7 @@ int main() try
     //! (  10  -2  -14  )
     //! (  -8  4  16  )
     //! (  -26  10  46  )
+    //! 
 
     // Scalars can be treated as a multiple of identity matrix
     m5 += 32.;
@@ -352,6 +383,7 @@ int main() try
     //! (  42  -2  -14  )
     //! (  -8  36  16  )
     //! (  -26  10  78  )
+    //! 
 
 
     // Complex matrices:
@@ -364,6 +396,7 @@ int main() try
     //! (  (-5,-10)  (8,16)  (2,4)  )
     //! (  (1,2)  (-7,-14)  (4,8)  )
     //! (  (-3,-6)  (1,2)  (0,0)  )
+    //! 
     std::cout<<"cm4.conjugate() = \n"<<cm4.conjugate()<<std::endl;
     //! cm4.conjugate() = 
     //! 4  3
@@ -371,18 +404,21 @@ int main() try
     //! (  (-5,10)  (8,-16)  (2,-4)  )
     //! (  (1,-2)  (-7,14)  (4,-8)  )
     //! (  (-3,6)  (1,-2)  (0,-0)  )
+    //! 
     std::cout<<"cm4.transpose() = \n"<<cm4.transpose()<<std::endl;
     //! cm4.transpose() = 
     //! 3  4
     //! (  (2,4)  (-5,-10)  (1,2)  (-3,-6)  )
     //! (  (-4,-8)  (8,16)  (-7,-14)  (1,2)  )
     //! (  (1,2)  (2,4)  (4,8)  (0,0)  )
+    //! 
     std::cout<<"cm4.adjoint() = \n"<<cm4.adjoint()<<std::endl;
     //! cm4.adjoint() = 
     //! 3  4
     //! (  (2,-4)  (-5,10)  (1,-2)  (-3,6)  )
     //! (  (-4,8)  (8,-16)  (-7,14)  (1,-2)  )
     //! (  (1,-2)  (2,-4)  (4,-8)  (0,-0)  )
+    //! 
     std::cout<<"cm4.realPart() = \n"<<cm4.realPart()<<std::endl;
     //! cm4.realPart() = 
     //! 4  3
@@ -390,6 +426,7 @@ int main() try
     //! (  -5  8  2  )
     //! (  1  -7  4  )
     //! (  -3  1  0  )
+    //! 
     std::cout<<"cm4.imagPart() = \n"<<cm4.imagPart()<<std::endl;
     //! cm4.imagPart() = 
     //! 4  3
@@ -397,6 +434,7 @@ int main() try
     //! (  -10  16  4  )
     //! (  2  -14  8  )
     //! (  -6  2  0  )
+    //! 
     std::cout<<"Norm(cm4) = "<<Norm(cm4)<<std::endl;
     //! Norm(cm4) = 30.8221
     std::cout<<"cm4*cm4.adjoint() = \n"<<cm4*cm4.adjoint()<<std::endl;
@@ -406,6 +444,7 @@ int main() try
     //! (  (-200,0)  (465,0)  (-265,0)  (115,0)  )
     //! (  (170,0)  (-265,0)  (330,0)  (-50,0)  )
     //! (  (-50,0)  (115,0)  (-50,0)  (50,0)  )
+    //! 
 
     // Can mix real and complex in any combination
     std::cout<<"cm4 - m4 = \n"<<cm4 - m4<<std::endl;
@@ -415,6 +454,7 @@ int main() try
     //! (  (0,-10)  (0,16)  (0,4)  )
     //! (  (0,2)  (0,-14)  (0,8)  )
     //! (  (0,-6)  (0,2)  (0,0)  )
+    //! 
     std::cout<<"cm4 * m4.transpose() * (1-2i) = \n"<<
         cm4 * m4.transpose() * std::complex<double>(1,-2)<<std::endl;
     //! cm4 * m4.transpose() * (1-2i) = 
@@ -423,6 +463,7 @@ int main() try
     //! (  (-200,0)  (465,0)  (-265,0)  (115,0)  )
     //! (  (170,0)  (-265,0)  (330,0)  (-50,0)  )
     //! (  (-50,0)  (115,0)  (-50,0)  (50,0)  )
+    //! 
 
     return 0;
 } 

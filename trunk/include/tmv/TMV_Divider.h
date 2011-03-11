@@ -67,6 +67,8 @@ namespace tmv {
 
         typedef typename Traits<T>::real_type RT;
         typedef typename Traits<T>::complex_type CT;
+        typedef typename Traits<RT>::float_type FT;
+        typedef typename Traits<T>::float_type ZFT;
 
         //
         // Constructors -- none specified.
@@ -74,10 +76,10 @@ namespace tmv {
         // set up or destroy.
         //
         // We do need to include the destructor though to make it virtual.
-        virtual inline ~Divider() {}
+        virtual ~Divider() {}
 
         // MJ: I don't remember why I need this...
-        virtual inline bool isSV() const { return false; }
+        virtual bool isSV() const { return false; }
 
         // 
         // Perform the division in place
@@ -115,14 +117,14 @@ namespace tmv {
         // can, but you need to use something like m.lud().solveInPlace(v)
         // instead of going through the normal division operator.
         template <class M2> 
-        inline void solveInPlace(BaseMatrix_Rec_Mutable<M2>& m2) const
+        void solveInPlace(BaseMatrix_Rec_Mutable<M2>& m2) const
         { 
             TMVStaticAssert(Traits<T>::isreal || M2::iscomplex);
             TMVStaticAssert((Traits2<T,typename M2::value_type>::samebase));
             doSolveInPlace(m2.mat().xView()); 
         }
         template <class V2> 
-        inline void solveInPlace(BaseVector_Mutable<V2>& v2) const
+        void solveInPlace(BaseVector_Mutable<V2>& v2) const
         {
             TMVStaticAssert(Traits<T>::isreal || V2::iscomplex);
             TMVStaticAssert((Traits2<T,typename V2::value_type>::samebase));
@@ -130,14 +132,14 @@ namespace tmv {
         }
 
         template <class M2> 
-        inline void solveTransposeInPlace(BaseMatrix_Rec_Mutable<M2>& m2) const
+        void solveTransposeInPlace(BaseMatrix_Rec_Mutable<M2>& m2) const
         {
             TMVStaticAssert(Traits<T>::isreal || M2::iscomplex);
             TMVStaticAssert((Traits2<T,typename M2::value_type>::samebase));
             doSolveTransposeInPlace(m2.mat().xView()); 
         }
         template <class V2>
-        inline void solveTransposeInPlace(BaseVector_Mutable<V2>& v2) const
+        void solveTransposeInPlace(BaseVector_Mutable<V2>& v2) const
         {
             TMVStaticAssert(Traits<T>::isreal || V2::iscomplex);
             TMVStaticAssert((Traits2<T,typename V2::value_type>::samebase));
@@ -227,7 +229,7 @@ namespace tmv {
         // If the divider intrinsically likes in-place solves, use that.
         // Otherwise, make a temporary copy of m1.
         template <class M1, class T2, bool C2>
-        inline void doSolve(
+        void doSolve(
             const M1& m1, MatrixView<T2,UNKNOWN,UNKNOWN,C2> m2) const
         {
             if (preferInPlace()) doSolveInPlace(m2=m1);
@@ -237,7 +239,7 @@ namespace tmv {
             }
         }
         template <class M1, class T2, bool C2>
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const M1& m1, MatrixView<T2,UNKNOWN,UNKNOWN,C2> m2) const
         {
             if (preferInPlace()) doSolveTransposeInPlace(m2=m1);
@@ -248,20 +250,20 @@ namespace tmv {
         }
 
         template <class M1, class M2> 
-        inline void solve(
+        void solve(
             const BaseMatrix<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2) const
         { doSolve(m1.mat().xView(),m2.mat().xView()); }
         template <class V1, class V2> 
-        inline void solve(
+        void solve(
             const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2) const
         { doSolve(v1.vec().xView(),v2.vec().xView()); }
 
         template <class M1, class M2> 
-        inline void solveTranspose(
+        void solveTranspose(
             const BaseMatrix<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2) const
         { doSolveTranspose(m1.mat().xView(),m2.mat().xView()); }
         template <class V1, class V2> 
-        inline void solveTranspose(
+        void solveTranspose(
             const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2) const
         { doSolveTranspose(v1.vec().xView(),v2.vec().xView()); }
 
@@ -271,7 +273,7 @@ namespace tmv {
         //
         
         virtual T det() const = 0;
-        virtual RT logDet(T* sign) const = 0;
+        virtual FT logDet(ZFT* sign) const = 0;
         virtual bool isSingular() const = 0;
 
         //
@@ -285,7 +287,7 @@ namespace tmv {
             MatrixView<CT,UNKNOWN,UNKNOWN,true> minv) const = 0;
 
         template <class M2> 
-        inline void makeInverse(BaseMatrix_Rec_Mutable<M2>& minv) const
+        void makeInverse(BaseMatrix_Rec_Mutable<M2>& minv) const
         { doMakeInverse(minv.mat().xView()); }
 
 
@@ -299,7 +301,7 @@ namespace tmv {
             MatrixView<CT,UNKNOWN,UNKNOWN,true> ata) const = 0;
 
         template <class M2>
-        inline void makeInverseATA(BaseMatrix_Rec_Mutable<M2>& ata) const
+        void makeInverseATA(BaseMatrix_Rec_Mutable<M2>& ata) const
         { doMakeInverseATA(ata.mat().xView()); }
 
 
@@ -327,7 +329,7 @@ namespace tmv {
             std::ostream* fout) const = 0;
 
         template <class M2>
-        inline bool checkDecomp(
+        bool checkDecomp(
             const BaseMatrix_Rec<M2>& m, std::ostream* fout) const
         { return doCheckDecomp(m.mat().xView(),fout); }
 

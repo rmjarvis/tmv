@@ -53,50 +53,50 @@ namespace tmv {
 
     // Defined below:
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void MultMM(
+    static void MultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3);
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasMultMM(
+    static void NoAliasMultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3);
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void InlineMultMM(
+    static void InlineMultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3);
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void AliasMultMM(
+    static void AliasMultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3);
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void MultMM(
+    static void MultMM(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1, const BaseMatrix_Rec<M2>& m2,
         BaseMatrix_Rec_Mutable<M3>& m3);
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasMultMM(
+    static void NoAliasMultMM(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1, const BaseMatrix_Rec<M2>& m2,
         BaseMatrix_Rec_Mutable<M3>& m3);
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void AliasMultMM(
+    static void AliasMultMM(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1, const BaseMatrix_Rec<M2>& m2,
         BaseMatrix_Rec_Mutable<M3>& m3);
     template <class M1, int ix, class T, class M2>
-    inline void MultEqMM(
+    static void MultEqMM(
         BaseMatrix_Rec_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2);
     template <class M1, int ix, class T, class M2>
-    inline void NoAliasMultEqMM(
+    static void NoAliasMultEqMM(
         BaseMatrix_Rec_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2);
     template <class M1, int ix, class T, class M2>
-    inline void AliasMultEqMM(
+    static void AliasMultEqMM(
         BaseMatrix_Rec_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2);
 
@@ -427,7 +427,7 @@ namespace tmv {
               int ix, class T, class M1, class M2, class M3>
     struct MultMD_Helper<-4,cs,rs,add,ix,T,M1,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const bool bothrm = M1::_rowmajor && M3::_rowmajor;
@@ -451,7 +451,7 @@ namespace tmv {
               int ix, class T, class M1, class M2, class M3>
     struct MultMD_Helper<-3,cs,rs,add,ix,T,M1,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             // Possible algorithms to choose from:
@@ -460,7 +460,9 @@ namespace tmv {
             //  2 = rs == 1: reduces to trivial MultXV function
             //
             // 11 = column major loop: MultXV on each column
+            // 12 = column major loop with iterators
             // 14 = row major loop: MultDV on each row
+            // 15 = row major loop with iterators
             //
             // 82 = copy x*m2
 
@@ -500,7 +502,7 @@ namespace tmv {
               int ix, class T, class M1, class M2, class M3>
     struct MultMD_Helper<97,cs,rs,add,ix,T,M1,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         { 
             typedef typename M1::const_conjugate_type M1c;
@@ -521,7 +523,8 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            typename M3::value_type xx(x);
+            typedef typename M3::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
             InstMultMM(xx,m1.xView(),m2.xView(),m3.xView());
         }
     };
@@ -531,7 +534,8 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            typename M3::value_type xx(x);
+            typedef typename M3::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
             InstAddMultMM(xx,m1.xView(),m2.xView(),m3.xView());
         }
     };
@@ -541,16 +545,15 @@ namespace tmv {
               int ix, class T, class M1, class M2, class M3>
     struct MultMD_Helper<-2,cs,rs,add,ix,T,M1,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
             const bool inst = 
-                M1::unknownsizes &&
-                M2::unknownsizes &&
-                M3::unknownsizes &&
+                (cs == UNKNOWN || cs > 16) &&
+                (rs == UNKNOWN || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -574,7 +577,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2, class M3>
     struct MultMD_Helper<99,cs,rs,true,ix,T,M1,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             if ( ( !SameStorage(m1,m3) ||
@@ -595,7 +598,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2, class M3>
     struct MultMD_Helper<99,cs,rs,false,ix,T,M1,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             if ( ( !SameStorage(m1,m3) ||
@@ -620,7 +623,7 @@ namespace tmv {
               int ix, class T, class M1, class M2, class M3>
     struct MultMD_Helper<-1,cs,rs,add,ix,T,M1,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const bool checkalias =
@@ -638,7 +641,7 @@ namespace tmv {
     };
 
     template <int algo, bool add, int ix, class T, class M1, class M2, class M3>
-    inline void DoMultMD(
+    static void DoMultMD(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -662,35 +665,35 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void MultMM(
+    static void MultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     { DoMultMD<-1,add>(x,m1,m2,m3); }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasMultMM(
+    static void NoAliasMultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     { DoMultMD<-2,add>(x,m1,m2,m3); }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void InlineMultMM(
+    static void InlineMultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     { DoMultMD<-3,add>(x,m1,m2,m3); }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void AliasMultMM(
+    static void AliasMultMM(
         const Scaling<ix,T>& x, 
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     { DoMultMD<99,add>(x,m1,m2,m3); }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void MultMM(
+    static void MultMM(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1, const BaseMatrix_Rec<M2>& m2,
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -700,7 +703,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasMultMM(
+    static void NoAliasMultMM(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1, const BaseMatrix_Rec<M2>& m2,
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -710,7 +713,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void InlineMultMM(
+    static void InlineMultMM(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1, const BaseMatrix_Rec<M2>& m2,
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -720,7 +723,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void AliasMultMM(
+    static void AliasMultMM(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1, const BaseMatrix_Rec<M2>& m2,
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -730,19 +733,19 @@ namespace tmv {
     }
 
     template <class M1, int ix, class T, class M2>
-    inline void MultEqMM(
+    static void MultEqMM(
         BaseMatrix_Rec_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { MultMM<false>(x,m1.mat(),m2.mat(),m1.mat()); }
 
     template <class M1, int ix, class T, class M2>
-    inline void NoAliasMultEqMM(
+    static void NoAliasMultEqMM(
         BaseMatrix_Rec_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { NoAliasMultMM<false>(x,m1.mat(),m2.mat(),m1.mat()); }
 
     template <class M1, int ix, class T, class M2>
-    inline void AliasMultEqMM(
+    static void AliasMultEqMM(
         BaseMatrix_Rec_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { AliasMultMM<false>(x,m1.mat(),m2.mat(),m1.mat()); }

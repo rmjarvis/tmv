@@ -35,6 +35,12 @@
 
 #include "TMV_BaseMatrix_Tri.h"
 
+#ifdef PRINTALGO_AddUU
+#include <iostream>
+#include "tmv/TMV_MatrixIO.h"
+#include "tmv/TMV_TriMatrixIO.h"
+#endif
+
 namespace tmv {
 
     //
@@ -61,10 +67,13 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUU_Helper<1,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUU algo 1: N,s = "<<m3.size()<<','<<s<<std::endl;
+#endif
             typedef typename M1::const_transpose_type M1t;
             typedef typename M2::const_transpose_type M2t;
             typedef typename M3::transpose_type M3t;
@@ -81,10 +90,13 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUU_Helper<2,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUU algo 2: N,s = "<<m3.size()<<','<<s<<std::endl;
+#endif
             typedef typename M1::const_offdiag_type M1o;
             typedef typename M2::const_offdiag_type M2o;
             typedef typename M3::offdiag_type M3o;
@@ -107,10 +119,13 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUU_Helper<3,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUU algo 3: N,s = "<<m3.size()<<','<<s<<std::endl;
+#endif
             if (m1.isunit() || m2.isunit())
                 AddUU_Helper<2,s,ix1,T1,M1,ix2,T2,M2,M3>::call(
                     x1,m1,x2,m2,m3);
@@ -126,10 +141,13 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUU_Helper<11,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUU algo 11: N,s = "<<m3.size()<<','<<s<<std::endl;
+#endif
             int N = (s == UNKNOWN ? m2.size() : s);
             typedef typename M1::const_col_sub_type M1c;
             typedef typename M2::const_col_sub_type M2c;
@@ -159,10 +177,13 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUU_Helper<12,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUU algo 12: N,s = "<<m3.size()<<','<<s<<std::endl;
+#endif
             int N = (s == UNKNOWN ? m2.size() : s);
             typedef typename M1::const_row_sub_type M1r;
             typedef typename M2::const_row_sub_type M2r;
@@ -194,7 +215,7 @@ namespace tmv {
         template <int I, int M, int J, int N>
         struct Unroller
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
             {
@@ -205,7 +226,7 @@ namespace tmv {
         template <int I, int J, int N>
         struct Unroller<I,1,J,N>
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
             {
@@ -216,14 +237,14 @@ namespace tmv {
         template <int I, int J, int N>
         struct Unroller<I,0,J,N>
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3) {}
         };
         template <int I, int J>
         struct Unroller<I,1,J,1>
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
             { m3.ref(I,J) = x1 * m1.cref(I,J) + x2 * m2.cref(I,J); }
@@ -231,14 +252,19 @@ namespace tmv {
         template <int I, int J>
         struct Unroller<I,1,J,0>
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3) {}
         };
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
-        { Unroller<0,s,0,s>::unroll(x1,m1,x2,m2,m3); }
+        {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUU algo 15: N,s = "<<m3.size()<<','<<s<<std::endl;
+#endif
+            Unroller<0,s,0,s>::unroll(x1,m1,x2,m2,m3); 
+        }
     };
 
     // algo 16: Fully unroll by columns
@@ -249,7 +275,7 @@ namespace tmv {
         template <int I, int M, int J, int N>
         struct Unroller
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
             {
@@ -260,7 +286,7 @@ namespace tmv {
         template <int I, int M, int J>
         struct Unroller<I,M,J,1>
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
             {
@@ -271,14 +297,14 @@ namespace tmv {
         template <int I, int M, int J>
         struct Unroller<I,M,J,0>
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3) {}
         };
         template <int I, int J>
         struct Unroller<I,1,J,1>
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
             { m3.ref(I,J) = x1 * m1.cref(I,J) + x2 * m2.cref(I,J); }
@@ -286,14 +312,19 @@ namespace tmv {
         template <int I, int J>
         struct Unroller<I,0,J,1>
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3) {}
         };
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
-        { Unroller<0,s,0,s>::unroll(x1,m1,x2,m2,m3); }
+        {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUU algo 16: N,s = "<<m3.size()<<','<<s<<std::endl;
+#endif
+            Unroller<0,s,0,s>::unroll(x1,m1,x2,m2,m3); 
+        }
     };
 
     // algo -4: No branches or copies
@@ -301,7 +332,7 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUU_Helper<-4,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -332,6 +363,15 @@ namespace tmv {
                 ( (M1::_rowmajor && M2::_rowmajor) ||
                   (M1::_rowmajor && M3::_rowmajor) ||
                   (M2::_rowmajor && M3::_rowmajor) ) ? 12 : 11;
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUU algo -4: N,s = "<<m3.size()<<','<<s<<std::endl;
+            std::cout<<"x1 = "<<ix1<<"  "<<T1(x1)<<std::endl;
+            std::cout<<"x2 = "<<ix2<<"  "<<T2(x2)<<std::endl;
+            std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
+            std::cout<<"m3 = "<<TMV_Text(m3)<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             AddUU_Helper<algo,s,ix1,T1,M1,ix2,T2,M2,M3>::call(
                 x1,m1,x2,m2,m3);
         }
@@ -342,7 +382,7 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUU_Helper<-3,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -367,20 +407,32 @@ namespace tmv {
                 ( (M1::_rowmajor && M2::_rowmajor) ||
                   (M1::_rowmajor && M3::_rowmajor) ||
                   (M2::_rowmajor && M3::_rowmajor) ) ? 12 : 11;
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUU algo -3: N,s = "<<m3.size()<<','<<s<<std::endl;
+            std::cout<<"x1 = "<<ix1<<"  "<<T1(x1)<<std::endl;
+            std::cout<<"x2 = "<<ix2<<"  "<<T2(x2)<<std::endl;
+            std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
+            std::cout<<"m3 = "<<TMV_Text(m3)<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             AddUU_Helper<algo,s,ix1,T1,M1,ix2,T2,M2,M3>::call(
                 x1,m1,x2,m2,m3);
         }
     };
 
-    // algo 96: Conjugate
+    // algo 97: Conjugate
     template <int s, int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    struct AddUU_Helper<96,s,ix1,T1,M1,ix2,T2,M2,M3>
+    struct AddUU_Helper<97,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUU algo 97: N,s = "<<m3.size()<<','<<s<<std::endl;
+#endif
             typedef typename M1::const_conjugate_type M1c;
             typedef typename M2::const_conjugate_type M2c;
             typedef typename M3::conjugate_type M3c;
@@ -392,15 +444,18 @@ namespace tmv {
         }
     };
 
-    // algo 97: Call inst
+    // algo 98: Call inst
     template <int s, int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    struct AddUU_Helper<97,s,ix1,T1,M1,ix2,T2,M2,M3>
+    struct AddUU_Helper<98,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUU algo 98: N,s = "<<m3.size()<<','<<s<<std::endl;
+#endif
             NoAliasMultXM<false>(x1,m1,m3);
             NoAliasMultXM<true>(x2,m2,m3);
         }
@@ -411,17 +466,18 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUU_Helper<-2,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUU algo -2: N,s = "<<m3.size()<<','<<s<<std::endl;
+#endif
             typedef typename M1::value_type TM1;
             typedef typename M2::value_type TM2;
             typedef typename M3::value_type TM3;
             const bool inst =
-                M1::unknownsizes &&
-                M2::unknownsizes &&
-                M3::unknownsizes &&
+                (s == UNKNOWN || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<TM1,TM2>::samebase &&
                 Traits2<TM1,TM3>::samebase &&
@@ -432,14 +488,14 @@ namespace tmv {
                 Traits<TM3>::isinst;
             const bool conj = M3::_conj;
             const int algo = 
-                conj ? 96 :
-                inst ? 97 :
+                conj ? 97 :
+                inst ? 98 :
                 -3;
             AddUU_Helper<algo,s,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
         }
     };
 
-    // algo 98: Check for aliases when calling Inst functions
+    // algo 980: Check for aliases when calling Inst functions
     // We don't have a separate Inst function for this.  We just
     // split the operation into two parts: 
     // m3 = x1*m1; 
@@ -449,9 +505,9 @@ namespace tmv {
     // normal ones, so we need to put some alias checking here.
     template <int s, int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    struct AddUU_Helper<98,s,ix1,T1,M1,ix2,T2,M2,M3>
+    struct AddUU_Helper<980,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -461,6 +517,10 @@ namespace tmv {
             const bool s2 = 
                 SameStorage(m2,m3) &&
                 !OppositeStorage(m2,m3);
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUU algo 980: N,s = "<<m3.size()<<','<<s<<std::endl;
+            std::cout<<"s1,s2 = "<<s1<<','<<s2<<std::endl;
+#endif
 
             if (!s1 && !s2) {
                 // No aliasing
@@ -488,7 +548,7 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUU_Helper<99,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -500,6 +560,11 @@ namespace tmv {
             const bool s2 = ss2 &&
                 !ExactSameStorage(m2,m3) &&
                 !OppositeStorage(m2,m3);
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUU algo 99: N,s = "<<m3.size()<<','<<s<<std::endl;
+            std::cout<<"ss1,ss2 = "<<ss1<<','<<ss2<<std::endl;
+            std::cout<<"s1,s2 = "<<s1<<','<<s2<<std::endl;
+#endif
 
             if (!s1 && !s2) {
                 // No aliasing (or no clobbering)
@@ -527,10 +592,13 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUU_Helper<-1,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUU algo -1: N,s = "<<m3.size()<<','<<s<<std::endl;
+#endif
             const bool noclobber = 
                 (MStepHelper<M1,M3>::same || MStepHelper<M1,M3>::opp) &&
                 (MStepHelper<M2,M3>::same || MStepHelper<M2,M3>::opp);
@@ -538,9 +606,7 @@ namespace tmv {
             typedef typename M2::value_type TM2;
             typedef typename M3::value_type TM3;
             const bool inst =
-                M1::unknownsizes &&
-                M2::unknownsizes &&
-                M3::unknownsizes &&
+                (s == UNKNOWN || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<TM1,TM2>::samebase &&
                 Traits2<TM1,TM3>::samebase &&
@@ -556,7 +622,7 @@ namespace tmv {
                 !noclobber;
             const int algo = 
                 // We do a different check alias with the Inst calls.
-                inst ? 98 :
+                inst ? 980 :
                 checkalias ? 99 : 
                 -3;
             AddUU_Helper<algo,s,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
@@ -565,7 +631,7 @@ namespace tmv {
 
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void AddMM(
+    static void AddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Tri<M1>& m1, 
         const Scaling<ix2,T2>& x2, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Tri_Mutable<M3>& m3)
@@ -590,7 +656,7 @@ namespace tmv {
 
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void NoAliasAddMM(
+    static void NoAliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Tri<M1>& m1, 
         const Scaling<ix2,T2>& x2, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Tri_Mutable<M3>& m3)
@@ -615,7 +681,7 @@ namespace tmv {
 
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void InlineAddMM(
+    static void InlineAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Tri<M1>& m1, 
         const Scaling<ix2,T2>& x2, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Tri_Mutable<M3>& m3)
@@ -640,7 +706,7 @@ namespace tmv {
 
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void AliasAddMM(
+    static void AliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Tri<M1>& m1, 
         const Scaling<ix2,T2>& x2, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Tri_Mutable<M3>& m3)
@@ -658,9 +724,7 @@ namespace tmv {
         typedef typename M2::value_type TM2;
         typedef typename M3::value_type TM3;
         const bool inst =
-            M1::unknownsizes &&
-            M2::unknownsizes &&
-            M3::unknownsizes &&
+            (s == UNKNOWN || s > 16) &&
 #ifdef TMV_INST_MIX
             Traits2<TM1,TM2>::samebase &&
             Traits2<TM1,TM3>::samebase &&
@@ -675,7 +739,7 @@ namespace tmv {
         M1v m1v = m1.cView();
         M2v m2v = m2.cView();
         M3v m3v = m3.cView();
-        AddUU_Helper<inst?98:99,s,ix1,T1,M1v,ix2,T2,M2v,M3v>::call(
+        AddUU_Helper<inst?980:99,s,ix1,T1,M1v,ix2,T2,M2v,M3v>::call(
             x1,m1v,x2,m2v,m3v);
     }
 
@@ -692,10 +756,13 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUUM_Helper<11,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUMM algo 11\n";
+#endif
             typename M3::uppertri_type m3u = m3.upperTri();
             AliasAddMM(x1,m1,x2,m2,m3u);
             m3.lowerTri().offDiag().setZero();
@@ -707,12 +774,16 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUUM_Helper<12,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
             const bool s1 = SameStorage(m1,m3);
             const bool s2 = SameStorage(m2,m3);
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUMM algo 12\n";
+            std::cout<<"s1,s22 = "<<s1<<','<<s2<<std::endl;
+#endif
 
             if (!s1 && !s2) {
                 // No aliasing
@@ -755,12 +826,16 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUUM_Helper<13,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
             const bool s1 = SameStorage(m1,m3);
             const bool s2 = SameStorage(m2,m3);
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUMM algo 13\n";
+            std::cout<<"s1,s22 = "<<s1<<','<<s2<<std::endl;
+#endif
 
             if (!s1 && !s2) {
                 // No aliasing
@@ -803,10 +878,13 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUUM_Helper<14,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUMM algo 14\n";
+#endif
             typename M3::lowertri_type m3l = m3.lowerTri();
             AliasAddMM(x1,m1,x2,m2,m3l);
             m3.upperTri().offDiag().setZero();
@@ -818,10 +896,13 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUUM_Helper<21,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUMM algo 21\n";
+#endif
             typename M3::uppertri_type m3u = m3.upperTri();
             m3.setZero();
             NoAliasAddMM(x1,m1,x2,m2,m3u);
@@ -834,10 +915,13 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUUM_Helper<22,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUMM algo 22\n";
+#endif
             typename M3::uppertri_type::offdiag_type m3u = 
                 m3.upperTri().offDiag();
             typename M3::lowertri_type::offdiag_type m3l = 
@@ -853,10 +937,13 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUUM_Helper<23,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUMM algo 23\n";
+#endif
             typename M3::uppertri_type::offdiag_type m3u = 
                 m3.upperTri().offDiag();
             typename M3::lowertri_type::offdiag_type m3l = 
@@ -872,10 +959,13 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUUM_Helper<24,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUMM algo 24\n";
+#endif
             typename M3::lowertri_type m3l = m3.lowerTri();
             m3.setZero();
             NoAliasAddMM(x1,m1,x2,m2,m3l);
@@ -890,10 +980,13 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUUM_Helper<31,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUMM algo 31\n";
+#endif
             const int algo = 
                 (M1::_unit || M2::_unit) ? 33 :
                 (M1::_unknowndiag || M2::_unknowndiag) ? 32 :
@@ -907,10 +1000,13 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUUM_Helper<32,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUMM algo 32\n";
+#endif
             if (m1.isunit() || m2.isunit())
                 AddUUM_Helper<33,ix1,T1,M1,ix2,T2,M2,M3>::call(
                     x1,m1,x2,m2,m3);
@@ -925,20 +1021,23 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUUM_Helper<33,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUMM algo 33\n";
+#endif
             typename M3::diag_type m3d = m3.diag();
             if (m1.isunit()) {
                 if (m2.isunit()) {
                     m3d.setAllTo(T1(x1)+T2(x2));
                 } else {
-                    NoAliasMultXV<false>(x2,m2.diag(),m3d);
+                    MultXV<false>(x2,m2.diag(),m3d);
                     m3d.addToAll(T1(x1));
                 }
             } else {
-                NoAliasMultXV<false>(x1,m1.diag(),m3d);
+                MultXV<false>(x1,m1.diag(),m3d);
                 m3d.addToAll(T2(x2));
             }
         }
@@ -949,10 +1048,13 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUUM_Helper<34,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUMM algo 34\n";
+#endif
             typename M3::diag_type m3d = m3.diag();
             AddVV(x1,m1.diag(),x2,m2.diag(),m3d);
         }
@@ -963,7 +1065,7 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUUM_Helper<99,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -972,6 +1074,15 @@ namespace tmv {
                 (M1::_upper && M2::_lower) ? 12 :
                 (M1::_lower && M2::_upper) ? 13 :
                 14;
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUUM algo 99\n";
+            std::cout<<"x1 = "<<ix1<<"  "<<T1(x1)<<std::endl;
+            std::cout<<"x2 = "<<ix2<<"  "<<T2(x2)<<std::endl;
+            std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
+            std::cout<<"m3 = "<<TMV_Text(m3)<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             AddUUM_Helper<algo,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
         }
     };
@@ -980,7 +1091,7 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUUM_Helper<-2,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -989,6 +1100,15 @@ namespace tmv {
                 (M1::_upper && M2::_lower) ? 22 :
                 (M1::_lower && M2::_upper) ? 23 :
                 24;
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUUM algo -2\n";
+            std::cout<<"x1 = "<<ix1<<"  "<<T1(x1)<<std::endl;
+            std::cout<<"x2 = "<<ix2<<"  "<<T2(x2)<<std::endl;
+            std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
+            std::cout<<"m3 = "<<TMV_Text(m3)<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             AddUUM_Helper<algo,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
         }
     };
@@ -998,10 +1118,13 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUUM_Helper<-1,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUUM algo -1\n";
+#endif
             const bool checkalias =
                 M1::_size == UNKNOWN &&
                 M2::_size == UNKNOWN &&
@@ -1015,7 +1138,7 @@ namespace tmv {
 
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void AddMM(
+    static void AddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Tri<M1>& m1, 
         const Scaling<ix2,T2>& x2, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -1032,7 +1155,7 @@ namespace tmv {
 
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void NoAliasAddMM(
+    static void NoAliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Tri<M1>& m1, 
         const Scaling<ix2,T2>& x2, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -1049,7 +1172,7 @@ namespace tmv {
 
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void AliasAddMM(
+    static void AliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Tri<M1>& m1, 
         const Scaling<ix2,T2>& x2, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -1078,13 +1201,17 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUMM_Helper<11,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
             TMVStaticAssert(M1::_upper);
             const bool s1 = SameStorage(m1,m3);
             const bool s2 = SameStorage(m2,m3);
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUMM algo 11\n";
+            std::cout<<"s1,s2 = "<<s1<<','<<s2<<std::endl;
+#endif
 
             if (!s1 && !s2) {
                 // No aliasing
@@ -1124,13 +1251,17 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUMM_Helper<12,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
             TMVStaticAssert(M1::_lower);
             const bool s1 = SameStorage(m1,m3);
             const bool s2 = SameStorage(m2,m3);
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUMM algo 12\n";
+            std::cout<<"s1,s2 = "<<s1<<','<<s2<<std::endl;
+#endif
 
             if (!s1 && !s2) {
                 // No aliasing
@@ -1170,10 +1301,13 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUMM_Helper<21,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUMM algo 21\n";
+#endif
             TMVStaticAssert(M1::_upper);
             typename M3::uppertri_type m3u = m3.upperTri();
             NoAliasMultXM<false>(x2,m2,m3);
@@ -1186,10 +1320,13 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUMM_Helper<22,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUMM algo 22\n";
+#endif
             TMVStaticAssert(M1::_lower);
             typename M3::lowertri_type m3l = m3.lowerTri();
             NoAliasMultXM<false>(x2,m2,m3);
@@ -1205,10 +1342,13 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUMM_Helper<31,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUMM algo 31\n";
+#endif
             const int algo = 
                 M1::_unit ? 33 :
                 M1::_unknowndiag ? 32 :
@@ -1222,10 +1362,13 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUMM_Helper<32,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUMM algo 32\n";
+#endif
             if (m1.isunit())
                 AddUMM_Helper<33,ix1,T1,M1,ix2,T2,M2,M3>::call(
                     x1,m1,x2,m2,m3);
@@ -1240,12 +1383,15 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUMM_Helper<33,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUMM algo 33\n";
+#endif
             typename M3::diag_type m3d = m3.diag();
-            NoAliasMultXV<false>(x2,m2.diag(),m3d);
+            MultXV<false>(x2,m2.diag(),m3d);
             m3d.addToAll(T1(x1));
         }
     };
@@ -1255,10 +1401,13 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUMM_Helper<34,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUMM algo 34\n";
+#endif
             typename M3::diag_type m3d = m3.diag();
             AddVV(x1,m1.diag(),x2,m2.diag(),m3d);
         }
@@ -1269,11 +1418,20 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUMM_Helper<-2,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
             const int algo = M1::_upper ? 21 : 22;
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUMM algo -2\n";
+            std::cout<<"x1 = "<<ix1<<"  "<<T1(x1)<<std::endl;
+            std::cout<<"x2 = "<<ix2<<"  "<<T2(x2)<<std::endl;
+            std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
+            std::cout<<"m3 = "<<TMV_Text(m3)<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             AddUMM_Helper<algo,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
         }
     };
@@ -1283,11 +1441,20 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUMM_Helper<99,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
             const int algo = M1::_upper ? 11 : 12;
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUMM algo 99\n";
+            std::cout<<"x1 = "<<ix1<<"  "<<T1(x1)<<std::endl;
+            std::cout<<"x2 = "<<ix2<<"  "<<T2(x2)<<std::endl;
+            std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
+            std::cout<<"m3 = "<<TMV_Text(m3)<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             AddUMM_Helper<algo,ix1,T1,M1,ix2,T2,M2,M3>::call(x1,m1,x2,m2,m3);
         }
     };
@@ -1297,10 +1464,13 @@ namespace tmv {
               int ix2, class T2, class M2, class M3>
     struct AddUMM_Helper<-1,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_AddUU
+            std::cout<<"AddUMM algo -1\n";
+#endif
             const bool checkalias =
                 M1::_size == UNKNOWN &&
                 M2::_colsize == UNKNOWN && M2::_rowsize == UNKNOWN &&
@@ -1314,7 +1484,7 @@ namespace tmv {
 
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void AddMM(
+    static void AddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Tri<M1>& m1, 
         const Scaling<ix2,T2>& x2, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -1333,7 +1503,7 @@ namespace tmv {
 
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void NoAliasAddMM(
+    static void NoAliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Tri<M1>& m1, 
         const Scaling<ix2,T2>& x2, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -1352,7 +1522,7 @@ namespace tmv {
 
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void AliasAddMM(
+    static void AliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Tri<M1>& m1, 
         const Scaling<ix2,T2>& x2, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -1376,21 +1546,21 @@ namespace tmv {
 
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void AddMM(
+    static void AddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Rec<M1>& m1, 
         const Scaling<ix2,T2>& x2, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     { AddMM(x2,m2,x1,m1,m3); }
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void NoAliasAddMM(
+    static void NoAliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Rec<M1>& m1, 
         const Scaling<ix2,T2>& x2, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
     { NoAliasAddMM(x2,m2,x1,m1,m3); }
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void AliasAddMM(
+    static void AliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Rec<M1>& m1, 
         const Scaling<ix2,T2>& x2, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)

@@ -1,5 +1,5 @@
 
-#define DefMM(ix, T) \
+#define Def1(ix, T) \
   template void multmm_16_16_16( \
       const int M, const int N, const int K, \
       const Scaling<ix,T>& x, \
@@ -22,7 +22,7 @@
       const T* A, const T* B, T* C0); \
 
 
-DefMM(1,T)
-DefMM(-1,T)
+Def1(1,T)
+Def1(-1,T)
 
-#undef DefMM
+#undef Def1

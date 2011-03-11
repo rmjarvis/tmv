@@ -48,116 +48,169 @@ const int TMV_MaxStack = 1024; // bytes
 
 namespace tmv
 {
+    template <class T>
+    static bool TMV_Aligned(const T* p)
+    { return (reinterpret_cast<size_t>(p) & 0xf) == 0; }
+
     // There doesn't seem to be any portable C++ function that guarantees
     // that the memory allocated will be aligned as necessary for 
     // SSE functions.
     // Sometimes posix_memalign or memalign does this job.
     // But it doesn't seem to be standard, since some systems don't have it.
-    // So we make this simple class that simply loads a bit more memory than
-    // necessary and then finds the starting point that is 16 byte aligned.
+    // Other systems have _mm_malloc (ICPC) or _aligned_malloc (WIN).
+    // So probably I should have ifdefs that check to see if one of these
+    // is available and use that instead.
+    //
+    // But for now we have this simple class that simply loads a bit more 
+    // memory than necessary and then finds the starting point that is 
+    // 16 byte aligned.
 
+    // Also, the TMV_END_PADDING option is implemented here.  If it is 
+    // defined, then we write 0's to the end of the full 16 byte word.
+    // This is mostly useful when running valgrind with a BLAS library
+    // that isn't careful about reading past the end of the allocated
+    // memory.  GotoBLAS for example.
+    // So if end padding is enabled, we make sure to allocate enough memory
+    // to finish the block of 16 bytes.  And we write 0's to the values
+    // that aren't part of the requested memory.
+    
     // First the regular non-SSE version, where we don't need aligment.
     template <class T>
-    struct AlignedMemory
+    class AlignedMemory
     {
-        T* p;
-
+    public:
         AlignedMemory() : p(0) {}
-        inline void allocate(const size_t n) 
-        { p = new T[n]; }
-        inline void deallocate()
+        void allocate(const size_t n) 
+        { 
+#ifdef TMV_END_PADDING
+            const size_t nn = n + 16/sizeof(T);
+            p = new T[nn];
+            for(size_t i=n;i<nn;++i) p[i] = T(0);
+#else
+            p = new T[n]; 
+#endif
+        }
+        void deallocate()
         { if (p) delete [] p; p=0; }
-        inline void swapWith(AlignedMemory<T>& rhs)
+        void swapWith(AlignedMemory<T>& rhs)
         { T* temp = p; p = rhs.p; rhs.p = temp; }
-        inline T* get() { return p; }
-        inline const T* get() const { return p; }
+        T* get() { return p; }
+        const T* get() const { return p; }
+    private:
+        T* p;
     };
 
-    // Now specialize float and double if SSE commands are enabled
-    // Thie solution is adapted from the web page:
-    // http://stackoverflow.com/questions/227897/
-    //   solve-the-memory-alignment-in-c-interview-question-that-stumped-me
-    // See that page for more discussion of this kind of problem.
-#ifdef __SSE__
+    // Now specialize float and double
+    // We do this regardless of whether __SSE__ or __SSE2__ is defined,
+    // since these might be allocated in a unit that doesn't defined them
+    // and then have get() called in a unit that does.  This leads to problems!
+    // So we always make the float and double allocations aligned at
+    // 16 byte boundaries.
     template <>
-    struct AlignedMemory<float>
+    class AlignedMemory<float>
     {
-        float* p;
-
-#if 0
-        AlignedMemory() : mem(0), p(0) {}
-        float* mem;
-        inline void allocate(const size_t n) 
-        { 
-            mem = new float[n+3];
-            //p = mem + ((4 - (size_t(mem) & 3)) & 3);
-            p = mem + ((4 - (((size_t)(mem) & 0xf)>>2)) & 3);
-            TMVAssert( ((size_t)(p) & 0xf) == 0);
-            TMVAssert(p <= mem + 3);
-            TMVAssert(p >= mem);
-        }
-        inline void deallocate()
-        { if (mem) delete [] mem; p=0; mem=0; }
-        inline void swapWith(AlignedMemory<float>& rhs)
-        {
-            float* temp = p; p = rhs.p; rhs.p = temp; 
-            temp = mem; mem = rhs.mem; rhs.mem = temp; 
-        }
-#else
+    public:
         AlignedMemory() : p(0) {}
-        inline void allocate(const size_t n) 
+        void allocate(const size_t n) 
         { 
-            p = reinterpret_cast<float*>(new __m128[(n+3)>>2]);
-            TMVAssert( ((size_t)(p) & 0xf) == 0);
-        }
-        inline void deallocate()
-        { if (p) delete [] reinterpret_cast<__m128*>(p); p=0; }
-        inline void swapWith(AlignedMemory<float>& rhs)
-        { float* temp = p; p = rhs.p; rhs.p = temp; }
+#ifdef TMV_END_PADDING
+            const size_t nn = (n<<2)+15 + 16;
+            p = new char[nn];
+            float* pf = get();
+            for(size_t i=n;i<(nn>>2);++i) pf[i] = 0.F;
+#else
+            p = new char[(n<<2)+15];
 #endif
-        inline float* get() { return p; }
-        inline const float* get() const { return p; }
+            TMVAssert((void*)(p+(n<<2)+15) >= (void*)(get()+n));
+        }
+        void deallocate()
+        { if (p) delete [] p; p=0; }
+        void swapWith(AlignedMemory<float>& rhs)
+        { char* temp = p; p = rhs.p; rhs.p = temp; }
+        float* get() 
+        {
+            float* pf = reinterpret_cast<float*>(
+                p + ((0x10-((size_t)(p) & 0xf)) & ~0x10));
+            TMVAssert( TMV_Aligned(pf) );
+            return pf;
+        }
+        const float* get() const 
+        {
+            const float* pf = reinterpret_cast<const float*>(
+                p + ((0x10-((size_t)(p) & 0xf)) & ~0x10));
+            TMVAssert( TMV_Aligned(pf) );
+            return pf;
+        }
+    private:
+        char* p;
     };
-#endif
-#ifdef __SSE2__
     template <>
-    struct AlignedMemory<double>
+    class AlignedMemory<double>
     {
-        double* p;
-
-#if 0
-        double* mem;
-        AlignedMemory() : mem(0), p(0) {}
-        inline void allocate(const size_t n)
-        {
-            mem = new double[n+1]; 
-            //p = mem + (size_t(mem) & 1);
-            p = mem + (((size_t)(mem) & 0xf)>>3);
-            TMVAssert( ((size_t)(p) & 0xf) == 0);
-            TMVAssert(p <= mem + 1);
-            TMVAssert(p >= mem);
-        }
-        inline void deallocate()
-        { if (mem) delete [] mem; p=0; mem=0; }
-        inline void swapWith(AlignedMemory<double>& rhs)
-        {
-            double* temp = p; p = rhs.p; rhs.p = temp; 
-            temp = mem; mem = rhs.mem; rhs.mem = temp; 
-        }
-#else
+    public:
         AlignedMemory() : p(0) {}
-        inline void allocate(const size_t n) 
+        void allocate(const size_t n) 
         { 
-            p = reinterpret_cast<double*>(new __m128d[(n+1)>>1]);
-            TMVAssert( ((size_t)(p) & 0xf) == 0);
-        }
-        inline void deallocate()
-        { if (p) delete [] reinterpret_cast<__m128d*>(p); p=0; }
-        inline void swapWith(AlignedMemory<double>& rhs)
-        { double* temp = p; p = rhs.p; rhs.p = temp; }
+#ifdef TMV_END_PADDING
+            const size_t nn = (n<<3)+15 + 16;
+            p = new char[nn];
+            double* pd = get();
+            for(size_t i=n;i<(nn>>3);++i) pd[i] = 0.;
+#else
+            p = new char[(n<<3)+15];
 #endif
-        inline double* get() { return p; }
-        inline const double* get() const { return p; }
+            TMVAssert((void*)(p+(n<<3)+15) >= (void*)(get()+n));
+        }
+        void deallocate()
+        { if (p) delete [] p; p=0; }
+        void swapWith(AlignedMemory<double>& rhs)
+        { char* temp = p; p = rhs.p; rhs.p = temp; }
+        double* get() 
+        {
+            double* pd = reinterpret_cast<double*>(
+                p + ((0x10-((size_t)(p) & 0xf)) & ~0x10));
+            TMVAssert( TMV_Aligned(pd) );
+            return pd;
+        }
+        const double* get() const 
+        {
+            const double* pd = reinterpret_cast<const double*>(
+                p + ((0x10-((size_t)(p) & 0xf)) & ~0x10));
+            TMVAssert( TMV_Aligned(pd) );
+            return pd;
+        }
+
+    private :
+        char* p;
+
+    };
+
+#ifdef TMV_INITIALIZE_NAN
+    // This option is to stress test the code to make sure it works
+    // ok if uninitialized data happens to have a nan in it.
+    // Naive BLAS calls can fail when there are nan's, since it recasts
+    // the equation y = A*x as y = beta*y + alpha*A*x with alpha=1 and
+    // beta=0.  So if y initially has nan's, then the beta*y
+    // part has 0*nan => nan, which is then added to whatever 
+    // alpha*A*x has, so stays nan on output.
+    // TMV should be accounting for this kind of thing correctly, and 
+    // this section here helps test for it.
+    template <class T>
+    struct TMV_Nan 
+    {
+        static T get() 
+        { 
+            static T zero(0);
+            static T nan = 
+                std::numeric_limits<T>::is_integer ? UNKNOWN : zero/zero;
+            return nan; 
+        }
+    };
+    template <class T>
+    struct TMV_Nan<std::complex<T> >
+    {
+        static std::complex<T> get()
+        { return std::complex<T>(TMV_Nan<T>::get(),TMV_Nan<T>::get()); }
     };
 #endif
 
@@ -168,30 +221,68 @@ namespace tmv
     {
     public :
 
-        inline AlignedArray() {}
-        inline AlignedArray(const size_t n) { p.allocate(n); }
-        inline ~AlignedArray() { p.deallocate(); }
+        AlignedArray() 
+        {
+#ifdef TMV_INITIALIZE_NAN
+            _n = 0;
+#endif
+        }
+        AlignedArray(const size_t n) 
+        {
+            p.allocate(n); 
+#ifdef TMV_INITIALIZE_NAN
+            _n = n;
+            for(size_t i=0;i<_n;++i) get()[i] = TMV_Nan<T>::get();
+#endif
+        }
+        ~AlignedArray() 
+        { 
+#ifdef TMV_INITIALIZE_NAN
+            for(size_t i=0;i<_n;++i) get()[i] = T(-999);
+#endif
+            p.deallocate(); 
+        }
 
-        inline T& operator*() { return *get(); }
-        inline T* operator->() { return get(); }
-        inline operator T*() { return get(); }
+        T& operator*() { return *get(); }
+        T* operator->() { return get(); }
+        operator T*() { return get(); }
 
-        inline const T& operator*() const { return *get(); }
-        inline const T* operator->() const { return get(); }
-        inline operator const T*() const { return get(); }
+        const T& operator*() const { return *get(); }
+        const T* operator->() const { return get(); }
+        operator const T*() const { return get(); }
 
-        inline void swapWith(AlignedArray<T>& rhs) { p.swapWith(rhs.p); }
-        inline void resize(const size_t n) { p.deallocate(); p.allocate(n); }
+        void swapWith(AlignedArray<T>& rhs) 
+        {
+#ifdef TMV_INITIALIZE_NAN
+            TMV_SWAP(_n,rhs._n);
+#endif
+            p.swapWith(rhs.p); 
+        }
+        void resize(const size_t n) 
+        { 
+#ifdef TMV_INITIALIZE_NAN
+            for(size_t i=0;i<_n;++i) get()[i] = T(-999);
+#endif
+            p.deallocate(); 
+            p.allocate(n); 
+#ifdef TMV_INITIALIZE_NAN
+            _n = n;
+            for(size_t i=0;i<_n;++i) get()[i] = TMV_Nan<T>::get();
+#endif
+        }
 
-        inline T* get() { return p.get(); }
-        inline const T* get() const  { return p.get(); }
+        T* get() { return p.get(); }
+        const T* get() const  { return p.get(); }
 
     private :
 
         AlignedMemory<T> p;
+#ifdef TMV_INITIALIZE_NAN
+        size_t _n;
+#endif
 
-        inline AlignedArray& operator=(AlignedArray& p2);
-        inline AlignedArray(const AlignedArray& p2);
+        AlignedArray& operator=(AlignedArray& p2);
+        AlignedArray(const AlignedArray& p2);
     };
 
     template <class RT>
@@ -200,90 +291,220 @@ namespace tmv
     public :
         typedef std::complex<RT> T;
 
-        inline AlignedArray() {}
-        inline AlignedArray(const size_t n) { p.allocate(n<<1); }
-        inline ~AlignedArray() { p.deallocate(); }
+        AlignedArray()
+        {
+#ifdef TMV_INITIALIZE_NAN
+            _n = 0;
+#endif
+        }
+        AlignedArray(const size_t n) 
+        { 
+            p.allocate(n<<1); 
+#ifdef TMV_INITIALIZE_NAN
+            _n = n;
+            for(size_t i=0;i<_n;++i) 
+                get()[i] = TMV_Nan<std::complex<RT> >::get();
+#endif
+        }
+        ~AlignedArray() 
+        {
+#ifdef TMV_INITIALIZE_NAN
+            for(size_t i=0;i<_n;++i) get()[i] = std::complex<RT>(-999,-888);
+#endif
+            p.deallocate(); 
+        }
 
-        inline T& operator*() { return *get(); }
-        inline T* operator->() { return get(); }
-        inline operator T*() { return get(); }
+        T& operator*() { return *get(); }
+        T* operator->() { return get(); }
+        operator T*() { return get(); }
 
-        inline const T& operator*() const { return *get(); }
-        inline const T* operator->() const { return get(); }
-        inline operator const T*() const { return get(); }
+        const T& operator*() const { return *get(); }
+        const T* operator->() const { return get(); }
+        operator const T*() const { return get(); }
 
-        inline void swapWith(AlignedArray<T>& rhs) { p.swapWith(rhs.p); }
-        inline void resize(const size_t n) { p.deallocate(); p.allocate(n<<1); }
+        void swapWith(AlignedArray<T>& rhs) 
+        { 
+#ifdef TMV_INITIALIZE_NAN
+            TMV_SWAP(_n,rhs._n);
+#endif
+            p.swapWith(rhs.p); 
+        }
+        void resize(const size_t n) 
+        { 
+#ifdef TMV_INITIALIZE_NAN
+            for(size_t i=0;i<_n;++i) get()[i] = std::complex<RT>(-999,-888);
+#endif
+            p.deallocate();
+            p.allocate(n<<1); 
+#ifdef TMV_INITIALIZE_NAN
+            _n = n;
+            for(size_t i=0;i<_n;++i) 
+                get()[i] = TMV_Nan<std::complex<RT> >::get();
+#endif
+        }
 
-        inline T* get() { return reinterpret_cast<T*>(p.get()); }
-        inline const T* get() const 
+        T* get() { return reinterpret_cast<T*>(p.get()); }
+        const T* get() const 
         { return reinterpret_cast<const T*>(p.get()); }
 
     private :
 
         AlignedMemory<RT> p;
+#ifdef TMV_INITIALIZE_NAN
+        size_t _n;
+#endif
 
-        inline AlignedArray& operator=(AlignedArray& p2);
-        inline AlignedArray(const AlignedArray& p2);
+        AlignedArray& operator=(AlignedArray& p2);
+        AlignedArray(const AlignedArray& p2);
     };
 
 
-    // This is a helper class that has bigN as a template parameter
+
+    // The rest of this file implements memory that is allocated on 
+    // the stack rather than on the heap.  Here things are a bit easier,
+    // since this will always align __m128 objects on 16 byte boundaries.
+    // So the way to get float or double aligned is simply to union
+    // the array with one of these.
+
+    // Another wrinkle though is that we don't actually want to use the
+    // stack for very large arrays, since it will crash.  And very small
+    // arrays don't need the alignement.
+    // So here is a helper class that has bigN as a template parameter
     // to decide whether to use the stack or not.
-    // smallN is for N < 4 or N < 2 where the SSE alignment isn't necessary,
-    // to make sure we don't gratuitously use extra memory when we have
-    // a lot of SmallVector<float,2>'s or something like that.
-    template <class T, int N, bool bigN, bool smallN> 
+    // And smallN is for N < 4 or N < 2 where the SSE alignment isn't 
+    // necessary, to make sure we don't gratuitously use extra memory when 
+    // we have a lot of SmallVector<float,2>'s or something like that.
+    template <class T, int N, bool bigN, bool smallN>
     class StackArray2;
 
     template <class T, int N>
-    struct StackArray2<T,N,false,false>
-    { 
-        T p[N]; 
-        inline T* get() { return p; }
-        inline const T* get() const { return p; }
+    class StackArray2<T,N,false,false>
+    // !bigN, !smallN
+    {
+    public:
+#ifdef TMV_END_PADDING
+        StackArray2() { for(int i=N;i<NN;++i) get()[i] = T(0); }
+#endif
+        T* get() { return p; }
+        const T* get() const { return p; }
+    private:
+#ifdef TMV_END_PADDING
+        enum { NN = N + (16/sizeof(T)) };
+#else 
+        enum { NN = N };
+#endif
+#ifdef __GNUC__
+        T p[NN] __attribute__ ((aligned (16)));
+#else
+        T p[NN]; 
+#endif
+    };
+    template <class T, int N>
+    class StackArray2<T,N,false,true>
+    // smallN 
+    {
+    public:
+#ifdef TMV_END_PADDING
+        StackArray2() { for(int i=N;i<NN;++i) get()[i] = T(0); }
+#endif
+        T* get() { return p; }
+        const T* get() const { return p; }
+    private:
+#ifdef TMV_END_PADDING
+        enum { NN = N + 4 };
+#else 
+        enum { NN = N };
+#endif
+        T p[NN];
     };
 
 #ifdef __SSE__
     template <int N>
-    struct StackArray2<float,N,false,false>
+    class StackArray2<float,N,false,false>
+    // !bigN, !smallN 
     {
-        union { float xf[N]; __m128 xm; } xp;
-        inline float* get() { return xp.xf; }
-        inline const float* get() const { return xp.xf; }
+    public:
+#ifdef TMV_END_PADDING
+        StackArray2() { for(int i=N;i<NN;++i) get()[i] = 0.F; }
+#endif
+        float* get() { return xp.p; }
+        const float* get() const { return xp.p; }
+    private:
+#ifdef TMV_END_PADDING
+        enum { NN = N + 4 };
+#else 
+        enum { NN = N };
+#endif
+        union { float p[NN]; __m128 x; } xp;
     };
     template <int N>
-    struct StackArray2<float,N,false,true>
+    class StackArray2<float,N,false,true>
+    // smallN 
     {
-        float p[N];
-        inline float* get() { return p; }
-        inline const float* get() const { return p; }
+    public:
+#ifdef TMV_END_PADDING
+        StackArray2() { for(int i=N;i<NN;++i) get()[i] = 0.F; }
+#endif
+        float* get() { return p; }
+        const float* get() const { return p; }
+    private:
+#ifdef TMV_END_PADDING
+        enum { NN = N + 4 };
+#else 
+        enum { NN = N };
+#endif
+        float p[NN];
     };
 #endif
 #ifdef __SSE2__
     template <int N>
-    struct StackArray2<double,N,false,false>
-    { 
-        union { double xd[N]; __m128d xm; } xp;
-        inline double* get() { return xp.xd; }
-        inline const double* get() const { return xp.xd; }
+    class StackArray2<double,N,false,false>
+    // !bigN, !smallN 
+    {
+    public:
+#ifdef TMV_END_PADDING
+        StackArray2() { for(int i=N;i<NN;++i) get()[i] = 0.; }
+#endif
+        double* get() { return xp.p; }
+        const double* get() const { return xp.p; }
+    private:
+#ifdef TMV_END_PADDING
+        enum { NN = N + 2 };
+#else 
+        enum { NN = N };
+#endif
+        union { double p[NN]; __m128d x; } xp;
     };
     template <int N>
-    struct StackArray2<double,N,false,true>
+    class StackArray2<double,N,false,true>
+    // smallN 
     {
-        double p[N];
-        inline double* get() { return p; }
-        inline const double* get() const { return p; }
+    public:
+#ifdef TMV_END_PADDING
+        StackArray2() { for(int i=N;i<NN;++i) get()[i] = 0.; }
+#endif
+        double* get() { return p; }
+        const double* get() const { return p; }
+    private:
+#ifdef TMV_END_PADDING
+        enum { NN = N + 2 };
+#else 
+        enum { NN = N };
+#endif
+        double p[NN];
     };
 #endif
 
     template <class T, int N>
-    struct StackArray2<T,N,true,false>
+    class StackArray2<T,N,true,false>
+    // bigN
     {
+    public:
+        StackArray2() : p(N) {}
+        T* get() { return p.get(); }
+        const T* get() const { return p.get(); }
+    private:
         AlignedArray<T> p;
-        inline StackArray2() : p(N) {}
-        inline T* get() { return p.get(); }
-        inline const T* get() const { return p.get(); }
     };
 
     // Now the real class that we use: StackArray<T,N>
@@ -291,19 +512,29 @@ namespace tmv
     class StackArray
     {
     public :
-        inline StackArray() {}
-        inline ~StackArray() {}
+        StackArray()
+        {
+#ifdef TMV_INITIALIZE_NAN
+            for(int i=0;i<N;++i) get()[i] = TMV_Nan<T>::get();
+#endif
+        }
+        ~StackArray() 
+        {
+#ifdef TMV_INITIALIZE_NAN
+            for(int i=0;i<N;++i) get()[i] = T(-999);
+#endif
+        }
 
-        inline T& operator*() { return *get(); }
-        inline T* operator->() { return get(); }
-        inline operator T*() { return get(); }
+        T& operator*() { return *get(); }
+        T* operator->() { return get(); }
+        operator T*() { return get(); }
 
-        inline const T& operator*() const { return *get(); }
-        inline const T* operator->() const { return get(); }
-        inline operator const T*() const { return get(); }
+        const T& operator*() const { return *get(); }
+        const T* operator->() const { return get(); }
+        operator const T*() const { return get(); }
 
-        inline T* get() { return p.get(); }
-        inline const T* get() const { return p.get(); }
+        T* get() { return p.get(); }
+        const T* get() const { return p.get(); }
 
     private :
         enum { bigN = N*int(sizeof(T)) > TMV_MaxStack };
@@ -318,8 +549,8 @@ namespace tmv
 
         StackArray2<T,N,bigN,smallN> p;
 
-        inline StackArray& operator=(StackArray& p2);
-        inline StackArray(const StackArray& p2);
+        StackArray& operator=(StackArray& p2);
+        StackArray(const StackArray& p2);
     };
 
     template <class RT, int N>
@@ -328,19 +559,29 @@ namespace tmv
     public :
         typedef std::complex<RT> T;
 
-        inline StackArray() {}
-        inline ~StackArray() {}
+        StackArray() 
+        {
+#ifdef TMV_INITIALIZE_NAN
+            for(int i=0;i<N;++i) get()[i] = TMV_Nan<std::complex<RT> >::get();
+#endif
+        }
+        ~StackArray() 
+        {
+#ifdef TMV_INITIALIZE_NAN
+            for(int i=0;i<N;++i) get()[i] = std::complex<RT>(-999,-888);
+#endif
+        }
 
-        inline T& operator*() { return *get(); }
-        inline T* operator->() { return get(); }
-        inline operator T*() { return get(); }
+        T& operator*() { return *get(); }
+        T* operator->() { return get(); }
+        operator T*() { return get(); }
 
-        inline const T& operator*() const { return *get(); }
-        inline const T* operator->() const { return get(); }
-        inline operator const T*() const { return get(); }
+        const T& operator*() const { return *get(); }
+        const T* operator->() const { return get(); }
+        operator const T*() const { return get(); }
 
-        inline T* get() { return reinterpret_cast<T*>(p.get()); }
-        inline const T* get() const 
+        T* get() { return reinterpret_cast<T*>(p.get()); }
+        const T* get() const 
         { return reinterpret_cast<const T*>(p.get()); }
 
     private :
@@ -355,10 +596,10 @@ namespace tmv
 #endif
                 false ) };
 
-        StackArray2<T,(N<<1),bigN,smallN> p;
+        StackArray2<RT,(N<<1),bigN,smallN> p;
 
-        inline StackArray& operator=(StackArray& p2);
-        inline StackArray(const StackArray& p2);
+        StackArray& operator=(StackArray& p2);
+        StackArray(const StackArray& p2);
     };
 
 } // namespace tmv

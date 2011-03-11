@@ -70,9 +70,9 @@ namespace tmv {
 
     // Defined below:
     template <class M>
-    inline void InvertSelf(BaseMatrix_Tri_Mutable<M>& m);
+    static void InvertSelf(BaseMatrix_Tri_Mutable<M>& m);
     template <class M>
-    inline void InlineInvertSelf(BaseMatrix_Tri_Mutable<M>& m);
+    static void InlineInvertSelf(BaseMatrix_Tri_Mutable<M>& m);
 
     // Defined in TMV_InvertU.cpp
     template <class T>
@@ -238,10 +238,10 @@ namespace tmv {
         };
         template <int I>
         struct Unroller<I,1> // diagonal is already done, so nothing to do.
-        { static inline void unroll(M&) {} };
+        { static void unroll(M&) {} };
         template <int I>
         struct Unroller<I,0>
-        { static inline void unroll(M&) {} };
+        { static void unroll(M&) {} };
         static void call(M& m)
         {
 #ifdef PRINTALGO_InvU
@@ -535,7 +535,7 @@ namespace tmv {
         { 
             typedef typename M::conjugate_type Mc;
             Mc mc = m.conjugate();
-            InvertU_Helper<-2,s,Mc>::call(mc);
+            InvertU_Helper<-1,s,Mc>::call(mc);
         }
     };
 
@@ -547,15 +547,15 @@ namespace tmv {
         { InstInvertSelf(m.xdView()); }
     };
 
-    // algo -2: Check for inst
+    // algo -1: Check for inst
     template <int s, class M>
-    struct InvertU_Helper<-2,s,M>
+    struct InvertU_Helper<-1,s,M>
     {
         static void call(M& m)
         {
             typedef typename M::value_type T;
             const bool inst = 
-                M::unknownsizes &&
+                (s == UNKNOWN || s > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 ( s == 0 ) ? 0 :
@@ -566,16 +566,8 @@ namespace tmv {
         }
     };
 
-    // algo -1: Check for aliases? No.
-    template <int s, class M>
-    struct InvertU_Helper<-1,s,M>
-    {
-        static void call(M& m)
-        { InvertU_Helper<-2,s,M>::call(m); }
-    };
-
     template <int algo, class M>
-    inline void DoInvertSelf(BaseMatrix_Tri_Mutable<M>& m)
+    static void DoInvertSelf(BaseMatrix_Tri_Mutable<M>& m)
     {
         typedef typename M::cview_type Mv;
         Mv mv = m.cView();
@@ -591,11 +583,11 @@ namespace tmv {
     }
 
     template <class M>
-    inline void InvertSelf(BaseMatrix_Tri_Mutable<M>& m)
-    { DoInvertSelf<-2>(m); }
+    static void InvertSelf(BaseMatrix_Tri_Mutable<M>& m)
+    { DoInvertSelf<-1>(m); }
 
     template <class M>
-    inline void InlineInvertSelf(BaseMatrix_Tri_Mutable<M>& m)
+    static void InlineInvertSelf(BaseMatrix_Tri_Mutable<M>& m)
     { DoInvertSelf<-3>(m); }
 
 #undef TMV_Q1

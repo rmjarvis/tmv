@@ -29,6 +29,8 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
+//#define PRINTALGO_XV
+
 #include "TMV_Blas.h"
 #include "tmv/TMV_ScaleV.h"
 #include "tmv/TMV_MultXV.h"

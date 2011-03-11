@@ -39,10 +39,10 @@ namespace tmv {
 
     // Defined below:
     template <int ix, class T, class M>
-    inline void Scale(
+    static void Scale(
         const Scaling<ix,T>& x, BaseMatrix_Tri_Mutable<M>& m);
     template <int ix, class T, class M>
-    inline void InlineScale(
+    static void InlineScale(
         const Scaling<ix,T>& x, BaseMatrix_Tri_Mutable<M>& m);
 
     // Defined in TMV_ScaleU.cpp
@@ -70,13 +70,13 @@ namespace tmv {
     // algo 0: trivial: s == 0 or ix == 1, so nothing to do
     template <int s, int ix, class T, class M1>
     struct ScaleU_Helper<0,s,ix,T,M1>
-    { static inline void call(const Scaling<1,T>& , M1& ) {} };
+    { static void call(const Scaling<1,T>& , M1& ) {} };
 
     // algo 1: transpose
     template <int s, int ix, class T, class M1>
     struct ScaleU_Helper<1,s,ix,T,M1>
     {
-        static inline void call(const Scaling<ix,T>& x, M1& m)
+        static void call(const Scaling<ix,T>& x, M1& m)
         {
             typedef typename M1::transpose_type Mt;
             Mt mt = m.transpose();
@@ -88,7 +88,7 @@ namespace tmv {
     template <int s, int ix, class T, class M1>
     struct ScaleU_Helper<11,s,ix,T,M1> 
     {
-        static inline void call(const Scaling<ix,T>& x, M1& m)
+        static void call(const Scaling<ix,T>& x, M1& m)
         {
             int N = (s == UNKNOWN ? m.size() : s);
             typedef typename M1::col_sub_type Mc;
@@ -110,7 +110,7 @@ namespace tmv {
         template <int I, int M, int J, int N, bool iscomplex>
         struct Unroller
         {
-            static inline void unroll(const Scaling<ix,T>& x, M1& m)
+            static void unroll(const Scaling<ix,T>& x, M1& m)
             {
                 Unroller<I,M-(N-N/2),J,N/2,iscomplex>::unroll(x,m);
                 Unroller<I,M,J+N/2,N-N/2,iscomplex>::unroll(x,m);
@@ -119,7 +119,7 @@ namespace tmv {
         template <int I, int M, int J, bool iscomplex>
         struct Unroller<I,M,J,1,iscomplex>
         {
-            static inline void unroll(const Scaling<ix,T>& x, M1& m)
+            static void unroll(const Scaling<ix,T>& x, M1& m)
             {
                 Unroller<I,M/2,J,1,iscomplex>::unroll(x,m);
                 Unroller<I+M/2,M-M/2,J,1,iscomplex>::unroll(x,m);
@@ -127,17 +127,17 @@ namespace tmv {
         };
         template <int I, int M, int J, bool iscomplex>
         struct Unroller<I,M,J,0,iscomplex>
-        { static inline void unroll(const Scaling<ix,T>& , M1& ) {} };
+        { static void unroll(const Scaling<ix,T>& , M1& ) {} };
         template <int I, int J>
         struct Unroller<I,1,J,1,false>
         {
-            static inline void unroll(const Scaling<ix,T>& x, M1& m)
+            static void unroll(const Scaling<ix,T>& x, M1& m)
             { m.ref(I,J) *= x; }
         };
         template <int I, int J>
         struct Unroller<I,1,J,1,true>
         {
-            static inline void unroll(const Scaling<ix,T>& x, M1& m)
+            static void unroll(const Scaling<ix,T>& x, M1& m)
             {
                 typedef typename M1::real_type RT;
                 typedef typename M1::value_type VT;
@@ -150,9 +150,9 @@ namespace tmv {
         };
         template <int I, int J, bool iscomplex>
         struct Unroller<I,0,J,1,iscomplex>
-        { static inline void unroll(const Scaling<ix,T>& , M1& ) {} };
+        { static void unroll(const Scaling<ix,T>& , M1& ) {} };
 
-        static inline void call(const Scaling<ix,T>& x, M1& m)
+        static void call(const Scaling<ix,T>& x, M1& m)
         { Unroller<0,s,0,s,M1::iscomplex>::unroll(x,m); }
     };
 
@@ -160,7 +160,7 @@ namespace tmv {
     template <int s, int ix, class T, class M1>
     struct ScaleU_Helper<21,s,ix,T,M1> 
     {
-        static inline void call(const Scaling<ix,T>& x, M1& m)
+        static void call(const Scaling<ix,T>& x, M1& m)
         {
             int N = (s == UNKNOWN ? m.size() : s);
             typedef typename M1::row_sub_type Mr;
@@ -181,7 +181,7 @@ namespace tmv {
         template <int I, int M, int J, int N, bool iscomplex>
         struct Unroller
         {
-            static inline void unroll(const Scaling<ix,T>& x, M1& m)
+            static void unroll(const Scaling<ix,T>& x, M1& m)
             {
                 Unroller<I,M/2,J,N,iscomplex>::unroll(x,m);
                 Unroller<I+M/2,M-M/2,J+M/2,N-M/2,iscomplex>::unroll(x,m);
@@ -190,7 +190,7 @@ namespace tmv {
         template <int I, int J, int N, bool iscomplex>
         struct Unroller<I,1,J,N,iscomplex>
         {
-            static inline void unroll(const Scaling<ix,T>& x, M1& m)
+            static void unroll(const Scaling<ix,T>& x, M1& m)
             {
                 Unroller<I,1,J,N/2,iscomplex>::unroll(x,m);
                 Unroller<I,1,J+N/2,N-N/2,iscomplex>::unroll(x,m);
@@ -198,17 +198,17 @@ namespace tmv {
         };
         template <int I, int J, int N, bool iscomplex>
         struct Unroller<I,0,J,N,iscomplex>
-        { static inline void unroll(const Scaling<ix,T>& , M1& ) {} };
+        { static void unroll(const Scaling<ix,T>& , M1& ) {} };
         template <int I, int J>
         struct Unroller<I,1,J,1,false>
         {
-            static inline void unroll(const Scaling<ix,T>& x, M1& m)
+            static void unroll(const Scaling<ix,T>& x, M1& m)
             { m.ref(I,J) *= x; }
         };
         template <int I, int J>
         struct Unroller<I,1,J,1,true>
         {
-            static inline void unroll(const Scaling<ix,T>& x, M1& m)
+            static void unroll(const Scaling<ix,T>& x, M1& m)
             {
                 typedef typename M1::real_type RT;
                 typedef typename M1::value_type VT;
@@ -221,9 +221,9 @@ namespace tmv {
         };
         template <int I, int J, bool iscomplex>
         struct Unroller<I,1,J,0,iscomplex>
-        { static inline void unroll(const Scaling<ix,T>& , M1& ) {} };
+        { static void unroll(const Scaling<ix,T>& , M1& ) {} };
 
-        static inline void call(const Scaling<ix,T>& x, M1& m)
+        static void call(const Scaling<ix,T>& x, M1& m)
         { Unroller<0,s,0,s,M1::iscomplex>::unroll(x,m); }
     };
 
@@ -231,7 +231,7 @@ namespace tmv {
     template <int s, int ix, class T, class M1>
     struct ScaleU_Helper<-4,s,ix,T,M1> 
     {
-        static inline void call(const Scaling<ix,T>& x, M1& m)
+        static void call(const Scaling<ix,T>& x, M1& m)
         {
             TMVStaticAssert(!M1::_unit || ix == 1);
             typedef typename M1::value_type T1;
@@ -256,7 +256,7 @@ namespace tmv {
     template <int s, int ix, class T, class M1>
     struct ScaleU_Helper<-3,s,ix,T,M1> 
     {
-        static inline void call(const Scaling<ix,T>& x, M1& m)
+        static void call(const Scaling<ix,T>& x, M1& m)
         { ScaleU_Helper<-4,s,ix,T,M1>::call(x,m); }
     };
 
@@ -264,11 +264,11 @@ namespace tmv {
     template <int s, int ix, class T, class M1>
     struct ScaleU_Helper<96,s,ix,T,M1>
     {
-        static inline void call(const Scaling<ix,T>& x, M1& m)
+        static void call(const Scaling<ix,T>& x, M1& m)
         {
             typedef typename M1::transpose_type Mt;
             Mt mt = m.transpose();
-            ScaleU_Helper<-2,s,ix,T,Mt>::call(x,mt);
+            ScaleU_Helper<-1,s,ix,T,Mt>::call(x,mt);
         }
     };
 
@@ -276,11 +276,11 @@ namespace tmv {
     template <int s, int ix, class T, class M1>
     struct ScaleU_Helper<97,s,ix,T,M1>
     {
-        static inline void call(const Scaling<ix,T>& x, M1& m)
+        static void call(const Scaling<ix,T>& x, M1& m)
         {
             typedef typename M1::conjugate_type Mc;
             Mc mc = m.conjugate();
-            ScaleU_Helper<-2,s,ix,T,Mc>::call(TMV_CONJ(x),mc);
+            ScaleU_Helper<-1,s,ix,T,Mc>::call(TMV_CONJ(x),mc);
         }
     };
 
@@ -288,23 +288,24 @@ namespace tmv {
     template <int s, int ix, class T, class M1>
     struct ScaleU_Helper<98,s,ix,T,M1>
     {
-        static inline void call(const Scaling<ix,T>& x, M1& m)
+        static void call(const Scaling<ix,T>& x, M1& m)
         {
             TMVAssert(!m.isunit());
-            typename M1::value_type xx(x);
+            typedef typename M1::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
             InstScale(xx,m.xView().viewAsNonUnitDiag());
         }
     };
 
-    // algo -2: Check for inst
+    // algo -1: Check for inst
     template <int s, int ix, class T, class M1>
-    struct ScaleU_Helper<-2,s,ix,T,M1>
+    struct ScaleU_Helper<-1,s,ix,T,M1>
     {
-        static inline void call(const Scaling<ix,T>& x, M1& m)
+        static void call(const Scaling<ix,T>& x, M1& m)
         {
             typedef typename M1::value_type T1;
             const bool inst =
-                M1::unknownsizes &&
+                (s == UNKNOWN || s > 16) &&
                 Traits<T1>::isinst;
             const int algo =
                 ix == 1 ? 0 :
@@ -316,27 +317,19 @@ namespace tmv {
         }
     };
 
-    // algo -1: Check for alias? No.
-    template <int s, int ix, class T, class M1>
-    struct ScaleU_Helper<-1,s,ix,T,M1>
-    {
-        static inline void call(const Scaling<ix,T>& x, M1& m)
-        { ScaleU_Helper<-2,s,ix,T,M1>::call(x,m); }
-    };
-
     template <int ix, class T, class M>
-    inline void Scale(
+    static void Scale(
         const Scaling<ix,T>& x, BaseMatrix_Tri_Mutable<M>& m)
     {
         TMVStaticAssert(!M::_unit || ix == 1);
         TMVAssert(!m.isunit() || ix == 1);
         typedef typename M::cview_type Mv;
         Mv mv = m.cView();
-        ScaleU_Helper<-2,M::_size,ix,T,Mv>::call(x,mv); 
+        ScaleU_Helper<-1,M::_size,ix,T,Mv>::call(x,mv); 
     }
 
     template <int ix, class T, class M>
-    inline void InlineScale(
+    static void InlineScale(
         const Scaling<ix,T>& x, BaseMatrix_Tri_Mutable<M>& m)
     {
         TMVStaticAssert(!M::_unit || ix == 1);
@@ -347,7 +340,7 @@ namespace tmv {
     }
 
     template <class T>
-    inline void InstScale(const T x, LowerTriMatrixView<T,NonUnitDiag> m)
+    static void InstScale(const T x, LowerTriMatrixView<T,NonUnitDiag> m)
     { InstScale(x,m.transpose()); }
 
 

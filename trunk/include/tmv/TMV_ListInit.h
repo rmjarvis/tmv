@@ -40,8 +40,8 @@ namespace tmv {
         int n;
 
     public :
-        inline ListReadError(int nleft) : n(nleft) {}
-        inline void write(std::ostream& os) const throw()
+        ListReadError(int nleft) : n(nleft) {}
+        void write(std::ostream& os) const throw()
         {
             os<<"TMV Read Error: Reading from List initialization.\n";
             if (n == 0)
@@ -56,11 +56,11 @@ namespace tmv {
     class ListAssigner
     {
     public:
-        inline ListAssigner(IT ptr, int nLeft ) :
+        ListAssigner(IT ptr, int nLeft ) :
             _ptr(ptr), _nLeft(nLeft), _isLast(true)
         {}
 
-        inline ListAssigner(IT ptr, int nLeft, const T& x) :
+        ListAssigner(IT ptr, int nLeft, const T& x) :
             _ptr(ptr), _nLeft(nLeft), _isLast(false)
         {
             if (_nLeft == 0) throw ListReadError(0);
@@ -69,14 +69,14 @@ namespace tmv {
             --_nLeft;
         }
 
-        inline ListAssigner( const ListAssigner<T,IT>& rhs ) : 
+        ListAssigner( const ListAssigner<T,IT>& rhs ) : 
             _ptr(rhs._ptr), _nLeft(rhs._nLeft), _isLast(true)
         { rhs._isLast = false; }
 
-        inline ~ListAssigner()
+        ~ListAssigner()
         { if (_nLeft > 0 && _isLast) throw ListReadError(_nLeft); }
 
-        inline ListAssigner<T,IT> operator,(const T& x)
+        ListAssigner<T,IT> operator,(const T& x)
         {
             if (_nLeft == 0) throw ListReadError(0);
             TMVAssert((_nLeft > 0) && "Too many elements in ListInit");

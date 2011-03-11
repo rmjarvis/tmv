@@ -79,15 +79,17 @@
 //            const T* m, size_t size, StorageType stor)
 //    ConstUpperTriMatrixView UnitUpperTriMatrixViewOf(
 //            const T* m, size_t size, StorageType stor)
-//    UpperTriMatrixView UnitUpperTriMatrixViewOf(
+//    UpperTriMatrixView UpperTriMatrixViewOf(
 //            T* m, size_t size, StorageType stor)
-//    UpperTriMatrixView UnitUnitUpperTriMatrixViewOf(
+//    UpperTriMatrixView UnitUpperTriMatrixViewOf(
 //            T* m, size_t size, StorageType stor)
 //        Returns a TriMatrixView of the elements in m, using the 
 //        actual elements m for the storage.  The Unit versions return
 //        views with dt = UnitDiag, the non-Unit versions return views
 //        with dt = NonUnitDiag.
 //        There are also corresponding LowerTriMatrix versions of these.
+//        And there are versions with a final dt parameter that 
+//        returns an UnknownDiag TriMatrixView with the value set by dt.
 //        
 //
 // Access Functions
@@ -321,140 +323,140 @@ namespace tmv {
     {
     public:
         typedef typename AuxRef<T,C>::reference reference;
-        explicit inline TriRef(bool _u, T& _v) : isunit(_u), itsref(_v) {}
-        inline TriRef(const TriRef<T,C>& rhs) : 
+        explicit TriRef(bool _u, T& _v) : isunit(_u), itsref(_v) {}
+        TriRef(const TriRef<T,C>& rhs) : 
             isunit(rhs.isunit), itsref(rhs.itsref) {}
-        inline ~TriRef() {}
+        ~TriRef() {}
 
-        inline operator T() const { return val(); }
-        inline reference getRef() { return ref(); }
-        inline T operator-() const { return -val(); }
+        operator T() const { return val(); }
+        reference getRef() { return ref(); }
+        T operator-() const { return -val(); }
 
         template <class T2>
-        inline TriRef<T,C>& operator=(const TriRef<T2,C>& rhs)
+        TriRef<T,C>& operator=(const TriRef<T2,C>& rhs)
         { assign(rhs.val()); return *this; }
         template <class T2>
-        inline TriRef<T,C>& operator=(T2 rhs)
+        TriRef<T,C>& operator=(T2 rhs)
         { assign(rhs); return *this; }
 
         template <class T2>
-        inline TriRef<T,C>& operator+=(const TriRef<T2,C>& x2)
+        TriRef<T,C>& operator+=(const TriRef<T2,C>& x2)
         { assign(val() + x2.val()); return *this; }
         template <class T2>
-        inline TriRef<T,C>& operator+=(T2 x2)
+        TriRef<T,C>& operator+=(T2 x2)
         { assign(val() + x2); return *this; }
         template <class T2>
-        inline typename Traits2<T,T2>::type operator+(const TriRef<T2,C>& x2)
+        typename Traits2<T,T2>::type operator+(const TriRef<T2,C>& x2)
         { return val() + x2.val(); }
         template <class T2>
-        inline friend typename Traits2<T,T2>::type operator+(
+        friend typename Traits2<T,T2>::type operator+(
             const TriRef<T,C>& x1, T2 x2)
         { return x1.val()+x2; }
         template <class T2>
-        inline friend typename Traits2<T,T2>::type operator+(
+        friend typename Traits2<T,T2>::type operator+(
             T2 x1, const TriRef<T,C>& x2)
         { return x1+x2.val(); }
         template <class T2>
-        inline friend T2& operator+=(T2& x1, const TriRef<T,C>& x2)
+        friend T2& operator+=(T2& x1, const TriRef<T,C>& x2)
         { return x1 += x2.val(); }
 
         template <class T2>
-        inline TriRef<T,C>& operator-=(const TriRef<T2,C>& x2) 
+        TriRef<T,C>& operator-=(const TriRef<T2,C>& x2) 
         { assign(val() - x2.val()); return *this; }
         template <class T2>
-        inline TriRef<T,C>& operator-=(T2 x2)
+        TriRef<T,C>& operator-=(T2 x2)
         { assign(val() - x2); return *this; }
         template <class T2>
-        inline typename Traits2<T,T2>::type operator-(const TriRef<T2,C>& x2)
+        typename Traits2<T,T2>::type operator-(const TriRef<T2,C>& x2)
         { return val()-x2.val(); }
         template <class T2>
-        inline friend typename Traits2<T,T2>::type operator-(
+        friend typename Traits2<T,T2>::type operator-(
             const TriRef<T,C>& x1, T2 x2)
         { return x1.val()-x2; }
         template <class T2>
-        inline friend typename Traits2<T,T2>::type operator-(
+        friend typename Traits2<T,T2>::type operator-(
             T2 x1, const TriRef<T,C>& x2)
         { return x1-x2.val(); }
         template <class T2>
-        inline friend T2& operator-=(T2& x1, const TriRef<T,C>& x2)
+        friend T2& operator-=(T2& x1, const TriRef<T,C>& x2)
         { return x1 -= x2.val(); }
 
         template <class T2>
-        inline TriRef<T,C>& operator*=(const TriRef<T2,C>& x2) 
+        TriRef<T,C>& operator*=(const TriRef<T2,C>& x2) 
         { assign(x2.val() * val()); return *this; }
         template <class T2>
-        inline TriRef<T,C>& operator*=(T2 x2) 
+        TriRef<T,C>& operator*=(T2 x2) 
         { assign(x2 * val()); return *this; }
         template <class T2>
-        inline typename Traits2<T,T2>::type operator*(const TriRef<T2,C> x2)
+        typename Traits2<T,T2>::type operator*(const TriRef<T2,C> x2)
         { return val()*x2.val(); }
         template <class T2>
-        inline friend typename Traits2<T,T2>::type operator*(
+        friend typename Traits2<T,T2>::type operator*(
             const TriRef<T,C>& x1, T2 x2)
         { return x1.val()*x2; }
         template <class T2>
-        inline friend typename Traits2<T,T2>::type operator*(
+        friend typename Traits2<T,T2>::type operator*(
             T2 x1, const TriRef<T,C>& x2)
         { return x1*x2.val(); }
         template <class T2>
-        inline friend T2& operator*=(T2& x1, const TriRef<T,C>& x2)
+        friend T2& operator*=(T2& x1, const TriRef<T,C>& x2)
         {
             if (x2.isunit) return x1;
             else return x1 *= x2.val(); 
         }
 
         template <class T2>
-        inline TriRef<T,C>& operator/=(const TriRef<T2,C>& x2) 
+        TriRef<T,C>& operator/=(const TriRef<T2,C>& x2) 
         { assign(val() / x2.val()); return *this; }
         template <class T2>
-        inline TriRef<T,C>& operator/=(T2 x2) 
+        TriRef<T,C>& operator/=(T2 x2) 
         { assign(val() / x2); return *this; }
         template <class T2>
-        inline typename Traits2<T,T2>::type operator/(const TriRef<T2,C>& x2)
+        typename Traits2<T,T2>::type operator/(const TriRef<T2,C>& x2)
         { return val()/x2.val(); }
         template <class T2>
-        inline friend typename Traits2<T,T2>::type operator/(
+        friend typename Traits2<T,T2>::type operator/(
             const TriRef<T,C>& x1, T2 x2)
         { return x1.val()/x2; }
         template <class T2>
-        inline friend typename Traits2<T,T2>::type operator/(
+        friend typename Traits2<T,T2>::type operator/(
             T2 x1, const TriRef<T,C>& x2)
         { return x1/x2.val(); }
         template <class T2>
-        inline friend T2& operator/=(T2& x1, const TriRef<T,C>& x2)
+        friend T2& operator/=(T2& x1, const TriRef<T,C>& x2)
         {
             if (x2.isunit) return x1;
             else return x1 /= x2.val(); 
         }
 
         template <class T2>
-        inline bool operator==(const TriRef<T2,C>& x2) const
+        bool operator==(const TriRef<T2,C>& x2) const
         { return val() == x2.val(); }
         template <class T2>
-        inline bool operator==(T2 x2) const 
+        bool operator==(T2 x2) const 
         { return val() == x2; }
         template <class T2>
-        inline friend bool operator==(T2 x1, const TriRef<T,C>& x2)
+        friend bool operator==(T2 x1, const TriRef<T,C>& x2)
         { return x1 == val(); }
         template <class T2>
-        inline bool operator!=(const TriRef<T2,C>& x2) const
+        bool operator!=(const TriRef<T2,C>& x2) const
         { return !(operator==(x2)); }
         template <class T2>
-        inline bool operator!=(T2 x2) const 
+        bool operator!=(T2 x2) const 
         { return !(operator==(x2)); }
         template <class T2>
-        inline friend bool operator!=(T2 x1, const TriRef<T,C>& x2)
+        friend bool operator!=(T2 x1, const TriRef<T,C>& x2)
         { return !(x2==x1); }
 
-        inline friend std::ostream& operator<<(std::ostream& os, TriRef<T,C> x)
+        friend std::ostream& operator<<(std::ostream& os, TriRef<T,C> x)
         { os << x.val(); return os; }
-        inline friend std::istream& operator>>(std::istream& is, TriRef<T,C> x)
+        friend std::istream& operator>>(std::istream& is, TriRef<T,C> x)
         { is >> x.ref(); return is; }
 
     private:
 
         template <class T2>
-        void check(T2 x) const
+        void check(T2 TMV_DEBUG_PARAM(x)) const
         {
             TMVAssert(
                 (!isunit || x == T2(1)) && 
@@ -477,37 +479,50 @@ namespace tmv {
 
     // Overload some functions to work with TriRef
     template <class T, bool C> 
-    inline T TMV_CONJ(const TriRef<T,C>& x) 
+    static T TMV_CONJ(const TriRef<T,C>& x) 
     { return TMV_CONJ(T(x)); }
     template <class T, bool C> 
-    inline typename Traits<T>::real_type TMV_NORM(const TriRef<T,C>& x) 
+    static typename Traits<T>::real_type TMV_NORM(const TriRef<T,C>& x) 
     { return TMV_NORM(T(x)); }
     template <class T, bool C> 
-    inline typename Traits<T>::real_type TMV_ABS(const TriRef<T,C>& x) 
+    static typename Traits<T>::real_type TMV_ABS(const TriRef<T,C>& x) 
     { return TMV_ABS(T(x)); }
     template <class T, bool C> 
-    inline T TMV_SQR(const TriRef<T,C>& x) 
+    static T TMV_SQR(const TriRef<T,C>& x) 
     { return TMV_SQR(T(x)); }
     template <class T, bool C> 
-    inline T TMV_SQRT(const TriRef<T,C>& x) 
+    static T TMV_SQRT(const TriRef<T,C>& x) 
     { return TMV_SQRT(T(x)); }
     template <class T, bool C> 
-    inline typename Traits<T>::real_type TMV_REAL(const TriRef<T,C>& x) 
+    static typename Traits<T>::real_type TMV_REAL(const TriRef<T,C>& x) 
     { return TMV_REAL(T(x)); }
     template <class T, bool C> 
-    inline typename Traits<T>::real_type TMV_IMAG(const TriRef<T,C>& x) 
+    static typename Traits<T>::real_type TMV_IMAG(const TriRef<T,C>& x) 
     { return TMV_IMAG(T(x)); }
 
     template <class T, bool C1, bool C2> 
-    inline void TMV_SWAP(TriRef<T,C1> x1, TriRef<T,C2> x2)
-    { return TMV_SWAP(x1.GetRef(),x2.GetRef()); }
+    static void TMV_SWAP(TriRef<T,C1> x1, TriRef<T,C2> x2)
+    { TMV_SWAP(x1.getRef(),x2.getRef()); }
     template <class T, bool C2> 
-    inline void TMV_SWAP(T& x1, TriRef<T,C2> x2)
-    { return TMV_SWAP(x1,x2.GetRef()); }
+    static void TMV_SWAP(T& x1, TriRef<T,C2> x2)
+    { TMV_SWAP(x1,x2.getRef()); }
     template <class T, bool C1> 
-    inline void TMV_SWAP(TriRef<T,C1> x1, T& x2)
-    { return TMV_SWAP(x1.GetRef(),x2); }
+    static void TMV_SWAP(TriRef<T,C1> x1, T& x2)
+    { TMV_SWAP(x1.getRef(),x2); }
 
+    template <class T, bool C, bool nonunit>
+    struct TriRefHelper // D = NonUnitDiag
+    {
+        typedef T& reference;
+        static reference makeRef(bool, T& r) { return r; }
+    };
+    template <class T, bool C>
+    struct TriRefHelper<T,C,false>
+    {
+        typedef TriRef<T,C> reference;
+        static reference makeRef(bool isunit, T& r)
+        { return reference(isunit,r); }
+    };
 
     template <class T, DiagType D, StorageType S, IndexStyle I> 
     struct Traits<UpperTriMatrix<T,D,S,I> >
@@ -595,7 +610,7 @@ namespace tmv {
 
         typedef QuotXM<1,real_type,type> inverse_type;
 
-        typedef TriRef<T,false> reference;
+        typedef typename TriRefHelper<T,false,D==NonUnitDiag>::reference reference;
 
         typedef VectorView<T,_stepi,false,I> col_sub_type;
         typedef VectorView<T,_stepj,false,I> row_sub_type;
@@ -635,12 +650,6 @@ namespace tmv {
         typedef realpart_type imagpart_type;
         typedef UpperTriMatrixView<T,D,_stepi,_stepj,false,I> nonconj_type;
     };
-
-#ifdef XTEST
-#ifdef TMVDEBUG
-#define XTEST_DEBUG
-#endif
-#endif
 
     // A Helper class to make a TriMatrix from a BaseMatrix
     // If the BaseMatrix is assignable to the Tri then we do the 
@@ -701,59 +710,50 @@ namespace tmv {
         // Constructors
         //
 
-        explicit inline UpperTriMatrix(size_t n=0) : itss(n), itsm(n*n)
+        explicit UpperTriMatrix(size_t n=0) : itss(n), itsm(n*n)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
-#ifdef TMVDEBUG
+#ifdef TMV_DEBUG
             Maybe<_unit>::offdiag(*this).setAllTo(T(888));
 #endif
         }
 
-        inline UpperTriMatrix(size_t n, T x) : itss(n), itsm(n*n)
+        UpperTriMatrix(size_t n, T x) : itss(n), itsm(n*n)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
             Maybe<_unit>::offdiag(*this).setAllTo(x);
         }
 
-        inline UpperTriMatrix(size_t n, const T* vv) : itss(n), itsm(n*n)
+        UpperTriMatrix(size_t n, const T* vv) : itss(n), itsm(n*n)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
-#ifdef XTEST_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
-#endif
             VectorView<T,1> lv(ptr(),n*n);
             ConstVectorView<T,1>(vv,n*n).newAssignTo(lv);
         }
 
-        inline UpperTriMatrix(size_t n, const std::vector<T>& vv) :
+        UpperTriMatrix(size_t n, const std::vector<T>& vv) :
             itss(n), itsm(n*n)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
-#ifdef XTEST_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
-#endif
             TMVAssert(vv.size() == n*n);
             VectorView<T,1> lv(ptr(),n*n);
             ConstVectorView<T,1>(&vv[0],n*n).newAssignTo(lv);
         }
 
-        inline UpperTriMatrix(const type& m2) :
+        UpperTriMatrix(const type& m2) :
             itss(m2.size()), itsm(itss*itss)
         { 
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
-#ifdef XTEST_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
-#endif
             m2.newAssignTo(*this);
         }
 
         template <class M2> 
-        inline UpperTriMatrix(const BaseMatrix<M2>& m2) :
+        UpperTriMatrix(const BaseMatrix<M2>& m2) :
             itss(m2.rowsize()), itsm(itss*itss)
         { 
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
@@ -762,9 +762,6 @@ namespace tmv {
                 ShapeTraits2<M2::_shape,_shape>::assignable;
             TMVStaticAssert((
                 (M2::_calc && ShapeTraits<M2::_shape>::upper) || assignable));
-#ifdef XTEST_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
-#endif
             TMVAssert(m2.colsize() == size());
             TMVAssert(m2.rowsize() == size());
 
@@ -772,35 +769,29 @@ namespace tmv {
         }
 
         template <class M2>
-        inline UpperTriMatrix(const BaseMatrix_Tri<M2>& m2) :
+        UpperTriMatrix(const BaseMatrix_Tri<M2>& m2) :
             itss(m2.size()), itsm(itss*itss)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
             TMVStaticAssert(M2::_upper);
-#ifdef XTEST_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
-#endif
             Maybe<_unit && !M2::_unit>::unitview(m2).newAssignTo(*this);
         }
 
         template <class M2>
-        inline UpperTriMatrix(const BaseMatrix_Diag<M2>& m2) :
+        UpperTriMatrix(const BaseMatrix_Diag<M2>& m2) :
             itss(m2.size()), itsm(itss*itss)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
-#ifdef XTEST_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
-#endif
             typename type::diag_type d = this->diag();
             this->setZero();
             m2.calc().diag().newAssignTo(d);
         }
 
-        inline ~UpperTriMatrix()
+        ~UpperTriMatrix()
         {
-#ifdef TMVDEBUG
+#ifdef TMV_DEBUG
             Maybe<_unit>::offdiag(*this).setAllTo(T(999));
 #endif
         }
@@ -810,34 +801,34 @@ namespace tmv {
         // Op=
         //
 
-        inline type& operator=(const type& m2)
+        type& operator=(const type& m2)
         { 
             if (&m2 != this) base_mut::operator=(m2);
             return *this;
         }
 
         template <class M2>
-        inline type& operator=(const BaseMatrix<M2>& m2)
+        type& operator=(const BaseMatrix<M2>& m2)
         {
             base_mut::operator=(m2);
             return *this;
         }
 
         template <class M2>
-        inline type& operator=(const BaseMatrix_Tri<M2>& m2)
+        type& operator=(const BaseMatrix_Tri<M2>& m2)
         {
             base_mut::operator=(m2);
             return *this;
         }
 
         template <class M2>
-        inline type& operator=(const BaseMatrix_Diag<M2>& m2)
+        type& operator=(const BaseMatrix_Diag<M2>& m2)
         {
             base_mut::operator=(m2);
             return *this;
         }
 
-        inline type& operator=(T x)
+        type& operator=(T x)
         {
             base_mut::operator=(x);
             return *this;
@@ -848,10 +839,10 @@ namespace tmv {
         // Auxilliary Functions
         //
 
-        inline const T* cptr() const { return itsm; }
-        inline T* ptr() { return itsm; }
+        const T* cptr() const { return itsm; }
+        T* ptr() { return itsm; }
 
-        inline T cref(int i, int j) const 
+        T cref(int i, int j) const 
         {
             return (
                 (isunit() && i==j ) ? T(1) :
@@ -859,35 +850,39 @@ namespace tmv {
                 itsm[S==RowMajor ? i*stepi() + j : i + j*stepj()]);
         }
 
-        inline reference ref(int i, int j)
+        reference ref(int i, int j)
         {
-            return reference(
+            return TriRefHelper<T,false,D==NonUnitDiag>::makeRef(
                 isunit() && i==j,
                 itsm[S==RowMajor ? i*stepi() + j : i + j*stepj()] ); 
         }
 
-        inline void swapWith(type& m2)
+        void swapWith(type& m2)
         {
             TMVAssert(m2.size() == size());
             if (itsm.get() == m2.itsm.get()) return;
             itsm.swapWith(m2.itsm);
         }
 
-        inline void resize(const size_t s)
+        void resize(const size_t s)
         {
             itss = s;
             itsm.resize(s*s);
+#ifdef TMV_DEBUG
+            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
+#endif
         }
 
-        inline size_t size() const { return itss; }
-        inline int stepi() const { return S==RowMajor ? itss : 1; }
-        inline int stepj() const { return S==RowMajor ? 1 : itss; }
-        inline DiagType dt() const { return D; }
-        inline bool isunit() const { return D == UnitDiag; }
-        inline bool isconj() const { return false; }
-        inline bool isrm() const { return S==RowMajor; }
-        inline bool iscm() const { return S==ColMajor; }
-        inline StorageType stor() const { return S; }
+        size_t size() const { return itss; }
+        int nElements() const { return itss*(itss+1)/2; }
+        int stepi() const { return S==RowMajor ? itss : 1; }
+        int stepj() const { return S==RowMajor ? 1 : itss; }
+        DiagType dt() const { return D; }
+        bool isunit() const { return D == UnitDiag; }
+        bool isconj() const { return false; }
+        bool isrm() const { return S==RowMajor; }
+        bool iscm() const { return S==ColMajor; }
+        StorageType stor() const { return S; }
 
     protected :
 
@@ -904,32 +899,32 @@ namespace tmv {
         typedef UpperTriMatrixF<T,D,S> type;
         typedef UpperTriMatrix<T,D,S,FortranStyle> mtype;
 
-        explicit inline UpperTriMatrixF(size_t s) : mtype(s) {}
-        inline UpperTriMatrixF(size_t s, T x) : mtype(s,x) {}
-        inline UpperTriMatrixF(size_t s, const T* vv) : mtype(s,vv) {}
-        inline UpperTriMatrixF(size_t s, const std::vector<T>& vv) :
+        explicit UpperTriMatrixF(size_t s) : mtype(s) {}
+        UpperTriMatrixF(size_t s, T x) : mtype(s,x) {}
+        UpperTriMatrixF(size_t s, const T* vv) : mtype(s,vv) {}
+        UpperTriMatrixF(size_t s, const std::vector<T>& vv) :
             mtype(s,vv) {}
         template <class M2> 
-        inline UpperTriMatrixF(const BaseMatrix<M2>& m2) : mtype(m2) {}
-        inline UpperTriMatrixF(const type& m2) : mtype(m2) {}
+        UpperTriMatrixF(const BaseMatrix<M2>& m2) : mtype(m2) {}
+        UpperTriMatrixF(const type& m2) : mtype(m2) {}
         template <class M2>
-        inline UpperTriMatrixF(const BaseMatrix_Tri<M2>& m2) : mtype(m2) {}
+        UpperTriMatrixF(const BaseMatrix_Tri<M2>& m2) : mtype(m2) {}
         template <class M2>
-        inline UpperTriMatrixF(const BaseMatrix_Rec<M2>& m2) : mtype(m2) {}
-        inline ~UpperTriMatrixF() {}
+        UpperTriMatrixF(const BaseMatrix_Rec<M2>& m2) : mtype(m2) {}
+        ~UpperTriMatrixF() {}
 
-        inline type& operator=(const type& m2)
+        type& operator=(const type& m2)
         { mtype::operator=(m2); return *this; }
         template <class M2>
-        inline type& operator=(const BaseMatrix<M2>& m2)
+        type& operator=(const BaseMatrix<M2>& m2)
         { mtype::operator=(m2); return *this; }
         template <class M2>
-        inline type& operator=(const BaseMatrix_Tri<M2>& m2)
+        type& operator=(const BaseMatrix_Tri<M2>& m2)
         { mtype::operator=(m2); return *this; }
         template <class M2>
-        inline type& operator=(const BaseMatrix_Diag<M2>& m2)
+        type& operator=(const BaseMatrix_Diag<M2>& m2)
         { mtype::operator=(m2); return *this; }
-        inline type& operator=(T x)
+        type& operator=(T x)
         { mtype::operator=(x); return *this; }
 
     }; // UpperTriMatrixF
@@ -1047,63 +1042,63 @@ namespace tmv {
         //
         // Constructors
         //
-        inline ConstUpperTriMatrixView(
+        ConstUpperTriMatrixView(
             const T* m, size_t s, bool u, int si, int sj) :
             itsm(m), itss(s), itsu(u), itssi(si), itssj(sj) {}
 
-        inline ConstUpperTriMatrixView(const T* m, size_t s, bool u, int si) :
+        ConstUpperTriMatrixView(const T* m, size_t s, bool u, int si) :
             itsm(m), itss(s), itsu(u), itssi(si), itssj(Sj)
         { TMVStaticAssert(Sj != UNKNOWN); }
 
-        inline ConstUpperTriMatrixView(const T* m, size_t s, bool u) :
+        ConstUpperTriMatrixView(const T* m, size_t s, bool u) :
             itsm(m), itss(s), itsu(u), itssi(Si), itssj(Sj)
         { TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); }
 
-        inline ConstUpperTriMatrixView(const type& m2) :
+        ConstUpperTriMatrixView(const type& m2) :
             itsm(m2.cptr()), itss(m2.size()), itsu(m2.isunit()),
             itssi(m2.stepi()), itssj(m2.stepj()) {}
 
         template <DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        inline ConstUpperTriMatrixView(
+        ConstUpperTriMatrixView(
             const ConstUpperTriMatrixView<T,D2,Si2,Sj2,C,I2>& m2) :
             itsm(m2.cptr()), itss(m2.size()), itsu(m2.isunit()),
             itssi(m2.stepi()), itssj(m2.stepj()) {}
 
         template <DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        inline ConstUpperTriMatrixView(
+        ConstUpperTriMatrixView(
             const UpperTriMatrixView<T,D2,Si2,Sj2,C,I2>& m2) :
             itsm(m2.cptr()), itss(m2.size()), itsu(m2.isunit()),
             itssi(m2.stepi()), itssj(m2.stepj()) {}
 
         template <int N2, DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        inline ConstUpperTriMatrixView(
+        ConstUpperTriMatrixView(
             const ConstSmallUpperTriMatrixView<T,N2,D2,Si2,Sj2,C,I2>& m2) :
             itsm(m2.cptr()), itss(m2.size()), itsu(m2.isunit()),
             itssi(m2.stepi()), itssj(m2.stepj()) {}
 
         template <int N2, DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        inline ConstUpperTriMatrixView(
+        ConstUpperTriMatrixView(
             const SmallUpperTriMatrixView<T,N2,D2,Si2,Sj2,C,I2>& m2) :
             itsm(m2.cptr()), itss(m2.size()), itsu(m2.isunit()),
             itssi(m2.stepi()), itssj(m2.stepj()) {}
 
-        inline ~ConstUpperTriMatrixView() {
+        ~ConstUpperTriMatrixView() {
 #ifdef TMV_DEBUG
             itsm = 0;
 #endif
         }
 
     private :
-        inline void operator=(const type& m2);
+        void operator=(const type& m2);
     public :
 
         //
         // Auxilliary Functions
         //
 
-        inline const T* cptr() const { return itsm; }
+        const T* cptr() const { return itsm; }
 
-        inline T cref(int i, int j) const 
+        T cref(int i, int j) const 
         {
             return (
                 (isunit() && i==j ) ? T(1) :
@@ -1111,19 +1106,20 @@ namespace tmv {
                 DoConj<C>(itsm[i*stepi() + j*stepj()]));
         }
 
-        inline size_t colsize() const { return itss; }
-        inline size_t rowsize() const { return itss; }
-        inline size_t size() const { return itss; }
-        inline int stepi() const { return itssi; }
-        inline int stepj() const { return itssj; }
-        inline bool isconj() const { return C; }
-        inline bool isunit() const { return itsu; }
-        inline bool isrm() const
+        size_t colsize() const { return itss; }
+        size_t rowsize() const { return itss; }
+        size_t size() const { return itss; }
+        int nElements() const { return itss*(itss+1)/2; }
+        int stepi() const { return itssi; }
+        int stepj() const { return itssj; }
+        bool isconj() const { return C; }
+        bool isunit() const { return itsu; }
+        bool isrm() const
         {
             return Traits<type>::_rowmajor || 
                 (!Traits<type>::_colmajor && stepj() == 1); 
         }
-        inline bool iscm() const
+        bool iscm() const
         { 
             return Traits<type>::_colmajor ||
                 (!Traits<type>::_rowmajor && stepi() == 1); 
@@ -1131,11 +1127,7 @@ namespace tmv {
 
     private :
 
-#ifdef TMV_DEBUG
         const T* itsm;
-#else
-        const T*const itsm;
-#endif
         const size_t itss;
         const CheckedInt<D==UnknownDiag ? UNKNOWN : D==UnitDiag> itsu;
         const CheckedInt<Si> itssi;
@@ -1152,31 +1144,31 @@ namespace tmv {
         typedef ConstUpperTriMatrixViewF<T,D,Si,Sj,C> type;
         typedef ConstUpperTriMatrixView<T,D,Si,Sj,C,FortranStyle> mtype;
 
-        inline ConstUpperTriMatrixViewF(const T* m, size_t s, int si, int sj) :
+        ConstUpperTriMatrixViewF(const T* m, size_t s, int si, int sj) :
             mtype(m,s,si,sj) {}
-        inline ConstUpperTriMatrixViewF(const T* m, size_t s, int si) :
+        ConstUpperTriMatrixViewF(const T* m, size_t s, int si) :
             mtype(m,s,si) {}
-        inline ConstUpperTriMatrixViewF(const T* m, size_t s) :
+        ConstUpperTriMatrixViewF(const T* m, size_t s) :
             mtype(m,s) {}
-        inline ConstUpperTriMatrixViewF(const type& m2) : mtype(m2) {}
+        ConstUpperTriMatrixViewF(const type& m2) : mtype(m2) {}
         template <DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        inline ConstUpperTriMatrixViewF(
+        ConstUpperTriMatrixViewF(
             const ConstUpperTriMatrixView<T,D2,Si2,Sj2,C,I2>& m2) : mtype(m2) {}
         template <DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        inline ConstUpperTriMatrixViewF(
+        ConstUpperTriMatrixViewF(
             const UpperTriMatrixView<T,D2,Si2,Sj2,C,I2>& m2) : mtype(m2) {}
         template <int N2, DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        inline ConstUpperTriMatrixViewF(
+        ConstUpperTriMatrixViewF(
             const ConstSmallUpperTriMatrixView<T,N2,D2,Si2,Sj2,C,I2>& m2) :
             mtype(m2) {}
         template <int N2, DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        inline ConstUpperTriMatrixViewF(
+        ConstUpperTriMatrixViewF(
             const SmallUpperTriMatrixView<T,N2,D2,Si2,Sj2,C,I2>& m2) :
             mtype(m2) {}
-        inline ~ConstUpperTriMatrixViewF() {}
+        ~ConstUpperTriMatrixViewF() {}
 
     private :
-        inline void operator=(const type& m2);
+        void operator=(const type& m2);
 
     }; // ConstUpperTriMatrixViewF
 
@@ -1268,7 +1260,7 @@ namespace tmv {
             const_nonconj_type;
         typedef UpperTriMatrixView<T,D,_stepi,_stepj,C,I> nonconst_type;
 
-        typedef TriRef<T,C> reference;
+        typedef typename TriRefHelper<T,C,D==NonUnitDiag>::reference reference;
 
         typedef VectorView<T,_stepi,C,I> col_sub_type;
         typedef VectorView<T,_stepj,C,I> row_sub_type;
@@ -1338,34 +1330,34 @@ namespace tmv {
         // Constructors
         //
 
-        inline UpperTriMatrixView(T* m, size_t s, bool u, int si, int sj) :
+        UpperTriMatrixView(T* m, size_t s, bool u, int si, int sj) :
             itsm(m), itss(s), itsu(u), itssi(si), itssj(sj) {}
 
-        inline UpperTriMatrixView(T* m, size_t s, bool u, int si) :
+        UpperTriMatrixView(T* m, size_t s, bool u, int si) :
             itsm(m), itss(s), itsu(u), itssi(si), itssj(Sj)
         { TMVStaticAssert(Sj != UNKNOWN); }
 
-        inline UpperTriMatrixView(T* m, size_t s, bool u) :
+        UpperTriMatrixView(T* m, size_t s, bool u) :
             itsm(m), itss(s), itsu(u), itssi(Si), itssj(Sj)
         { TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); }
 
-        inline UpperTriMatrixView(const type& m2) :
+        UpperTriMatrixView(const type& m2) :
             itsm(m2.itsm), itss(m2.size()), itsu(m2.isunit()), 
             itssi(m2.stepi()), itssj(m2.stepj()) {}
 
         template <DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        inline UpperTriMatrixView(UpperTriMatrixView<T,D2,Si2,Sj2,C,I2> m2) :
+        UpperTriMatrixView(UpperTriMatrixView<T,D2,Si2,Sj2,C,I2> m2) :
             itsm(m2.ptr()), itss(m2.size()), itsu(m2.isunit()),
             itssi(m2.stepi()), itssj(m2.stepj()) {}
 
         template <int N2, DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        inline UpperTriMatrixView(
+        UpperTriMatrixView(
             SmallUpperTriMatrixView<T,N2,D2,Si2,Sj2,C,I2> m2
         ) :
             itsm(m2.ptr()), itss(m2.size()), itsu(m2.isunit()),
             itssi(m2.stepi()), itssj(m2.stepj()) {}
 
-        inline ~UpperTriMatrixView() {
+        ~UpperTriMatrixView() {
 #ifdef TMV_DEBUG
             itsm = 0;
 #endif
@@ -1376,34 +1368,34 @@ namespace tmv {
         // Op = 
         //
 
-        inline type& operator=(const type& m2)
+        type& operator=(const type& m2)
         {
             base_mut::operator=(m2);
             return *this;
         }
 
         template <class M2>
-        inline type& operator=(const BaseMatrix<M2>& m2)
+        type& operator=(const BaseMatrix<M2>& m2)
         {
             base_mut::operator=(m2);
             return *this;
         }
 
         template <class M2>
-        inline type& operator=(const BaseMatrix_Tri<M2>& m2)
+        type& operator=(const BaseMatrix_Tri<M2>& m2)
         {
             base_mut::operator=(m2);
             return *this;
         }
 
         template <class M2>
-        inline type& operator=(const BaseMatrix_Diag<M2>& m2)
+        type& operator=(const BaseMatrix_Diag<M2>& m2)
         {
             base_mut::operator=(m2);
             return *this;
         }
 
-        inline type& operator=(const T x)
+        type& operator=(const T x)
         {
             base_mut::operator=(x);
             return *this;
@@ -1414,10 +1406,10 @@ namespace tmv {
         // Auxilliary Functions
         //
 
-        inline const T* cptr() const { return itsm; }
-        inline T* ptr() { return itsm; }
+        const T* cptr() const { return itsm; }
+        T* ptr() { return itsm; }
 
-        inline T cref(int i, int j) const
+        T cref(int i, int j) const
         {
             return (
                 (isunit() && i==j ) ? T(1) :
@@ -1425,22 +1417,27 @@ namespace tmv {
                 DoConj<C>(itsm[i*stepi() + j*stepj()]));
         }
 
-        inline reference ref(int i, int j)
-        { return reference(isunit() && i==j,itsm[i*stepi()+j*stepj()]); }
+        reference ref(int i, int j)
+        {
+            return TriRefHelper<T,C,D==NonUnitDiag>::makeRef(
+                isunit() && i==j,
+                itsm[i*stepi()+j*stepj()]); 
+        }
 
-        inline size_t colsize() const { return itss; }
-        inline size_t rowsize() const { return itss; }
-        inline size_t size() const { return itss; }
-        inline int stepi() const { return itssi; }
-        inline int stepj() const { return itssj; }
-        inline bool isconj() const { return C; }
-        inline bool isunit() const { return itsu; }
-        inline bool isrm() const
+        size_t colsize() const { return itss; }
+        size_t rowsize() const { return itss; }
+        size_t size() const { return itss; }
+        int nElements() const { return itss*(itss+1)/2; }
+        int stepi() const { return itssi; }
+        int stepj() const { return itssj; }
+        bool isconj() const { return C; }
+        bool isunit() const { return itsu; }
+        bool isrm() const
         {
             return Traits<type>::_rowmajor || 
                 (!Traits<type>::_colmajor && stepj() == 1); 
         }
-        inline bool iscm() const
+        bool iscm() const
         { 
             return Traits<type>::_colmajor ||
                 (!Traits<type>::_rowmajor && stepi() == 1); 
@@ -1448,11 +1445,7 @@ namespace tmv {
 
     private :
 
-#ifdef TMV_DEBUG
         T* itsm;
-#else
-        T*const itsm;
-#endif
         const size_t itss;
         const CheckedInt<D==UnknownDiag ? UNKNOWN : D==UnitDiag> itsu;
         const CheckedInt<Si> itssi;
@@ -1469,32 +1462,32 @@ namespace tmv {
         typedef UpperTriMatrixViewF<T,D,Si,Sj,C> type;
         typedef UpperTriMatrixView<T,D,Si,Sj,C,FortranStyle> mtype;
 
-        inline UpperTriMatrixViewF(T* m, size_t s, bool u, int si, int sj) :
+        UpperTriMatrixViewF(T* m, size_t s, bool u, int si, int sj) :
             mtype(m,s,si,sj) {}
-        inline UpperTriMatrixViewF(T* m, size_t s, bool u, int si) :
+        UpperTriMatrixViewF(T* m, size_t s, bool u, int si) :
             mtype(m,s,si) {}
-        inline UpperTriMatrixViewF(T* m, size_t s, bool u) : mtype(m,s) {}
-        inline UpperTriMatrixViewF(const type& m2) : mtype(m2) {}
+        UpperTriMatrixViewF(T* m, size_t s, bool u) : mtype(m,s) {}
+        UpperTriMatrixViewF(const type& m2) : mtype(m2) {}
         template <DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        inline UpperTriMatrixViewF(UpperTriMatrixView<T,D2,Si2,Sj2,C,I2> m2) :
+        UpperTriMatrixViewF(UpperTriMatrixView<T,D2,Si2,Sj2,C,I2> m2) :
             mtype(m2) {}
         template <int N2, DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        inline UpperTriMatrixViewF(
+        UpperTriMatrixViewF(
             SmallUpperTriMatrixView<T,N2,D2,Si2,Sj2,C,I2> m2) : mtype(m2) {}
-        inline ~UpperTriMatrixViewF() {}
+        ~UpperTriMatrixViewF() {}
 
-        inline type& operator=(const type& m2)
+        type& operator=(const type& m2)
         { mtype::operator=(m2); return *this; }
         template <class M2>
-        inline type& operator=(const BaseMatrix<M2>& m2)
+        type& operator=(const BaseMatrix<M2>& m2)
         { mtype::operator=(m2); return *this; }
         template <class M2>
-        inline type& operator=(const BaseMatrix_Tri<M2>& m2)
+        type& operator=(const BaseMatrix_Tri<M2>& m2)
         { mtype::operator=(m2); return *this; }
         template <class M2>
-        inline type& operator=(const BaseMatrix_Diag<M2>& m2)
+        type& operator=(const BaseMatrix_Diag<M2>& m2)
         { mtype::operator=(m2); return *this; }
-        inline type& operator=(const T x)
+        type& operator=(const T x)
         { mtype::operator=(x); return *this; }
 
     }; // UpperTriMatrixViewF
@@ -1586,7 +1579,7 @@ namespace tmv {
 
         typedef QuotXM<1,real_type,type> inverse_type;
 
-        typedef TriRef<T,false> reference;
+        typedef typename TriRefHelper<T,false,D==NonUnitDiag>::reference reference;
 
         typedef VectorView<T,_stepi,false,I> col_sub_type;
         typedef VectorView<T,_stepj,false,I> row_sub_type;
@@ -1627,12 +1620,6 @@ namespace tmv {
         typedef LowerTriMatrixView<T,D,_stepi,_stepj,false,I> nonconj_type;
     };
 
-#ifdef XTEST
-#ifdef TMVDEBUG
-#define XTEST_DEBUG
-#endif
-#endif
-
     template <class T, DiagType D, StorageType S, IndexStyle I> 
     class LowerTriMatrix : 
         public BaseMatrix_Tri_Mutable<LowerTriMatrix<T,D,S,I> >
@@ -1662,59 +1649,50 @@ namespace tmv {
         // Constructors
         //
 
-        explicit inline LowerTriMatrix(size_t n=0) : itss(n), itsm(n*n)
+        explicit LowerTriMatrix(size_t n=0) : itss(n), itsm(n*n)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
-#ifdef TMVDEBUG
+#ifdef TMV_DEBUG
             Maybe<_unit>::offdiag(*this).setAllTo(T(888));
 #endif
         }
 
-        inline LowerTriMatrix(size_t n, T x) : itss(n), itsm(n*n)
+        LowerTriMatrix(size_t n, T x) : itss(n), itsm(n*n)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
             Maybe<_unit>::offdiag(*this).setAllTo(x);
         }
 
-        inline LowerTriMatrix(size_t n, const T* vv) : itss(n), itsm(n*n)
+        LowerTriMatrix(size_t n, const T* vv) : itss(n), itsm(n*n)
         {
-#ifdef XTEST_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
-#endif
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
             VectorView<T,1> lv(ptr(),n*n);
             ConstVectorView<T,1>(vv,n*n).newAssignTo(lv);
         }
 
-        inline LowerTriMatrix(size_t n, const std::vector<T>& vv) :
+        LowerTriMatrix(size_t n, const std::vector<T>& vv) :
             itss(n), itsm(n*n)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
-#ifdef XTEST_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
-#endif
             TMVAssert(vv.size() == n*n);
             VectorView<T,1> lv(ptr(),n*n);
             ConstVectorView<T,1>(&vv[0],n*n).newAssignTo(lv);
         }
 
-        inline LowerTriMatrix(const type& m2) :
+        LowerTriMatrix(const type& m2) :
             itss(m2.size()), itsm(itss*itss)
         { 
-#ifdef XTEST_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
-#endif
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
             m2.newAssignTo(*this);
         }
 
         template <class M2> 
-        inline LowerTriMatrix(const BaseMatrix<M2>& m2) :
+        LowerTriMatrix(const BaseMatrix<M2>& m2) :
             itss(m2.colsize()), itsm(itss*itss)
         { 
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
@@ -1723,44 +1701,35 @@ namespace tmv {
                 ShapeTraits2<M2::_shape,_shape>::assignable;
             TMVStaticAssert((
                 (M2::_calc && ShapeTraits<M2::_shape>::lower) || assignable));
-#ifdef XTEST_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
-#endif
             TMVAssert(m2.colsize() == size());
             TMVAssert(m2.rowsize() == size());
             TriCopy<assignable>::copy(m2,*this);
         }
 
         template <class M2>
-        inline LowerTriMatrix(const BaseMatrix_Tri<M2>& m2) :
+        LowerTriMatrix(const BaseMatrix_Tri<M2>& m2) :
             itss(m2.size()), itsm(itss*itss)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
             TMVStaticAssert(M2::_lower);
-#ifdef XTEST_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
-#endif
             Maybe<_unit && !M2::_unit>::unitview(m2).newAssignTo(*this);
         }
 
         template <class M2>
-        inline LowerTriMatrix(const BaseMatrix_Diag<M2>& m2) :
+        LowerTriMatrix(const BaseMatrix_Diag<M2>& m2) :
             itss(m2.size()), itsm(itss*itss)
         {
             TMVStaticAssert(S==RowMajor || S==ColMajor);
             TMVStaticAssert(D != UnknownDiag);
-#ifdef XTEST_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
-#endif
             typename type::diag_type d = this->diag();
             this->setZero();
             m2.calc().diag().newAssignTo(d);
         }
 
-        inline ~LowerTriMatrix()
+        ~LowerTriMatrix()
         {
-#ifdef TMVDEBUG
+#ifdef TMV_DEBUG
             Maybe<_unit>::offdiag(*this).setAllTo(T(999));
 #endif
         }
@@ -1770,34 +1739,34 @@ namespace tmv {
         // Op=
         //
 
-        inline type& operator=(const type& m2)
+        type& operator=(const type& m2)
         { 
             if (&m2 != this) base_mut::operator=(m2);
             return *this;
         }
 
         template <class M2>
-        inline type& operator=(const BaseMatrix<M2>& m2)
+        type& operator=(const BaseMatrix<M2>& m2)
         {
             base_mut::operator=(m2);
             return *this;
         }
 
         template <class M2>
-        inline type& operator=(const BaseMatrix_Tri<M2>& m2)
+        type& operator=(const BaseMatrix_Tri<M2>& m2)
         {
             base_mut::operator=(m2);
             return *this;
         }
 
         template <class M2>
-        inline type& operator=(const BaseMatrix_Diag<M2>& m2)
+        type& operator=(const BaseMatrix_Diag<M2>& m2)
         {
             base_mut::operator=(m2);
             return *this;
         }
 
-        inline type& operator=(T x)
+        type& operator=(T x)
         {
             base_mut::operator=(x);
             return *this;
@@ -1808,10 +1777,10 @@ namespace tmv {
         // Auxilliary Functions
         //
 
-        inline const T* cptr() const { return itsm; }
-        inline T* ptr() { return itsm; }
+        const T* cptr() const { return itsm; }
+        T* ptr() { return itsm; }
 
-        inline T cref(int i, int j) const 
+        T cref(int i, int j) const 
         {
             return (
                 (isunit() && i==j ) ? T(1) :
@@ -1819,35 +1788,39 @@ namespace tmv {
                 itsm[S==RowMajor ? i*stepi() + j : i + j*stepj()]);
         }
 
-        inline reference ref(int i, int j)
+        reference ref(int i, int j)
         {
-            return reference(
+            return TriRefHelper<T,false,D==NonUnitDiag>::makeRef(
                 isunit() && i==j,
                 itsm[S==RowMajor ? i*stepi() + j : i + j*stepj()] ); 
         }
 
-        inline void swapWith(type& m2)
+        void swapWith(type& m2)
         {
             TMVAssert(m2.size() == size());
             if (itsm.get() == m2.itsm.get()) return;
             itsm.swapWith(m2.itsm);
         }
 
-        inline void resize(const size_t s)
+        void resize(const size_t s)
         {
             itss = s;
             itsm.resize(s*s);
+#ifdef TMV_DEBUG
+            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
+#endif
         }
 
-        inline size_t size() const { return itss; }
-        inline int stepi() const { return S==RowMajor ? itss : 1; }
-        inline int stepj() const { return S==RowMajor ? 1 : itss; }
-        inline DiagType dt() const { return D; }
-        inline bool isunit() const { return D == UnitDiag; }
-        inline bool isconj() const { return false; }
-        inline bool isrm() const { return S==RowMajor; }
-        inline bool iscm() const { return S==ColMajor; }
-        inline StorageType stor() const { return S; }
+        size_t size() const { return itss; }
+        int nElements() const { return itss*(itss+1)/2; }
+        int stepi() const { return S==RowMajor ? itss : 1; }
+        int stepj() const { return S==RowMajor ? 1 : itss; }
+        DiagType dt() const { return D; }
+        bool isunit() const { return D == UnitDiag; }
+        bool isconj() const { return false; }
+        bool isrm() const { return S==RowMajor; }
+        bool iscm() const { return S==ColMajor; }
+        StorageType stor() const { return S; }
 
     protected :
 
@@ -1864,32 +1837,32 @@ namespace tmv {
         typedef LowerTriMatrixF<T,D,S> type;
         typedef LowerTriMatrix<T,D,S,FortranStyle> mtype;
 
-        explicit inline LowerTriMatrixF(size_t s) : mtype(s) {}
-        inline LowerTriMatrixF(size_t s, T x) : mtype(s,x) {}
-        inline LowerTriMatrixF(size_t s, const T* vv) : mtype(s,vv) {}
-        inline LowerTriMatrixF(size_t s, const std::vector<T>& vv) :
+        explicit LowerTriMatrixF(size_t s) : mtype(s) {}
+        LowerTriMatrixF(size_t s, T x) : mtype(s,x) {}
+        LowerTriMatrixF(size_t s, const T* vv) : mtype(s,vv) {}
+        LowerTriMatrixF(size_t s, const std::vector<T>& vv) :
             mtype(s,vv) {}
         template <class M2> 
-        inline LowerTriMatrixF(const BaseMatrix<M2>& m2) : mtype(m2) {}
-        inline LowerTriMatrixF(const type& m2) : mtype(m2) {}
+        LowerTriMatrixF(const BaseMatrix<M2>& m2) : mtype(m2) {}
+        LowerTriMatrixF(const type& m2) : mtype(m2) {}
         template <class M2>
-        inline LowerTriMatrixF(const BaseMatrix_Tri<M2>& m2) : mtype(m2) {}
+        LowerTriMatrixF(const BaseMatrix_Tri<M2>& m2) : mtype(m2) {}
         template <class M2>
-        inline LowerTriMatrixF(const BaseMatrix_Rec<M2>& m2) : mtype(m2) {}
-        inline ~LowerTriMatrixF() {}
+        LowerTriMatrixF(const BaseMatrix_Rec<M2>& m2) : mtype(m2) {}
+        ~LowerTriMatrixF() {}
 
-        inline type& operator=(const type& m2)
+        type& operator=(const type& m2)
         { mtype::operator=(m2); return *this; }
         template <class M2>
-        inline type& operator=(const BaseMatrix<M2>& m2)
+        type& operator=(const BaseMatrix<M2>& m2)
         { mtype::operator=(m2); return *this; }
         template <class M2>
-        inline type& operator=(const BaseMatrix_Tri<M2>& m2)
+        type& operator=(const BaseMatrix_Tri<M2>& m2)
         { mtype::operator=(m2); return *this; }
         template <class M2>
-        inline type& operator=(const BaseMatrix_Diag<M2>& m2)
+        type& operator=(const BaseMatrix_Diag<M2>& m2)
         { mtype::operator=(m2); return *this; }
-        inline type& operator=(T x)
+        type& operator=(T x)
         { mtype::operator=(x); return *this; }
 
     }; // LowerTriMatrixF
@@ -2007,63 +1980,63 @@ namespace tmv {
         //
         // Constructors
         //
-        inline ConstLowerTriMatrixView(
+        ConstLowerTriMatrixView(
             const T* m, size_t s, bool u, int si, int sj) :
             itsm(m), itss(s), itsu(u), itssi(si), itssj(sj) {}
 
-        inline ConstLowerTriMatrixView(const T* m, size_t s, bool u, int si) :
+        ConstLowerTriMatrixView(const T* m, size_t s, bool u, int si) :
             itsm(m), itss(s), itsu(u), itssi(si), itssj(Sj)
         { TMVStaticAssert(Sj != UNKNOWN); }
 
-        inline ConstLowerTriMatrixView(const T* m, size_t s, bool u) :
+        ConstLowerTriMatrixView(const T* m, size_t s, bool u) :
             itsm(m), itss(s), itsu(u), itssi(Si), itssj(Sj)
         { TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); }
 
-        inline ConstLowerTriMatrixView(const type& m2) :
+        ConstLowerTriMatrixView(const type& m2) :
             itsm(m2.cptr()), itss(m2.size()), itsu(m2.isunit()),
             itssi(m2.stepi()), itssj(m2.stepj()) {}
 
         template <DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        inline ConstLowerTriMatrixView(
+        ConstLowerTriMatrixView(
             const ConstLowerTriMatrixView<T,D2,Si2,Sj2,C,I2>& m2) :
             itsm(m2.cptr()), itss(m2.size()), itsu(m2.isunit()),
             itssi(m2.stepi()), itssj(m2.stepj()) {}
 
         template <DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        inline ConstLowerTriMatrixView(
+        ConstLowerTriMatrixView(
             const LowerTriMatrixView<T,D2,Si2,Sj2,C,I2>& m2) :
             itsm(m2.cptr()), itss(m2.size()), itsu(m2.isunit()),
             itssi(m2.stepi()), itssj(m2.stepj()) {}
 
         template <int N2, DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        inline ConstLowerTriMatrixView(
+        ConstLowerTriMatrixView(
             const ConstSmallLowerTriMatrixView<T,N2,D2,Si2,Sj2,C,I2>& m2) :
             itsm(m2.cptr()), itss(m2.size()), itsu(m2.isunit()),
             itssi(m2.stepi()), itssj(m2.stepj()) {}
 
         template <int N2, DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        inline ConstLowerTriMatrixView(
+        ConstLowerTriMatrixView(
             const SmallLowerTriMatrixView<T,N2,D2,Si2,Sj2,C,I2>& m2) :
             itsm(m2.cptr()), itss(m2.size()), itsu(m2.isunit()),
             itssi(m2.stepi()), itssj(m2.stepj()) {}
 
-        inline ~ConstLowerTriMatrixView() {
+        ~ConstLowerTriMatrixView() {
 #ifdef TMV_DEBUG
             itsm = 0;
 #endif
         }
 
     private :
-        inline void operator=(const type& m2);
+        void operator=(const type& m2);
     public :
 
         //
         // Auxilliary Functions
         //
 
-        inline const T* cptr() const { return itsm; }
+        const T* cptr() const { return itsm; }
 
-        inline T cref(int i, int j) const 
+        T cref(int i, int j) const 
         {
             return (
                 (isunit() && i==j ) ? T(1) :
@@ -2071,19 +2044,20 @@ namespace tmv {
                 DoConj<C>(itsm[i*stepi() + j*stepj()]));
         }
 
-        inline size_t colsize() const { return itss; }
-        inline size_t rowsize() const { return itss; }
-        inline size_t size() const { return itss; }
-        inline int stepi() const { return itssi; }
-        inline int stepj() const { return itssj; }
-        inline bool isconj() const { return C; }
-        inline bool isunit() const { return itsu; }
-        inline bool isrm() const
+        size_t colsize() const { return itss; }
+        size_t rowsize() const { return itss; }
+        size_t size() const { return itss; }
+        int nElements() const { return itss*(itss+1)/2; }
+        int stepi() const { return itssi; }
+        int stepj() const { return itssj; }
+        bool isconj() const { return C; }
+        bool isunit() const { return itsu; }
+        bool isrm() const
         {
             return Traits<type>::_rowmajor || 
                 (!Traits<type>::_colmajor && stepj() == 1); 
         }
-        inline bool iscm() const
+        bool iscm() const
         { 
             return Traits<type>::_colmajor ||
                 (!Traits<type>::_rowmajor && stepi() == 1); 
@@ -2091,11 +2065,7 @@ namespace tmv {
 
     private :
 
-#ifdef TMV_DEBUG
         const T* itsm;
-#else
-        const T*const itsm;
-#endif
         const size_t itss;
         const CheckedInt<D==UnknownDiag ? UNKNOWN : D==UnitDiag> itsu;
         const CheckedInt<Si> itssi;
@@ -2112,32 +2082,32 @@ namespace tmv {
         typedef ConstLowerTriMatrixViewF<T,D,Si,Sj,C> type;
         typedef ConstLowerTriMatrixView<T,D,Si,Sj,C,FortranStyle> mtype;
 
-        inline ConstLowerTriMatrixViewF(
+        ConstLowerTriMatrixViewF(
             const T* m, size_t s, bool u, int si, int sj) :
             mtype(m,s,si,sj) {}
-        inline ConstLowerTriMatrixViewF(const T* m, size_t s, bool u, int si) :
+        ConstLowerTriMatrixViewF(const T* m, size_t s, bool u, int si) :
             mtype(m,s,si) {}
-        inline ConstLowerTriMatrixViewF(const T* m, size_t s, bool u) :
+        ConstLowerTriMatrixViewF(const T* m, size_t s, bool u) :
             mtype(m,s) {}
-        inline ConstLowerTriMatrixViewF(const type& m2) : mtype(m2) {}
+        ConstLowerTriMatrixViewF(const type& m2) : mtype(m2) {}
         template <DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        inline ConstLowerTriMatrixViewF(
+        ConstLowerTriMatrixViewF(
             const ConstLowerTriMatrixView<T,D2,Si2,Sj2,C,I2>& m2) : mtype(m2) {}
         template <DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        inline ConstLowerTriMatrixViewF(
+        ConstLowerTriMatrixViewF(
             const LowerTriMatrixView<T,D2,Si2,Sj2,C,I2>& m2) : mtype(m2) {}
         template <int N2, DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        inline ConstLowerTriMatrixViewF(
+        ConstLowerTriMatrixViewF(
             const ConstSmallLowerTriMatrixView<T,N2,D2,Si2,Sj2,C,I2>& m2) :
             mtype(m2) {}
         template <int N2, DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        inline ConstLowerTriMatrixViewF(
+        ConstLowerTriMatrixViewF(
             const SmallLowerTriMatrixView<T,N2,D2,Si2,Sj2,C,I2>& m2) :
             mtype(m2) {}
-        inline ~ConstLowerTriMatrixViewF() {}
+        ~ConstLowerTriMatrixViewF() {}
 
     private :
-        inline void operator=(const type& m2);
+        void operator=(const type& m2);
 
     }; // ConstLowerTriMatrixViewF
 
@@ -2229,7 +2199,7 @@ namespace tmv {
             const_nonconj_type;
         typedef LowerTriMatrixView<T,D,_stepi,_stepj,C,I> nonconst_type;
 
-        typedef TriRef<T,C> reference;
+        typedef typename TriRefHelper<T,C,D==NonUnitDiag>::reference reference;
 
         typedef VectorView<T,_stepi,C,I> col_sub_type;
         typedef VectorView<T,_stepj,C,I> row_sub_type;
@@ -2299,34 +2269,34 @@ namespace tmv {
         // Constructors
         //
 
-        inline LowerTriMatrixView(T* m, size_t s, bool u, int si, int sj) :
+        LowerTriMatrixView(T* m, size_t s, bool u, int si, int sj) :
             itsm(m), itss(s), itsu(u), itssi(si), itssj(sj) {}
 
-        inline LowerTriMatrixView(T* m, size_t s, bool u, int si) :
+        LowerTriMatrixView(T* m, size_t s, bool u, int si) :
             itsm(m), itss(s), itsu(u), itssi(si), itssj(Sj)
         { TMVStaticAssert(Sj != UNKNOWN); }
 
-        inline LowerTriMatrixView(T* m, size_t s, bool u) :
+        LowerTriMatrixView(T* m, size_t s, bool u) :
             itsm(m), itss(s), itsu(u), itssi(Si), itssj(Sj)
         { TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); }
 
-        inline LowerTriMatrixView(const type& m2) :
+        LowerTriMatrixView(const type& m2) :
             itsm(m2.itsm), itss(m2.size()), itsu(m2.isunit()), 
             itssi(m2.stepi()), itssj(m2.stepj()) {}
 
         template <DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        inline LowerTriMatrixView(LowerTriMatrixView<T,D2,Si2,Sj2,C,I2> m2) :
+        LowerTriMatrixView(LowerTriMatrixView<T,D2,Si2,Sj2,C,I2> m2) :
             itsm(m2.ptr()), itss(m2.size()), itsu(m2.isunit()),
             itssi(m2.stepi()), itssj(m2.stepj()) {}
 
         template <int N2, DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        inline LowerTriMatrixView(
+        LowerTriMatrixView(
             SmallLowerTriMatrixView<T,N2,D2,Si2,Sj2,C,I2> m2
         ) :
             itsm(m2.ptr()), itss(m2.size()), itsu(m2.isunit()),
             itssi(m2.stepi()), itssj(m2.stepj()) {}
 
-        inline ~LowerTriMatrixView() {
+        ~LowerTriMatrixView() {
 #ifdef TMV_DEBUG
             itsm = 0;
 #endif
@@ -2337,34 +2307,34 @@ namespace tmv {
         // Op = 
         //
 
-        inline type& operator=(const type& m2)
+        type& operator=(const type& m2)
         {
             base_mut::operator=(m2);
             return *this;
         }
 
         template <class M2>
-        inline type& operator=(const BaseMatrix<M2>& m2)
+        type& operator=(const BaseMatrix<M2>& m2)
         {
             base_mut::operator=(m2);
             return *this;
         }
 
         template <class M2>
-        inline type& operator=(const BaseMatrix_Tri<M2>& m2)
+        type& operator=(const BaseMatrix_Tri<M2>& m2)
         {
             base_mut::operator=(m2);
             return *this;
         }
 
         template <class M2>
-        inline type& operator=(const BaseMatrix_Diag<M2>& m2)
+        type& operator=(const BaseMatrix_Diag<M2>& m2)
         {
             base_mut::operator=(m2);
             return *this;
         }
 
-        inline type& operator=(const T x)
+        type& operator=(const T x)
         {
             base_mut::operator=(x);
             return *this;
@@ -2375,10 +2345,10 @@ namespace tmv {
         // Auxilliary Functions
         //
 
-        inline const T* cptr() const { return itsm; }
-        inline T* ptr() { return itsm; }
+        const T* cptr() const { return itsm; }
+        T* ptr() { return itsm; }
 
-        inline T cref(int i, int j) const
+        T cref(int i, int j) const
         {
             return (
                 (isunit() && i==j ) ? T(1) :
@@ -2386,22 +2356,27 @@ namespace tmv {
                 DoConj<C>(itsm[i*stepi() + j*stepj()]));
         }
 
-        inline reference ref(int i, int j)
-        { return reference(isunit() && i==j,itsm[i*stepi()+j*stepj()]); }
+        reference ref(int i, int j)
+        { 
+            return TriRefHelper<T,C,D==NonUnitDiag>::makeRef(
+                isunit() && i==j,
+                itsm[i*stepi()+j*stepj()]); 
+        }
 
-        inline size_t colsize() const { return itss; }
-        inline size_t rowsize() const { return itss; }
-        inline size_t size() const { return itss; }
-        inline int stepi() const { return itssi; }
-        inline int stepj() const { return itssj; }
-        inline bool isconj() const { return C; }
-        inline bool isunit() const { return itsu; }
-        inline bool isrm() const
+        size_t colsize() const { return itss; }
+        size_t rowsize() const { return itss; }
+        size_t size() const { return itss; }
+        int nElements() const { return itss*(itss+1)/2; }
+        int stepi() const { return itssi; }
+        int stepj() const { return itssj; }
+        bool isconj() const { return C; }
+        bool isunit() const { return itsu; }
+        bool isrm() const
         {
             return Traits<type>::_rowmajor || 
                 (!Traits<type>::_colmajor && stepj() == 1); 
         }
-        inline bool iscm() const
+        bool iscm() const
         { 
             return Traits<type>::_colmajor ||
                 (!Traits<type>::_rowmajor && stepi() == 1); 
@@ -2409,11 +2384,7 @@ namespace tmv {
 
     private :
 
-#ifdef TMV_DEBUG
         T* itsm;
-#else
-        T*const itsm;
-#endif
         const size_t itss;
         const CheckedInt<D==UnknownDiag ? UNKNOWN : D==UnitDiag> itsu;
         const CheckedInt<Si> itssi;
@@ -2430,32 +2401,32 @@ namespace tmv {
         typedef LowerTriMatrixViewF<T,D,Si,Sj,C> type;
         typedef LowerTriMatrixView<T,D,Si,Sj,C,FortranStyle> mtype;
 
-        inline LowerTriMatrixViewF(T* m, size_t s, bool u, int si, int sj) :
+        LowerTriMatrixViewF(T* m, size_t s, bool u, int si, int sj) :
             mtype(m,s,si,sj) {}
-        inline LowerTriMatrixViewF(T* m, size_t s, bool u, int si) :
+        LowerTriMatrixViewF(T* m, size_t s, bool u, int si) :
             mtype(m,s,si) {}
-        inline LowerTriMatrixViewF(T* m, size_t s, bool u) : mtype(m,s) {}
-        inline LowerTriMatrixViewF(const type& m2) : mtype(m2) {}
+        LowerTriMatrixViewF(T* m, size_t s, bool u) : mtype(m,s) {}
+        LowerTriMatrixViewF(const type& m2) : mtype(m2) {}
         template <DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        inline LowerTriMatrixViewF(LowerTriMatrixView<T,D2,Si2,Sj2,C,I2> m2) :
+        LowerTriMatrixViewF(LowerTriMatrixView<T,D2,Si2,Sj2,C,I2> m2) :
             mtype(m2) {}
         template <int N2, DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        inline LowerTriMatrixViewF(
+        LowerTriMatrixViewF(
             SmallLowerTriMatrixView<T,N2,D2,Si2,Sj2,C,I2> m2) : mtype(m2) {}
-        inline ~LowerTriMatrixViewF() {}
+        ~LowerTriMatrixViewF() {}
 
-        inline type& operator=(const type& m2)
+        type& operator=(const type& m2)
         { mtype::operator=(m2); return *this; }
         template <class M2>
-        inline type& operator=(const BaseMatrix<M2>& m2)
+        type& operator=(const BaseMatrix<M2>& m2)
         { mtype::operator=(m2); return *this; }
         template <class M2>
-        inline type& operator=(const BaseMatrix_Tri<M2>& m2)
+        type& operator=(const BaseMatrix_Tri<M2>& m2)
         { mtype::operator=(m2); return *this; }
         template <class M2>
-        inline type& operator=(const BaseMatrix_Diag<M2>& m2)
+        type& operator=(const BaseMatrix_Diag<M2>& m2)
         { mtype::operator=(m2); return *this; }
-        inline type& operator=(const T x)
+        type& operator=(const T x)
         { mtype::operator=(x); return *this; }
 
     }; // LowerTriMatrixViewF
@@ -2477,7 +2448,7 @@ namespace tmv {
     //
 
     template <class T> 
-    inline UpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
+    static UpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
         T* m, size_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -2488,7 +2459,7 @@ namespace tmv {
     }
 
     template <class T> 
-    inline ConstUpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
+    static ConstUpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
         const T* m, size_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -2499,17 +2470,17 @@ namespace tmv {
     }
 
     template <class T> 
-    inline UpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
+    static UpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
         T* m, size_t size, int stepi, int stepj)
     { return UpperTriMatrixView<T,NonUnitDiag>(m,size,false,stepi,stepj); }
 
     template <class T> 
-    inline ConstUpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
+    static ConstUpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
         const T* m, size_t size, int stepi, int stepj)
     { return ConstUpperTriMatrixView<T,NonUnitDiag>(m,size,false,stepi,stepj); }
 
     template <class T> 
-    inline UpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
+    static UpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
         T* m, size_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -2520,7 +2491,7 @@ namespace tmv {
     }
 
     template <class T> 
-    inline ConstUpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
+    static ConstUpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
         const T* m, size_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -2531,17 +2502,59 @@ namespace tmv {
     }
 
     template <class T> 
-    inline UpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
+    static UpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
         T* m, size_t size, int stepi, int stepj)
     { return UpperTriMatrixView<T,UnitDiag>(m,size,true,stepi,stepj); }
 
     template <class T> 
-    inline ConstUpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
+    static ConstUpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
         const T* m, size_t size, int stepi, int stepj)
     { return ConstUpperTriMatrixView<T,UnitDiag>(m,size,true,stepi,stepj); }
 
     template <class T> 
-    inline LowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
+    static UpperTriMatrixView<T,UnknownDiag> UpperTriMatrixViewOf(
+        T* m, size_t size, StorageType stor, DiagType dt)
+    {
+        TMVAssert(stor == RowMajor || stor == ColMajor);
+        if (stor == RowMajor)
+            return UpperTriMatrixView<T,UnknownDiag>(
+                m,size,dt==UnitDiag,size,1);
+        else
+            return UpperTriMatrixView<T,UnknownDiag>(
+                m,size,dt==UnitDiag,1,size);
+    }
+
+    template <class T> 
+    static ConstUpperTriMatrixView<T,UnknownDiag> UpperTriMatrixViewOf(
+        const T* m, size_t size, StorageType stor, DiagType dt)
+    {
+        TMVAssert(stor == RowMajor || stor == ColMajor);
+        if (stor == RowMajor)
+            return ConstUpperTriMatrixView<T,UnknownDiag>(
+                m,size,dt==UnitDiag,size,1);
+        else
+            return ConstUpperTriMatrixView<T,UnknownDiag>(
+                m,size,dt==UnitDiag,1,size);
+    }
+
+    template <class T> 
+    static UpperTriMatrixView<T,UnknownDiag> UpperTriMatrixViewOf(
+        T* m, size_t size, int stepi, int stepj, DiagType dt)
+    {
+        return UpperTriMatrixView<T,UnknownDiag>(
+            m,size,dt==UnitDiag,stepi,stepj); 
+    }
+
+    template <class T> 
+    static ConstUpperTriMatrixView<T,UnknownDiag> UpperTriMatrixViewOf(
+        const T* m, size_t size, int stepi, int stepj, DiagType dt)
+    { 
+        return ConstUpperTriMatrixView<T,UnknownDiag>(
+            m,size,dt==UnitDiag,stepi,stepj); 
+    }
+ 
+    template <class T> 
+    static LowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
         T* m, size_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -2552,7 +2565,7 @@ namespace tmv {
     }
 
     template <class T> 
-    inline ConstLowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
+    static ConstLowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
         const T* m, size_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -2563,17 +2576,17 @@ namespace tmv {
     }
 
     template <class T> 
-    inline LowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
+    static LowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
         T* m, size_t size, int stepi, int stepj)
     { return LowerTriMatrixView<T,NonUnitDiag>(m,size,false,stepi,stepj); }
 
     template <class T> 
-    inline ConstLowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
+    static ConstLowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
         const T* m, size_t size, int stepi, int stepj)
     { return ConstLowerTriMatrixView<T,NonUnitDiag>(m,size,false,stepi,stepj); }
 
     template <class T> 
-    inline LowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
+    static LowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
         T* m, size_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -2584,7 +2597,7 @@ namespace tmv {
     }
 
     template <class T> 
-    inline ConstLowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
+    static ConstLowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
         const T* m, size_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -2595,15 +2608,58 @@ namespace tmv {
     }
 
     template <class T> 
-    inline LowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
+    static LowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
         T* m, size_t size, int stepi, int stepj)
     { return LowerTriMatrixView<T,UnitDiag>(m,size,true,stepi,stepj); }
 
     template <class T> 
-    inline ConstLowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
+    static ConstLowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
         const T* m, size_t size, int stepi, int stepj)
     { return ConstLowerTriMatrixView<T,UnitDiag>(m,size,true,stepi,stepj); }
 
+    template <class T> 
+    static LowerTriMatrixView<T,UnknownDiag> LowerTriMatrixViewOf(
+        T* m, size_t size, StorageType stor, DiagType dt)
+    {
+        TMVAssert(stor == RowMajor || stor == ColMajor);
+        if (stor == RowMajor)
+            return LowerTriMatrixView<T,UnknownDiag>(
+                m,size,dt==UnitDiag,size,1);
+        else
+            return LowerTriMatrixView<T,UnknownDiag>(
+                m,size,dt==UnitDiag,1,size);
+    }
+
+    template <class T> 
+    static ConstLowerTriMatrixView<T,UnknownDiag> LowerTriMatrixViewOf(
+        const T* m, size_t size, StorageType stor, DiagType dt)
+    {
+        TMVAssert(stor == RowMajor || stor == ColMajor);
+        if (stor == RowMajor)
+            return ConstLowerTriMatrixView<T,UnknownDiag>(
+                m,size,dt==UnitDiag,size,1);
+        else
+            return ConstLowerTriMatrixView<T,UnknownDiag>(
+                m,size,dt==UnitDiag,1,size);
+    }
+
+    template <class T> 
+    static LowerTriMatrixView<T,UnknownDiag> LowerTriMatrixViewOf(
+        T* m, size_t size, int stepi, int stepj, DiagType dt)
+    {
+        return LowerTriMatrixView<T,UnknownDiag>(
+            m,size,dt==UnitDiag,stepi,stepj); 
+    }
+
+    template <class T> 
+    static ConstLowerTriMatrixView<T,UnknownDiag> LowerTriMatrixViewOf(
+        const T* m, size_t size, int stepi, int stepj, DiagType dt)
+    {
+        return ConstLowerTriMatrixView<T,UnknownDiag>(
+            m,size,dt==UnitDiag,stepi,stepj); 
+    }
+
+ 
 
 
     //
@@ -2611,44 +2667,97 @@ namespace tmv {
     //
 
     template <class T, DiagType D, StorageType S, IndexStyle I>
-    inline void Swap(UpperTriMatrix<T,D,S,I>& m1, UpperTriMatrix<T,D,S,I>& m2)
+    static void Swap(UpperTriMatrix<T,D,S,I>& m1, UpperTriMatrix<T,D,S,I>& m2)
     { m1.swapWith(m2); }
-    template <class M, class T, DiagType D, 
-              int Si, int Sj, bool C, IndexStyle I>
-    inline void Swap(
+    template <class M, class T, DiagType D, int Si, int Sj, bool C, IndexStyle I>
+    static void Swap(
         BaseMatrix_Tri<M>& m1, UpperTriMatrixView<T,D,Si,Sj,C,I> m2)
     { DoSwap(m1,m2); }
-    template <class M, class T, DiagType D, 
-              int Si, int Sj, bool C, IndexStyle I>
-    inline void Swap(
+    template <class M, class T, DiagType D, int Si, int Sj, bool C, IndexStyle I>
+    static void Swap(
         UpperTriMatrixView<T,D,Si,Sj,C,I> m1, BaseMatrix_Tri<M>& m2)
     { DoSwap(m1,m2); }
-    template <class T, DiagType D, int Si1, int Sj1, bool C1, IndexStyle I1, 
-              int Si2, int Sj2, bool C2, IndexStyle I2>
-    inline void Swap(
+    template <class T, DiagType D, int Si1, int Sj1, bool C1, IndexStyle I1, int Si2, int Sj2, bool C2, IndexStyle I2>
+    static void Swap(
         UpperTriMatrixView<T,D,Si1,Sj1,C1,I1> m1,
         UpperTriMatrixView<T,D,Si2,Sj2,C2,I2> m2)
     { DoSwap(m1,m2); }
 
     template <class T, DiagType D, StorageType S, IndexStyle I>
-    inline void Swap(LowerTriMatrix<T,D,S,I>& m1, LowerTriMatrix<T,D,S,I>& m2)
+    static void Swap(LowerTriMatrix<T,D,S,I>& m1, LowerTriMatrix<T,D,S,I>& m2)
     { m1.swapWith(m2); }
-    template <class M, class T, DiagType D, 
-              int Si, int Sj, bool C, IndexStyle I>
-    inline void Swap(
+    template <class M, class T, DiagType D, int Si, int Sj, bool C, IndexStyle I>
+    static void Swap(
         BaseMatrix_Tri<M>& m1, LowerTriMatrixView<T,D,Si,Sj,C,I> m2)
     { DoSwap(m1,m2); }
-    template <class M, class T, DiagType D, 
-              int Si, int Sj, bool C, IndexStyle I>
-    inline void Swap(
+    template <class M, class T, DiagType D, int Si, int Sj, bool C, IndexStyle I>
+    static void Swap(
         LowerTriMatrixView<T,D,Si,Sj,C,I> m1, BaseMatrix_Tri<M>& m2)
     { DoSwap(m1,m2); }
-    template <class T, DiagType D, int Si1, int Sj1, bool C1, IndexStyle I1, 
-              int Si2, int Sj2, bool C2, IndexStyle I2>
-    inline void Swap(
+    template <class T, DiagType D, int Si1, int Sj1, bool C1, IndexStyle I1, int Si2, int Sj2, bool C2, IndexStyle I2>
+    static void Swap(
         LowerTriMatrixView<T,D,Si1,Sj1,C1,I1> m1, 
         LowerTriMatrixView<T,D,Si2,Sj2,C2,I2> m2)
     { DoSwap(m1,m2); }
+
+
+    //
+    // Conjugate, Transpose, Adjoint
+    //
+
+    template <class T, DiagType D, StorageType S, IndexStyle I>
+    static typename UpperTriMatrix<T,D,S,I>::conjugate_type Conjugate(
+        UpperTriMatrix<T,D,S,I>& m)
+    { return m.conjugate(); }
+    template <class T, DiagType D, int Si, int Sj, bool C, IndexStyle I>
+    static typename UpperTriMatrixView<T,D,Si,Sj,C,I>::conjugate_type Conjugate(
+        UpperTriMatrixView<T,D,Si,Sj,C,I> m)
+    { return m.conjugate(); }
+
+    template <class T, DiagType D, StorageType S, IndexStyle I>
+    static typename UpperTriMatrix<T,D,S,I>::transpose_type Transpose(
+        UpperTriMatrix<T,D,S,I>& m)
+    { return m.transpose(); }
+    template <class T, DiagType D, int Si, int Sj, bool C, IndexStyle I>
+    static typename UpperTriMatrixView<T,D,Si,Sj,C,I>::transpose_type Transpose(
+        UpperTriMatrixView<T,D,Si,Sj,C,I> m)
+    { return m.transpose(); }
+
+    template <class T, DiagType D, StorageType S, IndexStyle I>
+    static typename UpperTriMatrix<T,D,S,I>::adjoint_type Adjoint(
+        UpperTriMatrix<T,D,S,I>& m)
+    { return m.adjoint(); }
+    template <class T, DiagType D, int Si, int Sj, bool C, IndexStyle I>
+    static typename UpperTriMatrixView<T,D,Si,Sj,C,I>::adjoint_type Adjoint(
+        UpperTriMatrixView<T,D,Si,Sj,C,I> m)
+    { return m.adjoint(); }
+
+    template <class T, DiagType D, StorageType S, IndexStyle I>
+    static typename LowerTriMatrix<T,D,S,I>::conjugate_type Conjugate(
+        LowerTriMatrix<T,D,S,I>& m)
+    { return m.conjugate(); }
+    template <class T, DiagType D, int Si, int Sj, bool C, IndexStyle I>
+    static typename LowerTriMatrixView<T,D,Si,Sj,C,I>::conjugate_type Conjugate(
+        LowerTriMatrixView<T,D,Si,Sj,C,I> m)
+    { return m.conjugate(); }
+
+    template <class T, DiagType D, StorageType S, IndexStyle I>
+    static typename LowerTriMatrix<T,D,S,I>::transpose_type Transpose(
+        LowerTriMatrix<T,D,S,I>& m)
+    { return m.transpose(); }
+    template <class T, DiagType D, int Si, int Sj, bool C, IndexStyle I>
+    static typename LowerTriMatrixView<T,D,Si,Sj,C,I>::transpose_type Transpose(
+        LowerTriMatrixView<T,D,Si,Sj,C,I> m)
+    { return m.transpose(); }
+
+    template <class T, DiagType D, StorageType S, IndexStyle I>
+    static typename LowerTriMatrix<T,D,S,I>::adjoint_type Adjoint(
+        LowerTriMatrix<T,D,S,I>& m)
+    { return m.adjoint(); }
+    template <class T, DiagType D, int Si, int Sj, bool C, IndexStyle I>
+    static typename LowerTriMatrixView<T,D,Si,Sj,C,I>::adjoint_type Adjoint(
+        LowerTriMatrixView<T,D,Si,Sj,C,I> m)
+    { return m.adjoint(); }
 
 
     //
@@ -2656,7 +2765,7 @@ namespace tmv {
     //
 
     template <class T, DiagType D, StorageType S, IndexStyle I>
-    inline std::string TMV_Text(const UpperTriMatrix<T,D,S,I>& m)
+    static std::string TMV_Text(const UpperTriMatrix<T,D,S,I>& m)
     {
         std::ostringstream s;
         s << "UpperTriMatrix<"<<TMV_Text(T())<<","<<TMV_Text(D);
@@ -2666,7 +2775,7 @@ namespace tmv {
     }
 
     template <class T, DiagType D, int Si, int Sj, bool C, IndexStyle I>
-    inline std::string TMV_Text(
+    static std::string TMV_Text(
         const ConstUpperTriMatrixView<T,D,Si,Sj,C,I>& m)
     {
         std::ostringstream s;
@@ -2681,7 +2790,7 @@ namespace tmv {
     }
 
     template <class T, DiagType D, int Si, int Sj, bool C, IndexStyle I>
-    inline std::string TMV_Text(const UpperTriMatrixView<T,D,Si,Sj,C,I>& m)
+    static std::string TMV_Text(const UpperTriMatrixView<T,D,Si,Sj,C,I>& m)
     {
         std::ostringstream s;
         s << "UpperTriMatrixView<"<<TMV_Text(T())<<","<<TMV_Text(D);
@@ -2695,7 +2804,7 @@ namespace tmv {
     }
 
     template <class T, DiagType D, StorageType S, IndexStyle I>
-    inline std::string TMV_Text(const LowerTriMatrix<T,D,S,I>& m)
+    static std::string TMV_Text(const LowerTriMatrix<T,D,S,I>& m)
     {
         std::ostringstream s;
         s << "LowerTriMatrix<"<<TMV_Text(T())<<","<<TMV_Text(D);
@@ -2705,7 +2814,7 @@ namespace tmv {
     }
 
     template <class T, DiagType D, int Si, int Sj, bool C, IndexStyle I>
-    inline std::string TMV_Text(
+    static std::string TMV_Text(
         const ConstLowerTriMatrixView<T,D,Si,Sj,C,I>& m)
     {
         std::ostringstream s;
@@ -2720,7 +2829,7 @@ namespace tmv {
     }
 
     template <class T, DiagType D, int Si, int Sj, bool C, IndexStyle I>
-    inline std::string TMV_Text(const LowerTriMatrixView<T,D,Si,Sj,C,I>& m)
+    static std::string TMV_Text(const LowerTriMatrixView<T,D,Si,Sj,C,I>& m)
     {
         std::ostringstream s;
         s << "LowerTriMatrixView<"<<TMV_Text(T())<<","<<TMV_Text(D);

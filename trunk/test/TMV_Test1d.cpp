@@ -1,7 +1,7 @@
 
 #include <fstream>
 #include "TMV_Test.h"
-#include "TMV_Test1.h"
+#include "TMV_Test_1.h"
 
 bool XXDEBUG1 = false;
 bool XXDEBUG2 = false;
@@ -30,20 +30,26 @@ int main() try {
     //showdiv=true;
     //showtests=true;
     //showstartdone=true;
-    TestMatrixDiv<double>();
 
-#if 0
+#if 1
 
 #ifdef TEST_DOUBLE
     TestMatrixDiv<double>();
+    TestMatrixDet<double>();
 #endif // DOUBLE
 
 #ifdef TEST_FLOAT
     TestMatrixDiv<float>();
+    TestMatrixDet<float>();
 #endif // FLOAT
+
+#ifdef TEST_INT
+    TestMatrixDet<int>();
+#endif // INT
 
 #ifdef TEST_LONGDOUBLE
     TestMatrixDiv<long double>();
+    TestMatrixDet<long double>();
 #endif // LONGDOUBLE
 
 #endif

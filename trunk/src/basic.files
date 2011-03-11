@@ -11,3 +11,5 @@ TMV_Rank1VVM.cpp
 TMV_MultMM_Kernel.cpp 
 TMV_MultMM_Winograd.cpp 
 TMV_MultMM_Block.cpp 
+TMV_IntegerDet.cpp
+TMV_Det.cpp

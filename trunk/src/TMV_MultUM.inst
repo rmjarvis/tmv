@@ -1,38 +1,34 @@
 
 #define CT std::complex<T>
 
-#define DefMM1(T1,D,C1,T2,C2,T3)\
+#define Def1(T1,C1,T2,C2,T3)\
   template void InstMultMM(const T3 x, \
-      const ConstUpperTriMatrixView<T1,D,UNKNOWN,UNKNOWN,C1>& m1, \
+      const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1, \
       const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, MatrixView<T3 > m3); \
   template void InstAddMultMM(const T3 x, \
-      const ConstUpperTriMatrixView<T1,D,UNKNOWN,UNKNOWN,C1>& m1, \
+      const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1, \
       const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, MatrixView<T3 > m3); \
   template void InstMultMM(const T3 x, \
-      const ConstLowerTriMatrixView<T1,D,UNKNOWN,UNKNOWN,C1>& m1, \
+      const ConstLowerTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1, \
       const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, MatrixView<T3 > m3); \
   template void InstAddMultMM(const T3 x, \
-      const ConstLowerTriMatrixView<T1,D,UNKNOWN,UNKNOWN,C1>& m1, \
+      const ConstLowerTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1, \
       const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, MatrixView<T3 > m3); \
 
-#define DefMM(T1,C1,T2,C2,T3)\
-  DefMM1(T1,UnknownDiag,C1,T2,C2,T3) \
-
-DefMM(T,false,T,false,T)
+Def1(T,false,T,false,T)
 #ifdef TMV_INST_COMPLEX
 #ifdef TMV_INST_MIX
-DefMM(T,false,T,false,CT)
-DefMM(T,false,CT,false,CT)
-DefMM(T,false,CT,true,CT)
-DefMM(CT,false,T,false,CT)
-DefMM(CT,true,T,false,CT)
+Def1(T,false,T,false,CT)
+Def1(T,false,CT,false,CT)
+Def1(T,false,CT,true,CT)
+Def1(CT,false,T,false,CT)
+Def1(CT,true,T,false,CT)
 #endif
-DefMM(CT,false,CT,false,CT)
-DefMM(CT,false,CT,true,CT)
-DefMM(CT,true,CT,false,CT)
-DefMM(CT,true,CT,true,CT)
+Def1(CT,false,CT,false,CT)
+Def1(CT,false,CT,true,CT)
+Def1(CT,true,CT,false,CT)
+Def1(CT,true,CT,true,CT)
 #endif
 
-#undef DefMM1
-#undef DefMM
+#undef Def1
 #undef CT

@@ -41,21 +41,21 @@ namespace tmv {
 #if 1
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void AddMM(
+    static void AddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix<M2>& m2,
         BaseMatrix_Mutable<M3>& m3)
     { AddMM(x1,m1.calc(),x2,m2.calc(),m3.mat()); }
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void NoAliasAddMM(
+    static void NoAliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix<M2>& m2,
         BaseMatrix_Mutable<M3>& m3)
     { NoAliasAddMM(x1,m1.calc(),x2,m2.calc(),m3.mat()); }
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void AliasAddMM(
+    static void AliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix<M2>& m2,
         BaseMatrix_Mutable<M3>& m3)
@@ -106,7 +106,7 @@ namespace tmv {
         typedef typename Traits<value_type>::real_type real_type;
         typedef typename Traits<value_type>::complex_type complex_type;
 
-        inline SumMM(
+        SumMM(
             const T1& _x1, const BaseMatrix<M1>& _m1, 
             const T2& _x2, const BaseMatrix<M2>& _m2) :
             x1(_x1), m1(_m1.mat()), x2(_x2), m2(_m2.mat())
@@ -117,19 +117,19 @@ namespace tmv {
             TMVAssert(m1.rowsize() == m2.rowsize());
         }
 
-        inline const Scaling<ix1,T1>& getX1() const { return x1; }
-        inline const M1& getM1() const { return m1; }
-        inline const Scaling<ix2,T2>& getX2() const { return x2; }
-        inline const M2& getM2() const { return m2; }
+        const Scaling<ix1,T1>& getX1() const { return x1; }
+        const M1& getM1() const { return m1; }
+        const Scaling<ix2,T2>& getX2() const { return x2; }
+        const M2& getM2() const { return m2; }
 
-        inline size_t colsize() const { return m1.colsize(); }
-        inline size_t rowsize() const { return m1.rowsize(); }
+        size_t colsize() const { return m1.colsize(); }
+        size_t rowsize() const { return m1.rowsize(); }
 
-        inline value_type cref(int i, int j) const
+        value_type cref(int i, int j) const
         { return x1 * m1.cref(i,j) + x2 * m2.cref(i,j); }
 
         template <class M3>
-        inline void assignTo(BaseMatrix_Mutable<M3>& m3) const
+        void assignTo(BaseMatrix_Mutable<M3>& m3) const
         {
             TMVStaticAssert((
                     ShapeTraits2<type::_shape,M3::_shape>::assignable)); 
@@ -142,7 +142,7 @@ namespace tmv {
         }
 
         template <class M3>
-        inline void newAssignTo(BaseMatrix_Mutable<M3>& m3) const
+        void newAssignTo(BaseMatrix_Mutable<M3>& m3) const
         {
             TMVStaticAssert((
                     ShapeTraits2<type::_shape,M3::_shape>::assignable)); 
@@ -164,7 +164,7 @@ namespace tmv {
 #define RT typename M2::real_type
     // m += m
     template <class M1, class M2>
-    inline void AddEq(
+    static void AddEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix<M2>& m2) 
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
@@ -177,7 +177,7 @@ namespace tmv {
 
     // m += xm
     template <class M1, int ix2, class T2, class M2>
-    inline void AddEq(
+    static void AddEq(
         BaseMatrix_Mutable<M1>& m1, const ProdXM<ix2,T2,M2>& m2) 
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
@@ -190,7 +190,7 @@ namespace tmv {
 
     // m -= m
     template <class M1, class M2>
-    inline void SubtractEq(
+    static void SubtractEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
@@ -203,7 +203,7 @@ namespace tmv {
 
     // m -= xm
     template <class M1, int ix2, class T2, class M2>
-    inline void SubtractEq(
+    static void SubtractEq(
         BaseMatrix_Mutable<M1>& m1, const ProdXM<ix2,T2,M2>& m2) 
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
@@ -216,7 +216,7 @@ namespace tmv {
 
     // m + m
     template <class M1, class M2>
-    inline SumMM<1,RT,M1,1,RT,M2> operator+(
+    static SumMM<1,RT,M1,1,RT,M2> operator+(
         const BaseMatrix<M1>& m1, const BaseMatrix<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
@@ -228,7 +228,7 @@ namespace tmv {
 
     // xm + m
     template <int ix1, class T1, class M1, class M2>
-    inline SumMM<ix1,T1,M1,1,RT,M2> operator+(
+    static SumMM<ix1,T1,M1,1,RT,M2> operator+(
         const ProdXM<ix1,T1,M1>& m1, const BaseMatrix<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
@@ -240,7 +240,7 @@ namespace tmv {
 
     // m + xm
     template <class M1, int ix2, class T2, class M2>
-    inline SumMM<1,RT,M1,ix2,T2,M2> operator+(
+    static SumMM<1,RT,M1,ix2,T2,M2> operator+(
         const BaseMatrix<M1>& m1, const ProdXM<ix2,T2,M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
@@ -252,7 +252,7 @@ namespace tmv {
 
     // xm + xm
     template <int ix1, class T1, class M1, int ix2, class T2, class M2>
-    inline SumMM<ix1,T1,M1,ix2,T2,M2> operator+(
+    static SumMM<ix1,T1,M1,ix2,T2,M2> operator+(
         const ProdXM<ix1,T1,M1>& m1, const ProdXM<ix2,T2,M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
@@ -265,7 +265,7 @@ namespace tmv {
 
     // m - m
     template <class M1, class M2>
-    inline SumMM<1,RT,M1,-1,RT,M2> operator-(
+    static SumMM<1,RT,M1,-1,RT,M2> operator-(
         const BaseMatrix<M1>& m1, const BaseMatrix<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
@@ -277,7 +277,7 @@ namespace tmv {
 
     // xm - m
     template <int ix1, class T1, class M1, class M2>
-    inline SumMM<ix1,T1,M1,-1,RT,M2> operator-(
+    static SumMM<ix1,T1,M1,-1,RT,M2> operator-(
         const ProdXM<ix1,T1,M1>& m1, const BaseMatrix<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
@@ -289,7 +289,7 @@ namespace tmv {
 
     // m - xm
     template <class M1, int ix2, class T2, class M2>
-    inline SumMM<1,RT,M1,-ix2,T2,M2> operator-(
+    static SumMM<1,RT,M1,-ix2,T2,M2> operator-(
         const BaseMatrix<M1>& m1, const ProdXM<ix2,T2,M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
@@ -301,7 +301,7 @@ namespace tmv {
 
     // xm - xm
     template <int ix1, class T1, class M1, int ix2, class T2, class M2>
-    inline SumMM<ix1,T1,M1,-ix2,T2,M2> operator-(
+    static SumMM<ix1,T1,M1,-ix2,T2,M2> operator-(
         const ProdXM<ix1,T1,M1>& m1, const ProdXM<ix2,T2,M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
@@ -324,7 +324,7 @@ namespace tmv {
 
     // -(xm+xm)
     template <int ix1, class T1, class M1, int ix2, class T2, class M2>
-    inline SumMM<-ix1,T1,M1,-ix2,T2,M2> operator-(
+    static SumMM<-ix1,T1,M1,-ix2,T2,M2> operator-(
         const SumMM<ix1,T1,M1,ix2,T2,M2>& smm)
     {
         return SumMM<-ix1,T1,M1,-ix2,T2,M2>(
@@ -333,7 +333,7 @@ namespace tmv {
 
     // x * (xm+xm)
     template <int ix1, class T1, class M1, int ix2, class T2, class M2>
-    inline SumMM<0,T1,M1,0,T2,M2> operator*(
+    static SumMM<0,T1,M1,0,T2,M2> operator*(
         const int x, const SumMM<ix1,T1,M1,ix2,T2,M2>& smm)
     {
         return SumMM<0,T1,M1,0,T2,M2>(
@@ -341,7 +341,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class M1, int ix2, class T2, class M2>
-    inline SumMM<0,T1,M1,0,T2,M2> operator*(
+    static SumMM<0,T1,M1,0,T2,M2> operator*(
         const RT x, const SumMM<ix1,T1,M1,ix2,T2,M2>& smm)
     {
         return SumMM<0,T1,M1,0,T2,M2>(
@@ -349,7 +349,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class M1, int ix2, class T2, class M2>
-    inline SumMM<0,CT,M1,0,CT,M2> operator*(
+    static SumMM<0,CT,M1,0,CT,M2> operator*(
         const CT x, const SumMM<ix1,T1,M1,ix2,T2,M2>& smm)
     {
         return SumMM<0,CT,M1,0,CT,M2>(
@@ -357,7 +357,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class M1, int ix2, class T2, class M2>
-    inline SumMM<0,CT,M1,0,CT,M2> operator*(
+    static SumMM<0,CT,M1,0,CT,M2> operator*(
         const CCT x, const SumMM<ix1,T1,M1,ix2,T2,M2>& smm)
     {
         return SumMM<0,CT,M1,0,CT,M2>(
@@ -365,7 +365,7 @@ namespace tmv {
     }
     template <int ix, class T, int ix1, class T1, class M1, 
               int ix2, class T2, class M2>
-    inline SumMM<ix1*ix,TX1,M1,ix2*ix,TX2,M2> operator*(
+    static SumMM<ix1*ix,TX1,M1,ix2*ix,TX2,M2> operator*(
         const Scaling<ix,T>& x, const SumMM<ix1,T1,M1,ix2,T2,M2>& smm)
     {
         return SumMM<ix1*ix,TX1,M1,ix2*ix,TX2,M2>(
@@ -374,7 +374,7 @@ namespace tmv {
 
     // (xm+xm)*x
     template <int ix1, class T1, class M1, int ix2, class T2, class M2>
-    inline SumMM<0,T1,M1,0,T2,M2> operator*(
+    static SumMM<0,T1,M1,0,T2,M2> operator*(
         const SumMM<ix1,T1,M1,ix2,T2,M2>& smm, const int x)
     {
         return SumMM<0,T1,M1,0,T2,M2>(
@@ -382,7 +382,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class M1, int ix2, class T2, class M2>
-    inline SumMM<0,T1,M1,0,T2,M2> operator*(
+    static SumMM<0,T1,M1,0,T2,M2> operator*(
         const SumMM<ix1,T1,M1,ix2,T2,M2>& smm, const RT x)
     {
         return SumMM<0,T1,M1,0,T2,M2>(
@@ -390,7 +390,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class M1, int ix2, class T2, class M2>
-    inline SumMM<0,CT,M1,0,CT,M2> operator*(
+    static SumMM<0,CT,M1,0,CT,M2> operator*(
         const SumMM<ix1,T1,M1,ix2,T2,M2>& smm, const CT x)
     {
         return SumMM<0,CT,M1,0,CT,M2>(
@@ -398,7 +398,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class M1, int ix2, class T2, class M2>
-    inline SumMM<0,CT,M1,0,CT,M2> operator*(
+    static SumMM<0,CT,M1,0,CT,M2> operator*(
         const SumMM<ix1,T1,M1,ix2,T2,M2>& smm, const CCT x)
     {
         return SumMM<0,CT,M1,0,CT,M2>(
@@ -407,7 +407,7 @@ namespace tmv {
 
     template <int ix, class T, int ix1, class T1, class M1, 
               int ix2, class T2, class M2>
-    inline SumMM<ix1*ix,TX1,M1,ix2*ix,TX2,M2> operator*(
+    static SumMM<ix1*ix,TX1,M1,ix2*ix,TX2,M2> operator*(
         const SumMM<ix1,T1,M1,ix2,T2,M2>& smm, const Scaling<ix,T>& x)
     {
         return SumMM<ix1*ix,TX1,M1,ix2*ix,TX2,M2>(
@@ -416,7 +416,7 @@ namespace tmv {
 
     // (xm+xm)/x
     template <int ix1, class T1, class M1, int ix2, class T2, class M2>
-    inline SumMM<0,T1,M1,0,T2,M2> operator/(
+    static SumMM<0,T1,M1,0,T2,M2> operator/(
         const SumMM<ix1,T1,M1,ix2,T2,M2>& smm, const int x)
     {
         return SumMM<0,T1,M1,0,T2,M2>(
@@ -424,7 +424,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class M1, int ix2, class T2, class M2>
-    inline SumMM<0,T1,M1,0,T2,M2> operator/(
+    static SumMM<0,T1,M1,0,T2,M2> operator/(
         const SumMM<ix1,T1,M1,ix2,T2,M2>& smm, const RT x)
     {
         return SumMM<0,T1,M1,0,T2,M2>(
@@ -432,7 +432,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class M1, int ix2, class T2, class M2>
-    inline SumMM<0,CT,M1,0,CT,M2> operator/(
+    static SumMM<0,CT,M1,0,CT,M2> operator/(
         const SumMM<ix1,T1,M1,ix2,T2,M2>& smm, const CT x)
     {
         return SumMM<0,CT,M1,0,CT,M2>(
@@ -440,7 +440,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class M1, int ix2, class T2, class M2>
-    inline SumMM<0,CT,M1,0,CT,M2> operator/(
+    static SumMM<0,CT,M1,0,CT,M2> operator/(
         const SumMM<ix1,T1,M1,ix2,T2,M2>& smm, const CCT x)
     {
         return SumMM<0,CT,M1,0,CT,M2>(
@@ -449,7 +449,7 @@ namespace tmv {
 
     template <int ix, class T, int ix1, class T1, class M1, 
               int ix2, class T2, class M2>
-    inline SumMM<ix1*ix,TX1,M1,ix2*ix,TX2,M2> operator/(
+    static SumMM<ix1*ix,TX1,M1,ix2*ix,TX2,M2> operator/(
         const SumMM<ix1,T1,M1,ix2,T2,M2>& smm, const Scaling<ix,T>& x)
     {
         return SumMM<ix1*ix,TX1,M1,ix2*ix,TX2,M2>(
@@ -467,7 +467,7 @@ namespace tmv {
     // TMV_Text
 
     template <int ix1, class T1, class M1, int ix2, class T2, class M2>
-    inline std::string TMV_Text(const SumMM<ix1,T1,M1,ix2,T2,M2>& smm)
+    static std::string TMV_Text(const SumMM<ix1,T1,M1,ix2,T2,M2>& smm)
     {
         std::ostringstream s;
         s << "SumMM< "<< ix1<<","<<TMV_Text(T1())

@@ -4,7 +4,7 @@
 
 template <class T> void TestVector();
 template <class T> void TestMatrix();
-void TestPermutation();
+template <class T> void TestPermutation();
 template <class T> void TestMatrixArith_1();
 template <class T> void TestMatrixArith_2();
 template <class T> void TestMatrixArith_3();
@@ -14,6 +14,7 @@ template <class T> void TestMatrixArith_6();
 template <class T> void TestMatrixArith_7();
 template <class T> void TestMatrixArith_8();
 template <class T> void TestMatrixDiv();
+template <class T> void TestMatrixDet();
 template <class T, tmv::StorageType stor> void TestMatrixDecomp();
 
 template <class T> void TestDiagMatrix();

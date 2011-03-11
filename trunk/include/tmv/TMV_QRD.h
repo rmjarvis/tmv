@@ -149,104 +149,104 @@ namespace tmv {
             const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2) const;
 
         // These are the virtual functions from the Divider base class.
-        inline void doSolve(
+        void doSolve(
             const ConstMatrixView<RT>& m1, MatrixView<RT> m2) const 
         { solve(m1,m2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstMatrixView<RT>& m1, MatrixView<CT> m2) const 
         { solve(m1,m2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstMatrixView<RT>& m1, 
             MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
         { solve(m1,m2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstMatrixView<CT>& m1, MatrixView<CT> m2) const 
         { solve(m1,m2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstMatrixView<CT>& m1, 
             MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
         { solve(m1,m2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstMatrixView<CT,UNKNOWN,UNKNOWN,true>& m1, 
             MatrixView<CT> m2) const 
         { solve(m1,m2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstMatrixView<CT,UNKNOWN,UNKNOWN,true>& m1, 
             MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
         { solve(m1,m2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstVectorView<RT>& v1, VectorView<RT> v2) const 
         { solve(v1,v2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstVectorView<RT>& v1, VectorView<CT> v2) const 
         { solve(v1,v2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstVectorView<RT>& v1, 
             VectorView<CT,UNKNOWN,true> v2) const 
         { solve(v1,v2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstVectorView<CT>& v1, VectorView<CT> v2) const 
         { solve(v1,v2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstVectorView<CT>& v1, 
             VectorView<CT,UNKNOWN,true> v2) const 
         { solve(v1,v2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstVectorView<CT,UNKNOWN,true>& v1, 
             VectorView<CT> v2) const 
         { solve(v1,v2); } 
-        inline void doSolve(
+        void doSolve(
             const ConstVectorView<CT,UNKNOWN,true>& v1, 
             VectorView<CT,UNKNOWN,true> v2) const 
         { solve(v1,v2); } 
 
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstMatrixView<RT>& m1, MatrixView<RT> m2) const 
         { solveTranspose(m1,m2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstMatrixView<RT>& m1, MatrixView<CT> m2) const 
         { solveTranspose(m1,m2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstMatrixView<RT>& m1, 
             MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
         { solveTranspose(m1,m2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstMatrixView<CT>& m1, MatrixView<CT> m2) const 
         { solveTranspose(m1,m2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstMatrixView<CT>& m1, 
             MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
         { solveTranspose(m1,m2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstMatrixView<CT,UNKNOWN,UNKNOWN,true>& m1, 
             MatrixView<CT> m2) const 
         { solveTranspose(m1,m2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstMatrixView<CT,UNKNOWN,UNKNOWN,true>& m1, 
             MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
         { solveTranspose(m1,m2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstVectorView<RT>& v1, VectorView<RT> v2) const 
         { solveTranspose(v1,v2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstVectorView<RT>& v1, VectorView<CT> v2) const 
         { solveTranspose(v1,v2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstVectorView<RT>& v1, 
             VectorView<CT,UNKNOWN,true> v2) const 
         { solveTranspose(v1,v2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstVectorView<CT>& v1, VectorView<CT> v2) const 
         { solveTranspose(v1,v2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstVectorView<CT>& v1, 
             VectorView<CT,UNKNOWN,true> v2) const 
         { solveTranspose(v1,v2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstVectorView<CT,UNKNOWN,true>& v1, 
             VectorView<CT> v2) const 
         { solveTranspose(v1,v2); }
-        inline void doSolveTranspose(
+        void doSolveTranspose(
             const ConstVectorView<CT,UNKNOWN,true>& v1, 
             VectorView<CT,UNKNOWN,true> v2) const 
         { solveTranspose(v1,v2); }
@@ -257,42 +257,42 @@ namespace tmv {
         //
         
         template <class M2> 
-        inline void solveInPlace(BaseMatrix_Rec_Mutable<M2>& m2) const;
+        void solveInPlace(BaseMatrix_Rec_Mutable<M2>& m2) const;
         template <class V2> 
-        inline void solveInPlace(BaseVector_Mutable<V2>& v2) const;
+        void solveInPlace(BaseVector_Mutable<V2>& v2) const;
 
         template <class M2> 
-        inline void solveTransposeInPlace(BaseMatrix_Rec_Mutable<M2>& m2) const;
+        void solveTransposeInPlace(BaseMatrix_Rec_Mutable<M2>& m2) const;
         template <class V2> 
-        inline void solveTransposeInPlace(BaseVector_Mutable<V2>& v2) const;
+        void solveTransposeInPlace(BaseVector_Mutable<V2>& v2) const;
 
         // These are the virtual functions from the Divider base class.
-        inline void doSolveInPlace(MatrixView<RT> m2) const 
+        void doSolveInPlace(MatrixView<RT> m2) const 
         { solveInPlace(m2);  }
-        inline void doSolveInPlace(MatrixView<CT> m2) const 
+        void doSolveInPlace(MatrixView<CT> m2) const 
         { solveInPlace(m2);  }
-        inline void doSolveInPlace(
+        void doSolveInPlace(
             MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
         { solveInPlace(m2);  }
-        inline void doSolveInPlace(VectorView<RT> v2) const 
+        void doSolveInPlace(VectorView<RT> v2) const 
         { solveInPlace(v2);  }
-        inline void doSolveInPlace(VectorView<CT> v2) const 
+        void doSolveInPlace(VectorView<CT> v2) const 
         { solveInPlace(v2);  }
-        inline void doSolveInPlace(VectorView<CT,UNKNOWN,true> v2) const 
+        void doSolveInPlace(VectorView<CT,UNKNOWN,true> v2) const 
         { solveInPlace(v2);  }
 
-        inline void doSolveTransposeInPlace(MatrixView<RT> m2) const 
+        void doSolveTransposeInPlace(MatrixView<RT> m2) const 
         { solveTransposeInPlace(m2); } 
-        inline void doSolveTransposeInPlace(MatrixView<CT> m2) const 
+        void doSolveTransposeInPlace(MatrixView<CT> m2) const 
         { solveTransposeInPlace(m2); } 
-        inline void doSolveTransposeInPlace(
+        void doSolveTransposeInPlace(
             MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
         { solveTransposeInPlace(m2); } 
-        inline void doSolveTransposeInPlace(VectorView<RT> v2) const 
+        void doSolveTransposeInPlace(VectorView<RT> v2) const 
         { solveTransposeInPlace(v2); } 
-        inline void doSolveTransposeInPlace(VectorView<CT> v2) const 
+        void doSolveTransposeInPlace(VectorView<CT> v2) const 
         { solveTransposeInPlace(v2); } 
-        inline void doSolveTransposeInPlace(
+        void doSolveTransposeInPlace(
             VectorView<CT,UNKNOWN,true> v2) const 
         { solveTransposeInPlace(v2); } 
 
@@ -313,11 +313,11 @@ namespace tmv {
         template <class M2> 
         void makeInverse(BaseMatrix_Rec_Mutable<M2>& minv) const;
 
-        inline void doMakeInverse(MatrixView<RT> minv) const 
+        void doMakeInverse(MatrixView<RT> minv) const 
         { makeInverse(minv); } 
-        inline void doMakeInverse(MatrixView<CT> minv) const 
+        void doMakeInverse(MatrixView<CT> minv) const 
         { makeInverse(minv); } 
-        inline void doMakeInverse(
+        void doMakeInverse(
             MatrixView<CT,UNKNOWN,UNKNOWN,true> minv) const 
         { makeInverse(minv); } 
 
@@ -329,11 +329,11 @@ namespace tmv {
         template <class M2>
         void makeInverseATA(BaseMatrix_Rec_Mutable<M2>& ata) const;
 
-        inline void doMakeInverseATA(MatrixView<RT> ata) const
+        void doMakeInverseATA(MatrixView<RT> ata) const
         { makeInverseATA(ata); }
-        inline void doMakeInverseATA(MatrixView<CT> ata) const
+        void doMakeInverseATA(MatrixView<CT> ata) const
         { makeInverseATA(ata); }
-        inline void doMakeInverseATA(
+        void doMakeInverseATA(
             MatrixView<CT,UNKNOWN,UNKNOWN,true> ata) const
         { makeInverseATA(ata); }
 
@@ -359,10 +359,10 @@ namespace tmv {
         bool checkDecomp(
             const BaseMatrix<M2>& m2, std::ostream* fout) const;
 
-        inline bool doCheckDecomp(
+        bool doCheckDecomp(
             const ConstMatrixView<T>& m2, std::ostream* fout) const
         { return checkDecomp(m2,fout); }
-        inline bool doCheckDecomp(
+        bool doCheckDecomp(
             const ConstMatrixView<T,UNKNOWN,UNKNOWN,true>& m2,
             std::ostream* fout) const
         { return checkDecomp(Maybe<Traits<T>::isreal>::conjugate(m2),fout); }

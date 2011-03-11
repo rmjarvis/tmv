@@ -40,7 +40,7 @@ namespace tmv {
     {
         TMVAssert(m1.isrm() || m1.iscm());
         TMVAssert(m2.isrm() || m2.iscm());
-        if (m2.iscm()) {
+        if (m1.iscm()) {
             typename M1::cmview_type m1cm = m1.cmView();
             if (m2.iscm())
                 InlineLDivEq(m1cm,m2.cmView());

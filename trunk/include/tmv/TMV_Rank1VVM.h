@@ -56,22 +56,22 @@ namespace tmv {
 
     // Defined below:
     template <bool add, int ix, class T, class V1, class V2, class M3>
-    inline void Rank1Update(
+    static void Rank1Update(
         const Scaling<ix,T>& x, 
         const BaseVector_Calc<V1>& v1, const BaseVector_Calc<V2>& v2, 
         BaseMatrix_Rec_Mutable<M3>& m3);
     template <bool add, int ix, class T, class V1, class V2, class M3>
-    inline void NoAliasRank1Update(
+    static void NoAliasRank1Update(
         const Scaling<ix,T>& x, 
         const BaseVector_Calc<V1>& v1, const BaseVector_Calc<V2>& v2, 
         BaseMatrix_Rec_Mutable<M3>& m3);
     template <bool add, int ix, class T, class V1, class V2, class M3>
-    inline void InlineRank1Update(
+    static void InlineRank1Update(
         const Scaling<ix,T>& x, 
         const BaseVector_Calc<V1>& v1, const BaseVector_Calc<V2>& v2, 
         BaseMatrix_Rec_Mutable<M3>& m3);
     template <bool add, int ix, class T, class V1, class V2, class M3>
-    inline void AliasRank1Update(
+    static void AliasRank1Update(
         const Scaling<ix,T>& x, 
         const BaseVector_Calc<V1>& v1, const BaseVector_Calc<V2>& v2, 
         BaseMatrix_Rec_Mutable<M3>& m3);
@@ -253,7 +253,7 @@ namespace tmv {
               int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<3,cs,rs,add,ix,T,V1,V2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
 #ifdef PRINTALGO_R1
@@ -434,7 +434,7 @@ namespace tmv {
     template <int cs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<14,cs,1,add,ix,T,V1,V2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         { Rank1VVM_Helper<2,cs,1,add,ix,T,V1,V2,M3>::call(x,v1,v2,m3); }
     };
@@ -666,7 +666,7 @@ namespace tmv {
     template <int cs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<17,cs,1,add,ix,T,V1,V2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         { Rank1VVM_Helper<2,cs,1,add,ix,T,V1,V2,M3>::call(x,v1,v2,m3); }
     };
@@ -862,7 +862,7 @@ namespace tmv {
         template <int J, int N>
         struct Unroller
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
             {
                 Unroller<J,N/2>::unroll(x,v1,v2,m3);
@@ -876,7 +876,7 @@ namespace tmv {
             template <int I, int M>
             struct Unroller2
             {
-                static inline void unroll(const V1& v1, const PT2& v2j, M3& m3)
+                static void unroll(const V1& v1, const PT2& v2j, M3& m3)
                 { 
                     Unroller2<I,M/2>::unroll(v1,v2j,m3);
                     Unroller2<I+M/2,M-M/2>::unroll(v1,v2j,m3);
@@ -885,18 +885,18 @@ namespace tmv {
             template <int I>
             struct Unroller2<I,1>
             {
-                static inline void unroll(const V1& v1, const PT2& v2j, M3& m3)
+                static void unroll(const V1& v1, const PT2& v2j, M3& m3)
                 {
                     Maybe<add>::add(
                         m3.ref(I,J) , 
                         ZProd<false,false>::prod(v1.cref(I) , v2j ) ); 
                 }
             };
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
             { Unroller2<0,cs>::unroll(v1,x*v2.cref(J),m3); }
         };
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
 #ifdef PRINTALGO_R1
@@ -915,7 +915,7 @@ namespace tmv {
         template <int I, int M>
         struct Unroller
         {
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
             {
                 Unroller<I,M/2>::unroll(x,v1,v2,m3);
@@ -929,7 +929,7 @@ namespace tmv {
             template <int J, int N>
             struct Unroller2
             {
-                static inline void unroll(const PT1& v1i, const V2& v2, M3& m3)
+                static void unroll(const PT1& v1i, const V2& v2, M3& m3)
                 { 
                     Unroller2<J,N/2>::unroll(v1i,v2,m3);
                     Unroller2<J+N/2,N-N/2>::unroll(v1i,v2,m3);
@@ -938,18 +938,18 @@ namespace tmv {
             template <int J>
             struct Unroller2<J,1>
             {
-                static inline void unroll(const PT1& v1i, const V2& v2, M3& m3)
+                static void unroll(const PT1& v1i, const V2& v2, M3& m3)
                 {
                     Maybe<add>::add(
                         m3.ref(I,J),
                         ZProd<false,false>::prod(v1i , v2.cref(J) ) ); 
                 }
             };
-            static inline void unroll(
+            static void unroll(
                 const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
             { Unroller2<0,rs>::unroll(x*v1.cref(I),v2,m3); }
         };
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
 #ifdef PRINTALGO_R1
@@ -965,7 +965,7 @@ namespace tmv {
               int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<31,cs,rs,add,ix,T,V1,V2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
             TMVStaticAssert(TMV_R1_ZeroIX);
@@ -996,7 +996,7 @@ namespace tmv {
               int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<81,cs,rs,add,ix,T,V1,V2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
 #ifdef PRINTALGO_MV_R1
@@ -1014,7 +1014,7 @@ namespace tmv {
               int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<82,cs,rs,add,ix,T,V1,V2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
 #ifdef PRINTALGO_R1
@@ -1034,7 +1034,7 @@ namespace tmv {
               int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<83,cs,rs,add,ix,T,V1,V2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
@@ -1050,7 +1050,7 @@ namespace tmv {
     template <int cs, int rs, bool add, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<83,cs,rs,add,1,T,V1,V2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<1,T>& x, const V1& v1, const V2& v2, M3& m3)
         { Rank1VVM_Helper<81,cs,rs,add,1,T,V1,V2,M3>::call(x,v1,v2,m3); }
     };
@@ -1060,7 +1060,7 @@ namespace tmv {
               int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<84,cs,rs,add,ix,T,V1,V2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
 #ifdef PRINTALGO_R1
@@ -1078,7 +1078,7 @@ namespace tmv {
               int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<85,cs,rs,add,ix,T,V1,V2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
 #ifdef PRINTALGO_R1
@@ -1098,7 +1098,7 @@ namespace tmv {
               int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<86,cs,rs,add,ix,T,V1,V2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
@@ -1114,7 +1114,7 @@ namespace tmv {
     template <int cs, int rs, bool add, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<86,cs,rs,add,1,T,V1,V2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<1,T>& x, const V1& v1, const V2& v2, M3& m3)
         { Rank1VVM_Helper<84,cs,rs,add,1,T,V1,V2,M3>::call(x,v1,v2,m3); }
     };
@@ -1124,7 +1124,7 @@ namespace tmv {
               int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<87,cs,rs,add,ix,T,V1,V2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
             const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
@@ -1146,7 +1146,7 @@ namespace tmv {
     template <int cs, int rs, bool add, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<87,cs,rs,add,1,T,V1,V2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<1,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
 #ifdef PRINTALGO_R1
@@ -1164,15 +1164,20 @@ namespace tmv {
               int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<-4,cs,rs,add,ix,T,V1,V2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
             TMVStaticAssert(!M3::_conj);
+            typedef typename V1::value_type T1;
+            typedef typename V2::value_type T2;
+            typedef typename M3::value_type T3;
 #if TMV_OPT >= 1
             const int algo = 
                 ( rs == 0 || cs == 0 ) ? 0 : 
                 ( cs == 1 ) ? 401 :
                 ( rs == 1 ) ? 402 :
+                !(Traits2<T1,T2>::samebase && Traits2<T1,T3>::samebase) ?
+                ( M3::_colmajor ? 11 : 3 ) :
                 M3::_colmajor ? ( 
                     ( cs == UNKNOWN || rs == UNKNOWN ) ? (
                         ( M3::iscomplex ? 16 : 13 ) ) :
@@ -1198,9 +1203,12 @@ namespace tmv {
               int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<-3,cs,rs,add,ix,T,V1,V2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
+            typedef typename V1::value_type T1;
+            typedef typename V2::value_type T2;
+            typedef typename M3::value_type T3;
             TMVStaticAssert(!M3::_conj);
             // Possible algorithms to choose from:
             //
@@ -1238,6 +1246,8 @@ namespace tmv {
                 ( rs == 0 || cs == 0 ) ? 0 : 
                 ( cs == 1 ) ? 401 :
                 ( rs == 1 ) ? 402 :
+                !(Traits2<T1,T2>::samebase && Traits2<T1,T3>::samebase) ?
+                ( M3::_colmajor ? 11 : 3 ) :
                 M3::_colmajor ? (
                     ( cs == UNKNOWN || rs == UNKNOWN ) ? (
                         ( V1::_step != 1 ? 83 : 
@@ -1283,7 +1293,7 @@ namespace tmv {
               int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<97,cs,rs,add,ix,T,V1,V2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         { 
             typedef typename V1::const_conjugate_type V1c;
@@ -1301,20 +1311,22 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<98,cs,rs,true,ix,T,V1,V2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
-            typename M3::value_type xx(x);
+            typedef typename M3::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
             InstAddRank1Update(xx,v1.xView(),v2.xView(),m3.xView()); 
         }
     };
     template <int cs, int rs, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<98,cs,rs,false,ix,T,V1,V2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
-            typename M3::value_type xx(x);
+            typedef typename M3::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
             InstRank1Update(xx,v1.xView(),v2.xView(),m3.xView()); 
         }
     };
@@ -1324,16 +1336,15 @@ namespace tmv {
               int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<-2,cs,rs,add,ix,T,V1,V2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
             typedef typename V1::value_type T1;
             typedef typename V2::value_type T2;
             typedef typename M3::value_type T3;
             const bool inst =
-                V1::unknownsizes &&
-                V2::unknownsizes &&
-                M3::unknownsizes &&
+                (cs == UNKNOWN || cs > 16) &&
+                (rs == UNKNOWN || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -1359,7 +1370,7 @@ namespace tmv {
               int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<99,cs,rs,add,ix,T,V1,V2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
             const bool s1 = SameStorage(v1,m3);
@@ -1385,7 +1396,7 @@ namespace tmv {
               int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<-1,cs,rs,add,ix,T,V1,V2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
             const bool checkalias =
@@ -1403,7 +1414,7 @@ namespace tmv {
     };
 
     template <bool add, int ix, class T, class V1, class V2, class M3>
-    inline void Rank1Update(
+    static void Rank1Update(
         const Scaling<ix,T>& x, 
         const BaseVector_Calc<V1>& v1, const BaseVector_Calc<V2>& v2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -1424,7 +1435,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class V1, class V2, class M3>
-    inline void NoAliasRank1Update(
+    static void NoAliasRank1Update(
         const Scaling<ix,T>& x, 
         const BaseVector_Calc<V1>& v1, const BaseVector_Calc<V2>& v2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -1445,7 +1456,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class V1, class V2, class M3>
-    inline void InlineRank1Update(
+    static void InlineRank1Update(
         const Scaling<ix,T>& x, 
         const BaseVector_Calc<V1>& v1, const BaseVector_Calc<V2>& v2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -1466,7 +1477,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class V1, class V2, class M3>
-    inline void AliasRank1Update(
+    static void AliasRank1Update(
         const Scaling<ix,T>& x, 
         const BaseVector_Calc<V1>& v1, const BaseVector_Calc<V2>& v2, 
         BaseMatrix_Rec_Mutable<M3>& m3)

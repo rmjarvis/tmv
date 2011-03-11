@@ -43,61 +43,61 @@ namespace tmv {
     //
 
     template <bool add, int ix, class T, class M1, class V2, class V3>
-    inline void MultMV(
+    static void MultMV(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1, const BaseVector_Calc<V2>& v2,
         BaseVector_Mutable<V3>& v3)
     { ElemMultVV<add>(x,m1.diag(),v2.vec(),v3.vec()); }
 
     template <bool add, int ix, class T, class M1, class V2, class V3>
-    inline void NoAliasMultMV(
+    static void NoAliasMultMV(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1, const BaseVector_Calc<V2>& v2,
         BaseVector_Mutable<V3>& v3)
     { NoAliasElemMultVV<add>(x,m1.diag(),v2.vec(),v3.vec()); }
 
     template <bool add, int ix, class T, class M1, class V2, class V3>
-    inline void AliasMultMV(
+    static void AliasMultMV(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1, const BaseVector_Calc<V2>& v2,
         BaseVector_Mutable<V3>& v3)
     { AliasElemMultVV<add>(x,m1.diag(),v2.vec(),v3.vec()); }
 
     template <bool add, int ix, class T, class V1, class M2, class V3>
-    inline void MultVM(
+    static void MultVM(
         const Scaling<ix,T>& x,
         const BaseVector_Calc<V1>& v1, const BaseMatrix_Diag<M2>& m2,
         BaseVector_Mutable<V3>& v3)
     { ElemMultVV<add>(x,m2.diag(),v1.vec(),v3.vec()); }
 
     template <bool add, int ix, class T, class V1, class M2, class V3>
-    inline void NoAliasMultVM(
+    static void NoAliasMultVM(
         const Scaling<ix,T>& x,
         const BaseVector_Calc<V1>& v1, const BaseMatrix_Diag<M2>& m2,
         BaseVector_Mutable<V3>& v3)
     { NoAliasElemMultVV<add>(x,m2.diag(),v1.vec(),v3.vec()); }
 
     template <bool add, int ix, class T, class V1, class M2, class V3>
-    inline void AliasMultVM(
+    static void AliasMultVM(
         const Scaling<ix,T>& x,
         const BaseVector_Calc<V1>& v1, const BaseMatrix_Diag<M2>& m2,
         BaseVector_Mutable<V3>& v3)
     { AliasElemMultVV<add>(x,m2.diag(),v1.vec(),v3.vec()); }
 
     template <class V1, int ix, class T, class M2>
-    inline void MultEqVM(
+    static void MultEqVM(
         BaseVector_Mutable<V1>& v1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { ElemMultVV<false>(x,m2.diag(),v1.vec(),v1.vec()); }
 
     template <class V1, int ix, class T, class M2>
-    inline void NoAliasMultEqVM(
+    static void NoAliasMultEqVM(
         BaseVector_Mutable<V1>& v1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { NoAliasElemMultVV<false>(x,m2.diag(),v1.vec(),v1.vec()); }
 
     template <class V1, int ix, class T, class M2>
-    inline void AliasMultEqVM(
+    static void AliasMultEqVM(
         BaseVector_Mutable<V1>& v1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { AliasElemMultVV<false>(x,m2.diag(),v1.vec(),v1.vec()); }
@@ -108,7 +108,7 @@ namespace tmv {
     //
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void MultMM(
+    static void MultMM(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1, const BaseMatrix_Diag<M2>& m2,
         BaseMatrix_Diag_Mutable<M3>& m3)
@@ -118,7 +118,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasMultMM(
+    static void NoAliasMultMM(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1, const BaseMatrix_Diag<M2>& m2,
         BaseMatrix_Diag_Mutable<M3>& m3)
@@ -128,7 +128,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void AliasMultMM(
+    static void AliasMultMM(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1, const BaseMatrix_Diag<M2>& m2,
         BaseMatrix_Diag_Mutable<M3>& m3)
@@ -138,7 +138,7 @@ namespace tmv {
     }
 
     template <class M1, int ix, class T, class M2>
-    inline void MultEqMM(
+    static void MultEqMM(
         BaseMatrix_Diag_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { 
@@ -147,7 +147,7 @@ namespace tmv {
     }
 
     template <class M1, int ix, class T, class M2>
-    inline void NoAliasMultEqMM(
+    static void NoAliasMultEqMM(
         BaseMatrix_Diag_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { 
@@ -156,7 +156,7 @@ namespace tmv {
     }
 
     template <class M1, int ix, class T, class M2>
-    inline void AliasMultEqMM(
+    static void AliasMultEqMM(
         BaseMatrix_Diag_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { 
@@ -165,7 +165,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void MultMM(
+    static void MultMM(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1, const BaseMatrix_Diag<M2>& m2,
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -182,7 +182,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void NoAliasMultMM(
+    static void NoAliasMultMM(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1, const BaseMatrix_Diag<M2>& m2,
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -193,7 +193,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void AliasMultMM(
+    static void AliasMultMM(
         const Scaling<ix,T>& x,
         const BaseMatrix_Diag<M1>& m1, const BaseMatrix_Diag<M2>& m2,
         BaseMatrix_Rec_Mutable<M3>& m3)

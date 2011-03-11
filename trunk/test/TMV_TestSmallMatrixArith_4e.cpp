@@ -4,9 +4,7 @@
 
 template <class T> void TestSmallMatrixArith_4e()
 {
-#if (XTEST & 2)
     TestSmallMatrixArith_4<T,1,10>("1 10");
-#endif
 }
 
 #ifdef TEST_DOUBLE

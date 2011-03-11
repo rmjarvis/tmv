@@ -3,7 +3,7 @@
 
 template <class T> void TestSmallMatrixArith_1a()
 {
-    TestSmallMatrixArith_1<T,2,2>("2 2");
+    TestSmallMatrixArith_1<T,1,1>("1 1");
 }
 
 #ifdef TEST_DOUBLE

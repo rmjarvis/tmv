@@ -1,6 +1,6 @@
 
 #include "TMV_Test.h"
-#include "TMV_Test3.h"
+#include "TMV_Test_3.h"
 
 //#define PRINTALGO_R1
 //#define PRINTALGO_XV
@@ -21,6 +21,7 @@ template <class T> void TestSmallMatrixArith_7c();
 template <class T> void TestSmallMatrixArith_7d();
 template <class T> void TestSmallMatrixArith_7e();
 template <class T> void TestSmallMatrixArith_7f();
+template <class T> void TestSmallMatrixArith_7g();
 
 template <class T, int M, int N> void TestSmallMatrixArith_7(std::string label)
 {

@@ -72,7 +72,6 @@
 
 #include <sstream>
 #include "TMV_BaseVector.h"
-#include "TMV_Shape.h"
 #include "TMV_Array.h"
 
 // MJ temporary:
@@ -196,26 +195,26 @@ namespace tmv {
     // to whether the matrix uses CStyle or FortranStyle indexing.
     // They also update the indices to be consistent with CStyle.
     template <bool _fort>
-    inline void CheckRowIndex(int& i, int m)
+    static void CheckRowIndex(int& i, int m)
     { // CStyle
         TMVAssert(i >= 0 && "row index must be in matrix");
         TMVAssert(i < m && "row index must be in matrix");
     }
     template <bool _fort>
-    inline void CheckColIndex(int& j, int n)
+    static void CheckColIndex(int& j, int n)
     { // CStyle
         TMVAssert(j >= 0 && "column index must be in matrix");
         TMVAssert(j < n && "column index must be in matrix");
     }
     template <>
-    inline void CheckRowIndex<true>(int& i, int m)
+    static void CheckRowIndex<true>(int& i, int m)
     { // FortranStyle
         TMVAssert(i >= 1 && "row index must be in matrix");
         TMVAssert(i <= m && "row index must be in matrix");
         --i;
     }
     template <>
-    inline void CheckColIndex<true>(int& j, int n)
+    static void CheckColIndex<true>(int& j, int n)
     { // FortranStyle
         TMVAssert(j >= 1 && "column index must be in matrix");
         TMVAssert(j <= n && "column index must be in matrix");
@@ -224,25 +223,33 @@ namespace tmv {
 
     // Override SameStorage for Matrix objects:
     template <class M1, class M2>
-    inline bool SameStorage(const BaseMatrix<M1>& v1, const BaseMatrix<M2>& m2)
+    static bool SameStorage(const BaseMatrix<M1>& v1, const BaseMatrix<M2>& m2)
     { return false; }
     template <class V1, class M2>
-    inline bool SameStorage(const BaseVector<V1>& v1, const BaseMatrix<M2>& m2)
+    static bool SameStorage(const BaseVector<V1>& v1, const BaseMatrix<M2>& m2)
     { return false; }
     template <class M1, class V2>
-    inline bool SameStorage(const BaseMatrix<M1>& v1, const BaseVector<V2>& m2)
+    static bool SameStorage(const BaseMatrix<M1>& v1, const BaseVector<V2>& m2)
     { return false; }
 #ifndef TMV_NO_ALIAS_CHECK
     template <class V1, class M2>
-    inline bool SameStorage(
+    static bool SameStorage(
         const BaseVector_Calc<V1>& v1, const BaseMatrix_Calc<M2>& m2)
-    { return v1.realPart().cptr() == m2.realPart().cptr(); }
+    { 
+        return 
+            static_cast<const void*>(v1.vec().cptr()) == 
+            static_cast<const void*>(m2.mat().cptr()); 
+    }
     template <class M1, class V2>
-    inline bool SameStorage(
+    static bool SameStorage(
         const BaseMatrix_Calc<M1>& m1, const BaseVector_Calc<V2>& v2)
-    { return m1.realPart().cptr() == v2.realPart().cptr(); }
+    {
+        return 
+            static_cast<const void*>(m1.mat().cptr()) == 
+            static_cast<const void*>(v2.vec().cptr()); 
+    }
     template <class M1, class M2>
-    inline bool SameStorage(
+    static bool SameStorage(
         const BaseMatrix_Calc<M1>& m1, const BaseMatrix_Calc<M2>& m2)
     {
         return 
@@ -252,11 +259,11 @@ namespace tmv {
 #endif
 
     template <class M1, class M2>
-    inline bool ExactSameStorage(
+    static bool ExactSameStorage(
         const BaseMatrix<M1>& m1, const BaseMatrix<M2>& m2)
     { return false; }
     template <class M1, class M2>
-    inline bool OppositeStorage(
+    static bool OppositeStorage(
         const BaseMatrix<M1>& m1, const BaseMatrix<M2>& m2)
     { return false; }
     // Step checks are done for specific shapes in the various files
@@ -293,15 +300,15 @@ namespace tmv {
     struct MCopyHelper;
 
     template <class M>
-    inline typename M::value_type DoTrace(const BaseMatrix<M>& m);
+    static typename M::value_type DoTrace(const BaseMatrix<M>& m);
 
     // Defined in TMV_MatrixIO.h
     template <class M>
-    inline void Write(std::ostream& os, const BaseMatrix_Calc<M>& m);
+    static void Write(std::ostream& os, const BaseMatrix_Calc<M>& m);
     template <class M>
-    inline void Write(
+    static void Write(
         std::ostream& os,
-        const BaseMatrix_Calc<M>& m, typename M::real_type thresh) ;
+        const BaseMatrix_Calc<M>& m, typename M::float_type thresh) ;
 
     // Defined in TMV_QuotXM.h
     template <int ix, class T, class M>
@@ -309,21 +316,21 @@ namespace tmv {
 
     // Defined in TMV_Det.h
     template <class M>
-    inline typename M::value_type Det(const BaseMatrix_Calc<M>& m);
+    static typename M::value_type Det(const BaseMatrix_Calc<M>& m);
     template <class M>
-    inline typename M::real_type LogDet(
-        const BaseMatrix_Calc<M>& m, typename M::value_type* sign=0);
+    static typename M::float_type LogDet(
+        const BaseMatrix_Calc<M>& m, typename M::zfloat_type* sign=0);
     template <class M>
-    inline bool IsSingular(const BaseMatrix_Calc<M>& m);
+    static bool IsSingular(const BaseMatrix_Calc<M>& m);
 
     // Defined in TMV_InvertM.h
     template <int ix, class T, class M1, class M2>
-    inline void MakeInverse(
+    static void MakeInverse(
         const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
         BaseMatrix_Mutable<M2>& minv);
 
     template <class M1, class M2>
-    inline void MakeInverseATA(
+    static void MakeInverseATA(
         const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& mata);
 
 
@@ -346,23 +353,24 @@ namespace tmv {
 
         // Derived values:
         typedef typename Traits<value_type>::real_type real_type;
+        typedef typename Traits<real_type>::float_type float_type;
+        typedef typename Traits<value_type>::float_type zfloat_type;
         typedef typename Traits<value_type>::complex_type complex_type;
         enum { isreal = Traits<value_type>::isreal };
         enum { iscomplex = Traits<value_type>::iscomplex };
         enum { _issquare =
             ShapeTraits<_shape>::square || Sizes<_colsize,_rowsize>::equal };
-        enum { unknownsizes = _colsize == UNKNOWN && _rowsize == UNKNOWN };
 
         //
         // Constructor
         //
 
-        inline BaseMatrix() {}
-        inline BaseMatrix(const BaseMatrix<M>&) {}
-        inline ~BaseMatrix() {}
+        BaseMatrix() {}
+        BaseMatrix(const BaseMatrix<M>&) {}
+        ~BaseMatrix() {}
 
     private :
-        inline void operator=(const BaseMatrix<M>& m2);
+        void operator=(const BaseMatrix<M>& m2);
     public :
 
 
@@ -370,7 +378,7 @@ namespace tmv {
         // Access
         //
 
-        inline value_type operator()(int i, int j) const 
+        value_type operator()(int i, int j) const 
         {
             CheckRowIndex<_fort>(i,colsize());
             CheckColIndex<_fort>(j,rowsize());
@@ -382,38 +390,44 @@ namespace tmv {
         // Functions
         //
 
-        inline value_type trace() const
+        value_type trace() const
         { return tmv::DoTrace(eval()); }
 
-        inline value_type sumElements() const
+        value_type sumElements() const
         { return calc().sumElements(); }
 
-        inline real_type sumAbsElements() const
+        float_type sumAbsElements() const
         { return calc().sumAbsElements(); }
 
-        inline real_type maxAbsElement() const 
+        real_type sumAbs2Elements() const
+        { return calc().sumAbs2Elements(); }
+
+        float_type maxAbsElement() const 
         { return calc().maxAbsElement(); }
 
-        inline real_type normSq() const
+        real_type maxAbs2Element() const 
+        { return calc().maxAbs2Element(); }
+
+        real_type normSq() const
         { return calc().normSq(); }
 
-        inline real_type normSq(const real_type scale) const
+        float_type normSq(const float_type scale) const
         { return calc().normSq(scale); }
 
-        inline real_type normF() const
+        float_type normF() const
         { return calc().normF(); }
 
-        inline real_type norm() const
+        float_type norm() const
         { return normF(); }
 
-        inline real_type norm1() const 
+        float_type norm1() const 
         { return calc().norm1(); }
 
-        inline real_type normInf() const 
+        float_type normInf() const 
         { return calc().normInf(); }
 
         template <class ret_type, class F>
-        inline ret_type sumElements(const F& f) const
+        ret_type sumElements(const F& f) const
         { return calc().sumElements(f); }
 
 
@@ -421,9 +435,9 @@ namespace tmv {
         // I/O
         //
 
-        inline void write(std::ostream& os) const
+        void write(std::ostream& os) const
         { tmv::Write(os,calc().cView()); }
-        inline void write(std::ostream& os, real_type thresh) const
+        void write(std::ostream& os, float_type thresh) const
         { tmv::Write(os,calc().cView(),thresh); }
 
 
@@ -431,43 +445,45 @@ namespace tmv {
         // Auxilliary routines
         //
 
-        inline const type& mat() const 
+        const type& mat() const 
         { return static_cast<const type&>(*this); }
 
-        inline calc_type calc() const 
+        calc_type calc() const 
         { return static_cast<calc_type>(mat()); }
 
-        inline eval_type eval() const 
+        eval_type eval() const 
         { return static_cast<eval_type>(mat()); }
 
-        inline copy_type copy() const 
+        copy_type copy() const 
         { return static_cast<copy_type>(mat()); }
 
-        inline size_t nrows() const { return colsize(); }
-        inline size_t ncols() const { return rowsize(); }
-        inline bool isSquare() const 
+        size_t nrows() const { return colsize(); }
+        size_t ncols() const { return rowsize(); }
+        bool isSquare() const 
         { return _issquare || (colsize() == rowsize()); }
 
         // Note that these last functions need to be defined in a more derived
         // class than this, or an infinite loop will result when compiling.
 
-        inline size_t colsize() const { return mat().colsize(); }
-        inline size_t rowsize() const { return mat().rowsize(); }
+        size_t colsize() const { return mat().colsize(); }
+        size_t rowsize() const { return mat().rowsize(); }
+        int nElements() const { return mat().nElements(); }
 
-        inline value_type cref(int i, int j) const  { return mat().cref(i,j); }
+        value_type cref(int i, int j) const  { return mat().cref(i,j); }
 
         template <class M2>
-        inline void assignTo(BaseMatrix_Mutable<M2>& m2) const
+        void assignTo(BaseMatrix_Mutable<M2>& m2) const
         { mat().assignTo(m2.mat()); }
 
         template <class M2>
-        inline void newAssignTo(BaseMatrix_Mutable<M2>& m2) const
+        void newAssignTo(BaseMatrix_Mutable<M2>& m2) const
         { mat().newAssignTo(m2.mat()); }
 
     }; // BaseMatrix
 
     template <class M> 
-    class BaseMatrix_Calc : public BaseMatrix<M>
+    class BaseMatrix_Calc : 
+        public BaseMatrix<M>
     {
     public:
         enum { _colsize = Traits<M>::_colsize };
@@ -486,6 +502,8 @@ namespace tmv {
 
         typedef typename base::value_type value_type;
         typedef typename base::real_type real_type;
+        typedef typename base::float_type float_type;
+        typedef typename base::zfloat_type zfloat_type;
 
         typedef typename Traits<M>::const_view_type const_view_type;
         typedef typename Traits<M>::const_cview_type const_cview_type;
@@ -511,9 +529,9 @@ namespace tmv {
         // Constructor
         //
 
-        inline BaseMatrix_Calc() {}
-        inline BaseMatrix_Calc(const BaseMatrix_Calc<M>&) {}
-        inline ~BaseMatrix_Calc() {}
+        BaseMatrix_Calc() {}
+        BaseMatrix_Calc(const BaseMatrix_Calc<M>&) {}
+        ~BaseMatrix_Calc() {}
 
     private:
         void operator=(const BaseMatrix_Calc<M>&);
@@ -529,49 +547,49 @@ namespace tmv {
         // Views
         //
 
-        inline const_view_type view() const
+        const_view_type view() const
         { return mat().view(); }
 
-        inline const_cview_type cView() const
+        const_cview_type cView() const
         { return mat().view(); }
 
-        inline const_fview_type fView() const
+        const_fview_type fView() const
         { return mat().view(); }
 
-        inline const_xview_type xView() const
+        const_xview_type xView() const
         { return mat().view(); }
 
-        inline const_cmview_type cmView() const
+        const_cmview_type cmView() const
         {
             TMVAssert(mat().iscm());
             return mat().view(); 
         }
 
-        inline const_rmview_type rmView() const
+        const_rmview_type rmView() const
         {
             TMVAssert(mat().isrm());
             return mat().view(); 
         }
 
-        inline const_transpose_type transpose() const
+        const_transpose_type transpose() const
         { return mat().transpose(); }
 
-        inline const_conjugate_type conjugate() const
+        const_conjugate_type conjugate() const
         { return mat().conjugate(); }
 
-        inline const_adjoint_type adjoint() const
+        const_adjoint_type adjoint() const
         { return mat().adjoint(); }
 
-        inline const_realpart_type realPart() const
+        const_realpart_type realPart() const
         { return mat().realPart(); }
 
-        inline const_imagpart_type imagPart() const
+        const_imagpart_type imagPart() const
         { TMVStaticAssert(type::iscomplex); return mat().imagPart(); }
 
-        inline const_nonconj_type nonConj() const
+        const_nonconj_type nonConj() const
         { return mat().nonConj(); }
 
-        inline nonconst_type nonConst() const
+        nonconst_type nonConst() const
         { return mat().nonConst(); } 
 
 
@@ -579,24 +597,24 @@ namespace tmv {
         // Division Routines
         //
 
-        inline inverse_type inverse() const
+        inverse_type inverse() const
         { return inverse_type(real_type(1),mat()); }
 
-        inline value_type det() const
+        value_type det() const
         {
             TMVStaticAssert((Sizes<_rowsize,_colsize>::same));
             TMVAssert(colsize() == rowsize());
             return tmv::Det(*this);
         }
 
-        inline real_type logDet(value_type* sign=0) const
+        float_type logDet(zfloat_type* sign=0) const
         {
             TMVStaticAssert((Sizes<_rowsize,_colsize>::same));
             TMVAssert(colsize() == rowsize());
             return tmv::LogDet(*this,sign);
         }
 
-        inline bool isSingular() const
+        bool isSingular() const
         { 
             TMVStaticAssert((Sizes<_rowsize,_colsize>::same));
             TMVAssert(colsize() == rowsize());
@@ -604,18 +622,18 @@ namespace tmv {
         }
 
         template <class M2>
-        inline void makeInverse(BaseMatrix_Mutable<M2>& minv) const
+        void makeInverse(BaseMatrix_Mutable<M2>& minv) const
         { tmv::MakeInverse(Scaling<1,real_type>(),*this,minv); }
 
         template <class M2>
-        inline void makeInverseATA(BaseMatrix_Mutable<M2>& mata) const
+        void makeInverseATA(BaseMatrix_Mutable<M2>& mata) const
         { tmv::MakeInverseATA(*this,mata); }
 
 #if 0
-        inline real_type norm2() const
+        real_type norm2() const
         { return svd().norm2(); }
 
-        inline real_type condition() const
+        real_type condition() const
         { return svd().condition(); }
 #endif
 
@@ -623,18 +641,18 @@ namespace tmv {
         // Auxilliary routines
         //
 
-        inline bool isconj() const { return _conj; }
+        bool isconj() const { return _conj; }
 
-        inline bool isrm() const { return mat().isrm(); }
-        inline bool iscm() const { return mat().iscm(); }
-        inline StorageType stor() const 
+        bool isrm() const { return mat().isrm(); }
+        bool iscm() const { return mat().iscm(); }
+        StorageType stor() const 
         { return isrm() ? RowMajor : iscm() ? ColMajor : NoMajor; }
 
-        inline const type& mat() const
+        const type& mat() const
         { return *static_cast<const type*>(this); }
 
-        inline size_t colsize() const { return mat().colsize(); }
-        inline size_t rowsize() const { return mat().rowsize(); }
+        size_t colsize() const { return mat().colsize(); }
+        size_t rowsize() const { return mat().rowsize(); }
 
     }; // BaseMatrix_Calc
 
@@ -683,16 +701,16 @@ namespace tmv {
         // Constructor
         //
 
-        inline BaseMatrix_Mutable() {}
-        inline BaseMatrix_Mutable(const BaseMatrix_Mutable<M>&) {}
-        inline ~BaseMatrix_Mutable() {}
+        BaseMatrix_Mutable() {}
+        BaseMatrix_Mutable(const BaseMatrix_Mutable<M>&) {}
+        ~BaseMatrix_Mutable() {}
 
 
         //
         // Access 
         //
 
-        inline reference operator()(int i, int j)
+        reference operator()(int i, int j)
         {
             CheckIndex<_fort>(i,colsize());
             CheckIndex<_fort>(j,rowsize());
@@ -704,7 +722,7 @@ namespace tmv {
         // Op =
         //
 
-        inline type& operator=(const BaseMatrix_Mutable<M>& m2) 
+        type& operator=(const BaseMatrix_Mutable<M>& m2) 
         {
             TMVAssert(colsize() == m2.colsize());
             TMVAssert(rowsize() == m2.rowsize());
@@ -713,7 +731,7 @@ namespace tmv {
         }
 
         template <class M2>
-        inline type& operator=(const BaseMatrix<M2>& m2) 
+        type& operator=(const BaseMatrix<M2>& m2) 
         {
             TMVStaticAssert((Sizes<_colsize,M2::_colsize>::same));
             TMVStaticAssert((Sizes<_rowsize,M2::_rowsize>::same));
@@ -729,23 +747,23 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline type& setZero() 
+        type& setZero() 
         { return mat().setZero(); }
 
-        inline type& setAllTo(value_type val) 
+        type& setAllTo(value_type val) 
         { return mat().setAllTo(val); }
 
-        inline type& addToAll(value_type val) 
+        type& addToAll(value_type val) 
         { return mat().addToAll(val); }
 
-        inline type& clip(real_type thresh) 
+        type& clip(real_type thresh) 
         { return mat().clip(thresh); }
 
         template <class F>
-        inline type& applyToAll(const F& f)
+        type& applyToAll(const F& f)
         { return mat().applyToAll(f); }
 
-        inline type& conjugateSelf() 
+        type& conjugateSelf() 
         { return mat().conjugateSelf(); }
 
 
@@ -753,37 +771,37 @@ namespace tmv {
         // Views
         //
 
-        inline view_type view() 
+        view_type view() 
         { return mat().view(); }
 
-        inline cview_type cView() 
+        cview_type cView() 
         { return mat().cView(); }
 
-        inline fview_type fView() 
+        fview_type fView() 
         { return mat().fView(); }
 
-        inline xview_type xView() 
+        xview_type xView() 
         { return mat().xView(); }
 
-        inline cmview_type cmView() 
+        cmview_type cmView() 
         {
             TMVAssert(mat().iscm());
             return mat().cmView(); 
         }
 
-        inline rmview_type rmView() 
+        rmview_type rmView() 
         {
             TMVAssert(mat().isrm());
             return mat().rmView(); 
         }
 
-        inline transpose_type transpose() 
+        transpose_type transpose() 
         { return mat().transpose(); }
 
-        inline conjugate_type conjugate() 
+        conjugate_type conjugate() 
         { return mat().conjugate(); }
 
-        inline adjoint_type adjoint() 
+        adjoint_type adjoint() 
         { return mat().adjiont(); }
 
 
@@ -791,7 +809,7 @@ namespace tmv {
         // I/O
         //
 
-        inline void read(std::istream& is)
+        void read(std::istream& is)
         { mat().read(is); }
 
 
@@ -811,23 +829,23 @@ namespace tmv {
         // function defined as non-member functions for various objects.
 
         template <class X2>
-        inline type& operator+=(const X2& x2)
+        type& operator+=(const X2& x2)
         { AddEq(mat(),x2); return mat(); }
 
         template <class X2>
-        inline type& operator-=(const X2& x2)
+        type& operator-=(const X2& x2)
         { SubtractEq(mat(),x2); return mat(); }
 
         template <class X2>
-        inline type& operator*=(const X2& x2)
+        type& operator*=(const X2& x2)
         { MultEq(mat(),x2); return mat(); }
 
         template <class X2>
-        inline type& operator/=(const X2& x2)
+        type& operator/=(const X2& x2)
         { DivEq(mat(),x2); return mat(); }
 
         template <class X2>
-        inline type& operator%=(const X2& x2)
+        type& operator%=(const X2& x2)
         { RDivEq(mat(),x2); return mat(); }
 
 
@@ -835,34 +853,35 @@ namespace tmv {
         // Auxilliary routines
         //
 
-        inline const type& mat() const
+        const type& mat() const
         { return *static_cast<const type*>(this); }
-        inline type& mat()
+        type& mat()
         { return *static_cast<type*>(this); }
 
-        inline size_t colsize() const { return mat().colsize(); }
-        inline size_t rowsize() const { return mat().rowsize(); }
-        inline reference ref(int i, int j) { return mat().ref(i,j); }
-        inline value_type cref(int i, int j) const  { return mat().cref(i,j); }
+        size_t colsize() const { return mat().colsize(); }
+        size_t rowsize() const { return mat().rowsize(); }
+        reference ref(int i, int j) { return mat().ref(i,j); }
+        value_type cref(int i, int j) const  { return mat().cref(i,j); }
 
     }; // BaseMatrix_Mutable
 
-#if 0
     template <class T>
-    class MatrixSizer : public BaseMatrix<MatrixSizer<T> >
+    class MatrixSizer : 
+        public BaseMatrix<MatrixSizer<T> >
     {
     public:
-        inline MatrixSizer(const int _cs, const int _rs) : cs(_cs), rs(_rs) {}
-        inline size_t colsize() const { return cs; }
-        inline size_t rowsize() const { return rs; }
+        MatrixSizer(const int _cs, const int _rs) : cs(_cs), rs(_rs) {}
+        size_t colsize() const { return cs; }
+        size_t rowsize() const { return rs; }
+        int nElements() const { return cs * rs; }
 
-        inline T cref(int , int ) const  { return T(0); }
-
-        template <class M2>
-        inline void assignTo(BaseMatrix_Mutable<M2>& ) const {}
+        T cref(int , int ) const  { return T(0); }
 
         template <class M2>
-        inline void newAssignTo(BaseMatrix_Mutable<M2>& ) const {}
+        void assignTo(BaseMatrix_Mutable<M2>& ) const {}
+
+        template <class M2>
+        void newAssignTo(BaseMatrix_Mutable<M2>& ) const {}
 
     private :
         const int cs, rs;
@@ -885,7 +904,6 @@ namespace tmv {
         enum { _fort = false };
         enum { _calc = false };
     };
-#endif
 
     //
     // Trace
@@ -959,7 +977,7 @@ namespace tmv {
     };
 
     template <class M1, class M2>
-    inline bool CallEq(
+    static bool CallEq(
         const BaseMatrix_Calc<M1>& m1, const BaseMatrix_Calc<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same)); 
@@ -973,15 +991,14 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    inline bool operator==(
+    static bool operator==(
         const BaseMatrix<M1>& m1, const BaseMatrix<M2>& m2)
     { return CallEq(m1.calc().cView(),m2.calc().cView()); }
 
     template <class M1, class M2>
-    inline bool operator!=(
+    static bool operator!=(
         const BaseMatrix<M1>& m1, const BaseMatrix<M2>& m2)
     { return !(m1 == m2); }
-
 
 
     //
@@ -990,57 +1007,56 @@ namespace tmv {
     //
 
     template <class M>
-    inline typename M::value_type Trace(const BaseMatrix<M>& m)
+    static typename M::value_type Trace(const BaseMatrix<M>& m)
     { return m.trace(); }
 
     template <class M>
-    inline typename M::real_type Norm(const BaseMatrix<M>& m)
+    static typename M::float_type Norm(const BaseMatrix<M>& m)
     { return m.norm(); }
-
     template <class M>
-    inline typename M::real_type NormF(const BaseMatrix<M>& m)
+    static typename M::float_type NormF(const BaseMatrix<M>& m)
     { return m.normF(); }
-
     template <class M>
-    inline typename M::real_type NormSq(const BaseMatrix<M>& m)
+    static typename M::real_type NormSq(const BaseMatrix<M>& m)
     { return m.normSq(); }
-
     template <class M>
-    inline typename M::real_type Norm1(const BaseMatrix<M>& m)
+    static typename M::float_type Norm1(const BaseMatrix<M>& m)
     { return m.norm1(); }
-
     template <class M>
-    inline typename M::real_type NormInf(const BaseMatrix<M>& m)
+    static typename M::float_type NormInf(const BaseMatrix<M>& m)
     { return m.normInf(); }
 
     template <class M>
-    inline typename M::real_type MaxAbsElement(const BaseMatrix<M>& m)
-    { return m.normInf(); }
+    static typename M::float_type MaxAbsElement(const BaseMatrix<M>& m)
+    { return m.maxAbsElement(); }
+    template <class M>
+    static typename M::real_type MaxAbs2Element(const BaseMatrix<M>& m)
+    { return m.maxAbs2Element(); }
 
     template <class M>
-    inline typename M::value_type SumElements(const BaseMatrix<M>& m)
+    static typename M::value_type SumElements(const BaseMatrix<M>& m)
     { return m.sumElements(); }
-
     template <class M>
-    inline typename M::real_type SumAbsElements(const BaseMatrix<M>& m)
+    static typename M::float_type SumAbsElements(const BaseMatrix<M>& m)
     { return m.sumAbsElements(); }
+    template <class M>
+    static typename M::real_type SumAbs2Elements(const BaseMatrix<M>& m)
+    { return m.sumAbs2Elements(); }
 
     template <class M>
-    inline typename M::const_conjugate_type Conjugate(
+    static typename M::const_conjugate_type Conjugate(
         const BaseMatrix_Calc<M>& m)
     { return m.conjugate(); }
-
     template <class M>
-    inline typename M::const_transpose_type Transpose(
+    static typename M::const_transpose_type Transpose(
         const BaseMatrix_Calc<M>& m)
     { return m.transpose(); }
-
     template <class M>
-    inline typename M::const_adjoint_type Adjoint(const BaseMatrix_Calc<M>& m)
+    static typename M::const_adjoint_type Adjoint(const BaseMatrix_Calc<M>& m)
     { return m.adjoint(); }
 
     template <class M>
-    inline typename M::inverse_type Inverse(const BaseMatrix<M>& m)
+    static typename M::inverse_type Inverse(const BaseMatrix<M>& m)
     { return m.inverse(); }
 
 

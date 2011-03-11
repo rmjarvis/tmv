@@ -39,7 +39,7 @@ namespace tmv {
     template <bool trans, class M1, class M2>
     struct NonLapLUSolve // trans == false here
     {
-        static void call(const M1& m1, const int* P, M2& m2)
+        static void call(const M1& m1, const Permutation& P, M2& m2)
         {
             if (m2.iscm()) {
                 typename M2::cmview_type m2cm = m2.cmView();
@@ -49,7 +49,7 @@ namespace tmv {
                 InlineLU_SolveInPlace(m1,P,m2rm);
             }
         }
-        static void call2(const M1& m1, const int* P, M2& v2)
+        static void call2(const M1& m1, const Permutation& P, M2& v2)
         {
             typename M2::unitview_type v2u = v2.unitView();
             InlineLU_SolveInPlace(m1,P,v2u);
@@ -58,7 +58,7 @@ namespace tmv {
     template <class M1, class M2>
     struct NonLapLUSolve<true,M1,M2>
     {
-        static void call(const M1& m1, const int* P, M2& m2)
+        static void call(const M1& m1, const Permutation& P, M2& m2)
         {
             if (m2.iscm()) {
                 typename M2::cmview_type m2cm = m2.cmView();
@@ -68,7 +68,7 @@ namespace tmv {
                 InlineLU_SolveTransposeInPlace(m1,P,m2rm);
             }
         }
-        static void call2(const M1& m1, const int* P, M2& v2)
+        static void call2(const M1& m1, const Permutation& P, M2& v2)
         {
             typename M2::unitview_type v2u = v2.unitView();
             InlineLU_SolveTransposeInPlace(m1,P,v2u);
@@ -79,27 +79,28 @@ namespace tmv {
     // ALAP, not LAP, since ATLAS has these routines
     template <bool trans, class M1, class T2, class T1> 
     static inline void LapLUSolve(
-        const M1& m1, const int* P, MatrixView<T2>& m2, T1)
+        const M1& m1, const Permutation& P, MatrixView<T2>& m2, T1)
     { NonLapLUSolve<trans,M1,MatrixView<T2> >::call(m1,P,m2); }
     template <bool trans, class M1, class T2, class T1> 
     static inline void LapLUSolve(
-        const M1& m1, const int* P, VectorView<T2>& v2, T1)
+        const M1& m1, const Permutation& P, VectorView<T2>& v2, T1)
     { NonLapLUSolve<trans,M1,VectorView<T2> >::call2(m1,P,v2); }
 #ifdef INST_DOUBLE
     template <bool trans, class M1> 
     static void LapLUSolve(
-        const M1& m1, const int* P, MatrixView<double>& m2, double)
+        const M1& m1, const Permutation& P, MatrixView<double>& m2, double)
     {
+        TMVAssert(P.isInverse());
         int n = m1.colsize();
         int nrhs = m2.rowsize();
         int lda = m1.stepj();
         int ldb = m2.stepj();
 #ifdef CLAP
-        const int* ipiv = P;
+        const int* ipiv = P.getValues();
 #else
         auto_array<int> ipiv1(new int[n]);
         const int* ipiv = ipiv1.get();
-        for(int i=0;i<n;++i) ipiv[i] = P[i] LAPPLUS1;
+        for(int i=0;i<n;++i) ipiv[i] = P.getValues()[i] LAPPLUS1;
 #endif
         LAPNAME(dgetrs) (
             LAPCM trans?LAPCH_T:LAPCH_NT,
@@ -109,19 +110,20 @@ namespace tmv {
     }
     template <bool trans, class M1> 
     static void LapLUSolve(
-        const M1& m1, const int* P, MatrixView<std::complex<double> > m2,
-        std::complex<double> )
+        const M1& m1, const Permutation& P,
+        MatrixView<std::complex<double> > m2, std::complex<double> )
     {
+        TMVAssert(P.isInverse());
         int n = m1.colsize();
         int nrhs = m2.rowsize();
         int lda = m1.stepj();
         int ldb = m2.stepj();
 #ifdef CLAP
-        const int* ipiv = P;
+        const int* ipiv = P.getValues();
 #else
         auto_array<int> ipiv1(new int[n]);
         const int* ipiv = ipiv1.get();
-        for(int i=0;i<n;++i) ipiv[i] = P[i] LAPPLUS1;
+        for(int i=0;i<n;++i) ipiv[i] = P.getValues()[i] LAPPLUS1;
 #endif
         if (!trans && m1.isconj()) m2.conjugateSelf();
         LAPNAME(zgetrs) (
@@ -133,8 +135,8 @@ namespace tmv {
     }
     template <bool trans, class M1> 
     static void LapLUSolve(
-        const M1& m1, const int* P, MatrixView<std::complex<double> > m2,
-        double t1)
+        const M1& m1, const Permutation& P,
+        MatrixView<std::complex<double> > m2, double t1)
     {
         Matrix<double,ColMajor> temp = m2.realPart();
         LapLUSolve(m1,P,temp,t1);
@@ -145,35 +147,36 @@ namespace tmv {
     }
     template <bool trans, class M1> 
     static void LapLUSolve(
-        const M1& m1, const int* P, VectorView<double> v2, double t1)
+        const M1& m1, const Permutation& P, VectorView<double> v2, double t1)
     { LapLUSolve(m1,P,ColVectorViewOf(v2).xView(),t1); }
     template <bool trans, class M1> 
     static void LapLUSolve(
-        const M1& m1, const int* P, VectorView<std::complex<double> > v2,
-        std::complex<double> t1)
+        const M1& m1, const Permutation& P, 
+        VectorView<std::complex<double> > v2, std::complex<double> t1)
     { LapLUSolve(m1,P,ColVectorViewOf(v2).xView(),t1); }
     template <bool trans, class M1> 
     static void LapLUSolve(
-        const M1& m1, const int* P, VectorView<std::complex<double> > v2,
-        double t1)
+        const M1& m1, const Permutation& P, 
+        VectorView<std::complex<double> > v2, double t1)
     { LapLUSolve(m1,P,ColVectorViewOf(v2).xView(),t1); }
 #endif
 #ifdef INST_FLOAT
 #ifndef MKL // TODO: Check if this is still required...
     template <bool trans, class M1> 
     static void LapLUSolve(
-        const M1& m1, const int* P, MatrixView<float>& m2, float)
+        const M1& m1, const Permutation& P, MatrixView<float>& m2, float)
     {
+        TMVAssert(P.isInverse());
         int n = m1.colsize();
         int nrhs = m2.rowsize();
         int lda = m1.stepj();
         int ldb = m2.stepj();
 #ifdef CLAP
-        const int* ipiv = P;
+        const int* ipiv = P.getValues();
 #else
         auto_array<int> ipiv1(new int[n]);
         const int* ipiv = ipiv1.get();
-        for(int i=0;i<n;++i) ipiv[i] = P[i] LAPPLUS1;
+        for(int i=0;i<n;++i) ipiv[i] = P.getValues()[i] LAPPLUS1;
 #endif
         LAPNAME(sgetrs) (
             LAPCM trans?LAPCH_T:LAPCH_NT,
@@ -183,19 +186,20 @@ namespace tmv {
     }
     template <bool trans, class M1> 
     static void LapLUSolve(
-        const M1& m1, const int* P, MatrixView<std::complex<float> > m2,
-        std::complex<float> )
+        const M1& m1, const Permutation& P,
+        MatrixView<std::complex<float> > m2, std::complex<float> )
     {
+        TMVAssert(P.isInverse());
         int n = m1.colsize();
         int nrhs = m2.rowsize();
         int lda = m1.stepj();
         int ldb = m2.stepj();
 #ifdef CLAP
-        const int* ipiv = P;
+        const int* ipiv = P.getValues();
 #else
         auto_array<int> ipiv1(new int[n]);
         const int* ipiv = ipiv1.get();
-        for(int i=0;i<n;++i) ipiv[i] = P[i] LAPPLUS1;
+        for(int i=0;i<n;++i) ipiv[i] = P.getValues()[i] LAPPLUS1;
 #endif
         if (!trans && m1.isconj()) m2.conjugateSelf();
         LAPNAME(cgetrs) (
@@ -207,8 +211,8 @@ namespace tmv {
     }
     template <bool trans, class M1> 
     static void LapLUSolve(
-        const M1& m1, const int* P, MatrixView<std::complex<float> > m2,
-        float t1)
+        const M1& m1, const Permutation& P,
+        MatrixView<std::complex<float> > m2, float t1)
     {
         Matrix<float,ColMajor> temp = m2.realPart();
         LapLUSolve(m1,P,temp,t1);
@@ -219,24 +223,24 @@ namespace tmv {
     }
     template <bool trans, class M1> 
     static void LapLUSolve(
-        const M1& m1, const int* P, VectorView<float> v2, float t1)
+        const M1& m1, const Permutation& P, VectorView<float> v2, float t1)
     { LapLUSolve(m1,P,ColVectorViewOf(v2).xView(),t1); }
     template <bool trans, class M1> 
     static void LapLUSolve(
-        const M1& m1, const int* P, VectorView<std::complex<float> > v2,
-        std::complex<float> t1)
+        const M1& m1, const Permutation& P, 
+        VectorView<std::complex<float> > v2, std::complex<float> t1)
     { LapLUSolve(m1,P,ColVectorViewOf(v2).xView(),t1); }
     template <bool trans, class M1> 
     static void LapLUSolve(
-        const M1& m1, const int* P, VectorView<std::complex<float> > v2,
-        float t1)
+        const M1& m1, const Permutation& P,
+        VectorView<std::complex<float> > v2, float t1)
     { LapLUSolve(m1,P,ColVectorViewOf(v2).xView(),t1); }
 #endif // MKL
 #endif // FLOAT
 #endif // ALAP
 
     template <bool trans, class M1, class T2>
-    static void DoLUSolve(const M1& m1, const int* P, MatrixView<T2> m2)
+    static void DoLUSolve(const M1& m1, const Permutation& P, MatrixView<T2> m2)
     {
 #ifdef ALAP
         if (m1.stepj()>0) {
@@ -265,7 +269,7 @@ namespace tmv {
     }
 
     template <bool trans, class M1, class T2>
-    static void DoLUSolve(const M1& m1, const int* P, VectorView<T2> v2)
+    static void DoLUSolve(const M1& m1, const Permutation& P, VectorView<T2> v2)
     {
 #ifdef ALAP
         if (m1.stepj()>0) {
@@ -296,22 +300,22 @@ namespace tmv {
 
     template <class T1, class T2, bool C1>
     void InstLU_SolveInPlace(
-        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const int* P,
+        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P,
         MatrixView<T2> m2)
     { DoLUSolve<false>(m1,P,m2); }
     template <class T1, class T2, bool C1>
     void InstLU_SolveTransposeInPlace(
-        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const int* P,
+        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P,
         MatrixView<T2> m2)
     { DoLUSolve<true>(m1,P,m2); }
     template <class T1, class T2, bool C1>
     void InstLU_SolveInPlace(
-        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const int* P,
+        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P,
         VectorView<T2> v2)
     { DoLUSolve<false>(m1,P,v2); }
     template <class T1, class T2, bool C1>
     void InstLU_SolveTransposeInPlace(
-        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const int* P,
+        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P,
         VectorView<T2> v2)
     { DoLUSolve<true>(m1,P,v2); }
 

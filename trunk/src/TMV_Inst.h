@@ -51,6 +51,8 @@
 #endif
 
 #ifdef TMV_INST_INT
+// Define TISINT for any integer type.  e.g. long, short, etc.
+#define TISINT 
 #define T int
 #include InstFile
 #undef T

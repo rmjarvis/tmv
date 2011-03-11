@@ -38,11 +38,29 @@
 
 namespace tmv {
 
-    // TODO: Convert to new algo numbering scheme
-    
     // 
     // SumElements
+    // SumAbsElements
+    // SumAbs2Elements
+    // NormSq
     //
+
+    // Defined in TMV_TriMatrix.cpp
+    template <class T>
+    T InstSumElements(const ConstUpperTriMatrixView<T>& m); 
+    template <class T>
+    typename ConstUpperTriMatrixView<T>::float_type InstSumAbsElements(
+        const ConstUpperTriMatrixView<T>& m); 
+    template <class T>
+    typename Traits<T>::real_type InstSumAbs2Elements(
+        const ConstUpperTriMatrixView<T>& m); 
+    template <class T>
+    typename Traits<T>::real_type InstNormSq(
+        const ConstUpperTriMatrixView<T>& m); 
+    template <class T>
+    typename ConstUpperTriMatrixView<T>::float_type InstNormSq(
+        const ConstUpperTriMatrixView<T>& m, 
+        typename ConstUpperTriMatrixView<T>::float_type scale); 
 
     // UNROLL is the maximum nops to unroll.
 #if TMV_OPT >= 3
@@ -55,154 +73,86 @@ namespace tmv {
 #define TMV_NORMU_UNROLL 0
 #endif
 
-    template <int algo, int s, CompType comp, int ix, class M1>
+    template <int algo, int s, CompType comp, int ix, class ret, class M1>
     struct SumElementsU_Helper;
 
     // algo 1: m1 is unitdiag
-    template <int s, CompType comp, int ix, class M1>
-    struct SumElementsU_Helper<1,s,comp,ix,M1> 
+    template <int s, CompType comp, int ix, class ret, class M1>
+    struct SumElementsU_Helper<1,s,comp,ix,ret,M1> 
     {
-        typedef typename M1::value_type MT;
-        typedef typename M1::real_type RT;
-        typedef typename Maybe<comp!=ValueComp>::
-            template RealType<MT>::type ret;
-
-        static inline ret call(const M1& m, const Scaling<ix,RT>& x)
+        typedef typename Traits<ret>::real_type RT;
+        static ret call(const M1& m, const Scaling<ix,RT>& x)
         {
             const int N = (s == UNKNOWN ? m.size() : s);
             typedef typename M1::const_offdiag_type Mo;
             Mo mo = m.offDiag();
             const int sm1 = IntTraits2<s,-1>::sum;
-            return SumElementsU_Helper<-1,sm1,comp,ix,Mo>::call(mo,x) 
+            return SumElementsU_Helper<-1,sm1,comp,ix,ret,Mo>::call(mo,x) 
                 + Component<comp,RT>::f(RT(x)) * RT(N);
         }
     };
 
     // algo 2: unknown diag, figure out which it is.
-    template <int s, CompType comp, int ix, class M1>
-    struct SumElementsU_Helper<2,s,comp,ix,M1>
+    template <int s, CompType comp, int ix, class ret, class M1>
+    struct SumElementsU_Helper<2,s,comp,ix,ret,M1>
     {
-        typedef typename M1::value_type MT;
-        typedef typename M1::real_type RT;
-        typedef typename Maybe<comp!=ValueComp>::
-            template RealType<MT>::type ret;
-        static inline ret call(const M1& m, const Scaling<ix,RT>& x)
+        typedef typename Traits<ret>::real_type RT;
+        static ret call(const M1& m, const Scaling<ix,RT>& x)
         {
             if (m.isunit()) 
-                return SumElementsU_Helper<1,s,comp,ix,M1>::call(m,x);
+                return SumElementsU_Helper<1,s,comp,ix,ret,M1>::call(m,x);
             else 
-                return SumElementsU_Helper<-4,s,comp,ix,M1>::call(m,x);
+                return SumElementsU_Helper<-4,s,comp,ix,ret,M1>::call(m,x);
         }
     };
 
     // algo 11: loop over columns
-    template <int s, CompType comp, int ix, class M1>
-    struct SumElementsU_Helper<11,s,comp,ix,M1> 
+    template <int s, CompType comp, int ix, class ret, class M1>
+    struct SumElementsU_Helper<11,s,comp,ix,ret,M1> 
     {
-        typedef typename M1::value_type MT;
-        typedef typename M1::real_type RT;
-        typedef typename Maybe<comp!=ValueComp>::
-            template RealType<MT>::type ret;
-
-        static inline ret call(const M1& m, const Scaling<ix,RT>& x)
+        typedef typename Traits<ret>::real_type RT;
+        static ret call(const M1& m, const Scaling<ix,RT>& x)
         {
             const int N = (s == UNKNOWN ? m.size() : s);
             typedef typename M1::const_col_sub_type Mc;
             ret sum(0);
             for(int j=0;j<N;++j) {
                 Mc mc = m.get_col(j,0,j+1);
-                sum += SumElementsV_Helper<-1,UNKNOWN,comp,ix,Mc>::call(mc,x);
+                sum += SumElementsV_Helper<-1,UNKNOWN,comp,ix,ret,Mc>::call(mc,x);
             }
             return sum;
         }
     };
 
     // algo 12: loop over rows
-    template <int s, CompType comp, int ix, class M1>
-    struct SumElementsU_Helper<12,s,comp,ix,M1> 
+    template <int s, CompType comp, int ix, class ret, class M1>
+    struct SumElementsU_Helper<12,s,comp,ix,ret,M1> 
     {
-        typedef typename M1::value_type MT;
-        typedef typename M1::real_type RT;
-        typedef typename Maybe<comp!=ValueComp>::
-            template RealType<MT>::type ret;
-
-        static inline ret call(const M1& m, const Scaling<ix,RT>& x)
+        typedef typename Traits<ret>::real_type RT;
+        static ret call(const M1& m, const Scaling<ix,RT>& x)
         {
             const int N = (s == UNKNOWN ? m.size() : s);
             typedef typename M1::const_row_sub_type Mr;
             ret sum(0);
             for(int i=0;i<N;++i) {
                 Mr mr = m.get_row(i,i,N);
-                sum += SumElementsV_Helper<-1,UNKNOWN,comp,ix,Mr>::call(mr,x);
+                sum += SumElementsV_Helper<-1,UNKNOWN,comp,ix,ret,Mr>::call(mr,x);
             }
             return sum;
         }
     };
 
-    // algo 15: Fully unroll by rows
-    template <int s, CompType comp, int ix, class M1>
-    struct SumElementsU_Helper<15,s,comp,ix,M1>
+    // algo 15: Fully unroll by columns
+    template <int s, CompType comp, int ix, class ret, class M1>
+    struct SumElementsU_Helper<15,s,comp,ix,ret,M1>
     {
-        typedef typename M1::value_type MT;
-        typedef typename M1::real_type RT;
-        typedef typename Maybe<comp!=ValueComp>::
-            template RealType<MT>::type ret;
+        typedef typename M1::value_type VT;
+        typedef typename Traits<ret>::real_type RT;
 
         template <int I, int M, int J, int N>
         struct Unroller
         {
-            static inline ret unroll(const M1& m, const Scaling<ix,RT>& x)
-            {
-                return (
-                    Unroller<I,M/2,J,N>::unroll(m,x) +
-                    Unroller<I+M/2,M-M/2,J,N>::unroll(m,x));
-            }
-        };
-        template <int I, int J, int N>
-        struct Unroller<I,1,J,N>
-        {
-            static inline ret unroll(const M1& m, const Scaling<ix,RT>& x)
-            {
-                return (
-                    Unroller<I,1,J,N/2>::unroll(m,x) +
-                    Unroller<I,1,J+N/2,N-N/2>::unroll(m,x));
-            }
-        };
-        template <int I, int J, int N>
-        struct Unroller<I,0,J,N>
-        { 
-            static inline ret unroll(const M1& , const Scaling<ix,RT>& ) 
-            { return ret(0); } 
-        };
-        template <int I, int J>
-        struct Unroller<I,1,J,1>
-        {
-            static inline ret unroll(const M1& m, const Scaling<ix,RT>& x)
-            { return Component<comp,MT>::f(x * m.cref(I,J)); }
-        };
-        template <int I, int J>
-        struct Unroller<I,1,J,0>
-        { 
-            static inline ret unroll(const M1& m, const Scaling<ix,RT>& x)
-            { return ret(0); }
-        };
-        static inline ret call(const M1& m, const Scaling<ix,RT>& x)
-        { return Unroller<0,s,0,s>::unroll(m,x); }
-    };
-
-    // algo 16: Fully unroll by columns
-    template <int s, CompType comp, int ix, class M1>
-    struct SumElementsU_Helper<16,s,comp,ix,M1>
-    {
-        typedef typename M1::value_type MT;
-        typedef typename M1::real_type RT;
-        typedef typename Maybe<comp!=ValueComp>::
-            template RealType<MT>::type ret;
-
-        template <int I, int M, int J, int N>
-        struct Unroller
-        {
-            static inline ret unroll(const M1& m, const Scaling<ix,RT>& x)
+            static ret unroll(const M1& m, const Scaling<ix,RT>& x)
             {
                 return (
                     Unroller<I,M-(N-N/2),J,N/2>::unroll(m,x) +
@@ -212,7 +162,7 @@ namespace tmv {
         template <int I, int M, int J>
         struct Unroller<I,M,J,1>
         {
-            static inline ret unroll(const M1& m, const Scaling<ix,RT>& x)
+            static ret unroll(const M1& m, const Scaling<ix,RT>& x)
             {
                 return (
                     Unroller<I,M/2,J,1>::unroll(m,x) +
@@ -222,35 +172,81 @@ namespace tmv {
         template <int I, int M, int J>
         struct Unroller<I,M,J,0>
         { 
-            static inline ret unroll(const M1& , const Scaling<ix,RT>& ) 
+            static ret unroll(const M1& , const Scaling<ix,RT>& ) 
             { return ret(0); } 
         };
         template <int I, int J>
         struct Unroller<I,1,J,1>
         {
-            static inline ret unroll(const M1& m, const Scaling<ix,RT>& x)
-            { return Component<comp,MT>::f(x * m.cref(I,J)); }
+            static ret unroll(const M1& m, const Scaling<ix,RT>& x)
+            { return Component<comp,VT>::f(x * m.cref(I,J)); }
         };
         template <int I, int J>
         struct Unroller<I,1,J,0>
         { 
-            static inline ret unroll(const M1& m, const Scaling<ix,RT>& x)
+            static ret unroll(const M1& m, const Scaling<ix,RT>& x)
             { return ret(0); }
         };
-        static inline ret call(const M1& m, const Scaling<ix,RT>& x)
+        static ret call(const M1& m, const Scaling<ix,RT>& x)
         { return Unroller<0,s,0,s>::unroll(m,x); }
     };
 
-    // algo -4: No branches or copies
-    // And m is NonUnitDiag
-    template <int s, CompType comp, int ix, class M1>
-    struct SumElementsU_Helper<-4,s,comp,ix,M1>
+    // algo 16: Fully unroll by rows
+    template <int s, CompType comp, int ix, class ret, class M1>
+    struct SumElementsU_Helper<16,s,comp,ix,ret,M1>
     {
-        typedef typename M1::value_type MT;
-        typedef typename M1::real_type RT;
-        typedef typename Maybe<comp!=ValueComp>::
-            template RealType<MT>::type ret;
-        static inline ret call(const M1& m, const Scaling<ix,RT>& x)
+        typedef typename M1::value_type VT;
+        typedef typename Traits<ret>::real_type RT;
+        template <int I, int M, int J, int N>
+        struct Unroller
+        {
+            static ret unroll(const M1& m, const Scaling<ix,RT>& x)
+            {
+                return (
+                    Unroller<I,M/2,J,N-(M-M/2)>::unroll(m,x) +
+                    Unroller<I+M/2,M-M/2,J,N>::unroll(m,x));
+            }
+        };
+        template <int I, int J, int N>
+        struct Unroller<I,1,J,N>
+        {
+            static ret unroll(const M1& m, const Scaling<ix,RT>& x)
+            {
+                return (
+                    Unroller<I,1,J,N/2>::unroll(m,x) +
+                    Unroller<I,1,J+N/2,N-N/2>::unroll(m,x));
+            }
+        };
+        template <int I, int J, int N>
+        struct Unroller<I,0,J,N>
+        { 
+            static ret unroll(const M1& , const Scaling<ix,RT>& ) 
+            { return ret(0); } 
+        };
+        template <int I, int J>
+        struct Unroller<I,1,J,1>
+        {
+            static ret unroll(const M1& m, const Scaling<ix,RT>& x)
+            { return Component<comp,VT>::f(x * m.cref(I,J)); }
+        };
+        template <int I, int J>
+        struct Unroller<I,1,J,0>
+        { 
+            static ret unroll(const M1& m, const Scaling<ix,RT>& x)
+            { return ret(0); }
+        };
+        static ret call(const M1& m, const Scaling<ix,RT>& x)
+        { return Unroller<0,s,0,s>::unroll(m,x); }
+    };
+
+
+    // algo -4: No branches or copies, and m is Upper, NonUnitDiag
+    template <int s, CompType comp, int ix, class ret, class M1>
+    struct SumElementsU_Helper<-4,s,comp,ix,ret,M1>
+    {
+        typedef typename Traits<ret>::real_type RT;
+
+        static ret call(const M1& m, const Scaling<ix,RT>& x)
         {
             TMVStaticAssert(M1::_upper);
             TMVStaticAssert(!M1::_unit);
@@ -258,608 +254,570 @@ namespace tmv {
             const int s2 = s > 20 ? UNKNOWN : s;
             const int s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)/2
-            const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
+            const int nops = IntTraits<IntTraits2<s2,s2p1>::safeprod>::halfS;
             const bool unroll = 
                 s == UNKNOWN ? false :
+                nops == UNKNOWN ? false :
+                nops > TMV_NORMU_UNROLL ? false :
                 // Norm is faster with the regular algorithm except for 
                 // very small matrices.
                 (s > 3 && comp == NormComp) ? false :
-                nops > TMV_NORMU_UNROLL ? false :
                 s <= 10;
             const int algo = 
-                unroll ? ( M1::_rowmajor ? 15 : 16 ) :
+                unroll ? ( M1::_colmajor ? 15 : 16 ) :
                 M1::_colmajor ? 11 : 12;
-            return SumElementsU_Helper<algo,s,comp,ix,M1>::call(m,x);
+            return SumElementsU_Helper<algo,s,comp,ix,ret,M1>::call(m,x);
         }
     };
 
-    // algo -1: Determine which algorithm to use
-    template <int s, CompType comp, int ix, class M1>
-    struct SumElementsU_Helper<-1,s,comp,ix,M1>
+    // algo 95: Transpose (and go back to -3, not -1)
+    template <int s, CompType comp, int ix, class ret, class M1>
+    struct SumElementsU_Helper<95,s,comp,ix,ret,M1>
     {
-        typedef typename M1::value_type MT;
-        typedef typename M1::real_type RT;
-        typedef typename Maybe<comp!=ValueComp>::
-            template RealType<MT>::type ret;
-        static inline ret call(const M1& m, const Scaling<ix,RT>& x)
+        typedef typename Traits<ret>::real_type RT;
+
+        static ret call(const M1& m, const Scaling<ix,RT>& x)
         {
-            TMVStaticAssert(M1::_upper);
+            typedef typename M1::const_transpose_type Mt;
+            Mt mt = m.transpose();
+            return SumElementsU_Helper<-3,s,comp,ix,ret,Mt>::call(mt,x);
+        }
+    };
+    
+    // algo -3: Determine which algorithm to use
+    template <int s, CompType comp, int ix, class ret, class M1>
+    struct SumElementsU_Helper<-3,s,comp,ix,ret,M1>
+    {
+        typedef typename Traits<ret>::real_type RT;
+
+        static ret call(const M1& m, const Scaling<ix,RT>& x)
+        {
             const int algo = 
                 M1::_unit ? 1 :
                 M1::_unknowndiag ? 2 :
+                M1::_lower ? 95 :
                 -4;
-            return SumElementsU_Helper<algo,s,comp,ix,M1>::call(m,x);
+            return SumElementsU_Helper<algo,s,comp,ix,ret,M1>::call(m,x);
         }
     };
 
-    template <class M>
-    inline typename M::value_type InlineSumElements(const BaseMatrix_Tri<M>& m)
+    // algo 96: Transpose
+    template <int s, CompType comp, int ix, class ret, class M1>
+    struct SumElementsU_Helper<96,s,comp,ix,ret,M1>
     {
-        TMVStaticAssert(M::_upper);
-        typedef typename M::value_type MT;
-        typedef typename M::real_type RT;
-        typedef typename M::const_cview_type Mv;
-        Mv mv = m.cView();
-        return SumElementsU_Helper<-1,M::_size,ValueComp,1,Mv>::call(
-            mv,Scaling<1,RT>());
-    }
+        typedef typename Traits<ret>::real_type RT;
 
-    // Defined in TMV_TriMatrix.cpp
-    template <class T>
-    T InstSumElements(
-        const ConstUpperTriMatrixView<T>& m); 
-
-    template <bool lower, bool conj, bool inst, class M>
-    struct CallSumElementsU;
-
-    template <bool conj, bool inst, class M>
-    struct CallSumElementsU<true,conj,inst,M> // lower = true
-    {
-        static inline typename M::value_type call(const M& m)
+        static ret call(const M1& m, const Scaling<ix,RT>& x)
         {
-            typedef typename M::const_transpose_type Mt;
+            typedef typename M1::const_transpose_type Mt;
             Mt mt = m.transpose();
-            return CallSumElementsU<false,conj,inst,Mt>::call(mt);
+            return SumElementsU_Helper<-1,s,comp,ix,ret,Mt>::call(mt,x);
         }
     };
-    template <bool inst, class M>
-    struct CallSumElementsU<false,true,inst,M> // conj = true
+    
+    // algo 97: Conjugate
+    template <int s, CompType comp, int ix, class ret, class M1>
+    struct SumElementsU_Helper<97,s,comp,ix,ret,M1>
     {
-        static inline typename M::value_type call(const M& m)
+        typedef typename Traits<ret>::real_type RT;
+
+        static ret call(const M1& m, const Scaling<ix,RT>& x)
         {
-            typedef typename M::const_conjugate_type Mc;
-            return TMV_CONJ(
-                CallSumElementsU<false,false,inst,Mc>::call(m.conjugate()));
+            typedef typename M1::const_conjugate_type Mc;
+            Mc mc = m.conjugate();
+            return TMV_CONJ(SumElementsU_Helper<-1,s,comp,ix,ret,Mc>::call(mc,x));
         }
     };
-    template <class M>
-    struct CallSumElementsU<false,false,true,M> // inst = true
+    
+    // algo 98: Call inst
+    template <int s, int ix, class ret, class M1>
+    struct SumElementsU_Helper<98,s,ValueComp,ix,ret,M1>
     {
-        static inline typename M::value_type call(const M& m)
+        typedef typename Traits<ret>::real_type RT;
+
+        static ret call(const M1& m, const Scaling<ix,RT>& x)
         { return InstSumElements(m.xdView()); }
     };
-    template <class M>
-    struct CallSumElementsU<false,false,false,M> // inst = false
+    template <int s, int ix, class ret, class M1>
+    struct SumElementsU_Helper<98,s,AbsComp,ix,ret,M1>
     {
-        static inline typename M::value_type call(const M& m)
-        { return InlineSumElements(m); }
-    };
+        typedef typename Traits<ret>::real_type RT;
 
-    template <class M>
-    inline typename M::value_type SumElements(const BaseMatrix_Tri<M>& m)
-    {
-        typedef typename M::value_type T;
-        const bool inst = 
-            M::unknownsizes &&
-            (M::_rowmajor || M::_colmajor) &&
-            Traits<T>::isinst;
-        const bool lower = M::_lower;
-        return CallSumElementsU<lower,M::_conj,inst,M>::call(m.mat());
-    }
-
-
-    // 
-    // SumAbsElements
-    //
-
-    template <class M>
-    inline typename M::real_type InlineSumAbsElements(
-        const BaseMatrix_Tri<M>& m)
-    {
-        TMVStaticAssert(M::_upper);
-        typedef typename M::value_type MT;
-        typedef typename M::real_type RT;
-        typedef typename M::const_cview_type Mv;
-        Mv mv = m.cView();
-        return SumElementsU_Helper<-1,M::_size,AbsComp,1,Mv>::call(
-            mv,Scaling<1,RT>());
-    }
-
-    // Defined in TMV_TriMatrix.cpp
-    template <class T>
-    typename Traits<T>::real_type InstSumAbsElements(
-        const ConstUpperTriMatrixView<T>& m); 
-
-    template <bool lower, bool inst, class M>
-    struct CallSumAbsElementsU;
-
-    template <bool inst, class M>
-    struct CallSumAbsElementsU<true,inst,M> // lower = true
-    {
-        static inline typename M::real_type call(const M& m)
-        {
-            typedef typename M::const_transpose_type Mt;
-            Mt mt = m.transpose();
-            return CallSumAbsElementsU<false,inst,Mt>::call(mt);
-        }
-    };
-    template <class M>
-    struct CallSumAbsElementsU<false,true,M> // inst = true
-    {
-        static inline typename M::real_type call(const M& m)
+        static ret call(const M1& m, const Scaling<ix,RT>& x)
         { return InstSumAbsElements(m.xdView()); }
     };
-    template <class M>
-    struct CallSumAbsElementsU<false,false,M> // inst = false
+    template <int s, int ix, class ret, class M1>
+    struct SumElementsU_Helper<98,s,Abs2Comp,ix,ret,M1>
     {
-        static inline typename M::real_type call(const M& m)
-        { return InlineSumAbsElements(m); }
-    };
+        typedef typename Traits<ret>::real_type RT;
 
-    template <class M>
-    inline typename M::real_type SumAbsElements(const BaseMatrix_Tri<M>& m)
-    {
-        typedef typename M::value_type T;
-        typedef typename M::const_nonconj_type Mn;
-        const bool inst = 
-            M::unknownsizes &&
-            (M::_rowmajor || M::_colmajor) &&
-            Traits<T>::isinst;
-        const bool lower = M::_lower;
-        return CallSumAbsElementsU<lower,inst,Mn>::call(m.nonConj());
-    }
-
-
-    // 
-    // SumAbs2Elements
-    //
-
-    template <class M>
-    inline typename M::real_type InlineSumAbs2Elements(
-        const BaseMatrix_Tri<M>& m)
-    {
-        TMVStaticAssert(M::_upper);
-        typedef typename M::value_type MT;
-        typedef typename M::real_type RT;
-        typedef typename M::const_cview_type Mv;
-        Mv mv = m.cView();
-        return SumElementsU_Helper<-1,M::_size,Abs2Comp,1,Mv>::call(
-            mv,Scaling<1,RT>());
-    }
-
-    // Defined in TMV_TriMatrix.cpp
-    template <class T>
-    typename Traits<T>::real_type InstSumAbs2Elements(
-        const ConstUpperTriMatrixView<T>& m); 
-
-    template <bool lower, bool inst, class M>
-    struct CallSumAbs2ElementsU;
-
-    template <bool inst, class M>
-    struct CallSumAbs2ElementsU<true,inst,M> // lower = true
-    {
-        static inline typename M::real_type call(const M& m)
-        {
-            typedef typename M::const_transpose_type Mt;
-            Mt mt = m.transpose();
-            return CallSumAbs2ElementsU<false,inst,Mt>::call(mt);
-        }
-    };
-    template <class M>
-    struct CallSumAbs2ElementsU<false,true,M> // inst = true
-    {
-        static inline typename M::real_type call(const M& m)
+        static ret call(const M1& m, const Scaling<ix,RT>& x)
         { return InstSumAbs2Elements(m.xdView()); }
     };
-    template <class M>
-    struct CallSumAbs2ElementsU<false,false,M> // inst = false
+    template <int s, class ret, class M1>
+    struct SumElementsU_Helper<98,s,NormComp,1,ret,M1>
     {
-        static inline typename M::real_type call(const M& m)
-        { return InlineSumAbs2Elements(m); }
+        typedef typename Traits<ret>::real_type RT;
+
+        static ret call(const M1& m, const Scaling<1,RT>& x)
+        { return InstNormSq(m.xdView()); }
     };
-
-    template <class M>
-    inline typename M::real_type SumAbs2Elements(const BaseMatrix_Tri<M>& m)
+    template <int s, class ret, class M1>
+    struct SumElementsU_Helper<98,s,NormComp,0,ret,M1>
     {
-        typedef typename M::value_type T;
-        typedef typename M::const_nonconj_type Mn;
-        const bool inst = 
-            M::unknownsizes &&
-            (M::_rowmajor || M::_colmajor) &&
-            Traits<T>::isinst;
-        const bool lower = M::_lower;
-        return CallSumAbs2ElementsU<lower,inst,Mn>::call(m.nonConj());
-    }
+        typedef typename Traits<ret>::real_type RT;
 
-
-    // 
-    // NormSq
-    //
-
-    template <class M>
-    inline typename M::real_type InlineNormSq(const BaseMatrix_Tri<M>& m)
+        static ret call(const M1& m, const Scaling<0,RT>& x)
+        { return InstNormSq(m.xdView(),x); }
+    };
+    
+    // algo -1: Check for inst
+    template <int s, CompType comp, int ix, class ret, class M1>
+    struct SumElementsU_Helper<-1,s,comp,ix,ret,M1>
     {
-        TMVStaticAssert(M::_upper);
-        typedef typename M::value_type MT;
+        typedef typename Traits<ret>::real_type RT;
+
+        static ret call(const M1& m, const Scaling<ix,RT>& x)
+        {
+            typedef typename M1::value_type VT;
+            const bool inst = 
+                (s == UNKNOWN || s > 16) &&
+                Traits<VT>::isinst;
+            const int algo =
+                M1::_conj ? 97 :
+                M1::_lower ? 96 :
+                inst ? 98 :
+                -3;
+            return SumElementsU_Helper<algo,s,comp,ix,ret,M1>::call(m,x);
+        }
+    };
+    
+    template <class M>
+    static typename M::value_type InlineSumElements(const BaseMatrix_Tri<M>& m)
+    {
+        const int s = M::_size;
+        typedef typename M::value_type VT;
         typedef typename M::real_type RT;
         typedef typename M::const_cview_type Mv;
         Mv mv = m.cView();
-        return SumElementsU_Helper<-1,M::_size,NormComp,1,Mv>::call(
+        return SumElementsU_Helper<-3,s,ValueComp,1,VT,Mv>::call(
             mv,Scaling<1,RT>());
     }
 
-    // Defined in TMV_TriMatrix.cpp
-    template <class T>
-    typename Traits<T>::real_type InstNormSq(
-        const ConstUpperTriMatrixView<T>& m); 
-
-    template <bool lower, bool inst, class M>
-    struct CallNormSqU;
-
-    template <bool inst, class M>
-    struct CallNormSqU<true,inst,M> // lower = true
-    {
-        static inline typename M::real_type call(const M& m)
-        {
-            typedef typename M::const_transpose_type Mt;
-            Mt mt = m.transpose();
-            return CallNormSqU<false,inst,Mt>::call(mt);
-        }
-    };
     template <class M>
-    struct CallNormSqU<false,true,M> // inst = true
+    static typename M::value_type DoSumElements(const BaseMatrix_Tri<M>& m)
     {
-        static inline typename M::real_type call(const M& m)
-        { return InstNormSq(m.xdView()); }
-    };
-    template <class M>
-    struct CallNormSqU<false,false,M> // inst = false
-    {
-        static inline typename M::real_type call(const M& m)
-        { return InlineNormSq(m); }
-    };
-
-    template <class M>
-    inline typename M::real_type NormSq(const BaseMatrix_Tri<M>& m)
-    {
-        typedef typename M::value_type T;
-        typedef typename M::const_nonconj_type Mn;
-        const bool inst = 
-            M::unknownsizes &&
-            (M::_rowmajor || M::_colmajor) &&
-            Traits<T>::isinst;
-        const bool lower = M::_lower;
-        return CallNormSqU<lower,inst,Mn>::call(m.nonConj());
-    }
-
-
-    // 
-    // NormSq with scaling
-    //
-
-    template <class M>
-    inline typename M::real_type InlineNormSq(
-        const BaseMatrix_Tri<M>& m, typename M::real_type scale)
-    {
-        TMVStaticAssert(M::_upper);
-        typedef typename M::value_type MT;
+        const int s = M::_size;
+        typedef typename M::value_type VT;
         typedef typename M::real_type RT;
         typedef typename M::const_cview_type Mv;
         Mv mv = m.cView();
-        return SumElementsU_Helper<-1,M::_size,NormComp,0,Mv>::call(
+        return SumElementsU_Helper<-1,s,ValueComp,1,VT,Mv>::call(
+            mv,Scaling<1,RT>());
+    }
+
+    template <class M>
+    static typename M::float_type InlineSumAbsElements(
+        const BaseMatrix_Tri<M>& m)
+    {
+        const int s = M::_size;
+        typedef typename M::float_type RT;
+        typedef typename M::const_cview_type::const_nonconj_type Mv;
+        Mv mv = m.cView().nonConj();
+        return SumElementsU_Helper<-3,s,AbsComp,1,RT,Mv>::call(
+            mv,Scaling<1,RT>());
+    }
+
+    template <class M>
+    static typename M::float_type DoSumAbsElements(const BaseMatrix_Tri<M>& m)
+    {
+        const int s = M::_size;
+        typedef typename M::float_type RT;
+        typedef typename M::const_cview_type::const_nonconj_type Mv;
+        Mv mv = m.cView().nonConj();
+        return SumElementsU_Helper<-1,s,AbsComp,1,RT,Mv>::call(
+            mv,Scaling<1,RT>());
+    }
+
+    template <class M>
+    static typename M::real_type InlineSumAbs2Elements(
+        const BaseMatrix_Tri<M>& m)
+    {
+        const int s = M::_size;
+        typedef typename M::real_type RT;
+        typedef typename M::const_cview_type::const_nonconj_type Mv;
+        Mv mv = m.cView().nonConj();
+        return SumElementsU_Helper<-3,s,Abs2Comp,1,RT,Mv>::call(
+            mv,Scaling<1,RT>());
+    }
+
+    template <class M>
+    static typename M::real_type DoSumAbs2Elements(const BaseMatrix_Tri<M>& m)
+    {
+        const int s = M::_size;
+        typedef typename M::real_type RT;
+        typedef typename M::const_cview_type::const_nonconj_type Mv;
+        Mv mv = m.cView().nonConj();
+        return SumElementsU_Helper<-1,s,Abs2Comp,1,RT,Mv>::call(
+            mv,Scaling<1,RT>());
+    }
+
+    template <class M>
+    static typename M::real_type InlineNormSq(const BaseMatrix_Tri<M>& m)
+    {
+        const int s = M::_size;
+        typedef typename M::real_type RT;
+        typedef typename M::const_cview_type::const_nonconj_type Mv;
+        Mv mv = m.cView().nonConj();
+        return SumElementsU_Helper<-3,s,NormComp,1,RT,Mv>::call(
+            mv,Scaling<1,RT>());
+    }
+
+    template <class M>
+    static typename M::real_type DoNormSq(const BaseMatrix_Tri<M>& m)
+    {
+        const int s = M::_size;
+        typedef typename M::real_type RT;
+        typedef typename M::const_cview_type::const_nonconj_type Mv;
+        Mv mv = m.cView().nonConj();
+        return SumElementsU_Helper<-1,s,NormComp,1,RT,Mv>::call(
+            mv,Scaling<1,RT>());
+    }
+
+    template <class M>
+    static typename M::float_type InlineNormSq(
+        const BaseMatrix_Tri<M>& m, typename M::float_type scale)
+    {
+        const int s = M::_size;
+        typedef typename M::float_type RT;
+        typedef typename M::const_cview_type::const_nonconj_type Mv;
+        Mv mv = m.cView().nonConj();
+        return SumElementsU_Helper<-3,s,NormComp,0,RT,Mv>::call(
             mv,Scaling<0,RT>(scale));
     }
 
-    // Defined in TMV_TriMatrix.cpp
-    template <class T>
-    typename Traits<T>::real_type InstNormSq(
-        const ConstUpperTriMatrixView<T>& m, 
-        typename Traits<T>::real_type scale); 
-
-    template <bool lower, bool inst, class M>
-    struct CallNormSq_scaleU;
-
-    template <bool inst, class M>
-    struct CallNormSq_scaleU<true,inst,M> // lower = true
-    {
-        static inline typename M::real_type call(
-            const M& m, const typename M::real_type scale)
-        {
-            typedef typename M::const_transpose_type Mt;
-            Mt mt = m.transpose();
-            return CallNormSq_scaleU<false,inst,Mt>::call(mt,scale);
-        }
-    };
     template <class M>
-    struct CallNormSq_scaleU<false,true,M> // inst = true
+    static typename M::float_type DoNormSq(
+        const BaseMatrix_Tri<M>& m, typename M::float_type scale)
     {
-        static inline typename M::real_type call(
-            const M& m, const typename M::real_type scale)
-        { return InstNormSq(m.xdView(),scale); }
-    };
-    template <class M>
-    struct CallNormSq_scaleU<false,false,M> // inst = false
-    {
-        static inline typename M::real_type call(
-            const M& m, const typename M::real_type scale)
-        { return InlineNormSq(m,scale); }
-    };
-
-    template <class M>
-    inline typename M::real_type NormSq(
-        const BaseMatrix_Tri<M>& m, const typename M::real_type scale)
-    {
-        typedef typename M::value_type T;
-        typedef typename M::const_nonconj_type Mn;
-        const bool inst = 
-            M::unknownsizes &&
-            (M::_rowmajor || M::_colmajor) &&
-            Traits<T>::isinst;
-        const bool lower = M::_lower;
-        return CallNormSq_scaleU<lower,inst,Mn>::call(m.nonConj(),scale);
-    }
-
-
-
-    //
-    // NormF
-    //
-
-    // Norm_Helper in TMV_NormV.h works for UpperTriMatrix as well, so no
-    // need to repeat that here.
-    template <class M>
-    inline typename M::real_type InlineNormF(const BaseMatrix_Tri<M>& m)
-    {
-        TMVStaticAssert(M::_upper);
-        typedef typename M::const_cview_type Mv;
-        Mv mv = m.cView();
-#if TMV_OPT == 0
-        return Norm_Helper<1,Mv>::call(mv);
-#else
-        if (m.size() == 0) return typename M::real_type(0);
-        else return Norm_Helper<3,Mv>::call(mv);
-#endif
-    }
-
-    // Defined in TMV_TriMatrix.cpp
-    template <class T>
-    typename Traits<T>::real_type InstNormF(
-        const ConstUpperTriMatrixView<T>& m); 
-
-    template <bool lower, bool inst, class M>
-    struct CallNormFU;
-
-    template <bool inst, class M>
-    struct CallNormFU<true,inst,M> // lower = true
-    {
-        static inline typename M::real_type call(const M& m)
-        {
-            typedef typename M::const_transpose_type Mt;
-            Mt mt = m.transpose();
-            return CallNormFU<false,inst,Mt>::call(mt);
-        }
-    };
-    template <class M>
-    struct CallNormFU<false,true,M> // inst = true
-    {
-        static inline typename M::real_type call(const M& m)
-        { return InstNormF(m.xdView()); }
-    };
-    template <class M>
-    struct CallNormFU<false,false,M> // inst = false
-    {
-        static inline typename M::real_type call(const M& m)
-        { return InlineNormF(m); }
-    };
-
-    template <class M>
-    inline typename M::real_type NormF(const BaseMatrix_Tri<M>& m)
-    {
-        typedef typename M::value_type T;
-        typedef typename M::const_nonconj_type Mn;
-        const bool inst = 
-            M::unknownsizes &&
-            (M::_rowmajor || M::_colmajor) &&
-            Traits<T>::isinst;
-        const bool lower = M::_lower;
-        return CallNormFU<lower,inst,Mn>::call(m.nonConj());
+        const int s = M::_size;
+        typedef typename M::float_type RT;
+        typedef typename M::const_cview_type::const_nonconj_type Mv;
+        Mv mv = m.cView().nonConj();
+        return SumElementsU_Helper<-1,s,NormComp,0,RT,Mv>::call(
+            mv,Scaling<0,RT>(scale));
     }
 
 
     // 
     // MaxAbsElement
+    // MaxAbs2Element
     //
-
-    template <int algo, int s, class M1>
-    struct MaxAbsElementU_Helper;
-
-    // algo 1: m1 is unitdiag
-    template <int s, class M1>
-    struct MaxAbsElementU_Helper<1,s,M1> 
-    {
-        typedef typename M1::real_type RT;
-        static inline RT call(const M1& m)
-        {
-            typedef typename M1::const_offdiag_type Mo;
-            Mo mo = m.offDiag();
-            const int sm1 = IntTraits2<s,-1>::sum;
-            const int algo2 = M1::_rowmajor ? 2 : 3;
-            RT temp = MaxAbsElementU_Helper<algo2,sm1,Mo>::call(mo);
-            return (temp > RT(1)) ? temp : RT(1);
-        }
-    };
-
-    // algo 2: loop over rows
-    template <int s, class M1>
-    struct MaxAbsElementU_Helper<2,s,M1> 
-    {
-        typedef typename M1::real_type RT;
-        static inline RT call(const M1& m)
-        {
-            const int N = (s == UNKNOWN ? m.size() : s);
-            RT max(0);
-            for(int i=0;i<N;++i) {
-                RT temp = InlineMaxAbsElement(m.get_row(i,i,N),0);
-                if (temp > max) max = temp;
-            }
-            return max;
-        }
-    };
-
-    // algo 3: loop over columns
-    template <int s, class M1>
-    struct MaxAbsElementU_Helper<3,s,M1> 
-    {
-        typedef typename M1::real_type RT;
-        static inline RT call(const M1& m)
-        {
-            const int N = (s == UNKNOWN ? m.size() : s);
-            RT max(0);
-            for(int j=0;j<N;++j) {
-                RT temp = InlineMaxAbsElement(m.get_col(j,0,j+1),0);
-                if (temp > max) max = temp;
-            }
-            return max;
-        }
-    };
-
-    // algo 4: loop over rows with temp storage
-    template <int s, class M1>
-    struct MaxAbsElementU_Helper<4,s,M1> 
-    {
-        typedef typename M1::real_type RT;
-        static inline RT call(const M1& m)
-        {
-            const int N = (s == UNKNOWN ? m.size() : s);
-            tmv::Vector<RT> temp(N);
-            for(int i=0;i<N;++i) {
-                temp(i) = InlineMaxAbsElement(m.get_row(i,i,N),0);
-            }
-            return temp.maxAbsElement();
-        }
-    };
-
-    // algo 5: loop over columns with temp storage
-    template <int s, class M1>
-    struct MaxAbsElementU_Helper<5,s,M1> 
-    {
-        typedef typename M1::real_type RT;
-        static inline RT call(const M1& m)
-        {
-            const int N = (s == UNKNOWN ? m.size() : s);
-            tmv::Vector<RT> temp(N);
-            for(int j=0;j<N;++j) {
-                temp(j) = InlineMaxAbsElement(m.get_col(j,0,j+1),0);
-            }
-            return temp.maxAbsElement();
-        }
-    };
-
-    // algo 90: unknown diag, figure out which it is.
-    template <int s, class M1>
-    struct MaxAbsElementU_Helper<90,s,M1> 
-    {
-        typedef typename M1::real_type RT;
-        static inline RT call(const M1& m)
-        {
-            const int algo2 = M1::_rowmajor ? 4 : 5;
-            if (m.isunit()) 
-                return MaxAbsElementU_Helper<1,s,M1>::call(m);
-            else 
-                return MaxAbsElementU_Helper<algo2,s,M1>::call(m);
-        }
-    };
-
-    template <class M>
-    inline typename M::real_type InlineMaxAbsElement(
-        const BaseMatrix_Tri<M>& m)
-    {
-        TMVStaticAssert(M::_upper);
-        const int s = M::_size;
-        const int algo = 
-            M::_unit ? 1 : 
-            M::_unknowndiag ? 90 :
-            M::_rowmajor ? 4 : 
-            5;
-        typedef typename M::const_cview_type Mv;
-        Mv mv = m.cView();
-        return MaxAbsElementU_Helper<algo,s,M>::call(mv);
-    }
 
     // Defined in TMV_TriMatrix.cpp
     template <class T>
-    typename Traits<T>::real_type InstMaxAbsElement(
+    typename ConstUpperTriMatrixView<T>::float_type InstMaxAbsElement(
+        const ConstUpperTriMatrixView<T>& m); 
+    template <class T>
+    typename Traits<T>::real_type InstMaxAbs2Element(
         const ConstUpperTriMatrixView<T>& m); 
 
-    template <bool lower, bool inst, class M>
-    struct CallMaxAbsElementU;
+    template <int algo, int s, CompType comp, class M1>
+    struct MaxAbsElementU_Helper;
 
-    template <bool inst, class M>
-    struct CallMaxAbsElementU<true,inst,M> // lower = true
+    // algo 1: m1 is unitdiag
+    template <int s, CompType comp, class M1>
+    struct MaxAbsElementU_Helper<1,s,comp,M1> 
     {
-        static inline typename M::real_type call(const M& m)
+        typedef typename Component<comp,typename M1::value_type>::ret_type ret;
+        static ret call(const M1& m)
         {
-            typedef typename M::const_transpose_type Mt;
-            Mt mt = m.transpose();
-            return CallMaxAbsElementU<false,inst,Mt>::call(mt);
+            if (s == 0) return ret(0);
+            else if (s == 1) return ret(1);
+            else {
+                typedef typename M1::const_offdiag_type Mo;
+                Mo mo = m.offDiag();
+                const int sm1 = IntTraits2<s,-1>::sum;
+                ret temp = MaxAbsElementU_Helper<-4,sm1,comp,Mo>::call(mo);
+                return (temp > ret(1)) ? temp : ret(1);
+            }
         }
     };
-    template <class M>
-    struct CallMaxAbsElementU<false,true,M> // inst = true
+
+    // algo 2: unknown diag, figure out which it is.
+    template <int s, CompType comp, class M1>
+    struct MaxAbsElementU_Helper<2,s,comp,M1> 
     {
-        static inline typename M::real_type call(const M& m)
+        typedef typename Component<comp,typename M1::value_type>::ret_type ret;
+        static ret call(const M1& m)
+        {
+            const int algo2 = M1::_rowmajor ? 12 : 11;
+            if (m.isunit()) 
+                return MaxAbsElementU_Helper<1,s,comp,M1>::call(m);
+            else 
+                return MaxAbsElementU_Helper<algo2,s,comp,M1>::call(m);
+        }
+    };
+
+    // algo 11: loop over columns
+    template <int s, CompType comp, class M1>
+    struct MaxAbsElementU_Helper<11,s,comp,M1> 
+    {
+        typedef typename Component<comp,typename M1::value_type>::ret_type ret;
+        static ret call(const M1& m)
+        {
+            typedef typename M1::const_col_sub_type Mc;
+            const int N = (s == UNKNOWN ? m.size() : s);
+            ret max(0);
+            for(int j=0;j<N;++j) {
+                ret temp = MinMaxElement_Helper<-3,comp,true,Mc>::call(
+                    m.get_col(j,0,j+1),0);
+                if (temp > max) max = temp;
+            }
+            return max;
+        }
+    };
+
+    // algo 12: loop over rows
+    template <int s, CompType comp, class M1>
+    struct MaxAbsElementU_Helper<12,s,comp,M1> 
+    {
+        typedef typename Component<comp,typename M1::value_type>::ret_type ret;
+        static ret call(const M1& m)
+        {
+            typedef typename M1::const_row_sub_type Mr;
+            const int N = (s == UNKNOWN ? m.size() : s);
+            ret max(0);
+            for(int i=0;i<N;++i) {
+                ret temp = MinMaxElement_Helper<-3,comp,true,Mr>::call(
+                    m.get_row(i,i,N),0);
+                if (temp > max) max = temp;
+            }
+            return max;
+        }
+    };
+
+    // algo 13: loop over columns with temp storage
+    template <int s, CompType comp, class M1>
+    struct MaxAbsElementU_Helper<13,s,comp,M1> 
+    {
+        typedef typename Component<comp,typename M1::value_type>::ret_type ret;
+        static ret call(const M1& m)
+        {
+            typedef typename M1::const_col_sub_type Mc;
+            typedef tmv::Vector<ret> V;
+            const int N = (s == UNKNOWN ? m.size() : s);
+            if (N == 0) return ret(0);
+            else {
+                V temp(N);
+                for(int j=0;j<N;++j) {
+                    temp(j) = MinMaxElement_Helper<-3,comp,true,Mc>::call(
+                        m.get_col(j,0,j+1),0);
+                }
+                return MinMaxElement_Helper<-3,comp,true,V>::call(temp,0);
+            }
+        }
+    };
+
+    // algo 14: loop over rows with temp storage
+    template <int s, CompType comp, class M1>
+    struct MaxAbsElementU_Helper<14,s,comp,M1> 
+    {
+        typedef typename Component<comp,typename M1::value_type>::ret_type ret;
+        static ret call(const M1& m)
+        {
+            typedef typename M1::const_row_sub_type Mr;
+            typedef tmv::Vector<ret> V;
+            const int N = (s == UNKNOWN ? m.size() : s);
+            if (N == 0) return ret(0);
+            else {
+                V temp(N);
+                for(int i=0;i<N;++i) {
+                    temp(i) = MinMaxElement_Helper<-3,comp,true,Mr>::call(
+                        m.get_row(i,i,N),0);
+                }
+                return MinMaxElement_Helper<-3,comp,true,V>::call(temp,0);
+            }
+        }
+    };
+
+    // algo -4: No branches or copies, and m is Upper, NonUnitDiag
+    template <int s, CompType comp, class M1>
+    struct MaxAbsElementU_Helper<-4,s,comp,M1> 
+    {
+        typedef typename Component<comp,typename M1::value_type>::ret_type ret;
+        static ret call(const M1& m)
+        {
+            TMVStaticAssert(M1::_upper);
+            TMVStaticAssert(!M1::_unit);
+            TMVAssert(!m.isunit());
+            const int algo = 
+                M1::_rowmajor ? 14 : 13;
+            return MaxAbsElementU_Helper<algo,s,comp,M1>::call(m);
+        }
+    };
+
+    // algo 95: Transpose, and go back to -3 rather than -1
+    template <int s, CompType comp, class M1>
+    struct MaxAbsElementU_Helper<95,s,comp,M1> 
+    {
+        typedef typename Component<comp,typename M1::value_type>::ret_type ret;
+        static ret call(const M1& m)
+        {
+            typedef typename M1::const_transpose_type Mt;
+            Mt mt = m.transpose();
+            return MaxAbsElementU_Helper<-3,s,comp,Mt>::call(mt);
+        }
+    };
+
+    // algo -3: Determine which algo to use
+    template <int s, CompType comp, class M1>
+    struct MaxAbsElementU_Helper<-3,s,comp,M1> 
+    {
+        typedef typename Component<comp,typename M1::value_type>::ret_type ret;
+        static ret call(const M1& m)
+        {
+            const int algo = 
+                M1::_lower ? 95 : 
+                M1::_unit ? 1 : 
+                M1::_unknowndiag ? 2 :
+                -4;
+            return MaxAbsElementU_Helper<algo,s,comp,M1>::call(m);
+        }
+    };
+
+    // algo 96: Transpose
+    template <int s, CompType comp, class M1>
+    struct MaxAbsElementU_Helper<96,s,comp,M1> 
+    {
+        typedef typename Component<comp,typename M1::value_type>::ret_type ret;
+        static ret call(const M1& m)
+        {
+            typedef typename M1::const_transpose_type Mt;
+            Mt mt = m.transpose();
+            return MaxAbsElementU_Helper<-1,s,comp,Mt>::call(mt);
+        }
+    };
+
+    // algo 98: Call inst
+    template <int s, class M1>
+    struct MaxAbsElementU_Helper<98,s,AbsComp,M1> 
+    {
+        typedef typename M1::float_type ret;
+        static ret call(const M1& m)
         { return InstMaxAbsElement(m.xdView()); }
     };
-    template <class M>
-    struct CallMaxAbsElementU<false,false,M> // inst = false
+    template <int s, class M1>
+    struct MaxAbsElementU_Helper<98,s,Abs2Comp,M1> 
     {
-        static inline typename M::real_type call(const M& m)
-        { return InlineMaxAbsElement(m); }
+        typedef typename M1::real_type ret;
+        static ret call(const M1& m)
+        { return InstMaxAbs2Element(m.xdView()); }
+    };
+
+    // algo -1: Check for inst
+    template <int s, CompType comp, class M1>
+    struct MaxAbsElementU_Helper<-1,s,comp,M1> 
+    {
+        typedef typename Component<comp,typename M1::value_type>::ret_type ret;
+        static ret call(const M1& m)
+        {
+            typedef typename M1::value_type VT;
+            const bool inst = 
+                (s == UNKNOWN || s > 16) &&
+                Traits<VT>::isinst;
+            const int algo =
+                M1::_lower ? 96 :
+                inst ? 98 :
+                -3;
+            return MaxAbsElementU_Helper<algo,s,comp,M1>::call(m);
+        }
     };
 
     template <class M>
-    inline typename M::real_type MaxAbsElement(const BaseMatrix_Tri<M>& m)
+    static typename M::float_type InlineMaxAbsElement(
+        const BaseMatrix_Tri<M>& m)
     {
-        TMVAssert(m.size() > 0);
-        typedef typename M::value_type T;
-        typedef typename M::const_nonconj_type Mn;
-        const bool inst = 
-            M::unknownsizes &&
-            (M::_rowmajor || M::_colmajor) &&
-            Traits<T>::isinst;
-        const bool lower = M::_lower;
-        return CallMaxAbsElementU<lower,inst,Mn>::call(m.nonConj());
+        const int s = M::_size;
+        typedef typename M::const_cview_type::const_nonconj_type Mv;
+        Mv mv = m.cView().nonConj();
+        return MaxAbsElementU_Helper<-3,s,AbsComp,Mv>::call(mv);
+    }
+
+    template <class M>
+    static typename M::float_type DoMaxAbsElement(const BaseMatrix_Tri<M>& m)
+    {
+        const int s = M::_size;
+        typedef typename M::const_cview_type::const_nonconj_type Mv;
+        Mv mv = m.cView().nonConj();
+        return MaxAbsElementU_Helper<-1,s,AbsComp,Mv>::call(mv);
+    }
+
+    template <class M>
+    static typename M::real_type InlineMaxAbs2Element(
+        const BaseMatrix_Tri<M>& m)
+    {
+        const int s = M::_size;
+        typedef typename M::const_cview_type::const_nonconj_type Mv;
+        Mv mv = m.cView().nonConj();
+        return MaxAbsElementU_Helper<-3,s,Abs2Comp,Mv>::call(mv);
+    }
+
+    template <class M>
+    static typename M::real_type DoMaxAbs2Element(const BaseMatrix_Tri<M>& m)
+    {
+        const int s = M::_size;
+        typedef typename M::const_cview_type::const_nonconj_type Mv;
+        Mv mv = m.cView().nonConj();
+        return MaxAbsElementU_Helper<-1,s,Abs2Comp,Mv>::call(mv);
     }
 
 
     // 
     // Norm1
+    // NormInf
     //
 
-    // TODO: Norm1 and NormInf would benefit from an unroller.
+    // Defined in TMV_TriMatrix.cpp
+    template <class T>
+    typename ConstUpperTriMatrixView<T>::float_type InstNorm1(
+        const ConstUpperTriMatrixView<T>& m); 
+    template <class T>
+    typename ConstLowerTriMatrixView<T>::float_type InstNorm1(
+        const ConstLowerTriMatrixView<T>& m); 
+
+    // TODO: Norm1 would benefit from an unroller.
     // Unlike with a regular matrix, where small matrices can unroll
     // each column (or row), with a triangle matrix, we lose the knowledge
     // of the length of each column in the for loop, so a full unroller
     // would be able to keep that.
+    
     template <int algo, int s, class M1>
     struct Norm1U_Helper;
 
-    // algo 1: loop over columns
+    // algo 1: unknown diag, figure out which it is.
     template <int s, class M1>
     struct Norm1U_Helper<1,s,M1> 
     {
-        typedef typename M1::real_type RT;
-        static inline RT call(const M1& m)
+        typedef typename M1::float_type RT;
+        static RT call(const M1& m)
+        {
+            if (m.isunit()) {
+                typedef typename M1::const_unitdiag_type Mu;
+                return Norm1U_Helper<-4,s,Mu>::call(m.viewAsUnitDiag());
+            } else {
+                typedef typename M1::const_nonunitdiag_type Mnu;
+                return Norm1U_Helper<-4,s,Mnu>::call(m.viewAsNonUnitDiag());
+            }
+        }
+    };
+
+    // algo 11: loop over columns, uppertri
+    template <int s, class M1>
+    struct Norm1U_Helper<11,s,M1> 
+    {
+        typedef typename M1::float_type RT;
+        static RT call(const M1& m)
         {
             const int N = (s == UNKNOWN ? m.size() : s);
             RT max(0);
@@ -875,21 +833,21 @@ namespace tmv {
         }
     };
 
-    // algo 2: loop over rows
+    // algo 12: loop over rows, uppertri
     template <int s, class M1>
-    struct Norm1U_Helper<2,s,M1> 
+    struct Norm1U_Helper<12,s,M1> 
     {
-        typedef typename M1::real_type RT;
-        static inline RT call(const M1& m)
+        typedef typename M1::float_type RT;
+        static RT call(const M1& m)
         {
             int N = (s == UNKNOWN ? m.size() : s);
-            if (N <= 8) return Norm1U_Helper<1,s,M1>::call(m);
+            if (N <= 8) return Norm1U_Helper<11,s,M1>::call(m);
 
-            typedef typename M1::value_type MT;
+            typedef typename M1::value_type VT;
             typedef typename tmv::Vector<RT>::iterator IT1;
             typedef typename M1::const_row_sub_type::const_iterator IT2;
 
-            MT value;
+            VT value;
 
             // If unit,     start with all 1's.
             // If non-unit, start with all 0's.
@@ -909,7 +867,7 @@ namespace tmv {
             do {
                 do {
                     value = *it2++;
-                    Component<AbsComp,MT>::applyf(value);
+                    Component<AbsComp,VT>::applyf(value);
                     *it1++ += TMV_REAL(value);
                 } while (it1 != end1);
                 it2 += end_step++;
@@ -919,128 +877,42 @@ namespace tmv {
         }
     };
 
-    template <class M>
-    inline typename M::real_type InlineNorm1(const BaseMatrix_Tri<M>& m);
-
-    // algo 90: unknown diag, figure out which it is.
+    // algo 21: loop over columns, lowertri
     template <int s, class M1>
-    struct Norm1U_Helper<90,s,M1> 
+    struct Norm1U_Helper<21,s,M1> 
     {
-        typedef typename M1::real_type RT;
-        static inline RT call(const M1& m)
-        {
-            if (m.isunit()) 
-                return InlineNorm1(m.viewAsUnitDiag());
-            else 
-                return InlineNorm1(m.viewAsNonUnitDiag());
-        }
-    };
-
-    template <class M>
-    inline typename M::real_type InlineNorm1(const BaseMatrix_Tri<M>& m)
-    {
-        TMVStaticAssert(M::_upper);
-        const int s = M::_size;
-        const int algo = 
-            M::_unknowndiag ? 90 :
-#if TMV_OPT >= 1
-            ( M::_rowmajor && (s == UNKNOWN || s > 8) ) ? 2 :
-#endif
-            1;
-        typedef typename M::const_cview_type Mv;
-        Mv mv = m.cView();
-        return Norm1U_Helper<algo,s,Mv>::call(mv);
-    }
-
-    // Defined in TMV_TriMatrix.cpp
-    template <class T>
-    typename Traits<T>::real_type InstNorm1(
-        const ConstUpperTriMatrixView<T>& m); 
-
-    template <bool lower, bool inst, class M>
-    struct CallNorm1U;
-    template <bool lower, bool inst, class M>
-    struct CallNormInfU;
-
-    template <bool inst, class M>
-    struct CallNorm1U<true,inst,M> // lower = true
-    {
-        static inline typename M::real_type call(const M& m)
-        {
-            typedef typename M::const_transpose_type Mt;
-            Mt mt = m.transpose();
-            return CallNormInfU<false,inst,Mt>::call(mt);
-        }
-    };
-    template <class M>
-    struct CallNorm1U<false,true,M> // inst = true
-    {
-        static inline typename M::real_type call(const M& m)
-        { return InstNorm1(m.xdView()); }
-    };
-    template <class M>
-    struct CallNorm1U<false,false,M> // inst = false
-    {
-        static inline typename M::real_type call(const M& m)
-        { return InlineNorm1(m); }
-    };
-
-    template <class M>
-    inline typename M::real_type Norm1(const BaseMatrix_Tri<M>& m)
-    {
-        typedef typename M::value_type T;
-        typedef typename M::const_nonconj_type Mn;
-        const bool inst = 
-            M::unknownsizes &&
-            (M::_rowmajor || M::_colmajor) &&
-            Traits<T>::isinst;
-        const bool lower = M::_lower;
-        return CallNorm1U<lower,inst,Mn>::call(m.nonConj());
-    }
-
-    // 
-    // NormInf
-    //
-
-    template <int algo, int s, class M1>
-    struct NormInfU_Helper;
-
-    // algo 1: loop over rows
-    template <int s, class M1>
-    struct NormInfU_Helper<1,s,M1> 
-    {
-        typedef typename M1::real_type RT;
-        static inline RT call(const M1& m)
+        typedef typename M1::float_type RT;
+        static RT call(const M1& m)
         {
             const int N = (s == UNKNOWN ? m.size() : s);
             RT max(0);
             for(int i=0;i<N;++i) {
-                // If unit,     temp = 1 + SumAbsElements(m.row(i,0,i)
-                // If non-unit, temp =     SumAbsElements(m.row(i,0,i+1)
+                // If unit,     temp = 1 + SumAbsElements(m.col(i,i+1,N)
+                // If non-unit, temp =     SumAbsElements(m.col(i,i,N)
                 RT temp = Maybe<M1::_unit>::sum( 
                     RT(1) , InlineSumAbsElements(
-                        m.get_row(i,Maybe<M1::_unit>::select(i+1,i),N)));
+                        m.get_col(i,Maybe<M1::_unit>::select(i+1,i),N)));
                 if (temp > max) max = temp;
             }
             return max;
         }
     };
 
-    // algo 2: loop over cols
+    // algo 22: loop over rows, lowertri
     template <int s, class M1>
-    struct NormInfU_Helper<2,s,M1> 
+    struct Norm1U_Helper<22,s,M1> 
     {
-        typedef typename M1::real_type RT;
-        static inline RT call(const M1& m)
+        typedef typename M1::float_type RT;
+        static RT call(const M1& m)
         {
             int N = (s == UNKNOWN ? m.size() : s);
-            if (N <= 8) return NormInfU_Helper<1,s,M1>::call(m);
+            if (N <= 8) return Norm1U_Helper<21,s,M1>::call(m);
 
-            typedef typename M1::value_type MT;
+            typedef typename M1::value_type VT;
             typedef typename tmv::Vector<RT>::iterator IT1;
             typedef typename M1::const_col_sub_type::const_iterator IT2;
 
-            MT value;
+            VT value;
 
             // If unit,     start with all 1's.
             // If non-unit, start with all 0's.
@@ -1048,17 +920,17 @@ namespace tmv {
             const IT1 begin1 = temp.begin();
 
             IT1 it1 = begin1;
-            IT2 it2 = m.get_col(Maybe<M1::_unit>::select(1,0),0,1).begin();
+            IT2 it2 = m.get_row(Maybe<M1::_unit>::select(1,0),0,1).begin();
             // If unit, then we only need to add the offdiag to temp.
             // This is effected by: --N, and the above select for it2.
             Maybe<M1::_unit>::decrement(N);
-            int end_step = m.stepj()-1; // back to the start of next column
+            int end_step = m.stepi()-1; // back to the start of next column
 
             int M=1, i;
             do {
                 i=M; do {
                     value = *it2++;
-                    Component<AbsComp,MT>::applyf(value);
+                    Component<AbsComp,VT>::applyf(value);
                     *it1++ += TMV_REAL(value);
                 } while (--i);
                 it1 -= M++;
@@ -1068,79 +940,92 @@ namespace tmv {
         }
     };
 
-    template <class M>
-    inline typename M::real_type InlineNormInf(const BaseMatrix_Tri<M>& m);
-
-    // algo 90: unknown diag, figure out which it is.
+    // algo -4: No branches or copies
     template <int s, class M1>
-    struct NormInfU_Helper<90,s,M1> 
+    struct Norm1U_Helper<-4,s,M1> 
     {
-        typedef typename M1::real_type RT;
-        static inline RT call(const M1& m)
+        typedef typename M1::float_type RT;
+        static RT call(const M1& m)
         {
-            if (m.isunit()) 
-                return InlineNormInf(m.viewAsUnitDiag());
-            else 
-                return InlineNormInf(m.viewAsNonUnitDiag());
-        }
-    };
-
-    template <class M>
-    inline typename M::real_type InlineNormInf(const BaseMatrix_Tri<M>& m)
-    {
-        TMVStaticAssert(M::_upper);
-        const int s = M::_size;
-        const int algo = 
-            M::_unknowndiag ? 90 :
+            TMVStaticAssert(!M1::_unknowndiag);
+            const int algo = 
+                M1::_upper ? 
 #if TMV_OPT >= 1
-            ( M::_colmajor && (s == UNKNOWN || s > 8) ) ? 2 :
+                ( M1::_rowmajor && (s == UNKNOWN || s > 8) ) ? 12 :
 #endif
-            1;
-        typedef typename M::const_cview_type Mv;
-        Mv mv = m.cView();
-        return NormInfU_Helper<algo,s,Mv>::call(mv);
-    }
-
-    // Defined in TMV_TriMatrix.cpp
-    template <class T>
-    typename Traits<T>::real_type InstNormInf(
-        const ConstUpperTriMatrixView<T>& m); 
-
-    template <bool inst, class M>
-    struct CallNormInfU<true,inst,M> // lower = true
-    {
-        static inline typename M::real_type call(const M& m)
-        {
-            typedef typename M::const_transpose_type Mt;
-            Mt mt = m.transpose();
-            return CallNorm1U<false,inst,Mt>::call(mt);
+                11 :
+#if TMV_OPT >= 1
+                ( M1::_rowmajor && (s == UNKNOWN || s > 8) ) ? 22 :
+#endif
+                21 ;
+            return Norm1U_Helper<algo,s,M1>::call(m);
         }
     };
-    template <class M>
-    struct CallNormInfU<false,true,M> // inst = true
+
+    // algo -3: Determine which algo to use
+    template <int s, class M1>
+    struct Norm1U_Helper<-3,s,M1> 
     {
-        static inline typename M::real_type call(const M& m)
-        { return InstNormInf(m.xdView()); }
+        typedef typename M1::float_type RT;
+        static RT call(const M1& m)
+        {
+            const int algo = M1::_unknowndiag ? 1 : -4;
+            return Norm1U_Helper<algo,s,M1>::call(m);
+        }
     };
-    template <class M>
-    struct CallNormInfU<false,false,M> // inst = false
+
+    // algo 98: Call inst
+    template <int s, class M1>
+    struct Norm1U_Helper<98,s,M1> 
     {
-        static inline typename M::real_type call(const M& m)
-        { return InlineNormInf(m); }
+        typedef typename M1::float_type RT;
+        static RT call(const M1& m)
+        { return InstNorm1(m.xdView()); }
+    };
+
+    // algo -1: Check for inst
+    template <int s, class M1>
+    struct Norm1U_Helper<-1,s,M1> 
+    {
+        typedef typename M1::float_type RT;
+        static RT call(const M1& m)
+        {
+            typedef typename M1::value_type VT;
+            const bool inst =
+                (s == UNKNOWN || s > 16) &&
+                Traits<VT>::isinst;
+            const int algo =
+                inst ? 98 :
+                -3;
+            return Norm1U_Helper<algo,s,M1>::call(m);
+        }
     };
 
     template <class M>
-    inline typename M::real_type NormInf(const BaseMatrix_Tri<M>& m)
-    {
-        typedef typename M::value_type T;
-        typedef typename M::const_nonconj_type Mn;
-        const bool inst =
-            M::unknownsizes &&
-            (M::_rowmajor || M::_colmajor) &&
-            Traits<T>::isinst;
-        const bool lower = M::_lower;
-        return CallNormInfU<lower,inst,Mn>::call(m.nonConj());
+    static typename M::float_type InlineNorm1(const BaseMatrix_Tri<M>& m)
+    { 
+        const int s = M::_size;
+        typedef typename M::const_cview_type::const_nonconj_type Mv;
+        Mv mv = m.cView().nonConj();
+        return Norm1U_Helper<-3,s,Mv>::call(mv);
     }
+
+    template <class M>
+    static typename M::float_type DoNorm1(const BaseMatrix_Tri<M>& m)
+    { 
+        const int s = M::_size;
+        typedef typename M::const_cview_type::const_nonconj_type Mv;
+        Mv mv = m.cView().nonConj();
+        return Norm1U_Helper<-1,s,Mv>::call(mv);
+    }
+
+    template <class M>
+    static typename M::float_type InlineNormInf(const BaseMatrix_Tri<M>& m)
+    { return InlineNorm1(m.transpose()); }
+
+    template <class M>
+    static typename M::float_type DoNormInf(const BaseMatrix_Tri<M>& m)
+    { return Norm1(m.transpose()); }
 
 } // namespace tmv
 

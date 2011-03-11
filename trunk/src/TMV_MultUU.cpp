@@ -38,9 +38,6 @@
 #include "tmv/TMV_TriMatrix.h"
 #include "tmv/TMV_ProdXM.h"
 
-#include "tmv/TMV_TriMatrixIO.h"
-#include "tmv/TMV_MatrixIO.h"
-
 namespace tmv {
 
     template <class M1, class M2, class M3>
@@ -93,10 +90,13 @@ namespace tmv {
             UpperTriMatrix<T3,NonUnitDiag,ColMajor> m3c(m3.size());
             UpperTriMatrixView<T3,UnknownDiag> m3v = m3c.xdView();
             DoMultUU(m1,m2,m3v);
-            MultXM<false>(x,m3v.constView(),m3);
+            if (m3.isunit()) 
+                InstCopy(m3v.constView().viewAsUnitDiag().xdView(),m3);
+            else
+                InstMultXM(x,m3v.constView(),m3.viewAsNonUnitDiag());
         } else {
             DoMultUU(m1,m2,m3);
-            Scale(x,m3);
+            if (!m3.isunit()) InstScale(x,m3.viewAsNonUnitDiag());
         }
     }
 
@@ -115,7 +115,7 @@ namespace tmv {
             UpperTriMatrix<T3,NonUnitDiag,ColMajor> m3c(m3.size());
             UpperTriMatrixView<T3,UnknownDiag> m3v = m3c.xdView();
             DoMultUU(m1,m2,m3v);
-            MultXM<true>(x,m3v.constView(),m3);
+            InstAddMultXM(x,m3v.constView(),m3);
         }
     }
 
@@ -134,10 +134,13 @@ namespace tmv {
             LowerTriMatrix<T3,NonUnitDiag,ColMajor> m3c(m3.size());
             LowerTriMatrixView<T3,UnknownDiag> m3v = m3c.xdView();
             DoMultUU(m1,m2,m3v);
-            MultXM<false>(x,m3v.constView(),m3);
+            if (m3.isunit()) 
+                InstCopy(m3v.constView().viewAsUnitDiag().xdView(),m3);
+            else
+                InstMultXM(x,m3v.constView(),m3.viewAsNonUnitDiag());
         } else {
             DoMultUU(m1,m2,m3);
-            Scale(x,m3);
+            if (!m3.isunit()) InstScale(x,m3.viewAsNonUnitDiag());
         }
     }
 
@@ -156,7 +159,7 @@ namespace tmv {
             LowerTriMatrix<T3,NonUnitDiag,ColMajor> m3c(m3.size());
             LowerTriMatrixView<T3,UnknownDiag> m3v = m3c.xdView();
             DoMultUU(m1,m2,m3v);
-            MultXM<true>(x,m3v.constView(),m3);
+            InstAddMultXM(x,m3v.constView(),m3);
         }
     }
 

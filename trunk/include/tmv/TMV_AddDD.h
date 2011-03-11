@@ -46,7 +46,7 @@ namespace tmv {
 
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void AddMM(
+    static void AddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix_Diag<M2>& m2,
         BaseMatrix_Diag_Mutable<M3>& m3)
@@ -58,7 +58,7 @@ namespace tmv {
     }
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void NoAliasAddMM(
+    static void NoAliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix_Diag<M2>& m2,
         BaseMatrix_Diag_Mutable<M3>& m3)
@@ -70,7 +70,7 @@ namespace tmv {
     }
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void AliasAddMM(
+    static void AliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix_Diag<M2>& m2,
         BaseMatrix_Diag_Mutable<M3>& m3)
@@ -87,7 +87,7 @@ namespace tmv {
 
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void AddMM(
+    static void AddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix_Diag<M2>& m2,
         BaseMatrix_Mutable<M3>& m3)
@@ -101,7 +101,7 @@ namespace tmv {
     }
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void NoAliasAddMM(
+    static void NoAliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix_Diag<M2>& m2,
         BaseMatrix_Mutable<M3>& m3)
@@ -114,7 +114,7 @@ namespace tmv {
     }
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void AliasAddMM(
+    static void AliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix_Diag<M2>& m2,
         BaseMatrix_Mutable<M3>& m3)
@@ -135,7 +135,7 @@ namespace tmv {
     // the sizes are UNKNOWN.
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void AddMM(
+    static void AddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix_Calc<M2>& m2,
         BaseMatrix_Mutable<M3>& m3)
@@ -155,7 +155,7 @@ namespace tmv {
     }
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void NoAliasAddMM(
+    static void NoAliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix_Calc<M2>& m2,
         BaseMatrix_Mutable<M3>& m3)
@@ -167,7 +167,7 @@ namespace tmv {
     }
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void AliasAddMM(
+    static void AliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix_Calc<M2>& m2,
         BaseMatrix_Mutable<M3>& m3)
@@ -192,21 +192,21 @@ namespace tmv {
 
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void AddMM(
+    static void AddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Calc<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix_Diag<M2>& m2,
         BaseMatrix_Mutable<M3>& m3)
     { AddMM(x2,m2,x1,m1,m3); }
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void NoAliasAddMM(
+    static void NoAliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Calc<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix_Diag<M2>& m2,
         BaseMatrix_Mutable<M3>& m3)
     { NoAliasAddMM(x2,m2,x1,m1,m3); }
     template <int ix1, class T1, class M1,
               int ix2, class T2, class M2, class M3>
-    inline void AliasAddMM(
+    static void AliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Calc<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix_Diag<M2>& m2,
         BaseMatrix_Mutable<M3>& m3)

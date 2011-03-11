@@ -66,22 +66,22 @@ namespace tmv {
 
     // Defined below:
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void MultMM_Block(
+    static void MultMM_Block(
         const Scaling<ix,T>& x,
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2,
         BaseMatrix_Rec_Mutable<M3>& m3);
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void InlineMultMM_Block(
+    static void InlineMultMM_Block(
         const Scaling<ix,T>& x,
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2,
         BaseMatrix_Rec_Mutable<M3>& m3);
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void MultMM_RecursiveBlock(
+    static void MultMM_RecursiveBlock(
         const Scaling<ix,T>& x,
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2,
         BaseMatrix_Rec_Mutable<M3>& m3);
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void InlineMultMM_RecursiveBlock(
+    static void InlineMultMM_RecursiveBlock(
         const Scaling<ix,T>& x,
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2,
         BaseMatrix_Rec_Mutable<M3>& m3);
@@ -104,7 +104,7 @@ namespace tmv {
         typedef void Kcleanup(
             const int M, const int N, const int K,
             const Scaling<1,T>& x, const T* A, const T* B, T* C);
-        static inline Kcleanup* call(const int K)
+        static Kcleanup* call(const int K)
         {
             TMVStaticAssert(K2 != UNKNOWN);
             return &call_multmm_16_16_K_known<K2,1,T>;
@@ -118,7 +118,7 @@ namespace tmv {
         typedef void Kcleanup(
             const int M, const int N, const int K,
             const Scaling<1,T>& x, const T* A, const T* B, T* C);
-        static inline Kcleanup* call(const int K)
+        static Kcleanup* call(const int K)
         { return &call_multmm_16_16_K<1,T>; }
     };
 #else
@@ -134,7 +134,7 @@ namespace tmv {
         typedef void Kcleanup(
             const int M, const int N, const int K,
             const Scaling<1,T>& x, const T* A, const T* B, T* C);
-        static inline Kcleanup* call(const int K)
+        static Kcleanup* call(const int K)
         {
             TMVAssert(K > 0);
             TMVAssert(K < 64);
@@ -277,7 +277,7 @@ namespace tmv {
         typedef void Kcleanup(
             const int M, const int N, const int K,
             const Scaling<1,T>& x, const T* A, const T* B, T* C);
-        static inline Kcleanup* call(const int K)
+        static Kcleanup* call(const int K)
         {
             TMVAssert(K > 0);
             TMVAssert(K < 32);
@@ -356,7 +356,7 @@ namespace tmv {
         typedef void Kcleanup(
             const int M, const int N, const int K,
             const Scaling<1,T>& x, const T* A, const T* B, T* C);
-        static inline Kcleanup* call(const int K)
+        static Kcleanup* call(const int K)
         {
             TMVAssert(K > 0);
             TMVAssert(K < 16);
@@ -416,12 +416,10 @@ namespace tmv {
         typedef typename M1::real_type RT;
         typedef MatrixView<RT,1> M2;
 
-        static void call(const ConstMatrixView<RT>& m1x,
-                         RT* m2p, int M, int N, int si, int sj)
+        static void call(
+            const ConstMatrixView<RT>& m1x,
+            RT* m2p, int M, int N, int si, int sj)
         {
-            TMVAssert(si == 1);
-            M1 m1(m1x);
-            M2 m2(m2p,M,N,si,sj);
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"MyCopy real"<<std::endl;
             std::cout<<"cs,rs = "<<cs<<','<<rs<<std::endl;
@@ -429,12 +427,27 @@ namespace tmv {
             std::cout<<"si,sj = "<<si<<','<<sj<<std::endl;
             std::cout<<"m2p = "<<m2p<<"..."<<
                 (m2p+(M-1)*si+(N-1)*sj+1)<<std::endl;
-            std::cout<<"m1 = "<<m1<<std::endl;
+            std::cout<<"M1 cs,rs,si,sj = "<<
+                M1::_colsize<<','<<M1::_rowsize<<','<<
+                M1::_stepi<<','<<M1::_stepj<<std::endl;
+            std::cout<<"m1x M,N,si,sj = "<<
+                m1x.colsize()<<','<<m1x.rowsize()<<','<<
+                m1x.stepi()<<','<<m1x.stepj()<<std::endl;
+            std::cout<<"M2 cs,rs,si,sj = "<<
+                M2::_colsize<<','<<M2::_rowsize<<','<<
+                M2::_stepi<<','<<M2::_stepj<<std::endl;
+#endif
+            TMVAssert(si == 1);
+            M1 m1(m1x);
+            M2 m2(m2p,M,N,si,sj);
+#ifdef PRINTALGO_MM_BLOCK
+            std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
+            //std::cout<<"m1 = "<<m1<<std::endl;
 #endif
             CopyM_Helper<-4,cs,rs,M1,M2>::call(m1,m2); 
 #ifdef PRINTALGO_MM_BLOCK
-            std::cout<<"m2 = "<<m2<<std::endl;
             std::cout<<"after copy\n";
+            //std::cout<<"m2 = "<<m2<<std::endl;
 #endif
         }
     };
@@ -449,6 +462,14 @@ namespace tmv {
             const ConstMatrixView<RT>& m1x,
             RT* m2p, int M, int N, int si, int sj)
         {
+#ifdef PRINTALGO_MM_BLOCK
+            std::cout<<"MyCopy complex"<<std::endl;
+            std::cout<<"cs,rs = "<<cs<<','<<rs<<std::endl;
+            std::cout<<"M,N = "<<M<<','<<N<<std::endl;
+            std::cout<<"si,sj = "<<si<<','<<sj<<std::endl;
+            std::cout<<"m2p = "<<m2p<<"..."<<
+                (m2p+(M-1)*si+(N-1)*sj+1)<<std::endl;
+#endif
             TMVAssert(si == 1);
             const int size = N*sj;
             M1r m1r(m1x);
@@ -457,14 +478,8 @@ namespace tmv {
             M2r m2r(m2p,M,N,si,sj);
             M2r m2i(m2p+size,M,N,si,sj);
 #ifdef PRINTALGO_MM_BLOCK
-            std::cout<<"MyCopy complex"<<std::endl;
-            std::cout<<"cs,rs = "<<cs<<','<<rs<<std::endl;
-            std::cout<<"m2p = "<<m2p<<"..."<<
-                (m2p+(M-1)*si+(N-1)*sj+1)<<std::endl;
             //std::cout<<"m1r = "<<m1r<<std::endl;
             //std::cout<<"m1i = "<<m1i<<std::endl;
-            //std::cout<<"m2r = "<<m2r<<std::endl;
-            //std::cout<<"m2i = "<<m2i<<std::endl;
 #endif
             const int ix1 = M1::_conj ? -1 : 1; // 1 or -1 as required
             const Scaling<ix1,RT> one;
@@ -473,6 +488,7 @@ namespace tmv {
 #ifdef PRINTALGO_MM_BLOCK
             //std::cout<<"m2r => "<<m2r<<std::endl;
             //std::cout<<"m2i => "<<m2i<<std::endl;
+            std::cout<<"after copy\n";
 #endif
         }
     };
@@ -481,27 +497,52 @@ namespace tmv {
     struct get_copy
     {
         typedef typename M1::real_type RT;
-        typedef typename M1::const_rmview_type M1rm;
-        typedef typename M1::const_cmview_type M1cm;
+        typedef typename M1::value_type T1;
+        // The point of providing M1 as a template is merely to know
+        // whether it is rowmajor or column major.  We specifically
+        // do not want to maintain the sizes if they are known, since
+        // the matrices that will be passed to MyCopy will be much 
+        // smaller.  
+        typedef ConstMatrixView<T1,M1::_stepi,M1::_stepj,M1::_conj> M1x;
+        typedef ConstMatrixView<T1,1,M1::_stepj,M1::_conj> M1cm;
+        typedef ConstMatrixView<T1,M1::_stepi,1,M1::_conj> M1rm;
 
-        typedef void F(const ConstMatrixView<RT>& m1x,
-                       RT* m2p, int M, int N, int si, int sj);
+        typedef void F(
+            const ConstMatrixView<RT>& m1x,
+            RT* m2p, int M, int N, int si, int sj);
 
+        template <bool known, int dummy> struct GetCopyHelper;
+
+        template <int dummy>
+        struct GetCopyHelper<true,dummy> // known steps
+        {
+            static F* call(const M1& m)
+            { return &MyCopy<iscomplex,cs,rs,M1x>::call; }
+        };
+        template <int dummy>
+        struct GetCopyHelper<false,dummy> // unknown steps
+        {
+            static F* call(const M1& m)
+            {
+                if (m.isrm()) 
+                    return &MyCopy<iscomplex,cs,rs,M1rm>::call;
+                else if (m.iscm())
+                    return &MyCopy<iscomplex,cs,rs,M1cm>::call;
+                else
+                    return &MyCopy<iscomplex,cs,rs,M1x>::call;
+            }
+        };
         static F* call(const M1& m)
         {
-            if (m.isrm()) 
-                return &MyCopy<iscomplex,cs,rs,M1rm>::call;
-            else if (m.iscm())
-                return &MyCopy<iscomplex,cs,rs,M1cm>::call;
-            else
-                return &MyCopy<iscomplex,cs,rs,M1>::call;
+            const bool known = M1::_stepi != UNKNOWN || M1::_stepj != UNKNOWN;
+            return GetCopyHelper<known,1>::call(m);
         }
     };
 
     template <int MB, int NB, int KB, int ix, class T> 
     struct select_multmm
     {
-        static inline void call(
+        static void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_M_N_K(M,N,K,x,A,B,C); }
@@ -509,7 +550,7 @@ namespace tmv {
     template <int ix, class T>
     struct select_multmm<16,16,16,ix,T>
     {
-        static inline void call(
+        static void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_16_16(M,N,K,x,A,B,C); }
@@ -517,7 +558,7 @@ namespace tmv {
     template <int ix, class T>
     struct select_multmm<16,16,32,ix,T>
     {
-        static inline void call(
+        static void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_16_32(M,N,K,x,A,B,C); }
@@ -525,7 +566,7 @@ namespace tmv {
     template <int ix, class T>
     struct select_multmm<16,16,64,ix,T>
     {
-        static inline void call(
+        static void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_16_64(M,N,K,x,A,B,C); }
@@ -533,7 +574,7 @@ namespace tmv {
     template <int MB, int ix, class T>
     struct select_multmm<MB,16,16,ix,T>
     {
-        static inline void call(
+        static void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_M_16_16_known<MB>(M,N,K,x,A,B,C); }
@@ -541,7 +582,7 @@ namespace tmv {
     template <int MB, int ix, class T>
     struct select_multmm<MB,16,32,ix,T>
     {
-        static inline void call(
+        static void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_M_16_32_known<MB>(M,N,K,x,A,B,C); }
@@ -549,7 +590,7 @@ namespace tmv {
     template <int MB, int ix, class T>
     struct select_multmm<MB,16,64,ix,T>
     {
-        static inline void call(
+        static void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_M_16_64_known<MB>(M,N,K,x,A,B,C); }
@@ -557,7 +598,7 @@ namespace tmv {
     template <int ix, class T>
     struct select_multmm<UNKNOWN,16,16,ix,T>
     {
-        static inline void call(
+        static void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_M_16_16(M,N,K,x,A,B,C); }
@@ -565,7 +606,7 @@ namespace tmv {
     template <int ix, class T>
     struct select_multmm<UNKNOWN,16,32,ix,T>
     {
-        static inline void call(
+        static void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_M_16_32(M,N,K,x,A,B,C); }
@@ -573,7 +614,7 @@ namespace tmv {
     template <int ix, class T>
     struct select_multmm<UNKNOWN,16,64,ix,T>
     {
-        static inline void call(
+        static void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_M_16_64(M,N,K,x,A,B,C); }
@@ -581,7 +622,7 @@ namespace tmv {
     template <int NB, int ix, class T>
     struct select_multmm<16,NB,16,ix,T>
     {
-        static inline void call(
+        static void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_N_16_known<NB>(M,N,K,x,A,B,C); }
@@ -589,7 +630,7 @@ namespace tmv {
     template <int NB, int ix, class T>
     struct select_multmm<16,NB,32,ix,T>
     {
-        static inline void call(
+        static void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_N_32_known<NB>(M,N,K,x,A,B,C); }
@@ -597,7 +638,7 @@ namespace tmv {
     template <int NB, int ix, class T>
     struct select_multmm<16,NB,64,ix,T>
     {
-        static inline void call(
+        static void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_N_64_known<NB>(M,N,K,x,A,B,C); }
@@ -605,7 +646,7 @@ namespace tmv {
     template <int ix, class T>
     struct select_multmm<16,UNKNOWN,16,ix,T>
     {
-        static inline void call(
+        static void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_N_16(M,N,K,x,A,B,C); }
@@ -613,7 +654,7 @@ namespace tmv {
     template <int ix, class T>
     struct select_multmm<16,UNKNOWN,32,ix,T>
     {
-        static inline void call(
+        static void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_N_32(M,N,K,x,A,B,C); }
@@ -621,7 +662,7 @@ namespace tmv {
     template <int ix, class T>
     struct select_multmm<16,UNKNOWN,64,ix,T>
     {
-        static inline void call(
+        static void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_N_64(M,N,K,x,A,B,C); }
@@ -629,7 +670,7 @@ namespace tmv {
     template <int KB, int ix, class T>
     struct select_multmm<16,16,KB,ix,T>
     {
-        static inline void call(
+        static void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_16_K_known<KB>(M,N,K,x,A,B,C); }
@@ -637,7 +678,7 @@ namespace tmv {
     template <int ix, class T>
     struct select_multmm<16,16,UNKNOWN,ix,T>
     {
-        static inline void call(
+        static void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_16_K(M,N,K,x,A,B,C); }
@@ -654,20 +695,30 @@ namespace tmv {
             RT* m3p, const int si3, const int sj3)
         {
 #ifdef PRINTALGO_MM_BLOCK
-            MatrixView<RT> m1(m1p,M,K,si1,sj1);
-            MatrixView<RT> m2(m2p,K,N,si2,sj2);
-            MatrixView<RT> m3(m3p,M,N,si3,sj3);
             std::cout<<"MyProd both real"<<std::endl;
             std::cout<<"cs,rs,xs = "<<cs<<','<<rs<<','<<xs<<std::endl;
-            std::cout<<"m1 = "<<m1<<std::endl;
-            std::cout<<"m2 = "<<m2<<std::endl;
-            std::cout<<"m3 = "<<m3<<std::endl;
+            std::cout<<"M,N,K = "<<M<<','<<N<<','<<K<<std::endl;
+            std::cout<<"si1,sj1 = "<<si1<<','<<sj1<<std::endl;
+            std::cout<<"si2,sj2 = "<<si2<<','<<sj2<<std::endl;
+            std::cout<<"si3,sj3 = "<<si3<<','<<sj3<<std::endl;
+            std::cout<<"m1p = "<<m1p<<"..."<<
+                (m1p+(M-1)*si1+(K-1)*sj1+1)<<std::endl;
+            std::cout<<"m2p = "<<m2p<<"..."<<
+                (m2p+(K-1)*si2+(N-1)*sj2+1)<<std::endl;
+            std::cout<<"m3p = "<<m3p<<"..."<<
+                (m3p+(M-1)*si3+(N-1)*sj3+1)<<std::endl;
+            //MatrixView<RT> m1(m1p,M,K,si1,sj1);
+            //MatrixView<RT> m2(m2p,K,N,si2,sj2);
+            //MatrixView<RT> m3(m3p,M,N,si3,sj3);
+            //std::cout<<"m1 = "<<m1<<std::endl;
+            //std::cout<<"m2 = "<<m2<<std::endl;
+            //std::cout<<"m3 = "<<m3<<std::endl;
 #endif
             const Scaling<1,RT> one;
             select_multmm<cs,rs,xs,1,RT>::call(M,N,K,one,m1p,m2p,m3p);
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"After call to multmm\n";
-            std::cout<<"m3 => "<<m3<<std::endl;
+            //std::cout<<"m3 => "<<m3<<std::endl;
 #endif
         }
     };
@@ -683,11 +734,21 @@ namespace tmv {
             RT* m3p, const int si3, const int sj3)
         {
 #ifdef PRINTALGO_MM_BLOCK
-            MatrixView<CT> m1((CT*)m1p,M,K,si1,sj1);
-            MatrixView<RT> m2(m2p,K,N,si2,sj2);
-            MatrixView<CT> m3((CT*)m3p,M,N,si3,sj3);
             std::cout<<"MyProd (m1 complex)"<<std::endl;
             std::cout<<"cs,rs,xs = "<<cs<<','<<rs<<','<<xs<<std::endl;
+            std::cout<<"M,N,K = "<<M<<','<<N<<','<<K<<std::endl;
+            std::cout<<"si1,sj1 = "<<si1<<','<<sj1<<std::endl;
+            std::cout<<"si2,sj2 = "<<si2<<','<<sj2<<std::endl;
+            std::cout<<"si3,sj3 = "<<si3<<','<<sj3<<std::endl;
+            std::cout<<"m1p = "<<m1p<<"..."<<
+                (m1p+(M-1)*si1+(K-1)*sj1+1)<<std::endl;
+            std::cout<<"m2p = "<<m2p<<"..."<<
+                (m2p+(K-1)*si2+(N-1)*sj2+1)<<std::endl;
+            std::cout<<"m3p = "<<m3p<<"..."<<
+                (m3p+(M-1)*si3+(N-1)*sj3+1)<<std::endl;
+            //MatrixView<CT> m1((CT*)m1p,M,K,si1,sj1);
+            //MatrixView<RT> m2(m2p,K,N,si2,sj2);
+            //MatrixView<CT> m3((CT*)m3p,M,N,si3,sj3);
             //std::cout<<"m1 = "<<m1<<std::endl;
             //std::cout<<"m2 = "<<m2<<std::endl;
 #endif
@@ -714,11 +775,21 @@ namespace tmv {
             RT* m3p, const int si3, const int sj3)
         {
 #ifdef PRINTALGO_MM_BLOCK
-            MatrixView<RT> m1(m1p,M,K,si1,sj1);
-            MatrixView<CT> m2((CT*)m2p,K,N,si2,sj2);
-            MatrixView<CT> m3((CT*)m3p,M,N,si3,sj3);
             std::cout<<"MyProd (m2 complex)"<<std::endl;
             std::cout<<"cs,rs,xs = "<<cs<<','<<rs<<','<<xs<<std::endl;
+            std::cout<<"M,N,K = "<<M<<','<<N<<','<<K<<std::endl;
+            std::cout<<"si1,sj1 = "<<si1<<','<<sj1<<std::endl;
+            std::cout<<"si2,sj2 = "<<si2<<','<<sj2<<std::endl;
+            std::cout<<"si3,sj3 = "<<si3<<','<<sj3<<std::endl;
+            std::cout<<"m1p = "<<m1p<<"..."<<
+                (m1p+(M-1)*si1+(K-1)*sj1+1)<<std::endl;
+            std::cout<<"m2p = "<<m2p<<"..."<<
+                (m2p+(K-1)*si2+(N-1)*sj2+1)<<std::endl;
+            std::cout<<"m3p = "<<m3p<<"..."<<
+                (m3p+(M-1)*si3+(N-1)*sj3+1)<<std::endl;
+            //MatrixView<RT> m1(m1p,M,K,si1,sj1);
+            //MatrixView<CT> m2((CT*)m2p,K,N,si2,sj2);
+            //MatrixView<CT> m3((CT*)m3p,M,N,si3,sj3);
             //std::cout<<"m1 = "<<m1<<std::endl;
             //std::cout<<"m2 = "<<m2<<std::endl;
 #endif
@@ -745,14 +816,24 @@ namespace tmv {
             RT* m3p, const int si3, const int sj3)
         {
 #ifdef PRINTALGO_MM_BLOCK
-            MatrixView<CT> m1((CT*)m1p,M,K,si1,sj1);
-            MatrixView<CT> m2((CT*)m2p,K,N,si2,sj2);
-            MatrixView<CT> m3((CT*)m3p,M,N,si3,sj3);
             std::cout<<"MyProd (both complex)"<<std::endl;
             std::cout<<"cs,rs,xs = "<<cs<<','<<rs<<','<<xs<<std::endl;
-            std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1<<std::endl;
-            std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
-            std::cout<<"m3 = "<<TMV_Text(m3)<<"  "<<m3<<std::endl;
+            std::cout<<"M,N,K = "<<M<<','<<N<<','<<K<<std::endl;
+            std::cout<<"si1,sj1 = "<<si1<<','<<sj1<<std::endl;
+            std::cout<<"si2,sj2 = "<<si2<<','<<sj2<<std::endl;
+            std::cout<<"si3,sj3 = "<<si3<<','<<sj3<<std::endl;
+            std::cout<<"m1p = "<<m1p<<"..."<<
+                (m1p+(M-1)*si1+(K-1)*sj1+1)<<std::endl;
+            std::cout<<"m2p = "<<m2p<<"..."<<
+                (m2p+(K-1)*si2+(N-1)*sj2+1)<<std::endl;
+            std::cout<<"m3p = "<<m3p<<"..."<<
+                (m3p+(M-1)*si3+(N-1)*sj3+1)<<std::endl;
+            //MatrixView<CT> m1((CT*)m1p,M,K,si1,sj1);
+            //MatrixView<CT> m2((CT*)m2p,K,N,si2,sj2);
+            //MatrixView<CT> m3((CT*)m3p,M,N,si3,sj3);
+            //std::cout<<"m1 = "<<m1<<std::endl;
+            //std::cout<<"m2 = "<<m2<<std::endl;
+            //std::cout<<"m3 = "<<m3<<std::endl;
 #endif
             const int xn1 = M*si1;
             const int xn2 = N*sj2;
@@ -766,7 +847,7 @@ namespace tmv {
             select_multmm<cs,rs,xs,1,RT>::call(M,N,K,one,m1p,m2p+xn2,m3p+xn3);
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"After call to multmm\n";
-            std::cout<<"m3 => "<<m3<<std::endl;
+            //std::cout<<"m3 => "<<m3<<std::endl;
 #endif
         }
     };
@@ -786,20 +867,30 @@ namespace tmv {
             Kcleanup* cleanup)
         {
 #ifdef PRINTALGO_MM_BLOCK
-            MatrixView<RT> m1(m1p,M,K,si1,sj1);
-            MatrixView<RT> m2(m2p,K,N,si2,sj2);
-            MatrixView<RT> m3(m3p,M,N,si3,sj3);
             std::cout<<"MyCleanup (both real) \n";
-            std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1<<std::endl;
-            std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
-            std::cout<<"m3 = "<<TMV_Text(m3)<<"  "<<m3<<std::endl;
+            std::cout<<"M,N,K = "<<M<<','<<N<<','<<K<<std::endl;
+            std::cout<<"si1,sj1 = "<<si1<<','<<sj1<<std::endl;
+            std::cout<<"si2,sj2 = "<<si2<<','<<sj2<<std::endl;
+            std::cout<<"si3,sj3 = "<<si3<<','<<sj3<<std::endl;
+            std::cout<<"m1p = "<<m1p<<"..."<<
+                (m1p+(M-1)*si1+(K-1)*sj1+1)<<std::endl;
+            std::cout<<"m2p = "<<m2p<<"..."<<
+                (m2p+(K-1)*si2+(N-1)*sj2+1)<<std::endl;
+            std::cout<<"m3p = "<<m3p<<"..."<<
+                (m3p+(M-1)*si3+(N-1)*sj3+1)<<std::endl;
+            //MatrixView<RT> m1(m1p,M,K,si1,sj1);
+            //MatrixView<RT> m2(m2p,K,N,si2,sj2);
+            //MatrixView<RT> m3(m3p,M,N,si3,sj3);
+            //std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1<<std::endl;
+            //std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
+            //std::cout<<"m3 = "<<TMV_Text(m3)<<"  "<<m3<<std::endl;
 #endif
             TMVAssert(cleanup);
             const Scaling<1,RT> one;
             (*cleanup)(M,N,K,one,m1p,m2p,m3p); 
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"After cleanup call\n";
-            std::cout<<"m3 => "<<m3<<std::endl;
+            //std::cout<<"m3 => "<<m3<<std::endl;
 #endif
         }
     };
@@ -820,10 +911,20 @@ namespace tmv {
             Kcleanup* cleanup)
         {
 #ifdef PRINTALGO_MM_BLOCK
-            MatrixView<CT> m1((CT*)m1p,M,K,si1,sj1);
-            MatrixView<RT> m2(m2p,K,N,si2,sj2);
-            MatrixView<CT> m3((CT*)m3p,M,N,si3,sj3);
             std::cout<<"MyCleanup (m1 complex) \n";
+            std::cout<<"M,N,K = "<<M<<','<<N<<','<<K<<std::endl;
+            std::cout<<"si1,sj1 = "<<si1<<','<<sj1<<std::endl;
+            std::cout<<"si2,sj2 = "<<si2<<','<<sj2<<std::endl;
+            std::cout<<"si3,sj3 = "<<si3<<','<<sj3<<std::endl;
+            std::cout<<"m1p = "<<m1p<<"..."<<
+                (m1p+(M-1)*si1+(K-1)*sj1+1)<<std::endl;
+            std::cout<<"m2p = "<<m2p<<"..."<<
+                (m2p+(K-1)*si2+(N-1)*sj2+1)<<std::endl;
+            std::cout<<"m3p = "<<m3p<<"..."<<
+                (m3p+(M-1)*si3+(N-1)*sj3+1)<<std::endl;
+            //MatrixView<CT> m1((CT*)m1p,M,K,si1,sj1);
+            //MatrixView<RT> m2(m2p,K,N,si2,sj2);
+            //MatrixView<CT> m3((CT*)m3p,M,N,si3,sj3);
             //std::cout<<"m1 = "<<m1<<std::endl;
             //std::cout<<"m2 = "<<m2<<std::endl;
 #endif
@@ -855,10 +956,20 @@ namespace tmv {
             Kcleanup* cleanup)
         {
 #ifdef PRINTALGO_MM_BLOCK
-            MatrixView<RT> m1(m1p,M,K,si1,sj1);
-            MatrixView<CT> m2((CT*)m2p,K,N,si2,sj2);
-            MatrixView<CT> m3((CT*)m3p,M,N,si3,sj3);
             std::cout<<"MyCleanup (m2 complex) \n";
+            std::cout<<"M,N,K = "<<M<<','<<N<<','<<K<<std::endl;
+            std::cout<<"si1,sj1 = "<<si1<<','<<sj1<<std::endl;
+            std::cout<<"si2,sj2 = "<<si2<<','<<sj2<<std::endl;
+            std::cout<<"si3,sj3 = "<<si3<<','<<sj3<<std::endl;
+            std::cout<<"m1p = "<<m1p<<"..."<<
+                (m1p+(M-1)*si1+(K-1)*sj1+1)<<std::endl;
+            std::cout<<"m2p = "<<m2p<<"..."<<
+                (m2p+(K-1)*si2+(N-1)*sj2+1)<<std::endl;
+            std::cout<<"m3p = "<<m3p<<"..."<<
+                (m3p+(M-1)*si3+(N-1)*sj3+1)<<std::endl;
+            //MatrixView<RT> m1(m1p,M,K,si1,sj1);
+            //MatrixView<CT> m2((CT*)m2p,K,N,si2,sj2);
+            //MatrixView<CT> m3((CT*)m3p,M,N,si3,sj3);
             //std::cout<<"m1 = "<<m1<<std::endl;
             //std::cout<<"m2 = "<<m2<<std::endl;
 #endif
@@ -890,13 +1001,23 @@ namespace tmv {
             Kcleanup* cleanup)
         {
 #ifdef PRINTALGO_MM_BLOCK
-            MatrixView<CT> m1((CT*)m1p,M,K,si1,sj1);
-            MatrixView<CT> m2((CT*)m2p,K,N,si2,sj2);
-            MatrixView<CT> m3((CT*)m3p,M,N,si3,sj3);
             std::cout<<"MyCleanup (both complex) \n";
-            std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1<<std::endl;
-            std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
-            std::cout<<"m3 = "<<TMV_Text(m3)<<"  "<<m3<<std::endl;
+            std::cout<<"M,N,K = "<<M<<','<<N<<','<<K<<std::endl;
+            std::cout<<"si1,sj1 = "<<si1<<','<<sj1<<std::endl;
+            std::cout<<"si2,sj2 = "<<si2<<','<<sj2<<std::endl;
+            std::cout<<"si3,sj3 = "<<si3<<','<<sj3<<std::endl;
+            std::cout<<"m1p = "<<m1p<<"..."<<
+                (m1p+(M-1)*si1+(K-1)*sj1+1)<<std::endl;
+            std::cout<<"m2p = "<<m2p<<"..."<<
+                (m2p+(K-1)*si2+(N-1)*sj2+1)<<std::endl;
+            std::cout<<"m3p = "<<m3p<<"..."<<
+                (m3p+(M-1)*si3+(N-1)*sj3+1)<<std::endl;
+            //MatrixView<CT> m1((CT*)m1p,M,K,si1,sj1);
+            //MatrixView<CT> m2((CT*)m2p,K,N,si2,sj2);
+            //MatrixView<CT> m3((CT*)m3p,M,N,si3,sj3);
+            //std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1<<std::endl;
+            //std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
+            //std::cout<<"m3 = "<<TMV_Text(m3)<<"  "<<m3<<std::endl;
 #endif
             TMVAssert(cleanup);
             const Scaling<1,RT> one;
@@ -906,16 +1027,13 @@ namespace tmv {
 
             (*cleanup)(M,N,K,one,m1p,m2p,m3p);
 #ifdef PRINTALGO_MM_BLOCK
-            std::cout<<"MyCleanup (both complex) \n";
-            std::cout<<"si1, si2, si3 = "<<si1<<" "<<si2<<" "<<si3<<std::endl;
-            std::cout<<"sj1, sj2, sj3 = "<<sj1<<" "<<sj2<<" "<<sj3<<std::endl;
             std::cout<<"xn1, xn2, xn3 = "<<xn1<<" "<<xn2<<" "<<xn3<<std::endl;
-            MatrixView<RT> m1r(m1p,M,K,si1,sj1);
-            MatrixView<RT> m2r(m2p,K,N,si2,sj2);
-            MatrixView<RT> m3r(m3p,M,N,si3,sj3);
-            std::cout<<"m1r = "<<TMV_Text(m1r)<<"  "<<m1r<<std::endl;
-            std::cout<<"m2r = "<<TMV_Text(m2r)<<"  "<<m2r<<std::endl;
-            std::cout<<"m3r => "<<TMV_Text(m3r)<<"  "<<m3r<<std::endl;
+            //MatrixView<RT> m1r(m1p,M,K,si1,sj1);
+            //MatrixView<RT> m2r(m2p,K,N,si2,sj2);
+            //MatrixView<RT> m3r(m3p,M,N,si3,sj3);
+            //std::cout<<"m1r = "<<TMV_Text(m1r)<<"  "<<m1r<<std::endl;
+            //std::cout<<"m2r = "<<TMV_Text(m2r)<<"  "<<m2r<<std::endl;
+            //std::cout<<"m3r => "<<TMV_Text(m3r)<<"  "<<m3r<<std::endl;
 #endif
 
             // This next one is tricky, since we have the wrong function to 
@@ -933,61 +1051,80 @@ namespace tmv {
             const Scaling<-1,RT> mone;
             multmm_M_N_K(M,N,K,mone,m1p+xn1,m2p+xn2,m3p);
 #ifdef PRINTALGO_MM_BLOCK
-            MatrixView<RT> m1i(m1p+xn1,M,K,si1,sj1);
-            MatrixView<RT> m2i(m2p+xn2,K,N,si2,sj2);
-            std::cout<<"m1i = "<<TMV_Text(m1i)<<"  "<<m1i<<std::endl;
-            std::cout<<"m2i = "<<TMV_Text(m2i)<<"  "<<m2i<<std::endl;
-            std::cout<<"m3r => "<<TMV_Text(m3r)<<"  "<<m3r<<std::endl;
+            //MatrixView<RT> m1i(m1p+xn1,M,K,si1,sj1);
+            //MatrixView<RT> m2i(m2p+xn2,K,N,si2,sj2);
+            //std::cout<<"m1i = "<<TMV_Text(m1i)<<"  "<<m1i<<std::endl;
+            //std::cout<<"m2i = "<<TMV_Text(m2i)<<"  "<<m2i<<std::endl;
+            //std::cout<<"m3r => "<<TMV_Text(m3r)<<"  "<<m3r<<std::endl;
 #endif
 
             (*cleanup)(M,N,K,one,m1p+xn1,m2p,m3p+xn3);
             (*cleanup)(M,N,K,one,m1p,m2p+xn2,m3p+xn3);
 #ifdef PRINTALGO_MM_BLOCK
-            MatrixView<RT> m3i(m3p+xn3,M,N,si3,sj3);
-            std::cout<<"m3i => "<<TMV_Text(m3i)<<"  "<<m3i<<std::endl;
             std::cout<<"After cleanup call\n";
-            std::cout<<"m3 => "<<m3<<std::endl;
+            //MatrixView<RT> m3i(m3p+xn3,M,N,si3,sj3);
+            //std::cout<<"m3i => "<<TMV_Text(m3i)<<"  "<<m3i<<std::endl;
+            //std::cout<<"m3 => "<<m3<<std::endl;
 #endif
         }
     };
 
-    template <bool iscomplex_x, bool iscomplex2, bool add, 
-              int ix, class T, int cs, int rs, class M2>
+    template <bool iscomplex_x, bool iscomplex2, int cs, int rs,
+              bool add, int ix, class T, class M2>
     struct MyAssign // both real
     {
         typedef typename M2::real_type RT;
         typedef typename M2::value_type T2; 
         // Note: T2 might be complex, but m1 isn't.
         typedef ConstMatrixView<RT,1> M1r;
+        typedef typename M2::const_realpart_type M2r;
 
         static void call(
             const RT* xp, 
             RT* m1p, const int M, const int N, const int si1, const int sj1,
             MatrixView<RT> m2x)
         {
+#ifdef PRINTALGO_MM_BLOCK
+            std::cout<<"MyAssign real"<<std::endl;
+            std::cout<<"cs,rs = "<<cs<<','<<rs<<std::endl;
+            std::cout<<"M,N = "<<M<<','<<N<<std::endl;
+            std::cout<<"si1,sj1 = "<<si1<<','<<sj1<<std::endl;
+            std::cout<<"si2,sj2 = "<<m2x.stepi()<<','<<m2x.stepj()<<std::endl;
+            std::cout<<"m1p = "<<m1p<<"..."<<
+                (m1p+(M-1)*si1+(N-1)*sj1+1)<<std::endl;
+            std::cout<<"m2p = "<<m2x.ptr()<<"..."<<
+                (m2x.ptr()+(M-1)*m2x.stepi()+(N-1)*m2x.stepj()+1)<<std::endl;
+            std::cout<<"M1r cs,rs,si,sj = "<<
+                M1r::_colsize<<','<<M1r::_rowsize<<','<<
+                M1r::_stepi<<','<<M1r::_stepj<<std::endl;
+            std::cout<<"M2r cs,rs,si,sj = "<<
+                M2r::_colsize<<','<<M2r::_rowsize<<','<<
+                M2r::_stepi<<','<<M2r::_stepj<<std::endl;
+            std::cout<<"m2x M,N,si,sj = "<<
+                m2x.colsize()<<','<<m2x.rowsize()<<','<<
+                m2x.stepi()<<','<<m2x.stepj()<<std::endl;
+#endif
             TMVAssert(si1 == 1);
             const Scaling<ix,T> x(*((T*)(xp)));
             M1r m1(m1p,M,N,si1,sj1);
+            // Get back to original steps, rather than realPart.
+            const int si2 = Maybe<Traits<T2>::iscomplex>::divby2(m2x.stepi());
+            const int sj2 = Maybe<Traits<T2>::iscomplex>::divby2(m2x.stepj());
+            M2 m2((T2*)m2x.ptr(),m2x.colsize(),m2x.rowsize(),si2,sj2);
 #ifdef PRINTALGO_MM_BLOCK
-            std::cout<<"MyAssign real"<<std::endl;
             std::cout<<"x = "<<T(x)<<std::endl;
-            std::cout<<"m1 = "<<m1<<std::endl;
-            std::cout<<"cs,rs,M,N,si1,sj1 = "<<cs<<','<<rs<<','<<M<<','<<N<<
-                ','<<si1<<','<<sj1<<std::endl;
-            std::cout<<"m2x = "<<TMV_Text(m2x)<<std::endl;
+            //std::cout<<"m1 = "<<m1<<std::endl;
+            //std::cout<<"m2x = "<<TMV_Text(m2x)<<std::endl;
 #endif
-            M2 m2((T2*)m2x.ptr(),m2x.colsize(),m2x.rowsize(),
-                  m2x.stepi(),m2x.stepj());
             MultXM_Helper<-4,cs,rs,add,ix,T,M1r,M2>::call(x,m1,m2); 
 #ifdef PRINTALGO_MM_BLOCK
-            std::cout<<"m2p = "<<m2x.ptr()<<"..."<<
-                (m2x.ptr()+(M-1)*m2x.stepi()+(N-1)*m2x.stepj()+1)<<std::endl;
-            std::cout<<"m2 => "<<m2<<std::endl;
+            std::cout<<"done assign\n";
+            //std::cout<<"m2 => "<<m2<<std::endl;
 #endif
         }
     };
-    template <bool add, int ix, class T, int cs, int rs, class M2>
-    struct MyAssign<true,false,add,ix,T,cs,rs,M2> // x is complex
+    template <int cs, int rs, bool add, int ix, class T, class M2>
+    struct MyAssign<true,false,cs,rs,add,ix,T,M2> // x is complex
     {
         typedef typename M2::real_type RT;
         typedef typename M2::value_type T2; 
@@ -999,26 +1136,38 @@ namespace tmv {
             RT* m1p, const int M, const int N, const int si1, const int sj1,
             MatrixView<RT> m2x)
         {
+#ifdef PRINTALGO_MM_BLOCK
+            std::cout<<"MyAssign x complex"<<std::endl;
+            std::cout<<"cs,rs = "<<cs<<','<<rs<<std::endl;
+            std::cout<<"M,N = "<<M<<','<<N<<std::endl;
+            std::cout<<"si1,sj1 = "<<si1<<','<<sj1<<std::endl;
+            std::cout<<"si2,sj2 = "<<m2x.stepi()<<','<<m2x.stepj()<<std::endl;
+            std::cout<<"m1p = "<<m1p<<"..."<<
+                (m1p+(M-1)*si1+(N-1)*sj1+1)<<std::endl;
+            std::cout<<"m2p = "<<m2x.ptr()<<"..."<<
+                (m2x.ptr()+(M-1)*m2x.stepi()+(N-1)*m2x.stepj()+1)<<std::endl;
+#endif
             TMVAssert(si1 == 1);
             const Scaling<ix,T>& x(*((T*)(xp)));
             M1r m1(m1p,M,N,si1,sj1);
+            // Get back to original steps, rather than realPart.
+            const int si2 = Maybe<Traits<T2>::iscomplex>::divby2(m2x.stepi());
+            const int sj2 = Maybe<Traits<T2>::iscomplex>::divby2(m2x.stepj());
+            M2 m2((T2*)m2x.ptr(),m2x.colsize(),m2x.rowsize(),si2,sj2);
 #ifdef PRINTALGO_MM_BLOCK
-            std::cout<<"MyAssign x complex"<<std::endl;
             std::cout<<"x = "<<T(x)<<std::endl;
             //std::cout<<"m1 = "<<m1<<std::endl;
+            //std::cout<<"m2x = "<<TMV_Text(m2x)<<std::endl;
 #endif
-            M2 m2((T2*)m2x.ptr(),m2x.colsize(),m2x.rowsize(),
-                  m2x.stepi(),m2x.stepj());
             MultXM_Helper<-4,cs,rs,add,ix,T,M1r,M2>::call(x,m1,m2); 
 #ifdef PRINTALGO_MM_BLOCK
-            std::cout<<"m2p = "<<m2x.ptr()<<"..."<<
-                (m2x.ptr()+(M-1)*m2x.stepi()+(N-1)*m2x.stepj()+1)<<std::endl;
+            std::cout<<"done assign\n";
             //std::cout<<"m2 => "<<m2<<std::endl;
 #endif
         }
     };
-    template <bool add, int ix, class T, int cs, int rs, class M2>
-    struct MyAssign<false,true,add,ix,T,cs,rs,M2> // m2 is complex
+    template <int cs, int rs, bool add, int ix, class T, class M2>
+    struct MyAssign<false,true,cs,rs,add,ix,T,M2> // m2 is complex
     {
         typedef typename M2::real_type RT;
         typedef ConstMatrixView<RT,1> M1r;
@@ -1031,6 +1180,17 @@ namespace tmv {
             const int si1, const int sj1,
             MatrixView<RT> m2x)
         {
+#ifdef PRINTALGO_MM_BLOCK
+            std::cout<<"MyAssign m2 complex"<<std::endl;
+            std::cout<<"cs,rs = "<<cs<<','<<rs<<std::endl;
+            std::cout<<"M,N = "<<M<<','<<N<<std::endl;
+            std::cout<<"si1,sj1 = "<<si1<<','<<sj1<<std::endl;
+            std::cout<<"si2,sj2 = "<<m2x.stepi()<<','<<m2x.stepj()<<std::endl;
+            std::cout<<"m1p = "<<m1p<<"..."<<
+                (m1p+(M-1)*si1+(N-1)*sj1+1)<<std::endl;
+            std::cout<<"m2p = "<<m2x.ptr()<<"..."<<
+                (m2x.ptr()+(M-1)*m2x.stepi()+(N-1)*m2x.stepj()+1)<<std::endl;
+#endif
             TMVAssert(si1 == 1);
             const Scaling<ix,T>& x(*((T*)(xp)));
             M2r m2r(m2x);
@@ -1040,25 +1200,21 @@ namespace tmv {
             M1r m1r(m1p,M,N,si1,sj1);
             M1r m1i(m1p+size,M,N,si1,sj1);
 #ifdef PRINTALGO_MM_BLOCK
-            std::cout<<"MyAssign m2 complex"<<std::endl;
-            std::cout<<"si1,sj1,size = "<<si1<<"  "<<sj1
-                <<"  "<<size<<std::endl;
             std::cout<<"x = "<<T(x)<<std::endl;
-            std::cout<<"m1r = "<<m1r<<std::endl;
-            std::cout<<"m1i = "<<m1i<<std::endl;
+            //std::cout<<"m1r = "<<m1r<<std::endl;
+            //std::cout<<"m1i = "<<m1i<<std::endl;
 #endif
             MultXM_Helper<-4,cs,rs,add,ix,T,M1r,M2r>::call(x,m1r,m2r); 
             MultXM_Helper<-4,cs,rs,add,ix,T,M1r,M2i>::call(x,m1i,m2i); 
 #ifdef PRINTALGO_MM_BLOCK
-            std::cout<<"m2p = "<<m2x.ptr()<<"..."<<
-                (m2x.ptr()+(M-1)*m2x.stepi()+(N-1)*m2x.stepj()+1)<<std::endl;
-            std::cout<<"m1r = "<<m1r<<std::endl;
-            std::cout<<"m2r => "<<m2r<<std::endl;
+            std::cout<<"done assign\n";
+            //std::cout<<"m2r => "<<m2r<<std::endl;
+            //std::cout<<"m2i => "<<m2i<<std::endl;
 #endif
         }
     };
-    template <bool add, int ix, class T, int cs, int rs, class M2>
-    struct MyAssign<true,true,add,ix,T,cs,rs,M2> // both complex
+    template <int cs, int rs, bool add, int ix, class T, class M2>
+    struct MyAssign<true,true,cs,rs,add,ix,T,M2> // both complex
     {
         typedef typename M2::real_type RT;
         typedef typename M2::realpart_type M2r;
@@ -1071,6 +1227,17 @@ namespace tmv {
             const int si1, const int sj1,
             MatrixView<RT> m2x)
         {
+#ifdef PRINTALGO_MM_BLOCK
+            std::cout<<"MyAssign both complex"<<std::endl;
+            std::cout<<"cs,rs = "<<cs<<','<<rs<<std::endl;
+            std::cout<<"M,N = "<<M<<','<<N<<std::endl;
+            std::cout<<"si1,sj1 = "<<si1<<','<<sj1<<std::endl;
+            std::cout<<"si2,sj2 = "<<m2x.stepi()<<','<<m2x.stepj()<<std::endl;
+            std::cout<<"m1p = "<<m1p<<"..."<<
+                (m1p+(M-1)*si1+(N-1)*sj1+1)<<std::endl;
+            std::cout<<"m2p = "<<m2x.ptr()<<"..."<<
+                (m2x.ptr()+(M-1)*m2x.stepi()+(N-1)*m2x.stepj()+1)<<std::endl;
+#endif
             TMVAssert(si1 == 1);
             const T x(*((T*)(xp)));
             M2r m2r(m2x);
@@ -1080,10 +1247,9 @@ namespace tmv {
             M1r m1r(m1p,M,N,si1,sj1);
             M1r m1i(m1p+size,M,N,si1,sj1);
 #ifdef PRINTALGO_MM_BLOCK
-            std::cout<<"MyAssign both complex"<<std::endl;
             std::cout<<"x = "<<T(x)<<std::endl;
-            std::cout<<"m1r = "<<m1r<<std::endl;
-            std::cout<<"m1i = "<<m1i<<std::endl;
+            //std::cout<<"m1r = "<<m1r<<std::endl;
+            //std::cout<<"m1i = "<<m1i<<std::endl;
 #endif
             //m2r (+)= TMV_REAL(x) * m1r;
             //m2r -=   TMV_IMAG(x) * m1i;
@@ -1098,107 +1264,62 @@ namespace tmv {
             MultXM_Helper<-4,cs,rs,true,0,RT,M1r,M2i>::call(
                 Scaling<0,RT>(TMV_IMAG(x)),m1r,m2i); 
 #ifdef PRINTALGO_MM_BLOCK
-            std::cout<<"m2p = "<<m2x.ptr()<<"..."<<
-                (m2x.ptr()+(M-1)*m2x.stepi()+(N-1)*m2x.stepj()+1)<<std::endl;
-            std::cout<<"m1r = "<<m1r<<std::endl;
-            std::cout<<"m2r => "<<m2r<<std::endl;
+            std::cout<<"done assign\n";
+            //std::cout<<"m2r => "<<m2r<<std::endl;
+            //std::cout<<"m2i => "<<m2i<<std::endl;
 #endif
         }
     };
 
-    template <bool zx, bool z2, class T, int cs, int rs, class M2>
+    template <bool zx, bool z2, int cs, int rs, bool add, int ix, class T, class M2>
     struct get_assign
     {
         typedef typename M2::real_type RT;
-        typedef typename M2::rmview_type M2rm;
-        typedef typename M2::cmview_type M2cm;
+        typedef typename M2::value_type T2;
+        typedef MatrixView<T2,M2::_stepi,M2::_stepj,M2::_conj> M2x;
+        typedef MatrixView<T2,1,M2::_stepj,M2::_conj> M2cm;
+        typedef MatrixView<T2,M2::_stepi,1,M2::_conj> M2rm;
 
         typedef void F(
             const RT* xp,
             RT* m1p, const int M, const int N, const int si1, const int sj1,
             MatrixView<RT> m2x);
 
-        static F* call(const bool add, const T& x, const M2& m)
+        template <bool known, int dummy> struct GetAssignHelper;
+
+        template <int dummy>
+        struct GetAssignHelper<true,dummy> // known steps
         {
-            if (add)
-                if (TMV_IMAG(x) == RT(0))
-                    if (TMV_REAL(x) == RT(1))
-                        if (m.isrm()) 
-                            return &MyAssign<zx,z2,true,1,RT,cs,rs,M2rm>::call;
-                        else if (m.iscm())
-                            return &MyAssign<zx,z2,true,1,RT,cs,rs,M2cm>::call;
-                        else
-                            return &MyAssign<zx,z2,true,1,RT,cs,rs,M2>::call;
-                    else if (TMV_REAL(x) == RT(-1))
-                        if (m.isrm()) 
-                            return 
-                                &MyAssign<zx,z2,true,-1,RT,cs,rs,M2rm>::call;
-                        else if (m.iscm())
-                            return 
-                                &MyAssign<zx,z2,true,-1,RT,cs,rs,M2cm>::call;
-                        else
-                            return &MyAssign<zx,z2,true,-1,RT,cs,rs,M2>::call;
-                    else 
-                        if (m.isrm()) 
-                            return &MyAssign<zx,z2,true,0,RT,cs,rs,M2rm>::call;
-                        else if (m.iscm())
-                            return &MyAssign<zx,z2,true,0,RT,cs,rs,M2cm>::call;
-                        else
-                            return &MyAssign<zx,z2,true,0,RT,cs,rs,M2>::call;
+            static F* call(const M2& m)
+            { return &MyAssign<zx,z2,cs,rs,add,ix,T,M2x>::call; }
+        };
+        template <int dummy>
+        struct GetAssignHelper<false,dummy> // unknown steps
+        {
+            static F* call(const M2& m)
+            {
+                if (m.isrm()) 
+                    return &MyAssign<zx,z2,cs,rs,add,ix,T,M2rm>::call;
+                else if (m.iscm())
+                    return &MyAssign<zx,z2,cs,rs,add,ix,T,M2cm>::call;
                 else
-                    if (m.isrm()) 
-                        return &MyAssign<zx,z2,true,0,T,cs,rs,M2rm>::call;
-                    else if (m.iscm())
-                        return &MyAssign<zx,z2,true,0,T,cs,rs,M2cm>::call;
-                    else
-                        return &MyAssign<zx,z2,true,0,T,cs,rs,M2>::call;
-            else
-                if (TMV_IMAG(x) == RT(0))
-                    if (TMV_REAL(x) == RT(1))
-                        if (m.isrm()) 
-                            return 
-                                &MyAssign<zx,z2,false,1,RT,cs,rs,M2rm>::call;
-                        else if (m.iscm())
-                            return 
-                                &MyAssign<zx,z2,false,1,RT,cs,rs,M2cm>::call;
-                        else
-                            return &MyAssign<zx,z2,false,1,RT,cs,rs,M2>::call;
-                    else if (TMV_REAL(x) == RT(-1))
-                        if (m.isrm()) 
-                            return 
-                                &MyAssign<zx,z2,false,-1,RT,cs,rs,M2rm>::call;
-                        else if (m.iscm())
-                            return 
-                                &MyAssign<zx,z2,false,-1,RT,cs,rs,M2cm>::call;
-                        else
-                            return &MyAssign<zx,z2,false,-1,RT,cs,rs,M2>::call;
-                    else 
-                        if (m.isrm()) 
-                            return 
-                                &MyAssign<zx,z2,false,0,RT,cs,rs,M2rm>::call;
-                        else if (m.iscm())
-                            return 
-                                &MyAssign<zx,z2,false,0,RT,cs,rs,M2cm>::call;
-                        else
-                            return &MyAssign<zx,z2,false,0,RT,cs,rs,M2>::call;
-                else
-                    if (m.isrm()) 
-                        return &MyAssign<zx,z2,false,0,T,cs,rs,M2rm>::call;
-                    else if (m.iscm())
-                        return &MyAssign<zx,z2,false,0,T,cs,rs,M2cm>::call;
-                    else
-                        return &MyAssign<zx,z2,false,0,T,cs,rs,M2>::call;
+                    return &MyAssign<zx,z2,cs,rs,add,ix,T,M2x>::call;
+            }
+        };
+        static F* call(const M2& m)
+        {
+            const bool known = M2::_stepi != UNKNOWN || M2::_stepj != UNKNOWN;
+            return GetAssignHelper<known,1>::call(m);
         }
     };
-
 
     // A helper function to round a column length up to the next
     // multiple of 2 or 4 if required for the SSE commands for that type.
     template <class T>
-    static inline int RoundUp(const int x)
+    static int RoundUp(const int x)
     { return x; }
     template <>
-    inline int RoundUp<double>(const int x)
+    static int RoundUp<double>(const int x)
     { 
         return (
 #ifdef __SSE2__
@@ -1209,7 +1330,7 @@ namespace tmv {
         );
     }
     template <>
-    inline int RoundUp<float>(const int x)
+    static int RoundUp<float>(const int x)
     { 
         return (
 #ifdef __SSE__
@@ -1302,8 +1423,7 @@ namespace tmv {
             <<"  "<<(size_t)mykf<<std::endl;
 #endif
 
-        if (Mb > 1 && Nb > 1 && Kb > 1)
-        {
+        if (Mb > 1 && Nb > 1 && Kb > 1) {
             const int Mx = Mb>>1; // = Mb/2
             const int Nx = Nb>>1; // = Nb/2
             const int Kx = Kb>>1; // = Kb/2
@@ -1442,9 +1562,7 @@ namespace tmv {
                 assign,assigna,assignb,myassign,
                 prod,proda,prodb,myprod,
                 mycleanup,kf,kfa,kfb,mykf);
-        }
-        else if (Mb == 1 && Nb == 1 && Kb == 1) 
-        {
+        } else if (Mb == 1 && Nb == 1 && Kb == 1) {
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"No split (all == 1)"<<std::endl;
             // For real:
@@ -1520,9 +1638,7 @@ namespace tmv {
                 }
                 (*myassign) (x,m3p,MB,NB,1,MB,m3.cSubMatrix(i1,i2,j1,j2));
             }
-        }
-        else if (Mb > 1 && Nb > 1)
-        {
+        } else if (Mb > 1 && Nb > 1) {
             TMVAssert(Mb > 1 && Nb > 1 && Kb == 1);
             const int Mx = Mb>>1; // = Mb/2
             const int Nx = Nb>>1; // = Nb/2
@@ -1603,9 +1719,7 @@ namespace tmv {
                 assign,assigna,assignb,myassign,
                 prod,proda,prodb,myprod,
                 mycleanup,kf,kfa,kfb,mykf);
-        }
-        else if (Mb > 1 && Kb > 1)
-        {
+        } else if (Mb > 1 && Kb > 1) {
             TMVAssert(Mb > 1 && Kb > 1 && Nb == 1);
             const int Mx = Mb>>1; // = Mb/2
             const int Kx = Kb>>1; // = Kb/2
@@ -1688,9 +1802,7 @@ namespace tmv {
                 assign,assigna,assignb,myassign,
                 prod,proda,prodb,myprod,
                 mycleanup,kf,kfa,kfb,mykf);
-        }
-        else if (Nb > 1 && Kb > 1)
-        {
+        } else if (Nb > 1 && Kb > 1) {
             TMVAssert(Nb > 1 && Kb > 1 && Mb == 1);
             const int Nx = Nb>>1; // = Nb/2
             const int Kx = Kb>>1; // = Kb/2
@@ -1773,9 +1885,7 @@ namespace tmv {
                 assign,assigna,assignb,myassign,
                 prod,proda,prodb,myprod,
                 mycleanup,kf,kfa,kfb,mykf);
-        }
-        else if (Mb > 1)
-        {
+        } else if (Mb > 1) {
             TMVAssert(Mb > 1 && Nb == 1 && Kb == 1);
             const int Mx = Mb>>1; // = Mb/2
             const int Mz = Mx<<lgMB;
@@ -1826,9 +1936,7 @@ namespace tmv {
                 assign,assigna,assignb,myassign,
                 prod,proda,prodb,myprod,
                 mycleanup,kf,kfa,kfb,mykf);
-        }
-        else if (Nb > 1)
-        {
+        } else if (Nb > 1) {
             TMVAssert(Nb > 1 && Kb == 1 && Mb == 1);
             const int Nx = Nb>>1; // = Nb/2
             const int Nz = Nx<<lgNB;
@@ -1879,9 +1987,7 @@ namespace tmv {
                 assign,assigna,assignb,myassign,
                 prod,proda,prodb,myprod,
                 mycleanup,kf,kfa,kfb,mykf);
-        }
-        else // Kb > 1
-        {
+        } else { // Kb > 1
             TMVAssert(Kb > 1 && Mb == 1 && Nb == 1);
             const int Kx = Kb>>1; // = Kb/2
             const int Kz = Kx<<lgKB;
@@ -2056,8 +2162,7 @@ namespace tmv {
         TMVAssert(Nb >= 2);
         TMVAssert(Kb >= 2);
 
-        if (Mb >= 3*std::max(Nb,Kb)/2) // M is largest
-        {
+        if (Mb >= 3*std::max(Nb,Kb)/2) { // M is largest
             TMVAssert(Mb >= 3);
             TMVAssert(Nb >= 2 || Kb >= 2);
             int nsplit = Mb / (std::max(Nb,Kb)/2);
@@ -2090,9 +2195,9 @@ namespace tmv {
             AlignedArray<RT> m1_temp(size1);
             AlignedArray<RT> m2_temp(size2);
             AlignedArray<RT> m3_temp(size3);
-            RT*const m1p = m1_temp;
-            RT*const m2p = m2_temp;
-            RT*const m3p = m3_temp;
+            RT* m1p = m1_temp;
+            RT* m2p = m2_temp;
+            RT* m3p = m3_temp;
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"M >= 3*max(N,K)/2\n";
             std::cout<<"m1p = "<<m1p<<" end = "<<(m1p+size1)<<std::endl;
@@ -2145,9 +2250,7 @@ namespace tmv {
                     assign,assignax,assignbx,assigncx,
                     prod,prodax,prodbx,prodcx,
                     cleanup,kf,kfax,kfbx,kfcx);
-        }
-        else if (Nb >= 3*std::max(Mb,Kb)/2) // N is largest
-        {
+        } else if (Nb >= 3*std::max(Mb,Kb)/2) { // N is largest
             TMVAssert(Nb >= 3);
             TMVAssert(Mb >= 2 || Kb >= 2);
             int nsplit = Nb / (std::max(Mb,Kb)/2);
@@ -2173,9 +2276,9 @@ namespace tmv {
             AlignedArray<RT> m1_temp(size1);
             AlignedArray<RT> m2_temp(size2);
             AlignedArray<RT> m3_temp(size3);
-            RT*const m1p = m1_temp;
-            RT*const m2p = m2_temp;
-            RT*const m3p = m3_temp;
+            RT* m1p = m1_temp;
+            RT* m2p = m2_temp;
+            RT* m3p = m3_temp;
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"N >= 3*max(M,K)/2\n";
             std::cout<<"m1p = "<<m1p<<" end = "<<(m1p+size1)<<std::endl;
@@ -2228,9 +2331,7 @@ namespace tmv {
                     assign,assignax,assignbx,assigncx,
                     prod,prodax,prodbx,prodcx,
                     cleanup,kf,kfax,kfbx,kfcx);
-        }
-        else if (Kb >= 2*std::max(Mb,Nb)) // K is largest
-        {
+        } else if (Kb >= 2*std::max(Mb,Nb)) { // K is largest
             TMVAssert(Kb >= 4);
             TMVAssert(Mb >= 2 || Nb >= 2);
             int nsplit = Kb / std::max(Mb,Nb);
@@ -2259,9 +2360,9 @@ namespace tmv {
             AlignedArray<RT> m1_temp(size1);
             AlignedArray<RT> m2_temp(size2);
             AlignedArray<RT> m3_temp(size3);
-            RT*const m1p = m1_temp;
-            RT*const m2p = m2_temp;
-            RT*const m3p = m3_temp;
+            RT* m1p = m1_temp;
+            RT* m2p = m2_temp;
+            RT* m3p = m3_temp;
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"K >= 2*max(M,N)\n";
             std::cout<<"m1p = "<<m1p<<" end = "<<(m1p+size1)<<std::endl;
@@ -2300,9 +2401,7 @@ namespace tmv {
                 assign,assignax,assignbx,assigncx,
                 prod,prodax,prodbx,prodcx,
                 cleanup,kf,kfax,kfbx,kfcx);
-        }
-        else // None is much larger than the others (or at least one other)
-        {
+        } else { // None is much larger than the others (or at least one other)
             TMVAssert(Mb >= 2);
             TMVAssert(Nb >= 2);
             TMVAssert(Kb >= 2);
@@ -2333,9 +2432,9 @@ namespace tmv {
             AlignedArray<RT> m1_temp(size1);
             AlignedArray<RT> m2_temp(size2);
             AlignedArray<RT> m3_temp(size3);
-            RT*const m1p = m1_temp;
-            RT*const m2p = m2_temp;
-            RT*const m3p = m3_temp;
+            RT* m1p = m1_temp;
+            RT* m2p = m2_temp;
+            RT* m3p = m3_temp;
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"None much larger than the others\n";
             std::cout<<"m1p = "<<m1p<<" end = "<<(m1p+size1)<<std::endl;
@@ -2463,7 +2562,7 @@ namespace tmv {
               int ix, class T, class M1, class M2, class M3>
     struct MultMM_RecursiveBlock_Helper<1,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         {
             typedef typename M1::value_type T1;
@@ -2505,6 +2604,7 @@ namespace tmv {
             const int csx = cs == UNKNOWN ? UNKNOWN : (cs-((cs>>lgMB)<<lgMB));
             const int rsx = rs == UNKNOWN ? UNKNOWN : (rs-((rs>>lgNB)<<lgNB));
             const int xsx = xs == UNKNOWN ? UNKNOWN : (xs-((xs>>lgKB)<<lgKB));
+
             typedef typename M1::const_submatrix_type M1sub;
             typedef typename M1sub::const_transpose_type M1sub_t;
             typedef typename M2::const_submatrix_type M2sub;
@@ -2576,10 +2676,10 @@ namespace tmv {
             CopyF* copy2a = &MyCopy<m2_z,KB,rsx,M2sub>::call;
             CopyF* copy2a_k = &MyCopy<m2_z,xsx,rsx,M2sub>::call;
 
-            AssignF* assign = &MyAssign<x_z,m3_z,add,ix,T,MB,NB,M3sub>::call;
-            AssignF* assigna = &MyAssign<x_z,m3_z,add,ix,T,MB,rsx,M3sub>::call;
-            AssignF* assignb = &MyAssign<x_z,m3_z,add,ix,T,csx,NB,M3sub>::call;
-            AssignF* assignc = &MyAssign<x_z,m3_z,add,ix,T,csx,rsx,M3sub>::call;
+            AssignF* assign = &MyAssign<x_z,m3_z,MB,NB,add,ix,T,M3sub>::call;
+            AssignF* assigna = &MyAssign<x_z,m3_z,MB,rsx,add,ix,T,M3sub>::call;
+            AssignF* assignb = &MyAssign<x_z,m3_z,csx,NB,add,ix,T,M3sub>::call;
+            AssignF* assignc = &MyAssign<x_z,m3_z,csx,rsx,add,ix,T,M3sub>::call;
             T xx = T(x);
 
             ProdF* prod = &MyProd<m1_z,m2_z,MB,NB,KB,RT>::call;
@@ -2609,7 +2709,7 @@ namespace tmv {
               int ix, class T, class M1, class M2, class M3>
     struct MultMM_RecursiveBlock_Helper<2,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         {
             typedef typename M1::value_type T1;
@@ -2641,8 +2741,6 @@ namespace tmv {
             const int lgKB  = IntTraits<KB>::log;
 
             typedef typename M1::const_transpose_type M1t;
-            typedef typename M2::const_view_type M2v;
-            typedef typename M3::view_type M3v;
 
             typedef void KF(
                 const int M, const int N, const int K,
@@ -2702,15 +2800,15 @@ namespace tmv {
             CopyF* copy1_k = get_copy<m1_z,XX,MB,M1t>::call(m1.transpose());
             CopyF* copy1b = get_copy<m1_z,KB,XX,M1t>::call(m1.transpose());
             CopyF* copy1b_k = get_copy<m1_z,XX,XX,M1t>::call(m1.transpose());
-            CopyF* copy2 = get_copy<m2_z,KB,NB,M2v>::call(m2);
-            CopyF* copy2_k = get_copy<m2_z,XX,NB,M2v>::call(m2);
-            CopyF* copy2a = get_copy<m2_z,KB,XX,M2v>::call(m2);
-            CopyF* copy2a_k = get_copy<m2_z,XX,XX,M2v>::call(m2);
+            CopyF* copy2 = get_copy<m2_z,KB,NB,M2>::call(m2);
+            CopyF* copy2_k = get_copy<m2_z,XX,NB,M2>::call(m2);
+            CopyF* copy2a = get_copy<m2_z,KB,XX,M2>::call(m2);
+            CopyF* copy2a_k = get_copy<m2_z,XX,XX,M2>::call(m2);
 
-            AssignF* assign = get_assign<x_z,m3_z,T,MB,NB,M3v>::call(add,x,m3);
-            AssignF* assigna = get_assign<x_z,m3_z,T,MB,XX,M3v>::call(add,x,m3);
-            AssignF* assignb = get_assign<x_z,m3_z,T,XX,NB,M3v>::call(add,x,m3);
-            AssignF* assignc = get_assign<x_z,m3_z,T,XX,XX,M3v>::call(add,x,m3);
+            AssignF* assign = get_assign<x_z,m3_z,MB,NB,add,ix,T,M3>::call(m3);
+            AssignF* assigna = get_assign<x_z,m3_z,MB,XX,add,ix,T,M3>::call(m3);
+            AssignF* assignb = get_assign<x_z,m3_z,XX,NB,add,ix,T,M3>::call(m3);
+            AssignF* assignc = get_assign<x_z,m3_z,XX,XX,add,ix,T,M3>::call(m3);
 
             T xx = T(x);
 
@@ -2739,7 +2837,7 @@ namespace tmv {
               int ix, class T, class M1, class M2, class M3>
     struct MultMM_RecursiveBlock_Helper<-2,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         {
             const int algo =
@@ -2756,10 +2854,11 @@ namespace tmv {
               int ix, class T, class M1, class M2, class M3>
     struct MultMM_RecursiveBlock_Helper<98,cs,rs,xs,false,ix,T,M1,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         {
-            typename M3::value_type xx(x);
+            typedef typename M3::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
             InstMultMM_RecursiveBlock(xx,m1.xView(),m2.xView(),m3.xView());
         }
     };
@@ -2767,10 +2866,11 @@ namespace tmv {
               int ix, class T, class M1, class M2, class M3>
     struct MultMM_RecursiveBlock_Helper<98,cs,rs,xs,true,ix,T,M1,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         {
-            typename M3::value_type xx(x);
+            typedef typename M3::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
             InstAddMultMM_RecursiveBlock(xx,m1.xView(),m2.xView(),m3.xView());
         }
     };
@@ -2780,7 +2880,7 @@ namespace tmv {
               int ix, class T, class M1, class M2, class M3>
     struct MultMM_RecursiveBlock_Helper<-1,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         {
             TMVStaticAssert(!M3::_conj);
@@ -2788,9 +2888,6 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
             const bool inst =
-                M1::unknownsizes &&
-                M2::unknownsizes &&
-                M3::unknownsizes &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -2808,7 +2905,7 @@ namespace tmv {
     };
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void MultMM_RecursiveBlock(
+    static void MultMM_RecursiveBlock(
         const Scaling<ix,T>& x,
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2,
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -2834,7 +2931,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void InlineMultMM_RecursiveBlock(
+    static void InlineMultMM_RecursiveBlock(
         const Scaling<ix,T>& x,
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2,
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -2931,6 +3028,9 @@ namespace tmv {
     {
 #ifdef PRINTALGO_MM_BLOCK
         std::cout<<"DoBlockMultMM3\n";
+        std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
+        std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
+        std::cout<<"m3 = "<<TMV_Text(m3)<<std::endl;
         std::cout<<"i1,j1 = "<<i1<<','<<j1<<std::endl;
         std::cout<<"i2,j2 = "<<i2<<','<<j2<<std::endl;
         std::cout<<"MB,NB,Kb = "<<MB<<','<<NB<<','<<Kb<<std::endl;
@@ -2944,8 +3044,7 @@ namespace tmv {
 
         VectorView<RT,1> m3x(m3p,size3,1);
         m3x.setZero();
-        for (int k=0;k<Kb;++k,m1p+=size1,m2p+=size2)
-        {
+        for (int k=0;k<Kb;++k,m1p+=size1,m2p+=size2) {
             if (firstm1) 
                 (*mycopy1) (m1.cSubMatrix(i1,i2,k*KB,(k+1)*KB).transpose(),
                             m1p,KB,MB,1,KB);
@@ -2998,6 +3097,10 @@ namespace tmv {
         const int Ktot_d = (Kb<<lgKB) + Kd;
         TMVAssert(Ktot_d == RoundUp<RT>(K));
 #ifdef PRINTALGO_MM_BLOCK
+        std::cout<<"DoBlockMultMM2\n";
+        std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
+        std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
+        std::cout<<"m3 = "<<TMV_Text(m3)<<std::endl;
         std::cout<<"Mb,Nb,Kb = "<<Mb<<','<<Nb<<','<<Kb<<std::endl;
         std::cout<<"Mc,Nc,Kc,Kd = "<<Mc<<','<<Nc<<','<<Kc<<','<<Kd<<std::endl;
 #endif
@@ -3013,7 +3116,7 @@ namespace tmv {
         const int size3 = two3*MB*NB;
 
         AlignedArray<RT> m3_temp(size3);
-        RT*const m3p = m3_temp;
+        RT* m3p = m3_temp;
         if (N >= M) {
             // Then we loop over the columns of m2 (in blocks).
             // We store a full copy of m1 in block format.
@@ -3021,8 +3124,8 @@ namespace tmv {
             // temporary storage.
             AlignedArray<RT> m1_temp(two1*M*Ktot_d);
             AlignedArray<RT> m2_temp(two2*NB*Ktot_d);
-            RT*const m1p0 = m1_temp;
-            RT*const m2p0 = m2_temp;
+            RT* m1p0 = m1_temp;
+            RT* m2p0 = m2_temp;
             const int fullsize1 = two1*MB*Ktot_d;
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"N >= M\n";
@@ -3036,11 +3139,9 @@ namespace tmv {
             glob_m3p_end = m3p+size3;
 #endif
 
-            for(int j=0;j<Nb;++j)
-            {
+            for(int j=0;j<Nb;++j) {
                 RT* m1p = m1p0;
-                for(int i=0;i<Mb;++i)
-                {
+                for(int i=0;i<Mb;++i) {
                     DoBlockMultMM3(
                         x,m1,m2,m3,
                         i*MB,j*NB,(i+1)*MB,(j+1)*NB, MB,NB,KB,Kb,
@@ -3064,8 +3165,7 @@ namespace tmv {
             }
             if (Nc) {
                 RT* m1p = m1p0;
-                for(int i=0;i<Mb;++i)
-                {
+                for(int i=0;i<Mb;++i) {
                     DoBlockMultMM3(
                         x,m1,m2,m3,
                         i*MB,Na,(i+1)*MB,N, MB,Nc,KB,Kb,
@@ -3091,8 +3191,8 @@ namespace tmv {
             // Then we loop over the rows of m1 and store a full copy of m2.
             AlignedArray<RT> m1_temp(two1*MB*Ktot_d);
             AlignedArray<RT> m2_temp(two2*N*Ktot_d);
-            RT*const m1p0 = m1_temp;
-            RT*const m2p0 = m2_temp;
+            RT* m1p0 = m1_temp;
+            RT* m2p0 = m2_temp;
             const int fullsize2 = two2*NB*Ktot_d;
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"N <= M\n";
@@ -3106,11 +3206,9 @@ namespace tmv {
             glob_m3p_end = m3p+size3;
 #endif
 
-            for(int i=0;i<Mb;++i)
-            {
+            for(int i=0;i<Mb;++i) {
                 RT* m2p = m2p0;
-                for(int j=0;j<Nb;++j)
-                {
+                for(int j=0;j<Nb;++j) {
                     DoBlockMultMM3(
                         x,m1,m2,m3,
                         i*MB,j*NB,(i+1)*MB,(j+1)*NB, MB,NB,KB,Kb,
@@ -3134,8 +3232,7 @@ namespace tmv {
             }
             if (Mc) {
                 RT* m2p = m2p0;
-                for(int j=0;j<Nb;++j)
-                {
+                for(int j=0;j<Nb;++j) {
                     DoBlockMultMM3(
                         x,m1,m2,m3,
                         Ma,j*NB,M,(j+1)*NB, Mc,NB,KB,Kb,
@@ -3211,6 +3308,7 @@ namespace tmv {
             const int csx = cs == UNKNOWN ? UNKNOWN : (cs-((cs>>lgMB)<<lgMB));
             const int rsx = rs == UNKNOWN ? UNKNOWN : (rs-((rs>>lgNB)<<lgNB));
             const int xsx = xs == UNKNOWN ? UNKNOWN : (xs-((xs>>lgKB)<<lgKB));
+
             typedef typename M1::const_submatrix_type M1sub;
             typedef typename M1sub::const_transpose_type M1sub_t;
             typedef typename M2::const_submatrix_type M2sub;
@@ -3274,10 +3372,15 @@ namespace tmv {
             CopyF* copy2a = &MyCopy<m2_z,KB,rsx,M2sub>::call;
             CopyF* copy2a_k = &MyCopy<m2_z,xsx,rsx,M2sub>::call;
 
-            AssignF* assign = &MyAssign<x_z,m3_z,add,ix,T,MB,NB,M3sub>::call;
-            AssignF* assigna = &MyAssign<x_z,m3_z,add,ix,T,MB,rsx,M3sub>::call;
-            AssignF* assignb = &MyAssign<x_z,m3_z,add,ix,T,csx,NB,M3sub>::call;
-            AssignF* assignc = &MyAssign<x_z,m3_z,add,ix,T,csx,rsx,M3sub>::call;
+#ifdef PRINTALGO_MM_BLOCK
+            std::cout<<"assigns use M3sub with steps = "<<M3sub::_stepi<<"  "<<M3sub::_stepj<<std::endl;
+            std::cout<<"M3 has steps = "<<M3::_stepi<<"  "<<M3::_stepj<<std::endl;
+            std::cout<<"M3 = "<<TMV_Text(m3)<<std::endl;
+#endif
+            AssignF* assign = &MyAssign<x_z,m3_z,MB,NB,add,ix,T,M3sub>::call;
+            AssignF* assigna = &MyAssign<x_z,m3_z,MB,rsx,add,ix,T,M3sub>::call;
+            AssignF* assignb = &MyAssign<x_z,m3_z,csx,NB,add,ix,T,M3sub>::call;
+            AssignF* assignc = &MyAssign<x_z,m3_z,csx,rsx,add,ix,T,M3sub>::call;
 
             T xx = T(x);
 
@@ -3339,8 +3442,6 @@ namespace tmv {
             const int lgKB  = IntTraits<KB>::log;
 
             typedef typename M1::const_transpose_type M1t;
-            typedef typename M2::const_view_type M2v;
-            typedef typename M3::view_type M3v;
 
             typedef void KF(
                 const int M, const int N, const int K,
@@ -3395,15 +3496,15 @@ namespace tmv {
             CopyF* copy1_k = get_copy<m1_z,XX,MB,M1t>::call(m1.transpose());
             CopyF* copy1b = get_copy<m1_z,KB,XX,M1t>::call(m1.transpose());
             CopyF* copy1b_k = get_copy<m1_z,XX,XX,M1t>::call(m1.transpose());
-            CopyF* copy2 = get_copy<m2_z,KB,NB,M2v>::call(m2);
-            CopyF* copy2_k = get_copy<m2_z,XX,NB,M2v>::call(m2);
-            CopyF* copy2a = get_copy<m2_z,KB,XX,M2v>::call(m2);
-            CopyF* copy2a_k = get_copy<m2_z,XX,XX,M2v>::call(m2);
+            CopyF* copy2 = get_copy<m2_z,KB,NB,M2>::call(m2);
+            CopyF* copy2_k = get_copy<m2_z,XX,NB,M2>::call(m2);
+            CopyF* copy2a = get_copy<m2_z,KB,XX,M2>::call(m2);
+            CopyF* copy2a_k = get_copy<m2_z,XX,XX,M2>::call(m2);
 
-            AssignF* assign = get_assign<x_z,m3_z,T,MB,NB,M3v>::call(add,x,m3);
-            AssignF* assigna = get_assign<x_z,m3_z,T,MB,XX,M3v>::call(add,x,m3);
-            AssignF* assignb = get_assign<x_z,m3_z,T,XX,NB,M3v>::call(add,x,m3);
-            AssignF* assignc = get_assign<x_z,m3_z,T,XX,XX,M3v>::call(add,x,m3);
+            AssignF* assign = get_assign<x_z,m3_z,MB,NB,add,ix,T,M3>::call(m3);
+            AssignF* assigna = get_assign<x_z,m3_z,MB,XX,add,ix,T,M3>::call(m3);
+            AssignF* assignb = get_assign<x_z,m3_z,XX,NB,add,ix,T,M3>::call(m3);
+            AssignF* assignc = get_assign<x_z,m3_z,XX,XX,add,ix,T,M3>::call(m3);
 
             T xx = T(x);
 
@@ -3432,13 +3533,21 @@ namespace tmv {
               int ix, class T, class M1, class M2, class M3>
     struct MultMM_Block_Helper<-2,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         {
             const int algo =
                 ( (M1::_rowmajor || M1::_colmajor) &&
                   (M2::_rowmajor || M2::_colmajor) &&
                   (M3::_rowmajor || M3::_colmajor) ) ? 1 : 2;
+#ifdef PRINTALGO_MM_BLOCK
+            std::cout<<"Start BlockMultMM\n";
+            std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
+            std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
+            std::cout<<"m3 = "<<TMV_Text(m3)<<std::endl;
+            std::cout<<"initial algo = "<<algo<<std::endl;
+#endif
             MultMM_Block_Helper<algo,cs,rs,xs,add,ix,T,M1,M2,M3>::call(
                 x,m1,m2,m3);
         }
@@ -3449,10 +3558,11 @@ namespace tmv {
               int ix, class T, class M1, class M2, class M3>
     struct MultMM_Block_Helper<98,cs,rs,xs,false,ix,T,M1,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         {
-            typename M3::value_type xx(x);
+            typedef typename M3::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
             InstMultMM_Block(xx,m1.xView(),m2.xView(),m3.xView());
         }
     };
@@ -3460,10 +3570,11 @@ namespace tmv {
               int ix, class T, class M1, class M2, class M3>
     struct MultMM_Block_Helper<98,cs,rs,xs,true,ix,T,M1,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         {
-            typename M3::value_type xx(x);
+            typedef typename M3::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
             InstAddMultMM_Block(xx,m1.xView(),m2.xView(),m3.xView());
         }
     };
@@ -3473,7 +3584,7 @@ namespace tmv {
               int ix, class T, class M1, class M2, class M3>
     struct MultMM_Block_Helper<-1,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
-        static inline void call(
+        static void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         {
             TMVStaticAssert(!M3::_conj);
@@ -3481,9 +3592,6 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
             const bool inst =
-                M1::unknownsizes &&
-                M2::unknownsizes &&
-                M3::unknownsizes &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -3501,7 +3609,7 @@ namespace tmv {
     };
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void MultMM_Block(
+    static void MultMM_Block(
         const Scaling<ix,T>& x,
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2,
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -3527,7 +3635,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    inline void InlineMultMM_Block(
+    static void InlineMultMM_Block(
         const Scaling<ix,T>& x,
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2,
         BaseMatrix_Rec_Mutable<M3>& m3)

@@ -2,11 +2,11 @@
 #define CT std::complex<T>
 
 #define Def1(T1)\
-  template void InstLU_Inverse(MatrixView<T1> lu, const int* P);
+  template void InstLU_Inverse(MatrixView<T1> lu, const Permutation& P);
 
 #define Def2(T1,T2,C1)\
   template void InstLU_InverseATA( \
-      const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const int* P, \
+      const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P, \
       const bool trans, MatrixView<T2> m2); \
 
 Def1(T)
