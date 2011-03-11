@@ -30,38 +30,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef TMV_DIVIMPL_H
-#define TMV_DIVIMPL_H
+#ifndef TMV_Small_H
+#define TMV_Small_H
 
-#include "tmv/TMV_BaseMatrix.h"
-
-namespace tmv {
-
-    template <class T> 
-    struct DivHelper<T>::DivImpl 
-    {
-    public :
-
-        DivImpl(const BaseMatrix<T>& _m) : 
-            m(_m), itsdiv(0), itsdt(_m.IsSquare() ? LU : QR),
-            inplace(false), cache(false) {}
-        ~DivImpl() { if (itsdiv) delete itsdiv; itsdiv=0; }
-
-        const BaseMatrix<T>& m;
-        const Divider<T>* itsdiv;
-        DivType itsdt;
-        bool inplace;
-        bool cache;
-
-    private :
-
-        DivImpl(const DivImpl&)
-        { TMVAssert(FALSE); }
-        DivImpl& operator=(const DivImpl&)
-        { TMVAssert(FALSE); return *this; }
-    };
-
-}
+// Not used anymore.  Just provided for backwards compatibility.
 
 #endif
-
