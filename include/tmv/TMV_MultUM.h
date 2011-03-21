@@ -37,6 +37,7 @@
 #include "TMV_MultUV.h"
 #include "TMV_CopyU.h"
 #include "TMV_MultXU.h"
+#include "TMV_Rank1VVM.h"
 
 #ifdef _OPENMP
 #include "omp.h"
@@ -52,80 +53,41 @@
 // Use the specialized 1,2,3 sized algorithms for the end of the 
 // recursive algorithm.
 #if TMV_OPT >= 2
-#define TMV_OPT_CLEANUP
+#define TMV_UM_CLEANUP
 #endif
 
 // Check for small (<=5) values of cs or rs
 // This leads to significant speed improvements for such matrices at little
 // cost to larger matrices, but the large increase in code size and the fact
 // that it only benefits a few particular sizes of matrices mean that
-// we require TMV_OPT = 3 for it.
+// we require OPT = 3 for it.
 #if TMV_OPT >= 3
-#define TMV_OPT_SMALL
+#define TMV_UM_SMALL
 #endif
 
-// Q2 is the minimum size to keep recursing
-#define TMV_Q2 8
+// The minimum size to keep recursing
+#if TMV_OPT >= 3
+#define TMV_UM_RECURSE 8
+#else
+#define TMV_UM_RECURSE 1
+#endif
 
-// Q6 is the minimum value of (M^2*N / 16^3) to use multiple threads.
+// Inline the MV (MultUV, Rank1VVM) calls.
+#if TMV_OPT >= 1
+#define TMV_UM_INLINE_MV
+#endif
+
+// Inline the small-sized MM (MultMM) calls.
+// (Only relevant if RECURSE <= 16.)
+#if TMV_OPT >= 2
+#define TMV_UM_INLINE_MM
+#endif
+
+// The minimum value of (M^2*N / 16^3) to use multiple threads.
 // (We also require that N > 64 so we have something to split.)
-#define TMV_Q6 64
+#define TMV_UM_OMP_THRESH 64
 
 namespace tmv {
-
-    // Defined below:
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void MultMM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Rec<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3);
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void NoAliasMultMM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Rec<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3);
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void InlineMultMM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Rec<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3);
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void AliasMultMM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Rec<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3);
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void MultMM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3);
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void NoAliasMultMM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3);
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void InlineMultMM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3);
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void AliasMultMM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3);
-    template <class M1, int ix, class T, class M2>
-    static void MultEqMM(
-        BaseMatrix_Rec_Mutable<M1>& m1,
-        const Scaling<ix,T>& x, const BaseMatrix_Tri<M2>& m2);
-    template <class M1, int ix, class T, class M2>
-    static void NoAliasMultEqMM(
-        BaseMatrix_Rec_Mutable<M1>& m1,
-        const Scaling<ix,T>& x, const BaseMatrix_Tri<M2>& m2);
-    template <class M1, int ix, class T, class M2>
-    static void AliasMultEqMM(
-        BaseMatrix_Rec_Mutable<M1>& m1,
-        const Scaling<ix,T>& x, const BaseMatrix_Tri<M2>& m2);
 
     // Defined in TMV_MultUM.cpp
     template <class T1, bool C1, class T2, bool C2, class T3>
@@ -152,16 +114,15 @@ namespace tmv {
 
 
     //
-    // Matrix * Matrix
+    // U * m
+    // L * m
     //
 
-    template <int algo, int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3> 
+    template <int algo, int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper;
 
     // algo 0: Trivial, nothing to do.
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<0,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
@@ -170,9 +131,8 @@ namespace tmv {
     };
 
     // algo 1: cs == 1, so reduces to MultXV
-    template <int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<1,1,rs,add,ix,T,M1,M2,M3>
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<1,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -180,99 +140,7 @@ namespace tmv {
 #ifdef PRINTALGO_UM
             const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"UM algo 1: M,N,cs,rs,x = "<<1<<','<<N<<
-                ','<<1<<','<<rs<<','<<T(x)<<std::endl;
-#endif
-            typedef typename Traits2<T,typename M1::value_type>::type PT1;
-            typedef typename M2::const_row_type M2r;
-            typedef typename M3::row_type M3r;
-
-            M2r m2r = m2.get_row(0);
-            M3r m3r = m3.get_row(0);
-            MultXV_Helper<-1,rs,add,0,PT1,M2r,M3r>::call(
-                Scaling<0,PT1>(x*m1.cref(0,0)), m2r, m3r);
-        }
-    };
-
-    // algo 2: rs == 1, so reduces to MultUV
-    template <int cs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<2,cs,1,add,ix,T,M1,M2,M3>
-    {
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
-#ifdef PRINTALGO_UM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            std::cout<<"UM algo 2: M,N,cs,rs,x = "<<M<<','<<1<<
-                ','<<cs<<','<<1<<','<<T(x)<<std::endl;
-#endif
-            typedef typename M2::const_col_type M2c;
-            typedef typename M3::col_type M3c;
-
-            M2c m2c = m2.get_col(0);
-            M3c m3c = m3.get_col(0);
-            MultUV_Helper<-1,cs,add,ix,T,M1,M2c,M3c>::call(x,m1,m2c,m3c);
-        }
-    };
-
-    // algo 201: same as 1, but use -2 algo
-    template <int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<201,1,rs,add,ix,T,M1,M2,M3>
-    {
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
-#ifdef PRINTALGO_UM
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-            std::cout<<"UM algo 201: M,N,cs,rs,x = "<<1<<','<<N<<
-                ','<<1<<','<<rs<<','<<T(x)<<std::endl;
-#endif
-            typedef typename Traits2<T,typename M1::value_type>::type PT1;
-            typedef typename M2::const_row_type M2r;
-            typedef typename M3::row_type M3r;
-
-            M2r m2r = m2.get_row(0);
-            M3r m3r = m3.get_row(0);
-            MultXV_Helper<-2,rs,add,0,PT1,M2r,M3r>::call(
-                Scaling<0,PT1>(x*m1.cref(0,0)), m2r, m3r);
-        }
-    };
-
-    // algo 202: same as 2, but use -2 algo
-    template <int cs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<202,cs,1,add,ix,T,M1,M2,M3>
-    {
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
-#ifdef PRINTALGO_UM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            std::cout<<"UM algo 202: M,N,cs,rs,x = "<<M<<','<<1<<
-                ','<<cs<<','<<1<<','<<T(x)<<std::endl;
-#endif
-            typedef typename M2::const_col_type M2c;
-            typedef typename M3::col_type M3c;
-
-            M2c m2c = m2.get_col(0);
-            M3c m3c = m3.get_col(0);
-            MultUV_Helper<-2,cs,add,ix,T,M1,M2c,M3c>::call(x,m1,m2c,m3c);
-        }
-    };
-
-    // algo 401: same as 1, but use -4 algo
-    template <int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<401,1,rs,add,ix,T,M1,M2,M3>
-    {
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
-#ifdef PRINTALGO_UM
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-            std::cout<<"UM algo 401: M,N,cs,rs,x = "<<1<<','<<N<<
-                ','<<1<<','<<rs<<','<<T(x)<<std::endl;
+                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename Traits2<T,typename M1::value_type>::type PT1;
             typedef typename M2::const_row_type M2r;
@@ -285,18 +153,63 @@ namespace tmv {
         }
     };
 
-    // algo 402: same as 2, but use -4 algo
-    template <int cs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<402,cs,1,add,ix,T,M1,M2,M3>
+    // algo 101: same as 1, but use -1 algo
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<101,cs,rs,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+#ifdef PRINTALGO_UM
+            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            std::cout<<"UM algo 101: M,N,cs,rs,x = "<<1<<','<<N<<
+                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
+#endif
+            typedef typename Traits2<T,typename M1::value_type>::type PT1;
+            typedef typename M2::const_row_type M2r;
+            typedef typename M3::row_type M3r;
+
+            M2r m2r = m2.get_row(0);
+            M3r m3r = m3.get_row(0);
+            MultXV_Helper<-1,rs,add,0,PT1,M2r,M3r>::call(
+                Scaling<0,PT1>(x*m1.cref(0,0)), m2r, m3r);
+        }
+    };
+
+    // algo 201: same as 1, but use -2 algo
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<201,cs,rs,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+#ifdef PRINTALGO_UM
+            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            std::cout<<"UM algo 201: M,N,cs,rs,x = "<<1<<','<<N<<
+                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
+#endif
+            typedef typename Traits2<T,typename M1::value_type>::type PT1;
+            typedef typename M2::const_row_type M2r;
+            typedef typename M3::row_type M3r;
+
+            M2r m2r = m2.get_row(0);
+            M3r m3r = m3.get_row(0);
+            MultXV_Helper<-2,rs,add,0,PT1,M2r,M3r>::call(
+                Scaling<0,PT1>(x*m1.cref(0,0)), m2r, m3r);
+        }
+    };
+
+    // algo 2: rs == 1, so reduces to MultUV
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<2,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UM
             const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            std::cout<<"UM algo 402: M,N,cs,rs,x = "<<M<<','<<1<<
-                ','<<cs<<','<<1<<','<<T(x)<<std::endl;
+            std::cout<<"UM algo 2: M,N,cs,rs,x = "<<M<<','<<1<<
+                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M2::const_col_type M2c;
             typedef typename M3::col_type M3c;
@@ -307,10 +220,51 @@ namespace tmv {
         }
     };
 
+    // algo 102: same as 2, but use -1 algo
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<102,cs,rs,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+#ifdef PRINTALGO_UM
+            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
+            std::cout<<"UM algo 102: M,N,cs,rs,x = "<<M<<','<<1<<
+                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
+#endif
+            typedef typename M2::const_col_type M2c;
+            typedef typename M3::col_type M3c;
+
+            M2c m2c = m2.get_col(0);
+            M3c m3c = m3.get_col(0);
+            MultUV_Helper<-1,cs,add,ix,T,M1,M2c,M3c>::call(x,m1,m2c,m3c);
+        }
+    };
+
+    // algo 202: same as 2, but use -2 algo
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<202,cs,rs,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+#ifdef PRINTALGO_UM
+            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
+            std::cout<<"UM algo 202: M,N,cs,rs,x = "<<M<<','<<1<<
+                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
+#endif
+            typedef typename M2::const_col_type M2c;
+            typedef typename M3::col_type M3c;
+
+            M2c m2c = m2.get_col(0);
+            M3c m3c = m3.get_col(0);
+            MultUV_Helper<-2,cs,add,ix,T,M1,M2c,M3c>::call(x,m1,m2c,m3c);
+        }
+    };
+
     // algo 11: UpperTri loop over n
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<11,cs,rs,add,ix,T,M1,M2,M3> 
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<11,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -323,20 +277,24 @@ namespace tmv {
 #endif
             typedef typename M2::const_col_type M2c;
             typedef typename M3::col_type M3c;
+#ifdef TMV_UM_INLINE_MV
+            const int algo2 = -4;
+#else
+            const int algo2 = -2;
+#endif
 
             for(int j=0;j<N;++j) {
                 // m3.col(j) = m1 * m2.col(j)
                 M2c m2j = m2.get_col(j);
                 M3c m3j = m3.get_col(j);
-                MultUV_Helper<-4,cs,add,ix,T,M1,M2c,M3c>::call(x,m1,m2j,m3j);
+                MultUV_Helper<algo2,cs,add,ix,T,M1,M2c,M3c>::call(x,m1,m2j,m3j);
             }
         }
     };
 
     // algo 12: UpperTri loop over m
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<12,cs,rs,add,ix,T,M1,M2,M3> 
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<12,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -357,6 +315,11 @@ namespace tmv {
             typedef typename M3::row_type M3r;
             const int ix1 = unit ? ix : 0;
             const int xx = UNKNOWN;
+#ifdef TMV_UM_INLINE_MV
+            const int algo2 = -4;
+#else
+            const int algo2 = -2;
+#endif
 
             for(int i=0;i<M;++i) {
                 // m3.row(i) = m1.row(i,i,M) * m2.rowRange(i,M)
@@ -368,16 +331,15 @@ namespace tmv {
                 M3r m3i = m3.get_row(i);
                 const Scaling<ix1,PT1> xdi(Maybe<!unit>::prod(m1.cref(i,i),x));
                 MultXV_Helper<-4,rs,add,ix1,PT1,M2r,M3r>::call(xdi,m2i,m3i);
-                MultMV_Helper<-4,rs,xx,true,ix,T,M2t,M1r,M3r>::call(
+                MultMV_Helper<algo2,rs,xx,true,ix,T,M2t,M1r,M3r>::call(
                     x,m2t,m1i,m3i);
             }
         }
     };
 
     // algo 13: UpperTri loop over k
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<13,cs,rs,add,ix,T,M1,M2,M3> 
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<13,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -397,10 +359,15 @@ namespace tmv {
             typedef typename M3::rowrange_type M3rr;
             const int ix1 = unit ? ix : 0;
             const int xx = UNKNOWN;
+#ifdef TMV_UM_INLINE_MV
+            const int algo2 = -4;
+#else
+            const int algo2 = -2;
+#endif
 
             for(int k=0;k<M;++k) {
                 // m3.rowRange(0,k+1) = m1.col(k,0,k+1) ^ m2.row(k)
-                // ==> 
+                // ==>
                 // m3.rowRange(0,k) += m1.col(k,0,k) ^ m2.row(k)
                 // m3.row(k) = m1(k,k) * m2.row(k)
                 M1c m1k = m1.get_col(k,0,k);
@@ -408,7 +375,7 @@ namespace tmv {
                 M3r m3k = m3.get_row(k);
                 M3rr m3r = m3.cRowRange(0,k);
                 const Scaling<ix1,PT1> xdk(Maybe<!unit>::prod(m1.cref(k,k),x));
-                Rank1VVM_Helper<-4,xx,rs,true,ix,T,M1c,M2r,M3rr>::call(
+                Rank1VVM_Helper<algo2,xx,rs,true,ix,T,M1c,M2r,M3rr>::call(
                     x,m1k,m2k,m3r);
                 MultXV_Helper<-4,rs,add,ix1,PT1,M2r,M3r>::call(xdk,m2k,m3k);
             }
@@ -417,7 +384,7 @@ namespace tmv {
 
     // algo 16: Specialization for cs = 2,3,4,5
     template <int rs, bool add, int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<16,2,rs,add,ix,T,M1,M2,M3> 
+    struct MultUM_Helper<16,2,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -471,7 +438,7 @@ namespace tmv {
         }
     };
     template <int rs, bool add, int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<16,3,rs,add,ix,T,M1,M2,M3> 
+    struct MultUM_Helper<16,3,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -534,7 +501,7 @@ namespace tmv {
         }
     };
     template <int rs, bool add, int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<16,4,rs,add,ix,T,M1,M2,M3> 
+    struct MultUM_Helper<16,4,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -607,7 +574,7 @@ namespace tmv {
         }
     };
     template <int rs, bool add, int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<16,5,rs,add,ix,T,M1,M2,M3> 
+    struct MultUM_Helper<16,5,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -691,7 +658,7 @@ namespace tmv {
         }
     };
     template <int rs, bool add, int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<16,UNKNOWN,rs,add,ix,T,M1,M2,M3> 
+    struct MultUM_Helper<16,UNKNOWN,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -714,17 +681,29 @@ namespace tmv {
                    MultUM_Helper<1,1,rs,add,ix,T,M1,M2,M3>::call(
                        x,m1,m2,m3);
                    break;
+#if TMV_UM_RECURSE > 1
               case 2 :
                    MultUM_Helper<16,2,rs,add,ix,T,M1,M2,M3>::call(
                        x,m1,m2,m3);
                    break;
+#endif
+#if TMV_UM_RECURSE > 2
               case 3 :
                    MultUM_Helper<16,3,rs,add,ix,T,M1,M2,M3>::call(
                        x,m1,m2,m3);
                    break;
+#endif
+#if TMV_UM_RECURSE > 3
+              case 4 :
+                   MultUM_Helper<16,4,rs,add,ix,T,M1,M2,M3>::call(
+                       x,m1,m2,m3);
+                   break;
+#endif
+#if TMV_UM_RECURSE > 4
               default :
                    MultUM_Helper<algo2,UNKNOWN,rs,add,ix,T,M1,M2,M3>::call(
                        x,m1,m2,m3);
+#endif
             }
         }
     };
@@ -735,9 +714,8 @@ namespace tmv {
     // ( 0 C ) ( E )   ( G )
     // F = AD + BE
     // G = CE
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<17,cs,rs,add,ix,T,M1,M2,M3> 
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<17,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -749,37 +727,43 @@ namespace tmv {
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
 
-#if (TMV_Q2 == 1)
-            const int algo2 = (cs == UNKNOWN || cs == 1) ? 1 : 0;
-#else
             const bool rxr = M1::_rowmajor && M3::_rowmajor;
             const bool crx = M1::_colmajor && M2::_rowmajor;
             const bool xcc = M2::_colmajor && M3::_colmajor;
             const int algo2 = 
                 cs == 0 ? 0 :
                 cs == 1 ? 1 :
-                (cs != UNKNOWN && cs > TMV_Q2) ? 0 :
-#ifdef TMV_OPT_CLEANUP
+                (cs != UNKNOWN && cs > TMV_UM_RECURSE) ? 0 :
+                TMV_UM_RECURSE == 1 ? 1 :
+#ifdef TMV_UM_CLEANUP
                 cs == UNKNOWN ? 16 :
 #endif
-                cs <= 5 ? 16 :
+                cs != UNKNOWN && cs <= 5 ? 16 :
                 rxr ? 12 : crx ? 13 : xcc ? 11 : 13;
-#endif
-            const int algo3 =  // The algorithm for M > Q2
-                (cs == UNKNOWN || cs > TMV_Q2) ? 17 : 0;
+            const int algo3 =  // The algorithm for M > 16
+                cs == UNKNOWN || cs > 16 ? 17 : 0;
             const int algo4 =  // The algorithm for MultMM
-                cs == UNKNOWN ? -2 : cs > 16 ? -3 : cs > TMV_Q2 ? -4 : 0;
+                cs == UNKNOWN ? -2 :
+                cs > 16 ? -3 : 0;
+#ifdef TMV_UM_INLINE_MM
+            const int algo3b =  // The algorithm for M > RECURSE
+                cs == UNKNOWN || 
+                (cs > TMV_UM_RECURSE && cs <= 16) ? 17 : 0;
+            const int algo4b =  // The algorithm for MultMM
+                cs == UNKNOWN ||
+                (cs > TMV_UM_RECURSE && cs <= 16) ? -4 : 0;
+#endif
 
-            if (M > TMV_Q2) {
+            typedef typename M1::const_subtrimatrix_type M1a;
+            typedef typename M1::const_submatrix_type M1b;
+            typedef typename M2::const_rowrange_type M2r;
+            typedef typename M3::rowrange_type M3r;
+
+            if (M > TMV_UM_RECURSE) {
                 const int Mx = M > 16 ? ((((M-1)>>5)+1)<<4) : (M>>1);
                 // (If M > 16, round M/2 up to a multiple of 16.)
                 const int csx = IntTraits<cs>::half_roundup;
                 const int csy = IntTraits2<cs,csx>::diff;
-
-                typedef typename M1::const_subtrimatrix_type M1a;
-                typedef typename M1::const_submatrix_type M1b;
-                typedef typename M2::const_rowrange_type M2r;
-                typedef typename M3::rowrange_type M3r;
 
                 M1a A = m1.cSubTriMatrix(0,Mx);
                 M1b B = m1.cSubMatrix(0,Mx,Mx,M);
@@ -789,10 +773,27 @@ namespace tmv {
                 M3r F = m3.cRowRange(0,Mx);
                 M3r G = m3.cRowRange(Mx,M);
 
-                MultUM_Helper<algo3,csx,rs,add,ix,T,M1a,M2r,M3r>::call(x,A,D,F);
-                MultMM_Helper<algo4,csx,rs,csy,true,ix,T,M1b,M2r,M3r>::call(
-                    x,B,E,F);
-                MultUM_Helper<algo3,csy,rs,add,ix,T,M1a,M2r,M3r>::call(x,C,E,G);
+#ifdef TMV_UM_INLINE_MM
+                if (M > 16) {
+                    // For large M, make sure to use good MultMM algo
+#endif
+                    MultUM_Helper<algo3,csx,rs,add,ix,T,M1a,M2r,M3r>::call(
+                        x,A,D,F);
+                    MultMM_Helper<algo4,csx,rs,csy,true,ix,T,M1b,M2r,M3r>::
+                        call(x,B,E,F);
+                    MultUM_Helper<algo3,csx,rs,add,ix,T,M1a,M2r,M3r>::call(
+                        x,C,E,G);
+#ifdef TMV_UM_INLINE_MM
+                } else {
+                    // For small M, do the no branching algorithm
+                    MultUM_Helper<algo3b,csx,rs,add,ix,T,M1a,M2r,M3r>::call(
+                        x,A,D,F);
+                    MultMM_Helper<algo4b,csx,rs,csy,true,ix,T,M1b,M2r,M3r>::
+                        call(x,B,E,F);
+                    MultUM_Helper<algo3b,csy,rs,add,ix,T,M1a,M2r,M3r>::call(
+                        x,C,E,G);
+                }
+#endif
             } else {
                 MultUM_Helper<algo2,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
             }
@@ -800,9 +801,8 @@ namespace tmv {
     };
 
     // algo 21: LowerTri loop over n
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<21,cs,rs,add,ix,T,M1,M2,M3> 
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<21,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -815,20 +815,24 @@ namespace tmv {
 #endif
             typedef typename M2::const_col_type M2c;
             typedef typename M3::col_type M3c;
+#ifdef TMV_UM_INLINE_MV
+            const int algo2 = -4;
+#else
+            const int algo2 = -2;
+#endif
 
             for(int j=0;j<N;++j) {
                 // m3.col(j) = m1 * m2.col(j)
                 M2c m2j = m2.get_col(j);
                 M3c m3j = m3.get_col(j);
-                MultUV_Helper<-4,cs,add,ix,T,M1,M2c,M3c>::call(x,m1,m2j,m3j);
+                MultUV_Helper<algo2,cs,add,ix,T,M1,M2c,M3c>::call(x,m1,m2j,m3j);
             }
         }
     };
 
     // algo 22: LowerTri loop over m
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<22,cs,rs,add,ix,T,M1,M2,M3> 
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<22,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -849,6 +853,11 @@ namespace tmv {
             typedef typename M3::row_type M3r;
             const int ix1 = unit ? ix : 0;
             const int xx = UNKNOWN;
+#ifdef TMV_UM_INLINE_MV
+            const int algo2 = -4;
+#else
+            const int algo2 = -2;
+#endif
 
             for(int i=M-1;i>=0;--i) {
                 // m3.row(i) = m1.row(i,0,i+1) * m2.rowRange(0,i+1)
@@ -860,16 +869,15 @@ namespace tmv {
                 M3r m3i = m3.get_row(i);
                 const Scaling<ix1,PT1> xdi(Maybe<!unit>::prod(m1.cref(i,i),x));
                 MultXV_Helper<-4,rs,add,ix1,PT1,M2r,M3r>::call(xdi,m2i,m3i);
-                MultMV_Helper<-4,rs,xx,true,ix,T,M2t,M1r,M3r>::call(
+                MultMV_Helper<algo2,rs,xx,true,ix,T,M2t,M1r,M3r>::call(
                     x,m2t,m1i,m3i);
             }
         }
     };
 
     // algo 23: LowerTri loop over k
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<23,cs,rs,add,ix,T,M1,M2,M3> 
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<23,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -889,6 +897,11 @@ namespace tmv {
             typedef typename M3::rowrange_type M3rr;
             const int ix1 = unit ? ix : 0;
             const int xx = UNKNOWN;
+#ifdef TMV_UM_INLINE_MV
+            const int algo2 = -4;
+#else
+            const int algo2 = -2;
+#endif
 
             for(int k=M-1;k>=0;--k) {
                 // m3.rowRange(k,M) = m1.col(k,k,M) ^ m2.row(k)
@@ -899,7 +912,7 @@ namespace tmv {
                 M3r m3k = m3.get_row(k);
                 M3rr m3r = m3.cRowRange(k+1,M);
                 const Scaling<ix1,PT1> xdk(Maybe<!unit>::prod(m1.cref(k,k),x));
-                Rank1VVM_Helper<-4,xx,rs,true,ix,T,M1c,M2r,M3rr>::call(
+                Rank1VVM_Helper<algo2,xx,rs,true,ix,T,M1c,M2r,M3rr>::call(
                     x,m1k,m2k,m3r);
                 MultXV_Helper<-4,rs,add,ix1,PT1,M2r,M3r>::call(xdk,m2k,m3k);
             }
@@ -908,7 +921,7 @@ namespace tmv {
 
     // algo 26: Specialization for cs = 2,3,4,5
     template <int rs, bool add, int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<26,2,rs,add,ix,T,M1,M2,M3> 
+    struct MultUM_Helper<26,2,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -962,7 +975,7 @@ namespace tmv {
         }
     };
     template <int rs, bool add, int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<26,3,rs,add,ix,T,M1,M2,M3> 
+    struct MultUM_Helper<26,3,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -1025,7 +1038,7 @@ namespace tmv {
         }
     };
     template <int rs, bool add, int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<26,4,rs,add,ix,T,M1,M2,M3> 
+    struct MultUM_Helper<26,4,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -1098,7 +1111,7 @@ namespace tmv {
         }
     };
     template <int rs, bool add, int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<26,5,rs,add,ix,T,M1,M2,M3> 
+    struct MultUM_Helper<26,5,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -1182,7 +1195,7 @@ namespace tmv {
         }
     };
     template <int rs, bool add, int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<26,UNKNOWN,rs,add,ix,T,M1,M2,M3> 
+    struct MultUM_Helper<26,UNKNOWN,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -1205,17 +1218,29 @@ namespace tmv {
                    MultUM_Helper<1,1,rs,add,ix,T,M1,M2,M3>::call(
                        x,m1,m2,m3);
                    break;
+#if TMV_UM_RECURSE > 1
               case 2 :
                    MultUM_Helper<26,2,rs,add,ix,T,M1,M2,M3>::call(
                        x,m1,m2,m3);
                    break;
+#endif
+#if TMV_UM_RECURSE > 2
               case 3 :
                    MultUM_Helper<26,3,rs,add,ix,T,M1,M2,M3>::call(
                        x,m1,m2,m3);
                    break;
+#endif
+#if TMV_UM_RECURSE > 3
+              case 4 :
+                   MultUM_Helper<26,4,rs,add,ix,T,M1,M2,M3>::call(
+                       x,m1,m2,m3);
+                   break;
+#endif
+#if TMV_UM_RECURSE > 4
               default :
                    MultUM_Helper<algo2,UNKNOWN,rs,add,ix,T,M1,M2,M3>::call(
                        x,m1,m2,m3);
+#endif
             }
         }
     };
@@ -1226,9 +1251,8 @@ namespace tmv {
     // ( B C ) ( E )   ( G )
     // G = BD + CE
     // F = AD
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<27,cs,rs,add,ix,T,M1,M2,M3> 
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<27,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -1240,37 +1264,42 @@ namespace tmv {
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
 
-#if (TMV_Q2 == 1)
-            const int algo2 = (cs == UNKNOWN || cs == 1) ? 1 : 0;
-#else
             const bool rxr = M1::_rowmajor && M3::_rowmajor;
             const bool crx = M1::_colmajor && M2::_rowmajor;
             const bool xcc = M2::_colmajor && M3::_colmajor;
             const int algo2 = 
                 cs == 0 ? 0 :
                 cs == 1 ? 1 :
-                (cs != UNKNOWN && cs > TMV_Q2) ? 0 :
-#ifdef TMV_OPT_CLEANUP
+                (cs != UNKNOWN && cs > TMV_UM_RECURSE) ? 0 :
+                TMV_UM_RECURSE == 1 ? 1:
+#ifdef TMV_UM_CLEANUP
                 cs == UNKNOWN ? 26 :
 #endif
-                cs <= 5 ? 26 :
+                (cs != UNKNOWN && cs <= 5) ? 26 :
                 rxr ? 22 : crx ? 23 : xcc ? 21 : 23;
-#endif
-            const int algo3 =  // The algorithm for M > Q2
-                (cs == UNKNOWN || cs > TMV_Q2) ? 27 : 0;
+            const int algo3 =  // The algorithm for M > 16
+                cs == UNKNOWN || cs > 16 ? 27 : 0;
             const int algo4 =  // The algorithm for MultMM
-                cs == UNKNOWN ? -2 : cs > 16 ? -3 : cs > TMV_Q2 ? -4 : 0;
+                cs == UNKNOWN ? -2 :
+                cs > 16 ? -3 : 0;
+#ifdef TMV_UM_INLINE_MM
+            const int algo3b =  // The algorithm for M > RECURSE
+                cs == UNKNOWN || 
+                (cs > TMV_UM_RECURSE && cs <= 16) ? 27 : 0;
+            const int algo4b =  // The algorithm for MultMM
+                cs == UNKNOWN || 
+                (cs > TMV_UM_RECURSE && cs <= 16) ? -4 : 0;
+#endif
+            typedef typename M1::const_subtrimatrix_type M1a;
+            typedef typename M1::const_submatrix_type M1b;
+            typedef typename M2::const_rowrange_type M2r;
+            typedef typename M3::rowrange_type M3r;
 
-            if (M > TMV_Q2) {
+            if (M > TMV_UM_RECURSE) {
                 const int Mx = M > 16 ? ((((M-1)>>5)+1)<<4) : (M>>1);
                 // (If M > 16, round M/2 up to a multiple of 16.)
                 const int csx = IntTraits<cs>::half_roundup;
                 const int csy = IntTraits2<cs,csx>::diff;
-
-                typedef typename M1::const_subtrimatrix_type M1a;
-                typedef typename M1::const_submatrix_type M1b;
-                typedef typename M2::const_rowrange_type M2r;
-                typedef typename M3::rowrange_type M3r;
 
                 M1a A = m1.cSubTriMatrix(0,Mx);
                 M1b B = m1.cSubMatrix(Mx,M,0,Mx);
@@ -1280,10 +1309,27 @@ namespace tmv {
                 M3r F = m3.cRowRange(0,Mx);
                 M3r G = m3.cRowRange(Mx,M);
 
-                MultUM_Helper<algo3,csy,rs,add,ix,T,M1a,M2r,M3r>::call(x,C,E,G);
-                MultMM_Helper<algo4,csy,rs,csx,true,ix,T,M1b,M2r,M3r>::call(
-                    x,B,D,G);
-                MultUM_Helper<algo3,csx,rs,add,ix,T,M1a,M2r,M3r>::call(x,A,D,F);
+#ifdef TMV_UM_INLINE_MM
+                if (M > 16) {
+                    // For large M, make sure to use good MultMM algo
+#endif
+                    MultUM_Helper<algo3,csy,rs,add,ix,T,M1a,M2r,M3r>::call(
+                        x,C,E,G);
+                    MultMM_Helper<algo4,csy,rs,csx,true,ix,T,M1b,M2r,M3r>::
+                        call(x,B,D,G);
+                    MultUM_Helper<algo3,csx,rs,add,ix,T,M1a,M2r,M3r>::call(
+                        x,A,D,F);
+#ifdef TMV_UM_INLINE_MM
+                } else {
+                    // For smaller M, do the no branching algorithm
+                    MultUM_Helper<algo3b,csy,rs,add,ix,T,M1a,M2r,M3r>::call(
+                        x,C,E,G);
+                    MultMM_Helper<algo4b,csy,rs,csx,true,ix,T,M1b,M2r,M3r>::
+                        call(x,B,D,G);
+                    MultUM_Helper<algo3b,csx,rs,add,ix,T,M1a,M2r,M3r>::call(
+                        x,A,D,F);
+                }
+#endif
             } else {
                 MultUM_Helper<algo2,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
             }
@@ -1292,9 +1338,8 @@ namespace tmv {
 
     // algo 31: Determine which algorithm to use based on the runtime
     // knowledge of the sizes.
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<31,cs,rs,add,ix,T,M1,M2,M3> 
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<31,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -1308,33 +1353,22 @@ namespace tmv {
             const bool rxr = M1::_rowmajor && M3::_rowmajor;
             const bool crx = M1::_colmajor && M2::_rowmajor;
             const bool xcc = M2::_colmajor && M3::_colmajor;
-            const bool nxx = !(M1::_colmajor || M1::_rowmajor);
-            const bool xxn = !(M3::_colmajor || M3::_rowmajor);
-            // xcc, rxr, crx have fast algorithms already
-            // add can't be turned into a MultEq op
-            // nxx, xxn don't benefit from the change
-            //   (and would go into an infinite loop)
-            const bool multeq = !(xcc || rxr || crx || add || nxx || xxn);
             const bool maybesmall = 
                 cs==UNKNOWN || (cs<=5 && (rs==UNKNOWN || rs<16)) || cs<=3;
-            const bool upper1 = M1::_upper;
-#ifdef TMV_OPT_CLEANUP
-            const int algo2 = maybesmall ? ( upper1 ? 16 : 26 ) : 0;
-#else
+            const bool upper = M1::_upper;
             const int algo2 = maybesmall ? (
-                upper1 ?  ( rxr ? 12 : crx ? 13 : xcc ? 11 : 13 ) :
+                TMV_UM_RECURSE == 1 ? 1 :
+#ifdef TMV_UM_CLEANUP
+                true ? ( upper ? 16 : 26 ) : 
+#endif
+                upper ?  ( rxr ? 12 : crx ? 13 : xcc ? 11 : 13 ) :
                 ( rxr ? 22 : crx ? 23 : xcc ? 21 : 23 ) ) :
                 0; 
+#ifdef TMV_UM_SMALL
+            const int algo3 = 
+                (rs == UNKNOWN || rs <= 3) ? ( upper ? 11 : 21 ) : 0;
 #endif
-            // This next trick just avoids compiling algo 33 for 
-            // cases where multeq = false, since algo3 is only called
-            // when multeq is true.
-            const int algo3 = multeq ? 33 : 0;
-            const int algo4 = 
-                (rs == UNKNOWN || rs <= 3) ? (
-                    upper1 ? 11 : 21 ) :
-                0;
-            const int algo5 = upper1 ? 17 : 27;
+            const int algo4 = upper ? 17 : 27;
 
 #ifdef _OPENMP
             const int Mc = M < 16 ? 1 : M>>4; // M/16
@@ -1344,25 +1378,24 @@ namespace tmv {
             // Put the small matrix option first, so it doesn't have to 
             // go through a bunch of if/else statements.  For large matrices,
             // all these if/else's don't matter for the total time.
-            if ((M <= 5 && N < 16) || (M <= 3))
+            if (M <= TMV_UM_RECURSE)
                 MultUM_Helper<algo2,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
-            else if (multeq) 
-                MultUM_Helper<algo3,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+#ifdef TMV_UM_SMALL
             else if (N <= 3)
-                MultUM_Helper<algo4,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+                MultUM_Helper<algo3,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+#endif
 #ifdef _OPENMP
-            else if (!omp_in_parallel() && N >= 64 && Mc*Mc*Nc > TMV_Q6)
+            else if (N >= 64 && Mc*Mc*Nc > TMV_UM_OMP_THRESH)
                 MultUM_Helper<36,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
 #endif
             else
-                MultUM_Helper<algo5,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+                MultUM_Helper<algo4,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };
 
     // algo 33: Bad majority, copy m2 and turn into a MultEq operation.
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<33,cs,rs,add,ix,T,M1,M2,M3> 
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<33,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -1388,9 +1421,8 @@ namespace tmv {
     // that is a multiple of 16.  This way we get the maximum advantage from
     // our blocking structure while keeping the threads as balanced as 
     // possible.
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<36,cs,rs,add,ix,T,M1,M2,M3> 
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<36,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -1401,96 +1433,84 @@ namespace tmv {
             std::cout<<"UM algo 36: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const bool upper1 = M1::_upper;
-            const int algo2 = upper1 ? 17 : 27;
-            bool bad_alloc = false;
+            const bool upper = M1::_upper;
+            const int algo2 = upper ? 17 : 27;
 #ifdef PRINTALGO_UM_OMP
             std::ofstream fout("omp.out");
 #endif
 #pragma omp parallel
             {
-                try {
-                    int num_threads = omp_get_num_threads();
-                    int mythread = omp_get_thread_num();
+                int num_threads = omp_get_num_threads();
+                int mythread = omp_get_thread_num();
+#ifdef PRINTALGO_UM_OMP
+#pragma omp critical
+                {
+                    fout<<"thread "<<mythread<<"/"<<num_threads<<std::endl;
+                }
+#endif
+                if (num_threads == 1) {
 #ifdef PRINTALGO_UM_OMP
 #pragma omp critical
                     {
-                        fout<<"thread "<<mythread<<"/"<<num_threads<<std::endl;
+                        fout<<"thread "<<mythread<<"/"<<num_threads;
+                        fout<<"\nonly 1 thread"<<std::endl;
                     }
 #endif
-                    if (num_threads == 1) {
+                    MultUM_Helper<algo2,cs,rs,add,ix,T,M1,M2,M3>::call(
+                        x,m1,m2,m3);
+                } else {
+                    int Nx = N / num_threads;
+                    Nx = ((((Nx-1)>>4)+1)<<4); 
+                    int j1 = mythread * Nx;
+                    int j2 = (mythread+1) * Nx;
+                    if (j2 > N || mythread == num_threads-1) j2 = N;
+#ifdef PRINTALGO_UM_OMP
+#pragma omp critical
+                    {
+                        fout<<"thread "<<mythread<<"/"<<num_threads;
+                        fout<<"Nx = "<<Nx<<std::endl;
+                        fout<<"j1 = "<<j1<<std::endl;
+                        fout<<"j2 = "<<j2<<std::endl;
+                    }
+#endif
+                    if (j1 < N)  {
+                        typedef typename M2::const_colrange_type M2c;
+                        typedef typename M3::colrange_type M3c;
+                        const int rsx = UNKNOWN; 
+                        M2c m2c = m2.cColRange(j1,j2);
+                        M3c m3c = m3.cColRange(j1,j2);
 #ifdef PRINTALGO_UM_OMP
 #pragma omp critical
                         {
                             fout<<"thread "<<mythread<<"/"<<num_threads;
-                            fout<<"\nonly 1 thread"<<std::endl;
+                            fout<<"\nm1 = "<<m1<<std::endl;
+                            fout<<"m2c = "<<m2c<<std::endl;
+                            fout<<"m3c = "<<m3c<<std::endl;
                         }
 #endif
-                        MultUM_Helper<algo2,cs,rs,add,ix,T,M1,M2,M3>::call(
-                            x,m1,m2,m3);
-                    } else {
-                        int Nx = N / num_threads;
-                        Nx = ((((Nx-1)>>4)+1)<<4); 
-                        int j1 = mythread * Nx;
-                        int j2 = (mythread+1) * Nx;
-                        if (j2 > N || mythread == num_threads-1) j2 = N;
+                        MultUM_Helper<algo2,cs,rsx,add,ix,T,M1,M2c,M3c>::call(
+                            x,m1,m2c,m3c);
 #ifdef PRINTALGO_UM_OMP
 #pragma omp critical
                         {
                             fout<<"thread "<<mythread<<"/"<<num_threads;
-                            fout<<"Nx = "<<Nx<<std::endl;
-                            fout<<"j1 = "<<j1<<std::endl;
-                            fout<<"j2 = "<<j2<<std::endl;
+                            fout<<"\nm3c => "<<m3c<<std::endl;
                         }
 #endif
-                        if (j1 < N)  {
-                            typedef typename M2::const_colrange_type M2c;
-                            typedef typename M3::colrange_type M3c;
-                            const int rsx = UNKNOWN; 
-                            M2c m2c = m2.cColRange(j1,j2);
-                            M3c m3c = m3.cColRange(j1,j2);
-#ifdef PRINTALGO_UM_OMP
-#pragma omp critical
-                            {
-                                fout<<"thread "<<mythread<<"/"<<num_threads;
-                                fout<<"\nm1 = "<<m1<<std::endl;
-                                fout<<"m2c = "<<m2c<<std::endl;
-                                fout<<"m3c = "<<m3c<<std::endl;
-                            }
-#endif
-                            MultUM_Helper<
-                                algo2,cs,rsx,add,ix,T,M1,M2c,M3c>::call(
-                                    x,m1,m2c,m3c);
-#ifdef PRINTALGO_UM_OMP
-#pragma omp critical
-                            {
-                                fout<<"thread "<<mythread<<"/"<<num_threads;
-                                fout<<"\nm3c => "<<m3c<<std::endl;
-                            }
-#endif
-                        }
                     }
-                } catch (...) {
-                    // should only be std::bad_alloc, but it's good form to 
-                    // catch everything inside a parallel block
-                    bad_alloc = true;
                 }
             }
-            if (bad_alloc)
-                MultUM_Helper<algo2,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };
 #endif
 
     // algo 38: Unknown cs, check if M is small
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<38,cs,rs,add,ix,T,M1,M2,M3> 
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<38,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef TMV_OPT_SMALL
             TMVStaticAssert(cs == UNKNOWN);
             const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
 #ifdef PRINTALGO_UM
@@ -1498,8 +1518,8 @@ namespace tmv {
             std::cout<<"UM algo 38: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const bool upper1 = M1::_upper;
-            const int algo2 = upper1 ? 16 : 26;
+            const bool upper = M1::_upper;
+            const int algo2 = upper ? 16 : 26;
 
             if (M <= 5) {
                 // then it is worth figuring out what M is.
@@ -1528,14 +1548,12 @@ namespace tmv {
                            x,m1,m2,m3);
                 }
             } else 
-#endif
                 MultUM_Helper<31,cs,rs,add,ix,T,M1,M2,M3>::call( x,m1,m2,m3); 
         }
     };
 
     // algo 81: copy m1
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<81,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
@@ -1556,8 +1574,7 @@ namespace tmv {
     };
 
     // algo 82: copy x*m1
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<82,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
@@ -1581,8 +1598,7 @@ namespace tmv {
     };
 
     // algo 83: Copy m1, figure out where to put x
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<83,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
@@ -1598,8 +1614,7 @@ namespace tmv {
         }
     };
     // If ix == 1, don't need the branch - just go to 81
-    template <int cs, int rs, 
-              bool add, class T, class M1, class M2, class M3>
+    template <int cs, int rs, bool add, class T, class M1, class M2, class M3>
     struct MultUM_Helper<83,cs,rs,add,1,T,M1,M2,M3>
     {
         static void call(
@@ -1608,8 +1623,7 @@ namespace tmv {
     };
 
     // algo 84: copy m2
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<84,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
@@ -1629,8 +1643,7 @@ namespace tmv {
     };
 
     // algo 85: copy x*m2
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<85,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
@@ -1653,8 +1666,7 @@ namespace tmv {
     };
 
     // algo 86: Copy m2, figure out where to put x
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<86,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
@@ -1679,8 +1691,7 @@ namespace tmv {
     };
 
     // algo 87: Use temporary for m1*m2
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<87,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
@@ -1710,8 +1721,7 @@ namespace tmv {
         }
     };
     // If ix == 1, don't need the branch
-    template <int cs, int rs, bool add, 
-              class T, class M1, class M2, class M3>
+    template <int cs, int rs, bool add, class T, class M1, class M2, class M3>
     struct MultUM_Helper<87,cs,rs,add,1,T,M1,M2,M3>
     {
         static void call(
@@ -1732,31 +1742,103 @@ namespace tmv {
         }
     };
 
-    // algo -4: No branches or copies
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<-4,cs,rs,add,ix,T,M1,M2,M3> 
+    // algo 90: call InstMultMM
+    template <int cs, int rs, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<90,cs,rs,false,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const bool upper1 = M1::_upper;
+            typedef typename M3::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
+            InstMultMM(xx,m1.xdView(),m2.xView(),m3.xView());
+        }
+    };
+    template <int cs, int rs, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<90,cs,rs,true,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            typedef typename M3::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
+            InstAddMultMM(xx,m1.xdView(),m2.xView(),m3.xView());
+        }
+    };
+
+    // algo 97: Conjugate
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<97,cs,rs,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            typedef typename M1::const_conjugate_type M1c;
+            typedef typename M2::const_conjugate_type M2c;
+            typedef typename M3::conjugate_type M3c;
+            M1c m1c = m1.conjugate();
+            M2c m2c = m2.conjugate();
+            M3c m3c = m3.conjugate();
+            MultUM_Helper<-2,cs,rs,add,ix,T,M1c,M2c,M3c>::call(
+                TMV_CONJ(x),m1c,m2c,m3c);
+        }
+    };
+
+    // algo 99: Check for aliases
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<99,cs,rs,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            const bool s1 = SameStorage(m1,m3);
+            const bool s2 = SameStorage(m2,m3) && !ExactSameStorage(m2,m3);
+            if (!s1 && !s2) {
+                // No aliasing (or no clobber)
+                MultUM_Helper<-2,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+            } else if (!add && !s1) {
+                // MultEq: copy m2
+                AliasCopy(m2,m3);
+                NoAliasMultMM<add>(x,m1,m3,m3);
+            } else if (s1 && !s2) {
+                // copy m1
+                MultUM_Helper<83,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+            } else {
+                // Use temporary for m1*m2
+                MultUM_Helper<87,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+            }
+        }
+    };
+
+    // algo -4: No branches or copies
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<-4,cs,rs,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            const bool upper = M1::_upper;
             const int algo = 
                 ( cs == 0 || rs == 0 ) ? 0 :
-                cs == 1 ? 401 :
-                rs == 1 ? 402 :
-                ( cs != UNKNOWN ) ? (
-                    upper1 ? (cs <= 5 ? 16 : 17 ) :
-                    (cs <= 5 ? 26 : 27 ) ) :
-                upper1 ? 17 : 27;
+                cs == 1 ? 1 :
+                rs == 1 ? 2 :
+                upper ?
+
+                cs != UNKNOWN && cs <= 5 ? 16 :
+                rs != UNKNOWN && rs <= 3 ? 11 :
+                17  :
+
+                cs != UNKNOWN && cs <= 5 ? 26 :
+                rs != UNKNOWN && rs <= 3 ? 21 :
+                27;
+
             MultUM_Helper<algo,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<-3,cs,rs,add,ix,T,M1,M2,M3> 
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<-3,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -1791,16 +1873,10 @@ namespace tmv {
             const bool xcc = M2::_colmajor && M3::_colmajor;
             const bool rxr = M1::_rowmajor && M3::_rowmajor;
             const bool crx = M1::_colmajor && M2::_rowmajor;
-            const bool upper1 = M1::_upper;
+            const bool upper = M1::_upper;
 
 #if 0
             const int algo = 33;
-#else
-#if TMV_OPT == 0 
-            const int algo =
-                upper1 ? 
-                ( rxr ? 12 : crx ? 13 : xcc ? 11 : 13 ) :
-                ( rxr ? 22 : crx ? 23 : xcc ? 21 : 23 );
 #else
             const bool nxx = !(M1::_colmajor || M1::_rowmajor);
             const bool xxn = !(M3::_colmajor || M3::_rowmajor);
@@ -1808,7 +1884,10 @@ namespace tmv {
             // add can't be turned into a MultEq op
             // nxx, xxn don't benefit from the change
             //   (and would go into an infinite loop)
-            const bool multeq = !(xcc || rxr || crx || add || nxx || xxn);
+            const bool multeq = 
+                !(xcc || rxr || crx || add || nxx || xxn) &&
+                (cs == UNKNOWN || cs > 5) &&
+                (rs == UNKNOWN || rs > 3);
 #ifdef _OPENMP
             const int Mc = cs == UNKNOWN ? UNKNOWN : (cs < 16) ? 1 : (cs>>4);
             const int Nc = rs == UNKNOWN ? UNKNOWN : (rs < 16) ? 1 : (rs>>4);
@@ -1816,27 +1895,37 @@ namespace tmv {
 #endif
             const int algo = 
                 ( cs == 0 || rs == 0 ) ? 0 :
-                cs == 1 ? 201 :
-                rs == 1 ? 202 :
-                upper1 ? (
-                    cs == UNKNOWN ? 38 : 
-                    cs <= 5 ? 16 :
-                    rs == UNKNOWN ? 31 :
-                    multeq ? 33 :
+                cs == 1 ? 1 :
+                rs == 1 ? 2 :
+                multeq ? 33 :
+
+                upper ? 
+                TMV_OPT == 0 ? ( rxr ? 12 : crx ? 13 : xcc ? 11 : 13 ) :
+#ifdef TMV_UM_SMALL
+                cs == UNKNOWN ? 38 : 
+#endif
+                cs == UNKNOWN ? 31 : 
+                cs <= 5 ? 16 :
+                rs == UNKNOWN ? 31 :
+                rs <= 3 ? 11 :
 #ifdef _OPENMP
-                    (rs >= 64 && McMcNc >= TMV_Q6) ? 36 :
+                (rs >= 64 && McMcNc >= TMV_UM_OMP_THRESH) ? 36 :
 #endif
-                    17 ) :
-                ( // lowertri
-                    cs == UNKNOWN ? 38 : 
-                    cs <= 5 ? 26 :
-                    rs == UNKNOWN ? 31 :
-                    multeq ? 33 :
+                17  :
+
+                // lowertri
+                TMV_OPT == 0 ? ( rxr ? 22 : crx ? 23 : xcc ? 21 : 23 ) : 
+#ifdef TMV_UM_SMALL
+                cs == UNKNOWN ? 38 : 
+#endif
+                cs == UNKNOWN ? 31 : 
+                cs <= 5 ? 26 :
+                rs == UNKNOWN ? 31 :
+                rs <= 3 ? 21 :
 #ifdef _OPENMP
-                    (rs >= 64 && McMcNc >= TMV_Q6) ? 36 :
+                (rs >= 64 && McMcNc >= TMV_UM_OMP_THRESH) ? 36 :
 #endif
-                    27 );
-#endif
+                27 ;
 #endif
 #ifdef PRINTALGO_UM
             const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
@@ -1853,54 +1942,8 @@ namespace tmv {
         }
     };
 
-    // algo 97: Conjugate
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<97,cs,rs,add,ix,T,M1,M2,M3>
-    {
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        { 
-            typedef typename M1::const_conjugate_type M1c;
-            typedef typename M2::const_conjugate_type M2c;
-            typedef typename M3::conjugate_type M3c;
-            M1c m1c = m1.conjugate();
-            M2c m2c = m2.conjugate();
-            M3c m3c = m3.conjugate();
-            MultUM_Helper<-2,cs,rs,add,ix,T,M1c,M2c,M3c>::call(
-                TMV_CONJ(x),m1c,m2c,m3c);
-        }
-    };
-
-    // algo 98: call InstMultMM
-    template <int cs, int rs, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<98,cs,rs,false,ix,T,M1,M2,M3>
-    {
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
-            typedef typename M3::value_type VT;
-            VT xx = Traits<VT>::convert(T(x));
-            InstMultMM(xx,m1.xdView(),m2.xView(),m3.xView());
-        }
-    };
-    template <int cs, int rs, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<98,cs,rs,true,ix,T,M1,M2,M3>
-    {
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
-            typedef typename M3::value_type VT;
-            VT xx = Traits<VT>::convert(T(x));
-            InstAddMultMM(xx,m1.xdView(),m2.xView(),m3.xView());
-        }
-    };
-
     // algo -2: Check for inst
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<-2,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
@@ -1925,42 +1968,14 @@ namespace tmv {
                 cs == 1 ? 201 :
                 rs == 1 ? 202 :
                 M3::_conj ? 97 :
-                inst ? 98 : 
+                inst ? 90 : 
                 -3;
             MultUM_Helper<algo,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };
 
-    // algo 99: Check for aliases
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<99,cs,rs,add,ix,T,M1,M2,M3>
-    {
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
-            const bool s1 = SameStorage(m1,m3);
-            const bool s2 = SameStorage(m2,m3) && !ExactSameStorage(m2,m3);
-            if (!s1 && !s2) {
-                // No aliasing (or no clobber)
-                MultUM_Helper<-2,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
-            } else if (!add && !s1) {
-                // MultEq: copy m2
-                AliasCopy(m2,m3);
-                NoAliasMultMM<add>(x,m1,m3,m3);
-            } else if (s1 && !s2) {
-                // copy m1
-                MultUM_Helper<83,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
-            } else { 
-                // Use temporary for m1*m2
-                MultUM_Helper<87,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
-            }
-        }
-    };
-
     // algo -1: Check for aliases?
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<-1,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
@@ -1972,19 +1987,18 @@ namespace tmv {
                 M3::_colsize == UNKNOWN && M3::_rowsize == UNKNOWN;
             const int algo = 
                 ( cs == 0 || rs == 0 ) ? 0 :
-                cs == 1 ? 1 :
-                rs == 1 ? 2 :
+                cs == 1 ? 101 :
+                rs == 1 ? 102 :
                 checkalias ? 99 : 
                 -2;
             MultUM_Helper<algo,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };
 
-    template <int algo, bool add, int ix, class T, class M1, class M2, class M3>
-    static void DoMultUM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Rec<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3)
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    static inline void MultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
+        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
         TMVStaticAssert((Sizes<M1::_size,M3::_colsize>::same));
         TMVStaticAssert((Sizes<M1::_size,M2::_colsize>::same));
@@ -1998,45 +2012,85 @@ namespace tmv {
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         typedef typename M3::cview_type M3v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        M3v m3v = m3.cView();
-        MultUM_Helper<algo,cs,rs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
+        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
+        MultUM_Helper<-1,cs,rs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void MultMM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Rec<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3)
-    { DoMultUM<-1,add>(x,m1,m2,m3); }
+    static inline void NoAliasMultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
+        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
+    {
+        TMVStaticAssert((Sizes<M1::_size,M3::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M2::_colsize>::same));
+        TMVStaticAssert((Sizes<M2::_rowsize,M3::_rowsize>::same));
+        TMVAssert(m1.size() == m3.colsize());
+        TMVAssert(m1.size() == m2.colsize());
+        TMVAssert(m2.rowsize() == m3.rowsize());
+
+        const int cs = Sizes<M3::_colsize,M1::_size>::size;
+        const int rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
+        typedef typename M1::const_cview_type M1v;
+        typedef typename M2::const_cview_type M2v;
+        typedef typename M3::cview_type M3v;
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
+        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
+        MultUM_Helper<-2,cs,rs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
+    }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void NoAliasMultMM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Rec<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3)
-    { DoMultUM<-2,add>(x,m1,m2,m3); }
+    static inline void InlineMultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
+        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
+    {
+        TMVStaticAssert((Sizes<M1::_size,M3::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M2::_colsize>::same));
+        TMVStaticAssert((Sizes<M2::_rowsize,M3::_rowsize>::same));
+        TMVAssert(m1.size() == m3.colsize());
+        TMVAssert(m1.size() == m2.colsize());
+        TMVAssert(m2.rowsize() == m3.rowsize());
+
+        const int cs = Sizes<M3::_colsize,M1::_size>::size;
+        const int rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
+        typedef typename M1::const_cview_type M1v;
+        typedef typename M2::const_cview_type M2v;
+        typedef typename M3::cview_type M3v;
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
+        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
+        MultUM_Helper<-3,cs,rs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
+    }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void InlineMultMM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Rec<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3)
-    { DoMultUM<-3,add>(x,m1,m2,m3); }
+    static inline void AliasMultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
+        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
+    {
+        TMVStaticAssert((Sizes<M1::_size,M3::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M2::_colsize>::same));
+        TMVStaticAssert((Sizes<M2::_rowsize,M3::_rowsize>::same));
+        TMVAssert(m1.size() == m3.colsize());
+        TMVAssert(m1.size() == m2.colsize());
+        TMVAssert(m2.rowsize() == m3.rowsize());
+
+        const int cs = Sizes<M3::_colsize,M1::_size>::size;
+        const int rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
+        typedef typename M1::const_cview_type M1v;
+        typedef typename M2::const_cview_type M2v;
+        typedef typename M3::cview_type M3v;
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
+        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
+        MultUM_Helper<99,cs,rs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
+    }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void AliasMultMM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Rec<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3)
-    { DoMultUM<99,add>(x,m1,m2,m3); }
-
-    template <int algo, bool add, int ix, class T, class M1, class M2, class M3>
-    static void DoMultMU(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3)
+    static inline void MultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
+        const BaseMatrix_Tri<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M3::_colsize>::same));
         TMVStaticAssert((Sizes<M1::_rowsize,M2::_size>::same));
@@ -2053,59 +2107,100 @@ namespace tmv {
         M1t m1t = m1.transpose();
         M2t m2t = m2.transpose();
         M3t m3t = m3.transpose();
-        MultUM_Helper<algo,rs,cs,add,ix,T,M2t,M1t,M3t>::call(x,m2t,m1t,m3t);
+        MultUM_Helper<-1,rs,cs,add,ix,T,M2t,M1t,M3t>::call(x,m2t,m1t,m3t);
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void MultMM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3)
-    { DoMultMU<-1,add>(x,m1,m2,m3); }
+    static inline void NoAliasMultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
+        const BaseMatrix_Tri<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
+    {
+        TMVStaticAssert((Sizes<M1::_colsize,M3::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_rowsize,M2::_size>::same));
+        TMVStaticAssert((Sizes<M2::_size,M3::_rowsize>::same));
+        TMVAssert(m1.colsize() == m3.colsize());
+        TMVAssert(m1.rowsize() == m2.size());
+        TMVAssert(m2.size() == m3.rowsize());
+
+        const int cs = Sizes<M3::_colsize,M1::_colsize>::size;
+        const int rs = Sizes<M3::_rowsize,M2::_size>::size;
+        typedef typename M1::const_transpose_type M1t;
+        typedef typename M2::const_transpose_type M2t;
+        typedef typename M3::transpose_type M3t;
+        M1t m1t = m1.transpose();
+        M2t m2t = m2.transpose();
+        M3t m3t = m3.transpose();
+        MultUM_Helper<-2,rs,cs,add,ix,T,M2t,M1t,M3t>::call(x,m2t,m1t,m3t);
+    }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void NoAliasMultMM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3)
-    { DoMultMU<-2,add>(x,m1,m2,m3); }
+    static inline void InlineMultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
+        const BaseMatrix_Tri<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
+    {
+        TMVStaticAssert((Sizes<M1::_colsize,M3::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_rowsize,M2::_size>::same));
+        TMVStaticAssert((Sizes<M2::_size,M3::_rowsize>::same));
+        TMVAssert(m1.colsize() == m3.colsize());
+        TMVAssert(m1.rowsize() == m2.size());
+        TMVAssert(m2.size() == m3.rowsize());
+
+        const int cs = Sizes<M3::_colsize,M1::_colsize>::size;
+        const int rs = Sizes<M3::_rowsize,M2::_size>::size;
+        typedef typename M1::const_transpose_type M1t;
+        typedef typename M2::const_transpose_type M2t;
+        typedef typename M3::transpose_type M3t;
+        M1t m1t = m1.transpose();
+        M2t m2t = m2.transpose();
+        M3t m3t = m3.transpose();
+        MultUM_Helper<-3,rs,cs,add,ix,T,M2t,M1t,M3t>::call(x,m2t,m1t,m3t);
+    }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void InlineMultMM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3)
-    { DoMultMU<-3,add>(x,m1,m2,m3); }
+    static inline void AliasMultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
+        const BaseMatrix_Tri<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
+    {
+        TMVStaticAssert((Sizes<M1::_colsize,M3::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_rowsize,M2::_size>::same));
+        TMVStaticAssert((Sizes<M2::_size,M3::_rowsize>::same));
+        TMVAssert(m1.colsize() == m3.colsize());
+        TMVAssert(m1.rowsize() == m2.size());
+        TMVAssert(m2.size() == m3.rowsize());
 
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void AliasMultMM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Tri<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3)
-    { DoMultMU<99,add>(x,m1,m2,m3); }
+        const int cs = Sizes<M3::_colsize,M1::_colsize>::size;
+        const int rs = Sizes<M3::_rowsize,M2::_size>::size;
+        typedef typename M1::const_transpose_type M1t;
+        typedef typename M2::const_transpose_type M2t;
+        typedef typename M3::transpose_type M3t;
+        M1t m1t = m1.transpose();
+        M2t m2t = m2.transpose();
+        M3t m3t = m3.transpose();
+        MultUM_Helper<99,rs,cs,add,ix,T,M2t,M1t,M3t>::call(x,m2t,m1t,m3t);
+    }
 
     template <class M1, int ix, class T, class M2>
-    static void MultEqMM(
+    static inline void MultEqMM(
         BaseMatrix_Rec_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M2>& m2)
     { MultMM<false>(x,m1.mat(),m2.mat(),m1.mat()); }
 
     template <class M1, int ix, class T, class M2>
-    static void NoAliasMultEqMM(
+    static inline void NoAliasMultEqMM(
         BaseMatrix_Rec_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M2>& m2)
     { NoAliasMultMM<false>(x,m1.mat(),m2.mat(),m1.mat()); }
 
     template <class M1, int ix, class T, class M2>
-    static void AliasMultEqMM(
+    static inline void AliasMultEqMM(
         BaseMatrix_Rec_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M2>& m2)
     { AliasMultMM<false>(x,m1.mat(),m2.mat(),m1.mat()); }
 
-#undef TMV_OPT_SMALL
-#undef TMV_OPT_CLEANUP
-#undef TMV_Q2
-#undef TMV_Q6
+#undef TMV_UM_SMALL
+#undef TMV_UM_CLEANUP
+#undef TMV_UM_RECURSE
+#undef TMV_UM_OMP_THRESH
 
 } // namespace tmv
 

@@ -43,36 +43,42 @@
 #include "TMV_Permutation.h"
 #include "TMV_PermuteM.h"
 
+#ifdef PRINTALGO_LU
 #include <iostream>
 #include "TMV_MatrixIO.h"
 #include "TMV_VectorIO.h"
 #include "TMV_TriMatrixIO.h"
-
-#include "TMV_Matrix.h"
-#include "TMV_SmallMatrix.h"
-
-#ifdef PRINTALGO_LU
-#include <iostream>
+#include "TMV_ProdMM.h"
+#include "TMV_MultUL.h"
+#include "TMV_PermuteM.h"
 #endif
 
-// TMV_LU_BLOCKSIZE is the block size to use in algo 21
+// BLOCKSIZE is the block size to use in algo 21
 #define TMV_LU_BLOCKSIZE 64
 
-// Q2 is the maximum size to stop recursing in algo 27
-#define TMV_Q2 1
+// RECURSE = the maximum size to stop recursing in algo 27
+#if TMV_OPT >= 3
+#define TMV_LU_RECURSE 2
+#elif TMV_OPT == 2
+#define TMV_LU_RECURSE 32
+#else
+#define TMV_LU_RECURSE 1
+#endif
+
+// INLINE_MV = Inline the MV (MultMV, LDivEqVU) calls.
+#if TMV_OPT >= 1
+#define TMV_LU_INLINE_MV
+#endif
+
+// INLINE_MM = Inline the small-sized MM (MultMM, LDivEqMU) calls.
+#if TMV_OPT >= 3
+#define TMV_LU_INLINE_MM
+#endif
 
 namespace tmv {
 
-    // Defined below:
-    template <class M> 
-    void LU_Decompose(
-        BaseMatrix_Rec_Mutable<M>& m, int* P, int& detp);
-    template <class M> 
-    void InlineLU_Decompose(
-        BaseMatrix_Rec_Mutable<M>& m, int* P, int& detp);
-
     // Defined in TMV_LUDecompose.cpp
-    template <class T> 
+    template <class T>
     void InstLU_Decompose(MatrixView<T,1> m, int* P, int& detp);
 
     template <int algo, int cs, int rs, class M>
@@ -84,15 +90,16 @@ namespace tmv {
     { static void call(M& A, int* P, int& detp) {} };
 
     // algo 1: N == 1
-    template <int cs, class M1>
-    struct LUDecompose_Helper<1,cs,1,M1>
+    template <int cs, int rs, class M1>
+    struct LUDecompose_Helper<1,cs,rs,M1>
     {
         static void call(M1& A, int* P, int& detp)
         {
             const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
+            TMVAssert(A.rowsize() == 1);
 #ifdef PRINTALGO_LU
             std::cout<<"LUDecompose algo 1: M,N,cs,rs = "<<M<<','<<1<<
-                ','<<cs<<','<<1<<std::endl;
+                ','<<cs<<','<<rs<<std::endl;
 #endif
             // Same as NonBlock version, but with R==1 hard coded
             typedef typename M1::value_type T;
@@ -111,21 +118,22 @@ namespace tmv {
                 }
                 //A0.cSubVector(1,M) /= A0.cref(0);
                 typename M1::col_sub_type A0b = A0.cSubVector(1,M);
-                InlineScale(Scaling<0,T>(RT(1)/A0.cref(0)),A0b);
+                Scale(Scaling<0,T>(RT(1)/A0.cref(0)),A0b);
             }
         }
     };
 
     // algo 2: N == 2
-    template <int cs, class M1>
-    struct LUDecompose_Helper<2,cs,2,M1>
+    template <int cs, int rs, class M1>
+    struct LUDecompose_Helper<2,cs,rs,M1>
     {
         static void call(M1& A, int* P, int& detp)
         {
             const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
+            TMVAssert(A.rowsize() == 2);
 #ifdef PRINTALGO_LU
             std::cout<<"LUDecompose algo 2: M,N,cs,rs = "<<M<<','<<2<<
-                ','<<cs<<','<<2<<std::endl;
+                ','<<cs<<','<<rs<<std::endl;
 #endif
             // Same as NonBlock version, but with N==2 hard coded
             typedef typename M1::value_type T;
@@ -137,12 +145,12 @@ namespace tmv {
             typename M1::col_type::iterator it1 = A1.begin();
 
             int ip0,ip1;
-            RT piv = InlineMaxAbsElement(A0,&ip0);
+            RT piv = A0.maxAbsElement(&ip0);
 
             if (TMV_Underflow(piv)) {
                 A0.setZero();
                 ip0 = 0;
-                piv = InlineMaxAbsElement(A1.cSubVector(1,M),&ip1);
+                piv = A1.cSubVector(1,M).maxAbsElement(&ip1);
                 ip1++;
             } else {
                 if (ip0 != 0) {
@@ -178,7 +186,7 @@ namespace tmv {
 
                     //A1.cSubVector(2,M) /= A1.cref(1);
                     typename M1::col_sub_type A1b = A1.cSubVector(2,M);
-                    InlineScale(Scaling<0,T>(RT(1)/A1.cref(1)),A1b);
+                    Scale(Scaling<0,T>(RT(1)/A1.cref(1)),A1b);
                 }
             }
 
@@ -188,15 +196,16 @@ namespace tmv {
     };
 
     // algo 3: M == 2
-    template <int rs, class M1>
-    struct LUDecompose_Helper<3,2,rs,M1>
+    template <int cs, int rs, class M1>
+    struct LUDecompose_Helper<3,cs,rs,M1>
     {
         static void call(M1& A, int* P, int& detp)
         {
             const int N = rs==UNKNOWN ? int(A.rowsize()) : rs;
+            TMVAssert(A.colsize() == 2);
 #ifdef PRINTALGO_LU
             std::cout<<"LUDecompose algo 3: M,N,cs,rs = "<<2<<','<<N<<
-                ','<<2<<','<<rs<<std::endl;
+                ','<<cs<<','<<rs<<std::endl;
 #endif
             // Same as NonBlock version, but with M==2 hard coded
             typedef typename M1::value_type T;
@@ -206,7 +215,7 @@ namespace tmv {
             typename M1::col_type A1 = A.get_col(1);
 
             int ip0;
-            RT piv = InlineMaxAbsElement(A0,&ip0);
+            RT piv = A0.maxAbsElement(&ip0);
 
             if (TMV_Underflow(piv)) {
                 A0.setZero();
@@ -235,12 +244,12 @@ namespace tmv {
                 // A.colRange(2,N).permuteRows(P);
                 if (ip0 == 1) {
                     //A.cColRange(2,N).swapRows(0,1);
-                    InlineSwap(Aa,Ab);
+                    NoAliasSwap(Aa,Ab);
                 }
 
                 // A.colRange(2,N) /= A.colRange(0,2).unitLowerTri();
                 //A.get_row(1,2,N) -= A1.cref(0) * A.get_row(0,2,N);
-                InlineMultXV<true>(Scaling<0,T>(-A1.cref(0)),Aa,Ab);
+                NoAliasMultXV<true>(Scaling<0,T>(-A1.cref(0)),Aa,Ab);
             }
         }
     };
@@ -332,6 +341,12 @@ namespace tmv {
             typedef typename M1::const_submatrix_type M1s;
             typedef typename M1::submatrix_type::const_unit_lowertri_type M1l;
 
+#ifdef TMV_LU_INLINE_MV
+            const int algo2 = -4;
+#else
+            const int algo2 = -2;
+#endif
+
             for (int j=0; j<R; ++j) {
                 M1c Ajb = A.get_col(j,j,M);
                 M1l L = A.cSubMatrix(0,j,0,j).unitLowerTri();
@@ -340,18 +355,18 @@ namespace tmv {
                     M1c Aja = A.get_col(j,0,j);
                     // Solve for U(0:j,j))
                     //A.get_col(j,0,j) /= A.cSubMatrix(0,j,0,j).unitLowerTri();
-                    LDivEqVU_Helper<-4,xx,M1c,M1l>::call(Aja,L);
+                    LDivEqVU_Helper<algo2,xx,M1c,M1l>::call(Aja,L);
 
                     // Solve for v = L(j:M,j) U(j,j)
                     //A.get_col(j,j,M) -= 
                         //A.cSubMatrix(j,M,0,j) * A.get_col(j,0,j);
-                    MultMV_Helper<-4,xx,xx,true,-1,RT,M1s,M1cc,M1c>::call(
+                    MultMV_Helper<algo2,xx,xx,true,-1,RT,M1s,M1cc,M1c>::call(
                         Scaling<-1,RT>(),A.cSubMatrix(j,M,0,j),Aja,Ajb);
                 }
 
                 // Find the pivot element
                 int ip;
-                RT piv = InlineMaxAbsElement(Ajb,&ip);
+                RT piv = Ajb.maxAbsElement(&ip);
                 // ip is relative to j index, not absolute.
 
                 // Check for underflow:
@@ -366,10 +381,7 @@ namespace tmv {
                     ip += j;
                     TMVAssert(ip < int(A.colsize()));
                     TMVAssert(j < int(A.colsize()));
-                    //A.cSwapRows(ip,j);  // This does both Lkb and A'
-                    M1r Aip = A.get_row(ip);
-                    M1r Aj = A.get_row(j);
-                    InlineSwap(Aip,Aj);
+                    A.cSwapRows(ip,j);  // This does both Lkb and A'
                     P[j] = ip;
                     detp = -detp;
                 } else P[j] = j;
@@ -381,7 +393,7 @@ namespace tmv {
                 if (A.cref(j,j) != T(0)) {
                     //A.col(j,j+1,M) /= *Ujj;
                     M1c Ajc = A.get_col(j,j+1,M);
-                    InlineScale(Scaling<0,T>(RT(1)/A.cref(j,j)),Ajc);
+                    Scale(Scaling<0,T>(RT(1)/A.cref(j,j)),Ajc);
                 }
             }
             if (N > M) {
@@ -460,12 +472,10 @@ namespace tmv {
 
                 // Apply the permutation to the rest of the matrix
                 if (jk > 0) {
-                    //A2.cPermuteRows(P+jk,0,Nx);
-                    InlinePermuteRows(A2,P+jk,0,Nx);
+                    A2.cPermuteRows(P+jk,0,Nx);
                 }
                 if (jkpk < N) {
-                    //A1.cPermuteRows(P+jk,0,Nx);
-                    InlinePermuteRows(A1,P+jk,0,Nx);
+                    A1.cPermuteRows(P+jk,0,Nx);
 
                     // Solve for U01
                     //A01 /= A00.unitLowerTri();
@@ -498,12 +508,10 @@ namespace tmv {
 
                 // Apply the permutation to the rest of the matrix
                 if (jk > 0) {
-                    //A2.cPermuteRows(P+jk,0,Nx);
-                    InlinePermuteRows(A2,P+jk,0,Ny);
+                    A2.cPermuteRows(P+jk,0,Nx);
                 }
                 if (R < N) {
-                    //A1.cPermuteRows(P+jk,0,Nx);
-                    InlinePermuteRows(A1,P+jk,0,Ny);
+                    A1.cPermuteRows(P+jk,0,Nx);
 
                     // Solve for U01
                     //A01 /= A00.unitLowerTri();
@@ -538,54 +546,60 @@ namespace tmv {
             const int rx = IntTraits2<rs,cs>::min;
             const int algo2a = 
                 (rs==UNKNOWN || rs==1) ? 1 : 0;
+#if TMV_LU_RECURSE > 1
             const int algo2b = 
-                TMV_Q2 == 1 ? 0 :
                 (rs==UNKNOWN || rs==2) && (cs==UNKNOWN || cs>2) ? 2 : 0;
             const int algo2c = 
-                TMV_Q2 == 1 ? 0 :
                 (cs==UNKNOWN || cs==2) ? 3 : 0;
+#endif
+#if TMV_LU_RECURSE > 2
             const int algo2d = 
-                TMV_Q2 <= 2 ? 0 :
-                (rx != UNKNOWN && rx > TMV_Q2) ? 0 :
+                (rx != UNKNOWN && rx > TMV_LU_RECURSE) ? 0 :
                 11;
+#endif
 
             const int algo3 =  // The algorithm for R > 32
                 (rx == UNKNOWN || rx > 32) ? 27 : 0;
             const int algo4 =  // The algorithm for MultMM, LDivEqMU
                 rx == UNKNOWN ? -2 : rx > 32 ? -3 : 0;
-#if TMV_Q2 < 32
-            const int algo3b =  // The algorithm for R > Q2
-                (rx == UNKNOWN || rx > TMV_Q2) ? 27 : 0;
-            const int algo4b =  // The algorithm for MultMM, LDivEqMU
-                (rx == UNKNOWN || rx > TMV_Q2) ? -4 : 0;
+#if TMV_LU_RECURSE < 32
+            const int algo3b =  // The algorithm for R > LU_RECURSE
+                (rx == UNKNOWN || rx > TMV_LU_RECURSE) ? 27 : 0;
+            const int algo4b =  // The algorithm for R<32 MultMM, LDivEqMU
+#ifdef TMV_LU_INLINE_MM
+                rx == UNKNOWN ? -4 :
+#else
+                rx == UNKNOWN ? -402 :
+#endif
+                rx > TMV_LU_RECURSE ? -4 : 0;
 #endif
             typedef typename M1::colrange_type M1c;
             typedef typename M1c::rowrange_type M1s;
             typedef typename M1c::const_rowrange_type M1sc;
             typedef typename M1s::const_unit_lowertri_type M1l;
 
-            if (R > 32) { // For large R, make sure to use good MultMM algo
+            const int Nx = R > 16 ? ((((R-1)>>5)+1)<<4) : (R>>1);
+            // (If R > 16, round R/2 up to a multiple of 16.)
+            const int rsx = IntTraits<rx>::half_roundup;
+            const int rsy = IntTraits2<rs,rsx>::diff;
+            const int csy = IntTraits2<cs,rsx>::diff;
 
-                const int Nx = (((R-1)>>5)+1)<<4;
-                // (Round R/2 up to a multiple of 16.)
-                const int rsx = IntTraits<rx>::half_roundup;
-                const int rsy = IntTraits2<rs,rsx>::diff;
-                const int csy = IntTraits2<cs,rsx>::diff;
+            M1c A0 = A.cColRange(0,Nx);
+            M1s A00 = A0.cRowRange(0,Nx);
+            M1s A10 = A0.cRowRange(Nx,M);
+            M1c A1 = A.cColRange(Nx,N);
+            M1s A01 = A1.cRowRange(0,Nx);
+            M1s A11 = A1.cRowRange(Nx,M);
+            M1l L00 = A00.unitLowerTri();
 
-                M1c A0 = A.cColRange(0,Nx);
-                M1s A00 = A0.cRowRange(0,Nx);
-                M1s A10 = A0.cRowRange(Nx,M);
-                M1c A1 = A.cColRange(Nx,N);
-                M1s A01 = A1.cRowRange(0,Nx);
-                M1s A11 = A1.cRowRange(Nx,M);
-                M1l L00 = A00.unitLowerTri();
+            if (R > 32) { 
+                // For large R, make sure to use good MultMM algo
 
                 // Decompose left half into PLU
                 LUDecompose_Helper<algo3,cs,rsx,M1c>::call(A0,P,detp);
 
                 // Apply the permutation to the right half of the matrix
-                //A1.cPermuteRows(P,0,Nx);
-                InlinePermuteRows(A1,P,0,Nx);
+                A1.cPermuteRows(P,0,Nx);
 
                 // Solve for U01
                 //A01 /= A00.unitLowerTri();
@@ -601,32 +615,17 @@ namespace tmv {
                 for(int i=Nx;i<R;++i) P[i]+=Nx;
 
                 // Apply the new permutations to the left half
-                //A0.cPermuteRows(P,Nx,R);
-                InlinePermuteRows(A0,P,Nx,R);
+                A0.cPermuteRows(P,Nx,R);
 
-#if TMV_Q2 < 32
-            } else if (R > TMV_Q2) { // For small R, use simpler algo inline
-
-                const int Nx = R > 16 ? ((((R-1)>>5)+1)<<4) : (R>>1);
-                // (If R > 16, round R/2 up to a multiple of 16.)
-                const int rsx = IntTraits<rx>::half_roundup;
-                const int rsy = IntTraits2<rs,rsx>::diff;
-                const int csy = IntTraits2<cs,rsx>::diff;
-
-                M1c A0 = A.cColRange(0,Nx);
-                M1s A00 = A0.cRowRange(0,Nx);
-                M1s A10 = A0.cRowRange(Nx,M);
-                M1c A1 = A.cColRange(Nx,N);
-                M1s A01 = A1.cRowRange(0,Nx);
-                M1s A11 = A1.cRowRange(Nx,M);
-                M1l L00 = A00.unitLowerTri();
+#if TMV_LU_RECURSE < 32
+            } else if (R > TMV_LU_RECURSE) {
+                // For small R, use simpler inline algorithms
 
                 // Decompose left half into PLU
                 LUDecompose_Helper<algo3b,cs,rsx,M1c>::call(A0,P,detp);
 
                 // Apply the permutation to the right half of the matrix
-                //A1.cPermuteRows(P,0,Nx);
-                InlinePermuteRows(A1,P,0,Nx);
+                A1.cPermuteRows(P,0,Nx);
 
                 // Solve for U01
                 //A01 /= A00.unitLowerTri();
@@ -642,18 +641,20 @@ namespace tmv {
                 for(int i=Nx;i<R;++i) P[i]+=Nx;
 
                 // Apply the new permutations to the left half
-                //A0.cPermuteRows(P,Nx,R);
-                InlinePermuteRows(A0,P,Nx,R);
+                A0.cPermuteRows(P,Nx,R);
 #endif
-            }
-            else if (N == 1) 
-                LUDecompose_Helper<algo2a,cs,1,M1>::call(A,P,detp);
+            } else if (N == 1) 
+                LUDecompose_Helper<algo2a,cs,rs,M1>::call(A,P,detp);
+#if TMV_LU_RECURSE > 1
             else if (N == 2 && M > 2) 
-                LUDecompose_Helper<algo2b,cs,2,M1>::call(A,P,detp);
+                LUDecompose_Helper<algo2b,cs,rs,M1>::call(A,P,detp);
             else if (M == 2) 
-                LUDecompose_Helper<algo2c,2,rs,M1>::call(A,P,detp);
+                LUDecompose_Helper<algo2c,cs,rs,M1>::call(A,P,detp);
+#endif
+#if TMV_LU_RECURSE > 2
             else if (R > 2) 
                 LUDecompose_Helper<algo2d,cs,rs,M1>::call(A,P,detp);
+#endif
             else 
                 TMVAssert(N==0 || M==0 || M==1); // and thus nothing to do.
         }
@@ -671,8 +672,28 @@ namespace tmv {
             typedef typename M::value_type T;
             typedef typename MCopyHelper<T,Rec,cs,rs,false,false>::type Mcm;
             Mcm mcm = m;
-            LUDecompose_Helper<-1,cs,rs,Mcm>::call(mcm,P,detp);
+            LUDecompose_Helper<-2,cs,rs,Mcm>::call(mcm,P,detp);
             NoAliasCopy(mcm,m);
+        }
+    };
+
+    // algo 90: call InstLU_Decompose
+    template <int cs, int rs, class M>
+    struct LUDecompose_Helper<90,cs,rs,M>
+    {
+        static void call(M& m, int* P, int& detp)
+        { InstLU_Decompose(m.xView().cmView(),P,detp); }
+    };
+
+    // algo 97: Conjugate
+    template <int cs, int rs, class M>
+    struct LUDecompose_Helper<97,cs,rs,M>
+    {
+        static void call(M& m, int* P, int& detp)
+        {
+            typedef typename M::conjugate_type Mc;
+            Mc mc = m.conjugate();
+            LUDecompose_Helper<-2,cs,rs,Mc>::call(mc,P,detp);
         }
     };
 
@@ -682,30 +703,31 @@ namespace tmv {
     {
         static void call(M1& m, int* P, int& detp)
         {
-#if 0
-            const int algo = 27;
-#else
             const int algo = 
                 cs == 0 || rs == 0 || cs == 1 ? 0 :
+                TMV_OPT == 0 ? 11 :
                 rs == 1 ? 1 : 
                 cs == 2 ? 3 :
                 rs == 2 ? 2 :
                 27;
-#endif
 #ifdef PRINTALGO_LU
+            typedef typename M1::value_type T;
             std::cout<<"Inline LUDecompose: \n";
             std::cout<<"m = "<<TMV_Text(m)<<std::endl;
             std::cout<<"cs = "<<cs<<"  rs = "<<rs<<std::endl;
             std::cout<<"sizes = "<<m.colsize()<<"  "<<m.rowsize()<<std::endl;
             std::cout<<"algo = "<<algo<<std::endl;
             //std::cout<<"m = "<<m<<std::endl;
-            //std::cout<<"detp = "<<detp<<std::endl;
 #endif
             LUDecompose_Helper<algo,cs,rs,M1>::call(m,P,detp);
 #ifdef PRINTALGO_LU
             //std::cout<<"m => "<<m<<std::endl;
-            //std::cout<<"P => "<<ConstVectorView<int>(P,m.rowsize(),1)<<std::endl;
-            //std::cout<<"detp -> "<<detp<<std::endl;
+            //std::cout<<"L = "<<m.unitLowerTri()<<std::endl;
+            //std::cout<<"U = "<<m.upperTri()<<std::endl;
+            //Matrix<T> lu = m.unitLowerTri() * m.upperTri();
+            //std::cout<<"L*U = "<<lu<<std::endl;
+            //lu.reversePermuteRows(P);
+            //std::cout<<"P*L*U = "<<lu<<std::endl;
 #endif
         }
     };
@@ -731,29 +753,9 @@ namespace tmv {
         }
     };
 
-    // algo 97: Conjugate
+    // algo -2: Check for inst
     template <int cs, int rs, class M>
-    struct LUDecompose_Helper<97,cs,rs,M>
-    {
-        static void call(M& m, int* P, int& detp)
-        {
-            typedef typename M::conjugate_type Mc;
-            Mc mc = m.conjugate();
-            LUDecompose_Helper<-1,cs,rs,Mc>::call(mc,P,detp);
-        }
-    };
-
-    // algo 98: call InstLU_Decompose
-    template <int cs, int rs, class M>
-    struct LUDecompose_Helper<98,cs,rs,M>
-    {
-        static void call(M& m, int* P, int& detp)
-        { InstLU_Decompose(m.xView().cmView(),P,detp); }
-    };
-
-    // algo -1: Check for inst
-    template <int cs, int rs, class M>
-    struct LUDecompose_Helper<-1,cs,rs,M>
+    struct LUDecompose_Helper<-2,cs,rs,M>
     {
         static void call(M& m, int* P, int& detp)
         {
@@ -765,37 +767,45 @@ namespace tmv {
             const int algo = 
                 cs == 0 || rs == 0 || cs == 1 ? 0 :
                 M::_conj ? 97 :
-                inst ? (M::_colmajor ? 98 : 81) :
+                inst ? (M::_colmajor ? 90 : 81) :
                 -3;
             LUDecompose_Helper<algo,cs,rs,M>::call(m,P,detp);
         }
     };
 
-    template <class M> 
-    static void InlineLU_Decompose(
+    template <int cs, int rs, class M>
+    struct LUDecompose_Helper<-1,cs,rs,M>
+    {
+        static void call(M& m, int* P, int& detp)
+        { LUDecompose_Helper<-2,cs,rs,M>::call(m,P,detp); }
+    };
+
+    template <class M>
+    static inline void InlineLU_Decompose(
         BaseMatrix_Rec_Mutable<M>& m, int* P, int& detp)
     {
         const int cs = M::_colsize;
         const int rs = M::_rowsize;
         typedef typename M::cview_type Mv;
-        Mv mv = m.cView();
+        TMV_MAYBE_REF(M,Mv) mv = m.cView();
         LUDecompose_Helper<-3,cs,rs,Mv>::call(mv,P,detp);
     }
 
-    template <class M> 
-    static void LU_Decompose(
+    template <class M>
+    static inline void LU_Decompose(
         BaseMatrix_Rec_Mutable<M>& m, int* P, int& detp)
     {
         const int cs = M::_colsize;
         const int rs = M::_rowsize;
         typedef typename M::cview_type Mv;
-        Mv mv = m.cView();
-        LUDecompose_Helper<-1,cs,rs,Mv>::call(mv,P,detp);
+        TMV_MAYBE_REF(M,Mv) mv = m.cView();
+        LUDecompose_Helper<-2,cs,rs,Mv>::call(mv,P,detp);
     }
 
     // This function is a friend of Permutation class.
     template <class M>
-    static void LU_Decompose(BaseMatrix_Rec_Mutable<M>& m, Permutation& P)
+    static inline void LU_Decompose(
+        BaseMatrix_Rec_Mutable<M>& m, Permutation& P)
     {
         TMVAssert(P.size() == m.colsize());
         P.allocateMem();
@@ -805,20 +815,20 @@ namespace tmv {
 
     // Allow views as an argument by value (for convenience)
     template <class T, int Si, int Sj, bool C, IndexStyle I>
-    static void LU_Decompose(MatrixView<T,Si,Sj,C,I> m, Permutation& P)
-    { 
+    static inline void LU_Decompose(MatrixView<T,Si,Sj,C,I> m, Permutation& P)
+    {
         typedef MatrixView<T,Si,Sj,C,I> M;
         LU_Decompose(static_cast<BaseMatrix_Rec_Mutable<M>&>(m),P); 
     }
     template <class T, int M, int N, int Si, int Sj, bool C, IndexStyle I>
-    static void LU_Decompose(
+    static inline void LU_Decompose(
         SmallMatrixView<T,M,N,Si,Sj,C,I> m, Permutation& P)
-    { 
+    {
         typedef SmallMatrixView<T,M,N,Si,Sj,C,I> MM;
         LU_Decompose(static_cast<BaseMatrix_Rec_Mutable<MM>&>(m),P); 
     }
 
-#undef TMV_Q2
+#undef TMV_LU_RECURSE
 #undef TMV_LU_BLOCKSIZE
 
 } // namespace tmv

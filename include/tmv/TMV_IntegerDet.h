@@ -44,7 +44,7 @@ namespace tmv {
 
     // This is a helper class that defines different operations for 
     // int and complex<int>.
-    template <class T> 
+    template <class T>
     struct Bareiss_Helper
     {
         typedef double double_type;
@@ -63,7 +63,7 @@ namespace tmv {
         { return TMV_ABS2(x) < 0.1; }
     };
 
-    template <class T> 
+    template <class T>
     struct Bareiss_Helper<std::complex<T> >
     {
         typedef std::complex<T> CT;
@@ -74,7 +74,7 @@ namespace tmv {
         { return double_type(x.real(),x.imag()); }
 
         static CT convert(longdouble_type x) 
-        { 
+        {
             return CT(Bareiss_Helper<T>::convert(x.real()),
                       Bareiss_Helper<T>::convert(x.imag()));
         }
@@ -89,9 +89,9 @@ namespace tmv {
     template <int algo, class M>
     struct IntegerDet_Helper;
 
-    // algo 1: Bareiss 1x1 algorithm
+    // algo 11: Bareiss 1x1 algorithm
     template <class M>
-    struct IntegerDet_Helper<1,M>
+    struct IntegerDet_Helper<11,M>
     {
         // This algorithm is based on a paper by Erwin H. Bareiss:
         // Sylvester's Identity and Multistep Integer-Preserving
@@ -240,6 +240,15 @@ namespace tmv {
     // TODO: There is also a 2x2 (and higher nxn) Bareiss algorithm. 
     // Should check to see when this is faster.  
 
+    // algo 90: Call inst
+    template <class M>
+    struct IntegerDet_Helper<90,M>
+    {
+        typedef typename M::value_type T;
+        static T call(const M& m)
+        { return InstIntegerDet(m.xView()); }
+    };
+
     // algo 97: Conjugate
     template <class M>
     struct IntegerDet_Helper<97,M>
@@ -253,13 +262,16 @@ namespace tmv {
         }
     };
 
-    // algo 98: Call inst
+    // algo -3: Determine which algorithm to use
     template <class M>
-    struct IntegerDet_Helper<98,M>
+    struct IntegerDet_Helper<-3,M>
     {
         typedef typename M::value_type T;
         static T call(const M& m)
-        { return InstIntegerDet(m.xView()); }
+        {
+            const int algo = 11;
+            return IntegerDet_Helper<algo,M>::call(m);
+        }
     };
 
     // algo -2: Check for inst
@@ -275,33 +287,43 @@ namespace tmv {
                 Traits<T>::isinst;
             const int algo =
                 M::_conj ? 97 :
-                inst ? 98 :
-                1;
+                inst ? 90 :
+                -3;
             return IntegerDet_Helper<algo,M>::call(m);
         }
     };
 
     template <class M>
-    static typename M::value_type IntegerDet(const BaseMatrix_Rec<M>& m)
+    struct IntegerDet_Helper<-1,M>
+    {
+        typedef typename M::value_type T;
+        static T call(const M& m)
+        { return IntegerDet_Helper<-2,M>::call(m); }
+    };
+
+    template <class M>
+    static inline typename M::value_type IntegerDet(
+        const BaseMatrix_Rec<M>& m)
     {
         typedef typename M::value_type T;
         TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same));
         TMVAssert(m.colsize() == m.rowsize());
         TMVStaticAssert(Traits<T>::isinteger);
         typedef typename M::const_cview_type Mv;
-        Mv mv = m.cView();
+        TMV_MAYBE_CREF(M,Mv) mv = m.cView();
         return IntegerDet_Helper<-2,Mv>::call(mv);
     }
 
     template <class M>
-    static typename M::value_type InlineIntegerDet(const BaseMatrix_Rec<M>& m)
+    static inline typename M::value_type InlineIntegerDet(
+        const BaseMatrix_Rec<M>& m)
     {
         typedef typename M::value_type T;
         TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same));
         TMVAssert(m.colsize() == m.rowsize());
         TMVStaticAssert(Traits<T>::isinteger);
         typedef typename M::const_cview_type Mv;
-        Mv mv = m.cView();
+        TMV_MAYBE_CREF(M,Mv) mv = m.cView();
         return IntegerDet_Helper<1,Mv>::call(mv);
     }
 

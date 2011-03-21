@@ -1,5 +1,4 @@
 
-
 #include "TMV_Test.h"
 #include "TMV_Test_3.h"
 #include "TMV.h"
@@ -44,6 +43,16 @@ static void TestSmallSquareDiv_Basic()
     T kappa = Norm(m) * Norm(minv);
     FT eps = EPS * kappa;
 
+    tmv::SmallMatrix<T,N,N> id = m*minv;
+    if (showacc) {
+        std::cout<<"minv = "<<minv<<std::endl;
+        std::cout<<"m*minv = "<<id<<std::endl;
+        std::cout<<"minv*m = "<<minv*m<<std::endl;
+        std::cout<<"Norm(id-I) = "<<Norm(id-T(1))<<std::endl;
+        std::cout<<"eps = "<<eps<<std::endl;
+    }
+    Assert(Norm(id-T(1)) < eps,"Square Inverse");
+
     tmv::SmallVector<T,N> x = b/m;
     tmv::SmallVector<T,N> b2 = m*x;
     if (showacc) {
@@ -65,16 +74,6 @@ static void TestSmallSquareDiv_Basic()
         std::cout<<"eps*Norm(b) = "<<eps*Norm(b)<<std::endl;
     }
     Assert(Norm(b2-b) < eps*Norm(b),"Square b%m");
-
-    tmv::SmallMatrix<T,N,N> id = m*minv;
-    if (showacc) {
-        std::cout<<"minv = "<<minv<<std::endl;
-        std::cout<<"m*minv = "<<id<<std::endl;
-        std::cout<<"minv*m = "<<minv*m<<std::endl;
-        std::cout<<"Norm(id-I) = "<<Norm(id-T(1))<<std::endl;
-        std::cout<<"eps = "<<eps<<std::endl;
-    }
-    Assert(Norm(id-T(1)) < eps,"Square Inverse");
 
     tmv::SmallMatrix<T,N,N> mtm = m.adjoint() * m;
     tmv::SmallMatrix<T,N,N> mata;

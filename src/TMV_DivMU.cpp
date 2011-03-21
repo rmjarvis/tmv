@@ -35,10 +35,7 @@
 #include "TMV_Blas.h"
 #include "tmv/TMV_DivMU.h"
 #include "tmv/TMV_TriMatrix.h"
-#include "tmv/TMV_MultXM.h"
-#include "tmv/TMV_MultUU.h"
-#include "tmv/TMV_MultUM.h"
-#include "tmv/TMV_MultMM.h"
+#include "tmv/TMV_SimpleMatrix.h"
 
 namespace tmv {
 
@@ -255,20 +252,23 @@ namespace tmv {
     template <class T1, class M2>
     static void DoLDivEq(MatrixView<T1> m1, const M2& m2)
     {
+        typedef typename M2::value_type T2;
 #ifdef BLAS
-        const typename M2::value_type t2(0);
+        const T2 t2(0);
         if ((m1.isrm() && m1.stepi()>0) || (m1.iscm() && m1.stepj()>0) ) {
             if ((m2.isrm() && m2.stepi()>0) || (m2.iscm() && m2.stepj()>0)) {
                 BlasLDivEq(m1,m2,t2);
             } else {
-                if (m2.isunit()) 
-                    BlasLDivEq(
-                        m1,m2.copy().viewAsUnitDiag().constView().xdView(),t2);
-                else 
-                    BlasLDivEq(m1,m2.copy().constView().xdView(),t2);
+                SimpleMatrix<T2,ColMajor> m2c(m2.size(),m2.size());
+                typedef typename TypeSelect<M2::_upper,
+                        UpperTriMatrixView<T2,UnknownDiag,1>,
+                        LowerTriMatrixView<T2,UnknownDiag,1> >::type M2t;
+                M2t m2ct = Maybe<M2::_upper>::uppertri(m2c,m2.dt());
+                InstCopy(m2,m2ct.xdView());
+                NonBlasLDivEq(m1,m2ct.constView());
             }
         } else {
-            Matrix<T1,ColMajor> m1c(m1);
+            SimpleMatrix<T1,ColMajor> m1c(m1);
             DoLDivEq(m1c.xView(),m2);
             InstCopy(m1c.constView().xView(),m1);
         }
@@ -277,14 +277,16 @@ namespace tmv {
             if (m2.iscm() || m2.isrm()) {
                 NonBlasLDivEq(m1,m2);
             } else {
-                if (m2.isunit()) 
-                    NonBlasLDivEq(
-                        m1,m2.copy().viewAsUnitDiag().constView().xdView());
-                else 
-                    NonBlasLDivEq(m1,m2.copy().constView().xdView());
+                SimpleMatrix<T2,ColMajor> m2c(m2.size(),m2.size());
+                typedef typename TypeSelect<M2::_upper,
+                        UpperTriMatrixView<T2,UnknownDiag,1>,
+                        LowerTriMatrixView<T2,UnknownDiag,1> >::type M2t;
+                M2t m2ct = Maybe<M2::_upper>::uppertri(m2c,m2.dt());
+                InstCopy(m2,m2ct.xdView());
+                NonBlasLDivEq(m1,m2ct.constView());
             }
         } else {
-            Matrix<T1,ColMajor> m1c(m1);
+            SimpleMatrix<T1,ColMajor> m1c(m1);
             DoLDivEq(m1c.xView(),m2);
             InstCopy(m1c.constView().xView(),m1);
         }

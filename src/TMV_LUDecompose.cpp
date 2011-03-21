@@ -34,16 +34,17 @@
 #include "TMV_Blas.h"
 #include "tmv/TMV_LUDecompose.h"
 #include "tmv/TMV_Matrix.h"
+#include "tmv/TMV_SimpleMatrix.h"
 #include "tmv/TMV_CopyV.h"
 
 namespace tmv {
 
 #ifdef ALAP
     template <class T> 
-    static void LapLU_Decompose(MatrixView<T,1>& A, int* P, int& signdet)
+    static inline void LapLU_Decompose(MatrixView<T,1>& A, int* P, int& signdet)
     { InlineLU_Decompose(A,P,signdet); }
 #ifdef TMV_INST_DOUBLE
-    void LapLU_Decompose(MatrixView<double,1>& A, int* P, int& signdet)
+    static void LapLU_Decompose(MatrixView<double,1>& A, int* P, int& signdet)
     {
         TMVAssert(A.iscm());
         TMVAssert(A.ct()==NonConj);
@@ -52,8 +53,9 @@ namespace tmv {
         int n = A.rowsize();
         int lda = A.stepj();
         int* lap_p = new int[n];
-        LAPNAME(dgetrf) (LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
-                         LAPP(lap_p) LAPINFO);
+        LAPNAME(dgetrf) (
+            LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
+            LAPP(lap_p) LAPINFO);
         LAP_Results("dgetrf");
         const int M = A.colsize();
         for(int i=0;i<M;i++) {
@@ -62,7 +64,7 @@ namespace tmv {
         }
         delete [] lap_p;
     }
-    void LapLU_Decompose(
+    static void LapLU_Decompose(
         MatrixView<std::complex<double>,1>& A, int* P, int& signdet)
     {
         TMVAssert(A.iscm());
@@ -72,8 +74,9 @@ namespace tmv {
         int n = A.rowsize();
         int lda = A.stepj();
         int* lap_p = new int[n];
-        LAPNAME(zgetrf) (LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
-                         LAPP(lap_p) LAPINFO);
+        LAPNAME(zgetrf) (
+            LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
+            LAPP(lap_p) LAPINFO);
         LAP_Results("zgetrf");
         const int M = A.colsize();
         for(int i=0;i<M;i++) {
@@ -89,14 +92,15 @@ namespace tmv {
     //   OMP abort: Unable to set worker thread stack size to 2098176 bytes
     //   Try reducing KMP_STACKSIZE or increasing the shell stack limit.
     // So I'm cutting it out for MKL compilations
-    void LapLU_Decompose(MatrixView<float,1>& A, int* P, int& signdet)
+    static void LapLU_Decompose(MatrixView<float,1>& A, int* P, int& signdet)
     {
         int m = A.colsize();
         int n = A.rowsize();
         int lda = A.stepj();
         int* lap_p = new int[n];
-        LAPNAME(sgetrf) (LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
-                         LAPP(lap_p) LAPINFO);
+        LAPNAME(sgetrf) (
+            LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
+            LAPP(lap_p) LAPINFO);
         LAP_Results("sgetrf");
         const int M = A.colsize();
         for(int i=0;i<M;i++) {
@@ -105,15 +109,16 @@ namespace tmv {
         }
         delete [] lap_p;
     }
-    void LapLU_Decompose(
+    static void LapLU_Decompose(
         MatrixView<std::complex<float>,1>& A, int* P, int& signdet)
     {
         int m = A.colsize();
         int n = A.rowsize();
         int lda = A.stepj();
         int* lap_p = new int[n];
-        LAPNAME(cgetrf) (LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
-                         LAPP(lap_p) LAPINFO);
+        LAPNAME(cgetrf) (
+            LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
+            LAPP(lap_p) LAPINFO);
         LAP_Results("cgetrf");
         const int M = A.colsize();
         for(int i=0;i<M;i++) {
@@ -129,20 +134,24 @@ namespace tmv {
     template <class T> 
     void InstLU_Decompose(MatrixView<T,1> A, int* P, int& signdet)
     {
+        //std::cout<<"Start LUDecompose:\n";
+        //std::cout<<"A = "<<A<<std::endl;
+        //Matrix<T> A0 = A;
         if (A.colsize() > 0 && A.rowsize() > 0) {
-            if (A.iscm()) {
-                MatrixView<T,1> Acm = A.cmView();
 #ifdef ALAP
-                LapLU_Decompose(Acm,P,signdet);
+            LapLU_Decompose(A,P,signdet);
 #else
-                InlineLU_Decompose(Acm,P,signdet);
+            InlineLU_Decompose(A,P,signdet);
 #endif
-            } else {
-                Matrix<T,ColMajor> Acm = A;
-                InstLU_Decompose(Acm.view(),P,signdet);
-                InstCopy(Acm.xView().constView(),A.xView());
-            }
         }
+        //std::cout<<"A -> "<<A<<std::endl;
+        //Matrix<T> lu = A.unitLowerTri() * A.upperTri();
+        //std::cout<<"LU = "<<lu<<std::endl;
+        //lu.reversePermuteRows(P);
+        //std::cout<<"PLU = "<<lu<<std::endl;
+        //std::cout<<"diff = ";
+        //(lu-A0).write(std::cout,1.e-8);
+        //std::cout<<"\nNorm(diff) = "<<Norm(lu-A0)<<std::endl;
     }
 
 #define InstFile "TMV_LUDecompose.inst"

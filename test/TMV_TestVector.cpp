@@ -408,8 +408,8 @@ static void TestVectorComplex()
     FT eps = EPS;
     if (!std::numeric_limits<T>::is_integer) eps *= Norm(ca) * Norm(cb);
     Assert(Equal2(ca*cb,prod,eps),"CInner Product");
-    Assert(Equal2(NormSq(ca+cb),normsqsum,EPS*normsqsum),"CVector Sum");
-    Assert(Equal2(NormSq(ca-cb),normsqdiff,EPS*normsqdiff),"CVector Diff");
+    Assert(Equal2(NormSq(ca+cb),normsqsum,EPS*N*normsqsum),"CVector Sum");
+    Assert(Equal2(NormSq(ca-cb),normsqdiff,EPS*N*normsqdiff),"CVector Diff");
 
     const int NN=20;
     tmv::Vector<std::complex<T> > w(NN);

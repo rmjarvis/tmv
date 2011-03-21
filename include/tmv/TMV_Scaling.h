@@ -42,7 +42,7 @@ namespace tmv {
     // The ix is a flag integer that can be 1, -1 or 0.
     // When ix is 1 or -1 then x is 1 or -1 and isn't stored.
     // When ix is 0, then x is stored and acts normally.
-    template <int ix, class T> 
+    template <int ix, class T>
     struct Scaling;
 
     template <class T>
@@ -82,11 +82,11 @@ namespace tmv {
         operator T() const { return T(-1); }
     };
 
-    template <int ix, class T> 
-    static Scaling<ix,T> TMV_CONJ(const Scaling<ix,T>& x)
+    template <int ix, class T>
+    static inline Scaling<ix,T> TMV_CONJ(const Scaling<ix,T>& x)
     { return x; }
-    template <class T> 
-    static Scaling<0,T> TMV_CONJ(const Scaling<0,T>& x)
+    template <class T>
+    static inline Scaling<0,T> TMV_CONJ(const Scaling<0,T>& x)
     { return Scaling<0,T>(TMV_CONJ(x.x)); }
 
 #define RT typename Traits<T>::real_type
@@ -95,152 +95,152 @@ namespace tmv {
 
     // Define how a Scaling object multiplies a regular number:
     template <class T>
-    static RT& operator*=(RT& y, const Scaling<0,T>& x)
+    static inline RT& operator*=(RT& y, const Scaling<0,T>& x)
     { y *= x.x; return y; }
     template <class T>
-    static RT& operator*=(RT& y, const Scaling<1,T>& x)
+    static inline RT& operator*=(RT& y, const Scaling<1,T>& x)
     { return y; }
     template <class T>
-    static RT& operator*=(RT& y, const Scaling<-1,T>& x)
+    static inline RT& operator*=(RT& y, const Scaling<-1,T>& x)
     { y = -y; return y; }
     template <class T>
-    static RT& operator/=(RT& y, const Scaling<0,T>& x)
+    static inline RT& operator/=(RT& y, const Scaling<0,T>& x)
     { y /= x.x; return y; }
     template <class T>
-    static RT& operator/=(RT& y, const Scaling<1,T>& x)
+    static inline RT& operator/=(RT& y, const Scaling<1,T>& x)
     { return y; }
     template <class T>
-    static RT& operator/=(RT& y, const Scaling<-1,T>& x)
+    static inline RT& operator/=(RT& y, const Scaling<-1,T>& x)
     { y = -y; return y; }
 
     template <class T>
-    static CT& operator*=(CT& y, const Scaling<0,T>& x)
+    static inline CT& operator*=(CT& y, const Scaling<0,T>& x)
     { y *= x.x; return y; }
     template <class T>
-    static CT& operator*=(CT& y, const Scaling<1,T>& x)
+    static inline CT& operator*=(CT& y, const Scaling<1,T>& x)
     { return y; }
     template <class T>
-    static CT& operator*=(CT& y, const Scaling<-1,T>& x)
+    static inline CT& operator*=(CT& y, const Scaling<-1,T>& x)
     { y = -y; return y; }
     template <class T>
-    static CT& operator/=(CT& y, const Scaling<0,T>& x)
+    static inline CT& operator/=(CT& y, const Scaling<0,T>& x)
     { y /= x.x; return y; }
     template <class T>
-    static CT& operator/=(CT& y, const Scaling<1,T>& x)
+    static inline CT& operator/=(CT& y, const Scaling<1,T>& x)
     { return y; }
     template <class T>
-    static CT& operator/=(CT& y, const Scaling<-1,T>& x)
+    static inline CT& operator/=(CT& y, const Scaling<-1,T>& x)
     { y = -y; return y; }
 
     template <class T>
-    static CCT& operator*=(CCT& y, const Scaling<0,T>& x)
+    static inline CCT& operator*=(CCT& y, const Scaling<0,T>& x)
     { y *= x.x; return y; }
     template <class T>
-    static CCT& operator*=(CCT& y, const Scaling<1,T>& x)
+    static inline CCT& operator*=(CCT& y, const Scaling<1,T>& x)
     { return y; }
     template <class T>
-    static CCT& operator*=(CCT& y, const Scaling<-1,T>& x)
+    static inline CCT& operator*=(CCT& y, const Scaling<-1,T>& x)
     { y = -y; return y; }
     template <class T>
-    static CCT& operator/=(CCT& y, const Scaling<0,T>& x)
+    static inline CCT& operator/=(CCT& y, const Scaling<0,T>& x)
     { y /= x.x; return y; }
     template <class T>
-    static CCT& operator/=(CCT& y, const Scaling<1,T>& x)
+    static inline CCT& operator/=(CCT& y, const Scaling<1,T>& x)
     { return y; }
     template <class T>
-    static CCT& operator/=(CCT& y, const Scaling<-1,T>& x)
+    static inline CCT& operator/=(CCT& y, const Scaling<-1,T>& x)
     { y = -y; return y; }
 
 
     template <class T>
-    static T operator*(const Scaling<0,T>& x, const RT& y)
+    static inline T operator*(const Scaling<0,T>& x, const RT& y)
     { return x.x * y; }
     template <class T>
-    static RT operator*(const Scaling<1,T>& x, const RT& y)
+    static inline RT operator*(const Scaling<1,T>& x, const RT& y)
     { return y; }
     template <class T>
-    static RT operator*(const Scaling<-1,T>& x, const RT& y)
+    static inline RT operator*(const Scaling<-1,T>& x, const RT& y)
     { return -y; }
 
     template <class T>
-    static T operator/(const RT& y, const Scaling<0,T>& x)
+    static inline T operator/(const RT& y, const Scaling<0,T>& x)
     { return y / x.x; }
     template <class T>
-    static RT operator/(const RT& y, const Scaling<1,T>& x)
+    static inline RT operator/(const RT& y, const Scaling<1,T>& x)
     { return y; }
     template <class T>
-    static RT operator/(const RT& y, const Scaling<-1,T>& x)
+    static inline RT operator/(const RT& y, const Scaling<-1,T>& x)
     { return -y; }
 
     template <class T>
-    static CT operator*(const Scaling<0,T>& x, const CT& y)
+    static inline CT operator*(const Scaling<0,T>& x, const CT& y)
     { return ZProd<false,false>::prod(x.x,y); }
     template <class T>
-    static CT operator*(const Scaling<1,T>& x, const CT& y)
+    static inline CT operator*(const Scaling<1,T>& x, const CT& y)
     { return y; }
     template <class T>
-    static CT operator*(const Scaling<-1,T>& x, const CT& y)
+    static inline CT operator*(const Scaling<-1,T>& x, const CT& y)
     { return -y; }
 
     template <class T>
-    static CT operator/(const CT& y, const Scaling<0,T>& x)
+    static inline CT operator/(const CT& y, const Scaling<0,T>& x)
     { return y / x.x; }
     template <class T>
-    static CT operator/(const CT& y, const Scaling<1,T>& x)
+    static inline CT operator/(const CT& y, const Scaling<1,T>& x)
     { return y; }
     template <class T>
-    static CT operator/(const CT& y, const Scaling<-1,T>& x)
+    static inline CT operator/(const CT& y, const Scaling<-1,T>& x)
     { return -y; }
 
     template <class T>
-    static CT operator*(const Scaling<0,T>& x, const CCT& y)
+    static inline CT operator*(const Scaling<0,T>& x, const CCT& y)
     { return x * CT(y); }
     template <class T>
-    static CT operator*(const Scaling<1,T>& x, const CCT& y)
+    static inline CT operator*(const Scaling<1,T>& x, const CCT& y)
     { return CT(y); }
     template <class T>
-    static CT operator*(const Scaling<-1,T>& x, const CCT& y)
+    static inline CT operator*(const Scaling<-1,T>& x, const CCT& y)
     { return -CT(y); }
 
     template <class T>
-    static CT operator/(const CCT& y, const Scaling<0,T>& x)
+    static inline CT operator/(const CCT& y, const Scaling<0,T>& x)
     { return CT(y) / x.x; }
     template <class T>
-    static CT operator/(const CCT& y, const Scaling<1,T>& x)
+    static inline CT operator/(const CCT& y, const Scaling<1,T>& x)
     { return CT(y); }
     template <class T>
-    static CT operator/(const CCT& y, const Scaling<-1,T>& x)
+    static inline CT operator/(const CCT& y, const Scaling<-1,T>& x)
     { return -CT(y); }
 
     // Other * and / remap into the above operations:
     template <int ix, class T>
-    static RT operator*(const RT& y, const Scaling<ix,T>& x)
+    static inline RT operator*(const RT& y, const Scaling<ix,T>& x)
     { return x * y; }
     template <class T>
-    static T operator*(const RT& y, const Scaling<0,T>& x)
+    static inline T operator*(const RT& y, const Scaling<0,T>& x)
     { return x * y; }
     template <class T>
-    static T operator/(const Scaling<0,T>& x, const RT& y)
+    static inline T operator/(const Scaling<0,T>& x, const RT& y)
     { return T(x) / y; }
     template <class T>
-    static RT operator/(const Scaling<1,T>& x, const RT& y)
+    static inline RT operator/(const Scaling<1,T>& x, const RT& y)
     { return RT(1) / y; }
     template <class T>
-    static RT operator/(const Scaling<-1,T>& x, const RT& y)
+    static inline RT operator/(const Scaling<-1,T>& x, const RT& y)
     { return RT(-1) / y; }
 
     template <int ix, class T>
-    static CT operator*(const CT& y, const Scaling<ix,T>& x)
+    static inline CT operator*(const CT& y, const Scaling<ix,T>& x)
     { return x * y; }
     template <int ix, class T>
-    static CT operator/(const Scaling<ix,T>& x, const CT& y)
+    static inline CT operator/(const Scaling<ix,T>& x, const CT& y)
     { return T(x) / y; }
 
     template <int ix, class T>
-    static CT operator*(const CCT& y, const Scaling<ix,T>& x)
+    static inline CT operator*(const CCT& y, const Scaling<ix,T>& x)
     { return x * CT(y); }
     template <int ix, class T>
-    static CT operator/(const Scaling<ix,T>& x, const CCT& y)
+    static inline CT operator/(const Scaling<ix,T>& x, const CCT& y)
     { return T(x) / CT(y); }
 
 #undef RT
@@ -248,7 +248,7 @@ namespace tmv {
 #undef CCT
 
     template <int ix, class T>
-    static Scaling<-ix,T> operator-(const Scaling<ix,T>& x)
+    static inline Scaling<-ix,T> operator-(const Scaling<ix,T>& x)
     { return Scaling<-ix,T>(-T(x)); }
 
     // These don't work.  Get messed up with x * m that we have
@@ -257,173 +257,173 @@ namespace tmv {
 #if 0
     // Different base types:
     template <class T1, int ix, class T2>
-    static T1& operator*=(T1& y, const Scaling<ix,T2>& x)
+    static inline T1& operator*=(T1& y, const Scaling<ix,T2>& x)
     { y *= T2(x); return y; }
     template <class T1, int ix, class T2>
-    static T1& operator/=(T1& y, const Scaling<ix,T2>& x)
+    static inline T1& operator/=(T1& y, const Scaling<ix,T2>& x)
     { y /= T2(x); return y; }
     template <class T1, class T2>
-    static T1& operator*=(T1& y, const Scaling<1,T2>& )
+    static inline T1& operator*=(T1& y, const Scaling<1,T2>& )
     { return y; }
     template <class T1, class T2>
-    static T1& operator/=(T1& y, const Scaling<1,T2>& )
+    static inline T1& operator/=(T1& y, const Scaling<1,T2>& )
     { return y; }
     template <class T1, class T2>
-    static T1& operator*=(T1& y, const Scaling<-1,T2>& )
+    static inline T1& operator*=(T1& y, const Scaling<-1,T2>& )
     { y *= T1(-1); return y; }
     template <class T1, class T2>
-    static T1& operator/=(T1& y, const Scaling<-1,T2>& )
+    static inline T1& operator/=(T1& y, const Scaling<-1,T2>& )
     { y *= T1(-1); return y; }
 
     template <int ix, class T1, class T2>
-    static typename Traits2<T1,T2>::type operator*(
+    static inline typename Traits2<T1,T2>::type operator*(
         const Scaling<ix,T1>& x, const T2& y)
     { return T1(x) * y; }
     template <int ix, class T1, class T2>
-    static typename Traits2<T1,T2>::type operator/(
+    static inline typename Traits2<T1,T2>::type operator/(
         const Scaling<ix,T1>& x, const T2& y)
     { return T1(x) / y; }
     template <class T1, class T2>
-    static typename Traits2<T1,T2>::type operator*(
+    static inline typename Traits2<T1,T2>::type operator*(
         const Scaling<1,T1>& , const T2& y)
     { return y; }
     template <class T1, class T2>
-    static typename Traits2<T1,T2>::type operator*(
+    static inline typename Traits2<T1,T2>::type operator*(
         const Scaling<-1,T1>& , const T2& y)
     { return -y; }
 
     template <class T1, int ix, class T2>
-    static typename Traits2<T1,T2>::type operator*(
+    static inline typename Traits2<T1,T2>::type operator*(
         const T1& x, const Scaling<ix,T2>& y)
     { return x * T2(y); }
     template <class T1, int ix, class T2>
-    static typename Traits2<T1,T2>::type operator/(
+    static inline typename Traits2<T1,T2>::type operator/(
         const T1& x, const Scaling<ix,T2>& y)
     { return x / T2(y); }
     template <class T1, class T2>
-    static typename Traits2<T1,T2>::type operator*(
+    static inline typename Traits2<T1,T2>::type operator*(
         const T1& x, const Scaling<1,T2>& )
     { return x; }
     template <class T1, class T2>
-    static typename Traits2<T1,T2>::type operator/(
+    static inline typename Traits2<T1,T2>::type operator/(
         const T1& x, const Scaling<1,T2>& )
     { return x; }
     template <class T1, class T2>
-    static typename Traits2<T1,T2>::type operator*(
+    static inline typename Traits2<T1,T2>::type operator*(
         const T1& x, const Scaling<-1,T2>& )
     { return -x; }
     template <class T1, class T2>
-    static typename Traits2<T1,T2>::type operator/(
+    static inline typename Traits2<T1,T2>::type operator/(
         const T1& x, const Scaling<-1,T2>& )
     { return -x; }
 #endif
 
     // Scaling * Scaling:
     template <class T1, class T2>
-    static typename Traits2<T1,T2>::type operator*(
+    static inline typename Traits2<T1,T2>::type operator*(
         const Scaling<0,T1>& x, const Scaling<0,T2>& y)
     { return ZProd<false,false>::prod(x.x,y.x); }
     template <class T1, class T2>
-    static T2 operator*(const Scaling<1,T1>& x, const Scaling<0,T2>& y)
+    static inline T2 operator*(const Scaling<1,T1>& x, const Scaling<0,T2>& y)
     { return y.x; }
     template <class T1, class T2>
-    static T2 operator*(const Scaling<-1,T1>& x, const Scaling<0,T2>& y)
+    static inline T2 operator*(const Scaling<-1,T1>& x, const Scaling<0,T2>& y)
     { return -y.x; }
 
     template <class T1, class T2>
-    static T1 operator*(const Scaling<0,T1>& x, const Scaling<1,T2>& y)
+    static inline T1 operator*(const Scaling<0,T1>& x, const Scaling<1,T2>& y)
     { return x; }
     template <class T1, class T2>
-    static Scaling<1,T2> operator*(
+    static inline Scaling<1,T2> operator*(
         const Scaling<1,T1>& x, const Scaling<1,T2>& y)
     { return Scaling<1,T2>(); }
     template <class T1, class T2>
-    static Scaling<-1,T2> operator*(
+    static inline Scaling<-1,T2> operator*(
         const Scaling<-1,T1>& x, const Scaling<1,T2>& y)
     { return Scaling<-1,T2>(); }
 
     template <class T1, class T2>
-    static T1 operator*(const Scaling<0,T1>& x, const Scaling<-1,T2>& y)
+    static inline T1 operator*(const Scaling<0,T1>& x, const Scaling<-1,T2>& y)
     { return -x.x; }
     template <class T1, class T2>
-    static Scaling<-1,T2> operator*(
+    static inline Scaling<-1,T2> operator*(
         const Scaling<1,T1>& x, const Scaling<-1,T2>& y)
     { return Scaling<-1,T2>(); }
     template <class T1, class T2>
-    static Scaling<1,T2> operator*(
+    static inline Scaling<1,T2> operator*(
         const Scaling<-1,T1>& x, const Scaling<-1,T2>& y)
     { return Scaling<1,T2>(); }
 
 
     // Scaling / Scaling:
     template <class T1, class T2>
-    static typename Traits2<T1,T2>::type operator/(
+    static inline typename Traits2<T1,T2>::type operator/(
         const Scaling<0,T1>& x, const Scaling<0,T2>& y)
     { return x.x/y.x; }
     template <class T1, class T2>
-    static T2 operator/(const Scaling<1,T1>& x, const Scaling<0,T2>& y)
+    static inline T2 operator/(const Scaling<1,T1>& x, const Scaling<0,T2>& y)
     { return T1(1)/y.x; }
     template <class T1, class T2>
-    static T2 operator/(const Scaling<-1,T1>& x, const Scaling<0,T2>& y)
+    static inline T2 operator/(const Scaling<-1,T1>& x, const Scaling<0,T2>& y)
     { return T1(-1)/y.x; }
 
     template <class T1, class T2>
-    static T1 operator/(const Scaling<0,T1>& x, const Scaling<1,T2>& y)
+    static inline T1 operator/(const Scaling<0,T1>& x, const Scaling<1,T2>& y)
     { return x; }
     template <class T1, class T2>
-    static Scaling<1,T2> operator/(
+    static inline Scaling<1,T2> operator/(
         const Scaling<1,T1>& x, const Scaling<1,T2>& y)
     { return Scaling<1,T2>(); }
     template <class T1, class T2>
-    static Scaling<-1,T2> operator/(
+    static inline Scaling<-1,T2> operator/(
         const Scaling<-1,T1>& x, const Scaling<1,T2>& y)
     { return Scaling<-1,T2>(); }
 
     template <class T1, class T2>
-    static T1 operator/(const Scaling<0,T1>& x, const Scaling<-1,T2>& y)
+    static inline T1 operator/(const Scaling<0,T1>& x, const Scaling<-1,T2>& y)
     { return -x.x; }
     template <class T1, class T2>
-    static Scaling<-1,T2> operator/(
+    static inline Scaling<-1,T2> operator/(
         const Scaling<1,T1>& x, const Scaling<-1,T2>& y)
     { return Scaling<-1,T2>(); }
     template <class T1, class T2>
-    static Scaling<1,T2> operator/(
+    static inline Scaling<1,T2> operator/(
         const Scaling<-1,T1>& x, const Scaling<-1,T2>& y)
     { return Scaling<1,T2>(); }
 
 
     // Define + and - too:
     template <class T1, int ix, class T2>
-    static T1& operator+=(T1& y, const Scaling<ix,T2>& x)
+    static inline T1& operator+=(T1& y, const Scaling<ix,T2>& x)
     { y += T2(x); return y; }
     template <class T1, int ix, class T2>
-    static T1& operator-=(T1& y, const Scaling<ix,T2>& x)
+    static inline T1& operator-=(T1& y, const Scaling<ix,T2>& x)
     { y -= T2(x); return y; }
 
     template <int ix, class T1, class T2>
-    static typename Traits2<T1,T2>::type operator+(
+    static inline typename Traits2<T1,T2>::type operator+(
         const Scaling<ix,T1>& x, const T2& y)
     { return T1(x) + y; }
     template <int ix, class T1, class T2>
-    static typename Traits2<T1,T2>::type operator-(
+    static inline typename Traits2<T1,T2>::type operator-(
         const Scaling<ix,T1>& x, const T2& y)
     { return T1(x) - y; }
 
     template <class T1, int ix, class T2>
-    static typename Traits2<T1,T2>::type operator+(
+    static inline typename Traits2<T1,T2>::type operator+(
         const T1& x, const Scaling<ix,T2>& y)
     { return x + T2(y); }
     template <class T1, int ix, class T2>
-    static typename Traits2<T1,T2>::type operator-(
+    static inline typename Traits2<T1,T2>::type operator-(
         const T1& x, const Scaling<ix,T2>& y)
     { return x - T2(y); }
 
     template <int ix1, class T1, int ix2, class T2>
-    static typename Traits2<T1,T2>::type operator+(
+    static inline typename Traits2<T1,T2>::type operator+(
         const Scaling<ix1,T1>& x, const Scaling<ix2,T2>& y)
     { return T1(x) + T2(y); }
     template <int ix1, class T1, int ix2, class T2>
-    static typename Traits2<T1,T2>::type operator-(
+    static inline typename Traits2<T1,T2>::type operator-(
         const Scaling<ix1,T1>& x, const Scaling<ix2,T2>& y)
     { return T1(x) - T2(y); }
 

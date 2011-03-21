@@ -167,7 +167,8 @@ namespace tmv {
         enum { _calc = false };
     };
 
-    class Permutation : public BaseMatrix<Permutation>
+    class Permutation : 
+        public BaseMatrix<Permutation>
     {
 
     public:
@@ -215,7 +216,7 @@ namespace tmv {
         size_t rowsize() const { return itsn; }
 
         int cref(int i, int j) const
-        { 
+        {
             // Two options:
             // 1) P = P * I = I.permuteRows(p)
             //    P.col(j) = I.col(j).permute(p)
@@ -497,7 +498,7 @@ namespace tmv {
 
         // Defined below.
         template <class V>
-        friend BaseVector_Mutable<V>& BaseVector_Mutable<V>::sort(
+        friend V& BaseVector_Mutable<V>::sort(
             Permutation& P, ADType ad, CompType comp);
 
         // In TMV_LUDecompose.h
@@ -655,7 +656,7 @@ namespace tmv {
         }
 
         int* getMem() 
-        { 
+        {
             // Make sure P owns its memory:
             TMVAssert(itsmem.get());
             // This next one shoudl be true if the previous one passes.
@@ -696,12 +697,14 @@ namespace tmv {
     static inline int LogDet(const Permutation& m)
     { return m.logDet(); }
 
-    static inline std::ostream& operator<<(std::ostream& os, const Permutation& p)
+    static inline std::ostream& operator<<(
+        std::ostream& os, const Permutation& p)
     { p.write(os); return os; }
 
 
 #ifndef NOTHROW
-    class PermutationReadError : public ReadError
+    class PermutationReadError : 
+        public ReadError
     {
     public :
         int i;
@@ -905,11 +908,10 @@ namespace tmv {
     //
 
     template <class V>
-    BaseVector_Mutable<V>& BaseVector_Mutable<V>::sort(
-        Permutation& P, ADType ad, CompType comp)
+    V& BaseVector_Mutable<V>::sort(Permutation& P, ADType ad, CompType comp)
     {
-        DoVectorSort(*this,P,ad,comp);
-        return *this;
+        DoVectorSort(vec(),P,ad,comp);
+        return vec();
     }
 
 

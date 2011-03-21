@@ -37,24 +37,6 @@
 
 namespace tmv {
 
-    // Defined below:
-    template <class M>
-    static void PermuteRows(
-        BaseMatrix_Rec_Mutable<M>& m, 
-        const int* p, const int i1, const int i2);
-    template <class M>
-    static void InlinePermuteRows(
-        BaseMatrix_Rec_Mutable<M>& m, 
-        const int* p, const int i1, const int i2);
-    template <class M>
-    static void ReversePermuteRows(
-        BaseMatrix_Rec_Mutable<M>& m, 
-        const int* p, const int i1, const int i2);
-    template <class M>
-    static void InlineReversePermuteRows(
-        BaseMatrix_Rec_Mutable<M>& m, 
-        const int* p, const int i1, const int i2);
-
     // Defined in TMV_Matrix.cpp
     template <class T>
     void InstPermuteRows(
@@ -68,15 +50,26 @@ namespace tmv {
     //
     
     // Defined in TMV_Matrix.cpp
-    template <int algo, int cs, int rs, class M1> 
+    template <int algo, int cs, int rs, class M1>
     struct PermuteRows_Helper;
 
-    // algo 1: Simple loop over rows
+    // algo 11: Simple loop over columns
     template <int cs, int rs, class M1>
-    struct PermuteRows_Helper<1,cs,rs,M1>
+    struct PermuteRows_Helper<11,cs,rs,M1>
     {
-        static void call(
-            M1& m, const int* p, const int i1, const int i2)
+        static void call(M1& m, const int* p, const int i1, const int i2)
+        {
+            const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
+            for (int j=0;j<N;++j) 
+                m.get_col(j).permute(p,i1,i2);
+        }
+    };
+
+    // algo 12: Simple loop over rows
+    template <int cs, int rs, class M1>
+    struct PermuteRows_Helper<12,cs,rs,M1>
+    {
+        static void call(M1& m, const int* p, const int i1, const int i2)
         {
             p += i1;
             for(int i=i1;i<i2;++i,++p) {
@@ -86,51 +79,11 @@ namespace tmv {
         }
     };
 
-    // algo 2: Simple loop over columns
+    // algo 13: Loop over columns in blocks, then over rows with a block
     template <int cs, int rs, class M1>
-    struct PermuteRows_Helper<2,cs,rs,M1>
+    struct PermuteRows_Helper<13,cs,rs,M1>
     {
-        static void call(
-            M1& m, const int* p, const int i1, const int i2)
-        {
-            const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
-            for (int j=0;j<N;++j) 
-                m.get_col(j).permute(p,i1,i2);
-        }
-    };
-
-    // algo 3: Loop over rows with iterators
-    template <int cs, int rs, class M1>
-    struct PermuteRows_Helper<3,cs,rs,M1>
-    {
-        static void call(
-            M1& m, const int* p, const int i1, const int i2)
-        {
-            const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
-            typedef typename M1::row_type M1r;
-            typedef typename M1r::iterator IT;
-            IT it1 = m.get_row(0).begin();
-            const int stepi = m.stepi();
-            it1.shiftP(i1*stepi);
-            p += i1;
-            for(int i=i1;i<i2;++i,++p) {
-                TMVAssert(*p < int(m.colsize()));
-                if (*p != i) {
-                    IT it2 = it1;
-                    it2.shiftP((*p-i)*stepi);
-                    SwapV_Helper<-3,rs,M1r,M1r>::call2(N,it1,it2);
-                }
-                it1.shiftP(stepi);
-            }
-        }
-    };
-
-    // algo 4: Loop over columns in blocks, then over rows with a block
-    template <int cs, int rs, class M1>
-    struct PermuteRows_Helper<4,cs,rs,M1>
-    {
-        static void call(
-            M1& m, const int* p, const int i1, const int i2)
+        static void call(M1& m, const int* p, const int i1, const int i2)
         {
             const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
             typedef typename M1::row_type M1r;
@@ -171,51 +124,71 @@ namespace tmv {
         }
     };
 
-    // algo -3: Determine which algorithm to use
+    // algo 14: Loop over rows with iterators
     template <int cs, int rs, class M1>
-    struct PermuteRows_Helper<-3,cs,rs,M1>
+    struct PermuteRows_Helper<14,cs,rs,M1>
     {
-        static void call(
-            M1& m, const int* p, const int i1, const int i2)
+        static void call(M1& m, const int* p, const int i1, const int i2)
         {
-            const int algo = 
-#if TMV_OPT >= 1
-                (M1::_colmajor && (rs != UNKNOWN && rs <= 32)) ? 2 :
-                M1::_colmajor ? 4 : M1::_rowmajor ? 3 :
-#endif
-                1;
-            PermuteRows_Helper<algo,cs,rs,M1>::call(m,p,i1,i2);
+            const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
+            typedef typename M1::row_type M1r;
+            typedef typename M1r::iterator IT;
+            IT it1 = m.get_row(0).begin();
+            const int stepi = m.stepi();
+            it1.shiftP(i1*stepi);
+            p += i1;
+            for(int i=i1;i<i2;++i,++p) {
+                TMVAssert(*p < int(m.colsize()));
+                if (*p != i) {
+                    IT it2 = it1;
+                    it2.shiftP((*p-i)*stepi);
+                    SwapV_Helper<-3,rs,M1r,M1r>::call2(N,it1,it2);
+                }
+                it1.shiftP(stepi);
+            }
         }
+    };
+
+    // algo 90: Call inst
+    template <int cs, int rs, class M1>
+    struct PermuteRows_Helper<90,cs,rs,M1>
+    {
+        static void call(M1& m, const int* p, const int i1, const int i2)
+        { InstPermuteRows(m.xView(),p,i1,i2); } 
     };
 
     // algo 97: Conjugate
     template <int cs, int rs, class M1>
     struct PermuteRows_Helper<97,cs,rs,M1>
     {
-        static void call(
-            M1& m, const int* p, const int i1, const int i2)
+        static void call(M1& m, const int* p, const int i1, const int i2)
         {
             typedef typename M1::conjugate_type Mc;
             Mc mc = m.conjugate();
-            PermuteRows_Helper<-1,cs,rs,Mc>::call(mc,p,i1,i2);
+            PermuteRows_Helper<-2,cs,rs,Mc>::call(mc,p,i1,i2);
         }
     };
 
-    // algo 98: Call inst
+    // algo -3: Determine which algorithm to use
     template <int cs, int rs, class M1>
-    struct PermuteRows_Helper<98,cs,rs,M1>
+    struct PermuteRows_Helper<-3,cs,rs,M1>
     {
-        static void call(
-            M1& m, const int* p, const int i1, const int i2)
-        { InstPermuteRows(m.xView(),p,i1,i2); } 
+        static void call(M1& m, const int* p, const int i1, const int i2)
+        {
+            const int algo = 
+                TMV_OPT == 0 ? 12 :
+                (M1::_colmajor && (rs != UNKNOWN && rs <= 32)) ? 11 :
+                M1::_rowmajor ? 14 : M1::_colmajor ? 13 :
+                12;
+            PermuteRows_Helper<algo,cs,rs,M1>::call(m,p,i1,i2);
+        }
     };
 
-    // algo -1: Check for inst
+    // algo -2: Check for inst
     template <int cs, int rs, class M1>
-    struct PermuteRows_Helper<-1,cs,rs,M1>
+    struct PermuteRows_Helper<-2,cs,rs,M1>
     {
-        static void call(
-            M1& m, const int* p, const int i1, const int i2)
+        static void call(M1& m, const int* p, const int i1, const int i2)
         {
             typedef typename M1::value_type T;
             const bool inst = 
@@ -224,33 +197,40 @@ namespace tmv {
                 Traits<T>::isinst;
             const int algo = 
                 M1::_conj ? 97 :
-                inst ? 98 :
+                inst ? 90 :
                 -3;
             PermuteRows_Helper<algo,cs,rs,M1>::call(m,p,i1,i2);
         }
     };
 
+    template <int cs, int rs, class M1>
+    struct PermuteRows_Helper<-1,cs,rs,M1>
+    {
+        static void call(M1& m, const int* p, const int i1, const int i2)
+        { PermuteRows_Helper<-2,cs,rs,M1>::call(m,p,i1,i2); }
+    };
+
     template <class M>
-    static void PermuteRows(
+    static inline void PermuteRows(
         BaseMatrix_Rec_Mutable<M>& m,
         const int* p, const int i1, const int i2)
     {
-        typedef typename M::cview_type Mv;
-        Mv mv = m.cView();
         const int cs = M::_colsize;
         const int rs = M::_rowsize;
-        PermuteRows_Helper<-1,cs,rs,Mv>::call(mv,p,i1,i2); 
+        typedef typename M::cview_type Mv;
+        TMV_MAYBE_REF(M,Mv) mv = m.cView();
+        PermuteRows_Helper<-2,cs,rs,Mv>::call(mv,p,i1,i2); 
     }
 
     template <class M>
-    static void InlinePermuteRows(
+    static inline void InlinePermuteRows(
         BaseMatrix_Rec_Mutable<M>& m, 
         const int* p, const int i1, const int i2)
     {
-        typedef typename M::cview_type Mv;
-        Mv mv = m.cView();
         const int cs = M::_colsize;
         const int rs = M::_rowsize;
+        typedef typename M::cview_type Mv;
+        TMV_MAYBE_REF(M,Mv) mv = m.cView();
         PermuteRows_Helper<-3,cs,rs,Mv>::call(mv,p,i1,i2); 
     }
 
@@ -259,15 +239,26 @@ namespace tmv {
     // ReversePermuteRows
     //
 
-    template <int algo, int cs, int rs, class M1> 
+    template <int algo, int cs, int rs, class M1>
     struct ReversePermuteRows_Helper;
 
-    // algo 1: Simple loop over rows
+    // algo 11: Simple loop over columns
     template <int cs, int rs, class M1>
-    struct ReversePermuteRows_Helper<1,cs,rs,M1>
+    struct ReversePermuteRows_Helper<11,cs,rs,M1>
     {
-        static void call(
-            M1& m, const int* p, const int i1, const int i2)
+        static void call(M1& m, const int* p, const int i1, const int i2)
+        {
+            const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
+            for (int j=0;j<N;++j) 
+                m.get_col(j).reversePermute(p,i1,i2);
+        }
+    };
+
+    // algo 12: Simple loop over rows
+    template <int cs, int rs, class M1>
+    struct ReversePermuteRows_Helper<12,cs,rs,M1>
+    {
+        static void call(M1& m, const int* p, const int i1, const int i2)
         {
             p += i2-1;
             for(int i=i2-1;i>=i1;--i,--p) {
@@ -277,52 +268,11 @@ namespace tmv {
         }
     };
 
-    // algo 2: Simple loop over columns
+    // algo 13: Loop over columns in blocks, then over rows with a block
     template <int cs, int rs, class M1>
-    struct ReversePermuteRows_Helper<2,cs,rs,M1>
+    struct ReversePermuteRows_Helper<13,cs,rs,M1>
     {
-        static void call(
-            M1& m, const int* p, const int i1, const int i2)
-        {
-            const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
-            for (int j=0;j<N;++j) 
-                m.get_col(j).reversePermute(p,i1,i2);
-        }
-    };
-
-    // algo 3: Loop over rows with iterators
-    template <int cs, int rs, class M1>
-    struct ReversePermuteRows_Helper<3,cs,rs,M1>
-    {
-        static void call(
-            M1& m, const int* p, const int i1, const int i2)
-        {
-            const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
-            typedef typename M1::row_type M1r;
-            typedef typename M1r::iterator IT;
-            IT it1 = m.get_row(0).begin();
-            const int stepi = m.stepi();
-            Prefetch_Write(it1.get()+i1*stepi);
-            it1.shiftP((i2-1)*stepi);
-            p += i2-1;
-            for(int i=i2-1;i>=i1;--i,--p) {
-                TMVAssert(*p < int(m.colsize()));
-                if (*p != i) {
-                    IT it2 = it1;
-                    it2.shiftP((*p-i)*stepi);
-                    SwapV_Helper<-3,rs,M1r,M1r>::call2(N,it1,it2);
-                }
-                it1.shiftP(-stepi);
-            }
-        }
-    };
-
-    // algo 4: Loop over columns in blocks, then over rows with a block
-    template <int cs, int rs, class M1>
-    struct ReversePermuteRows_Helper<4,cs,rs,M1>
-    {
-        static void call(
-            M1& m, const int* p, const int i1, const int i2)
+        static void call(M1& m, const int* p, const int i1, const int i2)
         {
             const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
             typedef typename M1::value_type T1;
@@ -365,51 +315,72 @@ namespace tmv {
         }
     };
 
-    // algo -3: Determine which algorithm to use
+    // algo 14: Loop over rows with iterators
     template <int cs, int rs, class M1>
-    struct ReversePermuteRows_Helper<-3,cs,rs,M1>
+    struct ReversePermuteRows_Helper<14,cs,rs,M1>
     {
-        static void call(
-            M1& m, const int* p, const int i1, const int i2)
+        static void call(M1& m, const int* p, const int i1, const int i2)
         {
-            const int algo = 
-#if TMV_OPT >= 1
-                (M1::_rowmajor && (rs != UNKNOWN && rs <= 32)) ? 3 :
-                M1::_colmajor ? 2 : M1::_rowmajor ? 4 :
-#endif
-                1;
-            ReversePermuteRows_Helper<algo,cs,rs,M1>::call(m,p,i1,i2);
+            const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
+            typedef typename M1::row_type M1r;
+            typedef typename M1r::iterator IT;
+            IT it1 = m.get_row(0).begin();
+            const int stepi = m.stepi();
+            Prefetch_Write(it1.get()+i1*stepi);
+            it1.shiftP((i2-1)*stepi);
+            p += i2-1;
+            for(int i=i2-1;i>=i1;--i,--p) {
+                TMVAssert(*p < int(m.colsize()));
+                if (*p != i) {
+                    IT it2 = it1;
+                    it2.shiftP((*p-i)*stepi);
+                    SwapV_Helper<-3,rs,M1r,M1r>::call2(N,it1,it2);
+                }
+                it1.shiftP(-stepi);
+            }
         }
+    };
+
+    // algo 90: Call inst
+    template <int cs, int rs, class M1>
+    struct ReversePermuteRows_Helper<90,cs,rs,M1>
+    {
+        static void call(M1& m, const int* p, const int i1, const int i2)
+        { InstReversePermuteRows(m.xView(),p,i1,i2); } 
     };
 
     // algo 97: Conjugate
     template <int cs, int rs, class M1>
     struct ReversePermuteRows_Helper<97,cs,rs,M1>
     {
-        static void call(
-            M1& m, const int* p, const int i1, const int i2)
+        static void call(M1& m, const int* p, const int i1, const int i2)
         {
             typedef typename M1::conjugate_type Mc;
             Mc mc = m.conjugate();
-            ReversePermuteRows_Helper<-1,cs,rs,Mc>::call(mc,p,i1,i2);
+            ReversePermuteRows_Helper<-2,cs,rs,Mc>::call(mc,p,i1,i2);
         }
     };
 
-    // algo 98: Call inst
+    // algo -3: Determine which algorithm to use
     template <int cs, int rs, class M1>
-    struct ReversePermuteRows_Helper<98,cs,rs,M1>
+    struct ReversePermuteRows_Helper<-3,cs,rs,M1>
     {
-        static void call(
-            M1& m, const int* p, const int i1, const int i2)
-        { InstReversePermuteRows(m.xView(),p,i1,i2); } 
+        static void call(M1& m, const int* p, const int i1, const int i2)
+        {
+            const int algo = 
+                TMV_OPT == 0 ? 12 :
+                (M1::_rowmajor && (rs != UNKNOWN && rs <= 32)) ? 14 :
+                M1::_colmajor ? 11 : M1::_rowmajor ? 13 :
+                12;
+            ReversePermuteRows_Helper<algo,cs,rs,M1>::call(m,p,i1,i2);
+        }
     };
 
-    // algo -1: Check for inst
+    // algo -2: Check for inst
     template <int cs, int rs, class M1>
-    struct ReversePermuteRows_Helper<-1,cs,rs,M1>
+    struct ReversePermuteRows_Helper<-2,cs,rs,M1>
     {
-        static void call(
-            M1& m, const int* p, const int i1, const int i2)
+        static void call(M1& m, const int* p, const int i1, const int i2)
         {
             typedef typename M1::value_type T;
             const bool inst = 
@@ -418,33 +389,40 @@ namespace tmv {
                 Traits<T>::isinst;
             const int algo = 
                 M1::_conj ? 97 :
-                inst ? 98 :
+                inst ? 90 :
                 -3;
             ReversePermuteRows_Helper<algo,cs,rs,M1>::call(m,p,i1,i2);
         }
     };
 
+    template <int cs, int rs, class M1>
+    struct ReversePermuteRows_Helper<-1,cs,rs,M1>
+    {
+        static void call(M1& m, const int* p, const int i1, const int i2)
+        { ReversePermuteRows_Helper<-2,cs,rs,M1>::call(m,p,i1,i2); }
+    };
+
     template <class M>
-    static void ReversePermuteRows(
+    static inline void ReversePermuteRows(
         BaseMatrix_Rec_Mutable<M>& m,
         const int* p, const int i1, const int i2)
     {
-        typedef typename M::cview_type Mv;
-        Mv mv = m.cView();
         const int cs = M::_colsize;
         const int rs = M::_rowsize;
-        ReversePermuteRows_Helper<-1,cs,rs,Mv>::call(mv,p,i1,i2); 
+        typedef typename M::cview_type Mv;
+        TMV_MAYBE_REF(M,Mv) mv = m.cView();
+        ReversePermuteRows_Helper<-2,cs,rs,Mv>::call(mv,p,i1,i2); 
     }
 
     template <class M>
-    static void InlineReversePermuteRows(
+    static inline void InlineReversePermuteRows(
         BaseMatrix_Rec_Mutable<M>& m, 
         const int* p, const int i1, const int i2)
     {
-        typedef typename M::cview_type Mv;
-        Mv mv = m.cView();
         const int cs = M::_colsize;
         const int rs = M::_rowsize;
+        typedef typename M::cview_type Mv;
+        TMV_MAYBE_REF(M,Mv) mv = m.cView();
         ReversePermuteRows_Helper<-3,cs,rs,Mv>::call(mv,p,i1,i2); 
     }
 

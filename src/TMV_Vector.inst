@@ -29,8 +29,6 @@ template void InstCopy(const ConstVectorView<T >& v1, VectorView<CT > v2);
   template void InstSort(VectorView<T > v, ADType ad, CompType comp); \
   template void InstSort(VectorView<T > v, int* P, ADType ad, CompType comp); \
   template void InstRead(std::istream& is, VectorView<T > v); \
-  template void InstRead( \
-      std::istream& is, VectorView<T,UNKNOWN,true> v); \
 
 Def2(T,T)
 #ifdef TMV_INST_COMPLEX

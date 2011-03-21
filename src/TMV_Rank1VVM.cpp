@@ -33,10 +33,9 @@
 #include "TMV_Blas.h"
 #include "tmv/TMV_Rank1VVM.h"
 #include "tmv/TMV_Matrix.h"
+#include "tmv/TMV_SimpleMatrix.h"
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_MultXM.h"
-#include "tmv/TMV_ProdXV.h"
-#include "tmv/TMV_ProdXM.h"
 
 namespace tmv {
 
@@ -53,6 +52,8 @@ namespace tmv {
         // algo path to the ones that have vstep == 1.
 
         typedef typename Traits<T>::real_type RT;
+        typedef typename V1::value_type T1;
+        typedef typename V2::value_type T2;
         const Scaling<1,RT> one;
 
         const int M = m3.colsize();
@@ -60,21 +61,36 @@ namespace tmv {
 
         if (v1.step() == 1) {
             if (v2.step() == 1) {
-                if (x == RT(1))
+                if (x == RT(1)) {
                     InlineRank1Update<add>(one,v1.unitView(),v2.unitView(),m3);
-                else if (M > N) 
-                    InlineRank1Update<add>(one,v1.unitView(),(x*v2).calc(),m3);
-                else 
-                    InlineRank1Update<add>(one,(x*v1).calc(),v2.unitView(),m3);
-            } else 
-                InlineRank1Update<add>(one,v1.unitView(),(x*v2).calc(),m3);
+                } else if (M > N) {
+                    Vector<T> xv2(N);
+                    InstMultXV(x,v2,xv2.xView());
+                    InlineRank1Update<add>(one,v1.unitView(),xv2,m3);
+                } else {
+                    Vector<T> xv1(M);
+                    InstMultXV(x,v1,xv1.xView());
+                    InlineRank1Update<add>(one,xv1,v2.unitView(),m3);
+                }
+            } else {
+                Vector<T> xv2(N);
+                InstMultXV(x,v2,xv2.xView());
+                InlineRank1Update<add>(one,v1.unitView(),xv2,m3);
+            }
         } else {
-            if (v2.step() == 1) 
-                InlineRank1Update<add>(one,(x*v1).calc(),v2.unitView(),m3);
-            else if (M > N)
-                InlineRank1Update<add>(one,v1.copy(),(x*v2).calc(),m3);
-            else
-                InlineRank1Update<add>(one,(x*v1).calc(),v2.copy(),m3);
+            if (v2.step() == 1) {
+                Vector<T> xv1(M);
+                InstMultXV(x,v1,xv1.xView());
+                InlineRank1Update<add>(one,xv1,v2.unitView(),m3);
+            } else if (M > N) {
+                Vector<T> xv2(N);
+                InstMultXV(x,v2,xv2.xView());
+                InlineRank1Update<add>(one,v1.copy(),xv2,m3);
+            } else {
+                Vector<T> xv1(M);
+                InstMultXV(x,v1,xv1.xView());
+                InlineRank1Update<add>(one,xv1,v2.copy(),m3);
+            }
         }
     }
 
@@ -530,6 +546,10 @@ namespace tmv {
         const T3 x, const ConstVectorView<T1,UNKNOWN,C1>& v1,
         const ConstVectorView<T2,UNKNOWN,C2>& v2, MatrixView<T3> m3)
     {
+#if TMV_OPT <= 1
+        m3.setZero();
+        InstAddRank1Update(x,v1,v2,m3);
+#else
         if (m3.isrm()) {
             MatrixView<T3,1> m3t = m3.transpose();
             DoRank1Update<false>(x,v2,v1,m3t);
@@ -537,11 +557,12 @@ namespace tmv {
             MatrixView<T3,1> m3cm = m3;
             DoRank1Update<false>(x,v1,v2,m3cm);
         } else {
-            Matrix<T3,ColMajor> m3x(m3.colsize(),m3.rowsize());
+            SimpleMatrix<T3,ColMajor> m3x(m3.colsize(),m3.rowsize());
             MatrixView<T3,1> m3cm = m3x.cmView();
             DoRank1Update<false>(x,v1,v2,m3cm);
             InstCopy(m3x.constView().xView(),m3);
         }
+#endif
     }
     template <class T1, bool C1, class T2, bool C2, class T3>
     void InstAddRank1Update(
@@ -555,7 +576,7 @@ namespace tmv {
             MatrixView<T3,1> m3cm = m3;
             DoRank1Update<true>(x,v1,v2,m3cm);
         } else {
-            Matrix<T3,ColMajor> m3x(m3.colsize(),m3.rowsize());
+            SimpleMatrix<T3,ColMajor> m3x(m3.colsize(),m3.rowsize());
             MatrixView<T3,1> m3cm = m3x.cmView();
             DoRank1Update<false>(T3(1),v1,v2,m3cm);
             InstAddMultXM(x,m3x.constView().xView(),m3);

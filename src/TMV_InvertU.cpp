@@ -31,7 +31,8 @@
 
 #include "tmv/TMV_InvertU.h"
 #include "tmv/TMV_TriMatrix.h"
-#include "tmv/TMV_ScaleU.h"
+#include "tmv/TMV_SimpleMatrix.h"
+#include "tmv/TMV_Det.h" // For isSingular().
 
 namespace tmv {
 
@@ -44,24 +45,22 @@ namespace tmv {
         } else if (m.isrm()) {
             UpperTriMatrixView<T,UnknownDiag,UNKNOWN,1> mrm = m.rmView();
             InlineInvertSelf(mrm);
+        } else if (m.isunit()) {
+            UpperTriMatrix<T,UnitDiag,ColMajor> mc = m;
+            UpperTriMatrixView<T,UnknownDiag,1> mcm = mc.cmView();
+            InlineInvertSelf(mcm);
+            InstCopy(mc.constView().xdView(),m);
         } else {
-            InlineInvertSelf(m);
+            UpperTriMatrix<T,NonUnitDiag,ColMajor> mc = m;
+            UpperTriMatrixView<T,UnknownDiag,1> mcm = mc.cmView();
+            InlineInvertSelf(mcm);
+            InstCopy(mc.constView().xdView(),m);
         }
     }
 
     template <class T>
     void InstInvertSelf(LowerTriMatrixView<T> m)
-    {
-        if (m.iscm()) {
-            LowerTriMatrixView<T,UnknownDiag,1> mcm = m.cmView();
-            InlineInvertSelf(mcm);
-        } else if (m.isrm()) {
-            LowerTriMatrixView<T,UnknownDiag,UNKNOWN,1> mrm = m.rmView();
-            InlineInvertSelf(mrm);
-        } else {
-            InlineInvertSelf(m);
-        }
-    }
+    { InstInvertSelf(m.transpose()); }
 
 #define InstFile "TMV_InvertU.inst"
 #include "TMV_Inst.h"

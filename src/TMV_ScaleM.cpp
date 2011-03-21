@@ -31,7 +31,6 @@
 
 #include "tmv/TMV_ScaleM.h"
 #include "tmv/TMV_Matrix.h"
-//#include "tmv/TMV_ProdXM.h"
 
 namespace tmv {
 
@@ -63,10 +62,7 @@ namespace tmv {
     template <class T>
     void InstScale(const T x, MatrixView<T> m)
     {
-        if (m.canLinearize()) {
-            VectorView<T> ml = m.linearView();
-            InstScale(x,ml);
-        } else if (m.iscm()) {
+        if (m.iscm()) {
             MatrixView<T,1> mcm = m.cmView();
             DoScale(x,mcm); 
         } else if (m.isrm()) {

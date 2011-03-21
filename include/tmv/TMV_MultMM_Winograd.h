@@ -34,6 +34,7 @@
 #define TMV_MultMM_Winograd_H
 
 #include "TMV_Matrix.h"
+#include "TMV_SimpleMatrix.h"
 
 #ifndef TMV_MM_MIN_WINOGRAD
 #ifdef TMV_USE_RECURSIVE_BLOCK
@@ -59,43 +60,22 @@ namespace tmv {
         const ConstMatrixView<T2,UNKNOWN,UNKNOWN,CC2>& m2,
         MatrixView<T3> m3);
 
-    // Defined below:
     template <bool add, int ix, class T, class M1, class M2, class M3>
     static void MultMM_Winograd(
-        const Scaling<ix,T>& x,
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3);
+        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
+        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
 
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void InlineMultMM_Winograd(
-        const Scaling<ix,T>& x,
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3);
 
     // Need this for final pass.
-    template <int algo, int cs, int rs, int xs, bool add, 
-              int ix, class T, class M1, class M2, class M3> 
+    template <int algo, int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Helper;
 
-    template <int algo, bool add, 
-              int ix, class T, class M1, class M2, class M3> 
+    template <int algo, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Winograd_Helper;
 
-    // algo 0: Final pass: call another algorithm
-    template <bool add, int ix, class T, class M1, class M2, class M3> 
-    struct MultMM_Winograd_Helper<0,add,ix,T,M1,M2,M3>
-    {
-        static void call(
-            const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
-        {
-            const int xx = UNKNOWN;
-            MultMM_Helper<73,xx,xx,xx,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3); 
-        }
-    };
-
-    // algo 10: Normal recursion
-    template <bool add, int ix, class T, class M1, class M2, class M3> 
-    struct MultMM_Winograd_Helper<1,add,ix,T,M1,M2,M3>
+    // algo 11: Normal recursion
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultMM_Winograd_Helper<11,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3 m3)
@@ -128,34 +108,35 @@ namespace tmv {
             //
             // Notation: (+=) means = if add=false, or += if add=true
             //
-            // if (min(m,n,k) < TMV_MM_MIN_WINOGRAD) { Call direct algorithm }
-            // else {
-            //   X = A2 + A3
-            //   Y = B1 - B0
-            //   Z = X * Y
-            //   C3 (+=) Z
-            //   C1 (+=) Z
+            // if (min(m,n,k) < TMV_MM_MIN_WINOGRAD) {
+            //     Call direct algorithm 
+            // } else {
+            //     X = A2 + A3
+            //     Y = B1 - B0
+            //     Z = X * Y
+            //     C3 (+=) Z
+            //     C1 (+=) Z
             // 
-            //   Z = A0 * B0
-            //   C0 (+=) Z
+            //     Z = A0 * B0
+            //     C0 (+=) Z
             //
-            //   C0 += A1 * B2
-            //   X = X - A0
-            //   Y = B3 - Y
-            //   Z += X * Y
-            //   C1 += Z
-            //   
-            //   X = A1 - X
-            //   C1 += X * B3
+            //     C0 += A1 * B2
+            //     X = X - A0
+            //     Y = B3 - Y
+            //     Z += X * Y
+            //     C1 += Z
+            //     
+            //     X = A1 - X
+            //     C1 += X * B3
             // 
-            //   Y = B2 - Y
-            //   C2 (+=) A3 * Y
+            //     Y = B2 - Y
+            //     C2 (+=) A3 * Y
             //
-            //   X = A0 - A2
-            //   Y = B3 - B1
-            //   Z += X * Y
-            //   C3 += Z
-            //   C2 += Z
+            //     X = A0 - A2
+            //     Y = B3 - B1
+            //     Z += X * Y
+            //     C3 += Z
+            //     C2 += Z
             // }
             //
             // X = A0-A2
@@ -208,12 +189,10 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
             typedef typename Traits<T3>::real_type RT;
-            Scaling<1,RT> one;
-            Scaling<-1,RT> mone;
 
             if (M < TMV_MM_MIN_WINOGRAD && N < TMV_MM_MIN_WINOGRAD && 
                 K < TMV_MM_MIN_WINOGRAD) {
-                return MultMM_Winograd_Helper<0,add,ix,T,M1,M2,M3>::call(
+                return MultMM_Winograd_Helper<12,add,ix,T,M1,M2,M3>::call(
                     x,m1,m2,m3);
             }
 
@@ -234,16 +213,28 @@ namespace tmv {
             // X,Y,Z are temporaries.
             // We use the subscripts 1,2,3 to match the size of the 
             // corrsponding A, B or C submatrix.  0 matches the full size.
-            Matrix<T1,RowMajor> X(Ma,Ka,T1(0)); 
-            Matrix<T2,ColMajor> Y(Ka,Na,T2(0));
-            Matrix<T3,ColMajor> Z(Ma,Na,T3(0));
+            SimpleMatrix<T1,RowMajor> X(Ma,Ka,T1(0)); 
+            SimpleMatrix<T2,ColMajor> Y(Ka,Na,T2(0));
+            SimpleMatrix<T3,ColMajor> Z(Ma,Na,T3(0));
 
-            typedef MatrixView<T1,UNKNOWN,1> M1r;
-            typedef MatrixView<T2,1> M2c;
-            typedef MatrixView<T3,1> M3c;
+            // Only use the versions that maintain knowledge of the
+            // majority of X,Y,Z submatrices if the input m1,m2, and m3
+            // all have such knowledge.
+            const bool majority_known = 
+                (M1::_colmajor || M1::_rowmajor) &&
+                (M2::_colmajor || M2::_rowmajor) &&
+                (M3::_colmajor || M3::_rowmajor);
+            const int maybe_unit = majority_known ? 1 : UNKNOWN;
+            const int maybe_one = majority_known ? 1 : 0;
+            const int maybe_mone = majority_known ? -1 : 0;
+            typedef MatrixView<T1,UNKNOWN,maybe_unit> M1r;
+            typedef MatrixView<T2,maybe_unit> M2c;
+            typedef MatrixView<T3,maybe_unit> M3c;
+            Scaling<maybe_one,RT> one(RT(1));
+            Scaling<maybe_mone,RT> mone(RT(-1));
 
             M1r X0 = X.view();
-            M1r X1 = X.colRange(0,Kb).xView();
+            M1r X1 = X.colRange(0,Kb);
             M1r X2 = X.rowRange(0,Mb);
             M1r X3 = X.subMatrix(0,Mb,0,Kb);
 
@@ -276,10 +267,11 @@ namespace tmv {
 
             // Y = B1 - B0
             NoAliasCopy(B1,Y1);
-            NoAliasMultXM<true>(mone,B0,Y);
+            NoAliasMultXM<true>(mone,B0,Y0);
 
             // Z = X * Y
-            InlineMultMM_Winograd<false>(one,X2,Y0,Z2);
+            // Z is already 0, so can use add=true.
+            MultMM_Winograd<true>(one,X2,Y0,Z2);
 
             // C3 (+=) Z
             NoAliasMultXM<add>(x,Z3,C3);
@@ -288,43 +280,44 @@ namespace tmv {
             NoAliasMultXM<add>(x,Z1,C1);
 
             // Z = A0 * B0
-            InlineMultMM_Winograd<false>(one,A0,B0,Z0);
+            Z.setZero();
+            MultMM_Winograd<true>(one,A0,B0,Z0);
 
             // C0 (+=) Z
-            NoAliasMultXM<add>(x,Z,C0);
+            NoAliasMultXM<add>(x,Z0,C0);
 
             // C0 += A1 * B2
-            InlineMultMM_Winograd<true>(x,A1,B2,C0);
+            MultMM_Winograd<true>(x,A1,B2,C0);
 
             // X = X - A0
-            NoAliasMultXM<true>(mone,A0,X);
+            NoAliasMultXM<true>(mone,A0,X0);
 
             // Y = B3 - Y
-            Scale(mone,Y);
+            Scale(mone,Y0);
             NoAliasMultXM<true>(one,B3,Y3);
 
             // Z += X * Y
-            InlineMultMM_Winograd<true>(one,X0,Y0,Z0);
+            MultMM_Winograd<true>(one,X0,Y0,Z0);
 
             // C1 += Z
             NoAliasMultXM<true>(x,Z1,C1);
 
             // X = A1 - X
-            Scale(mone,X);
+            Scale(mone,X0);
             NoAliasMultXM<true>(one,A1,X1);
 
             // C1 += X * B3
-            InlineMultMM_Winograd<true>(x,X1,B3,C1);
+            MultMM_Winograd<true>(x,X1,B3,C1);
 
             // Y = B2 - Y
-            Scale(mone,Y);
+            Scale(mone,Y0);
             NoAliasMultXM<true>(one,B2,Y2);
 
             // C2 (+=) A3 * Y
-            InlineMultMM_Winograd<add>(x,A3,Y2,C2);
+            MultMM_Winograd<add>(x,A3,Y2,C2);
 
             // X = A0 - A2
-            NoAliasCopy(A0,X);
+            NoAliasCopy(A0,X0);
             NoAliasMultXM<true>(mone,A2,X2);
 
             // Y = B3 - B1
@@ -332,7 +325,7 @@ namespace tmv {
             NoAliasMultXM<true>(one,B3,Y3);
 
             // Z += X * Y
-            InlineMultMM_Winograd<true>(one,X0,Y1,Z1);
+            MultMM_Winograd<true>(one,X0,Y1,Z1);
 
             // C3 += Z
             NoAliasMultXM<true>(x,Z3,C3);
@@ -342,9 +335,21 @@ namespace tmv {
         }
     };
 
-    // algo 98: Call inst
-    template <int ix, class T, class M1, class M2, class M3> 
-    struct MultMM_Winograd_Helper<98,false,ix,T,M1,M2,M3>
+    // algo 12: Final pass: call another algorithm
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultMM_Winograd_Helper<12,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
+        {
+            const int xx = UNKNOWN;
+            MultMM_Helper<73,xx,xx,xx,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3); 
+        }
+    };
+
+    // algo 90: Call inst
+    template <int ix, class T, class M1, class M2, class M3>
+    struct MultMM_Winograd_Helper<90,false,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
@@ -354,8 +359,8 @@ namespace tmv {
             InstMultMM_Winograd(xx,m1.xView(),m2.xView(),m3.xView());
         }
     };
-    template <int ix, class T, class M1, class M2, class M3> 
-    struct MultMM_Winograd_Helper<98,true,ix,T,M1,M2,M3>
+    template <int ix, class T, class M1, class M2, class M3>
+    struct MultMM_Winograd_Helper<90,true,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
@@ -366,9 +371,20 @@ namespace tmv {
         }
     };
 
-    // algo -1: Check for inst
-    template <bool add, int ix, class T, class M1, class M2, class M3> 
-    struct MultMM_Winograd_Helper<-1,add,ix,T,M1,M2,M3>
+    // algo -3: Only one algorithm here, so do it.
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultMM_Winograd_Helper<-3,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
+        {
+            MultMM_Winograd_Helper<11,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+        }
+    };
+
+    // algo -2: Check for inst
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultMM_Winograd_Helper<-2,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
@@ -387,17 +403,24 @@ namespace tmv {
 #endif
                 Traits<T3>::isinst;
             const int algo =
-                inst ? 98 :
-                1;
+                inst ? 90 :
+                -3;
             MultMM_Winograd_Helper<algo,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void MultMM_Winograd(
-        const Scaling<ix,T>& x,
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3)
+    struct MultMM_Winograd_Helper<-1,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
+        { MultMM_Winograd_Helper<-2,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3); }
+    };
+
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    static inline void MultMM_Winograd(
+        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
+        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
         TMVAssert(m1.colsize() == m3.colsize());
         TMVAssert(m1.rowsize() == m2.colsize());
@@ -405,17 +428,16 @@ namespace tmv {
         typedef typename M1::const_xview_type M1v;
         typedef typename M2::const_xview_type M2v;
         typedef typename M3::xview_type M3v;
-        M1v m1v = m1.xView();
-        M2v m2v = m2.xView();
-        M3v m3v = m3.xView();
-        MultMM_Winograd_Helper<-1,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.xView();
+        TMV_MAYBE_CREF(M1,M2v) m2v = m2.xView();
+        TMV_MAYBE_REF(M1,M3v) m3v = m3.xView();
+        MultMM_Winograd_Helper<-2,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void InlineMultMM_Winograd(
-        const Scaling<ix,T>& x,
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3)
+    static inline void InlineMultMM_Winograd(
+        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
+        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
         TMVAssert(m1.colsize() == m3.colsize());
         TMVAssert(m1.rowsize() == m2.colsize());
@@ -423,10 +445,10 @@ namespace tmv {
         typedef typename M1::const_xview_type M1v;
         typedef typename M2::const_xview_type M2v;
         typedef typename M3::xview_type M3v;
-        M1v m1v = m1.xView();
-        M2v m2v = m2.xView();
-        M3v m3v = m3.xView();
-        MultMM_Winograd_Helper<1,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.xView();
+        TMV_MAYBE_CREF(M1,M2v) m2v = m2.xView();
+        TMV_MAYBE_REF(M1,M3v) m3v = m3.xView();
+        MultMM_Winograd_Helper<-3,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
     }
 
 

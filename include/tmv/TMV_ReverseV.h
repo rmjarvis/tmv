@@ -37,12 +37,6 @@
 
 namespace tmv {
 
-    // Defined below:
-    template <class V>
-    static void ReverseSelf(BaseVector_Mutable<V>& v);
-    template <class V>
-    static void InlineReverseSelf(BaseVector_Mutable<V>& v);
-
     // Defined in TMV_Vector.cpp
     template <class T>
     void InstReverseSelf(VectorView<T> v);
@@ -51,15 +45,15 @@ namespace tmv {
     // ReverseSelf
     //
 
-    template <int algo, int size, class V> 
+    template <int algo, int size, class V>
     struct ReverseV_Helper;
 
-    // algo 1: simple for loop
+    // algo 11: simple for loop
     template <int size, class V>
-    struct ReverseV_Helper<1,size,V>
+    struct ReverseV_Helper<11,size,V>
     {
         static void call(V& v)
-        { 
+        {
             const int n = size == UNKNOWN ? int(v.size()) : size;
             const int no2 = n/2;
             if (no2) 
@@ -67,9 +61,9 @@ namespace tmv {
         }
     };
 
-    // algo 2: call swap on two halves
+    // algo 12: call swap on two halves
     template <int size, class V>
-    struct ReverseV_Helper<2,size,V> 
+    struct ReverseV_Helper<12,size,V>
     {
         static void call(V& v)
         {
@@ -81,21 +75,14 @@ namespace tmv {
             if (n > 1)  {
                 V1 v1 = v.cSubVector(0,n/2);
                 V2 v2 = v.cSubVector(n-n/2,n).reverse();
-                const int algo2 = 
-#if TMV_OPT >= 1
-                    size != UNKNOWN && size <= 64 ? 5 :
-                    sizeof(T) == 8 ? 2 :
-                    sizeof(T) == 4 ? 4 :
-#endif
-                    1;
-                SwapV_Helper<algo2,sizeo2,V1,V2>::call(v1,v2);
+                SwapV_Helper<-3,sizeo2,V1,V2>::call(v1,v2);
             }
         }
     };
 
-    // algo 5: fully unroll
+    // algo 15: fully unroll
     template <int size, class V>
-    struct ReverseV_Helper<5,size,V> 
+    struct ReverseV_Helper<15,size,V>
     {
         template <int I, int N>
         struct Unroller
@@ -113,25 +100,17 @@ namespace tmv {
         { Unroller<0,size/2>::unroll(v); }
     };
 
-    // algo -3: Determine which algorithm to use
+    // algo 90: Call inst
     template <int size, class V>
-    struct ReverseV_Helper<-3,size,V> 
+    struct ReverseV_Helper<90,size,V>
     {
         static void call(V& v)
-        {
-            const int algo = 
-#if TMV_OPT >= 1
-                size != UNKNOWN && size <= 32 ? 5 :
-                V::iscomplex ? 2 :
-#endif
-                1;
-            ReverseV_Helper<algo,size,V>::call(v);
-        }
+        { InstReverseSelf(v.xView()); }
     };
 
     // algo 97: Conjugate
     template <int size, class V>
-    struct ReverseV_Helper<97,size,V> 
+    struct ReverseV_Helper<97,size,V>
     {
         static void call(V& v)
         {
@@ -141,17 +120,24 @@ namespace tmv {
         }
     };
 
-    // algo 98: Call inst
+    // algo -3: Determine which algorithm to use
     template <int size, class V>
-    struct ReverseV_Helper<98,size,V> 
+    struct ReverseV_Helper<-3,size,V>
     {
         static void call(V& v)
-        { InstReverseSelf(v.xView()); }
+        {
+            const int algo = 
+                TMV_OPT == 0 ? 11 :
+                size != UNKNOWN && size <= 32 ? 15 :
+                V::iscomplex ? 12 :
+                11;
+            ReverseV_Helper<algo,size,V>::call(v);
+        }
     };
 
-    // algo -1: Check for inst
+    // algo -2: Check for inst
     template <int size, class V>
-    struct ReverseV_Helper<-1,size,V> 
+    struct ReverseV_Helper<-2,size,V>
     {
         static void call(V& v)
         {
@@ -161,27 +147,34 @@ namespace tmv {
                 V::_size == UNKNOWN;
             const int algo = 
                 V::_conj ? 97 :
-                inst ? 98 :
+                inst ? 90 :
                 -3;
             ReverseV_Helper<algo,size,V>::call(v);
         }
     };
 
+    template <int size, class V>
+    struct ReverseV_Helper<-1,size,V>
+    {
+        static void call(V& v)
+        { ReverseV_Helper<-2,size,V>::call(v); }
+    };
+
     template <class V>
-    static void ReverseSelf(BaseVector_Mutable<V>& v)
+    static inline void ReverseSelf(BaseVector_Mutable<V>& v)
     {
         const int size = V::_size;
         typedef typename V::cview_type Vv;
-        Vv vv = v.cView();
-        ReverseV_Helper<-1,size,Vv>::call(vv);
+        TMV_MAYBE_REF(V,Vv) vv = v.cView();
+        ReverseV_Helper<-2,size,Vv>::call(vv);
     }
 
     template <class V>
-    static void InlineReverseSelf(BaseVector_Mutable<V>& v)
+    static inline void InlineReverseSelf(BaseVector_Mutable<V>& v)
     {
         const int size = V::_size;
         typedef typename V::cview_type Vv;
-        Vv vv = v.cView();
+        TMV_MAYBE_REF(V,Vv) vv = v.cView();
         ReverseV_Helper<-3,size,Vv>::call(vv);
     }
 

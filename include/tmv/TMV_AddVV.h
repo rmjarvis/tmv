@@ -35,7 +35,7 @@
 
 #include "TMV_BaseVector.h"
 #include "TMV_Scaling.h"
-#include "TMV_MultXV.h"
+#include "TMV_MultXV_Funcs.h"
 
 namespace tmv {
 
@@ -43,14 +43,12 @@ namespace tmv {
     // Vector = x1 * Vector + x2 * Vector
     //
 
-    template <int algo, int size, int ix1, class T1, class V1,
-              int ix2, class T2, class V2, class V3>
+    template <int algo, int size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper;
 
     // algo 0: size = 0, nothing to do
-    template <int ix1, class T1, class V1,
-              int ix2, class T2, class V2, class V3>
-    struct AddVV_Helper<0,0,ix1,T1,V1,ix2,T2,V2,V3> 
+    template <int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    struct AddVV_Helper<0,0,ix1,T1,V1,ix2,T2,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -66,9 +64,8 @@ namespace tmv {
     };  
 
     // algo 1: complex vectors with unit step, convert to real version
-    template <int size, int ix1, class T1, class V1,
-              int ix2, class T2, class V2, class V3>
-    struct AddVV_Helper<1,size,ix1,T1,V1,ix2,T2,V2,V3> 
+    template <int size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    struct AddVV_Helper<1,size,ix1,T1,V1,ix2,T2,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -104,9 +101,8 @@ namespace tmv {
     };
 
     // algo 11: simple for loop
-    template <int size, int ix1, class T1, class V1,
-              int ix2, class T2, class V2, class V3>
-    struct AddVV_Helper<11,size,ix1,T1,V1,ix2,T2,V2,V3> 
+    template <int size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    struct AddVV_Helper<11,size,ix1,T1,V1,ix2,T2,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -117,8 +113,9 @@ namespace tmv {
         {
             const int n = size == UNKNOWN ? int(v3.size()) : size;
             for(int i=0;i<n;++i) 
-                v3.ref(i) = ZProd<false,false>::prod(x1 , v1.cref(i)) +
-                    ZProd<false,false>::prod(x2 , v2.cref(i));
+                v3.ref(i) = ZSum::sum(
+                    ZProd<false,false>::prod(x1 , v1.cref(i)),
+                    ZProd<false,false>::prod(x2 , v2.cref(i)));
         }
         static void call2(
             int n, const Scaling<ix1,T1>& x1, IT1 it1,
@@ -134,9 +131,8 @@ namespace tmv {
     };  
 
     // algo 12: 2 at a time
-    template <int size, int ix1, class T1, class V1,
-              int ix2, class T2, class V2, class V3>
-    struct AddVV_Helper<12,size,ix1,T1,V1,ix2,T2,V2,V3> 
+    template <int size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    struct AddVV_Helper<12,size,ix1,T1,V1,ix2,T2,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -146,7 +142,7 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
             const int n = size == UNKNOWN ? int(v3.size()) : size;
-            call2(n,x1,v1.nonConj().begin(),x2,v2.nonConj().begin(),v3.begin());
+            call2(n,x1,v1.begin().nonConj(),x2,v2.begin().nonConj(),v3.begin());
         }
         static void call2(
             const int n, const Scaling<ix1,T1>& x1, IT1 it1,
@@ -175,9 +171,8 @@ namespace tmv {
     };
 
     // algo 13: 4 at a time
-    template <int size, int ix1, class T1, class V1,
-              int ix2, class T2, class V2, class V3>
-    struct AddVV_Helper<13,size,ix1,T1,V1,ix2,T2,V2,V3> 
+    template <int size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    struct AddVV_Helper<13,size,ix1,T1,V1,ix2,T2,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -187,7 +182,7 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
             const int n = size == UNKNOWN ? int(v3.size()) : size;
-            call2(n,x1,v1.nonConj().begin(),x2,v2.nonConj().begin(),v3.begin());
+            call2(n,x1,v1.begin().nonConj(),x2,v2.begin().nonConj(),v3.begin());
         }
         static void call2(
             const int n, const Scaling<ix1,T1>& x1, IT1 it1,
@@ -222,9 +217,8 @@ namespace tmv {
     };
 
     // algo 14: 8 at a time
-    template <int size, int ix1, class T1, class V1,
-              int ix2, class T2, class V2, class V3>
-    struct AddVV_Helper<14,size,ix1,T1,V1,ix2,T2,V2,V3> 
+    template <int size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    struct AddVV_Helper<14,size,ix1,T1,V1,ix2,T2,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -234,7 +228,7 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
             const int n = size == UNKNOWN ? int(v3.size()) : size;
-            call2(n,x1,v1.nonConj().begin(),x2,v2.nonConj().begin(),v3.begin());
+            call2(n,x1,v1.begin().nonConj(),x2,v2.begin().nonConj(),v3.begin());
         }
         static void call2(
             const int n, const Scaling<ix1,T1>& x1, IT1 it1,
@@ -281,8 +275,7 @@ namespace tmv {
     };
 
     // algo 15: fully unroll
-    template <int size, int ix1, class T1, class V1,
-              int ix2, class T2, class V2, class V3>
+    template <int size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<15,size,ix1,T1,V1,ix2,T2,V2,V3> // known size, unroll
     {
         template <int I, int N>
@@ -321,10 +314,114 @@ namespace tmv {
         { Unroller<0,size>::unroll(x1,v1,x2,v2,v3); }
     };
 
+    // algo 90: Call inst
+    template <int s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    struct AddVV_Helper<90,s,ix1,T1,V1,ix2,T2,V2,V3>
+    {
+        static void call(
+            const Scaling<ix1,T1>& x1, const V1& v1, 
+            const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
+        {
+            NoAliasMultXV<false>(x1,v1,v3);
+            NoAliasMultXV<true>(x2,v2,v3);
+        }
+    };
+
+    // algo 91: Check for aliases when calling Inst functions
+    // We don't have a separate Inst function for this.  We just
+    // split the operation into two parts: 
+    // v3 = x1*v1; 
+    // v3 += x2*v2;
+    // and let those operations call their Inst functions.
+    // However, the alias requirements for this are different than the
+    // normal ones, so we need to put some alias checking here.
+    template <int s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    struct AddVV_Helper<91,s,ix1,T1,V1,ix2,T2,V2,V3>
+    {
+        static void call(
+            const Scaling<ix1,T1>& x1, const V1& v1, 
+            const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
+        {
+            const bool s1 = SameStorage(v1,v3);
+            const bool s2 = SameStorage(v2,v3);
+
+            if (!s1 && !s2) {
+                // No aliasing
+                NoAliasMultXV<false>(x1,v1,v3);
+                NoAliasMultXV<true>(x2,v2,v3);
+            } else if (!s2) {
+                // Alias with v1 only, do v1 first
+                AliasMultXV<false>(x1,v1,v3);
+                NoAliasMultXV<true>(x2,v2,v3);
+            } else if (!s1) {
+                // Alias with v2 only, do v2 first
+                AliasMultXV<false>(x2,v2,v3);
+                NoAliasMultXV<true>(x1,v1,v3);
+            } else {
+                // Need a temporary
+                typename V1::copy_type v1c = v1;
+                AliasMultXV<false>(x2,v2,v3);
+                NoAliasMultXV<true>(x1,v1c,v3);
+            }
+        }
+    };
+
+    // algo 97: Conjugate
+    template <int s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    struct AddVV_Helper<97,s,ix1,T1,V1,ix2,T2,V2,V3>
+    {
+        static void call(
+            const Scaling<ix1,T1>& x1, const V1& v1, 
+            const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
+        {
+            typedef typename V1::const_conjugate_type V1c;
+            typedef typename V2::const_conjugate_type V2c;
+            typedef typename V3::conjugate_type V3c;
+            V1c v1c = v1.conjugate();
+            V2c v2c = v2.conjugate();
+            V3c v3c = v3.conjugate();
+            AddVV_Helper<-2,s,ix1,T1,V1c,ix2,T2,V2c,V3c>::call(
+                TMV_CONJ(x1),v1c,TMV_CONJ(x2),v2c,v3c);
+        }
+    };
+
+    // algo 99: Check for aliases when not calling Inst functions
+    template <int s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    struct AddVV_Helper<99,s,ix1,T1,V1,ix2,T2,V2,V3>
+    {
+        static void call(
+            const Scaling<ix1,T1>& x1, const V1& v1, 
+            const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
+        {
+            const bool ss1 = SameStorage(v1,v3);
+            const bool ss2 = SameStorage(v2,v3);
+            const bool s1 = ss1 && !ExactSameStorage(v1,v3);
+            const bool s2 = ss2 && !ExactSameStorage(v2,v3);
+
+            if (!s1 && !s2) {
+                // No aliasing (or no clobbering)
+                AddVV_Helper<-2,s,ix1,T1,V1,ix2,T2,V2,V3>::call(
+                    x1,v1,x2,v2,v3);
+            } else if (!ss2) {
+                // Alias with v1 only, do v1 first
+                AliasMultXV<false>(x1,v1,v3);
+                NoAliasMultXV<true>(x2,v2,v3);
+            } else if (!ss1) {
+                // Alias with v2 only, do v2 first
+                AliasMultXV<false>(x2,v2,v3);
+                NoAliasMultXV<true>(x1,v1,v3);
+            } else {
+                // Need a temporary
+                typename V1::copy_type v1c = v1;
+                AliasMultXV<false>(x2,v2,v3);
+                NoAliasMultXV<true>(x1,v1c,v3);
+            }
+        }
+    };
+
     // algo -4: No branches or copies
-    template <int size, int ix1, class T1, class V1,
-              int ix2, class T2, class V2, class V3>
-    struct AddVV_Helper<-4,size,ix1,T1,V1,ix2,T2,V2,V3> 
+    template <int size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    struct AddVV_Helper<-4,size,ix1,T1,V1,ix2,T2,V2,V3>
     {
         typedef typename V3::value_type VT;
         typedef typename V2::real_type RT;
@@ -341,11 +438,10 @@ namespace tmv {
                 V1::_conj == int(V3::_conj) && V2::_conj == int(V3::_conj) ) };
         enum { algo =  (
                 size == 0 ? 0 : 
-#if TMV_OPT >= 1
+                TMV_OPT == 0 ? 11 :
                 flatten ? 1 :
                 (sizeof(RT) == 8 && allunit && allreal) ? 12 :
                 (sizeof(RT) == 4 && allunit && allreal) ? 13 :
-#endif
                 11 ) };
         static void call(
             const Scaling<ix1,T1>& x1, const V1& v1,
@@ -369,9 +465,8 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int size, int ix1, class T1, class V1,
-              int ix2, class T2, class V2, class V3>
-    struct AddVV_Helper<-3,size,ix1,T1,V1,ix2,T2,V2,V3> 
+    template <int size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    struct AddVV_Helper<-3,size,ix1,T1,V1,ix2,T2,V2,V3>
     {
         static void call(
             const Scaling<ix1,T1>& x1, const V1& v1,
@@ -382,42 +477,8 @@ namespace tmv {
         }
     };
 
-    // algo 97: Conjugate
-    template <int s, int ix1, class T1, class V1,
-              int ix2, class T2, class V2, class V3>
-    struct AddVV_Helper<97,s,ix1,T1,V1,ix2,T2,V2,V3>
-    {
-        static void call(
-            const Scaling<ix1,T1>& x1, const V1& v1, 
-            const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
-        {
-            typedef typename V1::const_conjugate_type V1c;
-            typedef typename V2::const_conjugate_type V2c;
-            typedef typename V3::conjugate_type V3c;
-            V1c v1c = v1.conjugate();
-            V2c v2c = v2.conjugate();
-            V3c v3c = v3.conjugate();
-            AddVV_Helper<-2,s,ix1,T1,V1c,ix2,T2,V2c,V3c>::call(
-                TMV_CONJ(x1),v1c,TMV_CONJ(x2),v2c,v3c);
-        }
-    };
-
-    // algo 98: Call inst
-    template <int s, int ix1, class T1, class V1,
-              int ix2, class T2, class V2, class V3>
-    struct AddVV_Helper<98,s,ix1,T1,V1,ix2,T2,V2,V3>
-    {
-        static void call(
-            const Scaling<ix1,T1>& x1, const V1& v1, 
-            const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
-        {
-            NoAliasMultXV<false>(x1,v1,v3);
-            NoAliasMultXV<true>(x2,v2,v3);
-        }
-    };
     // algo -2: Check for inst
-    template <int s, int ix1, class T1, class V1,
-              int ix2, class T2, class V2, class V3>
+    template <int s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<-2,s,ix1,T1,V1,ix2,T2,V2,V3>
     {
         static void call(
@@ -440,90 +501,14 @@ namespace tmv {
             const bool conj = V3::_conj;
             const int algo = 
                 conj ? 97 :
-                inst ? 98 :
+                inst ? 90 :
                 -4;
             AddVV_Helper<algo,s,ix1,T1,V1,ix2,T2,V2,V3>::call(x1,v1,x2,v2,v3);
         }
     };
 
-    // algo 980: Check for aliases when calling Inst functions
-    // We don't have a separate Inst function for this.  We just
-    // split the operation into two parts: 
-    // v3 = x1*v1; 
-    // v3 += x2*v2;
-    // and let those operations call their Inst functions.
-    // However, the alias requirements for this are different than the
-    // normal ones, so we need to put some alias checking here.
-    template <int s, int ix1, class T1, class V1,
-              int ix2, class T2, class V2, class V3>
-    struct AddVV_Helper<980,s,ix1,T1,V1,ix2,T2,V2,V3>
-    {
-        static void call(
-            const Scaling<ix1,T1>& x1, const V1& v1, 
-            const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
-        {
-            const bool s1 = SameStorage(v1,v3);
-            const bool s2 = SameStorage(v2,v3);
-
-            if (!s1 && !s2) {
-                // No aliasing
-                NoAliasMultXV<false>(x1,v1,v3);
-                NoAliasMultXV<true>(x2,v2,v3);
-            } else if (!s2) { 
-                // Alias with v1 only, do v1 first
-                AliasMultXV<false>(x1,v1,v3);
-                NoAliasMultXV<true>(x2,v2,v3);
-            } else if (!s1) { 
-                // Alias with v2 only, do v2 first
-                AliasMultXV<false>(x2,v2,v3);
-                NoAliasMultXV<true>(x1,v1,v3);
-            } else { 
-                // Need a temporary
-                typename V1::copy_type v1c = v1;
-                AliasMultXV<false>(x2,v2,v3);
-                NoAliasMultXV<true>(x1,v1c,v3);
-            }
-        }
-    };
-
-    // algo 99: Check for aliases when not calling Inst functions
-    template <int s, int ix1, class T1, class V1,
-              int ix2, class T2, class V2, class V3>
-    struct AddVV_Helper<99,s,ix1,T1,V1,ix2,T2,V2,V3>
-    {
-        static void call(
-            const Scaling<ix1,T1>& x1, const V1& v1, 
-            const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
-        {
-            const bool ss1 = SameStorage(v1,v3);
-            const bool ss2 = SameStorage(v2,v3);
-            const bool s1 = ss1 && !ExactSameStorage(v1,v3);
-            const bool s2 = ss2 && !ExactSameStorage(v2,v3);
-
-            if (!s1 && !s2) {
-                // No aliasing (or no clobbering)
-                AddVV_Helper<-2,s,ix1,T1,V1,ix2,T2,V2,V3>::call(
-                    x1,v1,x2,v2,v3);
-            } else if (!ss2) { 
-                // Alias with v1 only, do v1 first
-                AliasMultXV<false>(x1,v1,v3);
-                NoAliasMultXV<true>(x2,v2,v3);
-            } else if (!ss1) { 
-                // Alias with v2 only, do v2 first
-                AliasMultXV<false>(x2,v2,v3);
-                NoAliasMultXV<true>(x1,v1,v3);
-            } else { 
-                // Need a temporary
-                typename V1::copy_type v1c = v1;
-                AliasMultXV<false>(x2,v2,v3);
-                NoAliasMultXV<true>(x1,v1c,v3);
-            }
-        }
-    };
-
     // algo -1: Check for aliases?
-    template <int s, int ix1, class T1, class V1,
-              int ix2, class T2, class V2, class V3>
+    template <int s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<-1,s,ix1,T1,V1,ix2,T2,V2,V3>
     {
         static void call(
@@ -549,16 +534,15 @@ namespace tmv {
                 V3::_size == UNKNOWN;
             const int algo = 
                 // We do a different check alias with the Inst calls.
-                inst ? 980 : 
+                inst ? 91 : 
                 checkalias ? 99 : 
                 -2;
             AddVV_Helper<algo,s,ix1,T1,V1,ix2,T2,V2,V3>::call(x1,v1,x2,v2,v3);
         }
     };
 
-    template <int ix1, class T1, class V1,
-              int ix2, class T2, class V2, class V3>
-    static void AddVV(
+    template <int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    static inline void AddVV(
         const Scaling<ix1,T1>& x1, const BaseVector_Calc<V1>& v1,
         const Scaling<ix2,T2>& x2, const BaseVector_Calc<V2>& v2,
         BaseVector_Mutable<V3>& v3)
@@ -573,16 +557,15 @@ namespace tmv {
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;
-        V1v v1v = v1.cView();
-        V2v v2v = v2.cView();
-        V3v v3v = v3.cView();
+        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
+        TMV_MAYBE_CREF(V2,V2v) v2v = v2.cView();
+        TMV_MAYBE_REF(V3,V3v) v3v = v3.cView();
         AddVV_Helper<-1,size,ix1,T1,V1v,ix2,T2,V2v,V3v>::call(
             x1,v1v,x2,v2v,v3v);
     }
 
-    template <int ix1, class T1, class V1,
-              int ix2, class T2, class V2, class V3>
-    static void NoAliasAddVV(
+    template <int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    static inline void NoAliasAddVV(
         const Scaling<ix1,T1>& x1, const BaseVector_Calc<V1>& v1,
         const Scaling<ix2,T2>& x2, const BaseVector_Calc<V2>& v2,
         BaseVector_Mutable<V3>& v3)
@@ -597,16 +580,15 @@ namespace tmv {
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;
-        V1v v1v = v1.cView();
-        V2v v2v = v2.cView();
-        V3v v3v = v3.cView();
+        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
+        TMV_MAYBE_CREF(V2,V2v) v2v = v2.cView();
+        TMV_MAYBE_REF(V3,V3v) v3v = v3.cView();
         AddVV_Helper<-2,size,ix1,T1,V1v,ix2,T2,V2v,V3v>::call(
             x1,v1v,x2,v2v,v3v);
     }
 
-    template <int ix1, class T1, class V1,
-              int ix2, class T2, class V2, class V3>
-    static void InlineAddVV(
+    template <int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    static inline void InlineAddVV(
         const Scaling<ix1,T1>& x1, const BaseVector_Calc<V1>& v1,
         const Scaling<ix2,T2>& x2, const BaseVector_Calc<V2>& v2,
         BaseVector_Mutable<V3>& v3)
@@ -621,16 +603,15 @@ namespace tmv {
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;
-        V1v v1v = v1.cView();
-        V2v v2v = v2.cView();
-        V3v v3v = v3.cView();
+        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
+        TMV_MAYBE_CREF(V2,V2v) v2v = v2.cView();
+        TMV_MAYBE_REF(V3,V3v) v3v = v3.cView();
         AddVV_Helper<-4,size,ix1,T1,V1v,ix2,T2,V2v,V3v>::call(
             x1,v1v,x2,v2v,v3v);
     }
 
-    template <int ix1, class T1, class V1,
-              int ix2, class T2, class V2, class V3>
-    static void AliasAddVV(
+    template <int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    static inline void AliasAddVV(
         const Scaling<ix1,T1>& x1, const BaseVector_Calc<V1>& v1,
         const Scaling<ix2,T2>& x2, const BaseVector_Calc<V2>& v2,
         BaseVector_Mutable<V3>& v3)
@@ -658,10 +639,10 @@ namespace tmv {
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;
-        V1v v1v = v1.cView();
-        V2v v2v = v2.cView();
-        V3v v3v = v3.cView();
-        AddVV_Helper<inst?980:99,s,ix1,T1,V1v,ix2,T2,V2v,V3v>::call(
+        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
+        TMV_MAYBE_CREF(V2,V2v) v2v = v2.cView();
+        TMV_MAYBE_REF(V3,V3v) v3v = v3.cView();
+        AddVV_Helper<inst?91:99,s,ix1,T1,V1v,ix2,T2,V2v,V3v>::call(
             x1,v1v,x2,v2v,v3v);
     }
 

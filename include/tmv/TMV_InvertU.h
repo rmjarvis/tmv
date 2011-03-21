@@ -37,42 +37,38 @@
 #include "TMV_MultUV.h"
 #include "TMV_MultUM.h"
 #include "TMV_InvertD.h"
-#include "tmv/TMV_Det.h"
-#include "tmv/TMV_TriMatrixIO.h"
-#include "tmv/TMV_MatrixIO.h"
 #include "tmv/TMV_Scaling.h"
 
 #ifdef PRINTALGO_InvU
 #include <iostream>
+#include "tmv/TMV_TriMatrixIO.h"
+#include "tmv/TMV_MatrixIO.h"
 #endif
 
-// Use the specialized 1,2,3,4 sized algorithms for the end of the
-// recursive algorithm.
-#if TMV_OPT >= 2
-#define TMV_OPT_CLEANUP
-#endif
-
-// Q1 is the maximum nops to unroll
+// The maximum nops to unroll
 #if TMV_OPT >= 3
-#define TMV_Q1 200 
+#define TMV_INVU_UNROLL 200 
 #elif TMV_OPT >= 2
-#define TMV_Q1 25
+#define TMV_INVU_UNROLL 25
 #elif TMV_OPT >= 1
-#define TMV_Q1 9
+#define TMV_INVU_UNROLL 9
 #else
-#define TMV_Q1 0
+#define TMV_INVU_UNROLL 0
 #endif
 
-// Q2 is the minimum size to keep recursing.
-#define TMV_Q2 8
+// Inline the MV (MultUV) calls.
+#if TMV_OPT >= 1
+#define TMV_INVU_INLINE_MV
+#endif
+
+// The size to stop recursing.
+#if TMV_OPT >= 3
+#define TMV_INVU_RECURSE 8
+#else
+#define TMV_INVU_RECURSE 1
+#endif
 
 namespace tmv {
-
-    // Defined below:
-    template <class M>
-    static void InvertSelf(BaseMatrix_Tri_Mutable<M>& m);
-    template <class M>
-    static void InlineInvertSelf(BaseMatrix_Tri_Mutable<M>& m);
 
     // Defined in TMV_InvertU.cpp
     template <class T>
@@ -93,8 +89,8 @@ namespace tmv {
     { static void call(M& ) {} };
 
     // algo 1: s == 1, so simplifies to a scalar quotient
-    template <class M>
-    struct InvertU_Helper<1,1,M>
+    template <int s, class M>
+    struct InvertU_Helper<1,s,M>
     {
         // m.diag is already inverted, so nothing to do.
         static void call(M& ) {}
@@ -105,14 +101,14 @@ namespace tmv {
     struct InvertU_Helper<2,s,M>
     {
         static void call(M& m)
-        { 
+        {
 #ifdef PRINTALGO_InvU
             int N = (s == UNKNOWN ? m.size() : s);
             std::cout<<"InvU algo 2: N,s,x = "<<N<<','<<s<<std::endl;
 #endif
             typedef typename M::transpose_type Mt;
             Mt mt = m.transpose();
-            InvertU_Helper<-3,s,Mt>::call(mt);
+            InvertU_Helper<-4,s,Mt>::call(mt);
         }
     };
 
@@ -135,6 +131,11 @@ namespace tmv {
             typedef typename M::real_type RT;
             typedef typename TypeSelect<u,RT,T>::type XT;
             const int xx = UNKNOWN;
+#ifdef TMV_INVU_INLINE_MV
+            const int algo2 = -4;
+#else
+            const int algo2 = -2;
+#endif
 
             for(int j=0;j<N;++j) {
                 // m.col(j,0,j) = -m.subTraiMatrix(0,j)^-1 *
@@ -142,7 +143,7 @@ namespace tmv {
                 Mc mj = m.get_col(j,0,j);
                 Mst mst = m.cSubTriMatrix(0,j); 
                 Scaling<ix,XT> invAjj(-Maybe<u>::real(m.cref(j,j)));
-                MultUV_Helper<-4,xx,false,ix,XT,Mst,Mcc,Mc>::call(
+                MultUV_Helper<algo2,xx,false,ix,XT,Mst,Mcc,Mc>::call(
                     invAjj,mst,mj,mj);
             }
         }
@@ -168,6 +169,11 @@ namespace tmv {
             typedef typename M::real_type RT;
             typedef typename TypeSelect<u,RT,T>::type XT;
             const int xx = UNKNOWN;
+#ifdef TMV_INVU_INLINE_MV
+            const int algo2 = -4;
+#else
+            const int algo2 = -2;
+#endif
 
             for(int i=N-1;i>=0;--i) {
                 // m.row(i,i+1,N) = -(m(i,i)^-1) * m.row(i,i+1,N) * 
@@ -175,7 +181,7 @@ namespace tmv {
                 Mr mi = m.get_row(i,i+1,N);
                 Mstct mstt = m.cSubTriMatrix(i+1,N).transpose();
                 Scaling<ix,XT> invAii(-Maybe<u>::real(m.cref(i,i)));
-                MultUV_Helper<-4,xx,false,ix,XT,Mstct,Mcr,Mr>::call(
+                MultUV_Helper<algo2,xx,false,ix,XT,Mstct,Mcr,Mr>::call(
                     invAii,mstt,mi,mi);
             }
         }
@@ -251,138 +257,56 @@ namespace tmv {
             Unroller<0,s>::unroll(m); 
         }
     };
-    template <class M>
-    struct InvertU_Helper<16,UNKNOWN,M>
-    {
-        static void call(M& m)
-        {
-            const int N = m.size();
-#ifdef PRINTALGO_InvU
-            std::cout<<"InvU algo 16: N,s,x = "<<N<<','<<UNKNOWN<<std::endl;
-#endif
-            const int algo2 = M::_rowmajor ? 12 : 11;
-            switch (N) {
-              case 0 :
-                   // do nothing
-                   break;
-              case 1 :
-                   InvertU_Helper<1,1,M>::call(m);
-                   break;
-              case 2 :
-                   InvertU_Helper<16,2,M>::call(m);
-                   break;
-              case 3 :
-                   InvertU_Helper<16,3,M>::call(m);
-                   break;
-              default :
-                   InvertU_Helper<algo2,UNKNOWN,M>::call(m);
-            }
-        }
-    };
 
     // algo 17: Split U into 3 sections and recurse 
     // TODO: Combine these the way I do for MultUU, etc.
     template <int s, class M>
     struct InvertU_Helper<17,s,M>
     {
-        template <int which, int dummy>
-        struct Helper2;
-
-        template <int dummy>
-        struct Helper2<0,dummy> // s == UNKNOWN
+        static void call(M& m)
         {
-            static void call(M& m)
-            {
-                const int N = m.size();
-#ifdef TMV_OPT_CLEANUP
-                const int algo2 = 16;
-#else
-                const int algo2 = M::_rowmajor ? 12 : 11;
+            const int N = m.size();
+#ifdef PRINTALGO_InvU
+            const int N = m.size();
+            std::cout<<"InvU algo 17: N,s,x = "<<N<<','<<s<<std::endl;
 #endif
-                const int xx = UNKNOWN;
-                if (N < TMV_Q2) {
-                    InvertU_Helper<algo2,xx,M>::call(m);
-                } else {
-                    // [ B00 B01 ] * [ A00 A01 ] = [ 1 0 ]
-                    // [  0  B11 ]   [  0  A11 ]   [ 0 1 ]
-                    // B00 A00 = 1
-                    // B00 A01 + B01 A11 = 0
-                    // B11 A11 = 1
-                    //
-                    // B11 = A11^-1
-                    // B00 = A00^-1
-                    // B01 = -B00 A01 B11
+            const int sp1 = IntTraits<s>::Sp1;
+            const int sp2 = IntTraits<sp1>::Sp1;
+            // nops = 1/6 n(n+1)(n+2)
+            const int nops =
+                IntTraits2<IntTraits2<s,sp1>::safeprod,sp2>::safeprod/6;
+            const bool unroll =
+                s > 10 ? false :
+                s == UNKNOWN ? false :
+                nops <= TMV_INVU_UNROLL;
+            const int algo2 =
+                s == 0 ? 0 :
+                s == 1 ? ( M::_unit ? 0 : 1 ) :
+                unroll ? 16 :
+                // For known s, always recurse down to unroll size
+                s != UNKNOWN ? 0 :
+                (TMV_INVU_RECURSE == 1) ? ( M::_unit ? 0 : 1 ) :
+                M::_rowmajor ? 12 : 11;
+            const int algo3 =  // The algorithm for N > INVU_RECURSE
+                unroll || s == 1 ? 0 : 17;
+            const int algo4 =  // The algorithm for MultUM
+                unroll || s == 1 ? 0 : -2;
 
-                    const int Nx = N > 16 ? ((((N-1)>>5)+1)<<4) : (N>>1);
-                    // (If N > 16, round N/2 up to a multiple of 16.)
-                    
-                    typedef typename M::submatrix_type Msm;
-                    typedef typename M::subtrimatrix_type Mst;
-                    typedef typename Msm::transpose_type Msmt;
-                    typedef typename M::const_submatrix_type Msmc;
-                    typedef typename M::const_subtrimatrix_type Mstc;
-                    typedef typename Mst::const_transpose_type Mstct;
-                    typedef typename Msm::const_transpose_type Msmct;
-                    typedef typename M::real_type RT;
+            if (s==UNKNOWN ? N > TMV_INVU_RECURSE : (s > 1 && !unroll)) {
+                // [ B00 B01 ] * [ A00 A01 ] = [ 1 0 ]
+                // [  0  B11 ]   [  0  A11 ]   [ 0 1 ]
+                // B00 A00 = 1
+                // B00 A01 + B01 A11 = 0
+                // B11 A11 = 1
+                //
+                // B11 = A11^-1
+                // B00 = A00^-1
+                // B01 = -B00 A01 B11
 
-                    Mst A00 = m.cSubTriMatrix(0,Nx);
-                    Msm A01 = m.cSubMatrix(0,Nx,Nx,N);
-                    Msmt A01t = A01.transpose();
-                    Mst A11 = m.cSubTriMatrix(Nx,N);
-                    Mstc A00c = A00;
-                    Msmct A01ct = A01.transpose();
-                    Mstct A11ct = A11.transpose();
-
-                    // B00 = A00^-1
-                    InvertU_Helper<17,xx,Mst>::call(A00);
-
-                    // B11 = A11^-1
-                    InvertU_Helper<17,xx,Mst>::call(A11);
-
-                    // B01 = -B00 A01
-                    Scaling<-1,RT> mone;
-                    MultUM_Helper<-4,xx,xx,false,-1,RT,Mstc,Msmc,Msm>::call(
-                        mone,A00c,A01,A01);
-
-                    // B01 = B01 B11
-                    Scaling<1,RT> one;
-                    MultUM_Helper<-4,xx,xx,false,1,RT,Mstct,Msmct,Msmt>::call(
-                        one,A11ct,A01ct,A01t);
-                }
-            }
-        };
-        template <int dummy>
-        struct Helper2<1,dummy> // s < TMV_Q2
-        {
-            static void call(M& m)
-            {
-                const int s2 = s > 20 ? UNKNOWN : s;
-                const int s2p1 = IntTraits<s2>::Sp1;
-                const int s2p2 = IntTraits<s2p1>::Sp1;
-                // nops = 1/6 n(n+1)(n+2)
-                const int nops =
-                    IntTraits2<IntTraits2<s2,s2p1>::safeprod,s2p2>::safeprod/6;
-                const bool unroll =
-                    s == UNKNOWN ? false :
-                    nops > TMV_Q1 ? false :
-                    s <= 10;
-                const int algo2 =
-                    s == 0 ? 0 :
-                    s == 1 ? ( M::_unit ? 0 : 1 ) :
-                    unroll ? 16 :
-                    M::_rowmajor ? 12 : 11;
-                InvertU_Helper<algo2,s,M>::call(m);
-            }
-        };
-        template <int dummy>
-        struct Helper2<2,dummy> // s >= TMV_Q2
-        {
-            static void call(M& m)
-            {
-                const int N = s;
                 const int Nx = N > 16 ? ((((N-1)>>5)+1)<<4) : (N>>1);
                 // (If N > 16, round N/2 up to a multiple of 16.)
-                const int Ny = N-Nx;
+                const int sx = IntTraits<s>::half_roundup;
+                const int sy = IntTraits2<s,sx>::diff;
 
                 typedef typename M::submatrix_type Msm;
                 typedef typename M::subtrimatrix_type Mst;
@@ -403,34 +327,26 @@ namespace tmv {
 
                 // B00 = A00^-1
                 // F(n)
-                InvertU_Helper<17,Nx,Mst>::call(A00);
+                InvertU_Helper<algo3,sx,Mst>::call(A00);
 
                 // B11 = A11^-1
                 // F(n)
-                InvertU_Helper<17,Ny,Mst>::call(A11);
+                InvertU_Helper<algo3,sy,Mst>::call(A11);
 
                 // B01 = -B00 A01
                 // n*n*(n+1)/2
                 Scaling<-1,RT> mone;
-                MultUM_Helper<-4,Nx,Ny,false,-1,RT,Mstc,Msmc,Msm>::call(
+                MultUM_Helper<algo4,sx,sy,false,-1,RT,Mstc,Msmc,Msm>::call(
                     mone,A00c,A01,A01);
 
                 // B01 = B01 B11
                 // n*n*(n+1)/2
                 Scaling<1,RT> one;
-                MultUM_Helper<-4,Ny,Nx,false,1,RT,Mstct,Msmct,Msmt>::call(
+                MultUM_Helper<algo4,sy,sx,false,1,RT,Mstct,Msmct,Msmt>::call(
                     one,A11ct,A01ct,A01t);
+            } else {
+                InvertU_Helper<algo2,s,M>::call(m);
             }
-        };
-        static void call(M& m)
-        {
-#ifdef PRINTALGO_InvU
-            const int N = m.size();
-            std::cout<<"InvU algo 17: N,s,x = "<<N<<','<<s<<std::endl;
-#endif
-            const int s2 = (s >= 0 && s <= 64) ? s : UNKNOWN;
-            const int which = s2 == UNKNOWN ? 0 : s2 < TMV_Q2 ? 1 : 2;
-            Helper2<which,1>::call(m);
         }
     };
 
@@ -461,6 +377,26 @@ namespace tmv {
         }
     };
 
+    // algo 90: call InstInvertSelf
+    template <int s, class M>
+    struct InvertU_Helper<90,s,M>
+    {
+        static void call(M& m)
+        { InstInvertSelf(m.xdView()); }
+    };
+
+    // algo 97: Conjugate
+    template <int s, class M>
+    struct InvertU_Helper<97,s,M>
+    {
+        static void call(M& m)
+        {
+            typedef typename M::conjugate_type Mc;
+            Mc mc = m.conjugate();
+            InvertU_Helper<-1,s,Mc>::call(mc);
+        }
+    };
+
     // algo -4: No branches or copies
     template <int s, class M>
     struct InvertU_Helper<-4,s,M>
@@ -475,15 +411,16 @@ namespace tmv {
             const int nops =
                 IntTraits2<IntTraits2<s2,s2p1>::safeprod,s2p2>::safeprod / 6;
             const bool unroll = 
+                s > 10 ? false :
                 s == UNKNOWN ? false :
-                nops > TMV_Q1 ? false :
-                s <= 10;
+                nops <= TMV_INVU_UNROLL;
             const int algo1 = 
                 M::_unit ? 0 : M::_unknowndiag ? 51 : 50;
             const int algo2 = 
                 s == 0 ? 0 :
                 s == 1 ? ( M::_unit ? 0 : 1 ) :
                 unroll ? 16 :
+                TMV_OPT == 0 ? ( M::_rowmajor ? 12 : 11 ) :
                 17;
 #ifdef PRINTALGO_InvU
             std::cout<<"InlineInvertU (algo -4): \n";
@@ -523,33 +460,21 @@ namespace tmv {
             std::cout<<"m "<<TMV_Text(m)<<std::endl;
             std::cout<<"s,algo = "<<s<<"  "<<algo<<std::endl;
 #endif
+            if (m.isSingular()) {
+#ifdef TMV_NO_THROW
+                std::cerr<<"Singular TriMatrix found\n";
+                exit(1);
+#else
+                throw Singular("TriMatrix found\n");
+#endif
+            }
             InvertU_Helper<algo,s,M>::call(m);
         }
     };
 
-    // algo 97: Conjugate
+    // algo -2: Check for inst
     template <int s, class M>
-    struct InvertU_Helper<97,s,M>
-    {
-        static void call(M& m)
-        { 
-            typedef typename M::conjugate_type Mc;
-            Mc mc = m.conjugate();
-            InvertU_Helper<-1,s,Mc>::call(mc);
-        }
-    };
-
-    // algo 98: call InstInvertSelf
-    template <int s, class M>
-    struct InvertU_Helper<98,s,M>
-    {
-        static void call(M& m)
-        { InstInvertSelf(m.xdView()); }
-    };
-
-    // algo -1: Check for inst
-    template <int s, class M>
-    struct InvertU_Helper<-1,s,M>
+    struct InvertU_Helper<-2,s,M>
     {
         static void call(M& m)
         {
@@ -560,39 +485,37 @@ namespace tmv {
             const int algo = 
                 ( s == 0 ) ? 0 :
                 M::_conj ? 97 :
-                inst ? 98 : 
+                inst ? 90 : 
                 -3;
             InvertU_Helper<algo,s,M>::call(m);
         }
     };
 
-    template <int algo, class M>
-    static void DoInvertSelf(BaseMatrix_Tri_Mutable<M>& m)
+    template <int s, class M>
+    struct InvertU_Helper<-1,s,M>
+    {
+        static void call(M& m)
+        { InvertU_Helper<-2,s,M>::call(m); }
+    };
+
+    template <class M>
+    static inline void InvertSelf(BaseMatrix_Tri_Mutable<M>& m)
     {
         typedef typename M::cview_type Mv;
-        Mv mv = m.cView();
-        if (m.isSingular()) {
-#ifdef TMV_NO_THROW
-            std::cerr<<"Singular TriMatrix found in InvertSelf\n";
-            exit(1);
-#else
-            throw SingularMatrix<M>(m.mat());
-#endif
-        }
-        InvertU_Helper<algo,M::_size,Mv>::call(mv);
+        TMV_MAYBE_REF(M,Mv) mv = m.cView();
+        InvertU_Helper<-2,M::_size,Mv>::call(mv);
     }
 
     template <class M>
-    static void InvertSelf(BaseMatrix_Tri_Mutable<M>& m)
-    { DoInvertSelf<-1>(m); }
+    static inline void InlineInvertSelf(BaseMatrix_Tri_Mutable<M>& m)
+    {
+        typedef typename M::cview_type Mv;
+        TMV_MAYBE_REF(M,Mv) mv = m.cView();
+        InvertU_Helper<-3,M::_size,Mv>::call(mv);
+    }
 
-    template <class M>
-    static void InlineInvertSelf(BaseMatrix_Tri_Mutable<M>& m)
-    { DoInvertSelf<-3>(m); }
-
-#undef TMV_Q1
-#undef TMV_Q2
-#undef TMV_Q3
+#undef TMV_INVU_UNROLL
+#undef TMV_INVU_RECURSE
 
 } // namespace tmv
 

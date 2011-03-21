@@ -92,7 +92,7 @@ namespace tmv {
     // SmallVector
     //
 
-    template <class T, int N, IndexStyle I> 
+    template <class T, int N, IndexStyle I>
     struct Traits<SmallVector<T,N,I> >
     {
         typedef T value_type;
@@ -117,16 +117,16 @@ namespace tmv {
         typedef ConstVectorView<T,UNKNOWN,false,I> const_subvector_step_type;
         typedef ConstSmallVectorView<T,N,1,false,I> const_view_type;
         typedef ConstSmallVectorView<T,N,1,false,CStyle> const_cview_type;
-        typedef ConstSmallVectorView<T,N,1,false,FortranStyle> 
+        typedef ConstSmallVectorView<T,N,1,false,FortranStyle>
             const_fview_type;
         typedef ConstVectorView<T> const_xview_type;
         typedef ConstSmallVectorView<T,N,1,false,I> const_unitview_type;
         typedef ConstSmallVectorView<T,N,1,iscomplex,I> const_conjugate_type;
         typedef ConstSmallVectorView<T,N,-1,false,I> const_reverse_type;
-        typedef ConstSmallVectorView<real_type,N,isreal?1:2,false,I> 
+        typedef ConstSmallVectorView<real_type,N,isreal?1:2,false,I>
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstSmallVectorView<real_type,isreal?N:N*2,1,false,I> 
+        typedef ConstSmallVectorView<real_type,isreal?N:N*2,1,false,I>
             const_flatten_type;
         typedef ConstSmallVectorView<T,N,1,false,I> const_nonconj_type;
         typedef SmallVectorView<T,N,1,false,I> nonconst_type;
@@ -147,7 +147,7 @@ namespace tmv {
         typedef SmallVectorView<T,N,-1,false,I> reverse_type;
         typedef SmallVectorView<real_type,N,isreal?1:2,false,I> realpart_type;
         typedef realpart_type imagpart_type;
-        typedef SmallVectorView<real_type,isreal?N:N*2,1,false,I> 
+        typedef SmallVectorView<real_type,isreal?N:N*2,1,false,I>
             flatten_type;
         typedef SmallVectorView<T,N,1,false,I> nonconj_type;
 
@@ -155,8 +155,9 @@ namespace tmv {
         typedef VIt<T,-1,false> reverse_iterator;
     };
 
-    template <class T, int N, IndexStyle I> 
-    class SmallVector : public BaseVector_Mutable<SmallVector<T,N,I> >
+    template <class T, int N, IndexStyle I>
+    class SmallVector : 
+        public BaseVector_Mutable<SmallVector<T,N,I> >
     {
     public:
 
@@ -232,7 +233,7 @@ namespace tmv {
         //
 
         type& operator=(const type& v2)
-        { 
+        {
             if (&v2 != this) base_mut::operator=(v2); 
             return *this; 
         }
@@ -264,7 +265,8 @@ namespace tmv {
     }; // SmallVector
 
     template <class T, int N>
-    class SmallVectorF : public SmallVector<T,N,FortranStyle>
+    class SmallVectorF : 
+        public SmallVector<T,N,FortranStyle>
     {
     public:
 
@@ -328,10 +330,10 @@ namespace tmv {
         typedef ConstSmallVectorView<T,N,1,C,I> const_unitview_type;
         typedef ConstSmallVectorView<T,N,S,notC,I> const_conjugate_type;
         typedef ConstSmallVectorView<T,N,negS,C,I> const_reverse_type;
-        typedef ConstSmallVectorView<real_type,N,twoS,false,I> 
+        typedef ConstSmallVectorView<real_type,N,twoS,false,I>
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstSmallVectorView<real_type,twoN,1,false,I> 
+        typedef ConstSmallVectorView<real_type,twoN,1,false,I>
             const_flatten_type;
         typedef ConstSmallVectorView<T,N,S,false,I> const_nonconj_type;
         typedef SmallVectorView<T,N,S,C,I> nonconst_type;
@@ -504,10 +506,10 @@ namespace tmv {
         typedef ConstSmallVectorView<T,N,1,C,I> const_unitview_type;
         typedef ConstSmallVectorView<T,N,S,notC,I> const_conjugate_type;
         typedef ConstSmallVectorView<T,N,negS,C,I> const_reverse_type;
-        typedef ConstSmallVectorView<real_type,N,twoS,false,I> 
+        typedef ConstSmallVectorView<real_type,N,twoS,false,I>
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstSmallVectorView<real_type,twoN,1,false,I> 
+        typedef ConstSmallVectorView<real_type,twoN,1,false,I>
             const_flatten_type;
         typedef ConstSmallVectorView<T,N,S,false,I> const_nonconj_type;
         typedef SmallVectorView<T,N,S,C,I> nonconst_type;
@@ -619,7 +621,8 @@ namespace tmv {
     }; // SmallVectorView
 
     template <class T, int N, int S, bool C>
-    class SmallVectorViewF : public SmallVectorView<T,N,S,C,FortranStyle>
+    class SmallVectorViewF : 
+        public SmallVectorView<T,N,S,C,FortranStyle>
     {
     public:
         typedef SmallVectorViewF<T,N,S,C> type;
@@ -649,24 +652,21 @@ namespace tmv {
     //
 
     template <class V, class T, int N, int S, bool C, IndexStyle I>
-    static void Swap(BaseVector_Mutable<V>& v1, SmallVectorView<T,N,S,C,I> v2)
+    static inline void Swap(BaseVector_Mutable<V>& v1, SmallVectorView<T,N,S,C,I> v2)
     { DoSwap(v1,v2); }
     template <class V, class T, int N, int S, bool C, IndexStyle I>
-    static void Swap(SmallVectorView<T,N,S,C,I> v1, BaseVector_Mutable<V>& v2)
+    static inline void Swap(SmallVectorView<T,N,S,C,I> v1, BaseVector_Mutable<V>& v2)
     { DoSwap(v1,v2); }
-    template <class T, int N, int S1, bool C1, IndexStyle I1, 
-              int S2, bool C2, IndexStyle I2>
-    static void Swap(
+    template <class T, int N, int S1, bool C1, IndexStyle I1, int S2, bool C2, IndexStyle I2>
+    static inline void Swap(
         SmallVectorView<T,N,S1,C1,I1> v1, SmallVectorView<T,N,S2,C2,I2> v2)
     { DoSwap(v1,v2); }
-    template <class T, int N, int S1, bool C1, IndexStyle I1, 
-              int S2, bool C2, IndexStyle I2>
-    static void Swap(
+    template <class T, int N, int S1, bool C1, IndexStyle I1, int S2, bool C2, IndexStyle I2>
+    static inline void Swap(
         VectorView<T,S1,C1,I1> v1, SmallVectorView<T,N,S2,C2,I2> v2)
     { DoSwap(v1,v2); }
-    template <class T, int N, int S1, bool C1, IndexStyle I1, 
-              int S2, bool C2, IndexStyle I2>
-    static void Swap(
+    template <class T, int N, int S1, bool C1, IndexStyle I1, int S2, bool C2, IndexStyle I2>
+    static inline void Swap(
         SmallVectorView<T,N,S1,C1,I1> v1, VectorView<T,S2,C2,I2> v2)
     { DoSwap(v1,v2); }
 
@@ -676,10 +676,11 @@ namespace tmv {
     //
     
     template <class T, int N, IndexStyle I>
-    static SmallVectorView<T,N,1,true,I> Conjugate(SmallVector<T,N,I>& v)
+    static inline SmallVectorView<T,N,1,true,I> Conjugate(SmallVector<T,N,I>& v)
     { return v.conjugate(); }
     template <class T, int N, int S, bool C, IndexStyle I>
-    static SmallVectorView<T,N,S,!C,I> Conjugate(SmallVectorView<T,N,S,C,I> v)
+    static inline SmallVectorView<T,N,S,!C,I> Conjugate(
+        SmallVectorView<T,N,S,C,I> v)
     { return v.conjugate(); }
 
 
@@ -687,8 +688,8 @@ namespace tmv {
     // TMV_Text functions
     //
 
-    template <class T, int N, IndexStyle I> 
-    static std::string TMV_Text(const SmallVector<T,N,I>& )
+    template <class T, int N, IndexStyle I>
+    static inline std::string TMV_Text(const SmallVector<T,N,I>& )
     {
         std::ostringstream s;
         s << "SmallVector<"<<TMV_Text(T())<<","<<N<<","<<TMV_Text(I)<<">";
@@ -696,7 +697,7 @@ namespace tmv {
     }
 
     template <class T, int N, int S, bool C, IndexStyle I>
-    static std::string TMV_Text(const SmallVectorView<T,N,S,C,I>& v)
+    static inline std::string TMV_Text(const SmallVectorView<T,N,S,C,I>& v)
     {
         std::ostringstream s;
         s << "SmallVectorView<"<<TMV_Text(T());
@@ -709,7 +710,7 @@ namespace tmv {
     }
 
     template <class T, int N, int S, bool C, IndexStyle I>
-    static std::string TMV_Text(const ConstSmallVectorView<T,N,S,C,I>& v)
+    static inline std::string TMV_Text(const ConstSmallVectorView<T,N,S,C,I>& v)
     {
         std::ostringstream s;
         s << "ConstSmallVectorView<"<<TMV_Text(T());

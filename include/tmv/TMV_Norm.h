@@ -62,26 +62,26 @@ namespace tmv {
     
 
     // This helper struct works for either Vector or Matrix "V"
-    template <int algo, class V> 
+    template <int algo, class V>
     struct Norm_Helper;
 
-    // algo 1: simple: sqrt(NormSq(v))
-    template <class V> 
-    struct Norm_Helper<1,V>
+    // algo 11: simple: sqrt(NormSq(v))
+    template <class V>
+    struct Norm_Helper<11,V>
     {
         typedef typename V::float_type RT;
         static RT call(const V& v)
         { return TMV_SQRT(v.normSq()); }
     };
 
-    // algo 2: Robust algorithm with checks for overflow and underflow.
+    // algo 12: Robust algorithm with checks for overflow and underflow.
     // This one always calls MaxAbsElement and then NormSq.
     // This is inefficient if there are no problems.
     // Since no problems is the usual case, I switched to the below
-    // version (algo 3) that calls NormSq first and then redoes it if there
+    // version (algo 13) that calls NormSq first and then redoes it if there
     // are problems.
-    template <class V> 
-    struct Norm_Helper<2,V>
+    template <class V>
+    struct Norm_Helper<12,V>
     {
         typedef typename V::float_type RT;
         static RT call(const V& v)
@@ -130,11 +130,11 @@ namespace tmv {
         }
     };
 
-    // algo 3: Robust algorithm with checks for overflow and underflow.
+    // algo 13: Robust algorithm with checks for overflow and underflow.
     // This version is slower if there is a problem, but since
     // there usually isn't a problem, it is generally faster.
-    template <class V> 
-    struct Norm_Helper<3,V>
+    template <class V>
+    struct Norm_Helper<13,V>
     {
         typedef typename V::float_type RT;
         static RT call(const V& v)
@@ -193,41 +193,9 @@ namespace tmv {
         }
     };
 
-    // algo -3: Select algorithm
-    template <class V> 
-    struct Norm_Helper<-3,V>
-    {
-        typedef typename V::float_type RT;
-        static RT call(const V& v)
-        {
-#if TMV_OPT == 0
-            const int algo = 1;
-#else
-            typedef typename V::value_type T;
-            const int algo = 
-                Traits<T>::isinteger ? 1 :
-                3;
-#endif
-            return Norm_Helper<algo,V>::call(v);
-        }
-    };
-
-    // algo 96: Transpose
-    template <class V> 
-    struct Norm_Helper<96,V>
-    {
-        typedef typename V::float_type RT;
-        static RT call(const V& v)
-        {
-            typedef typename V::const_transpose_type Vt;
-            Vt vt = v.transpose();
-            return Norm_Helper<-2,Vt>::call(vt);
-        }
-    };
-
-    // algo 98: Call inst
-    template <class V> 
-    struct Norm_Helper<98,V>
+    // algo 90: Call inst
+    template <class V>
+    struct Norm_Helper<90,V>
     {
         typedef typename V::float_type RT;
         template <class V2>
@@ -241,12 +209,67 @@ namespace tmv {
         { return InstNormF(m.mat().xdView()); }
     };
 
+    // algo 95: Conjugate Matrix
+    template <class M>
+    struct Norm_Helper<95,M>
+    {
+        typedef typename M::float_type RT;
+        static RT call(const M& m)
+        {
+            typedef typename M::const_nonconj_type Mnc;
+            Mnc mnc = m.nonConj();
+            return Norm_Helper<-2,Mnc>::call(mnc);
+        }
+    };
+
+    // algo 96: Transpose
+    template <class V>
+    struct Norm_Helper<96,V>
+    {
+        typedef typename V::float_type RT;
+        static RT call(const V& v)
+        {
+            typedef typename V::const_transpose_type Vt;
+            Vt vt = v.transpose();
+            return Norm_Helper<-2,Vt>::call(vt);
+        }
+    };
+
+    // algo 97: Conjugate Vector
+    template <class V>
+    struct Norm_Helper<97,V>
+    {
+        typedef typename V::float_type RT;
+        static RT call(const V& v)
+        {
+            typedef typename V::const_nonconj_type Vnc;
+            Vnc vnc = v.nonConj();
+            return Norm_Helper<-1,Vnc>::call(vnc);
+        }
+    };
+
+    // algo -3: Select algorithm
+    template <class V>
+    struct Norm_Helper<-3,V>
+    {
+        typedef typename V::float_type RT;
+        static RT call(const V& v)
+        {
+            typedef typename V::value_type T;
+            const int algo = 
+                TMV_OPT == 0 ? 11 :
+                Traits<T>::isinteger ? 11 :
+                13;
+            return Norm_Helper<algo,V>::call(v);
+        }
+    };
+
     // algo -2: Check for inst - Matrix
-    template <class M> 
+    template <class M>
     struct Norm_Helper<-2,M>
     {
         typedef typename M::float_type RT;
-        static RT call(const M& v)
+        static RT call(const M& m)
         {
             typedef typename M::value_type VT;
             const bool inst = 
@@ -257,24 +280,27 @@ namespace tmv {
             const bool lo = ShapeTraits<M::_shape>::lower;
             const int algo = 
                 (lo && !up) ? 96 :
-                inst ? 98 : 
+                M::_conj ? 95 :
+                inst ? 90 : 
                 -3;
-            return Norm_Helper<algo,M>::call(v);
+            return Norm_Helper<algo,M>::call(m);
         }
     };
 
     // algo -1: Check for inst - Vector
-    template <class V> 
+    template <class V>
     struct Norm_Helper<-1,V>
     {
         typedef typename V::float_type RT;
         static RT call(const V& v)
         {
+            typedef typename V::value_type VT;
             const bool inst = 
                 (V::_size == UNKNOWN || V::_size > 16) &&
-                Traits<RT>::isinst;
+                Traits<VT>::isinst;
             const int algo = 
-                inst ? 98 : 
+                V::_conj ? 97 :
+                inst ? 90 : 
                 -3;
             return Norm_Helper<algo,V>::call(v);
         }
@@ -283,51 +309,52 @@ namespace tmv {
 
 
     template <class V>
-    static typename V::float_type InlineNorm2(const BaseVector_Calc<V>& v)
+    static inline typename V::float_type InlineNorm2(
+        const BaseVector_Calc<V>& v)
     {
-        typedef typename V::const_cview_type::const_nonconj_type Vv;
-        Vv vv = v.cView().nonConj();
+        typedef typename V::const_cview_type Vv;
+        TMV_MAYBE_CREF(V,Vv) vv = v.cView();
         return Norm_Helper<-3,Vv>::call(vv);
     }
 
     template <class V>
-    static typename V::float_type DoNorm2(const BaseVector_Calc<V>& v)
+    static inline typename V::float_type DoNorm2(const BaseVector_Calc<V>& v)
     {
-        typedef typename V::const_cview_type::const_nonconj_type Vv;
-        Vv vv = v.cView().nonConj();
+        typedef typename V::const_cview_type Vv;
+        TMV_MAYBE_CREF(V,Vv) vv = v.cView();
         return Norm_Helper<-1,Vv>::call(vv);
     }
 
     template <class M>
-    static typename M::float_type InlineNormF(const BaseMatrix_Rec<M>& m)
+    static inline typename M::float_type InlineNormF(const BaseMatrix_Rec<M>& m)
     {   
-        typedef typename M::const_cview_type::const_nonconj_type Mv;
-        Mv mv = m.cView().nonConj();
+        typedef typename M::const_cview_type Mv;
+        TMV_MAYBE_CREF(M,Mv) mv = m.cView();
         return Norm_Helper<-3,Mv>::call(mv);
     }   
 
     template <class M>
-    static typename M::float_type DoNormF(const BaseMatrix_Rec<M>& m)
+    static inline typename M::float_type DoNormF(const BaseMatrix_Rec<M>& m)
     {
-        typedef typename M::const_cview_type::const_nonconj_type Mv;
-        Mv mv = m.cView().nonConj();
+        typedef typename M::const_cview_type Mv;
+        TMV_MAYBE_CREF(M,Mv) mv = m.cView();
         return Norm_Helper<-2,Mv>::call(mv);
     }
 
 
     template <class M>
-    static typename M::float_type InlineNormF(const BaseMatrix_Tri<M>& m)
+    static inline typename M::float_type InlineNormF(const BaseMatrix_Tri<M>& m)
     {   
-        typedef typename M::const_cview_type::const_nonconj_type Mv;
-        Mv mv = m.cView().nonConj();
+        typedef typename M::const_cview_type Mv;
+        TMV_MAYBE_CREF(M,Mv) mv = m.cView();
         return Norm_Helper<-3,Mv>::call(mv);
     }   
 
     template <class M>
-    static typename M::float_type DoNormF(const BaseMatrix_Tri<M>& m)
+    static inline typename M::float_type DoNormF(const BaseMatrix_Tri<M>& m)
     {
-        typedef typename M::const_cview_type::const_nonconj_type Mv;
-        Mv mv = m.cView().nonConj();
+        typedef typename M::const_cview_type Mv;
+        TMV_MAYBE_CREF(M,Mv) mv = m.cView();
         return Norm_Helper<-2,Mv>::call(mv);
     }
 

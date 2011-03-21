@@ -54,15 +54,10 @@ namespace tmv {
     // First the generic implementations for any type T.
     // If we have SSE commands, therea are specialized double and float
     // versions below.
-    // Note: add is always true the way I use this now, but I've left
-    // in the Maybe<add> bits, in case I ever want to recover the
-    // add = false possibility.
     template <int ix, class T>
     static void generic_multmm_16_16_16(
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     {
-        const bool add = true;
-
         T a0, a1;
         T b0, b1;
         T C00, C01, C10, C11;
@@ -75,13 +70,13 @@ namespace tmv {
             b1 = B0[16]; 
             i2 = 4; do {
                 // 1
-                C00 = Maybe<add && (ix==1)>::select(C0[0] , T(0));
+                C00 = Maybe<(ix==1)>::select(C0[0] , T(0));
                 a0 = A0[0];  c00 = a0 * b0; C00 += c00;
-                C10 = Maybe<add && (ix==1)>::select(C0[1] , T(0));
+                C10 = Maybe<(ix==1)>::select(C0[1] , T(0));
                 a1 = A0[16]; c10 = a1 * b0; C10 += c10;
-                C01 = Maybe<add && (ix==1)>::select(C0[16] , T(0));
+                C01 = Maybe<(ix==1)>::select(C0[16] , T(0));
                 c01 = a0 * b1; C01 += c01;
-                C11 = Maybe<add && (ix==1)>::select(C0[17] , T(0));
+                C11 = Maybe<(ix==1)>::select(C0[17] , T(0));
                 b0 = B0[1];  c11 = a1 * b1; C11 += c11;
 
                 // 2
@@ -170,17 +165,17 @@ namespace tmv {
 
                 // 16
                 a0 = A0[15]; c00 = a0 * b0; C00 += c00;
-                Maybe<add && (ix!=1)>::add(C0[0] , x * C00);
-                C00 = Maybe<add && (ix==1)>::select(C0[2]  , T(0));
+                Maybe<(ix!=1)>::add(C0[0] , x * C00);
+                C00 = Maybe<(ix==1)>::select(C0[2]  , T(0));
                 a1 = A0[31]; c10 = a1 * b0; C10 += c10;
-                Maybe<add && (ix!=1)>::add(C0[1] , x * C10);
-                C10 = Maybe<add && (ix==1)>::select(C0[3]  , T(0));
+                Maybe<(ix!=1)>::add(C0[1] , x * C10);
+                C10 = Maybe<(ix==1)>::select(C0[3]  , T(0));
                 b1 = B0[31]; c01 = a0 * b1; C01 += c01;
-                Maybe<add && (ix!=1)>::add(C0[16] , x * C01);
-                C01 = Maybe<add && (ix==1)>::select(C0[18] , T(0));
+                Maybe<(ix!=1)>::add(C0[16] , x * C01);
+                C01 = Maybe<(ix==1)>::select(C0[18] , T(0));
                 c11 = a1 * b1; C11 += c11;
-                Maybe<add && (ix!=1)>::add(C0[17] , x * C11);
-                C11 = Maybe<add && (ix==1)>::select(C0[19] , T(0));
+                Maybe<(ix!=1)>::add(C0[17] , x * C11);
+                C11 = Maybe<(ix==1)>::select(C0[19] , T(0));
 
                 // 16
                 a0 = A0[47]; c00 = a0 * b0; C00 += c00;
@@ -274,13 +269,13 @@ namespace tmv {
 
                 // 1
                 a0 = A0[32]; c00 = a0 * b0; C00 += c00;
-                Maybe<add && (ix!=1)>::add(C0[ 2] , x * C00);
+                Maybe<(ix!=1)>::add(C0[ 2] , x * C00);
                 a1 = A0[48]; c10 = a1 * b0; C10 += c10;
-                Maybe<add && (ix!=1)>::add(C0[ 3] , x * C10);
+                Maybe<(ix!=1)>::add(C0[ 3] , x * C10);
                 b1 = B0[16]; c01 = a0 * b1; C01 += c01;
-                Maybe<add && (ix!=1)>::add(C0[18] , x * C01);
+                Maybe<(ix!=1)>::add(C0[18] , x * C01);
                 A0 += 64;    c11 = a1 * b1; C11 += c11;
-                Maybe<add && (ix!=1)>::add(C0[19] , x * C11);
+                Maybe<(ix!=1)>::add(C0[19] , x * C11);
                 C0 += 4;
             } while (--i2);
             A0 -= 256;
@@ -297,7 +292,6 @@ namespace tmv {
         const int M_4 = M>>2; // M_4 = M/4
         const int Mc = M-(M_4<<2); // Mc = M%4
         const int Mx16 = M<<4; // = M*16
-        const bool add = true;
 
         T a0, a1;
         T b0, b1;
@@ -313,13 +307,13 @@ namespace tmv {
             b1 = B0[16]; 
             i = M_4; if (i) do {
                 // 1
-                C00 = Maybe<add && (ix==1)>::select(C0[0] , T(0));
+                C00 = Maybe<(ix==1)>::select(C0[0] , T(0));
                 a0 = A0[0];  c00 = a0 * b0; C00 += c00;
-                C10 = Maybe<add && (ix==1)>::select(C0[1] , T(0));
+                C10 = Maybe<(ix==1)>::select(C0[1] , T(0));
                 a1 = A0[16]; c10 = a1 * b0; C10 += c10;
-                C01 = Maybe<add && (ix==1)>::select(C1[0] , T(0));
+                C01 = Maybe<(ix==1)>::select(C1[0] , T(0));
                 c01 = a0 * b1; C01 += c01;
-                C11 = Maybe<add && (ix==1)>::select(C1[1] , T(0));
+                C11 = Maybe<(ix==1)>::select(C1[1] , T(0));
                 b0 = B0[1];  c11 = a1 * b1; C11 += c11;
 
                 // 2
@@ -408,17 +402,17 @@ namespace tmv {
 
                 // 16
                 a0 = A0[15]; c00 = a0 * b0; C00 += c00;
-                Maybe<add && (ix!=1)>::add(C0[0] , x * C00);
-                C00 = Maybe<add && (ix==1)>::select(C0[2]  , T(0));
+                Maybe<(ix!=1)>::add(C0[0] , x * C00);
+                C00 = Maybe<(ix==1)>::select(C0[2]  , T(0));
                 a1 = A0[31]; c10 = a1 * b0; C10 += c10;
-                Maybe<add && (ix!=1)>::add(C0[1] , x * C10);
-                C10 = Maybe<add && (ix==1)>::select(C0[3]  , T(0));
+                Maybe<(ix!=1)>::add(C0[1] , x * C10);
+                C10 = Maybe<(ix==1)>::select(C0[3]  , T(0));
                 b1 = B0[31]; c01 = a0 * b1; C01 += c01;
-                Maybe<add && (ix!=1)>::add(C1[0] , x * C01);
-                C01 = Maybe<add && (ix==1)>::select(C1[2] , T(0));
+                Maybe<(ix!=1)>::add(C1[0] , x * C01);
+                C01 = Maybe<(ix==1)>::select(C1[2] , T(0));
                 c11 = a1 * b1; C11 += c11;
-                Maybe<add && (ix!=1)>::add(C1[1] , x * C11);
-                C11 = Maybe<add && (ix==1)>::select(C1[3] , T(0));
+                Maybe<(ix!=1)>::add(C1[1] , x * C11);
+                C11 = Maybe<(ix==1)>::select(C1[3] , T(0));
 
                 // 16
                 a0 = A0[47]; c00 = a0 * b0; C00 += c00;
@@ -512,21 +506,21 @@ namespace tmv {
 
                 // 1
                 a0 = A0[32]; c00 = a0 * b0; C00 += c00;
-                Maybe<add && (ix!=1)>::add(C0[ 2] , x * C00);
+                Maybe<(ix!=1)>::add(C0[ 2] , x * C00);
                 a1 = A0[48]; c10 = a1 * b0; C10 += c10;
-                Maybe<add && (ix!=1)>::add(C0[ 3] , x * C10);
+                Maybe<(ix!=1)>::add(C0[ 3] , x * C10);
                 b1 = B0[16]; c01 = a0 * b1; C01 += c01;
-                Maybe<add && (ix!=1)>::add(C1[ 2] , x * C01);
+                Maybe<(ix!=1)>::add(C1[ 2] , x * C01);
                 A0 += 64;    c11 = a1 * b1; C11 += c11;
-                Maybe<add && (ix!=1)>::add(C1[ 3] , x * C11);
+                Maybe<(ix!=1)>::add(C1[ 3] , x * C11);
                 C0 += 4;
                 C1 += 4;
             } while (--i);
             i = Mc; if (i) do {
                 // 1
-                C00 = Maybe<add && (ix==1)>::select(C0[0] , T(0));
+                C00 = Maybe<(ix==1)>::select(C0[0] , T(0));
                 a0 = A0[0];  c00 = a0 * b0; C00 += c00;
-                C01 = Maybe<add && (ix==1)>::select(C1[0] , T(0));
+                C01 = Maybe<(ix==1)>::select(C1[0] , T(0));
                 b1 = B0[16]; c01 = a0 * b1; C01 += c01;
                 b0 = B0[1];
 
@@ -602,9 +596,9 @@ namespace tmv {
 
                 // 16
                 a0 = A0[15]; c00 = a0 * b0; C00 += c00; A0 += 16;
-                Maybe<add && (ix!=1)>::add(*C0++ , x * C00);
+                Maybe<(ix!=1)>::add(*C0++ , x * C00);
                 b1 = B0[31]; c01 = a0 * b1; C01 += c01;
-                Maybe<add && (ix!=1)>::add(*C1++ , x * C01);
+                Maybe<(ix!=1)>::add(*C1++ , x * C01);
                 b0 = B0[0];
             } while (--i);
             A0 -= Mx16;
@@ -621,7 +615,6 @@ namespace tmv {
         const int N = (N2 == UNKNOWN ? N1 : N2);
         const int N_2 = N>>1; // N_2 = N/2
         const int Nc = N-(N_2<<1); // Nc = N%2
-        const bool add = true;
 
         T a0, a1;
         T b0, b1;
@@ -635,13 +628,13 @@ namespace tmv {
             b1 = B0[16]; 
             i = 4; do {
                 // 1
-                C00 = Maybe<add && (ix==1)>::select(C0[0] , T(0));
+                C00 = Maybe<(ix==1)>::select(C0[0] , T(0));
                 a0 = A0[0];  c00 = a0 * b0; C00 += c00;
-                C10 = Maybe<add && (ix==1)>::select(C0[1] , T(0));
+                C10 = Maybe<(ix==1)>::select(C0[1] , T(0));
                 a1 = A0[16]; c10 = a1 * b0; C10 += c10;
-                C01 = Maybe<add && (ix==1)>::select(C0[16] , T(0));
+                C01 = Maybe<(ix==1)>::select(C0[16] , T(0));
                 c01 = a0 * b1; C01 += c01;
-                C11 = Maybe<add && (ix==1)>::select(C0[17] , T(0));
+                C11 = Maybe<(ix==1)>::select(C0[17] , T(0));
                 b0 = B0[1];  c11 = a1 * b1; C11 += c11;
 
                 // 2
@@ -730,17 +723,17 @@ namespace tmv {
 
                 // 16
                 a0 = A0[15]; c00 = a0 * b0; C00 += c00;
-                Maybe<add && (ix!=1)>::add(C0[0] , x * C00);
-                C00 = Maybe<add && (ix==1)>::select(C0[2]  , T(0));
+                Maybe<(ix!=1)>::add(C0[0] , x * C00);
+                C00 = Maybe<(ix==1)>::select(C0[2]  , T(0));
                 a1 = A0[31]; c10 = a1 * b0; C10 += c10;
-                Maybe<add && (ix!=1)>::add(C0[1] , x * C10);
-                C10 = Maybe<add && (ix==1)>::select(C0[3]  , T(0));
+                Maybe<(ix!=1)>::add(C0[1] , x * C10);
+                C10 = Maybe<(ix==1)>::select(C0[3]  , T(0));
                 b1 = B0[31]; c01 = a0 * b1; C01 += c01;
-                Maybe<add && (ix!=1)>::add(C0[16] , x * C01);
-                C01 = Maybe<add && (ix==1)>::select(C0[18] , T(0));
+                Maybe<(ix!=1)>::add(C0[16] , x * C01);
+                C01 = Maybe<(ix==1)>::select(C0[18] , T(0));
                 c11 = a1 * b1; C11 += c11;
-                Maybe<add && (ix!=1)>::add(C0[17] , x * C11);
-                C11 = Maybe<add && (ix==1)>::select(C0[19] , T(0));
+                Maybe<(ix!=1)>::add(C0[17] , x * C11);
+                C11 = Maybe<(ix==1)>::select(C0[19] , T(0));
 
                 // 16
                 a0 = A0[47]; c00 = a0 * b0; C00 += c00;
@@ -834,13 +827,13 @@ namespace tmv {
 
                 // 1
                 a0 = A0[32]; c00 = a0 * b0; C00 += c00;
-                Maybe<add && (ix!=1)>::add(C0[ 2] , x * C00);
+                Maybe<(ix!=1)>::add(C0[ 2] , x * C00);
                 a1 = A0[48]; c10 = a1 * b0; C10 += c10;
-                Maybe<add && (ix!=1)>::add(C0[ 3] , x * C10);
+                Maybe<(ix!=1)>::add(C0[ 3] , x * C10);
                 b1 = B0[16]; c01 = a0 * b1; C01 += c01;
-                Maybe<add && (ix!=1)>::add(C0[18] , x * C01);
+                Maybe<(ix!=1)>::add(C0[18] , x * C01);
                 A0 += 64;    c11 = a1 * b1; C11 += c11;
-                Maybe<add && (ix!=1)>::add(C0[19] , x * C11);
+                Maybe<(ix!=1)>::add(C0[19] , x * C11);
                 C0 += 4;
             } while (--i);
             A0 -= 256;
@@ -851,9 +844,9 @@ namespace tmv {
             b0 = B0[0]; 
             i = 4; do {
                 // 1
-                C00 = Maybe<add && (ix==1)>::select(C0[0] , T(0));
+                C00 = Maybe<(ix==1)>::select(C0[0] , T(0));
                 a0 = A0[0];  c00 = a0 * b0; C00 += c00;
-                C10 = Maybe<add && (ix==1)>::select(C0[1] , T(0));
+                C10 = Maybe<(ix==1)>::select(C0[1] , T(0));
                 a1 = A0[16]; c10 = a1 * b0; C10 += c10;
                 b0 = B0[1];  
 
@@ -929,11 +922,11 @@ namespace tmv {
 
                 // 16
                 a0 = A0[15]; c00 = a0 * b0; C00 += c00;
-                Maybe<add && (ix!=1)>::add(C0[0] , x * C00);
-                C00 = Maybe<add && (ix==1)>::select(C0[2]  , T(0));
+                Maybe<(ix!=1)>::add(C0[0] , x * C00);
+                C00 = Maybe<(ix==1)>::select(C0[2]  , T(0));
                 a1 = A0[31]; c10 = a1 * b0; C10 += c10;
-                Maybe<add && (ix!=1)>::add(C0[1] , x * C10);
-                C10 = Maybe<add && (ix==1)>::select(C0[3]  , T(0));
+                Maybe<(ix!=1)>::add(C0[1] , x * C10);
+                C10 = Maybe<(ix==1)>::select(C0[3]  , T(0));
 
                 // 16
                 a0 = A0[47]; c00 = a0 * b0; C00 += c00;
@@ -1012,9 +1005,9 @@ namespace tmv {
 
                 // 1
                 a0 = A0[32]; c00 = a0 * b0; C00 += c00;
-                Maybe<add && (ix!=1)>::add(C0[ 2] , x * C00);
+                Maybe<(ix!=1)>::add(C0[ 2] , x * C00);
                 a1 = A0[48]; c10 = a1 * b0; C10 += c10;
-                Maybe<add && (ix!=1)>::add(C0[ 3] , x * C10);
+                Maybe<(ix!=1)>::add(C0[ 3] , x * C10);
                 A0 += 64;    
                 C0 += 4;
             } while (--i);
@@ -1035,7 +1028,6 @@ namespace tmv {
         const int Kcm1 = Kc-1;
         const int Kx16 = K<<4; // = K * 16
         const int Kx2 = K<<1; // = K * 2
-        const bool add = true;
 
         T a0, a1;
         T b0, b1;
@@ -1050,10 +1042,10 @@ namespace tmv {
 
         j = 8; do {
             i = 8; do {
-                C00 = Maybe<add && (ix==1)>::select(C0[0] , T(0));
-                C01 = Maybe<add && (ix==1)>::select(C1[0] , T(0));
-                C10 = Maybe<add && (ix==1)>::select(C0[1] , T(0));
-                C11 = Maybe<add && (ix==1)>::select(C1[1] , T(0));
+                C00 = Maybe<(ix==1)>::select(C0[0] , T(0));
+                C01 = Maybe<(ix==1)>::select(C1[0] , T(0));
+                C10 = Maybe<(ix==1)>::select(C0[1] , T(0));
+                C11 = Maybe<(ix==1)>::select(C1[1] , T(0));
                 b0 = B0[0];
                 k = K_4; if (k) do {
                     a0 = A0[0]; c00 = a0 * b0; C00 += c00;
@@ -1083,10 +1075,10 @@ namespace tmv {
                 a1 = *A1++; c10 = a1 * b0; C10 += c10;
                 b1 = *B1++; c01 = a0 * b1; C01 += c01;
                 ++B0;       c11 = a1 * b1; C11 += c11;
-                Maybe<add && (ix!=1)>::add(C0[0] , x * C00);
-                Maybe<add && (ix!=1)>::add(C0[1] , x * C10); C0 += 2;
-                Maybe<add && (ix!=1)>::add(C1[0] , x * C01);
-                Maybe<add && (ix!=1)>::add(C1[1] , x * C11); C1 += 2;
+                Maybe<(ix!=1)>::add(C0[0] , x * C00);
+                Maybe<(ix!=1)>::add(C0[1] , x * C10); C0 += 2;
+                Maybe<(ix!=1)>::add(C1[0] , x * C01);
+                Maybe<(ix!=1)>::add(C1[1] , x * C11); C1 += 2;
                 A0 += K; A1 += K;
                 B0 -= K; B1 -= K;
             } while (--i);
@@ -1117,7 +1109,6 @@ namespace tmv {
         const int Kdx2 = Kd<<1; // = Kd * 2
         const int Kdx2mK = Kdx2-K; // = Kd * 2 - K
 
-        const bool add = true;
 
         T a0, a1;
         T b0, b1;
@@ -1133,10 +1124,10 @@ namespace tmv {
         j = N_2; if (j) do {
             i = M_2; if (i) do {
                 b0 = *B0++;
-                C00 = Maybe<add && (ix==1)>::select(C0[0] , T(0));
-                C01 = Maybe<add && (ix==1)>::select(C1[0] , T(0));
-                C10 = Maybe<add && (ix==1)>::select(C0[1] , T(0));
-                C11 = Maybe<add && (ix==1)>::select(C1[1] , T(0));
+                C00 = Maybe<(ix==1)>::select(C0[0] , T(0));
+                C01 = Maybe<(ix==1)>::select(C1[0] , T(0));
+                C10 = Maybe<(ix==1)>::select(C0[1] , T(0));
+                C11 = Maybe<(ix==1)>::select(C1[1] , T(0));
                 k = K_4; if (k) do {
                     a0 = A0[0]; c00 = a0 * b0; C00 += c00;
                     a1 = A1[0]; c10 = a1 * b0; C10 += c10;
@@ -1165,17 +1156,17 @@ namespace tmv {
                 a1 = *A1++; c10 = a1 * b0; C10 += c10;
                 b1 = *B1++; c01 = a0 * b1; C01 += c01;
                 c11 = a1 * b1; C11 += c11;
-                Maybe<add && (ix!=1)>::add(C0[0] , x * C00);
-                Maybe<add && (ix!=1)>::add(C0[1] , x * C10); C0 += 2;
-                Maybe<add && (ix!=1)>::add(C1[0] , x * C01);
-                Maybe<add && (ix!=1)>::add(C1[1] , x * C11); C1 += 2;
+                Maybe<(ix!=1)>::add(C0[0] , x * C00);
+                Maybe<(ix!=1)>::add(C0[1] , x * C10); C0 += 2;
+                Maybe<(ix!=1)>::add(C1[0] , x * C01);
+                Maybe<(ix!=1)>::add(C1[1] , x * C11); C1 += 2;
                 A0 += Kdx2mK; A1 += Kdx2mK;
                 B0 -= K; B1 -= K;
             } while (--i);
             if (Mc) {
                 b0 = *B0++;
-                C00 = Maybe<add && (ix==1)>::select(C0[0] , T(0));
-                C01 = Maybe<add && (ix==1)>::select(C1[0] , T(0));
+                C00 = Maybe<(ix==1)>::select(C0[0] , T(0));
+                C01 = Maybe<(ix==1)>::select(C1[0] , T(0));
                 k = K_4; if (k) do {
                     a0 = A0[0]; c00 = a0 * b0; C00 += c00;
                     b1 = B1[0]; c01 = a0 * b1; C01 += c01;
@@ -1197,8 +1188,8 @@ namespace tmv {
                 } while (--k);
                 a0 = *A0++; c00 = a0 * b0; C00 += c00;
                 b1 = *B1++; c01 = a0 * b1; C01 += c01;
-                Maybe<add && (ix!=1)>::add(*C0++, x * C00);
-                Maybe<add && (ix!=1)>::add(*C1++ , x * C01);
+                Maybe<(ix!=1)>::add(*C0++, x * C00);
+                Maybe<(ix!=1)>::add(*C1++ , x * C01);
                 A0 -= K;
                 B0 -= K; B1 -= K;
             }
@@ -1209,8 +1200,8 @@ namespace tmv {
         if (Nc) {
             i = M_2; if (i) do {
                 b0 = *B0++;
-                C00 = Maybe<add && (ix==1)>::select(C0[0] , T(0));
-                C10 = Maybe<add && (ix==1)>::select(C0[1] , T(0));
+                C00 = Maybe<(ix==1)>::select(C0[0] , T(0));
+                C10 = Maybe<(ix==1)>::select(C0[1] , T(0));
                 k = K_4; if (k) do {
                     a0 = A0[0]; c00 = a0 * b0; C00 += c00;
                     a1 = A1[0]; c10 = a1 * b0; C10 += c10;
@@ -1232,14 +1223,14 @@ namespace tmv {
                 } while (--k);
                 a0 = *A0++; c00 = a0 * b0; C00 += c00;
                 a1 = *A1++; c10 = a1 * b0; C10 += c10;
-                Maybe<add && (ix!=1)>::add(C0[0] , x * C00);
-                Maybe<add && (ix!=1)>::add(C0[1] , x * C10); C0 += 2;
+                Maybe<(ix!=1)>::add(C0[0] , x * C00);
+                Maybe<(ix!=1)>::add(C0[1] , x * C10); C0 += 2;
                 A0 += Kdx2mK; A1 += Kdx2mK;
                 B0 -= K;
             } while (--i);
             if (Mc) {
                 b0 = *B0++;
-                C00 = Maybe<add && (ix==1)>::select(C0[0] , T(0));
+                C00 = Maybe<(ix==1)>::select(C0[0] , T(0));
                 k = K_4; if (k) do {
                     a0 = A0[0]; c00 = a0 * b0; C00 += c00;
                     b0 = B0[0]; 
@@ -1255,7 +1246,7 @@ namespace tmv {
                     b0 = *B0++;
                 } while (--k);
                 a0 = *A0++; c00 = a0 * b0; C00 += c00;
-                Maybe<add && (ix!=1)>::add(*C0++, x * C00);
+                Maybe<(ix!=1)>::add(*C0++, x * C00);
             }
         }
     }
@@ -1264,49 +1255,49 @@ namespace tmv {
     // There are always inlined, but get overloaded below
     // as necessary depending on the INST_* definitions.
     template <int ix, class T>
-    static void multmm_16_16_16(
+    static inline void multmm_16_16_16(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { generic_multmm_16_16_16(x,A0,B0,C0); }
 
     template <int ix, class T>
-    static void multmm_M_16_16(
+    static inline void multmm_M_16_16(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { generic_multmm_M_16_16<UNKNOWN>(M,x,A0,B0,C0); }
 
     template <int M2, int ix, class T>
-    static void multmm_M_16_16_known(
+    static inline void multmm_M_16_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { generic_multmm_M_16_16<M2>(M,x,A0,B0,C0); }
 
     template <int ix, class T>
-    static void multmm_16_N_16(
+    static inline void multmm_16_N_16(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { generic_multmm_16_N_16<UNKNOWN>(N,x,A0,B0,C0); }
 
     template <int N2, int ix, class T>
-    static void multmm_16_N_16_known(
+    static inline void multmm_16_N_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { generic_multmm_16_N_16<N2>(N,x,A0,B0,C0); }
 
     template <int ix, class T>
-    static void multmm_16_16_K(
+    static inline void multmm_16_16_K(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { generic_multmm_16_16_K<UNKNOWN>(K,x,A0,B0,C0); }
 
     template <int K2, int ix, class T>
-    static void multmm_16_16_K_known(
+    static inline void multmm_16_16_K_known(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { generic_multmm_16_16_K<K2>(K,x,A0,B0,C0); }
 
     template <int ix, class T>
-    static void multmm_M_N_K(
+    static inline void multmm_M_N_K(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { generic_multmm_M_N_K(M,N,K,K,x,A0,B0,C0); }
@@ -1337,7 +1328,6 @@ namespace tmv {
         TMVAssert( ((size_t)(A) & 0xf) == 0 );
         TMVAssert( ((size_t)(B) & 0xf) == 0 );
         TMVAssert( ((size_t)(C0) & 0xf) == 0 );
-        const bool add = true;
 
         __m128 C00, C01, C10, C11;
         __m128 c00, c01, c10, c11;
@@ -1370,42 +1360,34 @@ namespace tmv {
                 c01 = _mm_mul_ps(A0[ 3],B0[ 7]); d01.xm = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[ 7],B0[ 7]); d11.xm = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[ 0] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
+                C0[ 0] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
                 C00 = _mm_mul_ps(A0[11],B0[3]);
                 C10 = _mm_mul_ps(A0[15],B0[3]);
                 C01 = _mm_mul_ps(A0[11],B0[7]);
                 C11 = _mm_mul_ps(A0[15],B0[7]);
 
-                Maybe<add>::add(C0[ 1] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
+                C0[ 1] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
                 c00 = _mm_mul_ps(A0[10],B0[2]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[14],B0[2]); C10 = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[10],B0[6]); C01 = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[14],B0[6]); C11 = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[16] , x * (
-                        d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
+                C0[16] += x * (d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]);
                 c00 = _mm_mul_ps(A0[ 9],B0[1]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[13],B0[1]); C10 = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[ 9],B0[5]); C01 = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[13],B0[5]); C11 = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[17] , x * (
-                        d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]));
+                C0[17] += x * (d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]);
                 c00 = _mm_mul_ps(A0[ 8],B0[0]); d00.xm = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[12],B0[0]); d10.xm = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[ 8],B0[4]); d01.xm = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[12],B0[4]); d11.xm = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[ 2] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
-                Maybe<add>::add(C0[ 3] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
-                Maybe<add>::add(C0[18] , x * (
-                        d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
-                Maybe<add>::add(C0[19] , x * (
-                        d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]));
+                C0[ 2] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
+                C0[ 3] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
+                C0[18] += x * (d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]);
+                C0[19] += x * (d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]);
 
                 A0 += 16;
                 C0 += 4;
@@ -1423,7 +1405,6 @@ namespace tmv {
         TMVAssert( ((size_t)(A) & 0xf) == 0 );
         TMVAssert( ((size_t)(B) & 0xf) == 0 );
         TMVAssert( ((size_t)(C0) & 0xf) == 0 );
-        const bool add = true;
 
         __m128 C00, C01, C10, C11;
         __m128 c00, c01, c10, c11;
@@ -1476,29 +1457,25 @@ namespace tmv {
                 c01 = _mm_mul_ps(A0[ 7],B0[15]); d01.xm = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[15],B0[15]); d11.xm = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[ 0] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
+                C0[ 0] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
                 C00 = _mm_mul_ps(A0[23],B0[ 7]);
                 C10 = _mm_mul_ps(A0[31],B0[ 7]);
                 C01 = _mm_mul_ps(A0[23],B0[15]);
                 C11 = _mm_mul_ps(A0[31],B0[15]);
 
-                Maybe<add>::add(C0[ 1] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
+                C0[ 1] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
                 c00 = _mm_mul_ps(A0[22],B0[ 6]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[30],B0[ 6]); C10 = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[22],B0[14]); C01 = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[30],B0[14]); C11 = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[16] , x * (
-                        d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
+                C0[16] += x * (d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]);
                 c00 = _mm_mul_ps(A0[21],B0[ 5]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[29],B0[ 5]); C10 = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[21],B0[13]); C01 = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[29],B0[13]); C11 = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[17] , x * (
-                        d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]));
+                C0[17] += x * (d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]);
                 c00 = _mm_mul_ps(A0[20],B0[ 4]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[28],B0[ 4]); C10 = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[20],B0[12]); C01 = _mm_add_ps(C01,c01);
@@ -1524,14 +1501,10 @@ namespace tmv {
                 c01 = _mm_mul_ps(A0[16],B0[ 8]); d01.xm = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[24],B0[ 8]); d11.xm = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[ 2] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
-                Maybe<add>::add(C0[ 3] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
-                Maybe<add>::add(C0[18] , x * (
-                        d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
-                Maybe<add>::add(C0[19] , x * (
-                        d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]));
+                C0[ 2] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
+                C0[ 3] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
+                C0[18] += x * (d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]);
+                C0[19] += x * (d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]);
 
                 A0 += 32;
                 C0 += 4;
@@ -1549,7 +1522,6 @@ namespace tmv {
         TMVAssert( ((size_t)(A) & 0xf) == 0 );
         TMVAssert( ((size_t)(B) & 0xf) == 0 );
         TMVAssert( ((size_t)(C0) & 0xf) == 0 );
-        const bool add = true;
 
         __m128 C00, C01, C10, C11;
         __m128 c00, c01, c10, c11;
@@ -1642,29 +1614,25 @@ namespace tmv {
                 c01 = _mm_mul_ps(A0[15],B0[31]); d01.xm = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[31],B0[31]); d11.xm = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[ 0] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
+                C0[ 0] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
                 C00 = _mm_mul_ps(A0[47],B0[15]);
                 C10 = _mm_mul_ps(A0[63],B0[15]);
                 C01 = _mm_mul_ps(A0[47],B0[31]);
                 C11 = _mm_mul_ps(A0[63],B0[31]);
 
-                Maybe<add>::add(C0[ 1] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
+                C0[ 1] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
                 c00 = _mm_mul_ps(A0[46],B0[14]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[62],B0[14]); C10 = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[46],B0[30]); C01 = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[62],B0[30]); C11 = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[16] , x * (
-                        d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
+                C0[16] += x * (d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]);
                 c00 = _mm_mul_ps(A0[45],B0[13]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[61],B0[13]); C10 = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[45],B0[29]); C01 = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[61],B0[29]); C11 = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[17] , x * (
-                        d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]));
+                C0[17] += x * (d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]);
                 c00 = _mm_mul_ps(A0[44],B0[12]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[60],B0[12]); C10 = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[44],B0[28]); C01 = _mm_add_ps(C01,c01);
@@ -1730,14 +1698,10 @@ namespace tmv {
                 c01 = _mm_mul_ps(A0[32],B0[16]); d01.xm = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[48],B0[16]); d11.xm = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[ 2] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
-                Maybe<add>::add(C0[ 3] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
-                Maybe<add>::add(C0[18] , x * (
-                        d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
-                Maybe<add>::add(C0[19] , x * (
-                        d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]));
+                C0[ 2] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
+                C0[ 3] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
+                C0[18] += x * (d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]);
+                C0[19] += x * (d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]);
 
                 A0 += 64;
                 C0 += 4;
@@ -1761,7 +1725,6 @@ namespace tmv {
         const int Mc = (M-(M_4<<2)); // = M%4
         const int Mc1 = Mc>>1;       // = M%4 == 2 or 3
         const int Mc2 = Mc-(Mc1<<1); // = M%4 == 1 or 3
-        const bool add = true;
 
         __m128 C00, C01, C10, C11;
         __m128 c00, c01, c10, c11;
@@ -1795,42 +1758,34 @@ namespace tmv {
                 c01 = _mm_mul_ps(A0[ 3],B0[ 7]); d01.xm = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[ 7],B0[ 7]); d11.xm = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[ 0] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
+                C0[ 0] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
                 C00 = _mm_mul_ps(A0[11],B0[3]);
                 C10 = _mm_mul_ps(A0[15],B0[3]);
                 C01 = _mm_mul_ps(A0[11],B0[7]);
                 C11 = _mm_mul_ps(A0[15],B0[7]);
 
-                Maybe<add>::add(C0[ 1] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
+                C0[ 1] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
                 c00 = _mm_mul_ps(A0[10],B0[2]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[14],B0[2]); C10 = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[10],B0[6]); C01 = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[14],B0[6]); C11 = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C1[ 0] , x * (
-                        d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
+                C1[ 0] += x * (d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]);
                 c00 = _mm_mul_ps(A0[ 9],B0[1]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[13],B0[1]); C10 = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[ 9],B0[5]); C01 = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[13],B0[5]); C11 = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C1[ 1] , x * (
-                        d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]));
+                C1[ 1] += x * (d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]);
                 c00 = _mm_mul_ps(A0[ 8],B0[0]); d00.xm = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[12],B0[0]); d10.xm = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[ 8],B0[4]); d01.xm = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[12],B0[4]); d11.xm = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[ 2] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
-                Maybe<add>::add(C0[ 3] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
-                Maybe<add>::add(C1[ 2] , x * (
-                        d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
-                Maybe<add>::add(C1[ 3] , x * (
-                        d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]));
+                C0[ 2] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
+                C0[ 3] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
+                C1[ 2] += x * (d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]);
+                C1[ 3] += x * (d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]);
 
                 A0 += 16;
                 C0 += 4;
@@ -1857,14 +1812,10 @@ namespace tmv {
                 c01 = _mm_mul_ps(A0[ 3],B0[ 7]); d01.xm = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[ 7],B0[ 7]); d11.xm = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[ 0] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
-                Maybe<add>::add(C0[ 1] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
-                Maybe<add>::add(C1[ 0] , x * (
-                        d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
-                Maybe<add>::add(C1[ 1] , x * (
-                        d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]));
+                C0[ 0] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
+                C0[ 1] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
+                C1[ 0] += x * (d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]);
+                C1[ 1] += x * (d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]);
                 A0 += 8;
                 C0 += 2;
                 C1 += 2;
@@ -1882,10 +1833,8 @@ namespace tmv {
                 c00 = _mm_mul_ps(A0[ 3],B0[ 3]); d00.xm = _mm_add_ps(C00,c00);
                 c01 = _mm_mul_ps(A0[ 3],B0[ 7]); d01.xm = _mm_add_ps(C01,c01);
 
-                Maybe<add>::add(*C0++ , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
-                Maybe<add>::add(*C1++ , x * (
-                        d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
+                *C0++ += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
+                *C1++ += x * (d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]);
                 A0 += 4;
             }
             A0 -= Mx4;
@@ -1908,7 +1857,6 @@ namespace tmv {
         const int Mc = (M-(M_4<<2)); // = M%4
         const int Mc1 = Mc>>1;       // = M%4 == 2 or 3
         const int Mc2 = Mc-(Mc1<<1); // = M%4 == 1 or 3
-        const bool add = true;
 
         __m128 C00, C01, C10, C11;
         __m128 c00, c01, c10, c11;
@@ -1962,29 +1910,25 @@ namespace tmv {
                 c01 = _mm_mul_ps(A0[ 7],B0[15]); d01.xm = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[15],B0[15]); d11.xm = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[ 0] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
+                C0[ 0] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
                 C00 = _mm_mul_ps(A0[23],B0[ 7]);
                 C10 = _mm_mul_ps(A0[31],B0[ 7]);
                 C01 = _mm_mul_ps(A0[23],B0[15]);
                 C11 = _mm_mul_ps(A0[31],B0[15]);
 
-                Maybe<add>::add(C0[ 1] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
+                C0[ 1] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
                 c00 = _mm_mul_ps(A0[22],B0[ 6]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[30],B0[ 6]); C10 = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[22],B0[14]); C01 = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[30],B0[14]); C11 = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C1[ 0] , x * (
-                        d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
+                C1[ 0] += x * (d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]);
                 c00 = _mm_mul_ps(A0[21],B0[ 5]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[29],B0[ 5]); C10 = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[21],B0[13]); C01 = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[29],B0[13]); C11 = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C1[ 1] , x * (
-                        d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]));
+                C1[ 1] += x * (d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]);
                 c00 = _mm_mul_ps(A0[20],B0[ 4]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[28],B0[ 4]); C10 = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[20],B0[12]); C01 = _mm_add_ps(C01,c01);
@@ -2010,14 +1954,10 @@ namespace tmv {
                 c01 = _mm_mul_ps(A0[16],B0[ 8]); d01.xm = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[24],B0[ 8]); d11.xm = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[ 2] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
-                Maybe<add>::add(C0[ 3] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
-                Maybe<add>::add(C1[ 2] , x * (
-                        d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
-                Maybe<add>::add(C1[ 3] , x * (
-                        d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]));
+                C0[ 2] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
+                C0[ 3] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
+                C1[ 2] += x * (d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]);
+                C1[ 3] += x * (d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]);
 
                 A0 += 32;
                 C0 += 4;
@@ -2064,14 +2004,10 @@ namespace tmv {
                 c01 = _mm_mul_ps(A0[ 7],B0[15]); d01.xm = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[15],B0[15]); d11.xm = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[ 0] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
-                Maybe<add>::add(C0[ 1] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
-                Maybe<add>::add(C1[ 0] , x * (
-                        d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
-                Maybe<add>::add(C1[ 1] , x * (
-                        d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]));
+                C0[ 0] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
+                C0[ 1] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
+                C1[ 0] += x * (d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]);
+                C1[ 1] += x * (d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]);
                 A0 += 16;
                 C0 += 2;
                 C1 += 2;
@@ -2101,10 +2037,8 @@ namespace tmv {
                 c00 = _mm_mul_ps(A0[ 7],B0[ 7]); d00.xm = _mm_add_ps(C00,c00);
                 c01 = _mm_mul_ps(A0[ 7],B0[15]); d01.xm = _mm_add_ps(C01,c01);
 
-                Maybe<add>::add(*C0++ , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
-                Maybe<add>::add(*C1++ , x * (
-                        d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
+                *C0++ += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
+                *C1++ += x * (d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]);
                 A0 += 8;
             }
             A0 -= Mx8;
@@ -2127,7 +2061,6 @@ namespace tmv {
         const int Mc = (M-(M_4<<2)); // = M%4
         const int Mc1 = Mc>>1;       // = M%4 == 2 or 3
         const int Mc2 = Mc-(Mc1<<1); // = M%4 == 1 or 3
-        const bool add = true;
 
         __m128 C00, C01, C10, C11;
         __m128 c00, c01, c10, c11;
@@ -2221,29 +2154,25 @@ namespace tmv {
                 c01 = _mm_mul_ps(A0[15],B0[31]); d01.xm = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[31],B0[31]); d11.xm = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[ 0] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
+                C0[ 0] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
                 C00 = _mm_mul_ps(A0[47],B0[15]);
                 C10 = _mm_mul_ps(A0[63],B0[15]);
                 C01 = _mm_mul_ps(A0[47],B0[31]);
                 C11 = _mm_mul_ps(A0[63],B0[31]);
 
-                Maybe<add>::add(C0[ 1] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
+                C0[ 1] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
                 c00 = _mm_mul_ps(A0[46],B0[14]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[62],B0[14]); C10 = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[46],B0[30]); C01 = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[62],B0[30]); C11 = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C1[ 0] , x * (
-                        d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
+                C1[ 0] += x * (d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]);
                 c00 = _mm_mul_ps(A0[45],B0[13]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[61],B0[13]); C10 = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[45],B0[29]); C01 = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[61],B0[29]); C11 = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C1[ 1] , x * (
-                        d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]));
+                C1[ 1] += x * (d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]);
                 c00 = _mm_mul_ps(A0[44],B0[12]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[60],B0[12]); C10 = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[44],B0[28]); C01 = _mm_add_ps(C01,c01);
@@ -2309,14 +2238,10 @@ namespace tmv {
                 c01 = _mm_mul_ps(A0[32],B0[16]); d01.xm = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[48],B0[16]); d11.xm = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[ 2] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
-                Maybe<add>::add(C0[ 3] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
-                Maybe<add>::add(C1[ 2] , x * (
-                        d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
-                Maybe<add>::add(C1[ 3] , x * (
-                        d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]));
+                C0[ 2] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
+                C0[ 3] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
+                C1[ 2] += x * (d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]);
+                C1[ 3] += x * (d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]);
 
                 A0 += 64;
                 C0 += 4;
@@ -2403,14 +2328,10 @@ namespace tmv {
                 c01 = _mm_mul_ps(A0[15],B0[31]); d01.xm = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[31],B0[31]); d11.xm = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[ 0] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
-                Maybe<add>::add(C0[ 1] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
-                Maybe<add>::add(C1[ 0] , x * (
-                        d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
-                Maybe<add>::add(C1[ 1] , x * (
-                        d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]));
+                C0[ 0] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
+                C0[ 1] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
+                C1[ 0] += x * (d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]);
+                C1[ 1] += x * (d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]);
                 A0 += 32;
                 C0 += 2;
                 C1 += 2;
@@ -2464,10 +2385,8 @@ namespace tmv {
                 c00 = _mm_mul_ps(A0[15],B0[15]); d00.xm = _mm_add_ps(C00,c00);
                 c01 = _mm_mul_ps(A0[15],B0[31]); d01.xm = _mm_add_ps(C01,c01);
 
-                Maybe<add>::add(*C0++ , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
-                Maybe<add>::add(*C1++ , x * (
-                        d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
+                *C0++ += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
+                *C1++ += x * (d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]);
                 A0 += 16;
             }
             A0 -= Mx16;
@@ -2487,7 +2406,6 @@ namespace tmv {
         const int N = (N2 == UNKNOWN ? N1 : N2);
         const int N_2 = N>>1;        // = N/2
         const int Nc = (N-(N_2<<1)); // = N%2
-        const bool add = true;
 
         __m128 C00, C01, C10, C11;
         __m128 c00, c01, c10, c11;
@@ -2520,42 +2438,34 @@ namespace tmv {
                 c01 = _mm_mul_ps(A0[ 3],B0[ 7]); d01.xm = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[ 7],B0[ 7]); d11.xm = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[ 0] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
+                C0[ 0] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
                 C00 = _mm_mul_ps(A0[11],B0[3]);
                 C10 = _mm_mul_ps(A0[15],B0[3]);
                 C01 = _mm_mul_ps(A0[11],B0[7]);
                 C11 = _mm_mul_ps(A0[15],B0[7]);
 
-                Maybe<add>::add(C0[ 1] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
+                C0[ 1] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
                 c00 = _mm_mul_ps(A0[10],B0[2]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[14],B0[2]); C10 = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[10],B0[6]); C01 = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[14],B0[6]); C11 = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[16] , x * (
-                        d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
+                C0[16] += x * (d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]);
                 c00 = _mm_mul_ps(A0[ 9],B0[1]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[13],B0[1]); C10 = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[ 9],B0[5]); C01 = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[13],B0[5]); C11 = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[17] , x * (
-                        d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]));
+                C0[17] += x * (d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]);
                 c00 = _mm_mul_ps(A0[ 8],B0[0]); d00.xm = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[12],B0[0]); d10.xm = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[ 8],B0[4]); d01.xm = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[12],B0[4]); d11.xm = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[ 2] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
-                Maybe<add>::add(C0[ 3] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
-                Maybe<add>::add(C0[18] , x * (
-                        d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
-                Maybe<add>::add(C0[19] , x * (
-                        d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]));
+                C0[ 2] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
+                C0[ 3] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
+                C0[18] += x * (d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]);
+                C0[19] += x * (d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]);
 
                 A0 += 16;
                 C0 += 4;
@@ -2578,13 +2488,11 @@ namespace tmv {
                 c00 = _mm_mul_ps(A0[ 3],B0[ 3]); d00.xm = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[ 7],B0[ 3]); d10.xm = _mm_add_ps(C10,c10);
 
-                Maybe<add>::add(C0[ 0] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
+                C0[ 0] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
                 C00 = _mm_mul_ps(A0[11],B0[3]);
                 C10 = _mm_mul_ps(A0[15],B0[3]);
 
-                Maybe<add>::add(C0[ 1] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
+                C0[ 1] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
                 c00 = _mm_mul_ps(A0[10],B0[2]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[14],B0[2]); C10 = _mm_add_ps(C10,c10);
 
@@ -2594,10 +2502,8 @@ namespace tmv {
                 c00 = _mm_mul_ps(A0[ 8],B0[0]); d00.xm = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[12],B0[0]); d10.xm = _mm_add_ps(C10,c10);
 
-                Maybe<add>::add(C0[ 2] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
-                Maybe<add>::add(C0[ 3] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
+                C0[ 2] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
+                C0[ 3] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
 
                 A0 += 16;
                 C0 += 4;
@@ -2615,7 +2521,6 @@ namespace tmv {
         const int N = (N2 == UNKNOWN ? N1 : N2);
         const int N_2 = N>>1;        // = N/2
         const int Nc = (N-(N_2<<1)); // = N%2
-        const bool add = true;
 
         __m128 C00, C01, C10, C11;
         __m128 c00, c01, c10, c11;
@@ -2668,29 +2573,25 @@ namespace tmv {
                 c01 = _mm_mul_ps(A0[ 7],B0[15]); d01.xm = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[15],B0[15]); d11.xm = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[ 0] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
+                C0[ 0] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
                 C00 = _mm_mul_ps(A0[23],B0[ 7]);
                 C10 = _mm_mul_ps(A0[31],B0[ 7]);
                 C01 = _mm_mul_ps(A0[23],B0[15]);
                 C11 = _mm_mul_ps(A0[31],B0[15]);
 
-                Maybe<add>::add(C0[ 1] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
+                C0[ 1] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
                 c00 = _mm_mul_ps(A0[22],B0[ 6]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[30],B0[ 6]); C10 = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[22],B0[14]); C01 = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[30],B0[14]); C11 = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[16] , x * (
-                        d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
+                C0[16] += x * (d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]);
                 c00 = _mm_mul_ps(A0[21],B0[ 5]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[29],B0[ 5]); C10 = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[21],B0[13]); C01 = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[29],B0[13]); C11 = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[17] , x * (
-                        d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]));
+                C0[17] += x * (d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]);
                 c00 = _mm_mul_ps(A0[20],B0[ 4]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[28],B0[ 4]); C10 = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[20],B0[12]); C01 = _mm_add_ps(C01,c01);
@@ -2716,14 +2617,10 @@ namespace tmv {
                 c01 = _mm_mul_ps(A0[16],B0[ 8]); d01.xm = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[24],B0[ 8]); d11.xm = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[ 2] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
-                Maybe<add>::add(C0[ 3] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
-                Maybe<add>::add(C0[18] , x * (
-                        d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
-                Maybe<add>::add(C0[19] , x * (
-                        d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]));
+                C0[ 2] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
+                C0[ 3] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
+                C0[18] += x * (d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]);
+                C0[19] += x * (d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]);
 
                 A0 += 32;
                 C0 += 4;
@@ -2758,13 +2655,11 @@ namespace tmv {
                 c00 = _mm_mul_ps(A0[ 7],B0[ 7]); d00.xm = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[15],B0[ 7]); d10.xm = _mm_add_ps(C10,c10);
 
-                Maybe<add>::add(C0[ 0] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
+                C0[ 0] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
                 C00 = _mm_mul_ps(A0[23],B0[ 7]);
                 C10 = _mm_mul_ps(A0[31],B0[ 7]);
 
-                Maybe<add>::add(C0[ 1] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
+                C0[ 1] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
                 c00 = _mm_mul_ps(A0[22],B0[ 6]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[30],B0[ 6]); C10 = _mm_add_ps(C10,c10);
 
@@ -2786,10 +2681,8 @@ namespace tmv {
                 c00 = _mm_mul_ps(A0[16],B0[ 0]); d00.xm = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[24],B0[ 0]); d10.xm = _mm_add_ps(C10,c10);
 
-                Maybe<add>::add(C0[ 2] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
-                Maybe<add>::add(C0[ 3] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
+                C0[ 2] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
+                C0[ 3] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
 
                 A0 += 32;
                 C0 += 4;
@@ -2807,7 +2700,6 @@ namespace tmv {
         const int N = (N2 == UNKNOWN ? N1 : N2);
         const int N_2 = N>>1;        // = N/2
         const int Nc = (N-(N_2<<1)); // = N%2
-        const bool add = true;
 
         __m128 C00, C01, C10, C11;
         __m128 c00, c01, c10, c11;
@@ -2900,29 +2792,25 @@ namespace tmv {
                 c01 = _mm_mul_ps(A0[15],B0[31]); d01.xm = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[31],B0[31]); d11.xm = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[ 0] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
+                C0[ 0] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
                 C00 = _mm_mul_ps(A0[47],B0[15]);
                 C10 = _mm_mul_ps(A0[63],B0[15]);
                 C01 = _mm_mul_ps(A0[47],B0[31]);
                 C11 = _mm_mul_ps(A0[63],B0[31]);
 
-                Maybe<add>::add(C0[ 1] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
+                C0[ 1] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
                 c00 = _mm_mul_ps(A0[46],B0[14]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[62],B0[14]); C10 = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[46],B0[30]); C01 = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[62],B0[30]); C11 = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[16] , x * (
-                        d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
+                C0[16] += x * (d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]);
                 c00 = _mm_mul_ps(A0[45],B0[13]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[61],B0[13]); C10 = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[45],B0[29]); C01 = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[61],B0[29]); C11 = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[17] , x * (
-                        d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]));
+                C0[17] += x * (d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]);
                 c00 = _mm_mul_ps(A0[44],B0[12]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[60],B0[12]); C10 = _mm_add_ps(C10,c10);
                 c01 = _mm_mul_ps(A0[44],B0[28]); C01 = _mm_add_ps(C01,c01);
@@ -2988,14 +2876,10 @@ namespace tmv {
                 c01 = _mm_mul_ps(A0[32],B0[16]); d01.xm = _mm_add_ps(C01,c01);
                 c11 = _mm_mul_ps(A0[48],B0[16]); d11.xm = _mm_add_ps(C11,c11);
 
-                Maybe<add>::add(C0[ 2] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
-                Maybe<add>::add(C0[ 3] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
-                Maybe<add>::add(C0[18] , x * (
-                        d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]));
-                Maybe<add>::add(C0[19] , x * (
-                        d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]));
+                C0[ 2] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
+                C0[ 3] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
+                C0[18] += x * (d01.xf[0] + d01.xf[1] + d01.xf[2] + d01.xf[3]);
+                C0[19] += x * (d11.xf[0] + d11.xf[1] + d11.xf[2] + d11.xf[3]);
 
                 A0 += 64;
                 C0 += 4;
@@ -3054,13 +2938,11 @@ namespace tmv {
                 c00 = _mm_mul_ps(A0[15],B0[15]); d00.xm = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[31],B0[15]); d10.xm = _mm_add_ps(C10,c10);
 
-                Maybe<add>::add(C0[ 0] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
+                C0[ 0] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
                 C00 = _mm_mul_ps(A0[47],B0[15]);
                 C10 = _mm_mul_ps(A0[63],B0[15]);
 
-                Maybe<add>::add(C0[ 1] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
+                C0[ 1] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
                 c00 = _mm_mul_ps(A0[46],B0[14]); C00 = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[62],B0[14]); C10 = _mm_add_ps(C10,c10);
 
@@ -3106,10 +2988,8 @@ namespace tmv {
                 c00 = _mm_mul_ps(A0[32],B0[ 0]); d00.xm = _mm_add_ps(C00,c00);
                 c10 = _mm_mul_ps(A0[48],B0[ 0]); d10.xm = _mm_add_ps(C10,c10);
 
-                Maybe<add>::add(C0[ 2] , x * (
-                        d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]));
-                Maybe<add>::add(C0[ 3] , x * (
-                        d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]));
+                C0[ 2] += x * (d00.xf[0] + d00.xf[1] + d00.xf[2] + d00.xf[3]);
+                C0[ 3] += x * (d10.xf[0] + d10.xf[1] + d10.xf[2] + d10.xf[3]);
 
                 A0 += 64;
                 C0 += 4;
@@ -3133,7 +3013,6 @@ namespace tmv {
         //const int Kd = Kd_4<<2; // = K rounded up to next multiple of 4
         const int Kd_2 = Kd_4<<1;  // = Kd/2
         const int Kd16 = Kd_4<<4; // = (Kd/4) * 16
-        const bool add = true;
 
         union ff { __m128 xm; float xf[4]; }; // ff = four floats
         __m128 C00, C01, C10, C11;
@@ -3200,10 +3079,10 @@ namespace tmv {
                         }
                     }
 
-                    Maybe<add>::add(C0[0] , x * e00);
-                    Maybe<add>::add(C0[1] , x * e10); C0 += 2;
-                    Maybe<add>::add(C1[0] , x * e01);
-                    Maybe<add>::add(C1[1] , x * e11); C1 += 2;
+                    C0[0] += x * e00;
+                    C0[1] += x * e10; C0 += 2;
+                    C1[0] += x * e01;
+                    C1[1] += x * e11; C1 += 2;
 
                     A0 += Kd_4; A1 += Kd_4;
                     B0 -= Kd_4; B1 -= Kd_4;
@@ -3239,10 +3118,10 @@ namespace tmv {
                         }
                     }
 
-                    Maybe<add>::add(C0[0] , x * e00);
-                    Maybe<add>::add(C0[1] , x * e10); C0 += 2;
-                    Maybe<add>::add(C1[0] , x * e01);
-                    Maybe<add>::add(C1[1] , x * e11); C1 += 2;
+                    C0[0] += x * e00;
+                    C0[1] += x * e10; C0 += 2;
+                    C1[0] += x * e01;
+                    C1[1] += x * e11; C1 += 2;
                     A0 += Kd_4; A1 += Kd_4;
                     B0 -= Kd_4; B1 -= Kd_4;
                 } while (--i);
@@ -3268,10 +3147,10 @@ namespace tmv {
                         e01 += d01.xf[k];
                         e11 += d11.xf[k];
                     }
-                    Maybe<add>::add(C0[0] , x * e00);
-                    Maybe<add>::add(C0[1] , x * e10); C0 += 2;
-                    Maybe<add>::add(C1[0] , x * e01);
-                    Maybe<add>::add(C1[1] , x * e11); C1 += 2;
+                    C0[0] += x * e00;
+                    C0[1] += x * e10; C0 += 2;
+                    C1[0] += x * e01;
+                    C1[1] += x * e11; C1 += 2;
                     A0 += Kd_4; A1 += Kd_4;
                     B0 -= Kd_4; B1 -= Kd_4;
                 } while (--i);
@@ -3479,49 +3358,49 @@ namespace tmv {
     // These go outside the above ifdef so they are always visible.
 #ifdef __SSE__
     template <int M2, int ix>
-    static void multmm_M_16_16_known(
+    static inline void multmm_M_16_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x, 
         const float* A0, const float* B0, float* C0)
     { sse_multmm_M_16_16<M2>(M,x,A0,B0,C0); }
 
     template <int N2, int ix>
-    static void multmm_16_N_16_known(
+    static inline void multmm_16_N_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
     { sse_multmm_16_N_16<N2>(N,x,A0,B0,C0); }
 
     template <int K2, int ix>
-    static void multmm_16_16_K_known(
+    static inline void multmm_16_16_K_known(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
     { sse_multmm_16_16_K<K2>(K,x,A0,B0,C0); }
 
     template <int M2, int ix>
-    static void multmm_M_16_32_known(
+    static inline void multmm_M_16_32_known(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
     { sse_multmm_M_16_32<M2>(M,x,A0,B0,C0); }
 
     template <int N2, int ix>
-    static void multmm_16_N_32_known(
+    static inline void multmm_16_N_32_known(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
     { sse_multmm_16_N_32<N2>(N,x,A0,B0,C0); }
 
     template <int M2, int ix>
-    static void multmm_M_16_64_known(
+    static inline void multmm_M_16_64_known(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
     { sse_multmm_M_16_64<M2>(M,x,A0,B0,C0); }
 
     template <int N2, int ix>
-    static void multmm_16_N_64_known(
+    static inline void multmm_16_N_64_known(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
@@ -3529,21 +3408,21 @@ namespace tmv {
 
 #else
     template <int M2, int ix>
-    static void multmm_M_16_16_known(
+    static inline void multmm_M_16_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
     { generic_multmm_M_16_16<M2>(M,x,A0,B0,C0); }
 
     template <int N2, int ix>
-    static void multmm_16_N_16_known(
+    static inline void multmm_16_N_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
     { generic_multmm_16_N_16<N2>(N,x,A0,B0,C0); }
 
     template <int K2, int ix>
-    static void multmm_16_16_K_known(
+    static inline void multmm_16_16_K_known(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
@@ -3565,7 +3444,6 @@ namespace tmv {
         TMVAssert( ((size_t)(A) & 0xf) == 0 );
         TMVAssert( ((size_t)(B) & 0xf) == 0 );
         TMVAssert( ((size_t)(C0) & 0xf) == 0 );
-        const bool add = true;
 
         __m128d C00, C01, C10, C11;
         __m128d c00, c01, c10, c11;
@@ -3618,25 +3496,25 @@ namespace tmv {
                 c01 = _mm_mul_pd(A0[ 7],B0[15]); d01.xm = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[15],B0[15]); d11.xm = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C0[ 0] , x * (d00.xd[0] + d00.xd[1]));
+                C0[ 0] += x * (d00.xd[0] + d00.xd[1]);
                 C00 = _mm_mul_pd(A0[23],B0[ 7]);
                 C10 = _mm_mul_pd(A0[31],B0[ 7]);
                 C01 = _mm_mul_pd(A0[23],B0[15]);
                 C11 = _mm_mul_pd(A0[31],B0[15]);
 
-                Maybe<add>::add(C0[ 1] , x * (d10.xd[0] + d10.xd[1]));
+                C0[ 1] += x * (d10.xd[0] + d10.xd[1]);
                 c00 = _mm_mul_pd(A0[22],B0[ 6]); C00 = _mm_add_pd(C00,c00);
                 c10 = _mm_mul_pd(A0[30],B0[ 6]); C10 = _mm_add_pd(C10,c10);
                 c01 = _mm_mul_pd(A0[22],B0[14]); C01 = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[30],B0[14]); C11 = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C0[16] , x * (d01.xd[0] + d01.xd[1]));
+                C0[16] += x * (d01.xd[0] + d01.xd[1]);
                 c00 = _mm_mul_pd(A0[21],B0[ 5]); C00 = _mm_add_pd(C00,c00);
                 c10 = _mm_mul_pd(A0[29],B0[ 5]); C10 = _mm_add_pd(C10,c10);
                 c01 = _mm_mul_pd(A0[21],B0[13]); C01 = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[29],B0[13]); C11 = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C0[17] , x * (d11.xd[0] + d11.xd[1]));
+                C0[17] += x * (d11.xd[0] + d11.xd[1]);
                 c00 = _mm_mul_pd(A0[20],B0[ 4]); C00 = _mm_add_pd(C00,c00);
                 c10 = _mm_mul_pd(A0[28],B0[ 4]); C10 = _mm_add_pd(C10,c10);
                 c01 = _mm_mul_pd(A0[20],B0[12]); C01 = _mm_add_pd(C01,c01);
@@ -3662,10 +3540,10 @@ namespace tmv {
                 c01 = _mm_mul_pd(A0[16],B0[ 8]); d01.xm = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[24],B0[ 8]); d11.xm = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C0[ 2] , x * (d00.xd[0] + d00.xd[1]));
-                Maybe<add>::add(C0[ 3] , x * (d10.xd[0] + d10.xd[1]));
-                Maybe<add>::add(C0[18] , x * (d01.xd[0] + d01.xd[1]));
-                Maybe<add>::add(C0[19] , x * (d11.xd[0] + d11.xd[1]));
+                C0[ 2] += x * (d00.xd[0] + d00.xd[1]);
+                C0[ 3] += x * (d10.xd[0] + d10.xd[1]);
+                C0[18] += x * (d01.xd[0] + d01.xd[1]);
+                C0[19] += x * (d11.xd[0] + d11.xd[1]);
 
                 A0 += 32;
                 C0 += 4;
@@ -3683,7 +3561,6 @@ namespace tmv {
         TMVAssert( ((size_t)(A) & 0xf) == 0 );
         TMVAssert( ((size_t)(B) & 0xf) == 0 );
         TMVAssert( ((size_t)(C0) & 0xf) == 0 );
-        const bool add = true;
 
         __m128d C00, C01, C10, C11;
         __m128d c00, c01, c10, c11;
@@ -3776,25 +3653,25 @@ namespace tmv {
                 c01 = _mm_mul_pd(A0[15],B0[31]); d01.xm = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[31],B0[31]); d11.xm = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C0[ 0] , x * (d00.xd[0] + d00.xd[1]));
+                C0[ 0] += x * (d00.xd[0] + d00.xd[1]);
                 C00 = _mm_mul_pd(A0[47],B0[15]);
                 C10 = _mm_mul_pd(A0[63],B0[15]);
                 C01 = _mm_mul_pd(A0[47],B0[31]);
                 C11 = _mm_mul_pd(A0[63],B0[31]);
 
-                Maybe<add>::add(C0[ 1] , x * (d10.xd[0] + d10.xd[1]));
+                C0[ 1] += x * (d10.xd[0] + d10.xd[1]);
                 c00 = _mm_mul_pd(A0[46],B0[14]); C00 = _mm_add_pd(C00,c00);
                 c10 = _mm_mul_pd(A0[62],B0[14]); C10 = _mm_add_pd(C10,c10);
                 c01 = _mm_mul_pd(A0[46],B0[30]); C01 = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[62],B0[30]); C11 = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C0[16] , x * (d01.xd[0] + d01.xd[1]));
+                C0[16] += x * (d01.xd[0] + d01.xd[1]);
                 c00 = _mm_mul_pd(A0[45],B0[13]); C00 = _mm_add_pd(C00,c00);
                 c10 = _mm_mul_pd(A0[61],B0[13]); C10 = _mm_add_pd(C10,c10);
                 c01 = _mm_mul_pd(A0[45],B0[29]); C01 = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[61],B0[29]); C11 = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C0[17] , x * (d11.xd[0] + d11.xd[1]));
+                C0[17] += x * (d11.xd[0] + d11.xd[1]);
                 c00 = _mm_mul_pd(A0[44],B0[12]); C00 = _mm_add_pd(C00,c00);
                 c10 = _mm_mul_pd(A0[60],B0[12]); C10 = _mm_add_pd(C10,c10);
                 c01 = _mm_mul_pd(A0[44],B0[28]); C01 = _mm_add_pd(C01,c01);
@@ -3860,10 +3737,10 @@ namespace tmv {
                 c01 = _mm_mul_pd(A0[32],B0[16]); d01.xm = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[48],B0[16]); d11.xm = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C0[ 2] , x * (d00.xd[0] + d00.xd[1]));
-                Maybe<add>::add(C0[ 3] , x * (d10.xd[0] + d10.xd[1]));
-                Maybe<add>::add(C0[18] , x * (d01.xd[0] + d01.xd[1]));
-                Maybe<add>::add(C0[19] , x * (d11.xd[0] + d11.xd[1]));
+                C0[ 2] += x * (d00.xd[0] + d00.xd[1]);
+                C0[ 3] += x * (d10.xd[0] + d10.xd[1]);
+                C0[18] += x * (d01.xd[0] + d01.xd[1]);
+                C0[19] += x * (d11.xd[0] + d11.xd[1]);
 
                 A0 += 64;
                 C0 += 4;
@@ -3888,7 +3765,6 @@ namespace tmv {
         const int Mc = (M-(M_4<<2)); // = M%4
         const int Mc1 = Mc>>1;       // = M%4 == 2 or 3
         const int Mc2 = Mc-(Mc1<<1); // = M%4 == 1 or 3
-        const bool add = true;
 
         __m128d C00, C01, C10, C11;
         __m128d c00, c01, c10, c11;
@@ -3942,25 +3818,25 @@ namespace tmv {
                 c01 = _mm_mul_pd(A0[ 7],B0[15]); d01.xm = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[15],B0[15]); d11.xm = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C0[ 0] , x * (d00.xd[0] + d00.xd[1]));
+                C0[ 0] += x * (d00.xd[0] + d00.xd[1]);
                 C00 = _mm_mul_pd(A0[23],B0[ 7]);
                 C10 = _mm_mul_pd(A0[31],B0[ 7]);
                 C01 = _mm_mul_pd(A0[23],B0[15]);
                 C11 = _mm_mul_pd(A0[31],B0[15]);
 
-                Maybe<add>::add(C0[ 1] , x * (d10.xd[0] + d10.xd[1]));
+                C0[ 1] += x * (d10.xd[0] + d10.xd[1]);
                 c00 = _mm_mul_pd(A0[22],B0[ 6]); C00 = _mm_add_pd(C00,c00);
                 c10 = _mm_mul_pd(A0[30],B0[ 6]); C10 = _mm_add_pd(C10,c10);
                 c01 = _mm_mul_pd(A0[22],B0[14]); C01 = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[30],B0[14]); C11 = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C1[ 0] , x * (d01.xd[0] + d01.xd[1]));
+                C1[ 0] += x * (d01.xd[0] + d01.xd[1]);
                 c00 = _mm_mul_pd(A0[21],B0[ 5]); C00 = _mm_add_pd(C00,c00);
                 c10 = _mm_mul_pd(A0[29],B0[ 5]); C10 = _mm_add_pd(C10,c10);
                 c01 = _mm_mul_pd(A0[21],B0[13]); C01 = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[29],B0[13]); C11 = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C1[ 1] , x * (d11.xd[0] + d11.xd[1]));
+                C1[ 1] += x * (d11.xd[0] + d11.xd[1]);
                 c00 = _mm_mul_pd(A0[20],B0[ 4]); C00 = _mm_add_pd(C00,c00);
                 c10 = _mm_mul_pd(A0[28],B0[ 4]); C10 = _mm_add_pd(C10,c10);
                 c01 = _mm_mul_pd(A0[20],B0[12]); C01 = _mm_add_pd(C01,c01);
@@ -3986,10 +3862,10 @@ namespace tmv {
                 c01 = _mm_mul_pd(A0[16],B0[ 8]); d01.xm = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[24],B0[ 8]); d11.xm = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C0[ 2] , x * (d00.xd[0] + d00.xd[1]));
-                Maybe<add>::add(C0[ 3] , x * (d10.xd[0] + d10.xd[1]));
-                Maybe<add>::add(C1[ 2] , x * (d01.xd[0] + d01.xd[1]));
-                Maybe<add>::add(C1[ 3] , x * (d11.xd[0] + d11.xd[1]));
+                C0[ 2] += x * (d00.xd[0] + d00.xd[1]);
+                C0[ 3] += x * (d10.xd[0] + d10.xd[1]);
+                C1[ 2] += x * (d01.xd[0] + d01.xd[1]);
+                C1[ 3] += x * (d11.xd[0] + d11.xd[1]);
 
                 A0 += 32;
                 C0 += 4;
@@ -4036,10 +3912,10 @@ namespace tmv {
                 c01 = _mm_mul_pd(A0[ 7],B0[15]); d01.xm = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[15],B0[15]); d11.xm = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C0[ 0] , x * (d00.xd[0] + d00.xd[1]));
-                Maybe<add>::add(C0[ 1] , x * (d10.xd[0] + d10.xd[1]));
-                Maybe<add>::add(C1[ 0] , x * (d01.xd[0] + d01.xd[1]));
-                Maybe<add>::add(C1[ 1] , x * (d11.xd[0] + d11.xd[1]));
+                C0[ 0] += x * (d00.xd[0] + d00.xd[1]);
+                C0[ 1] += x * (d10.xd[0] + d10.xd[1]);
+                C1[ 0] += x * (d01.xd[0] + d01.xd[1]);
+                C1[ 1] += x * (d11.xd[0] + d11.xd[1]);
 
                 A0 += 16;
                 C0 += 2;
@@ -4070,8 +3946,8 @@ namespace tmv {
                 c00 = _mm_mul_pd(A0[ 7],B0[ 7]); d00.xm = _mm_add_pd(C00,c00);
                 c01 = _mm_mul_pd(A0[ 7],B0[15]); d01.xm = _mm_add_pd(C01,c01);
 
-                Maybe<add>::add(*C0++ , x * (d00.xd[0] + d00.xd[1]));
-                Maybe<add>::add(*C1++ , x * (d01.xd[0] + d01.xd[1]));
+                *C0++ += x * (d00.xd[0] + d00.xd[1]);
+                *C1++ += x * (d01.xd[0] + d01.xd[1]);
 
                 A0 += 8;
             }
@@ -4096,7 +3972,6 @@ namespace tmv {
         const int Mc = (M-(M_4<<2)); // = M%4
         const int Mc1 = Mc>>1;       // = M%4 == 2 or 3
         const int Mc2 = Mc-(Mc1<<1); // = M%4 == 1 or 3
-        const bool add = true;
 
         __m128d C00, C01, C10, C11;
         __m128d c00, c01, c10, c11;
@@ -4190,25 +4065,25 @@ namespace tmv {
                 c01 = _mm_mul_pd(A0[15],B0[31]); d01.xm = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[31],B0[31]); d11.xm = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C0[ 0] , x * (d00.xd[0] + d00.xd[1]));
+                C0[ 0] += x * (d00.xd[0] + d00.xd[1]);
                 C00 = _mm_mul_pd(A0[47],B0[15]);
                 C10 = _mm_mul_pd(A0[63],B0[15]);
                 C01 = _mm_mul_pd(A0[47],B0[31]);
                 C11 = _mm_mul_pd(A0[63],B0[31]);
 
-                Maybe<add>::add(C0[ 1] , x * (d10.xd[0] + d10.xd[1]));
+                C0[ 1] += x * (d10.xd[0] + d10.xd[1]);
                 c00 = _mm_mul_pd(A0[46],B0[14]); C00 = _mm_add_pd(C00,c00);
                 c10 = _mm_mul_pd(A0[62],B0[14]); C10 = _mm_add_pd(C10,c10);
                 c01 = _mm_mul_pd(A0[46],B0[30]); C01 = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[62],B0[30]); C11 = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C1[ 0] , x * (d01.xd[0] + d01.xd[1]));
+                C1[ 0] += x * (d01.xd[0] + d01.xd[1]);
                 c00 = _mm_mul_pd(A0[45],B0[13]); C00 = _mm_add_pd(C00,c00);
                 c10 = _mm_mul_pd(A0[61],B0[13]); C10 = _mm_add_pd(C10,c10);
                 c01 = _mm_mul_pd(A0[45],B0[29]); C01 = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[61],B0[29]); C11 = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C1[ 1] , x * (d11.xd[0] + d11.xd[1]));
+                C1[ 1] += x * (d11.xd[0] + d11.xd[1]);
                 c00 = _mm_mul_pd(A0[44],B0[12]); C00 = _mm_add_pd(C00,c00);
                 c10 = _mm_mul_pd(A0[60],B0[12]); C10 = _mm_add_pd(C10,c10);
                 c01 = _mm_mul_pd(A0[44],B0[28]); C01 = _mm_add_pd(C01,c01);
@@ -4274,10 +4149,10 @@ namespace tmv {
                 c01 = _mm_mul_pd(A0[32],B0[16]); d01.xm = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[48],B0[16]); d11.xm = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C0[ 2] , x * (d00.xd[0] + d00.xd[1]));
-                Maybe<add>::add(C0[ 3] , x * (d10.xd[0] + d10.xd[1]));
-                Maybe<add>::add(C1[ 2] , x * (d01.xd[0] + d01.xd[1]));
-                Maybe<add>::add(C1[ 3] , x * (d11.xd[0] + d11.xd[1]));
+                C0[ 2] += x * (d00.xd[0] + d00.xd[1]);
+                C0[ 3] += x * (d10.xd[0] + d10.xd[1]);
+                C1[ 2] += x * (d01.xd[0] + d01.xd[1]);
+                C1[ 3] += x * (d11.xd[0] + d11.xd[1]);
 
                 A0 += 64;
                 C0 += 4;
@@ -4364,10 +4239,10 @@ namespace tmv {
                 c01 = _mm_mul_pd(A0[15],B0[31]); d01.xm = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[31],B0[31]); d11.xm = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C0[ 0] , x * (d00.xd[0] + d00.xd[1]));
-                Maybe<add>::add(C0[ 1] , x * (d10.xd[0] + d10.xd[1]));
-                Maybe<add>::add(C1[ 0] , x * (d01.xd[0] + d01.xd[1]));
-                Maybe<add>::add(C1[ 1] , x * (d11.xd[0] + d11.xd[1]));
+                C0[ 0] += x * (d00.xd[0] + d00.xd[1]);
+                C0[ 1] += x * (d10.xd[0] + d10.xd[1]);
+                C1[ 0] += x * (d01.xd[0] + d01.xd[1]);
+                C1[ 1] += x * (d11.xd[0] + d11.xd[1]);
 
                 A0 += 32;
                 C0 += 2;
@@ -4422,8 +4297,8 @@ namespace tmv {
                 c00 = _mm_mul_pd(A0[15],B0[15]); d00.xm = _mm_add_pd(C00,c00);
                 c01 = _mm_mul_pd(A0[15],B0[31]); d01.xm = _mm_add_pd(C01,c01);
 
-                Maybe<add>::add(*C0++ , x * (d00.xd[0] + d00.xd[1]));
-                Maybe<add>::add(*C1++ , x * (d01.xd[0] + d01.xd[1]));
+                *C0++ += x * (d00.xd[0] + d00.xd[1]);
+                *C1++ += x * (d01.xd[0] + d01.xd[1]);
 
                 A0 += 16;
             }
@@ -4445,7 +4320,6 @@ namespace tmv {
         const int N = (N2 == UNKNOWN ? N1 : N2);
         const int N_2 = N>>1;        // = N/2
         const int Nc = (N-(N_2<<1)); // = N%2
-        const bool add = true;
 
         __m128d C00, C01, C10, C11;
         __m128d c00, c01, c10, c11;
@@ -4498,25 +4372,25 @@ namespace tmv {
                 c01 = _mm_mul_pd(A0[ 7],B0[15]); d01.xm = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[15],B0[15]); d11.xm = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C0[ 0] , x * (d00.xd[0] + d00.xd[1]));
+                C0[ 0] += x * (d00.xd[0] + d00.xd[1]);
                 C00 = _mm_mul_pd(A0[23],B0[ 7]);
                 C10 = _mm_mul_pd(A0[31],B0[ 7]);
                 C01 = _mm_mul_pd(A0[23],B0[15]);
                 C11 = _mm_mul_pd(A0[31],B0[15]);
 
-                Maybe<add>::add(C0[ 1] , x * (d10.xd[0] + d10.xd[1]));
+                C0[ 1] += x * (d10.xd[0] + d10.xd[1]);
                 c00 = _mm_mul_pd(A0[22],B0[ 6]); C00 = _mm_add_pd(C00,c00);
                 c10 = _mm_mul_pd(A0[30],B0[ 6]); C10 = _mm_add_pd(C10,c10);
                 c01 = _mm_mul_pd(A0[22],B0[14]); C01 = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[30],B0[14]); C11 = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C0[16] , x * (d01.xd[0] + d01.xd[1]));
+                C0[16] += x * (d01.xd[0] + d01.xd[1]);
                 c00 = _mm_mul_pd(A0[21],B0[ 5]); C00 = _mm_add_pd(C00,c00);
                 c10 = _mm_mul_pd(A0[29],B0[ 5]); C10 = _mm_add_pd(C10,c10);
                 c01 = _mm_mul_pd(A0[21],B0[13]); C01 = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[29],B0[13]); C11 = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C0[17] , x * (d11.xd[0] + d11.xd[1]));
+                C0[17] += x * (d11.xd[0] + d11.xd[1]);
                 c00 = _mm_mul_pd(A0[20],B0[ 4]); C00 = _mm_add_pd(C00,c00);
                 c10 = _mm_mul_pd(A0[28],B0[ 4]); C10 = _mm_add_pd(C10,c10);
                 c01 = _mm_mul_pd(A0[20],B0[12]); C01 = _mm_add_pd(C01,c01);
@@ -4542,10 +4416,10 @@ namespace tmv {
                 c01 = _mm_mul_pd(A0[16],B0[ 8]); d01.xm = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[24],B0[ 8]); d11.xm = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C0[ 2] , x * (d00.xd[0] + d00.xd[1]));
-                Maybe<add>::add(C0[ 3] , x * (d10.xd[0] + d10.xd[1]));
-                Maybe<add>::add(C0[18] , x * (d01.xd[0] + d01.xd[1]));
-                Maybe<add>::add(C0[19] , x * (d11.xd[0] + d11.xd[1]));
+                C0[ 2] += x * (d00.xd[0] + d00.xd[1]);
+                C0[ 3] += x * (d10.xd[0] + d10.xd[1]);
+                C0[18] += x * (d01.xd[0] + d01.xd[1]);
+                C0[19] += x * (d11.xd[0] + d11.xd[1]);
 
                 A0 += 32;
                 C0 += 4;
@@ -4580,11 +4454,11 @@ namespace tmv {
                 c00 = _mm_mul_pd(A0[ 7],B0[ 7]); d00.xm = _mm_add_pd(C00,c00);
                 c10 = _mm_mul_pd(A0[15],B0[ 7]); d10.xm = _mm_add_pd(C10,c10);
 
-                Maybe<add>::add(C0[ 0] , x * (d00.xd[0] + d00.xd[1]));
+                C0[ 0] += x * (d00.xd[0] + d00.xd[1]);
                 C00 = _mm_mul_pd(A0[23],B0[ 7]);
                 C10 = _mm_mul_pd(A0[31],B0[ 7]);
 
-                Maybe<add>::add(C0[ 1] , x * (d10.xd[0] + d10.xd[1]));
+                C0[ 1] += x * (d10.xd[0] + d10.xd[1]);
                 c00 = _mm_mul_pd(A0[22],B0[ 6]); C00 = _mm_add_pd(C00,c00);
                 c10 = _mm_mul_pd(A0[30],B0[ 6]); C10 = _mm_add_pd(C10,c10);
 
@@ -4606,8 +4480,8 @@ namespace tmv {
                 c00 = _mm_mul_pd(A0[16],B0[ 0]); d00.xm = _mm_add_pd(C00,c00);
                 c10 = _mm_mul_pd(A0[24],B0[ 0]); d10.xm = _mm_add_pd(C10,c10);
 
-                Maybe<add>::add(C0[ 2] , x * (d00.xd[0] + d00.xd[1]));
-                Maybe<add>::add(C0[ 3] , x * (d10.xd[0] + d10.xd[1]));
+                C0[ 2] += x * (d00.xd[0] + d00.xd[1]);
+                C0[ 3] += x * (d10.xd[0] + d10.xd[1]);
 
                 A0 += 32;
                 C0 += 4;
@@ -4626,7 +4500,6 @@ namespace tmv {
         const int N = (N2 == UNKNOWN ? N1 : N2);
         const int N_2 = N>>1;        // = N/2
         const int Nc = (N-(N_2<<1)); // = N%2
-        const bool add = true;
 
         __m128d C00, C01, C10, C11;
         __m128d c00, c01, c10, c11;
@@ -4719,25 +4592,25 @@ namespace tmv {
                 c01 = _mm_mul_pd(A0[15],B0[31]); d01.xm = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[31],B0[31]); d11.xm = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C0[ 0] , x * (d00.xd[0] + d00.xd[1]));
+                C0[ 0] += x * (d00.xd[0] + d00.xd[1]);
                 C00 = _mm_mul_pd(A0[47],B0[15]);
                 C10 = _mm_mul_pd(A0[63],B0[15]);
                 C01 = _mm_mul_pd(A0[47],B0[31]);
                 C11 = _mm_mul_pd(A0[63],B0[31]);
 
-                Maybe<add>::add(C0[ 1] , x * (d10.xd[0] + d10.xd[1]));
+                C0[ 1] += x * (d10.xd[0] + d10.xd[1]);
                 c00 = _mm_mul_pd(A0[46],B0[14]); C00 = _mm_add_pd(C00,c00);
                 c10 = _mm_mul_pd(A0[62],B0[14]); C10 = _mm_add_pd(C10,c10);
                 c01 = _mm_mul_pd(A0[46],B0[30]); C01 = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[62],B0[30]); C11 = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C0[16] , x * (d01.xd[0] + d01.xd[1]));
+                C0[16] += x * (d01.xd[0] + d01.xd[1]);
                 c00 = _mm_mul_pd(A0[45],B0[13]); C00 = _mm_add_pd(C00,c00);
                 c10 = _mm_mul_pd(A0[61],B0[13]); C10 = _mm_add_pd(C10,c10);
                 c01 = _mm_mul_pd(A0[45],B0[29]); C01 = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[61],B0[29]); C11 = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C0[17] , x * (d11.xd[0] + d11.xd[1]));
+                C0[17] += x * (d11.xd[0] + d11.xd[1]);
                 c00 = _mm_mul_pd(A0[44],B0[12]); C00 = _mm_add_pd(C00,c00);
                 c10 = _mm_mul_pd(A0[60],B0[12]); C10 = _mm_add_pd(C10,c10);
                 c01 = _mm_mul_pd(A0[44],B0[28]); C01 = _mm_add_pd(C01,c01);
@@ -4803,10 +4676,10 @@ namespace tmv {
                 c01 = _mm_mul_pd(A0[32],B0[16]); d01.xm = _mm_add_pd(C01,c01);
                 c11 = _mm_mul_pd(A0[48],B0[16]); d11.xm = _mm_add_pd(C11,c11);
 
-                Maybe<add>::add(C0[ 2] , x * (d00.xd[0] + d00.xd[1]));
-                Maybe<add>::add(C0[ 3] , x * (d10.xd[0] + d10.xd[1]));
-                Maybe<add>::add(C0[18] , x * (d01.xd[0] + d01.xd[1]));
-                Maybe<add>::add(C0[19] , x * (d11.xd[0] + d11.xd[1]));
+                C0[ 2] += x * (d00.xd[0] + d00.xd[1]);
+                C0[ 3] += x * (d10.xd[0] + d10.xd[1]);
+                C0[18] += x * (d01.xd[0] + d01.xd[1]);
+                C0[19] += x * (d11.xd[0] + d11.xd[1]);
 
                 A0 += 64;
                 C0 += 4;
@@ -4865,11 +4738,11 @@ namespace tmv {
                 c00 = _mm_mul_pd(A0[15],B0[15]); d00.xm = _mm_add_pd(C00,c00);
                 c10 = _mm_mul_pd(A0[31],B0[15]); d10.xm = _mm_add_pd(C10,c10);
 
-                Maybe<add>::add(C0[ 0] , x * (d00.xd[0] + d00.xd[1]));
+                C0[ 0] += x * (d00.xd[0] + d00.xd[1]);
                 C00 = _mm_mul_pd(A0[47],B0[15]);
                 C10 = _mm_mul_pd(A0[63],B0[15]);
 
-                Maybe<add>::add(C0[ 1] , x * (d10.xd[0] + d10.xd[1]));
+                C0[ 1] += x * (d10.xd[0] + d10.xd[1]);
                 c00 = _mm_mul_pd(A0[46],B0[14]); C00 = _mm_add_pd(C00,c00);
                 c10 = _mm_mul_pd(A0[62],B0[14]); C10 = _mm_add_pd(C10,c10);
 
@@ -4915,8 +4788,8 @@ namespace tmv {
                 c00 = _mm_mul_pd(A0[32],B0[ 0]); d00.xm = _mm_add_pd(C00,c00);
                 c10 = _mm_mul_pd(A0[48],B0[ 0]); d10.xm = _mm_add_pd(C10,c10);
 
-                Maybe<add>::add(C0[ 2] , x * (d00.xd[0] + d00.xd[1]));
-                Maybe<add>::add(C0[ 3] , x * (d10.xd[0] + d10.xd[1]));
+                C0[ 2] += x * (d00.xd[0] + d00.xd[1]);
+                C0[ 3] += x * (d10.xd[0] + d10.xd[1]);
 
                 A0 += 64;
                 C0 += 4;
@@ -4940,7 +4813,6 @@ namespace tmv {
         const int Kd = K + Kc; // = K rounded up to next multiple of 2
         const int Kd_2 = Kd>>1; // = Kd/2
         const int Kd16 = Kd_2<<4; // = (Kd/2)*16
-        const bool add = true;
 
         union dd { __m128d xm; double xd[2]; }; // dd = two doubles
         __m128d C00, C01, C10, C11;
@@ -5001,10 +4873,10 @@ namespace tmv {
                         e01 += d01.xd[0];
                         e11 += d11.xd[0];
                     }
-                    Maybe<add>::add(C0[0] , x * e00);
-                    Maybe<add>::add(C0[1] , x * e10); C0 += 2;
-                    Maybe<add>::add(C1[0] , x * e01);
-                    Maybe<add>::add(C1[1] , x * e11); C1 += 2;
+                    C0[0] += x * e00;
+                    C0[1] += x * e10; C0 += 2;
+                    C1[0] += x * e01;
+                    C1[1] += x * e11; C1 += 2;
                     A0 += Kd_2; A1 += Kd_2;
                     B0 -= Kd_2; B1 -= Kd_2;
                 } while (--i);
@@ -5037,10 +4909,10 @@ namespace tmv {
                         e11 += d11.xd[0];
                     }
 
-                    Maybe<add>::add(C0[0] , x * e00);
-                    Maybe<add>::add(C0[1] , x * e10); C0 += 2;
-                    Maybe<add>::add(C1[0] , x * e01);
-                    Maybe<add>::add(C1[1] , x * e11); C1 += 2;
+                    C0[0] += x * e00;
+                    C0[1] += x * e10; C0 += 2;
+                    C1[0] += x * e01;
+                    C1[1] += x * e11; C1 += 2;
                     A0 += Kd_2; A1 += Kd_2;
                     B0 -= Kd_2; B1 -= Kd_2;
                 } while (--i);
@@ -5056,10 +4928,10 @@ namespace tmv {
                     e01 = (*A0++).xd[0] * (*B1).xd[0];
                     e11 = (*A1++).xd[0] * (*B1++).xd[0];
 
-                    Maybe<add>::add(C0[0] , x * e00);
-                    Maybe<add>::add(C0[1] , x * e10); C0 += 2;
-                    Maybe<add>::add(C1[0] , x * e01);
-                    Maybe<add>::add(C1[1] , x * e11); C1 += 2;
+                    C0[0] += x * e00;
+                    C0[1] += x * e10; C0 += 2;
+                    C1[0] += x * e01;
+                    C1[1] += x * e11; C1 += 2;
                     A0 += Kd_2; A1 += Kd_2;
                     B0 -= Kd_2; B1 -= Kd_2;
                 } while (--i);
@@ -5223,35 +5095,35 @@ namespace tmv {
 
 #ifdef __SSE2__
     template <int M2, int ix>
-    static void multmm_M_16_16_known(
+    static inline void multmm_M_16_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,double>& x,
         const double* A0, const double* B0, double* C0)
     { sse2_multmm_M_16_16<M2>(M,x,A0,B0,C0); }
 
     template <int M2, int ix>
-    static void multmm_M_16_32_known(
+    static inline void multmm_M_16_32_known(
         const int M, const int N, const int K,
         const Scaling<ix,double>& x,
         const double* A0, const double* B0, double* C0)
     { sse2_multmm_M_16_32<M2>(M,x,A0,B0,C0); }
 
     template <int N2, int ix>
-    static void multmm_16_N_16_known(
+    static inline void multmm_16_N_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,double>& x,
         const double* A0, const double* B0, double* C0)
     { sse2_multmm_16_N_16<N2>(N,x,A0,B0,C0); }
 
     template <int N2, int ix>
-    static void multmm_16_N_32_known(
+    static inline void multmm_16_N_32_known(
         const int M, const int N, const int K,
         const Scaling<ix,double>& x,
         const double* A0, const double* B0, double* C0)
     { sse2_multmm_16_N_32<N2>(N,x,A0,B0,C0); }
 
     template <int K2, int ix>
-    static void multmm_16_16_K_known(
+    static inline void multmm_16_16_K_known(
         const int M, const int N, const int K,
         const Scaling<ix,double>& x,
         const double* A0, const double* B0, double* C0)
@@ -5259,21 +5131,21 @@ namespace tmv {
 
 #else
     template <int M2, int ix>
-    static void multmm_M_16_16_known(
+    static inline void multmm_M_16_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,double>& x,
         const double* A0, const double* B0, double* C0)
     { generic_multmm_M_16_16<M2>(M,x,A0,B0,C0); }
 
     template <int N2, int ix>
-    static void multmm_16_N_16_known(
+    static inline void multmm_16_N_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,double>& x,
         const double* A0, const double* B0, double* C0)
     { generic_multmm_16_N_16<N2>(N,x,A0,B0,C0); }
 
     template <int K2, int ix>
-    static void multmm_16_16_K_known(
+    static inline void multmm_16_16_K_known(
         const int M, const int N, const int K,
         const Scaling<ix,double>& x,
         const double* A0, const double* B0, double* C0)
@@ -5355,21 +5227,21 @@ namespace tmv {
 #endif
 
     template <int M2, int ix>
-    static void multmm_M_16_16_known(
+    static inline void multmm_M_16_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,int>& x,
         const int* A0, const int* B0, int* C0)
     { generic_multmm_M_16_16<M2>(M,x,A0,B0,C0); }
 
     template <int N2, int ix>
-    static void multmm_16_N_16_known(
+    static inline void multmm_16_N_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,int>& x,
         const int* A0, const int* B0, int* C0)
     { generic_multmm_16_N_16<N2>(N,x,A0,B0,C0); }
 
     template <int K2, int ix>
-    static void multmm_16_16_K_known(
+    static inline void multmm_16_16_K_known(
         const int M, const int N, const int K,
         const Scaling<ix,int>& x,
         const int* A0, const int* B0, int* C0)
@@ -5451,21 +5323,21 @@ namespace tmv {
 #endif 
 
     template <int M2, int ix>
-    static void multmm_M_16_16_known(
+    static inline void multmm_M_16_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,long double>& x,
         const long double* A0, const long double* B0, long double* C0)
     { generic_multmm_M_16_16<M2>(M,x,A0,B0,C0); }
 
     template <int N2, int ix>
-    static void multmm_16_N_16_known(
+    static inline void multmm_16_N_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,long double>& x,
         const long double* A0, const long double* B0, long double* C0)
     { generic_multmm_16_N_16<N2>(N,x,A0,B0,C0); }
 
     template <int K2, int ix>
-    static void multmm_16_16_K_known(
+    static inline void multmm_16_16_K_known(
         const int M, const int N, const int K,
         const Scaling<ix,long double>& x,
         const long double* A0, const long double* B0, long double* C0)
@@ -5484,49 +5356,49 @@ namespace tmv {
     // So we specify this one instead.
 
     template <int ix, class T>
-    static void call_multmm_16_16_16(
+    static inline void call_multmm_16_16_16(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { multmm_16_16_16(M,N,K,x,A0,B0,C0); }
 
     template <int ix, class T>
-    static void call_multmm_M_16_16(
+    static inline void call_multmm_M_16_16(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { multmm_M_16_16(M,N,K,x,A0,B0,C0); }
 
     template <int M2, int ix, class T>
-    static void call_multmm_M_16_16_known(
+    static inline void call_multmm_M_16_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { multmm_M_16_16_known<M2>(M,N,K,x,A0,B0,C0); }
 
     template <int ix, class T>
-    static void call_multmm_16_N_16(
+    static inline void call_multmm_16_N_16(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { multmm_16_N_16(M,N,K,x,A0,B0,C0); }
 
     template <int N2, int ix, class T>
-    static void call_multmm_16_N_16_known(
+    static inline void call_multmm_16_N_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { multmm_16_N_16_known<N2>(M,N,K,x,A0,B0,C0); }
 
     template <int ix, class T>
-    static void call_multmm_16_16_K(
+    static inline void call_multmm_16_16_K(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { multmm_16_16_K(M,N,K,x,A0,B0,C0); }
 
     template <int K2, int ix, class T>
-    static void call_multmm_16_16_K_known(
+    static inline void call_multmm_16_16_K_known(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { multmm_16_16_K_known<K2>(M,N,K,x,A0,B0,C0); }
 
     template <int ix, class T>
-    static void call_multmm_M_N_K(
+    static inline void call_multmm_M_N_K(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { multmm_M_N_K(M,N,K,x,A0,B0,C0); }

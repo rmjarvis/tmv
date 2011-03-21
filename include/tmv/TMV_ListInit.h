@@ -34,7 +34,8 @@
 
 namespace tmv {
 
-    class ListReadError : public ReadError
+    class ListReadError : 
+        public ReadError
     {
     private :
         int n;

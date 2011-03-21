@@ -43,37 +43,14 @@ namespace tmv {
         const T3 x,
         const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
         const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, MatrixView<T3> m3)
-    {
-        typedef typename Traits<T3>::real_type RT;
-        if (x == RT(1))
-            InlineMultMM_OpenMP<false>(Scaling<1,RT>(),m1,m2,m3);
-        else if (x == RT(-1))
-            InlineMultMM_OpenMP<false>(Scaling<-1,RT>(),m1,m2,m3);
-        else if (x == RT(0))
-            m3.setZero();
-        else if (TMV_IMAG(x) == RT(0))
-            InlineMultMM_OpenMP<false>(Scaling<0,RT>(TMV_REAL(x)),m1,m2,m3);
-        else
-            InlineMultMM_OpenMP<false>(Scaling<0,T3>(x),m1,m2,m3);
-    }
+    { InlineMultMM_OpenMP<false>(Scaling<0,T3>(x),m1,m2,m3); }
 
     template <class T1, bool C1, class T2, bool C2, class T3>
     void InstAddMultMM_OpenMP(
         const T3 x,
         const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
         const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, MatrixView<T3> m3)
-    {
-        typedef typename Traits<T3>::real_type RT;
-        if (x == RT(1))
-            InlineMultMM_OpenMP<true>(Scaling<1,RT>(),m1,m2,m3);
-        else if (x == RT(-1))
-            InlineMultMM_OpenMP<true>(Scaling<-1,RT>(),m1,m2,m3);
-        else if (x == RT(0)) {}
-        else if (TMV_IMAG(x) == RT(0))
-            InlineMultMM_OpenMP<true>(Scaling<0,RT>(TMV_REAL(x)),m1,m2,m3);
-        else
-            InlineMultMM_OpenMP<true>(Scaling<0,T3>(x),m1,m2,m3);
-    }
+    { InlineMultMM_OpenMP<true>(Scaling<0,T3>(x),m1,m2,m3); }
 
 #define InstFile "TMV_MultMM_OpenMP.inst"
 #include "TMV_Inst.h"

@@ -35,15 +35,15 @@
 namespace tmv {
 
     enum Shape {
-        Vec,
+        InvalidShape, Vec,
         Rec, SquareRec, Diag, UpperTri, LowerTri, UnitUpperTri, UnitLowerTri,
         Band, SquareBand, UpperBand, LowerBand, UnitUpperBand, UnitLowerBand,
         RealSym, Sym, Herm, RealSymBand, SymBand, HermBand };
 
-    template <int S> 
+    template <int S>
     struct ShapeTraits;
 
-    template <> 
+    template <>
     struct ShapeTraits<Vec>
     {
         enum { vector = true };
@@ -56,9 +56,10 @@ namespace tmv {
         enum { unit = false };
         enum { inverse_shape = Vec };
         enum { nonunit_shape = Vec };
+        enum { unit_shape = Vec };
     };
 
-    template <> 
+    template <>
     struct ShapeTraits<Rec>
     {
         enum { vector = false };
@@ -71,9 +72,10 @@ namespace tmv {
         enum { unit = false };
         enum { inverse_shape = Rec };
         enum { nonunit_shape = Rec };
+        enum { unit_shape = InvalidShape };
     };
 
-    template <> 
+    template <>
     struct ShapeTraits<SquareRec>
     {
         enum { vector = false };
@@ -86,9 +88,10 @@ namespace tmv {
         enum { unit = false };
         enum { inverse_shape = SquareRec };
         enum { nonunit_shape = SquareRec };
+        enum { unit_shape = InvalidShape };
     };
 
-    template <> 
+    template <>
     struct ShapeTraits<Diag>
     {
         enum { vector = false };
@@ -101,9 +104,10 @@ namespace tmv {
         enum { unit = false };
         enum { inverse_shape = Diag };
         enum { nonunit_shape = Diag };
+        enum { unit_shape = InvalidShape };
     };
 
-    template <> 
+    template <>
     struct ShapeTraits<UpperTri>
     {
         enum { vector = false };
@@ -116,9 +120,10 @@ namespace tmv {
         enum { unit = false };
         enum { inverse_shape = UpperTri };
         enum { nonunit_shape = UpperTri };
+        enum { unit_shape = UnitUpperTri };
     };
 
-    template <> 
+    template <>
     struct ShapeTraits<LowerTri>
     {
         enum { vector = false };
@@ -131,9 +136,10 @@ namespace tmv {
         enum { unit = false };
         enum { inverse_shape = LowerTri };
         enum { nonunit_shape = LowerTri };
+        enum { unit_shape = UnitLowerTri };
     };
 
-    template <> 
+    template <>
     struct ShapeTraits<UnitUpperTri>
     {
         enum { vector = false };
@@ -146,9 +152,10 @@ namespace tmv {
         enum { unit = true };
         enum { inverse_shape = UnitUpperTri };
         enum { nonunit_shape = UpperTri };
+        enum { unit_shape = UnitUpperTri };
     };
 
-    template <> 
+    template <>
     struct ShapeTraits<UnitLowerTri>
     {
         enum { vector = false };
@@ -161,9 +168,10 @@ namespace tmv {
         enum { unit = true };
         enum { inverse_shape = UnitLowerTri };
         enum { nonunit_shape = LowerTri };
+        enum { unit_shape = UnitLowerTri };
     };
 
-    template <> 
+    template <>
     struct ShapeTraits<Band>
     {
         enum { vector = false };
@@ -176,9 +184,10 @@ namespace tmv {
         enum { unit = false };
         enum { inverse_shape = Rec };
         enum { nonunit_shape = Band };
+        enum { unit_shape = InvalidShape };
     };
 
-    template <> 
+    template <>
     struct ShapeTraits<SquareBand>
     {
         enum { vector = false };
@@ -191,9 +200,10 @@ namespace tmv {
         enum { unit = false };
         enum { inverse_shape = SquareRec };
         enum { nonunit_shape = SquareBand };
+        enum { unit_shape = InvalidShape };
     };
 
-    template <> 
+    template <>
     struct ShapeTraits<UpperBand>
     {
         enum { vector = false };
@@ -206,9 +216,10 @@ namespace tmv {
         enum { unit = false };
         enum { inverse_shape = UpperTri };
         enum { nonunit_shape = UpperBand };
+        enum { unit_shape = UnitUpperBand };
     };
 
-    template <> 
+    template <>
     struct ShapeTraits<LowerBand>
     {
         enum { vector = false };
@@ -221,9 +232,10 @@ namespace tmv {
         enum { unit = false };
         enum { inverse_shape = LowerTri };
         enum { nonunit_shape = LowerBand };
+        enum { unit_shape = UnitLowerBand };
     };
 
-    template <> 
+    template <>
     struct ShapeTraits<UnitUpperBand>
     {
         enum { vector = false };
@@ -236,9 +248,10 @@ namespace tmv {
         enum { unit = true };
         enum { inverse_shape = UnitUpperTri };
         enum { nonunit_shape = UpperBand };
+        enum { unit_shape = UnitUpperBand };
     };
 
-    template <> 
+    template <>
     struct ShapeTraits<UnitLowerBand>
     {
         enum { vector = false };
@@ -251,9 +264,10 @@ namespace tmv {
         enum { unit = true };
         enum { inverse_shape = UnitLowerTri };
         enum { nonunit_shape = LowerBand };
+        enum { unit_shape = UnitLowerBand };
     };
 
-    template <> 
+    template <>
     struct ShapeTraits<RealSym>
     {
         enum { vector = false };
@@ -266,9 +280,10 @@ namespace tmv {
         enum { unit = false };
         enum { inverse_shape = RealSym };
         enum { nonunit_shape = RealSym };
+        enum { unit_shape = InvalidShape };
     };
 
-    template <> 
+    template <>
     struct ShapeTraits<Sym>
     {
         enum { vector = false };
@@ -281,9 +296,10 @@ namespace tmv {
         enum { unit = false };
         enum { inverse_shape = Sym };
         enum { nonunit_shape = Sym };
+        enum { unit_shape = InvalidShape };
     };
 
-    template <> 
+    template <>
     struct ShapeTraits<Herm>
     {
         enum { vector = false };
@@ -296,9 +312,10 @@ namespace tmv {
         enum { unit = false };
         enum { inverse_shape = Herm };
         enum { nonunit_shape = Herm };
+        enum { unit_shape = InvalidShape };
     };
 
-    template <> 
+    template <>
     struct ShapeTraits<RealSymBand>
     {
         enum { vector = false };
@@ -311,9 +328,10 @@ namespace tmv {
         enum { unit = false };
         enum { inverse_shape = RealSym };
         enum { nonunit_shape = RealSymBand };
+        enum { unit_shape = InvalidShape };
     };
 
-    template <> 
+    template <>
     struct ShapeTraits<SymBand>
     {
         enum { vector = false };
@@ -326,9 +344,10 @@ namespace tmv {
         enum { unit = false };
         enum { inverse_shape = Sym };
         enum { nonunit_shape = SymBand };
+        enum { unit_shape = InvalidShape };
     };
 
-    template <> 
+    template <>
     struct ShapeTraits<HermBand>
     {
         enum { vector = false };
@@ -341,9 +360,10 @@ namespace tmv {
         enum { unit = false };
         enum { inverse_shape = Herm };
         enum { nonunit_shape = HermBand };
+        enum { unit_shape = InvalidShape };
     };
 
-    template <int S1, int S2> 
+    template <int S1, int S2>
     struct ShapeTraits2
     {
         enum { bothunit = ShapeTraits<S1>::unit && ShapeTraits<S2>::unit };

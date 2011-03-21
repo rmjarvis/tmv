@@ -36,6 +36,7 @@
 #include "tmv/TMV_CopyU.h"
 #include "tmv/TMV_MultXM.h"
 #include "tmv/TMV_TriMatrix.h"
+#include "tmv/TMV_SimpleMatrix.h"
 #include "tmv/TMV_ProdXM.h"
 
 namespace tmv {
@@ -245,20 +246,23 @@ namespace tmv {
     template <class M1, class T2>
     static void DoMultEq(const M1& m1, MatrixView<T2> m2)
     {
+        typedef typename M1::value_type T1;
 #ifdef BLAS
-        const typename M1::value_type t1(0);
+        const T1 t1(0);
         if ((m2.isrm() && m2.stepi()>0) || (m2.iscm() && m2.stepj()>0)) {
             if ((m1.isrm() && m1.stepi()>0) || (m1.iscm() && m1.stepj()>0)) {
                 BlasMultEq(m1,m2,t1);
             } else {
-                if (m1.isunit()) 
-                    BlasMultEq(
-                        m1.copy().viewAsUnitDiag().constView().xdView(),m2,t1);
-                else 
-                    BlasMultEq(m1.copy().constView().xdView(),m2,t1);
+                SimpleMatrix<T1,ColMajor> m1c(m1.size(),m1.size());
+                typedef typename TypeSelect<M1::_upper,
+                        UpperTriMatrixView<T1,UnknownDiag,1>,
+                        LowerTriMatrixView<T1,UnknownDiag,1> >::type M1t;
+                M1t m1ct = Maybe<M1::_upper>::uppertri(m1c,m1.dt());
+                InstCopy(m1,m1ct.xdView());
+                BlasMultEq(m1ct.constView(),m2,t1);
             }
         } else {
-            Matrix<T2,ColMajor> m2c(m2);
+            SimpleMatrix<T2,ColMajor> m2c(m2);
             DoMultEq(m1,m2c.xView());
             InstCopy(m2c.constView().xView(),m2);
         }
@@ -267,14 +271,16 @@ namespace tmv {
             if (m1.isrm() || m1.iscm()) {
                 NonBlasMultEq(m1,m2);
             } else {
-                if (m1.isunit()) 
-                    NonBlasMultEq(
-                        m1.copy().viewAsUnitDiag().constView().xdView(),m2);
-                else 
-                    NonBlasMultEq(m1.copy().constView().xdView(),m2);
+                SimpleMatrix<T1,ColMajor> m1c(m1.size(),m1.size());
+                typedef typename TypeSelect<M1::_upper,
+                        UpperTriMatrixView<T1,UnknownDiag,1>,
+                        LowerTriMatrixView<T1,UnknownDiag,1> >::type M1t;
+                M1t m1ct = Maybe<M1::_upper>::uppertri(m1c,m1.dt());
+                InstCopy(m1,m1ct.xdView());
+                NonBlasMultEq(m1ct.constView(),m2);
             }
         } else {
-            Matrix<T2,ColMajor> m2c(m2);
+            SimpleMatrix<T2,ColMajor> m2c(m2);
             DoMultEq(m1,m2c.xView());
             InstCopy(m2c.constView().xView(),m2);
         }
@@ -293,7 +299,7 @@ namespace tmv {
     static void DoInstAddMultMM(
         const T x, const M1& m1, const M2& m2, MatrixView<T> m3)
     {
-        Matrix<T,ColMajor> m3c(m3.colsize(),m3.rowsize());
+        SimpleMatrix<T,ColMajor> m3c(m3.colsize(),m3.rowsize());
         InstMultXM(x,m2,m3c.xView());
         DoMultEq(m1,m3c.xView());
         InstAddMultXM(T(1),m3c.xView().constView(),m3);

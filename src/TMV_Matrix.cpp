@@ -32,7 +32,6 @@
 
 
 #include "TMV_Blas.h"
-#include <iostream>
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_MatrixIO.h"
@@ -43,8 +42,7 @@
 #include "tmv/TMV_Norm.h"
 #include "tmv/TMV_PermuteM.h"
 #include "tmv/TMV_ScaleM.h"
-#include "tmv/TMV_MultXM.h"
-//#include "tmv/TMV_ProdXM.h"
+#include "tmv/TMV_LUD.h"
 
 namespace tmv {
 
@@ -56,20 +54,16 @@ namespace tmv {
     static void NonLapCopy(
         const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1, MatrixView<T2> m2)
     {
-        if (m2.isrm() && !m2.iscm()) {
-            NonLapCopy(m1.transpose(),m2.transpose());
-        } else if (m2.iscm()) {
+        if (m2.iscm()) {
             MatrixView<T2,1> m2cm = m2;
-            if (m1.isrm())
+            if (m1.iscm()) {
+                InlineCopy(m1.cmView(),m2cm);
+            } else if (m1.isrm()) {
                 InlineCopy(m1.rmView(),m2cm);
-            else if (m1.iscm()) {
-                if (m1.canLinearize() && m2.canLinearize()) {
-                    VectorView<T2> m2l = m2.linearView();
-                    InstCopy(m1.linearView().xView(),m2l);
-                } else
-                    InlineCopy(m1.cmView(),m2cm);
             } else
                 InlineCopy(m1,m2cm);
+        } else if (m2.isrm()) {
+            NonLapCopy(m1.transpose(),m2.transpose());
         } else {
             if (m1.isrm())
                 InlineCopy(m1.rmView(),m2);
@@ -184,24 +178,18 @@ namespace tmv {
     template <class T, bool C> 
     void InstSwap(MatrixView<T,UNKNOWN,UNKNOWN,C> m1, MatrixView<T> m2)
     {
-        if (m2.isrm() && !m2.iscm()) {
-            InstSwap(m1.transpose(),m2.transpose());
-        } else if (m2.iscm()) {
+        if (m2.iscm()) {
             MatrixView<T,1> m2cm = m2.cmView();
-            if (m1.isrm()) {
+            if (m1.iscm()) {
+                MatrixView<T,1,UNKNOWN,C> m1cm = m1.cmView();
+                InlineSwap(m1cm,m2cm);
+            } else if (m1.isrm()) {
                 MatrixView<T,UNKNOWN,1,C> m1rm = m1.rmView();
                 InlineSwap(m1rm,m2cm);
-            } else if (m1.iscm()) {
-                if (m1.canLinearize() && m2.canLinearize()) {
-                    VectorView<T,UNKNOWN,C> m1l = m1.linearView();
-                    VectorView<T> m2l = m2.linearView();
-                    InstSwap(m1l,m2l);
-                } else {
-                    MatrixView<T,1,UNKNOWN,C> m1cm = m1.cmView();
-                    InlineSwap(m1cm,m2cm);
-                }
             } else
                 InlineSwap(m1,m2cm);
+        } else if (m2.isrm()) {
+            InstSwap(m1.transpose(),m2.transpose());
         } else {
             if (m1.isrm()) {
                 MatrixView<T,UNKNOWN,1,C> m1rm = m1.rmView();
@@ -222,11 +210,12 @@ namespace tmv {
     template <class T>
     void InstTransposeSelf(MatrixView<T> m)
     {
-        if (m.isrm() && !m.iscm()) {
-            InstTransposeSelf(m.transpose());
-        } else if (m.iscm()) {
+        if (m.iscm()) {
             MatrixView<T,1> mcm = m;
             InlineTransposeSelf(mcm);
+        } else if (m.isrm()) {
+            MatrixView<T,1> mt = m.transpose();
+            InlineTransposeSelf(mt);
         } else {
             InlineTransposeSelf(m);
         }
@@ -248,12 +237,12 @@ namespace tmv {
     void InstPermuteRows(
         MatrixView<T> m, const int* p, const int i1, const int i2)
     {
-        if (m.isrm()) {
-            MatrixView<T,UNKNOWN,1> mrm = m;
-            InlinePermuteRows(mrm,p,i1,i2);
-        } else if (m.iscm()) {
+        if (m.iscm()) {
             MatrixView<T,1> mcm = m;
             InlinePermuteRows(mcm,p,i1,i2);
+        } else if (m.isrm()) {
+            MatrixView<T,UNKNOWN,1> mrm = m;
+            InlinePermuteRows(mrm,p,i1,i2);
         } else {
             InlinePermuteRows(m,p,i1,i2);
         }
@@ -263,12 +252,12 @@ namespace tmv {
     void InstReversePermuteRows(
         MatrixView<T> m, const int* p, const int i1, const int i2)
     {
-        if (m.isrm()) {
-            MatrixView<T,UNKNOWN,1> mrm = m;
-            InlineReversePermuteRows(mrm,p,i1,i2);
-        } else if (m.iscm()) {
+        if (m.iscm()) {
             MatrixView<T,1> mcm = m;
             InlineReversePermuteRows(mcm,p,i1,i2);
+        } else if (m.isrm()) {
+            MatrixView<T,UNKNOWN,1> mrm = m;
+            InlineReversePermuteRows(mrm,p,i1,i2);
         } else {
             InlineReversePermuteRows(m,p,i1,i2);
         }
@@ -284,8 +273,7 @@ namespace tmv {
     template <class T>
     static T DoInstSumElements(const ConstMatrixView<T>& m)
     {
-        if (m.canLinearize()) return m.linearView().sumElements();
-        else if (m.iscm()) return InlineSumElements(m.cmView());
+        if (m.iscm()) return InlineSumElements(m.cmView());
         else if (m.isrm()) return InlineSumElements(m.transpose().cmView()); 
         else return InlineSumElements(m);
     }
@@ -294,8 +282,7 @@ namespace tmv {
     static typename ConstMatrixView<T>::float_type DoInstSumAbsElements(
         const ConstMatrixView<T>& m)
     {
-        if (m.canLinearize()) return m.linearView().sumAbsElements();
-        else if (m.iscm()) return InlineSumAbsElements(m.cmView());
+        if (m.iscm()) return InlineSumAbsElements(m.cmView());
         else if (m.isrm()) return InlineSumAbsElements(m.transpose().cmView()); 
         else return InlineSumAbsElements(m);
     }
@@ -304,8 +291,7 @@ namespace tmv {
     static typename Traits<T>::real_type DoInstSumAbs2Elements(
         const ConstMatrixView<T>& m)
     {
-        if (m.canLinearize()) return m.linearView().sumAbs2Elements();
-        else if (m.iscm()) return InlineSumAbs2Elements(m.cmView());
+        if (m.iscm()) return InlineSumAbs2Elements(m.cmView());
         else if (m.isrm()) return InlineSumAbs2Elements(
             m.transpose().cmView()); 
         else return InlineSumAbs2Elements(m);
@@ -315,8 +301,7 @@ namespace tmv {
     static typename Traits<T>::real_type DoInstNormSq(
         const ConstMatrixView<T>& m)
     {
-        if (m.canLinearize()) return m.linearView().normSq();
-        else if (m.iscm()) return InlineNormSq(m.cmView());
+        if (m.iscm()) return InlineNormSq(m.cmView());
         else if (m.isrm()) return InlineNormSq(m.transpose().cmView()); 
         else return InlineNormSq(m);
     }
@@ -326,8 +311,7 @@ namespace tmv {
         const ConstMatrixView<T>& m, 
         const typename ConstMatrixView<T>::float_type scale)
     {
-        if (m.canLinearize()) return m.linearView().normSq(scale);
-        else if (m.iscm()) return InlineNormSq(m.cmView(),scale);
+        if (m.iscm()) return InlineNormSq(m.cmView(),scale);
         else if (m.isrm()) return InlineNormSq(m.transpose().cmView(),scale); 
         else return InlineNormSq(m,scale);
     }
@@ -336,8 +320,7 @@ namespace tmv {
     static typename ConstMatrixView<T>::float_type DoInstNormF(
         const ConstMatrixView<T>& m)
     {
-        if (m.canLinearize()) return m.linearView().norm2();
-        else if (m.iscm()) return InlineNormF(m.cmView());
+        if (m.iscm()) return InlineNormF(m.cmView());
         else if (m.isrm()) return InlineNormF(m.transpose().cmView()); 
         else return InlineNormF(m);
     }
@@ -346,8 +329,7 @@ namespace tmv {
     static typename ConstMatrixView<T>::float_type DoInstMaxAbsElement(
         const ConstMatrixView<T>& m)
     {
-        if (m.canLinearize()) return m.linearView().maxAbsElement();
-        else if (m.iscm()) return InlineMaxAbsElement(m.cmView());
+        if (m.iscm()) return InlineMaxAbsElement(m.cmView());
         else if (m.isrm()) return InlineMaxAbsElement(m.transpose().cmView()); 
         else return InlineMaxAbsElement(m);
     }
@@ -356,8 +338,7 @@ namespace tmv {
     static typename Traits<T>::real_type DoInstMaxAbs2Element(
         const ConstMatrixView<T>& m)
     {
-        if (m.canLinearize()) return m.linearView().maxAbs2Element();
-        else if (m.iscm()) return InlineMaxAbs2Element(m.cmView());
+        if (m.iscm()) return InlineMaxAbs2Element(m.cmView());
         else if (m.isrm()) return InlineMaxAbs2Element(m.transpose().cmView()); 
         else return InlineMaxAbs2Element(m);
     }
@@ -660,8 +641,8 @@ namespace tmv {
     void InstWrite(
         std::ostream& os, const ConstMatrixView<T,UNKNOWN,UNKNOWN,C>& m)
     {
-        if (m.isrm()) InlineWrite(os,m.rmView());
-        else if (m.iscm()) InlineWrite(os,m.cmView());
+        if (m.iscm()) InlineWrite(os,m.cmView());
+        else if (m.isrm()) InlineWrite(os,m.rmView());
         else InlineWrite(os,m);
     }
 
@@ -670,23 +651,111 @@ namespace tmv {
         std::ostream& os, const ConstMatrixView<T,UNKNOWN,UNKNOWN,C>& m,
         typename ConstMatrixView<T>::float_type thresh)
     {
-        if (m.isrm()) InlineWrite(os,m.rmView(),thresh);
-        else if (m.iscm()) InlineWrite(os,m.cmView(),thresh);
+        if (m.iscm()) InlineWrite(os,m.cmView(),thresh);
+        else if (m.isrm()) InlineWrite(os,m.rmView(),thresh);
         else InlineWrite(os,m,thresh);
     }
 
-    template <class T, bool C>
-    void InstRead(std::istream& is, MatrixView<T,UNKNOWN,UNKNOWN,C> m)
+    template <class T>
+    void InstRead(std::istream& is, MatrixView<T> m)
     {
-        if (m.isrm()) {
-            MatrixView<T,UNKNOWN,1,C> mrm = m.rmView();
-            InlineRead(is,mrm);
-        } else if (m.iscm()) {
-            MatrixView<T,1,UNKNOWN,C> mcm = m.cmView();
+        if (m.iscm()) {
+            MatrixView<T,1> mcm = m.cmView();
             InlineRead(is,mcm);
+        } else if (m.isrm()) {
+            MatrixView<T,UNKNOWN,1> mrm = m.rmView();
+            InlineRead(is,mrm);
         } else 
             InlineRead(is,m);
     }
+
+    //
+    // MatrixDivHelper
+    //
+
+    template <class T>
+    MatrixDivHelper2<T>::MatrixDivHelper2() {}
+
+    template <class T>
+    MatrixDivHelper2<T>::~MatrixDivHelper2() {}
+
+    template <class T>
+    void MatrixDivHelper2<T>::resetDivType() const 
+    { this->divideUsing(getConstView().isSquare() ? tmv::LU : tmv::QR); }
+
+    template <class T>
+    Matrix<T> MatrixDivHelper2<T>::getM() const
+    { return Matrix<T>(getConstView()); }
+
+    template <class T>
+    void MatrixDivHelper2<T>::setDiv() const
+    {
+        TMVStaticAssert(!Traits<T>::isinteger);
+        if (!this->divIsSet()) {
+            DivType dt = this->getDivType();
+            TMVAssert(dt == tmv::LU 
+                      /*|| dt == tmv::QR 
+                       *|| dt == tmv::QRP
+                       *|| dt == tmv::SV */
+            );
+            switch (dt) {
+              case tmv::LU : 
+                   this->divider.reset(
+                       new InstLUD<T>(
+                           this->getConstView(),this->divIsInPlace()));
+                   break;
+              default :
+                   // The above assert should have already failed.
+                   // So go ahead and fall through.
+                   break;
+            }
+        }
+    }
+
+    template <class T>
+    const InstLUD<T>& MatrixDivHelper2<T>::lud() const
+    {
+        this->divideUsing(LU);
+        setDiv();
+        TMVAssert(dynamic_cast<const InstLUD<T>*>(this->getDiv()));
+        return static_cast<const InstLUD<T>&>(*this->getDiv());
+    }
+
+    template <class T>
+    void MatrixDivHelper2<T>::qrd() const {}
+    template <class T>
+    void MatrixDivHelper2<T>::qrpd() const {}
+    template <class T>
+    void MatrixDivHelper2<T>::svd() const {}
+
+#if 0
+    template <class T>
+    typename const InstQRD<T>& MatrixDivHelper2<T>::qrd() const
+    {
+        this->divideUsing(QR);
+        setDiv();
+        TMVAssert(dynamic_cast<const InstQRD<T>*>(this->getDiv()));
+        return static_cast<const InstQRD<T>&>(*this->getDiv());
+    }
+
+    template <class T>
+    typename const InstQRPD<T>& MatrixDivHelper2<T>::qrpd() const
+    {
+        this->divideUsing(QRP);
+        setDiv();
+        TMVAssert(dynamic_cast<const InstQRPD<T>*>(this->getDiv()));
+        return static_cast<const InstQRPD<T>&>(*this->getDiv());
+    }
+
+    template <class T>
+    typename const InstSVD<T>& MatrixDivHelper2<T>::svd() const
+    {
+        this->divideUsing(SV);
+        setDiv();
+        TMVAssert(dynamic_cast<const InstSVD<T>*>(this->getDiv()));
+        return static_cast<const InstSVD<T>&>(*this->getDiv());
+    }
+#endif
 
 #define InstFile "TMV_Matrix.inst"
 #include "TMV_Inst.h"

@@ -41,50 +41,19 @@
 
 namespace tmv {
 
-    // Defined below:
-    template <class V1, class M2>
-    static void LDivEq(
-        BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2);
-    template <class M1, class M2>
-    static void LDivEq(
-        BaseMatrix_Mutable<M1>& m1, const BaseMatrix_Calc<M2>& m2);
-    template <class V1, class M2>
-    static void RDivEq(
-        BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2);
-    template <class M1, class M2>
-    static void RDivEq(
-        BaseMatrix_Mutable<M1>& m1, const BaseMatrix_Calc<M2>& m2);
-    template <int ix, class T, class V1, class M2, class V3>
-    static void LDiv(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
-    template <int ix, class T, class M1, class M2, class M3>
-    static void LDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
-        const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3);
-    template <int ix, class T, class V1, class M2, class V3>
-    static void RDiv(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
-    template <int ix, class T, class M1, class M2, class M3>
-    static void RDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
-        const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3);
-
     //
     // m1 /= m2   or   m1 = m2.inverse() * m1
     // (Most of these routines are the same is m1 is a vector rather than
     //  a matrix, so the same Helper structure is used for both.)
     //
 
-    template <class M1>
-    static void DivM_ThrowSingular(const M1& m1)
+    static inline void DivM_ThrowSingular()
     {
 #ifdef TMV_NO_THROW
-        std::cerr<<"Singular Matrix found in Division\n";
+        std::cerr<<"Singular Matrix found\n";
         exit(1);
 #else
-        throw SingularMatrix<M1>(m1.mat());
+        throw Singular("Matrix found\n");
 #endif
     }
 
@@ -116,7 +85,7 @@ namespace tmv {
             std::cout<<"LDivEq algo 1: s,xs = "<<1<<','<<xs<<std::endl;
 #endif
             typedef typename M2::value_type T2;
-            if (m2.cref(0,0) == T2(0)) DivM_ThrowSingular(m2);
+            if (m2.cref(0,0) == T2(0)) DivM_ThrowSingular();
             call2(m1,m2);
         }
     };
@@ -139,7 +108,7 @@ namespace tmv {
                 typedef typename V1x::value_type T1;
                 typedef typename M2::value_type T2;
                 T2 det = DetM_Helper<2,2,M2>::call(m2);
-                if (det == T2(0)) DivM_ThrowSingular(m2);
+                if (det == T2(0)) DivM_ThrowSingular();
                 T1 a = (v1.cref(0) * m2.cref(1,1) - 
                         v1.cref(1) * m2.cref(0,1))/det;
                 T1 b = (v1.cref(1) * m2.cref(0,0) -
@@ -217,8 +186,7 @@ namespace tmv {
             std::cout<<"LDivEq algo 12: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
             TMVStaticAssert(!Traits<typename M2::real_type>::isinteger);
-            LUD<M2> lud(m2,false);
-            lud.solveInPlace(m1);
+            m2.lud().solveInPlace(m1);
         } 
     };
 
@@ -264,14 +232,13 @@ namespace tmv {
                 s<<','<<xs<<std::endl;
 #endif
             TMVStaticAssert(!Traits<typename M2::real_type>::isinteger);
-            LUD<M2> lud(m2,false);
-            lud.solveTransposeInPlace(m1);
+            m2.lud().solveTransposeInPlace(m1);
         } 
     };
 
     // algo -2: Figure out which algorithm to use for transpose solution
     template <int s, int xs, class M1, class M2>
-    struct LDivEqM_Helper<-2,s,xs,M1,M2> 
+    struct LDivEqM_Helper<-2,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
@@ -304,7 +271,7 @@ namespace tmv {
 
     // algo -1: Figure out which algorithm to use
     template <int s, int xs, class M1, class M2>
-    struct LDivEqM_Helper<-1,s,xs,M1,M2> 
+    struct LDivEqM_Helper<-1,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
@@ -338,7 +305,7 @@ namespace tmv {
     // v1 /= m2
     //
     template <class V1, class M2>
-    static void LDivEq(
+    static inline void LDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2)
     {
         typedef typename V1::real_type RT1;
@@ -357,15 +324,15 @@ namespace tmv {
         const int s1 = Sizes<M2::_colsize,M2::_rowsize>::size;
         const int s = Sizes<V1::_size,s1>::size;
         typedef typename V1::cview_type V1v;
-        V1v v1v = v1.cView();
+        TMV_MAYBE_REF(V1,V1v) v1v = v1.cView();
         LDivEqM_Helper<-1,s,1,V1v,M2>::call(v1v,m2.mat());
     }
     template <class V1, class M2>
-    static void NoAliasLDivEq(
+    static inline void NoAliasLDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2)
     { LDivEq(v1,m2); }
     template <class V1, class M2>
-    static void AliasLDivEq(
+    static inline void AliasLDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2)
     { LDivEq(v1,m2); }
 
@@ -374,7 +341,7 @@ namespace tmv {
     //
     
     template <class M1, class M2>
-    static void LDivEq(
+    static inline void LDivEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix_Calc<M2>& m2)
     {
         typedef typename M1::real_type RT1;
@@ -392,15 +359,15 @@ namespace tmv {
         const int s = Sizes<M1::_colsize,s1>::size;
         const int xs = M1::_rowsize;
         typedef typename M1::cview_type M1v;
-        M1v m1v = m1.cView();
+        TMV_MAYBE_REF(M1,M1v) m1v = m1.cView();
         LDivEqM_Helper<-1,s,xs,M1v,M2>::call(m1v,m2.mat());
     }
     template <class M1, class M2>
-    static void NoAliasLDivEq(
+    static inline void NoAliasLDivEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix_Calc<M2>& m2)
     { LDivEq(m1,m2); }
     template <class M1, class M2>
-    static void AliasLDivEq(
+    static inline void AliasLDivEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix_Calc<M2>& m2)
     { LDivEq(m1,m2); }
 
@@ -409,7 +376,7 @@ namespace tmv {
     //
     
     template <class V1, class M2>
-    static void RDivEq(
+    static inline void RDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2)
     {
         typedef typename V1::real_type RT1;
@@ -426,24 +393,25 @@ namespace tmv {
         const int s1 = Sizes<M2::_colsize,M2::_rowsize>::size;
         const int s = Sizes<V1::_size,s1>::size;
         typedef typename V1::cview_type V1v;
-        V1v v1v = v1.cView();
+        TMV_MAYBE_REF(V1,V1v) v1v = v1.cView();
         LDivEqM_Helper<-2,s,1,V1v,M2>::call(v1v,m2.mat());
     }
     template <class V1, class M2>
-    static void NoAliasRDivEq(
+    static inline void NoAliasRDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2)
     { RDivEq(v1,m2); }
     template <class V1, class M2>
-    static void AliasRDivEq(
+    static inline void AliasRDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2)
     { RDivEq(v1,m2); }
 
     //
     // m1 %= m2
+    // -> mt1 /= m2t
     //
     
     template <class M1, class M2>
-    static void RDivEq(
+    static inline void RDivEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix_Calc<M2>& m2)
     {
         typedef typename M1::real_type RT1;
@@ -460,16 +428,16 @@ namespace tmv {
         const int s1 = Sizes<M2::_colsize,M2::_rowsize>::size;
         const int s = Sizes<M1::_rowsize,s1>::size;
         const int xs = M1::_colsize;
-        typedef typename M1::cview_type::transpose_type M1t;
-        M1t m1t = m1.cView().transpose();
+        typedef typename M1::transpose_type::cview_type M1t;
+        M1t m1t = m1.transpose().cView();
         LDivEqM_Helper<-2,s,xs,M1t,M2>::call(m1t,m2.mat());
     }
     template <class M1, class M2>
-    static void NoAliasRDivEq(
+    static inline void NoAliasRDivEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix_Calc<M2>& m2)
     { RDivEq(m1,m2); }
     template <class M1, class M2>
-    static void AliasRDivEq(
+    static inline void AliasRDivEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix_Calc<M2>& m2)
     { RDivEq(m1,m2); }
 
@@ -484,7 +452,7 @@ namespace tmv {
 
     // algo 0: Nothing to do
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<0,cs,rs,xs,ix,T,M1,M2,M3> 
+    struct LDivM_Helper<0,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(const Scaling<ix,T>& , const M1& , const M2& , M3& )
         {}
@@ -492,7 +460,7 @@ namespace tmv {
 
     // algo 1: m2 is 1x1
     template <int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<1,1,1,xs,ix,T,M1,M2,M3> 
+    struct LDivM_Helper<1,1,1,xs,ix,T,M1,M2,M3>
     {
         // This one is different for vector and matrix, so break it out here.
         template <class M1x, class M3x>
@@ -526,14 +494,14 @@ namespace tmv {
                 1<<','<<1<<','<<xs<<std::endl;
 #endif
             typedef typename M2::value_type T2;
-            if (m2.cref(0,0) == T2(0)) DivM_ThrowSingular(m2);
+            if (m2.cref(0,0) == T2(0)) DivM_ThrowSingular();
             call2(x,m1,m2,m3);
         }
     };
 
     // algo 2: m2 is 2x2
     template <int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<2,2,2,xs,ix,T,M1,M2,M3> 
+    struct LDivM_Helper<2,2,2,xs,ix,T,M1,M2,M3>
     {
         template <int algo2, int dummy>
         struct Helper2;
@@ -550,7 +518,7 @@ namespace tmv {
                 typedef typename V3x::value_type T3;
                 typedef typename M2::value_type T2;
                 T2 det = DetM_Helper<2,2,M2>::call(m2);
-                if (det == T2(0)) DivM_ThrowSingular(m2);
+                if (det == T2(0)) DivM_ThrowSingular();
                 v3.ref(0) = x*(v1.cref(0) * m2.cref(1,1) -
                              v1.cref(1) * m2.cref(0,1))/det;
                 v3.ref(1) = x*(v1.cref(1) * m2.cref(0,0) -
@@ -596,7 +564,7 @@ namespace tmv {
 
     // algo 11: Use Divider
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<11,cs,rs,xs,ix,T,M1,M2,M3> 
+    struct LDivM_Helper<11,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -615,7 +583,7 @@ namespace tmv {
 
     // algo 12: Calculate LU decomposition on the spot.
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<12,cs,rs,xs,ix,T,M1,M2,M3> 
+    struct LDivM_Helper<12,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -625,15 +593,14 @@ namespace tmv {
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
             TMVStaticAssert(!Traits<typename M2::real_type>::isinteger);
-            LUD<M2> lud(m2,false);
-            lud.solve(m1,m3);
+            m2.lud().solve(m1,m3);
             Scale(x,m3);
         }
     };
 
     // algo 13: Calculate QR decomposition on the spot.
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<13,cs,rs,xs,ix,T,M1,M2,M3> 
+    struct LDivM_Helper<13,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -643,15 +610,17 @@ namespace tmv {
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
             TMVStaticAssert(!Traits<typename M2::real_type>::isinteger);
-            QRD<M2> qrd(m2,false);
+#if 0
+            QRD<M2> qrd(m2);
             qrd.solve(m1,m3);
             Scale(x,m3);
+#endif
         }
     };
 
     // algo 14: Figure out whether to use LU or QR
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<14,cs,rs,xs,ix,T,M1,M2,M3> 
+    struct LDivM_Helper<14,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -669,7 +638,7 @@ namespace tmv {
 
     // algo 20: Direct transpose
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<20,cs,rs,xs,ix,T,M1,M2,M3> 
+    struct LDivM_Helper<20,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -686,7 +655,7 @@ namespace tmv {
 
     // algo 21: Use Divider
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<21,cs,rs,xs,ix,T,M1,M2,M3> 
+    struct LDivM_Helper<21,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -705,7 +674,7 @@ namespace tmv {
 
     // algo 22: Calculate LU decomposition on the spot.
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<22,cs,rs,xs,ix,T,M1,M2,M3> 
+    struct LDivM_Helper<22,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -715,15 +684,14 @@ namespace tmv {
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
             TMVStaticAssert(!Traits<typename M2::real_type>::isinteger);
-            LUD<M2> lud(m2,false);
-            lud.solveTranspose(m1,m3);
+            m2.lud().solveTranspose(m1,m3);
             Scale(x,m3);
         }
     };
 
     // algo 23: Calculate QR decomposition on the spot.
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<23,cs,rs,xs,ix,T,M1,M2,M3> 
+    struct LDivM_Helper<23,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -732,15 +700,18 @@ namespace tmv {
             std::cout<<"LDiv algo 23: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
-            QRD<M2> qrd(m2,false);
+            TMVStaticAssert(!Traits<typename M2::real_type>::isinteger);
+#if 0
+            QRD<M2> qrd(m2);
             qrd.solveTranspose(m1,m3);
             Scale(x,m3);
+#endif
         }
     };
 
     // algo 24: Figure out whether to use LU or QR
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<24,cs,rs,xs,ix,T,M1,M2,M3> 
+    struct LDivM_Helper<24,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -749,7 +720,7 @@ namespace tmv {
             std::cout<<"LDiv algo 24: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
-            if (m2.colsize() == m2.rowsize())
+            if (m2.isSquare())
                 LDivM_Helper<22,cs,rs,xs,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
             else
                 LDivM_Helper<23,cs,rs,xs,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
@@ -758,7 +729,7 @@ namespace tmv {
 
     // algo -2: Figure out which algorithm to use for transpose solution
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<-2,cs,rs,xs,ix,T,M1,M2,M3> 
+    struct LDivM_Helper<-2,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -797,7 +768,7 @@ namespace tmv {
    
     // algo -1: Figure out which algorithm to use
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<-1,cs,rs,xs,ix,T,M1,M2,M3> 
+    struct LDivM_Helper<-1,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -841,7 +812,7 @@ namespace tmv {
     // v3 = x * v1 / m2   or   v3 = x * m2.inverse() * v1
     //
     template <int ix, class T, class V1, class M2, class V3>
-    static void LDiv(
+    static inline void LDiv(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
@@ -862,17 +833,17 @@ namespace tmv {
         const int rs = Sizes<M2::_rowsize,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V3::cview_type V3v;
-        V1v v1v = v1.cView();
-        V3v v3v = v3.cView();
+        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
+        TMV_MAYBE_REF(V3,V3v) v3v = v3.cView();
         LDivM_Helper<-1,cs,rs,1,ix,T,V1v,M2,V3v>::call(x,v1v,m2.mat(),v3v);
     }
     template <int ix, class T, class V1, class M2, class V3>
-    static void NoAliasLDiv(
+    static inline void NoAliasLDiv(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3)
     { LDiv(x,v1,m2,v3); }
     template <int ix, class T, class V1, class M2, class V3>
-    static void AliasLDiv(
+    static inline void AliasLDiv(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3)
     { LDiv(x,v1,m2,v3); }
@@ -881,7 +852,7 @@ namespace tmv {
     // m3 = x * m1 / m2   or   m3 = x * m2.inverse() * m1
     //
     template <int ix, class T, class M1, class M2, class M3>
-    static void LDiv(
+    static inline void LDiv(
         const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
         const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     {
@@ -893,6 +864,8 @@ namespace tmv {
         TMVStaticAssert(!Traits<RT3>::isinteger);
         TMVStaticAssert(ShapeTraits<M2::_shape>::upper);
         TMVStaticAssert(ShapeTraits<M2::_shape>::lower);
+        TMVStaticAssert(ShapeTraits<M3::_shape>::upper);
+        TMVStaticAssert(ShapeTraits<M3::_shape>::lower);
 
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
         TMVStaticAssert((Sizes<M3::_colsize,M2::_rowsize>::same));
@@ -904,17 +877,17 @@ namespace tmv {
         const int xs = Sizes<M3::_rowsize,M1::_rowsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M3::cview_type M3v;
-        M1v m1v = m1.cView();
-        M3v m3v = m3.cView();
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
         LDivM_Helper<-1,cs,rs,xs,ix,T,M1v,M2,M3v>::call(x,m1v,m2.mat(),m3v);
     }
     template <int ix, class T, class M1, class M2, class M3>
-    static void NoAliasLDiv(
+    static inline void NoAliasLDiv(
         const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
         const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     { LDiv(x,m1,m2,m3); }
     template <int ix, class T, class M1, class M2, class M3>
-    static void AliasLDiv(
+    static inline void AliasLDiv(
         const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
         const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     { LDiv(x,m1,m2,m3); }
@@ -923,9 +896,8 @@ namespace tmv {
     // v3 = x * v1 % m2   or   v3 = x * v1 * m2.inverse()
     //
     template <int ix, class T, class V1, class M2, class V3>
-    static void RDiv(
-        const Scaling<ix,T>& x,
-        const BaseVector_Calc<V1>& v1,
+    static inline void RDiv(
+        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
         typedef typename V1::real_type RT1;
@@ -945,29 +917,28 @@ namespace tmv {
         const int rs = Sizes<M2::_rowsize,V1::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V3::cview_type V3v;
-        V1v v1v = v1.cView();
-        V3v v3v = v3.cView();
+        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
+        TMV_MAYBE_REF(V3,V3v) v3v = v3.cView();
         LDivM_Helper<-2,cs,rs,1,ix,T,V1v,M2,V3v>::call(x,v1v,m2.mat(),v3v);
     }
     template <int ix, class T, class V1, class M2, class V3>
-    static void NoAliasRDiv(
-        const Scaling<ix,T>& x,
-        const BaseVector_Calc<V1>& v1,
+    static inline void NoAliasRDiv(
+        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3)
     { RDiv(x,v1,m2,v3); }
     template <int ix, class T, class V1, class M2, class V3>
-    static void AliasRDiv(
-        const Scaling<ix,T>& x,
-        const BaseVector_Calc<V1>& v1,
+    static inline void AliasRDiv(
+        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3)
     { RDiv(x,v1,m2,v3); }
 
  
     //
     // m3 = x * m1 % m2   or   m3 = x * m1 * m2.inverse()
+    // Switch to m3t = x * m2t.inverse * m1t
     //
     template <int ix, class T, class M1, class M2, class M3>
-    static void RDiv(
+    static inline void RDiv(
         const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
         const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     {
@@ -979,6 +950,8 @@ namespace tmv {
         TMVStaticAssert(!Traits<RT3>::isinteger);
         TMVStaticAssert(ShapeTraits<M2::_shape>::upper);
         TMVStaticAssert(ShapeTraits<M2::_shape>::lower);
+        TMVStaticAssert(ShapeTraits<M3::_shape>::upper);
+        TMVStaticAssert(ShapeTraits<M3::_shape>::lower);
 
         TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same));
         TMVStaticAssert((Sizes<M3::_rowsize,M2::_colsize>::same));
@@ -989,22 +962,22 @@ namespace tmv {
         const int cs = Sizes<M2::_colsize,M3::_rowsize>::size;
         const int rs = Sizes<M2::_rowsize,M1::_rowsize>::size;
         const int xs = Sizes<M3::_colsize,M1::_colsize>::size;
-        typedef typename M1::const_cview_type::const_transpose_type M1t;
-        typedef typename M3::cview_type::transpose_type M3t;
-        M1t m1t = m1.cView().transpose();
-        M3t m3t = m3.cView().transpose();
+        typedef typename M1::const_transpose_type::const_cview_type M1t;
+        typedef typename M3::transpose_type::cview_type M3t;
+        M1t m1t = m1.transpose().cView();
+        M3t m3t = m3.transpose().cView();
         LDivM_Helper<-2,cs,rs,xs,ix,T,M1t,M2,M3t>::call(x,m1t,m2.mat(),m3t);
     }
     template <int ix, class T, class M1, class M2, class M3>
-    static void NoAliasRDiv(
+    static inline void NoAliasRDiv(
         const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
         const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3)
-    { RDiv(x,m1,m2,m3); }
+    { RDiv(x,m1.mat(),m2,m3); }
     template <int ix, class T, class M1, class M2, class M3>
-    static void AliasRDiv(
+    static inline void AliasRDiv(
         const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
         const BaseMatrix_Calc<M2>& m2, BaseMatrix_Mutable<M3>& m3)
-    { RDiv(x,m1,m2,m3); }
+    { RDiv(x,m1.mat(),m2,m3); }
 
  
 } // namespace tmv

@@ -68,7 +68,7 @@
 
 namespace tmv {
 
-    template <class T, int N, DiagType D, StorageType S, IndexStyle I> 
+    template <class T, int N, DiagType D, StorageType S, IndexStyle I>
     struct Traits<SmallUpperTriMatrix<T,N,D,S,I> >
     {
         typedef T value_type;
@@ -111,35 +111,35 @@ namespace tmv {
         typedef ConstSmallVectorView<T,N,_diagstep,false,I> const_diag_type;
         typedef ConstVectorView<T,_diagstep,false,I> const_diag_sub_type;
 
-        typedef ConstUpperTriMatrixView<T,D,_stepi,_stepj,false,I> 
+        typedef ConstUpperTriMatrixView<T,D,_stepi,_stepj,false,I>
             const_subtrimatrix_type;
-        typedef ConstUpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,false,I> 
+        typedef ConstUpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,false,I>
             const_subtrimatrix_step_type;
         typedef ConstMatrixView<T,_stepi,_stepj,false,I> const_submatrix_type;
-        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,false,I> 
+        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,false,I>
             const_submatrix_step_type;
         typedef ConstVectorView<T,UNKNOWN,false,I> const_subvector_type;
 
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,I>
             const_view_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,CStyle> 
+        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,CStyle>
             const_cview_type;
         typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,
                 false,FortranStyle> const_fview_type;
         typedef ConstUpperTriMatrixView<T,D> const_xview_type;
         typedef ConstUpperTriMatrixView<T,UnknownDiag> const_xdview_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,1,_stepj,false,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,D,1,_stepj,false,I>
             const_cmview_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,1,false,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,1,false,I>
             const_rmview_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,notC,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,notC,I>
             const_conjugate_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepj,_stepi,false,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepj,_stepi,false,I>
             const_transpose_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepj,_stepi,notC,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepj,_stepi,notC,I>
             const_adjoint_type;
 
-        typedef ConstSmallUpperTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,false,I> 
+        typedef ConstSmallUpperTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,false,I>
             const_offdiag_type;
         typedef ConstSmallUpperTriMatrixView<T,N,UnitDiag,_stepi,_stepj,
                 false,I> const_unitdiag_type;
@@ -147,12 +147,12 @@ namespace tmv {
                 false,I> const_nonunitdiag_type;
         typedef ConstSmallUpperTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,
                 false,I> const_unknowndiag_type;
-        typedef ConstSmallUpperTriMatrixView<real_type,N,D,twoSi,twoSj,false,I> 
+        typedef ConstSmallUpperTriMatrixView<real_type,N,D,twoSi,twoSj,false,I>
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,I>
             const_nonconj_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,I> 
+        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,I>
             nonconst_type;
 
         typedef TriRef<T,false> reference;
@@ -162,46 +162,46 @@ namespace tmv {
         typedef SmallVectorView<T,N,_diagstep,false,I> diag_type;
         typedef VectorView<T,_diagstep,false,I> diag_sub_type;
 
-        typedef UpperTriMatrixView<T,D,_stepi,_stepj,false,I> 
+        typedef UpperTriMatrixView<T,D,_stepi,_stepj,false,I>
             subtrimatrix_type;
-        typedef UpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,false,I> 
+        typedef UpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,false,I>
             subtrimatrix_step_type;
         typedef MatrixView<T,_stepi,_stepj,false,I> submatrix_type;
         typedef MatrixView<T,UNKNOWN,UNKNOWN,false,I> submatrix_step_type;
         typedef VectorView<T,UNKNOWN,false,I> subvector_type;
 
         typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,I> view_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,CStyle> 
+        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,CStyle>
             cview_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,FortranStyle> 
+        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,FortranStyle>
             fview_type;
         typedef UpperTriMatrixView<T,D> xview_type;
         typedef UpperTriMatrixView<T,UnknownDiag> xdview_type;
         typedef SmallUpperTriMatrixView<T,N,D,1,_stepj,false,I> cmview_type;
         typedef SmallUpperTriMatrixView<T,N,D,_stepi,1,false,I> rmview_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,notC,I> 
+        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,notC,I>
             conjugate_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepj,_stepi,false,I> 
+        typedef SmallLowerTriMatrixView<T,N,D,_stepj,_stepi,false,I>
             transpose_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepj,_stepi,notC,I> 
+        typedef SmallLowerTriMatrixView<T,N,D,_stepj,_stepi,notC,I>
             adjoint_type;
 
-        typedef SmallUpperTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,false,I> 
+        typedef SmallUpperTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,false,I>
             offdiag_type;
-        typedef SmallUpperTriMatrixView<T,N,UnitDiag,_stepi,_stepj,false,I> 
+        typedef SmallUpperTriMatrixView<T,N,UnitDiag,_stepi,_stepj,false,I>
             unitdiag_type;
-        typedef SmallUpperTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,false,I> 
+        typedef SmallUpperTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,false,I>
             nonunitdiag_type;
-        typedef SmallUpperTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,false,I> 
+        typedef SmallUpperTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,false,I>
             unknowndiag_type;
-        typedef SmallUpperTriMatrixView<real_type,N,D,twoSi,twoSj,false,I> 
+        typedef SmallUpperTriMatrixView<real_type,N,D,twoSi,twoSj,false,I>
             realpart_type;
         typedef realpart_type imagpart_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,I> 
+        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,I>
             nonconj_type;
     };
 
-    template <class T, int N, DiagType D, StorageType S, IndexStyle I> 
+    template <class T, int N, DiagType D, StorageType S, IndexStyle I>
     class SmallUpperTriMatrix : 
         public BaseMatrix_Tri_Mutable<SmallUpperTriMatrix<T,N,D,S,I> >
     {
@@ -273,16 +273,16 @@ namespace tmv {
         }
 
         SmallUpperTriMatrix(const type& m2) 
-        { 
+        {
             TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
             m2.newAssignTo(*this);
         }
 
-        template <class M2> 
+        template <class M2>
         SmallUpperTriMatrix(const BaseMatrix<M2>& m2) 
-        { 
+        {
             TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
@@ -306,9 +306,9 @@ namespace tmv {
             Maybe<_unit && !M2::_unit>::unitview(m2).newAssignTo(*this);
         }
 
-        template <class M2> 
+        template <class M2>
         SmallUpperTriMatrix(const BaseMatrix_Diag<M2>& m2) 
-        { 
+        {
             TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
@@ -331,7 +331,7 @@ namespace tmv {
         //
 
         type& operator=(const type& m2)
-        { 
+        {
             if (&m2 != this) base_mut::operator=(m2);
             return *this;
         }
@@ -417,7 +417,7 @@ namespace tmv {
         explicit SmallUpperTriMatrixF(const T* vv) : mtype(vv) {}
         explicit SmallUpperTriMatrixF(const std::vector<T>& vv) : 
             mtype(vv) {}
-        template <class M2> 
+        template <class M2>
         SmallUpperTriMatrixF(const BaseMatrix<M2>& m2) : mtype(m2) {}
         SmallUpperTriMatrixF(const type& m2) : mtype(m2) {}
         template <class M2>
@@ -490,48 +490,48 @@ namespace tmv {
         typedef ConstSmallVectorView<T,N,_diagstep,C,I> const_diag_type;
         typedef ConstVectorView<T,_diagstep,C,I> const_diag_sub_type;
 
-        typedef ConstUpperTriMatrixView<T,D,_stepi,_stepj,C,I> 
+        typedef ConstUpperTriMatrixView<T,D,_stepi,_stepj,C,I>
             const_subtrimatrix_type;
-        typedef ConstUpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,C,I> 
+        typedef ConstUpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,C,I>
             const_subtrimatrix_step_type;
         typedef ConstMatrixView<T,_stepi,_stepj,C,I> const_submatrix_type;
-        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,C,I> 
+        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,C,I>
             const_submatrix_step_type;
         typedef ConstVectorView<T,UNKNOWN,C,I> const_subvector_type;
 
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,I>
             const_view_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,CStyle> 
+        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,CStyle>
             const_cview_type;
         typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,
                 FortranStyle> const_fview_type;
-        typedef ConstUpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,C> 
+        typedef ConstUpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,C>
             const_xview_type;
-        typedef ConstUpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C> 
+        typedef ConstUpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>
             const_xdview_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,1,_stepj,C,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,D,1,_stepj,C,I>
             const_cmview_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,1,C,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,1,C,I>
             const_rmview_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,notC,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,notC,I>
             const_conjugate_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepj,_stepi,C,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepj,_stepi,C,I>
             const_transpose_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepj,_stepi,notC,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepj,_stepi,notC,I>
             const_adjoint_type;
 
-        typedef ConstSmallUpperTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,C,I> 
+        typedef ConstSmallUpperTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,C,I>
             const_offdiag_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,UnitDiag,_stepi,_stepj,C,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,UnitDiag,_stepi,_stepj,C,I>
             const_unitdiag_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,C,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,C,I>
             const_nonunitdiag_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,C,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,C,I>
             const_unknowndiag_type;
-        typedef ConstSmallUpperTriMatrixView<real_type,N,D,twoSi,twoSj,false,I> 
+        typedef ConstSmallUpperTriMatrixView<real_type,N,D,twoSi,twoSj,false,I>
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,I>
             const_nonconj_type;
         typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,I> nonconst_type;
     };
@@ -750,48 +750,48 @@ namespace tmv {
         typedef ConstSmallVectorView<T,N,_diagstep,C,I> const_diag_type;
         typedef ConstVectorView<T,_diagstep,C,I> const_diag_sub_type;
 
-        typedef ConstUpperTriMatrixView<T,D,_stepi,_stepj,C,I> 
+        typedef ConstUpperTriMatrixView<T,D,_stepi,_stepj,C,I>
             const_subtrimatrix_type;
-        typedef ConstUpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,C,I> 
+        typedef ConstUpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,C,I>
             const_subtrimatrix_step_type;
         typedef ConstMatrixView<T,_stepi,_stepj,C,I> const_submatrix_type;
-        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,C,I> 
+        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,C,I>
             const_submatrix_step_type;
         typedef ConstVectorView<T,UNKNOWN,C,I> const_subvector_type;
 
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,I>
             const_view_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,CStyle> 
+        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,CStyle>
             const_cview_type;
         typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,
                 FortranStyle> const_fview_type;
-        typedef ConstUpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,C> 
+        typedef ConstUpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,C>
             const_xview_type;
-        typedef ConstUpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C> 
+        typedef ConstUpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>
             const_xdview_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,1,_stepj,C,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,D,1,_stepj,C,I>
             const_cmview_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,1,C,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,1,C,I>
             const_rmview_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,notC,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,notC,I>
             const_conjugate_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepj,_stepi,C,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepj,_stepi,C,I>
             const_transpose_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepj,_stepi,notC,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepj,_stepi,notC,I>
             const_adjoint_type;
 
-        typedef ConstSmallUpperTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,C,I> 
+        typedef ConstSmallUpperTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,C,I>
             const_offdiag_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,UnitDiag,_stepi,_stepj,C,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,UnitDiag,_stepi,_stepj,C,I>
             const_unitdiag_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,C,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,C,I>
             const_nonunitdiag_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,C,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,C,I>
             const_unknowndiag_type;
-        typedef ConstSmallUpperTriMatrixView<real_type,N,D,twoSi,twoSj,false,I> 
+        typedef ConstSmallUpperTriMatrixView<real_type,N,D,twoSi,twoSj,false,I>
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,I>
             const_nonconj_type;
         typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,I> nonconst_type;
 
@@ -803,41 +803,41 @@ namespace tmv {
         typedef VectorView<T,_diagstep,C,I> diag_sub_type;
 
         typedef UpperTriMatrixView<T,D,_stepi,_stepj,C,I> subtrimatrix_type;
-        typedef UpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,C,I> 
+        typedef UpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,C,I>
             subtrimatrix_step_type;
         typedef MatrixView<T,_stepi,_stepj,C,I> submatrix_type;
         typedef MatrixView<T,UNKNOWN,UNKNOWN,C,I> submatrix_step_type;
         typedef VectorView<T,UNKNOWN,C,I> subvector_type;
 
         typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,I> view_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,CStyle> 
+        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,CStyle>
             cview_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,FortranStyle> 
+        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,FortranStyle>
             fview_type;
         typedef UpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,C> xview_type;
-        typedef UpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C> 
+        typedef UpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>
             xdview_type;
         typedef SmallUpperTriMatrixView<T,N,D,1,_stepj,C,I> cmview_type;
         typedef SmallUpperTriMatrixView<T,N,D,_stepi,1,C,I> rmview_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,notC,I> 
+        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,notC,I>
             conjugate_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepj,_stepi,C,I> 
+        typedef SmallLowerTriMatrixView<T,N,D,_stepj,_stepi,C,I>
             transpose_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepj,_stepi,notC,I> 
+        typedef SmallLowerTriMatrixView<T,N,D,_stepj,_stepi,notC,I>
             adjoint_type;
 
-        typedef SmallUpperTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,C,I> 
+        typedef SmallUpperTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,C,I>
             offdiag_type;
-        typedef SmallUpperTriMatrixView<T,N,UnitDiag,_stepi,_stepj,C,I> 
+        typedef SmallUpperTriMatrixView<T,N,UnitDiag,_stepi,_stepj,C,I>
             unitdiag_type;
-        typedef SmallUpperTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,C,I> 
+        typedef SmallUpperTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,C,I>
             nonunitdiag_type;
-        typedef SmallUpperTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,C,I> 
+        typedef SmallUpperTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,C,I>
             unknowndiag_type;
-        typedef SmallUpperTriMatrixView<real_type,N,D,twoSi,twoSj,false,I> 
+        typedef SmallUpperTriMatrixView<real_type,N,D,twoSi,twoSj,false,I>
             realpart_type;
         typedef realpart_type imagpart_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,I> 
+        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,I>
             nonconj_type;
     };
 
@@ -1039,7 +1039,7 @@ namespace tmv {
     }; // SmallUpperTriMatrixViewF
 
 
-    template <class T, int N, DiagType D, StorageType S, IndexStyle I> 
+    template <class T, int N, DiagType D, StorageType S, IndexStyle I>
     struct Traits<SmallLowerTriMatrix<T,N,D,S,I> >
     {
         typedef T value_type;
@@ -1082,35 +1082,35 @@ namespace tmv {
         typedef ConstSmallVectorView<T,N,_diagstep,false,I> const_diag_type;
         typedef ConstVectorView<T,_diagstep,false,I> const_diag_sub_type;
 
-        typedef ConstLowerTriMatrixView<T,D,_stepi,_stepj,false,I> 
+        typedef ConstLowerTriMatrixView<T,D,_stepi,_stepj,false,I>
             const_subtrimatrix_type;
-        typedef ConstLowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,false,I> 
+        typedef ConstLowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,false,I>
             const_subtrimatrix_step_type;
         typedef ConstMatrixView<T,_stepi,_stepj,false,I> const_submatrix_type;
-        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,false,I> 
+        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,false,I>
             const_submatrix_step_type;
         typedef ConstVectorView<T,UNKNOWN,false,I> const_subvector_type;
 
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,I>
             const_view_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,CStyle> 
+        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,CStyle>
             const_cview_type;
         typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,
                 FortranStyle> const_fview_type;
         typedef ConstLowerTriMatrixView<T,D> const_xview_type;
         typedef ConstLowerTriMatrixView<T,UnknownDiag> const_xdview_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,1,_stepj,false,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,D,1,_stepj,false,I>
             const_cmview_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,1,false,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,1,false,I>
             const_rmview_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,notC,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,notC,I>
             const_conjugate_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepj,_stepi,false,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepj,_stepi,false,I>
             const_transpose_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepj,_stepi,notC,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepj,_stepi,notC,I>
             const_adjoint_type;
 
-        typedef ConstSmallLowerTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,false,I> 
+        typedef ConstSmallLowerTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,false,I>
             const_offdiag_type;
         typedef ConstSmallLowerTriMatrixView<T,N,UnitDiag,_stepi,_stepj,
                 false,I> const_unitdiag_type;
@@ -1118,12 +1118,12 @@ namespace tmv {
                 false,I> const_nonunitdiag_type;
         typedef ConstSmallLowerTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,
                 false,I> const_unknowndiag_type;
-        typedef ConstSmallLowerTriMatrixView<real_type,N,D,twoSi,twoSj,false,I> 
+        typedef ConstSmallLowerTriMatrixView<real_type,N,D,twoSi,twoSj,false,I>
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,I>
             const_nonconj_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,I> 
+        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,I>
             nonconst_type;
 
         typedef TriRef<T,false> reference;
@@ -1133,16 +1133,16 @@ namespace tmv {
         typedef SmallVectorView<T,N,_diagstep,false,I> diag_type;
         typedef VectorView<T,_diagstep,false,I> diag_sub_type;
 
-        typedef LowerTriMatrixView<T,D,_stepi,_stepj,false,I> 
+        typedef LowerTriMatrixView<T,D,_stepi,_stepj,false,I>
             subtrimatrix_type;
-        typedef LowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,false,I> 
+        typedef LowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,false,I>
             subtrimatrix_step_type;
         typedef MatrixView<T,_stepi,_stepj,false,I> submatrix_type;
         typedef MatrixView<T,UNKNOWN,UNKNOWN,false,I> submatrix_step_type;
         typedef VectorView<T,UNKNOWN,false,I> subvector_type;
 
         typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,I> view_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,CStyle> 
+        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,CStyle>
             cview_type;
         typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,
                 FortranStyle> fview_type;
@@ -1150,29 +1150,29 @@ namespace tmv {
         typedef LowerTriMatrixView<T,UnknownDiag> xdview_type;
         typedef SmallLowerTriMatrixView<T,N,D,1,_stepj,false,I> cmview_type;
         typedef SmallLowerTriMatrixView<T,N,D,_stepi,1,false,I> rmview_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,notC,I> 
+        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,notC,I>
             conjugate_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepj,_stepi,false,I> 
+        typedef SmallUpperTriMatrixView<T,N,D,_stepj,_stepi,false,I>
             transpose_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepj,_stepi,notC,I> 
+        typedef SmallUpperTriMatrixView<T,N,D,_stepj,_stepi,notC,I>
             adjoint_type;
 
-        typedef SmallLowerTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,false,I> 
+        typedef SmallLowerTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,false,I>
             offdiag_type;
-        typedef SmallLowerTriMatrixView<T,N,UnitDiag,_stepi,_stepj,false,I> 
+        typedef SmallLowerTriMatrixView<T,N,UnitDiag,_stepi,_stepj,false,I>
             unitdiag_type;
-        typedef SmallLowerTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,false,I> 
+        typedef SmallLowerTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,false,I>
             nonunitdiag_type;
-        typedef SmallLowerTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,false,I> 
+        typedef SmallLowerTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,false,I>
             unknowndiag_type;
-        typedef SmallLowerTriMatrixView<real_type,N,D,twoSi,twoSj,false,I> 
+        typedef SmallLowerTriMatrixView<real_type,N,D,twoSi,twoSj,false,I>
             realpart_type;
         typedef realpart_type imagpart_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,I> 
+        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,I>
             nonconj_type;
     };
 
-    template <class T, int N, DiagType D, StorageType S, IndexStyle I> 
+    template <class T, int N, DiagType D, StorageType S, IndexStyle I>
     class SmallLowerTriMatrix : 
         public BaseMatrix_Tri_Mutable<SmallLowerTriMatrix<T,N,D,S,I> >
     {
@@ -1244,16 +1244,16 @@ namespace tmv {
         }
 
         SmallLowerTriMatrix(const type& m2) 
-        { 
+        {
             TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
             m2.newAssignTo(*this);
         }
 
-        template <class M2> 
+        template <class M2>
         SmallLowerTriMatrix(const BaseMatrix<M2>& m2) 
-        { 
+        {
             TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
@@ -1277,9 +1277,9 @@ namespace tmv {
             Maybe<_unit && !M2::_unit>::unitview(m2).newAssignTo(*this);
         }
 
-        template <class M2> 
+        template <class M2>
         SmallLowerTriMatrix(const BaseMatrix_Diag<M2>& m2) 
-        { 
+        {
             TMVStaticAssert(N>=0);
             TMVStaticAssert(S==RowMajor || S==ColMajor); 
             TMVStaticAssert(D != UnknownDiag);
@@ -1302,7 +1302,7 @@ namespace tmv {
         //
 
         type& operator=(const type& m2)
-        { 
+        {
             if (&m2 != this) base_mut::operator=(m2);
             return *this;
         }
@@ -1388,7 +1388,7 @@ namespace tmv {
         explicit SmallLowerTriMatrixF(const T* vv) : mtype(vv) {}
         explicit SmallLowerTriMatrixF(const std::vector<T>& vv) :
             mtype(vv) {}
-        template <class M2> 
+        template <class M2>
         SmallLowerTriMatrixF(const BaseMatrix<M2>& m2) : mtype(m2) {}
         SmallLowerTriMatrixF(const type& m2) : mtype(m2) {}
         template <class M2>
@@ -1461,48 +1461,48 @@ namespace tmv {
         typedef ConstSmallVectorView<T,N,_diagstep,C,I> const_diag_type;
         typedef ConstVectorView<T,_diagstep,C,I> const_diag_sub_type;
 
-        typedef ConstLowerTriMatrixView<T,D,_stepi,_stepj,C,I> 
+        typedef ConstLowerTriMatrixView<T,D,_stepi,_stepj,C,I>
             const_subtrimatrix_type;
-        typedef ConstLowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,C,I> 
+        typedef ConstLowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,C,I>
             const_subtrimatrix_step_type;
         typedef ConstMatrixView<T,_stepi,_stepj,C,I> const_submatrix_type;
-        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,C,I> 
+        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,C,I>
             const_submatrix_step_type;
         typedef ConstVectorView<T,UNKNOWN,C,I> const_subvector_type;
 
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,I>
             const_view_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,CStyle> 
+        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,CStyle>
             const_cview_type;
         typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,
                 FortranStyle> const_fview_type;
-        typedef ConstLowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,C> 
+        typedef ConstLowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,C>
             const_xview_type;
-        typedef ConstLowerTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C> 
+        typedef ConstLowerTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>
             const_xdview_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,1,_stepj,C,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,D,1,_stepj,C,I>
             const_cmview_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,1,C,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,1,C,I>
             const_rmview_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,notC,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,notC,I>
             const_conjugate_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepj,_stepi,C,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepj,_stepi,C,I>
             const_transpose_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepj,_stepi,notC,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepj,_stepi,notC,I>
             const_adjoint_type;
 
-        typedef ConstSmallLowerTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,C,I> 
+        typedef ConstSmallLowerTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,C,I>
             const_offdiag_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,UnitDiag,_stepi,_stepj,C,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,UnitDiag,_stepi,_stepj,C,I>
             const_unitdiag_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,C,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,C,I>
             const_nonunitdiag_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,C,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,C,I>
             const_unknowndiag_type;
-        typedef ConstSmallLowerTriMatrixView<real_type,N,D,twoSi,twoSj,false,I> 
+        typedef ConstSmallLowerTriMatrixView<real_type,N,D,twoSi,twoSj,false,I>
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,I>
             const_nonconj_type;
         typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,I> nonconst_type;
     };
@@ -1721,48 +1721,48 @@ namespace tmv {
         typedef ConstSmallVectorView<T,N,_diagstep,C,I> const_diag_type;
         typedef ConstVectorView<T,_diagstep,C,I> const_diag_sub_type;
 
-        typedef ConstLowerTriMatrixView<T,D,_stepi,_stepj,C,I> 
+        typedef ConstLowerTriMatrixView<T,D,_stepi,_stepj,C,I>
             const_subtrimatrix_type;
-        typedef ConstLowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,C,I> 
+        typedef ConstLowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,C,I>
             const_subtrimatrix_step_type;
         typedef ConstMatrixView<T,_stepi,_stepj,C,I> const_submatrix_type;
-        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,C,I> 
+        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,C,I>
             const_submatrix_step_type;
         typedef ConstVectorView<T,UNKNOWN,C,I> const_subvector_type;
 
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,I>
             const_view_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,CStyle> 
+        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,CStyle>
             const_cview_type;
         typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,
                 FortranStyle> const_fview_type;
-        typedef ConstLowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,C> 
+        typedef ConstLowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,C>
             const_xview_type;
-        typedef ConstLowerTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C> 
+        typedef ConstLowerTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>
             const_xdview_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,1,_stepj,C,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,D,1,_stepj,C,I>
             const_cmview_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,1,C,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,1,C,I>
             const_rmview_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,notC,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,notC,I>
             const_conjugate_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepj,_stepi,C,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepj,_stepi,C,I>
             const_transpose_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepj,_stepi,notC,I> 
+        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepj,_stepi,notC,I>
             const_adjoint_type;
 
-        typedef ConstSmallLowerTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,C,I> 
+        typedef ConstSmallLowerTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,C,I>
             const_offdiag_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,UnitDiag,_stepi,_stepj,C,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,UnitDiag,_stepi,_stepj,C,I>
             const_unitdiag_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,C,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,C,I>
             const_nonunitdiag_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,C,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,C,I>
             const_unknowndiag_type;
-        typedef ConstSmallLowerTriMatrixView<real_type,N,D,twoSi,twoSj,false,I> 
+        typedef ConstSmallLowerTriMatrixView<real_type,N,D,twoSi,twoSj,false,I>
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,I> 
+        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,I>
             const_nonconj_type;
         typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,I> nonconst_type;
 
@@ -1774,41 +1774,41 @@ namespace tmv {
         typedef SmallVectorView<T,N,_diagstep,C,I> diag_sub_type;
 
         typedef LowerTriMatrixView<T,D,_stepi,_stepj,C,I> subtrimatrix_type;
-        typedef LowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,C,I> 
+        typedef LowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,C,I>
             subtrimatrix_step_type;
         typedef MatrixView<T,_stepi,_stepj,C,I> submatrix_type;
         typedef MatrixView<T,UNKNOWN,UNKNOWN,C,I> submatrix_step_type;
         typedef VectorView<T,UNKNOWN,C,I> subvector_type;
 
         typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,I> view_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,CStyle> 
+        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,CStyle>
             cview_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,FortranStyle> 
+        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,FortranStyle>
             fview_type;
         typedef LowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,C> xview_type;
-        typedef LowerTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C> 
+        typedef LowerTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>
             xdview_type;
         typedef SmallLowerTriMatrixView<T,N,D,1,_stepj,C,I> cmview_type;
         typedef SmallLowerTriMatrixView<T,N,D,_stepi,1,C,I> rmview_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,notC,I> 
+        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,notC,I>
             conjugate_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepj,_stepi,C,I> 
+        typedef SmallUpperTriMatrixView<T,N,D,_stepj,_stepi,C,I>
             transpose_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepj,_stepi,notC,I> 
+        typedef SmallUpperTriMatrixView<T,N,D,_stepj,_stepi,notC,I>
             adjoint_type;
 
-        typedef SmallLowerTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,C,I> 
+        typedef SmallLowerTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,C,I>
             offdiag_type;
-        typedef SmallLowerTriMatrixView<T,N,UnitDiag,_stepi,_stepj,C,I> 
+        typedef SmallLowerTriMatrixView<T,N,UnitDiag,_stepi,_stepj,C,I>
             unitdiag_type;
-        typedef SmallLowerTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,C,I> 
+        typedef SmallLowerTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,C,I>
             nonunitdiag_type;
-        typedef SmallLowerTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,C,I> 
+        typedef SmallLowerTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,C,I>
             unknowndiag_type;
-        typedef SmallLowerTriMatrixView<real_type,N,D,twoSi,twoSj,false,I> 
+        typedef SmallLowerTriMatrixView<real_type,N,D,twoSi,twoSj,false,I>
             realpart_type;
         typedef realpart_type imagpart_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,I> 
+        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,I>
             nonconj_type;
     };
 
@@ -2015,53 +2015,53 @@ namespace tmv {
     //
 
     template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I, class M>
-    static void Swap(
+    static inline void Swap(
         BaseMatrix_Tri_Mutable<M>& m1,
         SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I> m2)
     { DoSwap(m1,m2); }
     template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I, class M>
-    static void Swap(
+    static inline void Swap(
         SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I> m1,
         BaseMatrix_Tri_Mutable<M>& m2)
     { DoSwap(m1,m2); }
     template <class T, int N, DiagType D, int Si1, int Sj1, bool C1, IndexStyle I1, int Si2, int Sj2, bool C2, IndexStyle I2>
-    static void Swap(
+    static inline void Swap(
         SmallUpperTriMatrixView<T,N,D,Si1,Sj1,C1,I1> m1,
         SmallUpperTriMatrixView<T,N,D,Si2,Sj2,C2,I2> m2)
     { DoSwap(m1,m2); }
     template <class T, int N, DiagType D, int Si1, int Sj1, bool C1, IndexStyle I1, int Si2, int Sj2, bool C2, IndexStyle I2>
-    static void Swap(
+    static inline void Swap(
         SmallUpperTriMatrixView<T,N,D,Si1,Sj1,C1,I1> m1,
         UpperTriMatrixView<T,D,Si2,Sj2,C2,I2> m2)
     { DoSwap(m1,m2); }
     template <class T, int N, DiagType D, int Si1, int Sj1, bool C1, IndexStyle I1, int Si2, int Sj2, bool C2, IndexStyle I2>
-    static void Swap(
+    static inline void Swap(
         UpperTriMatrixView<T,D,Si1,Sj1,C1,I1> m1,
         SmallUpperTriMatrixView<T,N,D,Si2,Sj2,C2,I2> m2)
     { DoSwap(m1,m2); }
 
     template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I, class M>
-    static void Swap(
+    static inline void Swap(
         BaseMatrix_Tri_Mutable<M>& m1,
         SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I> m2)
     { Swap(m1.transpose(),m2.transpose()); }
     template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I, class M>
-    static void Swap(
+    static inline void Swap(
         SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I> m1,
         BaseMatrix_Tri_Mutable<M>& m2)
     { Swap(m1.transpose(),m2.transpose()); }
     template <class T, int N, DiagType D, int Si1, int Sj1, bool C1, IndexStyle I1, int Si2, int Sj2, bool C2, IndexStyle I2>
-    static void Swap(
+    static inline void Swap(
         SmallLowerTriMatrixView<T,N,D,Si1,Sj1,C1,I1> m1,
         SmallLowerTriMatrixView<T,N,D,Si2,Sj2,C2,I2> m2)
     { Swap(m1.transpose(),m2.transpose()); }
     template <class T, int N, DiagType D, int Si1, int Sj1, bool C1, IndexStyle I1, int Si2, int Sj2, bool C2, IndexStyle I2>
-    static void Swap(
+    static inline void Swap(
         SmallLowerTriMatrixView<T,N,D,Si1,Sj1,C1,I1> m1,
         LowerTriMatrixView<T,D,Si2,Sj2,C2,I2> m2)
     { Swap(m1.transpose(),m2.transpose()); }
     template <class T, int N, DiagType D, int Si1, int Sj1, bool C1, IndexStyle I1, int Si2, int Sj2, bool C2, IndexStyle I2>
-    static void Swap(
+    static inline void Swap(
         LowerTriMatrixView<T,D,Si1,Sj1,C1,I1> m1,
         SmallLowerTriMatrixView<T,N,D,Si2,Sj2,C2,I2> m2)
     { Swap(m1.transpose(),m2.transpose()); }
@@ -2072,56 +2072,56 @@ namespace tmv {
     //
     
     template <class T, int N, DiagType D, StorageType S, IndexStyle I>
-    static typename SmallUpperTriMatrix<T,N,D,S,I>::conjugate_type Conjugate(
+    static inline typename SmallUpperTriMatrix<T,N,D,S,I>::conjugate_type Conjugate(
         SmallUpperTriMatrix<T,N,S,I>& m)
     { return m.conjugate(); }
     template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
-    static typename SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I>::conjugate_type Conjugate(
+    static inline typename SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I>::conjugate_type Conjugate(
         SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I> m)
     { return m.conjugate(); }
 
     template <class T, int N, DiagType D, StorageType S, IndexStyle I>
-    static typename SmallUpperTriMatrix<T,N,D,S,I>::transpose_type Transpose(
+    static inline typename SmallUpperTriMatrix<T,N,D,S,I>::transpose_type Transpose(
         SmallUpperTriMatrix<T,N,D,S,I>& m)
     { return m.transpose(); }
     template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
-    static typename SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I>::transpose_type Transpose(
+    static inline typename SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I>::transpose_type Transpose(
         SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I> m)
     { return m.transpose(); }
 
     template <class T, int N, DiagType D, StorageType S, IndexStyle I>
-    static typename SmallUpperTriMatrix<T,N,D,S,I>::adjoint_type Adjoint(
+    static inline typename SmallUpperTriMatrix<T,N,D,S,I>::adjoint_type Adjoint(
         SmallUpperTriMatrix<T,N,D,S,I>& m)
     { return m.adjoint(); }
     template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
-    static typename SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I>::adjoint_type Adjoint(
+    static inline typename SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I>::adjoint_type Adjoint(
         SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I> m)
     { return m.adjoint(); }
 
     template <class T, int N, DiagType D, StorageType S, IndexStyle I>
-    static typename SmallLowerTriMatrix<T,N,D,S,I>::conjugate_type Conjugate(
+    static inline typename SmallLowerTriMatrix<T,N,D,S,I>::conjugate_type Conjugate(
         SmallLowerTriMatrix<T,N,S,I>& m)
     { return m.conjugate(); }
     template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
-    static typename SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I>::conjugate_type Conjugate(
+    static inline typename SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I>::conjugate_type Conjugate(
         SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I> m)
     { return m.conjugate(); }
 
     template <class T, int N, DiagType D, StorageType S, IndexStyle I>
-    static typename SmallLowerTriMatrix<T,N,D,S,I>::transpose_type Transpose(
+    static inline typename SmallLowerTriMatrix<T,N,D,S,I>::transpose_type Transpose(
         SmallLowerTriMatrix<T,N,D,S,I>& m)
     { return m.transpose(); }
     template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
-    static typename SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I>::transpose_type Transpose(
+    static inline typename SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I>::transpose_type Transpose(
         SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I> m)
     { return m.transpose(); }
 
     template <class T, int N, DiagType D, StorageType S, IndexStyle I>
-    static typename SmallLowerTriMatrix<T,N,D,S,I>::adjoint_type Adjoint(
+    static inline typename SmallLowerTriMatrix<T,N,D,S,I>::adjoint_type Adjoint(
         SmallLowerTriMatrix<T,N,D,S,I>& m)
     { return m.adjoint(); }
     template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
-    static typename SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I>::adjoint_type Adjoint(
+    static inline typename SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I>::adjoint_type Adjoint(
         SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I> m)
     { return m.adjoint(); }
 
@@ -2131,7 +2131,7 @@ namespace tmv {
     //
 
     template <class T, int N, DiagType D, StorageType S, IndexStyle I>
-    static std::string TMV_Text(const SmallUpperTriMatrix<T,N,D,S,I>& )
+    static inline std::string TMV_Text(const SmallUpperTriMatrix<T,N,D,S,I>& )
     {
         std::ostringstream s;
         s << "SmallUpperTriMatrix<"<<TMV_Text(T())<<","<<N<<","<<TMV_Text(D);
@@ -2140,7 +2140,7 @@ namespace tmv {
     }
 
     template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
-    static std::string TMV_Text(
+    static inline std::string TMV_Text(
         const ConstSmallUpperTriMatrixView<T,N,D,Si,Sj,C,I>& m)
     {
         std::ostringstream s;
@@ -2157,7 +2157,7 @@ namespace tmv {
     }
 
     template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
-    static std::string TMV_Text(
+    static inline std::string TMV_Text(
         const SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I>& m)
     {
         std::ostringstream s;
@@ -2174,7 +2174,7 @@ namespace tmv {
     }
 
     template <class T, int N, DiagType D, StorageType S, IndexStyle I>
-    static std::string TMV_Text(const SmallLowerTriMatrix<T,N,D,S,I>& )
+    static inline std::string TMV_Text(const SmallLowerTriMatrix<T,N,D,S,I>& )
     {
         std::ostringstream s;
         s << "SmallLowerTriMatrix<"<<TMV_Text(T())<<","<<N<<","<<TMV_Text(D);
@@ -2183,7 +2183,7 @@ namespace tmv {
     }
 
     template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
-    static std::string TMV_Text(
+    static inline std::string TMV_Text(
         const ConstSmallLowerTriMatrixView<T,N,D,Si,Sj,C,I>& m)
     {
         std::ostringstream s;
@@ -2200,7 +2200,7 @@ namespace tmv {
     }
 
     template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
-    static std::string TMV_Text(
+    static inline std::string TMV_Text(
         const SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I>& m)
     {
         std::ostringstream s;

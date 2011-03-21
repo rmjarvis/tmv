@@ -39,10 +39,10 @@ namespace tmv {
     template <bool add, class T, class M1, class M2>
     static void DoMultXM(const T x, const M1& m1, M2& m2)
     {
-        if (x == T(-1))
-            InlineMultXM<add>(Scaling<-1,T>(x),m1,m2); 
-        else if (x == T(1))
+        if (x == T(1))
             InlineMultXM<add>(Scaling<1,T>(x),m1,m2); 
+        else if (x == T(-1))
+            InlineMultXM<add>(Scaling<-1,T>(x),m1,m2); 
         else if (x == T(0))
             Maybe<!add>::zero(m2);
         else
@@ -53,10 +53,10 @@ namespace tmv {
     static void DoMultXM(const std::complex<T> x, const M1& m1, M2& m2)
     { 
         if (imag(x) == T(0)) {
-            if (real(x) == T(-1))
-                InlineMultXM<add>(Scaling<-1,T>(real(x)),m1,m2); 
-            else if (real(x) == T(1))
+            if (real(x) == T(1))
                 InlineMultXM<add>(Scaling<1,T>(real(x)),m1,m2); 
+            else if (real(x) == T(-1))
+                InlineMultXM<add>(Scaling<-1,T>(real(x)),m1,m2); 
             else if (real(x) == T(0))
                 Maybe<!add>::zero(m2);
             else
@@ -71,12 +71,12 @@ namespace tmv {
         const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
         UpperTriMatrixView<T2,NonUnitDiag> m2)
     {
-        if (m1.isrm() && m2.isrm()) {
-            UpperTriMatrixView<T2,NonUnitDiag,UNKNOWN,1> m2rm = m2.rmView();
-            DoMultXM<false>(x,m1.rmView(),m2rm);
-        } else if (m1.iscm() && m2.iscm()) {
+        if (m1.iscm() && m2.iscm()) {
             UpperTriMatrixView<T2,NonUnitDiag,1> m2cm = m2.cmView();
             DoMultXM<false>(x,m1.cmView(),m2cm);
+        } else if (m1.isrm() && m2.isrm()) {
+            UpperTriMatrixView<T2,NonUnitDiag,UNKNOWN,1> m2rm = m2.rmView();
+            DoMultXM<false>(x,m1.rmView(),m2rm);
         } else {
             InstCopy(m1,m2.xdView());
             InstScale(x,m2);
@@ -89,29 +89,20 @@ namespace tmv {
         const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
         UpperTriMatrixView<T2,NonUnitDiag> m2)
     {
-        if (m2.isrm()) {
+        if (m2.iscm()) {
+            UpperTriMatrixView<T2,NonUnitDiag,1> m2cm = m2;
+            if (m1.iscm())
+                DoMultXM<true>(x,m1.cmView(),m2cm);
+            else 
+                DoMultXM<true>(x,m1,m2cm);
+        } else if (m2.isrm()) {
             UpperTriMatrixView<T2,NonUnitDiag,UNKNOWN,1> m2rm = m2;
             if (m1.isrm())
                 DoMultXM<true>(x,m1.rmView(),m2rm);
-            else if (m1.iscm())
-                DoMultXM<true>(x,m1.cmView(),m2rm);
-            else
+            else 
                 DoMultXM<true>(x,m1,m2rm);
-        } else if (m2.iscm()) {
-            UpperTriMatrixView<T2,NonUnitDiag,1> m2cm = m2;
-            if (m1.isrm())
-                DoMultXM<true>(x,m1.rmView(),m2cm);
-            else if (m1.iscm())
-                DoMultXM<true>(x,m1.cmView(),m2cm);
-            else
-                DoMultXM<true>(x,m1,m2cm);
         } else {
-            if (m1.isrm())
-                DoMultXM<true>(x,m1.rmView(),m2);
-            else if (m1.iscm())
-                DoMultXM<true>(x,m1.cmView(),m2);
-            else
-                DoMultXM<true>(x,m1,m2);
+            DoMultXM<true>(x,m1,m2);
         }
     }
 

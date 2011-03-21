@@ -7,6 +7,8 @@
   template RT InstSumAbs2Elements(const ConstUpperTriMatrixView<T>& m); \
   template RT InstNormSq(const ConstUpperTriMatrixView<T>& m);  \
   template RT InstMaxAbs2Element(const ConstUpperTriMatrixView<T>& m);  \
+  template void InstRead(std::istream& is, UpperTriMatrixView<T> m1); \
+  template void InstRead(std::istream& is, LowerTriMatrixView<T> m1); \
 
 Def1(T,T)
 #ifdef TMV_INST_COMPLEX
@@ -14,12 +16,9 @@ Def1(T,CT)
 #endif
 
 #define Def2(T,C) \
-  template void InstSwap(UpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C> m1, \
+  template void InstSwap(\
+      UpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C> m1, \
       UpperTriMatrixView<T> m2); \
-  template void InstRead(std::istream& is, \
-      UpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C> m1); \
-  template void InstRead(std::istream& is, \
-      LowerTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C> m1); \
 
 Def2(T,false)
 #ifdef TMV_INST_COMPLEX

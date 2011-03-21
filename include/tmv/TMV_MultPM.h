@@ -14,7 +14,7 @@ namespace tmv {
     //
 
     template <bool add, int ix, class T, class M2, class M3>
-    static void MultMM(
+    static inline void MultMM(
         const Scaling<ix,T>& x, const Permutation& m1, 
         const BaseMatrix<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
@@ -26,7 +26,7 @@ namespace tmv {
         }
     }
     template <bool add, int ix, class T, class M2, class M3>
-    static void NoAliasMultMM(
+    static inline void NoAliasMultMM(
         const Scaling<ix,T>& x, const Permutation& m1, 
         const BaseMatrix<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
@@ -38,7 +38,7 @@ namespace tmv {
         }
     }
     template <bool add, int ix, class T, class M2, class M3>
-    static void AliasMultMM(
+    static inline void AliasMultMM(
         const Scaling<ix,T>& x, const Permutation& m1, 
         const BaseMatrix<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
@@ -56,7 +56,7 @@ namespace tmv {
     //
     
     template <bool add, int ix, class T, class M1, class M3>
-    static void MultMM(
+    static inline void MultMM(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
         const Permutation& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
@@ -68,7 +68,7 @@ namespace tmv {
         }
     }
     template <bool add, int ix, class T, class M1, class M3>
-    static void NoAliasMultMM(
+    static inline void NoAliasMultMM(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
         const Permutation& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
@@ -80,7 +80,7 @@ namespace tmv {
         }
     }
     template <bool add, int ix, class T, class M1, class M3>
-    static void AliasMultMM(
+    static inline void AliasMultMM(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
         const Permutation& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
@@ -97,7 +97,7 @@ namespace tmv {
     //
 
     template <bool add, int ix, class T, class M3>
-    static void MultMM(
+    static inline void MultMM(
         const Scaling<ix,T>& x, const Permutation& m1, 
         const Permutation& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
@@ -108,12 +108,12 @@ namespace tmv {
         }
     }
     template <bool add, int ix, class T, class M3>
-    static void NoAliasMultMM(
+    static inline void NoAliasMultMM(
         const Scaling<ix,T>& x, const Permutation& m1, 
         const Permutation& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     { MultMM<add>(x,m1,m2,m3); }
     template <bool add, int ix, class T, class M3>
-    static void AliasMultMM(
+    static inline void AliasMultMM(
         const Scaling<ix,T>& x, const Permutation& m1, 
         const Permutation& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     { MultMM<add>(x,m1,m2,m3); }
@@ -124,17 +124,17 @@ namespace tmv {
     // 
 
     template <int ix, class T, class M1, class M3>
-    static void LDiv(
+    static inline void LDiv(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
         const Permutation& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     { MultMM<false>(x,m2.inverse(),m1.mat(),m3.mat()); }
     template <int ix, class T, class M1, class M2, class M3>
-    static void NoAliasLDiv(
+    static inline void NoAliasLDiv(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
         const Permutation& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     { NoAliasMultMM<false>(x,m2.inverse(),m1.mat(),m3.mat()); }
     template <int ix, class T, class M1, class M2, class M3>
-    static void AliasLDiv(
+    static inline void AliasLDiv(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
         const Permutation& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     { AliasMultMM<false>(x,m2.inverse(),m1.mat(),m3.mat()); }
@@ -145,17 +145,17 @@ namespace tmv {
     // 
 
     template <int ix, class T, class M1, class M3>
-    static void RDiv(
+    static inline void RDiv(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
         const Permutation& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     { MultMM<false>(x,m1.mat(),m2.inverse(),m3.mat()); }
     template <int ix, class T, class M1, class M2, class M3>
-    static void NoAliasRDiv(
+    static inline void NoAliasRDiv(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
         const Permutation& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     { NoAliasMultMM<false>(x,m1.mat(),m2.inverse(),m3.mat()); }
     template <int ix, class T, class M1, class M2, class M3>
-    static void AliasRDiv(
+    static inline void AliasRDiv(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
         const Permutation& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     { AliasMultMM<false>(x,m1.mat(),m2.inverse(),m3.mat()); }
@@ -166,7 +166,7 @@ namespace tmv {
     //
 
     template <class M1, int ix, class T>
-    static void MultEqMM(
+    static inline void MultEqMM(
         BaseMatrix_Rec_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const Permutation& m2)
     {
@@ -174,12 +174,12 @@ namespace tmv {
         Scale(x,m1.mat());
     }
     template <class M1, int ix, class T>
-    static void NoAliasMultEqMM(
+    static inline void NoAliasMultEqMM(
         BaseMatrix_Rec_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const Permutation& m2)
     { MultEqMM(m1,x,m2); }
     template <class M1, int ix, class T>
-    static void AliasMultEqMM(
+    static inline void AliasMultEqMM(
         BaseMatrix_Rec_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const Permutation& m2)
     { MultEqMM(m1,x,m2); }
@@ -189,14 +189,15 @@ namespace tmv {
     //
 
     template <class M1>
-    static void LDivEq(BaseMatrix_Rec_Mutable<M1>& m1, const Permutation& m2)
+    static inline void LDivEq(
+        BaseMatrix_Rec_Mutable<M1>& m1, const Permutation& m2)
     { m2.inverse().applyOnLeft(m1); }
     template <class M1>
-    static void NoAliasLDivEq(
+    static inline void NoAliasLDivEq(
         BaseMatrix_Rec_Mutable<M1>& m1, const Permutation& m2)
     { LDivEq(m1,m2); }
     template <class M1>
-    static void AliasLDivEq(
+    static inline void AliasLDivEq(
         BaseMatrix_Rec_Mutable<M1>& m1, const Permutation& m2)
     { LDivEq(m1,m2); }
 
@@ -205,14 +206,15 @@ namespace tmv {
     //
 
     template <class M1>
-    static void RDivEq(BaseMatrix_Rec_Mutable<M1>& m1, const Permutation& m2)
+    static inline void RDivEq(
+        BaseMatrix_Rec_Mutable<M1>& m1, const Permutation& m2)
     { m2.inverse().applyOnRight(m1); }
     template <class M1>
-    static void NoAliasRDivEq(
+    static inline void NoAliasRDivEq(
         BaseMatrix_Rec_Mutable<M1>& m1, const Permutation& m2)
     { RDivEq(m1,m2); }
     template <class M1>
-    static void AliasRDivEq(
+    static inline void AliasRDivEq(
         BaseMatrix_Rec_Mutable<M1>& m1, const Permutation& m2)
     { RDivEq(m1,m2); }
 

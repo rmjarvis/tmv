@@ -35,28 +35,10 @@
 
 #include "TMV_Scaling.h"
 #include "TMV_BaseVector.h"
-#include "TMV_MultXV.h"
+#include "TMV_MultXV_Funcs.h"
+#include "TMV_MultVV_Funcs.h"
 
 namespace tmv {
-
-    // Defined below:
-    template <bool add, int ix, class T, class V1, class V2, class V3>
-    static void ElemMultVV(
-        const Scaling<ix,T>& x1, const BaseVector_Calc<V1>& v1,
-        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3);
-    template <bool add, int ix, class T, class V1, class V2, class V3>
-    static void NoAliasElemMultVV(
-        const Scaling<ix,T>& x1, const BaseVector_Calc<V1>& v1,
-        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3);
-    template <bool add, int ix, class T, class V1, class V2, class V3>
-    static void InlineElemMultVV(
-        const Scaling<ix,T>& x1, const BaseVector_Calc<V1>& v1,
-        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3);
-    template <bool add, int ix, class T, class V1, class V2, class V3>
-    static void AliasElemMultVV(
-        const Scaling<ix,T>& x1, const BaseVector_Calc<V1>& v1,
-        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3);
-
 
     // Defined in TMV_ElemMultVV.cpp
     template <class T1, bool C1, class T2, bool C2, class T3>
@@ -79,7 +61,7 @@ namespace tmv {
 
     // algo 0: s == 0, nothing to do
     template <bool add, int ix, class T, class V1, class V2, class V3>
-    struct ElemMultVV_Helper<0,0,add,ix,T,V1,V2,V3> 
+    struct ElemMultVV_Helper<0,0,add,ix,T,V1,V2,V3>
     {
         static void call(const Scaling<ix,T>& , const V1& , const V2& , V3& ) 
         {}
@@ -87,7 +69,7 @@ namespace tmv {
 
     // algo 11: simple for loop
     template <int s, bool add, int ix, class T, class V1, class V2, class V3>
-    struct ElemMultVV_Helper<11,s,add,ix,T,V1,V2,V3> 
+    struct ElemMultVV_Helper<11,s,add,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -96,7 +78,7 @@ namespace tmv {
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
             const int n = s == UNKNOWN ? int(v3.size()) : s;
-            call2(n,x1,v1.nonConj().begin(),v2.nonConj().begin(),v3.begin());
+            call2(n,x1,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(
             int n, const Scaling<ix,T>& x1, IT1 it1, IT2 it2, IT3 it3)
@@ -114,7 +96,7 @@ namespace tmv {
 
     // algo 12: 2 at a time
     template <int s, bool add, int ix, class T, class V1, class V2, class V3>
-    struct ElemMultVV_Helper<12,s,add,ix,T,V1,V2,V3> 
+    struct ElemMultVV_Helper<12,s,add,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -123,7 +105,7 @@ namespace tmv {
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
             const int n = s == UNKNOWN ? int(v3.size()) : s;
-            call2(n,x1,v1.nonConj().begin(),v2.nonConj().begin(),v3.begin());
+            call2(n,x1,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(
             const int n, const Scaling<ix,T>& x1, IT1 x, IT2 y, IT3 z)
@@ -154,7 +136,7 @@ namespace tmv {
 
     // algo 13: 4 at a time
     template <int s, bool add, int ix, class T, class V1, class V2, class V3>
-    struct ElemMultVV_Helper<13,s,add,ix,T,V1,V2,V3> 
+    struct ElemMultVV_Helper<13,s,add,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -163,7 +145,7 @@ namespace tmv {
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
             const int n = s == UNKNOWN ? int(v3.size()) : s;
-            call2(n,x1,v1.nonConj().begin(),v2.nonConj().begin(),v3.begin());
+            call2(n,x1,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(
             const int n, const Scaling<ix,T>& x1, IT1 x, IT2 y, IT3 z)
@@ -203,7 +185,7 @@ namespace tmv {
 
     // algo 14: 8 at a time
     template <int s, bool add, int ix, class T, class V1, class V2, class V3>
-    struct ElemMultVV_Helper<14,s,add,ix,T,V1,V2,V3> 
+    struct ElemMultVV_Helper<14,s,add,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -212,7 +194,7 @@ namespace tmv {
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
             const int n = s == UNKNOWN ? int(v3.size()) : s;
-            call2(n,x1,v1.nonConj().begin(),v2.nonConj().begin(),v3.begin());
+            call2(n,x1,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(
             const int n, const Scaling<ix,T>& x1, IT1 x, IT2 y, IT3 z)
@@ -268,7 +250,7 @@ namespace tmv {
 
     // algo 15: fully unroll
     template <int s, bool add, int ix, class T, class V1, class V2, class V3>
-    struct ElemMultVV_Helper<15,s,add,ix,T,V1,V2,V3> 
+    struct ElemMultVV_Helper<15,s,add,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -295,7 +277,7 @@ namespace tmv {
         {
             static void unroll(
                 const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
-            { 
+            {
                 Maybe<add>::add( 
                     v3.ref(I) , 
                     ZProd<false,false>::prod(
@@ -331,57 +313,37 @@ namespace tmv {
         { Unroller<0,s>::unroll2(x1,x,y,z); }
     };
 
-    // algo -4: No branches or copies
-    template <int s, bool add, int ix, class T, class V1, class V2, class V3>
-    struct ElemMultVV_Helper<-4,s,add,ix,T,V1,V2,V3> 
+    // algo 90: Call inst
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemMultVV_Helper<90,s,true,ix,T,V1,V2,V3>
     {
-        typedef typename V1::const_nonconj_type::const_iterator IT1;
-        typedef typename V2::const_nonconj_type::const_iterator IT2;
-        typedef typename V3::iterator IT3;
-        typedef typename V3::real_type RT;
-        typedef typename V3::value_type VT;
-        enum { allunit =
-            V1::_step == 1 && V2::_step == 1 && V3::_step == 1 };
-        enum { algo = (
-                s == 0 ? 0 :
-#if TMV_OPT >= 1
-                // Unrolling doesn't ever seem to be faster for this function.
-                //(s != UNKNOWN && s <= int(128/sizeof(VT))) ? 15 :
-                (allunit && sizeof(RT) == 8) ? V3::iscomplex ? 12 : 13 :
-                (allunit && sizeof(RT) == 4) ? V3::iscomplex ? 13 : 14 :
-#endif
-                11 ) };
         static void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
-            TMVStaticAssert(!V3::_conj);
-            ElemMultVV_Helper<algo,s,add,ix,T,V1,V2,V3>::call(x1,v1,v2,v3); 
-        }
-        static void call2(
-            const int n,
-            const Scaling<ix,T>& x1, const IT1& x, const IT2& y, IT3& z)
-        {
-            TMVStaticAssert(!V3::_conj);
-            ElemMultVV_Helper<algo,s,add,ix,T,V1,V2,V3>::call2(n,x1,x,y,z); 
+            typedef typename V3::value_type VT;
+            VT xx = Traits<VT>::convert(T(x1));
+            InstAddElemMultVV(xx,v1.xView(),v2.xView(),v3.xView()); 
         }
     };
-
-    // algo -3: Determine which algorithm to use
-    template <int s, bool add, int ix, class T, class V1, class V2, class V3>
-    struct ElemMultVV_Helper<-3,s,add,ix,T,V1,V2,V3> 
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemMultVV_Helper<90,s,false,ix,T,V1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
-        { ElemMultVV_Helper<-4,s,add,ix,T,V1,V2,V3>::call(x1,v1,v2,v3); }
+        {
+            typedef typename V3::value_type VT;
+            VT xx = Traits<VT>::convert(T(x1));
+            InstElemMultVV(xx,v1.xView(),v2.xView(),v3.xView()); 
+        }
     };
 
     // algo 97: Conjugate
     template <int s, bool add, int ix, class T, class V1, class V2, class V3>
-    struct ElemMultVV_Helper<97,s,add,ix,T,V1,V2,V3> 
+    struct ElemMultVV_Helper<97,s,add,ix,T,V1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
-        { 
+        {
             typedef typename V1::const_conjugate_type V1c;
             typedef typename V2::const_conjugate_type V2c;
             typedef typename V3::conjugate_type V3c;
@@ -393,62 +355,9 @@ namespace tmv {
         }
     };
 
-    // algo 98: Call inst
-    template <int s, int ix, class T, class V1, class V2, class V3>
-    struct ElemMultVV_Helper<98,s,true,ix,T,V1,V2,V3> 
-    {
-        static void call(
-            const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
-        {
-            typedef typename V3::value_type VT;
-            VT xx = Traits<VT>::convert(T(x1));
-            InstAddElemMultVV(xx,v1.xView(),v2.xView(),v3.xView()); 
-        }
-    };
-    template <int s, int ix, class T, class V1, class V2, class V3>
-    struct ElemMultVV_Helper<98,s,false,ix,T,V1,V2,V3> 
-    {
-        static void call(
-            const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
-        {
-            typedef typename V3::value_type VT;
-            VT xx = Traits<VT>::convert(T(x1));
-            InstElemMultVV(xx,v1.xView(),v2.xView(),v3.xView()); 
-        }
-    };
-
-    // algo -2: Check for inst
-    template <int s, bool add, int ix, class T, class V1, class V2, class V3>
-    struct ElemMultVV_Helper<-2,s,add,ix,T,V1,V2,V3> 
-    {
-        static void call(
-            const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
-        {
-            typedef typename V1::value_type T1;
-            typedef typename V2::value_type T2;
-            typedef typename V3::value_type T3;
-            const bool inst =
-                (s == UNKNOWN || s > 16) &&
-#ifdef TMV_INST_MIX
-                Traits2<T1,T3>::samebase &&
-                Traits2<T2,T3>::samebase &&
-#else
-                Traits2<T1,T3>::sametype &&
-                Traits2<T2,T3>::sametype &&
-#endif
-                Traits<T3>::isinst;
-            const int algo =
-                V3::_conj ? 97 : 
-                inst ? 98 : 
-                -4;
-            ElemMultVV_Helper<algo,s,add,ix,T,V1,V2,V3>::call(
-                x1,v1,v2,v3); 
-        }
-    };
-
     // algo 99: Check for aliases
     template <int s, bool add, int ix, class T, class V1, class V2, class V3>
-    struct ElemMultVV_Helper<99,s,add,ix,T,V1,V2,V3> 
+    struct ElemMultVV_Helper<99,s,add,ix,T,V1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
@@ -468,7 +377,7 @@ namespace tmv {
                     // No aliasing (or no clobering)
                     ElemMultVV_Helper<-2,s,add,ix,T,V1,V2,V3>::call(
                         x1,v1,v2,v3); 
-                } else { 
+                } else {
                     // Need a temporary for v2
                     NoAliasElemMultVV<add>(x1,v1,v2.copy(),v3);
                 }
@@ -487,9 +396,81 @@ namespace tmv {
         }
     };
 
+    // algo -4: No branches or copies
+    template <int s, bool add, int ix, class T, class V1, class V2, class V3>
+    struct ElemMultVV_Helper<-4,s,add,ix,T,V1,V2,V3>
+    {
+        typedef typename V1::const_nonconj_type::const_iterator IT1;
+        typedef typename V2::const_nonconj_type::const_iterator IT2;
+        typedef typename V3::iterator IT3;
+        typedef typename V3::real_type RT;
+        typedef typename V3::value_type VT;
+        enum { allunit =
+            V1::_step == 1 && V2::_step == 1 && V3::_step == 1 };
+        enum { algo = (
+                s == 0 ? 0 :
+                TMV_OPT == 0 ? 11 :
+                // Unrolling doesn't ever seem to be faster for this function.
+                //(s != UNKNOWN && s <= int(128/sizeof(VT))) ? 15 :
+                (allunit && sizeof(RT) == 8) ? V3::iscomplex ? 12 : 13 :
+                (allunit && sizeof(RT) == 4) ? V3::iscomplex ? 13 : 14 :
+                11 ) };
+        static void call(
+            const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
+        {
+            TMVStaticAssert(!V3::_conj);
+            ElemMultVV_Helper<algo,s,add,ix,T,V1,V2,V3>::call(x1,v1,v2,v3); 
+        }
+        static void call2(
+            const int n,
+            const Scaling<ix,T>& x1, const IT1& x, const IT2& y, IT3& z)
+        {
+            TMVStaticAssert(!V3::_conj);
+            ElemMultVV_Helper<algo,s,add,ix,T,V1,V2,V3>::call2(n,x1,x,y,z); 
+        }
+    };
+
+    // algo -3: Determine which algorithm to use
+    template <int s, bool add, int ix, class T, class V1, class V2, class V3>
+    struct ElemMultVV_Helper<-3,s,add,ix,T,V1,V2,V3>
+    {
+        static void call(
+            const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
+        { ElemMultVV_Helper<-4,s,add,ix,T,V1,V2,V3>::call(x1,v1,v2,v3); }
+    };
+
+    // algo -2: Check for inst
+    template <int s, bool add, int ix, class T, class V1, class V2, class V3>
+    struct ElemMultVV_Helper<-2,s,add,ix,T,V1,V2,V3>
+    {
+        static void call(
+            const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
+        {
+            typedef typename V1::value_type T1;
+            typedef typename V2::value_type T2;
+            typedef typename V3::value_type T3;
+            const bool inst =
+                (s == UNKNOWN || s > 16) &&
+#ifdef TMV_INST_MIX
+                Traits2<T1,T3>::samebase &&
+                Traits2<T2,T3>::samebase &&
+#else
+                Traits2<T1,T3>::sametype &&
+                Traits2<T2,T3>::sametype &&
+#endif
+                Traits<T3>::isinst;
+            const int algo =
+                V3::_conj ? 97 : 
+                inst ? 90 : 
+                -4;
+            ElemMultVV_Helper<algo,s,add,ix,T,V1,V2,V3>::call(
+                x1,v1,v2,v3); 
+        }
+    };
+
     // algo -1: Check for aliases?
     template <int s, bool add, int ix, class T, class V1, class V2, class V3>
-    struct ElemMultVV_Helper<-1,s,add,ix,T,V1,V2,V3> 
+    struct ElemMultVV_Helper<-1,s,add,ix,T,V1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
@@ -511,7 +492,7 @@ namespace tmv {
     };
 
     template <bool add, int ix, class T, class V1, class V2, class V3>
-    static void ElemMultVV(
+    static inline void ElemMultVV(
         const Scaling<ix,T>& x1, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
@@ -524,15 +505,15 @@ namespace tmv {
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;
-        V1v v1v = v1.cView();
-        V2v v2v = v2.cView();
-        V3v v3v = v3.cView();
+        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
+        TMV_MAYBE_CREF(V2,V2v) v2v = v2.cView();
+        TMV_MAYBE_REF(V3,V3v) v3v = v3.cView();
         ElemMultVV_Helper<-1,s,add,ix,T,V1v,V2v,V3v>::call(
             x1,v1v,v2v,v3v);
     }
 
     template <bool add, int ix, class T, class V1, class V2, class V3>
-    static void NoAliasElemMultVV(
+    static inline void NoAliasElemMultVV(
         const Scaling<ix,T>& x1, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
@@ -545,15 +526,15 @@ namespace tmv {
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;
-        V1v v1v = v1.cView();
-        V2v v2v = v2.cView();
-        V3v v3v = v3.cView();
+        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
+        TMV_MAYBE_CREF(V2,V2v) v2v = v2.cView();
+        TMV_MAYBE_REF(V3,V3v) v3v = v3.cView();
         ElemMultVV_Helper<-2,s,add,ix,T,V1v,V2v,V3v>::call(
             x1,v1v,v2v,v3v);
     }
 
     template <bool add, int ix, class T, class V1, class V2, class V3>
-    static void InlineElemMultVV(
+    static inline void InlineElemMultVV(
         const Scaling<ix,T>& x1, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
@@ -566,15 +547,15 @@ namespace tmv {
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;
-        V1v v1v = v1.cView();
-        V2v v2v = v2.cView();
-        V3v v3v = v3.cView();
+        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
+        TMV_MAYBE_CREF(V2,V2v) v2v = v2.cView();
+        TMV_MAYBE_REF(V3,V3v) v3v = v3.cView();
         ElemMultVV_Helper<-4,s,add,ix,T,V1v,V2v,V3v>::call(
             x1,v1v,v2v,v3v);
     }
 
     template <bool add, int ix, class T, class V1, class V2, class V3>
-    static void AliasElemMultVV(
+    static inline void AliasElemMultVV(
         const Scaling<ix,T>& x1, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
@@ -587,9 +568,9 @@ namespace tmv {
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;
-        V1v v1v = v1.cView();
-        V2v v2v = v2.cView();
-        V3v v3v = v3.cView();
+        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
+        TMV_MAYBE_CREF(V2,V2v) v2v = v2.cView();
+        TMV_MAYBE_REF(V3,V3v) v3v = v3.cView();
         ElemMultVV_Helper<99,s,add,ix,T,V1v,V2v,V3v>::call(
             x1,v1v,v2v,v3v);
     }

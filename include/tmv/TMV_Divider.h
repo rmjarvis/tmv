@@ -60,7 +60,7 @@
 
 namespace tmv {
 
-    template <class T> 
+    template <class T>
     class Divider
     {
     public :
@@ -116,14 +116,14 @@ namespace tmv {
         // divide a double vector by a float matrix for example, you
         // can, but you need to use something like m.lud().solveInPlace(v)
         // instead of going through the normal division operator.
-        template <class M2> 
+        template <class M2>
         void solveInPlace(BaseMatrix_Rec_Mutable<M2>& m2) const
-        { 
+        {
             TMVStaticAssert(Traits<T>::isreal || M2::iscomplex);
             TMVStaticAssert((Traits2<T,typename M2::value_type>::samebase));
             doSolveInPlace(m2.mat().xView()); 
         }
-        template <class V2> 
+        template <class V2>
         void solveInPlace(BaseVector_Mutable<V2>& v2) const
         {
             TMVStaticAssert(Traits<T>::isreal || V2::iscomplex);
@@ -131,7 +131,7 @@ namespace tmv {
             doSolveInPlace(v2.vec().xView()); 
         }
 
-        template <class M2> 
+        template <class M2>
         void solveTransposeInPlace(BaseMatrix_Rec_Mutable<M2>& m2) const
         {
             TMVStaticAssert(Traits<T>::isreal || M2::iscomplex);
@@ -249,20 +249,20 @@ namespace tmv {
             }
         }
 
-        template <class M1, class M2> 
+        template <class M1, class M2>
         void solve(
             const BaseMatrix<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2) const
         { doSolve(m1.mat().xView(),m2.mat().xView()); }
-        template <class V1, class V2> 
+        template <class V1, class V2>
         void solve(
             const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2) const
         { doSolve(v1.vec().xView(),v2.vec().xView()); }
 
-        template <class M1, class M2> 
+        template <class M1, class M2>
         void solveTranspose(
             const BaseMatrix<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2) const
         { doSolveTranspose(m1.mat().xView(),m2.mat().xView()); }
-        template <class V1, class V2> 
+        template <class V1, class V2>
         void solveTranspose(
             const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2) const
         { doSolveTranspose(v1.vec().xView(),v2.vec().xView()); }
@@ -286,7 +286,7 @@ namespace tmv {
         virtual void doMakeInverse(
             MatrixView<CT,UNKNOWN,UNKNOWN,true> minv) const = 0;
 
-        template <class M2> 
+        template <class M2>
         void makeInverse(BaseMatrix_Rec_Mutable<M2>& minv) const
         { doMakeInverse(minv.mat().xView()); }
 
@@ -318,22 +318,6 @@ namespace tmv {
 
 
         //
-        // Check the validity of the decomposition 
-        // (Used for testing)
-        //
-
-        virtual bool doCheckDecomp(
-            const ConstMatrixView<T>& m, std::ostream* fout) const = 0;
-        virtual bool doCheckDecomp(
-            const ConstMatrixView<T,UNKNOWN,UNKNOWN,true>& m,
-            std::ostream* fout) const = 0;
-
-        template <class M2>
-        bool checkDecomp(
-            const BaseMatrix_Rec<M2>& m, std::ostream* fout) const
-        { return doCheckDecomp(m.mat().xView(),fout); }
-
-        //
         // Does the solver intrinsically prefer to do the solution in place?
         //
         virtual bool preferInPlace() const = 0;
@@ -342,7 +326,98 @@ namespace tmv {
         // op= not allowed.
         Divider<T>& operator=(const Divider<T>&);
     };
-    
+
+    template <class T, class M2>
+    static bool CheckDecomp(
+        const Divider<T>* div, const BaseMatrix_Calc<M2>& m,
+        std::ostream* fout=0)
+    {
+        TMVAssert(div);
+        typedef typename M2::lud_type lud_type1;
+        // Traits<>::type removes any reference that is part of lud_type1
+        typedef typename Traits<lud_type1>::type lud_type;
+        if (dynamic_cast<const lud_type*>(div)) {
+            return CheckDecomp(static_cast<const lud_type&>(*div),m,fout);
+        } else {
+            *fout << "Couldn't cast divider to a known type.\n";
+            return false;
+        }
+    }
+
+    template <class T>
+    class DivHelper
+    {
+    public:
+
+        typedef const Divider<T> div_type;
+        typedef const div_type* getdiv_type;
+
+        // Constructor starts with a default of LU or QR depending on 
+        // whether matrix is square.
+        DivHelper() : divtype(tmv::XX) {}
+
+        ~DivHelper() {}
+
+        void divideInPlace() const
+        { divtype |= tmv::DivInPlaceFlag; saveDiv(); }
+
+        bool divIsInPlace() const 
+        { return divtype & tmv::DivInPlaceFlag; }
+
+        void saveDiv() const
+        { divtype |= tmv::SaveDivFlag; }
+
+        void unsaveDiv() const
+        { divtype &= ~tmv::SaveDivFlag; }
+
+        bool divIsSaved() const 
+        { return divtype & tmv::SaveDivFlag; }
+
+        void divideUsing(DivType dt) const
+        {
+            TMVAssert(dt == tmv::LU || dt == tmv::QR || 
+                      dt == tmv::QRP || dt == tmv::SV);
+            if (!(divtype & dt)) {
+                unsetDiv();
+                divtype &= ~tmv::DivTypeFlags;
+                divtype |= dt;
+            }
+        }
+
+        DivType getDivType() const 
+        {
+            if (divtype & tmv::XX) resetDivType();
+            return divtype & tmv::DivTypeFlags; 
+        }
+
+        void unsetDiv() const
+        { divider.reset(); }
+
+        bool divIsSet() const
+        { return getDiv(); }
+
+        void resetDiv() const
+        { unsetDiv(); setDiv(); }
+
+        void doneDiv() const
+        { if (!divIsSaved()) unsetDiv(); }
+
+        getdiv_type getDiv() const
+        { return divider.get(); }
+
+        // Here are the virtual functions that need to be 
+        // defined in the derived class:
+        virtual void setDiv() const = 0;
+        virtual void resetDivType() const = 0;
+        virtual Matrix<T> getM() const = 0;
+
+    protected:
+
+        mutable std::auto_ptr<div_type> divider;
+        mutable DivType divtype;
+
+    }; // DivHelper
+
 } // namespace tmv
 
 #endif

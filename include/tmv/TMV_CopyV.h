@@ -38,20 +38,6 @@
 
 namespace tmv {
 
-    // Defined below:
-    template <class V1, class V2>
-    static void Copy(
-        const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2);
-    template <class V1, class V2>
-    static void NoAliasCopy(
-        const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2);
-    template <class V1, class V2>
-    static void InlineCopy(
-        const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2);
-    template <class V1, class V2>
-    static void AliasCopy(
-        const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2);
-
     // Defined in TMV_Vector.cpp
     template <class T1, bool C1, class T2>
     void InstCopy(
@@ -61,7 +47,7 @@ namespace tmv {
     // Copy Vectors
     //
 
-    template <int algo, int s, class V1, class V2> 
+    template <int algo, int s, class V1, class V2>
     struct CopyV_Helper;
 
     // algo 0: s = 0, nothing to do
@@ -132,16 +118,62 @@ namespace tmv {
 
     // algo 22: std::copy
     template <int s, class V1, class V2>
-    struct CopyV_Helper<22,s,V1,V2> 
+    struct CopyV_Helper<22,s,V1,V2>
     {
         static void call(const V1& v1, V2& v2)
         { std::copy(v1.begin(),v1.end(),v2.begin()); }
+        static void call2(
+            const int n, 
+            typename V1::const_iterator it1, typename V2::iterator it2)
+        { std::copy(it1,it1+n,it2); }
     };
 
-
-    // algo -4: No branches or copies
+    // algo 90: Call inst
     template <int s, class V1, class V2>
-    struct CopyV_Helper<-4,s,V1,V2>
+    struct CopyV_Helper<90,s,V1,V2>
+    {
+        static void call(const V1& v1, V2& v2)
+        { InstCopy(v1.xView(),v2.xView()); }
+    };
+
+    // algo 97: Conjugate
+    template <int s, class V1, class V2>
+    struct CopyV_Helper<97,s,V1,V2>
+    {
+        static void call(const V1& v1, V2& v2)
+        {
+            typedef typename V1::const_conjugate_type V1c;
+            typedef typename V2::conjugate_type V2c;
+            V1c v1c = v1.conjugate();
+            V2c v2c = v2.conjugate();
+            CopyV_Helper<-2,s,V1c,V2c>::call(v1c,v2c);
+        }
+    };
+
+    // algo 99: Check for aliases
+    template <int s, class V1, class V2>
+    struct CopyV_Helper<99,s,V1,V2>
+    {
+        static void call(const V1& v1, V2& v2)
+        {
+            if ( !SameStorage(v1,v2) ||
+                 v1.step()*v2.step() < 0 || 
+                 std::abs(v2.step()) < std::abs(v1.step())) {
+                // No aliasing (or no clobbering)
+                CopyV_Helper<-2,s,V1,V2>::call(v1,v2);
+            } else if (ExactSameStorage(v1,v2)) {
+                // They are already equal modulo a conjugation.
+                Maybe<V1::_conj != int(V2::_conj)>::conjself(v2); 
+            } else {
+                // Need a temporary
+                NoAliasCopy(v1.copy(),v2);
+            }
+        }
+    };
+
+    // algo -3: Determine which algorithm to use
+    template <int s, class V1, class V2>
+    struct CopyV_Helper<-3,s,V1,V2>
     {
         typedef typename V1::const_iterator IT1;
         typedef typename V2::iterator IT2;
@@ -152,12 +184,11 @@ namespace tmv {
             typedef typename V2::value_type T2;
             const int algo = 
                 s == 0 ? 0 :
-#if TMV_OPT > 0
+                TMV_OPT == 0 ? 11 :
                 ( s != UNKNOWN && s <= 8 ) ? 15 :
                 ( Traits2<T1,T2>::sametype && 
                   V1::_conj == int(V2::_conj) &&
                   V1::_step == 1 && V2::_step == 1 ) ? 21 :
-#endif
                 11;
             CopyV_Helper<algo,s,V1,V2>::call(v1,v2);
         }
@@ -167,44 +198,13 @@ namespace tmv {
             typedef typename V2::value_type T2;
             const int algo = 
                 s == 0 ? 0 :
-#if TMV_OPT > 0
+                TMV_OPT == 0 ? 11 :
                 ( Traits2<T1,T2>::sametype && 
                   V1::_conj == int(V2::_conj) &&
                   V1::_step == 1 && V2::_step == 1 ) ? 21 :
-#endif
                 11;
             CopyV_Helper<algo,s,V1,V2>::call2(n,it1,it2);
         }
-    };
-
-    // algo -3: Determine which algorithm to use
-    template <int s, class V1, class V2>
-    struct CopyV_Helper<-3,s,V1,V2>
-    {
-        static void call(const V1& v1, V2& v2)
-        { CopyV_Helper<-4,s,V1,V2>::call(v1,v2); }
-    };
-
-    // algo 97: Conjugate
-    template <int s, class V1, class V2>
-    struct CopyV_Helper<97,s,V1,V2>
-    {
-        static void call(const V1& v1, V2& v2)
-        { 
-            typedef typename V1::const_conjugate_type V1c;
-            typedef typename V2::conjugate_type V2c;
-            V1c v1c = v1.conjugate();
-            V2c v2c = v2.conjugate();
-            CopyV_Helper<-2,s,V1c,V2c>::call(v1c,v2c);
-        }
-    };
-
-    // algo 98: Call inst
-    template <int s, class V1, class V2>
-    struct CopyV_Helper<98,s,V1,V2>
-    {
-        static void call(const V1& v1, V2& v2)
-        { InstCopy(v1.xView(),v2.xView()); }
     };
 
     // algo -2: Check for inst
@@ -225,30 +225,9 @@ namespace tmv {
                 Traits<T2>::isinst;
             const int algo = 
                 V2::_conj ? 97 :
-                inst ? 98 :
-                -4;
+                inst ? 90 :
+                -3;
             CopyV_Helper<algo,s,V1,V2>::call(v1,v2);
-        }
-    };
-
-    // algo 99: Check for aliases
-    template <int s, class V1, class V2>
-    struct CopyV_Helper<99,s,V1,V2>
-    {
-        static void call(const V1& v1, V2& v2)
-        {
-            if ( !SameStorage(v1,v2) ||
-                 v1.step()*v2.step() < 0 || 
-                 std::abs(v2.step()) < std::abs(v1.step())) { 
-                // No aliasing (or no clobbering)
-                CopyV_Helper<-2,s,V1,V2>::call(v1,v2);
-            } else if (ExactSameStorage(v1,v2)) {
-                // They are already equal modulo a conjugation.
-                Maybe<V1::_conj != int(V2::_conj)>::conjself(v2); 
-            } else {
-                // Need a temporary
-                NoAliasCopy(v1.copy(),v2);
-            }
         }
     };
 
@@ -273,8 +252,8 @@ namespace tmv {
         }
     };
 
-    template <class V1, class V2> 
-    static void Copy(
+    template <class V1, class V2>
+    static inline void Copy(
         const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2)
     {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
@@ -282,15 +261,15 @@ namespace tmv {
         const int s = Sizes<V1::_size,V2::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::cview_type V2v;
-        V1v v1v = v1.cView();
-        V2v v2v = v2.cView();
+        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
+        TMV_MAYBE_REF(V2,V2v) v2v = v2.cView();
         typedef typename V1::value_type T1;
         typedef typename V2::value_type T2;
         CopyV_Helper<-1,s,V1v,V2v>::call(v1v,v2v); 
     }
 
     template <class V1, class V2>
-    static void NoAliasCopy(
+    static inline void NoAliasCopy(
         const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2)
     {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
@@ -298,13 +277,13 @@ namespace tmv {
         const int s = Sizes<V1::_size,V2::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::cview_type V2v;
-        V1v v1v = v1.cView();
-        V2v v2v = v2.cView();
+        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
+        TMV_MAYBE_REF(V2,V2v) v2v = v2.cView();
         CopyV_Helper<-2,s,V1v,V2v>::call(v1v,v2v); 
     }
 
     template <class V1, class V2>
-    static void InlineCopy(
+    static inline void InlineCopy(
         const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2)
     {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
@@ -312,13 +291,13 @@ namespace tmv {
         const int s = Sizes<V1::_size,V2::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::cview_type V2v;
-        V1v v1v = v1.cView();
-        V2v v2v = v2.cView();
-        CopyV_Helper<-4,s,V1v,V2v>::call(v1v,v2v); 
+        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
+        TMV_MAYBE_REF(V2,V2v) v2v = v2.cView();
+        CopyV_Helper<-3,s,V1v,V2v>::call(v1v,v2v); 
     }
 
     template <class V1, class V2>
-    static void AliasCopy(
+    static inline void AliasCopy(
         const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2)
     {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
@@ -326,8 +305,8 @@ namespace tmv {
         const int s = Sizes<V1::_size,V2::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::cview_type V2v;
-        V1v v1v = v1.cView();
-        V2v v2v = v2.cView();
+        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
+        TMV_MAYBE_REF(V2,V2v) v2v = v2.cView();
         CopyV_Helper<99,s,V1v,V2v>::call(v1v,v2v); 
     }
 
