@@ -51,56 +51,6 @@
 
 namespace tmv {
 
-    // Defined below:
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void MultMM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3);
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void NoAliasMultMM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3);
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void InlineMultMM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3);
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void AliasMultMM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3);
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void MultMM(
-        const Scaling<ix,T>& x,
-        const BaseMatrix_Diag<M1>& m1, const BaseMatrix_Rec<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3);
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void NoAliasMultMM(
-        const Scaling<ix,T>& x,
-        const BaseMatrix_Diag<M1>& m1, const BaseMatrix_Rec<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3);
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void AliasMultMM(
-        const Scaling<ix,T>& x,
-        const BaseMatrix_Diag<M1>& m1, const BaseMatrix_Rec<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3);
-    template <class M1, int ix, class T, class M2>
-    static void MultEqMM(
-        BaseMatrix_Rec_Mutable<M1>& m1,
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2);
-    template <class M1, int ix, class T, class M2>
-    static void NoAliasMultEqMM(
-        BaseMatrix_Rec_Mutable<M1>& m1,
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2);
-    template <class M1, int ix, class T, class M2>
-    static void AliasMultEqMM(
-        BaseMatrix_Rec_Mutable<M1>& m1,
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2);
-
-
     // Defined in TMV_MultMD.cpp
     template <class T1, bool C1, class T2, bool C2, class T3>
     void InstMultMM(
@@ -112,6 +62,11 @@ namespace tmv {
         const T3 x,
         const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
         const ConstDiagMatrixView<T2,UNKNOWN,C2>& m2, MatrixView<T3> m3);
+
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    static void NoAliasMultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
 
     //
     // Matrix * DiagMatrix
@@ -128,20 +83,18 @@ namespace tmv {
 #define TMV_MD_ZeroIX (ix == 0)
     //#define TMV_MD_ZeroIX (ix != 1)
 
-    template <int algo, int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
+    template <int algo, int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMD_Helper;
 
     // algo 0: cs or rs = 0, so nothing to do
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMD_Helper<0,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(const Scaling<ix,T>& , const M1& , const M2& , M3& ) 
         {} 
     };
 
-    // algo 1: cs == 1, so simplifies to a MultDV function
+    // algo 1: cs == 1, so simplifies to an ElemMultVV function
     template <int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMD_Helper<1,1,rs,add,ix,T,M1,M2,M3>
     {
@@ -154,24 +107,24 @@ namespace tmv {
             M1r m10 = m1.get_row(0);
             M2d m2d = m2.diag();
             M3r m30 = m3.get_row(0);
-            ElemMultVV_Helper<-1,rs,add,ix,T,M1r,M2d,M3r>::call(x,m10,m2d,m30);
+            ElemMultVV_Helper<-4,rs,add,ix,T,M1r,M2d,M3r>::call(x,m10,m2d,m30);
         }
     };
 
-    // algo 2: rs == 1, so simplifies to a MultXV function
-    template <int cs, bool add, int ix, class T, class M1, class M2, class M3>
-    struct MultMD_Helper<2,cs,1,add,ix,T,M1,M2,M3>
+    // algo 101: same as 1, but use -1 algo
+    template <int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultMD_Helper<101,1,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            typedef typename M1::const_col_type M1c;
-            typedef typename M3::col_type M3c;
-            typedef typename Traits2<T,typename M2::value_type>::type PT2;
-            M1c m10 = m1.get_col(0);
-            PT2 xm2 = ZProd<false,false>::prod(x , m2.cref(0));
-            M3c m30 = m3.get_col(0);
-            MultXV_Helper<-1,cs,add,0,PT2,M1c,M3c>::call(xm2,m10,m30);
+            typedef typename M1::const_row_type M1r;
+            typedef typename M2::const_diag_type M2d;
+            typedef typename M3::row_type M3r;
+            M1r m10 = m1.get_row(0);
+            M2d m2d = m2.diag();
+            M3r m30 = m3.get_row(0);
+            ElemMultVV_Helper<-1,rs,add,ix,T,M1r,M2d,M3r>::call(x,m10,m2d,m30);
         }
     };
 
@@ -192,6 +145,40 @@ namespace tmv {
         }
     };
 
+    // algo 2: rs == 1, so simplifies to a MultXV function
+    template <int cs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultMD_Helper<2,cs,1,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            typedef typename M1::const_col_type M1c;
+            typedef typename M3::col_type M3c;
+            typedef typename Traits2<T,typename M2::value_type>::type PT2;
+            M1c m10 = m1.get_col(0);
+            PT2 xm2 = ZProd<false,false>::prod(x , m2.cref(0));
+            M3c m30 = m3.get_col(0);
+            MultXV_Helper<-1,cs,add,0,PT2,M1c,M3c>::call(xm2,m10,m30);
+        }
+    };
+
+    // algo 102: same as 2, but use -1 algo
+    template <int cs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultMD_Helper<102,cs,1,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            typedef typename M1::const_col_type M1c;
+            typedef typename M3::col_type M3c;
+            typedef typename Traits2<T,typename M2::value_type>::type PT2;
+            M1c m10 = m1.get_col(0);
+            PT2 xm2 = ZProd<false,false>::prod(x , m2.cref(0));
+            M3c m30 = m3.get_col(0);
+            MultXV_Helper<-1,cs,add,0,PT2,M1c,M3c>::call(xm2,m10,m30);
+        }
+    };
+
     // algo 202: same as 2, but use -2 algo
     template <int cs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMD_Helper<202,cs,1,add,ix,T,M1,M2,M3>
@@ -209,43 +196,8 @@ namespace tmv {
         }
     };
 
-    // algo 401: same as 1, but use -4 algo
-    template <int rs, bool add, int ix, class T, class M1, class M2, class M3>
-    struct MultMD_Helper<401,1,rs,add,ix,T,M1,M2,M3>
-    {
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
-            typedef typename M1::const_row_type M1r;
-            typedef typename M2::const_diag_type M2d;
-            typedef typename M3::row_type M3r;
-            M1r m10 = m1.get_row(0);
-            M2d m2d = m2.diag();
-            M3r m30 = m3.get_row(0);
-            ElemMultVV_Helper<-4,rs,add,ix,T,M1r,M2d,M3r>::call(x,m10,m2d,m30);
-        }
-    };
-
-    // algo 402: same as 2, but use -4 algo
-    template <int cs, bool add, int ix, class T, class M1, class M2, class M3>
-    struct MultMD_Helper<402,cs,1,add,ix,T,M1,M2,M3>
-    {
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
-            typedef typename M1::const_col_type M1c;
-            typedef typename M3::col_type M3c;
-            typedef typename Traits2<T,typename M2::value_type>::type PT2;
-            M1c m10 = m1.get_col(0);
-            PT2 xm2 = ZProd<false,false>::prod(x , m2.cref(0));
-            M3c m30 = m3.get_col(0);
-            MultXV_Helper<-4,cs,add,0,PT2,M1c,M3c>::call(xm2,m10,m30);
-        }
-    };
-
     // algo 11: The basic column major loop
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMD_Helper<11,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
@@ -273,8 +225,7 @@ namespace tmv {
     };
 
     // algo 12: Column major loop with iterators
-    template <int cs, int rs, bool add,
-              int ix, class T, class M1, class M2, class M3>
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMD_Helper<12,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
@@ -292,13 +243,13 @@ namespace tmv {
             typedef typename M1::const_col_type M1c;
             typedef typename M1c::const_nonconj_type::const_iterator IT1;
             const int Astepj = m1.stepj();
-            IT1 A = m1.get_col(0).nonConj().begin();
+            IT1 A = m1.get_col(0).begin().nonConj();
 
             typedef typename M2::const_diag_type M2d;
             typedef typename M2d::const_nonconj_type::const_iterator IT2;
             typedef typename M2::value_type T2;
             typedef typename Traits2<T,T2>::type PT2;
-            IT2 D = m2.diag().nonConj().begin();
+            IT2 D = m2.diag().begin().nonConj();
             PT2 dj;
 
             typedef typename M3::col_type M3c;
@@ -327,8 +278,7 @@ namespace tmv {
     };
 
     // algo 14: The basic row major loop
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMD_Helper<14,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
@@ -356,8 +306,7 @@ namespace tmv {
     };
 
     // algo 15: Row major loop with iterators
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMD_Helper<15,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
@@ -373,11 +322,11 @@ namespace tmv {
             typedef typename M1::const_row_type M1r;
             typedef typename M1r::const_nonconj_type::const_iterator IT1;
             const int Astepi = m1.stepi();
-            IT1 A = m1.get_row(0).nonConj().begin();
+            IT1 A = m1.get_row(0).begin().nonConj();
 
             typedef typename M2::const_diag_type M2d;
             typedef typename M2d::const_nonconj_type::const_iterator IT2;
-            IT2 D = m2.diag().nonConj().begin();
+            IT2 D = m2.diag().begin().nonConj();
 
             typedef typename M3::row_type M3r;
             typedef typename M3r::iterator IT3;
@@ -404,9 +353,8 @@ namespace tmv {
     };
 
     // algo 82: copy x*m2
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultMD_Helper<82,cs,rs,add,ix,T,M1,M2,M3> 
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultMD_Helper<82,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -422,9 +370,95 @@ namespace tmv {
         }
     };
 
+    // algo 90: call InstMultMM
+    template <int cs, int rs, int ix, class T, class M1, class M2, class M3>
+    struct MultMD_Helper<90,cs,rs,false,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            typedef typename M3::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
+            InstMultMM(xx,m1.xView(),m2.xView(),m3.xView());
+        }
+    };
+    template <int cs, int rs, int ix, class T, class M1, class M2, class M3>
+    struct MultMD_Helper<90,cs,rs,true,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            typedef typename M3::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
+            InstAddMultMM(xx,m1.xView(),m2.xView(),m3.xView());
+        }
+    };
+
+    // algo 97: Conjugate
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultMD_Helper<97,cs,rs,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            typedef typename M1::const_conjugate_type M1c;
+            typedef typename M2::const_conjugate_type M2c;
+            typedef typename M3::conjugate_type M3c;
+            M1c m1c = m1.conjugate();
+            M2c m2c = m2.conjugate();
+            M3c m3c = m3.conjugate();
+            MultMD_Helper<-2,cs,rs,add,ix,T,M1c,M2c,M3c>::call(
+                TMV_CONJ(x),m1c,m2c,m3c);
+        }
+    };
+
+    // algo 99: Check for aliases
+    template <int cs, int rs, int ix, class T, class M1, class M2, class M3>
+    struct MultMD_Helper<99,cs,rs,true,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            if ( ( !SameStorage(m1,m3) ||
+                   ExactSameStorage(m1,m3) ) &&
+                 !SameStorage(m2,m3) ) {
+                // No aliasing (or no clobbering)
+                MultMD_Helper<-2,cs,rs,true,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+            } else if (SameStorage(m2,m3)) {
+                // Use temporary for m2
+                MultMD_Helper<82,cs,rs,true,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+            } else {
+                // SameStorage(m1,m3)
+                // Need a temporary
+                NoAliasMultMM<true>(x,m1.copy(),m2,m3);
+            }
+        }
+    };
+    template <int cs, int rs, int ix, class T, class M1, class M2, class M3>
+    struct MultMD_Helper<99,cs,rs,false,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            if ( ( !SameStorage(m1,m3) ||
+                   ExactSameStorage(m1,m3) ) &&
+                 !SameStorage(m2,m3) ) {
+                // No aliasing (or no clobbering)
+                MultMD_Helper<-2,cs,rs,false,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+            } else if (SameStorage(m2,m3)) {
+                // Use temporary for m2
+                MultMD_Helper<82,cs,rs,false,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+            } else {
+                // SameStorage(m1,m3)
+                // Let Copy handle the aliasing
+                AliasCopy(m1,m3);
+                NoAliasMultMM<false>(x,m3,m2,m3);
+            }
+        }
+    };
+
     // algo -4: No branches or copies
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMD_Helper<-4,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
@@ -434,8 +468,8 @@ namespace tmv {
             const bool bothcm = M1::_colmajor && M3::_colmajor;
             const int algo = 
                 ( rs == 0 || cs == 0 ) ? 0 :
-                ( cs == 1 ) ? 401 :
-                ( rs == 1 ) ? 402 :
+                ( cs == 1 ) ? 1 :
+                ( rs == 1 ) ? 2 :
                 bothrm ? ( 
                     ( rs != UNKNOWN && rs <= 5 && cs > rs ) ? 11 : 
                     ( rs != UNKNOWN && rs <= 10 ) ? 14 : 15 ) :
@@ -447,8 +481,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMD_Helper<-3,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
@@ -468,16 +501,14 @@ namespace tmv {
 
             const bool bothrm = M1::_rowmajor && M3::_rowmajor;
             const bool bothcm = M1::_colmajor && M3::_colmajor;
-#if TMV_OPT >= 1
-            const bool docopy = TMV_MD_ZeroIX || M2::_diagstep != 1;
-#else
-            const bool docopy = false;
-#endif
+            const bool docopy = 
+                TMV_OPT == 0 ? false :
+                TMV_MD_ZeroIX || M2::_diagstep != 1;
 
             const int algo = 
                 ( rs == 0 || cs == 0 ) ? 0 :
-                ( cs == 1 ) ? 401 :
-                ( rs == 1 ) ? 402 :
+                ( cs == 1 ) ? 1 :
+                ( rs == 1 ) ? 2 :
                 bothrm ? ( 
                     ( rs != UNKNOWN && rs <= 5 && cs > rs ) ? 11 : 
                     docopy ? 82 : 
@@ -497,52 +528,8 @@ namespace tmv {
         }
     };
 
-    // algo 97: Conjugate
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultMD_Helper<97,cs,rs,add,ix,T,M1,M2,M3>
-    {
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        { 
-            typedef typename M1::const_conjugate_type M1c;
-            typedef typename M2::const_conjugate_type M2c;
-            typedef typename M3::conjugate_type M3c;
-            M1c m1c = m1.conjugate();
-            M2c m2c = m2.conjugate();
-            M3c m3c = m3.conjugate();
-            MultMD_Helper<-2,cs,rs,add,ix,T,M1c,M2c,M3c>::call(
-                TMV_CONJ(x),m1c,m2c,m3c);
-        }
-    };
-
-    // algo 98: call InstMultMM
-    template <int cs, int rs, int ix, class T, class M1, class M2, class M3>
-    struct MultMD_Helper<98,cs,rs,false,ix,T,M1,M2,M3>
-    {
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
-            typedef typename M3::value_type VT;
-            VT xx = Traits<VT>::convert(T(x));
-            InstMultMM(xx,m1.xView(),m2.xView(),m3.xView());
-        }
-    };
-    template <int cs, int rs, int ix, class T, class M1, class M2, class M3>
-    struct MultMD_Helper<98,cs,rs,true,ix,T,M1,M2,M3>
-    {
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
-            typedef typename M3::value_type VT;
-            VT xx = Traits<VT>::convert(T(x));
-            InstAddMultMM(xx,m1.xView(),m2.xView(),m3.xView());
-        }
-    };
-
     // algo -2: Check for inst
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMD_Helper<-2,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
@@ -567,60 +554,14 @@ namespace tmv {
                 ( cs == 1 ) ? 201 :
                 ( rs == 1 ) ? 202 :
                 M3::_conj ? 97 :
-                inst ? 98 : 
+                inst ? 90 : 
                 -3;
             MultMD_Helper<algo,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };
 
-    // algo 99: Check for aliases
-    template <int cs, int rs, int ix, class T, class M1, class M2, class M3>
-    struct MultMD_Helper<99,cs,rs,true,ix,T,M1,M2,M3>
-    {
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
-            if ( ( !SameStorage(m1,m3) ||
-                   ExactSameStorage(m1,m3) ) &&
-                 !SameStorage(m2,m3) ) {
-                // No aliasing (or no clobbering)
-                MultMD_Helper<-2,cs,rs,true,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
-            } else if (SameStorage(m2,m3)) {
-                // Use temporary for m2
-                MultMD_Helper<82,cs,rs,true,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
-            } else { 
-                // SameStorage(m1,m3)
-                // Need a temporary
-                NoAliasMultMM<true>(x,m1.copy(),m2,m3);
-            }
-        }
-    };
-    template <int cs, int rs, int ix, class T, class M1, class M2, class M3>
-    struct MultMD_Helper<99,cs,rs,false,ix,T,M1,M2,M3>
-    {
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
-            if ( ( !SameStorage(m1,m3) ||
-                   ExactSameStorage(m1,m3) ) &&
-                 !SameStorage(m2,m3) ) {
-                // No aliasing (or no clobbering)
-                MultMD_Helper<-2,cs,rs,false,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
-            } else if (SameStorage(m2,m3)) {
-                // Use temporary for m2
-                MultMD_Helper<82,cs,rs,false,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
-            } else { 
-                // SameStorage(m1,m3)
-                // Let Copy handle the aliasing
-                AliasCopy(m1,m3);
-                NoAliasMultMM<false>(x,m3,m2,m3);
-            }
-        }
-    };
-
     // algo -1: Check for aliases?
-    template <int cs, int rs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMD_Helper<-1,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
@@ -632,19 +573,18 @@ namespace tmv {
                 M3::_colsize == UNKNOWN && M3::_rowsize == UNKNOWN;
             const int algo = 
                 ( rs == 0 || cs == 0 ) ? 0 :
-                ( cs == 1 ) ? 1 :
-                ( rs == 1 ) ? 2 :
+                ( cs == 1 ) ? 101 :
+                ( rs == 1 ) ? 102 :
                 checkalias ? 99 : 
                 -2;
             MultMD_Helper<algo,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };
 
-    template <int algo, bool add, int ix, class T, class M1, class M2, class M3>
-    static void DoMultMD(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3)
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    static inline void MultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
         TMVStaticAssert((Sizes<M3::_colsize,M1::_colsize>::same));
         TMVStaticAssert((Sizes<M3::_rowsize,M1::_rowsize>::same));
@@ -658,94 +598,131 @@ namespace tmv {
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         typedef typename M3::cview_type M3v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        M3v m3v = m3.cView();
-        MultMD_Helper<algo,cs,rs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
+        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
+        MultMD_Helper<-1,cs,rs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void MultMM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3)
-    { DoMultMD<-1,add>(x,m1,m2,m3); }
+    static inline void NoAliasMultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
+    {
+        TMVStaticAssert((Sizes<M3::_colsize,M1::_colsize>::same));
+        TMVStaticAssert((Sizes<M3::_rowsize,M1::_rowsize>::same));
+        TMVStaticAssert((Sizes<M3::_rowsize,M2::_size>::same));
+        TMVAssert(m3.colsize() == m1.colsize());
+        TMVAssert(m3.rowsize() == m1.rowsize());
+        TMVAssert(m3.rowsize() == m2.size());
+        const int cs = Sizes<M3::_colsize,M1::_colsize>::size;
+        const int rs1 = Sizes<M3::_rowsize,M1::_rowsize>::size;
+        const int rs = Sizes<rs1,M2::_size>::size;
+        typedef typename M1::const_cview_type M1v;
+        typedef typename M2::const_cview_type M2v;
+        typedef typename M3::cview_type M3v;
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
+        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
+        MultMD_Helper<-2,cs,rs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
+    }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void NoAliasMultMM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3)
-    { DoMultMD<-2,add>(x,m1,m2,m3); }
+    static inline void InlineMultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
+    {
+        TMVStaticAssert((Sizes<M3::_colsize,M1::_colsize>::same));
+        TMVStaticAssert((Sizes<M3::_rowsize,M1::_rowsize>::same));
+        TMVStaticAssert((Sizes<M3::_rowsize,M2::_size>::same));
+        TMVAssert(m3.colsize() == m1.colsize());
+        TMVAssert(m3.rowsize() == m1.rowsize());
+        TMVAssert(m3.rowsize() == m2.size());
+        const int cs = Sizes<M3::_colsize,M1::_colsize>::size;
+        const int rs1 = Sizes<M3::_rowsize,M1::_rowsize>::size;
+        const int rs = Sizes<rs1,M2::_size>::size;
+        typedef typename M1::const_cview_type M1v;
+        typedef typename M2::const_cview_type M2v;
+        typedef typename M3::cview_type M3v;
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
+        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
+        MultMD_Helper<-3,cs,rs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
+    }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void InlineMultMM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3)
-    { DoMultMD<-3,add>(x,m1,m2,m3); }
+    static inline void AliasMultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
+    {
+        TMVStaticAssert((Sizes<M3::_colsize,M1::_colsize>::same));
+        TMVStaticAssert((Sizes<M3::_rowsize,M1::_rowsize>::same));
+        TMVStaticAssert((Sizes<M3::_rowsize,M2::_size>::same));
+        TMVAssert(m3.colsize() == m1.colsize());
+        TMVAssert(m3.rowsize() == m1.rowsize());
+        TMVAssert(m3.rowsize() == m2.size());
+        const int cs = Sizes<M3::_colsize,M1::_colsize>::size;
+        const int rs1 = Sizes<M3::_rowsize,M1::_rowsize>::size;
+        const int rs = Sizes<rs1,M2::_size>::size;
+        typedef typename M1::const_cview_type M1v;
+        typedef typename M2::const_cview_type M2v;
+        typedef typename M3::cview_type M3v;
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
+        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
+        MultMD_Helper<99,cs,rs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
+    }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void AliasMultMM(
-        const Scaling<ix,T>& x, 
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Diag<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3)
-    { DoMultMD<99,add>(x,m1,m2,m3); }
-
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void MultMM(
-        const Scaling<ix,T>& x,
-        const BaseMatrix_Diag<M1>& m1, const BaseMatrix_Rec<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3)
+    static inline void MultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
         typename M3::transpose_type m3t = m3.transpose();
         MultMM<add>(x,m2.transpose(),m1.transpose(),m3t);
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void NoAliasMultMM(
-        const Scaling<ix,T>& x,
-        const BaseMatrix_Diag<M1>& m1, const BaseMatrix_Rec<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3)
+    static inline void NoAliasMultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
         typename M3::transpose_type m3t = m3.transpose();
         NoAliasMultMM<add>(x,m2.transpose(),m1.transpose(),m3t);
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void InlineMultMM(
-        const Scaling<ix,T>& x,
-        const BaseMatrix_Diag<M1>& m1, const BaseMatrix_Rec<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3)
+    static inline void InlineMultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
         typename M3::transpose_type m3t = m3.transpose();
         InlineMultMM<add>(x,m2.transpose(),m1.transpose(),m3t);
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void AliasMultMM(
-        const Scaling<ix,T>& x,
-        const BaseMatrix_Diag<M1>& m1, const BaseMatrix_Rec<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3)
+    static inline void AliasMultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
         typename M3::transpose_type m3t = m3.transpose();
         AliasMultMM<add>(x,m2.transpose(),m1.transpose(),m3t);
     }
 
     template <class M1, int ix, class T, class M2>
-    static void MultEqMM(
+    static inline void MultEqMM(
         BaseMatrix_Rec_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { MultMM<false>(x,m1.mat(),m2.mat(),m1.mat()); }
 
     template <class M1, int ix, class T, class M2>
-    static void NoAliasMultEqMM(
+    static inline void NoAliasMultEqMM(
         BaseMatrix_Rec_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { NoAliasMultMM<false>(x,m1.mat(),m2.mat(),m1.mat()); }
 
     template <class M1, int ix, class T, class M2>
-    static void AliasMultEqMM(
+    static inline void AliasMultEqMM(
         BaseMatrix_Rec_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { AliasMultMM<false>(x,m1.mat(),m2.mat(),m1.mat()); }

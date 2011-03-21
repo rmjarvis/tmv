@@ -36,12 +36,14 @@
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_MultXV.h"
 #include "tmv/TMV_MultXM.h"
-#include "tmv/TMV_ProdXV.h"
-#include "tmv/TMV_ProdXM.h"
+#include "tmv/TMV_CopyV.h"
+#include "tmv/TMV_SimpleMatrix.h"
 
 #ifdef BLAS
 #include "tmv/TMV_AddVV.h"
 #include "tmv/TMV_SumVV.h"
+#include "tmv/TMV_ProdXV.h"
+#include "tmv/TMV_ProdXM.h"
 #endif
 
 // The CBLAS trick of using RowMajor with ConjTrans when we have a 
@@ -54,7 +56,7 @@
 
 namespace tmv {
 
-    template <bool add, class T, class M1, class V2>
+    template <class T, class M1, class V2>
     static void DoMultMV(
         const T x, const M1& m1, const V2& v2, VectorView<T>& v3)
     {
@@ -73,39 +75,86 @@ namespace tmv {
             VectorView<T,1> v3u = v3.unitView();
             if (v2.step() == 1) {
                 if (x == RT(1))
-                    InlineMultMV<add>(one,m1,v2.unitView(),v3u);
-                else if (!add) {
-                    if (M > 4*N) {
-                        InlineMultMV<false>(one,m1,(x*v2).calc(),v3u);
-                    } else {
-                        InlineMultMV<false>(one,m1,v2.unitView(),v3u);
-                        Scale(x,v3);
-                    }
+                    InlineMultMV<false>(one,m1,v2.unitView(),v3u);
+                else if (M > 4*N) {
+                    Vector<T> xv2(N);
+                    InstMultXV(x,v2,xv2.xView());
+                    InlineMultMV<false>(one,m1,xv2,v3u);
                 } else {
-                    if (N > 4*M) {
-                        Vector<T> v3c(v3.size());
-                        VectorView<T,1> v3cu = v3c.unitView();
-                        InlineMultMV<false>(one,m1,v2.unitView(),v3cu);
-                        InstAddMultXV(x,v3c.constView().xView(),v3);
-                    } else {
-                        InlineMultMV<add>(one,m1,(x*v2).calc(),v3u);
-                    }
+                    InlineMultMV<false>(one,m1,v2.unitView(),v3u);
+                    InstScale(x,v3);
                 }
             } else {
-                InlineMultMV<add>(one,m1,(x*v2).calc(),v3u);
+                Vector<T> xv2(N);
+                InstMultXV(x,v2,xv2.xView());
+                InlineMultMV<false>(one,m1,xv2,v3u);
             }
         } else {
-            Vector<T> v3c(v3.size());
+            Vector<T> v3c(M);
             VectorView<T,1> v3u = v3c.unitView();
             if (v2.step() == 1) {
                 InlineMultMV<false>(one,m1,v2.unitView(),v3u);
-                NoAliasMultXV<add>(x,v3c,v3);
+                InstMultXV(x,v3c.constView().xView(),v3);
             } else if (M > N) {
-                InlineMultMV<false>(one,m1,(x*v2).calc(),v3u);
-                NoAliasMultXV<add>(v3c,v3);
+                Vector<T> xv2(N);
+                InstMultXV(x,v2,xv2.xView());
+                InlineMultMV<false>(one,m1,xv2,v3u);
+                InstCopy(v3c.constView().xView(),v3);
             } else {
                 InlineMultMV<false>(one,m1,v2.copy(),v3u);
-                NoAliasMultXV<add>(x,v3c,v3);
+                InstMultXV(x,v3c.constView().xView(),v3);
+            }
+        }
+    }
+
+    template <class T, class M1, class V2>
+    static void DoAddMultMV(
+        const T x, const M1& m1, const V2& v2, VectorView<T>& v3)
+    {
+        // Check for non-unit step and x != 1, and do the necessary copies here,
+        // rather than in the InlineMultMV function.  
+        // This is faster to compile, since it keeps the InlineMultMV
+        // algo path to the ones that have vstep == 1.
+
+        typedef typename Traits<T>::real_type RT;
+        const Scaling<1,RT> one;
+
+        const int M = m1.colsize();
+        const int N = m1.rowsize();
+
+        if (v3.step() == 1) {
+            VectorView<T,1> v3u = v3.unitView();
+            if (v2.step() == 1) {
+                if (x == RT(1))
+                    InlineMultMV<true>(one,m1,v2.unitView(),v3u);
+                else if (N > 4*M) {
+                    Vector<T> v3c(M);
+                    InlineMultMV<false>(one,m1,v2.unitView(),v3c);
+                    InstAddMultXV(x,v3c.constView().xView(),v3);
+                } else {
+                    Vector<T> xv2(N);
+                    InstMultXV(x,v2,xv2.xView());
+                    InlineMultMV<true>(one,m1,xv2,v3u);
+                }
+            } else {
+                Vector<T> xv2(N);
+                InstMultXV(x,v2,xv2.xView());
+                InlineMultMV<true>(one,m1,xv2,v3u);
+            }
+        } else {
+            Vector<T> v3c(v3.size(),T(0));
+            VectorView<T,1> v3u = v3c.unitView();
+            if (v2.step() == 1) {
+                InlineMultMV<true>(one,m1,v2.unitView(),v3u);
+                InstAddMultXV(x,v3c.constView().xView(),v3);
+            } else if (M > N) {
+                Vector<T> xv2(N);
+                InstMultXV(x,v2,xv2.xView());
+                InlineMultMV<true>(one,m1,xv2,v3u);
+                InstAddMultXV(T(1),v3c.constView().xView(),v3);
+            } else {
+                InlineMultMV<true>(one,m1,v2.copy(),v3u);
+                InstAddMultXV(x,v3c.constView().xView(),v3);
             }
         }
     }
@@ -715,12 +764,19 @@ namespace tmv {
         const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
         const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3)
     {
+#if TMV_OPT <= 2
+        v3.setZero();
+        InstAddMultMV(x,m1,v2,v3);
+#else
         if (m1.isrm())
-            DoMultMV<false>(x,m1.rmView(),v2,v3);
+            DoMultMV(x,m1.rmView(),v2,v3);
         else if (m1.iscm())
-            DoMultMV<false>(x,m1.cmView(),v2,v3);
-        else 
-            DoMultMV<false>(T3(1),(x*m1).calc().constView().xView(),v2,v3);
+            DoMultMV(x,m1.cmView(),v2,v3);
+        else {
+            SimpleMatrix<T1,ColMajor> m1c = m1;
+            DoMultMV(x,m1c.constView(),v2,v3);
+        }
+#endif
     }
     template <class T1, bool C1, class T2, bool C2, class T3>
     void InstAddMultMV(
@@ -729,11 +785,13 @@ namespace tmv {
         const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3)
     {
         if (m1.isrm())
-            DoMultMV<true>(x,m1.rmView(),v2,v3);
+            DoAddMultMV(x,m1.rmView(),v2,v3);
         else if (m1.iscm())
-            DoMultMV<true>(x,m1.cmView(),v2,v3);
-        else 
-            DoMultMV<true>(T3(1),(x*m1).calc().constView().xView(),v2,v3);
+            DoAddMultMV(x,m1.cmView(),v2,v3);
+        else {
+            SimpleMatrix<T1,ColMajor> m1c = m1;
+            DoAddMultMV(x,m1c.constView(),v2,v3);
+        }
     }
 
 #define InstFile "TMV_MultMV.inst"

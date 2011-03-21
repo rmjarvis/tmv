@@ -37,16 +37,6 @@
 
 namespace tmv {
 
-    // Defined below:
-    template <class V>
-    static void ConjugateSelf(BaseVector_Mutable<V>& v);
-    template <class V>
-    static void NoAliasConjugateSelf(BaseVector_Mutable<V>& v);
-    template <class V>
-    static void InlineConjugateSelf(BaseVector_Mutable<V>& v);
-    template <class V>
-    static void AliasConjugateSelf(BaseVector_Mutable<V>& v);
-
     // Defined in TMV_Vector.cpp
     template <class T>
     void InstConjugateSelf(VectorView<T> v);
@@ -55,31 +45,31 @@ namespace tmv {
     // ConjugateSelf
     //
 
-    template <int algo, int s, class V> 
+    template <int algo, int s, class V>
     struct ConjugateV_Helper;
 
     // algo 0: real, so nothing to do
     template <int s, class V>
-    struct ConjugateV_Helper<0,s,V> 
+    struct ConjugateV_Helper<0,s,V>
     { static void call(V& ) { } };
     
-    // algo 1: simple for loop
+    // algo 11: simple for loop
     template <int s, class V>
-    struct ConjugateV_Helper<1,s,V> 
+    struct ConjugateV_Helper<11,s,V>
     {
         static void call(V& v)
-        { 
+        {
             const int n=v.size();
             for(int i=0;i<n;++i) v.ref(i) = TMV_CONJ(v.cref(i));
         }
     };
 
-    // algo 2: v.imagPart() *= -1
+    // algo 12: v.imagPart() *= -1
     template <int s, class V>
-    struct ConjugateV_Helper<2,s,V> 
+    struct ConjugateV_Helper<12,s,V>
     {
         static void call(V& v)
-        { 
+        {
             typedef typename V::real_type RT;
             typedef typename V::imagpart_type Vi;
             const Scaling<-1,RT> mone;
@@ -88,9 +78,9 @@ namespace tmv {
         }
     };
 
-    // algo 5: fully unroll
+    // algo 15: fully unroll
     template <int s, class V>
-    struct ConjugateV_Helper<5,s,V>
+    struct ConjugateV_Helper<15,s,V>
     {
         template <int I, int N>
         struct Unroller
@@ -114,6 +104,26 @@ namespace tmv {
         { Unroller<0,s>::unroll(v); }
     };
 
+    // algo 90: Call inst
+    template <int s, class V>
+    struct ConjugateV_Helper<90,s,V>
+    {
+        static void call(V& v)
+        { InstConjugateSelf(v.xView()); }
+    };
+
+    // algo 97: Conjugate
+    template <int s, class V>
+    struct ConjugateV_Helper<97,s,V>
+    {
+        static void call(V& v)
+        {
+            typedef typename V::conjugate_type Vc;
+            Vc vc = v.conjugate();
+            ConjugateV_Helper<-2,s,Vc>::call(vc);
+        }
+    };
+
     // algo -3: Determine which algorithm to use
     template <int s, class V>
     struct ConjugateV_Helper<-3,s,V>
@@ -121,37 +131,16 @@ namespace tmv {
         static void call(V& v)
         {
             const int algo = 
-#if TMV_OPT >= 1
-                s != UNKNOWN && s <= 32 ? 5 :
-#endif
-                2;
+                TMV_OPT == 0 ? 12 :
+                s != UNKNOWN && s <= 32 ? 15 :
+                12;
             ConjugateV_Helper<algo,s,V>::call(v);
         }
     };
 
-    // algo 97: Conjugate
+    // algo -2: Check for inst
     template <int s, class V>
-    struct ConjugateV_Helper<97,s,V> 
-    {
-        static void call(V& v)
-        {
-            typedef typename V::conjugate_type Vc;
-            Vc vc = v.conjugate();
-            ConjugateV_Helper<-1,s,Vc>::call(vc);
-        }
-    };
-
-    // algo 98: Call inst
-    template <int s, class V>
-    struct ConjugateV_Helper<98,s,V> 
-    {
-        static void call(V& v)
-        { InstConjugateSelf(v.xView()); }
-    };
-
-    // algo -1: Check for inst
-    template <int s, class V>
-    struct ConjugateV_Helper<-1,s,V> 
+    struct ConjugateV_Helper<-2,s,V>
     {
         static void call(V& v)
         {
@@ -162,25 +151,32 @@ namespace tmv {
             const int algo = 
                 V::isreal ? 0 :
                 V::_conj ? 97 :
-                inst ? 98 : 
+                inst ? 90 : 
                 -3;
             ConjugateV_Helper<algo,s,V>::call(v);
         }
     };
 
+    template <int s, class V>
+    struct ConjugateV_Helper<-1,s,V>
+    {
+        static void call(V& v)
+        { ConjugateV_Helper<-2,s,V>::call(v); }
+    };
+
     template <class V>
-    static void ConjugateSelf(BaseVector_Mutable<V>& v)
+    static inline void ConjugateSelf(BaseVector_Mutable<V>& v)
     {
         typedef typename V::cview_type Vv;
-        Vv vv = v.cView();
-        ConjugateV_Helper<-1,V::_size,Vv>::call(vv); 
+        TMV_MAYBE_REF(V,Vv) vv = v.cView();
+        ConjugateV_Helper<-2,V::_size,Vv>::call(vv); 
     }
 
     template <class V>
-    static void InlineConjugateSelf(BaseVector_Mutable<V>& v)
+    static inline void InlineConjugateSelf(BaseVector_Mutable<V>& v)
     {
         typedef typename V::cview_type Vv;
-        Vv vv = v.cView();
+        TMV_MAYBE_REF(V,Vv) vv = v.cView();
         ConjugateV_Helper<-3,V::_size,Vv>::call(vv); 
     }
 

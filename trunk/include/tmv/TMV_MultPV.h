@@ -13,7 +13,7 @@ namespace tmv {
     //
 
     template <bool add, int ix, class T, class V2, class V3>
-    static void MultMV(
+    static inline void MultMV(
         const Scaling<ix,T>& x, const Permutation& m1, 
         const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
@@ -25,7 +25,7 @@ namespace tmv {
         }
     }
     template <bool add, int ix, class T, class V2, class V3>
-    static void NoAliasMultMV(
+    static inline void NoAliasMultMV(
         const Scaling<ix,T>& x, const Permutation& m1, 
         const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
@@ -37,7 +37,7 @@ namespace tmv {
         }
     }
     template <bool add, int ix, class T, class V2, class V3>
-    static void AliasMultMV(
+    static inline void AliasMultMV(
         const Scaling<ix,T>& x, const Permutation& m1, 
         const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
@@ -55,17 +55,17 @@ namespace tmv {
     //
 
     template <bool add, int ix, class T, class V1, class V3>
-    static void MultVM(
+    static inline void MultVM(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1, 
         const Permutation& m2, BaseVector_Mutable<V3>& v3)
     { MultMV<add>(x,m2.transpose(),v1,v3); }
     template <bool add, int ix, class T, class V1, class V3>
-    static void NoAliasMultVM(
+    static inline void NoAliasMultVM(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1, 
         const Permutation& m2, BaseVector_Mutable<V3>& v3)
     { NoAliasMultMV<add>(x,m2.transpose(),v1,v3); }
     template <bool add, int ix, class T, class V1, class V3>
-    static void AliasMultVM(
+    static inline void AliasMultVM(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1, 
         const Permutation& m2, BaseVector_Mutable<V3>& v3)
     { AliasMultMV<add>(x,m2.transpose(),v1,v3); }
@@ -76,17 +76,17 @@ namespace tmv {
     //
 
     template <int ix, class T, class V1>
-    static void MultEqVM(
+    static inline void MultEqVM(
         BaseVector_Mutable<V1>& v1, const Scaling<ix,T>& x,
         const Permutation& m2)
     { m2.applyOnRight(v1); Scale(x,v1); }
     template <int ix, class T, class V1>
-    static void NoAliasMultEqVM(
+    static inline void NoAliasMultEqVM(
         BaseVector_Mutable<V1>& v1, const Scaling<ix,T>& x,
         const Permutation& m2)
     { m2.applyOnRight(v1); Scale(x,v1); }
     template <int ix, class T, class V1>
-    static void AliasMultEqVM(
+    static inline void AliasMultEqVM(
         BaseVector_Mutable<V1>& v1, const Scaling<ix,T>& x,
         const Permutation& m2)
     { m2.applyOnRight(v1); Scale(x,v1); }
@@ -97,26 +97,26 @@ namespace tmv {
     //
 
     template <int ix, class T, class V1, class V3>
-    static void LDiv(
+    static inline void LDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const Permutation& m2, BaseVector_Mutable<V3>& v3)
-    { 
+    {
         MultXV<false>(x,v1.vec(),v3.vec());
         m2.applyOnRight(v3);
     }
     template <int ix, class T, class V1, class V3>
-    static void NoAliasLDiv(
+    static inline void NoAliasLDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const Permutation& m2, BaseVector_Mutable<V3>& v3)
-    { 
+    {
         NoAliasMultXV<false>(x,v1.vec(),v3.vec());
         m2.applyOnRight(v3);
     }
     template <int ix, class T, class V1, class V3>
-    static void AliasLDiv(
+    static inline void AliasLDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const Permutation& m2, BaseVector_Mutable<V3>& v3)
-    { 
+    {
         AliasMultXV<false>(x,v1.vec(),v3.vec());
         m2.applyOnRight(v3);
     }
@@ -127,15 +127,15 @@ namespace tmv {
     //
 
     template <class V1>
-    static void LDivEq(
+    static inline void LDivEq(
         BaseVector_Mutable<V1>& v1, const Permutation& m2)
     { m2.applyOnRight(v1); }
     template <class V1>
-    static void NoAliasLDivEq(
+    static inline void NoAliasLDivEq(
         BaseVector_Mutable<V1>& v1, const Permutation& m2)
     { m2.applyOnRight(v1); }
     template <class V1>
-    static void AliasLDivEq(
+    static inline void AliasLDivEq(
         BaseVector_Mutable<V1>& v1, const Permutation& m2)
     { m2.applyOnRight(v1); }
 
@@ -145,26 +145,26 @@ namespace tmv {
     //
 
     template <int ix, class T, class V1, class V3>
-    static void RDiv(
+    static inline void RDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const Permutation& m2, BaseVector_Mutable<V3>& v3)
-    { 
+    {
         MultXV<false>(x,v1.vec(),v3.vec());
         m2.applyOnLeft(v3);
     }
     template <int ix, class T, class V1, class V3>
-    static void NoAliasRDiv(
+    static inline void NoAliasRDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const Permutation& m2, BaseVector_Mutable<V3>& v3)
-    { 
+    {
         NoAliasMultXV<false>(x,v1.vec(),v3.vec());
         m2.applyOnLeft(v3);
     }
     template <int ix, class T, class V1, class V3>
-    static void AliasRDiv(
+    static inline void AliasRDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const Permutation& m2, BaseVector_Mutable<V3>& v3)
-    { 
+    {
         AliasMultXV<false>(x,v1.vec(),v3.vec());
         m2.applyOnLeft(v3);
     }
@@ -175,15 +175,15 @@ namespace tmv {
     //
 
     template <class V1>
-    static void RDivEq(
+    static inline void RDivEq(
         BaseVector_Mutable<V1>& v1, const Permutation& m2)
     { m2.applyOnLeft(v1); }
     template <class V1>
-    static void NoAliasRDivEq(
+    static inline void NoAliasRDivEq(
         BaseVector_Mutable<V1>& v1, const Permutation& m2)
     { m2.applyOnLeft(v1); }
     template <class V1>
-    static void AliasRDivEq(
+    static inline void AliasRDivEq(
         BaseVector_Mutable<V1>& v1, const Permutation& m2)
     { m2.applyOnLeft(v1); }
 

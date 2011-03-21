@@ -47,55 +47,20 @@
 
 namespace tmv {
 
-    // Defined below:
-    template <class M1, class M2> 
-    void LU_SolveInPlace(
-        const BaseMatrix_Rec<M1>& m1, const Permutation& P,
-        BaseMatrix_Rec_Mutable<M2>& m2);
-    template <class M1, class M2> 
-    void InlineLU_SolveInPlace(
-        const BaseMatrix_Rec<M1>& m1, const Permutation& P,
-        BaseMatrix_Rec_Mutable<M2>& m2);
-    template <class M1, class M2> 
-    void LU_SolveTransposeInPlace(
-        const BaseMatrix_Rec<M1>& m1, const Permutation& P,
-        BaseMatrix_Rec_Mutable<M2>& m2);
-    template <class M1, class M2> 
-    void InlineLU_SolveTransposeInPlace(
-        const BaseMatrix_Rec<M1>& m1, const Permutation& P,
-        BaseMatrix_Rec_Mutable<M2>& m2);
-
-    template <class M1, class V2> 
-    void LU_SolveInPlace(
-        const BaseMatrix_Rec<M1>& m1, const Permutation& P,
-        BaseVector_Mutable<V2>& v2);
-    template <class M1, class V2> 
-    void InlineLU_SolveInPlace(
-        const BaseMatrix_Rec<M1>& m1, const Permutation& P,
-        BaseVector_Mutable<V2>& v2);
-    template <class M1, class V2> 
-    void LU_SolveTransposeInPlace(
-        const BaseMatrix_Rec<M1>& m1, const Permutation& P,
-        BaseVector_Mutable<V2>& v2);
-    template <class M1, class V2> 
-    void InlineLU_SolveTransposeInPlace(
-        const BaseMatrix_Rec<M1>& m1, const Permutation& P,
-        BaseVector_Mutable<V2>& v2);
-
     // Defined in TMV_LUDiv.cpp
-    template <class T1, class T2, bool C1> 
+    template <class T1, class T2, bool C1>
     void InstLU_SolveInPlace(
         const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P,
         MatrixView<T2> m2);
-    template <class T1, class T2, bool C1> 
+    template <class T1, class T2, bool C1>
     void InstLU_SolveTransposeInPlace(
         const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P,
         MatrixView<T2> m2);
-    template <class T1, class T2, bool C1> 
+    template <class T1, class T2, bool C1>
     void InstLU_SolveInPlace(
         const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P,
         VectorView<T2> v2);
-    template <class T1, class T2, bool C1> 
+    template <class T1, class T2, bool C1>
     void InstLU_SolveTransposeInPlace(
         const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P,
         VectorView<T2> v2);
@@ -170,6 +135,47 @@ namespace tmv {
         }
     };
 
+    // algo 90: call InstLU_Solve
+    template <int cs, int rs, class M1, class M2>
+    struct LU_Solve_Helper<90,false,cs,rs,M1,M2>
+    {
+        static void call(const M1& m1, const Permutation& P, M2& m2)
+        { InstLU_SolveInPlace(m1.xView().cmView(),P,m2.xView()); }
+    };
+    template <int cs, int rs, class M1, class M2>
+    struct LU_Solve_Helper<90,true,cs,rs,M1,M2>
+    {
+        static void call(const M1& m1, const Permutation& P, M2& m2)
+        { InstLU_SolveTransposeInPlace(m1.xView().cmView(),P,m2.xView()); }
+    };
+
+    // algo 95: Turn m1,m3 into vector
+    template <bool trans, int cs, int rs, class M1, class M2>
+    struct LU_Solve_Helper<95,trans,cs,rs,M1,M2>
+    {
+        static void call(const M1& m1, const Permutation& P, M2& m2)
+        {
+            TMVStaticAssert(!ShapeTraits<M2::_shape>::vector);
+            typedef typename M2::col_type M2c;
+            M2c m2c = m2.col(0);
+            LU_Solve_Helper<-2,trans,cs,rs,M1,M2c>::call(m1,P,m2c);
+        }
+    };
+
+    // algo 97: Conjugate
+    template <bool trans, int cs, int rs, class M1, class M2>
+    struct LU_Solve_Helper<97,trans,cs,rs,M1,M2>
+    {
+        static void call(const M1& m1, const Permutation& P, M2& m2)
+        {
+            typedef typename M1::const_conjugate_type M1c;
+            typedef typename M2::conjugate_type M2c;
+            M1c m1c = m1.conjugate();
+            M2c m2c = m2.conjugate();
+            LU_Solve_Helper<-2,trans,cs,rs,M1c,M2c>::call(m1c,P,m2c);
+        }
+    };
+
     // algo -3: Determine which algorithm to use
     template <bool trans, int cs, int rs, class M1, class M2>
     struct LU_Solve_Helper<-3,trans,cs,rs,M1,M2>
@@ -197,37 +203,9 @@ namespace tmv {
         }
     };
 
-    // algo 97: Conjugate
+    // algo -2: Check for inst
     template <bool trans, int cs, int rs, class M1, class M2>
-    struct LU_Solve_Helper<97,trans,cs,rs,M1,M2>
-    {
-        static void call(const M1& m1, const Permutation& P, M2& m2)
-        {
-            typedef typename M1::const_conjugate_type M1c;
-            typedef typename M2::conjugate_type M2c;
-            M1c m1c = m1.conjugate();
-            M2c m2c = m2.conjugate();
-            LU_Solve_Helper<-1,trans,cs,rs,M1c,M2c>::call(m1c,P,m2c);
-        }
-    };
-
-    // algo 98: call InstLU_Solve
-    template <int cs, int rs, class M1, class M2>
-    struct LU_Solve_Helper<98,false,cs,rs,M1,M2>
-    {
-        static void call(const M1& m1, const Permutation& P, M2& m2)
-        { InstLU_SolveInPlace(m1.xView().cmView(),P,m2.xView()); }
-    };
-    template <int cs, int rs, class M1, class M2>
-    struct LU_Solve_Helper<98,true,cs,rs,M1,M2>
-    {
-        static void call(const M1& m1, const Permutation& P, M2& m2)
-        { InstLU_SolveTransposeInPlace(m1.xView().cmView(),P,m2.xView()); }
-    };
-
-    // algo -1: Check for inst
-    template <bool trans, int cs, int rs, class M1, class M2>
-    struct LU_Solve_Helper<-1,trans,cs,rs,M1,M2>
+    struct LU_Solve_Helper<-2,trans,cs,rs,M1,M2>
     {
         static void call(const M1& m1, const Permutation& P, M2& m2)
         {
@@ -235,7 +213,7 @@ namespace tmv {
             typedef typename M2::value_type T2;
             const bool inst = 
                 (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
+                (rs == UNKNOWN || rs > 16 || rs == 1) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
@@ -243,19 +221,29 @@ namespace tmv {
 #endif
                 M1::_colmajor && 
                 Traits<T1>::isinst;
+            const bool makevector =
+                rs == 1 && !ShapeTraits<M2::_shape>::vector;
             const bool invalid =
                 M1::iscomplex && M2::isreal;
             const int algo = 
                 cs == 0 || rs == 0 || invalid ? 0 : 
+                makevector ? 95 :
                 M2::_conj ? 97 :
-                inst ? 98 :
+                inst ? 90 :
                 -3;
             LU_Solve_Helper<algo,trans,cs,rs,M1,M2>::call(m1,P,m2);
         }
     };
 
-    template <class M1, class M2> 
-    static void InlineLU_SolveInPlace(
+    template <bool trans, int cs, int rs, class M1, class M2>
+    struct LU_Solve_Helper<-1,trans,cs,rs,M1,M2>
+    {
+        static void call(const M1& m1, const Permutation& P, M2& m2)
+        { LU_Solve_Helper<-2,trans,cs,rs,M1,M2>::call(m1,P,m2); }
+    };
+
+    template <class M1, class M2>
+    static inline void InlineLU_SolveInPlace(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseMatrix_Rec_Mutable<M2>& m2)
     {
@@ -263,13 +251,13 @@ namespace tmv {
         const int rs = M2::_rowsize;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::cview_type M2v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
         LU_Solve_Helper<-3,false,cs,rs,M1v,M2v>::call(m1v,P,m2v);
     }
 
-    template <class M1, class M2> 
-    static void LU_SolveInPlace(
+    template <class M1, class M2>
+    static inline void LU_SolveInPlace(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseMatrix_Rec_Mutable<M2>& m2)
     {
@@ -277,39 +265,39 @@ namespace tmv {
         const int rs = M2::_rowsize;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::cview_type M2v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        LU_Solve_Helper<-1,false,cs,rs,M1v,M2v>::call(m1v,P,m2v);
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
+        LU_Solve_Helper<-2,false,cs,rs,M1v,M2v>::call(m1v,P,m2v);
     }
 
-    template <class M1, class V2> 
-    static void InlineLU_SolveInPlace(
+    template <class M1, class V2>
+    static inline void InlineLU_SolveInPlace(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseVector_Mutable<V2>& v2)
     {
         const int cs = V2::_size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V2::cview_type V2v;
-        M1v m1v = m1.cView();
-        V2v v2v = v2.cView();
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_REF(V2,V2v) v2v = v2.cView();
         LU_Solve_Helper<-3,false,cs,1,M1v,V2v>::call(m1v,P,v2v);
     }
 
-    template <class M1, class V2> 
-    static void LU_SolveInPlace(
+    template <class M1, class V2>
+    static inline void LU_SolveInPlace(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseVector_Mutable<V2>& v2)
     {
         const int cs = V2::_size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V2::cview_type V2v;
-        M1v m1v = m1.cView();
-        V2v v2v = v2.cView();
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_REF(V2,V2v) v2v = v2.cView();
         LU_Solve_Helper<-1,false,cs,1,M1v,V2v>::call(m1v,P,v2v);
     }
 
-    template <class M1, class M2> 
-    static void InlineLU_SolveTransposeInPlace(
+    template <class M1, class M2>
+    static inline void InlineLU_SolveTransposeInPlace(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseMatrix_Rec_Mutable<M2>& m2)
     {
@@ -317,13 +305,13 @@ namespace tmv {
         const int rs = M2::_rowsize;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::cview_type M2v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
         LU_Solve_Helper<-3,true,cs,rs,M1v,M2v>::call(m1v,P,m2v);
     }
 
-    template <class M1, class M2> 
-    static void LU_SolveTransposeInPlace(
+    template <class M1, class M2>
+    static inline void LU_SolveTransposeInPlace(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseMatrix_Rec_Mutable<M2>& m2)
     {
@@ -331,34 +319,34 @@ namespace tmv {
         const int rs = M2::_rowsize;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::cview_type M2v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
         LU_Solve_Helper<-1,true,cs,rs,M1v,M2v>::call(m1v,P,m2v);
     }
 
-    template <class M1, class V2> 
-    static void InlineLU_SolveTransposeInPlace(
+    template <class M1, class V2>
+    static inline void InlineLU_SolveTransposeInPlace(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseVector_Mutable<V2>& v2)
     {
         const int cs = V2::_size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V2::cview_type V2v;
-        M1v m1v = m1.cView();
-        V2v v2v = v2.cView();
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_REF(V2,V2v) v2v = v2.cView();
         LU_Solve_Helper<-3,true,cs,1,M1v,V2v>::call(m1v,P,v2v);
     }
 
-    template <class M1, class V2> 
-    static void LU_SolveTransposeInPlace(
+    template <class M1, class V2>
+    static inline void LU_SolveTransposeInPlace(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseVector_Mutable<V2>& v2)
     {
         const int cs = V2::_size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V2::cview_type V2v;
-        M1v m1v = m1.cView();
-        V2v v2v = v2.cView();
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_REF(V2,V2v) v2v = v2.cView();
         LU_Solve_Helper<-1,true,cs,1,M1v,V2v>::call(m1v,P,v2v);
     }
 

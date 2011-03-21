@@ -24,11 +24,19 @@ static void TestSquareDiv(tmv::DivType dt)
     b(2) = 5;
     b(3) = -5;
 
+    if (showstartdone) {
+        std::cout<<"Start TestSquareDiv:\n";
+        std::cout<<"stor = "<<tmv::TMV_Text(stor)<<std::endl;
+        std::cout<<"dt = "<<tmv::TMV_Text(dt)<<std::endl;
+        std::cout<<"m = "<<m<<std::endl;
+        std::cout<<"b = "<<b<<std::endl;
+    }
+
     m.divideUsing(dt);
     m.saveDiv();
     m.setDiv();
     std::ostream* dbgout = showdiv ? &std::cout : 0;
-    Assert(m.checkDecomp(dbgout),"checkDecomp");
+    Assert(CheckDecomp(m.getDiv(),m,dbgout),"CheckDecomp");
 
     FT eps = EPS * Norm(m) * Norm(m.inverse());
 
@@ -97,7 +105,7 @@ static void TestSquareDiv(tmv::DivType dt)
     c.divideUsing(dt);
     c.saveDiv();
     c.setDiv();
-    Assert(c.checkDecomp(dbgout),"checkDecomp");
+    Assert(CheckDecomp(c.getDiv(),c,dbgout),"CheckDecomp");
 
     FT ceps = EPS * Norm(m) * Norm(m.inverse());
 
@@ -202,8 +210,7 @@ static void TestSquareDiv(tmv::DivType dt)
 
     tmv::Vector<T> S = R/M;
     tmv::Vector<T> R2 = M*S;
-    Assert(M.checkDecomp(),"checkDecomp");
-    //Assert(M.checkDecomp(dbgout),"checkDecomp");
+    Assert(CheckDecomp(M.getDiv(),M),"CheckDecomp");
 
     if (showacc) {
         std::cout<<"R/M Norm(R2-R) = "<<Norm(R2-R)<<std::endl;
@@ -219,8 +226,7 @@ static void TestSquareDiv(tmv::DivType dt)
     Assert(Norm(R2-R) < eps*Norm(R),"Square R%M");
     tmv::Vector<std::complex<T> > CS = R/CM;
     tmv::Vector<std::complex<T> > CR2 = CM*CS;
-    Assert(CM.checkDecomp(),"checkDecomp");
-    //Assert(CM.checkDecomp(dbgout),"checkDecomp");
+    Assert(CheckDecomp(CM.getDiv(),CM),"CheckDecomp");
     if (showacc) {
         std::cout<<"R/CM Norm(CR2-R) = "<<Norm(CR2-R)<<std::endl;
         std::cout<<"EPS*Norm(R) = "<<ceps*Norm(R)<<std::endl;
@@ -275,10 +281,10 @@ static void TestSquareDiv(tmv::DivType dt)
     c1.row(3).addToAll(std::complex<T>(1,-6));
     c2.row(0).addToAll(std::complex<T>(-2,-11));
 
-    tmv::MatrixView<T> a1v = a1.view();
-    tmv::MatrixView<T> a2v = a2.view();
-    tmv::MatrixView<std::complex<T> > c1v = c1.view();
-    tmv::MatrixView<std::complex<T> > c2v = c2.view();
+    tmv::MatrixViewD<T> a1v = a1.view();
+    tmv::MatrixViewD<T> a2v = a2.view();
+    tmv::MatrixViewD<std::complex<T> > c1v = c1.view();
+    tmv::MatrixViewD<std::complex<T> > c2v = c2.view();
 
     a1v.divideUsing(dt);
     a1v.saveDiv();
@@ -295,10 +301,10 @@ static void TestSquareDiv(tmv::DivType dt)
     tmv::Matrix<T,stor,tmv::FortranStyle> a2f = a2;
     tmv::Matrix<std::complex<T>,stor,tmv::FortranStyle> c1f = c1;
     tmv::Matrix<std::complex<T>,stor,tmv::FortranStyle> c2f = c2;
-    tmv::MatrixViewF<T> a1fv = a1f.view();
-    tmv::MatrixViewF<T> a2fv = a2f.view();
-    tmv::MatrixViewF<std::complex<T> > c1fv = c1f.view();
-    tmv::MatrixViewF<std::complex<T> > c2fv = c2f.view();
+    tmv::MatrixViewDF<T> a1fv = a1f.view();
+    tmv::MatrixViewDF<T> a2fv = a2f.view();
+    tmv::MatrixViewDF<std::complex<T> > c1fv = c1f.view();
+    tmv::MatrixViewDF<std::complex<T> > c2fv = c2f.view();
     a1fv.divideUsing(dt);
     a1fv.saveDiv();
     a2fv.divideUsing(dt);
@@ -328,10 +334,10 @@ static void TestSquareDiv(tmv::DivType dt)
     c4.col(3) *= std::complex<T>(-1,3);
     c4.row(0).addToAll(std::complex<T>(1,9));
 
-    tmv::MatrixView<T> a3v = a3.view();
-    tmv::MatrixView<T> a4v = a4.view();
-    tmv::MatrixView<std::complex<T> > c3v = c3.view();
-    tmv::MatrixView<std::complex<T> > c4v = c4.view();
+    tmv::MatrixViewD<T> a3v = a3.view();
+    tmv::MatrixViewD<T> a4v = a4.view();
+    tmv::MatrixViewD<std::complex<T> > c3v = c3.view();
+    tmv::MatrixViewD<std::complex<T> > c4v = c4.view();
     a3v.divideUsing(dt);
     a3v.saveDiv();
     a4v.divideUsing(dt);
@@ -350,10 +356,10 @@ static void TestSquareDiv(tmv::DivType dt)
     tmv::Matrix<std::complex<T>,stor> c5 = a5;
     tmv::Matrix<std::complex<T>,stor> c6 = a6;
 
-    tmv::MatrixView<T> a5v = a5.view();
-    tmv::MatrixView<T> a6v = a6.view();
-    tmv::MatrixView<std::complex<T> > c5v = c5.view();
-    tmv::MatrixView<std::complex<T> > c6v = c6.view();
+    tmv::MatrixViewD<T> a5v = a5.view();
+    tmv::MatrixViewD<T> a6v = a6.view();
+    tmv::MatrixViewD<std::complex<T> > c5v = c5.view();
+    tmv::MatrixViewD<std::complex<T> > c6v = c6.view();
     a5v.divideUsing(dt);
     a5v.saveDiv();
     a6v.divideUsing(dt);
@@ -395,12 +401,20 @@ static void TestNonSquareDiv(tmv::DivType dt)
     x(2) = 5;
     x(3) = -5;
 
+    if (showstartdone) {
+        std::cout<<"Start TestNonSquareDiv:\n";
+        std::cout<<"stor = "<<tmv::TMV_Text(stor)<<std::endl;
+        std::cout<<"dt = "<<tmv::TMV_Text(dt)<<std::endl;
+        std::cout<<"m = "<<m<<std::endl;
+        std::cout<<"x = "<<x<<std::endl;
+    }
+
     m.divideUsing(dt);
     m.saveDiv();
     m.setDiv();
 
     std::ostream* dbgout = showdiv ? &std::cout : 0;
-    Assert(m.checkDecomp(dbgout),"checkDecomp");
+    Assert(CheckDecomp(m.getDiv(),m,dbgout),"CheckDecomp");
 
     FT eps = EPS * Norm(m) * Norm(m.inverse());
     tmv::Vector<T> b = m * x;
@@ -475,7 +489,7 @@ static void TestNonSquareDiv(tmv::DivType dt)
     tmv::Vector<std::complex<T> > e = c * y;
     tmv::Vector<std::complex<T> > y2 = e/c;
 
-    Assert(c.checkDecomp(dbgout),"checkDecomp");
+    Assert(CheckDecomp(c.getDiv(),c,dbgout),"CheckDecomp");
 
     Assert(Norm(y2-y) < ceps*Norm(y),"NonSquare exact e/c");
 
@@ -502,7 +516,7 @@ static void TestNonSquareDiv(tmv::DivType dt)
     eps = EPS * Norm(ms) * Norm(ms.inverse());
     b = x * ms;
     x2 = b%ms;
-    Assert(ms.checkDecomp(dbgout),"checkDecomp");
+    Assert(CheckDecomp(ms.getDiv(),ms,dbgout),"CheckDecomp");
     Assert(Norm(x2-x) < eps*Norm(x),"NonSquare exact b%ms");
 
     b2 = x/ms;
@@ -612,8 +626,7 @@ static void TestNonSquareDiv(tmv::DivType dt)
 
     t = q * s;
     s2 = t/q;
-    Assert(q.checkDecomp(),"checkDecomp");
-    //Assert(q.checkDecomp(dbgout),"checkDecomp");
+    Assert(CheckDecomp(q.getDiv(),q),"CheckDecomp");
     Assert(Norm(s2-s) < eps*Norm(s),"NonSquare t/q");
 
     t2 = s%q;
@@ -776,11 +789,19 @@ static void TestSingularDiv(tmv::DivType dt)
     x(2) = 5;
     x(3) = -5;
 
+    if (showstartdone) {
+        std::cout<<"Start TestSingularDiv:\n";
+        std::cout<<"stor = "<<tmv::TMV_Text(stor)<<std::endl;
+        std::cout<<"dt = "<<tmv::TMV_Text(dt)<<std::endl;
+        std::cout<<"m = "<<m<<std::endl;
+        std::cout<<"x = "<<x<<std::endl;
+    }
+
     m.divideUsing(dt);
     m.saveDiv();
     m.setDiv();
     std::ostream* dbgout = showdiv ? &std::cout : 0;
-    Assert(m.checkDecomp(dbgout),"checkDecomp");
+    Assert(CheckDecomp(m.getDiv(),m,dbgout),"CheckDecomp");
 
     FT eps = EPS * Norm(m) * Norm(m.inverse());
 
@@ -865,8 +886,7 @@ static void TestSingularDiv(tmv::DivType dt)
     tmv::Vector<T> bb = mm*xx;
     tmv::Vector<T> xx2 = bb/mm;
     tmv::Vector<T> bb2 = mm*xx2;
-    //Assert(mm.checkDecomp(),"checkDecomp");
-    Assert(mm.checkDecomp(dbgout),"checkDecomp");
+    Assert(CheckDecomp(mm.getDiv(),mm),"CheckDecomp");
     if (showacc) {
         std::cout<<"Norm(bb2-bb) = "<<Norm(bb2-bb);
         std::cout<<", EPS*Norm(bb) = "<<eps*Norm(bb)<<std::endl;
@@ -900,8 +920,7 @@ static void TestSingularDiv(tmv::DivType dt)
     tmv::Vector<std::complex<T> > cbb = cc*cxx;
     tmv::Vector<std::complex<T> > cxx2 = cbb/cc;
     tmv::Vector<std::complex<T> > cbb2 = cc*cxx2;
-    //Assert(cc.checkDecomp(),"checkDecomp");
-    Assert(cc.checkDecomp(dbgout),"checkDecomp");
+    Assert(CheckDecomp(cc.getDiv(),cc),"CheckDecomp");
     if (showacc) {
         std::cout<<"Norm(cbb2-cbb) = "<<Norm(cbb2-cbb);
         std::cout<<", EPS*Norm(cbb) = "<<eps*Norm(cbb)<<std::endl;

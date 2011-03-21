@@ -39,11 +39,6 @@
 
 namespace tmv {
 
-    // Defined below:
-    template <class V>
-    static void ElemInvert(BaseVector_Mutable<V>& v);
-    template <class V>
-    static void InlineElemInvert(BaseVector_Mutable<V>& v);
 
     // Defined in TMV_InvertD.cpp
     template <class T>
@@ -58,8 +53,8 @@ namespace tmv {
 
     // algo 0: s == 0, nothing to do
     template <class V>
-    struct ElemInvert_Helper<0,0,V> 
-    { 
+    struct ElemInvert_Helper<0,0,V>
+    {
         typedef typename V::iterator IT;
         static void call(V& ) {}
         static void call2(int, IT ) {}
@@ -270,6 +265,26 @@ namespace tmv {
     };
 #endif
 
+    // algo 90: Call inst
+    template <int s, class V>
+    struct ElemInvert_Helper<90,s,V>
+    {
+        static void call(V& v)
+        { InstElemInvert(v.xView()); }
+    };
+
+    // algo 97: Conjugate
+    template <int s, class V>
+    struct ElemInvert_Helper<97,s,V>
+    {
+        static void call(V& v)
+        {
+            typedef typename V::conjugate_type Vc;
+            Vc vc = v.conjugate();
+            ElemInvert_Helper<-2,s,Vc>::call(vc);
+        }
+    };
+
     // algo -4: No branches or copies
     template <int s, class V>
     struct ElemInvert_Helper<-4,s,V>
@@ -282,9 +297,12 @@ namespace tmv {
         enum { vcomplex = V::iscomplex };
         enum { unit = V::_step == 1 };
 
+#if 0
+        enum { algo = 11 };
+#else
         enum { algo = (
                 s == 0 ? 0 : 
-#if TMV_OPT >= 1
+                TMV_OPT == 0? 11 :
 #ifdef __SSE__
                 ( vfloat && vreal && unit ) ? 21 :
                 ( vfloat && vcomplex ) ? 23 :
@@ -293,8 +311,8 @@ namespace tmv {
                 ( vdouble && vreal && unit ) ? 31 :
                 ( vdouble && vcomplex ) ? 33 :
 #endif
-#endif
                 11 ) };
+#endif
         static void call(V& v)
         {
             TMVStaticAssert(!V::_conj);
@@ -319,35 +337,15 @@ namespace tmv {
 
     // algo -3: Determine which algorithm to use
     template <int s, class V>
-    struct ElemInvert_Helper<-3,s,V> 
+    struct ElemInvert_Helper<-3,s,V>
     {
         static void call(V& v)
         { ElemInvert_Helper<-4,s,V>::call(v); }
     };
 
-    // algo 97: Conjugate
+    // algo -2: Check for inst
     template <int s, class V>
-    struct ElemInvert_Helper<97,s,V>
-    {
-        static void call(V& v)
-        { 
-            typedef typename V::conjugate_type Vc;
-            Vc vc = v.conjugate();
-            ElemInvert_Helper<-1,s,Vc>::call(vc);
-        }
-    };
-
-    // algo 98: Call inst
-    template <int s, class V>
-    struct ElemInvert_Helper<98,s,V>
-    {
-        static void call(V& v)
-        { InstElemInvert(v.xView()); }
-    };
-
-    // algo -1: Check for inst
-    template <int s, class V>
-    struct ElemInvert_Helper<-1,s,V>
+    struct ElemInvert_Helper<-2,s,V>
     {
         static void call(V& v)
         {
@@ -358,31 +356,69 @@ namespace tmv {
             const int algo = 
                 s == 0 ? 0 : 
                 V::_conj ? 97 :
-                inst ? 98 :
+                inst ? 90 :
                 -4;
             ElemInvert_Helper<algo,s,V>::call(v);
         }
+    };
+
+    template <int s, class V>
+    struct ElemInvert_Helper<-1,s,V>
+    {
+        static void call(V& v)
+        { ElemInvert_Helper<-2,s,V>::call(v); }
     };
 
     //
     // Element-wise v(i) = 1/v(i)
     //
 
-    template <int algo, class V>
-    static void DoElemInvert(BaseVector_Mutable<V>& v)
+    template <class V>
+    static inline void ElemInvert(BaseVector_Mutable<V>& v)
     {
         typedef typename V::cview_type Vv;
-        Vv vv = v.cView();
-        ElemInvert_Helper<algo,V::_size,Vv>::call(vv);
+        TMV_MAYBE_REF(V,Vv) vv = v.cView();
+        ElemInvert_Helper<-2,V::_size,Vv>::call(vv);
     }
 
     template <class V>
-    static void ElemInvert(BaseVector_Mutable<V>& v)
-    { DoElemInvert<-1>(v); }
+    static inline void InlineElemInvert(BaseVector_Mutable<V>& v)
+    {
+        typedef typename V::cview_type Vv;
+        TMV_MAYBE_REF(V,Vv) vv = v.cView();
+        ElemInvert_Helper<-3,V::_size,Vv>::call(vv);
+    }
 
-    template <class V>
-    static void InlineElemInvert(BaseVector_Mutable<V>& v)
-    { DoElemInvert<-3>(v); }
+    template <class M>
+    static inline void InvertSelf(BaseMatrix_Diag_Mutable<M>& m)
+    {
+        if (m.isSingular()) {
+#ifdef TMV_NO_THROW
+            std::cerr<<"Singular DiagMatrix found\n";
+            exit(1);
+#else
+            throw Singular("DiagMatrix found\n");
+#endif
+        }
+        typename M::diag_type md = m.diag();
+        ElemInvert(md);
+    }
+
+    template <class M>
+    static inline void InlineInvertSelf(BaseMatrix_Diag_Mutable<M>& m)
+    {
+        if (m.isSingular()) {
+#ifdef TMV_NO_THROW
+            std::cerr<<"Singular DiagMatrix found\n";
+            exit(1);
+#else
+            throw Singular("DiagMatrix found\n");
+#endif
+        }
+        typename M::diag_type md = m.diag();
+        InlineElemInvert(md);
+    }
+
 
 } // namespace tmv
 

@@ -98,12 +98,28 @@ namespace tmv {
         const T3 x,
         const ConstMatrixView<T1,1,UNKNOWN,C1>& m1,
         const ConstMatrixView<T2,1,UNKNOWN,C2>& m2, MatrixView<T3,1> m3)
-    { 
+    {
+        //std::cout<<"Start MultMM_CCC:\n";
+        //std::cout<<"x = "<<x<<std::endl;
+        //std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1<<std::endl;
+        //std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
+        //std::cout<<"m3 = "<<TMV_Text(m3)<<"  "<<m3<<std::endl;
+        //Matrix<T3> m3x = m3;
+        //if (!add) m3x.setZero();
+        //for(size_t j=0;j<m3.rowsize();++j) 
+            //InstAddMultMV(x,m1.xView(),m2.col(j).xView(),m3x.col(j).xView());
+        //std::cout<<"m3x = "<<m3x<<std::endl;
+
         if (m3.colsize() > 0 && m3.rowsize() > 0) {
             if (m1.rowsize() == 0) Maybe<!add>::zero(m3);
             else DoMultMM<add>(x,m1,m2,m3); 
         }
+        //std::cout<<"m3 => "<<m3<<std::endl;
+        //typename Traits<T3>::real_type normdiff = Norm(m3-m3x);
+        //std::cout<<"Norm(diff) = "<<normdiff<<std::endl;
+        //if (normdiff > 1.e-3) abort();
     }
+ 
 
 #define InstFile "TMV_MultMM_CCC.inst"
 #include "TMV_Inst.h"

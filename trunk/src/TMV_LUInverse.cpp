@@ -35,22 +35,13 @@
 #include "tmv/TMV_LUInverse.h"
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_TriMatrix.h"
+#include "tmv/TMV_SimpleMatrix.h"
 #include "tmv/TMV_DivMU.h"
-
-// since I use an AliasCopy in LU_Inverse
-#include "tmv/TMV_TransposeM.h" 
-
-// since I use normal arithmetic in LU_InverseATA
-#include "tmv/TMV_QuotXM.h"
-#include "tmv/TMV_QuotMM.h"
-#include "tmv/TMV_ProdMM.h"
-#include "tmv/TMV_InvertM.h"
-#include "tmv/TMV_ScaleU.h"
 
 namespace tmv {
 
     template <class T1>
-    static void NonLapLUInverse(MatrixView<T1> m1, const Permutation& P)
+    static inline void NonLapLUInverse(MatrixView<T1> m1, const Permutation& P)
     {
         if (m1.iscm()) {
             MatrixView<T1,1> m1cm = m1.cmView();
@@ -225,7 +216,7 @@ namespace tmv {
         if (m1.iscm() && m1.stepj() > 0) {
             LapLUInverse(m1.cmView(),P);
         } else {
-            Matrix<T1,ColMajor> m1c(m1);
+            SimpleMatrix<T1,ColMajor> m1c(m1);
             LapLUInverse(m1c.view(),P);
             InstCopy(m1c.xView().constView(),m1);
         }
@@ -233,7 +224,7 @@ namespace tmv {
         if (m1.iscm() || m1.isrm()) {
             NonLapLUInverse(m1,P);
         } else {
-            Matrix<T1,ColMajor> m1c(m1);
+            SimpleMatrix<T1,ColMajor> m1c(m1);
             NonLapLUInverse(m1c.xView(),P);
             InstCopy(m1c.xView().constView(),m1);
         }
@@ -252,7 +243,7 @@ namespace tmv {
             MatrixView<T2,UNKNOWN,1> m2rm = m2.rmView();
             InlineLU_InverseATA(m1,P,trans,m2rm);
         } else {
-            Matrix<T2,ColMajor> m2c(m2);
+            SimpleMatrix<T2,ColMajor> m2c(m2);
             MatrixView<T2,1> m2cm = m2c.view();
             InlineLU_InverseATA(m1,P,trans,m2cm);
             InstCopy(m2c.xView().constView(),m2);

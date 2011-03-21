@@ -37,12 +37,6 @@
 
 namespace tmv {
 
-    // Defined below:
-    template <int ix, class T, class V>
-    static void Scale(const Scaling<ix,T>& x, BaseVector_Mutable<V>& v);
-    template <int ix, class T, class V>
-    static void InlineScale(const Scaling<ix,T>& x, BaseVector_Mutable<V>& v);
-
     // Defined in TMV_ScaleV.cpp
     template <class T>
     void InstScale(const T x, VectorView<T> v);  
@@ -61,7 +55,7 @@ namespace tmv {
 
     // algo 1: complex vector with unit step, convert to real version.
     template <int s, int ix, class T, class V>
-    struct ScaleV_Helper<1,s,ix,T,V> 
+    struct ScaleV_Helper<1,s,ix,T,V>
     {
         typedef typename V::iterator IT;
         typedef typename V::flatten_type Vf;
@@ -71,13 +65,13 @@ namespace tmv {
         static void call(const Scaling<ix,T>& x, V& v)
         {
             Vf vf = v.flatten();
-            ScaleV_Helper<-4,s2,ix,T,Vf>::call(x,vf);
+            ScaleV_Helper<-3,s2,ix,T,Vf>::call(x,vf);
         }
         static void call2(int n, const Scaling<ix,T>& x, IT it)
-        { 
+        {
             ITf itf = it.flatten();
             const int n2 = n<<1;
-            ScaleV_Helper<-4,s2,ix,T,Vf>::call2(n2,x,itf);
+            ScaleV_Helper<-3,s2,ix,T,Vf>::call2(n2,x,itf);
         }
     };
 
@@ -92,7 +86,7 @@ namespace tmv {
             call2(n,x,v.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT it)
-        { 
+        {
             if (n) do {
                 *it = ZProd<false,false>::prod(x,*it); ++it;
             } while (--n);
@@ -151,7 +145,7 @@ namespace tmv {
 
     // algo 15: fully unroll
     template <int s, int ix, class T, class V>
-    struct ScaleV_Helper<15,s,ix,T,V> 
+    struct ScaleV_Helper<15,s,ix,T,V>
     {
         template <int I, int N>
         struct Unroller
@@ -423,9 +417,33 @@ namespace tmv {
     };
 #endif
 
-    // algo -4: No branches or copies
+    // algo 90: Call inst
     template <int s, int ix, class T, class V>
-    struct ScaleV_Helper<-4,s,ix,T,V> 
+    struct ScaleV_Helper<90,s,ix,T,V>
+    {
+        static void call(const Scaling<ix,T>& x, V& v)
+        {
+            typedef typename V::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
+            InstScale(xx,v.xView());
+        }
+    };
+
+    // algo 97: Conjugate
+    template <int s, int ix, class T, class V>
+    struct ScaleV_Helper<97,s,ix,T,V>
+    {
+        static void call(const Scaling<ix,T>& x, V& v)
+        {
+            typedef typename V::conjugate_type Vc;
+            Vc vc = v.conjugate();
+            ScaleV_Helper<-2,s,ix,T,Vc>::call(TMV_CONJ(x),vc);
+        }
+    };
+
+    // algo -3: Determine which algorithm to use
+    template <int s, int ix, class T, class V>
+    struct ScaleV_Helper<-3,s,ix,T,V>
     {
         typedef typename V::value_type VT;
         typedef typename V::real_type RT;
@@ -437,10 +455,13 @@ namespace tmv {
         enum { xcomplex = Traits<T>::iscomplex };
         enum { vreal = V::isreal };
         enum { vcomplex = V::iscomplex };
+#if 0
+        enum { algo = 11 };
+#else
         enum { algo = (
                 (s == 0 || ix == 1) ? 0 :
-#if TMV_OPT >= 1
                 (unit && xreal && vcomplex) ? 1 :
+                TMV_OPT == 0 ? 11 :
 #ifdef __SSE__
                 (vfloat && xreal && vreal) ? 21 :
                 (vfloat && xreal && vcomplex) ? 22 :
@@ -453,8 +474,8 @@ namespace tmv {
 #endif
                 (vreal && sizeof(RT) == 4) ? 13 :
                 (vreal && sizeof(RT) == 8) ? 12 :
-#endif
                 11 ) };
+#endif
         static void call(const Scaling<ix,T>& x, V& v)
         {
             TMVStaticAssert(!V::_conj);
@@ -468,41 +489,9 @@ namespace tmv {
         }
     };
 
-    // algo -3: Determine which algorithm to use
+    // algo -2: Check for inst
     template <int s, int ix, class T, class V>
-    struct ScaleV_Helper<-3,s,ix,T,V> 
-    {
-        static void call(const Scaling<ix,T>& x, V& v)
-        { ScaleV_Helper<-4,s,ix,T,V>::call(x,v); }
-    };
-
-    // algo 97: Conjugate
-    template <int s, int ix, class T, class V>
-    struct ScaleV_Helper<97,s,ix,T,V> 
-    {
-        static void call(const Scaling<ix,T>& x, V& v)
-        {
-            typedef typename V::conjugate_type Vc;
-            Vc vc = v.conjugate();
-            ScaleV_Helper<-1,s,ix,T,Vc>::call(TMV_CONJ(x),vc);
-        }
-    };
-
-    // algo 98: Call inst
-    template <int s, int ix, class T, class V>
-    struct ScaleV_Helper<98,s,ix,T,V> 
-    {
-        static void call(const Scaling<ix,T>& x, V& v)
-        {
-            typedef typename V::value_type VT;
-            VT xx = Traits<VT>::convert(T(x));
-            InstScale(xx,v.xView());
-        }
-    };
-
-    // algo -1: Check for inst
-    template <int s, int ix, class T, class V>
-    struct ScaleV_Helper<-1,s,ix,T,V> 
+    struct ScaleV_Helper<-2,s,ix,T,V>
     {
         static void call(const Scaling<ix,T>& x, V& v)
         {
@@ -514,26 +503,34 @@ namespace tmv {
             const int algo = 
                 ix == 1 ? 0 :
                 conj ? 97 :
-                inst ? 98 : 
-                -4;
+                inst ? 90 : 
+                -3;
             ScaleV_Helper<algo,s,ix,T,V>::call(x,v);
         }
     };
 
+    template <int s, int ix, class T, class V>
+    struct ScaleV_Helper<-1,s,ix,T,V>
+    {
+        static void call(const Scaling<ix,T>& x, V& v)
+        { ScaleV_Helper<-2,s,ix,T,V>::call(x,v); }
+    };
+
     template <int ix, class T, class V>
-    static void Scale(const Scaling<ix,T>& x, BaseVector_Mutable<V>& v)
+    static inline void Scale(const Scaling<ix,T>& x, BaseVector_Mutable<V>& v)
     {
         typedef typename V::cview_type Vv;
-        Vv vv = v.cView();
-        ScaleV_Helper<-1,V::_size,ix,T,Vv>::call(x,vv);
+        TMV_MAYBE_REF(V,Vv) vv = v.cView();
+        ScaleV_Helper<-2,V::_size,ix,T,Vv>::call(x,vv);
     }
 
     template <int ix, class T, class V>
-    static void InlineScale(const Scaling<ix,T>& x, BaseVector_Mutable<V>& v)
+    static inline void InlineScale(
+        const Scaling<ix,T>& x, BaseVector_Mutable<V>& v)
     {
         typedef typename V::cview_type Vv;
-        Vv vv = v.cView();
-        ScaleV_Helper<-4,V::_size,ix,T,Vv>::call(x,vv);
+        TMV_MAYBE_REF(V,Vv) vv = v.cView();
+        ScaleV_Helper<-3,V::_size,ix,T,Vv>::call(x,vv);
     }
 
 } // namespace tmv

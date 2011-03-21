@@ -29,6 +29,8 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
+//#define PRINTALGO_DivU
+
 #include "tmv/TMV_DivUU.h"
 #include "tmv/TMV_TriMatrix.h"
 #include "tmv/TMV_CopyU.h"

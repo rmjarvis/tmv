@@ -48,41 +48,6 @@ namespace tmv {
 
 #define DETM_MAX_DIRECT_SIZE 3
 
-    // Defined below:
-    template <class M>
-    static typename M::value_type Det(const BaseMatrix_Calc<M>& m);
-    template <class M>
-    static typename M::value_type InlineDet(const BaseVector_Calc<M>& m);
-    template <class M>
-    static typename M::float_type LogDet(
-        const BaseMatrix_Calc<M>& m, typename M::zfloat_type* sign);
-    template <class M>
-    static typename M::float_type InlineLogDet(
-        const BaseVector_Calc<M>& m, typename M::zfloat_type* sign);
-    template <class M>
-    static bool IsSingular(const BaseMatrix_Calc<M>& m);
-    template <class M>
-    static bool InlineIsSingular(const BaseVector_Calc<M>& m);
-
-    template <class V>
-    static typename V::value_type ProdElements(const BaseVector_Calc<V>& v);
-    template <class V>
-    static typename V::value_type InlineProdElements(
-        const BaseVector_Calc<V>& v);
-
-    template <class V>
-    static typename V::float_type LogProdElements(
-        const BaseVector_Calc<V>& v, typename V::zfloat_type* sign);
-    template <class V>
-    static typename V::float_type InlineLogProdElements(
-        const BaseVector_Calc<V>& v, typename V::zfloat_type* sign);
-
-    template <class V>
-    static bool HasZeroElement(const BaseVector_Calc<V>& v);
-    template <class V>
-    static bool InlineHasZeroElement(const BaseVector_Calc<V>& v);
-
-
     // Defined in TMV_Det.cpp:
     template <class T>
     T InstProdElements(const ConstVectorView<T>& v);
@@ -98,13 +63,13 @@ namespace tmv {
     // Det
     //
 
-    template <int algo, int s, class M> 
+    template <int algo, int s, class M>
     struct DetM_Helper;
 
     // algo 0: s == 0, det = 1 (by definition)
     // Also unit-diag triangle matrices.
     template <int s, class M>
-    struct DetM_Helper<0,s,M> 
+    struct DetM_Helper<0,s,M>
     {
         typedef typename M::value_type T;
         static T call(const M& m)
@@ -119,11 +84,11 @@ namespace tmv {
 
     // algo 1: s == 1
     template <class M>
-    struct DetM_Helper<1,1,M> 
+    struct DetM_Helper<1,1,M>
     {
         typedef typename M::value_type T;
         static T call(const M& m)
-        { 
+        {
 #ifdef PRINTALGO_Det
             const int N = m.rowsize();
             std::cout<<"Det algo 1: N,s = "<<N<<','<<1<<std::endl;
@@ -134,7 +99,7 @@ namespace tmv {
 
     // algo 2: s == 2
     template <class M>
-    struct DetM_Helper<2,2,M> 
+    struct DetM_Helper<2,2,M>
     {
         typedef typename M::value_type T;
         static T call(const M& m)
@@ -149,11 +114,11 @@ namespace tmv {
 
     // algo 3: s == 3
     template <class M>
-    struct DetM_Helper<3,3,M> 
+    struct DetM_Helper<3,3,M>
     {
         typedef typename M::value_type T;
         static T call(const M& m)
-        { 
+        {
 #ifdef PRINTALGO_Det
             const int N = m.rowsize();
             std::cout<<"Det algo 3: N,s = "<<N<<','<<3<<std::endl;
@@ -170,7 +135,7 @@ namespace tmv {
 
     // algo 11: Direct product of diagonal:
     template <int s, class M>
-    struct DetM_Helper<11,s,M> 
+    struct DetM_Helper<11,s,M>
     {
         typedef typename M::value_type T;
         static T call(const M& m)
@@ -185,7 +150,7 @@ namespace tmv {
 
     // algo 12: Use Divider
     template <int s, class M>
-    struct DetM_Helper<12,s,M> 
+    struct DetM_Helper<12,s,M>
     {
         typedef typename M::value_type T;
         static T call(const M& m)
@@ -203,7 +168,7 @@ namespace tmv {
 
     // algo 13: Calculate LU decomposition on the spot.
     template <int s, class M>
-    struct DetM_Helper<13,s,M> 
+    struct DetM_Helper<13,s,M>
     {
         typedef typename M::value_type T;
         static T call(const M& m)
@@ -213,18 +178,17 @@ namespace tmv {
             std::cout<<"Det algo 13: N,s = "<<N<<','<<s<<std::endl;
 #endif
             TMVStaticAssert(!Traits<typename M::real_type>::isinteger);
-            LUD<M> lud(m,false);
-            return lud.det();
+            return m.lud().det();
         }
     };
 
     // algo 21: TriMatrix -- need to check for UnknownDiag
     template <int s, class M>
-    struct DetM_Helper<21,s,M> 
+    struct DetM_Helper<21,s,M>
     {
         typedef typename M::value_type T;
         static T call(const M& m)
-        { 
+        {
             const int algo2 = 
                 M::_unit ? 0 :
                 M::_unknowndiag ? 22 :
@@ -240,11 +204,11 @@ namespace tmv {
 
     // algo 22: UnknownDiag TriMatrix, so might be trivial.
     template <int s, class M>
-    struct DetM_Helper<22,s,M> 
+    struct DetM_Helper<22,s,M>
     {
         typedef typename M::value_type T;
         static T call(const M& m)
-        { 
+        {
 #ifdef PRINTALGO_Det
             const int N = m.rowsize();
             std::cout<<"Det algo 22: N,s = "<<N<<','<<s<<std::endl;
@@ -257,7 +221,7 @@ namespace tmv {
  
     // algo 31: For integer, unknown size
     template <int s, class M>
-    struct DetM_Helper<31,s,M> 
+    struct DetM_Helper<31,s,M>
     {
         typedef typename M::value_type T;
         static T call(const M& m)
@@ -281,7 +245,7 @@ namespace tmv {
 
     // algo 32: Use 1x1 Bareiss algorithm.
     template <int s, class M>
-    struct DetM_Helper<32,s,M> 
+    struct DetM_Helper<32,s,M>
     {
         typedef typename M::value_type T;
         static T call(const M& m)
@@ -296,7 +260,7 @@ namespace tmv {
 
     // algo -3: Determine which algorithm to use
     template <int s, class M>
-    struct DetM_Helper<-3,s,M> 
+    struct DetM_Helper<-3,s,M>
     {
         typedef typename M::value_type T;
         static T call(const M& m)
@@ -326,7 +290,7 @@ namespace tmv {
     };
 
     template <class M>
-    static typename M::value_type Det(const BaseMatrix_Calc<M>& m)
+    static inline typename M::value_type Det(const BaseMatrix_Calc<M>& m)
     {
         TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same));
         TMVAssert(m.colsize() == m.rowsize());
@@ -346,12 +310,12 @@ namespace tmv {
 
     // algo 0: Det = 1.
     template <int s, class M>
-    struct LogDetM_Helper<0,s,M> 
+    struct LogDetM_Helper<0,s,M>
     {
         typedef typename M::float_type RT;
         typedef typename M::zfloat_type T;
         static RT call(const M& m, T* sign)
-        { 
+        {
 #ifdef PRINTALGO_Det
             const int N = m.rowsize();
             std::cout<<"LogDet algo 0: N,s = "<<N<<','<<s<<std::endl;
@@ -363,12 +327,12 @@ namespace tmv {
 
     // algo 1: Log of direct det calculation.
     template <int s, class M>
-    struct LogDetM_Helper<1,s,M> 
+    struct LogDetM_Helper<1,s,M>
     {
         typedef typename M::float_type RT;
         typedef typename M::zfloat_type T;
         static RT call(const M& m, T* sign)
-        { 
+        {
             T det = Traits<T>::convert(Det(m));
             RT absdet = TMV_ABS(det);
             RT logdet = TMV_LOG(absdet);
@@ -386,7 +350,7 @@ namespace tmv {
 
     // algo 11: Direct log product of diagonal:
     template <int s, class M>
-    struct LogDetM_Helper<11,s,M> 
+    struct LogDetM_Helper<11,s,M>
     {
         typedef typename M::float_type RT;
         typedef typename M::zfloat_type T;
@@ -402,12 +366,12 @@ namespace tmv {
 
     // algo 12: Use Divider 
     template <int s, class M>
-    struct LogDetM_Helper<12,s,M> 
+    struct LogDetM_Helper<12,s,M>
     {
         typedef typename M::float_type RT;
         typedef typename M::zfloat_type T;
         static RT call(const M& m, T* sign)
-        { 
+        {
 #ifdef PRINTALGO_Det
             const int N = m.rowsize();
             std::cout<<"LogDet algo 12: N,s = "<<N<<','<<s<<std::endl;
@@ -422,7 +386,7 @@ namespace tmv {
 
     // algo 13: Calculate LU decomposition on the spot.
     template <int s, class M>
-    struct LogDetM_Helper<13,s,M> 
+    struct LogDetM_Helper<13,s,M>
     {
         typedef typename M::float_type RT;
         typedef typename M::zfloat_type T;
@@ -433,19 +397,18 @@ namespace tmv {
             std::cout<<"LogDet algo 13: N,s = "<<N<<','<<s<<std::endl;
 #endif
             TMVStaticAssert(!Traits<typename M::real_type>::isinteger);
-            LUD<M> lud(m,false);
-            return lud.logDet(sign);
+            return m.lud().logDet(sign);
         }
     };
 
     // algo 21: TriMatrix -- need to check for UnknownDiag
     template <int s, class M>
-    struct LogDetM_Helper<21,s,M> 
+    struct LogDetM_Helper<21,s,M>
     {
         typedef typename M::float_type RT;
         typedef typename M::zfloat_type T;
         static RT call(const M& m, T* sign)
-        { 
+        {
             const int algo2 = 
                 M::_unit ? 0 :
                 M::_unknowndiag ? 22 :
@@ -461,12 +424,12 @@ namespace tmv {
 
     // algo 22: UnknownDiag TriMatrix, so might be trivial.
     template <int s, class M>
-    struct LogDetM_Helper<22,s,M> 
+    struct LogDetM_Helper<22,s,M>
     {
         typedef typename M::float_type RT;
         typedef typename M::zfloat_type T;
         static RT call(const M& m, T* sign)
-        { 
+        {
 #ifdef PRINTALGO_Det
             const int N = m.rowsize();
             std::cout<<"LogDet algo 22: N,s = "<<N<<','<<s<<std::endl;
@@ -479,7 +442,7 @@ namespace tmv {
  
     // algo -3: Determine which algorithm to use
     template <int s, class M>
-    struct LogDetM_Helper<-3,s,M> 
+    struct LogDetM_Helper<-3,s,M>
     {
         typedef typename M::float_type RT;
         typedef typename M::zfloat_type T;
@@ -509,7 +472,7 @@ namespace tmv {
     };
 
     template <class M>
-    static typename M::float_type LogDet(
+    static inline typename M::float_type LogDet(
         const BaseMatrix_Calc<M>& m, typename M::zfloat_type* sign)
     {
         TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same));
@@ -530,10 +493,10 @@ namespace tmv {
 
     // algo 0: Trivially non-singular
     template <int s, class M>
-    struct IsSingularM_Helper<0,s,M> 
+    struct IsSingularM_Helper<0,s,M>
     {
         static bool call(const M& m)
-        { 
+        {
 #ifdef PRINTALGO_Det
             const int N = m.rowsize();
             std::cout<<"IsSingular algo 0: N,s = "<<N<<','<<s<<std::endl;
@@ -544,7 +507,7 @@ namespace tmv {
 
     // algo 1: Check if Det == 0
     template <int s, class M>
-    struct IsSingularM_Helper<1,s,M> 
+    struct IsSingularM_Helper<1,s,M>
     {
         static bool call(const M& m)
         {
@@ -561,7 +524,7 @@ namespace tmv {
 
     // algo 11: Look for a zero on the diagonal
     template <int s, class M>
-    struct IsSingularM_Helper<11,s,M> 
+    struct IsSingularM_Helper<11,s,M>
     {
         static bool call(const M& m)
         {
@@ -575,10 +538,10 @@ namespace tmv {
 
     // algo 12: Use Divider
     template <int s, class M>
-    struct IsSingularM_Helper<12,s,M> 
+    struct IsSingularM_Helper<12,s,M>
     {
         static bool call(const M& m)
-        { 
+        {
 #ifdef PRINTALGO_Det
             const int N = m.rowsize();
             std::cout<<"IsSingular algo 12: N,s = "<<N<<','<<s<<std::endl;
@@ -593,7 +556,7 @@ namespace tmv {
 
     // algo 13: Calculate LU decomposition on the spot.
     template <int s, class M>
-    struct IsSingularM_Helper<13,s,M> 
+    struct IsSingularM_Helper<13,s,M>
     {
         static bool call(const M& m)
         {
@@ -602,17 +565,16 @@ namespace tmv {
             std::cout<<"IsSingular algo 12: N,s = "<<N<<','<<s<<std::endl;
 #endif
             TMVStaticAssert(!Traits<typename M::real_type>::isinteger);
-            LUD<M> lud(m,false);
-            return lud.isSingular(); 
+            return m.lud().isSingular();
         }
     };
 
     // algo 21: TriMatrix -- need to check for UnknownDiag
     template <int s, class M>
-    struct IsSingularM_Helper<21,s,M> 
+    struct IsSingularM_Helper<21,s,M>
     {
         static bool call(const M& m)
-        { 
+        {
             const int algo2 = 
                 M::_unit ? 0 :
                 M::_unknowndiag ? 22 :
@@ -628,10 +590,10 @@ namespace tmv {
 
     // algo 22: UnknownDiag TriMatrix, so might be trivial.
     template <int s, class M>
-    struct IsSingularM_Helper<22,s,M> 
+    struct IsSingularM_Helper<22,s,M>
     {
         static bool call(const M& m)
-        { 
+        {
 #ifdef PRINTALGO_Det
             const int N = m.rowsize();
             std::cout<<"IsSingular algo 21: N,s = "<<N<<','<<s<<std::endl;
@@ -644,7 +606,7 @@ namespace tmv {
 
     // algo -3: Determine which algorithm to use
     template <int s, class M>
-    struct IsSingularM_Helper<-3,s,M> 
+    struct IsSingularM_Helper<-3,s,M>
     {
         static bool call(const M& m)
         {
@@ -672,7 +634,7 @@ namespace tmv {
     };
 
     template <class M>
-    static bool IsSingular(const BaseMatrix_Calc<M>& m)
+    static inline bool IsSingular(const BaseMatrix_Calc<M>& m)
     {
         TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same));
         TMVAssert(m.colsize() == m.rowsize());
@@ -700,7 +662,7 @@ namespace tmv {
 
     // algo 0: s == 0, define prod = 1
     template <int s, class V>
-    struct ProdElementsV_Helper<0,s,V> 
+    struct ProdElementsV_Helper<0,s,V>
     {
         typedef typename V::value_type T;
         static T call(const V& v)
@@ -714,7 +676,7 @@ namespace tmv {
     };
     // algo 1: s == 1
     template <int s, class V>
-    struct ProdElementsV_Helper<1,s,V> 
+    struct ProdElementsV_Helper<1,s,V>
     {
         typedef typename V::value_type T;
         static T call(const V& v)
@@ -729,7 +691,7 @@ namespace tmv {
 
     // algo 11: simple for loop
     template <int s, class V>
-    struct ProdElementsV_Helper<11,s,V> 
+    struct ProdElementsV_Helper<11,s,V>
     {
         typedef typename V::value_type T;
         static T call(const V& v)
@@ -749,7 +711,7 @@ namespace tmv {
 
     // algo 12: 2 at a time
     template <int s, class V>
-    struct ProdElementsV_Helper<12,s,V> 
+    struct ProdElementsV_Helper<12,s,V>
     {
         typedef typename V::value_type T;
         static T call(const V& v)
@@ -780,7 +742,7 @@ namespace tmv {
 
     // algo 13: 4 at a time
     template <int s, class V>
-    struct ProdElementsV_Helper<13,s,V> 
+    struct ProdElementsV_Helper<13,s,V>
     {
         typedef typename V::value_type T;
         static T call(const V& v)
@@ -811,7 +773,7 @@ namespace tmv {
 
     // algo 14: 8 at a time
     template <int s, class V>
-    struct ProdElementsV_Helper<14,s,V> 
+    struct ProdElementsV_Helper<14,s,V>
     {
         typedef typename V::value_type T;
         static T call(const V& v)
@@ -869,7 +831,7 @@ namespace tmv {
         struct Unroller<I,0>
         { static T unroll(const V& v) { return T(1); } };
         static T call(const V& v)
-        { 
+        {
 #ifdef PRINTALGO_Det
             const int n = v.size();
             std::cout<<"Prod Elements algo 15: n,s = "<<n<<','<<s<<std::endl;
@@ -881,7 +843,7 @@ namespace tmv {
 #ifdef __SSE2__
     // algo 31: double precision SSE2: real
     template <int s, class V>
-    struct ProdElementsV_Helper<31,s,V> 
+    struct ProdElementsV_Helper<31,s,V>
     {
         typedef typename V::const_iterator IT;
         static double call(const V& v)
@@ -930,7 +892,7 @@ namespace tmv {
 
     // algo 32: double precision SSE2: complex
     template <int s, class V>
-    struct ProdElementsV_Helper<32,s,V> 
+    struct ProdElementsV_Helper<32,s,V>
     {
         typedef typename V::const_iterator IT;
         static std::complex<double> call(const V& v)
@@ -979,7 +941,7 @@ namespace tmv {
     // algo 41: If the direct product might cause an overflow, use
     // LogDet instead.
     template <int s, class V>
-    struct ProdElementsV_Helper<41,s,V> 
+    struct ProdElementsV_Helper<41,s,V>
     {
         typedef typename V::value_type T;
         typedef typename V::real_type RT;
@@ -1026,7 +988,7 @@ namespace tmv {
     // algo 42: Similar to 41, but try direct product first, and only 
     // check min,max if overflow or underflow is found.
     template <int s, class V>
-    struct ProdElementsV_Helper<42,s,V> 
+    struct ProdElementsV_Helper<42,s,V>
     {
         typedef typename V::value_type T;
         typedef typename V::real_type RT;
@@ -1037,9 +999,10 @@ namespace tmv {
             std::cout<<"Prod Elements algo 42: n,s = "<<n<<','<<s<<std::endl;
 #endif
             T det1 = ProdElementsV_Helper<-4,s,V>::call(v);
+            RT absdet1 = TMV_ABS(det1);
 
             // If det1 isn't 0 or inf or nan, then it's ok to return it.
-            if (TMV_ABS(det1) > 0 && RT(1)/TMV_ABS(det1) > 0) return det1;
+            if (absdet1 > 0 && RT(1)/absdet1 > 0) return det1;
 
             // Check if exactly zero and not from underflow.
             if (det1 == T(0) &&
@@ -1074,16 +1037,36 @@ namespace tmv {
         }
     };
 
-    // algo -4: No branches or copies
+    // algo 90: Call inst
     template <int s, class V>
-    struct ProdElementsV_Helper<-4,s,V> 
+    struct ProdElementsV_Helper<90,s,V>
+    {
+        typedef typename V::value_type T;
+        static T call(const V& v)
+        { return InstProdElements(v.xView()); }
+    };
+
+    // algo 97: Conjugate
+    template <int s, class V>
+    struct ProdElementsV_Helper<97,s,V>
     {
         typedef typename V::value_type T;
         static T call(const V& v)
         {
-#if TMV_OPT == 0
-            const int algo = 11;
-#else
+            typedef typename V::const_conjugate_type Vc;
+            Vc vc = v.conjugate();
+            T ret = ProdElementsV_Helper<-2,s,Vc>::call(vc);
+            return TMV_CONJ(ret);
+        }
+    };
+
+    // algo -4: No branches or copies
+    template <int s, class V>
+    struct ProdElementsV_Helper<-4,s,V>
+    {
+        typedef typename V::value_type T;
+        static T call(const V& v)
+        {
             typedef typename V::real_type RT;
             const bool vdouble = Traits2<RT,double>::sametype;
             const bool vreal = V::isreal;
@@ -1091,6 +1074,7 @@ namespace tmv {
             const int algo = 
                 s == 0 ? 0 :
                 s == 1 ? 1 :
+                TMV_OPT == 0 ? 11 :
                 (s != UNKNOWN && s <= int(128/sizeof(T))) ? 15 :
 #ifdef __SSE2__
                 (vdouble && vreal) ? 31 :
@@ -1099,7 +1083,6 @@ namespace tmv {
                 (sizeof(RT) == 8) ? (V::iscomplex ? 11 : 13) :
                 (sizeof(RT) == 4) ? (V::iscomplex ? 12 : 14) :
                 11;
-#endif
 #ifdef PRINTALGO_Det
             std::cout<<"No branch Prod Elements\n";
             std::cout<<"v = "<<TMV_Text(v)<<std::endl;
@@ -1112,17 +1095,16 @@ namespace tmv {
 
     // algo -3: Determine which algorithm to use
     template <int s, class V>
-    struct ProdElementsV_Helper<-3,s,V> 
+    struct ProdElementsV_Helper<-3,s,V>
     {
         typedef typename V::value_type T;
         static T call(const V& v)
         {
             const int algo = 
-#if TMV_OPT >= 2
+                TMV_OPT <= 1 ? -4 :
                 // 20 here is a bit arbitrary.  
                 // For N <= 20, the product is not very likely to overflow.
                 (!Traits<T>::isinteger && (s == UNKNOWN || s > 20)) ? 42 :
-#endif
                 -4;
 #ifdef PRINTALGO_Det
             std::cout<<"Inline ProdElements\n";
@@ -1135,32 +1117,9 @@ namespace tmv {
         }
     };
 
-    // algo 97: Conjugate
+    // algo -2: Check for inst
     template <int s, class V>
-    struct ProdElementsV_Helper<97,s,V> 
-    {
-        typedef typename V::value_type T;
-        static T call(const V& v)
-        { 
-            typedef typename V::const_conjugate_type Vc;
-            Vc vc = v.conjugate();
-            T ret = ProdElementsV_Helper<-1,s,Vc>::call(vc);
-            return TMV_CONJ(ret);
-        }
-    };
-
-    // algo 98: Call inst
-    template <int s, class V>
-    struct ProdElementsV_Helper<98,s,V> 
-    {
-        typedef typename V::value_type T;
-        static T call(const V& v)
-        { return InstProdElements(v.xView()); }
-    };
-
-    // algo -1: Check for inst
-    template <int s, class V>
-    struct ProdElementsV_Helper<-1,s,V> 
+    struct ProdElementsV_Helper<-2,s,V>
     {
         typedef typename V::value_type T;
         static T call(const V& v)
@@ -1170,27 +1129,36 @@ namespace tmv {
                 Traits<T>::isinst;
             const int algo =
                 V::_conj ? 97 : 
-                inst ? 98 : 
+                inst ? 90 : 
                 -3;
             return ProdElementsV_Helper<algo,s,V>::call(v); 
         }
     };
 
+    template <int s, class V>
+    struct ProdElementsV_Helper<-1,s,V>
+    {
+        typedef typename V::value_type T;
+        static T call(const V& v)
+        { return ProdElementsV_Helper<-2,s,V>::call(v); }
+    };
+
     template <class V>
-    static typename V::value_type InlineProdElements(
+    static inline typename V::value_type InlineProdElements(
         const BaseVector_Calc<V>& v)
     {
         typedef typename V::const_cview_type Vv;
-        Vv vv = v.cView();
+        TMV_MAYBE_CREF(V,Vv) vv = v.cView();
         return ProdElementsV_Helper<-3,V::_size,Vv>::call(vv);
     }
 
     template <class V>
-    static typename V::value_type ProdElements(const BaseVector_Calc<V>& v)
+    static inline typename V::value_type ProdElements(
+        const BaseVector_Calc<V>& v)
     {
         typedef typename V::const_cview_type Vv;
-        Vv vv = v.cView();
-        return ProdElementsV_Helper<-1,V::_size,Vv>::call(vv);
+        TMV_MAYBE_CREF(V,Vv) vv = v.cView();
+        return ProdElementsV_Helper<-2,V::_size,Vv>::call(vv);
     }
 
 
@@ -1200,12 +1168,12 @@ namespace tmv {
 
     // algo 1: If no sign given, call version without sign.
     template <int s, class V>
-    struct LogProdElementsV_Helper<1,s,V> 
+    struct LogProdElementsV_Helper<1,s,V>
     {
         typedef typename V::float_type RT;
         typedef typename V::zfloat_type T;
         static RT call(const V& v, T* sign)
-        { 
+        {
 #ifdef PRINTALGO_Det
             const int n = v.size();
             std::cout<<"LogProd Elements algo 1: n,s = "<<n<<','<<s<<std::endl;
@@ -1220,7 +1188,7 @@ namespace tmv {
 
     // algo 11: simple for loop, real
     template <int s, class V>
-    struct LogProdElementsV_Helper<11,s,V> 
+    struct LogProdElementsV_Helper<11,s,V>
     {
         typedef typename V::float_type RT;
         typedef typename V::zfloat_type T;
@@ -1265,7 +1233,7 @@ namespace tmv {
 
     // algo 12: 2 at a time, real
     template <int s, class V>
-    struct LogProdElementsV_Helper<12,s,V> 
+    struct LogProdElementsV_Helper<12,s,V>
     {
         typedef typename V::float_type RT;
         typedef typename V::zfloat_type T;
@@ -1333,7 +1301,7 @@ namespace tmv {
 
     // algo 16: simple for loop, complex
     template <int s, class V>
-    struct LogProdElementsV_Helper<16,s,V> 
+    struct LogProdElementsV_Helper<16,s,V>
     {
         typedef typename V::float_type RT;
         typedef typename V::zfloat_type T;
@@ -1377,21 +1345,45 @@ namespace tmv {
         }
     };
 
-    // algo -4: No branches or copies
+    // algo 90: Call inst
     template <int s, class V>
-    struct LogProdElementsV_Helper<-4,s,V> 
+    struct LogProdElementsV_Helper<90,s,V>
     {
         typedef typename V::float_type RT;
         typedef typename V::zfloat_type T;
-#if TMV_OPT == 0
-        enum { algo = V::isreal ? 11 : 16 };
-#else
+        static RT call(const V& v, T* sign)
+        { return InstLogProdElements(v.xView(),sign); }
+    };
+
+    // algo 97: Conjugate
+    template <int s, class V>
+    struct LogProdElementsV_Helper<97,s,V>
+    {
+        typedef typename V::float_type RT;
+        typedef typename V::zfloat_type T;
+        static RT call(const V& v, T* sign)
+        {
+            typedef typename V::const_conjugate_type Vc;
+            Vc vc = v.conjugate();
+            RT ret = LogProdElementsV_Helper<-2,s,Vc>::call(vc,sign);
+            if (sign) *sign = TMV_CONJ(*sign);
+            return ret;
+        }
+    };
+
+    // algo -4: No branches or copies
+    template <int s, class V>
+    struct LogProdElementsV_Helper<-4,s,V>
+    {
+        typedef typename V::float_type RT;
+        typedef typename V::zfloat_type T;
         enum { algo = (
                 V::iscomplex ? 16 :
-                (V::_step == 1 && sizeof(RT) == 4) ? 12 : 11 ) };
-#endif
+                TMV_OPT == 0 ? 11 :
+                (V::_step == 1 && sizeof(RT) == 4) ? 12 : 
+                11 ) };
         static RT call(const V& v, T* sign)
-        { 
+        {
 #ifdef PRINTALGO_Det
             std::cout<<"Inline LogProdElements with sign\n";
             std::cout<<"v = "<<TMV_Text(v)<<std::endl;
@@ -1401,7 +1393,7 @@ namespace tmv {
             return LogProdElementsV_Helper<algo,s,V>::call(v,sign); 
         }
         static RT call(const V& v)
-        { 
+        {
 #ifdef PRINTALGO_Det
             std::cout<<"Inline LogProdElements no sign\n";
             std::cout<<"v = "<<TMV_Text(v)<<std::endl;
@@ -1415,7 +1407,7 @@ namespace tmv {
     // algo -3: Determine which algorithm to use
     // Just check if sign is 0 and call correct version of algo -4.
     template <int s, class V>
-    struct LogProdElementsV_Helper<-3,s,V> 
+    struct LogProdElementsV_Helper<-3,s,V>
     {
         typedef typename V::float_type RT;
         typedef typename V::zfloat_type T;
@@ -1423,35 +1415,9 @@ namespace tmv {
         { return LogProdElementsV_Helper<1,s,V>::call(v,sign); }
     };
 
-    // algo 97: Conjugate
+    // algo -2: Check for inst
     template <int s, class V>
-    struct LogProdElementsV_Helper<97,s,V> 
-    {
-        typedef typename V::float_type RT;
-        typedef typename V::zfloat_type T;
-        static RT call(const V& v, T* sign)
-        { 
-            typedef typename V::const_conjugate_type Vc;
-            Vc vc = v.conjugate();
-            RT ret = LogProdElementsV_Helper<-1,s,Vc>::call(vc,sign);
-            if (sign) *sign = TMV_CONJ(*sign);
-            return ret;
-        }
-    };
-
-    // algo 98: Call inst
-    template <int s, class V>
-    struct LogProdElementsV_Helper<98,s,V> 
-    {
-        typedef typename V::float_type RT;
-        typedef typename V::zfloat_type T;
-        static RT call(const V& v, T* sign)
-        { return InstLogProdElements(v.xView(),sign); }
-    };
-
-    // algo -1: Check for inst
-    template <int s, class V>
-    struct LogProdElementsV_Helper<-1,s,V> 
+    struct LogProdElementsV_Helper<-2,s,V>
     {
         typedef typename V::float_type RT;
         typedef typename V::zfloat_type T;
@@ -1462,28 +1428,37 @@ namespace tmv {
                 Traits<T>::isinst;
             const int algo =
                 V::_conj ? 97 : 
-                inst ? 98 : 
+                inst ? 90 : 
                 -3;
             return LogProdElementsV_Helper<algo,s,V>::call(v,sign); 
         }
     };
 
+    template <int s, class V>
+    struct LogProdElementsV_Helper<-1,s,V>
+    {
+        typedef typename V::float_type RT;
+        typedef typename V::zfloat_type T;
+        static RT call(const V& v, T* sign)
+        { return LogProdElementsV_Helper<-2,s,V>::call(v,sign);  }
+    };
+
     template <class V>
-    static typename V::float_type InlineLogProdElements(
+    static inline typename V::float_type InlineLogProdElements(
         const BaseVector_Calc<V>& v, typename V::zfloat_type* sign)
     {
         typedef typename V::const_cview_type Vv;
-        Vv vv = v.cView();
+        TMV_MAYBE_CREF(V,Vv) vv = v.cView();
         return LogProdElementsV_Helper<-3,V::_size,Vv>::call(vv,sign);
     }
 
     template <class V>
-    static typename V::float_type LogProdElements(
+    static inline typename V::float_type LogProdElements(
         const BaseVector_Calc<V>& v, typename V::zfloat_type* sign)
     {
         typedef typename V::const_cview_type Vv;
-        Vv vv = v.cView();
-        return LogProdElementsV_Helper<-1,V::_size,Vv>::call(vv,sign);
+        TMV_MAYBE_CREF(V,Vv) vv = v.cView();
+        return LogProdElementsV_Helper<-2,V::_size,Vv>::call(vv,sign);
     }
 
 
@@ -1493,7 +1468,7 @@ namespace tmv {
 
     // algo 11: simple for loop
     template <int s, class V>
-    struct HasZeroElementV_Helper<11,s,V> 
+    struct HasZeroElementV_Helper<11,s,V>
     {
         typedef typename V::value_type T;
         static bool call(const V& v)
@@ -1512,7 +1487,7 @@ namespace tmv {
 
     // algo 12: 2 at a time
     template <int s, class V>
-    struct HasZeroElementV_Helper<12,s,V> 
+    struct HasZeroElementV_Helper<12,s,V>
     {
         typedef typename V::value_type T;
         static bool call(const V& v)
@@ -1536,7 +1511,7 @@ namespace tmv {
 
     // algo 13: 4 at a time
     template <int s, class V>
-    struct HasZeroElementV_Helper<13,s,V> 
+    struct HasZeroElementV_Helper<13,s,V>
     {
         typedef typename V::value_type T;
         static bool call(const V& v)
@@ -1564,7 +1539,7 @@ namespace tmv {
 
     // algo 14: 8 at a time
     template <int s, class V>
-    struct HasZeroElementV_Helper<14,s,V> 
+    struct HasZeroElementV_Helper<14,s,V>
     {
         typedef typename V::value_type T;
         static bool call(const V& v)
@@ -1623,23 +1598,42 @@ namespace tmv {
         }
     };
 
-    // algo -3: Determine which algorithm to use
+    // algo 90: Call inst
     template <int s, class V>
-    struct HasZeroElementV_Helper<-3,s,V> 
+    struct HasZeroElementV_Helper<90,s,V>
+    {
+        typedef typename V::value_type T;
+        static bool call(const V& v)
+        { return InstHasZeroElement(v.xView()); }
+    };
+
+    // algo 97: Conjugate
+    template <int s, class V>
+    struct HasZeroElementV_Helper<97,s,V>
     {
         typedef typename V::value_type T;
         static bool call(const V& v)
         {
-#if TMV_OPT == 0
-            const int algo = 11;
-#else
+            typedef typename V::const_conjugate_type Vc;
+            Vc vc = v.conjugate();
+            return HasZeroElementV_Helper<-2,s,Vc>::call(vc);
+        }
+    };
+
+    // algo -3: Determine which algorithm to use
+    template <int s, class V>
+    struct HasZeroElementV_Helper<-3,s,V>
+    {
+        typedef typename V::value_type T;
+        static bool call(const V& v)
+        {
             typedef typename V::real_type RT;
             const int algo = 
+                TMV_OPT == 0 ? 11 :
                 (s != UNKNOWN && s <= int(128/sizeof(T))) ? 15 :
                 (sizeof(RT) == 8) ? (V::iscomplex ? 12 : 13) :
                 (sizeof(RT) == 4) ? (V::iscomplex ? 13 : 14) :
                 11;
-#endif
 #ifdef PRINTALGO_Det
             std::cout<<"Inline HaxZeroElement\n";
             std::cout<<"v = "<<TMV_Text(v)<<std::endl;
@@ -1650,31 +1644,9 @@ namespace tmv {
         }
     };
 
-    // algo 97: Conjugate
+    // algo -2: Check for inst
     template <int s, class V>
-    struct HasZeroElementV_Helper<97,s,V> 
-    {
-        typedef typename V::value_type T;
-        static bool call(const V& v)
-        { 
-            typedef typename V::const_conjugate_type Vc;
-            Vc vc = v.conjugate();
-            return HasZeroElementV_Helper<-1,s,Vc>::call(vc);
-        }
-    };
-
-    // algo 98: Call inst
-    template <int s, class V>
-    struct HasZeroElementV_Helper<98,s,V> 
-    {
-        typedef typename V::value_type T;
-        static bool call(const V& v)
-        { return InstHasZeroElement(v.xView()); }
-    };
-
-    // algo -1: Check for inst
-    template <int s, class V>
-    struct HasZeroElementV_Helper<-1,s,V> 
+    struct HasZeroElementV_Helper<-2,s,V>
     {
         typedef typename V::value_type T;
         static bool call(const V& v)
@@ -1684,26 +1656,34 @@ namespace tmv {
                 Traits<T>::isinst;
             const int algo =
                 V::_conj ? 97 : 
-                inst ? 98 : 
+                inst ? 90 : 
                 -3;
             return HasZeroElementV_Helper<algo,s,V>::call(v); 
         }
     };
 
+    template <int s, class V>
+    struct HasZeroElementV_Helper<-1,s,V>
+    {
+        typedef typename V::value_type T;
+        static bool call(const V& v)
+        { return HasZeroElementV_Helper<-2,s,V>::call(v); }
+    };
+
     template <class V>
-    static bool InlineHasZeroElement(const BaseVector_Calc<V>& v)
+    static inline bool InlineHasZeroElement(const BaseVector_Calc<V>& v)
     {
         typedef typename V::const_cview_type Vv;
-        Vv vv = v.cView();
+        TMV_MAYBE_CREF(V,Vv) vv = v.cView();
         return HasZeroElementV_Helper<-3,V::_size,Vv>::call(vv);
     }
 
     template <class V>
-    static bool HasZeroElement(const BaseVector_Calc<V>& v)
+    static inline bool HasZeroElement(const BaseVector_Calc<V>& v)
     {
         typedef typename V::const_cview_type Vv;
-        Vv vv = v.cView();
-        return HasZeroElementV_Helper<-1,V::_size,Vv>::call(vv);
+        TMV_MAYBE_CREF(V,Vv) vv = v.cView();
+        return HasZeroElementV_Helper<-2,V::_size,Vv>::call(vv);
     }
 
 

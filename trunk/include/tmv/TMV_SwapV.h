@@ -39,20 +39,6 @@
 
 namespace tmv {
 
-    // Defined below:
-    template <class V1, class V2>
-    static void Swap(
-        BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2);
-    template <class V1, class V2>
-    static void NoAliasSwap(
-        BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2);
-    template <class V1, class V2>
-    static void InlineSwap(
-        BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2);
-    template <class V1, class V2>
-    static void AliasSwap(
-        BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2);
-
     // Defined in TMV_Vector.cpp
     template <class T, bool C>
     void InstSwap(VectorView<T,UNKNOWN,C> v1, VectorView<T> v2);
@@ -61,12 +47,27 @@ namespace tmv {
     // Swap Vectors
     //
 
-    template <int algo, int s, class V1, class V2> 
+    template <int algo, int s, class V1, class V2>
     struct SwapV_Helper;
 
-    // algo 1: simple for loop
+    // algo 2: complex vectors with unit step, convert to real version
     template <int s, class V1, class V2>
-    struct SwapV_Helper<1,s,V1,V2> 
+    struct SwapV_Helper<2,s,V1,V2>
+    {
+        static void call(V1& v1, V2& v2)
+        {
+            typedef typename V1::flatten_type V1f;
+            typedef typename V2::flatten_type V2f;
+            const int s2 = IntTraits<s>::twoS;
+            V1f v1f = v1.flatten();
+            V2f v2f = v2.flatten();
+            SwapV_Helper<-3,s2,V1f,V2f>::call(v1f,v2f);
+        }
+    };
+
+    // algo 11: simple for loop
+    template <int s, class V1, class V2>
+    struct SwapV_Helper<11,s,V1,V2>
     {
         typedef typename V1::iterator IT1;
         typedef typename V2::iterator IT2;
@@ -79,9 +80,9 @@ namespace tmv {
         { for(;n;--n) TMV_SWAP(*it1++,*it2++); }
     };
 
-    // algo 2: 2 at a time
+    // algo 12: 2 at a time
     template <int s, class V1, class V2>
-    struct SwapV_Helper<2,s,V1,V2> 
+    struct SwapV_Helper<12,s,V1,V2>
     {
         typedef typename V1::iterator IT1;
         typedef typename V2::iterator IT2;
@@ -113,9 +114,9 @@ namespace tmv {
         }
     };
 
-    // algo 3: 4 at a time
+    // algo 13: 4 at a time
     template <int s, class V1, class V2>
-    struct SwapV_Helper<3,s,V1,V2> 
+    struct SwapV_Helper<13,s,V1,V2>
     {
         typedef typename V1::iterator IT1;
         typedef typename V2::iterator IT2;
@@ -154,9 +155,9 @@ namespace tmv {
         }
     };
 
-    // algo 5: fully unroll
+    // algo 15: fully unroll
     template <int s, class V1, class V2>
-    struct SwapV_Helper<5,s,V1,V2>
+    struct SwapV_Helper<15,s,V1,V2>
     {
         template <int I, int N>
         struct Unroller
@@ -180,30 +181,9 @@ namespace tmv {
         { Unroller<0,s>::unroll(v1,v2); }
     };
 
-    // algo 7: complex vectors with unit step, convert to real version
+    // algo 21: complex vectors, but not unit step
     template <int s, class V1, class V2>
-    struct SwapV_Helper<7,s,V1,V2>
-    {
-        static void call(V1& v1, V2& v2)
-        {
-            typedef typename V1::flatten_type V1f;
-            typedef typename V2::flatten_type V2f;
-            typedef typename V1::real_type RT;
-            const int s2 = IntTraits<s>::twoS;
-            const int algo2 = 
-                s != UNKNOWN && s <= 32 ? 5 :
-                sizeof(RT) == 8 ? 2 :
-                sizeof(RT) == 4 ? 3 :
-                1;
-            V1f v1f = v1.flatten();
-            V2f v2f = v2.flatten();
-            SwapV_Helper<algo2,s2,V1f,V2f>::call(v1f,v2f);
-        }
-    };
-
-    // algo 8: complex vectors, but not unit step
-    template <int s, class V1, class V2>
-    struct SwapV_Helper<8,s,V1,V2> 
+    struct SwapV_Helper<21,s,V1,V2>
     {
         typedef typename V1::iterator IT1;
         typedef typename V2::iterator IT2;
@@ -227,9 +207,9 @@ namespace tmv {
         }
     };
 
-    // algo 9: complex vectors, but v1 is conjugate
+    // algo 22: complex vectors, but v1 is conjugate
     template <int s, class V1, class V2>
-    struct SwapV_Helper<9,s,V1,V2> 
+    struct SwapV_Helper<22,s,V1,V2>
     {
         typedef typename V1::iterator IT1;
         typedef typename V2::iterator IT2;
@@ -255,40 +235,12 @@ namespace tmv {
         }
     };
 
-    // algo -3: Determine which algorithm to use
+    // algo 90: Call inst
     template <int s, class V1, class V2>
-    struct SwapV_Helper<-3,s,V1,V2>
+    struct SwapV_Helper<90,s,V1,V2>
     {
-        typedef typename V1::iterator IT1;
-        typedef typename V2::iterator IT2;
-        typedef typename V1::real_type RT;
-
-#if TMV_OPT == 0
-        enum { algo = 1 };
-#else
-        enum { allunit = V1::_step == 1 && V2::_step == 1 };
-        enum { algo = (
-                // Strangely, algo 7 doesn't seem to be faster.
-                //(V1::iscomplex && allunit && !V1::_conj) ? 7 :
-                (V1::iscomplex) ? (V1::_conj ? 9 : 8) :
-                (sizeof(RT) == 8 && allunit) ? 2 :
-                (sizeof(RT) == 4 && allunit) ? 3 :
-                1 ) };
-#endif
-
         static void call(V1& v1, V2& v2)
-        { 
-            TMVStaticAssert(!V2::_conj);
-            const int algo1 = 
-                s != UNKNOWN && s <= int(128/sizeof(RT)) ? 5 :
-                algo;
-            SwapV_Helper<algo1,s,V1,V2>::call(v1,v2); 
-        }
-        static void call2(int n, IT1 it1, IT2 it2)
-        { 
-            TMVStaticAssert(!V2::_conj);
-            SwapV_Helper<algo,s,V1,V2>::call2(n,it1,it2); 
-        }
+        { InstSwap(v1.xView(),v2.xView()); }
     };
 
     // algo 97: Conjugate
@@ -296,40 +248,12 @@ namespace tmv {
     struct SwapV_Helper<97,s,V1,V2>
     {
         static void call(V1& v1, V2& v2)
-        { 
+        {
             typedef typename V1::conjugate_type V1c;
             typedef typename V2::conjugate_type V2c;
             V1c v1c = v1.conjugate();
             V2c v2c = v2.conjugate();
             SwapV_Helper<-2,s,V1c,V2c>::call(v1c,v2c);
-        }
-    };
-
-    // algo 98: Call inst
-    template <int s, class V1, class V2>
-    struct SwapV_Helper<98,s,V1,V2>
-    {
-        static void call(V1& v1, V2& v2)
-        { InstSwap(v1.xView(),v2.xView()); }
-    };
-
-    // algo -2: Check for inst
-    template <int s, class V1, class V2>
-    struct SwapV_Helper<-2,s,V1,V2>
-    {
-        static void call(V1& v1, V2& v2)
-        {
-            typedef typename V1::value_type T1;
-            typedef typename V2::value_type T2;
-            const bool inst = 
-                (s == UNKNOWN || s > 16) &&
-                Traits2<T1,T2>::sametype &&
-                Traits<T1>::isinst;
-            const int algo = 
-                V2::_conj ? 97 :
-                inst ? 98 :
-                -3;
-            SwapV_Helper<algo,s,V1,V2>::call(v1,v2);
         }
     };
 
@@ -352,6 +276,59 @@ namespace tmv {
                 NoAliasCopy(v2,v1);
                 NoAliasCopy(v1c,v2);
             }
+        }
+    };
+
+    // algo -3: Determine which algorithm to use
+    template <int s, class V1, class V2>
+    struct SwapV_Helper<-3,s,V1,V2>
+    {
+        typedef typename V1::iterator IT1;
+        typedef typename V2::iterator IT2;
+        typedef typename V1::real_type RT;
+
+        enum { allunit = V1::_step == 1 && V2::_step == 1 };
+        enum { algo = (
+                TMV_OPT == 0 ? 11 :
+                // Strangely, algo 2 doesn't seem to be faster.
+                //(V1::iscomplex && allunit && !V1::_conj) ? 2 :
+                (V1::iscomplex) ? (V1::_conj ? 22 : 21) :
+                (sizeof(RT) == 8 && allunit) ? 12 :
+                (sizeof(RT) == 4 && allunit) ? 13 :
+                11 ) };
+
+        static void call(V1& v1, V2& v2)
+        {
+            TMVStaticAssert(!V2::_conj);
+            const int algo1 = 
+                s != UNKNOWN && s <= int(128/sizeof(RT)) ? 15 :
+                algo;
+            SwapV_Helper<algo1,s,V1,V2>::call(v1,v2); 
+        }
+        static void call2(int n, IT1 it1, IT2 it2)
+        {
+            TMVStaticAssert(!V2::_conj);
+            SwapV_Helper<algo,s,V1,V2>::call2(n,it1,it2); 
+        }
+    };
+
+    // algo -2: Check for inst
+    template <int s, class V1, class V2>
+    struct SwapV_Helper<-2,s,V1,V2>
+    {
+        static void call(V1& v1, V2& v2)
+        {
+            typedef typename V1::value_type T1;
+            typedef typename V2::value_type T2;
+            const bool inst = 
+                (s == UNKNOWN || s > 16) &&
+                Traits2<T1,T2>::sametype &&
+                Traits<T1>::isinst;
+            const int algo = 
+                V2::_conj ? 97 :
+                inst ? 90 :
+                -3;
+            SwapV_Helper<algo,s,V1,V2>::call(v1,v2);
         }
     };
 
@@ -381,7 +358,7 @@ namespace tmv {
     };
 
     template <class V1, class V2>
-    static void DoSwap(
+    static inline void DoSwap(
         BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2)
     {
         typedef typename V1::value_type T1;
@@ -392,13 +369,13 @@ namespace tmv {
         const int s = Sizes<V1::_size,V2::_size>::size;
         typedef typename V1::cview_type V1v;
         typedef typename V2::cview_type V2v;
-        V1v v1v = v1.cView();
-        V2v v2v = v2.cView();
+        TMV_MAYBE_REF(V1,V1v) v1v = v1.cView();
+        TMV_MAYBE_REF(V2,V2v) v2v = v2.cView();
         SwapV_Helper<-1,s,V1v,V2v>::call(v1v,v2v);
     }
 
     template <class V1, class V2>
-    static void NoAliasSwap(
+    static inline void NoAliasSwap(
         BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2)
     {
         typedef typename V1::value_type T1;
@@ -409,13 +386,13 @@ namespace tmv {
         const int s = Sizes<V1::_size,V2::_size>::size;
         typedef typename V1::cview_type V1v;
         typedef typename V2::cview_type V2v;
-        V1v v1v = v1.cView();
-        V2v v2v = v2.cView();
+        TMV_MAYBE_REF(V1,V1v) v1v = v1.cView();
+        TMV_MAYBE_REF(V2,V2v) v2v = v2.cView();
         SwapV_Helper<-2,s,V1v,V2v>::call(v1v,v2v);
     }
 
     template <class V1, class V2>
-    static void InlineSwap(
+    static inline void InlineSwap(
         BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2)
     {
         typedef typename V1::value_type T1;
@@ -426,13 +403,13 @@ namespace tmv {
         const int s = Sizes<V1::_size,V2::_size>::size;
         typedef typename V1::cview_type V1v;
         typedef typename V2::cview_type V2v;
-        V1v v1v = v1.cView();
-        V2v v2v = v2.cView();
+        TMV_MAYBE_REF(V1,V1v) v1v = v1.cView();
+        TMV_MAYBE_REF(V2,V2v) v2v = v2.cView();
         SwapV_Helper<-3,s,V1v,V2v>::call(v1v,v2v);
     }
 
     template <class V1, class V2>
-    static void AliasSwap(
+    static inline void AliasSwap(
         BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2)
     {
         typedef typename V1::value_type T1;
@@ -443,13 +420,13 @@ namespace tmv {
         const int s = Sizes<V1::_size,V2::_size>::size;
         typedef typename V1::cview_type V1v;
         typedef typename V2::cview_type V2v;
-        V1v v1v = v1.cView();
-        V2v v2v = v2.cView();
+        TMV_MAYBE_REF(V1,V1v) v1v = v1.cView();
+        TMV_MAYBE_REF(V2,V2v) v2v = v2.cView();
         SwapV_Helper<99,s,V1v,V2v>::call(v1v,v2v);
     }
 
     template <class V1, class V2>
-    static void Swap(
+    static inline void Swap(
         BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2)
     { DoSwap(v1,v2); }
 

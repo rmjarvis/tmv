@@ -2786,19 +2786,20 @@ static void DoTestMM4a_Basic(M1& a, const M2& b, std::string label)
         tmv::Matrix<PT> m4 = mm;
         tmv::Matrix<PT> m0 = mm;
         m0 /= T(2);
-#ifdef XXD
-        if (XXDEBUG8) {
-            std::cout<<"CanMult("<<tmv::TMV_Text(a)<<","<<tmv::TMV_Text(b)<<"\n";
-            std::cout<<"m0 = "<<m0<<std::endl;
-            std::cout<<"m1 * m2 = "<<mm<<std::endl;
-            std::cout<<"a * b = "<<(m3 = a*b)<<std::endl;
-            std::cout<<"Norm(diff) = "<<Norm(m3 - mm)<<std::endl;
-        }
-#endif
         RT x(5);
         T z; SetZ(z);
         m3 = a*b;
         m4 = mm;
+#ifdef XXD
+        if (XXDEBUG8) {
+            std::cout<<"CanMult("<<tmv::TMV_Text(a)<<","<<tmv::TMV_Text(b)<<"\n";
+            std::cout<<"m0 = "<<m0<<std::endl;
+            std::cout<<"m1 * m2 = "<<m4<<std::endl;
+            std::cout<<"a * b = "<<m3<<std::endl;
+            std::cout<<"dff = "<<(m3-m4)<<std::endl;
+            std::cout<<"Norm(diff) = "<<Norm(m3 - m4)<<std::endl;
+        }
+#endif
         Assert(Equal(m3,m4,eps),label+" m = a*b");
         m3 = m0;
         m3 += a*b;

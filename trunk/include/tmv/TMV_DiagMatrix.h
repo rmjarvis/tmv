@@ -187,19 +187,18 @@ namespace tmv {
         typedef ConstVectorView<T,_diagstep,false,I> const_diag_type;
 
         typedef ConstDiagMatrixView<T,_diagstep,false,I> const_subdiagmatrix_type;
-        typedef ConstDiagMatrixView<T,UNKNOWN,false,I> 
+        typedef ConstDiagMatrixView<T,UNKNOWN,false,I>
             const_subdiagmatrix_step_type;
         typedef ConstDiagMatrixView<T,_diagstep,false,I> const_view_type;
         typedef ConstDiagMatrixView<T,_diagstep,false,CStyle> const_cview_type;
-        typedef ConstDiagMatrixView<T,_diagstep,false,FortranStyle> 
+        typedef ConstDiagMatrixView<T,_diagstep,false,FortranStyle>
             const_fview_type;
         typedef ConstDiagMatrixView<T> const_xview_type;
-        typedef ConstDiagMatrixView<T,1,false> const_rmview_type;
-        typedef ConstDiagMatrixView<T,1,false> const_cmview_type;
+        typedef ConstDiagMatrixView<T,1,false> const_unitview_type;
         typedef ConstDiagMatrixView<T,_diagstep,notC,I> const_conjugate_type;
         typedef ConstDiagMatrixView<T,_diagstep,false,I> const_transpose_type;
         typedef ConstDiagMatrixView<T,_diagstep,notC,I> const_adjoint_type;
-        typedef ConstDiagMatrixView<real_type,twoS,false,I> 
+        typedef ConstDiagMatrixView<real_type,twoS,false,I>
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstDiagMatrixView<T,_diagstep,false,I> const_nonconj_type;
@@ -217,8 +216,7 @@ namespace tmv {
         typedef DiagMatrixView<T,_diagstep,false,CStyle> cview_type;
         typedef DiagMatrixView<T,_diagstep,false,FortranStyle> fview_type;
         typedef DiagMatrixView<T> xview_type;
-        typedef DiagMatrixView<T,1,false> rmview_type;
-        typedef DiagMatrixView<T,1,false> cmview_type;
+        typedef DiagMatrixView<T,1,false> unitview_type;
         typedef DiagMatrixView<T,_diagstep,notC,I> conjugate_type;
         typedef DiagMatrixView<T,_diagstep,false,I> transpose_type;
         typedef DiagMatrixView<T,_diagstep,notC,I> adjoint_type;
@@ -245,14 +243,15 @@ namespace tmv {
         template <class M1, class M2>
         static void copy(
             const BaseMatrix<M1>& m1, BaseMatrix_Diag_Mutable<M2>& m2)
-        { 
+        {
             typename M2::diag_type m2d = m2.diag();
             m1.calc().diag().newAssignTo(m2d);
         }
     };
 
     template <class T, IndexStyle I>
-    class DiagMatrix : public BaseMatrix_Diag_Mutable<DiagMatrix<T,I> >
+    class DiagMatrix : 
+        public BaseMatrix_Diag_Mutable<DiagMatrix<T,I> >
     {
     public:
         typedef DiagMatrix<T,I> type;
@@ -394,7 +393,8 @@ namespace tmv {
     }; // DiagMatrix
 
     template <class T>
-    class DiagMatrixF : public DiagMatrix<T,FortranStyle>
+    class DiagMatrixF : 
+        public DiagMatrix<T,FortranStyle>
     {
     public:
         typedef DiagMatrixF<T> type;
@@ -452,14 +452,13 @@ namespace tmv {
         typedef ConstVectorView<T,S,C,I> const_diag_type;
 
         typedef ConstDiagMatrixView<T,S,C,I> const_subdiagmatrix_type;
-        typedef ConstDiagMatrixView<T,UNKNOWN,C,I> 
+        typedef ConstDiagMatrixView<T,UNKNOWN,C,I>
             const_subdiagmatrix_step_type;
         typedef ConstDiagMatrixView<T,S,C,I> const_view_type;
         typedef ConstDiagMatrixView<T,S,C,CStyle> const_cview_type;
         typedef ConstDiagMatrixView<T,S,C,FortranStyle> const_fview_type;
         typedef ConstDiagMatrixView<T,UNKNOWN,C> const_xview_type;
-        typedef ConstDiagMatrixView<T,1,C> const_rmview_type;
-        typedef ConstDiagMatrixView<T,1,C> const_cmview_type;
+        typedef ConstDiagMatrixView<T,1,C> const_unitview_type;
         typedef ConstDiagMatrixView<T,S,notC,I> const_conjugate_type;
         typedef ConstDiagMatrixView<T,S,C,I> const_transpose_type;
         typedef ConstDiagMatrixView<T,S,notC,I> const_adjoint_type;
@@ -521,7 +520,7 @@ namespace tmv {
             const SmallDiagMatrixView<T,N2,S2,C,I2>& m2) :
             itsm(m2.cptr()), itssize(m2.size()), itsstep(m2.step()) {}
 
-        ~ConstDiagMatrixView() { 
+        ~ConstDiagMatrixView() {
 #ifdef TMV_DEBUG
             itsm = 0; 
 #endif
@@ -557,7 +556,8 @@ namespace tmv {
     }; // ConstDiagMatrixView
 
     template <class T, int S=1, bool C=false>
-    class ConstDiagMatrixViewF : public ConstDiagMatrixView<T,S,C,FortranStyle>
+    class ConstDiagMatrixViewF : 
+        public ConstDiagMatrixView<T,S,C,FortranStyle>
     {
     public:
 
@@ -621,14 +621,13 @@ namespace tmv {
         typedef ConstVectorView<T,S,C,I> const_diag_type;
 
         typedef ConstDiagMatrixView<T,S,C,I> const_subdiagmatrix_type;
-        typedef ConstDiagMatrixView<T,UNKNOWN,C,I> 
+        typedef ConstDiagMatrixView<T,UNKNOWN,C,I>
             const_subdiagmatrix_step_type;
         typedef ConstDiagMatrixView<T,S,C,I> const_view_type;
         typedef ConstDiagMatrixView<T,S,C,CStyle> const_cview_type;
         typedef ConstDiagMatrixView<T,S,C,FortranStyle> const_fview_type;
         typedef ConstDiagMatrixView<T,UNKNOWN,C> const_xview_type;
-        typedef ConstDiagMatrixView<T,1,C> const_rmview_type;
-        typedef ConstDiagMatrixView<T,1,C> const_cmview_type;
+        typedef ConstDiagMatrixView<T,1,C> const_unitview_type;
         typedef ConstDiagMatrixView<T,S,notC,I> const_conjugate_type;
         typedef ConstDiagMatrixView<T,S,C,I> const_transpose_type;
         typedef ConstDiagMatrixView<T,S,notC,I> const_adjoint_type;
@@ -649,8 +648,7 @@ namespace tmv {
         typedef DiagMatrixView<T,S,C,CStyle> cview_type;
         typedef DiagMatrixView<T,S,C,FortranStyle> fview_type;
         typedef DiagMatrixView<T,UNKNOWN,C> xview_type;
-        typedef DiagMatrixView<T,1,C> rmview_type;
-        typedef DiagMatrixView<T,1,C> cmview_type;
+        typedef DiagMatrixView<T,1,C> unitview_type;
         typedef DiagMatrixView<T,S,notC,I> conjugate_type;
         typedef DiagMatrixView<T,S,C,I> transpose_type;
         typedef DiagMatrixView<T,S,notC,I> adjoint_type;
@@ -701,7 +699,7 @@ namespace tmv {
         DiagMatrixView(SmallDiagMatrixView<T,N2,S2,C,I2> m2) :
             itsm(m2.ptr()), itssize(m2.size()), itsstep(m2.step()) {}
 
-        ~DiagMatrixView() { 
+        ~DiagMatrixView() {
 #ifdef TMV_DEBUG
             itsm = 0; 
 #endif
@@ -762,7 +760,8 @@ namespace tmv {
     }; // DiagMatrixView
 
     template <class T, int S=1, bool C=false>
-    class DiagMatrixViewF : public DiagMatrixView<T,S,C,FortranStyle>
+    class DiagMatrixViewF : 
+        public DiagMatrixView<T,S,C,FortranStyle>
     {
     public:
 
@@ -798,13 +797,14 @@ namespace tmv {
 #define S V::_step
 #define C V::_conj
 #define I (V::_fort ? FortranStyle : CStyle)
-    template <class V> 
-    static ConstDiagMatrixView<T,S,C,I> DiagMatrixViewOf(
+    template <class V>
+    static inline ConstDiagMatrixView<T,S,C,I> DiagMatrixViewOf(
         const BaseVector_Calc<V>& v)
     { return ConstDiagMatrixView<T,S,C,I>(v.cptr(),v.size(),v.step()); }
 
-    template <class V> 
-    static DiagMatrixView<T,S,C,I> DiagMatrixViewOf(BaseVector_Mutable<V>& v)
+    template <class V>
+    static inline DiagMatrixView<T,S,C,I> DiagMatrixViewOf(
+        BaseVector_Mutable<V>& v)
     { return DiagMatrixView<T,S,C,I>(v.ptr(),v.size(),v.step()); }
 #undef T
 #undef S
@@ -812,15 +812,17 @@ namespace tmv {
 #undef I
 
     template <class T, int S, bool C, IndexStyle I>
-    static DiagMatrixView<T,S,C,I> DiagMatrixViewOf(VectorView<T,S,C,I> v)
+    static inline DiagMatrixView<T,S,C,I> DiagMatrixViewOf(
+        VectorView<T,S,C,I> v)
     { return DiagMatrixView<T,S,C,I>(v.ptr(),v.size(),v.step()); }
 
-    template <class T> 
-    static ConstDiagMatrixView<T> DiagMatrixViewOf(const T* v, size_t size)
+    template <class T>
+    static inline ConstDiagMatrixView<T> DiagMatrixViewOf(
+        const T* v, size_t size)
     { return ConstDiagMatrixView<T,1>(v,size); }
 
-    template <class T> 
-    static DiagMatrixView<T> DiagMatrixViewOf(T* v, size_t size)
+    template <class T>
+    static inline DiagMatrixView<T> DiagMatrixViewOf(T* v, size_t size)
     { return DiagMatrixView<T,1>(v,size); }
 
 
@@ -829,18 +831,18 @@ namespace tmv {
     //
 
     template <class T, IndexStyle I>
-    static void Swap(DiagMatrix<T,I>& m1, DiagMatrix<T,I>& m2)
+    static inline void Swap(DiagMatrix<T,I>& m1, DiagMatrix<T,I>& m2)
     { m1.swapWith(m2); }
     template <class M, class T, int S, bool C, IndexStyle I>
-    static void Swap(
+    static inline void Swap(
         BaseMatrix_Diag_Mutable<M>& m1, DiagMatrixView<T,S,C,I> m2)
     { Swap(m1.diag(),m2.diag()); }
     template <class M, class T, int S, bool C, IndexStyle I>
-    static void Swap(
+    static inline void Swap(
         DiagMatrixView<T,S,C,I> m1, BaseMatrix_Diag_Mutable<M>& m2)
     { Swap(m1.diag(),m2.diag()); }
     template <class T, int S1, bool C1, IndexStyle I1, int S2, bool C2, IndexStyle I2>
-    static void Swap(
+    static inline void Swap(
         DiagMatrixView<T,S1,C1,I1> m1, DiagMatrixView<T,S2,C2,I2> m2)
     { Swap(m1.diag(),m2.diag()); }
 
@@ -850,28 +852,29 @@ namespace tmv {
     //
 
     template <class T, IndexStyle I>
-    static typename DiagMatrix<T,I>::conjugate_type Conjugate(
+    static inline typename DiagMatrix<T,I>::conjugate_type Conjugate(
         DiagMatrix<T,I>& m)
     { return m.conjugate(); }
     template <class T, int S, bool C, IndexStyle I>
-    static typename DiagMatrixView<T,S,C,I>::conjugate_type Conjugate(
+    static inline typename DiagMatrixView<T,S,C,I>::conjugate_type Conjugate(
         DiagMatrixView<T,S,C,I> m)
     { return m.conjugate(); }
 
     template <class T, IndexStyle I>
-    static typename DiagMatrix<T,I>::transpose_type Transpose(
+    static inline typename DiagMatrix<T,I>::transpose_type Transpose(
         DiagMatrix<T,I>& m)
     { return m.transpose(); }
     template <class T, int S, bool C, IndexStyle I>
-    static typename DiagMatrixView<T,S,C,I>::transpose_type Transpose(
+    static inline typename DiagMatrixView<T,S,C,I>::transpose_type Transpose(
         DiagMatrixView<T,S,C,I> m)
     { return m.transpose(); }
 
     template <class T, IndexStyle I>
-    static typename DiagMatrix<T,I>::adjoint_type Adjoint(DiagMatrix<T,I>& m)
+    static inline typename DiagMatrix<T,I>::adjoint_type Adjoint(
+        DiagMatrix<T,I>& m)
     { return m.adjoint(); }
     template <class T, int S, bool C, IndexStyle I>
-    static typename DiagMatrixView<T,S,C,I>::adjoint_type Adjoint(
+    static inline typename DiagMatrixView<T,S,C,I>::adjoint_type Adjoint(
         DiagMatrixView<T,S,C,I> m)
     { return m.adjoint(); }
 
@@ -881,7 +884,7 @@ namespace tmv {
     //
 
     template <class T, IndexStyle I>
-    static std::string TMV_Text(const DiagMatrix<T,I>& )
+    static inline std::string TMV_Text(const DiagMatrix<T,I>& )
     {
         std::ostringstream s;
         s << "DiagMatrix<"<<TMV_Text(T())<<","<<TMV_Text(I)<<">";
@@ -889,7 +892,7 @@ namespace tmv {
     }
 
     template <class T, int S, bool C, IndexStyle I>
-    static std::string TMV_Text(const ConstDiagMatrixView<T,S,C,I>& m)
+    static inline std::string TMV_Text(const ConstDiagMatrixView<T,S,C,I>& m)
     {
         std::ostringstream s;
         s << "ConstDiagMatrixView<"<<TMV_Text(T());
@@ -900,7 +903,7 @@ namespace tmv {
     }
 
     template <class T, int S, bool C, IndexStyle I>
-    static std::string TMV_Text(const DiagMatrixView<T,S,C,I>& m)
+    static inline std::string TMV_Text(const DiagMatrixView<T,S,C,I>& m)
     {
         std::ostringstream s;
         s << "DiagMatrixView<"<<TMV_Text(T());

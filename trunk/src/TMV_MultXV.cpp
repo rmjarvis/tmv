@@ -41,10 +41,12 @@ namespace tmv {
     template <bool add, class T, class V1, class V2>
     static void DoMultXV3(const T x, const V1& v1, V2& v2)
     { 
-        if (x == T(-1))
-            InlineMultXV<add>(Scaling<-1,T>(x),v1,v2); 
-        else if (x == T(1))
+        if (x == T(1))
             InlineMultXV<add>(Scaling<1,T>(x),v1,v2); 
+        else if (x == T(-1))
+            InlineMultXV<add>(Scaling<-1,T>(x),v1,v2); 
+        else if (x == T(0))
+            Maybe<!add>::zero(v2);
         else
             InlineMultXV<add>(Scaling<0,T>(x),v1,v2); 
     }
@@ -53,10 +55,12 @@ namespace tmv {
     static void DoMultXV3(const std::complex<T> x, const V1& v1, V2& v2)
     {
         if (imag(x) == T(0)) {
-            if (real(x) == T(-1))
-                InlineMultXV<add>(Scaling<-1,T>(real(x)),v1,v2);
-            else if (real(x) == T(1))
+            if (real(x) == T(1))
                 InlineMultXV<add>(Scaling<1,T>(real(x)),v1,v2);
+            else if (real(x) == T(-1))
+                InlineMultXV<add>(Scaling<-1,T>(real(x)),v1,v2);
+            else if (real(x) == T(0))
+                Maybe<!add>::zero(v2);
             else
                 InlineMultXV<add>(Scaling<0,T>(real(x)),v1,v2);
         } else 
@@ -66,17 +70,11 @@ namespace tmv {
     template <bool add, class T, class V1>
     static void DoMultXV2(const T x, const V1& v1, VectorView<T> v2)
     {
-        if (v2.step() == 1) {
+        if (v1.step() == 1 && v2.step() == 1) {
             VectorView<T,1> v2u = v2.unitView();
-            if (v1.step() == 1) 
-                DoMultXV3<add>(x,v1.unitView(),v2u);
-            else
-                DoMultXV3<add>(x,v1,v2u);
+            DoMultXV3<add>(x,v1.unitView(),v2u);
         } else 
-            if (v1.step() == 1)
-                DoMultXV3<add>(x,v1.unitView(),v2); 
-            else
-                DoMultXV3<add>(x,v1,v2); 
+            DoMultXV3<add>(x,v1,v2); 
     }
 
     template <class T1, bool C1, class T2>

@@ -486,8 +486,9 @@ namespace tmv {
         typedef VIt<T,-1,false> reverse_iterator;
     };
 
-    template <class T, IndexStyle I> 
-    class Vector : public BaseVector_Mutable<Vector<T,I> >
+    template <class T, IndexStyle I>
+    class Vector : 
+        public BaseVector_Mutable<Vector<T,I> >
     {
     public:
 
@@ -507,7 +508,7 @@ namespace tmv {
         //
 
         explicit Vector(size_t n=0) : itssize(n), itsv(n)
-        { 
+        {
             TMVAssert(n>=0);
 #ifdef TMV_DEBUG
             this->setAllTo(T(888));
@@ -608,7 +609,8 @@ namespace tmv {
     }; // Vector
 
     template <class T>
-    class VectorF : public Vector<T,FortranStyle>
+    class VectorF : 
+        public Vector<T,FortranStyle>
     {
     public:
 
@@ -678,7 +680,8 @@ namespace tmv {
     };
 
     template <class T, int S, bool C, IndexStyle I>
-    class ConstVectorView : public BaseVector_Calc<ConstVectorView<T,S,C,I> >
+    class ConstVectorView : 
+        public BaseVector_Calc<ConstVectorView<T,S,C,I> >
     {
     public:
 
@@ -757,7 +760,8 @@ namespace tmv {
     }; // ConstVectorView
 
     template <class T, int S, bool C>
-    class ConstVectorViewF : public ConstVectorView<T,S,C,FortranStyle>
+    class ConstVectorViewF : 
+        public ConstVectorView<T,S,C,FortranStyle>
     {
     public:
         typedef ConstVectorViewF<T,S,C> type;
@@ -852,7 +856,8 @@ namespace tmv {
     };
 
     template <class T, int S, bool C, IndexStyle I>
-    class VectorView : public BaseVector_Mutable<VectorView<T,S,C,I> >
+    class VectorView : 
+        public BaseVector_Mutable<VectorView<T,S,C,I> >
     {
     public:
 
@@ -932,7 +937,8 @@ namespace tmv {
     }; // VectorView
 
     template <class T, int S, bool C>
-    class VectorViewF : public VectorView<T,S,C,FortranStyle>
+    class VectorViewF : 
+        public VectorView<T,S,C,FortranStyle>
     {
     public:
         typedef VectorViewF<T,S,C> type;
@@ -961,12 +967,13 @@ namespace tmv {
     //
 
     // VectorView of raw memory:
-    template <class T> 
-    static VectorView<T,1> VectorViewOf(T* v, size_t size)
+    template <class T>
+    static inline VectorView<T,1> VectorViewOf(T* v, size_t size)
     { return VectorView<T,1>(v,size,1); }
 
-    template <class T> 
-    static VectorView<T,UNKNOWN> VectorViewOf(T* v, size_t size, int step)
+    template <class T>
+    static inline VectorView<T,UNKNOWN> VectorViewOf(
+        T* v, size_t size, int step)
     { return VectorView<T,UNKNOWN>(v,size,step); }
 
 
@@ -975,17 +982,17 @@ namespace tmv {
     //
 
     template <class T, IndexStyle I>
-    static void Swap(Vector<T,I>& v1, Vector<T,I>& v2)
+    static inline void Swap(Vector<T,I>& v1, Vector<T,I>& v2)
     { v1.swapWith(v2); }
     template <class V, class T, int S, bool C, IndexStyle I>
-    static void Swap(BaseVector_Mutable<V>& v1, VectorView<T,S,C,I> v2)
+    static inline void Swap(BaseVector_Mutable<V>& v1, VectorView<T,S,C,I> v2)
     { DoSwap(v1,v2); }
     template <class V, class T, int S, bool C, IndexStyle I>
-    static void Swap(VectorView<T,S,C,I> v1, BaseVector_Mutable<V>& v2)
+    static inline void Swap(VectorView<T,S,C,I> v1, BaseVector_Mutable<V>& v2)
     { DoSwap(v1,v2); }
-    template <class T, int S1, bool C1, IndexStyle I1,
-              int S2, bool C2, IndexStyle I2>
-    static void Swap(VectorView<T,S1,C1,I1> v1, VectorView<T,S2,C2,I2> v2)
+    template <class T, int S1, bool C1, IndexStyle I1, int S2, bool C2, IndexStyle I2>
+    static inline void Swap(
+        VectorView<T,S1,C1,I1> v1, VectorView<T,S2,C2,I2> v2)
     { DoSwap(v1,v2); }
 
 
@@ -994,10 +1001,10 @@ namespace tmv {
     //
     
     template <class T, IndexStyle I>
-    static VectorView<T,1,true,I> Conjugate(Vector<T,I>& v)
+    static inline VectorView<T,1,true,I> Conjugate(Vector<T,I>& v)
     { return v.conjugate(); }
     template <class T, int S, bool C, IndexStyle I>
-    static VectorView<T,S,!C,I> Conjugate(VectorView<T,S,C,I> v)
+    static inline VectorView<T,S,!C,I> Conjugate(VectorView<T,S,C,I> v)
     { return v.conjugate(); }
 
 
@@ -1006,7 +1013,7 @@ namespace tmv {
     //
 
     template <class T, IndexStyle I>
-    static std::string TMV_Text(const Vector<T,I>& )
+    static inline std::string TMV_Text(const Vector<T,I>& )
     {
         std::ostringstream s;
         s << "Vector<"<<TMV_Text(T())<<","<<TMV_Text(I)<<">";
@@ -1014,7 +1021,7 @@ namespace tmv {
     }
 
     template <class T, int S, bool C, IndexStyle I>
-    static std::string TMV_Text(const ConstVectorView<T,S,C,I>& v)
+    static inline std::string TMV_Text(const ConstVectorView<T,S,C,I>& v)
     {
         std::ostringstream s;
         s << "ConstVectorView<"<<TMV_Text(T());
@@ -1025,7 +1032,7 @@ namespace tmv {
     }
 
     template <class T, int S, bool C, IndexStyle I>
-    static std::string TMV_Text(const VectorView<T,S,C,I>& v)
+    static inline std::string TMV_Text(const VectorView<T,S,C,I>& v)
     {
         std::ostringstream s;
         s << "VectorView<"<<TMV_Text(T());

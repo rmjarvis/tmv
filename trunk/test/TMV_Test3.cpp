@@ -66,7 +66,7 @@ int main() try {
 #ifdef TEST_INT
     TestAllSmallVector<int>();
     TestAllSmallMatrix<int>();
-    TestAllSmallMatrixDet<int>();
+    TestSmallMatrixDet<int>();
 #endif 
 
 #endif

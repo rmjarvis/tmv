@@ -60,7 +60,7 @@ namespace tmv {
     template <class T, IndexStyle I=CStyle>
     class BasisVector;
 
-    template <class T, IndexStyle I> 
+    template <class T, IndexStyle I>
     struct Traits<BasisVector<T,I> >
     {
         typedef T value_type;
@@ -80,8 +80,9 @@ namespace tmv {
         enum { _calc = true };
     };
 
-    template <class T, IndexStyle I> 
-    class BasisVector : public BaseVector<BasisVector<T,I> >
+    template <class T, IndexStyle I>
+    class BasisVector : 
+        public BaseVector<BasisVector<T,I> >
     {
     public:
         typedef BasisVector<T,I> type;
@@ -112,7 +113,7 @@ namespace tmv {
         int nElements() const { return 1; }
         template <class V2>
         void assignTo(BaseVector_Mutable<V2>& v2) const
-        { 
+        {
             TMVAssert(v2.size() == itssize);
             v2.setZero();
             v2.ref(itsindex) = itsval; 
@@ -131,9 +132,9 @@ namespace tmv {
     // TMV_Text functions
     //
 
-    template <class T, IndexStyle I> 
-    static std::string TMV_Text(const BasisVector<T,I>& )
-    { 
+    template <class T, IndexStyle I>
+    static inline std::string TMV_Text(const BasisVector<T,I>& )
+    {
         std::ostringstream s;
         s << "BasisVector<"<<TMV_Text(T())<<","<<TMV_Text(I)<<">";
         return s.str();

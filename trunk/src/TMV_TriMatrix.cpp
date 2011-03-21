@@ -47,34 +47,37 @@ namespace tmv {
     // Copy Matrices
     //
 
+    template <class M1, class M2>
+    void DoCopyU(const M1& m1, M2& m2)
+    {
+        if (m1.iscm() && m2.iscm()) {
+            typename M2::cmview_type m2cm = m2.cmView();
+            InlineCopy(m1.cmView(),m2cm);
+        } else if (m1.isrm() && m2.isrm()) {
+            typename M2::rmview_type m2rm = m2.rmView();
+            InlineCopy(m1.rmView(),m2rm);
+        } else {
+            InlineCopy(m1,m2);
+        }
+    }
+
     template <class T1, bool C1, class T2>
     void InstCopy(
         const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
         UpperTriMatrixView<T2,UnknownDiag> m2)
     {
-        if (m2.isrm()) {
-            UpperTriMatrixView<T2,UnknownDiag,UNKNOWN,1> m2rm = m2;
-            if (m1.isrm())
-                InlineCopy(m1.rmView(),m2rm);
-            else if (m1.iscm())
-                InlineCopy(m1.cmView(),m2rm);
-            else
-                InlineCopy(m1,m2rm);
-        } else if (m2.iscm()) {
-            UpperTriMatrixView<T2,UnknownDiag,1> m2cm = m2;
-            if (m1.isrm())
-                InlineCopy(m1.rmView(),m2cm);
-            else if (m1.iscm())
-                InlineCopy(m1.cmView(),m2cm);
-            else
-                InlineCopy(m1,m2cm);
+        if (m1.isunit()) {
+            if (m2.size() > 1) {
+                UpperTriMatrixView<T2,NonUnitDiag> m2o = m2.offDiag();
+                DoCopyU(m1.nonConj().offDiag(),m2o);
+                Maybe<C1>::conjself(m2o);
+            }
+            if (!m2.isunit()) m2.diag().setAllTo(T2(1));
         } else {
-            if (m1.isrm())
-                InlineCopy(m1.rmView(),m2);
-            else if (m1.iscm())
-                InlineCopy(m1.cmView(),m2);
-            else
-                InlineCopy(m1,m2);
+            UpperTriMatrixView<T2,NonUnitDiag> m2n = m2.viewAsNonUnitDiag();
+            TMVAssert(!m2.isunit());
+            DoCopyU(m1.nonConj().viewAsNonUnitDiag(),m2n);
+            Maybe<C1>::conjself(m2n);
         }
     }
 
@@ -88,35 +91,16 @@ namespace tmv {
         UpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C> m1,
         UpperTriMatrixView<T,UnknownDiag> m2)
     {
-        if (m2.isrm()) {
-            UpperTriMatrixView<T,UnknownDiag,UNKNOWN,1> m2rm = m2;
-            if (m1.isrm()) {
-                UpperTriMatrixView<T,UnknownDiag,UNKNOWN,1,C> m1rm = m1;
-                InlineSwap(m1rm,m2rm);
-            } else if (m1.iscm()) {
-                UpperTriMatrixView<T,UnknownDiag,1,UNKNOWN,C> m1cm = m1;
-                InlineSwap(m1cm,m2rm);
-            } else
-                InlineSwap(m1,m2rm);
-        } else if (m2.iscm()) {
+        if (m1.iscm() && m2.iscm()) {
+            UpperTriMatrixView<T,UnknownDiag,1,UNKNOWN,C> m1cm = m1;
             UpperTriMatrixView<T,UnknownDiag,1> m2cm = m2;
-            if (m1.isrm()) {
-                UpperTriMatrixView<T,UnknownDiag,UNKNOWN,1,C> m1rm = m1;
-                InlineSwap(m1rm,m2cm);
-            } else if (m1.iscm()) {
-                UpperTriMatrixView<T,UnknownDiag,1,UNKNOWN,C> m1cm = m1;
-                InlineSwap(m1cm,m2cm);
-            } else
-                InlineSwap(m1,m2cm);
+            InlineSwap(m1cm,m2cm);
+        } else if (m1.isrm() && m2.isrm()) {
+            UpperTriMatrixView<T,UnknownDiag,UNKNOWN,1,C> m1rm = m1;
+            UpperTriMatrixView<T,UnknownDiag,UNKNOWN,1> m2rm = m2;
+            InlineSwap(m1rm,m2rm);
         } else {
-            if (m1.isrm()) {
-                UpperTriMatrixView<T,UnknownDiag,UNKNOWN,1,C> m1rm = m1;
-                InlineSwap(m1rm,m2);
-            } else if (m1.iscm()) {
-                UpperTriMatrixView<T,UnknownDiag,1,UNKNOWN,C> m1cm = m1;
-                InlineSwap(m1cm,m2);
-            } else
-                InlineSwap(m1,m2);
+            InlineSwap(m1,m2);
         }
     }
 
@@ -128,8 +112,8 @@ namespace tmv {
     template <class T>
     static T DoInstSumElements(const ConstUpperTriMatrixView<T>& m)
     { 
-        if (m.isrm()) return InlineSumElements(m.rmView());
-        else if (m.iscm()) return InlineSumElements(m.cmView());
+        if (m.iscm()) return InlineSumElements(m.cmView());
+        else if (m.isrm()) return InlineSumElements(m.rmView());
         else return InlineSumElements(m);
     }
 
@@ -137,8 +121,8 @@ namespace tmv {
     static typename ConstUpperTriMatrixView<T>::float_type DoInstSumAbsElements(
         const ConstUpperTriMatrixView<T>& m)
     {
-        if (m.isrm()) return InlineSumAbsElements(m.rmView());
-        else if (m.iscm()) return InlineSumAbsElements(m.cmView());
+        if (m.iscm()) return InlineSumAbsElements(m.cmView());
+        else if (m.isrm()) return InlineSumAbsElements(m.rmView());
         else return InlineSumAbsElements(m);
     }
 
@@ -146,8 +130,8 @@ namespace tmv {
     static typename Traits<T>::real_type DoInstSumAbs2Elements(
         const ConstUpperTriMatrixView<T>& m)
     {
-        if (m.isrm()) return InlineSumAbs2Elements(m.rmView());
-        else if (m.iscm()) return InlineSumAbs2Elements(m.cmView());
+        if (m.iscm()) return InlineSumAbs2Elements(m.cmView());
+        else if (m.isrm()) return InlineSumAbs2Elements(m.rmView());
         else return InlineSumAbs2Elements(m);
     }
 
@@ -155,8 +139,8 @@ namespace tmv {
     static typename Traits<T>::real_type DoInstNormSq(
         const ConstUpperTriMatrixView<T>& m)
     {
-        if (m.isrm()) return InlineNormSq(m.rmView());
-        else if (m.iscm()) return InlineNormSq(m.cmView());
+        if (m.iscm()) return InlineNormSq(m.cmView());
+        else if (m.isrm()) return InlineNormSq(m.rmView());
         else return InlineNormSq(m);
     }
 
@@ -165,8 +149,8 @@ namespace tmv {
         const ConstUpperTriMatrixView<T>& m,
         const typename ConstUpperTriMatrixView<T>::float_type scale)
     {
-        if (m.isrm()) return InlineNormSq(m.rmView());
-        else if (m.iscm()) return InlineNormSq(m.cmView());
+        if (m.iscm()) return InlineNormSq(m.cmView());
+        else if (m.isrm()) return InlineNormSq(m.rmView());
         else return InlineNormSq(m);
     }
 
@@ -174,8 +158,8 @@ namespace tmv {
     static typename ConstUpperTriMatrixView<T>::float_type DoInstNormF(
         const ConstUpperTriMatrixView<T>& m)
     {
-        if (m.isrm()) return InlineNormF(m.rmView());
-        else if (m.iscm()) return InlineNormF(m.cmView());
+        if (m.iscm()) return InlineNormF(m.cmView());
+        else if (m.isrm()) return InlineNormF(m.rmView());
         else return InlineNormF(m);
     }
 
@@ -183,8 +167,8 @@ namespace tmv {
     static typename ConstUpperTriMatrixView<T>::float_type DoInstMaxAbsElement(
         const ConstUpperTriMatrixView<T>& m)
     {
-        if (m.isrm()) return InlineMaxAbsElement(m.rmView());
-        else if (m.iscm()) return InlineMaxAbsElement(m.cmView());
+        if (m.iscm()) return InlineMaxAbsElement(m.cmView());
+        else if (m.isrm()) return InlineMaxAbsElement(m.rmView());
         else return InlineMaxAbsElement(m);
     }
 
@@ -192,8 +176,8 @@ namespace tmv {
     static typename Traits<T>::real_type DoInstMaxAbs2Element(
         const ConstUpperTriMatrixView<T>& m)
     {
-        if (m.isrm()) return InlineMaxAbs2Element(m.rmView());
-        else if (m.iscm()) return InlineMaxAbs2Element(m.cmView());
+        if (m.iscm()) return InlineMaxAbs2Element(m.cmView());
+        else if (m.isrm()) return InlineMaxAbs2Element(m.rmView());
         else return InlineMaxAbs2Element(m);
     }
 
@@ -201,8 +185,8 @@ namespace tmv {
     static typename ConstUpperTriMatrixView<T>::float_type DoInstNorm1(
         const ConstUpperTriMatrixView<T>& m)
     {
-        if (m.isrm()) return InlineNorm1(m.rmView());
-        else if (m.iscm()) return InlineNorm1(m.cmView());
+        if (m.iscm()) return InlineNorm1(m.cmView());
+        else if (m.isrm()) return InlineNorm1(m.rmView());
         else return InlineNorm1(m);
     }
 
@@ -210,8 +194,8 @@ namespace tmv {
     static typename ConstLowerTriMatrixView<T>::float_type DoInstNorm1(
         const ConstLowerTriMatrixView<T>& m)
     {
-        if (m.isrm()) return InlineNorm1(m.rmView());
-        else if (m.iscm()) return InlineNorm1(m.cmView());
+        if (m.iscm()) return InlineNorm1(m.cmView());
+        else if (m.isrm()) return InlineNorm1(m.rmView());
         else return InlineNorm1(m);
     }
 
@@ -517,8 +501,8 @@ namespace tmv {
         std::ostream& os, 
         const ConstUpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>& m)
     {
-        if (m.isrm()) InlineWriteCompact(os,m.rmView());
-        else if (m.iscm()) InlineWriteCompact(os,m.cmView());
+        if (m.iscm()) InlineWriteCompact(os,m.cmView());
+        else if (m.isrm()) InlineWriteCompact(os,m.rmView());
         else InlineWriteCompact(os,m);
     }
 
@@ -527,8 +511,8 @@ namespace tmv {
         std::ostream& os, 
         const ConstLowerTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>& m)
     {
-        if (m.isrm()) InlineWriteCompact(os,m.rmView());
-        else if (m.iscm()) InlineWriteCompact(os,m.cmView());
+        if (m.iscm()) InlineWriteCompact(os,m.cmView());
+        else if (m.isrm()) InlineWriteCompact(os,m.rmView());
         else InlineWriteCompact(os,m);
     }
 
@@ -538,8 +522,8 @@ namespace tmv {
         const ConstUpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>& m, 
         typename ConstUpperTriMatrixView<T>::float_type thresh)
     {
-        if (m.isrm()) InlineWriteCompact(os,m.rmView(),thresh);
-        else if (m.iscm()) InlineWriteCompact(os,m.cmView(),thresh);
+        if (m.iscm()) InlineWriteCompact(os,m.cmView(),thresh);
+        else if (m.isrm()) InlineWriteCompact(os,m.rmView(),thresh);
         else InlineWriteCompact(os,m,thresh);
     }
 
@@ -549,34 +533,32 @@ namespace tmv {
         const ConstLowerTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>& m, 
         typename ConstLowerTriMatrixView<T>::float_type thresh)
     {
-        if (m.isrm()) InlineWriteCompact(os,m.rmView(),thresh);
-        else if (m.iscm()) InlineWriteCompact(os,m.cmView(),thresh);
+        if (m.iscm()) InlineWriteCompact(os,m.cmView(),thresh);
+        else if (m.isrm()) InlineWriteCompact(os,m.rmView(),thresh);
         else InlineWriteCompact(os,m,thresh);
     }
 
-    template <class T, bool C>
-    void InstRead(
-        std::istream& is, UpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C> m)
+    template <class T>
+    void InstRead(std::istream& is, UpperTriMatrixView<T> m)
     {
-        if (m.isrm()) {
-            UpperTriMatrixView<T,UnknownDiag,UNKNOWN,1,C> mrm = m.rmView();
-            InlineRead(is,mrm);
-        } else if (m.iscm()) {
-            UpperTriMatrixView<T,UnknownDiag,1,UNKNOWN,C> mcm = m.cmView();
+        if (m.iscm()) {
+            UpperTriMatrixView<T,UnknownDiag,1> mcm = m.cmView();
             InlineRead(is,mcm);
+        } else if (m.isrm()) {
+            UpperTriMatrixView<T,UnknownDiag,UNKNOWN,1> mrm = m.rmView();
+            InlineRead(is,mrm);
         } else 
             InlineRead(is,m);
     }
-    template <class T, bool C>
-    void InstRead(
-        std::istream& is, LowerTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C> m)
+    template <class T>
+    void InstRead(std::istream& is, LowerTriMatrixView<T> m)
     {
-        if (m.isrm()) {
-            LowerTriMatrixView<T,UnknownDiag,UNKNOWN,1,C> mrm = m.rmView();
-            InlineRead(is,mrm);
-        } else if (m.iscm()) {
-            LowerTriMatrixView<T,UnknownDiag,1,UNKNOWN,C> mcm = m.cmView();
+        if (m.iscm()) {
+            LowerTriMatrixView<T,UnknownDiag,1> mcm = m.cmView();
             InlineRead(is,mcm);
+        } else if (m.isrm()) {
+            LowerTriMatrixView<T,UnknownDiag,UNKNOWN,1> mrm = m.rmView();
+            InlineRead(is,mrm);
         } else 
             InlineRead(is,m);
     }

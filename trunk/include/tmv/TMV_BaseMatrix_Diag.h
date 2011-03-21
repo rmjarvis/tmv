@@ -55,14 +55,8 @@ namespace tmv {
     static void Read(std::istream& is, BaseMatrix_Diag_Mutable<M>& m);
 
     // Defined in InvertD.h
-    template <int ix, class T, class M1, class M2>
-    static void Invert(
-        const Scaling<ix,T>& x,
-        const BaseMatrix_Diag<M1>& m1, BaseMatrix_Mutable<M2>& m2);
-    template <int ix, class T, class M1, class M2>
-    static void Invert(
-        const Scaling<ix,T>& x,
-        const BaseMatrix_Diag<M1>& m1, BaseMatrix_Diag_Mutable<M2>& m2);
+    template <class M1>
+    static void InvertSelf(BaseMatrix_Diag_Mutable<M1>& m1);
 
     // Defined in ElemMultVV.h
     template <bool add, int ix, class T, class V1, class V2, class V3>
@@ -71,19 +65,59 @@ namespace tmv {
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3);
 
     // Defined below:
-    template <class M1, class M2> 
+    template <class M1, class M2>
     static void Copy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
-    template <class M1, class M2> 
+    template <class M1, class M2>
     static void Copy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Diag_Mutable<M2>& m2);
-    template <class M1, class M2> 
+    template <class M1, class M2>
     static void NoAliasCopy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
-    template <class M1, class M2> 
+    template <class M1, class M2>
     static void NoAliasCopy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Diag_Mutable<M2>& m2);
 
+    // A helper class for returning views without necessarily
+    // making a new object.
+    template <bool ref, class type, class view_type>
+    struct MakeDiagView_Helper;
+
+    template <class type, class view_type>
+    struct MakeDiagView_Helper<true,type,view_type>
+    {
+        typedef type& ret_type;
+        typedef const type& const_ret_type;
+        static ret_type call(type& m) { return m; }
+        static const_ret_type call(const type& m) { return m; }
+    };
+
+    template <class type, class view_type>
+    struct MakeDiagView_Helper<false,type,view_type>
+    {
+        typedef view_type ret_type;
+        typedef view_type const_ret_type;
+        static ret_type call(type& m) 
+        { return view_type(m.ptr(),m.size(),m.step()); }
+        static const_ret_type call(const type& m) 
+        { return view_type(m.cptr(),m.size(),m.step()); }
+    };
+
+    template <class type, class view_type>
+    struct MakeDiagView
+    {
+        enum { ref = Traits2<type,view_type>::sametype };
+        typedef MakeDiagView_Helper<ref,type,view_type> helper;
+
+        static typename helper::ret_type call(type& m)
+        { return helper::call(m); }
+        static typename helper::const_ret_type call(const type& m)
+        { return helper::call(m); }
+    };
+
+ 
+    //
+    // BaseVector
     template <class M>
     class BaseMatrix_Diag : 
         public BaseMatrix_Calc<M>
@@ -101,40 +135,38 @@ namespace tmv {
         enum { _conj = Traits<M>::_conj };
 
         typedef M type;
+        typedef BaseMatrix_Calc<M> base;
 
-        typedef typename Traits<M>::value_type value_type;
+        typedef typename base::calc_type calc_type;
+        typedef typename base::eval_type eval_type;
+        typedef typename base::copy_type copy_type;
+        typedef typename base::inverse_type inverse_type;
+        typedef typename base::value_type value_type;
+        typedef typename base::real_type real_type;
+        typedef typename base::complex_type complex_type;
+        typedef typename base::float_type float_type;
+        typedef typename base::zfloat_type zfloat_type;
 
-        typedef typename Traits<M>::calc_type calc_type;
-        typedef typename Traits<M>::eval_type eval_type;
-        typedef typename Traits<M>::copy_type copy_type;
+        typedef typename base::const_view_type const_view_type;
+        typedef typename base::const_cview_type const_cview_type;
+        typedef typename base::const_fview_type const_fview_type;
+        typedef typename base::const_xview_type const_xview_type;
+        typedef typename base::const_transpose_type const_transpose_type;
+        typedef typename base::const_conjugate_type const_conjugate_type;
+        typedef typename base::const_adjoint_type const_adjoint_type;
+        typedef typename base::const_realpart_type const_realpart_type;
+        typedef typename base::const_imagpart_type const_imagpart_type;
+        typedef typename base::const_nonconj_type const_nonconj_type;
+        typedef typename base::nonconst_type nonconst_type;
 
         typedef typename Traits<M>::const_diag_type const_diag_type;
+
+        typedef typename Traits<M>::const_unitview_type const_unitview_type;
 
         typedef typename Traits<M>::const_subdiagmatrix_type 
             const_subdiagmatrix_type;
         typedef typename Traits<M>::const_subdiagmatrix_step_type 
             const_subdiagmatrix_step_type;
-        typedef typename Traits<M>::const_view_type const_view_type;
-        typedef typename Traits<M>::const_cview_type const_cview_type;
-        typedef typename Traits<M>::const_fview_type const_fview_type;
-        typedef typename Traits<M>::const_xview_type const_xview_type;
-        typedef typename Traits<M>::const_cmview_type const_cmview_type;
-        typedef typename Traits<M>::const_rmview_type const_rmview_type;
-        typedef typename Traits<M>::const_transpose_type 
-            const_transpose_type;
-        typedef typename Traits<M>::const_conjugate_type 
-            const_conjugate_type;
-        typedef typename Traits<M>::const_adjoint_type const_adjoint_type;
-        typedef typename Traits<M>::const_realpart_type const_realpart_type;
-        typedef typename Traits<M>::const_imagpart_type const_imagpart_type;
-        typedef typename Traits<M>::const_nonconj_type const_nonconj_type;
-        typedef typename Traits<M>::nonconst_type nonconst_type;
-
-        // Derived values:
-        typedef typename Traits<value_type>::real_type real_type;
-        typedef typename Traits<real_type>::float_type float_type;
-        typedef typename Traits<value_type>::float_type zfloat_type;
-        typedef typename Traits<value_type>::complex_type complex_type;
 
 
         //
@@ -265,41 +297,35 @@ namespace tmv {
         // Views
         //
 
-        const_view_type view() const
-        { return const_view_type(cptr(),size(),step()); }
+        TMV_MAYBE_CREF(type,const_view_type) view() const
+        { return MakeDiagView<type,const_view_type>::call(mat()); }
 
-        const_cview_type cView() const
-        { return view(); }
+        TMV_MAYBE_CREF(type,const_cview_type) cView() const
+        { return MakeDiagView<type,const_cview_type>::call(mat()); }
 
-        const_fview_type fView() const
-        { return view(); }
+        TMV_MAYBE_CREF(type,const_fview_type) fView() const
+        { return MakeDiagView<type,const_fview_type>::call(mat()); }
 
-        const_xview_type xView() const
-        { return view(); }
+        TMV_MAYBE_CREF(type,const_xview_type) xView() const
+        { return MakeDiagView<type,const_xview_type>::call(mat()); }
 
-        const_cmview_type cmView() const
+        TMV_MAYBE_CREF(type,const_unitview_type) unitView() const
         {
-            TMVAssert(step()==1 && "Called cmView on DiagMatrix with step!=1");
-            return view(); 
+            TMVAssert(step()==1&&"Called unitView on DiagMatrix with step!=1");
+            return MakeDiagView<type,const_unitview_type>::call(mat()); 
         }
 
-        const_rmview_type rmView() const
-        {
-            TMVAssert(step()==1 && "Called rmView on DiagMatrix with step!=1");
-            return view(); 
-        }
+        TMV_MAYBE_CREF(type,const_view_type) constView() const
+        { return MakeDiagView<type,const_view_type>::call(mat()); }
 
-        const_view_type constView() const
-        { return view(); }
+        TMV_MAYBE_CREF(type,const_transpose_type) transpose() const
+        { return MakeDiagView<type,const_transpose_type>::call(mat()); }
 
-        const_transpose_type transpose() const
-        { return view(); }
+        TMV_MAYBE_CREF(type,const_conjugate_type) conjugate() const
+        { return MakeDiagView<type,const_conjugate_type>::call(mat()); }
 
-        const_conjugate_type conjugate() const
-        { return const_conjugate_type(cptr(),size(),step()); }
-
-        const_adjoint_type adjoint() const
-        { return conjugate(); }
+        TMV_MAYBE_CREF(type,const_adjoint_type) adjoint() const
+        { return MakeDiagView<type,const_adjoint_type>::call(mat()); }
 
         const_realpart_type realPart() const
         {
@@ -318,11 +344,14 @@ namespace tmv {
                 isreal ? step() : 2*step());
         }
 
-        const_nonconj_type nonConj() const
-        { return const_nonconj_type(cptr(),size(),step()); }
+        TMV_MAYBE_CREF(type,const_nonconj_type) nonConj() const
+        { return MakeDiagView<type,const_nonconj_type>::call(mat()); }
 
         nonconst_type nonConst() const
-        { return nonconst_type(const_cast<value_type*>(cptr()),size(),step()); }
+        {
+            return nonconst_type(
+                const_cast<value_type*>(cptr()),size(),step()); 
+        }
 
 
         //
@@ -341,20 +370,20 @@ namespace tmv {
 
         template <class M2>
         void assignTo(BaseMatrix_Mutable<M2>& m2) const
-        { 
+        {
             TMVStaticAssert((ShapeTraits2<_shape,M2::_shape>::assignable));
             tmv::Copy(mat(),m2.mat()); 
         }
 
         template <class M2>
         void newAssignTo(BaseMatrix_Mutable<M2>& m2) const
-        { 
+        {
             TMVStaticAssert((ShapeTraits2<_shape,M2::_shape>::assignable));
             tmv::NoAliasCopy(mat(),m2.mat()); 
         }
 
         const type& mat() const
-        { return *static_cast<const type*>(this); }
+        { return static_cast<const type&>(*this); }
 
         bool isconj() const { return _conj; }
 
@@ -403,60 +432,59 @@ namespace tmv {
         enum { _conj = Traits<M>::_conj };
 
         typedef M type;
-        typedef BaseMatrix_Diag<M> base_diag;
+        typedef BaseMatrix_Diag<M> base;
+        typedef BaseMatrix_Mutable<M> base_mut;
 
-        typedef typename Traits<M>::value_type value_type;
+        typedef typename base::calc_type calc_type;
+        typedef typename base::eval_type eval_type;
+        typedef typename base::copy_type copy_type;
+        typedef typename base::inverse_type inverse_type;
+        typedef typename base::value_type value_type;
+        typedef typename base::real_type real_type;
+        typedef typename base::complex_type complex_type;
+        typedef typename base::float_type float_type;
+        typedef typename base::zfloat_type zfloat_type;
 
-        typedef typename Traits<M>::calc_type calc_type;
-        typedef typename Traits<M>::eval_type eval_type;
-        typedef typename Traits<M>::copy_type copy_type;
+        typedef typename base::const_view_type const_view_type;
+        typedef typename base::const_cview_type const_cview_type;
+        typedef typename base::const_fview_type const_fview_type;
+        typedef typename base::const_xview_type const_xview_type;
+        typedef typename base::const_transpose_type const_transpose_type;
+        typedef typename base::const_conjugate_type const_conjugate_type;
+        typedef typename base::const_adjoint_type const_adjoint_type;
+        typedef typename base::const_realpart_type const_realpart_type;
+        typedef typename base::const_imagpart_type const_imagpart_type;
+        typedef typename base::const_nonconj_type const_nonconj_type;
+        typedef typename base::nonconst_type nonconst_type;
 
-        typedef typename Traits<M>::const_diag_type const_diag_type;
+        typedef typename base_mut::view_type view_type;
+        typedef typename base_mut::cview_type cview_type;
+        typedef typename base_mut::fview_type fview_type;
+        typedef typename base_mut::xview_type xview_type;
+        typedef typename base_mut::transpose_type transpose_type;
+        typedef typename base_mut::conjugate_type conjugate_type;
+        typedef typename base_mut::adjoint_type adjoint_type;
+        typedef typename base_mut::realpart_type realpart_type;
+        typedef typename base_mut::imagpart_type imagpart_type;
+        typedef typename base_mut::nonconj_type nonconj_type;
+        typedef typename base_mut::reference reference;
 
-        typedef typename Traits<M>::const_subdiagmatrix_type 
+        typedef typename base::const_diag_type const_diag_type;
+        typedef typename base::const_unitview_type const_unitview_type;
+        typedef typename base::const_subdiagmatrix_type 
             const_subdiagmatrix_type;
-        typedef typename Traits<M>::const_subdiagmatrix_step_type 
+        typedef typename base::const_subdiagmatrix_step_type 
             const_subdiagmatrix_step_type;
-        typedef typename Traits<M>::const_view_type const_view_type;
-        typedef typename Traits<M>::const_cview_type const_cview_type;
-        typedef typename Traits<M>::const_fview_type const_fview_type;
-        typedef typename Traits<M>::const_xview_type const_xview_type;
-        typedef typename Traits<M>::const_cmview_type const_cmview_type;
-        typedef typename Traits<M>::const_rmview_type const_rmview_type;
-        typedef typename Traits<M>::const_transpose_type 
-            const_transpose_type;
-        typedef typename Traits<M>::const_conjugate_type 
-            const_conjugate_type;
-        typedef typename Traits<M>::const_adjoint_type const_adjoint_type;
-        typedef typename Traits<M>::const_realpart_type const_realpart_type;
-        typedef typename Traits<M>::const_imagpart_type const_imagpart_type;
-        typedef typename Traits<M>::const_nonconj_type const_nonconj_type;
 
         typedef typename Traits<M>::diag_type diag_type;
+
+        typedef typename Traits<M>::unitview_type unitview_type;
+
         typedef typename Traits<M>::subdiagmatrix_type subdiagmatrix_type;
         typedef typename Traits<M>::subdiagmatrix_step_type 
             subdiagmatrix_step_type;
-        typedef typename Traits<M>::view_type view_type;
-        typedef typename Traits<M>::cview_type cview_type;
-        typedef typename Traits<M>::fview_type fview_type;
-        typedef typename Traits<M>::xview_type xview_type;
-        typedef typename Traits<M>::cmview_type cmview_type;
-        typedef typename Traits<M>::rmview_type rmview_type;
-        typedef typename Traits<M>::transpose_type transpose_type;
-        typedef typename Traits<M>::conjugate_type conjugate_type;
-        typedef typename Traits<M>::adjoint_type adjoint_type;
-        typedef typename Traits<M>::realpart_type realpart_type;
-        typedef typename Traits<M>::imagpart_type imagpart_type;
-        typedef typename Traits<M>::nonconj_type nonconj_type;
 
-        typedef typename Traits<M>::reference reference;
-
-        // Derived values:
-        typedef typename Traits<value_type>::real_type real_type;
-        typedef typename Traits<real_type>::float_type float_type;
-        typedef typename Traits<value_type>::float_type zfloat_type;
-        typedef typename Traits<value_type>::complex_type complex_type;
-
+        //
         //
         // Constructor
         //
@@ -490,9 +518,9 @@ namespace tmv {
         // We need to repeat the const versions so the non-const ones
         // don't clobber them.
         value_type operator()(int i, int j) const
-        { return base_diag::operator()(i,j); }
+        { return base::operator()(i,j); }
         const_diag_type diag() const
-        { return base_diag::diag(); }
+        { return base::diag(); }
 
 
         //
@@ -554,11 +582,7 @@ namespace tmv {
         { return mat(); }
 
         type& invertSelf() 
-        {
-            const int n=size();
-            for(int i=0;i<n;++i) ref(i) = real_type(1)/cref(i);
-            return mat(); 
-        }
+        { tmv::InvertSelf(mat()); return mat(); }
 
         type& setToIdentity(const value_type x=value_type(1))
         { diag().setAllTo(x); return mat(); }
@@ -625,54 +649,48 @@ namespace tmv {
 
         // Repeat the const versions:
         const_subdiagmatrix_type cSubDiagMatrix(int i1, int i2) const
-        { return base_diag::cSubDiagMatrix(i1,i2); }
+        { return base::cSubDiagMatrix(i1,i2); }
         const_subdiagmatrix_step_type cSubDiagMatrix(
             int i1, int i2, int istep) const
-        { return base_diag::cSubDiagMatrix(i1,i2,istep); }
+        { return base::cSubDiagMatrix(i1,i2,istep); }
 
         const_subdiagmatrix_type subDiagMatrix(int i1, int i2) const
-        { return base_diag::subDiagMatrix(i1,i2); }
+        { return base::subDiagMatrix(i1,i2); }
         const_subdiagmatrix_step_type subDiagMatrix(
             int i1, int i2, int istep) const
-        { return base_diag::subDiagMatrix(i1,i2,istep); }
+        { return base::subDiagMatrix(i1,i2,istep); }
 
 
         //
         // Views
         //
 
-        view_type view() 
-        { return view_type(ptr(),size(),step()); }
+        TMV_MAYBE_REF(type,view_type) view() 
+        { return MakeDiagView<type,view_type>::call(mat()); }
 
-        cview_type cView() 
-        { return view(); }
+        TMV_MAYBE_REF(type,cview_type) cView() 
+        { return MakeDiagView<type,cview_type>::call(mat()); }
 
-        fview_type fView() 
-        { return view(); }
+        TMV_MAYBE_REF(type,fview_type) fView() 
+        { return MakeDiagView<type,fview_type>::call(mat()); }
 
-        xview_type xView() 
-        { return view(); }
+        TMV_MAYBE_REF(type,xview_type) xView() 
+        { return MakeDiagView<type,xview_type>::call(mat()); }
 
-        cmview_type cmView() 
+        TMV_MAYBE_REF(type,unitview_type) unitView() 
         {
-            TMVAssert(step()==1 && "Called cmView on DiagMatrix with step!=1");
-            return view(); 
+            TMVAssert(step()==1&&"Called unitView on DiagMatrix with step!=1");
+            return MakeDiagView<type,unitview_type>::call(mat()); 
         }
 
-        rmview_type rmView() 
-        {
-            TMVAssert(step()==1 && "Called rmView on DiagMatrix with step!=1");
-            return view(); 
-        }
+        TMV_MAYBE_REF(type,transpose_type) transpose()
+        { return MakeDiagView<type,transpose_type>::call(mat()); }
 
-        transpose_type transpose() 
-        { return view(); }
+        TMV_MAYBE_REF(type,conjugate_type) conjugate() 
+        { return MakeDiagView<type,conjugate_type>::call(mat()); }
 
-        conjugate_type conjugate() 
-        { return conjugate_type(ptr(),size(),step()); }
-
-        adjoint_type adjoint() 
-        { return conjugate(); }
+        TMV_MAYBE_REF(type,adjoint_type) adjoint()
+        { return MakeDiagView<type,adjoint_type>::call(mat()); }
 
         realpart_type realPart() 
         {
@@ -691,35 +709,33 @@ namespace tmv {
                 isreal ? step() : 2*step());
         }
 
-        nonconj_type nonConj()
-        { return nonconj_type(ptr(),size(),step()); }
+        TMV_MAYBE_REF(type,nonconj_type) nonConj()
+        { return MakeDiagView<type,nonconj_type>::call(mat()); }
 
 
         // Repeat the const versions:
-        const_view_type view() const
-        { return base_diag::view(); }
-        const_cview_type cView() const
-        { return base_diag::cView(); }
-        const_fview_type fView() const
-        { return base_diag::fView(); }
-        const_xview_type xView() const
-        { return base_diag::xView(); }
-        const_cmview_type cmView() const
-        { return base_diag::cmView(); }
-        const_rmview_type rmView() const
-        { return base_diag::rmView(); }
-        const_transpose_type transpose() const
-        { return base_diag::transpose(); }
-        const_conjugate_type conjugate() const
-        { return base_diag::conjugate(); }
-        const_adjoint_type adjoint() const
-        { return base_diag::adjoint(); }
+        TMV_MAYBE_CREF(type,const_view_type) view() const
+        { return base::view(); }
+        TMV_MAYBE_CREF(type,const_cview_type) cView() const
+        { return base::cView(); }
+        TMV_MAYBE_CREF(type,const_fview_type) fView() const
+        { return base::fView(); }
+        TMV_MAYBE_CREF(type,const_xview_type) xView() const
+        { return base::xView(); }
+        TMV_MAYBE_CREF(type,const_unitview_type) unitView() const
+        { return base::unitView(); }
+        TMV_MAYBE_CREF(type,const_transpose_type) transpose() const
+        { return base::transpose(); }
+        TMV_MAYBE_CREF(type,const_conjugate_type) conjugate() const
+        { return base::conjugate(); }
+        TMV_MAYBE_CREF(type,const_adjoint_type) adjoint() const
+        { return base::adjoint(); }
         const_realpart_type realPart() const
-        { return base_diag::realPart(); }
+        { return base::realPart(); }
         const_imagpart_type imagPart() const
-        { return base_diag::imagPart(); }
-        const_nonconj_type nonConj() const
-        { return base_diag::nonConj(); }
+        { return base::imagPart(); }
+        TMV_MAYBE_CREF(type,const_nonconj_type) nonConj() const
+        { return base::nonConj(); }
 
         //
         // I/O
@@ -733,9 +749,9 @@ namespace tmv {
         //
 
         const type& mat() const
-        { return *static_cast<const type*>(this); }
+        { return static_cast<const type&>(*this); }
         type& mat()
-        { return *static_cast<type*>(this); }
+        { return static_cast<type&>(*this); }
 
 
         // Note that these last functions need to be defined in a more derived
@@ -758,7 +774,7 @@ namespace tmv {
     // But if we do have the elements calculated, this overloaded 
     // version will be faster:
     template <class M>
-    static typename M::value_type DoTrace(const BaseMatrix_Diag<M>& m)
+    static inline typename M::value_type DoTrace(const BaseMatrix_Diag<M>& m)
     { return m.diag().sumElements(); }
 
 
@@ -793,19 +809,19 @@ namespace tmv {
     // Copy Matrices
     //
 
-    template <class M1, class M2> 
-    static void Copy(
+    template <class M1, class M2>
+    static inline void Copy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Diag_Mutable<M2>& m2)
-    { 
+    {
         typename M1::const_diag_type m1d = m1.diag();
         typename M2::diag_type m2d = m2.diag();
         Copy(m1d,m2d);
     }
 
-    template <class M1, class M2> 
-    static void NoAliasCopy(
+    template <class M1, class M2>
+    static inline void NoAliasCopy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Diag_Mutable<M2>& m2)
-    { 
+    {
         typename M1::const_diag_type m1d = m1.diag();
         typename M2::diag_type m2d = m2.diag();
         NoAliasCopy(m1d,m2d);
@@ -815,24 +831,26 @@ namespace tmv {
     // M = D
     //
 
-    template <class M1, class M2> 
-    static void Copy(
+    template <class M1, class M2>
+    static inline void Copy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
         typename M1::const_diag_type m1d = m1.diag();
         typename M2::diag_type m2d = m2.diag();
         if (SameStorage(m1,m2)) {
             AliasCopy(m1d,m2d);
-            m2.upperTri().offDiag().setZero();
-            m2.lowerTri().offDiag().setZero();
+            if (m1.size() > 1) {
+                m2.upperTri().offDiag().setZero();
+                m2.lowerTri().offDiag().setZero();
+            }
         } else {
             m2.setZero();
             NoAliasCopy(m1d,m2d);
         }
     }
 
-    template <class M1, class M2> 
-    static void NoAliasCopy(
+    template <class M1, class M2>
+    static inline void NoAliasCopy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
         typename M1::const_diag_type m1d = m1.diag();
@@ -842,7 +860,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static void AliasCopy(
+    static inline void AliasCopy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
     { Copy(m1,m2); }
 
@@ -851,8 +869,8 @@ namespace tmv {
     // Swap Matrices
     //
 
-    template <class M1, class M2> 
-    static void Swap(
+    template <class M1, class M2>
+    static inline void Swap(
         BaseMatrix_Diag_Mutable<M1>& m1, BaseMatrix_Diag_Mutable<M2>& m2)
     { Swap(m1.diag(),m2.diag()); }
 
@@ -862,7 +880,7 @@ namespace tmv {
     //
 
     template <class M>
-    static std::string TMV_Text(const BaseMatrix_Diag<M>& m)
+    static inline std::string TMV_Text(const BaseMatrix_Diag<M>& m)
     {
         std::ostringstream s;
         s << "BaseMatrix_Diag< "<<TMV_Text(m.mat())<<" >";
@@ -870,7 +888,7 @@ namespace tmv {
     }
 
     template <class M>
-    static std::string TMV_Text(const BaseMatrix_Diag_Mutable<M>& m)
+    static inline std::string TMV_Text(const BaseMatrix_Diag_Mutable<M>& m)
     {
         std::ostringstream s;
         s << "BaseMatrix_Diag_Mutable< "<<TMV_Text(m.mat())<<" >";

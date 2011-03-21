@@ -35,7 +35,6 @@
 
 #include "TMV_DiagMatrix.h"
 #include "TMV_VectorIO.h"
-#include <iostream>
 
 namespace tmv {
 
@@ -98,55 +97,54 @@ namespace tmv {
     //
 
 #ifndef TMV_NO_THROW
-    template <class M> 
-    class DiagMatrixReadError : public ReadError
+    template <class T>
+    class DiagMatrixReadError : 
+        public ReadError
     {
     public :
-        typedef typename M::copy_type copy_type;
+        DiagMatrix<T> m;
         int i;
-        mutable auto_ptr<copy_type> m;
         char exp,got;
         size_t s;
         bool is, iseof, isbad;
 
         DiagMatrixReadError(std::istream& _is) throw() :
             ReadError("DiagMatrix"),
-            i(0), m(0), exp(0), got(0), s(0),
+            i(0), exp(0), got(0), s(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+        template <class M>
         DiagMatrixReadError(
             int _i, const BaseMatrix_Diag<M>& _m, char _e, char _g, size_t _s,
-            bool _is, bool _iseof, bool _isbad
-        ) throw() :
+            bool _is, bool _iseof, bool _isbad) throw() :
             ReadError("DiagMatrix"),
-            i(_i), m(new copy_type(_m)), exp(_e), got(_g), s(_s),
+            m(_m), i(_i), exp(_e), got(_g), s(_s),
             is(_is), iseof(_iseof), isbad(_isbad) {}
+        template <class M>
         DiagMatrixReadError(
-            const BaseMatrix_Diag<M>& _m, std::istream& _is, size_t _s
-        ) throw() :
+            const BaseMatrix_Diag<M>& _m,
+            std::istream& _is, size_t _s) throw() :
             ReadError("DiagMatrix"),
-            i(0), m(new copy_type(_m)), exp(0), got(0), s(_s),
+            m(_m), i(0), exp(0), got(0), s(_s),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        DiagMatrixReadError(
-            std::istream& _is, char _e, char _g
-        ) throw() :
+        DiagMatrixReadError(std::istream& _is, char _e, char _g) throw() :
             ReadError("DiagMatrix"),
-            i(0), m(0), exp(_e), got(_g), s(0),
+            i(0), exp(_e), got(_g), s(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        DiagMatrixReadError(const DiagMatrixReadError<M>& rhs) :
+        DiagMatrixReadError(const DiagMatrixReadError<T>& rhs) throw() :
             ReadError("DiagMatrix"),
-            i(rhs.i), m(rhs.m), exp(rhs.exp), got(rhs.got), s(rhs.s),
+            m(rhs.m), i(rhs.i), exp(rhs.exp), got(rhs.got), s(rhs.s),
             is(rhs.is), iseof(rhs.iseof), isbad(rhs.isbad) {}
 
         ~DiagMatrixReadError() throw() {}
 
-        virtual void Write(std::ostream& os) const throw()
+        virtual void write(std::ostream& os) const throw()
         {
             os<<"TMV Read Error: Reading istream input for DiagMatrix\n";
             if (exp != got) {
                 os<<"Wrong format: expected '"<<exp<<"', got '"<<got<<"'.\n";
             }
-            if (m.get() && s != m->size()) {
-                os<<"Wrong size: expected "<<m->size()<<", got "<<s<<".\n";
+            if (m.size() > 0 && s != m.size()) {
+                os<<"Wrong size: expected "<<m.size()<<", got "<<s<<".\n";
             }
             if (!is) {
                 if (iseof) {
@@ -157,22 +155,22 @@ namespace tmv {
                     os<<"Input stream cannot read next character.\n";
                 }
             }
-            if (m.get()) {
+            if (m.size() > 0) {
                 os<<"The portion of the DiagMatrix which was successfully "
                     "read is: \n";
                 os<<"( ";
                 for(int ii=0;ii<i;++ii)
-                    os<<' '<<(*m)(ii,ii)<<' ';
+                    os<<' '<<m(ii,ii)<<' ';
                 os<<" )\n";
             }
         }
     };
 #endif
 
-    template <class T, IndexStyle I> 
-    std::istream& operator>>(std::istream& is, auto_ptr<DiagMatrix<T,I> >& m)
+    template <class T, IndexStyle I>
+    static std::istream& operator>>(
+        std::istream& is, auto_ptr<DiagMatrix<T,I> >& m)
     {
-        typedef DiagMatrix<T,I> type;
         char d;
         is >> d;
         if (!is || d != 'D') {
@@ -180,7 +178,7 @@ namespace tmv {
             std::cerr<<"DiagMatrix ReadError: "<<d<<" != D\n"; 
             exit(1); 
 #else
-            throw DiagMatrixReadError<type>(is,'D',d);
+            throw DiagMatrixReadError<T>(is,'D',d);
 #endif
         }
         size_t size;
@@ -190,27 +188,28 @@ namespace tmv {
             std::cerr<<"DiagMatrix ReadError: !is\n"; 
             exit(1); 
 #else
-            throw DiagMatrixReadError<type>(is);
+            throw DiagMatrixReadError<T>(is);
 #endif
         }
-        m.reset(new type(size));
+        m.reset(new DiagMatrix<T,I>(size));
 #ifndef TMV_NO_THROW
         try {
 #endif
             m->diag().read(is);
 #ifndef TMV_NO_THROW
-        } catch (VectorReadError<Vector<T,I> >& ve) {
-            throw DiagMatrixReadError<type>(
+        } catch (VectorReadError<T>& ve) {
+            throw DiagMatrixReadError<T>(
                 ve.i,*m,ve.exp,ve.got,ve.s,ve.is,ve.iseof,ve.isbad);
         }
 #endif
         return is;
     }
 
-    template <class M> 
-    std::istream& operator>>(
+    template <class M>
+    static std::istream& operator>>(
         std::istream& is, BaseMatrix_Diag_Mutable<M>& m)
     {
+        typedef typename M::value_type T;
         char d;
         is >> d;
         if (!is || d != 'D') {
@@ -218,7 +217,7 @@ namespace tmv {
             std::cerr<<"DiagMatrix ReadError: "<<d<<" != D\n"; 
             exit(1); 
 #else
-            throw DiagMatrixReadError<M>(is,'D',d);
+            throw DiagMatrixReadError<T>(is,'D',d);
 #endif
         }
         size_t s;
@@ -228,7 +227,7 @@ namespace tmv {
             std::cerr<<"DiagMatrix ReadError: !is\n"; 
             exit(1); 
 #else
-            throw DiagMatrixReadError<M>(is);
+            throw DiagMatrixReadError<T>(is);
 #endif
         }
         if (m.size() != s) {
@@ -236,7 +235,7 @@ namespace tmv {
             std::cerr<<"DiagMatrix ReadError: Wrong size\n"; 
             exit(1); 
 #else
-            throw DiagMatrixReadError<M>(m,is,s);
+            throw DiagMatrixReadError<T>(m,is,s);
 #endif
         }
         TMVAssert(m.size() == s);
@@ -245,8 +244,8 @@ namespace tmv {
 #endif
             m.diag().read(is);
 #ifndef TMV_NO_THROW
-        } catch (VectorReadError<typename M::diag_type>& ve) {
-            throw DiagMatrixReadError<M>(
+        } catch (VectorReadError<T>& ve) {
+            throw DiagMatrixReadError<T>(
                 ve.i,m,ve.exp,ve.got,ve.s,ve.is,ve.iseof,ve.isbad);
         }
 #endif

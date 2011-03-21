@@ -61,7 +61,7 @@ opts.Add(BoolVariable('INST_MIX',
         'Instantiate functions that mix real with complex', False))
 
 opts.Add(EnumVariable('TEST_OPT',
-        'Set the optimization level for TMV test suite', '0',
+        'Set the optimization level for TMV test suite', '1',
         allowed_values=('0','1','2','3')))
 opts.Add(BoolVariable('TEST_FLOAT',
         'Instantiate <float> in the test suite', True))
@@ -119,7 +119,7 @@ opts.Add('LIBS','Libraries to send to the linker','')
 opts.Add(BoolVariable('DEBUG',
         'Turn on debugging statements in compilied library',False))
 opts.Add(BoolVariable('TEST_DEBUG',
-        'Only turn on debugging statements in the test suite',True))
+        'Only turn on debugging statements in the test suite',False))
 opts.Add(BoolVariable('STATIC','Use static linkage', False))
 opts.Add(BoolVariable('WITH_SSE',
         'Only necessary for icpc compilations: Use SSE commands', True))

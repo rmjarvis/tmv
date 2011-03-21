@@ -43,14 +43,6 @@
 
 namespace tmv {
 
-    // Defined below:
-    template <int ix, class T, class M>
-    static void Scale(
-        const Scaling<ix,T>& x, BaseMatrix_Rec_Mutable<M>& m);
-    template <int ix, class T, class M>
-    static void InlineScale(
-        const Scaling<ix,T>& x, BaseMatrix_Rec_Mutable<M>& m);
-
     // Defined in TMV_ScaleM.cpp
     template <class T>
     void InstScale(const T x, MatrixView<T> m);
@@ -69,19 +61,19 @@ namespace tmv {
 
     // algo 1: Linearize to vector version
     template <int cs, int rs, int ix, class T, class M1>
-    struct ScaleM_Helper<1,cs,rs,ix,T,M1> 
+    struct ScaleM_Helper<1,cs,rs,ix,T,M1>
     {
         static void call(const Scaling<ix,T>& x, M1& m)
         {
             typedef typename M1::linearview_type Ml;
             Ml ml = m.linearView();
-            Scale(x,ml);
+            ScaleV_Helper<-3,Ml::_size,ix,T,Ml>::call(x,ml);
         }
     };
 
     // algo 11: Loop over columns
     template <int cs, int rs, int ix, class T, class M1>
-    struct ScaleM_Helper<11,cs,rs,ix,T,M1> 
+    struct ScaleM_Helper<11,cs,rs,ix,T,M1>
     {
         static void call(const Scaling<ix,T>& x, M1& m)
         {
@@ -92,7 +84,7 @@ namespace tmv {
             const int step = m.stepj();
             IT it = m.get_col(0).begin();
             for(;N;--N) {
-                ScaleV_Helper<-4,cs,ix,T,Mc>::call2(M,x,it);
+                ScaleV_Helper<-3,cs,ix,T,Mc>::call2(M,x,it);
                 it.shiftP(step);
             }
         }
@@ -100,7 +92,7 @@ namespace tmv {
 
     // algo 21: Loop over rows
     template <int cs, int rs, int ix, class T, class M1>
-    struct ScaleM_Helper<21,cs,rs,ix,T,M1> 
+    struct ScaleM_Helper<21,cs,rs,ix,T,M1>
     {
         static void call(const Scaling<ix,T>& x, M1& m)
         {
@@ -111,7 +103,7 @@ namespace tmv {
             const int step = m.stepi();
             IT it = m.get_row(0).begin();
             for(;M;--M) {
-                ScaleV_Helper<-4,rs,ix,T,Mr>::call2(N,x,it);
+                ScaleV_Helper<-3,rs,ix,T,Mr>::call2(N,x,it);
                 it.shiftP(step);
             }
         }
@@ -172,9 +164,9 @@ namespace tmv {
                 typedef typename M1::real_type RT;
                 typedef typename M1::value_type VT;
                 const RT rm = 
-                    ZProd<false,M1::_conj>::rprod(x,m.nonConj().cref(I,J));
+                    ZProd<false,false>::rprod(x,m.cref(I,J));
                 const RT im = 
-                    ZProd<false,M1::_conj>::iprod(x,m.nonConj().cref(I,J));
+                    ZProd<false,false>::iprod(x,m.cref(I,J));
                 m.ref(I,J) = VT(rm,im);
             }
         };
@@ -225,9 +217,9 @@ namespace tmv {
                 typedef typename M1::real_type RT;
                 typedef typename M1::value_type VT;
                 const RT rm =
-                    ZProd<false,M1::_conj>::rprod(x,m.nonConj().cref(I,J));
+                    ZProd<false,false>::rprod(x,m.cref(I,J));
                 const RT im =
-                    ZProd<false,M1::_conj>::iprod(x,m.nonConj().cref(I,J));
+                    ZProd<false,false>::iprod(x,m.cref(I,J));
                 m.ref(I,J) = VT(rm,im);
             }
         };
@@ -239,63 +231,9 @@ namespace tmv {
         { Unroller<0,cs,0,rs,M1::iscomplex>::unroll(x,m); }
     };
 
-    // algo -4: No copies or branches
+    // algo 90: Call inst
     template <int cs, int rs, int ix, class T, class M1>
-    struct ScaleM_Helper<-4,cs,rs,ix,T,M1> 
-    {
-        static void call(const Scaling<ix,T>& x, M1& m)
-        {
-            typedef typename M1::value_type T1;
-            const int algo = 
-                (cs == 0 || rs == 0) ? 0 :
-                (ix == 1) ? 1 :
-                M1::_canlin ? 2 :
-#if TMV_OPT >= 1
-                ( cs != UNKNOWN && rs != UNKNOWN ) ? (
-                    ( IntTraits2<cs,rs>::prod <= int(128/sizeof(T1)) ) ? (
-                        ( M1::_rowmajor ? 25 : 15 ) ) :
-                    M1::_rowmajor ? 21 :
-                    M1::_colmajor ? 11 :
-                    ( cs > rs ) ? 21 : 11 ) :
-                M1::_rowmajor ? 21 :
-#endif
-                11;
-            ScaleM_Helper<algo,cs,rs,ix,T,M1>::call(x,m);
-        }
-    };
-
-    // algo -3: Determine which algorithm to use
-    template <int cs, int rs, int ix, class T, class M1>
-    struct ScaleM_Helper<-3,cs,rs,ix,T,M1> 
-    {
-        static void call(const Scaling<ix,T>& x, M1& m)
-        {
-            const int algo = 
-                (cs == 0 || rs == 0 || ix == 1) ? 0 :
-                M1::_canlin ? 1 :
-#if TMV_OPT >= 2
-                cs == UNKNOWN || rs == UNKNOWN ? 31 :
-#endif
-                -4;
-            ScaleM_Helper<algo,cs,rs,ix,T,M1>::call(x,m);
-        }
-    };
-
-    // algo 97: Conjugate
-    template <int cs, int rs, int ix, class T, class M1>
-    struct ScaleM_Helper<97,cs,rs,ix,T,M1> 
-    {
-        static void call(const Scaling<ix,T>& x, M1& m)
-        {
-            typedef typename M1::conjugate_type Mc;
-            Mc mc = m.conjugate();
-            ScaleM_Helper<-1,cs,rs,ix,T,Mc>::call(TMV_CONJ(x),mc);
-        }
-    };
-
-    // algo 98: Call inst
-    template <int cs, int rs, int ix, class T, class M1>
-    struct ScaleM_Helper<98,cs,rs,ix,T,M1> 
+    struct ScaleM_Helper<90,cs,rs,ix,T,M1>
     {
         static void call(const Scaling<ix,T>& x, M1& m)
         {
@@ -305,9 +243,60 @@ namespace tmv {
         }
     };
 
-    // algo -1: Check for inst
+    // algo 97: Conjugate
     template <int cs, int rs, int ix, class T, class M1>
-    struct ScaleM_Helper<-1,cs,rs,ix,T,M1> 
+    struct ScaleM_Helper<97,cs,rs,ix,T,M1>
+    {
+        static void call(const Scaling<ix,T>& x, M1& m)
+        {
+            typedef typename M1::conjugate_type Mc;
+            Mc mc = m.conjugate();
+            ScaleM_Helper<-2,cs,rs,ix,T,Mc>::call(TMV_CONJ(x),mc);
+        }
+    };
+
+    // algo -4: No copies or branches
+    template <int cs, int rs, int ix, class T, class M1>
+    struct ScaleM_Helper<-4,cs,rs,ix,T,M1>
+    {
+        static void call(const Scaling<ix,T>& x, M1& m)
+        {
+            typedef typename M1::value_type T1;
+            const int algo = 
+                (cs == 0 || rs == 0) ? 0 :
+                (ix == 1) ? 1 :
+                M1::_canlin ? 2 :
+                TMV_OPT == 0 ? 11 :
+                ( cs != UNKNOWN && rs != UNKNOWN ) ? (
+                    ( IntTraits2<cs,rs>::prod <= int(128/sizeof(T1)) ) ? (
+                        ( M1::_rowmajor ? 25 : 15 ) ) :
+                    M1::_rowmajor ? 21 :
+                    M1::_colmajor ? 11 :
+                    ( cs > rs ) ? 21 : 11 ) :
+                M1::_rowmajor ? 21 :
+                11;
+            ScaleM_Helper<algo,cs,rs,ix,T,M1>::call(x,m);
+        }
+    };
+
+    // algo -3: Determine which algorithm to use
+    template <int cs, int rs, int ix, class T, class M1>
+    struct ScaleM_Helper<-3,cs,rs,ix,T,M1>
+    {
+        static void call(const Scaling<ix,T>& x, M1& m)
+        {
+            const int algo = 
+                (cs == 0 || rs == 0 || ix == 1) ? 0 :
+                M1::_canlin ? 1 :
+                TMV_OPT >= 2 && (cs == UNKNOWN || rs == UNKNOWN) ? 31 :
+                -4;
+            ScaleM_Helper<algo,cs,rs,ix,T,M1>::call(x,m);
+        }
+    };
+
+    // algo -2: Check for inst
+    template <int cs, int rs, int ix, class T, class M1>
+    struct ScaleM_Helper<-2,cs,rs,ix,T,M1>
     {
         static void call(const Scaling<ix,T>& x, M1& m)
         {
@@ -319,31 +308,38 @@ namespace tmv {
             const int algo = 
                 ix == 1 ? 0 :
                 M1::_conj ? 97 :
-                inst ? 98 : 
+                inst ? 90 : 
                 -3;
             ScaleM_Helper<algo,cs,rs,ix,T,M1>::call(x,m);
         }
     };
 
+    template <int cs, int rs, int ix, class T, class M1>
+    struct ScaleM_Helper<-1,cs,rs,ix,T,M1>
+    {
+        static void call(const Scaling<ix,T>& x, M1& m)
+        { ScaleM_Helper<-2,cs,rs,ix,T,M1>::call(x,m); }
+    };
+
     template <int ix, class T, class M>
-    static void Scale(
+    static inline void Scale(
         const Scaling<ix,T>& x, BaseMatrix_Rec_Mutable<M>& m)
     {
         const int cs = M::_colsize;
         const int rs = M::_rowsize;
         typedef typename M::cview_type Mv;
-        Mv mv = m.cView();
-        ScaleM_Helper<-1,cs,rs,ix,T,Mv>::call(x,mv);
+        TMV_MAYBE_REF(M,Mv) mv = m.cView();
+        ScaleM_Helper<-2,cs,rs,ix,T,Mv>::call(x,mv);
     }
 
     template <int ix, class T, class M>
-    static void InlineScale(
+    static inline void InlineScale(
         const Scaling<ix,T>& x, BaseMatrix_Rec_Mutable<M>& m)
     {
         const int cs = M::_colsize;
         const int rs = M::_rowsize;
         typedef typename M::cview_type Mv;
-        Mv mv = m.cView();
+        TMV_MAYBE_REF(M,Mv) mv = m.cView();
         ScaleM_Helper<-3,cs,rs,ix,T,Mv>::call(x,mv);
     }
 

@@ -38,19 +38,26 @@
 namespace tmv {
 
     template <class T1, class M2>
-    static void NonBlasLDivEq(VectorView<T1> v1, const M2& m2)
+    static void NonBlasLDivEq(VectorView<T1,1> v1, const M2& m2)
     {
-        TMVAssert(m2.iscm() || m2.isrm());
-        if (v1.step() == 1) {
-            VectorView<T1,1> v1u = v1.unitView();
-            if (m2.isrm()) 
-                InlineLDivEq(v1u,m2.rmView());
-            else 
-                InlineLDivEq(v1u,m2.cmView());
-        } else {
-            Vector<T1> v1c = v1;
-            NonBlasLDivEq(v1c.xView(),m2);
-            InstCopy(v1c.constView().xView(),v1);
+        if (m2.iscm()) 
+            InlineLDivEq(v1,m2.cmView());
+        else if (m2.isrm())
+            InlineLDivEq(v1,m2.rmView());
+        else {
+            typedef typename M2::value_type T;
+            const int N = m2.size();
+            if (m2.isunit()) {
+                const int s = ShapeTraits<M2::_shape>::unit_shape;
+                typename MCopyHelper<T,s,UNKNOWN,UNKNOWN,false,false>::type mc(N);
+                InstCopy(m2,mc.xdView());
+                InlineLDivEq(v1,mc.xdView().constView().cmView());
+            } else  {
+                const int s = ShapeTraits<M2::_shape>::nonunit_shape;
+                typename MCopyHelper<T,s,UNKNOWN,UNKNOWN,false,false>::type mc(N);
+                InstCopy(m2,mc.xdView());
+                InlineLDivEq(v1,mc.xdView().constView().cmView());
+            }
         }
     }
 
@@ -197,7 +204,7 @@ namespace tmv {
 #endif // BLAS
 
     template <class T1, class M2>
-    static void DoInstLDivEq(VectorView<T1> v1, const M2& m2)
+    static inline void DoInstLDivEq(VectorView<T1> v1, const M2& m2)
     {
 #ifdef BLAS
         const typename M2::value_type t2(0);
@@ -212,15 +219,13 @@ namespace tmv {
             }
         }
 #else
-        if (m2.isrm() || m2.iscm()) {
-            NonBlasLDivEq(v1,m2);
+        if (v1.step() == 1) {
+            NonBlasLDivEq(v1.unitView(),m2);
         } else {
-            if (m2.isunit()) {
-                NonBlasLDivEq(
-                    v1,m2.copy().viewAsUnitDiag().constView().xdView());
-            } else {
-                NonBlasLDivEq(v1,m2.copy().constView().xdView());
-            }
+            Vector<T1> v1c(v1.size());
+            InstCopy(v1.constView(),v1c.xView());
+            NonBlasLDivEq(v1c.view(),m2);
+            InstCopy(v1c.xView().constView(),v1);
         }
 #endif
     }

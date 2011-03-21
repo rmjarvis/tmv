@@ -39,10 +39,10 @@ namespace tmv {
     template <bool add, class T, class M1, class M2>
     static void DoMultXM(const T x, const M1& m1, M2& m2)
     {
-        if (x == T(-1))
-            InlineMultXM<add>(Scaling<-1,T>(x),m1,m2); 
-        else if (x == T(1))
+        if (x == T(1))
             InlineMultXM<add>(Scaling<1,T>(x),m1,m2); 
+        else if (x == T(-1))
+            InlineMultXM<add>(Scaling<-1,T>(x),m1,m2); 
         else if (x == T(0))
             Maybe<!add>::zero(m2);
         else
@@ -53,16 +53,16 @@ namespace tmv {
     static void DoMultXM(const std::complex<T> x, const M1& m1, M2& m2)
     { 
         if (imag(x) == T(0)) {
-            if (real(x) == T(-1))
-                InlineMultXM<add>(Scaling<-1,T>(real(x)),m1,m2); 
-            else if (real(x) == T(1))
+            if (real(x) == T(1))
                 InlineMultXM<add>(Scaling<1,T>(real(x)),m1,m2); 
+            else if (real(x) == T(-1))
+                InlineMultXM<add>(Scaling<-1,T>(real(x)),m1,m2); 
             else if (real(x) == T(0))
                 Maybe<!add>::zero(m2);
             else
                 InlineMultXM<add>(Scaling<0,T>(real(x)),m1,m2); 
-        }
-        else InlineMultXM<add>(Scaling<0,std::complex<T> >(x),m1,m2); 
+        } else 
+            InlineMultXM<add>(Scaling<0,std::complex<T> >(x),m1,m2); 
     }
 
     template <class T1, bool C1, class T2>
@@ -70,16 +70,12 @@ namespace tmv {
         const T2 x, const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
         MatrixView<T2> m2)
     {
-        if (m2.isrm() && !m2.iscm()) {
-            InstMultXM(x,m1.transpose(),m2.transpose());
-        } else if (m1.iscm() && m2.iscm()) {
-            if (m1.canLinearize() && m2.canLinearize()) {
-                VectorView<T2> m2l = m2.linearView();
-                InstMultXV(x,m1.linearView().xView(),m2l);
-            } else {
-                MatrixView<T2,1> m2cm = m2.cmView();
-                DoMultXM<false>(x,m1.cmView(),m2cm);
-            }
+        if (m1.iscm() && m2.iscm()) {
+            MatrixView<T2,1> m2cm = m2.cmView();
+            DoMultXM<false>(x,m1.cmView(),m2cm);
+        } else if (m1.isrm() && m2.isrm()) {
+            MatrixView<T2,1> m2t = m2.transpose().cmView();
+            DoMultXM<false>(x,m1.transpose().cmView(),m2t);
         } else {
             InstCopy(m1,m2);
             InstScale(x,m2);
@@ -91,27 +87,20 @@ namespace tmv {
         const T2 x, const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
         MatrixView<T2> m2)
     {
-        if (m2.isrm() && !m2.iscm()) {
-            InstAddMultXM(x,m1.transpose(),m2.transpose());
-        } else if (m2.iscm()) {
-            MatrixView<T2,1> m2cm = m2;
-            if (m1.isrm())
-                DoMultXM<true>(x,m1.rmView(),m2cm);
-            else if (m1.iscm()) {
-                if (m1.canLinearize() && m2.canLinearize()) {
-                    VectorView<T2> m2l = m2.linearView();
-                    InstAddMultXV(x,m1.linearView().xView(),m2l);
-                } else 
-                    DoMultXM<true>(x,m1.cmView(),m2cm);
-            } else
-                DoMultXM<true>(x,m1,m2cm);
-        } else {
-            if (m1.isrm())
-                DoMultXM<true>(x,m1.rmView(),m2);
-            else if (m2.iscm())
-                DoMultXM<true>(x,m1.cmView(),m2);
+        if (m2.iscm()) {
+            MatrixView<T2,1> m2cm = m2.cmView();
+            if (m1.iscm()) 
+                DoMultXM<true>(x,m1.cmView(),m2cm);
             else
-                DoMultXM<true>(x,m1,m2);
+                DoMultXM<true>(x,m1,m2cm);
+        } else if (m2.isrm()) {
+            MatrixView<T2,1> m2t = m2.transpose().cmView();
+            if (m1.isrm()) 
+                DoMultXM<true>(x,m1.transpose().cmView(),m2t);
+            else
+                DoMultXM<true>(x,m1.transpose(),m2t);
+        } else {
+            DoMultXM<true>(x,m1,m2);
         }
     }
 

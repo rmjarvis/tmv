@@ -60,24 +60,6 @@ namespace tmv {
         InstScale(x,v3);
     }
 
-    template <class T1, bool C1, class T2, bool C2, class T3>
-    void InstLDiv(
-        const T3 x,
-        const ConstVectorView<T1,UNKNOWN,C1>& v1,
-        const ConstDiagMatrixView<T2,UNKNOWN,C2>& m2, VectorView<T3> v3)
-    {
-        typedef typename Traits<T3>::real_type RT;
-        const Scaling<1,RT> one;
-        if (v1.step() == 1 && m2.step() == 1 && v3.step() == 1) {
-            ConstVectorView<T1,1,C1> v1unit = v1.unitView();
-            ConstDiagMatrixView<T2,1,C2> m2unit = m2.cmView();
-            VectorView<T3,1> v3unit = v3.unitView();
-            InlineLDiv(one,v1unit,m2unit,v3unit);
-        } else 
-            InlineLDiv(one,v1,m2,v3);
-        InstScale(x,v3);
-    }
-
 #define InstFile "TMV_DivVD.inst"
 #include "TMV_Inst.h"
 #undef InstFile

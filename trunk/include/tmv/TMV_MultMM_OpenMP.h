@@ -48,36 +48,21 @@ namespace tmv {
         const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2,
         MatrixView<T3> m3);
 
-    // Defined below:
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void MultMM_OpenMP(
-        const Scaling<ix,T>& x,
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3);
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void InlineMultMM_OpenMP(
-        const Scaling<ix,T>& x,
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3);
-
     //
     // Algo 69: OpenMPMultMM
     //
 
-    template <int algo, int cs, int rs, int xs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
+    template <int algo, int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_OpenMP_Helper;
 
-    // algo 1: The actual OpenMP algorithm
-    // Split the output matrix, m3, into strips.  
+    // algo 69: Split the output matrix, m3, into strips.  
     // Use either row strips or columns strips according to whether there
     // are more rows or columns.  Also, round each strip up to a multiple 
     // of 16 rows or columns to maximize the efficiency of blocking in 
     // each section.
     // Then call the normal block algorithm for each section.
-    template <int cs, int rs, int xs, bool add, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultMM_OpenMP_Helper<1,cs,rs,xs,add,ix,T,M1,M2,M3>
+    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultMM_OpenMP_Helper<69,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
@@ -133,92 +118,55 @@ namespace tmv {
 #endif
                 64;
 
-            bool bad_alloc = false;
 #pragma omp parallel
             {
-                try {
-                    int num_threads = omp_get_num_threads();
-                    int mythread = omp_get_thread_num();
-                    if (num_threads == 1) {
-                        MultMM_Helper<algo1,cs,rs,xs,add,ix,T,M1,M2,M3>::call(
-                            x,m1,m2,m3);
-                    } else if (M > N) {
-                        int Mx = M / num_threads;
-                        Mx = ((((Mx-1)>>4)+1)<<4); // round up to mult of 16
-                        int i1 = mythread * Mx;
-                        int i2 = (mythread+1) * Mx;
-                        if (i2 > M || mythread == num_threads-1) i2 = M;
-                        if (i1 < M) {
-                            // Need to make sure, since we rounded up Mx!
-                            typedef typename M1::const_rowrange_type M1r;
-                            typedef typename M3::rowrange_type M3r;
-                            const int csx = UNKNOWN; 
-                            M1r m1r = m1.cRowRange(i1,i2);
-                            M3r m3r = m3.cRowRange(i1,i2);
+                int num_threads = omp_get_num_threads();
+                int mythread = omp_get_thread_num();
+                if (num_threads == 1) {
+                    MultMM_Helper<algo1,cs,rs,xs,add,ix,T,M1,M2,M3>::call(
+                        x,m1,m2,m3);
+                } else if (M > N) {
+                    int Mx = M / num_threads;
+                    Mx = ((((Mx-1)>>4)+1)<<4); // round up to mult of 16
+                    int i1 = mythread * Mx;
+                    int i2 = (mythread+1) * Mx;
+                    if (i2 > M || mythread == num_threads-1) i2 = M;
+                    if (i1 < M) {
+                        // Need to make sure, since we rounded up Mx!
+                        typedef typename M1::const_rowrange_type M1r;
+                        typedef typename M3::rowrange_type M3r;
+                        const int csx = UNKNOWN; 
+                        M1r m1r = m1.cRowRange(i1,i2);
+                        M3r m3r = m3.cRowRange(i1,i2);
 
-                            MultMM_Helper<
-                                algo1,csx,rs,xs,add,ix,T,M1r,M2,M3r>::call(
-                                    x,m1r,m2,m3r);
-                        }
-                    } else {
-                        int Nx = N / num_threads;
-                        Nx = ((((Nx-1)>>4)+1)<<4); 
-                        int j1 = mythread * Nx;
-                        int j2 = (mythread+1) * Nx;
-                        if (j2 > N || mythread == num_threads-1) j2 = N;
-                        if (j1 < N)  {
-                            typedef typename M2::const_colrange_type M2c;
-                            typedef typename M3::colrange_type M3c;
-                            const int rsx = UNKNOWN; 
-                            M2c m2c = m2.cColRange(j1,j2);
-                            M3c m3c = m3.cColRange(j1,j2);
-                            MultMM_Helper<
-                                algo1,cs,rsx,xs,add,ix,T,M1,M2c,M3c>::call(
-                                    x,m1,m2c,m3c);
-                        }
+                        MultMM_Helper<
+                            algo1,csx,rs,xs,add,ix,T,M1r,M2,M3r>::call(
+                                x,m1r,m2,m3r);
                     }
-                } catch (...) {
-                    // should only be std::bad_alloc, but it's good form to 
-                    // catch everything inside a parallel block
-                    bad_alloc = true;
+                } else {
+                    int Nx = N / num_threads;
+                    Nx = ((((Nx-1)>>4)+1)<<4); 
+                    int j1 = mythread * Nx;
+                    int j2 = (mythread+1) * Nx;
+                    if (j2 > N || mythread == num_threads-1) j2 = N;
+                    if (j1 < N)  {
+                        typedef typename M2::const_colrange_type M2c;
+                        typedef typename M3::colrange_type M3c;
+                        const int rsx = UNKNOWN; 
+                        M2c m2c = m2.cColRange(j1,j2);
+                        M3c m3c = m3.cColRange(j1,j2);
+                        MultMM_Helper<
+                            algo1,cs,rsx,xs,add,ix,T,M1,M2c,M3c>::call(
+                                x,m1,m2c,m3c);
+                    }
                 }
             }
-#ifdef TMV_MM_OPT_BAD_ALLOC
-            const int algo2 = 66;
-#else
-            const bool ccc = M1::_colmajor && M2::_colmajor && M3::_colmajor;
-            const bool rcc = M1::_rowmajor && M2::_colmajor && M3::_colmajor;
-            const bool crc = M1::_colmajor && M2::_rowmajor && M3::_colmajor;
-            const int algo2 = 
-                ccc ? ( M3::iscomplex ? 11 : 12 ) :
-                rcc ? ( M3::iscomplex ? 21 : 22 ) :
-                crc ? ( M3::iscomplex ? 31 : 32 ) :
-                21;
-#endif
-            if (bad_alloc)
-                MultMM_Helper<algo2,cs,rs,xs,add,ix,T,M1,M2,M3>::call(
-                    x,m1,m2,m3);
         }
     };
 
-    // algo -2: Only one algorithm here, so do it.
-    template <int cs, int rs, int xs, bool add,
-              int ix, class T, class M1, class M2, class M3>
-    struct MultMM_OpenMP_Helper<-2,cs,rs,xs,add,ix,T,M1,M2,M3>
-    {
-        static void call(
-            const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
-        {
-            const int algo = 1;
-            MultMM_OpenMP_Helper<algo,cs,rs,xs,add,ix,T,M1,M2,M3>::call(
-                x,m1,m2,m3);
-        }
-    };
-
-    // algo 98: Call inst
-    template <int cs, int rs, int xs, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultMM_OpenMP_Helper<98,cs,rs,xs,false,ix,T,M1,M2,M3>
+    // algo 90: Call inst
+    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    struct MultMM_OpenMP_Helper<90,cs,rs,xs,false,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
@@ -228,9 +176,8 @@ namespace tmv {
             InstMultMM_OpenMP(xx,m1.xView(),m2.xView(),m3.xView());
         }
     };
-    template <int cs, int rs, int xs, 
-              int ix, class T, class M1, class M2, class M3>
-    struct MultMM_OpenMP_Helper<98,cs,rs,xs,true,ix,T,M1,M2,M3>
+    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    struct MultMM_OpenMP_Helper<90,cs,rs,xs,true,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
@@ -241,10 +188,22 @@ namespace tmv {
         }
     };
 
-    // algo -1: Check for inst
-    template <int cs, int rs, int xs, bool add,
-              int ix, class T, class M1, class M2, class M3>
-    struct MultMM_OpenMP_Helper<-1,cs,rs,xs,add,ix,T,M1,M2,M3>
+    // algo -3: Only one algorithm here, so do it.
+    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultMM_OpenMP_Helper<-3,cs,rs,xs,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
+        {
+            const int algo = 69;
+            MultMM_OpenMP_Helper<algo,cs,rs,xs,add,ix,T,M1,M2,M3>::call(
+                x,m1,m2,m3);
+        }
+    };
+
+    // algo -2: Check for inst
+    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultMM_OpenMP_Helper<-2,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
@@ -263,18 +222,28 @@ namespace tmv {
 #endif
                 Traits<T3>::isinst;
             const int algo =
-                inst ? 98 :
-                -2;
+                inst ? 90 :
+                -3;
             MultMM_OpenMP_Helper<algo,cs,rs,xs,add,ix,T,M1,M2,M3>::call(
                 x,m1,m2,m3);
         }
     };
 
+    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultMM_OpenMP_Helper<-1,cs,rs,xs,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
+        {
+            MultMM_OpenMP_Helper<-2,cs,rs,xs,add,ix,T,M1,M2,M3>::call(
+                x,m1,m2,m3);
+        }
+    };
+
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void MultMM_OpenMP(
-        const Scaling<ix,T>& x,
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3)
+    static inline void MultMM_OpenMP(
+        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
+        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M3::_colsize>::same));
         TMVStaticAssert((Sizes<M1::_rowsize,M2::_colsize>::same));
@@ -289,18 +258,17 @@ namespace tmv {
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         typedef typename M3::cview_type M3v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        M3v m3v = m3.cView();
-        MultMM_OpenMP_Helper<-1,cs,rs,xs,add,ix,T,M1v,M2v,M3v>::call(
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
+        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
+        MultMM_OpenMP_Helper<-2,cs,rs,xs,add,ix,T,M1v,M2v,M3v>::call(
             x,m1v,m2v,m3v);
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void InlineMultMM_OpenMP(
-        const Scaling<ix,T>& x,
-        const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2,
-        BaseMatrix_Rec_Mutable<M3>& m3)
+    static inline void InlineMultMM_OpenMP(
+        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
+        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M3::_colsize>::same));
         TMVStaticAssert((Sizes<M1::_rowsize,M2::_colsize>::same));
@@ -315,10 +283,10 @@ namespace tmv {
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         typedef typename M3::cview_type M3v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
-        M3v m3v = m3.cView();
-        MultMM_OpenMP_Helper<-2,cs,rs,xs,add,ix,T,M1v,M2v,M3v>::call(
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
+        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
+        MultMM_OpenMP_Helper<-3,cs,rs,xs,add,ix,T,M1v,M2v,M3v>::call(
             x,m1v,m2v,m3v);
     }
 

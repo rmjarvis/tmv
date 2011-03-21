@@ -52,30 +52,39 @@ namespace tmv {
     // I'll have the think about that...
     
     template <class M1, class T2>
-    static void NonBlasMultEq(const M1& m1, VectorView<T2> v2)
+    static void NonBlasMultEq(const M1& m1, VectorView<T2,1> v2)
     {
-        TMVAssert(m1.iscm() || m1.isrm());
-        if (v2.step() == 1) {
-            const Scaling<1,typename Traits<T2>::real_type> one;
-            VectorView<T2,1> v2u = v2.unitView();
-            if (m1.iscm()) 
-                InlineMultMV<false>(one,m1.cmView(),v2u.constView(),v2u);
-            else 
-                InlineMultMV<false>(one,m1.rmView(),v2u.constView(),v2u);
-        } else {
-            Vector<T2> v2c = v2;
-            DoMultEq(m1,v2c.xView());
-            InstCopy(v2c.constView().xView(),v2);
+        const Scaling<1,typename Traits<T2>::real_type> one;
+        if (m1.iscm()) 
+            InlineMultMV<false>(one,m1.cmView(),v2.constView(),v2);
+        else if (m1.isrm())
+            InlineMultMV<false>(one,m1.rmView(),v2.constView(),v2);
+        else {
+            typedef typename M1::value_type T;
+            const int N = m1.size();
+            if (m1.isunit()) {
+                const int s = ShapeTraits<M1::_shape>::unit_shape;
+                typename MCopyHelper<T,s,UNKNOWN,UNKNOWN,false,false>::type mc(N);
+                InstCopy(m1,mc.xdView());
+                InlineMultMV<false>(
+                    one,mc.xdView().constView().cmView(),v2.constView(),v2);
+            } else  {
+                const int s = ShapeTraits<M1::_shape>::nonunit_shape;
+                typename MCopyHelper<T,s,UNKNOWN,UNKNOWN,false,false>::type mc(N);
+                InstCopy(m1,mc.xdView());
+                InlineMultMV<false>(
+                    one,mc.xdView().constView().cmView(),v2.constView(),v2);
+            }
         }
     }
 
 #ifdef BLAS
     template <class M1, class T2, class T1> 
-    static inline void BlasMultEq(const M1& A, VectorView<T2> x, T1)
+    static inline void BlasMultEq(const M1& A, VectorView<T2,1> x, T1)
     { NonBlasMultEq(A,x); }
 #ifdef TMV_INST_DOUBLE
     template <class M1>
-    static void BlasMultEq(const M1& A, VectorView<double> x, double)
+    static void BlasMultEq(const M1& A, VectorView<double,1> x, double)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
@@ -92,7 +101,7 @@ namespace tmv {
     }
     template <class M1>
     static void BlasMultEq(
-        const M1& A, VectorView<std::complex<double> > x, std::complex<double>)
+        const M1& A, VectorView<std::complex<double>,1> x, std::complex<double>)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
@@ -120,7 +129,7 @@ namespace tmv {
     }
     template <class M1>
     static void BlasMultEq( 
-        const M1& A, VectorView<std::complex<double> > x, double)
+        const M1& A, VectorView<std::complex<double>,1> x, double)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
@@ -143,7 +152,7 @@ namespace tmv {
 #endif
 #ifdef TMV_INST_FLOAT
     template <class M1>
-    static void BlasMultEq(const M1& A, VectorView<float> x, float)
+    static void BlasMultEq(const M1& A, VectorView<float,1> x, float)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
@@ -160,7 +169,7 @@ namespace tmv {
     }
     template <class M1>
     static void BlasMultEq(
-        const M1& A, VectorView<std::complex<float> > x, std::complex<float>)
+        const M1& A, VectorView<std::complex<float>,1> x, std::complex<float>)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
@@ -188,7 +197,7 @@ namespace tmv {
     }
     template <class M1>
     static void BlasMultEq( 
-        const M1& A, VectorView<std::complex<float> > x, float)
+        const M1& A, VectorView<std::complex<float>,1> x, float)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
@@ -212,7 +221,7 @@ namespace tmv {
 #endif // BLAS
 
     template <class M1, class T2>
-    static void DoMultEq(const M1& m1, VectorView<T2> v2)
+    static inline void DoMultEq(const M1& m1, VectorView<T2,1> v2)
     {
 #ifdef BLAS
         const typename M1::value_type t1(0);
@@ -227,33 +236,31 @@ namespace tmv {
             }
         }
 #else
-        if (m1.isrm() || m1.iscm()) {
-            NonBlasMultEq(m1,v2);
-        } else {
-            if (m1.isunit()) {
-                NonBlasMultEq(
-                    m1.copy().viewAsUnitDiag().constView().xdView(),v2);
-            } else {
-                NonBlasMultEq(m1.copy().constView().xdView(),v2);
-            }
-        }
+        NonBlasMultEq(m1,v2);
 #endif
     }
 
     template <class T, class M1, class V2>
-    void DoInstMultMV(
+    static void DoInstMultMV(
         const T x, const M1& m1, const V2& v2, VectorView<T> v3)
     {
-        InstMultXV(x,v2,v3);
-        DoMultEq(m1,v3);
+        if (v3.step() == 1) {
+            InstMultXV(x,v2,v3);
+            DoMultEq(m1,v3.unitView());
+        } else {
+            Vector<T> v3c(v3.size());
+            InstMultXV(x,v2,v3c.xView());
+            DoMultEq(m1,v3c.view());
+            InstCopy(v3c.xView().constView(),v3);
+        }
     }
 
     template <class T, class M1, class V2>
-    void DoInstAddMultMV(
+    static void DoInstAddMultMV(
         const T x, const M1& m1, const V2& v2, VectorView<T> v3)
     {
         Vector<T> v2c = v2;
-        DoMultEq(m1,v2c.xView());
+        DoMultEq(m1,v2c.view());
         InstAddMultXV(x,v2c.constView().xView(),v3);
     }
 

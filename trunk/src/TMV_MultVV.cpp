@@ -43,16 +43,10 @@ namespace tmv {
     template <class V1, class V2>
     static typename V2::value_type DoMultVV(const V1& v1, const V2& v2)
     {
-        if (v1.step() == 1)
-            if (v2.step() == 1)
-                return InlineMultVV(v1.unitView(),v2.unitView());
-            else
-                return InlineMultVV(v1.unitView(),v2);
+        if (v1.step() == 1 && v2.step() == 1)
+            return InlineMultVV(v1.unitView(),v2.unitView());
         else
-            if (v2.step() == 1)
-                return InlineMultVV(v1,v2.unitView());
-            else
-                return InlineMultVV(v1,v2);
+            return InlineMultVV(v1,v2);
     }
 
 #ifdef BLAS

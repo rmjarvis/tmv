@@ -49,7 +49,7 @@
 
 namespace tmv {
 
-    template <class T> 
+    template <class T>
     class ConjRef; // Undefined unless T is complex<T>
 
     template <class T>
@@ -175,12 +175,12 @@ namespace tmv {
         { return !(x2==x1); }
 
         void swapWith(CT& x2)
-        { 
+        {
             TMVAssert(&val != &x2);
             CT temp = x2; x2 = std::conj(val); val = std::conj(temp); 
         }
         void swapWith(ConjRef<CT> x2)
-        { 
+        {
             TMVAssert(&val != &x2);
             CT temp = x2.val; x2.val = val; val = temp; 
         }
@@ -207,7 +207,7 @@ namespace tmv {
     struct AuxRef<std::complex<T>,false>
     { typedef std::complex<T>& reference; };
 
-    template <class T, int S, bool C> 
+    template <class T, int S, bool C>
     class VIt 
     {
     public :
@@ -223,13 +223,13 @@ namespace tmv {
         explicit VIt(T* inp) : p(inp), s(S) { TMVAssert(S != UNKNOWN); }
         VIt(const type& rhs) : p(rhs.get()), s(rhs.step()) {}
 
-        template <int S2> 
+        template <int S2>
         VIt(const VIt<T,S2,C>& rhs) : p(rhs.get()), s(rhs.step()) {}
 
         type& operator=(const type& rhs) 
         { TMVAssert(step()==rhs.step()); p=rhs.get(); return *this; }
 
-        template <int S2> 
+        template <int S2>
         type& operator=(const VIt<T,S2,C>& rhs) 
         { TMVAssert(step()==rhs.step()); p=rhs.get(); return *this; }
 
@@ -275,7 +275,7 @@ namespace tmv {
         const CheckedInt<S> s;
     };
 
-    template <class T, int S, bool C> 
+    template <class T, int S, bool C>
     class CVIt
     {
     public :
@@ -292,20 +292,20 @@ namespace tmv {
         { TMVAssert(S != UNKNOWN); }
         CVIt(const type& rhs) : p(rhs.get()), s(rhs.step()) {}
 
-        template <int S2> 
+        template <int S2>
         CVIt(const CVIt<T,S2,C>& rhs) : p(rhs.get()), s(rhs.step()) {}
 
-        template <int S2> 
+        template <int S2>
         CVIt(const VIt<T,S2,C>& rhs) : p(rhs.get()), s(rhs.step()) {}
 
         type& operator=(const type& rhs)
         { TMVAssert(step()==rhs.step()); p = rhs.get(); return *this; }
 
-        template <int S2> 
+        template <int S2>
         type& operator=(const CVIt<T,S2,C>& rhs)
         { TMVAssert(step()==rhs.step()); p = rhs.get(); return *this; }
 
-        template <int S2> 
+        template <int S2>
         type& operator=(const VIt<T,S2,C>& rhs)
         { TMVAssert(step()==rhs.step()); p = rhs.get(); return *this; }
 
@@ -350,51 +350,51 @@ namespace tmv {
         const CheckedInt<S> s;
     };
 
-    template <class T, int S, bool C> 
-    static CVIt<T,S,C> operator+(int i, const CVIt<T,S,C>& it)
+    template <class T, int S, bool C>
+    static inline CVIt<T,S,C> operator+(int i, const CVIt<T,S,C>& it)
     { return it + i; }
-    template <class T, int S, bool C> 
-    static VIt<T,S,C> operator+(int i, const VIt<T,S,C>& it)
+    template <class T, int S, bool C>
+    static inline VIt<T,S,C> operator+(int i, const VIt<T,S,C>& it)
     { return it + i; }
 
 
     // Overload some functions to work with ConjRef<T>
-    template <class T> 
-    static T TMV_CONJ(const ConjRef<T>& x) { return x.conj(); }
-    template <class T> 
-    static typename Traits<T>::real_type TMV_NORM(const ConjRef<T>& x) 
+    template <class T>
+    static inline T TMV_CONJ(const ConjRef<T>& x) { return x.conj(); }
+    template <class T>
+    static inline typename Traits<T>::real_type TMV_NORM(const ConjRef<T>& x) 
     { return TMV_NORM(x.conj()); }
-    template <class T> 
-    static typename Traits<T>::real_type TMV_ABS(const ConjRef<T>& x) 
+    template <class T>
+    static inline typename Traits<T>::real_type TMV_ABS(const ConjRef<T>& x) 
     { return TMV_ABS(x.conj()); }
-    template <class T> 
-    static T TMV_SQR(const ConjRef<T>& x) 
+    template <class T>
+    static inline T TMV_SQR(const ConjRef<T>& x) 
     { return TMV_SQR(x.conj()); }
-    template <class T> 
-    static T TMV_SQRT(const ConjRef<T>& x) 
+    template <class T>
+    static inline T TMV_SQRT(const ConjRef<T>& x) 
     { return TMV_SQRT(x.conj()); }
-    template <class T> 
-    static typename Traits<T>::real_type TMV_REAL(const ConjRef<T>& x) 
+    template <class T>
+    static inline typename Traits<T>::real_type TMV_REAL(const ConjRef<T>& x) 
     { return x.real(); }
-    template <class T> 
-    static typename Traits<T>::real_type TMV_IMAG(const ConjRef<T>& x) 
+    template <class T>
+    static inline typename Traits<T>::real_type TMV_IMAG(const ConjRef<T>& x) 
     { return x.imag(); }
 
-    template <class T> 
-    static void TMV_SWAP(
+    template <class T>
+    static inline void TMV_SWAP(
         tmv::ConjRef<std::complex<T> > x1, tmv::ConjRef<std::complex<T> > x2)
     { return x1.swapWith(x2); }
-    template <class T> 
-    static void TMV_SWAP(
+    template <class T>
+    static inline void TMV_SWAP(
         std::complex<T>& x1, tmv::ConjRef<std::complex<T> > x2)
     { return x2.swapWith(x1); }
-    template <class T> 
-    static void TMV_SWAP(
+    template <class T>
+    static inline void TMV_SWAP(
         tmv::ConjRef<std::complex<T> > x1, std::complex<T>& x2)
     { return x1.swapWith(x2); }
 
     template <class T1, class T2>
-    struct Traits2<T1,ConjRef<T2> > 
+    struct Traits2<T1,ConjRef<T2> >
     {
         enum { sametype = Traits2<T1,T2>::sametype };
         enum { samebase = Traits2<T1,T2>::samebase };
@@ -415,12 +415,12 @@ namespace tmv {
         typedef typename Traits2<T1,T2>::type type;
     };
 
-    template <class T> 
-    static std::string TMV_Text(ConjRef<T>)
+    template <class T>
+    static inline std::string TMV_Text(ConjRef<T>)
     { return std::string("ConjRef<") + TMV_Text(T()) + ">"; }
 
-    template <class T, int S, bool C> 
-    static std::string TMV_Text(VIt<T,S,C> it)
+    template <class T, int S, bool C>
+    static inline std::string TMV_Text(VIt<T,S,C> it)
     {
         std::ostringstream s;
         s << "VIt<" << TMV_Text(T());
@@ -430,8 +430,8 @@ namespace tmv {
         return s.str();
     }
 
-    template <class T, int S, bool C> 
-    static std::string TMV_Text(CVIt<T,S,C> it)
+    template <class T, int S, bool C>
+    static inline std::string TMV_Text(CVIt<T,S,C> it)
     {
         std::ostringstream s;
         s << "CVIt<" << TMV_Text(T());

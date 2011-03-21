@@ -35,6 +35,7 @@
 
 #include "TMV_BaseVector.h"
 #include "TMV_Scaling.h"
+#include "TMV_MultXV_Funcs.h"
 
 namespace tmv {
 
@@ -45,56 +46,56 @@ namespace tmv {
     // These first few are for when an argument is a composite vector
     // and needs to be calculated before running MultXV.
     template <bool add, int ix, class T, class M1, class M2>
-    static void MultXV(
+    static inline void MultXV(
         const Scaling<ix,T>& x, const BaseVector<M1>& m1, 
         BaseVector_Mutable<M2>& m2)
     { MultXV(x,m1.calc(),m2.mat()); }
     template <bool add, int ix, class T, class M1, class M2>
-    static void NoAliasMultXV(
+    static inline void NoAliasMultXV(
         const Scaling<ix,T>& x, const BaseVector<M1>& m1, 
         BaseVector_Mutable<M2>& m2)
     { NoAliasMultXV(x,m1.calc(),m2.mat()); }
     template <bool add, int ix, class T, class M1, class M2>
-    static void AliasMultXV(
+    static inline void AliasMultXV(
         const Scaling<ix,T>& x, const BaseVector<M1>& m1, 
         BaseVector_Mutable<M2>& m2)
     { AliasMultXV(x,m1.calc(),m2.mat()); }
 
     // These are helpers to allow the caller to not use a Scaling object.
     template <bool add, class T, class V1, class V2>
-    static void MultXV(
+    static inline void MultXV(
         const T& x, const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2)
     { MultXV<add>(Scaling<0,T>(x),v1.vec(),v2.vec()); }
     template <bool add, class T, class V1, class V2>
-    static void NoAliasMultXV(
+    static inline void NoAliasMultXV(
         const T& x, const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2)
     { NoAliasMultXV<add>(Scaling<0,T>(x),v1.vec(),v2.vec()); }
     template <bool add, class T, class V1, class V2>
-    static void AliasMultXV(
+    static inline void AliasMultXV(
         const T& x, const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2)
     { AliasMultXV<add>(Scaling<0,T>(x),v1.vec(),v2.vec()); }
 
     template <bool add, class V1, class V2>
-    static void MultXV(
+    static inline void MultXV(
         const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2)
     { MultXV<add>(Scaling<1,typename V2::real_type>(),v1.vec(),v2.vec()); }
     template <bool add, class V1, class V2>
-    static void NoAliasMultXV(
+    static inline void NoAliasMultXV(
         const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2)
     {
         NoAliasMultXV<add>(
             Scaling<1,typename V2::real_type>(),v1.vec(),v2.vec()); 
     }
     template <bool add, class V1, class V2>
-    static void AliasMultXV(
+    static inline void AliasMultXV(
         const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2)
-    { 
+    {
         AliasMultXV<add>(
             Scaling<1,typename V2::real_type>(),v1.vec(),v2.vec()); 
     }
 
     template <class T, class V>
-    static void Scale(const T& x, BaseVector_Mutable<V>& v)
+    static inline void Scale(const T& x, BaseVector_Mutable<V>& v)
     { Scale(Scaling<0,T>(x),v); }
 
     template <int ix, class T, class V>
@@ -115,7 +116,8 @@ namespace tmv {
     };
 
     template <int ix, class T, class V>
-    class ProdXV : public BaseVector<ProdXV<ix,T,V> >
+    class ProdXV : 
+        public BaseVector<ProdXV<ix,T,V> >
     {
     public:
 
@@ -163,130 +165,130 @@ namespace tmv {
 
     // v *= x
     template <class V>
-    static void MultEq(BaseVector_Mutable<V>& v, const int x)
+    static inline void MultEq(BaseVector_Mutable<V>& v, const int x)
     { Scale(RT(x),v.vec()); }
 
     template <class V>
-    static void MultEq(BaseVector_Mutable<V>& v, const RT x)
+    static inline void MultEq(BaseVector_Mutable<V>& v, const RT x)
     { Scale(x,v.vec()); }
 
     template <class V>
-    static void MultEq(BaseVector_Mutable<V>& v, const CT x)
+    static inline void MultEq(BaseVector_Mutable<V>& v, const CT x)
     { Scale(x,v.vec()); }
 
     template <class V>
-    static void MultEq(BaseVector_Mutable<V>& v, const CCT x)
+    static inline void MultEq(BaseVector_Mutable<V>& v, const CCT x)
     { Scale(CT(x),v.vec()); }
 
     template <class V, class T>
-    static void MultEq(BaseVector_Mutable<V>& v, const Scaling<0,T> x)
+    static inline void MultEq(BaseVector_Mutable<V>& v, const Scaling<0,T> x)
     { Scale(x,v.vec()); }
 
     template <class V, class T>
-    static void MultEq(BaseVector_Mutable<V>& v, const Scaling<1,T> x)
+    static inline void MultEq(BaseVector_Mutable<V>& v, const Scaling<1,T> x)
     {}
 
     template <class V, class T>
-    static void MultEq(BaseVector_Mutable<V>& v, const Scaling<-1,T> x)
+    static inline void MultEq(BaseVector_Mutable<V>& v, const Scaling<-1,T> x)
     { Scale(x,v.vec()); }
 
     // v /= x
     template <class V>
-    static void DivEq(BaseVector_Mutable<V>& v, const int x)
+    static inline void DivEq(BaseVector_Mutable<V>& v, const int x)
     { Scale(RT(1)/RT(x),v.vec()); }
 
     template <class V>
-    static void DivEq(BaseVector_Mutable<V>& v, const RT x)
+    static inline void DivEq(BaseVector_Mutable<V>& v, const RT x)
     { Scale(RT(1)/x,v.vec()); }
 
     template <class V>
-    static void DivEq(BaseVector_Mutable<V>& v, const CT x)
+    static inline void DivEq(BaseVector_Mutable<V>& v, const CT x)
     { Scale(RT(1)/x,v.vec()); }
 
     template <class V>
-    static void DivEq(BaseVector_Mutable<V>& v, const CCT x)
+    static inline void DivEq(BaseVector_Mutable<V>& v, const CCT x)
     { Scale(RT(1)/CT(x),v.vec()); }
 
     template <class V, class T>
-    static void DivEq(BaseVector_Mutable<V>& v, const Scaling<0,T> x)
+    static inline void DivEq(BaseVector_Mutable<V>& v, const Scaling<0,T> x)
     { Scale(RT(1)/T(x),v.vec()); }
 
     template <class V, class T>
-    static void DivEq(BaseVector_Mutable<V>& v, const Scaling<1,T> x)
+    static inline void DivEq(BaseVector_Mutable<V>& v, const Scaling<1,T> x)
     {}
 
     template <class V, class T>
-    static void DivEq(BaseVector_Mutable<V>& v, const Scaling<-1,T> x)
+    static inline void DivEq(BaseVector_Mutable<V>& v, const Scaling<-1,T> x)
     { Scale(x,v.vec()); }
 
     // -v
-    template <class V> 
-    static ProdXV<-1,RT,V> operator-(const BaseVector<V>& v)
+    template <class V>
+    static inline ProdXV<-1,RT,V> operator-(const BaseVector<V>& v)
     { return ProdXV<-1,RT,V>(RT(-1),v); }
 
     // x * v
-    template <class V> 
-    static ProdXV<0,RT,V> operator*(const int x, const BaseVector<V>& v)
+    template <class V>
+    static inline ProdXV<0,RT,V> operator*(const int x, const BaseVector<V>& v)
     { return ProdXV<0,RT,V>(RT(x),v); }
 
-    template <class V> 
-    static ProdXV<0,RT,V> operator*(const RT x, const BaseVector<V>& v)
+    template <class V>
+    static inline ProdXV<0,RT,V> operator*(const RT x, const BaseVector<V>& v)
     { return ProdXV<0,RT,V>(x,v); }
 
-    template <class V> 
-    static ProdXV<0,CT,V> operator*(const CT x, const BaseVector<V>& v)
+    template <class V>
+    static inline ProdXV<0,CT,V> operator*(const CT x, const BaseVector<V>& v)
     { return ProdXV<0,CT,V>(x,v); }
 
-    template <class V> 
-    static ProdXV<0,CT,V> operator*(const CCT x, const BaseVector<V>& v)
+    template <class V>
+    static inline ProdXV<0,CT,V> operator*(const CCT x, const BaseVector<V>& v)
     { return CT(x)*v; }
 
-    template <class V, int ix, class T> 
-    static ProdXV<ix,T,V> operator*(
+    template <class V, int ix, class T>
+    static inline ProdXV<ix,T,V> operator*(
         const Scaling<ix,T> x, const BaseVector<V>& v)
     { return ProdXV<ix,T,V>(T(x),v); }
 
     // v * x
-    template <class V> 
-    static ProdXV<0,RT,V> operator*(const BaseVector<V>& v, const int x)
+    template <class V>
+    static inline ProdXV<0,RT,V> operator*(const BaseVector<V>& v, const int x)
     { return RT(x)*v; }
 
-    template <class V> 
-    static ProdXV<0,RT,V> operator*(const BaseVector<V>& v, const RT x)
+    template <class V>
+    static inline ProdXV<0,RT,V> operator*(const BaseVector<V>& v, const RT x)
     { return x*v; }
 
-    template <class V> 
-    static ProdXV<0,CT,V> operator*(const BaseVector<V>& v, const CT x)
+    template <class V>
+    static inline ProdXV<0,CT,V> operator*(const BaseVector<V>& v, const CT x)
     { return x*v; }
 
-    template <class V> 
-    static ProdXV<0,CT,V> operator*(const BaseVector<V>& v, const CCT x)
+    template <class V>
+    static inline ProdXV<0,CT,V> operator*(const BaseVector<V>& v, const CCT x)
     { return CT(x)*v; }
 
-    template <class V, int ix, class T> 
-    static ProdXV<ix,T,V> operator*(
+    template <class V, int ix, class T>
+    static inline ProdXV<ix,T,V> operator*(
         const BaseVector<V>& v, const Scaling<ix,T> x)
     { return ProdXV<ix,T,V>(T(x),v); }
 
     // v / x
-    template <class V> 
-    static ProdXV<0,RT,V> operator/(const BaseVector<V>& v, const int x)
+    template <class V>
+    static inline ProdXV<0,RT,V> operator/(const BaseVector<V>& v, const int x)
     { return (RT(1)/RT(x))*v; }
 
-    template <class V> 
-    static ProdXV<0,RT,V> operator/(const BaseVector<V>& v, const RT x)
+    template <class V>
+    static inline ProdXV<0,RT,V> operator/(const BaseVector<V>& v, const RT x)
     { return (RT(1)/x)*v; }
 
-    template <class V> 
-    static ProdXV<0,CT,V> operator/(const BaseVector<V>& v, const CT x)
+    template <class V>
+    static inline ProdXV<0,CT,V> operator/(const BaseVector<V>& v, const CT x)
     { return (RT(1)/x)*v; }
 
-    template <class V> 
-    static ProdXV<0,CT,V> operator/(const BaseVector<V>& v, const CCT x)
+    template <class V>
+    static inline ProdXV<0,CT,V> operator/(const BaseVector<V>& v, const CCT x)
     { return (RT(1)/CT(x))*v; }
 
-    template <class V, int ix, class T> 
-    static ProdXV<ix,T,V> operator/(
+    template <class V, int ix, class T>
+    static inline ProdXV<ix,T,V> operator/(
         const BaseVector<V>& v, const Scaling<ix,T> x)
     { return ProdXV<ix,T,V>(RT(1)/T(x),v); }
 
@@ -302,53 +304,61 @@ namespace tmv {
 
     // -(x*v)
     template <int ix, class T, class V>
-    static ProdXV<-ix,T,V> operator-(const ProdXV<ix,T,V>& pxv)
+    static inline ProdXV<-ix,T,V> operator-(const ProdXV<ix,T,V>& pxv)
     { return ProdXV<-ix,T,V>(-pxv.getX(),pxv.getV()); }
 
     // x * (x*v)
     template <int ix, class T, class V>
-    static ProdXV<0,T,V> operator*(const int x, const ProdXV<ix,T,V>& pxv)
+    static inline ProdXV<0,T,V> operator*(
+        const int x, const ProdXV<ix,T,V>& pxv)
     { return ProdXV<0,T,V>(RT(x)*pxv.getX(),pxv.getV()); }
 
     template <int ix, class T, class V>
-    static ProdXV<0,T,V> operator*(const RT x, const ProdXV<ix,T,V>& pxv)
+    static inline ProdXV<0,T,V> operator*(
+        const RT x, const ProdXV<ix,T,V>& pxv)
     { return ProdXV<0,T,V>(x*pxv.getX(),pxv.getV()); }
 
     template <int ix, class T, class V>
-    static ProdXV<0,CT,V> operator*(const CT x, const ProdXV<ix,T,V>& pxv)
+    static inline ProdXV<0,CT,V> operator*(
+        const CT x, const ProdXV<ix,T,V>& pxv)
     { return ProdXV<0,CT,V>(x*pxv.getX(),pxv.getV()); }
 
     template <int ix, class T, class V>
-    static ProdXV<0,CT,V> operator*(const CCT x, const ProdXV<ix,T,V>& pxv)
+    static inline ProdXV<0,CT,V> operator*(
+        const CCT x, const ProdXV<ix,T,V>& pxv)
     { return ProdXV<0,CT,V>(x*pxv.getX(),pxv.getV()); }
 
     template <int ix1, class T1, int ix, class T, class V>
-    static ProdXV<ix1*ix,typename Traits2<T,T1>::type,V> operator*(
+    static inline ProdXV<ix1*ix,typename Traits2<T,T1>::type,V> operator*(
         const Scaling<ix1,T1>& x, const ProdXV<ix,T,V>& pxv)
-    { 
+    {
         return ProdXV<ix1*ix,typename Traits2<T,T1>::type,V>(
             T1(x)*pxv.getX(),pxv.getV()); 
     }
 
     // (x*v)*x
     template <int ix, class T, class V>
-    static ProdXV<0,T,V> operator*(const ProdXV<ix,T,V>& pxv, const int x)
+    static inline ProdXV<0,T,V> operator*(
+        const ProdXV<ix,T,V>& pxv, const int x)
     { return ProdXV<0,T,V>(RT(x)*pxv.getX(),pxv.getV()); }
 
     template <int ix, class T, class V>
-    static ProdXV<0,T,V> operator*(const ProdXV<ix,T,V>& pxv, const RT x)
+    static inline ProdXV<0,T,V> operator*(
+        const ProdXV<ix,T,V>& pxv, const RT x)
     { return ProdXV<0,T,V>(x*pxv.getX(),pxv.getV()); }
 
     template <int ix, class T, class V>
-    static ProdXV<0,CT,V> operator*(const ProdXV<ix,T,V>& pxv, const CT x)
+    static inline ProdXV<0,CT,V> operator*(
+        const ProdXV<ix,T,V>& pxv, const CT x)
     { return ProdXV<0,CT,V>(x*pxv.getX(),pxv.getV()); }
 
     template <int ix, class T, class V>
-    static ProdXV<0,CT,V> operator*(const ProdXV<ix,T,V>& pxv, const CCT x)
+    static inline ProdXV<0,CT,V> operator*(
+        const ProdXV<ix,T,V>& pxv, const CCT x)
     { return ProdXV<0,CT,V>(x*pxv.getX(),pxv.getV()); }
 
     template <int ix1, class T1, int ix, class T, class V>
-    static ProdXV<ix1*ix,typename Traits2<T,T1>::type,V> operator*(
+    static inline ProdXV<ix1*ix,typename Traits2<T,T1>::type,V> operator*(
         const ProdXV<ix,T,V>& pxv, const Scaling<ix1,T1>& x)
     {
         return ProdXV<ix1*ix,typename Traits2<T,T1>::type,V>(
@@ -357,25 +367,29 @@ namespace tmv {
 
     // (x*v)/x
     template <int ix, class T, class V>
-    static ProdXV<0,T,V> operator/(const ProdXV<ix,T,V>& pxv, const int x)
+    static inline ProdXV<0,T,V> operator/(
+        const ProdXV<ix,T,V>& pxv, const int x)
     { return ProdXV<0,T,V>(pxv.getX()/RT(x),pxv.getV()); }
 
     template <int ix, class T, class V>
-    static ProdXV<0,T,V> operator/(const ProdXV<ix,T,V>& pxv, const RT x)
+    static inline ProdXV<0,T,V> operator/(
+        const ProdXV<ix,T,V>& pxv, const RT x)
     { return ProdXV<0,T,V>(pxv.getX()/x,pxv.getV()); }
 
     template <int ix, class T, class V>
-    static ProdXV<0,CT,V> operator/(const ProdXV<ix,T,V>& pxv, const CT x)
+    static inline ProdXV<0,CT,V> operator/(
+        const ProdXV<ix,T,V>& pxv, const CT x)
     { return ProdXV<0,CT,V>(pxv.getX()/x,pxv.getV()); }
 
     template <int ix, class T, class V>
-    static ProdXV<0,CT,V> operator/(const ProdXV<ix,T,V>& pxv, const CCT x)
+    static inline ProdXV<0,CT,V> operator/(
+        const ProdXV<ix,T,V>& pxv, const CCT x)
     { return ProdXV<0,CT,V>(pxv.getX()/x,pxv.getV()); }
 
     template <int ix1, class T1, int ix, class T, class V>
-    static ProdXV<ix1*ix,typename Traits2<T,T1>::type,V> operator/(
+    static inline ProdXV<ix1*ix,typename Traits2<T,T1>::type,V> operator/(
         const ProdXV<ix,T,V>& pxv, const Scaling<ix1,T1>& x)
-    { 
+    {
         return ProdXV<ix1*ix,typename Traits2<T,T1>::type,V>(
             pxv.getX()/T1(x),pxv.getV()); 
     }
@@ -387,23 +401,23 @@ namespace tmv {
 #ifndef TMV_NO_ALIAS_CHECK
     // Have SameStorage look into a ProdXV object:
     template <int ix1, class T1, class V1, class V2>
-    static bool SameStorage(
+    static inline bool SameStorage(
         const ProdXV<ix1,T1,V1>& v1, const BaseVector_Calc<V2>& v2)
     { return SameStorage(v1.getV().vec(),v2.vec()); }
     template <class V1, int ix2, class T2, class V2>
-    static bool SameStorage(
+    static inline bool SameStorage(
         const BaseVector_Calc<V1>& v1, const ProdXV<ix2,T2,V2>& v2)
     { return SameStorage(v1.vec(),v2.getV().vec()); }
     template <int ix1, class T1, class V1, int ix2, class T2, class V2>
-    static bool SameStorage(
+    static inline bool SameStorage(
         const ProdXV<ix1,T1,V1>& v1, const ProdXV<ix2,T2,V2>& v2)
     { return SameStorage(v1.getV().vec(),v2.getV().vec()); }
 #endif
 
 
     template <int ix, class T, class V>
-    static std::string TMV_Text(const ProdXV<ix,T,V>& pxv)
-    { 
+    static inline std::string TMV_Text(const ProdXV<ix,T,V>& pxv)
+    {
         std::ostringstream s;
         s << "ProdXV< "<<ix<<","<<TMV_Text(T(pxv.getX()));
         s << " , "<<TMV_Text(pxv.getV())<<" >";

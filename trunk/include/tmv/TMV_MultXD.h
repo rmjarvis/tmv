@@ -44,8 +44,9 @@ namespace tmv {
     //
 
     template <int ix, class T, class M>
-    static void Scale(const Scaling<ix,T>& x, BaseMatrix_Diag_Mutable<M>& m)
-    { 
+    static inline void Scale(
+        const Scaling<ix,T>& x, BaseMatrix_Diag_Mutable<M>& m)
+    {
         typename M::diag_type md = m.diag();
         Scale(x,md);
     }
@@ -56,30 +57,30 @@ namespace tmv {
     //
 
     template <bool add, int ix1, class T1, class M1, class M2>
-    static void MultXM(
+    static inline void MultXM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         BaseMatrix_Diag_Mutable<M2>& m2)
-    { 
+    {
         typename M1::const_diag_type m1d = m1.diag();
         typename M2::diag_type m2d = m2.diag();
         MultXV<add>(x1,m1d,m2d);
     }
 
     template <bool add, int ix1, class T1, class M1, class M2>
-    static void NoAliasMultXM(
+    static inline void NoAliasMultXM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         BaseMatrix_Diag_Mutable<M2>& m2)
-    { 
+    {
         typename M1::const_diag_type m1d = m1.diag();
         typename M2::diag_type m2d = m2.diag();
         NoAliasMultXV<add>(x1,m1d,m2d);
     }
 
     template <bool add, int ix1, class T1, class M1, class M2>
-    static void AliasMultXM(
+    static inline void AliasMultXM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         BaseMatrix_Diag_Mutable<M2>& m2)
-    { 
+    {
         typename M1::const_diag_type m1d = m1.diag();
         typename M2::diag_type m2d = m2.diag();
         AliasMultXV<add>(x1,m1d,m2d);
@@ -90,7 +91,7 @@ namespace tmv {
     //
 
     template <bool add, int ix1, class T1, class M1, class M2>
-    static void MultXM(
+    static inline void MultXM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         BaseMatrix_Rec_Mutable<M2>& m2)
     {
@@ -107,7 +108,7 @@ namespace tmv {
     }
 
     template <bool add, int ix1, class T1, class M1, class M2>
-    static void NoAliasMultXM(
+    static inline void NoAliasMultXM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         BaseMatrix_Rec_Mutable<M2>& m2)
     {
@@ -118,7 +119,7 @@ namespace tmv {
     }
 
     template <bool add, int ix1, class T1, class M1, class M2>
-    static void AliasMultXM(
+    static inline void AliasMultXM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         BaseMatrix_Rec_Mutable<M2>& m2)
     { MultXM<add>(x1,m1,m2); }

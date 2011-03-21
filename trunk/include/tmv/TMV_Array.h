@@ -49,7 +49,7 @@ const int TMV_MaxStack = 1024; // bytes
 namespace tmv
 {
     template <class T>
-    static bool TMV_Aligned(const T* p)
+    static inline bool TMV_Aligned(const T* p)
     { return (reinterpret_cast<size_t>(p) & 0xf) == 0; }
 
     // There doesn't seem to be any portable C++ function that guarantees
@@ -81,7 +81,7 @@ namespace tmv
     public:
         AlignedMemory() : p(0) {}
         void allocate(const size_t n) 
-        { 
+        {
 #ifdef TMV_END_PADDING
             const size_t nn = n + 16/sizeof(T);
             p = new T[nn];
@@ -112,7 +112,7 @@ namespace tmv
     public:
         AlignedMemory() : p(0) {}
         void allocate(const size_t n) 
-        { 
+        {
 #ifdef TMV_END_PADDING
             const size_t nn = (n<<2)+15 + 16;
             p = new char[nn];
@@ -150,7 +150,7 @@ namespace tmv
     public:
         AlignedMemory() : p(0) {}
         void allocate(const size_t n) 
-        { 
+        {
 #ifdef TMV_END_PADDING
             const size_t nn = (n<<3)+15 + 16;
             p = new char[nn];
@@ -199,7 +199,7 @@ namespace tmv
     struct TMV_Nan 
     {
         static T get() 
-        { 
+        {
             static T zero(0);
             static T nan = 
                 std::numeric_limits<T>::is_integer ? UNKNOWN : zero/zero;
@@ -236,7 +236,7 @@ namespace tmv
 #endif
         }
         ~AlignedArray() 
-        { 
+        {
 #ifdef TMV_INITIALIZE_NAN
             for(size_t i=0;i<_n;++i) get()[i] = T(-999);
 #endif
@@ -259,7 +259,7 @@ namespace tmv
             p.swapWith(rhs.p); 
         }
         void resize(const size_t n) 
-        { 
+        {
 #ifdef TMV_INITIALIZE_NAN
             for(size_t i=0;i<_n;++i) get()[i] = T(-999);
 #endif
@@ -298,7 +298,7 @@ namespace tmv
 #endif
         }
         AlignedArray(const size_t n) 
-        { 
+        {
             p.allocate(n<<1); 
 #ifdef TMV_INITIALIZE_NAN
             _n = n;
@@ -323,14 +323,14 @@ namespace tmv
         operator const T*() const { return get(); }
 
         void swapWith(AlignedArray<T>& rhs) 
-        { 
+        {
 #ifdef TMV_INITIALIZE_NAN
             TMV_SWAP(_n,rhs._n);
 #endif
             p.swapWith(rhs.p); 
         }
         void resize(const size_t n) 
-        { 
+        {
 #ifdef TMV_INITIALIZE_NAN
             for(size_t i=0;i<_n;++i) get()[i] = std::complex<RT>(-999,-888);
 #endif

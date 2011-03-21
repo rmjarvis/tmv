@@ -851,8 +851,9 @@ namespace tmv {
         if (v.step() == 1) {
             VectorView<T,1> vu = v.unitView();
             InlineSort(vu,ad,comp);
-        } else 
+        } else {
             InlineSort(v,ad,comp); 
+        }
     }
     template <class T> 
     void InstSort(VectorView<T> v, int* P, ADType ad, CompType comp)
@@ -885,11 +886,11 @@ namespace tmv {
         else InlineWrite(os,v,thresh); 
     }
 
-    template <class T, bool C> 
-    void InstRead(std::istream& is, VectorView<T,UNKNOWN,C> v)
+    template <class T>
+    void InstRead(std::istream& is, VectorView<T> v)
     {
         if (v.step() == 1) {
-            VectorView<T,1,C> vu = v.unitView();
+            VectorView<T,1> vu = v.unitView();
             InlineRead(is,vu); 
         } else 
             InlineRead(is,v); 

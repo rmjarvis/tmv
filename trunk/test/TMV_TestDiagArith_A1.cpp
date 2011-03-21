@@ -2,7 +2,6 @@
 #include "TMV_Test.h"
 #include "TMV_Test_1.h"
 
-//#define PRINTALGO_Det
 #include "TMV.h"
 #include <fstream>
 

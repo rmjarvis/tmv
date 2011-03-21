@@ -37,20 +37,6 @@
 
 namespace tmv {
 
-    // Defined below:
-    template <class M1, class M2>
-    static void Copy(
-        const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
-    template <class M1, class M2>
-    static void NoAliasCopy(
-        const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
-    template <class M1, class M2>
-    static void InlineCopy(
-        const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
-    template <class M1, class M2>
-    static void AliasCopy(
-        const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
-
     // Defined in TMV_Matrix.cpp
     template <class T1, bool C1, class T2>
     void InstCopy(
@@ -79,7 +65,7 @@ namespace tmv {
             M1l m1l = m1.linearView();
             M2l m2l = m2.linearView();
             const int cs_rs = IntTraits2<cs,rs>::prod;
-            CopyV_Helper<-2,cs_rs,M1l,M2l>::call(m1l,m2l);
+            CopyV_Helper<-3,cs_rs,M1l,M2l>::call(m1l,m2l);
         }
     };
 
@@ -100,7 +86,7 @@ namespace tmv {
             IT1 it1 = m1.get_col(0).begin();
             IT2 it2 = m2.get_col(0).begin();
             for(;N;--N) {
-                CopyV_Helper<-4,cs,M1c,M2c>::call2(M,it1,it2);
+                CopyV_Helper<-3,cs,M1c,M2c>::call2(M,it1,it2);
                 it1.shiftP(step1);
                 it2.shiftP(step2);
             }
@@ -163,7 +149,7 @@ namespace tmv {
             IT1 it1 = m1.get_row(0).begin();
             IT2 it2 = m2.get_row(0).begin();
             for(;M;--M) {
-                CopyV_Helper<-4,rs,M1r,M2r>::call2(N,it1,it2);
+                CopyV_Helper<-3,rs,M1r,M2r>::call2(N,it1,it2);
                 it1.shiftP(step1);
                 it2.shiftP(step2);
             }
@@ -227,48 +213,12 @@ namespace tmv {
         }
     };
 
-    // algo -4: No branches or copies
+    // algo 90: Call inst
     template <int cs, int rs, class M1, class M2>
-    struct CopyM_Helper<-4,cs,rs,M1,M2>
+    struct CopyM_Helper<90,cs,rs,M1,M2>
     {
         static void call(const M1& m1, M2& m2)
-        {
-            typedef typename M2::value_type T2;
-            const bool allrm = M1::_rowmajor && M2::_rowmajor;
-#if TMV_OPT == 0
-            const int algo = allrm ? 21 : 11;
-#else
-            const bool allcm = M1::_colmajor && M2::_colmajor;
-            const bool canlin = 
-                M1::_canlin && M2::_canlin && (allrm || allcm);
-            const int algo = 
-                (cs == 0 || rs == 0) ? 0 :
-                canlin ? 1 :
-                ( cs != UNKNOWN && rs != UNKNOWN ) ? (
-                    ( IntTraits2<cs,rs>::prod <= int(128/sizeof(T2)) ) ? (
-                        ( M1::_rowmajor && M2::_rowmajor ) ? 25 : 15 ) :
-                    allrm ? 21 : 
-                    allcm ? 11 :
-                    ( cs > rs ) ? 21 : 11 ) :
-                allrm ? 21 : 11;
-#endif
-            CopyM_Helper<algo,cs,rs,M1,M2>::call(m1,m2);
-        }
-    };
-
-    // algo -3: Determine which algorithm to use
-    template <int cs, int rs, class M1, class M2>
-    struct CopyM_Helper<-3,cs,rs,M1,M2>
-    {
-        static void call(const M1& m1, M2& m2)
-        { 
-            const int algo = 
-#if TMV_OPT >= 2
-                cs == UNKNOWN || rs == UNKNOWN ? 31 :
-#endif
-                -4;
-            CopyM_Helper<algo,cs,rs,M1,M2>::call(m1,m2); 
-        }
+        { InstCopy(m1.xView(),m2.xView()); }
     };
 
     // algo 97: Conjugate
@@ -282,39 +232,6 @@ namespace tmv {
             M1c m1c = m1.conjugate();
             M2c m2c = m2.conjugate();
             CopyM_Helper<-2,cs,rs,M1c,M2c>::call(m1c,m2c);
-        }
-    };
-
-    // algo 98: Call inst
-    template <int cs, int rs, class M1, class M2>
-    struct CopyM_Helper<98,cs,rs,M1,M2>
-    {
-        static void call(const M1& m1, M2& m2)
-        { InstCopy(m1.xView(),m2.xView()); }
-    };
-
-    // algo -2: Check for inst
-    template <int cs, int rs, class M1, class M2>
-    struct CopyM_Helper<-2,cs,rs,M1,M2>
-    {
-        static void call(const M1& m1, M2& m2)
-        {
-            typedef typename M1::value_type T1;
-            typedef typename M2::value_type T2;
-            const bool inst = 
-                (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
-#ifdef TMV_INST_MIX
-                Traits2<T1,T2>::samebase &&
-#else
-                Traits2<T1,T2>::sametype &&
-#endif
-                Traits<T1>::isinst;
-            const int algo = 
-                M2::_conj ? 97 :
-                inst ? 98 :
-                -3;
-            CopyM_Helper<algo,cs,rs,M1,M2>::call(m1,m2);
         }
     };
 
@@ -343,6 +260,71 @@ namespace tmv {
         }
     };
 
+    // algo -4: No branches or copies
+    template <int cs, int rs, class M1, class M2>
+    struct CopyM_Helper<-4,cs,rs,M1,M2>
+    {
+        static void call(const M1& m1, M2& m2)
+        {
+            typedef typename M2::value_type T2;
+            const bool allrm = M1::_rowmajor && M2::_rowmajor;
+            const bool allcm = M1::_colmajor && M2::_colmajor;
+            const bool canlin = 
+                M1::_canlin && M2::_canlin && (allrm || allcm);
+            const int algo = 
+                (cs == 0 || rs == 0) ? 0 :
+                canlin ? 1 :
+                TMV_OPT == 0 ? (allrm ? 21 : 11) :
+                ( cs != UNKNOWN && rs != UNKNOWN ) ? (
+                    ( IntTraits2<cs,rs>::prod <= int(128/sizeof(T2)) ) ? (
+                        ( M1::_rowmajor && M2::_rowmajor ) ? 25 : 15 ) :
+                    allrm ? 21 : 
+                    allcm ? 11 :
+                    ( cs > rs ) ? 21 : 11 ) :
+                allrm ? 21 : 11;
+            CopyM_Helper<algo,cs,rs,M1,M2>::call(m1,m2);
+        }
+    };
+
+    // algo -3: Determine which algorithm to use
+    template <int cs, int rs, class M1, class M2>
+    struct CopyM_Helper<-3,cs,rs,M1,M2>
+    {
+        static void call(const M1& m1, M2& m2)
+        {
+            const int algo = 
+                TMV_OPT <= 1 ? -4 : 
+                cs == UNKNOWN || rs == UNKNOWN ? 31 :
+                -4;
+            CopyM_Helper<algo,cs,rs,M1,M2>::call(m1,m2); 
+        }
+    };
+
+    // algo -2: Check for inst
+    template <int cs, int rs, class M1, class M2>
+    struct CopyM_Helper<-2,cs,rs,M1,M2>
+    {
+        static void call(const M1& m1, M2& m2)
+        {
+            typedef typename M1::value_type T1;
+            typedef typename M2::value_type T2;
+            const bool inst = 
+                (cs == UNKNOWN || cs > 16) &&
+                (rs == UNKNOWN || rs > 16) &&
+#ifdef TMV_INST_MIX
+                Traits2<T1,T2>::samebase &&
+#else
+                Traits2<T1,T2>::sametype &&
+#endif
+                Traits<T1>::isinst;
+            const int algo = 
+                M2::_conj ? 97 :
+                inst ? 90 :
+                -3;
+            CopyM_Helper<algo,cs,rs,M1,M2>::call(m1,m2);
+        }
+    };
+
     // algo -1: Check for aliases?
     template <int cs, int rs, class M1, class M2>
     struct CopyM_Helper<-1,cs,rs,M1,M2>
@@ -364,7 +346,7 @@ namespace tmv {
     };
 
     template <class M1, class M2>
-    static void Copy(
+    static inline void Copy(
         const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
@@ -375,13 +357,13 @@ namespace tmv {
         const int rs = Sizes<M1::_rowsize,M2::_rowsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::cview_type M2v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
         CopyM_Helper<-1,cs,rs,M1v,M2v>::call(m1v,m2v);
     }
 
     template <class M1, class M2>
-    static void NoAliasCopy(
+    static inline void NoAliasCopy(
         const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
@@ -392,13 +374,13 @@ namespace tmv {
         const int rs = Sizes<M1::_rowsize,M2::_rowsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::cview_type M2v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
         CopyM_Helper<-2,cs,rs,M1v,M2v>::call(m1v,m2v);
     }
 
     template <class M1, class M2>
-    static void InlineCopy(
+    static inline void InlineCopy(
         const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
@@ -409,13 +391,13 @@ namespace tmv {
         const int rs = Sizes<M1::_rowsize,M2::_rowsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::cview_type M2v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
         CopyM_Helper<-3,cs,rs,M1v,M2v>::call(m1v,m2v);
     }
 
     template <class M1, class M2>
-    static void AliasCopy(
+    static inline void AliasCopy(
         const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
@@ -426,8 +408,8 @@ namespace tmv {
         const int rs = Sizes<M1::_rowsize,M2::_rowsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::cview_type M2v;
-        M1v m1v = m1.cView();
-        M2v m2v = m2.cView();
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
         CopyM_Helper<99,cs,rs,M1v,M2v>::call(m1v,m2v);
     }
 

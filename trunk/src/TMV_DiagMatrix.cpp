@@ -40,7 +40,7 @@ namespace tmv {
     void InstWrite(std::ostream& os, const ConstDiagMatrixView<T,UNKNOWN,C>& m)
     {
         if (m.step() == 1)
-            InlineWrite(os,m.cmView()); 
+            InlineWrite(os,m.unitView()); 
         else
             InlineWrite(os,m); 
     }
@@ -51,7 +51,7 @@ namespace tmv {
         typename Traits<T>::real_type thresh)
     {
         if (m.step() == 1)
-            InlineWrite(os,m.cmView(),thresh); 
+            InlineWrite(os,m.unitView(),thresh); 
         else
             InlineWrite(os,m,thresh); 
     }
