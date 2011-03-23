@@ -32,8 +32,8 @@
 
 
 #include "TMV_Blas.h"
-#include "tmv/TMV_Vector.h"
 #include "tmv/TMV_Matrix.h"
+#include "tmv/TMV_Vector.h"
 #include "tmv/TMV_MatrixIO.h"
 #include "tmv/TMV_CopyM.h"
 #include "tmv/TMV_SwapM.h"
@@ -50,12 +50,12 @@ namespace tmv {
     // Copy Matrices
     //
 
-    template <class T1, bool C1, class T2>
+    template <class T1, int C1, class T2>
     static void NonLapCopy(
-        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1, MatrixView<T2> m2)
+        const ConstMatrixView<T1,C1>& m1, MatrixView<T2> m2)
     {
         if (m2.iscm()) {
-            MatrixView<T2,1> m2cm = m2;
+            MatrixView<T2,ColMajor> m2cm = m2;
             if (m1.iscm()) {
                 InlineCopy(m1.cmView(),m2cm);
             } else if (m1.isrm()) {
@@ -75,9 +75,9 @@ namespace tmv {
     }
 
 #ifdef ELAP
-    template <class T1, bool C1, class T2>
+    template <class T1, int C1, class T2>
     static void LapCopy(
-        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1, MatrixView<T2> m2)
+        const ConstMatrixView<T1,C1>& m1, MatrixView<T2> m2)
     { NonLapCopy(m1,m2); }
 #ifdef TMV_INST_DOUBLE
     static void LapCopy(
@@ -159,9 +159,9 @@ namespace tmv {
 #endif
 #endif
 
-    template <class T1, bool C1, class T2>
+    template <class T1, int C1, class T2>
     void InstCopy(
-        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1, MatrixView<T2> m2)
+        const ConstMatrixView<T1,C1>& m1, MatrixView<T2> m2)
     {
 #ifdef ELAP
         if (m1.iscm() && m2.iscm() && m1.stepj()>0 && m2.stepj()>0)
@@ -175,16 +175,16 @@ namespace tmv {
     // Swap Matrices
     //
 
-    template <class T, bool C> 
-    void InstSwap(MatrixView<T,UNKNOWN,UNKNOWN,C> m1, MatrixView<T> m2)
+    template <class T, int C> 
+    void InstSwap(MatrixView<T,C> m1, MatrixView<T> m2)
     {
         if (m2.iscm()) {
-            MatrixView<T,1> m2cm = m2.cmView();
+            MatrixView<T,ColMajor> m2cm = m2.cmView();
             if (m1.iscm()) {
-                MatrixView<T,1,UNKNOWN,C> m1cm = m1.cmView();
+                MatrixView<T,C|ColMajor> m1cm = m1.cmView();
                 InlineSwap(m1cm,m2cm);
             } else if (m1.isrm()) {
-                MatrixView<T,UNKNOWN,1,C> m1rm = m1.rmView();
+                MatrixView<T,C|RowMajor> m1rm = m1.rmView();
                 InlineSwap(m1rm,m2cm);
             } else
                 InlineSwap(m1,m2cm);
@@ -192,10 +192,10 @@ namespace tmv {
             InstSwap(m1.transpose(),m2.transpose());
         } else {
             if (m1.isrm()) {
-                MatrixView<T,UNKNOWN,1,C> m1rm = m1.rmView();
+                MatrixView<T,C|RowMajor> m1rm = m1.rmView();
                 InlineSwap(m1rm,m2);
             } else if (m1.iscm()) {
-                MatrixView<T,1,UNKNOWN,C> m1cm = m1.cmView();
+                MatrixView<T,C|ColMajor> m1cm = m1.cmView();
                 InlineSwap(m1cm,m2);
             } else
                 InlineSwap(m1,m2);
@@ -211,10 +211,10 @@ namespace tmv {
     void InstTransposeSelf(MatrixView<T> m)
     {
         if (m.iscm()) {
-            MatrixView<T,1> mcm = m;
+            MatrixView<T,ColMajor> mcm = m;
             InlineTransposeSelf(mcm);
         } else if (m.isrm()) {
-            MatrixView<T,1> mt = m.transpose();
+            MatrixView<T,ColMajor> mt = m.transpose();
             InlineTransposeSelf(mt);
         } else {
             InlineTransposeSelf(m);
@@ -238,10 +238,10 @@ namespace tmv {
         MatrixView<T> m, const int* p, const int i1, const int i2)
     {
         if (m.iscm()) {
-            MatrixView<T,1> mcm = m;
+            MatrixView<T,ColMajor> mcm = m;
             InlinePermuteRows(mcm,p,i1,i2);
         } else if (m.isrm()) {
-            MatrixView<T,UNKNOWN,1> mrm = m;
+            MatrixView<T,RowMajor> mrm = m;
             InlinePermuteRows(mrm,p,i1,i2);
         } else {
             InlinePermuteRows(m,p,i1,i2);
@@ -253,10 +253,10 @@ namespace tmv {
         MatrixView<T> m, const int* p, const int i1, const int i2)
     {
         if (m.iscm()) {
-            MatrixView<T,1> mcm = m;
+            MatrixView<T,ColMajor> mcm = m;
             InlineReversePermuteRows(mcm,p,i1,i2);
         } else if (m.isrm()) {
-            MatrixView<T,UNKNOWN,1> mrm = m;
+            MatrixView<T,RowMajor> mrm = m;
             InlineReversePermuteRows(mrm,p,i1,i2);
         } else {
             InlineReversePermuteRows(m,p,i1,i2);
@@ -637,18 +637,18 @@ namespace tmv {
     // I/O
     //
 
-    template <class T, bool C>
+    template <class T, int C>
     void InstWrite(
-        std::ostream& os, const ConstMatrixView<T,UNKNOWN,UNKNOWN,C>& m)
+        std::ostream& os, const ConstMatrixView<T,C>& m)
     {
         if (m.iscm()) InlineWrite(os,m.cmView());
         else if (m.isrm()) InlineWrite(os,m.rmView());
         else InlineWrite(os,m);
     }
 
-    template <class T, bool C>
+    template <class T, int C>
     void InstWrite(
-        std::ostream& os, const ConstMatrixView<T,UNKNOWN,UNKNOWN,C>& m,
+        std::ostream& os, const ConstMatrixView<T,C>& m,
         typename ConstMatrixView<T>::float_type thresh)
     {
         if (m.iscm()) InlineWrite(os,m.cmView(),thresh);
@@ -660,10 +660,10 @@ namespace tmv {
     void InstRead(std::istream& is, MatrixView<T> m)
     {
         if (m.iscm()) {
-            MatrixView<T,1> mcm = m.cmView();
+            MatrixView<T,ColMajor> mcm = m.cmView();
             InlineRead(is,mcm);
         } else if (m.isrm()) {
-            MatrixView<T,UNKNOWN,1> mrm = m.rmView();
+            MatrixView<T,RowMajor> mrm = m.rmView();
             InlineRead(is,mrm);
         } else 
             InlineRead(is,m);

@@ -70,6 +70,28 @@ namespace tmv {
         BaseMatrix_Rec_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Rec<M2>& m2);
 
+    // From TMV_MultMM_Block.h
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    static void MultMM_RecursiveBlock(
+        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
+        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    static void MultMM_Block(
+        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
+        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
+
+    // From TMV_MultMM_Winograd.h
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    static void MultMM_Winograd(
+        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
+        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
+
+    // From TMV_MultMM_OpenMP
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    static void MultMM_OpenMP(
+        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
+        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
+
     // From TMV_MultMD.h:
     template <bool add, int ix, class T, class M1, class M2, class M3>
     static void MultMM(
@@ -112,41 +134,41 @@ namespace tmv {
 
     // From TMV_MultDV.h:
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void MultMM(
+    static void MultMM(
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Diag_Mutable<M3>& m3);
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void NoAliasMultMM(
+    static void NoAliasMultMM(
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Diag_Mutable<M3>& m3);
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void AliasMultMM(
+    static void AliasMultMM(
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Diag_Mutable<M3>& m3);
 
     template <class M1, int ix, class T, class M2>
-    static inline void MultEqMM(
+    static void MultEqMM(
         BaseMatrix_Diag_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2);
     template <class M1, int ix, class T, class M2>
-    static inline void NoAliasMultEqMM(
+    static void NoAliasMultEqMM(
         BaseMatrix_Diag_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2);
     template <class M1, int ix, class T, class M2>
-    static inline void AliasMultEqMM(
+    static void AliasMultEqMM(
         BaseMatrix_Diag_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2);
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void MultMM(
+    static void MultMM(
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void NoAliasMultMM(
+    static void NoAliasMultMM(
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void AliasMultMM(
+    static void AliasMultMM(
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
 

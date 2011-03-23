@@ -33,7 +33,14 @@
 
 #include "TMV_Blas.h"
 #include "tmv/TMV_LUDiv.h"
-#include "tmv/TMV_SimpleMatrix.h"
+#include "tmv/TMV_Matrix.h"
+#include "tmv/TMV_Vector.h"
+#include "tmv/TMV_TriMatrix.h"
+#include "tmv/TMV_CopyM.h"
+#include "tmv/TMV_CopyV.h"
+#include "tmv/TMV_DivVU.h"
+#include "tmv/TMV_DivMU.h"
+#include "tmv/TMV_PermuteM.h"
 
 namespace tmv {
 
@@ -45,16 +52,16 @@ namespace tmv {
             const M1& m1, const Permutation& P, MatrixView<T2>& m2)
         {
             if (m2.iscm()) {
-                MatrixView<T2,1> m2cm = m2.cmView();
+                MatrixView<T2,ColMajor> m2cm = m2.cmView();
                 InlineLU_SolveInPlace(m1,P,m2cm);
             } else {
-                MatrixView<T2,UNKNOWN,1> m2rm = m2.rmView();
+                MatrixView<T2,RowMajor> m2rm = m2.rmView();
                 InlineLU_SolveInPlace(m1,P,m2rm);
             }
         }
         template <class M1, class T2>
         static void call(
-            const M1& m1, const Permutation& P, VectorView<T2,1>& v2)
+            const M1& m1, const Permutation& P, VectorView<T2,Unit>& v2)
         { InlineLU_SolveInPlace(m1,P,v2); }
     };
     template <>
@@ -65,16 +72,16 @@ namespace tmv {
             const M1& m1, const Permutation& P, MatrixView<T2>& m2)
         {
             if (m2.iscm()) {
-                MatrixView<T2,1> m2cm = m2.cmView();
+                MatrixView<T2,ColMajor> m2cm = m2.cmView();
                 InlineLU_SolveTransposeInPlace(m1,P,m2cm);
             } else {
-                MatrixView<T2,UNKNOWN,1> m2rm = m2.rmView();
+                MatrixView<T2,RowMajor> m2rm = m2.rmView();
                 InlineLU_SolveTransposeInPlace(m1,P,m2rm);
             }
         }
         template <class M1, class T2>
         static void call(
-            const M1& m1, const Permutation& P, VectorView<T2,1>& v2)
+            const M1& m1, const Permutation& P, VectorView<T2,Unit>& v2)
         { InlineLU_SolveTransposeInPlace(m1,P,v2); }
     };
 
@@ -86,7 +93,7 @@ namespace tmv {
     { NonLapLUSolve<trans>::call(m1,P,m2); }
     template <bool trans, class M1, class T2, class T1> 
     static inline void LapLUSolve(
-        const M1& m1, const Permutation& P, VectorView<T2,1>& v2, T1)
+        const M1& m1, const Permutation& P, VectorView<T2,Unit>& v2, T1)
     { NonLapLUSolve<trans>::call(m1,P,v2); }
 #ifdef INST_DOUBLE
     template <bool trans, class M1> 
@@ -150,17 +157,17 @@ namespace tmv {
     }
     template <bool trans, class M1> 
     static inline void LapLUSolve(
-        const M1& m1, const Permutation& P, VectorView<double,1> v2, double t1)
+        const M1& m1, const Permutation& P, VectorView<double,Unit> v2, double t1)
     { LapLUSolve(m1,P,ColVectorViewOf(v2).xView(),t1); }
     template <bool trans, class M1> 
     static inline void LapLUSolve(
         const M1& m1, const Permutation& P, 
-        VectorView<std::complex<double,1> > v2, std::complex<double> t1)
+        VectorView<std::complex<double,Unit> > v2, std::complex<double> t1)
     { LapLUSolve(m1,P,ColVectorViewOf(v2).xView(),t1); }
     template <bool trans, class M1> 
     static inline void LapLUSolve(
         const M1& m1, const Permutation& P, 
-        VectorView<std::complex<double>,1> v2, double t1)
+        VectorView<std::complex<double>,Unit> v2, double t1)
     { LapLUSolve(m1,P,ColVectorViewOf(v2).xView(),t1); }
 #endif
 #ifdef INST_FLOAT
@@ -226,17 +233,17 @@ namespace tmv {
     }
     template <bool trans, class M1> 
     static inline void LapLUSolve(
-        const M1& m1, const Permutation& P, VectorView<float,1> v2, float t1)
+        const M1& m1, const Permutation& P, VectorView<float,Unit> v2, float t1)
     { LapLUSolve(m1,P,ColVectorViewOf(v2).xView(),t1); }
     template <bool trans, class M1> 
     static inline void LapLUSolve(
         const M1& m1, const Permutation& P, 
-        VectorView<std::complex<float>,1> v2, std::complex<float> t1)
+        VectorView<std::complex<float>,Unit> v2, std::complex<float> t1)
     { LapLUSolve(m1,P,ColVectorViewOf(v2).xView(),t1); }
     template <bool trans, class M1> 
     static inline void LapLUSolve(
         const M1& m1, const Permutation& P,
-        VectorView<std::complex<float>,1> v2, float t1)
+        VectorView<std::complex<float>,Unit> v2, float t1)
     { LapLUSolve(m1,P,ColVectorViewOf(v2).xView(),t1); }
 #endif // MKL
 #endif // FLOAT
@@ -252,19 +259,19 @@ namespace tmv {
             if ( (m2.iscm() && m2.stepj()>0) ) {
                 LapLUSolve(m1,P,m2,t1);
             } else {
-                SimpleMatrix<T2,ColMajor> m2c(m2);
+                Matrix<T2,ColMajor|NoDivider> m2c(m2);
                 LapLUSolve(m1,P,m2c.constView().xView(),t1);
                 InstCopy(m2c.constView().xView(),m2);
             }
         } else {
-            SimpleMatrix<M1::value_type,ColMajor> m1c(m1);
+            Matrix<M1::value_type,ColMajor|NoDivider> m1c(m1);
             DoLUSolve(m1c.xView(),P,m2);
         }
 #else
         if (m2.iscm() || m2.isrm()) {
             NonLapLUSolve<trans>::call(m1,P,m2);
         } else {
-            SimpleMatrix<T2,ColMajor> m2c(m2);
+            Matrix<T2,ColMajor|NoDivider> m2c(m2);
             MatrixView<T2> m2cv = m2c.xView();
             NonLapLUSolve<trans>::call(m1,P,m2cv);
             InstCopy(m2cv.constView(),m2);
@@ -287,16 +294,16 @@ namespace tmv {
                 InstCopy(v2c.constView().xView(),v2);
             }
         } else {
-            SimpleMatrix<M1::value_type,ColMajor> m1c(m1);
+            Matrix<M1::value_type,ColMajor|NoDivider> m1c(m1);
             DoLUSolve(m1c.xView(),P,v2);
         }
 #else
         if ( v2.step() == 1 ) {
-            VectorView<T2,1> v2v = v2.unitView();
+            VectorView<T2,Unit> v2v = v2.unitView();
             NonLapLUSolve<trans>::call(m1,P,v2v);
         } else {
             Vector<T2> v2c(v2);
-            VectorView<T2,1> v2cv = v2c.unitView();
+            VectorView<T2,Unit> v2cv = v2c.unitView();
             NonLapLUSolve<trans>::call(m1,P,v2cv);
             InstCopy(v2c.constView().xView(),v2);
         }
@@ -304,24 +311,24 @@ namespace tmv {
     }
 
 
-    template <class T1, class T2, bool C1>
+    template <class T1, class T2, int C1>
     void InstLU_SolveInPlace(
-        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P,
+        const ConstMatrixView<T1,C1>& m1, const Permutation& P,
         MatrixView<T2> m2)
     { DoLUSolve<false>(m1,P,m2); }
-    template <class T1, class T2, bool C1>
+    template <class T1, class T2, int C1>
     void InstLU_SolveTransposeInPlace(
-        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P,
+        const ConstMatrixView<T1,C1>& m1, const Permutation& P,
         MatrixView<T2> m2)
     { DoLUSolve<true>(m1,P,m2); }
-    template <class T1, class T2, bool C1>
+    template <class T1, class T2, int C1>
     void InstLU_SolveInPlace(
-        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P,
+        const ConstMatrixView<T1,C1>& m1, const Permutation& P,
         VectorView<T2> v2)
     { DoLUSolve<false>(m1,P,v2); }
-    template <class T1, class T2, bool C1>
+    template <class T1, class T2, int C1>
     void InstLU_SolveTransposeInPlace(
-        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P,
+        const ConstMatrixView<T1,C1>& m1, const Permutation& P,
         VectorView<T2> v2)
     { DoLUSolve<true>(m1,P,v2); }
 

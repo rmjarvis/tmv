@@ -31,6 +31,7 @@
 
 #include "tmv/TMV_ScaleU.h"
 #include "tmv/TMV_TriMatrix.h"
+#include "tmv/TMV_Vector.h"
 
 namespace tmv {
 
@@ -66,10 +67,10 @@ namespace tmv {
     void InstScale(const T x, UpperTriMatrixView<T,NonUnitDiag> m)
     {
         if (m.iscm()) {
-            UpperTriMatrixView<T,NonUnitDiag,1> mcm = m.cmView();
+            UpperTriMatrixView<T,NonUnitDiag|ColMajor> mcm = m.cmView();
             DoScale(x,mcm); 
         } else if (m.isrm()) {
-            UpperTriMatrixView<T,NonUnitDiag,UNKNOWN,1> mrm = m.rmView();
+            UpperTriMatrixView<T,NonUnitDiag|RowMajor> mrm = m.rmView();
             DoScale(x,mrm); 
         } else {
             DoScale(x,m); 

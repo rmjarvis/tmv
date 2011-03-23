@@ -44,7 +44,7 @@ namespace tmv {
     T InstProdElements(const ConstVectorView<T>& v)
     {
         if (v.step() == 1) {
-            ConstVectorView<T,1> vunit = v.unitView();
+            ConstVectorView<T,Unit> vunit = v.unitView();
             return InlineProdElements(vunit);
         } else {
             return InlineProdElements(v);
@@ -57,7 +57,7 @@ namespace tmv {
         typename ConstVectorView<T>::zfloat_type* sign)
     {
         if (v.step() == 1) {
-            ConstVectorView<T,1> vunit = v.unitView();
+            ConstVectorView<T,Unit> vunit = v.unitView();
             return InlineLogProdElements(vunit,sign);
         } else {
             return InlineLogProdElements(v,sign);
@@ -68,7 +68,7 @@ namespace tmv {
     bool InstHasZeroElement(const ConstVectorView<T>& v)
     {
         if (v.step() == 1) {
-            ConstVectorView<T,1> vunit = v.unitView();
+            ConstVectorView<T,Unit> vunit = v.unitView();
             return InlineHasZeroElement(vunit);
         } else {
             return InlineHasZeroElement(v);

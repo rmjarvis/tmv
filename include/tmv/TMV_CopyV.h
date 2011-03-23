@@ -33,15 +33,13 @@
 #define TMV_CopyV_H
 
 #include "TMV_BaseVector.h"
-#include <string.h> // for memmove
-#include "TMV_ConjugateV.h"
 
 namespace tmv {
 
     // Defined in TMV_Vector.cpp
-    template <class T1, bool C1, class T2>
+    template <class T1, int C1, class T2>
     void InstCopy(
-        const ConstVectorView<T1,UNKNOWN,C1>& v1, VectorView<T2> v2); 
+        const ConstVectorView<T1,C1>& v1, VectorView<T2> v2); 
 
     //
     // Copy Vectors

@@ -34,9 +34,10 @@
 #define TMV_Rank1VVM_H
 
 #include "TMV_BaseMatrix_Rec.h"
+#include "TMV_BaseVector.h"
 #include "TMV_Prefetch.h"
-#include "TMV_MultXV.h"
 #include "TMV_Rank1VVM_Funcs.h"
+#include "TMV_MultXV.h"
 
 #ifdef PRINTALGO_R1
 #include <iostream>
@@ -81,16 +82,14 @@
 namespace tmv {
 
     // Defined in TMV_Rank1VVM.cpp
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstRank1Update(
-        const T3 x,
-        const ConstVectorView<T1,UNKNOWN,C1>& v1, 
-        const ConstVectorView<T2,UNKNOWN,C2>& v2, MatrixView<T3> m3);
-    template <class T1, bool C1, class T2, bool C2, class T3>
+        const T3 x, const ConstVectorView<T1,C1>& v1, 
+        const ConstVectorView<T2,C2>& v2, MatrixView<T3> m3);
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstAddRank1Update(
-        const T3 x,
-        const ConstVectorView<T1,UNKNOWN,C1>& v1, 
-        const ConstVectorView<T2,UNKNOWN,C2>& v2, MatrixView<T3> m3);
+        const T3 x, const ConstVectorView<T1,C1>& v1, 
+        const ConstVectorView<T2,C2>& v2, MatrixView<T3> m3);
 
     template <int algo, int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper;

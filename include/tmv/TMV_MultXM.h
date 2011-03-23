@@ -32,22 +32,21 @@
 #ifndef TMV_MultXM_H
 #define TMV_MultXM_H
 
+#include "TMV_BaseMatrix_Rec.h"
+#include "TMV_Scaling.h"
 #include "TMV_MultXV.h"
 #include "TMV_CopyM.h"
-#include "TMV_ScaleM.h"
-#include "TMV_Scaling.h"
+#include "TMV_SwapM.h"
 
 namespace tmv {
 
     // Defined in TMV_MultXM.cpp
-    template <class T1, bool C1, class T2>
+    template <class T1, int C1, class T2>
     void InstMultXM(
-        const T2 x, const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
-        MatrixView<T2> m2);
-    template <class T1, bool C1, class T2>
+        const T2 x, const ConstMatrixView<T1,C1>& m1, MatrixView<T2> m2);
+    template <class T1, int C1, class T2>
     void InstAddMultXM(
-        const T2 x, const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
-        MatrixView<T2> m2);
+        const T2 x, const ConstMatrixView<T1,C1>& m1, MatrixView<T2> m2);
 
     template <bool add, int ix, class T, class M1, class M2>
     static inline void NoAliasMultXM(

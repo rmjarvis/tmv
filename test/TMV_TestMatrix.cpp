@@ -25,8 +25,8 @@ template <class T, tmv::StorageType S> static void TestBasicMatrix_1()
     }
     tmv::ConstMatrixView<T> mcv = m.view();
     tmv::MatrixView<T> mv = m.view();
-    tmv::ConstMatrixViewF<T> mfcv = mf.view();
-    tmv::MatrixViewF<T> mfv = mf.view();
+    tmv::ConstMatrixView<T,tmv::FortranStyle> mfcv = mf.view();
+    tmv::MatrixView<T,tmv::FortranStyle> mfv = mf.view();
 
     for (int i=0, k=0; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
         Assert(m(i,j) == k,"Read/Write Matrix");
@@ -147,8 +147,8 @@ template <class T, tmv::StorageType S> static void TestBasicMatrix_2()
     }
     tmv::ConstMatrixView<T> mcv = m.view();
     tmv::MatrixView<T> mv = m.view();
-    tmv::ConstMatrixViewF<T> mfcv = mf.view();
-    tmv::MatrixViewF<T> mfv = mf.view();
+    tmv::ConstMatrixView<T,tmv::FortranStyle> mfcv = mf.view();
+    tmv::MatrixView<T,tmv::FortranStyle> mfv = mf.view();
 
     Assert(m.subMatrix(2,5,1,4) == m.subMatrix(2,5,1,4,1,1),"subMatrix");
     Assert(m.subVector(2,5,4,2,3) == m.subMatrix(2,14,5,11,4,2).diag(),

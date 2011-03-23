@@ -34,7 +34,6 @@
 #define TMV_InvertD_H
 
 #include "TMV_BaseMatrix_Diag.h"
-#include "TMV_Scaling.h"
 
 
 namespace tmv {

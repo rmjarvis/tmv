@@ -29,8 +29,8 @@ template <class T> void TestTriDiv_B2()
     tmv::UpperTriMatrixView<std::complex<T> > ca1v = ca1.view();
     tmv::LowerTriMatrixView<T> a1t = a1.transpose();
     tmv::LowerTriMatrixView<std::complex<T> > ca1t = ca1.transpose();
-    tmv::MatrixViewD<T> mv = m.view();
-    tmv::MatrixViewD<std::complex<T> > cmv = cm.view();
+    tmv::MatrixView<T,tmv::WithDivider> mv = m.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> cmv = cm.view();
     mv.divideUsing(tmv::LU);
     mv.saveDiv();
     cmv.divideUsing(tmv::LU);

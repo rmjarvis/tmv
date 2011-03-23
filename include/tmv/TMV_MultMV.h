@@ -33,13 +33,12 @@
 #ifndef TMV_MultMV_H
 #define TMV_MultMV_H
 
+#include "TMV_BaseMatrix_Rec.h"
+#include "TMV_BaseVector.h"
 #include "TMV_MultVV.h"
 #include "TMV_MultXV.h"
-#include "TMV_Vector.h"
-#include "TMV_SmallVector.h"
-#include "TMV_BaseMatrix_Rec.h"
-#include "TMV_Prefetch.h"
 #include "TMV_MultMV_Funcs.h"
+#include "TMV_Prefetch.h"
 
 #ifdef PRINTALGO_MV
 #include <iostream>
@@ -126,16 +125,16 @@
 namespace tmv {
 
     // Defined in TMV_MultMV.cpp
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMV(
         const T3 x,
-        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1, 
-        const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3);
-    template <class T1, bool C1, class T2, bool C2, class T3>
+        const ConstMatrixView<T1,C1>& m1, 
+        const ConstVectorView<T2,C2>& v2, VectorView<T3> v3);
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMV(
         const T3 x,
-        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1, 
-        const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3);
+        const ConstMatrixView<T1,C1>& m1, 
+        const ConstVectorView<T2,C2>& v2, VectorView<T3> v3);
 
     template <int algo, int cs, int rs, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultMV_Helper;
@@ -2381,14 +2380,29 @@ namespace tmv {
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"v2 = "<<TMV_Text(v2)<<std::endl;
             std::cout<<"v3 = "<<TMV_Text(v3)<<std::endl;
-            std::cout<<"m1 = "<<m1<<std::endl;
-            std::cout<<"v2 = "<<v2<<std::endl;
-            std::cout<<"v3 = "<<v3<<std::endl;
             std::cout<<"cs,rs,algo = "<<cs<<"  "<<rs<<"  "<<algo<<std::endl;
 #endif
+#ifdef XDEBUG_MV
+            typedef typename V3::real_type RT;
+            typedef typename V3::value_type T3;
+            Matrix<T3> m1c = m1;
+            Vector<T3> v2c = v2;
+            Vector<T3> v3i = v3;
+            Vector<T3> v3c = v3;
+            for(size_t i=0; i<v3.size(); ++i) {
+                Maybe<add>:add(v3c(i),x*MultVV(m1c.row(i),v2c));
+            }
+#endif
             MultMV_Helper<algo,cs,rs,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
-#ifdef PRINTALGO_MV
-            std::cout<<"v3 => "<<v3<<std::endl;
+#ifdef XDEBUG_MV
+            if (Norm(v3-v3c) > 1.e-3*(Norm(m1c)*Norm(v2c)+(add?Norm(v3i):RT(0)))) {
+                std::cout<<"m1 = "<<m1c<<std::endl;
+                std::cout<<"v2 = "<<v2c<<std::endl;
+                std::cout<<"v3 = "<<v3i<<std::endl;
+                std::cout<<"v3 => "<<v3<<std::endl;
+                std::cout<<"Correct v3 = "<<v3c<<std::endl;
+                abort();
+            }
 #endif
         }
     };

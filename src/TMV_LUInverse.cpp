@@ -34,9 +34,14 @@
 #include "TMV_Blas.h"
 #include "tmv/TMV_LUInverse.h"
 #include "tmv/TMV_Matrix.h"
+#include "tmv/TMV_Vector.h"
 #include "tmv/TMV_TriMatrix.h"
-#include "tmv/TMV_SimpleMatrix.h"
 #include "tmv/TMV_DivMU.h"
+#include "tmv/TMV_CopyM.h"
+#include "tmv/TMV_MultXM.h"
+#include "tmv/TMV_CopyU.h"
+#include "tmv/TMV_MultUL.h"
+#include "tmv/TMV_PermuteM.h"
 
 namespace tmv {
 
@@ -44,10 +49,10 @@ namespace tmv {
     static inline void NonLapLUInverse(MatrixView<T1> m1, const Permutation& P)
     {
         if (m1.iscm()) {
-            MatrixView<T1,1> m1cm = m1.cmView();
+            MatrixView<T1,ColMajor> m1cm = m1.cmView();
             InlineLU_Inverse(m1cm,P);
         } else {
-            MatrixView<T1,UNKNOWN,1> m1rm = m1.rmView();
+            MatrixView<T1,RowMajor> m1rm = m1.rmView();
             InlineLU_Inverse(m1rm,P);
         }
     }
@@ -55,11 +60,13 @@ namespace tmv {
 #ifdef ALAP
     // ALAP, not LAP, since ATLAS has these routines
     template <class T1> 
-    static inline void LapLUInverse(MatrixView<T1,1> m1, const Permutation& P)
+    static inline void LapLUInverse(
+        MatrixView<T1,ColMajor> m1, const Permutation& P)
     { NonLapLUInverse(m1,P); }
 #ifdef INST_DOUBLE
     template <>
-    static void LapLUInverse(MatrixView<double,1> m1, const Permutation& P)
+    static void LapLUInverse(
+        MatrixView<double,ColMajor> m1, const Permutation& P)
     {
         TMVAssert(P.isInverse());
         int n = m1.colsize();
@@ -96,7 +103,7 @@ namespace tmv {
     }
     template <>
     static void LapLUInverse(
-        MatrixView<std::complex<double>,1> m1, const Permutation& P)
+        MatrixView<std::complex<double>,ColMajor> m1, const Permutation& P)
     {
         TMVAssert(P.isInverse());
         int n = m1.colsize();
@@ -134,7 +141,8 @@ namespace tmv {
 #endif
 #ifdef INST_FLOAT
     template <>
-    static void LapLUInverse(MatrixView<float,1> m1, const Permutation& P)
+    static void LapLUInverse(
+        MatrixView<float,ColMajor> m1, const Permutation& P)
     {
         TMVAssert(P.isInverse());
         int n = m1.colsize();
@@ -171,7 +179,7 @@ namespace tmv {
     }
     template <>
     static void LapLUInverse(
-        MatrixView<std::complex<float>,1> m1, const Permutation& P)
+        MatrixView<std::complex<float>,ColMajor> m1, const Permutation& P)
     {
         TMVAssert(P.isInverse());
         int n = m1.colsize();
@@ -216,7 +224,7 @@ namespace tmv {
         if (m1.iscm() && m1.stepj() > 0) {
             LapLUInverse(m1.cmView(),P);
         } else {
-            SimpleMatrix<T1,ColMajor> m1c(m1);
+            Matrix<T1,ColMajor|NoDivider> m1c(m1);
             LapLUInverse(m1c.view(),P);
             InstCopy(m1c.xView().constView(),m1);
         }
@@ -224,27 +232,27 @@ namespace tmv {
         if (m1.iscm() || m1.isrm()) {
             NonLapLUInverse(m1,P);
         } else {
-            SimpleMatrix<T1,ColMajor> m1c(m1);
+            Matrix<T1,ColMajor|NoDivider> m1c(m1);
             NonLapLUInverse(m1c.xView(),P);
             InstCopy(m1c.xView().constView(),m1);
         }
 #endif
     }
 
-    template <class T1, class T2, bool C1>
+    template <class T1, class T2, int C1>
     void InstLU_InverseATA(
-        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P,
+        const ConstMatrixView<T1,C1>& m1, const Permutation& P,
         const bool trans, MatrixView<T2> m2)
     {
         if (m2.iscm()) {
-            MatrixView<T2,1> m2cm = m2.cmView();
+            MatrixView<T2,ColMajor> m2cm = m2.cmView();
             InlineLU_InverseATA(m1,P,trans,m2cm);
         } else if (m2.isrm()) {
-            MatrixView<T2,UNKNOWN,1> m2rm = m2.rmView();
+            MatrixView<T2,RowMajor> m2rm = m2.rmView();
             InlineLU_InverseATA(m1,P,trans,m2rm);
         } else {
-            SimpleMatrix<T2,ColMajor> m2c(m2);
-            MatrixView<T2,1> m2cm = m2c.view();
+            Matrix<T2,ColMajor|NoDivider> m2c(m2);
+            MatrixView<T2,ColMajor> m2cm = m2c.view();
             InlineLU_InverseATA(m1,P,trans,m2cm);
             InstCopy(m2c.xView().constView(),m2);
         }

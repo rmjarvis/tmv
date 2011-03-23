@@ -35,9 +35,6 @@
 #include "TMV_BaseVector.h"
 #include "TMV_BaseMatrix.h"
 #include "TMV_BaseMatrix_Rec.h"
-#include "TMV_Scaling.h"
-#include "TMV_MinMax.h"
-#include "TMV_IntegerDet.h"
 
 #ifdef PRINTALGO_Det
 #include <iostream>

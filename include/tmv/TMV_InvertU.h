@@ -34,10 +34,10 @@
 #define TMV_InvertU_H
 
 #include "TMV_BaseMatrix_Tri.h"
+#include "TMV_Scaling.h"
 #include "TMV_MultUV.h"
 #include "TMV_MultUM.h"
 #include "TMV_InvertD.h"
-#include "tmv/TMV_Scaling.h"
 
 #ifdef PRINTALGO_InvU
 #include <iostream>
@@ -291,6 +291,9 @@ namespace tmv {
                 unroll || s == 1 ? 0 : 17;
             const int algo4 =  // The algorithm for MultUM
                 unroll || s == 1 ? 0 : -2;
+#ifdef PRINTALGO_InvU
+            std::cout<<"algo2,3,4 = "<<algo2<<"  "<<algo3<<"  "<<algo4<<std::endl;
+#endif
 
             if (s==UNKNOWN ? N > TMV_INVU_RECURSE : (s > 1 && !unroll)) {
                 // [ B00 B01 ] * [ A00 A01 ] = [ 1 0 ]
@@ -382,7 +385,7 @@ namespace tmv {
     struct InvertU_Helper<90,s,M>
     {
         static void call(M& m)
-        { InstInvertSelf(m.xdView()); }
+        { InstInvertSelf(m.xView()); }
     };
 
     // algo 97: Conjugate

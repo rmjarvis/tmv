@@ -40,21 +40,21 @@
 //    before TriMatrix in the below constructors, since they are the same
 //    form for each.
 //
-//    SmallTriMatrix<T,n,dt,stor,I>()
+//    SmallTriMatrix<T,n,A>()
 //        Makes a Triangular Matrix with column size = row size = n
 //        with _uninitialized_ values.
 //
-//    SmallTriMatrix<T,n,dt,stor,I>(T x)
+//    SmallTriMatrix<T,n,A>(T x)
 //        Makes a Triangular Matrix with column size = row size = n
 //        with all values = x
 //
-//    SmallTriMatrix<T,n,dt,stor,I>(T* vv)
-//    SmallTriMatrix<T,n,dt,stor,I>(const std::vector<T>& vv)
+//    SmallTriMatrix<T,n,A>(T* vv)
+//    SmallTriMatrix<T,n,A>(const std::vector<T>& vv)
 //        Makes a Triangular Matrix with column size = row size = n
 //        which copies the values from vv.
 //
-//    SmallTriMatrix<T,n,dt,stor,I>(const Matrix<T>& m)
-//    SmallTriMatrix<T,n,dt,stor,I>(const SmallTriMatrix<T>& m)
+//    SmallTriMatrix<T,n,A>(const Matrix<T>& m)
+//    SmallTriMatrix<T,n,A>(const SmallTriMatrix<T>& m)
 //        Makes a TriMatrix which copies the corresponding elements of m.
 //
 //
@@ -62,152 +62,178 @@
 #ifndef TMV_SmallTriMatrix_H
 #define TMV_SmallTriMatrix_H
 
-#include "TMV_BaseMatrix_Tri.h"
-#include "TMV_TriMatrix.h"
 #include <vector>
+#include "TMV_BaseMatrix_Tri.h"
+#include "TMV_VIt.h"
+#include "TMV_Array.h"
 
 namespace tmv {
 
-    template <class T, int N, DiagType D, StorageType S, IndexStyle I>
-    struct Traits<SmallUpperTriMatrix<T,N,D,S,I> >
+    template <class T, int N, int A0, int A1, int A2>
+    struct Traits<SmallUpperTriMatrix<T,N,A0,A1,A2> >
     {
-        typedef T value_type;
-
         typedef typename Traits<T>::real_type real_type;
+
+        enum { A012 = A0 | A1 | A2 };
+        enum { A = (A012 & ~NoDivider) | (
+                (Attrib<A012>::rowmajor ? 0 : ColMajor) |
+                (Attrib<A012>::unitdiag ? 0 : NonUnitDiag) )};
+        enum { okA = (
+                !Attrib<A>::conj &&
+                (Attrib<A>::rowmajor || Attrib<A>::colmajor) &&
+                (Attrib<A>::rowmajor != int(Attrib<A>::colmajor)) &&
+                !Attrib<A>::diagmajor &&
+                (Attrib<A>::unitdiag || Attrib<A>::nonunitdiag) &&
+                (Attrib<A>::unitdiag != int(Attrib<A>::nonunitdiag)) &&
+                !Attrib<A>::zerodiag &&
+                !Attrib<A>::packed &&
+                !Attrib<A>::lower &&
+                !Attrib<A>::nodivider &&
+                !Attrib<A>::withdivider )};
+        enum { _attrib = A };
+
+        typedef T value_type;
         typedef typename Traits<T>::complex_type complex_type;
         enum { isreal = Traits<T>::isreal };
         enum { iscomplex = Traits<T>::iscomplex };
 
-        typedef SmallUpperTriMatrix<T,N,D,S,I> type;
+        typedef SmallUpperTriMatrix<T,N,A0,A1,A2> type;
         typedef const type& calc_type;
         typedef const type& eval_type;
-        typedef type copy_type;
-        typedef QuotXM<1,real_type,type> inverse_type;
+        typedef SmallUpperTriMatrix<T,N,A012> copy_type;
 
         enum { _colsize = N };
         enum { _rowsize = N };
         enum { _size = N };
-        enum { _fort = (I == FortranStyle) };
+        enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
-        enum { _rowmajor = (S == RowMajor) };
-        enum { _colmajor = (S == ColMajor) };
-        enum { _stor = S };
-        enum { _stepi = (S==RowMajor ? N : 1) };
-        enum { _stepj = (S==RowMajor ? 1 : N) };
-        enum { _diagstep = N+1 };
+        enum { _rowmajor = Attrib<A>::rowmajor };
+        enum { _colmajor = Attrib<A>::colmajor };
+        enum { _stepi = _rowmajor ? N : 1 };
+        enum { _stepj = _rowmajor ? 1 : N };
+        enum { _diagstep = IntTraits<N>::Sp1 };
         enum { _conj = false };
-        enum { _unit = (D == UnitDiag) };
+        enum { _unit = Attrib<A>::unitdiag };
+        enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = false };
+        enum { _dt = A & AllDiagType };
         enum { _shape = _unit ? UnitUpperTri : UpperTri };
-        enum { _hasdivider = false };
-
         enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
-        enum { notC = iscomplex };
         enum { Nm1 = IntTraits<N>::Sm1 };
 
-        typedef ConstVectorView<T,_stepi,false,I> const_col_sub_type;
-        typedef ConstVectorView<T,_stepj,false,I> const_row_sub_type;
-        typedef ConstSmallVectorView<T,N,_diagstep,false,I> const_diag_type;
-        typedef ConstVectorView<T,_diagstep,false,I> const_diag_sub_type;
+        enum { _hasdivider = false };
+        typedef QuotXM<1,real_type,type> inverse_type;
 
-        typedef ConstUpperTriMatrixView<T,D,_stepi,_stepj,false,I>
-            const_subtrimatrix_type;
-        typedef ConstUpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,false,I>
-            const_subtrimatrix_step_type;
-        typedef ConstMatrixView<T,_stepi,_stepj,false,I> const_submatrix_type;
-        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,false,I>
-            const_submatrix_step_type;
-        typedef ConstVectorView<T,UNKNOWN,false,I> const_subvector_type;
+        enum { baseA = (_fort ? FortranStyle : 0) };
+        enum { colA = baseA | (_colmajor ? Unit : 0) };
+        enum { rowA = baseA | (_rowmajor ? Unit : 0) };
+        enum { cstyleA = A & ~FortranStyle };
+        enum { fstyleA = A | FortranStyle };
+        enum { nmA = (A & ~AllStorageType) };
+        enum { cmA = nmA | ColMajor };
+        enum { rmA = nmA | RowMajor };
+        enum { ndA = (A & ~AllDiagType) };
+        enum { ndnmA = (ndA & ~AllStorageType) };
+        enum { colpairA = _colmajor ? cmA : int(nmA) };
+        enum { rowpairA = _rowmajor ? rmA : int(nmA) };
+        enum { conjA = iscomplex ? (A ^ Conj) : int(A) };
+        enum { trA = _colmajor ? rmA : _rowmajor ? cmA : int(A) };
+        enum { adjA = iscomplex ? (trA ^ Conj) : int(trA) };
+        enum { nonunitA = ndA | NonUnitDiag };
+        enum { unitA = ndA | UnitDiag };
+        enum { nonconjA = A };
+        enum { twosA = isreal ? nonconjA : int(nonconjA & ~AllStorageType) };
 
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,I>
+        typedef ConstVectorView<T,colA> const_col_sub_type;
+        typedef ConstVectorView<T,rowA> const_row_sub_type;
+        typedef ConstSmallVectorView<T,N,_diagstep,baseA> const_diag_type;
+        typedef ConstVectorView<T,baseA> const_diag_sub_type;
+
+        typedef ConstUpperTriMatrixView<T,A> const_subtrimatrix_type;
+        typedef ConstUpperTriMatrixView<T,nmA> const_subtrimatrix_step_type;
+        typedef ConstMatrixView<T,ndA> const_submatrix_type;
+        typedef ConstMatrixView<T,ndnmA> const_submatrix_step_type;
+        typedef ConstVectorView<T,baseA> const_subvector_type;
+
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,A>
             const_view_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,CStyle>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,cstyleA>
             const_cview_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,
-                false,FortranStyle> const_fview_type;
-        typedef ConstUpperTriMatrixView<T,D> const_xview_type;
-        typedef ConstUpperTriMatrixView<T,UnknownDiag> const_xdview_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,1,_stepj,false,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,fstyleA>
+            const_fview_type;
+        typedef ConstUpperTriMatrixView<T> const_xview_type;
+        typedef ConstSmallUpperTriMatrixView<T,N,1,_stepj,cmA>
             const_cmview_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,1,false,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,1,rmA>
             const_rmview_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,notC,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,conjA>
             const_conjugate_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepj,_stepi,false,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepj,_stepi,trA>
             const_transpose_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepj,_stepi,notC,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepj,_stepi,adjA>
             const_adjoint_type;
 
-        typedef ConstSmallUpperTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,false,I>
+        typedef ConstSmallUpperTriMatrixView<T,Nm1,_stepi,_stepj,nonunitA>
             const_offdiag_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,UnitDiag,_stepi,_stepj,
-                false,I> const_unitdiag_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,
-                false,I> const_nonunitdiag_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,
-                false,I> const_unknowndiag_type;
-        typedef ConstSmallUpperTriMatrixView<real_type,N,D,twoSi,twoSj,false,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,unitA>
+            const_unitdiag_type;
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,nonunitA>
+            const_nonunitdiag_type;
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,ndA>
+            const_unknowndiag_type;
+        typedef ConstSmallUpperTriMatrixView<real_type,N,twoSi,twoSj,twosA>
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,nonconjA>
             const_nonconj_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,I>
-            nonconst_type;
+        typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,A> nonconst_type;
 
-        typedef TriRef<T,false> reference;
+        typedef typename TriRefHelper<T,false,_nonunit>::reference reference;
 
-        typedef VectorView<T,_stepi,false,I> col_sub_type;
-        typedef VectorView<T,_stepj,false,I> row_sub_type;
-        typedef SmallVectorView<T,N,_diagstep,false,I> diag_type;
-        typedef VectorView<T,_diagstep,false,I> diag_sub_type;
+        typedef VectorView<T,colA> col_sub_type;
+        typedef VectorView<T,rowA> row_sub_type;
+        typedef SmallVectorView<T,N,_diagstep,baseA> diag_type;
+        typedef VectorView<T,baseA> diag_sub_type;
 
-        typedef UpperTriMatrixView<T,D,_stepi,_stepj,false,I>
-            subtrimatrix_type;
-        typedef UpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,false,I>
-            subtrimatrix_step_type;
-        typedef MatrixView<T,_stepi,_stepj,false,I> submatrix_type;
-        typedef MatrixView<T,UNKNOWN,UNKNOWN,false,I> submatrix_step_type;
-        typedef VectorView<T,UNKNOWN,false,I> subvector_type;
+        typedef UpperTriMatrixView<T,A> subtrimatrix_type;
+        typedef UpperTriMatrixView<T,nmA> subtrimatrix_step_type;
+        typedef MatrixView<T,ndA> submatrix_type;
+        typedef MatrixView<T,ndnmA> submatrix_step_type;
+        typedef VectorView<T,baseA> subvector_type;
 
-        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,I> view_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,CStyle>
-            cview_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,FortranStyle>
-            fview_type;
-        typedef UpperTriMatrixView<T,D> xview_type;
-        typedef UpperTriMatrixView<T,UnknownDiag> xdview_type;
-        typedef SmallUpperTriMatrixView<T,N,D,1,_stepj,false,I> cmview_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepi,1,false,I> rmview_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,notC,I>
-            conjugate_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepj,_stepi,false,I>
-            transpose_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepj,_stepi,notC,I>
-            adjoint_type;
+        typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,A> view_type;
+        typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,cstyleA> cview_type;
+        typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,fstyleA> fview_type;
+        typedef UpperTriMatrixView<T> xview_type;
+        typedef SmallUpperTriMatrixView<T,N,1,_stepj,cmA> cmview_type;
+        typedef SmallUpperTriMatrixView<T,N,_stepi,1,rmA> rmview_type;
+        typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,conjA> conjugate_type;
+        typedef SmallLowerTriMatrixView<T,N,_stepj,_stepi,trA> transpose_type;
+        typedef SmallLowerTriMatrixView<T,N,_stepj,_stepi,adjA> adjoint_type;
 
-        typedef SmallUpperTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,false,I>
+        typedef SmallUpperTriMatrixView<T,Nm1,_stepi,_stepj,nonunitA>
             offdiag_type;
-        typedef SmallUpperTriMatrixView<T,N,UnitDiag,_stepi,_stepj,false,I>
+        typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,unitA>
             unitdiag_type;
-        typedef SmallUpperTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,false,I>
+        typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,nonunitA>
             nonunitdiag_type;
-        typedef SmallUpperTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,false,I>
+        typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,ndA>
             unknowndiag_type;
-        typedef SmallUpperTriMatrixView<real_type,N,D,twoSi,twoSj,false,I>
+        typedef SmallUpperTriMatrixView<real_type,N,twoSi,twoSj,twosA>
             realpart_type;
         typedef realpart_type imagpart_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,I>
+        typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,nonconjA>
             nonconj_type;
     };
 
-    template <class T, int N, DiagType D, StorageType S, IndexStyle I>
+    template <class T, int N, int A0, int A1, int A2>
     class SmallUpperTriMatrix : 
-        public BaseMatrix_Tri_Mutable<SmallUpperTriMatrix<T,N,D,S,I> >
+        public BaseMatrix_Tri_Mutable<SmallUpperTriMatrix<T,N,A0,A1,A2> >
     {
     public:
 
-        typedef SmallUpperTriMatrix<T,N,D,S,I> type;
+        typedef SmallUpperTriMatrix<T,N,A0,A1,A2> type;
         typedef BaseMatrix_Tri_Mutable<type> base_mut;
         typedef typename Traits<type>::reference reference;
 
@@ -215,17 +241,19 @@ namespace tmv {
         enum { _rowsize = Traits<type>::_size };
         enum { _size = Traits<type>::_size };
         enum { _shape = Traits<type>::_shape };
-        enum { _unit = Traits<type>::_unit };
-        enum { _unknowndiag = Traits<type>::_unknowndiag };
         enum { _fort = Traits<type>::_fort };
         enum { _calc = Traits<type>::_calc };
         enum { _rowmajor = Traits<type>::_rowmajor };
         enum { _colmajor = Traits<type>::_colmajor };
-        enum { _stor = Traits<type>::_stor };
         enum { _conj = Traits<type>::_conj };
         enum { _stepi = Traits<type>::_stepi };
         enum { _stepj = Traits<type>::_stepj };
         enum { _diagstep = Traits<type>::_diagstep };
+        enum { _dt = Traits<type>::_dt };
+        enum { _unit = Traits<type>::_unit };
+        enum { _nonunit = Traits<type>::_nonunit };
+        enum { _unknowndiag = Traits<type>::_unknowndiag };
+        enum { _attrib = Traits<type>::_attrib };
 
         //
         // Constructors
@@ -234,8 +262,6 @@ namespace tmv {
         SmallUpperTriMatrix(size_t n=N)
         {
             TMVStaticAssert(N>=0);
-            TMVStaticAssert(S==RowMajor || S==ColMajor); 
-            TMVStaticAssert(D != UnknownDiag);
             TMVAssert(n==N);
 #ifdef TMV_DEBUG
             Maybe<_unit>::offdiag(*this).setAllTo(T(888));
@@ -245,8 +271,6 @@ namespace tmv {
         explicit SmallUpperTriMatrix(size_t n, T x)
         {
             TMVStaticAssert(N>=0);
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
-            TMVStaticAssert(D != UnknownDiag);
             TMVAssert(n==N);
             this->setAllTo(x);
         }
@@ -254,8 +278,6 @@ namespace tmv {
         explicit SmallUpperTriMatrix(size_t n, const T* vv) 
         {
             TMVStaticAssert(N>=0);
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
-            TMVStaticAssert(D != UnknownDiag);
             TMVAssert(n==N);
             SmallVectorView<T,N*N,1> lv(itsm);
             ConstSmallVectorView<T,N*N,1>(vv).newAssignTo(lv);
@@ -264,8 +286,6 @@ namespace tmv {
         explicit SmallUpperTriMatrix(size_t n, const std::vector<T>& vv) 
         {
             TMVStaticAssert(N>=0);
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
-            TMVStaticAssert(D != UnknownDiag);
             TMVAssert(n==N);
             TMVAssert(vv.size() == N*N);
             SmallVectorView<T,N*N,1> lv(itsm);
@@ -275,8 +295,6 @@ namespace tmv {
         SmallUpperTriMatrix(const type& m2) 
         {
             TMVStaticAssert(N>=0);
-            TMVStaticAssert(S==RowMajor || S==ColMajor); 
-            TMVStaticAssert(D != UnknownDiag);
             m2.newAssignTo(*this);
         }
 
@@ -284,8 +302,6 @@ namespace tmv {
         SmallUpperTriMatrix(const BaseMatrix<M2>& m2) 
         {
             TMVStaticAssert(N>=0);
-            TMVStaticAssert(S==RowMajor || S==ColMajor); 
-            TMVStaticAssert(D != UnknownDiag);
             const bool assignable = 
                 ShapeTraits2<M2::_shape,_shape>::assignable;
             TMVStaticAssert((
@@ -299,8 +315,6 @@ namespace tmv {
         SmallUpperTriMatrix(const BaseMatrix_Tri<M2>& m2) 
         {
             TMVStaticAssert(N>=0);
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
-            TMVStaticAssert(D != UnknownDiag);
             TMVStaticAssert(M2::_upper);
             TMVAssert(m2.size() == N);
             Maybe<_unit && !M2::_unit>::unitview(m2).newAssignTo(*this);
@@ -310,8 +324,6 @@ namespace tmv {
         SmallUpperTriMatrix(const BaseMatrix_Diag<M2>& m2) 
         {
             TMVStaticAssert(N>=0);
-            TMVStaticAssert(S==RowMajor || S==ColMajor); 
-            TMVStaticAssert(D != UnknownDiag);
             TMVAssert(m2.size() == N);
             typename type::diag_type d = this->diag();
             this->setZero();
@@ -376,26 +388,25 @@ namespace tmv {
             return (
                 (isunit() && i==j ) ? T(1) :
                 (i>j) ? T(0) :
-                itsm[S==RowMajor ? i*stepi() + j : i + j*stepj()]);
+                itsm[_rowmajor ? i*stepi() + j : i + j*stepj()]);
         }
 
         reference ref(int i, int j)
         {
             return reference(
                 isunit() && i==j,
-                itsm[S==RowMajor ? i*stepi() + j : i + j*stepj()] ); 
+                itsm[_rowmajor ? i*stepi() + j : i + j*stepj()] ); 
         }
 
         size_t size() const { return N; }
         int nElements() const { return N*(N+1)/2; }
         int stepi() const { return _stepi; }
         int stepj() const { return _stepj; }
-        DiagType dt() const { return D; }
-        bool isunit() const { return D == UnitDiag; }
+        DiagType dt() const { return static_cast<DiagType>(_dt); }
+        bool isunit() const { return _unit; }
         bool isconj() const { return false; }
-        bool isrm() const { return S==RowMajor; }
-        bool iscm() const { return S==ColMajor; }
-        StorageType stor() const { return S; }
+        bool isrm() const { return _rowmajor; }
+        bool iscm() const { return _colmajor; }
 
     protected :
 
@@ -403,219 +414,241 @@ namespace tmv {
 
     }; // SmallUpperTriMatrix
 
-    template <class T, int N, DiagType D, StorageType S>
-    class SmallUpperTriMatrixF : 
-        public SmallUpperTriMatrix<T,N,D,S,FortranStyle>
+    template <class T, int N, int Si, int Sj, int A0>
+    struct Traits<ConstSmallUpperTriMatrixView<T,N,Si,Sj,A0> >
     {
-    public:
-
-        typedef SmallUpperTriMatrixF<T,N,D,S> type;
-        typedef SmallUpperTriMatrix<T,N,D,S,FortranStyle> mtype;
-
-        SmallUpperTriMatrixF() : mtype() {}
-        explicit SmallUpperTriMatrixF(T x) : mtype(x) {}
-        explicit SmallUpperTriMatrixF(const T* vv) : mtype(vv) {}
-        explicit SmallUpperTriMatrixF(const std::vector<T>& vv) : 
-            mtype(vv) {}
-        template <class M2>
-        SmallUpperTriMatrixF(const BaseMatrix<M2>& m2) : mtype(m2) {}
-        SmallUpperTriMatrixF(const type& m2) : mtype(m2) {}
-        template <class M2>
-        SmallUpperTriMatrixF(const BaseMatrix_Tri<M2>& m2) :
-            mtype(m2) {}
-        template <class M2>
-        SmallUpperTriMatrixF(const BaseMatrix_Rec<M2>& m2) :
-            mtype(m2) {}
-        ~SmallUpperTriMatrixF() {}
-
-        type& operator=(const type& m2)
-        { mtype::operator=(m2); return *this; }
-        template <class M2>
-        type& operator=(const BaseMatrix<M2>& m2)
-        { mtype::operator=(m2); return *this; }
-        template <class M2>
-        type& operator=(const BaseMatrix_Tri<M2>& m2)
-        { mtype::operator=(m2); return *this; }
-        template <class M2>
-        type& operator=(const BaseMatrix_Diag<M2>& m2)
-        { mtype::operator=(m2); return *this; }
-        type& operator=(T x)
-        { mtype::operator=(x); return *this; }
-
-    }; // SmallUpperTriMatrixF
-
-    template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
-    struct Traits<ConstSmallUpperTriMatrixView<T,N,D,Si,Sj,C,I> >
-    {
-        typedef T value_type;
-
         typedef typename Traits<T>::real_type real_type;
+
+        enum { A = (A0 & ~NoDivider) | (
+                ( Attrib<A0>::colmajor ? 0 :
+                  Attrib<A0>::rowmajor ? 0 :
+                  Si == 1 ? ColMajor :
+                  Sj == 1 ? RowMajor : 0 ) )};
+        enum { okA = (
+                !Attrib<A>::diagmajor &&
+                !Attrib<A>::zerodiag &&
+                !Attrib<A>::packed &&
+                !Attrib<A>::lower &&
+                !Attrib<A>::nodivider &&
+                !Attrib<A>::withdivider &&
+                !( Si != UNKNOWN && Si != 1 && Attrib<A>::colmajor ) &&
+                !( Sj != UNKNOWN && Sj != 1 && Attrib<A>::rowmajor ) )};
+        enum { _attrib = A };
+
+        typedef T value_type;
         typedef typename Traits<T>::complex_type complex_type;
         enum { isreal = Traits<T>::isreal };
         enum { iscomplex = Traits<T>::iscomplex };
 
-        typedef ConstSmallUpperTriMatrixView<T,N,D,Si,Sj,C,I> type;
+        typedef ConstSmallUpperTriMatrixView<T,N,Si,Sj,A0> type;
         typedef const type& calc_type;
         typedef const type& eval_type;
-        typedef QuotXM<1,real_type,type> inverse_type;
 
         enum { _colsize = N };
         enum { _rowsize = N };
         enum { _size = N };
-        enum { _fort = (I == FortranStyle) };
+        enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
-        enum { _rowmajor = (Sj == 1) };
-        enum { _colmajor = (Si == 1) };
-        enum { _stor = (_rowmajor ? RowMajor : ColMajor) };
+        enum { _rowmajor = Attrib<A>::rowmajor };
+        enum { _colmajor = Attrib<A>::colmajor };
         enum { _stepi = Si };
         enum { _stepj = Sj };
         enum { _diagstep = IntTraits2<Si,Sj>::sum };
-        enum { _conj = C };
-        enum { _unit = (D == UnitDiag) };
-        enum { _unknowndiag = (D == UnknownDiag) };
+        enum { _conj = Attrib<A>::conj };
+        enum { _unit = Attrib<A>::unitdiag };
+        enum { _nonunit = Attrib<A>::nonunitdiag };
+        enum { _unknowndiag = !(_unit || _nonunit) };
+        enum { _dt = _unknowndiag ? UNKNOWN : A & AllDiagType };
         enum { _shape = _unit ? UnitUpperTri : UpperTri };
-        enum { _hasdivider = false };
-
-        // In case N == UNKNOWN
-        typedef typename MCopyHelper<T,UpperTri,N,N,_rowmajor,_fort>::type 
-            copy_type;
-
-        enum { twoSi = isreal ? Si : IntTraits<Si>::twoS };
-        enum { twoSj = isreal ? Sj : IntTraits<Sj>::twoS };
-        enum { notC = !C && iscomplex };
+        enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
+        enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
         enum { Nm1 = IntTraits<N>::Sm1 };
 
-        typedef ConstVectorView<T,_stepi,C,I> const_col_sub_type;
-        typedef ConstVectorView<T,_stepj,C,I> const_row_sub_type;
-        typedef ConstSmallVectorView<T,N,_diagstep,C,I> const_diag_type;
-        typedef ConstVectorView<T,_diagstep,C,I> const_diag_sub_type;
+        typedef typename MCopyHelper<T,_shape,N,N,_rowmajor,_fort>::type 
+            copy_type;
 
-        typedef ConstUpperTriMatrixView<T,D,_stepi,_stepj,C,I>
-            const_subtrimatrix_type;
-        typedef ConstUpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,C,I>
-            const_subtrimatrix_step_type;
-        typedef ConstMatrixView<T,_stepi,_stepj,C,I> const_submatrix_type;
-        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,C,I>
-            const_submatrix_step_type;
-        typedef ConstVectorView<T,UNKNOWN,C,I> const_subvector_type;
+        enum { _hasdivider = false };
+        typedef QuotXM<1,real_type,type> inverse_type;
 
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,I>
+        enum { baseA = (
+                (_fort ? FortranStyle : 0) |
+                (_conj ? Conj : 0) )};
+        enum { colA = baseA | (_colmajor ? Unit : 0) };
+        enum { rowA = baseA | (_rowmajor ? Unit : 0) };
+        enum { cstyleA = A & ~FortranStyle };
+        enum { fstyleA = A | FortranStyle };
+        enum { nmA = (A & ~AllStorageType) };
+        enum { cmA = nmA | ColMajor };
+        enum { rmA = nmA | RowMajor };
+        enum { ndA = (A & ~AllDiagType) };
+        enum { ndnmA = (ndA & ~AllStorageType) };
+        enum { colpairA = _colmajor ? cmA : int(nmA) };
+        enum { rowpairA = _rowmajor ? rmA : int(nmA) };
+        enum { conjA = iscomplex ? (A ^ Conj) : int(A) };
+        enum { trA = _colmajor ? rmA : _rowmajor ? cmA : int(A) };
+        enum { adjA = iscomplex ? (trA ^ Conj) : int(trA) };
+        enum { nonunitA = ndA | NonUnitDiag };
+        enum { unitA = ndA | UnitDiag };
+        enum { nonconjA = A & ~Conj };
+        enum { twosA = isreal ? nonconjA : int(nonconjA & ~AllStorageType) };
+
+        typedef ConstVectorView<T,colA> const_col_sub_type;
+        typedef ConstVectorView<T,rowA> const_row_sub_type;
+        typedef ConstSmallVectorView<T,N,_diagstep,baseA> const_diag_type;
+        typedef ConstVectorView<T,baseA> const_diag_sub_type;
+
+        typedef ConstUpperTriMatrixView<T,A> const_subtrimatrix_type;
+        typedef ConstUpperTriMatrixView<T,nmA> const_subtrimatrix_step_type;
+        typedef ConstMatrixView<T,ndA> const_submatrix_type;
+        typedef ConstMatrixView<T,ndnmA> const_submatrix_step_type;
+        typedef ConstVectorView<T,baseA> const_subvector_type;
+
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,A>
             const_view_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,CStyle>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,cstyleA>
             const_cview_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,
-                FortranStyle> const_fview_type;
-        typedef ConstUpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,C>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,fstyleA>
+            const_fview_type;
+        typedef ConstUpperTriMatrixView<T,(_conj ? Conj : NonConj)> 
             const_xview_type;
-        typedef ConstUpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>
-            const_xdview_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,1,_stepj,C,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,1,_stepj,cmA>
             const_cmview_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,1,C,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,1,rmA>
             const_rmview_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,notC,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,conjA>
             const_conjugate_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepj,_stepi,C,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepj,_stepi,trA>
             const_transpose_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepj,_stepi,notC,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepj,_stepi,adjA>
             const_adjoint_type;
 
-        typedef ConstSmallUpperTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,C,I>
+        typedef ConstSmallUpperTriMatrixView<T,Nm1,_stepi,_stepj,nonunitA>
             const_offdiag_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,UnitDiag,_stepi,_stepj,C,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,unitA>
             const_unitdiag_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,C,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,nonunitA>
             const_nonunitdiag_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,C,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,ndA>
             const_unknowndiag_type;
-        typedef ConstSmallUpperTriMatrixView<real_type,N,D,twoSi,twoSj,false,I>
+        typedef ConstSmallUpperTriMatrixView<real_type,N,twoSi,twoSj,twosA>
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,nonconjA>
             const_nonconj_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,I> nonconst_type;
+        typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,A> nonconst_type;
     };
 
-    template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
+    template <class T, int N, int Si, int Sj, int A>
     class ConstSmallUpperTriMatrixView :
-        public BaseMatrix_Tri<ConstSmallUpperTriMatrixView<T,N,D,Si,Sj,C,I> >
+        public BaseMatrix_Tri<ConstSmallUpperTriMatrixView<T,N,Si,Sj,A> >
     {
     public:
 
-        typedef ConstSmallUpperTriMatrixView<T,N,D,Si,Sj,C,I> type;
+        typedef ConstSmallUpperTriMatrixView<T,N,Si,Sj,A> type;
 
         enum { _colsize = Traits<type>::_size };
         enum { _rowsize = Traits<type>::_size };
         enum { _size = Traits<type>::_size };
         enum { _shape = Traits<type>::_shape };
-        enum { _unit = Traits<type>::_unit };
-        enum { _unknowndiag = Traits<type>::_unknowndiag };
         enum { _fort = Traits<type>::_fort };
         enum { _calc = Traits<type>::_calc };
         enum { _rowmajor = Traits<type>::_rowmajor };
         enum { _colmajor = Traits<type>::_colmajor };
-        enum { _stor = Traits<type>::_stor };
         enum { _conj = Traits<type>::_conj };
         enum { _stepi = Traits<type>::_stepi };
         enum { _stepj = Traits<type>::_stepj };
         enum { _diagstep = Traits<type>::_diagstep };
+        enum { _dt = Traits<type>::_dt };
+        enum { _unit = Traits<type>::_unit };
+        enum { _nonunit = Traits<type>::_nonunit };
+        enum { _unknowndiag = Traits<type>::_unknowndiag };
+        enum { _attrib = Traits<type>::_attrib };
 
         //
         // Constructors
         //
+        
         ConstSmallUpperTriMatrixView(
-            const T* m, size_t s, bool u, int si, int sj
-        ) :
-            itsm(m), itss(s), itsu(u), itssi(si), itssj(sj) {}
+            const T* m, size_t s, int si, int sj, DiagType dt) :
+            itsm(m), itss(s), itssi(si), itssj(sj), itsdt(dt)
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
-        ConstSmallUpperTriMatrixView(
-            const T* m, size_t s, bool u, int si
-        ) :
-            itsm(m), itss(s), itsu(u), itssi(si), itssj(Sj)
-        { TMVStaticAssert(Sj != UNKNOWN); }
+        ConstSmallUpperTriMatrixView(const T* m, size_t s, int si, int sj) :
+            itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
+        {
+            TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(_dt != UNKNOWN); 
+        }
+
+        ConstSmallUpperTriMatrixView(const T* m, size_t s, int si) :
+            itsm(m), itss(s), itssi(si), itssj(Sj), itsdt(_dt)
+        {
+            TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Sj != UNKNOWN); 
+            TMVStaticAssert(_dt != UNKNOWN); 
+        }
 
         ConstSmallUpperTriMatrixView(const T* m, size_t s) :
-            itsm(m), itss(s), itsu(D==UnitDiag), itssi(Si), itssj(Sj)
+            itsm(m), itss(s), itssi(Si), itssj(Sj), itsdt(_dt)
         {
-            TMVStaticAssert(D != UnknownDiag);
+            TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); 
+            TMVStaticAssert(_dt != UNKNOWN); 
         }
 
         ConstSmallUpperTriMatrixView(const T* m) :
-            itsm(m), itss(N), itsu(D==UnitDiag), itssi(Si), itssj(Sj)
+            itsm(m), itss(N), itssi(Si), itssj(Sj), itsdt(_dt)
         {
+            TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(N != UNKNOWN);
-            TMVStaticAssert(D != UnknownDiag);
             TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); 
+            TMVStaticAssert(_dt != UNKNOWN); 
         }
 
         ConstSmallUpperTriMatrixView(const type& m2) :
             itsm(m2.cptr()), itss(m2.size()),
-            itsu(m2.isunit()), itssi(m2.stepi()), itssj(m2.stepj()) {}
+            itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
-        template <DiagType D2, int Si2, int Sj2, IndexStyle I2>
+        template <int A2>
         ConstSmallUpperTriMatrixView(
-            const ConstUpperTriMatrixView<T,D2,Si2,Sj2,C,I2>& m2) :
+            const ConstUpperTriMatrixView<T,A2>& m2) :
             itsm(m2.cptr()), itss(m2.size()),
-            itsu(m2.isunit()), itssi(m2.stepi()), itssj(m2.stepj()) {}
+            itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
-        template <DiagType D2, int Si2, int Sj2, IndexStyle I2>
+        template <int A2>
         ConstSmallUpperTriMatrixView(
-            const UpperTriMatrixView<T,D2,Si2,Sj2,C,I2>& m2) :
+            const UpperTriMatrixView<T,A2>& m2) :
             itsm(m2.cptr()), itss(m2.size()),
-            itsu(m2.isunit()), itssi(m2.stepi()), itssj(m2.stepj()) {}
+            itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
-        template <int N2, DiagType D2, int Si2, int Sj2, IndexStyle I2>
+        template <int N2, int Si2, int Sj2, int A2>
         ConstSmallUpperTriMatrixView(
-            const ConstSmallUpperTriMatrixView<T,N2,D2,Si2,Sj2,C,I2>& m2) :
+            const ConstSmallUpperTriMatrixView<T,N2,Si2,Sj2,A2>& m2) :
             itsm(m2.cptr()), itss(m2.size()),
-            itsu(m2.isunit()), itssi(m2.stepi()), itssj(m2.stepj()) {}
+            itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
-        template <int N2, DiagType D2, int Si2, int Sj2, IndexStyle I2>
+        template <int N2, int Si2, int Sj2, int A2>
         ConstSmallUpperTriMatrixView(
-            const SmallUpperTriMatrixView<T,N2,D2,Si2,Sj2,C,I2>& m2) :
+            const SmallUpperTriMatrixView<T,N2,Si2,Sj2,A2>& m2) :
             itsm(m2.cptr()), itss(m2.size()),
-            itsu(m2.isunit()), itssi(m2.stepi()), itssj(m2.stepj()) {}
+            itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
         ~ConstSmallUpperTriMatrixView() {
 #ifdef TMV_DEBUG
@@ -638,7 +671,7 @@ namespace tmv {
             return (
                 (isunit() && i==j ) ? T(1) :
                 (i>j) ? T(0) :
-                DoConj<C>(itsm[i*stepi() + j*stepj()]));
+                DoConj<_conj>(itsm[i*stepi() + j*stepj()]));
         }
 
         size_t colsize() const { return itss; }
@@ -647,8 +680,10 @@ namespace tmv {
         int nElements() const { return int(itss)*int(itss+1)/2; }
         int stepi() const { return itssi; }
         int stepj() const { return itssj; }
-        bool isconj() const { return C; }
-        bool isunit() const { return itsu; }
+        bool isconj() const { return _conj; }
+        DiagType dt() const 
+        { return static_cast<DiagType>(static_cast<int>(itsdt)); }
+        bool isunit() const { return dt() == UnitDiag; }
         bool isrm() const
         { return _rowmajor || (!_colmajor && stepj() == 1); }
         bool iscm() const
@@ -658,196 +693,180 @@ namespace tmv {
 
         const T* itsm;
         const CheckedInt<N> itss;
-        const CheckedInt<D==UnknownDiag ? UNKNOWN : D==UnitDiag> itsu;
         const CheckedInt<Si> itssi;
         const CheckedInt<Sj> itssj;
+        const CheckedInt<_dt> itsdt;
 
     }; // ConstSmallUpperTriMatrixView
 
-    template <class T, int N, DiagType D, int Si, int Sj, bool C>
-    class ConstSmallUpperTriMatrixViewF :
-        public ConstSmallUpperTriMatrixView<T,N,D,Si,Sj,C,FortranStyle>
+    template <class T, int N, int Si, int Sj, int A0>
+    struct Traits<SmallUpperTriMatrixView<T,N,Si,Sj,A0> >
     {
-    public:
-
-        typedef ConstSmallUpperTriMatrixViewF<T,N,D,Si,Sj,C> type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,Si,Sj,C,FortranStyle> mtype;
-
-        ConstSmallUpperTriMatrixViewF(
-            const T* m, size_t s, bool u, int si, int sj
-        ) : 
-            mtype(m,s,si,sj) {}
-        ConstSmallUpperTriMatrixViewF(const T* m, size_t s, bool u, int si) :
-            mtype(m,s,si) {}
-        ConstSmallUpperTriMatrixViewF(const T* m, size_t s) :
-            mtype(m,s) {}
-        ConstSmallUpperTriMatrixViewF(const type& m2) : mtype(m2) {}
-        template <DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        ConstSmallUpperTriMatrixViewF(
-            const ConstUpperTriMatrixView<T,D2,Si2,Sj2,C,I2>& m2) : mtype(m2) {}
-        template <DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        ConstSmallUpperTriMatrixViewF(
-            const UpperTriMatrixView<T,D2,Si2,Sj2,C,I2>& m2) : mtype(m2) {}
-        template <int N2, DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        ConstSmallUpperTriMatrixViewF(
-            const ConstSmallUpperTriMatrixView<T,N2,D2,Si2,Sj2,C,I2>& m2) :
-            mtype(m2) {}
-        template <int N2, DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        ConstSmallUpperTriMatrixViewF(
-            const SmallUpperTriMatrixView<T,N2,D2,Si2,Sj2,C,I2>& m2) :
-            mtype(m2) {}
-        ~ConstSmallUpperTriMatrixViewF() {}
-
-    private :
-        void operator=(const type& m2);
-
-    }; // ConstSmallUpperTriMatrixViewF
-
-    template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
-    struct Traits<SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I> >
-    {
-        typedef T value_type;
-
         typedef typename Traits<T>::real_type real_type;
+
+        enum { A = (A0 & ~NoDivider) | (
+                ( Attrib<A0>::colmajor ? 0 :
+                  Attrib<A0>::rowmajor ? 0 :
+                  Si == 1 ? ColMajor :
+                  Sj == 1 ? RowMajor : 0 ) )};
+        enum { okA = (
+                !Attrib<A>::diagmajor &&
+                !Attrib<A>::zerodiag &&
+                !Attrib<A>::packed &&
+                !Attrib<A>::lower &&
+                !Attrib<A>::nodivider &&
+                !Attrib<A>::withdivider &&
+                !( Si != UNKNOWN && Si != 1 && Attrib<A>::colmajor ) &&
+                !( Sj != UNKNOWN && Sj != 1 && Attrib<A>::rowmajor ) )};
+        enum { _attrib = A };
+
+        typedef T value_type;
         typedef typename Traits<T>::complex_type complex_type;
         enum { isreal = Traits<T>::isreal };
         enum { iscomplex = Traits<T>::iscomplex };
 
-        typedef SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I> type;
-        typedef const ConstSmallUpperTriMatrixView<T,N,D,Si,Sj,C,I> calc_type;
-        typedef calc_type eval_type;
-        typedef QuotXM<1,real_type,type> inverse_type;
+        typedef SmallUpperTriMatrixView<T,N,Si,Sj,A0> type;
+        typedef ConstSmallUpperTriMatrixView<T,N,Si,Sj,A> calc_type;
+        typedef const type& eval_type;
 
         enum { _colsize = N };
         enum { _rowsize = N };
         enum { _size = N };
-        enum { _fort = (I == FortranStyle) };
+        enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
-        enum { _rowmajor = (Sj == 1) };
-        enum { _colmajor = (Si == 1) };
-        enum { _stor = (_rowmajor ? RowMajor : ColMajor) };
+        enum { _rowmajor = Attrib<A>::rowmajor };
+        enum { _colmajor = Attrib<A>::colmajor };
         enum { _stepi = Si };
         enum { _stepj = Sj };
         enum { _diagstep = IntTraits2<Si,Sj>::sum };
-        enum { _conj = C };
-        enum { _unit = (D == UnitDiag) };
-        enum { _unknowndiag = (D == UnknownDiag) };
+        enum { _conj = Attrib<A>::conj };
+        enum { _unit = Attrib<A>::unitdiag };
+        enum { _nonunit = Attrib<A>::nonunitdiag };
+        enum { _unknowndiag = !(_unit || _nonunit) };
+        enum { _dt = _unknowndiag ? UNKNOWN : A & AllDiagType };
         enum { _shape = _unit ? UnitUpperTri : UpperTri };
-        enum { _hasdivider = false };
-
-        typedef typename MCopyHelper<T,UpperTri,N,N,_rowmajor,_fort>::type 
-            copy_type;
-
-        enum { twoSi = isreal ? Si : IntTraits<Si>::twoS };
-        enum { twoSj = isreal ? Sj : IntTraits<Sj>::twoS };
-        enum { notC = !C && iscomplex };
+        enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
+        enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
         enum { Nm1 = IntTraits<N>::Sm1 };
 
-        typedef ConstVectorView<T,_stepi,C,I> const_col_type;
-        typedef ConstVectorView<T,_stepi,C,I> const_col_sub_type;
-        typedef ConstVectorView<T,_stepj,C,I> const_row_type;
-        typedef ConstVectorView<T,_stepj,C,I> const_row_sub_type;
-        typedef ConstSmallVectorView<T,N,_diagstep,C,I> const_diag_type;
-        typedef ConstVectorView<T,_diagstep,C,I> const_diag_sub_type;
+        typedef typename MCopyHelper<T,_shape,N,N,_rowmajor,_fort>::type 
+            copy_type;
 
-        typedef ConstUpperTriMatrixView<T,D,_stepi,_stepj,C,I>
-            const_subtrimatrix_type;
-        typedef ConstUpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,C,I>
-            const_subtrimatrix_step_type;
-        typedef ConstMatrixView<T,_stepi,_stepj,C,I> const_submatrix_type;
-        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,C,I>
-            const_submatrix_step_type;
-        typedef ConstVectorView<T,UNKNOWN,C,I> const_subvector_type;
+        enum { _hasdivider = false };
+        typedef QuotXM<1,real_type,type> inverse_type;
 
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,I>
+        enum { baseA = (
+                (_fort ? FortranStyle : 0) |
+                (_conj ? Conj : 0) )};
+        enum { colA = baseA | (_colmajor ? Unit : 0) };
+        enum { rowA = baseA | (_rowmajor ? Unit : 0) };
+        enum { cstyleA = A & ~FortranStyle };
+        enum { fstyleA = A | FortranStyle };
+        enum { nmA = (A & ~AllStorageType) };
+        enum { cmA = nmA | ColMajor };
+        enum { rmA = nmA | RowMajor };
+        enum { ndA = (A & ~AllDiagType) };
+        enum { ndnmA = (ndA & ~AllStorageType) };
+        enum { colpairA = _colmajor ? cmA : int(nmA) };
+        enum { rowpairA = _rowmajor ? rmA : int(nmA) };
+        enum { conjA = iscomplex ? (A ^ Conj) : int(A) };
+        enum { trA = _colmajor ? rmA : _rowmajor ? cmA : int(A) };
+        enum { adjA = iscomplex ? (trA ^ Conj) : int(trA) };
+        enum { nonunitA = ndA | NonUnitDiag };
+        enum { unitA = ndA | UnitDiag };
+        enum { nonconjA = A & ~Conj };
+        enum { twosA = isreal ? nonconjA : int(nonconjA & ~AllStorageType) };
+
+        typedef ConstVectorView<T,colA> const_col_sub_type;
+        typedef ConstVectorView<T,rowA> const_row_sub_type;
+        typedef ConstSmallVectorView<T,N,_diagstep,baseA> const_diag_type;
+        typedef ConstVectorView<T,baseA> const_diag_sub_type;
+
+        typedef ConstUpperTriMatrixView<T,A> const_subtrimatrix_type;
+        typedef ConstUpperTriMatrixView<T,nmA> const_subtrimatrix_step_type;
+        typedef ConstMatrixView<T,ndA> const_submatrix_type;
+        typedef ConstMatrixView<T,ndnmA> const_submatrix_step_type;
+        typedef ConstVectorView<T,baseA> const_subvector_type;
+
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,A>
             const_view_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,CStyle>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,cstyleA>
             const_cview_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,
-                FortranStyle> const_fview_type;
-        typedef ConstUpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,C>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,fstyleA>
+            const_fview_type;
+        typedef ConstUpperTriMatrixView<T,(_conj ? Conj : NonConj)> 
             const_xview_type;
-        typedef ConstUpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>
-            const_xdview_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,1,_stepj,C,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,1,_stepj,cmA>
             const_cmview_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,1,C,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,1,rmA>
             const_rmview_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,notC,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,conjA>
             const_conjugate_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepj,_stepi,C,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepj,_stepi,trA>
             const_transpose_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepj,_stepi,notC,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepj,_stepi,adjA>
             const_adjoint_type;
 
-        typedef ConstSmallUpperTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,C,I>
+        typedef ConstSmallUpperTriMatrixView<T,Nm1,_stepi,_stepj,nonunitA>
             const_offdiag_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,UnitDiag,_stepi,_stepj,C,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,unitA>
             const_unitdiag_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,C,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,nonunitA>
             const_nonunitdiag_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,C,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,ndA>
             const_unknowndiag_type;
-        typedef ConstSmallUpperTriMatrixView<real_type,N,D,twoSi,twoSj,false,I>
+        typedef ConstSmallUpperTriMatrixView<real_type,N,twoSi,twoSj,twosA>
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,nonconjA>
             const_nonconj_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,I> nonconst_type;
+        typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,A> nonconst_type;
 
-        typedef TriRef<T,C> reference;
+        typedef typename TriRefHelper<T,_conj,_nonunit>::reference reference;
 
-        typedef VectorView<T,_stepi,C,I> col_sub_type;
-        typedef VectorView<T,_stepj,C,I> row_sub_type;
-        typedef SmallVectorView<T,N,_diagstep,C,I> diag_type;
-        typedef VectorView<T,_diagstep,C,I> diag_sub_type;
+        typedef VectorView<T,colA> col_sub_type;
+        typedef VectorView<T,rowA> row_sub_type;
+        typedef SmallVectorView<T,N,_diagstep,baseA> diag_type;
+        typedef VectorView<T,baseA> diag_sub_type;
 
-        typedef UpperTriMatrixView<T,D,_stepi,_stepj,C,I> subtrimatrix_type;
-        typedef UpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,C,I>
-            subtrimatrix_step_type;
-        typedef MatrixView<T,_stepi,_stepj,C,I> submatrix_type;
-        typedef MatrixView<T,UNKNOWN,UNKNOWN,C,I> submatrix_step_type;
-        typedef VectorView<T,UNKNOWN,C,I> subvector_type;
+        typedef UpperTriMatrixView<T,A> subtrimatrix_type;
+        typedef UpperTriMatrixView<T,nmA> subtrimatrix_step_type;
+        typedef MatrixView<T,ndA> submatrix_type;
+        typedef MatrixView<T,ndnmA> submatrix_step_type;
+        typedef VectorView<T,baseA> subvector_type;
 
-        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,I> view_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,CStyle>
-            cview_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,C,FortranStyle>
-            fview_type;
-        typedef UpperTriMatrixView<T,D,UNKNOWN,UNKNOWN,C> xview_type;
-        typedef UpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>
-            xdview_type;
-        typedef SmallUpperTriMatrixView<T,N,D,1,_stepj,C,I> cmview_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepi,1,C,I> rmview_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,notC,I>
-            conjugate_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepj,_stepi,C,I>
-            transpose_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepj,_stepi,notC,I>
-            adjoint_type;
+        typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,A> view_type;
+        typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,cstyleA> cview_type;
+        typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,fstyleA> fview_type;
+        typedef UpperTriMatrixView<T,(_conj ? Conj : NonConj)> xview_type;
+        typedef SmallUpperTriMatrixView<T,N,1,_stepj,cmA> cmview_type;
+        typedef SmallUpperTriMatrixView<T,N,_stepi,1,rmA> rmview_type;
+        typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,conjA> conjugate_type;
+        typedef SmallLowerTriMatrixView<T,N,_stepj,_stepi,trA> transpose_type;
+        typedef SmallLowerTriMatrixView<T,N,_stepj,_stepi,adjA> adjoint_type;
 
-        typedef SmallUpperTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,C,I>
+        typedef SmallUpperTriMatrixView<T,Nm1,_stepi,_stepj,nonunitA>
             offdiag_type;
-        typedef SmallUpperTriMatrixView<T,N,UnitDiag,_stepi,_stepj,C,I>
+        typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,unitA>
             unitdiag_type;
-        typedef SmallUpperTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,C,I>
+        typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,nonunitA>
             nonunitdiag_type;
-        typedef SmallUpperTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,C,I>
+        typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,ndA>
             unknowndiag_type;
-        typedef SmallUpperTriMatrixView<real_type,N,D,twoSi,twoSj,false,I>
+        typedef SmallUpperTriMatrixView<real_type,N,twoSi,twoSj,twosA>
             realpart_type;
         typedef realpart_type imagpart_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepi,_stepj,false,I>
+        typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,nonconjA>
             nonconj_type;
     };
 
-    template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
+    template <class T, int N, int Si, int Sj, int A>
     class SmallUpperTriMatrixView :
-        public BaseMatrix_Tri_Mutable<SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I> >
+        public BaseMatrix_Tri_Mutable<SmallUpperTriMatrixView<T,N,Si,Sj,A> >
     {
     public:
 
-        typedef SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I> type;
+        typedef SmallUpperTriMatrixView<T,N,Si,Sj,A> type;
         typedef BaseMatrix_Tri_Mutable<type> base_mut;
         typedef typename base_mut::reference reference;
 
@@ -855,60 +874,77 @@ namespace tmv {
         enum { _rowsize = Traits<type>::_size };
         enum { _size = Traits<type>::_size };
         enum { _shape = Traits<type>::_shape };
-        enum { _unit = Traits<type>::_unit };
-        enum { _unknowndiag = Traits<type>::_unknowndiag };
         enum { _fort = Traits<type>::_fort };
         enum { _calc = Traits<type>::_calc };
         enum { _rowmajor = Traits<type>::_rowmajor };
         enum { _colmajor = Traits<type>::_colmajor };
-        enum { _stor = Traits<type>::_stor };
         enum { _conj = Traits<type>::_conj };
         enum { _stepi = Traits<type>::_stepi };
         enum { _stepj = Traits<type>::_stepj };
         enum { _diagstep = Traits<type>::_diagstep };
+        enum { _dt = Traits<type>::_dt };
+        enum { _unit = Traits<type>::_unit };
+        enum { _nonunit = Traits<type>::_nonunit };
+        enum { _unknowndiag = Traits<type>::_unknowndiag };
+        enum { _attrib = Traits<type>::_attrib };
 
         //
         // Constructors
         //
 
-        SmallUpperTriMatrixView(T* m, size_t s, bool u, int si, int sj) :
-            itsm(m), itss(s), itsu(u), itssi(si), itssj(sj) {}
-
-        SmallUpperTriMatrixView(T* m, size_t s, bool u, int si) :
-            itsm(m), itss(s), itsu(u), itssi(si), itssj(Sj)
-        { TMVStaticAssert(Sj != UNKNOWN); }
-
-        SmallUpperTriMatrixView(T* m, size_t s) :
-            itsm(m), itss(s), itsu(D==UnitDiag), itssi(Si), itssj(Sj)
+        SmallUpperTriMatrixView(T* m, size_t s, int si, int sj, DiagType dt) :
+            itsm(m), itss(s), itssi(si), itssj(sj), itsdt(dt)
         {
-            TMVStaticAssert(D != UnknownDiag);
-            TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); 
+            TMVStaticAssert(Traits<type>::okA);
         }
 
-        SmallUpperTriMatrixView(T* m) :
-            itsm(m), itss(N), itsu(D==UnitDiag), itssi(Si), itssj(Sj)
+        SmallUpperTriMatrixView(T* m, size_t s, int si, int sj) :
+            itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
-            TMVStaticAssert(N != UNKNOWN);
-            TMVStaticAssert(D != UnknownDiag);
+            TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(_dt != UNKNOWN); 
+        }
+
+        SmallUpperTriMatrixView(T* m, size_t s, int si) :
+            itsm(m), itss(s), itssi(si), itssj(Sj), itsdt(_dt)
+        {
+            TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Sj != UNKNOWN); 
+            TMVStaticAssert(_dt != UNKNOWN); 
+        }
+
+        SmallUpperTriMatrixView(T* m, size_t s) :
+            itsm(m), itss(s), itssi(Si), itssj(Sj), itsdt(_dt)
+        {
+            TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); 
+            TMVStaticAssert(_dt != UNKNOWN); 
         }
 
         SmallUpperTriMatrixView(const type& m2) :
             itsm(m2.itsm), itss(m2.size()), 
-            itsu(m2.isunit()), itssi(m2.stepi()), itssj(m2.stepj()) {}
+            itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
-        template <DiagType D2, int Si2, int Sj2, IndexStyle I2>
+        template <int A2>
         SmallUpperTriMatrixView(
-            UpperTriMatrixView<T,D2,Si2,Sj2,C,I2> m2
-        ) :
+            UpperTriMatrixView<T,A2> m2) :
             itsm(m2.ptr()), itss(m2.size()),
-            itsu(m2.isunit()), itssi(m2.stepi()), itssj(m2.stepj()) {}
+            itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
-        template <int N2, DiagType D2, int Si2, int Sj2, IndexStyle I2>
+        template <int N2, int Si2, int Sj2, int A2>
         SmallUpperTriMatrixView(
-            SmallUpperTriMatrixView<T,N2,D2,Si2,Sj2,C,I2> m2) :
+            SmallUpperTriMatrixView<T,N2,Si2,Sj2,A2> m2) :
             itsm(m2.ptr()), itss(m2.size()),
-            itsu(m2.isunit()), itssi(m2.stepi()), itssj(m2.stepj()) {}
+            itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
         ~SmallUpperTriMatrixView() {
 #ifdef TMV_DEBUG
@@ -967,7 +1003,7 @@ namespace tmv {
             return (
                 (isunit() && i==j ) ? T(1) :
                 (i>j) ? T(0) :
-                DoConj<C>(itsm[i*stepi() + j*stepj()]));
+                DoConj<_conj>(itsm[i*stepi() + j*stepj()]));
         }
 
         reference ref(int i, int j)
@@ -979,8 +1015,10 @@ namespace tmv {
         int nElements() const { return int(itss)*int(itss+1)/2; }
         int stepi() const { return itssi; }
         int stepj() const { return itssj; }
-        bool isconj() const { return C; }
-        bool isunit() const { return itsu; }
+        bool isconj() const { return _conj; }
+        DiagType dt() const 
+        { return static_cast<DiagType>(static_cast<int>(itsdt)); }
+        bool isunit() const { return dt() == UnitDiag; }
         bool isrm() const
         { return _rowmajor || (!_colmajor && stepj() == 1); }
         bool iscm() const
@@ -990,195 +1028,177 @@ namespace tmv {
 
         T* itsm;
         const CheckedInt<N> itss;
-        const CheckedInt<D==UnknownDiag ? UNKNOWN : D==UnitDiag> itsu;
         const CheckedInt<Si> itssi;
         const CheckedInt<Sj> itssj;
+        const CheckedInt<_dt> itsdt;
 
     }; // SmallUpperTriMatrixView
 
-    template <class T, int N, DiagType D, int Si, int Sj, bool C>
-    class SmallUpperTriMatrixViewF :
-        public SmallUpperTriMatrixView<T,N,D,Si,Sj,C,FortranStyle>
+    template <class T, int N, int A0, int A1, int A2>
+    struct Traits<SmallLowerTriMatrix<T,N,A0,A1,A2> >
     {
-    public:
-
-        typedef SmallUpperTriMatrixViewF<T,N,D,Si,Sj,C> type;
-        typedef SmallUpperTriMatrixView<T,N,D,Si,Sj,C,FortranStyle> mtype;
-
-        SmallUpperTriMatrixViewF(T* m, size_t s, bool u, int si, int sj) :
-            mtype(m,s,si,sj) {}
-        SmallUpperTriMatrixViewF(T* m, size_t s, bool u, int si) :
-            mtype(m,s,si) {}
-        SmallUpperTriMatrixViewF(T* m, size_t s) : mtype(m,s) {}
-        SmallUpperTriMatrixViewF(T* m) : mtype(m) {}
-        SmallUpperTriMatrixViewF(const type& m2) : mtype(m2) {}
-        template <DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        SmallUpperTriMatrixViewF(
-            UpperTriMatrixView<T,D2,Si2,Sj2,C,I2> m2
-        ) :
-            mtype(m2) {}
-        template <int N2, DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        SmallUpperTriMatrixViewF(
-            SmallUpperTriMatrixView<T,N2,D2,Si2,Sj2,C,I2> m2) : mtype(m2) {}
-        ~SmallUpperTriMatrixViewF() {}
-
-        type& operator=(const type& m2)
-        { mtype::operator=(m2); return *this; }
-        template <class M2>
-        type& operator=(const BaseMatrix<M2>& m2)
-        { mtype::operator=(m2); return *this; }
-        template <class M2>
-        type& operator=(const BaseMatrix_Tri<M2>& m2)
-        { mtype::operator=(m2); return *this; }
-        template <class M2>
-        type& operator=(const BaseMatrix_Diag<M2>& m2)
-        { mtype::operator=(m2); return *this; }
-        type& operator=(const T x)
-        { mtype::operator=(x); return *this; }
-
-    }; // SmallUpperTriMatrixViewF
-
-
-    template <class T, int N, DiagType D, StorageType S, IndexStyle I>
-    struct Traits<SmallLowerTriMatrix<T,N,D,S,I> >
-    {
-        typedef T value_type;
-
         typedef typename Traits<T>::real_type real_type;
+
+        enum { A012 = A0 | A1 | A2 };
+        enum { A = (A012 & ~NoDivider) | (
+                (Attrib<A012>::rowmajor ? 0 : ColMajor) |
+                (Attrib<A012>::unitdiag ? 0 : NonUnitDiag) )};
+        enum { okA = (
+                !Attrib<A>::conj &&
+                (Attrib<A>::rowmajor || Attrib<A>::colmajor) &&
+                (Attrib<A>::rowmajor != int(Attrib<A>::colmajor)) &&
+                !Attrib<A>::diagmajor &&
+                (Attrib<A>::unitdiag || Attrib<A>::nonunitdiag) &&
+                (Attrib<A>::unitdiag != int(Attrib<A>::nonunitdiag)) &&
+                !Attrib<A>::zerodiag &&
+                !Attrib<A>::packed &&
+                !Attrib<A>::lower &&
+                !Attrib<A>::nodivider &&
+                !Attrib<A>::withdivider )};
+        enum { _attrib = A };
+
+        typedef T value_type;
         typedef typename Traits<T>::complex_type complex_type;
         enum { isreal = Traits<T>::isreal };
         enum { iscomplex = Traits<T>::iscomplex };
 
-        typedef SmallLowerTriMatrix<T,N,D,S,I> type;
+        typedef SmallLowerTriMatrix<T,N,A0,A1,A2> type;
         typedef const type& calc_type;
         typedef const type& eval_type;
-        typedef type copy_type;
-        typedef QuotXM<1,real_type,type> inverse_type;
+        typedef SmallLowerTriMatrix<T,N,A012> copy_type;
 
         enum { _colsize = N };
         enum { _rowsize = N };
         enum { _size = N };
-        enum { _fort = (I == FortranStyle) };
+        enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
-        enum { _rowmajor = (S == RowMajor) };
-        enum { _colmajor = (S == ColMajor) };
-        enum { _stor = S };
-        enum { _stepi = (S==RowMajor ? N : 1) };
-        enum { _stepj = (S==RowMajor ? 1 : N) };
-        enum { _diagstep = N+1 };
+        enum { _rowmajor = Attrib<A>::rowmajor };
+        enum { _colmajor = Attrib<A>::colmajor };
+        enum { _stepi = _rowmajor ? N : 1 };
+        enum { _stepj = _rowmajor ? 1 : N };
+        enum { _diagstep = IntTraits<N>::Sp1 };
         enum { _conj = false };
-        enum { _unit = (D == UnitDiag) };
+        enum { _unit = Attrib<A>::unitdiag };
+        enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = false };
+        enum { _dt = A & AllDiagType };
         enum { _shape = _unit ? UnitLowerTri : LowerTri };
-        enum { _hasdivider = false };
-
         enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
-        enum { notC = iscomplex };
         enum { Nm1 = IntTraits<N>::Sm1 };
 
-        typedef ConstVectorView<T,_stepi,false,I> const_col_sub_type;
-        typedef ConstVectorView<T,_stepj,false,I> const_row_sub_type;
-        typedef ConstSmallVectorView<T,N,_diagstep,false,I> const_diag_type;
-        typedef ConstVectorView<T,_diagstep,false,I> const_diag_sub_type;
+        enum { _hasdivider = false };
+        typedef QuotXM<1,real_type,type> inverse_type;
 
-        typedef ConstLowerTriMatrixView<T,D,_stepi,_stepj,false,I>
-            const_subtrimatrix_type;
-        typedef ConstLowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,false,I>
-            const_subtrimatrix_step_type;
-        typedef ConstMatrixView<T,_stepi,_stepj,false,I> const_submatrix_type;
-        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,false,I>
-            const_submatrix_step_type;
-        typedef ConstVectorView<T,UNKNOWN,false,I> const_subvector_type;
+        enum { baseA = (_fort ? FortranStyle : 0) };
+        enum { colA = baseA | (_colmajor ? Unit : 0) };
+        enum { rowA = baseA | (_rowmajor ? Unit : 0) };
+        enum { cstyleA = A & ~FortranStyle };
+        enum { fstyleA = A | FortranStyle };
+        enum { nmA = (A & ~AllStorageType) };
+        enum { cmA = nmA | ColMajor };
+        enum { rmA = nmA | RowMajor };
+        enum { ndA = (A & ~AllDiagType) };
+        enum { ndnmA = (ndA & ~AllStorageType) };
+        enum { colpairA = _colmajor ? cmA : int(nmA) };
+        enum { rowpairA = _rowmajor ? rmA : int(nmA) };
+        enum { conjA = iscomplex ? (A ^ Conj) : int(A) };
+        enum { trA = _colmajor ? rmA : _rowmajor ? cmA : int(A) };
+        enum { adjA = iscomplex ? (trA ^ Conj) : int(trA) };
+        enum { nonunitA = ndA | NonUnitDiag };
+        enum { unitA = ndA | UnitDiag };
+        enum { nonconjA = A };
+        enum { twosA = isreal ? nonconjA : int(nonconjA & ~AllStorageType) };
 
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,I>
+        typedef ConstVectorView<T,colA> const_col_sub_type;
+        typedef ConstVectorView<T,rowA> const_row_sub_type;
+        typedef ConstSmallVectorView<T,N,_diagstep,baseA> const_diag_type;
+        typedef ConstVectorView<T,baseA> const_diag_sub_type;
+
+        typedef ConstLowerTriMatrixView<T,A> const_subtrimatrix_type;
+        typedef ConstLowerTriMatrixView<T,nmA> const_subtrimatrix_step_type;
+        typedef ConstMatrixView<T,ndA> const_submatrix_type;
+        typedef ConstMatrixView<T,ndnmA> const_submatrix_step_type;
+        typedef ConstVectorView<T,baseA> const_subvector_type;
+
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,A>
             const_view_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,CStyle>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,cstyleA>
             const_cview_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,
-                FortranStyle> const_fview_type;
-        typedef ConstLowerTriMatrixView<T,D> const_xview_type;
-        typedef ConstLowerTriMatrixView<T,UnknownDiag> const_xdview_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,1,_stepj,false,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,fstyleA>
+            const_fview_type;
+        typedef ConstLowerTriMatrixView<T> const_xview_type;
+        typedef ConstSmallLowerTriMatrixView<T,N,1,_stepj,cmA>
             const_cmview_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,1,false,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,1,rmA>
             const_rmview_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,notC,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,conjA>
             const_conjugate_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepj,_stepi,false,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepj,_stepi,trA>
             const_transpose_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepj,_stepi,notC,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepj,_stepi,adjA>
             const_adjoint_type;
 
-        typedef ConstSmallLowerTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,false,I>
+        typedef ConstSmallLowerTriMatrixView<T,Nm1,_stepi,_stepj,nonunitA>
             const_offdiag_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,UnitDiag,_stepi,_stepj,
-                false,I> const_unitdiag_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,
-                false,I> const_nonunitdiag_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,
-                false,I> const_unknowndiag_type;
-        typedef ConstSmallLowerTriMatrixView<real_type,N,D,twoSi,twoSj,false,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,unitA>
+            const_unitdiag_type;
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,nonunitA>
+            const_nonunitdiag_type;
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,ndA>
+            const_unknowndiag_type;
+        typedef ConstSmallLowerTriMatrixView<real_type,N,twoSi,twoSj,twosA>
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,nonconjA>
             const_nonconj_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,I>
-            nonconst_type;
+        typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,A> nonconst_type;
 
-        typedef TriRef<T,false> reference;
+        typedef typename TriRefHelper<T,false,_nonunit>::reference reference;
 
-        typedef VectorView<T,_stepi,false,I> col_sub_type;
-        typedef VectorView<T,_stepj,false,I> row_sub_type;
-        typedef SmallVectorView<T,N,_diagstep,false,I> diag_type;
-        typedef VectorView<T,_diagstep,false,I> diag_sub_type;
+        typedef VectorView<T,colA> col_sub_type;
+        typedef VectorView<T,rowA> row_sub_type;
+        typedef SmallVectorView<T,N,_diagstep,baseA> diag_type;
+        typedef VectorView<T,baseA> diag_sub_type;
 
-        typedef LowerTriMatrixView<T,D,_stepi,_stepj,false,I>
-            subtrimatrix_type;
-        typedef LowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,false,I>
-            subtrimatrix_step_type;
-        typedef MatrixView<T,_stepi,_stepj,false,I> submatrix_type;
-        typedef MatrixView<T,UNKNOWN,UNKNOWN,false,I> submatrix_step_type;
-        typedef VectorView<T,UNKNOWN,false,I> subvector_type;
+        typedef LowerTriMatrixView<T,A> subtrimatrix_type;
+        typedef LowerTriMatrixView<T,nmA> subtrimatrix_step_type;
+        typedef MatrixView<T,ndA> submatrix_type;
+        typedef MatrixView<T,ndnmA> submatrix_step_type;
+        typedef VectorView<T,baseA> subvector_type;
 
-        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,I> view_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,CStyle>
-            cview_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,
-                FortranStyle> fview_type;
-        typedef LowerTriMatrixView<T,D> xview_type;
-        typedef LowerTriMatrixView<T,UnknownDiag> xdview_type;
-        typedef SmallLowerTriMatrixView<T,N,D,1,_stepj,false,I> cmview_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepi,1,false,I> rmview_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,notC,I>
-            conjugate_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepj,_stepi,false,I>
-            transpose_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepj,_stepi,notC,I>
-            adjoint_type;
+        typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,A> view_type;
+        typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,cstyleA> cview_type;
+        typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,fstyleA> fview_type;
+        typedef LowerTriMatrixView<T> xview_type;
+        typedef SmallLowerTriMatrixView<T,N,1,_stepj,cmA> cmview_type;
+        typedef SmallLowerTriMatrixView<T,N,_stepi,1,rmA> rmview_type;
+        typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,conjA> conjugate_type;
+        typedef SmallUpperTriMatrixView<T,N,_stepj,_stepi,trA> transpose_type;
+        typedef SmallUpperTriMatrixView<T,N,_stepj,_stepi,adjA> adjoint_type;
 
-        typedef SmallLowerTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,false,I>
+        typedef SmallLowerTriMatrixView<T,Nm1,_stepi,_stepj,nonunitA>
             offdiag_type;
-        typedef SmallLowerTriMatrixView<T,N,UnitDiag,_stepi,_stepj,false,I>
+        typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,unitA>
             unitdiag_type;
-        typedef SmallLowerTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,false,I>
+        typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,nonunitA>
             nonunitdiag_type;
-        typedef SmallLowerTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,false,I>
+        typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,ndA>
             unknowndiag_type;
-        typedef SmallLowerTriMatrixView<real_type,N,D,twoSi,twoSj,false,I>
+        typedef SmallLowerTriMatrixView<real_type,N,twoSi,twoSj,twosA>
             realpart_type;
         typedef realpart_type imagpart_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,I>
+        typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,nonconjA>
             nonconj_type;
     };
 
-    template <class T, int N, DiagType D, StorageType S, IndexStyle I>
+    template <class T, int N, int A0, int A1, int A2>
     class SmallLowerTriMatrix : 
-        public BaseMatrix_Tri_Mutable<SmallLowerTriMatrix<T,N,D,S,I> >
+        public BaseMatrix_Tri_Mutable<SmallLowerTriMatrix<T,N,A0,A1,A2> >
     {
     public:
 
-        typedef SmallLowerTriMatrix<T,N,D,S,I> type;
+        typedef SmallLowerTriMatrix<T,N,A0,A1,A2> type;
         typedef BaseMatrix_Tri_Mutable<type> base_mut;
         typedef typename Traits<type>::reference reference;
 
@@ -1186,17 +1206,19 @@ namespace tmv {
         enum { _rowsize = Traits<type>::_size };
         enum { _size = Traits<type>::_size };
         enum { _shape = Traits<type>::_shape };
-        enum { _unit = Traits<type>::_unit };
-        enum { _unknowndiag = Traits<type>::_unknowndiag };
         enum { _fort = Traits<type>::_fort };
         enum { _calc = Traits<type>::_calc };
         enum { _rowmajor = Traits<type>::_rowmajor };
         enum { _colmajor = Traits<type>::_colmajor };
-        enum { _stor = Traits<type>::_stor };
         enum { _conj = Traits<type>::_conj };
         enum { _stepi = Traits<type>::_stepi };
         enum { _stepj = Traits<type>::_stepj };
         enum { _diagstep = Traits<type>::_diagstep };
+        enum { _dt = Traits<type>::_dt };
+        enum { _unit = Traits<type>::_unit };
+        enum { _nonunit = Traits<type>::_nonunit };
+        enum { _unknowndiag = Traits<type>::_unknowndiag };
+        enum { _attrib = Traits<type>::_attrib };
 
         //
         // Constructors
@@ -1205,8 +1227,6 @@ namespace tmv {
         SmallLowerTriMatrix(size_t n=N)
         {
             TMVStaticAssert(N>=0);
-            TMVStaticAssert(S==RowMajor || S==ColMajor); 
-            TMVStaticAssert(D != UnknownDiag);
             TMVAssert(n==N);
 #ifdef TMV_DEBUG
             Maybe<_unit>::offdiag(*this).setAllTo(T(888));
@@ -1216,8 +1236,6 @@ namespace tmv {
         explicit SmallLowerTriMatrix(size_t n, T x)
         {
             TMVStaticAssert(N>=0);
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
-            TMVStaticAssert(D != UnknownDiag);
             TMVAssert(n==N);
             this->setAllTo(x);
         }
@@ -1225,8 +1243,6 @@ namespace tmv {
         explicit SmallLowerTriMatrix(size_t n, const T* vv) 
         {
             TMVStaticAssert(N>=0);
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
-            TMVStaticAssert(D != UnknownDiag);
             TMVAssert(n==N);
             SmallVectorView<T,N*N,1> lv(ptr());
             ConstSmallVectorView<T,N*N,1>(vv).newAssignTo(lv);
@@ -1235,8 +1251,6 @@ namespace tmv {
         explicit SmallLowerTriMatrix(size_t n, const std::vector<T>& vv) 
         {
             TMVStaticAssert(N>=0);
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
-            TMVStaticAssert(D != UnknownDiag);
             TMVAssert(n==N);
             TMVAssert(vv.size() == N*N);
             SmallVectorView<T,N*N,1> lv(ptr());
@@ -1246,8 +1260,6 @@ namespace tmv {
         SmallLowerTriMatrix(const type& m2) 
         {
             TMVStaticAssert(N>=0);
-            TMVStaticAssert(S==RowMajor || S==ColMajor); 
-            TMVStaticAssert(D != UnknownDiag);
             m2.newAssignTo(*this);
         }
 
@@ -1255,8 +1267,6 @@ namespace tmv {
         SmallLowerTriMatrix(const BaseMatrix<M2>& m2) 
         {
             TMVStaticAssert(N>=0);
-            TMVStaticAssert(S==RowMajor || S==ColMajor); 
-            TMVStaticAssert(D != UnknownDiag);
             const bool assignable = 
                 ShapeTraits2<M2::_shape,_shape>::assignable;
             TMVStaticAssert((
@@ -1270,8 +1280,6 @@ namespace tmv {
         SmallLowerTriMatrix(const BaseMatrix_Tri<M2>& m2) 
         {
             TMVStaticAssert(N>=0);
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
-            TMVStaticAssert(D != UnknownDiag);
             TMVStaticAssert(M2::_lower);
             TMVAssert(m2.size() == N);
             Maybe<_unit && !M2::_unit>::unitview(m2).newAssignTo(*this);
@@ -1281,8 +1289,6 @@ namespace tmv {
         SmallLowerTriMatrix(const BaseMatrix_Diag<M2>& m2) 
         {
             TMVStaticAssert(N>=0);
-            TMVStaticAssert(S==RowMajor || S==ColMajor); 
-            TMVStaticAssert(D != UnknownDiag);
             TMVAssert(m2.size() == N);
             typename type::diag_type d = this->diag();
             this->setZero();
@@ -1347,26 +1353,25 @@ namespace tmv {
             return (
                 (isunit() && i==j ) ? T(1) :
                 (i<j) ? T(0) :
-                itsm[S==RowMajor ? i*stepi() + j : i + j*stepj()]);
+                itsm[_rowmajor ? i*stepi() + j : i + j*stepj()]);
         }
 
         reference ref(int i, int j)
         {
             return reference(
                 isunit() && i==j,
-                itsm[S==RowMajor ? i*stepi() + j : i + j*stepj()] ); 
+                itsm[_rowmajor ? i*stepi() + j : i + j*stepj()] ); 
         }
 
         size_t size() const { return N; }
         int nElements() const { return N*(N+1)/2; }
         int stepi() const { return _stepi; }
         int stepj() const { return _stepj; }
-        DiagType dt() const { return D; }
-        bool isunit() const { return D == UnitDiag; }
+        DiagType dt() const { return static_cast<DiagType>(_dt); }
+        bool isunit() const { return _unit; }
         bool isconj() const { return false; }
-        bool isrm() const { return S==RowMajor; }
-        bool iscm() const { return S==ColMajor; }
-        StorageType stor() const { return S; }
+        bool isrm() const { return _rowmajor; }
+        bool iscm() const { return _colmajor; }
 
     protected :
 
@@ -1374,219 +1379,228 @@ namespace tmv {
 
     }; // SmallLowerTriMatrix
 
-    template <class T, int N, DiagType D, StorageType S>
-    class SmallLowerTriMatrixF : 
-        public SmallLowerTriMatrix<T,N,D,S,FortranStyle>
+    template <class T, int N, int Si, int Sj, int A0>
+    struct Traits<ConstSmallLowerTriMatrixView<T,N,Si,Sj,A0> >
     {
-    public:
-
-        typedef SmallLowerTriMatrixF<T,N,D,S> type;
-        typedef SmallLowerTriMatrix<T,N,D,S,FortranStyle> mtype;
-
-        SmallLowerTriMatrixF() : mtype() {}
-        explicit SmallLowerTriMatrixF(T x) : mtype(x) {}
-        explicit SmallLowerTriMatrixF(const T* vv) : mtype(vv) {}
-        explicit SmallLowerTriMatrixF(const std::vector<T>& vv) :
-            mtype(vv) {}
-        template <class M2>
-        SmallLowerTriMatrixF(const BaseMatrix<M2>& m2) : mtype(m2) {}
-        SmallLowerTriMatrixF(const type& m2) : mtype(m2) {}
-        template <class M2>
-        SmallLowerTriMatrixF(const BaseMatrix_Tri<M2>& m2) :
-            mtype(m2) {}
-        template <class M2>
-        SmallLowerTriMatrixF(const BaseMatrix_Rec<M2>& m2) : 
-            mtype(m2) {}
-        ~SmallLowerTriMatrixF() {}
-
-        type& operator=(const type& m2)
-        { mtype::operator=(m2); return *this; }
-        template <class M2>
-        type& operator=(const BaseMatrix<M2>& m2)
-        { mtype::operator=(m2); return *this; }
-        template <class M2>
-        type& operator=(const BaseMatrix_Tri<M2>& m2)
-        { mtype::operator=(m2); return *this; }
-        template <class M2>
-        type& operator=(const BaseMatrix_Diag<M2>& m2)
-        { mtype::operator=(m2); return *this; }
-        type& operator=(T x)
-        { mtype::operator=(x); return *this; }
-
-    }; // SmallLowerTriMatrixF
-
-    template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
-    struct Traits<ConstSmallLowerTriMatrixView<T,N,D,Si,Sj,C,I> >
-    {
-        typedef T value_type;
-
         typedef typename Traits<T>::real_type real_type;
+
+        enum { A = A0 & ~NoDivider };
+        enum { okA = (
+                !Attrib<A>::diagmajor &&
+                !Attrib<A>::zerodiag &&
+                !Attrib<A>::packed &&
+                !Attrib<A>::lower &&
+                !Attrib<A>::nodivider &&
+                !Attrib<A>::withdivider &&
+                !( Si != UNKNOWN && Si != 1 && Attrib<A>::colmajor ) &&
+                !( Sj != UNKNOWN && Sj != 1 && Attrib<A>::rowmajor ) )};
+        enum { _attrib = A };
+
+        typedef T value_type;
         typedef typename Traits<T>::complex_type complex_type;
         enum { isreal = Traits<T>::isreal };
         enum { iscomplex = Traits<T>::iscomplex };
 
-        typedef ConstSmallLowerTriMatrixView<T,N,D,Si,Sj,C,I> type;
+        typedef ConstSmallLowerTriMatrixView<T,N,Si,Sj,A0> type;
         typedef const type& calc_type;
         typedef const type& eval_type;
-        typedef QuotXM<1,real_type,type> inverse_type;
 
         enum { _colsize = N };
         enum { _rowsize = N };
         enum { _size = N };
-        enum { _fort = (I == FortranStyle) };
+        enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
-        enum { _rowmajor = (Sj == 1) };
-        enum { _colmajor = (Si == 1) };
-        enum { _stor = (_rowmajor ? RowMajor : ColMajor) };
+        enum { _rowmajor = Attrib<A>::rowmajor };
+        enum { _colmajor = Attrib<A>::colmajor };
         enum { _stepi = Si };
         enum { _stepj = Sj };
         enum { _diagstep = IntTraits2<Si,Sj>::sum };
-        enum { _conj = C };
-        enum { _unit = (D == UnitDiag) };
-        enum { _unknowndiag = (D == UnknownDiag) };
+        enum { _conj = Attrib<A>::conj };
+        enum { _unit = Attrib<A>::unitdiag };
+        enum { _nonunit = Attrib<A>::nonunitdiag };
+        enum { _unknowndiag = !(_unit || _nonunit) };
+        enum { _dt = _unknowndiag ? UNKNOWN : A & AllDiagType };
         enum { _shape = _unit ? UnitLowerTri : LowerTri };
-        enum { _hasdivider = false };
-
-        // In case N == UNKNOWN
-        typedef typename MCopyHelper<T,LowerTri,N,N,_rowmajor,_fort>::type 
-            copy_type;
-
-        enum { twoSi = isreal ? Si : IntTraits<Si>::twoS };
-        enum { twoSj = isreal ? Sj : IntTraits<Sj>::twoS };
-        enum { notC = !C && iscomplex };
+        enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
+        enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
         enum { Nm1 = IntTraits<N>::Sm1 };
 
-        typedef ConstVectorView<T,_stepi,C,I> const_col_sub_type;
-        typedef ConstVectorView<T,_stepj,C,I> const_row_sub_type;
-        typedef ConstSmallVectorView<T,N,_diagstep,C,I> const_diag_type;
-        typedef ConstVectorView<T,_diagstep,C,I> const_diag_sub_type;
+        typedef typename MCopyHelper<T,_shape,N,N,_rowmajor,_fort>::type 
+            copy_type;
 
-        typedef ConstLowerTriMatrixView<T,D,_stepi,_stepj,C,I>
-            const_subtrimatrix_type;
-        typedef ConstLowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,C,I>
-            const_subtrimatrix_step_type;
-        typedef ConstMatrixView<T,_stepi,_stepj,C,I> const_submatrix_type;
-        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,C,I>
-            const_submatrix_step_type;
-        typedef ConstVectorView<T,UNKNOWN,C,I> const_subvector_type;
+        enum { _hasdivider = false };
+        typedef QuotXM<1,real_type,type> inverse_type;
 
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,I>
+        enum { baseA = (
+                (_fort ? FortranStyle : 0) |
+                (_conj ? Conj : 0) )};
+        enum { colA = baseA | (_colmajor ? Unit : 0) };
+        enum { rowA = baseA | (_rowmajor ? Unit : 0) };
+        enum { cstyleA = A & ~FortranStyle };
+        enum { fstyleA = A | FortranStyle };
+        enum { nmA = (A & ~AllStorageType) };
+        enum { cmA = nmA | ColMajor };
+        enum { rmA = nmA | RowMajor };
+        enum { ndA = (A & ~AllDiagType) };
+        enum { ndnmA = (ndA & ~AllStorageType) };
+        enum { colpairA = _colmajor ? cmA : int(nmA) };
+        enum { rowpairA = _rowmajor ? rmA : int(nmA) };
+        enum { conjA = iscomplex ? (A ^ Conj) : int(A) };
+        enum { trA = _colmajor ? rmA : _rowmajor ? cmA : int(A) };
+        enum { adjA = iscomplex ? (trA ^ Conj) : int(trA) };
+        enum { nonunitA = ndA | NonUnitDiag };
+        enum { unitA = ndA | UnitDiag };
+        enum { nonconjA = A & ~Conj };
+        enum { twosA = isreal ? nonconjA : int(nonconjA & ~AllStorageType) };
+
+        typedef ConstVectorView<T,colA> const_col_sub_type;
+        typedef ConstVectorView<T,rowA> const_row_sub_type;
+        typedef ConstSmallVectorView<T,N,_diagstep,baseA> const_diag_type;
+        typedef ConstVectorView<T,baseA> const_diag_sub_type;
+
+        typedef ConstLowerTriMatrixView<T,A> const_subtrimatrix_type;
+        typedef ConstLowerTriMatrixView<T,nmA> const_subtrimatrix_step_type;
+        typedef ConstMatrixView<T,ndA> const_submatrix_type;
+        typedef ConstMatrixView<T,ndnmA> const_submatrix_step_type;
+        typedef ConstVectorView<T,baseA> const_subvector_type;
+
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,A>
             const_view_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,CStyle>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,cstyleA>
             const_cview_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,
-                FortranStyle> const_fview_type;
-        typedef ConstLowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,C>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,fstyleA>
+            const_fview_type;
+        typedef ConstLowerTriMatrixView<T,(_conj ? Conj : NonConj)> 
             const_xview_type;
-        typedef ConstLowerTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>
-            const_xdview_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,1,_stepj,C,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,1,_stepj,cmA>
             const_cmview_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,1,C,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,1,rmA>
             const_rmview_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,notC,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,conjA>
             const_conjugate_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepj,_stepi,C,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepj,_stepi,trA>
             const_transpose_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepj,_stepi,notC,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepj,_stepi,adjA>
             const_adjoint_type;
 
-        typedef ConstSmallLowerTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,C,I>
+        typedef ConstSmallLowerTriMatrixView<T,Nm1,_stepi,_stepj,nonunitA>
             const_offdiag_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,UnitDiag,_stepi,_stepj,C,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,unitA>
             const_unitdiag_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,C,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,nonunitA>
             const_nonunitdiag_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,C,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,ndA>
             const_unknowndiag_type;
-        typedef ConstSmallLowerTriMatrixView<real_type,N,D,twoSi,twoSj,false,I>
+        typedef ConstSmallLowerTriMatrixView<real_type,N,twoSi,twoSj,twosA>
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,nonconjA>
             const_nonconj_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,I> nonconst_type;
+        typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,A> nonconst_type;
     };
 
-    template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
+    template <class T, int N, int Si, int Sj, int A>
     class ConstSmallLowerTriMatrixView :
-        public BaseMatrix_Tri<ConstSmallLowerTriMatrixView<T,N,D,Si,Sj,C,I> >
+        public BaseMatrix_Tri<ConstSmallLowerTriMatrixView<T,N,Si,Sj,A> >
     {
     public:
 
-        typedef ConstSmallLowerTriMatrixView<T,N,D,Si,Sj,C,I> type;
+        typedef ConstSmallLowerTriMatrixView<T,N,Si,Sj,A> type;
 
         enum { _colsize = Traits<type>::_size };
         enum { _rowsize = Traits<type>::_size };
         enum { _size = Traits<type>::_size };
         enum { _shape = Traits<type>::_shape };
-        enum { _unit = Traits<type>::_unit };
-        enum { _unknowndiag = Traits<type>::_unknowndiag };
         enum { _fort = Traits<type>::_fort };
         enum { _calc = Traits<type>::_calc };
         enum { _rowmajor = Traits<type>::_rowmajor };
         enum { _colmajor = Traits<type>::_colmajor };
-        enum { _stor = Traits<type>::_stor };
         enum { _conj = Traits<type>::_conj };
         enum { _stepi = Traits<type>::_stepi };
         enum { _stepj = Traits<type>::_stepj };
         enum { _diagstep = Traits<type>::_diagstep };
+        enum { _dt = Traits<type>::_dt };
+        enum { _unit = Traits<type>::_unit };
+        enum { _nonunit = Traits<type>::_nonunit };
+        enum { _unknowndiag = Traits<type>::_unknowndiag };
+        enum { _attrib = Traits<type>::_attrib };
 
         //
         // Constructors
         //
+        
         ConstSmallLowerTriMatrixView(
-            const T* m, size_t s, bool u, int si, int sj
-        ) :
-            itsm(m), itss(s), itsu(u), itssi(si), itssj(sj) {}
-
-        ConstSmallLowerTriMatrixView(
-            const T* m, size_t s, bool u, int si
-        ) :
-            itsm(m), itss(s), itsu(u), itssi(si), itssj(Sj)
-        { TMVStaticAssert(Sj != UNKNOWN); }
-
-        ConstSmallLowerTriMatrixView(const T* m, size_t s) :
-            itsm(m), itss(s), itsu(D==UnitDiag), itssi(Si), itssj(Sj)
+            const T* m, size_t s, int si, int sj, DiagType dt) :
+            itsm(m), itss(s), itssi(si), itssj(sj), itsdt(dt)
         {
-            TMVStaticAssert(D != UnknownDiag);
-            TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); 
+            TMVStaticAssert(Traits<type>::okA);
         }
 
-        ConstSmallLowerTriMatrixView(const T* m) :
-            itsm(m), itss(N), itsu(D==UnitDiag), itssi(Si), itssj(Sj)
+        ConstSmallLowerTriMatrixView(const T* m, size_t s, int si, int sj) :
+            itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
-            TMVStaticAssert(N != UNKNOWN);
-            TMVStaticAssert(D != UnknownDiag);
+            TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(_dt != UNKNOWN); 
+        }
+
+        ConstSmallLowerTriMatrixView(const T* m, size_t s, int si) :
+            itsm(m), itss(s), itssi(si), itssj(Sj), itsdt(_dt)
+        {
+            TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Sj != UNKNOWN); 
+            TMVStaticAssert(_dt != UNKNOWN); 
+        }
+
+        ConstSmallLowerTriMatrixView(const T* m, size_t s) :
+            itsm(m), itss(s), itssi(Si), itssj(Sj), itsdt(_dt)
+        {
+            TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); 
+            TMVStaticAssert(_dt != UNKNOWN); 
         }
 
         ConstSmallLowerTriMatrixView(const type& m2) :
             itsm(m2.cptr()), itss(m2.size()),
-            itsu(m2.isunit()), itssi(m2.stepi()), itssj(m2.stepj()) {}
+            itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
-        template <DiagType D2, int Si2, int Sj2, IndexStyle I2>
+        template <int A2>
         ConstSmallLowerTriMatrixView(
-            const ConstLowerTriMatrixView<T,D2,Si2,Sj2,C,I2>& m2) :
+            const ConstLowerTriMatrixView<T,A2>& m2) :
             itsm(m2.cptr()), itss(m2.size()),
-            itsu(m2.isunit()), itssi(m2.stepi()), itssj(m2.stepj()) {}
+            itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
-        template <DiagType D2, int Si2, int Sj2, IndexStyle I2>
+        template <int A2>
         ConstSmallLowerTriMatrixView(
-            const LowerTriMatrixView<T,D2,Si2,Sj2,C,I2>& m2) :
+            const LowerTriMatrixView<T,A2>& m2) :
             itsm(m2.cptr()), itss(m2.size()),
-            itsu(m2.isunit()), itssi(m2.stepi()), itssj(m2.stepj()) {}
+            itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
-        template <int N2, DiagType D2, int Si2, int Sj2, IndexStyle I2>
+        template <int N2, int Si2, int Sj2, int A2>
         ConstSmallLowerTriMatrixView(
-            const ConstSmallLowerTriMatrixView<T,N2,D2,Si2,Sj2,C,I2>& m2) :
+            const ConstSmallLowerTriMatrixView<T,N2,Si2,Sj2,A2>& m2) :
             itsm(m2.cptr()), itss(m2.size()),
-            itsu(m2.isunit()), itssi(m2.stepi()), itssj(m2.stepj()) {}
+            itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
-        template <int N2, DiagType D2, int Si2, int Sj2, IndexStyle I2>
+        template <int N2, int Si2, int Sj2, int A2>
         ConstSmallLowerTriMatrixView(
-            const SmallLowerTriMatrixView<T,N2,D2,Si2,Sj2,C,I2>& m2) :
+            const SmallLowerTriMatrixView<T,N2,Si2,Sj2,A2>& m2) :
             itsm(m2.cptr()), itss(m2.size()),
-            itsu(m2.isunit()), itssi(m2.stepi()), itssj(m2.stepj()) {}
+            itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
         ~ConstSmallLowerTriMatrixView() {
 #ifdef TMV_DEBUG
@@ -1609,7 +1623,7 @@ namespace tmv {
             return (
                 (isunit() && i==j ) ? T(1) :
                 (i<j) ? T(0) :
-                DoConj<C>(itsm[i*stepi() + j*stepj()]));
+                DoConj<_conj>(itsm[i*stepi() + j*stepj()]));
         }
 
         size_t colsize() const { return itss; }
@@ -1618,8 +1632,10 @@ namespace tmv {
         int nElements() const { return int(itss)*int(itss+1)/2; }
         int stepi() const { return itssi; }
         int stepj() const { return itssj; }
-        bool isconj() const { return C; }
-        bool isunit() const { return itsu; }
+        bool isconj() const { return _conj; }
+        DiagType dt() const 
+        { return static_cast<DiagType>(static_cast<int>(itsdt)); }
+        bool isunit() const { return dt() == UnitDiag; }
         bool isrm() const
         { return _rowmajor || (!_colmajor && stepj() == 1); }
         bool iscm() const
@@ -1629,196 +1645,176 @@ namespace tmv {
 
         const T* itsm;
         const CheckedInt<N> itss;
-        const CheckedInt<D==UnknownDiag ? UNKNOWN : D==UnitDiag> itsu;
         const CheckedInt<Si> itssi;
         const CheckedInt<Sj> itssj;
+        const CheckedInt<_dt> itsdt;
 
     }; // ConstSmallLowerTriMatrixView
 
-    template <class T, int N, DiagType D, int Si, int Sj, bool C>
-    class ConstSmallLowerTriMatrixViewF :
-        public ConstSmallLowerTriMatrixView<T,N,D,Si,Sj,C,FortranStyle>
+    template <class T, int N, int Si, int Sj, int A0>
+    struct Traits<SmallLowerTriMatrixView<T,N,Si,Sj,A0> >
     {
-    public:
-
-        typedef ConstSmallLowerTriMatrixViewF<T,N,D,Si,Sj,C> type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,Si,Sj,C,FortranStyle> mtype;
-
-        ConstSmallLowerTriMatrixViewF(
-            const T* m, size_t s, bool u, int si, int sj
-        ) :
-            mtype(m,s,si,sj) {}
-        ConstSmallLowerTriMatrixViewF(const T* m, size_t s, bool u, int si) :
-            mtype(m,s,si) {}
-        ConstSmallLowerTriMatrixViewF(const T* m, size_t s) :
-            mtype(m,s) {}
-        ConstSmallLowerTriMatrixViewF(const type& m2) : mtype(m2) {}
-        template <DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        ConstSmallLowerTriMatrixViewF(
-            const ConstLowerTriMatrixView<T,D2,Si2,Sj2,C,I2>& m2) : mtype(m2) {}
-        template <DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        ConstSmallLowerTriMatrixViewF(
-            const LowerTriMatrixView<T,D2,Si2,Sj2,C,I2>& m2) : mtype(m2) {}
-        template <int N2, DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        ConstSmallLowerTriMatrixViewF(
-            const ConstSmallLowerTriMatrixView<T,N2,D2,Si2,Sj2,C,I2>& m2) :
-            mtype(m2) {}
-        template <int N2, DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        ConstSmallLowerTriMatrixViewF(
-            const SmallLowerTriMatrixView<T,N2,D2,Si2,Sj2,C,I2>& m2) :
-            mtype(m2) {}
-        ~ConstSmallLowerTriMatrixViewF() {}
-
-    private :
-        void operator=(const type& m2);
-
-    }; // ConstSmallLowerTriMatrixViewF
-
-    template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
-    struct Traits<SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I> >
-    {
-        typedef T value_type;
-
         typedef typename Traits<T>::real_type real_type;
+
+        enum { A = A0 & ~NoDivider };
+        enum { okA = (
+                !Attrib<A>::diagmajor &&
+                !Attrib<A>::zerodiag &&
+                !Attrib<A>::packed &&
+                !Attrib<A>::lower &&
+                !Attrib<A>::nodivider &&
+                !Attrib<A>::withdivider &&
+                !( Si != UNKNOWN && Si != 1 && Attrib<A>::colmajor ) &&
+                !( Sj != UNKNOWN && Sj != 1 && Attrib<A>::rowmajor ) )};
+        enum { _attrib = A };
+
+        typedef T value_type;
         typedef typename Traits<T>::complex_type complex_type;
         enum { isreal = Traits<T>::isreal };
         enum { iscomplex = Traits<T>::iscomplex };
 
-        typedef SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I> type;
-        typedef const ConstSmallLowerTriMatrixView<T,N,D,Si,Sj,C,I> calc_type;
-        typedef calc_type eval_type;
-        typedef QuotXM<1,real_type,type> inverse_type;
+        typedef SmallLowerTriMatrixView<T,N,Si,Sj,A0> type;
+        typedef ConstSmallLowerTriMatrixView<T,N,Si,Sj,A> calc_type;
+        typedef const type& eval_type;
 
         enum { _colsize = N };
         enum { _rowsize = N };
         enum { _size = N };
-        enum { _fort = (I == FortranStyle) };
+        enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
-        enum { _rowmajor = (Sj == 1) };
-        enum { _colmajor = (Si == 1) };
-        enum { _stor = (_rowmajor ? RowMajor : ColMajor) };
+        enum { _rowmajor = Attrib<A>::rowmajor };
+        enum { _colmajor = Attrib<A>::colmajor };
         enum { _stepi = Si };
         enum { _stepj = Sj };
         enum { _diagstep = IntTraits2<Si,Sj>::sum };
-        enum { _conj = C };
-        enum { _unit = (D == UnitDiag) };
-        enum { _unknowndiag = (D == UnknownDiag) };
+        enum { _conj = Attrib<A>::conj };
+        enum { _unit = Attrib<A>::unitdiag };
+        enum { _nonunit = Attrib<A>::nonunitdiag };
+        enum { _unknowndiag = !(_unit || _nonunit) };
+        enum { _dt = _unknowndiag ? UNKNOWN : A & AllDiagType };
         enum { _shape = _unit ? UnitLowerTri : LowerTri };
-        enum { _hasdivider = false };
-
-        typedef typename MCopyHelper<T,LowerTri,N,N,_rowmajor,_fort>::type 
-            copy_type;
-
-        enum { twoSi = isreal ? Si : IntTraits<Si>::twoS };
-        enum { twoSj = isreal ? Sj : IntTraits<Sj>::twoS };
-        enum { notC = !C && iscomplex };
+        enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
+        enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
         enum { Nm1 = IntTraits<N>::Sm1 };
 
-        typedef ConstVectorView<T,_stepi,C,I> const_col_type;
-        typedef ConstVectorView<T,_stepi,C,I> const_col_sub_type;
-        typedef ConstVectorView<T,_stepj,C,I> const_row_type;
-        typedef ConstVectorView<T,_stepj,C,I> const_row_sub_type;
-        typedef ConstSmallVectorView<T,N,_diagstep,C,I> const_diag_type;
-        typedef ConstVectorView<T,_diagstep,C,I> const_diag_sub_type;
+        typedef typename MCopyHelper<T,_shape,N,N,_rowmajor,_fort>::type 
+            copy_type;
 
-        typedef ConstLowerTriMatrixView<T,D,_stepi,_stepj,C,I>
-            const_subtrimatrix_type;
-        typedef ConstLowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,C,I>
-            const_subtrimatrix_step_type;
-        typedef ConstMatrixView<T,_stepi,_stepj,C,I> const_submatrix_type;
-        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,C,I>
-            const_submatrix_step_type;
-        typedef ConstVectorView<T,UNKNOWN,C,I> const_subvector_type;
+        enum { _hasdivider = false };
+        typedef QuotXM<1,real_type,type> inverse_type;
 
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,I>
+        enum { baseA = (
+                (_fort ? FortranStyle : 0) |
+                (_conj ? Conj : 0) )};
+        enum { colA = baseA | (_colmajor ? Unit : 0) };
+        enum { rowA = baseA | (_rowmajor ? Unit : 0) };
+        enum { cstyleA = A & ~FortranStyle };
+        enum { fstyleA = A | FortranStyle };
+        enum { nmA = (A & ~AllStorageType) };
+        enum { cmA = nmA | ColMajor };
+        enum { rmA = nmA | RowMajor };
+        enum { ndA = (A & ~AllDiagType) };
+        enum { ndnmA = (ndA & ~AllStorageType) };
+        enum { colpairA = _colmajor ? cmA : int(nmA) };
+        enum { rowpairA = _rowmajor ? rmA : int(nmA) };
+        enum { conjA = iscomplex ? (A ^ Conj) : int(A) };
+        enum { trA = _colmajor ? rmA : _rowmajor ? cmA : int(A) };
+        enum { adjA = iscomplex ? (trA ^ Conj) : int(trA) };
+        enum { nonunitA = ndA | NonUnitDiag };
+        enum { unitA = ndA | UnitDiag };
+        enum { nonconjA = A & ~Conj };
+        enum { twosA = isreal ? nonconjA : int(nonconjA & ~AllStorageType) };
+
+        typedef ConstVectorView<T,colA> const_col_sub_type;
+        typedef ConstVectorView<T,rowA> const_row_sub_type;
+        typedef ConstSmallVectorView<T,N,_diagstep,baseA> const_diag_type;
+        typedef ConstVectorView<T,baseA> const_diag_sub_type;
+
+        typedef ConstLowerTriMatrixView<T,A> const_subtrimatrix_type;
+        typedef ConstLowerTriMatrixView<T,nmA> const_subtrimatrix_step_type;
+        typedef ConstMatrixView<T,ndA> const_submatrix_type;
+        typedef ConstMatrixView<T,ndnmA> const_submatrix_step_type;
+        typedef ConstVectorView<T,baseA> const_subvector_type;
+
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,A>
             const_view_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,CStyle>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,cstyleA>
             const_cview_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,
-                FortranStyle> const_fview_type;
-        typedef ConstLowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,C>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,fstyleA>
+            const_fview_type;
+        typedef ConstLowerTriMatrixView<T,(_conj ? Conj : NonConj)> 
             const_xview_type;
-        typedef ConstLowerTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>
-            const_xdview_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,1,_stepj,C,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,1,_stepj,cmA>
             const_cmview_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,1,C,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,1,rmA>
             const_rmview_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,notC,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,conjA>
             const_conjugate_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepj,_stepi,C,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepj,_stepi,trA>
             const_transpose_type;
-        typedef ConstSmallUpperTriMatrixView<T,N,D,_stepj,_stepi,notC,I>
+        typedef ConstSmallUpperTriMatrixView<T,N,_stepj,_stepi,adjA>
             const_adjoint_type;
 
-        typedef ConstSmallLowerTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,C,I>
+        typedef ConstSmallLowerTriMatrixView<T,Nm1,_stepi,_stepj,nonunitA>
             const_offdiag_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,UnitDiag,_stepi,_stepj,C,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,unitA>
             const_unitdiag_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,C,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,nonunitA>
             const_nonunitdiag_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,C,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,ndA>
             const_unknowndiag_type;
-        typedef ConstSmallLowerTriMatrixView<real_type,N,D,twoSi,twoSj,false,I>
+        typedef ConstSmallLowerTriMatrixView<real_type,N,twoSi,twoSj,twosA>
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstSmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,I>
+        typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,nonconjA>
             const_nonconj_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,I> nonconst_type;
+        typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,A> nonconst_type;
 
-        typedef TriRef<T,C> reference;
+        typedef typename TriRefHelper<T,_conj,_nonunit>::reference reference;
 
-        typedef VectorView<T,_stepi,C,I> col_sub_type;
-        typedef VectorView<T,_stepj,C,I> row_sub_type;
-        typedef VectorView<T,_diagstep,C,I> diag_type;
-        typedef SmallVectorView<T,N,_diagstep,C,I> diag_sub_type;
+        typedef VectorView<T,colA> col_sub_type;
+        typedef VectorView<T,rowA> row_sub_type;
+        typedef SmallVectorView<T,N,_diagstep,baseA> diag_type;
+        typedef VectorView<T,baseA> diag_sub_type;
 
-        typedef LowerTriMatrixView<T,D,_stepi,_stepj,C,I> subtrimatrix_type;
-        typedef LowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,C,I>
-            subtrimatrix_step_type;
-        typedef MatrixView<T,_stepi,_stepj,C,I> submatrix_type;
-        typedef MatrixView<T,UNKNOWN,UNKNOWN,C,I> submatrix_step_type;
-        typedef VectorView<T,UNKNOWN,C,I> subvector_type;
+        typedef LowerTriMatrixView<T,A> subtrimatrix_type;
+        typedef LowerTriMatrixView<T,nmA> subtrimatrix_step_type;
+        typedef MatrixView<T,ndA> submatrix_type;
+        typedef MatrixView<T,ndnmA> submatrix_step_type;
+        typedef VectorView<T,baseA> subvector_type;
 
-        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,I> view_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,CStyle>
-            cview_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,C,FortranStyle>
-            fview_type;
-        typedef LowerTriMatrixView<T,D,UNKNOWN,UNKNOWN,C> xview_type;
-        typedef LowerTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>
-            xdview_type;
-        typedef SmallLowerTriMatrixView<T,N,D,1,_stepj,C,I> cmview_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepi,1,C,I> rmview_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,notC,I>
-            conjugate_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepj,_stepi,C,I>
-            transpose_type;
-        typedef SmallUpperTriMatrixView<T,N,D,_stepj,_stepi,notC,I>
-            adjoint_type;
+        typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,A> view_type;
+        typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,cstyleA> cview_type;
+        typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,fstyleA> fview_type;
+        typedef LowerTriMatrixView<T,(_conj ? Conj : NonConj)> xview_type;
+        typedef SmallLowerTriMatrixView<T,N,1,_stepj,cmA> cmview_type;
+        typedef SmallLowerTriMatrixView<T,N,_stepi,1,rmA> rmview_type;
+        typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,conjA> conjugate_type;
+        typedef SmallUpperTriMatrixView<T,N,_stepj,_stepi,trA> transpose_type;
+        typedef SmallUpperTriMatrixView<T,N,_stepj,_stepi,adjA> adjoint_type;
 
-        typedef SmallLowerTriMatrixView<T,Nm1,NonUnitDiag,_stepi,_stepj,C,I>
+        typedef SmallLowerTriMatrixView<T,Nm1,_stepi,_stepj,nonunitA>
             offdiag_type;
-        typedef SmallLowerTriMatrixView<T,N,UnitDiag,_stepi,_stepj,C,I>
+        typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,unitA>
             unitdiag_type;
-        typedef SmallLowerTriMatrixView<T,N,NonUnitDiag,_stepi,_stepj,C,I>
+        typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,nonunitA>
             nonunitdiag_type;
-        typedef SmallLowerTriMatrixView<T,N,UnknownDiag,_stepi,_stepj,C,I>
+        typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,ndA>
             unknowndiag_type;
-        typedef SmallLowerTriMatrixView<real_type,N,D,twoSi,twoSj,false,I>
+        typedef SmallLowerTriMatrixView<real_type,N,twoSi,twoSj,twosA>
             realpart_type;
         typedef realpart_type imagpart_type;
-        typedef SmallLowerTriMatrixView<T,N,D,_stepi,_stepj,false,I>
+        typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,nonconjA>
             nonconj_type;
     };
 
-    template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
+    template <class T, int N, int Si, int Sj, int A>
     class SmallLowerTriMatrixView :
-        public BaseMatrix_Tri_Mutable<SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I> >
+        public BaseMatrix_Tri_Mutable<SmallLowerTriMatrixView<T,N,Si,Sj,A> >
     {
     public:
 
-        typedef SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I> type;
+        typedef SmallLowerTriMatrixView<T,N,Si,Sj,A> type;
         typedef BaseMatrix_Tri_Mutable<type> base_mut;
         typedef typename base_mut::reference reference;
 
@@ -1826,60 +1822,77 @@ namespace tmv {
         enum { _rowsize = Traits<type>::_size };
         enum { _size = Traits<type>::_size };
         enum { _shape = Traits<type>::_shape };
-        enum { _unit = Traits<type>::_unit };
-        enum { _unknowndiag = Traits<type>::_unknowndiag };
         enum { _fort = Traits<type>::_fort };
         enum { _calc = Traits<type>::_calc };
         enum { _rowmajor = Traits<type>::_rowmajor };
         enum { _colmajor = Traits<type>::_colmajor };
-        enum { _stor = Traits<type>::_stor };
         enum { _conj = Traits<type>::_conj };
         enum { _stepi = Traits<type>::_stepi };
         enum { _stepj = Traits<type>::_stepj };
         enum { _diagstep = Traits<type>::_diagstep };
+        enum { _dt = Traits<type>::_dt };
+        enum { _unit = Traits<type>::_unit };
+        enum { _nonunit = Traits<type>::_nonunit };
+        enum { _unknowndiag = Traits<type>::_unknowndiag };
+        enum { _attrib = Traits<type>::_attrib };
 
         //
         // Constructors
         //
 
-        SmallLowerTriMatrixView(T* m, size_t s, bool u, int si, int sj) :
-            itsm(m), itss(s), itsu(u), itssi(si), itssj(sj) {}
-
-        SmallLowerTriMatrixView(T* m, size_t s, bool u, int si) :
-            itsm(m), itss(s), itsu(u), itssi(si), itssj(Sj)
-        { TMVStaticAssert(Sj != UNKNOWN); }
-
-        SmallLowerTriMatrixView(T* m, size_t s) :
-            itsm(m), itss(s), itsu(D==UnitDiag), itssi(Si), itssj(Sj)
+        SmallLowerTriMatrixView(T* m, size_t s, int si, int sj, DiagType dt) :
+            itsm(m), itss(s), itssi(si), itssj(sj), itsdt(dt)
         {
-            TMVStaticAssert(D != UnknownDiag);
-            TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); 
+            TMVStaticAssert(Traits<type>::okA);
         }
 
-        SmallLowerTriMatrixView(T* m) :
-            itsm(m), itss(N), itsu(D==UnitDiag), itssi(Si), itssj(Sj)
+        SmallLowerTriMatrixView(T* m, size_t s, int si, int sj) :
+            itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
-            TMVStaticAssert(N != UNKNOWN);
-            TMVStaticAssert(D != UnknownDiag);
+            TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(_dt != UNKNOWN); 
+        }
+
+        SmallLowerTriMatrixView(T* m, size_t s, int si) :
+            itsm(m), itss(s), itssi(si), itssj(Sj), itsdt(_dt)
+        {
+            TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Sj != UNKNOWN); 
+            TMVStaticAssert(_dt != UNKNOWN); 
+        }
+
+        SmallLowerTriMatrixView(T* m, size_t s) :
+            itsm(m), itss(s), itssi(Si), itssj(Sj), itsdt(_dt)
+        {
+            TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); 
+            TMVStaticAssert(_dt != UNKNOWN); 
         }
 
         SmallLowerTriMatrixView(const type& m2) :
             itsm(m2.itsm), itss(m2.size()), 
-            itsu(m2.isunit()), itssi(m2.stepi()), itssj(m2.stepj()) {}
+            itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
-        template <DiagType D2, int Si2, int Sj2, IndexStyle I2>
+        template <int A2>
         SmallLowerTriMatrixView(
-            LowerTriMatrixView<T,D2,Si2,Sj2,C,I2> m2
-        ) :
+            LowerTriMatrixView<T,A2> m2) :
             itsm(m2.ptr()), itss(m2.size()),
-            itsu(m2.isunit()), itssi(m2.stepi()), itssj(m2.stepj()) {}
+            itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
-        template <int N2, DiagType D2, int Si2, int Sj2, IndexStyle I2>
+        template <int N2, int Si2, int Sj2, int A2>
         SmallLowerTriMatrixView(
-            SmallLowerTriMatrixView<T,N2,D2,Si2,Sj2,C,I2> m2) :
+            SmallLowerTriMatrixView<T,N2,Si2,Sj2,A2> m2) :
             itsm(m2.ptr()), itss(m2.size()),
-            itsu(m2.isunit()), itssi(m2.stepi()), itssj(m2.stepj()) {}
+            itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
         ~SmallLowerTriMatrixView() {
 #ifdef TMV_DEBUG
@@ -1938,7 +1951,7 @@ namespace tmv {
             return (
                 (isunit() && i==j ) ? T(1) :
                 (i<j) ? T(0) :
-                DoConj<C>(itsm[i*stepi() + j*stepj()]));
+                DoConj<_conj>(itsm[i*stepi() + j*stepj()]));
         }
 
         reference ref(int i, int j)
@@ -1950,8 +1963,10 @@ namespace tmv {
         int nElements() const { return int(itss)*int(itss+1)/2; }
         int stepi() const { return itssi; }
         int stepj() const { return itssj; }
-        bool isconj() const { return C; }
-        bool isunit() const { return itsu; }
+        bool isconj() const { return _conj; }
+        DiagType dt() const 
+        { return static_cast<DiagType>(static_cast<int>(itsdt)); }
+        bool isunit() const { return dt() == UnitDiag; }
         bool isrm() const
         { return _rowmajor || (!_colmajor && stepj() == 1); }
         bool iscm() const
@@ -1961,109 +1976,67 @@ namespace tmv {
 
         T* itsm;
         const CheckedInt<N> itss;
-        const CheckedInt<D==UnknownDiag ? UNKNOWN : D==UnitDiag> itsu;
         const CheckedInt<Si> itssi;
         const CheckedInt<Sj> itssj;
+        const CheckedInt<_dt> itsdt;
 
     }; // SmallLowerTriMatrixView
-
-    template <class T, int N, DiagType D, int Si, int Sj, bool C>
-    class SmallLowerTriMatrixViewF :
-        public SmallLowerTriMatrixView<T,N,D,Si,Sj,C,FortranStyle>
-    {
-    public:
-
-        typedef SmallLowerTriMatrixViewF<T,N,D,Si,Sj,C> type;
-        typedef SmallLowerTriMatrixView<T,N,D,Si,Sj,C,FortranStyle> mtype;
-
-        SmallLowerTriMatrixViewF(T* m, size_t s, bool u, int si, int sj) :
-            mtype(m,s,si,sj) {}
-        SmallLowerTriMatrixViewF(T* m, size_t s, bool u, int si) :
-            mtype(m,s,si) {}
-        SmallLowerTriMatrixViewF(T* m, size_t s) : mtype(m,s) {}
-        SmallLowerTriMatrixViewF(T* m) : mtype(m) {}
-        SmallLowerTriMatrixViewF(const type& m2) : mtype(m2) {}
-        template <DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        SmallLowerTriMatrixViewF(
-            LowerTriMatrixView<T,D2,Si2,Sj2,C,I2> m2
-        ) :
-            mtype(m2) {}
-        template <int N2, DiagType D2, int Si2, int Sj2, IndexStyle I2>
-        SmallLowerTriMatrixViewF(
-            SmallLowerTriMatrixView<T,N2,D2,Si2,Sj2,C,I2> m2) : mtype(m2) {}
-        ~SmallLowerTriMatrixViewF() {}
-
-        type& operator=(const type& m2)
-        { mtype::operator=(m2); return *this; }
-        template <class M2>
-        type& operator=(const BaseMatrix<M2>& m2)
-        { mtype::operator=(m2); return *this; }
-        template <class M2>
-        type& operator=(const BaseMatrix_Tri<M2>& m2)
-        { mtype::operator=(m2); return *this; }
-        template <class M2>
-        type& operator=(const BaseMatrix_Diag<M2>& m2)
-        { mtype::operator=(m2); return *this; }
-        type& operator=(const T x)
-        { mtype::operator=(x); return *this; }
-
-    }; // SmallLowerTriMatrixViewF
 
 
     //
     // Swap
     //
 
-    template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I, class M>
+    template <class T, int N, int Si, int Sj, int A, class M>
     static inline void Swap(
         BaseMatrix_Tri_Mutable<M>& m1,
-        SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I> m2)
+        SmallUpperTriMatrixView<T,N,Si,Sj,A> m2)
     { DoSwap(m1,m2); }
-    template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I, class M>
+    template <class T, int N, int Si, int Sj, int A, class M>
     static inline void Swap(
-        SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I> m1,
+        SmallUpperTriMatrixView<T,N,Si,Sj,A> m1,
         BaseMatrix_Tri_Mutable<M>& m2)
     { DoSwap(m1,m2); }
-    template <class T, int N, DiagType D, int Si1, int Sj1, bool C1, IndexStyle I1, int Si2, int Sj2, bool C2, IndexStyle I2>
+    template <class T, int N, int Si1, int Sj1, int A1, int Si2, int Sj2, int A2>
     static inline void Swap(
-        SmallUpperTriMatrixView<T,N,D,Si1,Sj1,C1,I1> m1,
-        SmallUpperTriMatrixView<T,N,D,Si2,Sj2,C2,I2> m2)
+        SmallUpperTriMatrixView<T,N,Si1,Sj1,A1> m1,
+        SmallUpperTriMatrixView<T,N,Si2,Sj2,A2> m2)
     { DoSwap(m1,m2); }
-    template <class T, int N, DiagType D, int Si1, int Sj1, bool C1, IndexStyle I1, int Si2, int Sj2, bool C2, IndexStyle I2>
+    template <class T, int N, int Si1, int Sj1, int A1, int A2>
     static inline void Swap(
-        SmallUpperTriMatrixView<T,N,D,Si1,Sj1,C1,I1> m1,
-        UpperTriMatrixView<T,D,Si2,Sj2,C2,I2> m2)
+        SmallUpperTriMatrixView<T,N,Si1,Sj1,A1> m1,
+        UpperTriMatrixView<T,A2> m2)
     { DoSwap(m1,m2); }
-    template <class T, int N, DiagType D, int Si1, int Sj1, bool C1, IndexStyle I1, int Si2, int Sj2, bool C2, IndexStyle I2>
+    template <class T, int N, int A1, int Si2, int Sj2, int A2>
     static inline void Swap(
-        UpperTriMatrixView<T,D,Si1,Sj1,C1,I1> m1,
-        SmallUpperTriMatrixView<T,N,D,Si2,Sj2,C2,I2> m2)
+        UpperTriMatrixView<T,A1> m1,
+        SmallUpperTriMatrixView<T,N,Si2,Sj2,A2> m2)
     { DoSwap(m1,m2); }
 
-    template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I, class M>
+    template <class T, int N, int Si, int Sj, int A, class M>
     static inline void Swap(
         BaseMatrix_Tri_Mutable<M>& m1,
-        SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I> m2)
+        SmallLowerTriMatrixView<T,N,Si,Sj,A> m2)
     { Swap(m1.transpose(),m2.transpose()); }
-    template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I, class M>
+    template <class T, int N, int Si, int Sj, int A, class M>
     static inline void Swap(
-        SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I> m1,
+        SmallLowerTriMatrixView<T,N,Si,Sj,A> m1,
         BaseMatrix_Tri_Mutable<M>& m2)
     { Swap(m1.transpose(),m2.transpose()); }
-    template <class T, int N, DiagType D, int Si1, int Sj1, bool C1, IndexStyle I1, int Si2, int Sj2, bool C2, IndexStyle I2>
+    template <class T, int N, int Si1, int Sj1, int A1, int Si2, int Sj2, int A2>
     static inline void Swap(
-        SmallLowerTriMatrixView<T,N,D,Si1,Sj1,C1,I1> m1,
-        SmallLowerTriMatrixView<T,N,D,Si2,Sj2,C2,I2> m2)
+        SmallLowerTriMatrixView<T,N,Si1,Sj1,A1> m1,
+        SmallLowerTriMatrixView<T,N,Si2,Sj2,A2> m2)
     { Swap(m1.transpose(),m2.transpose()); }
-    template <class T, int N, DiagType D, int Si1, int Sj1, bool C1, IndexStyle I1, int Si2, int Sj2, bool C2, IndexStyle I2>
+    template <class T, int N, int Si1, int Sj1, int A1, int A2>
     static inline void Swap(
-        SmallLowerTriMatrixView<T,N,D,Si1,Sj1,C1,I1> m1,
-        LowerTriMatrixView<T,D,Si2,Sj2,C2,I2> m2)
+        SmallLowerTriMatrixView<T,N,Si1,Sj1,A1> m1,
+        LowerTriMatrixView<T,A2> m2)
     { Swap(m1.transpose(),m2.transpose()); }
-    template <class T, int N, DiagType D, int Si1, int Sj1, bool C1, IndexStyle I1, int Si2, int Sj2, bool C2, IndexStyle I2>
+    template <class T, int N, int A1, int Si2, int Sj2, int A2>
     static inline void Swap(
-        LowerTriMatrixView<T,D,Si1,Sj1,C1,I1> m1,
-        SmallLowerTriMatrixView<T,N,D,Si2,Sj2,C2,I2> m2)
+        LowerTriMatrixView<T,A1> m1,
+        SmallLowerTriMatrixView<T,N,Si2,Sj2,A2> m2)
     { Swap(m1.transpose(),m2.transpose()); }
 
 
@@ -2071,58 +2044,58 @@ namespace tmv {
     // Conjugate, Transpose, Adjoint
     //
     
-    template <class T, int N, DiagType D, StorageType S, IndexStyle I>
-    static inline typename SmallUpperTriMatrix<T,N,D,S,I>::conjugate_type Conjugate(
-        SmallUpperTriMatrix<T,N,S,I>& m)
+    template <class T, int N, int A0, int A1, int A2>
+    static inline typename SmallUpperTriMatrix<T,N,A0,A1,A2>::conjugate_type Conjugate(
+        SmallUpperTriMatrix<T,N,A0,A1,A2>& m)
     { return m.conjugate(); }
-    template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
-    static inline typename SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I>::conjugate_type Conjugate(
-        SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I> m)
+    template <class T, int N, int Si, int Sj, int A>
+    static inline typename SmallUpperTriMatrixView<T,N,Si,Sj,A>::conjugate_type Conjugate(
+        SmallUpperTriMatrixView<T,N,Si,Sj,A> m)
     { return m.conjugate(); }
 
-    template <class T, int N, DiagType D, StorageType S, IndexStyle I>
-    static inline typename SmallUpperTriMatrix<T,N,D,S,I>::transpose_type Transpose(
-        SmallUpperTriMatrix<T,N,D,S,I>& m)
+    template <class T, int N, int A0, int A1, int A2>
+    static inline typename SmallUpperTriMatrix<T,N,A0,A1,A2>::transpose_type Transpose(
+        SmallUpperTriMatrix<T,N,A0,A1,A2>& m)
     { return m.transpose(); }
-    template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
-    static inline typename SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I>::transpose_type Transpose(
-        SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I> m)
+    template <class T, int N, int Si, int Sj, int A>
+    static inline typename SmallUpperTriMatrixView<T,N,Si,Sj,A>::transpose_type Transpose(
+        SmallUpperTriMatrixView<T,N,Si,Sj,A> m)
     { return m.transpose(); }
 
-    template <class T, int N, DiagType D, StorageType S, IndexStyle I>
-    static inline typename SmallUpperTriMatrix<T,N,D,S,I>::adjoint_type Adjoint(
-        SmallUpperTriMatrix<T,N,D,S,I>& m)
+    template <class T, int N, int A0, int A1, int A2>
+    static inline typename SmallUpperTriMatrix<T,N,A0,A1,A2>::adjoint_type Adjoint(
+        SmallUpperTriMatrix<T,N,A0,A1,A2>& m)
     { return m.adjoint(); }
-    template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
-    static inline typename SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I>::adjoint_type Adjoint(
-        SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I> m)
+    template <class T, int N, int Si, int Sj, int A>
+    static inline typename SmallUpperTriMatrixView<T,N,Si,Sj,A>::adjoint_type Adjoint(
+        SmallUpperTriMatrixView<T,N,Si,Sj,A> m)
     { return m.adjoint(); }
 
-    template <class T, int N, DiagType D, StorageType S, IndexStyle I>
-    static inline typename SmallLowerTriMatrix<T,N,D,S,I>::conjugate_type Conjugate(
-        SmallLowerTriMatrix<T,N,S,I>& m)
+    template <class T, int N, int A0, int A1, int A2>
+    static inline typename SmallLowerTriMatrix<T,N,A0,A1,A2>::conjugate_type Conjugate(
+        SmallLowerTriMatrix<T,N,A0,A1,A2>& m)
     { return m.conjugate(); }
-    template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
-    static inline typename SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I>::conjugate_type Conjugate(
-        SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I> m)
+    template <class T, int N, int Si, int Sj, int A>
+    static inline typename SmallLowerTriMatrixView<T,N,Si,Sj,A>::conjugate_type Conjugate(
+        SmallLowerTriMatrixView<T,N,Si,Sj,A> m)
     { return m.conjugate(); }
 
-    template <class T, int N, DiagType D, StorageType S, IndexStyle I>
-    static inline typename SmallLowerTriMatrix<T,N,D,S,I>::transpose_type Transpose(
-        SmallLowerTriMatrix<T,N,D,S,I>& m)
+    template <class T, int N, int A0, int A1, int A2>
+    static inline typename SmallLowerTriMatrix<T,N,A0,A1,A2>::transpose_type Transpose(
+        SmallLowerTriMatrix<T,N,A0,A1,A2>& m)
     { return m.transpose(); }
-    template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
-    static inline typename SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I>::transpose_type Transpose(
-        SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I> m)
+    template <class T, int N, int Si, int Sj, int A>
+    static inline typename SmallLowerTriMatrixView<T,N,Si,Sj,A>::transpose_type Transpose(
+        SmallLowerTriMatrixView<T,N,Si,Sj,A> m)
     { return m.transpose(); }
 
-    template <class T, int N, DiagType D, StorageType S, IndexStyle I>
-    static inline typename SmallLowerTriMatrix<T,N,D,S,I>::adjoint_type Adjoint(
-        SmallLowerTriMatrix<T,N,D,S,I>& m)
+    template <class T, int N, int A0, int A1, int A2>
+    static inline typename SmallLowerTriMatrix<T,N,A0,A1,A2>::adjoint_type Adjoint(
+        SmallLowerTriMatrix<T,N,A0,A1,A2>& m)
     { return m.adjoint(); }
-    template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
-    static inline typename SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I>::adjoint_type Adjoint(
-        SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I> m)
+    template <class T, int N, int Si, int Sj, int A>
+    static inline typename SmallLowerTriMatrixView<T,N,Si,Sj,A>::adjoint_type Adjoint(
+        SmallLowerTriMatrixView<T,N,Si,Sj,A> m)
     { return m.adjoint(); }
 
 
@@ -2130,91 +2103,91 @@ namespace tmv {
     // TMV_Text 
     //
 
-    template <class T, int N, DiagType D, StorageType S, IndexStyle I>
-    static inline std::string TMV_Text(const SmallUpperTriMatrix<T,N,D,S,I>& )
+#ifdef TMV_DEBUG
+    template <class T, int N, int A0, int A1, int A2>
+    static inline std::string TMV_Text(
+        const SmallUpperTriMatrix<T,N,A0,A1,A2>& m)
     {
+        const int A = A0 | A1 | A2;
         std::ostringstream s;
-        s << "SmallUpperTriMatrix<"<<TMV_Text(T())<<","<<N<<","<<TMV_Text(D);
-        s << ","<<TMV_Text(S)<<","<<TMV_Text(I)<<">";
+        s << "SmallUpperTriMatrix<"<<TMV_Text(T());
+        s << ","<<N;
+        s << ","<<Attrib<A>::text()<<">";
+        s << "("<<m.size()<<","<<m.stepi()<<","<<m.stepj();
+        s << ","<<(m.isunit()?"Unit":"NonUnit")<<")";
         return s.str();
     }
 
-    template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
+    template <class T, int N, int Si, int Sj, int A>
     static inline std::string TMV_Text(
-        const ConstSmallUpperTriMatrixView<T,N,D,Si,Sj,C,I>& m)
+        const ConstSmallUpperTriMatrixView<T,N,Si,Sj,A>& m)
     {
         std::ostringstream s;
         s << "ConstSmallUpperTriMatrixView<"<<TMV_Text(T());
         s << ","<<IntTraits<N>::text();
-        if (N == UNKNOWN) s << "("<<m.stepi()<<")";
-        s <<","<<TMV_Text(D);
-        s << ","<<IntTraits<Si>::text();
-        if (Si == UNKNOWN) s << "("<<m.stepi()<<")";
-        s << ","<<IntTraits<Sj>::text();
-        if (Sj == UNKNOWN) s << "("<<m.stepj()<<")";
-        s << ","<<C<<","<<TMV_Text(I)<<">";
+        s << ","<<IntTraits<Si>::text()<<","<<IntTraits<Sj>::text();
+        s << ","<<Attrib<A>::text()<<">";
+        s << "("<<m.size()<<","<<m.stepi()<<","<<m.stepj();
+        s << ","<<(m.isunit()?"Unit":"NonUnit")<<")";
         return s.str();
     }
 
-    template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
+    template <class T, int N, int Si, int Sj, int A>
     static inline std::string TMV_Text(
-        const SmallUpperTriMatrixView<T,N,D,Si,Sj,C,I>& m)
+        const SmallUpperTriMatrixView<T,N,Si,Sj,A>& m)
     {
         std::ostringstream s;
         s << "SmallUpperTriMatrixView<"<<TMV_Text(T());
         s << ","<<IntTraits<N>::text();
-        if (N == UNKNOWN) s << "("<<m.stepi()<<")";
-        s <<","<<TMV_Text(D);
-        s << ","<<IntTraits<Si>::text();
-        if (Si == UNKNOWN) s << "("<<m.stepi()<<")";
-        s << ","<<IntTraits<Sj>::text();
-        if (Sj == UNKNOWN) s << "("<<m.stepj()<<")";
-        s << ","<<C<<","<<TMV_Text(I)<<">";
+        s << ","<<IntTraits<Si>::text()<<","<<IntTraits<Sj>::text();
+        s << ","<<Attrib<A>::text()<<">";
+        s << "("<<m.size()<<","<<m.stepi()<<","<<m.stepj();
+        s << ","<<(m.isunit()?"Unit":"NonUnit")<<")";
         return s.str();
     }
 
-    template <class T, int N, DiagType D, StorageType S, IndexStyle I>
-    static inline std::string TMV_Text(const SmallLowerTriMatrix<T,N,D,S,I>& )
-    {
-        std::ostringstream s;
-        s << "SmallLowerTriMatrix<"<<TMV_Text(T())<<","<<N<<","<<TMV_Text(D);
-        s << ","<<TMV_Text(S)<<","<<TMV_Text(I)<<">";
-        return s.str();
-    }
-
-    template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
+    template <class T, int N, int A0, int A1, int A2>
     static inline std::string TMV_Text(
-        const ConstSmallLowerTriMatrixView<T,N,D,Si,Sj,C,I>& m)
+        const SmallLowerTriMatrix<T,N,A0,A1,A2>& m)
+    {
+        const int A = A0 | A1 | A2;
+        std::ostringstream s;
+        s << "SmallLowerTriMatrix<"<<TMV_Text(T());
+        s << ","<<N;
+        s << ","<<Attrib<A>::text()<<">";
+        s << "("<<m.size()<<","<<m.stepi()<<","<<m.stepj();
+        s << ","<<(m.isunit()?"Unit":"NonUnit")<<")";
+        return s.str();
+    }
+
+    template <class T, int N, int Si, int Sj, int A>
+    static inline std::string TMV_Text(
+        const ConstSmallLowerTriMatrixView<T,N,Si,Sj,A>& m)
     {
         std::ostringstream s;
         s << "ConstSmallLowerTriMatrixView<"<<TMV_Text(T());
         s << ","<<IntTraits<N>::text();
-        if (N == UNKNOWN) s << "("<<m.stepi()<<")";
-        s <<","<<TMV_Text(D);
-        s << ","<<IntTraits<Si>::text();
-        if (Si == UNKNOWN) s << "("<<m.stepi()<<")";
-        s << ","<<IntTraits<Sj>::text();
-        if (Sj == UNKNOWN) s << "("<<m.stepj()<<")";
-        s << ","<<C<<","<<TMV_Text(I)<<">";
+        s << ","<<IntTraits<Si>::text()<<","<<IntTraits<Sj>::text();
+        s << ","<<Attrib<A>::text()<<">";
+        s << "("<<m.size()<<","<<m.stepi()<<","<<m.stepj();
+        s << ","<<(m.isunit()?"Unit":"NonUnit")<<")";
         return s.str();
     }
 
-    template <class T, int N, DiagType D, int Si, int Sj, bool C, IndexStyle I>
+    template <class T, int N, int Si, int Sj, int A>
     static inline std::string TMV_Text(
-        const SmallLowerTriMatrixView<T,N,D,Si,Sj,C,I>& m)
+        const SmallLowerTriMatrixView<T,N,Si,Sj,A>& m)
     {
         std::ostringstream s;
         s << "SmallLowerTriMatrixView<"<<TMV_Text(T());
         s << ","<<IntTraits<N>::text();
-        if (N == UNKNOWN) s << "("<<m.stepi()<<")";
-        s <<","<<TMV_Text(D);
-        s << ","<<IntTraits<Si>::text();
-        if (Si == UNKNOWN) s << "("<<m.stepi()<<")";
-        s << ","<<IntTraits<Sj>::text();
-        if (Sj == UNKNOWN) s << "("<<m.stepj()<<")";
-        s << ","<<C<<","<<TMV_Text(I)<<">";
+        s << ","<<IntTraits<Si>::text()<<","<<IntTraits<Sj>::text();
+        s << ","<<Attrib<A>::text()<<">";
+        s << "("<<m.size()<<","<<m.stepi()<<","<<m.stepj();
+        s << ","<<(m.isunit()?"Unit":"NonUnit")<<")";
         return s.str();
     }
+#endif
 
 
 } // namespace tmv

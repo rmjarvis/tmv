@@ -33,6 +33,7 @@
 #ifndef TMV_SumVV_H
 #define TMV_SumVV_H
 
+#include "TMV_BaseVector.h"
 #include "TMV_ProdXV.h"
 #include "TMV_AddVV_Funcs.h"
 

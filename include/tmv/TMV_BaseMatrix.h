@@ -70,9 +70,7 @@
 #ifndef TMV_BaseMatrix_H
 #define TMV_BaseMatrix_H
 
-#include <sstream>
 #include "TMV_BaseVector.h"
-#include "TMV_Array.h"
 
 namespace tmv {
 
@@ -115,8 +113,6 @@ namespace tmv {
     //  _rowsize = row size of matrix (aka number of columns)
     //  (Use UNKNOWN if unknown at compile time)
     //
-    //  _issquare = is the matrix square?
-    //
     //  _shape = The shape of the non-zero elements of the matrix
     //
     //  _fort = does the indexing use fortran style?
@@ -136,7 +132,6 @@ namespace tmv {
     //  _conj = is the matrix the conjugate of the underlying data?
     //  _rowmajor = is the matrix RowMajor?
     //  _colmajor = is the matrix ColMajor?
-    //  _stor = an appropriate storage class for copying the matrix
     //  _hasdivider = does this matrix have a divider object?
     //
     //  const_view_type = return type from view() const
@@ -353,8 +348,6 @@ namespace tmv {
 
         enum { isreal = Traits<value_type>::isreal };
         enum { iscomplex = Traits<value_type>::iscomplex };
-        enum { _issquare =
-            ShapeTraits<_shape>::square || Sizes<_colsize,_rowsize>::equal };
 
         //
         // Constructor
@@ -454,8 +447,7 @@ namespace tmv {
 
         size_t nrows() const { return colsize(); }
         size_t ncols() const { return rowsize(); }
-        bool isSquare() const 
-        { return _issquare || (colsize() == rowsize()); }
+        bool isSquare() const { return colsize() == rowsize(); }
 
         // Note that these last functions need to be defined in a more derived
         // class than this, or an infinite loop will result when compiling.
@@ -489,7 +481,6 @@ namespace tmv {
         enum { _conj = Traits<M>::_conj };
         enum { _rowmajor = Traits<M>::_rowmajor }; 
         enum { _colmajor = Traits<M>::_colmajor }; 
-        enum { _stor = Traits<M>::_stor };
         enum { _hasdivider = Traits<M>::_hasdivider };
 
         typedef M type;
@@ -627,8 +618,6 @@ namespace tmv {
 
         bool isrm() const { return mat().isrm(); }
         bool iscm() const { return mat().iscm(); }
-        StorageType stor() const 
-        { return isrm() ? RowMajor : iscm() ? ColMajor : NoMajor; }
 
         const type& mat() const
         { return static_cast<const type&>(*this); }
@@ -1039,6 +1028,7 @@ namespace tmv {
     // TMV_Text 
     //
 
+#ifdef TMV_DEBUG
     template <class M>
     static inline std::string TMV_Text(const BaseMatrix<M>& m)
     {
@@ -1062,6 +1052,7 @@ namespace tmv {
         s << "BaseMatrix_Mutable< "<<TMV_Text(m.mat())<<" >";
         return s.str();
     }
+#endif
 
 } // namespace tmv
 

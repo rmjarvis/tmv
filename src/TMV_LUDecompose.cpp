@@ -34,17 +34,22 @@
 #include "TMV_Blas.h"
 #include "tmv/TMV_LUDecompose.h"
 #include "tmv/TMV_Matrix.h"
-#include "tmv/TMV_SimpleMatrix.h"
+#include "tmv/TMV_TriMatrix.h"
+#include "tmv/TMV_Vector.h"
 #include "tmv/TMV_CopyV.h"
+#include "tmv/TMV_SwapV.h"
+#include "tmv/TMV_MinMax.h"
 
 namespace tmv {
 
 #ifdef ALAP
     template <class T> 
-    static inline void LapLU_Decompose(MatrixView<T,1>& A, int* P, int& signdet)
+    static inline void LapLU_Decompose(
+        MatrixView<T,ColMajor>& A, int* P, int& signdet)
     { InlineLU_Decompose(A,P,signdet); }
 #ifdef TMV_INST_DOUBLE
-    static void LapLU_Decompose(MatrixView<double,1>& A, int* P, int& signdet)
+    static void LapLU_Decompose(
+        MatrixView<double,ColMajor>& A, int* P, int& signdet)
     {
         TMVAssert(A.iscm());
         TMVAssert(A.ct()==NonConj);
@@ -65,7 +70,7 @@ namespace tmv {
         delete [] lap_p;
     }
     static void LapLU_Decompose(
-        MatrixView<std::complex<double>,1>& A, int* P, int& signdet)
+        MatrixView<std::complex<double>,ColMajor>& A, int* P, int& signdet)
     {
         TMVAssert(A.iscm());
         TMVAssert(A.ct()==NonConj);
@@ -92,7 +97,8 @@ namespace tmv {
     //   OMP abort: Unable to set worker thread stack size to 2098176 bytes
     //   Try reducing KMP_STACKSIZE or increasing the shell stack limit.
     // So I'm cutting it out for MKL compilations
-    static void LapLU_Decompose(MatrixView<float,1>& A, int* P, int& signdet)
+    static void LapLU_Decompose(
+        MatrixView<float,ColMajor>& A, int* P, int& signdet)
     {
         int m = A.colsize();
         int n = A.rowsize();
@@ -110,7 +116,7 @@ namespace tmv {
         delete [] lap_p;
     }
     static void LapLU_Decompose(
-        MatrixView<std::complex<float>,1>& A, int* P, int& signdet)
+        MatrixView<std::complex<float>,ColMajor>& A, int* P, int& signdet)
     {
         int m = A.colsize();
         int n = A.rowsize();
@@ -132,7 +138,7 @@ namespace tmv {
 #endif // ALAP
 
     template <class T> 
-    void InstLU_Decompose(MatrixView<T,1> A, int* P, int& signdet)
+    void InstLU_Decompose(MatrixView<T,ColMajor> A, int* P, int& signdet)
     {
         //std::cout<<"Start LUDecompose:\n";
         //std::cout<<"A = "<<A<<std::endl;

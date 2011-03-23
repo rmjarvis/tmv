@@ -35,9 +35,8 @@
 
 #include "TMV_BaseMatrix_Rec.h"
 #include "TMV_BaseMatrix_Tri.h"
-#include "TMV_MultUL.h"
-#include "TMV_InvertU.h"
 #include "TMV_Permutation.h"
+#include "TMV_MultMM_Funcs.h"
 
 #ifdef PRINTALGO_LU
 #include <iostream>
@@ -51,9 +50,9 @@ namespace tmv {
     template <class T1>
     void InstLU_Inverse(MatrixView<T1> m1, const Permutation& P);
 
-    template <class T1, class T2, bool C1>
+    template <class T1, class T2, int C1>
     void InstLU_InverseATA(
-        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P, 
+        const ConstMatrixView<T1,C1>& m1, const Permutation& P, 
         const bool trans, MatrixView<T2> m2);
 
 
@@ -76,34 +75,45 @@ namespace tmv {
 #endif
             // m1 = (PLU)^-1
             //    = U^-1 L^-1 Pt
-            //std::cout<<"Start LU_Inverse\n";
-            //typedef typename M1::value_type T;
+#ifdef PRINTALGO_LU
+            std::cout<<"Start LU_Inverse\n";
+            typedef typename M1::value_type T;
+#endif
             typename M1::uppertri_type U = m1.upperTri();
             typename M1::unit_lowertri_type L = m1.unitLowerTri();
-            //std::cout<<"L = "<<L<<std::endl;
-            //std::cout<<"U = "<<U<<std::endl;
-            //Matrix<T> lu = L*U;
-            //Matrix<T> U0 = U;
-            //Matrix<T> L0 = L;
-            //std::cout<<"LU = "<<lu<<std::endl;
-            //P.applyOnLeft(lu);
-            //std::cout<<"PLU = "<<lu<<std::endl;
+#ifdef XDEBUG_LU
+            Matrix<T> L0 = L;
+            Matrix<T> U0 = U;
+            Matrix<T> A = L*U;
+            P.applyOnLeft(A);
+#endif
             U.invertSelf();
-            //std::cout<<"U^-1 = "<<U<<std::endl;
             L.invertSelf();
-            //std::cout<<"L^-1 = "<<L<<std::endl;
-            //std::cout<<"U^-1 * U = "<<(U*U0)<<std::endl;
-            //std::cout<<"U * U^-1 = "<<(U0*U)<<std::endl;
-            //std::cout<<"L^-1 * L = "<<(L*L0)<<std::endl;
-            //std::cout<<"L * L^-1 = "<<(L0*L)<<std::endl;
+#ifdef XDEBUG_LU
+            Matrix<T> Linv = L;
+            Matrix<T> Uinv = U;
+#endif
             const Scaling<1,typename M1::real_type> one;
-            //std::cout<<"Direct U^-1 L^-1 = "<<Matrix<T>(U*L)<<std::endl;
             NoAliasMultMM<false>(one,U,L,m1);
-            //std::cout<<"In place U^-1 L^-1 = "<<m1<<std::endl;
             P.inverse().applyOnRight(m1);
-            //std::cout<<"U^-1 L^-1 P^-1 = "<<m1<<std::endl;
-            //std::cout<<"m1 * lu = "<<(m1*lu)<<std::endl;
-            //std::cout<<"lu * m1 = "<<(lu*m1)<<std::endl;
+#ifdef XDEBUG_LU
+            if (Norm(m1*A-T(1)) > 1.e-3*Norm(A)) {
+                std::cout<<"L = "<<L0<<std::endl;
+                std::cout<<"U = "<<U0<<std::endl;
+                std::cout<<"A = PLU = "<<A<<std::endl;
+                std::cout<<"U^-1 = "<<Uinv<<std::endl;
+                std::cout<<"L^-1 = "<<Linv<<std::endl;
+                std::cout<<"U^-1 * U = "<<(Uinv*U0)<<std::endl;
+                std::cout<<"U * U^-1 = "<<(U0*Uinv)<<std::endl;
+                std::cout<<"L^-1 * L = "<<(Linv*L0)<<std::endl;
+                std::cout<<"L * L^-1 = "<<(L0*Linv)<<std::endl;
+                std::cout<<"Direct U^-1 L^-1 = "<<(Uinv*Linv)<<std::endl;
+                std::cout<<"U^-1 L^-1 P^-1 = "<<m1<<std::endl;
+                std::cout<<"m1 * A = "<<(m1*A)<<std::endl;
+                std::cout<<"A * m1 = "<<(A*m1)<<std::endl;
+                abort();
+            }
+#endif
         }
     };
 
@@ -141,7 +151,24 @@ namespace tmv {
             std::cout<<"cs,rs = "<<cs<<','<<rs<<std::endl;
             std::cout<<"algo = "<<algo<<std::endl;
 #endif
+#ifdef XDEBUG_LU
+            Matrix<T> L0 = L;
+            Matrix<T> U0 = U;
+            Matrix<T> A = L*U;
+            P.applyOnLeft(A);
+#endif
             LU_Inverse_Helper<algo,cs,rs,M1>::call(m1,P);
+#ifdef XDEBUG_LU
+            if (Norm(m1*A-T(1)) > 1.e-3*Norm(A)) {
+                std::cout<<"L = "<<L0<<std::endl;
+                std::cout<<"U = "<<U0<<std::endl;
+                std::cout<<"A = PLU = "<<A<<std::endl;
+                std::cout<<"U^-1 L^-1 P^-1 = "<<m1<<std::endl;
+                std::cout<<"m1 * A = "<<(m1*A)<<std::endl;
+                std::cout<<"A * m1 = "<<(A*m1)<<std::endl;
+                abort();
+            }
+#endif
         }
     };
 
@@ -212,9 +239,9 @@ namespace tmv {
         {
 #ifdef PRINTALGO_LU
             std::cout<<"LUInverseATA algo 11: cs,rs = "<<cs<<','<<rs<<std::endl;
-            std::cout<<"m1 (=LU) = "<<m1<<std::endl;
-            std::cout<<"trans = "<<trans<<std::endl;
-            std::cout<<"m2 = "<<m2<<std::endl;
+            //std::cout<<"m1 (=LU) = "<<m1<<std::endl;
+            //std::cout<<"trans = "<<trans<<std::endl;
+            //std::cout<<"m2 = "<<m2<<std::endl;
 #endif
             // (At A)^-1 = A^-1 (A^-1)t
             // = (U^-1 L^-1 Pt) (P L^-1t U^-1t)
@@ -262,7 +289,7 @@ namespace tmv {
         }
     };
 
-    // algo 90: call InstLU_Inverse
+    // algo 90: call InstLU_InverseATA
     template <int cs, int rs, class M1, class M2>
     struct LU_InverseATA_Helper<90,cs,rs,M1,M2>
     {
@@ -270,7 +297,7 @@ namespace tmv {
             const M1& m1, const Permutation& P, const bool trans, M2& m2)
         {
             TMVAssert(m1.iscm());
-            InstLU_InverseATA(m1.xView().cmView(),P,trans,m2.xView()); 
+            InstLU_InverseATA(m1.xView(),P,trans,m2.xView()); 
         }
     };
 
@@ -306,7 +333,28 @@ namespace tmv {
             std::cout<<"cs,rs = "<<cs<<','<<rs<<std::endl;
             std::cout<<"algo = "<<algo<<std::endl;
 #endif
+#ifdef XDEBUG_LU
+            typedef typename M2::value_type T;
+            Matrix<T> L0 = L;
+            Matrix<T> U0 = U;
+            Matrix<T> A = L*U;
+            P.applyOnLeft(A);
+            Matrix<T> Ainv = m1;
+            LU_Inverse(Ainv,P);
+            Matrix<T> invAtA = Ainv * Ainv.adjoint();
+#endif
             LU_InverseATA_Helper<algo,cs,rs,M1,M2>::call(m1,P,trans,m2);
+#ifdef XDEBUG_LU
+            if (Norm(m2-invAtA) > 1.e-3*Norm(invAtA)) {
+                std::cout<<"L = "<<L0<<std::endl;
+                std::cout<<"U = "<<U0<<std::endl;
+                std::cout<<"A = PLU = "<<A<<std::endl;
+                std::cout<<"Ainv = "<<Ainv<<std::endl;
+                std::cout<<"Ainv * Ainvt = "<<invAtA<<std::endl;
+                std::cout<<"m2 = "<<m2<<std::endl;
+                abort();
+            }
+#endif
         }
     };
 

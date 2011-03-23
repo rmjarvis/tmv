@@ -46,23 +46,27 @@
 // so for a matrix of doubles, one would write 
 // tmv::Matrix<double>.  
 //
-// An optional second template parameter, which can be 
-// either RowMajor or ColMajor, sets which order to use for the
-// storage of the matrix elements.  If omitted, ColMajor is assumed.
+// An optional second template parameter specifies the known attributes
+// of the matrix.  The valid options are:
+// ColMajor or RowMajor
+// CStyle or FortranStyle
+// WithDivider or NoDivider
+// The default is (ColMajor,CStyle,WithDivider).
 //
-// Finally, an optional third template parameter, either CStyle or
-// FortranStyle, indicate whether to use C-style or Fortran-style indexing.  
+// The options are treated as a bit field, so you | them together to 
+// get the complete value.  e.g.
+// Matrix<double,ColMajor | NoDivider | FortranStyle>
+//
+// Also, you only need to specify things that differ from the default, so
+// Matrix<T,RowMajor> means Matrix<T,RowMajor|CStyle|WithDivider>
+//
+// The *Style options indicate whether to use C-style or Fortran-style indexing.
 // With C-style (the default), the upper left corner of an MxN matrix is 
 // m(0,0), and the lower right is m(M-1,N-1).  
 // With Fortran-style, these are m(1,1) and m(M,N) respectively.  
 // Also, when a function takes an index range, i1,i2, 
 // then with C-style, this means elements from i1...i2-1 inclusive. 
 // With Fortran-style, this means i1..i2 inclusive.
-//
-// If the third template parameter is omitted, CStyle is assumed.
-// Note that if you want to specify Fortran-style, then you must also 
-// specify the storage pattern, since that parameter precedes it.  For example:
-// Matrix<T,RowMajor,FortranStyle> m(10,10);
 //
 // The return type of many of the below methods are given generically
 // as value_type, real_type, iterator, etc.
@@ -76,26 +80,23 @@
 //
 // Constructors:
 //
-//    Matrix<T,stor,I>(size_t colsize, size_t rowsize)
+//    Matrix<T,A>(size_t colsize, size_t rowsize)
 //        Makes a matrix with column size = colsize and row size = rowsize
 //        with _uninitialized_ values
 //
-//    Matrix<T,stor,I>(size_t colsize, size_t rowsize, T x)
+//    Matrix<T,A>(size_t colsize, size_t rowsize, T x)
 //        Makes a matrix of size n with all values = x
 //
-//    Matrix<T,stor,I>(const vector<vector<T> >& m)
+//    Matrix<T,A>(const vector<vector<T> >& m)
 //        Makes a matrix with a_ij = m[i][j]
 //
-//    Matrix<T,stor,I>(size_t colsize, size_t rowsize, const T* vv)
-//    Matrix<T,stor,I>(size_t colsize, size_t rowsize, 
+//    Matrix<T,A>(size_t colsize, size_t rowsize, const T* vv)
+//    Matrix<T,A>(size_t colsize, size_t rowsize, 
 //            const std::vector<T>& vv)
 //        Make a matrix which copies the elements of vv.
-//        If stor is tmv::RowMajor then the elements are taken in row major
-//        order (m00,m01,..m0n,m10,m11...).  If stor is tmv::ColMajor
+//        If A is tmv::RowMajor then the elements are taken in row major
+//        order (m00,m01,..m0n,m10,m11...).  If A is tmv::ColMajor
 //        then the elements are taken in column major order.
-//        If stor is omitted, then tmv::ColMajor is assumed.
-//        (stor is also an optional last parameter on the other above 
-//        constructors as well.)
 //
 //
 // Special Creators:
@@ -329,44 +330,39 @@
 //    As for VectorView, we have both mutable and non-mutable views,
 //    called MatrixView and ConstMatrixView respectively.
 //
-//    Both of these take several template arguments:
+//    Both of these take two template arguments:
 //    T = the underlying data type.
-//    Si = (int) the step size along a column, if known. 
-//    Sj = (int) the step size along a row, if known. 
-//    C = (bool) whether the view is the conjugate of the data.
-//    I = (CStyle or FortranStyle) which indexing style to use.
+//    A = the known attributes of the matrix/
+//        Options are:
+//        NonConj || Conj
+//        CStyle || FortranStyle
+//        ColMajor || RowMajor || NonMajor
+//        WithDivider || NoDivider
 // 
-//    There are default arguments for all but T:
-//    Si = Sj = UNKNOWN, C = false, I = CStyle
-//    so you can omit these, although you will generally get better results
-//    by specifying the step sizes, since these are usually known.
+//    The default attributes if you don't specify them are:
+//    NonConj, CStyle, NonMajor, NoDivider
 //
-//    ConstMatrixView<T,Si,Sj,C,I>(const T* p, size_t m, size_t n, 
-//            int si=Si, int sj=Sj)
-//    MatrixView<T,Si,Sj,C,I>(T* p, size_t m, size_t n, int si=Si, int sj=Sj)
+//    ConstMatrixView<T,A>(const T* p, size_t m, size_t n, int si, int sj)
+//    MatrixView<T,A>(T* p, size_t m, size_t n, int si, int sj)
 //        Make a matrix view starting at memory location p, 
 //        with m rows and n cols, stepping over the data with step sizes 
 //        si and sj along the columns and rows respectively.
-//        Note, that si,sj are generally omitted if you are specifying Si,Sj
-//        as a template argument.  But if either S == UNKNOWN, then you would
-//        need to specify that s as an argument.
 //
-//    There are also copy constructors that change Si,Sj (e.g. from UNKNOWN
-//    to some compile-time-known value), or change MatrixView to 
-//    ConstMatrixView.  e.g.:
+//    You can also convert a MatrixView into a ConstMatrixView or
+//    convert to a view with different attributes, so long as the 
+//    conversion is logically valid.  e.g. you cannot just cast away
+//    a Conj attribute, but you can change the indexing style or 
+//    specify a storage attribute if you know that the matrix really
+//    is row-major or column-major.
 //
-//    ConstMatrixView<T,Si,Sj,C,I>(const MatrixView<T,Si,Sj,C,I>& m);
-//    ConstMatrixView<T,Si,Sj,C,I>(const MatrixView<T,Si,UNKNOWN,C,I>& m);
-//    MatrixView<T,Si,Sj,C,I>(const MatrixView<T,UNKNOWN,Sj,C,I>& m);
 //
 // Views:
 //
 //    All of these methods return some kind of view into the matrix
 //    data.  The return types are either ConstMatrixView or MatrixView
-//    with the appropriate values for the template parameters Si, Sj, and C.
+//    with the appropriate attributes.
 //    (Except for SubVector and LinearView, which return either 
 //    ConstVectorView or VectorView.)
-//    The template parameter I is preserved from the original matrix.
 //
 //    All of these have a const and non-const version.  For the const
 //    versions, prepend const_ to the return type name.  
@@ -599,6 +595,8 @@
 //   
 //    See the header comment to TMV_Divider.h for more info about
 //    the different algorithms.
+//    Note: These functions are only available for matrices that 
+//    have the WithDivider attribute specified.
 //
 //    There are also shorthands for accessing the decomposition.
 //    If dt = LU, then lud() returns the LUD<T> class, performing
@@ -613,11 +611,12 @@
 #ifndef TMV_Matrix_H
 #define TMV_Matrix_H
 
+#include <vector>
 #include "TMV_BaseMatrix_Rec.h"
 #include "TMV_BaseMatrix_Tri.h"
-#include "TMV_Vector.h"
 #include "TMV_Divider.h"
-#include <vector>
+#include "TMV_Array.h"
+#include "TMV_VIt.h"
 
 namespace tmv {
 
@@ -635,29 +634,25 @@ namespace tmv {
     template <class M> class SVD;
     template <class T> class InstSVD;
 
-    // If the second template argument is true, then this has all the
-    // setDiv, divideUsing, etc. functions that are in DivHelper.
+    // The MatrixDivHelper class breaks up into two other classes:
+    // MatrixDivHelper1<M,true> and MatrixDivHelper1<M,false>
+    // depending on whether the Matrix class M is set to have a divider
+    // or not.  
     //
-    // Otherwise, the division operations are done at the time 
-    // they are needed via the lud() or qrd() operations.
-    // These can also be called by the user directly, including the 
-    // qrpd() and svd() functions.  But the results are not saved,
-    // so the user should explicitly save the returned object.
-    // e.g.
-    // M::svd_type m_svd = m.svd();
-    // m_svd.thresh(1.e-10);
-    // m_svd.solve(a,b);
+    // If it does not, then MatrixDivHelper1<M,false> just sets up
+    // the lud(), etc. functions to return a new object on the spot.
     //
-    template <class M, bool hasdivider>
-    class MatrixDivHelper;
-
-    // There is no inline version of this.  These functions are defined
-    // in TMV_Matrix.cpp for the instantiated types.
+    // If it does, then MatrixDivHelper1<M,true> derives from yet another
+    // class that is a generic DivHelper<T> class and thus has all the
+    // functions like divideUsing, setDiv, resetDiv, etc.
+    
     template <class T>
     class MatrixDivHelper2 :
         public DivHelper<T>
     {
     public:
+        // There is no inline version of this.  These functions are defined
+        // in TMV_Matrix.cpp for the instantiated types.
 
         typedef const InstLUD<T>& lud_type;
         typedef void qrd_type;
@@ -683,16 +678,16 @@ namespace tmv {
 
     }; // MatrixDivHelper2
 
+    template <class M, bool hasdivider>
+    class MatrixDivHelper1;
+
     template <class M>
-    class MatrixDivHelper<M,true> :
+    class MatrixDivHelper1<M,true> :
         public MatrixDivHelper2<typename Traits<M>::value_type>
     {
     public:
 
         typedef typename Traits<M>::value_type T;
-
-        MatrixDivHelper() {}
-        ~MatrixDivHelper() {}
 
         ConstMatrixView<T> getConstView() const
         { return mat2().constView(); }
@@ -704,13 +699,11 @@ namespace tmv {
     };
 
     template <class M>
-    class MatrixDivHelper<M,false>
+    class MatrixDivHelper1<M,false>
     {
     public:
         typedef typename Traits<M>::lud_type lud_type;
 
-        MatrixDivHelper() {}
-        ~MatrixDivHelper() {}
         void resetDivType() const {}
 
         lud_type lud() const { return lud_type(mat2(),false); }
@@ -725,158 +718,190 @@ namespace tmv {
         { return static_cast<const M&>(*this); }
     };
 
-    template <class T, StorageType S, IndexStyle I>
-    struct Traits<Matrix<T,S,I> >
-    {
-        typedef T value_type;
+    template <class M>
+    class MatrixDivHelper :
+        public MatrixDivHelper1<M,Traits<M>::_hasdivider>
+    {};
 
+    template <class T, int A0, int A1>
+    struct Traits<Matrix<T,A0,A1> >
+    {
         typedef typename Traits<T>::real_type real_type;
+
+        enum { A01 = A0 | A1 };
+        enum { A = A01 | (
+                (Attrib<A01>::rowmajor ? 0 : ColMajor) |
+                ( !Traits<real_type>::isinst ? NoDivider :
+                  Traits<real_type>::isinteger ? NoDivider :
+                  Attrib<A01>::nodivider ? 0 : WithDivider ) )};
+        enum { okA = (
+                !Attrib<A>::conj &&
+                (Attrib<A>::rowmajor || Attrib<A>::colmajor) &&
+                (Attrib<A>::rowmajor != int(Attrib<A>::colmajor) ) &&
+                !Attrib<A>::diagmajor &&
+                !Attrib<A>::nonunitdiag &&
+                !Attrib<A>::unitdiag &&
+                !Attrib<A>::zerodiag &&
+                !Attrib<A>::packed &&
+                !Attrib<A>::lower &&
+                (Attrib<A>::nodivider || Attrib<A>::withdivider) &&
+                (Attrib<A>::nodivider != int(Attrib<A>::withdivider) ) &&
+                ( !Attrib<A>::withdivider ||
+                  ( Traits<real_type>::isinst && 
+                    !Traits<real_type>::isinteger) ) )};
+        enum { _attrib = A };
+
+        typedef T value_type;
         typedef typename Traits<T>::complex_type complex_type;
         enum { isreal = Traits<T>::isreal };
         enum { iscomplex = Traits<T>::iscomplex };
 
-        typedef Matrix<T,S,I> type;
+        typedef Matrix<T,A0,A1> type;
         typedef const type& calc_type;
         typedef const type& eval_type;
-        typedef type copy_type;
-
-        typedef QuotXM<1,real_type,type> inverse_type;
+        typedef Matrix<T,A01> copy_type;
 
         enum { _colsize = UNKNOWN };
         enum { _rowsize = UNKNOWN };
         enum { _shape = Rec };
-        enum { _fort = (I == FortranStyle) };
+        enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
-        enum { _rowmajor = (S == RowMajor) };
-        enum { _colmajor = (S == ColMajor) };
-        enum { _stor = S };
-        enum { _stepi = (S==ColMajor ? 1 : UNKNOWN) };
-        enum { _stepj = (S==RowMajor ? 1 : UNKNOWN) };
+        enum { _rowmajor = Attrib<A>::rowmajor };
+        enum { _colmajor = Attrib<A>::colmajor };
+        enum { _stepi = (_colmajor ? 1 : UNKNOWN) };
+        enum { _stepj = (_rowmajor ? 1 : UNKNOWN) };
         enum { _diagstep = UNKNOWN };
         enum { _conj = false };
         enum { _canlin = true };
         enum { twoSi = isreal ? int(_stepi) : IntTraits<_stepi>::twoS };
         enum { twoSj = isreal ? int(_stepj) : IntTraits<_stepj>::twoS };
-        enum { notC = iscomplex };
 
-        enum { _hasdivider = 
-            Traits<real_type>::isinst && !Traits<real_type>::isinteger };
+        enum { _hasdivider = Attrib<A>::withdivider };
+        typedef QuotXM<1,real_type,type> inverse_type;
+
         typedef typename TypeSelect<_hasdivider ,
                 const InstLUD<value_type>& , LUD<type> >::type lud_type;
-#if 1
         typedef InvalidType qrd_type;
         typedef InvalidType qrpd_type;
         typedef InvalidType svd_type;
-#else
-        typedef const QRD<type>& qrd_type;
-        typedef const QRPD<type>& qrpd_type;
-        typedef const SVD<type>& svd_type;
-#endif
 
-        typedef ConstVectorView<T,_stepi,false,I> const_col_type;
-        typedef ConstVectorView<T,_stepi,false,I> const_col_sub_type;
-        typedef ConstVectorView<T,_stepj,false,I> const_row_type;
-        typedef ConstVectorView<T,_stepj,false,I> const_row_sub_type;
-        typedef ConstVectorView<T,_diagstep,false,I> const_diag_type;
-        typedef ConstVectorView<T,_diagstep,false,I> const_diag_sub_type;
+        enum { baseA = (_fort ? FortranStyle : 0) };
+        enum { colA = baseA | (_colmajor ? Unit : 0) };
+        enum { rowA = baseA | (_rowmajor ? Unit : 0) };
+        enum { nodivA = (A & ~AllDivStatus) };
+        enum { cstyleA = nodivA & ~FortranStyle };
+        enum { fstyleA = nodivA | FortranStyle };
+        enum { nmA = (nodivA & ~AllStorageType) };
+        enum { cmA = nmA | ColMajor };
+        enum { rmA = nmA | RowMajor };
+        enum { colpairA = _colmajor ? cmA : int(nmA) };
+        enum { rowpairA = _rowmajor ? rmA : int(nmA) };
+        enum { conjA = iscomplex ? (nodivA ^ Conj) : int(nodivA) };
+        enum { trA = _colmajor ? rmA : _rowmajor ? cmA : int(nodivA) };
+        enum { adjA = iscomplex ? (trA ^ Conj) : int(trA) };
+        enum { nonconjA = nodivA };
+        enum { twosA = isreal ? nonconjA : int(nonconjA & ~AllStorageType) };
 
-        typedef ConstMatrixView<T,_stepi,_stepj,false,I> const_submatrix_type;
-        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,false,I>
-            const_submatrix_step_type;
-        typedef ConstVectorView<T,UNKNOWN,false,I> const_subvector_type;
-        typedef ConstSmallMatrixView<T,UNKNOWN,2,_stepi,UNKNOWN,false,I>
+        typedef ConstVectorView<T,colA> const_col_type;
+        typedef ConstVectorView<T,colA> const_col_sub_type;
+        typedef ConstVectorView<T,rowA> const_row_type;
+        typedef ConstVectorView<T,rowA> const_row_sub_type;
+        typedef ConstVectorView<T,baseA> const_diag_type;
+        typedef ConstVectorView<T,baseA> const_diag_sub_type;
+
+        typedef ConstMatrixView<T,nodivA> const_submatrix_type;
+        typedef ConstMatrixView<T,nmA> const_submatrix_step_type;
+        typedef ConstVectorView<T,baseA> const_subvector_type;
+        typedef ConstSmallMatrixView<T,UNKNOWN,2,_stepi,UNKNOWN,colpairA>
             const_colpair_type;
-        typedef ConstSmallMatrixView<T,2,UNKNOWN,UNKNOWN,_stepj,false,I>
+        typedef ConstSmallMatrixView<T,2,UNKNOWN,UNKNOWN,_stepj,rowpairA>
             const_rowpair_type;
-        typedef ConstMatrixView<T,_stepi,_stepj,false,I> const_colrange_type;
-        typedef ConstMatrixView<T,_stepi,_stepj,false,I> const_rowrange_type;
+        typedef ConstMatrixView<T,nodivA> const_colrange_type;
+        typedef ConstMatrixView<T,nodivA> const_rowrange_type;
 
-        typedef ConstMatrixView<T,_stepi,_stepj,false,I> const_view_type;
-        typedef ConstMatrixView<T,_stepi,_stepj,false,CStyle> const_cview_type;
-        typedef ConstMatrixView<T,_stepi,_stepj,false,FortranStyle>
-            const_fview_type;
+        typedef ConstMatrixView<T,nodivA> const_view_type;
+        typedef ConstMatrixView<T,cstyleA> const_cview_type;
+        typedef ConstMatrixView<T,fstyleA> const_fview_type;
         typedef ConstMatrixView<T> const_xview_type;
-        typedef ConstMatrixView<T,1,_stepj,false,I> const_cmview_type;
-        typedef ConstMatrixView<T,_stepi,1,false,I> const_rmview_type;
-        typedef ConstMatrixView<T,_stepi,_stepj,notC,I> const_conjugate_type;
-        typedef ConstMatrixView<T,_stepj,_stepi,false,I> const_transpose_type;
-        typedef ConstMatrixView<T,_stepj,_stepi,notC,I> const_adjoint_type;
-        typedef ConstUpperTriMatrixView<T,NonUnitDiag,_stepi,_stepj,false,I>
+        typedef ConstMatrixView<T,cmA> const_cmview_type;
+        typedef ConstMatrixView<T,rmA> const_rmview_type;
+        typedef ConstMatrixView<T,conjA> const_conjugate_type;
+        typedef ConstMatrixView<T,trA> const_transpose_type;
+        typedef ConstMatrixView<T,adjA> const_adjoint_type;
+        typedef ConstUpperTriMatrixView<T,(nodivA|NonUnitDiag)>
             const_uppertri_type;
-        typedef ConstUpperTriMatrixView<T,UnitDiag,_stepi,_stepj,false,I>
+        typedef ConstUpperTriMatrixView<T,(nodivA|UnitDiag)>
             const_unit_uppertri_type;
-        typedef ConstUpperTriMatrixView<T,UnknownDiag,_stepi,_stepj,false,I>
+        typedef ConstUpperTriMatrixView<T,(nodivA|UnknownDiag)>
             const_unknown_uppertri_type;
-        typedef ConstLowerTriMatrixView<T,NonUnitDiag,_stepi,_stepj,false,I>
+        typedef ConstLowerTriMatrixView<T,(nodivA|NonUnitDiag)>
             const_lowertri_type;
-        typedef ConstLowerTriMatrixView<T,UnitDiag,_stepi,_stepj,false,I>
+        typedef ConstLowerTriMatrixView<T,(nodivA|UnitDiag)>
             const_unit_lowertri_type;
-        typedef ConstLowerTriMatrixView<T,UnknownDiag,_stepi,_stepj,false,I>
+        typedef ConstLowerTriMatrixView<T,(nodivA|UnknownDiag)>
             const_unknown_lowertri_type;
-        typedef ConstMatrixView<real_type,twoSi,twoSj,false,I>
+        typedef ConstSmallMatrixView<real_type,UNKNOWN,UNKNOWN,twoSi,twoSj,twosA> 
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstVectorView<T,1,false,I> const_linearview_type;
-        typedef ConstMatrixView<T,_stepi,_stepj,false,I> const_nonconj_type;
-        typedef MatrixView<T,_stepi,_stepj,false,I> nonconst_type;
+        typedef ConstVectorView<T,(baseA|Unit)> const_linearview_type;
+        typedef ConstMatrixView<T,nonconjA> const_nonconj_type;
+        typedef MatrixView<T,nodivA> nonconst_type;
 
         typedef T& reference;
+        typedef VIt<T,1,false> linear_iterator;
 
-        typedef VectorView<T,_stepi,false,I> col_type;
-        typedef VectorView<T,_stepi,false,I> col_sub_type;
-        typedef VectorView<T,_stepj,false,I> row_type;
-        typedef VectorView<T,_stepj,false,I> row_sub_type;
-        typedef VectorView<T,_diagstep,false,I> diag_type;
-        typedef VectorView<T,_diagstep,false,I> diag_sub_type;
+        typedef VectorView<T,colA> col_type;
+        typedef VectorView<T,colA> col_sub_type;
+        typedef VectorView<T,rowA> row_type;
+        typedef VectorView<T,rowA> row_sub_type;
+        typedef VectorView<T,baseA> diag_type;
+        typedef VectorView<T,baseA> diag_sub_type;
 
-        typedef MatrixView<T,_stepi,_stepj,false,I> submatrix_type;
-        typedef MatrixView<T,UNKNOWN,UNKNOWN,false,I> submatrix_step_type;
-        typedef VectorView<T,UNKNOWN,false,I> subvector_type;
-        typedef SmallMatrixView<T,UNKNOWN,2,_stepi,UNKNOWN,false,I>
+        typedef MatrixView<T,nodivA> submatrix_type;
+        typedef MatrixView<T,nmA> submatrix_step_type;
+        typedef VectorView<T,baseA> subvector_type;
+        typedef SmallMatrixView<T,UNKNOWN,2,_stepi,UNKNOWN,colpairA>
             colpair_type;
-        typedef SmallMatrixView<T,2,UNKNOWN,UNKNOWN,_stepj,false,I>
+        typedef SmallMatrixView<T,2,UNKNOWN,UNKNOWN,_stepj,rowpairA>
             rowpair_type;
-        typedef MatrixView<T,_stepi,_stepj,false,I> colrange_type;
-        typedef MatrixView<T,_stepi,_stepj,false,I> rowrange_type;
+        typedef MatrixView<T,nodivA> colrange_type;
+        typedef MatrixView<T,nodivA> rowrange_type;
 
-        typedef MatrixView<T,_stepi,_stepj,false,I> view_type;
-        typedef MatrixView<T,_stepi,_stepj,false,CStyle> cview_type;
-        typedef MatrixView<T,_stepi,_stepj,false,FortranStyle> fview_type;
+        typedef MatrixView<T,nodivA> view_type;
+        typedef MatrixView<T,cstyleA> cview_type;
+        typedef MatrixView<T,fstyleA> fview_type;
         typedef MatrixView<T> xview_type;
-        typedef MatrixView<T,1,_stepj,false,I> cmview_type;
-        typedef MatrixView<T,_stepi,1,false,I> rmview_type;
-        typedef MatrixView<T,_stepi,_stepj,notC,I> conjugate_type;
-        typedef MatrixView<T,_stepj,_stepi,false,I> transpose_type;
-        typedef MatrixView<T,_stepj,_stepi,notC,I> adjoint_type;
-        typedef UpperTriMatrixView<T,NonUnitDiag,_stepi,_stepj,false,I>
-            uppertri_type;
-        typedef UpperTriMatrixView<T,UnitDiag,_stepi,_stepj,false,I>
-            unit_uppertri_type;
-        typedef UpperTriMatrixView<T,UnknownDiag,_stepi,_stepj,false,I>
+        typedef MatrixView<T,cmA> cmview_type;
+        typedef MatrixView<T,rmA> rmview_type;
+        typedef MatrixView<T,conjA> conjugate_type;
+        typedef MatrixView<T,trA> transpose_type;
+        typedef MatrixView<T,adjA> adjoint_type;
+        typedef UpperTriMatrixView<T,(nodivA|NonUnitDiag)> uppertri_type;
+        typedef UpperTriMatrixView<T,(nodivA|UnitDiag)> unit_uppertri_type;
+        typedef UpperTriMatrixView<T,(nodivA|UnknownDiag)>
             unknown_uppertri_type;
-        typedef LowerTriMatrixView<T,NonUnitDiag,_stepi,_stepj,false,I>
-            lowertri_type;
-        typedef LowerTriMatrixView<T,UnitDiag,_stepi,_stepj,false,I>
-            unit_lowertri_type;
-        typedef LowerTriMatrixView<T,UnknownDiag,_stepi,_stepj,false,I>
+        typedef LowerTriMatrixView<T,(nodivA|NonUnitDiag)> lowertri_type;
+        typedef LowerTriMatrixView<T,(nodivA|UnitDiag)> unit_lowertri_type;
+        typedef LowerTriMatrixView<T,(nodivA|UnknownDiag)>
             unknown_lowertri_type;
-        typedef MatrixView<real_type,twoSi,twoSj,false,I> realpart_type;
+        typedef SmallMatrixView<real_type,UNKNOWN,UNKNOWN,twoSi,twoSj,twosA> 
+            realpart_type;
         typedef realpart_type imagpart_type;
-        typedef VectorView<T,1,false,I> linearview_type;
-        typedef MatrixView<T,_stepi,_stepj,false,I> nonconj_type;
+        typedef VectorView<T,(baseA|Unit)> linearview_type;
+        typedef MatrixView<T,nonconjA> nonconj_type;
     };
 
-    template <class T, StorageType S, IndexStyle I>
+    template <class T, int A0, int A1>
     class Matrix : 
-        public BaseMatrix_Rec_Mutable<Matrix<T,S,I> >,
-        public MatrixDivHelper<Matrix<T,S,I> , Traits<Matrix<T,S,I> >::_hasdivider >
+        public BaseMatrix_Rec_Mutable<Matrix<T,A0,A1> >,
+        public MatrixDivHelper<Matrix<T,A0,A1> >
     {
     public:
 
-        typedef Matrix<T,S,I> type;
+        typedef Matrix<T,A0,A1> type;
         typedef BaseMatrix_Rec_Mutable<type> base_mut;
         typedef BaseMatrix_Rec_Mutable<type> base_div;
-        typedef MatrixDivHelper<type,Traits<type>::_hasdivider> divhelper;
+        typedef MatrixDivHelper<type> divhelper;
 
         enum { _colsize = Traits<type>::_colsize };
         enum { _rowsize = Traits<type>::_rowsize };
@@ -885,12 +910,12 @@ namespace tmv {
         enum { _calc = Traits<type>::_calc };
         enum { _rowmajor = Traits<type>::_rowmajor };
         enum { _colmajor = Traits<type>::_colmajor };
-        enum { _stor = Traits<type>::_stor };
         enum { _stepi = Traits<type>::_stepi };
         enum { _stepj = Traits<type>::_stepj };
         enum { _diagstep = Traits<type>::_diagstep };
         enum { _conj = Traits<type>::_conj };
         enum { _canlin = Traits<type>::_canlin };
+        enum { _attrib = Traits<type>::_attrib };
 
 
         //
@@ -900,13 +925,13 @@ namespace tmv {
         Matrix() : 
             itscs(0), itsrs(0), linsize(0), itsm(0)
         {
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
+            TMVStaticAssert(Traits<type>::okA);
         }
 
         Matrix(size_t cs, size_t rs) :
             itscs(cs), itsrs(rs), linsize(cs*rs), itsm(linsize)
         {
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
+            TMVStaticAssert(Traits<type>::okA);
 #ifdef TMV_DEBUG
             this->setAllTo(T(888));
 #endif
@@ -915,37 +940,37 @@ namespace tmv {
         Matrix(size_t cs, size_t rs, T x) :
             itscs(cs), itsrs(rs), linsize(cs*rs), itsm(linsize)
         {
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
+            TMVStaticAssert(Traits<type>::okA);
             this->setAllTo(x);
         }
 
         Matrix(size_t cs, size_t rs, const T* vv) :
             itscs(cs), itsrs(rs), linsize(cs*rs), itsm(linsize)
         {
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
+            TMVStaticAssert(Traits<type>::okA);
             typename type::linearview_type lv = this->linearView();
-            ConstVectorView<T,1>(vv,linsize).newAssignTo(lv);
+            ConstVectorView<T,Unit>(vv,linsize).newAssignTo(lv);
         }
 
         Matrix(size_t cs, size_t rs, const std::vector<T>& vv) : 
             itscs(cs), itsrs(rs), linsize(cs*rs), itsm(linsize)
         {
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
+            TMVStaticAssert(Traits<type>::okA);
             TMVAssert(vv.size() == linsize);
             typename type::linearview_type lv = this->linearView();
-            ConstVectorView<T,1>(&vv[0],linsize).newAssignTo(lv);
+            ConstVectorView<T,Unit>(&vv[0],linsize).newAssignTo(lv);
         }
 
         Matrix(const std::vector<std::vector<T> >& vv) :
             itscs(vv.size()), itsrs(0), linsize(0), itsm(0)
         {
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
+            TMVStaticAssert(Traits<type>::okA);
             if (itscs > 0) {
                 resize(itscs,vv[0].size());
                 for(size_t i=0;i<itscs;++i) {
                     TMVAssert(vv[i].size() == itsrs);
                     typename type::row_type mi = this->row(i);
-                    ConstVectorView<T,1>(&vv[i][0],itsrs).newAssignTo(mi);
+                    ConstVectorView<T,Unit>(&vv[i][0],itsrs).newAssignTo(mi);
                 }
             }
         }
@@ -954,7 +979,7 @@ namespace tmv {
             itscs(m2.itscs), itsrs(m2.itsrs),
             linsize(m2.linsize), itsm(linsize)
         {
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
+            TMVStaticAssert(Traits<type>::okA);
             m2.newAssignTo(*this);
         }
 
@@ -963,7 +988,7 @@ namespace tmv {
             itscs(m2.colsize()), itsrs(m2.rowsize()),
             linsize(itscs * itsrs), itsm(linsize)
         {
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
+            TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert((ShapeTraits2<M2::_shape,_shape>::assignable));
             m2.newAssignTo(*this);
         }
@@ -973,7 +998,7 @@ namespace tmv {
             itscs(m2.colsize()), itsrs(m2.rowsize()),
             linsize(m2.ls()), itsm(linsize)
         {
-            TMVStaticAssert(S==RowMajor || S==ColMajor);
+            TMVStaticAssert(Traits<type>::okA);
             m2.newAssignTo(*this);
         }
 
@@ -1016,10 +1041,10 @@ namespace tmv {
         T* ptr() { return itsm; }
 
         T cref(int i, int j) const
-        { return itsm[S==RowMajor ? i*stepi()+j : i+j*stepj()]; }
+        { return itsm[_rowmajor ? i*stepi()+j : i+j*stepj()]; }
 
         T& ref(int i, int j)
-        { return itsm[S==RowMajor ? i*stepi()+j : i+j*stepj()]; }
+        { return itsm[_rowmajor ? i*stepi()+j : i+j*stepj()]; }
 
         void swapWith(type& m2)
         {
@@ -1028,7 +1053,7 @@ namespace tmv {
             if (itsm.get() == m2.itsm.get()) return;
             itsm.swapWith(m2.itsm);
         }
-        
+
         void resize(const size_t cs, const size_t rs)
         {
             itscs = cs;
@@ -1045,12 +1070,11 @@ namespace tmv {
         size_t colsize() const { return itscs; }
         size_t rowsize() const { return itsrs; }
         int nElements() const { return itscs*itsrs; }
-        int stepi() const { return S == RowMajor ? itsrs : 1; }
-        int stepj() const { return S == RowMajor ? 1 : itscs; }
+        int stepi() const { return _rowmajor ? itsrs : 1; }
+        int stepj() const { return _rowmajor ? 1 : itscs; }
         bool isconj() const { return false; }
-        bool isrm() const { return S == RowMajor; }
-        bool iscm() const { return S == ColMajor; }
-        StorageType stor() const { return S; }
+        bool isrm() const { return _rowmajor; }
+        bool iscm() const { return _colmajor; }
 
     private:
 
@@ -1061,136 +1085,135 @@ namespace tmv {
 
     }; // Matrix
 
-    template <class T, StorageType S>
-    class MatrixF : 
-        public Matrix<T,S,FortranStyle>
+    template <class T, int A0>
+    struct Traits<ConstMatrixView<T,A0> >
     {
-    public:
-        typedef MatrixF<T,S> type;
-        typedef Matrix<T,S,FortranStyle> mtype;
-
-        MatrixF(size_t cs, size_t rs) : mtype(cs,rs) {}
-        MatrixF(size_t cs, size_t rs, T x) : mtype(cs,rs,x) {}
-        MatrixF(size_t cs, size_t rs, const T* vv) : mtype(cs,rs,vv) {}
-        MatrixF(size_t cs, size_t rs, const std::vector<T>& vv) : 
-            mtype(cs,rs,vv) {}
-        MatrixF(const std::vector<std::vector<T> >& vv) : mtype(vv) {}
-        MatrixF(const type& m2) : mtype(m2) {}
-        template <class M2>
-        MatrixF(const BaseMatrix<M2>& m2) : mtype(m2) {}
-        ~MatrixF() {}
-
-        type& operator=(const type& m2)
-        { mtype::operator=(m2); return *this; }
-        template <class M2>
-        type& operator=(const BaseMatrix<M2>& m2)
-        { mtype::operator=(m2); return *this; }
-        type& operator=(T x)
-        { mtype::operator=(x); return *this; }
-
-    }; // MatrixF
-
-    template <class T, int Si, int Sj, bool C, IndexStyle I>
-    struct Traits<ConstMatrixView<T,Si,Sj,C,I> >
-    {
-        typedef T value_type;
-
         typedef typename Traits<T>::real_type real_type;
+
+        enum { A = Attrib<A0>::withdivider ? A0 : (A0 & ~NoDivider) };
+        enum { okA = (
+                !Attrib<A>::diagmajor &&
+                !Attrib<A>::nonunitdiag &&
+                !Attrib<A>::unitdiag &&
+                !Attrib<A>::zerodiag &&
+                !Attrib<A>::packed &&
+                !Attrib<A>::lower &&
+                ( !Attrib<A>::withdivider ||
+                  ( Traits<real_type>::isinst && 
+                    !Traits<real_type>::isinteger ) ) &&
+                ( Traits<T>::iscomplex || !Attrib<A>::conj ) )};
+        enum { _attrib = A };
+
+        typedef T value_type;
         typedef typename Traits<T>::complex_type complex_type;
         enum { isreal = Traits<T>::isreal };
         enum { iscomplex = Traits<T>::iscomplex };
 
-        typedef ConstMatrixView<T,Si,Sj,C,I> type;
+        typedef ConstMatrixView<T,A0> type;
         typedef const type& calc_type;
         typedef const type& eval_type;
-        typedef Matrix<T,Sj==1?RowMajor:ColMajor,I> copy_type;
-
-        typedef QuotXM<1,real_type,type> inverse_type;
 
         enum { _colsize = UNKNOWN };
         enum { _rowsize = UNKNOWN };
         enum { _shape = Rec };
-        enum { _fort = (I == FortranStyle) };
+        enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
-        enum { _rowmajor = (Sj == 1) };
-        enum { _colmajor = (Si == 1) };
-        enum { _stor = (_rowmajor ? RowMajor : ColMajor) };
-        enum { _stepi = Si };
-        enum { _stepj = Sj };
-        enum { _diagstep = IntTraits2<Si,Sj>::sum };
-        enum { _conj = C };
+        enum { _rowmajor = Attrib<A>::rowmajor };
+        enum { _colmajor = Attrib<A>::colmajor };
+        enum { _stepi = (_colmajor ? 1 : UNKNOWN) };
+        enum { _stepj = (_rowmajor ? 1 : UNKNOWN) };
+        enum { _diagstep = UNKNOWN };
+        enum { _conj = Attrib<A>::conj };
         enum { _canlin = false };
-        enum { twoSi = isreal ? int(Si) : IntTraits<Si>::twoS };
-        enum { twoSj = isreal ? int(Sj) : IntTraits<Sj>::twoS };
-        enum { notC = !C && iscomplex };
+        enum { twoSi = isreal ? int(_stepi) : IntTraits<_stepi>::twoS };
+        enum { twoSj = isreal ? int(_stepj) : IntTraits<_stepj>::twoS };
 
-        enum { _hasdivider = false };
-        typedef LUD<copy_type> lud_type;
-#if 1
+        enum { copyA = (
+                (_rowmajor ? RowMajor : ColMajor) |
+                (_fort ? FortranStyle : CStyle) |
+                NoDivider ) };
+        typedef Matrix<T,copyA> copy_type;
+        enum { _hasdivider = Attrib<A>::withdivider };
+        typedef QuotXM<1,real_type,type> inverse_type;
+
+        typedef typename TypeSelect<_hasdivider ,
+                const InstLUD<value_type>& , LUD<copy_type> >::type lud_type;
         typedef InvalidType qrd_type;
         typedef InvalidType qrpd_type;
         typedef InvalidType svd_type;
-#else
-        typedef const QRD<type>& qrd_type;
-        typedef const QRPD<type>& qrpd_type;
-        typedef const SVD<type>& svd_type;
-#endif
 
-        typedef ConstVectorView<T,Si,C,I> const_col_type;
-        typedef ConstVectorView<T,Si,C,I> const_col_sub_type;
-        typedef ConstVectorView<T,Sj,C,I> const_row_type;
-        typedef ConstVectorView<T,Sj,C,I> const_row_sub_type;
-        typedef ConstVectorView<T,_diagstep,C,I> const_diag_type;
-        typedef ConstVectorView<T,_diagstep,C,I> const_diag_sub_type;
+        enum { baseA = (
+                (_fort ? FortranStyle : 0) |
+                (_conj ? Conj : 0 ) )};
+        enum { colA = baseA | (_colmajor ? Unit : 0) };
+        enum { rowA = baseA | (_rowmajor ? Unit : 0) };
+        enum { nodivA = (A & ~AllDivStatus) };
+        enum { cstyleA = nodivA & ~FortranStyle };
+        enum { fstyleA = nodivA | FortranStyle };
+        enum { nmA = (nodivA & ~AllStorageType) };
+        enum { cmA = nmA | ColMajor };
+        enum { rmA = nmA | RowMajor };
+        enum { colpairA = _colmajor ? cmA : int(nmA) };
+        enum { rowpairA = _rowmajor ? rmA : int(nmA) };
+        enum { conjA = iscomplex ? (nodivA ^ Conj) : int(nodivA) };
+        enum { trA = _colmajor ? rmA : _rowmajor ? cmA : int(nodivA) };
+        enum { adjA = iscomplex ? (trA ^ Conj) : int(trA) };
+        enum { nonconjA = nodivA & ~Conj };
+        enum { twosA = isreal ? nonconjA : int(nonconjA & ~AllStorageType) };
 
-        typedef ConstMatrixView<T,Si,Sj,C,I> const_submatrix_type;
-        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,C,I>
-            const_submatrix_step_type;
-        typedef ConstVectorView<T,UNKNOWN,C,I> const_subvector_type;
-        typedef ConstSmallMatrixView<T,UNKNOWN,2,Si,UNKNOWN,C,I>
+        typedef ConstVectorView<T,colA> const_col_type;
+        typedef ConstVectorView<T,colA> const_col_sub_type;
+        typedef ConstVectorView<T,rowA> const_row_type;
+        typedef ConstVectorView<T,rowA> const_row_sub_type;
+        typedef ConstVectorView<T,baseA> const_diag_type;
+        typedef ConstVectorView<T,baseA> const_diag_sub_type;
+
+        typedef ConstMatrixView<T,nodivA> const_submatrix_type;
+        typedef ConstMatrixView<T,nmA> const_submatrix_step_type;
+        typedef ConstVectorView<T,baseA> const_subvector_type;
+        typedef ConstSmallMatrixView<T,UNKNOWN,2,_stepi,UNKNOWN,colpairA>
             const_colpair_type;
-        typedef ConstSmallMatrixView<T,2,UNKNOWN,UNKNOWN,Sj,C,I>
+        typedef ConstSmallMatrixView<T,2,UNKNOWN,UNKNOWN,_stepj,rowpairA>
             const_rowpair_type;
-        typedef ConstMatrixView<T,Si,Sj,C,I> const_colrange_type;
-        typedef ConstMatrixView<T,Si,Sj,C,I> const_rowrange_type;
+        typedef ConstMatrixView<T,nodivA> const_colrange_type;
+        typedef ConstMatrixView<T,nodivA> const_rowrange_type;
 
-        typedef ConstMatrixView<T,Si,Sj,C,I> const_view_type;
-        typedef ConstMatrixView<T,Si,Sj,C,CStyle> const_cview_type;
-        typedef ConstMatrixView<T,Si,Sj,C,FortranStyle>
-            const_fview_type;
-        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,C> const_xview_type;
-        typedef ConstMatrixView<T,1,Sj,C,I> const_cmview_type;
-        typedef ConstMatrixView<T,Si,1,C,I> const_rmview_type;
-        typedef ConstMatrixView<T,Si,Sj,notC,I> const_conjugate_type;
-        typedef ConstMatrixView<T,Sj,Si,C,I> const_transpose_type;
-        typedef ConstMatrixView<T,Sj,Si,notC,I> const_adjoint_type;
-        typedef ConstUpperTriMatrixView<T,NonUnitDiag,Si,Sj,C,I>
+        typedef ConstMatrixView<T,nodivA> const_view_type;
+        typedef ConstMatrixView<T,cstyleA> const_cview_type;
+        typedef ConstMatrixView<T,fstyleA> const_fview_type;
+        typedef ConstMatrixView<T,(_conj ? Conj : NonConj)> const_xview_type;
+        typedef ConstMatrixView<T,cmA> const_cmview_type;
+        typedef ConstMatrixView<T,rmA> const_rmview_type;
+        typedef ConstMatrixView<T,conjA> const_conjugate_type;
+        typedef ConstMatrixView<T,trA> const_transpose_type;
+        typedef ConstMatrixView<T,adjA> const_adjoint_type;
+        typedef ConstUpperTriMatrixView<T,(nodivA|NonUnitDiag)>
             const_uppertri_type;
-        typedef ConstUpperTriMatrixView<T,UnitDiag,Si,Sj,C,I>
+        typedef ConstUpperTriMatrixView<T,(nodivA|UnitDiag)>
             const_unit_uppertri_type;
-        typedef ConstUpperTriMatrixView<T,UnknownDiag,Si,Sj,C,I>
+        typedef ConstUpperTriMatrixView<T,(nodivA|UnknownDiag)>
             const_unknown_uppertri_type;
-        typedef ConstLowerTriMatrixView<T,NonUnitDiag,Si,Sj,C,I>
+        typedef ConstLowerTriMatrixView<T,(nodivA|NonUnitDiag)>
             const_lowertri_type;
-        typedef ConstLowerTriMatrixView<T,UnitDiag,Si,Sj,C,I>
+        typedef ConstLowerTriMatrixView<T,(nodivA|UnitDiag)>
             const_unit_lowertri_type;
-        typedef ConstLowerTriMatrixView<T,UnknownDiag,Si,Sj,C,I>
+        typedef ConstLowerTriMatrixView<T,(nodivA|UnknownDiag)>
             const_unknown_lowertri_type;
-        typedef ConstMatrixView<real_type,twoSi,twoSj,false,I>
+        typedef ConstSmallMatrixView<real_type,UNKNOWN,UNKNOWN,twoSi,twoSj,twosA> 
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstVectorView<T,1,C,I> const_linearview_type;
-        typedef ConstMatrixView<T,Si,Sj,false,I> const_nonconj_type;
-        typedef MatrixView<T,Si,Sj,C,I> nonconst_type;
+        typedef ConstVectorView<T,(baseA|Unit)> const_linearview_type;
+        typedef ConstMatrixView<T,nonconjA> const_nonconj_type;
+        typedef MatrixView<T,nodivA> nonconst_type;
     };
 
-    template <class T, int Si, int Sj, bool C, IndexStyle I>
+    template <class T, int A>
     class ConstMatrixView : 
-        public BaseMatrix_Rec<ConstMatrixView<T,Si,Sj,C,I> >,
-        public MatrixDivHelper<ConstMatrixView<T,Si,Sj,C,I>,false>
+        public BaseMatrix_Rec<ConstMatrixView<T,A> >,
+        public MatrixDivHelper<ConstMatrixView<T,A> >
     {
     public:
-        typedef ConstMatrixView<T,Si,Sj,C,I> type;
+        typedef ConstMatrixView<T,A> type;
 
         enum { _colsize = Traits<type>::_colsize };
         enum { _rowsize = Traits<type>::_rowsize };
@@ -1199,12 +1222,12 @@ namespace tmv {
         enum { _calc = Traits<type>::_calc };
         enum { _rowmajor = Traits<type>::_rowmajor };
         enum { _colmajor = Traits<type>::_colmajor };
-        enum { _stor = Traits<type>::_stor };
         enum { _stepi = Traits<type>::_stepi };
         enum { _stepj = Traits<type>::_stepj };
         enum { _diagstep = Traits<type>::_diagstep };
         enum { _conj = Traits<type>::_conj };
         enum { _canlin = Traits<type>::_canlin };
+        enum { _attrib = Traits<type>::_attrib };
 
         //
         // Constructors
@@ -1213,61 +1236,65 @@ namespace tmv {
         ConstMatrixView(
             const T* m, size_t cs, size_t rs, int si, int sj) :
             itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(sj) 
-        {}
+        { 
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
         ConstMatrixView(const T* m, size_t cs, size_t rs, int si) :
-            itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(Sj) 
-        { TMVStaticAssert(Sj != UNKNOWN); }
+            itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(_stepj) 
+        {
+            TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(_stepj != UNKNOWN); 
+        }
 
         ConstMatrixView(const T* m, size_t cs, size_t rs) :
-            itsm(m), itscs(cs), itsrs(rs), itssi(Si), itssj(Sj)
+            itsm(m), itscs(cs), itsrs(rs), itssi(_stepi), itssj(_stepj)
         {
-            TMVStaticAssert(Si != UNKNOWN);
-            TMVStaticAssert(Sj != UNKNOWN); 
+            TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(_stepi != UNKNOWN);
+            TMVStaticAssert(_stepj != UNKNOWN); 
         }
 
         ConstMatrixView(const type& m2) :
             itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
             itssi(m2.stepi()), itssj(m2.stepj()) 
-        {}
+        { 
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
-        template <int Si2, int Sj2, IndexStyle I2>
-        ConstMatrixView(const ConstMatrixView<T,Si2,Sj2,C,I2>& m2) :
+        template <int A2>
+        ConstMatrixView(const ConstMatrixView<T,A2>& m2) :
             itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
             itssi(m2.stepi()), itssj(m2.stepj()) 
-        {}
+        { 
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
-        template <int Si2, int Sj2, IndexStyle I2>
-        ConstMatrixView(const MatrixView<T,Si2,Sj2,C,I2>& m2) :
+        template <int A2>
+        ConstMatrixView(const MatrixView<T,A2>& m2) :
             itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
             itssi(m2.stepi()), itssj(m2.stepj()) 
-        {}
+        { 
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
-        template <IndexStyle I2>
-        ConstMatrixView(const ConstMatrixViewD<T,C,I2>& m2) :
-            itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
-            itssi(m2.stepi()), itssj(m2.stepj()) 
-        {}
-
-        template <IndexStyle I2>
-        ConstMatrixView(const MatrixViewD<T,C,I2>& m2) :
-            itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
-            itssi(m2.stepi()), itssj(m2.stepj()) 
-        {}
-
-        template <int M2, int N2, int Si2, int Sj2, IndexStyle I2>
+        template <int M2, int N2, int Si2, int Sj2, int A2>
         ConstMatrixView(
-            const ConstSmallMatrixView<T,M2,N2,Si2,Sj2,C,I2>& m2) :
+            const ConstSmallMatrixView<T,M2,N2,Si2,Sj2,A2>& m2) :
             itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
             itssi(m2.stepi()), itssj(m2.stepj()) 
-        {}
+        { 
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
-        template <int M2, int N2, int Si2, int Sj2, IndexStyle I2>
+        template <int M2, int N2, int Si2, int Sj2, int A2>
         ConstMatrixView(
-            const SmallMatrixView<T,M2,N2,Si2,Sj2,C,I2>& m2) :
+            const SmallMatrixView<T,M2,N2,Si2,Sj2,A2>& m2) :
             itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
             itssi(m2.stepi()), itssj(m2.stepj()) 
-        {}
+        { 
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
         ~ConstMatrixView() {
 #ifdef TMV_DEBUG
@@ -1286,7 +1313,7 @@ namespace tmv {
         const T* cptr() const { return itsm; }
 
         T cref(int i, int j) const
-        { return DoConj<C>(itsm[i*stepi()+j*stepj()]); }
+        { return DoConj<_conj>(itsm[i*stepi()+j*stepj()]); }
 
         size_t ls() const { return itscs*itsrs; }
         size_t colsize() const { return itscs; }
@@ -1294,7 +1321,7 @@ namespace tmv {
         int nElements() const { return itscs*itsrs; }
         int stepi() const { return itssi; }
         int stepj() const { return itssj; }
-        bool isconj() const { return C; }
+        bool isconj() const { return _conj; }
         bool isrm() const 
         { return _rowmajor || (!_colmajor &&  stepj() == 1); }
         bool iscm() const 
@@ -1305,200 +1332,184 @@ namespace tmv {
         const T* itsm;
         const size_t itscs;
         const size_t itsrs;
-        const CheckedInt<Si> itssi;
-        const CheckedInt<Sj> itssj;
+        const CheckedInt<_stepi> itssi;
+        const CheckedInt<_stepj> itssj;
 
     }; // ConstMatrixView
 
-    template <class T, int Si, int Sj, bool C>
-    class ConstMatrixViewF : 
-        public ConstMatrixView<T,Si,Sj,C,FortranStyle>
+    template <class T, int A0>
+    struct Traits<MatrixView<T,A0> >
     {
-    public:
-
-        typedef ConstMatrixViewF<T,Si,Sj,C> type;
-        typedef ConstMatrixView<T,Si,Sj,C,FortranStyle> mtype;
-
-        ConstMatrixViewF(
-            const T* m, size_t cs, size_t rs, int si, int sj) :
-            mtype(m,cs,rs,si,sj) 
-        {}
-        ConstMatrixViewF(const T* m, size_t cs, size_t rs, int si) :
-            mtype(m,cs,rs,si) 
-        {}
-        ConstMatrixViewF(const T* m, size_t cs, size_t rs) : 
-            mtype(m,cs,rs) 
-        {}
-        ConstMatrixViewF(const type& m2) : mtype(m2) {}
-        template <int Si2, int Sj2, IndexStyle I2>
-        ConstMatrixViewF(const ConstMatrixView<T,Si2,Sj2,C,I2>& m2) :
-            mtype(m2) 
-        {}
-        template <int Si2, int Sj2, IndexStyle I2>
-        ConstMatrixViewF(const MatrixView<T,Si2,Sj2,C,I2>& m2) :
-            mtype(m2) 
-        {}
-        template <int M2, int N2, int Si2, int Sj2, IndexStyle I2>
-        ConstMatrixViewF(
-            const ConstSmallMatrixView<T,M2,N2,Si2,Sj2,C,I2>& m2) : mtype(m2) 
-        {}
-        template <int M2, int N2, int Si2, int Sj2, IndexStyle I2>
-        ConstMatrixViewF(
-            const SmallMatrixView<T,M2,N2,Si2,Sj2,C,I2>& m2) : mtype(m2) 
-        {}
-        ~ConstMatrixViewF() 
-        {}
-
-    private :
-        void operator=(const type& m2);
-
-    }; // ConstMatrixViewF
-
-    template <class T, int Si, int Sj, bool C, IndexStyle I>
-    struct Traits<MatrixView<T,Si,Sj,C,I> >
-    {
-        typedef T value_type;
-
         typedef typename Traits<T>::real_type real_type;
+
+        enum { A = Attrib<A0>::withdivider ? A0 : (A0 & ~NoDivider) };
+        enum { okA = (
+                !Attrib<A>::diagmajor &&
+                !Attrib<A>::nonunitdiag &&
+                !Attrib<A>::unitdiag &&
+                !Attrib<A>::zerodiag &&
+                !Attrib<A>::packed &&
+                !Attrib<A>::lower &&
+                ( !Attrib<A>::withdivider ||
+                  ( Traits<real_type>::isinst && 
+                    !Traits<real_type>::isinteger ) ) &&
+                ( Traits<T>::iscomplex || !Attrib<A>::conj ) )};
+        enum { _attrib = A };
+
+        typedef T value_type;
         typedef typename Traits<T>::complex_type complex_type;
         enum { isreal = Traits<T>::isreal };
         enum { iscomplex = Traits<T>::iscomplex };
 
-        typedef MatrixView<T,Si,Sj,C,I> type;
-        typedef const ConstMatrixView<T,Si,Sj,C,I> calc_type;
-        typedef calc_type eval_type;
-        typedef Matrix<T,Sj==1?RowMajor:ColMajor,I> copy_type;
-
-        typedef QuotXM<1,real_type,type> inverse_type;
+        typedef MatrixView<T,A0> type;
+        typedef ConstMatrixView<T,(A&~WithDivider)> calc_type;
+        typedef const type& eval_type;
 
         enum { _colsize = UNKNOWN };
         enum { _rowsize = UNKNOWN };
         enum { _shape = Rec };
-        enum { _fort = (I == FortranStyle) };
+        enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
-        enum { _rowmajor = (Sj == 1) };
-        enum { _colmajor = (Si == 1) };
-        enum { _stor = (_rowmajor ? RowMajor : ColMajor) };
-        enum { _stepi = Si };
-        enum { _stepj = Sj };
-        enum { _diagstep = IntTraits2<Si,Sj>::sum };
-        enum { _conj = C };
+        enum { _rowmajor = Attrib<A>::rowmajor };
+        enum { _colmajor = Attrib<A>::colmajor };
+        enum { _stepi = (_colmajor ? 1 : UNKNOWN) };
+        enum { _stepj = (_rowmajor ? 1 : UNKNOWN) };
+        enum { _diagstep = UNKNOWN };
+        enum { _conj = Attrib<A>::conj };
         enum { _canlin = false };
-        enum { twoSi = isreal ? Si : IntTraits<Si>::twoS };
-        enum { twoSj = isreal ? Sj : IntTraits<Sj>::twoS };
-        enum { notC = !C && iscomplex };
+        enum { twoSi = isreal ? int(_stepi) : IntTraits<_stepi>::twoS };
+        enum { twoSj = isreal ? int(_stepj) : IntTraits<_stepj>::twoS };
 
-        enum { _hasdivider = false };
-        typedef LUD<copy_type> lud_type;
-#if 1
+        enum { copyA = (
+                (_rowmajor ? RowMajor : ColMajor) |
+                (_fort ? FortranStyle : CStyle) |
+                NoDivider ) };
+        typedef Matrix<T,copyA> copy_type;
+        enum { _hasdivider = Attrib<A>::withdivider };
+        typedef QuotXM<1,real_type,type> inverse_type;
+
+        typedef typename TypeSelect<_hasdivider ,
+                const InstLUD<value_type>& , LUD<copy_type> >::type lud_type;
         typedef InvalidType qrd_type;
         typedef InvalidType qrpd_type;
         typedef InvalidType svd_type;
-#else
-        typedef const QRD<type>& qrd_type;
-        typedef const QRPD<type>& qrpd_type;
-        typedef const SVD<type>& svd_type;
-#endif
 
-        typedef ConstVectorView<T,Si,C,I> const_col_type;
-        typedef ConstVectorView<T,Si,C,I> const_col_sub_type;
-        typedef ConstVectorView<T,Sj,C,I> const_row_type;
-        typedef ConstVectorView<T,Sj,C,I> const_row_sub_type;
-        typedef ConstVectorView<T,_diagstep,C,I> const_diag_type;
-        typedef ConstVectorView<T,_diagstep,C,I> const_diag_sub_type;
+        enum { baseA = (
+                (_fort ? FortranStyle : 0) |
+                (_conj ? Conj : 0 ) )};
+        enum { colA = baseA | (_colmajor ? Unit : 0) };
+        enum { rowA = baseA | (_rowmajor ? Unit : 0) };
+        enum { nodivA = (A & ~AllDivStatus) };
+        enum { cstyleA = nodivA & ~FortranStyle };
+        enum { fstyleA = nodivA | FortranStyle };
+        enum { nmA = (nodivA & ~AllStorageType) };
+        enum { cmA = nmA | ColMajor };
+        enum { rmA = nmA | RowMajor };
+        enum { colpairA = _colmajor ? cmA : int(nmA) };
+        enum { rowpairA = _rowmajor ? rmA : int(nmA) };
+        enum { conjA = iscomplex ? (nodivA ^ Conj) : int(nodivA) };
+        enum { trA = _colmajor ? rmA : _rowmajor ? cmA : int(nodivA) };
+        enum { adjA = iscomplex ? (trA ^ Conj) : int(trA) };
+        enum { nonconjA = nodivA & ~Conj };
+        enum { twosA = isreal ? nonconjA : int(nonconjA & ~AllStorageType) };
 
-        typedef ConstMatrixView<T,Si,Sj,C,I> const_submatrix_type;
-        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,C,I>
-            const_submatrix_step_type;
-        typedef ConstVectorView<T,UNKNOWN,C,I> const_subvector_type;
-        typedef ConstSmallMatrixView<T,UNKNOWN,2,Si,UNKNOWN,C,I>
+        typedef ConstVectorView<T,colA> const_col_type;
+        typedef ConstVectorView<T,colA> const_col_sub_type;
+        typedef ConstVectorView<T,rowA> const_row_type;
+        typedef ConstVectorView<T,rowA> const_row_sub_type;
+        typedef ConstVectorView<T,baseA> const_diag_type;
+        typedef ConstVectorView<T,baseA> const_diag_sub_type;
+
+        typedef ConstMatrixView<T,nodivA> const_submatrix_type;
+        typedef ConstMatrixView<T,nmA> const_submatrix_step_type;
+        typedef ConstVectorView<T,baseA> const_subvector_type;
+        typedef ConstSmallMatrixView<T,UNKNOWN,2,_stepi,UNKNOWN,colpairA>
             const_colpair_type;
-        typedef ConstSmallMatrixView<T,2,UNKNOWN,UNKNOWN,Sj,C,I>
+        typedef ConstSmallMatrixView<T,2,UNKNOWN,UNKNOWN,_stepj,rowpairA>
             const_rowpair_type;
-        typedef ConstMatrixView<T,Si,Sj,C,I> const_colrange_type;
-        typedef ConstMatrixView<T,Si,Sj,C,I> const_rowrange_type;
+        typedef ConstMatrixView<T,nodivA> const_colrange_type;
+        typedef ConstMatrixView<T,nodivA> const_rowrange_type;
 
-        typedef ConstMatrixView<T,Si,Sj,C,I> const_view_type;
-        typedef ConstMatrixView<T,Si,Sj,C,CStyle> const_cview_type;
-        typedef ConstMatrixView<T,Si,Sj,C,FortranStyle>
-            const_fview_type;
-        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,C> const_xview_type;
-        typedef ConstMatrixView<T,1,Sj,C,I> const_cmview_type;
-        typedef ConstMatrixView<T,Si,1,C,I> const_rmview_type;
-        typedef ConstMatrixView<T,Si,Sj,notC,I> const_conjugate_type;
-        typedef ConstMatrixView<T,Sj,Si,C,I> const_transpose_type;
-        typedef ConstMatrixView<T,Sj,Si,notC,I> const_adjoint_type;
-        typedef ConstUpperTriMatrixView<T,NonUnitDiag,Si,Sj,C,I>
+        typedef ConstMatrixView<T,nodivA> const_view_type;
+        typedef ConstMatrixView<T,cstyleA> const_cview_type;
+        typedef ConstMatrixView<T,fstyleA> const_fview_type;
+        typedef ConstMatrixView<T,(_conj ? Conj : NonConj)> const_xview_type;
+        typedef ConstMatrixView<T,cmA> const_cmview_type;
+        typedef ConstMatrixView<T,rmA> const_rmview_type;
+        typedef ConstMatrixView<T,conjA> const_conjugate_type;
+        typedef ConstMatrixView<T,trA> const_transpose_type;
+        typedef ConstMatrixView<T,adjA> const_adjoint_type;
+        typedef ConstUpperTriMatrixView<T,(nodivA|NonUnitDiag)>
             const_uppertri_type;
-        typedef ConstUpperTriMatrixView<T,UnitDiag,Si,Sj,C,I>
+        typedef ConstUpperTriMatrixView<T,(nodivA|UnitDiag)>
             const_unit_uppertri_type;
-        typedef ConstUpperTriMatrixView<T,UnknownDiag,Si,Sj,C,I>
+        typedef ConstUpperTriMatrixView<T,(nodivA|UnknownDiag)>
             const_unknown_uppertri_type;
-        typedef ConstLowerTriMatrixView<T,NonUnitDiag,Si,Sj,C,I>
+        typedef ConstLowerTriMatrixView<T,(nodivA|NonUnitDiag)>
             const_lowertri_type;
-        typedef ConstLowerTriMatrixView<T,UnitDiag,Si,Sj,C,I>
+        typedef ConstLowerTriMatrixView<T,(nodivA|UnitDiag)>
             const_unit_lowertri_type;
-        typedef ConstLowerTriMatrixView<T,UnknownDiag,Si,Sj,C,I>
+        typedef ConstLowerTriMatrixView<T,(nodivA|UnknownDiag)>
             const_unknown_lowertri_type;
-        typedef ConstMatrixView<real_type,twoSi,twoSj,false,I>
+        typedef ConstSmallMatrixView<real_type,UNKNOWN,UNKNOWN,twoSi,twoSj,twosA> 
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstVectorView<T,1,C,I> const_linearview_type;
-        typedef ConstMatrixView<T,Si,Sj,false,I> const_nonconj_type;
-        typedef MatrixView<T,Si,Sj,C,I> nonconst_type;
+        typedef ConstVectorView<T,(baseA|Unit)> const_linearview_type;
+        typedef ConstMatrixView<T,nonconjA> const_nonconj_type;
+        typedef MatrixView<T,nodivA> nonconst_type;
 
-        typedef typename AuxRef<T,C>::reference reference;
+        typedef typename AuxRef<T,_conj>::reference reference;
+        typedef VIt<T,1,_conj> linear_iterator;
 
-        typedef VectorView<T,Si,C,I> col_type;
-        typedef VectorView<T,Si,C,I> col_sub_type;
-        typedef VectorView<T,Sj,C,I> row_type;
-        typedef VectorView<T,Sj,C,I> row_sub_type;
-        typedef VectorView<T,_diagstep,C,I> diag_type;
-        typedef VectorView<T,_diagstep,C,I> diag_sub_type;
+        typedef VectorView<T,colA> col_type;
+        typedef VectorView<T,colA> col_sub_type;
+        typedef VectorView<T,rowA> row_type;
+        typedef VectorView<T,rowA> row_sub_type;
+        typedef VectorView<T,baseA> diag_type;
+        typedef VectorView<T,baseA> diag_sub_type;
 
-        typedef MatrixView<T,Si,Sj,C,I> submatrix_type;
-        typedef MatrixView<T,UNKNOWN,UNKNOWN,C,I> submatrix_step_type;
-        typedef VectorView<T,UNKNOWN,C,I> subvector_type;
-        typedef SmallMatrixView<T,UNKNOWN,2,Si,UNKNOWN,C,I> colpair_type;
-        typedef SmallMatrixView<T,2,UNKNOWN,UNKNOWN,Sj,C,I> rowpair_type;
-        typedef MatrixView<T,Si,Sj,C,I> colrange_type;
-        typedef MatrixView<T,Si,Sj,C,I> rowrange_type;
+        typedef MatrixView<T,nodivA> submatrix_type;
+        typedef MatrixView<T,nmA> submatrix_step_type;
+        typedef VectorView<T,baseA> subvector_type;
+        typedef SmallMatrixView<T,UNKNOWN,2,_stepi,UNKNOWN,colpairA>
+            colpair_type;
+        typedef SmallMatrixView<T,2,UNKNOWN,UNKNOWN,_stepj,rowpairA>
+            rowpair_type;
+        typedef MatrixView<T,nodivA> colrange_type;
+        typedef MatrixView<T,nodivA> rowrange_type;
 
-        typedef MatrixView<T,Si,Sj,C,I> view_type;
-        typedef MatrixView<T,Si,Sj,C,CStyle> cview_type;
-        typedef MatrixView<T,Si,Sj,C,FortranStyle> fview_type;
-        typedef MatrixView<T,UNKNOWN,UNKNOWN,C> xview_type;
-        typedef MatrixView<T,1,Sj,C,I> cmview_type;
-        typedef MatrixView<T,Si,1,C,I> rmview_type;
-        typedef MatrixView<T,Si,Sj,notC,I> conjugate_type;
-        typedef MatrixView<T,Sj,Si,C,I> transpose_type;
-        typedef MatrixView<T,Sj,Si,notC,I> adjoint_type;
-        typedef UpperTriMatrixView<T,NonUnitDiag,Si,Sj,C,I>
-            uppertri_type;
-        typedef UpperTriMatrixView<T,UnitDiag,Si,Sj,C,I>
-            unit_uppertri_type;
-        typedef UpperTriMatrixView<T,UnknownDiag,Si,Sj,C,I>
+        typedef MatrixView<T,nodivA> view_type;
+        typedef MatrixView<T,cstyleA> cview_type;
+        typedef MatrixView<T,fstyleA> fview_type;
+        typedef MatrixView<T,(_conj ? Conj : NonConj)> xview_type;
+        typedef MatrixView<T,cmA> cmview_type;
+        typedef MatrixView<T,rmA> rmview_type;
+        typedef MatrixView<T,conjA> conjugate_type;
+        typedef MatrixView<T,trA> transpose_type;
+        typedef MatrixView<T,adjA> adjoint_type;
+        typedef UpperTriMatrixView<T,(nodivA|NonUnitDiag)> uppertri_type;
+        typedef UpperTriMatrixView<T,(nodivA|UnitDiag)> unit_uppertri_type;
+        typedef UpperTriMatrixView<T,(nodivA|UnknownDiag)>
             unknown_uppertri_type;
-        typedef LowerTriMatrixView<T,NonUnitDiag,Si,Sj,C,I>
-            lowertri_type;
-        typedef LowerTriMatrixView<T,UnitDiag,Si,Sj,C,I>
-            unit_lowertri_type;
-        typedef LowerTriMatrixView<T,UnknownDiag,Si,Sj,C,I>
+        typedef LowerTriMatrixView<T,(nodivA|NonUnitDiag)> lowertri_type;
+        typedef LowerTriMatrixView<T,(nodivA|UnitDiag)> unit_lowertri_type;
+        typedef LowerTriMatrixView<T,(nodivA|UnknownDiag)>
             unknown_lowertri_type;
-        typedef MatrixView<real_type,twoSi,twoSj,false,I> realpart_type;
+        typedef SmallMatrixView<real_type,UNKNOWN,UNKNOWN,twoSi,twoSj,twosA> 
+            realpart_type;
         typedef realpart_type imagpart_type;
-        typedef VectorView<T,1,C,I> linearview_type;
-        typedef MatrixView<T,Si,Sj,false,I> nonconj_type;
+        typedef VectorView<T,(baseA|Unit)> linearview_type;
+        typedef MatrixView<T,nonconjA> nonconj_type;
     };
 
-    template <class T, int Si, int Sj, bool C, IndexStyle I>
+    template <class T, int A>
     class MatrixView : 
-        public BaseMatrix_Rec_Mutable<MatrixView<T,Si,Sj,C,I> >,
-        public MatrixDivHelper<MatrixView<T,Si,Sj,C,I>,false>
+        public BaseMatrix_Rec_Mutable<MatrixView<T,A> >,
+        public MatrixDivHelper<MatrixView<T,A> >
     {
     public:
 
-        typedef MatrixView<T,Si,Sj,C,I> type;
+        typedef MatrixView<T,A> type;
         typedef BaseMatrix_Rec_Mutable<type> base_mut;
         typedef typename base_mut::reference reference;
 
@@ -1509,49 +1520,60 @@ namespace tmv {
         enum { _calc = Traits<type>::_calc };
         enum { _rowmajor = Traits<type>::_rowmajor };
         enum { _colmajor = Traits<type>::_colmajor };
-        enum { _stor = Traits<type>::_stor };
         enum { _stepi = Traits<type>::_stepi };
         enum { _stepj = Traits<type>::_stepj };
         enum { _diagstep = Traits<type>::_diagstep };
         enum { _conj = Traits<type>::_conj };
         enum { _canlin = Traits<type>::_canlin };
+        enum { _attrib = Traits<type>::_attrib };
 
         //
         // Constructors
         //
 
         MatrixView(T* m, size_t cs, size_t rs, int si, int sj) :
-            itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(sj) {}
+            itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(sj) 
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
         MatrixView(T* m, size_t cs, size_t rs, int si) :
-            itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(Sj) 
-        { TMVStaticAssert(Sj != UNKNOWN); }
+            itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(_stepj) 
+        {
+            TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(_stepj != UNKNOWN); 
+        }
 
         MatrixView(T* m, size_t cs, size_t rs) :
-            itsm(m), itscs(cs), itsrs(rs), itssi(Si), itssj(Sj)
+            itsm(m), itscs(cs), itsrs(rs), itssi(_stepi), itssj(_stepj)
         {
-            TMVStaticAssert(Si != UNKNOWN);
-            TMVStaticAssert(Sj != UNKNOWN); 
+            TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(_stepi != UNKNOWN);
+            TMVStaticAssert(_stepj != UNKNOWN); 
         }
 
         MatrixView(const type& m2) :
             itsm(m2.itsm), itscs(m2.colsize()), itsrs(m2.rowsize()),
-            itssi(m2.stepi()), itssj(m2.stepj()) {}
+            itssi(m2.stepi()), itssj(m2.stepj())
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
-        template <int Si2, int Sj2, IndexStyle I2>
-        MatrixView(MatrixView<T,Si2,Sj2,C,I2> m2) :
+        template <int A2>
+        MatrixView(MatrixView<T,A2> m2) :
             itsm(m2.ptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
-            itssi(m2.stepi()), itssj(m2.stepj()) {}
+            itssi(m2.stepi()), itssj(m2.stepj())
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
-        template <IndexStyle I2>
-        MatrixView(MatrixViewD<T,C,I2> m2) :
+        template <int M2, int N2, int Si2, int Sj2, int A2>
+        MatrixView(SmallMatrixView<T,M2,N2,Si2,Sj2,A2> m2) :
             itsm(m2.ptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
-            itssi(m2.stepi()), itssj(m2.stepj()) {}
-
-        template <int M2, int N2, int Si2, int Sj2, IndexStyle I2>
-        MatrixView(SmallMatrixView<T,M2,N2,Si2,Sj2,C,I2> m2) :
-            itsm(m2.ptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
-            itssi(m2.stepi()), itssj(m2.stepj()) {}
+            itssi(m2.stepi()), itssj(m2.stepj())
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
         ~MatrixView() {
 #ifdef TMV_DEBUG
@@ -1592,7 +1614,7 @@ namespace tmv {
         T* ptr() { return itsm; }
 
         T cref(int i, int j) const
-        { return DoConj<C>(itsm[i*stepi()+j*stepj()]); }
+        { return DoConj<_conj>(itsm[i*stepi()+j*stepj()]); }
 
         reference ref(int i, int j) 
         { return reference(itsm[i*stepi()+j*stepj()]); }
@@ -1603,7 +1625,7 @@ namespace tmv {
         int nElements() const { return itscs*itsrs; }
         int stepi() const { return itssi; }
         int stepj() const { return itssj; }
-        bool isconj() const { return C; }
+        bool isconj() const { return _conj; }
         bool isrm() const 
         { return _rowmajor || (!_colmajor &&  stepj() == 1); }
         bool iscm() const 
@@ -1614,519 +1636,8 @@ namespace tmv {
         T* itsm;
         const size_t itscs;
         const size_t itsrs;
-        const CheckedInt<Si> itssi;
-        const CheckedInt<Sj> itssj;
-
-    }; // MatrixView
-
-    template <class T, int Si, int Sj, bool C>
-    class MatrixViewF : 
-        public MatrixView<T,Si,Sj,C,FortranStyle>
-    {
-    public:
-
-        typedef MatrixViewF<T,Si,Sj,C> type;
-        typedef MatrixView<T,Si,Sj,C,FortranStyle> mtype;
-
-        MatrixViewF(T* m, size_t cs, size_t rs, int si, int sj) :
-            mtype(m,cs,rs,si,sj) 
-        {}
-        MatrixViewF(T* m, size_t cs, size_t rs, int si) :
-            mtype(m,cs,rs,si) 
-        {}
-        MatrixViewF(T* m, size_t cs, size_t rs) : mtype(m,cs,rs) 
-        {}
-        MatrixViewF(const type& m2) : mtype(m2) 
-        {}
-        template <int Si2, int Sj2, IndexStyle I2>
-        MatrixViewF(MatrixView<T,Si2,Sj2,C,I2> m2) : mtype(m2) 
-        {}
-        template <int M2, int N2, int Si2, int Sj2, IndexStyle I2>
-        MatrixViewF(SmallMatrixView<T,M2,N2,Si2,Sj2,C,I2> m2) :
-            mtype(m2) 
-        {}
-        ~MatrixViewF() 
-        {}
-
-        template <class M2>
-        type& operator=(const BaseMatrix<M2>& m2)
-        { mtype::operator=(m2); return *this; }
-        type& operator=(const type& m2)
-        { mtype::operator=(m2); return *this; }
-        type& operator=(const T x)
-        { mtype::operator=(x); return *this; }
-
-    }; // MatrixViewF
-
-
-    template <class T, bool C, IndexStyle I>
-    struct Traits<ConstMatrixViewD<T,C,I> >
-    {
-        typedef T value_type;
-        enum { Si = UNKNOWN };
-        enum { Sj = UNKNOWN };
-
-        typedef typename Traits<T>::real_type real_type;
-        typedef typename Traits<T>::complex_type complex_type;
-        enum { isreal = Traits<T>::isreal };
-        enum { iscomplex = Traits<T>::iscomplex };
-
-        typedef ConstMatrixViewD<T,C,I> type;
-        typedef const type& calc_type;
-        typedef const type& eval_type;
-        typedef Matrix<T,Sj==1?RowMajor:ColMajor,I> copy_type;
-
-        typedef QuotXM<1,real_type,type> inverse_type;
-
-        enum { _colsize = UNKNOWN };
-        enum { _rowsize = UNKNOWN };
-        enum { _shape = Rec };
-        enum { _fort = (I == FortranStyle) };
-        enum { _calc = true };
-        enum { _rowmajor = (Sj == 1) };
-        enum { _colmajor = (Si == 1) };
-        enum { _stor = (_rowmajor ? RowMajor : ColMajor) };
-        enum { _stepi = Si };
-        enum { _stepj = Sj };
-        enum { _diagstep = IntTraits2<Si,Sj>::sum };
-        enum { _conj = C };
-        enum { _canlin = false };
-        enum { twoSi = isreal ? Si : IntTraits<Si>::twoS };
-        enum { twoSj = isreal ? Sj : IntTraits<Sj>::twoS };
-        enum { notC = !C && iscomplex };
-
-        enum { _hasdivider =
-            Traits<real_type>::isinst && !Traits<real_type>::isinteger };
-        typedef typename TypeSelect<_hasdivider ,
-                const InstLUD<T>& , LUD<copy_type> >::type lud_type;
-#if 1
-        typedef InvalidType qrd_type;
-        typedef InvalidType qrpd_type;
-        typedef InvalidType svd_type;
-#else
-        typedef const QRD<type>& qrd_type;
-        typedef const QRPD<type>& qrpd_type;
-        typedef const SVD<type>& svd_type;
-#endif
-
-        typedef ConstVectorView<T,Si,C,I> const_col_type;
-        typedef ConstVectorView<T,Si,C,I> const_col_sub_type;
-        typedef ConstVectorView<T,Sj,C,I> const_row_type;
-        typedef ConstVectorView<T,Sj,C,I> const_row_sub_type;
-        typedef ConstVectorView<T,_diagstep,C,I> const_diag_type;
-        typedef ConstVectorView<T,_diagstep,C,I> const_diag_sub_type;
-
-        typedef ConstMatrixView<T,Si,Sj,C,I> const_submatrix_type;
-        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,C,I>
-            const_submatrix_step_type;
-        typedef ConstVectorView<T,UNKNOWN,C,I> const_subvector_type;
-        typedef ConstSmallMatrixView<T,UNKNOWN,2,Si,UNKNOWN,C,I>
-            const_colpair_type;
-        typedef ConstSmallMatrixView<T,2,UNKNOWN,UNKNOWN,Sj,C,I>
-            const_rowpair_type;
-        typedef ConstMatrixView<T,Si,Sj,C,I> const_colrange_type;
-        typedef ConstMatrixView<T,Si,Sj,C,I> const_rowrange_type;
-
-        typedef ConstMatrixView<T,Si,Sj,C,I> const_view_type;
-        typedef ConstMatrixView<T,Si,Sj,C,CStyle> const_cview_type;
-        typedef ConstMatrixView<T,Si,Sj,C,FortranStyle>
-            const_fview_type;
-        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,C> const_xview_type;
-        typedef ConstMatrixView<T,1,Sj,C,I> const_cmview_type;
-        typedef ConstMatrixView<T,Si,1,C,I> const_rmview_type;
-        typedef ConstMatrixView<T,Si,Sj,notC,I> const_conjugate_type;
-        typedef ConstMatrixView<T,Sj,Si,C,I> const_transpose_type;
-        typedef ConstMatrixView<T,Sj,Si,notC,I> const_adjoint_type;
-        typedef ConstUpperTriMatrixView<T,NonUnitDiag,Si,Sj,C,I>
-            const_uppertri_type;
-        typedef ConstUpperTriMatrixView<T,UnitDiag,Si,Sj,C,I>
-            const_unit_uppertri_type;
-        typedef ConstUpperTriMatrixView<T,UnknownDiag,Si,Sj,C,I>
-            const_unknown_uppertri_type;
-        typedef ConstLowerTriMatrixView<T,NonUnitDiag,Si,Sj,C,I>
-            const_lowertri_type;
-        typedef ConstLowerTriMatrixView<T,UnitDiag,Si,Sj,C,I>
-            const_unit_lowertri_type;
-        typedef ConstLowerTriMatrixView<T,UnknownDiag,Si,Sj,C,I>
-            const_unknown_lowertri_type;
-        typedef ConstMatrixView<real_type,twoSi,twoSj,false,I>
-            const_realpart_type;
-        typedef const_realpart_type const_imagpart_type;
-        typedef ConstVectorView<T,1,C,I> const_linearview_type;
-        typedef ConstMatrixView<T,Si,Sj,false,I> const_nonconj_type;
-        typedef MatrixView<T,Si,Sj,C,I> nonconst_type;
-    };
-
-    template <class T, bool C, IndexStyle I>
-    class ConstMatrixViewD : 
-        public BaseMatrix_Rec<ConstMatrixViewD<T,C,I> >,
-        public MatrixDivHelper<ConstMatrixViewD<T,C,I>,Traits<ConstMatrixViewD<T,C,I> >::_hasdivider >
-    {
-    public:
-        typedef ConstMatrixViewD<T,C,I> type;
-
-        enum { _colsize = Traits<type>::_colsize };
-        enum { _rowsize = Traits<type>::_rowsize };
-        enum { _shape = Traits<type>::_shape };
-        enum { _fort = Traits<type>::_fort };
-        enum { _calc = Traits<type>::_calc };
-        enum { _rowmajor = Traits<type>::_rowmajor };
-        enum { _colmajor = Traits<type>::_colmajor };
-        enum { _stor = Traits<type>::_stor };
-        enum { _stepi = Traits<type>::_stepi };
-        enum { _stepj = Traits<type>::_stepj };
-        enum { _diagstep = Traits<type>::_diagstep };
-        enum { _conj = Traits<type>::_conj };
-        enum { _canlin = Traits<type>::_canlin };
-
-        //
-        // Constructors
-        //
-
-        ConstMatrixViewD(
-            const T* m, size_t cs, size_t rs, int si, int sj) :
-            itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(sj) 
-        {}
-
-        ConstMatrixViewD(const type& m2) :
-            itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
-            itssi(m2.stepi()), itssj(m2.stepj()) 
-        {}
-
-        template <IndexStyle I2>
-        ConstMatrixViewD(const ConstMatrixViewD<T,C,I2>& m2) :
-            itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
-            itssi(m2.stepi()), itssj(m2.stepj()) 
-        {}
-
-        template <IndexStyle I2>
-        ConstMatrixViewD(const MatrixViewD<T,C,I2>& m2) :
-            itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
-            itssi(m2.stepi()), itssj(m2.stepj()) 
-        {}
-
-        template <int Si2, int Sj2, IndexStyle I2>
-        ConstMatrixViewD(const ConstMatrixView<T,Si2,Sj2,C,I2>& m2) :
-            itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
-            itssi(m2.stepi()), itssj(m2.stepj()) 
-        {}
-
-        template <int Si2, int Sj2, IndexStyle I2>
-        ConstMatrixViewD(const MatrixView<T,Si2,Sj2,C,I2>& m2) :
-            itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
-            itssi(m2.stepi()), itssj(m2.stepj()) 
-        {}
-
-        template <int M2, int N2, int Si2, int Sj2, IndexStyle I2>
-        ConstMatrixViewD(
-            const ConstSmallMatrixView<T,M2,N2,Si2,Sj2,C,I2>& m2) :
-            itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
-            itssi(m2.stepi()), itssj(m2.stepj()) 
-        {}
-
-        template <int M2, int N2, int Si2, int Sj2, IndexStyle I2>
-        ConstMatrixViewD(
-            const SmallMatrixView<T,M2,N2,Si2,Sj2,C,I2>& m2) :
-            itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
-            itssi(m2.stepi()), itssj(m2.stepj()) 
-        {}
-
-        ~ConstMatrixViewD() {
-#ifdef TMV_DEBUG
-            itsm = 0; 
-#endif
-        }
-
-    private :
-        void operator=(const type& m2);
-    public :
-
-        //
-        // Auxilliary Functions
-        //
-
-        const T* cptr() const { return itsm; }
-
-        T cref(int i, int j) const
-        { return DoConj<C>(itsm[i*stepi()+j*stepj()]); }
-
-        size_t ls() const { return itscs*itsrs; }
-        size_t colsize() const { return itscs; }
-        size_t rowsize() const { return itsrs; }
-        int nElements() const { return itscs*itsrs; }
-        int stepi() const { return itssi; }
-        int stepj() const { return itssj; }
-        bool isconj() const { return C; }
-        bool isrm() const 
-        { return _rowmajor || (!_colmajor &&  stepj() == 1); }
-        bool iscm() const 
-        { return _colmajor || (!_rowmajor &&  stepi() == 1); }
-
-    private :
-
-        const T* itsm;
-        const size_t itscs;
-        const size_t itsrs;
-        const int itssi;
-        const int itssj;
-
-    }; // ConstMatrixViewD
-
-    template <class T, bool C, IndexStyle I>
-    struct Traits<MatrixViewD<T,C,I> >
-    {
-        typedef T value_type;
-        enum { Si = UNKNOWN };
-        enum { Sj = UNKNOWN };
-
-        typedef typename Traits<T>::real_type real_type;
-        typedef typename Traits<T>::complex_type complex_type;
-        enum { isreal = Traits<T>::isreal };
-        enum { iscomplex = Traits<T>::iscomplex };
-
-        typedef MatrixViewD<T,C,I> type;
-        typedef const ConstMatrixView<T,Si,Sj,C,I> calc_type;
-        typedef calc_type eval_type;
-        typedef Matrix<T,Sj==1?RowMajor:ColMajor,I> copy_type;
-
-        typedef QuotXM<1,real_type,type> inverse_type;
-
-        enum { _colsize = UNKNOWN };
-        enum { _rowsize = UNKNOWN };
-        enum { _shape = Rec };
-        enum { _fort = (I == FortranStyle) };
-        enum { _calc = true };
-        enum { _rowmajor = (Sj == 1) };
-        enum { _colmajor = (Si == 1) };
-        enum { _stor = (_rowmajor ? RowMajor : ColMajor) };
-        enum { _stepi = Si };
-        enum { _stepj = Sj };
-        enum { _diagstep = IntTraits2<Si,Sj>::sum };
-        enum { _conj = C };
-        enum { _canlin = false };
-        enum { twoSi = isreal ? int(Si) : IntTraits<Si>::twoS };
-        enum { twoSj = isreal ? int(Sj) : IntTraits<Sj>::twoS };
-        enum { notC = !C && iscomplex };
-
-        enum { _hasdivider =
-            Traits<real_type>::isinst && !Traits<real_type>::isinteger };
-        typedef typename TypeSelect<_hasdivider ,
-                const InstLUD<T>& , LUD<copy_type> >::type lud_type;
-#if 1
-        typedef InvalidType qrd_type;
-        typedef InvalidType qrpd_type;
-        typedef InvalidType svd_type;
-#else
-        typedef const QRD<type>& qrd_type;
-        typedef const QRPD<type>& qrpd_type;
-        typedef const SVD<type>& svd_type;
-#endif
-
-        typedef ConstVectorView<T,Si,C,I> const_col_type;
-        typedef ConstVectorView<T,Si,C,I> const_col_sub_type;
-        typedef ConstVectorView<T,Sj,C,I> const_row_type;
-        typedef ConstVectorView<T,Sj,C,I> const_row_sub_type;
-        typedef ConstVectorView<T,_diagstep,C,I> const_diag_type;
-        typedef ConstVectorView<T,_diagstep,C,I> const_diag_sub_type;
-
-        typedef ConstMatrixView<T,Si,Sj,C,I> const_submatrix_type;
-        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,C,I>
-            const_submatrix_step_type;
-        typedef ConstVectorView<T,UNKNOWN,C,I> const_subvector_type;
-        typedef ConstSmallMatrixView<T,UNKNOWN,2,Si,UNKNOWN,C,I>
-            const_colpair_type;
-        typedef ConstSmallMatrixView<T,2,UNKNOWN,UNKNOWN,Sj,C,I>
-            const_rowpair_type;
-        typedef ConstMatrixView<T,Si,Sj,C,I> const_colrange_type;
-        typedef ConstMatrixView<T,Si,Sj,C,I> const_rowrange_type;
-
-        typedef ConstMatrixView<T,Si,Sj,C,I> const_view_type;
-        typedef ConstMatrixView<T,Si,Sj,C,CStyle> const_cview_type;
-        typedef ConstMatrixView<T,Si,Sj,C,FortranStyle>
-            const_fview_type;
-        typedef ConstMatrixView<T,UNKNOWN,UNKNOWN,C> const_xview_type;
-        typedef ConstMatrixView<T,1,Sj,C,I> const_cmview_type;
-        typedef ConstMatrixView<T,Si,1,C,I> const_rmview_type;
-        typedef ConstMatrixView<T,Si,Sj,notC,I> const_conjugate_type;
-        typedef ConstMatrixView<T,Sj,Si,C,I> const_transpose_type;
-        typedef ConstMatrixView<T,Sj,Si,notC,I> const_adjoint_type;
-        typedef ConstUpperTriMatrixView<T,NonUnitDiag,Si,Sj,C,I>
-            const_uppertri_type;
-        typedef ConstUpperTriMatrixView<T,UnitDiag,Si,Sj,C,I>
-            const_unit_uppertri_type;
-        typedef ConstUpperTriMatrixView<T,UnknownDiag,Si,Sj,C,I>
-            const_unknown_uppertri_type;
-        typedef ConstLowerTriMatrixView<T,NonUnitDiag,Si,Sj,C,I>
-            const_lowertri_type;
-        typedef ConstLowerTriMatrixView<T,UnitDiag,Si,Sj,C,I>
-            const_unit_lowertri_type;
-        typedef ConstLowerTriMatrixView<T,UnknownDiag,Si,Sj,C,I>
-            const_unknown_lowertri_type;
-        typedef ConstMatrixView<real_type,twoSi,twoSj,false,I>
-            const_realpart_type;
-        typedef const_realpart_type const_imagpart_type;
-        typedef ConstVectorView<T,1,C,I> const_linearview_type;
-        typedef ConstMatrixView<T,Si,Sj,false,I> const_nonconj_type;
-        typedef MatrixView<T,Si,Sj,C,I> nonconst_type;
-
-        typedef typename AuxRef<T,C>::reference reference;
-
-        typedef VectorView<T,Si,C,I> col_type;
-        typedef VectorView<T,Si,C,I> col_sub_type;
-        typedef VectorView<T,Sj,C,I> row_type;
-        typedef VectorView<T,Sj,C,I> row_sub_type;
-        typedef VectorView<T,_diagstep,C,I> diag_type;
-        typedef VectorView<T,_diagstep,C,I> diag_sub_type;
-
-        typedef MatrixView<T,Si,Sj,C,I> submatrix_type;
-        typedef MatrixView<T,UNKNOWN,UNKNOWN,C,I> submatrix_step_type;
-        typedef VectorView<T,UNKNOWN,C,I> subvector_type;
-        typedef SmallMatrixView<T,UNKNOWN,2,Si,UNKNOWN,C,I> colpair_type;
-        typedef SmallMatrixView<T,2,UNKNOWN,UNKNOWN,Sj,C,I> rowpair_type;
-        typedef MatrixView<T,Si,Sj,C,I> colrange_type;
-        typedef MatrixView<T,Si,Sj,C,I> rowrange_type;
-
-        typedef MatrixView<T,Si,Sj,C,I> view_type;
-        typedef MatrixView<T,Si,Sj,C,CStyle> cview_type;
-        typedef MatrixView<T,Si,Sj,C,FortranStyle> fview_type;
-        typedef MatrixView<T,UNKNOWN,UNKNOWN,C> xview_type;
-        typedef MatrixView<T,1,Sj,C,I> cmview_type;
-        typedef MatrixView<T,Si,1,C,I> rmview_type;
-        typedef MatrixView<T,Si,Sj,notC,I> conjugate_type;
-        typedef MatrixView<T,Sj,Si,C,I> transpose_type;
-        typedef MatrixView<T,Sj,Si,notC,I> adjoint_type;
-        typedef UpperTriMatrixView<T,NonUnitDiag,Si,Sj,C,I>
-            uppertri_type;
-        typedef UpperTriMatrixView<T,UnitDiag,Si,Sj,C,I>
-            unit_uppertri_type;
-        typedef UpperTriMatrixView<T,UnknownDiag,Si,Sj,C,I>
-            unknown_uppertri_type;
-        typedef LowerTriMatrixView<T,NonUnitDiag,Si,Sj,C,I>
-            lowertri_type;
-        typedef LowerTriMatrixView<T,UnitDiag,Si,Sj,C,I>
-            unit_lowertri_type;
-        typedef LowerTriMatrixView<T,UnknownDiag,Si,Sj,C,I>
-            unknown_lowertri_type;
-        typedef MatrixView<real_type,twoSi,twoSj,false,I> realpart_type;
-        typedef realpart_type imagpart_type;
-        typedef VectorView<T,1,C,I> linearview_type;
-        typedef MatrixView<T,Si,Sj,false,I> nonconj_type;
-    };
-
-    template <class T, bool C, IndexStyle I>
-    class MatrixViewD : 
-        public BaseMatrix_Rec_Mutable<MatrixViewD<T,C,I> >,
-        public MatrixDivHelper<MatrixViewD<T,C,I>,Traits<MatrixViewD<T,C,I> >::_hasdivider >
-    {
-    public:
-
-        typedef MatrixViewD<T,C,I> type;
-        typedef BaseMatrix_Rec_Mutable<type> base_mut;
-        typedef typename base_mut::reference reference;
-
-        enum { _colsize = Traits<type>::_colsize };
-        enum { _rowsize = Traits<type>::_rowsize };
-        enum { _shape = Traits<type>::_shape };
-        enum { _fort = Traits<type>::_fort };
-        enum { _calc = Traits<type>::_calc };
-        enum { _rowmajor = Traits<type>::_rowmajor };
-        enum { _colmajor = Traits<type>::_colmajor };
-        enum { _stor = Traits<type>::_stor };
-        enum { _stepi = Traits<type>::_stepi };
-        enum { _stepj = Traits<type>::_stepj };
-        enum { _diagstep = Traits<type>::_diagstep };
-        enum { _conj = Traits<type>::_conj };
-        enum { _canlin = Traits<type>::_canlin };
-
-        //
-        // Constructors
-        //
-
-        MatrixViewD(T* m, size_t cs, size_t rs, int si, int sj) :
-            itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(sj) {}
-
-        MatrixViewD(const type& m2) :
-            itsm(m2.itsm), itscs(m2.colsize()), itsrs(m2.rowsize()),
-            itssi(m2.stepi()), itssj(m2.stepj()) {}
-
-        template <IndexStyle I2>
-        MatrixViewD(MatrixViewD<T,C,I2> m2) :
-            itsm(m2.ptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
-            itssi(m2.stepi()), itssj(m2.stepj()) {}
-
-        template <int Si2, int Sj2, IndexStyle I2>
-        MatrixViewD(MatrixView<T,Si2,Sj2,C,I2> m2) :
-            itsm(m2.ptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
-            itssi(m2.stepi()), itssj(m2.stepj()) {}
-
-        template <int M2, int N2, int Si2, int Sj2, IndexStyle I2>
-        MatrixViewD(SmallMatrixView<T,M2,N2,Si2,Sj2,C,I2> m2) :
-            itsm(m2.ptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
-            itssi(m2.stepi()), itssj(m2.stepj()) {}
-
-        ~MatrixViewD() {
-#ifdef TMV_DEBUG
-            itsm = 0; 
-#endif
-        }
-
-
-        //
-        // Op = 
-        //
-
-        template <class M2>
-        type& operator=(const BaseMatrix<M2>& m2)
-        {
-            base_mut::operator=(m2); 
-            return *this;
-        }
-
-        type& operator=(const type& m2)
-        {
-            base_mut::operator=(m2); 
-            return *this;
-        }
-
-        type& operator=(const T x)
-        {
-            base_mut::operator=(x); 
-            return *this;
-        }
-
-
-        //
-        // Auxilliary Functions
-        //
-
-        const T* cptr() const { return itsm; }
-        T* ptr() { return itsm; }
-
-        T cref(int i, int j) const
-        { return DoConj<C>(itsm[i*stepi()+j*stepj()]); }
-
-        reference ref(int i, int j) 
-        { return reference(itsm[i*stepi()+j*stepj()]); }
-
-        size_t ls() const { return itscs*itsrs; }
-        size_t colsize() const { return itscs; }
-        size_t rowsize() const { return itsrs; }
-        int nElements() const { return itscs*itsrs; }
-        int stepi() const { return itssi; }
-        int stepj() const { return itssj; }
-        bool isconj() const { return C; }
-        bool isrm() const 
-        { return _rowmajor || (!_colmajor &&  stepj() == 1); }
-        bool iscm() const 
-        { return _colmajor || (!_rowmajor &&  stepi() == 1); }
-
-    private :
-
-        T* itsm;
-        const size_t itscs;
-        const size_t itsrs;
-        const int itssi;
-        const int itssj;
+        const CheckedInt<_stepi> itssi;
+        const CheckedInt<_stepj> itssj;
 
     }; // MatrixView
 
@@ -2177,20 +1688,19 @@ namespace tmv {
     // Swap
     //
 
-    template <class T, StorageType S, IndexStyle I>
-    static inline void Swap(Matrix<T,S,I>& m1, Matrix<T,S,I>& m2)
+    template <class T, int A0, int A1>
+    static inline void Swap(Matrix<T,A0,A1>& m1, Matrix<T,A0,A1>& m2)
     { m1.swapWith(m2); }
-    template <class M, class T, int Si, int Sj, bool C, IndexStyle I>
+    template <class M, class T, int A>
     static inline void Swap(
-        BaseMatrix_Rec_Mutable<M>& m1, MatrixView<T,Si,Sj,C,I> m2)
+        BaseMatrix_Rec_Mutable<M>& m1, MatrixView<T,A> m2)
     { DoSwap(m1,m2); }
-    template <class M, class T, int Si, int Sj, bool C, IndexStyle I>
+    template <class M, class T, int A>
     static inline void Swap(
-        MatrixView<T,Si,Sj,C,I> m1, BaseMatrix_Rec_Mutable<M>& m2)
+        MatrixView<T,A> m1, BaseMatrix_Rec_Mutable<M>& m2)
     { DoSwap(m1,m2); }
-    template <class T, int Si1, int Sj1, bool C1, IndexStyle I1, int Si2, int Sj2, bool C2, IndexStyle I2>
-    static inline void Swap(
-        MatrixView<T,Si1,Sj1,C1,I1> m1, MatrixView<T,Si2,Sj2,C2,I2> m2)
+    template <class T, int A1, int A2>
+    static inline void Swap(MatrixView<T,A1> m1, MatrixView<T,A2> m2)
     { DoSwap(m1,m2); }
 
 
@@ -2198,31 +1708,31 @@ namespace tmv {
     // Conjugate, Transpose, Adjoint
     //
 
-    template <class T, StorageType S, IndexStyle I>
-    static inline typename Matrix<T,S,I>::conjugate_type Conjugate(
-        Matrix<T,S,I>& m)
+    template <class T, int A0, int A1>
+    static inline typename Matrix<T,A0,A1>::conjugate_type Conjugate(
+        Matrix<T,A0,A1>& m)
     { return m.conjugate(); }
-    template <class T, int Si, int Sj, bool C, IndexStyle I>
-    static inline typename MatrixView<T,Si,Sj,C,I>::conjugate_type Conjugate(
-        MatrixView<T,Si,Sj,C,I>& m)
+    template <class T, int A>
+    static inline typename MatrixView<T,A>::conjugate_type Conjugate(
+        MatrixView<T,A>& m)
     { return m.conjugate(); }
 
-    template <class T, StorageType S, IndexStyle I>
-    static inline typename Matrix<T,S,I>::transpose_type Transpose(
-        Matrix<T,S,I>& m)
+    template <class T, int A0, int A1>
+    static inline typename Matrix<T,A0,A1>::transpose_type Transpose(
+        Matrix<T,A0,A1>& m)
     { return m.transpose(); }
-    template <class T, int Si, int Sj, bool C, IndexStyle I>
-    static inline typename MatrixView<T,Si,Sj,C,I>::transpose_type Transpose(
-        MatrixView<T,Si,Sj,C,I>& m)
+    template <class T, int A>
+    static inline typename MatrixView<T,A>::transpose_type Transpose(
+        MatrixView<T,A>& m)
     { return m.transpose(); }
 
-    template <class T, StorageType S, IndexStyle I>
-    static inline typename Matrix<T,S,I>::adjoint_type Adjoint(
-        Matrix<T,S,I>& m)
+    template <class T, int A0, int A1>
+    static inline typename Matrix<T,A0,A1>::adjoint_type Adjoint(
+        Matrix<T,A0,A1>& m)
     { return m.adjoint(); }
-    template <class T, int Si, int Sj, bool C, IndexStyle I>
-    static inline typename MatrixView<T,Si,Sj,C,I>::adjoint_type Adjoint(
-        MatrixView<T,Si,Sj,C,I>& m)
+    template <class T, int A>
+    static inline typename MatrixView<T,A>::adjoint_type Adjoint(
+        MatrixView<T,A>& m)
     { return m.adjoint(); }
 
 
@@ -2230,39 +1740,41 @@ namespace tmv {
     // TMV_Text 
     //
 
-    template <class T, StorageType S, IndexStyle I>
-    static inline std::string TMV_Text(const Matrix<T,S,I>& )
+#ifdef TMV_DEBUG
+    template <class T, int A0, int A1>
+    static inline std::string TMV_Text(const Matrix<T,A0,A1>& m)
     {
+        const int A = A0 | A1;
         std::ostringstream s;
-        s << "Matrix<"<<TMV_Text(T())<<","<<TMV_Text(S)<<","<<TMV_Text(I)<<">";
+        s << "Matrix<"<<TMV_Text(T());
+        s << ","<<Attrib<A>::text()<<">";
+        s << "("<<m.colsize()<<","<<m.rowsize()<<",";
+        s << m.stepi()<<","<<m.stepj()<<")";
         return s.str();
     }
 
-    template <class T, int Si, int Sj, bool C, IndexStyle I>
-    static inline std::string TMV_Text(const ConstMatrixView<T,Si,Sj,C,I>& m)
+    template <class T, int A>
+    static inline std::string TMV_Text(const ConstMatrixView<T,A>& m)
     {
         std::ostringstream s;
         s << "ConstMatrixView<"<<TMV_Text(T());
-        s << ","<<IntTraits<Si>::text();
-        if (Si == UNKNOWN) s << "("<<m.stepi()<<")";
-        s << ","<<IntTraits<Sj>::text();
-        if (Sj == UNKNOWN) s << "("<<m.stepj()<<")";
-        s << ","<<C<<","<<TMV_Text(I)<<">";
+        s << ","<<Attrib<A>::text()<<">";
+        s << "("<<m.colsize()<<","<<m.rowsize()<<",";
+        s << m.stepi()<<","<<m.stepj()<<")";
         return s.str();
     }
 
-    template <class T, int Si, int Sj, bool C, IndexStyle I>
-    static inline std::string TMV_Text(const MatrixView<T,Si,Sj,C,I>& m)
+    template <class T, int A>
+    static inline std::string TMV_Text(const MatrixView<T,A>& m)
     {
         std::ostringstream s;
         s << "MatrixView<"<<TMV_Text(T());
-        s << ","<<IntTraits<Si>::text();
-        if (Si == UNKNOWN) s << "("<<m.stepi()<<")";
-        s << ","<<IntTraits<Sj>::text();
-        if (Sj == UNKNOWN) s << "("<<m.stepj()<<")";
-        s << ","<<C<<","<<TMV_Text(I)<<">";
+        s << ","<<Attrib<A>::text()<<">";
+        s << "("<<m.colsize()<<","<<m.rowsize()<<",";
+        s << m.stepi()<<","<<m.stepj()<<")";
         return s.str();
     }
+#endif
 
 } // namespace tmv
 

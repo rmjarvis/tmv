@@ -3,25 +3,25 @@
 
 #define Def1(T1,T2,C1)\
   template void InstLU_SolveInPlace( \
-      const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P, \
+      const ConstMatrixView<T1,C1>& m1, const Permutation& P, \
       MatrixView<T2> m2); \
   template void InstLU_SolveTransposeInPlace( \
-      const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P, \
+      const ConstMatrixView<T1,C1>& m1, const Permutation& P, \
       MatrixView<T2> m2); \
   template void InstLU_SolveInPlace( \
-      const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P, \
+      const ConstMatrixView<T1,C1>& m1, const Permutation& P, \
       VectorView<T2> v2); \
   template void InstLU_SolveTransposeInPlace( \
-      const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P, \
+      const ConstMatrixView<T1,C1>& m1, const Permutation& P, \
       VectorView<T2> v2); \
 
-Def1(T,T,false)
+Def1(T,T,NonConj)
 #ifdef TMV_INST_COMPLEX
 #ifdef TMV_INST_MIX
-Def1(T,CT,false)
+Def1(T,CT,NonConj)
 #endif
-Def1(CT,CT,false)
-Def1(CT,CT,true)
+Def1(CT,CT,NonConj)
+Def1(CT,CT,Conj)
 #endif
 
 #undef Def1

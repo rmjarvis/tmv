@@ -39,15 +39,13 @@
 namespace tmv {
 
     // Defined in TMV_MultXU.cpp
-    template <class T1, bool C1, class T2>
+    template <class T1, int C1, class T2>
     void InstMultXM(
-        const T2 x,
-        const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
+        const T2 x, const ConstUpperTriMatrixView<T1,C1>& m1,
         UpperTriMatrixView<T2,NonUnitDiag> m2);
-    template <class T1,  bool C1, class T2>
+    template <class T1,  int C1, class T2>
     void InstAddMultXM(
-        const T2 x,
-        const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1, 
+        const T2 x, const ConstUpperTriMatrixView<T1,C1>& m1, 
         UpperTriMatrixView<T2,NonUnitDiag> m2);
 
     template <bool add, int ix, class T, class M1, class M2>
@@ -286,7 +284,7 @@ namespace tmv {
         {
             typedef typename M2::value_type VT;
             VT xx = Traits<VT>::convert(T(x));
-            InstAddMultXM(xx,m1.xdView(),m2.xView().viewAsNonUnitDiag());
+            InstAddMultXM(xx,m1.xView(),m2.xView().viewAsNonUnitDiag());
         }
     };
     template <int s, int ix, class T, class M1, class M2>
@@ -296,7 +294,7 @@ namespace tmv {
         {
             typedef typename M2::value_type VT;
             VT xx = Traits<VT>::convert(T(x));
-            InstMultXM(xx,m1.xdView(),m2.xView().viewAsNonUnitDiag());
+            InstMultXM(xx,m1.xView(),m2.xView().viewAsNonUnitDiag());
         }
     };
 
@@ -534,16 +532,14 @@ namespace tmv {
         MultXU_Helper<99,s,add,ix,T,M1v,M2v>::call(x,m1v,m2v);
     }
 
-    template <class T1, bool C1, class T2>
+    template <class T1, int C1, class T2>
     static inline void InstMultXM(
-        const T2 x,
-        const ConstLowerTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
+        const T2 x, const ConstLowerTriMatrixView<T1,C1>& m1,
         LowerTriMatrixView<T2,NonUnitDiag> m2)
     { InstMultXM(x,m1.transpose(),m2.transpose()); }
-    template <class T1,  bool C1, class T2>
+    template <class T1,  int C1, class T2>
     static inline void InstAddMultXM(
-        const T2 x,
-        const ConstLowerTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1, 
+        const T2 x, const ConstLowerTriMatrixView<T1,C1>& m1, 
         LowerTriMatrixView<T2,NonUnitDiag> m2)
     { InstAddMultXM(x,m1.transpose(),m2.transpose()); }
 

@@ -41,7 +41,6 @@
 #define TMV_BaseMatrix_Diag_H
 
 #include "TMV_BaseMatrix.h"
-#include "TMV_BaseMatrix_Rec.h"
 
 namespace tmv {
 
@@ -778,17 +777,17 @@ namespace tmv {
     { return m.diag().sumElements(); }
 
 
-    template <class T, IndexStyle I=CStyle>
+    template <class T, int A=0>
     class DiagMatrix;
-    template <class T, int S=UNKNOWN, bool C=false, IndexStyle I=CStyle>
+    template <class T, int A=0>
     class ConstDiagMatrixView;
-    template <class T, int S=UNKNOWN, bool C=false, IndexStyle I=CStyle>
+    template <class T, int A=0>
     class DiagMatrixView;
-    template <class T, int N, IndexStyle I=CStyle>
+    template <class T, int N, int A=0>
     class SmallDiagMatrix;
-    template <class T, int N, int S, bool C=false, IndexStyle I=CStyle>
+    template <class T, int N, int S, int A=0>
     class ConstSmallDiagMatrixView;
-    template <class T, int N, int S, bool C=false, IndexStyle I=CStyle>
+    template <class T, int N, int S, int A=0>
     class SmallDiagMatrixView;
 
     // This helper class helps decide calc_type for composite classes:

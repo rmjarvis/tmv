@@ -33,12 +33,14 @@
 
 #include "tmv/TMV_DivVU.h"
 #include "tmv/TMV_TriMatrix.h"
-#include "tmv/TMV_MultXV.h"
+#include "tmv/TMV_Vector.h"
+#include "tmv/TMV_CopyU.h"
+#include "tmv/TMV_Det.h"
 
 namespace tmv {
 
     template <class T1, class M2>
-    static void NonBlasLDivEq(VectorView<T1,1> v1, const M2& m2)
+    static void NonBlasLDivEq(VectorView<T1,Unit> v1, const M2& m2)
     {
         if (m2.iscm()) 
             InlineLDivEq(v1,m2.cmView());
@@ -50,13 +52,13 @@ namespace tmv {
             if (m2.isunit()) {
                 const int s = ShapeTraits<M2::_shape>::unit_shape;
                 typename MCopyHelper<T,s,UNKNOWN,UNKNOWN,false,false>::type mc(N);
-                InstCopy(m2,mc.xdView());
-                InlineLDivEq(v1,mc.xdView().constView().cmView());
+                InstCopy(m2,mc.xView());
+                InlineLDivEq(v1,mc.xView().constView().cmView());
             } else  {
                 const int s = ShapeTraits<M2::_shape>::nonunit_shape;
                 typename MCopyHelper<T,s,UNKNOWN,UNKNOWN,false,false>::type mc(N);
-                InstCopy(m2,mc.xdView());
-                InlineLDivEq(v1,mc.xdView().constView().cmView());
+                InstCopy(m2,mc.xView());
+                InlineLDivEq(v1,mc.xView().constView().cmView());
             }
         }
     }
@@ -213,9 +215,9 @@ namespace tmv {
         } else {
             if (m2.isunit()) {
                 BlasLDivEq(
-                    v1,m2.copy().viewAsUnitDiag().constView().xdView(),t2);
+                    v1,m2.copy().viewAsUnitDiag().constView().xView(),t2);
             } else {
-                BlasLDivEq(v1,m2.copy().constView().xdView(),t2);
+                BlasLDivEq(v1,m2.copy().constView().xView(),t2);
             }
         }
 #else
@@ -230,16 +232,14 @@ namespace tmv {
 #endif
     }
 
-    template <class T1, class T2, bool C2>
+    template <class T1, class T2, int C2>
     void InstLDivEq(
-        VectorView<T1> v1,
-        const ConstUpperTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2)
+        VectorView<T1> v1, const ConstUpperTriMatrixView<T2,C2>& m2)
     { DoInstLDivEq(v1,m2); }
 
-    template <class T1, class T2, bool C2>
+    template <class T1, class T2, int C2>
     void InstLDivEq(
-        VectorView<T1> v1,
-        const ConstLowerTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2)
+        VectorView<T1> v1, const ConstLowerTriMatrixView<T2,C2>& m2)
     { DoInstLDivEq(v1,m2); }
 
 #define InstFile "TMV_DivVU.inst"

@@ -33,7 +33,6 @@
 #include "TMV_Blas.h"
 #include "tmv/TMV_Rank1VVM.h"
 #include "tmv/TMV_Matrix.h"
-#include "tmv/TMV_SimpleMatrix.h"
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_MultXM.h"
 
@@ -98,7 +97,7 @@ namespace tmv {
 #ifdef TMV_INST_DOUBLE
     static void BlasRank1Update(
         double alpha, const ConstVectorView<double>& x,
-        const ConstVectorView<double>& y, MatrixView<double,1> A)
+        const ConstVectorView<double>& y, MatrixView<double,ColMajor> A)
     {
         TMVAssert(A.colsize() == x.size());
         TMVAssert(A.rowsize() == y.size());
@@ -122,12 +121,12 @@ namespace tmv {
             BLASP(xp),BLASV(xs),BLASP(yp),BLASV(ys),
             BLASP(A.ptr()),BLASV(lda));
     }
-    template <bool C1, bool C2>
+    template <int C1, int C2>
     static void BlasRank1Update(
         std::complex<double> alpha,
-        const ConstVectorView<std::complex<double>,UNKNOWN,C1>& x, 
-        const ConstVectorView<std::complex<double>,UNKNOWN,C2>& y,
-        MatrixView<std::complex<double>,1> A)
+        const ConstVectorView<std::complex<double>,C1>& x, 
+        const ConstVectorView<std::complex<double>,C2>& y,
+        MatrixView<std::complex<double>,ColMajor> A)
     {
         TMVAssert(A.colsize() == x.size());
         TMVAssert(A.rowsize() == y.size());
@@ -178,11 +177,11 @@ namespace tmv {
                 BLASP(A.ptr()),BLASV(lda));
     }
 #ifdef TMV_INST_MIX
-    template <bool C2>
+    template <int C2>
     static void BlasRank1Update(
         std::complex<double> alpha, const ConstVectorView<double>& x, 
-        const ConstVectorView<std::complex<double>,UNKNOWN,C2>& y,
-        MatrixView<std::complex<double>,1> A)
+        const ConstVectorView<std::complex<double>,C2>& y,
+        MatrixView<std::complex<double>,ColMajor> A)
     {
         // A += a * x ^ y
         // (Ar + I Ai) += (ar + I ai) * x ^ (yr + I yi)
@@ -224,11 +223,12 @@ namespace tmv {
             BLASP(xp),BLASV(xs),BLASP(yp+1),BLASV(ys),
             BLASP((double*)A.ptr()),BLASV(lda));
     }
-    template <bool C1>
+    template <int C1>
     static void BlasRank1Update(
         std::complex<double> alpha,
-        const ConstVectorView<std::complex<double>,UNKNOWN,C1>& x,
-        const ConstVectorView<double>& y, MatrixView<std::complex<double>,1> A)
+        const ConstVectorView<std::complex<double>,C1>& x,
+        const ConstVectorView<double>& y,
+        MatrixView<std::complex<double>,ColMajor> A)
     {
         TMVAssert(A.colsize() == x.size());
         TMVAssert(A.rowsize() == y.size());
@@ -264,7 +264,8 @@ namespace tmv {
     }
     static void BlasRank1Update(
         std::complex<double> alpha, const ConstVectorView<double>& x,
-        const ConstVectorView<double>& y, MatrixView<std::complex<double>,1> A)
+        const ConstVectorView<double>& y,
+        MatrixView<std::complex<double>,ColMajor> A)
     {
         // A += a * x ^ y
         // (Ar + I Ai) += (ar + I ai) * x ^ y
@@ -299,18 +300,18 @@ namespace tmv {
     template <bool add>
     static void DoRank1Update(
         const double x, const ConstVectorView<double>& v1,
-        const ConstVectorView<double>& v2, MatrixView<double,1> m3)
+        const ConstVectorView<double>& v2, MatrixView<double,ColMajor> m3)
     { 
         if (!add) m3.setZero();
         if (v1.size() > 0 && v2.size() > 0)
             BlasRank1Update(x,v1,v2,m3); 
     }
-    template <bool add, class T1, bool C1, class T2, bool C2>
+    template <bool add, class T1, int C1, class T2, int C2>
     static void DoRank1Update(
         const std::complex<double> x,
-        const ConstVectorView<T1,UNKNOWN,C1>& v1,
-        const ConstVectorView<T2,UNKNOWN,C2>& v2,
-        MatrixView<std::complex<double>,1> m3)
+        const ConstVectorView<T1,C1>& v1,
+        const ConstVectorView<T2,C2>& v2,
+        MatrixView<std::complex<double>,ColMajor> m3)
     {
         if (!add) m3.setZero();
         if (v1.size() > 0 && v2.size() > 0)
@@ -320,7 +321,7 @@ namespace tmv {
 #ifdef TMV_INST_FLOAT
     static void BlasRank1Update(
         float alpha, const ConstVectorView<float>& x,
-        const ConstVectorView<float>& y, MatrixView<float,1> A)
+        const ConstVectorView<float>& y, MatrixView<float,ColMajor> A)
     {
         TMVAssert(A.colsize() == x.size());
         TMVAssert(A.rowsize() == y.size());
@@ -344,12 +345,12 @@ namespace tmv {
             BLASP(xp),BLASV(xs),BLASP(yp),BLASV(ys),
             BLASP(A.ptr()),BLASV(lda));
     }
-    template <bool C1, bool C2>
+    template <int C1, int C2>
     static void BlasRank1Update(
         std::complex<float> alpha,
-        const ConstVectorView<std::complex<float>,UNKNOWN,C1>& x, 
-        const ConstVectorView<std::complex<float>,UNKNOWN,C2>& y,
-        MatrixView<std::complex<float>,1> A)
+        const ConstVectorView<std::complex<float>,C1>& x, 
+        const ConstVectorView<std::complex<float>,C2>& y,
+        MatrixView<std::complex<float>,ColMajor> A)
     {
         TMVAssert(A.colsize() == x.size());
         TMVAssert(A.rowsize() == y.size());
@@ -400,11 +401,11 @@ namespace tmv {
                 BLASP(A.ptr()),BLASV(lda));
     }
 #ifdef TMV_INST_MIX
-    template <bool C2>
+    template <int C2>
     static void BlasRank1Update(
         std::complex<float> alpha, const ConstVectorView<float>& x, 
-        const ConstVectorView<std::complex<float>,UNKNOWN,C2>& y,
-        MatrixView<std::complex<float>,1> A)
+        const ConstVectorView<std::complex<float>,C2>& y,
+        MatrixView<std::complex<float>,ColMajor> A)
     {
         // A += a * x ^ y
         // (Ar + I Ai) += (ar + I ai) * x ^ (yr + I yi)
@@ -446,11 +447,12 @@ namespace tmv {
             BLASP(xp),BLASV(xs),BLASP(yp+1),BLASV(ys),
             BLASP((float*)A.ptr()),BLASV(lda));
     }
-    template <bool C1>
+    template <int C1>
     static void BlasRank1Update(
         std::complex<float> alpha,
-        const ConstVectorView<std::complex<float>,UNKNOWN,C1>& x,
-        const ConstVectorView<float>& y, MatrixView<std::complex<float>,1> A)
+        const ConstVectorView<std::complex<float>,C1>& x,
+        const ConstVectorView<float>& y,
+        MatrixView<std::complex<float>,ColMajor> A)
     {
         TMVAssert(A.colsize() == x.size());
         TMVAssert(A.rowsize() == y.size());
@@ -486,7 +488,8 @@ namespace tmv {
     }
     static void BlasRank1Update(
         std::complex<float> alpha, const ConstVectorView<float>& x,
-        const ConstVectorView<float>& y, MatrixView<std::complex<float>,1> A)
+        const ConstVectorView<float>& y,
+        MatrixView<std::complex<float>,ColMajor> A)
     {
         // A += a * x ^ y
         // (Ar + I Ai) += (ar + I ai) * x ^ y
@@ -521,18 +524,18 @@ namespace tmv {
     template <bool add>
     static void DoRank1Update(
         const float x, const ConstVectorView<float>& v1,
-        const ConstVectorView<float>& v2, MatrixView<float,1> m3)
+        const ConstVectorView<float>& v2, MatrixView<float,ColMajor> m3)
     { 
         if (!add) m3.setZero();
         if (v1.size() > 0 && v2.size() > 0)
             BlasRank1Update(x,v1,v2,m3); 
     }
-    template <bool add, class T1, bool C1, class T2, bool C2>
+    template <bool add, class T1, int C1, class T2, int C2>
     static void DoRank1Update(
         const std::complex<float> x,
-        const ConstVectorView<T1,UNKNOWN,C1>& v1,
-        const ConstVectorView<T2,UNKNOWN,C2>& v2,
-        MatrixView<std::complex<float>,1> m3)
+        const ConstVectorView<T1,C1>& v1,
+        const ConstVectorView<T2,C2>& v2,
+        MatrixView<std::complex<float>,ColMajor> m3)
     {
         if (!add) m3.setZero();
         if (v1.size() > 0 && v2.size() > 0) 
@@ -541,43 +544,43 @@ namespace tmv {
 #endif // FLOAT
 #endif // BLAS
 
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstRank1Update(
-        const T3 x, const ConstVectorView<T1,UNKNOWN,C1>& v1,
-        const ConstVectorView<T2,UNKNOWN,C2>& v2, MatrixView<T3> m3)
+        const T3 x, const ConstVectorView<T1,C1>& v1,
+        const ConstVectorView<T2,C2>& v2, MatrixView<T3> m3)
     {
 #if TMV_OPT <= 1
         m3.setZero();
         InstAddRank1Update(x,v1,v2,m3);
 #else
         if (m3.isrm()) {
-            MatrixView<T3,1> m3t = m3.transpose();
+            MatrixView<T3,ColMajor> m3t = m3.transpose();
             DoRank1Update<false>(x,v2,v1,m3t);
         } else if (m3.iscm()) {
-            MatrixView<T3,1> m3cm = m3;
+            MatrixView<T3,ColMajor> m3cm = m3;
             DoRank1Update<false>(x,v1,v2,m3cm);
         } else {
-            SimpleMatrix<T3,ColMajor> m3x(m3.colsize(),m3.rowsize());
-            MatrixView<T3,1> m3cm = m3x.cmView();
+            Matrix<T3,ColMajor|NoDivider> m3x(m3.colsize(),m3.rowsize());
+            MatrixView<T3,ColMajor> m3cm = m3x.cmView();
             DoRank1Update<false>(x,v1,v2,m3cm);
             InstCopy(m3x.constView().xView(),m3);
         }
 #endif
     }
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstAddRank1Update(
-        const T3 x, const ConstVectorView<T1,UNKNOWN,C1>& v1,
-        const ConstVectorView<T2,UNKNOWN,C2>& v2, MatrixView<T3> m3)
+        const T3 x, const ConstVectorView<T1,C1>& v1,
+        const ConstVectorView<T2,C2>& v2, MatrixView<T3> m3)
     {
         if (m3.isrm()) {
-            MatrixView<T3,1> m3t = m3.transpose();
+            MatrixView<T3,ColMajor> m3t = m3.transpose();
             DoRank1Update<true>(x,v2,v1,m3t);
         } else if (m3.iscm()) {
-            MatrixView<T3,1> m3cm = m3;
+            MatrixView<T3,ColMajor> m3cm = m3;
             DoRank1Update<true>(x,v1,v2,m3cm);
         } else {
-            SimpleMatrix<T3,ColMajor> m3x(m3.colsize(),m3.rowsize());
-            MatrixView<T3,1> m3cm = m3x.cmView();
+            Matrix<T3,ColMajor|NoDivider> m3x(m3.colsize(),m3.rowsize());
+            MatrixView<T3,ColMajor> m3cm = m3x.cmView();
             DoRank1Update<false>(T3(1),v1,v2,m3cm);
             InstAddMultXM(x,m3x.constView().xView(),m3);
         }

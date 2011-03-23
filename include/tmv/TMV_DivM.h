@@ -750,7 +750,6 @@ namespace tmv {
                 cs == 1 && rs == 1 ? 1 :
                 cs == 2 && rs == 2 ? 20 :
                 M2::_hasdivider ? 21 :
-                ShapeTraits<M2::_shape>::square ? 22 :
                 cs == UNKNOWN || rs == UNKNOWN ? 24 :
                 cs == rs ? 22 :
                 23;
@@ -792,7 +791,6 @@ namespace tmv {
                 cs == 1 && rs == 1 ? 1 :
                 cs == 2 && rs == 2 ? 2 :
                 M2::_hasdivider ? 11 :
-                ShapeTraits<M2::_shape>::square ? 12 :
                 cs == UNKNOWN || rs == UNKNOWN ? 14 :
                 cs == rs ? 12 :
                 13;

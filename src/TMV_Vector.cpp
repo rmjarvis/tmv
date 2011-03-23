@@ -31,7 +31,9 @@
 
 #include "TMV_Blas.h"
 #include <iostream>
+#include <cstring> // for memmove
 #include "tmv/TMV_Vector.h"
+#include "tmv/TMV_SmallVector.h"
 #include "tmv/TMV_MinMax.h"
 #include "tmv/TMV_NormV.h"
 #include "tmv/TMV_Norm.h"
@@ -41,6 +43,7 @@
 #include "tmv/TMV_ReverseV.h"
 #include "tmv/TMV_ConjugateV.h"
 #include "tmv/TMV_VectorIO.h"
+#include "tmv/TMV_ScaleV.h"
 
 namespace tmv {
 
@@ -89,12 +92,12 @@ namespace tmv {
     // Copy Vectors
     //
 
-    template <class T1, bool C1, class T2> 
+    template <class T1, int C1, class T2> 
     static void DoInstCopy(
-        const ConstVectorView<T1,UNKNOWN,C1>& v1, VectorView<T2> v2)
+        const ConstVectorView<T1,C1>& v1, VectorView<T2> v2)
     {
         if (v2.step() == 1) {
-            VectorView<T2,1> v2u = v2.unitView();
+            VectorView<T2,Unit> v2u = v2.unitView();
             if (v1.step() == 1) InlineCopy(v1.unitView(),v2u);
             else InlineCopy(v1,v2u);
         } else 
@@ -136,7 +139,7 @@ namespace tmv {
         BLASNAME(zcopy) (BLASV(n),BLASP(v1p),BLASV(s1),BLASP(v2p),BLASV(s2));
     }
     static void DoInstCopy(
-        const ConstVectorView<std::complex<double>,UNKNOWN,true>& v1, 
+        const ConstVectorView<std::complex<double>,Conj>& v1, 
         VectorView<std::complex<double> > v2)
     {
         DoInstCopy(v1.conjugate(),v2);
@@ -176,7 +179,7 @@ namespace tmv {
         BLASNAME(ccopy) (BLASV(n),BLASP(v1p),BLASV(s1),BLASP(v2p),BLASV(s2));
     }
     static void DoInstCopy(
-        const ConstVectorView<std::complex<float>,UNKNOWN,true>& v1, 
+        const ConstVectorView<std::complex<float>,Conj>& v1, 
         VectorView<std::complex<float> > v2)
     {
         DoInstCopy(v1.conjugate(),v2);
@@ -185,8 +188,8 @@ namespace tmv {
 #endif // FLOAT
 #endif // BLAS
 
-    template <class T1, bool C1, class T2> 
-    void InstCopy(const ConstVectorView<T1,UNKNOWN,C1>& v1, VectorView<T2> v2)
+    template <class T1, int C1, class T2> 
+    void InstCopy(const ConstVectorView<T1,C1>& v1, VectorView<T2> v2)
     {
         TMVAssert(
             v1.realPart().cptr() != v2.realPart().cptr() ||
@@ -200,19 +203,19 @@ namespace tmv {
     // Swap Vectors
     //
 
-    template <class T, bool C> 
-    static void DoInstSwap(VectorView<T,UNKNOWN,C> v1, VectorView<T> v2)
+    template <class T, int C> 
+    static void DoInstSwap(VectorView<T,C> v1, VectorView<T> v2)
     {
         if (v1.step() == 1) {
-            VectorView<T,1,C> v1u = v1.unitView();
+            VectorView<T,C|Unit> v1u = v1.unitView();
             if (v2.step() == 1) {
-                VectorView<T,1> v2u = v2.unitView();
+                VectorView<T,Unit> v2u = v2.unitView();
                 InlineSwap(v1u,v2u);
             } else 
                 InlineSwap(v1u,v2);
         } else {
             if (v2.step() == 1) {
-                VectorView<T,1> v2u = v2.unitView();
+                VectorView<T,Unit> v2u = v2.unitView();
                 InlineSwap(v1,v2u);
             } else 
                 InlineSwap(v1,v2);
@@ -246,7 +249,7 @@ namespace tmv {
         BLASNAME(zswap) (BLASV(n),BLASP(v1p),BLASV(s1),BLASP(v2p),BLASV(s2));
     }
     static void DoInstSwap(
-        VectorView<std::complex<double>,UNKNOWN,true> v1, 
+        VectorView<std::complex<double>,Conj> v1, 
         VectorView<std::complex<double> > v2)
     {
         DoInstSwap(v1.conjugate(),v2);
@@ -280,7 +283,7 @@ namespace tmv {
         BLASNAME(cswap) (BLASV(n),BLASP(v1p),BLASV(s1),BLASP(v2p),BLASV(s2));
     }
     static void DoInstSwap(
-        VectorView<std::complex<float>,UNKNOWN,true> v1, 
+        VectorView<std::complex<float>,Conj> v1, 
         VectorView<std::complex<float> > v2)
     {
         DoInstSwap(v1.conjugate(),v2);
@@ -290,8 +293,8 @@ namespace tmv {
 #endif
 #endif // BLAS
 
-    template <class T, bool C> 
-    void InstSwap(VectorView<T,UNKNOWN,C> v1, VectorView<T> v2)
+    template <class T, int C> 
+    void InstSwap(VectorView<T,C> v1, VectorView<T> v2)
     { DoInstSwap(v1,v2); }
 
     //
@@ -302,7 +305,7 @@ namespace tmv {
     void InstReverseSelf(VectorView<T> v)
     {
         if (v.step() == 1) {
-            VectorView<T,1> vu = v.unitView();
+            VectorView<T,Unit> vu = v.unitView();
             InlineReverseSelf(vu);
         } else 
             InlineReverseSelf(v);
@@ -317,7 +320,7 @@ namespace tmv {
     static void DoInstConjugateSelf(VectorView<T> v)
     {
         if (v.step() == 1) {
-            VectorView<T,1> vu = v.unitView();
+            VectorView<T,Unit> vu = v.unitView();
             InlineConjugateSelf(vu);
         } else 
             InlineConjugateSelf(v);
@@ -849,7 +852,7 @@ namespace tmv {
     void InstSort(VectorView<T> v, ADType ad, CompType comp)
     {
         if (v.step() == 1) {
-            VectorView<T,1> vu = v.unitView();
+            VectorView<T,Unit> vu = v.unitView();
             InlineSort(vu,ad,comp);
         } else {
             InlineSort(v,ad,comp); 
@@ -859,7 +862,7 @@ namespace tmv {
     void InstSort(VectorView<T> v, int* P, ADType ad, CompType comp)
     {
         if (v.step() == 1) {
-            VectorView<T,1> vu = v.unitView();
+            VectorView<T,Unit> vu = v.unitView();
             InlineSort(vu,P,ad,comp);
         } else 
             InlineSort(v,P,ad,comp); 
@@ -870,16 +873,16 @@ namespace tmv {
     // I/O
     //
 
-    template <class T, bool C> 
-    void InstWrite(std::ostream& os, const ConstVectorView<T,UNKNOWN,C>& v)
+    template <class T, int C> 
+    void InstWrite(std::ostream& os, const ConstVectorView<T,C>& v)
     {
         if (v.step() == 1) InlineWrite(os,v.unitView()); 
         else InlineWrite(os,v); 
     }
 
-    template <class T, bool C> 
+    template <class T, int C> 
     void InstWrite(
-        std::ostream& os, const ConstVectorView<T,UNKNOWN,C>& v,
+        std::ostream& os, const ConstVectorView<T,C>& v,
         typename ConstVectorView<T>::float_type thresh)
     {
         if (v.step() == 1) InlineWrite(os,v.unitView(),thresh); 
@@ -890,7 +893,7 @@ namespace tmv {
     void InstRead(std::istream& is, VectorView<T> v)
     {
         if (v.step() == 1) {
-            VectorView<T,1> vu = v.unitView();
+            VectorView<T,Unit> vu = v.unitView();
             InlineRead(is,vu); 
         } else 
             InlineRead(is,v); 

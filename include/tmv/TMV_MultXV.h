@@ -35,8 +35,9 @@
 
 #include "TMV_BaseVector.h"
 #include "TMV_Scaling.h"
-#include "TMV_CopyV.h"
 #include "TMV_MultXV_Funcs.h"
+#include "TMV_CopyV.h"
+#include "TMV_ScaleV.h"
 
 #ifdef PRINTALGO_XV
 #include <iostream>
@@ -51,13 +52,13 @@
 namespace tmv {
 
     // Defined in TMV_MultXV.cpp
-    template <class T1, bool C1, class T2>
+    template <class T1, int C1, class T2>
     void InstMultXV(
-        const T2 x, const ConstVectorView<T1,UNKNOWN,C1>& v1,
+        const T2 x, const ConstVectorView<T1,C1>& v1,
         VectorView<T2> v2);
-    template <class T1, bool C1, class T2>
+    template <class T1, int C1, class T2>
     void InstAddMultXV(
-        const T2 x, const ConstVectorView<T1,UNKNOWN,C1>& v1,
+        const T2 x, const ConstVectorView<T1,C1>& v1,
         VectorView<T2> v2);
 
     //

@@ -78,7 +78,6 @@
 #ifndef TMV_BaseVector_H
 #define TMV_BaseVector_H
 
-#include <sstream>
 #include "TMV_Base.h"
 #include "TMV_Shape.h"
 #include "TMV_ListInit.h"
@@ -186,34 +185,18 @@ namespace tmv {
 
     // The following all derive from BaseVector_Mutable
     // See TMV_Vector.h and TMV_SmallVector.h for their definitions:
-    template <class T, IndexStyle I=CStyle>
+    template <class T, int A=0>
     class Vector;
-    template <class T, int S=UNKNOWN, bool C=false, IndexStyle I=CStyle>
+    template <class T, int A=0>
     class ConstVectorView;
-    template <class T, int S=UNKNOWN, bool C=false, IndexStyle I=CStyle>
+    template <class T, int A=0>
     class VectorView;
-    template <class T, int N, IndexStyle I=CStyle>
+    template <class T, int N, int A=0>
     class SmallVector;
-    template <class T, int N, int S=1, bool C=false, IndexStyle I=CStyle>
+    template <class T, int N, int S, int A=0>
     class ConstSmallVectorView;
-    template <class T, int N, int S=1, bool C=false, IndexStyle I=CStyle>
+    template <class T, int N, int S, int A=0>
     class SmallVectorView;
-
-    // These are effectively aliases for I = FortranStyle
-    // so you don't have to write all the S,C values if you are using
-    // the defaults when you want to specify FortranStyle.
-    template <class T>
-    class VectorF;
-    template <class T, int S=UNKNOWN, bool C=false>
-    class ConstVectorViewF;
-    template <class T, int S=UNKNOWN, bool C=false>
-    class VectorViewF;
-    template <class T, int N>
-    class SmallVectorF;
-    template <class T, int N, int S=1, bool C=false>
-    class ConstSmallVectorViewF;
-    template <class T, int N, int S=1, bool C=false>
-    class SmallVectorViewF;
 
     // Used by sort(p)
     class Permutation;
@@ -469,17 +452,18 @@ namespace tmv {
     };
 
     // This helper class helps decide calc_type for composite classes:
-    template <class T, int _size, bool _fort>
+    template <class T, int s, bool fort>
     struct VCopyHelper
-    { typedef SmallVector<T,_size,_fort?FortranStyle:CStyle> type; };
-    template <class T, bool _fort>
-    struct VCopyHelper<T,UNKNOWN,_fort>
-    { typedef Vector<T,_fort?FortranStyle:CStyle> type; };
-
-    // This is a type to use when there is no valid return type for a 
-    // particular function. 
-    // It will give a compiler error if it is ever used.
-    class InvalidType { private: InvalidType(); };
+    {
+        enum { A2 = fort ? FortranStyle : CStyle };
+        typedef SmallVector<T,s,A2> type; 
+    };
+    template <class T, bool fort>
+    struct VCopyHelper<T,UNKNOWN,fort>
+    {
+        enum { A2 = fort ? FortranStyle : CStyle };
+        typedef Vector<T,A2> type; 
+    };
 
     // This helper function checks for aliasis in the memory storage of
     // two objects.  We overload it for specific objects that can be 
@@ -1527,6 +1511,7 @@ namespace tmv {
     // TMV_Text 
     //
 
+#ifdef TMV_DEBUG
     static inline std::string TMV_Text(ADType ad)
     { return ad == Ascend ? "Ascend" : "Descend"; }
 
@@ -1562,6 +1547,7 @@ namespace tmv {
         s << "BaseVector_Mutable< "<<TMV_Text(v.vec())<<" >";
         return s.str();
     }
+#endif
 
 } // namespace tmv
 

@@ -37,9 +37,7 @@
 #include "TMV_BaseVector.h"
 #include "TMV_MultXV.h"
 #include "TMV_MultVV.h"
-#include "TMV_MultXU.h"
 #include "TMV_Prefetch.h"
-#include "TMV_Det.h"
 #include "TMV_MultXV_Funcs.h"
 #include "TMV_DivVM_Funcs.h"
 
@@ -54,14 +52,12 @@
 namespace tmv {
 
     // Defined in TMV_DivVU.cpp
-    template <class T1, class T2, bool C2>
+    template <class T1, class T2, int C2>
     void InstLDivEq(
-        VectorView<T1> v1,
-        const ConstUpperTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2);
-    template <class T1, class T2, bool C2>
+        VectorView<T1> v1, const ConstUpperTriMatrixView<T2,C2>& m2);
+    template <class T1, class T2, int C2>
     void InstLDivEq(
-        VectorView<T1> v1,
-        const ConstLowerTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2);
+        VectorView<T1> v1, const ConstLowerTriMatrixView<T2,C2>& m2);
 
     //
     // v1 /= m2
@@ -444,7 +440,7 @@ namespace tmv {
     struct LDivEqVU_Helper<90,s,V1,M2>
     {
         static void call(V1& v1, const M2& m2)
-        { InstLDivEq(v1.xView(),m2.xdView()); }
+        { InstLDivEq(v1.xView(),m2.xView()); }
     };
 
     // algo 97: Conjugate

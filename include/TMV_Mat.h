@@ -49,20 +49,27 @@
 #include "tmv/TMV_Rank1VVM.h"
 #include "tmv/TMV_MultMV.h"
 #include "tmv/TMV_MultMM.h"
+#include "tmv/TMV_MultMM_Block.h"
+#include "tmv/TMV_MultMM_OpenMP.h"
+#include "tmv/TMV_MultMM_Winograd.h"
 
 #include "tmv/TMV_Det.h"
 #include "tmv/TMV_InvertM.h"
 #include "tmv/TMV_DivM.h"
 
+#include "tmv/TMV_Permutation.h"
+#include "tmv/TMV_MultPM.h"
+
 #include "tmv/TMV_LUD.h"
+#include "tmv/TMV_LUDecompose.h"
+#include "tmv/TMV_LUDiv.h"
+#include "tmv/TMV_LUInverse.h"
+
 #if 0
 #include "tmv/TMV_QR.h"
 #include "tmv/TMV_QRP.h"
 #include "tmv/TMV_SVD.h"
 #endif
-
-#include "tmv/TMV_Permutation.h"
-#include "tmv/TMV_MultPM.h"
 
 #ifndef TMV_H
 #include "tmv/TMV_ProdXM.h"

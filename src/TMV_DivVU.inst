@@ -4,18 +4,18 @@
 #define Def1(T1,T2,C2)\
   template void InstLDivEq( \
       VectorView<T1> v1, \
-      const ConstUpperTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2); \
+      const ConstUpperTriMatrixView<T2,C2>& m2); \
   template void InstLDivEq( \
       VectorView<T1> v1, \
-      const ConstLowerTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2); \
+      const ConstLowerTriMatrixView<T2,C2>& m2); \
 
-Def1(T,T,false)
+Def1(T,T,NonConj)
 #ifdef TMV_INST_COMPLEX
 #ifdef TMV_INST_MIX
-Def1(CT,T,false)
+Def1(CT,T,NonConj)
 #endif
-Def1(CT,CT,false)
-Def1(CT,CT,true)
+Def1(CT,CT,NonConj)
+Def1(CT,CT,Conj)
 #endif
 
 #undef Def1

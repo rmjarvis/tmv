@@ -32,7 +32,6 @@
 #ifndef TMV_VectorIO_H
 #define TMV_VectorIO_H
 
-#include "../util/portable_platform.h"
 #include "TMV_BaseVector.h"
 
 namespace tmv {
@@ -41,26 +40,13 @@ namespace tmv {
     // Write Vector
     //
 
-    // This bit is to workaround a bug in pgCC that was fixed in version 7.
-    // I don't know if versions earlier than 6.1 had the bug, but 
-    // I apply the workaround to all version before 7.
-    template <class T>
-    static inline const T& Value(const T& x) { return x; }
-#ifdef PLATFORM_COMPILER_PGI
-#if PLATFORM_COMPILER_VERSION < 0x070000
-    static inline double Value(long double x) { return double(x); }
-    static inline std::complex<double> Value(std::complex<long double> x)
-    { return tmv::Traits<std::complex<double> >::convert(x); }
-#endif
-#endif
-
     // Defined in TMV_Vector.cpp
-    template <class T, bool C>
+    template <class T, int C>
     void InstWrite(
-        std::ostream& os, const ConstVectorView<T,UNKNOWN,C>& v);
-    template <class T, bool C>
+        std::ostream& os, const ConstVectorView<T,C>& v);
+    template <class T, int C>
     void InstWrite(
-        std::ostream& os, const ConstVectorView<T,UNKNOWN,C>& v,
+        std::ostream& os, const ConstVectorView<T,C>& v,
         typename ConstVectorView<T>::float_type thresh);
     template <class T>
     void InstRead(std::istream& is, VectorView<T> v);
@@ -409,9 +395,9 @@ namespace tmv {
         return is;
     }
 
-    template <class T, IndexStyle I>
+    template <class T, int A>
     static inline std::istream& operator>>(
-        std::istream& is, auto_ptr<Vector<T,I> >& v)
+        std::istream& is, auto_ptr<Vector<T,A> >& v)
     {
         size_t n;
         is >> n;
@@ -423,7 +409,7 @@ namespace tmv {
             throw VectorReadError<T>(is);
 #endif
         }
-        v.reset(new Vector<T,I>(n));
+        v.reset(new Vector<T,A>(n));
         v->read(is);
         return is;
     }

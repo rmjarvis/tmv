@@ -33,6 +33,8 @@
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_ProdXM.h"
 #include "tmv/TMV_TransposeM.h"
+#include "tmv/TMV_Vector.h"
+#include "tmv/TMV_ScaleM.h"
 
 namespace tmv {
 
@@ -65,16 +67,16 @@ namespace tmv {
             InlineMultXM<add>(Scaling<0,std::complex<T> >(x),m1,m2); 
     }
 
-    template <class T1, bool C1, class T2>
+    template <class T1, int C1, class T2>
     void InstMultXM(
-        const T2 x, const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
+        const T2 x, const ConstMatrixView<T1,C1>& m1,
         MatrixView<T2> m2)
     {
         if (m1.iscm() && m2.iscm()) {
-            MatrixView<T2,1> m2cm = m2.cmView();
+            MatrixView<T2,ColMajor> m2cm = m2.cmView();
             DoMultXM<false>(x,m1.cmView(),m2cm);
         } else if (m1.isrm() && m2.isrm()) {
-            MatrixView<T2,1> m2t = m2.transpose().cmView();
+            MatrixView<T2,ColMajor> m2t = m2.transpose().cmView();
             DoMultXM<false>(x,m1.transpose().cmView(),m2t);
         } else {
             InstCopy(m1,m2);
@@ -82,19 +84,19 @@ namespace tmv {
         }
     }
 
-    template <class T1, bool C1, class T2>
+    template <class T1, int C1, class T2>
     void InstAddMultXM(
-        const T2 x, const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
+        const T2 x, const ConstMatrixView<T1,C1>& m1,
         MatrixView<T2> m2)
     {
         if (m2.iscm()) {
-            MatrixView<T2,1> m2cm = m2.cmView();
+            MatrixView<T2,ColMajor> m2cm = m2.cmView();
             if (m1.iscm()) 
                 DoMultXM<true>(x,m1.cmView(),m2cm);
             else
                 DoMultXM<true>(x,m1,m2cm);
         } else if (m2.isrm()) {
-            MatrixView<T2,1> m2t = m2.transpose().cmView();
+            MatrixView<T2,ColMajor> m2t = m2.transpose().cmView();
             if (m1.isrm()) 
                 DoMultXM<true>(x,m1.transpose().cmView(),m2t);
             else

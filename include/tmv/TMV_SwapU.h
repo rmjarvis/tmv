@@ -38,10 +38,9 @@
 namespace tmv {
 
     // Defined in TMV_TriMatrix.cpp
-    template <class T, bool C1>
+    template <class T, int C1>
     void InstSwap(
-        UpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C1> m1,
-        UpperTriMatrixView<T,UnknownDiag> m2); 
+        UpperTriMatrixView<T,C1> m1, UpperTriMatrixView<T> m2); 
 
     //
     // Swap Matrices
@@ -244,7 +243,7 @@ namespace tmv {
     struct SwapU_Helper<90,s,M1,M2>
     {
         static void call(M1& m1, M2& m2)
-        { InstSwap(m1.xdView(),m2.xdView()); }
+        { InstSwap(m1.xView(),m2.xView()); }
     };
 
     // algo 96: Transpose

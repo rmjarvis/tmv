@@ -124,10 +124,6 @@ namespace tmv {
 #endif
 #endif
 
-#ifndef TMV_INST_MIX
-#define TMV_INST_SKIP_BLAS
-#endif
-
 #define InstFile "TMV_MultMM_Kernel.inst"
 #include "TMV_Inst.h"
 #undef InstFile

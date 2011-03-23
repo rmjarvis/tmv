@@ -32,7 +32,11 @@
 #ifndef TMV_MultMM_BLOCK_H
 #define TMV_MultMM_BLOCK_H
 
+#include "TMV_BaseMatrix_Rec.h"
 #include "TMV_MultMM_Kernel.h"
+#include "TMV_CopyM.h"
+#include "TMV_MultXM.h"
+#include "TMV_Array.h"
 
 #ifdef PRINTALGO_MM_BLOCK
 #include <iostream>
@@ -44,30 +48,26 @@
 namespace tmv {
 
     // Defined in TMV_MultMM_Block.cpp
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM_Block(
         const T3 x, 
-        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2,
-        MatrixView<T3> m3);
-    template <class T1, bool C1, class T2, bool C2, class T3>
+        const ConstMatrixView<T1,C1>& m1,
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM_Block(
         const T3 x, 
-        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2,
-        MatrixView<T3> m3);
-    template <class T1, bool C1, class T2, bool C2, class T3>
+        const ConstMatrixView<T1,C1>& m1,
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM_RecursiveBlock(
         const T3 x, 
-        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2,
-        MatrixView<T3> m3);
-    template <class T1, bool C1, class T2, bool C2, class T3>
+        const ConstMatrixView<T1,C1>& m1,
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM_RecursiveBlock(
         const T3 x, 
-        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2,
-        MatrixView<T3> m3);
+        const ConstMatrixView<T1,C1>& m1,
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
 
 #ifdef TEST_POINTERS
     void* glob_m1p_end;
@@ -396,7 +396,7 @@ namespace tmv {
     struct MyCopy // real
     {
         typedef typename M1::real_type RT;
-        typedef MatrixView<RT,1> M2;
+        typedef MatrixView<RT,ColMajor> M2;
 
         static void call(
             const ConstMatrixView<RT>& m1x,
@@ -437,7 +437,7 @@ namespace tmv {
     {
         typedef typename M1::real_type RT;
         typedef typename M1::const_realpart_type M1r;
-        typedef MatrixView<RT,1> M2r;
+        typedef MatrixView<RT,ColMajor> M2r;
 
         static void call(
             const ConstMatrixView<RT>& m1x,
@@ -484,9 +484,12 @@ namespace tmv {
         // do not want to maintain the sizes if they are known, since
         // the matrices that will be passed to MyCopy will be much 
         // smaller.  
-        typedef ConstMatrixView<T1,M1::_stepi,M1::_stepj,M1::_conj> M1x;
-        typedef ConstMatrixView<T1,1,M1::_stepj,M1::_conj> M1cm;
-        typedef ConstMatrixView<T1,M1::_stepi,1,M1::_conj> M1rm;
+        enum { xA = (M1::_attrib & (Conj | AllStorageType) ) };
+        enum { cmA = (M1::_attrib & Conj) | ColMajor };
+        enum { rmA = (M1::_attrib & Conj) | RowMajor };
+        typedef ConstMatrixView<T1,xA> M1x;
+        typedef ConstMatrixView<T1,cmA> M1cm;
+        typedef ConstMatrixView<T1,rmA> M1rm;
 
         typedef void F(
             const ConstMatrixView<RT>& m1x,
@@ -496,13 +499,13 @@ namespace tmv {
         struct GetCopyHelper;
 
         template <int dummy>
-        struct GetCopyHelper<true,dummy> // known steps
+        struct GetCopyHelper<true,dummy> // known majority
         {
             static F* call(const M1& m)
             { return &MyCopy<iscomplex,M1x>::call; }
         };
         template <int dummy>
-        struct GetCopyHelper<false,dummy> // unknown steps
+        struct GetCopyHelper<false,dummy> // unknown majority
         {
             static F* call(const M1& m)
             {
@@ -516,7 +519,7 @@ namespace tmv {
         };
         static F* call(const M1& m)
         {
-            const bool known = M1::_stepi != UNKNOWN || M1::_stepj != UNKNOWN;
+            const bool known = Attrib<xA>::colmajor || Attrib<xA>::rowmajor;
             return GetCopyHelper<known,1>::call(m);
         }
     };
@@ -1065,7 +1068,7 @@ namespace tmv {
         typedef typename M2::real_type RT;
         typedef typename M2::value_type T2; 
         // Note: T2 might be complex, but m1 isn't.
-        typedef ConstMatrixView<RT,1> M1r;
+        typedef ConstMatrixView<RT,ColMajor> M1r;
         typedef typename M2::const_realpart_type M2r;
 
         static void call(
@@ -1129,7 +1132,7 @@ namespace tmv {
         typedef typename M2::real_type RT;
         typedef typename M2::value_type T2; 
         // Note: T2 might be complex, but m1 isn't.
-        typedef ConstMatrixView<RT,1> M1r;
+        typedef ConstMatrixView<RT,ColMajor> M1r;
 
         static void call(
             const RT* xp, 
@@ -1171,7 +1174,7 @@ namespace tmv {
     {
         typedef typename M2::value_type T2;
         typedef typename M2::real_type RT;
-        typedef ConstMatrixView<RT,1> M1r;
+        typedef ConstMatrixView<RT,ColMajor> M1r;
         typedef typename M2::realpart_type M2r;
         typedef typename M2::imagpart_type M2i;
 
@@ -1240,7 +1243,7 @@ namespace tmv {
         typedef typename M2::value_type T2;
         typedef typename M2::realpart_type M2r;
         typedef typename M2::imagpart_type M2i;
-        typedef ConstMatrixView<RT,1> M1r;
+        typedef ConstMatrixView<RT,ColMajor> M1r;
 
         static void call(
             const RT* xp,
@@ -1296,9 +1299,12 @@ namespace tmv {
     {
         typedef typename M2::real_type RT;
         typedef typename M2::value_type T2;
-        typedef MatrixView<T2,M2::_stepi,M2::_stepj,M2::_conj> M2x;
-        typedef MatrixView<T2,1,M2::_stepj,M2::_conj> M2cm;
-        typedef MatrixView<T2,M2::_stepi,1,M2::_conj> M2rm;
+        enum { xA = (M2::_attrib & (Conj | AllStorageType) ) };
+        enum { cmA = (M2::_attrib & Conj) | ColMajor };
+        enum { rmA = (M2::_attrib & Conj) | RowMajor };
+        typedef MatrixView<T2,xA> M2x;
+        typedef MatrixView<T2,cmA> M2cm;
+        typedef MatrixView<T2,rmA> M2rm;
 
         typedef void F(
             const RT* xp,
@@ -1309,13 +1315,13 @@ namespace tmv {
         struct GetAssignHelper;
 
         template <int dummy>
-        struct GetAssignHelper<true,dummy> // known steps
+        struct GetAssignHelper<true,dummy> // known majority
         {
             static F* call(const M2& m)
             { return &MyAssign<zx,z2,add,M2x>::call; }
         };
         template <int dummy>
-        struct GetAssignHelper<false,dummy> // unknown steps
+        struct GetAssignHelper<false,dummy> // unknown majority
         {
             static F* call(const M2& m)
             {
@@ -1329,7 +1335,7 @@ namespace tmv {
         };
         static F* call(const M2& m)
         {
-            const bool known = M2::_stepi != UNKNOWN || M2::_stepj != UNKNOWN;
+            const bool known = Attrib<xA>::colmajor || Attrib<xA>::rowmajor;
             return GetAssignHelper<known,1>::call(m);
         }
     };
@@ -1610,7 +1616,7 @@ namespace tmv {
             TMVAssert(m2p+(two2*KB*NB) <= glob_m2p_end);
             TMVAssert(m3p+(two3*MB*MB) <= glob_m3p_end);
             std::cout<<"end of m2 = "<<
-                ConstVectorView<long,1>((const long*)glob_m2p_end,10)
+                ConstVectorView<long,Unit>((const long*)glob_m2p_end,10)
                 <<std::endl;
 #endif
             if (firstm1) 
@@ -1621,7 +1627,7 @@ namespace tmv {
             if (firstm3)
             {
                 const int size3 = two3*MB*NB;
-                VectorView<RT,1> m3x(m3p,size3,1);
+                VectorView<RT,Unit> m3x(m3p,size3);
                 m3x.setZero();
             }
             (*myprod) (MB,NB,KB, m1p,KB,1, m2p,1,KB, m3p,1,MB);
@@ -1645,7 +1651,7 @@ namespace tmv {
                     TMVAssert(m2p+(two2*Kd*NB) <= glob_m2p_end);
                     TMVAssert(m3p+(two3*MB*MB) <= glob_m3p_end);
                     std::cout<<"end of m2 = "<<
-                        ConstVectorView<long,1>((const long*)glob_m2p_end,10)
+                        ConstVectorView<long,Unit>((const long*)glob_m2p_end,10)
                         <<std::endl;
 #endif
                     if (firstm1) 
@@ -2466,7 +2472,7 @@ namespace tmv {
             glob_m2p_end = m2p+size2;
             glob_m3p_end = m3p+size3;
             std::cout<<"end of m2 = "<<
-                ConstVectorView<long,1>((const long*)glob_m2p_end,10)
+                ConstVectorView<long,Unit>((const long*)glob_m2p_end,10)
                 <<std::endl;
 #endif
 
@@ -2633,8 +2639,9 @@ namespace tmv {
                 const int M, const int N, const int K,
                 const Scaling<1,RT>& x, const RT* A, const RT* B, RT* C);
 
-            typedef void CopyF(const ConstMatrixView<RT>& m1x,
-                               RT* m2p, int M, int N, int si, int sj);
+            typedef void CopyF(
+                const ConstMatrixView<RT>& m1x,
+                RT* m2p, int M, int N, int si, int sj);
             typedef void AssignF(
                 const RT* x, 
                 RT* m1p, const int M, const int N, const int si1, const int sj1,
@@ -2761,8 +2768,9 @@ namespace tmv {
                 const int M, const int N, const int K,
                 const Scaling<1,RT>& x, const RT* A, const RT* B, RT* C);
 
-            typedef void CopyF(const ConstMatrixView<RT>& m1x,
-                               RT* m2p, int M, int N, int si, int sj);
+            typedef void CopyF(
+                const ConstMatrixView<RT>& m1x,
+                RT* m2p, int M, int N, int si, int sj);
             typedef void AssignF(
                 const RT* x, 
                 RT* m1p, const int M, const int N, const int si1, const int sj1,
@@ -3061,7 +3069,7 @@ namespace tmv {
         std::cout<<"sizes = "<<size1<<"  "<<size2<<"  "<<size3<<std::endl;
 #endif
 
-        VectorView<RT,1> m3x(m3p,size3,1);
+        VectorView<RT,Unit> m3x(m3p,size3);
         m3x.setZero();
         for (int k=0;k<Kb;++k,m1p+=size1,m2p+=size2) {
             if (firstm1) 
@@ -3336,8 +3344,9 @@ namespace tmv {
                 const int M, const int N, const int K,
                 const Scaling<1,RT>& x, const RT* A, const RT* B, RT* C);
 
-            typedef void CopyF(const ConstMatrixView<RT>& m1x,
-                               RT* m2p, int M, int N, int si, int sj);
+            typedef void CopyF(
+                const ConstMatrixView<RT>& m1x,
+                RT* m2p, int M, int N, int si, int sj);
             typedef void AssignF(
                 const RT* x, 
                 RT* m1p, const int M, const int N, const int si1, const int sj1,
@@ -3461,8 +3470,9 @@ namespace tmv {
                 const int M, const int N, const int K,
                 const Scaling<1,RT>& x, const RT* A, const RT* B, RT* C);
 
-            typedef void CopyF(const ConstMatrixView<RT>& m1x,
-                               RT* m2p, int M, int N, int si, int sj);
+            typedef void CopyF(
+                const ConstMatrixView<RT>& m1x,
+                RT* m2p, int M, int N, int si, int sj);
             typedef void AssignF(
                 const RT* x, 
                 RT* m1p, const int M, const int N, const int si1, const int sj1,

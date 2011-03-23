@@ -33,14 +33,12 @@
 #ifndef TMV_DivMU_H
 #define TMV_DivMU_H
 
-#include "TMV_MultMM.h"
-#include "TMV_MultUV.h"
-#include "TMV_MultUM.h"
-#include "TMV_CopyU.h"
-#include "TMV_MultXU.h"
+#include "TMV_BaseMatrix_Rec.h"
+#include "TMV_BaseMatrix_Tri.h"
+#include "TMV_ScaleV.h"
+#include "TMV_MultMV.h"
 #include "TMV_Rank1VVM.h"
 #include "TMV_DivVU.h"
-#include "TMV_SmallTriMatrix.h"
 #include "TMV_InvertU.h"
 #include "TMV_MultXM_Funcs.h"
 #include "TMV_DivMM_Funcs.h"
@@ -97,14 +95,12 @@
 namespace tmv {
 
     // Defined in TMV_DivMU.cpp
-    template <class T1, class T2, bool C2>
+    template <class T1, class T2, int C2>
     void InstLDivEq(
-        MatrixView<T1> m1,
-        const ConstUpperTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2);
-    template <class T1, class T2, bool C2>
+        MatrixView<T1> m1, const ConstUpperTriMatrixView<T2,C2>& m2);
+    template <class T1, class T2, int C2>
     void InstLDivEq(
-        MatrixView<T1> m1,
-        const ConstLowerTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2);
+        MatrixView<T1> m1, const ConstLowerTriMatrixView<T2,C2>& m2);
 
 
     //
@@ -372,7 +368,7 @@ namespace tmv {
 #endif
             typedef typename M2::real_type RT;
             typedef typename M2::value_type T2;
-            const DiagType D2 = M2::_unit ? UnitDiag : NonUnitDiag;
+            const DiagType D2 = M2::_attrib & AllDiagType;
             typedef SmallUpperTriMatrix<T2,cs,D2> Uinv;
             Uinv m2inv = m2;
             InvertU_Helper<-3,cs,Uinv>::call(m2inv);
@@ -463,10 +459,19 @@ namespace tmv {
                 (cs != UNKNOWN && cs <= 3) ? 16 :
                 rr ? 12 : rc ? 13 : cx ? 11 : 13;
             const int algo3 =  // The algorithm for M > 16
-                cs == UNKNOWN || cs > 16 ? 17 : 0;
+                cs == UNKNOWN ? 17 : 
+#ifdef TMV_DIVMU_INLINE_MM
+                cs <= 16 ? 0 : 
+#endif
+                cs > TMV_DIVMU_RECURSE ? 17 :
+                0;
             const int algo4 =  // The algorithm for MultMM
                 cs == UNKNOWN ? -2 : 
-                cs > 16 ? -3 : 0;
+#ifdef TMV_DIVMU_INLINE_MM
+                cs <= 16 ? 0 : 
+#endif
+                cs > TMV_DIVMU_RECURSE ? -3 :
+                0;
 #ifdef TMV_DIVMU_INLINE_MM
             const int algo3b =  // The algorithm for M > RECURSE
                 cs == UNKNOWN || 
@@ -474,6 +479,12 @@ namespace tmv {
             const int algo4b =  // The algorithm for MultMM
                 cs == UNKNOWN || 
                 (cs > TMV_DIVMU_RECURSE && cs <= 16) ? -4 : 0;
+#endif
+#ifdef PRINTALGO_DivU
+            std::cout<<"algo2,3,4 = "<<algo2<<"  "<<algo3<<"  "<<algo4<<std::endl;
+#ifdef TMV_DIVMU_INLINE_MM
+            std::cout<<"algo3b,4b = "<<algo3b<<"  "<<algo4b<<std::endl;
+#endif
 #endif
 
             typedef typename M2::real_type RT;
@@ -646,7 +657,7 @@ namespace tmv {
 #endif
             typedef typename M2::real_type RT;
             typedef typename M2::value_type T2;
-            const DiagType D2 = M2::_unit ? UnitDiag : NonUnitDiag;
+            const DiagType D2 = M2::_attrib & AllDiagType;
             typedef SmallLowerTriMatrix<T2,cs,D2> Linv;
             Linv m2inv = m2;
             InvertU_Helper<-3,cs,Linv>::call(m2inv);
@@ -737,10 +748,19 @@ namespace tmv {
                 (cs != UNKNOWN && cs <= TMV_DIVMU_RECURSE) ? 26 :
                 rr ? 22 : rc ? 23 : cx ? 21 : 23;
             const int algo3 =  // The algorithm for M > 16
-                cs == UNKNOWN || cs > 16 ? 27 : 0;
+                cs == UNKNOWN ? 27 : 
+#ifdef TMV_DIVMU_INLINE_MM
+                cs <= 16 ? 0 : 
+#endif
+                cs > TMV_DIVMU_RECURSE ? 27 :
+                0;
             const int algo4 =  // The algorithm for MultMM
                 cs == UNKNOWN ? -2 : 
-                cs > 16 ? -3 : 0;
+#ifdef TMV_DIVMU_INLINE_MM
+                cs <= 16 ? 0 : 
+#endif
+                cs > TMV_DIVMU_RECURSE ? -3 :
+                0;
 #ifdef TMV_DIVMU_INLINE_MM
             const int algo3b =  // The algorithm for M > RECURSE
                 cs == UNKNOWN || 
@@ -748,6 +768,12 @@ namespace tmv {
             const int algo4b =  // The algorithm for MultMM
                 cs == UNKNOWN || 
                 (cs > TMV_DIVMU_RECURSE && cs <= 16) ? -4 : 0;
+#endif
+#ifdef PRINTALGO_DivU
+            std::cout<<"algo2,3,4 = "<<algo2<<"  "<<algo3<<"  "<<algo4<<std::endl;
+#ifdef TMV_DIVMU_INLINE_MM
+            std::cout<<"algo3b,4b = "<<algo3b<<"  "<<algo4b<<std::endl;
+#endif
 #endif
 
             typedef typename M2::real_type RT;
@@ -800,7 +826,9 @@ namespace tmv {
         static void call(M1& m1, const M2& m2)
         {
             const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
+#if defined(PRINTALGO_DivU) || defined(_OPENMP)
             const int N = rs==UNKNOWN ? int(m1.rowsize()) : rs;
+#endif
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqMU algo 31: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -1005,7 +1033,7 @@ namespace tmv {
     struct LDivEqMU_Helper<90,cs,rs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
-        { InstLDivEq(m1.xView(),m2.xdView()); }
+        { InstLDivEq(m1.xView(),m2.xView()); }
     };
 
     // algo 97: Conjugate

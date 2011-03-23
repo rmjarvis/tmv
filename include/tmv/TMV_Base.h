@@ -141,7 +141,10 @@
 
 #ifdef TMV_DEBUG
 #include <typeinfo>
+#include <sstream>
 #endif
+
+#include "../util/portable_platform.h"
 
 #ifdef TMV_MEM_TEST
 #include "util/mmgr.h"
@@ -177,13 +180,133 @@ namespace tmv {
     ( (major > TMV_MAJOR_VERSION) || \
       (major == TMV_MAJOR_VERSION && minor >= TMV_MINOR_VERSION) )
 
-    // StorageType defines the order to store the elements of a matrix
-    // TODO: I haven't implemented RowPacked and ColPakced yet.
-    enum StorageType {
-        RowMajor, ColMajor, DiagMajor, NoMajor, RowPacked, ColPacked };
+    // This is based on the BOOST implementation BOOST_STATIC_ASSERT:
+    template<bool>
+    struct tmv_static_assert;
+    template<>
+    struct tmv_static_assert<true>
+    { 
+        enum { ok = 1 };
+        static void call() {} 
+    };
+#define TMVStaticAssert(e) \
+    do { tmv_static_assert<(e) != 0>::call(); } while (false)
 
-    // IndexStyle defines which kind of indexing to use for a vector
-    enum IndexStyle { CStyle, FortranStyle=789234 };
+    // Attributes are stored as a binary field, so they can be |'ed
+    // together to calculate the full set of attributes.
+    //
+    // For each object we have a default set of attributes that is 
+    // implied by A=0.  This way we can write, for example:
+    // UpperTriMatrix<T,UnitDiag> U;
+    // and this will imply (UnitDiag | ColMajor | NonPacked | CStyle).
+    //
+    // Attributes that are always the default (whenever they are allowed)
+    // can be defined as 0, since the absence of the converse is sufficient.
+    // e.g. CStyle, NonConj, NonUnit, NonMajor, NonPacked, UnknownDiag.
+    //
+    // Some pairs of attributes are logical opposites, but we can't
+    // set either to 0, since some objects have one as the default, and
+    // others have the other.  e.g. WithDivider and NoDivider.
+    // So these each need to have a non-zero bit.
+    //
+    // (Not implemented yet: Packed, ZeroDiag)
+    //
+    enum ConjType { NonConj = 0, Conj = 0x1 };
+    enum IndexStyle { CStyle = 0, FortranStyle = 0x2 };
+    enum StepType { NonUnit = 0, Unit = 0x4 };
+    enum StorageType {
+        NonMajor = 0, ColMajor = 0x4, RowMajor = 0x8, DiagMajor = 0x10,
+        AllStorageType = 0x1c };
+    enum DiagType {
+        UnknownDiag = 0, NonUnitDiag = 0x20, UnitDiag = 0x40,
+        ZeroDiag = 0x80, AllDiagType = 0xe0 };
+    enum PackType { NonPacked = 0, Packed = 0x100 };
+    enum DivStatus { 
+        NoDivider = 0x200, WithDivider = 0x400, AllDivStatus = 0x600 };
+    enum UpLo { Upper = 0, Lower = 0x800 };
+
+    template <bool iszero>
+    struct DoNonZeroMessage;
+    template <>
+    struct DoNonZeroMessage<true>
+    { 
+        template <class Dummy>
+        static void call() {} 
+    };
+#if 1
+    template <>
+    struct DoNonZeroMessage<false>
+    { 
+        template <class Dummy>
+        static void call() 
+        {
+            // I think this might be portable.  We'll see...
+            // At the very least, if it doesn't emit the #pragma message,
+            // I think it will just ignore it, so at least I don't
+            // think this will break anything...
+//#pragma message ("Use of multiple Attributes is deprecated.\ne.g. Matrix<T,ColMajor,FortranStyle> should now be \nMatrix<T,ColMajor | FortranStyle>.")
+            TMVStaticAssert(Dummy() == 100);
+        }
+    };
+#endif
+    template <bool iszero>
+    struct NonZeroMessage
+    { static void call() { DoNonZeroMessage<iszero>::template call<int>(); } };
+
+
+    template <int A>
+    struct Attrib
+    {
+        enum { vectoronly = (A <= 0x7) };
+        enum { conj = !(!(A & Conj)) };
+        enum { fort = !(!(A & FortranStyle)) };
+        enum { unit = !(!(A & Unit)) };
+        enum { colmajor = !(!(A & ColMajor)) };
+        enum { rowmajor = !(!(A & RowMajor)) };
+        enum { diagmajor = !(!(A & DiagMajor)) };
+        enum { nonmajor = !(colmajor || rowmajor || diagmajor) };
+        enum { nonunitdiag = !(!(A & NonUnitDiag)) };
+        enum { unitdiag = !(!(A & UnitDiag)) };
+        enum { zerodiag = !(!(A & ZeroDiag)) };
+        enum { unknowndiag = !(unitdiag || nonunitdiag || zerodiag) };
+        enum { packed = !(!(A & Packed)) };
+        enum { nodivider = !(!(A & NoDivider)) };
+        enum { withdivider = !(!(A & WithDivider)) };
+        enum { lower = !(!(A & Lower)) };
+        enum { upper = !(A & Lower) };
+
+        enum { stor = (
+                rowmajor ? RowMajor : colmajor ? ColMajor :
+                diagmajor ? DiagMajor : NonMajor ) };
+
+        static void checkzero() 
+        { NonZeroMessage<A==0>::call(); }
+        static std::string text()
+        {
+            return 
+                std::string() +
+                ( (A & ColMajor) ? "ColMajor" : 
+                  (A & RowMajor) ? "RowMajor" :
+                  (A & DiagMajor) ? "DiagMajor" : "NonMajor") +
+                ((A & Conj) ? "|Conj" : "") +
+                ((A & FortranStyle) ? "|FortranStyle " : "") +
+                ((A & NonUnitDiag) ? "|NonUnitDiag " : "") +
+                ((A & UnitDiag) ? "|UnitDiag" : "") +
+                ((A & ZeroDiag) ? "|ZeroDiag" : "") +
+                ((A & Packed) ? "|Packed" : "") +
+                ((A & Lower) ? "|Lower" : "") +
+                ((A & NoDivider) ? "|NoDivider" : "") +
+                ((A & WithDivider) ? "|WithDivider" : "");
+        }
+        static std::string vtext()
+        {
+            return 
+                std::string() +
+                ((A & Unit) ? "Unit" : "NonUnit") +
+                ((A & Conj) ? "|Conj" : "") +
+                ((A & FortranStyle) ? "|FortranStyle" : "");
+        }
+    };
 
     // UNKNOWN is the value of _size, _step, etc. whenever it
     // is not known at compile time.
@@ -204,12 +327,16 @@ namespace tmv {
         // And finally shorthand for "one of the real DivType's":
         DivTypeFlags = 62
     };
-    // I use things like &, |, |= to manipulate DivType's.  These are legal
-    // in C, but not C++, so write overrides for these functions:
     static inline DivType operator|(DivType a, DivType b) 
-    { return static_cast<DivType>(static_cast<int>(a) | static_cast<int>(b)); }
+    { 
+        return static_cast<DivType>(
+            static_cast<int>(a) | static_cast<int>(b)); 
+    }
     static inline DivType operator&(DivType a, DivType b) 
-    { return static_cast<DivType>(static_cast<int>(a) & static_cast<int>(b)); }
+    { 
+        return static_cast<DivType>(
+            static_cast<int>(a) & static_cast<int>(b)); 
+    }
     static inline DivType& operator|=(DivType& a, DivType b) 
     { a = (a|b); return a; }
     static inline DivType& operator&=(DivType& a, DivType b) 
@@ -217,8 +344,10 @@ namespace tmv {
     static inline DivType operator~(DivType a) 
     { return static_cast<DivType>(~static_cast<int>(a)); }
 
-    // TODO: I haven't implemented ZeroDiag yet.
-    enum DiagType { UnitDiag, NonUnitDiag, ZeroDiag, UnknownDiag };
+    // This is a type to use when there is no valid return type for a 
+    // particular function. 
+    // It will give a compiler error if it is ever used.
+    class InvalidType { private: InvalidType(); };
 
     template <class T> class ConjRef;
     template <class T, bool C> class TriRef;
@@ -556,15 +685,6 @@ namespace tmv {
     {
         enum { prod = UNKNOWN };
     };
-
-    // This is based on the BOOST implementation BOOST_STATIC_ASSERT:
-    template<bool>
-    struct tmv_static_assert;
-    template<>
-    struct tmv_static_assert<true>
-    { static void call() {} };
-#define TMVStaticAssert(e) \
-    do { tmv_static_assert<(e) != 0>::call(); } while (false)
 
     template <class T>
     static inline T TMV_SQR(const T& x) 
@@ -1290,7 +1410,7 @@ namespace tmv {
         { return m.upperTri(); }
         template <class M>
         static typename M::const_unknown_uppertri_type uppertri(
-            const M& m, DiagType dt) 
+            const M& m, int dt) 
         { return m.upperTri(dt); }
         template <class M>
         static typename M::unknown_uppertri_type uppertri(M& m, DiagType dt) 
@@ -1602,7 +1722,7 @@ namespace tmv {
         { return m.lowerTri(); }
         template <class M>
         static typename M::const_unknown_lowertri_type uppertri(
-            const M& m, DiagType dt) 
+            const M& m, int dt) 
         { return m.lowerTri(dt); }
         template <class M>
         static typename M::unknown_lowertri_type uppertri(M& m, DiagType dt) 
@@ -1943,8 +2063,8 @@ namespace tmv {
         unsigned long line;
         std::string file;
 
-        FailedAssert(std::string s, unsigned long l, 
-                            std::string f) throw() :
+        FailedAssert(
+            std::string s, unsigned long l, std::string f) throw() :
             Error("Failed Assert statement ",s),
             failed_assert(s), line(l), file(f) {}
         ~FailedAssert() throw() {}
@@ -2029,24 +2149,6 @@ namespace tmv {
                 std::endl; 
         }
     };
-
-    template <class M>
-    class NonPosDefMatrix : 
-        public NonPosDef
-    {
-    public:
-        typename M::copy_type m;
-
-        NonPosDefMatrix(const M& _m) : 
-            NonPosDef(TMV_Text(_m)), m(_m) {}
-        ~NonPosDefMatrix() throw() {}
-        void write(std::ostream& os) const throw()
-        {
-            NonPosDef::write(os);
-            m.write(os);
-            os << std::endl;
-        }
-    };
 #endif
 
 #ifdef TMV_WARN
@@ -2082,36 +2184,6 @@ namespace tmv {
         operator int() const { return S; }
     };
     template <>
-    struct CheckedInt<FortranStyle>
-    // This helps catch programming errors from the change in the 
-    // template parameters of VectorView, MatrixView, etc. from
-    // version 0.63 to 0.70.
-    // It used to be that to make a fortran-style view, you would write:
-    // VectorView<T,FortranStyle> v = m.row(i);
-    // This is now wrong, since the first template parameter is now the step
-    // size, so this would treat FortranStyle as the step size of the view.
-    // One thing I did to help catch this was to make FortranStyle a 
-    // crazy number that will probably never be used as an actual step
-    // (789234).  This specialization of CheckedInt catches when FortranStyle
-    // is used as a step and gives an error.
-#if 0
-    {
-        CheckedInt(int s) 
-        {
-            std::string str = 
-                "FortranStyle used as a step size is probably an error...\n"
-                "Now you should use F at the end of the name "
-                "(e.g. VectorViewF)\n"
-                "instead of using I=FotranStyle as a template parameter.\n";
-            TMV_Warning(str);
-            TMVAssert(s == FortranStyle); 
-        }
-        operator int() const { return FortranStyle; }
-    };
-#else
-    {};
-#endif
-    template <>
     struct CheckedInt<UNKNOWN>
     {
         int step;
@@ -2131,18 +2203,18 @@ namespace tmv {
     };
 
     // A similar helper to account for possibly unknown DiagType
-    template <DiagType D>
+    template <int A>
     struct DiagInt
     {
-        DiagInt(DiagType d) { TMVAssert(d == D); }
-        operator DiagType() const { return D; }
+        DiagInt(int d) { TMVAssert(d == A); }
+        operator int() const { return A; }
     };
     template <>
     struct DiagInt<UnknownDiag>
     {
-        DiagType dt;
-        DiagInt(DiagType d) : dt(d) {}
-        operator DiagType() const { return dt; }
+        int dt;
+        DiagInt(int d) : dt(d) {}
+        operator int() const { return dt; }
     };
 
     template <class T>
@@ -2160,6 +2232,7 @@ namespace tmv {
     static inline bool TMV_Underflow(int )
     { return false; }
 
+#ifdef TMV_DEBUG
     template <class T>
     static inline std::string TMV_Text(const T&)
     { return std::string("Unknown (") + typeid(T).name() + ")"; }
@@ -2180,21 +2253,6 @@ namespace tmv {
     static inline std::string TMV_Text(std::complex<T>)
     { return std::string("complex<") + TMV_Text(T()) + ">"; }
 
-    static inline std::string TMV_Text(StorageType s)
-    {
-        return 
-            s == RowMajor ? "RowMajor" :
-            s == ColMajor ? "ColMajor" :
-            s == DiagMajor ? "DiagMajor" :
-            s == NoMajor ? "NoMajor" :
-            s == RowPacked ? "RowPacked" :
-            s == ColPacked ? "ColPacked" :
-            "unkown StorageType";
-    }
-
-    static inline std::string TMV_Text(IndexStyle i)
-    { return i == CStyle ? "CStyle" : "FortranStyle"; }
-
     static inline std::string TMV_Text(DivType d)
     {
         return 
@@ -2210,23 +2268,7 @@ namespace tmv {
               char('0' + (d%100)/10) + 
               char('0' + (d%10)) );
     }
-
-    static inline std::string TMV_Text(DiagType d)
-    {
-        return 
-            d == UnitDiag ? "UnitDiag" :
-            d == NonUnitDiag ? "NonUnitDiag" :
-            "UnknownDiag"; 
-    }
-
-#if 0
-    static inline std::string TMV_Text(UpLoType u)
-    { return u == Upper ? "Upper" : "Lower"; }
-
-    static inline std::string TMV_Text(SymType s)
-    { return s == Sym ? "Sym" : "Herm"; }
 #endif
-
 
 #ifdef TMV_NO_STL_AUTO_PTR
     // This is copied more or less verbatim from gcc's auto_ptr implementation.
@@ -2310,6 +2352,20 @@ namespace tmv {
 #define TMV_DEBUG_PARAM(x)
 #endif
 
+    // This bit is to workaround a bug in pgCC that was fixed in version 7.
+    // I don't know if versions earlier than 6.1 had the bug, but 
+    // I apply the workaround to all version before 7.
+    template <class T>
+    static inline const T& Value(const T& x) { return x; }
+#ifdef PLATFORM_COMPILER_PGI
+#if PLATFORM_COMPILER_VERSION < 0x070000
+    static inline double Value(long double x) { return double(x); }
+    static inline std::complex<double> Value(std::complex<long double> x)
+    { return tmv::Traits<std::complex<double> >::convert(x); }
+#endif
+#endif
+
+ 
 } // namespace tmv
 
 #endif

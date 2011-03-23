@@ -3,7 +3,8 @@
 #define TMV_MultPV_H
 
 #include "TMV_Permutation.h"
-#include "TMV_MultXV.h"
+#include "TMV_BaseVector.h"
+#include "TMV_MultXV_Funcs.h"
 
 namespace tmv {
 

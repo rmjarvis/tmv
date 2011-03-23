@@ -39,9 +39,7 @@
 #include "TMV_MultMM.h"
 #include "TMV_DivVU.h"
 #include "TMV_DivMU.h"
-#include "TMV_SwapV.h"
 #include "TMV_Permutation.h"
-#include "TMV_PermuteM.h"
 
 #ifdef PRINTALGO_LU
 #include <iostream>
@@ -79,7 +77,7 @@ namespace tmv {
 
     // Defined in TMV_LUDecompose.cpp
     template <class T>
-    void InstLU_Decompose(MatrixView<T,1> m, int* P, int& detp);
+    void InstLU_Decompose(MatrixView<T,ColMajor> m, int* P, int& detp);
 
     template <int algo, int cs, int rs, class M>
     struct LUDecompose_Helper;
@@ -701,6 +699,7 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct LUDecompose_Helper<-4,cs,rs,M1>
     {
+        typedef typename M1::value_type T;
         static void call(M1& m, int* P, int& detp)
         {
             const int algo = 
@@ -711,23 +710,29 @@ namespace tmv {
                 rs == 2 ? 2 :
                 27;
 #ifdef PRINTALGO_LU
-            typedef typename M1::value_type T;
             std::cout<<"Inline LUDecompose: \n";
             std::cout<<"m = "<<TMV_Text(m)<<std::endl;
             std::cout<<"cs = "<<cs<<"  rs = "<<rs<<std::endl;
             std::cout<<"sizes = "<<m.colsize()<<"  "<<m.rowsize()<<std::endl;
             std::cout<<"algo = "<<algo<<std::endl;
-            //std::cout<<"m = "<<m<<std::endl;
+#endif
+#ifdef XDEBUG_LU
+            typedef typename M3::real_type RT;
+            Matrix<T> mi = m;
 #endif
             LUDecompose_Helper<algo,cs,rs,M1>::call(m,P,detp);
-#ifdef PRINTALGO_LU
-            //std::cout<<"m => "<<m<<std::endl;
-            //std::cout<<"L = "<<m.unitLowerTri()<<std::endl;
-            //std::cout<<"U = "<<m.upperTri()<<std::endl;
-            //Matrix<T> lu = m.unitLowerTri() * m.upperTri();
-            //std::cout<<"L*U = "<<lu<<std::endl;
-            //lu.reversePermuteRows(P);
-            //std::cout<<"P*L*U = "<<lu<<std::endl;
+#ifdef XDEBUG_LU
+            Matrix<T> lu = m.unitLowerTri() * m.upperTri();
+            Matrix<T> plu = lu;
+            plu.reversePermuteRows(P);
+            if (Norm(plu-mi) > 1.e-3*Norm(mi)) {
+                std::cout<<"m => "<<m<<std::endl;
+                std::cout<<"L = "<<m.unitLowerTri()<<std::endl;
+                std::cout<<"U = "<<m.upperTri()<<std::endl;
+                std::cout<<"L*U = "<<lu<<std::endl;
+                std::cout<<"P*L*U = "<<plu<<std::endl;
+                abort();
+            }
 #endif
         }
     };
@@ -814,17 +819,17 @@ namespace tmv {
     }
 
     // Allow views as an argument by value (for convenience)
-    template <class T, int Si, int Sj, bool C, IndexStyle I>
-    static inline void LU_Decompose(MatrixView<T,Si,Sj,C,I> m, Permutation& P)
+    template <class T, int A>
+    static inline void LU_Decompose(MatrixView<T,A> m, Permutation& P)
     {
-        typedef MatrixView<T,Si,Sj,C,I> M;
+        typedef MatrixView<T,A> M;
         LU_Decompose(static_cast<BaseMatrix_Rec_Mutable<M>&>(m),P); 
     }
-    template <class T, int M, int N, int Si, int Sj, bool C, IndexStyle I>
+    template <class T, int M, int N, int Si, int Sj, int A>
     static inline void LU_Decompose(
-        SmallMatrixView<T,M,N,Si,Sj,C,I> m, Permutation& P)
+        SmallMatrixView<T,M,N,Si,Sj,A> m, Permutation& P)
     {
-        typedef SmallMatrixView<T,M,N,Si,Sj,C,I> MM;
+        typedef SmallMatrixView<T,M,N,Si,Sj,A> MM;
         LU_Decompose(static_cast<BaseMatrix_Rec_Mutable<MM>&>(m),P); 
     }
 

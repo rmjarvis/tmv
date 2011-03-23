@@ -17,28 +17,28 @@ Def1(T,CT)
 
 #define Def2(T,C) \
   template void InstSwap(\
-      UpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C> m1, \
+      UpperTriMatrixView<T,C> m1, \
       UpperTriMatrixView<T> m2); \
 
-Def2(T,false)
+Def2(T,NonConj)
 #ifdef TMV_INST_COMPLEX
-Def2(CT,false)
-Def2(CT,true)
+Def2(CT,NonConj)
+Def2(CT,Conj)
 #endif
 
 
 #define Def3(T1,C,T2) \
   template void InstCopy(\
-      const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C>& m1, \
+      const ConstUpperTriMatrixView<T1,C>& m1, \
       UpperTriMatrixView<T2> m2); \
 
-Def3(T,false,T)
+Def3(T,NonConj,T)
 #ifdef TMV_INST_COMPLEX
 #ifdef TMV_INST_MIX
-Def3(T,false,CT)
+Def3(T,NonConj,CT)
 #endif
-Def3(CT,false,CT)
-Def3(CT,true,CT)
+Def3(CT,NonConj,CT)
+Def3(CT,Conj,CT)
 #endif
 
 #define Def4(RT,T)\
@@ -56,20 +56,20 @@ Def4(FT,CT)
 
 #define Def5(RT,T,C) \
   template void InstWriteCompact(std::ostream& os, \
-      const ConstUpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>& m1); \
+      const ConstUpperTriMatrixView<T,C>& m1); \
   template void InstWriteCompact(std::ostream& os, \
-      const ConstUpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>& m1,\
+      const ConstUpperTriMatrixView<T,C>& m1,\
       const RT thresh); \
   template void InstWriteCompact(std::ostream& os, \
-      const ConstLowerTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>& m1); \
+      const ConstLowerTriMatrixView<T,C>& m1); \
   template void InstWriteCompact(std::ostream& os, \
-      const ConstLowerTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>& m1,\
+      const ConstLowerTriMatrixView<T,C>& m1,\
       const RT thresh); \
 
-Def5(FT,T,false)
+Def5(FT,T,NonConj)
 #ifdef TMV_INST_COMPLEX
-Def5(FT,CT,false)
-Def5(FT,CT,true)
+Def5(FT,CT,NonConj)
+Def5(FT,CT,Conj)
 #endif
 
 #undef Def1

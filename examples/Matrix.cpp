@@ -7,7 +7,7 @@ int main() try
     // Several ways to create and initialize matrices:
 
     // Create with uninitialized values
-    tmv::Matrix<double> m1(4,3); 
+    tmv::Matrix<double,tmv::NoDivider> m1(4,3); 
     // In debugging mode (the default), these are all initialized to 888
     // to help you more easily notice when you have failed to correctly
     // initialize a matrix.
@@ -34,7 +34,7 @@ int main() try
     //! 
 
     // Create with all 2's.
-    tmv::Matrix<double> m2(4,3,2.); 
+    tmv::Matrix<double,tmv::NoDivider> m2(4,3,2.); 
     std::cout<<"m2 = \n"<<m2<<std::endl;
     //! m2 = 
     //! 4  3
@@ -46,7 +46,7 @@ int main() try
 
     // Create from given elements in a C array;
     double mm[12] = {1,2,3,4, 5,6,7,8, 9,10,11,12};
-    tmv::Matrix<double> m3(4,3,mm); // Default order is ColMajor
+    tmv::Matrix<double,tmv::NoDivider> m3(4,3,mm); // Default order is ColMajor
     std::cout<<"m3 (ColMajor) = \n"<<m3<<std::endl;
     //! m3 (ColMajor) = 
     //! 4  3
@@ -56,7 +56,7 @@ int main() try
     //! (  4  8  12  )
     //! 
 
-    tmv::Matrix<double,tmv::RowMajor> m4(4,3,mm);
+    tmv::Matrix<double,tmv::RowMajor | tmv::NoDivider> m4(4,3,mm);
     std::cout<<"m4 (RowMajor) = \n"<<m4<<std::endl;
     //! m4 (RowMajor) = 
     //! 4  3
@@ -100,7 +100,7 @@ int main() try
     for(size_t i=0;i<3;i++) 
         for(size_t j=0;j<3;j++) 
             mm2[i][j] = 2.*i+j-3.*i*j;
-    tmv::Matrix<double> m5(mm2); 
+    tmv::Matrix<double,tmv::NoDivider> m5(mm2); 
     std::cout<<"m5 = \n"<<m5<<std::endl;
     //! m5 = 
     //! 3  3
@@ -207,7 +207,7 @@ int main() try
 
     // Fortran Indexing:
 
-    tmv::Matrix<double,tmv::ColMajor,tmv::FortranStyle> fm1 = m1;
+    tmv::Matrix<double,tmv::ColMajor|tmv::NoDivider,tmv::FortranStyle> fm1 = m1;
     std::cout<<"fm1 = m1 = \n"<<fm1<<std::endl;
     //! fm1 = m1 = 
     //! 4  3
@@ -255,7 +255,7 @@ int main() try
 
     // Matrix arithmetic:
 
-    tmv::Matrix<double> m1pm3 = m1 + m3;  
+    tmv::Matrix<double,tmv::NoDivider> m1pm3 = m1 + m3;  
     std::cout<<"m1 + m3 = \n"<<m1pm3<<std::endl;
     //! m1 + m3 = 
     //! 4  3
@@ -265,7 +265,7 @@ int main() try
     //! (  13  14  10  )
     //! 
     // Works correctly even if matrices are stored in different order:
-    tmv::Matrix<double> m3pm4 = m3 + m4; 
+    tmv::Matrix<double,tmv::NoDivider> m3pm4 = m3 + m4; 
     std::cout<<"m3 + m4 = \n"<<m3pm4<<std::endl;
     //! m3 + m4 = 
     //! 4  3
@@ -298,7 +298,7 @@ int main() try
     // Vector outer product
     tmv::Vector<double> v1 = m4.col(0);
     tmv::Vector<double> v2 = m4.row(1);
-    tmv::Matrix<double> v1v2 = v1^v2;
+    tmv::Matrix<double,tmv::NoDivider> v1v2 = v1^v2;
     std::cout<<"v1 = "<<v1<<std::endl;
     //! v1 = 4 ( 2  -5  1  -3 )
     std::cout<<"v2 = "<<v2<<std::endl;
@@ -328,7 +328,7 @@ int main() try
     //! v1 * m1 = 3 ( -75  -136  -46 )
 
     // Matrix * Matrix product
-    tmv::Matrix<double> m1m5 = m1 * m5; 
+    tmv::Matrix<double,tmv::NoDivider> m1m5 = m1 * m5; 
     std::cout<<"m1 * m5 = \n"<<m1m5<<std::endl;
     //! m1 * m5 = 
     //! 4  3
@@ -389,7 +389,7 @@ int main() try
 
     // Complex matrices:
 
-    tmv::Matrix<std::complex<double> > cm4 = m4 * std::complex<double>(1,2);
+    tmv::Matrix<std::complex<double>,tmv::NoDivider > cm4 = m4 * std::complex<double>(1,2);
     std::cout<<"cm4 = m4 * (1+2i) = \n"<<cm4<<std::endl;
     //! cm4 = m4 * (1+2i) = 
     //! 4  3

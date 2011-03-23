@@ -34,7 +34,8 @@
 #define TMV_MultDV_H
 
 #include "TMV_BaseMatrix_Diag.h"
-#include "TMV_ElemMultVV.h"
+#include "TMV_BaseVector.h"
+#include "TMV_MultVV_Funcs.h"
 
 namespace tmv {
 

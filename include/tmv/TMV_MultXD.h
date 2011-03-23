@@ -34,8 +34,7 @@
 #define TMV_MultXD_H
 
 #include "TMV_BaseMatrix_Diag.h"
-#include "TMV_ScaleV.h"
-#include "TMV_MultXV.h"
+#include "TMV_MultXV_Funcs.h"
 
 namespace tmv {
 

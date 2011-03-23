@@ -58,34 +58,34 @@ namespace tmv {
 
     // From TMV_MultXD.h:
     template <bool add, int ix1, class T1, class M1, class M2>
-    static inline void MultXM(
+    static void MultXM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         BaseMatrix_Diag_Mutable<M2>& m2);
     template <bool add, int ix1, class T1, class M1, class M2>
-    static inline void NoAliasMultXM(
+    static void NoAliasMultXM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         BaseMatrix_Diag_Mutable<M2>& m2);
     template <bool add, int ix1, class T1, class M1, class M2>
-    static inline void AliasMultXM(
+    static void AliasMultXM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         BaseMatrix_Diag_Mutable<M2>& m2);
 
     template <bool add, int ix1, class T1, class M1, class M2>
-    static inline void MultXM(
+    static void MultXM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         BaseMatrix_Rec_Mutable<M2>& m2);
     template <bool add, int ix1, class T1, class M1, class M2>
-    static inline void NoAliasMultXM(
+    static void NoAliasMultXM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         BaseMatrix_Rec_Mutable<M2>& m2);
     template <bool add, int ix1, class T1, class M1, class M2>
-    static inline void AliasMultXM(
+    static void AliasMultXM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         BaseMatrix_Rec_Mutable<M2>& m2);
 
     // From TMV_MultXU.h:
     template <bool add, int ix, class T, class M1, class M2>
-    static void MultXU(
+    static void MultXM(
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1, 
         BaseMatrix_Tri_Mutable<M2>& m2);
     template <bool add, int ix, class T, class M1, class M2>
@@ -98,28 +98,28 @@ namespace tmv {
         BaseMatrix_Tri_Mutable<M2>& m2);
 
     template <bool add, int ix, class T, class M1, class M2>
-    static inline void MultXM(
+    static void MultXM(
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
         BaseMatrix_Rec_Mutable<M2>& m2);
     template <bool add, int ix, class T, class M1, class M2>
-    static inline void NoAliasMultXM(
+    static void NoAliasMultXM(
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
         BaseMatrix_Rec_Mutable<M2>& m2);
     template <bool add, int ix, class T, class M1, class M2>
-    static inline void AliasMultXM(
+    static void AliasMultXM(
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
         BaseMatrix_Rec_Mutable<M2>& m2);
 
     template <bool add, int ix, class T, class M1, class M2>
-    static inline void MultXM(
+    static void MultXM(
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
         BaseMatrix_Tri_Mutable<M2>& m2);
     template <bool add, int ix, class T, class M1, class M2>
-    static inline void NoAliasMultXM(
+    static void NoAliasMultXM(
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
         BaseMatrix_Tri_Mutable<M2>& m2);
     template <bool add, int ix, class T, class M1, class M2>
-    static inline void AliasMultXM(
+    static void AliasMultXM(
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
         BaseMatrix_Tri_Mutable<M2>& m2);
 

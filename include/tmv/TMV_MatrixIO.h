@@ -32,9 +32,7 @@
 #ifndef TMV_MatrixIO_H
 #define TMV_MatrixIO_H
 
-#include "TMV_VectorIO.h"
 #include "TMV_BaseMatrix_Rec.h"
-#include "TMV_SimpleMatrix.h"
 
 namespace tmv {
 
@@ -43,12 +41,12 @@ namespace tmv {
     //
 
     // Defined in TMV_Matrix.cpp
-    template <class T, bool C>
+    template <class T, int C>
     void InstWrite(
-        std::ostream& os, const ConstMatrixView<T,UNKNOWN,UNKNOWN,C>& m);
-    template <class T, bool C>
+        std::ostream& os, const ConstMatrixView<T,C>& m);
+    template <class T, int C>
     void InstWrite(
-        std::ostream& os, const ConstMatrixView<T,UNKNOWN,UNKNOWN,C>& m,
+        std::ostream& os, const ConstMatrixView<T,C>& m,
         typename ConstMatrixView<T>::float_type thresh);
     template <class T>
     void InstRead(std::istream& is, MatrixView<T> m);
@@ -192,7 +190,7 @@ namespace tmv {
         public ReadError
     {
     public :
-        SimpleMatrix<T> m;
+        Matrix<T,NoDivider> m;
         int i,j;
         char exp,got;
         size_t cs,rs;
@@ -433,9 +431,9 @@ namespace tmv {
         return is;
     }
 
-    template <class T, StorageType S, IndexStyle I>
+    template <class T, int A0, int A1>
     static inline std::istream& operator>>(
-        std::istream& is, auto_ptr<Matrix<T,S,I> >& m)
+        std::istream& is, auto_ptr<Matrix<T,A0,A1> >& m)
     {
         size_t cs,rs;
         is >> cs >> rs;
@@ -447,7 +445,7 @@ namespace tmv {
             throw MatrixReadError<T>(is);
 #endif
         }
-        m.reset(new Matrix<T,S,I>(cs,rs));
+        m.reset(new Matrix<T,A0,A1>(cs,rs));
         Read(is,*m);
         return is;
     }

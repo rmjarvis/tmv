@@ -35,9 +35,10 @@
 
 #include "TMV_BaseMatrix_Rec.h"
 #include "TMV_BaseMatrix_Tri.h"
-#include "TMV_DivVU.h"
-#include "TMV_DivMU.h"
 #include "TMV_Permutation.h"
+#include "TMV_DivVM_Funcs.h"
+#include "TMV_DivMM_Funcs.h"
+#include "TMV_MultMM_Funcs.h"
 
 #ifdef PRINTALGO_LU
 #include <iostream>
@@ -48,21 +49,21 @@
 namespace tmv {
 
     // Defined in TMV_LUDiv.cpp
-    template <class T1, class T2, bool C1>
+    template <class T1, class T2, int C1>
     void InstLU_SolveInPlace(
-        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P,
+        const ConstMatrixView<T1,C1>& m1, const Permutation& P,
         MatrixView<T2> m2);
-    template <class T1, class T2, bool C1>
+    template <class T1, class T2, int C1>
     void InstLU_SolveTransposeInPlace(
-        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P,
+        const ConstMatrixView<T1,C1>& m1, const Permutation& P,
         MatrixView<T2> m2);
-    template <class T1, class T2, bool C1>
+    template <class T1, class T2, int C1>
     void InstLU_SolveInPlace(
-        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P,
+        const ConstMatrixView<T1,C1>& m1, const Permutation& P,
         VectorView<T2> v2);
-    template <class T1, class T2, bool C1>
+    template <class T1, class T2, int C1>
     void InstLU_SolveTransposeInPlace(
-        const ConstMatrixView<T1,1,UNKNOWN,C1>& m1, const Permutation& P,
+        const ConstMatrixView<T1,C1>& m1, const Permutation& P,
         VectorView<T2> v2);
 
     template <int algo, bool trans, int cs, int rs, class M1, class M2>
@@ -140,13 +141,13 @@ namespace tmv {
     struct LU_Solve_Helper<90,false,cs,rs,M1,M2>
     {
         static void call(const M1& m1, const Permutation& P, M2& m2)
-        { InstLU_SolveInPlace(m1.xView().cmView(),P,m2.xView()); }
+        { InstLU_SolveInPlace(m1.xView(),P,m2.xView()); }
     };
     template <int cs, int rs, class M1, class M2>
     struct LU_Solve_Helper<90,true,cs,rs,M1,M2>
     {
         static void call(const M1& m1, const Permutation& P, M2& m2)
-        { InstLU_SolveTransposeInPlace(m1.xView().cmView(),P,m2.xView()); }
+        { InstLU_SolveTransposeInPlace(m1.xView(),P,m2.xView()); }
     };
 
     // algo 95: Turn m1,m3 into vector

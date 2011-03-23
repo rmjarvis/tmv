@@ -31,22 +31,24 @@
 
 #ifndef TMV_MultMM_OPENMP_H
 #define TMV_MultMM_OPENMP_H
+#ifdef _OPENMP
+
+#include "TMV_BaseMatrix_Rec.h"
+#include "TMV_MultMM.h"
 
 namespace tmv {
 
     // Defined in TMV_MultMM_OpenMP.cpp
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM_OpenMP(
         const T3 x, 
-        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2,
-        MatrixView<T3> m3);
-    template <class T1, bool C1, class T2, bool C2, class T3>
+        const ConstMatrixView<T1,C1>& m1,
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM_OpenMP(
         const T3 x, 
-        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2,
-        MatrixView<T3> m3);
+        const ConstMatrixView<T1,C1>& m1,
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
 
     //
     // Algo 69: OpenMPMultMM
@@ -294,4 +296,5 @@ namespace tmv {
 
 } // namespace tmv
 
+#endif
 #endif 

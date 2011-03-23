@@ -36,8 +36,8 @@
 
 namespace tmv {
 
-    template <class T, bool C>
-    void InstWrite(std::ostream& os, const ConstDiagMatrixView<T,UNKNOWN,C>& m)
+    template <class T, int C>
+    void InstWrite(std::ostream& os, const ConstDiagMatrixView<T,C>& m)
     {
         if (m.step() == 1)
             InlineWrite(os,m.unitView()); 
@@ -45,9 +45,9 @@ namespace tmv {
             InlineWrite(os,m); 
     }
 
-    template <class T, bool C>
+    template <class T, int C>
     void InstWrite(
-        std::ostream& os, const ConstDiagMatrixView<T,UNKNOWN,C>& m,
+        std::ostream& os, const ConstDiagMatrixView<T,C>& m,
         typename Traits<T>::real_type thresh)
     {
         if (m.step() == 1)

@@ -34,18 +34,16 @@
 #define TMV_DivVD_H
 
 #include "TMV_BaseMatrix_Diag.h"
-#include "TMV_BaseMatrix_Tri.h"
 #include "TMV_BaseVector.h"
-#include "TMV_DivVM_Funcs.h"
 
 namespace tmv {
 
     // Defined in TMV_DivVD.cpp
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstElemDivVV(
         const T3 x,
-        const ConstVectorView<T1,UNKNOWN,C1>& v1,
-        const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3);
+        const ConstVectorView<T1,C1>& v1,
+        const ConstVectorView<T2,C2>& v2, VectorView<T3> v3);
 
     //
     // Element-wise division:

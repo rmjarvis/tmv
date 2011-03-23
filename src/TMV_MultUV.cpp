@@ -34,6 +34,7 @@
 #include "TMV_Blas.h"
 #include "tmv/TMV_MultUV.h"
 #include "tmv/TMV_TriMatrix.h"
+#include "tmv/TMV_Vector.h"
 #include "tmv/TMV_MultXV.h"
 #include "tmv/TMV_CopyU.h"
 #include "tmv/TMV_ProdXV.h"
@@ -52,7 +53,7 @@ namespace tmv {
     // I'll have the think about that...
     
     template <class M1, class T2>
-    static void NonBlasMultEq(const M1& m1, VectorView<T2,1> v2)
+    static void NonBlasMultEq(const M1& m1, VectorView<T2,Unit> v2)
     {
         const Scaling<1,typename Traits<T2>::real_type> one;
         if (m1.iscm()) 
@@ -65,26 +66,26 @@ namespace tmv {
             if (m1.isunit()) {
                 const int s = ShapeTraits<M1::_shape>::unit_shape;
                 typename MCopyHelper<T,s,UNKNOWN,UNKNOWN,false,false>::type mc(N);
-                InstCopy(m1,mc.xdView());
+                InstCopy(m1,mc.xView());
                 InlineMultMV<false>(
-                    one,mc.xdView().constView().cmView(),v2.constView(),v2);
+                    one,mc.xView().constView().cmView(),v2.constView(),v2);
             } else  {
                 const int s = ShapeTraits<M1::_shape>::nonunit_shape;
                 typename MCopyHelper<T,s,UNKNOWN,UNKNOWN,false,false>::type mc(N);
-                InstCopy(m1,mc.xdView());
+                InstCopy(m1,mc.xView());
                 InlineMultMV<false>(
-                    one,mc.xdView().constView().cmView(),v2.constView(),v2);
+                    one,mc.xView().constView().cmView(),v2.constView(),v2);
             }
         }
     }
 
 #ifdef BLAS
     template <class M1, class T2, class T1> 
-    static inline void BlasMultEq(const M1& A, VectorView<T2,1> x, T1)
+    static inline void BlasMultEq(const M1& A, VectorView<T2,Unit> x, T1)
     { NonBlasMultEq(A,x); }
 #ifdef TMV_INST_DOUBLE
     template <class M1>
-    static void BlasMultEq(const M1& A, VectorView<double,1> x, double)
+    static void BlasMultEq(const M1& A, VectorView<double,Unit> x, double)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
@@ -101,7 +102,7 @@ namespace tmv {
     }
     template <class M1>
     static void BlasMultEq(
-        const M1& A, VectorView<std::complex<double>,1> x, std::complex<double>)
+        const M1& A, VectorView<std::complex<double>,Unit> x, std::complex<double>)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
@@ -129,7 +130,7 @@ namespace tmv {
     }
     template <class M1>
     static void BlasMultEq( 
-        const M1& A, VectorView<std::complex<double>,1> x, double)
+        const M1& A, VectorView<std::complex<double>,Unit> x, double)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
@@ -152,7 +153,7 @@ namespace tmv {
 #endif
 #ifdef TMV_INST_FLOAT
     template <class M1>
-    static void BlasMultEq(const M1& A, VectorView<float,1> x, float)
+    static void BlasMultEq(const M1& A, VectorView<float,Unit> x, float)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
@@ -169,7 +170,7 @@ namespace tmv {
     }
     template <class M1>
     static void BlasMultEq(
-        const M1& A, VectorView<std::complex<float>,1> x, std::complex<float>)
+        const M1& A, VectorView<std::complex<float>,Unit> x, std::complex<float>)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
@@ -197,7 +198,7 @@ namespace tmv {
     }
     template <class M1>
     static void BlasMultEq( 
-        const M1& A, VectorView<std::complex<float>,1> x, float)
+        const M1& A, VectorView<std::complex<float>,Unit> x, float)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
@@ -221,7 +222,7 @@ namespace tmv {
 #endif // BLAS
 
     template <class M1, class T2>
-    static inline void DoMultEq(const M1& m1, VectorView<T2,1> v2)
+    static inline void DoMultEq(const M1& m1, VectorView<T2,Unit> v2)
     {
 #ifdef BLAS
         const typename M1::value_type t1(0);
@@ -230,9 +231,9 @@ namespace tmv {
         } else {
             if (m1.isunit()) {
                 BlasMultEq(
-                    m1.copy().viewAsUnitDiag().constView().xdView(),v2,t1);
+                    m1.copy().viewAsUnitDiag().constView().xView(),v2,t1);
             } else {
-                BlasMultEq(m1.copy().constView().xdView(),v2,t1);
+                BlasMultEq(m1.copy().constView().xView(),v2,t1);
             }
         }
 #else
@@ -264,30 +265,30 @@ namespace tmv {
         InstAddMultXV(x,v2c.constView().xView(),v3);
     }
 
-    template <class T1, DiagType D, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMV(
         const T3 x,
-        const ConstUpperTriMatrixView<T1,D,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3)
+        const ConstUpperTriMatrixView<T1,C1>& m1,
+        const ConstVectorView<T2,C2>& v2, VectorView<T3> v3)
     { DoInstMultMV(x,m1,v2,v3); }
-    template <class T1, DiagType D, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMV(
         const T3 x,
-        const ConstUpperTriMatrixView<T1,D,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3)
+        const ConstUpperTriMatrixView<T1,C1>& m1,
+        const ConstVectorView<T2,C2>& v2, VectorView<T3> v3)
     { DoInstAddMultMV(x,m1,v2,v3); }
 
-    template <class T1, DiagType D, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMV(
         const T3 x,
-        const ConstLowerTriMatrixView<T1,D,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3)
+        const ConstLowerTriMatrixView<T1,C1>& m1,
+        const ConstVectorView<T2,C2>& v2, VectorView<T3> v3)
     { DoInstMultMV(x,m1,v2,v3); }
-    template <class T1, DiagType D, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMV(
         const T3 x,
-        const ConstLowerTriMatrixView<T1,D,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3)
+        const ConstLowerTriMatrixView<T1,C1>& m1,
+        const ConstVectorView<T2,C2>& v2, VectorView<T3> v3)
     { DoInstAddMultMV(x,m1,v2,v3); }
 
 #define InstFile "TMV_MultUV.inst"

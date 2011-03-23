@@ -35,7 +35,6 @@
 #include "TMV_BaseVector.h"
 #include "TMV_BaseMatrix_Rec.h"
 #include "TMV_BaseMatrix_Tri.h"
-#include "TMV_Scaling.h"
 
 namespace tmv {
 
@@ -206,7 +205,7 @@ namespace tmv {
         { return InstNormF(m.mat().xView()); }
         template <class M2>
         static RT call(const BaseMatrix_Tri<M2>& m)
-        { return InstNormF(m.mat().xdView()); }
+        { return InstNormF(m.mat().xView()); }
     };
 
     // algo 95: Conjugate Matrix

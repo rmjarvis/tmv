@@ -103,8 +103,8 @@ static void TestBasicUpperTriMatrix_1()
         }
     }
 
-    tmv::UpperTriMatrixViewF<T> ufv = uf.view();
-    tmv::ConstUpperTriMatrixViewF<T> ufcv = uf.view();
+    tmv::UpperTriMatrixView<T,tmv::FortranStyle> ufv = uf.view();
+    tmv::ConstUpperTriMatrixView<T,tmv::FortranStyle> ufcv = uf.view();
 
     const tmv::UpperTriMatrix<T,D,S,tmv::FortranStyle>& ufx = uf;
 
@@ -297,8 +297,8 @@ static void TestBasicLowerTriMatrix_1()
         }
     }
 
-    tmv::LowerTriMatrixViewF<T> lfv = lf.view();
-    tmv::ConstLowerTriMatrixViewF<T> lfcv = lf.view();
+    tmv::LowerTriMatrixView<T,tmv::FortranStyle> lfv = lf.view();
+    tmv::ConstLowerTriMatrixView<T,tmv::FortranStyle> lfcv = lf.view();
 
     const tmv::LowerTriMatrix<T,D,S,tmv::FortranStyle>& lfx = lf;
 
