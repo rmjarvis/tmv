@@ -35,8 +35,6 @@
 #include "tmv/TMV_ScaleV.h"
 #include "tmv/TMV_MultXD.h"
 #include "tmv/TMV_Det.h"
-#include "tmv/TMV_DiagMatrixIO.h"
-#include "tmv/TMV_MatrixIO.h"
 
 namespace tmv {
 
@@ -48,7 +46,7 @@ namespace tmv {
     void InstElemInvert(VectorView<T> v)
     {
         if (v.step() == 1) {
-            VectorView<T,1> vunit = v.unitView();
+            VectorView<T,Unit> vunit = v.unitView();
             InlineElemInvert(vunit);
         } else {
             InlineElemInvert(v);

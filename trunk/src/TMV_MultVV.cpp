@@ -89,7 +89,7 @@ namespace tmv {
         return res;
     }
     std::complex<double> DoMultVV(
-        const ConstVectorView<std::complex<double>,UNKNOWN,true>& v1,
+        const ConstVectorView<std::complex<double>,Conj>& v1,
         const ConstVectorView<std::complex<double> >& v2) 
     {
         TMVAssert(v1.size()==v2.size());
@@ -169,7 +169,7 @@ namespace tmv {
         return res;
     }
     std::complex<float> DoMultVV(
-        const ConstVectorView<std::complex<float>,UNKNOWN,true>& v2,
+        const ConstVectorView<std::complex<float>,Conj>& v2,
         const ConstVectorView<std::complex<float> >& v1) 
     {
         TMVAssert(v1.size()==v2.size());
@@ -214,9 +214,9 @@ namespace tmv {
 #endif // BLASNORETURN
 #endif // BLAS
 
-    template <class T1, bool C1, class T2>
+    template <class T1, int C1, class T2>
     T2 InstMultVV(
-        const ConstVectorView<T1,UNKNOWN,C1>& v1, const ConstVectorView<T2>& v2)
+        const ConstVectorView<T1,C1>& v1, const ConstVectorView<T2>& v2)
     { return DoMultVV(v1,v2); }
 
 

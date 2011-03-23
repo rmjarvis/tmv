@@ -246,7 +246,7 @@ namespace tmv {
         typedef typename Traits<ret>::real_type RT;
 
         static ret call(const M1& m, const Scaling<ix,RT>& x)
-        { return InstSumElements(m.xdView()); }
+        { return InstSumElements(m.xView()); }
     };
     template <int s, int ix, class ret, class M1>
     struct SumElementsU_Helper<90,s,AbsComp,ix,ret,M1>
@@ -254,7 +254,7 @@ namespace tmv {
         typedef typename Traits<ret>::real_type RT;
 
         static ret call(const M1& m, const Scaling<ix,RT>& x)
-        { return InstSumAbsElements(m.xdView()); }
+        { return InstSumAbsElements(m.xView()); }
     };
     template <int s, int ix, class ret, class M1>
     struct SumElementsU_Helper<90,s,Abs2Comp,ix,ret,M1>
@@ -262,7 +262,7 @@ namespace tmv {
         typedef typename Traits<ret>::real_type RT;
 
         static ret call(const M1& m, const Scaling<ix,RT>& x)
-        { return InstSumAbs2Elements(m.xdView()); }
+        { return InstSumAbs2Elements(m.xView()); }
     };
     template <int s, class ret, class M1>
     struct SumElementsU_Helper<90,s,NormComp,1,ret,M1>
@@ -270,7 +270,7 @@ namespace tmv {
         typedef typename Traits<ret>::real_type RT;
 
         static ret call(const M1& m, const Scaling<1,RT>& x)
-        { return InstNormSq(m.xdView()); }
+        { return InstNormSq(m.xView()); }
     };
     template <int s, class ret, class M1>
     struct SumElementsU_Helper<90,s,NormComp,0,ret,M1>
@@ -278,7 +278,7 @@ namespace tmv {
         typedef typename Traits<ret>::real_type RT;
 
         static ret call(const M1& m, const Scaling<0,RT>& x)
-        { return InstNormSq(m.xdView(),x); }
+        { return InstNormSq(m.xView(),x); }
     };
     
     // algo 95: Transpose (and go back to -3, not -2)
@@ -672,14 +672,14 @@ namespace tmv {
     {
         typedef typename M1::float_type ret;
         static ret call(const M1& m)
-        { return InstMaxAbsElement(m.xdView()); }
+        { return InstMaxAbsElement(m.xView()); }
     };
     template <int s, class M1>
     struct MaxAbsElementU_Helper<90,s,Abs2Comp,M1>
     {
         typedef typename M1::real_type ret;
         static ret call(const M1& m)
-        { return InstMaxAbs2Element(m.xdView()); }
+        { return InstMaxAbs2Element(m.xView()); }
     };
 
     // algo 95: Transpose, and go back to -3 rather than -2
@@ -995,7 +995,7 @@ namespace tmv {
     {
         typedef typename M1::float_type RT;
         static RT call(const M1& m)
-        { return InstNorm1(m.xdView()); }
+        { return InstNorm1(m.xView()); }
     };
 
     // algo 97: Conjugate

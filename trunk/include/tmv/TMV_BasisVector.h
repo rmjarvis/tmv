@@ -40,11 +40,11 @@
 // 
 // Constructors:
 //
-//    BasisVector<T,I>(size_t n, int i)  
+//    BasisVector<T,A>(size_t n, int i)  
 //        Makes a BasisVector of size n, with all values = 0, except for
 //        v[i] = 1.
 //
-//    BasisVector<T,I>(size_t n, int i, T x)  
+//    BasisVector<T,A>(size_t n, int i, T x)  
 //        Makes a BasisVector of size n, with all values = 0, except for
 //        v[i] = x.
 //
@@ -53,16 +53,18 @@
 #define TMV_BasisVector_H
 
 #include "TMV_BaseVector.h"
-#include <sstream>
 
 namespace tmv {
 
-    template <class T, IndexStyle I=CStyle>
+    template <class T, int A=0>
     class BasisVector;
 
-    template <class T, IndexStyle I>
-    struct Traits<BasisVector<T,I> >
+    template <class T, int A>
+    struct Traits<BasisVector<T,A> >
     {
+        enum { okA = (
+                A == CStyle || A == FortranStyle ) };
+
         typedef T value_type;
 
         typedef typename Traits<T>::real_type real_type;
@@ -70,22 +72,22 @@ namespace tmv {
         enum { isreal = Traits<T>::isreal };
         enum { iscomplex = Traits<T>::iscomplex };
 
-        typedef BasisVector<T,I> type;
-        typedef Vector<T,I> calc_type;
+        typedef BasisVector<T,A> type;
+        typedef Vector<T,A> calc_type;
         typedef const type& eval_type; 
         typedef calc_type copy_type;
 
         enum { _size = UNKNOWN }; 
-        enum { _fort = (I == FortranStyle) };
+        enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
     };
 
-    template <class T, IndexStyle I>
+    template <class T, int A>
     class BasisVector : 
-        public BaseVector<BasisVector<T,I> >
+        public BaseVector<BasisVector<T,A> >
     {
     public:
-        typedef BasisVector<T,I> type;
+        typedef BasisVector<T,A> type;
 
         enum { _size = Traits<type>::_size };
         enum { _fort = Traits<type>::_fort };
@@ -101,7 +103,10 @@ namespace tmv {
         //
 
         BasisVector(size_t n, int i, const T x=T(1)) : 
-            itssize(n), itsindex(I==FortranStyle?i-1:i), itsval(x) {}
+            itssize(n), itsindex(A==FortranStyle?i-1:i), itsval(x) 
+            {
+                TMVStaticAssert(Traits<type>::okA);
+            }
         ~BasisVector() {}
 
         //
@@ -132,11 +137,12 @@ namespace tmv {
     // TMV_Text functions
     //
 
-    template <class T, IndexStyle I>
-    static inline std::string TMV_Text(const BasisVector<T,I>& )
+    template <class T, int A>
+    static inline std::string TMV_Text(const BasisVector<T,A>& )
     {
         std::ostringstream s;
-        s << "BasisVector<"<<TMV_Text(T())<<","<<TMV_Text(I)<<">";
+        s << "BasisVector<"<<TMV_Text(T());
+        s <<","<<Attrib<A>::vtext()<<">";
         return s.str();
     }
 

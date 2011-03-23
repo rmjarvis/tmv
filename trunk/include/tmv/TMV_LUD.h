@@ -67,18 +67,54 @@
 #ifndef TMV_LU_H
 #define TMV_LU_H
 
-#include "TMV_Divider.h"
 #include "TMV_BaseMatrix_Rec.h"
-#include "TMV_Matrix.h"
 #include "TMV_Permutation.h"
-#include "TMV_CopyM.h"
-
-#include "TMV_LUDiv.h"
-#include "TMV_LUDecompose.h"
-#include "TMV_LUInverse.h"
+#include "TMV_Divider.h"
 
 
 namespace tmv {
+
+    // In TMV_LUDecompose.h
+    template <class M>
+    static void LU_Decompose(
+        BaseMatrix_Rec_Mutable<M>& m, int* P, int& detp);
+    template <class M>
+    static void LU_Decompose(
+        BaseMatrix_Rec_Mutable<M>& m, Permutation& P);
+    template <class T, int A>
+    static void LU_Decompose(
+        MatrixView<T,A> m, Permutation& P);
+    template <class T, int M, int N, int Si, int Sj, int A>
+    static void LU_Decompose(
+        SmallMatrixView<T,M,N,Si,Sj,A> m, Permutation& P);
+
+    // In TMV_LUInverse.h
+    template <class M1>
+    static void LU_Inverse(
+        BaseMatrix_Rec_Mutable<M1>& m1, const Permutation& P);
+    template <class M1, class M2>
+    static void LU_InverseATA(
+        const BaseMatrix_Rec<M1>& m1, const Permutation& P,
+        const bool trans, BaseMatrix_Rec_Mutable<M2>& m2);
+
+    // In TMV_LUDiv.h
+    template <class M1, class M2>
+    static void LU_SolveInPlace(
+        const BaseMatrix_Rec<M1>& m1, const Permutation& P,
+        BaseMatrix_Rec_Mutable<M2>& m2);
+    template <class M1, class V2>
+    static void LU_SolveInPlace(
+        const BaseMatrix_Rec<M1>& m1, const Permutation& P,
+        BaseVector_Mutable<V2>& v2);
+    template <class M1, class M2>
+    static void LU_SolveTransposeInPlace(
+        const BaseMatrix_Rec<M1>& m1, const Permutation& P,
+        BaseMatrix_Rec_Mutable<M2>& m2);
+    template <class M1, class V2>
+    static void LU_SolveTransposeInPlace(
+        const BaseMatrix_Rec<M1>& m1, const Permutation& P,
+        BaseVector_Mutable<V2>& v2);
+
 
     // The point of the Impl class here is to implement the transfer of
     // ownership copy semantics.
@@ -246,94 +282,75 @@ namespace tmv {
         // These are the virtual functions from the Divider base class.
         void doSolveInPlace(MatrixView<RT> m2) const;
         void doSolveInPlace(MatrixView<CT> m2) const;
-        void doSolveInPlace(
-            MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const;
+        void doSolveInPlace(MatrixView<CT,Conj> m2) const;
         void doSolveInPlace(VectorView<RT> v2) const;
         void doSolveInPlace(VectorView<CT> v2) const;
-        void doSolveInPlace(VectorView<CT,UNKNOWN,true> v2) const;
+        void doSolveInPlace(VectorView<CT,Conj> v2) const;
 
         void doSolveTransposeInPlace(MatrixView<RT> m2) const;
         void doSolveTransposeInPlace(MatrixView<CT> m2) const;
-        void doSolveTransposeInPlace(
-            MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const;
+        void doSolveTransposeInPlace(MatrixView<CT,Conj> m2) const;
         void doSolveTransposeInPlace(VectorView<RT> v2) const;
         void doSolveTransposeInPlace(VectorView<CT> v2) const;
-        void doSolveTransposeInPlace(
-            VectorView<CT,UNKNOWN,true> v2) const;
+        void doSolveTransposeInPlace(VectorView<CT,Conj> v2) const;
 
         void doSolve(
             const ConstMatrixView<RT>& m1, MatrixView<RT> m2) const;
         void doSolve(
             const ConstMatrixView<RT>& m1, MatrixView<CT> m2) const;
         void doSolve(
-            const ConstMatrixView<RT>& m1, 
-            MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const;
+            const ConstMatrixView<RT>& m1, MatrixView<CT,Conj> m2) const;
         void doSolve(
             const ConstMatrixView<CT>& m1, MatrixView<CT> m2) const;
         void doSolve(
-            const ConstMatrixView<CT>& m1, 
-            MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const;
+            const ConstMatrixView<CT>& m1, MatrixView<CT,Conj> m2) const;
         void doSolve(
-            const ConstMatrixView<CT,UNKNOWN,UNKNOWN,true>& m1, 
-            MatrixView<CT> m2) const;
+            const ConstMatrixView<CT,Conj>& m1, MatrixView<CT> m2) const;
         void doSolve(
-            const ConstMatrixView<CT,UNKNOWN,UNKNOWN,true>& m1, 
-            MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const;
+            const ConstMatrixView<CT,Conj>& m1, MatrixView<CT,Conj> m2) const;
         void doSolve(
             const ConstVectorView<RT>& v1, VectorView<RT> v2) const;
         void doSolve(
             const ConstVectorView<RT>& v1, VectorView<CT> v2) const;
         void doSolve(
-            const ConstVectorView<RT>& v1, 
-            VectorView<CT,UNKNOWN,true> v2) const;
+            const ConstVectorView<RT>& v1, VectorView<CT,Conj> v2) const;
         void doSolve(
             const ConstVectorView<CT>& v1, VectorView<CT> v2) const;
         void doSolve(
-            const ConstVectorView<CT>& v1, 
-            VectorView<CT,UNKNOWN,true> v2) const;
+            const ConstVectorView<CT>& v1, VectorView<CT,Conj> v2) const;
         void doSolve(
-            const ConstVectorView<CT,UNKNOWN,true>& v1, 
-            VectorView<CT> v2) const;
+            const ConstVectorView<CT,Conj>& v1, VectorView<CT> v2) const;
         void doSolve(
-            const ConstVectorView<CT,UNKNOWN,true>& v1, 
-            VectorView<CT,UNKNOWN,true> v2) const;
+            const ConstVectorView<CT,Conj>& v1, VectorView<CT,Conj> v2) const;
 
         void doSolveTranspose(
             const ConstMatrixView<RT>& m1, MatrixView<RT> m2) const;
         void doSolveTranspose(
             const ConstMatrixView<RT>& m1, MatrixView<CT> m2) const;
         void doSolveTranspose(
-            const ConstMatrixView<RT>& m1, 
-            MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const;
+            const ConstMatrixView<RT>& m1, MatrixView<CT,Conj> m2) const;
         void doSolveTranspose(
             const ConstMatrixView<CT>& m1, MatrixView<CT> m2) const;
         void doSolveTranspose(
-            const ConstMatrixView<CT>& m1, 
-            MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const;
+            const ConstMatrixView<CT>& m1, MatrixView<CT,Conj> m2) const;
         void doSolveTranspose(
-            const ConstMatrixView<CT,UNKNOWN,UNKNOWN,true>& m1, 
-            MatrixView<CT> m2) const;
+            const ConstMatrixView<CT,Conj>& m1, MatrixView<CT> m2) const;
         void doSolveTranspose(
-            const ConstMatrixView<CT,UNKNOWN,UNKNOWN,true>& m1, 
-            MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const;
+            const ConstMatrixView<CT,Conj>& m1, MatrixView<CT,Conj> m2) const;
         void doSolveTranspose(
             const ConstVectorView<RT>& v1, VectorView<RT> v2) const;
         void doSolveTranspose(
             const ConstVectorView<RT>& v1, VectorView<CT> v2) const;
         void doSolveTranspose(
-            const ConstVectorView<RT>& v1, 
-            VectorView<CT,UNKNOWN,true> v2) const;
+            const ConstVectorView<RT>& v1, VectorView<CT,Conj> v2) const;
         void doSolveTranspose(
             const ConstVectorView<CT>& v1, VectorView<CT> v2) const;
         void doSolveTranspose(
-            const ConstVectorView<CT>& v1, 
-            VectorView<CT,UNKNOWN,true> v2) const;
+            const ConstVectorView<CT>& v1, VectorView<CT,Conj> v2) const;
         void doSolveTranspose(
-            const ConstVectorView<CT,UNKNOWN,true>& v1, 
-            VectorView<CT> v2) const;
+            const ConstVectorView<CT,Conj>& v1, VectorView<CT> v2) const;
         void doSolveTranspose(
-            const ConstVectorView<CT,UNKNOWN,true>& v1, 
-            VectorView<CT,UNKNOWN,true> v2) const;
+            const ConstVectorView<CT,Conj>& v1, VectorView<CT,Conj> v2) const;
 
         T det() const;
         FT logDet(ZFT* sign) const;
@@ -341,13 +358,11 @@ namespace tmv {
 
         void doMakeInverse(MatrixView<RT> minv) const;
         void doMakeInverse(MatrixView<CT> minv) const;
-        void doMakeInverse(
-            MatrixView<CT,UNKNOWN,UNKNOWN,true> minv) const;
+        void doMakeInverse(MatrixView<CT,Conj> minv) const;
 
         void doMakeInverseATA(MatrixView<RT> ata) const;
         void doMakeInverseATA(MatrixView<CT> ata) const;
-        void doMakeInverseATA(
-            MatrixView<CT,UNKNOWN,UNKNOWN,true> ata) const;
+        void doMakeInverseATA(MatrixView<CT,Conj> ata) const;
         
         RT condition(RT normInf) const;
         bool preferInPlace() const;

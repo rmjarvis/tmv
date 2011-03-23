@@ -264,80 +264,80 @@ namespace tmv {
 #if 0
     // From TMV_DivUD.h
     template <class M1, int ix, class T, class M2>
-    static inline void LDivEq(
+    static void LDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2);
     template <class M1, int ix, class T, class M2>
-    static inline void NoAliasLDivEq(
+    static void NoAliasLDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2);
     template <class M1, int ix, class T, class M2>
-    static inline void AliasLDivEq(
+    static void AliasLDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2);
 
     template <class M1, int ix, class T, class M2>
-    static inline void RDivEq(
+    static void RDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2);
     template <class M1, int ix, class T, class M2>
-    static inline void NoAliasRDivEq(
+    static void NoAliasRDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2);
     template <class M1, int ix, class T, class M2>
-    static inline void AliasRDivEq(
+    static void AliasRDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2);
 
     template <int ix, class T, class M1, class M2, class M3>
-    static inline void LDiv(
+    static void LDiv(
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3);
     template <int ix, class T, class M1, class M2, class M3>
-    static inline void NoAliasLDiv(
+    static void NoAliasLDiv(
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3);
     template <int ix, class T, class M1, class M2, class M3>
-    static inline void AliasLDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3);
-
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void LDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void NoAliasLDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void AliasLDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
-
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void RDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3);
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void NoAliasRDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3);
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void AliasRDiv(
+    static void AliasLDiv(
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3);
 
     template <int ix, class T, class M1, class M2, class M3>
-    static inline void RDiv(
+    static void LDiv(
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
     template <int ix, class T, class M1, class M2, class M3>
-    static inline void NoAliasRDiv(
+    static void NoAliasLDiv(
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
     template <int ix, class T, class M1, class M2, class M3>
-    static inline void AliasRDiv(
+    static void AliasLDiv(
+        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
+
+    template <int ix, class T, class M1, class M2, class M3>
+    static void RDiv(
+        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3);
+    template <int ix, class T, class M1, class M2, class M3>
+    static void NoAliasRDiv(
+        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3);
+    template <int ix, class T, class M1, class M2, class M3>
+    static void AliasRDiv(
+        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3);
+
+    template <int ix, class T, class M1, class M2, class M3>
+    static void RDiv(
+        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
+    template <int ix, class T, class M1, class M2, class M3>
+    static void NoAliasRDiv(
+        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
+    template <int ix, class T, class M1, class M2, class M3>
+    static void AliasRDiv(
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
 #endif

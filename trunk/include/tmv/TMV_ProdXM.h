@@ -32,8 +32,8 @@
 #ifndef TMV_ProdXM_H
 #define TMV_ProdXM_H
 
-#include "TMV_ProdXV.h"
 #include "TMV_BaseMatrix.h"
+#include "TMV_ProdXV.h"
 #include "TMV_MultXM_Funcs.h"
 
 namespace tmv {

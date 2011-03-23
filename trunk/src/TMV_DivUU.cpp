@@ -33,7 +33,10 @@
 
 #include "tmv/TMV_DivUU.h"
 #include "tmv/TMV_TriMatrix.h"
+#include "tmv/TMV_Matrix.h"
+#include "tmv/TMV_Vector.h"
 #include "tmv/TMV_CopyU.h"
+#include "tmv/TMV_Det.h"
 
 namespace tmv {
 
@@ -66,36 +69,34 @@ namespace tmv {
             } else {
                 if (m2.isunit()) 
                     DoLDivEq2(
-                        m1,m2.copy().viewAsUnitDiag().constView().xdView());
+                        m1,m2.copy().viewAsUnitDiag().constView().xView());
                 else 
-                    DoLDivEq2(m1,m2.copy().constView().xdView());
+                    DoLDivEq2(m1,m2.copy().constView().xView());
             }
         } else {
             if (m1.isunit()) {
                 typename M1::copy_type m1c(m1);
-                typename M1::copy_type::unitdiag_type::xdview_type m1cv = 
-                    m1c.viewAsUnitDiag().xdView();
+                typename M1::copy_type::unitdiag_type::xview_type m1cv = 
+                    m1c.viewAsUnitDiag().xView();
                 DoLDivEq(m1cv,m2);
                 InstCopy(m1cv.constView(),m1);
             } else {
                 typename M1::copy_type m1c(m1);
-                typename M1::copy_type::xdview_type m1cv = m1c.xdView();
+                typename M1::copy_type::xview_type m1cv = m1c.xView();
                 DoLDivEq(m1cv,m2);
                 InstCopy(m1cv.constView(),m1);
             }
         }
     }
 
-    template <class T1, class T2, bool C2>
+    template <class T1, class T2, int C2>
     void InstLDivEq(
-        UpperTriMatrixView<T1> m1,
-        const ConstUpperTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2)
+        UpperTriMatrixView<T1> m1, const ConstUpperTriMatrixView<T2,C2>& m2)
     { DoLDivEq(m1,m2); }
 
-    template <class T1, class T2, bool C2>
+    template <class T1, class T2, int C2>
     void InstLDivEq(
-        LowerTriMatrixView<T1> m1,
-        const ConstLowerTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2)
+        LowerTriMatrixView<T1> m1, const ConstLowerTriMatrixView<T2,C2>& m2)
     { DoLDivEq(m1,m2); }
 
 #define InstFile "TMV_DivUU.inst"

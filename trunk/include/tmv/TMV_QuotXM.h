@@ -32,9 +32,9 @@
 #ifndef TMV_QuotXM_H
 #define TMV_QuotXM_H
 
+#include "TMV_BaseMatrix.h"
 #include "TMV_ProdXV.h"
 #include "TMV_ProdXM.h"
-#include "TMV_BaseMatrix.h"
 #include "TMV_InvertM_Funcs.h"
 
 namespace tmv {

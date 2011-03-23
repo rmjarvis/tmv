@@ -32,9 +32,11 @@
 #include "tmv/TMV_MultMD.h"
 #include "tmv/TMV_DiagMatrix.h"
 #include "tmv/TMV_Matrix.h"
-#include "tmv/TMV_SimpleMatrix.h"
+#include "tmv/TMV_Vector.h"
 #include "tmv/TMV_CopyM.h"
 #include "tmv/TMV_MultXM.h"
+#include "tmv/TMV_ScaleM.h"
+#include "tmv/TMV_SmallMatrix.h"
 
 namespace tmv {
 
@@ -55,11 +57,10 @@ namespace tmv {
         }
     }
 
-    template <class T1, bool C1, class T2, bool C2, class T3>  
+    template <class T1, int C1, class T2, int C2, class T3>  
     void InstMultMM(
-        const T3 x,
-        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstDiagMatrixView<T2,UNKNOWN,C2>& m2, MatrixView<T3> m3)
+        const T3 x, const ConstMatrixView<T1,C1>& m1,
+        const ConstDiagMatrixView<T2,C2>& m2, MatrixView<T3> m3)
     {
         if (SameStorage(m1,m3)) {
             // Must be exact same storage.  Just check conj.
@@ -69,28 +70,27 @@ namespace tmv {
             InstMultXM(x,m1,m3);
         }
         if (m3.iscm()) {
-            MatrixView<T3,1> m3cm = m3.cmView();
+            MatrixView<T3,ColMajor> m3cm = m3.cmView();
             DoMultEq(m3cm,m2);
         } else if (m3.isrm()) {
-            MatrixView<T3,UNKNOWN,1> m3rm = m3.rmView();
+            MatrixView<T3,RowMajor> m3rm = m3.rmView();
             DoMultEq(m3rm,m2);
         } else {
-            SimpleMatrix<T3,ColMajor> m3c = m3;
-            MatrixView<T3,1> m3cv = m3c.view();
+            Matrix<T3,ColMajor|NoDivider> m3c = m3;
+            MatrixView<T3,ColMajor> m3cv = m3c.view();
             DoMultEq(m3cv,m2);
             InstCopy(m3c.constView().xView(),m3);
         }
     }
 
-    template <class T1, bool C1, class T2, bool C2, class T3>  
+    template <class T1, int C1, class T2, int C2, class T3>  
     void InstAddMultMM(
-        const T3 x,
-        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstDiagMatrixView<T2,UNKNOWN,C2>& m2, MatrixView<T3> m3)
+        const T3 x, const ConstMatrixView<T1,C1>& m1,
+        const ConstDiagMatrixView<T2,C2>& m2, MatrixView<T3> m3)
     {
         typedef typename Traits2<T1,T2>::type T12;
-        SimpleMatrix<T12,ColMajor> m1c = m1;
-        MatrixView<T12,1> m1cv = m1c.view();
+        Matrix<T12,ColMajor|NoDivider> m1c = m1;
+        MatrixView<T12,ColMajor> m1cv = m1c.view();
         DoMultEq(m1cv,m2);
         InstAddMultXM(x,m1c.constView().xView(),m3);
     }

@@ -33,13 +33,16 @@
 #define TMV_ConjV_H
 
 #include "TMV_BaseVector.h"
-#include "TMV_ScaleV.h"
 
 namespace tmv {
 
     // Defined in TMV_Vector.cpp
     template <class T>
     void InstConjugateSelf(VectorView<T> v);
+
+    // In TMV_ScaleV.h
+    template <int ix, class T, class V>
+    static void Scale(const Scaling<ix,T>& x, BaseVector_Mutable<V>& v);
 
     //
     // ConjugateSelf

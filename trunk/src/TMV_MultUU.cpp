@@ -33,9 +33,12 @@
 
 #include "tmv/TMV_MultUU.h"
 #include "tmv/TMV_TriMatrix.h"
+#include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_CopyU.h"
 #include "tmv/TMV_MultXU.h"
 #include "tmv/TMV_ScaleU.h"
+#include "tmv/TMV_Vector.h"
+#include "tmv/TMV_ConjugateV.h"
 
 namespace tmv {
 
@@ -50,7 +53,7 @@ namespace tmv {
         else if (m2.isrm())
             InlineMultMM<false>(one,m3.constView(),m2.rmView(),m3);
         else {
-            DoMultEqUU(m2.copy().xdView(),m3);
+            DoMultEqUU(m2.copy().xView(),m3);
         }
     }
 
@@ -77,7 +80,7 @@ namespace tmv {
              (M1::_conj || m1.isunit() || !SameStorage(m1,m3)) ) {
             // Then the copy will clobber m2.diag().  
             // Need to use a temporary for m2.
-            DoMultUU(m1,m2.copy().xdView(),m3);
+            DoMultUU(m1,m2.copy().xView(),m3);
         } else {
             // OK to copy m1 to m3.  However, the copy might be trivial.
             // Check if m1 is same storage as m3.
@@ -88,101 +91,101 @@ namespace tmv {
                     if (m1.isunit() && !m3.isunit()) m3.diag().setAllTo(RT(1));
                 } else { // Opposite storage
                     if (m1.size() > 1)
-                        InstCopy(m1.offDiag().xdView(),m3.offDiag().xdView());
+                        InstCopy(m1.offDiag().xView(),m3.offDiag().xView());
                     if (!m3.isunit()) {
                         if (m1.isunit()) m3.diag().setAllTo(RT(1));
                         else Maybe<M1::_conj>::conjself2(m3.diag());
                     }
                 }
             } else {
-                InstCopy(m1,m3.xdView());
+                InstCopy(m1,m3.xView());
             }
             DoMultEqUU(m2,m3);
         }
     }
 
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM(
         const T3 x,
-        const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstUpperTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2,
-        UpperTriMatrixView<T3,UnknownDiag> m3)
+        const ConstUpperTriMatrixView<T1,C1>& m1,
+        const ConstUpperTriMatrixView<T2,C2>& m2,
+        UpperTriMatrixView<T3> m3)
     {
         if (m3.iscm()) {
-            UpperTriMatrixView<T3,UnknownDiag,1> m3cm = m3.cmView();
+            UpperTriMatrixView<T3,ColMajor> m3cm = m3.cmView();
             DoMultUU(m1,m2,m3cm);
             if (x != T3(1)) InstScale(x,m3.viewAsNonUnitDiag());
         } else if (m3.isrm()) {
-            UpperTriMatrixView<T3,UnknownDiag,UNKNOWN,1> m3rm = m3.rmView();
+            UpperTriMatrixView<T3,RowMajor> m3rm = m3.rmView();
             DoMultUU(m1,m2,m3rm);
             if (x != T3(1)) InstScale(x,m3.viewAsNonUnitDiag());
         } else {
-            SimpleMatrix<T3,ColMajor> m3c(m3.size(),m3.size(),T3(0));
-            UpperTriMatrixView<T3,UnknownDiag,1> m3ct = m3c.upperTri(m3.dt());
+            Matrix<T3,ColMajor|NoDivider> m3c(m3.size(),m3.size(),T3(0));
+            UpperTriMatrixView<T3,ColMajor> m3ct = m3c.upperTri(m3.dt());
             DoMultUU(m1,m2,m3ct);
             if (m3.isunit())
-                InstCopy(m3ct.constView().xdView(),m3);
+                InstCopy(m3ct.constView().xView(),m3);
             else
-                InstMultXM(x,m3ct.constView().xdView(),m3.viewAsNonUnitDiag());
+                InstMultXM(x,m3ct.constView().xView(),m3.viewAsNonUnitDiag());
         }
     }
 
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM(
         const T3 x,
-        const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstUpperTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2,
+        const ConstUpperTriMatrixView<T1,C1>& m1,
+        const ConstUpperTriMatrixView<T2,C2>& m2,
         UpperTriMatrixView<T3,NonUnitDiag> m3)
     {
         typedef typename Traits2<T1,T2>::type T12;
-        SimpleMatrix<T12,ColMajor> m1c(m3.size(),m3.size());
-        UpperTriMatrixView<T12,UnknownDiag,1> m1ct = m1c.upperTri(
+        Matrix<T12,ColMajor|NoDivider> m1c(m3.size(),m3.size());
+        UpperTriMatrixView<T12,ColMajor> m1ct = m1c.upperTri(
             (m1.isunit() && m2.isunit()) ? UnitDiag : NonUnitDiag);
-        InstCopy(m1,m1ct.xdView());
+        InstCopy(m1,m1ct.xView());
         DoMultUU(m1,m2,m1ct);
-        InstAddMultXM(x,m1ct.constView().xdView(),m3);
+        InstAddMultXM(x,m1ct.constView().xView(),m3);
     }
 
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM(
         const T3 x,
-        const ConstLowerTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstLowerTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2,
-        LowerTriMatrixView<T3,UnknownDiag> m3)
+        const ConstLowerTriMatrixView<T1,C1>& m1,
+        const ConstLowerTriMatrixView<T2,C2>& m2,
+        LowerTriMatrixView<T3> m3)
     {
         if (m3.iscm()) {
-            LowerTriMatrixView<T3,UnknownDiag,1> m3cm = m3.cmView();
+            LowerTriMatrixView<T3,ColMajor> m3cm = m3.cmView();
             DoMultUU(m1,m2,m3cm);
             if (x != T3(1)) InstScale(x,m3.viewAsNonUnitDiag());
         } else if (m3.isrm()) {
-            LowerTriMatrixView<T3,UnknownDiag,UNKNOWN,1> m3rm = m3.rmView();
+            LowerTriMatrixView<T3,RowMajor> m3rm = m3.rmView();
             DoMultUU(m1,m2,m3rm);
             if (x != T3(1)) InstScale(x,m3.viewAsNonUnitDiag());
         } else {
-            SimpleMatrix<T3,ColMajor> m3c(m3.size(),m3.size(),T3(0));
-            LowerTriMatrixView<T3,UnknownDiag,1> m3ct = m3c.lowerTri(m3.dt());
+            Matrix<T3,ColMajor|NoDivider> m3c(m3.size(),m3.size(),T3(0));
+            LowerTriMatrixView<T3,ColMajor> m3ct = m3c.lowerTri(m3.dt());
             DoMultUU(m1,m2,m3ct);
             if (m3.isunit())
-                InstCopy(m3ct.constView().xdView(),m3);
+                InstCopy(m3ct.constView().xView(),m3);
             else
-                InstMultXM(x,m3ct.constView().xdView(),m3.viewAsNonUnitDiag());
+                InstMultXM(x,m3ct.constView().xView(),m3.viewAsNonUnitDiag());
         }
     }
 
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM(
         const T3 x,
-        const ConstLowerTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstLowerTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2,
+        const ConstLowerTriMatrixView<T1,C1>& m1,
+        const ConstLowerTriMatrixView<T2,C2>& m2,
         LowerTriMatrixView<T3,NonUnitDiag> m3)
     {
         typedef typename Traits2<T1,T2>::type T12;
-        SimpleMatrix<T12,ColMajor> m1c(m3.size(),m3.size());
-        LowerTriMatrixView<T12,UnknownDiag,1> m1ct = m1c.lowerTri(
+        Matrix<T12,ColMajor|NoDivider> m1c(m3.size(),m3.size());
+        LowerTriMatrixView<T12,ColMajor> m1ct = m1c.lowerTri(
             (m1.isunit() && m2.isunit()) ? UnitDiag : NonUnitDiag);
-        InstCopy(m1,m1ct.xdView());
+        InstCopy(m1,m1ct.xView());
         DoMultUU(m1,m2,m1ct);
-        InstAddMultXM(x,m1ct.constView().xdView(),m3);
+        InstAddMultXM(x,m1ct.constView().xView(),m3);
     }
 
 

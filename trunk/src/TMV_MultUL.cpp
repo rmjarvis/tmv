@@ -36,7 +36,9 @@
 #include "tmv/TMV_MultXM.h"
 #include "tmv/TMV_ScaleM.h"
 #include "tmv/TMV_TriMatrix.h"
-#include "tmv/TMV_SimpleMatrix.h"
+#include "tmv/TMV_Matrix.h"
+#include "tmv/TMV_Vector.h"
+#include "tmv/TMV_SmallVector.h"
 
 // The most common reason to do this function is to basically undo an
 // LU decomposition.  So something like:
@@ -59,7 +61,8 @@
 namespace tmv {
 
     template <class M1, class M2, class T>
-    static inline void DoMultUL(const M1& m1, const M2& m2, MatrixView<T,1> m3)
+    static inline void DoMultUL(
+        const M1& m1, const M2& m2, MatrixView<T,ColMajor> m3)
     {
         Scaling<1,typename Traits<T>::real_type> one;
 
@@ -72,64 +75,64 @@ namespace tmv {
             } else if (m1.iscm() && !SameStorage(m1,m3) && !m1.isconj()) {
                 // Then can copy m2
                 typedef typename TypeSelect<M2::_upper,
-                        UpperTriMatrixView<T,UnknownDiag,1>,
-                        LowerTriMatrixView<T,UnknownDiag,1> >::type M2x;
+                        UpperTriMatrixView<T,ColMajor>,
+                        LowerTriMatrixView<T,ColMajor> >::type M2x;
                 M2x m2x = Maybe<M2::_upper>::uppertri(m3,m2.dt());
-                InstCopy(m2,m2x.xdView());
+                InstCopy(m2,m2x.xView());
                 InlineMultMM<false>(one,m1.nonConj().cmView(),m2x.cmView(),m3);
             } else if (m2.iscm() && !SameStorage(m2,m3) && !m2.isconj()) {
                 // Then can copy m1
                 typedef typename TypeSelect<M1::_upper,
-                        UpperTriMatrixView<T,UnknownDiag,1>,
-                        LowerTriMatrixView<T,UnknownDiag,1> >::type M1x;
+                        UpperTriMatrixView<T,ColMajor>,
+                        LowerTriMatrixView<T,ColMajor> >::type M1x;
                 M1x m1x = Maybe<M1::_upper>::uppertri(m3,m1.dt());
-                InstCopy(m1,m1x.xdView());
+                InstCopy(m1,m1x.xView());
                 InlineMultMM<false>(one,m1x.cmView(),m2.nonConj().cmView(),m3);
             } else if (m1.iscm() && !m1.isconj()) {
                 // Need temporary storage for m2.
                 typedef typename TypeSelect<M2::_upper,
-                        UpperTriMatrix<T,NonUnitDiag,ColMajor>,
-                        LowerTriMatrix<T,NonUnitDiag,ColMajor> >::type M2c;
+                        UpperTriMatrix<T,NonUnitDiag|ColMajor>,
+                        LowerTriMatrix<T,NonUnitDiag|ColMajor> >::type M2c;
                 M2c m2c(m2.size());
                 typedef typename TypeSelect<M2::_upper,
-                        UpperTriMatrixView<T,UnknownDiag,1>,
-                        LowerTriMatrixView<T,UnknownDiag,1> >::type M2cv;
+                        UpperTriMatrixView<T,ColMajor>,
+                        LowerTriMatrixView<T,ColMajor> >::type M2cv;
                 M2cv m2cv = m2c.viewAsUnknownDiag(m2.dt());
-                InstCopy(m2,m2cv.xdView());
+                InstCopy(m2,m2cv.xView());
                 InlineMultMM<false>(one,m1.nonConj().cmView(),m2cv,m3);
             } else {
                 // Need temporary storage for m1, and can copy m2
                 typedef typename TypeSelect<M2::_upper,
-                        UpperTriMatrixView<T,UnknownDiag,1>,
-                        LowerTriMatrixView<T,UnknownDiag,1> >::type M2x;
+                        UpperTriMatrixView<T,ColMajor>,
+                        LowerTriMatrixView<T,ColMajor> >::type M2x;
                 M2x m2x = Maybe<M2::_upper>::uppertri(m3,m2.dt());
-                InstCopy(m2,m2x.xdView());
+                InstCopy(m2,m2x.xView());
 
                 typedef typename TypeSelect<M1::_upper,
-                        UpperTriMatrix<T,NonUnitDiag,ColMajor>,
-                        LowerTriMatrix<T,NonUnitDiag,ColMajor> >::type M1c;
+                        UpperTriMatrix<T,NonUnitDiag|ColMajor>,
+                        LowerTriMatrix<T,NonUnitDiag|ColMajor> >::type M1c;
                 M1c m1c(m1.size());
                 typedef typename TypeSelect<M1::_upper,
-                        UpperTriMatrixView<T,UnknownDiag,1>,
-                        LowerTriMatrixView<T,UnknownDiag,1> >::type M1cv;
+                        UpperTriMatrixView<T,ColMajor>,
+                        LowerTriMatrixView<T,ColMajor> >::type M1cv;
                 M1cv m1cv = m1c.viewAsUnknownDiag(m1.dt());
-                InstCopy(m1,m1cv.xdView());
+                InstCopy(m1,m1cv.xView());
                 InlineMultMM<false>(one,m1cv,m2x.cmView(),m3);
             }
         } else {
             // No clash of the diagonals.  Copy both to m3, and do
             // the calculation in place.
             typedef typename TypeSelect<M1::_upper,
-                    UpperTriMatrixView<T,UnknownDiag,1>,
-                    LowerTriMatrixView<T,UnknownDiag,1> >::type M1x;
+                    UpperTriMatrixView<T,ColMajor>,
+                    LowerTriMatrixView<T,ColMajor> >::type M1x;
             M1x m1x = Maybe<M1::_upper>::uppertri(m3,m1.dt());
-            InstCopy(m1,m1x.xdView());
+            InstCopy(m1,m1x.xView());
 
             typedef typename TypeSelect<M2::_upper,
-                    UpperTriMatrixView<T,UnknownDiag,1>,
-                    LowerTriMatrixView<T,UnknownDiag,1> >::type M2x;
+                    UpperTriMatrixView<T,ColMajor>,
+                    LowerTriMatrixView<T,ColMajor> >::type M2x;
             M2x m2x = Maybe<M2::_upper>::uppertri(m3,m2.dt());
-            InstCopy(m2,m2x.xdView());
+            InstCopy(m2,m2x.xView());
 
             InlineMultMM<false>(one,m1x.cmView(),m2x.cmView(),m3);
         }
@@ -146,7 +149,7 @@ namespace tmv {
             DoMultUL(m2.transpose(),m1.transpose(),m3.transpose().cmView());
             InstScale(x,m3);
         } else {
-            SimpleMatrix<T,ColMajor> m3c(m3.colsize(),m3.rowsize());
+            Matrix<T,ColMajor|NoDivider> m3c(m3.colsize(),m3.rowsize());
             DoMultUL(m1,m2,m3c.cmView());
             InstMultXM(x,m3c.constView().xView(),m3.xView());
         }
@@ -156,38 +159,38 @@ namespace tmv {
     static inline void DoInstAddMultMM(
         const T x, const M1& m1, const M2& m2, MatrixView<T>& m3)
     {
-        SimpleMatrix<T,ColMajor> m3c(m3.colsize(),m3.rowsize());
+        Matrix<T,ColMajor|NoDivider> m3c(m3.colsize(),m3.rowsize());
         DoMultUL(m1,m2,m3c.cmView());
         InstAddMultXM(x,m3c.constView().xView(),m3.xView());
     }
 
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM(
         const T3 x,
-        const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstLowerTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2,
+        const ConstUpperTriMatrixView<T1,C1>& m1,
+        const ConstLowerTriMatrixView<T2,C2>& m2,
         MatrixView<T3> m3)
     { DoInstMultMM(x,m1,m2,m3); }
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM(
         const T3 x,
-        const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstLowerTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2,
+        const ConstUpperTriMatrixView<T1,C1>& m1,
+        const ConstLowerTriMatrixView<T2,C2>& m2,
         MatrixView<T3> m3)
     { DoInstAddMultMM(x,m1,m2,m3); }
 
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM(
         const T3 x,
-        const ConstLowerTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstUpperTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2,
+        const ConstLowerTriMatrixView<T1,C1>& m1,
+        const ConstUpperTriMatrixView<T2,C2>& m2,
         MatrixView<T3> m3)
     { DoInstMultMM(x,m1,m2,m3); }
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM(
         const T3 x,
-        const ConstLowerTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstUpperTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2,
+        const ConstLowerTriMatrixView<T1,C1>& m1,
+        const ConstUpperTriMatrixView<T2,C2>& m2,
         MatrixView<T3> m3)
     { DoInstAddMultMM(x,m1,m2,m3); }
 

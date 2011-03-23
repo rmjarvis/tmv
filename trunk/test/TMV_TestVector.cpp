@@ -104,10 +104,10 @@ static void TestVectorReal()
     for (int i=1; i<=N; ++i) af(i) = T(3+i-1);
     for (int i=1; i<=N; ++i) 
         Assert(af(i) == a(i-1),"FortranStyle Vector access");
-    tmv::ConstVectorViewF<T> afcv = af.view();
+    tmv::ConstVectorView<T,tmv::FortranStyle> afcv = af.view();
     for (int i=1; i<=N; ++i) 
         Assert(afcv(i) == a(i-1),"FortranStyle Vector CV access");
-    tmv::VectorViewF<T> afv = af.view();
+    tmv::VectorView<T,tmv::FortranStyle> afv = af.view();
     for (int i=1; i<=N; ++i) 
         Assert(afv(i) == a(i-1),"FortranStyle Vector V access");
     Assert(a == af,"FortransStyle Vector = CStyle Vector");
@@ -540,8 +540,8 @@ static void TestVectorArith()
 {
     typedef tmv::VectorView<T> V;
     typedef tmv::VectorView<std::complex<T> > CV;
-    typedef tmv::VectorViewF<T> VF;
-    typedef tmv::VectorViewF<std::complex<T> > CVF;
+    typedef tmv::VectorView<T,tmv::FortranStyle> VF;
+    typedef tmv::VectorView<std::complex<T>,tmv::FortranStyle> CVF;
 
     if (showstartdone) {
         std::cout<<"Start Test Vector Arith"<<std::endl;

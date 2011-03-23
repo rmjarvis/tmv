@@ -33,15 +33,15 @@
 #ifndef TMV_MultVV_H
 #define TMV_MultVV_H
 
-#include "TMV_Scaling.h"
 #include "TMV_BaseVector.h"
+#include "TMV_Scaling.h"
 
 namespace tmv {
 
     // Defined in TMV_MultVV.cpp
-    template <class T1, bool C1, class T2>
+    template <class T1, int C1, class T2>
     T2 InstMultVV(
-        const ConstVectorView<T1,UNKNOWN,C1>& v1,
+        const ConstVectorView<T1,C1>& v1,
         const ConstVectorView<T2>& v2);
 
 

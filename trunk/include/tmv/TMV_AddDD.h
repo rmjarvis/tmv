@@ -34,7 +34,7 @@
 #define TMV_AddDD_H
 
 #include "TMV_BaseMatrix_Diag.h"
-#include "TMV_AddVV.h"
+#include "TMV_Scaling.h"
 #include "TMV_MultXM_Funcs.h"
 #include "TMV_MultXV_Funcs.h"
 

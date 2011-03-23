@@ -21,15 +21,15 @@ Def1(T,CT)
 #endif
 
 #define Def2(RT,T,C) \
-  template void InstCopy(const ConstMatrixView<T,UNKNOWN,UNKNOWN,C>& m1, \
+  template void InstCopy(const ConstMatrixView<T,C>& m1, \
       MatrixView<T> m2); \
-  template void InstSwap(MatrixView<T,UNKNOWN,UNKNOWN,C> m1, \
+  template void InstSwap(MatrixView<T,C> m1, \
       MatrixView<T> m2); \
 
-Def2(T,T,false)
+Def2(T,T,NonConj)
 #ifdef TMV_INST_COMPLEX
-Def2(T,CT,false)
-Def2(T,CT,true)
+Def2(T,CT,NonConj)
+Def2(T,CT,Conj)
 #endif
 
 #define Def3(RT,T)\
@@ -46,14 +46,14 @@ Def3(FT,CT)
 
 #define Def4(RT,T,C) \
   template void InstWrite(std::ostream& os, \
-      const ConstMatrixView<T,UNKNOWN,UNKNOWN,C>& m1); \
+      const ConstMatrixView<T,C>& m1); \
   template void InstWrite(std::ostream& os, \
-      const ConstMatrixView<T,UNKNOWN,UNKNOWN,C>& m1, const RT thresh); \
+      const ConstMatrixView<T,C>& m1, const RT thresh); \
 
-Def4(FT,T,false)
+Def4(FT,T,NonConj)
 #ifdef TMV_INST_COMPLEX
-Def4(FT,CT,false)
-Def4(FT,CT,true)
+Def4(FT,CT,NonConj)
+Def4(FT,CT,Conj)
 #endif
 
 #ifdef TMV_INST_MIX

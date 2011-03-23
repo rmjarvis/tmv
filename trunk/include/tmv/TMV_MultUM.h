@@ -33,11 +33,14 @@
 #ifndef TMV_MultUM_H
 #define TMV_MultUM_H
 
-#include "TMV_MultMM.h"
+#include "TMV_BaseMatrix_Rec.h"
+#include "TMV_BaseMatrix_Tri.h"
+#include "TMV_MultXV.h"
+#include "TMV_MultMV.h"
 #include "TMV_MultUV.h"
-#include "TMV_CopyU.h"
-#include "TMV_MultXU.h"
 #include "TMV_Rank1VVM.h"
+#include "TMV_MultMM.h"
+#include "TMV_MultXM_Funcs.h"
 
 #ifdef _OPENMP
 #include "omp.h"
@@ -90,27 +93,27 @@
 namespace tmv {
 
     // Defined in TMV_MultUM.cpp
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM(
         const T3 x,
-        const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1, 
-        const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, MatrixView<T3> m3);
-    template <class T1, bool C1, class T2, bool C2, class T3>
+        const ConstUpperTriMatrixView<T1,C1>& m1, 
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM(
         const T3 x,
-        const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1, 
-        const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, MatrixView<T3> m3);
+        const ConstUpperTriMatrixView<T1,C1>& m1, 
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
 
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM(
         const T3 x,
-        const ConstLowerTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1, 
-        const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, MatrixView<T3> m3);
-    template <class T1, bool C1, class T2, bool C2, class T3>
+        const ConstLowerTriMatrixView<T1,C1>& m1, 
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM(
         const T3 x,
-        const ConstLowerTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1, 
-        const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, MatrixView<T3> m3);
+        const ConstLowerTriMatrixView<T1,C1>& m1, 
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
 
 
     //
@@ -738,13 +741,22 @@ namespace tmv {
 #ifdef TMV_UM_CLEANUP
                 cs == UNKNOWN ? 16 :
 #endif
-                cs != UNKNOWN && cs <= 5 ? 16 :
+                (cs != UNKNOWN && cs <= 5) ? 16 :
                 rxr ? 12 : crx ? 13 : xcc ? 11 : 13;
             const int algo3 =  // The algorithm for M > 16
-                cs == UNKNOWN || cs > 16 ? 17 : 0;
+                cs == UNKNOWN ? 17 :
+#ifdef TMV_UM_INLINE_MM
+                cs <= 16 ? 0 :
+#endif
+                cs > TMV_UM_RECURSE ? 17 :
+                0;
             const int algo4 =  // The algorithm for MultMM
                 cs == UNKNOWN ? -2 :
-                cs > 16 ? -3 : 0;
+#ifdef TMV_UM_INLINE_MM
+                cs <= 16 ? 0 :
+#endif
+                cs > TMV_UM_RECURSE ? -3 :
+                0;
 #ifdef TMV_UM_INLINE_MM
             const int algo3b =  // The algorithm for M > RECURSE
                 cs == UNKNOWN || 
@@ -752,6 +764,12 @@ namespace tmv {
             const int algo4b =  // The algorithm for MultMM
                 cs == UNKNOWN ||
                 (cs > TMV_UM_RECURSE && cs <= 16) ? -4 : 0;
+#endif
+#ifdef PRINTALGO_UM
+            std::cout<<"algo2,3,4 = "<<algo2<<"  "<<algo3<<"  "<<algo4<<std::endl;
+#ifdef TMV_UM_INLINE_MM
+            std::cout<<"algo3b,4b = "<<algo3b<<"  "<<algo4b<<std::endl;
+#endif
 #endif
 
             typedef typename M1::const_subtrimatrix_type M1a;
@@ -781,7 +799,7 @@ namespace tmv {
                         x,A,D,F);
                     MultMM_Helper<algo4,csx,rs,csy,true,ix,T,M1b,M2r,M3r>::
                         call(x,B,E,F);
-                    MultUM_Helper<algo3,csx,rs,add,ix,T,M1a,M2r,M3r>::call(
+                    MultUM_Helper<algo3,csy,rs,add,ix,T,M1a,M2r,M3r>::call(
                         x,C,E,G);
 #ifdef TMV_UM_INLINE_MM
                 } else {
@@ -1278,10 +1296,19 @@ namespace tmv {
                 (cs != UNKNOWN && cs <= 5) ? 26 :
                 rxr ? 22 : crx ? 23 : xcc ? 21 : 23;
             const int algo3 =  // The algorithm for M > 16
-                cs == UNKNOWN || cs > 16 ? 27 : 0;
+                cs == UNKNOWN ? 27 :
+#ifdef TMV_UM_INLINE_MM
+                cs <= 16 ? 0 :
+#endif
+                cs > TMV_UM_RECURSE ? 27 :
+                0;
             const int algo4 =  // The algorithm for MultMM
                 cs == UNKNOWN ? -2 :
-                cs > 16 ? -3 : 0;
+#ifdef TMV_UM_INLINE_MM
+                cs <= 16 ? 0 :
+#endif
+                cs > TMV_UM_RECURSE ? -3 :
+                0;
 #ifdef TMV_UM_INLINE_MM
             const int algo3b =  // The algorithm for M > RECURSE
                 cs == UNKNOWN || 
@@ -1289,6 +1316,12 @@ namespace tmv {
             const int algo4b =  // The algorithm for MultMM
                 cs == UNKNOWN || 
                 (cs > TMV_UM_RECURSE && cs <= 16) ? -4 : 0;
+#endif
+#ifdef PRINTALGO_UM
+            std::cout<<"algo2,3,4 = "<<algo2<<"  "<<algo3<<"  "<<algo4<<std::endl;
+#ifdef TMV_UM_INLINE_MM
+            std::cout<<"algo3b,4b = "<<algo3b<<"  "<<algo4b<<std::endl;
+#endif
 #endif
             typedef typename M1::const_subtrimatrix_type M1a;
             typedef typename M1::const_submatrix_type M1b;
@@ -1345,7 +1378,9 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
+#if defined(PRINTALGO_UM) || defined(_OPENMP) || defined(TMV_UM_SMALL)
             const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+#endif
 #ifdef PRINTALGO_UM
             std::cout<<"UM algo 31: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -1751,7 +1786,7 @@ namespace tmv {
         {
             typedef typename M3::value_type VT;
             VT xx = Traits<VT>::convert(T(x));
-            InstMultMM(xx,m1.xdView(),m2.xView(),m3.xView());
+            InstMultMM(xx,m1.xView(),m2.xView(),m3.xView());
         }
     };
     template <int cs, int rs, int ix, class T, class M1, class M2, class M3>
@@ -1762,7 +1797,7 @@ namespace tmv {
         {
             typedef typename M3::value_type VT;
             VT xx = Traits<VT>::convert(T(x));
-            InstAddMultMM(xx,m1.xdView(),m2.xView(),m3.xView());
+            InstAddMultMM(xx,m1.xView(),m2.xView(),m3.xView());
         }
     };
 
@@ -1938,7 +1973,26 @@ namespace tmv {
             std::cout<<"cs = "<<cs<<"  rs = "<<rs<<std::endl;
             std::cout<<"add = "<<add<<", algo = "<<algo<<std::endl;
 #endif
+#ifdef XDEBUG_UM
+            typedef typename M3::real_type RT;
+            typedef typename M3::value_type T3;
+            Matrix<T3> m1c = m1;
+            Matrix<T3> m2c = m2;
+            Matrix<T3> m3i = m3;
+            Matrix<T3> m3c = m3;
+            NoAliasMultMM<add>(x,m1c,m2c,m3c);
+#endif
             MultUM_Helper<algo,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+#ifdef XDEBUG_UM
+            if (Norm(m3-m3c) > 1.e-3*(Norm(m1c)*Norm(m2c)+(add?Norm(m3i):RT(0)))) {
+                std::cout<<"m1 = "<<m1c<<std::endl;
+                std::cout<<"m2 = "<<m2c<<std::endl;
+                std::cout<<"m3 = "<<m3i<<std::endl;
+                std::cout<<"m3 => "<<m3<<std::endl;
+                std::cout<<"Correct m3 = "<<m3c<<std::endl;
+                abort();
+            }
+#endif
         }
     };
 

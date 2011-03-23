@@ -42,7 +42,6 @@
 
 #include "TMV_BaseMatrix.h"
 #include "TMV_BaseMatrix_Rec.h"
-#include "TMV_BaseMatrix_Diag.h"
 
 namespace tmv {
 
@@ -51,57 +50,31 @@ namespace tmv {
     template <class M>
     class BaseMatrix_Tri_Mutable;
 
-    template <class T, DiagType D=NonUnitDiag, StorageType S=ColMajor, IndexStyle I=CStyle>
+    template <class T, int A=0, int A1=0, int A2=0>
     class UpperTriMatrix;
-    template <class T, DiagType D=UnknownDiag, int Si=UNKNOWN, int Sj=UNKNOWN, bool C=false, IndexStyle I=CStyle>
+    template <class T, int A=0>
     class ConstUpperTriMatrixView;
-    template <class T, DiagType D=UnknownDiag, int Si=UNKNOWN, int Sj=UNKNOWN, bool C=false, IndexStyle I=CStyle>
+    template <class T, int A=0>
     class UpperTriMatrixView;
-    template <class T, int N, DiagType D=NonUnitDiag, StorageType S=ColMajor, IndexStyle I=CStyle>
+    template <class T, int N, int A=0, int A1=0, int A2=0>
     class SmallUpperTriMatrix;
-    template <class T, int N, DiagType D, int Si, int Sj, bool C=false, IndexStyle I=CStyle>
+    template <class T, int N, int Si, int Sj, int A=0>
     class ConstSmallUpperTriMatrixView;
-    template <class T, int N, DiagType D, int Si, int Sj, bool C=false, IndexStyle I=CStyle>
+    template <class T, int N, int Si, int Sj, int A=0>
     class SmallUpperTriMatrixView;
 
-    template <class T, DiagType D=NonUnitDiag, StorageType S=ColMajor, IndexStyle I=CStyle>
+    template <class T, int A=0, int A1=0, int A2=0>
     class LowerTriMatrix;
-    template <class T, DiagType D=UnknownDiag, int Si=UNKNOWN, int Sj=UNKNOWN, bool C=false, IndexStyle I=CStyle>
+    template <class T, int A=0>
     class ConstLowerTriMatrixView;
-    template <class T, DiagType D=UnknownDiag, int Si=UNKNOWN, int Sj=UNKNOWN, bool C=false, IndexStyle I=CStyle>
+    template <class T, int A=0>
     class LowerTriMatrixView;
-    template <class T, int N, DiagType D=NonUnitDiag, StorageType S=ColMajor, IndexStyle I=CStyle>
+    template <class T, int N, int A=0, int A1=0, int A2=0>
     class SmallLowerTriMatrix;
-    template <class T, int N, DiagType D, int Si, int Sj, bool C=false, IndexStyle I=CStyle>
+    template <class T, int N, int Si, int Sj, int A=0>
     class ConstSmallLowerTriMatrixView;
-    template <class T, int N, DiagType D, int Si, int Sj, bool C=false, IndexStyle I=CStyle>
+    template <class T, int N, int Si, int Sj, int A=0>
     class SmallLowerTriMatrixView;
-
-    template <class T, DiagType D=NonUnitDiag, StorageType S=ColMajor>
-    class UpperTriMatrixF;
-    template <class T, DiagType D=UnknownDiag, int Si=UNKNOWN, int Sj=UNKNOWN, bool C=false>
-    class ConstUpperTriMatrixViewF;
-    template <class T, DiagType D=UnknownDiag, int Si=UNKNOWN, int Sj=UNKNOWN, bool C=false>
-    class UpperTriMatrixViewF;
-    template <class T, int N, DiagType D=NonUnitDiag, StorageType S=ColMajor>
-    class SmallUpperTriMatrixF;
-    template <class T, int N, DiagType D, int Si, int Sj, bool C=false>
-    class ConstSmallUpperTriMatrixViewF;
-    template <class T, int N, DiagType D, int Si, int Sj, bool C=false>
-    class SmallUpperTriMatrixViewF;
-
-    template <class T, DiagType D=NonUnitDiag, StorageType S=ColMajor>
-    class LowerTriMatrixF;
-    template <class T, DiagType D=UnknownDiag, int Si=UNKNOWN, int Sj=UNKNOWN, bool C=false>
-    class ConstLowerTriMatrixViewF;
-    template <class T, DiagType D=UnknownDiag, int Si=UNKNOWN, int Sj=UNKNOWN, bool C=false>
-    class LowerTriMatrixViewF;
-    template <class T, int N, DiagType D=NonUnitDiag, StorageType S=ColMajor>
-    class SmallLowerTriMatrixF;
-    template <class T, int N, DiagType D, int Si, int Sj, bool C=false>
-    class ConstSmallLowerTriMatrixViewF;
-    template <class T, int N, DiagType D, int Si, int Sj, bool C=false>
-    class SmallLowerTriMatrixViewF;
 
     // Specify ExactSameStorage for triangle matrices:
     template <class M1, class M2>
@@ -223,101 +196,133 @@ namespace tmv {
     template <class T, int cs, int rs, bool rm, bool fort>
     struct MCopyHelper<T,UpperTri,cs,rs,rm,fort>
     {
-        typedef SmallUpperTriMatrix<T,cs,NonUnitDiag,rm?RowMajor:ColMajor,
-                fort?FortranStyle:CStyle> type; 
+        enum { A2 = (
+                (rm ? RowMajor : ColMajor) |
+                (fort ? FortranStyle : CStyle) | NonUnitDiag )};
+        typedef SmallUpperTriMatrix<T,cs,A2> type;
     };
     template <class T, int rs, bool rm, bool fort>
     struct MCopyHelper<T,UpperTri,UNKNOWN,rs,rm,fort>
     {
-        typedef SmallUpperTriMatrix<T,rs,NonUnitDiag,rm?RowMajor:ColMajor,
-                fort?FortranStyle:CStyle> type; 
+        enum { A2 = (
+                (rm ? RowMajor : ColMajor) |
+                (fort ? FortranStyle : CStyle) | NonUnitDiag )};
+        typedef SmallUpperTriMatrix<T,rs,A2> type;
     };
     template <class T, int cs, bool rm, bool fort>
     struct MCopyHelper<T,UpperTri,cs,UNKNOWN,rm,fort>
     {
-        typedef SmallUpperTriMatrix<T,cs,NonUnitDiag,rm?RowMajor:ColMajor,
-                fort?FortranStyle:CStyle> type; 
+        enum { A2 = (
+                (rm ? RowMajor : ColMajor) |
+                (fort ? FortranStyle : CStyle) | NonUnitDiag )};
+        typedef SmallUpperTriMatrix<T,cs,A2> type;
     };
     template <class T, bool rm, bool fort>
     struct MCopyHelper<T,UpperTri,UNKNOWN,UNKNOWN,rm,fort>
     {
-        typedef UpperTriMatrix<T,NonUnitDiag,rm?RowMajor:ColMajor,
-                fort?FortranStyle:CStyle> type; 
+        enum { A2 = (
+                (rm ? RowMajor : ColMajor) |
+                (fort ? FortranStyle : CStyle) | NonUnitDiag )};
+        typedef UpperTriMatrix<T,A2> type;
     };
 
     template <class T, int cs, int rs, bool rm, bool fort>
     struct MCopyHelper<T,LowerTri,cs,rs,rm,fort>
     {
-        typedef SmallLowerTriMatrix<T,cs,NonUnitDiag,rm?RowMajor:ColMajor,
-                fort?FortranStyle:CStyle> type; 
+        enum { A2 = (
+                (rm ? RowMajor : ColMajor) |
+                (fort ? FortranStyle : CStyle) | NonUnitDiag )};
+        typedef SmallUpperTriMatrix<T,cs,A2> type;
     };
     template <class T, int rs, bool rm, bool fort>
     struct MCopyHelper<T,LowerTri,UNKNOWN,rs,rm,fort>
     {
-        typedef SmallLowerTriMatrix<T,rs,NonUnitDiag,rm?RowMajor:ColMajor,
-                fort?FortranStyle:CStyle> type; 
+        enum { A2 = (
+                (rm ? RowMajor : ColMajor) |
+                (fort ? FortranStyle : CStyle) | NonUnitDiag )};
+        typedef SmallUpperTriMatrix<T,rs,A2> type;
     };
     template <class T, int cs, bool rm, bool fort>
     struct MCopyHelper<T,LowerTri,cs,UNKNOWN,rm,fort>
     {
-        typedef SmallLowerTriMatrix<T,cs,NonUnitDiag,rm?RowMajor:ColMajor,
-                fort?FortranStyle:CStyle> type; 
+        enum { A2 = (
+                (rm ? RowMajor : ColMajor) |
+                (fort ? FortranStyle : CStyle) | NonUnitDiag )};
+        typedef SmallUpperTriMatrix<T,cs,A2> type;
     };
     template <class T, bool rm, bool fort>
     struct MCopyHelper<T,LowerTri,UNKNOWN,UNKNOWN,rm,fort>
     {
-        typedef LowerTriMatrix<T,NonUnitDiag,rm?RowMajor:ColMajor,
-                fort?FortranStyle:CStyle> type; 
+        enum { A2 = (
+                (rm ? RowMajor : ColMajor) |
+                (fort ? FortranStyle : CStyle) | NonUnitDiag )};
+        typedef LowerTriMatrix<T,A2> type;
     };
 
     template <class T, int cs, int rs, bool rm, bool fort>
     struct MCopyHelper<T,UnitUpperTri,cs,rs,rm,fort>
     {
-        typedef SmallUpperTriMatrix<T,cs,UnitDiag,rm?RowMajor:ColMajor,
-                fort?FortranStyle:CStyle> type; 
+        enum { A2 = (
+                (rm ? RowMajor : ColMajor) |
+                (fort ? FortranStyle : CStyle) | UnitDiag )};
+        typedef SmallUpperTriMatrix<T,cs,A2> type;
     };
     template <class T, int rs, bool rm, bool fort>
     struct MCopyHelper<T,UnitUpperTri,UNKNOWN,rs,rm,fort>
     {
-        typedef SmallUpperTriMatrix<T,rs,UnitDiag,rm?RowMajor:ColMajor,
-                fort?FortranStyle:CStyle> type; 
+        enum { A2 = (
+                (rm ? RowMajor : ColMajor) |
+                (fort ? FortranStyle : CStyle) | UnitDiag )};
+        typedef SmallUpperTriMatrix<T,rs,A2> type;
     };
     template <class T, int cs, bool rm, bool fort>
     struct MCopyHelper<T,UnitUpperTri,cs,UNKNOWN,rm,fort>
     {
-        typedef SmallUpperTriMatrix<T,cs,UnitDiag,rm?RowMajor:ColMajor,
-                fort?FortranStyle:CStyle> type; 
+        enum { A2 = (
+                (rm ? RowMajor : ColMajor) |
+                (fort ? FortranStyle : CStyle) | UnitDiag )};
+        typedef SmallUpperTriMatrix<T,cs,A2> type;
     };
     template <class T, bool rm, bool fort>
     struct MCopyHelper<T,UnitUpperTri,UNKNOWN,UNKNOWN,rm,fort>
     {
-        typedef UpperTriMatrix<T,UnitDiag,rm?RowMajor:ColMajor,
-                fort?FortranStyle:CStyle> type; 
+        enum { A2 = (
+                (rm ? RowMajor : ColMajor) |
+                (fort ? FortranStyle : CStyle) | UnitDiag )};
+        typedef UpperTriMatrix<T,A2> type;
     };
 
     template <class T, int cs, int rs, bool rm, bool fort>
     struct MCopyHelper<T,UnitLowerTri,cs,rs,rm,fort>
     {
-        typedef SmallLowerTriMatrix<T,cs,UnitDiag,rm?RowMajor:ColMajor,
-                fort?FortranStyle:CStyle> type; 
+        enum { A2 = (
+                (rm ? RowMajor : ColMajor) |
+                (fort ? FortranStyle : CStyle) | UnitDiag )};
+        typedef SmallLowerTriMatrix<T,cs,A2> type;
     };
     template <class T, int rs, bool rm, bool fort>
     struct MCopyHelper<T,UnitLowerTri,UNKNOWN,rs,rm,fort>
     {
-        typedef SmallLowerTriMatrix<T,rs,UnitDiag,rm?RowMajor:ColMajor,
-                fort?FortranStyle:CStyle> type; 
+        enum { A2 = (
+                (rm ? RowMajor : ColMajor) |
+                (fort ? FortranStyle : CStyle) | UnitDiag )};
+        typedef SmallLowerTriMatrix<T,rs,A2> type;
     };
     template <class T, int cs, bool rm, bool fort>
     struct MCopyHelper<T,UnitLowerTri,cs,UNKNOWN,rm,fort>
     {
-        typedef SmallLowerTriMatrix<T,cs,UnitDiag,rm?RowMajor:ColMajor,
-                fort?FortranStyle:CStyle> type; 
+        enum { A2 = (
+                (rm ? RowMajor : ColMajor) |
+                (fort ? FortranStyle : CStyle) | UnitDiag )};
+        typedef SmallLowerTriMatrix<T,cs,A2> type;
     };
     template <class T, bool rm, bool fort>
     struct MCopyHelper<T,UnitLowerTri,UNKNOWN,UNKNOWN,rm,fort>
     {
-        typedef LowerTriMatrix<T,UnitDiag,rm?RowMajor:ColMajor,
-                fort?FortranStyle:CStyle> type; 
+        enum { A2 = (
+                (rm ? RowMajor : ColMajor) |
+                (fort ? FortranStyle : CStyle) | UnitDiag )};
+        typedef LowerTriMatrix<T,A2> type;
     };
 
 
@@ -415,15 +420,9 @@ namespace tmv {
         typedef view_type ret_type;
         typedef view_type const_ret_type;
         static ret_type call(type& m) 
-        {
-            return view_type(
-                m.ptr(),m.size(),m.isunit(),m.stepi(),m.stepj()); 
-        }
+        { return view_type(m.ptr(),m.size(),m.stepi(),m.stepj(),m.dt()); }
         static const_ret_type call(const type& m) 
-        {
-            return view_type(
-                m.cptr(),m.size(),m.isunit(),m.stepi(),m.stepj()); 
-        }
+        { return view_type(m.cptr(),m.size(),m.stepi(),m.stepj(),m.dt()); }
     };
 
     template <class type, class view_type>
@@ -453,7 +452,6 @@ namespace tmv {
         enum { _calc = Traits<M>::_calc };
         enum { _rowmajor = Traits<M>::_rowmajor }; 
         enum { _colmajor = Traits<M>::_colmajor }; 
-        enum { _stor = Traits<M>::_stor };
         enum { _conj = Traits<M>::_conj };
         enum { _stepi = Traits<M>::_stepi };
         enum { _stepj = Traits<M>::_stepj };
@@ -489,7 +487,6 @@ namespace tmv {
         typedef typename Traits<M>::const_diag_type const_diag_type;
         typedef typename Traits<M>::const_diag_sub_type const_diag_sub_type;
 
-        typedef typename Traits<M>::const_xdview_type const_xdview_type;
         typedef typename Traits<M>::const_cmview_type const_cmview_type;
         typedef typename Traits<M>::const_rmview_type const_rmview_type;
 
@@ -524,9 +521,6 @@ namespace tmv {
     private:
         void operator=(const BaseMatrix_Tri<M>&);
     public:
-
-        // MJ Temporary -- remove this.
-        bool divIsSet() const { return false; }
 
         //
         // Access 
@@ -643,15 +637,15 @@ namespace tmv {
         const_subtrimatrix_type cSubTriMatrix(int i1, int i2) const
         {
             return const_subtrimatrix_type(
-                cptr()+i1*diagstep(), i2-i1, isunit(), stepi(), stepj());
+                cptr()+i1*diagstep(), i2-i1, stepi(), stepj(), dt());
         }
 
         const_subtrimatrix_step_type cSubTriMatrix(
             int i1, int i2, int istep) const
         {
             return const_subtrimatrix_step_type(
-                cptr()+i1*diagstep(), (i2-i1)/istep, isunit(), 
-                istep*stepi(), istep*stepj());
+                cptr()+i1*diagstep(), (i2-i1)/istep, 
+                istep*stepi(), istep*stepj(), dt());
         }
 
         const_submatrix_type cSubMatrix(
@@ -746,11 +740,6 @@ namespace tmv {
         TMV_MAYBE_CREF(type,const_xview_type) xView() const
         { return MakeTriView<type,const_xview_type>::call(mat()); }
 
-        // For Tri Matrices, we add this xdView option that also turns
-        // the known D into UnknownDiag
-        TMV_MAYBE_CREF(type,const_xdview_type) xdView() const
-        { return MakeTriView<type,const_xdview_type>::call(mat()); }
-
         TMV_MAYBE_CREF(type,const_cmview_type) cmView() const
         {
             TMVAssert(iscm() && "Called cmView on non-ColMajor matrix");
@@ -764,23 +753,23 @@ namespace tmv {
         }
 
         const_view_type constView() const
-        { return const_view_type(cptr(),size(),isunit(),stepi(),stepj()); }
+        { return const_view_type(cptr(),size(),stepi(),stepj(),dt()); }
 
         const_transpose_type transpose() const
-        { return const_transpose_type(cptr(),size(),isunit(),stepj(),stepi()); }
+        { return const_transpose_type(cptr(),size(),stepj(),stepi(),dt()); }
 
         TMV_MAYBE_CREF(type,const_conjugate_type) conjugate() const
         { return MakeTriView<type,const_conjugate_type>::call(mat()); }
 
         const_adjoint_type adjoint() const
-        { return const_adjoint_type(cptr(),size(),isunit(),stepj(),stepi()); }
+        { return const_adjoint_type(cptr(),size(),stepj(),stepi(),dt()); }
 
         const_offdiag_type offDiag(int noff) const
         {
             CheckOffDiag(noff,size());
             return const_offdiag_type(
                 cptr()+noff*(this->isupper()?stepj():stepi()),
-                size()-noff,false,stepi(),stepj()); 
+                size()-noff,stepi(),stepj()); 
         }
 
         const_offdiag_type offDiag() const
@@ -788,30 +777,27 @@ namespace tmv {
             CheckOffDiag(size());
             return const_offdiag_type(
                 cptr()+(this->isupper()?stepj():stepi()),
-                size()-1,false,stepi(),stepj()); 
+                size()-1,stepi(),stepj()); 
         }
 
         const_unitdiag_type viewAsUnitDiag() const
-        { return const_unitdiag_type(cptr(),size(),true,stepi(),stepj()); }
+        { return const_unitdiag_type(cptr(),size(),stepi(),stepj()); }
 
         const_nonunitdiag_type viewAsNonUnitDiag() const
         {
             TMVAssert(!isunit());
-            return const_nonunitdiag_type(cptr(),size(),false,stepi(),stepj()); 
+            return const_nonunitdiag_type(cptr(),size(),stepi(),stepj()); 
         }
 
         const_unknowndiag_type viewAsUnknownDiag(DiagType newdt=dt()) const
-        {
-            return const_unknowndiag_type(
-                cptr(),size(),newdt==UnitDiag,stepi(),stepj()); 
-        }
+        { return const_unknowndiag_type(cptr(),size(),stepi(),stepj(),newdt); }
 
         const_realpart_type realPart() const
         {
             return const_realpart_type(
-                reinterpret_cast<const real_type*>(cptr()), size(), isunit(),
+                reinterpret_cast<const real_type*>(cptr()), size(), 
                 M::isreal ? stepi() : 2*stepi(),
-                M::isreal ? stepj() : 2*stepj());
+                M::isreal ? stepj() : 2*stepj(), dt());
         }
 
         const_imagpart_type imagPart() const
@@ -819,8 +805,8 @@ namespace tmv {
             TMVStaticAssert(M::iscomplex);
             TMVAssert(!isunit());
             return const_imagpart_type(
-                reinterpret_cast<const real_type*>(cptr())+1, size(), false,
-                2*stepi(), 2*stepj());
+                reinterpret_cast<const real_type*>(cptr())+1, size(), 
+                2*stepi(), 2*stepj(), dt());
         }
 
         TMV_MAYBE_CREF(type,const_nonconj_type) nonConj() const
@@ -830,7 +816,7 @@ namespace tmv {
         {
             return nonconst_type(
                 const_cast<value_type*>(cptr()),
-                size(),isunit(),stepi(),stepj()); 
+                size(),stepi(),stepj(),dt()); 
         }
 
 
@@ -889,11 +875,11 @@ namespace tmv {
         int diagstep() const 
         { return _diagstep == UNKNOWN ? stepi() + stepj() : _diagstep; }
         bool isconj() const { return _conj; }
+        DiagType dt() const { return mat().dt(); }
         bool isunit() const { return mat().isunit(); }
         bool isupper() const { return _upper; }
         bool iscm() const { return mat().iscm(); }
         bool isrm() const { return mat().isrm(); }
-        DiagType dt() const { return isunit() ? UnitDiag : NonUnitDiag; }
 
         // Note that these last functions need to be defined in a more derived
         // class than this, or an infinite loop will result when compiling.
@@ -925,7 +911,6 @@ namespace tmv {
         enum { _calc = Traits<M>::_calc };
         enum { _rowmajor = Traits<M>::_rowmajor }; 
         enum { _colmajor = Traits<M>::_colmajor }; 
-        enum { _stor = Traits<M>::_stor };
         enum { _conj = Traits<M>::_conj };
         enum { _stepi = Traits<M>::_stepi };
         enum { _stepj = Traits<M>::_stepj };
@@ -973,7 +958,6 @@ namespace tmv {
         typedef typename base::const_col_sub_type const_col_sub_type;
         typedef typename base::const_diag_type const_diag_type;
         typedef typename base::const_diag_sub_type const_diag_sub_type;
-        typedef typename base::const_xdview_type const_xdview_type;
         typedef typename base::const_cmview_type const_cmview_type;
         typedef typename base::const_rmview_type const_rmview_type;
         typedef typename base::const_subtrimatrix_type const_subtrimatrix_type;
@@ -995,7 +979,6 @@ namespace tmv {
 
         typedef typename Traits<M>::cmview_type cmview_type;
         typedef typename Traits<M>::rmview_type rmview_type;
-        typedef typename Traits<M>::xdview_type xdview_type;
 
         typedef typename Traits<M>::subtrimatrix_type subtrimatrix_type;
         typedef typename Traits<M>::subtrimatrix_step_type 
@@ -1026,9 +1009,6 @@ namespace tmv {
         {
             CheckRowIndex<_fort>(i,size());
             CheckColIndex<_fort>(j,size());
-            // MJ: We don't actually want this next check.
-            // Let TriRef do the check if the reference is assigned to.
-            //CheckTri<_shape>(isunit(),i,j);
             return ref(i,j);
         }
 
@@ -1213,14 +1193,14 @@ namespace tmv {
         subtrimatrix_type cSubTriMatrix(int i1, int i2) 
         {
             return subtrimatrix_type(
-                ptr()+i1*diagstep(), i2-i1, isunit(), stepi(), stepj()); 
+                ptr()+i1*diagstep(), i2-i1, stepi(), stepj(), dt()); 
         }
 
         subtrimatrix_step_type cSubTriMatrix(int i1, int i2, int istep) 
         {
             return subtrimatrix_step_type(
-                ptr()+i1*diagstep(), (i2-i1)/istep, isunit(),
-                istep*stepi(), istep*stepj());
+                ptr()+i1*diagstep(), (i2-i1)/istep, 
+                istep*stepi(), istep*stepj(), dt());
         }
 
         submatrix_type cSubMatrix(int i1, int i2, int j1, int j2) 
@@ -1343,9 +1323,6 @@ namespace tmv {
         TMV_MAYBE_REF(type,xview_type) xView() 
         { return MakeTriView<type,xview_type>::call(mat()); }
 
-        TMV_MAYBE_REF(type,xdview_type) xdView() 
-        { return MakeTriView<type,xdview_type>::call(mat()); }
-
         TMV_MAYBE_REF(type,cmview_type) cmView() 
         {
             TMVAssert(iscm() && "Called cmView on non-ColMajor matrix");
@@ -1359,20 +1336,20 @@ namespace tmv {
         }
 
         transpose_type transpose() 
-        { return transpose_type(ptr(),size(),isunit(),stepj(),stepi()); }
+        { return transpose_type(ptr(),size(),stepj(),stepi(),dt()); }
 
         TMV_MAYBE_REF(type,conjugate_type) conjugate() 
         { return MakeTriView<type,conjugate_type>::call(mat()); }
 
         adjoint_type adjoint() 
-        { return adjoint_type(ptr(),size(),isunit(),stepj(),stepi()); }
+        { return adjoint_type(ptr(),size(),stepj(),stepi(),dt()); }
 
         offdiag_type offDiag(int noff) 
         {
             CheckOffDiag(noff,size());
             return offdiag_type(
                 ptr()+noff*(this->isupper()?stepj():stepi()),
-                size()-noff,false,stepi(),stepj()); 
+                size()-noff,stepi(),stepj()); 
         }
 
         offdiag_type offDiag()
@@ -1380,30 +1357,27 @@ namespace tmv {
             CheckOffDiag(size());
             return offdiag_type(
                 ptr()+(this->isupper()?stepj():stepi()),
-                size()-1,false,stepi(),stepj()); 
+                size()-1,stepi(),stepj()); 
         }
 
         unitdiag_type viewAsUnitDiag()
-        { return unitdiag_type(ptr(),size(),true,stepi(),stepj()); }
+        { return unitdiag_type(ptr(),size(),stepi(),stepj()); }
 
         nonunitdiag_type viewAsNonUnitDiag()
         {
             TMVAssert(!isunit());
-            return nonunitdiag_type(ptr(),size(),false,stepi(),stepj()); 
+            return nonunitdiag_type(ptr(),size(),stepi(),stepj()); 
         }
 
         unknowndiag_type viewAsUnknownDiag(DiagType newdt=dt()) 
-        {
-            return unknowndiag_type(
-                ptr(),size(),newdt==UnitDiag,stepi(),stepj()); 
-        }
+        { return unknowndiag_type(ptr(),size(),stepi(),stepj(),newdt); }
 
         realpart_type realPart() 
         {
             return realpart_type(
-                reinterpret_cast<real_type*>(ptr()), size(), isunit(),
+                reinterpret_cast<real_type*>(ptr()), size(), 
                 M::isreal ? stepi() : 2*stepi(),
-                M::isreal ? stepj() : 2*stepj());
+                M::isreal ? stepj() : 2*stepj(), dt());
         }
 
         imagpart_type imagPart() 
@@ -1411,8 +1385,8 @@ namespace tmv {
             TMVStaticAssert(M::iscomplex);
             TMVAssert(!isunit());
             return imagpart_type(
-                reinterpret_cast<real_type*>(ptr())+1, size(), false,
-                2*stepi(), 2*stepj());
+                reinterpret_cast<real_type*>(ptr())+1, size(),
+                2*stepi(), 2*stepj(), dt());
         }
 
         TMV_MAYBE_REF(type,nonconj_type) nonConj()
@@ -1428,8 +1402,6 @@ namespace tmv {
         { return base::fView(); }
         TMV_MAYBE_CREF(type,const_xview_type) xView() const
         { return base::xView(); }
-        TMV_MAYBE_CREF(type,const_xdview_type) xdView() const
-        { return base::xdView(); }
         TMV_MAYBE_CREF(type,const_cmview_type) cmView() const
         { return base::cmView(); }
         TMV_MAYBE_CREF(type,const_rmview_type) rmView() const
@@ -1485,6 +1457,7 @@ namespace tmv {
         size_t colsize() const { return mat().size(); }
         size_t rowsize() const { return mat().size(); }
         size_t size() const { return mat().size(); }
+        DiagType dt() const { return mat().dt(); }
         bool isunit() const { return mat().isunit(); }
         int stepi() const { return mat().stepi(); }
         int stepj() const { return mat().stepj(); }

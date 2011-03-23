@@ -37,9 +37,8 @@
 #ifndef TMV_ScaleM_H
 #define TMV_ScaleM_H
 
-#include "TMV_ScaleV.h"
-#include "TMV_MultXV.h"
 #include "TMV_BaseMatrix_Rec.h"
+#include "TMV_ScaleV.h"
 
 namespace tmv {
 

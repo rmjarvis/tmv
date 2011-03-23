@@ -38,9 +38,9 @@
 namespace tmv {
 
     // Defined in TMV_Matrix.cpp
-    template <class T1, bool C1, class T2>
+    template <class T1, int C1, class T2>
     void InstCopy(
-        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1, MatrixView<T2> m2); 
+        const ConstMatrixView<T1,C1>& m1, MatrixView<T2> m2); 
 
     //
     // Copy Matrices

@@ -32,8 +32,8 @@
 //#define PRINTALGO_XV
 
 #include "TMV_Blas.h"
-#include "tmv/TMV_ScaleV.h"
 #include "tmv/TMV_MultXV.h"
+#include "tmv/TMV_ScaleV.h"
 #include "tmv/TMV_Vector.h"
 
 namespace tmv {
@@ -71,20 +71,20 @@ namespace tmv {
     static void DoMultXV2(const T x, const V1& v1, VectorView<T> v2)
     {
         if (v1.step() == 1 && v2.step() == 1) {
-            VectorView<T,1> v2u = v2.unitView();
+            VectorView<T,Unit> v2u = v2.unitView();
             DoMultXV3<add>(x,v1.unitView(),v2u);
         } else 
             DoMultXV3<add>(x,v1,v2); 
     }
 
-    template <class T1, bool C1, class T2>
+    template <class T1, int C1, class T2>
     static void DoMultXV(
-        const T2 x, const ConstVectorView<T1,UNKNOWN,C1>& v1,
+        const T2 x, const ConstVectorView<T1,C1>& v1,
         VectorView<T2> v2)
     { DoMultXV2<false>(x,v1,v2); }
-    template <class T1, bool C1, class T2>
+    template <class T1, int C1, class T2>
     static void DoAddMultXV(
-        const T2 x, const ConstVectorView<T1,UNKNOWN,C1>& v1,
+        const T2 x, const ConstVectorView<T1,C1>& v1,
         VectorView<T2> v2)
     { DoMultXV2<true>(x,v1,v2); }
 
@@ -239,14 +239,14 @@ namespace tmv {
 #endif
 #endif // BLAS
 
-    template <class T1, bool C1, class T2>
+    template <class T1, int C1, class T2>
     void InstMultXV(
-        const T2 x, const ConstVectorView<T1,UNKNOWN,C1>& v1,
+        const T2 x, const ConstVectorView<T1,C1>& v1,
         VectorView<T2> v2)
     { DoMultXV(x,v1,v2); }
-    template <class T1, bool C1, class T2>
+    template <class T1, int C1, class T2>
     void InstAddMultXV(
-        const T2 x, const ConstVectorView<T1,UNKNOWN,C1>& v1,
+        const T2 x, const ConstVectorView<T1,C1>& v1,
         VectorView<T2> v2)
     { DoAddMultXV(x,v1,v2); }
 

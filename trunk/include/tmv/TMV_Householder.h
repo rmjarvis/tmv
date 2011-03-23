@@ -163,9 +163,8 @@
 #ifndef TMV_Householder_H
 #define TMV_Householder_H
 
-#include "tmv/TMV_Vector.h"
-#include "tmv/TMV_Matrix.h"
-#include "tmv/TMV_TriMatrix.h"
+#include "tmv/TMV_BaseVector.h"
+#include "tmv/TMV_BaseMatrix_Rec.h"
 
 namespace tmv {
 
@@ -189,7 +188,7 @@ namespace tmv {
 
         enum { _colsize = IntTraits<V::_size>::Sp1 };
         enum { _rowsize = _colsize };
-        enum { _shape = SquareRec };
+        enum { _shape = Rec };
         enum { _fort = V::_fort };
         enum { _calc = false };
     };
@@ -1391,7 +1390,7 @@ namespace tmv {
         // Make the first N columns equal to 
         // Ht [ I ] = (I - YZYt) [ I ]
         //    [ 0 ]              [ 0 ]
-        UpperTriMatrix<T,NonUnitDiag,RowMajor> temp = 
+        UpperTriMatrix<T,RowMajor> temp = 
             -Z * Y.rowRange(0,N).lowerTri(UnitDiag).adjoint();
         Y.rowRange(N,M) *= temp;
         Y.rowRange(0,N) = Y.rowRange(0,N).lowerTri(UnitDiag) * temp;

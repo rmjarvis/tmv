@@ -33,7 +33,7 @@
 #ifndef TMV_DiagMatrixIO_H
 #define TMV_DiagMatrixIO_H
 
-#include "TMV_DiagMatrix.h"
+#include "TMV_BaseMatrix_Diag.h"
 #include "TMV_VectorIO.h"
 
 namespace tmv {
@@ -61,9 +61,9 @@ namespace tmv {
     }
 
     // Defined in TMV_Diag.cpp
-    template <class T, bool C>
+    template <class T, int C>
     void InstWrite(
-        std::ostream& os, const ConstDiagMatrixView<T,UNKNOWN,C>& m);
+        std::ostream& os, const ConstDiagMatrixView<T,C>& m);
 
     // With thresh:
     template <class M>
@@ -87,9 +87,9 @@ namespace tmv {
     }
 
     // Defined in TMV_Diag.cpp
-    template <class T, bool C>
+    template <class T, int C>
     void InstWrite(
-        std::ostream& os, const ConstDiagMatrixView<T,UNKNOWN,C>& m,
+        std::ostream& os, const ConstDiagMatrixView<T,C>& m,
         typename Traits<T>::real_type thresh);
 
     //
@@ -167,9 +167,9 @@ namespace tmv {
     };
 #endif
 
-    template <class T, IndexStyle I>
+    template <class T, int A>
     static std::istream& operator>>(
-        std::istream& is, auto_ptr<DiagMatrix<T,I> >& m)
+        std::istream& is, auto_ptr<DiagMatrix<T,A> >& m)
     {
         char d;
         is >> d;
@@ -191,7 +191,7 @@ namespace tmv {
             throw DiagMatrixReadError<T>(is);
 #endif
         }
-        m.reset(new DiagMatrix<T,I>(size));
+        m.reset(new DiagMatrix<T,A>(size));
 #ifndef TMV_NO_THROW
         try {
 #endif

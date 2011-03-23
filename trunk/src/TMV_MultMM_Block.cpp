@@ -30,13 +30,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "TMV_Blas.h"
+#include "tmv/TMV_MultMM_Block.h"
+#include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_MultMM.h"
 
 namespace tmv {
-
-#ifdef BLAS
-#define TMV_INST_SKIP_BLAS
-#endif
 
     template <bool add, class M1, class M2, class T>
     static inline void DoMultMM_Block(
@@ -55,19 +53,31 @@ namespace tmv {
             InlineMultMM_Block<add>(Scaling<0,CT>(x),m1,m2,m3);
     }
 
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM_Block(
         const T3 x,
-        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, MatrixView<T3> m3)
-    { DoMultMM_Block<false>(x,m1,m2,m3); }
+        const ConstMatrixView<T1,C1>& m1,
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3)
+    { 
+#if !defined(BLAS) && TMV_OPT >= 3
+        DoMultMM_Block<false>(x,m1,m2,m3); 
+#else
+        InstMultMM(x,m1,m2,m3); 
+#endif
+    }
 
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM_Block(
         const T3 x,
-        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, MatrixView<T3> m3)
-    { DoMultMM_Block<true>(x,m1,m2,m3); }
+        const ConstMatrixView<T1,C1>& m1,
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3)
+    {
+#if !defined(BLAS) && TMV_OPT >= 1
+        DoMultMM_Block<true>(x,m1,m2,m3); 
+#else
+        InstAddMultMM(x,m1,m2,m3); 
+#endif
+    }
 
     template <bool add, class M1, class M2, class T>
     static inline void DoMultMM_RecursiveBlock(
@@ -87,24 +97,36 @@ namespace tmv {
             InlineMultMM_RecursiveBlock<add>(Scaling<0,CT>(x),m1,m2,m3);
     }
 
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM_RecursiveBlock(
         const T3 x,
-        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, MatrixView<T3> m3)
-    { DoMultMM_RecursiveBlock<false>(x,m1,m2,m3); }
+        const ConstMatrixView<T1,C1>& m1,
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3)
+    {
+#if !defined(BLAS) && (TMV_OPT >= 3) && defined(TMV_MM_USE_RECURSIVE_BLOCK)
+        DoMultMM_RecursiveBlock<false>(x,m1,m2,m3); 
+#else
+        InstMultMM(x,m1,m2,m3); 
+#endif
+    }
 
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM_RecursiveBlock(
         const T3 x,
-        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, MatrixView<T3> m3)
-    { DoMultMM_RecursiveBlock<true>(x,m1,m2,m3); }
+        const ConstMatrixView<T1,C1>& m1,
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3)
+    {
+#if !defined(BLAS) && (TMV_OPT >= 1) && defined(TMV_MM_USE_RECURSIVE_BLOCK)
+        DoMultMM_RecursiveBlock<true>(x,m1,m2,m3); 
+#else
+        InstAddMultMM(x,m1,m2,m3); 
+#endif
+    }
 
 #define InstFile "TMV_MultMM_Block.inst"
 #include "TMV_Inst.h"
 #undef InstFile
 
-} // namespace tmv
+} // namespace tmg
 
 

@@ -34,11 +34,6 @@
 #define TMV_InvertM_H
 
 #include "TMV_BaseMatrix.h"
-#include "TMV_MultMM.h"
-#include "TMV_MultUL.h"
-#include "TMV_InvertD.h"
-#include "TMV_InvertU.h"
-#include "TMV_ElemMultVV.h"
 
 #ifdef PRINTALGO_InvM
 #include <iostream>
@@ -102,7 +97,7 @@ namespace tmv {
                 2<<','<<2<<std::endl;
 #endif
             typedef typename M1::value_type T1;
-            T1 det = DetM_Helper<2,2,M1>::call(m1);
+            T1 det = m1.det();
             if (det == T1(0)) InvertM_ThrowSingular();
             // Store these in temporaries just in case there are aliases.
             const T1 m1_00 = m1.cref(0,0);
@@ -537,7 +532,6 @@ namespace tmv {
                     up2 ? 42 : 44 ) :
                 cs == 2 && rs == 2 ? 2 :
                 M1::_hasdivider ? 11 :
-                M1::_issquare  ? 12 :
                 cs == UNKNOWN || rs == UNKNOWN ? 14 :
                 cs == rs ? 12 : 
                 13;
@@ -576,7 +570,6 @@ namespace tmv {
                     up2 ? 41 : 43 ) :
                 cs == 2 && rs == 2 ? 2 :
                 M1::_hasdivider ? 11 :
-                M1::_issquare  ? 12 :
                 cs == UNKNOWN || rs == UNKNOWN ? 14 :
                 cs == rs ? 12 : 
                 13;
@@ -1073,7 +1066,6 @@ namespace tmv {
                 !up1 ? 42 : // m1 is lowertri
                 rs == 2 ? 2 :
                 M1::_hasdivider ? 11 :
-                M1::_issquare  ? 12 :
                 cs == UNKNOWN || rs == UNKNOWN ? 14 :
                 cs == rs ? 12 : 
                 13;
@@ -1110,7 +1102,6 @@ namespace tmv {
                 !up1 ? 41 : // m1 is lowertri
                 rs == 2 ? 2 :
                 M1::_hasdivider ? 11 :
-                M1::_issquare  ? 12 :
                 cs == UNKNOWN || rs == UNKNOWN ? 14 :
                 cs == rs ? 12 : 
                 13;

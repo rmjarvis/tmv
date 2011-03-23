@@ -33,24 +33,24 @@
 #ifndef TMV_ElemMultVV_H
 #define TMV_ElemMultVV_H
 
-#include "TMV_Scaling.h"
 #include "TMV_BaseVector.h"
+#include "TMV_Scaling.h"
 #include "TMV_MultXV_Funcs.h"
 #include "TMV_MultVV_Funcs.h"
 
 namespace tmv {
 
     // Defined in TMV_ElemMultVV.cpp
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstElemMultVV(
         const T3 x,
-        const ConstVectorView<T1,UNKNOWN,C1>& v1,
-        const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3);
-    template <class T1, bool C1, class T2, bool C2, class T3>
+        const ConstVectorView<T1,C1>& v1,
+        const ConstVectorView<T2,C2>& v2, VectorView<T3> v3);
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstAddElemMultVV(
         const T3 x,
-        const ConstVectorView<T1,UNKNOWN,C1>& v1,
-        const ConstVectorView<T2,UNKNOWN,C2>& v2, VectorView<T3> v3);
+        const ConstVectorView<T1,C1>& v1,
+        const ConstVectorView<T2,C2>& v2, VectorView<T3> v3);
 
     //
     // ElementProd functions:

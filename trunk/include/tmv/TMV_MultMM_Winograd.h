@@ -33,8 +33,8 @@
 #ifndef TMV_MultMM_Winograd_H
 #define TMV_MultMM_Winograd_H
 
-#include "TMV_Matrix.h"
-#include "TMV_SimpleMatrix.h"
+#include "TMV_BaseMatrix_Rec.h"
+#include "TMV_MultXM_Funcs.h"
 
 #ifndef TMV_MM_MIN_WINOGRAD
 #ifdef TMV_USE_RECURSIVE_BLOCK
@@ -47,18 +47,16 @@
 namespace tmv {
 
     // Defined in TMV_MultMM_Winograd.cpp
-    template <class T1, bool CC1, class T2, bool CC2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM_Winograd(
         const T3 x, 
-        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,CC1>& m1,
-        const ConstMatrixView<T2,UNKNOWN,UNKNOWN,CC2>& m2,
-        MatrixView<T3> m3);
-    template <class T1, bool CC1, class T2, bool CC2, class T3>
+        const ConstMatrixView<T1,C1>& m1,
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM_Winograd(
         const T3 x, 
-        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,CC1>& m1,
-        const ConstMatrixView<T2,UNKNOWN,UNKNOWN,CC2>& m2,
-        MatrixView<T3> m3);
+        const ConstMatrixView<T1,C1>& m1,
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
     static void MultMM_Winograd(
@@ -213,9 +211,9 @@ namespace tmv {
             // X,Y,Z are temporaries.
             // We use the subscripts 1,2,3 to match the size of the 
             // corrsponding A, B or C submatrix.  0 matches the full size.
-            SimpleMatrix<T1,RowMajor> X(Ma,Ka,T1(0)); 
-            SimpleMatrix<T2,ColMajor> Y(Ka,Na,T2(0));
-            SimpleMatrix<T3,ColMajor> Z(Ma,Na,T3(0));
+            Matrix<T1,RowMajor | NoDivider> X(Ma,Ka,T1(0)); 
+            Matrix<T2,ColMajor | NoDivider> Y(Ka,Na,T2(0));
+            Matrix<T3,ColMajor | NoDivider> Z(Ma,Na,T3(0));
 
             // Only use the versions that maintain knowledge of the
             // majority of X,Y,Z submatrices if the input m1,m2, and m3
@@ -224,12 +222,13 @@ namespace tmv {
                 (M1::_colmajor || M1::_rowmajor) &&
                 (M2::_colmajor || M2::_rowmajor) &&
                 (M3::_colmajor || M3::_rowmajor);
-            const int maybe_unit = majority_known ? 1 : UNKNOWN;
+            const int cmA = majority_known ? ColMajor : NonMajor;
+            const int rmA = majority_known ? RowMajor : NonMajor;
             const int maybe_one = majority_known ? 1 : 0;
             const int maybe_mone = majority_known ? -1 : 0;
-            typedef MatrixView<T1,UNKNOWN,maybe_unit> M1r;
-            typedef MatrixView<T2,maybe_unit> M2c;
-            typedef MatrixView<T3,maybe_unit> M3c;
+            typedef MatrixView<T1,rmA> M1r;
+            typedef MatrixView<T2,cmA> M2c;
+            typedef MatrixView<T3,cmA> M3c;
             Scaling<maybe_one,RT> one(RT(1));
             Scaling<maybe_mone,RT> mone(RT(-1));
 

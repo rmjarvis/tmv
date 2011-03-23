@@ -33,6 +33,7 @@
 #ifndef TMV_QuotMM_H
 #define TMV_QuotMM_H
 
+#include "TMV_BaseMatrix.h"
 #include "TMV_ProdXM.h"
 #include "TMV_QuotXM.h"
 #include "TMV_DivMM_Funcs.h"

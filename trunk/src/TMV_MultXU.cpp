@@ -33,6 +33,8 @@
 #include "tmv/TMV_TriMatrix.h"
 #include "tmv/TMV_ScaleU.h"
 #include "tmv/TMV_ProdXM.h"
+#include "tmv/TMV_Vector.h"
+#include "tmv/TMV_ConjugateV.h"
 
 namespace tmv {
 
@@ -65,38 +67,36 @@ namespace tmv {
             InlineMultXM<add>(Scaling<0,std::complex<T> >(x),m1,m2); 
     }
 
-    template <class T1, bool C1, class T2>
+    template <class T1, int C1, class T2>
     void InstMultXM(
-        const T2 x,
-        const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
+        const T2 x, const ConstUpperTriMatrixView<T1,C1>& m1,
         UpperTriMatrixView<T2,NonUnitDiag> m2)
     {
         if (m1.iscm() && m2.iscm()) {
-            UpperTriMatrixView<T2,NonUnitDiag,1> m2cm = m2.cmView();
+            UpperTriMatrixView<T2,NonUnitDiag|ColMajor> m2cm = m2.cmView();
             DoMultXM<false>(x,m1.cmView(),m2cm);
         } else if (m1.isrm() && m2.isrm()) {
-            UpperTriMatrixView<T2,NonUnitDiag,UNKNOWN,1> m2rm = m2.rmView();
+            UpperTriMatrixView<T2,NonUnitDiag|RowMajor> m2rm = m2.rmView();
             DoMultXM<false>(x,m1.rmView(),m2rm);
         } else {
-            InstCopy(m1,m2.xdView());
+            InstCopy(m1,m2.xView());
             InstScale(x,m2);
         }
     }
 
-    template <class T1, bool C1, class T2>
+    template <class T1, int C1, class T2>
     void InstAddMultXM(
-        const T2 x,
-        const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
+        const T2 x, const ConstUpperTriMatrixView<T1,C1>& m1,
         UpperTriMatrixView<T2,NonUnitDiag> m2)
     {
         if (m2.iscm()) {
-            UpperTriMatrixView<T2,NonUnitDiag,1> m2cm = m2;
+            UpperTriMatrixView<T2,NonUnitDiag|ColMajor> m2cm = m2;
             if (m1.iscm())
                 DoMultXM<true>(x,m1.cmView(),m2cm);
             else 
                 DoMultXM<true>(x,m1,m2cm);
         } else if (m2.isrm()) {
-            UpperTriMatrixView<T2,NonUnitDiag,UNKNOWN,1> m2rm = m2;
+            UpperTriMatrixView<T2,NonUnitDiag|RowMajor> m2rm = m2;
             if (m1.isrm())
                 DoMultXM<true>(x,m1.rmView(),m2rm);
             else 

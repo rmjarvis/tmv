@@ -33,6 +33,7 @@
 #ifndef TMV_ProdVV_H
 #define TMV_ProdVV_H
 
+#include "TMV_BaseVector.h"
 #include "TMV_ProdXV.h"
 #include "TMV_MultVV_Funcs.h"
 

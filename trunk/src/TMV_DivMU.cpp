@@ -35,7 +35,11 @@
 #include "TMV_Blas.h"
 #include "tmv/TMV_DivMU.h"
 #include "tmv/TMV_TriMatrix.h"
-#include "tmv/TMV_SimpleMatrix.h"
+#include "tmv/TMV_Matrix.h"
+#include "tmv/TMV_CopyM.h"
+#include "tmv/TMV_CopyU.h"
+#include "tmv/TMV_Vector.h"
+#include "tmv/TMV_Det.h"
 
 namespace tmv {
 
@@ -259,16 +263,16 @@ namespace tmv {
             if ((m2.isrm() && m2.stepi()>0) || (m2.iscm() && m2.stepj()>0)) {
                 BlasLDivEq(m1,m2,t2);
             } else {
-                SimpleMatrix<T2,ColMajor> m2c(m2.size(),m2.size());
+                Matrix<T2,ColMajor|NoDivider> m2c(m2.size(),m2.size());
                 typedef typename TypeSelect<M2::_upper,
-                        UpperTriMatrixView<T2,UnknownDiag,1>,
-                        LowerTriMatrixView<T2,UnknownDiag,1> >::type M2t;
+                        UpperTriMatrixView<T2,ColMajor>,
+                        LowerTriMatrixView<T2,ColMajor> >::type M2t;
                 M2t m2ct = Maybe<M2::_upper>::uppertri(m2c,m2.dt());
-                InstCopy(m2,m2ct.xdView());
+                InstCopy(m2,m2ct.xView());
                 NonBlasLDivEq(m1,m2ct.constView());
             }
         } else {
-            SimpleMatrix<T1,ColMajor> m1c(m1);
+            Matrix<T1,ColMajor|NoDivider> m1c(m1);
             DoLDivEq(m1c.xView(),m2);
             InstCopy(m1c.constView().xView(),m1);
         }
@@ -277,32 +281,30 @@ namespace tmv {
             if (m2.iscm() || m2.isrm()) {
                 NonBlasLDivEq(m1,m2);
             } else {
-                SimpleMatrix<T2,ColMajor> m2c(m2.size(),m2.size());
+                Matrix<T2,ColMajor|NoDivider> m2c(m2.size(),m2.size());
                 typedef typename TypeSelect<M2::_upper,
-                        UpperTriMatrixView<T2,UnknownDiag,1>,
-                        LowerTriMatrixView<T2,UnknownDiag,1> >::type M2t;
+                        UpperTriMatrixView<T2,ColMajor>,
+                        LowerTriMatrixView<T2,ColMajor> >::type M2t;
                 M2t m2ct = Maybe<M2::_upper>::uppertri(m2c,m2.dt());
-                InstCopy(m2,m2ct.xdView());
+                InstCopy(m2,m2ct.xView());
                 NonBlasLDivEq(m1,m2ct.constView());
             }
         } else {
-            SimpleMatrix<T1,ColMajor> m1c(m1);
+            Matrix<T1,ColMajor|NoDivider> m1c(m1);
             DoLDivEq(m1c.xView(),m2);
             InstCopy(m1c.constView().xView(),m1);
         }
 #endif
     }
 
-    template <class T1, class T2, bool C2>
+    template <class T1, class T2, int C2>
     void InstLDivEq(
-        MatrixView<T1> m1,
-        const ConstUpperTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2)
+        MatrixView<T1> m1, const ConstUpperTriMatrixView<T2,C2>& m2)
     { DoLDivEq(m1,m2); }
 
-    template <class T1, class T2, bool C2>
+    template <class T1, class T2, int C2>
     void InstLDivEq(
-        MatrixView<T1> m1,
-        const ConstLowerTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2)
+        MatrixView<T1> m1, const ConstLowerTriMatrixView<T2,C2>& m2)
     { DoLDivEq(m1,m2); }
 
 #define InstFile "TMV_DivMU.inst"

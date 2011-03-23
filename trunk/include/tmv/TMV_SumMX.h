@@ -33,6 +33,7 @@
 #ifndef TMV_SumMX_H
 #define TMV_SumMX_H
 
+#include "TMV_BaseMatrix.h"
 #include "TMV_ProdXM.h"
 #include "TMV_MultXM_Funcs.h"
 

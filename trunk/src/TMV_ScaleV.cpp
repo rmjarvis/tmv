@@ -67,7 +67,7 @@ namespace tmv {
     static void DoScale(const T x, VectorView<T> v)
     { 
         if (v.step() == 1) {
-            VectorView<T,1> vu = v.unitView();
+            VectorView<T,Unit> vu = v.unitView();
             DoScale2(x,vu);
         } else 
             DoScale2(x,v); 

@@ -33,9 +33,6 @@
 #ifndef TMV_SortV_H
 #define TMV_SortV_H
 
-#include <algorithm>
-#include <vector>
-
 #include "TMV_BaseVector.h";
 
 namespace tmv {

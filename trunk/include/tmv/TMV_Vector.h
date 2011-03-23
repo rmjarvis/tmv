@@ -42,13 +42,12 @@
 // so for a Vector of doubles, one would write 
 // tmv::Vector<double>.  
 //
-// An optional second template parameter can tell the Vector to
-// use Fortran-style indexing instead of C-style.
+// An optional second template parameter specifies known attributes
+// of the vector.  The only one that is valid is
+// A = CStyle or FortranStyle.
+// The default is CStyle, so you only need to specify if you want
+// FortranStyle indexing.
 // ie. the first element is v(1), and the last is v(n).
-// So you would write Vector<T,FortranStyle> v(n), for example.
-// If you want to use the Fortran-style indexing, you should
-// be aware that it only exists for a regular Vector and the two
-// view classes, VectorView and ConstVectorView.  
 //
 // The return type of many of the below methods are given generically
 // as value_type, real_type, iterator, etc.
@@ -67,14 +66,14 @@
 //
 // Constructors:
 //
-//    explicit Vector<T>(size_t n)
+//    explicit Vector<T,A>(size_t n)
 //        Makes a Vector of size n with _uninitialized_ values
 //
-//    Vector<T>(size_t n, T x)
+//    Vector<T,A>(size_t n, T x)
 //        Makes a Vector of size n with all values = x
 //
-//    Vector<T>(size_t n, const T* v2)
-//    Vector<T>(const std::vector<T>& v2)
+//    Vector<T,A>(size_t n, const T* v2)
+//    Vector<T,A>(const std::vector<T>& v2)
 //        Makes a vector which copies the elements of v2
 //        For the second one, n specifies the length of the vector
 //
@@ -266,31 +265,31 @@
 //    This is akin to the const_iterator and iterator types for the
 //    standard template library.
 //
-//    Both of these take several template arguments:
+//    Both of these take two template arguments:
 //    T = the underlying data type.
-//    S = (int) the step size if known.  (Use UNKNOWN if not known.)
-//    C = (bool) whether the view is the conjugate of the data.
-//    I = (CStyle or FortranStyle) which indexing style to use.
+//    A = the known attributes of the vector.
+//        Options are:
+//        NonConj || Conj
+//        NonUnit || Unit
+//        CStyle || FortranStyle
 // 
-//    There are default arguments for all but T:
-//    S = 1, C = false, I = CStyle
-//    so you can omit these in many cases.
+//    The default attributes are NonConj, NonUnit, CStyle, and you
+//    only need to specify anything that differs from this.
+//    So VectorView<T,Conj> means Conj, NonUnit, CStyle.
+//    To specify more than one, use the bitwise or: |.
+//    So VectorView<T,Unit | FortranStyle> means NonConj, Unit, FortranStyle.
 //
-//    ConstVectorView<T,S,C,I>(const T* p, size_t n, int s=S)
-//    VectorView<T,S,C,I>(T* p, size_t n, int s=S)
+//    ConstVectorView<T,A>(const T* p, size_t n, int s)
+//    VectorView<T,A>(T* p, size_t n, int s)
 //        Make a vector view, starting at memory location p, 
 //        with n elements, stepping over the data with step size s.
-//        Note, that s is generally omitted if you are specifying S
-//        as a template argument.  But if S == UNKNOWN, then you would
-//        need to specify s as an argument.
 //
-//    There are also copy constructors that change S (e.g. from UNKNOWN
-//    to some compile-time-known value), or change VectorView to 
-//    ConstVectorView.  e.g.:
-//
-//    ConstVectorView<T,S,C,I>(const VectorView<T,S,C,I>& v);
-//    ConstVectorView<T,S,C,I>(const VectorView<T,UNKNOWN,C,I>& v);
-//    VectorView<T,S,C,I>(const VectorView<T,UNKNOWN,C,I>& v);
+//    You can also convert a VectorView into a ConstVectorView or
+//    convert to a view with different attributes, so long as the 
+//    conversion is logically valid.  e.g. you cannot just cast away
+//    a Conj attribute, but you can change the indexing style or 
+//    specify a Unit attribute if you know that the step size really
+//    is 1.
 // 
 // Views:
 //
@@ -426,73 +425,88 @@ namespace tmv {
     // Vector
     //
 
-    template <class T, IndexStyle I>
-    struct Traits<Vector<T,I> >
+    template <class T, int A0>
+    struct Traits<Vector<T,A0> >
     {
-        typedef T value_type;
+        enum { A = A0 | Unit };
+        enum { okA = (
+                Attrib<A>::vectoronly && 
+                !Attrib<A>::conj ) };
+        enum { _attrib = A };
 
+        typedef T value_type;
         typedef typename Traits<T>::real_type real_type;
         typedef typename Traits<T>::complex_type complex_type;
         enum { isreal = Traits<T>::isreal };
         enum { iscomplex = Traits<T>::iscomplex };
 
-        typedef Vector<T,I> type;
+        typedef Vector<T,A0> type;
         typedef const type& calc_type;
         typedef const type& eval_type;
         typedef type copy_type;
 
         enum { _size = UNKNOWN };
-        enum { _fort = (I == FortranStyle) };
+        enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
         enum { _step = 1 };
         enum { _conj = false };
+        enum { _unit = true };
         enum { twoS = isreal ? 1 : 2 };
 
-        typedef ConstVectorView<T,1,false,I> const_subvector_type;
-        typedef ConstVectorView<T,UNKNOWN,false,I> const_subvector_step_type;
-        typedef ConstVectorView<T,1,false,I> const_view_type;
-        typedef ConstVectorView<T,1,false,CStyle> const_cview_type;
-        typedef ConstVectorView<T,1,false,FortranStyle> const_fview_type;
+        enum { unitA = A };
+        enum { nonunitA = A & ~Unit };
+        enum { conjA = iscomplex ? (A ^ Conj) : int(A) };
+        enum { nonconjA = A };
+        enum { cstyleA = A & ~FortranStyle };
+        enum { fstyleA = A | FortranStyle };
+        enum { twosA = isreal ? int(A) : nonunitA };
+
+        typedef ConstVectorView<T,A> const_subvector_type;
+        typedef ConstVectorView<T,nonunitA> const_subvector_step_type;
+        typedef ConstVectorView<T,A> const_view_type;
+        typedef ConstVectorView<T,cstyleA> const_cview_type;
+        typedef ConstVectorView<T,fstyleA> const_fview_type;
         typedef ConstVectorView<T> const_xview_type;
-        typedef ConstVectorView<T,1,false,I> const_unitview_type;
-        typedef ConstVectorView<T,1,iscomplex,I> const_conjugate_type;
-        typedef ConstVectorView<T,-1,false,I> const_reverse_type;
-        typedef ConstVectorView<real_type,twoS,false,I> const_realpart_type;
+        typedef ConstVectorView<T,unitA> const_unitview_type;
+        typedef ConstVectorView<T,conjA> const_conjugate_type;
+        typedef ConstSmallVectorView<T,UNKNOWN,-1,nonunitA> const_reverse_type;
+        typedef ConstSmallVectorView<real_type,UNKNOWN,twoS,twosA> 
+            const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstVectorView<real_type,1,false,I> const_flatten_type;
-        typedef ConstVectorView<T,1,false,I> const_nonconj_type;
-        typedef VectorView<T,1,false,I> nonconst_type;
+        typedef ConstVectorView<real_type,unitA> const_flatten_type;
+        typedef ConstVectorView<T,nonconjA> const_nonconj_type;
+        typedef VectorView<T,A> nonconst_type;
 
         typedef CVIt<T,1,false> const_iterator;
         typedef CVIt<T,-1,false> const_reverse_iterator;
 
         typedef T& reference;
 
-        typedef VectorView<T,1,false,I> subvector_type;
-        typedef VectorView<T,UNKNOWN,false,I> subvector_step_type;
-        typedef VectorView<T,1,false,I> view_type;
-        typedef VectorView<T,1,false,CStyle> cview_type;
-        typedef VectorView<T,1,false,FortranStyle> fview_type;
+        typedef VectorView<T,A> subvector_type;
+        typedef VectorView<T,nonunitA> subvector_step_type;
+        typedef VectorView<T,A> view_type;
+        typedef VectorView<T,cstyleA> cview_type;
+        typedef VectorView<T,fstyleA> fview_type;
         typedef VectorView<T> xview_type;
-        typedef VectorView<T,1,false,I> unitview_type;
-        typedef VectorView<T,1,iscomplex,I> conjugate_type;
-        typedef VectorView<T,-1,false,I> reverse_type;
-        typedef VectorView<real_type,twoS,false,I> realpart_type;
+        typedef VectorView<T,unitA> unitview_type;
+        typedef VectorView<T,conjA> conjugate_type;
+        typedef SmallVectorView<T,UNKNOWN,-1,nonunitA> reverse_type;
+        typedef SmallVectorView<real_type,UNKNOWN,twoS,twosA> realpart_type;
         typedef realpart_type imagpart_type;
-        typedef VectorView<real_type,1,false,I> flatten_type;
-        typedef VectorView<T,1,false,I> nonconj_type;
+        typedef VectorView<real_type,A> flatten_type;
+        typedef VectorView<T,A> nonconj_type;
 
         typedef VIt<T,1,false> iterator;
         typedef VIt<T,-1,false> reverse_iterator;
     };
 
-    template <class T, IndexStyle I>
+    template <class T, int A>
     class Vector : 
-        public BaseVector_Mutable<Vector<T,I> >
+        public BaseVector_Mutable<Vector<T,A> >
     {
     public:
 
-        typedef Vector<T,I> type;
+        typedef Vector<T,A> type;
         typedef BaseVector_Mutable<type> base_mut;
 
         enum { _size = Traits<type>::_size };
@@ -502,6 +516,8 @@ namespace tmv {
         enum { iscomplex = Traits<type>::iscomplex };
         enum { _step = Traits<type>::_step };
         enum { _conj = Traits<type>::_conj };
+        enum { _unit = Traits<type>::_unit };
+        enum { _attrib = Traits<type>::_attrib };
 
         //
         // Constructors
@@ -509,6 +525,7 @@ namespace tmv {
 
         explicit Vector(size_t n=0) : itssize(n), itsv(n)
         {
+            TMVStaticAssert(Traits<type>::okA);
             TMVAssert(n>=0);
 #ifdef TMV_DEBUG
             this->setAllTo(T(888));
@@ -517,12 +534,14 @@ namespace tmv {
 
         Vector(size_t n, T val) : itssize(n), itsv(n)
         {
+            TMVStaticAssert(Traits<type>::okA);
             TMVAssert(n>=0);
             this->setAllTo(val);
         }
 
         Vector(size_t n, const T* v2) : itssize(n), itsv(n)
         {
+            TMVStaticAssert(Traits<type>::okA);
             TMVAssert(n>=0);
             VectorViewOf(v2,n).newAssignTo(*this);
         }
@@ -530,12 +549,14 @@ namespace tmv {
         explicit Vector(const std::vector<T>& v2) : 
             itssize(v2.size()), itsv(itssize)
         {
+            TMVStaticAssert(Traits<type>::okA);
             TMVAssert(itssize>=0);
             VectorViewOf(&v2[0],itssize).newAssignTo(*this);
         }
 
         Vector(const type& v2) : itssize(v2.size()), itsv(itssize)
         {
+            TMVStaticAssert(Traits<type>::okA);
             TMVAssert(itssize>=0);
             v2.newAssignTo(*this);
         }
@@ -544,6 +565,7 @@ namespace tmv {
         Vector(const BaseVector<V2>& v2) :
             itssize(v2.size()), itsv(itssize)
         {
+            TMVStaticAssert(Traits<type>::okA);
             TMVAssert(itssize>=0);
             v2.newAssignTo(*this);
         }
@@ -608,84 +630,76 @@ namespace tmv {
 
     }; // Vector
 
-    template <class T>
-    class VectorF : 
-        public Vector<T,FortranStyle>
-    {
-    public:
-
-        typedef VectorF<T> type;
-        typedef Vector<T,FortranStyle> vtype;
-
-        explicit VectorF(size_t n) : vtype(n) {}
-        VectorF(size_t n, T val) : vtype(n,val) {}
-        VectorF(size_t n, const T* v2) : vtype(v2) {}
-        explicit VectorF(const std::vector<T>& v2) : vtype(v2) {}
-        VectorF(const type& v2) : vtype(v2) {}
-        template <class V2>
-        VectorF(const BaseVector<V2>& v2) : vtype(v2) {}
-        ~VectorF() {}
-
-        type& operator=(type& v2)
-        { vtype::operator=(v2); return *this; }
-        template <class V2>
-        type& operator=(const BaseVector<V2>& v2)
-        { vtype::operator=(v2); return *this; }
-    }; // VectorF
-
     //
     // ConstVectorView
     //
 
-    template <class T, int S, bool C, IndexStyle I>
-    struct Traits<ConstVectorView<T,S,C,I> >
+    template <class T, int A>
+    struct Traits<ConstVectorView<T,A> >
     {
+        enum { okA = (
+                Attrib<A>::vectoronly &&
+                ( Traits<T>::iscomplex || !Attrib<A>::conj ) )};
+        enum { _attrib = A };
+
         typedef T value_type;
         typedef typename Traits<T>::real_type real_type;
         typedef typename Traits<T>::complex_type complex_type;
         enum { isreal = Traits<T>::isreal };
         enum { iscomplex = Traits<T>::iscomplex };
 
-        typedef ConstVectorView<T,S,C,I> type;
+        typedef ConstVectorView<T,A> type;
         typedef const type& calc_type;
         typedef const type& eval_type;
-        typedef Vector<T,I> copy_type;
+        enum { copyA = Attrib<A>::fort ? FortranStyle : CStyle };
+        typedef Vector<T,copyA> copy_type;
 
         enum { _size = UNKNOWN };
-        enum { _fort = (I==FortranStyle) };
+        enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
-        enum { _step = S };
-        enum { _conj = C };
-        enum { negS = IntTraits<S>::negS };
-        enum { twoS = isreal ? S : IntTraits<S>::twoS };
-        enum { notC = !C && iscomplex };
+        enum { _step = Attrib<A>::unit ? 1 : UNKNOWN };
+        enum { _conj = Attrib<A>::conj };
+        enum { _unit = Attrib<A>::unit };
+        enum { negS = IntTraits<_step>::negS };
+        enum { twoS = isreal ? int(_step) : IntTraits<_step>::twoS };
 
-        typedef ConstVectorView<T,S,C,I> const_subvector_type;
-        typedef ConstVectorView<T,UNKNOWN,C,I> const_subvector_step_type;
-        typedef ConstVectorView<T,S,C,I> const_view_type;
-        typedef ConstVectorView<T,S,C,CStyle> const_cview_type;
-        typedef ConstVectorView<T,S,C,FortranStyle> const_fview_type;
-        typedef ConstVectorView<T,UNKNOWN,C> const_xview_type;
-        typedef ConstVectorView<T,1,C,I> const_unitview_type;
-        typedef ConstVectorView<T,S,notC,I> const_conjugate_type;
-        typedef ConstVectorView<T,negS,C,I> const_reverse_type;
-        typedef ConstVectorView<real_type,twoS,false,I> const_realpart_type;
+        enum { unitA = A | Unit };
+        enum { nonunitA = A & ~Unit };
+        enum { conjA = iscomplex ? (A ^ Conj) : int(A) };
+        enum { nonconjA = A & ~Conj };
+        enum { cstyleA = A & ~FortranStyle };
+        enum { fstyleA = A | FortranStyle };
+        enum { twosA = isreal ? int(A) : (nonunitA & ~Conj) };
+        enum { flatA = isreal ? int(A) : (unitA & ~Conj) };
+
+        typedef ConstVectorView<T,A> const_subvector_type;
+        typedef ConstVectorView<T,nonunitA> const_subvector_step_type;
+        typedef ConstVectorView<T,A> const_view_type;
+        typedef ConstVectorView<T,cstyleA> const_cview_type;
+        typedef ConstVectorView<T,fstyleA> const_fview_type;
+        typedef ConstVectorView<T,(_conj ? Conj : NonConj)> const_xview_type;
+        typedef ConstVectorView<T,unitA> const_unitview_type;
+        typedef ConstVectorView<T,conjA> const_conjugate_type;
+        typedef ConstSmallVectorView<T,UNKNOWN,negS,nonunitA> 
+            const_reverse_type;
+        typedef ConstSmallVectorView<real_type,UNKNOWN,twoS,twosA> 
+            const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstVectorView<real_type,1,false,I> const_flatten_type;
-        typedef ConstVectorView<T,S,false,I> const_nonconj_type;
-        typedef VectorView<T,S,C,I> nonconst_type;
+        typedef ConstVectorView<real_type,flatA> const_flatten_type;
+        typedef ConstVectorView<T,nonconjA> const_nonconj_type;
+        typedef VectorView<T,A> nonconst_type;
 
-        typedef CVIt<T,S,C> const_iterator;
-        typedef CVIt<T,negS,C> const_reverse_iterator;
+        typedef CVIt<T,_step,_conj> const_iterator;
+        typedef CVIt<T,negS,_conj> const_reverse_iterator;
     };
 
-    template <class T, int S, bool C, IndexStyle I>
+    template <class T, int A>
     class ConstVectorView : 
-        public BaseVector_Calc<ConstVectorView<T,S,C,I> >
+        public BaseVector_Calc<ConstVectorView<T,A> >
     {
     public:
 
-        typedef ConstVectorView<T,S,C,I> type;
+        typedef ConstVectorView<T,A> type;
 
         enum { _size = Traits<type>::_size };
         enum { _fort = Traits<type>::_fort };
@@ -694,39 +708,69 @@ namespace tmv {
         enum { iscomplex = Traits<type>::iscomplex };
         enum { _step = Traits<type>::_step };
         enum { _conj = Traits<type>::_conj };
+        enum { _unit = Traits<type>::_unit };
+        enum { _attrib = Traits<type>::_attrib };
 
         //
         // Constructors
         //
 
         ConstVectorView(const T* v, size_t n, int s) : 
-            itsv(v), itssize(n), itsstep(s) {}
+            itsv(v), itssize(n), itsstep(s) 
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
         ConstVectorView(const T* v, size_t n) : 
-            itsv(v), itssize(n), itsstep(S) 
-        { TMVStaticAssert(S != UNKNOWN); }
+            itsv(v), itssize(n), itsstep(_step) 
+        {
+            TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(_step != UNKNOWN);
+        }
 
         ConstVectorView(const type& v2) : 
-            itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) {}
+            itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step())
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
-        ConstVectorView(const VectorView<T,S,C,I>& v2) : 
-            itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) {}
+        ConstVectorView(const VectorView<T,A>& v2) : 
+            itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step())
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
-        template <int S2, IndexStyle I2>
-        ConstVectorView(const ConstVectorView<T,S2,C,I2>& v2) :
-            itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) {}
+        template <int A2>
+        ConstVectorView(const ConstVectorView<T,A2>& v2) :
+            itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) 
+        {
+            TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
+        }
 
-        template <int S2, IndexStyle I2>
-        ConstVectorView(const VectorView<T,S2,C,I2>& v2) :
-            itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) {}
+        template <int A2>
+        ConstVectorView(const VectorView<T,A2>& v2) :
+            itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) 
+        {
+            TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
+        }
 
-        template <int N2, int S2, IndexStyle I2>
-        ConstVectorView(const ConstSmallVectorView<T,N2,S2,C,I2>& v2) :
-            itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) {}
+        template <int N2, int S2, int A2>
+        ConstVectorView(const ConstSmallVectorView<T,N2,S2,A2>& v2) :
+            itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step())
+        {
+            TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
+        }
 
-        template <int N2, int S2, IndexStyle I2>
-        ConstVectorView(const SmallVectorView<T,N2,S2,C,I2>& v2) :
-            itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) {}
+        template <int N2, int S2, int A2>
+        ConstVectorView(const SmallVectorView<T,N2,S2,A2>& v2) :
+            itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) 
+        {
+            TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
+        }
 
         ~ConstVectorView() {
 #ifdef TMV_DEBUG
@@ -744,124 +788,111 @@ namespace tmv {
 
         const T* cptr() const { return itsv; }
 
-        T cref(int i) const  { return DoConj<C>(itsv[i*step()]); }
+        T cref(int i) const  { return DoConj<_conj>(itsv[i*step()]); }
 
         size_t size() const { return itssize; }
         int nElements() const { return itssize; }
         int step() const { return itsstep; }
-        bool isconj() const { return C; }
+        bool isconj() const { return _conj; }
 
     protected :
 
         const T* itsv;
         const size_t itssize;
-        const CheckedInt<S> itsstep;
+        const CheckedInt<_step> itsstep;
 
     }; // ConstVectorView
-
-    template <class T, int S, bool C>
-    class ConstVectorViewF : 
-        public ConstVectorView<T,S,C,FortranStyle>
-    {
-    public:
-        typedef ConstVectorViewF<T,S,C> type;
-        typedef ConstVectorView<T,S,C,FortranStyle> vtype;
-
-        ConstVectorViewF(const T* v, size_t n, int s) : vtype(v,n,s) {}
-        ConstVectorViewF(const T* v, size_t n) : vtype(v,n) {}
-        ConstVectorViewF(const type& v2) : vtype(v2) {}
-        ConstVectorViewF(const VectorView<T,S,C,FortranStyle>& v2) : 
-            vtype(v2) {}
-        template <int S2, IndexStyle I2>
-        ConstVectorViewF(const ConstVectorView<T,S2,C,I2>& v2) :
-            vtype(v2) {}
-        template <int S2, IndexStyle I2>
-        ConstVectorViewF(const VectorView<T,S2,C,I2>& v2) : vtype(v2) {}
-        template <int N2, int S2, IndexStyle I2>
-        ConstVectorViewF(const ConstSmallVectorView<T,N2,S2,C,I2>& v2) :
-            vtype(v2) {}
-        template <int N2, int S2, IndexStyle I2>
-        ConstVectorViewF(const SmallVectorView<T,N2,S2,C,I2>& v2) : 
-            vtype(v2) {}
-        ~ConstVectorViewF() {}
-
-    private :
-        void operator=(const type& v2);
-    }; // ConstVectorViewF
 
 
     //
     // VectorView
     //
 
-    template <class T, int S, bool C, IndexStyle I>
-    struct Traits<VectorView<T,S,C,I> >
+    template <class T, int A>
+    struct Traits<VectorView<T,A> >
     {
+        enum { okA = (
+                Attrib<A>::vectoronly &&
+                ( Traits<T>::iscomplex || !Attrib<A>::conj ) )};
+        enum { _attrib = A };
+
         typedef T value_type;
         typedef typename Traits<T>::real_type real_type;
         typedef typename Traits<T>::complex_type complex_type;
         enum { isreal = Traits<T>::isreal };
         enum { iscomplex = Traits<T>::iscomplex };
 
-        typedef VectorView<T,S,C,I> type;
-        typedef const ConstVectorView<T,S,C,I> calc_type;
+        typedef VectorView<T,A> type;
+        typedef const ConstVectorView<T,A> calc_type;
         typedef calc_type eval_type;
-        typedef Vector<T,I> copy_type;
+        enum { copyA = Attrib<A>::fort ? FortranStyle : CStyle };
+        typedef Vector<T,copyA> copy_type;
 
         enum { _size = UNKNOWN };
-        enum { _fort = (I==FortranStyle) };
+        enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
-        enum { _step = S };
-        enum { _conj = C };
-        enum { negS = IntTraits<S>::negS };
-        enum { twoS = isreal ? S : IntTraits<S>::twoS };
-        enum { notC = !C && iscomplex };
+        enum { _step = Attrib<A>::unit ? 1 : UNKNOWN };
+        enum { _conj = Attrib<A>::conj };
+        enum { _unit = Attrib<A>::unit };
+        enum { negS = IntTraits<_step>::negS };
+        enum { twoS = isreal ? int(_step) : IntTraits<_step>::twoS };
 
-        typedef ConstVectorView<T,S,C,I> const_subvector_type;
-        typedef ConstVectorView<T,UNKNOWN,C,I> const_subvector_step_type;
-        typedef ConstVectorView<T,S,C,I> const_view_type;
-        typedef ConstVectorView<T,S,C,CStyle> const_cview_type;
-        typedef ConstVectorView<T,S,C,FortranStyle> const_fview_type;
-        typedef ConstVectorView<T,UNKNOWN,C> const_xview_type;
-        typedef ConstVectorView<T,1,C,I> const_unitview_type;
-        typedef ConstVectorView<T,S,notC,I> const_conjugate_type;
-        typedef ConstVectorView<T,negS,C,I> const_reverse_type;
-        typedef ConstVectorView<real_type,twoS,false,I> const_realpart_type;
+        enum { unitA = A | Unit };
+        enum { nonunitA = A & ~Unit };
+        enum { conjA = iscomplex ? (A ^ Conj) : int(A) };
+        enum { nonconjA = A & ~Conj };
+        enum { cstyleA = A & ~FortranStyle };
+        enum { fstyleA = A | FortranStyle };
+        enum { twosA = isreal ? int(A) : (nonunitA & ~Conj) };
+        enum { flatA = isreal ? int(A) : (unitA & ~Conj) };
+
+        typedef ConstVectorView<T,A> const_subvector_type;
+        typedef ConstVectorView<T,nonunitA> const_subvector_step_type;
+        typedef ConstVectorView<T,A> const_view_type;
+        typedef ConstVectorView<T,cstyleA> const_cview_type;
+        typedef ConstVectorView<T,fstyleA> const_fview_type;
+        typedef ConstVectorView<T,(_conj ? Conj : NonConj)> const_xview_type;
+        typedef ConstVectorView<T,unitA> const_unitview_type;
+        typedef ConstVectorView<T,conjA> const_conjugate_type;
+        typedef ConstSmallVectorView<T,UNKNOWN,negS,nonunitA> 
+            const_reverse_type;
+        typedef ConstSmallVectorView<real_type,UNKNOWN,twoS,twosA> 
+            const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstVectorView<real_type,1,false,I> const_flatten_type;
-        typedef ConstVectorView<T,S,false,I> const_nonconj_type;
-        typedef VectorView<T,S,C,I> nonconst_type;
+        typedef ConstVectorView<real_type,flatA> const_flatten_type;
+        typedef ConstVectorView<T,nonconjA> const_nonconj_type;
+        typedef VectorView<T,A> nonconst_type;
 
-        typedef CVIt<T,S,C> const_iterator;
-        typedef CVIt<T,negS,C> const_reverse_iterator;
+        typedef CVIt<T,_step,_conj> const_iterator;
+        typedef CVIt<T,negS,_conj> const_reverse_iterator;
 
-        typedef typename AuxRef<T,C>::reference reference;
+        typedef typename AuxRef<T,_conj>::reference reference;
 
-        typedef VectorView<T,S,C,I> subvector_type;
-        typedef VectorView<T,UNKNOWN,C,I> subvector_step_type;
-        typedef VectorView<T,S,C,I> view_type;
-        typedef VectorView<T,S,C,CStyle> cview_type;
-        typedef VectorView<T,S,C,FortranStyle> fview_type;
-        typedef VectorView<T,UNKNOWN,C> xview_type;
-        typedef VectorView<T,1,C,I> unitview_type;
-        typedef VectorView<T,S,notC,I> conjugate_type;
-        typedef VectorView<T,negS,C,I> reverse_type;
-        typedef VectorView<real_type,twoS,false,I> realpart_type;
+        typedef VectorView<T,A> subvector_type;
+        typedef VectorView<T,nonunitA> subvector_step_type;
+        typedef VectorView<T,A> view_type;
+        typedef VectorView<T,cstyleA> cview_type;
+        typedef VectorView<T,fstyleA> fview_type;
+        typedef VectorView<T,(_conj ? Conj : NonConj)> xview_type;
+        typedef VectorView<T,unitA> unitview_type;
+        typedef VectorView<T,conjA> conjugate_type;
+        typedef SmallVectorView<T,UNKNOWN,negS,nonunitA> reverse_type;
+        typedef SmallVectorView<real_type,UNKNOWN,twoS,twosA> realpart_type;
         typedef realpart_type imagpart_type;
-        typedef VectorView<real_type,1,false,I> flatten_type;
-        typedef VectorView<T,S,false,I> nonconj_type;
+        typedef VectorView<real_type,flatA> flatten_type;
+        typedef VectorView<T,nonconjA> nonconj_type;
 
-        typedef VIt<T,S,C> iterator;
-        typedef VIt<T,negS,C> reverse_iterator;
+        typedef VIt<T,_step,_conj> iterator;
+        typedef VIt<T,negS,_conj> reverse_iterator;
     };
 
-    template <class T, int S, bool C, IndexStyle I>
+    template <class T, int A>
     class VectorView : 
-        public BaseVector_Mutable<VectorView<T,S,C,I> >
+        public BaseVector_Mutable<VectorView<T,A> >
     {
     public:
 
-        typedef VectorView<T,S,C,I> type;
+        typedef VectorView<T,A> type;
         typedef BaseVector_Mutable<type> base_mut;
         typedef typename base_mut::reference reference;
 
@@ -872,28 +903,47 @@ namespace tmv {
         enum { iscomplex = Traits<type>::iscomplex };
         enum { _step = Traits<type>::_step };
         enum { _conj = Traits<type>::_conj };
+        enum { _unit = Traits<type>::_unit };
+        enum { _attrib = Traits<type>::_attrib };
 
         //
         // Constructors
         //
 
         VectorView(T* v, size_t n, int s) : 
-            itsv(v), itssize(n), itsstep(s) {}
+            itsv(v), itssize(n), itsstep(s) 
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
         VectorView(T* v, size_t n) : 
-            itsv(v), itssize(n), itsstep(S) 
-        { TMVStaticAssert(S != UNKNOWN); }
+            itsv(v), itssize(n), itsstep(_step) 
+        {
+            TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(_step != UNKNOWN);
+        }
 
         VectorView(const type& v2) : 
-            itsv(v2.itsv), itssize(v2.itssize), itsstep(v2.itsstep) {}
+            itsv(v2.itsv), itssize(v2.itssize), itsstep(v2.itsstep)
+        {
+            TMVStaticAssert(Traits<type>::okA);
+        }
 
-        template <int S2, IndexStyle I2>
-        VectorView(VectorView<T,S2,C,I2> v2) :
-            itsv(v2.ptr()), itssize(v2.size()), itsstep(v2.step()) {}
+        template <int A2>
+        VectorView(VectorView<T,A2> v2) :
+            itsv(v2.ptr()), itssize(v2.size()), itsstep(v2.step())
+        {
+            TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
+        }
 
-        template <int N2, int S2, IndexStyle I2>
-        VectorView(SmallVectorView<T,N2,S2,C,I2> v2) :
-            itsv(v2.ptr()), itssize(v2.size()), itsstep(v2.step()) {}
+        template <int N2, int S2, int A2>
+        VectorView(SmallVectorView<T,N2,S2,A2> v2) :
+            itsv(v2.ptr()), itssize(v2.size()), itsstep(v2.step())
+        {
+            TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
+        }
 
         ~VectorView() {
 #ifdef TMV_DEBUG
@@ -920,45 +970,21 @@ namespace tmv {
         const T* cptr() const { return itsv; }
         T* ptr() { return itsv; }
 
-        T cref(int i) const  { return DoConj<C>(itsv[i*step()]); }
+        T cref(int i) const  { return DoConj<_conj>(itsv[i*step()]); }
         reference ref(int i) { return reference(itsv[i*step()]); }
 
         size_t size() const { return itssize; }
         int nElements() const { return itssize; }
         int step() const { return itsstep; }
-        bool isconj() const { return C; }
+        bool isconj() const { return _conj; }
 
     protected :
 
         T* itsv;
         const size_t itssize;
-        const CheckedInt<S> itsstep;
+        const CheckedInt<_step> itsstep;
 
     }; // VectorView
-
-    template <class T, int S, bool C>
-    class VectorViewF : 
-        public VectorView<T,S,C,FortranStyle>
-    {
-    public:
-        typedef VectorViewF<T,S,C> type;
-        typedef VectorView<T,S,C,FortranStyle> vtype;
-
-        VectorViewF(T* v, size_t n, int s) : vtype(v,n,s) {}
-        VectorViewF(T* v, size_t n) : vtype(v,n) {}
-        VectorViewF(const type& v2) : vtype(v2) {}
-        template <int S2, IndexStyle I2>
-        VectorViewF(VectorView<T,S2,C,I2> v2) : vtype(v2) {}
-        template <int N2, int S2, IndexStyle I2>
-        VectorViewF(SmallVectorView<T,N2,S2,C,I2> v2) : vtype(v2) {}
-        ~VectorViewF() {}
-
-        template <class V2>
-        type& operator=(const BaseVector<V2>& v2)
-        { vtype::operator=(v2); return *this; }
-        type& operator=(const type& v2)
-        { vtype::operator=(v2); return *this; }
-    }; // VectorViewF
 
 
     //
@@ -968,31 +994,31 @@ namespace tmv {
 
     // VectorView of raw memory:
     template <class T>
-    static inline VectorView<T,1> VectorViewOf(T* v, size_t size)
-    { return VectorView<T,1>(v,size,1); }
+    static inline VectorView<T,Unit> VectorViewOf(T* v, size_t size)
+    { return VectorView<T,Unit>(v,size); }
 
     template <class T>
-    static inline VectorView<T,UNKNOWN> VectorViewOf(
+    static inline VectorView<T,NonUnit> VectorViewOf(
         T* v, size_t size, int step)
-    { return VectorView<T,UNKNOWN>(v,size,step); }
+    { return VectorView<T,NonUnit>(v,size,step); }
 
 
     //
     // Swap
     //
 
-    template <class T, IndexStyle I>
-    static inline void Swap(Vector<T,I>& v1, Vector<T,I>& v2)
+    template <class T, int A>
+    static inline void Swap(Vector<T,A>& v1, Vector<T,A>& v2)
     { v1.swapWith(v2); }
-    template <class V, class T, int S, bool C, IndexStyle I>
-    static inline void Swap(BaseVector_Mutable<V>& v1, VectorView<T,S,C,I> v2)
+    template <class V, class T, int A>
+    static inline void Swap(BaseVector_Mutable<V>& v1, VectorView<T,A> v2)
     { DoSwap(v1,v2); }
-    template <class V, class T, int S, bool C, IndexStyle I>
-    static inline void Swap(VectorView<T,S,C,I> v1, BaseVector_Mutable<V>& v2)
+    template <class V, class T, int A>
+    static inline void Swap(VectorView<T,A> v1, BaseVector_Mutable<V>& v2)
     { DoSwap(v1,v2); }
-    template <class T, int S1, bool C1, IndexStyle I1, int S2, bool C2, IndexStyle I2>
+    template <class T, int A1, int A2>
     static inline void Swap(
-        VectorView<T,S1,C1,I1> v1, VectorView<T,S2,C2,I2> v2)
+        VectorView<T,A1> v1, VectorView<T,A2> v2)
     { DoSwap(v1,v2); }
 
 
@@ -1000,11 +1026,13 @@ namespace tmv {
     // Conjugate
     //
     
-    template <class T, IndexStyle I>
-    static inline VectorView<T,1,true,I> Conjugate(Vector<T,I>& v)
+    template <class T, int A>
+    static inline typename Vector<T,A>::conjugate_type Conjugate(
+        Vector<T,A>& v)
     { return v.conjugate(); }
-    template <class T, int S, bool C, IndexStyle I>
-    static inline VectorView<T,S,!C,I> Conjugate(VectorView<T,S,C,I> v)
+    template <class T, int A>
+    static inline typename VectorView<T,A>::conjugate_type Conjugate(
+        VectorView<T,A> v)
     { return v.conjugate(); }
 
 
@@ -1012,35 +1040,37 @@ namespace tmv {
     // TMV_Text 
     //
 
-    template <class T, IndexStyle I>
-    static inline std::string TMV_Text(const Vector<T,I>& )
+#ifdef TMV_DEBUG
+    template <class T, int A>
+    static inline std::string TMV_Text(const Vector<T,A>& v)
     {
         std::ostringstream s;
-        s << "Vector<"<<TMV_Text(T())<<","<<TMV_Text(I)<<">";
+        s << "Vector<"<<TMV_Text(T());
+        s << ","<<Attrib<A>::vtext()<<">";
+        s << "("<<v.size()<<","<<v.step()<<")";
         return s.str();
     }
 
-    template <class T, int S, bool C, IndexStyle I>
-    static inline std::string TMV_Text(const ConstVectorView<T,S,C,I>& v)
+    template <class T, int A>
+    static inline std::string TMV_Text(const ConstVectorView<T,A>& v)
     {
         std::ostringstream s;
         s << "ConstVectorView<"<<TMV_Text(T());
-        s << ","<<IntTraits<S>::text();
-        if (S == UNKNOWN) s << "("<<v.step()<<")";
-        s <<","<<C<<","<<TMV_Text(I)<<">";
+        s << ","<<Attrib<A>::vtext()<<">";
+        s << "("<<v.size()<<","<<v.step()<<")";
         return s.str();
     }
 
-    template <class T, int S, bool C, IndexStyle I>
-    static inline std::string TMV_Text(const VectorView<T,S,C,I>& v)
+    template <class T, int A>
+    static inline std::string TMV_Text(const VectorView<T,A>& v)
     {
         std::ostringstream s;
         s << "VectorView<"<<TMV_Text(T());
-        s << ","<<IntTraits<S>::text();
-        if (S == UNKNOWN) s << "("<<v.step()<<")";
-        s <<","<<C<<","<<TMV_Text(I)<<">";
+        s << ","<<Attrib<A>::vtext()<<">";
+        s << "("<<v.size()<<","<<v.step()<<")";
         return s.str();
     }
+#endif
 
 } // namespace tmv
 

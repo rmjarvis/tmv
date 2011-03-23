@@ -33,15 +33,12 @@
 #define TMV_SwapV_H
 
 #include "TMV_BaseVector.h"
-#include "TMV_ScaleV.h"
-#include "TMV_ConjugateV.h"
-#include "TMV_CopyV.h"
 
 namespace tmv {
 
     // Defined in TMV_Vector.cpp
-    template <class T, bool C>
-    void InstSwap(VectorView<T,UNKNOWN,C> v1, VectorView<T> v2);
+    template <class T, int C>
+    void InstSwap(VectorView<T,C> v1, VectorView<T> v2);
 
     //
     // Swap Vectors

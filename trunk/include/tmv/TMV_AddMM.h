@@ -34,6 +34,7 @@
 #define TMV_AddMM_H
 
 #include "TMV_BaseMatrix_Rec.h"
+#include "TMV_Scaling.h"
 #include "TMV_AddVV.h"
 #include "TMV_MultXM_Funcs.h"
 

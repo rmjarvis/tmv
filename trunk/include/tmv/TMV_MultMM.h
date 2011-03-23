@@ -33,12 +33,11 @@
 #ifndef TMV_MultMM_H
 #define TMV_MultMM_H
 
+#include "TMV_BaseMatrix_Rec.h"
 #include "TMV_MultMV.h"
 #include "TMV_Rank1VVM.h"
-#include "TMV_Matrix.h"
-#include "TMV_SmallMatrix.h"
-#include "TMV_MultXM.h"
 #include "TMV_MultMM_Funcs.h"
+#include "TMV_MultXM_Funcs.h"
 
 #ifdef _OPENMP
 #include "omp.h"
@@ -196,29 +195,19 @@
 #define TMV_MM_ZeroIX (ix==0)
 //#define TMV_MM_ZeroIX (ix!=1)
 
-// We split off some of the parts of the calculation to other files.
-// First, this helps us compile them into separate object files, so the
-// compilation doesn't take forever on a single file.  And second,
-// this header file would otherwise be over 12000 lines(!) long.
-#include "TMV_MultMM_Winograd.h"
-#include "TMV_MultMM_Block.h"
-#ifdef _OPENMP
-#include "TMV_MultMM_OpenMP.h"
-#endif
-
 namespace tmv {
 
     // Defined in TMV_MultMM.cpp
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM(
         const T3 x,
-        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1, 
-        const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, MatrixView<T3> m3);
-    template <class T1, bool C1, class T2, bool C2, class T3>
+        const ConstMatrixView<T1,C1>& m1, 
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM(
         const T3 x,
-        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1, 
-        const ConstMatrixView<T2,UNKNOWN,UNKNOWN,C2>& m2, MatrixView<T3> m3);
+        const ConstMatrixView<T1,C1>& m1, 
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
 
     //
     // Matrix * Matrix
@@ -2277,6 +2266,18 @@ namespace tmv {
             std::cout<<"cs = "<<cs<<"  rs = "<<rs<<"  xs = "<<xs<<std::endl;
             std::cout<<"add = "<<add<<", algo = "<<algo<<std::endl;
 #endif
+#ifdef XDEBUG_MM
+            typedef typename M3::real_type RT;
+            typedef typename M3::value_type T3;
+            Matrix<T3> m1c = m1;
+            Matrix<T3> m2c = m2;
+            Matrix<T3> m3i = m3;
+            Matrix<T3> m3c = m3;
+            for(size_t j=0; j<m3.colsize(); ++j) {
+                typename Matrix<T3>::col_type m3cj = m3c.col(j);
+                NoAliasMultMV<add>(x,m1c,m2c.col(j),m3cj);
+            }
+#endif
             try {
                 MultMM_Helper<algo,cs,rs,xs,add,ix,T,M1,M2,M3>::call(
                     x,m1,m2,m3);
@@ -2284,6 +2285,16 @@ namespace tmv {
                 MultMM_Helper<algo1,cs,rs,xs,add,ix,T,M1,M2,M3>::call(
                     x,m1,m2,m3);
             }
+#ifdef XDEBUG_MM
+            if (Norm(m3-m3c) > 1.e-3*(Norm(m1c)*Norm(m2c)+(add?Norm(m3i):RT(0)))) {
+                std::cout<<"m1 = "<<m1c<<std::endl;
+                std::cout<<"m2 = "<<m2c<<std::endl;
+                std::cout<<"m3 = "<<m3i<<std::endl;
+                std::cout<<"m3 => "<<m3<<std::endl;
+                std::cout<<"Correct m3 = "<<m3c<<std::endl;
+                abort();
+            }
+#endif
         }
     };
 

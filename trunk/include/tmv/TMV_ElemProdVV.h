@@ -30,10 +30,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef TMV_ProdVV_H
-#define TMV_ProdVV_H
+#ifndef TMV_ElemProdVV_H
+#define TMV_ElemProdVV_H
 
-#include "TMV_ProdXV.h"
+#include "TMV_BaseVector.h"
 
 namespace tmv {
 

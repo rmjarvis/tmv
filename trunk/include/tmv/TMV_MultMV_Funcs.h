@@ -171,41 +171,41 @@ namespace tmv {
 
     // From TMV_MultPV.h:
     template <bool add, int ix, class T, class V2, class V3>
-    static inline void MultMV(
+    static void MultMV(
         const Scaling<ix,T>& x, const Permutation& m1, 
         const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3);
     template <bool add, int ix, class T, class V2, class V3>
-    static inline void NoAliasMultMV(
+    static void NoAliasMultMV(
         const Scaling<ix,T>& x, const Permutation& m1, 
         const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3);
     template <bool add, int ix, class T, class V2, class V3>
-    static inline void AliasMultMV(
+    static void AliasMultMV(
         const Scaling<ix,T>& x, const Permutation& m1, 
         const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3);
 
     template <bool add, int ix, class T, class V1, class V3>
-    static inline void MultVM(
+    static void MultVM(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1, 
         const Permutation& m2, BaseVector_Mutable<V3>& v3);
     template <bool add, int ix, class T, class V1, class V3>
-    static inline void NoAliasMultVM(
+    static void NoAliasMultVM(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1, 
         const Permutation& m2, BaseVector_Mutable<V3>& v3);
     template <bool add, int ix, class T, class V1, class V3>
-    static inline void AliasMultVM(
+    static void AliasMultVM(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1, 
         const Permutation& m2, BaseVector_Mutable<V3>& v3);
     
     template <int ix, class T, class V1>
-    static inline void MultEqVM(
+    static void MultEqVM(
         BaseVector_Mutable<V1>& v1, const Scaling<ix,T>& x,
         const Permutation& m2);
     template <int ix, class T, class V1>
-    static inline void NoAliasMultEqVM(
+    static void NoAliasMultEqVM(
         BaseVector_Mutable<V1>& v1, const Scaling<ix,T>& x,
         const Permutation& m2);
     template <int ix, class T, class V1>
-    static inline void AliasMultEqVM(
+    static void AliasMultEqVM(
         BaseVector_Mutable<V1>& v1, const Scaling<ix,T>& x,
         const Permutation& m2);
 

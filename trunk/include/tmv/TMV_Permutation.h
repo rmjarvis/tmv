@@ -135,11 +135,8 @@
 #ifndef TMV_Permutation_H
 #define TMV_Permutation_H
 
-#include "TMV_Base.h"
-#include "TMV_Matrix.h"
-#include "TMV_Vector.h"
-#include "TMV_PermuteM.h"
-#include <algorithm>
+#include "TMV_BaseMatrix_Rec.h"
+#include "TMV_Array.h"
 
 namespace tmv {
 
@@ -162,7 +159,7 @@ namespace tmv {
 
         enum { _colsize = UNKNOWN };
         enum { _rowsize = UNKNOWN };
-        enum { _shape = SquareRec };
+        enum { _shape = Rec };
         enum { _fort = false };
         enum { _calc = false };
     };
@@ -412,12 +409,12 @@ namespace tmv {
         //
 
         template <class T2>
-        void makeInverse(const MatrixView<T2>& minv) const
+        void makeInverse(BaseMatrix_Rec_Mutable<T2>& minv) const
         { inverse().assignTo(minv); }
 
         // (PtP)^-1 = P^-1 Pt^-1 = Pt P = I
         template <class T2>
-        void makeInverseATA(const MatrixView<T2>& ata) const
+        void makeInverseATA(BaseMatrix_Rec_Mutable<T2>& ata) const
         { ata.setToIdentity(); }
 
 

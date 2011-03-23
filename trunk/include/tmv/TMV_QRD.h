@@ -74,18 +74,19 @@
 #ifndef TMV_QRD_H
 #define TMV_QRD_H
 
-#include "TMV_Divider.h"
 #include "TMV_BaseMatrix_Rec.h"
 #include "TMV_BaseMatrix_Tri.h"
-#include "TMV_Matrix.h"
-#include "TMV_NormU.h"
-#include "TMV_MultUL.h"
-#include "TMV_Permutation.h"
+#include "TMV_BaseVector.h"
+#include "TMV_Divider.h"
+//#include "TMV_Matrix.h"
+//#include "TMV_NormU.h"
+//#include "TMV_MultUL.h"
+//#include "TMV_Permutation.h"
 
-#include "TMV_PackedQ.h"
-#include "TMV_QRDiv.h"
-#include "TMV_QRDecompose.h"
-#include "TMV_QRInverse.h"
+//#include "TMV_PackedQ.h"
+//#include "TMV_QRDiv.h"
+//#include "TMV_QRDecompose.h"
+//#include "TMV_QRInverse.h"
 
 namespace tmv {
 

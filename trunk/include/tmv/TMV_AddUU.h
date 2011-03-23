@@ -34,6 +34,7 @@
 #define TMV_AddUU_H
 
 #include "TMV_BaseMatrix_Tri.h"
+#include "TMV_Scaling.h"
 #include "TMV_MultXM_Funcs.h"
 
 #ifdef PRINTALGO_AddUU

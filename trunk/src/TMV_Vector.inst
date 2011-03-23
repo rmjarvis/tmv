@@ -2,14 +2,14 @@
 #define FT Traits<T>::float_type
 
 #define Def1(T,C) \
-  template void InstCopy(const ConstVectorView<T,UNKNOWN,C>& v1, \
+  template void InstCopy(const ConstVectorView<T,C>& v1, \
       VectorView<T > v2); \
-  template void InstSwap(VectorView<T,UNKNOWN,C> v1, VectorView<T > v2); \
+  template void InstSwap(VectorView<T,C> v1, VectorView<T > v2); \
 
-Def1(T,false)
+Def1(T,NonConj)
 #ifdef TMV_INST_COMPLEX
-Def1(CT,false)
-Def1(CT,true)
+Def1(CT,NonConj)
+Def1(CT,Conj)
 #endif
 
 
@@ -49,14 +49,14 @@ Def3(FT,CT)
 
 #define Def4(RT,T,C) \
   template void InstWrite( \
-      std::ostream& os, const ConstVectorView<T,UNKNOWN,C>& v); \
+      std::ostream& os, const ConstVectorView<T,C>& v); \
   template void InstWrite(std::ostream& os, \
-      const ConstVectorView<T,UNKNOWN,C>& v, RT thresh); \
+      const ConstVectorView<T,C>& v, RT thresh); \
 
-Def4(FT,T,false)
+Def4(FT,T,NonConj)
 #ifdef TMV_INST_COMPLEX
-Def4(FT,CT,false)
-Def4(FT,CT,true)
+Def4(FT,CT,NonConj)
+Def4(FT,CT,Conj)
 #endif
 
 

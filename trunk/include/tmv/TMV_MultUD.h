@@ -36,8 +36,8 @@
 #include "TMV_BaseMatrix_Tri.h"
 #include "TMV_BaseMatrix_Diag.h"
 #include "TMV_MultXV.h"
-#include "TMV_CopyU.h"
 #include "TMV_ElemMultVV.h"
+#include "TMV_CopyU.h"
 
 #ifdef PRINTALGO_UD
 #include <iostream>
@@ -46,29 +46,25 @@
 namespace tmv {
 
     // Defined in TMV_MultUD.cpp
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM(
-        const T3 x,
-        const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstDiagMatrixView<T2,UNKNOWN,C2>& m2,
+        const T3 x, const ConstUpperTriMatrixView<T1,C1>& m1,
+        const ConstDiagMatrixView<T2,C2>& m2,
         UpperTriMatrixView<T3,NonUnitDiag> m3);
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM(
-        const T3 x,
-        const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstDiagMatrixView<T2,UNKNOWN,C2>& m2,
+        const T3 x, const ConstUpperTriMatrixView<T1,C1>& m1,
+        const ConstDiagMatrixView<T2,C2>& m2,
         UpperTriMatrixView<T3,NonUnitDiag> m3);
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM(
-        const T3 x,
-        const ConstLowerTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstDiagMatrixView<T2,UNKNOWN,C2>& m2,
+        const T3 x, const ConstLowerTriMatrixView<T1,C1>& m1,
+        const ConstDiagMatrixView<T2,C2>& m2,
         LowerTriMatrixView<T3,NonUnitDiag> m3);
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM(
-        const T3 x,
-        const ConstLowerTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstDiagMatrixView<T2,UNKNOWN,C2>& m2,
+        const T3 x, const ConstLowerTriMatrixView<T1,C1>& m1,
+        const ConstDiagMatrixView<T2,C2>& m2,
         LowerTriMatrixView<T3,NonUnitDiag> m3);
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
@@ -633,7 +629,8 @@ namespace tmv {
         {
             typedef typename M3::value_type VT;
             VT xx = Traits<VT>::convert(T(x));
-            InstMultMM(xx,m1.xdView(),m2.xView(),m3.xView().viewAsNonUnitDiag());
+            InstMultMM(
+                xx,m1.xView(),m2.xView(),m3.xView().viewAsNonUnitDiag());
         }
     };
     template <int s, int ix, class T, class M1, class M2, class M3>
@@ -645,7 +642,7 @@ namespace tmv {
             typedef typename M3::value_type VT;
             VT xx = Traits<VT>::convert(T(x));
             InstAddMultMM(
-                xx,m1.xdView(),m2.xView(),m3.xView().viewAsNonUnitDiag());
+                xx,m1.xView(),m2.xView(),m3.xView().viewAsNonUnitDiag());
         }
     };
 
@@ -839,7 +836,26 @@ namespace tmv {
             std::cout<<"m3 = "<<TMV_Text(m3)<<std::endl;
             std::cout<<"s,algo = "<<s<<"  "<<algo<<std::endl;
 #endif
+#ifdef XDEBUG_UD
+            typedef typename M3::real_type RT;
+            typedef typename M3::value_type T3;
+            Matrix<T3> m1c = m1;
+            Matrix<T3> m2c = m2;
+            Matrix<T3> m3i = m3;
+            Matrix<T3> m3c = m3;
+            NoAliasMultMM<add>(x,m1c,m2c,m3c);
+#endif
             MultUD_Helper<algo,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+#ifdef XDEBUG_UD
+            if (Norm(m3-m3c) > 1.e-3*(Norm(m1c)*Norm(m2c)+(add?Norm(m3i):RT(0)))) {
+                std::cout<<"m1 = "<<m1c<<std::endl;
+                std::cout<<"m2 = "<<m2c<<std::endl;
+                std::cout<<"m3 = "<<m3i<<std::endl;
+                std::cout<<"m3 => "<<m3<<std::endl;
+                std::cout<<"Correct m3 = "<<m3c<<std::endl;
+                abort();
+            }
+#endif
         }
     };
 

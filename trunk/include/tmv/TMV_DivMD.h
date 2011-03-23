@@ -33,8 +33,7 @@
 #ifndef TMV_DivMD_H
 #define TMV_DivMD_H
 
-#include "TMV_InvertM.h"
-#include "TMV_MultMD.h"
+#include "TMV_MultMM_Funcs.h"
 
 namespace tmv {
 

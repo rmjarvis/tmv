@@ -32,10 +32,12 @@
 #include "tmv/TMV_MultUD.h"
 #include "tmv/TMV_TriMatrix.h"
 #include "tmv/TMV_DiagMatrix.h"
-#include "tmv/TMV_SimpleMatrix.h"
+#include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_CopyU.h"
 #include "tmv/TMV_MultXU.h"
 #include "tmv/TMV_ScaleU.h"
+#include "tmv/TMV_Vector.h"
+#include "tmv/TMV_ConjugateV.h"
 
 namespace tmv {
 
@@ -77,12 +79,12 @@ namespace tmv {
             DoMultEq(m3rm,m2);
         } else {
             typedef typename TypeSelect<M3::_upper,
-                    UpperTriMatrix<T3,NonUnitDiag,ColMajor>,
-                    LowerTriMatrix<T3,NonUnitDiag,ColMajor> >::type M3c;
+                    UpperTriMatrix<T3,NonUnitDiag|ColMajor>,
+                    LowerTriMatrix<T3,NonUnitDiag|ColMajor> >::type M3c;
             M3c m3c = m3;
             typename M3c::cmview_type m3cm = m3c.view();
             DoMultEq(m3cm,m2);
-            InstCopy(m3c.constView().xdView(),m3.xdView());
+            InstCopy(m3c.constView().xView(),m3.xView());
         }
     }
 
@@ -92,42 +94,42 @@ namespace tmv {
     {
         typedef typename Traits2<
             typename M1::value_type,typename M2::value_type>::type T12;
-        SimpleMatrix<T12,ColMajor> m1c(m3.size(),m3.size());
+        Matrix<T12,ColMajor|NoDivider> m1c(m3.size(),m3.size());
         typedef typename TypeSelect<M3::_upper,
-                UpperTriMatrixView<T12,NonUnitDiag,1>,
-                LowerTriMatrixView<T12,NonUnitDiag,1> >::type M1t;
+                UpperTriMatrixView<T12,NonUnitDiag|ColMajor>,
+                LowerTriMatrixView<T12,NonUnitDiag|ColMajor> >::type M1t;
         M1t m1ct = Maybe<M3::_upper>::uppertri(m1c);
-        InstCopy(m1,m1ct.xdView());
+        InstCopy(m1,m1ct.xView());
         DoMultEq(m1ct,m2);
-        InstAddMultXM(x,m1ct.constView().xdView(),m3);
+        InstAddMultXM(x,m1ct.constView().xView(),m3);
     }
 
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM(
         const T3 x,
-        const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstDiagMatrixView<T2,UNKNOWN,C2>& m2,
+        const ConstUpperTriMatrixView<T1,C1>& m1,
+        const ConstDiagMatrixView<T2,C2>& m2,
         UpperTriMatrixView<T3,NonUnitDiag> m3)
     { DoInstMultMM(x,m1,m2,m3); }
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM(
         const T3 x,
-        const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstDiagMatrixView<T2,UNKNOWN,C2>& m2,
+        const ConstUpperTriMatrixView<T1,C1>& m1,
+        const ConstDiagMatrixView<T2,C2>& m2,
         UpperTriMatrixView<T3,NonUnitDiag> m3)
     { DoInstAddMultMM(x,m1,m2,m3); }
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM(
         const T3 x,
-        const ConstLowerTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstDiagMatrixView<T2,UNKNOWN,C2>& m2,
+        const ConstLowerTriMatrixView<T1,C1>& m1,
+        const ConstDiagMatrixView<T2,C2>& m2,
         LowerTriMatrixView<T3,NonUnitDiag> m3)
     { DoInstMultMM(x,m1,m2,m3); }
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM(
         const T3 x,
-        const ConstLowerTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstDiagMatrixView<T2,UNKNOWN,C2>& m2,
+        const ConstLowerTriMatrixView<T1,C1>& m1,
+        const ConstDiagMatrixView<T2,C2>& m2,
         LowerTriMatrixView<T3,NonUnitDiag> m3)
     { DoInstAddMultMM(x,m1,m2,m3); }
 

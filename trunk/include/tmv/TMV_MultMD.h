@@ -33,15 +33,11 @@
 #ifndef TMV_MultMD_H
 #define TMV_MultMD_H
 
+#include "TMV_BaseMatrix_Rec.h"
+#include "TMV_BaseMatrix_Diag.h"
 #include "TMV_ElemMultVV.h"
 #include "TMV_MultXV.h"
-#include "TMV_Vector.h"
-#include "TMV_SmallVector.h"
-#include "TMV_BaseMatrix_Rec.h"
 #include "TMV_Prefetch.h"
-#include "TMV_DiagMatrix.h"
-#include "TMV_CopyM.h"
-#include "TMV_MultXM.h"
 
 //#define PRINTALGO_MD
 
@@ -52,16 +48,16 @@
 namespace tmv {
 
     // Defined in TMV_MultMD.cpp
-    template <class T1, bool C1, class T2, bool C2, class T3>
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM(
         const T3 x,
-        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstDiagMatrixView<T2,UNKNOWN,C2>& m2, MatrixView<T3> m3);
-    template <class T1, bool C1, class T2, bool C2, class T3>
+        const ConstMatrixView<T1,C1>& m1,
+        const ConstDiagMatrixView<T2,C2>& m2, MatrixView<T3> m3);
+    template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM(
         const T3 x,
-        const ConstMatrixView<T1,UNKNOWN,UNKNOWN,C1>& m1,
-        const ConstDiagMatrixView<T2,UNKNOWN,C2>& m2, MatrixView<T3> m3);
+        const ConstMatrixView<T1,C1>& m1,
+        const ConstDiagMatrixView<T2,C2>& m2, MatrixView<T3> m3);
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
     static void NoAliasMultMM(
@@ -524,7 +520,26 @@ namespace tmv {
             std::cout<<"m3 = "<<TMV_Text(m3)<<std::endl;
             std::cout<<"cs,rs,algo = "<<cs<<"  "<<rs<<"  "<<algo<<std::endl;
 #endif
+#ifdef XDEBUG_MD
+            typedef typename M3::real_type RT;
+            typedef typename M3::value_type T3;
+            Matrix<T3> m1c = m1;
+            Matrix<T3> m2c = m2;
+            Matrix<T3> m3i = m3;
+            Matrix<T3> m3c = m3;
+            NoAliasMultMM<add>(x,m1c,m2c,m3c);
+#endif
             MultMD_Helper<algo,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+#ifdef XDEBUG_MD
+            if (Norm(m3-m3c) > 1.e-3*(Norm(m1c)*Norm(m2c)+(add?Norm(m3i):RT(0)))) {
+                std::cout<<"m1 = "<<m1c<<std::endl;
+                std::cout<<"m2 = "<<m2c<<std::endl;
+                std::cout<<"m3 = "<<m3i<<std::endl;
+                std::cout<<"m3 => "<<m3<<std::endl;
+                std::cout<<"Correct m3 = "<<m3c<<std::endl;
+                abort();
+            }
+#endif
         }
     };
 

@@ -40,6 +40,9 @@
 #include "tmv/TMV_SwapU.h"
 #include "tmv/TMV_NormU.h"
 #include "tmv/TMV_Norm.h"
+#include "tmv/TMV_Vector.h"
+#include "tmv/TMV_Matrix.h"
+#include "tmv/TMV_ConjugateV.h"
 
 namespace tmv {
 
@@ -61,10 +64,10 @@ namespace tmv {
         }
     }
 
-    template <class T1, bool C1, class T2>
+    template <class T1, int C1, class T2>
     void InstCopy(
-        const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
-        UpperTriMatrixView<T2,UnknownDiag> m2)
+        const ConstUpperTriMatrixView<T1,C1>& m1,
+        UpperTriMatrixView<T2> m2)
     {
         if (m1.isunit()) {
             if (m2.size() > 1) {
@@ -86,18 +89,17 @@ namespace tmv {
     // Swap Matrices
     //
 
-    template <class T, bool C> 
+    template <class T, int C> 
     void InstSwap(
-        UpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C> m1,
-        UpperTriMatrixView<T,UnknownDiag> m2)
+        UpperTriMatrixView<T,C> m1, UpperTriMatrixView<T> m2)
     {
         if (m1.iscm() && m2.iscm()) {
-            UpperTriMatrixView<T,UnknownDiag,1,UNKNOWN,C> m1cm = m1;
-            UpperTriMatrixView<T,UnknownDiag,1> m2cm = m2;
+            UpperTriMatrixView<T,C|ColMajor> m1cm = m1;
+            UpperTriMatrixView<T,ColMajor> m2cm = m2;
             InlineSwap(m1cm,m2cm);
         } else if (m1.isrm() && m2.isrm()) {
-            UpperTriMatrixView<T,UnknownDiag,UNKNOWN,1,C> m1rm = m1;
-            UpperTriMatrixView<T,UnknownDiag,UNKNOWN,1> m2rm = m2;
+            UpperTriMatrixView<T,C|RowMajor> m1rm = m1;
+            UpperTriMatrixView<T,ColMajor> m2rm = m2;
             InlineSwap(m1rm,m2rm);
         } else {
             InlineSwap(m1,m2);
@@ -496,30 +498,30 @@ namespace tmv {
     // I/O
     //
 
-    template <class T, bool C>
+    template <class T, int C>
     void InstWriteCompact(
         std::ostream& os, 
-        const ConstUpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>& m)
+        const ConstUpperTriMatrixView<T,C>& m)
     {
         if (m.iscm()) InlineWriteCompact(os,m.cmView());
         else if (m.isrm()) InlineWriteCompact(os,m.rmView());
         else InlineWriteCompact(os,m);
     }
 
-    template <class T, bool C>
+    template <class T, int C>
     void InstWriteCompact(
         std::ostream& os, 
-        const ConstLowerTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>& m)
+        const ConstLowerTriMatrixView<T,C>& m)
     {
         if (m.iscm()) InlineWriteCompact(os,m.cmView());
         else if (m.isrm()) InlineWriteCompact(os,m.rmView());
         else InlineWriteCompact(os,m);
     }
 
-    template <class T, bool C>
+    template <class T, int C>
     void InstWriteCompact(
         std::ostream& os,
-        const ConstUpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>& m, 
+        const ConstUpperTriMatrixView<T,C>& m, 
         typename ConstUpperTriMatrixView<T>::float_type thresh)
     {
         if (m.iscm()) InlineWriteCompact(os,m.cmView(),thresh);
@@ -527,10 +529,10 @@ namespace tmv {
         else InlineWriteCompact(os,m,thresh);
     }
 
-    template <class T, bool C>
+    template <class T, int C>
     void InstWriteCompact(
         std::ostream& os,
-        const ConstLowerTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>& m, 
+        const ConstLowerTriMatrixView<T,C>& m, 
         typename ConstLowerTriMatrixView<T>::float_type thresh)
     {
         if (m.iscm()) InlineWriteCompact(os,m.cmView(),thresh);
@@ -542,10 +544,10 @@ namespace tmv {
     void InstRead(std::istream& is, UpperTriMatrixView<T> m)
     {
         if (m.iscm()) {
-            UpperTriMatrixView<T,UnknownDiag,1> mcm = m.cmView();
+            UpperTriMatrixView<T,ColMajor> mcm = m.cmView();
             InlineRead(is,mcm);
         } else if (m.isrm()) {
-            UpperTriMatrixView<T,UnknownDiag,UNKNOWN,1> mrm = m.rmView();
+            UpperTriMatrixView<T,RowMajor> mrm = m.rmView();
             InlineRead(is,mrm);
         } else 
             InlineRead(is,m);
@@ -554,10 +556,10 @@ namespace tmv {
     void InstRead(std::istream& is, LowerTriMatrixView<T> m)
     {
         if (m.iscm()) {
-            LowerTriMatrixView<T,UnknownDiag,1> mcm = m.cmView();
+            LowerTriMatrixView<T,ColMajor> mcm = m.cmView();
             InlineRead(is,mcm);
         } else if (m.isrm()) {
-            LowerTriMatrixView<T,UnknownDiag,UNKNOWN,1> mrm = m.rmView();
+            LowerTriMatrixView<T,RowMajor> mrm = m.rmView();
             InlineRead(is,mrm);
         } else 
             InlineRead(is,m);

@@ -31,10 +31,11 @@
 
 //#define PRINTALGO_LU
 
-#include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_LUD.h"
-
-#include "tmv/TMV_BaseMatrix_Tri.h"
+#include "tmv/TMV_Matrix.h"
+#include "tmv/TMV_TriMatrix.h"
+#include "tmv/TMV_Vector.h"
+#include "tmv/TMV_SmallVector.h"
 #include "tmv/TMV_Norm.h"
 #include "tmv/TMV_NormM.h"
 #include "tmv/TMV_MultUL.h"
@@ -43,6 +44,14 @@
 #include "tmv/TMV_ProdMM.h"
 #include "tmv/TMV_SumMM.h"
 #include "tmv/TMV_AddMM.h"
+#include "tmv/TMV_LUInverse.h"
+#include "tmv/TMV_LUDecompose.h"
+#include "tmv/TMV_LUDiv.h"
+#include "tmv/TMV_CopyM.h"
+#include "tmv/TMV_SmallMatrix.h"
+#include "tmv/TMV_ConjugateV.h"
+#include "tmv/TMV_Det.h"
+#include "tmv/TMV_ScaleM.h"
 
 namespace tmv {
 
@@ -62,8 +71,7 @@ namespace tmv {
     void InstLUD<T>::doSolveInPlace(MatrixView<CT> m2) const 
     { base::solveInPlace(m2);  }
     template <class T> 
-    void InstLUD<T>::doSolveInPlace(
-        MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
+    void InstLUD<T>::doSolveInPlace(MatrixView<CT,Conj> m2) const 
     { base::solveInPlace(m2);  }
     template <class T> 
     void InstLUD<T>::doSolveInPlace(VectorView<RT> v2) const 
@@ -72,7 +80,7 @@ namespace tmv {
     void InstLUD<T>::doSolveInPlace(VectorView<CT> v2) const 
     { base::solveInPlace(v2);  }
     template <class T> 
-    void InstLUD<T>::doSolveInPlace(VectorView<CT,UNKNOWN,true> v2) const 
+    void InstLUD<T>::doSolveInPlace(VectorView<CT,Conj> v2) const 
     { base::solveInPlace(v2);  }
 
     template <class T> 
@@ -82,8 +90,7 @@ namespace tmv {
     void InstLUD<T>::doSolveTransposeInPlace(MatrixView<CT> m2) const 
     { base::solveTransposeInPlace(m2); } 
     template <class T> 
-    void InstLUD<T>::doSolveTransposeInPlace(
-        MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
+    void InstLUD<T>::doSolveTransposeInPlace(MatrixView<CT,Conj> m2) const 
     { base::solveTransposeInPlace(m2); } 
     template <class T> 
     void InstLUD<T>::doSolveTransposeInPlace(VectorView<RT> v2) const 
@@ -92,8 +99,7 @@ namespace tmv {
     void InstLUD<T>::doSolveTransposeInPlace(VectorView<CT> v2) const 
     { base::solveTransposeInPlace(v2); } 
     template <class T> 
-    void InstLUD<T>::doSolveTransposeInPlace(
-        VectorView<CT,UNKNOWN,true> v2) const 
+    void InstLUD<T>::doSolveTransposeInPlace(VectorView<CT,Conj> v2) const 
     { base::solveTransposeInPlace(v2); } 
 
     template <class T> 
@@ -106,8 +112,7 @@ namespace tmv {
     { base::solve(m1,m2); } 
     template <class T> 
     void InstLUD<T>::doSolve(
-        const ConstMatrixView<RT>& m1, 
-        MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
+        const ConstMatrixView<RT>& m1, MatrixView<CT,Conj> m2) const 
     { base::solve(m1,m2); } 
     template <class T> 
     void InstLUD<T>::doSolve(
@@ -115,18 +120,15 @@ namespace tmv {
     { base::solve(m1,m2); } 
     template <class T> 
     void InstLUD<T>::doSolve(
-        const ConstMatrixView<CT>& m1, 
-        MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
+        const ConstMatrixView<CT>& m1, MatrixView<CT,Conj> m2) const 
     { base::solve(m1,m2); } 
     template <class T> 
     void InstLUD<T>::doSolve(
-        const ConstMatrixView<CT,UNKNOWN,UNKNOWN,true>& m1, 
-        MatrixView<CT> m2) const 
+        const ConstMatrixView<CT,Conj>& m1, MatrixView<CT> m2) const 
     { base::solve(m1,m2); } 
     template <class T> 
     void InstLUD<T>::doSolve(
-        const ConstMatrixView<CT,UNKNOWN,UNKNOWN,true>& m1, 
-        MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
+        const ConstMatrixView<CT,Conj>& m1, MatrixView<CT,Conj> m2) const 
     { base::solve(m1,m2); } 
     template <class T> 
     void InstLUD<T>::doSolve(
@@ -138,8 +140,7 @@ namespace tmv {
     { base::solve(v1,v2); } 
     template <class T> 
     void InstLUD<T>::doSolve(
-        const ConstVectorView<RT>& v1, 
-        VectorView<CT,UNKNOWN,true> v2) const 
+        const ConstVectorView<RT>& v1, VectorView<CT,Conj> v2) const 
     { base::solve(v1,v2); } 
     template <class T> 
     void InstLUD<T>::doSolve(
@@ -147,18 +148,15 @@ namespace tmv {
     { base::solve(v1,v2); } 
     template <class T> 
     void InstLUD<T>::doSolve(
-        const ConstVectorView<CT>& v1, 
-        VectorView<CT,UNKNOWN,true> v2) const 
+        const ConstVectorView<CT>& v1, VectorView<CT,Conj> v2) const 
     { base::solve(v1,v2); } 
     template <class T> 
     void InstLUD<T>::doSolve(
-        const ConstVectorView<CT,UNKNOWN,true>& v1, 
-        VectorView<CT> v2) const 
+        const ConstVectorView<CT,Conj>& v1, VectorView<CT> v2) const 
     { base::solve(v1,v2); } 
     template <class T> 
     void InstLUD<T>::doSolve(
-        const ConstVectorView<CT,UNKNOWN,true>& v1, 
-        VectorView<CT,UNKNOWN,true> v2) const 
+        const ConstVectorView<CT,Conj>& v1, VectorView<CT,Conj> v2) const 
     { base::solve(v1,v2); } 
 
     template <class T> 
@@ -171,8 +169,7 @@ namespace tmv {
     { base::solveTranspose(m1,m2); }
     template <class T> 
     void InstLUD<T>::doSolveTranspose(
-        const ConstMatrixView<RT>& m1, 
-        MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
+        const ConstMatrixView<RT>& m1, MatrixView<CT,Conj> m2) const 
     { base::solveTranspose(m1,m2); }
     template <class T> 
     void InstLUD<T>::doSolveTranspose(
@@ -180,18 +177,15 @@ namespace tmv {
     { base::solveTranspose(m1,m2); }
     template <class T> 
     void InstLUD<T>::doSolveTranspose(
-        const ConstMatrixView<CT>& m1, 
-        MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
+        const ConstMatrixView<CT>& m1, MatrixView<CT,Conj> m2) const 
     { base::solveTranspose(m1,m2); }
     template <class T> 
     void InstLUD<T>::doSolveTranspose(
-        const ConstMatrixView<CT,UNKNOWN,UNKNOWN,true>& m1, 
-        MatrixView<CT> m2) const 
+        const ConstMatrixView<CT,Conj>& m1, MatrixView<CT> m2) const 
     { base::solveTranspose(m1,m2); }
     template <class T> 
     void InstLUD<T>::doSolveTranspose(
-        const ConstMatrixView<CT,UNKNOWN,UNKNOWN,true>& m1, 
-        MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
+        const ConstMatrixView<CT,Conj>& m1, MatrixView<CT,Conj> m2) const 
     { base::solveTranspose(m1,m2); }
     template <class T> 
     void InstLUD<T>::doSolveTranspose(
@@ -203,8 +197,7 @@ namespace tmv {
     { base::solveTranspose(v1,v2); }
     template <class T> 
     void InstLUD<T>::doSolveTranspose(
-        const ConstVectorView<RT>& v1, 
-        VectorView<CT,UNKNOWN,true> v2) const 
+        const ConstVectorView<RT>& v1, VectorView<CT,Conj> v2) const 
     { base::solveTranspose(v1,v2); }
     template <class T> 
     void InstLUD<T>::doSolveTranspose(
@@ -212,18 +205,15 @@ namespace tmv {
     { base::solveTranspose(v1,v2); }
     template <class T> 
     void InstLUD<T>::doSolveTranspose(
-        const ConstVectorView<CT>& v1, 
-        VectorView<CT,UNKNOWN,true> v2) const 
+        const ConstVectorView<CT>& v1, VectorView<CT,Conj> v2) const 
     { base::solveTranspose(v1,v2); }
     template <class T> 
     void InstLUD<T>::doSolveTranspose(
-        const ConstVectorView<CT,UNKNOWN,true>& v1, 
-        VectorView<CT> v2) const 
+        const ConstVectorView<CT,Conj>& v1, VectorView<CT> v2) const 
     { base::solveTranspose(v1,v2); }
     template <class T> 
     void InstLUD<T>::doSolveTranspose(
-        const ConstVectorView<CT,UNKNOWN,true>& v1, 
-        VectorView<CT,UNKNOWN,true> v2) const 
+        const ConstVectorView<CT,Conj>& v1, VectorView<CT,Conj> v2) const 
     { base::solveTranspose(v1,v2); }
 
     template <class T> 
@@ -244,8 +234,7 @@ namespace tmv {
     void InstLUD<T>::doMakeInverse(MatrixView<CT> minv) const 
     { base::makeInverse(minv); } 
     template <class T> 
-    void InstLUD<T>::doMakeInverse(
-        MatrixView<CT,UNKNOWN,UNKNOWN,true> minv) const 
+    void InstLUD<T>::doMakeInverse(MatrixView<CT,Conj> minv) const 
     { base::makeInverse(minv); } 
 
     template <class T> 
@@ -255,8 +244,7 @@ namespace tmv {
     void InstLUD<T>::doMakeInverseATA(MatrixView<CT> ata) const
     { base::makeInverseATA(ata); }
     template <class T> 
-    void InstLUD<T>::doMakeInverseATA(
-        MatrixView<CT,UNKNOWN,UNKNOWN,true> ata) const
+    void InstLUD<T>::doMakeInverseATA(MatrixView<CT,Conj> ata) const
     { base::makeInverseATA(ata); }
 
     template <class T> 

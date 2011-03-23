@@ -3,17 +3,17 @@
 
 #define Def1(T1,C1,T2)\
   template void InstMultXV(const T2 x, \
-      const ConstVectorView<T1,UNKNOWN,C1>& v1, VectorView<T2 > v2); \
+      const ConstVectorView<T1,C1>& v1, VectorView<T2 > v2); \
   template void InstAddMultXV(const T2 x, \
-      const ConstVectorView<T1,UNKNOWN,C1>& v1, VectorView<T2> v2); \
+      const ConstVectorView<T1,C1>& v1, VectorView<T2> v2); \
 
-Def1(T,false,T)
+Def1(T,NonConj,T)
 #ifdef TMV_INST_COMPLEX
 #ifdef TMV_INST_MIX
-Def1(T,false,CT)
+Def1(T,NonConj,CT)
 #endif
-Def1(CT,false,CT)
-Def1(CT,true,CT)
+Def1(CT,NonConj,CT)
+Def1(CT,Conj,CT)
 #endif
 
 #undef Def1

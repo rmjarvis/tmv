@@ -281,10 +281,10 @@ static void TestSquareDiv(tmv::DivType dt)
     c1.row(3).addToAll(std::complex<T>(1,-6));
     c2.row(0).addToAll(std::complex<T>(-2,-11));
 
-    tmv::MatrixViewD<T> a1v = a1.view();
-    tmv::MatrixViewD<T> a2v = a2.view();
-    tmv::MatrixViewD<std::complex<T> > c1v = c1.view();
-    tmv::MatrixViewD<std::complex<T> > c2v = c2.view();
+    tmv::MatrixView<T,tmv::WithDivider> a1v = a1.view();
+    tmv::MatrixView<T,tmv::WithDivider> a2v = a2.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> c1v = c1.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> c2v = c2.view();
 
     a1v.divideUsing(dt);
     a1v.saveDiv();
@@ -301,10 +301,12 @@ static void TestSquareDiv(tmv::DivType dt)
     tmv::Matrix<T,stor,tmv::FortranStyle> a2f = a2;
     tmv::Matrix<std::complex<T>,stor,tmv::FortranStyle> c1f = c1;
     tmv::Matrix<std::complex<T>,stor,tmv::FortranStyle> c2f = c2;
-    tmv::MatrixViewDF<T> a1fv = a1f.view();
-    tmv::MatrixViewDF<T> a2fv = a2f.view();
-    tmv::MatrixViewDF<std::complex<T> > c1fv = c1f.view();
-    tmv::MatrixViewDF<std::complex<T> > c2fv = c2f.view();
+    tmv::MatrixView<T,tmv::WithDivider|tmv::FortranStyle> a1fv = a1f.view();
+    tmv::MatrixView<T,tmv::WithDivider|tmv::FortranStyle> a2fv = a2f.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider|tmv::FortranStyle> c1fv = 
+        c1f.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider|tmv::FortranStyle> c2fv = 
+        c2f.view();
     a1fv.divideUsing(dt);
     a1fv.saveDiv();
     a2fv.divideUsing(dt);
@@ -334,10 +336,10 @@ static void TestSquareDiv(tmv::DivType dt)
     c4.col(3) *= std::complex<T>(-1,3);
     c4.row(0).addToAll(std::complex<T>(1,9));
 
-    tmv::MatrixViewD<T> a3v = a3.view();
-    tmv::MatrixViewD<T> a4v = a4.view();
-    tmv::MatrixViewD<std::complex<T> > c3v = c3.view();
-    tmv::MatrixViewD<std::complex<T> > c4v = c4.view();
+    tmv::MatrixView<T,tmv::WithDivider> a3v = a3.view();
+    tmv::MatrixView<T,tmv::WithDivider> a4v = a4.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> c3v = c3.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> c4v = c4.view();
     a3v.divideUsing(dt);
     a3v.saveDiv();
     a4v.divideUsing(dt);
@@ -356,10 +358,10 @@ static void TestSquareDiv(tmv::DivType dt)
     tmv::Matrix<std::complex<T>,stor> c5 = a5;
     tmv::Matrix<std::complex<T>,stor> c6 = a6;
 
-    tmv::MatrixViewD<T> a5v = a5.view();
-    tmv::MatrixViewD<T> a6v = a6.view();
-    tmv::MatrixViewD<std::complex<T> > c5v = c5.view();
-    tmv::MatrixViewD<std::complex<T> > c6v = c6.view();
+    tmv::MatrixView<T,tmv::WithDivider> a5v = a5.view();
+    tmv::MatrixView<T,tmv::WithDivider> a6v = a6.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> c5v = c5.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> c6v = c6.view();
     a5v.divideUsing(dt);
     a5v.saveDiv();
     a6v.divideUsing(dt);

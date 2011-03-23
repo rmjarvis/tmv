@@ -6,7 +6,7 @@ template T InstMultVV(
 template CT InstMultVV(
     const ConstVectorView<CT >& v1, const ConstVectorView<CT >& v2); 
 template CT InstMultVV(
-    const ConstVectorView<CT,UNKNOWN,true>& v1, 
+    const ConstVectorView<CT,Conj>& v1, 
     const ConstVectorView<CT >& v2); 
 #ifdef TMV_INST_MIX
 template CT InstMultVV(

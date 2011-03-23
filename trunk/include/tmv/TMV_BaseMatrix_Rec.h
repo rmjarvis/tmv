@@ -47,7 +47,6 @@
 #ifndef TMV_BaseMatrix_Rec_H
 #define TMV_BaseMatrix_Rec_H
 
-#include <sstream>
 #include "TMV_BaseMatrix.h"
 
 namespace tmv {
@@ -127,38 +126,18 @@ namespace tmv {
 
     // The following all derive from BaseMatrix_Rec or BaseMatrix_Rec_Mutable.
     // See TMV_Matrix.h and TMV_SmallMatrix.h for their definitions:
-    template <class T, StorageType S=ColMajor, IndexStyle I=CStyle>
+    template <class T, int A=0, int A2=0>
     class Matrix;
-    template <class T, int Si=UNKNOWN, int Sj=UNKNOWN, bool C=false, IndexStyle I=CStyle>
+    template <class T, int A=0>
     class ConstMatrixView;
-    template <class T, int Si=UNKNOWN, int Sj=UNKNOWN, bool C=false, IndexStyle I=CStyle>
+    template <class T, int A=0>
     class MatrixView;
-    template <class T, bool C=false, IndexStyle I=CStyle>
-    class ConstMatrixViewD;
-    template <class T, bool C=false, IndexStyle I=CStyle>
-    class MatrixViewD;
-    template <class T, int M, int N, StorageType S=ColMajor, IndexStyle I=CStyle>
+    template <class T, int M, int N, int A=0, int A2=0> 
     class SmallMatrix;
-    template <class T, int M, int N, int Si, int Sj, bool C=false, IndexStyle I=CStyle>
+    template <class T, int M, int N, int Si, int Sj, int A=0>
     class ConstSmallMatrixView;
-    template <class T, int M, int N, int Si, int Sj, bool C=false, IndexStyle I=CStyle>
+    template <class T, int M, int N, int Si, int Sj, int A=0>
     class SmallMatrixView;
-
-    // These are effectively aliases for I = FortranStyle
-    // so you don' thave to write all the Si,Sj,C values if you are using
-    // the defaults when you want to spectify FortranStyle.
-    template <class T, StorageType S=ColMajor>
-    class MatrixF;
-    template <class T, int Si=UNKNOWN, int Sj=UNKNOWN, bool C=false>
-    class ConstMatrixViewF;
-    template <class T, int Si=UNKNOWN, int Sj=UNKNOWN, bool C=false>
-    class MatrixViewF;
-    template <class T, int M, int N, StorageType S=ColMajor>
-    class SmallMatrixF;
-    template <class T, int M, int N, int Si, int Sj, bool C=false>
-    class ConstSmallMatrixViewF;
-    template <class T, int M, int N, int Si, int Sj, bool C=false>
-    class SmallMatrixViewF;
 
     // In TMV_Norm.h
     template <class M>
@@ -245,8 +224,8 @@ namespace tmv {
                   "must have a non-negative number of columns");
     }
     template <bool _fort>
-    static inline void CheckMatSubVector(int& i, int& j, int istep, int jstep, 
-                                  int size, int m, int n)
+    static inline void CheckMatSubVector(
+        int& i, int& j, int istep, int jstep, int size, int m, int n)
     { // CStyle
         TMVAssert(!(istep == 0 && jstep == 0) && 
                   "istep and jstep cannot both be 0");
@@ -262,7 +241,8 @@ namespace tmv {
                   "last element must be in matrix");
     }
     template <>
-    static inline void CheckDiagIndex<true>(int& i, int& j1, int& j2, int m, int n)
+    static inline void CheckDiagIndex<true>(
+        int& i, int& j1, int& j2, int m, int n)
     { // FortranStyle
         TMVAssert(i >= -m && "negative diag index must be <= nrows");
         TMVAssert(i <= n && "positive diag index must be <= ncols");
@@ -315,8 +295,8 @@ namespace tmv {
         --j1; j2 += jstep-1;
     }
     template <>
-    static inline void CheckMatSubVector<true>(int& i, int& j, int istep, int jstep, 
-                                        int size, int m, int n)
+    static inline void CheckMatSubVector<true>(
+        int& i, int& j, int istep, int jstep, int size, int m, int n)
     { // FortranStyle
         TMVAssert(!(istep == 0 && jstep == 0) && 
                   "istep and jstep cannot both be 0");
@@ -332,33 +312,39 @@ namespace tmv {
     template <class T, int cs, int rs, bool rm, bool fort>
     struct MCopyHelper<T,Rec,cs,rs,rm,fort>
     {
-        typedef SmallMatrix<T,cs,rs,rm?RowMajor:ColMajor,(
-            fort?FortranStyle:CStyle)> type; 
+        enum { A2 = (
+                (rm ? RowMajor : ColMajor) |
+                (fort ? FortranStyle : CStyle) |
+                NoDivider ) };
+        typedef SmallMatrix<T,cs,rs,A2> type;
     };
     template <class T, int rs, bool rm, bool fort>
     struct MCopyHelper<T,Rec,UNKNOWN,rs,rm,fort>
-    { typedef Matrix<T,rm?RowMajor:ColMajor,fort?FortranStyle:CStyle> type; };
+    {
+        enum { A2 = (
+                (rm ? RowMajor : ColMajor) |
+                (fort ? FortranStyle : CStyle) |
+                NoDivider ) };
+        typedef Matrix<T,A2> type; 
+    };
     template <class T, int cs, bool rm, bool fort>
     struct MCopyHelper<T,Rec,cs,UNKNOWN,rm,fort>
-    { typedef Matrix<T,rm?RowMajor:ColMajor,fort?FortranStyle:CStyle> type; };
+    { 
+        enum { A2 = (
+                (rm ? RowMajor : ColMajor) |
+                (fort ? FortranStyle : CStyle) |
+                NoDivider ) };
+        typedef Matrix<T,A2> type; 
+    };
     template <class T, bool rm, bool fort>
     struct MCopyHelper<T,Rec,UNKNOWN,UNKNOWN,rm,fort>
-    { typedef Matrix<T,rm?RowMajor:ColMajor,fort?FortranStyle:CStyle> type; };
-    template <class T, int cs, int rs, bool rm, bool fort>
-    struct MCopyHelper<T,SquareRec,cs,rs,rm,fort>
-    {
-        typedef SmallMatrix<T,cs,rs,rm?RowMajor:ColMajor,(
-            fort?FortranStyle:CStyle)> type; 
+    { 
+        enum { A2 = (
+                (rm ? RowMajor : ColMajor) |
+                (fort ? FortranStyle : CStyle) |
+                NoDivider ) };
+        typedef Matrix<T,A2> type; 
     };
-    template <class T, int rs, bool rm, bool fort>
-    struct MCopyHelper<T,SquareRec,UNKNOWN,rs,rm,fort>
-    { typedef Matrix<T,rm?RowMajor:ColMajor,fort?FortranStyle:CStyle> type; };
-    template <class T, int cs, bool rm, bool fort>
-    struct MCopyHelper<T,SquareRec,cs,UNKNOWN,rm,fort>
-    { typedef Matrix<T,rm?RowMajor:ColMajor,fort?FortranStyle:CStyle> type; };
-    template <class T, bool rm, bool fort>
-    struct MCopyHelper<T,SquareRec,UNKNOWN,UNKNOWN,rm,fort>
-    { typedef Matrix<T,rm?RowMajor:ColMajor,fort?FortranStyle:CStyle> type; };
 
     // A quick auxilliary function for canLinearize.
     // (It only accesses the steps that are unknown at compile time.)
@@ -371,8 +357,6 @@ namespace tmv {
         static bool ok(const M& m) 
         { return true; }
     };
-
-
     template <int Si, int Sj, class M>
     struct AuxCanLinearize<false,Si,Sj,M>
     {
@@ -528,7 +512,6 @@ namespace tmv {
         enum { _fort = Traits<M>::_fort };
         enum { _rowmajor = Traits<M>::_rowmajor }; 
         enum { _colmajor = Traits<M>::_colmajor }; 
-        enum { _stor = Traits<M>::_stor };
         enum { _calc = Traits<M>::_calc };
         enum { _stepi = Traits<M>::_stepi };
         enum { _stepj = Traits<M>::_stepj };
@@ -886,33 +869,41 @@ namespace tmv {
         }
 
         const_uppertri_type upperTri() const
-        { return const_uppertri_type(cptr(),rowsize(),false,stepi(),stepj()); }
+        {
+            return const_uppertri_type(
+                cptr(),rowsize(),stepi(),stepj(),NonUnitDiag); 
+        }
 
         const_unit_uppertri_type unitUpperTri() const
         {
             return const_unit_uppertri_type(
-                cptr(),rowsize(),true,stepi(),stepj()); 
+                cptr(),rowsize(),stepi(),stepj(),UnitDiag); 
         }
 
         const_unknown_uppertri_type upperTri(DiagType dt) const
         {
+            TMVAssert(dt == NonUnitDiag || dt == UnitDiag);
             return const_unknown_uppertri_type(
-                cptr(),rowsize(),dt==UnitDiag,stepi(),stepj()); 
+                cptr(),rowsize(),stepi(),stepj(),dt); 
         }
 
         const_lowertri_type lowerTri() const
-        { return const_lowertri_type(cptr(),colsize(),false,stepi(),stepj()); }
+        {
+            return const_lowertri_type(
+                cptr(),colsize(),stepi(),stepj(),NonUnitDiag); 
+        }
 
         const_unit_lowertri_type unitLowerTri() const
         {
             return const_unit_lowertri_type(
-                cptr(),colsize(),true,stepi(),stepj()); 
+                cptr(),colsize(),stepi(),stepj(),UnitDiag); 
         }
 
         const_unknown_lowertri_type lowerTri(DiagType dt) const
         {
+            TMVAssert(dt == NonUnitDiag || dt == UnitDiag);
             return const_unknown_lowertri_type(
-                cptr(),colsize(),dt==UnitDiag,stepi(),stepj()); 
+                cptr(),colsize(),stepi(),stepj(),dt); 
         }
 
         const_linearview_type linearView() const
@@ -1010,7 +1001,6 @@ namespace tmv {
         enum { _calc = Traits<M>::_calc };
         enum { _rowmajor = Traits<M>::_rowmajor }; 
         enum { _colmajor = Traits<M>::_colmajor }; 
-        enum { _stor = Traits<M>::_stor };
         enum { _stepi = Traits<M>::_stepi };
         enum { _stepj = Traits<M>::_stepj };
         enum { _diagstep = Traits<M>::_diagstep };
@@ -1111,6 +1101,7 @@ namespace tmv {
         typedef typename Traits<M>::unknown_lowertri_type unknown_lowertri_type;
 
         typedef typename Traits<M>::linearview_type linearview_type;
+        typedef typename Traits<M>::linear_iterator linear_iterator;
 
         //
         // Constructor
@@ -1280,12 +1271,12 @@ namespace tmv {
             return mat();
         }
 
-        typedef typename linearview_type::iterator lin_iter;
-        ListAssigner<value_type,lin_iter> operator<<(value_type x)
+        ListAssigner<value_type,linear_iterator> operator<<(value_type x)
         {
             TMVAssert(this->canLinearize());
             linearview_type v = linearView();
-            return ListAssigner<value_type,lin_iter>(v.begin(),v.size(),x); 
+            return ListAssigner<value_type,linear_iterator>(
+                v.begin(),v.size(),x); 
         }
 
 
@@ -1575,27 +1566,35 @@ namespace tmv {
         { return adjoint_type(ptr(),rowsize(),colsize(),stepj(),stepi()); }
 
         uppertri_type upperTri() 
-        { return uppertri_type(ptr(),rowsize(),false,stepi(),stepj()); }
+        { return uppertri_type(ptr(),rowsize(),stepi(),stepj(),NonUnitDiag); }
 
         unit_uppertri_type unitUpperTri() 
-        { return unit_uppertri_type(ptr(),rowsize(),true,stepi(),stepj()); }
+        {
+            return unit_uppertri_type(
+                ptr(),rowsize(),stepi(),stepj(),UnitDiag); 
+        }
 
         unknown_uppertri_type upperTri(DiagType dt)
         {
+            TMVAssert(dt == NonUnitDiag || dt == UnitDiag);
             return unknown_uppertri_type(
-                ptr(),rowsize(),dt==UnitDiag,stepi(),stepj()); 
+                ptr(),rowsize(),stepi(),stepj(),dt); 
         }
 
         lowertri_type lowerTri() 
-        { return lowertri_type(ptr(),colsize(),false,stepi(),stepj()); }
+        { return lowertri_type(ptr(),colsize(),stepi(),stepj(),NonUnitDiag); }
 
         unit_lowertri_type unitLowerTri() 
-        { return unit_lowertri_type(ptr(),colsize(),true,stepi(),stepj()); }
+        {
+            return unit_lowertri_type(
+                ptr(),colsize(),stepi(),stepj(),UnitDiag); 
+        }
 
         unknown_lowertri_type lowerTri(DiagType dt)
         {
+            TMVAssert(dt == NonUnitDiag || dt == UnitDiag);
             return unknown_lowertri_type(
-                ptr(),rowsize(),dt==UnitDiag,stepi(),stepj()); 
+                ptr(),rowsize(),stepi(),stepj(),dt); 
         }
 
         linearview_type linearView() 
@@ -1988,6 +1987,7 @@ namespace tmv {
     // TMV_Text 
     //
 
+#ifdef TMV_DEBUG
     template <class M>
     static inline std::string TMV_Text(const BaseMatrix_Rec<M>& m)
     {
@@ -2003,6 +2003,7 @@ namespace tmv {
         s << "BaseMatrix_Rec_Mutable< "<<TMV_Text(m.mat())<<" >";
         return s.str();
     }
+#endif
 
 } // namespace tmv
 

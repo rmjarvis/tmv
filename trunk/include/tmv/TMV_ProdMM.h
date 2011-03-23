@@ -33,6 +33,7 @@
 #ifndef TMV_ProdMM_H
 #define TMV_ProdMM_H
 
+#include "TMV_BaseMatrix.h"
 #include "TMV_ProdXM.h"
 #include "TMV_MultMM_Funcs.h"
 

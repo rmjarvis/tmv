@@ -32,9 +32,7 @@
 #ifndef TMV_TriMatrixIO_H
 #define TMV_TriMatrixIO_H
 
-#include "TMV_VectorIO.h"
 #include "TMV_BaseMatrix_Tri.h"
-#include "TMV_SimpleMatrix.h"
 
 namespace tmv {
 
@@ -44,23 +42,19 @@ namespace tmv {
     // TODO: Have the non-compact versions instantiated as well.
 
     // Defined in TMV_Matrix.cpp
-    template <class T, bool C>
+    template <class T, int C>
     void InstWriteCompact(
-        std::ostream& os, 
-        const ConstUpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>& m);
-    template <class T, bool C>
+        std::ostream& os, const ConstUpperTriMatrixView<T,C>& m);
+    template <class T, int C>
     void InstWriteCompact(
-        std::ostream& os,
-        const ConstLowerTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>& m);
-    template <class T, bool C>
+        std::ostream& os, const ConstLowerTriMatrixView<T,C>& m);
+    template <class T, int C>
     void InstWriteCompact(
-        std::ostream& os,
-        const ConstUpperTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>& m,
+        std::ostream& os, const ConstUpperTriMatrixView<T,C>& m,
         typename ConstUpperTriMatrixView<T>::float_type thresh);
-    template <class T, bool C>
+    template <class T, int C>
     void InstWriteCompact(
-        std::ostream& os,
-        const ConstLowerTriMatrixView<T,UnknownDiag,UNKNOWN,UNKNOWN,C>& m,
+        std::ostream& os, const ConstLowerTriMatrixView<T,C>& m,
         typename ConstLowerTriMatrixView<T>::float_type thresh);
     template <class T>
     void InstRead(std::istream& is, UpperTriMatrixView<T> m);
@@ -140,10 +134,10 @@ namespace tmv {
     struct WriteU_Helper<90,M>
     {
         static void call(std::ostream& os, const M& m)
-        { InstWriteCompact(os,m.calc().xdView()); }
+        { InstWriteCompact(os,m.calc().xView()); }
         static void call(
             std::ostream& os, const M& m, typename M::float_type thresh)
-        { InstWriteCompact(os,m.calc().xdView(),thresh); }
+        { InstWriteCompact(os,m.calc().xView(),thresh); }
     };
              
     // algo -3: Only one algorithm, so call it.
@@ -235,7 +229,7 @@ namespace tmv {
         public ReadError
     {
     public :
-        SimpleMatrix<T> m;
+        Matrix<T,NoDivider> m;
         int i,j;
         char exp,got;
         T unitgot;
@@ -418,7 +412,7 @@ namespace tmv {
     struct ReadU_Helper<90,M>
     {
         static void call(std::istream& is, M& m)
-        { InstRead(is,m.xdView()); }
+        { InstRead(is,m.xView()); }
     };
              
     // algo 97: Conjugate
@@ -546,11 +540,11 @@ namespace tmv {
         return is;
     }
 
-    template <class T, DiagType D, StorageType S, IndexStyle I>
+    template <class T, int A0, int A1, int A2>
     static inline std::istream& operator>>(
-        std::istream& is, auto_ptr<UpperTriMatrix<T,D,S,I> >& m)
+        std::istream& is, auto_ptr<UpperTriMatrix<T,A0,A1,A2> >& m)
     {
-        typedef UpperTriMatrix<T,D,S,I> M;
+        typedef UpperTriMatrix<T,A0,A1,A2> M;
         char ul;
         is >> ul;
         if (!is) {
@@ -584,11 +578,11 @@ namespace tmv {
         return is;
     }
 
-    template <class T, DiagType D, StorageType S, IndexStyle I>
+    template <class T, int A0, int A1, int A2>
     static inline std::istream& operator>>(
-        std::istream& is, auto_ptr<LowerTriMatrix<T,D,S,I> >& m)
+        std::istream& is, auto_ptr<LowerTriMatrix<T,A0,A1,A2> >& m)
     {
-        typedef LowerTriMatrix<T,D,S,I> M;
+        typedef LowerTriMatrix<T,A0,A1,A2> M;
         char ul;
         is >> ul;
         if (!is) {

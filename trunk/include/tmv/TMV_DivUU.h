@@ -33,13 +33,15 @@
 #ifndef TMV_DivUU_H
 #define TMV_DivUU_H
 
-#include "TMV_MultMM.h"
-#include "TMV_MultUV.h"
-#include "TMV_MultUM.h"
-#include "TMV_CopyU.h"
+#include "TMV_BaseMatrix_Tri.h"
+#include "TMV_MultXV.h"
 #include "TMV_DivVU.h"
-#include "TMV_DivMU.h"
+#include "TMV_MultUV.h"
+#include "TMV_ScaleV.h"
 #include "TMV_Rank1VVM.h"
+#include "TMV_MultUM.h"
+#include "TMV_DivMU.h"
+#include "TMV_InvertU.h"
 #include "TMV_MultXM_Funcs.h"
 #include "TMV_DivMM_Funcs.h"
 
@@ -68,14 +70,12 @@
 namespace tmv {
 
     // Defined in TMV_DivUU.cpp
-    template <class T1, class T2, bool C2>
+    template <class T1, class T2, int C2>
     void InstLDivEq(
-        UpperTriMatrixView<T1> m1,
-        const ConstUpperTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2);
-    template <class T1, class T2, bool C2>
+        UpperTriMatrixView<T1> m1, const ConstUpperTriMatrixView<T2,C2>& m2);
+    template <class T1, class T2, int C2>
     void InstLDivEq(
-        LowerTriMatrixView<T1> m1,
-        const ConstLowerTriMatrixView<T2,UnknownDiag,UNKNOWN,UNKNOWN,C2>& m2);
+        LowerTriMatrixView<T1> m1, const ConstLowerTriMatrixView<T2,C2>& m2);
 
 
     template <int algo, int s, class M1, class M2>
@@ -108,7 +108,7 @@ namespace tmv {
         {
             const int N = s==UNKNOWN ? int(m1.size()) : s;
 #ifdef PRINTALGO_DivU
-            std::cout<<"UU algo 11: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
+            std::cout<<"UU algo 11: N,s = "<<N<<','<<s<<std::endl;
 #endif
             const bool u1 = M1::_unit;
             const bool u2 = M2::_unit;
@@ -271,6 +271,12 @@ namespace tmv {
             const int algo4b =  // The algorithm for MultMM
                 s == UNKNOWN || s > TMV_DIVUU_RECURSE ? -4 : 0;
 #endif
+#ifdef PRINTALGO_DivU
+            std::cout<<"algo2,3,4 = "<<algo2<<"  "<<algo3<<"  "<<algo4<<std::endl;
+#if TMV_DIVUU_RECURSE < 32
+            std::cout<<"algo3b,4b = "<<algo3b<<"  "<<algo4b<<std::endl;
+#endif
+#endif
 
             typedef typename M2::real_type RT;
             typedef typename M2::const_subtrimatrix_type M2a;
@@ -330,7 +336,7 @@ namespace tmv {
         {
             const int N = s==UNKNOWN ? int(m1.size()) : s;
 #ifdef PRINTALGO_DivU
-            std::cout<<"UU algo 11: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
+            std::cout<<"UU algo 11: N,s = "<<N<<','<<s<<std::endl;
 #endif
             const bool u1 = M1::_unit;
             const bool u2 = M2::_unit;
@@ -493,6 +499,12 @@ namespace tmv {
             const int algo4b =  // The algorithm for MultMM
                 s == UNKNOWN || s > TMV_DIVUU_RECURSE ? -4 : 0;
 #endif
+#ifdef PRINTALGO_DivU
+            std::cout<<"algo2,3,4 = "<<algo2<<"  "<<algo3<<"  "<<algo4<<std::endl;
+#if TMV_DIVUU_RECURSE < 32
+            std::cout<<"algo3b,4b = "<<algo3b<<"  "<<algo4b<<std::endl;
+#endif
+#endif
 
             typedef typename M2::real_type RT;
             typedef typename M2::const_subtrimatrix_type M2a;
@@ -585,7 +597,7 @@ namespace tmv {
     struct LDivEqUU_Helper<90,s,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
-        { InstLDivEq(m1.xdView(),m2.xdView()); }
+        { InstLDivEq(m1.xView(),m2.xView()); }
     };
 
     // algo 97: Conjugate

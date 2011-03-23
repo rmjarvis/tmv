@@ -38,8 +38,8 @@
 namespace tmv {
 
     // Defined in TMV_Matrix.cpp
-    template <class T, bool C>
-    void InstSwap(MatrixView<T,UNKNOWN,UNKNOWN,C> m1, MatrixView<T> m2); 
+    template <class T, int C>
+    void InstSwap(MatrixView<T,C> m1, MatrixView<T> m2); 
 
     //
     // Swap Matrices

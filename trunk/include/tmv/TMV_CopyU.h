@@ -51,10 +51,9 @@ namespace tmv {
         const BaseMatrix_Tri<M1>& m1, BaseMatrix_Tri_Mutable<M2>& m2);
 
     // Defined in TMV_TriMatrix.cpp
-    template <class T1, bool C1, class T2>
+    template <class T1, int C1, class T2>
     void InstCopy(
-        const ConstUpperTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
-        UpperTriMatrixView<T2,UnknownDiag> m2);
+        const ConstUpperTriMatrixView<T1,C1>& m1, UpperTriMatrixView<T2> m2);
 
     //
     // Copy Matrices
@@ -263,7 +262,7 @@ namespace tmv {
             typedef typename M2::value_type T2;
             TMVStaticAssert((Traits2<T1,T2>::sametype));
 #endif
-            InstCopy(m1.xdView(),m2.xdView()); 
+            InstCopy(m1.xView(),m2.xView()); 
         }
     };
 
@@ -632,10 +631,9 @@ namespace tmv {
     // L = L
     //
 
-    template <class T1, bool C1, class T2>
+    template <class T1, int C1, class T2>
     static inline void InstCopy(
-        const ConstLowerTriMatrixView<T1,UnknownDiag,UNKNOWN,UNKNOWN,C1>& m1,
-        LowerTriMatrixView<T2,UnknownDiag> m2)
+        const ConstLowerTriMatrixView<T1,C1>& m1, LowerTriMatrixView<T2> m2)
     { InstCopy(m1.transpose(),m2.transpose()); }
 
 

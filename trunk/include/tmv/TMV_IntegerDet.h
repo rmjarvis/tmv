@@ -33,8 +33,7 @@
 #ifndef TMV_IntegerDet_H
 #define TMV_IntegerDet_H
 
-#include "TMV_Matrix.h"
-#include "TMV_SimpleMatrix.h"
+#include "TMV_BaseMatrix_Rec.h"
 
 namespace tmv {
 
@@ -180,7 +179,7 @@ namespace tmv {
         static T call(const M& m)
         {
             typedef typename Bareiss_Helper<T>::longdouble_type DT;
-            SimpleMatrix<DT> A(m);
+            Matrix<DT,NoDivider> A(m);
             const int N = A.rowsize();
 
             // Do the 1x1 Bareiss step for each element down the diagonal.

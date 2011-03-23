@@ -41,8 +41,8 @@ template <class T> void TestDiagMatrix()
     }
     tmv::ConstDiagMatrixView<T> acv = a.view();
     tmv::DiagMatrixView<T> av = a.view();
-    tmv::ConstDiagMatrixViewF<T> afcv = af.view();
-    tmv::DiagMatrixViewF<T> afv = af.view();
+    tmv::ConstDiagMatrixView<T,tmv::FortranStyle> afcv = af.view();
+    tmv::DiagMatrixView<T,tmv::FortranStyle> afv = af.view();
 
     for (int i=0, k=0; i<N; ++i) for (int j=0; j<N; ++j, ++k)
         if (i == j) {

@@ -2,8 +2,9 @@
 #ifndef TMV_MultPM_H
 #define TMV_MultPM_H
 
+#include "TMV_BaseMatrix_Rec.h"
 #include "TMV_Permutation.h"
-#include "TMV_MultXM.h"
+#include "TMV_MultXM_Funcs.h"
 
 namespace tmv {
 
