@@ -199,7 +199,7 @@ void TestMatrixDet()
                   2000000000.*NormSq(cm3)*EPS),
            "10x10 determinant complex full");
 
-    std::cout<<"Matrix<"<<tmv::TMV_Text(T())<<"> passed all determinant tests\n";
+    std::cout<<"Matrix<"<<Text(T())<<"> passed all determinant tests\n";
 }
 
 #ifdef TEST_DOUBLE

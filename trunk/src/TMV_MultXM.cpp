@@ -69,8 +69,7 @@ namespace tmv {
 
     template <class T1, int C1, class T2>
     void InstMultXM(
-        const T2 x, const ConstMatrixView<T1,C1>& m1,
-        MatrixView<T2> m2)
+        const T2 x, const ConstMatrixView<T1,C1>& m1, MatrixView<T2> m2)
     {
         if (m1.iscm() && m2.iscm()) {
             MatrixView<T2,ColMajor> m2cm = m2.cmView();
@@ -86,8 +85,7 @@ namespace tmv {
 
     template <class T1, int C1, class T2>
     void InstAddMultXM(
-        const T2 x, const ConstMatrixView<T1,C1>& m1,
-        MatrixView<T2> m2)
+        const T2 x, const ConstMatrixView<T1,C1>& m1, MatrixView<T2> m2)
     {
         if (m2.iscm()) {
             MatrixView<T2,ColMajor> m2cm = m2.cmView();
@@ -106,6 +104,14 @@ namespace tmv {
         }
     }
 
+    template <class T1, int C1, class T2>
+    void InstAliasMultXM(
+        const T2 x, const ConstMatrixView<T1,C1>& m1, MatrixView<T2> m2)
+    { InlineAliasMultXM<false>(Scaling<0,T2>(x),m1,m2); }
+    template <class T1, int C1, class T2>
+    void InstAliasAddMultXM(
+        const T2 x, const ConstMatrixView<T1,C1>& m1, MatrixView<T2> m2)
+    { InlineAliasMultXM<true>(Scaling<0,T2>(x),m1,m2); }
 
 #define InstFile "TMV_MultXM.inst"
 #include "TMV_Inst.h"

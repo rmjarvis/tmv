@@ -193,7 +193,7 @@ void TestSmallMatrixDet()
                   2000000000.*NormSq(cm3)*EPS),
            "10x10 determinant complex full");
 
-    std::cout<<"SmallMatrix<"<<tmv::TMV_Text(T())<<"> passed all determinant tests\n";
+    std::cout<<"SmallMatrix<"<<Text(T())<<"> passed all determinant tests\n";
 }
 
 #ifdef TEST_DOUBLE

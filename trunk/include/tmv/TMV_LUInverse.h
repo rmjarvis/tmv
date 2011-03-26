@@ -266,12 +266,12 @@ namespace tmv {
                 typename M2::transpose_type m2T = m2.transpose();
                 NoAliasMultMM<false>(one,uinv.adjoint(),uinv,m2T);
                 // m2 /= L.transpose();
-                NoAliasLDivEq(m2,L.transpose());
+                NoAliasTriLDivEq(m2,L.transpose());
                 // m2 %= L.conjugate();
                 // m2 = m2 * L.conjugate()^-1
                 // -> m2.adjoint() = L.transpose()^-1 * m2.adjoint()
                 typename M2::adjoint_type m2t = m2.adjoint();
-                NoAliasLDivEq(m2t,L.transpose());
+                NoAliasTriLDivEq(m2t,L.transpose());
                 P.inverse().applyOnRight(m2);
                 P.applyOnLeft(m2);
             } else {
@@ -281,10 +281,10 @@ namespace tmv {
                 // m2 = linv * linv.adjoint();
                 NoAliasMultMM<false>(one,linv,linv.adjoint(),m2);
                 // m2 /= U;
-                NoAliasLDivEq(m2,U);
+                NoAliasTriLDivEq(m2,U);
                 // m2 %= U.adjoint();
                 typename M2::adjoint_type m2t = m2.adjoint();
-                NoAliasLDivEq(m2t,U);
+                NoAliasTriLDivEq(m2t,U);
             }
         }
     };

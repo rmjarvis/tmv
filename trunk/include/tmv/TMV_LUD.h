@@ -386,6 +386,7 @@ namespace tmv {
             // This one might be same storage if LUx was done in place.
             // e.g. { A.divideInPlace(); A = A.inverse(); }
             // So go ahead and check. (i.e. Don't use NoAliasCopy.)
+            // TODO: Add this behavior to test suite.
             if (istrans) {
                 typename M2::transpose_type m2t = m2.transpose();
                 Copy(LUx,m2t);

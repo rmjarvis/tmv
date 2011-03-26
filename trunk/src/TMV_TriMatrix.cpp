@@ -29,7 +29,7 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-
+//#define PRINTALGO_NormU
 
 #include "TMV_Blas.h"
 #include <iostream>
@@ -66,8 +66,7 @@ namespace tmv {
 
     template <class T1, int C1, class T2>
     void InstCopy(
-        const ConstUpperTriMatrixView<T1,C1>& m1,
-        UpperTriMatrixView<T2> m2)
+        const ConstUpperTriMatrixView<T1,C1>& m1, UpperTriMatrixView<T2> m2)
     {
         if (m1.isunit()) {
             if (m2.size() > 1) {
@@ -83,6 +82,11 @@ namespace tmv {
             Maybe<C1>::conjself(m2n);
         }
     }
+
+    template <class T1, int C1, class T2>
+    void InstAliasCopy(
+        const ConstUpperTriMatrixView<T1,C1>& m1, UpperTriMatrixView<T2> m2)
+    { InlineAliasCopy(m1,m2); }
 
 
     //
@@ -105,6 +109,11 @@ namespace tmv {
             InlineSwap(m1,m2);
         }
     }
+
+    template <class T, int C> 
+    void InstAliasSwap(
+        UpperTriMatrixView<T,C> m1, UpperTriMatrixView<T> m2)
+    { InlineAliasSwap(m1,m2); }
 
 
     //
@@ -151,9 +160,9 @@ namespace tmv {
         const ConstUpperTriMatrixView<T>& m,
         const typename ConstUpperTriMatrixView<T>::float_type scale)
     {
-        if (m.iscm()) return InlineNormSq(m.cmView());
-        else if (m.isrm()) return InlineNormSq(m.rmView());
-        else return InlineNormSq(m);
+        if (m.iscm()) return InlineNormSq(m.cmView(),scale);
+        else if (m.isrm()) return InlineNormSq(m.rmView(),scale);
+        else return InlineNormSq(m,scale);
     }
 
     template <class T>
@@ -447,7 +456,7 @@ namespace tmv {
     template <class T>
     typename Traits<T>::real_type InstNormSq(
         const ConstUpperTriMatrixView<T>& m)
-    { return DoInstNormSq(m); }
+    { return DoInstNormSq(m); } 
 
     template <class T>
     typename ConstUpperTriMatrixView<T>::float_type InstNormSq(

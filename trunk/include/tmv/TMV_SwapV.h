@@ -39,6 +39,8 @@ namespace tmv {
     // Defined in TMV_Vector.cpp
     template <class T, int C>
     void InstSwap(VectorView<T,C> v1, VectorView<T> v2);
+    template <class T, int C>
+    void InstAliasSwap(VectorView<T,C> v1, VectorView<T> v2);
 
     //
     // Swap Vectors
@@ -240,6 +242,14 @@ namespace tmv {
         { InstSwap(v1.xView(),v2.xView()); }
     };
 
+    // algo 91: Call inst alias
+    template <int s, class V1, class V2>
+    struct SwapV_Helper<91,s,V1,V2>
+    {
+        static void call(V1& v1, V2& v2)
+        { InstAliasSwap(v1.xView(),v2.xView()); }
+    };
+
     // algo 97: Conjugate
     template <int s, class V1, class V2>
     struct SwapV_Helper<97,s,V1,V2>
@@ -254,9 +264,23 @@ namespace tmv {
         }
     };
 
-    // algo 99: Check for aliases
+    // algo 197: Conjugate
     template <int s, class V1, class V2>
-    struct SwapV_Helper<99,s,V1,V2>
+    struct SwapV_Helper<197,s,V1,V2>
+    {
+        static void call(V1& v1, V2& v2)
+        {
+            typedef typename V1::conjugate_type V1c;
+            typedef typename V2::conjugate_type V2c;
+            V1c v1c = v1.conjugate();
+            V2c v2c = v2.conjugate();
+            SwapV_Helper<99,s,V1c,V2c>::call(v1c,v2c);
+        }
+    };
+
+    // algo 98: Inline check for aliases
+    template <int s, class V1, class V2>
+    struct SwapV_Helper<98,s,V1,V2>
     {
         static void call(V1& v1, V2& v2)
         {
@@ -273,6 +297,26 @@ namespace tmv {
                 NoAliasCopy(v2,v1);
                 NoAliasCopy(v1c,v2);
             }
+        }
+    };
+
+    // algo 99: Check for aliases
+    template <int s, class V1, class V2>
+    struct SwapV_Helper<99,s,V1,V2>
+    {
+        static void call(V1& v1, V2& v2)
+        {
+            typedef typename V1::value_type T1;
+            typedef typename V2::value_type T2;
+            const bool inst = 
+                (s == UNKNOWN || s > 16) &&
+                Traits2<T1,T2>::sametype &&
+                Traits<T1>::isinst;
+            const int algo = 
+                V2::_conj ? 197 :
+                inst ? 91 :
+                98;
+            SwapV_Helper<algo,s,V1,V2>::call(v1,v2);
         }
     };
 
@@ -344,9 +388,7 @@ namespace tmv {
                 VStepHelper<V2,V1>::noclobber &&
                 !VStepHelper<V1,V2>::same;
             const bool checkalias =
-                V1::_size == UNKNOWN &&
-                V2::_size == UNKNOWN &&
-                !noclobber;
+                (V1::_checkalias || V2::_checkalias) && !noclobber;
             const int algo = 
                 checkalias ? 99 : 
                 -2;
@@ -403,6 +445,23 @@ namespace tmv {
         TMV_MAYBE_REF(V1,V1v) v1v = v1.cView();
         TMV_MAYBE_REF(V2,V2v) v2v = v2.cView();
         SwapV_Helper<-3,s,V1v,V2v>::call(v1v,v2v);
+    }
+
+    template <class V1, class V2>
+    static inline void InlineAliasSwap(
+        BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2)
+    {
+        typedef typename V1::value_type T1;
+        typedef typename V2::value_type T2;
+        TMVStaticAssert((Traits2<T1,T2>::sametype));
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
+        TMVAssert(v1.size() == v2.size());
+        const int s = Sizes<V1::_size,V2::_size>::size;
+        typedef typename V1::cview_type V1v;
+        typedef typename V2::cview_type V2v;
+        TMV_MAYBE_REF(V1,V1v) v1v = v1.cView();
+        TMV_MAYBE_REF(V2,V2v) v2v = v2.cView();
+        SwapV_Helper<98,s,V1v,V2v>::call(v1v,v2v);
     }
 
     template <class V1, class V2>

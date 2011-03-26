@@ -39,6 +39,9 @@
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_SmallVector.h"
+#include "tmv/TMV_ProdXM.h"
+#include "tmv/TMV_MultXU.h"
+
 
 // The most common reason to do this function is to basically undo an
 // LU decomposition.  So something like:
@@ -56,7 +59,6 @@
 // So we do a slightly inefficient thing for this.  We copy either 
 // U or L to ColMajor storage to match m so that the call to InlineMultMM
 // will be of the same signature as the in-place calls.
-
 
 namespace tmv {
 
@@ -166,34 +168,46 @@ namespace tmv {
 
     template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM(
-        const T3 x,
-        const ConstUpperTriMatrixView<T1,C1>& m1,
-        const ConstLowerTriMatrixView<T2,C2>& m2,
-        MatrixView<T3> m3)
+        const T3 x, const ConstUpperTriMatrixView<T1,C1>& m1,
+        const ConstLowerTriMatrixView<T2,C2>& m2, MatrixView<T3> m3)
     { DoInstMultMM(x,m1,m2,m3); }
     template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM(
-        const T3 x,
-        const ConstUpperTriMatrixView<T1,C1>& m1,
-        const ConstLowerTriMatrixView<T2,C2>& m2,
-        MatrixView<T3> m3)
+        const T3 x, const ConstUpperTriMatrixView<T1,C1>& m1,
+        const ConstLowerTriMatrixView<T2,C2>& m2, MatrixView<T3> m3)
     { DoInstAddMultMM(x,m1,m2,m3); }
 
     template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM(
-        const T3 x,
-        const ConstLowerTriMatrixView<T1,C1>& m1,
-        const ConstUpperTriMatrixView<T2,C2>& m2,
-        MatrixView<T3> m3)
+        const T3 x, const ConstLowerTriMatrixView<T1,C1>& m1,
+        const ConstUpperTriMatrixView<T2,C2>& m2, MatrixView<T3> m3)
     { DoInstMultMM(x,m1,m2,m3); }
     template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM(
-        const T3 x,
-        const ConstLowerTriMatrixView<T1,C1>& m1,
-        const ConstUpperTriMatrixView<T2,C2>& m2,
-        MatrixView<T3> m3)
+        const T3 x, const ConstLowerTriMatrixView<T1,C1>& m1,
+        const ConstUpperTriMatrixView<T2,C2>& m2, MatrixView<T3> m3)
     { DoInstAddMultMM(x,m1,m2,m3); }
 
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasMultMM(
+        const T3 x, const ConstUpperTriMatrixView<T1,C1>& m1,
+        const ConstLowerTriMatrixView<T2,C2>& m2, MatrixView<T3> m3)
+    { InlineAliasMultMM<false>(Scaling<0,T3>(x),m1,m2,m3); }
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasAddMultMM(
+        const T3 x, const ConstUpperTriMatrixView<T1,C1>& m1,
+        const ConstLowerTriMatrixView<T2,C2>& m2, MatrixView<T3> m3)
+    { InlineAliasMultMM<true>(Scaling<0,T3>(x),m1,m2,m3); }
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasMultMM(
+        const T3 x, const ConstLowerTriMatrixView<T1,C1>& m1,
+        const ConstUpperTriMatrixView<T2,C2>& m2, MatrixView<T3> m3)
+    { InlineAliasMultMM<false>(Scaling<0,T3>(x),m1,m2,m3); }
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasAddMultMM(
+        const T3 x, const ConstLowerTriMatrixView<T1,C1>& m1,
+        const ConstUpperTriMatrixView<T2,C2>& m2, MatrixView<T3> m3)
+    { InlineAliasMultMM<true>(Scaling<0,T3>(x),m1,m2,m3); }
 
 #define InstFile "TMV_MultUL.inst"
 #include "TMV_Inst.h"

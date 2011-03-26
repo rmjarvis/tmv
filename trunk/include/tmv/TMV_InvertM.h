@@ -45,16 +45,6 @@ namespace tmv {
     // minv = x * m^-1
     //
 
-    static inline void InvertM_ThrowSingular()
-    {
-#ifdef TMV_NO_THROW
-        std::cerr<<"Singular Matrix found\n";
-        exit(1);
-#else
-        throw Singular("Matrix found\n");
-#endif
-    }
-
     template <int algo, int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper;
 
@@ -79,7 +69,7 @@ namespace tmv {
                 1<<','<<1<<std::endl;
 #endif
             typedef typename M1::value_type T1;
-            if (m1.cref(0,0) == T1(0)) InvertM_ThrowSingular();
+            if (m1.cref(0,0) == T1(0)) ThrowSingular("1x1 Matrix");
             m2.ref(0,0) = ZProd<false,false>::quot(x , m1.cref(0,0)); 
         }
     };
@@ -98,7 +88,7 @@ namespace tmv {
 #endif
             typedef typename M1::value_type T1;
             T1 det = m1.det();
-            if (det == T1(0)) InvertM_ThrowSingular();
+            if (det == T1(0)) ThrowSingular("2x2 Matrix");
             // Store these in temporaries just in case there are aliases.
             const T1 m1_00 = m1.cref(0,0);
             const T1 m1_01 = m1.cref(0,1);
@@ -197,22 +187,18 @@ namespace tmv {
         }
     };
 
-    // algo 21: m1 is diagonal.  No alias check.
+    // algo 31: m1 is diagonal.  No alias check.
     template <int cs, int rs, int ix, class T, class M1, class M2>
-    struct InvertM_Helper<21,cs,rs,ix,T,M1,M2>
+    struct InvertM_Helper<31,cs,rs,ix,T,M1,M2>
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
             const int N = m1.rowsize();
-            std::cout<<"InvM algo 21: M,N,cs,rs = "<<M<<','<<N<<','<<
+            std::cout<<"InvM algo 31: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
-            TMVStaticAssert(!ShapeTraits<M1::_shape>::upper);
-            TMVStaticAssert(!ShapeTraits<M1::_shape>::lower);
-            TMVStaticAssert(ShapeTraits<M2::_shape>::lower || 
-                            ShapeTraits<M2::_shape>::upper);
             typename M2::diag_type m2d = m2.diag();
             m2.setZero();
             NoAliasCopy(m1.diag(),m2d);
@@ -221,22 +207,18 @@ namespace tmv {
         }
     };
 
-    // algo 22: m1 is diagonal.  Safe for aliases.
+    // algo 32: m1 is diagonal.  Safe for aliases.
     template <int cs, int rs, int ix, class T, class M1, class M2>
-    struct InvertM_Helper<22,cs,rs,ix,T,M1,M2>
+    struct InvertM_Helper<32,cs,rs,ix,T,M1,M2>
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_InvM
             const int M = m1.colsize();
             const int N = m1.rowsize();
-            std::cout<<"InvM algo 22: M,N,cs,rs = "<<M<<','<<N<<','<<
+            std::cout<<"InvM algo 32: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
-            TMVStaticAssert(!ShapeTraits<M1::_shape>::upper);
-            TMVStaticAssert(!ShapeTraits<M1::_shape>::lower);
-            TMVStaticAssert(ShapeTraits<M2::_shape>::lower || 
-                            ShapeTraits<M2::_shape>::upper);
             // For alias versions, we could invert the diagonal and then 
             // zero out the non-diagonal portions, but the non-diagonal part
             // is different for each kind of M2, so to make this code
@@ -256,126 +238,7 @@ namespace tmv {
         }
     };
 
-    // algo 23: m1,m2 are both diagonal.  No alias check.
-    template <int cs, int rs, int ix, class T, class M1, class M2>
-    struct InvertM_Helper<23,cs,rs,ix,T,M1,M2>
-    {
-        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
-        {
-#ifdef PRINTALGO_InvM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
-            std::cout<<"InvM algo 23: M,N,cs,rs = "<<M<<','<<N<<','<<
-                cs<<','<<rs<<std::endl;
-#endif
-            TMVStaticAssert(!ShapeTraits<M1::_shape>::upper);
-            TMVStaticAssert(!ShapeTraits<M1::_shape>::lower);
-            TMVStaticAssert(!ShapeTraits<M2::_shape>::upper);
-            TMVStaticAssert(!ShapeTraits<M2::_shape>::lower);
-            typename M2::diag_type m2d = m2.diag();
-            NoAliasCopy(m1.diag(),m2d);
-            m2.invertSelf();
-            Scale(x,m2d);
-        }
-    };
-
-    // algo 24: m1,m2 are both diagonal.  With alias check.
-    template <int cs, int rs, int ix, class T, class M1, class M2>
-    struct InvertM_Helper<24,cs,rs,ix,T,M1,M2>
-    {
-        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
-        {
-#ifdef PRINTALGO_InvM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
-            std::cout<<"InvM algo 24: M,N,cs,rs = "<<M<<','<<N<<','<<
-                cs<<','<<rs<<std::endl;
-#endif
-            TMVStaticAssert(!ShapeTraits<M1::_shape>::upper);
-            TMVStaticAssert(!ShapeTraits<M1::_shape>::lower);
-            TMVStaticAssert(!ShapeTraits<M2::_shape>::upper);
-            TMVStaticAssert(!ShapeTraits<M2::_shape>::lower);
-            typename M2::diag_type m2d = m2.diag();
-            AliasCopy(m1.diag(),m2d);
-            m2.invertSelf();
-            Scale(x,m2d);
-        }
-    };
-
-    // algo 25: m1,m2 are both diagonal, but use temporary anyway.
-    template <int cs, int rs, int ix, class T, class M1, class M2>
-    struct InvertM_Helper<25,cs,rs,ix,T,M1,M2>
-    {
-        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
-        {
-#ifdef PRINTALGO_InvM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
-            std::cout<<"InvM algo 25: M,N,cs,rs = "<<M<<','<<N<<','<<
-                cs<<','<<rs<<std::endl;
-#endif
-            TMVStaticAssert(!ShapeTraits<M1::_shape>::upper);
-            TMVStaticAssert(!ShapeTraits<M1::_shape>::lower);
-            TMVStaticAssert(!ShapeTraits<M2::_shape>::upper);
-            TMVStaticAssert(!ShapeTraits<M2::_shape>::lower);
-            typename M1::copy_type m1c = m1;
-            m1c.invertSelf();
-            typename M1::copy_type::diag_type m1cd = m1c.diag();
-            typename M2::diag_type m2d = m2.diag();
-            Scale(x,m1cd);
-            NoAliasCopy(m1cd,m2d);
-        }
-    };
-
-    // algo 31: m1 is uppertri.  No alias.
-    template <int cs, int rs, int ix, class T, class M1, class M2>
-    struct InvertM_Helper<31,cs,rs,ix,T,M1,M2>
-    {
-        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
-        {
-#ifdef PRINTALGO_InvM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
-            std::cout<<"InvM algo 31: M,N,cs,rs = "<<M<<','<<N<<','<<
-                cs<<','<<rs<<std::endl;
-#endif
-            TMVStaticAssert(ShapeTraits<M1::_shape>::upper);
-            TMVStaticAssert(!ShapeTraits<M1::_shape>::lower);
-            TMVStaticAssert(ShapeTraits<M2::_shape>::upper);
-            TMVStaticAssert(ShapeTraits<M2::_shape>::lower);
-            typename M2::uppertri_type m2u = m2.upperTri();
-            m2.setZero();
-            NoAliasCopy(m1,m2u);
-            m2u.invertSelf();
-            Scale(x,m2u);
-        }
-    };
-
-    // algo 32: m1 is uppertri.  With alias check.
-    template <int cs, int rs, int ix, class T, class M1, class M2>
-    struct InvertM_Helper<32,cs,rs,ix,T,M1,M2>
-    {
-        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
-        {
-            const int N = m1.rowsize();
-#ifdef PRINTALGO_InvM
-            const int M = m1.colsize();
-            std::cout<<"InvM algo 32: M,N,cs,rs = "<<M<<','<<N<<','<<
-                cs<<','<<rs<<std::endl;
-#endif
-            TMVStaticAssert(ShapeTraits<M1::_shape>::upper);
-            TMVStaticAssert(!ShapeTraits<M1::_shape>::lower);
-            TMVStaticAssert(ShapeTraits<M2::_shape>::upper);
-            TMVStaticAssert(ShapeTraits<M2::_shape>::lower);
-            typename M2::uppertri_type m2u = m2.upperTri();
-            AliasCopy(m1,m2u);
-            m2u.invertSelf();
-            Scale(x,m2u);
-            if (N > 1) m2.lowerTri().offDiag().setZero();
-        }
-    };
-
-    // algo 33: m1,m2 are both uppertri.  No alias
+    // algo 33: m1,m2 are both diagonal.  No alias check.
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<33,cs,rs,ix,T,M1,M2>
     {
@@ -387,17 +250,14 @@ namespace tmv {
             std::cout<<"InvM algo 33: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
-            TMVStaticAssert(ShapeTraits<M1::_shape>::upper);
-            TMVStaticAssert(!ShapeTraits<M1::_shape>::lower);
-            TMVStaticAssert(ShapeTraits<M2::_shape>::upper);
-            TMVStaticAssert(!ShapeTraits<M2::_shape>::lower);
-            NoAliasCopy(m1,m2);
+            typename M2::diag_type m2d = m2.diag();
+            NoAliasCopy(m1.diag(),m2d);
             m2.invertSelf();
-            Scale(x,m2);
+            Scale(x,m2d);
         }
     };
 
-    // algo 34: m1,m2 are both uppertri.  With alias check
+    // algo 34: m1,m2 are both diagonal.  With alias check.
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<34,cs,rs,ix,T,M1,M2>
     {
@@ -409,17 +269,14 @@ namespace tmv {
             std::cout<<"InvM algo 34: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
-            TMVStaticAssert(ShapeTraits<M1::_shape>::upper);
-            TMVStaticAssert(!ShapeTraits<M1::_shape>::lower);
-            TMVStaticAssert(ShapeTraits<M2::_shape>::upper);
-            TMVStaticAssert(!ShapeTraits<M2::_shape>::lower);
-            AliasCopy(m1,m2);
+            typename M2::diag_type m2d = m2.diag();
+            AliasCopy(m1.diag(),m2d);
             m2.invertSelf();
-            Scale(x,m2);
+            Scale(x,m2d);
         }
     };
 
-    // algo 41: m1 is lowertri.  No alias.
+    // algo 41: m1 is triangular.  No alias.
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<41,cs,rs,ix,T,M1,M2>
     {
@@ -431,19 +288,18 @@ namespace tmv {
             std::cout<<"InvM algo 41: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
-            TMVStaticAssert(!ShapeTraits<M1::_shape>::upper);
-            TMVStaticAssert(ShapeTraits<M1::_shape>::lower);
-            TMVStaticAssert(ShapeTraits<M2::_shape>::upper);
-            TMVStaticAssert(ShapeTraits<M2::_shape>::lower);
-            typename M2::lowertri_type m2l = m2.lowerTri();
+            typename TypeSelect<M1::_upper ,
+                     typename M2::uppertri_type ,
+                     typename M2::lowertri_type>::type m2u = 
+                         Maybe<M1::_upper>::uppertri(m2);
             m2.setZero();
-            NoAliasCopy(m1,m2l);
-            m2l.invertSelf();
-            Scale(x,m2l);
+            NoAliasCopy(m1,m2u);
+            m2u.invertSelf();
+            Scale(x,m2u);
         }
     };
 
-    // algo 42: m1 is lowertri.  With alias check.
+    // algo 42: m1 is triangular.  With alias check.
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<42,cs,rs,ix,T,M1,M2>
     {
@@ -455,19 +311,18 @@ namespace tmv {
             std::cout<<"InvM algo 42: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
-            TMVStaticAssert(!ShapeTraits<M1::_shape>::upper);
-            TMVStaticAssert(ShapeTraits<M1::_shape>::lower);
-            TMVStaticAssert(ShapeTraits<M2::_shape>::upper);
-            TMVStaticAssert(ShapeTraits<M2::_shape>::lower);
-            typename M2::lowertri_type m2l = m2.lowerTri();
-            AliasCopy(m1,m2l);
-            m2l.invertSelf();
-            Scale(x,m2l);
-            if (N > 1) m2.upperTri().offDiag().setZero();
+            typename TypeSelect<M1::_upper ,
+                     typename M2::uppertri_type ,
+                     typename M2::lowertri_type>::type m2u = 
+                         Maybe<M1::_upper>::uppertri(m2);
+            AliasCopy(m1,m2u);
+            m2u.invertSelf();
+            Scale(x,m2u);
+            if (N > 1) Maybe<!M1::_upper>::uppertri(m2).offDiag().setZero();
         }
     };
 
-    // algo 43: m1,m2 are both lowertri.  No alias
+    // algo 43: m1,m2 are both uppertri.  No alias
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<43,cs,rs,ix,T,M1,M2>
     {
@@ -479,17 +334,13 @@ namespace tmv {
             std::cout<<"InvM algo 43: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
-            TMVStaticAssert(!ShapeTraits<M1::_shape>::upper);
-            TMVStaticAssert(ShapeTraits<M1::_shape>::lower);
-            TMVStaticAssert(!ShapeTraits<M2::_shape>::upper);
-            TMVStaticAssert(ShapeTraits<M2::_shape>::lower);
             NoAliasCopy(m1,m2);
             m2.invertSelf();
             Scale(x,m2);
         }
     };
 
-    // algo 44: m1,m2 are both lowertri.  With alias check
+    // algo 44: m1,m2 are both uppertri.  With alias check
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<44,cs,rs,ix,T,M1,M2>
     {
@@ -501,10 +352,6 @@ namespace tmv {
             std::cout<<"InvM algo 44: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
-            TMVStaticAssert(!ShapeTraits<M1::_shape>::upper);
-            TMVStaticAssert(ShapeTraits<M1::_shape>::lower);
-            TMVStaticAssert(!ShapeTraits<M2::_shape>::upper);
-            TMVStaticAssert(ShapeTraits<M2::_shape>::lower);
             AliasCopy(m1,m2);
             m2.invertSelf();
             Scale(x,m2);
@@ -525,9 +372,9 @@ namespace tmv {
                 cs == 0 || rs == 0 ? 0 :
                 cs == 1 && rs == 1 ? 1 :
                 !up1 && !lo1 ? ( // m1 is diag
-                    (up2 || lo2) ? 22 : M2::_diagstep==1 ? 24 : 25 ) :
+                    (up2 || lo2) ? 32 : 34 ) :
                 !lo1 ? ( // m1 is uppertri
-                    lo2 ? 32 : 34 ) :
+                    lo2 ? 42 : 44 ) :
                 !up1 ? ( // m1 is lowertri
                     up2 ? 42 : 44 ) :
                 cs == 2 && rs == 2 ? 2 :
@@ -536,13 +383,11 @@ namespace tmv {
                 cs == rs ? 12 : 
                 13;
 #ifdef PRINTALGO_InvM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
-            std::cout<<"AliasCheck InvertM: M,N,cs,rs = "<<M<<','<<N<<','<<
-                cs<<','<<rs<<std::endl;
+            std::cout<<"AliasCheck InvertM:\n";
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
             std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
+            std::cout<<"cs,rs = "<<cs<<','<<rs<<std::endl;
             std::cout<<"algo = "<<algo<<std::endl;
 #endif
             InvertM_Helper<algo,cs,rs,ix,T,M1,M2>::call(x,m1,m2);
@@ -563,9 +408,9 @@ namespace tmv {
                 cs == 0 || rs == 0 ? 0 :
                 cs == 1 && rs == 1 ? 1 :
                 !up1 && !lo1 ? ( // m1 is diag
-                    (up2 || lo2) ? 21 : M2::_diagstep==1 ? 23 : 25 ) :
+                    (up2 || lo2) ? 31 : 33 ) :
                 !lo1 ? ( // m1 is uppertri
-                    lo2 ? 31 : 33 ) :
+                    lo2 ? 41 : 43 ) :
                 !up1 ? ( // m1 is lowertri
                     up2 ? 41 : 43 ) :
                 cs == 2 && rs == 2 ? 2 :
@@ -574,13 +419,11 @@ namespace tmv {
                 cs == rs ? 12 : 
                 13;
 #ifdef PRINTALGO_InvM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
-            std::cout<<"Inline InvertM: M,N,cs,rs = "<<M<<','<<N<<','<<
-                cs<<','<<rs<<std::endl;
+            std::cout<<"Inline InvertM\n";
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
             std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
+            std::cout<<"cs,rs, = "<<cs<<','<<rs<<std::endl;
             std::cout<<"algo = "<<algo<<std::endl;
 #endif
             InvertM_Helper<algo,cs,rs,ix,T,M1,M2>::call(x,m1,m2);
@@ -601,13 +444,10 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
-            const bool checkalias = 
-                M1::_colsize == UNKNOWN && M1::_rowsize == UNKNOWN &&
-                M2::_colsize == UNKNOWN && M2::_rowsize == UNKNOWN;
             const int algo = 
                 cs == 0 || rs == 0 ? 0 :
                 cs == 1 && rs == 1 ? 1 :
-                checkalias ? 99 :
+                M2::_checkalias ? 99 :
                 -3;
             InvertM_Helper<algo,cs,rs,ix,T,M1,M2>::call(x,m1,m2);
         }
@@ -682,16 +522,6 @@ namespace tmv {
     // mata = (at * a)^-1
     //
 
-    static inline void InverseATA_ThrowSingular()
-    {
-#ifdef TMV_NO_THROW
-        std::cerr<<"Singular Matrix found\n";
-        exit(1);
-#else
-        throw Singular("Matrix found\n");
-#endif
-    }
-
     template <int algo, int cs, int rs, class M1, class M2>
     struct InverseATA_Helper;
 
@@ -717,7 +547,7 @@ namespace tmv {
 #endif
             typedef typename M1::value_type T1;
             typedef typename M1::real_type RT;
-            if (m1.cref(0,0) == T1(0)) InverseATA_ThrowSingular();
+            if (m1.cref(0,0) == T1(0)) ThrowSingular("1x1 Matrix");
             T1 inva00 = ZProd<false,false>::quot(RT(1) , m1.cref(0,0));
             m2.ref(0,0) = ZProd<false,false>::prod(inva00 , inva00);
         }
@@ -832,7 +662,7 @@ namespace tmv {
             TMVStaticAssert(!ShapeTraits<M1::_shape>::lower);
             TMVStaticAssert(ShapeTraits<M2::_shape>::lower || 
                             ShapeTraits<M2::_shape>::upper);
-            if (m1.isSingular()) InverseATA_ThrowSingular();
+            if (m1.isSingular()) ThrowSingular("DiagMatrix");
             typename M2::diag_type m2d = m2.diag();
             m2.setZero();
             NoAliasCopy(m1.diag(),m2d);
@@ -858,7 +688,7 @@ namespace tmv {
             TMVStaticAssert(!ShapeTraits<M1::_shape>::lower);
             TMVStaticAssert(ShapeTraits<M2::_shape>::lower || 
                             ShapeTraits<M2::_shape>::upper);
-            if (m1.isSingular()) InverseATA_ThrowSingular();
+            if (m1.isSingular()) ThrowSingular("DiagMatrix");
             typename M1::const_diag_type::copy_type m1d(m1.size());
             typename M2::diag_type m2d = m2.diag();
             NoAliasCopy(m1.diag(),m1d);
@@ -886,7 +716,7 @@ namespace tmv {
             TMVStaticAssert(!ShapeTraits<M1::_shape>::lower);
             TMVStaticAssert(!ShapeTraits<M2::_shape>::upper);
             TMVStaticAssert(!ShapeTraits<M2::_shape>::lower);
-            if (m1.isSingular()) InverseATA_ThrowSingular();
+            if (m1.isSingular()) ThrowSingular("DiagMatrix");
             typename M2::diag_type m2d = m2.diag();
             NoAliasCopy(m1.diag(),m2d);
             ElemInvert(m2d);
@@ -911,38 +741,11 @@ namespace tmv {
             TMVStaticAssert(!ShapeTraits<M1::_shape>::lower);
             TMVStaticAssert(!ShapeTraits<M2::_shape>::upper);
             TMVStaticAssert(!ShapeTraits<M2::_shape>::lower);
-            if (m1.isSingular()) InverseATA_ThrowSingular();
+            if (m1.isSingular()) ThrowSingular("DiagMatrix");
             typename M2::diag_type m2d = m2.diag();
             AliasCopy(m1.diag(),m2d);
             ElemInvert(m2d);
             NoAliasElemMultVV<false>(Scaling<1,RT>(),m2d.conjugate(),m2d,m2d);
-        }
-    };
-
-    // algo 25: m1,m2 are both diagonal, but use temporary anyway.
-    template <int cs, int rs, class M1, class M2>
-    struct InverseATA_Helper<25,cs,rs,M1,M2>
-    {
-        static void call(const M1& m1, M2& m2)
-        {
-#ifdef PRINTALGO_InvM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
-            std::cout<<"InvATA algo 25: M,N,cs,rs = "<<M<<','<<N<<','<<
-                cs<<','<<rs<<std::endl;
-#endif
-            typedef typename M1::real_type RT;
-            TMVStaticAssert(!ShapeTraits<M1::_shape>::upper);
-            TMVStaticAssert(!ShapeTraits<M1::_shape>::lower);
-            TMVStaticAssert(!ShapeTraits<M2::_shape>::upper);
-            TMVStaticAssert(!ShapeTraits<M2::_shape>::lower);
-            if (m1.isSingular()) InverseATA_ThrowSingular();
-            typename M1::const_diag_type::copy_type m1d(m1.size());
-            typename M2::diag_type m2d = m2.diag();
-            NoAliasCopy(m1.diag(),m1d);
-            ElemInvert(m1d);
-            NoAliasElemMultVV<false>(Scaling<1,RT>(),m1d.conjugate(),m1d,m1d);
-            NoAliasCopy(m1d,m2d);
         }
     };
 
@@ -963,7 +766,7 @@ namespace tmv {
             TMVStaticAssert(!ShapeTraits<M1::_shape>::lower);
             TMVStaticAssert(ShapeTraits<M2::_shape>::upper);
             TMVStaticAssert(ShapeTraits<M2::_shape>::lower);
-            if (m1.isSingular()) InverseATA_ThrowSingular();
+            if (m1.isSingular()) ThrowSingular("TriMatrix");
             typename M2::uppertri_type m2u = m2.upperTri();
             NoAliasCopy(m1,m2u);
             InvertSelf(m2u);
@@ -988,7 +791,7 @@ namespace tmv {
             TMVStaticAssert(!ShapeTraits<M1::_shape>::lower);
             TMVStaticAssert(ShapeTraits<M2::_shape>::upper);
             TMVStaticAssert(ShapeTraits<M2::_shape>::lower);
-            if (m1.isSingular()) InverseATA_ThrowSingular();
+            if (m1.isSingular()) ThrowSingular("TriMatrix");
             typename M2::uppertri_type m2u = m2.upperTri();
             AliasCopy(m1,m2u);
             InvertSelf(m2u);
@@ -1013,7 +816,7 @@ namespace tmv {
             TMVStaticAssert(ShapeTraits<M1::_shape>::lower);
             TMVStaticAssert(ShapeTraits<M2::_shape>::upper);
             TMVStaticAssert(ShapeTraits<M2::_shape>::lower);
-            if (m1.isSingular()) InverseATA_ThrowSingular();
+            if (m1.isSingular()) ThrowSingular("TriMatrix");
             typename M2::lowertri_type m2l = m2.lowerTri();
             NoAliasCopy(m1,m2l);
             InvertSelf(m2l);
@@ -1038,7 +841,7 @@ namespace tmv {
             TMVStaticAssert(ShapeTraits<M1::_shape>::lower);
             TMVStaticAssert(ShapeTraits<M2::_shape>::upper);
             TMVStaticAssert(ShapeTraits<M2::_shape>::lower);
-            if (m1.isSingular()) InverseATA_ThrowSingular();
+            if (m1.isSingular()) ThrowSingular("TriMatrix");
             typename M2::lowertri_type m2l = m2.lowerTri();
             AliasCopy(m1,m2l);
             InvertSelf(m2l);
@@ -1061,7 +864,7 @@ namespace tmv {
                 cs == 0 || rs == 0 ? 0 :
                 cs == 1 && rs == 1 ? 1 :
                 !up1 && !lo1 ? ( // m1 is diag
-                    (up2 || lo2) ? 22 : M2::_diagstep==1 ? 24 : 25 ) :
+                    (up2 || lo2) ? 22 : 24 ) :
                 !lo1 ? 32 : // m1 is uppertri
                 !up1 ? 42 : // m1 is lowertri
                 rs == 2 ? 2 :
@@ -1097,7 +900,7 @@ namespace tmv {
                 cs == 0 || rs == 0 ? 0 :
                 cs == 1 && rs == 1 ? 1 :
                 !up1 && !lo1 ? ( // m1 is diag
-                    (up2 || lo2) ? 21 : M2::_diagstep==1 ? 23 : 25 ) :
+                    (up2 || lo2) ? 21 : 23 ) :
                 !lo1 ? 31 : // m1 is uppertri
                 !up1 ? 41 : // m1 is lowertri
                 rs == 2 ? 2 :
@@ -1132,13 +935,10 @@ namespace tmv {
     {
         static void call(const M1& m1, M2& m2)
         {
-            const bool checkalias = 
-                M1::_colsize == UNKNOWN && M1::_rowsize == UNKNOWN &&
-                M2::_colsize == UNKNOWN && M2::_rowsize == UNKNOWN;
             const int algo = 
                 cs == 0 || rs == 0 ? 0 :
                 cs == 1 && rs == 1 ? 1 :
-                checkalias ? 99 :
+                M2::_checkalias ? 99 :
                 -3;
             InverseATA_Helper<algo,cs,rs,M1,M2>::call(m1,m2);
         }

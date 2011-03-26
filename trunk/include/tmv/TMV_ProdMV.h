@@ -41,10 +41,6 @@
 
 //#define XDEBUG_PRODMV
 
-#ifdef XDEBUG_PRODMV
-#include "TMV_Vector.h"
-#include <iostream>
-#endif
 
 namespace tmv {
 
@@ -701,6 +697,7 @@ namespace tmv {
 
     // TMV_Text
 
+#ifdef TMV_DEBUG
     template <int ix, class T, class M1, class V2>
     static inline std::string TMV_Text(const ProdMV<ix,T,M1,V2>& mv)
     {
@@ -718,6 +715,7 @@ namespace tmv {
         s << TMV_Text(vm.getV())<<" , "<<TMV_Text(vm.getM())<<" >";
         return s.str();
     }
+#endif 
 
 } // namespace tmv
 

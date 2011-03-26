@@ -463,14 +463,7 @@ namespace tmv {
             std::cout<<"m "<<TMV_Text(m)<<std::endl;
             std::cout<<"s,algo = "<<s<<"  "<<algo<<std::endl;
 #endif
-            if (m.isSingular()) {
-#ifdef TMV_NO_THROW
-                std::cerr<<"Singular TriMatrix found\n";
-                exit(1);
-#else
-                throw Singular("TriMatrix found\n");
-#endif
-            }
+            if (m.isSingular()) ThrowSingular("TriMatrix");
             InvertU_Helper<algo,s,M>::call(m);
         }
     };

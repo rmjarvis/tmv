@@ -71,10 +71,17 @@ namespace tmv {
 
     // Defined in TMV_DivUU.cpp
     template <class T1, class T2, int C2>
-    void InstLDivEq(
+    void InstTriLDivEq(
         UpperTriMatrixView<T1> m1, const ConstUpperTriMatrixView<T2,C2>& m2);
     template <class T1, class T2, int C2>
-    void InstLDivEq(
+    void InstTriLDivEq(
+        LowerTriMatrixView<T1> m1, const ConstLowerTriMatrixView<T2,C2>& m2);
+
+    template <class T1, class T2, int C2>
+    void InstAliasTriLDivEq(
+        UpperTriMatrixView<T1> m1, const ConstUpperTriMatrixView<T2,C2>& m2);
+    template <class T1, class T2, int C2>
+    void InstAliasTriLDivEq(
         LowerTriMatrixView<T1> m1, const ConstLowerTriMatrixView<T2,C2>& m2);
 
 
@@ -585,19 +592,27 @@ namespace tmv {
             std::cout<<"LDivEqUU algo 87: N,s = "<<N<<','<<s<<std::endl;
 #endif
             typename M1::copy_type m1c = m1;
-            NoAliasLDivEq(m1c,m2);
+            NoAliasTriLDivEq(m1c,m2);
             const bool unknowndiag = M1::_unknowndiag && 
                 (M2::_unit || M2::_unknowndiag);
             copyBack<unknowndiag,1>::call(m1c,m1);
         }
     };
 
-    // algo 90: call InstMultMM
+    // algo 90: call inst
     template <int s, class M1, class M2>
     struct LDivEqUU_Helper<90,s,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
-        { InstLDivEq(m1.xView(),m2.xView()); }
+        { InstTriLDivEq(m1.xView(),m2.xView()); }
+    };
+
+    // algo 91: call inst alias
+    template <int s, class M1, class M2>
+    struct LDivEqUU_Helper<91,s,M1,M2>
+    {
+        static void call(M1& m1, const M2& m2)
+        { InstAliasTriLDivEq(m1.xView(),m2.xView()); }
     };
 
     // algo 97: Conjugate
@@ -614,9 +629,23 @@ namespace tmv {
         }
     };
 
-    // algo 99: Check for aliases
+    // algo 197: Conjugate
     template <int s, class M1, class M2>
-    struct LDivEqUU_Helper<99,s,M1,M2>
+    struct LDivEqUU_Helper<197,s,M1,M2>
+    {
+        static void call(M1& m1, const M2& m2)
+        {
+            typedef typename M1::conjugate_type M1c;
+            typedef typename M2::const_conjugate_type M2c;
+            M1c m1c = m1.conjugate();
+            M2c m2c = m2.conjugate();
+            LDivEqUU_Helper<99,s,M1c,M2c>::call(m1c,m2c);
+        }
+    };
+
+    // algo 98: Inline check for aliases
+    template <int s, class M1, class M2>
+    struct LDivEqUU_Helper<98,s,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
@@ -627,6 +656,32 @@ namespace tmv {
                 // Use temporary for m1/m2
                 LDivEqUU_Helper<87,s,M1,M2>::call(m1,m2);
             }
+        }
+    };
+
+    // algo 99: Check for aliases
+    template <int s, class M1, class M2>
+    struct LDivEqUU_Helper<99,s,M1,M2>
+    {
+        static void call(M1& m1, const M2& m2)
+        {
+            typedef typename M1::value_type T1;
+            typedef typename M2::value_type T2;
+            const bool inst = 
+                (s == UNKNOWN || s > 16) &&
+#ifdef TMV_INST_MIX
+                Traits2<T1,T2>::samebase &&
+#else
+                Traits2<T1,T2>::sametype &&
+#endif
+                Traits<T1>::isinst;
+            const int algo = 
+                ( s == 0 ) ? 0 :
+                s == 1 ? 1 :
+                M1::_conj ? 197 :
+                inst ? 91 : 
+                98;
+            LDivEqUU_Helper<algo,s,M1,M2>::call(m1,m2);
         }
     };
 
@@ -705,14 +760,7 @@ namespace tmv {
             std::cout<<"s = "<<s<<std::endl;
             std::cout<<"algo = "<<algo<<std::endl;
 #endif
-            if (m2.isSingular()) {
-#ifdef TMV_NO_THROW
-                std::cerr<<"Singular TriMatrix found\n";
-                exit(1);
-#else
-                throw Singular("TriMatrix found\n");
-#endif
-            }
+            if (m2.isSingular()) ThrowSingular("TriMatrix");
             LDivEqUU_Helper<algo,s,M1,M2>::call(m1,m2);
         }
     };
@@ -749,20 +797,17 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const bool checkalias =
-                M1::_size == UNKNOWN && 
-                M2::_size == UNKNOWN;
             const int algo = 
                 ( s == 0 ) ? 0 :
                 s == 1 ? 1 :
-                checkalias ? 99 : 
+                M1::_checkalias ? 99 : 
                 -2;
             LDivEqUU_Helper<algo,s,M1,M2>::call(m1,m2);
         }
     };
 
     template <class M1, class M2>
-    static inline void LDivEq(
+    static inline void TriLDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2)
     {
         TMVStaticAssert((Sizes<M2::_size,M1::_size>::same));
@@ -777,7 +822,7 @@ namespace tmv {
         LDivEqUU_Helper<-1,s,M1v,M2v>::call(m1v,m2v);
     }
     template <class M1, class M2>
-    static inline void NoAliasLDivEq(
+    static inline void NoAliasTriLDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2)
     {
         TMVStaticAssert((Sizes<M2::_size,M1::_size>::same));
@@ -792,7 +837,7 @@ namespace tmv {
         LDivEqUU_Helper<-2,s,M1v,M2v>::call(m1v,m2v);
     }
     template <class M1, class M2>
-    static inline void InlineLDivEq(
+    static inline void InlineTriLDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2)
     {
         TMVStaticAssert((Sizes<M2::_size,M1::_size>::same));
@@ -807,7 +852,22 @@ namespace tmv {
         LDivEqUU_Helper<-3,s,M1v,M2v>::call(m1v,m2v);
     }
     template <class M1, class M2>
-    static inline void AliasLDivEq(
+    static inline void InlineAliasTriLDivEq(
+        BaseMatrix_Tri_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2)
+    {
+        TMVStaticAssert((Sizes<M2::_size,M1::_size>::same));
+        TMVAssert(m2.size() == m1.size());
+        TMVAssert(!m1.isunit() || m2.isunit());
+
+        const int s = Sizes<M1::_size,M2::_size>::size;
+        typedef typename M1::cview_type M1v;
+        typedef typename M2::const_cview_type M2v;
+        TMV_MAYBE_REF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
+        LDivEqUU_Helper<98,s,M1v,M2v>::call(m1v,m2v);
+    }
+    template <class M1, class M2>
+    static inline void AliasTriLDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2)
     {
         TMVStaticAssert((Sizes<M2::_size,M1::_size>::same));
@@ -822,230 +882,10 @@ namespace tmv {
         LDivEqUU_Helper<99,s,M1v,M2v>::call(m1v,m2v);
     }
 
-    //
-    // m1 %= m2
-    //
 
-    template <class M1, class M2>
-    static inline void RDivEq(
-        BaseMatrix_Tri_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2)
-    {
-        typename M1::transpose_type m1t = m1.transpose();
-        LDivEq(m1t,m2.transpose()); 
-    }
-    template <class M1, class M2>
-    static inline void NoAliasRDivEq(
-        BaseMatrix_Tri_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2)
-    {
-        typename M1::transpose_type m1t = m1.transpose();
-        NoAliasLDivEq(m1t,m2.transpose()); 
-    }
-    template <class M1, class M2>
-    static inline void AliasRDivEq(
-        BaseMatrix_Tri_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2)
-    {
-        typename M1::transpose_type m1t = m1.transpose();
-        AliasLDivEq(m1t,m2.transpose()); 
-    }
-
-#if 0
-    // I think this is covered by the stuff in TMV_DivM.h
-
-    //
-    // m3 = m1 / m2
-    //
-
-    template <int algo, int ix, class T, class M1, class M2, class M3>
-    struct LDivUU_Helper;
-
-    // algo 99: Check for aliases
-    template <int ix, class T, class M1, class M2, class M3>
-    struct LDivUU_Helper<99,ix,T,M1,M2,M3>
-    {
-        template <bool unknowndiag, class M3c>
-        struct copyBack
-        { // unknowndiag = false
-            static void call(const M3c& m3c, M3& m3)
-            { NoAliasCopy(m3c,m3); }
-        };
-        template <class M3c>
-        struct copyBack<true,M3c>
-        {
-            static void call(const M3c& m3c, M3& m3)
-            {
-                if (m3.isunit()) {
-                    typedef typename M3c::const_unitdiag_type M3cu;
-                    M3cu m3cu = m3c.viewAsUnitDiag();
-                    NoAliasCopy(m3cu,m3);
-                } else {
-                    NoAliasCopy(m3c,m3);
-                }
-            }
-        };
-
-        // The copyBack call is only needed if M3 is a TriMatrix, not if it 
-        // is a regular Matrix.  So break out two options here.
-        template <class M3x>
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, 
-            BaseMatrix_Tri_Mutable<M3x>& m3)
-        {
-            if ( !SameStorage(m2,m3.mat()) ) {
-                AliasMultXM<false>(x,m1,m3.mat());
-                NoAliasLDivEq(m3.mat(),m2);
-            } else {
-                typedef typename M3::copy_type M3c;
-                M3c m3c(m3.size());
-                NoAliasMultXM<false>(x,m1,m3c);
-                NoAliasLDivEq(m3c,m2);
-                const bool unknowndiag = M3::_unknowndiag && ix == 1 && 
-                    (M1::_unit || M1::_unknowndiag) &&
-                    (M2::_unit || M2::_unknowndiag);
-                copyBack<unknowndiag,M3c>::call(m3c,m3.mat());
-            }
-        }
-        template <class M3x>
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2,
-            BaseMatrix_Mutable<M3x>& m3)
-        {
-            if ( !SameStorage(m2,m3) ) {
-                AliasMultXM<false>(x,m1,m3.mat());
-                NoAliasLDivEq(m3.mat(),m2);
-            } else {
-                typedef typename M3::copy_type M3c;
-                M3c m3c(m3.colsize(),m3.rowsize());
-                NoAliasMultXM<false>(x,m1,m3c);
-                NoAliasLDivEq(m3c,m2);
-                NoAliasCopy(m3c,m3.mat());
-            }
-        }
-    };
-
-    // algo -2: NoAlias: Move along to LDivEq
-    template <int ix, class T, class M1, class M2, class M3>
-    struct LDivUU_Helper<-2,ix,T,M1,M2,M3>
-    {
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
-            NoAliasMultXM<false>(x,m1,m3);
-            NoAliasLDivEq(m3,m2);
-        }
-    };
-
-    // algo -1: Check for aliases?
-    template <int ix, class T, class M1, class M2, class M3>
-    struct LDivUU_Helper<-1,ix,T,M1,M2,M3>
-    {
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
-            const bool checkalias =
-                M1::_size == UNKNOWN &&
-                M2::_size == UNKNOWN &&
-                M3::_size == UNKNOWN;
-            const int algo =
-                checkalias ? 99 :
-                -2;
-            LDivUU_Helper<algo,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
-        }
-    };
-
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void LDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
-        const BaseMatrix_Tri<M2>& m2, BaseMatrix_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M1::_size,M3::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_size,M3::_rowsize>::same));
-        TMVStaticAssert((Sizes<M1::_size,M2::_size>::same));
-        TMVAssert(m1.size() == m3.colsize());
-        TMVAssert(m1.size() == m3.rowsize());
-        TMVAssert(m1.size() == m2.size());
-        TMVAssert(!m3.isunit() || (m1.isunit() && m2.isunit() && ix == 1));
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        typedef typename M3::cview_type M3v;
-        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
-        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
-        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
-        LDivUU_Helper<-1,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
-    }
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void NoAliasLDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
-        const BaseMatrix_Tri<M2>& m2, BaseMatrix_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M1::_size,M3::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_size,M3::_rowsize>::same));
-        TMVStaticAssert((Sizes<M1::_size,M2::_size>::same));
-        TMVAssert(m1.size() == m3.colsize());
-        TMVAssert(m1.size() == m3.rowsize());
-        TMVAssert(m1.size() == m2.size());
-        TMVAssert(!m3.isunit() || (m1.isunit() && m2.isunit() && ix == 1));
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        typedef typename M3::cview_type M3v;
-        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
-        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
-        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
-        LDivUU_Helper<-2,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
-    }
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void AliasLDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
-        const BaseMatrix_Tri<M2>& m2, BaseMatrix_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M1::_size,M3::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_size,M3::_rowsize>::same));
-        TMVStaticAssert((Sizes<M1::_size,M2::_size>::same));
-        TMVAssert(m1.size() == m3.colsize());
-        TMVAssert(m1.size() == m3.rowsize());
-        TMVAssert(m1.size() == m2.size());
-        TMVAssert(!m3.isunit() || (m1.isunit() && m2.isunit() && ix == 1));
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        typedef typename M3::cview_type M3v;
-        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
-        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
-        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
-        LDivUU_Helper<99,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
-    }
-
-    //
-    // m3 = m1 % m2
-    //
-
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void RDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
-        const BaseMatrix_Tri<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
-    {
-        typename M3::transpose_type m3t = m3.transpose();
-        LDiv(x,m1.transpose(),m2.transpose(),m3t); 
-    }
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void NoAliasRDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
-        const BaseMatrix_Tri<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
-    {
-        typename M3::transpose_type m3t = m3.transpose();
-        NoAliasLDiv(x,m1.transpose(),m2.transpose(),m3t); 
-    }
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void AliasRDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
-        const BaseMatrix_Tri<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
-    {
-        typename M3::transpose_type m3t = m3.transpose();
-        AliasLDiv(x,m1.transpose(),m2.transpose(),m3t); 
-    }
-#endif
+} // namespace tmv
 
 #undef TMV_DIVUU_UNROLL
 #undef TMV_DIVUU_RECURSE
-
-} // namespace tmv
 
 #endif 

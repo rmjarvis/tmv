@@ -391,14 +391,7 @@ namespace tmv {
     template <class M>
     static inline void InvertSelf(BaseMatrix_Diag_Mutable<M>& m)
     {
-        if (m.isSingular()) {
-#ifdef TMV_NO_THROW
-            std::cerr<<"Singular DiagMatrix found\n";
-            exit(1);
-#else
-            throw Singular("DiagMatrix found\n");
-#endif
-        }
+        if (m.isSingular()) ThrowSingular("DiagMatrix");
         typename M::diag_type md = m.diag();
         ElemInvert(md);
     }
@@ -406,14 +399,7 @@ namespace tmv {
     template <class M>
     static inline void InlineInvertSelf(BaseMatrix_Diag_Mutable<M>& m)
     {
-        if (m.isSingular()) {
-#ifdef TMV_NO_THROW
-            std::cerr<<"Singular DiagMatrix found\n";
-            exit(1);
-#else
-            throw Singular("DiagMatrix found\n");
-#endif
-        }
+        if (m.isSingular()) ThrowSingular("DiagMatrix");
         typename M::diag_type md = m.diag();
         InlineElemInvert(md);
     }

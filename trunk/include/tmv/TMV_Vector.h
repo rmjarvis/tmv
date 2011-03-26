@@ -428,10 +428,10 @@ namespace tmv {
     template <class T, int A0>
     struct Traits<Vector<T,A0> >
     {
-        enum { A = A0 | Unit };
+        enum { A = (A0 & ~CheckAlias) | Unit };
         enum { okA = (
                 Attrib<A>::vectoronly && 
-                !Attrib<A>::conj ) };
+                !Attrib<A>::conj )};
         enum { _attrib = A };
 
         typedef T value_type;
@@ -450,6 +450,7 @@ namespace tmv {
         enum { _calc = true };
         enum { _step = 1 };
         enum { _conj = false };
+        enum { _checkalias = !Attrib<A>::noalias };
         enum { _unit = true };
         enum { twoS = isreal ? 1 : 2 };
 
@@ -459,7 +460,9 @@ namespace tmv {
         enum { nonconjA = A };
         enum { cstyleA = A & ~FortranStyle };
         enum { fstyleA = A | FortranStyle };
-        enum { twosA = isreal ? int(A) : nonunitA };
+        enum { Ac = _checkalias ? (A | CheckAlias) : (A & ~NoAlias) };
+        enum { nonunitAc = Ac & ~Unit };
+        enum { twosAc = isreal ? int(Ac) : (Ac & ~Conj & ~Unit) };
 
         typedef ConstVectorView<T,A> const_subvector_type;
         typedef ConstVectorView<T,nonunitA> const_subvector_step_type;
@@ -469,8 +472,9 @@ namespace tmv {
         typedef ConstVectorView<T> const_xview_type;
         typedef ConstVectorView<T,unitA> const_unitview_type;
         typedef ConstVectorView<T,conjA> const_conjugate_type;
-        typedef ConstSmallVectorView<T,UNKNOWN,-1,nonunitA> const_reverse_type;
-        typedef ConstSmallVectorView<real_type,UNKNOWN,twoS,twosA> 
+        typedef ConstSmallVectorView<T,UNKNOWN,-1,nonunitAc> 
+            const_reverse_type;
+        typedef ConstSmallVectorView<real_type,UNKNOWN,twoS,twosAc> 
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstVectorView<real_type,unitA> const_flatten_type;
@@ -490,8 +494,8 @@ namespace tmv {
         typedef VectorView<T> xview_type;
         typedef VectorView<T,unitA> unitview_type;
         typedef VectorView<T,conjA> conjugate_type;
-        typedef SmallVectorView<T,UNKNOWN,-1,nonunitA> reverse_type;
-        typedef SmallVectorView<real_type,UNKNOWN,twoS,twosA> realpart_type;
+        typedef SmallVectorView<T,UNKNOWN,-1,nonunitAc> reverse_type;
+        typedef SmallVectorView<real_type,UNKNOWN,twoS,twosAc> realpart_type;
         typedef realpart_type imagpart_type;
         typedef VectorView<real_type,A> flatten_type;
         typedef VectorView<T,A> nonconj_type;
@@ -516,6 +520,7 @@ namespace tmv {
         enum { iscomplex = Traits<type>::iscomplex };
         enum { _step = Traits<type>::_step };
         enum { _conj = Traits<type>::_conj };
+        enum { _checkalias = Traits<type>::_checkalias };
         enum { _unit = Traits<type>::_unit };
         enum { _attrib = Traits<type>::_attrib };
 
@@ -634,9 +639,10 @@ namespace tmv {
     // ConstVectorView
     //
 
-    template <class T, int A>
-    struct Traits<ConstVectorView<T,A> >
+    template <class T, int A0>
+    struct Traits<ConstVectorView<T,A0> >
     {
+        enum { A = (A0 & ~CheckAlias) };
         enum { okA = (
                 Attrib<A>::vectoronly &&
                 ( Traits<T>::iscomplex || !Attrib<A>::conj ) )};
@@ -648,7 +654,7 @@ namespace tmv {
         enum { isreal = Traits<T>::isreal };
         enum { iscomplex = Traits<T>::iscomplex };
 
-        typedef ConstVectorView<T,A> type;
+        typedef ConstVectorView<T,A0> type;
         typedef const type& calc_type;
         typedef const type& eval_type;
         enum { copyA = Attrib<A>::fort ? FortranStyle : CStyle };
@@ -659,6 +665,7 @@ namespace tmv {
         enum { _calc = true };
         enum { _step = Attrib<A>::unit ? 1 : UNKNOWN };
         enum { _conj = Attrib<A>::conj };
+        enum { _checkalias = !Attrib<A>::noalias };
         enum { _unit = Attrib<A>::unit };
         enum { negS = IntTraits<_step>::negS };
         enum { twoS = isreal ? int(_step) : IntTraits<_step>::twoS };
@@ -669,8 +676,11 @@ namespace tmv {
         enum { nonconjA = A & ~Conj };
         enum { cstyleA = A & ~FortranStyle };
         enum { fstyleA = A | FortranStyle };
-        enum { twosA = isreal ? int(A) : (nonunitA & ~Conj) };
         enum { flatA = isreal ? int(A) : (unitA & ~Conj) };
+        enum { twosA = isreal ? int(A) : (A & ~Conj & ~Unit) };
+        enum { Ac = _checkalias ? (A | CheckAlias) : (A & ~NoAlias) };
+        enum { nonunitAc = Ac & ~Unit };
+        enum { twosAc = isreal ? int(Ac) : (Ac & ~Conj & ~Unit) };
 
         typedef ConstVectorView<T,A> const_subvector_type;
         typedef ConstVectorView<T,nonunitA> const_subvector_step_type;
@@ -680,10 +690,12 @@ namespace tmv {
         typedef ConstVectorView<T,(_conj ? Conj : NonConj)> const_xview_type;
         typedef ConstVectorView<T,unitA> const_unitview_type;
         typedef ConstVectorView<T,conjA> const_conjugate_type;
-        typedef ConstSmallVectorView<T,UNKNOWN,negS,nonunitA> 
-            const_reverse_type;
-        typedef ConstSmallVectorView<real_type,UNKNOWN,twoS,twosA> 
-            const_realpart_type;
+        typedef typename TypeSelect<_unit ,
+                ConstSmallVectorView<T,UNKNOWN,negS,nonunitAc> ,
+                ConstVectorView<T,nonunitA> >::type const_reverse_type;
+        typedef typename TypeSelect< (iscomplex && _unit) ,
+                ConstSmallVectorView<real_type,UNKNOWN,twoS,twosAc> ,
+                ConstVectorView<real_type,twosA> >::type const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstVectorView<real_type,flatA> const_flatten_type;
         typedef ConstVectorView<T,nonconjA> const_nonconj_type;
@@ -708,6 +720,7 @@ namespace tmv {
         enum { iscomplex = Traits<type>::iscomplex };
         enum { _step = Traits<type>::_step };
         enum { _conj = Traits<type>::_conj };
+        enum { _checkalias = Traits<type>::_checkalias };
         enum { _unit = Traits<type>::_unit };
         enum { _attrib = Traits<type>::_attrib };
 
@@ -808,9 +821,10 @@ namespace tmv {
     // VectorView
     //
 
-    template <class T, int A>
-    struct Traits<VectorView<T,A> >
+    template <class T, int A0>
+    struct Traits<VectorView<T,A0> >
     {
+        enum { A = (A0 & ~CheckAlias) };
         enum { okA = (
                 Attrib<A>::vectoronly &&
                 ( Traits<T>::iscomplex || !Attrib<A>::conj ) )};
@@ -822,7 +836,7 @@ namespace tmv {
         enum { isreal = Traits<T>::isreal };
         enum { iscomplex = Traits<T>::iscomplex };
 
-        typedef VectorView<T,A> type;
+        typedef VectorView<T,A0> type;
         typedef const ConstVectorView<T,A> calc_type;
         typedef calc_type eval_type;
         enum { copyA = Attrib<A>::fort ? FortranStyle : CStyle };
@@ -833,6 +847,7 @@ namespace tmv {
         enum { _calc = true };
         enum { _step = Attrib<A>::unit ? 1 : UNKNOWN };
         enum { _conj = Attrib<A>::conj };
+        enum { _checkalias = !Attrib<A>::noalias };
         enum { _unit = Attrib<A>::unit };
         enum { negS = IntTraits<_step>::negS };
         enum { twoS = isreal ? int(_step) : IntTraits<_step>::twoS };
@@ -843,8 +858,11 @@ namespace tmv {
         enum { nonconjA = A & ~Conj };
         enum { cstyleA = A & ~FortranStyle };
         enum { fstyleA = A | FortranStyle };
-        enum { twosA = isreal ? int(A) : (nonunitA & ~Conj) };
         enum { flatA = isreal ? int(A) : (unitA & ~Conj) };
+        enum { twosA = isreal ? int(A) : (A & ~Conj & ~Unit) };
+        enum { Ac = _checkalias ? (A | CheckAlias) : (A & ~NoAlias) };
+        enum { nonunitAc = Ac & ~Unit };
+        enum { twosAc = isreal ? int(Ac) : (Ac & ~Conj & ~Unit) };
 
         typedef ConstVectorView<T,A> const_subvector_type;
         typedef ConstVectorView<T,nonunitA> const_subvector_step_type;
@@ -854,10 +872,12 @@ namespace tmv {
         typedef ConstVectorView<T,(_conj ? Conj : NonConj)> const_xview_type;
         typedef ConstVectorView<T,unitA> const_unitview_type;
         typedef ConstVectorView<T,conjA> const_conjugate_type;
-        typedef ConstSmallVectorView<T,UNKNOWN,negS,nonunitA> 
-            const_reverse_type;
-        typedef ConstSmallVectorView<real_type,UNKNOWN,twoS,twosA> 
-            const_realpart_type;
+        typedef typename TypeSelect<_unit ,
+                ConstSmallVectorView<T,UNKNOWN,negS,nonunitAc> ,
+                ConstVectorView<T,nonunitA> >::type const_reverse_type;
+        typedef typename TypeSelect< (iscomplex && _unit) ,
+                ConstSmallVectorView<real_type,UNKNOWN,twoS,twosAc> ,
+                ConstVectorView<real_type,twosA> >::type const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstVectorView<real_type,flatA> const_flatten_type;
         typedef ConstVectorView<T,nonconjA> const_nonconj_type;
@@ -876,8 +896,12 @@ namespace tmv {
         typedef VectorView<T,(_conj ? Conj : NonConj)> xview_type;
         typedef VectorView<T,unitA> unitview_type;
         typedef VectorView<T,conjA> conjugate_type;
-        typedef SmallVectorView<T,UNKNOWN,negS,nonunitA> reverse_type;
-        typedef SmallVectorView<real_type,UNKNOWN,twoS,twosA> realpart_type;
+        typedef typename TypeSelect<_unit ,
+                SmallVectorView<T,UNKNOWN,negS,nonunitAc> ,
+                VectorView<T,nonunitA> >::type reverse_type;
+        typedef typename TypeSelect< (iscomplex && _unit) ,
+                SmallVectorView<real_type,UNKNOWN,twoS,twosAc> ,
+                VectorView<real_type,twosA> >::type realpart_type;
         typedef realpart_type imagpart_type;
         typedef VectorView<real_type,flatA> flatten_type;
         typedef VectorView<T,nonconjA> nonconj_type;
@@ -903,6 +927,7 @@ namespace tmv {
         enum { iscomplex = Traits<type>::iscomplex };
         enum { _step = Traits<type>::_step };
         enum { _conj = Traits<type>::_conj };
+        enum { _checkalias = Traits<type>::_checkalias };
         enum { _unit = Traits<type>::_unit };
         enum { _attrib = Traits<type>::_attrib };
 
@@ -924,7 +949,7 @@ namespace tmv {
         }
 
         VectorView(const type& v2) : 
-            itsv(v2.itsv), itssize(v2.itssize), itsstep(v2.itsstep)
+            itsv(v2.itsv), itssize(v2.size()), itsstep(v2.step())
         {
             TMVStaticAssert(Traits<type>::okA);
         }

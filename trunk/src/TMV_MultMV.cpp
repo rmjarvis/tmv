@@ -38,6 +38,10 @@
 #include "tmv/TMV_MultXV.h"
 #include "tmv/TMV_MultXM.h"
 #include "tmv/TMV_CopyV.h"
+#include "tmv/TMV_ProdXV.h"
+#include "tmv/TMV_ProdXM.h"
+#include "tmv/TMV_ProdMV.h"
+#include "tmv/TMV_SmallVector.h"
 
 #ifdef BLAS
 #include "tmv/TMV_AddVV.h"
@@ -760,8 +764,7 @@ namespace tmv {
 
     template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMV(
-        const T3 x,
-        const ConstMatrixView<T1,C1>& m1,
+        const T3 x, const ConstMatrixView<T1,C1>& m1,
         const ConstVectorView<T2,C2>& v2, VectorView<T3> v3)
     {
 #if TMV_OPT <= 2
@@ -780,8 +783,7 @@ namespace tmv {
     }
     template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMV(
-        const T3 x,
-        const ConstMatrixView<T1,C1>& m1,
+        const T3 x, const ConstMatrixView<T1,C1>& m1,
         const ConstVectorView<T2,C2>& v2, VectorView<T3> v3)
     {
         if (m1.isrm())
@@ -793,6 +795,18 @@ namespace tmv {
             DoAddMultMV(x,m1c.constView(),v2,v3);
         }
     }
+
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasMultMV(
+        const T3 x, const ConstMatrixView<T1,C1>& m1,
+        const ConstVectorView<T2,C2>& v2, VectorView<T3> v3)
+    { InlineAliasMultMV<false>(Scaling<0,T3>(x),m1,v2,v3); }
+
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasAddMultMV(
+        const T3 x, const ConstMatrixView<T1,C1>& m1,
+        const ConstVectorView<T2,C2>& v2, VectorView<T3> v3)
+    { InlineAliasMultMV<true>(Scaling<0,T3>(x),m1,v2,v3); }
 
 #define InstFile "TMV_MultMV.inst"
 #include "TMV_Inst.h"

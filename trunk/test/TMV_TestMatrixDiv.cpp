@@ -26,8 +26,8 @@ static void TestSquareDiv(tmv::DivType dt)
 
     if (showstartdone) {
         std::cout<<"Start TestSquareDiv:\n";
-        std::cout<<"stor = "<<tmv::TMV_Text(stor)<<std::endl;
-        std::cout<<"dt = "<<tmv::TMV_Text(dt)<<std::endl;
+        std::cout<<"stor = "<<Text(stor)<<std::endl;
+        std::cout<<"dt = "<<Text(dt)<<std::endl;
         std::cout<<"m = "<<m<<std::endl;
         std::cout<<"b = "<<b<<std::endl;
     }
@@ -380,8 +380,8 @@ static void TestSquareDiv(tmv::DivType dt)
         TestSquareDiv<T,tmv::RowMajor>(dt);
     } else {
 #endif
-        std::cout<<"Square Matrix<"<<tmv::TMV_Text(T())<<"> Division using ";
-        std::cout<<tmv::TMV_Text(dt)<<" passed all tests\n";
+        std::cout<<"Square Matrix<"<<Text(T())<<"> Division using ";
+        std::cout<<Text(dt)<<" passed all tests\n";
     }
 }
 
@@ -405,8 +405,8 @@ static void TestNonSquareDiv(tmv::DivType dt)
 
     if (showstartdone) {
         std::cout<<"Start TestNonSquareDiv:\n";
-        std::cout<<"stor = "<<tmv::TMV_Text(stor)<<std::endl;
-        std::cout<<"dt = "<<tmv::TMV_Text(dt)<<std::endl;
+        std::cout<<"stor = "<<Text(stor)<<std::endl;
+        std::cout<<"dt = "<<Text(dt)<<std::endl;
         std::cout<<"m = "<<m<<std::endl;
         std::cout<<"x = "<<x<<std::endl;
     }
@@ -772,8 +772,8 @@ static void TestNonSquareDiv(tmv::DivType dt)
         TestNonSquareDiv<T,tmv::RowMajor>(dt);
     } else {
 #endif
-        std::cout<<"NonSquare Matrix<"<<tmv::TMV_Text(T())<<"> Division using ";
-        std::cout<<tmv::TMV_Text(dt)<<" passed all tests\n";
+        std::cout<<"NonSquare Matrix<"<<Text(T())<<"> Division using ";
+        std::cout<<Text(dt)<<" passed all tests\n";
     }
 }
 
@@ -793,8 +793,8 @@ static void TestSingularDiv(tmv::DivType dt)
 
     if (showstartdone) {
         std::cout<<"Start TestSingularDiv:\n";
-        std::cout<<"stor = "<<tmv::TMV_Text(stor)<<std::endl;
-        std::cout<<"dt = "<<tmv::TMV_Text(dt)<<std::endl;
+        std::cout<<"stor = "<<Text(stor)<<std::endl;
+        std::cout<<"dt = "<<Text(dt)<<std::endl;
         std::cout<<"m = "<<m<<std::endl;
         std::cout<<"x = "<<x<<std::endl;
     }
@@ -943,8 +943,8 @@ static void TestSingularDiv(tmv::DivType dt)
         TestSingularDiv<T,tmv::RowMajor>(dt);
     } else {
 #endif
-        std::cout<<"Singular Matrix<"<<tmv::TMV_Text(T())<<"> Division using ";
-        std::cout<<tmv::TMV_Text(dt)<<" passed all tests\n";
+        std::cout<<"Singular Matrix<"<<Text(T())<<"> Division using ";
+        std::cout<<Text(dt)<<" passed all tests\n";
     }
 }
 
@@ -953,7 +953,7 @@ template <class T> void TestMatrixDiv()
 #if 1
     TestMatrixDecomp<T,tmv::ColMajor>();
     TestMatrixDecomp<T,tmv::RowMajor>();
-    std::cout<<"Matrix<"<<tmv::TMV_Text(T())<<"> passed all ";
+    std::cout<<"Matrix<"<<Text(T())<<"> passed all ";
     std::cout<<"decomposition tests.\n";
 #endif
     TestSquareDiv<T,tmv::ColMajor>(tmv::LU);

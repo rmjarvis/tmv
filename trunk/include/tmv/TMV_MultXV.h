@@ -54,12 +54,17 @@ namespace tmv {
     // Defined in TMV_MultXV.cpp
     template <class T1, int C1, class T2>
     void InstMultXV(
-        const T2 x, const ConstVectorView<T1,C1>& v1,
-        VectorView<T2> v2);
+        const T2 x, const ConstVectorView<T1,C1>& v1, VectorView<T2> v2);
     template <class T1, int C1, class T2>
     void InstAddMultXV(
-        const T2 x, const ConstVectorView<T1,C1>& v1,
-        VectorView<T2> v2);
+        const T2 x, const ConstVectorView<T1,C1>& v1, VectorView<T2> v2);
+
+    template <class T1, int C1, class T2>
+    void InstAliasMultXV(
+        const T2 x, const ConstVectorView<T1,C1>& v1, VectorView<T2> v2);
+    template <class T1, int C1, class T2>
+    void InstAliasAddMultXV(
+        const T2 x, const ConstVectorView<T1,C1>& v1, VectorView<T2> v2);
 
     //
     // Vector = x * Vector
@@ -832,6 +837,28 @@ namespace tmv {
         }
     };
 
+    // algo 91: Call inst alias
+    template <int s, int ix, class T, class V1, class V2>
+    struct MultXV_Helper<91,s,true,ix,T,V1,V2>
+    {
+        static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        {
+            typedef typename V2::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
+            InstAliasAddMultXV(xx,v1.xView(),v2.xView()); 
+        }
+    };
+    template <int s, int ix, class T, class V1, class V2>
+    struct MultXV_Helper<91,s,false,ix,T,V1,V2>
+    {
+        static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        {
+            typedef typename V2::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
+            InstAliasMultXV(xx,v1.xView(),v2.xView()); 
+        }
+    };
+
     // algo 97: Conjugate
     template <int s, bool add, int ix, class T, class V1, class V2>
     struct MultXV_Helper<97,s,add,ix,T,V1,V2>
@@ -846,9 +873,23 @@ namespace tmv {
         }
     };
 
-    // algo 99: Check for aliases
+    // algo 197: Conjugate
+    template <int s, bool add, int ix, class T, class V1, class V2>
+    struct MultXV_Helper<197,s,add,ix,T,V1,V2>
+    {
+        static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        {
+            typedef typename V1::const_conjugate_type V1c;
+            typedef typename V2::conjugate_type V2c;
+            V1c v1c = v1.conjugate();
+            V2c v2c = v2.conjugate();
+            MultXV_Helper<99,s,add,ix,T,V1c,V2c>::call(TMV_CONJ(x),v1c,v2c);
+        }
+    };
+
+    // algo 98: Inline check for aliases
     template <int s, int ix, class T, class V1, class V2>
-    struct MultXV_Helper<99,s,false,ix,T,V1,V2>
+    struct MultXV_Helper<98,s,false,ix,T,V1,V2>
     {
         static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
@@ -863,7 +904,7 @@ namespace tmv {
         }
     };
     template <int s, int ix, class T, class V1, class V2>
-    struct MultXV_Helper<99,s,true,ix,T,V1,V2>
+    struct MultXV_Helper<98,s,true,ix,T,V1,V2>
     {
         static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
@@ -877,6 +918,31 @@ namespace tmv {
                 // Need a temporary
                 NoAliasMultXV<true>(x,v1.copy(),v2);
             }
+        }
+    };
+
+    // algo 99: Check for aliases
+    template <int s, bool add, int ix, class T, class V1, class V2>
+    struct MultXV_Helper<99,s,add,ix,T,V1,V2>
+    {
+        static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        {
+            typedef typename V1::value_type T1;
+            typedef typename V2::value_type T2;
+            const bool inst = 
+                (s == UNKNOWN || s > 16) &&
+#ifdef TMV_INST_MIX
+                Traits2<T1,T2>::samebase &&
+#else
+                Traits2<T1,T2>::sametype &&
+#endif
+                Traits<T1>::isinst;
+            const int algo = 
+                s == 0 ? 0 : 
+                V2::_conj ? 197 :
+                inst ? 91 :
+                98;
+            MultXV_Helper<algo,s,add,ix,T,V1,V2>::call(x,v1,v2);
         }
     };
 
@@ -998,9 +1064,7 @@ namespace tmv {
         {
             const bool noclobber = VStepHelper<V1,V2>::noclobber;
             const bool checkalias =
-                V1::_size == UNKNOWN &&
-                V2::_size == UNKNOWN &&
-                !noclobber;
+                V2::_checkalias && !noclobber;
             const int algo = 
                 s == 0 ? 0 : 
                 ( ix == 1 && !add ) ? 101 :
@@ -1053,6 +1117,21 @@ namespace tmv {
         TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
         TMV_MAYBE_REF(V2,V2v) v2v = v2.cView();
         MultXV_Helper<-3,s,add,ix,T,V1v,V2v>::call(x,v1v,v2v);
+    }
+
+    template <bool add, int ix, class T, class V1, class V2>
+    static inline void InlineAliasMultXV(
+        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
+        BaseVector_Mutable<V2>& v2)
+    {
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
+        TMVAssert(v1.size() == v2.size());
+        const int s = Sizes<V1::_size,V2::_size>::size;
+        typedef typename V1::const_cview_type V1v;
+        typedef typename V2::cview_type V2v;
+        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
+        TMV_MAYBE_REF(V2,V2v) v2v = v2.cView();
+        MultXV_Helper<98,s,add,ix,T,V1v,V2v>::call(x,v1v,v2v);
     }
 
     template <bool add, int ix, class T, class V1, class V2>

@@ -462,6 +462,7 @@ namespace tmv {
 
     // TMV_Text
 
+#ifdef TMV_DEBUG
     template <int ix1, class T1, class M1, int ix2, class T2, class M2>
     static inline std::string TMV_Text(const SumMM<ix1,T1,M1,ix2,T2,M2>& smm)
     {
@@ -472,6 +473,7 @@ namespace tmv {
             <<" , "<<TMV_Text(smm.getM2())<<" >";
         return s.str();
     }
+#endif
 
 
 

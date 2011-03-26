@@ -168,8 +168,7 @@ void TestDiagDiv()
     TestDiagDiv_A<T>();
     TestDiagDiv_B1<T>();
     TestDiagDiv_B2<T>();
-    std::cout<<"DiagMatrix<"<<tmv::TMV_Text(T())<<
-        "> Division passed all tests\n";
+    std::cout<<"DiagMatrix<"<<Text(T())<<"> Division passed all tests\n";
 }
 
 

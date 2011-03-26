@@ -38,6 +38,9 @@
 #include "tmv/TMV_MultXV.h"
 #include "tmv/TMV_CopyU.h"
 #include "tmv/TMV_ProdXV.h"
+#include "tmv/TMV_ProdXM.h"
+#include "tmv/TMV_ProdMV.h"
+#include "tmv/TMV_SmallVector.h"
 
 namespace tmv {
 
@@ -267,29 +270,46 @@ namespace tmv {
 
     template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMV(
-        const T3 x,
-        const ConstUpperTriMatrixView<T1,C1>& m1,
+        const T3 x, const ConstUpperTriMatrixView<T1,C1>& m1,
         const ConstVectorView<T2,C2>& v2, VectorView<T3> v3)
     { DoInstMultMV(x,m1,v2,v3); }
     template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMV(
-        const T3 x,
-        const ConstUpperTriMatrixView<T1,C1>& m1,
+        const T3 x, const ConstUpperTriMatrixView<T1,C1>& m1,
         const ConstVectorView<T2,C2>& v2, VectorView<T3> v3)
     { DoInstAddMultMV(x,m1,v2,v3); }
 
     template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMV(
-        const T3 x,
-        const ConstLowerTriMatrixView<T1,C1>& m1,
+        const T3 x, const ConstLowerTriMatrixView<T1,C1>& m1,
         const ConstVectorView<T2,C2>& v2, VectorView<T3> v3)
     { DoInstMultMV(x,m1,v2,v3); }
     template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMV(
-        const T3 x,
-        const ConstLowerTriMatrixView<T1,C1>& m1,
+        const T3 x, const ConstLowerTriMatrixView<T1,C1>& m1,
         const ConstVectorView<T2,C2>& v2, VectorView<T3> v3)
     { DoInstAddMultMV(x,m1,v2,v3); }
+
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasMultMV(
+        const T3 x, const ConstUpperTriMatrixView<T1,C1>& m1,
+        const ConstVectorView<T2,C2>& v2, VectorView<T3> v3)
+    { InlineAliasMultMV<false>(Scaling<0,T3>(x),m1,v2,v3); }
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasAddMultMV(
+        const T3 x, const ConstUpperTriMatrixView<T1,C1>& m1,
+        const ConstVectorView<T2,C2>& v2, VectorView<T3> v3)
+    { InlineAliasMultMV<true>(Scaling<0,T3>(x),m1,v2,v3); }
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasMultMV(
+        const T3 x, const ConstLowerTriMatrixView<T1,C1>& m1,
+        const ConstVectorView<T2,C2>& v2, VectorView<T3> v3)
+    { InlineAliasMultMV<false>(Scaling<0,T3>(x),m1,v2,v3); }
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasAddMultMV(
+        const T3 x, const ConstLowerTriMatrixView<T1,C1>& m1,
+        const ConstVectorView<T2,C2>& v2, VectorView<T3> v3)
+    { InlineAliasMultMV<true>(Scaling<0,T3>(x),m1,v2,v3); }
 
 #define InstFile "TMV_MultUV.inst"
 #include "TMV_Inst.h"

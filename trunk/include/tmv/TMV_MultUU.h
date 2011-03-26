@@ -77,8 +77,7 @@ namespace tmv {
     template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM(
         const T3 x, const ConstUpperTriMatrixView<T1,C1>& m1, 
-        const ConstUpperTriMatrixView<T2,C2>& m2,
-        UpperTriMatrixView<T3,NonUnitDiag> m3);
+        const ConstUpperTriMatrixView<T2,C2>& m2, UpperTriMatrixView<T3> m3);
 
     template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM(
@@ -87,8 +86,25 @@ namespace tmv {
     template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM(
         const T3 x, const ConstLowerTriMatrixView<T1,C1>& m2,
-        const ConstLowerTriMatrixView<T2,C2>& m1, 
-        LowerTriMatrixView<T3,NonUnitDiag> m3);
+        const ConstLowerTriMatrixView<T2,C2>& m1, LowerTriMatrixView<T3> m3);
+
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasMultMM(
+        const T3 x, const ConstUpperTriMatrixView<T1,C1>& m1, 
+        const ConstUpperTriMatrixView<T2,C2>& m2, UpperTriMatrixView<T3> m3);
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasAddMultMM(
+        const T3 x, const ConstUpperTriMatrixView<T1,C1>& m1, 
+        const ConstUpperTriMatrixView<T2,C2>& m2, UpperTriMatrixView<T3> m3);
+
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasMultMM(
+        const T3 x, const ConstLowerTriMatrixView<T1,C1>& m1,
+        const ConstLowerTriMatrixView<T2,C2>& m2, LowerTriMatrixView<T3> m3);
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasAddMultMM(
+        const T3 x, const ConstLowerTriMatrixView<T1,C1>& m2,
+        const ConstLowerTriMatrixView<T2,C2>& m1, LowerTriMatrixView<T3> m3);
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
     static void NoAliasMultMM(
@@ -856,16 +872,16 @@ namespace tmv {
         {
             template <class M3c>
             static void call(
-                const Scaling<1,T>& , const M3c& m3c, M3& m3)
+                const Scaling<ix,T>& x, const M3c& m3c, M3& m3)
             {
-                TMVStaticAssert(ix == 1);
                 TMVStaticAssert(!add);
                 if (m3.isunit()) {
+                    TMVAssert(T(x) == T(1));
                     typedef typename M3c::const_unitdiag_type M3cu;
                     M3cu m3cu = m3c.viewAsUnitDiag();
                     CopyU_Helper<-2,s,M3cu,M3>::call(m3cu,m3);
                 } else {
-                    CopyU_Helper<-2,s,M3c,M3>::call(m3c,m3);
+                    MultXU_Helper<-2,s,add,ix,T,M3c,M3>::call(x,m3c,m3);
                 }
             }
         };
@@ -884,16 +900,16 @@ namespace tmv {
             const bool rm = M1::_rowmajor && M2::_rowmajor;
             const int s3 = M3::_shape;
             typedef typename MCopyHelper<PT3,s3,s,s,rm,false>::type M3c;
-            // can't be unitdiag unless ix == 1 and !add and m1,m2 are unit
+            // can't be unitdiag unless x == 1 and !add and m1,m2 are unit
             const bool unknowndiag = 
-                M3::_unknowndiag && ix == 1 && !add &&
+                M3::_unknowndiag && ix != -1 && !add &&
                 (M1::_unit || M1::_unknowndiag) && 
                 (M2::_unit || M2::_unknowndiag);
             copyBack<unknowndiag,1>::call(x,M3c(m1*m2),m3);
         }
     };
 
-    // algo 90: call InstMultMM
+    // algo 90: call inst
     template <int s, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<90,s,false,ix,T,M1,M2,M3>
     {
@@ -913,8 +929,31 @@ namespace tmv {
         {
             typedef typename M3::value_type VT;
             VT xx = Traits<VT>::convert(T(x));
-            InstAddMultMM(
-                xx,m1.xView(),m2.xView(),m3.xView().viewAsNonUnitDiag());
+            InstAddMultMM(xx,m1.xView(),m2.xView(),m3.xView());
+        }
+    };
+
+    // algo 91: call inst alias
+    template <int s, int ix, class T, class M1, class M2, class M3>
+    struct MultUU_Helper<91,s,false,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            typedef typename M3::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
+            InstAliasMultMM(xx,m1.xView(),m2.xView(),m3.xView());
+        }
+    };
+    template <int s, int ix, class T, class M1, class M2, class M3>
+    struct MultUU_Helper<91,s,true,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            typedef typename M3::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
+            InstAliasAddMultMM(xx,m1.xView(),m2.xView(),m3.xView());
         }
     };
 
@@ -932,6 +971,23 @@ namespace tmv {
             M2t m2t = m2.transpose();
             M3t m3t = m3.transpose();
             MultUU_Helper<-2,s,add,ix,T,M2t,M1t,M3t>::call(x,m2t,m1t,m3t);
+        }
+    };
+
+    // algo 196: Transpose
+    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUU_Helper<196,s,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            typedef typename M1::const_transpose_type M1t;
+            typedef typename M2::const_transpose_type M2t;
+            typedef typename M3::transpose_type M3t;
+            M1t m1t = m1.transpose();
+            M2t m2t = m2.transpose();
+            M3t m3t = m3.transpose();
+            MultUU_Helper<99,s,add,ix,T,M2t,M1t,M3t>::call(x,m2t,m1t,m3t);
         }
     };
 
@@ -953,9 +1009,27 @@ namespace tmv {
         }
     };
 
-    // algo 99: Check for aliases
+    // algo 197: Conjugate
     template <int s, bool add, int ix, class T, class M1, class M2, class M3>
-    struct MultUU_Helper<99,s,add,ix,T,M1,M2,M3>
+    struct MultUU_Helper<197,s,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            typedef typename M1::const_conjugate_type M1c;
+            typedef typename M2::const_conjugate_type M2c;
+            typedef typename M3::conjugate_type M3c;
+            M1c m1c = m1.conjugate();
+            M2c m2c = m2.conjugate();
+            M3c m3c = m3.conjugate();
+            MultUU_Helper<99,s,add,ix,T,M1c,M2c,M3c>::call(
+                TMV_CONJ(x),m1c,m2c,m3c);
+        }
+    };
+
+    // algo 98: Inline check for aliases
+    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUU_Helper<98,s,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -966,7 +1040,7 @@ namespace tmv {
             const bool s1 = SameStorage(m1,m3);
             const bool s2 = SameStorage(m2,m3);
 #ifdef PRINTALGO_UU
-            std::cout<<"UU algo 99:\n";
+            std::cout<<"UU Check aliases:\n";
             std::cout<<"s1, s2 = "<<s1<<"  "<<s2<<std::endl;
             std::cout<<"Exact13 = "<<(s1 && ExactSameStorage(m1,m3))<<std::endl;
             std::cout<<"Opp13 = "<<(s1 && OppositeStorage(m1,m3))<<std::endl;
@@ -1013,6 +1087,36 @@ namespace tmv {
 #endif
                 MultUU_Helper<87,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
             }
+        }
+    };
+
+    // algo 99: Check for aliases
+    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUU_Helper<99,s,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            typedef typename M1::value_type T1;
+            typedef typename M2::value_type T2;
+            typedef typename M3::value_type T3;
+            const bool inst = 
+                (s == UNKNOWN || s > 16) &&
+#ifdef TMV_INST_MIX
+                Traits2<T1,T3>::samebase &&
+                Traits2<T2,T3>::samebase &&
+#else
+                Traits2<T1,T3>::sametype &&
+                Traits2<T2,T3>::sametype &&
+#endif
+                Traits<T3>::isinst;
+            const int algo = 
+                s == 0 ? 0 :
+                s == 1 ? ( M3::_unit ? 0 : 1 ) :
+                M3::_conj ? 197 :
+                inst ? 91 : 
+                98;
+            MultUU_Helper<algo,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };
 
@@ -1153,14 +1257,10 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const bool checkalias =
-                M1::_size == UNKNOWN && 
-                M2::_size == UNKNOWN && 
-                M3::_size == UNKNOWN;
             const int algo = 
                 s == 0 ? 0 :
                 s == 1 ? ( M3::_unit ? 0 : 1 ) :
-                checkalias ? 99 : 
+                M3::_checkalias ? 99 : 
                 -2;
             MultUU_Helper<algo,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
@@ -1178,7 +1278,7 @@ namespace tmv {
         TMVStaticAssert(!M3::_unit || ix == 1);
         TMVAssert(m1.size() == m3.size());
         TMVAssert(m1.size() == m2.size());
-        TMVAssert(!m3.isunit() || ix == 1);
+        TMVAssert(!m3.isunit() || T(x) == T(1));
 
         const int s = Sizes<Sizes<M1::_size,M2::_size>::size,M3::_size>::size;
         typedef typename M1::const_cview_type M1v;
@@ -1202,7 +1302,7 @@ namespace tmv {
         TMVStaticAssert(!M3::_unit || ix == 1);
         TMVAssert(m1.size() == m3.size());
         TMVAssert(m1.size() == m2.size());
-        TMVAssert(!m3.isunit() || ix == 1);
+        TMVAssert(!m3.isunit() || T(x) == T(1));
 
         const int s = Sizes<Sizes<M1::_size,M2::_size>::size,M3::_size>::size;
         typedef typename M1::const_cview_type M1v;
@@ -1226,7 +1326,7 @@ namespace tmv {
         TMVStaticAssert(!M3::_unit || ix == 1);
         TMVAssert(m1.size() == m3.size());
         TMVAssert(m1.size() == m2.size());
-        TMVAssert(!m3.isunit() || ix == 1);
+        TMVAssert(!m3.isunit() || T(x) == T(1));
 
         const int s = Sizes<Sizes<M1::_size,M2::_size>::size,M3::_size>::size;
         typedef typename M1::const_cview_type M1v;
@@ -1236,6 +1336,30 @@ namespace tmv {
         TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
         TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
         MultUU_Helper<-3,s,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
+    }
+
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    static inline void InlineAliasMultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
+        const BaseMatrix_Tri<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
+    {
+        TMVStaticAssert(M1::_upper == int(M2::_upper));
+        TMVStaticAssert(M1::_upper == int(M3::_upper));
+        TMVStaticAssert((Sizes<M1::_size,M3::_size>::same));
+        TMVStaticAssert((Sizes<M1::_size,M2::_size>::same));
+        TMVStaticAssert(!M3::_unit || ix == 1);
+        TMVAssert(m1.size() == m3.size());
+        TMVAssert(m1.size() == m2.size());
+        TMVAssert(!m3.isunit() || T(x) == T(1));
+
+        const int s = Sizes<Sizes<M1::_size,M2::_size>::size,M3::_size>::size;
+        typedef typename M1::const_cview_type M1v;
+        typedef typename M2::const_cview_type M2v;
+        typedef typename M3::cview_type M3v;
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
+        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
+        MultUU_Helper<98,s,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
@@ -1250,7 +1374,7 @@ namespace tmv {
         TMVStaticAssert(!M3::_unit || ix == 1);
         TMVAssert(m1.size() == m3.size());
         TMVAssert(m1.size() == m2.size());
-        TMVAssert(!m3.isunit() || ix == 1);
+        TMVAssert(!m3.isunit() || T(x) == T(1));
 
         const int s = Sizes<Sizes<M1::_size,M2::_size>::size,M3::_size>::size;
         typedef typename M1::const_cview_type M1v;
@@ -1269,7 +1393,7 @@ namespace tmv {
     {
         TMVStaticAssert(M1::_upper == int(M2::_upper));
         TMVStaticAssert(!M1::_unit || ix == 1);
-        TMVAssert(!m1.isunit() || ix == 1);
+        TMVAssert(!m1.isunit() || T(x) == T(1));
         MultMM<false>(x,m1.mat(),m2.mat(),m1.mat());
     }
 
@@ -1280,7 +1404,7 @@ namespace tmv {
     {
         TMVStaticAssert(M1::_upper == int(M2::_upper));
         TMVStaticAssert(!M1::_unit || ix == 1);
-        TMVAssert(!m1.isunit() || ix == 1);
+        TMVAssert(!m1.isunit() || T(x) == T(1));
         NoAliasMultMM<false>(x,m1.mat(),m2.mat(),m1.mat());
     }
 
@@ -1291,7 +1415,7 @@ namespace tmv {
     {
         TMVStaticAssert(M1::_upper == int(M2::_upper));
         TMVStaticAssert(!M1::_unit || ix == 1);
-        TMVAssert(!m1.isunit() || ix == 1);
+        TMVAssert(!m1.isunit() || T(x) == T(1));
         AliasMultMM<false>(x,m1.mat(),m2.mat(),m1.mat());
     }
 

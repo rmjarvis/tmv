@@ -130,6 +130,7 @@ namespace tmv {
     // BaseMatrix_Calc adds some more requirements to the Traits<M> class:
     //
     //  _conj = is the matrix the conjugate of the underlying data?
+    //  _checkalias = do we need to check this matrix for aliases?
     //  _rowmajor = is the matrix RowMajor?
     //  _colmajor = is the matrix ColMajor?
     //  _hasdivider = does this matrix have a divider object?
@@ -213,13 +214,16 @@ namespace tmv {
 
     // Override SameStorage for Matrix objects:
     template <class M1, class M2>
-    static inline bool SameStorage(const BaseMatrix<M1>& v1, const BaseMatrix<M2>& m2)
+    static inline bool SameStorage(
+        const BaseMatrix<M1>& v1, const BaseMatrix<M2>& m2)
     { return false; }
     template <class V1, class M2>
-    static inline bool SameStorage(const BaseVector<V1>& v1, const BaseMatrix<M2>& m2)
+    static inline bool SameStorage(
+        const BaseVector<V1>& v1, const BaseMatrix<M2>& m2)
     { return false; }
     template <class M1, class V2>
-    static inline bool SameStorage(const BaseMatrix<M1>& v1, const BaseVector<V2>& m2)
+    static inline bool SameStorage(
+        const BaseMatrix<M1>& v1, const BaseVector<V2>& m2)
     { return false; }
 #ifndef TMV_NO_ALIAS_CHECK
     template <class V1, class M2>
@@ -479,6 +483,7 @@ namespace tmv {
         enum { _fort = Traits<M>::_fort };
         enum { _calc = Traits<M>::_calc };
         enum { _conj = Traits<M>::_conj };
+        enum { _checkalias = Traits<M>::_checkalias };
         enum { _rowmajor = Traits<M>::_rowmajor }; 
         enum { _colmajor = Traits<M>::_colmajor }; 
         enum { _hasdivider = Traits<M>::_hasdivider };
@@ -637,6 +642,10 @@ namespace tmv {
         enum { _shape = Traits<M>::_shape };
         enum { _fort = Traits<M>::_fort };
         enum { _calc = Traits<M>::_calc };
+        enum { _conj = Traits<M>::_conj };
+        enum { _checkalias = Traits<M>::_checkalias };
+        enum { _rowmajor = Traits<M>::_rowmajor }; 
+        enum { _colmajor = Traits<M>::_colmajor }; 
 
         typedef M type;
 

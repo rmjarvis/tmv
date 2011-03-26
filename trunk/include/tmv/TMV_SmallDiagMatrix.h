@@ -103,6 +103,7 @@ namespace tmv {
         enum { _step = 1 };
         enum { _diagstep = 1 };
         enum { _conj = false };
+        enum { _checkalias = Attrib<A>::checkalias };
         enum { twoS = isreal ? 1 : 2 };
 
         enum { _hasdivider = false };
@@ -114,7 +115,7 @@ namespace tmv {
         enum { nonconjA = A };
         enum { cstyleA = A & ~FortranStyle };
         enum { fstyleA = A | FortranStyle };
-        enum { twosA = isreal ? int(A) : nonunitA };
+        enum { twosA = isreal ? int(A) : (A & ~Conj & ~Unit) };
 
         typedef ConstSmallVectorView<T,N,_diagstep,A> const_diag_type;
         typedef ConstDiagMatrixView<T,A> const_subdiagmatrix_type;
@@ -175,6 +176,7 @@ namespace tmv {
         enum { _step = Traits<type>::_step };
         enum { _diagstep = Traits<type>::_diagstep };
         enum { _conj = Traits<type>::_conj };
+        enum { _checkalias = Traits<type>::_checkalias };
         enum { _unit = Traits<type>::_unit };
         enum { _attrib = Traits<type>::_attrib };
 
@@ -302,7 +304,7 @@ namespace tmv {
     struct Traits<ConstSmallDiagMatrixView<T,N,S,A0> >
     {
         enum { A = (A0 & ~NoDivider) | (
-                (S == 1) ? Unit : 0 )};
+                ( (S == 1) ? Unit : 0 ) )};
         enum { okA = (
                 Attrib<A>::vectoronly &&
                 ( Traits<T>::iscomplex || !Attrib<A>::conj ) &&
@@ -330,6 +332,7 @@ namespace tmv {
         enum { _step = S };
         enum { _diagstep = S };
         enum { _conj = Attrib<A>::conj };
+        enum { _checkalias = Attrib<A>::checkalias };
         enum { _unit = Attrib<A>::unit };
         enum { twoS = isreal ? 1 : 2 };
 
@@ -344,7 +347,7 @@ namespace tmv {
         enum { nonconjA = A & ~Conj };
         enum { cstyleA = A & ~FortranStyle };
         enum { fstyleA = A | FortranStyle };
-        enum { twosA = isreal ? int(A) : (nonunitA & ~Conj) };
+        enum { twosA = isreal ? int(A) : (A & ~Conj & ~Unit) };
 
         typedef ConstSmallVectorView<T,N,_diagstep,A> const_diag_type;
         typedef ConstDiagMatrixView<T,A> const_subdiagmatrix_type;
@@ -387,6 +390,7 @@ namespace tmv {
         enum { _step = Traits<type>::_step };
         enum { _diagstep = Traits<type>::_diagstep };
         enum { _conj = Traits<type>::_conj };
+        enum { _checkalias = Traits<type>::_checkalias };
         enum { _unit = Traits<type>::_unit };
         enum { _attrib = Traits<type>::_attrib };
 
@@ -490,7 +494,7 @@ namespace tmv {
     struct Traits<SmallDiagMatrixView<T,N,S,A0> >
     {
         enum { A = (A0 & ~NoDivider) | (
-                (S == 1) ? Unit : 0 )};
+                ( (S == 1) ? Unit : 0 ) )};
         enum { okA = (
                 Attrib<A>::vectoronly &&
                 ( Traits<T>::iscomplex || !Attrib<A>::conj ) &&
@@ -518,6 +522,7 @@ namespace tmv {
         enum { _step = S };
         enum { _diagstep = S };
         enum { _conj = Attrib<A>::conj };
+        enum { _checkalias = Attrib<A>::checkalias };
         enum { _unit = Attrib<A>::unit };
         enum { twoS = isreal ? 1 : 2 };
 
@@ -532,7 +537,7 @@ namespace tmv {
         enum { nonconjA = A & ~Conj };
         enum { cstyleA = A & ~FortranStyle };
         enum { fstyleA = A | FortranStyle };
-        enum { twosA = isreal ? int(A) : (nonunitA & ~Conj) };
+        enum { twosA = isreal ? int(A) : (A & ~Conj & ~Unit) };
 
         typedef ConstSmallVectorView<T,N,_diagstep,A> const_diag_type;
         typedef ConstDiagMatrixView<T,A> const_subdiagmatrix_type;
@@ -594,6 +599,7 @@ namespace tmv {
         enum { _step = Traits<type>::_step };
         enum { _diagstep = Traits<type>::_diagstep };
         enum { _conj = Traits<type>::_conj };
+        enum { _checkalias = Traits<type>::_checkalias };
         enum { _unit = Traits<type>::_unit };
         enum { _attrib = Traits<type>::_attrib };
 

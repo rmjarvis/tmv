@@ -44,7 +44,6 @@
 // Put the arithmetic header files last, after all the Mult, Add, etc.
 // functions have been declared.
 #include "tmv/TMV_Norm.h"
-#include "tmv/TMV_DivMD.h"
 #include "tmv/TMV_ProdXM.h"
 #include "tmv/TMV_SumMM.h"
 #include "tmv/TMV_SumMX.h"

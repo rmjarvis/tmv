@@ -42,19 +42,30 @@ namespace tmv {
     template <class T1, int C1, class T2>
     void InstMultXM(
         const T2 x, const ConstUpperTriMatrixView<T1,C1>& m1,
-        UpperTriMatrixView<T2,NonUnitDiag> m2);
+        UpperTriMatrixView<T2> m2);
     template <class T1,  int C1, class T2>
     void InstAddMultXM(
         const T2 x, const ConstUpperTriMatrixView<T1,C1>& m1, 
-        UpperTriMatrixView<T2,NonUnitDiag> m2);
+        UpperTriMatrixView<T2> m2);
+
+    template <class T1, int C1, class T2>
+    void InstAliasMultXM(
+        const T2 x, const ConstUpperTriMatrixView<T1,C1>& m1,
+        UpperTriMatrixView<T2> m2);
+    template <class T1,  int C1, class T2>
+    void InstAliasAddMultXM(
+        const T2 x, const ConstUpperTriMatrixView<T1,C1>& m1, 
+        UpperTriMatrixView<T2> m2);
+
+
+    //
+    // U (+)= x * U
+    //
 
     template <bool add, int ix, class T, class M1, class M2>
     static inline void NoAliasMultXM(
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1, 
         BaseMatrix_Tri_Mutable<M2>& m2);
-    //
-    // U (+)= x * U
-    //
 
     // The maximum nops to unroll.
 #if TMV_OPT >= 3
@@ -284,7 +295,7 @@ namespace tmv {
         {
             typedef typename M2::value_type VT;
             VT xx = Traits<VT>::convert(T(x));
-            InstAddMultXM(xx,m1.xView(),m2.xView().viewAsNonUnitDiag());
+            InstAddMultXM(xx,m1.xView(),m2.xView());
         }
     };
     template <int s, int ix, class T, class M1, class M2>
@@ -294,7 +305,29 @@ namespace tmv {
         {
             typedef typename M2::value_type VT;
             VT xx = Traits<VT>::convert(T(x));
-            InstMultXM(xx,m1.xView(),m2.xView().viewAsNonUnitDiag());
+            InstMultXM(xx,m1.xView(),m2.xView());
+        }
+    };
+
+    // algo 91: Call inst alias
+    template <int s, int ix, class T, class M1, class M2>
+    struct MultXU_Helper<91,s,true,ix,T,M1,M2>
+    {
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        {
+            typedef typename M2::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
+            InstAliasAddMultXM(xx,m1.xView(),m2.xView());
+        }
+    };
+    template <int s, int ix, class T, class M1, class M2>
+    struct MultXU_Helper<91,s,false,ix,T,M1,M2>
+    {
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        {
+            typedef typename M2::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
+            InstAliasMultXM(xx,m1.xView(),m2.xView());
         }
     };
 
@@ -312,6 +345,20 @@ namespace tmv {
         }
     };
 
+    // algo 196: Transpose
+    template <int s, bool add, int ix, class T, class M1, class M2>
+    struct MultXU_Helper<196,s,add,ix,T,M1,M2>
+    {
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        {
+            typedef typename M1::const_transpose_type M1t;
+            typedef typename M2::transpose_type M2t;
+            M1t m1t = m1.transpose();
+            M2t m2t = m2.transpose();
+            MultXU_Helper<99,s,add,ix,T,M1t,M2t>::call(x,m1t,m2t);
+        }
+    };
+
     // algo 97: Conjugate
     template <int s, bool add, int ix, class T, class M1, class M2>
     struct MultXU_Helper<97,s,add,ix,T,M1,M2>
@@ -326,9 +373,23 @@ namespace tmv {
         }
     };
 
-    // algo 99: Check for aliases
+    // algo 197: Conjugate
+    template <int s, bool add, int ix, class T, class M1, class M2>
+    struct MultXU_Helper<197,s,add,ix,T,M1,M2>
+    {
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        {
+            typedef typename M1::const_conjugate_type M1c;
+            typedef typename M2::conjugate_type M2c;
+            M1c m1c = m1.conjugate();
+            M2c m2c = m2.conjugate();
+            MultXU_Helper<99,s,add,ix,T,M1c,M2c>::call(TMV_CONJ(x),m1c,m2c);
+        }
+    };
+
+    // algo 98: Inline check for aliases
     template <int s, int ix, class T, class M1, class M2>
-    struct MultXU_Helper<99,s,false,ix,T,M1,M2>
+    struct MultXU_Helper<98,s,false,ix,T,M1,M2>
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
@@ -345,7 +406,7 @@ namespace tmv {
         }
     };
     template <int s, int ix, class T, class M1, class M2>
-    struct MultXU_Helper<99,s,true,ix,T,M1,M2>
+    struct MultXU_Helper<98,s,true,ix,T,M1,M2>
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
@@ -358,6 +419,34 @@ namespace tmv {
                 // Need a temporary
                 NoAliasMultXM<true>(x,m1.copy(),m2);
             }
+        }
+    };
+
+    // algo 99: Check for aliases
+    template <int s, bool add, int ix, class T, class M1, class M2>
+    struct MultXU_Helper<99,s,add,ix,T,M1,M2>
+    {
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        {
+            TMVStaticAssert(M1::_upper == int(M2::_upper));
+            TMVStaticAssert(!M2::_unit || (!add && ix == 1 && M1::_unit));
+            typedef typename M1::value_type T1;
+            typedef typename M2::value_type T2;
+            const bool inst =
+                (s == UNKNOWN || s > 16) &&
+#ifdef TMV_INST_MIX
+                Traits2<T1,T2>::samebase &&
+#else
+                Traits2<T1,T2>::sametype &&
+#endif
+                Traits<T1>::isinst;
+            const int algo =
+                (ix == 1 && !add) ? 0 :
+                M2::_lower ? 196 :
+                M2::_conj ? 197 :
+                inst ? 91 :
+                98;
+            MultXU_Helper<algo,s,add,ix,T,M1,M2>::call(x,m1,m2);
         }
     };
 
@@ -448,9 +537,7 @@ namespace tmv {
                 MStepHelper<M1,M2>::same ||
                 MStepHelper<M1,M2>::opp;
             const bool checkalias =
-                M1::_size == UNKNOWN &&
-                M2::_size == UNKNOWN &&
-                !noclobber;
+                M2::_checkalias && !noclobber;
             const int algo =
                 (ix == 1 && !add) ? 0 :
                 checkalias ? 99 : 
@@ -515,6 +602,24 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class M1, class M2>
+    static inline void InlineAliasMultXM(
+        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1, 
+        BaseMatrix_Tri_Mutable<M2>& m2)
+    {
+        TMVStaticAssert(M1::_upper == int(M2::_upper));
+        TMVStaticAssert(!M2::_unit || (!add && ix == 1 && M1::_unit));
+        TMVStaticAssert((Sizes<M1::_size,M2::_size>::same));
+        TMVAssert(m1.size() == m2.size());
+        TMVAssert(!m2.isunit() || (!add && ix == 1 && m1.isunit()));
+        const int s = Sizes<M1::_size,M2::_size>::size;
+        typedef typename M1::const_cview_type M1v;
+        typedef typename M2::cview_type M2v;
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
+        MultXU_Helper<98,s,add,ix,T,M1v,M2v>::call(x,m1v,m2v);
+    }
+
+    template <bool add, int ix, class T, class M1, class M2>
     static inline void AliasMultXM(
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1, 
         BaseMatrix_Tri_Mutable<M2>& m2)
@@ -535,12 +640,12 @@ namespace tmv {
     template <class T1, int C1, class T2>
     static inline void InstMultXM(
         const T2 x, const ConstLowerTriMatrixView<T1,C1>& m1,
-        LowerTriMatrixView<T2,NonUnitDiag> m2)
+        LowerTriMatrixView<T2> m2)
     { InstMultXM(x,m1.transpose(),m2.transpose()); }
     template <class T1,  int C1, class T2>
     static inline void InstAddMultXM(
         const T2 x, const ConstLowerTriMatrixView<T1,C1>& m1, 
-        LowerTriMatrixView<T2,NonUnitDiag> m2)
+        LowerTriMatrixView<T2> m2)
     { InstAddMultXM(x,m1.transpose(),m2.transpose()); }
 
     //

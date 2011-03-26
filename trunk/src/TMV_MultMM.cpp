@@ -33,6 +33,8 @@
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_MultXM.h"
 #include "tmv/TMV_Vector.h"
+#include "tmv/TMV_ProdXM.h"
+#include "tmv/TMV_ProdMM.h"
 
 namespace tmv {
 
@@ -140,6 +142,18 @@ namespace tmv {
         //std::cout<<"Norm(diff) = "<<normdiff<<std::endl;
         //if (normdiff > 1.e-3) abort();
     }
+
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasMultMM(
+        const T3 x, const ConstMatrixView<T1,C1>& m1,
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3)
+    { InlineAliasMultMM<false>(Scaling<0,T3>(x),m1,m2,m3); }
+
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasAddMultMM(
+        const T3 x, const ConstMatrixView<T1,C1>& m1,
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3)
+    { InlineAliasMultMM<true>(Scaling<0,T3>(x),m1,m2,m3); }
 
 #define InstFile "TMV_MultMM.inst"
 #include "TMV_Inst.h"

@@ -685,7 +685,7 @@ template <class T> void TestVector()
     TestVectorArith<T>();
 #endif
 
-    std::cout<<"Vector<"<<tmv::TMV_Text(T())<<"> passed all tests\n";
+    std::cout<<"Vector<"<<Text(T())<<"> passed all tests\n";
 }
 
 #ifdef TEST_DOUBLE

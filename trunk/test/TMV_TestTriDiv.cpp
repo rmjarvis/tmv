@@ -361,8 +361,7 @@ void TestTriDiv()
     TestTriDiv_C1<T>();
     TestTriDiv_C2<T>();
 
-    std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<
-        "> Division passed all tests\n";
+    std::cout<<"TriMatrix<"<<Text(T())<<"> Division passed all tests\n";
 }
 
 #ifdef TEST_DOUBLE

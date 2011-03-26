@@ -46,7 +46,6 @@
 
 #ifndef TMV_H
 // In case TMV_Diag.h is included not as part of TMV.h:
-#include "tmv/TMV_DivMD.h"
 #include "tmv/TMV_MatrixIO.h"
 #include "tmv/TMV_ProdMM.h"
 #include "tmv/TMV_ProdMV.h"

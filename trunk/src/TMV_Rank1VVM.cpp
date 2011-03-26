@@ -35,6 +35,7 @@
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_MultXM.h"
+#include "tmv/TMV_ProdXV.h"
 
 namespace tmv {
 
@@ -585,6 +586,18 @@ namespace tmv {
             InstAddMultXM(x,m3x.constView().xView(),m3);
         }
     }
+
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasRank1Update(
+        const T3 x, const ConstVectorView<T1,C1>& v1,
+        const ConstVectorView<T2,C2>& v2, MatrixView<T3> m3)
+    { InlineAliasRank1Update<false>(Scaling<0,T3>(x),v1,v2,m3); }
+
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasAddRank1Update(
+        const T3 x, const ConstVectorView<T1,C1>& v1,
+        const ConstVectorView<T2,C2>& v2, MatrixView<T3> m3)
+    { InlineAliasRank1Update<true>(Scaling<0,T3>(x),v1,v2,m3); }
 
 
 #define InstFile "TMV_Rank1VVM.inst"

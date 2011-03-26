@@ -1,16 +1,17 @@
 
 #define CT std::complex<T>
 
-template T InstMultVV(
-    const ConstVectorView<T >& v1, const ConstVectorView<T >& v2); 
-template CT InstMultVV(
-    const ConstVectorView<CT >& v1, const ConstVectorView<CT >& v2); 
-template CT InstMultVV(
-    const ConstVectorView<CT,Conj>& v1, 
-    const ConstVectorView<CT >& v2); 
+#define Def1(T1,C1,T2) \
+  template T2 InstMultVV( \
+      const ConstVectorView<T1,C1>& v1, const ConstVectorView<T2 >& v2); \
+
+Def1(T,NonConj,T)
+#ifdef TMV_INST_COMPLEX
 #ifdef TMV_INST_MIX
-template CT InstMultVV(
-    const ConstVectorView<T >& v1, const ConstVectorView<CT >& v2); 
+Def1(T,NonConj,CT)
+#endif
+Def1(CT,NonConj,CT)
+Def1(CT,Conj,CT)
 #endif
 
 #undef CT

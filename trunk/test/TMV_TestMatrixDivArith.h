@@ -152,7 +152,7 @@ static void DoTestLDivVM1a(
         Assert(Equal(z*(a/b),z*frac,x*eps),label+" z*(a/b)");
         Assert(Equal(a/(z*b),frac/z,eps/x),label+" a/(z*b)");
 
-        Assert(Equal(x*a)/(x*b),frac,eps),label+" (x*a)/(x*b)");
+        Assert(Equal((x*a)/(x*b),frac,eps),label+" (x*a)/(x*b)");
         Assert(Equal((z*a)/(x*b),(z/x)*frac,eps), label+" (z*a)/(x*b)");
         Assert(Equal((x*a)/(z*b),(x/z)*frac,eps), label+" (x*a)/(z*b)");
         Assert(Equal((z*a)/(z*b),frac,eps), label+" (z*a)/(z*b)");
@@ -952,7 +952,7 @@ static void DoTestLDivMM1a(
         Assert(Equal(b.inverse()*a,frac,eps),label+" b^-1*a");
 #ifndef NOMIX
         Assert(Equal(a/m2,frac,eps),label+" a/m2");
-        Assert(Equal(m2.inverse()*a)frac,eps),label+" m2^-1*a");
+        Assert(Equal(m2.inverse()*a,frac,eps),label+" m2^-1*a");
         Assert(Equal(m1/b,frac,eps),label+" m1/b");
         Assert(Equal(b.inverse()*m1,frac,eps),label+" b^-1*m1");
 #endif

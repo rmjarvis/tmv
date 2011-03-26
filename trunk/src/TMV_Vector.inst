@@ -2,9 +2,12 @@
 #define FT Traits<T>::float_type
 
 #define Def1(T,C) \
-  template void InstCopy(const ConstVectorView<T,C>& v1, \
-      VectorView<T > v2); \
+  template void InstCopy( \
+      const ConstVectorView<T,C>& v1, VectorView<T > v2); \
+  template void InstAliasCopy( \
+      const ConstVectorView<T,C>& v1, VectorView<T > v2); \
   template void InstSwap(VectorView<T,C> v1, VectorView<T > v2); \
+  template void InstAliasSwap(VectorView<T,C> v1, VectorView<T > v2); \
 
 Def1(T,NonConj)
 #ifdef TMV_INST_COMPLEX
@@ -15,6 +18,7 @@ Def1(CT,Conj)
 
 #ifdef TMV_INST_MIX
 template void InstCopy(const ConstVectorView<T >& v1, VectorView<CT > v2); 
+template void InstAliasCopy(const ConstVectorView<T >& v1, VectorView<CT > v2); 
 #endif
 
 #define Def2(RT,T) \

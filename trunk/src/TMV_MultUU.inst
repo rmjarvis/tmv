@@ -4,20 +4,28 @@
 #define Def1(T1,C1,T2,C2,T3)\
   template void InstMultMM(const T3 x, \
       const ConstUpperTriMatrixView<T1,C1>& m1, \
-      const ConstUpperTriMatrixView<T2,C2>& m2, \
-      UpperTriMatrixView<T3> m3); \
+      const ConstUpperTriMatrixView<T2,C2>& m2, UpperTriMatrixView<T3> m3); \
   template void InstMultMM(const T3 x, \
       const ConstLowerTriMatrixView<T1,C1>& m1, \
-      const ConstLowerTriMatrixView<T2,C2>& m2, \
-      LowerTriMatrixView<T3> m3); \
+      const ConstLowerTriMatrixView<T2,C2>& m2, LowerTriMatrixView<T3> m3); \
   template void InstAddMultMM(const T3 x, \
       const ConstUpperTriMatrixView<T1,C1>& m1, \
-      const ConstUpperTriMatrixView<T2,C2>& m2, \
-      UpperTriMatrixView<T3,NonUnitDiag> m3); \
+      const ConstUpperTriMatrixView<T2,C2>& m2, UpperTriMatrixView<T3> m3); \
   template void InstAddMultMM(const T3 x, \
       const ConstLowerTriMatrixView<T1,C1>& m2, \
-      const ConstLowerTriMatrixView<T2,C2>& m1, \
-      LowerTriMatrixView<T3,NonUnitDiag> m3); \
+      const ConstLowerTriMatrixView<T2,C2>& m1, LowerTriMatrixView<T3> m3); \
+  template void InstAliasMultMM(const T3 x, \
+      const ConstUpperTriMatrixView<T1,C1>& m1, \
+      const ConstUpperTriMatrixView<T2,C2>& m2, UpperTriMatrixView<T3> m3); \
+  template void InstAliasMultMM(const T3 x, \
+      const ConstLowerTriMatrixView<T1,C1>& m1, \
+      const ConstLowerTriMatrixView<T2,C2>& m2, LowerTriMatrixView<T3> m3); \
+  template void InstAliasAddMultMM(const T3 x, \
+      const ConstUpperTriMatrixView<T1,C1>& m1, \
+      const ConstUpperTriMatrixView<T2,C2>& m2, UpperTriMatrixView<T3> m3); \
+  template void InstAliasAddMultMM(const T3 x, \
+      const ConstLowerTriMatrixView<T1,C1>& m2, \
+      const ConstLowerTriMatrixView<T2,C2>& m1, LowerTriMatrixView<T3> m3); \
 
 
 Def1(T,NonConj,T,NonConj,T)

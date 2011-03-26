@@ -325,9 +325,6 @@ namespace tmv {
 
         static ret call(const M1& m, const Scaling<ix,RT>& x)
         {
-#ifdef PRINTALGO_NormM
-            std::cout<<"SumElementsM algo 97: "<<TMV_Text(comp)<<std::endl;
-#endif
             typedef typename M1::const_nonconj_type Mnc;
             Mnc mnc = m.nonConj();
             return SumElementsM_Helper<-2,cs,rs,comp,ix,ret,Mnc>::call(mnc,x);
@@ -340,9 +337,6 @@ namespace tmv {
 
         static ret call(const M1& m, const Scaling<ix,RT>& x)
         {
-#ifdef PRINTALGO_NormM
-            std::cout<<"SumElementsM algo 97: "<<TMV_Text(comp)<<std::endl;
-#endif
             typedef typename M1::const_conjugate_type Mc;
             Mc mc = m.conjugate();
             return TMV_CONJ(
@@ -762,9 +756,6 @@ namespace tmv {
         typedef typename Component<comp,typename M1::value_type>::ret_type ret;
         static ret call(const M1& m)
         {
-#ifdef PRINTALGO_NormM
-            std::cout<<"MaxAbsElementM algo 97: "<<TMV_Text(comp)<<std::endl;
-#endif
             typedef typename M1::const_nonconj_type Mnc;
             Mnc mnc = m.nonConj();
             return MaxAbsElementM_Helper<-2,cs,rs,comp,Mnc>::call(mnc);
@@ -978,9 +969,6 @@ namespace tmv {
         typedef typename M1::float_type RT;
         static RT call(const M1& m)
         {
-#ifdef PRINTALGO_NormM
-            std::cout<<"Norm1M algo 97:\n";
-#endif
             typedef typename M1::const_nonconj_type Mnc;
             Mnc mnc = m.nonConj();
             return Norm1M_Helper<-2,cs,rs,Mnc>::call(mnc);
@@ -994,9 +982,6 @@ namespace tmv {
         typedef typename M1::float_type RT;
         static RT call(const M1& m)
         {
-#ifdef PRINTALGO_NormM
-            std::cout<<"Norm1M algo -3: "<<std::endl;
-#endif
             const int algo =
                 TMV_OPT == 0 ? 11 :
                 ( M1::_rowmajor &&

@@ -39,6 +39,7 @@
 #include "tmv/TMV_CopyV.h"
 #include "tmv/TMV_SwapV.h"
 #include "tmv/TMV_MinMax.h"
+#include "tmv/TMV_CopyM.h"
 
 namespace tmv {
 
@@ -138,17 +139,25 @@ namespace tmv {
 #endif // ALAP
 
     template <class T> 
-    void InstLU_Decompose(MatrixView<T,ColMajor> A, int* P, int& signdet)
+    void InstLU_Decompose(MatrixView<T> A, int* P, int& signdet)
     {
         //std::cout<<"Start LUDecompose:\n";
         //std::cout<<"A = "<<A<<std::endl;
         //Matrix<T> A0 = A;
         if (A.colsize() > 0 && A.rowsize() > 0) {
+            if (A.iscm()) {
+                MatrixView<T,ColMajor> Acm = A;
 #ifdef ALAP
-            LapLU_Decompose(A,P,signdet);
+                LapLU_Decompose(Acm,P,signdet);
 #else
-            InlineLU_Decompose(A,P,signdet);
+                InlineLU_Decompose(Acm,P,signdet);
 #endif
+            } else {
+                Matrix<T,ColMajor|NoDivider> Ac = A;
+                MatrixView<T,ColMajor> Acm = Ac.view();
+                InlineLU_Decompose(Acm,P,signdet);
+                InstCopy(Ac.constView().xView(),A);
+            }
         }
         //std::cout<<"A -> "<<A<<std::endl;
         //Matrix<T> lu = A.unitLowerTri() * A.upperTri();

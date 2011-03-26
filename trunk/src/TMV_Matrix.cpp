@@ -43,6 +43,7 @@
 #include "tmv/TMV_PermuteM.h"
 #include "tmv/TMV_ScaleM.h"
 #include "tmv/TMV_LUD.h"
+#include "tmv/TMV_SmallMatrix.h"
 
 namespace tmv {
 
@@ -171,6 +172,11 @@ namespace tmv {
             NonLapCopy(m1,m2); 
     }
 
+    template <class T1, int C1, class T2>
+    void InstAliasCopy(
+        const ConstMatrixView<T1,C1>& m1, MatrixView<T2> m2)
+    { InlineAliasCopy(m1,m2); }
+
     //
     // Swap Matrices
     //
@@ -201,6 +207,10 @@ namespace tmv {
                 InlineSwap(m1,m2);
         }
     }
+
+    template <class T, int C> 
+    void InstAliasSwap(MatrixView<T,C> m1, MatrixView<T> m2)
+    { InlineAliasSwap(m1,m2); }
 
 
     // 

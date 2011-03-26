@@ -401,10 +401,10 @@ inline void TestVectorArith1(V& a, CV& ca, std::string label)
     TestVX2<std::complex<T> >(ca,x,label+" C,R");
     TestVX<std::complex<T> >(ca,z,label+" C,C");
     TestVX2<std::complex<T> >(ca,z,label+" C,C");
-#ifdef ALIASOK
     TestVV<T,T>(a,a,label+" R,R");
-    TestVV2<T,T>(a,a,label+" R,R");
     TestVV<std::complex<T>,std::complex<T> >(ca,ca,label+" C,C");
+#ifdef ALIASOK
+    TestVV2<T,T>(a,a,label+" R,R");
     TestVV2<std::complex<T>,std::complex<T> >(ca,ca,label+" C,C");
 #endif
 

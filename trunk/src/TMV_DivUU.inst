@@ -2,12 +2,14 @@
 #define CT std::complex<T>
 
 #define Def1(T1,T2,C2)\
-  template void InstLDivEq( \
-      UpperTriMatrixView<T1> v1, \
-      const ConstUpperTriMatrixView<T2,C2>& m2); \
-  template void InstLDivEq( \
-      LowerTriMatrixView<T1> v1, \
-      const ConstLowerTriMatrixView<T2,C2>& m2); \
+  template void InstTriLDivEq( \
+      UpperTriMatrixView<T1> v1, const ConstUpperTriMatrixView<T2,C2>& m2); \
+  template void InstTriLDivEq( \
+      LowerTriMatrixView<T1> v1, const ConstLowerTriMatrixView<T2,C2>& m2); \
+  template void InstAliasTriLDivEq( \
+      UpperTriMatrixView<T1> v1, const ConstUpperTriMatrixView<T2,C2>& m2); \
+  template void InstAliasTriLDivEq( \
+      LowerTriMatrixView<T1> v1, const ConstLowerTriMatrixView<T2,C2>& m2); \
 
 Def1(T,T,NonConj)
 #ifdef TMV_INST_COMPLEX
@@ -19,4 +21,5 @@ Def1(CT,CT,Conj)
 #endif
 
 #undef Def1
+
 #undef CT

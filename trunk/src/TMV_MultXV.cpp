@@ -35,6 +35,7 @@
 #include "tmv/TMV_MultXV.h"
 #include "tmv/TMV_ScaleV.h"
 #include "tmv/TMV_Vector.h"
+#include "tmv/TMV_SmallVector.h"
 
 namespace tmv {
 
@@ -241,14 +242,21 @@ namespace tmv {
 
     template <class T1, int C1, class T2>
     void InstMultXV(
-        const T2 x, const ConstVectorView<T1,C1>& v1,
-        VectorView<T2> v2)
+        const T2 x, const ConstVectorView<T1,C1>& v1, VectorView<T2> v2)
     { DoMultXV(x,v1,v2); }
     template <class T1, int C1, class T2>
     void InstAddMultXV(
-        const T2 x, const ConstVectorView<T1,C1>& v1,
-        VectorView<T2> v2)
+        const T2 x, const ConstVectorView<T1,C1>& v1, VectorView<T2> v2)
     { DoAddMultXV(x,v1,v2); }
+
+    template <class T1, int C1, class T2>
+    void InstAliasMultXV(
+        const T2 x, const ConstVectorView<T1,C1>& v1, VectorView<T2> v2)
+    { InlineAliasMultXV<false>(Scaling<0,T2>(x),v1,v2); }
+    template <class T1, int C1, class T2>
+    void InstAliasAddMultXV(
+        const T2 x, const ConstVectorView<T1,C1>& v1, VectorView<T2> v2)
+    { InlineAliasMultXV<true>(Scaling<0,T2>(x),v1,v2); }
 
 #define InstFile "TMV_MultXV.inst"
 #include "TMV_Inst.h"
