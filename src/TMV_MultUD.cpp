@@ -38,6 +38,8 @@
 #include "tmv/TMV_ScaleU.h"
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_ConjugateV.h"
+#include "tmv/TMV_ProdXM.h"
+#include "tmv/TMV_MultXD.h"
 
 namespace tmv {
 
@@ -106,33 +108,45 @@ namespace tmv {
 
     template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM(
-        const T3 x,
-        const ConstUpperTriMatrixView<T1,C1>& m1,
-        const ConstDiagMatrixView<T2,C2>& m2,
-        UpperTriMatrixView<T3,NonUnitDiag> m3)
+        const T3 x, const ConstUpperTriMatrixView<T1,C1>& m1,
+        const ConstDiagMatrixView<T2,C2>& m2, UpperTriMatrixView<T3> m3)
     { DoInstMultMM(x,m1,m2,m3); }
     template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM(
-        const T3 x,
-        const ConstUpperTriMatrixView<T1,C1>& m1,
-        const ConstDiagMatrixView<T2,C2>& m2,
-        UpperTriMatrixView<T3,NonUnitDiag> m3)
+        const T3 x, const ConstUpperTriMatrixView<T1,C1>& m1,
+        const ConstDiagMatrixView<T2,C2>& m2, UpperTriMatrixView<T3> m3)
     { DoInstAddMultMM(x,m1,m2,m3); }
     template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM(
-        const T3 x,
-        const ConstLowerTriMatrixView<T1,C1>& m1,
-        const ConstDiagMatrixView<T2,C2>& m2,
-        LowerTriMatrixView<T3,NonUnitDiag> m3)
+        const T3 x, const ConstLowerTriMatrixView<T1,C1>& m1,
+        const ConstDiagMatrixView<T2,C2>& m2, LowerTriMatrixView<T3> m3)
     { DoInstMultMM(x,m1,m2,m3); }
     template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM(
-        const T3 x,
-        const ConstLowerTriMatrixView<T1,C1>& m1,
-        const ConstDiagMatrixView<T2,C2>& m2,
-        LowerTriMatrixView<T3,NonUnitDiag> m3)
+        const T3 x, const ConstLowerTriMatrixView<T1,C1>& m1,
+        const ConstDiagMatrixView<T2,C2>& m2, LowerTriMatrixView<T3> m3)
     { DoInstAddMultMM(x,m1,m2,m3); }
 
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasMultMM(
+        const T3 x, const ConstUpperTriMatrixView<T1,C1>& m1,
+        const ConstDiagMatrixView<T2,C2>& m2, UpperTriMatrixView<T3> m3)
+    { InlineAliasMultMM<false>(Scaling<0,T3>(x),m1,m2,m3); }
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasAddMultMM(
+        const T3 x, const ConstUpperTriMatrixView<T1,C1>& m1,
+        const ConstDiagMatrixView<T2,C2>& m2, UpperTriMatrixView<T3> m3)
+    { InlineAliasMultMM<true>(Scaling<0,T3>(x),m1,m2,m3); }
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasMultMM(
+        const T3 x, const ConstLowerTriMatrixView<T1,C1>& m1,
+        const ConstDiagMatrixView<T2,C2>& m2, LowerTriMatrixView<T3> m3)
+    { InlineAliasMultMM<false>(Scaling<0,T3>(x),m1,m2,m3); }
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasAddMultMM(
+        const T3 x, const ConstLowerTriMatrixView<T1,C1>& m1,
+        const ConstDiagMatrixView<T2,C2>& m2, LowerTriMatrixView<T3> m3)
+    { InlineAliasMultMM<true>(Scaling<0,T3>(x),m1,m2,m3); }
 
 #define InstFile "TMV_MultUD.inst"
 #include "TMV_Inst.h"

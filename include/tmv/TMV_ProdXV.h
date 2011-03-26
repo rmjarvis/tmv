@@ -415,6 +415,7 @@ namespace tmv {
 #endif
 
 
+#ifdef TMV_DEBUG
     template <int ix, class T, class V>
     static inline std::string TMV_Text(const ProdXV<ix,T,V>& pxv)
     {
@@ -423,6 +424,7 @@ namespace tmv {
         s << " , "<<TMV_Text(pxv.getV())<<" >";
         return s.str();
     }
+#endif
 
 
 } // namespace tmv

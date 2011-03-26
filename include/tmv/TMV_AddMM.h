@@ -45,6 +45,18 @@
 
 namespace tmv {
 
+    // Defined in TMV_AddMM.cpp
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAddMM(
+        const T3 x1, const ConstMatrixView<T1,C1>& m1,
+        const T3 x2, const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
+
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasAddMM(
+        const T3 x1, const ConstMatrixView<T1,C1>& m1,
+        const T3 x2, const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
+
+
     //
     // Matrix + Matrix
     //
@@ -330,27 +342,69 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_AddMM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-            std::cout<<"AddMM algo 90: M,N,cs,rs = "<<M<<','<<N<<
-                ','<<cs<<','<<rs<<std::endl;
-#endif
-            NoAliasMultXM<false>(x1,m1,m3);
-            NoAliasMultXM<true>(x2,m2,m3);
+            typedef typename M3::value_type T3;
+            T3 xx1 = Traits<T3>::convert(T1(x1));
+            T3 xx2 = Traits<T3>::convert(T2(x2));
+            InstAddMM(xx1,m1.xView(),xx2,m2.xView(),m3.xView());
         }
     };
 
-    // algo 91: Check for aliases when calling Inst functions
-    // We don't have a separate Inst function for this.  We just
-    // split the operation into two parts: 
-    // m3 = x1*m1; 
-    // m3 += x2*m2;
-    // and let those operations call their Inst functions.
-    // However, the alias requirements for this are different than the
-    // normal ones, so we need to put some alias checking here.
+    // algo 91: Call inst alias
     template <int cs, int rs, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     struct AddMM_Helper<91,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
+    {
+        static void call(
+            const Scaling<ix1,T1>& x1, const M1& m1, 
+            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
+        {
+            typedef typename M3::value_type T3;
+            T3 xx1 = Traits<T3>::convert(T1(x1));
+            T3 xx2 = Traits<T3>::convert(T2(x2));
+            InstAliasAddMM(xx1,m1.xView(),xx2,m2.xView(),m3.xView());
+        }
+    };
+
+    // algo 97: Conjugate
+    template <int cs, int rs, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
+    struct AddMM_Helper<97,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
+    {
+        static void call(
+            const Scaling<ix1,T1>& x1, const M1& m1, 
+            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
+        {
+            typedef typename M1::const_conjugate_type M1c;
+            typedef typename M2::const_conjugate_type M2c;
+            typedef typename M3::conjugate_type M3c;
+            M1c m1c = m1.conjugate();
+            M2c m2c = m2.conjugate();
+            M3c m3c = m3.conjugate();
+            AddMM_Helper<-2,cs,rs,ix1,T1,M1c,ix2,T2,M2c,M3c>::call(
+                TMV_CONJ(x1),m1c,TMV_CONJ(x2),m2c,m3c);
+        }
+    };
+
+    // algo 197: Conjugate
+    template <int cs, int rs, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
+    struct AddMM_Helper<197,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
+    {
+        static void call(
+            const Scaling<ix1,T1>& x1, const M1& m1, 
+            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
+        {
+            typedef typename M1::const_conjugate_type M1c;
+            typedef typename M2::const_conjugate_type M2c;
+            typedef typename M3::conjugate_type M3c;
+            M1c m1c = m1.conjugate();
+            M2c m2c = m2.conjugate();
+            M3c m3c = m3.conjugate();
+            AddMM_Helper<99,cs,rs,ix1,T1,M1c,ix2,T2,M2c,M3c>::call(
+                TMV_CONJ(x1),m1c,TMV_CONJ(x2),m2c,m3c);
+        }
+    };
+
+    // algo 98: Inline check for aliases
+    template <int cs, int rs, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
+    struct AddMM_Helper<98,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
     {
         static void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
@@ -359,17 +413,17 @@ namespace tmv {
             const bool s1 = SameStorage(m1,m3);
             const bool s2 = SameStorage(m2,m3);
 #ifdef PRINTALGO_AddMM
-            std::cout<<"AddMM algo 91\n";
+            std::cout<<"AddMM Check alias\n";
             std::cout<<"s1,2 = "<<s1<<"  "<<s2<<std::endl;
 #endif
 
             if (!s1 && !s2) {
+                // No aliasing 
 #ifdef PRINTALGO_AddMM
-                std::cout<<"No clobber\n";
+                std::cout<<"No alias\n";
 #endif
-                // No aliasing
-                NoAliasMultXM<false>(x1,m1,m3);
-                NoAliasMultXM<true>(x2,m2,m3);
+                AddMM_Helper<-2,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>::call(
+                    x1,m1,x2,m2,m3);
             } else if (!s2) {
 #ifdef PRINTALGO_AddMM
                 std::cout<<"Do m1 first\n";
@@ -396,32 +450,7 @@ namespace tmv {
         }
     };
 
-    // algo 97: Conjugate
-    template <int cs, int rs, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
-    struct AddMM_Helper<97,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
-    {
-        static void call(
-            const Scaling<ix1,T1>& x1, const M1& m1, 
-            const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
-        {
-#ifdef PRINTALGO_AddMM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-            std::cout<<"AddMM algo 97: M,N,cs,rs = "<<M<<','<<N<<
-                ','<<cs<<','<<rs<<std::endl;
-#endif
-            typedef typename M1::const_conjugate_type M1c;
-            typedef typename M2::const_conjugate_type M2c;
-            typedef typename M3::conjugate_type M3c;
-            M1c m1c = m1.conjugate();
-            M2c m2c = m2.conjugate();
-            M3c m3c = m3.conjugate();
-            AddMM_Helper<-2,cs,rs,ix1,T1,M1c,ix2,T2,M2c,M3c>::call(
-                TMV_CONJ(x1),m1c,TMV_CONJ(x2),m2c,m3c);
-        }
-    };
-
-    // algo 99: Check for aliases when not calling Inst functions
+    // algo 99: Check for aliases
     template <int cs, int rs, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     struct AddMM_Helper<99,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
     {
@@ -429,46 +458,27 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
-            const bool ss1 = SameStorage(m1,m3);
-            const bool ss2 = SameStorage(m2,m3);
-            const bool s1 = ss1 && !ExactSameStorage(m1,m3);
-            const bool s2 = ss2 && !ExactSameStorage(m2,m3);
-#ifdef PRINTALGO_AddMM
-            std::cout<<"AddMM algo 99\n";
-            std::cout<<"ss1,2 = "<<ss1<<"  "<<ss2<<std::endl;
-            std::cout<<"s1,2 = "<<s1<<"  "<<s2<<std::endl;
+            typedef typename M1::value_type TM1;
+            typedef typename M2::value_type TM2;
+            typedef typename M3::value_type TM3;
+            const bool inst =
+                (cs == UNKNOWN || cs > 16) &&
+                (rs == UNKNOWN || rs > 16) &&
+#ifdef TMV_INST_MIX
+                Traits2<TM1,TM2>::samebase &&
+                Traits2<TM1,TM3>::samebase &&
+#else
+                Traits2<TM1,TM2>::sametype &&
+                Traits2<TM1,TM3>::sametype &&
 #endif
-
-            if (!s1 && !s2) {
-                // No aliasing (or no clobbering)
-#ifdef PRINTALGO_AddMM
-                std::cout<<"No clobber\n";
-#endif
-                AddMM_Helper<-2,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>::call(
-                    x1,m1,x2,m2,m3);
-            } else if (!ss2) {
-#ifdef PRINTALGO_AddMM
-                std::cout<<"Do m1 first\n";
-#endif
-                // Alias with m1 only, do m1 first
-                AliasMultXM<false>(x1,m1,m3);
-                NoAliasMultXM<true>(x2,m2,m3);
-            } else if (!ss1) {
-#ifdef PRINTALGO_AddMM
-                std::cout<<"Do m2 first\n";
-#endif
-                // Alias with m2 only, do m2 first
-                AliasMultXM<false>(x2,m2,m3);
-                NoAliasMultXM<true>(x1,m1,m3);
-            } else {
-#ifdef PRINTALGO_AddMM
-                std::cout<<"Need temporary\n";
-#endif
-                // Need a temporary
-                typename M1::copy_type m1c = m1;
-                AliasMultXM<false>(x2,m2,m3);
-                NoAliasMultXM<true>(x1,m1c,m3);
-            }
+                Traits<TM3>::isinst;
+            const bool conj = M3::_conj;
+            const int algo = 
+                conj ? 197 :
+                inst ? 91 :
+                98;
+            AddMM_Helper<algo,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>::call(
+                x1,m1,x2,m2,m3);
         }
     };
 
@@ -615,31 +625,8 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
-            const bool noclobber = 
-                MStepHelper<M1,M3>::same && MStepHelper<M2,M3>::same;
-            const bool checkalias =
-                M1::_colsize == UNKNOWN && M1::_rowsize == UNKNOWN &&
-                M2::_colsize == UNKNOWN && M2::_rowsize == UNKNOWN &&
-                M3::_colsize == UNKNOWN && M3::_rowsize == UNKNOWN &&
-                !noclobber;
-            typedef typename M1::value_type TM1;
-            typedef typename M2::value_type TM2;
-            typedef typename M3::value_type TM3;
-            const bool inst =
-                (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
-#ifdef TMV_INST_MIX
-                Traits2<TM1,TM2>::samebase &&
-                Traits2<TM1,TM3>::samebase &&
-#else
-                Traits2<TM1,TM2>::sametype &&
-                Traits2<TM1,TM3>::sametype &&
-#endif
-                Traits<TM3>::isinst;
             const int algo = 
-                // We do a different alias check for the Inst calls.
-                inst ? 91 :
-                checkalias ? 99 : 
+                M3::_checkalias ? 99 : 
                 -2;
 #ifdef PRINTALGO_AddMM
             const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
@@ -748,6 +735,36 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
+    static inline void InlineAliasAddMM(
+        const Scaling<ix1,T1>& x1, const BaseMatrix_Rec<M1>& m1, 
+        const Scaling<ix2,T2>& x2, const BaseMatrix_Rec<M2>& m2, 
+        BaseMatrix_Rec_Mutable<M3>& m3)
+    {
+        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_colsize,M3::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_colsize,M3::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same));
+        TMVStaticAssert((Sizes<M1::_rowsize,M3::_rowsize>::same));
+        TMVStaticAssert((Sizes<M1::_rowsize,M3::_rowsize>::same));
+        TMVAssert(m1.colsize() == m2.colsize());
+        TMVAssert(m1.colsize() == m3.colsize());
+        TMVAssert(m1.rowsize() == m2.rowsize());
+        TMVAssert(m1.rowsize() == m3.rowsize());
+        const int cs = 
+            Sizes<Sizes<M1::_colsize,M2::_colsize>::size,M3::_colsize>::size;
+        const int rs = 
+            Sizes<Sizes<M1::_rowsize,M2::_rowsize>::size,M3::_rowsize>::size;
+        typedef typename M1::const_cview_type M1v;
+        typedef typename M2::const_cview_type M2v;
+        typedef typename M3::cview_type M3v;
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
+        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
+        AddMM_Helper<98,cs,rs,ix1,T1,M1v,ix2,T2,M2v,M3v>::call(
+            x1,m1v,x2,m2v,m3v);
+    }
+
+    template <int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     static inline void AliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Rec<M1>& m1, 
         const Scaling<ix2,T2>& x2, const BaseMatrix_Rec<M2>& m2, 
@@ -767,27 +784,13 @@ namespace tmv {
             Sizes<Sizes<M1::_colsize,M2::_colsize>::size,M3::_colsize>::size;
         const int rs = 
             Sizes<Sizes<M1::_rowsize,M2::_rowsize>::size,M3::_rowsize>::size;
-        typedef typename M1::value_type TM1;
-        typedef typename M2::value_type TM2;
-        typedef typename M3::value_type TM3;
-        const bool inst =
-            (cs == UNKNOWN || cs > 16) &&
-            (rs == UNKNOWN || rs > 16) &&
-#ifdef TMV_INST_MIX
-            Traits2<TM1,TM2>::samebase &&
-            Traits2<TM1,TM3>::samebase &&
-#else
-            Traits2<TM1,TM2>::sametype &&
-            Traits2<TM1,TM3>::sametype &&
-#endif
-            Traits<TM3>::isinst;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         typedef typename M3::cview_type M3v;
         TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
         TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
         TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
-        AddMM_Helper<inst?91:99,cs,rs,ix1,T1,M1v,ix2,T2,M2v,M3v>::call(
+        AddMM_Helper<99,cs,rs,ix1,T1,M1v,ix2,T2,M2v,M3v>::call(
             x1,m1v,x2,m2v,m3v);
     }
 

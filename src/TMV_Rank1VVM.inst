@@ -8,6 +8,12 @@
   template void InstAddRank1Update(const T3 x, \
       const ConstVectorView<T1,C1>& v1, \
       const ConstVectorView<T2,C2>& v2, MatrixView<T3> m3); \
+  template void InstAliasRank1Update(const T3 x, \
+      const ConstVectorView<T1,C1>& v1, \
+      const ConstVectorView<T2,C2>& v2, MatrixView<T3> m3); \
+  template void InstAliasAddRank1Update(const T3 x, \
+      const ConstVectorView<T1,C1>& v1, \
+      const ConstVectorView<T2,C2>& v2, MatrixView<T3> m3); \
 
 
 Def1(T,NonConj,T,NonConj,T)

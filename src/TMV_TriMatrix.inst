@@ -17,8 +17,9 @@ Def1(T,CT)
 
 #define Def2(T,C) \
   template void InstSwap(\
-      UpperTriMatrixView<T,C> m1, \
-      UpperTriMatrixView<T> m2); \
+      UpperTriMatrixView<T,C> m1, UpperTriMatrixView<T> m2); \
+  template void InstAliasSwap(\
+      UpperTriMatrixView<T,C> m1, UpperTriMatrixView<T> m2); \
 
 Def2(T,NonConj)
 #ifdef TMV_INST_COMPLEX
@@ -29,8 +30,9 @@ Def2(CT,Conj)
 
 #define Def3(T1,C,T2) \
   template void InstCopy(\
-      const ConstUpperTriMatrixView<T1,C>& m1, \
-      UpperTriMatrixView<T2> m2); \
+      const ConstUpperTriMatrixView<T1,C>& m1, UpperTriMatrixView<T2> m2); \
+  template void InstAliasCopy(\
+      const ConstUpperTriMatrixView<T1,C>& m1, UpperTriMatrixView<T2> m2); \
 
 Def3(T,NonConj,T)
 #ifdef TMV_INST_COMPLEX

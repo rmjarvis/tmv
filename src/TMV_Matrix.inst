@@ -21,10 +21,12 @@ Def1(T,CT)
 #endif
 
 #define Def2(RT,T,C) \
-  template void InstCopy(const ConstMatrixView<T,C>& m1, \
-      MatrixView<T> m2); \
-  template void InstSwap(MatrixView<T,C> m1, \
-      MatrixView<T> m2); \
+  template void InstCopy( \
+      const ConstMatrixView<T,C>& m1, MatrixView<T> m2); \
+  template void InstAliasCopy( \
+      const ConstMatrixView<T,C>& m1, MatrixView<T> m2); \
+  template void InstSwap(MatrixView<T,C> m1, MatrixView<T> m2); \
+  template void InstAliasSwap(MatrixView<T,C> m1, MatrixView<T> m2); \
 
 Def2(T,T,NonConj)
 #ifdef TMV_INST_COMPLEX
@@ -58,6 +60,7 @@ Def4(FT,CT,Conj)
 
 #ifdef TMV_INST_MIX
 template void InstCopy(const ConstMatrixView<T>& m1, MatrixView<CT> m2); 
+template void InstAliasCopy(const ConstMatrixView<T>& m1, MatrixView<CT> m2); 
 #endif
 
 #undef Def1

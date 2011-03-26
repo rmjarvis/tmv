@@ -916,8 +916,10 @@ namespace tmv {
     // TMV_Text
     //
     
+#ifdef TMV_DEBUG
     static inline std::string TMV_Text(const Permutation& )
     { return "Permutation"; }
+#endif
 
  
 } // namespace tmv

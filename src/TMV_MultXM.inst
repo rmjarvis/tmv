@@ -6,6 +6,10 @@
       const ConstMatrixView<T1,C1>& m1, MatrixView<T2> m2); \
   template void InstAddMultXM(const T2 x, \
       const ConstMatrixView<T1,C1>& m1, MatrixView<T2> m2); \
+  template void InstAliasMultXM(const T2 x, \
+      const ConstMatrixView<T1,C1>& m1, MatrixView<T2> m2); \
+  template void InstAliasAddMultXM(const T2 x, \
+      const ConstMatrixView<T1,C1>& m1, MatrixView<T2> m2); \
 
 Def1(T,NonConj,T)
 #ifdef TMV_INST_COMPLEX

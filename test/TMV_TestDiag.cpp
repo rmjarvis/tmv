@@ -189,7 +189,7 @@ template <class T> void TestDiagMatrix()
     TestDiagMatrixArith_B6a<T>();
     TestDiagMatrixArith_B6b<T>();
 
-    std::cout<<"DiagMatrix<"<<tmv::TMV_Text(T())<<"> passed all tests\n";
+    std::cout<<"DiagMatrix<"<<Text(T())<<"> passed all tests\n";
 }
 
 

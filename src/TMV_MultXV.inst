@@ -6,6 +6,10 @@
       const ConstVectorView<T1,C1>& v1, VectorView<T2 > v2); \
   template void InstAddMultXV(const T2 x, \
       const ConstVectorView<T1,C1>& v1, VectorView<T2> v2); \
+  template void InstAliasMultXV(const T2 x, \
+      const ConstVectorView<T1,C1>& v1, VectorView<T2 > v2); \
+  template void InstAliasAddMultXV(const T2 x, \
+      const ConstVectorView<T1,C1>& v1, VectorView<T2> v2); \
 
 Def1(T,NonConj,T)
 #ifdef TMV_INST_COMPLEX

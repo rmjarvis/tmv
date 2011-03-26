@@ -223,7 +223,9 @@ namespace tmv {
     enum PackType { NonPacked = 0, Packed = 0x100 };
     enum DivStatus { 
         NoDivider = 0x200, WithDivider = 0x400, AllDivStatus = 0x600 };
-    enum UpLo { Upper = 0, Lower = 0x800 };
+    enum AliasStatus { 
+        NoAlias = 0x800, CheckAlias = 0x1000, AllAliasStatus = 0x1800 };
+    enum UpLoType { Upper = 0x2000, Lower = 0x4000 };
 
     template <bool iszero>
     struct DoNonZeroMessage;
@@ -257,7 +259,7 @@ namespace tmv {
     template <int A>
     struct Attrib
     {
-        enum { vectoronly = (A <= 0x7) };
+        enum { vectoronly = ((A & ~AllAliasStatus) <= 0x7) };
         enum { conj = !(!(A & Conj)) };
         enum { fort = !(!(A & FortranStyle)) };
         enum { unit = !(!(A & Unit)) };
@@ -272,8 +274,10 @@ namespace tmv {
         enum { packed = !(!(A & Packed)) };
         enum { nodivider = !(!(A & NoDivider)) };
         enum { withdivider = !(!(A & WithDivider)) };
+        enum { noalias = !(!(A & NoAlias)) };
+        enum { checkalias = !(!(A & CheckAlias)) };
         enum { lower = !(!(A & Lower)) };
-        enum { upper = !(A & Lower) };
+        enum { upper = !(!(A & Upper)) };
 
         enum { stor = (
                 rowmajor ? RowMajor : colmajor ? ColMajor :
@@ -295,8 +299,11 @@ namespace tmv {
                 ((A & ZeroDiag) ? "|ZeroDiag" : "") +
                 ((A & Packed) ? "|Packed" : "") +
                 ((A & Lower) ? "|Lower" : "") +
+                ((A & Upper) ? "|upper" : "") +
                 ((A & NoDivider) ? "|NoDivider" : "") +
-                ((A & WithDivider) ? "|WithDivider" : "");
+                ((A & WithDivider) ? "|WithDivider" : "") +
+                ((A & NoAlias) ? "|NoAlias" : "") +
+                ((A & CheckAlias) ? "|CheckAlias" : "");
         }
         static std::string vtext()
         {
@@ -304,7 +311,9 @@ namespace tmv {
                 std::string() +
                 ((A & Unit) ? "Unit" : "NonUnit") +
                 ((A & Conj) ? "|Conj" : "") +
-                ((A & FortranStyle) ? "|FortranStyle" : "");
+                ((A & FortranStyle) ? "|FortranStyle" : "") +
+                ((A & NoAlias) ? "|NoAlias" : "") +
+                ((A & CheckAlias) ? "|CheckAlias" : "");
         }
     };
 
@@ -2127,11 +2136,6 @@ namespace tmv {
         Singular(std::string s) throw() :
             Error("Encountered singular ",s) {}
         ~Singular() throw() {}
-        void write(std::ostream& os) const throw()
-        {
-            os << "TMV Singular: " << Error::s1 << ' ' << Error::s2 <<
-                std::endl; 
-        }
     };
 
     class NonPosDef : 
@@ -2139,17 +2143,34 @@ namespace tmv {
     {
     public:
         NonPosDef() throw() :
-            Error("Invalid non-positive-definite matrix found.") {}
+            Error("Encountered invalid non-positive-definite matrix.") {}
         NonPosDef(std::string s) throw() :
-            Error("Non-positive-definite matrix found in ",s) {}
+            Error("Encountered invalid non-positive-definite matrix in ",s) {}
         ~NonPosDef() throw() {}
-        void write(std::ostream& os) const throw()
-        {
-            os << "TMV NonPosDef: " << Error::s1 << ' ' << Error::s2 << 
-                std::endl; 
-        }
     };
 #endif
+
+    static inline void ThrowSingular(std::string s)
+    {
+#ifdef TMV_NO_THROW
+        std::cerr<<"Encountered singular "<<s<<std::endl;
+        exit(1);
+#else
+        throw Singular(s);
+#endif
+    }
+
+    static inline void ThrowNonPosDef(std::string s)
+    {
+#ifdef TMV_NO_THROW
+        std::cerr<<"Encountered invalid non-positive-definite matrix in "<<
+            s<<std::endl;
+        exit(1);
+#else
+        throw NonPosDef(s);
+#endif
+    }
+
 
 #ifdef TMV_WARN
     // defined in TMV_Vector.cpp
@@ -2256,18 +2277,55 @@ namespace tmv {
     static inline std::string TMV_Text(DivType d)
     {
         return 
-            d==XX ? "XX" :
             d==LU ? "LU" :
             d==CH ? "CH" :
             d==QR ? "QR" :
             d==QRP ? "QRP" :
-            d==SV ? "SV" :
-            ( std::string("unkown DivType: ") + 
-              // This is a quick and dirty int->string for int < 1000
-              char('0' + (d/100)) + 
-              char('0' + (d%100)/10) + 
-              char('0' + (d%10)) );
+            d==SV ? "SV" : "XX";
     }
+
+    static inline std::string TMV_Text(ConjType c)
+    { return c==Conj ? "Conj" : "NonConj"; }
+
+    static inline std::string TMV_Text(IndexStyle i)
+    { return i==CStyle ? "CStyle" : "FortranStyle"; }
+
+    static inline std::string TMV_Text(StepType s)
+    { return s==Unit ? "Unit" : "NonUnit"; }
+
+    static inline std::string TMV_Text(StorageType s)
+    { 
+        return 
+            s==ColMajor ? "ColMajor" : 
+            s==RowMajor ? "RowMajor" :
+            s==DiagMajor ? "DiagMajor" :
+            "NonMajor";
+    }
+
+    static inline std::string TMV_Text(DiagType d)
+    { 
+        return 
+            d==NonUnitDiag ? "NonUnitDiag" :
+            d==UnitDiag ? "UnitDiag" :
+            d==ZeroDiag ? "ZeroDiag" :
+            "UnknownDiag";
+    }
+
+    static inline std::string TMV_Text(PackType p)
+    { return p==Packed ? "Packed" : "NonPacked"; }
+
+    static inline std::string TMV_Text(DivStatus d)
+    { return d==WithDivider ? "WithDivider" : "NoDivider"; }
+
+    static inline std::string TMV_Text(AliasStatus a)
+    { return a==CheckAlias ? "CheckAlias" : "NoAlias"; }
+
+    static inline std::string TMV_Text(UpLoType u)
+    { return u==Upper ? "Upper" : "Lower"; }
+#else
+    template <class T>
+    static inline std::string TMV_Text(const T&)
+    { return std::string(); }
 #endif
 
 #ifdef TMV_NO_STL_AUTO_PTR

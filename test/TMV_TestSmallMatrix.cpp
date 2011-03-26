@@ -217,7 +217,7 @@ template <class T> void TestAllSmallMatrix()
     TestBasicSmallMatrix<T,42,10,tmv::ColMajor>();
 #endif
     TestSmallMatrix_Sub<T>();
-    std::cout<<"SmallMatrix<"<<tmv::TMV_Text(T())<<"> passed all basic tests\n";
+    std::cout<<"SmallMatrix<"<<Text(T())<<"> passed all basic tests\n";
 }
 
 #ifdef TEST_DOUBLE

@@ -39,7 +39,7 @@ namespace tmv {
 
     // Defined in TMV_ScaleU.cpp
     template <class T>
-    void InstScale(const T x, UpperTriMatrixView<T,NonUnitDiag> m);
+    void InstScale(const T x, UpperTriMatrixView<T> m);
 
     //
     // Matrix *= Scalar 
@@ -228,7 +228,7 @@ namespace tmv {
             TMVAssert(!m.isunit());
             typedef typename M1::value_type VT;
             VT xx = Traits<VT>::convert(T(x));
-            InstScale(xx,m.xView().viewAsNonUnitDiag());
+            InstScale(xx,m.xView());
         }
     };
 
@@ -331,8 +331,7 @@ namespace tmv {
     }
 
     template <class T>
-    static inline void InstScale(
-        const T x, LowerTriMatrixView<T,NonUnitDiag> m)
+    static inline void InstScale(const T x, LowerTriMatrixView<T> m)
     { InstScale(x,m.transpose()); }
 
 

@@ -8,6 +8,12 @@
   template void InstAddMultMM(const T3 x, \
       const ConstMatrixView<T1,C1>& m1, \
       const ConstDiagMatrixView<T2,C2>& v2, MatrixView<T3> v3); \
+  template void InstAliasMultMM(const T3 x, \
+      const ConstMatrixView<T1,C1>& m1, \
+      const ConstDiagMatrixView<T2,C2>& v2, MatrixView<T3> v3); \
+  template void InstAliasAddMultMM(const T3 x, \
+      const ConstMatrixView<T1,C1>& m1, \
+      const ConstDiagMatrixView<T2,C2>& v2, MatrixView<T3> v3); \
 
 
 Def1(T,NonConj,T,NonConj,T)

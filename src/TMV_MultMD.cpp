@@ -37,6 +37,8 @@
 #include "tmv/TMV_MultXM.h"
 #include "tmv/TMV_ScaleM.h"
 #include "tmv/TMV_SmallMatrix.h"
+#include "tmv/TMV_ProdXM.h"
+#include "tmv/TMV_MultXD.h"
 
 namespace tmv {
 
@@ -94,6 +96,18 @@ namespace tmv {
         DoMultEq(m1cv,m2);
         InstAddMultXM(x,m1c.constView().xView(),m3);
     }
+
+    template <class T1, int C1, class T2, int C2, class T3>  
+    void InstAliasMultMM(
+        const T3 x, const ConstMatrixView<T1,C1>& m1,
+        const ConstDiagMatrixView<T2,C2>& m2, MatrixView<T3> m3)
+    { InlineAliasMultMM<false>(Scaling<0,T3>(x),m1,m2,m3); }
+
+    template <class T1, int C1, class T2, int C2, class T3>  
+    void InstAliasAddMultMM(
+        const T3 x, const ConstMatrixView<T1,C1>& m1,
+        const ConstDiagMatrixView<T2,C2>& m2, MatrixView<T3> m3)
+    { InlineAliasMultMM<true>(Scaling<0,T3>(x),m1,m2,m3); }
 
 
 #define InstFile "TMV_MultMD.inst"

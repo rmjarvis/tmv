@@ -44,32 +44,32 @@
 namespace tmv {
 
     template <class M1, class M2>
-    static void NonBlasLDivEq(M1& m1, const M2& m2)
+    static void NonBlasTriLDivEq(M1& m1, const M2& m2)
     {
         TMVAssert(m1.isrm() || m1.iscm());
         TMVAssert(m2.isrm() || m2.iscm());
         if (m1.iscm()) {
             typename M1::cmview_type m1cm = m1.cmView();
             if (m2.iscm())
-                InlineLDivEq(m1cm,m2.cmView());
+                InlineTriLDivEq(m1cm,m2.cmView());
             else
-                InlineLDivEq(m1cm,m2.rmView());
+                InlineTriLDivEq(m1cm,m2.rmView());
         } else {
             typename M1::rmview_type m1rm = m1.rmView();
             if (m2.iscm())
-                InlineLDivEq(m1rm,m2.cmView());
+                InlineTriLDivEq(m1rm,m2.cmView());
             else
-                InlineLDivEq(m1rm,m2.rmView());
+                InlineTriLDivEq(m1rm,m2.rmView());
         }
     }
 
 #ifdef BLAS
     template <class T1, class M2, class T2> 
-    static inline void BlasLDivEq(MatrixView<T1> A, const M2& B, T2)
-    { NonBlasLDivEq(A,B); }
+    static inline void BlasTriLDivEq(MatrixView<T1> A, const M2& B, T2)
+    { NonBlasTriLDivEq(A,B); }
 #ifdef TMV_INST_DOUBLE
     template <class M2> 
-    static void BlasLDivEq(MatrixView<double> A, const M2& B, double )
+    static void BlasTriLDivEq(MatrixView<double> A, const M2& B, double )
     {
         TMVAssert(B.size() == A.colsize());
         TMVAssert(A.colsize()>0);
@@ -92,7 +92,7 @@ namespace tmv {
             BLASP(A.ptr()),BLASV(lda) BLAS1 BLAS1 BLAS1 BLAS1);
     }
     template <class M2>
-    static void BlasLDivEq(
+    static void BlasTriLDivEq(
         MatrixView<std::complex<double> > A, const M2& B, std::complex<double> )
     {
         TMVAssert(B.size() == A.colsize());
@@ -126,7 +126,7 @@ namespace tmv {
         }
     }
     template <class M2>
-    static void BlasLDivEq(
+    static void BlasTriLDivEq(
         MatrixView<std::complex<double> > A, const M2& B, double )
     {
         TMVAssert(B.size() == A.colsize());
@@ -151,17 +151,17 @@ namespace tmv {
                 BLASP((double*)A.ptr()),BLASV(lda) BLAS1 BLAS1 BLAS1 BLAS1);
         } else {
             Matrix<double,ColMajor> A1 = A.realPart();
-            BlasLDivEq(A1.xView(),B,double(0));
+            BlasTriLDivEq(A1.xView(),B,double(0));
             A.realPart() = A1;
             A1 = A.imagPart();
-            BlasLDivEq(A1.xView(),B,double(0));
+            BlasTriLDivEq(A1.xView(),B,double(0));
             A.imagPart() = A1;
         }
     }
 #endif
 #ifdef TMV_INST_FLOAT
     template <class M2> 
-    static void BlasLDivEq(MatrixView<float> A, const M2& B, float )
+    static void BlasTriLDivEq(MatrixView<float> A, const M2& B, float )
     {
         TMVAssert(B.size() == A.colsize());
         TMVAssert(A.colsize()>0);
@@ -184,7 +184,7 @@ namespace tmv {
             BLASP(A.ptr()),BLASV(lda) BLAS1 BLAS1 BLAS1 BLAS1);
     }
     template <class M2>
-    static void BlasLDivEq(
+    static void BlasTriLDivEq(
         MatrixView<std::complex<float> > A, const M2& B, std::complex<float> )
     {
         TMVAssert(B.size() == A.colsize());
@@ -218,7 +218,7 @@ namespace tmv {
         }
     }
     template <class M2>
-    static void BlasLDivEq(
+    static void BlasTriLDivEq(
         MatrixView<std::complex<float> > A, const M2& B, float )
     {
         TMVAssert(B.size() == A.colsize());
@@ -243,10 +243,10 @@ namespace tmv {
                 BLASP((float*)A.ptr()),BLASV(lda) BLAS1 BLAS1 BLAS1 BLAS1);
         } else {
             Matrix<float,ColMajor> A1 = A.realPart();
-            BlasLDivEq(A1.xView(),B,float(0));
+            BlasTriLDivEq(A1.xView(),B,float(0));
             A.realPart() = A1;
             A1 = A.imagPart();
-            BlasLDivEq(A1.xView(),B,float(0));
+            BlasTriLDivEq(A1.xView(),B,float(0));
             A.imagPart() = A1;
         }
     }
@@ -254,14 +254,14 @@ namespace tmv {
 #endif // BLAS
 
     template <class T1, class M2>
-    static void DoLDivEq(MatrixView<T1> m1, const M2& m2)
+    static void DoTriLDivEq(MatrixView<T1> m1, const M2& m2)
     {
         typedef typename M2::value_type T2;
 #ifdef BLAS
         const T2 t2(0);
         if ((m1.isrm() && m1.stepi()>0) || (m1.iscm() && m1.stepj()>0) ) {
             if ((m2.isrm() && m2.stepi()>0) || (m2.iscm() && m2.stepj()>0)) {
-                BlasLDivEq(m1,m2,t2);
+                BlasTriLDivEq(m1,m2,t2);
             } else {
                 Matrix<T2,ColMajor|NoDivider> m2c(m2.size(),m2.size());
                 typedef typename TypeSelect<M2::_upper,
@@ -269,17 +269,17 @@ namespace tmv {
                         LowerTriMatrixView<T2,ColMajor> >::type M2t;
                 M2t m2ct = Maybe<M2::_upper>::uppertri(m2c,m2.dt());
                 InstCopy(m2,m2ct.xView());
-                NonBlasLDivEq(m1,m2ct.constView());
+                NonBlasTriLDivEq(m1,m2ct.constView());
             }
         } else {
             Matrix<T1,ColMajor|NoDivider> m1c(m1);
-            DoLDivEq(m1c.xView(),m2);
+            DoTriLDivEq(m1c.xView(),m2);
             InstCopy(m1c.constView().xView(),m1);
         }
 #else
         if (m1.iscm() || m1.isrm()) {
             if (m2.iscm() || m2.isrm()) {
-                NonBlasLDivEq(m1,m2);
+                NonBlasTriLDivEq(m1,m2);
             } else {
                 Matrix<T2,ColMajor|NoDivider> m2c(m2.size(),m2.size());
                 typedef typename TypeSelect<M2::_upper,
@@ -287,25 +287,50 @@ namespace tmv {
                         LowerTriMatrixView<T2,ColMajor> >::type M2t;
                 M2t m2ct = Maybe<M2::_upper>::uppertri(m2c,m2.dt());
                 InstCopy(m2,m2ct.xView());
-                NonBlasLDivEq(m1,m2ct.constView());
+                NonBlasTriLDivEq(m1,m2ct.constView());
             }
         } else {
             Matrix<T1,ColMajor|NoDivider> m1c(m1);
-            DoLDivEq(m1c.xView(),m2);
+            DoTriLDivEq(m1c.xView(),m2);
             InstCopy(m1c.constView().xView(),m1);
         }
 #endif
     }
 
     template <class T1, class T2, int C2>
-    void InstLDivEq(
+    void InstTriLDivEq(
         MatrixView<T1> m1, const ConstUpperTriMatrixView<T2,C2>& m2)
-    { DoLDivEq(m1,m2); }
+    { DoTriLDivEq(m1,m2); }
 
     template <class T1, class T2, int C2>
-    void InstLDivEq(
+    void InstTriLDivEq(
         MatrixView<T1> m1, const ConstLowerTriMatrixView<T2,C2>& m2)
-    { DoLDivEq(m1,m2); }
+    { DoTriLDivEq(m1,m2); }
+
+    template <class T1, class T2, int C2>
+    void InstAliasTriLDivEq(
+        MatrixView<T1> m1, const ConstUpperTriMatrixView<T2,C2>& m2)
+    { InlineAliasTriLDivEq(m1,m2); }
+
+    template <class T1, class T2, int C2>
+    void InstAliasTriLDivEq(
+        MatrixView<T1> m1, const ConstLowerTriMatrixView<T2,C2>& m2)
+    { InlineAliasTriLDivEq(m1,m2); }
+
+#if 0
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasLDivMM(
+        const T3 x, const ConstMatrixView<T1,C1>& m1,
+        const ConstUpperTriMatrixView<T2,C2>& m2, MatrixView<T3> m3)
+    { InlineAliasLDivMM(x,m1,m2,m3); }
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasLDivMM(
+        const T3 x, const ConstMatrixView<T1,C1>& m1,
+        const ConstLowerTriMatrixView<T2,C2>& m2, MatrixView<T3> m3);
+    { InlineAliasLDivMM(x,m1,m2,m3); }
+#endif
+
+
 
 #define InstFile "TMV_DivMU.inst"
 #include "TMV_Inst.h"

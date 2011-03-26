@@ -439,7 +439,7 @@ template <class T> void TestMatrix()
     TestBasicMatrix_2<T,tmv::ColMajor>();
     TestBasicMatrix_IO<T,tmv::RowMajor>();
     TestBasicMatrix_IO<T,tmv::ColMajor>();
-    std::cout<<"Matrix<"<<tmv::TMV_Text(T())<<"> passed all basic tests\n";
+    std::cout<<"Matrix<"<<Text(T())<<"> passed all basic tests\n";
 #endif
 
 #if 1
@@ -451,7 +451,7 @@ template <class T> void TestMatrix()
     TestMatrixArith_6<T>();
     TestMatrixArith_7<T>();
     TestMatrixArith_8<T>();
-    std::cout<<"Matrix<"<<tmv::TMV_Text(T())<<"> Arithmetic passed all tests\n";
+    std::cout<<"Matrix<"<<Text(T())<<"> Arithmetic passed all tests\n";
 #endif
 }
 

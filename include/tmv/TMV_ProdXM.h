@@ -433,6 +433,8 @@ namespace tmv {
         const ProdXM<ix1,T1,M1>& m1, const ProdXM<ix2,T2,M2>& m2)
     { return SameStorage(m1.getM().mat(),m2.getM().mat()); }
 #endif
+
+#ifdef TMV_DEBUG
     template <int ix, class T, class M>
     static inline std::string TMV_Text(const ProdXM<ix,T,M>& pxm)
     {
@@ -441,6 +443,7 @@ namespace tmv {
         s << " , "<<TMV_Text(pxm.getM())<<" >";
         return s.str();
     }
+#endif
 
 } // namespace tmv
 

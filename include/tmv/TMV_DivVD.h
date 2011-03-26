@@ -41,8 +41,12 @@ namespace tmv {
     // Defined in TMV_DivVD.cpp
     template <class T1, int C1, class T2, int C2, class T3>
     void InstElemDivVV(
-        const T3 x,
-        const ConstVectorView<T1,C1>& v1,
+        const T3 x, const ConstVectorView<T1,C1>& v1,
+        const ConstVectorView<T2,C2>& v2, VectorView<T3> v3);
+
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasElemDivVV(
+        const T3 x, const ConstVectorView<T1,C1>& v1,
         const ConstVectorView<T2,C2>& v2, VectorView<T3> v3);
 
     //
@@ -713,6 +717,19 @@ namespace tmv {
         }
     };
 
+    // algo 91: Call inst alias
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<91,s,ix,T,V1,V2,V3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
+        {
+            typedef typename V3::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
+            InstAliasElemDivVV(xx,v1.xView(),v2.xView(),v3.xView()); 
+        }
+    };
+
     // algo 97: Conjugate
     template <int s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<97,s,ix,T,V1,V2,V3>
@@ -731,9 +748,27 @@ namespace tmv {
         }
     };
 
-    // algo 99: Check for aliases
+    // algo 197: Conjugate
     template <int s, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<99,s,ix,T,V1,V2,V3>
+    struct ElemDivVV_Helper<197,s,ix,T,V1,V2,V3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
+        {
+            typedef typename V1::const_conjugate_type V1c;
+            typedef typename V2::const_conjugate_type V2c;
+            typedef typename V3::conjugate_type V3c;
+            V1c v1c = v1.conjugate();
+            V2c v2c = v2.conjugate();
+            V3c v3c = v3.conjugate();
+            ElemDivVV_Helper<99,s,ix,T,V1c,V2c,V3c>::call(
+                TMV_CONJ(x),v1c,v2c,v3c);
+        }
+    };
+
+    // algo 98: Inline check for aliases
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<98,s,ix,T,V1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
@@ -767,6 +802,34 @@ namespace tmv {
                     NoAliasCopy(v3c,v3);
                 }
             }
+        }
+    };
+
+    // algo 99: Check for aliases
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<99,s,ix,T,V1,V2,V3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
+        {
+            typedef typename V1::value_type T1;
+            typedef typename V2::value_type T2;
+            typedef typename V3::value_type T3;
+            const bool inst =
+                (s == UNKNOWN || s > 16) &&
+#ifdef TMV_INST_MIX
+                Traits2<T1,T3>::samebase &&
+                Traits2<T2,T3>::samebase &&
+#else
+                Traits2<T1,T3>::sametype &&
+                Traits2<T2,T3>::sametype &&
+#endif
+                Traits<T3>::isinst;
+            const int algo =
+                V3::_conj ? 197 : 
+                inst ? 91 : 
+                98;
+            ElemDivVV_Helper<algo,s,ix,T,V1,V2,V3>::call(x,v1,v2,v3); 
         }
     };
 
@@ -851,10 +914,7 @@ namespace tmv {
                 VStepHelper<V1,V3>::noclobber &&
                 VStepHelper<V2,V3>::noclobber;
             const bool checkalias =
-                V1::_size == UNKNOWN && 
-                V2::_size == UNKNOWN && 
-                V3::_size == UNKNOWN &&
-                !noclobber;
+                V3::_checkalias && !noclobber;
             const int algo =
                 checkalias ? 99 : 
                 -2;
@@ -923,6 +983,26 @@ namespace tmv {
     }
 
     template <int ix, class T, class V1, class V2, class V3>
+    static inline void InlineAliasElemDivVV(
+        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
+        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
+    {
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
+        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
+        TMVAssert(v1.size() == v2.size());
+        TMVAssert(v1.size() == v3.size());
+        const int s12 = Sizes<V1::_size,V2::_size>::size;
+        const int s = Sizes<s12,V3::_size>::size;
+        typedef typename V1::const_cview_type V1v;
+        typedef typename V2::const_cview_type V2v;
+        typedef typename V3::cview_type V3v;
+        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
+        TMV_MAYBE_CREF(V2,V2v) v2v = v2.cView();
+        TMV_MAYBE_REF(V3,V3v) v3v = v3.cView();
+        ElemDivVV_Helper<98,s,ix,T,V1v,V2v,V3v>::call(x,v1v,v2v,v3v);
+    }
+
+    template <int ix, class T, class V1, class V2, class V3>
     static inline void AliasElemDivVV(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
@@ -947,14 +1027,7 @@ namespace tmv {
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
-        if (m2.isSingular()) {
-#ifdef TMV_NO_THROW
-            std::cerr<<"Singular DiagMatrix found\n";
-            exit(1);
-#else
-            throw Singular("DiagMatrix found\n");
-#endif
-        }
+        if (m2.isSingular()) ThrowSingular("DiagMatrix");
         ElemDivVV(x,v1,m2.diag(),v3);
     }
 
@@ -963,14 +1036,7 @@ namespace tmv {
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
-        if (m2.isSingular()) {
-#ifdef TMV_NO_THROW
-            std::cerr<<"Singular DiagMatrix found\n";
-            exit(1);
-#else
-            throw Singular("DiagMatrix found\n");
-#endif
-        }
+        if (m2.isSingular()) ThrowSingular("DiagMatrix");
         ElemDivVV(x,v1,m2.diag(),v3);
     }
 
@@ -979,14 +1045,7 @@ namespace tmv {
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
-        if (m2.isSingular()) {
-#ifdef TMV_NO_THROW
-            std::cerr<<"Singular DiagMatrix found\n";
-            exit(1);
-#else
-            throw Singular("DiagMatrix found\n");
-#endif
-        }
+        if (m2.isSingular()) ThrowSingular("DiagMatrix");
         ElemDivVV(x,v1,m2.diag(),v3);
     }
 
@@ -995,257 +1054,9 @@ namespace tmv {
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
-        if (m2.isSingular()) {
-#ifdef TMV_NO_THROW
-            std::cerr<<"Singular DiagMatrix found\n";
-            exit(1);
-#else
-            throw Singular("DiagMatrix found\n");
-#endif
-        }
+        if (m2.isSingular()) ThrowSingular("DiagMatrix");
         ElemDivVV(x,v1,m2.diag(),v3);
     }
-
-    //
-    // v1 /= m2
-    //
-
-    template <class V1, class M2>
-    static inline void LDivEq(
-        BaseVector_Mutable<V1>& v1, const BaseMatrix_Diag<M2>& m2)
-    { LDiv(Scaling<1,typename V1::real_type>(),v1.vec(),m2,v1); }
-    template <class V1, class M2>
-    static inline void NoAliasLDivEq(
-        BaseVector_Mutable<V1>& v1, const BaseMatrix_Diag<M2>& m2)
-    { NoAliasLDiv(Scaling<1,typename V1::real_type>(),v1.vec(),m2,v1); }
-    template <class V1, class M2>
-    static inline void AliasLDivEq(
-        BaseVector_Mutable<V1>& v1, const BaseMatrix_Diag<M2>& m2)
-    { AliasLDiv(Scaling<1,typename V1::real_type>(),v1.vec(),m2,v1); }
-
-    //
-    // v3 = v1 % m2
-    //
-
-    template <int ix, class T, class V1, class M2, class V3>
-    static inline void RDiv(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
-    { LDiv(x,v1,m2,v3); }
-    template <int ix, class T, class V1, class M2, class V3>
-    static inline void NoAliasRDiv(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
-    { NoAliasLDiv(x,v1,m2,v3); }
-    template <int ix, class T, class V1, class M2, class V3>
-    static inline void AliasRDiv(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
-    { AliasLDiv(x,v1,m2,v3); }
-
-    //
-    // v1 %= m2
-    //
-
-    template <class V1, class M2>
-    static inline void RDivEq(
-        BaseVector_Mutable<V1>& v1, const BaseMatrix_Diag<M2>& m2)
-    { LDivEq(v1,m2); }
-    template <class V1, class M2>
-    static inline void NoAliasRDivEq(
-        BaseVector_Mutable<V1>& v1, const BaseMatrix_Diag<M2>& m2)
-    { NoAliasLDivEq(v1,m2); }
-    template <class V1, class M2>
-    static inline void AliasRDivEq(
-        BaseVector_Mutable<V1>& v1, const BaseMatrix_Diag<M2>& m2)
-    { AliasLDivEq(v1,m2); }
-
-    //
-    // m3 = m1 / m2
-    //
-    
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void LDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Diag_Mutable<M3>& m3)
-    {
-        typename M3::diag_type m3d = m3.diag();
-        LDiv(x,m1.diag(),m2,m3d); 
-    }
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void NoAliasLDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Diag_Mutable<M3>& m3)
-    {
-        typename M3::diag_type m3d = m3.diag();
-        NoAliasLDiv(x,m1.diag(),m2,m3d); 
-    }
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void AliasLDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Diag_Mutable<M3>& m3)
-    {
-        typename M3::diag_type m3d = m3.diag();
-        AliasLDiv(x,m1.diag(),m2,m3d); 
-    }
-
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void LDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        typename M3::diag_type m3d = m3.diag();
-        LDiv(x,m1.diag(),m2,m3d); 
-        if (m1.size() > 1) {
-            m3.upperTri().offDiag().setZero();
-            m3.lowerTri().offDiag().setZero();
-        }
-    }
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void NoAliasLDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        typename M3::diag_type m3d = m3.diag();
-        m3.setZero();
-        NoAliasLDiv(x,m1.diag(),m2,m3d); 
-    }
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void AliasLDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        typename M3::diag_type m3d = m3.diag();
-        AliasLDiv(x,m1.diag(),m2,m3d); 
-        if (m1.size() > 1) {
-            m3.upperTri().offDiag().setZero();
-            m3.lowerTri().offDiag().setZero();
-        }
-    }
-
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void LDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
-    {
-        typename M3::diag_type m3d = m3.diag();
-        LDiv(x,m1.diag(),m2,m3d); 
-        if (m1.size() > 1) m3.offDiag().setZero();
-    }
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void NoAliasLDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
-    {
-        typename M3::diag_type m3d = m3.diag();
-        m3.setZero();
-        NoAliasLDiv(x,m1.diag(),m2,m3d); 
-    }
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void AliasLDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
-    {
-        typename M3::diag_type m3d = m3.diag();
-        AliasLDiv(x,m1.diag(),m2,m3d); 
-        if (m1.size() > 1) m3.offDiag().setZero();
-    }
-
-
-    //
-    // m1 /= m2
-    //
-
-    template <class M1, class M2>
-    static inline void LDivEq(
-        BaseMatrix_Diag_Mutable<M1>& m1, const BaseMatrix_Diag<M2>& m2)
-    {
-        typename M1::diag_type m1d = m1.mat().diag();
-        LDivEq(m1d,m2); 
-    }
-    template <class M1, class M2>
-    static inline void NoAliasLDivEq(
-        BaseMatrix_Diag_Mutable<M1>& m1, const BaseMatrix_Diag<M2>& m2)
-    {
-        typename M1::diag_type m1d = m1.mat().diag();
-        NoAliasLDivEq(m1d,m2); 
-    }
-    template <class M1, class M2>
-    static inline void AliasLDivEq(
-        BaseMatrix_Diag_Mutable<M1>& m1, const BaseMatrix_Diag<M2>& m2)
-    {
-        typename M1::diag_type m1d = m1.mat().diag();
-        AliasLDivEq(m1d,m2); 
-    }
-
-    //
-    // m3 = m1 % m2
-    //
-
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void RDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Diag_Mutable<M3>& m3)
-    { LDiv(x,m1,m2,m3.mat()); }
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void NoAliasRDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Diag_Mutable<M3>& m3)
-    { NoAliasLDiv(x,m1,m2,m3.mat()); }
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void AliasRDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Diag_Mutable<M3>& m3)
-    { AliasLDiv(x,m1,m2,m3.mat()); }
-
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void RDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
-    { LDiv(x,m1,m2,m3.mat()); }
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void NoAliasRDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
-    { NoAliasLDiv(x,m1,m2,m3.mat()); }
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void AliasRDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
-    { AliasLDiv(x,m1,m2,m3.mat()); }
-
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void RDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
-    { LDiv(x,m1,m2,m3.mat()); }
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void NoAliasRDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
-    { NoAliasLDiv(x,m1,m2,m3.mat()); }
-    template <int ix, class T, class M1, class M2, class M3>
-    static inline void AliasRDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
-    { AliasLDiv(x,m1,m2,m3.mat()); }
-
-    //
-    // m1 %= m2
-    //
-
-    template <class M1, class M2>
-    static inline void RDivEq(
-        BaseMatrix_Diag_Mutable<M1>& m1, const BaseMatrix_Diag<M2>& m2)
-    { LDivEq(m1,m2); }
-    template <class M1, class M2>
-    static inline void NoAliasRDivEq(
-        BaseMatrix_Diag_Mutable<M1>& m1, const BaseMatrix_Diag<M2>& m2)
-    { NoAliasLDivEq(m1,m2); }
-    template <class M1, class M2>
-    static inline void AliasRDivEq(
-        BaseMatrix_Diag_Mutable<M1>& m1, const BaseMatrix_Diag<M2>& m2)
-    { AliasLDivEq(m1,m2); }
 
 } // namespace tmv
 

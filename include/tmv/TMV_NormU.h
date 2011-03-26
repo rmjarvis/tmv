@@ -83,6 +83,11 @@ namespace tmv {
         typedef typename Traits<ret>::real_type RT;
         static ret call(const M1& m, const Scaling<ix,RT>& x)
         {
+#ifdef PRINTALGO_NormU
+            std::cout<<"SumElementsU algo 1: "<<
+                TMV_Text(comp)<<"  "<<RT(x)<<std::endl;
+#endif
+
             const int N = (s == UNKNOWN ? m.size() : s);
             typedef typename M1::const_offdiag_type Mo;
             Mo mo = m.offDiag();
@@ -99,6 +104,10 @@ namespace tmv {
         typedef typename Traits<ret>::real_type RT;
         static ret call(const M1& m, const Scaling<ix,RT>& x)
         {
+#ifdef PRINTALGO_NormU
+            std::cout<<"SumElementsU algo 2: "<<
+                TMV_Text(comp)<<"  "<<RT(x)<<std::endl;
+#endif
             if (m.isunit()) 
                 return SumElementsU_Helper<1,s,comp,ix,ret,M1>::call(m,x);
             else 
@@ -113,6 +122,10 @@ namespace tmv {
         typedef typename Traits<ret>::real_type RT;
         static ret call(const M1& m, const Scaling<ix,RT>& x)
         {
+#ifdef PRINTALGO_NormU
+            std::cout<<"SumElementsU algo 11: "<<
+                TMV_Text(comp)<<"  "<<RT(x)<<std::endl;
+#endif
             const int N = (s == UNKNOWN ? m.size() : s);
             typedef typename M1::const_col_sub_type Mc;
             ret sum(0);
@@ -131,6 +144,10 @@ namespace tmv {
         typedef typename Traits<ret>::real_type RT;
         static ret call(const M1& m, const Scaling<ix,RT>& x)
         {
+#ifdef PRINTALGO_NormU
+            std::cout<<"SumElementsU algo 12: "<<
+                TMV_Text(comp)<<"  "<<RT(x)<<std::endl;
+#endif
             const int N = (s == UNKNOWN ? m.size() : s);
             typedef typename M1::const_row_sub_type Mr;
             ret sum(0);
@@ -188,7 +205,13 @@ namespace tmv {
             { return ret(0); }
         };
         static ret call(const M1& m, const Scaling<ix,RT>& x)
-        { return Unroller<0,s,0,s>::unroll(m,x); }
+        {
+#ifdef PRINTALGO_NormU
+            std::cout<<"SumElementsU algo 15: "<<
+                TMV_Text(comp)<<"  "<<RT(x)<<std::endl;
+#endif
+            return Unroller<0,s,0,s>::unroll(m,x); 
+        }
     };
 
     // algo 16: Fully unroll by rows
@@ -236,7 +259,13 @@ namespace tmv {
             { return ret(0); }
         };
         static ret call(const M1& m, const Scaling<ix,RT>& x)
-        { return Unroller<0,s,0,s>::unroll(m,x); }
+        {
+#ifdef PRINTALGO_NormU
+            std::cout<<"SumElementsU algo 16: "<<
+                TMV_Text(comp)<<"  "<<RT(x)<<std::endl;
+#endif
+            return Unroller<0,s,0,s>::unroll(m,x); 
+        }
     };
 
     // algo 90: Call inst
@@ -281,20 +310,6 @@ namespace tmv {
         { return InstNormSq(m.xView(),x); }
     };
     
-    // algo 95: Transpose (and go back to -3, not -2)
-    template <int s, CompType comp, int ix, class ret, class M1>
-    struct SumElementsU_Helper<95,s,comp,ix,ret,M1>
-    {
-        typedef typename Traits<ret>::real_type RT;
-
-        static ret call(const M1& m, const Scaling<ix,RT>& x)
-        {
-            typedef typename M1::const_transpose_type Mt;
-            Mt mt = m.transpose();
-            return SumElementsU_Helper<-3,s,comp,ix,ret,Mt>::call(mt,x);
-        }
-    };
-
     // algo 96: Transpose
     template <int s, CompType comp, int ix, class ret, class M1>
     struct SumElementsU_Helper<96,s,comp,ix,ret,M1>
@@ -309,6 +324,20 @@ namespace tmv {
         }
     };
     
+    // algo 396: Transpose 
+    template <int s, CompType comp, int ix, class ret, class M1>
+    struct SumElementsU_Helper<396,s,comp,ix,ret,M1>
+    {
+        typedef typename Traits<ret>::real_type RT;
+
+        static ret call(const M1& m, const Scaling<ix,RT>& x)
+        {
+            typedef typename M1::const_transpose_type Mt;
+            Mt mt = m.transpose();
+            return SumElementsU_Helper<-3,s,comp,ix,ret,Mt>::call(mt,x);
+        }
+    };
+
     // algo 97: Conjugate
     template <int s, CompType comp, int ix, class ret, class M1>
     struct SumElementsU_Helper<97,s,comp,ix,ret,M1>
@@ -362,6 +391,14 @@ namespace tmv {
             const int algo = 
                 unroll ? ( M1::_colmajor ? 15 : 16 ) :
                 M1::_colmajor ? 11 : 12;
+#ifdef PRINTALGO_NormU
+            std::cout<<"Inline SumElementsU\n";
+            std::cout<<"m = "<<TMV_Text(m)<<std::endl;
+            std::cout<<"comp = "<<TMV_Text(comp)<<std::endl;
+            std::cout<<"x = "<<ix<<"  "<<RT(x)<<std::endl;
+            std::cout<<"unroll = "<<unroll<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             return SumElementsU_Helper<algo,s,comp,ix,ret,M1>::call(m,x);
         }
     };
@@ -375,10 +412,15 @@ namespace tmv {
         static ret call(const M1& m, const Scaling<ix,RT>& x)
         {
             const int algo = 
+                M1::_lower ? 396 :
                 M1::_unit ? 1 :
                 M1::_unknowndiag ? 2 :
-                M1::_lower ? 95 :
                 -4;
+#ifdef PRINTALGO_NormU
+            std::cout<<"SumElementsU algo -3: "<<
+                TMV_Text(comp)<<"  "<<RT(x)<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             return SumElementsU_Helper<algo,s,comp,ix,ret,M1>::call(m,x);
         }
     };
@@ -682,19 +724,6 @@ namespace tmv {
         { return InstMaxAbs2Element(m.xView()); }
     };
 
-    // algo 95: Transpose, and go back to -3 rather than -2
-    template <int s, CompType comp, class M1>
-    struct MaxAbsElementU_Helper<95,s,comp,M1>
-    {
-        typedef typename Component<comp,typename M1::value_type>::ret_type ret;
-        static ret call(const M1& m)
-        {
-            typedef typename M1::const_transpose_type Mt;
-            Mt mt = m.transpose();
-            return MaxAbsElementU_Helper<-3,s,comp,Mt>::call(mt);
-        }
-    };
-
     // algo 96: Transpose
     template <int s, CompType comp, class M1>
     struct MaxAbsElementU_Helper<96,s,comp,M1>
@@ -705,6 +734,19 @@ namespace tmv {
             typedef typename M1::const_transpose_type Mt;
             Mt mt = m.transpose();
             return MaxAbsElementU_Helper<-2,s,comp,Mt>::call(mt);
+        }
+    };
+
+    // algo 396: Transpose
+    template <int s, CompType comp, class M1>
+    struct MaxAbsElementU_Helper<396,s,comp,M1>
+    {
+        typedef typename Component<comp,typename M1::value_type>::ret_type ret;
+        static ret call(const M1& m)
+        {
+            typedef typename M1::const_transpose_type Mt;
+            Mt mt = m.transpose();
+            return MaxAbsElementU_Helper<-3,s,comp,Mt>::call(mt);
         }
     };
 
@@ -745,7 +787,7 @@ namespace tmv {
         static ret call(const M1& m)
         {
             const int algo = 
-                M1::_lower ? 95 : 
+                M1::_lower ? 396 : 
                 M1::_unit ? 1 : 
                 M1::_unknowndiag ? 2 :
                 -4;

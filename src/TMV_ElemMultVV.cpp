@@ -32,6 +32,8 @@
 
 #include "tmv/TMV_ElemMultVV.h"
 #include "tmv/TMV_Vector.h"
+#include "tmv/TMV_SmallVector.h"
+#include "tmv/TMV_MultXV.h"
 
 namespace tmv {
 
@@ -97,6 +99,18 @@ namespace tmv {
         } else 
             DoElemMultVV<true>(x,v1,v2,v3);
     }
+
+    template <class T1, int C1, class T2, int C2, class T3> 
+    void InstAliasElemMultVV(
+        const T3 x, const ConstVectorView<T1,C1>& v1,
+        const ConstVectorView<T2,C2>& v2, VectorView<T3> v3)
+    { InlineAliasElemMultVV<false>(Scaling<0,T3>(x),v1,v2,v3); }
+
+    template <class T1, int C1, class T2, int C2, class T3> 
+    void InstAliasAddElemMultVV(
+        const T3 x, const ConstVectorView<T1,C1>& v1,
+        const ConstVectorView<T2,C2>& v2, VectorView<T3> v3)
+    { InlineAliasElemMultVV<true>(Scaling<0,T3>(x),v1,v2,v3); }
 
 #define InstFile "TMV_ElemMultVV.inst"
 #include "TMV_Inst.h"

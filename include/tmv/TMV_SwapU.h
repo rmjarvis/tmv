@@ -39,8 +39,9 @@ namespace tmv {
 
     // Defined in TMV_TriMatrix.cpp
     template <class T, int C1>
-    void InstSwap(
-        UpperTriMatrixView<T,C1> m1, UpperTriMatrixView<T> m2); 
+    void InstSwap(UpperTriMatrixView<T,C1> m1, UpperTriMatrixView<T> m2); 
+    template <class T, int C1>
+    void InstAliasSwap(UpperTriMatrixView<T,C1> m1, UpperTriMatrixView<T> m2); 
 
     //
     // Swap Matrices
@@ -246,6 +247,14 @@ namespace tmv {
         { InstSwap(m1.xView(),m2.xView()); }
     };
 
+    // algo 91: Call inst alias
+    template <int s, class M1, class M2>
+    struct SwapU_Helper<91,s,M1,M2>
+    {
+        static void call(M1& m1, M2& m2)
+        { InstAliasSwap(m1.xView(),m2.xView()); }
+    };
+
     // algo 96: Transpose
     template <int s, class M1, class M2>
     struct SwapU_Helper<96,s,M1,M2>
@@ -257,6 +266,20 @@ namespace tmv {
             M1t m1t = m1.transpose();
             M2t m2t = m2.transpose();
             SwapU_Helper<-2,s,M1t,M2t>::call(m1t,m2t);
+        }       
+    };          
+
+    // algo 196: Transpose
+    template <int s, class M1, class M2>
+    struct SwapU_Helper<196,s,M1,M2>
+    {
+        static void call(M1& m1, M2& m2)
+        {
+            typedef typename M1::transpose_type M1t;
+            typedef typename M2::transpose_type M2t;
+            M1t m1t = m1.transpose();
+            M2t m2t = m2.transpose();
+            SwapU_Helper<99,s,M1t,M2t>::call(m1t,m2t);
         }       
     };          
 
@@ -274,9 +297,23 @@ namespace tmv {
         }       
     };          
 
-    // algo 99: Check for aliases
+    // algo 197: Conjugate
     template <int s, class M1, class M2>
-    struct SwapU_Helper<99,s,M1,M2>
+    struct SwapU_Helper<197,s,M1,M2>
+    {
+        static void call(M1& m1, M2& m2)
+        {
+            typedef typename M1::conjugate_type M1c;
+            typedef typename M2::conjugate_type M2c;
+            M1c m1c = m1.conjugate();
+            M2c m2c = m2.conjugate();
+            SwapU_Helper<99,s,M1c,M2c>::call(m1c,m2c);
+        }       
+    };          
+
+    // algo 98: Inline check for aliases
+    template <int s, class M1, class M2>
+    struct SwapU_Helper<98,s,M1,M2>
     {
         static void call(M1& m1, M2& m2)
         {
@@ -305,6 +342,27 @@ namespace tmv {
                 NoAliasCopy(m2,m1);
                 NoAliasCopy(m1c,m2);
             }
+        }
+    };
+
+    // algo 99: Check for aliases
+    template <int s, class M1, class M2>
+    struct SwapU_Helper<99,s,M1,M2>
+    {
+        static void call(M1& m1, M2& m2)
+        {
+            typedef typename M1::value_type T1;
+            typedef typename M2::value_type T2;
+            const bool inst =
+                (s == UNKNOWN || s > 16) &&
+                Traits2<T1,T2>::sametype &&
+                Traits<T1>::isinst;
+            const int algo =
+                M2::_lower ? 196 :
+                M2::_conj ? 197 :
+                inst ? 91 :
+                98;
+            SwapU_Helper<algo,s,M1,M2>::call(m1,m2);
         }
     };
 
@@ -381,9 +439,7 @@ namespace tmv {
             const bool noclobber =
                 MStepHelper<M1,M2>::opp && M1::_unit;
             const bool checkalias =
-                M1::_size == UNKNOWN &&
-                M2::_size == UNKNOWN &&
-                !noclobber;
+                (M1::_checkalias || M2::_checkalias) && !noclobber;
             const int algo =
                 checkalias ? 99 :
                 -2;
@@ -441,6 +497,23 @@ namespace tmv {
         TMV_MAYBE_REF(M1,M1v) m1v = m1.cView();
         TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
         SwapU_Helper<-3,s,M1v,M2v>::call(m1v,m2v);
+    }
+
+    template <class M1, class M2>
+    static inline void InlineAliasSwap(
+        BaseMatrix_Tri_Mutable<M1>& m1, BaseMatrix_Tri_Mutable<M2>& m2)
+    {
+        TMVStaticAssert(M1::_upper == int(M2::_upper));
+        TMVStaticAssert(M1::_unit == int(M2::_unit));
+        TMVStaticAssert((Sizes<M1::_size,M2::_size>::same));
+        TMVAssert(m1.size() == m2.size());
+        TMVAssert(m1.isunit() == m2.isunit());
+        const int s = Sizes<M1::_size,M2::_size>::size;
+        typedef typename M1::cview_type M1v;
+        typedef typename M2::cview_type M2v;
+        TMV_MAYBE_REF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
+        SwapU_Helper<98,s,M1v,M2v>::call(m1v,m2v);
     }
 
     template <class M1, class M2>

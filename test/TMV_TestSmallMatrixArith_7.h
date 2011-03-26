@@ -46,14 +46,6 @@ template <class T, int M, int N> void TestSmallMatrixArith_7(std::string label)
     if (N > 1) ca1x.col(1) *= CT(-1.1,3.6);
     if (M > 3) ca1x.row(3) += tmv::SmallVector<CT,N>(CT(1.8,9.2));
 
-#ifndef NONSQUARE
-    // These next two is to make sure Det is calculable without overflow.
-    if (N > 10) {
-        a1x /= T(N*N); a1x += T(1);
-        ca1x /= T(N*N); ca1x += T(1);
-    }
-#endif
-
     tmv::SmallMatrix<T,N,M,tmv::ColMajor> a2x = a1x.transpose();
     if (N > 1) a2x.row(1) *= T(3.1);
     if (M > 2) a2x.col(2) -= tmv::SmallVector<T,N>(4.9);
@@ -111,14 +103,14 @@ template <class T, int M, int N> void TestSmallMatrixArith_7(std::string label)
     TestMatrixArith7<T>(a3,ca3,v1s,cv1s,v2s,cv2s,label+" NonMajor Step12");
 #endif
 #if (XTEST & 2)
-    tmv::MatrixView<T,N,1> a1m = a1;
-    tmv::MatrixView<T,1,N> a2m = a2;
-    tmv::MatrixView<CT,N,1> ca1m = ca1;
-    tmv::MatrixView<CT,1,N> ca2m = ca2;
-    tmv::VectorView<T,1> v1v = v1;
-    tmv::VectorView<T,1> v2v = v2;
-    tmv::VectorView<CT,1> cv1v = cv1;
-    tmv::VectorView<CT,1> cv2v = cv2;
+    tmv::MatrixView<T,tmv::RowMajor> a1m = a1;
+    tmv::MatrixView<T,tmv::ColMajor> a2m = a2;
+    tmv::MatrixView<CT,tmv::RowMajor> ca1m = ca1;
+    tmv::MatrixView<CT,tmv::ColMajor> ca2m = ca2;
+    tmv::VectorView<T,tmv::Unit> v1v = v1;
+    tmv::VectorView<T,tmv::Unit> v2v = v2;
+    tmv::VectorView<CT,tmv::Unit> cv1v = cv1;
+    tmv::VectorView<CT,tmv::Unit> cv2v = cv2;
 
     TestMatrixArith7<T>(a1m,ca1m,v1,cv1,v2,cv2,label+" ColMajor");
     TestMatrixArith7<T>(a2m,ca2m,v2,cv2,v1,cv1,label+" RowMajor");

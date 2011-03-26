@@ -110,14 +110,14 @@ template <class T, int M, int N> void TestSmallMatrixArith_2(std::string label)
     TestMatrixArith2b<T>(a3,ca3,v1s,cv1s,v2s,cv2s,label+" NonMajor Step12");
 #endif
 #if (XTEST & 2)
-    tmv::MatrixView<T,N,1> a1m = a1;
-    tmv::MatrixView<T,1,N> a2m = a2;
-    tmv::MatrixView<CT,N,1> ca1m = ca1;
-    tmv::MatrixView<CT,1,N> ca2m = ca2;
-    tmv::VectorView<T,1> v1v = v1;
-    tmv::VectorView<T,1> v2v = v2;
-    tmv::VectorView<CT,1> cv1v = cv1;
-    tmv::VectorView<CT,1> cv2v = cv2;
+    tmv::MatrixView<T,tmv::RowMajor> a1m = a1;
+    tmv::MatrixView<T,tmv::ColMajor> a2m = a2;
+    tmv::MatrixView<CT,tmv::RowMajor> ca1m = ca1;
+    tmv::MatrixView<CT,tmv::ColMajor> ca2m = ca2;
+    tmv::VectorView<T,tmv::Unit> v1v = v1;
+    tmv::VectorView<T,tmv::Unit> v2v = v2;
+    tmv::VectorView<CT,tmv::Unit> cv1v = cv1;
+    tmv::VectorView<CT,tmv::Unit> cv2v = cv2;
 
     TestMatrixArith2a<T>(a1m,ca1m,v1,cv1,v2,cv2,label+" ColMajor");
     TestMatrixArith2a<T>(a2m,ca2m,v2,cv2,v1,cv1,label+" RowMajor");

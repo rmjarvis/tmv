@@ -767,12 +767,12 @@ template <class T> void TestTriMatrix()
     TestBasicTriMatrix<T,tmv::NonUnitDiag,tmv::RowMajor>();
     TestBasicTriMatrix<T,tmv::UnitDiag,tmv::ColMajor>();
     TestBasicTriMatrix<T,tmv::NonUnitDiag,tmv::ColMajor>();
-    std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<"> passed all basic tests\n";
+    std::cout<<"TriMatrix<"<<Text(T())<<"> passed all basic tests\n";
 #endif
 
 #if 1
     TestAllAliasMultUL<T>();
-    std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<"> passed all aliased multiplication tests\n";
+    std::cout<<"TriMatrix<"<<Text(T())<<"> passed all aliased multiplication tests\n";
 #endif
 
 #if 1
@@ -787,7 +787,7 @@ template <class T> void TestTriMatrix()
     TestTriMatrixArith_A6a<T>();
     TestTriMatrixArith_A6b<T>();
     TestTriMatrixArith_A6c<T>();
-    std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<"> (Tri/Tri) Arithmetic passed all tests\n";
+    std::cout<<"TriMatrix<"<<Text(T())<<"> (Tri/Tri) Arithmetic passed all tests\n";
 #endif
 #if 1
     TestTriMatrixArith_B4a<T>();
@@ -796,7 +796,7 @@ template <class T> void TestTriMatrix()
     TestTriMatrixArith_B5b<T>();
     TestTriMatrixArith_B6a<T>();
     TestTriMatrixArith_B6b<T>();
-    std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<"> (Matrix/Tri) Arithmetic passed all tests\n";
+    std::cout<<"TriMatrix<"<<Text(T())<<"> (Matrix/Tri) Arithmetic passed all tests\n";
 #endif
 #if 1
     TestTriMatrixArith_C4a<T>();
@@ -805,7 +805,7 @@ template <class T> void TestTriMatrix()
     TestTriMatrixArith_C5b<T>();
     TestTriMatrixArith_C6a<T>();
     TestTriMatrixArith_C6b<T>();
-    std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<"> (Diag/Tri) Arithmetic passed all tests\n";
+    std::cout<<"TriMatrix<"<<Text(T())<<"> (Diag/Tri) Arithmetic passed all tests\n";
 #endif
 }
 

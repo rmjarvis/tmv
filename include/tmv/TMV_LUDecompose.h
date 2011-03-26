@@ -77,7 +77,7 @@ namespace tmv {
 
     // Defined in TMV_LUDecompose.cpp
     template <class T>
-    void InstLU_Decompose(MatrixView<T,ColMajor> m, int* P, int& detp);
+    void InstLU_Decompose(MatrixView<T> m, int* P, int& detp);
 
     template <int algo, int cs, int rs, class M>
     struct LUDecompose_Helper;
@@ -680,7 +680,7 @@ namespace tmv {
     struct LUDecompose_Helper<90,cs,rs,M>
     {
         static void call(M& m, int* P, int& detp)
-        { InstLU_Decompose(m.xView().cmView(),P,detp); }
+        { InstLU_Decompose(m.xView(),P,detp); }
     };
 
     // algo 97: Conjugate
@@ -772,7 +772,7 @@ namespace tmv {
             const int algo = 
                 cs == 0 || rs == 0 || cs == 1 ? 0 :
                 M::_conj ? 97 :
-                inst ? (M::_colmajor ? 90 : 81) :
+                inst ? 90 :
                 -3;
             LUDecompose_Helper<algo,cs,rs,M>::call(m,P,detp);
         }

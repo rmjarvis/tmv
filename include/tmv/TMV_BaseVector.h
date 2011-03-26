@@ -136,6 +136,7 @@ namespace tmv {
     //
     //  _step = the step size if known (else UNKNOWN)
     //  _conj = is the vector the conjugate of the underlying data?
+    //  _checkalias = do we need to check this vector for aliases?
     //
     //  const_subvector_type = return type from subVector(i1,i2) const
     //  const_subvector_step_type = return type from 
@@ -477,8 +478,8 @@ namespace tmv {
     static inline bool SameStorage(
         const BaseVector_Calc<V1>& v1, const BaseVector_Calc<V2>& v2)
     {
-        return static_cast<const void*>(v1.realPart().cptr()) == 
-            static_cast<const void*>(v2.realPart().cptr()); 
+        return static_cast<const void*>(v1.vec().cptr()) == 
+            static_cast<const void*>(v2.vec().cptr()); 
     }
 #endif
 
@@ -809,6 +810,7 @@ namespace tmv {
         enum { _calc = Traits<V>::_calc };
         enum { _step = Traits<V>::_step };
         enum { _conj = Traits<V>::_conj };
+        enum { _checkalias = Traits<V>::_checkalias };
 
         typedef V type;
         typedef BaseVector<V> base;
@@ -1008,6 +1010,7 @@ namespace tmv {
         enum { _calc = Traits<V>::_calc };
         enum { _step = Traits<V>::_step };
         enum { _conj = Traits<V>::_conj };
+        enum { _checkalias = Traits<V>::_checkalias };
 
         typedef V type;
         typedef BaseVector_Calc<V> base;

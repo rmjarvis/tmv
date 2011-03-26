@@ -335,7 +335,7 @@ void TestAllSmallVector()
     TestSmallVectorReal<T>();
     TestSmallVectorComplex<T>();
     TestSmallVectorIO<T>();
-    std::cout<<"SmallVector<"<<tmv::TMV_Text(T())<<"> passed all basic tests\n";
+    std::cout<<"SmallVector<"<<Text(T())<<"> passed all basic tests\n";
 #endif
 
 #if 1
@@ -345,7 +345,7 @@ void TestAllSmallVector()
     TestSmallVectorArith_2b<T>();
     TestSmallVectorArith_2c<T>();
     TestSmallVectorArith_2d<T>();
-    std::cout<<"SmallVector<"<<tmv::TMV_Text(T())<<"> passed all arithmetic tests\n";
+    std::cout<<"SmallVector<"<<Text(T())<<"> passed all arithmetic tests\n";
 #endif
 }
 

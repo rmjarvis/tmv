@@ -2,12 +2,14 @@
 #define CT std::complex<T>
 
 #define Def1(T1,T2,C2)\
-  template void InstLDivEq( \
-      MatrixView<T1> v1, \
-      const ConstUpperTriMatrixView<T2,C2>& m2); \
-  template void InstLDivEq( \
-      MatrixView<T1> v1, \
-      const ConstLowerTriMatrixView<T2,C2>& m2); \
+  template void InstTriLDivEq( \
+      MatrixView<T1> v1, const ConstUpperTriMatrixView<T2,C2>& m2); \
+  template void InstTriLDivEq( \
+      MatrixView<T1> v1, const ConstLowerTriMatrixView<T2,C2>& m2); \
+  template void InstAliasTriLDivEq( \
+      MatrixView<T1> v1, const ConstUpperTriMatrixView<T2,C2>& m2); \
+  template void InstAliasTriLDivEq( \
+      MatrixView<T1> v1, const ConstLowerTriMatrixView<T2,C2>& m2); \
 
 Def1(T,T,NonConj)
 #ifdef TMV_INST_COMPLEX
@@ -19,4 +21,32 @@ Def1(CT,CT,Conj)
 #endif
 
 #undef Def1
+
+#if 0
+#define Def2(T1,C1,T2,C2,T3)\
+  template void InstAliasTriLDivMM( \
+      const T3 x, const ConstMatrixView<T1,C1>& m1, \
+      const ConstUpperTriMatrixView<T2,C2>& m2, MatrixView<T3> m3); \
+  template void InstAliasTriLDivMM( \
+      const T3 x, const ConstMatrixView<T1,C1>& m1, \
+      const ConstLowerTriMatrixView<T2,C2>& m2, MatrixView<T3> m3); \
+
+Def2(T,NonConj,T,NonConj,T)
+#ifdef TMV_INST_COMPLEX
+#ifdef TMV_INST_MIX
+Def2(T,NonConj,T,NonConj,CT)
+Def2(T,NonConj,CT,NonConj,CT)
+Def2(T,NonConj,CT,Conj,CT)
+Def2(CT,NonConj,T,NonConj,CT)
+Def2(CT,Conj,T,NonConj,CT)
+#endif
+Def2(CT,NonConj,CT,NonConj,CT)
+Def2(CT,NonConj,CT,Conj,CT)
+Def2(CT,Conj,CT,NonConj,CT)
+Def2(CT,Conj,CT,Conj,CT)
+#endif
+
+#undef Def2
+#endif
+
 #undef CT

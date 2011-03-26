@@ -40,12 +40,12 @@
 namespace tmv {
 
     template <class T1, class M2>
-    static void NonBlasLDivEq(VectorView<T1,Unit> v1, const M2& m2)
+    static void NonBlasTriLDivEq(VectorView<T1,Unit> v1, const M2& m2)
     {
         if (m2.iscm()) 
-            InlineLDivEq(v1,m2.cmView());
+            InlineTriLDivEq(v1,m2.cmView());
         else if (m2.isrm())
-            InlineLDivEq(v1,m2.rmView());
+            InlineTriLDivEq(v1,m2.rmView());
         else {
             typedef typename M2::value_type T;
             const int N = m2.size();
@@ -53,23 +53,23 @@ namespace tmv {
                 const int s = ShapeTraits<M2::_shape>::unit_shape;
                 typename MCopyHelper<T,s,UNKNOWN,UNKNOWN,false,false>::type mc(N);
                 InstCopy(m2,mc.xView());
-                InlineLDivEq(v1,mc.xView().constView().cmView());
+                InlineTriLDivEq(v1,mc.xView().constView().cmView());
             } else  {
                 const int s = ShapeTraits<M2::_shape>::nonunit_shape;
                 typename MCopyHelper<T,s,UNKNOWN,UNKNOWN,false,false>::type mc(N);
                 InstCopy(m2,mc.xView());
-                InlineLDivEq(v1,mc.xView().constView().cmView());
+                InlineTriLDivEq(v1,mc.xView().constView().cmView());
             }
         }
     }
 
 #ifdef BLAS
     template <class T1, class M2, class T2> 
-    static inline void BlasLDivEq(VectorView<T1> b, const M2& A, T2)
-    { NonBlasLDivEq(b,A); }
+    static inline void BlasTriLDivEq(VectorView<T1> b, const M2& A, T2)
+    { NonBlasTriLDivEq(b,A); }
 #ifdef TMV_INST_DOUBLE
     template <class M2> 
-    static void BlasLDivEq(VectorView<double> b, const M2& A, double)
+    static void BlasTriLDivEq(VectorView<double> b, const M2& A, double)
     {
         TMVAssert(A.size() == b.size());
         TMVAssert(b.size()>0);
@@ -85,7 +85,7 @@ namespace tmv {
             BLAS1 BLAS1 BLAS1);
     }
     template <class M2> 
-    static void BlasLDivEq(
+    static void BlasTriLDivEq(
         VectorView<std::complex<double> > b, const M2& A, std::complex<double>)
     {
         TMVAssert(A.size() == b.size());
@@ -113,7 +113,7 @@ namespace tmv {
         }
     }
     template <class M2> 
-    static void BlasLDivEq(
+    static void BlasTriLDivEq(
         VectorView<std::complex<double> > b, const M2& A, double)
     {
         TMVAssert(A.size() == b.size());
@@ -137,7 +137,7 @@ namespace tmv {
 #endif
 #ifdef TMV_INST_FLOAT
     template <class M2> 
-    static void BlasLDivEq(VectorView<float> b, const M2& A, float)
+    static void BlasTriLDivEq(VectorView<float> b, const M2& A, float)
     {
         TMVAssert(A.size() == b.size());
         TMVAssert(b.size()>0);
@@ -153,7 +153,7 @@ namespace tmv {
             BLAS1 BLAS1 BLAS1);
     }
     template <class M2> 
-    static void BlasLDivEq(
+    static void BlasTriLDivEq(
         VectorView<std::complex<float> > b, const M2& A, std::complex<float>)
     {
         TMVAssert(A.size() == b.size());
@@ -181,7 +181,7 @@ namespace tmv {
         }
     }
     template <class M2> 
-    static void BlasLDivEq(
+    static void BlasTriLDivEq(
         VectorView<std::complex<float> > b, const M2& A, float)
     {
         TMVAssert(A.size() == b.size());
@@ -206,41 +206,62 @@ namespace tmv {
 #endif // BLAS
 
     template <class T1, class M2>
-    static inline void DoInstLDivEq(VectorView<T1> v1, const M2& m2)
+    static inline void DoInstTriLDivEq(VectorView<T1> v1, const M2& m2)
     {
 #ifdef BLAS
         const typename M2::value_type t2(0);
         if ( (m2.isrm() && m2.stepi()>0) || (m2.iscm() && m2.stepj()>0) ) {
-            BlasLDivEq(v1,m2,t2);
+            BlasTriLDivEq(v1,m2,t2);
         } else {
             if (m2.isunit()) {
-                BlasLDivEq(
+                BlasTriLDivEq(
                     v1,m2.copy().viewAsUnitDiag().constView().xView(),t2);
             } else {
-                BlasLDivEq(v1,m2.copy().constView().xView(),t2);
+                BlasTriLDivEq(v1,m2.copy().constView().xView(),t2);
             }
         }
 #else
         if (v1.step() == 1) {
-            NonBlasLDivEq(v1.unitView(),m2);
+            NonBlasTriLDivEq(v1.unitView(),m2);
         } else {
             Vector<T1> v1c(v1.size());
             InstCopy(v1.constView(),v1c.xView());
-            NonBlasLDivEq(v1c.view(),m2);
+            NonBlasTriLDivEq(v1c.view(),m2);
             InstCopy(v1c.xView().constView(),v1);
         }
 #endif
     }
 
     template <class T1, class T2, int C2>
-    void InstLDivEq(
+    void InstTriLDivEq(
         VectorView<T1> v1, const ConstUpperTriMatrixView<T2,C2>& m2)
-    { DoInstLDivEq(v1,m2); }
+    { DoInstTriLDivEq(v1,m2); }
+    template <class T1, class T2, int C2>
+    void InstTriLDivEq(
+        VectorView<T1> v1, const ConstLowerTriMatrixView<T2,C2>& m2)
+    { DoInstTriLDivEq(v1,m2); }
 
     template <class T1, class T2, int C2>
-    void InstLDivEq(
+    void InstAliasTriLDivEq(
+        VectorView<T1> v1, const ConstUpperTriMatrixView<T2,C2>& m2)
+    { InlineAliasTriLDivEq(v1,m2); }
+    template <class T1, class T2, int C2>
+    void InstAliasTriLDivEq(
         VectorView<T1> v1, const ConstLowerTriMatrixView<T2,C2>& m2)
-    { DoInstLDivEq(v1,m2); }
+    { InlineAliasTriLDivEq(v1,m2); }
+
+#if 0
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasLDivVM(
+        const T3 x, const ConstVectorView<T1,C1>& v1,
+        const ConstUpperTriMatrixView<T2,C2>& m2, VectorView<T3> v3)
+    { InlineAliasLDivVM(x,v1,m2,v3); }
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasLDivVM(
+        const T3 x, const ConstVectorView<T1,C1>& v1,
+        const ConstLowerTriMatrixView<T2,C2>& m2, VectorView<T3> v3);
+    { InlineAliasLDivVM(x,v1,m2,v3); }
+#endif
 
 #define InstFile "TMV_DivVU.inst"
 #include "TMV_Inst.h"

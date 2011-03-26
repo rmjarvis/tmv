@@ -198,6 +198,11 @@ namespace tmv {
         DoInstCopy(v1,v2); 
     }
 
+    template <class T1, int C1, class T2> 
+    static void InstAliasCopy(
+        const ConstVectorView<T1,C1>& v1, VectorView<T2> v2)
+    { InlineAliasCopy(v1,v2); }
+
 
     //
     // Swap Vectors
@@ -296,6 +301,11 @@ namespace tmv {
     template <class T, int C> 
     void InstSwap(VectorView<T,C> v1, VectorView<T> v2)
     { DoInstSwap(v1,v2); }
+
+    template <class T, int C> 
+    void InstAliasSwap(VectorView<T,C> v1, VectorView<T> v2)
+    { InlineAliasSwap(v1,v2); }
+
 
     //
     // ReverseSelf

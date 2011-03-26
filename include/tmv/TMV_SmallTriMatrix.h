@@ -76,8 +76,8 @@ namespace tmv {
 
         enum { A012 = A0 | A1 | A2 };
         enum { A = (A012 & ~NoDivider) | (
-                (Attrib<A012>::rowmajor ? 0 : ColMajor) |
-                (Attrib<A012>::unitdiag ? 0 : NonUnitDiag) )};
+                ( Attrib<A012>::rowmajor ? 0 : ColMajor ) |
+                ( Attrib<A012>::unitdiag ? 0 : NonUnitDiag ) )};
         enum { okA = (
                 !Attrib<A>::conj &&
                 (Attrib<A>::rowmajor || Attrib<A>::colmajor) &&
@@ -113,6 +113,7 @@ namespace tmv {
         enum { _stepj = _rowmajor ? 1 : N };
         enum { _diagstep = IntTraits<N>::Sp1 };
         enum { _conj = false };
+        enum { _checkalias = Attrib<A>::checkalias };
         enum { _unit = Attrib<A>::unitdiag };
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = false };
@@ -125,9 +126,12 @@ namespace tmv {
         enum { _hasdivider = false };
         typedef QuotXM<1,real_type,type> inverse_type;
 
-        enum { baseA = (_fort ? FortranStyle : 0) };
-        enum { colA = baseA | (_colmajor ? Unit : 0) };
-        enum { rowA = baseA | (_rowmajor ? Unit : 0) };
+        enum { vecA = (
+                (_fort ? FortranStyle : 0) |
+                (_checkalias ? CheckAlias : 0) )};
+        enum { colA = vecA | (_colmajor ? Unit : 0) };
+        enum { rowA = vecA | (_rowmajor ? Unit : 0) };
+        enum { diagA = vecA | (_diagstep == 1 ? Unit : 0) };
         enum { cstyleA = A & ~FortranStyle };
         enum { fstyleA = A | FortranStyle };
         enum { nmA = (A & ~AllStorageType) };
@@ -144,17 +148,25 @@ namespace tmv {
         enum { unitA = ndA | UnitDiag };
         enum { nonconjA = A };
         enum { twosA = isreal ? nonconjA : int(nonconjA & ~AllStorageType) };
+        enum { An = _checkalias ? (A & ~CheckAlias) : (A | NoAlias) };
+        enum { vecAn = _checkalias ? (vecA & ~CheckAlias) : (vecA | NoAlias) };
+        enum { colAn = vecAn | (_colmajor ? Unit : 0) };
+        enum { rowAn = vecAn | (_rowmajor ? Unit : 0) };
+        enum { diagAn = vecAn | (_diagstep == 1 ? Unit : 0) };
+        enum { ndAn = (An & ~AllDiagType) };
+        enum { nmAn = (An & ~AllStorageType) };
+        enum { ndnmAn = (ndAn & ~AllStorageType) };
 
-        typedef ConstVectorView<T,colA> const_col_sub_type;
-        typedef ConstVectorView<T,rowA> const_row_sub_type;
-        typedef ConstSmallVectorView<T,N,_diagstep,baseA> const_diag_type;
-        typedef ConstVectorView<T,baseA> const_diag_sub_type;
+        typedef ConstVectorView<T,colAn> const_col_sub_type;
+        typedef ConstVectorView<T,rowAn> const_row_sub_type;
+        typedef ConstSmallVectorView<T,N,_diagstep,vecA> const_diag_type;
+        typedef ConstVectorView<T,vecAn> const_diag_sub_type;
 
-        typedef ConstUpperTriMatrixView<T,A> const_subtrimatrix_type;
-        typedef ConstUpperTriMatrixView<T,nmA> const_subtrimatrix_step_type;
-        typedef ConstMatrixView<T,ndA> const_submatrix_type;
-        typedef ConstMatrixView<T,ndnmA> const_submatrix_step_type;
-        typedef ConstVectorView<T,baseA> const_subvector_type;
+        typedef ConstUpperTriMatrixView<T,An> const_subtrimatrix_type;
+        typedef ConstUpperTriMatrixView<T,nmAn> const_subtrimatrix_step_type;
+        typedef ConstMatrixView<T,ndAn> const_submatrix_type;
+        typedef ConstMatrixView<T,ndnmAn> const_submatrix_step_type;
+        typedef ConstVectorView<T,vecAn> const_subvector_type;
 
         typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,A>
             const_view_type;
@@ -191,16 +203,16 @@ namespace tmv {
 
         typedef typename TriRefHelper<T,false,_nonunit>::reference reference;
 
-        typedef VectorView<T,colA> col_sub_type;
-        typedef VectorView<T,rowA> row_sub_type;
-        typedef SmallVectorView<T,N,_diagstep,baseA> diag_type;
-        typedef VectorView<T,baseA> diag_sub_type;
+        typedef VectorView<T,colAn> col_sub_type;
+        typedef VectorView<T,rowAn> row_sub_type;
+        typedef SmallVectorView<T,N,_diagstep,vecA> diag_type;
+        typedef VectorView<T,vecAn> diag_sub_type;
 
-        typedef UpperTriMatrixView<T,A> subtrimatrix_type;
-        typedef UpperTriMatrixView<T,nmA> subtrimatrix_step_type;
-        typedef MatrixView<T,ndA> submatrix_type;
-        typedef MatrixView<T,ndnmA> submatrix_step_type;
-        typedef VectorView<T,baseA> subvector_type;
+        typedef UpperTriMatrixView<T,An> subtrimatrix_type;
+        typedef UpperTriMatrixView<T,nmAn> subtrimatrix_step_type;
+        typedef MatrixView<T,ndAn> submatrix_type;
+        typedef MatrixView<T,ndnmAn> submatrix_step_type;
+        typedef VectorView<T,vecAn> subvector_type;
 
         typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,A> view_type;
         typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,cstyleA> cview_type;
@@ -246,6 +258,7 @@ namespace tmv {
         enum { _rowmajor = Traits<type>::_rowmajor };
         enum { _colmajor = Traits<type>::_colmajor };
         enum { _conj = Traits<type>::_conj };
+        enum { _checkalias = Traits<type>::_checkalias };
         enum { _stepi = Traits<type>::_stepi };
         enum { _stepj = Traits<type>::_stepj };
         enum { _diagstep = Traits<type>::_diagstep };
@@ -431,6 +444,7 @@ namespace tmv {
                 !Attrib<A>::lower &&
                 !Attrib<A>::nodivider &&
                 !Attrib<A>::withdivider &&
+                ( Traits<T>::iscomplex || !Attrib<A>::conj ) &&
                 !( Si != UNKNOWN && Si != 1 && Attrib<A>::colmajor ) &&
                 !( Sj != UNKNOWN && Sj != 1 && Attrib<A>::rowmajor ) )};
         enum { _attrib = A };
@@ -455,6 +469,7 @@ namespace tmv {
         enum { _stepj = Sj };
         enum { _diagstep = IntTraits2<Si,Sj>::sum };
         enum { _conj = Attrib<A>::conj };
+        enum { _checkalias = Attrib<A>::checkalias };
         enum { _unit = Attrib<A>::unitdiag };
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = !(_unit || _nonunit) };
@@ -470,11 +485,13 @@ namespace tmv {
         enum { _hasdivider = false };
         typedef QuotXM<1,real_type,type> inverse_type;
 
-        enum { baseA = (
+        enum { vecA = (
                 (_fort ? FortranStyle : 0) |
-                (_conj ? Conj : 0) )};
-        enum { colA = baseA | (_colmajor ? Unit : 0) };
-        enum { rowA = baseA | (_rowmajor ? Unit : 0) };
+                (_conj ? Conj : 0) |
+                (_checkalias ? CheckAlias : 0) )};
+        enum { colA = vecA | (_colmajor ? Unit : 0) };
+        enum { rowA = vecA | (_rowmajor ? Unit : 0) };
+        enum { diagA = vecA | (_diagstep == 1 ? Unit : 0) };
         enum { cstyleA = A & ~FortranStyle };
         enum { fstyleA = A | FortranStyle };
         enum { nmA = (A & ~AllStorageType) };
@@ -491,17 +508,25 @@ namespace tmv {
         enum { unitA = ndA | UnitDiag };
         enum { nonconjA = A & ~Conj };
         enum { twosA = isreal ? nonconjA : int(nonconjA & ~AllStorageType) };
+        enum { An = _checkalias ? (A & ~CheckAlias) : (A | NoAlias) };
+        enum { vecAn = _checkalias ? (vecA & ~CheckAlias) : (vecA | NoAlias) };
+        enum { colAn = vecAn | (_colmajor ? Unit : 0) };
+        enum { rowAn = vecAn | (_rowmajor ? Unit : 0) };
+        enum { diagAn = vecAn | (_diagstep == 1 ? Unit : 0) };
+        enum { ndAn = (An & ~AllDiagType) };
+        enum { nmAn = (An & ~AllStorageType) };
+        enum { ndnmAn = (ndAn & ~AllStorageType) };
 
-        typedef ConstVectorView<T,colA> const_col_sub_type;
-        typedef ConstVectorView<T,rowA> const_row_sub_type;
-        typedef ConstSmallVectorView<T,N,_diagstep,baseA> const_diag_type;
-        typedef ConstVectorView<T,baseA> const_diag_sub_type;
+        typedef ConstVectorView<T,colAn> const_col_sub_type;
+        typedef ConstVectorView<T,rowAn> const_row_sub_type;
+        typedef ConstSmallVectorView<T,N,_diagstep,vecA> const_diag_type;
+        typedef ConstVectorView<T,vecAn> const_diag_sub_type;
 
-        typedef ConstUpperTriMatrixView<T,A> const_subtrimatrix_type;
-        typedef ConstUpperTriMatrixView<T,nmA> const_subtrimatrix_step_type;
-        typedef ConstMatrixView<T,ndA> const_submatrix_type;
-        typedef ConstMatrixView<T,ndnmA> const_submatrix_step_type;
-        typedef ConstVectorView<T,baseA> const_subvector_type;
+        typedef ConstUpperTriMatrixView<T,An> const_subtrimatrix_type;
+        typedef ConstUpperTriMatrixView<T,nmAn> const_subtrimatrix_step_type;
+        typedef ConstMatrixView<T,ndAn> const_submatrix_type;
+        typedef ConstMatrixView<T,ndnmAn> const_submatrix_step_type;
+        typedef ConstVectorView<T,vecAn> const_subvector_type;
 
         typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,A>
             const_view_type;
@@ -555,6 +580,7 @@ namespace tmv {
         enum { _rowmajor = Traits<type>::_rowmajor };
         enum { _colmajor = Traits<type>::_colmajor };
         enum { _conj = Traits<type>::_conj };
+        enum { _checkalias = Traits<type>::_checkalias };
         enum { _stepi = Traits<type>::_stepi };
         enum { _stepj = Traits<type>::_stepj };
         enum { _diagstep = Traits<type>::_diagstep };
@@ -716,6 +742,7 @@ namespace tmv {
                 !Attrib<A>::lower &&
                 !Attrib<A>::nodivider &&
                 !Attrib<A>::withdivider &&
+                ( Traits<T>::iscomplex || !Attrib<A>::conj ) &&
                 !( Si != UNKNOWN && Si != 1 && Attrib<A>::colmajor ) &&
                 !( Sj != UNKNOWN && Sj != 1 && Attrib<A>::rowmajor ) )};
         enum { _attrib = A };
@@ -740,6 +767,7 @@ namespace tmv {
         enum { _stepj = Sj };
         enum { _diagstep = IntTraits2<Si,Sj>::sum };
         enum { _conj = Attrib<A>::conj };
+        enum { _checkalias = Attrib<A>::checkalias };
         enum { _unit = Attrib<A>::unitdiag };
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = !(_unit || _nonunit) };
@@ -755,11 +783,13 @@ namespace tmv {
         enum { _hasdivider = false };
         typedef QuotXM<1,real_type,type> inverse_type;
 
-        enum { baseA = (
+        enum { vecA = (
                 (_fort ? FortranStyle : 0) |
-                (_conj ? Conj : 0) )};
-        enum { colA = baseA | (_colmajor ? Unit : 0) };
-        enum { rowA = baseA | (_rowmajor ? Unit : 0) };
+                (_conj ? Conj : 0) |
+                (_checkalias ? CheckAlias : 0) )};
+        enum { colA = vecA | (_colmajor ? Unit : 0) };
+        enum { rowA = vecA | (_rowmajor ? Unit : 0) };
+        enum { diagA = vecA | (_diagstep == 1 ? Unit : 0) };
         enum { cstyleA = A & ~FortranStyle };
         enum { fstyleA = A | FortranStyle };
         enum { nmA = (A & ~AllStorageType) };
@@ -776,17 +806,25 @@ namespace tmv {
         enum { unitA = ndA | UnitDiag };
         enum { nonconjA = A & ~Conj };
         enum { twosA = isreal ? nonconjA : int(nonconjA & ~AllStorageType) };
+        enum { An = _checkalias ? (A & ~CheckAlias) : (A | NoAlias) };
+        enum { vecAn = _checkalias ? (vecA & ~CheckAlias) : (vecA | NoAlias) };
+        enum { colAn = vecAn | (_colmajor ? Unit : 0) };
+        enum { rowAn = vecAn | (_rowmajor ? Unit : 0) };
+        enum { diagAn = vecAn | (_diagstep == 1 ? Unit : 0) };
+        enum { ndAn = (An & ~AllDiagType) };
+        enum { nmAn = (An & ~AllStorageType) };
+        enum { ndnmAn = (ndAn & ~AllStorageType) };
 
-        typedef ConstVectorView<T,colA> const_col_sub_type;
-        typedef ConstVectorView<T,rowA> const_row_sub_type;
-        typedef ConstSmallVectorView<T,N,_diagstep,baseA> const_diag_type;
-        typedef ConstVectorView<T,baseA> const_diag_sub_type;
+        typedef ConstVectorView<T,colAn> const_col_sub_type;
+        typedef ConstVectorView<T,rowAn> const_row_sub_type;
+        typedef ConstSmallVectorView<T,N,_diagstep,vecA> const_diag_type;
+        typedef ConstVectorView<T,vecAn> const_diag_sub_type;
 
-        typedef ConstUpperTriMatrixView<T,A> const_subtrimatrix_type;
-        typedef ConstUpperTriMatrixView<T,nmA> const_subtrimatrix_step_type;
-        typedef ConstMatrixView<T,ndA> const_submatrix_type;
-        typedef ConstMatrixView<T,ndnmA> const_submatrix_step_type;
-        typedef ConstVectorView<T,baseA> const_subvector_type;
+        typedef ConstUpperTriMatrixView<T,An> const_subtrimatrix_type;
+        typedef ConstUpperTriMatrixView<T,nmAn> const_subtrimatrix_step_type;
+        typedef ConstMatrixView<T,ndAn> const_submatrix_type;
+        typedef ConstMatrixView<T,ndnmAn> const_submatrix_step_type;
+        typedef ConstVectorView<T,vecAn> const_subvector_type;
 
         typedef ConstSmallUpperTriMatrixView<T,N,_stepi,_stepj,A>
             const_view_type;
@@ -824,16 +862,16 @@ namespace tmv {
 
         typedef typename TriRefHelper<T,_conj,_nonunit>::reference reference;
 
-        typedef VectorView<T,colA> col_sub_type;
-        typedef VectorView<T,rowA> row_sub_type;
-        typedef SmallVectorView<T,N,_diagstep,baseA> diag_type;
-        typedef VectorView<T,baseA> diag_sub_type;
+        typedef VectorView<T,colAn> col_sub_type;
+        typedef VectorView<T,rowAn> row_sub_type;
+        typedef SmallVectorView<T,N,_diagstep,vecA> diag_type;
+        typedef VectorView<T,vecAn> diag_sub_type;
 
-        typedef UpperTriMatrixView<T,A> subtrimatrix_type;
-        typedef UpperTriMatrixView<T,nmA> subtrimatrix_step_type;
-        typedef MatrixView<T,ndA> submatrix_type;
-        typedef MatrixView<T,ndnmA> submatrix_step_type;
-        typedef VectorView<T,baseA> subvector_type;
+        typedef UpperTriMatrixView<T,An> subtrimatrix_type;
+        typedef UpperTriMatrixView<T,nmAn> subtrimatrix_step_type;
+        typedef MatrixView<T,ndAn> submatrix_type;
+        typedef MatrixView<T,ndnmAn> submatrix_step_type;
+        typedef VectorView<T,vecAn> subvector_type;
 
         typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,A> view_type;
         typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,cstyleA> cview_type;
@@ -879,6 +917,7 @@ namespace tmv {
         enum { _rowmajor = Traits<type>::_rowmajor };
         enum { _colmajor = Traits<type>::_colmajor };
         enum { _conj = Traits<type>::_conj };
+        enum { _checkalias = Traits<type>::_checkalias };
         enum { _stepi = Traits<type>::_stepi };
         enum { _stepj = Traits<type>::_stepj };
         enum { _diagstep = Traits<type>::_diagstep };
@@ -1041,8 +1080,8 @@ namespace tmv {
 
         enum { A012 = A0 | A1 | A2 };
         enum { A = (A012 & ~NoDivider) | (
-                (Attrib<A012>::rowmajor ? 0 : ColMajor) |
-                (Attrib<A012>::unitdiag ? 0 : NonUnitDiag) )};
+                ( Attrib<A012>::rowmajor ? 0 : ColMajor ) |
+                ( Attrib<A012>::unitdiag ? 0 : NonUnitDiag ) )};
         enum { okA = (
                 !Attrib<A>::conj &&
                 (Attrib<A>::rowmajor || Attrib<A>::colmajor) &&
@@ -1078,6 +1117,7 @@ namespace tmv {
         enum { _stepj = _rowmajor ? 1 : N };
         enum { _diagstep = IntTraits<N>::Sp1 };
         enum { _conj = false };
+        enum { _checkalias = Attrib<A>::checkalias };
         enum { _unit = Attrib<A>::unitdiag };
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = false };
@@ -1090,9 +1130,12 @@ namespace tmv {
         enum { _hasdivider = false };
         typedef QuotXM<1,real_type,type> inverse_type;
 
-        enum { baseA = (_fort ? FortranStyle : 0) };
-        enum { colA = baseA | (_colmajor ? Unit : 0) };
-        enum { rowA = baseA | (_rowmajor ? Unit : 0) };
+        enum { vecA = (
+                (_fort ? FortranStyle : 0) |
+                (_checkalias ? CheckAlias : 0) )};
+        enum { colA = vecA | (_colmajor ? Unit : 0) };
+        enum { rowA = vecA | (_rowmajor ? Unit : 0) };
+        enum { diagA = vecA | (_diagstep == 1 ? Unit : 0) };
         enum { cstyleA = A & ~FortranStyle };
         enum { fstyleA = A | FortranStyle };
         enum { nmA = (A & ~AllStorageType) };
@@ -1109,17 +1152,25 @@ namespace tmv {
         enum { unitA = ndA | UnitDiag };
         enum { nonconjA = A };
         enum { twosA = isreal ? nonconjA : int(nonconjA & ~AllStorageType) };
+        enum { An = _checkalias ? (A & ~CheckAlias) : (A | NoAlias) };
+        enum { vecAn = _checkalias ? (vecA & ~CheckAlias) : (vecA | NoAlias) };
+        enum { colAn = vecAn | (_colmajor ? Unit : 0) };
+        enum { rowAn = vecAn | (_rowmajor ? Unit : 0) };
+        enum { diagAn = vecAn | (_diagstep == 1 ? Unit : 0) };
+        enum { ndAn = (An & ~AllDiagType) };
+        enum { nmAn = (An & ~AllStorageType) };
+        enum { ndnmAn = (ndAn & ~AllStorageType) };
 
-        typedef ConstVectorView<T,colA> const_col_sub_type;
-        typedef ConstVectorView<T,rowA> const_row_sub_type;
-        typedef ConstSmallVectorView<T,N,_diagstep,baseA> const_diag_type;
-        typedef ConstVectorView<T,baseA> const_diag_sub_type;
+        typedef ConstVectorView<T,colAn> const_col_sub_type;
+        typedef ConstVectorView<T,rowAn> const_row_sub_type;
+        typedef ConstSmallVectorView<T,N,_diagstep,vecA> const_diag_type;
+        typedef ConstVectorView<T,vecAn> const_diag_sub_type;
 
-        typedef ConstLowerTriMatrixView<T,A> const_subtrimatrix_type;
-        typedef ConstLowerTriMatrixView<T,nmA> const_subtrimatrix_step_type;
-        typedef ConstMatrixView<T,ndA> const_submatrix_type;
-        typedef ConstMatrixView<T,ndnmA> const_submatrix_step_type;
-        typedef ConstVectorView<T,baseA> const_subvector_type;
+        typedef ConstLowerTriMatrixView<T,An> const_subtrimatrix_type;
+        typedef ConstLowerTriMatrixView<T,nmAn> const_subtrimatrix_step_type;
+        typedef ConstMatrixView<T,ndAn> const_submatrix_type;
+        typedef ConstMatrixView<T,ndnmAn> const_submatrix_step_type;
+        typedef ConstVectorView<T,vecAn> const_subvector_type;
 
         typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,A>
             const_view_type;
@@ -1156,16 +1207,16 @@ namespace tmv {
 
         typedef typename TriRefHelper<T,false,_nonunit>::reference reference;
 
-        typedef VectorView<T,colA> col_sub_type;
-        typedef VectorView<T,rowA> row_sub_type;
-        typedef SmallVectorView<T,N,_diagstep,baseA> diag_type;
-        typedef VectorView<T,baseA> diag_sub_type;
+        typedef VectorView<T,colAn> col_sub_type;
+        typedef VectorView<T,rowAn> row_sub_type;
+        typedef SmallVectorView<T,N,_diagstep,vecA> diag_type;
+        typedef VectorView<T,vecAn> diag_sub_type;
 
-        typedef LowerTriMatrixView<T,A> subtrimatrix_type;
-        typedef LowerTriMatrixView<T,nmA> subtrimatrix_step_type;
-        typedef MatrixView<T,ndA> submatrix_type;
-        typedef MatrixView<T,ndnmA> submatrix_step_type;
-        typedef VectorView<T,baseA> subvector_type;
+        typedef LowerTriMatrixView<T,An> subtrimatrix_type;
+        typedef LowerTriMatrixView<T,nmAn> subtrimatrix_step_type;
+        typedef MatrixView<T,ndAn> submatrix_type;
+        typedef MatrixView<T,ndnmAn> submatrix_step_type;
+        typedef VectorView<T,vecAn> subvector_type;
 
         typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,A> view_type;
         typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,cstyleA> cview_type;
@@ -1211,6 +1262,7 @@ namespace tmv {
         enum { _rowmajor = Traits<type>::_rowmajor };
         enum { _colmajor = Traits<type>::_colmajor };
         enum { _conj = Traits<type>::_conj };
+        enum { _checkalias = Traits<type>::_checkalias };
         enum { _stepi = Traits<type>::_stepi };
         enum { _stepj = Traits<type>::_stepj };
         enum { _diagstep = Traits<type>::_diagstep };
@@ -1384,7 +1436,11 @@ namespace tmv {
     {
         typedef typename Traits<T>::real_type real_type;
 
-        enum { A = A0 & ~NoDivider };
+        enum { A = (A0 & ~NoDivider) | (
+                ( Attrib<A0>::colmajor ? 0 :
+                  Attrib<A0>::rowmajor ? 0 :
+                  Si == 1 ? ColMajor :
+                  Sj == 1 ? RowMajor : 0 ) )};
         enum { okA = (
                 !Attrib<A>::diagmajor &&
                 !Attrib<A>::zerodiag &&
@@ -1392,6 +1448,7 @@ namespace tmv {
                 !Attrib<A>::lower &&
                 !Attrib<A>::nodivider &&
                 !Attrib<A>::withdivider &&
+                ( Traits<T>::iscomplex || !Attrib<A>::conj ) &&
                 !( Si != UNKNOWN && Si != 1 && Attrib<A>::colmajor ) &&
                 !( Sj != UNKNOWN && Sj != 1 && Attrib<A>::rowmajor ) )};
         enum { _attrib = A };
@@ -1416,6 +1473,7 @@ namespace tmv {
         enum { _stepj = Sj };
         enum { _diagstep = IntTraits2<Si,Sj>::sum };
         enum { _conj = Attrib<A>::conj };
+        enum { _checkalias = Attrib<A>::checkalias };
         enum { _unit = Attrib<A>::unitdiag };
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = !(_unit || _nonunit) };
@@ -1431,11 +1489,13 @@ namespace tmv {
         enum { _hasdivider = false };
         typedef QuotXM<1,real_type,type> inverse_type;
 
-        enum { baseA = (
+        enum { vecA = (
                 (_fort ? FortranStyle : 0) |
-                (_conj ? Conj : 0) )};
-        enum { colA = baseA | (_colmajor ? Unit : 0) };
-        enum { rowA = baseA | (_rowmajor ? Unit : 0) };
+                (_conj ? Conj : 0) |
+                (_checkalias ? CheckAlias : 0) )};
+        enum { colA = vecA | (_colmajor ? Unit : 0) };
+        enum { rowA = vecA | (_rowmajor ? Unit : 0) };
+        enum { diagA = vecA | (_diagstep == 1 ? Unit : 0) };
         enum { cstyleA = A & ~FortranStyle };
         enum { fstyleA = A | FortranStyle };
         enum { nmA = (A & ~AllStorageType) };
@@ -1452,17 +1512,25 @@ namespace tmv {
         enum { unitA = ndA | UnitDiag };
         enum { nonconjA = A & ~Conj };
         enum { twosA = isreal ? nonconjA : int(nonconjA & ~AllStorageType) };
+        enum { An = _checkalias ? (A & ~CheckAlias) : (A | NoAlias) };
+        enum { vecAn = _checkalias ? (vecA & ~CheckAlias) : (vecA | NoAlias) };
+        enum { colAn = vecAn | (_colmajor ? Unit : 0) };
+        enum { rowAn = vecAn | (_rowmajor ? Unit : 0) };
+        enum { diagAn = vecAn | (_diagstep == 1 ? Unit : 0) };
+        enum { ndAn = (An & ~AllDiagType) };
+        enum { nmAn = (An & ~AllStorageType) };
+        enum { ndnmAn = (ndAn & ~AllStorageType) };
 
-        typedef ConstVectorView<T,colA> const_col_sub_type;
-        typedef ConstVectorView<T,rowA> const_row_sub_type;
-        typedef ConstSmallVectorView<T,N,_diagstep,baseA> const_diag_type;
-        typedef ConstVectorView<T,baseA> const_diag_sub_type;
+        typedef ConstVectorView<T,colAn> const_col_sub_type;
+        typedef ConstVectorView<T,rowAn> const_row_sub_type;
+        typedef ConstSmallVectorView<T,N,_diagstep,vecA> const_diag_type;
+        typedef ConstVectorView<T,vecAn> const_diag_sub_type;
 
-        typedef ConstLowerTriMatrixView<T,A> const_subtrimatrix_type;
-        typedef ConstLowerTriMatrixView<T,nmA> const_subtrimatrix_step_type;
-        typedef ConstMatrixView<T,ndA> const_submatrix_type;
-        typedef ConstMatrixView<T,ndnmA> const_submatrix_step_type;
-        typedef ConstVectorView<T,baseA> const_subvector_type;
+        typedef ConstLowerTriMatrixView<T,An> const_subtrimatrix_type;
+        typedef ConstLowerTriMatrixView<T,nmAn> const_subtrimatrix_step_type;
+        typedef ConstMatrixView<T,ndAn> const_submatrix_type;
+        typedef ConstMatrixView<T,ndnmAn> const_submatrix_step_type;
+        typedef ConstVectorView<T,vecAn> const_subvector_type;
 
         typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,A>
             const_view_type;
@@ -1516,6 +1584,7 @@ namespace tmv {
         enum { _rowmajor = Traits<type>::_rowmajor };
         enum { _colmajor = Traits<type>::_colmajor };
         enum { _conj = Traits<type>::_conj };
+        enum { _checkalias = Traits<type>::_checkalias };
         enum { _stepi = Traits<type>::_stepi };
         enum { _stepj = Traits<type>::_stepj };
         enum { _diagstep = Traits<type>::_diagstep };
@@ -1656,7 +1725,11 @@ namespace tmv {
     {
         typedef typename Traits<T>::real_type real_type;
 
-        enum { A = A0 & ~NoDivider };
+        enum { A = (A0 & ~NoDivider) | (
+                ( Attrib<A0>::colmajor ? 0 :
+                  Attrib<A0>::rowmajor ? 0 :
+                  Si == 1 ? ColMajor :
+                  Sj == 1 ? RowMajor : 0 ) )};
         enum { okA = (
                 !Attrib<A>::diagmajor &&
                 !Attrib<A>::zerodiag &&
@@ -1664,6 +1737,7 @@ namespace tmv {
                 !Attrib<A>::lower &&
                 !Attrib<A>::nodivider &&
                 !Attrib<A>::withdivider &&
+                ( Traits<T>::iscomplex || !Attrib<A>::conj ) &&
                 !( Si != UNKNOWN && Si != 1 && Attrib<A>::colmajor ) &&
                 !( Sj != UNKNOWN && Sj != 1 && Attrib<A>::rowmajor ) )};
         enum { _attrib = A };
@@ -1688,6 +1762,7 @@ namespace tmv {
         enum { _stepj = Sj };
         enum { _diagstep = IntTraits2<Si,Sj>::sum };
         enum { _conj = Attrib<A>::conj };
+        enum { _checkalias = Attrib<A>::checkalias };
         enum { _unit = Attrib<A>::unitdiag };
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = !(_unit || _nonunit) };
@@ -1703,11 +1778,13 @@ namespace tmv {
         enum { _hasdivider = false };
         typedef QuotXM<1,real_type,type> inverse_type;
 
-        enum { baseA = (
+        enum { vecA = (
                 (_fort ? FortranStyle : 0) |
-                (_conj ? Conj : 0) )};
-        enum { colA = baseA | (_colmajor ? Unit : 0) };
-        enum { rowA = baseA | (_rowmajor ? Unit : 0) };
+                (_conj ? Conj : 0) |
+                (_checkalias ? CheckAlias : 0) )};
+        enum { colA = vecA | (_colmajor ? Unit : 0) };
+        enum { rowA = vecA | (_rowmajor ? Unit : 0) };
+        enum { diagA = vecA | (_diagstep == 1 ? Unit : 0) };
         enum { cstyleA = A & ~FortranStyle };
         enum { fstyleA = A | FortranStyle };
         enum { nmA = (A & ~AllStorageType) };
@@ -1724,17 +1801,25 @@ namespace tmv {
         enum { unitA = ndA | UnitDiag };
         enum { nonconjA = A & ~Conj };
         enum { twosA = isreal ? nonconjA : int(nonconjA & ~AllStorageType) };
+        enum { An = _checkalias ? (A & ~CheckAlias) : (A | NoAlias) };
+        enum { vecAn = _checkalias ? (vecA & ~CheckAlias) : (vecA | NoAlias) };
+        enum { colAn = vecAn | (_colmajor ? Unit : 0) };
+        enum { rowAn = vecAn | (_rowmajor ? Unit : 0) };
+        enum { diagAn = vecAn | (_diagstep == 1 ? Unit : 0) };
+        enum { ndAn = (An & ~AllDiagType) };
+        enum { nmAn = (An & ~AllStorageType) };
+        enum { ndnmAn = (ndAn & ~AllStorageType) };
 
-        typedef ConstVectorView<T,colA> const_col_sub_type;
-        typedef ConstVectorView<T,rowA> const_row_sub_type;
-        typedef ConstSmallVectorView<T,N,_diagstep,baseA> const_diag_type;
-        typedef ConstVectorView<T,baseA> const_diag_sub_type;
+        typedef ConstVectorView<T,colAn> const_col_sub_type;
+        typedef ConstVectorView<T,rowAn> const_row_sub_type;
+        typedef ConstSmallVectorView<T,N,_diagstep,vecA> const_diag_type;
+        typedef ConstVectorView<T,vecAn> const_diag_sub_type;
 
-        typedef ConstLowerTriMatrixView<T,A> const_subtrimatrix_type;
-        typedef ConstLowerTriMatrixView<T,nmA> const_subtrimatrix_step_type;
-        typedef ConstMatrixView<T,ndA> const_submatrix_type;
-        typedef ConstMatrixView<T,ndnmA> const_submatrix_step_type;
-        typedef ConstVectorView<T,baseA> const_subvector_type;
+        typedef ConstLowerTriMatrixView<T,An> const_subtrimatrix_type;
+        typedef ConstLowerTriMatrixView<T,nmAn> const_subtrimatrix_step_type;
+        typedef ConstMatrixView<T,ndAn> const_submatrix_type;
+        typedef ConstMatrixView<T,ndnmAn> const_submatrix_step_type;
+        typedef ConstVectorView<T,vecAn> const_subvector_type;
 
         typedef ConstSmallLowerTriMatrixView<T,N,_stepi,_stepj,A>
             const_view_type;
@@ -1772,16 +1857,16 @@ namespace tmv {
 
         typedef typename TriRefHelper<T,_conj,_nonunit>::reference reference;
 
-        typedef VectorView<T,colA> col_sub_type;
-        typedef VectorView<T,rowA> row_sub_type;
-        typedef SmallVectorView<T,N,_diagstep,baseA> diag_type;
-        typedef VectorView<T,baseA> diag_sub_type;
+        typedef VectorView<T,colAn> col_sub_type;
+        typedef VectorView<T,rowAn> row_sub_type;
+        typedef SmallVectorView<T,N,_diagstep,vecA> diag_type;
+        typedef VectorView<T,vecAn> diag_sub_type;
 
-        typedef LowerTriMatrixView<T,A> subtrimatrix_type;
-        typedef LowerTriMatrixView<T,nmA> subtrimatrix_step_type;
-        typedef MatrixView<T,ndA> submatrix_type;
-        typedef MatrixView<T,ndnmA> submatrix_step_type;
-        typedef VectorView<T,baseA> subvector_type;
+        typedef LowerTriMatrixView<T,An> subtrimatrix_type;
+        typedef LowerTriMatrixView<T,nmAn> subtrimatrix_step_type;
+        typedef MatrixView<T,ndAn> submatrix_type;
+        typedef MatrixView<T,ndnmAn> submatrix_step_type;
+        typedef VectorView<T,vecAn> subvector_type;
 
         typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,A> view_type;
         typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,cstyleA> cview_type;
@@ -1827,6 +1912,7 @@ namespace tmv {
         enum { _rowmajor = Traits<type>::_rowmajor };
         enum { _colmajor = Traits<type>::_colmajor };
         enum { _conj = Traits<type>::_conj };
+        enum { _checkalias = Traits<type>::_checkalias };
         enum { _stepi = Traits<type>::_stepi };
         enum { _stepj = Traits<type>::_stepj };
         enum { _diagstep = Traits<type>::_diagstep };

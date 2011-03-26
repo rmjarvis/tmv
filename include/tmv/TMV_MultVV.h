@@ -41,8 +41,7 @@ namespace tmv {
     // Defined in TMV_MultVV.cpp
     template <class T1, int C1, class T2>
     T2 InstMultVV(
-        const ConstVectorView<T1,C1>& v1,
-        const ConstVectorView<T2>& v2);
+        const ConstVectorView<T1,C1>& v1, const ConstVectorView<T2>& v2);
 
 
     //

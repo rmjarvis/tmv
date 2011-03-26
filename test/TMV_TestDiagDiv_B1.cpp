@@ -26,10 +26,13 @@ void TestDiagDiv_B1()
     tmv::Matrix<std::complex<T> > cp = p*std::complex<T>(2,3);
     cp += ca;
 
-    tmv::MatrixView<T> pv = p.view();
     tmv::DiagMatrixView<T> bv = b.view();
-    tmv::MatrixView<std::complex<T> > cpv = cp.view();
     tmv::DiagMatrixView<std::complex<T> > cbv = cb.view();
+    tmv::MatrixView<T,tmv::WithDivider> pv = p.view();
+    tmv::MatrixView<std::complex<T>,tmv::WithDivider> cpv = cp.view();
+
+    pv.saveDiv();
+    cpv.saveDiv();
 
     TestMatrixDivArith1<T>(tmv::LU,pv,bv,cpv,cbv,"Diag/SquareM");
 }

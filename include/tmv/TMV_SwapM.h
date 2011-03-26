@@ -40,6 +40,8 @@ namespace tmv {
     // Defined in TMV_Matrix.cpp
     template <class T, int C>
     void InstSwap(MatrixView<T,C> m1, MatrixView<T> m2); 
+    template <class T, int C>
+    void InstAliasSwap(MatrixView<T,C> m1, MatrixView<T> m2); 
 
     //
     // Swap Matrices
@@ -215,6 +217,14 @@ namespace tmv {
         { InstSwap(m1.xView(),m2.xView()); }
     };
 
+    // algo 91: Call inst alias
+    template <int cs, int rs, class M1, class M2>
+    struct SwapM_Helper<91,cs,rs,M1,M2>
+    {
+        static void call(M1& m1, M2& m2)
+        { InstAliasSwap(m1.xView(),m2.xView()); }
+    };
+
     // algo 97: Conjugate
     template <int cs, int rs, class M1, class M2>
     struct SwapM_Helper<97,cs,rs,M1,M2>
@@ -229,9 +239,23 @@ namespace tmv {
         }
     };
 
-    // algo 99: Check for aliases
+    // algo 197: Conjugate
     template <int cs, int rs, class M1, class M2>
-    struct SwapM_Helper<99,cs,rs,M1,M2>
+    struct SwapM_Helper<197,cs,rs,M1,M2>
+    {
+        static void call(M1& m1, M2& m2)
+        {
+            typedef typename M1::conjugate_type M1c;
+            typedef typename M2::conjugate_type M2c;
+            M1c m1c = m1.conjugate();
+            M2c m2c = m2.conjugate();
+            SwapM_Helper<99,cs,rs,M1c,M2c>::call(m1c,m2c);
+        }
+    };
+
+    // algo 98: Inline check for aliases
+    template <int cs, int rs, class M1, class M2>
+    struct SwapM_Helper<98,cs,rs,M1,M2>
     {
         static void call(M1& m1, M2& m2)
         {
@@ -253,6 +277,27 @@ namespace tmv {
                 NoAliasCopy(m2,m1);
                 NoAliasCopy(m1c,m2);
             }
+        }
+    };
+
+    // algo 99: Check for aliases
+    template <int cs, int rs, class M1, class M2>
+    struct SwapM_Helper<99,cs,rs,M1,M2>
+    {
+        static void call(M1& m1, M2& m2)
+        {
+            typedef typename M1::value_type T1;
+            typedef typename M2::value_type T2;
+            const bool inst = 
+                (cs == UNKNOWN || cs > 16) &&
+                (rs == UNKNOWN || rs > 16) &&
+                Traits2<T1,T2>::sametype &&
+                Traits<T1>::isinst;
+            const int algo =
+                M2::_conj ? 197 :
+                inst ? 91 :
+                98;
+            SwapM_Helper<algo,cs,rs,M1,M2>::call(m1,m2);
         }
     };
 
@@ -314,10 +359,7 @@ namespace tmv {
         static void call(M1& m1, M2& m2)
         {
             const bool checkalias = 
-                M1::_colsize == UNKNOWN && 
-                M2::_colsize == UNKNOWN &&
-                M1::_rowsize == UNKNOWN && 
-                M2::_rowsize == UNKNOWN;
+                M1::_checkalias || M2::_checkalias;
             const int algo =
                 checkalias ? 99 : 
                 -2;
@@ -357,6 +399,23 @@ namespace tmv {
         TMV_MAYBE_REF(M1,M1v) m1v = m1.cView();
         TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
         SwapM_Helper<-3,cs,rs,M1v,M2v>::call(m1v,m2v);
+    }
+
+    template <class M1, class M2>
+    static inline void InlineAliasSwap(
+        BaseMatrix_Rec_Mutable<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
+    {
+        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same));
+        TMVAssert(m1.colsize() == m2.colsize());
+        TMVAssert(m1.rowsize() == m2.rowsize());
+        const int cs = Sizes<M1::_colsize,M2::_colsize>::size;
+        const int rs = Sizes<M1::_rowsize,M2::_rowsize>::size;
+        typedef typename M1::cview_type M1v;
+        typedef typename M2::cview_type M2v;
+        TMV_MAYBE_REF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
+        SwapM_Helper<98,cs,rs,M1v,M2v>::call(m1v,m2v);
     }
 
     template <class M1, class M2>

@@ -80,6 +80,7 @@ namespace tmv {
         enum { _size = UNKNOWN }; 
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
+        enum { _checkalias = false };
     };
 
     template <class T, int A>

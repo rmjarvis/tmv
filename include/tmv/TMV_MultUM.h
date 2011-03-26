@@ -95,24 +95,38 @@ namespace tmv {
     // Defined in TMV_MultUM.cpp
     template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM(
-        const T3 x,
-        const ConstUpperTriMatrixView<T1,C1>& m1, 
+        const T3 x, const ConstUpperTriMatrixView<T1,C1>& m1, 
         const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
     template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM(
-        const T3 x,
-        const ConstUpperTriMatrixView<T1,C1>& m1, 
+        const T3 x, const ConstUpperTriMatrixView<T1,C1>& m1, 
         const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
 
     template <class T1, int C1, class T2, int C2, class T3>
     void InstMultMM(
-        const T3 x,
-        const ConstLowerTriMatrixView<T1,C1>& m1, 
+        const T3 x, const ConstLowerTriMatrixView<T1,C1>& m1, 
         const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
     template <class T1, int C1, class T2, int C2, class T3>
     void InstAddMultMM(
-        const T3 x,
-        const ConstLowerTriMatrixView<T1,C1>& m1, 
+        const T3 x, const ConstLowerTriMatrixView<T1,C1>& m1, 
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
+
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasMultMM(
+        const T3 x, const ConstUpperTriMatrixView<T1,C1>& m1, 
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasAddMultMM(
+        const T3 x, const ConstUpperTriMatrixView<T1,C1>& m1, 
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
+
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasMultMM(
+        const T3 x, const ConstLowerTriMatrixView<T1,C1>& m1, 
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
+    template <class T1, int C1, class T2, int C2, class T3>
+    void InstAliasAddMultMM(
+        const T3 x, const ConstLowerTriMatrixView<T1,C1>& m1, 
         const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
 
 
@@ -1777,7 +1791,7 @@ namespace tmv {
         }
     };
 
-    // algo 90: call InstMultMM
+    // algo 90: call inst
     template <int cs, int rs, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<90,cs,rs,false,ix,T,M1,M2,M3>
     {
@@ -1801,6 +1815,30 @@ namespace tmv {
         }
     };
 
+    // algo 91: call inst alias
+    template <int cs, int rs, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<91,cs,rs,false,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            typedef typename M3::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
+            InstAliasMultMM(xx,m1.xView(),m2.xView(),m3.xView());
+        }
+    };
+    template <int cs, int rs, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<91,cs,rs,true,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            typedef typename M3::value_type VT;
+            VT xx = Traits<VT>::convert(T(x));
+            InstAliasAddMultMM(xx,m1.xView(),m2.xView(),m3.xView());
+        }
+    };
+
     // algo 97: Conjugate
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<97,cs,rs,add,ix,T,M1,M2,M3>
@@ -1819,9 +1857,27 @@ namespace tmv {
         }
     };
 
-    // algo 99: Check for aliases
+    // algo 197: Conjugate
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<99,cs,rs,add,ix,T,M1,M2,M3>
+    struct MultUM_Helper<197,cs,rs,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            typedef typename M1::const_conjugate_type M1c;
+            typedef typename M2::const_conjugate_type M2c;
+            typedef typename M3::conjugate_type M3c;
+            M1c m1c = m1.conjugate();
+            M2c m2c = m2.conjugate();
+            M3c m3c = m3.conjugate();
+            MultUM_Helper<99,cs,rs,add,ix,T,M1c,M2c,M3c>::call(
+                TMV_CONJ(x),m1c,m2c,m3c);
+        }
+    };
+
+    // algo 98: Inline check for aliases
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<98,cs,rs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -1842,6 +1898,36 @@ namespace tmv {
                 // Use temporary for m1*m2
                 MultUM_Helper<87,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
             }
+        }
+    };
+
+    // algo 99: Check for aliases
+    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
+    struct MultUM_Helper<99,cs,rs,add,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+            typedef typename M1::value_type T1;
+            typedef typename M2::value_type T2;
+            typedef typename M3::value_type T3;
+            const bool inst = 
+                (cs == UNKNOWN || cs > 16) &&
+                (rs == UNKNOWN || rs > 16) &&
+#ifdef TMV_INST_MIX
+                Traits2<T1,T3>::samebase &&
+                Traits2<T2,T3>::samebase &&
+#else
+                Traits2<T1,T3>::sametype &&
+                Traits2<T2,T3>::sametype &&
+#endif
+                Traits<T3>::isinst;
+            const int algo = 
+                ( cs == 0 || rs == 0 ) ? 0 :
+                M3::_conj ? 197 :
+                inst ? 91 : 
+                99;
+            MultUM_Helper<algo,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };
 
@@ -2035,15 +2121,11 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const bool checkalias =
-                M1::_size == UNKNOWN &&
-                M2::_colsize == UNKNOWN && M2::_rowsize == UNKNOWN &&
-                M3::_colsize == UNKNOWN && M3::_rowsize == UNKNOWN;
             const int algo = 
                 ( cs == 0 || rs == 0 ) ? 0 :
                 cs == 1 ? 101 :
                 rs == 1 ? 102 :
-                checkalias ? 99 : 
+                M3::_checkalias ? 99 : 
                 -2;
             MultUM_Helper<algo,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
@@ -2061,7 +2143,8 @@ namespace tmv {
         TMVAssert(m1.size() == m2.colsize());
         TMVAssert(m2.rowsize() == m3.rowsize());
 
-        const int cs = Sizes<M3::_colsize,M1::_size>::size;
+        const int cs1 = Sizes<M3::_colsize,M1::_size>::size;
+        const int cs = Sizes<M2::_colsize,cs1>::size;
         const int rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
@@ -2084,7 +2167,8 @@ namespace tmv {
         TMVAssert(m1.size() == m2.colsize());
         TMVAssert(m2.rowsize() == m3.rowsize());
 
-        const int cs = Sizes<M3::_colsize,M1::_size>::size;
+        const int cs1 = Sizes<M3::_colsize,M1::_size>::size;
+        const int cs = Sizes<M2::_colsize,cs1>::size;
         const int rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
@@ -2107,7 +2191,8 @@ namespace tmv {
         TMVAssert(m1.size() == m2.colsize());
         TMVAssert(m2.rowsize() == m3.rowsize());
 
-        const int cs = Sizes<M3::_colsize,M1::_size>::size;
+        const int cs1 = Sizes<M3::_colsize,M1::_size>::size;
+        const int cs = Sizes<M2::_colsize,cs1>::size;
         const int rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
@@ -2116,6 +2201,30 @@ namespace tmv {
         TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
         TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
         MultUM_Helper<-3,cs,rs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
+    }
+
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    static inline void InlineAliasMultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
+        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
+    {
+        TMVStaticAssert((Sizes<M1::_size,M3::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_size,M2::_colsize>::same));
+        TMVStaticAssert((Sizes<M2::_rowsize,M3::_rowsize>::same));
+        TMVAssert(m1.size() == m3.colsize());
+        TMVAssert(m1.size() == m2.colsize());
+        TMVAssert(m2.rowsize() == m3.rowsize());
+
+        const int cs1 = Sizes<M3::_colsize,M1::_size>::size;
+        const int cs = Sizes<M2::_colsize,cs1>::size;
+        const int rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
+        typedef typename M1::const_cview_type M1v;
+        typedef typename M2::const_cview_type M2v;
+        typedef typename M3::cview_type M3v;
+        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
+        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
+        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
+        MultUM_Helper<98,cs,rs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
@@ -2130,7 +2239,8 @@ namespace tmv {
         TMVAssert(m1.size() == m2.colsize());
         TMVAssert(m2.rowsize() == m3.rowsize());
 
-        const int cs = Sizes<M3::_colsize,M1::_size>::size;
+        const int cs1 = Sizes<M3::_colsize,M1::_size>::size;
+        const int cs = Sizes<M2::_colsize,cs1>::size;
         const int rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
@@ -2154,7 +2264,8 @@ namespace tmv {
         TMVAssert(m2.size() == m3.rowsize());
 
         const int cs = Sizes<M3::_colsize,M1::_colsize>::size;
-        const int rs = Sizes<M3::_rowsize,M2::_size>::size;
+        const int rs1 = Sizes<M3::_rowsize,M2::_size>::size;
+        const int rs = Sizes<M1::_rowsize,rs1>::size;
         typedef typename M1::const_transpose_type M1t;
         typedef typename M2::const_transpose_type M2t;
         typedef typename M3::transpose_type M3t;
@@ -2177,7 +2288,8 @@ namespace tmv {
         TMVAssert(m2.size() == m3.rowsize());
 
         const int cs = Sizes<M3::_colsize,M1::_colsize>::size;
-        const int rs = Sizes<M3::_rowsize,M2::_size>::size;
+        const int rs1 = Sizes<M3::_rowsize,M2::_size>::size;
+        const int rs = Sizes<M1::_rowsize,rs1>::size;
         typedef typename M1::const_transpose_type M1t;
         typedef typename M2::const_transpose_type M2t;
         typedef typename M3::transpose_type M3t;
@@ -2200,7 +2312,8 @@ namespace tmv {
         TMVAssert(m2.size() == m3.rowsize());
 
         const int cs = Sizes<M3::_colsize,M1::_colsize>::size;
-        const int rs = Sizes<M3::_rowsize,M2::_size>::size;
+        const int rs1 = Sizes<M3::_rowsize,M2::_size>::size;
+        const int rs = Sizes<M1::_rowsize,rs1>::size;
         typedef typename M1::const_transpose_type M1t;
         typedef typename M2::const_transpose_type M2t;
         typedef typename M3::transpose_type M3t;
@@ -2223,7 +2336,8 @@ namespace tmv {
         TMVAssert(m2.size() == m3.rowsize());
 
         const int cs = Sizes<M3::_colsize,M1::_colsize>::size;
-        const int rs = Sizes<M3::_rowsize,M2::_size>::size;
+        const int rs1 = Sizes<M3::_rowsize,M2::_size>::size;
+        const int rs = Sizes<M1::_rowsize,rs1>::size;
         typedef typename M1::const_transpose_type M1t;
         typedef typename M2::const_transpose_type M2t;
         typedef typename M3::transpose_type M3t;
