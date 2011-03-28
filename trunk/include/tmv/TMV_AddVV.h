@@ -64,11 +64,11 @@ namespace tmv {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         typedef typename V3::iterator IT3;
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& , const V1& ,
             const Scaling<ix2,T2>& , const V2& , V3& ) 
         {}
-        static void call2(
+        static TMV_INLINE void call2(
             int , const Scaling<ix1,T1>& , IT1 ,
             const Scaling<ix2,T2>& , IT2 , IT3 )
         {}
@@ -329,7 +329,7 @@ namespace tmv {
     template <int s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<90,s,ix1,T1,V1,ix2,T2,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const V1& v1, 
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
@@ -344,7 +344,7 @@ namespace tmv {
     template <int s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<91,s,ix1,T1,V1,ix2,T2,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const V1& v1, 
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
@@ -359,7 +359,7 @@ namespace tmv {
     template <int s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<97,s,ix1,T1,V1,ix2,T2,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const V1& v1, 
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
@@ -378,7 +378,7 @@ namespace tmv {
     template <int s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<197,s,ix1,T1,V1,ix2,T2,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const V1& v1, 
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
@@ -429,7 +429,7 @@ namespace tmv {
     template <int s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<99,s,ix1,T1,V1,ix2,T2,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const V1& v1, 
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
@@ -479,7 +479,7 @@ namespace tmv {
                 (sizeof(RT) == 8 && allunit && allreal) ? 12 :
                 (sizeof(RT) == 4 && allunit && allreal) ? 13 :
                 11 ) };
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
@@ -490,7 +490,7 @@ namespace tmv {
             AddVV_Helper<algo1,size,ix1,T1,V1,ix2,T2,V2,V3>::call(
                 x1,v1,x2,v2,v3);
         }
-        static void call2(
+        static TMV_INLINE void call2(
             const int n, const Scaling<ix1,T1>& x1, const IT1& it1,
             const Scaling<ix2,T2>& x2, const IT2& it2, const IT3& it3)
         {
@@ -504,7 +504,7 @@ namespace tmv {
     template <int size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<-3,size,ix1,T1,V1,ix2,T2,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
@@ -517,7 +517,7 @@ namespace tmv {
     template <int s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<-2,s,ix1,T1,V1,ix2,T2,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const V1& v1, 
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
@@ -547,7 +547,7 @@ namespace tmv {
     template <int s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<-1,s,ix1,T1,V1,ix2,T2,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const V1& v1, 
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {

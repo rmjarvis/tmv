@@ -17,187 +17,217 @@
 
 
 template <class M1, class M2>
-static inline bool CanAdd(
+static TMV_INLINE_ND bool CanAdd(
     const tmv::BaseMatrix<M1>& a, const tmv::BaseMatrix<M2>& b)
 {
+#ifdef XXD
     if (showtests) {
         std::cout<<"CanAdd:\n";
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
     }
+#endif
     return a.colsize() == b.colsize() && a.rowsize() == b.rowsize(); 
 }
 
 template <class M1, class M2>
-static inline bool CanAddEq(
+static TMV_INLINE_ND bool CanAddEq(
     const tmv::BaseMatrix_Mutable<M1>& a, const tmv::BaseMatrix<M2>& b)
 {
+#ifdef XXD
     if (showtests) {
         std::cout<<"CanAddEq:\n";
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
     }
+#endif
     return CanAdd(a.mat(),b.mat()); 
 }
 
 template <class M, class T2>
-static inline bool CanAddX(const tmv::BaseMatrix<M>& a, const T2 x)
+static TMV_INLINE_ND bool CanAddX(const tmv::BaseMatrix<M>& a, const T2 x)
 {
+#ifdef XXD
     if (showtests) {
         std::cout<<"CanAddX:\n";
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"x = "<<tmv::TMV_Text(x)<<std::endl;
     }
+#endif
     return a.isSquare(); 
 }
 
 template <class M, class T2>
-static inline bool CanAddEqX(const tmv::BaseMatrix_Mutable<M>& a, const T2 x)
+static TMV_INLINE_ND bool CanAddEqX(const tmv::BaseMatrix_Mutable<M>& a, const T2 x)
 {
+#ifdef XXD
     if (showtests) {
         std::cout<<"CanAddEqX:\n";
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"x = "<<tmv::TMV_Text(x)<<std::endl;
     }
+#endif
     return CanAddX(a.mat(),x); 
 }
 
 template <class M, class T2>
-static inline bool CanMultX(const tmv::BaseMatrix<M>& a, const T2 x)
+static TMV_INLINE_ND bool CanMultX(const tmv::BaseMatrix<M>& a, const T2 x)
 {
+#ifdef XXD
     if (showtests) {
         std::cout<<"CanMultX:\n";
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"x = "<<tmv::TMV_Text(x)<<std::endl;
     }
+#endif
     return true; 
 }
 
 template <class M, class T2>
-static inline bool CanMultEqX(const tmv::BaseMatrix_Mutable<M>& a, const T2 x)
+static TMV_INLINE_ND bool CanMultEqX(const tmv::BaseMatrix_Mutable<M>& a, const T2 x)
 {
+#ifdef XXD
     if (showtests) {
         std::cout<<"CanMultEqX:\n";
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"x = "<<tmv::TMV_Text(x)<<std::endl;
     }
+#endif
     return CanMultX(a.mat(),x); 
 }
 
 template <class M1, class M2>
-static inline bool CanMultMM(
+static TMV_INLINE_ND bool CanMultMM(
     const tmv::BaseMatrix<M1>& a, const tmv::BaseMatrix<M2>& b)
 {
+#ifdef XXD
     if (showtests) {
         std::cout<<"CanMultMM:\n";
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
     }
+#endif
     return a.rowsize() == b.colsize(); 
 }
 
 template <class M1, class V2>
-static inline bool CanMultMV(
+static TMV_INLINE_ND bool CanMultMV(
     const tmv::BaseMatrix<M1>& a, const tmv::BaseVector<V2>& b)
 {
+#ifdef XXD
     if (showtests) {
         std::cout<<"CanMultMV:\n";
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
     }
+#endif
     return a.rowsize() == b.size(); 
 }
 
 template <class V1, class M2>
-static inline bool CanMultVM(
+static TMV_INLINE_ND bool CanMultVM(
     const tmv::BaseVector<V1>& a, const tmv::BaseMatrix<M2>& b)
 {
+#ifdef XXD
     if (showtests) {
         std::cout<<"CanMultVM:\n";
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
     }
+#endif
     return a.size() == b.colsize(); 
 }
 
 template <class M1, class M2, class M3>
-static inline bool CanMultMM(
+static TMV_INLINE_ND bool CanMultMM(
     const tmv::BaseMatrix<M1>& a, const tmv::BaseMatrix<M2>& b,
     const tmv::BaseMatrix<M3>& c)
 {
+#ifdef XXD
     if (showtests) {
         std::cout<<"CanMultMM:\n";
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
     return (CanMultMM(a.mat(),b.mat()) && c.colsize() == a.colsize() && 
             c.rowsize() == b.rowsize());
 }
 
 template <class M1, class V2, class V3>
-static inline bool CanMultMV(
+static TMV_INLINE_ND bool CanMultMV(
     const tmv::BaseMatrix<M1>& a, const tmv::BaseVector<V2>& b,
     const tmv::BaseVector<V3>& c)
 {
+#ifdef XXD
     if (showtests) {
         std::cout<<"CanMultMV:\n";
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
     return CanMultMV(a.mat(),b.vec()) && c.size() == a.colsize(); 
 }
 
 template <class V1, class M2, class V3>
-static inline bool CanMultVM(
+static TMV_INLINE_ND bool CanMultVM(
     const tmv::BaseVector<V1>& a, const tmv::BaseMatrix<M2>& b,
     const tmv::BaseVector<V3>& c)
 {
+#ifdef XXD
     if (showtests) {
         std::cout<<"CanMultVM:\n";
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
     return CanMultVM(a.vec(),b.mat()) && c.size() == b.rowsize(); 
 }
 
 template <class M1, class M2, class M3>
-static inline bool CanMultXMM(
+static TMV_INLINE_ND bool CanMultXMM(
     const tmv::BaseMatrix<M1>& a, const tmv::BaseMatrix<M2>& b,
     const tmv::BaseMatrix<M3>& c)
 {
+#ifdef XXD
     if (showtests) {
         std::cout<<"CanMultXMM:\n";
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
     return CanMultMM(a.mat(),b.mat(),c.mat()); 
 }
 
 template <class V0, class V1>
-inline void CopyBack(
+static TMV_INLINE_ND void CopyBack(
     const tmv::BaseVector<V0>& v0, tmv::BaseVector_Mutable<V1>& v1)
 {
+#ifdef XXD
     if (showtests) {
         std::cout<<"CopyBack:\n";
         std::cout<<"v0 = "<<tmv::TMV_Text(v0)<<std::endl;
         std::cout<<"v1 = "<<tmv::TMV_Text(v1)<<std::endl;
     }
+#endif
     v1 = v0; 
 }
 
 template <class M0, class M1>
-inline void CopyBack(
+static TMV_INLINE_ND void CopyBack(
     const tmv::BaseMatrix<M0>& m0, tmv::BaseMatrix_Mutable<M1>& m1)
 {
+#ifdef XXD
     if (showtests) {
         std::cout<<"CopyBack:\n";
         std::cout<<"m0 = "<<tmv::TMV_Text(m0)<<std::endl;
         std::cout<<"m1 = "<<tmv::TMV_Text(m1)<<std::endl;
     }
+#endif
     m1 = m0; 
 }
 
@@ -1200,9 +1230,9 @@ static void DoTestVM1C(const MM& a, V& b, std::string label)
 }
 
 template <class T> 
-static inline void SetZ(T& z) { z = T(5); }
+static TMV_INLINE void SetZ(T& z) { z = T(5); }
 template <class T>
-static inline void SetZ(std::complex<T>& z) { z = std::complex<T>(3,4); }
+static TMV_INLINE void SetZ(std::complex<T>& z) { z = std::complex<T>(3,4); }
 
 template <class MM, class V> 
 static void DoTestMV2a_Basic(const MM& a, V& b, std::string label)

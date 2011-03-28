@@ -206,12 +206,6 @@ namespace tmv {
         // Access 
         //
 
-        size_t size() const { return itsn; }
-
-        size_t colsize() const { return itsn; }
-
-        size_t rowsize() const { return itsn; }
-
         int cref(int i, int j) const
         {
             // Two options:
@@ -249,21 +243,18 @@ namespace tmv {
             return (temp == i) ? 1 : 0;
         }
 
-        const int* getValues() const { return itsp; }
-
-        bool isInverse() const { return isinv; }
 
         //
         // Functions of Permutations
         //
 
-        Permutation inverse() const
+        TMV_INLINE Permutation inverse() const
         { return Permutation(itsn,itsp,!isinv,itsdet); }
 
-        Permutation transpose() const
+        TMV_INLINE Permutation transpose() const
         { return inverse(); }
 
-        int det() const
+        TMV_INLINE int det() const
         { return itsdet; }
 
         int logDet(int* sign=0) const
@@ -285,22 +276,22 @@ namespace tmv {
             return t;
         }
 
-        int sumElements() const
+        TMV_INLINE int sumElements() const
         { return itsn; }
 
-        int sumAbsElements() const
+        TMV_INLINE int sumAbsElements() const
         { return itsn; }
 
-        int sumAbs2Elements() const
+        TMV_INLINE int sumAbs2Elements() const
         { return itsn; }
 
-        int maxAbsElement() const
+        TMV_INLINE int maxAbsElement() const
         { return 1; }
 
-        int maxAbs2Element() const
+        TMV_INLINE int maxAbs2Element() const
         { return 1; }
 
-        int normSq() const
+        TMV_INLINE int normSq() const
         { return itsn; }
 
         int normSq(const int scale) const
@@ -311,28 +302,28 @@ namespace tmv {
         double normF() const
         { return TMV_SQRT(double(itsn)); }
 
-        double norm() const
+        TMV_INLINE double norm() const
         { return normF(); }
 
-        int norm1() const
+        TMV_INLINE int norm1() const
         { return 1; }
 
-        int norm2() const
+        TMV_INLINE int norm2() const
         { return 1; }
 
-        int doNorm2() const
+        TMV_INLINE int doNorm2() const
         { return 1; }
 
-        int normInf() const
+        TMV_INLINE int normInf() const
         { return 1; }
 
-        int condition() const
+        TMV_INLINE int condition() const
         { return 1; }
 
-        int doCondition() const
+        TMV_INLINE int doCondition() const
         { return 1; }
 
-        bool isSinular() const
+        TMV_INLINE bool isSinular() const
         { return false; }
 
 
@@ -585,6 +576,10 @@ namespace tmv {
             P.isinv = false;
         }
 
+        //
+        // Auxilliary functions
+        //
+
         void resize(size_t n)
         {
             itsn = n;
@@ -592,6 +587,12 @@ namespace tmv {
             isinv = false;
             itsdet = 1;
         }
+
+        TMV_INLINE size_t size() const { return itsn; }
+        TMV_INLINE size_t colsize() const { return itsn; }
+        TMV_INLINE size_t rowsize() const { return itsn; }
+        TMV_INLINE const int* getValues() const { return itsp; }
+        TMV_INLINE bool isInverse() const { return isinv; }
 
 
     protected:
@@ -652,7 +653,7 @@ namespace tmv {
                 if (itsp[i] != i) itsdet = -itsdet; 
         }
 
-        int* getMem() 
+        TMV_INLINE_ND int* getMem() 
         {
             // Make sure P owns its memory:
             TMVAssert(itsmem.get());
@@ -663,35 +664,35 @@ namespace tmv {
 
     }; // Permutation
 
-    static inline Permutation Transpose(const Permutation& m)
+    static TMV_INLINE Permutation Transpose(const Permutation& m)
     { return m.transpose(); }
-    static inline Permutation Adjoint(const Permutation& m)
+    static TMV_INLINE Permutation Adjoint(const Permutation& m)
     { return m.transpose(); }
-    static inline const Permutation& Conjugate(const Permutation& m)
+    static TMV_INLINE const Permutation& Conjugate(const Permutation& m)
     { return m; }
-    static inline Permutation Inverse(const Permutation& m)
+    static TMV_INLINE Permutation Inverse(const Permutation& m)
     { return m.transpose(); }
-    static inline double Norm(const Permutation& m)
+    static TMV_INLINE double Norm(const Permutation& m)
     { return m.norm(); }
-    static inline double NormF(const Permutation& m)
+    static TMV_INLINE double NormF(const Permutation& m)
     { return m.normF(); }
-    static inline int NormSq(const Permutation& m)
+    static TMV_INLINE int NormSq(const Permutation& m)
     { return m.normSq(); }
-    static inline int Norm1(const Permutation& m)
+    static TMV_INLINE int Norm1(const Permutation& m)
     { return m.norm1(); }
-    static inline int Norm2(const Permutation& m)
+    static TMV_INLINE int Norm2(const Permutation& m)
     { return m.norm2(); }
-    static inline int NormInf(const Permutation& m)
+    static TMV_INLINE int NormInf(const Permutation& m)
     { return m.normInf(); }
-    static inline int MaxAbsElement(const Permutation& m)
+    static TMV_INLINE int MaxAbsElement(const Permutation& m)
     { return m.maxAbsElement(); }
-    static inline int MaxAbs2Element(const Permutation& m)
+    static TMV_INLINE int MaxAbs2Element(const Permutation& m)
     { return m.maxAbs2Element(); }
-    static inline int Trace(const Permutation& m)
+    static TMV_INLINE int Trace(const Permutation& m)
     { return m.trace(); }
-    static inline int Det(const Permutation& m)
+    static TMV_INLINE int Det(const Permutation& m)
     { return m.det(); }
-    static inline int LogDet(const Permutation& m)
+    static TMV_INLINE int LogDet(const Permutation& m)
     { return m.logDet(); }
 
     static inline std::ostream& operator<<(

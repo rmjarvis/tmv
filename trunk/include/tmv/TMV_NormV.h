@@ -291,35 +291,35 @@ namespace tmv {
     struct SumElementsV_Helper<90,s,ValueComp,ix,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
-        static ret call(const V& v, const Scaling<ix,RT>& x)
+        static TMV_INLINE ret call(const V& v, const Scaling<ix,RT>& x)
         { return InstSumElements(v.xView()); }
     };
     template <int s, int ix, class ret, class V>
     struct SumElementsV_Helper<90,s,AbsComp,ix,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
-        static ret call(const V& v, const Scaling<ix,RT>& x)
+        static TMV_INLINE ret call(const V& v, const Scaling<ix,RT>& x)
         { return InstSumAbsElements(v.xView()); }
     };
     template <int s, int ix, class ret, class V>
     struct SumElementsV_Helper<90,s,Abs2Comp,ix,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
-        static ret call(const V& v, const Scaling<ix,RT>& x)
+        static TMV_INLINE ret call(const V& v, const Scaling<ix,RT>& x)
         { return InstSumAbs2Elements(v.xView()); }
     };
     template <int s, class ret, class V>
     struct SumElementsV_Helper<90,s,NormComp,1,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
-        static ret call(const V& v, const Scaling<1,RT>& x)
+        static TMV_INLINE ret call(const V& v, const Scaling<1,RT>& x)
         { return InstNormSq(v.xView()); }
     };
     template <int s, class ret, class V>
     struct SumElementsV_Helper<90,s,NormComp,0,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
-        static ret call(const V& v, const Scaling<0,RT>& x)
+        static TMV_INLINE ret call(const V& v, const Scaling<0,RT>& x)
         { return InstNormSq(v.xView(),x); }
     };
 
@@ -328,7 +328,7 @@ namespace tmv {
     struct SumElementsV_Helper<97,s,comp,ix,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
-        static ret call(const V& v, const Scaling<ix,RT>& x)
+        static TMV_INLINE ret call(const V& v, const Scaling<ix,RT>& x)
         {
             typedef typename V::const_nonconj_type Vnc;
             Vnc vnc = v.nonConj();
@@ -339,7 +339,7 @@ namespace tmv {
     struct SumElementsV_Helper<97,s,ValueComp,ix,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
-        static ret call(const V& v, const Scaling<ix,RT>& x)
+        static TMV_INLINE ret call(const V& v, const Scaling<ix,RT>& x)
         {
             typedef typename V::const_conjugate_type Vc;
             Vc vc = v.conjugate();
@@ -354,7 +354,7 @@ namespace tmv {
     {
         typedef typename Traits<ret>::real_type RT;
         typedef typename V::value_type VT;
-        static ret call(const V& v, const Scaling<ix,RT>& x)
+        static TMV_INLINE ret call(const V& v, const Scaling<ix,RT>& x)
         {
             typedef typename V::real_type RT;
             const int maxunroll = 80;
@@ -373,7 +373,7 @@ namespace tmv {
     struct SumElementsV_Helper<-2,s,comp,ix,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
-        static ret call(const V& v, const Scaling<ix,RT>& x)
+        static TMV_INLINE ret call(const V& v, const Scaling<ix,RT>& x)
         {
             typedef typename V::value_type VT;
             const bool inst = 
@@ -391,7 +391,7 @@ namespace tmv {
     struct SumElementsV_Helper<-1,s,comp,ix,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
-        static ret call(const V& v, const Scaling<ix,RT>& x)
+        static TMV_INLINE ret call(const V& v, const Scaling<ix,RT>& x)
         { return SumElementsV_Helper<-2,s,comp,ix,ret,V>::call(v,x); }
     };
 

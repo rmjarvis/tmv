@@ -85,7 +85,7 @@ namespace tmv {
     // algo 0: Trivial, nothing to do (M == 0 or 1, or N == 0)
     template <int cs, int rs, class M>
     struct LUDecompose_Helper<0,cs,rs,M>
-    { static void call(M& A, int* P, int& detp) {} };
+    { static TMV_INLINE void call(M& A, int* P, int& detp) {} };
 
     // algo 1: N == 1
     template <int cs, int rs, class M1>
@@ -679,7 +679,7 @@ namespace tmv {
     template <int cs, int rs, class M>
     struct LUDecompose_Helper<90,cs,rs,M>
     {
-        static void call(M& m, int* P, int& detp)
+        static TMV_INLINE void call(M& m, int* P, int& detp)
         { InstLU_Decompose(m.xView(),P,detp); }
     };
 
@@ -687,7 +687,7 @@ namespace tmv {
     template <int cs, int rs, class M>
     struct LUDecompose_Helper<97,cs,rs,M>
     {
-        static void call(M& m, int* P, int& detp)
+        static TMV_INLINE void call(M& m, int* P, int& detp)
         {
             typedef typename M::conjugate_type Mc;
             Mc mc = m.conjugate();
@@ -700,7 +700,7 @@ namespace tmv {
     struct LUDecompose_Helper<-4,cs,rs,M1>
     {
         typedef typename M1::value_type T;
-        static void call(M1& m, int* P, int& detp)
+        static TMV_INLINE void call(M1& m, int* P, int& detp)
         {
             const int algo = 
                 cs == 0 || rs == 0 || cs == 1 ? 0 :
@@ -741,7 +741,7 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct LUDecompose_Helper<-3,cs,rs,M1>
     {
-        static void call(M1& m, int* P, int& detp)
+        static TMV_INLINE void call(M1& m, int* P, int& detp)
         {
             const int algo = (
                 ( cs != UNKNOWN && rs != UNKNOWN &&
@@ -762,7 +762,7 @@ namespace tmv {
     template <int cs, int rs, class M>
     struct LUDecompose_Helper<-2,cs,rs,M>
     {
-        static void call(M& m, int* P, int& detp)
+        static TMV_INLINE void call(M& m, int* P, int& detp)
         {
             typedef typename M::value_type T;
             const bool inst = 
@@ -781,7 +781,7 @@ namespace tmv {
     template <int cs, int rs, class M>
     struct LUDecompose_Helper<-1,cs,rs,M>
     {
-        static void call(M& m, int* P, int& detp)
+        static TMV_INLINE void call(M& m, int* P, int& detp)
         { LUDecompose_Helper<-2,cs,rs,M>::call(m,P,detp); }
     };
 

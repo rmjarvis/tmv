@@ -3,14 +3,16 @@
 #include "TMV.h"
 
 template <class M0, class M1>
-inline void CopyBack(
+static TMV_INLINE_ND void CopyBack(
     const tmv::BaseMatrix_Tri<M0>& m0, tmv::BaseMatrix_Tri_Mutable<M1>& m1)
 {
+#ifdef XXD
     if (showtests) {
         std::cout<<"Special CopyBackM:\n";
         std::cout<<"m0 = "<<tmv::TMV_Text(m0)<<std::endl;
         std::cout<<"m1 = "<<tmv::TMV_Text(m1)<<std::endl;
     }
+#endif
     if (m1.isunit()) m1 = m0.viewAsUnitDiag();
     else m1 = m0;
 }

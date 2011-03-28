@@ -243,7 +243,7 @@ namespace tmv {
     template <int s, class M1, class M2>
     struct SwapU_Helper<90,s,M1,M2>
     {
-        static void call(M1& m1, M2& m2)
+        static TMV_INLINE void call(M1& m1, M2& m2)
         { InstSwap(m1.xView(),m2.xView()); }
     };
 
@@ -251,7 +251,7 @@ namespace tmv {
     template <int s, class M1, class M2>
     struct SwapU_Helper<91,s,M1,M2>
     {
-        static void call(M1& m1, M2& m2)
+        static TMV_INLINE void call(M1& m1, M2& m2)
         { InstAliasSwap(m1.xView(),m2.xView()); }
     };
 
@@ -259,7 +259,7 @@ namespace tmv {
     template <int s, class M1, class M2>
     struct SwapU_Helper<96,s,M1,M2>
     {
-        static void call(M1& m1, M2& m2)
+        static TMV_INLINE void call(M1& m1, M2& m2)
         {
             typedef typename M1::transpose_type M1t;
             typedef typename M2::transpose_type M2t;
@@ -273,7 +273,7 @@ namespace tmv {
     template <int s, class M1, class M2>
     struct SwapU_Helper<196,s,M1,M2>
     {
-        static void call(M1& m1, M2& m2)
+        static TMV_INLINE void call(M1& m1, M2& m2)
         {
             typedef typename M1::transpose_type M1t;
             typedef typename M2::transpose_type M2t;
@@ -287,7 +287,7 @@ namespace tmv {
     template <int s, class M1, class M2>
     struct SwapU_Helper<97,s,M1,M2>
     {
-        static void call(M1& m1, M2& m2)
+        static TMV_INLINE void call(M1& m1, M2& m2)
         {
             typedef typename M1::conjugate_type M1c;
             typedef typename M2::conjugate_type M2c;
@@ -301,7 +301,7 @@ namespace tmv {
     template <int s, class M1, class M2>
     struct SwapU_Helper<197,s,M1,M2>
     {
-        static void call(M1& m1, M2& m2)
+        static TMV_INLINE void call(M1& m1, M2& m2)
         {
             typedef typename M1::conjugate_type M1c;
             typedef typename M2::conjugate_type M2c;
@@ -349,7 +349,7 @@ namespace tmv {
     template <int s, class M1, class M2>
     struct SwapU_Helper<99,s,M1,M2>
     {
-        static void call(M1& m1, M2& m2)
+        static TMV_INLINE void call(M1& m1, M2& m2)
         {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
@@ -370,7 +370,7 @@ namespace tmv {
     template <int s, class M1, class M2>
     struct SwapU_Helper<-4,s,M1,M2>
     {
-        static void call(M1& m1, M2& m2)
+        static TMV_INLINE void call(M1& m1, M2& m2)
         {
             TMVStaticAssert(!M1::_unit);
             TMVStaticAssert(!M2::_unit);
@@ -396,7 +396,7 @@ namespace tmv {
     template <int s, class M1, class M2>
     struct SwapU_Helper<-3,s,M1,M2>
     {
-        static void call(M1& m1, M2& m2)
+        static TMV_INLINE void call(M1& m1, M2& m2)
         {
             TMVStaticAssert(M1::_unit == int(M2::_unit));
             TMVStaticAssert(M1::_upper == int(M2::_upper));
@@ -413,7 +413,7 @@ namespace tmv {
     template <int s, class M1, class M2>
     struct SwapU_Helper<-2,s,M1,M2>
     {
-        static void call(M1& m1, M2& m2)
+        static TMV_INLINE void call(M1& m1, M2& m2)
         {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
@@ -434,7 +434,7 @@ namespace tmv {
     template <int s, class M1, class M2>
     struct SwapU_Helper<-1,s,M1,M2>
     {
-        static void call(M1& m1, M2& m2)
+        static TMV_INLINE void call(M1& m1, M2& m2)
         {
             const bool noclobber =
                 MStepHelper<M1,M2>::opp && M1::_unit;

@@ -13,7 +13,7 @@ void TestAllSmallSquareDiv()
     TestSmallSquareDiv_f<T>();
     TestSmallSquareDiv_g<T>();
 
-    std::cout<<"Square SmallMatrix<"<<tmv::TMV_Text(T())<<"> Division ";
+    std::cout<<"Square SmallMatrix<"<<Text(T())<<"> Division ";
     std::cout<<"passed all tests\n";
 }
 

@@ -958,7 +958,7 @@ namespace tmv {
     struct Norm1M_Helper<90,cs,rs,M1>
     {
         typedef typename M1::float_type RT;
-        static RT call(const M1& m)
+        static TMV_INLINE RT call(const M1& m)
         { return InstNorm1(m.xView()); }
     };
 
@@ -967,7 +967,7 @@ namespace tmv {
     struct Norm1M_Helper<97,cs,rs,M1>
     {
         typedef typename M1::float_type RT;
-        static RT call(const M1& m)
+        static TMV_INLINE RT call(const M1& m)
         {
             typedef typename M1::const_nonconj_type Mnc;
             Mnc mnc = m.nonConj();
@@ -980,7 +980,7 @@ namespace tmv {
     struct Norm1M_Helper<-3,cs,rs,M1>
     {
         typedef typename M1::float_type RT;
-        static RT call(const M1& m)
+        static TMV_INLINE RT call(const M1& m)
         {
             const int algo =
                 TMV_OPT == 0 ? 11 :
@@ -1002,7 +1002,7 @@ namespace tmv {
     struct Norm1M_Helper<-2,cs,rs,M1>
     {
         typedef typename M1::float_type RT;
-        static RT call(const M1& m)
+        static TMV_INLINE RT call(const M1& m)
         {
             typedef typename M1::value_type VT;
             const bool inst =
@@ -1021,7 +1021,7 @@ namespace tmv {
     struct Norm1M_Helper<-1,cs,rs,M1>
     {
         typedef typename M1::float_type RT;
-        static RT call(const M1& m)
+        static TMV_INLINE RT call(const M1& m)
         { return Norm1M_Helper<-2,cs,rs,M1>::call(m); }
     };
 

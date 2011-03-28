@@ -325,11 +325,11 @@ namespace tmv {
         // Constructors
         //
 
-        SmallMatrix() 
+        TMV_INLINE_ND SmallMatrix() 
         {
+            TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(M>=0);
             TMVStaticAssert(N>=0);
-            TMVStaticAssert(Traits<type>::okA);
 #ifdef TMV_DEBUG
             this->setAllTo(T(888));
 #endif
@@ -337,26 +337,26 @@ namespace tmv {
 
         explicit SmallMatrix(T x) 
         {
+            TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(M>=0);
             TMVStaticAssert(N>=0);
-            TMVStaticAssert(Traits<type>::okA);
             this->setAllTo(x);
         }
 
         explicit SmallMatrix(const T* vv) 
         {
+            TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(M>=0);
             TMVStaticAssert(N>=0);
-            TMVStaticAssert(Traits<type>::okA);
             typename type::linearview_type lv = this->linearView();
             ConstSmallVectorView<T,_linsize,1>(vv).newAssignTo(lv);
         }
 
         explicit SmallMatrix(const std::vector<T>& vv) 
         {
+            TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(M>=0);
             TMVStaticAssert(N>=0);
-            TMVStaticAssert(Traits<type>::okA);
             TMVAssert(vv.size() == _linsize);
             typename type::linearview_type lv = this->linearView();
             ConstSmallVectorView<T,_linsize,1>(&vv[0]).newAssignTo(lv);
@@ -364,9 +364,9 @@ namespace tmv {
 
         explicit SmallMatrix(const std::vector<std::vector<T> >& vv) 
         {
+            TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(M>=0);
             TMVStaticAssert(N>=0);
-            TMVStaticAssert(Traits<type>::okA);
             TMVAssert(vv.size() == M);
             for(int i=0;i<M;++i) {
                 TMVAssert(vv[i].size() == N);
@@ -377,25 +377,25 @@ namespace tmv {
 
         SmallMatrix(const type& m2) 
         {
+            TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(M>=0);
             TMVStaticAssert(N>=0);
-            TMVStaticAssert(Traits<type>::okA);
             m2.newAssignTo(*this);
         }
 
         template <class M2>
         SmallMatrix(const BaseMatrix<M2>& m2) 
         {
+            TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(M>=0);
             TMVStaticAssert(N>=0);
-            TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert((ShapeTraits2<M2::_shape,_shape>::assignable));
             TMVAssert(m2.colsize() == M);
             TMVAssert(m2.rowsize() == N);
             m2.newAssignTo(*this);
         }
 
-        ~SmallMatrix()
+        TMV_INLINE_ND ~SmallMatrix()
         {
 #ifdef TMV_DEBUG
             this->setAllTo(T(999));
@@ -407,48 +407,39 @@ namespace tmv {
         // Op=
         //
 
-        type& operator=(const type& m2)
-        {
-            if (&m2 != this) base_mut::operator=(m2);
-            return *this;
-        }
+        TMV_INLINE type& operator=(const type& m2)
+        { if (this != &m2) base_mut::operator=(m2); return *this; }
 
         template <class M2>
-        type& operator=(const BaseMatrix<M2>& m2)
-        {
-            base_mut::operator=(m2);
-            return *this;
-        }
+        TMV_INLINE type& operator=(const BaseMatrix<M2>& m2)
+        { base_mut::operator=(m2); return *this; }
 
-        type& operator=(T x) 
-        {
-            base_mut::operator=(x); 
-            return *this;
-        }
+        TMV_INLINE type& operator=(T x) 
+        { base_mut::operator=(x); return *this; }
 
 
         //
         // Auxilliary Functions
         //
 
-        const T* cptr() const { return itsm; }
-        T* ptr() { return itsm; }
+        TMV_INLINE const T* cptr() const { return itsm; }
+        TMV_INLINE T* ptr() { return itsm; }
 
         T cref(int i, int j) const
-        { return itsm[_rowmajor ? i*stepi()+j : i+j*stepj()]; }
+        { return itsm[i*stepi()+j*stepj()]; }
 
         T& ref(int i, int j)
-        { return itsm[_rowmajor ? i*stepi()+j : i+j*stepj()]; }
+        { return itsm[i*stepi()+j*stepj()]; }
 
-        size_t ls() const { return _linsize; }
-        size_t colsize() const { return M; }
-        size_t rowsize() const { return N; }
-        int nElements() const { return _linsize; }
-        int stepi() const { return _stepi; }
-        int stepj() const { return _stepj; }
-        bool isconj() const { return false; }
-        bool isrm() const { return _rowmajor; }
-        bool iscm() const { return _colmajor; }
+        TMV_INLINE size_t ls() const { return _linsize; }
+        TMV_INLINE size_t colsize() const { return M; }
+        TMV_INLINE size_t rowsize() const { return N; }
+        TMV_INLINE int nElements() const { return _linsize; }
+        TMV_INLINE int stepi() const { return _stepi; }
+        TMV_INLINE int stepj() const { return _stepj; }
+        TMV_INLINE bool isconj() const { return false; }
+        TMV_INLINE bool isrm() const { return _rowmajor; }
+        TMV_INLINE bool iscm() const { return _colmajor; }
 
     private:
 
@@ -722,21 +713,21 @@ namespace tmv {
         // Auxilliary Functions
         //
 
-        const T* cptr() const { return itsm; }
+        TMV_INLINE const T* cptr() const { return itsm; }
 
         T cref(int i, int j) const
         { return DoConj<_conj>(itsm[i*stepi()+j*stepj()]); }
 
-        size_t ls() const { return int(itscs)*int(itsrs); }
-        size_t colsize() const { return itscs; }
-        size_t rowsize() const { return itsrs; }
-        int nElements() const { return int(itscs)*int(itsrs); }
-        int stepi() const { return itssi; }
-        int stepj() const { return itssj; }
-        bool isconj() const { return _conj; }
-        bool isrm() const 
+        TMV_INLINE size_t ls() const { return int(itscs)*int(itsrs); }
+        TMV_INLINE size_t colsize() const { return itscs; }
+        TMV_INLINE size_t rowsize() const { return itsrs; }
+        TMV_INLINE int nElements() const { return int(itscs)*int(itsrs); }
+        TMV_INLINE int stepi() const { return itssi; }
+        TMV_INLINE int stepj() const { return itssj; }
+        TMV_INLINE bool isconj() const { return _conj; }
+        TMV_INLINE bool isrm() const 
         { return _rowmajor || (!_colmajor &&  stepj() == 1); }
-        bool iscm() const 
+        TMV_INLINE bool iscm() const 
         { return _colmajor || (!_rowmajor &&  stepi() == 1); }
 
     private :
@@ -1038,14 +1029,14 @@ namespace tmv {
         // Op=
         //
 
+        TMV_INLINE type& operator=(const type& m2)
+        { if (this != &m2) base_mut::operator=(m2); return *this; }
+
         template <class M2>
-        type& operator=(const BaseMatrix<M2>& m2)
+        TMV_INLINE type& operator=(const BaseMatrix<M2>& m2)
         { base_mut::operator=(m2); return *this; }
 
-        type& operator=(const type& m2)
-        { base_mut::operator=(m2); return *this; }
-
-        type& operator=(const T x)
+        TMV_INLINE type& operator=(const T x)
         { base_mut::operator=(x); return *this; }
 
 
@@ -1053,8 +1044,8 @@ namespace tmv {
         // Auxilliary Functions
         //
 
-        const T* cptr() const { return itsm; }
-        T* ptr() { return itsm; }
+        TMV_INLINE const T* cptr() const { return itsm; }
+        TMV_INLINE T* ptr() { return itsm; }
 
         T cref(int i, int j) const
         { return DoConj<_conj>(itsm[i*stepi()+j*stepj()]); }
@@ -1062,16 +1053,16 @@ namespace tmv {
         reference ref(int i, int j)
         { return reference(itsm[i*stepi()+j*stepj()]); }
 
-        size_t ls() const { return int(itscs)*int(itsrs); }
-        size_t colsize() const { return itscs; }
-        size_t rowsize() const { return itsrs; }
-        int nElements() const { return int(itscs)*int(itsrs); }
-        int stepi() const { return itssi; }
-        int stepj() const { return itssj; }
-        bool isconj() const { return _conj; }
-        bool isrm() const 
+        TMV_INLINE size_t ls() const { return int(itscs)*int(itsrs); }
+        TMV_INLINE size_t colsize() const { return itscs; }
+        TMV_INLINE size_t rowsize() const { return itsrs; }
+        TMV_INLINE int nElements() const { return int(itscs)*int(itsrs); }
+        TMV_INLINE int stepi() const { return itssi; }
+        TMV_INLINE int stepj() const { return itssj; }
+        TMV_INLINE bool isconj() const { return _conj; }
+        TMV_INLINE bool isrm() const 
         { return _rowmajor || (!_colmajor && stepj() == 1); }
-        bool iscm() const 
+        TMV_INLINE bool iscm() const 
         { return _colmajor || (!_rowmajor && stepi() == 1); }
 
     private :
@@ -1109,7 +1100,7 @@ namespace tmv {
     };
 
     template <class V>
-    static inline typename VVO<V>::crv RowVectorViewOf(
+    static TMV_INLINE typename VVO<V>::crv RowVectorViewOf(
         const BaseVector_Calc<V>& v)
     {
         return typename VVO<V>::crv(
@@ -1117,7 +1108,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline typename VVO<V>::rv RowVectorViewOf(
+    static TMV_INLINE typename VVO<V>::rv RowVectorViewOf(
         BaseVector_Mutable<V>& v)
     {
         return typename VVO<V>::rv(
@@ -1125,7 +1116,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline typename VVO<V>::ccv ColVectorViewOf(
+    static TMV_INLINE typename VVO<V>::ccv ColVectorViewOf(
         const BaseVector_Calc<V>& v)
     {
         return typename VVO<V>::ccv(
@@ -1133,7 +1124,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline typename VVO<V>::cv ColVectorViewOf(
+    static TMV_INLINE typename VVO<V>::cv ColVectorViewOf(
         BaseVector_Mutable<V>& v)
     {
         return typename VVO<V>::cv(
@@ -1143,7 +1134,7 @@ namespace tmv {
     // Repeat for VectorView and SmallVectorView so we can have them 
     // work without requiring the non-const reference.
     template <class T, int A>
-    static inline typename VVO<VectorView<T,A> >::rv RowVectorViewOf(
+    static TMV_INLINE typename VVO<VectorView<T,A> >::rv RowVectorViewOf(
         VectorView<T,A> v)
     {
         return typename VVO<VectorView<T,A> >::rv(
@@ -1151,7 +1142,7 @@ namespace tmv {
     }
 
     template <class T, int N, int S, int A>
-    static inline typename VVO<SmallVectorView<T,N,S,A> >::rv RowVectorViewOf(
+    static TMV_INLINE typename VVO<SmallVectorView<T,N,S,A> >::rv RowVectorViewOf(
         SmallVectorView<T,N,S,A> v)
     {
         return typename VVO<SmallVectorView<T,N,S,A> >::rv(
@@ -1159,7 +1150,7 @@ namespace tmv {
     }
 
     template <class T, int S, int A>
-    static inline typename VVO<VectorView<T,A> >::cv ColVectorViewOf(
+    static TMV_INLINE typename VVO<VectorView<T,A> >::cv ColVectorViewOf(
         VectorView<T,A> v)
     {
         return typename VVO<VectorView<T,A> >::cv(
@@ -1167,7 +1158,7 @@ namespace tmv {
     }
 
     template <class T, int N, int S, int A>
-    static inline typename VVO<SmallVectorView<T,N,S,A> >::cv ColVectorViewOf(
+    static TMV_INLINE typename VVO<SmallVectorView<T,N,S,A> >::cv ColVectorViewOf(
         SmallVectorView<T,N,S,A> v)
     {
         return typename VVO<SmallVectorView<T,N,S,A> >::cv(
@@ -1180,25 +1171,25 @@ namespace tmv {
     //
 
     template <class T, int M, int N, int Si, int Sj, int A, class MM>
-    static inline void Swap(
+    static TMV_INLINE void Swap(
         BaseMatrix_Rec_Mutable<MM>& m1, SmallMatrixView<T,M,N,Si,Sj,A> m2)
     { DoSwap(m1,m2); }
     template <class T, int M, int N, int Si, int Sj, int A, class MM>
-    static inline void Swap(
+    static TMV_INLINE void Swap(
         SmallMatrixView<T,M,N,Si,Sj,A> m1, BaseMatrix_Rec_Mutable<MM>& m2)
     { DoSwap(m1,m2); }
     template <class T, int M, int N, int Si1, int Sj1, int A1, int Si2, int Sj2, int A2>
-    static inline void Swap(
+    static TMV_INLINE void Swap(
         SmallMatrixView<T,M,N,Si1,Sj1,A1> m1,
         SmallMatrixView<T,M,N,Si2,Sj2,A2> m2)
     { DoSwap(m1,m2); }
     template <class T, int M, int N, int Si1, int Sj1, int A1, int A2>
-    static inline void Swap(
+    static TMV_INLINE void Swap(
         SmallMatrixView<T,M,N,Si1,Sj1,A1> m1, 
         MatrixView<T,A2> m2)
     { DoSwap(m1,m2); }
     template <class T, int M, int N, int A1, int Si2, int Sj2, int A2>
-    static inline void Swap(
+    static TMV_INLINE void Swap(
         MatrixView<T,A1> m1,
         SmallMatrixView<T,M,N,Si2,Sj2,A2> m2)
     { DoSwap(m1,m2); }
@@ -1209,29 +1200,29 @@ namespace tmv {
     //
 
     template <class T, int M, int N, int A0, int A1>
-    static inline typename SmallMatrix<T,M,N,A0,A1>::conjugate_type Conjugate(
+    static TMV_INLINE typename SmallMatrix<T,M,N,A0,A1>::conjugate_type Conjugate(
         SmallMatrix<T,M,N,A0,A1>& m)
     { return m.conjugate(); }
     template <class T, int M, int N, int Si, int Sj, int A>
-    static inline typename SmallMatrixView<T,M,N,Si,Sj,A>::conjugate_type Conjugate(
+    static TMV_INLINE typename SmallMatrixView<T,M,N,Si,Sj,A>::conjugate_type Conjugate(
         SmallMatrixView<T,M,N,Si,Sj,A> m)
     { return m.conjugate(); }
 
     template <class T, int M, int N, int A0, int A1>
-    static inline typename SmallMatrix<T,M,N,A0,A1>::transpose_type Transpose(
+    static TMV_INLINE typename SmallMatrix<T,M,N,A0,A1>::transpose_type Transpose(
         SmallMatrix<T,M,N,A0,A1>& m)
     { return m.transpose(); }
     template <class T, int M, int N, int Si, int Sj, int A>
-    static inline typename SmallMatrixView<T,M,N,Si,Sj,A>::transpose_type Transpose(
+    static TMV_INLINE typename SmallMatrixView<T,M,N,Si,Sj,A>::transpose_type Transpose(
         SmallMatrixView<T,M,N,Si,Sj,A> m)
     { return m.transpose(); }
 
     template <class T, int M, int N, int A0, int A1>
-    static inline typename SmallMatrix<T,M,N,A0,A1>::adjoint_type Adjoint(
+    static TMV_INLINE typename SmallMatrix<T,M,N,A0,A1>::adjoint_type Adjoint(
         SmallMatrix<T,M,N,A0,A1>& m)
     { return m.adjoint(); }
     template <class T, int M, int N, int Si, int Sj, int A>
-    static inline typename SmallMatrixView<T,M,N,Si,Sj,A>::adjoint_type Adjoint(
+    static TMV_INLINE typename SmallMatrixView<T,M,N,Si,Sj,A>::adjoint_type Adjoint(
         SmallMatrixView<T,M,N,Si,Sj,A> m)
     { return m.adjoint(); }
 

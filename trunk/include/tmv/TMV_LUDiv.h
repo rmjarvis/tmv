@@ -73,7 +73,7 @@ namespace tmv {
     // Also used for invalid real/complex combination from the virtual calls.
     template <bool trans, int cs, int rs, class M1, class M2>
     struct LU_Solve_Helper<0,trans,cs,rs,M1,M2>
-    { static void call(const M1& , const Permutation& , M2& ) {} };
+    { static TMV_INLINE void call(const M1& , const Permutation& , M2& ) {} };
 
     // algo 11: Normal case
     template <int cs, int rs, class M1, class M2>
@@ -140,13 +140,13 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LU_Solve_Helper<90,false,cs,rs,M1,M2>
     {
-        static void call(const M1& m1, const Permutation& P, M2& m2)
+        static TMV_INLINE void call(const M1& m1, const Permutation& P, M2& m2)
         { InstLU_SolveInPlace(m1.xView(),P,m2.xView()); }
     };
     template <int cs, int rs, class M1, class M2>
     struct LU_Solve_Helper<90,true,cs,rs,M1,M2>
     {
-        static void call(const M1& m1, const Permutation& P, M2& m2)
+        static TMV_INLINE void call(const M1& m1, const Permutation& P, M2& m2)
         { InstLU_SolveTransposeInPlace(m1.xView(),P,m2.xView()); }
     };
 
@@ -154,7 +154,7 @@ namespace tmv {
     template <bool trans, int cs, int rs, class M1, class M2>
     struct LU_Solve_Helper<95,trans,cs,rs,M1,M2>
     {
-        static void call(const M1& m1, const Permutation& P, M2& m2)
+        static TMV_INLINE void call(const M1& m1, const Permutation& P, M2& m2)
         {
             TMVStaticAssert(!ShapeTraits<M2::_shape>::vector);
             typedef typename M2::col_type M2c;
@@ -167,7 +167,7 @@ namespace tmv {
     template <bool trans, int cs, int rs, class M1, class M2>
     struct LU_Solve_Helper<97,trans,cs,rs,M1,M2>
     {
-        static void call(const M1& m1, const Permutation& P, M2& m2)
+        static TMV_INLINE void call(const M1& m1, const Permutation& P, M2& m2)
         {
             typedef typename M1::const_conjugate_type M1c;
             typedef typename M2::conjugate_type M2c;
@@ -181,7 +181,7 @@ namespace tmv {
     template <bool trans, int cs, int rs, class M1, class M2>
     struct LU_Solve_Helper<-3,trans,cs,rs,M1,M2>
     {
-        static void call(const M1& m1, const Permutation& P, M2& m2)
+        static TMV_INLINE void call(const M1& m1, const Permutation& P, M2& m2)
         {
             const bool invalid =
                 M1::iscomplex && M2::isreal;
@@ -208,7 +208,7 @@ namespace tmv {
     template <bool trans, int cs, int rs, class M1, class M2>
     struct LU_Solve_Helper<-2,trans,cs,rs,M1,M2>
     {
-        static void call(const M1& m1, const Permutation& P, M2& m2)
+        static TMV_INLINE void call(const M1& m1, const Permutation& P, M2& m2)
         {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
@@ -239,7 +239,7 @@ namespace tmv {
     template <bool trans, int cs, int rs, class M1, class M2>
     struct LU_Solve_Helper<-1,trans,cs,rs,M1,M2>
     {
-        static void call(const M1& m1, const Permutation& P, M2& m2)
+        static TMV_INLINE void call(const M1& m1, const Permutation& P, M2& m2)
         { LU_Solve_Helper<-2,trans,cs,rs,M1,M2>::call(m1,P,m2); }
     };
 

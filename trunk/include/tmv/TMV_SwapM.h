@@ -213,7 +213,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct SwapM_Helper<90,cs,rs,M1,M2>
     {
-        static void call(M1& m1, M2& m2)
+        static TMV_INLINE void call(M1& m1, M2& m2)
         { InstSwap(m1.xView(),m2.xView()); }
     };
 
@@ -221,7 +221,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct SwapM_Helper<91,cs,rs,M1,M2>
     {
-        static void call(M1& m1, M2& m2)
+        static TMV_INLINE void call(M1& m1, M2& m2)
         { InstAliasSwap(m1.xView(),m2.xView()); }
     };
 
@@ -229,7 +229,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct SwapM_Helper<97,cs,rs,M1,M2>
     {
-        static void call(M1& m1, M2& m2)
+        static TMV_INLINE void call(M1& m1, M2& m2)
         {
             typedef typename M1::conjugate_type M1c;
             typedef typename M2::conjugate_type M2c;
@@ -243,7 +243,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct SwapM_Helper<197,cs,rs,M1,M2>
     {
-        static void call(M1& m1, M2& m2)
+        static TMV_INLINE void call(M1& m1, M2& m2)
         {
             typedef typename M1::conjugate_type M1c;
             typedef typename M2::conjugate_type M2c;
@@ -284,7 +284,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct SwapM_Helper<99,cs,rs,M1,M2>
     {
-        static void call(M1& m1, M2& m2)
+        static TMV_INLINE void call(M1& m1, M2& m2)
         {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
@@ -305,7 +305,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct SwapM_Helper<-3,cs,rs,M1,M2>
     {
-        static void call(M1& m1, M2& m2)
+        static TMV_INLINE void call(M1& m1, M2& m2)
         {
             typedef typename M2::value_type T2;
             const bool canlin = 
@@ -335,7 +335,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct SwapM_Helper<-2,cs,rs,M1,M2>
     {
-        static void call(M1& m1, M2& m2)
+        static TMV_INLINE void call(M1& m1, M2& m2)
         {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
@@ -356,7 +356,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct SwapM_Helper<-1,cs,rs,M1,M2>
     {
-        static void call(M1& m1, M2& m2)
+        static TMV_INLINE void call(M1& m1, M2& m2)
         {
             const bool checkalias = 
                 M1::_checkalias || M2::_checkalias;

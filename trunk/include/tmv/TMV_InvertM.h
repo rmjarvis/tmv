@@ -52,7 +52,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<0,cs,rs,ix,T,M1,M2>
     {
-        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static TMV_INLINE void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {}
     };
 
@@ -362,7 +362,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<99,cs,rs,ix,T,M1,M2>
     {
-        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static TMV_INLINE void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             const bool up1 = ShapeTraits<M1::_shape>::upper;
             const bool lo1 = ShapeTraits<M1::_shape>::lower;
@@ -398,7 +398,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<-3,cs,rs,ix,T,M1,M2>
     {
-        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static TMV_INLINE void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             const bool up1 = ShapeTraits<M1::_shape>::upper;
             const bool lo1 = ShapeTraits<M1::_shape>::lower;
@@ -434,7 +434,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<-2,cs,rs,ix,T,M1,M2>
     {
-        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static TMV_INLINE void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         { InvertM_Helper<-3,cs,rs,ix,T,M1,M2>::call(x,m1,m2); }
     };
 
@@ -442,7 +442,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<-1,cs,rs,ix,T,M1,M2>
     {
-        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static TMV_INLINE void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             const int algo = 
                 cs == 0 || rs == 0 ? 0 :
@@ -529,7 +529,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<0,cs,rs,M1,M2>
     {
-        static void call(const M1& , M2& )
+        static TMV_INLINE void call(const M1& , M2& )
         {}
     };
 
@@ -853,7 +853,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<99,cs,rs,M1,M2>
     {
-        static void call(const M1& m1, M2& m2)
+        static TMV_INLINE void call(const M1& m1, M2& m2)
         {
             const bool up1 = ShapeTraits<M1::_shape>::upper;
             const bool lo1 = ShapeTraits<M1::_shape>::lower;
@@ -889,7 +889,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<-3,cs,rs,M1,M2>
     {
-        static void call(const M1& m1, M2& m2)
+        static TMV_INLINE void call(const M1& m1, M2& m2)
         {
             const bool up1 = ShapeTraits<M1::_shape>::upper;
             const bool lo1 = ShapeTraits<M1::_shape>::lower;
@@ -925,7 +925,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<-2,cs,rs,M1,M2>
     {
-        static void call(const M1& m1, M2& m2)
+        static TMV_INLINE void call(const M1& m1, M2& m2)
         { InverseATA_Helper<-3,cs,rs,M1,M2>::call(m1,m2); }
     };
 
@@ -933,7 +933,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<-1,cs,rs,M1,M2>
     {
-        static void call(const M1& m1, M2& m2)
+        static TMV_INLINE void call(const M1& m1, M2& m2)
         {
             const int algo = 
                 cs == 0 || rs == 0 ? 0 :

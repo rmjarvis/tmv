@@ -55,8 +55,8 @@ namespace tmv {
     {
         typedef typename V1::const_iterator IT1;
         typedef typename V2::iterator IT2;
-        static void call(const V1&, V2& ) {}
-        static void call2(int , IT1 , IT2 ) {}
+        static TMV_INLINE void call(const V1&, V2& ) {}
+        static TMV_INLINE void call2(int , IT1 , IT2 ) {}
     };
 
     // algo 11: simple for loop
@@ -131,7 +131,7 @@ namespace tmv {
     template <int s, class V1, class V2>
     struct CopyV_Helper<90,s,V1,V2>
     {
-        static void call(const V1& v1, V2& v2)
+        static TMV_INLINE void call(const V1& v1, V2& v2)
         { InstCopy(v1.xView(),v2.xView()); }
     };
 
@@ -139,7 +139,7 @@ namespace tmv {
     template <int s, class V1, class V2>
     struct CopyV_Helper<91,s,V1,V2>
     {
-        static void call(const V1& v1, V2& v2)
+        static TMV_INLINE void call(const V1& v1, V2& v2)
         { InstAliasCopy(v1.xView(),v2.xView()); }
     };
 
@@ -147,7 +147,7 @@ namespace tmv {
     template <int s, class V1, class V2>
     struct CopyV_Helper<97,s,V1,V2>
     {
-        static void call(const V1& v1, V2& v2)
+        static TMV_INLINE void call(const V1& v1, V2& v2)
         {
             typedef typename V1::const_conjugate_type V1c;
             typedef typename V2::conjugate_type V2c;
@@ -161,7 +161,7 @@ namespace tmv {
     template <int s, class V1, class V2>
     struct CopyV_Helper<197,s,V1,V2>
     {
-        static void call(const V1& v1, V2& v2)
+        static TMV_INLINE void call(const V1& v1, V2& v2)
         {
             typedef typename V1::const_conjugate_type V1c;
             typedef typename V2::conjugate_type V2c;
@@ -196,7 +196,7 @@ namespace tmv {
     template <int s, class V1, class V2>
     struct CopyV_Helper<99,s,V1,V2>
     {
-        static void call(const V1& v1, V2& v2)
+        static TMV_INLINE void call(const V1& v1, V2& v2)
         {
             typedef typename V1::value_type T1;
             typedef typename V2::value_type T2;
@@ -223,7 +223,7 @@ namespace tmv {
         typedef typename V1::const_iterator IT1;
         typedef typename V2::iterator IT2;
 
-        static void call(const V1& v1, V2& v2)
+        static TMV_INLINE void call(const V1& v1, V2& v2)
         {
             typedef typename V1::value_type T1;
             typedef typename V2::value_type T2;
@@ -237,7 +237,7 @@ namespace tmv {
                 11;
             CopyV_Helper<algo,s,V1,V2>::call(v1,v2);
         }
-        static void call2(const int n, IT1 it1, IT2 it2)
+        static TMV_INLINE void call2(const int n, IT1 it1, IT2 it2)
         {
             typedef typename V1::value_type T1;
             typedef typename V2::value_type T2;
@@ -256,7 +256,7 @@ namespace tmv {
     template <int s, class V1, class V2>
     struct CopyV_Helper<-2,s,V1,V2>
     {
-        static void call(const V1& v1, V2& v2)
+        static TMV_INLINE void call(const V1& v1, V2& v2)
         {
             typedef typename V1::value_type T1;
             typedef typename V2::value_type T2;
@@ -280,7 +280,7 @@ namespace tmv {
     template <int s, class V1, class V2>
     struct CopyV_Helper<-1,s,V1,V2>
     {
-        static void call(const V1& v1, V2& v2)
+        static TMV_INLINE void call(const V1& v1, V2& v2)
         {
             typedef typename V1::value_type T1;
             typedef typename V2::value_type T2;

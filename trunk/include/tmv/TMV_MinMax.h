@@ -73,7 +73,7 @@ namespace tmv {
     struct MinMaxElement_Helper<0,comp,max,V>
     {
         typedef typename Component<comp,typename V::value_type>::ret_type ret;
-        static ret call(const V& , int* ibest)
+        static TMV_INLINE ret call(const V& , int* ibest)
         {
             if (ibest) *ibest = -1;
             return ret(0);
@@ -634,42 +634,42 @@ L2:
     struct MinMaxElement_Helper<90,ValueComp,true,V>
     {
         typedef typename V::value_type ret;
-        static ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, int* ibest)
         { return InstMaxElement(v.xView(),ibest); }
     };
     template <class V>
     struct MinMaxElement_Helper<90,AbsComp,true,V>
     {
         typedef typename V::float_type ret;
-        static ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, int* ibest)
         { return InstMaxAbsElement(v.xView(),ibest); }
     };
     template <class V>
     struct MinMaxElement_Helper<90,Abs2Comp,true,V>
     {
         typedef typename V::real_type ret;
-        static ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, int* ibest)
         { return InstMaxAbs2Element(v.xView(),ibest); }
     };
     template <class V>
     struct MinMaxElement_Helper<90,ValueComp,false,V>
     {
         typedef typename V::value_type ret;
-        static ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, int* ibest)
         { return InstMinElement(v.xView(),ibest); }
     };
     template <class V>
     struct MinMaxElement_Helper<90,AbsComp,false,V>
     {
         typedef typename V::float_type ret;
-        static ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, int* ibest)
         { return InstMinAbsElement(v.xView(),ibest); }
     };
     template <class V>
     struct MinMaxElement_Helper<90,Abs2Comp,false,V>
     {
         typedef typename V::real_type ret;
-        static ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, int* ibest)
         { return InstMinAbs2Element(v.xView(),ibest); }
     };
  
@@ -678,7 +678,7 @@ L2:
     struct MinMaxElement_Helper<97,comp,max,V>
     {
         typedef typename Component<comp,typename V::value_type>::ret_type ret;
-        static ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, int* ibest)
         {
             typedef typename V::const_nonconj_type Vnc;
             Vnc vnc = v.nonConj();
@@ -689,7 +689,7 @@ L2:
     struct MinMaxElement_Helper<97,ValueComp,max,V>
     {
         typedef typename V::value_type ret;
-        static ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, int* ibest)
         {
             typedef typename V::const_conjugate_type Vc;
             Vc vc = v.conjugate();
@@ -703,7 +703,7 @@ L2:
     struct MinMaxElement_Helper<-3,ValueComp,true,V>
     {
         typedef typename V::value_type ret;
-        static ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, int* ibest)
         {
 #if TMV_OPT >= 2
             const int algo1 = 
@@ -745,7 +745,7 @@ L2:
     struct MinMaxElement_Helper<-3,AbsComp,true,V>
     {
         typedef typename V::float_type ret;
-        static ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, int* ibest)
         {
 #if TMV_OPT >= 2
             const int algo1 = 
@@ -788,7 +788,7 @@ L2:
     struct MinMaxElement_Helper<-3,Abs2Comp,true,V>
     {
         typedef typename V::real_type ret;
-        static ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, int* ibest)
         {
 #if TMV_OPT >= 2
             const int algo1 = 
@@ -831,7 +831,7 @@ L2:
     struct MinMaxElement_Helper<-3,ValueComp,false,V>
     {
         typedef typename V::value_type ret;
-        static ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, int* ibest)
         {
 #if TMV_OPT >= 2
             const int algo1 = 
@@ -873,7 +873,7 @@ L2:
     struct MinMaxElement_Helper<-3,AbsComp,false,V>
     {
         typedef typename V::float_type ret;
-        static ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, int* ibest)
         
         {
 #if TMV_OPT >= 2
@@ -919,7 +919,7 @@ L2:
     struct MinMaxElement_Helper<-3,Abs2Comp,false,V>
     {
         typedef typename V::real_type ret;
-        static ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, int* ibest)
         {
 #if TMV_OPT >= 2
             const int algo1 = 
@@ -964,7 +964,7 @@ L2:
     struct MinMaxElement_Helper<-2,comp,max,V>
     {
         typedef typename Component<comp,typename V::value_type>::ret_type ret;
-        static ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, int* ibest)
         {
             typedef typename V::value_type VT;
             const bool inst = 
@@ -982,7 +982,7 @@ L2:
     struct MinMaxElement_Helper<-1,comp,max,V>
     {
         typedef typename Component<comp,typename V::value_type>::ret_type ret;
-        static ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, int* ibest)
         { return MinMaxElement_Helper<-2,comp,max,V>::call(v,ibest); }
     };
 

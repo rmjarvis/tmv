@@ -142,7 +142,7 @@ namespace tmv {
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<0,cs,rs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {}
     };
@@ -1795,7 +1795,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<90,cs,rs,false,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             typedef typename M3::value_type VT;
@@ -1806,7 +1806,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<90,cs,rs,true,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             typedef typename M3::value_type VT;
@@ -1819,7 +1819,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<91,cs,rs,false,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             typedef typename M3::value_type VT;
@@ -1830,7 +1830,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<91,cs,rs,true,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             typedef typename M3::value_type VT;
@@ -1843,7 +1843,7 @@ namespace tmv {
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<97,cs,rs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             typedef typename M1::const_conjugate_type M1c;
@@ -1861,7 +1861,7 @@ namespace tmv {
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<197,cs,rs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             typedef typename M1::const_conjugate_type M1c;
@@ -1905,7 +1905,7 @@ namespace tmv {
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<99,cs,rs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             typedef typename M1::value_type T1;
@@ -1935,7 +1935,7 @@ namespace tmv {
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<-4,cs,rs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const bool upper = M1::_upper;
@@ -1961,7 +1961,7 @@ namespace tmv {
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<-3,cs,rs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             // Possible algorithms are:
@@ -2086,7 +2086,7 @@ namespace tmv {
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<-2,cs,rs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             typedef typename M1::value_type T1;
@@ -2118,7 +2118,7 @@ namespace tmv {
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<-1,cs,rs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const int algo = 

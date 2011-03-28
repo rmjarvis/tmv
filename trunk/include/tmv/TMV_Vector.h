@@ -587,15 +587,11 @@ namespace tmv {
         // Op =
         //
 
-        type& operator=(type& v2)
-        {
-            TMVAssert(v2.size() == size());
-            if (&v2 != this) v2.assignTo(*this);
-            return *this; 
-        }
+        TMV_INLINE type& operator=(type& v2)
+        { if (this != &v2) base_mut::operator=(v2); return *this; }
 
         template <class V2>
-        type& operator=(const BaseVector<V2>& v2)
+        TMV_INLINE type& operator=(const BaseVector<V2>& v2)
         { base_mut::operator=(v2); return *this; }
 
 
@@ -603,15 +599,15 @@ namespace tmv {
         // Auxilliary Functions
         //
 
-        const T* cptr() const { return itsv; }
-        T* ptr() { return itsv; }
-        T cref(int i) const  { return itsv[i]; }
-        T& ref(int i) { return itsv[i]; }
+        TMV_INLINE const T* cptr() const { return itsv; }
+        TMV_INLINE T* ptr() { return itsv; }
+        TMV_INLINE T cref(int i) const  { return itsv[i]; }
+        TMV_INLINE T& ref(int i) { return itsv[i]; }
 
-        size_t size() const { return itssize; }
-        int nElements() const { return itssize; }
-        int step() const { return 1; }
-        bool isconj() const { return false; }
+        TMV_INLINE size_t size() const { return itssize; }
+        TMV_INLINE int nElements() const { return itssize; }
+        TMV_INLINE int step() const { return 1; }
+        TMV_INLINE bool isconj() const { return false; }
         void swapWith(type& rhs)
         {
             TMVAssert(rhs.size() == size());
@@ -799,14 +795,14 @@ namespace tmv {
         // Auxilliary Functions
         //
 
-        const T* cptr() const { return itsv; }
+        TMV_INLINE const T* cptr() const { return itsv; }
 
-        T cref(int i) const  { return DoConj<_conj>(itsv[i*step()]); }
+        TMV_INLINE T cref(int i) const  { return DoConj<_conj>(itsv[i*step()]); }
 
-        size_t size() const { return itssize; }
-        int nElements() const { return itssize; }
-        int step() const { return itsstep; }
-        bool isconj() const { return _conj; }
+        TMV_INLINE size_t size() const { return itssize; }
+        TMV_INLINE int nElements() const { return itssize; }
+        TMV_INLINE int step() const { return itsstep; }
+        TMV_INLINE bool isconj() const { return _conj; }
 
     protected :
 
@@ -981,27 +977,27 @@ namespace tmv {
         // Op =
         //
 
-        template <class V2>
-        type& operator=(const BaseVector<V2>& v2)
-        { base_mut::operator=(v2); return *this; }
+        TMV_INLINE type& operator=(const type& v2)
+        { if (this != &v2) base_mut::operator=(v2); return *this; }
 
-        type& operator=(const type& v2)
+        template <class V2>
+        TMV_INLINE type& operator=(const BaseVector<V2>& v2)
         { base_mut::operator=(v2); return *this; }
 
         //
         // Auxilliary Functions
         //
 
-        const T* cptr() const { return itsv; }
-        T* ptr() { return itsv; }
+        TMV_INLINE const T* cptr() const { return itsv; }
+        TMV_INLINE T* ptr() { return itsv; }
 
-        T cref(int i) const  { return DoConj<_conj>(itsv[i*step()]); }
-        reference ref(int i) { return reference(itsv[i*step()]); }
+        TMV_INLINE T cref(int i) const  { return DoConj<_conj>(itsv[i*step()]); }
+        TMV_INLINE reference ref(int i) { return reference(itsv[i*step()]); }
 
-        size_t size() const { return itssize; }
-        int nElements() const { return itssize; }
-        int step() const { return itsstep; }
-        bool isconj() const { return _conj; }
+        TMV_INLINE size_t size() const { return itssize; }
+        TMV_INLINE int nElements() const { return itssize; }
+        TMV_INLINE int step() const { return itsstep; }
+        TMV_INLINE bool isconj() const { return _conj; }
 
     protected :
 
@@ -1019,11 +1015,11 @@ namespace tmv {
 
     // VectorView of raw memory:
     template <class T>
-    static inline VectorView<T,Unit> VectorViewOf(T* v, size_t size)
+    static TMV_INLINE VectorView<T,Unit> VectorViewOf(T* v, size_t size)
     { return VectorView<T,Unit>(v,size); }
 
     template <class T>
-    static inline VectorView<T,NonUnit> VectorViewOf(
+    static TMV_INLINE VectorView<T,NonUnit> VectorViewOf(
         T* v, size_t size, int step)
     { return VectorView<T,NonUnit>(v,size,step); }
 
@@ -1033,16 +1029,16 @@ namespace tmv {
     //
 
     template <class T, int A>
-    static inline void Swap(Vector<T,A>& v1, Vector<T,A>& v2)
+    static TMV_INLINE void Swap(Vector<T,A>& v1, Vector<T,A>& v2)
     { v1.swapWith(v2); }
     template <class V, class T, int A>
-    static inline void Swap(BaseVector_Mutable<V>& v1, VectorView<T,A> v2)
+    static TMV_INLINE void Swap(BaseVector_Mutable<V>& v1, VectorView<T,A> v2)
     { DoSwap(v1,v2); }
     template <class V, class T, int A>
-    static inline void Swap(VectorView<T,A> v1, BaseVector_Mutable<V>& v2)
+    static TMV_INLINE void Swap(VectorView<T,A> v1, BaseVector_Mutable<V>& v2)
     { DoSwap(v1,v2); }
     template <class T, int A1, int A2>
-    static inline void Swap(
+    static TMV_INLINE void Swap(
         VectorView<T,A1> v1, VectorView<T,A2> v2)
     { DoSwap(v1,v2); }
 
@@ -1052,11 +1048,11 @@ namespace tmv {
     //
     
     template <class T, int A>
-    static inline typename Vector<T,A>::conjugate_type Conjugate(
+    static TMV_INLINE typename Vector<T,A>::conjugate_type Conjugate(
         Vector<T,A>& v)
     { return v.conjugate(); }
     template <class T, int A>
-    static inline typename VectorView<T,A>::conjugate_type Conjugate(
+    static TMV_INLINE typename VectorView<T,A>::conjugate_type Conjugate(
         VectorView<T,A> v)
     { return v.conjugate(); }
 

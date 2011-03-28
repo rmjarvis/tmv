@@ -1,11 +1,11 @@
 
 template <class M1, class M2> 
-inline bool CanLDiv(
+static TMV_INLINE bool CanLDiv(
     const tmv::BaseMatrix<M1>& a, const tmv::BaseMatrix<M2>& b)
 { return a.colsize() == b.colsize(); }
 
 template <class M1, class M2, class M3> 
-inline bool CanLDiv(
+static TMV_INLINE bool CanLDiv(
     const tmv::BaseMatrix<M1>& a, const tmv::BaseMatrix<M2>& b,
     const tmv::BaseMatrix_Mutable<M3>& c)
 { 
@@ -14,33 +14,33 @@ inline bool CanLDiv(
 }
 
 template <class M1, class M2> 
-inline bool CanLDivEq(
+static TMV_INLINE bool CanLDivEq(
     const tmv::BaseMatrix_Mutable<M1>& a, const tmv::BaseMatrix<M2>& b)
 { return CanLDiv(a.mat(),b) && b.isSquare(); }
 
 template <class V1, class M2> 
-inline bool CanLDiv(
+static TMV_INLINE bool CanLDiv(
     const tmv::BaseVector<V1>& a, const tmv::BaseMatrix<M2>& b)
 { return a.size() == b.colsize(); }
 
 template <class V1, class M2, class V3> 
-inline bool CanLDiv(
+static TMV_INLINE bool CanLDiv(
     const tmv::BaseVector<V1>& a, const tmv::BaseMatrix<M2>& b,
     const tmv::BaseVector_Mutable<V3>& c)
 { return a.size() == b.colsize() && c.size() == b.rowsize(); }
 
 template <class V1, class M2> 
-inline bool CanLDivEq(
+static TMV_INLINE bool CanLDivEq(
     const tmv::BaseVector_Mutable<V1>& a, const tmv::BaseMatrix<M2>& b)
 { return CanLDiv(a.vec(),b) && b.isSquare(); }
 
 template <class M1, class M2> 
-inline bool CanRDiv(
+static TMV_INLINE bool CanRDiv(
     const tmv::BaseMatrix<M1>& a, const tmv::BaseMatrix<M2>& b)
 { return a.rowsize() == b.rowsize(); }
 
 template <class M1, class M2, class M3> 
-inline bool CanRDiv(
+static TMV_INLINE bool CanRDiv(
     const tmv::BaseMatrix<M1>& a, const tmv::BaseMatrix<M2>& b,
     const tmv::BaseMatrix_Mutable<M3>& c)
 { 
@@ -49,33 +49,33 @@ inline bool CanRDiv(
 }
 
 template <class M1, class M2> 
-inline bool CanRDivEq(
+static TMV_INLINE bool CanRDivEq(
     const tmv::BaseMatrix_Mutable<M1>& a, const tmv::BaseMatrix<M2>& b)
 { return CanRDiv(a.mat(),b) && b.isSquare(); }
 
 template <class V1, class M2> 
-inline bool CanRDiv(
+static TMV_INLINE bool CanRDiv(
     const tmv::BaseVector<V1>& a, const tmv::BaseMatrix<M2>& b)
 { return a.size() == b.rowsize(); }
 
 template <class V1, class M2, class V3> 
-inline bool CanRDiv(
+static TMV_INLINE bool CanRDiv(
     const tmv::BaseVector<V1>& a, const tmv::BaseMatrix<M2>& b, 
     const tmv::BaseVector_Mutable<V3>& c)
 { return a.size() == b.rowsize() && c.size() == b.colsize(); }
 
 template <class V1, class M2> 
-inline bool CanRDivEq(
+static TMV_INLINE bool CanRDivEq(
     const tmv::BaseVector_Mutable<V1>& a, const tmv::BaseMatrix<M2>& b)
 { return CanRDiv(a.vec(),b) && b.isSquare(); }
 
 template <class V0, class V1> 
-inline void CopyBackV(
+static TMV_INLINE void CopyBackV(
     const tmv::BaseVector<V0>& v0, tmv::BaseVector_Mutable<V1>& v1)
 { v1 = v0; }
 
 template <class M0, class M1> 
-inline void CopyBackM(
+static TMV_INLINE void CopyBackM(
     const tmv::BaseMatrix<M0>& m0, tmv::BaseMatrix_Mutable<M1>& m1)
 { m1 = m0; }
 
@@ -281,10 +281,10 @@ static void DoTestRDivVM1C(
 #endif
 }
 
-template <class T> inline void SetZ(T& z)
-{ z = T(5); }
-template <class T> inline void SetZ(std::complex<T>& z)
-{ z = std::complex<T>(3,4); }
+template <class T> 
+static TMV_INLINE void SetZ(T& z) { z = T(5); }
+template <class T> 
+static TMV_INLINE void SetZ(std::complex<T>& z) { z = std::complex<T>(3,4); }
 
 #ifndef NOLDIVEQ
 template <class T, class Tb, class V, class MM> 

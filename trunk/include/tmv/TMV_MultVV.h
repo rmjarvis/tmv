@@ -63,9 +63,9 @@ namespace tmv {
         typedef typename ProdType<V1,V2>::type PT;
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
-        static PT call(const V1& , const V2& )
+        static TMV_INLINE PT call(const V1& , const V2& )
         { return PT(0); }
-        static PT call2(int n, IT1 it1, IT2 it2)
+        static TMV_INLINE PT call2(int n, IT1 it1, IT2 it2)
         { return PT(0); }
     };
 
@@ -76,9 +76,9 @@ namespace tmv {
         typedef typename ProdType<V1,V2>::type PT;
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
-        static PT call(const V1& v1, const V2& v2)
+        static TMV_INLINE PT call(const V1& v1, const V2& v2)
         { return MultVV_Helper<-4,s,V2,V1>::call(v2,v1); }
-        static PT call2(int n, IT1 it1, IT2 it2)
+        static TMV_INLINE PT call2(int n, IT1 it1, IT2 it2)
         { return MultVV_Helper<-4,s,V2,V1>::call2(n,it2,it1); }
     };
 
@@ -89,7 +89,7 @@ namespace tmv {
         typedef typename ProdType<V1,V2>::type PT;
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
-        static PT call(const V1& v1, const V2& v2)
+        static TMV_INLINE PT call(const V1& v1, const V2& v2)
         {
             typedef typename V1::const_conjugate_type V1c;
             typedef typename V2::const_conjugate_type V2c;
@@ -97,7 +97,7 @@ namespace tmv {
             V2c v2c = v2.conjugate();
             return TMV_CONJ(MultVV_Helper<-4,s,V1c,V2c>::call(v1c,v2c));
         }
-        static PT call2(int n, IT1 it1, IT2 it2)
+        static TMV_INLINE PT call2(int n, IT1 it1, IT2 it2)
         {
             typedef typename V1::const_conjugate_type V1c;
             typedef typename V2::const_conjugate_type V2c;
@@ -742,7 +742,7 @@ namespace tmv {
     struct MultVV_Helper<90,s,V1,V2>
     {
         typedef typename ProdType<V1,V2>::type PT;
-        static PT call(const V1& v1, const V2& v2)
+        static TMV_INLINE PT call(const V1& v1, const V2& v2)
         { return InstMultVV(v1.xView(),v2.xView()); }
     };
 
@@ -751,7 +751,7 @@ namespace tmv {
     struct MultVV_Helper<96,s,V1,V2>
     {
         typedef typename ProdType<V1,V2>::type PT;
-        static PT call(const V1& v1, const V2& v2)
+        static TMV_INLINE PT call(const V1& v1, const V2& v2)
         { return MultVV_Helper<-2,s,V2,V1>::call(v2,v1); }
     };
 
@@ -761,7 +761,7 @@ namespace tmv {
     struct MultVV_Helper<97,s,V1,V2>
     {
         typedef typename ProdType<V1,V2>::type PT;
-        static PT call(const V1& v1, const V2& v2)
+        static TMV_INLINE PT call(const V1& v1, const V2& v2)
         {
             typedef typename V1::const_conjugate_type V1c;
             typedef typename V2::const_conjugate_type V2c;
@@ -811,9 +811,9 @@ namespace tmv {
                 ( sizeof(RT2) == 4 && allunit && v1real && v2complex ) ? 12 :
                 ( sizeof(RT2) == 8 && allunit && v1real && v2real ) ? 12 :
                 11 ) };
-        static PT call(const V1& v1, const V2& v2)
+        static TMV_INLINE PT call(const V1& v1, const V2& v2)
         { return MultVV_Helper<algo,s,V1,V2>::call(v1,v2); }
-        static PT call2(const int n, const IT1& it1, const IT2& it2)
+        static TMV_INLINE PT call2(const int n, const IT1& it1, const IT2& it2)
         { return MultVV_Helper<algo,s,V1,V2>::call2(n,it1,it2); }
     };
 
@@ -822,7 +822,7 @@ namespace tmv {
     struct MultVV_Helper<-3,s,V1,V2>
     {
         typedef typename ProdType<V1,V2>::type PT;
-        static PT call(const V1& v1, const V2& v2)
+        static TMV_INLINE PT call(const V1& v1, const V2& v2)
         {
             const int algo = 
 #ifdef TMV_VV_RECURSE
@@ -838,7 +838,7 @@ namespace tmv {
     struct MultVV_Helper<-2,s,V1,V2>
     {
         typedef typename ProdType<V1,V2>::type PT;
-        static PT call(const V1& v1, const V2& v2)
+        static TMV_INLINE PT call(const V1& v1, const V2& v2)
         {
             typedef typename V1::value_type T1;
             typedef typename V2::value_type T2;
@@ -865,7 +865,7 @@ namespace tmv {
     struct MultVV_Helper<-1,s,V1,V2>
     {
         typedef typename ProdType<V1,V2>::type PT;
-        static PT call(const V1& v1, const V2& v2)
+        static TMV_INLINE PT call(const V1& v1, const V2& v2)
         { return MultVV_Helper<-2,s,V1,V2>::call(v1,v2); }
     };
 

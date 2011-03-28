@@ -350,7 +350,7 @@ namespace tmv {
     template <int ix, class T, class M1, class M2, class M3>
     struct MultMM_Winograd_Helper<90,false,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         {
             typedef typename M3::value_type VT;
@@ -361,7 +361,7 @@ namespace tmv {
     template <int ix, class T, class M1, class M2, class M3>
     struct MultMM_Winograd_Helper<90,true,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         {
             typedef typename M3::value_type VT;
@@ -374,7 +374,7 @@ namespace tmv {
     template <bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Winograd_Helper<-3,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         {
             MultMM_Winograd_Helper<11,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
@@ -385,7 +385,7 @@ namespace tmv {
     template <bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Winograd_Helper<-2,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         {
             TMVStaticAssert(!M3::_conj);
@@ -411,7 +411,7 @@ namespace tmv {
     template <bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Winograd_Helper<-1,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         { MultMM_Winograd_Helper<-2,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3); }
     };

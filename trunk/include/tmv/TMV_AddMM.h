@@ -68,7 +68,7 @@ namespace tmv {
     template <int cs, int rs, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     struct AddMM_Helper<0,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& , const M1& , 
             const Scaling<ix2,T2>& , const M2& , M3& )
         {
@@ -338,7 +338,7 @@ namespace tmv {
     template <int cs, int rs, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     struct AddMM_Helper<90,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -353,7 +353,7 @@ namespace tmv {
     template <int cs, int rs, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     struct AddMM_Helper<91,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -368,7 +368,7 @@ namespace tmv {
     template <int cs, int rs, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     struct AddMM_Helper<97,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -387,7 +387,7 @@ namespace tmv {
     template <int cs, int rs, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     struct AddMM_Helper<197,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -454,7 +454,7 @@ namespace tmv {
     template <int cs, int rs, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     struct AddMM_Helper<99,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -486,7 +486,7 @@ namespace tmv {
     template <int cs, int rs, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     struct AddMM_Helper<-4,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -536,7 +536,7 @@ namespace tmv {
     template <int cs, int rs, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     struct AddMM_Helper<-3,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -572,7 +572,7 @@ namespace tmv {
     template <int cs, int rs, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     struct AddMM_Helper<-2,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -621,7 +621,7 @@ namespace tmv {
     template <int cs, int rs, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     struct AddMM_Helper<-1,cs,rs,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {

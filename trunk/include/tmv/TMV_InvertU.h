@@ -86,21 +86,21 @@ namespace tmv {
     // algo 0: nothing to do (either s==0, or invert diag of unitdiag m.)
     template <int s, class M>
     struct InvertU_Helper<0,s,M>
-    { static void call(M& ) {} };
+    { static TMV_INLINE void call(M& ) {} };
 
     // algo 1: s == 1, so simplifies to a scalar quotient
     template <int s, class M>
     struct InvertU_Helper<1,s,M>
     {
         // m.diag is already inverted, so nothing to do.
-        static void call(M& ) {}
+        static TMV_INLINE void call(M& ) {}
     };
 
     // algo 2: transpose
     template <int s, class M>
     struct InvertU_Helper<2,s,M>
     {
-        static void call(M& m)
+        static TMV_INLINE void call(M& m)
         {
 #ifdef PRINTALGO_InvU
             int N = (s == UNKNOWN ? m.size() : s);
@@ -384,7 +384,7 @@ namespace tmv {
     template <int s, class M>
     struct InvertU_Helper<90,s,M>
     {
-        static void call(M& m)
+        static TMV_INLINE void call(M& m)
         { InstInvertSelf(m.xView()); }
     };
 
@@ -392,7 +392,7 @@ namespace tmv {
     template <int s, class M>
     struct InvertU_Helper<97,s,M>
     {
-        static void call(M& m)
+        static TMV_INLINE void call(M& m)
         {
             typedef typename M::conjugate_type Mc;
             Mc mc = m.conjugate();
@@ -404,7 +404,7 @@ namespace tmv {
     template <int s, class M>
     struct InvertU_Helper<-4,s,M>
     {
-        static void call(M& m)
+        static TMV_INLINE void call(M& m)
         {
             TMVStaticAssert(M::_upper);
             const int s2 = s > 20 ? UNKNOWN : s;
@@ -439,7 +439,7 @@ namespace tmv {
     template <int s, class M>
     struct InvertU_Helper<-3,s,M>
     {
-        static void call(M& m)
+        static TMV_INLINE void call(M& m)
         {
             // Possible algorithms to choose from:
             //
@@ -472,7 +472,7 @@ namespace tmv {
     template <int s, class M>
     struct InvertU_Helper<-2,s,M>
     {
-        static void call(M& m)
+        static TMV_INLINE void call(M& m)
         {
             typedef typename M::value_type T;
             const bool inst = 
@@ -490,7 +490,7 @@ namespace tmv {
     template <int s, class M>
     struct InvertU_Helper<-1,s,M>
     {
-        static void call(M& m)
+        static TMV_INLINE void call(M& m)
         { InvertU_Helper<-2,s,M>::call(m); }
     };
 

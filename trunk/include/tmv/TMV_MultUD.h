@@ -112,7 +112,7 @@ namespace tmv {
     template <bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUD_Helper<0,0,add,ix,T,M1,M2,M3>
     {
-        static void call(const Scaling<ix,T>& , const M1& , const M2& , M3& ) 
+        static TMV_INLINE void call(const Scaling<ix,T>& , const M1& , const M2& , M3& ) 
         {} 
     };
 
@@ -637,7 +637,7 @@ namespace tmv {
     template <int s, int ix, class T, class M1, class M2, class M3>
     struct MultUD_Helper<90,s,false,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             typedef typename M3::value_type VT;
@@ -648,7 +648,7 @@ namespace tmv {
     template <int s, int ix, class T, class M1, class M2, class M3>
     struct MultUD_Helper<90,s,true,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             typedef typename M3::value_type VT;
@@ -661,7 +661,7 @@ namespace tmv {
     template <int s, int ix, class T, class M1, class M2, class M3>
     struct MultUD_Helper<91,s,false,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             typedef typename M3::value_type VT;
@@ -672,7 +672,7 @@ namespace tmv {
     template <int s, int ix, class T, class M1, class M2, class M3>
     struct MultUD_Helper<91,s,true,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             typedef typename M3::value_type VT;
@@ -685,7 +685,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUD_Helper<97,s,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             typedef typename M1::const_conjugate_type M1c;
@@ -703,7 +703,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUD_Helper<197,s,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             typedef typename M1::const_conjugate_type M1c;
@@ -768,7 +768,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUD_Helper<99,s,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             typedef typename M1::value_type T1;
@@ -798,7 +798,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUD_Helper<-4,s,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             typedef typename M1::value_type T1;
@@ -842,7 +842,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUD_Helper<-3,s,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             typedef typename M1::value_type T1;
@@ -946,7 +946,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUD_Helper<-2,s,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             typedef typename M1::value_type T1;
@@ -976,7 +976,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUD_Helper<-1,s,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const int algo = 

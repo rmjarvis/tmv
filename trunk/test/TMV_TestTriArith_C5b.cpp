@@ -3,17 +3,18 @@
 #include "TMV.h"
 
 template <class M1, class M2, class M3>
-static inline bool CanMultMM(
-    const tmv::BaseMatrix_Tri<M1>& a, 
-    const tmv::BaseMatrix_Diag<M2>& b, 
+static TMV_INLINE_ND bool CanMultMM(
+    const tmv::BaseMatrix_Tri<M1>& a, const tmv::BaseMatrix_Diag<M2>& b, 
     const tmv::BaseMatrix_Tri_Mutable<M3>& c)
 {
+#ifdef XXD
     if (showtests) {
         std::cout<<"Special CanMultMM:\n";
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
     return a.size() == b.size() && a.size() == c.size() && !c.isunit(); 
 }
 

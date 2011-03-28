@@ -121,7 +121,7 @@ namespace tmv {
     // algo 0: Trivial, nothing to do.
     template <int cs, int rs, class M1, class M2>
     struct LDivEqMU_Helper<0,cs,rs,M1,M2>
-    { static void call(M1& , const M2& ) {} };
+    { static TMV_INLINE void call(M1& , const M2& ) {} };
 
     // algo 1: M == 1, so reduces to ScaleV
     template <int cs, int rs, class M1, class M2>
@@ -375,8 +375,7 @@ namespace tmv {
 #endif
             typedef typename M2::real_type RT;
             typedef typename M2::value_type T2;
-            const DiagType D2 = M2::_attrib & AllDiagType;
-            typedef SmallUpperTriMatrix<T2,cs,D2> Uinv;
+            typedef SmallUpperTriMatrix<T2,cs,M2::_dt> Uinv;
             Uinv m2inv = m2;
             InvertU_Helper<-3,cs,Uinv>::call(m2inv);
             const Scaling<1,RT> one;
@@ -664,8 +663,7 @@ namespace tmv {
 #endif
             typedef typename M2::real_type RT;
             typedef typename M2::value_type T2;
-            const DiagType D2 = M2::_attrib & AllDiagType;
-            typedef SmallLowerTriMatrix<T2,cs,D2> Linv;
+            typedef SmallLowerTriMatrix<T2,cs,M2::_dt> Linv;
             Linv m2inv = m2;
             InvertU_Helper<-3,cs,Linv>::call(m2inv);
             const Scaling<1,RT> one;
@@ -1039,7 +1037,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LDivEqMU_Helper<90,cs,rs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static TMV_INLINE void call(M1& m1, const M2& m2)
         { InstTriLDivEq(m1.xView(),m2.xView()); }
     };
 
@@ -1047,7 +1045,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LDivEqMU_Helper<91,cs,rs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static TMV_INLINE void call(M1& m1, const M2& m2)
         { InstAliasTriLDivEq(m1.xView(),m2.xView()); }
     };
 
@@ -1055,7 +1053,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LDivEqMU_Helper<97,cs,rs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static TMV_INLINE void call(M1& m1, const M2& m2)
         {
             typedef typename M1::conjugate_type M1c;
             typedef typename M2::const_conjugate_type M2c;
@@ -1069,7 +1067,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LDivEqMU_Helper<197,cs,rs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static TMV_INLINE void call(M1& m1, const M2& m2)
         {
             typedef typename M1::conjugate_type M1c;
             typedef typename M2::const_conjugate_type M2c;
@@ -1102,7 +1100,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LDivEqMU_Helper<99,cs,rs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static TMV_INLINE void call(M1& m1, const M2& m2)
         {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
@@ -1128,7 +1126,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LDivEqMU_Helper<-4,cs,rs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static TMV_INLINE void call(M1& m1, const M2& m2)
         {
             const bool upper = M2::_upper;
             const int algo = 
@@ -1151,7 +1149,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LDivEqMU_Helper<-3,cs,rs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static TMV_INLINE void call(M1& m1, const M2& m2)
         {
             // Possible algorithms are:
             //
@@ -1247,7 +1245,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LDivEqMU_Helper<-402,cs,rs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static TMV_INLINE void call(M1& m1, const M2& m2)
         {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
@@ -1274,7 +1272,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LDivEqMU_Helper<-2,cs,rs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static TMV_INLINE void call(M1& m1, const M2& m2)
         {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
@@ -1302,7 +1300,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LDivEqMU_Helper<-1,cs,rs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static TMV_INLINE void call(M1& m1, const M2& m2)
         {
             const int algo = 
                 ( cs == 0 || rs == 0 ) ? 0 :

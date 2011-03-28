@@ -104,7 +104,7 @@ namespace tmv {
     template <int size, class V>
     struct ReverseV_Helper<90,size,V>
     {
-        static void call(V& v)
+        static TMV_INLINE void call(V& v)
         { InstReverseSelf(v.xView()); }
     };
 
@@ -112,7 +112,7 @@ namespace tmv {
     template <int size, class V>
     struct ReverseV_Helper<97,size,V>
     {
-        static void call(V& v)
+        static TMV_INLINE void call(V& v)
         {
             typedef typename V::conjugate_type Vc;
             Vc vc = v.conjugate();
@@ -124,7 +124,7 @@ namespace tmv {
     template <int size, class V>
     struct ReverseV_Helper<-3,size,V>
     {
-        static void call(V& v)
+        static TMV_INLINE void call(V& v)
         {
             const int algo = 
                 TMV_OPT == 0 ? 11 :
@@ -139,7 +139,7 @@ namespace tmv {
     template <int size, class V>
     struct ReverseV_Helper<-2,size,V>
     {
-        static void call(V& v)
+        static TMV_INLINE void call(V& v)
         {
             typedef typename V::value_type T;
             const bool inst =
@@ -156,7 +156,7 @@ namespace tmv {
     template <int size, class V>
     struct ReverseV_Helper<-1,size,V>
     {
-        static void call(V& v)
+        static TMV_INLINE void call(V& v)
         { ReverseV_Helper<-2,size,V>::call(v); }
     };
 

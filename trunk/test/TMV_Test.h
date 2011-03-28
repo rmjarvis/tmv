@@ -44,8 +44,9 @@ void DoAssert(bool x, std::string s);
 
 template <class M1, class M2, class T>
 inline bool Equal(const M1& a, const M2& b, T eps)
-{ 
+{
     T normdiff = Norm(a-b);
+#ifdef XXD
     if (showacc && !(normdiff <= eps)) {
         std::cout<<"a = "<<a<<std::endl;
         std::cout<<"b = "<<b<<std::endl;
@@ -53,12 +54,14 @@ inline bool Equal(const M1& a, const M2& b, T eps)
         std::cout<<"eps = "<<eps<<std::endl;
     }
     if (showtests) std::cout<<"  "<<normdiff<<" <=? "<<eps<<"  ";
+#endif
     return normdiff <= eps; 
 }
 template <class X1, class X2, class T>
 inline bool Equal2(const X1& a, const X2& b, T eps)
 {
     T absdiff = tmv::TMV_ABS2(a-b);
+#ifdef XXD
     if (showacc && !(absdiff <= eps)) {
         std::cout<<"a = "<<a<<std::endl;
         std::cout<<"b = "<<b<<std::endl;
@@ -66,6 +69,7 @@ inline bool Equal2(const X1& a, const X2& b, T eps)
         std::cout<<"eps = "<<eps<<std::endl;
     }
     if (showtests) std::cout<<"  "<<absdiff<<" <=? "<<eps<<"  ";
+#endif
     return absdiff <= eps;
 }
 
@@ -73,24 +77,28 @@ template <class M1, class M2>
 inline bool Equal(const M1& a, const M2& b, int )
 {
     bool eq = (a == b);
+#ifdef XXD
     if (showacc && !(eq)) {
         std::cout<<"a = "<<a<<std::endl;
         std::cout<<"b = "<<b<<std::endl;
         std::cout<<"Norm(a-b) = "<<Norm(a-b)<<std::endl;
         std::cout<<"a == b = "<<eq<<std::endl;
     }
+#endif
     return eq;
 }
 template <class X1, class X2>
 inline bool Equal2(const X1& a, const X2& b, int )
 {
     bool eq = (a == b);
+#ifdef XXD
     if (showacc && !(eq)) {
         std::cout<<"a = "<<a<<std::endl;
         std::cout<<"b = "<<b<<std::endl;
         std::cout<<"abs(a-b) = "<<tmv::TMV_ABS2(a-b)<<std::endl;
         std::cout<<"a == b = "<<eq<<std::endl;
     }
+#endif
     return eq;
 }
 
@@ -142,104 +150,5 @@ extern bool XXDEBUG6;
 extern bool XXDEBUG7;
 extern bool XXDEBUG8;
 extern bool XXDEBUG9;
-
-#ifdef TMV_TEST_DEPRECATED
-#define subVector SubVector
-#define subMatrix SubMatrix
-#define subDiagMatrix SubDiagMatrix
-#define subTriMatrix SubTriMatrix
-#define subBandMatrix SubBandMatrix
-#define subSymMatrix SubSymMatrix
-#define subSymBandMatrix SubSymBandMatrix
-
-#define reverse Reverse
-#define view View
-#define conjugate Conjugate
-#define realPart Real
-#define imagPart Imag
-#define flatten Flatten
-
-#define transpose Transpose
-#define adjoint Adjoint
-#define upperTri UpperTri
-#define lowerTri LowerTri
-#define offDiag OffDiag
-#define upperBand UpperBand
-#define lowerBand LowerBand
-#define colPair ColPair
-#define rowPair RowPair
-#define colRange Cols
-#define rowRange Rows
-
-#define logDet LogDet
-#define maxElement MaxElement
-#define maxAbsElement MaxAbsElement
-#define minElement MinElement
-#define minAbsElement MinAbsElement
-#define isSquare IsSquare
-#define doNorm2 DoNorm2
-#define doCondition DoCondition
-#define condition Condition
-#define writeCompact WriteCompact
-
-#define inverse Inverse
-#define makeInverse Inverse
-#define makeInverseATA InverseATA
-
-#define saveDiv SaveDiv
-#define setDiv SetDiv
-#define unsetDiv UnSetDiv
-#define divideUsing DivideUsing
-#define checkDecomp CheckDecomp
-#define isTrans IsTrans
-
-#define getS GetS
-#define getV GetV
-#define getU GetU
-#define getL GetL
-#define getP GetP
-#define getD GetD
-#define getQ GetQ
-#define getR GetR
-
-#define setZero Zero
-#define clip Clip
-#define setAllTo SetAllTo
-#define addToAll AddToAll
-#define conjugateSelf ConjugateSelf
-#define makeBasis MakeBasis
-#define swap Swap
-#define permute Permute
-#define reversePermute ReversePermute
-
-#define transposeSelf TransposeSelf
-#define swapRows SwapRows
-#define swapCols SwapCols
-#define swapRowsCols SwapRowsCols
-#define permuteRows PermuteRows
-#define permuteCols PermuteCols
-#define permuteRowsCols PermuteRowsCols
-#define reversePermuteRows ReversePermuteRows
-#define reversePermuteCols ReversePermuteCols
-#define reversePermuteRowsCols ReversePermuteRowsCols
-
-#define sort Sort
-#define Ascend ASCEND
-#define Descend DESCEND
-#define RealComp REAL_COMP
-#define ImagComp IMAG_COMP
-#define AbsComp ABS_COMP
-#define ArgComp ARG_COMP
-
-#define PolarDecompose Polar_Decompose
-
-#define lud LUD
-#define qrd QRD
-#define qrpd QRPD
-#define svd SVD
-#define symsvd SymSVD
-#define chd CHD
-
-#endif
 
 #endif

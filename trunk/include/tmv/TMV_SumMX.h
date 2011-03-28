@@ -44,7 +44,7 @@ namespace tmv {
     //
 
     template <class T, class M>
-    static inline void AddMX(const T& x, BaseMatrix_Mutable<M>& m)
+    static TMV_INLINE_ND void AddMX(const T& x, BaseMatrix_Mutable<M>& m)
     {
         TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same)); 
         TMVAssert(m.colsize() == m.rowsize());
@@ -52,7 +52,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class M1, class T2, class M3>
-    static inline void AddMX(
+    static TMV_INLINE_ND void AddMX(
         const Scaling<ix1,T1>& x1, const BaseMatrix<M1>& m1,
         const T2& x2, BaseMatrix_Mutable<M3>& m3)
     {
@@ -67,7 +67,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class M1, class T2, class M3>
-    static inline void NoAliasAddMX(
+    static TMV_INLINE_ND void NoAliasAddMX(
         const Scaling<ix1,T1>& x1, const BaseMatrix<M1>& m1,
         const T2& x2, BaseMatrix_Mutable<M3>& m3)
     {
@@ -126,19 +126,19 @@ namespace tmv {
             TMVAssert(m1.colsize() == m1.rowsize());
         }
 
-        const Scaling<ix1,T1>& getX1() const { return x1; }
-        const M1& getM1() const { return m1; }
-        const T2& getX2() const { return x2; }
+        TMV_INLINE const Scaling<ix1,T1>& getX1() const { return x1; }
+        TMV_INLINE const M1& getM1() const { return m1; }
+        TMV_INLINE const T2& getX2() const { return x2; }
 
-        size_t colsize() const { return m1.colsize(); }
-        size_t rowsize() const { return m1.rowsize(); }
-        size_t ls() const { return m1.ls(); }
+        TMV_INLINE size_t colsize() const { return m1.colsize(); }
+        TMV_INLINE size_t rowsize() const { return m1.rowsize(); }
+        TMV_INLINE size_t ls() const { return m1.ls(); }
 
         value_type cref(int i, int j) const
         { return (i == j) ? (x1 * m1.cref(i,j) + x2) : (x1 * m1.cref(i,j)); }
 
         template <class M3>
-        void assignTo(BaseMatrix_Mutable<M3>& m3) const
+        TMV_INLINE_ND void assignTo(BaseMatrix_Mutable<M3>& m3) const
         {
             TMVStaticAssert((type::isreal || M3::iscomplex));
             TMVStaticAssert((Sizes<type::_colsize,M3::_colsize>::same)); 
@@ -149,7 +149,7 @@ namespace tmv {
         }
 
         template <class M3>
-        void newAssignTo(BaseMatrix_Mutable<M3>& m3) const
+        TMV_INLINE_ND void newAssignTo(BaseMatrix_Mutable<M3>& m3) const
         {
             TMVStaticAssert((type::isreal || M3::iscomplex));
             TMVStaticAssert((Sizes<type::_colsize,M3::_colsize>::same)); 
@@ -170,462 +170,256 @@ namespace tmv {
 #define CCT ConjRef<CT>
     // m += x
     template <class M1>
-    static inline void AddEq(BaseMatrix_Mutable<M1>& m1, const int x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        AddMX(RT(x2),m1.mat());
-    }
+    static TMV_INLINE void AddEq(BaseMatrix_Mutable<M1>& m1, const int x2)
+    { AddMX(RT(x2),m1.mat()); }
 
     template <class M1>
-    static inline void AddEq(BaseMatrix_Mutable<M1>& m1, const RT x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        AddMX(x2,m1.mat());
-    }
+    static TMV_INLINE void AddEq(BaseMatrix_Mutable<M1>& m1, const RT x2)
+    { AddMX(x2,m1.mat()); }
 
     template <class M1>
-    static inline void AddEq(BaseMatrix_Mutable<M1>& m1, const CT x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        TMVStaticAssert(M1::iscomplex);
-        AddMX(x2,m1.mat());
-    }
+    static TMV_INLINE void AddEq(BaseMatrix_Mutable<M1>& m1, const CT x2)
+    { AddMX(x2,m1.mat()); }
 
     template <class M1>
-    static inline void AddEq(BaseMatrix_Mutable<M1>& m1, const CCT x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        TMVStaticAssert(M1::iscomplex);
-        AddMX(CT(x2),m1.mat());
-    }
+    static TMV_INLINE void AddEq(BaseMatrix_Mutable<M1>& m1, const CCT x2)
+    { AddMX(CT(x2),m1.mat()); }
 
     template <class M1, int ix2, class T2>
-    static inline void AddEq(
+    static TMV_INLINE void AddEq(
         BaseMatrix_Mutable<M1>& m1, const Scaling<ix2,T2>& x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        TMVStaticAssert(M1::iscomplex || Traits<T2>::isreal);
-        AddMX(T2(x2),m1.mat());
-    }
+    { AddMX(T2(x2),m1.mat()); }
 
     // m -= x
     template <class M1>
-    static inline void SubtractEq(BaseMatrix_Mutable<M1>& m1, const int x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        AddMX(-RT(x2),m1.mat());
-    }
+    static TMV_INLINE void SubtractEq(BaseMatrix_Mutable<M1>& m1, const int x2)
+    { AddMX(-RT(x2),m1.mat()); }
 
     template <class M1>
-    static inline void SubtractEq(BaseMatrix_Mutable<M1>& m1, const RT x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        AddMX(-x2,m1.mat());
-    }
+    static TMV_INLINE void SubtractEq(BaseMatrix_Mutable<M1>& m1, const RT x2)
+    { AddMX(-x2,m1.mat()); }
 
     template <class M1>
-    static inline void SubtractEq(BaseMatrix_Mutable<M1>& m1, const CT x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        TMVStaticAssert(M1::iscomplex);
-        AddMX(-x2,m1.mat());
-    }
+    static TMV_INLINE void SubtractEq(BaseMatrix_Mutable<M1>& m1, const CT x2)
+    { AddMX(-x2,m1.mat()); }
 
     template <class M1>
-    static inline void SubtractEq(BaseMatrix_Mutable<M1>& m1, const CCT x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        TMVStaticAssert(M1::iscomplex);
-        AddMX(-CT(x2),m1.mat());
-    }
+    static TMV_INLINE void SubtractEq(BaseMatrix_Mutable<M1>& m1, const CCT x2)
+    { AddMX(-CT(x2),m1.mat()); }
 
     template <class M1, int ix2, class T2>
-    static inline void SubtractEq(
+    static TMV_INLINE void SubtractEq(
         BaseMatrix_Mutable<M1>& m1, const Scaling<ix2,T2>& x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        TMVStaticAssert(M1::iscomplex || Traits<T2>::isreal);
-        AddMX(-T2(x2),m1.mat());
-    }
+    { AddMX(-T2(x2),m1.mat()); }
 
 
     // m + x
     template <class M1>
-    static inline SumMX<1,RT,M1,RT> operator+(
+    static TMV_INLINE SumMX<1,RT,M1,RT> operator+(
         const BaseMatrix<M1>& m1, const int x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<1,RT,M1,RT>(RT(1),m1,RT(x2)); 
-    }
+    { return SumMX<1,RT,M1,RT>(RT(1),m1,RT(x2)); }
 
     template <class M1>
-    static inline SumMX<1,RT,M1,RT> operator+(
+    static TMV_INLINE SumMX<1,RT,M1,RT> operator+(
         const BaseMatrix<M1>& m1, const RT x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<1,RT,M1,RT>(RT(1),m1,x2); 
-    }
+    { return SumMX<1,RT,M1,RT>(RT(1),m1,x2); }
 
     template <class M1>
-    static inline SumMX<1,RT,M1,CT> operator+(
+    static TMV_INLINE SumMX<1,RT,M1,CT> operator+(
         const BaseMatrix<M1>& m1, const CT x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<1,RT,M1,CT>(RT(1),m1,x2); 
-    }
+    { return SumMX<1,RT,M1,CT>(RT(1),m1,x2); }
 
     template <class M1>
-    static inline SumMX<1,RT,M1,CT> operator+(
+    static TMV_INLINE SumMX<1,RT,M1,CT> operator+(
         const BaseMatrix<M1>& m1, const CCT x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<1,RT,M1,CT>(RT(1),m1,CT(x2)); 
-    }
+    { return SumMX<1,RT,M1,CT>(RT(1),m1,CT(x2)); }
 
     template <class M1, int ix2, class T2>
-    static inline SumMX<1,RT,M1,CT> operator+(
+    static TMV_INLINE SumMX<1,RT,M1,CT> operator+(
         const BaseMatrix<M1>& m1, const Scaling<ix2,T2> x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<1,RT,M1,T2>(RT(1),m1,T2(x2)); 
-    }
+    { return SumMX<1,RT,M1,T2>(RT(1),m1,T2(x2)); }
 
     // x + m
     template <class M1>
-    static inline SumMX<1,RT,M1,RT> operator+(
+    static TMV_INLINE SumMX<1,RT,M1,RT> operator+(
         const int x2, const BaseMatrix<M1>& m1)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<1,RT,M1,RT>(RT(1),m1,RT(x2)); 
-    }
+    { return SumMX<1,RT,M1,RT>(RT(1),m1,RT(x2)); }
 
     template <class M1>
-    static inline SumMX<1,RT,M1,RT> operator+(
+    static TMV_INLINE SumMX<1,RT,M1,RT> operator+(
         const RT x2, const BaseMatrix<M1>& m1)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<1,RT,M1,RT>(RT(1),m1,x2); 
-    }
+    { return SumMX<1,RT,M1,RT>(RT(1),m1,x2); }
 
     template <class M1>
-    static inline SumMX<1,RT,M1,CT> operator+(
+    static TMV_INLINE SumMX<1,RT,M1,CT> operator+(
         const CT x2, const BaseMatrix<M1>& m1)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<1,RT,M1,CT>(RT(1),m1,x2); 
-    }
+    { return SumMX<1,RT,M1,CT>(RT(1),m1,x2); }
 
     template <class M1>
-    static inline SumMX<1,RT,M1,CT> operator+(
+    static TMV_INLINE SumMX<1,RT,M1,CT> operator+(
         const CCT x2, const BaseMatrix<M1>& m1)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<1,RT,M1,CT>(RT(1),m1,CT(x2)); 
-    }
+    { return SumMX<1,RT,M1,CT>(RT(1),m1,CT(x2)); }
 
     template <class M1, int ix2, class T2>
-    static inline SumMX<1,RT,M1,CT> operator+(
+    static TMV_INLINE SumMX<1,RT,M1,CT> operator+(
         const Scaling<ix2,T2> x2, const BaseMatrix<M1>& m1)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<1,RT,M1,T2>(RT(1),m1,T2(x2)); 
-    }
+    { return SumMX<1,RT,M1,T2>(RT(1),m1,T2(x2)); }
 
     // m - x
     template <class M1>
-    static inline SumMX<1,RT,M1,RT> operator-(
+    static TMV_INLINE SumMX<1,RT,M1,RT> operator-(
         const BaseMatrix<M1>& m1, const int x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<1,RT,M1,RT>(RT(1),m1,-RT(x2)); 
-    }
+    { return SumMX<1,RT,M1,RT>(RT(1),m1,-RT(x2)); }
 
     template <class M1>
-    static inline SumMX<1,RT,M1,RT> operator-(
+    static TMV_INLINE SumMX<1,RT,M1,RT> operator-(
         const BaseMatrix<M1>& m1, const RT x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<1,RT,M1,RT>(RT(1),m1,-x2); 
-    }
+    { return SumMX<1,RT,M1,RT>(RT(1),m1,-x2); }
 
     template <class M1>
-    static inline SumMX<1,RT,M1,CT> operator-(
+    static TMV_INLINE SumMX<1,RT,M1,CT> operator-(
         const BaseMatrix<M1>& m1, const CT x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<1,RT,M1,CT>(RT(1),m1,-x2); 
-    }
+    { return SumMX<1,RT,M1,CT>(RT(1),m1,-x2); }
 
     template <class M1>
-    static inline SumMX<1,RT,M1,CT> operator-(
+    static TMV_INLINE SumMX<1,RT,M1,CT> operator-(
         const BaseMatrix<M1>& m1, const CCT x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<1,RT,M1,CT>(RT(1),m1,-CT(x2)); 
-    }
+    { return SumMX<1,RT,M1,CT>(RT(1),m1,-CT(x2)); }
 
     template <class M1, int ix2, class T2>
-    static inline SumMX<1,RT,M1,CT> operator-(
+    static TMV_INLINE SumMX<1,RT,M1,CT> operator-(
         const BaseMatrix<M1>& m1, const Scaling<ix2,T2> x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<1,RT,M1,T2>(RT(1),m1,-T2(x2)); 
-    }
+    { return SumMX<1,RT,M1,T2>(RT(1),m1,-T2(x2)); }
 
     // x - m
     template <class M1>
-    static inline SumMX<-1,RT,M1,RT> operator-(
+    static TMV_INLINE SumMX<-1,RT,M1,RT> operator-(
         const int x2, const BaseMatrix<M1>& m1)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<-1,RT,M1,RT>(RT(-1),m1,RT(x2)); 
-    }
+    { return SumMX<-1,RT,M1,RT>(RT(-1),m1,RT(x2)); }
 
     template <class M1>
-    static inline SumMX<-1,RT,M1,RT> operator-(
+    static TMV_INLINE SumMX<-1,RT,M1,RT> operator-(
         const RT x2, const BaseMatrix<M1>& m1)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<-1,RT,M1,RT>(RT(-1),m1,x2); 
-    }
+    { return SumMX<-1,RT,M1,RT>(RT(-1),m1,x2); }
 
     template <class M1>
-    static inline SumMX<-1,RT,M1,CT> operator-(
+    static TMV_INLINE SumMX<-1,RT,M1,CT> operator-(
         const CT x2, const BaseMatrix<M1>& m1)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<-1,RT,M1,CT>(RT(-1),m1,x2); 
-    }
+    { return SumMX<-1,RT,M1,CT>(RT(-1),m1,x2); }
 
     template <class M1>
-    static inline SumMX<-1,RT,M1,CT> operator-(
+    static TMV_INLINE SumMX<-1,RT,M1,CT> operator-(
         const CCT x2, const BaseMatrix<M1>& m1)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<-1,RT,M1,CT>(RT(-1),m1,CT(x2)); 
-    }
+    { return SumMX<-1,RT,M1,CT>(RT(-1),m1,CT(x2)); }
 
     template <class M1, int ix2, class T2>
-    static inline SumMX<-1,RT,M1,CT> operator-(
+    static TMV_INLINE SumMX<-1,RT,M1,CT> operator-(
         const Scaling<ix2,T2> x2, const BaseMatrix<M1>& m1)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<-1,RT,M1,T2>(RT(-1),m1,T2(x2)); 
-    }
+    { return SumMX<-1,RT,M1,T2>(RT(-1),m1,T2(x2)); }
 
     // xm + x
     template <int ix1, class T1, class M1>
-    static inline SumMX<ix1,T1,M1,RT> operator+(
+    static TMV_INLINE SumMX<ix1,T1,M1,RT> operator+(
         const ProdXM<ix1,T1,M1>& m1, const int x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<ix1,T1,M1,RT>(T1(m1.getX()),m1.getM(),RT(x2)); 
-    }
+    { return SumMX<ix1,T1,M1,RT>(T1(m1.getX()),m1.getM(),RT(x2)); }
 
     template <int ix1, class T1, class M1>
-    static inline SumMX<ix1,T1,M1,RT> operator+(
+    static TMV_INLINE SumMX<ix1,T1,M1,RT> operator+(
         const ProdXM<ix1,T1,M1>& m1, const RT x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<ix1,T1,M1,RT>(T1(m1.getX()),m1.getM(),x2); 
-    }
+    { return SumMX<ix1,T1,M1,RT>(T1(m1.getX()),m1.getM(),x2); }
 
     template <int ix1, class T1, class M1>
-    static inline SumMX<ix1,T1,M1,CT> operator+(
+    static TMV_INLINE SumMX<ix1,T1,M1,CT> operator+(
         const ProdXM<ix1,T1,M1>& m1, const CT x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<ix1,T1,M1,CT>(T1(m1.getX()),m1.getM(),x2); 
-    }
+    { return SumMX<ix1,T1,M1,CT>(T1(m1.getX()),m1.getM(),x2); }
 
     template <int ix1, class T1, class M1>
-    static inline SumMX<ix1,T1,M1,CT> operator+(
+    static TMV_INLINE SumMX<ix1,T1,M1,CT> operator+(
         const ProdXM<ix1,T1,M1>& m1, const CCT x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<ix1,T1,M1,CT>(T1(m1.getX()),m1.getM(),CT(x2)); 
-    }
+    { return SumMX<ix1,T1,M1,CT>(T1(m1.getX()),m1.getM(),CT(x2)); }
 
     template <int ix1, class T1, class M1, int ix2, class T2>
-    static inline SumMX<ix1,T1,M1,T2> operator+(
+    static TMV_INLINE SumMX<ix1,T1,M1,T2> operator+(
         const ProdXM<ix1,T1,M1>& m1, const Scaling<ix2,T2> x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<ix1,T1,M1,T2>(T1(m1.getX()),m1.getM(),T2(x2)); 
-    }
+    { return SumMX<ix1,T1,M1,T2>(T1(m1.getX()),m1.getM(),T2(x2)); }
 
     // x + xm 
     template <int ix1, class T1, class M1>
-    static inline SumMX<ix1,T1,M1,RT> operator+(
+    static TMV_INLINE SumMX<ix1,T1,M1,RT> operator+(
         const int x2, const ProdXM<ix1,T1,M1>& m1)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<ix1,T1,M1,RT>(T1(m1.getX()),m1.getM(),int(x2)); 
-    }
+    { return SumMX<ix1,T1,M1,RT>(T1(m1.getX()),m1.getM(),int(x2)); }
 
     template <int ix1, class T1, class M1>
-    static inline SumMX<ix1,T1,M1,RT> operator+(
+    static TMV_INLINE SumMX<ix1,T1,M1,RT> operator+(
         const RT x2, const ProdXM<ix1,T1,M1>& m1)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<ix1,T1,M1,RT>(T1(m1.getX()),m1.getM(),x2); 
-    }
+    { return SumMX<ix1,T1,M1,RT>(T1(m1.getX()),m1.getM(),x2); }
 
     template <int ix1, class T1, class M1>
-    static inline SumMX<ix1,T1,M1,CT> operator+(
+    static TMV_INLINE SumMX<ix1,T1,M1,CT> operator+(
         const CT x2, const ProdXM<ix1,T1,M1>& m1)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<ix1,T1,M1,CT>(T1(m1.getX()),m1.getM(),x2); 
-    }
+    { return SumMX<ix1,T1,M1,CT>(T1(m1.getX()),m1.getM(),x2); }
 
     template <int ix1, class T1, class M1>
-    static inline SumMX<ix1,T1,M1,CT> operator+(
+    static TMV_INLINE SumMX<ix1,T1,M1,CT> operator+(
         const CCT x2, const ProdXM<ix1,T1,M1>& m1)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<ix1,T1,M1,CT>(T1(m1.getX()),m1.getM(),CT(x2)); 
-    }
+    { return SumMX<ix1,T1,M1,CT>(T1(m1.getX()),m1.getM(),CT(x2)); }
 
     template <int ix1, class T1, class M1, int ix2, class T2>
-    static inline SumMX<ix1,T1,M1,T2> operator+(
+    static TMV_INLINE SumMX<ix1,T1,M1,T2> operator+(
         const Scaling<ix2,T2> x2, const ProdXM<ix1,T1,M1>& m1)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<ix1,T1,M1,T2>(T1(m1.getX()),m1.getM(),T2(x2)); 
-    }
+    { return SumMX<ix1,T1,M1,T2>(T1(m1.getX()),m1.getM(),T2(x2)); }
 
     // xm - x
     template <int ix1, class T1, class M1>
-    static inline SumMX<ix1,T1,M1,RT> operator-(
+    static TMV_INLINE SumMX<ix1,T1,M1,RT> operator-(
         const ProdXM<ix1,T1,M1>& m1, const int x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<ix1,T1,M1,RT>(T1(m1.getX()),m1.getM(),-RT(x2)); 
-    }
+    { return SumMX<ix1,T1,M1,RT>(T1(m1.getX()),m1.getM(),-RT(x2)); }
 
     template <int ix1, class T1, class M1>
-    static inline SumMX<ix1,T1,M1,RT> operator-(
+    static TMV_INLINE SumMX<ix1,T1,M1,RT> operator-(
         const ProdXM<ix1,T1,M1>& m1, const RT x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<ix1,T1,M1,RT>(T1(m1.getX()),m1.getM(),-x2); 
-    }
+    { return SumMX<ix1,T1,M1,RT>(T1(m1.getX()),m1.getM(),-x2); }
 
     template <int ix1, class T1, class M1>
-    static inline SumMX<ix1,T1,M1,CT> operator-(
+    static TMV_INLINE SumMX<ix1,T1,M1,CT> operator-(
         const ProdXM<ix1,T1,M1>& m1, const CT x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<ix1,T1,M1,CT>(T1(m1.getX()),m1.getM(),-x2); 
-    }
+    { return SumMX<ix1,T1,M1,CT>(T1(m1.getX()),m1.getM(),-x2); }
 
     template <int ix1, class T1, class M1>
-    static inline SumMX<ix1,T1,M1,CT> operator-(
+    static TMV_INLINE SumMX<ix1,T1,M1,CT> operator-(
         const ProdXM<ix1,T1,M1>& m1, const CCT x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<ix1,T1,M1,CT>(T1(m1.getX()),m1.getM(),-CT(x2)); 
-    }
+    { return SumMX<ix1,T1,M1,CT>(T1(m1.getX()),m1.getM(),-CT(x2)); }
 
     template <int ix1, class T1, class M1, int ix2, class T2>
-    static inline SumMX<ix1,T1,M1,T2> operator-(
+    static TMV_INLINE SumMX<ix1,T1,M1,T2> operator-(
         const ProdXM<ix1,T1,M1>& m1, const Scaling<ix2,T2> x2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<ix1,T1,M1,T2>(T1(m1.getX()),m1.getM(),-T2(x2)); 
-    }
+    { return SumMX<ix1,T1,M1,T2>(T1(m1.getX()),m1.getM(),-T2(x2)); }
 
     // x - xm 
     template <int ix1, class T1, class M1>
-    static inline SumMX<-ix1,T1,M1,RT> operator-(
+    static TMV_INLINE SumMX<-ix1,T1,M1,RT> operator-(
         const int x2, const ProdXM<ix1,T1,M1>& m1)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<-ix1,T1,M1,RT>(-T1(m1.getX()),m1.getM(),RT(x2)); 
-    }
+    { return SumMX<-ix1,T1,M1,RT>(-T1(m1.getX()),m1.getM(),RT(x2)); }
 
     template <int ix1, class T1, class M1>
-    static inline SumMX<-ix1,T1,M1,RT> operator-(
+    static TMV_INLINE SumMX<-ix1,T1,M1,RT> operator-(
         const RT x2, const ProdXM<ix1,T1,M1>& m1)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<-ix1,T1,M1,RT>(-T1(m1.getX()),m1.getM(),x2); 
-    }
+    { return SumMX<-ix1,T1,M1,RT>(-T1(m1.getX()),m1.getM(),x2); }
 
     template <int ix1, class T1, class M1>
-    static inline SumMX<-ix1,T1,M1,CT> operator-(
+    static TMV_INLINE SumMX<-ix1,T1,M1,CT> operator-(
         const CT x2, const ProdXM<ix1,T1,M1>& m1)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<-ix1,T1,M1,CT>(-T1(m1.getX()),m1.getM(),x2); 
-    }
+    { return SumMX<-ix1,T1,M1,CT>(-T1(m1.getX()),m1.getM(),x2); }
 
     template <int ix1, class T1, class M1>
-    static inline SumMX<-ix1,T1,M1,CT> operator-(
+    static TMV_INLINE SumMX<-ix1,T1,M1,CT> operator-(
         const CCT x2, const ProdXM<ix1,T1,M1>& m1)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<-ix1,T1,M1,CT>(-T1(m1.getX()),m1.getM(),x2); 
-    }
+    { return SumMX<-ix1,T1,M1,CT>(-T1(m1.getX()),m1.getM(),x2); }
 
     template <int ix1, class T1, class M1, int ix2, class T2>
-    static inline SumMX<-ix1,T1,M1,T2> operator-(
+    static TMV_INLINE SumMX<-ix1,T1,M1,T2> operator-(
         const Scaling<ix2,T2> x2, const ProdXM<ix1,T1,M1>& m1)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same)); 
-        TMVAssert(m1.colsize() == m1.rowsize());
-        return SumMX<-ix1,T1,M1,T2>(-T1(m1.getX()),m1.getM(),T2(x2)); 
-    }
+    { return SumMX<-ix1,T1,M1,T2>(-T1(m1.getX()),m1.getM(),T2(x2)); }
 
 #undef RT
 #undef CT
@@ -642,13 +436,13 @@ namespace tmv {
 
     // -(xm+x)
     template <int ix1, class T1, class M1, class T2>
-    static inline SumMX<-ix1,T1,M1,T2> operator-(
+    static TMV_INLINE SumMX<-ix1,T1,M1,T2> operator-(
         const SumMX<ix1,T1,M1,T2>& smx)
     { return SumMX<-ix1,T1,M1,T2>(-T1(smx.getX1()),smx.getM1(),-smx.getX2()); }
 
     // x * (xm+x)
     template <int ix1, class T1, class M1, class T2>
-    static inline SumMX<0,T1,M1,T2> operator*(
+    static TMV_INLINE SumMX<0,T1,M1,T2> operator*(
         const int x, const SumMX<ix1,T1,M1,T2>& smx)
     {
         return SumMX<0,T1,M1,T2>(
@@ -656,24 +450,24 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class M1, class T2>
-    static inline SumMX<0,T1,M1,T2> operator*(
+    static TMV_INLINE SumMX<0,T1,M1,T2> operator*(
         const RT x, const SumMX<ix1,T1,M1,T2>& smx)
     { return SumMX<0,T1,M1,T2>(x*smx.getX1(),smx.getM1(),x*smx.getX2()); }
 
     template <int ix1, class T1, class M1, class T2>
-    static inline SumMX<0,CT,M1,CT> operator*(
+    static TMV_INLINE SumMX<0,CT,M1,CT> operator*(
         const CT x, const SumMX<ix1,T1,M1,T2>& smx)
     { return SumMX<0,CT,M1,CT>(x*smx.getX1(),smx.getM1(),x*smx.getX2()); }
 
     template <int ix1, class T1, class M1, class T2>
-    static inline SumMX<0,CT,M1,CT> operator*(
+    static TMV_INLINE SumMX<0,CT,M1,CT> operator*(
         const CCT x, const SumMX<ix1,T1,M1,T2>& smx)
     {
         return SumMX<0,CT,M1,CT>(
             CT(x)*smx.getX1(),smx.getM1(),CT(x)*smx.getX2());
     }
     template <int ix, class T, int ix1, class T1, class M1, class T2>
-    static inline SumMX<ix1*ix,TX1,M1,TX2> operator*(
+    static TMV_INLINE SumMX<ix1*ix,TX1,M1,TX2> operator*(
         const Scaling<ix,T>& x, const SumMX<ix1,T1,M1,T2>& smx)
     {
         return SumMX<ix1*ix,TX1,M1,TX2>(
@@ -682,7 +476,7 @@ namespace tmv {
 
     // (xm+x)*x
     template <int ix1, class T1, class M1, class T2>
-    static inline SumMX<0,T1,M1,T2> operator*(
+    static TMV_INLINE SumMX<0,T1,M1,T2> operator*(
         const SumMX<ix1,T1,M1,T2>& smx, const int x)
     {
         return SumMX<0,T1,M1,T2>(
@@ -690,17 +484,17 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class M1, class T2>
-    static inline SumMX<0,T1,M1,T2> operator*(
+    static TMV_INLINE SumMX<0,T1,M1,T2> operator*(
         const SumMX<ix1,T1,M1,T2>& smx, const RT x)
     { return SumMX<0,T1,M1,T2>(x*smx.getX1(),smx.getM1(),x*smx.getX2()); }
 
     template <int ix1, class T1, class M1, class T2>
-    static inline SumMX<0,CT,M1,CT> operator*(
+    static TMV_INLINE SumMX<0,CT,M1,CT> operator*(
         const SumMX<ix1,T1,M1,T2>& smx, const CT x)
     { return SumMX<0,CT,M1,CT>(x*smx.getX1(),smx.getM1(),x*smx.getX2()); }
 
     template <int ix1, class T1, class M1, class T2>
-    static inline SumMX<0,CT,M1,CT> operator*(
+    static TMV_INLINE SumMX<0,CT,M1,CT> operator*(
         const SumMX<ix1,T1,M1,T2>& smx, const CCT x)
     {
         return SumMX<0,CT,M1,CT>(
@@ -708,7 +502,7 @@ namespace tmv {
     }
 
     template <int ix, class T, int ix1, class T1, class M1, class T2>
-    static inline SumMX<ix1*ix,TX1,M1,TX2> operator*(
+    static TMV_INLINE SumMX<ix1*ix,TX1,M1,TX2> operator*(
         const SumMX<ix1,T1,M1,T2>& smx, const Scaling<ix,T>& x)
     {
         return SumMX<ix1*ix,TX1,M1,TX2>(
@@ -717,7 +511,7 @@ namespace tmv {
 
     // (xm+x)/x
     template <int ix1, class T1, class M1, class T2>
-    static inline SumMX<0,T1,M1,T2> operator/(
+    static TMV_INLINE SumMX<0,T1,M1,T2> operator/(
         const SumMX<ix1,T1,M1,T2>& smx, const int x)
     {
         return SumMX<0,T1,M1,T2>(
@@ -725,19 +519,19 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class M1, class T2>
-    static inline SumMX<0,T1,M1,T2> operator/(
+    static TMV_INLINE SumMX<0,T1,M1,T2> operator/(
         const SumMX<ix1,T1,M1,T2>& smx, const RT x)
     {
         return SumMX<0,T1,M1,T2>(smx.getX1()/x,smx.getM1(),smx.getX2()/x);
     }
 
     template <int ix1, class T1, class M1, class T2>
-    static inline SumMX<0,CT,M1,CT> operator/(
+    static TMV_INLINE SumMX<0,CT,M1,CT> operator/(
         const SumMX<ix1,T1,M1,T2>& smx, const CT x)
     { return SumMX<0,CT,M1,CT>(smx.getX1()/x,smx.getM1(), smx.getX2()/x); }
 
     template <int ix1, class T1, class M1, class T2>
-    static inline SumMX<0,CT,M1,CT> operator/(
+    static TMV_INLINE SumMX<0,CT,M1,CT> operator/(
         const SumMX<ix1,T1,M1,T2>& smx, const CCT x)
     {
         return SumMX<0,CT,M1,CT>(
@@ -745,7 +539,7 @@ namespace tmv {
     }
 
     template <int ix, class T, int ix1, class T1, class M1, class T2>
-    static inline SumMX<ix1*ix,TX1,M1,TX2> operator/(
+    static TMV_INLINE SumMX<ix1*ix,TX1,M1,TX2> operator/(
         const SumMX<ix1,T1,M1,T2>& smx, const Scaling<ix,T>& x)
     {
         return SumMX<ix1*ix,TX1,M1,TX2>(

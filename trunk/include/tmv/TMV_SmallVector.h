@@ -199,7 +199,7 @@ namespace tmv {
         // Constructors
         //
 
-        SmallVector()
+        TMV_INLINE_ND SmallVector()
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(N >= 0);
@@ -246,7 +246,7 @@ namespace tmv {
             v2.newAssignTo(*this);
         }
 
-        ~SmallVector()
+        TMV_INLINE_ND ~SmallVector()
         {
 #ifdef TMV_DEBUG
             this->setAllTo(T(999));
@@ -257,14 +257,11 @@ namespace tmv {
         // Op =
         //
 
-        type& operator=(const type& v2)
-        {
-            if (&v2 != this) base_mut::operator=(v2); 
-            return *this; 
-        }
+        TMV_INLINE type& operator=(const type& v2)
+        { if (this != &v2) base_mut::operator=(v2); return *this; }
 
         template <class V2>
-        type& operator=(const BaseVector<V2>& v2) 
+        TMV_INLINE type& operator=(const BaseVector<V2>& v2) 
         { base_mut::operator=(v2); return *this; }
 
 
@@ -272,15 +269,15 @@ namespace tmv {
         // Auxilliary Functions
         //
 
-        const T* cptr() const { return itsv; }
-        T* ptr() { return itsv; }
+        TMV_INLINE const T* cptr() const { return itsv; }
+        TMV_INLINE T* ptr() { return itsv; }
         T cref(int i) const  { return itsv[i]; }
         T& ref(int i) { return itsv[i]; }
 
-        size_t size() const { return N; }
-        int nElements() const { return N; }
-        int step() const { return 1; }
-        bool isconj() const { return false; }
+        TMV_INLINE size_t size() const { return N; }
+        TMV_INLINE int nElements() const { return N; }
+        TMV_INLINE int step() const { return 1; }
+        TMV_INLINE bool isconj() const { return false; }
 
 
     protected :
@@ -465,13 +462,13 @@ namespace tmv {
         // Auxilliary Functions
         //
 
-        const T* cptr() const { return itsv; }
+        TMV_INLINE const T* cptr() const { return itsv; }
         T cref(int i) const  { return DoConj<_conj>(itsv[i*step()]); }
 
-        size_t size() const { return itssize; }
-        int nElements() const { return itssize; }
-        int step() const { return itsstep; }
-        bool isconj() const { return _conj; }
+        TMV_INLINE size_t size() const { return itssize; }
+        TMV_INLINE int nElements() const { return itssize; }
+        TMV_INLINE int step() const { return itsstep; }
+        TMV_INLINE bool isconj() const { return _conj; }
 
     protected :
 
@@ -606,10 +603,16 @@ namespace tmv {
 
         SmallVectorView(T* v, size_t n) :
             itsv(v), itssize(n), itsstep(S) 
-        { TMVAssert(S != UNKNOWN); }
+        {
+            TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(S != UNKNOWN); 
+        }
 
         SmallVectorView(T* v) : itsv(v), itssize(N), itsstep(S) 
-        { TMVAssert(N != UNKNOWN);  TMVAssert(S != UNKNOWN); }
+        { 
+            TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(N != UNKNOWN);  TMVStaticAssert(S != UNKNOWN); 
+        }
 
         SmallVectorView(const type& v2) : 
             itsv(v2.itsv), itssize(v2.size()), itsstep(v2.step())
@@ -642,26 +645,26 @@ namespace tmv {
         // Op =
         //
 
-        template <class V2>
-        type& operator=(const BaseVector<V2>& v2) 
-        { base_mut::operator=(v2); return *this; }
+        TMV_INLINE type& operator=(const type& v2)
+        { if (this != &v2) base_mut::operator=(v2); return *this; }
 
-        type& operator=(const type& v2)
+        template <class V2>
+        TMV_INLINE type& operator=(const BaseVector<V2>& v2) 
         { base_mut::operator=(v2); return *this; }
 
         //
         // Auxilliary Functions
         //
 
-        const T* cptr() const { return itsv; }
+        TMV_INLINE const T* cptr() const { return itsv; }
         T cref(int i) const  { return DoConj<_conj>(itsv[i*step()]); }
-        T* ptr() { return itsv; }
+        TMV_INLINE T* ptr() { return itsv; }
         reference ref(int i) { return reference(itsv[i*step()]); }
 
-        size_t size() const { return itssize; }
-        int nElements() const { return itssize; }
-        int step() const { return itsstep; }
-        bool isconj() const { return _conj; }
+        TMV_INLINE size_t size() const { return itssize; }
+        TMV_INLINE int nElements() const { return itssize; }
+        TMV_INLINE int step() const { return itsstep; }
+        TMV_INLINE bool isconj() const { return _conj; }
 
     protected :
 
@@ -677,23 +680,23 @@ namespace tmv {
     //
 
     template <class V, class T, int N, int S, int A>
-    static inline void Swap(
+    static TMV_INLINE void Swap(
         BaseVector_Mutable<V>& v1, SmallVectorView<T,N,S,A> v2)
     { DoSwap(v1,v2); }
     template <class V, class T, int N, int S, int A>
-    static inline void Swap(
+    static TMV_INLINE void Swap(
         SmallVectorView<T,N,S,A> v1, BaseVector_Mutable<V>& v2)
     { DoSwap(v1,v2); }
     template <class T, int N, int S1, int A1, int S2, int A2>
-    static inline void Swap(
+    static TMV_INLINE void Swap(
         SmallVectorView<T,N,S1,A1> v1, SmallVectorView<T,N,S2,A2> v2)
     { DoSwap(v1,v2); }
     template <class T, int N, int A1, int S2, int A2>
-    static inline void Swap(
+    static TMV_INLINE void Swap(
         VectorView<T,A1> v1, SmallVectorView<T,N,S2,A2> v2)
     { DoSwap(v1,v2); }
     template <class T, int N, int S1, int A1, int A2>
-    static inline void Swap(
+    static TMV_INLINE void Swap(
         SmallVectorView<T,N,S1,A1> v1, VectorView<T,A2> v2)
     { DoSwap(v1,v2); }
 
@@ -703,11 +706,11 @@ namespace tmv {
     //
     
     template <class T, int N, int A>
-    static inline typename SmallVector<T,N,A>::conjugate_type Conjugate(
+    static TMV_INLINE typename SmallVector<T,N,A>::conjugate_type Conjugate(
         SmallVector<T,N,A>& v)
     { return v.conjugate(); }
     template <class T, int N, int S, int A>
-    static inline typename SmallVectorView<T,N,S,A>::conjugate_type Conjugate(
+    static TMV_INLINE typename SmallVectorView<T,N,S,A>::conjugate_type Conjugate(
         SmallVectorView<T,N,S,A> v)
     { return v.conjugate(); }
 

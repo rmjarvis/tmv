@@ -37,7 +37,7 @@
 // There are different kernels depending on what is known at compile time.
 // e.g. multmm_16_N_64 has M = 16, K = 64, and N is a runtime value.
 //
-// When doing a TMV_INLINE compilation, (or for the types that aren't
+// When doing a TMV_NO_LIB compilation, (or for the types that aren't
 // instantiated in the compiled library) we let these be static functions.
 // Otherwise, we just declare the functions without defining them.
 // When we are actually compiling the library, however, we need to
