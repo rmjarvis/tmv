@@ -48,21 +48,21 @@ namespace tmv {
     // These first few are for when an argument is a composite vector
     // and needs to be calculated before running MultVV.
     template <class V1, class V2>
-    static inline PT MultVV(
+    static TMV_INLINE PT MultVV(
         const BaseVector<V1>& v1, const BaseVector<V2>& v2)
     { return MultVV(v1.calc(),v2.calc()); }
     template <class V1, class V2>
-    static inline PT NoAliasMultVV(
+    static TMV_INLINE PT NoAliasMultVV(
         const BaseVector<V1>& v1, const BaseVector<V2>& v2)
     { return NoAliasMultVV(v1.calc(),v2.calc()); }
     template <class V1, class V2>
-    static inline PT AliasMultVV(
+    static TMV_INLINE PT AliasMultVV(
         const BaseVector<V1>& v1, const BaseVector<V2>& v2)
     { return AliasMultVV(v1.calc(),v2.calc()); }
 
     // v * v
     template <class V1, class V2>
-    static inline PT operator*(
+    static TMV_INLINE_ND PT operator*(
         const BaseVector<V1>& v1, const BaseVector<V2>& v2) 
     {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
@@ -73,7 +73,7 @@ namespace tmv {
 #define PT2 typename Traits2<Tx,PT>::type
     // v * (x*v)
     template <class V1, int ix2, class Tx, class V2>
-    static inline PT2 operator*(
+    static TMV_INLINE_ND PT2 operator*(
         const BaseVector<V1>& v1, const ProdXV<ix2,Tx,V2>& v2) 
     {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
@@ -83,7 +83,7 @@ namespace tmv {
 
     // (x*v) * v
     template <int ix1, class Tx, class V1, class V2>
-    static inline PT2 operator*(
+    static TMV_INLINE_ND PT2 operator*(
         const ProdXV<ix1,Tx,V1>& v1, const BaseVector<V2>& v2)
     {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
@@ -95,7 +95,7 @@ namespace tmv {
 #define PT2 typename Traits2<Tx1,typename Traits2<Tx2,PT>::type>::type
     // (x*v) * (x*v)
     template <int ix1, class Tx1, class V1, int ix2, class Tx2, class V2>
-    static inline PT2 operator*(
+    static TMV_INLINE_ND PT2 operator*(
         const ProdXV<ix1,Tx1,V1>& v1, const ProdXV<ix2,Tx2,V2>& v2)
     {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));

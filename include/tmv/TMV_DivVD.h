@@ -64,8 +64,8 @@ namespace tmv {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         typedef typename V3::iterator IT3;
-        static void call(const Scaling<ix,T>&, const V1&, const V2&, V3&) {}
-        static void call2(int, const Scaling<ix,T>&, IT1, IT2, IT3) {}
+        static TMV_INLINE void call(const Scaling<ix,T>&, const V1&, const V2&, V3&) {}
+        static TMV_INLINE void call2(int, const Scaling<ix,T>&, IT1, IT2, IT3) {}
     };
 
     // algo 11: simple for loop
@@ -708,7 +708,7 @@ namespace tmv {
     template <int s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<90,s,ix,T,V1,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
             typedef typename V3::value_type VT;
@@ -721,7 +721,7 @@ namespace tmv {
     template <int s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<91,s,ix,T,V1,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
             typedef typename V3::value_type VT;
@@ -734,7 +734,7 @@ namespace tmv {
     template <int s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<97,s,ix,T,V1,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
             typedef typename V1::const_conjugate_type V1c;
@@ -752,7 +752,7 @@ namespace tmv {
     template <int s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<197,s,ix,T,V1,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
             typedef typename V1::const_conjugate_type V1c;
@@ -809,7 +809,7 @@ namespace tmv {
     template <int s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<99,s,ix,T,V1,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
             typedef typename V1::value_type T1;
@@ -843,7 +843,7 @@ namespace tmv {
         enum { algo = (
                 // SSE stuff doesn't seem to be faster.  Huh.
                 11 ) };
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
             TMVStaticAssert(!V3::_conj);
@@ -856,7 +856,7 @@ namespace tmv {
 #endif
             ElemDivVV_Helper<algo,s,ix,T,V1,V2,V3>::call(x,v1,v2,v3); 
         }
-        static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
+        static TMV_INLINE void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
             TMVStaticAssert(!V3::_conj);
             ElemDivVV_Helper<algo,s,ix,T,V1,V2,V3>::call2(n,x,A,B,C);
@@ -867,7 +867,7 @@ namespace tmv {
     template <int s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<-3,s,ix,T,V1,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
             TMVStaticAssert(!V3::_conj);
@@ -879,7 +879,7 @@ namespace tmv {
     template <int s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<-2,s,ix,T,V1,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
             typedef typename V1::value_type T1;
@@ -907,7 +907,7 @@ namespace tmv {
     template <int s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<-1,s,ix,T,V1,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
             const bool noclobber =

@@ -70,7 +70,7 @@ namespace tmv {
     template <bool add, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<0,0,add,ix,T,V1,V2,V3>
     {
-        static void call(const Scaling<ix,T>& , const V1& , const V2& , V3& ) 
+        static TMV_INLINE void call(const Scaling<ix,T>& , const V1& , const V2& , V3& ) 
         {}
     };
 
@@ -324,7 +324,7 @@ namespace tmv {
     template <int s, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<90,s,true,ix,T,V1,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
             typedef typename V3::value_type VT;
@@ -335,7 +335,7 @@ namespace tmv {
     template <int s, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<90,s,false,ix,T,V1,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
             typedef typename V3::value_type VT;
@@ -348,7 +348,7 @@ namespace tmv {
     template <int s, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<91,s,true,ix,T,V1,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
             typedef typename V3::value_type VT;
@@ -359,7 +359,7 @@ namespace tmv {
     template <int s, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<91,s,false,ix,T,V1,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
             typedef typename V3::value_type VT;
@@ -372,7 +372,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<97,s,add,ix,T,V1,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
             typedef typename V1::const_conjugate_type V1c;
@@ -390,7 +390,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<197,s,add,ix,T,V1,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
             typedef typename V1::const_conjugate_type V1c;
@@ -449,7 +449,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<99,s,add,ix,T,V1,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
             typedef typename V1::value_type T1;
@@ -492,13 +492,13 @@ namespace tmv {
                 (allunit && sizeof(RT) == 8) ? V3::iscomplex ? 12 : 13 :
                 (allunit && sizeof(RT) == 4) ? V3::iscomplex ? 13 : 14 :
                 11 ) };
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
             TMVStaticAssert(!V3::_conj);
             ElemMultVV_Helper<algo,s,add,ix,T,V1,V2,V3>::call(x1,v1,v2,v3); 
         }
-        static void call2(
+        static TMV_INLINE void call2(
             const int n,
             const Scaling<ix,T>& x1, const IT1& x, const IT2& y, IT3& z)
         {
@@ -511,7 +511,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<-3,s,add,ix,T,V1,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         { ElemMultVV_Helper<-4,s,add,ix,T,V1,V2,V3>::call(x1,v1,v2,v3); }
     };
@@ -520,7 +520,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<-2,s,add,ix,T,V1,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
             typedef typename V1::value_type T1;
@@ -549,7 +549,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<-1,s,add,ix,T,V1,V2,V3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
             const bool noclobber =

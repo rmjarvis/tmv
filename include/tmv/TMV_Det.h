@@ -69,7 +69,7 @@ namespace tmv {
     struct DetM_Helper<0,s,M>
     {
         typedef typename M::value_type T;
-        static T call(const M& m)
+        static TMV_INLINE T call(const M& m)
         {
 #ifdef PRINTALGO_Det
             const int N = m.rowsize();
@@ -84,7 +84,7 @@ namespace tmv {
     struct DetM_Helper<1,1,M>
     {
         typedef typename M::value_type T;
-        static T call(const M& m)
+        static TMV_INLINE T call(const M& m)
         {
 #ifdef PRINTALGO_Det
             const int N = m.rowsize();
@@ -135,7 +135,7 @@ namespace tmv {
     struct DetM_Helper<11,s,M>
     {
         typedef typename M::value_type T;
-        static T call(const M& m)
+        static TMV_INLINE T call(const M& m)
         {
 #ifdef PRINTALGO_Det
             const int N = m.rowsize();
@@ -184,7 +184,7 @@ namespace tmv {
     struct DetM_Helper<21,s,M>
     {
         typedef typename M::value_type T;
-        static T call(const M& m)
+        static TMV_INLINE T call(const M& m)
         {
             const int algo2 = 
                 M::_unit ? 0 :
@@ -245,7 +245,7 @@ namespace tmv {
     struct DetM_Helper<32,s,M>
     {
         typedef typename M::value_type T;
-        static T call(const M& m)
+        static TMV_INLINE T call(const M& m)
         {
 #ifdef PRINTALGO_Det
             const int N = m.rowsize();
@@ -260,7 +260,7 @@ namespace tmv {
     struct DetM_Helper<-3,s,M>
     {
         typedef typename M::value_type T;
-        static T call(const M& m)
+        static TMV_INLINE T call(const M& m)
         {
             const bool up = ShapeTraits<M::_shape>::upper;
             const bool lo = ShapeTraits<M::_shape>::lower;
@@ -443,7 +443,7 @@ namespace tmv {
     {
         typedef typename M::float_type RT;
         typedef typename M::zfloat_type T;
-        static RT call(const M& m, T* sign)
+        static TMV_INLINE RT call(const M& m, T* sign)
         {
             typedef typename M::real_type MRT;
             const bool up = ShapeTraits<M::_shape>::upper;
@@ -492,7 +492,7 @@ namespace tmv {
     template <int s, class M>
     struct IsSingularM_Helper<0,s,M>
     {
-        static bool call(const M& m)
+        static TMV_INLINE bool call(const M& m)
         {
 #ifdef PRINTALGO_Det
             const int N = m.rowsize();
@@ -523,7 +523,7 @@ namespace tmv {
     template <int s, class M>
     struct IsSingularM_Helper<11,s,M>
     {
-        static bool call(const M& m)
+        static TMV_INLINE bool call(const M& m)
         {
 #ifdef PRINTALGO_Det
             const int N = m.rowsize();
@@ -605,7 +605,7 @@ namespace tmv {
     template <int s, class M>
     struct IsSingularM_Helper<-3,s,M>
     {
-        static bool call(const M& m)
+        static TMV_INLINE bool call(const M& m)
         {
             typedef typename M::value_type T;
             const bool up = ShapeTraits<M::_shape>::upper;
@@ -662,7 +662,7 @@ namespace tmv {
     struct ProdElementsV_Helper<0,s,V>
     {
         typedef typename V::value_type T;
-        static T call(const V& v)
+        static TMV_INLINE T call(const V& v)
         {
 #ifdef PRINTALGO_Det
             const int n = s == UNKNOWN ? int(v.size()) : s;
@@ -676,7 +676,7 @@ namespace tmv {
     struct ProdElementsV_Helper<1,s,V>
     {
         typedef typename V::value_type T;
-        static T call(const V& v)
+        static TMV_INLINE T call(const V& v)
         {
 #ifdef PRINTALGO_Det
             const int n = s == UNKNOWN ? int(v.size()) : s;
@@ -1039,7 +1039,7 @@ namespace tmv {
     struct ProdElementsV_Helper<90,s,V>
     {
         typedef typename V::value_type T;
-        static T call(const V& v)
+        static TMV_INLINE T call(const V& v)
         { return InstProdElements(v.xView()); }
     };
 
@@ -1048,7 +1048,7 @@ namespace tmv {
     struct ProdElementsV_Helper<97,s,V>
     {
         typedef typename V::value_type T;
-        static T call(const V& v)
+        static TMV_INLINE T call(const V& v)
         {
             typedef typename V::const_conjugate_type Vc;
             Vc vc = v.conjugate();
@@ -1062,7 +1062,7 @@ namespace tmv {
     struct ProdElementsV_Helper<-4,s,V>
     {
         typedef typename V::value_type T;
-        static T call(const V& v)
+        static TMV_INLINE T call(const V& v)
         {
             typedef typename V::real_type RT;
             const bool vdouble = Traits2<RT,double>::sametype;
@@ -1095,7 +1095,7 @@ namespace tmv {
     struct ProdElementsV_Helper<-3,s,V>
     {
         typedef typename V::value_type T;
-        static T call(const V& v)
+        static TMV_INLINE T call(const V& v)
         {
             const int algo = 
                 TMV_OPT <= 1 ? -4 :
@@ -1119,7 +1119,7 @@ namespace tmv {
     struct ProdElementsV_Helper<-2,s,V>
     {
         typedef typename V::value_type T;
-        static T call(const V& v)
+        static TMV_INLINE T call(const V& v)
         {
             const bool inst =
                 (s == UNKNOWN || s > 16) &&
@@ -1136,7 +1136,7 @@ namespace tmv {
     struct ProdElementsV_Helper<-1,s,V>
     {
         typedef typename V::value_type T;
-        static T call(const V& v)
+        static TMV_INLINE T call(const V& v)
         { return ProdElementsV_Helper<-2,s,V>::call(v); }
     };
 
@@ -1348,7 +1348,7 @@ namespace tmv {
     {
         typedef typename V::float_type RT;
         typedef typename V::zfloat_type T;
-        static RT call(const V& v, T* sign)
+        static TMV_INLINE RT call(const V& v, T* sign)
         { return InstLogProdElements(v.xView(),sign); }
     };
 
@@ -1358,7 +1358,7 @@ namespace tmv {
     {
         typedef typename V::float_type RT;
         typedef typename V::zfloat_type T;
-        static RT call(const V& v, T* sign)
+        static TMV_INLINE RT call(const V& v, T* sign)
         {
             typedef typename V::const_conjugate_type Vc;
             Vc vc = v.conjugate();
@@ -1379,7 +1379,7 @@ namespace tmv {
                 TMV_OPT == 0 ? 11 :
                 (V::_step == 1 && sizeof(RT) == 4) ? 12 : 
                 11 ) };
-        static RT call(const V& v, T* sign)
+        static TMV_INLINE RT call(const V& v, T* sign)
         {
 #ifdef PRINTALGO_Det
             std::cout<<"Inline LogProdElements with sign\n";
@@ -1389,7 +1389,7 @@ namespace tmv {
 #endif
             return LogProdElementsV_Helper<algo,s,V>::call(v,sign); 
         }
-        static RT call(const V& v)
+        static TMV_INLINE RT call(const V& v)
         {
 #ifdef PRINTALGO_Det
             std::cout<<"Inline LogProdElements no sign\n";
@@ -1408,7 +1408,7 @@ namespace tmv {
     {
         typedef typename V::float_type RT;
         typedef typename V::zfloat_type T;
-        static RT call(const V& v, T* sign)
+        static TMV_INLINE RT call(const V& v, T* sign)
         { return LogProdElementsV_Helper<1,s,V>::call(v,sign); }
     };
 
@@ -1418,7 +1418,7 @@ namespace tmv {
     {
         typedef typename V::float_type RT;
         typedef typename V::zfloat_type T;
-        static RT call(const V& v, T* sign)
+        static TMV_INLINE RT call(const V& v, T* sign)
         {
             const bool inst =
                 (s == UNKNOWN || s > 16) &&
@@ -1436,7 +1436,7 @@ namespace tmv {
     {
         typedef typename V::float_type RT;
         typedef typename V::zfloat_type T;
-        static RT call(const V& v, T* sign)
+        static TMV_INLINE RT call(const V& v, T* sign)
         { return LogProdElementsV_Helper<-2,s,V>::call(v,sign);  }
     };
 
@@ -1600,7 +1600,7 @@ namespace tmv {
     struct HasZeroElementV_Helper<90,s,V>
     {
         typedef typename V::value_type T;
-        static bool call(const V& v)
+        static TMV_INLINE bool call(const V& v)
         { return InstHasZeroElement(v.xView()); }
     };
 
@@ -1609,7 +1609,7 @@ namespace tmv {
     struct HasZeroElementV_Helper<97,s,V>
     {
         typedef typename V::value_type T;
-        static bool call(const V& v)
+        static TMV_INLINE bool call(const V& v)
         {
             typedef typename V::const_conjugate_type Vc;
             Vc vc = v.conjugate();
@@ -1622,7 +1622,7 @@ namespace tmv {
     struct HasZeroElementV_Helper<-3,s,V>
     {
         typedef typename V::value_type T;
-        static bool call(const V& v)
+        static TMV_INLINE bool call(const V& v)
         {
             typedef typename V::real_type RT;
             const int algo = 
@@ -1646,7 +1646,7 @@ namespace tmv {
     struct HasZeroElementV_Helper<-2,s,V>
     {
         typedef typename V::value_type T;
-        static bool call(const V& v)
+        static TMV_INLINE bool call(const V& v)
         {
             const bool inst =
                 (s == UNKNOWN || s > 16) &&
@@ -1663,7 +1663,7 @@ namespace tmv {
     struct HasZeroElementV_Helper<-1,s,V>
     {
         typedef typename V::value_type T;
-        static bool call(const V& v)
+        static TMV_INLINE bool call(const V& v)
         { return HasZeroElementV_Helper<-2,s,V>::call(v); }
     };
 

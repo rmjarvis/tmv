@@ -56,13 +56,13 @@ namespace tmv {
     // algo 0: trivial: cs == 0, rs == 0 or ix == 1, so nothing to do
     template <int cs, int rs, int ix, class T, class M1>
     struct ScaleM_Helper<0,cs,rs,ix,T,M1>
-    { static void call(const Scaling<ix,T>& , M1& ) {} };
+    { static TMV_INLINE void call(const Scaling<ix,T>& , M1& ) {} };
 
     // algo 1: Linearize to vector version
     template <int cs, int rs, int ix, class T, class M1>
     struct ScaleM_Helper<1,cs,rs,ix,T,M1>
     {
-        static void call(const Scaling<ix,T>& x, M1& m)
+        static TMV_INLINE void call(const Scaling<ix,T>& x, M1& m)
         {
             typedef typename M1::linearview_type Ml;
             Ml ml = m.linearView();
@@ -234,7 +234,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1>
     struct ScaleM_Helper<90,cs,rs,ix,T,M1>
     {
-        static void call(const Scaling<ix,T>& x, M1& m)
+        static TMV_INLINE void call(const Scaling<ix,T>& x, M1& m)
         {
             typedef typename M1::value_type VT;
             VT xx = Traits<VT>::convert(T(x));
@@ -246,7 +246,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1>
     struct ScaleM_Helper<97,cs,rs,ix,T,M1>
     {
-        static void call(const Scaling<ix,T>& x, M1& m)
+        static TMV_INLINE void call(const Scaling<ix,T>& x, M1& m)
         {
             typedef typename M1::conjugate_type Mc;
             Mc mc = m.conjugate();
@@ -258,7 +258,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1>
     struct ScaleM_Helper<-4,cs,rs,ix,T,M1>
     {
-        static void call(const Scaling<ix,T>& x, M1& m)
+        static TMV_INLINE void call(const Scaling<ix,T>& x, M1& m)
         {
             typedef typename M1::value_type T1;
             const int algo = 
@@ -282,7 +282,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1>
     struct ScaleM_Helper<-3,cs,rs,ix,T,M1>
     {
-        static void call(const Scaling<ix,T>& x, M1& m)
+        static TMV_INLINE void call(const Scaling<ix,T>& x, M1& m)
         {
             const int algo = 
                 (cs == 0 || rs == 0 || ix == 1) ? 0 :
@@ -297,7 +297,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1>
     struct ScaleM_Helper<-2,cs,rs,ix,T,M1>
     {
-        static void call(const Scaling<ix,T>& x, M1& m)
+        static TMV_INLINE void call(const Scaling<ix,T>& x, M1& m)
         {
             typedef typename M1::value_type T1;
             const bool inst =
@@ -316,7 +316,7 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1>
     struct ScaleM_Helper<-1,cs,rs,ix,T,M1>
     {
-        static void call(const Scaling<ix,T>& x, M1& m)
+        static TMV_INLINE void call(const Scaling<ix,T>& x, M1& m)
         { ScaleM_Helper<-2,cs,rs,ix,T,M1>::call(x,m); }
     };
 

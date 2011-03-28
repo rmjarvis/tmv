@@ -8,8 +8,7 @@ template <class T> void TestAllSmallMatrixB()
     TestSmallMatrixArith_4<T>();
     TestSmallMatrixArith_5<T>();
     TestSmallMatrixArith_6<T>();
-    std::cout<<"SmallMatrix<"<<tmv::TMV_Text(T())<<
-        "> Arithmetic passed all MM tests\n";
+    std::cout<<"SmallMatrix<"<<Text(T())<<"> Arithmetic passed all MM tests\n";
 }
 
 #ifdef TEST_DOUBLE

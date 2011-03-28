@@ -62,7 +62,7 @@ namespace tmv {
     // algo 0: s == 0 or s == 1, nothing to do.
     template <int s, class M1>
     struct TransposeSelf_Helper<0,s,M1>
-    { static void call(M1& m) {} };
+    { static TMV_INLINE void call(M1& m) {} };
 
     // algo 11: Simple for loop
     template <int s, class M1>
@@ -188,7 +188,7 @@ namespace tmv {
     template <int s, class M1>
     struct TransposeSelf_Helper<90,s,M1>
     {
-        static void call(M1& m)
+        static TMV_INLINE void call(M1& m)
         { InstTransposeSelf(m.xView()); }
     };
 
@@ -196,7 +196,7 @@ namespace tmv {
     template <int s, class M1>
     struct TransposeSelf_Helper<97,s,M1>
     {
-        static void call(M1& m)
+        static TMV_INLINE void call(M1& m)
         {
             typedef typename M1::nonconj_type Mnc;
             Mnc mnc = m.nonConj();
@@ -208,7 +208,7 @@ namespace tmv {
     template <int s, class M1>
     struct TransposeSelf_Helper<-3,s,M1>
     {
-        static void call(M1& m)
+        static TMV_INLINE void call(M1& m)
         {
             TMVStaticAssert(!M1::_conj);
             // nops = n(n-1)/2
@@ -230,7 +230,7 @@ namespace tmv {
     template <int s, class M1>
     struct TransposeSelf_Helper<-2,s,M1>
     {
-        static void call(M1& m)
+        static TMV_INLINE void call(M1& m)
         {
             typedef typename M1::value_type T;
             const bool inst = 
@@ -247,7 +247,7 @@ namespace tmv {
     template <int s, class M1>
     struct TransposeSelf_Helper<-1,s,M1>
     {
-        static void call(M1& m)
+        static TMV_INLINE void call(M1& m)
         { TransposeSelf_Helper<-2,s,M1>::call(m); }
     };
 

@@ -3,14 +3,16 @@
 #include "TMV.h"
 
 template <class M1, class M2>
-static inline bool CanAddEq(
+static TMV_INLINE_ND bool CanAddEq(
     const tmv::BaseMatrix_Tri_Mutable<M1>& a, const tmv::BaseMatrix_Diag<M2>& b)
 {
+#ifdef XXD
     if (showtests) {
         std::cout<<"CanAddEq:\n";
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
     }
+#endif
     return CanAdd(a,b) && !a.isunit(); 
 }
 

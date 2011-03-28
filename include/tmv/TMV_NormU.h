@@ -1036,7 +1036,7 @@ namespace tmv {
     struct Norm1U_Helper<90,s,M1>
     {
         typedef typename M1::float_type RT;
-        static RT call(const M1& m)
+        static TMV_INLINE RT call(const M1& m)
         { return InstNorm1(m.xView()); }
     };
 
@@ -1045,7 +1045,7 @@ namespace tmv {
     struct Norm1U_Helper<97,s,M1>
     {
         typedef typename M1::float_type RT;
-        static RT call(const M1& m)
+        static TMV_INLINE RT call(const M1& m)
         {
             typedef typename M1::const_nonconj_type Mnc;
             Mnc mnc = m.nonConj();
@@ -1058,7 +1058,7 @@ namespace tmv {
     struct Norm1U_Helper<-4,s,M1>
     {
         typedef typename M1::float_type RT;
-        static RT call(const M1& m)
+        static TMV_INLINE RT call(const M1& m)
         {
             TMVStaticAssert(!M1::_unknowndiag);
             const int algo = 
@@ -1080,7 +1080,7 @@ namespace tmv {
     struct Norm1U_Helper<-3,s,M1>
     {
         typedef typename M1::float_type RT;
-        static RT call(const M1& m)
+        static TMV_INLINE RT call(const M1& m)
         {
             const int algo = M1::_unknowndiag ? 1 : -4;
             return Norm1U_Helper<algo,s,M1>::call(m);
@@ -1092,7 +1092,7 @@ namespace tmv {
     struct Norm1U_Helper<-2,s,M1>
     {
         typedef typename M1::float_type RT;
-        static RT call(const M1& m)
+        static TMV_INLINE RT call(const M1& m)
         {
             typedef typename M1::value_type VT;
             const bool inst =
@@ -1110,7 +1110,7 @@ namespace tmv {
     struct Norm1U_Helper<-1,s,M1>
     {
         typedef typename M1::float_type RT;
-        static RT call(const M1& m)
+        static TMV_INLINE RT call(const M1& m)
         { return Norm1U_Helper<-2,s,M1>::call(m); }
     };
 

@@ -247,7 +247,7 @@ namespace tmv {
     struct DiagCopy // true
     {
         template <class M1, class M2>
-        static void copy(
+        static TMV_INLINE void copy(
             const BaseMatrix<M1>& m1, BaseMatrix_Diag_Mutable<M2>& m2)
         { m1.newAssignTo(m2); }
     };
@@ -255,7 +255,7 @@ namespace tmv {
     struct DiagCopy<false>
     {
         template <class M1, class M2>
-        static void copy(
+        static TMV_INLINE void copy(
             const BaseMatrix<M1>& m1, BaseMatrix_Diag_Mutable<M2>& m2)
         {
             typename M2::diag_type m2d = m2.diag();
@@ -356,32 +356,23 @@ namespace tmv {
         // Op=
         //
 
-        type& operator=(const type& m2)
-        {
-            if (&m2 != this) base_mut::operator=(m2);
-            return *this; 
-        }
+        TMV_INLINE type& operator=(const type& m2)
+        { if (this != &m2) base_mut::operator=(m2); return *this; }
 
         template <class M2>
-        type& operator=(const BaseMatrix<M2>& m2)
-        {
-            base_mut::operator=(m2);
-            return *this; 
-        }
+        TMV_INLINE type& operator=(const BaseMatrix<M2>& m2)
+        { base_mut::operator=(m2); return *this; }
 
-        type& operator=(T x)
-        {
-            base_mut::operator=(x);
-            return *this; 
-        }
+        TMV_INLINE type& operator=(T x)
+        { base_mut::operator=(x); return *this; }
 
 
         //
         // Auxilliary Functions
         //
 
-        const T* cptr() const { return itsm; }
-        T* ptr() { return itsm; }
+        TMV_INLINE const T* cptr() const { return itsm; }
+        TMV_INLINE T* ptr() { return itsm; }
 
         T cref(int i, int j) const { return (i!=j ? T(0) : cref(i)); }
         T cref(int i) const { return itsm[i]; }
@@ -403,12 +394,12 @@ namespace tmv {
 #endif
         }
 
-        size_t size() const { return itssize; }
-        int nElements() const { return itssize; }
-        int step() const { return 1; }
-        bool isconj() const { return false; }
-        bool isrm() const { return true; }
-        bool iscm() const { return true; }
+        TMV_INLINE size_t size() const { return itssize; }
+        TMV_INLINE int nElements() const { return itssize; }
+        TMV_INLINE int step() const { return 1; }
+        TMV_INLINE bool isconj() const { return false; }
+        TMV_INLINE bool isrm() const { return true; }
+        TMV_INLINE bool iscm() const { return true; }
 
     private:
 
@@ -576,18 +567,18 @@ namespace tmv {
         // Auxilliary Functions
         //
 
-        const T* cptr() const { return itsm; }
+        TMV_INLINE const T* cptr() const { return itsm; }
 
         T cref(int i, int j) const { return (i!=j ? T(0) : cref(i)); }
         T cref(int i) const
         { return DoConj<_conj>(itsm[i*step()]); }
 
-        size_t size() const { return itssize; }
-        int nElements() const { return itssize; }
-        int step() const { return itsstep; }
-        bool isconj() const { return _conj; }
-        bool isrm() const { return step()==1; }
-        bool iscm() const { return step()==1; }
+        TMV_INLINE size_t size() const { return itssize; }
+        TMV_INLINE int nElements() const { return itssize; }
+        TMV_INLINE int step() const { return itsstep; }
+        TMV_INLINE bool isconj() const { return _conj; }
+        TMV_INLINE bool isrm() const { return step()==1; }
+        TMV_INLINE bool iscm() const { return step()==1; }
 
     private :
 
@@ -758,32 +749,23 @@ namespace tmv {
         // Op = 
         //
 
+        TMV_INLINE type& operator=(const type& m2)
+        { if (this != &m2) base_mut::operator=(m2); return *this; }
+
         template <class M2>
-        type& operator=(const BaseMatrix<M2>& m2)
-        {
-            base_mut::operator=(m2); 
-            return *this;
-        }
+        TMV_INLINE type& operator=(const BaseMatrix<M2>& m2)
+        { base_mut::operator=(m2); return *this; }
 
-        type& operator=(const type& m2)
-        {
-            base_mut::operator=(m2); 
-            return *this;
-        }
-
-        type& operator=(const T x)
-        {
-            base_mut::operator=(x); 
-            return *this;
-        }
+        TMV_INLINE type& operator=(const T x)
+        { base_mut::operator=(x); return *this; }
 
 
         //
         // Auxilliary Functions
         //
 
-        const T* cptr() const { return itsm; }
-        T* ptr() { return itsm; }
+        TMV_INLINE const T* cptr() const { return itsm; }
+        TMV_INLINE T* ptr() { return itsm; }
 
         T cref(int i, int j) const { return (i!=j ? T(0) : cref(i)); }
         T cref(int i) const
@@ -792,12 +774,12 @@ namespace tmv {
         reference ref(int i) 
         { return reference(itsm[i*step()]); }
 
-        size_t size() const { return itssize; }
-        int nElements() const { return itssize; }
-        int step() const { return itsstep; }
-        bool isconj() const { return _conj; }
-        bool isrm() const { return step()==1; }
-        bool iscm() const { return step()==1; }
+        TMV_INLINE size_t size() const { return itssize; }
+        TMV_INLINE int nElements() const { return itssize; }
+        TMV_INLINE int step() const { return itsstep; }
+        TMV_INLINE bool isconj() const { return _conj; }
+        TMV_INLINE bool isrm() const { return step()==1; }
+        TMV_INLINE bool iscm() const { return step()==1; }
 
     private :
 
@@ -815,21 +797,21 @@ namespace tmv {
     //
 
    template <class T>
-    static inline ConstDiagMatrixView<T,Unit> DiagMatrixViewOf(
+    static TMV_INLINE ConstDiagMatrixView<T,Unit> DiagMatrixViewOf(
         const T* v, size_t size)
     { return ConstDiagMatrixView<T,Unit>(v,size); }
 
     template <class T>
-    static inline ConstDiagMatrixView<T> DiagMatrixViewOf(
+    static TMV_INLINE ConstDiagMatrixView<T> DiagMatrixViewOf(
         const T* v, size_t size, int step)
     { return ConstDiagMatrixView<T>(v,size,step); }
 
     template <class T>
-    static inline DiagMatrixView<T,Unit> DiagMatrixViewOf(T* v, size_t size)
+    static TMV_INLINE DiagMatrixView<T,Unit> DiagMatrixViewOf(T* v, size_t size)
     { return DiagMatrixView<T,Unit>(v,size); }
 
     template <class T>
-    static inline DiagMatrixView<T> DiagMatrixViewOf(
+    static TMV_INLINE DiagMatrixView<T> DiagMatrixViewOf(
         T* v, size_t size, int step)
     { return DiagMatrixView<T>(v,size,step); }
 
@@ -839,18 +821,18 @@ namespace tmv {
     //
 
     template <class T, int A>
-    static inline void Swap(DiagMatrix<T,A>& m1, DiagMatrix<T,A>& m2)
+    static TMV_INLINE void Swap(DiagMatrix<T,A>& m1, DiagMatrix<T,A>& m2)
     { m1.swapWith(m2); }
     template <class M, class T, int A>
-    static inline void Swap(
+    static TMV_INLINE void Swap(
         BaseMatrix_Diag_Mutable<M>& m1, DiagMatrixView<T,A> m2)
     { Swap(m1.diag(),m2.diag()); }
     template <class M, class T, int A>
-    static inline void Swap(
+    static TMV_INLINE void Swap(
         DiagMatrixView<T,A> m1, BaseMatrix_Diag_Mutable<M>& m2)
     { Swap(m1.diag(),m2.diag()); }
     template <class T, int A1, int A2>
-    static inline void Swap(
+    static TMV_INLINE void Swap(
         DiagMatrixView<T,A1> m1, DiagMatrixView<T,A2> m2)
     { Swap(m1.diag(),m2.diag()); }
 
@@ -860,29 +842,29 @@ namespace tmv {
     //
 
     template <class T, int A>
-    static inline typename DiagMatrix<T,A>::conjugate_type Conjugate(
+    static TMV_INLINE typename DiagMatrix<T,A>::conjugate_type Conjugate(
         DiagMatrix<T,A>& m)
     { return m.conjugate(); }
     template <class T, int A>
-    static inline typename DiagMatrixView<T,A>::conjugate_type Conjugate(
+    static TMV_INLINE typename DiagMatrixView<T,A>::conjugate_type Conjugate(
         DiagMatrixView<T,A> m)
     { return m.conjugate(); }
 
     template <class T, int A>
-    static inline typename DiagMatrix<T,A>::transpose_type Transpose(
+    static TMV_INLINE typename DiagMatrix<T,A>::transpose_type Transpose(
         DiagMatrix<T,A>& m)
     { return m.transpose(); }
     template <class T, int A>
-    static inline typename DiagMatrixView<T,A>::transpose_type Transpose(
+    static TMV_INLINE typename DiagMatrixView<T,A>::transpose_type Transpose(
         DiagMatrixView<T,A> m)
     { return m.transpose(); }
 
     template <class T, int A>
-    static inline typename DiagMatrix<T,A>::adjoint_type Adjoint(
+    static TMV_INLINE typename DiagMatrix<T,A>::adjoint_type Adjoint(
         DiagMatrix<T,A>& m)
     { return m.adjoint(); }
     template <class T, int A>
-    static inline typename DiagMatrixView<T,A>::adjoint_type Adjoint(
+    static TMV_INLINE typename DiagMatrixView<T,A>::adjoint_type Adjoint(
         DiagMatrixView<T,A> m)
     { return m.adjoint(); }
 

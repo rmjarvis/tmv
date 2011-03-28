@@ -44,13 +44,15 @@
 // specified.  This means that we lose any knowledge (at compile time)
 // of things like the size and steps if they were known.
 //
-// It should be ok so long as the resulting call eventually goes through
-// in Inst function, since that also (intentionally) loses this information
-// to reduce the number of instantiated versions of each function.
-// But if you are running with -DTMV_INLINE, then you might want to always
-// call things like m.lud().solve(v1,v2) instead to make sure that the 
-// compile-time knowledge isn't lost.
-//
+// Also, since I couldn't figure out how to make this work without
+// the compiler instantiating a whole bunch of divider functions every
+// time I declare a Matrix, I decided to only use the Divider object
+// when the type is in the library.  Then I define all the divider functions
+// in the compiled library, which keeps the sizes of object files for the 
+// user code sane.  Thus, it is ok to drop down to MatrixView and VectorView
+// with no Unit, ColMajor, etc attributes since we'll go through an Inst
+// function anyway which recovers them.
+// 
 
 
 #ifndef TMV_Divider_H

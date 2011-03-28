@@ -62,7 +62,7 @@ namespace tmv {
     // algo 0: Trivial, nothing to do (M == 0 or N == 0)
     template <int cs, int rs, class M1>
     struct LU_Inverse_Helper<0,cs,rs,M1>
-    { static void call(M1& , const Permutation& ) {} };
+    { static TMV_INLINE void call(M1& , const Permutation& ) {} };
 
     // algo 11: Normal case
     template <int cs, int rs, class M1>
@@ -121,7 +121,7 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct LU_Inverse_Helper<90,cs,rs,M1>
     {
-        static void call(M1& m1, const Permutation& P)
+        static TMV_INLINE void call(M1& m1, const Permutation& P)
         { InstLU_Inverse(m1.xView(),P); }
     };
 
@@ -129,7 +129,7 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct LU_Inverse_Helper<97,cs,rs,M1>
     {
-        static void call(M1& m1, const Permutation& P)
+        static TMV_INLINE void call(M1& m1, const Permutation& P)
         {
             typedef typename M1::conjugate_type M1c;
             M1c m1c = m1.conjugate();
@@ -141,7 +141,7 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct LU_Inverse_Helper<-3,cs,rs,M1>
     {
-        static void call(M1& m1, const Permutation& P)
+        static TMV_INLINE void call(M1& m1, const Permutation& P)
         {
             const int algo = 
                 cs == 0 || rs == 0 ? 0 : 
@@ -176,7 +176,7 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct LU_Inverse_Helper<-2,cs,rs,M1>
     {
-        static void call(M1& m1, const Permutation& P)
+        static TMV_INLINE void call(M1& m1, const Permutation& P)
         {
             typedef typename M1::value_type T2;
             const bool inst = 
@@ -195,7 +195,7 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct LU_Inverse_Helper<-1,cs,rs,M1>
     {
-        static void call(M1& m1, const Permutation& P)
+        static TMV_INLINE void call(M1& m1, const Permutation& P)
         { LU_Inverse_Helper<-2,cs,rs,M1>::call(m1,P); }
     };
 
@@ -228,7 +228,7 @@ namespace tmv {
     // Also used for invalid real/complex combination from the virtual calls.
     template <int cs, int rs, class M1, class M2>
     struct LU_InverseATA_Helper<0,cs,rs,M1,M2>
-    { static void call(const M1& , const Permutation& , const bool, M2& ) {} };
+    { static TMV_INLINE void call(const M1& , const Permutation& , const bool, M2& ) {} };
 
     // algo 11: Normal case
     template <int cs, int rs, class M1, class M2>
@@ -293,7 +293,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LU_InverseATA_Helper<90,cs,rs,M1,M2>
     {
-        static void call(
+        static TMV_INLINE void call(
             const M1& m1, const Permutation& P, const bool trans, M2& m2)
         {
             TMVAssert(m1.iscm());
@@ -305,7 +305,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LU_InverseATA_Helper<97,cs,rs,M1,M2>
     {
-        static void call(
+        static TMV_INLINE void call(
             const M1& m1, const Permutation& P, const bool trans, M2& m2)
         {
             typedef typename M1::const_conjugate_type M1c;
@@ -320,7 +320,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LU_InverseATA_Helper<-3,cs,rs,M1,M2>
     {
-        static void call(
+        static TMV_INLINE void call(
             const M1& m1, const Permutation& P, const bool trans, M2& m2)
         {
             const bool invalid =
@@ -362,7 +362,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LU_InverseATA_Helper<-2,cs,rs,M1,M2>
     {
-        static void call(
+        static TMV_INLINE void call(
             const M1& m1, const Permutation& P, const bool trans, M2& m2)
         {
             typedef typename M1::value_type T1;
@@ -391,7 +391,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LU_InverseATA_Helper<-1,cs,rs,M1,M2>
     {
-        static void call(
+        static TMV_INLINE void call(
             const M1& m1, const Permutation& P, const bool trans, M2& m2)
         { LU_InverseATA_Helper<-2,cs,rs,M1,M2>::call(m1,P,trans,m2); }
     };

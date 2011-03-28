@@ -133,9 +133,9 @@ namespace tmv {
     template <class M>
     struct WriteU_Helper<90,M>
     {
-        static void call(std::ostream& os, const M& m)
+        static TMV_INLINE void call(std::ostream& os, const M& m)
         { InstWriteCompact(os,m.calc().xView()); }
-        static void call(
+        static TMV_INLINE void call(
             std::ostream& os, const M& m, typename M::float_type thresh)
         { InstWriteCompact(os,m.calc().xView(),thresh); }
     };
@@ -144,9 +144,9 @@ namespace tmv {
     template <class M>
     struct WriteU_Helper<-3,M>
     {
-        static void call(std::ostream& os, const M& m)
+        static TMV_INLINE void call(std::ostream& os, const M& m)
         { WriteU_Helper<1,M>::call(os,m); }
-        static void call(
+        static TMV_INLINE void call(
             std::ostream& os, const M& m, typename M::float_type thresh)
         { WriteU_Helper<1,M>::call(os,m,thresh); }
     };
@@ -162,9 +162,9 @@ namespace tmv {
         enum { algo = (
                 inst ? 90 :
                 -3 ) };
-        static void call(std::ostream& os, const M& m)
+        static TMV_INLINE void call(std::ostream& os, const M& m)
         { WriteU_Helper<algo,M>::call(os,m); }
-        static void call(
+        static TMV_INLINE void call(
             std::ostream& os, const M& m, typename M::float_type thresh)
         { WriteU_Helper<algo,M>::call(os,m,thresh); }
     };
@@ -172,9 +172,9 @@ namespace tmv {
     template <class M>
     struct WriteU_Helper<-1,M>
     {
-        static void call(std::ostream& os, const M& m)
+        static TMV_INLINE void call(std::ostream& os, const M& m)
         { WriteU_Helper<-2,M>::call(os,m); }
-        static void call(
+        static TMV_INLINE void call(
             std::ostream& os, const M& m, typename M::float_type thresh)
         { WriteU_Helper<-2,M>::call(os,m,thresh); }
     };
@@ -411,7 +411,7 @@ namespace tmv {
     template <class M>
     struct ReadU_Helper<90,M>
     {
-        static void call(std::istream& is, M& m)
+        static TMV_INLINE void call(std::istream& is, M& m)
         { InstRead(is,m.xView()); }
     };
              
@@ -419,7 +419,7 @@ namespace tmv {
     template <class M>
     struct ReadU_Helper<97,M>
     {
-        static void call(std::istream& is, M& m)
+        static TMV_INLINE void call(std::istream& is, M& m)
         {
             typedef typename M::conjugate_type Mc;
             Mc mc = m.conjugate();
@@ -432,7 +432,7 @@ namespace tmv {
     template <class M>
     struct ReadU_Helper<-3,M>
     {
-        static void call(std::istream& is, M& m)
+        static TMV_INLINE void call(std::istream& is, M& m)
         { ReadU_Helper<1,M>::call(is,m); }
     };
              
@@ -440,7 +440,7 @@ namespace tmv {
     template <class M>
     struct ReadU_Helper<-2,M>
     {
-        static void call(std::istream& is, M& m)
+        static TMV_INLINE void call(std::istream& is, M& m)
         {
             typedef typename M::value_type T;
             const int inst = 
@@ -458,7 +458,7 @@ namespace tmv {
     template <class M>
     struct ReadU_Helper<-1,M>
     {
-        static void call(std::istream& is, M& m)
+        static TMV_INLINE void call(std::istream& is, M& m)
         { ReadU_Helper<-2,M>::call(is,m); }
     };
 

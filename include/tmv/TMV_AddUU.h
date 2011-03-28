@@ -321,7 +321,7 @@ namespace tmv {
     template <int s, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     struct AddUU_Helper<90,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -336,7 +336,7 @@ namespace tmv {
     template <int s, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     struct AddUU_Helper<91,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -351,7 +351,7 @@ namespace tmv {
     template <int s, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     struct AddUU_Helper<96,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -373,7 +373,7 @@ namespace tmv {
     template <int s, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     struct AddUU_Helper<196,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -395,7 +395,7 @@ namespace tmv {
     template <int s, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     struct AddUU_Helper<97,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -414,7 +414,7 @@ namespace tmv {
     template <int s, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     struct AddUU_Helper<197,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -472,7 +472,7 @@ namespace tmv {
     template <int s, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     struct AddUU_Helper<99,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -502,7 +502,7 @@ namespace tmv {
     template <int s, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     struct AddUU_Helper<-4,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -551,7 +551,7 @@ namespace tmv {
     template <int s, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     struct AddUU_Helper<-3,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -594,7 +594,7 @@ namespace tmv {
     template <int s, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     struct AddUU_Helper<-2,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
@@ -628,7 +628,7 @@ namespace tmv {
     template <int s, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     struct AddUU_Helper<-1,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {

@@ -54,7 +54,7 @@ namespace tmv {
     // algo 0: real, so nothing to do
     template <int s, class V>
     struct ConjugateV_Helper<0,s,V>
-    { static void call(V& ) { } };
+    { static TMV_INLINE void call(V& ) { } };
     
     // algo 11: simple for loop
     template <int s, class V>
@@ -111,7 +111,7 @@ namespace tmv {
     template <int s, class V>
     struct ConjugateV_Helper<90,s,V>
     {
-        static void call(V& v)
+        static TMV_INLINE void call(V& v)
         { InstConjugateSelf(v.xView()); }
     };
 
@@ -119,7 +119,7 @@ namespace tmv {
     template <int s, class V>
     struct ConjugateV_Helper<97,s,V>
     {
-        static void call(V& v)
+        static TMV_INLINE void call(V& v)
         {
             typedef typename V::conjugate_type Vc;
             Vc vc = v.conjugate();
@@ -131,7 +131,7 @@ namespace tmv {
     template <int s, class V>
     struct ConjugateV_Helper<-3,s,V>
     {
-        static void call(V& v)
+        static TMV_INLINE void call(V& v)
         {
             const int algo = 
                 TMV_OPT == 0 ? 12 :
@@ -145,7 +145,7 @@ namespace tmv {
     template <int s, class V>
     struct ConjugateV_Helper<-2,s,V>
     {
-        static void call(V& v)
+        static TMV_INLINE void call(V& v)
         {
             typedef typename V::value_type T;
             const bool inst =
@@ -163,7 +163,7 @@ namespace tmv {
     template <int s, class V>
     struct ConjugateV_Helper<-1,s,V>
     {
-        static void call(V& v)
+        static TMV_INLINE void call(V& v)
         { ConjugateV_Helper<-2,s,V>::call(v); }
     };
 

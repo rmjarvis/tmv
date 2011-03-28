@@ -238,7 +238,7 @@ namespace tmv {
     template <int s, class V1, class V2>
     struct SwapV_Helper<90,s,V1,V2>
     {
-        static void call(V1& v1, V2& v2)
+        static TMV_INLINE void call(V1& v1, V2& v2)
         { InstSwap(v1.xView(),v2.xView()); }
     };
 
@@ -246,7 +246,7 @@ namespace tmv {
     template <int s, class V1, class V2>
     struct SwapV_Helper<91,s,V1,V2>
     {
-        static void call(V1& v1, V2& v2)
+        static TMV_INLINE void call(V1& v1, V2& v2)
         { InstAliasSwap(v1.xView(),v2.xView()); }
     };
 
@@ -254,7 +254,7 @@ namespace tmv {
     template <int s, class V1, class V2>
     struct SwapV_Helper<97,s,V1,V2>
     {
-        static void call(V1& v1, V2& v2)
+        static TMV_INLINE void call(V1& v1, V2& v2)
         {
             typedef typename V1::conjugate_type V1c;
             typedef typename V2::conjugate_type V2c;
@@ -268,7 +268,7 @@ namespace tmv {
     template <int s, class V1, class V2>
     struct SwapV_Helper<197,s,V1,V2>
     {
-        static void call(V1& v1, V2& v2)
+        static TMV_INLINE void call(V1& v1, V2& v2)
         {
             typedef typename V1::conjugate_type V1c;
             typedef typename V2::conjugate_type V2c;
@@ -304,7 +304,7 @@ namespace tmv {
     template <int s, class V1, class V2>
     struct SwapV_Helper<99,s,V1,V2>
     {
-        static void call(V1& v1, V2& v2)
+        static TMV_INLINE void call(V1& v1, V2& v2)
         {
             typedef typename V1::value_type T1;
             typedef typename V2::value_type T2;
@@ -338,7 +338,7 @@ namespace tmv {
                 (sizeof(RT) == 4 && allunit) ? 13 :
                 11 ) };
 
-        static void call(V1& v1, V2& v2)
+        static TMV_INLINE void call(V1& v1, V2& v2)
         {
             TMVStaticAssert(!V2::_conj);
             const int algo1 = 
@@ -346,7 +346,7 @@ namespace tmv {
                 algo;
             SwapV_Helper<algo1,s,V1,V2>::call(v1,v2); 
         }
-        static void call2(int n, IT1 it1, IT2 it2)
+        static TMV_INLINE void call2(int n, IT1 it1, IT2 it2)
         {
             TMVStaticAssert(!V2::_conj);
             SwapV_Helper<algo,s,V1,V2>::call2(n,it1,it2); 
@@ -357,7 +357,7 @@ namespace tmv {
     template <int s, class V1, class V2>
     struct SwapV_Helper<-2,s,V1,V2>
     {
-        static void call(V1& v1, V2& v2)
+        static TMV_INLINE void call(V1& v1, V2& v2)
         {
             typedef typename V1::value_type T1;
             typedef typename V2::value_type T2;
@@ -377,7 +377,7 @@ namespace tmv {
     template <int s, class V1, class V2>
     struct SwapV_Helper<-1,s,V1,V2>
     {
-        static void call(V1& v1, V2& v2)
+        static TMV_INLINE void call(V1& v1, V2& v2)
         {
             typedef typename V1::value_type T1;
             typedef typename V2::value_type T2;

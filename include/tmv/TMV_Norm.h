@@ -198,13 +198,13 @@ namespace tmv {
     {
         typedef typename V::float_type RT;
         template <class V2>
-        static RT call(const BaseVector<V2>& v)
+        static TMV_INLINE RT call(const BaseVector<V2>& v)
         { return InstNorm2(v.vec().xView()); }
         template <class M2>
-        static RT call(const BaseMatrix_Rec<M2>& m)
+        static TMV_INLINE RT call(const BaseMatrix_Rec<M2>& m)
         { return InstNormF(m.mat().xView()); }
         template <class M2>
-        static RT call(const BaseMatrix_Tri<M2>& m)
+        static TMV_INLINE RT call(const BaseMatrix_Tri<M2>& m)
         { return InstNormF(m.mat().xView()); }
     };
 
@@ -213,7 +213,7 @@ namespace tmv {
     struct Norm_Helper<95,M>
     {
         typedef typename M::float_type RT;
-        static RT call(const M& m)
+        static TMV_INLINE RT call(const M& m)
         {
             typedef typename M::const_nonconj_type Mnc;
             Mnc mnc = m.nonConj();
@@ -226,7 +226,7 @@ namespace tmv {
     struct Norm_Helper<96,V>
     {
         typedef typename V::float_type RT;
-        static RT call(const V& v)
+        static TMV_INLINE RT call(const V& v)
         {
             typedef typename V::const_transpose_type Vt;
             Vt vt = v.transpose();
@@ -239,7 +239,7 @@ namespace tmv {
     struct Norm_Helper<97,V>
     {
         typedef typename V::float_type RT;
-        static RT call(const V& v)
+        static TMV_INLINE RT call(const V& v)
         {
             typedef typename V::const_nonconj_type Vnc;
             Vnc vnc = v.nonConj();
@@ -252,7 +252,7 @@ namespace tmv {
     struct Norm_Helper<-3,V>
     {
         typedef typename V::float_type RT;
-        static RT call(const V& v)
+        static TMV_INLINE RT call(const V& v)
         {
             typedef typename V::value_type T;
             const int algo = 
@@ -268,7 +268,7 @@ namespace tmv {
     struct Norm_Helper<-2,M>
     {
         typedef typename M::float_type RT;
-        static RT call(const M& m)
+        static TMV_INLINE RT call(const M& m)
         {
             typedef typename M::value_type VT;
             const bool inst = 
@@ -291,7 +291,7 @@ namespace tmv {
     struct Norm_Helper<-1,V>
     {
         typedef typename V::float_type RT;
-        static RT call(const V& v)
+        static TMV_INLINE RT call(const V& v)
         {
             typedef typename V::value_type VT;
             const bool inst = 

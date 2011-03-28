@@ -67,14 +67,14 @@ namespace tmv {
     template <class M1, class M2>
     struct CopyU_Helper<0,0,M1,M2>
     {
-        static void call(const M1& , M2& ) {}
+        static TMV_INLINE void call(const M1& , M2& ) {}
     };
 
     // algo 1: transpose 
     template <int s, class M1, class M2>
     struct CopyU_Helper<1,s,M1,M2>
     {
-        static void call(const M1& m1, M2& m2)
+        static TMV_INLINE void call(const M1& m1, M2& m2)
         {
             typedef typename M1::const_transpose_type M1t;
             typedef typename M2::transpose_type M2t;
@@ -245,7 +245,7 @@ namespace tmv {
     template <int size, class M1, class M2>
     struct CopyU_Helper<90,size,M1,M2>
     {
-        static void call(const M1& m1, M2& m2)
+        static TMV_INLINE void call(const M1& m1, M2& m2)
         {
 #ifndef TMV_INST_MIX
             typedef typename M1::value_type T1;
@@ -260,7 +260,7 @@ namespace tmv {
     template <int size, class M1, class M2>
     struct CopyU_Helper<91,size,M1,M2>
     {
-        static void call(const M1& m1, M2& m2)
+        static TMV_INLINE void call(const M1& m1, M2& m2)
         {
 #ifndef TMV_INST_MIX
             typedef typename M1::value_type T1;
@@ -275,7 +275,7 @@ namespace tmv {
     template <int size, class M1, class M2>
     struct CopyU_Helper<96,size,M1,M2>
     {
-        static void call(const M1& m1, M2& m2)
+        static TMV_INLINE void call(const M1& m1, M2& m2)
         {
             typedef typename M1::const_transpose_type M1t;
             typedef typename M2::transpose_type M2t;
@@ -289,7 +289,7 @@ namespace tmv {
     template <int size, class M1, class M2>
     struct CopyU_Helper<196,size,M1,M2>
     {
-        static void call(const M1& m1, M2& m2)
+        static TMV_INLINE void call(const M1& m1, M2& m2)
         {
             typedef typename M1::const_transpose_type M1t;
             typedef typename M2::transpose_type M2t;
@@ -303,7 +303,7 @@ namespace tmv {
     template <int size, class M1, class M2>
     struct CopyU_Helper<97,size,M1,M2>
     {
-        static void call(const M1& m1, M2& m2)
+        static TMV_INLINE void call(const M1& m1, M2& m2)
         {
             typedef typename M1::const_conjugate_type M1c;
             typedef typename M2::conjugate_type M2c;
@@ -317,7 +317,7 @@ namespace tmv {
     template <int size, class M1, class M2>
     struct CopyU_Helper<197,size,M1,M2>
     {
-        static void call(const M1& m1, M2& m2)
+        static TMV_INLINE void call(const M1& m1, M2& m2)
         {
             typedef typename M1::const_conjugate_type M1c;
             typedef typename M2::conjugate_type M2c;
@@ -340,13 +340,13 @@ namespace tmv {
         template <int dummy>
         struct CopyWithTemp<0,dummy> // Normal case.
         {
-            static void call(const M1& m1, M2& m2)
+            static TMV_INLINE void call(const M1& m1, M2& m2)
             { NoAliasCopy(m1.copy(),m2); }
         };
         template <int dummy>
         struct CopyWithTemp<1,dummy> // Use UnitDiag
         {
-            static void call(const M1& m1, M2& m2)
+            static TMV_INLINE void call(const M1& m1, M2& m2)
             {
                 typename M2::unitdiag_type m2u = m2.viewAsUnitDiag();
                 NoAliasCopy(m1.viewAsUnitDiag().copy(),m2u); 
@@ -397,7 +397,7 @@ namespace tmv {
     template <int s, class M1, class M2>
     struct CopyU_Helper<99,s,M1,M2>
     {
-        static void call(const M1& m1, M2& m2)
+        static TMV_INLINE void call(const M1& m1, M2& m2)
         {
             TMVStaticAssert(M1::_upper == int(M2::_upper));
             TMVStaticAssert(M1::_unit || M1::_unknowndiag || !M2::_unit);
@@ -428,7 +428,7 @@ namespace tmv {
     template <int s, class M1, class M2>
     struct CopyU_Helper<-4,s,M1,M2>
     {
-        static void call(const M1& m1, M2& m2)
+        static TMV_INLINE void call(const M1& m1, M2& m2)
         {
             TMVStaticAssert(M1::_upper);
             TMVStaticAssert(M2::_upper);
@@ -456,7 +456,7 @@ namespace tmv {
     template <int s, class M1, class M2>
     struct CopyU_Helper<-3,s,M1,M2>
     {
-        static void call(const M1& m1, M2& m2)
+        static TMV_INLINE void call(const M1& m1, M2& m2)
         {
             TMVStaticAssert(M1::_upper == int(M2::_upper));
             TMVStaticAssert(M1::_unit || M1::_unknowndiag || !M2::_unit);
@@ -478,7 +478,7 @@ namespace tmv {
     template <int s, class M1, class M2>
     struct CopyU_Helper<-2,s,M1,M2>
     {
-        static void call(const M1& m1, M2& m2)
+        static TMV_INLINE void call(const M1& m1, M2& m2)
         {
             TMVStaticAssert(M1::_upper == int(M2::_upper));
             TMVStaticAssert(M1::_unit || M1::_unknowndiag || !M2::_unit);
@@ -508,7 +508,7 @@ namespace tmv {
     template <int s, class M1, class M2>
     struct CopyU_Helper<-1,s,M1,M2>
     {
-        static void call(const M1& m1, M2& m2)
+        static TMV_INLINE void call(const M1& m1, M2& m2)
         {
             TMVStaticAssert(M1::_upper == int(M2::_upper));
             TMVStaticAssert(M1::_unit || M1::_unknowndiag || !M2::_unit);

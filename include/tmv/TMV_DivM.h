@@ -57,7 +57,7 @@ namespace tmv {
     // algo 0: s=0 or xs=0, so nothing to do
     template <int s, int xs, class M1, class M2>
     struct LDivEqM_Helper<0,s,xs,M1,M2>
-    { static void call(M1& , const M2& ) {} };
+    { static TMV_INLINE void call(M1& , const M2& ) {} };
 
     // algo 1: m2 is 1x1
     template <int xs, class M1, class M2>
@@ -338,7 +338,7 @@ namespace tmv {
     template <int s, int xs, class M1, class M2>
     struct LDivEqM_Helper<41,s,xs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static TMV_INLINE void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivM
             std::cout<<"LDivEq algo 41: s,xs = "<<s<<','<<xs<<std::endl;
@@ -351,7 +351,7 @@ namespace tmv {
     template <int s, int xs, class M1, class M2>
     struct LDivEqM_Helper<42,s,xs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static TMV_INLINE void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivM
             std::cout<<"LDivEq algo 42: s,xs = "<<s<<','<<xs<<std::endl;
@@ -364,7 +364,7 @@ namespace tmv {
     template <int s, int xs, class M1, class M2>
     struct LDivEqM_Helper<98,s,xs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static TMV_INLINE void call(M1& m1, const M2& m2)
         {
             const bool vec1 = ShapeTraits<M1::_shape>::vector;
             const bool up1 = ShapeTraits<M1::_shape>::upper;
@@ -397,7 +397,7 @@ namespace tmv {
     template <int s, int xs, class M1, class M2>
     struct LDivEqM_Helper<99,s,xs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static TMV_INLINE void call(M1& m1, const M2& m2)
         {
             const bool vec1 = ShapeTraits<M1::_shape>::vector;
             const bool up1 = ShapeTraits<M1::_shape>::upper;
@@ -430,7 +430,7 @@ namespace tmv {
     template <int s, int xs, class M1, class M2>
     struct LDivEqM_Helper<-4,s,xs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static TMV_INLINE void call(M1& m1, const M2& m2)
         {
             const bool vec1 = ShapeTraits<M1::_shape>::vector;
             const bool up1 = ShapeTraits<M1::_shape>::upper;
@@ -463,7 +463,7 @@ namespace tmv {
     template <int s, int xs, class M1, class M2>
     struct LDivEqM_Helper<-3,s,xs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static TMV_INLINE void call(M1& m1, const M2& m2)
         {
             const bool vec1 = ShapeTraits<M1::_shape>::vector;
             const bool up1 = ShapeTraits<M1::_shape>::upper;
@@ -523,7 +523,7 @@ namespace tmv {
     template <int s, int xs, class M1, class M2>
     struct LDivEqM_Helper<-2,s,xs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static TMV_INLINE void call(M1& m1, const M2& m2)
         {
             const int algo = 
                 s == 0 ? 0 :
@@ -538,7 +538,7 @@ namespace tmv {
     template <int s, int xs, class M1, class M2>
     struct LDivEqM_Helper<-1,s,xs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static TMV_INLINE void call(M1& m1, const M2& m2)
         {
             const int algo = 
                 s == 0 ? 0 :
@@ -818,7 +818,7 @@ namespace tmv {
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<0,cs,rs,xs,ix,T,M1,M2,M3>
     {
-        static void call(const Scaling<ix,T>& , const M1& , const M2& , M3& )
+        static TMV_INLINE void call(const Scaling<ix,T>& , const M1& , const M2& , M3& )
         {}
     };
 
@@ -1294,7 +1294,7 @@ namespace tmv {
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<98,cs,rs,xs,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const bool up1 = ShapeTraits<M1::_shape>::upper;
@@ -1335,7 +1335,7 @@ namespace tmv {
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<99,cs,rs,xs,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const bool up1 = ShapeTraits<M1::_shape>::upper;
@@ -1376,7 +1376,7 @@ namespace tmv {
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<-4,cs,rs,xs,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const bool up1 = ShapeTraits<M1::_shape>::upper;
@@ -1417,7 +1417,7 @@ namespace tmv {
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<-3,cs,rs,xs,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const bool up1 = ShapeTraits<M1::_shape>::upper;
@@ -1494,7 +1494,7 @@ namespace tmv {
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<-2,cs,rs,xs,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const int algo = 
@@ -1510,7 +1510,7 @@ namespace tmv {
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<-1,cs,rs,xs,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const int algo = 

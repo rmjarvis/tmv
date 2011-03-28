@@ -51,7 +51,7 @@ namespace tmv {
     // algo 0: trivial: s == 0 or ix == 1, so nothing to do
     template <int s, int ix, class T, class V>
     struct ScaleV_Helper<0,s,ix,T,V>
-    { static void call(const Scaling<ix,T>& , V& ) {} };
+    { static TMV_INLINE void call(const Scaling<ix,T>& , V& ) {} };
 
     // algo 1: complex vector with unit step, convert to real version.
     template <int s, int ix, class T, class V>
@@ -421,7 +421,7 @@ namespace tmv {
     template <int s, int ix, class T, class V>
     struct ScaleV_Helper<90,s,ix,T,V>
     {
-        static void call(const Scaling<ix,T>& x, V& v)
+        static TMV_INLINE void call(const Scaling<ix,T>& x, V& v)
         {
             typedef typename V::value_type VT;
             VT xx = Traits<VT>::convert(T(x));
@@ -433,7 +433,7 @@ namespace tmv {
     template <int s, int ix, class T, class V>
     struct ScaleV_Helper<97,s,ix,T,V>
     {
-        static void call(const Scaling<ix,T>& x, V& v)
+        static TMV_INLINE void call(const Scaling<ix,T>& x, V& v)
         {
             typedef typename V::conjugate_type Vc;
             Vc vc = v.conjugate();
@@ -476,12 +476,12 @@ namespace tmv {
                 (vreal && sizeof(RT) == 8) ? 12 :
                 11 ) };
 #endif
-        static void call(const Scaling<ix,T>& x, V& v)
+        static TMV_INLINE void call(const Scaling<ix,T>& x, V& v)
         {
             TMVStaticAssert(!V::_conj);
             ScaleV_Helper<algo,s,ix,T,V>::call(x,v); 
         }
-        static void call2(
+        static TMV_INLINE void call2(
             const int n, const Scaling<ix,T>& x, const IT& it)
         {
             TMVStaticAssert(!V::_conj);
@@ -493,7 +493,7 @@ namespace tmv {
     template <int s, int ix, class T, class V>
     struct ScaleV_Helper<-2,s,ix,T,V>
     {
-        static void call(const Scaling<ix,T>& x, V& v)
+        static TMV_INLINE void call(const Scaling<ix,T>& x, V& v)
         {
             typedef typename V::value_type T1;
             const bool inst =
@@ -512,7 +512,7 @@ namespace tmv {
     template <int s, int ix, class T, class V>
     struct ScaleV_Helper<-1,s,ix,T,V>
     {
-        static void call(const Scaling<ix,T>& x, V& v)
+        static TMV_INLINE void call(const Scaling<ix,T>& x, V& v)
         { ScaleV_Helper<-2,s,ix,T,V>::call(x,v); }
     };
 

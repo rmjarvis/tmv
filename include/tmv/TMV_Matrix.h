@@ -689,12 +689,12 @@ namespace tmv {
 
         typedef typename Traits<M>::value_type T;
 
-        ConstMatrixView<T> getConstView() const
+        TMV_INLINE ConstMatrixView<T> getConstView() const
         { return mat2().constView(); }
 
         // Use mat2() rather than mat() to avoid having to disambiguate
         // it with the normal BaseMatrix mat() function.
-        const M& mat2() const
+        TMV_INLINE const M& mat2() const
         { return static_cast<const M&>(*this); }
     };
 
@@ -704,17 +704,17 @@ namespace tmv {
     public:
         typedef typename Traits<M>::lud_type lud_type;
 
-        void resetDivType() const {}
+        TMV_INLINE void resetDivType() const {}
 
-        lud_type lud() const { return lud_type(mat2(),false); }
+        TMV_INLINE lud_type lud() const { return lud_type(mat2(),false); }
         //QRD<M2> qrd() const { return QRD<M2>(mat2(),false); }
         //QRPD<M2> qrpd() const { return QRPD<M2>(mat2(),false); }
         //SVD<M2> svd() const { return SVD<M2>(mat2(),false); }
-        void qrp() const {}
-        void qrpd() const {}
-        void svd() const {}
+        TMV_INLINE void qrp() const {}
+        TMV_INLINE void qrpd() const {}
+        TMV_INLINE void svd() const {}
 
-        const M& mat2() const
+        TMV_INLINE const M& mat2() const
         { return static_cast<const M&>(*this); }
     };
 
@@ -1022,32 +1022,23 @@ namespace tmv {
         // Op=
         //
 
-        type& operator=(const type& m2)
-        {
-            if (&m2 != this) base_mut::operator=(m2);
-            return *this; 
-        }
+        TMV_INLINE type& operator=(const type& m2)
+        { if (this != &m2) base_mut::operator=(m2); return *this; }
 
         template <class M2>
-        type& operator=(const BaseMatrix<M2>& m2)
-        {
-            base_mut::operator=(m2);
-            return *this; 
-        }
+        TMV_INLINE type& operator=(const BaseMatrix<M2>& m2)
+        { base_mut::operator=(m2); return *this; }
 
-        type& operator=(T x)
-        {
-            base_mut::operator=(x);
-            return *this; 
-        }
+        TMV_INLINE type& operator=(T x)
+        { base_mut::operator=(x); return *this; }
 
 
         //
         // Auxilliary Functions
         //
 
-        const T* cptr() const { return itsm; }
-        T* ptr() { return itsm; }
+        TMV_INLINE const T* cptr() const { return itsm; }
+        TMV_INLINE T* ptr() { return itsm; }
 
         T cref(int i, int j) const
         { return itsm[_rowmajor ? i*stepi()+j : i+j*stepj()]; }
@@ -1075,15 +1066,15 @@ namespace tmv {
 #endif
         }
 
-        size_t ls() const { return linsize; }
-        size_t colsize() const { return itscs; }
-        size_t rowsize() const { return itsrs; }
+        TMV_INLINE size_t ls() const { return linsize; }
+        TMV_INLINE size_t colsize() const { return itscs; }
+        TMV_INLINE size_t rowsize() const { return itsrs; }
         int nElements() const { return itscs*itsrs; }
-        int stepi() const { return _rowmajor ? itsrs : 1; }
-        int stepj() const { return _rowmajor ? 1 : itscs; }
-        bool isconj() const { return false; }
-        bool isrm() const { return _rowmajor; }
-        bool iscm() const { return _colmajor; }
+        TMV_INLINE int stepi() const { return _rowmajor ? itsrs : 1; }
+        TMV_INLINE int stepj() const { return _rowmajor ? 1 : itscs; }
+        TMV_INLINE bool isconj() const { return false; }
+        TMV_INLINE bool isrm() const { return _rowmajor; }
+        TMV_INLINE bool iscm() const { return _colmajor; }
 
     private:
 
@@ -1325,21 +1316,21 @@ namespace tmv {
         // Auxilliary Functions
         //
 
-        const T* cptr() const { return itsm; }
+        TMV_INLINE const T* cptr() const { return itsm; }
 
         T cref(int i, int j) const
         { return DoConj<_conj>(itsm[i*stepi()+j*stepj()]); }
 
-        size_t ls() const { return itscs*itsrs; }
-        size_t colsize() const { return itscs; }
-        size_t rowsize() const { return itsrs; }
+        TMV_INLINE size_t ls() const { return itscs*itsrs; }
+        TMV_INLINE size_t colsize() const { return itscs; }
+        TMV_INLINE size_t rowsize() const { return itsrs; }
         int nElements() const { return itscs*itsrs; }
-        int stepi() const { return itssi; }
-        int stepj() const { return itssj; }
-        bool isconj() const { return _conj; }
-        bool isrm() const 
+        TMV_INLINE int stepi() const { return itssi; }
+        TMV_INLINE int stepj() const { return itssj; }
+        TMV_INLINE bool isconj() const { return _conj; }
+        TMV_INLINE bool isrm() const 
         { return _rowmajor || (!_colmajor &&  stepj() == 1); }
-        bool iscm() const 
+        TMV_INLINE bool iscm() const 
         { return _colmajor || (!_rowmajor &&  stepi() == 1); }
 
     private :
@@ -1608,32 +1599,23 @@ namespace tmv {
         // Op = 
         //
 
+        TMV_INLINE type& operator=(const type& m2)
+        { if (this != &m2) base_mut::operator=(m2); return *this; }
+
         template <class M2>
-        type& operator=(const BaseMatrix<M2>& m2)
-        {
-            base_mut::operator=(m2); 
-            return *this;
-        }
+        TMV_INLINE type& operator=(const BaseMatrix<M2>& m2)
+        { base_mut::operator=(m2); return *this; }
 
-        type& operator=(const type& m2)
-        {
-            base_mut::operator=(m2); 
-            return *this;
-        }
-
-        type& operator=(const T x)
-        {
-            base_mut::operator=(x); 
-            return *this;
-        }
+        TMV_INLINE type& operator=(const T x)
+        { base_mut::operator=(x); return *this; }
 
 
         //
         // Auxilliary Functions
         //
 
-        const T* cptr() const { return itsm; }
-        T* ptr() { return itsm; }
+        TMV_INLINE const T* cptr() const { return itsm; }
+        TMV_INLINE T* ptr() { return itsm; }
 
         T cref(int i, int j) const
         { return DoConj<_conj>(itsm[i*stepi()+j*stepj()]); }
@@ -1641,16 +1623,16 @@ namespace tmv {
         reference ref(int i, int j) 
         { return reference(itsm[i*stepi()+j*stepj()]); }
 
-        size_t ls() const { return itscs*itsrs; }
-        size_t colsize() const { return itscs; }
-        size_t rowsize() const { return itsrs; }
+        TMV_INLINE size_t ls() const { return itscs*itsrs; }
+        TMV_INLINE size_t colsize() const { return itscs; }
+        TMV_INLINE size_t rowsize() const { return itsrs; }
         int nElements() const { return itscs*itsrs; }
-        int stepi() const { return itssi; }
-        int stepj() const { return itssj; }
-        bool isconj() const { return _conj; }
-        bool isrm() const 
+        TMV_INLINE int stepi() const { return itssi; }
+        TMV_INLINE int stepj() const { return itssj; }
+        TMV_INLINE bool isconj() const { return _conj; }
+        TMV_INLINE bool isrm() const 
         { return _rowmajor || (!_colmajor &&  stepj() == 1); }
-        bool iscm() const 
+        TMV_INLINE bool iscm() const 
         { return _colmajor || (!_rowmajor &&  stepi() == 1); }
 
     private :
@@ -1711,18 +1693,18 @@ namespace tmv {
     //
 
     template <class T, int A0, int A1>
-    static inline void Swap(Matrix<T,A0,A1>& m1, Matrix<T,A0,A1>& m2)
+    static TMV_INLINE void Swap(Matrix<T,A0,A1>& m1, Matrix<T,A0,A1>& m2)
     { m1.swapWith(m2); }
     template <class M, class T, int A>
-    static inline void Swap(
+    static TMV_INLINE void Swap(
         BaseMatrix_Rec_Mutable<M>& m1, MatrixView<T,A> m2)
     { DoSwap(m1,m2); }
     template <class M, class T, int A>
-    static inline void Swap(
+    static TMV_INLINE void Swap(
         MatrixView<T,A> m1, BaseMatrix_Rec_Mutable<M>& m2)
     { DoSwap(m1,m2); }
     template <class T, int A1, int A2>
-    static inline void Swap(MatrixView<T,A1> m1, MatrixView<T,A2> m2)
+    static TMV_INLINE void Swap(MatrixView<T,A1> m1, MatrixView<T,A2> m2)
     { DoSwap(m1,m2); }
 
 
@@ -1731,29 +1713,29 @@ namespace tmv {
     //
 
     template <class T, int A0, int A1>
-    static inline typename Matrix<T,A0,A1>::conjugate_type Conjugate(
+    static TMV_INLINE typename Matrix<T,A0,A1>::conjugate_type Conjugate(
         Matrix<T,A0,A1>& m)
     { return m.conjugate(); }
     template <class T, int A>
-    static inline typename MatrixView<T,A>::conjugate_type Conjugate(
+    static TMV_INLINE typename MatrixView<T,A>::conjugate_type Conjugate(
         MatrixView<T,A>& m)
     { return m.conjugate(); }
 
     template <class T, int A0, int A1>
-    static inline typename Matrix<T,A0,A1>::transpose_type Transpose(
+    static TMV_INLINE typename Matrix<T,A0,A1>::transpose_type Transpose(
         Matrix<T,A0,A1>& m)
     { return m.transpose(); }
     template <class T, int A>
-    static inline typename MatrixView<T,A>::transpose_type Transpose(
+    static TMV_INLINE typename MatrixView<T,A>::transpose_type Transpose(
         MatrixView<T,A>& m)
     { return m.transpose(); }
 
     template <class T, int A0, int A1>
-    static inline typename Matrix<T,A0,A1>::adjoint_type Adjoint(
+    static TMV_INLINE typename Matrix<T,A0,A1>::adjoint_type Adjoint(
         Matrix<T,A0,A1>& m)
     { return m.adjoint(); }
     template <class T, int A>
-    static inline typename MatrixView<T,A>::adjoint_type Adjoint(
+    static TMV_INLINE typename MatrixView<T,A>::adjoint_type Adjoint(
         MatrixView<T,A>& m)
     { return m.adjoint(); }
 

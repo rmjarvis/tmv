@@ -222,85 +222,85 @@ namespace tmv {
     {
         typedef T ret_type;
         // return f(x);
-        static T f(const T& x) { return x; } 
+        static TMV_INLINE T f(const T& x) { return x; } 
         // apply x = f(x)
         // (usually assigning the result to the real part of x when x is complex
-        static void applyf(T& x) { }
+        static TMV_INLINE void applyf(T& x) { }
         // get the applied value of f(x) after doing applyf
         // usually this returns real(x), but sometimes the whole x
-        static T get(const T& x) { return x; }
+        static TMV_INLINE T get(const T& x) { return x; }
     };
     template <class T>
     struct Component<ImagComp,T>
     {
         typedef T ret_type;
         typedef T base_type;
-        static T f(const T& x) { return T(0); } 
-        static void applyf(T& x) { x = T(0); }
-        static T get(const T& x) { return x; }
+        static TMV_INLINE T f(const T& x) { return T(0); } 
+        static TMV_INLINE void applyf(T& x) { x = T(0); }
+        static TMV_INLINE T get(const T& x) { return x; }
     };
     template <class T>
     struct Component<AbsComp,T>
     {
         typedef typename Traits<T>::float_type ret_type;
         typedef ret_type base_type;
-        static ret_type f(const T& x) { return TMV_ABS(x); } 
-        static void applyf(T& x) { x = TMV_ABS(x); }
-        static T get(const T& x) { return x; }
+        static TMV_INLINE ret_type f(const T& x) { return TMV_ABS(x); } 
+        static TMV_INLINE void applyf(T& x) { x = TMV_ABS(x); }
+        static TMV_INLINE T get(const T& x) { return x; }
     };
     template <class T>
     struct Component<Abs2Comp,T>
     {
         typedef T ret_type;
         typedef T base_type;
-        static T f(const T& x) { return TMV_ABS2(x); } 
-        static void applyf(T& x) { x = TMV_ABS2(x); }
-        static T get(const T& x) { return x; }
+        static TMV_INLINE T f(const T& x) { return TMV_ABS2(x); } 
+        static TMV_INLINE void applyf(T& x) { x = TMV_ABS2(x); }
+        static TMV_INLINE T get(const T& x) { return x; }
     };
     template <class T>
     struct Component<ArgComp,T>
     {
         typedef typename Traits<T>::float_type ret_type;
         typedef ret_type base_type;
-        static ret_type f(const T& x) { return TMV_ARG(x); } 
-        static void applyf(T& x) { x = TMV_ARG(x); }
-        static T get(const T& x) { return x; }
+        static TMV_INLINE ret_type f(const T& x) { return TMV_ARG(x); } 
+        static TMV_INLINE void applyf(T& x) { x = TMV_ARG(x); }
+        static TMV_INLINE T get(const T& x) { return x; }
     };
     template <class T>
     struct Component<NormComp,T>
     {
         typedef T ret_type;
         typedef T base_type;
-        static T f(const T& x) { return TMV_NORM(x); } 
-        static void applyf(T& x) { x = TMV_NORM(x); }
-        static T get(const T& x) { return x; }
+        static TMV_INLINE T f(const T& x) { return TMV_NORM(x); } 
+        static TMV_INLINE void applyf(T& x) { x = TMV_NORM(x); }
+        static TMV_INLINE T get(const T& x) { return x; }
     };
     template <class T>
     struct Component<ValueComp,T>
     {
         typedef T ret_type;
         typedef T base_type;
-        static T f(const T& x) { return x; } 
-        static void applyf(T& x) { }
-        static T get(const T& x) { return x; }
+        static TMV_INLINE T f(const T& x) { return x; } 
+        static TMV_INLINE void applyf(T& x) { }
+        static TMV_INLINE T get(const T& x) { return x; }
     };
     template <class T>
     struct Component<InverseComp,T>
     {
         typedef typename Traits<T>::float_type ret_type;
         typedef ret_type base_type;
-        static ret_type f(const T& x) { return T(1) / x; } 
-        static void applyf(T& x) { x = T(1) / x; }
-        static T get(const T& x) { return x; }
+        static TMV_INLINE ret_type f(const T& x) { return T(1) / x; } 
+        static TMV_INLINE void applyf(T& x) { x = T(1) / x; }
+        static TMV_INLINE T get(const T& x) { return x; }
     };
     template <class T>
     struct Component<LogComp,T>
     {
         typedef typename Traits<T>::float_type ret_type;
         typedef ret_type base_type;
-        static ret_type f(const T& x) { return TMV_LOG(x); } 
-        static void applyf(T& x) { x = TMV_LOG(x); }
-        static T get(const T& x) { return x; }
+        static TMV_INLINE ret_type f(const T& x) { return TMV_LOG(x); } 
+        static TMV_INLINE void applyf(T& x) { x = TMV_LOG(x); }
+        static TMV_INLINE T get(const T& x) { return x; }
     };
 
     // Now the complex version:
@@ -310,82 +310,82 @@ namespace tmv {
     {
         typedef T ret_type;
         typedef CT base_type;
-        static T f(const CT& x) { return real(x); } 
-        static void applyf(CT& x) { }
-        static T get(const T& x) { return real(x); }
+        static TMV_INLINE T f(const CT& x) { return real(x); } 
+        static TMV_INLINE void applyf(CT& x) { }
+        static TMV_INLINE T get(const T& x) { return real(x); }
     };
     template <class T>
     struct Component<ImagComp,CT>
     {
         typedef T ret_type;
         typedef CT base_type;
-        static T f(const CT& x) { return imag(x); } 
-        static void applyf(CT& x) { TMV_REAL_PART(x) = imag(x); }
-        static T get(const CT& x) { return real(x); }
+        static TMV_INLINE T f(const CT& x) { return imag(x); } 
+        static TMV_INLINE void applyf(CT& x) { TMV_REAL_PART(x) = imag(x); }
+        static TMV_INLINE T get(const CT& x) { return real(x); }
     };
     template <class T>
     struct Component<AbsComp,CT>
     {
         typedef typename Traits<T>::float_type ret_type;
         typedef typename Traits<CT>::float_type base_type;
-        static ret_type f(const CT& x) { return TMV_ABS(x); } 
-        static void applyf(CT& x) { TMV_REAL_PART(x) = TMV_ABS(x); }
-        static T get(const CT& x) { return real(x); }
+        static TMV_INLINE ret_type f(const CT& x) { return TMV_ABS(x); } 
+        static TMV_INLINE void applyf(CT& x) { TMV_REAL_PART(x) = TMV_ABS(x); }
+        static TMV_INLINE T get(const CT& x) { return real(x); }
     };
     template <class T>
     struct Component<Abs2Comp,CT>
     {
         typedef T ret_type;
         typedef CT base_type;
-        static T f(const CT& x) { return TMV_ABS2(x); } 
-        static void applyf(CT& x) { TMV_REAL_PART(x) = TMV_ABS2(x); }
-        static T get(const CT& x) { return real(x); }
+        static TMV_INLINE T f(const CT& x) { return TMV_ABS2(x); } 
+        static TMV_INLINE void applyf(CT& x) { TMV_REAL_PART(x) = TMV_ABS2(x); }
+        static TMV_INLINE T get(const CT& x) { return real(x); }
     };
     template <class T>
     struct Component<ArgComp,CT>
     {
         typedef typename Traits<T>::float_type ret_type;
         typedef typename Traits<CT>::float_type base_type;
-        static ret_type f(const CT& x) { return TMV_ARG(x); } 
-        static void applyf(CT& x) { TMV_REAL_PART(x) = TMV_ARG(x); }
-        static T get(const CT& x) { return real(x); }
+        static TMV_INLINE ret_type f(const CT& x) { return TMV_ARG(x); } 
+        static TMV_INLINE void applyf(CT& x) { TMV_REAL_PART(x) = TMV_ARG(x); }
+        static TMV_INLINE T get(const CT& x) { return real(x); }
     };
     template <class T>
     struct Component<NormComp,CT>
     {
         typedef T ret_type;
         typedef CT base_type;
-        static T f(const CT& x) { return TMV_NORM(x); } 
-        static void applyf(CT& x) { TMV_REAL_PART(x) = TMV_NORM(x); }
-        static T get(const CT& x) { return real(x); }
+        static TMV_INLINE T f(const CT& x) { return TMV_NORM(x); } 
+        static TMV_INLINE void applyf(CT& x) { TMV_REAL_PART(x) = TMV_NORM(x); }
+        static TMV_INLINE T get(const CT& x) { return real(x); }
     };
     template <class T>
     struct Component<ValueComp,CT>
     {
         typedef CT ret_type;
         typedef CT base_type;
-        static CT f(const CT& x) { return x; } 
-        static void applyf(CT& x) { }
-        static CT get(const CT& x) { return x; }
+        static TMV_INLINE CT f(const CT& x) { return x; } 
+        static TMV_INLINE void applyf(CT& x) { }
+        static TMV_INLINE CT get(const CT& x) { return x; }
     };
     template <class T>
     struct Component<InverseComp,CT>
     {
         typedef typename Traits<CT>::float_type ret_type;
         typedef typename Traits<CT>::float_type base_type;
-        static ret_type f(const CT& x) 
+        static TMV_INLINE ret_type f(const CT& x) 
         { return ret_type(std::conj(x)) / TMV_NORM(x); }
-        static void applyf(CT& x) { x /= TMV_NORM(x); }
-        static CT get(const CT& x) { return std::conj(x); }
+        static TMV_INLINE void applyf(CT& x) { x /= TMV_NORM(x); }
+        static TMV_INLINE CT get(const CT& x) { return std::conj(x); }
     };
     template <class T>
     struct Component<LogComp,CT>
     {
         typedef typename Traits<T>::float_type ret_type;
         typedef typename Traits<CT>::float_type base_type;
-        static ret_type f(const CT& x) { return TMV_LOG(real(x)); } 
-        static void applyf(CT& x) { TMV_REAL_PART(x) = TMV_LOG(real(x)); }
-        static T get(const CT& x) { return real(x); }
+        static TMV_INLINE ret_type f(const CT& x) { return TMV_LOG(real(x)); } 
+        static TMV_INLINE void applyf(CT& x) { TMV_REAL_PART(x) = TMV_LOG(real(x)); }
+        static TMV_INLINE T get(const CT& x) { return real(x); }
     };
 #undef CT
 
@@ -393,13 +393,13 @@ namespace tmv {
     // to whether the vector uses CStyle or FortranStyle indexing.
     // They also update the indices to be consistent with CStyle.
     template <bool _fort>
-    static inline void CheckIndex(int& i, int n) 
+    static TMV_INLINE_ND void CheckIndex(int& i, int n) 
     { TMVAssert(i>=0 && i<n && "index is not valid"); } // CStyle
     template <>
-    static inline void CheckIndex<true>(int& i, int n) 
+    static TMV_INLINE_ND void CheckIndex<true>(int& i, int n) 
     { TMVAssert(i>=1 && i<=n && "index is not valid"); --i; } // FortranStyle
     template <bool _fort>
-    static inline void CheckRange(int& i1, int i2, int n)
+    static TMV_INLINE_ND void CheckRange(int& i1, int i2, int n)
     { // CStyle
         TMVAssert(i1 >= 0 && "first element must be in range");
         TMVAssert(i2 <= n && "last element must be in range");
@@ -407,7 +407,7 @@ namespace tmv {
                   "range must have a non-negative number of elements");
     }
     template <>
-    static inline void CheckRange<true>(int& i1, int i2, int n)
+    static TMV_INLINE_ND void CheckRange<true>(int& i1, int i2, int n)
     { // FortranStyle
         TMVAssert(i1 >= 1 && "first element must be in range");
         TMVAssert(i2 <= n && "last element must be in range");
@@ -415,7 +415,7 @@ namespace tmv {
         --i1;
     }
     template <bool _fort>
-    static inline void CheckRange(int& i1, int& i2, int istep, int n)
+    static TMV_INLINE_ND void CheckRange(int& i1, int& i2, int istep, int n)
     { // CStyle
         TMVAssert(istep != 0 && "istep cannot be 0");
         TMVAssert(((i1 >= 0 && i1 < n) || i1==i2) && 
@@ -428,7 +428,7 @@ namespace tmv {
                   "must have a non-negative number of elements");
     }
     template <>
-    static inline void CheckRange<true>(int& i1, int& i2, int istep, int n)
+    static TMV_INLINE_ND void CheckRange<true>(int& i1, int& i2, int istep, int n)
     { // FortranStyle
         TMVAssert(istep != 0 && "istep cannot be 0");
         TMVAssert(i1 >= 1 && i1 <= n && "first element must be in range");
@@ -470,12 +470,12 @@ namespace tmv {
     // two objects.  We overload it for specific objects that can be 
     // checked to have the same realPart().cptr() values.
     template <class V1, class V2>
-    static inline bool SameStorage(
+    static TMV_INLINE bool SameStorage(
         const BaseVector<V1>& v1, const BaseVector<V2>& v2)
     { return false; }
 #ifndef TMV_NO_ALIAS_CHECK
     template <class V1, class V2>
-    static inline bool SameStorage(
+    static TMV_INLINE bool SameStorage(
         const BaseVector_Calc<V1>& v1, const BaseVector_Calc<V2>& v2)
     {
         return static_cast<const void*>(v1.vec().cptr()) == 
@@ -489,11 +489,11 @@ namespace tmv {
     // We do not check the _conj values, so that is usually the next 
     // step depending on why we are checking this.
     template <class V1, class V2>
-    static inline bool ExactSameStorage(
+    static TMV_INLINE bool ExactSameStorage(
         const BaseVector<V1>& v1, const BaseVector<V2>& v2)
     { return false; }
     template <class V1, class V2>
-    static inline bool ExactSameStorage(
+    static TMV_INLINE bool ExactSameStorage(
         const BaseVector_Calc<V1>& v1, const BaseVector_Calc<V2>& v2)
     {
         typedef typename V1::value_type T1;
@@ -612,8 +612,8 @@ namespace tmv {
     {
         typedef type& ret_type;
         typedef const type& const_ret_type;
-        static ret_type call(type& v) { return v; }
-        static const_ret_type call(const type& v) { return v; }
+        static TMV_INLINE ret_type call(type& v) { return v; }
+        static TMV_INLINE const_ret_type call(const type& v) { return v; }
     };
 
     template <class type, class view_type>
@@ -621,9 +621,9 @@ namespace tmv {
     {
         typedef view_type ret_type;
         typedef view_type const_ret_type;
-        static ret_type call(type& v) 
+        static TMV_INLINE ret_type call(type& v) 
         { return view_type(v.ptr(),v.size(),v.step()); }
-        static const_ret_type call(const type& v) 
+        static TMV_INLINE const_ret_type call(const type& v) 
         { return view_type(v.cptr(),v.size(),v.step()); }
     };
 
@@ -633,9 +633,9 @@ namespace tmv {
         enum { ref = Traits2<type,view_type>::sametype };
         typedef MakeVecView_Helper<ref,type,view_type> helper;
 
-        static typename helper::ret_type call(type& v)
+        static TMV_INLINE typename helper::ret_type call(type& v)
         { return helper::call(v); }
-        static typename helper::const_ret_type call(const type& v)
+        static TMV_INLINE typename helper::const_ret_type call(const type& v)
         { return helper::call(v); }
     };
 
@@ -672,17 +672,17 @@ namespace tmv {
         // Constructor
         //
 
-        BaseVector() {}
-        BaseVector(const BaseVector<V>&) {}
-        ~BaseVector() {}
+        TMV_INLINE BaseVector() {}
+        TMV_INLINE BaseVector(const BaseVector<V>&) {}
+        TMV_INLINE ~BaseVector() {}
 
         //
         // Access
         // 
 
-        value_type operator[](int i) const 
+        TMV_INLINE value_type operator[](int i) const 
         { return operator()(i); }
-        value_type operator()(int i) const 
+        TMV_INLINE value_type operator()(int i) const 
         {
             CheckIndex<_fort>(i,size());
             return cref(i);
@@ -692,58 +692,58 @@ namespace tmv {
         // Functions
         //
 
-        value_type sumElements() const
+        TMV_INLINE value_type sumElements() const
         { return tmv::DoSumElements(calc()); }
 
-        float_type sumAbsElements() const 
+        TMV_INLINE float_type sumAbsElements() const 
         { return tmv::DoSumAbsElements(calc()); }
 
-        real_type sumAbs2Elements() const
+        TMV_INLINE real_type sumAbs2Elements() const
         { return tmv::DoSumAbs2Elements(calc()); }
 
-        value_type maxElement(int* imax=0) const
+        TMV_INLINE value_type maxElement(int* imax=0) const
         { return tmv::DoMaxElement(calc(),imax); }
 
-        float_type maxAbsElement(int* imax=0) const 
+        TMV_INLINE float_type maxAbsElement(int* imax=0) const 
         { return tmv::DoMaxAbsElement(calc(),imax); }
 
-        real_type maxAbs2Element(int* imax=0) const
+        TMV_INLINE real_type maxAbs2Element(int* imax=0) const
         { return tmv::DoMaxAbs2Element(calc(),imax); }
 
-        value_type minElement(int* imin=0) const
+        TMV_INLINE value_type minElement(int* imin=0) const
         { return tmv::DoMinElement(calc(),imin); }
 
-        float_type minAbsElement(int* imin=0) const 
+        TMV_INLINE float_type minAbsElement(int* imin=0) const 
         { return tmv::DoMinAbsElement(calc(),imin); }
 
-        real_type minAbs2Element(int* imin=0) const
+        TMV_INLINE real_type minAbs2Element(int* imin=0) const
         { return tmv::DoMinAbs2Element(calc(),imin); }
 
-        float_type norm1() const
+        TMV_INLINE float_type norm1() const
         { return sumAbsElements(); }
 
-        real_type normSq() const
+        TMV_INLINE real_type normSq() const
         { return tmv::DoNormSq(calc()); }
 
-        float_type normSq(const float_type scale) const
+        TMV_INLINE float_type normSq(const float_type scale) const
         { return tmv::DoNormSq(calc(),scale); }
 
-        float_type norm2() const
+        TMV_INLINE float_type norm2() const
         { return tmv::DoNorm2(calc()); }
 
-        float_type norm() const
+        TMV_INLINE float_type norm() const
         { return norm2(); }
 
-        float_type normInf() const
+        TMV_INLINE float_type normInf() const
         { return maxAbsElement(); }
 
-        value_type prodElements() const
+        TMV_INLINE value_type prodElements() const
         { return tmv::ProdElements(calc()); }
 
-        float_type logProdElements(zfloat_type* sign=0) const
+        TMV_INLINE float_type logProdElements(zfloat_type* sign=0) const
         { return tmv::LogProdElements(calc(),sign); }
 
-        bool hasZeroElement() const
+        TMV_INLINE bool hasZeroElement() const
         { return tmv::HasZeroElement(calc()); }
 
 
@@ -752,9 +752,9 @@ namespace tmv {
         // I/O
         //
 
-        void write(std::ostream& os) const
+        TMV_INLINE void write(std::ostream& os) const
         { tmv::Write(os,calc()); }
-        void write(std::ostream& os, float_type thresh) const
+        TMV_INLINE void write(std::ostream& os, float_type thresh) const
         { tmv::Write(os,calc(),thresh); }
 
 
@@ -763,32 +763,32 @@ namespace tmv {
         // Auxilliary routines
         //
 
-        const type& vec() const 
+        TMV_INLINE const type& vec() const 
         { return static_cast<const type&>(*this); }
 
-        calc_type calc() const 
+        TMV_INLINE calc_type calc() const 
         { return static_cast<calc_type>(vec()); }
 
-        eval_type eval() const 
+        TMV_INLINE eval_type eval() const 
         { return static_cast<eval_type>(vec()); }
 
-        copy_type copy() const 
+        TMV_INLINE copy_type copy() const 
         { return static_cast<copy_type>(vec()); }
 
         // Note that these last functions need to be defined in a more derived
         // class than this, or an infinite loop will result when compiling.
 
-        size_t size() const { return vec().size(); }
-        int nElements() const { return vec().nElements(); }
+        TMV_INLINE size_t size() const { return vec().size(); }
+        TMV_INLINE int nElements() const { return vec().nElements(); }
 
-        value_type cref(int i) const  { return vec().cref(i); }
+        TMV_INLINE value_type cref(int i) const  { return vec().cref(i); }
 
         template <class V2>
-        void assignTo(BaseVector_Mutable<V2>& v2) const
+        TMV_INLINE void assignTo(BaseVector_Mutable<V2>& v2) const
         { vec().assignTo(v2); }
 
         template <class V2>
-        void newAssignTo(BaseVector_Mutable<V2>& v2) const
+        TMV_INLINE void newAssignTo(BaseVector_Mutable<V2>& v2) const
         { vec().newAssignTo(v2); }
 
     private :
@@ -851,22 +851,22 @@ namespace tmv {
         // Constructor
         //
 
-        BaseVector_Calc() {}
-        BaseVector_Calc(const BaseVector_Calc<V>&) {}
-        ~BaseVector_Calc() {}
+        TMV_INLINE BaseVector_Calc() {}
+        TMV_INLINE BaseVector_Calc(const BaseVector_Calc<V>&) {}
+        TMV_INLINE ~BaseVector_Calc() {}
 
 
         //
         // Access 
         //
 
-        const_iterator begin() const
+        TMV_INLINE const_iterator begin() const
         { return const_iterator(cptr(),step()); }
-        const_iterator end() const
+        TMV_INLINE const_iterator end() const
         { return begin() + size(); }
-        const_reverse_iterator rbegin() const
+        TMV_INLINE const_reverse_iterator rbegin() const
         { return const_reverse_iterator(cptr(),step()); }
-        const_reverse_iterator rend() const
+        TMV_INLINE const_reverse_iterator rend() const
         { return rbegin() + size(); }
 
 
@@ -885,13 +885,13 @@ namespace tmv {
                 cptr()+i1*step(), (i2-i1)/istep, istep*step());
         }
 
-        const_subvector_type subVector(int i1, int i2) const
+        TMV_INLINE const_subvector_type subVector(int i1, int i2) const
         {
             CheckRange<_fort>(i1,i2,size());
             return cSubVector(i1,i2);
         }
 
-        const_subvector_step_type subVector(
+        TMV_INLINE const_subvector_step_type subVector(
             int i1, int i2, int istep) const
         {
             CheckRange<_fort>(i1,i2,istep,size());
@@ -903,28 +903,28 @@ namespace tmv {
         // Views
         //
 
-        TMV_MAYBE_CREF(type,const_view_type) view() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_view_type) view() const
         { return MakeVecView<type,const_view_type>::call(vec()); }
 
-        TMV_MAYBE_CREF(type,const_cview_type) cView() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_cview_type) cView() const
         { return MakeVecView<type,const_cview_type>::call(vec()); }
 
-        TMV_MAYBE_CREF(type,const_fview_type) fView() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_fview_type) fView() const
         { return MakeVecView<type,const_fview_type>::call(vec()); }
 
-        TMV_MAYBE_CREF(type,const_xview_type) xView() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_xview_type) xView() const
         { return MakeVecView<type,const_xview_type>::call(vec()); }
 
-        TMV_MAYBE_CREF(type,const_unitview_type) unitView() const
+        TMV_INLINE_ND TMV_MAYBE_CREF(type,const_unitview_type) unitView() const
         {
             TMVAssert(step() == 1 && "Called unitView on vector with step!=1");
             return MakeVecView<type,const_unitview_type>::call(vec()); 
         }
 
-        TMV_MAYBE_CREF(type,const_view_type) constView() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_view_type) constView() const
         { return MakeVecView<type,const_view_type>::call(vec()); }
 
-        TMV_MAYBE_CREF(type,const_conjugate_type) conjugate() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_conjugate_type) conjugate() const
         { return MakeVecView<type,const_conjugate_type>::call(vec()); }
 
         const_reverse_type reverse() const
@@ -957,10 +957,10 @@ namespace tmv {
                 V::isreal ? size() : 2*size(), 1);
         }
 
-        TMV_MAYBE_CREF(type,const_nonconj_type) nonConj() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_nonconj_type) nonConj() const
         { return MakeVecView<type,const_nonconj_type>::call(vec()); }
 
-        nonconst_type nonConst() const
+        TMV_INLINE nonconst_type nonConst() const
         {
             return nonconst_type(
                 const_cast<value_type*>(cptr()),size(),step());
@@ -971,25 +971,25 @@ namespace tmv {
         //
 
         template <class V2>
-        void assignTo(BaseVector_Mutable<V2>& v2) const
+        TMV_INLINE void assignTo(BaseVector_Mutable<V2>& v2) const
         { tmv::Copy(vec(),v2); }
 
         template <class V2>
-        void newAssignTo(BaseVector_Mutable<V2>& v2) const
+        TMV_INLINE void newAssignTo(BaseVector_Mutable<V2>& v2) const
         { tmv::NoAliasCopy(vec(),v2); }
 
-        const type& vec() const
+        TMV_INLINE const type& vec() const
         { return static_cast<const type&>(*this); }
 
-        bool isconj() const { return _conj; }
+        TMV_INLINE bool isconj() const { return _conj; }
 
         // Note that these last functions need to be defined in a more derived
         // class than this, or an infinite loop will result when compiling.
 
-        size_t size() const { return vec().size(); }
-        int step() const { return vec().step(); }
-        const value_type* cptr() const { return vec().cptr(); }
-        value_type cref(int i) const  { return vec().cref(i); }
+        TMV_INLINE size_t size() const { return vec().size(); }
+        TMV_INLINE int step() const { return vec().step(); }
+        TMV_INLINE const value_type* cptr() const { return vec().cptr(); }
+        TMV_INLINE value_type cref(int i) const  { return vec().cref(i); }
 
     private:
         void operator=(const BaseVector_Calc<V>&);
@@ -1069,46 +1069,46 @@ namespace tmv {
         // Constructor
         //
 
-        BaseVector_Mutable() {}
-        BaseVector_Mutable(const BaseVector_Mutable<V>&) {}
-        ~BaseVector_Mutable() {}
+        TMV_INLINE BaseVector_Mutable() {}
+        TMV_INLINE BaseVector_Mutable(const BaseVector_Mutable<V>&) {}
+        TMV_INLINE ~BaseVector_Mutable() {}
 
 
         //
         // Access 
         //
 
-        reference operator[](int i)
+        TMV_INLINE reference operator[](int i)
         { return operator()(i); }
-        reference operator()(int i)
+        TMV_INLINE reference operator()(int i)
         {
             CheckIndex<_fort>(i,size());
             return ref(i);
         }
 
-        iterator begin()
+        TMV_INLINE iterator begin()
         { return iterator(ptr(),step()); }
-        iterator end()
+        TMV_INLINE iterator end()
         { return begin() + size(); }
-        reverse_iterator rbegin()
+        TMV_INLINE reverse_iterator rbegin()
         { return reverse_iterator(ptr(),step()); }
-        reverse_iterator rend()
+        TMV_INLINE reverse_iterator rend()
         { return rbegin() + size(); }
 
         // We need to repeat the const versions so the non-const ones
         // don't clobber them.
-        value_type operator[](int i) const
+        TMV_INLINE value_type operator[](int i) const
         { return base::operator[](i); }
-        value_type operator()(int i) const
+        TMV_INLINE value_type operator()(int i) const
         { return base::operator()(i); }
 
-        const_iterator begin() const
+        TMV_INLINE const_iterator begin() const
         { return base::begin(); }
-        const_iterator end() const
+        TMV_INLINE const_iterator end() const
         { return base::end(); }
-        const_reverse_iterator rbegin() const
+        TMV_INLINE const_reverse_iterator rbegin() const
         { return base::rbegin(); }
-        const_reverse_iterator rend() const
+        TMV_INLINE const_reverse_iterator rend() const
         { return base::rend(); }
 
 
@@ -1171,7 +1171,7 @@ namespace tmv {
             return vec();
         }
 
-        type& conjugateSelf()
+        TMV_INLINE type& conjugateSelf()
         { tmv::ConjugateSelf(vec()); return vec(); }
 
         template <class F>
@@ -1187,7 +1187,7 @@ namespace tmv {
             setZero(); ref(i) = x;
             return vec();
         }
-        type& makeBasis(int i, value_type x=value_type(1)) 
+        TMV_INLINE type& makeBasis(int i, value_type x=value_type(1)) 
         {
             CheckIndex<_fort>(i,size());
             return cMakeBasis(i,x);
@@ -1198,7 +1198,7 @@ namespace tmv {
             TMV_SWAP(ref(i1),ref(i2)); 
             return vec();
         }
-        type& swap(int i1, int i2) 
+        TMV_INLINE type& swap(int i1, int i2) 
         {
             CheckIndex<_fort>(i1,size());
             CheckIndex<_fort>(i2,size());
@@ -1210,12 +1210,12 @@ namespace tmv {
             for(int i=i1;i<i2;++i) cSwap(i,p[i]); 
             return vec();
         }
-        type& permute(const int* p, int i1, int i2) 
+        TMV_INLINE type& permute(const int* p, int i1, int i2) 
         {
             CheckRange<_fort>(i1,i2,size());
             return cPermute(p,i1,i2);
         }
-        type& permute(const int* p) 
+        TMV_INLINE type& permute(const int* p) 
         { return cPermute(p,0,size()); }
 
         type& cReversePermute(const int* p, int i1, int i2) 
@@ -1223,18 +1223,18 @@ namespace tmv {
             for(int i=i2;i>i1;) { --i; cSwap(i,p[i]); }
             return vec();
         }
-        type& reversePermute(const int* p, int i1, int i2) 
+        TMV_INLINE type& reversePermute(const int* p, int i1, int i2) 
         {
             CheckRange<_fort>(i1,i2,size());
             return cReversePermute(p,i1,i2);
         }
-        type& reversePermute(const int* p) 
+        TMV_INLINE type& reversePermute(const int* p) 
         { return cReversePermute(p,0,size()); }
 
-        type& reverseSelf() 
+        TMV_INLINE type& reverseSelf() 
         { tmv::ReverseSelf(vec()); return vec(); }
 
-        type& sort(ADType ad=Ascend, CompType comp=RealComp) 
+        TMV_INLINE type& sort(ADType ad=Ascend, CompType comp=RealComp) 
         { tmv::Sort(vec(),ad,comp); return vec(); }
 
         // Defined in TMV_Permutation.h
@@ -1254,13 +1254,13 @@ namespace tmv {
                 ptr()+i1*step(), (i2-i1)/istep, istep*step());
         }
 
-        subvector_type subVector(int i1, int i2) 
+        TMV_INLINE subvector_type subVector(int i1, int i2) 
         {
             CheckRange<_fort>(i1,i2,size());
             return cSubVector(i1,i2);
         }
 
-        subvector_step_type subVector(int i1, int i2, int istep) 
+        TMV_INLINE subvector_step_type subVector(int i1, int i2, int istep) 
         {
             CheckRange<_fort>(i1,i2,istep,size());
             return cSubVector(i1,i2,istep);
@@ -1269,25 +1269,25 @@ namespace tmv {
         reverse_type reverse() 
         { return reverse_type(ptr()+(int(size())-1)*step(), size(),-step()); }
 
-        TMV_MAYBE_REF(type,view_type) view() 
+        TMV_INLINE TMV_MAYBE_REF(type,view_type) view() 
         { return MakeVecView<type,view_type>::call(vec()); }
 
-        TMV_MAYBE_REF(type,cview_type) cView() 
+        TMV_INLINE TMV_MAYBE_REF(type,cview_type) cView() 
         { return MakeVecView<type,cview_type>::call(vec()); }
 
-        TMV_MAYBE_REF(type,fview_type) fView() 
+        TMV_INLINE TMV_MAYBE_REF(type,fview_type) fView() 
         { return MakeVecView<type,fview_type>::call(vec()); }
 
-        TMV_MAYBE_REF(type,xview_type) xView() 
+        TMV_INLINE TMV_MAYBE_REF(type,xview_type) xView() 
         { return MakeVecView<type,xview_type>::call(vec()); }
 
-        TMV_MAYBE_REF(type,unitview_type) unitView() 
+        TMV_INLINE TMV_MAYBE_REF(type,unitview_type) unitView() 
         {
             TMVAssert(step() == 1 && "Called unitView on vector with step!=1");
             return MakeVecView<type,unitview_type>::call(vec()); 
         }
 
-        TMV_MAYBE_REF(type,conjugate_type) conjugate() 
+        TMV_INLINE TMV_MAYBE_REF(type,conjugate_type) conjugate() 
         { return MakeVecView<type,conjugate_type>::call(vec()); }
 
         realpart_type realPart() 
@@ -1314,43 +1314,43 @@ namespace tmv {
                 V::isreal ? size() : 2*size(), 1);
         }
 
-        TMV_MAYBE_REF(type,nonconj_type) nonConj()
+        TMV_INLINE TMV_MAYBE_REF(type,nonconj_type) nonConj()
         { return MakeVecView<type,nonconj_type>::call(vec()); }
 
 
 
         // Repeat the const versions:
-        const_subvector_type cSubVector(int i1, int i2) const
+        TMV_INLINE const_subvector_type cSubVector(int i1, int i2) const
         { return base::cSubVector(i1,i2); }
-        const_subvector_step_type cSubVector(
+        TMV_INLINE const_subvector_step_type cSubVector(
             int i1, int i2, int istep) const
         { return base::cSubVector(i1,i2,istep); }
-        const_subvector_type subVector(int i1, int i2) const
+        TMV_INLINE const_subvector_type subVector(int i1, int i2) const
         { return base::subVector(i1,i2); }
-        const_subvector_step_type subVector(
+        TMV_INLINE const_subvector_step_type subVector(
             int i1, int i2, int istep) const
         { return base::subVector(i1,i2,istep); }
-        const_reverse_type reverse() const
+        TMV_INLINE const_reverse_type reverse() const
         { return base::reverse(); }
-        TMV_MAYBE_CREF(type,const_view_type) view() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_view_type) view() const
         { return base::view(); }
-        TMV_MAYBE_CREF(type,const_cview_type) cView() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_cview_type) cView() const
         { return base::cView(); }
-        TMV_MAYBE_CREF(type,const_fview_type) fView() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_fview_type) fView() const
         { return base::fView(); }
-        TMV_MAYBE_CREF(type,const_xview_type) xView() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_xview_type) xView() const
         { return base::xView(); }
-        TMV_MAYBE_CREF(type,const_unitview_type) unitView() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_unitview_type) unitView() const
         { return base::unitView(); }
-        TMV_MAYBE_CREF(type,const_conjugate_type) conjugate() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_conjugate_type) conjugate() const
         { return base::conjugate(); }
-        const_realpart_type realPart() const
+        TMV_INLINE const_realpart_type realPart() const
         { return base::realPart(); }
-        const_imagpart_type imagPart() const
+        TMV_INLINE const_imagpart_type imagPart() const
         { return base::imagPart(); }
-        const_flatten_type flatten() const
+        TMV_INLINE const_flatten_type flatten() const
         { return base::flatten(); }
-        TMV_MAYBE_CREF(type,const_nonconj_type) nonConj() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_nonconj_type) nonConj() const
         { return base::nonConj(); }
 
 
@@ -1360,7 +1360,7 @@ namespace tmv {
         //
 
         // Defined in TMV_VectorIO.h
-        void read(std::istream& is)
+        TMV_INLINE void read(std::istream& is)
         { tmv::Read(is,vec()); }
 
 
@@ -1380,23 +1380,23 @@ namespace tmv {
         // function defined as non-member functions for various objects.
 
         template <class X2>
-        type& operator+=(const X2& x2)
+        TMV_INLINE type& operator+=(const X2& x2)
         { AddEq(vec(),x2); return vec(); }
 
         template <class X2>
-        type& operator-=(const X2& x2)
+        TMV_INLINE type& operator-=(const X2& x2)
         { SubtractEq(vec(),x2); return vec(); }
 
         template <class X2>
-        type& operator*=(const X2& x2)
+        TMV_INLINE type& operator*=(const X2& x2)
         { MultEq(vec(),x2); return vec(); }
 
         template <class X2>
-        type& operator/=(const X2& x2)
+        TMV_INLINE type& operator/=(const X2& x2)
         { DivEq(vec(),x2); return vec(); }
 
         template <class X2>
-        type& operator%=(const X2& x2)
+        TMV_INLINE type& operator%=(const X2& x2)
         { RDivEq(vec(),x2); return vec(); }
 
 
@@ -1405,20 +1405,20 @@ namespace tmv {
         // Auxilliary routines
         //
 
-        const type& vec() const
+        TMV_INLINE const type& vec() const
         { return static_cast<const type&>(*this); }
-        type& vec()
+        TMV_INLINE type& vec()
         { return static_cast<type&>(*this); }
 
         // Note that these last functionsneed to be defined in a more derived
         // class than this, or an infinite loop will result when compiling.
 
-        size_t size() const { return vec().size(); }
-        int step() const { return vec().step(); }
-        value_type* ptr() { return vec().ptr(); }
-        const value_type* cptr() { return vec().cptr(); }
-        reference ref(int i) { return vec().ref(i); }
-        value_type cref(int i) { return vec().cref(i); }
+        TMV_INLINE size_t size() const { return vec().size(); }
+        TMV_INLINE int step() const { return vec().step(); }
+        TMV_INLINE value_type* ptr() { return vec().ptr(); }
+        TMV_INLINE const value_type* cptr() { return vec().cptr(); }
+        TMV_INLINE reference ref(int i) { return vec().ref(i); }
+        TMV_INLINE value_type cref(int i) { return vec().cref(i); }
 
     }; // BaseVector_Mutable
 
@@ -1440,7 +1440,7 @@ namespace tmv {
     }
 
     template <class V1, class V2>
-    static inline bool operator==(
+    static TMV_INLINE_ND bool operator==(
         const BaseVector<V1>& v1, const BaseVector<V2>& v2)
     {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
@@ -1449,7 +1449,7 @@ namespace tmv {
     }
 
     template <class V1, class V2>
-    static inline bool operator!=(
+    static TMV_INLINE bool operator!=(
         const BaseVector<V1>& v1, const BaseVector<V2>& v2)
     { return !(v1 == v2); }
 
@@ -1461,52 +1461,52 @@ namespace tmv {
     //
 
     template <class V>
-    static inline typename V::value_type SumElements(const BaseVector<V>& v)
+    static TMV_INLINE typename V::value_type SumElements(const BaseVector<V>& v)
     { return v.sumElements(); }
     template <class V>
-    static inline typename V::float_type SumAbsElements(const BaseVector<V>& v)
+    static TMV_INLINE typename V::float_type SumAbsElements(const BaseVector<V>& v)
     { return v.sumAbsElements(); }
     template <class V>
-    static inline typename V::real_type SumAbs2Elements(const BaseVector<V>& v)
+    static TMV_INLINE typename V::real_type SumAbs2Elements(const BaseVector<V>& v)
     { return v.sumAbs2Elements(); }
 
     template <class V>
-    static inline typename V::float_type Norm(const BaseVector<V>& v)
+    static TMV_INLINE typename V::float_type Norm(const BaseVector<V>& v)
     { return v.norm(); }
     template <class V>
-    static inline typename V::float_type Norm1(const BaseVector<V>& v)
+    static TMV_INLINE typename V::float_type Norm1(const BaseVector<V>& v)
     { return v.norm1(); }
     template <class V>
-    static inline typename V::float_type Norm2(const BaseVector<V>& v)
+    static TMV_INLINE typename V::float_type Norm2(const BaseVector<V>& v)
     { return v.norm2(); }
     template <class V>
-    static inline typename V::real_type NormSq(const BaseVector<V>& v)
+    static TMV_INLINE typename V::real_type NormSq(const BaseVector<V>& v)
     { return v.normSq(); }
     template <class V>
-    static inline typename V::float_type NormInf(const BaseVector<V>& v)
+    static TMV_INLINE typename V::float_type NormInf(const BaseVector<V>& v)
     { return v.normInf(); }
 
     template <class V>
-    static inline typename V::value_type MaxElement(const BaseVector<V>& v)
+    static TMV_INLINE typename V::value_type MaxElement(const BaseVector<V>& v)
     { return v.maxElement(); }
     template <class V>
-    static inline typename V::float_type MaxAbsElement(const BaseVector<V>& v)
+    static TMV_INLINE typename V::float_type MaxAbsElement(const BaseVector<V>& v)
     { return v.maxAbsElement(); }
     template <class V>
-    static inline typename V::real_type MaxAbs2Element(const BaseVector<V>& v)
+    static TMV_INLINE typename V::real_type MaxAbs2Element(const BaseVector<V>& v)
     { return v.maxAbs2Element(); }
     template <class V>
-    static inline typename V::value_type MinElement(const BaseVector<V>& v)
+    static TMV_INLINE typename V::value_type MinElement(const BaseVector<V>& v)
     { return v.minElement(); }
     template <class V>
-    static inline typename V::float_type MinAbsElement(const BaseVector<V>& v)
+    static TMV_INLINE typename V::float_type MinAbsElement(const BaseVector<V>& v)
     { return v.minAbsElement(); }
     template <class V>
-    static inline typename V::real_type MinAbs2Element(const BaseVector<V>& v)
+    static TMV_INLINE typename V::real_type MinAbs2Element(const BaseVector<V>& v)
     { return v.minAbs2Element(); }
 
     template <class V>
-    static inline typename V::const_conjugate_type Conjugate(
+    static TMV_INLINE typename V::const_conjugate_type Conjugate(
         const BaseVector_Calc<V>& v)
     { return v.conjugate(); }
 

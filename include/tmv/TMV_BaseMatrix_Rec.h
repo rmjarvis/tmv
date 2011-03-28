@@ -149,7 +149,7 @@ namespace tmv {
 
     // Specify ExactSameStorage for rectangular matrices:
     template <class M1, class M2>
-    static inline bool ExactSameStorage(
+    static bool ExactSameStorage(
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2)
     {
         typedef typename M1::value_type T1;
@@ -162,13 +162,13 @@ namespace tmv {
     // to whether the matrix uses CStyle or FortranStyle indexing.
     // They also update the indices to be consistent with CStyle.
     template <bool _fort>
-    static inline void CheckDiagIndex(int& i, int m, int n)
+    static TMV_INLINE_ND void CheckDiagIndex(int& i, int m, int n)
     { // CStyle or FortranStyle
         TMVAssert(i >= -m && "negative diag index must be <= nrows");
         TMVAssert(i <= n && "positive diag index must be <= ncols");
     }
     template <bool _fort>
-    static inline void CheckDiagIndex(int& i, int& j1, int& j2, int m, int n)
+    static TMV_INLINE_ND void CheckDiagIndex(int& i, int& j1, int& j2, int m, int n)
     { // CStyle
         TMVAssert(i >= -m && "negative diag index must be <= nrows");
         TMVAssert(i <= n && "positive diag index must be <= ncols");
@@ -183,14 +183,14 @@ namespace tmv {
         TMVAssert((i > 0 || j2 <= n) && "last element must be in matrix");
     }
     template <bool _fort>
-    static inline void CheckRowRange(int& i1, int i2, int m)
+    static TMV_INLINE_ND void CheckRowRange(int& i1, int i2, int m)
     { // CStyle
         TMVAssert(i1 >= 0 && "first row must be in matrix");
         TMVAssert(i2 <= m && "last row must be in matrix");
         TMVAssert(i2 >= i1 && "range must have a non-negative number of rows");
     }
     template <bool _fort>
-    static inline void CheckColRange(int& j1, int j2, int n)
+    static TMV_INLINE_ND void CheckColRange(int& j1, int j2, int n)
     { // CStyle
         TMVAssert(j1 >= 0 && "first column must be in matrix");
         TMVAssert(j2 <= n && "last column must be in matrix");
@@ -198,7 +198,7 @@ namespace tmv {
                   "range must have a non-negative number of columns");
     }
     template <bool _fort>
-    static inline void CheckRowRange(int& i1, int& i2, int istep, int m)
+    static TMV_INLINE_ND void CheckRowRange(int& i1, int& i2, int istep, int m)
     { // CStyle
         TMVAssert(istep != 0 && "istep cannot be 0");
         TMVAssert(((i1 >= 0 && i1 < m) || i1==i2) && 
@@ -211,7 +211,7 @@ namespace tmv {
                   "must have a non-negative number of rows");
     }
     template <bool _fort>
-    static inline void CheckColRange(int& j1, int& j2, int jstep, int n)
+    static TMV_INLINE_ND void CheckColRange(int& j1, int& j2, int jstep, int n)
     { // CStyle
         TMVAssert(jstep != 0 && "jstep cannot be 0");
         TMVAssert(((j1 >= 0 && j1 < n) || j1==j2) && 
@@ -224,7 +224,7 @@ namespace tmv {
                   "must have a non-negative number of columns");
     }
     template <bool _fort>
-    static inline void CheckMatSubVector(
+    static TMV_INLINE_ND void CheckMatSubVector(
         int& i, int& j, int istep, int jstep, int size, int m, int n)
     { // CStyle
         TMVAssert(!(istep == 0 && jstep == 0) && 
@@ -241,7 +241,7 @@ namespace tmv {
                   "last element must be in matrix");
     }
     template <>
-    static inline void CheckDiagIndex<true>(
+    static TMV_INLINE_ND void CheckDiagIndex<true>(
         int& i, int& j1, int& j2, int m, int n)
     { // FortranStyle
         TMVAssert(i >= -m && "negative diag index must be <= nrows");
@@ -255,7 +255,7 @@ namespace tmv {
         --j1;
     }
     template <>
-    static inline void CheckRowRange<true>(int& i1, int i2, int m)
+    static TMV_INLINE_ND void CheckRowRange<true>(int& i1, int i2, int m)
     { // FortranStyle
         TMVAssert(i1 >= 1 && "first row must be in matrix");
         TMVAssert(i2 <= m && "last row must be in matrix");
@@ -263,7 +263,7 @@ namespace tmv {
         --i1;
     }
     template <>
-    static inline void CheckColRange<true>(int& j1, int j2, int n)
+    static TMV_INLINE_ND void CheckColRange<true>(int& j1, int j2, int n)
     { // FortranStyle
         TMVAssert(j1 >= 1 && "first column must be in matrix");
         TMVAssert(j2 <= n && "last column must be in matrix");
@@ -271,7 +271,7 @@ namespace tmv {
         --j1;
     }
     template <>
-    static inline void CheckRowRange<true>(int& i1, int& i2, int istep, int m)
+    static TMV_INLINE_ND void CheckRowRange<true>(int& i1, int& i2, int istep, int m)
     { // FortranStyle
         TMVAssert(istep != 0 && "istep cannot be 0");
         TMVAssert(i1 >= 1 && i1 <= m && "first row must be in matrix");
@@ -283,7 +283,7 @@ namespace tmv {
         --i1; i2 += istep-1;
     }
     template <>
-    static inline void CheckColRange<true>(int& j1, int& j2, int jstep, int n)
+    static TMV_INLINE_ND void CheckColRange<true>(int& j1, int& j2, int jstep, int n)
     { // FortranStyle
         TMVAssert(jstep != 0 && "jstep cannot be 0");
         TMVAssert(j1 >= 1 && j1 <= n && "first column must be in matrix");
@@ -295,7 +295,7 @@ namespace tmv {
         --j1; j2 += jstep-1;
     }
     template <>
-    static inline void CheckMatSubVector<true>(
+    static TMV_INLINE_ND void CheckMatSubVector<true>(
         int& i, int& j, int istep, int jstep, int size, int m, int n)
     { // FortranStyle
         TMVAssert(!(istep == 0 && jstep == 0) && 
@@ -354,7 +354,7 @@ namespace tmv {
     template <int Si, int Sj, class M>
     struct AuxCanLinearize<true,Si,Sj,M>
     {
-        static bool ok(const M& m) 
+        static TMV_INLINE bool ok(const M& m) 
         { return true; }
     };
     template <int Si, int Sj, class M>
@@ -381,7 +381,7 @@ namespace tmv {
     };
     template <class M>
     struct AuxCanLinearize<false,1,1,M>
-    { static bool ok(const M& m) { return true; } };
+    { static TMV_INLINE bool ok(const M& m) { return true; } };
 
     // Defined in TMV_CopyM.h
     template <class M1, class M2>
@@ -467,8 +467,8 @@ namespace tmv {
     {
         typedef type& ret_type;
         typedef const type& const_ret_type;
-        static ret_type call(type& m) { return m; }
-        static const_ret_type call(const type& m) { return m; }
+        static TMV_INLINE ret_type call(type& m) { return m; }
+        static TMV_INLINE const_ret_type call(const type& m) { return m; }
     };
 
     template <class type, class view_type>
@@ -476,12 +476,12 @@ namespace tmv {
     {
         typedef view_type ret_type;
         typedef view_type const_ret_type;
-        static ret_type call(type& m) 
+        static TMV_INLINE ret_type call(type& m) 
         {
             return view_type(
                 m.ptr(),m.colsize(),m.rowsize(),m.stepi(),m.stepj()); 
         }
-        static const_ret_type call(const type& m) 
+        static TMV_INLINE const_ret_type call(const type& m) 
         {
             return view_type(
                 m.cptr(),m.colsize(),m.rowsize(),m.stepi(),m.stepj()); 
@@ -494,9 +494,9 @@ namespace tmv {
         enum { ref = Traits2<type,view_type>::sametype };
         typedef MakeRecView_Helper<ref,type,view_type> helper;
 
-        static typename helper::ret_type call(type& m)
+        static TMV_INLINE typename helper::ret_type call(type& m)
         { return helper::call(m); }
-        static typename helper::const_ret_type call(const type& m)
+        static TMV_INLINE typename helper::const_ret_type call(const type& m)
         { return helper::call(m); }
     };
 
@@ -585,9 +585,9 @@ namespace tmv {
         // Constructor
         //
 
-        BaseMatrix_Rec() {}
-        BaseMatrix_Rec(const BaseMatrix_Rec<M>&) {}
-        ~BaseMatrix_Rec() {}
+        TMV_INLINE BaseMatrix_Rec() {}
+        TMV_INLINE BaseMatrix_Rec(const BaseMatrix_Rec<M>&) {}
+        TMV_INLINE ~BaseMatrix_Rec() {}
 
     private:
         void operator=(const BaseMatrix_Rec<M>&);
@@ -636,29 +636,29 @@ namespace tmv {
 
 
         // The regular versions respect the indexing style for i and j:
-        const_row_type row(int i) const
+        TMV_INLINE const_row_type row(int i) const
         {
             CheckRowIndex<_fort>(i,colsize());
             return get_row(i);
         }
 
-        const_row_type operator[](int i) const
+        TMV_INLINE const_row_type operator[](int i) const
         { return row(i); }
 
-        const_col_type col(int j) const
+        TMV_INLINE const_col_type col(int j) const
         {
             CheckColIndex<_fort>(j,rowsize());
             return get_col(j);
         }
 
-        const_row_sub_type row(int i, int j1, int j2) const
+        TMV_INLINE_ND const_row_sub_type row(int i, int j1, int j2) const
         {
             CheckRowIndex<_fort>(i,colsize());
             CheckColRange<_fort>(j1,j2,rowsize());
             return get_row(i,j1,j2); 
         }
 
-        const_col_sub_type col(int j, int i1, int i2) const
+        TMV_INLINE_ND const_col_sub_type col(int j, int i1, int i2) const
         {
             CheckColIndex<_fort>(j,rowsize());
             CheckRowRange<_fort>(i1,i2,colsize());
@@ -672,13 +672,13 @@ namespace tmv {
                 cptr(),TMV_MIN(colsize(),rowsize()),diagstep()); 
         }
 
-        const_diag_sub_type diag(int i) const
+        TMV_INLINE const_diag_sub_type diag(int i) const
         {
             CheckDiagIndex<_fort>(i,colsize(),rowsize());
             return get_diag(i);
         }
 
-        const_diag_sub_type diag(int i, int j1, int j2) const
+        TMV_INLINE const_diag_sub_type diag(int i, int j1, int j2) const
         {
             CheckDiagIndex<_fort>(i,j1,j2,colsize(),rowsize());
             return get_diag(i,j1,j2);
@@ -689,37 +689,37 @@ namespace tmv {
         // Functions
         //
 
-        value_type sumElements() const
+        TMV_INLINE value_type sumElements() const
         { return tmv::DoSumElements(mat()); }
 
-        float_type sumAbsElements() const
+        TMV_INLINE float_type sumAbsElements() const
         { return tmv::DoSumAbsElements(mat()); }
 
-        real_type sumAbs2Elements() const
+        TMV_INLINE real_type sumAbs2Elements() const
         { return tmv::DoSumAbs2Elements(mat()); }
 
-        float_type maxAbsElement() const
+        TMV_INLINE float_type maxAbsElement() const
         { return tmv::DoMaxAbsElement(mat()); }
 
-        real_type maxAbs2Element() const
+        TMV_INLINE real_type maxAbs2Element() const
         { return tmv::DoMaxAbs2Element(mat()); }
 
-        real_type normSq() const
+        TMV_INLINE real_type normSq() const
         { return tmv::DoNormSq(mat()); }
 
-        float_type normSq(const float_type scale) const
+        TMV_INLINE float_type normSq(const float_type scale) const
         { return tmv::DoNormSq(mat(),scale); }
 
-        float_type normF() const 
+        TMV_INLINE float_type normF() const 
         { return tmv::DoNormF(mat()); }
 
-        float_type norm() const
+        TMV_INLINE float_type norm() const
         { return normF(); }
 
-        float_type norm1() const
+        TMV_INLINE float_type norm1() const
         { return tmv::DoNorm1(mat()); }
 
-        float_type normInf() const
+        TMV_INLINE float_type normInf() const
         { return tmv::DoNormInf(mat()); }
 
 
@@ -778,8 +778,7 @@ namespace tmv {
 
         // These check the indices according the the indexing style being
         // used, and then calls the above CStyle versions.
-        const_submatrix_type subMatrix(
-            int i1, int i2, int j1, int j2) const
+        const_submatrix_type subMatrix(int i1, int i2, int j1, int j2) const
         {
             CheckRowRange<_fort>(i1,i2,colsize());
             CheckColRange<_fort>(j1,j2,rowsize());
@@ -950,41 +949,41 @@ namespace tmv {
         //
 
         template <class M2>
-        void assignTo(BaseMatrix_Mutable<M2>& m2) const
+        TMV_INLINE_ND void assignTo(BaseMatrix_Mutable<M2>& m2) const
         {
             TMVStaticAssert((ShapeTraits2<_shape,M2::_shape>::assignable));
             tmv::Copy(mat(),m2.mat()); 
         }
 
         template <class M2>
-        void newAssignTo(BaseMatrix_Mutable<M2>& m2) const
+        TMV_INLINE_ND void newAssignTo(BaseMatrix_Mutable<M2>& m2) const
         {
             TMVStaticAssert((ShapeTraits2<_shape,M2::_shape>::assignable));
             tmv::NoAliasCopy(mat(),m2.mat()); 
         }
 
-        const type& mat() const
+        TMV_INLINE const type& mat() const
         { return static_cast<const type&>(*this); }
 
-        int diagstep() const 
+        TMV_INLINE int diagstep() const 
         { return _diagstep == UNKNOWN ? stepi() + stepj() : _diagstep; }
-        bool isconj() const { return _conj; }
-        bool canLinearize() const 
+        TMV_INLINE bool isconj() const { return _conj; }
+        TMV_INLINE bool canLinearize() const 
         { return (AuxCanLinearize<_canlin,_colmajor,_rowmajor,M>::ok(mat())); }
 
         // Note that these last functions need to be defined in a more derived
         // class than this, or an infinite loop will result when compiling.
         // Also, cref from BaseMatrix.
 
-        size_t colsize() const { return mat().colsize(); }
-        size_t rowsize() const { return mat().rowsize(); }
-        size_t ls() const { return mat().ls(); }
-        int stepi() const { return mat().stepi(); }
-        int stepj() const { return mat().stepj(); }
-        bool isrm() const { return mat().isrm(); }
-        bool iscm() const { return mat().iscm(); }
+        TMV_INLINE size_t colsize() const { return mat().colsize(); }
+        TMV_INLINE size_t rowsize() const { return mat().rowsize(); }
+        TMV_INLINE size_t ls() const { return mat().ls(); }
+        TMV_INLINE int stepi() const { return mat().stepi(); }
+        TMV_INLINE int stepj() const { return mat().stepj(); }
+        TMV_INLINE bool isrm() const { return mat().isrm(); }
+        TMV_INLINE bool iscm() const { return mat().iscm(); }
 
-        const value_type* cptr() const { return mat().cptr(); }
+        TMV_INLINE const value_type* cptr() const { return mat().cptr(); }
 
     }; // BaseMatrix_Rec
 
@@ -1107,16 +1106,16 @@ namespace tmv {
         // Constructor
         //
 
-        BaseMatrix_Rec_Mutable() {}
-        BaseMatrix_Rec_Mutable(const BaseMatrix_Rec_Mutable<M>&) {}
-        ~BaseMatrix_Rec_Mutable() {}
+        TMV_INLINE BaseMatrix_Rec_Mutable() {}
+        TMV_INLINE BaseMatrix_Rec_Mutable(const BaseMatrix_Rec_Mutable<M>&) {}
+        TMV_INLINE ~BaseMatrix_Rec_Mutable() {}
 
 
         //
         // Access 
         //
 
-        reference operator()(int i, int j)
+        TMV_INLINE reference operator()(int i, int j)
         {
             CheckRowIndex<_fort>(i,colsize());
             CheckColIndex<_fort>(j,rowsize());
@@ -1132,9 +1131,7 @@ namespace tmv {
 
         // No need for a get_ routine for diag()
         diag_type diag() 
-        {
-            return diag_type(ptr(),TMV_MIN(colsize(),rowsize()),diagstep());
-        }
+        { return diag_type(ptr(),TMV_MIN(colsize(),rowsize()),diagstep()); }
 
         row_sub_type get_row(int i, int j1, int j2) 
         { return row_sub_type(ptr()+i*stepi()+j1*stepj(),j2-j1,stepj()); }
@@ -1161,42 +1158,42 @@ namespace tmv {
 
 
         // The regular versions respect the indexing style for i and j:
-        row_type row(int i) 
+        TMV_INLINE row_type row(int i) 
         {
             CheckRowIndex<_fort>(i,colsize());
             return get_row(i);
         }
 
-        row_type operator[](int i) 
+        TMV_INLINE row_type operator[](int i) 
         { return row(i); }
 
-        col_type col(int j) 
+        TMV_INLINE col_type col(int j) 
         {
             CheckColIndex<_fort>(j,rowsize());
             return get_col(j);
         }
 
-        row_sub_type row(int i, int j1, int j2) 
+        TMV_INLINE row_sub_type row(int i, int j1, int j2) 
         {
             CheckRowIndex<_fort>(i,colsize());
             CheckColRange<_fort>(j1,j2,rowsize());
             return get_row(i,j1,j2); 
         }
 
-        col_sub_type col(int j, int i1, int i2) 
+        TMV_INLINE col_sub_type col(int j, int i1, int i2) 
         {
             CheckColIndex<_fort>(j,rowsize());
             CheckRowRange<_fort>(i1,i2,colsize());
             return get_col(j,i1,i2); 
         }
 
-        diag_sub_type diag(int i) 
+        TMV_INLINE diag_sub_type diag(int i) 
         {
             CheckDiagIndex<_fort>(i,colsize(),rowsize());
             return get_diag(i);
         }
 
-        diag_sub_type diag(int i, int j1, int j2) 
+        TMV_INLINE diag_sub_type diag(int i, int j1, int j2) 
         {
             CheckDiagIndex<_fort>(i,j1,j2,colsize(),rowsize());
             return get_diag(i,j1,j2);
@@ -1205,37 +1202,37 @@ namespace tmv {
 
         // We need to repeat the const versions so the non-const ones
         // don't clobber them.
-        value_type operator()(int i, int j) const
+        TMV_INLINE value_type operator()(int i, int j) const
         { return base::operator()(i,j); }
 
-        const_row_type get_row(int i) const
+        TMV_INLINE const_row_type get_row(int i) const
         { return base::get_row(i); }
-        const_col_type get_col(int j) const
+        TMV_INLINE const_col_type get_col(int j) const
         { return base::get_col(j); }
-        const_diag_type diag() const
+        TMV_INLINE const_diag_type diag() const
         { return base::diag(); }
-        const_row_sub_type get_row(int i, int j1, int j2) const
+        TMV_INLINE const_row_sub_type get_row(int i, int j1, int j2) const
         { return base::get_row(i,j1,j2); }
-        const_col_sub_type get_col(int j, int i1, int i2) const
+        TMV_INLINE const_col_sub_type get_col(int j, int i1, int i2) const
         { return base::get_col(j,i1,i2); }
-        const_diag_sub_type get_diag(int i) const
+        TMV_INLINE const_diag_sub_type get_diag(int i) const
         { return base::get_diag(i); }
-        const_diag_sub_type get_diag(int i, int j1, int j2) const
+        TMV_INLINE const_diag_sub_type get_diag(int i, int j1, int j2) const
         { return base::get_diag(i,j1,j2); }
 
-        const_row_type row(int i) const
+        TMV_INLINE const_row_type row(int i) const
         { return base::row(i); }
-        const_row_type operator[](int i) const
+        TMV_INLINE const_row_type operator[](int i) const
         { return base::row(i); }
-        const_col_type col(int j) const
+        TMV_INLINE const_col_type col(int j) const
         { return base::col(j); }
-        const_row_sub_type row(int i, int j1, int j2) const
+        TMV_INLINE const_row_sub_type row(int i, int j1, int j2) const
         { return base::row(i,j1,j2); }
-        const_col_sub_type col(int j, int i1, int i2) const
+        TMV_INLINE const_col_sub_type col(int j, int i1, int i2) const
         { return base::col(j,i1,i2); }
-        const_diag_sub_type diag(int i) const
+        TMV_INLINE const_diag_sub_type diag(int i) const
         { return base::diag(i); }
-        const_diag_sub_type diag(int i, int j1, int j2) const
+        TMV_INLINE const_diag_sub_type diag(int i, int j1, int j2) const
         { return base::diag(i,j1,j2); }
 
 
@@ -1243,7 +1240,7 @@ namespace tmv {
         // Op =
         //
 
-        type& operator=(BaseMatrix_Rec_Mutable<M>& m2) 
+        TMV_INLINE_ND type& operator=(BaseMatrix_Rec_Mutable<M>& m2) 
         {
             TMVAssert(colsize() == m2.colsize());
             TMVAssert(rowsize() == m2.rowsize());
@@ -1252,7 +1249,7 @@ namespace tmv {
         }
 
         template <class M2>
-        type& operator=(const BaseMatrix<M2>& m2) 
+        TMV_INLINE_ND type& operator=(const BaseMatrix<M2>& m2) 
         {
             TMVStaticAssert((Sizes<_colsize,M2::_colsize>::same));
             TMVStaticAssert((Sizes<_rowsize,M2::_rowsize>::same));
@@ -1263,7 +1260,7 @@ namespace tmv {
             return mat(); 
         }
 
-        type& operator=(const value_type x)
+        TMV_INLINE_ND type& operator=(const value_type x)
         {
             TMVStaticAssert((Sizes<_rowsize,_colsize>::same));
             TMVAssert(colsize() == rowsize());
@@ -1285,27 +1282,27 @@ namespace tmv {
         //
 
         // First the ones from BaseMatrix_Mutable:
-        type& setZero()
+        TMV_INLINE type& setZero()
         { tmv::SetZero(mat()); return mat(); }
 
-        type& setAllTo(value_type val)
+        TMV_INLINE type& setAllTo(value_type val)
         { tmv::SetAllTo(mat(),val); return mat(); }
 
-        type& addToAll(value_type val)
+        TMV_INLINE type& addToAll(value_type val)
         { tmv::AddToAll(mat(),val); return mat(); }
 
-        type& clip(float_type thresh)
+        TMV_INLINE type& clip(float_type thresh)
         { tmv::Clip(mat(),thresh); return mat(); }
 
         template <class F>
-        type& applyToAll(const F& f)
+        TMV_INLINE type& applyToAll(const F& f)
         { tmv::ApplyToAll(mat(),f); return mat(); }
 
-        type& conjugateSelf()
+        TMV_INLINE type& conjugateSelf()
         { tmv::ConjugateSelf(mat()); return mat(); }
 
         // Some more that are added for Rec shape:
-        type& transposeSelf() 
+        TMV_INLINE type& transposeSelf() 
         { tmv::TransposeSelf(mat()); return mat(); }
 
         type& setToIdentity(const value_type x=value_type(1))
@@ -1325,7 +1322,7 @@ namespace tmv {
             }
             return mat();
         }
-        type& swapRows(int i1, int i2) 
+        TMV_INLINE type& swapRows(int i1, int i2) 
         {
             CheckRowIndex<_fort>(i1,colsize());
             CheckRowIndex<_fort>(i2,colsize());
@@ -1341,49 +1338,49 @@ namespace tmv {
             }
             return mat();
         }
-        type& swapCols(int j1, int j2) 
+        TMV_INLINE type& swapCols(int j1, int j2) 
         {
             CheckColIndex<_fort>(j1,rowsize());
             CheckColIndex<_fort>(j2,rowsize());
             return cSwapCols(j1,j2);
         }
 
-        type& cPermuteRows(const int* p, int i1, int i2) 
+        TMV_INLINE type& cPermuteRows(const int* p, int i1, int i2) 
         { tmv::PermuteRows(mat(),p,i1,i2); return mat(); }
-        type& permuteRows(const int* p, int i1, int i2) 
+        TMV_INLINE type& permuteRows(const int* p, int i1, int i2) 
         {
             CheckRowRange<_fort>(i1,i2,colsize());
             return cPermuteRows(p,i1,i2);
         }
-        type& permuteRows(const int* p) 
+        TMV_INLINE type& permuteRows(const int* p) 
         { return cPermuteRows(p,0,colsize()); }
 
-        type& cReversePermuteRows(const int* p, int i1, int i2) 
+        TMV_INLINE type& cReversePermuteRows(const int* p, int i1, int i2) 
         { tmv::ReversePermuteRows(mat(),p,i1,i2); return mat(); }
-        type& reversePermuteRows(const int* p, int i1, int i2) 
+        TMV_INLINE type& reversePermuteRows(const int* p, int i1, int i2) 
         {
             CheckRowRange<_fort>(i1,i2,colsize());
             return cReversePermuteRows(p,i1,i2);
         }
-        type& reversePermuteRows(const int* p) 
+        TMV_INLINE type& reversePermuteRows(const int* p) 
         { return cReversePermuteRows(p,0,colsize()); }
 
-        type& permuteCols(const int* p, int j1, int j2) 
+        TMV_INLINE type& permuteCols(const int* p, int j1, int j2) 
         {
             CheckColRange<_fort>(j1,j2,rowsize());
             transpose().cPermuteRows(p,j1,j2);
             return mat();
         }
-        type& permuteCols(const int* p) 
+        TMV_INLINE type& permuteCols(const int* p) 
         { transpose().cPermuteRows(p,0,rowsize()); return mat(); }
 
-        type& reversePermuteCols(const int* p, int j1, int j2) 
+        TMV_INLINE type& reversePermuteCols(const int* p, int j1, int j2) 
         {
             CheckColRange<_fort>(j1,j2,rowsize());
             transpose().cReversePermuteRows(p,j1,j2);
             return mat();
         }
-        type& reversePermuteCols(const int* p) 
+        TMV_INLINE type& reversePermuteCols(const int* p) 
         { transpose().cReversePermuteRows(p,0,rowsize()); return mat(); }
 
 
@@ -1491,40 +1488,40 @@ namespace tmv {
 
 
         // Repeat the const versions:
-        const_submatrix_type cSubMatrix(
+        TMV_INLINE const_submatrix_type cSubMatrix(
             int i1, int i2, int j1, int j2) const
         { return base::cSubMatrix(i1,i2,j1,j2); }
-        const_submatrix_step_type cSubMatrix(
+        TMV_INLINE const_submatrix_step_type cSubMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const
         { return base::cSubMatrix(i1,i2,j1,j2,istep,jstep); }
-        const_subvector_type cSubVector(
+        TMV_INLINE const_subvector_type cSubVector(
             int i, int j, int istep, int jstep, int s) const
         { return base::cSubVector(i,j,istep,jstep,s); }
-        const_colpair_type cColPair(int j1, int j2) const
+        TMV_INLINE const_colpair_type cColPair(int j1, int j2) const
         { return base::cColPair(j1,j2); }
-        const_rowpair_type cRowPair(int i1, int i2) const
+        TMV_INLINE const_rowpair_type cRowPair(int i1, int i2) const
         { return base::cRowPair(i1,i2); }
-        const_colrange_type cColRange(int j1, int j2) const
+        TMV_INLINE const_colrange_type cColRange(int j1, int j2) const
         { return base::cColRange(j1,j2); }
-        const_rowrange_type cRowRange(int i1, int i2) const
+        TMV_INLINE const_rowrange_type cRowRange(int i1, int i2) const
         { return base::cRowRange(i1,i2); }
 
-        const_submatrix_type subMatrix(
+        TMV_INLINE const_submatrix_type subMatrix(
             int i1, int i2, int j1, int j2) const
         { return base::subMatrix(i1,i2,j1,j2); }
-        const_submatrix_step_type subMatrix(
+        TMV_INLINE const_submatrix_step_type subMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const
         { return base::subMatrix(i1,i2,j1,j2,istep,jstep); }
-        const_subvector_type subVector(
+        TMV_INLINE const_subvector_type subVector(
             int i, int j, int istep, int jstep, int s) const
         { return base::subVector(i,j,istep,jstep,s); }
-        const_colpair_type colPair(int j1, int j2) const
+        TMV_INLINE const_colpair_type colPair(int j1, int j2) const
         { return base::colPair(j1,j2); }
-        const_rowpair_type rowPair(int i1, int i2) const
+        TMV_INLINE const_rowpair_type rowPair(int i1, int i2) const
         { return base::rowPair(i1,i2); }
-        const_colrange_type colRange(int j1, int j2) const
+        TMV_INLINE const_colrange_type colRange(int j1, int j2) const
         { return base::colRange(j1,j2); }
-        const_rowrange_type rowRange(int i1, int i2) const
+        TMV_INLINE const_rowrange_type rowRange(int i1, int i2) const
         { return base::rowRange(i1,i2); }
 
 
@@ -1625,43 +1622,43 @@ namespace tmv {
 
 
         // Repeat the const versions:
-        TMV_MAYBE_CREF(type,const_view_type) view() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_view_type) view() const
         { return base::view(); }
-        TMV_MAYBE_CREF(type,const_cview_type) cView() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_cview_type) cView() const
         { return base::cView(); }
-        TMV_MAYBE_CREF(type,const_fview_type) fView() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_fview_type) fView() const
         { return base::fView(); }
-        TMV_MAYBE_CREF(type,const_xview_type) xView() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_xview_type) xView() const
         { return base::xView(); }
-        TMV_MAYBE_CREF(type,const_cmview_type) cmView() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_cmview_type) cmView() const
         { return base::cmView(); }
-        TMV_MAYBE_CREF(type,const_rmview_type) rmView() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_rmview_type) rmView() const
         { return base::rmView(); }
-        const_transpose_type transpose() const
+        TMV_INLINE const_transpose_type transpose() const
         { return base::transpose(); }
-        TMV_MAYBE_CREF(type,const_conjugate_type) conjugate() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_conjugate_type) conjugate() const
         { return base::conjugate(); }
-        const_adjoint_type adjoint() const
+        TMV_INLINE const_adjoint_type adjoint() const
         { return base::adjoint(); }
-        const_uppertri_type upperTri() const
+        TMV_INLINE const_uppertri_type upperTri() const
         { return base::upperTri(); }
-        const_unit_uppertri_type unitUpperTri() const
+        TMV_INLINE const_unit_uppertri_type unitUpperTri() const
         { return base::unitUpperTri(); }
-        const_unknown_uppertri_type upperTri(DiagType dt) const
+        TMV_INLINE const_unknown_uppertri_type upperTri(DiagType dt) const
         { return base::upperTri(dt); }
-        const_lowertri_type lowerTri() const
+        TMV_INLINE const_lowertri_type lowerTri() const
         { return base::lowerTri(); }
-        const_unit_lowertri_type unitLowerTri() const
+        TMV_INLINE const_unit_lowertri_type unitLowerTri() const
         { return base::unitLowerTri(); }
-        const_unknown_lowertri_type lowerTri(DiagType dt) const
+        TMV_INLINE const_unknown_lowertri_type lowerTri(DiagType dt) const
         { return base::lowerTri(dt); }
-        const_linearview_type linearView() const
+        TMV_INLINE const_linearview_type linearView() const
         { return base::linearView(); }
-        const_realpart_type realPart() const
+        TMV_INLINE const_realpart_type realPart() const
         { return base::realPart(); }
-        const_imagpart_type imagPart() const
+        TMV_INLINE const_imagpart_type imagPart() const
         { return base::imagPart(); }
-        TMV_MAYBE_CREF(type,const_nonconj_type) nonConj() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_nonconj_type) nonConj() const
         { return base::nonConj(); }
 
 
@@ -1670,38 +1667,38 @@ namespace tmv {
         // I/O
         //
 
-        void read(std::istream& is)
+        TMV_INLINE void read(std::istream& is)
         { tmv::Read(is,mat()); }
 
         //
         // Auxilliary routines
         //
 
-        const type& mat() const
+        TMV_INLINE const type& mat() const
         { return static_cast<const type&>(*this); }
-        type& mat()
+        TMV_INLINE type& mat()
         { return static_cast<type&>(*this); }
 
-        bool isconj() const { return _conj; }
-        int diagstep() const 
+        TMV_INLINE bool isconj() const { return _conj; }
+        TMV_INLINE int diagstep() const 
         { return _diagstep == UNKNOWN ? stepi() + stepj() : _diagstep; }
-        bool canLinearize() const 
+        TMV_INLINE bool canLinearize() const 
         { return (AuxCanLinearize<_canlin,_colmajor,_rowmajor,M>::ok(mat())); }
 
         // Note that these last functions need to be defined in a more derived
         // class than this, or an infinite loop will result when compiling.
         // Also, cref and cptr from above.
 
-        size_t colsize() const { return mat().colsize(); }
-        size_t rowsize() const { return mat().rowsize(); }
-        size_t ls() const { return mat().ls(); }
-        int stepi() const { return mat().stepi(); }
-        int stepj() const { return mat().stepj(); }
-        bool isrm() const { return mat().isrm(); }
-        bool iscm() const { return mat().iscm(); }
+        TMV_INLINE size_t colsize() const { return mat().colsize(); }
+        TMV_INLINE size_t rowsize() const { return mat().rowsize(); }
+        TMV_INLINE size_t ls() const { return mat().ls(); }
+        TMV_INLINE int stepi() const { return mat().stepi(); }
+        TMV_INLINE int stepj() const { return mat().stepj(); }
+        TMV_INLINE bool isrm() const { return mat().isrm(); }
+        TMV_INLINE bool iscm() const { return mat().iscm(); }
 
-        value_type* ptr() { return mat().ptr(); }
-        reference ref(int i, int j) { return mat().ref(i,j); }
+        TMV_INLINE value_type* ptr() { return mat().ptr(); }
+        TMV_INLINE reference ref(int i, int j) { return mat().ref(i,j); }
 
     }; // BaseMatrix_Rec_Mutable
 

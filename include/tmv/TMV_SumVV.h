@@ -40,19 +40,19 @@
 namespace tmv {
 
     template <int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
-    static inline void AddVV(
+    static TMV_INLINE void AddVV(
         const Scaling<ix1,T1>& x1, const BaseVector<V1>& v1,
         const Scaling<ix2,T2>& x2, const BaseVector<V2>& v2,
         BaseVector_Mutable<V3>& v3)
     { AddVV(x1,v1.calc(),x2,v2.calc(),v3.vec()); }
     template <int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
-    static inline void NoAliasAddVV(
+    static TMV_INLINE void NoAliasAddVV(
         const Scaling<ix1,T1>& x1, const BaseVector<V1>& v1,
         const Scaling<ix2,T2>& x2, const BaseVector<V2>& v2,
         BaseVector_Mutable<V3>& v3)
     { NoAliasAddVV(x1,v1.calc(),x2,v2.calc(),v3.vec()); }
     template <int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
-    static inline void AliasAddVV(
+    static TMV_INLINE void AliasAddVV(
         const Scaling<ix1,T1>& x1, const BaseVector<V1>& v1,
         const Scaling<ix2,T2>& x2, const BaseVector<V2>& v2,
         BaseVector_Mutable<V3>& v3)
@@ -103,17 +103,17 @@ namespace tmv {
             TMVAssert(v1.size() == v2.size());
         }
 
-        const Scaling<ix1,T1>& getX1() const { return x1; }
-        const V1& getV1() const { return v1; }
-        const Scaling<ix2,T2>& getX2() const { return x2; }
-        const V2& getV2() const { return v2; }
+        TMV_INLINE const Scaling<ix1,T1>& getX1() const { return x1; }
+        TMV_INLINE const V1& getV1() const { return v1; }
+        TMV_INLINE const Scaling<ix2,T2>& getX2() const { return x2; }
+        TMV_INLINE const V2& getV2() const { return v2; }
 
-        size_t size() const { return v1.size(); }
+        TMV_INLINE size_t size() const { return v1.size(); }
         value_type cref(int i) const
         { return x1 * v1.cref(i) + x2 * v2.cref(i); }
 
         template <class V3>
-        void assignTo(BaseVector_Mutable<V3>& v3) const
+        TMV_INLINE_ND void assignTo(BaseVector_Mutable<V3>& v3) const
         {
             TMVStaticAssert((Sizes<type::_size,V3::_size>::same)); 
             TMVAssert(size() == v3.size());
@@ -122,7 +122,7 @@ namespace tmv {
         }
 
         template <class V3>
-        void newAssignTo(BaseVector_Mutable<V3>& v3) const
+        TMV_INLINE_ND void newAssignTo(BaseVector_Mutable<V3>& v3) const
         {
             TMVStaticAssert((Sizes<type::_size,V3::_size>::same)); 
             TMVAssert(size() == v3.size());
@@ -140,126 +140,78 @@ namespace tmv {
 #define RT typename V2::real_type
     // v += v
     template <class V1, class V2>
-    static inline void AddEq(
+    static TMV_INLINE void AddEq(
         BaseVector_Mutable<V1>& v1, const BaseVector<V2>& v2) 
-    {
-        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
-        TMVAssert(v1.size() == v2.size());
-        TMVStaticAssert(V1::iscomplex || V2::isreal);
-        MultXV<true>(v2.vec(),v1);
-    }
+    { MultXV<true>(v2.vec(),v1); }
 
     // v += xv
     template <class V1, int ix2, class T2, class V2>
-    static inline void AddEq(
+    static TMV_INLINE void AddEq(
         BaseVector_Mutable<V1>& v1, const ProdXV<ix2,T2,V2>& v2) 
-    {
-        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
-        TMVAssert(v1.size() == v2.size());
-        TMVStaticAssert(V1::iscomplex || V2::isreal);
-        MultXV<true>(v2.getX(),v2.getV().vec(),v1);
-    }
+    { MultXV<true>(v2.getX(),v2.getV().vec(),v1); }
 
     // v -= v
     template <class V1, class V2>
-    static inline void SubtractEq(
+    static TMV_INLINE void SubtractEq(
         BaseVector_Mutable<V1>& v1, const BaseVector<V2>& v2)
-    {
-        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
-        TMVAssert(v1.size() == v2.size());
-        TMVStaticAssert(V1::iscomplex || V2::isreal);
-        MultXV<true>(Scaling<-1,RT>(),v2.vec(),v1);
-    }
+    { MultXV<true>(Scaling<-1,RT>(),v2.vec(),v1); }
 
     // v -= xv
     template <class V1, int ix2, class T2, class V2>
-    static inline void SubtractEq(
+    static TMV_INLINE void SubtractEq(
         BaseVector_Mutable<V1>& v1, const ProdXV<ix2,T2,V2>& v2) 
-    {
-        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
-        TMVAssert(v1.size() == v2.size());
-        TMVStaticAssert(V1::iscomplex || V2::isreal);
-        MultXV<true>(-v2.getX(),v2.getV().vec(),v1);
-    }
+    { MultXV<true>(-v2.getX(),v2.getV().vec(),v1); }
 
     // v + v
     template <class V1, class V2>
-    static inline SumVV<1,RT,V1,1,RT,V2> operator+(
+    static TMV_INLINE SumVV<1,RT,V1,1,RT,V2> operator+(
         const BaseVector<V1>& v1, const BaseVector<V2>& v2)
-    {
-        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
-        TMVAssert(v1.size() == v2.size());
-        return SumVV<1,RT,V1,1,RT,V2>(RT(1),v1,RT(1),v2); 
-    }
+    { return SumVV<1,RT,V1,1,RT,V2>(RT(1),v1,RT(1),v2); }
 
     // xv + v
     template <int ix1, class T1, class V1, class V2>
-    static inline SumVV<ix1,T1,V1,1,RT,V2> operator+(
+    static TMV_INLINE SumVV<ix1,T1,V1,1,RT,V2> operator+(
         const ProdXV<ix1,T1,V1>& v1, const BaseVector<V2>& v2)
-    {
-        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
-        TMVAssert(v1.size() == v2.size());
-        return SumVV<ix1,T1,V1,1,RT,V2>(T1(v1.getX()),v1.getV(),RT(1),v2); 
-    }
+    { return SumVV<ix1,T1,V1,1,RT,V2>(T1(v1.getX()),v1.getV(),RT(1),v2); }
 
     // v + xv
     template <class V1, int ix2, class T2, class V2>
-    static inline SumVV<1,RT,V1,ix2,T2,V2> operator+(
+    static TMV_INLINE SumVV<1,RT,V1,ix2,T2,V2> operator+(
         const BaseVector<V1>& v1, const ProdXV<ix2,T2,V2>& v2)
-    {
-        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
-        TMVAssert(v1.size() == v2.size());
-        return SumVV<1,RT,V1,ix2,T2,V2>(RT(1),v1,T2(v2.getX()),v2.getV()); 
-    }
+    { return SumVV<1,RT,V1,ix2,T2,V2>(RT(1),v1,T2(v2.getX()),v2.getV()); }
 
     // xv + xv
     template <int ix1, class T1, class V1, int ix2, class T2, class V2>
-    static inline SumVV<ix1,T1,V1,ix2,T2,V2> operator+(
+    static TMV_INLINE SumVV<ix1,T1,V1,ix2,T2,V2> operator+(
         const ProdXV<ix1,T1,V1>& v1, const ProdXV<ix2,T2,V2>& v2)
     {
-        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
-        TMVAssert(v1.size() == v2.size());
         return SumVV<ix1,T1,V1,ix2,T2,V2>(
             T1(v1.getX()),v1.getV(),T2(v2.getX()),v2.getV()); 
     }
 
     // v - v
     template <class V1, class V2>
-    static inline SumVV<1,RT,V1,-1,RT,V2> operator-(
+    static TMV_INLINE SumVV<1,RT,V1,-1,RT,V2> operator-(
         const BaseVector<V1>& v1, const BaseVector<V2>& v2)
-    {
-        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
-        TMVAssert(v1.size() == v2.size());
-        return SumVV<1,RT,V1,-1,RT,V2>(RT(1),v1,RT(-1),v2); 
-    }
+    { return SumVV<1,RT,V1,-1,RT,V2>(RT(1),v1,RT(-1),v2); }
 
     // xv - v
     template <int ix1, class T1, class V1, class V2>
-    static inline SumVV<ix1,T1,V1,-1,RT,V2> operator-(
+    static TMV_INLINE SumVV<ix1,T1,V1,-1,RT,V2> operator-(
         const ProdXV<ix1,T1,V1>& v1, const BaseVector<V2>& v2)
-    {
-        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
-        TMVAssert(v1.size() == v2.size());
-        return SumVV<ix1,T1,V1,-1,RT,V2>(T1(v1.getX()),v1.getV(),RT(-1),v2); 
-    }
+    { return SumVV<ix1,T1,V1,-1,RT,V2>(T1(v1.getX()),v1.getV(),RT(-1),v2); }
 
     // v - xv
     template <class V1, int ix2, class T2, class V2>
-    static inline SumVV<1,RT,V1,-ix2,T2,V2> operator-(
+    static TMV_INLINE SumVV<1,RT,V1,-ix2,T2,V2> operator-(
         const BaseVector<V1>& v1, const ProdXV<ix2,T2,V2>& v2)
-    {
-        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
-        TMVAssert(v1.size() == v2.size());
-        return SumVV<1,RT,V1,-ix2,T2,V2>(RT(1),v1,T2(-v2.getX()),v2.getV()); 
-    }
+    { return SumVV<1,RT,V1,-ix2,T2,V2>(RT(1),v1,T2(-v2.getX()),v2.getV()); }
 
     // xv - xv
     template <int ix1, class T1, class V1, int ix2, class T2, class V2>
-    static inline SumVV<ix1,T1,V1,-ix2,T2,V2> operator-(
+    static TMV_INLINE SumVV<ix1,T1,V1,-ix2,T2,V2> operator-(
         const ProdXV<ix1,T1,V1>& v1, const ProdXV<ix2,T2,V2>& v2)
     {
-        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
-        TMVAssert(v1.size() == v2.size());
         return SumVV<ix1,T1,V1,-ix2,T2,V2>(
             T1(v1.getX()),v1.getV(),T2(-v2.getX()),v2.getV()); 
     }
@@ -276,7 +228,7 @@ namespace tmv {
 
     // -(xv+xv)
     template <int ix1, class T1, class V1, int ix2, class T2, class V2>
-    static inline SumVV<-ix1,T1,V1,-ix2,T2,V2> operator-(
+    static TMV_INLINE SumVV<-ix1,T1,V1,-ix2,T2,V2> operator-(
         const SumVV<ix1,T1,V1,ix2,T2,V2>& svv)
     {
         return SumVV<-ix1,T1,V1,-ix2,T2,V2>(
@@ -285,7 +237,7 @@ namespace tmv {
 
     // x * (xv+xv)
     template <int ix1, class T1, class V1, int ix2, class T2, class V2>
-    static inline SumVV<0,T1,V1,0,T2,V2> operator*(
+    static TMV_INLINE SumVV<0,T1,V1,0,T2,V2> operator*(
         const int x, const SumVV<ix1,T1,V1,ix2,T2,V2>& svv)
     {
         return SumVV<0,T1,V1,0,T2,V2>(
@@ -293,7 +245,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class V1, int ix2, class T2, class V2>
-    static inline SumVV<0,T1,V1,0,T2,V2> operator*(
+    static TMV_INLINE SumVV<0,T1,V1,0,T2,V2> operator*(
         const RT x, const SumVV<ix1,T1,V1,ix2,T2,V2>& svv)
     {
         return SumVV<0,T1,V1,0,T2,V2>(
@@ -301,7 +253,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class V1, int ix2, class T2, class V2>
-    static inline SumVV<0,CT,V1,0,CT,V2> operator*(
+    static TMV_INLINE SumVV<0,CT,V1,0,CT,V2> operator*(
         const CT x, const SumVV<ix1,T1,V1,ix2,T2,V2>& svv)
     {
         return SumVV<0,CT,V1,0,CT,V2>(
@@ -309,7 +261,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class V1, int ix2, class T2, class V2>
-    static inline SumVV<0,CT,V1,0,CT,V2> operator*(
+    static TMV_INLINE SumVV<0,CT,V1,0,CT,V2> operator*(
         const CCT x, const SumVV<ix1,T1,V1,ix2,T2,V2>& svv)
     {
         return SumVV<0,CT,V1,0,CT,V2>(
@@ -317,7 +269,7 @@ namespace tmv {
     }
 
     template <int ix, class T, int ix1, class T1, class V1, int ix2, class T2, class V2>
-    static inline SumVV<ix1*ix,TX1,V1,ix2*ix,TX2,V2> operator*(
+    static TMV_INLINE SumVV<ix1*ix,TX1,V1,ix2*ix,TX2,V2> operator*(
         const Scaling<ix,T>& x, const SumVV<ix1,T1,V1,ix2,T2,V2>& svv)
     {
         return SumVV<ix1*ix,TX1,V1,ix2*ix,TX2,V2>(
@@ -326,7 +278,7 @@ namespace tmv {
 
     // (xv+xv)*x
     template <int ix1, class T1, class V1, int ix2, class T2, class V2>
-    static inline SumVV<0,T1,V1,0,T2,V2> operator*(
+    static TMV_INLINE SumVV<0,T1,V1,0,T2,V2> operator*(
         const SumVV<ix1,T1,V1,ix2,T2,V2>& svv, const int x)
     {
         return SumVV<0,T1,V1,0,T2,V2>(
@@ -334,7 +286,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class V1, int ix2, class T2, class V2>
-    static inline SumVV<0,T1,V1,0,T2,V2> operator*(
+    static TMV_INLINE SumVV<0,T1,V1,0,T2,V2> operator*(
         const SumVV<ix1,T1,V1,ix2,T2,V2>& svv, const RT x)
     {
         return SumVV<0,T1,V1,0,T2,V2>(
@@ -342,7 +294,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class V1, int ix2, class T2, class V2>
-    static inline SumVV<0,CT,V1,0,CT,V2> operator*(
+    static TMV_INLINE SumVV<0,CT,V1,0,CT,V2> operator*(
         const SumVV<ix1,T1,V1,ix2,T2,V2>& svv, const CT x)
     {
         return SumVV<0,CT,V1,0,CT,V2>(
@@ -350,7 +302,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class V1, int ix2, class T2, class V2>
-    static inline SumVV<0,CT,V1,0,CT,V2> operator*(
+    static TMV_INLINE SumVV<0,CT,V1,0,CT,V2> operator*(
         const SumVV<ix1,T1,V1,ix2,T2,V2>& svv, const CCT x)
     {
         return SumVV<0,CT,V1,0,CT,V2>(
@@ -358,7 +310,7 @@ namespace tmv {
     }
 
     template <int ix, class T, int ix1, class T1, class V1, int ix2, class T2, class V2>
-    static inline SumVV<ix1*ix,TX1,V1,ix2*ix,TX2,V2> operator*(
+    static TMV_INLINE SumVV<ix1*ix,TX1,V1,ix2*ix,TX2,V2> operator*(
         const SumVV<ix1,T1,V1,ix2,T2,V2>& svv, const Scaling<ix,T>& x)
     {
         return SumVV<ix1*ix,TX1,V1,ix2*ix,TX2,V2>(
@@ -367,7 +319,7 @@ namespace tmv {
 
     // (xv+xv)/x
     template <int ix1, class T1, class V1, int ix2, class T2, class V2>
-    static inline SumVV<0,T1,V1,0,T2,V2> operator/(
+    static TMV_INLINE SumVV<0,T1,V1,0,T2,V2> operator/(
         const SumVV<ix1,T1,V1,ix2,T2,V2>& svv, const int x)
     {
         return SumVV<0,T1,V1,0,T2,V2>(
@@ -375,7 +327,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class V1, int ix2, class T2, class V2>
-    static inline SumVV<0,T1,V1,0,T2,V2> operator/(
+    static TMV_INLINE SumVV<0,T1,V1,0,T2,V2> operator/(
         const SumVV<ix1,T1,V1,ix2,T2,V2>& svv, const RT x)
     {
         return SumVV<0,T1,V1,0,T2,V2>(
@@ -383,7 +335,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class V1, int ix2, class T2, class V2>
-    static inline SumVV<0,CT,V1,0,CT,V2> operator/(
+    static TMV_INLINE SumVV<0,CT,V1,0,CT,V2> operator/(
         const SumVV<ix1,T1,V1,ix2,T2,V2>& svv, const CT x)
     {
         return SumVV<0,CT,V1,0,CT,V2>(
@@ -391,7 +343,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class V1, int ix2, class T2, class V2>
-    static inline SumVV<0,CT,V1,0,CT,V2> operator/(
+    static TMV_INLINE SumVV<0,CT,V1,0,CT,V2> operator/(
         const SumVV<ix1,T1,V1,ix2,T2,V2>& svv, const CCT x)
     {
         return SumVV<0,CT,V1,0,CT,V2>(
@@ -399,7 +351,7 @@ namespace tmv {
     }
 
     template <int ix, class T, int ix1, class T1, class V1, int ix2, class T2, class V2>
-    static inline SumVV<ix1*ix,TX1,V1,ix2*ix,TX2,V2> operator/(
+    static TMV_INLINE SumVV<ix1*ix,TX1,V1,ix2*ix,TX2,V2> operator/(
         const SumVV<ix1,T1,V1,ix2,T2,V2>& svv, const Scaling<ix,T>& x)
     {
         return SumVV<ix1*ix,TX1,V1,ix2*ix,TX2,V2>(

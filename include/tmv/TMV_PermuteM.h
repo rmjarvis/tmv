@@ -153,7 +153,7 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct PermuteRows_Helper<90,cs,rs,M1>
     {
-        static void call(M1& m, const int* p, const int i1, const int i2)
+        static TMV_INLINE void call(M1& m, const int* p, const int i1, const int i2)
         { InstPermuteRows(m.xView(),p,i1,i2); } 
     };
 
@@ -161,7 +161,7 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct PermuteRows_Helper<97,cs,rs,M1>
     {
-        static void call(M1& m, const int* p, const int i1, const int i2)
+        static TMV_INLINE void call(M1& m, const int* p, const int i1, const int i2)
         {
             typedef typename M1::conjugate_type Mc;
             Mc mc = m.conjugate();
@@ -173,7 +173,7 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct PermuteRows_Helper<-3,cs,rs,M1>
     {
-        static void call(M1& m, const int* p, const int i1, const int i2)
+        static TMV_INLINE void call(M1& m, const int* p, const int i1, const int i2)
         {
             const int algo = 
                 TMV_OPT == 0 ? 12 :
@@ -188,7 +188,7 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct PermuteRows_Helper<-2,cs,rs,M1>
     {
-        static void call(M1& m, const int* p, const int i1, const int i2)
+        static TMV_INLINE void call(M1& m, const int* p, const int i1, const int i2)
         {
             typedef typename M1::value_type T;
             const bool inst = 
@@ -206,7 +206,7 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct PermuteRows_Helper<-1,cs,rs,M1>
     {
-        static void call(M1& m, const int* p, const int i1, const int i2)
+        static TMV_INLINE void call(M1& m, const int* p, const int i1, const int i2)
         { PermuteRows_Helper<-2,cs,rs,M1>::call(m,p,i1,i2); }
     };
 
@@ -345,7 +345,7 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct ReversePermuteRows_Helper<90,cs,rs,M1>
     {
-        static void call(M1& m, const int* p, const int i1, const int i2)
+        static TMV_INLINE void call(M1& m, const int* p, const int i1, const int i2)
         { InstReversePermuteRows(m.xView(),p,i1,i2); } 
     };
 
@@ -353,7 +353,7 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct ReversePermuteRows_Helper<97,cs,rs,M1>
     {
-        static void call(M1& m, const int* p, const int i1, const int i2)
+        static TMV_INLINE void call(M1& m, const int* p, const int i1, const int i2)
         {
             typedef typename M1::conjugate_type Mc;
             Mc mc = m.conjugate();
@@ -365,7 +365,7 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct ReversePermuteRows_Helper<-3,cs,rs,M1>
     {
-        static void call(M1& m, const int* p, const int i1, const int i2)
+        static TMV_INLINE void call(M1& m, const int* p, const int i1, const int i2)
         {
             const int algo = 
                 TMV_OPT == 0 ? 12 :
@@ -380,7 +380,7 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct ReversePermuteRows_Helper<-2,cs,rs,M1>
     {
-        static void call(M1& m, const int* p, const int i1, const int i2)
+        static TMV_INLINE void call(M1& m, const int* p, const int i1, const int i2)
         {
             typedef typename M1::value_type T;
             const bool inst = 
@@ -398,7 +398,7 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct ReversePermuteRows_Helper<-1,cs,rs,M1>
     {
-        static void call(M1& m, const int* p, const int i1, const int i2)
+        static TMV_INLINE void call(M1& m, const int* p, const int i1, const int i2)
         { ReversePermuteRows_Helper<-2,cs,rs,M1>::call(m,p,i1,i2); }
     };
 

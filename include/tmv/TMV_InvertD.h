@@ -55,8 +55,8 @@ namespace tmv {
     struct ElemInvert_Helper<0,0,V>
     {
         typedef typename V::iterator IT;
-        static void call(V& ) {}
-        static void call2(int, IT ) {}
+        static TMV_INLINE void call(V& ) {}
+        static TMV_INLINE void call2(int, IT ) {}
     };
 
     // algo 11: simple for loop
@@ -268,7 +268,7 @@ namespace tmv {
     template <int s, class V>
     struct ElemInvert_Helper<90,s,V>
     {
-        static void call(V& v)
+        static TMV_INLINE void call(V& v)
         { InstElemInvert(v.xView()); }
     };
 
@@ -276,7 +276,7 @@ namespace tmv {
     template <int s, class V>
     struct ElemInvert_Helper<97,s,V>
     {
-        static void call(V& v)
+        static TMV_INLINE void call(V& v)
         {
             typedef typename V::conjugate_type Vc;
             Vc vc = v.conjugate();
@@ -312,7 +312,7 @@ namespace tmv {
 #endif
                 11 ) };
 #endif
-        static void call(V& v)
+        static TMV_INLINE void call(V& v)
         {
             TMVStaticAssert(!V::_conj);
 #ifdef PRINTALGO_InvD
@@ -327,7 +327,7 @@ namespace tmv {
             std::cout<<"v => "<<v<<std::endl;
 #endif
         }
-        static void call2(int n, IT A)
+        static TMV_INLINE void call2(int n, IT A)
         {
             TMVStaticAssert(!V::_conj);
             ElemInvert_Helper<algo,s,V>::call2(n,A); 
@@ -338,7 +338,7 @@ namespace tmv {
     template <int s, class V>
     struct ElemInvert_Helper<-3,s,V>
     {
-        static void call(V& v)
+        static TMV_INLINE void call(V& v)
         { ElemInvert_Helper<-4,s,V>::call(v); }
     };
 
@@ -346,7 +346,7 @@ namespace tmv {
     template <int s, class V>
     struct ElemInvert_Helper<-2,s,V>
     {
-        static void call(V& v)
+        static TMV_INLINE void call(V& v)
         {
             typedef typename V::value_type T;
             const bool inst = 
@@ -364,7 +364,7 @@ namespace tmv {
     template <int s, class V>
     struct ElemInvert_Helper<-1,s,V>
     {
-        static void call(V& v)
+        static TMV_INLINE void call(V& v)
         { ElemInvert_Helper<-2,s,V>::call(v); }
     };
 
