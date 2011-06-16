@@ -1,38 +1,40 @@
 #EIGEN= -I/home/mjarvis/eigen-2.0.0
 #EIGEN= -I/Users/Mike/Astro/eigen-2.0.12
 #EIGEN= -I../eigen
-EIGEN= -I/sw/include/eigen2
-#EIGEN= -I/Users/Mike/Astro/eigen-default
+#EIGEN= -I/sw/include/eigen2
+EIGEN= -I/Users/Mike/Astro/eigen-3.0.1
 
 #INCLUDE= -I../include $(EIGEN)
 
 #CC= icpc
-#CFLAGS= $(INCLUDE) -g3 -O -w -DTMV_INLINE -DTMV_OPT=3 -openmp -wd279
-#CFLAGS= $(INCLUDE) -g3 -fast -w -DTMV_INLINE -DTMV_OPT=3 -openmp -wd279
-#CFLAGS= $(INCLUDE) -g3 -w -O3 -DTMV_INLINE -DTMV_OPT=3 -wd279
+#CFLAGS= $(INCLUDE) -g3 -O -w -DTMV_NO_LIB -DTMV_OPT=3 -openmp -wd279
+#CFLAGS= $(INCLUDE) -g3 -fast -w -DTMV_NO_LIB -DTMV_OPT=3 -openmp -wd279
+#CFLAGS= $(INCLUDE) -g3 -w -O3 -DTMV_NO_LIB -DTMV_OPT=3 -wd279
 #CFLAGS= $(INCLUDE) -openmp -DNOBLAS -wd279
 #LIB= -L../lib -ltmv -L/usr/local/intel/mkl/10.0.1.014/lib/32 -lmkl_ia32 -lguide -lpthread
 
 #INCLUDE= -I../../tags/v0.63/include $(EIGEN) -DTMV_V063
 INCLUDE= -I../include $(EIGEN)
 CC= g++-4
-#CFLAGS= $(INCLUDE) -DNDEBUG -g3 -O2 -DTMV_INLINE -DTMV_OPT=3
-#CFLAGS= $(INCLUDE) -DNDEBUG -g3 -O2 -DTMV_OPT=3 -Wall -fopenmp
-#CFLAGS= $(INCLUDE) -DNDEBUG -g3 -O2 -DTMV_INLINE -DTMV_OPT=3 -fopenmp
+#CFLAGS= $(INCLUDE) -DNDEBUG -g3 -O2 -DTMV_NO_LIB -DTMV_OPT=3
+CFLAGS= $(INCLUDE) -DNDEBUG -g3 -O2 -DTMV_OPT=3 -fno-var-tracking-assignments -fopenmp
+#CFLAGS= $(INCLUDE) -DNDEBUG -g3 -O2 -DTMV_NO_LIB -DTMV_OPT=3 -fopenmp
 #CFLAGS= $(INCLUDE) -DNDEBUG -g3 -O2 -DTMV_OPT=3 -fopenmp
-#CFLAGS= $(INCLUDE) -g3 -O -DTMV_INLINE -DTMV_OPT=3 -fopenmp -DTMV_MEM_TEST
-CFLAGS= $(INCLUDE) -DNDEBUG -g3 -O2 -DTMV_OPT=2 -fopenmp
+#CFLAGS= $(INCLUDE) -g3 -O -DTMV_NO_LIB -DTMV_OPT=3 -fopenmp -DTMV_MEM_TEST
+#CFLAGS= $(INCLUDE) -ggdb -DNDEBUG -O2 -DTMV_OPT=3 -fopenmp
 #CFLAGS= $(INCLUDE) -g3 -O
 
 #LIB= 
-#LIB= -L../../tags/v0.63/lib -ltmv_symband -ltmv -llapack -lblas -lgfortran -lpthread
-LIB= -L../lib -ltmv /usr/lib/liblapack.dylib /usr/lib/libblas.dylib -lgfortran -lpthread
+#LIB= -L../../tags/v0.63/lib -ltmv_symband -ltmv -llapack -lblas -lgfortran -lpthread -fopenmp
+LIB= -L../lib -ltmv /usr/lib/liblapack.dylib /usr/lib/libblas.dylib -lgfortran -lpthread -fopenmp
+#LIB= -fopenmp
+#LIB= -L../lib -ltmv -lpthread -fopenmp
 #LIB= -L../lib -ltmv_3 -llapack -lblas -lgfortran
 #LIB= -L../lib -ltmv_mem -llapack -lblas -lgfortran -lpthread
 #LIB= -L../lib -llapack -lblas -lgfortran -lpthread
 
-all : tmvspeed4_always_make 
-#all : tmvspeed1 tmvspeed2 tmvspeed3 tmvspeed4
+all : tmvspeed5_always_make 
+#all : tmvspeed1 tmvspeed2 tmvspeed3 tmvspeed4 tmvspeed5
 
 tmvspeed1_always_make :
 	$(CC) $(CFLAGS) TMV_Speed_1.cpp -o tmvspeed1 $(LIB)
@@ -50,8 +52,10 @@ tmvspeed3_always_make :
 	$(CC) $(CFLAGS) TMV_Speed_3.cpp -o tmvspeed3 $(LIB)
 
 tmvspeed4_always_make :
-	$(CC) $(CFLAGS) -c TMV_Speed_4.cpp -o TMV_Speed_4.o
-	$(CC) $(CFLAGS) TMV_Speed_4.o -o tmvspeed4 $(LIB)
+	$(CC) $(CFLAGS) TMV_Speed_4.cpp -o tmvspeed4 $(LIB)
+
+tmvspeed5_always_make :
+	$(CC) $(CFLAGS) TMV_Speed_5.cpp -o tmvspeed5 $(LIB)
 
 tmvspeed1 : TMV_Speed_1.cpp
 	$(CC) $(CFLAGS) TMV_Speed_1.cpp -o tmvspeed1 $(LIB)
@@ -70,4 +74,7 @@ tmvspeed3 : TMV_Speed_3.cpp
 
 tmvspeed4 : TMV_Speed_4.cpp
 	$(CC) $(CFLAGS) TMV_Speed_4.cpp -o tmvspeed4 $(LIB)
+
+tmvspeed5 : TMV_Speed_5.cpp
+	$(CC) $(CFLAGS) TMV_Speed_5.cpp -o tmvspeed5 $(LIB)
 

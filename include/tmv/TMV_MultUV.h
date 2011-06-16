@@ -118,7 +118,8 @@ namespace tmv {
     template <bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<0,0,add,ix,T,M1,V2,V3>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& , const M1& , const V2& , V3& ) 
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& , const M1& , const V2& , V3& ) 
         {} 
     };
 
@@ -126,7 +127,7 @@ namespace tmv {
     template <bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<1,1,add,ix,T,M1,V2,V3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_UV
@@ -271,7 +272,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
             {
                 Unroller<I,N/2>::unroll(x,m1,v2,v3);
@@ -281,15 +282,16 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
             {
                 typedef typename M1::const_row_sub_type M1r;
                 typedef typename V2::const_subvector_type V2s;
                 const bool unit = M1::_unit;
                 Maybe<add>::add(
-                    v3.ref(I) , x * ( 
-                        Maybe<!unit>::prod(m1.cref(I,I) , v2.cref(I)) +
+                    v3.ref(I) , 
+                    ZProd<false,false>::prod(
+                        x , Maybe<!unit>::prod(m1.cref(I,I) , v2.cref(I)) +
                         MultVV_Helper<-4,s-I-1,M1r,V2s>::call(
                             m1.get_row(I,I+1,s),v2.cSubVector(I+1,s))));
             }
@@ -297,10 +299,10 @@ namespace tmv {
         template <int I>
         struct Unroller<I,0>
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix,T>& , const M1& , const V2& , V3& ) {}
         };
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_UV
@@ -452,7 +454,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
             {
                 Unroller<I+N/2,N-N/2>::unroll(x,m1,v2,v3);
@@ -462,15 +464,16 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
             {
                 typedef typename M1::const_row_sub_type M1r;
                 typedef typename V2::const_subvector_type V2s;
                 const bool unit = M1::_unit;
                 Maybe<add>::add(
-                    v3.ref(I) , x * ( 
-                        Maybe<!unit>::prod(m1.cref(I,I) , v2.cref(I)) +
+                    v3.ref(I) , 
+                    ZProd<false,false>::prod(
+                        x ,  Maybe<!unit>::prod(m1.cref(I,I) , v2.cref(I)) +
                         MultVV_Helper<-4,I,M1r,V2s>::call(
                             m1.get_row(I,0,I),v2.cSubVector(0,I))));
             }
@@ -478,11 +481,11 @@ namespace tmv {
         template <int I>
         struct Unroller<I,0>
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix,T>& , const M1& , const V2& , V3& ) {}
         };
 
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_UV
@@ -532,7 +535,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<81,s,add,ix,T,M1,V2,V3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_UV
@@ -547,7 +550,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<85,s,add,ix,T,M1,V2,V3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_UV
@@ -715,7 +718,7 @@ namespace tmv {
                 ( s == 1 ) ? 1 : 
                 V3::_conj ? 197 :
                 inst ? 91 : 
-                99;
+                98;
             MultUV_Helper<algo,s,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
         }
     };
@@ -1059,19 +1062,19 @@ namespace tmv {
     }
 
     template <class V1, int ix, class T, class M2>
-    static inline void MultEqVM(
+    static TMV_INLINE void MultEqVM(
         BaseVector_Mutable<V1>& v1,
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M2>& m2)
     { MultVM<false>(x,v1.vec(),m2.mat(),v1.vec()); }
 
     template <class V1, int ix, class T, class M2>
-    static inline void NoAliasMultEqVM(
+    static TMV_INLINE void NoAliasMultEqVM(
         BaseVector_Mutable<V1>& v1,
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M2>& m2)
     { NoAliasMultVM<false>(x,v1.vec(),m2.mat(),v1.vec()); }
 
     template <class V1, int ix, class T, class M2>
-    static inline void AliasMultEqVM(
+    static TMV_INLINE void AliasMultEqVM(
         BaseVector_Mutable<V1>& v1,
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M2>& m2)
     { AliasMultVM<false>(x,v1.vec(),m2.mat(),v1.vec()); }

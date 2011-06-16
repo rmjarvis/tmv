@@ -33,6 +33,7 @@
 
 #include "tmv/TMV_Det.h"
 #include "tmv/TMV_Vector.h"
+#include "tmv/TMV_MinMax.h"
 
 namespace tmv {
 

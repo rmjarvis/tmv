@@ -39,7 +39,7 @@ int main() try {
     TestAllSmallMatrixA<double>();
     TestAllSmallMatrixB<double>();
     TestAllSmallSquareDiv<double>();
-    //TestAllSmallNonSquareDiv<double>();
+    TestAllSmallNonSquareDiv<double>();
     TestSmallMatrixDet<double>();
 #endif
 
@@ -49,7 +49,7 @@ int main() try {
     TestAllSmallMatrixA<float>();
     TestAllSmallMatrixB<float>();
     TestAllSmallSquareDiv<float>();
-    //TestAllSmallNonSquareDiv<float>();
+    TestAllSmallNonSquareDiv<float>();
     TestSmallMatrixDet<float>();
 #endif
 
@@ -59,7 +59,7 @@ int main() try {
     TestAllSmallMatrixA<long double>();
     TestAllSmallMatrixB<long double>();
     TestAllSmallSquareDiv<long double>();
-    //TestAllSmallNonSquareDiv<long double>();
+    TestAllSmallNonSquareDiv<long double>();
     TestSmallMatrixDet<long double>();
 #endif 
 

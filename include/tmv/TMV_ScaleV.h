@@ -62,7 +62,7 @@ namespace tmv {
         typedef typename Vf::iterator ITf;
         typedef typename V::real_type RT;
         enum { s2 = IntTraits<s>::twoS };
-        static void call(const Scaling<ix,T>& x, V& v)
+        static inline void call(const Scaling<ix,T>& x, V& v)
         {
             Vf vf = v.flatten();
             ScaleV_Helper<-3,s2,ix,T,Vf>::call(x,vf);
@@ -80,7 +80,7 @@ namespace tmv {
     struct ScaleV_Helper<11,s,ix,T,V>
     {
         typedef typename V::iterator IT;
-        static void call(const Scaling<ix,T>& x, V& v)
+        static inline void call(const Scaling<ix,T>& x, V& v)
         {
             const int n = s == UNKNOWN ? int(v.size()) : s;
             call2(n,x,v.begin());
@@ -98,7 +98,7 @@ namespace tmv {
     struct ScaleV_Helper<12,s,ix,T,V>
     {
         typedef typename V::iterator IT;
-        static void call(const Scaling<ix,T>& x, V& v)
+        static inline void call(const Scaling<ix,T>& x, V& v)
         {
             const int n = s == UNKNOWN ? int(v.size()) : s;
             call2(n,x,v.begin());
@@ -121,7 +121,7 @@ namespace tmv {
     struct ScaleV_Helper<13,s,ix,T,V>
     {
         typedef typename V::iterator IT;
-        static void call(const Scaling<ix,T>& x, V& v)
+        static inline void call(const Scaling<ix,T>& x, V& v)
         {
             const int n = s == UNKNOWN ? int(v.size()) : s;
             call2(n,x,v.begin());
@@ -150,7 +150,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static void unroll(const Scaling<ix,T>& x, V& v)
+            static inline void unroll(const Scaling<ix,T>& x, V& v)
             {
                 Unroller<I,N/2>::unroll(x,v);
                 Unroller<I+N/2,N-N/2>::unroll(x,v);
@@ -159,14 +159,14 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static void unroll(const Scaling<ix,T>& x, V& v)
+            static inline void unroll(const Scaling<ix,T>& x, V& v)
             { v.ref(I) = ZProd<false,false>::prod(x,v.cref(I)); }
         };
         template <int I>
         struct Unroller<I,0>
-        { static void unroll(const Scaling<ix,T>& , V& ) {} };
+        { static inline void unroll(const Scaling<ix,T>& , V& ) {} };
 
-        static void call(const Scaling<ix,T>& x, V& v)
+        static inline void call(const Scaling<ix,T>& x, V& v)
         { Unroller<0,s>::unroll(x,v); }
     };
 
@@ -176,7 +176,7 @@ namespace tmv {
     struct ScaleV_Helper<21,s,ix,T,V>
     {
         typedef typename V::iterator IT;
-        static void call(const Scaling<ix,T>& x, V& v)
+        static inline void call(const Scaling<ix,T>& x, V& v)
         {
             const int n = s == UNKNOWN ? int(v.size()) : s;
             call2(n,x,v.begin());
@@ -219,7 +219,7 @@ namespace tmv {
     struct ScaleV_Helper<22,s,ix,T,V>
     {
         typedef typename V::iterator IT;
-        static void call(const Scaling<ix,T>& x, V& v)
+        static inline void call(const Scaling<ix,T>& x, V& v)
         {
             const int n = s == UNKNOWN ? int(v.size()) : s;
             call2(n,x,v.begin());
@@ -258,7 +258,7 @@ namespace tmv {
     struct ScaleV_Helper<23,s,ix,T,V>
     {
         typedef typename V::iterator IT;
-        static void call(const Scaling<ix,T>& x, V& v)
+        static inline void call(const Scaling<ix,T>& x, V& v)
         {
             const int n = s == UNKNOWN ? int(v.size()) : s;
             call2(n,x,v.begin());
@@ -309,7 +309,7 @@ namespace tmv {
     struct ScaleV_Helper<31,s,ix,T,V>
     {
         typedef typename V::iterator IT;
-        static void call(const Scaling<ix,T>& x, V& v)
+        static inline void call(const Scaling<ix,T>& x, V& v)
         {
             const int n = s == UNKNOWN ? int(v.size()) : s;
             call2(n,x,v.begin());
@@ -348,7 +348,7 @@ namespace tmv {
     struct ScaleV_Helper<32,s,ix,T,V>
     {
         typedef typename V::iterator IT;
-        static void call(const Scaling<ix,T>& x, V& v)
+        static inline void call(const Scaling<ix,T>& x, V& v)
         {
             const int n = s == UNKNOWN ? int(v.size()) : s;
             call2(n,x,v.begin());
@@ -374,7 +374,7 @@ namespace tmv {
     struct ScaleV_Helper<33,s,ix,T,V>
     {
         typedef typename V::iterator IT;
-        static void call(const Scaling<ix,T>& x, V& v)
+        static inline void call(const Scaling<ix,T>& x, V& v)
         {
             const int n = s == UNKNOWN ? int(v.size()) : s;
             call2(n,x,v.begin());

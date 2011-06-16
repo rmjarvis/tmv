@@ -58,9 +58,9 @@ namespace tmv {
     class UpperTriMatrixView;
     template <class T, int N, int A=0, int A1=0, int A2=0>
     class SmallUpperTriMatrix;
-    template <class T, int N, int Si, int Sj, int A=0>
+    template <class T, int N, int Si=UNKNOWN, int Sj=UNKNOWN, int A=0>
     class ConstSmallUpperTriMatrixView;
-    template <class T, int N, int Si, int Sj, int A=0>
+    template <class T, int N, int Si=UNKNOWN, int Sj=UNKNOWN, int A=0>
     class SmallUpperTriMatrixView;
 
     template <class T, int A=0, int A1=0, int A2=0>
@@ -71,14 +71,14 @@ namespace tmv {
     class LowerTriMatrixView;
     template <class T, int N, int A=0, int A1=0, int A2=0>
     class SmallLowerTriMatrix;
-    template <class T, int N, int Si, int Sj, int A=0>
+    template <class T, int N, int Si=UNKNOWN, int Sj=UNKNOWN, int A=0>
     class ConstSmallLowerTriMatrixView;
-    template <class T, int N, int Si, int Sj, int A=0>
+    template <class T, int N, int Si=UNKNOWN, int Sj=UNKNOWN, int A=0>
     class SmallLowerTriMatrixView;
 
     // Specify ExactSameStorage for triangle matrices:
     template <class M1, class M2>
-    static inline bool ExactSameStorage(
+    static TMV_INLINE bool ExactSameStorage(
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Tri<M2>& m2)
     {
         typedef typename M1::value_type T1;
@@ -87,7 +87,7 @@ namespace tmv {
             (m1.stepi() == m2.stepi() && m1.stepj() == m2.stepj()); 
     }
     template <class M1, class M2>
-    static inline bool OppositeStorage(
+    static TMV_INLINE bool OppositeStorage(
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Tri<M2>& m2)
     {
         typedef typename M1::value_type T1;
@@ -97,7 +97,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static inline bool ExactSameStorage(
+    static TMV_INLINE bool ExactSameStorage(
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Rec<M2>& m2)
     {
         typedef typename M1::value_type T1;
@@ -106,7 +106,7 @@ namespace tmv {
             (m1.stepi() == m2.stepi() && m1.stepj() == m2.stepj()); 
     }
     template <class M1, class M2>
-    static inline bool OppositeStorage(
+    static TMV_INLINE bool OppositeStorage(
         const BaseMatrix_Tri<M1>& m1, const BaseMatrix_Rec<M2>& m2)
     {
         typedef typename M1::value_type T1;
@@ -116,7 +116,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static inline bool ExactSameStorage(
+    static TMV_INLINE bool ExactSameStorage(
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Tri<M2>& m2)
     {
         typedef typename M1::value_type T1;
@@ -125,7 +125,7 @@ namespace tmv {
             (m1.stepi() == m2.stepi() && m1.stepj() == m2.stepj()); 
     }
     template <class M1, class M2>
-    static inline bool OppositeStorage(
+    static TMV_INLINE bool OppositeStorage(
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Tri<M2>& m2)
     {
         typedef typename M1::value_type T1;
@@ -141,18 +141,18 @@ namespace tmv {
         TMVAssert((!unit || i < j) && "i,j must be in strict upper triangle");
     }
     template <>
-    static TMV_INLINE_ND void CheckTri<LowerTri>(const bool unit, int i, int j)
+    TMV_INLINE_ND void CheckTri<LowerTri>(const bool unit, int i, int j)
     { // LowerTri
         TMVAssert(i >= j && "i,j must be in lower triangle");
         TMVAssert((!unit || i > j) && "i,j must be in strict lower triangle");
     }
     template <>
-    static TMV_INLINE_ND void CheckTri<UnitUpperTri>(const bool , int i, int j)
+    TMV_INLINE_ND void CheckTri<UnitUpperTri>(const bool , int i, int j)
     { // UnitUpperTri
         TMVAssert(i < j && "i,j must be in strict upper triangle");
     }
     template <>
-    static TMV_INLINE_ND void CheckTri<UnitLowerTri>(const bool , int i, int j)
+    TMV_INLINE_ND void CheckTri<UnitLowerTri>(const bool , int i, int j)
     { // UnitLowerTri
         TMVAssert(i > j && "i,j must be in strict upper triangle");
     }
@@ -165,7 +165,7 @@ namespace tmv {
                   "main diagonal not allowed for UnitDiag triangle matrix");
     }
     template <>
-    static TMV_INLINE_ND void CheckDiagTri<LowerTri>(const bool unit, int i)
+    TMV_INLINE_ND void CheckDiagTri<LowerTri>(const bool unit, int i)
     { // LowerTri
         TMVAssert(i <= 0 && 
                   "super-diagonal not allowed for lower triangle matrix");
@@ -173,7 +173,7 @@ namespace tmv {
                   "main diagonal not allowed for UnitDiag triangle matrix");
     }
     template <>
-    static TMV_INLINE_ND void CheckDiagTri<UnitUpperTri>(const bool , int i)
+    TMV_INLINE_ND void CheckDiagTri<UnitUpperTri>(const bool , int i)
     { // UpperTri
         TMVAssert(i >= 0 && 
                   "sub-diagonal not allowed for upper triangle matrix");
@@ -181,7 +181,7 @@ namespace tmv {
                   "main diagonal not allowed for UnitDiag triangle matrix");
     }
     template <>
-    static TMV_INLINE_ND void CheckDiagTri<UnitLowerTri>(const bool , int i)
+    TMV_INLINE_ND void CheckDiagTri<UnitLowerTri>(const bool , int i)
     { // LowerTri
         TMVAssert(i <= 0 && 
                   "super-diagonal not allowed for lower triangle matrix");
@@ -232,7 +232,7 @@ namespace tmv {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
                 (fort ? FortranStyle : CStyle) | NonUnitDiag )};
-        typedef SmallUpperTriMatrix<T,cs,A2> type;
+        typedef SmallLowerTriMatrix<T,cs,A2> type;
     };
     template <class T, int rs, bool rm, bool fort>
     struct MCopyHelper<T,LowerTri,UNKNOWN,rs,rm,fort>
@@ -240,7 +240,7 @@ namespace tmv {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
                 (fort ? FortranStyle : CStyle) | NonUnitDiag )};
-        typedef SmallUpperTriMatrix<T,rs,A2> type;
+        typedef SmallLowerTriMatrix<T,rs,A2> type;
     };
     template <class T, int cs, bool rm, bool fort>
     struct MCopyHelper<T,LowerTri,cs,UNKNOWN,rm,fort>
@@ -248,7 +248,7 @@ namespace tmv {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
                 (fort ? FortranStyle : CStyle) | NonUnitDiag )};
-        typedef SmallUpperTriMatrix<T,cs,A2> type;
+        typedef SmallLowerTriMatrix<T,cs,A2> type;
     };
     template <class T, bool rm, bool fort>
     struct MCopyHelper<T,LowerTri,UNKNOWN,UNKNOWN,rm,fort>
@@ -328,77 +328,83 @@ namespace tmv {
 
     // Defined in TMV_CopyU.h
     template <class M1, class M2>
-    static void Copy(
+    static inline void Copy(
         const BaseMatrix_Tri<M1>& m1, BaseMatrix_Tri_Mutable<M2>& m2);
     template <class M1, class M2>
-    static void NoAliasCopy(
+    static inline void NoAliasCopy(
         const BaseMatrix_Tri<M1>& m1, BaseMatrix_Tri_Mutable<M2>& m2);
 
     // Defiend below
     template <class M1, class M2>
-    static void Copy(
+    static inline void Copy(
         const BaseMatrix_Tri<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
     template <class M1, class M2>
-    static void NoAliasCopy(
+    static inline void NoAliasCopy(
         const BaseMatrix_Tri<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
 
     // Defined in TMV_SwapU.h
     template <class M1, class M2>
-    static void Swap(
+    static inline void Swap(
         BaseMatrix_Tri_Mutable<M1>& m1, BaseMatrix_Tri_Mutable<M2>& m2);
 
     // Defined in TMV_Norm.h
     template <class M>
-    static typename M::float_type DoNormF(const BaseMatrix_Tri<M>& m);
+    static inline typename M::float_type DoNormF(const BaseMatrix_Tri<M>& m);
 
     // Defined in TMV_NormU.h
     template <class M>
-    static typename M::real_type DoNormSq(const BaseMatrix_Tri<M>& m);
+    static inline typename M::real_type DoNormSq(const BaseMatrix_Tri<M>& m);
     template <class M>
-    static typename M::float_type DoNormSq(
+    static inline typename M::float_type DoNormSq(
         const BaseMatrix_Tri<M>& m, const typename M::float_type scale);
     template <class M>
-    static typename M::float_type DoNorm1(const BaseMatrix_Tri<M>& m);
+    static inline typename M::float_type DoNorm1(const BaseMatrix_Tri<M>& m);
     template <class M>
-    static typename M::float_type DoNormInf(const BaseMatrix_Tri<M>& m);
+    static inline typename M::float_type DoNormInf(const BaseMatrix_Tri<M>& m);
     template <class M>
-    static typename M::value_type DoSumElements(const BaseMatrix_Tri<M>& m);
+    static inline typename M::value_type DoSumElements(
+        const BaseMatrix_Tri<M>& m);
     template <class M>
-    static typename M::float_type DoSumAbsElements(const BaseMatrix_Tri<M>& m);
+    static inline typename M::float_type DoSumAbsElements(
+        const BaseMatrix_Tri<M>& m);
     template <class M>
-    static typename M::real_type DoSumAbs2Elements(const BaseMatrix_Tri<M>& m);
+    static inline typename M::real_type DoSumAbs2Elements(
+        const BaseMatrix_Tri<M>& m);
     template <class M>
-    static typename M::float_type DoMaxAbsElement(const BaseMatrix_Tri<M>& m);
+    static inline typename M::float_type DoMaxAbsElement(
+        const BaseMatrix_Tri<M>& m);
     template <class M>
-    static typename M::real_type DoMaxAbs2Element(const BaseMatrix_Tri<M>& m);
+    static inline typename M::real_type DoMaxAbs2Element(
+        const BaseMatrix_Tri<M>& m);
 
     // Defined in TMV_InvertU.h
     template <class M>
-    static void InvertSelf(BaseMatrix_Tri_Mutable<M>& m);
+    static inline void InvertSelf(BaseMatrix_Tri_Mutable<M>& m);
 
     // Defined in TMV_TriMatrixIO.h
     template <class M>
-    static void WriteCompact(std::ostream& os, const BaseMatrix_Tri<M>& m);
+    static inline void WriteCompact(
+        std::ostream& os, const BaseMatrix_Tri<M>& m);
     template <class M>
-    static void WriteCompact(
+    static inline void WriteCompact(
         std::ostream& os,
         const BaseMatrix_Tri<M>& m, typename M::float_type thresh) ;
     template <class M>
-    static void Read(std::istream& is, BaseMatrix_Tri_Mutable<M>& m);
+    static inline void Read(std::istream& is, BaseMatrix_Tri_Mutable<M>& m);
 
     // Defined below:
     template <class M>
-    static void SetZero(BaseMatrix_Tri_Mutable<M>& m);
+    static inline void SetZero(BaseMatrix_Tri_Mutable<M>& m);
     template <class M, class T>
-    static void SetAllTo(BaseMatrix_Tri_Mutable<M>& m, const T& val);
+    static inline void SetAllTo(BaseMatrix_Tri_Mutable<M>& m, const T& val);
     template <class M, class T>
-    static void AddToAll(BaseMatrix_Tri_Mutable<M>& m, const T& val);
+    static inline void AddToAll(BaseMatrix_Tri_Mutable<M>& m, const T& val);
     template <class M, class RT>
-    static void Clip(BaseMatrix_Tri_Mutable<M>& m, const RT& thresh);
+    static inline void Clip(BaseMatrix_Tri_Mutable<M>& m, const RT& thresh);
     template <class M, class F>
-    static void ApplyToAll(BaseMatrix_Tri_Mutable<M>& m, const F& f);
+    static inline void ApplyToAll(BaseMatrix_Tri_Mutable<M>& m, const F& f);
     template <class M>
-    static void ConjugateSelf(BaseMatrix_Tri_Mutable<M>& m);
+    static inline void ConjugateSelf(BaseMatrix_Tri_Mutable<M>& m);
 
     // A helper class for returning views without necessarily
     // making a new object.
@@ -1481,7 +1487,7 @@ namespace tmv {
     template <class M>
     struct SetZeroU_Helper<1,M>
     {
-        static void call(M& m) 
+        static inline void call(M& m) 
         { m.transpose().setZero(); } 
     };
 
@@ -1546,7 +1552,7 @@ namespace tmv {
     };
 
     template <class M>
-    static inline void SetZero(BaseMatrix_Tri_Mutable<M>& m)
+    static TMV_INLINE void SetZero(BaseMatrix_Tri_Mutable<M>& m)
     {
         const int algo = 
             M::_lower ? 1 :
@@ -1567,7 +1573,7 @@ namespace tmv {
     template <class M, class T>
     struct SetAllToU_Helper<1,M,T>
     {
-        static void call(M& m, const T& val) 
+        static inline void call(M& m, const T& val) 
         { m.transpose().setAllTo(val); } 
     };
 
@@ -1632,7 +1638,7 @@ namespace tmv {
     };
 
     template <class M, class T>
-    static inline void SetAllTo(BaseMatrix_Tri_Mutable<M>& m, const T& val)
+    static TMV_INLINE void SetAllTo(BaseMatrix_Tri_Mutable<M>& m, const T& val)
     {
         TMVAssert(!m.isunit() || val == T(1));
         const int algo = 
@@ -1654,7 +1660,7 @@ namespace tmv {
     template <class M, class T>
     struct AddToAllU_Helper<1,M,T>
     {
-        static void call(M& m, const T& val) 
+        static inline void call(M& m, const T& val) 
         { m.transpose().addToAll(val); } 
     };
 
@@ -1681,7 +1687,8 @@ namespace tmv {
     };
 
     template <class M, class T>
-    static inline void AddToAll(BaseMatrix_Tri_Mutable<M>& m, const T& val)
+    static TMV_INLINE_ND void AddToAll(
+        BaseMatrix_Tri_Mutable<M>& m, const T& val)
     {
         TMVStaticAssert(!M::_unit);
         TMVAssert(!m.isunit());
@@ -1702,7 +1709,7 @@ namespace tmv {
     template <class M, class RT>
     struct ClipU_Helper<1,M,RT>
     {
-        static void call(M& m, const RT& thresh) 
+        static inline void call(M& m, const RT& thresh) 
         { m.transpose().clip(thresh); } 
     };
 
@@ -1767,7 +1774,7 @@ namespace tmv {
     };
 
     template <class M, class RT>
-    static inline void Clip(BaseMatrix_Tri_Mutable<M>& m, const RT& thresh)
+    static TMV_INLINE void Clip(BaseMatrix_Tri_Mutable<M>& m, const RT& thresh)
     {
         const int algo = 
             M::_lower ? 1 :
@@ -1788,7 +1795,7 @@ namespace tmv {
     template <class M, class F>
     struct ApplyToAllU_Helper<1,M,F>
     {
-        static void call(M& m, const F& f) 
+        static inline void call(M& m, const F& f) 
         { m.transpose().applyToAll(f); } 
     };
 
@@ -1815,7 +1822,8 @@ namespace tmv {
     };
 
     template <class M, class F>
-    static inline void ApplyToAll(BaseMatrix_Tri_Mutable<M>& m, const F& f)
+    static TMV_INLINE_ND void ApplyToAll(
+        BaseMatrix_Tri_Mutable<M>& m, const F& f)
     {
         TMVStaticAssert(!M::_unit);
         TMVAssert(!m.isunit());
@@ -1835,13 +1843,13 @@ namespace tmv {
     // algo 0: Not complex, nothing to do
     template <class M>
     struct ConjugateU_Helper<0,M>
-    { static void call(M& ) {} };
+    { static inline void call(M& ) {} };
 
     // algo 1: LowerTri -- Transpose
     template <class M>
     struct ConjugateU_Helper<1,M>
     {
-        static void call(M& m)
+        static inline void call(M& m)
         { m.transpose().conjugateSelf(); }
     };
 
@@ -1906,7 +1914,7 @@ namespace tmv {
     };
 
     template <class M>
-    static inline void ConjugateSelf(BaseMatrix_Tri_Mutable<M>& m)
+    static TMV_INLINE void ConjugateSelf(BaseMatrix_Tri_Mutable<M>& m)
     {
         const int algo = 
             M::isreal ? 0 :
@@ -1937,7 +1945,7 @@ namespace tmv {
     template <class M>
     struct TraceU_Helper<1,M>
     {
-        static typename M::value_type call(const M& m)
+        static inline typename M::value_type call(const M& m)
         { return typename M::value_type(m.size()); }
     };
 
@@ -1956,12 +1964,12 @@ namespace tmv {
     template <class M>
     struct TraceU_Helper<11,M>
     {
-        static typename M::value_type call(const M& m)
+        static inline typename M::value_type call(const M& m)
         { return m.diag().sumElements(); }
     };
 
     template <class M>
-    static inline typename M::value_type DoTrace(const BaseMatrix_Tri<M>& m)
+    static TMV_INLINE typename M::value_type DoTrace(const BaseMatrix_Tri<M>& m)
     {
         const int algo = 
             M::_unit ? 1 :
@@ -1975,6 +1983,7 @@ namespace tmv {
     // TMV_Text 
     //
 
+#ifdef TMV_TEXT
     template <class M>
     static inline std::string TMV_Text(const BaseMatrix_Tri<M>& m)
     {
@@ -1990,6 +1999,7 @@ namespace tmv {
         s << "BaseMatrix_Tri_Mutable< "<<TMV_Text(m.mat())<<" >";
         return s.str();
     }
+#endif
 
 } // namespace tmv
 

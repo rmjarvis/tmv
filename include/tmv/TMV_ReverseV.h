@@ -87,7 +87,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static void unroll(V& v)
+            static inline void unroll(V& v)
             {
                 Unroller<I,N-1>::unroll(v);
                 v.cSwap(N-1,size-N);
@@ -95,8 +95,8 @@ namespace tmv {
         };
         template <int I>
         struct Unroller<I,0>
-        { static void unroll(V& v) {} };
-        static void call(V& v)
+        { static inline void unroll(V& v) {} };
+        static inline void call(V& v)
         { Unroller<0,size/2>::unroll(v); }
     };
 

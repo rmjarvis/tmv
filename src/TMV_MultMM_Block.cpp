@@ -30,9 +30,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "TMV_Blas.h"
+#include "tmv/TMV_MultMM.h"
 #include "tmv/TMV_MultMM_Block.h"
 #include "tmv/TMV_Matrix.h"
-#include "tmv/TMV_MultMM.h"
+#include "tmv/TMV_SmallMatrix.h"
+#include "tmv/TMV_Vector.h"
+#include "tmv/TMV_SmallVector.h"
 
 namespace tmv {
 

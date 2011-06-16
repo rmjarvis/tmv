@@ -1,17 +1,12 @@
 
 #define CT std::complex<T>
 
-#define Def1(T,C) \
-  template InstLUD<T>::InstLUD( \
-      const BaseMatrix<ConstMatrixView<T,C> >& A, bool _inplace); \
-
 template class InstLUD<T>; 
-Def1(T,NonConj)
+template InstLUD<T>::InstLUD(const ConstMatrixView<T,false>& A, bool _inplace);
 #ifdef TMV_INST_COMPLEX
 template class InstLUD<CT>; 
-Def1(CT,NonConj)
-Def1(CT,Conj)
+template InstLUD<CT>::InstLUD(const ConstMatrixView<CT,false>& A, bool _inplace);
+template InstLUD<CT>::InstLUD(const ConstMatrixView<CT,true>& A, bool _inplace);
 #endif
 
-#undef Def1
 #undef CT

@@ -41,6 +41,11 @@
 
 //#define XDEBUG_PRODMV
 
+#ifdef XDEBUG_PRODMM
+#include <iostream>
+#include "TMV_MatrixIO.h"
+#include "TMV_VectorIO.h"
+#endif
 
 namespace tmv {
 
@@ -516,7 +521,8 @@ namespace tmv {
 
     // -(mv)
     template <int ix, class T, class M1, class V2>
-    static TMV_INLINE ProdMV<-ix,T,M1,V2> operator-(const ProdMV<ix,T,M1,V2>& mv)
+    static TMV_INLINE ProdMV<-ix,T,M1,V2> operator-(
+        const ProdMV<ix,T,M1,V2>& mv)
     { return ProdMV<-ix,T,M1,V2>(-mv.getX(),mv.getM(),mv.getV()); }
 
     // x * (mv)
@@ -601,7 +607,8 @@ namespace tmv {
 
     // -(vm)
     template <int ix, class T, class V1, class M2>
-    static TMV_INLINE ProdVM<-ix,T,V1,M2> operator-(const ProdVM<ix,T,V1,M2>& vm)
+    static TMV_INLINE ProdVM<-ix,T,V1,M2> operator-(
+        const ProdVM<ix,T,V1,M2>& vm)
     { return ProdVM<-ix,T,V1,M2>(-vm.getX(),vm.getV(),vm.getM()); }
 
     // x * (vm)
@@ -697,7 +704,7 @@ namespace tmv {
 
     // TMV_Text
 
-#ifdef TMV_DEBUG
+#ifdef TMV_TEXT
     template <int ix, class T, class M1, class V2>
     static inline std::string TMV_Text(const ProdMV<ix,T,M1,V2>& mv)
     {

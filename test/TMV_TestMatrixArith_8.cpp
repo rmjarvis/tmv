@@ -7,7 +7,8 @@
 #include "TMV_TestMatrixArith.h"
 #define CT std::complex<T>
 
-template <class T> void TestMatrixArith_8()
+template <class T> 
+void TestMatrixArith_8()
 {
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<RT>::float_type FT;

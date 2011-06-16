@@ -35,11 +35,14 @@
 #include "TMV_Blas.h"
 #include "tmv/TMV_DivMU.h"
 #include "tmv/TMV_TriMatrix.h"
+#include "tmv/TMV_SmallTriMatrix.h"
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_CopyM.h"
 #include "tmv/TMV_CopyU.h"
 #include "tmv/TMV_Vector.h"
+#include "tmv/TMV_SmallVector.h"
 #include "tmv/TMV_Det.h"
+#include "tmv/TMV_ScaleM.h"
 
 namespace tmv {
 
@@ -85,7 +88,7 @@ namespace tmv {
 
         BLASNAME(dtrsm) (
             BLASCM A.iscm()?BLASCH_L:BLASCH_R, 
-            B.iscm()==M2::mupper?BLASCH_UP:BLASCH_LO, 
+            B.iscm()==M2::_upper?BLASCH_UP:BLASCH_LO, 
             A.iscm()==B.iscm()?BLASCH_NT:BLASCH_T,
             B.isunit()?BLASCH_U:BLASCH_NU, 
             BLASV(m),BLASV(n),BLASV(alpha),BLASP(B.cptr()),BLASV(ldb),
@@ -110,7 +113,7 @@ namespace tmv {
             A.conjugateSelf();
             BLASNAME(ztrsm) (
                 BLASCM A.iscm()?BLASCH_L:BLASCH_R, 
-                B.iscm()==M2::mupper?BLASCH_UP:BLASCH_LO, BLASCH_NT,
+                B.iscm()==M2::_upper?BLASCH_UP:BLASCH_LO, BLASCH_NT,
                 B.isunit()?BLASCH_U:BLASCH_NU, 
                 BLASV(m),BLASV(n),BLASP(&alpha),BLASP(B.cptr()),BLASV(ldb),
                 BLASP(A.ptr()),BLASV(lda) BLAS1 BLAS1 BLAS1 BLAS1);
@@ -118,7 +121,7 @@ namespace tmv {
         } else {
             BLASNAME(ztrsm) (
                 BLASCM A.iscm()?BLASCH_L:BLASCH_R, 
-                B.iscm()==M2::mupper?BLASCH_UP:BLASCH_LO, 
+                B.iscm()==M2::_upper?BLASCH_UP:BLASCH_LO, 
                 A.iscm()==B.iscm()?BLASCH_NT:B.isconj()?BLASCH_CT:BLASCH_T,
                 B.isunit()?BLASCH_U:BLASCH_NU, 
                 BLASV(m),BLASV(n),BLASP(&alpha),BLASP(B.cptr()),BLASV(ldb),
@@ -144,7 +147,7 @@ namespace tmv {
 
             BLASNAME(dtrsm) (
                 BLASCM A.iscm()?BLASCH_L:BLASCH_R, 
-                B.iscm()==M2::mupper?BLASCH_UP:BLASCH_LO, 
+                B.iscm()==M2::_upper?BLASCH_UP:BLASCH_LO, 
                 A.iscm()==B.iscm()?BLASCH_NT:BLASCH_T,
                 B.isunit()?BLASCH_U:BLASCH_NU, 
                 BLASV(m),BLASV(n),BLASV(alpha),BLASP(B.cptr()),BLASV(ldb),
@@ -177,7 +180,7 @@ namespace tmv {
 
         BLASNAME(strsm) (
             BLASCM A.iscm()?BLASCH_L:BLASCH_R, 
-            B.iscm()==M2::mupper?BLASCH_UP:BLASCH_LO, 
+            B.iscm()==M2::_upper?BLASCH_UP:BLASCH_LO, 
             A.iscm()==B.iscm()?BLASCH_NT:BLASCH_T,
             B.isunit()?BLASCH_U:BLASCH_NU, 
             BLASV(m),BLASV(n),BLASV(alpha),BLASP(B.cptr()),BLASV(ldb),
@@ -202,7 +205,7 @@ namespace tmv {
             A.conjugateSelf();
             BLASNAME(ctrsm) (
                 BLASCM A.iscm()?BLASCH_L:BLASCH_R, 
-                B.iscm()==M2::mupper?BLASCH_UP:BLASCH_LO, BLASCH_NT,
+                B.iscm()==M2::_upper?BLASCH_UP:BLASCH_LO, BLASCH_NT,
                 B.isunit()?BLASCH_U:BLASCH_NU, 
                 BLASV(m),BLASV(n),BLASP(&alpha),BLASP(B.cptr()),BLASV(ldb),
                 BLASP(A.ptr()),BLASV(lda) BLAS1 BLAS1 BLAS1 BLAS1);
@@ -210,7 +213,7 @@ namespace tmv {
         } else {
             BLASNAME(ctrsm) (
                 BLASCM A.iscm()?BLASCH_L:BLASCH_R, 
-                B.iscm()==M2::mupper?BLASCH_UP:BLASCH_LO, 
+                B.iscm()==M2::_upper?BLASCH_UP:BLASCH_LO, 
                 A.iscm()==B.iscm()?BLASCH_NT:B.isconj()?BLASCH_CT:BLASCH_T,
                 B.isunit()?BLASCH_U:BLASCH_NU, 
                 BLASV(m),BLASV(n),BLASP(&alpha),BLASP(B.cptr()),BLASV(ldb),
@@ -236,7 +239,7 @@ namespace tmv {
 
             BLASNAME(strsm) (
                 BLASCM A.iscm()?BLASCH_L:BLASCH_R, 
-                B.iscm()==M2::mupper?BLASCH_UP:BLASCH_LO, 
+                B.iscm()==M2::_upper?BLASCH_UP:BLASCH_LO, 
                 A.iscm()==B.iscm()?BLASCH_NT:BLASCH_T,
                 B.isunit()?BLASCH_U:BLASCH_NU, 
                 BLASV(m),BLASV(n),BLASV(alpha),BLASP(B.cptr()),BLASV(ldb),

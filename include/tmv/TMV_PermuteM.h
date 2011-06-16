@@ -35,6 +35,13 @@
 #include "TMV_BaseMatrix_Rec.h"
 #include "TMV_SwapV.h"
 
+//#define PRINTALGO_PERM
+
+#ifdef PRINTALGO_PERM
+#include <iostream>
+#include "TMV_MatrixIO.h"
+#endif
+
 namespace tmv {
 
     // Defined in TMV_Matrix.cpp
@@ -60,6 +67,11 @@ namespace tmv {
         static void call(M1& m, const int* p, const int i1, const int i2)
         {
             const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
+#ifdef PRINTALGO_PERM
+            const int M = cs == UNKNOWN ? int(m.colsize()) : cs;
+            std::cout<<"PermuteRows algo 11: M,N,cs,rs = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<std::endl;
+#endif
             for (int j=0;j<N;++j) 
                 m.get_col(j).permute(p,i1,i2);
         }
@@ -71,6 +83,12 @@ namespace tmv {
     {
         static void call(M1& m, const int* p, const int i1, const int i2)
         {
+#ifdef PRINTALGO_PERM
+            const int M = cs == UNKNOWN ? int(m.colsize()) : cs;
+            const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
+            std::cout<<"PermuteRows algo 12: M,N,cs,rs = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<std::endl;
+#endif
             p += i1;
             for(int i=i1;i<i2;++i,++p) {
                 TMVAssert(*p < int(m.colsize()));
@@ -86,6 +104,11 @@ namespace tmv {
         static void call(M1& m, const int* p, const int i1, const int i2)
         {
             const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
+#ifdef PRINTALGO_PERM
+            const int M = cs == UNKNOWN ? int(m.colsize()) : cs;
+            std::cout<<"PermuteRows algo 13: M,N,cs,rs = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<std::endl;
+#endif
             typedef typename M1::row_type M1r;
             typedef typename M1r::iterator IT;
 
@@ -131,6 +154,11 @@ namespace tmv {
         static void call(M1& m, const int* p, const int i1, const int i2)
         {
             const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
+#ifdef PRINTALGO_PERM
+            const int M = cs == UNKNOWN ? int(m.colsize()) : cs;
+            std::cout<<"PermuteRows algo 14: M,N,cs,rs = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<std::endl;
+#endif
             typedef typename M1::row_type M1r;
             typedef typename M1r::iterator IT;
             IT it1 = m.get_row(0).begin();
@@ -153,16 +181,32 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct PermuteRows_Helper<90,cs,rs,M1>
     {
-        static TMV_INLINE void call(M1& m, const int* p, const int i1, const int i2)
-        { InstPermuteRows(m.xView(),p,i1,i2); } 
+        static TMV_INLINE void call(
+            M1& m, const int* p, const int i1, const int i2)
+        {
+#ifdef PRINTALGO_PERM
+            const int M = cs == UNKNOWN ? int(m.colsize()) : cs;
+            const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
+            std::cout<<"PermuteRows algo 90: M,N,cs,rs = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<std::endl;
+#endif
+            InstPermuteRows(m.xView(),p,i1,i2); 
+        } 
     };
 
     // algo 97: Conjugate
     template <int cs, int rs, class M1>
     struct PermuteRows_Helper<97,cs,rs,M1>
     {
-        static TMV_INLINE void call(M1& m, const int* p, const int i1, const int i2)
+        static TMV_INLINE void call(
+            M1& m, const int* p, const int i1, const int i2)
         {
+#ifdef PRINTALGO_PERM
+            const int M = cs == UNKNOWN ? int(m.colsize()) : cs;
+            const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
+            std::cout<<"PermuteRows algo 97: M,N,cs,rs = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<std::endl;
+#endif
             typedef typename M1::conjugate_type Mc;
             Mc mc = m.conjugate();
             PermuteRows_Helper<-2,cs,rs,Mc>::call(mc,p,i1,i2);
@@ -173,14 +217,28 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct PermuteRows_Helper<-3,cs,rs,M1>
     {
-        static TMV_INLINE void call(M1& m, const int* p, const int i1, const int i2)
+        static TMV_INLINE void call(
+            M1& m, const int* p, const int i1, const int i2)
         {
             const int algo = 
                 TMV_OPT == 0 ? 12 :
                 (M1::_colmajor && (rs != UNKNOWN && rs <= 32)) ? 11 :
                 M1::_rowmajor ? 14 : M1::_colmajor ? 13 :
                 12;
+#ifdef PRINTALGO_PERM
+            const int M = cs == UNKNOWN ? int(m.colsize()) : cs;
+            const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
+            std::cout<<"InlinePermuteRows: M,N,cs,rs = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<std::endl;
+            std::cout<<"m = "<<TMV_Text(m)<<std::endl;
+            std::cout<<"i1,i2 = "<<i1<<','<<i2<<std::endl;
+            //std::cout<<"m = "<<m<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             PermuteRows_Helper<algo,cs,rs,M1>::call(m,p,i1,i2);
+#ifdef PRINTALGO_PERM
+            //std::cout<<"m => "<<m<<std::endl;
+#endif
         }
     };
 
@@ -188,7 +246,8 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct PermuteRows_Helper<-2,cs,rs,M1>
     {
-        static TMV_INLINE void call(M1& m, const int* p, const int i1, const int i2)
+        static TMV_INLINE void call(
+            M1& m, const int* p, const int i1, const int i2)
         {
             typedef typename M1::value_type T;
             const bool inst = 
@@ -199,14 +258,28 @@ namespace tmv {
                 M1::_conj ? 97 :
                 inst ? 90 :
                 -3;
+#ifdef PRINTALGO_PERM
+            const int M = cs == UNKNOWN ? int(m.colsize()) : cs;
+            const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
+            std::cout<<"PermuteRows: M,N,cs,rs = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<std::endl;
+            std::cout<<"m = "<<TMV_Text(m)<<std::endl;
+            std::cout<<"i1,i2 = "<<i1<<','<<i2<<std::endl;
+            //std::cout<<"m = "<<m<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             PermuteRows_Helper<algo,cs,rs,M1>::call(m,p,i1,i2);
+#ifdef PRINTALGO_PERM
+            //std::cout<<"m => "<<m<<std::endl;
+#endif
         }
     };
 
     template <int cs, int rs, class M1>
     struct PermuteRows_Helper<-1,cs,rs,M1>
     {
-        static TMV_INLINE void call(M1& m, const int* p, const int i1, const int i2)
+        static TMV_INLINE void call(
+            M1& m, const int* p, const int i1, const int i2)
         { PermuteRows_Helper<-2,cs,rs,M1>::call(m,p,i1,i2); }
     };
 
@@ -249,6 +322,11 @@ namespace tmv {
         static void call(M1& m, const int* p, const int i1, const int i2)
         {
             const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
+#ifdef PRINTALGO_PERM
+            const int M = cs == UNKNOWN ? int(m.colsize()) : cs;
+            std::cout<<"ReversePermuteRows algo 11: M,N,cs,rs = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<std::endl;
+#endif
             for (int j=0;j<N;++j) 
                 m.get_col(j).reversePermute(p,i1,i2);
         }
@@ -260,6 +338,12 @@ namespace tmv {
     {
         static void call(M1& m, const int* p, const int i1, const int i2)
         {
+#ifdef PRINTALGO_PERM
+            const int M = cs == UNKNOWN ? int(m.colsize()) : cs;
+            const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
+            std::cout<<"ReversePermuteRows algo 12: M,N,cs,rs = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<std::endl;
+#endif
             p += i2-1;
             for(int i=i2-1;i>=i1;--i,--p) {
                 TMVAssert(*p < int(m.colsize()));
@@ -275,6 +359,11 @@ namespace tmv {
         static void call(M1& m, const int* p, const int i1, const int i2)
         {
             const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
+#ifdef PRINTALGO_PERM
+            const int M = cs == UNKNOWN ? int(m.colsize()) : cs;
+            std::cout<<"ReversePermuteRows algo 13: M,N,cs,rs = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<std::endl;
+#endif
             typedef typename M1::value_type T1;
             typedef typename M1::row_type M1r;
             typedef typename M1r::iterator IT;
@@ -322,6 +411,11 @@ namespace tmv {
         static void call(M1& m, const int* p, const int i1, const int i2)
         {
             const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
+#ifdef PRINTALGO_PERM
+            const int M = cs == UNKNOWN ? int(m.colsize()) : cs;
+            std::cout<<"ReversePermuteRows algo 14: M,N,cs,rs = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<std::endl;
+#endif
             typedef typename M1::row_type M1r;
             typedef typename M1r::iterator IT;
             IT it1 = m.get_row(0).begin();
@@ -345,16 +439,32 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct ReversePermuteRows_Helper<90,cs,rs,M1>
     {
-        static TMV_INLINE void call(M1& m, const int* p, const int i1, const int i2)
-        { InstReversePermuteRows(m.xView(),p,i1,i2); } 
+        static TMV_INLINE void call(
+            M1& m, const int* p, const int i1, const int i2)
+        { 
+#ifdef PRINTALGO_PERM
+            const int M = cs == UNKNOWN ? int(m.colsize()) : cs;
+            const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
+            std::cout<<"ReversePermuteRows algo 90: M,N,cs,rs = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<std::endl;
+#endif
+            InstReversePermuteRows(m.xView(),p,i1,i2); 
+        }
     };
 
     // algo 97: Conjugate
     template <int cs, int rs, class M1>
     struct ReversePermuteRows_Helper<97,cs,rs,M1>
     {
-        static TMV_INLINE void call(M1& m, const int* p, const int i1, const int i2)
+        static TMV_INLINE void call(
+            M1& m, const int* p, const int i1, const int i2)
         {
+#ifdef PRINTALGO_PERM
+            const int M = cs == UNKNOWN ? int(m.colsize()) : cs;
+            const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
+            std::cout<<"ReversePermuteRows algo 97: M,N,cs,rs = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<std::endl;
+#endif
             typedef typename M1::conjugate_type Mc;
             Mc mc = m.conjugate();
             ReversePermuteRows_Helper<-2,cs,rs,Mc>::call(mc,p,i1,i2);
@@ -365,14 +475,28 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct ReversePermuteRows_Helper<-3,cs,rs,M1>
     {
-        static TMV_INLINE void call(M1& m, const int* p, const int i1, const int i2)
+        static TMV_INLINE void call(
+            M1& m, const int* p, const int i1, const int i2)
         {
             const int algo = 
                 TMV_OPT == 0 ? 12 :
                 (M1::_rowmajor && (rs != UNKNOWN && rs <= 32)) ? 14 :
                 M1::_colmajor ? 11 : M1::_rowmajor ? 13 :
                 12;
+#ifdef PRINTALGO_PERM
+            const int M = cs == UNKNOWN ? int(m.colsize()) : cs;
+            const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
+            std::cout<<"InlineReversePermuteRows: M,N,cs,rs = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<std::endl;
+            std::cout<<"m = "<<TMV_Text(m)<<std::endl;
+            std::cout<<"i1,i2 = "<<i1<<','<<i2<<std::endl;
+            //std::cout<<"m = "<<m<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             ReversePermuteRows_Helper<algo,cs,rs,M1>::call(m,p,i1,i2);
+#ifdef PRINTALGO_PERM
+            //std::cout<<"m => "<<m<<std::endl;
+#endif
         }
     };
 
@@ -380,7 +504,8 @@ namespace tmv {
     template <int cs, int rs, class M1>
     struct ReversePermuteRows_Helper<-2,cs,rs,M1>
     {
-        static TMV_INLINE void call(M1& m, const int* p, const int i1, const int i2)
+        static TMV_INLINE void call(
+            M1& m, const int* p, const int i1, const int i2)
         {
             typedef typename M1::value_type T;
             const bool inst = 
@@ -391,14 +516,28 @@ namespace tmv {
                 M1::_conj ? 97 :
                 inst ? 90 :
                 -3;
+#ifdef PRINTALGO_PERM
+            const int M = cs == UNKNOWN ? int(m.colsize()) : cs;
+            const int N = rs == UNKNOWN ? int(m.rowsize()) : rs;
+            std::cout<<"ReversePermuteRows: M,N,cs,rs = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<std::endl;
+            std::cout<<"m = "<<TMV_Text(m)<<std::endl;
+            std::cout<<"i1,i2 = "<<i1<<','<<i2<<std::endl;
+            //std::cout<<"m = "<<m<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             ReversePermuteRows_Helper<algo,cs,rs,M1>::call(m,p,i1,i2);
+#ifdef PRINTALGO_PERM
+            //std::cout<<"m = "<<m<<std::endl;
+#endif
         }
     };
 
     template <int cs, int rs, class M1>
     struct ReversePermuteRows_Helper<-1,cs,rs,M1>
     {
-        static TMV_INLINE void call(M1& m, const int* p, const int i1, const int i2)
+        static TMV_INLINE void call(
+            M1& m, const int* p, const int i1, const int i2)
         { ReversePermuteRows_Helper<-2,cs,rs,M1>::call(m,p,i1,i2); }
     };
 

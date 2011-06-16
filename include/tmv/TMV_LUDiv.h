@@ -49,19 +49,19 @@
 namespace tmv {
 
     // Defined in TMV_LUDiv.cpp
-    template <class T1, class T2, int C1>
+    template <class T1, int C1, class T2>
     void InstLU_SolveInPlace(
         const ConstMatrixView<T1,C1>& m1, const Permutation& P,
         MatrixView<T2> m2);
-    template <class T1, class T2, int C1>
+    template <class T1, int C1, class T2>
     void InstLU_SolveTransposeInPlace(
         const ConstMatrixView<T1,C1>& m1, const Permutation& P,
         MatrixView<T2> m2);
-    template <class T1, class T2, int C1>
+    template <class T1, int C1, class T2>
     void InstLU_SolveInPlace(
         const ConstMatrixView<T1,C1>& m1, const Permutation& P,
         VectorView<T2> v2);
-    template <class T1, class T2, int C1>
+    template <class T1, int C1, class T2>
     void InstLU_SolveTransposeInPlace(
         const ConstMatrixView<T1,C1>& m1, const Permutation& P,
         VectorView<T2> v2);

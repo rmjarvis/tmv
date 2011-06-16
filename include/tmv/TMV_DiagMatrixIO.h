@@ -48,7 +48,7 @@ namespace tmv {
     {
         typedef typename M::value_type T;
         const int n = m.size();
-        os << n << "  " << n << std::endl;
+        os << n << "  " << n << '\n';
         for(int i=0;i<n;++i) {
             os << "( ";
             for(int j=0;j<i;++j) 
@@ -73,7 +73,7 @@ namespace tmv {
     {
         typedef typename M::value_type T;
         const int n = m.size();
-        os << n << "  " << n << std::endl;
+        os << n << "  " << n << '\n';
         for(int i=0;i<n;++i) {
             os << "( ";
             for(int j=0;j<i;++j) 

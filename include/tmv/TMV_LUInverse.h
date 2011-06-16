@@ -178,11 +178,11 @@ namespace tmv {
     {
         static TMV_INLINE void call(M1& m1, const Permutation& P)
         {
-            typedef typename M1::value_type T2;
+            typedef typename M1::value_type T1;
             const bool inst = 
                 (cs == UNKNOWN || cs > 16) &&
                 (rs == UNKNOWN || rs > 16) &&
-                Traits<T2>::isinst;
+                Traits<T1>::isinst;
             const int algo = 
                 cs == 0 || rs == 0 ? 0 : 
                 M1::_conj ? 97 :
@@ -228,7 +228,10 @@ namespace tmv {
     // Also used for invalid real/complex combination from the virtual calls.
     template <int cs, int rs, class M1, class M2>
     struct LU_InverseATA_Helper<0,cs,rs,M1,M2>
-    { static TMV_INLINE void call(const M1& , const Permutation& , const bool, M2& ) {} };
+    { 
+        static TMV_INLINE void call(
+            const M1& , const Permutation& , const bool, M2& ) {} 
+    };
 
     // algo 11: Normal case
     template <int cs, int rs, class M1, class M2>

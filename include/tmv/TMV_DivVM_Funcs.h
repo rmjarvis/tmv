@@ -44,107 +44,107 @@ namespace tmv {
 
     // From TMV_DivM.h:
     template <class V1, class M2>
-    static void LDivEq(
+    static inline void LDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2);
     template <class V1, class M2>
-    static void NoAliasLDivEq(
+    static inline void NoAliasLDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2);
     template <class V1, class M2>
-    static void AliasLDivEq(
+    static inline void AliasLDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2);
 
     template <class V1, class M2>
-    static void RDivEq(
+    static inline void RDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2);
     template <class V1, class M2>
-    static void NoAliasRDivEq(
+    static inline void NoAliasRDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2);
     template <class V1, class M2>
-    static void AliasRDivEq(
+    static inline void AliasRDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2);
 
     template <int ix, class T, class V1, class M2, class V3>
-    static void LDiv(
+    static inline void LDiv(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
     template <int ix, class T, class V1, class M2, class V3>
-    static void NoAliasLDiv(
+    static inline void NoAliasLDiv(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
     template <int ix, class T, class V1, class M2, class V3>
-    static void AliasLDiv(
+    static inline void AliasLDiv(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
 
     template <int ix, class T, class V1, class M2, class V3>
-    static void RDiv(
+    static inline void RDiv(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
     template <int ix, class T, class V1, class M2, class V3>
-    static void NoAliasRDiv(
+    static inline void NoAliasRDiv(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
     template <int ix, class T, class V1, class M2, class V3>
-    static void AliasRDiv(
+    static inline void AliasRDiv(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3);
 
     // From TMV_DivVU.h:
     template <class V1, class M2>
-    static void TriLDivEq(
+    static inline void TriLDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Tri<M2>& m2);
     template <class V1, class M2>
-    static void NoAliasTriLDivEq(
+    static inline void NoAliasTriLDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Tri<M2>& m2);
     template <class V1, class M2>
-    static void AliasTriLDivEq(
+    static inline void AliasTriLDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Tri<M2>& m2);
 
     // From TMV_MultPV.h:
     template <int ix, class T, class V1, class V3>
-    static void LDiv(
+    static inline void LDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const Permutation& m2, BaseVector_Mutable<V3>& v3);
     template <int ix, class T, class V1, class V3>
-    static void NoAliasLDiv(
+    static inline void NoAliasLDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const Permutation& m2, BaseVector_Mutable<V3>& v3);
     template <int ix, class T, class V1, class V3>
-    static void AliasLDiv(
+    static inline void AliasLDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const Permutation& m2, BaseVector_Mutable<V3>& v3);
 
     template <class V1>
-    static void LDivEq(
+    static inline void LDivEq(
         BaseVector_Mutable<V1>& v1, const Permutation& m2);
     template <class V1>
-    static void NoAliasLDivEq(
+    static inline void NoAliasLDivEq(
         BaseVector_Mutable<V1>& v1, const Permutation& m2);
     template <class V1>
-    static void AliasLDivEq(
+    static inline void AliasLDivEq(
         BaseVector_Mutable<V1>& v1, const Permutation& m2);
 
     template <int ix, class T, class V1, class V3>
-    static void RDiv(
+    static inline void RDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const Permutation& m2, BaseVector_Mutable<V3>& v3);
     template <int ix, class T, class V1, class V3>
-    static void NoAliasRDiv(
+    static inline void NoAliasRDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const Permutation& m2, BaseVector_Mutable<V3>& v3);
     template <int ix, class T, class V1, class V3>
-    static void AliasRDiv(
+    static inline void AliasRDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const Permutation& m2, BaseVector_Mutable<V3>& v3);
 
     template <class V1>
-    static void RDivEq(
+    static inline void RDivEq(
         BaseVector_Mutable<V1>& v1, const Permutation& m2);
     template <class V1>
-    static void NoAliasRDivEq(
+    static inline void NoAliasRDivEq(
         BaseVector_Mutable<V1>& v1, const Permutation& m2);
     template <class V1>
-    static void AliasRDivEq(
+    static inline void AliasRDivEq(
         BaseVector_Mutable<V1>& v1, const Permutation& m2);
 
 } // namespace tmv

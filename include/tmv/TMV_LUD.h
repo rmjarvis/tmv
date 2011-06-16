@@ -71,53 +71,55 @@
 #include "TMV_Permutation.h"
 #include "TMV_Divider.h"
 
+#ifdef PRINTALGO_LU
+#include <iostream>
+#endif
 
 namespace tmv {
 
     // In TMV_LUDecompose.h
     template <class M>
-    static void LU_Decompose(
-        BaseMatrix_Rec_Mutable<M>& m, int* P, int& detp);
+    static inline void LU_Decompose(BaseMatrix_Rec_Mutable<M>& m, int* P);
     template <class M>
-    static void LU_Decompose(
+    static inline void LU_Decompose(
         BaseMatrix_Rec_Mutable<M>& m, Permutation& P);
     template <class T, int A>
-    static void LU_Decompose(
-        MatrixView<T,A> m, Permutation& P);
+    static inline void LU_Decompose(MatrixView<T,A> m, Permutation& P);
     template <class T, int M, int N, int Si, int Sj, int A>
-    static void LU_Decompose(
+    static inline void LU_Decompose(
         SmallMatrixView<T,M,N,Si,Sj,A> m, Permutation& P);
 
     // In TMV_LUInverse.h
     template <class M1>
-    static void LU_Inverse(
+    static inline void LU_Inverse(
         BaseMatrix_Rec_Mutable<M1>& m1, const Permutation& P);
     template <class M1, class M2>
-    static void LU_InverseATA(
+    static inline void LU_InverseATA(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         const bool trans, BaseMatrix_Rec_Mutable<M2>& m2);
 
     // In TMV_LUDiv.h
     template <class M1, class M2>
-    static void LU_SolveInPlace(
+    static inline void LU_SolveInPlace(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseMatrix_Rec_Mutable<M2>& m2);
     template <class M1, class V2>
-    static void LU_SolveInPlace(
+    static inline void LU_SolveInPlace(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseVector_Mutable<V2>& v2);
     template <class M1, class M2>
-    static void LU_SolveTransposeInPlace(
+    static inline void LU_SolveTransposeInPlace(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseMatrix_Rec_Mutable<M2>& m2);
     template <class M1, class V2>
-    static void LU_SolveTransposeInPlace(
+    static inline void LU_SolveTransposeInPlace(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseVector_Mutable<V2>& v2);
 
 
     // The point of the Impl class here is to implement the transfer of
     // ownership copy semantics.
+    // It also differentiates between small and non-small implementations.
     template <bool small, class M>
     struct LUD_Impl;
 
@@ -143,7 +145,7 @@ namespace tmv {
                 M::_colsize <= 8 && M::_rowsize <= 8 ) };
 
         typedef typename LUD_Impl<small,M>::lux_type lux_type;
-        typedef typename lux_type::const_view_type getlu_type;
+        typedef const lux_type& getlu_type;
         typedef typename lux_type::const_unit_lowertri_type getl_type;
         typedef typename lux_type::const_uppertri_type getu_type;
         typedef Permutation getp_type;
@@ -274,8 +276,8 @@ namespace tmv {
         typedef typename base::ZFT ZFT;
 
         // Sets up the internal storage and does the decomposition.
-        template <class M2>
-        InstLUD(const BaseMatrix<M2>& A, bool _inplace=false);
+        template <int C>
+        InstLUD(const ConstMatrixView<T,C>& A, bool _inplace=false);
         InstLUD(const InstLUD<T>& rhs);
         ~InstLUD();
 
@@ -369,48 +371,67 @@ namespace tmv {
 
     private :
         // op= not allowed.
-        Divider<T>& operator=(const Divider<T>&);
+        InstLUD<T>& operator=(const InstLUD<T>&);
     };
     
     // Now the instantiation and definition.
-    template <bool isvalid>
+    template <bool isvalid, bool istrans>
     struct LUHelper;
 
     template <>
-    struct LUHelper<true>
+    struct LUHelper<true,false>
     {
+        template <class M1, class M2, class M3>
+        static inline void solve(
+            const M1& LUx, const Permutation& P, const M2& m2, M3& m3)
+        { LU_SolveInPlace(LUx,P,m3=m2); }
         template <class M1, class M2>
-        static void makeInverse(
-            const M1& LUx, const Permutation& P, bool istrans, M2& m2)
+        static inline void solveInPlace(
+            const M1& LUx, const Permutation& P, M2& m2)
+        { LU_SolveInPlace(LUx,P,m2); }
+        template <class M1, class M2>
+        static inline void makeInverse(const M1& LUx, const Permutation& P, M2& m2)
         {
             // This one might be same storage if LUx was done in place.
             // e.g. { A.divideInPlace(); A = A.inverse(); }
             // So go ahead and check. (i.e. Don't use NoAliasCopy.)
             // TODO: Add this behavior to test suite.
-            if (istrans) {
-                typename M2::transpose_type m2t = m2.transpose();
-                Copy(LUx,m2t);
-                LU_Inverse(m2t,P);
-            } else {
-                Copy(LUx,m2);
-                LU_Inverse(m2,P);
-            }
-        }
-        template <class M1, class M2>
-        static void solveInPlace(
-            const M1& LUx, const Permutation& P, bool istrans, M2& m2)
-        {
-            if (istrans) LU_SolveTransposeInPlace(LUx,P,m2);
-            else LU_SolveInPlace(LUx,P,m2); 
+            Copy(LUx,m2);
+            LU_Inverse(m2,P);
         }
     };
     template <>
-    struct LUHelper<false>
+    struct LUHelper<true,true>
     {
+        template <class M1, class M2, class M3>
+        static inline void solve(
+            const M1& LUx, const Permutation& P, const M2& m2, M3& m3)
+        { LU_SolveTransposeInPlace(LUx,P,m3=m2); }
         template <class M1, class M2>
-        static void makeInverse(const M1& , const Permutation& , bool, M2& ) {}
+        static inline void solveInPlace(
+            const M1& LUx, const Permutation& P, M2& m2)
+        { LU_SolveTransposeInPlace(LUx,P,m2); }
         template <class M1, class M2>
-        static void solveInPlace(const M1& , const Permutation& , bool, M2& ) {}
+        static inline void makeInverse(
+            const M1& LUx, const Permutation& P, M2& m2)
+        {
+            typename M2::transpose_type m2t = m2.transpose();
+            Copy(LUx,m2t);
+            LU_Inverse(m2t,P);
+        }
+    };
+    template <bool istrans>
+    struct LUHelper<false,istrans>
+    {
+        template <class M1, class M2, class M3>
+        static inline void solve(
+            const M1& , const Permutation& , const M2&, M3& ) {}
+        template <class M1, class M2>
+        static inline void solveInPlace(
+            const M1& , const Permutation& , M2& ) {}
+        template <class M1, class M2>
+        static inline void makeInverse(
+            const M1& , const Permutation& , M2& ) {}
     };
 
     template <class M>
@@ -434,7 +455,41 @@ namespace tmv {
             TMVStaticAssert(M::_rowsize == int(M2::_rowsize));
             TMVStaticAssert(lux_type::_colmajor);
             A.newAssignTo(SmallLUx);
+            LU_Decompose(LUx,P);
         }
+        template <class M2, class M3>
+        void solve(const M2& m2, M3& m3)
+        {
+            const bool isvalid = (M::isreal && M2::isreal) || M3::iscomplex;
+            LUHelper<isvalid,istrans>::solve(LUx,P,m2,m3); 
+        }
+        template <class M2, class M3>
+        void solveTranspose(const M2& m2, M3& m3)
+        {
+            const bool isvalid = (M::isreal && M2::isreal) || M3::iscomplex;
+            LUHelper<isvalid,!istrans>::solve(LUx,P,m2,m3); 
+        }
+        template <class M2>
+        void solveInPlace(M2& m2)
+        {
+            const bool isvalid = M::isreal || M2::iscomplex;
+            LUHelper<isvalid,istrans>::solveInPlace(LUx,P,m2); 
+        }
+        template <class M2>
+        void solveTransposeInPlace(M2& m2)
+        {
+            const bool isvalid = M::isreal || M2::iscomplex;
+            LUHelper<isvalid,!istrans>::solveInPlace(LUx,P,m2); 
+        }
+        template <class M2>
+        void makeInverse(M2& minv)
+        {
+            const bool isvalid = M::isreal || M2::iscomplex;
+            LUHelper<isvalid,istrans>::makeInverse(LUx,P,minv);
+        }
+        template <class M2>
+        void makeInverseATA(M2& ata)
+        { LU_InverseATA(LUx,P,istrans,ata); }
 
         M SmallLUx;
         lux_type LUx;
@@ -473,6 +528,8 @@ namespace tmv {
             P(A.rowsize())
             {
                 TMVStaticAssert(lux_type::_colmajor);
+                TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same));
+                TMVStaticAssert((Sizes<M2::_colsize,M2::_rowsize>::same));
                 TMVAssert(A.colsize() == A.rowsize());
                 if (!inplace) {
                     if (istrans) NoAliasCopy(A.transpose(),LUx); 
@@ -480,6 +537,17 @@ namespace tmv {
                 } else {
                     Maybe<M2::_conj>::conjself(LUx);
                 }
+                LU_Decompose(LUx,P);
+#ifdef PRINTALGO_LU
+                std::cout<<"LUD_Impl (not small) constructor\n";
+                std::cout<<"this = "<<this<<std::endl;
+                std::cout<<"istrans = "<<istrans<<std::endl;
+                std::cout<<"inplace = "<<inplace<<std::endl;
+                std::cout<<"Aptr = "<<Aptr<<"  "<<(inplace ? 0 : A.rowsize()*A.rowsize())<<std::endl;
+                std::cout<<"A = "<<A<<std::endl;
+                std::cout<<"LUx = "<<LUx<<std::endl;
+                std::cout<<"P = "<<P<<std::endl;
+#endif
             }
 
         // If A is not a BaseMatrix_Rec, can't do it in place.
@@ -491,9 +559,71 @@ namespace tmv {
             P(A.rowsize())
         {
             TMVStaticAssert(lux_type::_colmajor);
+            TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same));
+            TMVStaticAssert((Sizes<M2::_colsize,M2::_rowsize>::same));
             TMVAssert(A.colsize() == A.rowsize());
             A.newAssignTo(LUx);
+            LU_Decompose(LUx,P);
+#ifdef PRINTALGO_LU
+            std::cout<<"LUD_Impl (not small) constructor for non-Rec\n";
+            std::cout<<"this = "<<this<<std::endl;
+            std::cout<<"istrans = "<<istrans<<std::endl;
+            std::cout<<"inplace = "<<inplace<<std::endl;
+            std::cout<<"Aptr = "<<Aptr<<"  "<<A.rowsize()*A.rowsize()<<std::endl;
+            std::cout<<"A = "<<A<<std::endl;
+            std::cout<<"LUx = "<<LUx<<std::endl;
+            std::cout<<"P = "<<P<<std::endl;
+#endif
         }
+        template <class M2, class M3>
+        void solve(const M2& m2, M3& m3)
+        {
+            const bool isvalid = (M::isreal && M2::isreal) || M3::iscomplex;
+            if (istrans)
+                LUHelper<isvalid,true>::solve(LUx,P,m2,m3); 
+            else
+                LUHelper<isvalid,false>::solve(LUx,P,m2,m3); 
+        }
+        template <class M2, class M3>
+        void solveTranspose(const M2& m2, M3& m3)
+        {
+            const bool isvalid = (M::isreal && M2::isreal) || M3::iscomplex;
+            if (istrans)
+                LUHelper<isvalid,false>::solve(LUx,P,m2,m3); 
+            else
+                LUHelper<isvalid,true>::solve(LUx,P,m2,m3); 
+        }
+        template <class M2>
+        void solveInPlace(M2& m2)
+        {
+            const bool isvalid = M::isreal || M2::iscomplex;
+            if (istrans)
+                LUHelper<isvalid,true>::solveInPlace(LUx,P,m2); 
+            else
+                LUHelper<isvalid,false>::solveInPlace(LUx,P,m2); 
+        }
+        template <class M2>
+        void solveTransposeInPlace(M2& m2)
+        {
+            const bool isvalid = M::isreal || M2::iscomplex;
+            if (istrans)
+                LUHelper<isvalid,false>::solveInPlace(LUx,P,m2); 
+            else
+                LUHelper<isvalid,true>::solveInPlace(LUx,P,m2); 
+        }
+        template <class M2>
+        void makeInverse(M2& minv)
+        {
+            const bool isvalid = M::isreal || M2::iscomplex;
+            if (istrans) 
+                LUHelper<isvalid,true>::makeInverse(LUx,P,minv);
+            else
+                LUHelper<isvalid,false>::makeInverse(LUx,P,minv);
+        }
+        template <class M2>
+        void makeInverseATA(M2& ata)
+        { LU_InverseATA(LUx,P,istrans,ata); }
+
 
         const bool istrans,inplace;
         AlignedArray<typename M::value_type> Aptr;
@@ -503,26 +633,48 @@ namespace tmv {
 
     template <class M> template <class M2>
     LUD<M>::LUD(const BaseMatrix<M2>& A, bool inplace) :
-        pimpl(new LUD_Impl<small,M>(A,inplace)) 
+        pimpl(new LUD_Impl<small,M>(A.mat(),inplace)) 
     {
-        TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same));
-        TMVAssert(A.mat().isSquare());
-        LU_Decompose(pimpl->LUx,pimpl->P);
+#ifdef PRINTALGO_LU
+        std::cout<<"Done LUD constructor for "<<this<<std::endl;
+        std::cout<<"pimpl = "<<pimpl.get()<<std::endl;
+        std::cout<<"A = "<<TMV_Text(A)<<"  "<<A.mat().cptr()<<std::endl;
+        std::cout<<"inplace = "<<inplace<<std::endl;
+        std::cout<<"small = "<<small<<std::endl;
+        if (pimpl.get())
+            std::cout<<"LUx = "<<TMV_Text(pimpl->LUx)<<"  "<<pimpl->LUx.cptr()<<std::endl;
+#endif
     }
 
     template <class M>
-    LUD<M>::LUD(const LUD<M>& rhs) : pimpl(rhs.pimpl.release()) {}
+    LUD<M>::LUD(const LUD<M>& rhs) : pimpl(rhs.pimpl.release()) 
+    {
+#ifdef PRINTALGO_LU
+        std::cout<<"LUD copy constructor for "<<this<<std::endl;
+        std::cout<<"pimpl = "<<pimpl.get()<<std::endl;
+        if (pimpl.get())
+            std::cout<<"LUx = "<<TMV_Text(pimpl->LUx)<<"  "<<pimpl->LUx.cptr()<<std::endl;
+#endif
+    }
+
 
     template <class M>
-    LUD<M>::~LUD() {}
+    LUD<M>::~LUD()
+    {
+#ifdef PRINTALGO_LU
+        std::cout<<"LUD destructor for "<<this<<std::endl;
+        std::cout<<"pimpl = "<<pimpl.get()<<std::endl;
+        if (pimpl.get())
+            std::cout<<"LUx = "<<TMV_Text(pimpl->LUx)<<"  "<<pimpl->LUx.cptr()<<std::endl;
+#endif
+    }
 
     template <class M> template <class M2>
     void LUD<M>::solveInPlace(BaseMatrix_Rec_Mutable<M2>& m2) const
     {
         TMVStaticAssert((Sizes<M2::_colsize,M::_colsize>::same));
         TMVAssert(m2.colsize() == colsize());
-        const bool isvalid = M::isreal || M2::iscomplex;
-        LUHelper<isvalid>::solveInPlace(pimpl->LUx,pimpl->P,pimpl->istrans,m2);
+        pimpl->solveInPlace(m2.mat());
     }
 
     template <class M> template <class M2>
@@ -530,8 +682,7 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<M2::_colsize,M::_rowsize>::same));
         TMVAssert(m2.colsize() == rowsize());
-        const bool isvalid = M::isreal || M2::iscomplex;
-        LUHelper<isvalid>::solveInPlace(pimpl->LUx,pimpl->P,!pimpl->istrans,m2);
+        pimpl->solveTransposeInPlace(m2.mat());
     }
 
     template <class M> template <class V2>
@@ -539,8 +690,7 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<V2::_size,M::_colsize>::same));
         TMVAssert(v2.size() == colsize());
-        const bool isvalid = M::isreal || V2::iscomplex;
-        LUHelper<isvalid>::solveInPlace(pimpl->LUx,pimpl->P,pimpl->istrans,v2);
+        pimpl->solveInPlace(v2.vec());
     }
 
     template <class M> template <class V2>
@@ -548,8 +698,7 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<V2::_size,M::_rowsize>::same));
         TMVAssert(v2.size() == rowsize());
-        const bool isvalid = M::isreal || V2::iscomplex;
-        LUHelper<isvalid>::solveInPlace(pimpl->LUx,pimpl->P,!pimpl->istrans,v2);
+        pimpl->solveTransposeInPlace(v2.vec());
     }
 
     template <class M>
@@ -560,7 +709,7 @@ namespace tmv {
     typename M::float_type LUD<M>::logDet(typename M::zfloat_type* sign) const
     {
         typename M::float_type ret = getU().logDet(sign);
-        if (sign) *sign *= getP().det();
+        if (sign) *sign *= typename M::float_type(getP().det());
         return ret;
     }                  
 
@@ -571,10 +720,11 @@ namespace tmv {
     template <class M> template <class M2>
     void LUD<M>::makeInverse(BaseMatrix_Rec_Mutable<M2>& minv) const
     {
+        TMVStaticAssert((Sizes<M::_colsize,M2::_rowsize>::same));
+        TMVStaticAssert((Sizes<M::_rowsize,M2::_colsize>::same));
         TMVAssert(minv.colsize() == rowsize());
         TMVAssert(minv.rowsize() == colsize());
-        const bool isvalid = M::isreal || M2::iscomplex;
-        LUHelper<isvalid>::makeInverse(pimpl->LUx,pimpl->P,pimpl->istrans,minv);
+        pimpl->makeInverse(minv.mat());
     }
 
     template <class M> template <class M2>
@@ -582,7 +732,7 @@ namespace tmv {
     {
         TMVAssert(ata.rowsize() == rowsize());
         TMVAssert(ata.colsize() == rowsize());
-        LU_InverseATA(pimpl->LUx,pimpl->P,pimpl->istrans,ata);
+        pimpl->makeInverseATA(ata.mat());
     }
 
     template <class M>
@@ -599,7 +749,16 @@ namespace tmv {
 
     template <class M>
     typename LUD<M>::getlu_type LUD<M>::getLU() const 
-    { return pimpl->LUx; }
+    {
+#ifdef PRINTALGO_LU
+        std::cout<<"LU<M>::getLU\n";
+        std::cout<<"this = "<<this<<std::endl;
+        std::cout<<"pimpl = "<<pimpl.get()<<std::endl;
+        std::cout<<"pimpl->LUx.cptr() = "<<pimpl->LUx.cptr()<<std::endl;
+        std::cout<<"LUx = "<<pimpl->LUx<<std::endl;
+#endif
+        return pimpl->LUx; 
+    }
 
     template <class M>
     typename LUD<M>::getp_type LUD<M>::getP() const 
@@ -626,6 +785,7 @@ namespace tmv {
     template <class M>
     size_t LUD<M>::rowsize() const
     { return pimpl->LUx.rowsize(); }
+
 
     template <class M, class M2> 
     static bool CheckDecomp(

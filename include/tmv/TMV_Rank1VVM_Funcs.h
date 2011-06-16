@@ -44,15 +44,15 @@ namespace tmv {
 
     // From TMV_Rank1_VVM.h:
     template <bool add, int ix, class T, class V1, class V2, class M3>
-    static void Rank1Update(
+    static inline void Rank1Update(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseMatrix_Rec_Mutable<M3>& m3);
     template <bool add, int ix, class T, class V1, class V2, class M3>
-    static void NoAliasRank1Update(
+    static inline void NoAliasRank1Update(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseMatrix_Rec_Mutable<M3>& m3);
     template <bool add, int ix, class T, class V1, class V2, class M3>
-    static void AliasRank1Update(
+    static inline void AliasRank1Update(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseMatrix_Rec_Mutable<M3>& m3);
 

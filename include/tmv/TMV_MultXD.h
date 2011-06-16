@@ -43,7 +43,7 @@ namespace tmv {
     //
 
     template <int ix, class T, class M>
-    static TMV_INLINE void Scale(
+    inline void Scale(
         const Scaling<ix,T>& x, BaseMatrix_Diag_Mutable<M>& m)
     {
         typename M::diag_type md = m.diag();
@@ -56,7 +56,7 @@ namespace tmv {
     //
 
     template <bool add, int ix1, class T1, class M1, class M2>
-    static TMV_INLINE void MultXM(
+    inline void MultXM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         BaseMatrix_Diag_Mutable<M2>& m2)
     {
@@ -66,7 +66,7 @@ namespace tmv {
     }
 
     template <bool add, int ix1, class T1, class M1, class M2>
-    static TMV_INLINE void NoAliasMultXM(
+    inline void NoAliasMultXM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         BaseMatrix_Diag_Mutable<M2>& m2)
     {
@@ -76,7 +76,7 @@ namespace tmv {
     }
 
     template <bool add, int ix1, class T1, class M1, class M2>
-    static TMV_INLINE void AliasMultXM(
+    inline void AliasMultXM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         BaseMatrix_Diag_Mutable<M2>& m2)
     {
@@ -118,7 +118,7 @@ namespace tmv {
     }
 
     template <bool add, int ix1, class T1, class M1, class M2>
-    static inline void AliasMultXM(
+    static TMV_INLINE void AliasMultXM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Diag<M1>& m1,
         BaseMatrix_Rec_Mutable<M2>& m2)
     { MultXM<add>(x1,m1,m2); }

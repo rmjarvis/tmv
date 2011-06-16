@@ -35,7 +35,7 @@
 
 #include "TMV_BaseMatrix.h"
 
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
 #include <iostream>
 #endif
 
@@ -62,7 +62,7 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvM algo 1: M,N,cs,rs = "<<M<<','<<N<<','<<
@@ -80,30 +80,343 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvM algo 2: M,N,cs,rs = "<<M<<','<<N<<','<<
                 2<<','<<2<<std::endl;
 #endif
             typedef typename M1::value_type T1;
+            typedef typename M1::real_type RT;
             T1 det = m1.det();
             if (det == T1(0)) ThrowSingular("2x2 Matrix");
+            T1 invdet = ZProd<false,false>::quot(RT(1) , det);
             // Store these in temporaries just in case there are aliases.
             const T1 m1_00 = m1.cref(0,0);
             const T1 m1_01 = m1.cref(0,1);
             const T1 m1_10 = m1.cref(1,0);
             const T1 m1_11 = m1.cref(1,1);
             m2.ref(0,0) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::quot(m1_11 , det));
+                x , ZProd<false,false>::prod(m1_11 , invdet));
             m2.ref(0,1) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::quot(-m1_01 , det));
+                x , ZProd<false,false>::prod(-m1_01 , invdet));
             m2.ref(1,0) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::quot(-m1_10 , det));
+                x , ZProd<false,false>::prod(-m1_10 , invdet));
             m2.ref(1,1) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::quot(m1_00 , det));
+                x , ZProd<false,false>::prod(m1_00 , invdet));
         }
     };
+
+    // algo 3: size = 3x3
+    template <int ix, class T, class M1, class M2>
+    struct InvertM_Helper<3,3,3,ix,T,M1,M2>
+    {
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        {
+#ifdef PRINTALGO_INVM
+            const int M = m1.colsize();
+            const int N = m1.rowsize();
+            std::cout<<"InvM algo 3: M,N,cs,rs = "<<M<<','<<N<<','<<
+                3<<','<<3<<std::endl;
+#endif
+            typedef typename M1::value_type T1;
+            typedef typename M1::real_type RT;
+            T1 det = m1.det();
+            if (det == T1(0)) ThrowSingular("3x3 Matrix");
+            T1 invdet = ZProd<false,false>::quot(RT(1) , det);
+            // Store these in temporaries just in case there are aliases.
+            const T1 ae = ZProd<false,false>::prod(m1.cref(0,0),m1.cref(1,1));
+            const T1 ai = ZProd<false,false>::prod(m1.cref(0,0),m1.cref(2,2));
+            const T1 ei = ZProd<false,false>::prod(m1.cref(1,1),m1.cref(2,2));
+            const T1 af = ZProd<false,false>::prod(m1.cref(0,0),m1.cref(1,2));
+            const T1 ah = ZProd<false,false>::prod(m1.cref(0,0),m1.cref(2,1));
+            const T1 fh = ZProd<false,false>::prod(m1.cref(1,2),m1.cref(2,1));
+            const T1 bf = ZProd<false,false>::prod(m1.cref(0,1),m1.cref(1,2));
+            const T1 bg = ZProd<false,false>::prod(m1.cref(0,1),m1.cref(2,0));
+            const T1 fg = ZProd<false,false>::prod(m1.cref(1,2),m1.cref(2,0));
+            const T1 bd = ZProd<false,false>::prod(m1.cref(0,1),m1.cref(1,0));
+            const T1 bi = ZProd<false,false>::prod(m1.cref(0,1),m1.cref(2,2));
+            const T1 di = ZProd<false,false>::prod(m1.cref(1,0),m1.cref(2,2));
+            const T1 cd = ZProd<false,false>::prod(m1.cref(0,2),m1.cref(1,0));
+            const T1 ch = ZProd<false,false>::prod(m1.cref(0,2),m1.cref(2,1));
+            const T1 dh = ZProd<false,false>::prod(m1.cref(1,0),m1.cref(2,1));
+            const T1 ce = ZProd<false,false>::prod(m1.cref(0,2),m1.cref(1,1));
+            const T1 cg = ZProd<false,false>::prod(m1.cref(0,2),m1.cref(2,0));
+            const T1 eg = ZProd<false,false>::prod(m1.cref(1,1),m1.cref(2,0));
+            m2.ref(0,0) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(ei-fh , invdet));
+            m2.ref(0,1) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(ch-bi , invdet));
+            m2.ref(0,2) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(bf-ce , invdet));
+            m2.ref(1,0) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(fg-di , invdet));
+            m2.ref(1,1) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(ai-cg , invdet));
+            m2.ref(1,2) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(cd-af , invdet));
+            m2.ref(2,0) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(dh-eg , invdet));
+            m2.ref(2,1) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(bg-ah , invdet));
+            m2.ref(2,2) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(ae-bd , invdet));
+        }
+    };
+
+    // algo 4: size = 4x4
+    template <int ix, class T, class M1, class M2>
+    struct InvertM_Helper<4,4,4,ix,T,M1,M2>
+    {
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        {
+#ifdef PRINTALGO_INVM
+            const int M = m1.colsize();
+            const int N = m1.rowsize();
+            std::cout<<"InvM algo 4: M,N,cs,rs = "<<M<<','<<N<<','<<
+                4<<','<<4<<std::endl;
+#endif
+            // This algorithm does the direct calculation from 
+            // the ajugate matrix divided by the determinant.
+            // The letters refer to describing the matrix as:
+            // ( a b c d )
+            // ( e f g h )
+            // ( i j k l )
+            // ( m n o p )
+            typedef typename M1::value_type T1;
+            typedef typename M1::real_type RT;
+            
+            const T1 af = ZProd<false,false>::prod(m1.cref(0,0),m1.cref(1,1));
+            const T1 ag = ZProd<false,false>::prod(m1.cref(0,0),m1.cref(1,2));
+            const T1 ah = ZProd<false,false>::prod(m1.cref(0,0),m1.cref(1,3));
+            const T1 be = ZProd<false,false>::prod(m1.cref(0,1),m1.cref(1,0));
+            const T1 bg = ZProd<false,false>::prod(m1.cref(0,1),m1.cref(1,2));
+            const T1 bh = ZProd<false,false>::prod(m1.cref(0,1),m1.cref(1,3));
+            const T1 ce = ZProd<false,false>::prod(m1.cref(0,2),m1.cref(1,0));
+            const T1 cf = ZProd<false,false>::prod(m1.cref(0,2),m1.cref(1,1));
+            const T1 ch = ZProd<false,false>::prod(m1.cref(0,2),m1.cref(1,3));
+            const T1 de = ZProd<false,false>::prod(m1.cref(0,3),m1.cref(1,0));
+            const T1 df = ZProd<false,false>::prod(m1.cref(0,3),m1.cref(1,1));
+            const T1 dg = ZProd<false,false>::prod(m1.cref(0,3),m1.cref(1,2));
+            const T1 in = ZProd<false,false>::prod(m1.cref(2,0),m1.cref(3,1));
+            const T1 io = ZProd<false,false>::prod(m1.cref(2,0),m1.cref(3,2));
+            const T1 ip = ZProd<false,false>::prod(m1.cref(2,0),m1.cref(3,3));
+            const T1 jm = ZProd<false,false>::prod(m1.cref(2,1),m1.cref(3,0));
+            const T1 jo = ZProd<false,false>::prod(m1.cref(2,1),m1.cref(3,2));
+            const T1 jp = ZProd<false,false>::prod(m1.cref(2,1),m1.cref(3,3));
+            const T1 km = ZProd<false,false>::prod(m1.cref(2,2),m1.cref(3,0));
+            const T1 kn = ZProd<false,false>::prod(m1.cref(2,2),m1.cref(3,1));
+            const T1 kp = ZProd<false,false>::prod(m1.cref(2,2),m1.cref(3,3));
+            const T1 lm = ZProd<false,false>::prod(m1.cref(2,3),m1.cref(3,0));
+            const T1 ln = ZProd<false,false>::prod(m1.cref(2,3),m1.cref(3,1));
+            const T1 lo = ZProd<false,false>::prod(m1.cref(2,3),m1.cref(3,2));
+
+            // Calculate the Inverse * Det
+            const T1 r00 = 
+                ZProd<false,false>::prod(m1.cref(1,1),(kp-lo))
+                + ZProd<false,false>::prod(m1.cref(1,2),(ln-jp))
+                + ZProd<false,false>::prod(m1.cref(1,3),(jo-kn));
+            const T1 r10 = 
+                ZProd<false,false>::prod(m1.cref(1,0),(lo-kp))
+                + ZProd<false,false>::prod(m1.cref(1,2),(ip-lm))
+                + ZProd<false,false>::prod(m1.cref(1,3),(km-io));
+            const T1 r20 = 
+                ZProd<false,false>::prod(m1.cref(1,0),(jp-ln))
+                + ZProd<false,false>::prod(m1.cref(1,1),(lm-ip))
+                + ZProd<false,false>::prod(m1.cref(1,3),(in-jm));
+            const T1 r30 = 
+                ZProd<false,false>::prod(m1.cref(1,0),(kn-jo))
+                + ZProd<false,false>::prod(m1.cref(1,1),(io-km))
+                + ZProd<false,false>::prod(m1.cref(1,2),(jm-in));
+
+            // Interrupt to calculate det now, to make sure it's not 0.
+            // We calculate the determinant directly here, since the
+            // above intermediate values are useful for calculating the 
+            // determinant.  So it saves a few multiplies compared to
+            // calling det().
+            const T1 det = 
+                ZProd<false,false>::prod(m1.cref(0,0),r00)
+                + ZProd<false,false>::prod(m1.cref(0,1),r10)
+                + ZProd<false,false>::prod(m1.cref(0,2),r20)
+                + ZProd<false,false>::prod(m1.cref(0,3),r30);
+            if (det == T1(0)) ThrowSingular("4x4 Matrix");
+            T1 invdet = ZProd<false,false>::quot(RT(1) , det);
+
+            const T1 r01 = 
+                ZProd<false,false>::prod(m1.cref(0,1),(lo-kp))
+                + ZProd<false,false>::prod(m1.cref(0,2),(jp-ln))
+                + ZProd<false,false>::prod(m1.cref(0,3),(kn-jo));
+            const T1 r11 = 
+                ZProd<false,false>::prod(m1.cref(0,0),(kp-lo))
+                + ZProd<false,false>::prod(m1.cref(0,2),(lm-ip))
+                + ZProd<false,false>::prod(m1.cref(0,3),(io-km));
+            const T1 r21 = 
+                ZProd<false,false>::prod(m1.cref(0,0),(ln-jp))
+                + ZProd<false,false>::prod(m1.cref(0,1),(ip-lm))
+                + ZProd<false,false>::prod(m1.cref(0,3),(jm-in));
+            const T1 r31 = 
+                ZProd<false,false>::prod(m1.cref(0,0),(jo-kn))
+                + ZProd<false,false>::prod(m1.cref(0,1),(km-io))
+                + ZProd<false,false>::prod(m1.cref(0,2),(in-jm));
+            const T1 r02 = 
+                ZProd<false,false>::prod(m1.cref(3,1),(ch-dg))
+                + ZProd<false,false>::prod(m1.cref(3,2),(df-bh))
+                + ZProd<false,false>::prod(m1.cref(3,3),(bg-cf));
+            const T1 r12 = 
+                ZProd<false,false>::prod(m1.cref(3,0),(dg-ch))
+                + ZProd<false,false>::prod(m1.cref(3,2),(ah-de))
+                + ZProd<false,false>::prod(m1.cref(3,3),(ce-ag));
+            const T1 r22 = 
+                ZProd<false,false>::prod(m1.cref(3,0),(bh-df))
+                + ZProd<false,false>::prod(m1.cref(3,1),(de-ah))
+                + ZProd<false,false>::prod(m1.cref(3,3),(af-be));
+            const T1 r32 = 
+                ZProd<false,false>::prod(m1.cref(3,0),(cf-bg))
+                + ZProd<false,false>::prod(m1.cref(3,1),(ag-ce))
+                + ZProd<false,false>::prod(m1.cref(3,2),(be-af));
+            const T1 r03 = 
+                ZProd<false,false>::prod(m1.cref(2,1),(dg-ch))
+                + ZProd<false,false>::prod(m1.cref(2,2),(bh-df))
+                + ZProd<false,false>::prod(m1.cref(2,3),(cf-bg));
+            const T1 r13 = 
+                ZProd<false,false>::prod(m1.cref(2,0),(ch-dg))
+                + ZProd<false,false>::prod(m1.cref(2,2),(de-ah))
+                + ZProd<false,false>::prod(m1.cref(2,3),(ag-ce));
+            const T1 r23 = 
+                ZProd<false,false>::prod(m1.cref(2,0),(df-bh))
+                + ZProd<false,false>::prod(m1.cref(2,1),(ah-de))
+                + ZProd<false,false>::prod(m1.cref(2,3),(be-af));
+            const T1 r33 = 
+                ZProd<false,false>::prod(m1.cref(2,0),(bg-cf))
+                + ZProd<false,false>::prod(m1.cref(2,1),(ce-ag))
+                + ZProd<false,false>::prod(m1.cref(2,2),(af-be));
+
+            // Finally divide rij values by det and multiply by x:
+            m2.ref(0,0) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(r00 , invdet));
+            m2.ref(1,0) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(r10 , invdet));
+            m2.ref(2,0) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(r20 , invdet));
+            m2.ref(3,0) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(r30 , invdet));
+            m2.ref(0,1) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(r01 , invdet));
+            m2.ref(1,1) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(r11 , invdet));
+            m2.ref(2,1) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(r21 , invdet));
+            m2.ref(3,1) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(r31 , invdet));
+            m2.ref(0,2) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(r02 , invdet));
+            m2.ref(1,2) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(r12 , invdet));
+            m2.ref(2,2) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(r22 , invdet));
+            m2.ref(3,2) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(r32 , invdet));
+            m2.ref(0,3) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(r03 , invdet));
+            m2.ref(1,3) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(r13 , invdet));
+            m2.ref(2,3) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(r23 , invdet));
+            m2.ref(3,3) = ZProd<false,false>::prod(
+                x , ZProd<false,false>::prod(r33 , invdet));
+        }
+    };
+
+    // algo 5: size = 4x4 using partitioning
+    template <int ix, class T, class M1, class M2>
+    struct InvertM_Helper<5,4,4,ix,T,M1,M2>
+    {
+        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        {
+#ifdef PRINTALGO_INVM
+            const int M = m1.colsize();
+            const int N = m1.rowsize();
+            std::cout<<"InvM algo 5: M,N,cs,rs = "<<M<<','<<N<<','<<
+                4<<','<<4<<std::endl;
+#endif
+            typedef typename M1::value_type T1;
+            typedef typename M1::real_type RT;
+            // This uses an alternate strategy for calculating the inverse.
+            // ( P Q )^-1 = ( T U )
+            // ( R S )      ( V W )
+            // W = (S - R P^-1 Q)^-1
+            // V = -W R P^-1
+            // U = -P^-1 Q W
+            // T = P^-1 - P^-1 Q U
+            SmallMatrix<T1,2,2,RowMajor> P; 
+            P << m1.cref(0,0) , m1.cref(0,1) , m1.cref(1,0) , m1.cref(1,1);
+            SmallMatrix<T1,2,2,RowMajor> S; 
+            S << m1.cref(2,2) , m1.cref(2,3) , m1.cref(3,2) , m1.cref(3,3);
+
+            // If P and S are both singular, m1 might not.  
+            // Use the more general formula instead.
+            T1 detP = P.det();
+            T1 detS = S.det();
+            if (detP == T1(0) && detS == T1(0)) 
+                InvertM_Helper<4,4,4,ix,T,M1,M2>::call(x,m1,m2);
+
+            SmallMatrix<T1,2,2,RowMajor> Q; 
+            Q << m1.cref(0,2) , m1.cref(0,3) , m1.cref(1,2) , m1.cref(1,3);
+            SmallMatrix<T1,2,2,RowMajor> R; 
+            R << m1.cref(2,0) , m1.cref(2,1) , m1.cref(3,0) , m1.cref(3,1);
+
+            SmallMatrix<T1,2,2> W;
+            SmallMatrix<T1,2,2> X;
+            SmallMatrix<T1,2,2> Y;
+            SmallMatrix<T1,2,2> Z;
+
+            if (TMV_ABS(detP) > TMV_ABS(detS)) {
+                SmallMatrix<T1,2,2> Pinv = P.inverse();
+                SmallMatrix<T1,2,2> PinvQ = Pinv * Q;
+                SmallMatrix<T1,2,2> V = S-R*PinvQ;
+
+                T1 detV = V.det();
+                if (detV == T1(0)) ThrowSingular("4x4 Matrix");
+
+                Z = V.inverse();
+                SmallMatrix<T1,2,2> RPinv = R * Pinv;
+                Y = -Z*RPinv;
+                X = -PinvQ * Z;
+                W = Pinv - PinvQ * Y;
+            } else {
+                SmallMatrix<T1,2,2> Sinv = S.inverse();
+                SmallMatrix<T1,2,2> SinvR = Sinv * R;
+                SmallMatrix<T1,2,2> V = P-Q*SinvR;
+
+                T1 detV = V.det();
+                if (detV == T1(0)) ThrowSingular("4x4 Matrix");
+
+                W = V.inverse();
+                SmallMatrix<T1,2,2> QSinv = Q * Sinv;
+                X = -W*QSinv;
+                Y = -SinvR * W;
+                Z = Sinv - SinvR * X;
+            }
+            m2.ref(0,0) = W.cref(0,0);
+            m2.ref(0,1) = W.cref(0,1);
+            m2.ref(1,0) = W.cref(1,0);
+            m2.ref(1,1) = W.cref(1,1);
+            m2.ref(2,0) = Y.cref(0,0);
+            m2.ref(2,1) = Y.cref(0,1);
+            m2.ref(3,0) = Y.cref(1,0);
+            m2.ref(3,1) = Y.cref(1,1);
+            m2.ref(0,2) = X.cref(0,0);
+            m2.ref(0,3) = X.cref(0,1);
+            m2.ref(1,2) = X.cref(1,0);
+            m2.ref(1,3) = X.cref(1,1);
+            m2.ref(2,2) = Z.cref(0,0);
+            m2.ref(2,3) = Z.cref(0,1);
+            m2.ref(3,2) = Z.cref(1,0);
+            m2.ref(3,3) = Z.cref(1,1);
+        }
+    };
+
+
 
     // algo 11: Use Divider 
     template <int cs, int rs, int ix, class T, class M1, class M2>
@@ -111,13 +424,15 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvM algo 11: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
-            std::cout<<"m1.divIsSet = "<<m1.divIsSet()<<std::endl;
-            std::cout<<"m1.getDivType = "<<TMV_Text(m1.getDivType())<<std::endl;
+            std::cout<<"divIsSet = "<<m1.divIsSet()<<std::endl;
+            std::cout<<"divIsInPlace = "<<m1.divIsInPlace()<<std::endl;
+            std::cout<<"divIsSaved = "<<m1.divIsSaved()<<std::endl;
+            std::cout<<"divType = "<<TMV_Text(m1.getDivType())<<std::endl;
 #endif
             m1.setDiv();
             m1.getDiv()->makeInverse(m2);
@@ -132,7 +447,7 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvM algo 12: M,N,cs,rs = "<<M<<','<<N<<','<<
@@ -154,17 +469,14 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvM algo 13: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
-#if 0
-            QRD<M1> qrd(m1);
-            qrd.makeInverse(m2);
+            m1.qrd().makeInverse(m2);
             Scale(x,m2);
-#endif
         }
     };
 
@@ -172,9 +484,9 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<14,cs,rs,ix,T,M1,M2>
     {
-        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvM algo 14: M,N,cs,rs = "<<M<<','<<N<<','<<
@@ -193,7 +505,7 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvM algo 31: M,N,cs,rs = "<<M<<','<<N<<','<<
@@ -213,7 +525,7 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvM algo 32: M,N,cs,rs = "<<M<<','<<N<<','<<
@@ -244,7 +556,7 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvM algo 33: M,N,cs,rs = "<<M<<','<<N<<','<<
@@ -263,7 +575,7 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvM algo 34: M,N,cs,rs = "<<M<<','<<N<<','<<
@@ -282,7 +594,7 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvM algo 41: M,N,cs,rs = "<<M<<','<<N<<','<<
@@ -306,7 +618,7 @@ namespace tmv {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             const int N = m1.rowsize();
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             std::cout<<"InvM algo 42: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
@@ -328,7 +640,7 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvM algo 43: M,N,cs,rs = "<<M<<','<<N<<','<<
@@ -346,7 +658,7 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvM algo 44: M,N,cs,rs = "<<M<<','<<N<<','<<
@@ -378,11 +690,13 @@ namespace tmv {
                 !up1 ? ( // m1 is lowertri
                     up2 ? 42 : 44 ) :
                 cs == 2 && rs == 2 ? 2 :
+                cs == 3 && rs == 3 ? 3 :
+                cs == 4 && rs == 4 ? 4 :
                 M1::_hasdivider ? 11 :
                 cs == UNKNOWN || rs == UNKNOWN ? 14 :
                 cs == rs ? 12 : 
                 13;
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             std::cout<<"AliasCheck InvertM:\n";
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
@@ -414,11 +728,13 @@ namespace tmv {
                 !up1 ? ( // m1 is lowertri
                     up2 ? 41 : 43 ) :
                 cs == 2 && rs == 2 ? 2 :
+                cs == 3 && rs == 3 ? 3 :
+                cs == 4 && rs == 4 ? 4 :
                 M1::_hasdivider ? 11 :
                 cs == UNKNOWN || rs == UNKNOWN ? 14 :
                 cs == rs ? 12 : 
                 13;
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             std::cout<<"Inline InvertM\n";
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
@@ -539,7 +855,7 @@ namespace tmv {
     {
         static void call(const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvATA algo 1: M,N,cs,rs = "<<M<<','<<N<<','<<
@@ -553,22 +869,48 @@ namespace tmv {
         }
     };
 
-    // algo 2: size = Nx2
-    template <int cs, class M1, class M2>
-    struct InverseATA_Helper<2,cs,2,M1,M2>
+    // algo 2: Direct (mtm)^-1
+    template <int cs, int rs, class M1, class M2>
+    struct InverseATA_Helper<2,cs,rs,M1,M2>
     {
         static void call(const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvATA algo 2: M,N,cs,rs = "<<M<<','<<N<<','<<
-                cs<<','<<2<<std::endl;
+                cs<<','<<rs<<std::endl;
 #endif
+            TMVStaticAssert(rs != UNKNOWN);
+            TMVStaticAssert(cs == UNKNOWN || rs <= cs);
+            TMVAssert(m1.rowsize() <= m1.colsize());
             typedef typename M1::value_type T1;
             typedef typename M1::real_type RT;
-            SmallMatrix<T1,2,2> ata;
+            SmallMatrix<T1,rs,rs> ata;
             NoAliasMultMM<false>(Scaling<1,RT>(),m1.adjoint(),m1,ata);
+            NoAliasMakeInverse(Scaling<1,RT>(),ata,m2);
+        }
+    };
+
+    // algo 3: Direct (mmt)^-1
+    template <int cs, int rs, class M1, class M2>
+    struct InverseATA_Helper<3,cs,rs,M1,M2>
+    {
+        static void call(const M1& m1, M2& m2)
+        {
+#ifdef PRINTALGO_INVM
+            const int M = m1.colsize();
+            const int N = m1.rowsize();
+            std::cout<<"InvATA algo 3: M,N,cs,rs = "<<M<<','<<N<<','<<
+                cs<<','<<rs<<std::endl;
+#endif
+            TMVStaticAssert(cs != UNKNOWN);
+            TMVStaticAssert(rs == UNKNOWN || cs < rs);
+            TMVAssert(m1.colsize() < m1.rowsize());
+            typedef typename M1::value_type T1;
+            typedef typename M1::real_type RT;
+            SmallMatrix<T1,cs,cs> ata;
+            NoAliasMultMM<false>(Scaling<1,RT>(),m1,m1.adjoint(),ata);
             NoAliasMakeInverse(Scaling<1,RT>(),ata,m2);
         }
     };
@@ -579,11 +921,15 @@ namespace tmv {
     {
         static void call(const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvATA algo 11: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
+            std::cout<<"divIsSet = "<<m1.divIsSet()<<std::endl;
+            std::cout<<"divIsInPlace = "<<m1.divIsInPlace()<<std::endl;
+            std::cout<<"divIsSaved = "<<m1.divIsSaved()<<std::endl;
+            std::cout<<"divType = "<<TMV_Text(m1.getDivType())<<std::endl;
 #endif
             m1.setDiv();
             m1.getDiv()->makeInverseATA(m2);
@@ -595,9 +941,9 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<12,cs,rs,M1,M2>
     {
-        static void call(const M1& m1, M2& m2)
+        static inline void call(const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvATA algo 12: M,N,cs,rs = "<<M<<','<<N<<','<<
@@ -611,18 +957,15 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<13,cs,rs,M1,M2>
     {
-        static void call(const M1& m1, M2& m2)
+        static inline void call(const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvATA algo 13: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
-#if 0
-            QRD<M1> qrd(m1);
-            qrd.makeInverseATA(m2);
-#endif
+            m1.qrd().makeInverseATA(m2);
         }
     };
 
@@ -630,15 +973,15 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct InverseATA_Helper<14,cs,rs,M1,M2>
     {
-        static void call(const M1& m1, M2& m2)
+        static inline void call(const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvATA algo 14: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
-            if (m1.isSqurae())
+            if (m1.isSquare())
                 InverseATA_Helper<12,cs,rs,M1,M2>::call(m1,m2);
             else
                 InverseATA_Helper<13,cs,rs,M1,M2>::call(m1,m2);
@@ -651,7 +994,7 @@ namespace tmv {
     {
         static void call(const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvATA algo 21: M,N,cs,rs = "<<M<<','<<N<<','<<
@@ -677,7 +1020,7 @@ namespace tmv {
     {
         static void call(const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvATA algo 22: M,N,cs,rs = "<<M<<','<<N<<','<<
@@ -705,7 +1048,7 @@ namespace tmv {
     {
         static void call(const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvATA algo 23: M,N,cs,rs = "<<M<<','<<N<<','<<
@@ -730,7 +1073,7 @@ namespace tmv {
     {
         static void call(const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvATA algo 24: M,N,cs,rs = "<<M<<','<<N<<','<<
@@ -755,7 +1098,7 @@ namespace tmv {
     {
         static void call(const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvATA algo 31: M,N,cs,rs = "<<M<<','<<N<<','<<
@@ -780,7 +1123,7 @@ namespace tmv {
     {
         static void call(const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvATA algo 32: M,N,cs,rs = "<<M<<','<<N<<','<<
@@ -805,7 +1148,7 @@ namespace tmv {
     {
         static void call(const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvATA algo 41: M,N,cs,rs = "<<M<<','<<N<<','<<
@@ -830,7 +1173,7 @@ namespace tmv {
     {
         static void call(const M1& m1, M2& m2)
         {
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"InvATA algo 42: M,N,cs,rs = "<<M<<','<<N<<','<<
@@ -867,12 +1210,13 @@ namespace tmv {
                     (up2 || lo2) ? 22 : 24 ) :
                 !lo1 ? 32 : // m1 is uppertri
                 !up1 ? 42 : // m1 is lowertri
-                rs == 2 ? 2 :
+                (rs != UNKNOWN && cs != UNKNOWN && rs <= 4 && rs <= cs) ? 2 :
+                (rs != UNKNOWN && cs != UNKNOWN && cs <= 4) ? 2 :
                 M1::_hasdivider ? 11 :
                 cs == UNKNOWN || rs == UNKNOWN ? 14 :
                 cs == rs ? 12 : 
                 13;
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"AliasCheck InverseATA: M,N,cs,rs = "<<M<<','<<N<<','<<
@@ -903,12 +1247,13 @@ namespace tmv {
                     (up2 || lo2) ? 21 : 23 ) :
                 !lo1 ? 31 : // m1 is uppertri
                 !up1 ? 41 : // m1 is lowertri
-                rs == 2 ? 2 :
+                (rs != UNKNOWN && cs != UNKNOWN && rs <= 4 && rs <= cs) ? 2 :
+                (rs != UNKNOWN && cs != UNKNOWN && cs <= 4) ? 2 :
                 M1::_hasdivider ? 11 :
                 cs == UNKNOWN || rs == UNKNOWN ? 14 :
                 cs == rs ? 12 : 
                 13;
-#ifdef PRINTALGO_InvM
+#ifdef PRINTALGO_INVM
             const int M = m1.colsize();
             const int N = m1.rowsize();
             std::cout<<"Inline InverseATA: M,N,cs,rs = "<<M<<','<<N<<','<<
@@ -952,12 +1297,13 @@ namespace tmv {
         typedef typename M2::real_type RT2;
         TMVStaticAssert(!Traits<RT1>::isinteger);
         TMVStaticAssert(!Traits<RT2>::isinteger);
-        TMVStaticAssert((Sizes<M1::_colsize,M2::_rowsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M2::_colsize>::same));
-        TMVAssert(m1.colsize() == m2.rowsize());
-        TMVAssert(m1.rowsize() == m2.colsize());
-        const int cs = Sizes<M2::_colsize,M1::_rowsize>::size;
-        const int rs = Sizes<M2::_rowsize,M1::_colsize>::size;
+        TMVStaticAssert((Sizes<IntTraits2<M1::_colsize,M1::_rowsize>::min,
+                         M2::_rowsize>::same));
+        TMVStaticAssert((Sizes<M2::_rowsize,M2::_colsize>::same));
+        TMVAssert(TMV_MIN(m1.colsize(),m1.rowsize()) == m2.rowsize());
+        TMVAssert(m2.rowsize() == m2.colsize());
+        const int cs = M1::_colsize;
+        const int rs = M1::_rowsize;
         // Don't make a view for m1, since we want to make sure we keep 
         // a divider object if one is present.
         typedef typename M2::cview_type M2v;
@@ -972,14 +1318,13 @@ namespace tmv {
         typedef typename M2::real_type RT2;
         TMVStaticAssert(!Traits<RT1>::isinteger);
         TMVStaticAssert(!Traits<RT2>::isinteger);
-        TMVStaticAssert((Sizes<M1::_colsize,M2::_rowsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M2::_colsize>::same));
-        TMVAssert(m1.colsize() == m2.rowsize());
-        TMVAssert(m1.rowsize() == m2.colsize());
-        const int cs = Sizes<M2::_colsize,M1::_rowsize>::size;
-        const int rs = Sizes<M2::_rowsize,M1::_colsize>::size;
-        // Don't make a view for m1, since we want to make sure we keep 
-        // a divider object if one is present.
+        TMVStaticAssert((Sizes<IntTraits2<M1::_colsize,M1::_rowsize>::min,
+                         M2::_rowsize>::same));
+        TMVStaticAssert((Sizes<M2::_rowsize,M2::_colsize>::same));
+        TMVAssert(TMV_MIN(m1.colsize(),m1.rowsize()) == m2.rowsize());
+        TMVAssert(m2.rowsize() == m2.colsize());
+        const int cs = M1::_colsize;
+        const int rs = M1::_rowsize;
         typedef typename M2::cview_type M2v;
         TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
         InverseATA_Helper<-3,cs,rs,M1,M2v>::call(m1.mat(),m2v);
@@ -992,14 +1337,13 @@ namespace tmv {
         typedef typename M2::real_type RT2;
         TMVStaticAssert(!Traits<RT1>::isinteger);
         TMVStaticAssert(!Traits<RT2>::isinteger);
-        TMVStaticAssert((Sizes<M1::_colsize,M2::_rowsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M2::_colsize>::same));
-        TMVAssert(m1.colsize() == m2.rowsize());
-        TMVAssert(m1.rowsize() == m2.colsize());
-        const int cs = Sizes<M2::_colsize,M1::_rowsize>::size;
-        const int rs = Sizes<M2::_rowsize,M1::_colsize>::size;
-        // Don't make a view for m1, since we want to make sure we keep 
-        // a divider object if one is present.
+        TMVStaticAssert((Sizes<IntTraits2<M1::_colsize,M1::_rowsize>::min,
+                         M2::_rowsize>::same));
+        TMVStaticAssert((Sizes<M2::_rowsize,M2::_colsize>::same));
+        TMVAssert(TMV_MIN(m1.colsize(),m1.rowsize()) == m2.rowsize());
+        TMVAssert(m2.rowsize() == m2.colsize());
+        const int cs = M1::_colsize;
+        const int rs = M1::_rowsize;
         typedef typename M2::cview_type M2v;
         TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
         InverseATA_Helper<99,cs,rs,M1,M2v>::call(m1.mat(),m2v);

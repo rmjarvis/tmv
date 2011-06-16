@@ -117,6 +117,7 @@ namespace tmv {
         T cref(int i) const  { return i==itsindex ? itsval : T(0); }
         size_t size() const { return itssize; }
         int nElements() const { return 1; }
+
         template <class V2>
         void assignTo(BaseVector_Mutable<V2>& v2) const
         {
@@ -124,6 +125,10 @@ namespace tmv {
             v2.setZero();
             v2.ref(itsindex) = itsval; 
         }
+
+        template <class V2>
+        void newAssignTo(BaseVector_Mutable<V2>& v2) const
+        { assignTo(v2); }
 
     protected :
 
@@ -138,6 +143,7 @@ namespace tmv {
     // TMV_Text functions
     //
 
+#ifdef TMV_TEXT
     template <class T, int A>
     static inline std::string TMV_Text(const BasisVector<T,A>& )
     {
@@ -146,6 +152,7 @@ namespace tmv {
         s <<","<<Attrib<A>::vtext()<<">";
         return s.str();
     }
+#endif
 
 } // namespace tmv
 

@@ -88,7 +88,7 @@ namespace tmv {
         typedef typename V2f::const_nonconj_type::const_iterator IT2f;
         typedef typename V3f::iterator IT3f;
         enum { size2 = size == UNKNOWN ? UNKNOWN : (size<<1) };
-        static void call(
+        static inline void call(
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
@@ -98,7 +98,7 @@ namespace tmv {
             AddVV_Helper<-4,size2,ix1,T1,V1f,ix2,T2,V2f,V3f>::call(
                 x1,v1f,x2,v2f,v3f);
         }
-        static void call2(
+        static inline void call2(
             int n, const Scaling<ix1,T1>& x1, IT1 it1,
             const Scaling<ix2,T2>& x2, IT2 it2, IT3 it3)
         {
@@ -148,7 +148,7 @@ namespace tmv {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         typedef typename V3::iterator IT3;
-        static void call(
+        static inline void call(
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
@@ -188,7 +188,7 @@ namespace tmv {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         typedef typename V3::iterator IT3;
-        static void call(
+        static inline void call(
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
@@ -234,7 +234,7 @@ namespace tmv {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         typedef typename V3::iterator IT3;
-        static void call(
+        static inline void call(
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
@@ -292,7 +292,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix1,T1>& x1, const V1& v1,
                 const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
             {
@@ -303,7 +303,7 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix1,T1>& x1, const V1& v1,
                 const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
             {
@@ -315,11 +315,11 @@ namespace tmv {
         template <int I>
         struct Unroller<I,0>
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix1,T1>& x1, const V1& v1,
                 const Scaling<ix2,T2>& x2, const V2& v2, V3& v3) {}
         };
-        static void call(
+        static inline void call(
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         { Unroller<0,size>::unroll(x1,v1,x2,v2,v3); }

@@ -8,14 +8,17 @@ inline void TestV(const V& a, std::string label)
 {
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<RT>::float_type FT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start V "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
     }
+#endif
 
     tmv::Vector<T> v = a;
     FT eps = EPS*v.size();
 
+#ifdef XXD
     if (XXDEBUG1) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" = "<<a<<std::endl;
         std::cout<<"v = "<<tmv::TMV_Text(v)<<" = "<<v<<std::endl;
@@ -28,6 +31,7 @@ inline void TestV(const V& a, std::string label)
         std::cout<<"abs(diff) = "<<tmv::TMV_ABS(NormSq(a)-NormSq(v))<<std::endl;
         std::cout<<"eps*normsq = "<<eps*NormSq(v)<<std::endl;
     }
+#endif
 
     Assert(Equal(a,v,eps),label+" a != v");
 
@@ -46,17 +50,20 @@ inline void TestVX(const V& a, T2 x, std::string label)
 {
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<RT>::float_type FT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start VX "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"x "<<x<<std::endl;
     }
+#endif
 
     tmv::Vector<T> v = a;
     FT eps = EPS*v.size();
     if (!(std::numeric_limits<RT>::is_integer)) 
         eps *= Norm(v) * tmv::TMV_ABS(x);
 
+#ifdef XXD
     if (XXDEBUG2) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" = "<<a<<std::endl;
         std::cout<<"v = "<<tmv::TMV_Text(v)<<" = "<<v<<std::endl;
@@ -67,6 +74,7 @@ inline void TestVX(const V& a, T2 x, std::string label)
         std::cout<<"Norm(diff) = "<<Norm((x*a)-(x*v))<<std::endl;
         std::cout<<"eps = "<<eps<<std::endl;
     }
+#endif
     Assert(Equal(a,v,eps),label+" a != v");
 
     Assert(Equal((x*a),(x*v),eps),label+" x*a");
@@ -85,11 +93,13 @@ inline void TestVX2(V& a, T2 x, std::string label)
 {
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<RT>::float_type FT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start VX2 "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"x "<<x<<std::endl;
     }
+#endif
 
     tmv::Vector<T> v = a;
     FT eps = EPS*v.size();
@@ -100,6 +110,7 @@ inline void TestVX2(V& a, T2 x, std::string label)
 
     typename V::copy_type a0 = a;
 
+#ifdef XXD
     if (XXDEBUG3) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" = "<<a<<std::endl;
         std::cout<<"v = "<<tmv::TMV_Text(v)<<" = "<<v<<std::endl;
@@ -110,6 +121,7 @@ inline void TestVX2(V& a, T2 x, std::string label)
         std::cout<<"eps = "<<eps<<std::endl;
         a = a0;
     }
+#endif
 
     a *= x;
     v = tmv::Vector<T>(v*x);
@@ -153,11 +165,13 @@ inline void TestVV(const V1& a, const V2& b, std::string label)
 {
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<RT>::float_type FT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start VV "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
     }
+#endif
 
     tmv::Vector<T> v1 = a;
     tmv::Vector<T2> v2 = b;
@@ -173,6 +187,7 @@ inline void TestVV(const V1& a, const V2& b, std::string label)
     Assert(Equal(a,v1,eps),label+" a != v1");
     Assert(Equal(b,v2,eps),label+" b != v2");
 
+#ifdef XXD
     if (XXDEBUG4) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" = "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" = "<<b<<std::endl;
@@ -183,6 +198,7 @@ inline void TestVV(const V1& a, const V2& b, std::string label)
         std::cout<<"Norm(diff) = "<<Norm((a+b)-(v1+v2))<<std::endl;
         std::cout<<"eps = "<<eps<<std::endl;
     }
+#endif
 
     Assert(Equal((a+b),(v1+v2),eps),label+" a+b");
     Assert(Equal((a-b),(v1-v2),eps),label+" a-b");
@@ -250,11 +266,13 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
 {
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<RT>::float_type FT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start VV2 "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
     }
+#endif
 
     tmv::Vector<T> v1 = a;
     tmv::Vector<T2> v2 = b;
@@ -267,6 +285,7 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
 
     tmv::Vector<T> v4 = v1;
     tmv::Vector<T> v3 = v1;
+#ifdef XXD
     if (XXDEBUG5) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" = "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" = "<<b<<std::endl;
@@ -276,6 +295,7 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
         std::cout<<"eps = "<<eps<<std::endl;
         v3 = v1;
     }
+#endif
 
     v3 += b;
     v4 = v1+v2;
@@ -328,6 +348,7 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
     a = v4 = v1;
 #endif
 
+#ifdef XXD
     if (XXDEBUG5) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" = "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" = "<<b<<std::endl;
@@ -338,6 +359,7 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
         std::cout<<"eps = "<<eps<<std::endl;
         a = v1;
     }
+#endif
 
     a += b;
     v4 = v1+v2;
@@ -382,11 +404,13 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
 template <class T, class V, class CV> 
 inline void TestVectorArith1(V& a, CV& ca, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start VectorArith1 "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
     }
+#endif
 
     TestV<T>(a,label+" R");
     TestV<std::complex<T> >(ca,label+" C");
@@ -414,6 +438,7 @@ template <class T, class V1, class CV1, class V2, class CV2>
 inline void TestVectorArith2(
     V1& a, CV1& ca, const V2& b, const CV2& cb, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start VectorArith2 "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -421,6 +446,7 @@ inline void TestVectorArith2(
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
         std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
     }
+#endif
 
     TestVV<T,T>(a,b,label+" R,R");
     TestVV2<T,T>(a,b,label+" R,R");

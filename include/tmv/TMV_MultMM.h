@@ -236,7 +236,7 @@ namespace tmv {
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Helper<1,cs,rs,xs,false,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         { m3.setZero(); }
     };
@@ -245,7 +245,7 @@ namespace tmv {
     template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Helper<2,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
@@ -268,7 +268,7 @@ namespace tmv {
     template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Helper<102,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
@@ -291,7 +291,7 @@ namespace tmv {
     template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Helper<202,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
@@ -314,7 +314,7 @@ namespace tmv {
     template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Helper<3,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
@@ -335,7 +335,7 @@ namespace tmv {
     template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Helper<103,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
@@ -356,7 +356,7 @@ namespace tmv {
     template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Helper<203,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
@@ -377,7 +377,7 @@ namespace tmv {
     template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Helper<4,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
@@ -398,7 +398,7 @@ namespace tmv {
     template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Helper<104,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
@@ -419,7 +419,7 @@ namespace tmv {
     template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Helper<204,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
@@ -440,7 +440,7 @@ namespace tmv {
     template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Helper<5,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
@@ -465,7 +465,7 @@ namespace tmv {
     template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Helper<405,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
@@ -490,7 +490,7 @@ namespace tmv {
     template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Helper<11,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             // This algorithm is the same as for RCC, so just call that one,
@@ -638,14 +638,14 @@ namespace tmv {
         template <int z>
         struct Helper2<0,z> // algo2 = 0 (cs,rs,xs=0)
         {
-            static void call(
+            static TMV_INLINE void call(
                 const Scaling<ix,T>& , const M1& , const M2& , M3& ) 
             {}
         };
         template <int z>
         struct Helper2<2,z> // algo2 = 2 (rs is even)
         {
-            static void call(
+            static inline void call(
                 const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
             {
                 TMVStaticAssert(rs != UNKNOWN);
@@ -686,7 +686,7 @@ namespace tmv {
                 }
             }
         };
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const int algo2 = 
@@ -864,20 +864,20 @@ namespace tmv {
         template <int z>
         struct Helper2<0,z> // algo2 = 0 (cs,rs=0 or (xs=0 && add))
         {
-            static void call(
+            static TMV_INLINE void call(
                 const Scaling<ix,T>& , const M1& , const M2& , M3& ) {}
         };
         template <int z>
         struct Helper2<1,z> // algo2 = 1 (xs=0 and !add)
         {
-            static void call(
+            static TMV_INLINE void call(
                 const Scaling<ix,T>& , const M1& , const M2& , M3& m3) 
             { m3.setZero(); }
         };
         template <int z>
         struct Helper2<2,z> // algo2 = 2 (cs and rs are even)
         {
-            static void call(
+            static inline void call(
                 const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
             {
                 TMVStaticAssert(cs != UNKNOWN);
@@ -933,7 +933,7 @@ namespace tmv {
                 }
             }
         };
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const int algo2 = 
@@ -1118,13 +1118,13 @@ namespace tmv {
         template <int z>
         struct Helper2<0,z> // algo2 = 0 (cs,rs,xs=0)
         {
-            static void call(
+            static TMV_INLINE void call(
                 const Scaling<ix,T>& , const M1& , const M2& , M3& ) {}
         };
         template <int z>
         struct Helper2<2,z> // algo2 = 2 (rs is even)
         {
-            static void call(
+            static TMV_INLINE void call(
                 const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
             {
                 TMVStaticAssert(xs != UNKNOWN);
@@ -1164,7 +1164,7 @@ namespace tmv {
                 }
             }
         };
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const int algo2 = 
@@ -1272,24 +1272,22 @@ namespace tmv {
             TMVAssert(K >= 1);
             if (M == 1 && N == 1 && K == 1)
                 call2<addx,csx,rsx,xsx>(i1,j1,k1,i2,j2,k2,x,m1,m2,m3);
-            else if (M >= N && M >= K)  // M is largest
-            {
+            else if (M >= N && M >= K) { 
+                // M is largest
                 TMVAssert(M >= N && M >= K);
                 const int Mx = M>>1; // = M/2
                 const int im = i1 + (Mx<<lnMB); // = i1 + Mx * MB
                 call1<addx,MB,rsx,xsx>(i1,j1,k1,im,j2,k2,Mx,N,K,x,m1,m2,m3);
                 call1<addx,csx,rsx,xsx>(im,j1,k1,i2,j2,k2,M-Mx,N,K,x,m1,m2,m3);
-            }
-            else if (N >= M && N >= K) // N is largest
-            {
+            } else if (N >= M && N >= K) { 
+                // N is largest
                 TMVAssert(N >= M && N >= K);
                 const int Nx = N>>1; // = N/2
                 const int jm = j1 + (Nx<<lnNB); // = j1 + Nx * NB
                 call1<addx,csx,NB,xsx>(i1,j1,k1,i2,jm,k2,M,Nx,K,x,m1,m2,m3);
                 call1<addx,csx,rsx,xsx>(i1,jm,k1,i2,j2,k2,M,N-Nx,K,x,m1,m2,m3);
-            }
-            else // K is largest
-            {
+            } else { 
+                // K is largest
                 TMVAssert(K >= M && K >= N);
                 const int Kx = K>>1; // = K/2
                 const int km = k1 + (Kx<<lnKB); // = k1 + Kx * KB
@@ -1298,7 +1296,7 @@ namespace tmv {
             }
         }
         template <bool addx, int csx, int rsx, int xsx>
-        static void call2(
+        static inline void call2(
             const int i1, const int j1, const int k1, 
             const int i2, const int j2, const int k2, 
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
@@ -1343,10 +1341,10 @@ namespace tmv {
                 const int Nb = (N>>lnNB)+1; // = N/NB + 1
                 const int Kb = (K>>lnKB)+1; // = K/KB + 1
                 call1<add,csx,rsx,xsx>(0,0,0,M,N,K,Mb,Nb,Kb,x,m1,m2,m3); 
-            }
-            else
+            } else {
                 MultMM_Helper<algo2,cs,rs,xs,add,ix,T,M1,M2,M3>::call(
                     x,m1,m2,m3);
+            }
         }
     };
 
@@ -1355,7 +1353,7 @@ namespace tmv {
     template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Helper<63,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
@@ -1377,7 +1375,7 @@ namespace tmv {
     template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Helper<64,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
@@ -1464,7 +1462,7 @@ namespace tmv {
     template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Helper<68,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
@@ -1501,7 +1499,7 @@ namespace tmv {
     template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Helper<69,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
@@ -1550,7 +1548,6 @@ namespace tmv {
                 21;
             // Strange -- 31,32 are faster than copying to new storage.
             // At least for the sizes I tested on.
-            TMVStaticAssert(algo2 != -999);
 
             // Put the small matrix option first, so it doesn't have to 
             // go through a bunch of if/else statements.  For large matrices,
@@ -1827,7 +1824,7 @@ namespace tmv {
     template <int cs, int rs, int xs, bool add, class T, class M1, class M2, class M3>
     struct MultMM_Helper<83,cs,rs,xs,add,1,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<1,T>& x, const M1& m1, const M2& m2, M3& m3)
         { MultMM_Helper<81,cs,rs,xs,add,1,T,M1,M2,M3>::call(x,m1,m2,m3); }
     };
@@ -1901,7 +1898,7 @@ namespace tmv {
     template <int cs, int rs, int xs, bool add, class T, class M1, class M2, class M3>
     struct MultMM_Helper<86,cs,rs,xs,add,1,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<1,T>& x, const M1& m1, const M2& m2, M3& m3)
         { MultMM_Helper<84,cs,rs,xs,add,1,T,M1,M2,M3>::call(x,m1,m2,m3); }
     };
@@ -1944,7 +1941,7 @@ namespace tmv {
     template <int cs, int rs, int xs, bool add, class T, class M1, class M2, class M3>
     struct MultMM_Helper<87,cs,rs,xs,add,1,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<1,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
@@ -2591,19 +2588,19 @@ namespace tmv {
     }
 
     template <class M1, int ix, class T, class M2>
-    static inline void MultEqMM(
+    static TMV_INLINE void MultEqMM(
         BaseMatrix_Rec_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Rec<M2>& m2)
     { MultMM<false>(x,m1.copy(),m2.mat(),m1.mat()); }
 
     template <class M1, int ix, class T, class M2>
-    static inline void NoAliasMultEqMM(
+    static TMV_INLINE void NoAliasMultEqMM(
         BaseMatrix_Rec_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Rec<M2>& m2)
     { NoAliasMultMM<false>(x,m1.copy(),m2.mat(),m1.mat()); }
 
     template <class M1, int ix, class T, class M2>
-    static inline void AliasMultEqMM(
+    static TMV_INLINE void AliasMultEqMM(
         BaseMatrix_Rec_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Rec<M2>& m2)
     { AliasMultMM<false>(x,m1.copy(),m2.mat(),m1.mat()); }

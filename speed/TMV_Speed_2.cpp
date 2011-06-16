@@ -401,7 +401,8 @@ UNKNOWN LAP definition....  // Give compile error
 
 #ifdef DOEIGENSMALL
 const int nloops2x = (
-    (M*N*sizeof(T) < 512 * 1024 && N!=10000 && M!=10000) ? nloops2 : 0 );
+    (M*N*sizeof(T) < 512 * 1024 && 
+     N!=Eigen::Dynamic && M!=Eigen::Dynamic) ?  nloops2 : 0 );
 #endif
 
 #include <sys/time.h>
@@ -513,8 +514,6 @@ static void MultXM(
     for (int n=0; n<nloops1; ++n) {
 
 #if 1 // C = A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -524,6 +523,7 @@ static void MultXM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -653,8 +653,6 @@ static void MultXM(
 #endif
 
 #if 1 // C = 8 * A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -666,6 +664,7 @@ static void MultXM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -790,8 +789,6 @@ static void MultXM(
 #endif
 
 #if 1 // C *= 7
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -803,6 +800,7 @@ static void MultXM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -919,8 +917,6 @@ static void MultXM(
 #endif
 
 #if 1 // C = -A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -932,6 +928,7 @@ static void MultXM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -1056,8 +1053,6 @@ static void MultXM(
 #endif
 
 #if 1 // C = -C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -1069,6 +1064,7 @@ static void MultXM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -1188,8 +1184,6 @@ static void MultXM(
 
 #ifdef TISCOMPLEX
 #if 1 // C *= complex(8,9)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -1201,6 +1195,7 @@ static void MultXM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -1319,8 +1314,6 @@ static void MultXM(
 #endif
 
 #if 1 // C = complex(8,9) * A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -1332,6 +1325,7 @@ static void MultXM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -1456,8 +1450,6 @@ static void MultXM(
 #endif
 
 #if 1 // C = complex(8,9) * A*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -1469,6 +1461,7 @@ static void MultXM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -1598,8 +1591,6 @@ static void MultXM(
 #endif
 
 #if 1 // C = B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -1609,6 +1600,7 @@ static void MultXM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -1723,8 +1715,6 @@ static void MultXM(
 #endif
 
 #if 1 // C = 8 * B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -1736,6 +1726,7 @@ static void MultXM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -1860,8 +1851,6 @@ static void MultXM(
 #endif
 
 #if 1 // C = -B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -1873,6 +1862,7 @@ static void MultXM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -1998,8 +1988,6 @@ static void MultXM(
 
 #ifdef TISCOMPLEX
 #if 1 // C = complex(8,9) * B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -2011,6 +1999,7 @@ static void MultXM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -2135,8 +2124,6 @@ static void MultXM(
 #endif
 
 #if 1 // C = complex(8,9) * B*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -2148,6 +2135,7 @@ static void MultXM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -2462,8 +2450,6 @@ static void AddMM(
     for (int n=0; n<nloops1; ++n) {
 
 #if 1 // C += A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -2475,6 +2461,7 @@ static void AddMM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -2594,8 +2581,6 @@ static void AddMM(
 #endif
 
 #if 1 // C += B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -2607,6 +2592,7 @@ static void AddMM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -2724,8 +2710,6 @@ static void AddMM(
 #endif
 
 #if 1 // C -= B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -2737,6 +2721,7 @@ static void AddMM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -2855,8 +2840,6 @@ static void AddMM(
 #endif
 
 #if 1 // C += 8 * B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -2868,6 +2851,7 @@ static void AddMM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -2985,8 +2969,6 @@ static void AddMM(
 #endif
 
 #if 1 // C = A + Ax
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -2998,6 +2980,7 @@ static void AddMM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -3123,8 +3106,6 @@ static void AddMM(
 #endif
 
 #if 1 // C = A + B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -3136,6 +3117,7 @@ static void AddMM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -3261,8 +3243,6 @@ static void AddMM(
 #endif
 
 #if 1 // C = B + Bx
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -3274,6 +3254,7 @@ static void AddMM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -3396,8 +3377,6 @@ static void AddMM(
 #endif
 
 #if 1 // C = A - B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -3409,6 +3388,7 @@ static void AddMM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -3534,8 +3514,6 @@ static void AddMM(
 #endif
 
 #if 1 // C = 7*A - 12*B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -3547,6 +3525,7 @@ static void AddMM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -3676,8 +3655,6 @@ static void AddMM(
 #endif
 
 #if 1 // C = 7*C - 12*A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -3689,6 +3666,7 @@ static void AddMM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -3814,8 +3792,6 @@ static void AddMM(
 
 #ifdef TISCOMPLEX
 #if 1 // C += complex(8,9) * A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -3827,6 +3803,7 @@ static void AddMM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -3946,8 +3923,6 @@ static void AddMM(
 #endif
 
 #if 1 // C += complex(8,9) * B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -3959,6 +3934,7 @@ static void AddMM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -4076,8 +4052,6 @@ static void AddMM(
 #endif
 
 #if 1 // C = 7*A + (8,9)*B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -4089,6 +4063,7 @@ static void AddMM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -4218,8 +4193,6 @@ static void AddMM(
 #endif
 
 #if 1 // C = (7,1)*A + (8,9)*B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -4231,6 +4204,7 @@ static void AddMM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -4360,8 +4334,6 @@ static void AddMM(
 #endif
 
 #if 1 // C = (7,1)*A - B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -4373,6 +4345,7 @@ static void AddMM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -4658,8 +4631,6 @@ static void NormM(
     for (int n=0; n<nloops1; ++n) {
 
 #if 1 // F = Norm1(A)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -4677,6 +4648,7 @@ static void NormM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -4836,8 +4808,6 @@ static void NormM(
 #endif
 
 #if 1 // F = NormF(A)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -4851,6 +4821,7 @@ static void NormM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -4998,8 +4969,6 @@ static void NormM(
 #endif
 
 #if 1 // F = NormInf(A)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -5016,6 +4985,7 @@ static void NormM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -5169,8 +5139,6 @@ static void NormM(
 #endif
 
 #if 1 // F = NormSq(A)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -5183,6 +5151,7 @@ static void NormM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -5332,8 +5301,6 @@ static void NormM(
 #endif
 
 #if 1 // F = MaxAbsElement(A)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -5346,6 +5313,7 @@ static void NormM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -5499,8 +5467,6 @@ static void NormM(
 #endif 
 
 #if 1 // D = SumElements(A)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -5513,6 +5479,7 @@ static void NormM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -5636,8 +5603,6 @@ static void NormM(
 #endif
 
 #if 1 // F = SumAbsElements(A)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -5650,6 +5615,7 @@ static void NormM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -5786,8 +5752,6 @@ static void NormM(
 #endif
 
 #if 1 // F = SumAbs2Elements(A)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -5807,6 +5771,7 @@ static void NormM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -6078,8 +6043,6 @@ static void SwapM(
     for (int n=0; n<nloops1; ++n) {
 
 #if 1 // Swap(A,Ax)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -6089,6 +6052,7 @@ static void SwapM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -6214,8 +6178,6 @@ static void SwapM(
 #endif
 
 #if 1 // Swap(A[0::N/2,0::N/2],Ax[0::N/2,0::N/2])
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -6225,6 +6187,7 @@ static void SwapM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -6362,8 +6325,6 @@ static void SwapM(
 #endif
 
 #if 1 // Swap(A,B);
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -6373,6 +6334,7 @@ static void SwapM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -6501,8 +6463,6 @@ static void SwapM(
 #ifdef DOTRANSPOSESELF
 #if 1 // A.transposeSelf()
 #ifdef AISSQUARE
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -6512,6 +6472,7 @@ static void SwapM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -6626,8 +6587,6 @@ static void SwapM(
 
 #ifdef TISCOMPLEX
 #if 1 // A.conjugateSelf()
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -6637,6 +6596,7 @@ static void SwapM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -6754,8 +6714,6 @@ static void SwapM(
 #endif
 
 #if 1 // Swap(A,Ax.conjugate);
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) 
             for (int k=0; k<nloops2; ++k) 
@@ -6767,6 +6725,7 @@ static void SwapM(
                         A0[k](i,j) = temp;
                     }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -6912,8 +6871,6 @@ static void SwapM(
 
 #ifdef DOPERMUTE
 #if 1 // A.permuteRows(P)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -6923,6 +6880,7 @@ static void SwapM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -7043,8 +7001,6 @@ static void SwapM(
 #endif
 
 #if 1 // A.reversePermuteRows(P)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -7054,6 +7010,7 @@ static void SwapM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -7174,8 +7131,6 @@ static void SwapM(
 #endif
 
 #if 1 // A.permuteCols(Q)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -7185,6 +7140,7 @@ static void SwapM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -7301,8 +7257,6 @@ static void SwapM(
 #endif
 
 #if 1 // A.reversePermuteCols(Q)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -7312,6 +7266,7 @@ static void SwapM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -7631,8 +7586,6 @@ static void MultMV(
     for (int n=0; n<nloops1; ++n) {
 
 #if 1 // D = A * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -7648,6 +7601,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -7762,8 +7716,6 @@ static void MultMV(
 #endif
 
 #if 1 // D = B * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -7779,6 +7731,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -7894,8 +7847,6 @@ static void MultMV(
 #endif
 
 #if 1 // D = -A * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -7911,6 +7862,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -8026,8 +7978,6 @@ static void MultMV(
 #endif
 
 #if 1 // D = -B * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -8043,6 +7993,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -8158,8 +8109,6 @@ static void MultMV(
 #endif
 
 #if 1 // D = 7 * A * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -8175,6 +8124,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -8290,8 +8240,6 @@ static void MultMV(
 #endif
 
 #if 1 // D = 7 * B * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -8307,6 +8255,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -8422,8 +8371,6 @@ static void MultMV(
 #endif
 
 #if 1 // D -= A * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -8438,6 +8385,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -8554,8 +8502,6 @@ static void MultMV(
 #endif
 
 #if 1 // D -= B * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -8570,6 +8516,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -8686,8 +8633,6 @@ static void MultMV(
 #endif
 
 #if 1 // D += 8 * A * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -8702,6 +8647,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -8818,8 +8764,6 @@ static void MultMV(
 #endif
 
 #if 1 // D += 8 * B * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -8834,6 +8778,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -8951,8 +8896,6 @@ static void MultMV(
 
 #ifdef TISCOMPLEX
 #if 1 // D = (7,1) * A * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -8968,6 +8911,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -9083,8 +9027,6 @@ static void MultMV(
 #endif
 
 #if 1 // D = (7,1) * B * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -9100,6 +9042,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -9215,8 +9158,6 @@ static void MultMV(
 #endif
 
 #if 1 // D += (8,9) * A * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -9231,6 +9172,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -9347,8 +9289,6 @@ static void MultMV(
 #endif
 
 #if 1 // D += (8,9) * B * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -9363,6 +9303,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -9479,8 +9420,6 @@ static void MultMV(
 #endif
 
 #if 1 // D = (7,1) * A* * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -9496,6 +9435,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -9616,8 +9556,6 @@ static void MultMV(
 #endif
 
 #if 1 // D = (7,1) * B* * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -9633,6 +9571,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -9748,8 +9687,6 @@ static void MultMV(
 #endif
 
 #if 1 // D += (8,9) * A* * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -9764,6 +9701,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -9886,8 +9824,6 @@ static void MultMV(
 #endif
 
 #if 1 // D += (8,9) * B* * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -9902,6 +9838,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -10018,8 +9955,6 @@ static void MultMV(
 #endif
 
 #if 1 // D = (7,1) * A * C*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -10035,6 +9970,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -10153,8 +10089,6 @@ static void MultMV(
 #endif
 
 #if 1 // D = (7,1) * B * C*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -10170,6 +10104,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -10287,8 +10222,6 @@ static void MultMV(
 #endif
 
 #if 1 // D += (8,9) * A * C*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -10303,6 +10236,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -10422,8 +10356,6 @@ static void MultMV(
 #endif
 
 #if 1 // D += (8,9) * B * C*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -10438,6 +10370,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -10557,8 +10490,6 @@ static void MultMV(
 #endif
 
 #if 1 // D = (7,1) * A* * C*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -10574,6 +10505,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -10691,8 +10623,6 @@ static void MultMV(
 #endif
 
 #if 1 // D = (7,1) * B* * C*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -10708,6 +10638,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -10825,8 +10756,6 @@ static void MultMV(
 #endif
 
 #if 1 // D += (8,9) * A* * C*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -10841,6 +10770,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -10960,8 +10890,6 @@ static void MultMV(
 #endif
 
 #if 1 // D += (8,9) * B* * C*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -10976,6 +10904,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -11097,8 +11026,6 @@ static void MultMV(
 
 #ifdef AISSQUARE
 #if 1 // D *= A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -11114,6 +11041,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         for (int k=0; k<nloops2; ++k) D1[k] = C1[k];
@@ -11239,8 +11167,6 @@ static void MultMV(
 #endif
 
 #if 1 // D *= B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -11256,6 +11182,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         for (int k=0; k<nloops2; ++k) D1[k] = C1[k];
@@ -11381,8 +11308,6 @@ static void MultMV(
 #endif
 
 #if 1 // D *= 7 * A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -11398,6 +11323,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         for (int k=0; k<nloops2; ++k) D1[k] = C1[k];
@@ -11524,8 +11450,6 @@ static void MultMV(
 #endif
 
 #if 1 // D *= 7 * B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -11541,6 +11465,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         for (int k=0; k<nloops2; ++k) D1[k] = C1[k];
@@ -11668,8 +11593,6 @@ static void MultMV(
 
 #ifdef TISCOMPLEX
 #if 1 // D *= (7,1) * A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -11685,6 +11608,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         for (int k=0; k<nloops2; ++k) D1[k] = C1[k];
@@ -11811,8 +11735,6 @@ static void MultMV(
 #endif
 
 #if 1 // D *= (7,1) * B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -11828,6 +11750,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         for (int k=0; k<nloops2; ++k) D1[k] = C1[k];
@@ -11954,8 +11877,6 @@ static void MultMV(
 #endif
 
 #if 1 // D *= (7,1) * A*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -11971,6 +11892,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         for (int k=0; k<nloops2; ++k) D1[k] = C1[k];
@@ -12097,8 +12019,6 @@ static void MultMV(
 #endif
 
 #if 1 // D *= (7,1) * B*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -12114,6 +12034,7 @@ static void MultMV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         for (int k=0; k<nloops2; ++k) D1[k] = C1[k];
@@ -12519,8 +12440,6 @@ static void Rank1Update(
     for (int n=0; n<nloops1; ++n) {
 
 #if 1 // A = D ^ C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -12533,6 +12452,7 @@ static void Rank1Update(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -12650,8 +12570,6 @@ static void Rank1Update(
 #endif
 
 #if 1 // B = D ^ C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -12664,6 +12582,7 @@ static void Rank1Update(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -12781,8 +12700,6 @@ static void Rank1Update(
 #endif
 
 #if 1 // A = -D ^ C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -12795,6 +12712,7 @@ static void Rank1Update(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -12912,8 +12830,6 @@ static void Rank1Update(
 #endif
 
 #if 1 // B = -D ^ C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -12926,6 +12842,7 @@ static void Rank1Update(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -13043,8 +12960,6 @@ static void Rank1Update(
 #endif
 
 #if 1 // A = 7 * D ^ C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -13057,6 +12972,7 @@ static void Rank1Update(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -13174,8 +13090,6 @@ static void Rank1Update(
 #endif
 
 #if 1 // B = 7 * D ^ C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -13188,6 +13102,7 @@ static void Rank1Update(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -13305,8 +13220,6 @@ static void Rank1Update(
 #endif
 
 #if 1 // A -= D ^ C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -13319,6 +13232,7 @@ static void Rank1Update(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -13435,8 +13349,6 @@ static void Rank1Update(
 #endif
 
 #if 1 // B -= D ^ C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -13449,6 +13361,7 @@ static void Rank1Update(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -13565,8 +13478,6 @@ static void Rank1Update(
 #endif
 
 #if 1 // A += 8 * D ^ C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -13579,6 +13490,7 @@ static void Rank1Update(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -13695,8 +13607,6 @@ static void Rank1Update(
 #endif
 
 #if 1 // B += 8 * D ^ C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -13709,6 +13619,7 @@ static void Rank1Update(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -13826,8 +13737,6 @@ static void Rank1Update(
 
 #ifdef TISCOMPLEX
 #if 1 // A = (7,1) * D ^ C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -13840,6 +13749,7 @@ static void Rank1Update(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -13951,8 +13861,6 @@ static void Rank1Update(
 #endif
 
 #if 1 // B = (7,1) * D ^ C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -13965,6 +13873,7 @@ static void Rank1Update(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -14076,8 +13985,6 @@ static void Rank1Update(
 #endif
 
 #if 1 // A += (8,9) * D ^ C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -14090,6 +13997,7 @@ static void Rank1Update(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -14200,8 +14108,6 @@ static void Rank1Update(
 #endif
 
 #if 1 // B += (8,9) * D ^ C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -14214,6 +14120,7 @@ static void Rank1Update(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -14324,8 +14231,6 @@ static void Rank1Update(
 #endif
 
 #if 1 // A = (7,1) * D* ^ C*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -14338,6 +14243,7 @@ static void Rank1Update(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -14452,8 +14358,6 @@ static void Rank1Update(
 #endif
 
 #if 1 // B = (7,1) * D* ^ C*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -14466,6 +14370,7 @@ static void Rank1Update(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -14580,8 +14485,6 @@ static void Rank1Update(
 #endif
 
 #if 1 // A += (8,9) * D* ^ C*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -14594,6 +14497,7 @@ static void Rank1Update(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -14706,8 +14610,6 @@ static void Rank1Update(
 #endif
 
 #if 1 // B += (8,9) * D* ^ C*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -14720,6 +14622,7 @@ static void Rank1Update(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -14832,8 +14735,6 @@ static void Rank1Update(
 #endif
 
 #if 1 // A = (7,1) * D ^ C*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -14846,6 +14747,7 @@ static void Rank1Update(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -14957,8 +14859,6 @@ static void Rank1Update(
 #endif
 
 #if 1 // B = (7,1) * D ^ C*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -14971,6 +14871,7 @@ static void Rank1Update(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -15083,8 +14984,6 @@ static void Rank1Update(
 #endif
 
 #if 1 // A += (8,9) * D ^ C*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -15097,6 +14996,7 @@ static void Rank1Update(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -15207,8 +15107,6 @@ static void Rank1Update(
 #endif
 
 #if 1 // B += (8,9) * D ^ C*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -15221,6 +15119,7 @@ static void Rank1Update(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -15560,8 +15459,6 @@ static void MultMD(
     for (int n=0; n<nloops1; ++n) {
 
 #if 1 // D = A * diag(C)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -15576,6 +15473,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -15701,8 +15599,6 @@ static void MultMD(
 #endif
 
 #if 1 // D = B * diag(C)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -15717,6 +15613,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -15840,8 +15737,6 @@ static void MultMD(
 #endif
 
 #if 1 // D = -A * diag(C)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -15856,6 +15751,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -15982,8 +15878,6 @@ static void MultMD(
 #endif
 
 #if 1 // D = -B * diag(C)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -15998,6 +15892,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -16121,8 +16016,6 @@ static void MultMD(
 #endif
 
 #if 1 // D = 7 * A * diag(C)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -16137,6 +16030,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -16263,8 +16157,6 @@ static void MultMD(
 #endif
 
 #if 1 // D = 7 * B * diag(C)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -16279,6 +16171,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -16402,8 +16295,6 @@ static void MultMD(
 #endif
 
 #if 1 // D -= A * diag(C)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -16418,6 +16309,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -16542,8 +16434,6 @@ static void MultMD(
 #endif
 
 #if 1 // D -= B * diag(C)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -16558,6 +16448,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -16682,8 +16573,6 @@ static void MultMD(
 #endif
 
 #if 1 // D += 8 * A * diag(C)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -16698,6 +16587,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -16822,8 +16712,6 @@ static void MultMD(
 #endif
 
 #if 1 // D += 8 * B * diag(C)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -16838,6 +16726,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -16963,8 +16852,6 @@ static void MultMD(
 
 #ifdef TISCOMPLEX
 #if 1 // D = (7,1) * A * diag(C)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -16979,6 +16866,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -17105,8 +16993,6 @@ static void MultMD(
 #endif
 
 #if 1 // D = (7,1) * B * diag(C)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -17121,6 +17007,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -17244,8 +17131,6 @@ static void MultMD(
 #endif
 
 #if 1 // D += (8,9) * A * diag(C)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -17260,6 +17145,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -17384,8 +17270,6 @@ static void MultMD(
 #endif
 
 #if 1 // D += (8,9) * B * diag(C)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -17400,6 +17284,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -17524,8 +17409,6 @@ static void MultMD(
 #endif
 
 #if 1 // D = (7,1) * A* * diag(C)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -17540,6 +17423,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -17670,8 +17554,6 @@ static void MultMD(
 #endif
 
 #if 1 // D = (7,1) * B* * diag(C)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -17686,6 +17568,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -17812,8 +17695,6 @@ static void MultMD(
 #endif
 
 #if 1 // D += (8,9) * A* * diag(C)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -17828,6 +17709,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -17953,8 +17835,6 @@ static void MultMD(
 #endif
 
 #if 1 // D += (8,9) * B* * diag(C)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -17969,6 +17849,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -18094,8 +17975,6 @@ static void MultMD(
 #endif
 
 #if 1 // D = (7,1) * A * diag(C*)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -18110,6 +17989,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -18237,8 +18117,6 @@ static void MultMD(
 #endif
 
 #if 1 // D = (7,1) * B * diag(C*)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -18253,6 +18131,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -18377,8 +18256,6 @@ static void MultMD(
 #endif
 
 #if 1 // D += (8,9) * A * diag(C*)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -18393,6 +18270,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -18519,8 +18397,6 @@ static void MultMD(
 #endif
 
 #if 1 // D += (8,9) * B * diag(C*)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -18535,6 +18411,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -18661,8 +18538,6 @@ static void MultMD(
 #endif
 
 #if 1 // D = (7,1) * A* * diag(C*)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -18677,6 +18552,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -18812,8 +18688,6 @@ static void MultMD(
 #endif
 
 #if 1 // D = (7,1) * B* * diag(C*)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -18828,6 +18702,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -18955,8 +18830,6 @@ static void MultMD(
 #endif
 
 #if 1 // D += (8,9) * A* * diag(C*)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -18971,6 +18844,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -19098,8 +18972,6 @@ static void MultMD(
 #endif
 
 #if 1 // D += (8,9) * B* * diag(C*)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -19114,6 +18986,7 @@ static void MultMD(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -19484,8 +19357,6 @@ static void MultDM(
     for (int n=0; n<nloops1; ++n) {
 
 #if 1 // D = diag(C) * A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -19500,6 +19371,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -19626,8 +19498,6 @@ static void MultDM(
 #endif
 
 #if 1 // D = diag(C) * B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -19642,6 +19512,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -19765,8 +19636,6 @@ static void MultDM(
 #endif
 
 #if 1 // D = -diag(C) * A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -19781,6 +19650,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -19909,8 +19779,6 @@ static void MultDM(
 #endif
 
 #if 1 // D = -diag(C) * B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -19925,6 +19793,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -20048,8 +19917,6 @@ static void MultDM(
 #endif
 
 #if 1 // D = 7 * diag(C) * A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -20064,6 +19931,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -20191,8 +20059,6 @@ static void MultDM(
 #endif
 
 #if 1 // D = 7 * diag(C) * B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -20207,6 +20073,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -20330,8 +20197,6 @@ static void MultDM(
 #endif
 
 #if 1 // D -= diag(C) * A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -20346,6 +20211,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -20470,8 +20336,6 @@ static void MultDM(
 #endif
 
 #if 1 // D -= diag(C) * B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -20486,6 +20350,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -20610,8 +20475,6 @@ static void MultDM(
 #endif
 
 #if 1 // D += 8 * diag(C) * A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -20626,6 +20489,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -20750,8 +20614,6 @@ static void MultDM(
 #endif
 
 #if 1 // D += 8 * diag(C) * B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -20766,6 +20628,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -20891,8 +20754,6 @@ static void MultDM(
 
 #ifdef TISCOMPLEX
 #if 1 // D = (7,1) * diag(C) * A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -20907,6 +20768,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -21034,8 +20896,6 @@ static void MultDM(
 #endif
 
 #if 1 // D = (7,1) * diag(C) * B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -21050,6 +20910,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -21173,8 +21034,6 @@ static void MultDM(
 #endif
 
 #if 1 // D += (8,9) * diag(C) * A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -21189,6 +21048,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -21316,8 +21176,6 @@ static void MultDM(
 #endif
 
 #if 1 // D += (8,9) * diag(C) * B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -21332,6 +21190,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -21456,8 +21315,6 @@ static void MultDM(
 #endif
 
 #if 1 // D = (7,1) * diag(C) * A*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -21472,6 +21329,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -21603,8 +21461,6 @@ static void MultDM(
 #endif
 
 #if 1 // D = (7,1) * diag(C) * B*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -21619,6 +21475,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -21745,8 +21602,6 @@ static void MultDM(
 #endif
 
 #if 1 // D += (8,9) * diag(C) * A*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -21761,6 +21616,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -21889,8 +21745,6 @@ static void MultDM(
 #endif
 
 #if 1 // D += (8,9) * diag(C) * B*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -21905,6 +21759,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -22030,8 +21885,6 @@ static void MultDM(
 #endif
 
 #if 1 // D = (7,1) * diag(C*) * A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -22046,6 +21899,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -22174,8 +22028,6 @@ static void MultDM(
 #endif
 
 #if 1 // D = (7,1) * diag(C*) * B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -22190,6 +22042,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -22314,8 +22167,6 @@ static void MultDM(
 #endif
 
 #if 1 // D += (8,9) * diag(C*) * A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -22330,6 +22181,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -22459,8 +22311,6 @@ static void MultDM(
 #endif
 
 #if 1 // D += (8,9) * diag(C*) * B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -22475,6 +22325,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -22601,8 +22452,6 @@ static void MultDM(
 #endif
 
 #if 1 // D = (7,1) * diag(C*) * A*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -22617,6 +22466,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -22754,8 +22604,6 @@ static void MultDM(
 #endif
 
 #if 1 // D = (7,1) * diag(C*) * B*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -22770,6 +22618,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -22897,8 +22746,6 @@ static void MultDM(
 #endif
 
 #if 1 // D += (8,9) * diag(C*) * A*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -22913,6 +22760,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -23043,8 +22891,6 @@ static void MultDM(
 #endif
 
 #if 1 // D += (8,9) * diag(C*) * B*
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -23059,6 +22905,7 @@ static void MultDM(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);

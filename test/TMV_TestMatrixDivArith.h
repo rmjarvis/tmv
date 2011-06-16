@@ -568,12 +568,14 @@ static void DoTestLDivVM3a(
 {
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<RT>::float_type FT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start LDiv VM3a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     tmv::Vector<Ta> v1 = a;
     tmv::Matrix<Tb> m = b;
@@ -633,12 +635,14 @@ static void DoTestRDivVM3a(
 {
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<RT>::float_type FT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start RDiv VM3a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     tmv::Vector<Ta> v1 = a;
     tmv::Matrix<Tb> m = b;
@@ -696,12 +700,14 @@ template <class Ta, class Tb, class T, class V1, class MM, class V2>
 static void DoTestLDivVM3RR(
     tmv::DivType dt, const V1& a, const MM& b, V2& c, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start LDiv VM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
@@ -718,12 +724,14 @@ template <class Ta, class Tb, class T, class V1, class MM, class V2>
 static void DoTestLDivVM3RC(
     tmv::DivType dt, const V1& a, const MM& b, V2& c, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start LDiv VM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
@@ -745,12 +753,14 @@ template <class Ta, class Tb, class T, class V1, class MM, class V2>
 static void DoTestLDivVM3CR(
     tmv::DivType dt, const V1& a, const MM& b, V2& c, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start LDiv VM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
@@ -771,12 +781,14 @@ template <class Ta, class Tb, class T, class V1, class MM, class V2>
 static void DoTestLDivVM3CC(
     tmv::DivType dt, const V1& a, const MM& b, V2& c, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start LDiv VM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     DoTestLDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
@@ -800,12 +812,14 @@ template <class Ta, class Tb, class T, class V1, class MM, class V2>
 static void DoTestRDivVM3RR(
     tmv::DivType dt, const V1& a, const MM& b, V2& c, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start RDiv VM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
@@ -822,12 +836,14 @@ template <class Ta, class Tb, class T, class V1, class MM, class V2>
 static void DoTestRDivVM3RC(
     tmv::DivType dt, const V1& a, const MM& b, V2& c, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start RDiv VM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
@@ -849,12 +865,14 @@ template <class Ta, class Tb, class T, class V1, class MM, class V2>
 static void DoTestRDivVM3CR(
     tmv::DivType dt, const V1& a, const MM& b, V2& c, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start RDiv VM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
@@ -875,12 +893,14 @@ template <class Ta, class Tb, class T, class V1, class MM, class V2>
 static void DoTestRDivVM3CC(
     tmv::DivType dt, const V1& a, const MM& b, V2& c, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start RDiv VM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     DoTestRDivVM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
@@ -1249,12 +1269,14 @@ static void DoTestLDivMM3a(
 {
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<RT>::float_type FT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start LDiv MM3a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     tmv::Matrix<Ta> v1 = a;
     tmv::Matrix<Tb> m = b;
@@ -1314,12 +1336,14 @@ static void DoTestRDivMM3a(
 {
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<RT>::float_type FT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start RDiv MM3a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     tmv::Matrix<Ta> v1 = a;
     tmv::Matrix<Tb> m = b;
@@ -1382,12 +1406,14 @@ template <class Ta, class Tb, class T, class M1, class M2, class M3>
 static void DoTestLDivMM3RR(
     tmv::DivType dt, const M1& a, const M2& b, M3& c, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start LDiv MM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
 
@@ -1398,12 +1424,14 @@ template <class Ta, class Tb, class T, class M1, class M2, class M3>
 static void DoTestLDivMM3RC(
     tmv::DivType dt, const M1& a, const M2& b, M3& c, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start LDiv MM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
@@ -1420,12 +1448,14 @@ template <class Ta, class Tb, class T, class M1, class M2, class M3>
 static void DoTestLDivMM3CR(
     tmv::DivType dt, const M1& a, const M2& b, M3& c, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start LDiv MM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
@@ -1441,12 +1471,14 @@ template <class Ta, class Tb, class T, class M1, class M2, class M3>
 static void DoTestLDivMM3CC(
     tmv::DivType dt, const M1& a, const M2& b, M3& c, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start LDiv MM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     DoTestLDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
@@ -1465,12 +1497,14 @@ template <class Ta, class Tb, class T, class M1, class M2, class M3>
 static void DoTestRDivMM3RR(
     tmv::DivType dt, const M1& a, const M2& b, M3& c, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start RDiv MM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
 
@@ -1481,12 +1515,14 @@ template <class Ta, class Tb, class T, class M1, class M2, class M3>
 static void DoTestRDivMM3RC(
     tmv::DivType dt, const M1& a, const M2& b, M3& c, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start RDiv MM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
@@ -1503,12 +1539,14 @@ template <class Ta, class Tb, class T, class M1, class M2, class M3>
 static void DoTestRDivMM3CR(
     tmv::DivType dt, const M1& a, const M2& b, M3& c, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start RDiv MM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
@@ -1524,12 +1562,14 @@ template <class Ta, class Tb, class T, class M1, class M2, class M3>
 static void DoTestRDivMM3CC(
     tmv::DivType dt, const M1& a, const M2& b, M3& c, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start RDiv MM3"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     DoTestRDivMM3a<Ta,Tb,T>(dt,a,b,c,label);
 #ifndef NOVIEWS
@@ -1635,6 +1675,7 @@ static void TestMatrixDivArith1(
     const CM1& ca, CM2& cb, std::string label)
 {
     typedef std::complex<T> CT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start Test Div 1: "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -1642,6 +1683,7 @@ static void TestMatrixDivArith1(
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
         std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
     }
+#endif
 
     tmv::Matrix<CT> cc(a.rowsize(),b.rowsize());
     tmv::Matrix<CT> cd(b.colsize(),a.colsize());
@@ -1694,6 +1736,7 @@ static void TestMatrixDivArith2(
     std::string label)
 {
     typedef std::complex<T> CT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start Test Div 2: "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -1701,6 +1744,7 @@ static void TestMatrixDivArith2(
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
         std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
     }
+#endif
 
     DoTestDivMX<T>(dt,a,label+" R");
     DoTestDivMX<CT>(dt,ca,label+" C");
@@ -1836,11 +1880,13 @@ static void TestMatrixDivArith3a(
     tmv::DivType dt, const M1& a, const CM1& ca, std::string label)
 {
     typedef std::complex<T> CT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start Test Div 3a: "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
     }
+#endif
 
     DoTestDivMX<T>(dt,a,label+" R");
     DoTestDivMX<CT>(dt,ca,label+" C");
@@ -1852,6 +1898,7 @@ static void TestMatrixDivArith3b(
     const CM1& ca, CM2& cb, CM3& cc, std::string label)
 {
     typedef std::complex<T> CT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start Test Div 3b: "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -1861,6 +1908,7 @@ static void TestMatrixDivArith3b(
         std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
         std::cout<<"cc = "<<tmv::TMV_Text(cc)<<"  "<<cc<<std::endl;
     }
+#endif
 
     DoTestLDivMM1R<T,T>(dt,b,a,label+" R,R");
 #if (XTEST & 4)
@@ -1892,6 +1940,7 @@ static void TestMatrixDivArith3c(
     const CM1& ca, CM2& cb, CM3& cc, std::string label)
 {
     typedef std::complex<T> CT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start Test Div 3c: "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -1901,6 +1950,7 @@ static void TestMatrixDivArith3c(
         std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
         std::cout<<"cc = "<<tmv::TMV_Text(cc)<<"  "<<cc<<std::endl;
     }
+#endif
 
     DoTestRDivMM1R<T,T>(dt,b,a,label+" R,R");
 #if (XTEST & 4)
@@ -1932,6 +1982,7 @@ static void TestMatrixDivArith3d(
     const CM1& ca, const CV1& cv, CV2& cx, std::string label)
 {
     typedef std::complex<T> CT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start Test Div 3d: "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -1941,6 +1992,7 @@ static void TestMatrixDivArith3d(
         std::cout<<"cv = "<<tmv::TMV_Text(cv)<<"  "<<cv<<std::endl;
         std::cout<<"cx = "<<tmv::TMV_Text(cx)<<"  "<<cx<<std::endl;
     }
+#endif
 
     DoTestLDivVM1R<T,T>(dt,v,a,label+" R,R");
 #if (XTEST & 4)
@@ -1972,6 +2024,7 @@ static void TestMatrixDivArith3e(
     const CM1& ca, const CV1& cw, CV2& cy, std::string label)
 {
     typedef std::complex<T> CT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start Test Div 3e: "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -1981,6 +2034,7 @@ static void TestMatrixDivArith3e(
         std::cout<<"cw = "<<tmv::TMV_Text(cw)<<"  "<<cw<<std::endl;
         std::cout<<"cy = "<<tmv::TMV_Text(cy)<<"  "<<cy<<std::endl;
     }
+#endif
 
     DoTestRDivVM1R<T,T>(dt,w,a,label+" R,R");
 #if (XTEST & 4)

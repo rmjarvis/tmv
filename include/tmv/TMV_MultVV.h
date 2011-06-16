@@ -142,7 +142,7 @@ namespace tmv {
         typedef typename ProdType<V1,V2>::type PT;
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
-        static PT call(const V1& v1, const V2& v2)
+        static inline PT call(const V1& v1, const V2& v2)
         {
             const int n = s == UNKNOWN ? int(v1.size()) : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
@@ -177,7 +177,7 @@ namespace tmv {
         typedef typename ProdType<V1,V2>::type PT;
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
-        static PT call(const V1& v1, const V2& v2)
+        static inline PT call(const V1& v1, const V2& v2)
         {
             const int n = s == UNKNOWN ? int(v1.size()) : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
@@ -214,7 +214,7 @@ namespace tmv {
         typedef typename ProdType<V1,V2>::type PT;
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
-        static PT call(const V1& v1, const V2& v2)
+        static inline PT call(const V1& v1, const V2& v2)
         {
             const int n = s == UNKNOWN ? int(v1.size()) : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
@@ -257,13 +257,13 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static PT unroll(const V1& v1, const V2& v2)
+            static inline PT unroll(const V1& v1, const V2& v2)
             {
                 return (
                     Unroller<I,N/2>::unroll(v1,v2) +
                     Unroller<I+N/2,N-N/2>::unroll(v1,v2));
             }
-            static PT unroll2(const IT1& it1, const IT2& it2)
+            static inline PT unroll2(const IT1& it1, const IT2& it2)
             {
                 return (
                     Unroller<I,N/2>::unroll2(it1,it2) +
@@ -273,9 +273,9 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static PT unroll(const V1& v1, const V2& v2)
+            static inline PT unroll(const V1& v1, const V2& v2)
             { return ZProd<false,false>::prod(v1.cref(I) , v2.cref(I)); }
-            static PT unroll2(const IT1& it1, const IT2& it2)
+            static inline PT unroll2(const IT1& it1, const IT2& it2)
             {
                 const bool c1 = V1::_conj;
                 const bool c2 = V2::_conj;
@@ -285,15 +285,15 @@ namespace tmv {
         template <int I>
         struct Unroller<I,0>
         {
-            static PT unroll(const V1& v1, const V2& v2)
+            static inline PT unroll(const V1& v1, const V2& v2)
             { return PT(0); }
-            static PT unroll2(const IT1& it1, const IT2& it2)
+            static inline PT unroll2(const IT1& it1, const IT2& it2)
             { return PT(0); }
         };
 
-        static PT call(const V1& v1, const V2& v2)
+        static inline PT call(const V1& v1, const V2& v2)
         { return Unroller<0,s>::unroll(v1,v2); }
-        static PT call2(const int n, const IT1& it1, const IT2& it2)
+        static inline PT call2(const int n, const IT1& it1, const IT2& it2)
         { return Unroller<0,s>::unroll2(it1,it2); }
     };
 
@@ -304,7 +304,7 @@ namespace tmv {
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
-        static float call(const V1& v1, const V2& v2)
+        static inline float call(const V1& v1, const V2& v2)
         {
             const int n = s == UNKNOWN ? int(v1.size()) : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
@@ -369,7 +369,7 @@ namespace tmv {
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
-        static std::complex<float> call(const V1& v1, const V2& v2)
+        static inline std::complex<float> call(const V1& v1, const V2& v2)
         {
             const int n = s == UNKNOWN ? int(v1.size()) : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
@@ -443,7 +443,7 @@ namespace tmv {
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
-        static std::complex<float> call(const V1& v1, const V2& v2)
+        static inline std::complex<float> call(const V1& v1, const V2& v2)
         {
             const int n = s == UNKNOWN ? int(v1.size()) : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
@@ -521,7 +521,7 @@ namespace tmv {
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
-        static double call(const V1& v1, const V2& v2)
+        static inline double call(const V1& v1, const V2& v2)
         {
             const int n = s == UNKNOWN ? int(v1.size()) : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
@@ -577,7 +577,7 @@ namespace tmv {
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
-        static std::complex<double> call(const V1& v1, const V2& v2)
+        static inline std::complex<double> call(const V1& v1, const V2& v2)
         {
             const int n = s == UNKNOWN ? int(v1.size()) : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
@@ -643,7 +643,7 @@ namespace tmv {
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
-        static std::complex<double> call(const V1& v1, const V2& v2)
+        static inline std::complex<double> call(const V1& v1, const V2& v2)
         {
             const int n = s == UNKNOWN ? int(v1.size()) : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
@@ -714,7 +714,7 @@ namespace tmv {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         typedef typename Traits<PT>::real_type RT;
-        static PT call(const V1& v1, const V2& v2)
+        static inline PT call(const V1& v1, const V2& v2)
         {
             const int n = s == UNKNOWN ? int(v1.size()) : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());

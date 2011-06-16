@@ -277,7 +277,8 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(N>=0);
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
+            Maybe<_unit>::offdiag(*this).setAllTo(
+                Traits<T>::constr_value());
 #endif
         }
 
@@ -350,7 +351,8 @@ namespace tmv {
         TMV_INLINE_ND ~SmallUpperTriMatrix()
         {
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(T(999));
+            Maybe<_unit>::offdiag(*this).setAllTo(
+                Traits<T>::destr_value());
 #endif
         }
 
@@ -1258,7 +1260,8 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(N>=0);
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
+            Maybe<_unit>::offdiag(*this).setAllTo(
+                Traits<T>::constr_value());
 #endif
         }
 
@@ -1330,7 +1333,8 @@ namespace tmv {
         TMV_INLINE_ND ~SmallLowerTriMatrix()
         {
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
+            Maybe<_unit>::offdiag(*this).setAllTo(
+                Traits<T>::destr_value());
 #endif
         }
 
@@ -2142,7 +2146,7 @@ namespace tmv {
     // TMV_Text 
     //
 
-#ifdef TMV_DEBUG
+#ifdef TMV_TEXT
     template <class T, int N, int A0, int A1, int A2>
     static inline std::string TMV_Text(
         const SmallUpperTriMatrix<T,N,A0,A1,A2>& m)

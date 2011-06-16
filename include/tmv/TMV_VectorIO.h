@@ -369,7 +369,7 @@ namespace tmv {
     { Write(os,v.calc()); return os; }
 
     template <class V>
-    static inline std::istream& operator>>(
+    static std::istream& operator>>(
         std::istream& is, BaseVector_Mutable<V>& v)
     {
         typedef typename V::value_type T;
@@ -396,7 +396,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    static inline std::istream& operator>>(
+    static std::istream& operator>>(
         std::istream& is, auto_ptr<Vector<T,A> >& v)
     {
         size_t n;

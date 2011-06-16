@@ -169,7 +169,7 @@ namespace tmv {
         template <int I, int M, int J, int N>
         struct Unroller
         {
-            static ret unroll(const M1& m, const Scaling<ix,RT>& x)
+            static inline ret unroll(const M1& m, const Scaling<ix,RT>& x)
             {
                 return (
                     Unroller<I,M-(N-N/2),J,N/2>::unroll(m,x) +
@@ -179,7 +179,7 @@ namespace tmv {
         template <int I, int M, int J>
         struct Unroller<I,M,J,1>
         {
-            static ret unroll(const M1& m, const Scaling<ix,RT>& x)
+            static inline ret unroll(const M1& m, const Scaling<ix,RT>& x)
             {
                 return (
                     Unroller<I,M/2,J,1>::unroll(m,x) +
@@ -189,22 +189,22 @@ namespace tmv {
         template <int I, int M, int J>
         struct Unroller<I,M,J,0>
         {
-            static ret unroll(const M1& , const Scaling<ix,RT>& ) 
+            static inline ret unroll(const M1& , const Scaling<ix,RT>& ) 
             { return ret(0); } 
         };
         template <int I, int J>
         struct Unroller<I,1,J,1>
         {
-            static ret unroll(const M1& m, const Scaling<ix,RT>& x)
+            static inline ret unroll(const M1& m, const Scaling<ix,RT>& x)
             { return Component<comp,VT>::f(x * m.cref(I,J)); }
         };
         template <int I, int J>
         struct Unroller<I,1,J,0>
         {
-            static ret unroll(const M1& m, const Scaling<ix,RT>& x)
+            static inline ret unroll(const M1& m, const Scaling<ix,RT>& x)
             { return ret(0); }
         };
-        static ret call(const M1& m, const Scaling<ix,RT>& x)
+        static inline ret call(const M1& m, const Scaling<ix,RT>& x)
         {
 #ifdef PRINTALGO_NormU
             std::cout<<"SumElementsU algo 15: "<<
@@ -223,7 +223,7 @@ namespace tmv {
         template <int I, int M, int J, int N>
         struct Unroller
         {
-            static ret unroll(const M1& m, const Scaling<ix,RT>& x)
+            static inline ret unroll(const M1& m, const Scaling<ix,RT>& x)
             {
                 return (
                     Unroller<I,M/2,J,N-(M-M/2)>::unroll(m,x) +
@@ -233,7 +233,7 @@ namespace tmv {
         template <int I, int J, int N>
         struct Unroller<I,1,J,N>
         {
-            static ret unroll(const M1& m, const Scaling<ix,RT>& x)
+            static inline ret unroll(const M1& m, const Scaling<ix,RT>& x)
             {
                 return (
                     Unroller<I,1,J,N/2>::unroll(m,x) +
@@ -243,22 +243,22 @@ namespace tmv {
         template <int I, int J, int N>
         struct Unroller<I,0,J,N>
         {
-            static ret unroll(const M1& , const Scaling<ix,RT>& ) 
+            static inline ret unroll(const M1& , const Scaling<ix,RT>& ) 
             { return ret(0); } 
         };
         template <int I, int J>
         struct Unroller<I,1,J,1>
         {
-            static ret unroll(const M1& m, const Scaling<ix,RT>& x)
+            static inline ret unroll(const M1& m, const Scaling<ix,RT>& x)
             { return Component<comp,VT>::f(x * m.cref(I,J)); }
         };
         template <int I, int J>
         struct Unroller<I,1,J,0>
         {
-            static ret unroll(const M1& m, const Scaling<ix,RT>& x)
+            static inline ret unroll(const M1& m, const Scaling<ix,RT>& x)
             { return ret(0); }
         };
-        static ret call(const M1& m, const Scaling<ix,RT>& x)
+        static inline ret call(const M1& m, const Scaling<ix,RT>& x)
         {
 #ifdef PRINTALGO_NormU
             std::cout<<"SumElementsU algo 16: "<<
@@ -274,7 +274,7 @@ namespace tmv {
     {
         typedef typename Traits<ret>::real_type RT;
 
-        static ret call(const M1& m, const Scaling<ix,RT>& x)
+        static TMV_INLINE ret call(const M1& m, const Scaling<ix,RT>& x)
         { return InstSumElements(m.xView()); }
     };
     template <int s, int ix, class ret, class M1>
@@ -282,7 +282,7 @@ namespace tmv {
     {
         typedef typename Traits<ret>::real_type RT;
 
-        static ret call(const M1& m, const Scaling<ix,RT>& x)
+        static TMV_INLINE ret call(const M1& m, const Scaling<ix,RT>& x)
         { return InstSumAbsElements(m.xView()); }
     };
     template <int s, int ix, class ret, class M1>
@@ -290,7 +290,7 @@ namespace tmv {
     {
         typedef typename Traits<ret>::real_type RT;
 
-        static ret call(const M1& m, const Scaling<ix,RT>& x)
+        static TMV_INLINE ret call(const M1& m, const Scaling<ix,RT>& x)
         { return InstSumAbs2Elements(m.xView()); }
     };
     template <int s, class ret, class M1>
@@ -298,7 +298,7 @@ namespace tmv {
     {
         typedef typename Traits<ret>::real_type RT;
 
-        static ret call(const M1& m, const Scaling<1,RT>& x)
+        static TMV_INLINE ret call(const M1& m, const Scaling<1,RT>& x)
         { return InstNormSq(m.xView()); }
     };
     template <int s, class ret, class M1>
@@ -306,7 +306,7 @@ namespace tmv {
     {
         typedef typename Traits<ret>::real_type RT;
 
-        static ret call(const M1& m, const Scaling<0,RT>& x)
+        static TMV_INLINE ret call(const M1& m, const Scaling<0,RT>& x)
         { return InstNormSq(m.xView(),x); }
     };
     
@@ -316,7 +316,7 @@ namespace tmv {
     {
         typedef typename Traits<ret>::real_type RT;
 
-        static ret call(const M1& m, const Scaling<ix,RT>& x)
+        static TMV_INLINE ret call(const M1& m, const Scaling<ix,RT>& x)
         {
             typedef typename M1::const_transpose_type Mt;
             Mt mt = m.transpose();
@@ -330,7 +330,7 @@ namespace tmv {
     {
         typedef typename Traits<ret>::real_type RT;
 
-        static ret call(const M1& m, const Scaling<ix,RT>& x)
+        static TMV_INLINE ret call(const M1& m, const Scaling<ix,RT>& x)
         {
             typedef typename M1::const_transpose_type Mt;
             Mt mt = m.transpose();
@@ -344,7 +344,7 @@ namespace tmv {
     {
         typedef typename Traits<ret>::real_type RT;
 
-        static ret call(const M1& m, const Scaling<ix,RT>& x)
+        static TMV_INLINE ret call(const M1& m, const Scaling<ix,RT>& x)
         {
             typedef typename M1::const_nonconj_type Mnc;
             Mnc mnc = m.nonConj();
@@ -356,7 +356,7 @@ namespace tmv {
     {
         typedef typename Traits<ret>::real_type RT;
 
-        static ret call(const M1& m, const Scaling<ix,RT>& x)
+        static TMV_INLINE ret call(const M1& m, const Scaling<ix,RT>& x)
         {
             typedef typename M1::const_conjugate_type Mc;
             Mc mc = m.conjugate();
@@ -371,7 +371,7 @@ namespace tmv {
     {
         typedef typename Traits<ret>::real_type RT;
 
-        static ret call(const M1& m, const Scaling<ix,RT>& x)
+        static TMV_INLINE ret call(const M1& m, const Scaling<ix,RT>& x)
         {
             TMVStaticAssert(M1::_upper);
             TMVStaticAssert(!M1::_unit);
@@ -409,7 +409,7 @@ namespace tmv {
     {
         typedef typename Traits<ret>::real_type RT;
 
-        static ret call(const M1& m, const Scaling<ix,RT>& x)
+        static TMV_INLINE ret call(const M1& m, const Scaling<ix,RT>& x)
         {
             const int algo = 
                 M1::_lower ? 396 :
@@ -431,7 +431,7 @@ namespace tmv {
     {
         typedef typename Traits<ret>::real_type RT;
 
-        static ret call(const M1& m, const Scaling<ix,RT>& x)
+        static TMV_INLINE ret call(const M1& m, const Scaling<ix,RT>& x)
         {
             typedef typename M1::value_type VT;
             const bool inst = 
@@ -451,7 +451,7 @@ namespace tmv {
     {
         typedef typename Traits<ret>::real_type RT;
 
-        static ret call(const M1& m, const Scaling<ix,RT>& x)
+        static TMV_INLINE ret call(const M1& m, const Scaling<ix,RT>& x)
         { return SumElementsU_Helper<-2,s,comp,ix,ret,M1>::call(m,x); }
     };
     
@@ -713,14 +713,14 @@ namespace tmv {
     struct MaxAbsElementU_Helper<90,s,AbsComp,M1>
     {
         typedef typename M1::float_type ret;
-        static ret call(const M1& m)
+        static TMV_INLINE ret call(const M1& m)
         { return InstMaxAbsElement(m.xView()); }
     };
     template <int s, class M1>
     struct MaxAbsElementU_Helper<90,s,Abs2Comp,M1>
     {
         typedef typename M1::real_type ret;
-        static ret call(const M1& m)
+        static TMV_INLINE ret call(const M1& m)
         { return InstMaxAbs2Element(m.xView()); }
     };
 
@@ -729,7 +729,7 @@ namespace tmv {
     struct MaxAbsElementU_Helper<96,s,comp,M1>
     {
         typedef typename Component<comp,typename M1::value_type>::ret_type ret;
-        static ret call(const M1& m)
+        static TMV_INLINE ret call(const M1& m)
         {
             typedef typename M1::const_transpose_type Mt;
             Mt mt = m.transpose();
@@ -742,7 +742,7 @@ namespace tmv {
     struct MaxAbsElementU_Helper<396,s,comp,M1>
     {
         typedef typename Component<comp,typename M1::value_type>::ret_type ret;
-        static ret call(const M1& m)
+        static TMV_INLINE ret call(const M1& m)
         {
             typedef typename M1::const_transpose_type Mt;
             Mt mt = m.transpose();
@@ -755,7 +755,7 @@ namespace tmv {
     struct MaxAbsElementU_Helper<97,s,comp,M1>
     {
         typedef typename Component<comp,typename M1::value_type>::ret_type ret;
-        static ret call(const M1& m)
+        static TMV_INLINE ret call(const M1& m)
         {
             typedef typename M1::const_nonconj_type Mnc;
             Mnc mnc = m.nonConj();
@@ -768,7 +768,7 @@ namespace tmv {
     struct MaxAbsElementU_Helper<-4,s,comp,M1>
     {
         typedef typename Component<comp,typename M1::value_type>::ret_type ret;
-        static ret call(const M1& m)
+        static TMV_INLINE ret call(const M1& m)
         {
             TMVStaticAssert(M1::_upper);
             TMVStaticAssert(!M1::_unit);
@@ -784,7 +784,7 @@ namespace tmv {
     struct MaxAbsElementU_Helper<-3,s,comp,M1>
     {
         typedef typename Component<comp,typename M1::value_type>::ret_type ret;
-        static ret call(const M1& m)
+        static TMV_INLINE ret call(const M1& m)
         {
             const int algo = 
                 M1::_lower ? 396 : 
@@ -800,7 +800,7 @@ namespace tmv {
     struct MaxAbsElementU_Helper<-2,s,comp,M1>
     {
         typedef typename Component<comp,typename M1::value_type>::ret_type ret;
-        static ret call(const M1& m)
+        static TMV_INLINE ret call(const M1& m)
         {
             typedef typename M1::value_type VT;
             const bool inst = 
@@ -819,7 +819,7 @@ namespace tmv {
     struct MaxAbsElementU_Helper<-1,s,comp,M1>
     {
         typedef typename Component<comp,typename M1::value_type>::ret_type ret;
-        static ret call(const M1& m)
+        static TMV_INLINE ret call(const M1& m)
         { return MaxAbsElementU_Helper<-2,s,comp,M1>::call(m); }
     };
 

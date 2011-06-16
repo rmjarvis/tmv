@@ -362,10 +362,12 @@ namespace tmv {
     template <class T>
     static TMV_INLINE T TMV_CONJ(const ConjRef<T>& x) { return x.conj(); }
     template <class T>
-    static TMV_INLINE typename Traits<T>::real_type TMV_NORM(const ConjRef<T>& x) 
+    static TMV_INLINE typename Traits<T>::real_type TMV_NORM(
+        const ConjRef<T>& x) 
     { return TMV_NORM(x.conj()); }
     template <class T>
-    static TMV_INLINE typename Traits<T>::real_type TMV_ABS(const ConjRef<T>& x) 
+    static TMV_INLINE typename Traits<T>::real_type TMV_ABS(
+        const ConjRef<T>& x) 
     { return TMV_ABS(x.conj()); }
     template <class T>
     static TMV_INLINE T TMV_SQR(const ConjRef<T>& x) 
@@ -374,10 +376,12 @@ namespace tmv {
     static TMV_INLINE T TMV_SQRT(const ConjRef<T>& x) 
     { return TMV_SQRT(x.conj()); }
     template <class T>
-    static TMV_INLINE typename Traits<T>::real_type TMV_REAL(const ConjRef<T>& x) 
+    static TMV_INLINE typename Traits<T>::real_type TMV_REAL(
+        const ConjRef<T>& x) 
     { return x.real(); }
     template <class T>
-    static TMV_INLINE typename Traits<T>::real_type TMV_IMAG(const ConjRef<T>& x) 
+    static TMV_INLINE typename Traits<T>::real_type TMV_IMAG(
+        const ConjRef<T>& x) 
     { return x.imag(); }
 
     template <class T>
@@ -415,7 +419,7 @@ namespace tmv {
         typedef typename Traits2<T1,T2>::type type;
     };
 
-#ifdef TMV_DEBUG
+#ifdef TMV_TEXT
     template <class T>
     static inline std::string TMV_Text(ConjRef<T>)
     { return std::string("ConjRef<") + TMV_Text(T()) + ">"; }

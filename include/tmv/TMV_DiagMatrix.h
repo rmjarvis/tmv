@@ -271,6 +271,8 @@ namespace tmv {
         typedef DiagMatrix<T,A> type;
         typedef BaseMatrix_Diag_Mutable<type> base_mut;
 
+        typedef typename Traits<T>::real_type real_type;
+
         enum { _colsize = Traits<type>::_size };
         enum { _rowsize = Traits<type>::_size };
         enum { _size = Traits<type>::_size };
@@ -296,7 +298,7 @@ namespace tmv {
         {
             TMVStaticAssert(Traits<type>::okA);
 #ifdef TMV_DEBUG
-            this->setAllTo(T(888));
+            this->diag().flatten().setAllTo(Traits<real_type>::constr_value());
 #endif
         }
 
@@ -348,7 +350,7 @@ namespace tmv {
         ~DiagMatrix() 
         {
 #ifdef TMV_DEBUG
-            this->setAllTo(T(999));
+            this->diag().flatten().setAllTo(Traits<real_type>::destr_value());
 #endif
         }
 
@@ -387,10 +389,13 @@ namespace tmv {
 
         void resize(const size_t n)
         {
+#ifdef TMV_DEBUG
+            this->diag().flatten().setAllTo(Traits<real_type>::destr_value());
+#endif
             itssize = n;
             itsm.resize(n);
 #ifdef TMV_DEBUG
-            this->setAllTo(T(888));
+            this->diag().flatten().setAllTo(Traits<real_type>::constr_value());
 #endif
         }
 
@@ -796,7 +801,7 @@ namespace tmv {
     //   DiagMatrixViewOf(T* v, n)
     //
 
-   template <class T>
+    template <class T>
     static TMV_INLINE ConstDiagMatrixView<T,Unit> DiagMatrixViewOf(
         const T* v, size_t size)
     { return ConstDiagMatrixView<T,Unit>(v,size); }
@@ -873,7 +878,7 @@ namespace tmv {
     // TMV_Text 
     //
 
-#ifdef TMV_DEBUG
+#ifdef TMV_TEXT
     template <class T, int A>
     static inline std::string TMV_Text(const DiagMatrix<T,A>& m)
     {

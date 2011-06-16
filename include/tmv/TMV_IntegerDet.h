@@ -49,16 +49,16 @@ namespace tmv {
         typedef double double_type;
         typedef long double longdouble_type;
 
-        static double_type to_double(T x)
+        static TMV_INLINE double_type to_double(T x)
         { return double_type(x); }
 
-        static T convert(longdouble_type x) 
+        static TMV_INLINE T convert(longdouble_type x) 
         { return x < 0. ? -T(floor(-x+0.5)) : T(floor(x+0.5)); }
 
-        static bool isUnity(longdouble_type x) 
+        static TMV_INLINE bool isUnity(longdouble_type x) 
         { return TMV_ABS2(TMV_ABS2(x)-1.) < 0.1; }
 
-        static bool isZero(longdouble_type x) 
+        static TMV_INLINE bool isZero(longdouble_type x) 
         { return TMV_ABS2(x) < 0.1; }
     };
 
@@ -69,19 +69,19 @@ namespace tmv {
         typedef std::complex<double> double_type;
         typedef std::complex<long double> longdouble_type;
 
-        static double_type to_double(CT x)
+        static TMV_INLINE double_type to_double(CT x)
         { return double_type(x.real(),x.imag()); }
 
-        static CT convert(longdouble_type x) 
+        static TMV_INLINE CT convert(longdouble_type x) 
         {
             return CT(Bareiss_Helper<T>::convert(x.real()),
                       Bareiss_Helper<T>::convert(x.imag()));
         }
 
-        static bool isUnity(longdouble_type x) 
+        static TMV_INLINE bool isUnity(longdouble_type x) 
         { return TMV_ABS2(TMV_ABS2(x) - 1.) < 0.1; }
 
-        static bool isZero(longdouble_type x) 
+        static TMV_INLINE bool isZero(longdouble_type x) 
         { return TMV_ABS2(x) < 0.1; }
     };
 
@@ -244,7 +244,7 @@ namespace tmv {
     struct IntegerDet_Helper<90,M>
     {
         typedef typename M::value_type T;
-        static T call(const M& m)
+        static TMV_INLINE T call(const M& m)
         { return InstIntegerDet(m.xView()); }
     };
 
@@ -253,7 +253,7 @@ namespace tmv {
     struct IntegerDet_Helper<97,M>
     {
         typedef typename M::value_type T;
-        static T call(const M& m)
+        static TMV_INLINE T call(const M& m)
         {
             typedef typename M::const_conjugate_type Mc;
             Mc mc = m.conjugate();
@@ -266,7 +266,7 @@ namespace tmv {
     struct IntegerDet_Helper<-3,M>
     {
         typedef typename M::value_type T;
-        static T call(const M& m)
+        static TMV_INLINE T call(const M& m)
         {
             const int algo = 11;
             return IntegerDet_Helper<algo,M>::call(m);
@@ -278,7 +278,7 @@ namespace tmv {
     struct IntegerDet_Helper<-2,M>
     {
         typedef typename M::value_type T;
-        static T call(const M& m)
+        static TMV_INLINE T call(const M& m)
         {
             const bool inst =
                 (M::_colsize == UNKNOWN || M::_colsize > 16) &&
@@ -296,7 +296,7 @@ namespace tmv {
     struct IntegerDet_Helper<-1,M>
     {
         typedef typename M::value_type T;
-        static T call(const M& m)
+        static TMV_INLINE T call(const M& m)
         { return IntegerDet_Helper<-2,M>::call(m); }
     };
 

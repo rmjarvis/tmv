@@ -51,15 +51,15 @@ namespace tmv {
 
     // Defined in TMV_DiagMatrixIO.h
     template <class M>
-    static void Read(std::istream& is, BaseMatrix_Diag_Mutable<M>& m);
+    static inline void Read(std::istream& is, BaseMatrix_Diag_Mutable<M>& m);
 
     // Defined in InvertD.h
     template <class M1>
-    static void InvertSelf(BaseMatrix_Diag_Mutable<M1>& m1);
+    static inline void InvertSelf(BaseMatrix_Diag_Mutable<M1>& m1);
 
     // Defined in ElemMultVV.h
     template <bool add, int ix, class T, class V1, class V2, class V3>
-    static void NoAliasElemMultVV(
+    static inline void NoAliasElemMultVV(
         const Scaling<ix,T>& x1, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3);
 
@@ -68,13 +68,13 @@ namespace tmv {
     static void Copy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
     template <class M1, class M2>
-    static void Copy(
+    static inline void Copy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Diag_Mutable<M2>& m2);
     template <class M1, class M2>
     static void NoAliasCopy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
     template <class M1, class M2>
-    static void NoAliasCopy(
+    static inline void NoAliasCopy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Diag_Mutable<M2>& m2);
 
     // A helper class for returning views without necessarily
@@ -773,7 +773,7 @@ namespace tmv {
     // But if we do have the elements calculated, this overloaded 
     // version will be faster:
     template <class M>
-    static inline typename M::value_type DoTrace(const BaseMatrix_Diag<M>& m)
+    inline typename M::value_type DoTrace(const BaseMatrix_Diag<M>& m)
     { return m.diag().sumElements(); }
 
 
@@ -785,9 +785,9 @@ namespace tmv {
     class DiagMatrixView;
     template <class T, int N, int A=0>
     class SmallDiagMatrix;
-    template <class T, int N, int S, int A=0>
+    template <class T, int N, int S=UNKNOWN, int A=0>
     class ConstSmallDiagMatrixView;
-    template <class T, int N, int S, int A=0>
+    template <class T, int N, int S=UNKNOWN, int A=0>
     class SmallDiagMatrixView;
 
     // This helper class helps decide calc_type for composite classes:
@@ -809,7 +809,7 @@ namespace tmv {
     //
 
     template <class M1, class M2>
-    static inline void Copy(
+    inline void Copy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Diag_Mutable<M2>& m2)
     {
         typename M1::const_diag_type m1d = m1.diag();
@@ -818,7 +818,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static inline void NoAliasCopy(
+    inline void NoAliasCopy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Diag_Mutable<M2>& m2)
     {
         typename M1::const_diag_type m1d = m1.diag();
@@ -831,7 +831,7 @@ namespace tmv {
     //
 
     template <class M1, class M2>
-    static inline void Copy(
+    static void Copy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
         typename M1::const_diag_type m1d = m1.diag();
@@ -849,7 +849,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static inline void NoAliasCopy(
+    static void NoAliasCopy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
         typename M1::const_diag_type m1d = m1.diag();
@@ -859,7 +859,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static inline void AliasCopy(
+    static TMV_INLINE void AliasCopy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
     { Copy(m1,m2); }
 
@@ -869,7 +869,7 @@ namespace tmv {
     //
 
     template <class M1, class M2>
-    static inline void Swap(
+    static TMV_INLINE void Swap(
         BaseMatrix_Diag_Mutable<M1>& m1, BaseMatrix_Diag_Mutable<M2>& m2)
     { Swap(m1.diag(),m2.diag()); }
 
@@ -878,6 +878,7 @@ namespace tmv {
     // TMV_Text 
     //
 
+#ifdef TMV_TEXT
     template <class M>
     static inline std::string TMV_Text(const BaseMatrix_Diag<M>& m)
     {
@@ -893,6 +894,7 @@ namespace tmv {
         s << "BaseMatrix_Diag_Mutable< "<<TMV_Text(m.mat())<<" >";
         return s.str();
     }
+#endif
 
 } // namespace tmv
 

@@ -198,14 +198,14 @@ namespace tmv {
         TMVAssert(j < n && "column index must be in matrix");
     }
     template <>
-    static TMV_INLINE_ND void CheckRowIndex<true>(int& i, int m)
+    TMV_INLINE_ND void CheckRowIndex<true>(int& i, int m)
     { // FortranStyle
         TMVAssert(i >= 1 && "row index must be in matrix");
         TMVAssert(i <= m && "row index must be in matrix");
         --i;
     }
     template <>
-    static TMV_INLINE_ND void CheckColIndex<true>(int& j, int n)
+    TMV_INLINE_ND void CheckColIndex<true>(int& j, int n)
     { // FortranStyle
         TMVAssert(j >= 1 && "column index must be in matrix");
         TMVAssert(j <= n && "column index must be in matrix");
@@ -294,13 +294,13 @@ namespace tmv {
     struct MCopyHelper;
 
     template <class M>
-    static typename M::value_type DoTrace(const BaseMatrix<M>& m);
+    static inline typename M::value_type DoTrace(const BaseMatrix<M>& m);
 
     // Defined in TMV_MatrixIO.h
     template <class M>
-    static void Write(std::ostream& os, const BaseMatrix_Calc<M>& m);
+    static inline void Write(std::ostream& os, const BaseMatrix_Calc<M>& m);
     template <class M>
-    static void Write(
+    static inline void Write(
         std::ostream& os,
         const BaseMatrix_Calc<M>& m, typename M::float_type thresh) ;
 
@@ -310,21 +310,21 @@ namespace tmv {
 
     // Defined in TMV_Det.h
     template <class M>
-    static typename M::value_type Det(const BaseMatrix_Calc<M>& m);
+    static inline typename M::value_type Det(const BaseMatrix_Calc<M>& m);
     template <class M>
-    static typename M::float_type LogDet(
+    static inline typename M::float_type LogDet(
         const BaseMatrix_Calc<M>& m, typename M::zfloat_type* sign=0);
     template <class M>
-    static bool IsSingular(const BaseMatrix_Calc<M>& m);
+    static inline bool IsSingular(const BaseMatrix_Calc<M>& m);
 
     // Defined in TMV_InvertM.h
     template <int ix, class T, class M1, class M2>
-    static void MakeInverse(
+    static inline void MakeInverse(
         const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
         BaseMatrix_Mutable<M2>& minv);
 
     template <class M1, class M2>
-    static void MakeInverseATA(
+    static inline void MakeInverseATA(
         const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& mata);
 
 
@@ -460,7 +460,8 @@ namespace tmv {
         TMV_INLINE size_t rowsize() const { return mat().rowsize(); }
         TMV_INLINE int nElements() const { return mat().nElements(); }
 
-        TMV_INLINE value_type cref(int i, int j) const  { return mat().cref(i,j); }
+        TMV_INLINE value_type cref(int i, int j) const  
+        { return eval().cref(i,j); }
 
         template <class M2>
         TMV_INLINE void assignTo(BaseMatrix_Mutable<M2>& m2) const
@@ -810,7 +811,7 @@ namespace tmv {
 
         template <class X2>
         TMV_INLINE type& operator/=(const X2& x2)
-        { DivEq(mat(),x2); return mat(); }
+        { LDivEq(mat(),x2); return mat(); }
 
         template <class X2>
         TMV_INLINE type& operator%=(const X2& x2)
@@ -829,7 +830,8 @@ namespace tmv {
         TMV_INLINE size_t colsize() const { return mat().colsize(); }
         TMV_INLINE size_t rowsize() const { return mat().rowsize(); }
         TMV_INLINE reference ref(int i, int j) { return mat().ref(i,j); }
-        TMV_INLINE value_type cref(int i, int j) const  { return mat().cref(i,j); }
+        TMV_INLINE value_type cref(int i, int j) const  
+        { return mat().cref(i,j); }
 
     }; // BaseMatrix_Mutable
 
@@ -1037,7 +1039,7 @@ namespace tmv {
     // TMV_Text 
     //
 
-#ifdef TMV_DEBUG
+#ifdef TMV_TEXT
     template <class M>
     static inline std::string TMV_Text(const BaseMatrix<M>& m)
     {

@@ -246,10 +246,12 @@ static void DoTestMa_Basic(RT , const MM& a, std::string label)
 {
     typedef typename MM::value_type T;
     typedef typename MM::float_type FT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start Ma "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
     }
+#endif
 
     tmv::Matrix<T> m = a;
     FT eps = EPS * FT(m.colsize()+m.rowsize());
@@ -364,10 +366,12 @@ static void DoTestMa_Basic(int , const MM& a, std::string label)
     typedef typename MM::value_type T;
     typedef typename MM::real_type RT;
     typedef typename MM::float_type FT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start Ma "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
     }
+#endif
 
     tmv::Matrix<T> m = a;
     FT eps = EPS * FT(m.colsize()+m.rowsize());
@@ -572,7 +576,7 @@ static void DoTestMa_Full(int rt, const MM& a, std::string label)
 template <class MM> 
 static void DoTestMR(const MM& a, std::string label)
 {
-    typename MM::real_type rt;
+    typename MM::real_type rt(0);
     DoTestMa_Basic(rt,a,label);
     DoTestMa_Basic(rt,Transpose(a),label+" Trans");
 }
@@ -580,7 +584,7 @@ static void DoTestMR(const MM& a, std::string label)
 template <class MM> 
 static void DoTestMC(const MM& a, std::string label)
 {
-    typename MM::real_type rt;
+    typename MM::real_type rt(0);
     DoTestMa_Full(rt,a,label);
     DoTestMa_Basic(rt,Transpose(a),label+" Trans");
     DoTestMa_Basic(rt,Conjugate(a),label+" Conj");
@@ -593,11 +597,13 @@ static void DoTestMX1a_Basic(const MM& a, T2 x, std::string label)
     typedef typename MM::value_type T;
     typedef typename MM::real_type RT;
     typedef typename MM::float_type FT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start MX1a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"x = "<<tmv::TMV_Text(x)<<" "<<x<<std::endl;
     }
+#endif
 
     tmv::Matrix<T> m = a;
 
@@ -682,12 +688,12 @@ static void DoTestMX2a_Basic(MM& a, T2 x, std::string label)
     typedef typename MM::value_type T;
     typedef typename MM::real_type RT;
     typedef typename MM::float_type FT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start MX2a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"x = "<<tmv::TMV_Text(x)<<" "<<x<<std::endl;
     }
-#ifdef XXD
     if (XXDEBUG3) {
         std::cout<<"a = "<<a<<std::endl;
     }
@@ -864,12 +870,12 @@ static void DoTestMV1a_Basic(const MM& a, const V& b, std::string label)
     typedef typename V::float_type FT;
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<T>::complex_type CT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start MV1a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
     }
-#ifdef XXD
     if (XXDEBUG4) {
         std::cout<<"a = "<<a<<std::endl;
         std::cout<<"b = "<<b<<std::endl;
@@ -960,12 +966,12 @@ static void DoTestVM1a_Basic(const MM& a, const V& b, std::string label)
     typedef typename V::float_type FT;
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<T>::complex_type CT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start VM1a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
     }
-#ifdef XXD
     if (XXDEBUG4) {
         std::cout<<"a = "<<a<<std::endl;
         std::cout<<"b = "<<b<<std::endl;
@@ -1242,12 +1248,12 @@ static void DoTestMV2a_Basic(const MM& a, V& b, std::string label)
     typedef typename V::float_type FT;
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<T>::complex_type CT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start MV2a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
     }
-#ifdef XXD
     if (XXDEBUG5) {
         std::cout<<"a = "<<a<<std::endl;
         std::cout<<"b = "<<b<<std::endl;
@@ -1482,12 +1488,12 @@ static void DoTestVM2a_Basic(const MM& a, V& b, std::string label)
     typedef typename V::float_type FT;
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<T>::complex_type CT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start VM2a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
     }
-#ifdef XXD
     if (XXDEBUG5) {
         std::cout<<"a = "<<a<<std::endl;
         std::cout<<"b = "<<b<<std::endl;
@@ -1842,12 +1848,14 @@ static void DoTestMV3a_Basic(
     typedef typename V2::float_type FT;
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<T>::complex_type CT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start MV3a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     tmv::Matrix<Ta> m = a;
     tmv::Matrix<Ta> mt = Transpose(a);
@@ -2053,12 +2061,14 @@ static void DoTestVM3a_Basic(
     typedef typename V2::float_type FT;
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<T>::complex_type CT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start VM3a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     tmv::Matrix<Ta> m = a;
     tmv::Matrix<Ta> mt = Transpose(a);
@@ -2321,12 +2331,12 @@ static void DoTestMM1a_Basic(const M1& a, const M2& b, std::string label)
     typedef typename tmv::Traits<Tb>::real_type RT;
     typedef typename tmv::Traits<Tb>::complex_type CT;
     typedef typename tmv::Traits2<T,Tb>::type PT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start MM1a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
     }
-#ifdef XXD
     if (XXDEBUG7) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" = "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" = "<<b<<std::endl;
@@ -2491,13 +2501,12 @@ static void DoTestMM2a_Basic(M1& a, const M2& b, std::string label)
     typedef typename M2::value_type Tb;
     typedef typename M1::float_type FT;
     typedef typename tmv::Traits<T>::real_type RT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start MM2a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
     }
-
-#ifdef XXD
     if (XXDEBUG8) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
@@ -2672,13 +2681,12 @@ static void DoTestMM3a_Basic(const M1& a, const M2& b, std::string label)
     typedef typename M1::float_type FT;
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits2<T,Tb>::type PT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start MM3a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
     }
-
-#ifdef XXD
     if (XXDEBUG7) {
         std::cout<<"a = "<<a<<std::endl;
         std::cout<<"b = "<<b<<std::endl;
@@ -2782,11 +2790,13 @@ static void DoTestMM4a_Basic(M1& a, const M2& b, std::string label)
     typedef typename M1::float_type FT;
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits2<T,Tb>::type PT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start MM4a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
     }
+#endif
 
     if (CanMultMM(a,b)) {
 #ifdef XXD
@@ -3087,12 +3097,14 @@ static void DoTestMM5a_Basic(
     typedef typename M3::value_type T;
     typedef typename M3::float_type FT;
     typedef typename tmv::Traits<T>::real_type RT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start MM5a"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
     }
+#endif
 
     tmv::Matrix<Ta> m = a;
     tmv::Matrix<Tb> m2 = b;
@@ -3285,13 +3297,13 @@ static void DoTestOProda_Basic(
     typedef typename M::value_type T;
     typedef typename M::float_type FT;
     typedef typename tmv::Traits<T>::real_type RT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start OProd"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"v1 = "<<tmv::TMV_Text(v1)<<std::endl;
         std::cout<<"v2 = "<<tmv::TMV_Text(v2)<<std::endl;
     }
-#ifdef XXD
     if (XXDEBUG9) {
         std::cout<<"a = "<<a<<std::endl;
         std::cout<<"v1 = "<<v1<<std::endl;
@@ -3498,15 +3510,19 @@ static void DoTestOProdC(M& a, const V1& v1, const V2& v2, std::string label)
 #endif
 }
 
+// Arith1 does things like Norm(m), m*x, Det(m), etc.
+// i.e. things that only involve a single matrix object.
 template <class T, class M, class CM> 
 static void TestMatrixArith1(M& a, CM& ca, std::string label)
 {
     typedef std::complex<T> CT;
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith1 "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
     }
+#endif
 
     CT z(9,-2);
     T x = 12;
@@ -3549,11 +3565,13 @@ static void TestMatrixArith1(M& a, CM& ca, std::string label)
     if (showstartdone) std::cout<<"Done Test1"<<std::endl;
 }
 
+// Arith2a does matrix * vector operations.
 template <class T, class M, class CM, class V1, class CV1, class V2, class CV2> 
 static void TestMatrixArith2a(
     const M& a, const CM& ca, V1& b, CV1& cb, 
     V2& c, CV2& cc, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith2a "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -3563,6 +3581,7 @@ static void TestMatrixArith2a(
         std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c<<std::endl;
         std::cout<<"cc = "<<tmv::TMV_Text(cc)<<"  "<<cc<<std::endl;
     }
+#endif
     DoTestMV1R(a,b,label+" R,R");
 #ifndef NO_COMPLEX_ARITH
     DoTestMV1C(ca,cb,label+" C,C");
@@ -3585,11 +3604,13 @@ static void TestMatrixArith2a(
     if (showstartdone) std::cout<<"Done Test2a"<<std::endl;
 }
 
+// Arith2a does vector * matrix operations.
 template <class T, class M, class CM, class V1, class CV1, class V2, class CV2> 
 static void TestMatrixArith2b(
     const M& a, const CM& ca, V1& b, CV1& cb, 
     V2& c, CV2& cc, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith2b "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -3599,6 +3620,7 @@ static void TestMatrixArith2b(
         std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c<<std::endl;
         std::cout<<"cc = "<<tmv::TMV_Text(cc)<<"  "<<cc<<std::endl;
     }
+#endif
 
     DoTestVM1R(a,c,label+" R,R");
 #ifndef NO_COMPLEX_ARITH
@@ -3622,6 +3644,7 @@ static void TestMatrixArith2b(
     if (showstartdone) std::cout<<"Done Test2b"<<std::endl;
 }
 
+// Arith2 calls Arith2a and Arith2b for unit and non-unit step vectors.
 template <class T, class M, class CM> 
 static void TestMatrixArith2(M& a, CM& ca, std::string label)
 {
@@ -3654,11 +3677,13 @@ static void TestMatrixArith2(M& a, CM& ca, std::string label)
     TestMatrixArith2b<T>(a,ca,v,cv,ws,cws,label);
 }
 
+// Arith3a does c = a * b where b,c are vectors.
 template <class T, class M, class CM, class V1, class CV1, class V2, class CV2> 
 static void TestMatrixArith3a(
     const M& a, const CM& ca, V1& b, CV1& cb,
     V2& c, CV2& cc, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith3a "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -3668,6 +3693,7 @@ static void TestMatrixArith3a(
         std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c<<std::endl;
         std::cout<<"cc = "<<tmv::TMV_Text(cc)<<"  "<<cc<<std::endl;
     }
+#endif
 
     DoTestMV3R(a,b,c,label+" R,R,R");
 #ifndef NO_COMPLEX_ARITH
@@ -3682,11 +3708,13 @@ static void TestMatrixArith3a(
     if (showstartdone) std::cout<<"Done Test3a"<<std::endl;
 }
 
+// Arith3a does b = c * a where b,c are vectors.
 template <class T, class M, class CM, class V1, class CV1, class V2, class CV2> 
 static void TestMatrixArith3b(
     const M& a, const CM& ca, V1& b, CV1& cb,
     V2& c, CV2& cc, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith3b "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -3696,6 +3724,7 @@ static void TestMatrixArith3b(
         std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c<<std::endl;
         std::cout<<"cc = "<<tmv::TMV_Text(cc)<<"  "<<cc<<std::endl;
     }
+#endif
 
     DoTestVM3R(a,c,b,label+" R,R,R");
 #ifndef NO_COMPLEX_ARITH
@@ -3710,6 +3739,7 @@ static void TestMatrixArith3b(
     if (showstartdone) std::cout<<"Done Test3b"<<std::endl;
 }
 
+// Arith3 calls Arith3a and Arith3b for unit and non-unit step vectors.
 template <class T, class M, class CM> 
 static void TestMatrixArith3(M& a, CM& ca, std::string label)
 {
@@ -3751,10 +3781,12 @@ static void TestMatrixArith3(M& a, CM& ca, std::string label)
     TestMatrixArith3b<T>(a,ca,vs,cvs,ws,cws,label); 
 }
 
+// Arith4 does matrix + matrix calls and similar
 template <class T, class M1, class CM1, class M2, class CM2> 
 static void TestMatrixArith4(
     M1& a, CM1& ca, const M2& b, const CM2& cb, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith4 "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -3762,6 +3794,7 @@ static void TestMatrixArith4(
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
         std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
     }
+#endif
 
     DoTestMM1RR(a,b,label+" R,R");
 #ifndef NOASSIGN
@@ -3784,10 +3817,12 @@ static void TestMatrixArith4(
     if (showstartdone) std::cout<<"Done Test4"<<std::endl;
 }
 
+// Arith5 does matrix * matrix calls and similar
 template <class T, class M1, class CM1, class M2, class CM2>
 static void TestMatrixArith5(
     M1& a, CM1& ca, const M2& b, const CM2& cb, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith5 "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -3795,6 +3830,7 @@ static void TestMatrixArith5(
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
         std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
     }
+#endif
 
     DoTestMM3RR(a,b,label+" R,R");
 #ifndef NOASSIGN
@@ -3817,11 +3853,13 @@ static void TestMatrixArith5(
     if (showstartdone) std::cout<<"Done Test5"<<std::endl;
 }
 
+// Arith6 does c = a * b where all are matrices.
 template <class T, class M1, class CM1, class M2, class CM2, class M3, class CM3> 
 static void TestMatrixArith6(
     const M1& a, const CM1& ca,
     const M2& b, const CM2& cb, M3& c, CM3& cc, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith6 "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -3831,6 +3869,7 @@ static void TestMatrixArith6(
         std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c<<std::endl;
         std::cout<<"cc = "<<tmv::TMV_Text(cc)<<"  "<<cc<<std::endl;
     }
+#endif
 
     DoTestMM5R(a,b,c,label+" R,R,R");
 #ifndef NO_COMPLEX_ARITH
@@ -3845,6 +3884,7 @@ static void TestMatrixArith6(
     if (showstartdone) std::cout<<"Done Test6"<<std::endl;
 }
 
+// Arith6x calls Arith6 for ColMajor, RowMajor and NonMajor c's.
 template <class T, class M1, class CM1, class M2, class CM2> 
 static void TestMatrixArith6x(
     const M1& a, const CM1& ca,
@@ -3873,11 +3913,13 @@ static void TestMatrixArith6x(
     }
 }
 
+// Arith7 does a = v1 ^ v2 and similar.
 template <class T, class M, class CM, class V1, class CV1, class V2, class CV2> 
 static void TestMatrixArith7(
     M& a, CM& ca, const V1& v1, const CV1& cv1,
     const V2& v2, const CV2& cv2, std::string label)
 {
+#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith6 "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
@@ -3887,6 +3929,7 @@ static void TestMatrixArith7(
         std::cout<<"v2 = "<<tmv::TMV_Text(v2)<<"  "<<v2<<std::endl;
         std::cout<<"cv2 = "<<tmv::TMV_Text(cv2)<<"  "<<cv2<<std::endl;
     }
+#endif
 
     DoTestOProdR(a,v1,v2,label+" R,R,R");
 #ifndef NO_COMPLEX_ARITH

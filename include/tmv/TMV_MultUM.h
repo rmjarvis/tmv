@@ -151,7 +151,7 @@ namespace tmv {
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<1,cs,rs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UM
@@ -174,7 +174,7 @@ namespace tmv {
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<101,cs,rs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UM
@@ -197,7 +197,7 @@ namespace tmv {
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<201,cs,rs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UM
@@ -220,7 +220,7 @@ namespace tmv {
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<2,cs,rs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UM
@@ -241,7 +241,7 @@ namespace tmv {
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<102,cs,rs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UM
@@ -262,7 +262,7 @@ namespace tmv {
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<202,cs,rs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UM
@@ -1402,26 +1402,46 @@ namespace tmv {
             const bool rxr = M1::_rowmajor && M3::_rowmajor;
             const bool crx = M1::_colmajor && M2::_rowmajor;
             const bool xcc = M2::_colmajor && M3::_colmajor;
-            const bool maybesmall = 
-                cs==UNKNOWN || (cs<=5 && (rs==UNKNOWN || rs<16)) || cs<=3;
             const bool upper = M1::_upper;
-            const int algo2 = maybesmall ? (
-                TMV_UM_RECURSE == 1 ? 1 :
+            const int algo2 = 
+                (cs == UNKNOWN || cs <= TMV_UM_RECURSE) ? (
+                    TMV_UM_RECURSE == 1 ? 1 :
 #ifdef TMV_UM_CLEANUP
-                true ? ( upper ? 16 : 26 ) : 
+                    (cs == UNKNOWN) ? ( upper ? 16 : 26 ) : 
 #endif
-                upper ?  ( rxr ? 12 : crx ? 13 : xcc ? 11 : 13 ) :
-                ( rxr ? 22 : crx ? 23 : xcc ? 21 : 23 ) ) :
+                    (cs != UNKNOWN && cs <= 5) ? ( upper ? 16 : 26 ) :
+                    upper ?  ( rxr ? 12 : crx ? 13 : xcc ? 11 : 13 ) :
+                    ( rxr ? 22 : crx ? 23 : xcc ? 21 : 23 ) ) :
                 0; 
 #ifdef TMV_UM_SMALL
             const int algo3 = 
+                (cs != UNKNOWN && cs <= TMV_UM_RECURSE) ? 0 :
                 (rs == UNKNOWN || rs <= 3) ? ( upper ? 11 : 21 ) : 0;
 #endif
-            const int algo4 = upper ? 17 : 27;
+#ifdef _OPENMP
+            const int algo4 = 
+                (cs != UNKNOWN && cs <= TMV_UM_RECURSE) ? 0 :
+#ifdef TMV_UM_SMALL
+                (rs != UNKNOWN && rs <= 3) ? 0 :
+#endif
+                (rs == UNKNOWN || rs >= 64) ? 36 :
+                0;
+#endif
+            const int algo5 =
+                (cs != UNKNOWN && cs <= TMV_UM_RECURSE) ? 0 :
+#ifdef TMV_UM_SMALL
+                (rs != UNKNOWN && rs <= 3) ? 0 :
+#endif
+                upper ? 17 : 27;
 
 #ifdef _OPENMP
             const int Mc = M < 16 ? 1 : M>>4; // M/16
             const int Nc = N < 16 ? 1 : N>>4; // N/16
+#endif
+#ifdef PRINTALGO_UM
+            std::cout<<"algo2 = "<<algo2<<std::endl;
+            std::cout<<"algo3 = "<<algo3<<std::endl;
+            std::cout<<"algo4 = "<<algo4<<std::endl;
 #endif
 
             // Put the small matrix option first, so it doesn't have to 
@@ -1435,10 +1455,10 @@ namespace tmv {
 #endif
 #ifdef _OPENMP
             else if (N >= 64 && Mc*Mc*Nc > TMV_UM_OMP_THRESH)
-                MultUM_Helper<36,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+                MultUM_Helper<algo4,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
 #endif
             else
-                MultUM_Helper<algo4,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+                MultUM_Helper<algo5,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };
 
@@ -1605,7 +1625,7 @@ namespace tmv {
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<81,cs,rs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MV_MM
@@ -1626,7 +1646,7 @@ namespace tmv {
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<82,cs,rs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UM
@@ -1666,7 +1686,7 @@ namespace tmv {
     template <int cs, int rs, bool add, class T, class M1, class M2, class M3>
     struct MultUM_Helper<83,cs,rs,add,1,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<1,T>& x, const M1& m1, const M2& m2, M3& m3)
         { MultUM_Helper<81,cs,rs,add,1,T,M1,M2,M3>::call(x,m1,m2,m3); }
     };
@@ -1675,7 +1695,7 @@ namespace tmv {
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<84,cs,rs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UM
@@ -1695,7 +1715,7 @@ namespace tmv {
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<85,cs,rs,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UM
@@ -1734,7 +1754,7 @@ namespace tmv {
     template <int cs, int rs, bool add, class T, class M1, class M2, class M3>
     struct MultUM_Helper<86,cs,rs,add,1,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<1,T>& x, const M1& m1, const M2& m2, M3& m3)
         { MultUM_Helper<84,cs,rs,add,1,T,M1,M2,M3>::call(x,m1,m2,m3); }
     };
@@ -1773,7 +1793,7 @@ namespace tmv {
     template <int cs, int rs, bool add, class T, class M1, class M2, class M3>
     struct MultUM_Helper<87,cs,rs,add,1,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<1,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UM
@@ -1798,6 +1818,12 @@ namespace tmv {
         static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_UM
+            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
+            std::cout<<"UM algo 90: M,N,cs,rs,x = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
+#endif
             typedef typename M3::value_type VT;
             VT xx = Traits<VT>::convert(T(x));
             InstMultMM(xx,m1.xView(),m2.xView(),m3.xView());
@@ -1809,6 +1835,12 @@ namespace tmv {
         static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_UM
+            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
+            std::cout<<"UM algo 90: M,N,cs,rs,x = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
+#endif
             typedef typename M3::value_type VT;
             VT xx = Traits<VT>::convert(T(x));
             InstAddMultMM(xx,m1.xView(),m2.xView(),m3.xView());
@@ -1822,6 +1854,12 @@ namespace tmv {
         static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_UM
+            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
+            std::cout<<"UM algo 91: M,N,cs,rs,x = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
+#endif
             typedef typename M3::value_type VT;
             VT xx = Traits<VT>::convert(T(x));
             InstAliasMultMM(xx,m1.xView(),m2.xView(),m3.xView());
@@ -1833,6 +1871,12 @@ namespace tmv {
         static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_UM
+            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
+            std::cout<<"UM algo 91: M,N,cs,rs,x = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
+#endif
             typedef typename M3::value_type VT;
             VT xx = Traits<VT>::convert(T(x));
             InstAliasAddMultMM(xx,m1.xView(),m2.xView(),m3.xView());
@@ -1846,6 +1890,12 @@ namespace tmv {
         static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_UM
+            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
+            std::cout<<"UM algo 97: M,N,cs,rs,x = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
+#endif
             typedef typename M1::const_conjugate_type M1c;
             typedef typename M2::const_conjugate_type M2c;
             typedef typename M3::conjugate_type M3c;
@@ -1864,6 +1914,12 @@ namespace tmv {
         static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_UM
+            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
+            std::cout<<"UM algo 197: M,N,cs,rs,x = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
+#endif
             typedef typename M1::const_conjugate_type M1c;
             typedef typename M2::const_conjugate_type M2c;
             typedef typename M3::conjugate_type M3c;
@@ -1884,6 +1940,13 @@ namespace tmv {
         {
             const bool s1 = SameStorage(m1,m3);
             const bool s2 = SameStorage(m2,m3) && !ExactSameStorage(m2,m3);
+#ifdef PRINTALGO_UM
+            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
+            std::cout<<"UM algo 98: M,N,cs,rs,x = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
+            std::cout<<"s1,s2 = "<<s1<<','<<s2<<std::endl;
+#endif
             if (!s1 && !s2) {
                 // No aliasing (or no clobber)
                 MultUM_Helper<-2,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
@@ -1926,7 +1989,13 @@ namespace tmv {
                 ( cs == 0 || rs == 0 ) ? 0 :
                 M3::_conj ? 197 :
                 inst ? 91 : 
-                99;
+                98;
+#ifdef PRINTALGO_UM
+            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
+            std::cout<<"UM algo 99: M,N,cs,rs,x = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
+#endif
             MultUM_Helper<algo,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };
@@ -2110,6 +2179,17 @@ namespace tmv {
                 M3::_conj ? 97 :
                 inst ? 90 : 
                 -3;
+#ifdef PRINTALGO_UM
+            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            std::cout<<"MultUM: x = "<<ix<<"  "<<T(x)<<std::endl;
+            std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
+            std::cout<<"m3 = "<<TMV_Text(m3)<<std::endl;
+            std::cout<<"M = "<<M<<"  N = "<<N<<std::endl;
+            std::cout<<"cs = "<<cs<<"  rs = "<<rs<<std::endl;
+            std::cout<<"add = "<<add<<", algo = "<<algo<<std::endl;
+#endif
             MultUM_Helper<algo,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };
@@ -2127,6 +2207,17 @@ namespace tmv {
                 rs == 1 ? 102 :
                 M3::_checkalias ? 99 : 
                 -2;
+#ifdef PRINTALGO_UM
+            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            std::cout<<"AliasCheck MultUM: x = "<<ix<<"  "<<T(x)<<std::endl;
+            std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
+            std::cout<<"m3 = "<<TMV_Text(m3)<<std::endl;
+            std::cout<<"M = "<<M<<"  N = "<<N<<std::endl;
+            std::cout<<"cs = "<<cs<<"  rs = "<<rs<<std::endl;
+            std::cout<<"add = "<<add<<", algo = "<<algo<<std::endl;
+#endif
             MultUM_Helper<algo,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };
@@ -2348,19 +2439,19 @@ namespace tmv {
     }
 
     template <class M1, int ix, class T, class M2>
-    static inline void MultEqMM(
+    static TMV_INLINE void MultEqMM(
         BaseMatrix_Rec_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M2>& m2)
     { MultMM<false>(x,m1.mat(),m2.mat(),m1.mat()); }
 
     template <class M1, int ix, class T, class M2>
-    static inline void NoAliasMultEqMM(
+    static TMV_INLINE void NoAliasMultEqMM(
         BaseMatrix_Rec_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M2>& m2)
     { NoAliasMultMM<false>(x,m1.mat(),m2.mat(),m1.mat()); }
 
     template <class M1, int ix, class T, class M2>
-    static inline void AliasMultEqMM(
+    static TMV_INLINE void AliasMultEqMM(
         BaseMatrix_Rec_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M2>& m2)
     { AliasMultMM<false>(x,m1.mat(),m2.mat(),m1.mat()); }

@@ -53,7 +53,7 @@ namespace tmv {
     template <int s, class V1, class V2>
     struct SwapV_Helper<2,s,V1,V2>
     {
-        static void call(V1& v1, V2& v2)
+        static inline void call(V1& v1, V2& v2)
         {
             typedef typename V1::flatten_type V1f;
             typedef typename V2::flatten_type V2f;
@@ -85,7 +85,7 @@ namespace tmv {
     {
         typedef typename V1::iterator IT1;
         typedef typename V2::iterator IT2;
-        static void call(V1& v1, V2& v2)
+        static inline void call(V1& v1, V2& v2)
         {
             const int n = s == UNKNOWN ? int(v1.size()) : s;
             call2(n,v1.begin(),v2.begin());
@@ -119,7 +119,7 @@ namespace tmv {
     {
         typedef typename V1::iterator IT1;
         typedef typename V2::iterator IT2;
-        static void call(V1& v1, V2& v2)
+        static inline void call(V1& v1, V2& v2)
         {
             const int n = s == UNKNOWN ? int(v1.size()) : s;
             call2(n,v1.begin(),v2.begin());
@@ -161,7 +161,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static void unroll(V1& v1, V2& v2)
+            static inline void unroll(V1& v1, V2& v2)
             {
                 Unroller<I,N/2>::unroll(v1,v2);
                 Unroller<I+N/2,N-N/2>::unroll(v1,v2);
@@ -170,13 +170,13 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static void unroll(V1& v1, V2& v2)
+            static inline void unroll(V1& v1, V2& v2)
             { TMV_SWAP(v1.ref(I),v2.ref(I)); }
         };
         template <int I>
         struct Unroller<I,0>
-        { static void unroll(V1& v1, V2& v2) {} };
-        static void call(V1& v1, V2& v2)
+        { static inline void unroll(V1& v1, V2& v2) {} };
+        static inline void call(V1& v1, V2& v2)
         { Unroller<0,s>::unroll(v1,v2); }
     };
 
@@ -186,7 +186,7 @@ namespace tmv {
     {
         typedef typename V1::iterator IT1;
         typedef typename V2::iterator IT2;
-        static void call(V1& v1, V2& v2)
+        static inline void call(V1& v1, V2& v2)
         {
             const int n = s == UNKNOWN ? int(v1.size()) : s;
             call2(n,v1.begin(),v2.begin());
@@ -212,7 +212,7 @@ namespace tmv {
     {
         typedef typename V1::iterator IT1;
         typedef typename V2::iterator IT2;
-        static void call(V1& v1, V2& v2)
+        static inline void call(V1& v1, V2& v2)
         {
             const int n = s == UNKNOWN ? int(v1.size()) : s;
             call2(n,v1.begin(),v2.begin());
@@ -482,7 +482,7 @@ namespace tmv {
     }
 
     template <class V1, class V2>
-    static inline void Swap(
+    static TMV_INLINE void Swap(
         BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2)
     { DoSwap(v1,v2); }
 

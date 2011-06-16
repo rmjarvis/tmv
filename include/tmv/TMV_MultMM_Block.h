@@ -86,7 +86,7 @@ namespace tmv {
         typedef void Kcleanup(
             const int M, const int N, const int K,
             const Scaling<1,T>& x, const T* A, const T* B, T* C);
-        static Kcleanup* call(const int K)
+        static TMV_INLINE Kcleanup* call(const int K)
         {
             TMVStaticAssert(K2 != UNKNOWN);
             return &call_multmm_16_16_K_known<K2,1,T>;
@@ -100,7 +100,7 @@ namespace tmv {
         typedef void Kcleanup(
             const int M, const int N, const int K,
             const Scaling<1,T>& x, const T* A, const T* B, T* C);
-        static Kcleanup* call(const int K)
+        static TMV_INLINE Kcleanup* call(const int K)
         { return &call_multmm_16_16_K<1,T>; }
     };
 #else
@@ -398,7 +398,7 @@ namespace tmv {
         typedef typename M1::real_type RT;
         typedef MatrixView<RT,ColMajor> M2;
 
-        static void call(
+        static inline void call(
             const ConstMatrixView<RT>& m1x,
             RT* m2p, int M, int N, int si, int sj)
         {
@@ -439,7 +439,7 @@ namespace tmv {
         typedef typename M1::const_realpart_type M1r;
         typedef MatrixView<RT,ColMajor> M2r;
 
-        static void call(
+        static inline void call(
             const ConstMatrixView<RT>& m1x,
             RT* m2p, int M, int N, int si, int sj)
         {
@@ -501,7 +501,7 @@ namespace tmv {
         template <int dummy>
         struct GetCopyHelper<true,dummy> // known majority
         {
-            static F* call(const M1& m)
+            static TMV_INLINE F* call(const M1& m)
             { return &MyCopy<iscomplex,M1x>::call; }
         };
         template <int dummy>
@@ -517,7 +517,7 @@ namespace tmv {
                     return &MyCopy<iscomplex,M1x>::call;
             }
         };
-        static F* call(const M1& m)
+        static TMV_INLINE F* call(const M1& m)
         {
             const bool known = Attrib<xA>::colmajor || Attrib<xA>::rowmajor;
             return GetCopyHelper<known,1>::call(m);
@@ -527,7 +527,7 @@ namespace tmv {
     template <int MB, int NB, int KB, int ix, class T>
     struct select_multmm
     {
-        static void call(
+        static TMV_INLINE void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_M_N_K(M,N,K,x,A,B,C); }
@@ -535,7 +535,7 @@ namespace tmv {
     template <int ix, class T>
     struct select_multmm<16,16,16,ix,T>
     {
-        static void call(
+        static TMV_INLINE void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_16_16(M,N,K,x,A,B,C); }
@@ -543,7 +543,7 @@ namespace tmv {
     template <int ix, class T>
     struct select_multmm<16,16,32,ix,T>
     {
-        static void call(
+        static TMV_INLINE void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_16_32(M,N,K,x,A,B,C); }
@@ -551,7 +551,7 @@ namespace tmv {
     template <int ix, class T>
     struct select_multmm<16,16,64,ix,T>
     {
-        static void call(
+        static TMV_INLINE void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_16_64(M,N,K,x,A,B,C); }
@@ -559,7 +559,7 @@ namespace tmv {
     template <int MB, int ix, class T>
     struct select_multmm<MB,16,16,ix,T>
     {
-        static void call(
+        static TMV_INLINE void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_M_16_16_known<MB>(M,N,K,x,A,B,C); }
@@ -567,7 +567,7 @@ namespace tmv {
     template <int MB, int ix, class T>
     struct select_multmm<MB,16,32,ix,T>
     {
-        static void call(
+        static TMV_INLINE void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_M_16_32_known<MB>(M,N,K,x,A,B,C); }
@@ -575,7 +575,7 @@ namespace tmv {
     template <int MB, int ix, class T>
     struct select_multmm<MB,16,64,ix,T>
     {
-        static void call(
+        static TMV_INLINE void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_M_16_64_known<MB>(M,N,K,x,A,B,C); }
@@ -583,7 +583,7 @@ namespace tmv {
     template <int ix, class T>
     struct select_multmm<UNKNOWN,16,16,ix,T>
     {
-        static void call(
+        static TMV_INLINE void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_M_16_16(M,N,K,x,A,B,C); }
@@ -591,7 +591,7 @@ namespace tmv {
     template <int ix, class T>
     struct select_multmm<UNKNOWN,16,32,ix,T>
     {
-        static void call(
+        static TMV_INLINE void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_M_16_32(M,N,K,x,A,B,C); }
@@ -599,7 +599,7 @@ namespace tmv {
     template <int ix, class T>
     struct select_multmm<UNKNOWN,16,64,ix,T>
     {
-        static void call(
+        static TMV_INLINE void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_M_16_64(M,N,K,x,A,B,C); }
@@ -607,7 +607,7 @@ namespace tmv {
     template <int NB, int ix, class T>
     struct select_multmm<16,NB,16,ix,T>
     {
-        static void call(
+        static TMV_INLINE void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_N_16_known<NB>(M,N,K,x,A,B,C); }
@@ -615,7 +615,7 @@ namespace tmv {
     template <int NB, int ix, class T>
     struct select_multmm<16,NB,32,ix,T>
     {
-        static void call(
+        static TMV_INLINE void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_N_32_known<NB>(M,N,K,x,A,B,C); }
@@ -623,7 +623,7 @@ namespace tmv {
     template <int NB, int ix, class T>
     struct select_multmm<16,NB,64,ix,T>
     {
-        static void call(
+        static TMV_INLINE void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_N_64_known<NB>(M,N,K,x,A,B,C); }
@@ -631,7 +631,7 @@ namespace tmv {
     template <int ix, class T>
     struct select_multmm<16,UNKNOWN,16,ix,T>
     {
-        static void call(
+        static TMV_INLINE void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_N_16(M,N,K,x,A,B,C); }
@@ -639,7 +639,7 @@ namespace tmv {
     template <int ix, class T>
     struct select_multmm<16,UNKNOWN,32,ix,T>
     {
-        static void call(
+        static TMV_INLINE void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_N_32(M,N,K,x,A,B,C); }
@@ -647,7 +647,7 @@ namespace tmv {
     template <int ix, class T>
     struct select_multmm<16,UNKNOWN,64,ix,T>
     {
-        static void call(
+        static TMV_INLINE void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_N_64(M,N,K,x,A,B,C); }
@@ -655,7 +655,7 @@ namespace tmv {
     template <int KB, int ix, class T>
     struct select_multmm<16,16,KB,ix,T>
     {
-        static void call(
+        static TMV_INLINE void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_16_K_known<KB>(M,N,K,x,A,B,C); }
@@ -663,7 +663,7 @@ namespace tmv {
     template <int ix, class T>
     struct select_multmm<16,16,UNKNOWN,ix,T>
     {
-        static void call(
+        static TMV_INLINE void call(
             const int M, const int N, const int K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_16_K(M,N,K,x,A,B,C); }
@@ -1317,7 +1317,7 @@ namespace tmv {
         template <int dummy>
         struct GetAssignHelper<true,dummy> // known majority
         {
-            static F* call(const M2& m)
+            static TMV_INLINE F* call(const M2& m)
             { return &MyAssign<zx,z2,add,M2x>::call; }
         };
         template <int dummy>
@@ -1333,7 +1333,7 @@ namespace tmv {
                     return &MyAssign<zx,z2,add,M2x>::call;
             }
         };
-        static F* call(const M2& m)
+        static TMV_INLINE F* call(const M2& m)
         {
             const bool known = Attrib<xA>::colmajor || Attrib<xA>::rowmajor;
             return GetAssignHelper<known,1>::call(m);
@@ -1343,10 +1343,10 @@ namespace tmv {
     // A helper function to round a column length up to the next
     // multiple of 2 or 4 if required for the SSE commands for that type.
     template <class T>
-    static inline int RoundUp(const int x)
+    static TMV_INLINE int RoundUp(const int x)
     { return x; }
     template <>
-    static inline int RoundUp<double>(const int x)
+    TMV_INLINE int RoundUp<double>(const int x)
     {
         return (
 #ifdef __SSE2__
@@ -1357,7 +1357,7 @@ namespace tmv {
         );
     }
     template <>
-    static inline int RoundUp<float>(const int x)
+    TMV_INLINE int RoundUp<float>(const int x)
     {
         return (
 #ifdef __SSE__

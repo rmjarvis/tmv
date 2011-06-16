@@ -204,7 +204,7 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(N >= 0);
 #ifdef TMV_DEBUG
-            this->setAllTo(T(888));
+            this->flatten().setAllTo(Traits<real_type>::constr_value());
 #endif
         }
 
@@ -249,7 +249,7 @@ namespace tmv {
         TMV_INLINE_ND ~SmallVector()
         {
 #ifdef TMV_DEBUG
-            this->setAllTo(T(999));
+            this->flatten().setAllTo(Traits<real_type>::destr_value());
 #endif
         }
 
@@ -719,7 +719,7 @@ namespace tmv {
     // TMV_Text functions
     //
 
-#ifdef TMV_DEBUG
+#ifdef TMV_TEXT
     template <class T, int N, int A>
     static inline std::string TMV_Text(const SmallVector<T,N,A>& v)
     {

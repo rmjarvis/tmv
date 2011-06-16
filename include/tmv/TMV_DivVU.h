@@ -233,7 +233,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static void unroll(V1& v1, const M2& m2)
+            static inline void unroll(V1& v1, const M2& m2)
             {
                 Unroller<I+N/2,N-N/2>::unroll(v1,m2);
                 Unroller<I,N/2>::unroll(v1,m2);
@@ -242,7 +242,7 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static void unroll(V1& v1, const M2& m2)
+            static inline void unroll(V1& v1, const M2& m2)
             {
                 typedef typename V1::const_subvector_type V1s;
                 typedef typename M2::const_row_sub_type M2r;
@@ -255,8 +255,8 @@ namespace tmv {
         };
         template <int I>
         struct Unroller<I,0>
-        { static void unroll(V1& , const M2& ) {} };
-        static void call(V1& v1, const M2& m2)
+        { static inline void unroll(V1& , const M2& ) {} };
+        static inline void call(V1& v1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqVU algo 15: N,s = "<<s<<','<<s<<std::endl;
@@ -377,7 +377,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static void unroll(V1& v1, const M2& m2)
+            static inline void unroll(V1& v1, const M2& m2)
             {
                 Unroller<I,N/2>::unroll(v1,m2);
                 Unroller<I+N/2,N-N/2>::unroll(v1,m2);
@@ -386,7 +386,7 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static void unroll(V1& v1, const M2& m2)
+            static inline void unroll(V1& v1, const M2& m2)
             {
                 typedef typename M2::const_row_sub_type M2r;
                 typedef typename V1::const_subvector_type V1s;
@@ -399,8 +399,8 @@ namespace tmv {
         };
         template <int I>
         struct Unroller<I,0>
-        { static void unroll(V1& , const M2& ) {} };
-        static void call(V1& v1, const M2& m2)
+        { static inline void unroll(V1& , const M2& ) {} };
+        static inline void call(V1& v1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqVU algo 25: N,s = "<<s<<','<<s<<std::endl;

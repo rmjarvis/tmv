@@ -61,7 +61,7 @@ namespace tmv {
         {
             const int nrows = m.nrows();
             const int ncols = m.ncols();
-            os << nrows << "  " << ncols << std::endl;
+            os << nrows << "  " << ncols << '\n';
             for(int i=0;i<nrows;++i) {
                 os << "( ";
                 for(int j=0;j<ncols;++j) {
@@ -76,7 +76,7 @@ namespace tmv {
             typedef typename M::value_type T;
             const int nrows = m.nrows();
             const int ncols = m.ncols();
-            os << nrows << "  " << ncols << std::endl;
+            os << nrows << "  " << ncols << '\n';
             for(int i=0;i<nrows;++i) {
                 os << "( ";
                 for(int j=0;j<ncols;++j) {
@@ -405,7 +405,7 @@ namespace tmv {
     { Write(os,m.calc()); return os; }
 
     template <class M>
-    static inline std::istream& operator>>(
+    static std::istream& operator>>(
         std::istream& is, BaseMatrix_Rec_Mutable<M>& m)
     {
         typedef typename M::value_type T;
@@ -432,7 +432,7 @@ namespace tmv {
     }
 
     template <class T, int A0, int A1>
-    static inline std::istream& operator>>(
+    static std::istream& operator>>(
         std::istream& is, auto_ptr<Matrix<T,A0,A1> >& m)
     {
         size_t cs,rs;

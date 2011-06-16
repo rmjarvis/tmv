@@ -4,9 +4,9 @@
 template <class T> 
 void TestSmallSquareDiv_f()
 {
-    TestSmallSquareDiv<T,tmv::RowMajor,12>();
+    TestSmallSquareDiv<T,tmv::RowMajor,12>("RM 12 12");
 #if XTEST & 2
-    TestSmallSquareDiv<T,tmv::ColMajor,12>();
+    TestSmallSquareDiv<T,tmv::ColMajor,12>("CM 12 12");
 #endif
 }
 

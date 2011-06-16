@@ -194,7 +194,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static void unroll(M& m)
+            static inline void unroll(M& m)
             {
                 // [ B00 B01 ] * [ A00 A01 ] = [ 1 0 ]
                 // [  0  B11 ]   [  0  A11 ]   [ 0 1 ]
@@ -244,11 +244,11 @@ namespace tmv {
         };
         template <int I>
         struct Unroller<I,1> // diagonal is already done, so nothing to do.
-        { static void unroll(M&) {} };
+        { static inline void unroll(M&) {} };
         template <int I>
         struct Unroller<I,0>
-        { static void unroll(M&) {} };
-        static void call(M& m)
+        { static inline void unroll(M&) {} };
+        static inline void call(M& m)
         {
 #ifdef PRINTALGO_InvU
             const int N = m.size();
@@ -267,7 +267,6 @@ namespace tmv {
         {
             const int N = m.size();
 #ifdef PRINTALGO_InvU
-            const int N = m.size();
             std::cout<<"InvU algo 17: N,s,x = "<<N<<','<<s<<std::endl;
 #endif
             const int sp1 = IntTraits<s>::Sp1;
@@ -359,7 +358,7 @@ namespace tmv {
     template <int s, class M>
     struct InvertU_Helper<50,s,M>
     {
-        static void call(M& m)
+        static inline void call(M& m)
         {
             TMVStaticAssert(M::_upper);
             TMVStaticAssert(!M::_unit);
@@ -373,7 +372,7 @@ namespace tmv {
     template <int s, class M>
     struct InvertU_Helper<51,s,M>
     {
-        static void call(M& m)
+        static inline void call(M& m)
         {
             if (!m.isunit()) 
                 InvertU_Helper<50,s,M>::call(m); 

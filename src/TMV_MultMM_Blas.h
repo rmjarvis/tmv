@@ -44,11 +44,11 @@
 namespace tmv {
 
 #ifdef TMV_INST_DOUBLE
-    template <int Si1, int Sj1, int Si2, int Sj2> 
+    template <int A1, int A2>
     static void BlasMultMM(
-        double alpha, const ConstMatrixView<double,Si1,Sj1>& A,
-        const ConstMatrixView<double,Si2,Sj2>& B,
-        double beta, MatrixView<double,1> C)
+        double alpha, const ConstMatrixView<double,A1>& A,
+        const ConstMatrixView<double,A2>& B,
+        double beta, MatrixView<double,ColMajor> C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -71,12 +71,12 @@ namespace tmv {
             BLASP(A.cptr()),BLASV(lda),BLASP(B.cptr()),BLASV(ldb),
             BLASV(xbeta),BLASP(C.ptr()),BLASV(ldc) BLAS1 BLAS1);
     }
-    template <int Si1, int Sj1, bool C1, int Si2, int Sj2, bool C2> 
+    template <int A1, int A2>
     static void BlasMultMM(
         std::complex<double> alpha,
-        const ConstMatrixView<std::complex<double>,Si1,Sj1,C1>& A,
-        const ConstMatrixView<std::complex<double>,Si2,Sj2,C2>& B,
-        double beta, MatrixView<std::complex<double>,1> C)
+        const ConstMatrixView<std::complex<double>,A1>& A,
+        const ConstMatrixView<std::complex<double>,A2>& B,
+        double beta, MatrixView<std::complex<double>,ColMajor> C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -108,12 +108,12 @@ namespace tmv {
         }
     }
 #ifdef TMV_INST_MIX
-    template <int Si1, int Sj1, bool C1, int Si2, int Sj2> 
+    template <int A1, int A2>
     static void BlasMultMM(
         std::complex<double> alpha,
-        const ConstMatrixView<std::complex<double>,Si1,Sj1,C1>& A,
-        const ConstMatrixView<double,Si2,Sj2>& B,
-        double beta, MatrixView<std::complex<double>,1> C)
+        const ConstMatrixView<std::complex<double>,A1>& A,
+        const ConstMatrixView<double,A2>& B,
+        double beta, MatrixView<std::complex<double>,ColMajor> C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -178,12 +178,12 @@ namespace tmv {
             }
         }
     }
-    template <int Si1, int Sj1, int Si2, int Sj2, bool C2> 
+    template <int A1, int A2>
     static void BlasMultMM(
         std::complex<double> alpha,
-        const ConstMatrixView<double,Si1,Sj1>& A,
-        const ConstMatrixView<std::complex<double>,Si2,Sj2,C2>& B,
-        double beta, MatrixView<std::complex<double>,1> C)
+        const ConstMatrixView<double,A1>& A,
+        const ConstMatrixView<std::complex<double>,A2>& B,
+        double beta, MatrixView<std::complex<double>,ColMajor> C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -218,12 +218,12 @@ namespace tmv {
             else C.imagPart() += Cx;
         }
     }
-    template <int Si1, int Sj1, int Si2, int Sj2> 
+    template <int A1, int A2>
     static void BlasMultMM(
         std::complex<double> alpha,
-        const ConstMatrixView<double,Si1,Sj1>& A,
-        const ConstMatrixView<double,Si2,Sj2>& B,
-        double beta, MatrixView<std::complex<double>,1> C)
+        const ConstMatrixView<double,A1>& A,
+        const ConstMatrixView<double,A2>& B,
+        double beta, MatrixView<std::complex<double>,ColMajor> C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -238,12 +238,12 @@ namespace tmv {
     }
 #endif
 #endif // INST_DOUBLE
-#ifdef TMV_INST_FLOAT
-    template <int Si1, int Sj1, int Si2, int Sj2> 
+#ifdef TMV_INST_DOUBLE
+    template <int A1, int A2>
     static void BlasMultMM(
-        float alpha, const ConstMatrixView<float,Si1,Sj1>& A,
-        const ConstMatrixView<float,Si2,Sj2>& B,
-        float beta, MatrixView<float,1> C)
+        float alpha, const ConstMatrixView<float,A1>& A,
+        const ConstMatrixView<float,A2>& B,
+        float beta, MatrixView<float,ColMajor> C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -266,12 +266,12 @@ namespace tmv {
             BLASP(A.cptr()),BLASV(lda),BLASP(B.cptr()),BLASV(ldb),
             BLASV(xbeta),BLASP(C.ptr()),BLASV(ldc) BLAS1 BLAS1);
     }
-    template <int Si1, int Sj1, bool C1, int Si2, int Sj2, bool C2> 
+    template <int A1, int A2>
     static void BlasMultMM(
         std::complex<float> alpha,
-        const ConstMatrixView<std::complex<float>,Si1,Sj1,C1>& A,
-        const ConstMatrixView<std::complex<float>,Si2,Sj2,C2>& B,
-        float beta, MatrixView<std::complex<float>,1> C)
+        const ConstMatrixView<std::complex<float>,A1>& A,
+        const ConstMatrixView<std::complex<float>,A2>& B,
+        float beta, MatrixView<std::complex<float>,ColMajor> C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -303,12 +303,12 @@ namespace tmv {
         }
     }
 #ifdef TMV_INST_MIX
-    template <int Si1, int Sj1, bool C1, int Si2, int Sj2> 
+    template <int A1, int A2>
     static void BlasMultMM(
         std::complex<float> alpha,
-        const ConstMatrixView<std::complex<float>,Si1,Sj1,C1>& A,
-        const ConstMatrixView<float,Si2,Sj2>& B,
-        float beta, MatrixView<std::complex<float>,1> C)
+        const ConstMatrixView<std::complex<float>,A1>& A,
+        const ConstMatrixView<float,A2>& B,
+        float beta, MatrixView<std::complex<float>,ColMajor> C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -373,12 +373,12 @@ namespace tmv {
             }
         }
     }
-    template <int Si1, int Sj1, int Si2, int Sj2, bool C2> 
+    template <int A1, int A2>
     static void BlasMultMM(
         std::complex<float> alpha,
-        const ConstMatrixView<float,Si1,Sj1>& A,
-        const ConstMatrixView<std::complex<float>,Si2,Sj2,C2>& B,
-        float beta, MatrixView<std::complex<float>,1> C)
+        const ConstMatrixView<float,A1>& A,
+        const ConstMatrixView<std::complex<float>,A2>& B,
+        float beta, MatrixView<std::complex<float>,ColMajor> C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -413,12 +413,12 @@ namespace tmv {
             else C.imagPart() += Cx;
         }
     }
-    template <int Si1, int Sj1, int Si2, int Sj2> 
+    template <int A1, int A2>
     static void BlasMultMM(
         std::complex<float> alpha,
-        const ConstMatrixView<float,Si1,Sj1>& A,
-        const ConstMatrixView<float,Si2,Sj2>& B,
-        float beta, MatrixView<std::complex<float>,1> C)
+        const ConstMatrixView<float,A1>& A,
+        const ConstMatrixView<float,A2>& B,
+        float beta, MatrixView<std::complex<float>,ColMajor> C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -432,7 +432,7 @@ namespace tmv {
         else C += alpha*Cx;
     }
 #endif
-#endif // INST_FLOAT
+#endif // INST_DOUBLE
 
 
 } // namespace tmv

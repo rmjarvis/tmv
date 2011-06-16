@@ -39,7 +39,6 @@
 
 namespace tmv {
 
-#if 1
     template <int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     static TMV_INLINE void AddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix<M1>& m1,
@@ -58,7 +57,6 @@ namespace tmv {
         const Scaling<ix2,T2>& x2, const BaseMatrix<M2>& m2,
         BaseMatrix_Mutable<M3>& m3)
     { AliasAddMM(x1,m1.calc(),x2,m2.calc(),m3.mat()); }
-#endif
 
     //
     // Matrix + Matrix
@@ -390,7 +388,7 @@ namespace tmv {
 
     // TMV_Text
 
-#ifdef TMV_DEBUG
+#ifdef TMV_TEXT
     template <int ix1, class T1, class M1, int ix2, class T2, class M2>
     static inline std::string TMV_Text(const SumMM<ix1,T1,M1,ix2,T2,M2>& smm)
     {

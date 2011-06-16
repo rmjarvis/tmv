@@ -34,6 +34,7 @@
 #include "tmv/TMV_LUD.h"
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_TriMatrix.h"
+#include "tmv/TMV_SmallTriMatrix.h"
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_SmallVector.h"
 #include "tmv/TMV_Norm.h"
@@ -52,12 +53,19 @@
 #include "tmv/TMV_ConjugateV.h"
 #include "tmv/TMV_Det.h"
 #include "tmv/TMV_ScaleM.h"
+#include "tmv/TMV_MultMM.h"
+#include "tmv/TMV_MultMM_Block.h"
+#include "tmv/TMV_MultMM_Winograd.h"
+#include "tmv/TMV_MultMM_OpenMP.h"
+#include "tmv/TMV_PermuteM.h"
+#include "tmv/TMV_TransposeM.h"
+#include "tmv/TMV_CopyU.h"
 
 namespace tmv {
 
 
-    template <class T> template <class M2>
-    InstLUD<T>::InstLUD(const BaseMatrix<M2>& A, bool _inplace) : 
+    template <class T> template <int C>
+    InstLUD<T>::InstLUD(const ConstMatrixView<T,C>& A, bool _inplace) : 
         base(A,_inplace) {}
     template <class T> 
     InstLUD<T>::InstLUD(const InstLUD<T>& rhs) : base(rhs) {}

@@ -3,10 +3,9 @@
 #include "TMV_Test_1.h"
 #include "TMV.h"
 
-#define NO_COMPLEX_ARITH
-#define NODIV
+#define NO_COMPLEX_ARITH // FIXME: Not sure if this can be made to work.
 #define NOASSIGN
-#define NOSV // Until Norm2 functions are written...
+#define NOSV // FIXME: Until Norm2 functions are written...
 
 #include "TMV_TestMatrixArith.h"
 #include <fstream>

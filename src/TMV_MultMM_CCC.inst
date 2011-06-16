@@ -30,7 +30,7 @@ Def1(CT,Conj,CT,Conj,CT)
   template void DoInstMultMM<false>(const T3 x, \
       const ConstMatrixView<T1,C1|ColMajor>& m1, \
       const ConstMatrixView<T2,C2|ColMajor>& m2, \
-      MatrixView<T3|ColMajor> m3); \
+      MatrixView<T3,ColMajor> m3); \
 
 
 Def2(T,NonConj,T,NonConj,T)

@@ -184,14 +184,14 @@
 #define TMV_INLINE inline
 #endif
 #ifdef TMV_DEBUG
-#define TMV_INLINE_ND TMV_INLINE
+#define TMV_INLINE_ND inline
 #else
-#define TMV_INLINE_ND 
+#define TMV_INLINE_ND TMV_INLINE
 #endif
 
 namespace tmv {
 
-    static TMV_INLINE std::string TMV_Version() { return "0.70"; }
+    TMV_INLINE std::string TMV_Version() { return "0.70"; }
 #define TMV_MAJOR_VERSION 0
 #define TMV_MINOR_VERSION 70
 #define TMV_VERSION_AT_LEAST(major,minor) \
@@ -268,7 +268,10 @@ namespace tmv {
 #endif
     template <bool iszero>
     struct NonZeroMessage
-    { static TMV_INLINE void call() { DoNonZeroMessage<iszero>::template call<int>(); } };
+    { 
+        static TMV_INLINE void call() 
+        { DoNonZeroMessage<iszero>::template call<int>(); } 
+    };
 
 
     template <int A>
@@ -339,33 +342,33 @@ namespace tmv {
     const int UNKNOWN = (1<<(sizeof(int)*8-1));
 
     enum DivType {
-        XX=1, LU=2, CH=4, QR=8, QRP=16, SV=32,
+        XX=0, LU=1, CH=2, QR=4, QRP=8, SV=16,
         // We store the divtype in a binary field integer.
         // In addition to the above, we also use the same object to 
         // store the following other flags related to division.
         // So these values must not clash with the above DivType values.
         // These aren't technically DivType's but since they are 
         // stored together, I think this adds to type-safety.
-        DivInPlaceFlag = 64,
-        SaveDivFlag = 128,
+        DivInPlaceFlag = 32,
+        SaveDivFlag = 64,
         // And finally shorthand for "one of the real DivType's":
-        DivTypeFlags = 62
+        DivTypeFlags = 31
     };
-    static TMV_INLINE DivType operator|(DivType a, DivType b) 
+    TMV_INLINE DivType operator|(DivType a, DivType b) 
     { 
         return static_cast<DivType>(
             static_cast<int>(a) | static_cast<int>(b)); 
     }
-    static TMV_INLINE DivType operator&(DivType a, DivType b) 
+    TMV_INLINE DivType operator&(DivType a, DivType b) 
     { 
         return static_cast<DivType>(
             static_cast<int>(a) & static_cast<int>(b)); 
     }
-    static TMV_INLINE DivType& operator|=(DivType& a, DivType b) 
+    TMV_INLINE DivType& operator|=(DivType& a, DivType b) 
     { a = (a|b); return a; }
-    static TMV_INLINE DivType& operator&=(DivType& a, DivType b) 
+    TMV_INLINE DivType& operator&=(DivType& a, DivType b) 
     { a = (a&b); return a; }
-    static TMV_INLINE DivType operator~(DivType a) 
+    TMV_INLINE DivType operator~(DivType a) 
     { return static_cast<DivType>(~static_cast<int>(a)); }
 
     // This is a type to use when there is no valid return type for a 
@@ -443,6 +446,9 @@ namespace tmv {
         static TMV_INLINE const T& convert(const T& x) { return x; }
         template <class T2>
         static TMV_INLINE T convert(const T2& x) { return T(x); }
+
+        static TMV_INLINE T constr_value() { return T(888); }
+        static TMV_INLINE T destr_value() { return T(999); }
     };
 
     template <class T>
@@ -459,13 +465,11 @@ namespace tmv {
         typedef std::complex<T> complex_type;
         typedef std::complex<typename Traits<T>::float_type> float_type;
 
-        typedef ConjRef<std::complex<T> >& conj_reference;
+        typedef ConjRef<type>& conj_reference;
 
-        static TMV_INLINE const std::complex<T>& convert(const std::complex<T>& x) 
-        { return x; }
+        static TMV_INLINE const type& convert(const type& x) { return x; }
         template <class T2>
-        static TMV_INLINE std::complex<T> convert(const T2& x) 
-        { return std::complex<T>(x); }
+        static TMV_INLINE type convert(const T2& x) { return type(x); }
         // This last one is the real reason to have a convert function.
         // Because std::complex doesn't have a constructor from a 
         // std::complex of a different base type.
@@ -473,6 +477,9 @@ namespace tmv {
         template <class T2>
         static TMV_INLINE std::complex<T> convert(const std::complex<T2>& x) 
         { return std::complex<T>(x.real(),x.imag()); }
+
+        static TMV_INLINE type constr_value() { return type(888,888); }
+        static TMV_INLINE type destr_value() { return type(999,999); }
     };
 
     template <class T> struct Traits<T&> : public Traits<T> {};
@@ -600,7 +607,7 @@ namespace tmv {
         { return std::conj(x); } 
     };
     template <bool C, class T>
-    static TMV_INLINE T DoConj(const T& x) { return DoConj_Helper<C,T>::apply(x); }
+    TMV_INLINE T DoConj(const T& x) { return DoConj_Helper<C,T>::apply(x); }
 
     template <int S>
     struct IntTraits
@@ -638,7 +645,7 @@ namespace tmv {
                 S > 16 ? ((((S-1)>>5)+1)<<4) :
                 (S>>1)  )
         };
-        static int text() { return S; }
+        static inline int text() { return S; }
     };
     template <>
     struct IntTraits<UNKNOWN>
@@ -652,7 +659,7 @@ namespace tmv {
         enum { ispowerof2 = false };
         enum { log = UNKNOWN };
         enum { half_roundup = UNKNOWN };
-        static const char* text() { return "UNKNOWN"; }
+        static inline const char* text() { return "UNKNOWN"; }
     };
 
     template <int S1, int S2, bool safe>
@@ -711,51 +718,51 @@ namespace tmv {
     };
 
     template <class T>
-    static inline T TMV_SQR(const T& x) 
+    inline T TMV_SQR(const T& x) 
     { return x*x; }
 
     template <class T>
-    static inline typename Traits<T>::float_type TMV_SQRT(const T& x) 
+    inline typename Traits<T>::float_type TMV_SQRT(const T& x) 
     { return std::sqrt(typename Traits<T>::float_type(x)); }
 
     template <class T>
-    static inline typename Traits<T>::float_type TMV_EXP(const T& x) 
+    inline typename Traits<T>::float_type TMV_EXP(const T& x) 
     { return std::exp(typename Traits<T>::float_type(x)); }
 
     template <class T>
-    static inline typename Traits<T>::float_type TMV_LOG(const T& x) 
+    inline typename Traits<T>::float_type TMV_LOG(const T& x) 
     { return std::log(typename Traits<T>::float_type(x)); }
 
     template <class T>
-    static inline T TMV_NORM(const T& x) 
+    inline T TMV_NORM(const T& x) 
     { return x*x; }
 
     template <class T>
-    static TMV_INLINE T TMV_NORM(const std::complex<T>& x) 
+    TMV_INLINE T TMV_NORM(const std::complex<T>& x) 
     { return std::norm(x); }
 
     template <class T>
-    static TMV_INLINE T TMV_CONJ(const T& x)
+    TMV_INLINE T TMV_CONJ(const T& x)
     { return x; }
 
     template <class T>
-    static TMV_INLINE std::complex<T> TMV_CONJ(const std::complex<T>& x)
+    TMV_INLINE std::complex<T> TMV_CONJ(const std::complex<T>& x)
     { return std::conj(x); }
 
     template <class T>
-    static TMV_INLINE T TMV_REAL(const T& x)
+    TMV_INLINE T TMV_REAL(const T& x)
     { return x; }
 
     template <class T>
-    static TMV_INLINE T TMV_REAL(const std::complex<T>& x)
+    TMV_INLINE T TMV_REAL(const std::complex<T>& x)
     { return x.real(); }
 
     template <class T>
-    static TMV_INLINE T TMV_IMAG(const T& )
+    TMV_INLINE T TMV_IMAG(const T& )
     { return T(0); }
 
     template <class T>
-    static TMV_INLINE T TMV_IMAG(const std::complex<T>& x)
+    TMV_INLINE T TMV_IMAG(const std::complex<T>& x)
     { return x.imag(); }
 
     // Many implemenations of complex allow x.real() and x.imag() to return 
@@ -764,34 +771,34 @@ namespace tmv {
     // value, not reference.  So we need to use a reinterpret_cast to 
     // really make sure we get the right thing.
     template <class T>
-    static TMV_INLINE T& TMV_REAL_PART(std::complex<T>& x)
+    TMV_INLINE T& TMV_REAL_PART(std::complex<T>& x)
     { return reinterpret_cast<T&>(x); }
 
     template <class T>
-    static TMV_INLINE T& TMV_REAL_PART(T& x)
+    TMV_INLINE T& TMV_REAL_PART(T& x)
     { return x; }
 
     template <class T>
-    static TMV_INLINE T& TMV_IMAG_PART(std::complex<T>& x)
+    TMV_INLINE T& TMV_IMAG_PART(std::complex<T>& x)
     { return *(reinterpret_cast<T*>(&x)+1); }
 
     template <class T>
-    static inline T TMV_ARG(const T& x)
+    inline T TMV_ARG(const T& x)
     { return x >= T(0) ? T(1) : T(-1); }
 
     template <class T>
-    static inline typename Traits<T>::float_type TMV_ARG(const std::complex<T>& x)
+    inline typename Traits<T>::float_type TMV_ARG(const std::complex<T>& x)
     {
         typedef typename Traits<T>::float_type FT;
         return arg(Traits<std::complex<FT> >::convert(x)); 
     }
 
     template <class T>
-    static TMV_INLINE T TMV_ABS(const T& x)
+    TMV_INLINE T TMV_ABS(const T& x)
     { return std::abs(x); }
 
     template <class T>
-    static inline typename Traits<T>::float_type TMV_ABS(const std::complex<T>& x)
+    static typename Traits<T>::float_type TMV_ABS(const std::complex<T>& x)
     {
         typedef typename Traits<T>::float_type FT;
         // This is the same as the usual std::abs algorithm.
@@ -808,36 +815,36 @@ namespace tmv {
     }
 
     template <class T>
-    static TMV_INLINE T TMV_ABS2(const T& x)
+    TMV_INLINE T TMV_ABS2(const T& x)
     { return std::abs(x); }
 
     template <class T>
-    static inline T TMV_ABS2(const std::complex<T>& x)
+    inline T TMV_ABS2(const std::complex<T>& x)
     { return std::abs(x.real()) + std::abs(x.imag()); }
 
     template <class T>
-    static inline T TMV_SIGN(const T& x, const T& )
+    inline T TMV_SIGN(const T& x, const T& )
     { return x > 0 ? T(1) : T(-1); }
 
     template <class T>
-    static inline std::complex<T> TMV_SIGN(const std::complex<T>& x, const T& absx)
+    inline std::complex<T> TMV_SIGN(const std::complex<T>& x, const T& absx)
     { return absx > 0 ? x/absx : std::complex<T>(1); }
 
     template <class T>
-    static inline T TMV_MIN(const T& x, const T& y)
+    inline T TMV_MIN(const T& x, const T& y)
     { return x > y ? y : x; }
 
     template <class T>
-    static inline T TMV_MAX(const T& x, const T& y)
+    inline T TMV_MAX(const T& x, const T& y)
     { return x > y ? x : y; }
 
     template <class T>
-    static inline void TMV_SWAP(T& x, T& y)
+    inline void TMV_SWAP(T& x, T& y)
     { T z = x; x = y; y = z; }
 
   // Useful for debugging SSE routines:
 #ifdef __SSE__
-    static inline std::ostream& operator<<(std::ostream& os, const __m128& xf)
+    inline std::ostream& operator<<(std::ostream& os, const __m128& xf)
     {
         os << &xf<<": ";
         float ff[4];
@@ -848,7 +855,7 @@ namespace tmv {
 #endif
 
 #ifdef __SSE2__
-    static inline std::ostream& operator<<(std::ostream& os, const __m128d& xd)
+    inline std::ostream& operator<<(std::ostream& os, const __m128d& xd)
     {
         os << &xd<<": ";
         double dd[2];
@@ -939,14 +946,14 @@ namespace tmv {
     {
         // complex * complex
         template <class T1, class T2>
-        static typename Traits2<T1,T2>::type rprod(
+        static inline typename Traits2<T1,T2>::type rprod(
             const std::complex<T1>& x, const std::complex<T2>& y)
         {
             return ZProd2<conj1,conj2>::rprod(
                 x.real(),x.imag(),y.real(),y.imag()); 
         }
         template <class T1, class T2>
-        static typename Traits2<T1,T2>::type iprod(
+        static inline typename Traits2<T1,T2>::type iprod(
             const std::complex<T1>& x, const std::complex<T2>& y)
         {
             return ZProd2<conj1,conj2>::iprod(
@@ -955,85 +962,85 @@ namespace tmv {
 
         // real * complex
         template <class T1, class T2>
-        static typename Traits2<T1,T2>::type rprod(
+        static inline typename Traits2<T1,T2>::type rprod(
             const T1& x, const std::complex<T2>& y)
         { return x*y.real(); }
         template <class T1, class T2>
-        static typename Traits2<T1,T2>::type iprod(
+        static inline typename Traits2<T1,T2>::type iprod(
             const T1& x, const std::complex<T2>& y)
         { return Maybe<conj2>::neg(x*y.imag()); }
 
         // complex * real
         template <class T1, class T2>
-        static typename Traits2<T1,T2>::type rprod(
+        static inline typename Traits2<T1,T2>::type rprod(
             const std::complex<T1>& x, const T2& y)
         { return y*x.real(); }
         template <class T1, class T2>
-        static typename Traits2<T1,T2>::type iprod(
+        static inline typename Traits2<T1,T2>::type iprod(
             const std::complex<T1>& x, const T2& y)
         { return Maybe<conj1>::neg(y*x.imag()); }
 
         // real * real
         template <class T1, class T2>
-        static typename Traits2<T1,T2>::type rprod(
+        static inline typename Traits2<T1,T2>::type rprod(
             const T1& x, const T2& y)
         { return x*y; }
         template <class T1, class T2>
-        static typename Traits2<T1,T2>::type iprod(
+        static inline typename Traits2<T1,T2>::type iprod(
             const T1& x, const T2& y)
         { return typename Traits2<T1,T2>::type(0); }
 
         // scaling * real
         template <class T1, class T2>
-        static typename Traits2<typename Traits<T1>::real_type,T2>::type rprod(
+        static inline typename Traits2<typename Traits<T1>::real_type,T2>::type rprod(
             const Scaling<0,T1>& x, const T2& y)
         { return rprod(x.x,y); }
         template <class T1, class T2>
-        static typename Traits2<typename Traits<T1>::real_type,T2>::type iprod(
+        static inline typename Traits2<typename Traits<T1>::real_type,T2>::type iprod(
             const Scaling<0,T1>& x, const T2& y)
         { return iprod(x.x,y); }
         template <class T1, class T2>
-        static T2 rprod(const Scaling<1,T1>& x, const T2& y)
+        static inline T2 rprod(const Scaling<1,T1>& x, const T2& y)
         { return y; }
         template <class T1, class T2>
-        static T2 iprod(const Scaling<1,T1>& x, const T2& y)
+        static inline T2 iprod(const Scaling<1,T1>& x, const T2& y)
         { return T2(0); }
         template <class T1, class T2>
-        static T2 rprod(const Scaling<-1,T1>& x, const T2& y)
+        static inline T2 rprod(const Scaling<-1,T1>& x, const T2& y)
         { return -y; }
         template <class T1, class T2>
-        static T2 iprod(const Scaling<-1,T1>& x, const T2& y)
+        static inline T2 iprod(const Scaling<-1,T1>& x, const T2& y)
         { return T2(0); }
 
         // scaling * complex
         template <class T1, class T2>
-        static typename Traits2<typename Traits<T1>::real_type,T2>::type rprod(
+        static inline typename Traits2<typename Traits<T1>::real_type,T2>::type rprod(
             const Scaling<0,T1>& x, const std::complex<T2>& y)
         { return rprod(x.x,y); }
         template <class T1, class T2>
-        static typename Traits2<typename Traits<T1>::real_type,T2>::type iprod(
+        static inline typename Traits2<typename Traits<T1>::real_type,T2>::type iprod(
             const Scaling<0,T1>& x, const std::complex<T2>& y)
         { return iprod(x.x,y); }
         template <class T1, class T2>
-        static typename Traits2<T1,T2>::type rprod(
+        static inline typename Traits2<T1,T2>::type rprod(
             const Scaling<1,T1>& x, const std::complex<T2>& y)
         { return y.real(); }
         template <class T1, class T2>
-        static typename Traits2<T1,T2>::type iprod(
+        static inline typename Traits2<T1,T2>::type iprod(
             const Scaling<1,T1>& x, const std::complex<T2>& y)
         { return Maybe<conj2>::neg(y.imag()); }
         template <class T1, class T2>
-        static typename Traits2<T1,T2>::type rprod(
+        static inline typename Traits2<T1,T2>::type rprod(
             const Scaling<-1,T1>& x, const std::complex<T2>& y)
         { return -y.real(); }
         template <class T1, class T2>
-        static typename Traits2<T1,T2>::type iprod(
+        static inline typename Traits2<T1,T2>::type iprod(
             const Scaling<-1,T1>& x, const std::complex<T2>& y)
         { return Maybe<!conj2>::neg(y.imag()); }
 
         // full prod
         template <class T1, class T2>
-        static typename Traits2<T1,T2>::type prod(
+        static inline typename Traits2<T1,T2>::type prod(
             const T1& x, const T2& y)
         {
             typedef typename Traits2<T1,T2>::type PT;
@@ -1041,27 +1048,39 @@ namespace tmv {
             return makeprod<iscomplex,T1,T2>::call(x,y);
         }
         template <class T1, class T2>
-        static typename Traits2<T1,T2>::type prod(
+        static inline typename Traits2<T1,T2>::type prod(
             const Scaling<1,T1>& x, const T2& y)
-        { return Maybe<conj2>::conj(y); }
+        { 
+            return tmv::Traits<typename Traits2<T1,T2>::type>::convert(
+                Maybe<conj2>::conj(y)); 
+        }
         template <int ix, class T1, class T2>
-        static typename Traits2<T1,T2>::type prod(
+        static inline typename Traits2<T1,T2>::type prod(
             const T1& x, const Scaling<1,T2>& y)
-        { return Maybe<conj1>::conj(x); }
+        { 
+            return tmv::Traits<typename Traits2<T1,T2>::type>::convert(
+                Maybe<conj1>::conj(x)); 
+        }
         template <class T1, class T2>
-        static typename Traits2<T1,T2>::type prod(
+        static inline typename Traits2<T1,T2>::type prod(
             const Scaling<-1,T1>& x, const T2& y)
-        { return -Maybe<conj2>::conj(y); }
+        { 
+            return tmv::Traits<typename Traits2<T1,T2>::type>::convert(
+                -Maybe<conj2>::conj(y)); 
+        }
         template <int ix, class T1, class T2>
-        static typename Traits2<T1,T2>::type prod(
+        static inline typename Traits2<T1,T2>::type prod(
             const T1& x, const Scaling<-1,T2>& y)
-        { return -Maybe<conj1>::conj(x); }
+        { 
+            return tmv::Traits<typename Traits2<T1,T2>::type>::convert(
+                -Maybe<conj1>::conj(x)); 
+        }
         template <class T1, class T2>
-        static typename Traits2<T1,T2>::type prod(
+        static inline typename Traits2<T1,T2>::type prod(
             const Scaling<0,T1>& x, const T2& y)
         { return prod(x.x , y); }
         template <class T1, class T2>
-        static typename Traits2<T1,T2>::type prod(
+        static inline typename Traits2<T1,T2>::type prod(
             const T1& x, const Scaling<0,T2>& y)
         { return prod(x , y.x); }
 
@@ -1071,35 +1090,35 @@ namespace tmv {
         struct makeprod<true,T1,T2>
         {
             typedef typename Traits2<T1,T2>::type PT;
-            static PT call(const T1& x, const T2& y)
+            static inline PT call(const T1& x, const T2& y)
             { return PT(rprod(x,y),iprod(x,y)); }
         };
         template <class T1, class T2>
         struct makeprod<false,T1,T2>
         {
             typedef typename Traits2<T1,T2>::type PT;
-            static PT call(const T1& x, const T2& y)
+            static inline PT call(const T1& x, const T2& y)
             { return x*y; }
         };
 
         // quot
         template <class T1, class T2>
-        static typename Traits2<T1,T2>::type quot(
+        static inline typename Traits2<T1,T2>::type quot(
             const T1& x, const T2& y)
         {
             const bool c2 = Traits<T2>::iscomplex;
             return makequot<c2,T1,T2>::call(x,y);
         }
         template <int ix, class T1, class T2>
-        static typename Traits2<T1,T2>::type quot(
+        static inline typename Traits2<T1,T2>::type quot(
             const Scaling<ix,T1>& x, const T2& y)
         { return quot(T1(x),y); }
         template <int ix, class T1, class T2>
-        static typename Traits2<T1,T2>::type quot(
+        static inline typename Traits2<T1,T2>::type quot(
             const T1& x, const Scaling<ix,T2>& y)
         { return prod(x,y); }
         template <class T1, class T2>
-        static typename Traits2<T1,T2>::type quot(
+        static inline typename Traits2<T1,T2>::type quot(
             const T1& x, const Scaling<0,T2>& y)
         { return quot(x , y.x); }
 
@@ -1110,14 +1129,14 @@ namespace tmv {
         {
             typedef typename Traits2<T1,T2>::type PT;
             typedef typename Traits<PT>::real_type RT;
-            static PT call(const T1& x, const T2& y)
+            static inline PT call(const T1& x, const T2& y)
             { return ZProd<conj1,!conj2>::prod(x,y) / std::norm(y); }
         };
         template <class T1, class T2>
         struct makequot<false,T1,T2>
         {
             typedef typename Traits2<T1,T2>::type PT;
-            static PT call(const T1& x, const T2& y)
+            static inline PT call(const T1& x, const T2& y)
             { return Maybe<conj1>::conj(x/y); }
         };
 
@@ -1134,7 +1153,7 @@ namespace tmv {
             const std::complex<T>& x, const std::complex<T>& y)
         { return x + y; }
         template <class T1, class T2>
-        static std::complex<typename Traits2<T1,T2>::type> sum(
+        static inline std::complex<typename Traits2<T1,T2>::type> sum(
             const std::complex<T1>& x, const std::complex<T2>& y)
         {
             typedef typename Traits2<T1,T2>::type T12;
@@ -1146,7 +1165,7 @@ namespace tmv {
         static TMV_INLINE std::complex<T> sum(const T& x, const std::complex<T>& y)
         { return x + y; }
         template <class T1, class T2>
-        static std::complex<typename Traits2<T1,T2>::type> sum(
+        static inline std::complex<typename Traits2<T1,T2>::type> sum(
             const T1& x, const std::complex<T2>& y)
         {
             typedef typename Traits2<T1,T2>::type T12;
@@ -1158,7 +1177,7 @@ namespace tmv {
         static TMV_INLINE std::complex<T> sum(const std::complex<T>& x, const T& y)
         { return x + y; }
         template <class T1, class T2>
-        static std::complex<typename Traits2<T1,T2>::type> sum(
+        static inline std::complex<typename Traits2<T1,T2>::type> sum(
             const std::complex<T1>& x, const T2& y)
         {
             typedef typename Traits2<T1,T2>::type T12;
@@ -1170,7 +1189,8 @@ namespace tmv {
         static TMV_INLINE T sum(const T& x, const T& y)
         { return x + y; }
         template <class T1, class T2>
-        static typename Traits2<T1,T2>::type sum(const T1& x, const T2& y)
+        static inline typename Traits2<T1,T2>::type sum(
+            const T1& x, const T2& y)
         { return x + y; }
     };
 
@@ -1316,15 +1336,19 @@ namespace tmv {
 
         // m.ref(i,i) = x or nothing
         template <class M, class T>
-        static TMV_INLINE void setdiag(M& m, int i, const T& x) { m.ref(i,i) = x; }
+        static TMV_INLINE void setdiag(M& m, int i, const T& x) 
+        { m.ref(i,i) = x; }
         template <class M, class T>
-        static TMV_INLINE void setdiag2(M m, int i, const T& x) { m.ref(i,i) = x; }
+        static TMV_INLINE void setdiag2(M m, int i, const T& x) 
+        { m.ref(i,i) = x; }
 
         // m.diag() = x or nothing
         template <class M, class T>
-        static TMV_INLINE void setdiag(M& m, const T& x) { m.diag().setAllTo(x); }
+        static TMV_INLINE void setdiag(M& m, const T& x) 
+        { m.diag().setAllTo(x); }
         template <class M, class T>
-        static TMV_INLINE void setdiag2(M m, const T& x) { m.diag().setAllTo(x); }
+        static TMV_INLINE void setdiag2(M m, const T& x) 
+        { m.diag().setAllTo(x); }
 
         // m.setZero() or nothing
         template <class M>
@@ -1356,7 +1380,8 @@ namespace tmv {
 
         // m.transpose() or m.view()
         template <class M>
-        static TMV_INLINE typename M::const_transpose_type transposeview(const M& m) 
+        static TMV_INLINE typename M::const_transpose_type transposeview(
+            const M& m) 
         { return m.transpose(); }
         template <class M>
         static TMV_INLINE typename M::transpose_type transposeview(M& m) 
@@ -1437,10 +1462,12 @@ namespace tmv {
             const M& m, int dt) 
         { return m.upperTri(dt); }
         template <class M>
-        static TMV_INLINE typename M::unknown_uppertri_type uppertri(M& m, DiagType dt) 
+        static TMV_INLINE typename M::unknown_uppertri_type uppertri(
+            M& m, DiagType dt) 
         { return m.upperTri(dt); }
         template <class M>
-        static TMV_INLINE typename M::unknown_uppertri_type uppertri2(M m, DiagType dt) 
+        static TMV_INLINE typename M::unknown_uppertri_type uppertri2(
+            M m, DiagType dt) 
         { return m.upperTri(dt); }
 
 #ifdef __SSE__
@@ -1533,14 +1560,18 @@ namespace tmv {
             __m128d& m, const std::complex<double>* x)
         { m = _mm_loadu_pd((const double*) x); }
 
-        static TMV_INLINE void sse_store(std::complex<double>* x, const __m128d& m)
+        static TMV_INLINE void sse_store(
+            std::complex<double>* x, const __m128d& m)
         { _mm_store_pd((double*) x,m); }
-        static TMV_INLINE void sse_storeu(std::complex<double>* x, const __m128d& m)
+        static TMV_INLINE void sse_storeu(
+            std::complex<double>* x, const __m128d& m)
         { _mm_storeu_pd((double*) x,m); }
 
-        static TMV_INLINE void sse_add(std::complex<double>* x, const __m128d& m)
+        static TMV_INLINE void sse_add(
+            std::complex<double>* x, const __m128d& m)
         { _mm_store_pd((double*)x,_mm_add_pd(_mm_load_pd((double*)x),m)); }
-        static TMV_INLINE void sse_addu(std::complex<double>* x, const __m128d& m)
+        static TMV_INLINE void sse_addu(
+            std::complex<double>* x, const __m128d& m)
         { _mm_storeu_pd((double*)x,_mm_add_pd(_mm_loadu_pd((double*)x),m)); }
 
         static TMV_INLINE void sse_mult(const __m128d& x, __m128d& A)
@@ -1557,9 +1588,11 @@ namespace tmv {
         struct ProdType { typedef T2 type; };
 
         template <class T1, class T2>
-        static TMV_INLINE const T2& select(const T1& /*x*/, const T2& y) { return y; }
+        static TMV_INLINE const T2& select(const T1& /*x*/, const T2& y) 
+        { return y; }
         template <class T1, class T2>
-        static TMV_INLINE const T2& select_ref(T1& /*x*/, const T2& y) { return y; }
+        static TMV_INLINE const T2& select_ref(T1& /*x*/, const T2& y) 
+        { return y; }
 
         template <class T>
         static TMV_INLINE T abs(const T& x) { return x; }
@@ -1626,7 +1659,8 @@ namespace tmv {
         { return y; }
 
         template <class T1, class T2>
-        static TMV_INLINE T2 invprod(const T1& /*x*/, const T2& y)  { return y; }
+        static TMV_INLINE T2 invprod(const T1& /*x*/, const T2& y)  
+        { return y; }
 
         template <class T1, int ix2, class T2>
         static TMV_INLINE Scaling<ix2,T2> invprod(
@@ -1704,9 +1738,11 @@ namespace tmv {
         static TMV_INLINE void zero_offdiag2(M /*m*/) { }
 
         template <class M>
-        static TMV_INLINE typename M::view_type offdiag(M& m) { return m.view(); }
+        static TMV_INLINE typename M::view_type offdiag(M& m) 
+        { return m.view(); }
         template <class M>
-        static TMV_INLINE typename M::view_type offdiag2(M m) { return m.view(); }
+        static TMV_INLINE typename M::view_type offdiag2(M m) 
+        { return m.view(); }
 
         template <class M>
         static TMV_INLINE const M& unitview(const M& m) 
@@ -1716,7 +1752,8 @@ namespace tmv {
         { return m; }
 
         template <class M>
-        static TMV_INLINE typename M::const_uppertri_type unit_uppertri(const M& m) 
+        static TMV_INLINE typename M::const_uppertri_type unit_uppertri(
+            const M& m) 
         { return m.upperTri(); }
         template <class M>
         static TMV_INLINE typename M::uppertri_type unit_uppertri(M& m) 
@@ -1726,7 +1763,8 @@ namespace tmv {
         { return m.upperTri(); }
 
         template <class M>
-        static TMV_INLINE typename M::const_lowertri_type unit_lowertri(const M& m) 
+        static TMV_INLINE typename M::const_lowertri_type unit_lowertri(
+            const M& m) 
         { return m.lowerTri(); }
         template <class M>
         static TMV_INLINE typename M::lowertri_type unit_lowertri(M& m) 
@@ -1749,10 +1787,12 @@ namespace tmv {
             const M& m, int dt) 
         { return m.lowerTri(dt); }
         template <class M>
-        static TMV_INLINE typename M::unknown_lowertri_type uppertri(M& m, DiagType dt) 
+        static TMV_INLINE typename M::unknown_lowertri_type uppertri(
+            M& m, DiagType dt) 
         { return m.lowerTri(dt); }
         template <class M>
-        static TMV_INLINE typename M::unknown_lowertri_type uppertri2(M m, DiagType dt) 
+        static TMV_INLINE typename M::unknown_lowertri_type uppertri2(
+            M m, DiagType dt) 
         { return m.lowerTri(dt); }
 
 #ifdef __SSE__
@@ -1848,23 +1888,27 @@ namespace tmv {
             __m128d& m, const double* x1, const double* x2)
         { m = _mm_set_pd(*x2,*x1); }
 
-        static TMV_INLINE void sse_store(double* x1, double* x2, const __m128d& m)
+        static TMV_INLINE void sse_store(
+            double* x1, double* x2, const __m128d& m)
         {
             const double* md= (const double*)(&m);
             *x1 = md[0]; *x2 = md[1];
         }
-        static TMV_INLINE void sse_storeu(double* x1, double* x2, const __m128d& m)
+        static TMV_INLINE void sse_storeu(
+            double* x1, double* x2, const __m128d& m)
         {
             const double* mf= (const double*)(&m);
             *x1 = mf[0]; *x2 = mf[1];
         }
 
-        static TMV_INLINE void sse_add(double* x1, double* x2, const __m128d& m)
+        static TMV_INLINE void sse_add(
+            double* x1, double* x2, const __m128d& m)
         {
             const double* md= (const double*)(&m);
             *x1 += md[0]; *x2 += md[1];
         }
-        static TMV_INLINE void sse_addu(double* x1, double* x2, const __m128d& m)
+        static TMV_INLINE void sse_addu(
+            double* x1, double* x2, const __m128d& m)
         {
             const double* mf= (const double*)(&m);
             *x1 += mf[0]; *x2 += mf[1];
@@ -1881,14 +1925,18 @@ namespace tmv {
             __m128d& m, const std::complex<double>* x)
         { m = _mm_loadu_pd((const double*)x); }
 
-        static TMV_INLINE void sse_store(std::complex<double>* x, const __m128d& m)
+        static TMV_INLINE void sse_store(
+            std::complex<double>* x, const __m128d& m)
         { _mm_store_pd((double*)x,m); }
-        static TMV_INLINE void sse_storeu(std::complex<double>* x, const __m128d& m)
+        static TMV_INLINE void sse_storeu(
+            std::complex<double>* x, const __m128d& m)
         { _mm_storeu_pd((double*)x,m); }
 
-        static TMV_INLINE void sse_add(std::complex<double>* x, const __m128d& m)
+        static TMV_INLINE void sse_add(
+            std::complex<double>* x, const __m128d& m)
         { _mm_store_pd((double*)x,_mm_add_pd(_mm_load_pd((double*)x),m)); }
-        static TMV_INLINE void sse_addu(std::complex<double>* x, const __m128d& m)
+        static TMV_INLINE void sse_addu(
+            std::complex<double>* x, const __m128d& m)
         { _mm_storeu_pd((double*)x,_mm_add_pd(_mm_loadu_pd((double*)x),m)); }
 
         static TMV_INLINE void sse_mult(const __m128d& , __m128d& ) {}
@@ -1916,20 +1964,20 @@ namespace tmv {
         // Maybe<unit>::unit_uppertri or Maybe<unit>::unit_lowertri
         template <class M>
         static TMV_INLINE typename TypeSelect<yn2,
-                        typename M::const_unit_uppertri_type,
-                        typename M::const_uppertri_type>::type uppertri(
-                            const M& m) 
+                          typename M::const_unit_uppertri_type,
+                          typename M::const_uppertri_type>::type uppertri(
+                              const M& m) 
         { return Maybe<yn2>::unit_uppertri(m); }
         template <class M>
         static TMV_INLINE typename TypeSelect<yn2,
-                        typename M::unit_uppertri_type,
-                        typename M::uppertri_type>::type uppertri(M& m) 
+                          typename M::unit_uppertri_type,
+                          typename M::uppertri_type>::type uppertri(M& m) 
         { return Maybe<yn2>::unit_uppertri(m); }
 
         template <class M>
         static TMV_INLINE typename TypeSelect<yn2,
-                        typename M::unit_uppertri_type,
-                        typename M::uppertri_type>::type uppertri2(M m) 
+                          typename M::unit_uppertri_type,
+                          typename M::uppertri_type>::type uppertri2(M m) 
         { return Maybe<yn2>::unit_uppertri(m); }
 
 #ifdef __SSE__
@@ -1980,7 +2028,7 @@ namespace tmv {
         { Maybe<yn2>::sse_addu(x,m); }
 #endif
     };
-        
+
     template <bool yn2>
     struct Maybe2<false,yn2>
     {
@@ -1992,20 +2040,21 @@ namespace tmv {
         static TMV_INLINE void add(TriRef<T1,C> , const T2& ) {}
 
         template <class M>
-        static TMV_INLINE typename TypeSelect<yn2,
-                        typename M::const_unit_lowertri_type,
-                        typename M::const_lowertri_type>::type uppertri(
-                            const M& m) 
+        static TMV_INLINE 
+        typename TypeSelect<yn2,
+                          typename M::const_unit_lowertri_type,
+                          typename M::const_lowertri_type>::type uppertri(
+                              const M& m) 
         { return Maybe<yn2>::unit_lowertri(m); }
         template <class M>
         static TMV_INLINE typename TypeSelect<yn2,
-                        typename M::unit_lowertri_type,
-                        typename M::lowertri_type>::type uppertri(M& m) 
+                          typename M::unit_lowertri_type,
+                          typename M::lowertri_type>::type uppertri(M& m) 
         { return Maybe<yn2>::unit_lowertri(m); }
         template <class M>
         static TMV_INLINE typename TypeSelect<yn2,
-                        typename M::unit_lowertri_type,
-                        typename M::lowertri_type>::type uppertri2(M m) 
+                          typename M::unit_lowertri_type,
+                          typename M::lowertri_type>::type uppertri2(M m) 
         { return Maybe<yn2>::unit_lowertri(m); }
 
 #ifdef __SSE2__
@@ -2058,7 +2107,7 @@ namespace tmv {
     typename TypeSelect<Traits2<T1,T2>::sametype,const T1&,T2>::type
 #define TMV_MAYBE_REF(T1,T2) \
     typename TypeSelect<Traits2<T1,T2>::sametype,T1&,T2>::type
-       
+
 #ifndef TMV_NO_THROW
     class Error : 
         public std::runtime_error
@@ -2165,7 +2214,7 @@ namespace tmv {
     };
 #endif
 
-    static TMV_INLINE void ThrowSingular(std::string s)
+    inline void ThrowSingular(std::string s)
     {
 #ifdef TMV_NO_THROW
         std::cerr<<"Encountered singular "<<s<<std::endl;
@@ -2175,7 +2224,7 @@ namespace tmv {
 #endif
     }
 
-    static TMV_INLINE void ThrowNonPosDef(std::string s)
+    inline void ThrowNonPosDef(std::string s)
     {
 #ifdef TMV_NO_THROW
         std::cerr<<"Encountered invalid non-positive-definite matrix in "<<
@@ -2191,22 +2240,22 @@ namespace tmv {
     // defined in TMV_Vector.cpp
     // initialized with &std::cout;
     extern std::ostream* warn_out;
-    static inline void TMV_Warning(std::string s)
+    inline void TMV_Warning(std::string s)
     {
         if (warn_out) {
             *warn_out << "Warning:\n" << s << std::endl;
         }
     }
 
-    static inline std::ostream* WriteWarningsTo(std::ostream* newos)
+    inline std::ostream* WriteWarningsTo(std::ostream* newos)
     { std::ostream* temp = warn_out; warn_out = newos; return temp; }
 
-    static inline void NoWarnings()
+    inline void NoWarnings()
     { warn_out = 0; }
 #else
-    static TMV_INLINE void TMV_Warning(std::string ) {}
-    static TMV_INLINE std::ostream* WriteWarningsTo(std::ostream* os) { return 0; }
-    static TMV_INLINE void NoWarnings() {}
+    TMV_INLINE void TMV_Warning(std::string ) {}
+    TMV_INLINE std::ostream* WriteWarningsTo(std::ostream* os) { return 0; }
+    TMV_INLINE void NoWarnings() {}
 #endif
 
     // A helper structure that acts like an int,
@@ -2253,21 +2302,25 @@ namespace tmv {
     };
 
     template <class T>
-    static TMV_INLINE typename Traits<T>::real_type TMV_Epsilon() 
+    TMV_INLINE typename Traits<T>::real_type TMV_Epsilon() 
     { return std::numeric_limits<typename Traits<T>::real_type>::epsilon(); }
 
     template <class T>
-    static inline bool TMV_Underflow(T x)
+    inline bool TMV_Underflow(T x)
     {
         typedef typename Traits<T>::real_type RT;
         return TMV_ABS2(x) < 
             std::numeric_limits<RT>::min() * RT(tmv::Traits<T>::twoifcomplex); 
     }
 
-    static TMV_INLINE bool TMV_Underflow(int )
+    TMV_INLINE bool TMV_Underflow(int )
     { return false; }
 
 #ifdef TMV_DEBUG
+#define TMV_TEXT
+#endif
+
+#ifdef TMV_TEXT
     template <class T>
     static inline std::string TMV_Text(const T&)
     { return std::string("Unknown (") + typeid(T).name() + ")"; }
@@ -2336,10 +2389,6 @@ namespace tmv {
 
     static inline std::string TMV_Text(UpLoType u)
     { return u==Upper ? "Upper" : "Lower"; }
-#else
-    template <class T>
-    static inline std::string TMV_Text(const T&)
-    { return std::string(); }
 #endif
 
 #ifdef TMV_NO_STL_AUTO_PTR
@@ -2428,16 +2477,16 @@ namespace tmv {
     // I don't know if versions earlier than 6.1 had the bug, but 
     // I apply the workaround to all version before 7.
     template <class T>
-    static TMV_INLINE const T& Value(const T& x) { return x; }
+    TMV_INLINE const T& Value(const T& x) { return x; }
 #ifdef PLATFORM_COMPILER_PGI
 #if PLATFORM_COMPILER_VERSION < 0x070000
-    static TMV_INLINE double Value(long double x) { return double(x); }
-    static TMV_INLINE std::complex<double> Value(std::complex<long double> x)
+    TMV_INLINE double Value(long double x) { return double(x); }
+    TMV_INLINE std::complex<double> Value(std::complex<long double> x)
     { return tmv::Traits<std::complex<double> >::convert(x); }
 #endif
 #endif
 
- 
+
 } // namespace tmv
 
 #endif

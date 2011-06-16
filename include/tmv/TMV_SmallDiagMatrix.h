@@ -165,6 +165,8 @@ namespace tmv {
         typedef SmallDiagMatrix<T,N,A> type;
         typedef BaseMatrix_Diag_Mutable<type> base_mut;
 
+        typedef typename Traits<T>::real_type real_type;
+
         enum { _colsize = Traits<type>::_size };
         enum { _rowsize = Traits<type>::_size };
         enum { _size = Traits<type>::_size };
@@ -189,7 +191,7 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(N >= 0);
 #ifdef TMV_DEBUG
-            this->setAllTo(T(888));
+            this->diag().flatten().setAllTo(Traits<real_type>::constr_value());
 #endif
         }
 
@@ -245,7 +247,7 @@ namespace tmv {
         TMV_INLINE_ND ~SmallDiagMatrix() 
         {
 #ifdef TMV_DEBUG
-            this->setAllTo(T(999));
+            this->diag().flatten().setAllTo(Traits<real_type>::destr_value());
 #endif
         }
 
@@ -800,7 +802,7 @@ namespace tmv {
     // TMV_Text 
     //
 
-#ifdef TMV_DEBUG
+#ifdef TMV_TEXT
     template <class T, int N, int A>
     static inline std::string TMV_Text(const SmallDiagMatrix<T,N,A>& m)
     {

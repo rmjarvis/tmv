@@ -174,7 +174,7 @@ namespace tmv {
         // Constructors
         //
 
-        Permutation(size_t n) :
+        explicit Permutation(size_t n) :
             itsn(n), itsmem(n), itsp(itsmem), isinv(false), itsdet(1) 
         { for(int i=0;i<itsn;++i) itsmem[i] = i; }
 
@@ -906,7 +906,8 @@ namespace tmv {
     //
 
     template <class V>
-    V& BaseVector_Mutable<V>::sort(Permutation& P, ADType ad, CompType comp)
+    TMV_INLINE V& BaseVector_Mutable<V>::sort(
+        Permutation& P, ADType ad, CompType comp)
     {
         DoVectorSort(vec(),P,ad,comp);
         return vec();
@@ -917,7 +918,7 @@ namespace tmv {
     // TMV_Text
     //
     
-#ifdef TMV_DEBUG
+#ifdef TMV_TEXT
     static inline std::string TMV_Text(const Permutation& )
     { return "Permutation"; }
 #endif

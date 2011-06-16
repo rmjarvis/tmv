@@ -1,0 +1,12 @@
+
+#define CT std::complex<T>
+
+template class InstQRD<T>; 
+template InstQRD<T>::InstQRD(const ConstMatrixView<T,false>& A, bool _inplace);
+#ifdef TMV_INST_COMPLEX
+template class InstQRD<CT>; 
+template InstQRD<CT>::InstQRD(const ConstMatrixView<CT,false>& A, bool _inplace);
+template InstQRD<CT>::InstQRD(const ConstMatrixView<CT,true>& A, bool _inplace);
+#endif
+
+#undef CT
