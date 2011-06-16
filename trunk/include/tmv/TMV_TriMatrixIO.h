@@ -75,7 +75,7 @@ namespace tmv {
             const bool upper = m.isupper();
             const bool unit = m.isunit();
             os << (upper ? "U " : "L ");
-            os << len << std::endl;
+            os << len << '\n';
             for(int i=0;i<len;++i) {
                 os << "( ";
                 if (!upper) {
@@ -103,7 +103,7 @@ namespace tmv {
             const bool upper = m.isupper();
             const bool unit = m.isunit();
             os << (upper ? "U " : "L ");
-            os << len << std::endl;
+            os << len << '\n';
             for(int i=0;i<len;++i) {
                 os << "( ";
                 if (!upper) {
@@ -494,7 +494,7 @@ namespace tmv {
 #endif
 
     template <class M>
-    static inline std::istream& operator>>(
+    static std::istream& operator>>(
         std::istream& is, BaseMatrix_Tri_Mutable<M>& m)
     {
         typedef typename M::value_type T;
@@ -541,7 +541,7 @@ namespace tmv {
     }
 
     template <class T, int A0, int A1, int A2>
-    static inline std::istream& operator>>(
+    static std::istream& operator>>(
         std::istream& is, auto_ptr<UpperTriMatrix<T,A0,A1,A2> >& m)
     {
         typedef UpperTriMatrix<T,A0,A1,A2> M;
@@ -579,7 +579,7 @@ namespace tmv {
     }
 
     template <class T, int A0, int A1, int A2>
-    static inline std::istream& operator>>(
+    static std::istream& operator>>(
         std::istream& is, auto_ptr<LowerTriMatrix<T,A0,A1,A2> >& m)
     {
         typedef LowerTriMatrix<T,A0,A1,A2> M;

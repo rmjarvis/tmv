@@ -41,6 +41,7 @@
 #include "tmv/TMV_ProdXM.h"
 #include "tmv/TMV_ProdMV.h"
 #include "tmv/TMV_SmallVector.h"
+#include "tmv/TMV_ConjugateV.h"
 
 namespace tmv {
 
@@ -98,7 +99,7 @@ namespace tmv {
         double* xp = x.ptr();
         if (xs < 0) xp += (n-1)*xs;
         BLASNAME(dtrmv) (
-            BLASCM A.iscm()==M1::mupper?BLASCH_UP:BLASCH_LO,
+            BLASCM A.iscm()==M1::_upper?BLASCH_UP:BLASCH_LO,
             A.iscm()?BLASCH_NT:BLASCH_T, A.isunit()?BLASCH_U:BLASCH_NU,
             BLASV(n),BLASP(A.cptr()),BLASV(lda),
             BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
@@ -117,14 +118,14 @@ namespace tmv {
         if (A.iscm() && A.isconj()) {
             x.conjugateSelf();
             BLASNAME(ztrmv) (
-                BLASCM A.iscm()==M1::mupper?BLASCH_UP:BLASCH_LO,
+                BLASCM A.iscm()==M1::_upper?BLASCH_UP:BLASCH_LO,
                 A.iscm()?BLASCH_NT:BLASCH_T, A.isunit()?BLASCH_U:BLASCH_NU,
                 BLASV(n),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
             x.conjugateSelf();
         } else {
             BLASNAME(ztrmv) (
-                BLASCM A.iscm()==M1::mupper?BLASCH_UP:BLASCH_LO,
+                BLASCM A.iscm()==M1::_upper?BLASCH_UP:BLASCH_LO,
                 A.iscm()?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T, 
                 A.isunit()?BLASCH_U:BLASCH_NU,
                 BLASV(n),BLASP(A.cptr()),BLASV(lda),
@@ -143,12 +144,12 @@ namespace tmv {
         double* xp = (double*) x.ptr();
         if (xs < 0) xp += (n-1)*xs;
         BLASNAME(dtrmv) (
-            BLASCM A.iscm()==M1::mupper?BLASCH_UP:BLASCH_LO,
+            BLASCM A.iscm()==M1::_upper?BLASCH_UP:BLASCH_LO,
             A.iscm()?BLASCH_NT:BLASCH_T, A.isunit()?BLASCH_U:BLASCH_NU,
             BLASV(n),BLASP(A.cptr()),BLASV(lda),
             BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
         BLASNAME(dtrmv) (
-            BLASCM A.iscm()==M1::mupper?BLASCH_UP:BLASCH_LO,
+            BLASCM A.iscm()==M1::_upper?BLASCH_UP:BLASCH_LO,
             A.iscm()?BLASCH_NT:BLASCH_T, A.isunit()?BLASCH_U:BLASCH_NU,
             BLASV(n),BLASP(A.cptr()),BLASV(lda),
             BLASP(xp+1),BLASV(xs) BLAS1 BLAS1 BLAS1);
@@ -166,7 +167,7 @@ namespace tmv {
         float* xp = x.ptr();
         if (xs < 0) xp += (n-1)*xs;
         BLASNAME(strmv) (
-            BLASCM A.iscm()==M1::mupper?BLASCH_UP:BLASCH_LO,
+            BLASCM A.iscm()==M1::_upper?BLASCH_UP:BLASCH_LO,
             A.iscm()?BLASCH_NT:BLASCH_T, A.isunit()?BLASCH_U:BLASCH_NU,
             BLASV(n),BLASP(A.cptr()),BLASV(lda),
             BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
@@ -185,14 +186,14 @@ namespace tmv {
         if (A.iscm() && A.isconj()) {
             x.conjugateSelf();
             BLASNAME(ctrmv) (
-                BLASCM A.iscm()==M1::mupper?BLASCH_UP:BLASCH_LO,
+                BLASCM A.iscm()==M1::_upper?BLASCH_UP:BLASCH_LO,
                 A.iscm()?BLASCH_NT:BLASCH_T, A.isunit()?BLASCH_U:BLASCH_NU,
                 BLASV(n),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
             x.conjugateSelf();
         } else {
             BLASNAME(ctrmv) (
-                BLASCM A.iscm()==M1::mupper?BLASCH_UP:BLASCH_LO,
+                BLASCM A.iscm()==M1::_upper?BLASCH_UP:BLASCH_LO,
                 A.iscm()?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T, 
                 A.isunit()?BLASCH_U:BLASCH_NU,
                 BLASV(n),BLASP(A.cptr()),BLASV(lda),
@@ -211,12 +212,12 @@ namespace tmv {
         float* xp = (float*) x.ptr();
         if (xs < 0) xp += (n-1)*xs;
         BLASNAME(strmv) (
-            BLASCM A.iscm()==M1::mupper?BLASCH_UP:BLASCH_LO,
+            BLASCM A.iscm()==M1::_upper?BLASCH_UP:BLASCH_LO,
             A.iscm()?BLASCH_NT:BLASCH_T, A.isunit()?BLASCH_U:BLASCH_NU,
             BLASV(n),BLASP(A.cptr()),BLASV(lda),
             BLASP(xp),BLASV(xs) BLAS1 BLAS1 BLAS1);
         BLASNAME(strmv) (
-            BLASCM A.iscm()==M1::mupper?BLASCH_UP:BLASCH_LO,
+            BLASCM A.iscm()==M1::_upper?BLASCH_UP:BLASCH_LO,
             A.iscm()?BLASCH_NT:BLASCH_T, A.isunit()?BLASCH_U:BLASCH_NU,
             BLASV(n),BLASP(A.cptr()),BLASV(lda),
             BLASP(xp+1),BLASV(xs) BLAS1 BLAS1 BLAS1);

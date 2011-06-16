@@ -483,35 +483,35 @@ namespace tmv {
 
     // Overload some functions to work with TriRef
     template <class T, bool C>
-    static TMV_INLINE T TMV_CONJ(const TriRef<T,C>& x) 
+    TMV_INLINE T TMV_CONJ(const TriRef<T,C>& x) 
     { return TMV_CONJ(T(x)); }
     template <class T, bool C>
-    static TMV_INLINE typename Traits<T>::real_type TMV_NORM(const TriRef<T,C>& x) 
+    TMV_INLINE typename Traits<T>::real_type TMV_NORM(const TriRef<T,C>& x) 
     { return TMV_NORM(T(x)); }
     template <class T, bool C>
-    static TMV_INLINE typename Traits<T>::real_type TMV_ABS(const TriRef<T,C>& x) 
+    TMV_INLINE typename Traits<T>::real_type TMV_ABS(const TriRef<T,C>& x) 
     { return TMV_ABS(T(x)); }
     template <class T, bool C>
-    static TMV_INLINE T TMV_SQR(const TriRef<T,C>& x) 
+    TMV_INLINE T TMV_SQR(const TriRef<T,C>& x) 
     { return TMV_SQR(T(x)); }
     template <class T, bool C>
-    static TMV_INLINE T TMV_SQRT(const TriRef<T,C>& x) 
+    TMV_INLINE T TMV_SQRT(const TriRef<T,C>& x) 
     { return TMV_SQRT(T(x)); }
     template <class T, bool C>
-    static TMV_INLINE typename Traits<T>::real_type TMV_REAL(const TriRef<T,C>& x) 
+    TMV_INLINE typename Traits<T>::real_type TMV_REAL(const TriRef<T,C>& x) 
     { return TMV_REAL(T(x)); }
     template <class T, bool C>
-    static TMV_INLINE typename Traits<T>::real_type TMV_IMAG(const TriRef<T,C>& x) 
+    TMV_INLINE typename Traits<T>::real_type TMV_IMAG(const TriRef<T,C>& x) 
     { return TMV_IMAG(T(x)); }
 
     template <class T, bool C1, bool C2>
-    static TMV_INLINE void TMV_SWAP(TriRef<T,C1> x1, TriRef<T,C2> x2)
+    TMV_INLINE void TMV_SWAP(TriRef<T,C1> x1, TriRef<T,C2> x2)
     { TMV_SWAP(x1.getRef(),x2.getRef()); }
     template <class T, bool C2>
-    static TMV_INLINE void TMV_SWAP(T& x1, TriRef<T,C2> x2)
+    TMV_INLINE void TMV_SWAP(T& x1, TriRef<T,C2> x2)
     { TMV_SWAP(x1,x2.getRef()); }
     template <class T, bool C1>
-    static TMV_INLINE void TMV_SWAP(TriRef<T,C1> x1, T& x2)
+    TMV_INLINE void TMV_SWAP(TriRef<T,C1> x1, T& x2)
     { TMV_SWAP(x1.getRef(),x2); }
 
     template <class T, bool C, bool nonunit>
@@ -740,7 +740,7 @@ namespace tmv {
         {
             TMVStaticAssert(Traits<type>::okA);
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
+            Maybe<_unit>::offdiag(*this).setAllTo(Traits<T>::constr_value());
 #endif
         }
 
@@ -810,7 +810,7 @@ namespace tmv {
         ~UpperTriMatrix()
         {
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(T(999));
+            Maybe<_unit>::offdiag(*this).setAllTo(Traits<T>::destr_value());
 #endif
         }
 
@@ -869,10 +869,13 @@ namespace tmv {
 
         void resize(const size_t s)
         {
+#ifdef TMV_DEBUG
+            Maybe<_unit>::offdiag(*this).setAllTo(Traits<T>::destr_value());
+#endif
             itss = s;
             itsm.resize(s*s);
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
+            Maybe<_unit>::offdiag(*this).setAllTo(Traits<T>::constr_value());
 #endif
         }
 
@@ -1654,7 +1657,7 @@ namespace tmv {
         {
             TMVStaticAssert(Traits<type>::okA);
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
+            Maybe<_unit>::offdiag(*this).setAllTo(Traits<T>::constr_value());
 #endif
         }
 
@@ -1723,7 +1726,7 @@ namespace tmv {
         ~LowerTriMatrix()
         {
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(T(999));
+            Maybe<_unit>::offdiag(*this).setAllTo(Traits<T>::destr_value());
 #endif
         }
 
@@ -1782,10 +1785,13 @@ namespace tmv {
 
         void resize(const size_t s)
         {
+#ifdef TMV_DEBUG
+            Maybe<_unit>::offdiag(*this).setAllTo(Traits<T>::destr_value());
+#endif
             itss = s;
             itsm.resize(s*s);
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(T(888));
+            Maybe<_unit>::offdiag(*this).setAllTo(Traits<T>::constr_value());
 #endif
         }
 
@@ -2426,12 +2432,12 @@ namespace tmv {
     }
 
     template <class T>
-    static inline UpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
+    static TMV_INLINE UpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
         T* m, size_t size, int stepi, int stepj)
     { return UpperTriMatrixView<T,NonUnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
-    static inline ConstUpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
+    static TMV_INLINE ConstUpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
         const T* m, size_t size, int stepi, int stepj)
     { return ConstUpperTriMatrixView<T,NonUnitDiag>(m,size,stepi,stepj); }
 
@@ -2458,12 +2464,12 @@ namespace tmv {
     }
 
     template <class T>
-    static inline UpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
+    static TMV_INLINE UpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
         T* m, size_t size, int stepi, int stepj)
     { return UpperTriMatrixView<T,UnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
-    static inline ConstUpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
+    static TMV_INLINE ConstUpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
         const T* m, size_t size, int stepi, int stepj)
     { return ConstUpperTriMatrixView<T,UnitDiag>(m,size,stepi,stepj); }
 
@@ -2492,7 +2498,7 @@ namespace tmv {
     }
 
     template <class T>
-    static inline UpperTriMatrixView<T> UpperTriMatrixViewOf(
+    static TMV_INLINE_ND UpperTriMatrixView<T> UpperTriMatrixViewOf(
         T* m, size_t size, int stepi, int stepj, DiagType dt)
     {
         TMVAssert(dt == UnitDiag || dt == NonUnitDiag);
@@ -2500,7 +2506,7 @@ namespace tmv {
     }
 
     template <class T>
-    static inline ConstUpperTriMatrixView<T> UpperTriMatrixViewOf(
+    static TMV_INLINE_ND ConstUpperTriMatrixView<T> UpperTriMatrixViewOf(
         const T* m, size_t size, int stepi, int stepj, DiagType dt)
     {
         TMVAssert(dt == UnitDiag || dt == NonUnitDiag);
@@ -2530,12 +2536,12 @@ namespace tmv {
     }
 
     template <class T>
-    static inline LowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
+    static TMV_INLINE LowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
         T* m, size_t size, int stepi, int stepj)
     { return LowerTriMatrixView<T,NonUnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
-    static inline ConstLowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
+    static TMV_INLINE ConstLowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
         const T* m, size_t size, int stepi, int stepj)
     { return ConstLowerTriMatrixView<T,NonUnitDiag>(m,size,stepi,stepj); }
 
@@ -2562,12 +2568,12 @@ namespace tmv {
     }
 
     template <class T>
-    static inline LowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
+    static TMV_INLINE LowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
         T* m, size_t size, int stepi, int stepj)
     { return LowerTriMatrixView<T,UnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
-    static inline ConstLowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
+    static TMV_INLINE ConstLowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
         const T* m, size_t size, int stepi, int stepj)
     { return ConstLowerTriMatrixView<T,UnitDiag>(m,size,stepi,stepj); }
 
@@ -2596,7 +2602,7 @@ namespace tmv {
     }
 
     template <class T>
-    static inline LowerTriMatrixView<T> LowerTriMatrixViewOf(
+    static TMV_INLINE_ND LowerTriMatrixView<T> LowerTriMatrixViewOf(
         T* m, size_t size, int stepi, int stepj, DiagType dt)
     {
         TMVAssert(dt == UnitDiag || dt == NonUnitDiag);
@@ -2604,7 +2610,7 @@ namespace tmv {
     }
 
     template <class T>
-    static inline ConstLowerTriMatrixView<T> LowerTriMatrixViewOf(
+    static TMV_INLINE_ND ConstLowerTriMatrixView<T> LowerTriMatrixViewOf(
         const T* m, size_t size, int stepi, int stepj, DiagType dt)
     {
         TMVAssert(dt == UnitDiag || dt == NonUnitDiag);
@@ -2716,7 +2722,7 @@ namespace tmv {
     // TMV_Text 
     //
 
-#ifdef TMV_DEBUG
+#ifdef TMV_TEXT
     template <class T, int A0, int A1, int A2>
     static inline std::string TMV_Text(const UpperTriMatrix<T,A0,A1,A2>& m)
     {

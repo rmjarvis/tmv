@@ -56,7 +56,7 @@ namespace tmv {
         TMV_INLINE Scaling(const T _x) : x(_x) {}
         TMV_INLINE_ND ~Scaling() {
 #ifdef TMV_DEBUG
-            x = T(999);
+            x = Traits<T>::destr_value();
 #endif
         }
         TMV_INLINE operator T() const { return x; }
@@ -257,14 +257,17 @@ namespace tmv {
         const Scaling<0,T1>& x, const Scaling<0,T2>& y)
     { return ZProd<false,false>::prod(x.x,y.x); }
     template <class T1, class T2>
-    static TMV_INLINE T2 operator*(const Scaling<1,T1>& x, const Scaling<0,T2>& y)
+    static TMV_INLINE T2 operator*(
+        const Scaling<1,T1>& x, const Scaling<0,T2>& y)
     { return y.x; }
     template <class T1, class T2>
-    static TMV_INLINE T2 operator*(const Scaling<-1,T1>& x, const Scaling<0,T2>& y)
+    static TMV_INLINE T2 operator*(
+        const Scaling<-1,T1>& x, const Scaling<0,T2>& y)
     { return -y.x; }
 
     template <class T1, class T2>
-    static TMV_INLINE T1 operator*(const Scaling<0,T1>& x, const Scaling<1,T2>& y)
+    static TMV_INLINE T1 operator*(
+        const Scaling<0,T1>& x, const Scaling<1,T2>& y)
     { return x; }
     template <class T1, class T2>
     static TMV_INLINE Scaling<1,T2> operator*(
@@ -276,7 +279,8 @@ namespace tmv {
     { return Scaling<-1,T2>(); }
 
     template <class T1, class T2>
-    static TMV_INLINE T1 operator*(const Scaling<0,T1>& x, const Scaling<-1,T2>& y)
+    static TMV_INLINE T1 operator*(
+        const Scaling<0,T1>& x, const Scaling<-1,T2>& y)
     { return -x.x; }
     template <class T1, class T2>
     static TMV_INLINE Scaling<-1,T2> operator*(
@@ -294,14 +298,17 @@ namespace tmv {
         const Scaling<0,T1>& x, const Scaling<0,T2>& y)
     { return x.x/y.x; }
     template <class T1, class T2>
-    static TMV_INLINE T2 operator/(const Scaling<1,T1>& x, const Scaling<0,T2>& y)
+    static TMV_INLINE T2 operator/(
+        const Scaling<1,T1>& x, const Scaling<0,T2>& y)
     { return T1(1)/y.x; }
     template <class T1, class T2>
-    static TMV_INLINE T2 operator/(const Scaling<-1,T1>& x, const Scaling<0,T2>& y)
+    static TMV_INLINE T2 operator/(
+        const Scaling<-1,T1>& x, const Scaling<0,T2>& y)
     { return T1(-1)/y.x; }
 
     template <class T1, class T2>
-    static TMV_INLINE T1 operator/(const Scaling<0,T1>& x, const Scaling<1,T2>& y)
+    static TMV_INLINE T1 operator/(
+        const Scaling<0,T1>& x, const Scaling<1,T2>& y)
     { return x; }
     template <class T1, class T2>
     static TMV_INLINE Scaling<1,T2> operator/(
@@ -313,7 +320,8 @@ namespace tmv {
     { return Scaling<-1,T2>(); }
 
     template <class T1, class T2>
-    static TMV_INLINE T1 operator/(const Scaling<0,T1>& x, const Scaling<-1,T2>& y)
+    static TMV_INLINE T1 operator/(
+        const Scaling<0,T1>& x, const Scaling<-1,T2>& y)
     { return -x.x; }
     template <class T1, class T2>
     static TMV_INLINE Scaling<-1,T2> operator/(

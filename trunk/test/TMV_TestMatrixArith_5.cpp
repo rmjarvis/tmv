@@ -7,7 +7,8 @@
 #include "TMV_TestMatrixArith.h"
 #define CT std::complex<T>
 
-template <class T> void TestMatrixArith_5()
+template <class T> 
+void TestMatrixArith_5()
 {
     // Now we use the TestMatrixArith.h file to test lots of different
     // syntaxes for calling matrix arithmetic.  This tests the inline
@@ -57,6 +58,16 @@ template <class T> void TestMatrixArith_5()
     TestMatrixArith5<T>(a3,ca3,a2,ca2,"Square 5");
     TestMatrixArith5<T>(a2,ca2,a3,ca3,"Square 6");
 #endif
+#endif
+
+#if (XTEST & 32)
+    tmv::Matrix<T,tmv::FortranStyle> a1f = a1;
+    tmv::Matrix<CT,tmv::FortranStyle> ca1f = ca1;
+    tmv::Matrix<T,tmv::FortranStyle> a2f = a2;
+    tmv::Matrix<CT,tmv::FortranStyle> ca2f = ca2;
+
+    TestMatrixArith5<T>(a1f,ca1f,a2f,ca2f,"Square 1F");
+    TestMatrixArith5<T>(a2f,ca2f,a1f,ca1f,"Square 2F");
 #endif
 
     tmv::Matrix<T,tmv::RowMajor> a4x(7,4);
@@ -111,26 +122,28 @@ template <class T> void TestMatrixArith_5()
 
     TestMatrixArith5<T>(a1,ca1,a6,ca6,"Degenerate 1");
     TestMatrixArith5<T>(a2,ca2,a6,ca6,"Degenerate 2");
-    TestMatrixArith5<T>(a3,ca3,a6,ca6,"Degenerate 3");
-    TestMatrixArith5<T>(a4,ca4,a6,ca6,"Degenerate 4");
-    TestMatrixArith5<T>(a5,ca5,a6,ca6,"Degenerate 5");
-    TestMatrixArith5<T>(a1,ca1,a7,ca7,"Degenerate 6");
-    TestMatrixArith5<T>(a2,ca2,a7,ca7,"Degenerate 7");
-    TestMatrixArith5<T>(a3,ca3,a7,ca7,"Degenerate 8");
-    TestMatrixArith5<T>(a4,ca4,a7,ca7,"Degenerate 9");
-    TestMatrixArith5<T>(a5,ca5,a7,ca7,"Degenerate 10");
-    TestMatrixArith5<T>(a6,ca6,a1,ca1,"Degenerate 11");
-    TestMatrixArith5<T>(a6,ca6,a2,ca2,"Degenerate 12");
-    TestMatrixArith5<T>(a6,ca6,a3,ca3,"Degenerate 13");
-    TestMatrixArith5<T>(a6,ca6,a4,ca4,"Degenerate 14");
-    TestMatrixArith5<T>(a6,ca6,a5,ca5,"Degenerate 15");
-    TestMatrixArith5<T>(a7,ca7,a1,ca1,"Degenerate 16");
-    TestMatrixArith5<T>(a7,ca7,a2,ca2,"Degenerate 17");
-    TestMatrixArith5<T>(a7,ca7,a3,ca3,"Degenerate 18");
-    TestMatrixArith5<T>(a7,ca7,a4,ca4,"Degenerate 19");
-    TestMatrixArith5<T>(a7,ca7,a5,ca5,"Degenerate 20");
-    TestMatrixArith5<T>(a7,ca7,a6,ca6,"Degenerate 21");
-    TestMatrixArith5<T>(a6,ca6,a7,ca7,"Degenerate 22");
+    TestMatrixArith5<T>(a4,ca4,a6,ca6,"Degenerate 3");
+    TestMatrixArith5<T>(a5,ca5,a6,ca6,"Degenerate 4");
+    TestMatrixArith5<T>(a1,ca1,a7,ca7,"Degenerate 5");
+    TestMatrixArith5<T>(a2,ca2,a7,ca7,"Degenerate 6");
+    TestMatrixArith5<T>(a4,ca4,a7,ca7,"Degenerate 7");
+    TestMatrixArith5<T>(a5,ca5,a7,ca7,"Degenerate 8");
+    TestMatrixArith5<T>(a6,ca6,a1,ca1,"Degenerate 9");
+    TestMatrixArith5<T>(a6,ca6,a2,ca2,"Degenerate 10");
+    TestMatrixArith5<T>(a6,ca6,a4,ca4,"Degenerate 11");
+    TestMatrixArith5<T>(a6,ca6,a5,ca5,"Degenerate 12");
+    TestMatrixArith5<T>(a7,ca7,a1,ca1,"Degenerate 13");
+    TestMatrixArith5<T>(a7,ca7,a2,ca2,"Degenerate 14");
+    TestMatrixArith5<T>(a7,ca7,a4,ca4,"Degenerate 15");
+    TestMatrixArith5<T>(a7,ca7,a5,ca5,"Degenerate 16");
+    TestMatrixArith5<T>(a7,ca7,a6,ca6,"Degenerate 17");
+    TestMatrixArith5<T>(a6,ca6,a7,ca7,"Degenerate 18");
+#if (XTEST & 1)
+    TestMatrixArith5<T>(a3,ca3,a6,ca6,"Degenerate 19");
+    TestMatrixArith5<T>(a3,ca3,a7,ca7,"Degenerate 20");
+    TestMatrixArith5<T>(a6,ca6,a3,ca3,"Degenerate 21");
+    TestMatrixArith5<T>(a7,ca7,a3,ca3,"Degenerate 22");
+#endif
 #endif
 }
 

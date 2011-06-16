@@ -655,19 +655,18 @@ namespace tmv {
         // in TMV_Matrix.cpp for the instantiated types.
 
         typedef const InstLUD<T>& lud_type;
-        typedef void qrd_type;
+        typedef const InstQRD<T>& qrd_type;
         typedef void qrpd_type;
         typedef void svd_type;
-        //typedef InstQRD<T> qrd_type;
         //typedef InstQRPD<T> qrpd_type;
         //typedef InstSVD<T> svd_type;
 
         MatrixDivHelper2();
         ~MatrixDivHelper2();
 
-        void resetDivType() const;
         void setDiv() const;
         Matrix<T> getM() const;
+        bool mIsSquare() const;
 
         lud_type lud() const;
         qrd_type qrd() const;
@@ -703,14 +702,13 @@ namespace tmv {
     {
     public:
         typedef typename Traits<M>::lud_type lud_type;
+        typedef typename Traits<M>::qrd_type qrd_type;
 
-        TMV_INLINE void resetDivType() const {}
-
+        TMV_INLINE void resetDivType() const {} 
         TMV_INLINE lud_type lud() const { return lud_type(mat2(),false); }
-        //QRD<M2> qrd() const { return QRD<M2>(mat2(),false); }
-        //QRPD<M2> qrpd() const { return QRPD<M2>(mat2(),false); }
-        //SVD<M2> svd() const { return SVD<M2>(mat2(),false); }
-        TMV_INLINE void qrp() const {}
+        TMV_INLINE qrd_type qrd() const { return qrd_type(mat2(),false); }
+        //TMV_INLINE qrd_type qrpd() const { return qrpd_type(mat2(),false); }
+        //TMV_INLINE qrd_type svd() const { return svd_type(mat2(),false); }
         TMV_INLINE void qrpd() const {}
         TMV_INLINE void svd() const {}
 
@@ -783,7 +781,8 @@ namespace tmv {
 
         typedef typename TypeSelect<_hasdivider ,
                 const InstLUD<value_type>& , LUD<type> >::type lud_type;
-        typedef InvalidType qrd_type;
+        typedef typename TypeSelect<_hasdivider ,
+                const InstQRD<value_type>& , QRD<type> >::type qrd_type;
         typedef InvalidType qrpd_type;
         typedef InvalidType svd_type;
 
@@ -911,6 +910,8 @@ namespace tmv {
         typedef BaseMatrix_Rec_Mutable<type> base_div;
         typedef MatrixDivHelper<type> divhelper;
 
+        typedef typename Traits<T>::real_type real_type;
+
         enum { _colsize = Traits<type>::_colsize };
         enum { _rowsize = Traits<type>::_rowsize };
         enum { _shape = Traits<type>::_shape };
@@ -942,7 +943,7 @@ namespace tmv {
         {
             TMVStaticAssert(Traits<type>::okA);
 #ifdef TMV_DEBUG
-            this->setAllTo(T(888));
+            this->linearView().flatten().setAllTo(Traits<real_type>::constr_value());
 #endif
         }
 
@@ -1014,7 +1015,7 @@ namespace tmv {
         ~Matrix() 
         {
 #ifdef TMV_DEBUG
-            this->setAllTo(T(999));
+            this->linearView().flatten().setAllTo(Traits<real_type>::destr_value());
 #endif
         }
 
@@ -1056,13 +1057,16 @@ namespace tmv {
 
         void resize(const size_t cs, const size_t rs)
         {
+#ifdef TMV_DEBUG
+            this->linearView().flatten().setAllTo(Traits<real_type>::destr_value());
+#endif
             itscs = cs;
             itsrs = rs;
             divhelper::resetDivType();
             linsize = cs*rs;
             itsm.resize(linsize);
 #ifdef TMV_DEBUG
-            this->setAllTo(T(888));
+            this->linearView().flatten().setAllTo(Traits<real_type>::constr_value());
 #endif
         }
 
@@ -1139,7 +1143,8 @@ namespace tmv {
 
         typedef typename TypeSelect<_hasdivider ,
                 const InstLUD<value_type>& , LUD<copy_type> >::type lud_type;
-        typedef InvalidType qrd_type;
+        typedef typename TypeSelect<_hasdivider ,
+                const InstQRD<value_type>& , QRD<copy_type> >::type qrd_type;
         typedef InvalidType qrpd_type;
         typedef InvalidType svd_type;
 
@@ -1397,7 +1402,8 @@ namespace tmv {
 
         typedef typename TypeSelect<_hasdivider ,
                 const InstLUD<value_type>& , LUD<copy_type> >::type lud_type;
-        typedef InvalidType qrd_type;
+        typedef typename TypeSelect<_hasdivider ,
+                const InstQRD<value_type>& , QRD<copy_type> >::type qrd_type;
         typedef InvalidType qrpd_type;
         typedef InvalidType svd_type;
 
@@ -1678,12 +1684,12 @@ namespace tmv {
     }
 
     template <class T>
-    static inline MatrixView<T> MatrixViewOf(
+    static TMV_INLINE MatrixView<T> MatrixViewOf(
         T* m, size_t colsize, size_t rowsize, int stepi, int stepj)
     { return MatrixView<T>(m,colsize,rowsize,stepi,stepj); }
 
     template <class T>
-    static inline ConstMatrixView<T> MatrixViewOf(
+    static TMV_INLINE ConstMatrixView<T> MatrixViewOf(
         const T* m, size_t colsize, size_t rowsize, int stepi, int stepj)
     { return ConstMatrixView<T>(m,colsize,rowsize,stepi,stepj); }
 
@@ -1744,7 +1750,7 @@ namespace tmv {
     // TMV_Text 
     //
 
-#ifdef TMV_DEBUG
+#ifdef TMV_TEXT
     template <class T, int A0, int A1>
     static inline std::string TMV_Text(const Matrix<T,A0,A1>& m)
     {

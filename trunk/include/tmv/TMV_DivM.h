@@ -39,7 +39,7 @@
 #include "TMV_DivMM_Funcs.h"
 #include "TMV_DivVM_Funcs.h" 
 
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
 #include <iostream>
 #endif
 
@@ -65,17 +65,17 @@ namespace tmv {
     {
         // This one is different for vector and matrix, so break it out here.
         template <class M1x>
-        static void call2(BaseVector_Mutable<M1x>& v1, const M2& m2)
+        static inline void call2(BaseVector_Mutable<M1x>& v1, const M2& m2)
         { v1.ref(0) /= m2.cref(0,0); }
         template <class M1x>
-        static void call2(BaseMatrix_Mutable<M1x>& m1, const M2& m2)
+        static inline void call2(BaseMatrix_Mutable<M1x>& m1, const M2& m2)
         { m1.row(0,0,m1.rowsize()) /= m2.cref(0,0); }
         template <class M1x>
-        static void call2(BaseMatrix_Rec_Mutable<M1x>& m1, const M2& m2)
+        static inline void call2(BaseMatrix_Rec_Mutable<M1x>& m1, const M2& m2)
         { m1.row(0) /= m2.cref(0,0); }
-        static void call(M1& m1, const M2& m2)
+        static inline void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq algo 1: s,xs = "<<1<<','<<xs<<std::endl;
 #endif
             typedef typename M2::value_type T2;
@@ -97,7 +97,7 @@ namespace tmv {
         {
             // M1 is a vector, so do the whole calculation directly
             template <class V1x>
-            static void call(BaseVector_Mutable<V1x>& v1, const M2& m2)
+            static inline void call(BaseVector_Mutable<V1x>& v1, const M2& m2)
             {
                 typedef typename V1x::value_type T1;
                 typedef typename M2::value_type T2;
@@ -112,7 +112,7 @@ namespace tmv {
             }
             // M1 is a matrix, but only one column. 
             template <class M1x>
-            static void call(BaseMatrix_Mutable<M1x>& m1, const M2& m2)
+            static inline void call(BaseMatrix_Mutable<M1x>& m1, const M2& m2)
             {
                 typedef typename M1x::col_type M1c;
                 M1c m1c = m1.col(0);
@@ -144,9 +144,9 @@ namespace tmv {
                 }
             }
         };
-        static void call(M1& m1, const M2& m2)
+        static inline void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq algo 2: s,xs = "<<2<<','<<xs<<std::endl;
 #endif
             const int algo2 = xs==1 ? 1 : 2;
@@ -154,13 +154,27 @@ namespace tmv {
         }
     };
 
+    // algo 3: m2 is small enough to do inverse directly and multiply.
+    template <int s, int xs, class M1, class M2>
+    struct LDivEqM_Helper<3,s,xs,M1,M2>
+    {
+        static inline void call(M1& m1, const M2& m2)
+        {
+#ifdef PRINTALGO_DIVM
+            std::cout<<"LDivEq algo 3: s,xs = "<<s<<','<<xs<<std::endl;
+#endif
+            Scaling<1,typename M1::real_type> one;
+            NoAliasMultMM<false>(one,m2.inverse().calc(),m1.copy(),m1);
+        }
+    };
+
     // algo 5: Direct transpose
     template <int s, int xs, class M1, class M2>
     struct LDivEqM_Helper<5,s,xs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static inline void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq algo 5: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
             typedef typename M2::const_transpose_type M2t;
@@ -173,9 +187,9 @@ namespace tmv {
     template <int s, int xs, class M1, class M2>
     struct LDivEqM_Helper<6,s,xs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static inline void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq algo 6: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
             typedef typename M2::const_transpose_type M2t;
@@ -190,9 +204,12 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq algo 11: s,xs = "<<s<<','<<xs<<std::endl;
             std::cout<<"divIsSet = "<<m2.divIsSet()<<std::endl;
+            std::cout<<"divIsInPlace = "<<m2.divIsInPlace()<<std::endl;
+            std::cout<<"divIsSaved = "<<m2.divIsSaved()<<std::endl;
+            std::cout<<"divType = "<<TMV_Text(m2.getDivType())<<std::endl;
 #endif
             m2.setDiv();
             m2.getDiv()->solveInPlace(m1);
@@ -204,9 +221,9 @@ namespace tmv {
     template <int s, int xs, class M1, class M2>
     struct LDivEqM_Helper<12,s,xs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static inline void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq algo 12: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
             TMVStaticAssert(!Traits<typename M2::real_type>::isinteger);
@@ -220,9 +237,12 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq algo 21: s,xs = "<<s<<','<<xs<<std::endl;
             std::cout<<"divIsSet = "<<m2.divIsSet()<<std::endl;
+            std::cout<<"divIsInPlace = "<<m2.divIsInPlace()<<std::endl;
+            std::cout<<"divIsSaved = "<<m2.divIsSaved()<<std::endl;
+            std::cout<<"divType = "<<TMV_Text(m2.getDivType())<<std::endl;
 #endif
             m2.setDiv();
             m2.getDiv()->solveTransposeInPlace(m1);
@@ -234,9 +254,9 @@ namespace tmv {
     template <int s, int xs, class M1, class M2>
     struct LDivEqM_Helper<22,s,xs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static inline void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq algo 22: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
             TMVStaticAssert(!Traits<typename M2::real_type>::isinteger);
@@ -248,9 +268,9 @@ namespace tmv {
     template <int s, int xs, class M1, class M2>
     struct LDivEqM_Helper<31,s,xs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static inline void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq algo 31: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
             Scaling<1,typename M1::real_type> one;
@@ -262,9 +282,9 @@ namespace tmv {
     template <int s, int xs, class M1, class M2>
     struct LDivEqM_Helper<32,s,xs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static inline void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq algo 32: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
             Scaling<1,typename M1::real_type> one;
@@ -276,9 +296,9 @@ namespace tmv {
     template <int s, int xs, class M1, class M2>
     struct LDivEqM_Helper<33,s,xs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static inline void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq algo 33: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
             if (m2.isSingular()) ThrowSingular("DiagMatrix");
@@ -293,7 +313,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq algo 34: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
             if (m2.isSingular()) ThrowSingular("DiagMatrix");
@@ -308,7 +328,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq algo 35: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
             if (m2.isSingular()) ThrowSingular("DiagMatrix");
@@ -324,7 +344,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq algo 36: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
             if (m2.isSingular()) ThrowSingular("DiagMatrix");
@@ -340,7 +360,7 @@ namespace tmv {
     {
         static TMV_INLINE void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq algo 41: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
             NoAliasTriLDivEq(m1,m2);
@@ -353,7 +373,7 @@ namespace tmv {
     {
         static TMV_INLINE void call(M1& m1, const M2& m2)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq algo 42: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
             AliasTriLDivEq(m1,m2);
@@ -379,10 +399,10 @@ namespace tmv {
                     (!up1 && !lo1) ? 36 :
                     32 ) : 
                 (!lo2 || !up2) ? 6 : // m2 is triangular
-                s == 2 ? 6 :
+                (s != UNKNOWN && s <= 4) ? 6 :
                 M2::_hasdivider ? 21 :
                 22;
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq transpose, alias:\n";
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
@@ -413,9 +433,10 @@ namespace tmv {
                     32 ) : 
                 (!lo2 || !up2) ? 42 : // m2 is triangular
                 s == 2 ? 2 :
+                (s != UNKNOWN && s <= 4) ? 3 :
                 M2::_hasdivider ? 11 :
                 12;
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq alias:\n";
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
@@ -445,10 +466,10 @@ namespace tmv {
                     (!up1 && !lo1) ? 35 :
                     31 ) : 
                 (!lo2 || !up2) ? 41 : // m2 is triangular
-                s == 2 ? 5 :
+                (s != UNKNOWN && s <= 4) ? 5 :
                 M2::_hasdivider ? 21 :
                 22;
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq transpose:\n";
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
@@ -476,6 +497,7 @@ namespace tmv {
             //  0 = s==0, so nothing to do
             //  1 = s==1: reduces to trivial scalar division
             //  2 = s==2: do division directly
+            //  3 = m2 = m1.inverse() * m2
             //  5 = Direct transpose
             //  6 = Direct transpose with alias check
             //
@@ -506,9 +528,10 @@ namespace tmv {
                     31 ) : 
                 (!lo2 || !up2) ? 41 : // m2 is triangular
                 s == 2 ? 2 :
+                (s != UNKNOWN && s <= 4) ? 3 :
                 M2::_hasdivider ? 11 :
                 12;
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq: regular solution\n";
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
@@ -615,7 +638,7 @@ namespace tmv {
     //
     // m1 /= m2
     //
-    
+
     template <class M1, class M2>
     static inline void LDivEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix_Calc<M2>& m2)
@@ -680,7 +703,7 @@ namespace tmv {
     //
     // v1 %= m2
     //
-    
+
     template <class V1, class M2>
     static inline void RDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Calc<M2>& m2)
@@ -743,7 +766,7 @@ namespace tmv {
     // m1 %= m2
     // -> mt1 /= m2t
     //
-    
+
     template <class M1, class M2>
     static inline void RDivEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix_Calc<M2>& m2)
@@ -810,7 +833,7 @@ namespace tmv {
     //
     // m3 = m1 / m2, or v3 = v1 / m2
     // 
- 
+
     template <int algo, int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper;
 
@@ -818,7 +841,8 @@ namespace tmv {
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<0,cs,rs,xs,ix,T,M1,M2,M3>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& , const M1& , const M2& , M3& )
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& , const M1& , const M2& , M3& )
         {}
     };
 
@@ -828,12 +852,12 @@ namespace tmv {
     {
         // This one is different for vector and matrix, so break it out here.
         template <class M1x, class M3x>
-        static void call2(
+        static inline void call2(
             const Scaling<ix,T>& x, const BaseVector<M1x>& v1, 
             const M2& m2, BaseVector_Mutable<M3x>& v3)
         { v3.ref(0) = x * v1.cref(0) / m2.cref(0,0); }
         template <class M1x, class M3x>
-        static void call2(
+        static inline void call2(
             const Scaling<ix,T>& x, const BaseMatrix_Calc<M1x>& m1,
             const M2& m2, BaseMatrix_Mutable<M3x>& m3)
         {
@@ -841,19 +865,19 @@ namespace tmv {
                 x * m1.row(0,0,m1.rowsize()) / m2.cref(0,0); 
         }
         template <class M1x, class M3x>
-        static void call2(
+        static inline void call2(
             const Scaling<ix,T>& x, const BaseMatrix_Calc<M1x>& m1,
             const M2& m2, BaseMatrix_Rec_Mutable<M3x>& m3)
         { m3.row(0) = x * m1.row(0,0,m1.rowsize()) / m2.cref(0,0); }
         template <class M1x, class M3x>
-        static void call2(
+        static inline void call2(
             const Scaling<ix,T>& x, const BaseMatrix_Rec<M1x>& m1,
             const M2& m2, BaseMatrix_Rec_Mutable<M3x>& m3)
         { m3.row(0) = x * m1.row(0) / m2.cref(0,0); }
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv algo 1: cs,rs,xs = "<<
                 1<<','<<1<<','<<xs<<std::endl;
 #endif
@@ -875,7 +899,7 @@ namespace tmv {
         {
             // M1,M3 are vectors
             template <class V1x, class V3x>
-            static void call(
+            static inline void call(
                 const Scaling<ix,T>& x, const BaseVector<V1x>& v1, 
                 const M2& m2, BaseVector_Mutable<V3x>& v3)
             {
@@ -884,13 +908,13 @@ namespace tmv {
                 T2 det = DetM_Helper<2,2,M2>::call(m2);
                 if (det == T2(0)) ThrowSingular("2x2 Matrix");
                 v3.ref(0) = x*(v1.cref(0) * m2.cref(1,1) -
-                             v1.cref(1) * m2.cref(0,1))/det;
+                               v1.cref(1) * m2.cref(0,1))/det;
                 v3.ref(1) = x*(v1.cref(1) * m2.cref(0,0) -
-                             v1.cref(0) * m2.cref(1,0))/det;
+                               v1.cref(0) * m2.cref(1,0))/det;
             }
             // M1,m3 are matrices, but only one column. 
             template <class M1x, class M3x>
-            static void call(
+            static inline void call(
                 const Scaling<ix,T>& x, const BaseMatrix_Calc<M1x>& m1, 
                 const M2& m2, BaseMatrix_Mutable<M3x>& m3)
             {
@@ -905,7 +929,7 @@ namespace tmv {
         template <int dummy>
         struct Helper2<2,dummy>
         {
-            static void call(
+            static inline void call(
                 const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
             {
                 typedef typename M3::value_type T3;
@@ -914,10 +938,10 @@ namespace tmv {
                 m3 = x * m2inv * m1;
             }
         };
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv algo 2: cs,rs,xs = "<<
                 2<<','<<2<<','<<xs<<std::endl;
 #endif
@@ -926,14 +950,44 @@ namespace tmv {
         }
     };
 
+    // algo 3: m2 is small enough to do inverse directly and multiply.
+    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    struct LDivM_Helper<3,cs,rs,xs,ix,T,M1,M2,M3>
+    {
+        static inline void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+#ifdef PRINTALGO_DIVM
+            std::cout<<"LDiv algo 3: cs,rs,xs = "<<
+                cs<<','<<rs<<','<<xs<<std::endl;
+#endif
+            NoAliasMultMM<false>(x,m2.inverse().calc(),m1,m3);
+        }
+    };
+
+    // algo 4: invert directly with alias check
+    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    struct LDivM_Helper<4,cs,rs,xs,ix,T,M1,M2,M3>
+    {
+        static inline void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+#ifdef PRINTALGO_DIVM
+            std::cout<<"LDiv algo 4: cs,rs,xs = "<<
+                cs<<','<<rs<<','<<xs<<std::endl;
+#endif
+            AliasMultMM<false>(x,m2.inverse().calc(),m1,m3);
+        }
+    };
+
     // algo 5: Direct transpose
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<5,cs,rs,xs,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv algo 5: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
@@ -947,10 +1001,10 @@ namespace tmv {
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<6,cs,rs,xs,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv algo 6: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
@@ -967,10 +1021,13 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv algo 11: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
             std::cout<<"divIsSet = "<<m2.divIsSet()<<std::endl;
+            std::cout<<"divIsInPlace = "<<m2.divIsInPlace()<<std::endl;
+            std::cout<<"divIsSaved = "<<m2.divIsSaved()<<std::endl;
+            std::cout<<"divType = "<<TMV_Text(m2.getDivType())<<std::endl;
 #endif
             m2.setDiv();
             m2.getDiv()->solve(m1,m3);
@@ -983,10 +1040,10 @@ namespace tmv {
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<12,cs,rs,xs,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv algo 12: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
@@ -1000,19 +1057,16 @@ namespace tmv {
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<13,cs,rs,xs,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv algo 13: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
             TMVStaticAssert(!Traits<typename M2::real_type>::isinteger);
-#if 0
-            QRD<M2> qrd(m2);
-            qrd.solve(m1,m3);
+            m2.qrd().solve(m1,m3);
             Scale(x,m3);
-#endif
         }
     };
 
@@ -1020,10 +1074,10 @@ namespace tmv {
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<14,cs,rs,xs,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv algo 14: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
@@ -1041,10 +1095,13 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv algo 21: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
             std::cout<<"divIsSet = "<<m2.divIsSet()<<std::endl;
+            std::cout<<"divIsInPlace = "<<m2.divIsInPlace()<<std::endl;
+            std::cout<<"divIsSaved = "<<m2.divIsSaved()<<std::endl;
+            std::cout<<"divType = "<<TMV_Text(m2.getDivType())<<std::endl;
 #endif
             m2.setDiv();
             m2.getDiv()->solveTranspose(m1,m3);
@@ -1057,10 +1114,10 @@ namespace tmv {
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<22,cs,rs,xs,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv algo 22: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
@@ -1074,19 +1131,16 @@ namespace tmv {
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<23,cs,rs,xs,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv algo 23: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
             TMVStaticAssert(!Traits<typename M2::real_type>::isinteger);
-#if 0
-            QRD<M2> qrd(m2);
-            qrd.solveTranspose(m1,m3);
+            m2.qrd().solveTranspose(m1,m3);
             Scale(x,m3);
-#endif
         }
     };
 
@@ -1094,10 +1148,10 @@ namespace tmv {
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<24,cs,rs,xs,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv algo 24: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
@@ -1116,11 +1170,10 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv algo 31: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
-            if (m2.isSingular()) ThrowSingular("DiagMatrix");
             NoAliasMultMM<false>(x,m2.inverse().calc(),m1,m3);
         }
     };
@@ -1132,11 +1185,10 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv algo 32: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
-            if (m2.isSingular()) ThrowSingular("DiagMatrix");
             AliasMultMM<false>(x,m2.inverse().calc(),m1,m3);
         }
     };
@@ -1148,7 +1200,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv algo 33: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
@@ -1164,7 +1216,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv algo 34: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
@@ -1180,7 +1232,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv algo 35: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
@@ -1197,7 +1249,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv algo 36: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
@@ -1214,7 +1266,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv algo 37: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
@@ -1236,19 +1288,19 @@ namespace tmv {
     struct LDivM_Helper<41,cs,rs,xs,ix,T,M1,M2,M3>
     {
         template <class M>
-        static void copy(
+        static inline void copy(
             const Scaling<ix,T>& x, const BaseMatrix<M>& m1, M3& m3)
         { NoAliasMultXM<false>(x,m1.mat(),m3); }
 
         template <class V>
-        static void copy(
+        static inline void copy(
             const Scaling<ix,T>& x, const BaseVector<V>& m1, M3& m3)
         { NoAliasMultXV<false>(x,m1.vec(),m3); }
 
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv algo 41: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
@@ -1262,19 +1314,19 @@ namespace tmv {
     struct LDivM_Helper<42,cs,rs,xs,ix,T,M1,M2,M3>
     {
         template <class M>
-        static void copy(
+        static inline void copy(
             const Scaling<ix,T>& x, const BaseMatrix<M>& m1, M3& m3)
         { AliasMultXM<false>(x,m1.mat(),m3); }
 
         template <class V>
-        static void copy(
+        static inline void copy(
             const Scaling<ix,T>& x, const BaseVector<V>& m1, M3& m3)
         { AliasMultXV<false>(x,m1.vec(),m3); }
 
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv algo 42: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
@@ -1314,12 +1366,12 @@ namespace tmv {
                     (!up1 && !lo1) ? 37 : // m1 diag
                     32 ) :
                 !up2 || !lo2 ? 6 : // m2 is triangular
-                cs == 2 && rs == 2 ? 6 :
+                cs == rs && cs != UNKNOWN && cs <= 4 ? 6 :
                 M2::_hasdivider ? 21 :
                 cs == UNKNOWN || rs == UNKNOWN ? 24 :
                 cs == rs ? 22 :
                 23;
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv: alias, transpose \n";
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
@@ -1356,11 +1408,12 @@ namespace tmv {
                     32 ) :
                 (!lo2 || !up2) ? 42 : // m1 is triangular
                 cs == 2 && rs == 2 ? 2 :
+                cs == rs && cs != UNKNOWN && cs <= 4 ? 4 :
                 M2::_hasdivider ? 11 :
                 cs == UNKNOWN || rs == UNKNOWN ? 14 :
                 cs == rs ? 12 :
                 13;
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv: alias\n";
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
@@ -1396,12 +1449,12 @@ namespace tmv {
                     (!up1 && !lo1) ? 37 : // m1 diag
                     31 ) :
                 !up2 || !lo2 ? 5 : // m2 is triangular
-                cs == 2 && rs == 2 ? 5 :
+                cs == rs && cs != UNKNOWN && cs <= 4 ? 5 :
                 M2::_hasdivider ? 21 :
                 cs == UNKNOWN || rs == UNKNOWN ? 24 :
                 cs == rs ? 22 :
                 23;
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv: transpose\n";
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
@@ -1412,7 +1465,7 @@ namespace tmv {
             LDivM_Helper<algo,cs,rs,xs,ix,T,M1,M2,M3>::call(x,m1,m2,m3); 
         }
     };
-   
+
     // algo -3: Figure out which algorithm to use for regular solution
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<-3,cs,rs,xs,ix,T,M1,M2,M3>
@@ -1433,6 +1486,8 @@ namespace tmv {
             //  0 = cs==0 or rs==0, so nothing to do
             //  1 = cs==1, rs==1: reduces to trivial scalar division
             //  2 = cs==2, rs==2: do division directly
+            //  3 = invert m2 directly and multiply.
+            //  4 = invert m2 directly and multiply, with alias check
             //  5 = Direct transpose
             //  6 = Direct transpose with alias check
             //
@@ -1474,19 +1529,26 @@ namespace tmv {
                     31 ) :
                 (!lo2 || !up2) ? 41 : // m2 is triangular
                 cs == 2 && rs == 2 ? 2 :
+                cs == rs && cs != UNKNOWN && cs <= 4 ? 3 :
                 M2::_hasdivider ? 11 :
                 cs == UNKNOWN || rs == UNKNOWN ? 14 :
                 cs == rs ? 12 :
                 13;
-#ifdef PRINTALGO_DivM
+#ifdef PRINTALGO_DIVM
             std::cout<<"LDiv: regular\n";
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
             std::cout<<"m3 = "<<TMV_Text(m3)<<std::endl;
             std::cout<<"cs,rs,xs = "<<cs<<','<<rs<<','<<xs<<std::endl;
             std::cout<<"algo = "<<algo<<std::endl;
+            std::cout<<"m1 = "<<m1<<std::endl;
+            std::cout<<"m2 = "<<m2<<std::endl;
+            std::cout<<"m3 = "<<m3<<std::endl;
 #endif
             LDivM_Helper<algo,cs,rs,xs,ix,T,M1,M2,M3>::call(x,m1,m2,m3); 
+#ifdef PRINTALGO_DIVM
+            std::cout<<"m3 => "<<m3<<std::endl;
+#endif
         }
     };
 
@@ -1505,7 +1567,7 @@ namespace tmv {
             LDivM_Helper<algo,cs,rs,xs,ix,T,M1,M2,M3>::call(x,m1,m2,m3); 
         }
     };
-   
+
     // algo -1: Check for aliases? for regular solution
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<-1,cs,rs,xs,ix,T,M1,M2,M3>
@@ -1521,7 +1583,7 @@ namespace tmv {
             LDivM_Helper<algo,cs,rs,xs,ix,T,M1,M2,M3>::call(x,m1,m2,m3); 
         }
     };
-   
+
     //
     // v3 = x * v1 / m2   or   v3 = x * m2.inverse() * v1
     //
@@ -1756,7 +1818,7 @@ namespace tmv {
         LDivM_Helper<98,cs,rs,1,ix,T,V1v,M2,V3v>::call(x,v1v,m2.mat(),v3v);
     }
 
- 
+
     //
     // m3 = x * m1 % m2   or   m3 = x * m1 * m2.inverse()
     // Switch to m3t = x * m2t.inverse * m1t
@@ -1843,7 +1905,7 @@ namespace tmv {
         LDivM_Helper<98,cs,rs,xs,ix,T,M1t,M2,M3t>::call(x,m1t,m2.mat(),m3t);
     }
 
- 
+
 } // namespace tmv
 
 #endif 

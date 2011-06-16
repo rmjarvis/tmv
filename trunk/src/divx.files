@@ -2,3 +2,8 @@ TMV_LUD.cpp
 TMV_LUDecompose.cpp 
 TMV_LUDiv.cpp 
 TMV_LUInverse.cpp
+TMV_QRD.cpp 
+TMV_QRDecompose.cpp 
+TMV_UnpackQ.cpp 
+TMV_QRDiv.cpp 
+TMV_QRInverse.cpp 

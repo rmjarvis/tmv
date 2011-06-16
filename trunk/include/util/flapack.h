@@ -463,6 +463,18 @@ int zlaswp_(const int& n, void* a, const int& lda,
 int claswp_(const int& n, cfloat* a, const int& lda, 
     const int& k1, const int& k2, const int* ipiv, const int& incx);
 
+int cgels_(const char& trans, const int& m, const int& n, const int& nrhs,
+           void* a, const int& lda, void* b, const int& ldb, 
+           void* work, const int& lwork, int* info);
+int dgels_(const char& trans, const int& m, const int& n, const int& nrhs,
+           double* a, const int& lda, double* b, const int& ldb, 
+           double* work, const int& lwork, int* info);
+int sgels_(const char& trans, const int& m, const int& n, const int& nrhs,
+           float* a, const int& lda, float* b, const int& ldb,
+           float* work, const int& lwork, int* info);
+int zgels_(const char& trans, const int& m, const int& n, const int& nrhs,
+           void* a, const int& lda, void* b, const int& ldb, 
+           void* work, const int& lwork, int* info);
 
 // The rest are not used by TMV, so I haven't bothered to convert them
 // to the correct const-ness and such.
@@ -555,9 +567,6 @@ int cgelq2_(int *m, int *n, void *a, int *lda,
     void *tau, void *work, int *info);
 
 
-int cgels_(char *trans, int *m, int *n, int *
-    nrhs, void *a, int *lda, void *b, int *ldb, void *
-    work, int *lwork, int *info);
 
 int cgelsx_(int *m, int *n, int *nrhs, void *
     a, int *lda, void *b, int *ldb, int *jpvt, float *rcond,
@@ -1590,9 +1599,6 @@ int dgelq2_(int *m, int *n, double *a, int *
     lda, double *tau, double *work, int *info);
 
 
-int dgels_(char *trans, int *m, int *n, int *
-    nrhs, double *a, int *lda, double *b, int *ldb, 
-    double *work, int *lwork, int *info);
 
 int dgelsd_(int *m, int *n, int *nrhs, 
     double *a, int *lda, double *b, int *ldb, double *
@@ -2882,9 +2888,6 @@ int sgelq2_(int *m, int *n, float *a, int *lda,
     float *tau, float *work, int *info);
 
 
-int sgels_(char *trans, int *m, int *n, int *
-    nrhs, float *a, int *lda, float *b, int *ldb, float *work, 
-    int *lwork, int *info);
 
 int sgelsd_(int *m, int *n, int *nrhs, float *a, 
     int *lda, float *b, int *ldb, float *s, float *rcond, int *
@@ -4046,9 +4049,6 @@ int zgelq2_(int *m, int *n, void *a,
     int *lda, void *tau, void *work, int *info);
 
 
-int zgels_(char *trans, int *m, int *n, int *
-    nrhs, void *a, int *lda, void *b, int *ldb, 
-    void *work, int *lwork, int *info);
 
 int zgelsx_(int *m, int *n, int *nrhs, 
     void *a, int *lda, void *b, int *ldb, 

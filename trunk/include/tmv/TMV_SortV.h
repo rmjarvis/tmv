@@ -33,7 +33,7 @@
 #ifndef TMV_SortV_H
 #define TMV_SortV_H
 
-#include "TMV_BaseVector.h";
+#include "TMV_BaseVector.h"
 
 namespace tmv {
 
@@ -164,27 +164,27 @@ namespace tmv {
     }
 
     template <class IT>
-    static inline void DoSort(const IT& begin, const IT& end)
+    inline void DoSort(const IT& begin, const IT& end)
     { DoSort(begin,end,std::less<iterator_traits<IT>::value_type>()); }
 #else
     // Otherwise, just use the standard library sort routine.
     template <class IT, class COMP>
-    static inline void DoSort(IT begin, IT end, const COMP& comp)
+    inline void DoSort(IT begin, IT end, const COMP& comp)
     { std::sort(begin,end,comp); }
 
     // Overload the case of RealComp with real values, since then
     // we can call the sort without a comp object
     template <class IT, class T>
-    static inline void DoSort(
+    inline void DoSort(
         IT begin, IT end, const Compare<T,Ascend,RealComp>& comp)
     { std::sort(begin,end); }
     template <class IT, class T>
-    static inline void DoSort(
+    inline void DoSort(
         IT begin, IT end, const Compare<std::complex<T>,Ascend,RealComp>& comp)
     { std::sort(begin,end,comp); }
 
     template <class IT>
-    static inline void DoSort(const IT& begin, const IT& end)
+    inline void DoSort(const IT& begin, const IT& end)
     { std::sort(begin,end); }
 #endif
 
@@ -375,9 +375,9 @@ namespace tmv {
     template <class V>
     struct Sort_Helper<90,V>
     {
-        static void call(V& v, int* P, ADType ad, CompType comp)
+        static TMV_INLINE void call(V& v, int* P, ADType ad, CompType comp)
         { InstSort(v.xView(),P,ad,comp); }
-        static void call(V& v, ADType ad, CompType comp)
+        static TMV_INLINE void call(V& v, ADType ad, CompType comp)
         { InstSort(v.xView(),ad,comp); }
     };
 
@@ -385,7 +385,7 @@ namespace tmv {
     template <class V>
     struct Sort_Helper<97,V>
     {
-        static void call(V& v, int* P, ADType ad, CompType comp)
+        static TMV_INLINE void call(V& v, int* P, ADType ad, CompType comp)
         {
             // Swap ad if necessary 
             if (comp==ImagComp || comp==ArgComp) {
@@ -396,7 +396,7 @@ namespace tmv {
             Vc vc = v.conjugate();
             Sort_Helper<-2,Vc>::call(vc,P,ad,comp); 
         }
-        static void call(V& v, ADType ad, CompType comp)
+        static TMV_INLINE void call(V& v, ADType ad, CompType comp)
         {
             // Swap ad if necessary 
             if (comp==ImagComp || comp==ArgComp) {
@@ -417,12 +417,12 @@ namespace tmv {
     template <class V>
     struct Sort_Helper<-3,V>
     {
-        static void call(V& v, int* P, ADType ad, CompType comp)
+        static TMV_INLINE void call(V& v, int* P, ADType ad, CompType comp)
         {
             const int algo = V::isreal ? 12 : 11;
             Sort_Helper<algo,V>::call(v,P,ad,comp);
         }
-        static void call(V& v, ADType ad, CompType comp)
+        static TMV_INLINE void call(V& v, ADType ad, CompType comp)
         {
             const int algo = V::isreal ? 12 : 11;
             Sort_Helper<algo,V>::call(v,ad,comp);
@@ -433,7 +433,7 @@ namespace tmv {
     template <class V>
     struct Sort_Helper<-2,V>
     {
-        static void call(V& v, int* P, ADType ad, CompType comp)
+        static TMV_INLINE void call(V& v, int* P, ADType ad, CompType comp)
         {
             typedef typename V::value_type T;
             const bool inst = 
@@ -445,7 +445,7 @@ namespace tmv {
                 -3;
             Sort_Helper<algo,V>::call(v,P,ad,comp);
         }
-        static void call(V& v, ADType ad, CompType comp)
+        static TMV_INLINE void call(V& v, ADType ad, CompType comp)
         {
             typedef typename V::value_type T;
             const bool inst = 

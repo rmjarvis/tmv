@@ -97,7 +97,7 @@ namespace tmv {
     template <int s, class M1, class M2>
     struct LDivEqUU_Helper<1,s,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqUU algo 1: N,s = "<<1<<','<<s<<std::endl;
@@ -572,14 +572,14 @@ namespace tmv {
         struct copyBack
         { // unknowndiag = false
             template <class M1c>
-            static void call(const M1c& m1c, M1& m1)
+            static inline void call(const M1c& m1c, M1& m1)
             { NoAliasCopy(m1c,m1); }
         };
         template <int dummy>
         struct copyBack<true,dummy>
         {
             template <class M1c>
-            static void call(const M1c& m1c, M1& m1)
+            static inline void call(const M1c& m1c, M1& m1)
             {
                 if (m1.isunit()) NoAliasCopy(m1c.viewAsUnitDiag(),m1); 
                 else NoAliasCopy(m1c,m1); 

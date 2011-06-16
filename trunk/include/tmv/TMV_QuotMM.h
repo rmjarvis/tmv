@@ -42,7 +42,6 @@
 
 #ifdef XDEBUG_QUOTMM
 #include "TMV_ProdMM.h"
-#include "TMV_LUD.h"
 #include <iostream>
 #endif
 
@@ -64,10 +63,12 @@ namespace tmv {
         const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     { AliasLDiv(x,m1.calc(),m2.calc(),m3.mat()); }
 
+#if 0
     template <class M1, class M2>
     static TMV_INLINE void LDivEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix<M2>& m2)
     { LDivEq(m1.mat(),m2.calc()); }
+#endif
     template <class M1, class M2>
     static TMV_INLINE void NoAliasLDivEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix<M2>& m2)
@@ -138,7 +139,7 @@ namespace tmv {
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
             std::cout<<"m3 = "<<TMV_Text(m3)<<std::endl;
-            if (m3.colsize() < 100 && m3.rowsize() < 100 && m1.colsize() < 100) {
+            if (m3.colsize()<100 && m3.rowsize()<100 && m1.colsize()<100) {
                 std::cout<<"m1 = "<<m1i<<std::endl;
                 std::cout<<"m2 = "<<m2i<<std::endl;
                 std::cout<<"m3 = "<<m3i<<std::endl;
@@ -312,9 +313,6 @@ namespace tmv {
         TMV_INLINE size_t colsize() const { return m2.rowsize(); }
         TMV_INLINE size_t rowsize() const { return m1.rowsize(); }
 
-        TMV_INLINE value_type cref(int i, int j) const
-        { return this->calc().cref(i,j); }
-
         template <class M3>
         TMV_INLINE_ND void assignTo(BaseMatrix_Mutable<M3>& m3) const
         {
@@ -411,9 +409,6 @@ namespace tmv {
         size_t colsize() const { return m1.colsize(); }
         size_t rowsize() const { return m2.colsize(); }
 
-        value_type cref(int i, int j) const
-        { return this->calc().cref(i,j); }
-
         template <class M3>
         void assignTo(BaseMatrix_Mutable<M3>& m3) const
         {
@@ -480,7 +475,10 @@ namespace tmv {
     template <int ix1, class T1, class M1, int ix2, class T2, class M2>
     static TMV_INLINE QuotMM<ix1*ix2,PT,M1,M2> operator/(
         const ProdXM<ix1,T1,M1>& m1, const ProdXM<ix2,T2,M2>& m2)
-    { return QuotMM<ix1*ix2,PT,M1,M2>(m1.getX()/m2.getX(),m1.getM(),m2.getM()); }
+    { 
+        return QuotMM<ix1*ix2,PT,M1,M2>(
+            m1.getX()/m2.getX(),m1.getM(),m2.getM()); 
+    }
 #undef PT
 
     // x/m * m
@@ -503,19 +501,19 @@ namespace tmv {
 
     // m /= m
     template <class M1, class M2>
-    static TMV_INLINE void DivEq(
+    static TMV_INLINE void LDivEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix<M2>& m2)
     {
 #ifdef XDEBUG_QUOTMM
         LDivEq_Debug(m1.mat(),m2.mat()); 
 #else
-        LDivEq(m1.mat(),m2.mat()); 
+        LDivEq(m1.mat(),m2.calc()); 
 #endif
     }
 
     // m /= xm
     template <class M1, int ix2, class T2, class M2>
-    static TMV_INLINE void DivEq(
+    static TMV_INLINE void LDivEq(
         BaseMatrix_Mutable<M1>& m1, const ProdXM<ix2,T2,M2>& m2)
     {
 #ifdef XDEBUG_QUOTMM
@@ -625,7 +623,8 @@ namespace tmv {
 
     // -(m/m)
     template <int ix, class T, class M1, class M2>
-    static TMV_INLINE QuotMM<-ix,T,M1,M2> operator-(const QuotMM<ix,T,M1,M2>& qmm)
+    static TMV_INLINE QuotMM<-ix,T,M1,M2> operator-(
+        const QuotMM<ix,T,M1,M2>& qmm)
     { return QuotMM<-ix,T,M1,M2>(-qmm.getX(),qmm.getM1(),qmm.getM2()); }
 
     // x * (m/m)
@@ -710,7 +709,8 @@ namespace tmv {
 
     // -(m/m)
     template <int ix, class T, class M1, class M2>
-    static TMV_INLINE RQuotMM<-ix,T,M1,M2> operator-(const RQuotMM<ix,T,M1,M2>& qmm)
+    static TMV_INLINE RQuotMM<-ix,T,M1,M2> operator-(
+        const RQuotMM<ix,T,M1,M2>& qmm)
     { return RQuotMM<-ix,T,M1,M2>(-qmm.getX(),qmm.getM1(),qmm.getM2()); }
 
     // x * (m/m)
@@ -792,7 +792,7 @@ namespace tmv {
 
     // TMV_Text
 
-#ifdef TMV_DEBUG
+#ifdef TMV_TEXT
     template <int ix, class T, class M1, class M2>
     static inline std::string TMV_Text(const QuotMM<ix,T,M1,M2>& qmm)
     {

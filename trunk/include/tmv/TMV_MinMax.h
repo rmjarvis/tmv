@@ -328,7 +328,7 @@ namespace tmv {
         template <int n, int x>
         struct Helper1
         {
-            static IT unroll1(const IT& v0)
+            static inline IT unroll1(const IT& v0)
             {
                 const IT temp1 = Helper1<n-1,x>::unroll1(v0);
                 const IT temp2 = v0 + n-1;
@@ -336,14 +336,14 @@ namespace tmv {
                     Component<comp,VT>::f(*temp1),
                     Component<comp,VT>::f(*temp2)) ? temp2 : temp1;
             }
-            static ret unroll2(const V& v)
+            static inline ret unroll2(const V& v)
             {
                 const ret temp1 = Helper1<n-1,x>::unroll2(v);
                 const ret temp2 = Component<comp,VT>::f(v.cref(n-1));
                 return Maybe<max>::less(TMV_REAL(temp1),TMV_REAL(temp2)) ?
                     temp2 : temp1;
             }
-            static IT unroll3(const IT& v0, ret& best)
+            static inline IT unroll3(const IT& v0, ret& best)
             {
                 const IT temp1 = Helper1<n-1,x>::unroll3(v0,best);
                 const IT temp2 = v0 + n-1;
@@ -356,17 +356,17 @@ namespace tmv {
         template <int x>
         struct Helper1<1,x>
         {
-            static IT unroll1(const IT& v0)
+            static inline IT unroll1(const IT& v0)
             { return v0; }
-            static ret unroll2(const V& v)
+            static inline ret unroll2(const V& v)
             { return Component<comp,VT>::f(v.cref(0)); }
-            static IT unroll3(const IT& v0, ret& best)
+            static inline IT unroll3(const IT& v0, ret& best)
             { best = Component<comp,VT>::f(*v0); return v0; }
         };
         template <int x>
         struct Helper1<0,x>; // not defined so give a compile error
 
-        static ret call(const V& v, int* ibest)
+        static inline ret call(const V& v, int* ibest)
         {
             if (ibest) {
                 IT bestit = Helper1<V::_size,1>::unroll1(v.begin());
@@ -389,7 +389,7 @@ namespace tmv {
         template <int n, int x>
         struct Helper1
         {
-            static void unroll(ret& best, IT& bestit, const IT& v0)
+            static inline void unroll(ret& best, IT& bestit, const IT& v0)
             {
                 Helper1<n-1,x>::unroll(best,bestit,v0);
                 const ret temp = Component<comp,VT>::f(v0[n-1]);
@@ -400,12 +400,12 @@ namespace tmv {
 
         template <int x>
         struct Helper1<1,x>
-        { static void unroll(ret& best, IT& bestit, const IT& v0) {} };
+        { static inline void unroll(ret& best, IT& bestit, const IT& v0) {} };
 
         template <int x>
         struct Helper1<0,x>; 
 
-        static ret call(const V& v, int* ibest)
+        static inline ret call(const V& v, int* ibest)
         {
             IT it = v.begin();
             ret best = Component<comp,VT>::f(*it);
@@ -840,7 +840,7 @@ L2:
                     V::_size <= 160 ? 15 :
                     (V::_step == 1 && V::_size > 250) ? (
                         ( V::iscomplex ? 12 : 24 ) ) :
-                    1 ) :
+                    11 ) :
                 V::_step == 1 ? ( V::iscomplex ? 32 : 34 ) :
                 11;
 #endif
@@ -940,7 +940,7 @@ L2:
                     V::_size <= 40 ? 16 :
                     (V::_step == 1 && V::_size > 250) ? (
                         ( V::iscomplex ? 11 : 24 ) ) :
-                    1 ) :
+                    11 ) :
                 V::_step == 1 ? ( V::iscomplex ? 11 : 35 ) :
                 11;
 #ifdef PRINTALGO

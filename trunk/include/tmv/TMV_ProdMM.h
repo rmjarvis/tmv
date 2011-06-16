@@ -39,19 +39,25 @@
 
 //#define XDEBUG_PRODMM
 
+#ifdef XDEBUG_PRODMM
+#include <iostream>
+#include "TMV_MatrixIO.h"
+#endif
+
 namespace tmv {
 
     //
     // Matrix * Matrix
     //
 
-#if 1
     // These first few are for matrices that aren't calculated yet.
     // Some BaseMatrix objects are overloaded (e.g. Permutation), but
     // others aren't, in which case they calculate the matrix first
     // and then call MultMM.  If a BaseMatrix_Calc type doesn't overload
     // this function, then an infinite loop will result, so make sure
     // to remember to overload these for any new matrix types
+    // Also, this effects the intermediate calculation for things like
+    // D = A * B * C, where (A*B) needs a temporary.
     template <bool add, int ix, class T, class M1, class M2, class M3>
     static TMV_INLINE void MultMM(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
@@ -84,7 +90,6 @@ namespace tmv {
         const T& x, const BaseMatrix<M1>& m1,
         const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     { AliasMultMM<add>(Scaling<0,T>(x),m1.mat(),m2.mat(),m3.mat()); }
-#endif
 
     template <bool add, class M1, class M2, class M3>
     static TMV_INLINE void MultMM(
@@ -151,7 +156,7 @@ namespace tmv {
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
             std::cout<<"m3 = "<<TMV_Text(m3)<<std::endl;
-            if (m3.colsize() < 100 && m3.rowsize() < 100 && m1.colsize() < 100) {
+            if (m3.colsize()<100 && m3.rowsize()<100 && m1.colsize()<100) {
                 std::cout<<"m1 = "<<m1i<<std::endl;
                 std::cout<<"m2 = "<<m2i<<std::endl;
                 std::cout<<"m3 = "<<m3i<<std::endl;
@@ -279,7 +284,7 @@ namespace tmv {
             TMVAssert(colsize() == m3.colsize());
             TMVAssert(rowsize() == m3.rowsize());
 #ifdef XDEBUG_PRODMM
-            MultMM_Debug<false>(x,m1.mat(),m2.mat(),m3.mat());
+            MultMM_Debug<false>(x,m1.eval(),m2.eval(),m3.mat());
 #else
             MultMM<false>(x,m1.mat(),m2.mat(),m3.mat());
 #endif
@@ -296,7 +301,7 @@ namespace tmv {
             TMVAssert(colsize() == m3.colsize());
             TMVAssert(rowsize() == m3.rowsize());
 #ifdef XDEBUG_PRODMM
-            MultMM_Debug<false>(x,m1.mat(),m2.mat(),m3.mat());
+            MultMM_Debug<false>(x,m1.eval(),m2.eval(),m3.mat());
 #else
             NoAliasMultMM<false>(x,m1.mat(),m2.mat(),m3.mat());
 #endif
@@ -348,7 +353,7 @@ namespace tmv {
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix<M2>& m2)
     {
 #ifdef XDEBUG_PRODMM
-        MultEqMM_Debug(m1.mat(),Scaling<1,RT>(),m2.mat()); 
+        MultEqMM_Debug(m1.mat(),Scaling<1,RT>(),m2.eval()); 
 #else
         MultEqMM(m1.mat(),Scaling<1,RT>(),m2.mat()); 
 #endif
@@ -361,7 +366,7 @@ namespace tmv {
         BaseMatrix_Mutable<M1>& m1, const ProdXM<ix2,T2,M2>& m2)
     {
 #ifdef XDEBUG_PRODMM
-        MultEqMM_Debug(m1.mat(),m2.getX(),m2.getM().mat()); 
+        MultEqMM_Debug(m1.mat(),m2.getX(),m2.getM().eval()); 
 #else
         MultEqMM(m1.mat(),m2.getX(),m2.getM().mat()); 
 #endif
@@ -374,7 +379,7 @@ namespace tmv {
     {
 #ifdef XDEBUG_PRODMM
         MultMM_Debug<true>(
-            mm.getX(),mm.getM1().mat(),mm.getM2().mat(),m3.mat()); 
+            mm.getX(),mm.getM1().eval(),mm.getM2().eval(),m3.mat()); 
 #else
         MultMM<true>(mm.getX(),mm.getM1().mat(),mm.getM2().mat(),m3.mat()); 
 #endif
@@ -387,7 +392,7 @@ namespace tmv {
     {
 #ifdef XDEBUG_PRODMM
         MultMM_Debug<true>(
-            -mm.getX(),mm.getM1().mat(),mm.getM2().mat(),m3.mat()); 
+            -mm.getX(),mm.getM1().eval(),mm.getM2().eval(),m3.mat()); 
 #else
         MultMM<true>(-mm.getX(),mm.getM1().mat(),mm.getM2().mat(),m3.mat()); 
 #endif
@@ -402,7 +407,8 @@ namespace tmv {
 
     // -(mm)
     template <int ix, class T, class M1, class M2>
-    static TMV_INLINE ProdMM<-ix,T,M1,M2> operator-(const ProdMM<ix,T,M1,M2>& mm)
+    static TMV_INLINE ProdMM<-ix,T,M1,M2> operator-(
+        const ProdMM<ix,T,M1,M2>& mm)
     { return ProdMM<-ix,T,M1,M2>(-mm.getX(),mm.getM1(),mm.getM2()); }
 
     // x * (mm)
@@ -498,7 +504,7 @@ namespace tmv {
 
     // TMV_Text
 
-#ifdef TMV_DEBUG
+#ifdef TMV_TEXT
     template <int ix, class T, class M1, class M2>
     static inline std::string TMV_Text(const ProdMM<ix,T,M1,M2>& mm)
     {

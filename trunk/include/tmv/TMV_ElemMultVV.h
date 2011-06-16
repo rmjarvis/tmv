@@ -70,7 +70,8 @@ namespace tmv {
     template <bool add, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<0,0,add,ix,T,V1,V2,V3>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& , const V1& , const V2& , V3& ) 
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& , const V1& , const V2& , V3& ) 
         {}
     };
 
@@ -265,13 +266,13 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
             {
                 Unroller<I,N/2>::unroll(x1,v1,v2,v3);
                 Unroller<I+N/2,N-N/2>::unroll(x1,v1,v2,v3);
             }
-            static void unroll2(
+            static inline void unroll2(
                 const Scaling<ix,T>& x1,
                 const IT1& x, const IT2& y, const IT3& z)
             {
@@ -282,7 +283,7 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
             {
                 Maybe<add>::add( 
@@ -290,7 +291,7 @@ namespace tmv {
                     ZProd<false,false>::prod(
                         x1 , ZProd<false,false>(v1.cref(I) , v2.cref(I)) )); 
             }
-            static void unroll2(
+            static inline void unroll2(
                 const Scaling<ix,T>& x1,
                 const IT1& x, const IT2& y, const IT3& z)
             {
@@ -305,16 +306,16 @@ namespace tmv {
         template <int I>
         struct Unroller<I,0>
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix,T>& , const V1& , const V2& , V3& ) {}
-            static void unroll2(
+            static inline void unroll2(
                 const Scaling<ix,T>& , const IT1& , const IT2& , const IT3& )
             {}
         };
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         { Unroller<0,s>::unroll(x1,v1,v2,v3); }
-        static void call2(
+        static inline void call2(
             const int , const Scaling<ix,T>& x1,
             const IT1& x, const IT2& y, const IT3& z)
         { Unroller<0,s>::unroll2(x1,x,y,z); }

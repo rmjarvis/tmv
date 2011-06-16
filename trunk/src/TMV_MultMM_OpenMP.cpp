@@ -31,6 +31,7 @@
 
 #include "TMV_Blas.h"
 #include "tmv/TMV_MultMM_OpenMP.h"
+#include "tmv/TMV_MultMM.h"
 #include "tmv/TMV_Matrix.h"
 
 namespace tmv {
@@ -41,7 +42,7 @@ namespace tmv {
         const ConstMatrixView<T1,C1>& m1,
         const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3)
     {
-#if !defined(BLAS) && TMV_OPT > 3 && defined(_OPENMP)
+#if !defined(BLAS) && TMV_OPT > 2 && defined(_OPENMP)
         InlineMultMM_OpenMP<false>(Scaling<0,T3>(x),m1,m2,m3); 
 #else
         InstMultMM(x,m1,m2,m3);

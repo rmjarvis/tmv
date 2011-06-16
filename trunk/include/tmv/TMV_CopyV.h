@@ -33,6 +33,7 @@
 #define TMV_CopyV_H
 
 #include "TMV_BaseVector.h"
+#include <cstring>  // for memmove
 
 namespace tmv {
 
@@ -81,7 +82,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static void dounroll(const V1& v1, V2& v2)
+            static inline void dounroll(const V1& v1, V2& v2)
             {
                 Unroller<I,N/2>::dounroll(v1,v2);
                 Unroller<I+N/2,N-N/2>::dounroll(v1,v2);
@@ -90,13 +91,13 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static void dounroll(const V1& v1, V2& v2)
+            static inline void dounroll(const V1& v1, V2& v2)
             { v2.ref(I) = v1.cref(I); }
         };
         template <int I>
         struct Unroller<I,0>
-        { static void dounroll(const V1& v1, V2& v2) {} };
-        static void call(const V1& v1, V2& v2)
+        { static inline void dounroll(const V1& v1, V2& v2) {} };
+        static inline void call(const V1& v1, V2& v2)
         { Unroller<0,s>::dounroll(v1,v2); }
     };
 
@@ -104,12 +105,12 @@ namespace tmv {
     template <int s, class V1, class V2>
     struct CopyV_Helper<21,s,V1,V2>
     {
-        static void call(const V1& v1, V2& v2)
+        static inline void call(const V1& v1, V2& v2)
         {
             const int n = s == UNKNOWN ? int(v1.size()) : s;
             memmove(v2.ptr(),v1.cptr(),n*sizeof(typename V2::value_type));
         }
-        static void call2(
+        static inline void call2(
             const int n, 
             typename V1::const_iterator it1, typename V2::iterator it2)
         { memmove(it2.get(),it1.get(),n*sizeof(typename V2::value_type)); }
@@ -119,9 +120,9 @@ namespace tmv {
     template <int s, class V1, class V2>
     struct CopyV_Helper<22,s,V1,V2>
     {
-        static void call(const V1& v1, V2& v2)
+        static inline void call(const V1& v1, V2& v2)
         { std::copy(v1.begin(),v1.end(),v2.begin()); }
-        static void call2(
+        static inline void call2(
             const int n, 
             typename V1::const_iterator it1, typename V2::iterator it2)
         { std::copy(it1,it1+n,it2); }

@@ -64,7 +64,7 @@ namespace tmv {
     struct ElemInvert_Helper<11,s,V>
     {
         typedef typename V::iterator IT;
-        static void call(V& v)
+        static inline void call(V& v)
         {
             const int n = s == UNKNOWN ? int(v.size()) : s;
             call2(n,v.begin());
@@ -88,7 +88,7 @@ namespace tmv {
     struct ElemInvert_Helper<21,s,V>
     {
         typedef typename V::iterator IT;
-        static void call(V& v)
+        static inline void call(V& v)
         {
             const int n = s == UNKNOWN ? int(v.size()) : s;
             call2(n,v.begin());
@@ -134,7 +134,7 @@ namespace tmv {
     struct ElemInvert_Helper<23,s,V>
     {
         typedef typename V::iterator IT;
-        static void call(V& v)
+        static inline void call(V& v)
         {
             const int n = s == UNKNOWN ? int(v.size()) : s;
             call2(n,v.begin());
@@ -184,7 +184,7 @@ namespace tmv {
     struct ElemInvert_Helper<31,s,V>
     {
         typedef typename V::iterator IT;
-        static void call(V& v)
+        static inline void call(V& v)
         {
             const int n = s == UNKNOWN ? int(v.size()) : s;
             call2(n,v.begin());
@@ -226,7 +226,7 @@ namespace tmv {
     struct ElemInvert_Helper<33,s,V>
     {
         typedef typename V::iterator IT;
-        static void call(V& v)
+        static inline void call(V& v)
         {
             const int n = s == UNKNOWN ? int(v.size()) : s;
             call2(n,v.begin());

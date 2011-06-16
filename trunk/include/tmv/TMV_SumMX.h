@@ -556,7 +556,7 @@ namespace tmv {
 
     // TMV_Text
 
-#ifdef TMV_DEBUG
+#ifdef TMV_TEXT
     template <int ix1, class T1, class M1, class T2>
     static inline std::string TMV_Text(const SumMX<ix1,T1,M1,T2>& smx)
     {

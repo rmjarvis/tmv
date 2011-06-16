@@ -59,7 +59,7 @@ namespace tmv {
         const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void MultMM_Winograd(
+    static inline void MultMM_Winograd(
         const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
 
@@ -338,7 +338,7 @@ namespace tmv {
     template <bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Winograd_Helper<12,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static TMV_INLINE void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         {
             const int xx = UNKNOWN;

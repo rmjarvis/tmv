@@ -202,44 +202,50 @@ namespace tmv {
     { Scale(CT(x),m.mat()); }
 
     template <class M, class T>
-    static TMV_INLINE void MultEq(BaseMatrix_Mutable<M>& m, const Scaling<0,T>& x)
+    static TMV_INLINE void MultEq(
+        BaseMatrix_Mutable<M>& m, const Scaling<0,T>& x)
     { Scale(x,m.mat()); }
 
     template <class M, class T>
-    static TMV_INLINE void MultEq(BaseMatrix_Mutable<M>& m, const Scaling<1,T>& x)
+    static TMV_INLINE void MultEq(
+        BaseMatrix_Mutable<M>& m, const Scaling<1,T>& x)
     {}
 
     template <class M, class T>
-    static TMV_INLINE void MultEq(BaseMatrix_Mutable<M>& m, const Scaling<-1,T>& x)
+    static TMV_INLINE void MultEq(
+        BaseMatrix_Mutable<M>& m, const Scaling<-1,T>& x)
     { Scale(x,m.mat()); }
 
     // m /= x
     template <class M>
-    static TMV_INLINE void DivEq(BaseMatrix_Mutable<M>& m, const int x)
+    static TMV_INLINE void LDivEq(BaseMatrix_Mutable<M>& m, const int x)
     { Scale(RT(1)/RT(x),m.mat()); }
 
     template <class M>
-    static TMV_INLINE void DivEq(BaseMatrix_Mutable<M>& m, const RT x)
+    static TMV_INLINE void LDivEq(BaseMatrix_Mutable<M>& m, const RT x)
     { Scale(RT(1)/x,m.mat()); }
 
     template <class M>
-    static TMV_INLINE void DivEq(BaseMatrix_Mutable<M>& m, const CT x)
+    static TMV_INLINE void LDivEq(BaseMatrix_Mutable<M>& m, const CT x)
     { Scale(RT(1)/x,m.mat()); }
 
     template <class M>
-    static TMV_INLINE void DivEq(BaseMatrix_Mutable<M>& m, const CCT x)
+    static TMV_INLINE void LDivEq(BaseMatrix_Mutable<M>& m, const CCT x)
     { Scale(RT(1)/CT(x),m.mat()); }
 
     template <class M, class T>
-    static TMV_INLINE void DivEq(BaseMatrix_Mutable<M>& m, const Scaling<0,T>& x)
+    static TMV_INLINE void LDivEq(
+        BaseMatrix_Mutable<M>& m, const Scaling<0,T>& x)
     { Scale(RT(1)/T(x),m.mat()); }
 
     template <class M, class T>
-    static TMV_INLINE void DivEq(BaseMatrix_Mutable<M>& m, const Scaling<1,T>& x)
+    static TMV_INLINE void LDivEq(
+        BaseMatrix_Mutable<M>& m, const Scaling<1,T>& x)
     {}
 
     template <class M, class T>
-    static TMV_INLINE void DivEq(BaseMatrix_Mutable<M>& m, const Scaling<-1,T>& x)
+    static TMV_INLINE void LDivEq(
+        BaseMatrix_Mutable<M>& m, const Scaling<-1,T>& x)
     { Scale(x,m.mat()); }
 
     // -m
@@ -249,68 +255,80 @@ namespace tmv {
 
     // x * m
     template <class M>
-    static TMV_INLINE ProdXM<0,RT,M> operator*(const int x, const BaseMatrix<M>& m)
+    static TMV_INLINE ProdXM<0,RT,M> operator*(
+        const int x, const BaseMatrix<M>& m)
     { return ProdXM<0,RT,M>(RT(x),m); }
 
     template <class M>
-    static TMV_INLINE ProdXM<0,RT,M> operator*(const RT x, const BaseMatrix<M>& m)
+    static TMV_INLINE ProdXM<0,RT,M> operator*(
+        const RT x, const BaseMatrix<M>& m)
     { return ProdXM<0,RT,M>(x,m); }
 
     template <class M>
-    static TMV_INLINE ProdXM<0,CT,M> operator*(const CT x, const BaseMatrix<M>& m)
+    static TMV_INLINE ProdXM<0,CT,M> operator*(
+        const CT x, const BaseMatrix<M>& m)
     { return ProdXM<0,CT,M>(x,m); }
 
     template <class M>
-    static TMV_INLINE ProdXM<0,CT,M> operator*(const CCT x, const BaseMatrix<M>& m)
+    static TMV_INLINE ProdXM<0,CT,M> operator*(
+        const CCT x, const BaseMatrix<M>& m)
     { return CT(x)*m; }
 
     template <class M, int ix, class T>
-    static TMV_INLINE ProdXM<ix,T,M> operator*(const Scaling<ix,T>& x, 
-                                    const BaseMatrix<M>& m)
+    static TMV_INLINE ProdXM<ix,T,M> operator*(
+        const Scaling<ix,T>& x, const BaseMatrix<M>& m)
     { return ProdXM<ix,T,M>(T(x),m); }
 
     // m * x
     template <class M>
-    static TMV_INLINE ProdXM<0,RT,M> operator*(const BaseMatrix<M>& m, const int x)
+    static TMV_INLINE ProdXM<0,RT,M> operator*(
+        const BaseMatrix<M>& m, const int x)
     { return RT(x)*m; }
 
     template <class M>
-    static TMV_INLINE ProdXM<0,RT,M> operator*(const BaseMatrix<M>& m, const RT x)
+    static TMV_INLINE ProdXM<0,RT,M> operator*(
+        const BaseMatrix<M>& m, const RT x)
     { return x*m; }
 
     template <class M>
-    static TMV_INLINE ProdXM<0,CT,M> operator*(const BaseMatrix<M>& m, const CT x)
+    static TMV_INLINE ProdXM<0,CT,M> operator*(
+        const BaseMatrix<M>& m, const CT x)
     { return x*m; }
 
     template <class M>
-    static TMV_INLINE ProdXM<0,CT,M> operator*(const BaseMatrix<M>& m, const CCT x)
+    static TMV_INLINE ProdXM<0,CT,M> operator*(
+        const BaseMatrix<M>& m, const CCT x)
     { return CT(x)*m; }
 
     template <class M, int ix, class T>
-    static TMV_INLINE ProdXM<ix,T,M> operator*(const BaseMatrix<M>& m,
-                                    const Scaling<ix,T>& x)
+    static TMV_INLINE ProdXM<ix,T,M> operator*(
+        const BaseMatrix<M>& m, const Scaling<ix,T>& x)
     { return ProdXM<ix,T,M>(T(x),m); }
 
     // m / x
     template <class M>
-    static TMV_INLINE ProdXM<0,RT,M> operator/(const BaseMatrix<M>& m, const int x)
+    static TMV_INLINE ProdXM<0,RT,M> operator/(
+        const BaseMatrix<M>& m, const int x)
     { return (RT(1)/RT(x))*m; }
 
     template <class M>
-    static TMV_INLINE ProdXM<0,RT,M> operator/(const BaseMatrix<M>& m, const RT x)
+    static TMV_INLINE ProdXM<0,RT,M> operator/(
+        const BaseMatrix<M>& m, const RT x)
     { return (RT(1)/x)*m; }
 
     template <class M>
-    static TMV_INLINE ProdXM<0,CT,M> operator/(const BaseMatrix<M>& m, const CT x)
+    static TMV_INLINE ProdXM<0,CT,M> operator/(
+        const BaseMatrix<M>& m, const CT x)
     { return (RT(1)/x)*m; }
 
     template <class M>
-    static TMV_INLINE ProdXM<0,CT,M> operator/(const BaseMatrix<M>& m, const CCT x)
+    static TMV_INLINE ProdXM<0,CT,M> operator/(
+        const BaseMatrix<M>& m, const CCT x)
     { return (RT(1)/CT(x))*m; }
 
     template <class M, int ix, class T>
-    static TMV_INLINE ProdXM<ix,T,M> operator/(const BaseMatrix<M>& m,
-                                    const Scaling<ix,T>& x)
+    static TMV_INLINE ProdXM<ix,T,M> operator/(
+        const BaseMatrix<M>& m, const Scaling<ix,T>& x)
     { return ProdXM<ix,T,M>(RT(1)/T(x),m); }
 
 #undef RT
@@ -335,7 +353,8 @@ namespace tmv {
     { return ProdXM<0,T,M>(RT(x)*pxm.getX(),pxm.getM()); }
 
     template <int ix, class T, class M>
-    static TMV_INLINE ProdXM<0,T,M> operator*(const RT x, const ProdXM<ix,T,M>& pxm)
+    static TMV_INLINE ProdXM<0,T,M> operator*(
+        const RT x, const ProdXM<ix,T,M>& pxm)
     { return ProdXM<0,T,M>(x*pxm.getX(),pxm.getM()); }
 
     template <int ix, class T, class M>
@@ -434,7 +453,7 @@ namespace tmv {
     { return SameStorage(m1.getM().mat(),m2.getM().mat()); }
 #endif
 
-#ifdef TMV_DEBUG
+#ifdef TMV_TEXT
     template <int ix, class T, class M>
     static inline std::string TMV_Text(const ProdXM<ix,T,M>& pxm)
     {

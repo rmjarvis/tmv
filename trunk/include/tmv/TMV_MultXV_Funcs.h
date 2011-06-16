@@ -45,15 +45,15 @@ namespace tmv {
 
     // From TMV_MultXV.h:
     template <bool add, int ix, class T, class V1, class V2>
-    static void MultXV(
+    static inline void MultXV(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         BaseVector_Mutable<V2>& v2);
     template <bool add, int ix, class T, class V1, class V2>
-    static void NoAliasMultXV(
+    static inline void NoAliasMultXV(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         BaseVector_Mutable<V2>& v2);
     template <bool add, int ix, class T, class V1, class V2>
-    static void AliasMultXV(
+    static inline void AliasMultXV(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         BaseVector_Mutable<V2>& v2);
 

@@ -66,10 +66,12 @@ namespace tmv {
         const BaseMatrix<M2>& m2, BaseVector_Mutable<V3>& v3)
     { AliasLDiv(x,v1.calc(),m2.calc(),v3.vec()); }
 
+#if 0
     template <class V1, class M2>
     static TMV_INLINE void LDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
     { LDivEq(v1.vec(),m2.calc()); }
+#endif
     template <class V1, class M2>
     static TMV_INLINE void NoAliasLDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
@@ -279,9 +281,6 @@ namespace tmv {
 
         TMV_INLINE size_t size() const { return m2.rowsize(); }
 
-        value_type cref(int i) const
-        { return this->calc().cref(i); }
-
         template <class V3>
         TMV_INLINE_ND void assignTo(BaseVector_Mutable<V3>& v3) const
         {
@@ -360,9 +359,6 @@ namespace tmv {
         TMV_INLINE const M2& getM() const { return m2; }
 
         TMV_INLINE size_t size() const { return m2.colsize(); }
-
-        value_type cref(int i) const
-        { return this->calc().cref(i); }
 
         template <class V3>
         TMV_INLINE_ND void assignTo(BaseVector_Mutable<V3>& v3) const
@@ -446,19 +442,19 @@ namespace tmv {
 
     // v /= m
     template <class V1, class M2>
-    static TMV_INLINE void DivEq(
+    static TMV_INLINE void LDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
     {
 #ifdef XDEBUG_QUOTVM
         LDivEq_Debug(v1.vec(),m2.mat()); 
 #else
-        LDivEq(v1.vec(),m2.mat()); 
+        LDivEq(v1.vec(),m2.calc()); 
 #endif
     }
 
     // v /= xm
     template <class V1, int ix2, class T2, class M2>
-    static TMV_INLINE void DivEq(
+    static TMV_INLINE void LDivEq(
         BaseVector_Mutable<V1>& v1, const ProdXM<ix2,T2,M2>& m2)
     {
 #ifdef XDEBUG_QUOTVM
@@ -562,7 +558,8 @@ namespace tmv {
 
     // -(v/m)
     template <int ix, class T, class V1, class M2>
-    static TMV_INLINE QuotVM<-ix,T,V1,M2> operator-(const QuotVM<ix,T,V1,M2>& qvm)
+    static TMV_INLINE QuotVM<-ix,T,V1,M2> operator-(
+        const QuotVM<ix,T,V1,M2>& qvm)
     { return QuotVM<-ix,T,V1,M2>(-qvm.getX(),qvm.getV(),qvm.getM()); }
 
     // x * (v/m)
@@ -647,7 +644,8 @@ namespace tmv {
 
     // -(v/m)
     template <int ix, class T, class V1, class M2>
-    static TMV_INLINE RQuotVM<-ix,T,V1,M2> operator-(const RQuotVM<ix,T,V1,M2>& qvm)
+    static TMV_INLINE RQuotVM<-ix,T,V1,M2> operator-(
+        const RQuotVM<ix,T,V1,M2>& qvm)
     { return RQuotVM<-ix,T,V1,M2>(-qvm.getX(),qvm.getV(),qvm.getM()); }
 
     // x * (v/m)
@@ -729,7 +727,7 @@ namespace tmv {
 
     // TMV_Text
 
-#ifdef TMV_DEBUG
+#ifdef TMV_TEXT
     template <int ix, class T, class V1, class M2>
     static inline std::string TMV_Text(const QuotVM<ix,T,V1,M2>& qvm)
     {

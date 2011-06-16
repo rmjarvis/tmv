@@ -308,6 +308,11 @@ namespace tmv {
         Divider<T>& operator=(const Divider<T>&);
     };
 
+    // Don't have CheckDecomp be a method of Divider, since it needs
+    // to be different for each kind of Divider class, so it should
+    // be virtual.  But you can't have virtual functions with template
+    // arguments.  So do it here with explicit dynamic_cast checks
+    // to determine which kind of divider it is.
     template <class T, class M2>
     static bool CheckDecomp(
         const Divider<T>* div, const BaseMatrix_Calc<M2>& m,
@@ -315,10 +320,14 @@ namespace tmv {
     {
         TMVAssert(div);
         typedef typename M2::lud_type lud_type1;
-        // Traits<>::type removes any reference that is part of lud_type1
+        typedef typename M2::qrd_type qrd_type1;
+        // Traits<>::type removes any reference that is part of lud_type1, etc.
         typedef typename Traits<lud_type1>::type lud_type;
+        typedef typename Traits<qrd_type1>::type qrd_type;
         if (dynamic_cast<const lud_type*>(div)) {
             return CheckDecomp(static_cast<const lud_type&>(*div),m,fout);
+        } else if (dynamic_cast<const qrd_type*>(div)) {
+            return CheckDecomp(static_cast<const qrd_type&>(*div),m,fout);
         } else {
             *fout << "Couldn't cast divider to a known type.\n";
             return false;
@@ -333,8 +342,9 @@ namespace tmv {
         typedef const Divider<T> div_type;
         typedef const div_type* getdiv_type;
 
-        // Constructor starts with a default of LU or QR depending on 
-        // whether matrix is square.
+        // Start with XX (= 0) and if we request divtype using getDivType,
+        // and it hasn't been manually set yet, then it gets reset to either 
+        // LU or QR depending on whether the matrix is square.
         DivHelper() : divtype(tmv::XX) {}
 
         ~DivHelper() {}
@@ -367,7 +377,7 @@ namespace tmv {
 
         DivType getDivType() const 
         {
-            if (divtype & tmv::XX) resetDivType();
+            if ((divtype & tmv::DivTypeFlags) == tmv::XX) resetDivType();
             return divtype & tmv::DivTypeFlags; 
         }
 
@@ -386,11 +396,15 @@ namespace tmv {
         getdiv_type getDiv() const
         { return divider.get(); }
 
+        void resetDivType() const
+        { divideUsing(mIsSquare() ? tmv::LU : tmv::QR); }
+
         // Here are the virtual functions that need to be 
         // defined in the derived class:
         virtual void setDiv() const = 0;
-        virtual void resetDivType() const = 0;
         virtual Matrix<T> getM() const = 0;
+        virtual bool mIsSquare() const = 0;
+
 
     protected:
 

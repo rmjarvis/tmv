@@ -64,8 +64,10 @@ namespace tmv {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         typedef typename V3::iterator IT3;
-        static TMV_INLINE void call(const Scaling<ix,T>&, const V1&, const V2&, V3&) {}
-        static TMV_INLINE void call2(int, const Scaling<ix,T>&, IT1, IT2, IT3) {}
+        static TMV_INLINE void call(
+            const Scaling<ix,T>&, const V1&, const V2&, V3&) {}
+        static TMV_INLINE void call2(
+            int, const Scaling<ix,T>&, IT1, IT2, IT3) {}
     };
 
     // algo 11: simple for loop
@@ -856,7 +858,8 @@ namespace tmv {
 #endif
             ElemDivVV_Helper<algo,s,ix,T,V1,V2,V3>::call(x,v1,v2,v3); 
         }
-        static TMV_INLINE void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
+        static TMV_INLINE void call2(
+            int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
             TMVStaticAssert(!V3::_conj);
             ElemDivVV_Helper<algo,s,ix,T,V1,V2,V3>::call2(n,x,A,B,C);
@@ -1023,7 +1026,7 @@ namespace tmv {
     }
 
     template <int ix, class T, class V1, class M2, class V3>
-    static inline void LDiv(
+    static void LDiv(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
@@ -1032,7 +1035,7 @@ namespace tmv {
     }
 
     template <int ix, class T, class V1, class M2, class V3>
-    static inline void NoAliasLDiv(
+    static void NoAliasLDiv(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
@@ -1041,7 +1044,7 @@ namespace tmv {
     }
 
     template <int ix, class T, class V1, class M2, class V3>
-    static inline void InlineLDiv(
+    static void InlineLDiv(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
     {
@@ -1050,7 +1053,7 @@ namespace tmv {
     }
 
     template <int ix, class T, class V1, class M2, class V3>
-    static inline void AliasLDiv(
+    static void AliasLDiv(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
     {

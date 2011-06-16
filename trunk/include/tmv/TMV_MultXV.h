@@ -80,7 +80,8 @@ namespace tmv {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::iterator IT2;
         static TMV_INLINE void call(const Scaling<ix,T>& , const V1& , V2& ) {}
-        static TMV_INLINE void call2(int n, const Scaling<ix,T>& , IT1 , IT2 ) {}
+        static TMV_INLINE void call2(
+            int n, const Scaling<ix,T>& , IT1 , IT2 ) {}
     };
 
     // algo 1: trivial: ix == 1, !add, so call Copy
@@ -117,7 +118,7 @@ namespace tmv {
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::iterator IT2;
-        static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static inline void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             typedef typename V1::const_flatten_type V1f;
             typedef typename V2::flatten_type V2f;
@@ -126,7 +127,7 @@ namespace tmv {
             V2f v2f = v2.flatten();
             MultXV_Helper<-4,s2,add,ix,T,V1f,V2f>::call(x,v1f,v2f);
         }
-        static void call2(
+        static inline void call2(
             const int n, const Scaling<ix,T>& x, 
             const IT1& A, const IT2& B)
         {
@@ -146,7 +147,7 @@ namespace tmv {
     template <int s, int ix, class T, class V1, class V2>
     struct MultXV_Helper<3,s,true,ix,T,V1,V2>
     {
-        static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static inline void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
         { NoAliasMultXV<true>(x,v1.copy(),v2); }
     };
 
@@ -154,7 +155,7 @@ namespace tmv {
     template <int s, int ix, class T, class V1, class V2>
     struct MultXV_Helper<4,s,false,ix,T,V1,V2>
     {
-        static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static inline void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             CopyV_Helper<-3,s,V1,V2>::call(v1,v2);
             ScaleV_Helper<-3,s,ix,T,V2>::call(x,v2);
@@ -167,7 +168,7 @@ namespace tmv {
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::iterator IT2;
-        static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static inline void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             const int n = s == UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.begin().nonConj(),v2.begin());
@@ -187,7 +188,7 @@ namespace tmv {
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::iterator IT2;
-        static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static inline void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             const int n = s == UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.begin().nonConj(),v2.begin());
@@ -215,7 +216,7 @@ namespace tmv {
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::iterator IT2;
-        static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static inline void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             const int n = s == UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.begin().nonConj(),v2.begin());
@@ -248,13 +249,13 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix,T>& x, const V1& v1, V2& v2)
             {
                 Unroller<I,N/2>::unroll(x,v1,v2);
                 Unroller<I+N/2,N-N/2>::unroll(x,v1,v2);
             }
-            static void unroll2(
+            static inline void unroll2(
                 const Scaling<ix,T>& x, const IT1& A, const IT2& B)
             {
                 Unroller<I,N/2>::unroll2(x,A,B);
@@ -264,13 +265,13 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix,T>& x, const V1& v1, V2& v2)
             {
                 Maybe<add>::add(
                     v2.ref(I), ZProd<false,false>::prod(x , v1.cref(I))); 
             }
-            static void unroll2(
+            static inline void unroll2(
                 const Scaling<ix,T>& x, const IT1& A, const IT2& B)
             {
                 const bool c1 = V1::_conj;
@@ -280,15 +281,15 @@ namespace tmv {
         template <int I>
         struct Unroller<I,0>
         {
-            static void unroll(const Scaling<ix,T>& , const V1& , V2& ) 
+            static inline void unroll(const Scaling<ix,T>& , const V1& , V2& ) 
             {}
-            static void unroll2(
+            static inline void unroll2(
                 const Scaling<ix,T>& , const IT1& , const IT2& ) 
             {}
         };
-        static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static inline void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
         { Unroller<0,s>::unroll(x,v1,v2); }
-        static void call2(
+        static inline void call2(
             const int , const Scaling<ix,T>& x, const IT1& A, const IT2& B)
         { Unroller<0,s>::unroll2(x,A,B); }
     };
@@ -301,7 +302,7 @@ namespace tmv {
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::iterator IT2;
-        static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static inline void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             const int n = s == UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.begin().nonConj(),v2.begin());
@@ -362,7 +363,7 @@ namespace tmv {
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::iterator IT2;
-        static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static inline void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             const int n = s == UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.begin().nonConj(),v2.begin());
@@ -419,7 +420,7 @@ namespace tmv {
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::iterator IT2;
-        static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static inline void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             const int n = s == UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.begin().nonConj(),v2.begin());
@@ -472,7 +473,7 @@ namespace tmv {
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::iterator IT2;
-        static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static inline void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             const int n = s == UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.begin().nonConj(),v2.begin());
@@ -533,7 +534,7 @@ namespace tmv {
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::iterator IT2;
-        static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static inline void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             const int n = s == UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.begin().nonConj(),v2.begin());
@@ -600,7 +601,7 @@ namespace tmv {
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::iterator IT2;
-        static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static inline void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             const int n = s == UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.begin().nonConj(),v2.begin());
@@ -650,7 +651,7 @@ namespace tmv {
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::iterator IT2;
-        static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static inline void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             const int n = s == UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.begin().nonConj(),v2.begin());
@@ -697,7 +698,7 @@ namespace tmv {
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::iterator IT2;
-        static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static inline void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             const int n = s == UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.begin().nonConj(),v2.begin());
@@ -730,7 +731,7 @@ namespace tmv {
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::iterator IT2;
-        static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static inline void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             const int n = s == UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.begin().nonConj(),v2.begin());
@@ -779,7 +780,7 @@ namespace tmv {
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::iterator IT2;
-        static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static inline void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             const int n = s == UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.begin().nonConj(),v2.begin());
@@ -819,7 +820,8 @@ namespace tmv {
     template <int s, int ix, class T, class V1, class V2>
     struct MultXV_Helper<90,s,true,ix,T,V1,V2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             typedef typename V2::value_type VT;
             VT xx = Traits<VT>::convert(T(x));
@@ -829,7 +831,8 @@ namespace tmv {
     template <int s, int ix, class T, class V1, class V2>
     struct MultXV_Helper<90,s,false,ix,T,V1,V2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             typedef typename V2::value_type VT;
             VT xx = Traits<VT>::convert(T(x));
@@ -841,7 +844,8 @@ namespace tmv {
     template <int s, int ix, class T, class V1, class V2>
     struct MultXV_Helper<91,s,true,ix,T,V1,V2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             typedef typename V2::value_type VT;
             VT xx = Traits<VT>::convert(T(x));
@@ -851,7 +855,8 @@ namespace tmv {
     template <int s, int ix, class T, class V1, class V2>
     struct MultXV_Helper<91,s,false,ix,T,V1,V2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             typedef typename V2::value_type VT;
             VT xx = Traits<VT>::convert(T(x));
@@ -863,7 +868,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class V1, class V2>
     struct MultXV_Helper<97,s,add,ix,T,V1,V2>
     {
-        static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static inline void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             typedef typename V1::const_conjugate_type V1c;
             typedef typename V2::conjugate_type V2c;
@@ -877,7 +882,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class V1, class V2>
     struct MultXV_Helper<197,s,add,ix,T,V1,V2>
     {
-        static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static inline void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             typedef typename V1::const_conjugate_type V1c;
             typedef typename V2::conjugate_type V2c;
@@ -925,7 +930,8 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class V1, class V2>
     struct MultXV_Helper<99,s,add,ix,T,V1,V2>
     {
-        static void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             typedef typename V1::value_type T1;
             typedef typename V2::value_type T2;
@@ -996,7 +1002,8 @@ namespace tmv {
                 ( allunit && xreal && v1real && sizeof(RT2) == 4 ) ? 13 :
                 ( allunit && xreal && v1real && sizeof(RT2) == 8 ) ? 12 :
                 11 ) };
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             TMVStaticAssert(!V2::_conj);
 #ifdef PRINTALGO_XV
@@ -1009,8 +1016,7 @@ namespace tmv {
             MultXV_Helper<algo,s,add,ix,T,V1,V2>::call(x,v1,v2); 
         }
         static TMV_INLINE void call2(
-            const int n, const Scaling<ix,T>& x,
-            const IT1& it1, const IT2& it2)
+            int n, const Scaling<ix,T>& x, const IT1& it1, const IT2& it2)
         {
             TMVStaticAssert(!V2::_conj);
 #ifdef PRINTALGO_XV
@@ -1026,7 +1032,8 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class V1, class V2>
     struct MultXV_Helper<-3,s,add,ix,T,V1,V2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const V1& v1, V2& v2)
         { MultXV_Helper<-4,s,add,ix,T,V1,V2>::call(x,v1,v2); }
     };
 
@@ -1034,7 +1041,8 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class V1, class V2>
     struct MultXV_Helper<-2,s,add,ix,T,V1,V2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             typedef typename V1::value_type T1;
             typedef typename V2::value_type T2;
@@ -1060,7 +1068,8 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class V1, class V2>
     struct MultXV_Helper<-1,s,add,ix,T,V1,V2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const V1& v1, V2& v2)
         {
             const bool noclobber = VStepHelper<V1,V2>::noclobber;
             const bool checkalias =

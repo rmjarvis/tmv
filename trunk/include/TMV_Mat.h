@@ -65,8 +65,14 @@
 #include "tmv/TMV_LUDiv.h"
 #include "tmv/TMV_LUInverse.h"
 
+#include "tmv/TMV_QRD.h"
+#include "tmv/TMV_QRDecompose.h"
+#include "tmv/TMV_QRDiv.h"
+#include "tmv/TMV_QRInverse.h"
+#include "tmv/TMV_PackedQ.h"
+#include "tmv/TMV_UnpackQ.h"
+
 #if 0
-#include "tmv/TMV_QR.h"
 #include "tmv/TMV_QRP.h"
 #include "tmv/TMV_SVD.h"
 #endif

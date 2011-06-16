@@ -14,7 +14,7 @@ template <class T> void TestSmallSquareDiv_f();
 template <class T> void TestSmallSquareDiv_g();
 
 template <class T, tmv::StorageType stor, int N> 
-static void TestSmallSquareDiv_Basic()
+static void TestSmallSquareDiv_Basic(std::string label)
 {
     typedef typename tmv::Traits<T>::float_type FT;
 
@@ -28,16 +28,11 @@ static void TestSmallSquareDiv_Basic()
     if (N > 3) m(3,0) = -10;
     if (N > 2) m(2,2) = 30;
 
-    tmv::SmallVector<T,N> b(T(7));
+    tmv::SmallVector<T,N> b = 2.5*m.row(0);
     b(0) = 2;
     if (N > 1) b(1) = -10;
     if (N > 2) b(2) = 5;
     if (N > 3) b(3) = -5;
-
-    if (showstartdone) {
-        std::cout<<"Start TestSmallSquareDiv\n";
-        std::cout<<"m = "<<TMV_Text(m)<<" "<<m<<std::endl;
-    }
 
     tmv::SmallMatrix<T,N,N> minv = m.inverse();
     T kappa = Norm(m) * Norm(minv);
@@ -51,7 +46,7 @@ static void TestSmallSquareDiv_Basic()
         std::cout<<"Norm(id-I) = "<<Norm(id-T(1))<<std::endl;
         std::cout<<"eps = "<<eps<<std::endl;
     }
-    Assert(Norm(id-T(1)) < eps,"Square Inverse");
+    Assert(Norm(id-T(1)) < eps,label+" Square Inverse");
 
     tmv::SmallVector<T,N> x = b/m;
     tmv::SmallVector<T,N> b2 = m*x;
@@ -62,7 +57,7 @@ static void TestSmallSquareDiv_Basic()
         std::cout<<"Norm(b-b2) = "<<Norm(b-b2)<<std::endl;
         std::cout<<"eps*Norm(b) = "<<eps*Norm(b)<<std::endl;
     }
-    Assert(Norm(b2-b) < eps*Norm(b),"Square b/m");
+    Assert(Norm(b2-b) < eps*Norm(b),label+" Square b/m");
 
     x = b%m;
     b2 = x*m;
@@ -73,7 +68,7 @@ static void TestSmallSquareDiv_Basic()
         std::cout<<"Norm(b-b2) = "<<Norm(b-b2)<<std::endl;
         std::cout<<"eps*Norm(b) = "<<eps*Norm(b)<<std::endl;
     }
-    Assert(Norm(b2-b) < eps*Norm(b),"Square b%m");
+    Assert(Norm(b2-b) < eps*Norm(b),label+" Square b%m");
 
     tmv::SmallMatrix<T,N,N> mtm = m.adjoint() * m;
     tmv::SmallMatrix<T,N,N> mata;
@@ -86,7 +81,7 @@ static void TestSmallSquareDiv_Basic()
         std::cout<<"Norm(diff) = "<<Norm(mata-mtm.inverse())<<std::endl;
         std::cout<<"c.f. eps*Norm(mata) = "<<eps*kappa<<" * "<<Norm(mata)<<" = "<<eps*Norm(mata)<<std::endl;
     }
-    Assert(Norm(mata-mtm.inverse()) < eps*kappa*Norm(mata),"Square inverseATA");
+    Assert(Norm(mata-mtm.inverse()) < eps*kappa*Norm(mata),label+" Square inverseATA");
 
     T mdet = Det(tmv::Matrix<T>(m));
     if (T(1)/tmv::TMV_ABS(mdet) > T(0)) {
@@ -100,11 +95,11 @@ static void TestSmallSquareDiv_Basic()
             std::cout<<"abs(logdet-log(mdet)) = "<<
                 std::abs(m.logDet()-std::log(std::abs(mdet)))<<std::endl;
         }
-        Assert(std::abs(Det(m)-mdet) < eps*std::abs(mdet),"Square Det");
+        Assert(std::abs(Det(m)-mdet) < eps*std::abs(mdet),label+" Square Det");
         T sdet;
         Assert(std::abs(m.logDet(&sdet)-std::log(std::abs(mdet))) < eps,
                "Square LogDet");
-        Assert(std::abs(sdet-mdet/std::abs(mdet)) < eps,"Square LogDet - sign");
+        Assert(std::abs(sdet-mdet/std::abs(mdet)) < eps,label+" Square LogDet - sign");
     }
 
     tmv::SmallMatrix<std::complex<T>,N,N,stor> c = m*std::complex<T>(2,3);
@@ -130,23 +125,23 @@ static void TestSmallSquareDiv_Basic()
             std::cout<<"abs(logdet-log(cdet)) = "<<
                 std::abs(c.logDet()-std::log(cdet))<<std::endl;
         }
-        Assert(std::abs(Det(c)-cdet) < ceps*std::abs(cdet),"Square CDet");
+        Assert(std::abs(Det(c)-cdet) < ceps*std::abs(cdet),label+" Square CDet");
         std::complex<T> csdet;
         Assert(std::abs(c.logDet(&csdet)-std::log(std::abs(cdet))) < eps,
                "Square CLogDet");
-        Assert(std::abs(csdet-cdet/std::abs(cdet)) < eps,"Square CLogDet - sign");
+        Assert(std::abs(csdet-cdet/std::abs(cdet)) < eps,label+" Square CLogDet - sign");
     }
 
     tmv::SmallMatrix<std::complex<T>,N,N> cid = c*cinv;
-    Assert(Norm(cid-T(1)) < ceps,"Square CInverse");
+    Assert(Norm(cid-T(1)) < ceps,label+" Square CInverse");
 
     tmv::SmallMatrix<std::complex<T>,N,N> ctc = c.adjoint() * c;
     tmv::SmallMatrix<std::complex<T>,N,N> cata;
     tmv::SmallMatrix<std::complex<T>,N,N> ctcinv = ctc.inverse();
     c.makeInverseATA(cata);
-    Assert(Norm(cata-ctcinv) < ceps*ckappa*Norm(cata),"Square CInverseATA");
+    Assert(Norm(cata-ctcinv) < ceps*ckappa*Norm(cata),label+" Square CInverseATA");
 
-    tmv::SmallVector<std::complex<T>,N> e;
+    tmv::SmallVector<std::complex<T>,N> e = std::complex<T>(2.5,1.5)*c.row(0);
     e = b*std::complex<T>(1,2);
     if (N > 1) e(1) += std::complex<T>(-1,5);
     if (N > 2) e(2) -= std::complex<T>(-1,5);
@@ -154,30 +149,30 @@ static void TestSmallSquareDiv_Basic()
     // test real / complex
     tmv::SmallVector<std::complex<T>,N> y = b/c;
     tmv::SmallVector<std::complex<T>,N> b3 = c*y;
-    Assert(Norm(b3-b) < ceps*Norm(b),"Square b/c");
+    Assert(Norm(b3-b) < ceps*Norm(b),label+" Square b/c");
     y = b%c;
     b3 = y*c;
-    Assert(Norm(b3-b) < ceps*Norm(b),"Square b%c");
+    Assert(Norm(b3-b) < ceps*Norm(b),label+" Square b%c");
 
     // test complex / real
     y = e/m;
     b3 = m*y;
-    Assert(Norm(b3-e) < eps*Norm(e),"Square e/m");
+    Assert(Norm(b3-e) < eps*Norm(e),label+" Square e/m");
     y = e%m;
     b3 = y*m;
-    Assert(Norm(b3-e) < eps*Norm(e),"Square e%m");
+    Assert(Norm(b3-e) < eps*Norm(e),label+" Square e%m");
 
     // test complex / complex
     y = e/c;
     b3 = c*y;
-    Assert(Norm(b3-e) < ceps*Norm(e),"Square e/c");
+    Assert(Norm(b3-e) < ceps*Norm(e),label+" Square e/c");
     y = e%c;
     b3 = y*c;
-    Assert(Norm(b3-e) < ceps*Norm(e),"Square e%c");
+    Assert(Norm(b3-e) < ceps*Norm(e),label+" Square e%c");
 }
 
 template <class T, tmv::StorageType stor, int N> 
-static void TestSmallSquareDiv_Arith()
+static void TestSmallSquareDiv_Arith(std::string label)
 {
     tmv::SmallMatrix<T,N,N,stor> m;
 
@@ -227,79 +222,20 @@ static void TestSmallSquareDiv_Arith()
     tmv::SmallMatrix<T,3*N,N,stor> a5b = a5;
     tmv::SmallMatrix<std::complex<T>,3*N,N,stor> c5b = c5;
 
-    TestMatrixDivArith3a<T>(tmv::LU,a1,c1,"Square"); 
-    TestMatrixDivArith3d<T>(tmv::LU,a1,b,x,c1,e,y,"V/Square"); 
-    TestMatrixDivArith3e<T>(tmv::LU,a1,b,x,c1,e,y,"V/Square"); 
-    TestMatrixDivArith3b<T>(tmv::LU,a1,a2a,a3,c1,c2a,c3,"Square/Square"); 
-    TestMatrixDivArith3b<T>(tmv::LU,a1,a2b,a3,c1,c2b,c3,"Square/Square"); 
-    TestMatrixDivArith3c<T>(tmv::LU,a1,a2a,a3,c1,c2a,c3,"Square/Square"); 
-    TestMatrixDivArith3c<T>(tmv::LU,a1,a2b,a3,c1,c2b,c3,"Square/Square"); 
-    TestMatrixDivArith3b<T>(tmv::LU,a1,a4,a4b,c1,c4,c4b,"NonSquare/Square");
-    TestMatrixDivArith3c<T>(tmv::LU,a1,a5,a5b,c1,c5,c5b,"NonSquare/Square");
-
-#if XTEST & 32
-    tmv::SmallMatrix<T,N,N,stor,tmv::FortranStyle> a1f = a1;
-    tmv::SmallMatrix<std::complex<T>,N,N,stor,tmv::FortranStyle> c1f = c1;
-
-    tmv::SmallVector<T,N,tmv::FortranStyle> bf = b;
-    tmv::SmallVector<std::complex<T>,N,tmv::FortranStyle> ef = e;
-    tmv::SmallVector<T,N,tmv::FortranStyle> xf = x;
-    tmv::SmallVector<std::complex<T>,N,tmv::FortranStyle> yf = y;
-
-    tmv::SmallMatrix<T,N,N,tmv::ColMajor,tmv::FortranStyle> a2fa = a2a;
-    tmv::SmallMatrix<std::complex<T>,N,N,tmv::ColMajor,tmv::FortranStyle> c2fa = c2a;
-    tmv::SmallMatrix<T,N,N,tmv::RowMajor,tmv::FortranStyle> a2fb = a2b;
-    tmv::SmallMatrix<std::complex<T>,N,N,tmv::RowMajor,tmv::FortranStyle> c2fb = c2b;
-    tmv::SmallMatrix<T,N,N,stor,tmv::FortranStyle> a3f = a3;
-    tmv::SmallMatrix<std::complex<T>,N,N,stor,tmv::FortranStyle> c3f = c3;
-
-    tmv::SmallMatrix<T,N,3*N,stor,tmv::FortranStyle> a4f = a4;
-    tmv::SmallMatrix<std::complex<T>,N,3*N,stor,tmv::FortranStyle> c4f = c4;
-    tmv::SmallMatrix<T,N,3*N,stor,tmv::FortranStyle> a4fb = a4;
-    tmv::SmallMatrix<std::complex<T>,N,3*N,stor,tmv::FortranStyle> c4fb = c4;
-
-    tmv::SmallMatrix<T,3*N,N,stor,tmv::FortranStyle> a5f = a5;
-    tmv::SmallMatrix<std::complex<T>,3*N,N,stor,tmv::FortranStyle> c5f = c5;
-    tmv::SmallMatrix<T,3*N,N,stor,tmv::FortranStyle> a5fb = a5;
-    tmv::SmallMatrix<std::complex<T>,3*N,N,stor,tmv::FortranStyle> c5fb = c5;
-
-    TestMatrixDivArith3a<T>(tmv::LU,a1f,c1f,"Square"); 
-
-    TestMatrixDivArith3d<T>(tmv::LU,a1f,b,x,c1f,e,y,"V/Square"); 
-    TestMatrixDivArith3d<T>(tmv::LU,a1f,bf,x,c1f,ef,y,"V/Square"); 
-    TestMatrixDivArith3d<T>(tmv::LU,a1f,bf,xf,c1f,ef,yf,"V/Square"); 
-
-    TestMatrixDivArith3e<T>(tmv::LU,a1f,b,x,c1f,e,y,"V/Square"); 
-    TestMatrixDivArith3e<T>(tmv::LU,a1f,bf,x,c1f,ef,y,"V/Square"); 
-    TestMatrixDivArith3e<T>(tmv::LU,a1f,bf,xf,c1f,ef,yf,"V/Square"); 
-
-    TestMatrixDivArith3b<T>(tmv::LU,a1f,a2a,a3,c1f,c2a,c3,"Square/Square"); 
-    TestMatrixDivArith3b<T>(tmv::LU,a1f,a2fa,a3,c1f,c2fa,c3,"Square/Square"); 
-    TestMatrixDivArith3b<T>(tmv::LU,a1f,a2fa,a3f,c1f,c2fa,c3f,"Square/Square"); 
-    TestMatrixDivArith3b<T>(tmv::LU,a1f,a2b,a3,c1f,c2b,c3,"Square/Square"); 
-    TestMatrixDivArith3b<T>(tmv::LU,a1f,a2fb,a3,c1f,c2fb,c3,"Square/Square"); 
-    TestMatrixDivArith3b<T>(tmv::LU,a1f,a2fb,a3f,c1f,c2fb,c3f,"Square/Square"); 
-
-    TestMatrixDivArith3c<T>(tmv::LU,a1f,a2a,a3,c1f,c2a,c3,"Square/Square"); 
-    TestMatrixDivArith3c<T>(tmv::LU,a1f,a2fa,a3,c1f,c2fa,c3,"Square/Square"); 
-    TestMatrixDivArith3c<T>(tmv::LU,a1f,a2fa,a3f,c1f,c2fa,c3f,"Square/Square"); 
-    TestMatrixDivArith3c<T>(tmv::LU,a1f,a2b,a3,c1f,c2b,c3,"Square/Square"); 
-    TestMatrixDivArith3c<T>(tmv::LU,a1f,a2fb,a3,c1f,c2fb,c3,"Square/Square"); 
-    TestMatrixDivArith3c<T>(tmv::LU,a1f,a2fb,a3f,c1f,c2fb,c3f,"Square/Square"); 
-
-    TestMatrixDivArith3b<T>(tmv::LU,a1f,a4,a4b,c1f,c4,c4b,"NonSquare/Square");
-    TestMatrixDivArith3b<T>(tmv::LU,a1f,a4f,a4b,c1f,c4f,c4b,"NonSquare/Square");
-    TestMatrixDivArith3b<T>(tmv::LU,a1f,a4f,a4fb,c1f,c4f,c4fb,"NonSquare/Square");
-
-    TestMatrixDivArith3c<T>(tmv::LU,a1f,a5,a5b,c1f,c5,c5b,"NonSquare/Square");
-    TestMatrixDivArith3c<T>(tmv::LU,a1f,a5f,a5b,c1f,c5f,c5b,"NonSquare/Square");
-    TestMatrixDivArith3c<T>(tmv::LU,a1f,a5f,a5fb,c1f,c5f,c5fb,"NonSquare/Square");
-#endif
+    TestMatrixDivArith3a<T>(tmv::LU,a1,c1,label+" Square"); 
+    TestMatrixDivArith3d<T>(tmv::LU,a1,b,x,c1,e,y,label+" V/Square"); 
+    TestMatrixDivArith3e<T>(tmv::LU,a1,b,x,c1,e,y,label+" V/Square"); 
+    TestMatrixDivArith3b<T>(tmv::LU,a1,a2a,a3,c1,c2a,c3,label+" Square/Square"); 
+    TestMatrixDivArith3b<T>(tmv::LU,a1,a2b,a3,c1,c2b,c3,label+" Square/Square"); 
+    TestMatrixDivArith3c<T>(tmv::LU,a1,a2a,a3,c1,c2a,c3,label+" Square/Square"); 
+    TestMatrixDivArith3c<T>(tmv::LU,a1,a2b,a3,c1,c2b,c3,label+" Square/Square"); 
+    TestMatrixDivArith3b<T>(tmv::LU,a1,a4,a4b,c1,c4,c4b,label+" NonSquare/Square");
+    TestMatrixDivArith3c<T>(tmv::LU,a1,a5,a5b,c1,c5,c5b,label+" NonSquare/Square");
 }
 
 template <class T, tmv::StorageType stor, int N> 
-static void TestSmallSquareDiv()
+static void TestSmallSquareDiv(std::string label)
 {
-    TestSmallSquareDiv_Basic<T,stor,N>();
-    TestSmallSquareDiv_Arith<T,stor,N>();
+    TestSmallSquareDiv_Basic<T,stor,N>(label);
+    TestSmallSquareDiv_Arith<T,stor,N>(label);
 }

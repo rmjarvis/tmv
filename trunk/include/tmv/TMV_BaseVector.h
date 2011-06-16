@@ -194,9 +194,9 @@ namespace tmv {
     class VectorView;
     template <class T, int N, int A=0>
     class SmallVector;
-    template <class T, int N, int S, int A=0>
+    template <class T, int N, int S=UNKNOWN, int A=0>
     class ConstSmallVectorView;
-    template <class T, int N, int S, int A=0>
+    template <class T, int N, int S=UNKNOWN, int A=0>
     class SmallVectorView;
 
     // Used by sort(p)
@@ -384,7 +384,8 @@ namespace tmv {
         typedef typename Traits<T>::float_type ret_type;
         typedef typename Traits<CT>::float_type base_type;
         static TMV_INLINE ret_type f(const CT& x) { return TMV_LOG(real(x)); } 
-        static TMV_INLINE void applyf(CT& x) { TMV_REAL_PART(x) = TMV_LOG(real(x)); }
+        static TMV_INLINE void applyf(CT& x) 
+        { TMV_REAL_PART(x) = TMV_LOG(real(x)); }
         static TMV_INLINE T get(const CT& x) { return real(x); }
     };
 #undef CT
@@ -396,7 +397,7 @@ namespace tmv {
     static TMV_INLINE_ND void CheckIndex(int& i, int n) 
     { TMVAssert(i>=0 && i<n && "index is not valid"); } // CStyle
     template <>
-    static TMV_INLINE_ND void CheckIndex<true>(int& i, int n) 
+    TMV_INLINE_ND void CheckIndex<true>(int& i, int n) 
     { TMVAssert(i>=1 && i<=n && "index is not valid"); --i; } // FortranStyle
     template <bool _fort>
     static TMV_INLINE_ND void CheckRange(int& i1, int i2, int n)
@@ -407,7 +408,7 @@ namespace tmv {
                   "range must have a non-negative number of elements");
     }
     template <>
-    static TMV_INLINE_ND void CheckRange<true>(int& i1, int i2, int n)
+    TMV_INLINE_ND void CheckRange<true>(int& i1, int i2, int n)
     { // FortranStyle
         TMVAssert(i1 >= 1 && "first element must be in range");
         TMVAssert(i2 <= n && "last element must be in range");
@@ -428,7 +429,7 @@ namespace tmv {
                   "must have a non-negative number of elements");
     }
     template <>
-    static TMV_INLINE_ND void CheckRange<true>(int& i1, int& i2, int istep, int n)
+    TMV_INLINE_ND void CheckRange<true>(int& i1, int& i2, int istep, int n)
     { // FortranStyle
         TMVAssert(istep != 0 && "istep cannot be 0");
         TMVAssert(i1 >= 1 && i1 <= n && "first element must be in range");
@@ -521,85 +522,91 @@ namespace tmv {
 
     // Defined in TMV_CopyV.h
     template <class V1, class V2>
-    static void Copy(const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2);
+    static inline void Copy(
+        const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2);
     template <class V1, class V2>
-    static void NoAliasCopy(
+    static inline void NoAliasCopy(
         const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2);
 
     // Defined in TMV_SwapV.h
     template <class V1, class V2>
-    static void Swap(BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2);
+    static inline void Swap(
+        BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2);
     template <class V1, class V2>
-    static void NoAliasSwap(
+    static inline void NoAliasSwap(
         BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2);
     template <class V>
-    static void ReverseSelf(BaseVector_Mutable<V>& v);
+    static inline void ReverseSelf(BaseVector_Mutable<V>& v);
 
     // Defined in TMV_ConjugateV.h
     template <class V>
-    static void ConjugateSelf(BaseVector_Mutable<V>& v);
+    static inline void ConjugateSelf(BaseVector_Mutable<V>& v);
 
     // Defined in TMV_NormV.h
     template <class V>
-    static typename V::real_type DoNormSq(const BaseVector_Calc<V>& v);
+    static inline typename V::real_type DoNormSq(const BaseVector_Calc<V>& v);
     template <class V>
-    static typename V::float_type DoNormSq(
+    static inline typename V::float_type DoNormSq(
         const BaseVector_Calc<V>& v, const typename V::float_type scale);
     template <class V>
-    static typename V::value_type DoSumElements(const BaseVector_Calc<V>& v);
+    static inline typename V::value_type DoSumElements(
+        const BaseVector_Calc<V>& v);
     template <class V>
-    static typename V::float_type DoSumAbsElements(const BaseVector_Calc<V>& v);
+    static inline typename V::float_type DoSumAbsElements(
+        const BaseVector_Calc<V>& v);
     template <class V>
-    static typename V::real_type DoSumAbs2Elements(const BaseVector_Calc<V>& v);
+    static inline typename V::real_type DoSumAbs2Elements(
+        const BaseVector_Calc<V>& v);
 
     // Defined in TMV_Norm.h
     template <class V>
-    static typename V::float_type DoNorm2(const BaseVector_Calc<V>& v);
+    static inline typename V::float_type DoNorm2(const BaseVector_Calc<V>& v);
 
     // Defined in TMV_Det.h
     template <class V>
-    static typename V::value_type ProdElements(const BaseVector_Calc<V>& v);
+    static inline typename V::value_type ProdElements(
+        const BaseVector_Calc<V>& v);
     template <class V>
-    static typename V::float_type LogProdElements(
+    static inline typename V::float_type LogProdElements(
         const BaseVector_Calc<V>& v, typename V::zfloat_type* sign);
     template <class V>
-    static bool HasZeroElement(const BaseVector_Calc<V>& v);
+    static inline bool HasZeroElement(const BaseVector_Calc<V>& v);
 
     // Defined in TMV_MinMax.h
     template <class V>
-    static typename V::value_type DoMaxElement(
+    static inline typename V::value_type DoMaxElement(
         const BaseVector_Calc<V>& v, int* imax=0);
     template <class V>
-    static typename V::float_type DoMaxAbsElement(
+    static inline typename V::float_type DoMaxAbsElement(
         const BaseVector_Calc<V>& v, int* imax=0);
     template <class V>
-    static typename V::real_type DoMaxAbs2Element(
+    static inline typename V::real_type DoMaxAbs2Element(
         const BaseVector_Calc<V>& v, int* imax=0);
     template <class V>
-    static typename V::value_type DoMinElement(
+    static inline typename V::value_type DoMinElement(
         const BaseVector_Calc<V>& v, int* imin=0);
     template <class V>
-    static typename V::float_type DoMinAbsElement(
+    static inline typename V::float_type DoMinAbsElement(
         const BaseVector_Calc<V>& v, int* imin=0);
     template <class V>
-    static typename V::real_type DoMinAbs2Element(
+    static inline typename V::real_type DoMinAbs2Element(
         const BaseVector_Calc<V>& v, int* imin=0);
 
     // Defined in TMV_VectorIO.h
     template <class V>
-    static void Write(std::ostream& os, const BaseVector_Calc<V>& v);
+    static inline void Write(std::ostream& os, const BaseVector_Calc<V>& v);
     template <class V>
-    static void Write(
+    static inline void Write(
         std::ostream& os, const BaseVector_Calc<V>& v,
         typename V::float_type thresh) ;
     template <class V>
-    static void Read(std::istream& is, BaseVector_Mutable<V>& v);
+    static inline void Read(std::istream& is, BaseVector_Mutable<V>& v);
 
     // Defined in TMV_SortV.h
     template <class V>
-    static void Sort(BaseVector_Mutable<V>& v, ADType ad, CompType comp);
+    static inline void Sort(BaseVector_Mutable<V>& v, ADType ad, CompType comp);
     template <class V>
-    static void Sort(
+    static inline void Sort(
         BaseVector_Mutable<V>& v, int* P, ADType ad, CompType comp);
 
     // A helper class for returning views without necessarily
@@ -865,7 +872,7 @@ namespace tmv {
         TMV_INLINE const_iterator end() const
         { return begin() + size(); }
         TMV_INLINE const_reverse_iterator rbegin() const
-        { return const_reverse_iterator(cptr(),step()); }
+        { return const_reverse_iterator(cptr()+(size()-1)*step(),-step()); }
         TMV_INLINE const_reverse_iterator rend() const
         { return rbegin() + size(); }
 
@@ -949,7 +956,6 @@ namespace tmv {
 
         const_flatten_type flatten() const
         {
-            TMVStaticAssert(V::iscomplex);
             TMVStaticAssert(_step == UNKNOWN || _step == 1);
             TMVAssert(step() == 1);
             return const_flatten_type(
@@ -1091,7 +1097,7 @@ namespace tmv {
         TMV_INLINE iterator end()
         { return begin() + size(); }
         TMV_INLINE reverse_iterator rbegin()
-        { return reverse_iterator(ptr(),step()); }
+        { return reverse_iterator(ptr()+(size()-1)*step(),-step()); }
         TMV_INLINE reverse_iterator rend()
         { return rbegin() + size(); }
 
@@ -1306,7 +1312,6 @@ namespace tmv {
 
         flatten_type flatten() 
         {
-            TMVStaticAssert(V::iscomplex);
             TMVStaticAssert(_step == UNKNOWN || _step == 1);
             TMVAssert(step() == 1);
             return flatten_type(
@@ -1393,7 +1398,7 @@ namespace tmv {
 
         template <class X2>
         TMV_INLINE type& operator/=(const X2& x2)
-        { DivEq(vec(),x2); return vec(); }
+        { LDivEq(vec(),x2); return vec(); }
 
         template <class X2>
         TMV_INLINE type& operator%=(const X2& x2)
@@ -1422,13 +1427,34 @@ namespace tmv {
 
     }; // BaseVector_Mutable
 
+    template <class T>
+    class VectorSizer : 
+        public BaseVector<VectorSizer<T> >
+    {
+    public:
+        TMV_INLINE VectorSizer(const int _s) : s(_s) {}
+        TMV_INLINE size_t size() const { return s; }
+
+        TMV_INLINE T cref(int ) const  { return T(0); }
+
+        template <class M2>
+        TMV_INLINE void assignTo(BaseVector_Mutable<M2>& ) const {}
+
+        template <class M2>
+        TMV_INLINE void newAssignTo(BaseVector_Mutable<M2>& ) const {}
+
+    private :
+        const int s;
+
+    }; // VectorSizer
+
 
     //
     // Vector ==, != Vector
     //
     
     template <class V1, class V2>
-    static inline bool DoEq(
+    static bool DoEq(
         const BaseVector_Calc<V1>& v1, const BaseVector_Calc<V2>& v2)
     {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
@@ -1464,10 +1490,12 @@ namespace tmv {
     static TMV_INLINE typename V::value_type SumElements(const BaseVector<V>& v)
     { return v.sumElements(); }
     template <class V>
-    static TMV_INLINE typename V::float_type SumAbsElements(const BaseVector<V>& v)
+    static TMV_INLINE typename V::float_type SumAbsElements(
+        const BaseVector<V>& v)
     { return v.sumAbsElements(); }
     template <class V>
-    static TMV_INLINE typename V::real_type SumAbs2Elements(const BaseVector<V>& v)
+    static TMV_INLINE typename V::real_type SumAbs2Elements(
+        const BaseVector<V>& v)
     { return v.sumAbs2Elements(); }
 
     template <class V>
@@ -1490,19 +1518,23 @@ namespace tmv {
     static TMV_INLINE typename V::value_type MaxElement(const BaseVector<V>& v)
     { return v.maxElement(); }
     template <class V>
-    static TMV_INLINE typename V::float_type MaxAbsElement(const BaseVector<V>& v)
+    static TMV_INLINE typename V::float_type MaxAbsElement(
+        const BaseVector<V>& v)
     { return v.maxAbsElement(); }
     template <class V>
-    static TMV_INLINE typename V::real_type MaxAbs2Element(const BaseVector<V>& v)
+    static TMV_INLINE typename V::real_type MaxAbs2Element(
+        const BaseVector<V>& v)
     { return v.maxAbs2Element(); }
     template <class V>
     static TMV_INLINE typename V::value_type MinElement(const BaseVector<V>& v)
     { return v.minElement(); }
     template <class V>
-    static TMV_INLINE typename V::float_type MinAbsElement(const BaseVector<V>& v)
+    static TMV_INLINE typename V::float_type MinAbsElement(
+        const BaseVector<V>& v)
     { return v.minAbsElement(); }
     template <class V>
-    static TMV_INLINE typename V::real_type MinAbs2Element(const BaseVector<V>& v)
+    static TMV_INLINE typename V::real_type MinAbs2Element(
+        const BaseVector<V>& v)
     { return v.minAbs2Element(); }
 
     template <class V>
@@ -1514,7 +1546,7 @@ namespace tmv {
     // TMV_Text 
     //
 
-#ifdef TMV_DEBUG
+#ifdef TMV_TEXT
     static inline std::string TMV_Text(ADType ad)
     { return ad == Ascend ? "Ascend" : "Descend"; }
 

@@ -560,7 +560,7 @@ const int nloops2x = (
     (M*N*sizeof(T) < 256 * 1024 && 
      M*K*sizeof(T) < 256 * 1024 && 
      K*N*sizeof(T) < 256 * 1024 && 
-     N!=10000 && M!=10000 && K!=10000) ? 
+     N!=Eigen::Dynamic && M!=Eigen::Dynamic && K!=Eigen::Dynamic) ? 
     nloops2 : 0 );
 
 #define EIGENSMA Eigen::Matrix<T,M,K>
@@ -695,8 +695,6 @@ static void MultMM_CCC(
     for (int n=0; n<nloops1; ++n) {
 
 #if 1 // E = A * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -716,6 +714,7 @@ static void MultMM_CCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -839,8 +838,6 @@ static void MultMM_CCC(
 
 #ifndef BASIC_ONLY
 #if 1 // E = -A * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -860,6 +857,7 @@ static void MultMM_CCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -982,8 +980,6 @@ static void MultMM_CCC(
 #endif
 
 #if 1 // E = 7 * A * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -1003,6 +999,7 @@ static void MultMM_CCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -1125,8 +1122,6 @@ static void MultMM_CCC(
 #endif
 
 #if 1 // E -= A * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -1146,6 +1141,7 @@ static void MultMM_CCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -1270,8 +1266,6 @@ static void MultMM_CCC(
 #endif
 
 #if 1 // E += 8 * A * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -1291,6 +1285,7 @@ static void MultMM_CCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -1416,8 +1411,6 @@ static void MultMM_CCC(
 
 #if 1 // E = (7,1) * A * C
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -1437,6 +1430,7 @@ static void MultMM_CCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -1561,8 +1555,6 @@ static void MultMM_CCC(
 
 #if 1 // E += (8,9) * A * C
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -1582,6 +1574,7 @@ static void MultMM_CCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -1708,8 +1701,6 @@ static void MultMM_CCC(
 
 #if 1 // E = (7,1) * A* * C
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -1729,6 +1720,7 @@ static void MultMM_CCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -1857,8 +1849,6 @@ static void MultMM_CCC(
 
 #if 1 // E += (8,9) * A* * C
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -1878,6 +1868,7 @@ static void MultMM_CCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -2006,8 +1997,6 @@ static void MultMM_CCC(
 
 #if 1 // E = (7,1) * A * C*
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -2027,6 +2016,7 @@ static void MultMM_CCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -2155,8 +2145,6 @@ static void MultMM_CCC(
 
 #if 1 // E += (8,9) * A * C*
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -2176,6 +2164,7 @@ static void MultMM_CCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -2304,8 +2293,6 @@ static void MultMM_CCC(
 
 #if 1 // E = (7,1) * A* * C*
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -2325,6 +2312,7 @@ static void MultMM_CCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -2452,8 +2440,6 @@ static void MultMM_CCC(
 
 #if 1 // E += (8,9) * A* * C*
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -2473,6 +2459,7 @@ static void MultMM_CCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -2602,8 +2589,6 @@ static void MultMM_CCC(
 
 #ifdef DOMULTEQ
 #if 1 // E *= C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -2621,6 +2606,7 @@ static void MultMM_CCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         for (int k=0; k<nloops2; ++k) E1[k] = A1[k];
@@ -2776,8 +2762,6 @@ static void MultMM_CCC(
 
 #ifndef BASIC_ONLY
 #if 1 // E *= 7 * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -2795,6 +2779,7 @@ static void MultMM_CCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         for (int k=0; k<nloops2; ++k) E1[k] = A1[k];
@@ -2950,8 +2935,6 @@ static void MultMM_CCC(
 
 #ifdef TISCOMPLEX
 #if 1 // E *= (7,1) * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -2969,6 +2952,7 @@ static void MultMM_CCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         for (int k=0; k<nloops2; ++k) E1[k] = A1[k];
@@ -3308,8 +3292,6 @@ static void MultMM_RCC(
     for (int n=0; n<nloops1; ++n) {
 
 #if 1 // E = B.transpose() * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -3329,6 +3311,7 @@ static void MultMM_RCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -3452,8 +3435,6 @@ static void MultMM_RCC(
 
 #ifndef BASIC_ONLY
 #if 1 // E = -B.transpose() * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -3473,6 +3454,7 @@ static void MultMM_RCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -3595,8 +3577,6 @@ static void MultMM_RCC(
 #endif
 
 #if 1 // E = 7 * B.transpose() * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -3616,6 +3596,7 @@ static void MultMM_RCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -3738,8 +3719,6 @@ static void MultMM_RCC(
 #endif
 
 #if 1 // E -= B.transpose() * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -3759,6 +3738,7 @@ static void MultMM_RCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -3883,8 +3863,6 @@ static void MultMM_RCC(
 #endif
 
 #if 1 // E += 8 * B.transpose() * C
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -3904,6 +3882,7 @@ static void MultMM_RCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -4029,8 +4008,6 @@ static void MultMM_RCC(
 
 #if 1 // E = (7,1) * B.transpose() * C
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -4050,6 +4027,7 @@ static void MultMM_RCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -4174,8 +4152,6 @@ static void MultMM_RCC(
 
 #if 1 // E += (8,9) * B.transpose() * C
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -4195,6 +4171,7 @@ static void MultMM_RCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -4321,8 +4298,6 @@ static void MultMM_RCC(
 
 #if 1 // E = (7,1) * B.adjoint() * C
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -4342,6 +4317,7 @@ static void MultMM_RCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -4466,8 +4442,6 @@ static void MultMM_RCC(
 
 #if 1 // E += (8,9) * B.adjoint() * C
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -4487,6 +4461,7 @@ static void MultMM_RCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -4613,8 +4588,6 @@ static void MultMM_RCC(
 
 #if 1 // E = (7,1) * B * C*
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -4634,6 +4607,7 @@ static void MultMM_RCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -4762,8 +4736,6 @@ static void MultMM_RCC(
 
 #if 1 // E += (8,9) * B * C*
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -4783,6 +4755,7 @@ static void MultMM_RCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -4912,8 +4885,6 @@ static void MultMM_RCC(
 
 #if 1 // E = (7,1) * B.adjoint() * C*
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -4933,6 +4904,7 @@ static void MultMM_RCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -5060,8 +5032,6 @@ static void MultMM_RCC(
 
 #if 1 // E += (8,9) * B.adjoint() * C*
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -5081,6 +5051,7 @@ static void MultMM_RCC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -5374,8 +5345,6 @@ static void MultMM_CRC(
     for (int n=0; n<nloops1; ++n) {
 
 #if 1 // E = A * D.transpose()
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -5395,6 +5364,7 @@ static void MultMM_CRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -5521,8 +5491,6 @@ static void MultMM_CRC(
 
 #ifndef BASIC_ONLY
 #if 1 // E = -A * D.transpose()
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -5542,6 +5510,7 @@ static void MultMM_CRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -5664,8 +5633,6 @@ static void MultMM_CRC(
 #endif
 
 #if 1 // E = 7 * A * D.transpose()
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -5685,6 +5652,7 @@ static void MultMM_CRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -5807,8 +5775,6 @@ static void MultMM_CRC(
 #endif
 
 #if 1 // E -= A * D.transpose()
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -5828,6 +5794,7 @@ static void MultMM_CRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -5952,8 +5919,6 @@ static void MultMM_CRC(
 #endif
 
 #if 1 // E += 8 * A * D.transpose()
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -5973,6 +5938,7 @@ static void MultMM_CRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -6098,8 +6064,6 @@ static void MultMM_CRC(
 
 #if 1 // E = (7,1) * A * D.transpose()
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -6119,6 +6083,7 @@ static void MultMM_CRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -6243,8 +6208,6 @@ static void MultMM_CRC(
 
 #if 1 // E += (8,9) * A * D.transpose()
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -6264,6 +6227,7 @@ static void MultMM_CRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -6390,8 +6354,6 @@ static void MultMM_CRC(
 
 #if 1 // E = (7,1) * A* * D.transpose()
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -6411,6 +6373,7 @@ static void MultMM_CRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -6538,8 +6501,6 @@ static void MultMM_CRC(
 
 #if 1 // E += (8,9) * A* * D.transpose()
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -6559,6 +6520,7 @@ static void MultMM_CRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -6687,8 +6649,6 @@ static void MultMM_CRC(
 
 #if 1 // E = (7,1) * A * D.adjoint()
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -6708,6 +6668,7 @@ static void MultMM_CRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -6832,8 +6793,6 @@ static void MultMM_CRC(
 
 #if 1 // E += (8,9) * A * D.adjoint()
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -6853,6 +6812,7 @@ static void MultMM_CRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -6979,8 +6939,6 @@ static void MultMM_CRC(
 
 #if 1 // E = (7,1) * A* * D.adjoint()
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -7000,6 +6958,7 @@ static void MultMM_CRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -7126,8 +7085,6 @@ static void MultMM_CRC(
 
 #if 1 // E += (8,9) * A* * D.adjoint()
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -7147,6 +7104,7 @@ static void MultMM_CRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -7276,8 +7234,6 @@ static void MultMM_CRC(
 
 #ifdef DOMULTEQ
 #if 1 // E *= D.transpose()
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -7295,6 +7251,7 @@ static void MultMM_CRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         for (int k=0;k<nloops2;++k) E1[k] = A1[k];
@@ -7450,8 +7407,6 @@ static void MultMM_CRC(
 
 #ifndef BASIC_ONLY
 #if 1 // E *= 7 * D.transpose()
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -7469,6 +7424,7 @@ static void MultMM_CRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         for (int k=0;k<nloops2;++k) E1[k] = A1[k];
@@ -7624,8 +7580,6 @@ static void MultMM_CRC(
 
 #ifdef TISCOMPLEX
 #if 1 // E *= (7,1) * D.transpose()
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -7643,6 +7597,7 @@ static void MultMM_CRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         for (int k=0;k<nloops2;++k) E1[k] = A1[k];
@@ -7983,8 +7938,6 @@ static void MultMM_RRC(
     for (int n=0; n<nloops1; ++n) {
 
 #if 1 // E = B * D
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -8004,6 +7957,7 @@ static void MultMM_RRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -8127,8 +8081,6 @@ static void MultMM_RRC(
 
 #ifndef BASIC_ONLY
 #if 1 // E = -B * D
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -8148,6 +8100,7 @@ static void MultMM_RRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -8270,8 +8223,6 @@ static void MultMM_RRC(
 #endif
 
 #if 1 // E = 7 * B * D
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -8291,6 +8242,7 @@ static void MultMM_RRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -8413,8 +8365,6 @@ static void MultMM_RRC(
 #endif
 
 #if 1 // E -= B * D
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -8434,6 +8384,7 @@ static void MultMM_RRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -8558,8 +8509,6 @@ static void MultMM_RRC(
 #endif
 
 #if 1 // E += 8 * B * D
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -8579,6 +8528,7 @@ static void MultMM_RRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -8704,8 +8654,6 @@ static void MultMM_RRC(
 
 #if 1 // E = (7,1) * B * D
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -8725,6 +8673,7 @@ static void MultMM_RRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -8849,8 +8798,6 @@ static void MultMM_RRC(
 
 #if 1 // E += (8,9) * B * D
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -8870,6 +8817,7 @@ static void MultMM_RRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -8996,8 +8944,6 @@ static void MultMM_RRC(
 
 #if 1 // E = (7,1) * B.adjoint() * D
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -9017,6 +8963,7 @@ static void MultMM_RRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -9141,8 +9088,6 @@ static void MultMM_RRC(
 
 #if 1 // E += (8,9) * B.adjoint() * D
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -9162,6 +9107,7 @@ static void MultMM_RRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -9288,8 +9234,6 @@ static void MultMM_RRC(
 
 #if 1 // E = (7,1) * B * D.adjoint()
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -9309,6 +9253,7 @@ static void MultMM_RRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -9433,8 +9378,6 @@ static void MultMM_RRC(
 
 #if 1 // E += (8,9) * B * D.adjoint()
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -9454,6 +9397,7 @@ static void MultMM_RRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -9580,8 +9524,6 @@ static void MultMM_RRC(
 
 #if 1 // E = (7,1) * B.adjoint() * D.adjoint()
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -9601,6 +9543,7 @@ static void MultMM_RRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -9725,8 +9668,6 @@ static void MultMM_RRC(
 
 #if 1 // E += (8,9) * B.adjoint() * D.adjoint()
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (n == 0) {
             for (int n2=0; n2<nloops2; ++n2) {
@@ -9746,6 +9687,7 @@ static void MultMM_RRC(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);

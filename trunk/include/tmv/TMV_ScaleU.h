@@ -102,7 +102,7 @@ namespace tmv {
         template <int I, int M, int J, int N, bool iscomplex>
         struct Unroller
         {
-            static void unroll(const Scaling<ix,T>& x, M1& m)
+            static inline void unroll(const Scaling<ix,T>& x, M1& m)
             {
                 Unroller<I,M-(N-N/2),J,N/2,iscomplex>::unroll(x,m);
                 Unroller<I,M,J+N/2,N-N/2,iscomplex>::unroll(x,m);
@@ -111,7 +111,7 @@ namespace tmv {
         template <int I, int M, int J, bool iscomplex>
         struct Unroller<I,M,J,1,iscomplex>
         {
-            static void unroll(const Scaling<ix,T>& x, M1& m)
+            static inline void unroll(const Scaling<ix,T>& x, M1& m)
             {
                 Unroller<I,M/2,J,1,iscomplex>::unroll(x,m);
                 Unroller<I+M/2,M-M/2,J,1,iscomplex>::unroll(x,m);
@@ -119,17 +119,17 @@ namespace tmv {
         };
         template <int I, int M, int J, bool iscomplex>
         struct Unroller<I,M,J,0,iscomplex>
-        { static void unroll(const Scaling<ix,T>& , M1& ) {} };
+        { static inline void unroll(const Scaling<ix,T>& , M1& ) {} };
         template <int I, int J>
         struct Unroller<I,1,J,1,false>
         {
-            static void unroll(const Scaling<ix,T>& x, M1& m)
+            static inline void unroll(const Scaling<ix,T>& x, M1& m)
             { m.ref(I,J) *= x; }
         };
         template <int I, int J>
         struct Unroller<I,1,J,1,true>
         {
-            static void unroll(const Scaling<ix,T>& x, M1& m)
+            static inline void unroll(const Scaling<ix,T>& x, M1& m)
             {
                 typedef typename M1::real_type RT;
                 typedef typename M1::value_type VT;
@@ -142,9 +142,9 @@ namespace tmv {
         };
         template <int I, int J, bool iscomplex>
         struct Unroller<I,0,J,1,iscomplex>
-        { static void unroll(const Scaling<ix,T>& , M1& ) {} };
+        { static inline void unroll(const Scaling<ix,T>& , M1& ) {} };
 
-        static void call(const Scaling<ix,T>& x, M1& m)
+        static inline void call(const Scaling<ix,T>& x, M1& m)
         { Unroller<0,s,0,s,M1::iscomplex>::unroll(x,m); }
     };
 
@@ -173,7 +173,7 @@ namespace tmv {
         template <int I, int M, int J, int N, bool iscomplex>
         struct Unroller
         {
-            static void unroll(const Scaling<ix,T>& x, M1& m)
+            static inline void unroll(const Scaling<ix,T>& x, M1& m)
             {
                 Unroller<I,M/2,J,N,iscomplex>::unroll(x,m);
                 Unroller<I+M/2,M-M/2,J+M/2,N-M/2,iscomplex>::unroll(x,m);
@@ -182,7 +182,7 @@ namespace tmv {
         template <int I, int J, int N, bool iscomplex>
         struct Unroller<I,1,J,N,iscomplex>
         {
-            static void unroll(const Scaling<ix,T>& x, M1& m)
+            static inline void unroll(const Scaling<ix,T>& x, M1& m)
             {
                 Unroller<I,1,J,N/2,iscomplex>::unroll(x,m);
                 Unroller<I,1,J+N/2,N-N/2,iscomplex>::unroll(x,m);
@@ -190,17 +190,17 @@ namespace tmv {
         };
         template <int I, int J, int N, bool iscomplex>
         struct Unroller<I,0,J,N,iscomplex>
-        { static void unroll(const Scaling<ix,T>& , M1& ) {} };
+        { static inline void unroll(const Scaling<ix,T>& , M1& ) {} };
         template <int I, int J>
         struct Unroller<I,1,J,1,false>
         {
-            static void unroll(const Scaling<ix,T>& x, M1& m)
+            static inline void unroll(const Scaling<ix,T>& x, M1& m)
             { m.ref(I,J) *= x; }
         };
         template <int I, int J>
         struct Unroller<I,1,J,1,true>
         {
-            static void unroll(const Scaling<ix,T>& x, M1& m)
+            static inline void unroll(const Scaling<ix,T>& x, M1& m)
             {
                 typedef typename M1::real_type RT;
                 typedef typename M1::value_type VT;
@@ -213,9 +213,9 @@ namespace tmv {
         };
         template <int I, int J, bool iscomplex>
         struct Unroller<I,1,J,0,iscomplex>
-        { static void unroll(const Scaling<ix,T>& , M1& ) {} };
+        { static inline void unroll(const Scaling<ix,T>& , M1& ) {} };
 
-        static void call(const Scaling<ix,T>& x, M1& m)
+        static inline void call(const Scaling<ix,T>& x, M1& m)
         { Unroller<0,s,0,s,M1::iscomplex>::unroll(x,m); }
     };
 
@@ -331,7 +331,7 @@ namespace tmv {
     }
 
     template <class T>
-    static inline void InstScale(const T x, LowerTriMatrixView<T> m)
+    static TMV_INLINE void InstScale(const T x, LowerTriMatrixView<T> m)
     { InstScale(x,m.transpose()); }
 
 

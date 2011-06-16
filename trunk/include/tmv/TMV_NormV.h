@@ -260,7 +260,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static ret unroll(const V& v, const Scaling<ix,RT>& x)
+            static inline ret unroll(const V& v, const Scaling<ix,RT>& x)
             {
                 return (
                     Unroller<I,N/2>::unroll(v,x) +
@@ -270,7 +270,7 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static ret unroll(const V& v, const Scaling<ix,RT>& x)
+            static inline ret unroll(const V& v, const Scaling<ix,RT>& x)
             {
                 return Component<comp,BT>::f(
                     x * Traits<BT>::convert(v.cref(I)));
@@ -279,10 +279,10 @@ namespace tmv {
         template <int I>
         struct Unroller<I,0>
         {
-            static ret unroll(const V& v, const Scaling<ix,RT>& x)
+            static inline ret unroll(const V& v, const Scaling<ix,RT>& x)
             { return ret(0); }
         };
-        static ret call(const V& v, const Scaling<ix,RT>& x)
+        static inline ret call(const V& v, const Scaling<ix,RT>& x)
         { return Unroller<0,s>::unroll(v,x); }
     };
 

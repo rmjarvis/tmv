@@ -134,14 +134,14 @@ namespace tmv {
     class MatrixView;
     template <class T, int M, int N, int A=0, int A2=0> 
     class SmallMatrix;
-    template <class T, int M, int N, int Si, int Sj, int A=0>
+    template <class T, int M, int N, int Si=UNKNOWN, int Sj=UNKNOWN, int A=0>
     class ConstSmallMatrixView;
-    template <class T, int M, int N, int Si, int Sj, int A=0>
+    template <class T, int M, int N, int Si=UNKNOWN, int Sj=UNKNOWN, int A=0>
     class SmallMatrixView;
 
     // In TMV_Norm.h
     template <class M>
-    static typename M::float_type DoNormF(const BaseMatrix_Rec<M>& m);
+    static inline typename M::float_type DoNormF(const BaseMatrix_Rec<M>& m);
 
     //
     // Helper functions and values:
@@ -149,7 +149,7 @@ namespace tmv {
 
     // Specify ExactSameStorage for rectangular matrices:
     template <class M1, class M2>
-    static bool ExactSameStorage(
+    static TMV_INLINE bool ExactSameStorage(
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2)
     {
         typedef typename M1::value_type T1;
@@ -241,7 +241,7 @@ namespace tmv {
                   "last element must be in matrix");
     }
     template <>
-    static TMV_INLINE_ND void CheckDiagIndex<true>(
+    TMV_INLINE_ND void CheckDiagIndex<true>(
         int& i, int& j1, int& j2, int m, int n)
     { // FortranStyle
         TMVAssert(i >= -m && "negative diag index must be <= nrows");
@@ -255,7 +255,7 @@ namespace tmv {
         --j1;
     }
     template <>
-    static TMV_INLINE_ND void CheckRowRange<true>(int& i1, int i2, int m)
+    TMV_INLINE_ND void CheckRowRange<true>(int& i1, int i2, int m)
     { // FortranStyle
         TMVAssert(i1 >= 1 && "first row must be in matrix");
         TMVAssert(i2 <= m && "last row must be in matrix");
@@ -263,7 +263,7 @@ namespace tmv {
         --i1;
     }
     template <>
-    static TMV_INLINE_ND void CheckColRange<true>(int& j1, int j2, int n)
+    TMV_INLINE_ND void CheckColRange<true>(int& j1, int j2, int n)
     { // FortranStyle
         TMVAssert(j1 >= 1 && "first column must be in matrix");
         TMVAssert(j2 <= n && "last column must be in matrix");
@@ -271,7 +271,7 @@ namespace tmv {
         --j1;
     }
     template <>
-    static TMV_INLINE_ND void CheckRowRange<true>(int& i1, int& i2, int istep, int m)
+    TMV_INLINE_ND void CheckRowRange<true>(int& i1, int& i2, int istep, int m)
     { // FortranStyle
         TMVAssert(istep != 0 && "istep cannot be 0");
         TMVAssert(i1 >= 1 && i1 <= m && "first row must be in matrix");
@@ -283,7 +283,7 @@ namespace tmv {
         --i1; i2 += istep-1;
     }
     template <>
-    static TMV_INLINE_ND void CheckColRange<true>(int& j1, int& j2, int jstep, int n)
+    TMV_INLINE_ND void CheckColRange<true>(int& j1, int& j2, int jstep, int n)
     { // FortranStyle
         TMVAssert(jstep != 0 && "jstep cannot be 0");
         TMVAssert(j1 >= 1 && j1 <= n && "first column must be in matrix");
@@ -295,7 +295,7 @@ namespace tmv {
         --j1; j2 += jstep-1;
     }
     template <>
-    static TMV_INLINE_ND void CheckMatSubVector<true>(
+    TMV_INLINE_ND void CheckMatSubVector<true>(
         int& i, int& j, int istep, int jstep, int size, int m, int n)
     { // FortranStyle
         TMVAssert(!(istep == 0 && jstep == 0) && 
@@ -360,7 +360,7 @@ namespace tmv {
     template <int Si, int Sj, class M>
     struct AuxCanLinearize<false,Si,Sj,M>
     {
-        static bool ok(const M& m) 
+        static inline bool ok(const M& m) 
         {
             return (
                 (m.stepi() == 1 && m.stepj() == int(m.colsize())) ||
@@ -370,13 +370,13 @@ namespace tmv {
     template <int Sj, class M>
     struct AuxCanLinearize<false,1,Sj,M>
     {
-        static bool ok(const M& m) 
+        static inline bool ok(const M& m) 
         { return m.stepj() == int(m.colsize()); } 
     };
     template <int Si, class M>
     struct AuxCanLinearize<false,Si,1,M>
     {
-        static bool ok(const M& m) 
+        static inline bool ok(const M& m) 
         { return m.stepi() == int(m.rowsize()); } 
     };
     template <class M>
@@ -385,76 +385,76 @@ namespace tmv {
 
     // Defined in TMV_CopyM.h
     template <class M1, class M2>
-    static void Copy(
+    static inline void Copy(
         const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
     template <class M1, class M2>
-    static void NoAliasCopy(
+    static inline void NoAliasCopy(
         const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
 
     // Defined in TMV_SwapM.h
     template <class M1, class M2>
-    static void Swap(
+    static inline void Swap(
         BaseMatrix_Rec_Mutable<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
     template <class M1, class M2>
-    static void NoAliasSwap(
+    static inline void NoAliasSwap(
         BaseMatrix_Rec_Mutable<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
     template <class M>
-    static void TransposeSelf(BaseMatrix_Rec_Mutable<M>& m);
+    static inline void TransposeSelf(BaseMatrix_Rec_Mutable<M>& m);
 
     // Defined in TMV_Permute.h
     template <class M>
-    static void PermuteRows(
+    static inline void PermuteRows(
         BaseMatrix_Rec_Mutable<M>& m, const int* p, int i1, int i2);
     template <class M>
-    static void ReversePermuteRows(
+    static inline void ReversePermuteRows(
         BaseMatrix_Rec_Mutable<M>& m, const int* p, int i1, int i2);
 
     // Defined in TMV_NormM.h
     template <class M>
-    static typename M::real_type DoNormSq(const BaseMatrix_Rec<M>& m);
+    static inline typename M::real_type DoNormSq(const BaseMatrix_Rec<M>& m);
     template <class M>
-    static typename M::float_type DoNormSq(
+    static inline typename M::float_type DoNormSq(
         const BaseMatrix_Rec<M>& m, const typename M::float_type scale);
     template <class M>
-    static typename M::float_type DoNorm1(const BaseMatrix_Rec<M>& m);
+    static inline typename M::float_type DoNorm1(const BaseMatrix_Rec<M>& m);
     template <class M>
-    static typename M::float_type DoNormInf(const BaseMatrix_Rec<M>& m);
+    static inline typename M::float_type DoNormInf(const BaseMatrix_Rec<M>& m);
     template <class M>
-    static typename M::value_type DoSumElements(const BaseMatrix_Rec<M>& m);
+    static inline typename M::value_type DoSumElements(const BaseMatrix_Rec<M>& m);
     template <class M>
-    static typename M::float_type DoSumAbsElements(const BaseMatrix_Rec<M>& m);
+    static inline typename M::float_type DoSumAbsElements(const BaseMatrix_Rec<M>& m);
     template <class M>
-    static typename M::real_type DoSumAbs2Elements(const BaseMatrix_Rec<M>& m);
+    static inline typename M::real_type DoSumAbs2Elements(const BaseMatrix_Rec<M>& m);
     template <class M>
-    static typename M::float_type DoMaxAbsElement(const BaseMatrix_Rec<M>& m);
+    static inline typename M::float_type DoMaxAbsElement(const BaseMatrix_Rec<M>& m);
     template <class M>
-    static typename M::real_type DoMaxAbs2Element(const BaseMatrix_Rec<M>& m);
+    static inline typename M::real_type DoMaxAbs2Element(const BaseMatrix_Rec<M>& m);
 
     // Defined in TMV_MatrixIO.h
     template <class M>
-    static void Read(std::istream& is, BaseMatrix_Rec_Mutable<M>& m);
+    static inline void Read(std::istream& is, BaseMatrix_Rec_Mutable<M>& m);
 
     // Defined below:
     template <class M>
-    static void SetZero(BaseMatrix_Rec_Mutable<M>& m);
+    static inline void SetZero(BaseMatrix_Rec_Mutable<M>& m);
     template <class M, class RT>
-    static void Clip(BaseMatrix_Rec_Mutable<M>& m, const RT& thresh);
+    static inline void Clip(BaseMatrix_Rec_Mutable<M>& m, const RT& thresh);
     template <class M, class T>
-    static void SetAllTo(BaseMatrix_Rec_Mutable<M>& m, const T& val);
+    static inline void SetAllTo(BaseMatrix_Rec_Mutable<M>& m, const T& val);
     template <class M, class T>
-    static void AddToAll(BaseMatrix_Rec_Mutable<M>& m, const T& val);
+    static inline void AddToAll(BaseMatrix_Rec_Mutable<M>& m, const T& val);
     template <class M>
-    static void ConjugateSelf(BaseMatrix_Rec_Mutable<M>& m);
+    static inline void ConjugateSelf(BaseMatrix_Rec_Mutable<M>& m);
     template <class M, class F>
-    static void ApplyToAll(BaseMatrix_Rec_Mutable<M>& m, const F& f);
+    static inline void ApplyToAll(BaseMatrix_Rec_Mutable<M>& m, const F& f);
 
 
 #if 0
     // Defined in TMV_MatrixDiv.h
     template <class M>
-    static typename M::float_type DoNorm2(const BaseMatrix_Rec<M>& m);
+    static inline typename M::float_type DoNorm2(const BaseMatrix_Rec<M>& m);
     template <class M>
-    static typename M::float_type DoCondition(const BaseMatrix_Rec<M>& m);
+    static inline typename M::float_type DoCondition(const BaseMatrix_Rec<M>& m);
 #endif
 
     // A helper class for returning views without necessarily
@@ -1714,7 +1714,7 @@ namespace tmv {
     template <class M>
     struct SetZeroM_Helper<1,M>
     {
-        static void call(M& m) 
+        static inline void call(M& m) 
         { m.linearView().setZero(); } 
     };
 
@@ -1741,7 +1741,7 @@ namespace tmv {
     };
 
     template <class M>
-    static inline void SetZero(BaseMatrix_Rec_Mutable<M>& m)
+    static TMV_INLINE void SetZero(BaseMatrix_Rec_Mutable<M>& m)
     {
         const int algo = M::_canlin ? 1 : M::_colmajor ? 3 : 2;
         SetZeroM_Helper<algo,M>::call(m.mat());
@@ -1758,7 +1758,7 @@ namespace tmv {
     template <class M, class T>
     struct SetAllToM_Helper<1,M,T> // algo 1, linearize
     {
-        static void call(M& m, const T& val) 
+        static inline void call(M& m, const T& val) 
         { m.linearView().setAllTo(val); } 
     };
 
@@ -1785,7 +1785,7 @@ namespace tmv {
     };
 
     template <class M, class T>
-    static inline void SetAllTo(BaseMatrix_Rec_Mutable<M>& m, const T& val)
+    static TMV_INLINE void SetAllTo(BaseMatrix_Rec_Mutable<M>& m, const T& val)
     {
         const int algo = M::_canlin ? 1 : M::_colmajor ? 3 : 2;
         SetAllToM_Helper<algo,M,T>::call(m.mat(),val);
@@ -1802,7 +1802,7 @@ namespace tmv {
     template <class M, class T>
     struct AddToAllM_Helper<1,M,T> // algo 1, linearize
     {
-        static void call(M& m, const T& val) 
+        static inline void call(M& m, const T& val) 
         { m.linearView().addToAll(val); } 
     };
 
@@ -1829,7 +1829,7 @@ namespace tmv {
     };
 
     template <class M, class T>
-    static inline void AddToAll(BaseMatrix_Rec_Mutable<M>& m, const T& val)
+    static TMV_INLINE void AddToAll(BaseMatrix_Rec_Mutable<M>& m, const T& val)
     {
         const int algo = M::_canlin ? 1 : M::_colmajor ? 3 : 2;
         AddToAllM_Helper<algo,M,T>::call(m.mat(),val);
@@ -1846,7 +1846,7 @@ namespace tmv {
     template <class M, class RT>
     struct ClipM_Helper<1,M,RT> // algo 1, linearize
     {
-        static void call(M& m, const RT& thresh) 
+        static inline void call(M& m, const RT& thresh) 
         { m.linearView().clip(thresh); } 
     };
 
@@ -1873,7 +1873,7 @@ namespace tmv {
     };
 
     template <class M, class RT>
-    static inline void Clip(BaseMatrix_Rec_Mutable<M>& m, const RT& thresh)
+    static TMV_INLINE void Clip(BaseMatrix_Rec_Mutable<M>& m, const RT& thresh)
     {
         const int algo = M::_canlin ? 1 : M::_colmajor ? 3 : 2;
         ClipM_Helper<algo,M,RT>::call(m.mat(),thresh);
@@ -1890,7 +1890,7 @@ namespace tmv {
     template <class M, class F>
     struct ApplyToAllM_Helper<1,M,F> // algo 1, linearize
     {
-        static void call(M& m, const F& f) 
+        static inline void call(M& m, const F& f) 
         { m.linearView().applyToAll(f); } 
     };
 
@@ -1898,7 +1898,7 @@ namespace tmv {
     template <class M, class F>
     struct ApplyToAllM_Helper<2,M,F>
     {
-        static void call(M& m1, const F& f) 
+        static inline void call(M& m1, const F& f) 
         {
             const int m = m1.colsize();
             for(int i=0;i<m;++i) m1.get_row(i).applyToAll(f);
@@ -1909,7 +1909,7 @@ namespace tmv {
     template <class M, class F>
     struct ApplyToAllM_Helper<3,M,F>
     {
-        static void call(M& m, const F& f) 
+        static inline void call(M& m, const F& f) 
         {
             const int n = m.rowsize();
             for(int j=0;j<n;++j) m.get_col(j).applyToAll(f);
@@ -1917,7 +1917,7 @@ namespace tmv {
     };
 
     template <class M, class F>
-    static inline void ApplyToAll(BaseMatrix_Mutable<M>& m, const F& f)
+    static TMV_INLINE void ApplyToAll(BaseMatrix_Mutable<M>& m, const F& f)
     {
         const int algo = M::_canlin ? 1 : M::_colmajor ? 3 : 2;
         ApplyToAllM_Helper<algo,M,F>::call(m.mat(),f);
@@ -1933,25 +1933,25 @@ namespace tmv {
     // algo 0: Not complex, nothing to do
     template <class M>
     struct ConjugateM_Helper<0,M>
-    { static void call(M& ) {} };
+    { static inline void call(M& ) {} };
 
     // algo 1: Linearize to vector version
     template <class M>
     struct ConjugateM_Helper<1,M>
     {
-        static void call(M& m)
+        static inline void call(M& m)
         { m.linearView().conjugateSelf(); }
     };
 
     // In TMV_ScaleM.h
     template <int ix, class T, class M>
-    static void Scale(const Scaling<ix,T>& x, BaseMatrix_Mutable<M>& m);
+    static inline void Scale(const Scaling<ix,T>& x, BaseMatrix_Mutable<M>& m);
 
     // algo 2: m.imagPart() *= -1
     template <class M>
     struct ConjugateM_Helper<2,M>
     {
-        static void call(M& m)
+        static inline void call(M& m)
         {
             typedef typename M::real_type RT;
             typedef typename M::imagpart_type Mi;
@@ -1962,7 +1962,7 @@ namespace tmv {
     };
 
     template <class M>
-    static inline void ConjugateSelf(BaseMatrix_Rec_Mutable<M>& m)
+    static TMV_INLINE void ConjugateSelf(BaseMatrix_Rec_Mutable<M>& m)
     {
         const bool isreal = Traits<typename M::value_type>::isreal;
         const int algo = isreal ? 0 : M::_canlin ? 1 : 2;
@@ -1976,7 +1976,7 @@ namespace tmv {
     // But if we do have the elements calculated, this overloaded 
     // version will be faster:
     template <class M>
-    static inline typename M::value_type DoTrace(const BaseMatrix_Rec<M>& m)
+    static TMV_INLINE typename M::value_type DoTrace(const BaseMatrix_Rec<M>& m)
     { return m.diag().sumElements(); }
 
 
@@ -1984,7 +1984,7 @@ namespace tmv {
     // TMV_Text 
     //
 
-#ifdef TMV_DEBUG
+#ifdef TMV_TEXT
     template <class M>
     static inline std::string TMV_Text(const BaseMatrix_Rec<M>& m)
     {

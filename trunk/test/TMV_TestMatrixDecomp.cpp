@@ -15,10 +15,12 @@ void TestMatrixDecomp()
         if (mattype >= 4) break;
 #endif
 
+#ifdef XXD
         if (showstartdone) {
             std::cout<<"mattype = "<<mattype<<", stor = "<<
                 tmv::TMV_Text(stor)<<std::endl;
         }
+#endif
         // mattype = 0  is Square
         // mattype = 1  is NonSquare slightly tall
         // mattype = 2  is NonSquare very tall
@@ -31,9 +33,6 @@ void TestMatrixDecomp()
         int M = N;
         if (mattype == 1) M = 211;
         else if (mattype == 2) M = 545;
-
-        // MJ: Until QR is implemented.
-        if (M != N) continue;
 
         const bool singular = mattype >= 3;
         const bool baddefect = mattype == 4;
@@ -191,7 +190,6 @@ void TestMatrixDecomp()
             std::cout<<"."; std::cout.flush();
         } while (false);
 
-#if 0
         // QR Decomposition
         do {
             // QR Decomposition always works.  It just can't be used for
@@ -202,6 +200,12 @@ void TestMatrixDecomp()
             tmv::Matrix<T,stor> Q = m.qrd().getQ();
             tmv::UpperTriMatrix<T> R = m.qrd().getR();
             tmv::Matrix<T> QR = Q*R;
+            if (showacc) {
+                //std::cout<<"m = "<<m<<std::endl;
+                //std::cout<<"QR = "<<QR<<std::endl;
+                //std::cout<<"m-QR = "<<(m-QR)<<std::endl;
+                std::cout<<"Norm(m-QR) = "<<Norm(m-QR)<<std::endl;
+            }
             Assert(Equal(m,QR,eps*normm),"QR"); 
             Assert(Equal(m,m.qrd().getQ()*m.qrd().getR(),eps*normm),
                    "QR - PackedQ"); 
@@ -305,6 +309,7 @@ void TestMatrixDecomp()
             std::cout<<"."; std::cout.flush();
         } while (false);
 
+#if 0
         // QRP Decomposition
         for (int istrict = 0; istrict <= 1; istrict++) {
             if (showstartdone) {

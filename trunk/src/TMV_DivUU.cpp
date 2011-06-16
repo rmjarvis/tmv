@@ -34,7 +34,9 @@
 #include "tmv/TMV_DivUU.h"
 #include "tmv/TMV_TriMatrix.h"
 #include "tmv/TMV_Matrix.h"
+#include "tmv/TMV_SmallTriMatrix.h"
 #include "tmv/TMV_Vector.h"
+#include "tmv/TMV_SmallVector.h"
 #include "tmv/TMV_CopyU.h"
 #include "tmv/TMV_Det.h"
 

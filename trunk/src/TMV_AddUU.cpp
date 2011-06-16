@@ -74,7 +74,7 @@ namespace tmv {
     {
 #ifdef BLAS
         InstMultXM(x1,m1,m3);
-        InstAddMultXM(x2m2,m3);
+        InstAddMultXM(x2,m2,m3);
 #else
         if (m1.iscm() && m2.iscm() && m3.iscm()) 
             DoAddMM(x1,m1.cmView(),x2,m2.cmView(),m3.cmView());

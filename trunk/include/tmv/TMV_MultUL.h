@@ -112,7 +112,7 @@ namespace tmv {
         const ConstUpperTriMatrixView<T2,C2>& m2, MatrixView<T3> m3);
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static void NoAliasMultMM(
+    static inline void NoAliasMultMM(
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
         const BaseMatrix_Tri<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
 
@@ -136,7 +136,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUL_Helper<1,s,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UL
@@ -418,7 +418,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
             {
                 // [ C00 C01 ] = [ A00 A01 ] [ B00  0  ]
@@ -468,7 +468,7 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
             {
                 const bool u1 = M1::_unit;
@@ -482,10 +482,10 @@ namespace tmv {
         template <int I>
         struct Unroller<I,0>
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix,T>& , const M1& , const M2& , M3& ) {}
         };
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UL
@@ -893,7 +893,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
             {
                 // [ C00 C01 ] = [ A00  0  ] [ B00 B01 ]
@@ -943,7 +943,7 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
             {
                 const bool u1 = M1::_unit;
@@ -957,10 +957,10 @@ namespace tmv {
         template <int I>
         struct Unroller<I,0>
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix,T>& , const M1& , const M2& , M3& ) {}
         };
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UL
@@ -1114,7 +1114,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUL_Helper<87,s,add,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UL
@@ -1134,7 +1134,7 @@ namespace tmv {
     template <int s, int ix, class T, class M1, class M2, class M3>
     struct MultUL_Helper<88,s,false,ix,T,M1,M2,M3>
     {
-        static void call(
+        static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const int N = s==UNKNOWN ? int(m1.size()) : s;
@@ -1470,7 +1470,7 @@ namespace tmv {
                 s == 1 ? 1 :
                 M3::_conj ? 197 :
                 inst ? 91 : 
-                99;
+                98;
             MultUL_Helper<algo,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };

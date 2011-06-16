@@ -166,6 +166,32 @@
 #include "tmv/TMV_BaseVector.h"
 #include "tmv/TMV_BaseMatrix_Rec.h"
 
+// TODO: Put functions with arithmetic into .cpp file with Inst, etc.
+// so don't need these:
+#include "tmv/TMV_ScaleV.h"
+#include "tmv/TMV_ProdMM.h"
+#include "tmv/TMV_ProdMV.h"
+#include "tmv/TMV_ProdVV.h"
+#include "tmv/TMV_OProdVV.h"
+#include "tmv/TMV_SumVV.h"
+#include "tmv/TMV_SumMM.h"
+
+//#define XDEBUG_HOUSE
+
+#ifdef XDEBUG_HOUSE
+#include <iostream>
+#include "tmv/TMV_MultXM.h"
+#include "tmv/TMV_AddMM.h"
+#include "tmv/TMV_SumMX.h"
+#include "tmv/TMV_NormM.h"
+#include "tmv/TMV_NormV.h"
+#include "tmv/TMV_Norm.h"
+#include "tmv/TMV_MatrixIO.h"
+#include "tmv/TMV_VectorIO.h"
+using std::cerr;
+using std::endl;
+#endif
+
 namespace tmv {
 
     template <class V>
@@ -243,27 +269,30 @@ namespace tmv {
             u(xfull.subVector(1,xfull.size()))
         { T temp=xfull.cref(0); doReflection(temp); xfull.ref(0) = temp; }
 
-        // The next constructor assumes that the reflection is already
-        // done, so u and beta are passed in, and can then be used.
-        Householder(const V& _u, const RT& _beta) : u(_u), beta(_beta) {}
 
-        // The next constructor reverses the roles of x0 and y.  
-        // The extra bool parameter would normally be set to true, 
-        // meaning unreflect = true, but in fact it is ignored, as the
-        // different functionality is actually set by the signature. 
+        typedef enum { UnReflect } UnReflectType;
+        // The next constructors reverse the roles of x0 and y.  
+        // The extra parameter must be UnReflect, the only valid value
+        // of type UnReflectType.
         // In this case, the x0 parameter is actually y on input and 
         // x0 on output (rather than the usual x0 on input and y on output).
         // Again, x is the unreflected vector on input, and is
         // converted to u on output.  
         // N.B. This version is used for QR downdating.
-        Householder(T& x0, const V& x, bool) : u(x)
-        { doUnReflection(x0); }
+        Householder(T& y, const V& x, UnReflectType ) : u(x)
+        { doUnReflection(y); }
         template <class RefT>
-        Householder(RefT x0, const V& x, bool) : u(x)
-        { T temp=x0; doReflection(temp); x0 = temp; }
+        Householder(RefT y, const V& x, UnReflectType ) : u(x)
+        { T temp=y; doReflection(temp); y = temp; }
         template <class Vfull>
-        Householder(Vfull& xfull, bool) : u(xfull.subVector(1,xfull.size()))
+        Householder(Vfull& xfull, UnReflectType ) : 
+            u(xfull.subVector(1,xfull.size()))
         { T temp=xfull.cref(0); doUnReflection(temp); xfull.ref(0) = temp; }
+
+
+        // The next constructor assumes that the reflection is already
+        // done, so u and beta are passed in, and can then be used.
+        Householder(const V& _u, const RT& _beta) : u(_u), beta(_beta) {}
 
         //
         // Special Accessors: 
@@ -287,11 +316,12 @@ namespace tmv {
         // This first one allows the first row and the rest in different
         // places:
         template <class M0, class Mx>
-        void multEq(M0& m0, Mx& mx) const;
+        void multEq(
+            BaseVector_Mutable<M0>& m0, BaseMatrix_Rec_Mutable<Mx>& mx) const;
 
         // Here m0 and mx are a single matrix:
         template <class M>
-        void multEq(M& m) const
+        void multEq(BaseMatrix_Rec_Mutable<M>& m) const
         {
             typename M::row_type m0 = m.row(0);
             typename M::rowrange_type mx = m.rowRange(1,m.colsize());
@@ -302,20 +332,23 @@ namespace tmv {
         // vector during the calculation.  The temporary isn't very
         // much, but still worth having the separate function.
         template <class M1, class M2>
-        void mult(const M1& m1, M2& m2) const;
+        void mult(
+            const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2) const;
 
         // Repeat for vectors:
         template <class Vx>
-        void multEqV(typename Vx::reference v0, Vx& vx) const;
+        void multEq(
+            typename Vx::reference v0, BaseVector_Mutable<Vx>& vx) const;
         template <class V2>
-        void multEqV(V2& v) const
+        void multEq(BaseVector_Mutable<V2>& v) const
         {
-            typename Vx::reference v0 = v.ref(0);
-            typename Vx::subvector_type vx = v.rowRange(1,v.size());
-            multEqV(v0,vx);
+            typename V2::reference v0 = v.ref(0);
+            typename V2::subvector_type vx = v.subVector(1,v.size());
+            multEq(v0,vx);
         }
         template <class V1, class V2>
-        void multV(const V1& v1, V2& v2) const;
+        void mult(
+            const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2) const;
 
  
         
@@ -327,12 +360,12 @@ namespace tmv {
         // with the v0 location into H*e0.
         // Note: after doing this function, the Householder matrix
         // shouldn't be used further, since it isn't correct.
-        void unPack(T& v0);
+        void unpack(T& v0);
 
         // In case v0 is some other reference type
         template <class RefT>
-        void unPack(RefT v0)
-        { T temp = v0; unPack(temp); v0 = temp; }
+        void unpack(RefT v0)
+        { T temp = v0; unpack(temp); v0 = temp; }
 
 
         //
@@ -363,12 +396,16 @@ namespace tmv {
         template <class M2>
         void assignTo(BaseMatrix_Rec_Mutable<M2>& m2) const
         {
-            const int N = u.size()+1;
-            m2.mat().ref(0,0) = RT(1)-beta;
-            m2.mat().col(0,1,N) = -beta*u;
-            m2.mat().row(0,1,N) = -beta*u.conjugate();
-            m2.mat().subMatrix(1,1,N,N) = -beta*u^u.conjugate();
-            m2.mat().subMatrix(1,1,N,N) += RT(1);
+            if (beta == RT(0)) {
+                m2.setToIdentity();
+            } else {
+                const int N = u.size()+1;
+                m2.mat().ref(0,0) = -beta;
+                m2.mat().col(0,1,N) = -beta*u;
+                m2.mat().row(0,1,N) = -beta*u.conjugate();
+                m2.mat().subMatrix(1,1,N,N) = -beta*u^u.conjugate();
+                m2.mat().diag().addToAll(RT(1));
+            }
         }
 
         template <class M2>
@@ -382,21 +419,21 @@ namespace tmv {
         { return const_conjugate_type(u,beta); }
         const_transpose_type transpose() const
         { return const_transpose_type(u,beta); }
-        const_adjoint_type conjugate() const
+        const_adjoint_type adjoint() const
         { return *this; }
         const_inverse_type inverse() const
         { return *this; }
 
     private :
         void doReflection(T& x0);
-        void doUnReflection(T& x0);
+        bool doUnReflection(T& y);
 
         V u; 
         RT beta;
     };
 
     template <class V>
-    static void Householder<V>::doReflection(typename Householder<V>::T& x0)
+    void Householder<V>::doReflection(typename Householder<V>::T& x0)
     {
 #ifdef XDEBUG_HOUSE
         Vector<T> xx(u.size()+1);
@@ -414,8 +451,8 @@ namespace tmv {
         // probably not the most efficient) solution is to scale all the 
         // intermediate values by the maximum abs value in the vector.
 
-        RT scale = x.maxAbs2Element();
-        RT absx0 = TMV_Abs(x0);
+        RT scale = u.maxAbs2Element();
+        RT absx0 = TMV_ABS(x0);
         if (absx0 > scale) scale = absx0;
 
         if (TMV_Underflow(scale)) {
@@ -432,10 +469,9 @@ namespace tmv {
         RT normsqx = u.normSq(invscale);
 
         // if all of x other than first element are 0, H is identity
-        if (normsqx == RT(0) && TMV_IMAG(x0) == RT(0)) {
+        if (normsqx == RT(0)) {
             // Set them all to x explicitly in case underflow led to the 0.
             u.setZero();
-            x0 = T(0);
             beta = RT(0);
             return;
         }
@@ -448,7 +484,6 @@ namespace tmv {
         RT normx = TMV_SQRT(normsqx);
 
         // y = -|x| (x0/|x0|) 
-        RT absx0 = TMV_ABS(x0);
         T y = absx0 == RT(0) ? normx : -normx*x0/absx0;
 
         // beta = 1 / (|x|^2 + |x||x0|)
@@ -458,12 +493,12 @@ namespace tmv {
         T u0 = x0-y;
         RT normu0 = TMV_NORM(u0);
         beta = normu0 / (normsqx + normx * absx0);
-
         T invu0 = RT(1)/u0;
+
         // Sometimes this combination can underflow, so check.
         T scaled_invu0 = invu0 * invscale;
-        if ((TMV_REAL(invv0)!=RT(0) && TMV_Underflow(TMV_REAL(scaled_invv0))) ||
-            (TMV_IMAG(invv0)!=RT(0) && TMV_Underflow(TMV_IMAG(scaled_invv0)))) {
+        if ((TMV_REAL(invu0)!=RT(0) && TMV_Underflow(TMV_REAL(scaled_invu0))) ||
+            (TMV_IMAG(invu0)!=RT(0) && TMV_Underflow(TMV_IMAG(scaled_invu0)))) {
             u *= invscale;
             u *= invu0;
         } else {
@@ -504,7 +539,7 @@ namespace tmv {
     }
 
     template <class V>
-    static void Householder<V>::doUnReflection(typename Householder<V>::T& y)
+    bool Householder<V>::doUnReflection(typename Householder<V>::T& y)
     {
         // This is similar, except that the roles of y and x0 are swapped.
         // That is, the final rotated vector y e0 is presumed known, as is 
@@ -515,105 +550,68 @@ namespace tmv {
         // This is used for downdating QR decompositions.
         // The return value is true if successful, false if |y| < |x|.
 
-        TMVAssert(u.size() > 0);
-#ifdef XDEBUG_HOUSE
-        Vector<T> xx(u.size()+1);
-        xx.subVector(1,xx.size()) = u;
-        T yy = y;
-#endif
-        // abs(y) = |x|, so |x0|^2 is |y|^2 - |x_1..N|^2
-        // normsqx1 = |x_1..N|^2
-        RT normsqx1 = NormSq(u);
+        RT scale = u.maxAbs2Element();
+        RT absy = TMV_ABS(y);
+        if (absy > scale) scale = absy;
+
+        if (TMV_Underflow(scale)) {
+            // Then the situation is hopeless, and we should just zero out
+            // the whole vector.
+            u.setZero();
+            y = T(0);
+            beta = RT(0);
+            return true; // But still declared successful.
+        }
+
+        // Determine |y| = |x| now, but need to find x0 from |x1| and |y|.
+        RT invscale = RT(1)/scale;
+        RT normsqx1 = u.normSq(invscale);
 
         // if all of x other than first element are 0, H is identity
         if (normsqx1 == RT(0)) {
             // Set them all to x explicitly in case underflow led to the 0.
             u.setZero();
             beta = RT(0);
-            return;
+            return true;
         }
 
         // Finish calculating x0 in usual case
-        RT normsqx = TMV_NORM(y);
-        RT normx = TMV_SQRT(normsqx);
+        absy *= invscale;
+        y *= invscale;
+        RT normsqx = absy*absy;
+        RT normsqx0 = normsqx - normsqx1;
+        if (normsqx0 < RT(0)) return false;
 
-        if (normsqx * TMV_Epsilon<T>() == RT(0)) {
-            // Then we need to rescale, since underflow will cause 
-            // rounding errors
-            const RT eps = TMV_Epsilon<T>();
-            // Epsilon is a pure power of 2, so no rounding errors from 
-            // rescaling.
-            u /= eps;
-            y /= eps;
-            doUnReflection(y);
-            y *= eps;
-        } else if (RT(1)/normsqx == RT(0)) {
-            // Then we have overflow, so we need to rescale:
-            const RT eps = TMV_Epsilon<T>();
-            RT scale = eps; normx *= eps;
-            while (normx > RT(1)) { scale *= eps; normx *= eps; }
-            u *= scale;
-            y *= scale;
-            doUnReflection(y);
-            y /= scale;
+        // y = -|x| (x0/|x0|) 
+        // x0 = -|x0| (y/|y|)
+        RT absx0 = TMV_SQRT(normsqx0);
+        T x0 = -absx0*y/absy;
+
+        // beta = 1 / (|x|^2 + |x||x0|)
+        // H = I - beta v vt
+        // with u = x - y e0 in first column
+        // Renormalize beta,u so that u(0) = 1
+        T u0 = x0-y;
+        RT normu0 = TMV_NORM(u0);
+        beta = normu0 / (normsqx + absy * absx0);
+        T invu0 = RT(1)/u0;
+
+        // Sometimes this combination can underflow, so check.
+        T scaled_invu0 = invu0 * invscale;
+        if ((TMV_REAL(invu0)!=RT(0) && TMV_Underflow(TMV_REAL(scaled_invu0))) ||
+            (TMV_IMAG(invu0)!=RT(0) && TMV_Underflow(TMV_IMAG(scaled_invu0)))) {
+            u *= invscale;
+            u *= invu0;
         } else {
-            // The usual case with no rescaling required:
-            RT normsqx0 = normsqx - normsqx1;
-            if (normsqx0 < RT(0)) {
-                // TODO: Do something more with this?
-                throw NonPosDef();
-            }
-
-            // y = -|x| (x0/|x0|) 
-            // x0 = -|x0| (y/|x|)
-            RT absx0 = TMV_SQRT(normsqx0);
-            T x0 = absx0 == RT(0) ? T(0) : -absx0*y/normx;
-
-            // beta = 1 / (|x|^2 + |x||x0|)
-            // H = I - beta v vt
-            // with u = x - y e0 in first column
-            // Renormalize beta,u so that u(0) = 1
-            T u0 = x0-y;
-            RT normu0 = TMV_NORM(u0);
-            beta = normu0 / (normsqx + normx * absx0);
-            u /= u0;
-            y = x0;
+            u *= scaled_invu0;
         }
-#ifdef XDEBUG_HOUSE
-        xx(0) = y;
-        Vector<T> uu(xx.size());
-        uu(0) = T(1);
-        uu.subVector(1,uu.size()) = u;
-        Matrix<T> H = T(1)-beta*(uu^uu.conjugate());
-        // Check the following:
-        // H * xx = (yy,0,0.0...)
-        // |xx| = |yy|
-        Vector<T> Hxx = H * xx;
-        if (TMV_ABS(TMV_ABS(Hxx(0))-TMV_ABS(yy)) > 0.0001*TMV_ABS(yy) ||
-            TMV_ABS(Norm(xx)-TMV_ABS(yy)) > 0.0001*TMV_ABS(yy) ||
-            Norm(Hxx.subVector(1,Hxx.size())) > 0.0001*TMV_ABS(yy)) {
-            cerr<<"Householder UnReflect:\n";
-            cerr<<"Input: x = "<<xx<<endl;
-            cerr<<"       y = "<<yy<<endl;
-            cerr<<"x0 => "<<y<<endl;
-            cerr<<"Norm(x) = "<<Norm(xx)<<endl;
-            cerr<<"Output: uu= "<<uu<<endl;
-            cerr<<"beta = "<<beta<<endl;
-            cerr<<"H = "<<H<<endl;
-            cerr<<"xx = "<<xx<<endl;
-            cerr<<"Hxx = "<<Hxx<<endl;
-            cerr<<"abs(abs(hxx(0))-abs(x0)) = "<<
-                TMV_ABS(TMV_ABS(Hxx(0))-TMV_ABS(yy))<<endl;
-            cerr<<"abs(Norm(xx)-abs(x0)) = "<<
-                TMV_ABS(Norm(xx))-TMV_ABS(yy)<<endl;
-            cerr<<"Norm(Hxx(1,N)) = "<<Norm(Hxx.subVector(1,Hxx.size()))<<endl;
-            abort();
-        }
-#endif
+                        
+        y = x0*scale;
     }
 
     template <class V> template <class M0, class Mx>
-    static void Householder<V>::multEq(M0& m0, Mx& mx)
+    void Householder<V>::multEq(
+        BaseVector_Mutable<M0>& m0, BaseMatrix_Rec_Mutable<Mx>& mx) const
     {
         // This routine takes 
         // ( m0 ) <- H ( m0 ) = [ ( m0 ) - beta ( 1 ) ( 1 ut ) ( m0 ) ]
@@ -624,35 +622,43 @@ namespace tmv {
 
         TMVAssert(u.size() == mx.colsize());
         TMVAssert(m0.size() == mx.rowsize());
-#ifdef XDEBUG
-        //std::cout<<"Start Householder::multEq"<<std::endl;
-        //std::cout<<"u = "<<u<<std::endl;
-        //std::cout<<"beta = "<<beta<<std::endl;
-        //std::cout<<"m0 = "<<m0<<std::endl;
-        //std::cout<<"mx = "<<mx<<std::endl;
+#ifdef XDEBUG_HOUSE
+        std::cout<<"Start Householder::multEq"<<std::endl;
+        std::cout<<"u = "<<u<<std::endl;
+        std::cout<<"beta = "<<beta<<std::endl;
+        std::cout<<"m0 = "<<m0.vec()<<std::endl;
+        std::cout<<"mx = "<<mx.mat()<<std::endl;
+        typedef typename V::value_type T1;
+        typedef typename Mx::value_type T2;
         Matrix<T2> mm(mx.colsize()+1,m0.size());
-        mm.row(0) = m0;
-        mm.rowRange(1,mm.colsize()) = mx;
+        mm.row(0) = m0.vec();
+        mm.rowRange(1,mm.colsize()) = mx.mat();
 #endif
 
         if (m0.size() > 0 && beta != RT(0)) {
-            typedef typename M0::copy_type Vtemp;
-            Vtemp temp = u.conjugate() * mx;
-            temp += m0;
+            //std::cout<<"Not trivial.\n";
+            typedef typename M0::copy_type M0c;
+            M0c temp = u.conjugate() * mx.mat();
+            //std::cout<<"temp = "<<temp<<std::endl;
+            temp += m0.vec();
+            //std::cout<<"temp => "<<temp<<std::endl;
             temp *= beta;
+            //std::cout<<"temp => "<<temp<<std::endl;
 
-            m0 -= temp;
-            mx -= u^temp;
+            m0.vec() -= temp;
+            //std::cout<<"m0 => "<<m0<<std::endl;
+            mx.mat() -= u^temp;
+            //std::cout<<"m0 => "<<mx<<std::endl;
         }
-#ifdef XDEBUG
+#ifdef XDEBUG_HOUSE
         Vector<T1> uu(u.size()+1);
         uu(0) = T1(1);
         uu.subVector(1,uu.size()) = u;
         Matrix<T1> H = T1(1) - beta*(uu^uu.conjugate());
         Matrix<T2> Hm = H * mm;
         Matrix<T2> Hm2(mx.colsize()+1,m0.size());
-        Hm2.row(0) = m0;
-        Hm2.rowRange(1,Hm2.colsize()) = mx;
+        Hm2.row(0) = m0.vec();
+        Hm2.rowRange(1,Hm2.colsize()) = mx.mat();
         if (Norm(Hm-Hm2) > 0.001*Norm(Hm)) {
             cerr<<"Householder::multEq\n";
             cerr<<"Input: m = "<<mm<<endl;
@@ -663,56 +669,61 @@ namespace tmv {
             cerr<<"Output: m = "<<Hm2<<endl;
             abort();
         }
-        //std::cout<<"mx => "<<mx<<std::endl;
+        //std::cout<<"mx => "<<mx.mat()<<std::endl;
 #endif
     }
 
     template <class V> template <class M1, class M2>
-    static void Householder<V>::mult(const M1& m1, M2& m2)
+    void Householder<V>::mult(
+        const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2) const
     {
         TMVAssert(m1.rowsize() == m2.rowsize());
         TMVAssert(u.size()+1 == m1.colsize());
         TMVAssert(u.size()+1 == m2.colsize());
-#ifdef XDEBUG
+#ifdef XDEBUG_HOUSE
+        typedef typename V::value_type T1;
+        typedef typename M2::value_type T2;
         //std::cout<<"Start Householder::mult"<<std::endl;
         //std::cout<<"u = "<<u<<std::endl;
         //std::cout<<"beta = "<<beta<<std::endl;
-        //std::cout<<"m1 = "<<m1<<std::endl;
-        //std::cout<<"m2 = "<<m2<<std::endl;
+        //std::cout<<"m1 = "<<m1.mat()<<std::endl;
+        //std::cout<<"m2 = "<<m2.mat()<<std::endl;
 #endif
 
         if (m1.rowsize() > 0) {
             if (beta != RT(0)) {
                 const int N = m1.colsize();
-                typename M1::const_row_type m0 = m1.row(0);
-                typename M1::const_rowrange_type mx = m1.rowRange(1,N);
+                typename M1::const_row_type m0 = m1.mat().row(0);
+                typename M1::const_rowrange_type mx = m1.mat().rowRange(1,N);
 
-                typename M2::row_type m2_0 = u.conjugate() * mx;
+                typename M2::row_type m2_0 = m2.mat().row(0);
+                typename M2::rowrange_type m2_x = m2.mat().rowRange(1,N);
+
+                m2_0 = u.conjugate() * mx;
                 m2_0 += m0;
                 m2_0 *= -beta;
 
-                typename M2::rowrange_type m2_x = m2.rowRange(1,N);
                 m2_x = mx;
                 m2_x += u^m2_0;
                 m2_0 += m0;
             } else {
-                m2 = m1;
+                m2.mat() = m1.mat();
             }
         }
-#ifdef XDEBUG
+#ifdef XDEBUG_HOUSE
         Vector<T1> uu(u.size()+1);
         uu(0) = T1(1);
         uu.subVector(1,uu.size()) = u;
         Matrix<T1> H = T1(1) - beta*(uu^uu.conjugate());
-        Matrix<T2> Hm = H * m1;
-        if (Norm(Hm-m2) > 0.001*Norm(Hm)) {
+        Matrix<T2> Hm = H * m1.mat();
+        if (Norm(Hm-m2.mat()) > 0.001*Norm(Hm)) {
             cerr<<"Householder::mult\n";
-            cerr<<"Input: m = "<<m1<<endl;
+            cerr<<"Input: m = "<<m1.mat()<<endl;
             cerr<<"uu = "<<uu<<endl;
             cerr<<"beta = "<<beta<<endl;
             cerr<<"H = "<<H<<endl;
             cerr<<"Hm = "<<Hm<<endl;
-            cerr<<"Output: m = "<<m2<<endl;
+            cerr<<"Output: m = "<<m2.mat()<<endl;
             abort();
         }
         //std::cout<<"mx => "<<mx<<std::endl;
@@ -720,37 +731,39 @@ namespace tmv {
     }
 
     template <class V> template <class Vx>
-    static void Householder<V>::multEqV(typename Vx::reference v0, Vx& vx)
+    void Householder<V>::multEq(
+        typename Vx::reference v0, BaseVector_Mutable<Vx>& vx) const 
     {
         // ( v0 ) -= beta (   v0 + ut vx   )
         // ( vx )         ( u (v0 + ut vx) )
         TMVAssert(u.size() == vx.size());
         if (beta != RT(0)) {
-            typename Vx::value_type temp = u.conjugate() * vx;
+            typename Vx::value_type temp = u.conjugate() * vx.vec();
             temp += v0;
             temp *= beta;
             v0 -= temp;
-            vx -= temp*u;
+            vx.vec() -= temp*u;
         }
     }
 
     template <class V> template <class V1, class V2>
-    static void Householder<V>::multV(const V1& v1, V2& v2)
+    void Householder<V>::mult(
+        const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2) const
     {
         TMVAssert(u.size()+1 == v1.size());
         TMVAssert(u.size()+1 == v2.size());
         if (beta != RT(0)) {
-            const int N = m1.colsize();
+            const int N = v1.size();
             typename V2::value_type temp = u.conjugate() * v1.subVector(1,N);
             temp += v1.cref(0);
-            temp *= -beta;
-            v2.ref(0) = v2.cref(0) - temp;
+            temp *= beta;
+            v2.ref(0) = v1.cref(0) - temp;
             v2.subVector(1,N) = v1.subVector(1,N) - temp*u;
         }
     }
 
     template <class V>
-    static void Householder<V>::unpack(T& u0)
+    void Householder<V>::unpack(T& u0)
     {
         // This routine takes u <- H*e0
 
@@ -778,49 +791,49 @@ namespace tmv {
         if (add) {
             v3 += (x*m1*v2).calc();
         } else {
-            m1.multV(v2,v3);
+            m1.mult(v2,v3);
             Scale(x,v3);
         }
     }
     template <bool add, int ix, class T, class V1, class V2, class V3>
-    static inline void NoAliasMultMV(
+    static TMV_INLINE void NoAliasMultMV(
         const Scaling<ix,T>& x, const Householder<V1>& m1, 
         const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
     { MultMV<add>(x,m1,v2,v3); }
     template <bool add, int ix, class T, class V1, class V2, class V3>
-    static inline void AliasMultMV(
+    static TMV_INLINE void AliasMultMV(
         const Scaling<ix,T>& x, const Householder<V1>& m1, 
         const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
     { MultMV<add>(x,m1,v2,v3); }
 
     template <bool add, int ix, class T, class V1, class V2, class V3>
-    static inline void MultVM(
+    static TMV_INLINE void MultVM(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1, 
         const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
     { MultMV<add>(x,m2.transpose(),v1,v3); }
     template <bool add, int ix, class T, class V1, class V2, class V3>
-    static inline void NoAliasMultVM(
+    static TMV_INLINE void NoAliasMultVM(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1, 
         const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
     { NoAliasMultMV<add>(x,m2.transpose(),v1,v3); }
     template <bool add, int ix, class T, class V1, class V2, class V3>
-    static inline void AliasMultVM(
+    static TMV_INLINE void AliasMultVM(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1, 
         const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
     { AliasMultMV<add>(x,m2.transpose(),v1,v3); }
  
     template <int ix, class T, class V1, class V2>
-    static inline void MultEqVM(
+    static TMV_INLINE void MultEqVM(
         BaseVector_Mutable<V1>& v1, const Scaling<ix,T>& x,
         const Householder<V2>& m2)
-    { m2.transpose().multEqV(v1); Scale(x,v1); }
+    { m2.transpose().multEq(v1); Scale(x,v1); }
     template <int ix, class T, class V1, class V2>
-    static inline void NoAliasMultEqVM(
+    static TMV_INLINE void NoAliasMultEqVM(
         BaseVector_Mutable<V1>& v1, const Scaling<ix,T>& x,
         const Householder<V2>& m2)
     { MultEqVM(v1,x,m2); }
     template <int ix, class T, class V1, class V2>
-    static inline void AliasMultEqVM(
+    static TMV_INLINE void AliasMultEqVM(
         BaseVector_Mutable<V1>& v1, const Scaling<ix,T>& x,
         const Householder<V2>& m2)
     { MultEqVM(v1,x,m2); }
@@ -831,31 +844,31 @@ namespace tmv {
     //
 
     template <int ix, class T, class V1, class V2, class V3>
-    static inline void LDiv(
+    static TMV_INLINE void LDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
-    { m2.multV(v1,v3); Scale(x,v3); }
+    { m2.mult(v1,v3); Scale(x,v3); }
     template <int ix, class T, class V1, class V2, class V3>
-    static inline void NoAliasLDiv(
+    static TMV_INLINE void NoAliasLDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
     { LDiv(x,v1,m2,v3); }
     template <int ix, class T, class V1, class V2, class V3>
-    static inline void AliasLDiv(
+    static TMV_INLINE void AliasLDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
     { LDiv(x,v1,m2,v3); }
 
     template <class V1, class V2>
-    static inline void LDivEq(
+    static TMV_INLINE void LDivEq(
         BaseVector_Mutable<V1>& v1, const Householder<V2>& m2)
-    { m2.multEqV(v1); }
+    { m2.multEq(v1); }
     template <class V1, class V2>
-    static inline void NoAliasLDivEq(
+    static TMV_INLINE void NoAliasLDivEq(
         BaseVector_Mutable<V1>& v1, const Householder<V2>& m2)
     { LDivEq(v1,m2); }
     template <class V1, class V2>
-    static inline void AliasLDivEq(
+    static TMV_INLINE void AliasLDivEq(
         BaseVector_Mutable<V1>& v1, const Householder<V2>& m2)
     { LDivEq(v1,m2); }
 
@@ -865,32 +878,32 @@ namespace tmv {
     // v3 = HT v1
     //
 
-    template <int ix, class T, class V1, class V3>
-    static inline void RDiv(
+    template <int ix, class T, class V1, class V2, class V3>
+    static TMV_INLINE void RDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
-    { m2.transpose().multV(v1,v3); Scale(x,v3); }
-    template <int ix, class T, class V1, class V3>
-    static inline void NoAliasRDiv(
+    { m2.transpose().mult(v1,v3); Scale(x,v3); }
+    template <int ix, class T, class V1, class V2, class V3>
+    static TMV_INLINE void NoAliasRDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
     { RDiv(x,v1,m2,v3); }
-    template <int ix, class T, class V1, class V3>
-    static inline void AliasRDiv(
+    template <int ix, class T, class V1, class V2, class V3>
+    static TMV_INLINE void AliasRDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
     { RDiv(x,v1,m2,v3); }
 
     template <class V1, class V2>
-    static inline void RDivEq(
+    static TMV_INLINE void RDivEq(
         BaseVector_Mutable<V1>& v1, const Householder<V2>& m2)
-    { m2.transpose().multEqV(v1); }
+    { m2.transpose().multEq(v1); }
     template <class V1, class V2>
-    static inline void NoAliasRDivEq(
+    static TMV_INLINE void NoAliasRDivEq(
         BaseVector_Mutable<V1>& v1, const Householder<V2>& m2)
     { RDivEq(v1,m2); }
     template <class V1, class V2>
-    static inline void AliasRDivEq(
+    static TMV_INLINE void AliasRDivEq(
         BaseVector_Mutable<V1>& v1, const Householder<V2>& m2)
     { RDivEq(v1,m2); }
 
@@ -914,44 +927,44 @@ namespace tmv {
         }
     }
     template <bool add, int ix, class T, class V1, class M2, class M3>
-    static inline void NoAliasMultMM(
+    static TMV_INLINE void NoAliasMultMM(
         const Scaling<ix,T>& x, const Householder<V1>& m1, 
         const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     { MultMM<add>(x,m1,m2,m3); }
     template <bool add, int ix, class T, class V1, class M2, class M3>
-    static inline void AliasMultMM(
+    static TMV_INLINE void AliasMultMM(
         const Scaling<ix,T>& x, const Householder<V1>& m1, 
         const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     { MultMM<add>(x,m1,m2,m3); }
 
     template <bool add, int ix, class T, class M1, class V2, class M3>
-    static inline void MultVM(
+    static TMV_INLINE void MultVM(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
         const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
     { MultMM<add>(x,m2.transpose(),m1,m3); }
     template <bool add, int ix, class T, class M1, class V2, class M3>
-    static inline void NoAliasMultVM(
+    static TMV_INLINE void NoAliasMultVM(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
         const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
     { NoAliasMultMM<add>(x,m2.transpose(),m1,m3); }
     template <bool add, int ix, class T, class M1, class V2, class M3>
-    static inline void AliasMultVM(
+    static TMV_INLINE void AliasMultVM(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
         const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
     { AliasMultMM<add>(x,m2.transpose(),m1,m3); }
  
     template <int ix, class T, class M1, class V2>
-    static inline void MultEqMM(
+    static TMV_INLINE void MultEqMM(
         BaseMatrix_Mutable<M1>& m1, const Scaling<ix,T>& x,
         const Householder<V2>& m2)
     { m2.transpose().multEq(m1); Scale(x,m1); }
     template <int ix, class T, class M1, class V2>
-    static inline void NoAliasMultEqMM(
+    static TMV_INLINE void NoAliasMultEqMM(
         BaseMatrix_Mutable<M1>& m1, const Scaling<ix,T>& x,
         const Householder<V2>& m2)
     { MultEqMM(m1,x,m2); }
     template <int ix, class T, class M1, class V2>
-    static inline void AliasMultEqMM(
+    static TMV_INLINE void AliasMultEqMM(
         BaseMatrix_Mutable<M1>& m1, const Scaling<ix,T>& x,
         const Householder<V2>& m2)
     { MultEqMM(m1,x,m2); }
@@ -961,31 +974,31 @@ namespace tmv {
     //
 
     template <int ix, class T, class M1, class V2, class M3>
-    static inline void LDiv(
+    static TMV_INLINE void LDiv(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
         const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
     { m2.mult(m1,m3); Scale(x,m3); }
     template <int ix, class T, class M1, class V2, class M3>
-    static inline void NoAliasLDiv(
+    static TMV_INLINE void NoAliasLDiv(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
         const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
     { LDiv(x,m1,m2,m3); }
     template <int ix, class T, class M1, class V2, class M3>
-    static inline void AliasLDiv(
+    static TMV_INLINE void AliasLDiv(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
         const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
     { LDiv(x,m1,m2,m3); }
 
     template <class M1, class V2>
-    static inline void LDivEq(
+    static TMV_INLINE void LDivEq(
         BaseMatrix_Mutable<M1>& m1, const Householder<V2>& m2)
     { m2.multEq(m1); }
     template <class M1, class V2>
-    static inline void NoAliasLDivEq(
+    static TMV_INLINE void NoAliasLDivEq(
         BaseMatrix_Mutable<M1>& m1, const Householder<V2>& m2)
     { LDivEq(m1,m2); }
     template <class M1, class V2>
-    static inline void AliasLDivEq(
+    static TMV_INLINE void AliasLDivEq(
         BaseMatrix_Mutable<M1>& m1, const Householder<V2>& m2)
     { LDivEq(m1,m2); }
 
@@ -994,37 +1007,37 @@ namespace tmv {
     //
 
     template <int ix, class T, class M1, class V2, class M3>
-    static inline void RDiv(
+    static TMV_INLINE void RDiv(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
         const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
     { m2.transpose().mult(m1,m3); Scale(x,m3); }
     template <int ix, class T, class M1, class V2, class M3>
-    static inline void NoAliasRDiv(
+    static TMV_INLINE void NoAliasRDiv(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
         const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
     { RDiv(x,m1,m2,m3); }
     template <int ix, class T, class M1, class V2, class M3>
-    static inline void AliasRDiv(
+    static TMV_INLINE void AliasRDiv(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
         const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
     { RDiv(x,m1,m2,m3); }
 
     template <class M1, class V2>
-    static inline void RDivEq(
+    static TMV_INLINE void RDivEq(
         BaseMatrix_Mutable<M1>& m1, const Householder<V2>& m2)
     { m2.transpose().multEq(m1); }
     template <class M1, class V2>
-    static inline void NoAliasRDivEq(
+    static TMV_INLINE void NoAliasRDivEq(
         BaseMatrix_Mutable<M1>& m1, const Householder<V2>& m2)
     { RDivEq(m1,m2); }
     template <class M1, class V2>
-    static inline void AliasRDivEq(
+    static TMV_INLINE void AliasRDivEq(
         BaseMatrix_Mutable<M1>& m1, const Householder<V2>& m2)
     { RDivEq(m1,m2); }
 
 
-#if 0
     // I'll deal with these next...
+#if 0
     template <class T>
     void BlockHouseholderAugment(
         const GenMatrix<T>& Y, const UpperTriMatrixView<T>& Z, T beta)
@@ -1057,7 +1070,7 @@ namespace tmv {
         TMVAssert(!Z.isconj());
         int M = Y.colsize();
         int N = Y.rowsize()-1; // # of cols already computed
-#ifdef XDEBUG
+#ifdef XDEBUG_HOUSE
         Matrix<T> Y0(Y);
         Y0.upperTri().setToIdentity();
         Matrix<T> Z0(Z);
@@ -1090,7 +1103,7 @@ namespace tmv {
 #endif
             *(Z.ptr() + N*(Z.stepi()+Z.stepj())) = beta;
         }
-#ifdef XDEBUG
+#ifdef XDEBUG_HOUSE
         Matrix<T> YY(Y);
         YY.upperTri().setToIdentity();
         Matrix<T> HH = T(1) - YY * Z * YY.adjoint();
@@ -1132,7 +1145,7 @@ namespace tmv {
         TMVAssert(!Z.isconj());
         TMVAssert(!Y.isconj());
         TMVAssert(!beta.isconj());
-#ifdef XDEBUG
+#ifdef XDEBUG_HOUSE
         Matrix<T> Y0(Y);
         Y0.upperTri().setToIdentity();
         Matrix<T> Z0(Z);
@@ -1244,7 +1257,7 @@ namespace tmv {
             Z3 = -Z1*Z3;
             Z3 *= Z2;
         }
-#ifdef XDEBUG
+#ifdef XDEBUG_HOUSE
         Matrix<T> Y2(Y);
         Y2.upperTri().setToIdentity();
         Matrix<T> Hnet = T(1) - Y2*Z*Y2.adjoint();
@@ -1276,7 +1289,7 @@ namespace tmv {
         TMVAssert(Y.rowsize() > 0);
         TMVAssert(Y.colsize() > 0);
         TMVAssert(m.colsize() == Y.colsize());
-#ifdef XDEBUG
+#ifdef XDEBUG_HOUSE
         Matrix<T> Y0(Y);
         Y0.upperTri().setToIdentity();
         Matrix<T> Z0(Z);
@@ -1303,7 +1316,7 @@ namespace tmv {
             m.rowRange(0,N) -= Y.rowRange(0,N).lowerTri(UnitDiag) * ZYtm;
             m.rowRange(N,M) -= Y.rowRange(N,M) * ZYtm;
         }
-#ifdef XDEBUG
+#ifdef XDEBUG_HOUSE
         if (Norm(Hm-m) > 0.001*Norm(m0)*Norm(H)) {
             cerr<<"BlockHouseholderLMult\n";
             cerr<<"Input: Y = "<<Y0<<endl;
@@ -1328,7 +1341,7 @@ namespace tmv {
         TMVAssert(Y.rowsize() > 0);
         TMVAssert(Y.colsize() > 0);
         TMVAssert(m.colsize() == Y.colsize());
-#ifdef XDEBUG
+#ifdef XDEBUG_HOUSE
         Matrix<T> Y0(Y);
         Y0.upperTri().setToIdentity();
         Matrix<T> Z0(Z.adjoint());
@@ -1355,7 +1368,7 @@ namespace tmv {
             m.rowRange(0,N) -= Y.rowRange(0,N).lowerTri(UnitDiag) * ZtYtm;
             m.rowRange(N,M) -= Y.rowRange(N,M) * ZtYtm;
         }
-#ifdef XDEBUG
+#ifdef XDEBUG_HOUSE
         if (Norm(Hm-m) > 0.001*Norm(m0)*Norm(Hinv)) {
             cerr<<"BlockHouseholderLDiv\n";
             cerr<<"Input: Y = "<<Y0<<endl;
@@ -1412,7 +1425,7 @@ namespace tmv {
         // (For the first column, this means that y is the new first element.)
         TMVAssert(m.colsize() > 0);
         TMVAssert(m.rowsize() > 0);
-#ifdef XDEBUG
+#ifdef XDEBUG_HOUSE
         Matrix<T> m0(m);
 #endif
 
@@ -1430,7 +1443,7 @@ namespace tmv {
             beta = HouseholderReflect(*m.ptr(),v,det);
         }
         if (beta != T(0)) HouseholderLMult(v,beta,m.colRange(1,m.rowsize()));
-#ifdef XDEBUG
+#ifdef XDEBUG_HOUSE
         Vector<T> vv(m.colsize());
         vv(0) = T(1);
         vv.subVector(1,vv.size()) = m.col(0,1,vv.size());

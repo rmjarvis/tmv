@@ -69,7 +69,7 @@ namespace tmv {
     struct Norm_Helper<11,V>
     {
         typedef typename V::float_type RT;
-        static RT call(const V& v)
+        static inline RT call(const V& v)
         { return TMV_SQRT(v.normSq()); }
     };
 
@@ -91,41 +91,37 @@ namespace tmv {
             // we need to use a scaling for NormSq().
             RT vmax = v.maxAbs2Element();
 
-            // If vmax = 0, then norm2 = 0:
-            if (vmax == RT(0)) return RT(0);
-
-            // If vmax^2 underflows but vmax != 0, then a naive NormSq()
-            // will produce underflow rounding errors.  Find a better scaling.
-            // eps is a pure power of 2, so no rounding errors from
-            // rescaling by a power of eps.
-            else if (TMV_Underfloat(vmax * vmax)) {
+            if (vmax == RT(0)) {
+                // If vmax = 0, then norm2 = 0:
+                return RT(0);
+            } else if (TMV_Underfloat(vmax * vmax)) {
+                // If vmax^2 underflows but vmax != 0, then a naive NormSq()
+                // will produce underflow rounding errors.  Find a better 
+                // scaling.  eps is a pure power of 2, so no rounding errors 
+                // from rescaling by a power of eps.
                 const RT inveps = RT(1)/eps;
                 RT scale = inveps;
                 vmax *= scale;
                 const RT eps2 = eps*eps;
                 while (vmax < eps2) { scale *= inveps; vmax *= inveps; }
                 return TMV_SQRT(v.normSq(scale))/scale;
-            }
-
-            // If 1/vmax == 0, then vmax is already inf, so no hope of
-            // making it more accurate.  (And need to check, since otherwise
-            // the next section would cause an infinite loop.)
-            else if (RT(1)/vmax == RT(0)) {
+            } else if (RT(1)/vmax == RT(0)) {
+                // If 1/vmax == 0, then vmax is already inf, so no hope of
+                // making it more accurate.  (And need to check, since otherwise
+                // the next section would cause an infinite loop.)
                 return vmax;
-            }
-
-            // If 1/(n*vmax^2) underflows, then a naive NormSq() will produce 
-            // overflow.  Find a better scaling.
-            else if (TMV_Underflow(RT(1)/(v.nElements()*vmax*vmax))) {
+            } else if (TMV_Underflow(RT(1)/(v.nElements()*vmax*vmax))) {
+                // If 1/(n*vmax^2) underflows, then a naive NormSq() will 
+                // produce overflow./ Find a better scaling.
                 const RT inveps = RT(1)/eps;
                 RT scale = eps;
                 vmax *= scale;
                 while (vmax > inveps) { scale *= eps; vmax *= eps; }
                 return TMV_SQRT(v.normSq(scale))/scale;
+            } else {
+                // No problems with overflow or underflow.
+                return TMV_SQRT(v.normSq());
             }
-
-            // No problems with overflow or underflow.
-            else return TMV_SQRT(v.normSq());
         }
     };
 
@@ -146,25 +142,23 @@ namespace tmv {
 
                 // If vmax = 0, then norm2 = 0:
                 RT vmax = v.maxAbs2Element();
-                if (vmax == RT(0)) return RT(0);
-
-                // If vmax^2 underflows, but vmax != 0, then vnormsq has
-                // underflow rounding errors.  Find a better scaling.
-                // eps is a pure power of 2, so no rounding errors from
-                // rescaling by a power of eps.
-                else if (TMV_Underflow(vmax * vmax)) {
+                if (vmax == RT(0)) {
+                    return RT(0);
+                } else if (TMV_Underflow(vmax * vmax)) {
+                    // If vmax^2 underflows, but vmax != 0, then vnormsq has
+                    // underflow rounding errors.  Find a better scaling.
+                    // eps is a pure power of 2, so no rounding errors from
+                    // rescaling by a power of eps.
                     const RT inveps = RT(1)/eps;
                     RT scale = inveps;
                     vmax *= scale;
                     RT eps2 = eps*eps;
                     while (vmax < eps2) { scale *= inveps; vmax *= inveps; }
                     return TMV_SQRT(v.normSq(scale))/scale;
+                } else {
+                    return TMV_SQRT(vnormsq);
                 }
-
-                else return TMV_SQRT(vnormsq);
-            }
-
-            else if (TMV_Underflow(RT(1)/vnormsq)) {
+            } else if (TMV_Underflow(RT(1)/vnormsq)) {
                 // Possible overflow errors:
 
                 // If 1/vmax == 0, then vmax is already inf, so no hope of
@@ -173,22 +167,20 @@ namespace tmv {
                 RT vmax = v.maxAbs2Element();
                 if (RT(1)/vmax == RT(0)) {
                     return vmax;
-                }
-
-                // If 1/(vmax^2) underflows, then vnormsq has overflow errors. 
-                // Find a better scaling.
-                else if (TMV_Underflow(RT(1)/(v.nElements()*vmax*vmax))) {
+                } else if (TMV_Underflow(RT(1)/(v.nElements()*vmax*vmax))) {
+                    // If 1/(vmax^2) underflows, then vnormsq has overflow 
+                    // errors.  Find a better scaling.
                     RT scale = eps;
                     vmax *= scale;
                     while (vmax > RT(1)) { scale *= eps; vmax *= eps; }
                     return TMV_SQRT(v.normSq(scale))/scale;
+                } else {
+                    return TMV_SQRT(vnormsq);
                 }
-
-                else return TMV_SQRT(vnormsq);
+            } else {
+                // No problems with overflow or underflow.
+                return TMV_SQRT(vnormsq);
             }
-
-            // No problems with overflow or underflow.
-            else return TMV_SQRT(vnormsq);
         }
     };
 

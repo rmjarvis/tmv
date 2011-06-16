@@ -67,7 +67,7 @@
 // |R x - Qt b|^2 + |b|^2 - |Qt b|^2
 // Clearly the x which minimizes this is the solution of R x = Qt b.
 //
-// If R is singular, then you need QRP Decomposition (see TMV_QRPDiv.h).
+// If R is singular, then you need QRP Decomposition (see TMV_QRPD.h).
 //
 
 
@@ -78,41 +78,105 @@
 #include "TMV_BaseMatrix_Tri.h"
 #include "TMV_BaseVector.h"
 #include "TMV_Divider.h"
-//#include "TMV_Matrix.h"
-//#include "TMV_NormU.h"
-//#include "TMV_MultUL.h"
-//#include "TMV_Permutation.h"
-
-//#include "TMV_PackedQ.h"
-//#include "TMV_QRDiv.h"
-//#include "TMV_QRDecompose.h"
-//#include "TMV_QRInverse.h"
+#include "TMV_PackedQ.h"
+#include "TMV_Array.h"
 
 namespace tmv {
 
+    // In TMV_QRDecompose.h
+    template <class M, class V>
+    static inline void QR_Decompose(
+        BaseMatrix_Rec_Mutable<M>& m, BaseVector_Mutable<V>& beta);
+    template <class M1, class M2>
+    static inline void QR_Decompose(
+        BaseMatrix_Rec_Mutable<M1>& Q, BaseMatrix_Tri_Mutable<M2>& R);
+    template <class M>
+    static inline void QR_Decompose(BaseMatrix_Rec_Mutable<M>& m);
+
+    // In TMV_QRInverse.h
+    template <class M1, class V1, class M2>
+    static inline void QR_Inverse(
+        const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
+        const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& minv);
+    template <class M1, class V1, class M2>
+    static inline void QR_InverseATA(
+        const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
+        const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& ata);
+
+    // In TMV_QRDiv.h
+    template <class M1, class V1, class M2, class M3>
+    static inline void QR_Solve(
+        const BaseMatrix_Rec<M1>& QR, const BaseVector<V1>& beta,
+        const Permutation* P, int N1, 
+        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
+    template <class M1, class V1, class V2, class V3>
+    static inline void QR_Solve(
+        const BaseMatrix_Rec<M1>& QR, const BaseVector<V1>& beta,
+        const Permutation* P, int N1, 
+        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3);
+    template <class M1, class V1, class M2, class M3>
+    static inline void QR_SolveTranspose(
+        const BaseMatrix_Rec<M1>& QR, const BaseVector<V1>& beta,
+        const Permutation* P, int N1, 
+        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
+    template <class M1, class V1, class V2, class V3>
+    static inline void QR_SolveTranspose(
+        const BaseMatrix_Rec<M1>& QR, const BaseVector<V1>& beta,
+        const Permutation* P, int N1, 
+        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3);
+    template <class M1, class V1, class M2>
+    static inline void QR_SolveInPlace(
+        const BaseMatrix_Rec<M1>& QR, const BaseVector<V1>& beta,
+        const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& m2);
+    template <class M1, class V1, class V2>
+    static inline void QR_SolveInPlace(
+        const BaseMatrix_Rec<M1>& QR, const BaseVector<V1>& beta,
+        const Permutation* P, int N1, BaseVector_Mutable<V2>& v2);
+    template <class M1, class V1, class M2>
+    static inline void QR_SolveTransposeInPlace(
+        const BaseMatrix_Rec<M1>& QR, const BaseVector<V1>& beta,
+        const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& m2);
+    template <class M1, class V1, class V2>
+    static inline void QR_SolveTransposeInPlace(
+        const BaseMatrix_Rec<M1>& QR, const BaseVector<V1>& beta,
+        const Permutation* P, int N1, BaseVector_Mutable<V2>& v2);
+
+
+
+
+    // The point of the Impl class here is to implement the transfer of 
+    // ownership copy semantics.
+    // It also differentiates between small and non-small implementations.
     template <bool small, class M>
     struct QRD_Impl;
 
     template <class M>
-    class QRD : 
-        public Divider<typename M::value_type>
+    class QRD 
     {
     public :
 
         typedef typename M::value_type T;
         typedef typename M::real_type RT;
         typedef typename M::complex_type CT;
+        typedef typename M::float_type FT;
+        typedef typename M::zfloat_type ZFT;
 
-        // This next bit finds the storage type to use for the lu matrix
+        // This next bit finds the storage type to use for the qr matrix
         // regardless of what kind of matrix M is.  e.g. this should
         // work even if M is a TriMatrix or a BandMatrix, etc.
         enum { cs = IntTraits2<M::_colsize,M::_rowsize>::max };
         enum { rs = IntTraits2<M::_colsize,M::_rowsize>::min };
-        typedef typename MCopyHelper<T,Rec,cs,rs,false,false>::type qr_type;
 
-        typedef typename qr_type::const_view_type getqr_type;
-        typedef typename PackedQ<qr_type,beta_type> getq_type;
-        typedef typename qr_type::const_uppertri_type getr_type;
+        enum { small = (
+                M::_colsize != UNKNOWN && M::_rowsize != UNKNOWN &&
+                M::_colsize <= 8 && M::_rowsize <= 8 ) };
+
+        typedef typename QRD_Impl<small,M>::qrx_type qrx_type;
+        typedef typename QRD_Impl<small,M>::beta_type beta_type;
+
+        typedef typename qrx_type::const_view_type getqr_type;
+        typedef PackedQ<qrx_type,beta_type> getq_type;
+        typedef typename qrx_type::const_uppertri_type getr_type;
         typedef const beta_type& getbeta_type;
 
         //
@@ -120,7 +184,8 @@ namespace tmv {
         //
 
         // Sets up the internal storage and does the decomposition.
-        QRD(const M& A, bool _inplace=false);
+        template <class M2>
+        QRD(const BaseMatrix<M2>& A, bool _inplace=false);
 
         // The copy constructor has transfer of ownership semantics.
         // This way an QRD object can be returned by value, and the 
@@ -136,7 +201,7 @@ namespace tmv {
         //
         // Division: (not in place)
         // 
-        
+
         template <class M1, class M2>
         void solve(
             const BaseMatrix<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2) const;
@@ -150,115 +215,11 @@ namespace tmv {
         template <class V1, class V2>
         void solveTranspose(
             const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2) const;
-
-        // These are the virtual functions from the Divider base class.
-        void doSolve(
-            const ConstMatrixView<RT>& m1, MatrixView<RT> m2) const 
-        { solve(m1,m2); } 
-        void doSolve(
-            const ConstMatrixView<RT>& m1, MatrixView<CT> m2) const 
-        { solve(m1,m2); } 
-        void doSolve(
-            const ConstMatrixView<RT>& m1, 
-            MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
-        { solve(m1,m2); } 
-        void doSolve(
-            const ConstMatrixView<CT>& m1, MatrixView<CT> m2) const 
-        { solve(m1,m2); } 
-        void doSolve(
-            const ConstMatrixView<CT>& m1, 
-            MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
-        { solve(m1,m2); } 
-        void doSolve(
-            const ConstMatrixView<CT,UNKNOWN,UNKNOWN,true>& m1, 
-            MatrixView<CT> m2) const 
-        { solve(m1,m2); } 
-        void doSolve(
-            const ConstMatrixView<CT,UNKNOWN,UNKNOWN,true>& m1, 
-            MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
-        { solve(m1,m2); } 
-        void doSolve(
-            const ConstVectorView<RT>& v1, VectorView<RT> v2) const 
-        { solve(v1,v2); } 
-        void doSolve(
-            const ConstVectorView<RT>& v1, VectorView<CT> v2) const 
-        { solve(v1,v2); } 
-        void doSolve(
-            const ConstVectorView<RT>& v1, 
-            VectorView<CT,UNKNOWN,true> v2) const 
-        { solve(v1,v2); } 
-        void doSolve(
-            const ConstVectorView<CT>& v1, VectorView<CT> v2) const 
-        { solve(v1,v2); } 
-        void doSolve(
-            const ConstVectorView<CT>& v1, 
-            VectorView<CT,UNKNOWN,true> v2) const 
-        { solve(v1,v2); } 
-        void doSolve(
-            const ConstVectorView<CT,UNKNOWN,true>& v1, 
-            VectorView<CT> v2) const 
-        { solve(v1,v2); } 
-        void doSolve(
-            const ConstVectorView<CT,UNKNOWN,true>& v1, 
-            VectorView<CT,UNKNOWN,true> v2) const 
-        { solve(v1,v2); } 
-
-        void doSolveTranspose(
-            const ConstMatrixView<RT>& m1, MatrixView<RT> m2) const 
-        { solveTranspose(m1,m2); }
-        void doSolveTranspose(
-            const ConstMatrixView<RT>& m1, MatrixView<CT> m2) const 
-        { solveTranspose(m1,m2); }
-        void doSolveTranspose(
-            const ConstMatrixView<RT>& m1, 
-            MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
-        { solveTranspose(m1,m2); }
-        void doSolveTranspose(
-            const ConstMatrixView<CT>& m1, MatrixView<CT> m2) const 
-        { solveTranspose(m1,m2); }
-        void doSolveTranspose(
-            const ConstMatrixView<CT>& m1, 
-            MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
-        { solveTranspose(m1,m2); }
-        void doSolveTranspose(
-            const ConstMatrixView<CT,UNKNOWN,UNKNOWN,true>& m1, 
-            MatrixView<CT> m2) const 
-        { solveTranspose(m1,m2); }
-        void doSolveTranspose(
-            const ConstMatrixView<CT,UNKNOWN,UNKNOWN,true>& m1, 
-            MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
-        { solveTranspose(m1,m2); }
-        void doSolveTranspose(
-            const ConstVectorView<RT>& v1, VectorView<RT> v2) const 
-        { solveTranspose(v1,v2); }
-        void doSolveTranspose(
-            const ConstVectorView<RT>& v1, VectorView<CT> v2) const 
-        { solveTranspose(v1,v2); }
-        void doSolveTranspose(
-            const ConstVectorView<RT>& v1, 
-            VectorView<CT,UNKNOWN,true> v2) const 
-        { solveTranspose(v1,v2); }
-        void doSolveTranspose(
-            const ConstVectorView<CT>& v1, VectorView<CT> v2) const 
-        { solveTranspose(v1,v2); }
-        void doSolveTranspose(
-            const ConstVectorView<CT>& v1, 
-            VectorView<CT,UNKNOWN,true> v2) const 
-        { solveTranspose(v1,v2); }
-        void doSolveTranspose(
-            const ConstVectorView<CT,UNKNOWN,true>& v1, 
-            VectorView<CT> v2) const 
-        { solveTranspose(v1,v2); }
-        void doSolveTranspose(
-            const ConstVectorView<CT,UNKNOWN,true>& v1, 
-            VectorView<CT,UNKNOWN,true> v2) const 
-        { solveTranspose(v1,v2); }
 
         //
         // Perform the division in place
-        // (This requires a temporary for QR division.)
         //
-        
+
         template <class M2>
         void solveInPlace(BaseMatrix_Rec_Mutable<M2>& m2) const;
         template <class V2>
@@ -269,76 +230,29 @@ namespace tmv {
         template <class V2>
         void solveTransposeInPlace(BaseVector_Mutable<V2>& v2) const;
 
-        // These are the virtual functions from the Divider base class.
-        void doSolveInPlace(MatrixView<RT> m2) const 
-        { solveInPlace(m2);  }
-        void doSolveInPlace(MatrixView<CT> m2) const 
-        { solveInPlace(m2);  }
-        void doSolveInPlace(
-            MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
-        { solveInPlace(m2);  }
-        void doSolveInPlace(VectorView<RT> v2) const 
-        { solveInPlace(v2);  }
-        void doSolveInPlace(VectorView<CT> v2) const 
-        { solveInPlace(v2);  }
-        void doSolveInPlace(VectorView<CT,UNKNOWN,true> v2) const 
-        { solveInPlace(v2);  }
-
-        void doSolveTransposeInPlace(MatrixView<RT> m2) const 
-        { solveTransposeInPlace(m2); } 
-        void doSolveTransposeInPlace(MatrixView<CT> m2) const 
-        { solveTransposeInPlace(m2); } 
-        void doSolveTransposeInPlace(
-            MatrixView<CT,UNKNOWN,UNKNOWN,true> m2) const 
-        { solveTransposeInPlace(m2); } 
-        void doSolveTransposeInPlace(VectorView<RT> v2) const 
-        { solveTransposeInPlace(v2); } 
-        void doSolveTransposeInPlace(VectorView<CT> v2) const 
-        { solveTransposeInPlace(v2); } 
-        void doSolveTransposeInPlace(
-            VectorView<CT,UNKNOWN,true> v2) const 
-        { solveTransposeInPlace(v2); } 
-
-
         //
         // Determinant
         //
-        
+
         T det() const;
-        RT logDet(T* sign) const;
+        FT logDet(ZFT* sign) const;
         bool isSingular() const;
 
-        
+
         //
         // Inverse
         //
-        
+
         template <class M2>
         void makeInverse(BaseMatrix_Rec_Mutable<M2>& minv) const;
-
-        void doMakeInverse(MatrixView<RT> minv) const 
-        { makeInverse(minv); } 
-        void doMakeInverse(MatrixView<CT> minv) const 
-        { makeInverse(minv); } 
-        void doMakeInverse(
-            MatrixView<CT,UNKNOWN,UNKNOWN,true> minv) const 
-        { makeInverse(minv); } 
 
 
         //
         // InverseATA
         //
-        
+
         template <class M2>
         void makeInverseATA(BaseMatrix_Rec_Mutable<M2>& ata) const;
-
-        void doMakeInverseATA(MatrixView<RT> ata) const
-        { makeInverseATA(ata); }
-        void doMakeInverseATA(MatrixView<CT> ata) const
-        { makeInverseATA(ata); }
-        void doMakeInverseATA(
-            MatrixView<CT,UNKNOWN,UNKNOWN,true> ata) const
-        { makeInverseATA(ata); }
 
 
         // 
@@ -362,133 +276,278 @@ namespace tmv {
 
     private :
 
-        enum { small = (
-                M::_colsize != UNKNOWN && M::_rowsize != UNKNOWN &&
-                M::_colsize <= 8 && M::_rowsize <= 8 ) };
-
+        // mutable so the normal copy constructor with the argument
+        // const QRD<M>& can release the memory.
         mutable std::auto_ptr<QRD_Impl<small,M> > pimpl;
 
         size_t colsize() const;
         size_t rowsize() const;
 
+        // Helper function to compute the determinant of Q.
+        int calculateDetQ() const;
+
         // op= not allowed.
         QRD<M>& operator=(const QRD<M>&);
     };
-    
+
+
+    template <class T>
+    class InstQRD :
+        public QRD<Matrix<T,ColMajor> >,
+        public Divider<T>
+    {
+    public :
+        typedef QRD<Matrix<T,ColMajor> > base;
+        typedef typename base::RT RT;
+        typedef typename base::CT CT;
+        typedef typename base::FT FT;
+        typedef typename base::ZFT ZFT;
+
+        // Sets up the internal storage and does the decomposition.
+        template <int C>
+        InstQRD(const ConstMatrixView<T,C>& A, bool _inplace=false);
+        InstQRD(const InstQRD<T>& rhs);
+        ~InstQRD();
+
+        // These are the virtual functions from the Divider base class.
+        void doSolveInPlace(MatrixView<RT> m2) const;
+        void doSolveInPlace(MatrixView<CT> m2) const;
+        void doSolveInPlace(MatrixView<CT,Conj> m2) const;
+        void doSolveInPlace(VectorView<RT> v2) const;
+        void doSolveInPlace(VectorView<CT> v2) const;
+        void doSolveInPlace(VectorView<CT,Conj> v2) const;
+
+        void doSolveTransposeInPlace(MatrixView<RT> m2) const;
+        void doSolveTransposeInPlace(MatrixView<CT> m2) const;
+        void doSolveTransposeInPlace(MatrixView<CT,Conj> m2) const;
+        void doSolveTransposeInPlace(VectorView<RT> v2) const;
+        void doSolveTransposeInPlace(VectorView<CT> v2) const;
+        void doSolveTransposeInPlace(VectorView<CT,Conj> v2) const;
+
+        void doSolve(
+            const ConstMatrixView<RT>& m1, MatrixView<RT> m2) const;
+        void doSolve(
+            const ConstMatrixView<RT>& m1, MatrixView<CT> m2) const;
+        void doSolve(
+            const ConstMatrixView<RT>& m1, MatrixView<CT,Conj> m2) const;
+        void doSolve(
+            const ConstMatrixView<CT>& m1, MatrixView<CT> m2) const;
+        void doSolve(
+            const ConstMatrixView<CT>& m1, MatrixView<CT,Conj> m2) const;
+        void doSolve(
+            const ConstMatrixView<CT,Conj>& m1, MatrixView<CT> m2) const;
+        void doSolve(
+            const ConstMatrixView<CT,Conj>& m1, MatrixView<CT,Conj> m2) const;
+        void doSolve(
+            const ConstVectorView<RT>& v1, VectorView<RT> v2) const;
+        void doSolve(
+            const ConstVectorView<RT>& v1, VectorView<CT> v2) const;
+        void doSolve(
+            const ConstVectorView<RT>& v1, VectorView<CT,Conj> v2) const;
+        void doSolve(
+            const ConstVectorView<CT>& v1, VectorView<CT> v2) const;
+        void doSolve(
+            const ConstVectorView<CT>& v1, VectorView<CT,Conj> v2) const;
+        void doSolve(
+            const ConstVectorView<CT,Conj>& v1, VectorView<CT> v2) const;
+        void doSolve(
+            const ConstVectorView<CT,Conj>& v1, VectorView<CT,Conj> v2) const;
+
+        void doSolveTranspose(
+            const ConstMatrixView<RT>& m1, MatrixView<RT> m2) const;
+        void doSolveTranspose(
+            const ConstMatrixView<RT>& m1, MatrixView<CT> m2) const;
+        void doSolveTranspose(
+            const ConstMatrixView<RT>& m1, MatrixView<CT,Conj> m2) const;
+        void doSolveTranspose(
+            const ConstMatrixView<CT>& m1, MatrixView<CT> m2) const;
+        void doSolveTranspose(
+            const ConstMatrixView<CT>& m1, MatrixView<CT,Conj> m2) const;
+        void doSolveTranspose(
+            const ConstMatrixView<CT,Conj>& m1, MatrixView<CT> m2) const;
+        void doSolveTranspose(
+            const ConstMatrixView<CT,Conj>& m1, MatrixView<CT,Conj> m2) const;
+        void doSolveTranspose(
+            const ConstVectorView<RT>& v1, VectorView<RT> v2) const;
+        void doSolveTranspose(
+            const ConstVectorView<RT>& v1, VectorView<CT> v2) const;
+        void doSolveTranspose(
+            const ConstVectorView<RT>& v1, VectorView<CT,Conj> v2) const;
+        void doSolveTranspose(
+            const ConstVectorView<CT>& v1, VectorView<CT> v2) const;
+        void doSolveTranspose(
+            const ConstVectorView<CT>& v1, VectorView<CT,Conj> v2) const;
+        void doSolveTranspose(
+            const ConstVectorView<CT,Conj>& v1, VectorView<CT> v2) const;
+        void doSolveTranspose(
+            const ConstVectorView<CT,Conj>& v1, VectorView<CT,Conj> v2) const;
+
+        T det() const;
+        FT logDet(ZFT* sign) const;
+        bool isSingular() const;
+
+        void doMakeInverse(MatrixView<RT> minv) const;
+        void doMakeInverse(MatrixView<CT> minv) const;
+        void doMakeInverse(MatrixView<CT,Conj> minv) const;
+
+        void doMakeInverseATA(MatrixView<RT> ata) const;
+        void doMakeInverseATA(MatrixView<CT> ata) const;
+        void doMakeInverseATA(MatrixView<CT,Conj> ata) const;
+        
+        RT condition(RT normInf) const;
+        bool preferInPlace() const;
+
+    private :
+        // op= not allowed.
+        Divider<T>& operator=(const Divider<T>&);
+    };
+
     template <bool isvalid, bool istrans>
     struct QRHelper;
 
     template <>
     struct QRHelper<true,false>
     {
-        template <class M0, class V0, class M2>
-        static void makeInverse(const M0& QRx, const V0& beta, M2& m2)
-        { QR_Inverse(QRx,beta,m2); }
-        template <class M0, class V0, class M2>
-        static void solveInPlace(const M0& QRx, const V0& beta, M2& m2)
-        { QR_SolveInPlace(QRx,beta,m2); }
-        template <class M0, class V0, class M1, class M2>
-        static void solve(const M0& QRx, const V0& beta, const M1& m1, M2& m2)
-        { QR_Solve(QRx,beta,m1,m2); }
+        template <class M1, class V1, class M2, class M3>
+        static TMV_INLINE void solve(
+            const M1& QRx, const V1& beta, const M2& m2, M3& m3)
+        { QR_Solve(QRx,beta,0,QRx.rowsize(),m2,m3); }
+        template <class M1, class V1, class M2>
+        static TMV_INLINE void solveInPlace(
+            const M1& QRx, const V1& beta, M2& m2)
+        { QR_SolveInPlace(QRx,beta,0,QRx.rowsize(),m2); }
+        template <class M1, class V1, class M2>
+        static TMV_INLINE void makeInverse(
+            const M1& QRx, const V1& beta, M2& m2)
+        { QR_Inverse(QRx,beta,0,QRx.rowsize(),m2); }
+        template <class M1, class V1, class M2>
+        static TMV_INLINE void makeInverseATA(
+            const M1& QRx, const V1& beta, M2& m2)
+        { QR_InverseATA(QRx,beta,0,QRx.rowsize(),m2); }
     };
     template <>
     struct QRHelper<true,true>
     {
-        template <class M0, class V0, class M2>
-        static void makeInverse(const M0& QRx, const V0& beta, M2& m2)
-        {
+        template <class M1, class V1, class M2, class M3>
+        static TMV_INLINE void solve(
+            const M1& QRx, const V1& beta, const M2& m2, M3& m3)
+        { QR_SolveTranspose(QRx,beta,0,QRx.rowsize(),m2,m3); }
+        template <class M1, class V1, class M2>
+        static TMV_INLINE void solveInPlace(
+            const M1& QRx, const V1& beta, M2& m2)
+        { QR_SolveTransposeInPlace(QRx,beta,0,QRx.rowsize(),m2); }
+        template <class M1, class V1, class M2>
+        static TMV_INLINE void makeInverse(
+            const M1& QRx, const V1& beta, M2& m2)
+        { 
             typename M2::transpose_type m2t = m2.transpose();
-            QR_Inverse(QRx,beta,m2t);
+            QR_Inverse(QRx,beta,0,QRx.rowsize(),m2t);
         }
-        template <class M0, class V0, class M2>
-        static void solveInPlace(const M0& QRx, const V0& beta, M2& m2)
-        { QR_SolveTransposeInPlace(QRx,beta,m2); }
-        template <class M0, class V0, class M1, class M2>
-        static void solve(const M0& QRx, const V0& beta, const M1& m1, M2& m2)
-        { QR_SolveTranspose(QRx,beta,m1,m2); }
+        template <class M1, class V1, class M2>
+        static TMV_INLINE void makeInverseATA(
+            const M1& QRx, const V1& beta, M2& m2)
+        { QR_InverseATA(QRx,beta,0,QRx.rowsize(),m2); }
     };
     template <bool istrans>
     struct QRHelper<false,istrans>
     {
-        template <class M0, class V0, class M2>
-        static void makeInverse(const M0& , const V0& , M2& ) {}
-        template <class M0, class V0, class M2>
-        static void solveInPlace(const M0& , const V0& , M2& ) {}
-        template <class M0, class V0, class M1, class M2>
-        static void solve(const M0& , const V0& , const M1& , M2& ) {}
+        template <class M1, class V1, class M2, class M3>
+        static TMV_INLINE void solve(const M1& , const V1& , const M2& , M3& ) 
+        { TMVAssert(false && "Calling invalid QRHelper::solve\n"); }
+        template <class M1, class V1, class M2>
+        static TMV_INLINE void solveInPlace(const M1& , const V1& , M2& )
+        { TMVAssert(false && "Calling invalid QRHelper::solveInPlace\n"); }
+        template <class M1, class V1, class M2>
+        static TMV_INLINE void makeInverse(const M1& , const V1& , M2& )
+        { TMVAssert(false && "Calling invalid QRHelper::makeInverse\n"); }
+        template <class M1, class V1, class M2>
+        static TMV_INLINE void makeInverseATA(const M1& , const V1& , M2& ) 
+        { TMVAssert(false && "Calling invalid QRHelper::makeInverseATA\n"); }
     };
 
     template <class M>
-    struct QRD_Impl<true,M>
+    struct QRD_Impl<true,M> 
+    // small = true, so cs,rs both known and <= 8
     {
-        enum { istrans = M::_colmajor < M::_rowmajor };
-        typedef typename QRD<M>::qr_type::view_type qrx_type;
-        enum { cs = typename QRD<M>::qr_type::_colsize };
-        enum { rs = typename QRD<M>::qr_type::_colsize };
+        typedef typename M::real_type RT;
+        enum { istrans = int(M::_colsize) < int(M::_rowsize) };
+        enum { cs = istrans ? int(M::_rowsize) : int(M::_colsize) };
+        enum { rs = istrans ? int(M::_colsize) : int(M::_rowsize) };
+        typedef typename TypeSelect< istrans ,
+                typename M::transpose_type ,
+                typename M::view_type >::type qrx_type;
+        typedef typename VCopyHelper<RT,rs,false>::type beta_type;
 
-        QRD_Impl(const M& A, bool ) : QRx( SmallQRx.view() )
+        template <class M2>
+        QRD_Impl(const BaseMatrix<M2>& A, bool ) : 
+            QRx(Maybe<istrans>::transposeview(SmallQRx) )
         {
             TMVStaticAssert(M::_colsize != UNKNOWN);
             TMVStaticAssert(M::_rowsize != UNKNOWN);
-            TMVStaticAssert(M::_colsize == istrans ? rs : cs);
-            TMVStaticAssert(M::_rowsize == istrans ? cs : rs);
-            QRx = Maybe<istrans>::transpose(A);
+            TMVAssert(A.colsize() == istrans ? int(rs) : int(cs));
+            TMVAssert(A.rowsize() == istrans ? int(cs) : int(rs));
+            A.newAssignTo(SmallQRx);
+            QR_Decompose(QRx,beta);
         }
-
-        template <class M1, class M2>
-        void solve(const M1& m1, M2& m2) const
+        template <class M2, class M3>
+        void solve(const M2& m2, M3& m3)
         {
-            const bool isvalid = M::isreal || M2::iscomplex;
-            QRHelper<isvalid,istrans>::solve(QRx,beta,m1,m2); 
+            const bool isvalid = (M::isreal && M2::isreal) || M3::iscomplex;
+            QRHelper<isvalid,istrans>::solve(QRx,beta,m2,m3);
         }
-
-        template <class M1, class M2>
-        void solveTranspose(const M1& m1, M2& m2) const
+        template <class M2, class M3>
+        void solveTranspose(const M2& m2, M3& m3)
         {
-            const bool isvalid = M::isreal || M2::iscomplex;
-            QRHelper<isvalid,!istrans>::solve(QRx,beta,m1,m2); 
+            const bool isvalid = (M::isreal && M2::isreal) || M3::iscomplex;
+            QRHelper<isvalid,!istrans>::solve(QRx,beta,m2,m3);
         }
-
         template <class M2>
-        void solveInPlace(M2& m2) const
+        void solveInPlace(M2& m2)
         {
             const bool isvalid = M::isreal || M2::iscomplex;
             QRHelper<isvalid,istrans>::solveInPlace(QRx,beta,m2);
         }
-
         template <class M2>
-        void solveTransposeInPlace(M2& m2) const
+        void solveTransposeInPlace(M2& m2)
         {
             const bool isvalid = M::isreal || M2::iscomplex;
             QRHelper<isvalid,!istrans>::solveInPlace(QRx,beta,m2);
         }
-
         template <class M2>
-        void makeInverse(M2& minv) const
+        void makeInverse(M2& minv)
         {
             const bool isvalid = M::isreal || M2::iscomplex;
-            QRHelper<isvalid,istrans>::makeInverse(QRx,beta,minv); 
+            QRHelper<isvalid,istrans>::makeInverse(QRx,beta,minv);
+        }
+        template <class M2>
+        void makeInverseATA(M2& ata)
+        { 
+            const bool isvalid = M::isreal || M2::iscomplex;
+            QRHelper<isvalid,istrans>::makeInverseATA(QRx,beta,ata);
         }
 
-        typename QRD<M>::qr_type SmallQRx;
+        M SmallQRx;
         qrx_type QRx;
         beta_type beta;
-        int detq;
     };
     
     template <class M>
     struct QRD_Impl<false,M>
     {
-        enum { rmorcm = M::_rowmajor || M::_colmajor };
-        typedef typename QRD<M>::qr_type::view_type qrx_type;
+        typedef typename M::value_type T;
+        typedef typename M::real_type RT;
+        typedef MatrixView<T,ColMajor> qrx_type;
+        typedef Vector<RT> beta_type;
 
-        QRD_Impl(const M& A, bool _inplace) :
+        template <class M2>
+        QRD_Impl(const BaseMatrix_Rec<M2>& A, bool _inplace) :
             // if A is short, need to transpose
             istrans(A.colsize() < A.rowsize()),
-            // inplace only if matrix is rowmajor or colmajor
-            inplace(rmorcm && _inplace),
+            // inplace only if it works with a ColMajor QRx object
+            inplace( _inplace && 
+                     ((A.iscm() && !istrans) || (A.isrm() && istrans)) ),
             // Aptr is the pointer to new storage if any
-            Aptr( inplace ? 0 : A.rowsize()*A.rowsize() ),
+            Aptr( inplace ? 0 : A.rowsize()*A.colsize() ),
             // QRx views this memory as the QR matrix
             QRx(
                 inplace ? A.nonConst().ptr() : Aptr.get() , // ptr
@@ -496,93 +555,111 @@ namespace tmv {
                 istrans ? A.colsize() : A.rowsize() ,  // rowsize
                 inplace ? (istrans ? A.stepi() : A.stepj()) : 1 , // stepi
                 ( inplace ? (istrans ? A.stepj() : A.stepi()) : 
-                  int(A.rowsize()) ) // stepj
-            )
+                  int(istrans ? A.rowsize() : A.colsize()) ) // stepj
+            ),
+            beta(istrans ? A.colsize() : A.rowsize())
             {
                 if (!inplace) {
-                    if (istrans) QRx = A.transpose();
-                    else QRx = A;
+                    if (istrans) {
+                        typename qrx_type::transpose_type QRxt = QRx.transpose();
+                        A.newAssignTo(QRxt);
+                    } else {
+                        A.newAssignTo(QRx);
+                    }
                 } else {
-                    Maybe<M::_conj>::conjself(QRx);
+                    Maybe<M2::_conj>::conjself(QRx);
                 }
+                QR_Decompose(QRx,beta);
             }
 
-        // Unlike for LU, istrans isn't known at compile time, at least
-        // in the non-small Impl.
-        // So we moved the following functions into the Impl.
-        // The above small Impl uses the istrans parameter of QRHelper at
-        // compile time, and here we check for it at run time.
-        
-        template <class M1, class M2>
-        void solve(const M1& m1, M2& m2) const
-        {
-            const bool isvalid = M::isreal || M2::iscomplex;
-            if (istrans) {
-                QRHelper<isvalid,true>::solve(QRx,beta,m1,m2);
-            } else {
-                QRHelper<isvalid,false>::solve(QRx,beta,m1,m2);
-            }
-        }
-
-        template <class M1, class M2>
-        void solveTranspose(const M1& m1, M2& m2) const
-        {
-            const bool isvalid = M::isreal || M2::iscomplex;
-            if (istrans) {
-                QRHelper<isvalid,false>::solve(QRx,beta,m1,m2);
-            } else {
-                QRHelper<isvalid,true>::solve(QRx,beta,m1,m2);
-            }
-        }
-
+        // If A is not a BaseMatrix_Rec, can't do it in place.
         template <class M2>
-        void solveInPlace(M2& m2) const
+        QRD_Impl(const BaseMatrix<M2>& A, bool _inplace) :
+            istrans(A.colsize() < A.rowsize()), inplace(false),
+            Aptr( A.rowsize()*A.colsize() ),
+            QRx(
+                Aptr.get() , // ptr
+                istrans ? A.rowsize() : A.colsize() ,  // colsize
+                istrans ? A.colsize() : A.rowsize() ,  // rowsize
+                1 , // stepi
+                int(istrans ? A.rowsize() : A.colsize()) // stepj
+            ),
+            beta(istrans ? A.colsize() : A.rowsize())
+            {
+                if (istrans) {
+                    typename qrx_type::transpose_type QRxt = QRx.transpose();
+                    A.newAssignTo(QRxt);
+                } else {
+                    A.newAssignTo(QRx);
+                }
+                QR_Decompose(QRx,beta);
+            }
+
+        template <class M2, class M3>
+        void solve(const M2& m2, M3& m3)
+        {
+            const bool isvalid = (M::isreal && M2::isreal) || M3::iscomplex;
+            if (istrans)
+                QRHelper<isvalid,true>::solve(QRx,beta,m2,m3);
+            else
+                QRHelper<isvalid,false>::solve(QRx,beta,m2,m3);
+        }
+        template <class M2, class M3>
+        void solveTranspose(const M2& m2, M3& m3)
+        {
+            const bool isvalid = (M::isreal && M2::isreal) || M3::iscomplex;
+            if (istrans)
+                QRHelper<isvalid,false>::solve(QRx,beta,m2,m3);
+            else
+                QRHelper<isvalid,true>::solve(QRx,beta,m2,m3);
+        }
+        template <class M2>
+        void solveInPlace(M2& m2)
         {
             const bool isvalid = M::isreal || M2::iscomplex;
-            if (pimpl->istrans) {
+            if (istrans)
                 QRHelper<isvalid,true>::solveInPlace(QRx,beta,m2);
-            } else {
+            else
                 QRHelper<isvalid,false>::solveInPlace(QRx,beta,m2);
-            }
         }
-
         template <class M2>
-        void solveTransposeInPlace(M2& m2) const
+        void solveTransposeInPlace(M2& m2)
         {
             const bool isvalid = M::isreal || M2::iscomplex;
-            if (pimpl->istrans) {
+            if (istrans)
                 QRHelper<isvalid,false>::solveInPlace(QRx,beta,m2);
-            } else {
+            else
                 QRHelper<isvalid,true>::solveInPlace(QRx,beta,m2);
-            }
         }
-
-
         template <class M2>
-        void makeInverse(BaseMatrix_Rec_Mutable<M2>& minv) const
+        void makeInverse(M2& minv)
         {
             const bool isvalid = M::isreal || M2::iscomplex;
-            if (istrans) {
+            if (istrans)
                 QRHelper<isvalid,true>::makeInverse(QRx,beta,minv);
-            } else {
+            else
                 QRHelper<isvalid,false>::makeInverse(QRx,beta,minv);
-            }
         }
+        template <class M2>
+        void makeInverseATA(M2& ata)
+        {
+            const bool isvalid = M::isreal || M2::iscomplex;
+            // For this one, it doesn't actually matter if istrans = true
+            // So just use trans = false arbitrarily.
+            QRHelper<isvalid,false>::makeInverseATA(QRx,beta,ata);
+        }
+
 
         const bool istrans;
         const bool inplace;
         AlignedArray<typename M::value_type> Aptr;
         qrx_type QRx;
         beta_type beta;
-        int detq;
     };
 
-    template <class M>
-    QRD<M>::QRD(const M& A, bool inplace) :
-        pimpl(new QRD_Impl<small,M>(A,inplace)) 
-    {
-        QR_Decompose(pimpl->QRx,pimpl->beta,pimpl->detq);
-    }
+    template <class M> template <class M2>
+    QRD<M>::QRD(const BaseMatrix<M2>& A, bool inplace) :
+        pimpl(new QRD_Impl<small,M>(A,inplace)) {}
 
     template <class M>
     QRD<M>::QRD(const QRD<M>& rhs) : pimpl(rhs.pimpl.release()) {}
@@ -590,104 +667,114 @@ namespace tmv {
     template <class M>
     QRD<M>::~QRD() {}
 
-    template <class M> template <class M1, class M2>
+    template <class M> template <class M2, class M3>
     void QRD<M>::solve(
-        const BaseMatrix<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2) const
+        const BaseMatrix<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3) const
     {
-        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same));
-        TMVStaticAssert((Sizes<M1::_colsize,M::_colsize>::same));
-        TMVStaticAssert((Sizes<M2::_colsize,M::_rowsize>::same));
-        TMVAssert(m1.rowsize() == m2.rowsize());
-        TMVAssert(m1.colsize() == colsize());
-        TMVAssert(m2.colsize() == rowsize());
-        pimpl->solve(m1,m2);
+        TMVStaticAssert((Sizes<M2::_rowsize,M3::_rowsize>::same));
+        TMVStaticAssert((Sizes<M2::_colsize,M::_colsize>::same));
+        TMVStaticAssert((Sizes<M3::_colsize,M::_rowsize>::same));
+        TMVAssert(m2.rowsize() == m3.rowsize());
+        TMVAssert(m2.colsize() == colsize());
+        TMVAssert(m3.colsize() == rowsize());
+        pimpl->solve(m2.mat(),m3.mat());
     }
 
-    template <class M> template <class V1, class V2>
+    template <class M> template <class V2, class V3>
     void QRD<M>::solve(
-        const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2) const
+        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3) const
     {
-        TMVStaticAssert((Sizes<V1::_size,M::_colsize>::same));
-        TMVStaticAssert((Sizes<V2::_size,M::_rowsize>::same));
-        TMVAssert(v1.size() == colsize());
-        TMVAssert(v2.size() == rowsize());
-        pimpl->solve(v1,v2);
+        TMVStaticAssert((Sizes<V2::_size,M::_colsize>::same));
+        TMVStaticAssert((Sizes<V3::_size,M::_rowsize>::same));
+        TMVAssert(v2.size() == colsize());
+        TMVAssert(v3.size() == rowsize());
+        pimpl->solve(v2.vec(),v3.vec());
     }
 
     template <class M> template <class M2>
     void QRD<M>::solveInPlace(BaseMatrix_Rec_Mutable<M2>& m2) const
     {
         TMVStaticAssert((Sizes<M2::_colsize,M::_colsize>::same));
-        TMVStaticAssert((Sizes<M2::_colsize,M::_rowsize>::same));
-        TMVAssert(m2.colsize() == rowsize());
+        TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same));
         TMVAssert(m2.colsize() == colsize());
-        pimpl->solveInPlace(m2);
+        TMVAssert(colsize() == rowsize());
+        pimpl->solveInPlace(m2.mat());
     }
 
     template <class M> template <class V2>
     void QRD<M>::solveInPlace(BaseVector_Mutable<V2>& v2) const
     {
         TMVStaticAssert((Sizes<V2::_size,M::_colsize>::same));
+        TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same));
+        TMVAssert(v2.size() == colsize());
+        TMVAssert(colsize() == rowsize());
+        pimpl->solveInPlace(v2.vec());
+    }
+
+    template <class M> template <class M2, class M3>
+    void QRD<M>::solveTranspose(
+        const BaseMatrix<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3) const
+    {
+        TMVStaticAssert((Sizes<M2::_rowsize,M3::_rowsize>::same));
+        TMVStaticAssert((Sizes<M2::_colsize,M::_rowsize>::same));
+        TMVStaticAssert((Sizes<M3::_colsize,M::_colsize>::same));
+        TMVAssert(m2.rowsize() == m3.rowsize());
+        TMVAssert(m2.colsize() == rowsize());
+        TMVAssert(m3.colsize() == colsize());
+        pimpl->solveTranspose(m2.mat(),m3.mat());
+    }
+
+    template <class M> template <class V2, class V3>
+    void QRD<M>::solveTranspose(
+        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3) const
+    {
         TMVStaticAssert((Sizes<V2::_size,M::_rowsize>::same));
-        TMVAssert(v2.size() == colsize());
+        TMVStaticAssert((Sizes<V3::_size,M::_colsize>::same));
         TMVAssert(v2.size() == rowsize());
-        pimpl->solveInPlace(v2);
-    }
-
-    template <class M> template <class M1, class M2>
-    void QRD<M>::solveTranspose(
-        const BaseMatrix<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2) const
-    {
-        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same));
-        TMVStaticAssert((Sizes<M1::_colsize,M::_rowsize>::same));
-        TMVStaticAssert((Sizes<M2::_colsize,M::_colsize>::same));
-        TMVAssert(m1.rowsize() == m2.rowsize());
-        TMVAssert(m1.colsize() == rowsize());
-        TMVAssert(m2.colsize() == colsize());
-        pimpl->solveTranspose(m1,m2);
-    }
-
-    template <class M> template <class V1, class V2>
-    void QRD<M>::solveTranspose(
-        const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2) const
-    {
-        TMVStaticAssert((Sizes<V1::_size,M::_rowsize>::same));
-        TMVStaticAssert((Sizes<V2::_size,M::_colsize>::same));
-        TMVAssert(v1.size() == rowsize());
-        TMVAssert(v2.size() == colsize());
-        pimpl->solveTranspose(v1,v2);
+        TMVAssert(v3.size() == colsize());
+        pimpl->solveTranspose(v2.vec(),v3.vec());
     }
 
     template <class M> template <class M2>
     void QRD<M>::solveTransposeInPlace(BaseMatrix_Rec_Mutable<M2>& m2) const
     {
         TMVStaticAssert((Sizes<M2::_colsize,M::_colsize>::same));
-        TMVStaticAssert((Sizes<M2::_colsize,M::_rowsize>::same));
+        TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same));
         TMVAssert(m2.colsize() == rowsize());
-        TMVAssert(m2.colsize() == colsize());
-        pimpl->solveTransposeInPlace(m2);
+        TMVAssert(colsize() == rowsize());
+        pimpl->solveTransposeInPlace(m2.mat());
     }
 
     template <class M> template <class V2>
     void QRD<M>::solveTransposeInPlace(BaseVector_Mutable<V2>& v2) const
     {
         TMVStaticAssert((Sizes<V2::_size,M::_colsize>::same));
-        TMVStaticAssert((Sizes<V2::_size,M::_rowsize>::same));
+        TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same));
         TMVAssert(v2.size() == colsize());
-        TMVAssert(v2.size() == rowsize());
-        pimpl->solveTransposeInPlace(v2);
+        TMVAssert(colsize() == rowsize());
+        pimpl->solveTransposeInPlace(v2.vec());
     }
 
     template <class M>
     typename M::value_type QRD<M>::det() const
-    { return typename M::real_type(pimpl->detq) * getR().det(); }                  
+    { return typename M::real_type(calculateDetQ()) * getR().det(); }
+
     template <class M>
-    typename M::real_type QRD<M>::logDet(typename M::value_type* sign) const
+    typename M::float_type QRD<M>::logDet(typename M::zfloat_type* sign) const
     {
-        typename M::real_type ret = getR().logDet(sign);
-        if (sign) *sign *= typename M::real_type(pimpl->detq);
+        typename M::float_type ret = getR().logDet(sign);
+        if (sign) *sign *= typename M::float_type(calculateDetQ());
         return ret;
     }                  
+
+    template <class M>
+    int QRD<M>::calculateDetQ() const 
+    {
+        int detq = 1;
+        const int n = pimpl->beta.size();
+        for(int i=0; i<n; ++i) if (pimpl->beta[i] != RT(0)) detq = -detq;
+        return detq;
+    }
 
     template <class M>
     bool QRD<M>::isSingular() const 
@@ -700,24 +787,25 @@ namespace tmv {
         TMVStaticAssert((Sizes<M::_rowsize,M2::_colsize>::same));
         TMVAssert(minv.colsize() == rowsize());
         TMVAssert(minv.rowsize() == colsize());
-        pimpl->makeInverse(minv);
+        pimpl->makeInverse(minv.mat());
     }
 
     template <class M> template <class M2>
     void QRD<M>::makeInverseATA(BaseMatrix_Rec_Mutable<M2>& ata) const
     {
+        TMVStaticAssert((Sizes<M2::_colsize,M2::_rowsize>::same));
         TMVAssert(ata.rowsize() == rowsize());
         TMVAssert(ata.colsize() == rowsize());
-        QR_InverseATA(pimpl->QRx,pimpl->beta,ata);
+        pimpl->makeInverseATA(ata.mat());
     }
 
     template <class M>
     bool QRD<M>::isTrans() const 
-    { return QRD_Impl<small,M>::istrans; }
+    { return pimpl->istrans; }
 
     template <class M>
     typename QRD<M>::getq_type QRD<M>::getQ() const 
-    { return QRD<M>::getq_type(pimpl->QRx,pimpl->beta); }
+    { return typename QRD<M>::getq_type(pimpl->QRx,pimpl->beta); }
 
     template <class M>
     typename QRD<M>::getr_type QRD<M>::getR() const 
@@ -734,7 +822,7 @@ namespace tmv {
     template <class M>
     typename M::real_type QRD<M>::condition(RT normInf) const 
     {
-        // TODO: This is a placeholder until I write the real function.
+        // FIXME: This is a placeholder until I write the real function.
         // Make sure to do this before releasing the code!
         // See page 129 of Golub and van Loan.
         //
@@ -745,16 +833,25 @@ namespace tmv {
         return normInf * minv.normInf();
     }
 
+    template <class M>
+    size_t QRD<M>::colsize() const
+    { return pimpl->istrans ? pimpl->QRx.rowsize() : pimpl->QRx.colsize(); }
+
+    template <class M>
+    size_t QRD<M>::rowsize() const
+    { return pimpl->istrans ? pimpl->QRx.colsize() : pimpl->QRx.rowsize(); }
+
+
     template <class M, class M2>
     static bool CheckDecomp(
-        const QRD<M>& qrd, const BaseMatrix_Calc<M2>& m, std::ostream* fout)
+        const QRD<M>& qrd, const BaseMatrix_Calc<M2>& m, std::ostream* fout=0)
     {
         typedef typename M2::real_type RT;
         bool printmat = fout && m.colsize() < 100 && m.rowsize() < 100;
         if (printmat) {
             *fout << "QR:\n";
-            *fout << "M = "<<
-                (qrd.isTrans()?m.transpose():m.view()) << std::endl;
+            if (qrd.isTrans()) *fout << m.transpose() << std::endl;
+            else *fout << m << std::endl;
             *fout << "Q = "<<qrd.getQ()<<std::endl;
             *fout << "R = "<<qrd.getR()<<std::endl;
         }
@@ -762,7 +859,7 @@ namespace tmv {
         if (printmat) {
             *fout << "QR = "<<qr<<std::endl;
         }
-        RT nm = pimpl->istrans ? Norm(qr-m.transpose()) : Norm(qr-m);
+        RT nm = qrd.isTrans() ? Norm(qr-m.transpose()) : Norm(qr-m);
         nm /= Norm(qrd.getQ())*Norm(qrd.getR());
         RT kappa = qrd.condition(m.normInf());
         if (fout) {
@@ -772,14 +869,6 @@ namespace tmv {
         }
         return nm < kappa*RT(m.colsize())*TMV_Epsilon<RT>();
     }
-
-    template <class M>
-    size_t QRD<M>::colsize() const
-    { return pimpl->istrans ? pimpl->QRx.rowsize() : pimpl->QRx.colsize(); }
-
-    template <class M>
-    size_t QRD<M>::rowsize() const
-    { return pimpl->istrans ? pimpl->QRx.colsize() : pimpl->QRx.rowsize(); }
 
 
 } // namespace mv

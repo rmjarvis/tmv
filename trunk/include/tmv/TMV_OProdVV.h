@@ -396,7 +396,7 @@ namespace tmv {
 
     // TMV_Text
 
-#ifdef TMV_DEBUG
+#ifdef TMV_TEXT
     template <int ix, class T, class V1, class V2>
     static inline std::string TMV_Text(const OProdVV<ix,T,V1,V2>& svv)
     {

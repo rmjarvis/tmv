@@ -44,8 +44,7 @@ namespace tmv {
     // Defined in TMV_MultMM_RRC.cpp
     template <bool add, class T1, int C1, class T2, int C2, class T3>
     void DoInstMultMM(
-        const T3 x,
-        const ConstMatrixView<T1,C1>& m1,
+        const T3 x, const ConstMatrixView<T1,C1>& m1,
         const ConstMatrixView<T2,C2>& m2, MatrixView<T3,ColMajor> m3);
 
     template <class T1, int C1, class T2, int C2, class T3>
@@ -96,16 +95,6 @@ namespace tmv {
         const T3 x, const ConstMatrixView<T1,C1>& m1,
         const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3)
     {
-        //std::cout<<"Start AddMultMM:\n";
-        //std::cout<<"x = "<<x<<std::endl;
-        //std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1<<std::endl;
-        //std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
-        //std::cout<<"m3 = "<<TMV_Text(m3)<<"  "<<m3<<std::endl;
-        //Matrix<T3> m3x = m3;
-        //for(size_t j=0;j<m3.rowsize();++j) 
-            //InstAddMultMV(x,m1,m2.col(j),m3x.col(j).xView());
-        //std::cout<<"m3x = "<<m3x<<std::endl;
-
         if (m3.iscm()) {
             MatrixView<T3,ColMajor> m3cm = m3.cmView();
             if (m1.iscm()) {
@@ -137,10 +126,6 @@ namespace tmv {
             InstMultMM(T3(1),m1,m2,m3c.xView());
             InstAddMultXM(x,m3c.constView().xView(),m3);
         }
-        //std::cout<<"m3 => "<<m3<<std::endl;
-        //typename Traits<T3>::real_type normdiff = Norm(m3-m3x);
-        //std::cout<<"Norm(diff) = "<<normdiff<<std::endl;
-        //if (normdiff > 1.e-3) abort();
     }
 
     template <class T1, int C1, class T2, int C2, class T3>

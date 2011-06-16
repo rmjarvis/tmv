@@ -6,6 +6,7 @@
 #endif
 
 #include <iostream>
+#include <typeinfo>
 #include <cmath>
 #include "tmv/TMV_Base.h"
 

@@ -35,15 +35,15 @@
 #include "TMV_BaseVector.h"
 #include "TMV_BaseMatrix.h"
 #include "TMV_BaseMatrix_Rec.h"
+#include "TMV_IntegerDet.h"
 
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
 #include <iostream>
 #include "TMV_VectorIO.h"
+#include "TMV_MatrixIO.h"
 #endif
 
 namespace tmv {
-
-#define DETM_MAX_DIRECT_SIZE 3
 
     // Defined in TMV_Det.cpp:
     template <class T>
@@ -54,7 +54,6 @@ namespace tmv {
         typename ConstVectorView<T>::zfloat_type* sign);
     template <class T>
     bool InstHasZeroElement(const ConstVectorView<T>& v);
-
 
     //
     // Det
@@ -71,7 +70,7 @@ namespace tmv {
         typedef typename M::value_type T;
         static TMV_INLINE T call(const M& m)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"Det algo 0: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -86,7 +85,7 @@ namespace tmv {
         typedef typename M::value_type T;
         static TMV_INLINE T call(const M& m)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"Det algo 1: N,s = "<<N<<','<<1<<std::endl;
 #endif
@@ -99,9 +98,9 @@ namespace tmv {
     struct DetM_Helper<2,2,M>
     {
         typedef typename M::value_type T;
-        static T call(const M& m)
+        static inline T call(const M& m)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"Det algo 2: N,s = "<<N<<','<<2<<std::endl;
 #endif
@@ -114,9 +113,9 @@ namespace tmv {
     struct DetM_Helper<3,3,M>
     {
         typedef typename M::value_type T;
-        static T call(const M& m)
+        static inline T call(const M& m)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"Det algo 3: N,s = "<<N<<','<<3<<std::endl;
 #endif
@@ -127,8 +126,67 @@ namespace tmv {
         }
     };
 
+    // algo 4: s == 4
+    template <class M>
+    struct DetM_Helper<4,4,M>
+    {
+        typedef typename M::value_type T;
+        static inline T call(const M& m)
+        {
+#ifdef PRINTALGO_DET
+            const int N = m.rowsize();
+            std::cout<<"Det algo 4: N,s = "<<N<<','<<4<<std::endl;
+            std::cout<<"m = "<<m<<std::endl;
+#endif
+            // det = | a b c d | 
+            //       | e f g h |
+            //       | i j k l |
+            //       | m n o p |
+            // =   afkp - aflo - agjp + agln + ahjo - ahkn
+            //   - bekp + belo + cejp - celn - dejo + dekn
+            //   + bgip - bglm - bhio + bhkm + chin - chjm
+            //   - cfip + cflm + dfio - dfkm - dgin + dgjm
+            // =   (af-be)(kp-lo) - (ag-ce)(jp-ln) + (ah-de)(jo-kn)
+            //   + (bg-cf)(ip-lm) - (bh-df)(io-km) + (ch-dg)(in-jm)
+            const T af = ZProd<false,false>::prod(m.cref(0,0),m.cref(1,1));
+            const T ag = ZProd<false,false>::prod(m.cref(0,0),m.cref(1,2));
+            const T ah = ZProd<false,false>::prod(m.cref(0,0),m.cref(1,3));
+            const T be = ZProd<false,false>::prod(m.cref(0,1),m.cref(1,0));
+            const T bg = ZProd<false,false>::prod(m.cref(0,1),m.cref(1,2));
+            const T bh = ZProd<false,false>::prod(m.cref(0,1),m.cref(1,3));
+            const T ce = ZProd<false,false>::prod(m.cref(0,2),m.cref(1,0));
+            const T cf = ZProd<false,false>::prod(m.cref(0,2),m.cref(1,1));
+            const T ch = ZProd<false,false>::prod(m.cref(0,2),m.cref(1,3));
+            const T de = ZProd<false,false>::prod(m.cref(0,3),m.cref(1,0));
+            const T df = ZProd<false,false>::prod(m.cref(0,3),m.cref(1,1));
+            const T dg = ZProd<false,false>::prod(m.cref(0,3),m.cref(1,2));
+            const T in = ZProd<false,false>::prod(m.cref(2,0),m.cref(3,1));
+            const T io = ZProd<false,false>::prod(m.cref(2,0),m.cref(3,2));
+            const T ip = ZProd<false,false>::prod(m.cref(2,0),m.cref(3,3));
+            const T jm = ZProd<false,false>::prod(m.cref(2,1),m.cref(3,0));
+            const T jo = ZProd<false,false>::prod(m.cref(2,1),m.cref(3,2));
+            const T jp = ZProd<false,false>::prod(m.cref(2,1),m.cref(3,3));
+            const T km = ZProd<false,false>::prod(m.cref(2,2),m.cref(3,0));
+            const T kn = ZProd<false,false>::prod(m.cref(2,2),m.cref(3,1));
+            const T kp = ZProd<false,false>::prod(m.cref(2,2),m.cref(3,3));
+            const T lm = ZProd<false,false>::prod(m.cref(2,3),m.cref(3,0));
+            const T ln = ZProd<false,false>::prod(m.cref(2,3),m.cref(3,1));
+            const T lo = ZProd<false,false>::prod(m.cref(2,3),m.cref(3,2));
+            return 
+                ZProd<false,false>::prod(af-be,kp-lo)
+                - ZProd<false,false>::prod(ag-ce,jp-ln)
+                + ZProd<false,false>::prod(ah-de,jo-kn)
+                + ZProd<false,false>::prod(bg-cf,ip-lm)
+                - ZProd<false,false>::prod(bh-df,io-km)
+                + ZProd<false,false>::prod(ch-dg,in-jm);
+        }
+    };
+
     // TODO: There is a fast 4x4 calculation.  Probably worth putting in.
     // Also would benefit from SSE commands.  Especially for float.
+    // See:
+    // http://download.intel.com/design/PentiumIII/sml/24504302.pdf
+    // http://freevec.org/function/inverse_matrix_4x4_using_partitioning
 
     // algo 11: Direct product of diagonal:
     template <int s, class M>
@@ -137,7 +195,7 @@ namespace tmv {
         typedef typename M::value_type T;
         static TMV_INLINE T call(const M& m)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"Det algo 11: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -152,7 +210,7 @@ namespace tmv {
         typedef typename M::value_type T;
         static T call(const M& m)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"Det algo 12: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -168,9 +226,9 @@ namespace tmv {
     struct DetM_Helper<13,s,M>
     {
         typedef typename M::value_type T;
-        static T call(const M& m)
+        static inline T call(const M& m)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"Det algo 13: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -190,7 +248,7 @@ namespace tmv {
                 M::_unit ? 0 :
                 M::_unknowndiag ? 22 :
                 11;
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"Det algo 21: N,s = "<<N<<','<<s<<std::endl;
             std::cout<<" -> algo "<<algo2<<std::endl;
@@ -204,9 +262,9 @@ namespace tmv {
     struct DetM_Helper<22,s,M>
     {
         typedef typename M::value_type T;
-        static T call(const M& m)
+        static inline T call(const M& m)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"Det algo 22: N,s = "<<N<<','<<s<<std::endl;
             std::cout<<"m.isunit() = "<<m.isunit()<<std::endl;
@@ -224,7 +282,7 @@ namespace tmv {
         static T call(const M& m)
         {
             const int N = m.rowsize();
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             std::cout<<"Det algo 31: N,s = "<<N<<','<<s<<std::endl;
 #endif
             if (N == 0)
@@ -247,7 +305,7 @@ namespace tmv {
         typedef typename M::value_type T;
         static TMV_INLINE T call(const M& m)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"Det algo 32: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -272,11 +330,12 @@ namespace tmv {
                 !up || !lo ? 21 :
                 s == 2 ? 2 : 
                 s == 3 ? 3 :
+                s == 4 ? 4 :
                 Traits<T>::isinteger ? 31 :
                 M::_hasdivider ? 12 :
                 13;
 
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"Inline Det N,s = "<<N<<','<<s<<std::endl;
             std::cout<<"m = "<<TMV_Text(m)<<std::endl;
@@ -311,9 +370,9 @@ namespace tmv {
     {
         typedef typename M::float_type RT;
         typedef typename M::zfloat_type T;
-        static RT call(const M& m, T* sign)
+        static inline RT call(const M& m, T* sign)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"LogDet algo 0: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -334,7 +393,7 @@ namespace tmv {
             RT absdet = TMV_ABS(det);
             RT logdet = TMV_LOG(absdet);
             if (sign) *sign = TMV_SIGN(det,absdet);
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"LogDet algo 1: N,s = "<<N<<','<<s<<std::endl;
             std::cout<<"det = "<<det<<std::endl;
@@ -351,9 +410,9 @@ namespace tmv {
     {
         typedef typename M::float_type RT;
         typedef typename M::zfloat_type T;
-        static RT call(const M& m, T* sign)
+        static inline RT call(const M& m, T* sign)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"LogDet algo 11: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -369,7 +428,7 @@ namespace tmv {
         typedef typename M::zfloat_type T;
         static RT call(const M& m, T* sign)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"LogDet algo 12: N,s = "<<N<<','<<s<<std::endl;
             std::cout<<"divisset? "<<m.divIsSet()<<std::endl;
@@ -387,9 +446,9 @@ namespace tmv {
     {
         typedef typename M::float_type RT;
         typedef typename M::zfloat_type T;
-        static RT call(const M& m, T* sign)
+        static inline RT call(const M& m, T* sign)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"LogDet algo 13: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -404,13 +463,13 @@ namespace tmv {
     {
         typedef typename M::float_type RT;
         typedef typename M::zfloat_type T;
-        static RT call(const M& m, T* sign)
+        static inline RT call(const M& m, T* sign)
         {
             const int algo2 = 
                 M::_unit ? 0 :
                 M::_unknowndiag ? 22 :
                 11;
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"LogDet algo 21: N,s = "<<N<<','<<s<<std::endl;
             std::cout<<" -> algo "<<algo2<<std::endl;
@@ -425,9 +484,9 @@ namespace tmv {
     {
         typedef typename M::float_type RT;
         typedef typename M::zfloat_type T;
-        static RT call(const M& m, T* sign)
+        static inline RT call(const M& m, T* sign)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"LogDet algo 22: N,s = "<<N<<','<<s<<std::endl;
             std::cout<<"m.isunit() = "<<m.isunit()<<std::endl;
@@ -458,7 +517,7 @@ namespace tmv {
                 s != UNKNOWN && s <= 3 ? 1 :
                 M::_hasdivider ? 12 :
                 13;
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"Inline LogDet N,s = "<<N<<','<<s<<std::endl;
             std::cout<<"m = "<<TMV_Text(m)<<std::endl;
@@ -494,7 +553,7 @@ namespace tmv {
     {
         static TMV_INLINE bool call(const M& m)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"IsSingular algo 0: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -506,11 +565,11 @@ namespace tmv {
     template <int s, class M>
     struct IsSingularM_Helper<1,s,M>
     {
-        static bool call(const M& m)
+        static inline bool call(const M& m)
         {
             typedef typename M::real_type RT;
             RT det = Det(m);
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"IsSingular algo 1: N,s = "<<N<<','<<s<<std::endl;
             std::cout<<"det = "<<det<<std::endl;
@@ -525,7 +584,7 @@ namespace tmv {
     {
         static TMV_INLINE bool call(const M& m)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"IsSingular algo 11: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -539,7 +598,7 @@ namespace tmv {
     {
         static bool call(const M& m)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"IsSingular algo 12: N,s = "<<N<<','<<s<<std::endl;
             std::cout<<"divisset? "<<m.divIsSet()<<std::endl;
@@ -555,9 +614,9 @@ namespace tmv {
     template <int s, class M>
     struct IsSingularM_Helper<13,s,M>
     {
-        static bool call(const M& m)
+        static inline bool call(const M& m)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"IsSingular algo 12: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -570,13 +629,13 @@ namespace tmv {
     template <int s, class M>
     struct IsSingularM_Helper<21,s,M>
     {
-        static bool call(const M& m)
+        static inline bool call(const M& m)
         {
             const int algo2 = 
                 M::_unit ? 0 :
                 M::_unknowndiag ? 22 :
                 11;
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"IsSingular algo 21: N,s = "<<N<<','<<s<<std::endl;
             std::cout<<" -> algo ="<<algo2<<std::endl;
@@ -589,9 +648,9 @@ namespace tmv {
     template <int s, class M>
     struct IsSingularM_Helper<22,s,M>
     {
-        static bool call(const M& m)
+        static inline bool call(const M& m)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"IsSingular algo 21: N,s = "<<N<<','<<s<<std::endl;
             std::cout<<"m.isunit() = "<<m.isunit()<<std::endl;
@@ -620,7 +679,7 @@ namespace tmv {
                 s != UNKNOWN && s <= 3 ? 1 :
                 M::_hasdivider ? 12 :
                 13;
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int N = m.rowsize();
             std::cout<<"Inline IsSingular N,s = "<<N<<','<<s<<std::endl;
             std::cout<<"m = "<<TMV_Text(m)<<std::endl;
@@ -664,7 +723,7 @@ namespace tmv {
         typedef typename V::value_type T;
         static TMV_INLINE T call(const V& v)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int n = s == UNKNOWN ? int(v.size()) : s;
             std::cout<<"Prod Elements algo 0: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -678,7 +737,7 @@ namespace tmv {
         typedef typename V::value_type T;
         static TMV_INLINE T call(const V& v)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int n = s == UNKNOWN ? int(v.size()) : s;
             std::cout<<"Prod Elements algo 1: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -694,13 +753,13 @@ namespace tmv {
         static T call(const V& v)
         {
             const int n = s == UNKNOWN ? int(v.size()) : s;
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             std::cout<<"Prod Elements algo 11: n,s = "<<n<<','<<s<<std::endl;
 #endif
             if (n > 0) {
                 T prod = v.cref(0);
                 for(int i=1;i<n;++i) 
-                prod = ZProd<false,false>::prod(prod,v.cref(i));
+                    prod = ZProd<false,false>::prod(prod,v.cref(i));
                 return prod;
             } else return T(1);
         }
@@ -714,7 +773,7 @@ namespace tmv {
         static T call(const V& v)
         {
             const int n = s == UNKNOWN ? int(v.size()) : s;
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             std::cout<<"Prod Elements algo 12: n,s = "<<n<<','<<s<<std::endl;
 #endif
             T prod0(1), prod1(1);
@@ -729,7 +788,7 @@ namespace tmv {
                 } while (--n_2);
             }
             if (nb) prod0 = ZProd<false,false>::prod(prod0,*it);
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             std::cout<<"prod0, prod1 = "<<prod0<<"  "<<prod1<<std::endl;
             std::cout<<"product = "<<ZProd<false,false>::prod(prod0,prod1)<<std::endl;
 #endif
@@ -745,7 +804,7 @@ namespace tmv {
         static T call(const V& v)
         {
             const int n = s == UNKNOWN ? int(v.size()) : s;
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             std::cout<<"Prod Elements algo 13: n,s = "<<n<<','<<s<<std::endl;
 #endif
             T prod0(1), prod1(1);
@@ -776,7 +835,7 @@ namespace tmv {
         static T call(const V& v)
         {
             const int n = s == UNKNOWN ? int(v.size()) : s;
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             std::cout<<"Prod Elements algo 14: n,s = "<<n<<','<<s<<std::endl;
 #endif
             T prod0(1), prod1(1), prod2(1), prod3(1);
@@ -814,7 +873,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static T unroll(const V& v)
+            static inline T unroll(const V& v)
             {
                 return ZProd<false,false>::prod(
                     Unroller<I,N/2>::unroll(v),
@@ -823,13 +882,13 @@ namespace tmv {
         };
         template <int I>
         struct Unroller<I,1>
-        { static T unroll(const V& v) { return v.cref(I); } };
+        { static inline T unroll(const V& v) { return v.cref(I); } };
         template <int I>
         struct Unroller<I,0>
-        { static T unroll(const V& v) { return T(1); } };
-        static T call(const V& v)
+        { static inline T unroll(const V& v) { return T(1); } };
+        static inline T call(const V& v)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int n = v.size();
             std::cout<<"Prod Elements algo 15: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -846,7 +905,7 @@ namespace tmv {
         static double call(const V& v)
         {
             int n = s == UNKNOWN ? int(v.size()) : s;
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             std::cout<<"Prod Elements algo 31: n,s = "<<n<<','<<s<<std::endl;
 #endif
             if (n) {
@@ -895,7 +954,7 @@ namespace tmv {
         static std::complex<double> call(const V& v)
         {
             int n = s == UNKNOWN ? int(v.size()) : s;
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             std::cout<<"Prod Elements algo 32: n,s = "<<n<<','<<s<<std::endl;
 #endif
             if (n) {
@@ -944,7 +1003,7 @@ namespace tmv {
         typedef typename V::real_type RT;
         static T call(const V& v)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int n = v.size();
             std::cout<<"Prod Elements algo 41: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -968,7 +1027,7 @@ namespace tmv {
                     // Need to do LogDet version
                     T sign;
                     RT logdet = LogProdElements(v,&sign);
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
                     std::cout<<"Underflow or overflow found:\n";
                     std::cout<<"logdet, sign = "<<logdet<<" , "<<sign<<std::endl;
                     std::cout<<"exp(logdet) = "<<TMV_EXP(logdet)<<std::endl;
@@ -991,7 +1050,7 @@ namespace tmv {
         typedef typename V::real_type RT;
         static T call(const V& v)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int n = v.size();
             std::cout<<"Prod Elements algo 42: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -1014,7 +1073,7 @@ namespace tmv {
                 // LogDet version.
                 T sign;
                 RT logdet = LogProdElementsV_Helper<-4,s,V>::call(v,&sign);
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
                 std::cout<<"Underflow or overflow found:\n";
                 std::cout<<"logdet, sign = "<<logdet<<" , "<<sign<<std::endl;
                 std::cout<<"exp(logdet) = "<<TMV_EXP(logdet)<<std::endl;
@@ -1023,7 +1082,7 @@ namespace tmv {
                 if (sign == T(0)) return T(0);
                 else return sign * TMV_EXP(logdet);
             } else {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
                 std::cout<<"Underflow or overflow found:\n";
                 std::cout<<"But can't do better.  det1 = "<<det1<<std::endl;
                 std::cout<<"max,min = "<<max<<" , "<<min<<std::endl;
@@ -1080,7 +1139,7 @@ namespace tmv {
                 (sizeof(RT) == 8) ? (V::iscomplex ? 11 : 13) :
                 (sizeof(RT) == 4) ? (V::iscomplex ? 12 : 14) :
                 11;
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             std::cout<<"No branch Prod Elements\n";
             std::cout<<"v = "<<TMV_Text(v)<<std::endl;
             std::cout<<"s = "<<s<<std::endl;
@@ -1103,7 +1162,7 @@ namespace tmv {
                 // For N <= 20, the product is not very likely to overflow.
                 (!Traits<T>::isinteger && (s == UNKNOWN || s > 20)) ? 42 :
                 -4;
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             std::cout<<"Inline ProdElements\n";
             std::cout<<"v = "<<TMV_Text(v)<<std::endl;
             std::cout<<"v = "<<v<<std::endl;
@@ -1169,9 +1228,9 @@ namespace tmv {
     {
         typedef typename V::float_type RT;
         typedef typename V::zfloat_type T;
-        static RT call(const V& v, T* sign)
+        static inline RT call(const V& v, T* sign)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             const int n = v.size();
             std::cout<<"LogProd Elements algo 1: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -1193,7 +1252,7 @@ namespace tmv {
         {
             TMVStaticAssert(Traits<T>::isreal);
             const int n = s == UNKNOWN ? int(v.size()) : s;
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             std::cout<<"LogProd Elements algo 11: n,s = "<<n<<','<<s<<std::endl;
 #endif
             RT sum(0);
@@ -1214,7 +1273,7 @@ namespace tmv {
         {
             TMVStaticAssert(Traits<T>::isreal);
             const int n = s == UNKNOWN ? int(v.size()) : s;
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             std::cout<<"LogProd Elements algo 11: n,s = "<<n<<','<<s<<std::endl;
 #endif
             RT sum(0);
@@ -1237,7 +1296,7 @@ namespace tmv {
         static RT call(const V& v, T* sign)
         {
             const int n = s == UNKNOWN ? int(v.size()) : s;
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             std::cout<<"LogProd Elements algo 12: n,s = "<<n<<','<<s<<std::endl;
 #endif
             RT sum0(0), sum1(0);
@@ -1271,7 +1330,7 @@ namespace tmv {
         static RT call(const V& v)
         {
             const int n = s == UNKNOWN ? int(v.size()) : s;
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             std::cout<<"LogProd Elements algo 12: n,s = "<<n<<','<<s<<std::endl;
 #endif
             RT sum0(0), sum1(0);
@@ -1306,7 +1365,7 @@ namespace tmv {
         {
             TMVStaticAssert(Traits<T>::iscomplex);
             const int n = s == UNKNOWN ? int(v.size()) : s;
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             std::cout<<"LogProd Elements algo 16: n,s = "<<n<<','<<s<<std::endl;
 #endif
             RT sum(0);
@@ -1328,7 +1387,7 @@ namespace tmv {
         {
             TMVStaticAssert(Traits<T>::iscomplex);
             const int n = s == UNKNOWN ? int(v.size()) : s;
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             std::cout<<"LogProd Elements algo 16: n,s = "<<n<<','<<s<<std::endl;
 #endif
             RT sum(0);
@@ -1381,7 +1440,7 @@ namespace tmv {
                 11 ) };
         static TMV_INLINE RT call(const V& v, T* sign)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             std::cout<<"Inline LogProdElements with sign\n";
             std::cout<<"v = "<<TMV_Text(v)<<std::endl;
             std::cout<<"s = "<<s<<std::endl;
@@ -1391,7 +1450,7 @@ namespace tmv {
         }
         static TMV_INLINE RT call(const V& v)
         {
-#ifdef PRINTALGO_Det
+#ifdef PRINTALGO_DET
             std::cout<<"Inline LogProdElements no sign\n";
             std::cout<<"v = "<<TMV_Text(v)<<std::endl;
             std::cout<<"s = "<<s<<std::endl;
@@ -1471,8 +1530,8 @@ namespace tmv {
         static bool call(const V& v)
         {
             const int n = s == UNKNOWN ? int(v.size()) : s;
-#ifdef PRINTALGO_Det
-            std::cout<<"HaxZeroElement algo 11: n,s = "<<n<<','<<s<<std::endl;
+#ifdef PRINTALGO_DET
+            std::cout<<"HasZeroElement algo 11: n,s = "<<n<<','<<s<<std::endl;
 #endif
             for(int i=0;i<n;++i) {
                 if (v.cref(i) != T(0)) continue;
@@ -1490,8 +1549,8 @@ namespace tmv {
         static bool call(const V& v)
         {
             const int n = s == UNKNOWN ? int(v.size()) : s;
-#ifdef PRINTALGO_Det
-            std::cout<<"HaxZeroElement algo 12: n,s = "<<n<<','<<s<<std::endl;
+#ifdef PRINTALGO_DET
+            std::cout<<"HasZeroElement algo 12: n,s = "<<n<<','<<s<<std::endl;
 #endif
             typename V::const_iterator it = v.begin();
             int n_2 = (n>>1);
@@ -1514,8 +1573,8 @@ namespace tmv {
         static bool call(const V& v)
         {
             const int n = s == UNKNOWN ? int(v.size()) : s;
-#ifdef PRINTALGO_Det
-            std::cout<<"HaxZeroElement algo 13: n,s = "<<n<<','<<s<<std::endl;
+#ifdef PRINTALGO_DET
+            std::cout<<"HasZeroElement algo 13: n,s = "<<n<<','<<s<<std::endl;
 #endif
             typename V::const_iterator it = v.begin();
             int n_4 = (n>>2);
@@ -1542,8 +1601,8 @@ namespace tmv {
         static bool call(const V& v)
         {
             const int n = s == UNKNOWN ? int(v.size()) : s;
-#ifdef PRINTALGO_Det
-            std::cout<<"HaxZeroElement algo 14: n,s = "<<n<<','<<s<<std::endl;
+#ifdef PRINTALGO_DET
+            std::cout<<"HasZeroElement algo 14: n,s = "<<n<<','<<s<<std::endl;
 #endif
             typename V::const_iterator it = v.begin();
             int n_8 = (n>>3);
@@ -1573,7 +1632,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static bool unroll(const V& v)
+            static inline bool unroll(const V& v)
             {
                 return (
                     Unroller<I,N/2>::unroll(v) ||
@@ -1582,14 +1641,14 @@ namespace tmv {
         };
         template <int I>
         struct Unroller<I,1>
-        { static bool unroll(const V& v) { return v.cref(I) == T(0); } };
+        { static inline bool unroll(const V& v) { return v.cref(I) == T(0); } };
         template <int I>
         struct Unroller<I,0>
-        { static bool unroll(const V& v) { return false; } };
-        static bool call(const V& v)
+        { static inline bool unroll(const V& v) { return false; } };
+        static inline bool call(const V& v)
         {
-#ifdef PRINTALGO_Det
-            std::cout<<"HaxZeroElement algo 15: n,s = "<<v.size()<<','<<s<<std::endl;
+#ifdef PRINTALGO_DET
+            std::cout<<"HasZeroElement algo 15: n,s = "<<v.size()<<','<<s<<std::endl;
 #endif
             return Unroller<0,s>::unroll(v); 
         }
@@ -1631,8 +1690,8 @@ namespace tmv {
                 (sizeof(RT) == 8) ? (V::iscomplex ? 12 : 13) :
                 (sizeof(RT) == 4) ? (V::iscomplex ? 13 : 14) :
                 11;
-#ifdef PRINTALGO_Det
-            std::cout<<"Inline HaxZeroElement\n";
+#ifdef PRINTALGO_DET
+            std::cout<<"Inline HasZeroElement\n";
             std::cout<<"v = "<<TMV_Text(v)<<std::endl;
             std::cout<<"s = "<<s<<std::endl;
             std::cout<<"algo = "<<algo<<std::endl;

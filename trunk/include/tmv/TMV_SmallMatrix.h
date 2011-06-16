@@ -164,7 +164,7 @@ namespace tmv {
         typedef QuotXM<1,real_type,type> inverse_type;
 
         typedef LUD<copy_type> lud_type;
-        typedef InvalidType qrd_type;
+        typedef QRD<copy_type> qrd_type;
         typedef InvalidType qrpd_type;
         typedef InvalidType svd_type;
 
@@ -305,6 +305,8 @@ namespace tmv {
         typedef typename Traits<type>::qrpd_type qrpd_type;
         typedef typename Traits<type>::svd_type svd_type;
 
+        typedef typename Traits<T>::real_type real_type;
+
         enum { _colsize = Traits<type>::_colsize };
         enum { _rowsize = Traits<type>::_rowsize };
         enum { _shape = Traits<type>::_shape };
@@ -331,7 +333,8 @@ namespace tmv {
             TMVStaticAssert(M>=0);
             TMVStaticAssert(N>=0);
 #ifdef TMV_DEBUG
-            this->setAllTo(T(888));
+            this->linearView().flatten().setAllTo(
+                Traits<real_type>::constr_value());
 #endif
         }
 
@@ -398,7 +401,8 @@ namespace tmv {
         TMV_INLINE_ND ~SmallMatrix()
         {
 #ifdef TMV_DEBUG
-            this->setAllTo(T(999));
+            this->linearView().flatten().setAllTo(
+                Traits<real_type>::destr_value());
 #endif
         }
 
@@ -505,7 +509,7 @@ namespace tmv {
         typedef QuotXM<1,real_type,type> inverse_type;
 
         typedef LUD<copy_type> lud_type;
-        typedef InvalidType qrd_type;
+        typedef QRD<copy_type> qrd_type;
         typedef InvalidType qrpd_type;
         typedef InvalidType svd_type;
 
@@ -797,7 +801,7 @@ namespace tmv {
         typedef QuotXM<1,real_type,type> inverse_type;
 
         typedef LUD<copy_type> lud_type;
-        typedef InvalidType qrd_type;
+        typedef QRD<copy_type> qrd_type;
         typedef InvalidType qrpd_type;
         typedef InvalidType svd_type;
 
@@ -1231,7 +1235,7 @@ namespace tmv {
     // TMV_Text
     //
 
-#ifdef TMV_DEBUG
+#ifdef TMV_TEXT
     template <class T, int M, int N, int A0, int A1>
     static inline std::string TMV_Text(const SmallMatrix<T,M,N,A0,A1>& m)
     {

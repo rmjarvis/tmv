@@ -552,7 +552,7 @@ namespace tmv {
         const ConstVectorView<double>& v, int* imax)
     { return DoInstMaxAbs2Element(v,imax); }
     static double DoInstMaxAbs2Element(
-        const ConstVectorView<std::complex<double> >& v, int*t imax)
+        const ConstVectorView<std::complex<double> >& v, int* imax)
     {
         int n=v.size();
         int s=v.step();

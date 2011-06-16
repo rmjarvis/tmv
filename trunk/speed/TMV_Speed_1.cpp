@@ -205,7 +205,7 @@ const T dmone(-1);
 
 #ifdef DOEIGENSMALL
 const int nloops2x = (
-    (N*sizeof(T) < 1536 * 1024 && N!=10000) ? nloops2 : 0 );
+    (N*sizeof(T) < 1536 * 1024 && N!=Eigen::Dynamic) ? nloops2 : 0 );
 #endif
 
 static void ClearCache()
@@ -294,8 +294,6 @@ static void MultXV(
     for (int i=0; i<nloops1; ++i) {
 
 #if 1 // B = A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -305,6 +303,7 @@ static void MultXV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -411,8 +410,6 @@ static void MultXV(
 #endif
 
 #if 1 // B = 8 * A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -422,6 +419,7 @@ static void MultXV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -529,8 +527,6 @@ static void MultXV(
 #endif
 
 #if 1 // B *= 7
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -539,6 +535,7 @@ static void MultXV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -645,8 +642,6 @@ static void MultXV(
 #endif
 
 #if 1 // B = -A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -656,6 +651,7 @@ static void MultXV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -763,8 +759,6 @@ static void MultXV(
 #endif
 
 #if 1 // B = -B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -774,6 +768,7 @@ static void MultXV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -881,8 +876,6 @@ static void MultXV(
 
 #if 1 // B *= complex(8,9)
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -891,6 +884,7 @@ static void MultXV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -999,8 +993,6 @@ static void MultXV(
 
 #if 1 // B = complex(8,9) * A
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -1010,6 +1002,7 @@ static void MultXV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -1119,8 +1112,6 @@ static void MultXV(
 
 #if 1 // B = complex(8,9) * A*
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -1130,6 +1121,7 @@ static void MultXV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -1374,8 +1366,6 @@ static void AddVV(
     for (int i=0; i<nloops1; ++i) {
 
 #if 1 // C = A + B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -1386,6 +1376,7 @@ static void AddVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -1493,8 +1484,6 @@ static void AddVV(
 #endif
 
 #if 1 // C += A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -1504,6 +1493,7 @@ static void AddVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -1610,8 +1600,6 @@ static void AddVV(
 #endif
 
 #if 1 // C -= A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -1621,6 +1609,7 @@ static void AddVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -1728,8 +1717,6 @@ static void AddVV(
 #endif
 
 #if 1 // C += 8 * A
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -1739,6 +1726,7 @@ static void AddVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -1845,8 +1833,6 @@ static void AddVV(
 #endif
 
 #if 1 // C = A - B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -1857,6 +1843,7 @@ static void AddVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -1964,8 +1951,6 @@ static void AddVV(
 #endif
 
 #if 1 // C = 7*A - 12*B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -1976,6 +1961,7 @@ static void AddVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -2084,8 +2070,6 @@ static void AddVV(
 #endif
 
 #if 1 // C = 7*C - 12*B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -2096,6 +2080,7 @@ static void AddVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -2204,8 +2189,6 @@ static void AddVV(
 
 #if 1 // C += complex(8,9) * A
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -2215,6 +2198,7 @@ static void AddVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -2324,8 +2308,6 @@ static void AddVV(
 
 #if 1 // C = 7*A + (8,9)*B
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -2336,6 +2318,7 @@ static void AddVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -2446,8 +2429,6 @@ static void AddVV(
 
 #if 1 // C = (7,1)*A + (8,9)*B
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -2458,6 +2439,7 @@ static void AddVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -2568,8 +2550,6 @@ static void AddVV(
 
 #if 1 // C = (7,1)*A - B
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -2580,6 +2560,7 @@ static void AddVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -2825,8 +2806,6 @@ static void MultVV(
     for (int i=0; i<nloops1; ++i) {
 
 #if 1 // D = A * B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -2838,6 +2817,7 @@ static void MultVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -2972,8 +2952,6 @@ static void MultVV(
 #endif
 
 #if 1 // D = 8 * A * B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -2986,6 +2964,7 @@ static void MultVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -3117,8 +3096,6 @@ static void MultVV(
         // multiplies them outside of the vector product.
         // It's probably a useless feature in that nobody probably ever 
         // uses it, but there it is.
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -3131,6 +3108,7 @@ static void MultVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -3258,8 +3236,6 @@ static void MultVV(
 
 #if 1 // D = A * B.conjugate()
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -3271,6 +3247,7 @@ static void MultVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -3388,8 +3365,6 @@ static void MultVV(
 
 #if 1 // D = A.conjugate() * B
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -3401,6 +3376,7 @@ static void MultVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -3516,8 +3492,6 @@ static void MultVV(
 
 #if 1 // D = A.conjugate() * B.conjugate()
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -3529,6 +3503,7 @@ static void MultVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -3767,8 +3742,6 @@ static void NormV(
     for (int i=0; i<nloops1; ++i) {
 
 #if 1 // F = Norm1(A)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -3779,6 +3752,7 @@ static void NormV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -3894,8 +3868,6 @@ static void NormV(
 #endif
 
 #if 1 // F = Norm2(A)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -3907,6 +3879,7 @@ static void NormV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -4016,8 +3989,6 @@ static void NormV(
 #endif
 
 #if 1 // F = NormInf(A)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -4029,6 +4000,7 @@ static void NormV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -4146,8 +4118,6 @@ static void NormV(
 #endif
 
 #if 1 // F = NormSq(A)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -4158,6 +4128,7 @@ static void NormV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -4276,8 +4247,6 @@ static void NormV(
 #endif
 
 #if 1 // F = Norm(A)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -4289,6 +4258,7 @@ static void NormV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -4398,8 +4368,6 @@ static void NormV(
 #endif
 
 #if 1 // D = SumElements(A)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -4410,6 +4378,7 @@ static void NormV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -4520,8 +4489,6 @@ static void NormV(
 #endif
 
 #if 1 // F = SumAbsElements(A)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -4532,6 +4499,7 @@ static void NormV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -4646,8 +4614,6 @@ static void NormV(
 #endif
 
 #if 1 // F = SumAbs2Elements(A)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -4665,6 +4631,7 @@ static void NormV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -4905,10 +4872,8 @@ static void MinMaxV(
 
     for (int i=0; i<nloops1; ++i) {
 
-#if 0 // D = MaxElement(A)
+#if 1 // D = MaxElement(A)
 #ifndef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -4920,6 +4885,7 @@ static void MinMaxV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -5024,9 +4990,7 @@ static void MinMaxV(
 #endif
 #endif
 
-#if 0 // F = MaxAbsElement(A)
-        ClearCache();
-
+#if 1 // F = MaxAbsElement(A)
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -5038,6 +5002,7 @@ static void MinMaxV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -5149,10 +5114,8 @@ static void MinMaxV(
 #endif
 #endif
 
-#if 0 // D = MinElement(A)
+#if 1 // D = MinElement(A)
 #ifndef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -5164,6 +5127,7 @@ static void MinMaxV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -5268,9 +5232,7 @@ static void MinMaxV(
 #endif
 #endif
 
-#if 0 // F = MinAbsElement(A)
-        ClearCache();
-
+#if 1 // F = MinAbsElement(A)
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -5282,6 +5244,7 @@ static void MinMaxV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -5387,10 +5350,8 @@ static void MinMaxV(
 #endif
 #endif
 
-#if 0 // D = MaxElement(A,&i)
+#if 1 // D = MaxElement(A,&i)
 #ifndef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -5404,6 +5365,7 @@ static void MinMaxV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -5521,9 +5483,7 @@ static void MinMaxV(
 #endif
 #endif
 
-#if 0 // F = MaxAbsElement(A,&i)
-        ClearCache();
-
+#if 1 // F = MaxAbsElement(A,&i)
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -5537,6 +5497,7 @@ static void MinMaxV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -5661,10 +5622,8 @@ static void MinMaxV(
 #endif
 #endif
 
-#if 0 // D = MinElement(A,&i)
+#if 1 // D = MinElement(A,&i)
 #ifndef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -5678,6 +5637,7 @@ static void MinMaxV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -5796,8 +5756,6 @@ static void MinMaxV(
 #endif
 
 #if 1 // F = MinAbsElement(A,&i)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -5815,6 +5773,7 @@ static void MinMaxV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -5933,10 +5892,8 @@ static void MinMaxV(
 #endif
 #endif
 
-#if 0 // F = MaxAbs2Element(A)
+#if 1 // F = MaxAbs2Element(A)
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -5954,6 +5911,7 @@ static void MinMaxV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -6080,10 +6038,8 @@ static void MinMaxV(
 #endif
 #endif
 
-#if 0 // F = MaxAbs2Element(A,&i)
+#if 1 // F = MaxAbs2Element(A,&i)
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -6103,6 +6059,7 @@ static void MinMaxV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -6395,8 +6352,6 @@ static void SwapV(
     for (int i=0; i<nloops1; ++i) {
 
 #if 1 // Swap(A,B);
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -6406,6 +6361,7 @@ static void SwapV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -6519,8 +6475,6 @@ static void SwapV(
 #endif
 
 #if 1 // Swap(A[0::N/2],B[0::N/2])
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -6530,6 +6484,7 @@ static void SwapV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -6645,8 +6600,6 @@ static void SwapV(
 #endif
 
 #if 1 // A.reverseSelf()
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -6655,6 +6608,7 @@ static void SwapV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -6765,8 +6719,6 @@ static void SwapV(
 
 #if 1 // A.sort()
 #ifndef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -6775,6 +6727,7 @@ static void SwapV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -6883,8 +6836,6 @@ static void SwapV(
 
 #if 1 // A.conjugateSelf()
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -6893,6 +6844,7 @@ static void SwapV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -7001,8 +6953,6 @@ static void SwapV(
 
 #if 1 // Swap(A,B.conjugate);
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -7016,6 +6966,7 @@ static void SwapV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -7141,8 +7092,6 @@ static void SwapV(
 #endif
 
 #if 1 // A.permute(P);
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -7151,6 +7100,7 @@ static void SwapV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -7262,8 +7212,6 @@ static void SwapV(
 #endif
 
 #if 1 // A.reversePermute(P);
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -7272,6 +7220,7 @@ static void SwapV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -7519,8 +7468,6 @@ static void ElemMultVV(
     for (int i=0; i<nloops1; ++i) {
 
 #if 1 // C = DiagMatrixViewOf(A) * B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -7531,6 +7478,7 @@ static void ElemMultVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -7639,8 +7587,6 @@ static void ElemMultVV(
 #endif
 
 #if 1 // C *= 8 * DiagMatrixViewOf(A)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -7650,6 +7596,7 @@ static void ElemMultVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -7768,8 +7715,6 @@ static void ElemMultVV(
 #endif
 
 #if 1 // C = 7 * DiagMatrixViewOf(A) * B
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -7780,6 +7725,7 @@ static void ElemMultVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -7894,8 +7840,6 @@ static void ElemMultVV(
 
 #if 1 // C *= (8,9) * DiagMatrixViewOf(A)
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -7905,6 +7849,7 @@ static void ElemMultVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -8019,8 +7964,6 @@ static void ElemMultVV(
 
 #if 1 // C = (7,1) * DiagMatrixViewOf(A) * B
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -8031,6 +7974,7 @@ static void ElemMultVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -8264,9 +8208,7 @@ static void ElemDivVV(
 
     for (int i=0; i<nloops1; ++i) {
 
-#if 0 // C = B / DiagMatrixViewOf(A)
-        ClearCache();
-
+#if 1 // C = B / DiagMatrixViewOf(A)
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -8277,6 +8219,7 @@ static void ElemDivVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -8386,9 +8329,7 @@ static void ElemDivVV(
 #endif
 #endif
 
-#if 0 // C /= 8 * DiagMatrixViewOf(A)
-        ClearCache();
-
+#if 1 // C /= 8 * DiagMatrixViewOf(A)
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -8398,6 +8339,7 @@ static void ElemDivVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -8508,9 +8450,7 @@ static void ElemDivVV(
 #endif
 #endif
 
-#if 0 // C = 7 * DiagMatrixViewOf(A).inverse() * B
-        ClearCache();
-
+#if 1 // C = 7 * DiagMatrixViewOf(A).inverse() * B
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -8521,6 +8461,7 @@ static void ElemDivVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -8635,10 +8576,8 @@ static void ElemDivVV(
 #endif
 #endif
 
-#if 0 // C = (8,9) * C % DiagMatrixViewOf(A)
+#if 1 // C = (8,9) * C % DiagMatrixViewOf(A)
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -8648,6 +8587,7 @@ static void ElemDivVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -8763,10 +8703,8 @@ static void ElemDivVV(
 #endif
 #endif
 
-#if 0 // C = (7,1) * DiagMatrixViewOf(A).inverse() * B
+#if 1 // C = (7,1) * DiagMatrixViewOf(A).inverse() * B
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -8777,6 +8715,7 @@ static void ElemDivVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -8893,8 +8832,6 @@ static void ElemDivVV(
 #endif
 
 #if 1 // C = DiagMatrixViewOf(A).inverse()
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -8905,6 +8842,7 @@ static void ElemDivVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -9015,8 +8953,6 @@ static void ElemDivVV(
 #endif
 
 #if 1 // C = 7 / DiagMatrixViewOf(A)
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -9027,6 +8963,7 @@ static void ElemDivVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -9138,8 +9075,6 @@ static void ElemDivVV(
 
 #if 1 // C = (7,1) / DiagMatrixViewOf(A)
 #ifdef TISCOMPLEX
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -9150,6 +9085,7 @@ static void ElemDivVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);
@@ -9261,8 +9197,6 @@ static void ElemDivVV(
 #endif
 
 #if 1 // C = DiagMatrixViewOf(C).inverse()
-        ClearCache();
-
 #ifdef ERRORCHECK
         if (i == 0) {
             for (int k=0; k<nloops2; ++k) {
@@ -9273,6 +9207,7 @@ static void ElemDivVV(
             }
         }
 #endif
+        ClearCache();
 
 #ifdef DOREG
         gettimeofday(&tp,0);

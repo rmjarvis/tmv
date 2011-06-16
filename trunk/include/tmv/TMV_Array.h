@@ -49,7 +49,7 @@ const int TMV_MaxStack = 1024; // bytes
 namespace tmv
 {
     template <class T>
-    static TMV_INLINE bool TMV_Aligned(const T* p)
+    TMV_INLINE bool TMV_Aligned(const T* p)
     { return (reinterpret_cast<size_t>(p) & 0xf) == 0; }
 
     // There doesn't seem to be any portable C++ function that guarantees
@@ -238,7 +238,7 @@ namespace tmv
         TMV_INLINE ~AlignedArray() 
         {
 #ifdef TMV_INITIALIZE_NAN
-            fill_with(T(-999));
+            fill_with(-Traits<T>::destr_value());
 #endif
             p.deallocate(); 
         }
@@ -261,7 +261,7 @@ namespace tmv
         TMV_INLINE void resize(const size_t n) 
         {
 #ifdef TMV_INITIALIZE_NAN
-            fill_with(T(-999));
+            fill_with(-Traits<T>::destr_value());
 #endif
             p.deallocate(); 
             p.allocate(n); 
@@ -312,7 +312,7 @@ namespace tmv
         TMV_INLINE ~AlignedArray() 
         {
 #ifdef TMV_INITIALIZE_NAN
-            fill_with(std::complex<RT>(-999,-888));
+            fill_with(-Traits<RT>::destr_value());
 #endif
             p.deallocate(); 
         }
@@ -340,7 +340,7 @@ namespace tmv
         TMV_INLINE void resize(const size_t n) 
         {
 #ifdef TMV_INITIALIZE_NAN
-            fill_with(std::complex<RT>(-999,-888));
+            fill_with(-Traits<RT>::destr_value());
 #endif
             p.deallocate();
             p.allocate(n<<1); 
@@ -523,7 +523,10 @@ namespace tmv
         StackArray()
         { for(int i=0;i<N;++i) get()[i] = TMV_Nan<T>::get(); }
         ~StackArray() 
-        { for(int i=0;i<N;++i) get()[i] = T(-999); }
+        { for(int i=0;i<N;++i) get()[i] = -Traits<T>::destr_value(); }
+#else
+        TMV_INLINE StackArray() {}
+        TMV_INLINE ~StackArray()  {}
 #endif
 
         TMV_INLINE T& operator*() { return *get(); }
@@ -564,7 +567,10 @@ namespace tmv
         StackArray() 
         { for(int i=0;i<N;++i) get()[i] = TMV_Nan<std::complex<RT> >::get(); }
         ~StackArray() 
-        { for(int i=0;i<N;++i) get()[i] = std::complex<RT>(-999,-888); }
+        { for(int i=0;i<N;++i) get()[i] = -Traits<RT>::destr_value(); }
+#else
+        TMV_INLINE StackArray() {}
+        TMV_INLINE ~StackArray() {}
 #endif
 
         TMV_INLINE T& operator*() { return *get(); }

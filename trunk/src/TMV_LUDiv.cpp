@@ -311,22 +311,22 @@ namespace tmv {
     }
 
 
-    template <class T1, class T2, int C1>
+    template <class T1, int C1, class T2>
     void InstLU_SolveInPlace(
         const ConstMatrixView<T1,C1>& m1, const Permutation& P,
         MatrixView<T2> m2)
     { DoLUSolve<false>(m1,P,m2); }
-    template <class T1, class T2, int C1>
+    template <class T1, int C1, class T2>
     void InstLU_SolveTransposeInPlace(
         const ConstMatrixView<T1,C1>& m1, const Permutation& P,
         MatrixView<T2> m2)
     { DoLUSolve<true>(m1,P,m2); }
-    template <class T1, class T2, int C1>
+    template <class T1, int C1, class T2>
     void InstLU_SolveInPlace(
         const ConstMatrixView<T1,C1>& m1, const Permutation& P,
         VectorView<T2> v2)
     { DoLUSolve<false>(m1,P,v2); }
-    template <class T1, class T2, int C1>
+    template <class T1, int C1, class T2>
     void InstLU_SolveTransposeInPlace(
         const ConstMatrixView<T1,C1>& m1, const Permutation& P,
         VectorView<T2> v2)

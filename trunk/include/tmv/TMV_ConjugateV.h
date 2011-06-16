@@ -42,7 +42,7 @@ namespace tmv {
 
     // In TMV_ScaleV.h
     template <int ix, class T, class V>
-    static void Scale(const Scaling<ix,T>& x, BaseVector_Mutable<V>& v);
+    static inline void Scale(const Scaling<ix,T>& x, BaseVector_Mutable<V>& v);
 
     //
     // ConjugateSelf
@@ -88,7 +88,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static void unroll(V& v)
+            static inline void unroll(V& v)
             {
                 Unroller<I,N/2>::unroll(v);
                 Unroller<I+N/2,N-N/2>::unroll(v);
@@ -97,13 +97,13 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static void unroll(V& v)
+            static inline void unroll(V& v)
             { v.ref(I) = TMV_CONJ(v.cref(I)); }
         };
         template <int I>
         struct Unroller<I,0>
-        { static void unroll(V& v) {} };
-        static void call(V& v)
+        { static inline void unroll(V& v) {} };
+        static inline void call(V& v)
         { Unroller<0,s>::unroll(v); }
     };
 

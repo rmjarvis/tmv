@@ -513,6 +513,8 @@ namespace tmv {
         typedef Vector<T,A> type;
         typedef BaseVector_Mutable<type> base_mut;
 
+        typedef typename Traits<T>::real_type real_type;
+
         enum { _size = Traits<type>::_size };
         enum { _fort = Traits<type>::_fort };
         enum { _calc = Traits<type>::_calc };
@@ -533,7 +535,7 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
             TMVAssert(n>=0);
 #ifdef TMV_DEBUG
-            this->setAllTo(T(888));
+            this->flatten().setAllTo(Traits<real_type>::constr_value());
 #endif
         }
 
@@ -578,7 +580,7 @@ namespace tmv {
         ~Vector() 
         {
 #ifdef TMV_DEBUG
-            this->setAllTo(T(999));
+            this->flatten().setAllTo(Traits<real_type>::destr_value());
 #endif
         }
 
@@ -617,10 +619,13 @@ namespace tmv {
 
         void resize(size_t n)
         {
+#ifdef TMV_DEBUG
+            this->flatten().setAllTo(Traits<real_type>::destr_value());
+#endif
             itssize = n;
             itsv.resize(n);
 #ifdef TMV_DEBUG
-            this->setAllTo(T(888));
+            this->flatten().setAllTo(Traits<real_type>::constr_value());
 #endif
         }
 
@@ -1061,7 +1066,7 @@ namespace tmv {
     // TMV_Text 
     //
 
-#ifdef TMV_DEBUG
+#ifdef TMV_TEXT
     template <class T, int A>
     static inline std::string TMV_Text(const Vector<T,A>& v)
     {

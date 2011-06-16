@@ -181,44 +181,48 @@ namespace tmv {
     { Scale(CT(x),v.vec()); }
 
     template <class V, class T>
-    static TMV_INLINE void MultEq(BaseVector_Mutable<V>& v, const Scaling<0,T> x)
+    static TMV_INLINE void MultEq(
+        BaseVector_Mutable<V>& v, const Scaling<0,T> x)
     { Scale(x,v.vec()); }
 
     template <class V, class T>
-    static TMV_INLINE void MultEq(BaseVector_Mutable<V>& v, const Scaling<1,T> x)
+    static TMV_INLINE void MultEq(
+        BaseVector_Mutable<V>& v, const Scaling<1,T> x)
     {}
 
     template <class V, class T>
-    static TMV_INLINE void MultEq(BaseVector_Mutable<V>& v, const Scaling<-1,T> x)
+    static TMV_INLINE void MultEq(
+        BaseVector_Mutable<V>& v, const Scaling<-1,T> x)
     { Scale(x,v.vec()); }
 
     // v /= x
     template <class V>
-    static TMV_INLINE void DivEq(BaseVector_Mutable<V>& v, const int x)
+    static TMV_INLINE void LDivEq(BaseVector_Mutable<V>& v, const int x)
     { Scale(RT(1)/RT(x),v.vec()); }
 
     template <class V>
-    static TMV_INLINE void DivEq(BaseVector_Mutable<V>& v, const RT x)
+    static TMV_INLINE void LDivEq(BaseVector_Mutable<V>& v, const RT x)
     { Scale(RT(1)/x,v.vec()); }
 
     template <class V>
-    static TMV_INLINE void DivEq(BaseVector_Mutable<V>& v, const CT x)
+    static TMV_INLINE void LDivEq(BaseVector_Mutable<V>& v, const CT x)
     { Scale(RT(1)/x,v.vec()); }
 
     template <class V>
-    static TMV_INLINE void DivEq(BaseVector_Mutable<V>& v, const CCT x)
+    static TMV_INLINE void LDivEq(BaseVector_Mutable<V>& v, const CCT x)
     { Scale(RT(1)/CT(x),v.vec()); }
 
     template <class V, class T>
-    static TMV_INLINE void DivEq(BaseVector_Mutable<V>& v, const Scaling<0,T> x)
+    static TMV_INLINE void LDivEq(BaseVector_Mutable<V>& v, const Scaling<0,T> x)
     { Scale(RT(1)/T(x),v.vec()); }
 
     template <class V, class T>
-    static TMV_INLINE void DivEq(BaseVector_Mutable<V>& v, const Scaling<1,T> x)
+    static TMV_INLINE void LDivEq(BaseVector_Mutable<V>& v, const Scaling<1,T> x)
     {}
 
     template <class V, class T>
-    static TMV_INLINE void DivEq(BaseVector_Mutable<V>& v, const Scaling<-1,T> x)
+    static TMV_INLINE void LDivEq(
+        BaseVector_Mutable<V>& v, const Scaling<-1,T> x)
     { Scale(x,v.vec()); }
 
     // -v
@@ -228,19 +232,23 @@ namespace tmv {
 
     // x * v
     template <class V>
-    static TMV_INLINE ProdXV<0,RT,V> operator*(const int x, const BaseVector<V>& v)
+    static TMV_INLINE ProdXV<0,RT,V> operator*(
+        const int x, const BaseVector<V>& v)
     { return ProdXV<0,RT,V>(RT(x),v); }
 
     template <class V>
-    static TMV_INLINE ProdXV<0,RT,V> operator*(const RT x, const BaseVector<V>& v)
+    static TMV_INLINE ProdXV<0,RT,V> operator*(
+        const RT x, const BaseVector<V>& v)
     { return ProdXV<0,RT,V>(x,v); }
 
     template <class V>
-    static TMV_INLINE ProdXV<0,CT,V> operator*(const CT x, const BaseVector<V>& v)
+    static TMV_INLINE ProdXV<0,CT,V> operator*(
+        const CT x, const BaseVector<V>& v)
     { return ProdXV<0,CT,V>(x,v); }
 
     template <class V>
-    static TMV_INLINE ProdXV<0,CT,V> operator*(const CCT x, const BaseVector<V>& v)
+    static TMV_INLINE ProdXV<0,CT,V> operator*(
+        const CCT x, const BaseVector<V>& v)
     { return CT(x)*v; }
 
     template <class V, int ix, class T>
@@ -250,19 +258,23 @@ namespace tmv {
 
     // v * x
     template <class V>
-    static TMV_INLINE ProdXV<0,RT,V> operator*(const BaseVector<V>& v, const int x)
+    static TMV_INLINE ProdXV<0,RT,V> operator*(
+        const BaseVector<V>& v, const int x)
     { return RT(x)*v; }
 
     template <class V>
-    static TMV_INLINE ProdXV<0,RT,V> operator*(const BaseVector<V>& v, const RT x)
+    static TMV_INLINE ProdXV<0,RT,V> operator*(
+        const BaseVector<V>& v, const RT x)
     { return x*v; }
 
     template <class V>
-    static TMV_INLINE ProdXV<0,CT,V> operator*(const BaseVector<V>& v, const CT x)
+    static TMV_INLINE ProdXV<0,CT,V> operator*(
+        const BaseVector<V>& v, const CT x)
     { return x*v; }
 
     template <class V>
-    static TMV_INLINE ProdXV<0,CT,V> operator*(const BaseVector<V>& v, const CCT x)
+    static TMV_INLINE ProdXV<0,CT,V> operator*(
+        const BaseVector<V>& v, const CCT x)
     { return CT(x)*v; }
 
     template <class V, int ix, class T>
@@ -272,19 +284,23 @@ namespace tmv {
 
     // v / x
     template <class V>
-    static TMV_INLINE ProdXV<0,RT,V> operator/(const BaseVector<V>& v, const int x)
+    static TMV_INLINE ProdXV<0,RT,V> operator/(
+        const BaseVector<V>& v, const int x)
     { return (RT(1)/RT(x))*v; }
 
     template <class V>
-    static TMV_INLINE ProdXV<0,RT,V> operator/(const BaseVector<V>& v, const RT x)
+    static TMV_INLINE ProdXV<0,RT,V> operator/(
+        const BaseVector<V>& v, const RT x)
     { return (RT(1)/x)*v; }
 
     template <class V>
-    static TMV_INLINE ProdXV<0,CT,V> operator/(const BaseVector<V>& v, const CT x)
+    static TMV_INLINE ProdXV<0,CT,V> operator/(
+        const BaseVector<V>& v, const CT x)
     { return (RT(1)/x)*v; }
 
     template <class V>
-    static TMV_INLINE ProdXV<0,CT,V> operator/(const BaseVector<V>& v, const CCT x)
+    static TMV_INLINE ProdXV<0,CT,V> operator/(
+        const BaseVector<V>& v, const CCT x)
     { return (RT(1)/CT(x))*v; }
 
     template <class V, int ix, class T>
@@ -415,7 +431,7 @@ namespace tmv {
 #endif
 
 
-#ifdef TMV_DEBUG
+#ifdef TMV_TEXT
     template <int ix, class T, class V>
     static inline std::string TMV_Text(const ProdXV<ix,T,V>& pxv)
     {

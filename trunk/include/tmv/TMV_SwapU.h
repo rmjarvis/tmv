@@ -65,7 +65,7 @@ namespace tmv {
     template <int s, class M1, class M2>
     struct SwapU_Helper<1,s,M1,M2>
     {
-        static void call(M1& m1, M2& m2)
+        static inline void call(M1& m1, M2& m2)
         {
             if (m1.size() > 1) {
                 typedef typename M1::offdiag_type M1o;
@@ -105,7 +105,7 @@ namespace tmv {
     template <int s, class M1, class M2>
     struct SwapU_Helper<3,s,M1,M2>
     {
-        static void call(M1& m1, M2& m2)
+        static TMV_INLINE void call(M1& m1, M2& m2)
         {
             typedef typename M1::transpose_type M1t;
             typedef typename M2::transpose_type M2t;
@@ -168,7 +168,7 @@ namespace tmv {
         template <int I, int M, int J, int N>
         struct Unroller
         {
-            static void unroll(M1& m1, M2& m2)
+            static inline void unroll(M1& m1, M2& m2)
             {
                 Unroller<I,M-(N-N/2),J,N/2>::unroll(m1,m2);
                 Unroller<I,M,J+N/2,N-N/2>::unroll(m1,m2);
@@ -177,7 +177,7 @@ namespace tmv {
         template <int I, int M, int J>
         struct Unroller<I,M,J,1>
         {
-            static void unroll(M1& m1, M2& m2)
+            static inline void unroll(M1& m1, M2& m2)
             {
                 Unroller<I,M/2,J,1>::unroll(m1,m2);
                 Unroller<I+M/2,M-M/2,J,1>::unroll(m1,m2);
@@ -185,18 +185,18 @@ namespace tmv {
         };
         template <int I, int M, int J>
         struct Unroller<I,M,J,0>
-        { static void unroll(M1& , M2& ) {} };
+        { static inline void unroll(M1& , M2& ) {} };
         template <int I, int J>
         struct Unroller<I,1,J,1>
         {
-            static void unroll(M1& m1, M2& m2)
+            static inline void unroll(M1& m1, M2& m2)
             { TMV_SWAP(m2.ref(I,J) , m1.ref(I,J)); }
         };
         template <int I, int J>
         struct Unroller<I,0,J,1>
-        { static void unroll(M1& , M2& ) {} };
+        { static inline void unroll(M1& , M2& ) {} };
 
-        static void call(M1& m1, M2& m2)
+        static inline void call(M1& m1, M2& m2)
         { Unroller<0,s,0,s>::unroll(m1,m2); }
     };
 
@@ -207,7 +207,7 @@ namespace tmv {
         template <int I, int M, int J, int N>
         struct Unroller
         {
-            static void unroll(M1& m1, M2& m2)
+            static inline void unroll(M1& m1, M2& m2)
             {
                 Unroller<I,M/2,J,N>::unroll(m1,m2);
                 Unroller<I+M/2,M-M/2,J+M/2,N-M/2>::unroll(m1,m2);
@@ -216,7 +216,7 @@ namespace tmv {
         template <int I, int J, int N>
         struct Unroller<I,1,J,N>
         {
-            static void unroll(M1& m1, M2& m2)
+            static inline void unroll(M1& m1, M2& m2)
             {
                 Unroller<I,1,J,N/2>::unroll(m1,m2);
                 Unroller<I,1,J+N/2,N-N/2>::unroll(m1,m2);
@@ -224,18 +224,18 @@ namespace tmv {
         };
         template <int I, int J, int N>
         struct Unroller<I,0,J,N>
-        { static void unroll(M1& , M2& ) {} };
+        { static inline void unroll(M1& , M2& ) {} };
         template <int I, int J>
         struct Unroller<I,1,J,1>
         {
-            static void unroll(M1& m1, M2& m2)
+            static inline void unroll(M1& m1, M2& m2)
             { TMV_SWAP(m2.ref(I,J) , m1.ref(I,J) ); }
         };
         template <int I, int J>
         struct Unroller<I,1,J,0>
-        { static void unroll(M1& , M2& ) {} };
+        { static inline void unroll(M1& , M2& ) {} };
 
-        static void call(M1& m1, M2& m2)
+        static inline void call(M1& m1, M2& m2)
         { Unroller<0,s,0,s>::unroll(m1,m2); }
     };
 
@@ -534,7 +534,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static inline void Swap(
+    static TMV_INLINE void Swap(
         BaseMatrix_Tri_Mutable<M1>& m1, BaseMatrix_Tri_Mutable<M2>& m2)
     { DoSwap(m1,m2); }
 

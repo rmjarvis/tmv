@@ -93,7 +93,8 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class M2>
     struct MultXU_Helper<1,s,add,ix,T,M1,M2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             typedef typename M1::const_transpose_type M1t;
             typedef typename M2::transpose_type M2t;
@@ -107,7 +108,7 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class M2>
     struct MultXU_Helper<2,s,add,ix,T,M1,M2>
     {
-        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             if (m1.isunit())
                 MultXU_Helper<3,s,add,ix,T,M1,M2>::call(x,m1,m2);
@@ -192,7 +193,7 @@ namespace tmv {
         template <int I, int M, int J, int N>
         struct Unroller
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix,T>& x, const M1& m1, M2& m2)
             {
                 Unroller<I,M-(N-N/2),J,N/2>::unroll(x,m1,m2);
@@ -202,7 +203,7 @@ namespace tmv {
         template <int I, int M, int J>
         struct Unroller<I,M,J,1>
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix,T>& x, const M1& m1, M2& m2)
             {
                 Unroller<I,M/2,J,1>::unroll(x,m1,m2);
@@ -212,13 +213,13 @@ namespace tmv {
         template <int I, int M, int J>
         struct Unroller<I,M,J,0>
         {
-            static void unroll(const Scaling<ix,T>& , const M1& , M2& ) 
+            static inline void unroll(const Scaling<ix,T>& , const M1& , M2& ) 
             {} 
         };
         template <int I, int J>
         struct Unroller<I,1,J,1>
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix,T>& x, const M1& m1, M2& m2)
             {
                 Maybe<add>::add( 
@@ -228,11 +229,11 @@ namespace tmv {
         template <int I, int J>
         struct Unroller<I,0,J,1>
         {
-            static void unroll(const Scaling<ix,T>& , const M1& , M2& ) 
+            static inline void unroll(const Scaling<ix,T>& , const M1& , M2& ) 
             {} 
         };
 
-        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         { Unroller<0,s,0,s>::unroll(x,m1,m2); }
     };
 
@@ -243,7 +244,7 @@ namespace tmv {
         template <int I, int M, int J, int N>
         struct Unroller
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix,T>& x, const M1& m1, M2& m2)
             {
                 Unroller<I,M/2,J,N>::unroll(x,m1,m2);
@@ -253,7 +254,7 @@ namespace tmv {
         template <int I, int J, int N>
         struct Unroller<I,1,J,N>
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix,T>& x, const M1& m1, M2& m2)
             {
                 Unroller<I,1,J,N/2>::unroll(x,m1,m2);
@@ -263,13 +264,13 @@ namespace tmv {
         template <int I, int J, int N>
         struct Unroller<I,0,J,N>
         {
-            static void unroll(const Scaling<ix,T>& , const M1& , M2& ) 
+            static inline void unroll(const Scaling<ix,T>& , const M1& , M2& ) 
             {} 
         };
         template <int I, int J>
         struct Unroller<I,1,J,1>
         {
-            static void unroll(
+            static inline void unroll(
                 const Scaling<ix,T>& x, const M1& m1, M2& m2)
             {
                 Maybe<add>::add( 
@@ -279,11 +280,11 @@ namespace tmv {
         template <int I, int J>
         struct Unroller<I,1,J,0>
         {
-            static void unroll(const Scaling<ix,T>& , const M1& , M2& ) 
+            static inline void unroll(const Scaling<ix,T>& , const M1& , M2& ) 
             {} 
         };
 
-        static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         { Unroller<0,s,0,s>::unroll(x,m1,m2); }
     };
 
@@ -291,7 +292,8 @@ namespace tmv {
     template <int s, int ix, class T, class M1, class M2>
     struct MultXU_Helper<90,s,true,ix,T,M1,M2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             typedef typename M2::value_type VT;
             VT xx = Traits<VT>::convert(T(x));
@@ -301,7 +303,8 @@ namespace tmv {
     template <int s, int ix, class T, class M1, class M2>
     struct MultXU_Helper<90,s,false,ix,T,M1,M2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             typedef typename M2::value_type VT;
             VT xx = Traits<VT>::convert(T(x));
@@ -313,7 +316,8 @@ namespace tmv {
     template <int s, int ix, class T, class M1, class M2>
     struct MultXU_Helper<91,s,true,ix,T,M1,M2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             typedef typename M2::value_type VT;
             VT xx = Traits<VT>::convert(T(x));
@@ -323,7 +327,8 @@ namespace tmv {
     template <int s, int ix, class T, class M1, class M2>
     struct MultXU_Helper<91,s,false,ix,T,M1,M2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             typedef typename M2::value_type VT;
             VT xx = Traits<VT>::convert(T(x));
@@ -335,7 +340,8 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class M2>
     struct MultXU_Helper<96,s,add,ix,T,M1,M2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             typedef typename M1::const_transpose_type M1t;
             typedef typename M2::transpose_type M2t;
@@ -349,7 +355,8 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class M2>
     struct MultXU_Helper<196,s,add,ix,T,M1,M2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             typedef typename M1::const_transpose_type M1t;
             typedef typename M2::transpose_type M2t;
@@ -363,7 +370,8 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class M2>
     struct MultXU_Helper<97,s,add,ix,T,M1,M2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             typedef typename M1::const_conjugate_type M1c;
             typedef typename M2::conjugate_type M2c;
@@ -377,7 +385,8 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class M2>
     struct MultXU_Helper<197,s,add,ix,T,M1,M2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             typedef typename M1::const_conjugate_type M1c;
             typedef typename M2::conjugate_type M2c;
@@ -426,7 +435,8 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class M2>
     struct MultXU_Helper<99,s,add,ix,T,M1,M2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             TMVStaticAssert(M1::_upper == int(M2::_upper));
             TMVStaticAssert(!M2::_unit || (!add && ix == 1 && M1::_unit));
@@ -455,7 +465,8 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class M2>
     struct MultXU_Helper<-4,s,add,ix,T,M1,M2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             TMVStaticAssert(M1::_upper);
             TMVStaticAssert(M2::_upper);
@@ -483,7 +494,8 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class M2>
     struct MultXU_Helper<-3,s,add,ix,T,M1,M2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             TMVStaticAssert(M1::_upper == int(M2::_upper));
             TMVStaticAssert(!M2::_unit || (!add && ix == 1 && M1::_unit));
@@ -501,7 +513,8 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class M2>
     struct MultXU_Helper<-2,s,add,ix,T,M1,M2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             TMVStaticAssert(M1::_upper == int(M2::_upper));
             TMVStaticAssert(!M2::_unit || (!add && ix == 1 && M1::_unit));
@@ -529,7 +542,8 @@ namespace tmv {
     template <int s, bool add, int ix, class T, class M1, class M2>
     struct MultXU_Helper<-1,s,add,ix,T,M1,M2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             TMVStaticAssert(M1::_upper == int(M2::_upper));
             TMVStaticAssert(!M2::_unit || (!add && ix == 1 && M1::_unit));
@@ -638,12 +652,12 @@ namespace tmv {
     }
 
     template <class T1, int C1, class T2>
-    static inline void InstMultXM(
+    static TMV_INLINE void InstMultXM(
         const T2 x, const ConstLowerTriMatrixView<T1,C1>& m1,
         LowerTriMatrixView<T2> m2)
     { InstMultXM(x,m1.transpose(),m2.transpose()); }
     template <class T1,  int C1, class T2>
-    static inline void InstAddMultXM(
+    static TMV_INLINE void InstAddMultXM(
         const T2 x, const ConstLowerTriMatrixView<T1,C1>& m1, 
         LowerTriMatrixView<T2> m2)
     { InstAddMultXM(x,m1.transpose(),m2.transpose()); }

@@ -67,10 +67,10 @@ template <class T, int M, int N> void TestSmallMatrixArith_1(std::string label)
 
 #if (XTEST & 1)
     tmv::SmallMatrix<T,3*M,4*N,tmv::ColMajor> a3x;
-    tmv::SmallMatrixView<T,M,N,3,12*M> a3 = a3x.subMatrix(0,3*M,0,4*N,3,4);
+    tmv::SmallMatrixView<T,M,N> a3 = a3x.subMatrix(0,3*M,0,4*N,3,4);
     a3 = a1;
     tmv::SmallMatrix<CT,3*M,4*N,tmv::ColMajor> ca3x;
-    tmv::SmallMatrixView<CT,M,N,3,12*M> ca3 = ca3x.subMatrix(0,3*M,0,4*N,3,4);
+    tmv::SmallMatrixView<CT,M,N> ca3 = ca3x.subMatrix(0,3*M,0,4*N,3,4);
     ca3 = ca1;
 
     TestMatrixArith1<T>(a3,ca3,label+" NonMajor");

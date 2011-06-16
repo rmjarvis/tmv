@@ -84,8 +84,7 @@ namespace tmv {
         typedef typename MCopyHelper<value_type,_shape,_colsize,_rowsize,
                 _rowmajor,_fort>::type copy_type;
         typedef const copy_type calc_type;
-        typedef typename TypeSelect<M::_calc,const type,calc_type>::type 
-            eval_type;
+        typedef const copy_type eval_type;
         typedef InvalidType inverse_type;
     };
 
@@ -108,9 +107,6 @@ namespace tmv {
 
         TMV_INLINE size_t colsize() const { return m.rowsize(); }
         TMV_INLINE size_t rowsize() const { return m.colsize(); }
-
-        value_type cref(int i, int j) const
-        { return x * m.cref(i,j); }
 
         template <class M2>
         TMV_INLINE_ND void assignTo(BaseMatrix_Mutable<M2>& m2) const
@@ -149,19 +145,23 @@ namespace tmv {
 
     // x / m
     template <class M>
-    static TMV_INLINE QuotXM<0,RT,M> operator/(const int x, const BaseMatrix<M>& m)
+    static TMV_INLINE QuotXM<0,RT,M> operator/(
+        const int x, const BaseMatrix<M>& m)
     { return QuotXM<0,RT,M>(RT(x),m); }
 
     template <class M>
-    static TMV_INLINE QuotXM<0,RT,M> operator/(const RT x, const BaseMatrix<M>& m)
+    static TMV_INLINE QuotXM<0,RT,M> operator/(
+        const RT x, const BaseMatrix<M>& m)
     { return QuotXM<0,RT,M>(x,m); }
 
     template <class M>
-    static TMV_INLINE QuotXM<0,CT,M> operator/(const CT x, const BaseMatrix<M>& m)
+    static TMV_INLINE QuotXM<0,CT,M> operator/(
+        const CT x, const BaseMatrix<M>& m)
     { return QuotXM<0,CT,M>(x,m); }
 
     template <class M>
-    static TMV_INLINE QuotXM<0,CT,M> operator/(const CCT x, const BaseMatrix<M>& m)
+    static TMV_INLINE QuotXM<0,CT,M> operator/(
+        const CCT x, const BaseMatrix<M>& m)
     { return CT(x)/m; }
 
     template <int ix, class T, class M>
@@ -198,19 +198,23 @@ namespace tmv {
     // x % m
     // In this context, there is no difference between / and %
     template <class M>
-    static TMV_INLINE QuotXM<0,RT,M> operator%(const int x, const BaseMatrix<M>& m)
+    static TMV_INLINE QuotXM<0,RT,M> operator%(
+        const int x, const BaseMatrix<M>& m)
     { return x/m; }
 
     template <class M>
-    static TMV_INLINE QuotXM<0,RT,M> operator%(const RT x, const BaseMatrix<M>& m)
+    static TMV_INLINE QuotXM<0,RT,M> operator%(
+        const RT x, const BaseMatrix<M>& m)
     { return x/m; }
 
     template <class M>
-    static TMV_INLINE QuotXM<0,CT,M> operator%(const CT x, const BaseMatrix<M>& m)
+    static TMV_INLINE QuotXM<0,CT,M> operator%(
+        const CT x, const BaseMatrix<M>& m)
     { return x/m; }
 
     template <class M>
-    static TMV_INLINE QuotXM<0,CT,M> operator%(const CCT x, const BaseMatrix<M>& m)
+    static TMV_INLINE QuotXM<0,CT,M> operator%(
+        const CCT x, const BaseMatrix<M>& m)
     { return x/m; }
 
     template <int ix, class T, class M>
@@ -350,7 +354,7 @@ namespace tmv {
 #undef CT
 #undef CCT
 
-#ifdef TMV_DEBUG
+#ifdef TMV_TEXT
     template <int ix, class T, class M>
     static inline std::string TMV_Text(const QuotXM<ix,T,M>& qxm)
     {

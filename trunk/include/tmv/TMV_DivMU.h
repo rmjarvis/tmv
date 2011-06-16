@@ -127,7 +127,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LDivEqMU_Helper<1,cs,rs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
             const int N = rs==UNKNOWN ? int(m1.rowsize()) : rs;
@@ -152,7 +152,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LDivEqMU_Helper<101,cs,rs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
             const int N = rs==UNKNOWN ? int(m1.rowsize()) : rs;
@@ -177,7 +177,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LDivEqMU_Helper<201,cs,rs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
             const int N = rs==UNKNOWN ? int(m1.rowsize()) : rs;
@@ -202,7 +202,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LDivEqMU_Helper<2,cs,rs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
             const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
@@ -220,7 +220,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LDivEqMU_Helper<102,cs,rs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
             const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
@@ -238,7 +238,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LDivEqMU_Helper<202,cs,rs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
             const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
@@ -256,7 +256,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LDivEqMU_Helper<11,cs,rs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static inline void call(M1& m1, const M2& m2)
         {
             const int N = rs==UNKNOWN ? int(m1.rowsize()) : rs;
 #ifdef PRINTALGO_DivU
@@ -278,7 +278,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LDivEqMU_Helper<12,cs,rs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static inline void call(M1& m1, const M2& m2)
         {
             const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
 #ifdef PRINTALGO_DivU
@@ -365,7 +365,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LDivEqMU_Helper<16,cs,rs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
             const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
@@ -653,7 +653,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LDivEqMU_Helper<26,cs,rs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
             const int M = cs==UNKNOWN ? int(m1.colsize()) : cs;
@@ -998,7 +998,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LDivEqMU_Helper<81,cs,rs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
             const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
@@ -1014,7 +1014,7 @@ namespace tmv {
     template <int cs, int rs, class M1, class M2>
     struct LDivEqMU_Helper<84,cs,rs,M1,M2>
     {
-        static void call(M1& m1, const M2& m2)
+        static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
             const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;

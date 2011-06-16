@@ -31,8 +31,6 @@ int main() try {
     //showtests=true;
     //showstartdone=true;
 
-#if 1
-
 #ifdef TEST_DOUBLE
     TestDiagMatrix<double>();
     TestDiagDiv<double>();
@@ -50,8 +48,6 @@ int main() try {
 
 #ifdef TEST_INT
     TestDiagMatrix<int>();
-#endif
-
 #endif
 
     return 0;

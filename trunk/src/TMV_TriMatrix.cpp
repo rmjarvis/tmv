@@ -43,6 +43,7 @@
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_ConjugateV.h"
+#include "tmv/TMV_CopyM.h"
 
 namespace tmv {
 
