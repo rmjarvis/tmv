@@ -2083,6 +2083,9 @@ namespace tmv {
             const int Nc = rs == UNKNOWN ? UNKNOWN : (rs < 16) ? 1 : (rs>>4);
             const int McMcNc = IntTraits2<IntTraits2<Mc,Mc>::prod,Nc>::prod;
 #endif
+#if 0
+            const int algo = upper ? 17 : 27;
+#else
             const int algo = 
                 ( cs == 0 || rs == 0 ) ? 0 :
                 cs == 1 ? 1 :
@@ -2116,6 +2119,7 @@ namespace tmv {
                 (rs >= 64 && McMcNc >= TMV_UM_OMP_THRESH) ? 36 :
 #endif
                 27 ;
+#endif
 #endif
 #ifdef PRINTALGO_UM
             const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;

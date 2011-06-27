@@ -1279,6 +1279,7 @@ namespace tmv {
             itssi(m2.stepi()), itssj(m2.stepj()) 
         { 
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         template <int A2>
@@ -1287,6 +1288,7 @@ namespace tmv {
             itssi(m2.stepi()), itssj(m2.stepj()) 
         { 
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         template <int M2, int N2, int Si2, int Sj2, int A2>
@@ -1296,6 +1298,7 @@ namespace tmv {
             itssi(m2.stepi()), itssj(m2.stepj()) 
         { 
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         template <int M2, int N2, int Si2, int Sj2, int A2>
@@ -1305,6 +1308,7 @@ namespace tmv {
             itssi(m2.stepi()), itssj(m2.stepj()) 
         { 
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         ~ConstMatrixView() {
@@ -1584,6 +1588,7 @@ namespace tmv {
             itssi(m2.stepi()), itssj(m2.stepj())
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         template <int M2, int N2, int Si2, int Sj2, int A2>
@@ -1592,6 +1597,7 @@ namespace tmv {
             itssi(m2.stepi()), itssj(m2.stepj())
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         ~MatrixView() {

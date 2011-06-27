@@ -194,8 +194,7 @@ namespace tmv {
     { // CStyle
         TMVAssert(j1 >= 0 && "first column must be in matrix");
         TMVAssert(j2 <= n && "last column must be in matrix");
-        TMVAssert(j2 >= j1 && 
-                  "range must have a non-negative number of columns");
+        TMVAssert(j2 >= j1 && "range must have a non-negative number of columns");
     }
     template <bool _fort>
     static TMV_INLINE_ND void CheckRowRange(int& i1, int& i2, int istep, int m)
@@ -315,7 +314,7 @@ namespace tmv {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
                 (fort ? FortranStyle : CStyle) |
-                NoDivider ) };
+                NoDivider | NoAlias ) };
         typedef SmallMatrix<T,cs,rs,A2> type;
     };
     template <class T, int rs, bool rm, bool fort>
@@ -324,7 +323,7 @@ namespace tmv {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
                 (fort ? FortranStyle : CStyle) |
-                NoDivider ) };
+                NoDivider | NoAlias ) };
         typedef Matrix<T,A2> type; 
     };
     template <class T, int cs, bool rm, bool fort>
@@ -333,7 +332,7 @@ namespace tmv {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
                 (fort ? FortranStyle : CStyle) |
-                NoDivider ) };
+                NoDivider | NoAlias ) };
         typedef Matrix<T,A2> type; 
     };
     template <class T, bool rm, bool fort>
@@ -342,9 +341,47 @@ namespace tmv {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
                 (fort ? FortranStyle : CStyle) |
-                NoDivider ) };
+                NoDivider | NoAlias ) };
         typedef Matrix<T,A2> type; 
     };
+
+
+    template <class T, int cs, int rs, int si, int sj, int c>
+    struct MViewHelper<T,Rec,cs,rs,si,sj,c>
+    { 
+        typedef SmallMatrixView<T,cs,rs,si,sj,c> type; 
+        typedef ConstSmallMatrixView<T,cs,rs,si,sj,c> ctype; 
+    };
+    template <class T, int si, int sj, int c>
+    struct MViewHelper<T,Rec,UNKNOWN,UNKNOWN,si,sj,c>
+    {
+        enum { A2 = c | (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) };
+        typedef MatrixView<T,A2> type; 
+        typedef ConstMatrixView<T,A2> ctype; 
+    };
+
+    // A quick helper class to get the return types correct for
+    // RowVectorView and ColVectorView.
+    // These are in SmallMatrix.h, but since they are used elsewhere
+    // we put the VVO helper here.
+    template <class V>
+    struct VVO
+    {
+        typedef typename V::value_type T;
+        enum { N = V::_size };
+        enum { S = V::_step };
+        enum { vecA = (
+                ( V::_conj ? Conj : NonConj ) |
+                ( V::_fort ? FortranStyle : CStyle ) |
+                ( Traits<V>::A & AllAliasStatus ) )};
+        enum { colA = vecA | (S == 1 ? ColMajor : 0 ) };
+        enum { rowA = vecA | (S == 1 ? RowMajor : 0 ) };
+        typedef ConstSmallMatrixView<T,1,N,N,S,rowA> crv;
+        typedef SmallMatrixView<T,1,N,N,S,rowA> rv;
+        typedef ConstSmallMatrixView<T,N,1,S,N,colA> ccv;
+        typedef SmallMatrixView<T,N,1,S,N,colA> cv;
+    };
+
 
     // A quick auxilliary function for canLinearize.
     // (It only accesses the steps that are unknown at compile time.)

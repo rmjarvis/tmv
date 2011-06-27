@@ -1082,6 +1082,7 @@ namespace tmv {
             itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         template <int A2>
@@ -1091,6 +1092,7 @@ namespace tmv {
             itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         template <int N2, int Si2, int Sj2, int A2>
@@ -1100,6 +1102,7 @@ namespace tmv {
             itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         template <int N2, int Si2, int Sj2, int A2>
@@ -1109,6 +1112,7 @@ namespace tmv {
             itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         ~ConstUpperTriMatrixView() {
@@ -1385,6 +1389,7 @@ namespace tmv {
             itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         template <int N2, int Si2, int Sj2, int A2>
@@ -1393,6 +1398,7 @@ namespace tmv {
             itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         ~UpperTriMatrixView() {
@@ -1998,6 +2004,7 @@ namespace tmv {
             itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         template <int A2>
@@ -2007,6 +2014,7 @@ namespace tmv {
             itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         template <int N2, int Si2, int Sj2, int A2>
@@ -2016,6 +2024,7 @@ namespace tmv {
             itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         template <int N2, int Si2, int Sj2, int A2>
@@ -2025,6 +2034,7 @@ namespace tmv {
             itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         ~ConstLowerTriMatrixView() {
@@ -2226,12 +2236,12 @@ namespace tmv {
         typedef LowerTriMatrixView<T,nonconjA> nonconj_type;
     };
 
-    template <class T, int A0>
+    template <class T, int A>
     class LowerTriMatrixView :
-        public BaseMatrix_Tri_Mutable<LowerTriMatrixView<T,A0> >
+        public BaseMatrix_Tri_Mutable<LowerTriMatrixView<T,A> >
     {
     public:
-        typedef LowerTriMatrixView<T,A0> type;
+        typedef LowerTriMatrixView<T,A> type;
         typedef BaseMatrix_Tri_Mutable<type> base_mut;
         typedef typename base_mut::reference reference;
 
@@ -2301,6 +2311,7 @@ namespace tmv {
             itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         template <int N2, int Si2, int Sj2, int A2>
@@ -2309,6 +2320,7 @@ namespace tmv {
             itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         ~LowerTriMatrixView() {

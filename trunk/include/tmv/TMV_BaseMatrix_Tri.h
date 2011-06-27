@@ -198,7 +198,8 @@ namespace tmv {
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | NonUnitDiag )};
+                (fort ? FortranStyle : CStyle) | 
+                NonUnitDiag | NoAlias )};
         typedef SmallUpperTriMatrix<T,cs,A2> type;
     };
     template <class T, int rs, bool rm, bool fort>
@@ -206,7 +207,8 @@ namespace tmv {
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | NonUnitDiag )};
+                (fort ? FortranStyle : CStyle) | 
+                NonUnitDiag | NoAlias )};
         typedef SmallUpperTriMatrix<T,rs,A2> type;
     };
     template <class T, int cs, bool rm, bool fort>
@@ -214,7 +216,8 @@ namespace tmv {
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | NonUnitDiag )};
+                (fort ? FortranStyle : CStyle) | 
+                NonUnitDiag | NoAlias )};
         typedef SmallUpperTriMatrix<T,cs,A2> type;
     };
     template <class T, bool rm, bool fort>
@@ -222,7 +225,8 @@ namespace tmv {
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | NonUnitDiag )};
+                (fort ? FortranStyle : CStyle) | 
+                NonUnitDiag | NoAlias )};
         typedef UpperTriMatrix<T,A2> type;
     };
 
@@ -231,7 +235,8 @@ namespace tmv {
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | NonUnitDiag )};
+                (fort ? FortranStyle : CStyle) | 
+                NonUnitDiag | NoAlias )};
         typedef SmallLowerTriMatrix<T,cs,A2> type;
     };
     template <class T, int rs, bool rm, bool fort>
@@ -239,7 +244,8 @@ namespace tmv {
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | NonUnitDiag )};
+                (fort ? FortranStyle : CStyle) | 
+                NonUnitDiag | NoAlias )};
         typedef SmallLowerTriMatrix<T,rs,A2> type;
     };
     template <class T, int cs, bool rm, bool fort>
@@ -247,7 +253,8 @@ namespace tmv {
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | NonUnitDiag )};
+                (fort ? FortranStyle : CStyle) | 
+                NonUnitDiag | NoAlias )};
         typedef SmallLowerTriMatrix<T,cs,A2> type;
     };
     template <class T, bool rm, bool fort>
@@ -255,7 +262,8 @@ namespace tmv {
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | NonUnitDiag )};
+                (fort ? FortranStyle : CStyle) | 
+                NonUnitDiag | NoAlias )};
         typedef LowerTriMatrix<T,A2> type;
     };
 
@@ -264,7 +272,8 @@ namespace tmv {
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | UnitDiag )};
+                (fort ? FortranStyle : CStyle) | 
+                UnitDiag | NoAlias )};
         typedef SmallUpperTriMatrix<T,cs,A2> type;
     };
     template <class T, int rs, bool rm, bool fort>
@@ -272,7 +281,8 @@ namespace tmv {
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | UnitDiag )};
+                (fort ? FortranStyle : CStyle) | 
+                UnitDiag | NoAlias )};
         typedef SmallUpperTriMatrix<T,rs,A2> type;
     };
     template <class T, int cs, bool rm, bool fort>
@@ -280,7 +290,8 @@ namespace tmv {
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | UnitDiag )};
+                (fort ? FortranStyle : CStyle) | 
+                UnitDiag | NoAlias )};
         typedef SmallUpperTriMatrix<T,cs,A2> type;
     };
     template <class T, bool rm, bool fort>
@@ -288,7 +299,8 @@ namespace tmv {
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | UnitDiag )};
+                (fort ? FortranStyle : CStyle) | 
+                UnitDiag | NoAlias )};
         typedef UpperTriMatrix<T,A2> type;
     };
 
@@ -297,7 +309,8 @@ namespace tmv {
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | UnitDiag )};
+                (fort ? FortranStyle : CStyle) | 
+                UnitDiag | NoAlias )};
         typedef SmallLowerTriMatrix<T,cs,A2> type;
     };
     template <class T, int rs, bool rm, bool fort>
@@ -305,7 +318,8 @@ namespace tmv {
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | UnitDiag )};
+                (fort ? FortranStyle : CStyle) | 
+                UnitDiag | NoAlias )};
         typedef SmallLowerTriMatrix<T,rs,A2> type;
     };
     template <class T, int cs, bool rm, bool fort>
@@ -313,7 +327,8 @@ namespace tmv {
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | UnitDiag )};
+                (fort ? FortranStyle : CStyle) | 
+                UnitDiag | NoAlias )};
         typedef SmallLowerTriMatrix<T,cs,A2> type;
     };
     template <class T, bool rm, bool fort>
@@ -321,8 +336,63 @@ namespace tmv {
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | UnitDiag )};
+                (fort ? FortranStyle : CStyle) | 
+                UnitDiag | NoAlias )};
         typedef LowerTriMatrix<T,A2> type;
+    };
+
+
+    template <class T, int cs, int rs, int si, int sj, int c>
+    struct MViewHelper<T,UpperTri,cs,rs,si,sj,c>
+    { 
+        typedef SmallUpperTriMatrixView<T,cs,si,sj,c> type; 
+        typedef ConstSmallUpperTriMatrixView<T,cs,si,sj,c> ctype; 
+    };
+    template <class T, int si, int sj, int c>
+    struct MViewHelper<T,UpperTri,UNKNOWN,UNKNOWN,si,sj,c>
+    {
+        enum { A2 = c | (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) };
+        typedef UpperTriMatrixView<T,A2> type; 
+        typedef ConstUpperTriMatrixView<T,A2> ctype; 
+    };
+    template <class T, int cs, int rs, int si, int sj, int c>
+    struct MViewHelper<T,UnitUpperTri,cs,rs,si,sj,c>
+    { 
+        typedef SmallUpperTriMatrixView<T,cs,si,sj,c|UnitDiag> type; 
+        typedef ConstSmallUpperTriMatrixView<T,cs,si,sj,c|UnitDiag> ctype; 
+    };
+    template <class T, int si, int sj, int c>
+    struct MViewHelper<T,UnitUpperTri,UNKNOWN,UNKNOWN,si,sj,c>
+    {
+        enum { A2 = c | (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) };
+        typedef UpperTriMatrixView<T,A2|UnitDiag> type; 
+        typedef ConstUpperTriMatrixView<T,A2|UnitDiag> ctype; 
+    };
+    template <class T, int cs, int rs, int si, int sj, int c>
+    struct MViewHelper<T,LowerTri,cs,rs,si,sj,c>
+    { 
+        typedef SmallLowerTriMatrixView<T,cs,si,sj,c> type; 
+        typedef ConstSmallLowerTriMatrixView<T,cs,si,sj,c> ctype; 
+    };
+    template <class T, int si, int sj, int c>
+    struct MViewHelper<T,LowerTri,UNKNOWN,UNKNOWN,si,sj,c>
+    {
+        enum { A2 = c | (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) };
+        typedef LowerTriMatrixView<T,A2> type; 
+        typedef ConstLowerTriMatrixView<T,A2> ctype; 
+    };
+    template <class T, int cs, int rs, int si, int sj, int c>
+    struct MViewHelper<T,UnitLowerTri,cs,rs,si,sj,c>
+    { 
+        typedef SmallLowerTriMatrixView<T,cs,si,sj,c|UnitDiag> type; 
+        typedef ConstSmallLowerTriMatrixView<T,cs,si,sj,c|UnitDiag> ctype; 
+    };
+    template <class T, int si, int sj, int c>
+    struct MViewHelper<T,UnitLowerTri,UNKNOWN,UNKNOWN,si,sj,c>
+    {
+        enum { A2 = c | (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) };
+        typedef LowerTriMatrixView<T,A2|UnitDiag> type; 
+        typedef ConstLowerTriMatrixView<T,A2|UnitDiag> ctype; 
     };
 
 

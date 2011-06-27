@@ -126,6 +126,18 @@
 #define TMV_OPT 2
 #endif
 
+// The L1_CACHE and L2_CACHE parameters can be set to the cache values 
+// for your machine if you know them (in KB).  
+// If don't know these or don't want to bother defining them, it's ok.
+// The below values will produce reasonable code for all machines,
+// even if it may not be exactly optimal.
+#ifndef TMV_L1_CACHE
+#define TMV_L1_CACHE 32
+#endif
+#ifndef TMV_L2_CACHE
+#define TMV_L2_CACHE 256
+#endif
+
 #include <iosfwd>
 #include <limits>
 #include <cmath>
@@ -662,18 +674,29 @@ namespace tmv {
         static inline const char* text() { return "UNKNOWN"; }
     };
 
-    template <int S1, int S2, bool safe>
-    struct SafeIntTraits2;
-
     template <int S1, int S2>
     struct IntTraits2
     {
         enum { sum = S1 + S2 };
         enum { diff = S1 - S2 };
         enum { prod = S1 * S2 };
-        enum { safeprod = SafeIntTraits2<S1,S2,(S1<300 && S2<300)>::prod };
+        enum { safeprod = IntTraits2<
+            (S1<300 ? S1 : UNKNOWN), (S2<300 ? S2 : UNKNOWN)>::prod };
+        //enum { quot = S2 == 0 ? 0 : S1 / S2 };
+        enum { quot = S1 / S2 };
         enum { min = S1 < S2 ? S1 : S2 };
         enum { max = S1 > S2 ? S1 : S2 };
+    };
+    template <int S1>
+    struct IntTraits2<S1,0>
+    { // Specialization just to avoid division by zero warning.
+        enum { sum = S1 };
+        enum { diff = S1 };
+        enum { prod = 0 };
+        enum { safeprod = 0 };
+        enum { quot = 0 };
+        enum { min = S1 < 0 ? S1 : 0 };
+        enum { max = S1 > 0 ? S1 : 0 };
     };
     template <int S1>
     struct IntTraits2<S1,UNKNOWN>
@@ -682,6 +705,7 @@ namespace tmv {
         enum { diff = UNKNOWN };
         enum { prod = UNKNOWN };
         enum { safeprod = UNKNOWN };
+        enum { quot = UNKNOWN };
         enum { min = UNKNOWN };
         enum { max = UNKNOWN };
     };
@@ -692,6 +716,7 @@ namespace tmv {
         enum { diff = UNKNOWN };
         enum { prod = UNKNOWN };
         enum { safeprod = UNKNOWN };
+        enum { quot = UNKNOWN };
         enum { min = UNKNOWN };
         enum { max = UNKNOWN };
     };
@@ -702,19 +727,20 @@ namespace tmv {
         enum { diff = UNKNOWN };
         enum { prod = UNKNOWN };
         enum { safeprod = UNKNOWN };
+        enum { quot = UNKNOWN };
         enum { min = UNKNOWN };
         enum { max = UNKNOWN };
     };
-
-    template <int S1, int S2>
-    struct SafeIntTraits2<S1,S2,true>
+    template <>
+    struct IntTraits2<UNKNOWN,0>
     {
-        enum { prod = IntTraits2<S1,S2>::prod };
-    };
-    template <int S1, int S2>
-    struct SafeIntTraits2<S1,S2,false>
-    {
+        enum { sum = UNKNOWN };
+        enum { diff = UNKNOWN };
         enum { prod = UNKNOWN };
+        enum { safeprod = UNKNOWN };
+        enum { quot = UNKNOWN };
+        enum { min = UNKNOWN };
+        enum { max = UNKNOWN };
     };
 
     template <class T>

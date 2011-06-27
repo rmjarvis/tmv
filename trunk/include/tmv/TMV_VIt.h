@@ -59,119 +59,119 @@ namespace tmv {
 
         typedef std::complex<T> CT;
 
-        explicit ConjRef(CT& _val) : val(_val) {}
-        ConjRef(const ConjRef<CT>& rhs) : val(rhs.getRef()) {}
-        ~ConjRef() {}
+        TMV_INLINE explicit ConjRef(CT& _val) : val(_val) {}
+        TMV_INLINE ConjRef(const ConjRef<CT>& rhs) : val(rhs.getRef()) {}
+        TMV_INLINE ~ConjRef() {}
 
-        operator CT() const { return std::conj(val); }
-        CT& getRef() { return val; }
-        CT conj() const { return val; }
-        T real() const { return val.real(); }
-        T imag() const { return -val.imag(); }
-        CT operator-() const { return -std::conj(val); }
+        TMV_INLINE operator CT() const { return std::conj(val); }
+        TMV_INLINE CT& getRef() { return val; }
+        TMV_INLINE CT conj() const { return val; }
+        TMV_INLINE T real() const { return val.real(); }
+        TMV_INLINE T imag() const { return -val.imag(); }
+        TMV_INLINE CT operator-() const { return -std::conj(val); }
 
-        ConjRef<CT>& operator=(const ConjRef<CT>& rhs)
+        TMV_INLINE ConjRef<CT>& operator=(const ConjRef<CT>& rhs)
         { val = rhs.getRef(); return *this; }
-        ConjRef<CT>& operator=(CT rhs)
+        TMV_INLINE ConjRef<CT>& operator=(CT rhs)
         { val = std::conj(rhs); return *this; }
-        ConjRef<CT>& operator=(T rhs)
+        TMV_INLINE ConjRef<CT>& operator=(T rhs)
         { val = rhs; return *this; }
 
-        ConjRef<CT>& operator+=(const ConjRef<CT>& x2)
+        TMV_INLINE ConjRef<CT>& operator+=(const ConjRef<CT>& x2)
         { val += x2.val; return *this; }
-        ConjRef<CT>& operator+=(CT x2)
+        TMV_INLINE ConjRef<CT>& operator+=(CT x2)
         { val += std::conj(x2); return *this; }
-        ConjRef<CT>& operator+=(T x2)
+        TMV_INLINE ConjRef<CT>& operator+=(T x2)
         { val += x2; return *this; }
-        CT operator+(const ConjRef<CT>& x2)
+        TMV_INLINE CT operator+(const ConjRef<CT>& x2)
         { return std::conj(val+x2.val); }
-        friend CT operator+(const ConjRef<CT>& x1, CT x2)
+        TMV_INLINE friend CT operator+(const ConjRef<CT>& x1, CT x2)
         { return std::conj(x1.val)+x2; }
-        friend CT operator+(const ConjRef<CT>& x1, T x2)
+        TMV_INLINE friend CT operator+(const ConjRef<CT>& x1, T x2)
         { return std::conj(x1.val)+x2; }
-        friend CT operator+(CT x1, const ConjRef<CT>& x2)
+        TMV_INLINE friend CT operator+(CT x1, const ConjRef<CT>& x2)
         { return x1+std::conj(x2.val); }
-        friend CT operator+(T x1, const ConjRef<CT>& x2)
+        TMV_INLINE friend CT operator+(T x1, const ConjRef<CT>& x2)
         { return x1+std::conj(x2.val); }
         //friend CT& operator+=(CT& x1, const ConjRef<CT>& x2)
         //{ return x1+=std::conj(x2.val); }
 
-        ConjRef<CT>& operator-=(const ConjRef<CT>& x2) 
+        TMV_INLINE ConjRef<CT>& operator-=(const ConjRef<CT>& x2) 
         { val -= x2.val; return *this; }
-        ConjRef<CT>& operator-=(CT x2) 
+        TMV_INLINE ConjRef<CT>& operator-=(CT x2) 
         { val -= std::conj(x2); return *this; }
-        ConjRef<CT>& operator-=(T x2) 
+        TMV_INLINE ConjRef<CT>& operator-=(T x2) 
         { val -= x2; return *this; }
-        CT operator-(const ConjRef<CT>& x2)
+        TMV_INLINE CT operator-(const ConjRef<CT>& x2)
         { return std::conj(val-x2.val); }
-        friend CT operator-(const ConjRef<CT>& x1, CT x2)
+        TMV_INLINE friend CT operator-(const ConjRef<CT>& x1, CT x2)
         { return std::conj(x1.val)-x2; }
-        friend CT operator-(const ConjRef<CT>& x1, T x2)
+        TMV_INLINE friend CT operator-(const ConjRef<CT>& x1, T x2)
         { return std::conj(x1.val)-x2; }
-        friend CT operator-(CT x1, const ConjRef<CT>& x2)
+        TMV_INLINE friend CT operator-(CT x1, const ConjRef<CT>& x2)
         { return x1-std::conj(x2.val); }
-        friend CT operator-(T x1, const ConjRef<CT>& x2)
+        TMV_INLINE friend CT operator-(T x1, const ConjRef<CT>& x2)
         { return x1-std::conj(x2.val); }
         //friend CT& operator-=(CT& x1, const ConjRef<CT>& x2)
         //{ return x1-=std::conj(x2.val); }
 
-        ConjRef<CT>& operator*=(const ConjRef<CT>& x2) 
+        TMV_INLINE ConjRef<CT>& operator*=(const ConjRef<CT>& x2) 
         { val *= x2.val; return *this; }
-        ConjRef<CT>& operator*=(CT x2) 
+        TMV_INLINE ConjRef<CT>& operator*=(CT x2) 
         { val *= std::conj(x2); return *this; }
-        ConjRef<CT>& operator*=(T x2) 
+        TMV_INLINE ConjRef<CT>& operator*=(T x2) 
         { val *= x2; return *this; }
-        CT operator*(const ConjRef<CT> x2)
+        TMV_INLINE CT operator*(const ConjRef<CT> x2)
         { return std::conj(val*x2.val); }
-        friend CT operator*(const ConjRef<CT>& x1, CT x2)
+        TMV_INLINE friend CT operator*(const ConjRef<CT>& x1, CT x2)
         { return std::conj(x1.val)*x2; }
-        friend CT operator*(const ConjRef<CT>& x1, T x2)
+        TMV_INLINE friend CT operator*(const ConjRef<CT>& x1, T x2)
         { return std::conj(x1.val)*x2; }
-        friend CT operator*(CT x1, const ConjRef<CT>& x2)
+        TMV_INLINE friend CT operator*(CT x1, const ConjRef<CT>& x2)
         { return x1*std::conj(x2.val); }
-        friend CT operator*(T x1, const ConjRef<CT>& x2)
+        TMV_INLINE friend CT operator*(T x1, const ConjRef<CT>& x2)
         { return x1*std::conj(x2.val); }
         //friend CT& operator*=(CT& x1, const ConjRef<CT>& x2)
         //{ return x1*=std::conj(x2.val); }
 
-        ConjRef<CT>& operator/=(const ConjRef<CT>& x2) 
+        TMV_INLINE ConjRef<CT>& operator/=(const ConjRef<CT>& x2) 
         { val /= x2.val; return *this; }
-        ConjRef<CT>& operator/=(CT x2) 
+        TMV_INLINE ConjRef<CT>& operator/=(CT x2) 
         { val /= std::conj(x2); return *this; }
-        ConjRef<CT>& operator/=(T x2) 
+        TMV_INLINE ConjRef<CT>& operator/=(T x2) 
         { val /= x2; return *this; }
-        CT operator/(const ConjRef<CT>& x2)
+        TMV_INLINE CT operator/(const ConjRef<CT>& x2)
         { return std::conj(val/x2.val); }
-        friend CT operator/(const ConjRef<CT>& x1, CT x2)
+        TMV_INLINE friend CT operator/(const ConjRef<CT>& x1, CT x2)
         { return std::conj(x1.val)/x2; }
-        friend CT operator/(const ConjRef<CT>& x1, T x2)
+        TMV_INLINE friend CT operator/(const ConjRef<CT>& x1, T x2)
         { return std::conj(x1.val)/x2; }
-        friend CT operator/(CT x1, const ConjRef<CT>& x2)
+        TMV_INLINE friend CT operator/(CT x1, const ConjRef<CT>& x2)
         { return x1/std::conj(x2.val); }
-        friend CT operator/(T x1, const ConjRef<CT>& x2)
+        TMV_INLINE friend CT operator/(T x1, const ConjRef<CT>& x2)
         { return x1/std::conj(x2.val); }
         //friend CT& operator/=(CT& x1, const ConjRef<CT>& x2)
         //{ return x1/=std::conj(x2.val); }
 
-        bool operator==(const ConjRef<CT>& x2) const
+        TMV_INLINE bool operator==(const ConjRef<CT>& x2) const
         { return val == x2.val; }
-        bool operator==(CT x2) const 
+        TMV_INLINE bool operator==(CT x2) const 
         { return std::conj(val) == x2; }
-        bool operator==(T x2) const 
+        TMV_INLINE bool operator==(T x2) const 
         { return std::real(val) == x2 && std::imag(val) == T(0); }
-        friend bool operator==(CT x1, const ConjRef<CT>& x2)
+        TMV_INLINE friend bool operator==(CT x1, const ConjRef<CT>& x2)
         { return x2==x1; }
-        friend bool operator==(T x1, const ConjRef<CT>& x2)
+        TMV_INLINE friend bool operator==(T x1, const ConjRef<CT>& x2)
         { return x2==x1; }
-        bool operator!=(const ConjRef<CT>& x2) const
+        TMV_INLINE bool operator!=(const ConjRef<CT>& x2) const
         { return !(operator==(x2)); }
-        bool operator!=(CT x2) const 
+        TMV_INLINE bool operator!=(CT x2) const 
         { return !(operator==(x2)); }
-        bool operator!=(T x2) const 
+        TMV_INLINE bool operator!=(T x2) const 
         { return !(operator==(x2)); }
-        friend bool operator!=(CT x1, const ConjRef<CT>& x2)
+        TMV_INLINE friend bool operator!=(CT x1, const ConjRef<CT>& x2)
         { return !(x2==x1); }
-        friend bool operator!=(T x1, const ConjRef<CT>& x2)
+        TMV_INLINE friend bool operator!=(T x1, const ConjRef<CT>& x2)
         { return !(x2==x1); }
 
         void swapWith(CT& x2)
@@ -192,7 +192,7 @@ namespace tmv {
 
     private:
 
-        CT& getRef() const { return val; }
+        TMV_INLINE CT& getRef() const { return val; }
         CT& val;
     };
 
@@ -219,54 +219,62 @@ namespace tmv {
         typedef T* pointer;
         typedef typename AuxRef<T,C>::reference reference;
 
-        VIt(T* inp, int step) : p(inp), s(step) {}
-        explicit VIt(T* inp) : p(inp), s(S) { TMVAssert(S != UNKNOWN); }
-        VIt(const type& rhs) : p(rhs.get()), s(rhs.step()) {}
+        TMV_INLINE VIt(T* inp, int step) : p(inp), s(step) {}
+        TMV_INLINE explicit VIt(T* inp) : p(inp), s(S) 
+        { TMVAssert(S != UNKNOWN); }
+        TMV_INLINE VIt(const type& rhs) : p(rhs.get()), s(rhs.step()) {}
 
         template <int S2>
-        VIt(const VIt<T,S2,C>& rhs) : p(rhs.get()), s(rhs.step()) {}
+        TMV_INLINE VIt(const VIt<T,S2,C>& rhs) : p(rhs.get()), s(rhs.step()) {}
 
-        type& operator=(const type& rhs) 
+        TMV_INLINE type& operator=(const type& rhs) 
         { TMVAssert(step()==rhs.step()); p=rhs.get(); return *this; }
 
         template <int S2>
-        type& operator=(const VIt<T,S2,C>& rhs) 
+        TMV_INLINE type& operator=(const VIt<T,S2,C>& rhs) 
         { TMVAssert(step()==rhs.step()); p=rhs.get(); return *this; }
 
-        ~VIt() {}
+        TMV_INLINE ~VIt() {}
 
-        T* get() const { return p; }
-        int step() const { return s; }
+        TMV_INLINE T* get() const { return p; }
+        TMV_INLINE int step() const { return s; }
 
-        bool operator==(const type& rhs) const { return p == rhs.get(); }
-        bool operator!=(const type& rhs) const { return p != rhs.get(); }
-        bool operator<(const type& rhs) const 
+        TMV_INLINE bool operator==(const type& rhs) const 
+        { return p == rhs.get(); }
+        TMV_INLINE bool operator!=(const type& rhs) const 
+        { return p != rhs.get(); }
+        TMV_INLINE bool operator<(const type& rhs) const 
         { return (step()>0 ? p < rhs.get() : p > rhs.get()); }
 
-        reference operator*() const { return reference(*p); }
+        TMV_INLINE reference operator*() const { return reference(*p); }
 
-        type& operator++() { p+=step(); return *this; }
-        type& operator--() { p-=step(); return *this; }
-        type operator++(int) { type p2 = *this; p+=step(); return p2; }
-        type operator--(int) { type p2 = *this; p-=step(); return p2; }
+        TMV_INLINE type& operator++() { p+=step(); return *this; }
+        TMV_INLINE type& operator--() { p-=step(); return *this; }
+        TMV_INLINE type operator++(int) 
+        { type p2 = *this; p+=step(); return p2; }
+        TMV_INLINE type operator--(int) 
+        { type p2 = *this; p-=step(); return p2; }
 
-        type& operator+=(int n) { p += n*step(); return *this; }
-        type& operator-=(int n) { p -= n*step(); return *this; }
-        type operator+(int n) const { return type(p+n*step(),step()); }
-        type operator-(int n) const { return type(p-n*step(),step()); }
-        type& shiftP(int n) { p += n; return *this; }
+        TMV_INLINE type& operator+=(int n) { p += n*step(); return *this; }
+        TMV_INLINE type& operator-=(int n) { p -= n*step(); return *this; }
+        TMV_INLINE type operator+(int n) const 
+        { return type(p+n*step(),step()); }
+        TMV_INLINE type operator-(int n) const 
+        { return type(p-n*step(),step()); }
+        TMV_INLINE type& shiftP(int n) { p += n; return *this; }
 
-        ptrdiff_t operator-(const type& rhs) const 
+        TMV_INLINE ptrdiff_t operator-(const type& rhs) const 
         { return (p-rhs.get())/step(); }
 
-        reference operator[](int n) const 
+        TMV_INLINE reference operator[](int n) const 
         { return reference(p[n*step()]); }
 
         typedef VIt<T,S,false> nonconj_type;
-        nonconj_type nonConj() const { return nonconj_type(p,step()); }
+        TMV_INLINE nonconj_type nonConj() const 
+        { return nonconj_type(p,step()); }
         typedef typename Traits<T>::real_type real_type;
         typedef VIt<real_type,S,false> flatten_type;
-        flatten_type flatten() const 
+        TMV_INLINE flatten_type flatten() const 
         { return flatten_type(reinterpret_cast<real_type*>(p),1); }
 
     private :
@@ -287,61 +295,71 @@ namespace tmv {
         typedef const T* pointer;
         typedef const T& reference;
 
-        CVIt(const T* inp, int step) : p(inp), s(step) {}
-        explicit CVIt(const T* inp) : p(inp), s(S) 
+        TMV_INLINE CVIt(const T* inp, int step) : p(inp), s(step) {}
+        TMV_INLINE explicit CVIt(const T* inp) : p(inp), s(S) 
         { TMVAssert(S != UNKNOWN); }
-        CVIt(const type& rhs) : p(rhs.get()), s(rhs.step()) {}
+        TMV_INLINE CVIt(const type& rhs) : p(rhs.get()), s(rhs.step()) {}
 
         template <int S2>
-        CVIt(const CVIt<T,S2,C>& rhs) : p(rhs.get()), s(rhs.step()) {}
+        TMV_INLINE CVIt(const CVIt<T,S2,C>& rhs) : 
+            p(rhs.get()), s(rhs.step()) {}
 
         template <int S2>
-        CVIt(const VIt<T,S2,C>& rhs) : p(rhs.get()), s(rhs.step()) {}
+        TMV_INLINE CVIt(const VIt<T,S2,C>& rhs) : 
+            p(rhs.get()), s(rhs.step()) {}
 
-        type& operator=(const type& rhs)
+        TMV_INLINE type& operator=(const type& rhs)
         { TMVAssert(step()==rhs.step()); p = rhs.get(); return *this; }
 
         template <int S2>
-        type& operator=(const CVIt<T,S2,C>& rhs)
+        TMV_INLINE type& operator=(const CVIt<T,S2,C>& rhs)
         { TMVAssert(step()==rhs.step()); p = rhs.get(); return *this; }
 
         template <int S2>
-        type& operator=(const VIt<T,S2,C>& rhs)
+        TMV_INLINE type& operator=(const VIt<T,S2,C>& rhs)
         { TMVAssert(step()==rhs.step()); p = rhs.get(); return *this; }
 
-        ~CVIt() {}
+        TMV_INLINE ~CVIt() {}
 
-        const T* get() const { return p; }
-        int step() const { return s; }
+        TMV_INLINE const T* get() const { return p; }
+        TMV_INLINE int step() const { return s; }
 
-        bool operator==(const type& rhs) const { return p == rhs.get(); }
-        bool operator!=(const type& rhs) const { return p != rhs.get(); }
-        bool operator<(const type& rhs) const 
+        TMV_INLINE bool operator==(const type& rhs) const 
+        { return p == rhs.get(); }
+        TMV_INLINE bool operator!=(const type& rhs) const 
+        { return p != rhs.get(); }
+        TMV_INLINE bool operator<(const type& rhs) const 
         { return (step()>0 ? p < rhs.get() : p > rhs.get()); }
 
-        T operator*() const { return DoConj<C>(*p); }
+        TMV_INLINE T operator*() const { return DoConj<C>(*p); }
 
-        type& operator++() { p+=step(); return *this; }
-        type& operator--() { p-=step(); return *this; }
-        type operator++(int) { type p2 = *this; p+=step(); return p2; }
-        type operator--(int) { type p2 = *this; p-=step(); return p2; }
+        TMV_INLINE type& operator++() { p+=step(); return *this; }
+        TMV_INLINE type& operator--() { p-=step(); return *this; }
+        TMV_INLINE type operator++(int) 
+        { type p2 = *this; p+=step(); return p2; }
+        TMV_INLINE type operator--(int) 
+        { type p2 = *this; p-=step(); return p2; }
 
-        type& operator+=(int n) { p += n*step(); return *this; }
-        type& operator-=(int n) { p -= n*step(); return *this; }
-        type operator+(int n) const { return type(p+n*step(),step()); }
-        type operator-(int n) const { return type(p-n*step(),step()); }
-        type& shiftP(int n) { p += n; return *this; }
+        TMV_INLINE type& operator+=(int n) { p += n*step(); return *this; }
+        TMV_INLINE type& operator-=(int n) { p -= n*step(); return *this; }
+        TMV_INLINE type operator+(int n) const 
+        { return type(p+n*step(),step()); }
+        TMV_INLINE type operator-(int n) const 
+        { return type(p-n*step(),step()); }
+        TMV_INLINE type& shiftP(int n) { p += n; return *this; }
 
-        ptrdiff_t operator-(const type& rhs) const 
+        TMV_INLINE ptrdiff_t operator-(const type& rhs) const 
         { return (p-rhs.get())/step(); }
 
-        T operator[](int n) const { return DoConj<C>(p[n*step()]); }
+        TMV_INLINE T operator[](int n) const 
+        { return DoConj<C>(p[n*step()]); }
 
         typedef CVIt<T,S,false> nonconj_type;
-        nonconj_type nonConj() const { return nonconj_type(p,step()); }
+        TMV_INLINE nonconj_type nonConj() const 
+        { return nonconj_type(p,step()); }
         typedef typename Traits<T>::real_type real_type;
         typedef CVIt<real_type,S,false> flatten_type;
-        flatten_type flatten() const 
+        TMV_INLINE flatten_type flatten() const 
         { return flatten_type(reinterpret_cast<const real_type*>(p),1); }
 
     private :

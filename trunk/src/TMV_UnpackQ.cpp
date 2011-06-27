@@ -40,7 +40,10 @@
 #include "tmv/TMV_SwapV.h"
 #include "tmv/TMV_MinMax.h"
 #include "tmv/TMV_CopyM.h"
-
+#include "tmv/TMV_CopyU.h"
+#include "tmv/TMV_MultUM.h"
+#include "tmv/TMV_MultUU.h"
+#include "tmv/TMV_MultUL.h"
 
 namespace tmv {
 

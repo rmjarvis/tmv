@@ -195,246 +195,11 @@ using std::endl;
 namespace tmv {
 
     template <class V>
-    class Householder;
-
-    template <class V>
-    struct Traits<Householder<V> >
+    static inline void HouseholderReflect(
+        typename V::reference x0, V& u, typename V::real_type& beta)
     {
-        typedef typename V::value_type value_type;
-        typedef typename V::real_type real_type;
-        typedef typename V::complex_type complex_type;
-        enum { isreal = V::isreal };
-        enum { iscomplex = V::iscomplex };
-
-        typedef Householder<V> type;
-        typedef Matrix<value_type> copy_type;
-        typedef copy_type calc_type;
-        typedef type eval_type;
-        typedef Householder<V> inverse_type;
-
-        enum { _colsize = IntTraits<V::_size>::Sp1 };
-        enum { _rowsize = _colsize };
-        enum { _shape = Rec };
-        enum { _fort = V::_fort };
-        enum { _calc = false };
-    };
-
-    // The template parameter is the vector type used to store u_1..N.
-    // Note: V itself might be const, in which case many of the 
-    // non-const methods won't work.
-    // Also, the normal usage would have V be a VectorView, so the 
-    // V copies are trivial.  However, you can have the Householder matrix
-    // copy all the elements into its own storage by having V be 
-    // a deep copying class like Vector.
-    template <class V>
-    class Householder : 
-        public BaseMatrix<Householder<V> >
-    {
-    public :
         typedef typename V::value_type T;
         typedef typename V::real_type RT;
-
-        typedef Householder<V> type;
-        typedef const Householder<typename V::const_conjugate_type>
-            const_conjugate_type;
-        typedef const_conjugate_type const_transpose_type;
-        typedef const type& const_adjoint_type;
-        typedef const type& const_inverse_type;
-
-        //
-        // Constructors
-        //
-        
-        // The first constructor performs the reflection on the given
-        // vector and ends up with the Householder vector in the location
-        // of x.
-        //
-        // Sometimes (e.g. for QR_Update), the first element of the 
-        // reflected vector is separated from the rest of the vector.
-        // So we pass in the first element and the rest as separate parameters.
-        //
-        // x is converted to u on output.
-        Householder(T& x0, const V& x) : u(x)
-        { doReflection(x0); }
-
-        // In case the first element is some other reference type:
-        template <class RefT>
-        Householder(RefT x0, const V& x) : u(x)
-        { T temp=x0; doReflection(temp); x0 = temp; }
-
-        // This is a convenience constructor that takes x0 and x as
-        // a single vector:
-        template <class Vfull>
-        Householder(Vfull& xfull) : 
-            u(xfull.subVector(1,xfull.size()))
-        { T temp=xfull.cref(0); doReflection(temp); xfull.ref(0) = temp; }
-
-
-        typedef enum { UnReflect } UnReflectType;
-        // The next constructors reverse the roles of x0 and y.  
-        // The extra parameter must be UnReflect, the only valid value
-        // of type UnReflectType.
-        // In this case, the x0 parameter is actually y on input and 
-        // x0 on output (rather than the usual x0 on input and y on output).
-        // Again, x is the unreflected vector on input, and is
-        // converted to u on output.  
-        // N.B. This version is used for QR downdating.
-        Householder(T& y, const V& x, UnReflectType ) : u(x)
-        { doUnReflection(y); }
-        template <class RefT>
-        Householder(RefT y, const V& x, UnReflectType ) : u(x)
-        { T temp=y; doReflection(temp); y = temp; }
-        template <class Vfull>
-        Householder(Vfull& xfull, UnReflectType ) : 
-            u(xfull.subVector(1,xfull.size()))
-        { T temp=xfull.cref(0); doUnReflection(temp); xfull.ref(0) = temp; }
-
-
-        // The next constructor assumes that the reflection is already
-        // done, so u and beta are passed in, and can then be used.
-        Householder(const V& _u, const RT& _beta) : u(_u), beta(_beta) {}
-
-        //
-        // Special Accessors: 
-        //
-        
-        // beta
-        RT getBeta() const { return beta; }
-
-        // u except for the first element (which is 1)
-        const V& getU() const { return u; }
-
-        // determinant
-        RT det() const 
-        { return beta == RT(0) ? RT(1) : RT(-1); }
-
-
-        //
-        // Perform Householder multiplication:
-        // 
-        
-        // This first one allows the first row and the rest in different
-        // places:
-        template <class M0, class Mx>
-        void multEq(
-            BaseVector_Mutable<M0>& m0, BaseMatrix_Rec_Mutable<Mx>& mx) const;
-
-        // Here m0 and mx are a single matrix:
-        template <class M>
-        void multEq(BaseMatrix_Rec_Mutable<M>& m) const
-        {
-            typename M::row_type m0 = m.row(0);
-            typename M::rowrange_type mx = m.rowRange(1,m.colsize());
-            multEq(m0,mx);
-        }
-
-        // If result is new storage, then there is no need for a temporary
-        // vector during the calculation.  The temporary isn't very
-        // much, but still worth having the separate function.
-        template <class M1, class M2>
-        void mult(
-            const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2) const;
-
-        // Repeat for vectors:
-        template <class Vx>
-        void multEq(
-            typename Vx::reference v0, BaseVector_Mutable<Vx>& vx) const;
-        template <class V2>
-        void multEq(BaseVector_Mutable<V2>& v) const
-        {
-            typename V2::reference v0 = v.ref(0);
-            typename V2::subvector_type vx = v.subVector(1,v.size());
-            multEq(v0,vx);
-        }
-        template <class V1, class V2>
-        void mult(
-            const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2) const;
-
- 
-        
-        // 
-        // Unpack the Householder vector in place
-        //
-
-        // Convert the vector used for the Householder matrix along
-        // with the v0 location into H*e0.
-        // Note: after doing this function, the Householder matrix
-        // shouldn't be used further, since it isn't correct.
-        void unpack(T& v0);
-
-        // In case v0 is some other reference type
-        template <class RefT>
-        void unpack(RefT v0)
-        { T temp = v0; unpack(temp); v0 = temp; }
-
-
-        //
-        // Now all the stuff to make it work as a BaseMatrix:
-        // (Including overloads of some functions that are trivial to 
-        //  calculate.)
-        //
-
-        size_t colsize() const { return u.size()+1; }
-        size_t rowsize() const { return u.size()+1; }
-        T cref(size_t i, size_t j) const 
-        {
-            // H = [ I - beta ( 1 ) ( 1 ut ) ]
-            //     [          ( u )          ]
-            //   = [ 1-beta      -beta ut   ]
-            //     [ -beta u    I-beta u ut ]
-            return 
-                i==j ? 
-                ( i==0 ? T(1)-beta : T(1)-beta*TMV_NORM(u.cref(i-1)) ) : 
-                ( i==0 ? -beta*TMV_CONJ(u.cref(j-1)) : 
-                  j==0 ? -beta*u.cref(j-1) :
-                  -beta*u.cref(i-1)*TMV_CONJ(u.cref(j-1)) );
-        }
-
-        RT trace() const
-        { return RT(colsize()) - beta*(RT(1)+u.NormSq()); }
-
-        template <class M2>
-        void assignTo(BaseMatrix_Rec_Mutable<M2>& m2) const
-        {
-            if (beta == RT(0)) {
-                m2.setToIdentity();
-            } else {
-                const int N = u.size()+1;
-                m2.mat().ref(0,0) = -beta;
-                m2.mat().col(0,1,N) = -beta*u;
-                m2.mat().row(0,1,N) = -beta*u.conjugate();
-                m2.mat().subMatrix(1,1,N,N) = -beta*u^u.conjugate();
-                m2.mat().diag().addToAll(RT(1));
-            }
-        }
-
-        template <class M2>
-        void newAssignTo(BaseMatrix_Rec_Mutable<M2>& m2) const
-        {
-            // TODO use NoAlias versions:
-            assignTo(m2);
-        }
-
-        const_conjugate_type conjugate() const
-        { return const_conjugate_type(u,beta); }
-        const_transpose_type transpose() const
-        { return const_transpose_type(u,beta); }
-        const_adjoint_type adjoint() const
-        { return *this; }
-        const_inverse_type inverse() const
-        { return *this; }
-
-    private :
-        void doReflection(T& x0);
-        bool doUnReflection(T& y);
-
-        V u; 
-        RT beta;
-    };
-
-    template <class V>
-    void Householder<V>::doReflection(typename Householder<V>::T& x0)
-    {
 #ifdef XDEBUG_HOUSE
         Vector<T> xx(u.size()+1);
         xx(0) = x0;
@@ -539,7 +304,16 @@ namespace tmv {
     }
 
     template <class V>
-    bool Householder<V>::doUnReflection(typename Householder<V>::T& y)
+    static inline void HouseholderReflect(V& x, typename V::real_type& beta)
+    {
+        typename V::reference x0 = x.ref(0);
+        typename V::subvector_type u = x.subVector(1,x.size());
+        HouseholderReflect(x0,u,beta);
+    }
+
+    template <class V>
+    static inline bool HouseholderUnReflect(
+        typename V::reference y, V& u, typename V::real_type& beta)
     {
         // This is similar, except that the roles of y and x0 are swapped.
         // That is, the final rotated vector y e0 is presumed known, as is 
@@ -549,6 +323,9 @@ namespace tmv {
         // The rest of the vector is transformed into the Householder vector.
         // This is used for downdating QR decompositions.
         // The return value is true if successful, false if |y| < |x|.
+
+        typedef typename V::value_type T;
+        typedef typename V::real_type RT;
 
         RT scale = u.maxAbs2Element();
         RT absy = TMV_ABS(y);
@@ -609,9 +386,11 @@ namespace tmv {
         y = x0*scale;
     }
 
-    template <class V> template <class M0, class Mx>
-    void Householder<V>::multEq(
-        BaseVector_Mutable<M0>& m0, BaseMatrix_Rec_Mutable<Mx>& mx) const
+    template <class V, class M0, class Mx, class Vt>
+    static inline void HouseholderMultEq(
+        const V& u, const typename V::real_type beta,
+        BaseVector_Mutable<M0>& m0, BaseMatrix_Rec_Mutable<Mx>& mx,
+        BaseVector_Mutable<Vt>& temp)
     {
         // This routine takes 
         // ( m0 ) <- H ( m0 ) = [ ( m0 ) - beta ( 1 ) ( 1 ut ) ( m0 ) ]
@@ -622,23 +401,24 @@ namespace tmv {
 
         TMVAssert(u.size() == mx.colsize());
         TMVAssert(m0.size() == mx.rowsize());
+        TMVAssert(temp.size() == mx.rowsize());
 #ifdef XDEBUG_HOUSE
-        std::cout<<"Start Householder::multEq"<<std::endl;
-        std::cout<<"u = "<<u<<std::endl;
-        std::cout<<"beta = "<<beta<<std::endl;
-        std::cout<<"m0 = "<<m0.vec()<<std::endl;
-        std::cout<<"mx = "<<mx.mat()<<std::endl;
-        typedef typename V::value_type T1;
+        //std::cout<<"Start Householder::multEq"<<std::endl;
+        //std::cout<<"u = "<<u<<std::endl;
+        //std::cout<<"beta = "<<beta<<std::endl;
+        //std::cout<<"m0 = "<<m0.vec()<<std::endl;
+        //std::cout<<"mx = "<<mx.mat()<<std::endl;
+        typedef typename V::value_type T;
         typedef typename Mx::value_type T2;
         Matrix<T2> mm(mx.colsize()+1,m0.size());
         mm.row(0) = m0.vec();
         mm.rowRange(1,mm.colsize()) = mx.mat();
 #endif
+        typedef typename V::real_type RT;
 
         if (m0.size() > 0 && beta != RT(0)) {
             //std::cout<<"Not trivial.\n";
-            typedef typename M0::copy_type M0c;
-            M0c temp = u.conjugate() * mx.mat();
+            temp = u.conjugate() * mx.mat();
             //std::cout<<"temp = "<<temp<<std::endl;
             temp += m0.vec();
             //std::cout<<"temp => "<<temp<<std::endl;
@@ -651,10 +431,10 @@ namespace tmv {
             //std::cout<<"m0 => "<<mx<<std::endl;
         }
 #ifdef XDEBUG_HOUSE
-        Vector<T1> uu(u.size()+1);
-        uu(0) = T1(1);
+        Vector<T> uu(u.size()+1);
+        uu(0) = T(1);
         uu.subVector(1,uu.size()) = u;
-        Matrix<T1> H = T1(1) - beta*(uu^uu.conjugate());
+        Matrix<T> H = T(1) - beta*(uu^uu.conjugate());
         Matrix<T2> Hm = H * mm;
         Matrix<T2> Hm2(mx.colsize()+1,m0.size());
         Hm2.row(0) = m0.vec();
@@ -673,15 +453,28 @@ namespace tmv {
 #endif
     }
 
-    template <class V> template <class M1, class M2>
-    void Householder<V>::mult(
-        const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2) const
+#if 0
+    template <class V, class M>
+    static inline void HouseholderMultEq(
+        const V& u, const typename V::real_type beta,
+        BaseMatrix_Rec_Mutable<M>& m)
+    {
+        typename M::row_type m0 = m.row(0);
+        typename M::rowrange_type mx = m.rowRange(1,m.colsize());
+        HouseholderMultEq(u,beta,m0,mx);
+    }
+#endif
+
+    template <class V, class M1, class M2>
+    static inline void HouseholderMult(
+        const V& u, const typename V::real_type beta,
+        const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2) 
     {
         TMVAssert(m1.rowsize() == m2.rowsize());
         TMVAssert(u.size()+1 == m1.colsize());
         TMVAssert(u.size()+1 == m2.colsize());
 #ifdef XDEBUG_HOUSE
-        typedef typename V::value_type T1;
+        typedef typename V::value_type T;
         typedef typename M2::value_type T2;
         //std::cout<<"Start Householder::mult"<<std::endl;
         //std::cout<<"u = "<<u<<std::endl;
@@ -689,6 +482,7 @@ namespace tmv {
         //std::cout<<"m1 = "<<m1.mat()<<std::endl;
         //std::cout<<"m2 = "<<m2.mat()<<std::endl;
 #endif
+        typedef typename V::real_type RT;
 
         if (m1.rowsize() > 0) {
             if (beta != RT(0)) {
@@ -711,10 +505,10 @@ namespace tmv {
             }
         }
 #ifdef XDEBUG_HOUSE
-        Vector<T1> uu(u.size()+1);
-        uu(0) = T1(1);
+        Vector<T> uu(u.size()+1);
+        uu(0) = T(1);
         uu.subVector(1,uu.size()) = u;
-        Matrix<T1> H = T1(1) - beta*(uu^uu.conjugate());
+        Matrix<T> H = T(1) - beta*(uu^uu.conjugate());
         Matrix<T2> Hm = H * m1.mat();
         if (Norm(Hm-m2.mat()) > 0.001*Norm(Hm)) {
             cerr<<"Householder::mult\n";
@@ -730,15 +524,18 @@ namespace tmv {
 #endif
     }
 
-    template <class V> template <class Vx>
-    void Householder<V>::multEq(
-        typename Vx::reference v0, BaseVector_Mutable<Vx>& vx) const 
+#if 0
+    template <class V, class V1x>
+    static inline void HouseholderMultEq(
+        const V& u, const typename V::real_type beta,
+        typename V1x::reference& v0, BaseVector_Mutable<V1x>& vx)
     {
+        typedef typename V::real_type RT;
         // ( v0 ) -= beta (   v0 + ut vx   )
         // ( vx )         ( u (v0 + ut vx) )
         TMVAssert(u.size() == vx.size());
         if (beta != RT(0)) {
-            typename Vx::value_type temp = u.conjugate() * vx.vec();
+            typename V1x::value_type temp = u.conjugate() * vx.vec();
             temp += v0;
             temp *= beta;
             v0 -= temp;
@@ -746,10 +543,22 @@ namespace tmv {
         }
     }
 
-    template <class V> template <class V1, class V2>
-    void Householder<V>::mult(
-        const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2) const
+    template <class V, class V1>
+    static inline void HouseholderMultEq(
+        const V& u, const typename V::real_type beta, BaseVector_Mutable<V1>& v)
     {
+        typename V1::reference v0 = v.ref(0);
+        typename V1::subvector_type vx = v.subVector(1,v.size());
+        HouseholderMultEq(u,beta,v0,vx);
+    }
+#endif
+
+    template <class V, class V1, class V2>
+    static inline void HouseholderMult(
+        const V& u, const typename V::real_type beta,
+        const BaseVector_Calc<V1>& v1, BaseVector_Mutable<V2>& v2)
+    {
+        typedef typename V::real_type RT;
         TMVAssert(u.size()+1 == v1.size());
         TMVAssert(u.size()+1 == v2.size());
         if (beta != RT(0)) {
@@ -763,8 +572,10 @@ namespace tmv {
     }
 
     template <class V>
-    void Householder<V>::unpack(T& u0)
+    static inline void HouseholderUnpack(
+        V& u, const typename V::real_type beta, typename V::reference u0)
     {
+        typedef typename V::value_type T;
         // This routine takes u <- H*e0
 
         if (beta == T(0)) {
@@ -777,270 +588,9 @@ namespace tmv {
         }
     }
 
-
-    //
-    // H * v
-    // TODO: break out add option at compile time rather than runtime if
-    //
-
-    template <bool add, int ix, class T, class V1, class V2, class V3>
-    static inline void MultMV(
-        const Scaling<ix,T>& x, const Householder<V1>& m1, 
-        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
-    {
-        if (add) {
-            v3 += (x*m1*v2).calc();
-        } else {
-            m1.mult(v2,v3);
-            Scale(x,v3);
-        }
-    }
-    template <bool add, int ix, class T, class V1, class V2, class V3>
-    static TMV_INLINE void NoAliasMultMV(
-        const Scaling<ix,T>& x, const Householder<V1>& m1, 
-        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
-    { MultMV<add>(x,m1,v2,v3); }
-    template <bool add, int ix, class T, class V1, class V2, class V3>
-    static TMV_INLINE void AliasMultMV(
-        const Scaling<ix,T>& x, const Householder<V1>& m1, 
-        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
-    { MultMV<add>(x,m1,v2,v3); }
-
-    template <bool add, int ix, class T, class V1, class V2, class V3>
-    static TMV_INLINE void MultVM(
-        const Scaling<ix,T>& x, const BaseVector<V1>& v1, 
-        const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
-    { MultMV<add>(x,m2.transpose(),v1,v3); }
-    template <bool add, int ix, class T, class V1, class V2, class V3>
-    static TMV_INLINE void NoAliasMultVM(
-        const Scaling<ix,T>& x, const BaseVector<V1>& v1, 
-        const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
-    { NoAliasMultMV<add>(x,m2.transpose(),v1,v3); }
-    template <bool add, int ix, class T, class V1, class V2, class V3>
-    static TMV_INLINE void AliasMultVM(
-        const Scaling<ix,T>& x, const BaseVector<V1>& v1, 
-        const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
-    { AliasMultMV<add>(x,m2.transpose(),v1,v3); }
- 
-    template <int ix, class T, class V1, class V2>
-    static TMV_INLINE void MultEqVM(
-        BaseVector_Mutable<V1>& v1, const Scaling<ix,T>& x,
-        const Householder<V2>& m2)
-    { m2.transpose().multEq(v1); Scale(x,v1); }
-    template <int ix, class T, class V1, class V2>
-    static TMV_INLINE void NoAliasMultEqVM(
-        BaseVector_Mutable<V1>& v1, const Scaling<ix,T>& x,
-        const Householder<V2>& m2)
-    { MultEqVM(v1,x,m2); }
-    template <int ix, class T, class V1, class V2>
-    static TMV_INLINE void AliasMultEqVM(
-        BaseVector_Mutable<V1>& v1, const Scaling<ix,T>& x,
-        const Householder<V2>& m2)
-    { MultEqVM(v1,x,m2); }
-
-    //
-    // v / H:
-    // v3 = H^-1 * v1 = H*v1
-    //
-
-    template <int ix, class T, class V1, class V2, class V3>
-    static TMV_INLINE void LDiv(
-        const Scaling<ix,T>& x, const BaseVector<V1>& v1,
-        const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
-    { m2.mult(v1,v3); Scale(x,v3); }
-    template <int ix, class T, class V1, class V2, class V3>
-    static TMV_INLINE void NoAliasLDiv(
-        const Scaling<ix,T>& x, const BaseVector<V1>& v1,
-        const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
-    { LDiv(x,v1,m2,v3); }
-    template <int ix, class T, class V1, class V2, class V3>
-    static TMV_INLINE void AliasLDiv(
-        const Scaling<ix,T>& x, const BaseVector<V1>& v1,
-        const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
-    { LDiv(x,v1,m2,v3); }
-
-    template <class V1, class V2>
-    static TMV_INLINE void LDivEq(
-        BaseVector_Mutable<V1>& v1, const Householder<V2>& m2)
-    { m2.multEq(v1); }
-    template <class V1, class V2>
-    static TMV_INLINE void NoAliasLDivEq(
-        BaseVector_Mutable<V1>& v1, const Householder<V2>& m2)
-    { LDivEq(v1,m2); }
-    template <class V1, class V2>
-    static TMV_INLINE void AliasLDivEq(
-        BaseVector_Mutable<V1>& v1, const Householder<V2>& m2)
-    { LDivEq(v1,m2); }
-
-    //
-    // v % H:
-    // v3 = v1 H^-1 = v1 H
-    // v3 = HT v1
-    //
-
-    template <int ix, class T, class V1, class V2, class V3>
-    static TMV_INLINE void RDiv(
-        const Scaling<ix,T>& x, const BaseVector<V1>& v1,
-        const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
-    { m2.transpose().mult(v1,v3); Scale(x,v3); }
-    template <int ix, class T, class V1, class V2, class V3>
-    static TMV_INLINE void NoAliasRDiv(
-        const Scaling<ix,T>& x, const BaseVector<V1>& v1,
-        const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
-    { RDiv(x,v1,m2,v3); }
-    template <int ix, class T, class V1, class V2, class V3>
-    static TMV_INLINE void AliasRDiv(
-        const Scaling<ix,T>& x, const BaseVector<V1>& v1,
-        const Householder<V2>& m2, BaseVector_Mutable<V3>& v3)
-    { RDiv(x,v1,m2,v3); }
-
-    template <class V1, class V2>
-    static TMV_INLINE void RDivEq(
-        BaseVector_Mutable<V1>& v1, const Householder<V2>& m2)
-    { m2.transpose().multEq(v1); }
-    template <class V1, class V2>
-    static TMV_INLINE void NoAliasRDivEq(
-        BaseVector_Mutable<V1>& v1, const Householder<V2>& m2)
-    { RDivEq(v1,m2); }
-    template <class V1, class V2>
-    static TMV_INLINE void AliasRDivEq(
-        BaseVector_Mutable<V1>& v1, const Householder<V2>& m2)
-    { RDivEq(v1,m2); }
-
-
-
-    //
-    // H * m
-    // TODO: break out add option at compile time rather than runtime if
-    //
-
-    template <bool add, int ix, class T, class V1, class M2, class M3>
-    static inline void MultMM(
-        const Scaling<ix,T>& x, const Householder<V1>& m1, 
-        const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
-    {
-        if (add) {
-            m3 += (x*m1*m2).calc();
-        } else {
-            m1.mult(m2,m3);
-            Scale(x,m3);
-        }
-    }
-    template <bool add, int ix, class T, class V1, class M2, class M3>
-    static TMV_INLINE void NoAliasMultMM(
-        const Scaling<ix,T>& x, const Householder<V1>& m1, 
-        const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
-    { MultMM<add>(x,m1,m2,m3); }
-    template <bool add, int ix, class T, class V1, class M2, class M3>
-    static TMV_INLINE void AliasMultMM(
-        const Scaling<ix,T>& x, const Householder<V1>& m1, 
-        const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
-    { MultMM<add>(x,m1,m2,m3); }
-
-    template <bool add, int ix, class T, class M1, class V2, class M3>
-    static TMV_INLINE void MultVM(
-        const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
-        const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
-    { MultMM<add>(x,m2.transpose(),m1,m3); }
-    template <bool add, int ix, class T, class M1, class V2, class M3>
-    static TMV_INLINE void NoAliasMultVM(
-        const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
-        const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
-    { NoAliasMultMM<add>(x,m2.transpose(),m1,m3); }
-    template <bool add, int ix, class T, class M1, class V2, class M3>
-    static TMV_INLINE void AliasMultVM(
-        const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
-        const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
-    { AliasMultMM<add>(x,m2.transpose(),m1,m3); }
- 
-    template <int ix, class T, class M1, class V2>
-    static TMV_INLINE void MultEqMM(
-        BaseMatrix_Mutable<M1>& m1, const Scaling<ix,T>& x,
-        const Householder<V2>& m2)
-    { m2.transpose().multEq(m1); Scale(x,m1); }
-    template <int ix, class T, class M1, class V2>
-    static TMV_INLINE void NoAliasMultEqMM(
-        BaseMatrix_Mutable<M1>& m1, const Scaling<ix,T>& x,
-        const Householder<V2>& m2)
-    { MultEqMM(m1,x,m2); }
-    template <int ix, class T, class M1, class V2>
-    static TMV_INLINE void AliasMultEqMM(
-        BaseMatrix_Mutable<M1>& m1, const Scaling<ix,T>& x,
-        const Householder<V2>& m2)
-    { MultEqMM(m1,x,m2); }
-
-    //
-    // m / H:
-    //
-
-    template <int ix, class T, class M1, class V2, class M3>
-    static TMV_INLINE void LDiv(
-        const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
-        const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
-    { m2.mult(m1,m3); Scale(x,m3); }
-    template <int ix, class T, class M1, class V2, class M3>
-    static TMV_INLINE void NoAliasLDiv(
-        const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
-        const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
-    { LDiv(x,m1,m2,m3); }
-    template <int ix, class T, class M1, class V2, class M3>
-    static TMV_INLINE void AliasLDiv(
-        const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
-        const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
-    { LDiv(x,m1,m2,m3); }
-
-    template <class M1, class V2>
-    static TMV_INLINE void LDivEq(
-        BaseMatrix_Mutable<M1>& m1, const Householder<V2>& m2)
-    { m2.multEq(m1); }
-    template <class M1, class V2>
-    static TMV_INLINE void NoAliasLDivEq(
-        BaseMatrix_Mutable<M1>& m1, const Householder<V2>& m2)
-    { LDivEq(m1,m2); }
-    template <class M1, class V2>
-    static TMV_INLINE void AliasLDivEq(
-        BaseMatrix_Mutable<M1>& m1, const Householder<V2>& m2)
-    { LDivEq(m1,m2); }
-
-    //
-    // m % H:
-    //
-
-    template <int ix, class T, class M1, class V2, class M3>
-    static TMV_INLINE void RDiv(
-        const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
-        const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
-    { m2.transpose().mult(m1,m3); Scale(x,m3); }
-    template <int ix, class T, class M1, class V2, class M3>
-    static TMV_INLINE void NoAliasRDiv(
-        const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
-        const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
-    { RDiv(x,m1,m2,m3); }
-    template <int ix, class T, class M1, class V2, class M3>
-    static TMV_INLINE void AliasRDiv(
-        const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
-        const Householder<V2>& m2, BaseMatrix_Mutable<M3>& m3)
-    { RDiv(x,m1,m2,m3); }
-
-    template <class M1, class V2>
-    static TMV_INLINE void RDivEq(
-        BaseMatrix_Mutable<M1>& m1, const Householder<V2>& m2)
-    { m2.transpose().multEq(m1); }
-    template <class M1, class V2>
-    static TMV_INLINE void NoAliasRDivEq(
-        BaseMatrix_Mutable<M1>& m1, const Householder<V2>& m2)
-    { RDivEq(m1,m2); }
-    template <class M1, class V2>
-    static TMV_INLINE void AliasRDivEq(
-        BaseMatrix_Mutable<M1>& m1, const Householder<V2>& m2)
-    { RDivEq(m1,m2); }
-
-
-    // I'll deal with these next...
-#if 0
-    template <class T>
+    template <class M1, class M2, class RT>
     void BlockHouseholderAugment(
-        const GenMatrix<T>& Y, const UpperTriMatrixView<T>& Z, T beta)
+        const BaseMatrix_Rec<M1>& Y, BaseMatrix_Tri_Mutable<M2>& Z, RT beta)
     {
         // All but the last columns of the input matrices, Y,Z are such that
         // I - Y'Z'Y't is a Block Householder matrix (the product of several
@@ -1067,10 +617,10 @@ namespace tmv {
         TMVAssert(Z.size() == Y.rowsize());
         TMVAssert(Y.rowsize() > 0);
         TMVAssert(Y.colsize() > 0);
-        TMVAssert(!Z.isconj());
         int M = Y.colsize();
         int N = Y.rowsize()-1; // # of cols already computed
 #ifdef XDEBUG_HOUSE
+        typedef typename M1::value_type T;
         Matrix<T> Y0(Y);
         Y0.upperTri().setToIdentity();
         Matrix<T> Z0(Z);
@@ -1082,26 +632,17 @@ namespace tmv {
         Matrix<T> H2 = H0*H1;
 #endif
 
-        if (beta == T(0)) {
+        if (beta == RT(0)) {
             Z.col(N,0,N+1).setZero();
         } else if (N == 0) {
-#ifdef TMVFLDEBUG
-            TMVAssert(Z.ptr() >= Z.first);
-            TMVAssert(Z.ptr() < Z.last);
-#endif
-            *Z.ptr() = beta;
+            Z.ref(0,0) = beta;
         } else {
-            ConstVectorView<T> v = Y.col(N,N+1,M);
-            VectorView<T> z = Z.col(N,0,N);
+            typename M1::const_col_sub_type v = Y.col(N,N+1,M);
+            typename M2::col_sub_type z = Z.col(N,0,N);
             z = Y.subMatrix(N+1,M,0,N).adjoint()*v;
             z += Y.row(N,0,N).conjugate();
             z = -beta * Z.subTriMatrix(0,N) * z;
-            // Z(N,N) = beta
-#ifdef TMVFLDEBUG
-            TMVAssert(Z.ptr()+N*(Z.stepi()+Z.stepj()) >= Z.first);
-            TMVAssert(Z.ptr()+N*(Z.stepi()+Z.stepj()) < Z.last);
-#endif
-            *(Z.ptr() + N*(Z.stepi()+Z.stepj())) = beta;
+            Z.ref(N,N) = beta;
         }
 #ifdef XDEBUG_HOUSE
         Matrix<T> YY(Y);
@@ -1123,10 +664,10 @@ namespace tmv {
 #endif
     }
 
-    template <class T>
+    template <class M1, class M2, class V>
     void BlockHouseholderMakeZ(
-        const GenMatrix<T>& Y, const UpperTriMatrixView<T>& Z, 
-        const GenVector<T>& beta)
+        const BaseMatrix_Rec<M1>& Y, BaseMatrix_Tri_Mutable<M2>& Z, 
+        const BaseVector_Calc<V>& beta)
     {
         // This routine calculates the Z component of the BlockHouseholder
         // formulation for Q.  Y contains the v's for the Householder matrices,
@@ -1142,9 +683,9 @@ namespace tmv {
         TMVAssert(Y.rowsize() == Z.rowsize());
         TMVAssert(Y.rowsize() == beta.size());
         TMVAssert(Y.colsize() >= Y.rowsize());
-        TMVAssert(!Z.isconj());
-        TMVAssert(!Y.isconj());
-        TMVAssert(!beta.isconj());
+
+        typedef typename M1::value_type T;
+        typedef typename M1::real_type RT;
 #ifdef XDEBUG_HOUSE
         Matrix<T> Y0(Y);
         Y0.upperTri().setToIdentity();
@@ -1165,16 +706,36 @@ namespace tmv {
         const int M = Y.colsize();
         const int N = Y.rowsize();
 
-        if (N==1) {
-            // I - Y Z Yt = I - beta* v vt
-            // Therefore:
-            // Y.col(0) = v
-            // Z(0,0) = beta*
-#ifdef TMVFLDEBUG
-            TMVAssert(Z.ptr() >= Z.first);
-            TMVAssert(Z.ptr() < Z.last);
-#endif
-            *Z.ptr() = TMV_CONJ(*beta.cptr());
+        if (N > 2) {
+            int j1 = (N+1)/2;
+            typename M1::const_colrange_type Y1 = Y.colRange(0,j1);
+            typename M2::subtrimatrix_type Z1 = Z.subTriMatrix(0,j1);
+            typename V::const_subvector_type beta1 = beta.subVector(0,j1);
+            BlockHouseholderMakeZ(Y1,Z1,beta1);
+
+            typename M1::const_submatrix_type Y2 = Y.subMatrix(j1,M,j1,N);
+            typename M2::subtrimatrix_type Z2 = Z.subTriMatrix(j1,N);
+            typename V::const_subvector_type beta2 = beta.subVector(j1,N);
+            BlockHouseholderMakeZ(Y2,Z2,beta2);
+
+            // (I-Y1 Z1 Y1t)(I-Y2 Z2 Y2t) = 
+            // I - Y1 Z1 Y1t - Y2 Z2 Y2t + Y1 Z1 Y1t Y2 Z2 Y2t
+            // Y = [ Y1 Y2 ]
+            // Z = [ Z1 Z3 ]
+            //     [ 0  Z2 ]
+            // Y Z Yt = [ Y1 Y2 ] [ Z1 Y1t + Z3 Y2t ]
+            //                    [      Z2 Y2t     ]
+            //        = Y1 Z1 Y1t + Y2 Z2 Y2t + Y1 Z3 Y2t
+            // So, Z3 = -Z1 Y1t Y2 Z2
+            // Remember that the Y's are Unit Lower Trapezoidal, so do the 
+            // rectangle and triangle parts separately.
+            //
+            typename M2::submatrix_type Z3 = Z.subMatrix(0,j1,j1,N);
+            Z3 = Y1.rowRange(j1,N).adjoint() *
+                Y.subMatrix(j1,N,j1,N).unitLowerTri();
+            Z3 += Y1.rowRange(N,M).adjoint() * Y.subMatrix(N,M,j1,N);
+            Z3 = -Z1*Z3;
+            Z3 *= Z2;
         } else if (N==2) {
             // Y = ( Y00  0  )   Z = ( Z00  Z01 )
             //     ( Yx0 Yx1 )       (  0   Z11 )
@@ -1203,59 +764,19 @@ namespace tmv {
             // Z00 = b0*
             // Z11 = b1*
             // Z01 = -b0* b1* v0xt v1
-            T* Z00 = Z.ptr();
-            T* Z01 = Z00 + Z.stepj();
-            T* Z11 = Z01 + Z.stepi();
-            const T cb0 = TMV_CONJ(*beta.cptr());
-            const T cb1 = TMV_CONJ(*(beta.cptr() + beta.step()));
-            const T cY10 = TMV_CONJ(*(Y.cptr() + Y.stepi()));
-            // Z(0,0) = TMV_CONJ(beta(0))
-#ifdef TMVFLDEBUG
-            TMVAssert(Z00 >= Z.first);
-            TMVAssert(Z00 < Z.last);
-            TMVAssert(Z01 >= Z.first);
-            TMVAssert(Z01 < Z.last);
-            TMVAssert(Z11 >= Z.first);
-            TMVAssert(Z11 < Z.last);
-#endif
-            *Z00 = cb0;
-            // Z(1,1) = TMV_CONJ(beta(1))
-            *Z11 = cb1;
+            const RT b0 = beta.cref(0);
+            const RT b1 = beta.cref(1);
+            Z.ref(0,0) = b0;
+            Z.ref(1,1) = b1;
             T temp = Y.col(0,2,M).conjugate()*Y.col(1,2,M);
-            // temp += TMV_CONJ(Y(1,0))
-            temp += cY10;
-            // Z(0,1) = -Z(0,0)*Z(1,1)*temp;
-            *Z01 = -cb0*cb1*temp;
-        } else {
-            int j1 = (N+1)/2;
-            ConstMatrixView<T> Y1 = Y.colRange(0,j1);
-            UpperTriMatrixView<T> Z1 = Z.subTriMatrix(0,j1);
-            ConstVectorView<T> beta1 = beta.subVector(0,j1);
-            BlockHouseholderMakeZ(Y1,Z1,beta1);
-
-            ConstMatrixView<T> Y2 = Y.subMatrix(j1,M,j1,N);
-            UpperTriMatrixView<T> Z2 = Z.subTriMatrix(j1,N);
-            ConstVectorView<T> beta2 = beta.subVector(j1,N);
-            BlockHouseholderMakeZ(Y2,Z2,beta2);
-
-            // (I-Y1 Z1 Y1t)(I-Y2 Z2 Y2t) = 
-            // I - Y1 Z1 Y1t - Y2 Z2 Y2t + Y1 Z1 Y1t Y2 Z2 Y2t
-            // Y = [ Y1 Y2 ]
-            // Z = [ Z1 Z3 ]
-            //     [ 0  Z2 ]
-            // Y Z Yt = [ Y1 Y2 ] [ Z1 Y1t + Z3 Y2t ]
-            //                    [      Z2 Y2t     ]
-            //        = Y1 Z1 Y1t + Y2 Z2 Y2t + Y1 Z3 Y2t
-            // So, Z3 = -Z1 Y1t Y2 Z2
-            // Remember that the Y's are Unit Lower Trapezoidal, so do the 
-            // rectangle and triangle parts separately.
-            //
-            MatrixView<T> Z3 = Z.subMatrix(0,j1,j1,N);
-            Z3 = Y1.rowRange(j1,N).adjoint() *
-                Y.subMatrix(j1,N,j1,N).lowerTri(UnitDiag);
-            Z3 += Y1.rowRange(N,M).adjoint() * Y.subMatrix(N,M,j1,N);
-            Z3 = -Z1*Z3;
-            Z3 *= Z2;
+            temp += TMV_CONJ(Y.cref(1,0));
+            Z.ref(0,1) = -b0*b1*temp;
+        } else { // N == 1
+            // I - Y Z Yt = I - beta* v vt
+            // Therefore:
+            // Y.col(0) = v
+            // Z(0,0) = beta*
+            Z.ref(0,0) = beta.cref(0);
         }
 #ifdef XDEBUG_HOUSE
         Matrix<T> Y2(Y);
@@ -1275,10 +796,10 @@ namespace tmv {
 #endif
     }
 
-    template <class T, class T2>
+    template <class M1, class M2, class M3, class M4>
     void BlockHouseholderLMult(
-        const GenMatrix<T>& Y, const GenUpperTriMatrix<T>& Z,
-        const MatrixView<T2>& m)
+        const BaseMatrix_Rec<M1>& Y, const BaseMatrix_Tri<M2>& Z,
+        BaseMatrix_Rec_Mutable<M3>& m, BaseMatrix_Rec_Mutable<M4>& temp)
     {
         // The input Y,Z are such that (I - YZYt) is a Block Householder matrix.
         // The upper square portion of Y is taken to be unit lower triangular.
@@ -1289,33 +810,51 @@ namespace tmv {
         TMVAssert(Y.rowsize() > 0);
         TMVAssert(Y.colsize() > 0);
         TMVAssert(m.colsize() == Y.colsize());
+        TMVAssert(temp.colsize() == Y.rowsize());
+        TMVAssert(temp.rowsize() == m.rowsize());
+
 #ifdef XDEBUG_HOUSE
+        typedef typename M1::value_type T;
+        typedef typename M3::value_type T3;
         Matrix<T> Y0(Y);
         Y0.upperTri().setToIdentity();
         Matrix<T> Z0(Z);
-        Matrix<T2> m0(m);
+        Matrix<T3> m0(m);
         Matrix<T> H = T(1) - Y0*Z0*Y0.adjoint();
-        Matrix<T2> Hm = H*m0;
+        Matrix<T3> Hm = H*m0;
 #endif
 
         int M = Y.colsize();
         int N = Y.rowsize();
+        const int cs = Sizes<M1::_colsize,M3::_colsize>::size;
+        const int rs = Sizes<M1::_rowsize,M2::_size>::size;
+        const int xs = M3::_rowsize;
+        const int cs1 = IntTraits2<cs,rs>::diff;
+        const int Si1 = M1::_stepi;
+        const int Sj1 = M1::_stepj;
+        const int C1 = M1::_conj;
+        const int Si3 = M3::_stepi;
+        const int Sj3 = M3::_stepj;
+        const int C3 = M3::_conj;
+        typedef typename M1::value_type T1;
+        typedef typename M3::value_type T3;
+        typedef typename MViewHelper<T1,Rec,rs,rs,Si1,Sj1,C1>::ctype M1a;
+        typedef typename MViewHelper<T1,Rec,cs1,rs,Si1,Sj1,C1>::ctype M1b;
+        typedef typename MViewHelper<T3,Rec,rs,xs,Si3,Sj3,C3>::type M3a;
+        typedef typename MViewHelper<T3,Rec,cs1,xs,Si3,Sj3,C3>::type M3b;
 
-        if (m.iscm()) {
-            Matrix<T2,ColMajor> ZYtm = 
-                Y.rowRange(0,N).lowerTri(UnitDiag).adjoint() * m.rowRange(0,N);
-            ZYtm += Y.rowRange(N,M).adjoint() * m.rowRange(N,M);
-            ZYtm = Z * ZYtm;
-            m.rowRange(0,N) -= Y.rowRange(0,N).lowerTri(UnitDiag) * ZYtm;
-            m.rowRange(N,M) -= Y.rowRange(N,M) * ZYtm;
-        } else {
-            Matrix<T2,RowMajor> ZYtm = 
-                Y.rowRange(0,N).lowerTri(UnitDiag).adjoint() * m.rowRange(0,N);
-            ZYtm += Y.rowRange(N,M).adjoint() * m.rowRange(N,M);
-            ZYtm = Z * ZYtm;
-            m.rowRange(0,N) -= Y.rowRange(0,N).lowerTri(UnitDiag) * ZYtm;
-            m.rowRange(N,M) -= Y.rowRange(N,M) * ZYtm;
-        }
+        M1a Ya = Y.rowRange(0,N);
+        M1b Yb = Y.rowRange(N,M);
+        M3a ma = m.rowRange(0,N);
+        M3b mb = m.rowRange(N,M);
+ 
+        // temp = ZYtm
+        temp = Ya.unitLowerTri().adjoint() * ma;
+        temp += Yb.adjoint() * mb;
+        temp = Z * temp;
+        ma -= Ya.unitLowerTri() * temp;
+        mb -= Yb * temp;
+
 #ifdef XDEBUG_HOUSE
         if (Norm(Hm-m) > 0.001*Norm(m0)*Norm(H)) {
             cerr<<"BlockHouseholderLMult\n";
@@ -1323,16 +862,20 @@ namespace tmv {
             cerr<<"Z = "<<Z0<<endl;
             cerr<<"m = "<<m0<<endl;
             cerr<<"H = "<<H<<endl;
+            cerr<<"Ya = "<<Ya<<endl;
+            cerr<<"Yb = "<<Yb<<endl;
+            cerr<<"temp = "<<temp<<endl;
             cerr<<"Output: m = "<<m<<endl;
+            cerr<<"Hm = "<<Hm<<endl;
             abort();
         }
 #endif
     }
 
-    template <class T, class T2>
+    template <class M1, class M2, class M3, class M4>
     void BlockHouseholderLDiv(
-        const GenMatrix<T>& Y, const GenUpperTriMatrix<T>& Z,
-        const MatrixView<T2>& m)
+        const BaseMatrix_Rec<M1>& Y, const BaseMatrix_Tri<M2>& Z,
+        BaseMatrix_Rec_Mutable<M3>& m, BaseMatrix_Rec_Mutable<M4>& temp)
     {
         // The routine finds m <- (I - YZYt)^-1 m
         // = (I - YZtYt) m
@@ -1341,33 +884,50 @@ namespace tmv {
         TMVAssert(Y.rowsize() > 0);
         TMVAssert(Y.colsize() > 0);
         TMVAssert(m.colsize() == Y.colsize());
+        TMVAssert(temp.colsize() == Y.rowsize());
+        TMVAssert(temp.rowsize() == m.rowsize());
 #ifdef XDEBUG_HOUSE
+        typedef typename M1::value_type T;
+        typedef typename M3::value_type T3;
         Matrix<T> Y0(Y);
         Y0.upperTri().setToIdentity();
         Matrix<T> Z0(Z.adjoint());
-        Matrix<T2> m0(m);
+        Matrix<T3> m0(m);
         Matrix<T> Hinv = T(1) - Y0*Z0*Y0.adjoint();
-        Matrix<T2> Hm = Hinv*m0;
+        Matrix<T3> Hm = Hinv*m0;
 #endif
 
         int M = Y.colsize();
         int N = Y.rowsize();
+        const int cs = Sizes<M1::_colsize,M3::_colsize>::size;
+        const int rs = Sizes<M1::_rowsize,M2::_size>::size;
+        const int xs = M3::_rowsize;
+        const int cs1 = IntTraits2<cs,rs>::diff;
+        const int Si1 = M1::_stepi;
+        const int Sj1 = M1::_stepj;
+        const int C1 = M1::_conj;
+        const int Si3 = M3::_stepi;
+        const int Sj3 = M3::_stepj;
+        const int C3 = M3::_conj;
+        typedef typename M1::value_type T1;
+        typedef typename M3::value_type T3;
+        typedef typename MViewHelper<T1,Rec,rs,rs,Si1,Sj1,C1>::ctype M1a;
+        typedef typename MViewHelper<T1,Rec,cs1,rs,Si1,Sj1,C1>::ctype M1b;
+        typedef typename MViewHelper<T3,Rec,rs,xs,Si3,Sj3,C3>::type M3a;
+        typedef typename MViewHelper<T3,Rec,cs1,xs,Si3,Sj3,C3>::type M3b;
 
-        if (m.isrm()) {
-            Matrix<T2,RowMajor> ZtYtm = 
-                Y.rowRange(0,N).lowerTri(UnitDiag).adjoint() * m.rowRange(0,N);
-            ZtYtm += Y.rowRange(N,M).adjoint() * m.rowRange(N,M);
-            ZtYtm = Z.adjoint() * ZtYtm;
-            m.rowRange(0,N) -= Y.rowRange(0,N).lowerTri(UnitDiag) * ZtYtm;
-            m.rowRange(N,M) -= Y.rowRange(N,M) * ZtYtm;
-        } else {
-            Matrix<T2,ColMajor> ZtYtm = 
-                Y.rowRange(0,N).lowerTri(UnitDiag).adjoint() * m.rowRange(0,N);
-            ZtYtm += Y.rowRange(N,M).adjoint() * m.rowRange(N,M);
-            ZtYtm = Z.adjoint() * ZtYtm;
-            m.rowRange(0,N) -= Y.rowRange(0,N).lowerTri(UnitDiag) * ZtYtm;
-            m.rowRange(N,M) -= Y.rowRange(N,M) * ZtYtm;
-        }
+        M1a Ya = Y.rowRange(0,N);
+        M1b Yb = Y.rowRange(N,M);
+        M3a ma = m.rowRange(0,N);
+        M3b mb = m.rowRange(N,M);
+
+        // temp = ZtYtm
+        temp = Ya.unitLowerTri().adjoint() * ma;
+        temp += Yb.adjoint() * mb;
+        temp = Z.adjoint() * temp;
+        ma -= Ya.unitLowerTri() * temp;
+        mb -= Yb * temp;
+
 #ifdef XDEBUG_HOUSE
         if (Norm(Hm-m) > 0.001*Norm(m0)*Norm(Hinv)) {
             cerr<<"BlockHouseholderLDiv\n";
@@ -1381,127 +941,46 @@ namespace tmv {
 #endif
     }
 
-    template <class T>
+    template <class M1, class M2, class M3>
     void BlockHouseholderUnpack(
-        const MatrixView<T>& Y, const GenUpperTriMatrix<T>& Z,
-        const MatrixView<T>& m)
+        BaseMatrix_Rec_Mutable<M1>& Y, const BaseMatrix_Tri<M2>& Z,
+        BaseMatrix_Tri_Mutable<M3>& temp)
     {
-        // This routine multiplies the rest of the matrix by the 
-        // BlockHouseholder matrix Ht, defined by Y,Z.
-        // Then Y is unpacked in place.
+        // The BlockHouseholder matrix H is defined by Y,Z.
+        // Y is unpacked in place.
         TMVAssert(Y.colsize() > 0);
         TMVAssert(Y.rowsize() > 0);
         TMVAssert(Y.colsize() >= Y.rowsize());
-        TMVAssert(Y.colsize() == m.colsize());
         TMVAssert(Y.rowsize() == Z.size());
+        TMVStaticAssert(M3::_upper);
+        TMVStaticAssert(!M3::_unit);
+        TMVStaticAssert(!M3::_unknowndiag);
+        TMVAssert(temp.size() == Y.rowsize());
 
         int M = Y.colsize();
         int N = Y.rowsize();
+        const int cs = M1::_colsize;
+        const int rs = Sizes<M1::_rowsize,M2::_size>::size;
+        const int cs1 = IntTraits2<cs,rs>::diff;
+        const int Si1 = M1::_stepi;
+        const int Sj1 = M1::_stepj;
+        const int C1 = M1::_conj;
+        typedef typename M1::value_type T;
+        typedef typename MViewHelper<T,Rec,rs,rs,Si1,Sj1,C1>::type M1a;
+        typedef typename MViewHelper<T,Rec,cs1,rs,Si1,Sj1,C1>::type M1b;
 
-        // Multiply the rest of m by Ht
-        BlockHouseholderLMult(Y,Z,m);
-        // Make the first N columns equal to 
+        M1a Ya = Y.rowRange(0,N);
+        M1b Yb = Y.rowRange(N,M);
+ 
+        // Make Y equal to:
         // Ht [ I ] = (I - YZYt) [ I ]
         //    [ 0 ]              [ 0 ]
-        UpperTriMatrix<T,RowMajor> temp = 
-            -Z * Y.rowRange(0,N).lowerTri(UnitDiag).adjoint();
-        Y.rowRange(N,M) *= temp;
-        Y.rowRange(0,N) = Y.rowRange(0,N).lowerTri(UnitDiag) * temp;
-        Y.rowRange(0,N).diag().addToAll(T(1));
+        temp = -Z * Ya.unitLowerTri().adjoint();
+        Yb *= temp;
+        Ya = Ya.unitLowerTri() * temp;
+        Ya.diag().addToAll(T(1));
     }
-#endif
 
-#if 0
-    // Expand this out in the calling routine.
-    template <class T>
-    T HouseholderReflect(const MatrixView<T>& m, T& det)
-    {
-        // Multiplies m by a Householder matrix H which rotates
-        // the first column into y e0.
-        // The vector v of the  Householder matrix is stored
-        // in the first column of m, except for the first element.
-        // Beta is the return value.
-        // The rest of the matrix is multiplied by H.
-        // (For the first column, this means that y is the new first element.)
-        TMVAssert(m.colsize() > 0);
-        TMVAssert(m.rowsize() > 0);
-#ifdef XDEBUG_HOUSE
-        Matrix<T> m0(m);
-#endif
-
-        const VectorView<T> v = m.col(0,1,m.colsize());
-        T beta;
-        if (m.isconj()) {
-            T m00 = TMV_CONJ(*m.cptr());
-            beta = HouseholderReflect(m00,v,det);
-#ifdef TMVFLDEBUG
-            TMVAssert(m.ptr() >= m.first);
-            TMVAssert(m.ptr() < m.last);
-#endif
-            *m.ptr() = TMV_CONJ(m00);
-        } else {
-            beta = HouseholderReflect(*m.ptr(),v,det);
-        }
-        if (beta != T(0)) HouseholderLMult(v,beta,m.colRange(1,m.rowsize()));
-#ifdef XDEBUG_HOUSE
-        Vector<T> vv(m.colsize());
-        vv(0) = T(1);
-        vv.subVector(1,vv.size()) = m.col(0,1,vv.size());
-        Matrix<T> H = T(1)-beta*(vv^vv.conjugate());
-        Matrix<T> Hm = H * m0;
-        Matrix<T> Hm2 = m;
-        Hm2.col(0,1,vv.size()).setZero();
-        if (Norm(Hm-Hm2) > 0.001*Norm(m0)) {
-            cerr<<"Householder Reflect\n";
-            cerr<<"Input: m0 = "<<m0<<endl;
-            cerr<<"Output: vv = "<<vv<<endl;
-            cerr<<"beta = "<<beta<<endl;
-            cerr<<"m = "<<m<<endl;
-            cerr<<"H = "<<H<<endl;
-            cerr<<"vv^vvt = "<<(vv^vv.conjugate())<<endl;
-            cerr<<"beta*vv^vvt = "<<beta*(vv^vv.conjugate())<<endl;
-            cerr<<"1-beta*vv^vvt = "<<(T(1)-beta*(vv^vv.conjugate()))<<endl;
-            cerr<<"Hm = "<<Hm<<endl;
-            cerr<<"Hm2 = "<<Hm2<<endl;
-            abort();
-        }
-#endif
-        return beta;
-    }
-#endif
-
-#if 0
-    // Expand this out in the calling routine.
-    template <class T>
-    void HouseholderUnpack(const MatrixView<T>& m, T beta)
-    {
-        // The input matrix is taken to have a Householder vector
-        // stored in the first column (not including the first element.   
-        // This routine multiplies the rest of the matrix by the Householder   
-        // matrix Ht.
-        // The First column is then set to Ht times e0.
-
-        TMVAssert(m.colsize() > 0);
-        TMVAssert(m.rowsize() > 0);
-
-        // Multiply the rest of m by Ht = I - beta* v vt
-        HouseholderLMult(
-            m.col(0,1,m.colsize()),TMV_CONJ(beta),
-            m.subMatrix(0,m.colsize(),1,m.rowsize()));
-        // Finally, make the first column equal to Ht times e0
-        if (m.isconj()) {
-            T m00 = TMV_CONJ(*m.cptr());
-            HouseholderUnpack(m00,m.col(0,1,m.colsize()),beta);
-#ifdef TMVFLDEBUG
-            TMVAssert(m.ptr() >= m.first);
-            TMVAssert(m.ptr() < m.last);
-#endif
-            *m.ptr() = TMV_CONJ(m00);
-        } else {
-            HouseholderUnpack(*m.ptr(),m.col(0,1,m.colsize()),beta);
-        }
-    }
-#endif
 
 } // namespace tmv
 

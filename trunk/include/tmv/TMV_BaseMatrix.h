@@ -293,6 +293,11 @@ namespace tmv {
     template <class T, int shape, int cs, int rs, bool rm, bool fort>
     struct MCopyHelper;
 
+    // This is similar - it defines the right view type when some
+    // sizes or steps might be known.
+    template <class T, int shape, int cs, int rs, int si, int sj, int c=NonConj>
+    struct MViewHelper;
+
     template <class M>
     static inline typename M::value_type DoTrace(const BaseMatrix<M>& m);
 
@@ -836,11 +841,32 @@ namespace tmv {
     }; // BaseMatrix_Mutable
 
     template <class T>
+    class MatrixSizer;
+
+    template <class T>
+    struct Traits<MatrixSizer<T> >
+    {
+        typedef T value_type;
+        typedef MatrixSizer<T> type;
+        typedef InvalidType calc_type;
+        typedef InvalidType eval_type;
+        typedef InvalidType copy_type;
+        typedef InvalidType inverse_type;
+
+        enum { _colsize = UNKNOWN };
+        enum { _rowsize = UNKNOWN };
+        enum { _shape = Null };
+        enum { _fort = false };
+        enum { _calc = false };
+    };
+
+    template <class T>
     class MatrixSizer : 
         public BaseMatrix<MatrixSizer<T> >
     {
     public:
-        TMV_INLINE MatrixSizer(const int _cs, const int _rs) : cs(_cs), rs(_rs) {}
+        TMV_INLINE MatrixSizer(const int _cs, const int _rs) :
+            cs(_cs), rs(_rs) {}
         TMV_INLINE size_t colsize() const { return cs; }
         TMV_INLINE size_t rowsize() const { return rs; }
         TMV_INLINE int nElements() const { return cs * rs; }
@@ -855,25 +881,7 @@ namespace tmv {
 
     private :
         const int cs, rs;
-
     }; // MatrixSizer
-
-    template <class T>
-    class Traits<MatrixSizer<T> >
-    {
-        typedef T value_type;
-        typedef MatrixSizer<T> type;
-        typedef InvalidType calc_type;
-        typedef InvalidType eval_type;
-        typedef InvalidType copy_type;
-        typedef InvalidType inverse_type;
-
-        enum { _colsize = UNKNOWN };
-        enum { _rowsize = UNKNOWN };
-        enum { _shape = Rec };
-        enum { _fort = false };
-        enum { _calc = false };
-    };
 
     //
     // Trace

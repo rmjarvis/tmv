@@ -134,22 +134,22 @@ namespace tmv {
                 }
             }
         }
-        std::cout<<"Start MultMM XDEBUG"<<std::endl;
-        std::cout<<"add = "<<add<<std::endl;
-        std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
-        std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1<<std::endl;
-        std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
-        std::cout<<"m3 = "<<TMV_Text(m3)<<"  "<<m3.mat()<<std::endl;
-        std::cout<<"m3i = "<<TMV_Text(m3i)<<"  "<<m3i<<std::endl;
-        std::cout<<"m3c = "<<TMV_Text(m3c)<<"  "<<m3c<<std::endl;
-        std::cout<<"m3c => "<<m3c<<std::endl;
+        //std::cout<<"Start MultMM XDEBUG"<<std::endl;
+        //std::cout<<"add = "<<add<<std::endl;
+        //std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
+        //std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1<<std::endl;
+        //std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
+        //std::cout<<"m3 = "<<TMV_Text(m3)<<"  "<<m3.mat()<<std::endl;
+        //std::cout<<"m3i = "<<TMV_Text(m3i)<<"  "<<m3i<<std::endl;
+        //std::cout<<"m3c = "<<TMV_Text(m3c)<<"  "<<m3c<<std::endl;
+        //std::cout<<"m3c => "<<m3c<<std::endl;
 
         MultMM<add>(x,m1.mat(),m2.mat(),m3.mat());
 
-        std::cout<<"m3 => "<<m3.mat()<<std::endl;
+        //std::cout<<"m3 => "<<m3.mat()<<std::endl;
         Matrix<typename M3::value_type> m3f = m3.mat();
-        std::cout<<"diff = "<<m3.mat()-m3c<<std::endl;
-        std::cout<<"Norm(diff) = "<<Norm(m3.mat()-m3c)<<std::endl;
+        //std::cout<<"diff = "<<m3.mat()-m3c<<std::endl;
+        //std::cout<<"Norm(diff) = "<<Norm(m3.mat()-m3c)<<std::endl;
         if (Norm(m3f-m3c) > 1.e-6 * std::abs(T(x))*Norm(m1i)*Norm(m2i)) {
             std::cout<<"MultMM:  add = "<<add<<std::endl;
             std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;

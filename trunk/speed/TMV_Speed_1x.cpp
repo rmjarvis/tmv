@@ -72,9 +72,8 @@ const double ACC = 1.e-12;
 const int nloops1 = 10;
 const int nloops2 = 10;
 #else
-const int nloops2 = (
-    (N * sizeof(RT) > targetmem) ? 1 : targetmem / N / (sizeof(RT)));
-const int nloops1 = targetnflops / (N * nloops2);
+const int nloops2 = targetmem / (N * sizeof(RT)) + 1;
+const int nloops1 = targetnflops / (N * nloops2) + 1;
 #endif
 
 #ifdef DOEIGEN

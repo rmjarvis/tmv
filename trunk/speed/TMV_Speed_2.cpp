@@ -108,9 +108,8 @@ typedef RT T;
 const int nloops1 = 1;
 const int nloops2 = 1;
 #else
-const int nloops2 = (
-    (M*N*sizeof(T) > targetmem ? 1 : targetmem / (M*N) / (sizeof(T))));
-const int nloops1 = targetnflops / (M * N * nloops2) / XFOUR;
+const int nloops2 = targetmem / (M*N * sizeof(T)) + 1;
+const int nloops1 = targetnflops / (M*N * nloops2 * XFOUR) + 1;
 #endif
 
 #if (PART == 1) // Full rectangle

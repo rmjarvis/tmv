@@ -51,26 +51,7 @@
 #endif
 
 // BLOCKSIZE is the block size to use in algo 21
-#define TMV_QR_BLOCKSIZE 64
-
-// RECURSE = the maximum size to stop recursing in algo 27
-#if TMV_OPT >= 3
-#define TMV_QR_RECURSE 2
-#elif TMV_OPT == 2
-#define TMV_QR_RECURSE 32
-#else
-#define TMV_QR_RECURSE 1
-#endif
-
-// INLINE_MV = Inline the MV (MultMV, LDivEqVU) calls.
-#if TMV_OPT >= 1
-#define TMV_QR_INLINE_MV
-#endif
-
-// INLINE_MM = Inline the small-sized MM (MultMM, LDivEqMU) calls.
-#if TMV_OPT >= 3
-#define TMV_QR_INLINE_MM
-#endif
+#define TMV_QR_BLOCKSIZE 48
 
 namespace tmv {
 
@@ -99,48 +80,153 @@ namespace tmv {
             typedef typename M1::real_type RT;
 
             const int M = cs==UNKNOWN ? int(Q.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(Q.rowsize()) : rs;
+            const int N = rs==UNKNOWN ? int(beta.size()) : rs;
+            const int K = Q.rowsize();
 #ifdef PRINTALGO_QR
             std::cout<<"UnpackQ algo 11: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
             typedef typename V::const_reverse_iterator IT;
-            typedef typename M1::reference Mr;
+            typedef typename M1::reference Mref;
             typedef typename M1::col_sub_type Mc;
+            typedef typename M1::row_sub_type Mr;
             typedef typename M1::submatrix_type Ms;
 
-            Q.upperTri().offDiag().setZero();
+            typedef Vector<T,NoAlias> V2;
+            typedef typename V2::subvector_type V2s;
+            V2 tempBase(K);
+
+            Q.colRange(0,N).upperTri().offDiag().setZero();
 
             IT bj = beta.rbegin(); // rbegin, so iterate from end.
             for (int j=N-1;j>=0;--j,++bj) {
                 // Work on the lower part of column j
-                Mr Qjj = Q.ref(j,j);
-                Mc Qcolj = Q.col(j,j+1,M);
-                Householder<Mc> H(Qcolj,*bj);
+                Mref Qjj = Q.ref(j,j);
+                Mc u = Q.col(j,j+1,M);
+                Mr Q1a = Q.row(j,j+1,K);
+                Ms Q1b = Q.subMatrix(j+1,M,j+1,K);
+                V2s temp = tempBase.subVector(0,K-j-1);
                 // Reflect the rest of the matrix to the right of this column.
-                Ms Qsub = Q.subMatrix(j,M,j+1,N);
-                H.multEq(Qsub);
-                H.unpack(Qjj);
+                HouseholderMultEq(u,*bj,Q1a,Q1b,temp);
+                // Unpack this column into H * ej
+                HouseholderUnpack(u,*bj,Qjj);
             }
         }
     };
 
-#if 0
     // algo 21: Block algorithm
     template <int cs, int rs, class M1, class V>
     struct UnpackQ_Helper<21,cs,rs,M1,V>
     {
         typedef typename M1::value_type T;
         static void call(M1& Q, const V& beta)
+        {
+            const int M = cs==UNKNOWN ? int(Q.colsize()) : cs;
+            const int N = rs==UNKNOWN ? int(beta.size()) : rs;
+            const int K = Q.rowsize();
+#ifdef PRINTALGO_QR
+            std::cout<<"UnpackQ algo 21: M,N,cs,rs = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<std::endl;
+#endif
+            const int Nx = TMV_QR_BLOCKSIZE;
+            const int s1 = IntTraits2<Nx,rs>::min;
+            const int N1 = TMV_MIN(Nx,N);
+            typedef typename MCopyHelper<T,UpperTri,s1,s1,false,false>::type Ztype;
+            Ztype BaseZ = MatrixSizer<T>(N1,N1);
+
+            typedef typename Ztype::subtrimatrix_type Zs;
+            typedef typename M1::submatrix_type M1s;
+            typedef typename V::const_subvector_type Vs;
+
+            typedef Matrix<T,NoAlias> M2;
+            typedef typename M2::submatrix_type M2s;
+            typedef typename M2s::uppertri_type M2t;
+            M2 tempBase = MatrixSizer<T>(N1,K);
+
+            Q.colRange(0,N).upperTri().setZero();
+            for(int j2=N;j2>0;) {
+                int j1 = j2 > Nx ? j2-Nx : 0;
+                M1s Y = Q.subMatrix(j1,M,j1,j2);
+                Zs Z = BaseZ.subTriMatrix(0,j2-j1);
+                Vs b1 = beta.subVector(j1,j2);
+                M1s Q2 = Q.subMatrix(j1,M,j2,K);
+                M2s temp1 = tempBase.subMatrix(0,j2-j1,0,K-j2);
+                M2t temp2 = tempBase.subMatrix(0,j2-j1,0,j2-j1).upperTri();
+
+                BlockHouseholderMakeZ(Y,Z,b1);
+                BlockHouseholderLMult(Y,Z,Q2,temp1);
+                BlockHouseholderUnpack(Y,Z,temp2);
+                j2 = j1;
+            }
+        }
     };
 
-    // algo 27: Recursive algorithm
+    // algo 27: Block algorithm -- single block
     template <int cs, int rs, class M1, class V>
     struct UnpackQ_Helper<27,cs,rs,M1,V>
     {
+        typedef typename M1::value_type T;
         static void call(M1& Q, const V& beta)
-    };
+        {
+            const int N = rs==UNKNOWN ? int(beta.size()) : rs;
+            const int K = Q.rowsize();
+#ifdef PRINTALGO_QR
+            const int M = cs==UNKNOWN ? int(Q.colsize()) : cs;
+            std::cout<<"UnpackQ algo 27: M,N,cs,rs = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<std::endl;
 #endif
+            typedef typename MCopyHelper<T,UpperTri,rs,rs,false,false>::type Ztype;
+            Ztype Z = MatrixSizer<T>(N,N);
+
+            typedef typename M1::colrange_type M1c;
+
+            const int xx = UNKNOWN;
+            typedef typename MCopyHelper<T,Rec,rs,xx,false,false>::type M2;
+            typedef typename M2::colrange_type M2c;
+            typedef typename M2c::uppertri_type M2t;
+            M2 tempBase(N,TMV_MAX(K-N,N));
+            M2t temp2 = tempBase.rowRange(0,N).upperTri();
+
+            M1c Q1 = Q.colRange(0,N);
+
+            Q1.upperTri().setZero();
+            BlockHouseholderMakeZ(Q1,Z,beta);
+            if (K > N) {
+                M1c Q2 = Q.colRange(N,K);
+                M2c temp1 = tempBase.colRange(0,K-N);
+                BlockHouseholderLMult(Q1,Z,Q2,temp1);
+            }
+            BlockHouseholderUnpack(Q1,Z,temp2);
+        }
+    };
+
+    // algo 31: Decide which algorithm to use from runtime size
+    template <int cs, int rs, class M1, class V>
+    struct UnpackQ_Helper<31,cs,rs,M1,V>
+    {
+        typedef typename M1::value_type T;
+        static void call(M1& Q, const V& beta)
+        {
+            const int M = cs==UNKNOWN ? int(Q.colsize()) : cs;
+            const int N = rs==UNKNOWN ? int(beta.size()) : rs;
+#ifdef PRINTALGO_QR
+            std::cout<<"UnpackQ algo 31: M,N,cs,rs = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<std::endl;
+#endif
+            const int algo27 =
+                (rs == UNKNOWN || rs <= 128) ? 27 : 0;
+            const int algo21 =
+                (rs == UNKNOWN || rs > 128) ? 21 : 0;
+            const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
+
+            if (M*N <= l2cache)
+                UnpackQ_Helper<11,cs,rs,M1,V>::call(Q,beta);
+            else if (N <= 128)
+                UnpackQ_Helper<algo27,cs,rs,M1,V>::call(Q,beta);
+            else
+                UnpackQ_Helper<algo21,cs,rs,M1,V>::call(Q,beta);
+        }
+    };
 
     // algo 81: Copy to colmajor
     template <int cs, int rs, class M, class V>
@@ -186,16 +272,23 @@ namespace tmv {
         typedef typename M1::value_type T;
         static TMV_INLINE void call(M1& Q, const V& beta)
         {
+            typedef typename M1::value_type T;
+            const int csrs = IntTraits2<cs,rs>::prod;
+            const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
             const int algo = 
                 cs == 0 || rs == 0 || cs == 1 ? 0 :
                 TMV_OPT == 0 ? 11 :
-                11;
-                //27;
+                rs == UNKNOWN ? 31 :
+                cs == UNKNOWN ? 31 :
+                csrs <= l2cache ? 11 :
+                rs <= 128 ? 27 : 21;
 #ifdef PRINTALGO_QR
             std::cout<<"Inline UnpackQ: \n";
             std::cout<<"Q = "<<TMV_Text(Q)<<std::endl;
             std::cout<<"cs = "<<cs<<"  rs = "<<rs<<std::endl;
-            std::cout<<"sizes = "<<Q.colsize()<<"  "<<Q.rowsize()<<std::endl;
+            std::cout<<"sizes = "<<Q.colsize()<<"  "<<beta.size()<<std::endl;
+            std::cout<<"csrs = "<<csrs<<std::endl;
+            std::cout<<"l2cache = "<<l2cache<<std::endl;
             std::cout<<"algo = "<<algo<<std::endl;
 #endif
             UnpackQ_Helper<algo,cs,rs,M1,V>::call(Q,beta);
@@ -211,11 +304,11 @@ namespace tmv {
             const int algo = (
                 ( cs != UNKNOWN && rs != UNKNOWN &&
                   cs <= 16 && rs <= 16 ) ? -4 :
-                !M1::_colmajor ? 81 :
+                ( TMV_OPT >= 2 && !M1::_colmajor ) ? 81 :
                 -4 );
 #ifdef PRINTALGO_QR
             const int M = cs==UNKNOWN ? int(Q.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(Q.rowsize()) : rs;
+            const int N = rs==UNKNOWN ? int(beta.size()) : rs;
             std::cout<<"UnpackQ algo -3: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -258,13 +351,12 @@ namespace tmv {
         TMVStaticAssert((Traits2<
                          typename M::value_type,
                          typename V::value_type>::samebase));
-        TMVAssert(Q.colsize() >= Q.rowsize());
-        TMVAssert(beta.size() == Q.rowsize());
-        TMVStaticAssert((Sizes<M::_rowsize,V::_size>::same));
-        TMVAssert(Q.rowsize() == beta.size());
+        TMVAssert(Q.colsize() >= beta.size());
+        TMVAssert(Q.rowsize() == beta.size() ||
+                  Q.rowsize() == Q.colsize());
 
         const int cs = M::_colsize;
-        const int rs = Sizes<M::_rowsize,V::_size>::size;
+        const int rs = V::_size;
         typedef typename M::cview_type Mv;
         typedef typename V::const_cview_type Vv;
         TMV_MAYBE_REF(M,Mv) Qv = Q.cView();
@@ -281,13 +373,12 @@ namespace tmv {
         TMVStaticAssert((Traits2<
                          typename M::value_type,
                          typename V::value_type>::samebase));
-        TMVAssert(Q.colsize() >= Q.rowsize());
-        TMVAssert(beta.size() == Q.rowsize());
-        TMVStaticAssert((Sizes<M::_rowsize,V::_size>::same));
-        TMVAssert(Q.rowsize() == beta.size());
+        TMVAssert(Q.colsize() >= beta.size());
+        TMVAssert(Q.rowsize() == beta.size() ||
+                  Q.rowsize() == Q.colsize());
 
         const int cs = M::_colsize;
-        const int rs = Sizes<M::_rowsize,V::_size>::size;
+        const int rs = V::_size;
         typedef typename M::cview_type Mv;
         typedef typename V::const_cview_type Vv;
         TMV_MAYBE_REF(M,Mv) Qv = Q.cView();
@@ -295,12 +386,9 @@ namespace tmv {
         UnpackQ_Helper<-2,cs,rs,Mv,Vv>::call(Qv,betav);
     }
 
-#undef TMV_QR_RECURSE
-#undef TMV_QR_BLOCKSIZE
-#undef TMV_QR_INLINE_MV
-#undef TMV_QR_INLINE_MM
-
 } // namespace tmv
+
+#undef TMV_QR_BLOCKSIZE
 
 #endif
 

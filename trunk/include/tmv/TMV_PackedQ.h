@@ -117,85 +117,621 @@
 #include "TMV_BaseMatrix_Rec.h"
 #include "TMV_BaseVector.h"
 #include "TMV_UnpackQ.h"
+#include "TMV_Householder.h"
+
+#ifdef PRINTALGO_QR
+#include <iostream>
+#include "TMV_MatrixIO.h"
+#include "TMV_VectorIO.h"
+#endif
+
+// BLOCKSIZE is the block size to use in algo 21
+#define TMV_QR_BLOCKSIZE 48
 
 namespace tmv {
 
-    // TODO: Move this to another file and add block, inst, inline, etc.
-    template <class M1, class V1, class M2>
-    static void PackedQ_MultEq(
-        const M1& Q, const V1& beta, BaseMatrix_Rec_Mutable<M2>& m)
-    {
-        typedef typename V1::value_type T1;
+    // 
+    // First the basic functionality of doing the PackedQ multiplication
+    // or division without having to unpack the full Q matrix.
+    //
 
-        TMVAssert(Q.colsize() >= Q.rowsize());
-        TMVAssert(Q.rowsize() == beta.size());
-        const int M = Q.colsize();
-        const int N = Q.rowsize();
-        typedef typename M1::const_col_sub_type M1c;
-        typedef typename M2::rowrange_type M2r;
-        for(int j=N-1;j>=0;--j) if (beta(j) != T1(0)) {
-            Householder<M1c> H(Q.col(j,j+1,M),beta(j));
-            M2r mr = m.rowRange(j,M);
-            H.multEq(mr);
+    // Defined in TMV_PackedQ.cpp
+    template <class T1, int C1, class RT1, class T2>
+    void InstPackedQ_MultEq(
+        const ConstMatrixView<T1,C1>& Q, const ConstVectorView<RT1>& beta,
+        MatrixView<T2> m2);
+    template <class T1, int C1, class RT1, class T2>
+    void InstPackedQ_LDivEq(
+        const ConstMatrixView<T1,C1>& Q, const ConstVectorView<RT1>& beta,
+        MatrixView<T2> m2);
+    template <class T1, int C1, class RT1, class T2>
+    void InstPackedQ_MultEq(
+        const ConstMatrixView<T1,C1>& Q, const ConstVectorView<RT1>& beta,
+        VectorView<T2> v2);
+    template <class T1, int C1, class RT1, class T2>
+    void InstPackedQ_LDivEq(
+        const ConstMatrixView<T1,C1>& Q, const ConstVectorView<RT1>& beta,
+        VectorView<T2> v2);
+
+    // cs,rs refer to M1.  xs is the other dimension of M2
+    template <int algo, bool div, int cs, int rs, int xs, class M1, class V1, class M2>
+    struct PackedQ_MultEq_Helper;
+
+    // algo 0: Trivial, nothing to do (M == 0 or N == 0 or K == 0)
+    template <bool div, int cs, int rs, int xs, class M1, class V1, class M2>
+    struct PackedQ_MultEq_Helper<0,div,cs,rs,xs,M1,V1,M2>
+    { static TMV_INLINE void call(const M1& , const V1& , M2& ) {} };
+
+    // algo 11: Normal case
+    template <int cs, int rs, int xs, class M1, class V1, class M2>
+    struct PackedQ_MultEq_Helper<11,false,cs,rs,xs,M1,V1,M2>
+    {
+        static void call(const M1& Q, const V1& beta, M2& m2)
+        {
+#ifdef PRINTALGO_QR
+            std::cout<<"PackedQ_MultEq algo 11: div,cs,rs,xs = "<<
+                false<<','<<cs<<','<<rs<<','<<xs<<std::endl;
+            //std::cout<<"Q = "<<Q<<std::endl;
+            //std::cout<<"beta = "<<beta<<std::endl;
+            //std::cout<<"m2 = "<<m2<<std::endl;
+#endif
+            typedef typename M1::real_type RT;
+
+            const int M = cs==UNKNOWN ? Q.colsize() : cs;
+            const int N = rs==UNKNOWN ? Q.rowsize() : rs;
+            typedef typename M1::const_col_sub_type M1c;
+            typedef typename M2::row_type M2r;
+            typedef typename M2::rowrange_type M2rr;
+
+            typedef typename M2::value_type T2;
+            typedef typename VCopyHelper<T2,xs,false>::type V3;
+            V3 temp = VectorSizer<T2>(m2.rowsize());
+
+            for(int j=N-1;j>=0;--j) if (beta(j) != RT(0)) {
+                M1c u = Q.col(j,j+1,M);
+                M2r m2a = m2.row(j);
+                M2rr m2b = m2.rowRange(j+1,M);
+                HouseholderMultEq(u,beta(j),m2a,m2b,temp);
+            }
         }
+    };
+    template <int cs, int rs, int xs, class M1, class V1, class M2>
+    struct PackedQ_MultEq_Helper<11,true,cs,rs,xs,M1,V1,M2>
+    {
+        static void call(const M1& Q, const V1& beta, M2& m2)
+        {
+#ifdef PRINTALGO_QR
+            std::cout<<"PackedQ_MultEq algo 11: div,cs,rs,xs = "<<
+                true<<','<<cs<<','<<rs<<','<<xs<<std::endl;
+            //std::cout<<"Q = "<<Q<<std::endl;
+            //std::cout<<"beta = "<<beta<<std::endl;
+            //std::cout<<"m2 = "<<m2<<std::endl;
+#endif
+            typedef typename M1::real_type RT;
+
+            const int M = cs==UNKNOWN ? Q.colsize() : cs;
+            const int N = rs==UNKNOWN ? Q.rowsize() : rs;
+            typedef typename M1::const_col_sub_type M1c;
+            typedef typename M2::row_type M2r;
+            typedef typename M2::rowrange_type M2rr;
+
+            typedef typename M2::value_type T2;
+            typedef typename VCopyHelper<T2,xs,false>::type V3;
+            V3 temp = VectorSizer<T2>(m2.rowsize());
+
+            for(int j=0;j<N;++j) if (beta(j) != RT(0)) {
+                M1c u = Q.col(j,j+1,M);
+                M2r m2a = m2.row(j);
+                M2rr m2b = m2.rowRange(j+1,M);
+                HouseholderMultEq(u,beta(j),m2a,m2b,temp);
+            }
+        }
+    };
+
+    // algo 12: Construct Q directly and multiply.
+    template <bool div, int cs, int rs, int xs, class M1, class V1, class M2>
+    struct PackedQ_MultEq_Helper<12,div,cs,rs,xs,M1,V1,M2>
+    {
+        static void call(const M1& Q, const V1& beta, M2& m2)
+        {
+            const int M = cs==UNKNOWN ? Q.colsize() : cs;
+            const int N = rs==UNKNOWN ? Q.rowsize() : rs;
+#ifdef PRINTALGO_QR
+            std::cout<<"PackedQ_MultEq algo 12: div,cs,rs,xs = "<<
+                true<<','<<cs<<','<<rs<<','<<xs<<std::endl;
+            //std::cout<<"Q = "<<Q<<std::endl;
+            //std::cout<<"beta = "<<beta<<std::endl;
+            //std::cout<<"m2 = "<<m2<<std::endl;
+#endif
+            typedef typename M1::real_type RT;
+            typedef typename M1::value_type T1;
+
+            typedef typename MCopyHelper<T1,Rec,cs,cs,false,false>::type M1f;
+            M1f Qfull = MatrixSizer<T1>(M,M);
+            Qfull.colRange(0,N) = Q;
+            Qfull.colRange(N,M).setZero();
+
+            UnpackQ(Qfull,beta);
+
+            typename M2::copy_type m2c = m2;
+            m2 = Maybe<div>::transpose(Qfull) * m2c;
+        }
+    };
+
+    // algo 21: Block algorithm
+    template <int cs, int rs, int xs, class M1, class V1, class M2>
+    struct PackedQ_MultEq_Helper<21,false,cs,rs,xs,M1,V1,M2>
+    {
+        static void call(const M1& Q, const V1& beta, M2& m2)
+        {
+#ifdef PRINTALGO_QR
+            std::cout<<"PackedQ_MultEq algo 21: div,cs,rs,xs = "<<
+                false<<','<<cs<<','<<rs<<','<<xs<<std::endl;
+            //std::cout<<"Q = "<<Q<<std::endl;
+            //std::cout<<"beta = "<<beta<<std::endl;
+            //std::cout<<"m2 = "<<m2<<std::endl;
+            //typedef typename M2::copy_type M2c;
+            //M2c m2c = m2;
+#endif
+            typedef typename M1::value_type T1;
+            typedef typename M2::value_type T2;
+
+            const int M = cs==UNKNOWN ? Q.colsize() : cs;
+            const int N = rs==UNKNOWN ? Q.rowsize() : rs;
+            const int Nb = TMV_QR_BLOCKSIZE;
+            const int s1 = IntTraits2<Nb,rs>::min;
+            const int N1 = TMV_MIN(Nb,N);
+            typedef typename MCopyHelper<T1,UpperTri,s1,s1,false,false>::type Ztype;
+            Ztype BaseZ(MatrixSizer<T1>(N1,N1));
+
+            typedef typename MCopyHelper<T2,Rec,s1,M2::_rowsize,false,false>::type M3;
+            typedef typename M3::rowrange_type M3r;
+            M3 tempBase = MatrixSizer<T2>(N1,m2.rowsize());
+
+            typedef typename Ztype::subtrimatrix_type Zs;
+            typedef typename M1::const_submatrix_type M1s;
+            typedef typename V1::const_subvector_type V1s;
+            typedef typename M2::rowrange_type M2r;
+
+            for(int j2=N;j2>0;) {
+                int j1 = j2 > Nb ? j2-Nb : 0;
+                M1s Y = Q.subMatrix(j1,M,j1,j2);
+                Zs Z = BaseZ.subTriMatrix(0,j2-j1);
+                V1s b1 = beta.subVector(j1,j2);
+                M2r m2r = m2.rowRange(j1,M);
+                M3r temp = tempBase.rowRange(0,j2-j1);
+
+                BlockHouseholderMakeZ(Y,Z,b1);
+                BlockHouseholderLMult(Y,Z,m2r,temp);
+                j2 = j1;
+            }
+#ifdef PRINTALGO_QR
+            //std::cout<<"m2 => "<<m2<<std::endl;
+            //PackedQ_MultEq_Helper<11,false,cs,rs,xs,M1,V1,M2c>::call(
+                //Q,beta,m2c);
+            //std::cout<<"Correct m2 = "<<m2c<<std::endl;
+#endif
+        }
+    };
+    template <int cs, int rs, int xs, class M1, class V1, class M2>
+    struct PackedQ_MultEq_Helper<21,true,cs,rs,xs,M1,V1,M2>
+    {
+        static void call(const M1& Q, const V1& beta, M2& m2)
+        {
+#ifdef PRINTALGO_QR
+            std::cout<<"PackedQ_MultEq algo 21: div,cs,rs,xs = "<<
+                true<<','<<cs<<','<<rs<<','<<xs<<std::endl;
+            //std::cout<<"Q = "<<Q<<std::endl;
+            //std::cout<<"beta = "<<beta<<std::endl;
+            //std::cout<<"m2 = "<<m2<<std::endl;
+#endif
+            typedef typename M1::value_type T1;
+            typedef typename M2::value_type T2;
+
+            const int M = cs==UNKNOWN ? Q.colsize() : cs;
+            const int N = rs==UNKNOWN ? Q.rowsize() : rs;
+            const int Nb = TMV_QR_BLOCKSIZE;
+            const int s1 = IntTraits2<Nb,rs>::min;
+            const int N1 = TMV_MIN(Nb,N);
+            typedef typename MCopyHelper<T1,UpperTri,s1,s1,false,false>::type Ztype;
+            Ztype BaseZ(MatrixSizer<T1>(N1,N1));
+
+            typedef typename MCopyHelper<T2,Rec,s1,M2::_rowsize,false,false>::type M3;
+            typedef typename M3::rowrange_type M3r;
+            M3 tempBase = MatrixSizer<T2>(N1,m2.rowsize());
+
+            typedef typename Ztype::subtrimatrix_type Zs;
+            typedef typename M1::const_submatrix_type M1s;
+            typedef typename V1::const_subvector_type V1s;
+            typedef typename M2::rowrange_type M2r;
+
+            for(int j1=0;j1<N;) {
+                int j2 = TMV_MIN(j1+Nb,N);
+                M1s Y = Q.subMatrix(j1,M,j1,j2);
+                Zs Z = BaseZ.subTriMatrix(0,j2-j1);
+                V1s b1 = beta.subVector(j1,j2);
+                M2r m2r = m2.rowRange(j1,M);
+                M3r temp = tempBase.rowRange(0,j2-j1);
+
+                BlockHouseholderMakeZ(Y,Z,b1);
+                BlockHouseholderLDiv(Y,Z,m2r,temp);
+                j1 = j2;
+            }
+        }
+    };
+
+    // algo 27: Block algorithm -- single block
+    template <int cs, int rs, int xs, class M1, class V1, class M2>
+    struct PackedQ_MultEq_Helper<27,false,cs,rs,xs,M1,V1,M2>
+    {
+        static void call(const M1& Q, const V1& beta, M2& m2)
+        {
+#ifdef PRINTALGO_QR
+            std::cout<<"PackedQ_MultEq algo 27: div,cs,rs,xs = "<<
+                false<<','<<cs<<','<<rs<<','<<xs<<std::endl;
+            //std::cout<<"Q = "<<Q<<std::endl;
+            //std::cout<<"beta = "<<beta<<std::endl;
+            //std::cout<<"m2 = "<<m2<<std::endl;
+#endif
+            typedef typename M1::value_type T1;
+            typedef typename M2::value_type T2;
+
+            const int N = rs==UNKNOWN ? Q.rowsize() : rs;
+
+            typedef typename MCopyHelper<T1,UpperTri,rs,rs,false,false>::type Ztype;
+            Ztype Z(MatrixSizer<T1>(N,N));
+
+            typedef typename MCopyHelper<T2,Rec,rs,M2::_rowsize,false,false>::type M3;
+            M3 temp = MatrixSizer<T2>(N,m2.rowsize());
+
+            BlockHouseholderMakeZ(Q,Z,beta);
+            BlockHouseholderLMult(Q,Z,m2,temp);
+        }
+    };
+    template <int cs, int rs, int xs, class M1, class V1, class M2>
+    struct PackedQ_MultEq_Helper<27,true,cs,rs,xs,M1,V1,M2>
+    {
+        static void call(const M1& Q, const V1& beta, M2& m2)
+        {
+#ifdef PRINTALGO_QR
+            std::cout<<"PackedQ_MultEq algo 27: div,cs,rs,xs = "<<
+                true<<','<<cs<<','<<rs<<','<<xs<<std::endl;
+            //std::cout<<"Q = "<<Q<<std::endl;
+            //std::cout<<"beta = "<<beta<<std::endl;
+            //std::cout<<"m2 = "<<m2<<std::endl;
+#endif
+            typedef typename M1::value_type T1;
+            typedef typename M2::value_type T2;
+
+            const int N = rs==UNKNOWN ? Q.rowsize() : rs;
+
+            typedef typename MCopyHelper<T1,UpperTri,rs,rs,false,false>::type Ztype;
+            Ztype Z(MatrixSizer<T1>(N,N));
+
+            typedef typename MCopyHelper<T2,Rec,rs,xs,false,false>::type M3;
+            M3 temp = MatrixSizer<T2>(N,m2.rowsize());
+
+            BlockHouseholderMakeZ(Q,Z,beta);
+            BlockHouseholderLDiv(Q,Z,m2,temp);
+        }
+    };
+
+    // algo 31: Decide which algorithm to use from runtime size
+    template <bool div, int cs, int rs, int xs, class M1, class V1, class M2>
+    struct PackedQ_MultEq_Helper<31,div,cs,rs,xs,M1,V1,M2>
+    {
+        static void call(const M1& Q, const V1& beta, M2& m2)
+        {
+            const int M = cs==UNKNOWN ? int(Q.colsize()) : cs;
+            const int N = rs==UNKNOWN ? int(Q.rowsize()) : rs;
+            const int K = xs==UNKNOWN ? int(m2.rowsize()) : xs;
+#ifdef PRINTALGO_QR
+            std::cout<<"PackedQ_MultEq algo 31: div,cs,rs,xs = "<<
+                div<<','<<cs<<','<<rs<<','<<xs<<std::endl;
+#endif
+            typedef typename M1::value_type T;
+            const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
+            const int csrs = IntTraits2<cs,rs>::prod;
+            const int algo27 =
+                csrs != UNKNOWN && csrs <= l2cache ? 0 :
+                (rs == UNKNOWN || rs <= 128) ? 27 : 0;
+            const int algo21 =
+                csrs != UNKNOWN && csrs <= l2cache ? 0 :
+                (rs == UNKNOWN || rs > 128) ? 21 : 0;
+
+            // algo 12 uses more floating point operations than algo 11.
+            // However, algo 11 is all Level 2 calculations, while algo 12
+            // ens with a direct matrix-matrix product, so can use Level 3
+            // operations.  This can make it faster for some matrix sizes.
+            // We calculate the total ops for algo 11 and 12, but we discount
+            // the level 3 ops by 25% when M is < 32 and 50% for higher M's.
+            // If M < 16, level 3 isn't really any faster, so just use algo 11.
+            //
+            // Algo 11: nops = (2M-N)NK
+            //
+            // Also 12: nops = 2(M-N)MN + 2N^3/3 + x M^2K
+            // x is our discount factor.  0.75 or 0.5.
+            //
+            // nops_11 <? nops_12
+            // 2MNK - N^2K <? 2M^2N - 2MN^2 + 2N^3/3 + xM^2K
+            //
+            // 2MN(K-M) <? N^2*(K-2M+2N/3) + xM^2K
+            
+            if (M*N <= l2cache)
+                if (M < 16 ||
+                    2*M*N*(K-M) < N*N*(K-2*M+2*N/3) + (
+                        M < 32 ? M*M*K*3/4 : M*M*K/2 ) ) 
+                    PackedQ_MultEq_Helper<11,div,cs,rs,xs,M1,V1,M2>::call(
+                        Q,beta,m2);
+                else
+                    PackedQ_MultEq_Helper<12,div,cs,rs,xs,M1,V1,M2>::call(
+                        Q,beta,m2);
+            else if (N <= 128)
+                PackedQ_MultEq_Helper<algo27,div,cs,rs,xs,M1,V1,M2>::call(
+                    Q,beta,m2);
+            else
+                PackedQ_MultEq_Helper<algo21,div,cs,rs,xs,M1,V1,M2>::call(
+                    Q,beta,m2);
+        }
+    };
+
+    // algo 32: Decide which algorithm to use from runtime size,
+    // all sizes known, csrs <= l2cache, cs >= 16
+    template <bool div, int cs, int rs, int xs, class M1, class V1, class M2>
+    struct PackedQ_MultEq_Helper<32,div,cs,rs,xs,M1,V1,M2>
+    {
+        static void call(const M1& Q, const V1& beta, M2& m2)
+        {
+            TMVStaticAssert(cs != UNKNOWN);
+            TMVStaticAssert(rs != UNKNOWN);
+            TMVStaticAssert(xs != UNKNOWN);
+            TMVStaticAssert(cs >= 16);
+
+#ifdef PRINTALGO_QR
+            std::cout<<"PackedQ_MultEq algo 32: div,cs,rs,xs = "<<
+                div<<','<<cs<<','<<rs<<','<<xs<<std::endl;
+#endif
+            typedef typename M1::value_type T;
+            const int algo1 = 
+                2*cs*rs*(xs-cs) < rs*rs*(xs-2*cs+2*rs/3) + (
+                    cs < 32 ? cs*cs*xs*3/4 : cs*cs*xs/2 ) ? 11 : 12;
+            PackedQ_MultEq_Helper<algo1,div,cs,rs,xs,M1,V1,M2>::call(
+                Q,beta,m2);
+        }
+    };
+
+    // algo 90: call InstPackedQ_MultEq
+    template <int cs, int rs, int xs, class M1, class V1, class M2>
+    struct PackedQ_MultEq_Helper<90,false,cs,rs,xs,M1,V1,M2>
+    {
+        static TMV_INLINE void call(const M1& Q, const V1& beta, M2& m2)
+        { InstPackedQ_MultEq(Q.xView(),beta.xView(),m2.xView()); }
+    };
+    template <int cs, int rs, int xs, class M1, class V1, class M2>
+    struct PackedQ_MultEq_Helper<90,true,cs,rs,xs,M1,V1,M2>
+    {
+        static TMV_INLINE void call(const M1& Q, const V1& beta, M2& m2)
+        { InstPackedQ_LDivEq(Q.xView(),beta.xView(),m2.xView()); }
+    };
+
+    // algo 91: call InstPackedQ_MultEq for Vector m2
+    template <int cs, int rs, class M1, class V1, class M2>
+    struct PackedQ_MultEq_Helper<91,false,cs,rs,1,M1,V1,M2>
+    {
+        static TMV_INLINE void call(const M1& Q, const V1& beta, M2& m2)
+        { InstPackedQ_MultEq(Q.xView(),beta.xView(),m2.col(0).xView()); }
+    };
+    template <int cs, int rs, class M1, class V1, class M2>
+    struct PackedQ_MultEq_Helper<91,true,cs,rs,1,M1,V1,M2>
+    {
+        static TMV_INLINE void call(const M1& Q, const V1& beta, M2& m2)
+        { InstPackedQ_LDivEq(Q.xView(),beta.xView(),m2.col(0).xView()); }
+    };
+
+    // algo 97: Conjugate
+    template <bool div, int cs, int rs, int xs, class M1, class V1, class M2>
+    struct PackedQ_MultEq_Helper<97,div,cs,rs,xs,M1,V1,M2>
+    {
+        static TMV_INLINE void call(const M1& Q, const V1& beta, M2& m2)
+        {
+            typedef typename M1::const_conjugate_type M1c;
+            typedef typename M2::conjugate_type M2c;
+            M1c Qc = Q.conjugate();
+            M2c m2c = m2.conjugate();
+            PackedQ_MultEq_Helper<-2,div,cs,rs,xs,M1c,V1,M2c>::call(Qc,beta,m2c);
+        }
+    };
+
+    // algo -3: Determine which algorithm to use
+    template <bool div, int cs, int rs, int xs, class M1, class V1, class M2>
+    struct PackedQ_MultEq_Helper<-3,div,cs,rs,xs,M1,V1,M2>
+    {
+        static TMV_INLINE void call(const M1& Q, const V1& beta, M2& m2)
+        {
+#if 0
+            const int algo = 21;
+#else
+            typedef typename M2::value_type T;
+            const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
+            const int csrs = IntTraits2<cs,rs>::prod;
+            const int algo =
+                cs == 0 || rs == 0 || cs == 1 ? 0 :
+                TMV_OPT == 0 ? 11 :
+                rs == UNKNOWN ? 31 :
+                cs == UNKNOWN ? 31 :
+                csrs <= l2cache ? (
+                    cs < 16 ? 11 : xs == UNKNOWN ? 31 : 32 ) :
+                rs <= 128 ? 27 : 21;
+#endif
+#ifdef PRINTALGO_QR
+            std::cout<<"Inline PackedQ_MultEq\n";
+            std::cout<<"div,cs,rs,xs = "<<div<<','<<cs<<','<<rs<<std::endl;
+            std::cout<<"Q = "<<TMV_Text(Q)<<std::endl;
+            std::cout<<"beta = "<<TMV_Text(beta)<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+            //std::cout<<"Q = "<<Q<<std::endl;
+            //std::cout<<"beta = "<<beta<<std::endl;
+            //std::cout<<"m2 = "<<m2<<std::endl;
+#endif
+            PackedQ_MultEq_Helper<algo,div,cs,rs,xs,M1,V1,M2>::call(Q,beta,m2);
+#ifdef PRINTALGO_QR
+            //std::cout<<"m2 => "<<m2<<std::endl;
+#endif
+        }
+    };
+
+    // algo -2: Check for inst
+    template <bool div, int cs, int rs, int xs, class M1, class V1, class M2>
+    struct PackedQ_MultEq_Helper<-2,div,cs,rs,xs,M1,V1,M2>
+    {
+        static TMV_INLINE void call(const M1& Q, const V1& beta, M2& m2)
+        {
+            typedef typename M1::value_type T1;
+            typedef typename M2::value_type T2;
+            const bool inst = 
+                (cs == UNKNOWN || cs > 16) &&
+                (rs == UNKNOWN || rs > 16) &&
+                (xs == UNKNOWN || xs > 16 || xs == 1) &&
+#ifdef TMV_INST_MIX
+                Traits2<T1,T2>::samebase &&
+#else
+                Traits2<T1,T2>::sametype &&
+#endif
+                M1::_colmajor && 
+                Traits<T1>::isinst;
+            const int algo = 
+                cs == 0 || rs == 0 || xs == 0 ? 0 : 
+                M2::_conj ? 97 :
+                inst ? (xs == 1 ? 91 : 90) :
+                -3;
+            PackedQ_MultEq_Helper<algo,div,cs,rs,xs,M1,V1,M2>::call(Q,beta,m2);
+        }
+    };
+
+    template <bool div, int cs, int rs, int xs, class M1, class V1, class M2>
+    struct PackedQ_MultEq_Helper<-1,div,cs,rs,xs,M1,V1,M2>
+    {
+        static TMV_INLINE void call(const M1& Q, const V1& beta, M2& m2)
+        { PackedQ_MultEq_Helper<-2,div,cs,rs,xs,M1,V1,M2>::call(Q,beta,m2); }
+    };
+
+    template <class M1, class V1, class M2>
+    static inline void InlinePackedQ_MultEq(
+        const BaseMatrix_Rec<M1>& Q, const BaseVector_Calc<V1>& beta,
+        BaseMatrix_Rec_Mutable<M2>& m2)
+    {
+        TMVStaticAssert((Sizes<M2::_colsize,M1::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_rowsize,V1::_size>::same));
+        const int cs = Sizes<M2::_colsize,M1::_colsize>::size;
+        const int rs = Sizes<M1::_rowsize,V1::_size>::size;
+        const int xs = M2::_rowsize;
+        typedef typename M1::const_cview_type M1v;
+        typedef typename V1::const_cview_type V1v;
+        typedef typename M2::cview_type M2v;
+        TMV_MAYBE_CREF(M1,M1v) Qv = Q.cView();
+        TMV_MAYBE_CREF(V1,V1v) betav = beta.cView();
+        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
+        PackedQ_MultEq_Helper<-3,false,cs,rs,xs,M1v,V1,M2v>::call(Qv,betav,m2v);
     }
 
     template <class M1, class V1, class M2>
-    static void PackedQ_LDivEq(
-        const M1& Q, const V1& beta, BaseMatrix_Rec_Mutable<M2>& m)
+    static inline void PackedQ_MultEq(
+        const BaseMatrix_Rec<M1>& Q, const BaseVector_Calc<V1>& beta,
+        BaseMatrix_Rec_Mutable<M2>& m2)
     {
-        typedef typename V1::value_type T1;
-
-        TMVAssert(Q.colsize() >= Q.rowsize());
-        TMVAssert(Q.rowsize() == beta.size());        
-        const int M = Q.colsize();
-        const int N = Q.rowsize();
-        typedef typename M1::const_col_sub_type M1c;
-        typedef typename M2::rowrange_type M2r;
-        for(int j=0;j<N;++j) if (beta(j) != T1(0)) {
-            Householder<M1c> H(Q.col(j,j+1,M),beta(j));
-            M2r mr = m.rowRange(j,M);
-            H.multEq(mr);
-        }
+        TMVStaticAssert((Sizes<M2::_colsize,M1::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_rowsize,V1::_size>::same));
+        const int cs = Sizes<M2::_colsize,M1::_colsize>::size;
+        const int rs = Sizes<M1::_rowsize,V1::_size>::size;
+        const int xs = M2::_rowsize;
+        typedef typename M1::const_cview_type M1v;
+        typedef typename V1::const_cview_type V1v;
+        typedef typename M2::cview_type M2v;
+        TMV_MAYBE_CREF(M1,M1v) Qv = Q.cView();
+        TMV_MAYBE_CREF(V1,V1v) betav = beta.cView();
+        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
+        PackedQ_MultEq_Helper<-2,false,cs,rs,xs,M1v,V1,M2v>::call(Qv,betav,m2v);
     }
 
     template <class M1, class V1, class V2>
-    static void PackedQ_MultEq(
-        const M1& Q, const V1& beta, BaseVector_Mutable<V2>& v)
+    static inline void InlinePackedQ_MultEq(
+        const BaseMatrix_Rec<M1>& Q, const BaseVector_Calc<V1>& beta,
+        BaseVector_Mutable<V2>& v2)
     {
-        typedef typename V1::value_type T1;
-
-        TMVAssert(Q.colsize() >= Q.rowsize());
-        TMVAssert(Q.rowsize() == beta.size());
-        const int M = Q.colsize();
-        const int N = Q.rowsize();
-        typedef typename M1::const_col_sub_type M1c;
-        typedef typename V2::subvector_type V2s;
-        for(int j=N-1;j>=0;--j) if (beta(j) != T1(0)) {
-            Householder<M1c> H(Q.col(j,j+1,M),beta(j));
-            V2s vs = v.subVector(j,M);
-            H.multEq(vs);
-        }
+        typename VVO<V2>::cv m2 = ColVectorViewOf(v2);
+        InlinePackedQ_MultEq(Q,beta,m2);
     }
 
     template <class M1, class V1, class V2>
-    static void PackedQ_LDivEq(
-        const M1& Q, const V1& beta, BaseVector_Mutable<V2>& v)
+    static inline void PackedQ_MultEq(
+        const BaseMatrix_Rec<M1>& Q, const BaseVector_Calc<V1>& beta,
+        BaseVector_Mutable<V2>& v2)
     {
-        typedef typename V1::value_type T1;
-
-        TMVAssert(Q.colsize() >= Q.rowsize());
-        TMVAssert(Q.rowsize() == beta.size());        
-        const int M = Q.colsize();
-        const int N = Q.rowsize();
-        typedef typename M1::const_col_sub_type M1c;
-        typedef typename V2::subvector_type V2s;
-        for(int j=0;j<N;++j) if (beta(j) != T1(0)) {
-            Householder<M1c> H(Q.col(j,j+1,M),beta(j));
-            V2s vs = v.subVector(j,M);
-            H.multEq(vs);
-        }               
+        typename VVO<V2>::cv m2 = ColVectorViewOf(v2);
+        PackedQ_MultEq(Q,beta,m2);
     }
+
+    template <class M1, class V1, class M2>
+    static inline void InlinePackedQ_LDivEq(
+        const BaseMatrix_Rec<M1>& Q, const BaseVector_Calc<V1>& beta,
+        BaseMatrix_Rec_Mutable<M2>& m2)
+    {
+        TMVStaticAssert((Sizes<M2::_colsize,M1::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_rowsize,V1::_size>::same));
+        const int cs = Sizes<M2::_colsize,M1::_colsize>::size;
+        const int rs = Sizes<M1::_rowsize,V1::_size>::size;
+        const int xs = M2::_rowsize;
+        typedef typename M1::const_cview_type M1v;
+        typedef typename V1::const_cview_type V1v;
+        typedef typename M2::cview_type M2v;
+        TMV_MAYBE_CREF(M1,M1v) Qv = Q.cView();
+        TMV_MAYBE_CREF(V1,V1v) betav = beta.cView();
+        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
+        PackedQ_MultEq_Helper<-3,true,cs,rs,xs,M1v,V1,M2v>::call(Qv,betav,m2v);
+    }
+
+    template <class M1, class V1, class M2>
+    static inline void PackedQ_LDivEq(
+        const BaseMatrix_Rec<M1>& Q, const BaseVector_Calc<V1>& beta,
+        BaseMatrix_Rec_Mutable<M2>& m2)
+    {
+        TMVStaticAssert((Sizes<M2::_colsize,M1::_colsize>::same));
+        TMVStaticAssert((Sizes<M1::_rowsize,V1::_size>::same));
+        const int cs = Sizes<M2::_colsize,M1::_colsize>::size;
+        const int rs = Sizes<M1::_rowsize,V1::_size>::size;
+        const int xs = M2::_rowsize;
+        typedef typename M1::const_cview_type M1v;
+        typedef typename V1::const_cview_type V1v;
+        typedef typename M2::cview_type M2v;
+        TMV_MAYBE_CREF(M1,M1v) Qv = Q.cView();
+        TMV_MAYBE_CREF(V1,V1v) betav = beta.cView();
+        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
+        PackedQ_MultEq_Helper<-2,true,cs,rs,xs,M1v,V1,M2v>::call(Qv,betav,m2v);
+    }
+
+    template <class M1, class V1, class V2>
+    static inline void InlinePackedQ_LDivEq(
+        const BaseMatrix_Rec<M1>& Q, const BaseVector_Calc<V1>& beta,
+        BaseVector_Mutable<V2>& v2)
+    {
+        typename VVO<V2>::cv m2 = ColVectorViewOf(v2);
+        InlinePackedQ_LDivEq(Q,beta,m2);
+    }
+
+    template <class M1, class V1, class V2>
+    static inline void PackedQ_LDivEq(
+        const BaseMatrix_Rec<M1>& Q, const BaseVector_Calc<V1>& beta,
+        BaseVector_Mutable<V2>& v2)
+    {
+        typename VVO<V2>::cv m2 = ColVectorViewOf(v2);
+        PackedQ_LDivEq(Q,beta,m2);
+    }
+
+
+    // 
+    // PackedQ class 
+    //
 
     template <class M, class V> 
     class PackedQ;
@@ -280,6 +816,16 @@ namespace tmv {
             UnpackQ(m2,beta);
         }
 
+        template <class M2>
+        void makeFullQ(BaseMatrix_Rec_Mutable<M2>& m2) const
+        {
+            TMVAssert(m2.colsize() == Q.colsize());
+            TMVAssert(m2.rowsize() == Q.colsize());
+
+            m2.colRange(0,Q.rowsize()) = Q;
+            UnpackQ(m2,beta);
+        }
+
 
         // 
         // Auxilliary functions
@@ -287,7 +833,7 @@ namespace tmv {
 
         TMV_INLINE size_t colsize() const { return Q.colsize(); }
         TMV_INLINE size_t rowsize() const { return Q.rowsize(); }
-        
+
     private : 
 
         const M& Q;
@@ -339,7 +885,7 @@ namespace tmv {
         const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
     { MultMV<add>(x,m1,v2,v3); }
 
-    
+
     //
     // v3 = v1 * Q
     // v3 = QT * v1
@@ -379,7 +925,7 @@ namespace tmv {
         const Scaling<ix,T>& x, const BaseVector<V1>& v1, 
         const PackedQ<M2,V2>& m2, BaseVector_Mutable<V3>& v3)
     { MultVM<add>(x,v1,m2,v3); }
- 
+
 
     //
     // v *= Q
@@ -536,8 +1082,8 @@ namespace tmv {
             Scale(x,m3);
         } else {
             TMVAssert(m3.size() > m2.size());
-            m3.rowRange(0,m2.size()) = m2;
-            m3.rowRange(m2.size(),m3.size()).setZero();
+            m3.rowRange(0,m2.colsize()) = m2;
+            m3.rowRange(m2.colsize(),m3.colsize()).setZero();
             PackedQ_MultEq(m1.getQ(),m1.getBeta(),m3.mat());
             Scale(x,m3);
         }
@@ -553,7 +1099,7 @@ namespace tmv {
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     { MultMV<add>(x,m1,m2,m3); }
 
-    
+
     //
     // m3 = m1 * Q
     // m3t = Qt * m1t
@@ -579,7 +1125,7 @@ namespace tmv {
             const int cs = M1::_colsize;
             const int rs = M1::_rowsize;
             const int rm = M1::_rowmajor;
-            typename MCopyHelper<T12,Rec,cs,rs,rm,false>::type m1a =
+            typename MCopyHelper<T12,Rec,rs,cs,rm,false>::type m1a =
                 m1.adjoint();
             PackedQ_LDivEq(m2.getQ(),m2.getBeta(),m1a);
             m3.adjoint() = x * m1a.rowRange(0,m3.colsize());
@@ -595,7 +1141,7 @@ namespace tmv {
         const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1, 
         const PackedQ<M2,V2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     { MultMM<add>(x,m1,m2,m3); }
- 
+
 
     //
     // m *= Q
@@ -697,8 +1243,8 @@ namespace tmv {
             Scale(x,m3);
         } else {
             TMVAssert(m3.size() > m1.size());
-            m3.rowRange(0,m1.size()) = m1;
-            m3.rowRange(m1.size(),m3.size()).setZero();
+            m3.rowRange(0,m1.colsize()) = m1;
+            m3.rowRange(m1.colsize(),m3.colsize()).setZero();
             PackedQ_MultEq(m2.getQ(),m2.getBeta(),m3a);
             Scale(x,m3);
         }
@@ -736,7 +1282,7 @@ namespace tmv {
     { RDivEq(m1,m2); }
 
 
-    
+
     //
     // TMV_Text
     //
@@ -754,6 +1300,8 @@ namespace tmv {
 
 
 } // namespace mv
+
+#undef TMV_QR_BLOCKSIZE
 
 
 #endif

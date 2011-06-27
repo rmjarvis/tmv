@@ -423,6 +423,7 @@ namespace tmv {
             itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) 
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         template <int A2>
@@ -430,6 +431,7 @@ namespace tmv {
             itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) 
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         template <int N2, int S2, int A2>
@@ -438,6 +440,7 @@ namespace tmv {
             itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) 
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         template <int N2, int S2, int A2>
@@ -445,6 +448,7 @@ namespace tmv {
             itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) 
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         ~ConstSmallVectorView() {
@@ -625,6 +629,7 @@ namespace tmv {
             itsv(v2.ptr()), itssize(v2.size()), itsstep(v2.step())
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         template <int A2>
@@ -632,6 +637,7 @@ namespace tmv {
             itsv(v2.ptr()), itssize(v2.size()), itsstep(v2.step())
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         ~SmallVectorView() {
